@@ -1,0 +1,45 @@
+#!/bin/sh
+
+if [ $# -lt 1 ] ; then
+	echo mkrlse RLSE
+	exit 1
+fi
+RLSE=$1
+if [ \! -d ~/xtrkcad/$RLSE ] ; then
+	echo ~/xtrkcad/$RLSE does not exist
+	exit 1
+fi
+
+cd ~/xtrkcad/$RLSE
+rm -fr install xtrkcad
+mkdir xtrkcad
+mkdir xtrkcad/demos
+mkdir xtrkcad/examples
+mkdir xtrkcad/html
+mkdir xtrkcad/params
+cp lib/xtrkcad.xtq xtrkcad/
+cp lib/xtrkcad.bug xtrkcad/
+cp lib/xtrkcad.enh xtrkcad/
+cp lib/xtrkcad.fix xtrkcad/
+cp lib/xtrkcad.upd xtrkcad/
+cp lib/register.* xtrkcad/
+cp lib/aareadme.txt xtrkcad/
+cp help/xtrkcad.help xtrkcad/
+cp help/xtrkcad.tip xtrkcad/
+cp lib/examples/*.xtc xtrkcad/examples/
+cp lib/params/*.xtp xtrkcad/params/
+cp lib/demos/dm*.xtr xtrkcad/demos/
+cp bin/xtrkcad xtrkcad/
+cp bin/xtc64.xpm xtrkcad/
+#cp bin/xtrkcad-libc5 xtrkcad/
+cp help/html/*.html xtrkcad/html/
+cp help/html/*.png xtrkcad/html/
+chmod 444 xtrkcad/*/*
+chmod 444 xtrkcad/{aareadme.txt,register.*,xtc64.xpm,xtrkcad.*}
+chmod 777 xtrkcad/{demos,examples,html,params}
+chmod 555 xtrkcad/xtrkcad
+RLSE=`echo $RLSE | sed -e 's/r//' -e 's/_/./g'`
+tar cvfz xtrkcad-linux-elf.${RLSE}.tar.gz xtrkcad
+
+cd lib
+make rpm

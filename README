@@ -1,0 +1,9 @@
+The source code for XtrkCad is in the 4.0.0 directory.
+
+The dfx directory contains sample code for importing a dfx file.  This is being stored here 
+so that someone will be able to write a module for importing a dfx file, and can use
+the information in these two files as a reference
+
+
+
+JBB

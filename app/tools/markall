@@ -1,0 +1,17 @@
+#!/bin/sh
+if [ $# -lt 1 ] ; then
+	echo "markall TAG"
+	exit 1
+fi
+TAG=$1
+cd ~/xtrkcad/src
+for d in bin help lib lib/params lib/demos lib/examples tools ; do
+	echo xtrkcad/src/$d:
+	(cd $d ; co Makefile ; rcs -N$TAG:1. `make rcssrc`)
+done
+cd ~/wlib/src
+for d in include mswlib test gtklib ; do
+	echo wlib/src/$d
+	(cd $d ; co Makefile ; rcs -N$TAG:1. `make rcssrc`)
+done
+

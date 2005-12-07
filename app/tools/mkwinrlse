@@ -1,0 +1,34 @@
+#!/bin/sh
+
+rm -fr mswrel
+if [ -d mswrel ] ; then
+	echo ./mswrel already exists
+	exit 1
+fi
+
+mkdir mswrel
+mkdir mswrel/demos
+mkdir mswrel/examples
+mkdir mswrel/params
+echo lib/demos
+(cd lib/demos; for f in *.xtr ; do addcr < $f > ../../mswrel/demos/$f ; done )
+echo lib/examples
+(cd lib/examples; for f in *.xtc ; do addcr < "$f" > ../../mswrel/examples/"$f" ; done )
+echo lib/params
+(cd lib/params; for f in *.xtp ; do addcr < $f > ../../mswrel/params/$f ; done )
+echo lib
+cp bin/Release/xtrkcad.exe mswrel
+echo release
+cp bin/Debug/xtrkcad.exe mswrel/xtrkcadd.exe
+echo debug
+addcr < COPYING > mswrel/license.txt
+echo license
+addcr < lib/aareadme.txt > mswrel/aareadme.txt
+addcr < lib/xtrkcad.bug > mswrel/xtrkcad.bug
+addcr < lib/xtrkcad.enh > mswrel/xtrkcad.enh
+addcr < lib/xtrkcad.fix > mswrel/xtrkcad.fix
+addcr < lib/xtrkcad.upd > mswrel/xtrkcad.upd
+addcr < help/xtrkcad.tip > mswrel/xtrkcad.tip
+addcr < lib/xtrkcad.xtq > mswrel/xtrkcad.xtq
+chmod -w -R mswrel
+chmod +w  mswrel mswrel/demos mswrel/examples mswrel/params

@@ -1,0 +1,37 @@
+#!/bin/sh
+if [ $# -lt 1 ] ; then
+	echo "Usage: checkall <RLSE> [<home>]"
+	exit 1
+fi
+RLSE=$1
+HOMEDIR=$HOME
+if [ $# -eq 2 ] ; then
+	HOMEDIR=$2
+fi
+cd ${HOMEDIR}/xtrkcad/$RLSE
+for d in bin help lib lib/params lib/demos lib/examples tools ; do
+	echo === $d
+	( cd $d
+	for f in `make rcssrc` ; do
+		if rcsdiff -q -r$RLSE -r1. $f > /dev/null ; then
+			true
+		else
+			echo $d/$f diffs
+		fi
+	done
+	)
+done
+cd ${HOMEDIR}/wlib/$RLSE
+for d in include mswlib test gtklib ; do
+	echo === $d
+	( cd $d
+	for f in `make rcssrc` ; do
+		if rcsdiff -q -r$RLSE -r1. $f > /dev/null ; then
+			true
+		else
+			echo $d/$f diffs
+		fi
+	done
+	)
+done
+

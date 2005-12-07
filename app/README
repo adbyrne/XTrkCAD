@@ -1,0 +1,33 @@
+Welcome to XTrkCad source.
+
+Building from source:
+
+Linux:
+
+From the top level directory
+    make
+    cd lib
+    export XTRKCADLIB=`pwd`
+    ln -s ../help/xtrkcad.help .
+    cd ../bin
+    ./xtrkcad
+
+Windows:
+
+    Get and install gnu sed for Windows.  Suggest URL is:
+ 		http://gnuwin32.sourceforge.net/packages/sed.htm
+	Link to the setup program is at the bottom of the page
+
+	The VC project assumes that it is installed in:
+
+		C:\Program Files\gnuwin32\bin\
+
+Outstanding problems:
+
+This version is build against gtk-2 and there is 1 known problem
+
+1) If you expand a window, buttons and messages are truncated at the former boundary
+   Try dragging on the edge of the main window and notice that the buttons on the button bar
+   are truncated.  This might be a problem in wlib/gtklib/gtkwindow.c or gtkmisc.c.
+
+MS-Windows build instructions are pending
