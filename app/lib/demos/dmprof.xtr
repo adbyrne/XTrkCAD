@@ -1,0 +1,330 @@
+VERSION 7
+DEMOINIT
+ORIG 9.000 23.000 2.000
+PARAMETER display description-fontsize 96
+PARAMETER display labelenable 4
+PARAMETER display labelscale 12
+CURVE 1 0 0 0 0 N -1 12.666667 13.666667 10.000000
+	T 3 11.809617 3.703461 94.916566
+	T 21 22.410419 15.915955 167.001307
+	END
+STRAIGHT 2 0 0 0 0 N -1
+	T 22 27.376540 8.227390 232.674480 10 1.103460 -0.387390
+	T 6 29.448408 9.807189 52.674480
+	END
+CURVE 3 0 0 0 0 N -1 13.737465 26.114701 22.494005
+	T 22 24.278245 6.243309 62.056285 11 0.401755 -0.563309
+	T 1 11.809617 3.703461 274.916566
+	END
+STRAIGHT 4 0 0 0 0 N -1
+	T 5 37.111111 4.222222 270.000000
+	T 9 38.222222 4.222222 90.000000 9 0.001462 -0.748538 0.500000
+	END
+CURVE 5 0 0 0 0 N -1 37.111111 19.309524 15.087302
+	T 4 37.111111 4.222222 90.000000
+	T 21 26.521963 8.562588 314.576286 10 -1.201963 -0.162588
+	END
+TURNOUT  6 0 0 0 0 N -1 29.448408 9.807189 322.674480 "Peco-55	Medium Right	SL-E395F"
+	T 2 29.448408 9.807189 232.674480
+	T 7 33.746482 13.084471 52.674480
+	T 8 34.035161 12.648152 62.360480
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.353000 0.000000
+	S 0 0.000000 0.353000 0.000000 5.405000 0.000000
+	C 0 0.000000 23.136000 0.351000 -23.136000 0.004000 9.700000
+	S 0 0.000000 4.251000 -0.331000 5.370000 -0.522000
+	END
+STRAIGHT 7 0 0 0 0 N -1
+	T 19 42.270123 19.583746 52.674480
+	T 6 33.746482 13.084471 232.674480
+	END
+CURVE 8 0 0 0 0 N -1 45.574853 -9.388207 24.875000
+	T 6 34.035161 12.648152 242.360480
+	T 18 51.462480 14.779984 103.691177
+	END
+TURNOUT  9 0 0 0 0 N -1 38.222222 4.222222 0.000000 "Peco-55	Medium Left	SL-E396F"
+	T 4 38.222222 4.222222 270.000000 9 0.000000 0.000000 0.500000
+	T 15 43.627222 4.222222 90.000000
+	T 13 43.592222 4.744222 80.314000
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.353000 0.000000
+	S 0 0.000000 0.353000 0.000000 5.405000 0.000000
+	C 0 0.000000 -23.136000 0.351000 23.136000 170.297000 9.700000
+	S 0 0.000000 4.251000 0.331000 5.370000 0.522000
+	END
+STRAIGHT 10 0 0 0 0 N -1
+	E 76.446137 4.222222 90.000000
+	T 14 72.333333 4.222222 270.000000 9 -0.017544 -0.722222 1.000000
+	END
+STRAIGHT 11 0 0 0 0 N -1
+	T 23 55.000000 5.472222 270.000000 13 -0.040000 0.647778 "New York City"
+	T 16 60.777778 5.472222 90.000000
+	END
+CURVE 12 0 0 0 0 N -1 49.777778 -17.192082 22.664304
+	T 13 45.964542 5.149134 260.314000
+	T 23 49.777778 5.472222 90.000000
+	END
+STRAIGHT 13 0 0 0 0 N -1
+	T 9 43.592222 4.744222 260.314000
+	T 12 45.964542 5.149134 80.314000
+	END
+TURNOUT  14 0 0 0 0 N -1 72.333333 4.222222 180.000000 "Peco-55	Medium Right	SL-E395F"
+	T 10 72.333333 4.222222 90.000000 9 0.000000 0.000000 1.000000
+	T 15 66.928333 4.222222 270.000000
+	T 17 66.963333 4.744222 279.686000
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.353000 0.000000
+	S 0 0.000000 0.353000 0.000000 5.405000 0.000000
+	C 0 0.000000 23.136000 0.351000 -23.136000 0.004000 9.700000
+	S 0 0.000000 4.251000 -0.331000 5.370000 -0.522000
+	END
+STRAIGHT 15 0 0 0 0 N -1
+	T 9 43.627222 4.222222 270.000000
+	T 14 66.928333 4.222222 90.000000
+	END
+CURVE 16 0 0 0 0 N -1 60.777778 -17.192082 22.664304
+	T 11 60.777778 5.472222 270.000000
+	T 17 64.591013 5.149134 99.686000
+	END
+STRAIGHT 17 0 0 0 0 N -1
+	T 14 66.963333 4.744222 99.686000
+	T 16 64.591013 5.149134 279.686000
+	END
+CURVE 18 0 0 0 0 N -1 64.332420 67.609950 54.375000
+	E 74.352464 14.166154 79.381036 9 -0.128780 -0.718786 2.000000
+	T 8 51.462480 14.779984 283.691177
+	END
+CURVE 19 0 0 0 0 N -1 49.773613 9.743103 12.375000
+	T 7 42.270123 19.583746 232.674480
+	T 20 56.175027 20.333784 121.150374
+	END
+CURVE 20 0 0 0 0 N -1 64.968888 34.882599 17.000000
+	E 74.032528 20.500303 57.781104 9 0.099051 -0.789777 4.000000
+	T 19 56.175027 20.333784 301.150374
+	END
+CURVE 21 0 0 0 0 N -1 37.111111 19.309524 15.087302
+	T 5 26.521963 8.562588 134.576286 10 0.000000 0.000000
+	T 1 22.410418 15.915955 347.001307
+	END
+CURVE 22 0 0 0 0 N -1 13.737465 26.114701 22.494005
+	T 2 27.376540 8.227390 52.674480 10 0.000000 0.000000
+	T 3 24.278245 6.243309 242.056285 11 0.000000 0.000000
+	END
+STRAIGHT 23 0 0 0 0 N -1
+	T 12 49.777778 5.472222 270.000000
+	T 11 55.000000 5.472222 90.000000 13 0.000000 0.000000 "New York City"
+	END
+REDRAW
+RESET
+COMMAND Profile
+MESSAGE
+To use the <Profile> command you first need to define Elevations on your layout.
+
+In this example we'll use the Elevations defined in the last example.
+
+You can move or resize the Profile dialog now if you want.
+END
+STEP
+#PARAMETER action profile-setpath 0
+MESSAGE
+_________________________________________
+
+To show the Profile you need to select a Path on the tracks of your layout.
+
+Select a Defined Elevation point (marked by Gold dots).
+
+We will start with the right end of the siding.
+END
+STEP
+#ORIG 4.000 70.000 3.000
+MOUSE 2 72.347 4.227
+MOUSE 4 72.347 4.227
+MESSAGE
+_________________________________________
+
+The second Point is at the left end of the siding.  The Path will be drawn in Purple on the layout.
+END
+STEP
+#ORIG 4.000 36.000 3.000
+MOUSE 2 38.240 4.200
+MOUSE 4 38.240 4.200
+#ORIG 4.000 72.000 13.000
+BIGPAUSE
+#ORIG 8.000 25.000 3.000
+MESSAGE
+_________________________________________
+
+Now select the end of one of the Branches
+
+END
+STEP
+MOUSE 2 73.63 20.25
+MOUSE 4 73.63 20.25
+MESSAGE
+_________________________________________
+
+The Profile line is drawn in Red.  This indicates that there some turnouts on that section of the Path which have more than 2 connections.
+
+The grade on this part of the Path is the average and may be affected by other Elevations, such the end of the lower branch.
+
+END
+STEP
+MESSAGE
+_________________________________________
+
+Now try to select the End-Point of the other branch.
+You will get an error message because there is no route to one of the ends of the existing Path.
+END
+STEP
+MOUSE 2 74.0 14.0
+MOUSE 4 74.0 14.0
+MESSAGE
+_________________________________________
+
+In this case remove the last part of the Path by clicking on current end of the Path and reselect the End-Point.
+END
+STEP
+MOUSE 2 73.63 20.25
+MOUSE 4 73.63 20.25
+BIGPAUSE
+MOUSE 2 74.0 14.0
+MOUSE 4 74.0 14.0
+MESSAGE
+_________________________________________
+
+Notice that the Grade has changed on the Profile.
+END
+STEP
+#ORIG 4 30 11
+MESSAGE
+_________________________________________
+
+You can Ignore End-Points on the Path by using Shift-Right-Click to display the Profile Options popup menu and chosing Ignore.
+
+Note: We can't show the menu in demo mode but we will show the effect of a Shift Right Click and selecting ignore.  We will be Ignoring the End-Point of the Turnout that is not on the Path.
+END
+STEP
+BIGPAUSE
+#PARAMETER action profile-setpath 1
+#MOUSE 1 33.789 13.158
+MENU 33.789 13.158 "Profile Mode" "Ignore"
+MESSAGE
+_________________________________________
+
+Notice that part of the Profile line is redrawn in Blue.
+Also, the Computed Elevations and Grade marker on the right side of the layout have been updated.
+END
+STEP
+#ORIG 4 48 12
+MESSAGE
+_________________________________________
+
+You can set additional Defined Elevation points using the Profile Options popup menu.  These points are added to the Profile if they are on the Path.
+
+We do this by Shift Right Click to display the Profile Options popup menu and selecting Define.
+END
+STEP
+#MOUSE 1 51.526 14.737
+MENU 51.526 14.737 "Profile Mode" "Define"
+#MOUSE 2 51.526 14.737
+#MOUSE 4 51.526 14.737
+MESSAGE
+_________________________________________
+
+We've just added a Defined Elevation point to the middle of the lower branch.  Notice the addition on the Profile dialog.
+=========================================
+END
+STEP
+CLEAR
+#ORIG 4 40 2
+MESSAGE
+For the siding we defined a Station name but it's not on the Path, since the Path takes the shortest distance between points.
+
+We can Ignore one of the End-Points on a Turnout to force the Path to take the other route.
+
+Again we use Shift-Right-Click to display the Profile Options menu and select ignore.
+END
+STEP
+#MOUSE 1 43.737 4.158
+MENU 43.737 4.158 "Profile Mode" "Ignore"
+BIGPAUSE
+#ORIG 4 70 2
+MESSAGE
+_________________________________________
+
+Now remove the First section of the Path,
+END
+STEP
+#PARAMETER action profile-setpath 0
+MOUSE 2 72.211 4.316
+MOUSE 4 72.211 4.316
+BIGPAUSE
+MESSAGE
+
+and reselect it.
+END
+STEP
+MOUSE 2 72.368 4.158
+MOUSE 4 72.368 4.158
+BIGPAUSE
+#ORIG 8 24 2
+MESSAGE
+_________________________________________
+
+Now the Path goes through the Station End-Point and the name appears on the Profile dialog.
+=========================================
+END
+STEP
+CLEAR
+ORIG 2 20 5
+MESSAGE
+Now we need to increase the separation where the tracks cross.
+
+The two Elevations you see here are Computed Elevations which means XTrkCad dynamically computes the Elevation based on the Elevations of connecting tracks.
+
+First make the lower End-Point a Defined Elevation point using Shift-Right-Click and the Profile Options menu.  You will see the End-Point marked by a Gold dot and a new line is added to the Profile dialog.
+END
+STEP
+#PARAMETER action profile-setpath 1
+#MOUSE 1 26.421 8.684
+MENU 26.421 8.684 "Profile Mode" "Define"
+MESSAGE
+_________________________________________
+
+Now, drag the point on the Profile Dialog to change the Elevation.
+
+Note the grade on each side of the point will be displayed at the bottom of the Profile dialog.
+END
+STEP
+PARAMETER profile canvas 2 48.028 0.733
+PAUSE 100
+PARAMETER profile canvas 3 48.028 0.70
+PAUSE 100
+PARAMETER profile canvas 3 48.028 0.67
+PAUSE 100
+PARAMETER profile canvas 3 48.028 0.63
+PAUSE 100
+PARAMETER profile canvas 3 48.028 0.60
+PAUSE 100
+PARAMETER profile canvas 3 48.028 0.57
+PAUSE 100
+PARAMETER profile canvas 3 48.028 0.53
+PAUSE 100
+MESSAGE
+_________________________________________
+
+After we release the Profile is updated to show the new Elevation and Grade.
+END
+PARAMETER profile canvas 4 48.028 0.50
+BIGPAUSE
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

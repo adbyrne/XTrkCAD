@@ -1,0 +1,357 @@
+VERSION 7
+DEMOINIT
+ORIG 12.000 0.000 0.000
+PARAMETER display description-fontsize 72
+PARAMETER display labelenable 4
+CURVE 1 0 0 0 0 N -1 12.666667 13.666667 10.000000
+	T 3 11.809617 3.703461 94.916566
+	T 5 22.410419 15.915955 167.001307
+	END
+STRAIGHT 2 0 0 0 0 N -1
+	T 3 27.376540 8.227390 232.674480
+	T 6 29.448408 9.807189 52.674480
+	END
+CURVE 3 0 0 0 0 N -1 13.737465 26.114701 22.494005
+	T 2 27.376540 8.227390 52.674480
+	T 1 11.809617 3.703461 274.916566
+	END
+STRAIGHT 4 0 0 0 0 N -1
+	T 5 37.111111 4.222222 270.000000
+	T 9 38.222222 4.222222 90.000000
+	END
+CURVE 5 0 0 0 0 N -1 37.111111 19.309524 15.087302
+	T 4 37.111111 4.222222 90.000000
+	T 1 22.410419 15.915955 347.001307
+	END
+TURNOUT  6 0 0 0 0 N -1 29.448408 9.807189 322.674480 "Peco-55	Medium Right	SL-E395F"
+	T 2 29.448408 9.807189 232.674480
+	T 7 33.746482 13.084471 52.674480
+	T 8 34.035161 12.648152 62.360480
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.353000 0.000000
+	S 0 0.000000 0.353000 0.000000 5.405000 0.000000
+	C 0 0.000000 23.136000 0.351000 -23.136000 0.004000 9.700000
+	S 0 0.000000 4.251000 -0.331000 5.370000 -0.522000
+	END
+STRAIGHT 7 0 0 0 0 N -1
+	T 19 42.270123 19.583746 52.674480
+	T 6 33.746482 13.084471 232.674480
+	END
+CURVE 8 0 0 0 0 N -1 45.574853 -9.388207 24.875000
+	T 6 34.035161 12.648152 242.360480
+	T 18 51.462480 14.779984 103.691177
+	END
+TURNOUT  9 0 0 0 0 N -1 38.222222 4.222222 0.000000 "Peco-55	Medium Left	SL-E396F"
+	T 4 38.222222 4.222222 270.000000
+	T 15 43.627222 4.222222 90.000000
+	T 13 43.592222 4.744222 80.314000
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.353000 0.000000
+	S 0 0.000000 0.353000 0.000000 5.405000 0.000000
+	C 0 0.000000 -23.136000 0.351000 23.136000 170.297000 9.700000
+	S 0 0.000000 4.251000 0.331000 5.370000 0.522000
+	END
+STRAIGHT 10 0 0 0 0 N -1
+	E 76.446137 4.222222 90.000000
+	T 14 72.333333 4.222222 270.000000
+	END
+STRAIGHT 11 0 0 0 0 N -1
+	T 12 49.777778 5.472222 270.000000
+	T 16 60.777778 5.472222 90.000000
+	END
+CURVE 12 0 0 0 0 N -1 49.777778 -17.192082 22.664304
+	T 13 45.964542 5.149134 260.314000
+	T 11 49.777778 5.472222 90.000000
+	END
+STRAIGHT 13 0 0 0 0 N -1
+	T 9 43.592222 4.744222 260.314000
+	T 12 45.964542 5.149134 80.314000
+	END
+TURNOUT  14 0 0 0 0 N -1 72.333333 4.222222 180.000000 "Peco-55	Medium Right	SL-E395F"
+	T 10 72.333333 4.222222 90.000000
+	T 15 66.928333 4.222222 270.000000
+	T 17 66.963333 4.744222 279.686000
+	D 0.000000 0.000000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.353000 0.000000
+	S 0 0.000000 0.353000 0.000000 5.405000 0.000000
+	C 0 0.000000 23.136000 0.351000 -23.136000 0.004000 9.700000
+	S 0 0.000000 4.251000 -0.331000 5.370000 -0.522000
+	END
+STRAIGHT 15 0 0 0 0 N -1
+	T 9 43.627222 4.222222 270.000000
+	T 14 66.928333 4.222222 90.000000
+	END
+CURVE 16 0 0 0 0 N -1 60.777778 -17.192082 22.664304
+	T 11 60.777778 5.472222 270.000000
+	T 17 64.591013 5.149134 99.686000
+	END
+STRAIGHT 17 0 0 0 0 N -1
+	T 14 66.963333 4.744222 99.686000
+	T 16 64.591013 5.149134 279.686000
+	END
+CURVE 18 0 0 0 0 N -1 64.332420 67.609950 54.375000
+	E 74.352464 14.166154 79.381036
+	T 8 51.462480 14.779984 283.691177
+	END
+CURVE 19 0 0 0 0 N -1 49.773613 9.743103 12.375000
+	T 7 42.270123 19.583746 232.674480
+	T 20 56.175027 20.333784 121.150374
+	END
+CURVE 20 0 0 0 0 N -1 64.968888 34.882599 17.000000
+	E 74.032528 20.500303 57.781104
+	T 19 56.175027 20.333784 301.150374
+	END
+REDRAW
+RESET
+MESSAGE
+We have designed part of the layout with a siding, 2 branches and a spiral loop.  We want to set Elevations.
+END
+STEP
+MESSAGE
+_________________________________________
+
+First we will set elevations at the end of the branches.
+END
+STEP
+ORIG 4 65 11
+COMMAND Elevation
+PARAMETER elev mode 0
+PARAMETER elev value 0.000
+MESSAGE
+_________________________________________
+
+We'll select the end of the top branch and set the Elevation to 4"
+
+First, click on the End-Point.
+END
+STEP
+MOUSE 2 73.895 20.474
+MOUSE 4 73.895 20.474
+MESSAGE
+
+Next, pick Defined on the Elevation dialog Radio box.
+END
+STEP
+PARAMETER elev mode 1
+MESSAGE
+
+And set the Elevation to 4.
+END
+STEP
+PARAMETER elev value 4.000000
+#REDRAW
+BIGPAUSE
+MESSAGE
+_________________________________________
+
+Now, select the other branch and set it's elevation to 2"
+END
+STEP
+MOUSE 2 74.263 14.263
+MOUSE 4 74.263 14.263
+BIGPAUSE
+PARAMETER elev mode 1
+BIGPAUSE
+PARAMETER elev value 2.000000
+BIGPAUSE
+#REDRAW
+MESSAGE
+_________________________________________
+
+We can move the Elevations by using Right-Drag
+END
+STEP
+MOUSE 5 74.307 14.173
+#MOUSE 6 74.227 13.453
+MOUSE 7 74.227 12.453
+#PARAMETER elev ok
+MESSAGE
+_________________________________________
+
+Now, we set the Elevation at one end of the Siding.
+END
+STEP
+ORIG 3.000 34.000 3.000
+#COMMAND Elevation
+#PARAMETER elev mode 1
+#PARAMETER elev value 3.000
+MOUSE 2 38.160 4.320
+MOUSE 4 38.160 4.320
+BIGPAUSE
+PARAMETER elev mode 1
+BIGPAUSE
+PARAMETER elev value 0.500000
+BIGPAUSE
+REDRAW
+BIGPAUSE
+MOUSE 5 38.320 4.280
+MOUSE 6 38.240 3.480
+MOUSE 7 38.240 3.480
+#PARAMETER elev ok
+BIGPAUSE
+MESSAGE
+=========================================
+END
+STEP
+ORIG 3 21.0 5.0
+CLEAR
+MESSAGE
+We want to find the elevations where the 2 tracks cross.
+END
+STEP
+#COMMAND Elevation
+#PARAMETER elev mode 0
+#PARAMETER elev value 0.000
+MOUSE 2 27.320 8.320
+MOUSE 4 27.320 8.320
+MESSAGE
+_________________________________________
+
+We picked an End-Point on the upper track.
+
+XTrkCad has computed the Elevation (2.34") at this point based on the Elevation at the siding and a combination of the of the first Elevations.
+
+We create a Computed Elevation here that will be automatically adjusted whenever the other Elevations are changed.
+END
+STEP
+PARAMETER elev mode 3
+BIGPAUSE
+MOUSE 5 27.400 8.240
+MOUSE 6 28.480 7.840
+MOUSE 7 28.480 7.840
+BIGPAUSE
+MESSAGE
+_________________________________________
+
+The Compute Elevation is based on Elevations at end of both of the branches.  We may want to base the Elevation on only one branch.  For example if one branch was the mainline we don't want the other branch affecting this Computed Elevation.
+
+We do this by Ignoring the branch we don't want.
+
+We'll ignore the lower branch.
+END
+STEP
+#ORIG 3 26 8
+MOUSE 2 34.200 12.600
+MOUSE 4 34.200 12.600
+PARAMETER elev mode 6
+REDRAW
+MESSAGE
+_________________________________________
+
+Notice at the End-Point where the tracks cross, we see the Elevation has changed from 2.34 to 2.64.
+END
+STEP
+MESSAGE
+_________________________________________
+
+Now we want to know the elevation of the lower track.
+END
+STEP
+#ORIG 3 23 6.0
+#COMMAND Elevation
+#PARAMETER elev mode 3
+#PARAMETER elev value 2.641
+MESSAGE
+_________________________________________
+
+There is no End-Point on the lower track here.
+
+Use Shift-Left-Click to Split the track and create an End-Point we can use for an Elevation,
+END
+STEP
+KEYSTATE 2
+MOUSE 2 26.480 8.520
+KEYSTATE 2
+MOUSE 4 26.480 8.520
+STEP
+MESSAGE
+and create another Computed Elevation point.
+END
+STEP
+PARAMETER elev mode 3
+BIGPAUSE
+#REDRAW
+MOUSE 5 26.480 8.640
+MOUSE 6 25.320 8.400
+MOUSE 7 25.320 8.400
+BIGPAUSE
+#PARAMETER elev ok
+MESSAGE
+_________________________________________
+
+Now we want to label the Grade on this section of track.
+END
+STEP
+#COMMAND Elevation
+#PARAMETER elev mode 3
+#PARAMETER elev value 0.835
+MESSAGE
+_________________________________________
+
+Again, since there is no End-Point nearby, we split the track to create an End-Point we can use,
+END
+STEP
+KEYSTATE 2
+MOUSE 2 24.280 6.240
+KEYSTATE 2
+MOUSE 4 24.280 6.240
+MESSAGE
+and create a Grade marker.
+END
+STEP
+PARAMETER elev mode 4
+BIGPAUSE
+MOUSE 5 24.240 6.360
+MOUSE 6 25.680 5.1
+MOUSE 7 25.680 5.1
+BIGPAUSE
+#PARAMETER elev ok
+MESSAGE
+_________________________________________
+
+Note the marker has an arrow pointing in the upwards direction.
+=========================================
+END
+STEP
+CLEAR
+ORIG 3 45 2
+MESSAGE
+_________________________________________
+
+The last thing we want to do is to create a Station label that we'll use in the <Profile> command.
+END
+STEP
+#COMMAND Elevation
+#PARAMETER elev value 0.000
+KEYSTATE 2
+MOUSE 2 55.080 5.320
+KEYSTATE 2
+MOUSE 4 55.080 5.320
+MOUSE 2 55.080 5.320
+MOUSE 4 55.080 5.320
+MESSAGE
+_________________________________________
+
+Now, set the Elevation to Station and enter the its name.
+END
+STEP
+PARAMETER elev mode 5
+BIGPAUSE
+PARAMETER elev station New York City
+BIGPAUSE
+MOUSE 5 55.120 5.480
+#MOUSE 6 54.960 6.120
+MOUSE 7 54.960 6.520
+BIGPAUSE
+PARAMETER elev ok
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

@@ -1,0 +1,43 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+REDRAW
+RESET
+MESSAGE
+The <Note> command lets you attach notes to various spots on the layout.
+END
+STEP
+COMMAND Note
+MOUSE 2 15.167 7.833
+MOUSE 3 9.917 7.167
+MOUSE 4 9.917 7.167
+MESSAGE
+_________________________________________
+
+When you place a note, the Note editor window is displayed which lets you enter the note.
+END
+STEP
+RESET
+MOUSE 6920 9.917 7.167
+MESSAGE
+_________________________________________
+
+If you click on a note in <Describe> mode the Note editor displays the note.
+END
+STEP
+COMMAND Describe
+MOUSE 2 9.917 7.167
+MOUSE 4 9.917 7.167
+STEP
+MOUSE 6920 9.917 7.167
+CLEAR
+MESSAGE
+This is the end of the XTrkCad Demos.
+
+Click Step to return to XTrkCad.
+
+Thanks for watching.
+=========================================
+END
+STEP
+CLEAR

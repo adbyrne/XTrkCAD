@@ -1,0 +1,76 @@
+VERSION 7
+DEMOINIT
+ORIG 8.000 0.000 0.000
+PARAMETER display description-fontsize 24
+DRAW 1 0 0 0 0 0.000000 0.000000 0.000000
+	Y 255 0.333333 3
+		3.888889 4.333333
+		11.333333 18.888889
+		18.888889 4.333333
+	END
+DRAW 2 0 0 0 0 0.000000 0.000000 0.000000
+	F 255 0.333333 3
+		23.888889 4.333333
+		31.000000 19.000000
+		39.000000 4.444444
+	END
+REDRAW
+RESET
+MESSAGE
+Polylines and Polygons (created with the <Draw> command) can be modified by dragging on their Corners or Edges.
+END
+STEP
+COMMAND Modify
+MOUSE 2 11.333 18.889
+MOUSE 3 18.889 19.333
+MOUSE 4 18.889 19.333
+MOUSE 2 4.000 4.444
+MOUSE 3 4.111 19.333
+MOUSE 4 4.111 19.333
+MOUSE 2 31.222 18.889
+MOUSE 3 38.889 19.667
+MOUSE 4 38.889 19.667
+MOUSE 2 24.222 4.667
+MOUSE 3 24.778 19.667
+MOUSE 4 24.778 19.667
+MESSAGE
+_________________________________________
+
+If you select the middle of an Edge a new Corner is created.
+END
+STEP
+MOUSE 2 10.556 12.667
+MOUSE 3 4.111 4.333
+MOUSE 4 4.111 4.333
+MOUSE 2 31.556 12.333
+MOUSE 3 24.889 4.333
+MOUSE 4 24.889 4.333
+MESSAGE
+_________________________________________
+
+If you drag a Corner to another Corner the two are merged and the Edge between them is removed.
+END
+STEP
+MOUSE 2 4.333 19.222
+MOUSE 3 4.000 4.444
+MOUSE 4 4.000 4.444
+MOUSE 2 25.111 19.667
+MOUSE 3 25.111 4.444
+MOUSE 4 25.111 4.444
+MESSAGE
+_________________________________________
+
+But you cannot have a Poly-shape with less than 3 sides.
+END
+STEP
+MOUSE 2 4.000 4.444
+MOUSE 3 18.900 4.333
+MOUSE 4 18.900 4.333
+MOUSE 2 25.111 4.444
+MOUSE 3 39.111 4.778
+MOUSE 4 39.111 4.778
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

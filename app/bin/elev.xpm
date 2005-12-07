@@ -1,0 +1,23 @@
+/* XPM */
+static char * elev_xpm[] = {
+"16 16 4 1",
+" 	c #FFFFFFFFFFFF",
+".	c #FFFF00000000",
+"X	c #FFFF0000FFFF",
+"o	c #000000000000",
+"      .         ",
+"     ...        ",
+"    . . .  XXXXX",
+"   .  .  .     X",
+"      .       X ",
+"      .      X  ",
+"      .     X   ",
+"      .    X    ",
+"      .    XXXXX",
+" o   o   o   o  ",
+"ooooooooooooooo ",
+" o   o   o   o  ",
+" o   o   o   o  ",
+" o   o   o   o  ",
+"ooooooooooooooo ",
+" o   o   o   o  "};

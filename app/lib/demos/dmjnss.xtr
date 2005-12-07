@@ -1,0 +1,61 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+STRAIGHT 1 DEMO 1
+	E 13.716667 4.466667 270.000000
+	E 37.133333 4.466667 90.000000
+	END
+STRAIGHT 2 DEMO 1
+	E 13.216667 8.383333 240.802413
+	E 27.383333 16.300000 60.802413
+	END
+REDRAW
+RESET
+MESSAGE
+Two straight tracks are joined by selecting the two End-Points.  The selected End-Points will be those closest to the cursor when the track is selected.
+
+END
+STEP
+COMMAND Join
+MOUSE 2 16.583 10.417
+MOUSE 4 16.583 10.417
+MOUSE 2 17.083 4.583
+MESSAGE
+_________________________________________
+
+A connecting track is drawn between the two tracks.  Notice how it moves as the cursor is dragged along the second track.
+END
+STEP
+MOUSE 3 17.167 4.583
+MOUSE 3 21.917 4.583
+BIGPAUSE
+MOUSE 3 21.917 4.583
+MOUSE 3 14.833 4.250
+MESSAGE
+_________________________________________
+
+Note that two tracks are extended if you move past the end of the track.
+END
+STEP
+MOUSE 3 14.750 4.250
+MOUSE 3 9.000 4.000
+MESSAGE
+_________________________________________
+
+Notice what happens if you drag past the intersection points of the two tracks.
+END
+STEP
+MOUSE 3 8.833 4.000
+MOUSE 3 -0.667 2.750
+MESSAGE
+_________________________________________
+
+This is probably not a very useful thing to do.
+END
+BIGPAUSE
+MOUSE 4 -0.667 2.750
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

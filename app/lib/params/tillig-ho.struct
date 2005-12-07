@@ -1,0 +1,6 @@
+mkturnout -m HOm "Tillig Pilz" R "EW2 15° Left" 321 "EW2 15° Right" 322 17.356 15 2.943 17.8
+mkturnout -m HOm "Tillig Pilz" Q "EW1 15° Left" 341 "EW1 15° Right" 342 86.6 15 22.8
+mkturnout -m HOm "Tillig Pilz" Q "EW3 12° Left" 351 "EW3 12° Right" 352 135.0 12 28.4
+mkturnout -m HOm "Tillig Pilz" X "15° Crossing" 160 22.8 15 22.8
+mkturnout -m HOm "Tillig Pilz" 1 "EKW 15° Crossing" 395 22.8 15 22.8
+mkturnout -m HOm "Tillig Pilz" 2 "DKW 15° Crossing" 390 22.8 15 22.8

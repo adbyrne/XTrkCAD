@@ -1,0 +1,25 @@
+The 'Font Select' window lets you choose the font used by your application.  The window contains:
+
+?HfontSelList
+A list of available fonts.
+
+?HfontSelWeight
+A Radio button to choose 'Medium' or 'Bold' weight.
+
+?HfontSelSlant
+A Radio button to choose 'Regular' or 'Italic' slant.
+
+?HfontSelOk
+Ok button updates the current font and closes the 'Font Select' window.
+
+?HfontSelCancel
+Cancel button closes the window without updating the current font.
+
+?HfontSelSample
+A canvas which show a sample of the font.
+
+Fonts which do not support the specified weight or slant cannot be selected.
+
+?HfontSelLoading
+Note: loading a font can take a noticeable amount of time, especially if you do not have a FPU.
+

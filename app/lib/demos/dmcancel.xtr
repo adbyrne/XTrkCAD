@@ -1,0 +1,112 @@
+VERSION 10
+DEMOINIT
+ORIG 6.000 0.000 0.000
+STRAIGHT 1 0 0 0 0 DEMO 2
+	E 5.333333 2.250000 270.000000
+	T 2 14.000000 2.250011 90.000000
+	END
+TURNOUT  2 0 0 0 0 DEMO 2 14.000000 2.250011 0 0.000000 "Peco-55	Med Left	SL-E396F"
+	T 1 14.000000 2.250011 270.000000
+	T 3 19.405000 2.250011 90.000000
+	E 19.370000 2.772011 80.314000
+	D 0.172500 -1.261011
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.353000 0.000000
+	S 0 0.000000 0.353000 0.000000 5.405000 0.000000
+	C 0 0.000000 -23.136000 0.351000 23.136000 170.297000 9.700000
+	S 0 0.000000 4.251000 0.331000 5.370000 0.522000
+	END
+STRAIGHT 3 0 0 0 0 DEMO 2
+	E 28.166667 2.250000 90.000123
+	T 2 19.405000 2.250007 270.000123
+	END
+NOTE 4 0 0 0 16.666667 4.250000 0 69
+This is a note about something important 
+but I can't remember what.
+    END
+DRAW 5 0 0 0 0 4.125000 5.750000 0 0.000000
+	Z 0 0.000000 0.000000 0.000000 0 140.000000 "This is some text"
+	END
+REDRAW
+RESET
+MESSAGE
+Pushing the <Describe> button will cancel any other command in progress.
+
+Here we will begin to create a Curved track which is a two step process.
+END
+STEP
+COMMAND CurveEndPt
+MOUSE 2 21.250 5.583
+MOUSE 4 32.333 5.750
+COMMAND Describe
+MESSAGE
+_________________________________________
+
+When we clicked on the <Describe> button, the current command was cancelled.
+
+When in <Describe> mode, selecting any object will print a description in the Status Bar and display a Dialog showing properties of the clicked-on object.
+END
+STEP
+MOUSE 2 11.333 2.167
+MOUSE 4 11.333 2.167
+MESSAGE
+_________________________________________
+
+Certain parameters of the object can be changed.  In this case we'll change the Length
+END
+STEP
+#DESCRIBE Length	7.500
+PARAMETER describe F7 7.500
+MESSAGE
+_________________________________________
+
+Let's look at the Turnout...
+END
+BIGPAUSE
+MOUSE 2 18.083 2.250
+MOUSE 4 18.083 2.250
+MESSAGE
+and change the turnout Title.
+END
+STEP
+#DESCRIBE Name	Medium Left
+#DESCRIBE Part No	SL-E396F2
+PARAMETER describe S2 Medium Left
+PARAMETER describe S3 SL-E396F2
+STEP
+MOUSE 2 11.500 6.625
+MOUSE 4 11.500 6.625
+MESSAGE
+_________________________________________
+
+You can change the contents of Text...
+END
+STEP
+#DESCRIBE Text	Goodbye
+PARAMETER describe S1 Goodbye
+BIGPAUSE
+MESSAGE
+and its size.
+END
+STEP
+#DESCRIBE Font Size	19
+PARAMETER describe LE1 -1 19
+STEP
+MESSAGE
+_________________________________________
+
+If you select a Note, the Description dialog appears which displays the contents of the note.
+END
+BIGPAUSE
+MOUSE 2 16.750 4.583
+PAUSE 50
+MOUSE 3 16.750 4.583
+MOUSE 4 16.750 4.583
+BIGPAUSE
+BIGPAUSE
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

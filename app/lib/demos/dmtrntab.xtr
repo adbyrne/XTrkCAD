@@ -1,0 +1,26 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+REDRAW
+RESET
+MESSAGE
+Turntables are created by specifying the radius in a dialog box on the Status Bar.  The radius in the dialog can be changed before proceeding.
+END
+STEP
+COMMAND Turntable
+BIGPAUSE
+PARAMETER turntable diameter 7.5
+MOUSE 2 18.0 9.000
+MOUSE 3 6.0 6.0
+MESSAGE
+_________________________________________
+
+Then the turntable is dragged to its final location.
+END
+BIGPAUSE
+MOUSE 4 6.0 6.0
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

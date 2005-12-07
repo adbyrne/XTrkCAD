@@ -1,0 +1,52 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+REDRAW
+RESET
+MESSAGE
+These examples shows some of the various Turnout Designer windows.  Each window defines a different type of turnout.
+
+In each window there are a number of parameters to fill in and one or two description lines.
+
+You can print the design to check the dimensions before saving them.
+END
+STEP
+CTURNOUT DESIGNER SHOW Regular Turnout
+#PARAMETER turnoutNew anglemode 0
+MESSAGE
+_________________________________________
+
+This is the regular turnout.
+
+In addition to the dimensions, you also enter the Title (Manufacturer, Description and Part Number).  For Turnouts with Left and Right hand versions there are separate Descriptions and Part Numbers.
+
+Some Turnouts and Sectional track are pre-mounted on roadbed.  For these parts you can specify the width of the roadbed, the thickness of the lines drawn for the edge of the roadbed and the color.
+END
+STEP
+#CTURNOUT DESIGNER HIDE Regular Turnout
+PARAMETER turnoutNew cancel
+CTURNOUT DESIGNER SHOW Double Slipswitch
+#PARAMETER turnoutNew anglemode 0
+MESSAGE
+_________________________________________
+
+The double slip switch is described by only a few parameters.
+END
+STEP
+#CTURNOUT DESIGNER HIDE Double Slipswitch
+PARAMETER turnoutNew cancel
+CTURNOUT DESIGNER SHOW Double Crossover
+#PARAMETER turnoutNew anglemode 0
+MESSAGE
+_________________________________________
+
+The double crossover only needs length and track separation.
+END
+STEP
+#CTURNOUT DESIGNER HIDE Double Crossover
+PARAMETER turnoutNew cancel
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

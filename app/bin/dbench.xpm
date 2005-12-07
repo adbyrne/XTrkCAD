@@ -1,0 +1,22 @@
+/* XPM */
+static char * dbench_xpm[] = {
+"16 16 3 1",
+" 	c #FFFFFFFFFFFF",
+".	c #000000000000",
+"X	c #FFFF9A691861",
+"        .XXXX.XX",
+"       .XXXX.XXX",
+"     ..XXX..XXXX",
+"    .XXXX.XXXXXX",
+"   .XXXX.XXXXXXX",
+"  ......XXXXXXXX",
+"  .XXXX.XXXXXXXX",
+"  .XXXX.XXXXXXXX",
+"  .XXXX.XXXXXXX.",
+"  .XXXX.XXXXXX. ",
+"  .XXXX.XXXXX.  ",
+"  .XXXX.XXXX.   ",
+"  .XXXX.XX..    ",
+"  .XXXX.X.      ",
+"  .XXXX..       ",
+"  ......        "};

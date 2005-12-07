@@ -1,0 +1,111 @@
+# XTrkCad Version: 3.0.1, Date: Sat Sep 23 20:54:12 2000
+
+VERSION 10
+DEMOINIT
+ORIG 4.000 13.000 6.000
+STRAIGHT 1 0 0 0 0 N 2
+	E 13.625000 6.625000 243.300294
+	E 34.875000 17.312500 63.300294
+	END
+CURVE 2 0 0 0 0 N 2 34.992582 -3.178627 0 16.250000 0 0.000000 0.000000
+	E 19.937500 2.937500 202.109448
+	E 40.001921 12.279996 107.954824
+	END
+REDRAW
+RESET
+MESSAGE
+In addition to using the turnout definitions you can create 'Hand Laid Turnout'.
+
+This is two step process:
+END
+STEP
+COMMAND HandLaidTurnout
+MESSAGE
+1 - click on the frog and drag away to set the frog angle
+END
+STEP
+MOUSE 2 24.125 12.000
+MOUSE 3 28.312 15.312
+MESSAGE
+    Hint: the further you drag from the frog, the more accurate the angle.
+END
+STEP
+MOUSE 4 28.312 15.312
+MESSAGE
+2 - click and drag to set the position of the points
+END
+STEP
+MOUSE 2 21.312 10.500
+BIGPAUSE
+MOUSE 4 20.688 10.188
+RESET
+MESSAGE
+_________________________________________
+
+We can create Hand Laid Turnouts on curved tracks.
+END
+STEP
+COMMAND HandLaidTurnout
+BIGPAUSE
+MOUSE 2 26.750 10.875
+MOUSE 4 31.875 15.562
+BIGPAUSE
+MOUSE 2 23.688 8.500
+MOUSE 4 23.125 7.312
+RESET
+BIGPAUSE
+ORIG 2.000 19.000 7.000
+MESSAGE
+_________________________________________
+
+A Hand Laid Turnout is composed of several parts.
+END
+STEP
+COMMAND Describe
+MOUSE 2 21.000 10.312
+MOUSE 4 21.000 10.312
+MESSAGE
+The actual Turnout is a short portion at the points.
+END
+STEP
+MOUSE 2 23.375 12.000
+MOUSE 4 23.375 12.000
+BIGPAUSE
+MOUSE 2 24.094 12.500
+MOUSE 4 24.094 12.500
+BIGPAUSE
+MESSAGE
+The other parts are various straight and curved segments.
+END
+STEP
+MESSAGE
+_________________________________________
+
+The new curved turnout is also composed of several segments.
+END
+STEP
+MOUSE 2 23.094 7.844
+MOUSE 4 23.094 7.844
+BIGPAUSE
+#MOUSE 2 23.312 8.156
+#MOUSE 4 23.312 8.156
+#BIGPAUSE
+#MOUSE 2 23.281 8.250
+#MOUSE 4 23.281 8.250
+#BIGPAUSE
+MOUSE 2 25.500 10.344
+MOUSE 4 25.500 10.344
+BIGPAUSE
+MOUSE 2 26.531 11.250
+MOUSE 4 26.531 11.250
+BIGPAUSE
+MOUSE 2 26.656 11.094
+MOUSE 4 26.656 11.094
+#DESCRIBE OK
+PARAMETER describe ok
+RESET
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

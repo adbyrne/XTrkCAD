@@ -1,0 +1,9 @@
+;
+[OPTIONS]
+TITLE=XTrkCad - Help
+COMPRESS=TRUE
+REPORT=ON
+ERRORLOG=xtc31.err
+WARNING=2
+[CONFIG]
+BrowseButtons()

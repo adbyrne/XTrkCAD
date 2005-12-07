@@ -1,0 +1,23 @@
+/* XPM */
+static char * newcar_xpm[] = {
+"16 16 4 1",
+".	c #FFFFFFFFFFFF",
+"X	c #800080008000",
+"o	c #000000000000",
+" 	c #FFFFFFFF0000",
+"  ...X. X.X.... ",
+"oooo...  ..XX.  ",
+".. o...  ...X  .",
+"...o ..o ..X  ..",
+"...o  ooo. oo...",
+"...o. ooo  oo...",
+"oooooooooooooo  ",
+"oooooooooooooo  ",
+"oooooooooooooo..",
+"oooooooooooooooo",
+"oooooooooooooooo",
+"...oo.. oo  ...o",
+"..oooo.oooo  ..o",
+". oooo.oooo.  o.",
+"  .oo.. oo...oo.",
+" ......  .....  "};

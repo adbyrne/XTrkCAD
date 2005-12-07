@@ -1,0 +1,467 @@
+# XTrkCad Version: 3.0.1, Date: Wed Sep 20 22:05:35 2000
+
+VERSION 10
+DEMOINIT
+PARAMETER display labelenable 1
+ORIG 2.000 0.000 0.000
+TURNOUT  6 0 0 0 0 DEMO 2 2.125000 2.281250 0 0.000000 "Peco-55	Medium Right	SL-E395F"
+	E 2.125000 2.281250 270.000000
+	E 7.530000 2.281250 90.000000
+	E 7.495000 1.759250 99.686000
+	D -0.108750 -0.832750
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.353000 0.000000
+	S 0 0.000000 0.353000 0.000000 5.405000 0.000000
+	C 0 0.000000 23.136000 0.351000 -23.136000 0.004000 9.700000
+	S 0 0.000000 4.251000 -0.331000 5.370000 -0.522000
+	END
+REDRAW
+RESET
+MESSAGE
+The <Group> and <Ungroup> commands (on the Tools menu) are a powerful way to manipulate Turnout and Structure definitions.
+
+We'll start with a simple turnout and add a switch machine.
+END
+STEP
+COMMAND DrawLine
+PARAMETER draw linewidth 0
+PARAMETER draw linecolor 0
+PARAMETER GROUP draw
+PARAMETER draw linewidth 4
+MOUSE 2 2.500 3.000
+MOUSE 4 2.500 1.500
+MOUSE 2 3.200 3.000
+MOUSE 4 3.200 1.500
+RESET
+COMMAND DrawFilledBox
+PARAMETER draw linecolor 0
+PARAMETER GROUP draw
+MOUSE 2 2.600 3.000
+MOUSE 4 3.100 2.500
+MOUSE 2 2.600 2.000
+MOUSE 4 3.100 1.500
+RESET
+MESSAGE
+_________________________________________
+
+Now that we have drawn a rough outline of a switch machine we will group it with the turnout definition.
+
+First we Select the objects in the new definition.
+END
+STEP
+COMMAND Select
+MOUSE 2 0.781 3.375
+MOUSE 4 8.312 1.312
+MESSAGE
+_________________________________________
+
+Now do the <Group> command.
+END
+STEP
+PARAMETER misc cmdGroup
+MESSAGE
+_________________________________________
+
+The <Group> command dialog shows the Title (Manufacturer, Description and Part Number) of the new definition.  This information is taken from the Selected objects you are grouping.
+END
+STEP
+MESSAGE
+_________________________________________
+
+The 'Replace with new group?' toggle will replace the Selected objects with the new definition.
+END
+STEP
+PARAMETER group replace 1
+MESSAGE
+_________________________________________
+
+If we don't change the Title then the new definition will replace the existing definition.
+
+We'll give this definition a new Description.
+END
+STEP
+PARAMETER group desc M Medium Right
+PARAMETER group desc Modi Medium Right
+PARAMETER group desc Modified Medium Right
+MESSAGE
+_________________________________________
+
+We're done with this definition.  Press Ok.
+END
+STEP
+PARAMETER group ok
+MESSAGE
+_________________________________________
+
+You will see the updated image on the HotBar.
+END
+STEP
+CLEAR
+MESSAGE
+The <Ungroup> command replaces any Selected turnouts or structures with their parts.
+
+Structures and non-track segements of turnouts are composed of Lines, Circles and other shapes.  In this turnout these are the two lines and the two squares.
+
+We will Ungroup this turnout and see how the individual parts can be changed.
+
+First Select the turnout and then Ungroup it.
+
+END
+STEP
+MOUSE 2 7.156 2.094
+MOUSE 4 7.156 2.094
+PARAMETER misc cmdUngroup
+MESSAGE
+_________________________________________
+
+Notice that the Title now indicates the turnout is Ungrouped.
+
+Hit Escape to deselect everything.
+END
+STEP
+MOUSE 6920 4.094 5.188
+RESET
+MESSAGE
+_________________________________________
+
+Now Select the lines and squares.
+END
+STEP
+MOUSE 2 2.469 2.812
+MOUSE 4 2.469 2.812
+MOUSE 2 2.688 2.875
+MOUSE 4 2.688 2.875
+MOUSE 2 3.188 2.844
+MOUSE 4 3.188 2.844
+MOUSE 2 2.812 1.656
+MOUSE 4 2.812 1.656
+MESSAGE
+_________________________________________
+
+We could modify these object or add new ones.  For now we'll just delete them.
+END
+STEP
+PARAMETER misc cmdDelete
+MESSAGE
+_________________________________________
+
+And move the Label out of the way.
+END
+STEP
+COMMAND MoveLabel
+MOUSE 2 4.281 2.031
+MOUSE 4 4.594 0.844
+ORIG 3.000 0.000 0.000
+ORIG 1.000 2.000 1.000
+MESSAGE
+_________________________________________
+
+Notice that the turnout has been broken into three parts.
+END
+STEP
+COMMAND Describe
+MOUSE 2 4.531 2.219
+MOUSE 4 4.531 2.219
+BIGPAUSE
+MOUSE 2 6.984 1.812
+MOUSE 4 6.984 1.812
+BIGPAUSE
+MOUSE 2 2.359 2.266
+MOUSE 4 2.359 2.266
+BIGPAUSE
+#DESCRIBE OK
+PARAMETER describe ok
+RESET
+MESSAGE
+_________________________________________
+
+Two ends of the turnout, from the frog to the end of the diverging leg and from the points to the left, are now straight track sections.
+
+The a turnout is made of a number of individual straight and curved track segements.  This turnout had four segments:
+   1 a short straight segment to the left of the points
+   2 a long straight segment to the right of the points
+   3 a curved segment from the points to the frog
+   4 a straight segment from the frog to the end of the diverging leg.
+The first and last segments have be converted to straight tracks.
+The second and third segments form the the body of the turnout and can not be ungrouped further.
+
+You can later Group this turnout with the straight segments to recreate the turnout definition.  You can also add other track segments to turnout definitions.
+
+END
+STEP
+KEYSTATE 2
+MOUSE 2 4.625 1.969
+KEYSTATE 2
+MOUSE 4 4.625 1.969
+PARAMETER misc cmdDelete
+ORIG 3.000 0.000 0.000
+CLEAR
+MESSAGE
+Now, create a track and place the new turnout on it.
+END
+STEP
+COMMAND Straight
+MOUSE 2 0.281 0.688
+MOUSE 4 11.156 4.281
+BIGPAUSE
+COMMAND TurnoutHotBar
+#PARAMETER turnout list 0 
+PARAMETER GROUP turnout
+HOTBARSELECT Peco-55	Modified Medium Right	SL-E395F
+MOUSE 4 4.750 1.906
+MOUSE 8200 4.750 1.906
+MESSAGE
+_________________________________________
+
+Now suppose we want to replace the black squares with green circles.
+
+First we Select the turnout.
+END
+STEP
+COMMAND Select
+MOUSE 2 6.062 2.906
+MOUSE 4 6.062 2.906
+MESSAGE
+And now Ungroup it (from the Tools Menu)
+END
+STEP
+PARAMETER misc cmdUngroup
+MESSAGE
+_________________________________________
+
+Notice that the name has changed to indicate the turnout was Ungrouped.
+END
+STEP
+MESSAGE
+_________________________________________
+
+Now, hit escape to deselect everything and then Select the 2 squares and delete them.
+END
+STEP
+MOUSE 6920 6.062 2.906
+RESET
+BIGPAUSE
+MOUSE 2 5.219 2.938
+MOUSE 4 5.219 2.938
+MOUSE 2 5.531 1.844
+MOUSE 4 5.531 1.844
+PARAMETER misc cmdDelete
+MESSAGE
+_________________________________________
+
+Now draw the green circles...
+END
+STEP
+ORIG 1.000 2.000 1.000
+COMMAND DrawFilledCircleCenter
+PARAMETER draw linecolor 0
+PARAMETER GROUP draw
+PARAMETER draw linecolor 65280
+MOUSE 2 5.203 2.812
+MOUSE 4 5.359 2.609
+PARAMETER GROUP draw
+MOUSE 2 5.516 1.891
+MOUSE 4 5.672 1.719
+PARAMETER GROUP draw
+MESSAGE
+and Group the new definition.
+END
+STEP
+ORIG 2.000 0.000 0.000
+RESET
+COMMAND Select
+MOUSE 2 3.719 4.156
+MOUSE 4 10.531 0.969
+BIGPAUSE
+PARAMETER misc cmdGroup
+PARAMETER group replace 1
+BIGPAUSE
+PARAMETER group ok
+MESSAGE
+_________________________________________
+
+Notice that the turnout in the HotBar is angled the same as the turnout on the layout.  Make sure your new definition is rotated the way you want it.
+END
+STEP
+KEYSTATE 2
+MOUSE 2 5.000 2.188
+KEYSTATE 2
+MOUSE 4 5.000 2.188
+PARAMETER misc cmdDelete
+CLEAR
+RESET
+MESSAGE
+We can also create turnouts from simple straight and curved tracks.
+
+We'll create two tracks that have a common End-Point.
+END
+STEP
+COMMAND Straight
+MOUSE 2 2.000 2.000
+MOUSE 4 10.000 2.000
+COMMAND CurveEndPt
+MOUSE 2 2.000 2.000
+MOUSE 4 9.000 2.000
+MOUSE 2 9.000 2.000
+MOUSE 4 8.875 3.062
+MESSAGE
+_________________________________________
+
+At this point we can modify the tracks if necessary.
+
+We will use the <Describe> command to change the tracks.
+END
+STEP
+COMMAND Describe
+MOUSE 2 9.438 2.000
+MOUSE 4 9.438 2.000
+MESSAGE
+_________________________________________
+
+We'll make the Length 7.5".
+
+If we change the Length, each End-Point will be moved to shorten the track.  We want to just move the Right End-Point.  To control this, change the Pivot to First which means the Left End-Point will be unchanged when we change the length (or angle) of the track.
+END
+STEP
+#DESCRIBE Pivot	0
+PARAMETER describe P1 0
+MESSAGE
+_________________________________________
+
+Now when change the Length only the Right End-Point will move.
+END
+STEP
+#DESCRIBE Length	7.500
+PARAMETER describe F7 7.500
+#DESCRIBE OK
+PARAMETER describe ok
+RESET
+MESSAGE
+_________________________________________
+
+Now let's look at the curved track.
+END
+STEP
+COMMAND Describe
+MOUSE 2 7.688 2.625
+MOUSE 4 7.688 2.625
+MESSAGE
+_________________________________________
+
+Here the Left End-Point (which we don't want to move) is the Second End-Point, so we'll make that the Pivot.
+END
+STEP
+#DESCRIBE Pivot	2
+PARAMETER describe P1 2
+MESSAGE
+_________________________________________
+
+We want the curve to have a radius of 20" and an angle of 17.5°.
+First change the Radius...
+END
+STEP
+#DESCRIBE Radius	20.000
+PARAMETER describe F9 20.000000
+MESSAGE
+and the the Angular Length.
+END
+STEP
+PARAMETER describe F11 17.5
+BIGPAUSE
+#DESCRIBE OK
+PARAMETER describe ok
+MESSAGE
+_________________________________________
+
+Now Select both tracks...
+END
+STEP
+COMMAND Select
+MOUSE 2 7.500 2.750
+MOUSE 4 7.500 2.750
+MOUSE 2 8.000 2.000
+MOUSE 4 8.000 2.000
+MESSAGE
+and Group them.
+END
+PARAMETER group manuf 
+PARAMETER group desc 
+PARAMETER group partno 
+STEP
+PARAMETER misc cmdGroup
+PARAMETER group manuf Custom
+PARAMETER group desc Left
+PARAMETER group partno 99-L
+MESSAGE
+_________________________________________
+
+If the two tracks have a common End-Point then they will form a Turnout and can be switched with the <Train> command.  Otherwise they will just be two track segments grouped together.
+END
+STEP
+PARAMETER group ok
+MESSAGE
+_________________________________________
+
+We have created a left hand turnout and we also want a right hand version.
+
+We'll use the <Flip> command.
+END
+STEP
+COMMAND Select
+MOUSE 2 7.812 2.250
+MOUSE 4 7.812 2.250
+COMMAND Flip
+MESSAGE
+_________________________________________
+
+Drag a horizontal line that will be the mirror for the <Flip> command.
+END
+STEP
+MOUSE 2 1.438 1.938
+MOUSE 4 11.625 1.938
+MESSAGE
+_________________________________________
+
+Notice the title has changed to Flipped Left.
+
+Now Group the turnout.
+END
+STEP
+PARAMETER misc cmdGroup
+MESSAGE
+_________________________________________
+
+We'll change the Title and Part No for the new defintion.
+END
+STEP
+PARAMETER group desc Right
+PARAMETER group partno 99-
+PARAMETER group partno 99-R
+PARAMETER group replace 1
+PARAMETER group ok
+STEP
+CLEAR
+MESSAGE
+To Remove the definitions, use the Custom Management dialog on the Tools menu.
+END
+STEP
+PARAMETER misc cmdCustmgm
+MESSAGE
+_________________________________________
+
+Select the definitions you added and Delete them.
+END
+STEP
+PARAMETER custmgm inx 0 	Peco-55	DEMO	SL-E395F	Modified Medium Right
+PARAMETER custmgm delete
+PARAMETER custmgm inx 0 	Custom	DEMO	99-L	Left
+PARAMETER custmgm delete
+PARAMETER custmgm inx 0 	Custom	DEMO	99-R	Right
+PARAMETER custmgm delete
+PARAMETER custmgm ok
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

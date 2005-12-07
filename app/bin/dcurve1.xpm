@@ -1,0 +1,22 @@
+/* XPM */
+static char * dcurve1_xpm[] = {
+"16 16 3 1",
+" 	c #FFFFFFFFFFFF",
+".	c #FFFF00000000",
+"X	c #000000000000",
+"            .   ",
+"           ...  ",
+"          . . . ",
+"         .  .  .",
+"         XXX.X  ",
+"        XXXX.X  ",
+"      XXX   .   ",
+"     XXX .  .   ",
+"    XXX   . . . ",
+"   XXX     ...  ",
+"  XXX       .   ",
+"  XX            ",
+" XXX            ",
+" XX             ",
+" XX             ",
+" XX             "};

@@ -1,0 +1,23 @@
+/* XPM */
+static char * dflcrcl2_xpm[] = {
+"16 16 4 1",
+" 	c #FFFFFFFFFFFF",
+".	c #000000000000",
+"X	c #0000FFFFFFFF",
+"o	c #FFFF00000000",
+"     ......     ",
+"    .XXXXXX.    ",
+"  ..XXXXXXXX..  ",
+" .XXXXXXXXXXXX. ",
+" .XXXXXXXXXXXX. ",
+".XXXXXXXXXXXXXX.",
+".XXXXXXXXXXXXXX.",
+".XXXXXXoooooXXX.",
+".XXXXXXooXXXXXX.",
+".XXXXXXoXoXXXXX.",
+".XXXXXXoXXoXXXX.",
+" .XXXXXoXXXoXX. ",
+" .XXXXXXXXXXoX. ",
+"  ..XXXXXXXXXo  ",
+"    .XXXXXX..   ",
+"     ......     "};

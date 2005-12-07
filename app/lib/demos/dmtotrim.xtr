@@ -1,0 +1,96 @@
+# XTrkCad Version: 3.0.1, Date: Sat Sep 23 14:10:40 2000
+
+VERSION 10
+DEMOINIT
+ORIG 1.000 0.000 0.000
+PARAMETER display labelenable 4
+TURNOUT  2 0 0 0 0 N 2 0.218750 1.390625 0 0.000000 "Peco-55	Medium Left	SL-E396F"
+	E 0.218750 1.390625 270.000000
+	E 5.623750 1.390625 90.000000
+	E 5.588750 1.912625 80.314000
+	D -0.015000 -1.136000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0.000000 0.000000 0.000000 0.353000 0.000000
+	S 0 0.000000 0.353000 0.000000 5.405000 0.000000
+	C 0 0.000000 -23.136000 0.351000 23.136000 170.297000 9.700000
+	S 0 0.000000 4.251000 0.331000 5.370000 0.522000
+	END
+REDRAW
+RESET
+MESSAGE
+Sometimes it's useful to modify turnouts triming one of the ends.
+
+We use the <Split> command for this.
+END
+STEP
+COMMAND SplitTrack
+MESSAGE
+_________________________________________
+
+Normally, if we try to Split a turnout we get an error message.
+END
+STEP
+MOUSE 2 4.922 1.406
+MOUSE 4 4.922 1.406
+RESET
+MESSAGE
+_________________________________________
+
+Hold down the Shift key and try again.
+END
+STEP
+COMMAND SplitTrack
+#KEYSTATE 2
+#MOUSE 2 4.906 1.391
+#KEYSTATE 2
+#MOUSE 4 4.906 1.391
+KEYSTATE 2
+MOUSE 2 5.094 1.375
+KEYSTATE 2
+MOUSE 4 5.094 1.375
+MESSAGE
+_________________________________________
+
+The end of the turnout has been replaced by a piece of straight flex track which we can modify.
+END
+STEP
+COMMAND Modify
+KEYSTATE 2
+MOUSE 2 5.562 1.344
+KEYSTATE 2
+MOUSE 4 5.938 1.359
+MESSAGE
+_________________________________________
+
+We can try splitting the diverging leg.
+END
+STEP
+COMMAND SplitTrack
+KEYSTATE 2
+MOUSE 2 3.453 1.672
+KEYSTATE 2
+MOUSE 4 3.453 1.672
+MESSAGE
+_________________________________________
+
+Notice that the tail of the diverging leg has been changed to a curved track...
+END
+STEP
+COMMAND Describe
+MOUSE 2 4.078 1.672
+MOUSE 4 4.078 1.672
+STEP
+MESSAGE
+and a straight track.
+END
+STEP
+MOUSE 2 5.453 1.875
+MOUSE 4 5.453 1.875
+#DESCRIBE OK
+PARAMETER describe ok
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

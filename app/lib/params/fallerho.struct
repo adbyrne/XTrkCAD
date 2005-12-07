@@ -1,0 +1,99 @@
+echo "CONTENTS Faller HO Structures"
+./mkstruct -cm HO "Faller	Kirkbach Station	272-104" 26.5 10.3
+./mkstruct -cm HO "Faller	Roofed Platform	272-192" 45 4.8
+./mkstruct -cm HO "Faller	Loading Crane	272-129" 2.6 8.3
+./mkstruct -cm HO "Faller	Friedichshohe Passenger Station	272-110" 40.7 15.6
+./mkstruct -cm HO "Faller	Covered Platform	272-189" 29.5 5.3
+./mkstruct -cm HO "Faller	Covered Platform	272-181" 33.8 9.2
+./mkstruct -cm HO "Faller	Mittelstadt Passenger Station	272-115" 44.6 16
+./mkstruct -cm HO "Faller	Bonn Passenger Station	272-113" 70 16
+./mkstruct -cm HO "Faller	GFlass Train Shed	272-188" 48.8 5.3
+./mkstruct -cm HO "Faller	Roofed Platform	272-190" 18 7.2
+./mkstruct -cm HO "Faller	Small Shed	272-151" 12 6.7
+./mkstruct -cm HO "Faller	Passenger Station Platform	272-191" 30.2 4.8
+./mkstruct -cm HO "Faller	Freight Station	272-155" 19.2 10.8
+./mkstruct -cm HO "Faller	Covered Platform	272-1109" 26 5
+./mkstruct -cm HO "Faller	Glass Covered Platform	272-187" 48.8 5.3
+./mkstruct -cm HO "Faller	Passenger Station Canopy, Bonn	272-180" 30.2 17.8
+./mkstruct -cm HO "Faller	Service Station (Bosch)	272-349a" 11.3 11.3
+./mkstruct -cm HO "Faller	Service Station (Bosch)	272-349b" 11 6.8
+./mkstruct -cm HO "Faller	Station Schwarzburg	272-116" 47.6 17.5
+./mkstruct -cm HO "Faller	Wayside Station	272-91" 12.4 8.1
+./mkstruct -cm HO "Faller	Freight Depot	272-154" 21 8.8
+./mkstruct -cm HO "Faller	Rural Station Guglingen	272-107" 30.8 13.5
+./mkstruct -cm HO "Faller	Lengmoos Passenger Station	272-100" 30.6 17.5
+./mkstruct -cm HO "Faller	Beet Loader	272-128" 18 6.5
+./mkstruct -cm HO "Faller	Talheim Rural Station	272-105" 23.9 11.5
+./mkstruct -cm HO "Faller	Alterode Station	272-98" 29.7 13.5
+./mkstruct -cm HO "Faller	St. Julien Station	272-1101" 20.5 20
+./mkstruct -cm HO "Faller	World's Largest Cuckoo Clock	272-389" 11 9.5
+./mkstruct -cm HO "Faller	Mainline Station	272-112" 25.5 13
+./mkstruct -cm HO "Faller	Country Station	272-92" 20.3 10.4
+./mkstruct -cm HO "Faller	Driver's Cabin	272-133" 3.2 2.0
+./mkstruct -cm HO "Faller	Diesel Oil Facility	272-145" 10.5 3.5
+./mkstruct -cm HO "Faller	Container Gantry Crane	272-130" 20.2 13.5
+./mkstruct -cm HO "Faller	Two-Stall Engine House	272-156" 40 17.2
+./mkstruct -cm HO "Faller	Stucco Chalet	272-206" 11.9 8.4
+./mkstruct -cm HO "Faller	Small Coaling Station	272-147" 20.7 8
+./mkstruct -cm HO "Faller	Overhead Crane	272-164" 13.7 3
+./mkstruct -cm HO "Faller	Small Signal Box	272-123" 13.6 4.7
+./mkstruct -cm HO "Faller	Diesel Oil Facility	272-157" 22.5 12.4
+./mkstruct -cm HO "Faller	Heating & Power Plant	272-982" 23 21
+./mkstruct -cm HO "Faller	Gantry Crane	272-162" 34 5.8
+./mkstruct -cm HO "Faller	Operations Bldg	272-973" 15.5 14.8
+./mkstruct -cm HO "Faller	Sanding Facility	272-146" 15.5 5.5
+./mkstruct -cm HO "Faller	Back Shop	272-159" 26.6 15
+./mkstruct -cm HO "Faller	Mittlestadt Signal Tower	272-120" 8.4 6.4
+./mkstruct -cm HO "Faller	Double Silo	272-167" 7.8 14.8
+./mkstruct -cm HO "Faller	Gatekeeper's House	272-132" 9.8 7.5
+./mkstruct -cm HO "Faller	Water Tower	272-144" 8.7 8.7
+./mkstruct -cm HO "Faller	Sanding Tower	272-138" 3.7 3.7
+./mkstruct -cm HO "Faller	Cinder Removal Facility	272-149" 34.4 14.7
+./mkstruct -cm HO "Faller	Duderstadt Enginehouse	272-160" 31 18.5
+./mkstruct -cm HO "Faller	Wooden Hut	272-947" 11.1 7.2
+./mkstruct -cm HO "Faller	Freight House	272-150" 24.8 14.4
+./mkstruct -cm HO "Faller	Two-Stall Engine House	272-161" 21 15.7
+./mkstruct -cm HO "Faller	Coaling Station	272-148" 34 27.4
+./mkstruct -cm HO "Faller	Swivel Wate Spout	272-137" 7.8 1.5
+./mkstruct -cm HO "Faller	Wate Tower	272-143" 10 10
+./mkstruct -cm HO "Faller	Black Forest Sawmill	272-230" 23 16
+./mkstruct -cm HO "Faller	Overhead Signal ower	272-125" 18 17
+./mkstruct -cm HO "Faller	Compressor Housing	272-139" 9.4 5.6
+./mkstruct -cm HO "Faller	Rural Fire Station	272-268" 13 10
+./mkstruct -cm HO "Faller	Forest Farmhouse	272-283" 12.5 12.5
+./mkstruct -cm HO "Faller	Log Barn	272-294" 10.6 5.7
+./mkstruct -cm HO "Faller	Timber Yard	272-288" 13 9
+./mkstruct -cm HO "Faller	Alsfeld Town Hall	272-936" 11.1 10.3
+./mkstruct -cm HO "Faller	Signal Tower	272-126" 21 8.4
+./mkstruct -cm HO "Faller	Black Forest Gristmill	272-228" 24 13
+./mkstruct -cm HO "Faller	Old Blacksmith Shop	272-266" 14.7 9.7
+./mkstruct -cm HO "Faller	Hunter's Lookout	272-290" 4 3
+./mkstruct -cm HO "Faller	Alpine Blackship	272-332" 18.5 11.5
+./mkstruct -cm HO "Faller	Grain Store	272-333" 9 8
+./mkstruct -cm HO "Faller	Gutach Valley Farmhouse	272-289" 14.6 12.6
+./mkstruct -cm HO "Faller	Log Cabin	272-299" 8.2 7.6
+./mkstruct -cm HO "Faller	Forest Log Cabin	272-283" 8.7 5.1
+./mkstruct -cm HO "Faller	Alpine Farm House	272-331" 13 11
+./mkstruct -cm HO "Faller	Alpine Inn	272-330" 18.5 11
+./mkstruct -cm HO "Faller	Lower Saxon Farmhouse	272-371" 11 17.5
+./mkstruct -cm HO "Faller	House Under Construction	272-303" 12 9
+./mkstruct -cm HO "Faller	Timbered House w/ Garage	272-215" 12.6 6.2
+./mkstruct -cm HO "Faller	Two Town Houses w/ Shop	272-418" 12 14.9
+./mkstruct -cm HO "Faller	Multi-Story House w/ Antique Shop	272-422" 9.7 16.5
+./mkstruct -cm HO "Faller	Town Hall	272-930" 13.5 10.3
+./mkstruct -cm HO "Faller	Villa	272-364" 17.5 14.5
+./mkstruct -cm HO "Faller	Farm Bldg w/ Details	272-276a" 16.2 9.8
+./mkstruct -cm HO "Faller	Farm Bldg w/ Details	272-276b" 9.6 5.3
+./mkstruct -cm HO "Faller	Farm Bldg w/ Details	272-276c" 13.7 9.8
+./mkstruct -cm HO "Faller	Half-Timbered House	272-272" 12.5 12.5
+./mkstruct -cm HO "Faller	Detached House	272-214" 9.1 7.2
+./mkstruct -cm HO "Faller	Town House w/Shops	272-421" 9.7 16.5
+./mkstruct -cm HO "Faller	Hunter's Lodge Falkeneck	272-385" 18.8 13.4
+./mkstruct -cm HO "Faller	Farm	272-370" 22.5 34
+./mkstruct -cm HO "Faller	Watermill	272-225" 24 13
+./mkstruct -cm HO "Faller	House Flair	272-392" 17.8 15.3
+./mkstruct -cm HO "Faller	Timbered House	272-423" 9.7 14.9
+./mkstruct -cm HO "Faller	White Plaster House	272-1209" 9.3 8.6
+./mkstruct -cm HO "Faller	Brick/Timbered House	272-1208" 9.3 8.6
+./mkstruct -cm HO "Faller	Detached House	272-1255" 24.5 22.5
+./mkstruct -cm HO "Faller	Townhouse w/ Stationer's House	272-419" 9.7 14.9

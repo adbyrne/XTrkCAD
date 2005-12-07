@@ -1,0 +1,72 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+STRAIGHT 1 DEMO 1
+	E 1.916667 32.771041 0.000000
+	E 1.916667 0.416667 180.000000
+	END
+STRAIGHT 2 DEMO 1
+	E 2.583333 0.833333 270.000000
+	E 37.083333 0.833333 90.000000
+	END
+REDRAW
+RESET
+MESSAGE
+This example will show the effect of using easements while joining tracks.
+
+First, we'll enable easements.
+END
+PARAMETER misc cmdEasement
+STEP
+PARAMETER easement val 0.500
+BIGPAUSE
+PARAMETER easement ok
+MESSAGE
+_________________________________________
+
+We've selected sharp easements.  The minimum radius curve we can use will be 9.75"
+
+Notice the label on the Easement button has changed to 'Sharp'.
+END
+STEP
+COMMAND Join
+MOUSE 2 1.917 12.167
+MOUSE 3 1.917 12.167
+MOUSE 4 1.917 12.167
+MOUSE 2 12.000 0.833
+MESSAGE
+_________________________________________
+
+Note the connecting curve does not quite meet the straight tracks.  This the 'Offset'.
+END
+STEP
+MOUSE 3 14.000 0.833
+MOUSE 3 11.833 0.833
+MESSAGE
+_________________________________________
+
+Here the connecting curve is too small.
+END
+STEP
+MOUSE 3 11.750 0.833
+BIGPAUSE
+MOUSE 4 14.500 0.833
+PARAMETER easement val 0.500
+MESSAGE
+_________________________________________
+
+The connecting curve is made of three tracks, the curve and two easement segments on each end.
+END
+STEP
+COMMAND Describe
+MOUSE 2 5.750 4.083
+MOUSE 4 5.750 4.083
+MOUSE 2 14.333 0.500
+MOUSE 4 14.333 0.500
+MOUSE 2 1.917 13.333
+MOUSE 4 1.917 13.333
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

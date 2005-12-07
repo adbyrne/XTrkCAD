@@ -1,0 +1,22 @@
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/xtrkcad.bug,v 1.1 2005-12-07 15:47:41 rc-flyer Exp $
+
+OPEN IN RELEASE 3.1.3 ----------------------------------------------------------
+
+GENERIC:
+
+None
+
+
+MS-WINDOWS Version:
+
+BUG: Tunnels of Thick and Medium lines drawn as thin
+
+BUG: Win95/Win98/WinME - cannot draw fat lines with flat endcaps
+
+
+Linux/GTK version:
+
+BUG: In 8-bit color mode, the colormap gets messed up when selecting new
+     colors.
+
+BUG: Cannot rotate Text (this is a problem with X-Windows)

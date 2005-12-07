@@ -1,0 +1,70 @@
+# XTrkCad Version: 3.0.1, Date: Sat Sep 23 23:40:39 2000
+
+VERSION 10
+DEMOINIT
+ORIG 4.000 0.000 0.000
+PARAMETER display description-fontsize 64
+REDRAW
+RESET
+MESSAGE
+You can draw a variety of different types of benchwork:
+- rectangular (1x2, 2x4 etc)
+- L girders
+- T girders
+
+You can also draw them in different orientations.
+END
+STEP
+COMMAND DrawBench
+PARAMETER draw benchcolor 16760832
+PARAMETER draw benchlist 0 1"x1"
+PARAMETER draw benchorient 0 On Edge
+PARAMETER GROUP draw
+PARAMETER draw benchlist 12 L-2"x4"
+PARAMETER draw benchlist 16 L-3"x6"
+MESSAGE
+_________________________________________
+
+We will draw two 3x6 inch L-girders.
+END
+STEP
+MOUSE 2 0.000 2.000
+MOUSE 4 23.812 2.000
+PARAMETER draw benchcolor 16760832
+PARAMETER draw benchlist 16 L-3"x6"
+PARAMETER draw benchorient 0 Left
+PARAMETER GROUP draw
+MOUSE 2 0.000 10.250
+MOUSE 4 23.750 10.250
+PARAMETER draw benchcolor 16760832
+PARAMETER draw benchlist 16 L-3"x6"
+PARAMETER draw benchorient 0 Left
+PARAMETER GROUP draw
+MESSAGE
+_________________________________________
+
+The flange of the top L-Girders is on the outside edge of the girders.  We want to change the girder so both flanges are on the inside.
+
+We will use the <Describe> command for this.
+END
+STEP
+COMMAND Describe
+MOUSE 2 12.312 10.500
+MOUSE 4 12.312 10.500
+MESSAGE
+_________________________________________
+
+Change the Orientation to Right.
+END
+STEP
+PARAMETER describe L2 1 Right
+PARAMETER describe ok
+RESET
+MESSAGE
+_________________________________________
+
+Now both flanges are on the inside of the two girders.
+=========================================
+END
+STEP
+CLEAR

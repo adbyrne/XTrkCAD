@@ -1,0 +1,20 @@
+/* XPM */
+static char * bo_lrd_xpm[] = {
+"16 14 3 1",
+" 	c #FFFFFFFFFFFF",
+".	c #000000000000",
+"X	c #FFFF9A691861",
+"                ",
+"                ",
+"                ",
+" .............. ",
+" .XXXXXXXXXXXX. ",
+" .XXXXXXXXXXXX. ",
+" .XXXXXXXXXXXX. ",
+" .XXX.......... ",
+" .XXX.          ",
+" .XXX.          ",
+" .XXX.          ",
+" .....          ",
+"                ",
+"                "};

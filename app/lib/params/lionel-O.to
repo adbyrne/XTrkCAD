@@ -1,0 +1,16 @@
+mkturnout O "Lionel O" S '½ Straight Track' 6-65505 5.5
+mkturnout O "Lionel O" S 'Straight Track' 6-65500 10.0
+mkturnout O "Lionel O" S 'Extra Long Straight Track' 6-65523 40.0
+mkturnout O "Lionel O" C '½ 31" Curved Track' 6-65504 14.75 22.5
+mkturnout O "Lionel O" C '31" Curved Track' 6-65501 14.75 45.0
+mkturnout O "Lionel O" C '42" Curved Track' 6-12925 20.25 30.0
+mkturnout O "Lionel O" C '54" Curved Track' 6-65554 26.25 22.5
+mkturnout O "Lionel O" C '72" Curved Track' 6-65572 35.25 22.5
+mkturnout O "Lionel O" S 'Insulated Track' 6-12840 10.0
+mkturnout O "Lionel O" S 'Remote Control Track' 6-65530 10.0
+mkturnout O "Lionel O" X "45° Crossing" 6-65023 10.0 45 10.0
+mkturnout O "Lionel O" X "90° Crossing" 6-65020 5.5 90 5.5
+mkturnout O "Lionel O" Q "Left Remote Control Switch" 6-23010 "Right Remote Control Switch" 6-23011 14.75 33.75 8.125
+mkturnout O "Lionel O" S 'Switch Straight Extension' 6-2301x-1 1.875
+mkturnout O "Lionel O" C 'Switch Curved Extension' 6-2301x-2 14.75 11.25
+mkturnout O "Lionel O" Q 'Left 42" Remote Control Switch' 6-65166 'Right 42" Remote Control Switch' 6-65165 26.25 30 14.25

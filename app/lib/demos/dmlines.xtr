@@ -1,0 +1,223 @@
+VERSION 2
+DEMOINIT
+ORIG 4.000 0.000 0.000
+PARAMETER display labelenable 4
+STRAIGHT 1 DEMO 1
+	E 0.051703 4.160000 270.000000
+	T 2 4.533333 4.160000 90.000000
+	END
+TURNOUT 2 DEMO 1 4.533333 4.160000 0.000000 "Peco-55	Medium Left	SL-E395F"
+	T 1 4.533333 4.160000 270.000000
+	T 3 9.938333 4.160000 90.000000
+	T 6 9.903333 3.638000 99.686000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0 0.000000 0.000000 0.353000 0.000000
+	S 0 0 0.353000 0.000000 5.405000 0.000000
+	C 0 0 23.136000 0.351000 -23.136000 0.004000 9.700000
+	S 0 0 4.251000 -0.331000 5.370000 -0.522000
+	END
+STRAIGHT 3 DEMO 1
+	E 31.466667 4.160000 90.000000
+	T 2 9.938333 4.160000 270.000000
+	END
+STRAIGHT 4 DEMO 1
+	E 31.466667 2.660000 90.000000
+	T 5 16.693333 2.660000 270.000000
+	END
+CURVE 5 DEMO 1 16.693333 15.171003 12.511003
+	T 4 16.693333 2.660000 90.000000
+	T 6 14.588376 2.838349 279.686000
+	END
+STRAIGHT 6 DEMO 1
+	T 2 9.903333 3.638000 279.686000
+	T 5 14.588376 2.838349 99.686000
+	END
+REDRAW
+RESET
+MESSAGE
+The Draw Commands are used to draw straight and curved lines on the layout.
+
+END
+STEP
+COMMAND DrawLine
+PARAMETER draw linewidth 0
+PARAMETER draw linecolor 0
+MESSAGE
+_________________________________________
+
+Lines are drawn by clicking at the starting postion and dragging to the final position.
+END
+STEP
+MOUSE 2 0.533 4.693
+MOUSE 3 4.320 4.693
+MOUSE 4 4.320 4.693
+MOUSE 2 4.373 4.693
+MOUSE 3 4.533 5.120
+MOUSE 4 4.533 5.120
+MOUSE 2 0.267 5.120
+MOUSE 3 0.587 4.747
+MOUSE 4 0.587 4.747
+MOUSE 2 0.267 3.253
+MOUSE 3 0.533 3.787
+MOUSE 4 0.533 3.787
+MESSAGE
+_________________________________________
+
+Drawing lines with the Shift key held down will use the previous line End-Point as the starting position.  This makes it easy to draw connected lines.
+END
+STEP
+KEYSTATE 2
+MOUSE 2 3.520 3.680
+KEYSTATE 2
+MOUSE 3 4.320 3.787
+KEYSTATE 2
+MOUSE 4 4.320 3.787
+KEYSTATE 2
+MOUSE 2 4.533 3.307
+KEYSTATE 2
+MOUSE 3 4.533 3.307
+KEYSTATE 2
+MOUSE 4 4.533 3.307
+MESSAGE
+_________________________________________
+
+You also draw in various colors and line widths.
+END
+PARAMETER draw linecolor 255
+PARAMETER draw linewidth 2
+STEP
+MOUSE 2 0.747 4.800
+MOUSE 4 0.693 6.560
+KEYSTATE 2
+MOUSE 2 0.693 6.560
+KEYSTATE 2
+MOUSE 4 1.493 7.573
+KEYSTATE 2
+MOUSE 2 1.547 7.573
+KEYSTATE 2
+MOUSE 4 3.147 7.467
+KEYSTATE 2
+MOUSE 2 3.787 6.773
+KEYSTATE 2
+MOUSE 4 4.213 5.813
+KEYSTATE 2
+MOUSE 2 4.107 5.173
+KEYSTATE 2
+MOUSE 4 4.107 4.693
+MESSAGE
+_________________________________________
+
+Like Curved Tracks, Curved Lines can be drawn by a variety of methods.
+
+Here we will draw a Curve by dragging from one End-Point to the other to define the chord of the Curve.  Then we will drag from the center to shape the curve.
+END
+STEP
+COMMAND DrawCurveChord
+MOUSE 2 0.800 3.680
+#MOUSE 3 0.800 3.573
+#MOUSE 3 0.853 3.467
+#MOUSE 3 0.853 3.360
+#MOUSE 3 0.853 3.253
+#MOUSE 3 0.853 3.147
+#MOUSE 3 0.853 2.987
+#MOUSE 3 0.853 2.880
+#MOUSE 3 0.747 2.560
+#MOUSE 3 0.747 2.133
+#MOUSE 3 0.747 1.707
+#MOUSE 3 0.747 1.547
+#MOUSE 3 0.800 1.493
+#MOUSE 3 0.800 1.440
+#MOUSE 3 0.800 1.387
+#MOUSE 3 0.853 1.280
+#MOUSE 3 0.907 1.173
+#MOUSE 3 1.120 0.960
+#MOUSE 3 1.173 0.907
+#MOUSE 3 1.173 0.853
+#MOUSE 3 1.173 0.800
+#MOUSE 3 1.173 0.747
+#MOUSE 4 1.173 0.747
+#BIGPAUSE
+#MOUSE 2 1.173 0.747
+#MOUSE 3 1.280 0.747
+#MOUSE 3 1.600 0.533
+#MOUSE 3 2.133 0.427
+#MOUSE 3 2.773 0.427
+#MOUSE 3 3.520 0.533
+#MOUSE 3 4.053 0.747
+#MOUSE 3 4.480 0.960
+#MOUSE 3 4.693 1.173
+#MOUSE 3 4.800 1.493
+#MOUSE 3 4.800 1.920
+#MOUSE 3 4.800 2.347
+#MOUSE 3 4.907 2.773
+#MOUSE 3 4.853 2.880
+#MOUSE 3 4.747 3.200
+#MOUSE 3 4.693 3.253
+#MOUSE 3 4.640 3.307
+#MOUSE 3 4.533 3.307
+#MOUSE 3 4.480 3.307
+#MOUSE 3 4.427 3.307
+#MOUSE 3 4.373 3.360
+#MOUSE 3 4.267 3.360
+#MOUSE 3 4.160 3.413
+#MOUSE 3 4.107 3.467
+#MOUSE 3 4.053 3.520
+#MOUSE 3 4.000 3.520
+#MOUSE 3 4.000 3.467
+#MOUSE 3 4.000 3.520
+#MOUSE 3 4.053 3.573
+#MOUSE 3 4.000 3.627
+#MOUSE 3 4.000 3.680
+#MOUSE 3 3.947 3.680
+#MOUSE 3 3.947 3.733
+#MOUSE 3 3.947 3.787
+MOUSE 4 4.107 3.787
+BIGPAUSE
+MOUSE 2 2.9 3.78
+MOUSE 4 2.9 1.5
+MESSAGE
+_________________________________________
+
+Boxes are useful for drawing rectangular shapes.
+END
+STEP
+PARAMETER draw linecolor 8355584
+COMMAND DrawBox
+MOUSE 2 11.413 4.960
+MOUSE 4 20.640 7.840
+MESSAGE
+_________________________________________
+
+Circles can be drawn by clicking on the center or edge and dragging to set the radius.
+Here we will drag from the Center.
+END
+STEP
+COMMAND DrawCircleCenter
+MOUSE 2 7.360 6.453
+MOUSE 4 8.533 5.920
+MESSAGE
+_________________________________________
+
+Lines and Shapes can be deleted by Selecting and Deleting.
+END
+STEP
+COMMAND Select
+MOUSE 2 11.307 6.400
+MOUSE 4 11.307 6.400
+#BIGPAUSE
+#PARAMETER misc cmdDelete
+MOUSE 2 4.160 5.493
+MOUSE 4 4.160 5.493
+#BIGPAUSE
+#PARAMETER misc cmdDelete
+MOUSE 2 3.467 6.933
+MOUSE 4 3.467 6.933
+BIGPAUSE
+PARAMETER misc cmdDelete
+MESSAGE
+=========================================
+END
+STEP
+CLEAR
+RESET

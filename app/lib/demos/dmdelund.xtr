@@ -1,0 +1,80 @@
+VERSION 2
+DEMOINIT
+ORIG 6.000 0.000 0.000
+STRAIGHT 1 DEMO 1
+	E 4.166667 1.750000 270.000000
+	T 4 8.916667 1.750001 90.000000
+	END
+CURVE 2 DEMO 1 21.833333 25.924310 24.125000
+	E 40.128499 10.198454 40.681260
+	T 3 24.504997 1.947700 263.642025
+	END
+JOINT 3 DEMO 1 0.000000 5.343264 13.750000 9.375000 0 1 0 19.161701 1.750004 90.000089
+	T 5 19.161701 1.750004 270.000000
+	T 2 24.504997 1.947700 83.642025
+	END
+TURNOUT 4 DEMO 1 8.916667 1.750001 0.000000 "Peco-55	Medium Left	SL-E396F"
+	T 1 8.916667 1.750001 270.000000
+	T 5 14.321667 1.750001 90.000000
+	E 14.286667 2.272001 80.314000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0 0.000000 0.000000 0.353000 0.000000
+	S 0 0 0.353000 0.000000 5.405000 0.000000
+	C 0 0 -23.136000 0.351000 23.136000 170.297000 9.700000
+	S 0 0 4.251000 0.331000 5.370000 0.522000
+	END
+STRAIGHT 5 DEMO 1
+	T 3 19.161701 1.750004 90.000062
+	T 4 14.321667 1.750002 270.000062
+	END
+REDRAW
+RESET
+MESSAGE
+Pressing the <Delete> button lets you delete selected tracks from the layout.
+
+First you select the tracks you want to delete, and then press the <Delete> button.
+END
+STEP
+COMMAND Select
+MOUSE 2 6.417 1.833
+MOUSE 4 6.417 1.833
+MOUSE 2 11.833 2.083
+MOUSE 4 11.833 2.083
+PARAMETER misc cmdDelete
+MESSAGE
+_________________________________________
+
+If you delete a track connected to an easement curve, then the easement curve is deleted as well.
+END
+STEP
+COMMAND Select
+MOUSE 2 17.750 1.833
+MOUSE 4 17.750 1.833
+PARAMETER misc cmdDelete
+MESSAGE
+_________________________________________
+
+You can use the <Undo> command to undelete tracks.
+END
+BIGPAUSE
+PARAMETER misc cmdUndo
+BIGPAUSE
+PARAMETER misc cmdUndo
+BIGPAUSE
+MESSAGE
+_________________________________________
+
+If you Left-Drag on the layout you can select all tracks within an area.
+
+Note, only tracks within the selected area are deleted.  Since the easement curve is connected to a deleted track, it is deleted as well.
+END
+STEP
+MOUSE 2 3.167 3.333
+MOUSE 4 22.083 0.667
+PARAMETER misc cmdDelete
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

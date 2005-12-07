@@ -1,0 +1,51 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+PARAMETER cmdopt move-quick 2
+STRAIGHT 1 DEMO 1
+	E 13.440000 4.160000 270.000000
+	E 30.186667 4.160000 90.000000
+	END
+CURVE 2 DEMO 1 19.577603 7.976896 5.250000
+	E 14.380804 7.231395 171.836391
+	T 3 19.577724 13.226896 90.001318
+	END
+STRAIGHT 3 DEMO 1
+	T 2 19.577724 13.226896 270.001318
+	E 29.546667 13.226667 90.001318
+	END
+REDRAW
+RESET
+MESSAGE
+The <Join> command can move one group of tracks to join with another.
+
+First <Select> the tracks you want to move.
+END
+STEP
+MOUSE 2 24.000 13.013
+MOUSE 4 24.000 13.013
+MOUSE 2 15.893 12.160
+MOUSE 4 15.893 12.160
+MESSAGE
+_________________________________________
+
+Click <Join> and Shift-Left-Click on the two End-Points.
+END
+STEP
+COMMAND Join
+KEYSTATE 2
+MOUSE 2 14.613 7.573
+KEYSTATE 2
+MOUSE 4 14.613 7.573
+KEYSTATE 2
+MOUSE 2 13.867 4.373
+KEYSTATE 2
+MOUSE 4 13.867 4.373
+MESSAGE
+_________________________________________
+
+The selected tracks are moved into position.
+=========================================
+END
+STEP
+CLEAR

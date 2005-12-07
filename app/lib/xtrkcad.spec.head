@@ -1,0 +1,34 @@
+BuildRoot: /home/jbayer/xtrkcad/RLSEDIR/install
+Name: xtrkcad
+Version: RLSEVER
+Release: 1
+Summary: XTrkCad Model Railroad CAD
+License: commercial
+Group: Applications/Engineering
+Vendor: Sillub Technology
+
+%define _rpmdir /home/jbayer/xtrkcad/RLSEDIR/install/
+%define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
+
+%pre
+
+
+%post
+rm -f /usr/local/bin/xtrkcad
+ln -s /usr/local/lib/xtrkcad/xtrkcad /usr/local/bin/xtrkcad
+
+%description
+XTrkCad is a CAD program for designing Model Railroad layouts.
+XTrkCad supports any scale, has libraries of popular brands of x
+turnouts and sectional track (plus you add your own easily), can
+automatically use spiral transition curves when joining track
+and has extensive on-line help and demonstrations.  
+XTrkCad lets you manipulate track much like you would with actual
+flex-track to modify, extend and join tracks and turnouts.
+Additional features include tunnels, 'post-it' notes, on-screen
+ruler, parts list, 99 drawing layers, undo/redo commands,
+benchwork, 'Print to BitMap', elevations, train simulation and
+car inventory.
+
+%files
+%defattr( -, root, root )

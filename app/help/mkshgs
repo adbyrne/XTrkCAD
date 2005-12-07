@@ -1,0 +1,348 @@
+rm -f xtchelp.d/*.shg
+
+PNG1DIR=png.d
+PNG2DIR=images.orig
+SHGDIR=xtchelp.d
+
+./mkshg ${PNG1DIR}/bgzoom.png ${SHGDIR}/bgzoom.shg << EOF
+jump 0 0 26 26 cmdZoomIn
+jump 26 0 26 26 cmdZoom
+jump 52 0 26 26 cmdZoomOut
+EOF
+./mkshg ${PNG1DIR}/bgundo.png ${SHGDIR}/bgundo.shg << EOF
+jump 0 0 26 26 cmdUndo
+jump 26 0 26 26 cmdRedo
+EOF
+./mkshg ${PNG1DIR}/bgease.png ${SHGDIR}/bgease.shg << EOF
+jump 0 0 50 25 cmdEasement
+EOF
+./mkshg ${PNG1DIR}/bgsnap.png ${SHGDIR}/bgsnap.shg << EOF
+jump 0 0 26 26 cmdGridEnable
+jump 26 0 26 26 cmdGridShow
+EOF
+./mkshg ${PNG1DIR}/bgtrkcrt.png ${SHGDIR}/bgtrkcrt.shg << EOF
+jump 0 0 26 26 cmdStraight
+jump 26 0 40 26 cmdCurve
+jump 66 0 40 26 cmdCircle
+jump 104 0 26 26 cmdHelix
+jump 132 0 26 26 cmdTurnout
+jump 158 0 26 26 cmdHandLaidTurnout
+jump 184 0 26 26 cmdTurntable
+jump 210 0 26 26 cmdParallel
+EOF
+./mkshg ${PNG1DIR}/bgtrkmod.png ${SHGDIR}/bgtrkmod.shg << EOF
+jump 0 0 26 26 cmdModify
+jump 26 0 26 26 cmdJoin
+jump 52 0 26 26 cmdConnect
+jump 78 0 26 26 cmdSplitTrack
+jump 104 0 26 26 cmdElevation
+jump 130 0 26 26 cmdProfile
+jump 156 0 26 26 cmdMoveDesc
+EOF
+./mkshg ${PNG1DIR}/bgselect.png ${SHGDIR}/bgselect.shg << EOF
+jump 0 0 26 26 cmdDescribe
+jump 26 0 26 26 cmdSelect
+EOF
+./mkshg ${PNG1DIR}/bgtrkgrp.png ${SHGDIR}/bgtrkgrp.shg << EOF
+jump 0 0 26 26 cmdMove
+jump 26 0 26 26 cmdRotate
+jump 52 0 26 26 cmdFlip
+jump 78 0 26 26 cmdDelete
+jump 104 0 26 26 cmdTunnel
+jump 130 0 26 26 cmdAbove
+jump 156 0 26 26 cmdBelow
+EOF
+./mkshg ${PNG1DIR}/bgmsccrt.png ${SHGDIR}/bgmsccrt.shg << EOF
+jump 0 0 26 26 cmdText
+jump 26 0 26 26 cmdDraw
+jump 52 0 40 26 cmdDraw
+jump 92 0 40 26 cmdDraw
+jump 132 0 40 26 cmdDraw
+jump 172 0 26 26 cmdNote
+jump 198 0 26 26 cmdStructure
+EOF
+./mkshg ${PNG1DIR}/bgruler.png ${SHGDIR}/bgruler.shg << EOF
+jump 0 0 26 26 cmdRuler
+EOF
+./mkshg ${PNG1DIR}/bgtrain.png ${SHGDIR}/bgtrain.shg << EOF
+jump 0 0 26 26 cmdTrain
+EOF
+
+for png in ${PNG1DIR}/*.png ; do 
+	shg=`echo ${png}|sed -e "s/${PNG1DIR}\///" -e 's/\.png//'`
+	shg=${SHGDIR}\/${shg}.shg
+	if [ ! -f $shg ] ; then
+		./mkshg $png $shg < /dev/null
+	fi
+done
+
+./mkshg ${PNG2DIR}/bglayer.png ${SHGDIR}/bglayer.shg << EOF
+jump 0 0 400 26 cmdLayer
+EOF
+./mkshg ${PNG2DIR}/bhotbar.png ${SHGDIR}/bhotbar.shg << EOF
+popup 1 1 26 26 _hotBarLeft
+popup 517 1 26 26 _hotBarRight
+EOF
+./mkshg ${PNG2DIR}/bitmap.png ${SHGDIR}/bitmap.shg << EOF
+popup 2 83 132 28 _outputbitmap_density
+popup 2 22 132 60 _outputbitmap_toggles
+EOF
+./mkshg ${PNG2DIR}/blayer.png ${SHGDIR}/blayer.shg << EOF
+jump 0 0 400 26 cmdLayer
+EOF
+./mkshg ${PNG2DIR}/carinv.png ${SHGDIR}/carinv.shg << EOF
+popup 7 24 515 24 _carinv_sort1
+popup 550 28 80 20 _carinv_ok
+popup 550 50 80 20 _carinv_edit
+popup 550 73 80 20 _carinv_add
+popup 550 102 80 20 _carinv_delete
+popup 550 132 80 20 _carinv_import
+popup 550 156 80 20 _carinv_export
+popup 550 179 80 20 _carinv_savetext
+EOF
+./mkshg ${PNG2DIR}/caritem.png ${SHGDIR}/caritem.shg << EOF
+popup 7 28 455 24 _carpart_manuf
+popup 7 54 455 24 _carpart_prototype_list
+popup 7 81 455 24 _carpart_partno_list
+popup 7 143 455 24 _carpart_dispmode
+popup 7 176 455 24 _carpart_index
+popup 7 211 154 24 _carpart_purchPrice
+popup 166 211 145 24 _carpart_currPrice
+popup 314 211 162 24 _carpart_condition
+popup 7 244 185 24 _carpart_purchDate
+popup 197 244 185 24 _carpart_serviceDate
+popup 7 278 154 24 _carpart_quantity
+popup 163 278 253 24 _carpart_multinum
+popup 7 309 442 104 _carpart_notes
+popup 491 47 80 20 _carpart_new
+EOF
+./mkshg ${PNG2DIR}/carpart.png ${SHGDIR}/carpart.shg << EOF
+popup 7 28 455 24 _carpart_manuf
+popup 7 54 455 24 _carpart_prototype_list
+popup 7 81 455 24 _carpart_partno
+popup 7 109 455 24 _carpart_desc
+popup 7 173 455 24 _carpart_road
+popup 7 203 168 24 _carpart_repmark
+popup 179 203 140 24 _carpart_number
+popup 324 203 61 24 _carpart_bodycolor
+popup 7 237 192 24 _carpart_carLength
+popup 203 237 265 24 _carpart_carWidth
+popup 7 265 192 24 _carpart_trkCenter
+popup 203 265 265 24 _carpart_cplrMount
+popup 7 291 192 24 _carpart_cpldLen
+popup 203 291 265 24 _carpart_cplrLen
+popup 491 23 80 20 _carpart_ok
+popup 491 47 80 20 _carpart_newproto
+EOF
+./mkshg ${PNG2DIR}/carproto.png ${SHGDIR}/carproto.shg << EOF
+popup 7 28 455 24 _carpart_prototype
+popup 7 54 455 24 _carpart_type
+popup 7 81 455 24 _carpart_isLoco
+popup 115 109 80 24 _carpart_import
+popup 198 109 80 24 _carpart_reset
+popup 298 109 80 24 _carpart_flip
+popup 7 237 192 24 _carpart_carLength
+popup 203 237 265 24 _carpart_carWidth
+popup 7 265 192 24 _carpart_trkCenter
+popup 7 321 457 100 _carpart_canvas
+popup 491 23 80 20 _carpart_ok
+EOF
+./mkshg ${PNG2DIR}/celev.png ${SHGDIR}/celev.shg << EOF
+popup 5 22 92 127 _elev_mode
+popup 100 46 83 27 _elev_value
+popup 100 73 83 17 _elev_computed
+popup 100 90 83 17 _elev_grade
+popup 100 107 203 27 _elev_station
+ignore 192 23 79 19 _elev_ok
+EOF
+./mkshg ${PNG2DIR}/chelix.png ${SHGDIR}/chelix.shg << EOF
+popup 9 25 232 26 _helix_elev
+popup 9 53 232 26 _helix_radius
+popup 9 80 232 26 _helix_turns
+popup 9 106 232 26 _helix_angSep
+popup 9 133 232 26 _helix_grade
+popup 9 160 232 26 _helix_vertSep
+EOF
+#./mkshg ${PNG2DIR}/cnote.png ${SHGDIR}/cnote.shg << EOF
+#popup 4 22 302 152 _note_text
+#ignore 8 22 31 20 _noteMFile
+#EOF
+./mkshg ${PNG2DIR}/cparalle.png ${SHGDIR}/cparalle.shg << EOF
+popup 227 5 245 19 _parallel_separation
+EOF
+./mkshg ${PNG2DIR}/cprofile.png ${SHGDIR}/cprofile.shg << EOF
+ignore 505 24 79 19 _profile_ok
+popup 505 48 80 19 _profile_clear
+popup 506 71 79 20 _profile_print
+popup 5 23 486 221 _profile_canvas
+ignore 3 244 434 22 _profile_message
+EOF
+./mkshg ${PNG2DIR}/custmgm.png ${SHGDIR}/custmgm.shg << EOF
+popup 5 25 397 230 _custmgm_inx
+popup 415 25 80 20 _custmgm_ok
+popup 415 48 80 20 _custmgm_edit
+popup 415 73 80 20 _custmgm_delete
+popup 415 95 80 20 _custmgm_export
+popup 415 126 80 20 _custmgm_new
+EOF
+./mkshg ${PNG2DIR}/dchgelev.png ${SHGDIR}/dchgelev.shg << EOF
+EOF
+./mkshg ${PNG2DIR}/demo.png ${SHGDIR}/demo.shg << EOF
+popup 7 53 419 229 _demo_text
+popup 251 27 138 20 _demo_speed
+popup 169 27 81 20 _demo_quit
+popup 87 27 80 20 _demo_next
+popup 5 27 79 20 _demo_step
+EOF
+./mkshg ${PNG2DIR}/dlayer.png ${SHGDIR}/dlayer.shg << EOF
+popup 9 28 252 26 _layer_layer
+popup 9 57 250 24 _layer_name
+popup 9 81 79 24 _layer_color
+popup 9 107 79 24 _layer_visible
+popup 87 107 79 24 _layer_frozen
+popup 167 107 79 24 _layer_onmap
+popup 9 132 130 24 _layer_object_count
+popup 9 167 266 24 _layer_button_count
+EOF
+./mkshg ${PNG2DIR}/easeex1.png ${SHGDIR}/easeex1.shg << EOF
+EOF
+./mkshg ${PNG2DIR}/easeex2.png ${SHGDIR}/easeex2.shg << EOF
+EOF
+./mkshg ${PNG2DIR}/easew.png ${SHGDIR}/easew.shg << EOF
+popup 19 69 266 20 _easement_radio
+popup 165 43 76 25 _easement_l
+popup 83 45 82 22 _easement_x
+popup 3 45 78 24 _easement_r
+popup 54 21 109 22 _easement_val
+EOF
+./mkshg ${PNG2DIR}/grid.png ${SHGDIR}/grid.shg << EOF
+popup 244 99 77 25 _grid_show
+popup 243 24 101 74 _grid_origx
+popup 3 96 188 21 _grid_horzenable
+popup 2 67 189 26 _grid_horzdivision
+popup 2 37 218 29 _grid_horzspacing
+EOF
+./mkshg ${PNG2DIR}/pricels.png ${SHGDIR}/pricels.shg << EOF
+popup 2 49 404 194 _pricelist_inx
+popup 2 22 404 24 _pricelist_cost
+popup 2 248 404 24 _pricelist_flexcost
+EOF
+./mkshg ${PNG2DIR}/print.png ${SHGDIR}/print.shg << EOF
+popup 5 26 190 25 _print_scale
+popup 5 54 190 25 _print_pagew
+popup 198 54 80 20 _print_max
+popup 5 78 190 25 _print_pageh
+popup 198 78 80 20 _print_snapshot
+popup 5 101 274 25 _print_format
+popup 5 122 274 25 _print_order
+popup 5 156 275 25 _print_style
+popup 5 180 275 25 _print_physsize
+popup 5 205 275 25 _print_registrationMarks
+popup 5 227 275 25 _print_grid
+popup 5 252 275 25 _print_ruler
+popup 5 277 275 25 _print_roadbed
+popup 5 301 275 25 _print_roadbedWidth
+popup 5 333 165 80 _print_origx
+popup 173 362 80 20 _print_reset
+popup 291 23 80 20 _print_ok
+popup 291 47 80 20 _printSetup
+popup 291 68 80 20 _print_clear
+EOF
+./mkshg ${PNG2DIR}/prmfile.png ${SHGDIR}/prmfile.shg << EOF
+popup 392 88 81 20 _prmfile_browse
+popup 393 67 81 18 _prmfile_action
+popup 76 215 150 23 _prmfile_mode
+popup 1 19 371 193 _prmfile_inx
+EOF
+./mkshg ${PNG2DIR}/regw.png ${SHGDIR}/regw.shg << EOF
+popup 1 110 299 26 _parameter_key
+popup 1 81 301 27 _parameter_name
+EOF
+./mkshg ${PNG2DIR}/rescale.png ${SHGDIR}/rescale.shg << EOF
+popup 1 21 274 24 _rescale_toggle
+popup 1 45 142 24 _rescale_from
+popup 143 45 131 24 _rescale_to
+popup 1 72 274 24 _rescale_change_gauge
+popup 1 99 274 24 _rescale_ratio
+popup 283 21 80 24 _rescale_ok
+EOF
+./mkshg ${PNG2DIR}/strsel.png ${SHGDIR}/strsel.shg << EOF
+popup 366 75 87 61 _structure_stats
+popup 9 272 440 220 _structure_canvas
+popup 9 26 350 241 _structure_list
+popup 366 48 80 20 _structure_hide
+EOF
+./mkshg ${PNG2DIR}/ctext.png ${SHGDIR}/ctext.shg << EOF
+popup 223 2 280 24 _text_fontsize
+EOF
+./mkshg ${PNG2DIR}/ttdiam.png ${SHGDIR}/ttdiam.shg << EOF
+popup 224 4 245 19 _turntable_diameter
+EOF
+./mkshg ${PNG2DIR}/turndes.png ${SHGDIR}/turndes.shg << EOF
+popup 494 158 86 42 _turnoutNew_angleMode
+popup 494 70 80 20 _printSetup
+popup 494 44 80 20 _turnoutNew_print
+popup 50 139 135 25 _turnoutNew_len1
+popup 282 87 126 25 _turnoutNew_off1
+popup 357 47 124 25 _turnoutNew_angle1
+popup 126 29 130 25 _turnoutNew_len1
+popup 5 167 478 25 _turnoutNew_manuf
+popup 5 196 343 53 _turnoutNew_desc1
+popup 352 196 129 53 _turnoutNew_partno1
+popup 5 250 200 25 _turnoutNew_roadbedWidth
+popup 209 250 117 25 _turnoutNew_roadbedLineWidth
+popup 328 250 65 25 _turnoutNew_color
+EOF
+./mkshg ${PNG2DIR}/turnsel.png ${SHGDIR}/turnsel.shg << EOF
+popup 10 314 25 25 _turnout_endPoint
+popup 10 277 25 25 _turnout_endPoint
+popup 379 314 25 25 _turnout_endPoint
+popup 379 277 25 25 _turnout_activeEndPoint
+popup 330 49 80 20 _turnout_new
+popup 330 72 80 20 _turnout_hide
+popup 6 269 404 133 _turnout_canvas
+popup 6 26 316 243 _turnout_list
+EOF
+./mkshg ${PNG2DIR}/train.png ${SHGDIR}/train.shg << EOF
+popup 4 23 120 24 _train_list
+popup 4 93 22 200 _train_speed
+popup 27 91 80 24 _train_distance
+popup 112 91 14 24 _train_zeroDistance
+popup 27 129 80 24 _train_goto
+popup 27 160 80 24 _train_follow
+popup 27 183 80 24 _train_autoreverse
+popup 27 213 80 24 _train_direction
+popup 27 244 80 24 _train_stop
+EOF
+./mkshg ${PNG2DIR}/trainbar.png ${SHGDIR}/trainbar.shg << EOF
+EOF
+./mkshg ${PNG2DIR}/updttl.png ${SHGDIR}/updttl.shg << EOF
+popup 1 150 301 21 _updatetitle_old
+popup 4 177 303 196 _updatetitle_sel
+popup 310 177 80 20 _updatetitle_ok
+popup 310 200 80 19 _updatetitle_ignore
+popup 310 223 80 19 _updatetitle_load
+EOF
+./mkshg ${PNG2DIR}/wenum.png ${SHGDIR}/wenum.shg << EOF
+popup 6 26 550 278 _enum_text
+popup 565 26 80 20 _enum_save
+popup 565 50 80 20 _enum_print
+popup 565 74 80 20 _printSetup
+popup 565 100 80 20 _enum_list_prices
+EOF
+./mkshg ${PNG2DIR}/wmain.png ${SHGDIR}/wmain.shg << EOF
+popup 3 25 645 18 _main_menubar
+popup 3 41 645 59 _main_commandbar
+popup 3 102 645 27 _main_layers
+popup 3 136 645 34 _main_hotbar
+popup 3 2 645 21 _main_titlebar
+popup 3 173 645 301 _main_canvas
+popup 7 476 50 22 _infoBarScale
+popup 63 476 49 22 _infoBarCount
+popup 119 476 115 22 _infoBarPosX
+popup 238 476 115 22 _infoBarPosY
+popup 364 476 283 22 _infoBarStatus
+EOF
+./mkshg ${PNG2DIR}/wmap.png ${SHGDIR}/wmap.shg << EOF
+popup 95 349 112 50 _map_hilight
+EOF

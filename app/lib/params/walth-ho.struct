@@ -1,0 +1,35 @@
+echo "CONTENTS Walthers HO Structures"
+./mkstruct HO "Walther	O.L. King Coal Yard, Shed	933-3015a" 5.0 2.875
+./mkstruct HO "Walther	O.L. King Coal Yard, Office	933-3015b" 6.5 4.5
+./mkstruct HO "Walther	O.L. King Coal Yard, Trestle	933-3015c" 15.75 2.0
+./mkstruct HO "Walther	Hardwood Furniture Co	933-3044" 11.875 10.625
+./mkstruct HO "Walther	Geo. Roberts Printing Inc	933-3046" 12.75 7.5
+./mkstruct HO "Walther	Water St Freight Terminal	933-3009" 20.5 6.25
+./mkstruct HO "Walther	Brook Hill Farm Dairy	933-3010" 7.375 7.25
+./mkstruct HO "Walther	Golden Valley Canning Co, Main Bldg	933-3018a" 10.5 8.0
+./mkstruct HO "Walther	Golden Valley Canning Co, Boiler House	933-3018b" 4.75 3.0
+./mkstruct HO "Walther	North Island Refinery	933-3013" 13.5 8.25
+./mkstruct HO "Walther	Interstate Fuel & Oil, Loading Rack	933-3006a" 7.0 5.75
+./mkstruct HO "Walther	Interstate Fuel & Oil, Office	933-3006b" 4.5 5.75
+./mkstruct HO "Walther	Interstate Fuel & Oil, Tanks	933-3006c" 2.0 4.0
+./mkstruct HO "Walther	Interstate Fuel & Oil, Shed	933-3006d" 1.5 1.25
+./mkstruct HO "Walther	Central Gas & Supply, Office	933-3011a" 4.375 3.0
+./mkstruct HO "Walther	Central Gas & Supply, Tank	933-3011b" 9.0 1.5
+./mkstruct HO "Walther	Central Gas & Supply, Shed	933-3011c" 0.825 1.0
+./mkstruct HO "Walther	Central Gas & Supply, Pump House	933-3011d" 1.375 1.375
+./mkstruct HO "Walther	Medusa Cement Co	933-3019" 9.0 7.0
+./mkstruct HO "Walther	Amtrak Station	933-3038" 11.8125 8.5
+./mkstruct HO "Walther	Bailey Saving & Loan	933-3031" 10.125 5.9375
+./mkstruct HO "Walther	Crown Paint & Hardware	933-3032" 7.625 4.125
+./mkstruct HO "Walther	Neighborhood Food Mart	933-3033" 5 8.25
+./mkstruct HO "Walther	Bill's Glass Shop	933-3002" 3 4
+./mkstruct HO "Walther	Gemini Bldg	933-3001" 4.25 3.625
+./mkstruct HO "Walther	Wallschlager Motors	933-3004" 5.25 5
+./mkstruct HO "Walther	United Trucking Transfer Terminal	933-3005" 2.625 6
+./mkstruct HO "Walther	White Tower Restaurant	933-3030" 4.625 3
+./mkstruct HO "Walther	Adam's Rib Restaurant	933-3034" 5.5 3
+./mkstruct HO "Walther	Western Ave Fire Station	933-3037" 4.25 6.75
+./mkstruct HO "Walther	Main St, Merchant's Row 1	933-3028" 11 5
+./mkstruct HO "Walther	Don's Shoe Store	933-3000" 2.5 3.5
+./mkstruct HO "Walther	Interstate Fuel & Oil Gas Station	933-3035" 9.25 7.75
+./mkstruct HO "Walther	Main St, Merchant's Row 2	933-3029" 10 5

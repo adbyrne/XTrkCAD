@@ -1,0 +1,100 @@
+VERSION 2
+DEMOINIT
+ORIG 6.000 6.000 1.000
+REDRAW
+STRAIGHT 1 DEMO 1
+	E 2.466667 2.633333 270.000000
+	T 2 17.550000 2.633353 90.000000
+	END
+TURNOUT 2 DEMO 1 17.550000 2.633353 0.000000 "Peco-55	Medium Left	SL-E396F"
+	T 1 17.550000 2.633353 270.000000
+	T 3 22.955000 2.633353 90.000000
+	T 4 22.920000 3.155353 80.314000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0 0.000000 0.000000 0.353000 0.000000
+	S 0 0 0.353000 0.000000 5.405000 0.000000
+	C 0 0 -23.136000 0.351000 23.136000 170.297000 9.700000
+	S 0 0 4.251000 0.331000 5.370000 0.522000
+	END
+STRAIGHT 3 DEMO 1
+	E 40.800000 2.633333 90.000125
+	T 2 22.955000 2.633349 270.000125
+	END
+CURVE 4 DEMO 1 20.249057 18.804049 15.875000
+	E 34.679895 12.188421 24.628563
+	T 2 22.920000 3.155353 260.314152
+	END
+REDRAW
+RESET
+MESSAGE
+The <Split> command is used to split and disconnect tracks.
+END
+STEP
+COMMAND SplitTrack
+MESSAGE
+_________________________________________
+
+Simply select the spot on the track you want to split.
+
+You cannot split turnouts (unless you hold down the Shift key).
+END
+BIGPAUSE
+MOUSE 2 10.000 2.750
+MOUSE 4 10.000 2.750
+MOUSE 2 30.917 7.250
+MOUSE 4 30.917 7.250
+MOUSE 1 31 5
+MESSAGE
+_________________________________________
+
+If you split at spot that is already an End-Point between two tracks, or split twice at the same spot, the track is disconnected.
+END
+STEP
+MOUSE 2 33.417 2.667
+MOUSE 4 33.417 2.667
+BIGPAUSE
+MOUSE 2 33.417 2.250
+MOUSE 4 33.417 2.250
+MOUSE 1 36 1
+MESSAGE
+=========================================
+END
+STEP
+CLEAR
+MESSAGE
+The <Tunnel> command marks selected tracks as hidden.
+
+A tunnel portal is drawn at the boundary between hidden and normal track.
+
+How the hidden tracks are drawn (solid, dashed or invisible) is controlled by the Draw EndPts radio button group on the Setup dialog.
+END
+STEP
+COMMAND Select
+MOUSE 2 27.333 4.750
+MOUSE 4 27.333 4.750
+MOUSE 2 21.333 3.000
+MOUSE 4 21.333 3.000
+MOUSE 2 16.250 2.667
+MOUSE 4 16.250 2.667
+BIGPAUSE
+PARAMETER misc cmdTunnel
+MESSAGE
+_________________________________________
+
+To 'un-hide' a track just Select it again and click the Tunnel button.
+END
+STEP
+MOUSE 6920 16.250 2.667
+BIGPAUSE
+MOUSE 2 16.250 2.667
+MOUSE 4 16.250 2.667
+BIGPAUSE
+PARAMETER misc cmdTunnel
+BIGPAUSE
+MOUSE 6920 16.250 2.667
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

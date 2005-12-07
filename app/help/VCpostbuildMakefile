@@ -1,0 +1,11 @@
+
+all:
+	copy Release\genhelp.exe .
+	.\genhelp.exe -bh genhelp.in bllnhlp.out
+	"C:\Program Files\gnuwin32\bin\sed" -e /"help"/d -e /"cancel"/d -e /"close"/d bllnhlp.out > bllnhlp.c
+	copy bllnhlp.c ..\bin
+	.\genhelp.exe -msw genhelp.in popups.rtf
+	.\genhelp.exe -xv genhelp.in xtrkcad.info
+	-mkdir xtchelp.d
+	.\genhelp.exe -hpj genhelp.in popups.ali
+	copy xtrkcad.hpj.first + popups.ali + xtrkcad.hpj.last  xtchelp.d\xtrkcad.hpj

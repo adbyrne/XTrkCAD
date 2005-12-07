@@ -1,0 +1,96 @@
+VERSION 9
+DEMOINIT
+ORIG 8.000 0.000 0.000
+PARAMETER display description-fontsize 72
+REDRAW
+RESET
+MESSAGE
+There are several ways to create a Curved track.
+
+You can choose which to use by clicking on the small button to the left of <Curve> command button if the current Curve command is not the one you want.
+_________________________________________
+
+The first is by clicking on the first End-Point and dragging in the direction of the Curve.
+END
+STEP
+COMMAND CurveEndPt
+MOUSE 2 6.500 1.625
+MOUSE 4 31.250 2.750
+MESSAGE
+_________________________________________
+
+You will see a straight track with a double ended Red arrow at the end.
+
+Click and drag on one of the Red arrows to complete the Curve.
+END
+STEP
+MOUSE 2 31.125 2.500
+MOUSE 4 20.375 17.875
+RESET
+RESET
+MESSAGE
+_________________________________________
+
+The next method is to click at one End-Point and drag to the center of the Curve.
+END
+STEP
+PARAMETER misc cmdUndo
+COMMAND CurveTangent
+MOUSE 2 8.250 2.250
+MOUSE 4 31.875 2.500
+MESSAGE
+_________________________________________
+
+Now you will see the double ended Red arrow connected to the center of the Curve marked by a small circle.
+
+As before, drag on one of the Red arrows to complete the Curve.
+END
+STEP
+MOUSE 2 8.875 2.500
+MOUSE 4 17.375 19.125
+RESET
+RESET
+MESSAGE
+_________________________________________
+
+The next method is similar to the last except that you drag first from the center of the Curve to one End-Point.
+END
+STEP
+PARAMETER misc cmdUndo
+COMMAND CurveCenter
+MOUSE 2 27.375 4.250
+MOUSE 4 5.000 4.250
+MESSAGE
+_________________________________________
+
+Once again, drag on a Red arrow to complete the Curve.
+END
+STEP
+MOUSE 2 5.000 4.375
+MOUSE 4 15.625 18.875
+RESET
+MESSAGE
+_________________________________________
+
+The last method begins by drawing a line between the two End-Points of the Curve.  This forms the Chord of the Curve.
+END
+STEP
+RESET
+PARAMETER misc cmdUndo
+COMMAND CurveChord
+MOUSE 2 5.625 1.500
+MOUSE 4 37.125 1.500
+MESSAGE
+_________________________________________
+
+Now drag on a Red arrow to complete the Curve.
+END
+STEP
+MOUSE 2 21.250 2.125
+MOUSE 4 20.750 16.750
+RESET
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

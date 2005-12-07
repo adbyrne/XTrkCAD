@@ -1,0 +1,30 @@
+
+all:	toreg.lin tocrv.lin towye.lin to3way.lin toxing.lin tosslip.lin todslip.lin torcross.lin tolcross.lin todcross.lin tostrsct.lin messages.h tocrvsct.lin
+
+toreg.lin: cnvdsgn.exe toreg.src
+	.\cnvdsgn.exe < toreg.src > toreg.lin
+tocrv.lin: cnvdsgn.exe tocrv.src
+	.\cnvdsgn.exe < tocrv.src > tocrv.lin
+towye.lin: cnvdsgn.exe towye.src
+	.\cnvdsgn.exe < towye.src > towye.lin
+to3way.lin: cnvdsgn.exe to3way.src
+	.\cnvdsgn.exe < to3way.src > to3way.lin
+toxing.lin: cnvdsgn.exe toxing.src
+	.\cnvdsgn.exe < toxing.src > toxing.lin
+tosslip.lin: cnvdsgn.exe tosslip.src
+	.\cnvdsgn.exe < tosslip.src > tosslip.lin
+todslip.lin: cnvdsgn.exe todslip.src
+	.\cnvdsgn.exe < todslip.src > todslip.lin
+torcross.lin: cnvdsgn.exe torcross.src
+	.\cnvdsgn.exe < torcross.src > torcross.lin
+tolcross.lin: cnvdsgn.exe tolcross.src
+	.\cnvdsgn.exe < tolcross.src > tolcross.lin
+todcross.lin: cnvdsgn.exe todcross.src
+	.\cnvdsgn.exe < todcross.src > todcross.lin
+tostrsct.lin: cnvdsgn.exe tostrsct.src
+	.\cnvdsgn.exe < tostrsct.src > tostrsct.lin
+tocrvsct.lin: cnvdsgn.exe tocrvsct.src
+	.\cnvdsgn.exe < tocrvsct.src > tocrvsct.lin
+
+messages.h:
+	copy ..\help\messages.h

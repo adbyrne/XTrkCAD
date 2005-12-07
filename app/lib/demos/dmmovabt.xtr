@@ -1,0 +1,75 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+CURVE 1 DEMO 1 24.000000 24.000000 18.000000
+	T 4 37.512875 12.108734 41.347736
+	T 3 37.546349 35.853119 138.813964
+	END
+CURVE 2 DEMO 1 72.000000 24.000000 18.000000
+	T 4 58.487157 35.891302 221.347736
+	T 3 58.453619 12.146917 318.813964
+	END
+STRAIGHT 3 DEMO 1
+	T 1 37.546349 35.853119 318.589846
+	T 2 58.453619 12.146917 138.589846
+	END
+STRAIGHT 4 DEMO 1
+	T 1 37.512875 12.108734 221.409543
+	T 2 58.487157 35.891302 41.409543
+	END
+REDRAW
+RESET
+MESSAGE
+The main drawing area shows a portion of total layout.  You can zoom in or zoom out by choosing 'Zoom In' or 'Zoom Out' in the 'Edit' menu, by using the Zoom buttons on the toolbar or by using the 'Page Down' and 'Page Up' keys.
+
+You can see the entire layout in the Map window.
+END
+STEP
+ORIG 12.000 0.000 0.000
+BIGPAUSE
+BIGPAUSE
+ORIG 16.000 0.000 0.000
+MESSAGE
+_________________________________________
+
+As you Zoom Out tracks are drawn with one line instead of two.
+END
+STEP
+ORIG 32.000 0.000 0.000
+BIGPAUSE
+BIGPAUSE
+ORIG 16.000 3.500 13.500
+BIGPAUSE
+BIGPAUSE
+ORIG 8.000 26.625 22.125
+BIGPAUSE
+BIGPAUSE
+ORIG 4.000 38.188 26.438
+MESSAGE
+=========================================
+END
+STEP
+CLEAR
+MESSAGE
+You can change what portion of the layout is shown by using the 'Map' window which shows a compressed version of the entire layout.  A hilighted area of the 'Map' (in reverse video) shows what portion of the layout is displayed in the main drawing area.
+
+You can Left-Drag the hilighted area in the Map window to change the displayed portion of the layout.
+END
+STEP
+BIGPAUSE
+PARAMETER map canvas 2 48.000 34.000
+PARAMETER map canvas 4 46.000 26.000
+MESSAGE
+_________________________________________
+
+You can also Right-Drag on the Map window to set the scale and position of the Main window.
+END
+STEP
+PARAMETER map canvas 5 18.667 8.667
+PARAMETER map canvas 7 21.333 6.000
+ORIG 2.000 18.667 4.354
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

@@ -1,0 +1,64 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+STRAIGHT 1 DEMO 1
+	E 1.883214 2.133372 270.000000
+	E 31.050000 2.133333 90.000000
+	END
+CURVE 2 DEMO 1 29.473372 12.727335 7.625000
+	E 37.081031 13.241282 356.135245
+	E 33.769610 6.427894 235.706018
+	END
+REDRAW
+RESET
+MESSAGE
+The <Join> command can join straight and curved tracks (in either order).
+END
+STEP
+COMMAND Join
+MOUSE 2 34.167 6.917
+MOUSE 4 34.167 6.917
+MOUSE 2 23.750 2.167
+MESSAGE
+_________________________________________
+
+A connecting track is drawn between the two tracks.
+END
+STEP
+MOUSE 3 23.750 2.083
+MOUSE 3 19.417 2.000
+MESSAGE
+_________________________________________
+
+Notice that the curved track is extended as the connection point moves past the End-Point.
+END
+STEP
+MOUSE 3 19.167 2.000
+MOUSE 3 10.917 2.333
+BIGPAUSE
+MOUSE 3 10.917 2.333
+MOUSE 3 28.250 2.250
+MESSAGE
+_________________________________________
+
+Here the connection makes the curved track wrap around.
+END
+STEP
+MOUSE 3 28.250 2.250
+MOUSE 3 3.250 2.333
+MESSAGE
+_________________________________________
+
+Now the cursor is about to be moved past the other (far) End-Point of the straight track.  You will receive a warning and the connecting track turns Red.
+END
+STEP
+MOUSE 3 2.500 2.250
+MOUSE 3 0.667 2.167
+STEP
+MOUSE 3 0.667 2.167
+MOUSE 4 7.333 1.833
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

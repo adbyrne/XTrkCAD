@@ -1,0 +1,46 @@
+VERSION 2
+DEMOINIT
+ORIG 5.000 5.000 0.000
+STRAIGHT 1 DEMO 1
+	E 5.916667 3.166667 270.000000
+	E 29.166667 3.166667 90.000000
+	END
+STRAIGHT 2 DEMO 1
+	E 6.000000 6.916667 270.000000
+	E 29.166667 6.916667 90.000000
+	END
+REDRAW
+RESET
+MESSAGE
+The <Ruler> command draws a Ruler on the layout you can use to measure distances.
+
+END
+STEP
+COMMAND Ruler
+MOUSE 2 29.000 6.917
+MOUSE 3 29.083 3.167
+BIGPAUSE
+MOUSE 4 29.083 3.167
+MESSAGE
+_________________________________________
+
+If you press the <Ruler> command again the Ruler is removed.
+END
+BIGPAUSE
+COMMAND Ruler
+BIGPAUSE
+MESSAGE
+_________________________________________
+
+But you can place it somewhere else.
+END
+BIGPAUSE
+MOUSE 2 6.000 5.583
+MOUSE 3 29.250 5.750
+BIGPAUSE
+MOUSE 4 29.250 5.750
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

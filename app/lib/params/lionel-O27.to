@@ -1,0 +1,15 @@
+mkturnout O "Lionel O-27" S '½ Straight Track' 6-65019 4.875
+mkturnout O "Lionel O-27" S 'Straight Track' 6-65038 8.75
+mkturnout O "Lionel O-27" S 'Extra Long Straight Track' 6-65024 35.0
+mkturnout O "Lionel O-27" C '½ 27" Curved Track' 6-65014 12.75 22.5
+mkturnout O "Lionel O-27" C '27" Curved Track' 6-65033 12.75 45.0
+mkturnout O "Lionel O-27" C '42" Curved Track' 6-65049 20.75 30.0
+mkturnout O "Lionel O-27" C '54" Curved Track' 6-65113 26.25 22.5
+mkturnout O "Lionel O-27" S 'Insulated Track' 6-12841 8.75
+mkturnout O "Lionel O-27" S 'Uncoupling Track' 6-12849 8.75
+mkturnout O "Lionel O-27" S 'Remote Control Track' 6-12846 8.75
+mkturnout O "Lionel O-27" X "45° Crossing" 6-65023 8.75 45 8.75
+mkturnout O "Lionel O-27" X "90° Crossing" 6-65020 4.875 90 4.875
+mkturnout O "Lionel O-27" Q "Left Manual Switch" 6-65021 "Right Manual Switch" 6-65022 12.75 45 8.75
+mkturnout O "Lionel O-27" Q "Left Remote Control Switch" 6-65121 "Right Remote Control Switch" 6-65122 12.75 45 8.75
+mkturnout O "Lionel O-27" Q 'Left 42" Remote Control Switch' 6-65167 'Right 42" Remote Control Switch' 6-65168 20.75 30 13.125

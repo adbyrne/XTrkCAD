@@ -1,0 +1,69 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+TURNOUT 1 DEMO 1 6.916667 2.666667 0.000000 "Peco-55	Med Left	SL-E396F"
+	E 6.916667 2.666667 270.000000
+	E 12.321667 2.666667 90.000000
+	E 12.286667 3.188667 80.314000
+	P "Normal" 1 2
+	P "Reverse" 1 3 4
+	S 0 0 0.000000 0.000000 0.353000 0.000000
+	S 0 0 0.353000 0.000000 5.405000 0.000000
+	C 0 0 -23.136000 0.351000 23.136000 170.297000 9.700000
+	S 0 0 4.251000 0.331000 5.370000 0.522000
+	END
+STRAIGHT 2 DEMO 1
+	E 2 1 270
+	E 12 1 90
+	END
+REDRAW
+RESET
+MESSAGE
+The unconnected End-Point of any track can be extended with the <Modify> command using Right-Drag.
+END
+STEP
+COMMAND Modify
+MESSAGE
+_________________________________________
+
+Select the End-Point and Right-Drag.
+END
+BIGPAUSE
+MOUSE 5 12.250 2.750
+MOUSE 6 15.500 2.583
+MESSAGE
+_________________________________________
+
+The extending track can be straight...
+END
+BIGPAUSE
+PAUSE 60
+MOUSE 6 15.500 2.583
+MOUSE 6 26.000 2.583
+PAUSE 50
+MESSAGE
+
+... or curved.
+END
+BIGPAUSE
+MOUSE 6 26.083 2.583
+MOUSE 7 26.333 12.417
+MESSAGE
+_________________________________________
+
+If you extend a Straight or Curved flex track and enable Easements then an Easement curve will be automatically generated when you extend the track.
+END
+STEP
+PARAMETER misc cmdEasement
+BIGPAUSE
+PARAMETER easement val 0.500
+BIGPAUSE
+PARAMETER easement ok
+MOUSE 5 12 1
+MOUSE 6 18 1
+MOUSE 7 28 11
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

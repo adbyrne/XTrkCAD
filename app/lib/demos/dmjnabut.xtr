@@ -1,0 +1,59 @@
+VERSION 2
+DEMOINIT
+ORIG 4.000 12.000 0.000
+STRAIGHT 1 DEMO 1
+	E 4.133333 3.216667 270.000000
+	E 23.383333 3.216692 90.000000
+	END
+STRAIGHT 2 DEMO 1
+	E 4.133333 4.466667 270.000000
+	E 19.216667 4.466687 90.000000
+	END
+CURVE 3 DEMO 1 19.300229 18.466687 14.000000
+	E 32.510491 13.831066 19.336606
+	E 19.300192 4.466687 270.000000
+	END
+STRAIGHT 4 DEMO 1
+	E 35.216667 3.216667 90.000200
+	E 23.383333 3.216692 270.000200
+	END
+REDRAW
+RESET
+MESSAGE
+This examples shows joining tracks whose End-Points are aligned.
+
+Note the 2 pairs of tracks have End-Points that are close and aligned but not connected.
+END
+STEP
+COMMAND Join
+MOUSE 2 20.167 4.500
+MESSAGE
+_________________________________________
+
+The first case joins the curve and straight track.
+END
+STEP
+MOUSE 3 20.250 4.500
+MOUSE 4 20.250 4.500
+MOUSE 2 17.583 4.417
+MOUSE 4 17.583 4.417
+MESSAGE
+_________________________________________
+
+The second case will join the two straight tracks.
+END
+STEP
+MOUSE 2 24.000 3.250
+MOUSE 4 24.000 3.250
+MOUSE 2 21.917 3.250
+MOUSE 4 21.917 3.250
+MESSAGE
+_________________________________________
+
+Note that the two straight tracks were combined to form one track.
+END
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

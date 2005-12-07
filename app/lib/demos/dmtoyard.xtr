@@ -1,0 +1,207 @@
+VERSION 2
+DEMOINIT
+ORIG 8.000 0.000 0.000
+PARAMETER display description-fontsize 24
+PARAMETER turnout hide 1
+STRAIGHT 1 DEMO 1
+	E 3.666667 1.833333 270.000000
+	E 41.833333 1.833333 90.000000
+	END
+REDRAW
+RESET
+MESSAGE
+This example show how to layout a yard using the <Turnout> and <Parallel> commands.
+END
+STEP
+COMMAND Turnout
+MESSAGE
+_________________________________________
+
+You can resize and move the Turnout Selection dialog if it obscures the other windows.
+
+First we place a turnout on the main-line.
+END
+STEP
+PARAMETER turnout list 0 Peco-55	SL-E395F	Medium Right
+MOUSE 2 35.417 1.917
+BIGPAUSE
+MOUSE 3 36.417 1.917
+BIGPAUSE
+MOUSE 4 36.417 1.917
+PARAMETER turnout ok
+PARAMETER turnout cancel
+RESET
+MESSAGE
+_________________________________________
+
+Next extend the turnout with the <Modify> command.
+END
+STEP
+COMMAND Modify
+MOUSE 2 31.167 2.417
+MOUSE 3 8.167 5.833
+BIGPAUSE
+MOUSE 4 8.167 5.833
+MESSAGE
+_________________________________________
+
+Now create a track parallel to the main-line.  Make sure the separation is reasonable for your scale.
+END
+STEP
+COMMAND Parallel
+PARAMETER parallel separation 1.25
+MOUSE 2 23.083 1.917
+PARAMETER parallel separation 1.250000
+MOUSE 3 23.083 1.917
+MOUSE 3 22.917 2.500
+BIGPAUSE
+MOUSE 4 22.917 2.500
+RESET
+MESSAGE
+_________________________________________
+
+And place a turnout to connect the new track.
+
+We'll zoom in here to see what's going on.
+END
+STEP
+#PAN 5 21.333 6.667
+#PAN 7 23.333 1.000
+ORIG 2.000 21.333 1.000
+BIGPAUSE
+COMMAND Turnout
+PARAMETER turnout list 0 Peco-55	SL-E396F	Medium Left
+MOUSE 2 29.500 2.542
+MESSAGE
+_________________________________________
+
+Notice how we control which way the turnout is facing by moving the mouse across the center line of the track.
+
+END
+STEP
+MOUSE 3 29.500 2.563
+#MOUSE 3 29.500 2.604
+#MOUSE 3 29.521 2.604
+#MOUSE 3 29.542 2.583
+#MOUSE 3 29.542 2.521
+#MOUSE 3 29.500 2.438
+MOUSE 3 29.500 2.438
+#MOUSE 3 29.604 2.583
+BIGPAUSE
+MOUSE 3 29.625 2.667
+BIGPAUSE
+MOUSE 3 29.500 2.438
+BIGPAUSE
+MOUSE 3 29.625 2.667
+MESSAGE
+_________________________________________
+
+The Status bar displays the number of auto-connections that will be made and the maximum offset.
+
+XTrkCad adjusts the turnout position for the best fit to minimize any connection offset
+END
+STEP
+MOUSE 4 29.625 2.667
+PARAMETER turnout ok
+PARAMETER turnout cancel
+#RESET
+MESSAGE
+_________________________________________
+
+Note that placing the turnout splits the parallel track.
+
+We have to delete the leftover piece by Selecting and Deleting it.
+END
+STEP
+#COMMAND Select
+MOUSE 2 30.229 3.042
+MOUSE 4 30.229 3.042
+PARAMETER misc cmdDelete
+BIGPAUSE
+ORIG 8.000 0.000 0.000
+MESSAGE
+_________________________________________
+
+Repeat the process for the other tracks in the yard.
+END
+STEP
+BIGPAUSE
+COMMAND Parallel
+PARAMETER parallel separation 1.250
+MOUSE 2 16.667 3.167
+MOUSE 3 16.417 3.583
+MOUSE 4 16.417 3.583
+RESET
+BIGPAUSE
+ORIG 2.000 16.000 2.000
+COMMAND Turnout
+PARAMETER turnout list 0 Peco-55	SL-E396F	Medium Left
+MOUSE 2 22.167 3.938
+MOUSE 3 21.750 4.000
+BIGPAUSE
+MOUSE 4 21.750 4.000
+PARAMETER turnout ok
+PARAMETER turnout cancel
+#RESET
+#COMMAND Select
+MOUSE 2 22.688 4.438
+MOUSE 4 22.688 4.438
+PARAMETER misc cmdDelete
+BIGPAUSE
+ORIG 8.000 0.000 0.000
+MESSAGE
+_________________________________________
+
+For the last track we will join with a curve instead of a turnout.
+END
+STEP
+BIGPAUSE
+COMMAND Parallel
+PARAMETER parallel separation 1.250
+MOUSE 2 10.750 4.333
+MOUSE 3 10.750 5.000
+MOUSE 4 10.750 5.000
+RESET
+#PAN 5 11.333 5.667
+#PAN 6 12.000 5.667
+#PAN 6 12.667 5.667
+#PAN 7 12.667 6.667
+BIGPAUSE
+ORIG 2.0 5.0 4.0
+COMMAND Join
+MOUSE 2 10.354 5.604
+MOUSE 4 10.354 5.604
+MOUSE 2 12.417 5.521
+MOUSE 3 12.438 5.521
+MOUSE 3 12.458 5.521
+MOUSE 3 12.583 5.479
+MOUSE 3 12.646 5.479
+MOUSE 3 12.813 5.458
+MOUSE 3 13.021 5.438
+MOUSE 3 13.042 5.438
+MOUSE 3 13.104 5.438
+MOUSE 3 13.125 5.438
+MOUSE 3 13.146 5.438
+MOUSE 3 13.188 5.438
+MOUSE 3 13.208 5.438
+MOUSE 3 13.583 5.396
+MOUSE 3 13.604 5.396
+MOUSE 3 13.646 5.375
+MOUSE 3 13.708 5.354
+MOUSE 3 13.729 5.354
+MOUSE 3 13.750 5.354
+MOUSE 3 13.771 5.354
+MOUSE 3 13.813 5.354
+MOUSE 3 13.875 5.354
+MOUSE 3 13.875 5.333
+MOUSE 3 13.896 5.333
+MOUSE 3 13.917 5.313
+MOUSE 3 13.979 5.313
+MOUSE 4 14.000 5.313
+BIGPAUSE
+ORIG 8.000 0.000 0.000
+MESSAGE
+=========================================
+END
+STEP
+CLEAR

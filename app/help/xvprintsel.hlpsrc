@@ -1,0 +1,73 @@
+The $BPrinter Setup$ dialog allows you configure the application's use of the printer.
+
+The $BPrinter Setup$ window contains:
+
+?LSo
+?HprintSetupPrinter
+?LI
+$BPrinter$ - a list to select a particular printer.  The entries on this list are defined by $Bprinter$ lines in the $B~/.xtrkcad/xtrkcad.rc$ file.
+The first entry, 'File', causes printouts to be sent to a file.  You will be prompted for a file name when doing a print.
+
+?HprintSetupPaper
+?LI
+$BPaper Size$ - a list of various North American and European paper sizes.
+
+?HprintSetupMargin
+?LI
+$BMargins$ - non-printable margins for particular printers.
+You can adjust these entries or select a printer type from the list.  
+To add margins for a new printer, enter the printer's name and then enter the margin for each edge.
+You can use $BPrint Test Page$ to determine the margins for your printer.
+The $BDelete$ button removes a printer from the margin list.
+
+?HprintSetupFormat
+?LI
+$BFormat$ - a Radio button to select either Landscape or Portrait format.
+
+?HFont Alias Map
+?LI
+$BX Font$ and $BPS Font$ - specifies the mapping between the display's X Font and the corresponding PostScript Font.
+You can change the PostScript font for a specifed X Font by typing the new font name in the $BPS Font$ field.
+The $Bfont alias$ map will be printed on the $BPrint Test Page$.
+
+?HprintSetupFontSizeFactor
+?LI
+$BFactor$ - adjusts the scaling between X Font and PostScript Font sizes.  Due to differences between the two font systems, text size may be of slightly different between the display and printer.  This option allows you to adjust the font size.  Normally only a small adjustment is required, (like 0.950).
+
+?HprintSetupOk
+?LI
+$BOk button$ - updates the data and ends the dialog.
+
+?HprintSetupCancel
+?LI
+$BCancel button$ - ends the dialog without update.
+
+?HprintSetupTest
+?LI
+$BPrint Test Page button$ - prints a test page you can use to determine the printer margins.
+?LE
+
+The formats of the $Bprinter$ entries are:
+?W-
+$BWPRINTER.$$Iprinter-num$$B: $$Iprinter-name$$B=$$Icommand$
+?W+
+where:
+?LS-
+?LI
+$Iprinter-num$ is the next value in a sequential list (starting at $B1$, $B0$ is reserved for $BFILE$).  $Bprinter.1$ is predefined as $Blp=lpr -P%s$.
+?LI
+$Iprinter-name$ is the name of the printer as it appears in the $BPrinter$ selection list.
+?LI
+$Icommand$ is the command to invoke where $B%s$ will be replaced by the $Iprinter-name$.
+?LE
+
+To add a new $BPrinter$, select the next value for $Iprinter-num$ and add the $Bprinter$ line with the name and print command.
+
+?HprintFontAlias
+Printing generates PostScript data which is sent to the specified printer (or File).
+The names of fonts differs between the X Window System and PostScript and there is no formula to convert them.
+The printing system uses a $Bfont alias$ map to convert from X font names to PostScript font names.
+Font aliases for the common PostScript fonts are predefined but you must supply an alias for unknown fonts.
+The 'Font Alias' window will be shown when ever you are printing an unknown font.
+You will be asked to supply a PostScript font name for a X font.
+You can change the $Bfont alias$ mapping by using the $BX Font$ and $BPS Font$ entries on the $BPrinter Setup$ dialog.

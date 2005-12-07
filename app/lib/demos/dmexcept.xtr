@@ -1,0 +1,89 @@
+# XTrkCad Version: 3.0.1, Date: Sat Sep 23 21:54:29 2000
+
+VERSION 10
+DEMOINIT
+ORIG 4.000 0.000 0.000
+PARAMETER display description-fontsize 64
+PARAMETER pref mintrackradius 9.000000
+PARAMETER pref maxtrackgrade 5.000000
+CURVE 1 0 128 0 0 N 2 9.328210 12.681510 0 9.000000 0 -0.662481 0.508964
+	T 3 10.311823 3.735421 83.725592
+	E 0.736918 15.362872 17.333261
+	END
+STRAIGHT 2 0 0 0 0 N 2
+	T 3 18.591303 5.367316 253.974133
+	E 23.914162 6.896222 73.974133
+	END
+CURVE 3 0 0 0 0 N 2 4.886341 53.080886 0 49.642831 0 0.000000 0.000000
+	T 2 18.591303 5.367316 73.974133
+	T 1 10.311823 3.735421 263.725592
+	END
+STRAIGHT 4 0 0 0 0 N 2
+	E 4.698097 0.130693 253.974133 9 -0.010597 0.869307 1.000000
+	T 5 14.456557 2.933654 73.974133 11 0.855943 -1.308654
+	END
+STRAIGHT 5 0 0 0 0 N 2
+	E 23.748581 5.602640 73.974133 9 -1.123581 -1.415140 1.750000
+	T 4 14.456557 2.933654 253.974133 11 0.855943 -1.308654
+	END
+REDRAW
+RESET
+MESSAGE
+XTrkCad can help find tracks that are curved too sharply or are too steep.  These tracks are Exception tracks and are drawn in the Exception track color.
+
+In this example we have a curved track with radius of 9" and a straight track with a grade of 3.8%.
+ 
+END
+STEP
+PARAMETER misc cmdPref
+MESSAGE
+_________________________________________
+
+The Preferences dialog shows the Minimum Track Radius is 9" and the Maximum Track Grade is 5%.
+END
+STEP
+PARAMETER pref mintrackradius 9.000000
+PARAMETER pref maxtrackgrade 5.000000
+PARAMETER pref ok
+MESSAGE
+_________________________________________
+
+If we make the curved track sharper it will be drawn in the Exception color.
+END
+STEP
+COMMAND Describe
+MOUSE 2 4.500 5.188
+MOUSE 4 4.500 5.188
+BIGPAUSE
+#DESCRIBE Radius	8.000
+PARAMETER describe F9 8.000
+STEP
+MESSAGE
+_________________________________________
+
+If we make the straight track steeper it will also be drawn in the Exception color.
+END
+STEP
+MOUSE 2 23.125 5.375
+MOUSE 4 23.125 5.375
+BIGPAUSE
+#DESCRIBE Z	2.250
+PARAMETER describe F3 2.250
+REDRAW
+STEP
+#DESCRIBE OK
+PARAMETER describe ok
+RESET
+PARAMETER misc cmdColor
+MESSAGE
+_________________________________________
+
+You can change the Exception color on the Colors dialog from the Options menu.
+END
+STEP
+PARAMETER rgbcolor ok
+MESSAGE
+=========================================
+END
+STEP
+CLEAR
