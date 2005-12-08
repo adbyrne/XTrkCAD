@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.1 2005-12-07 15:46:59 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.2 2005-12-08 17:11:50 m_fischer Exp $
  *
  * TRAIN
  *
@@ -2025,8 +2025,9 @@ static STATUS_T CmdTrain( wAction_t action, coOrd pos )
 		if ( CarAvailableCount() <= 0 ) {
 			if ( NoticeMessage( MSG_NO_CARS, "Yes", "No" ) > 0 ) {
 				DoCarDlg();
+				DoChangeNotification( CHANGE_PARAMS );
 			}
-		}
+		} 
 		EnableCommands();
 		if ( curTrainDlg == NULL )
 			curTrainDlg = CreateTrainControlDlg();
