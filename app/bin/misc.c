@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.1 2005-12-07 15:47:25 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.2 2005-12-11 17:22:31 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -436,14 +436,13 @@ EXPORT void Confirm( char * label2, doSaveCallBack_p after )
 	int rc;
 	if (changed) {
 		 rc = wNotice3( 
-						"The layout has changed\n"
-						"Your changes will be lost\n"
-						"Do you want to save changes?",
-						"Yes", "No", "Cancel" );
+						"Save changes to the layout design before closing?\n\n"
+						"If you don't save now, your unsaved changes will be discarded.",
+						"&Save", "&Cancel", "&Don't Save" );
 		if (rc == 1) {
 			DoSave( after );
 			return;
-		} else if (rc == -1) {
+		} else if (rc == 0) {
 			return;
 		}
 	}
