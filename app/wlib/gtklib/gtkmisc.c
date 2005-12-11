@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.1 2005-12-07 15:48:48 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.2 2005-12-11 17:20:42 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -311,6 +311,30 @@ wControl_p gtkGetControlFromPos(
 	}
 	return NULL;
 }
+
+/* \brief Convert label string from Windows mnemonic to GTK
+ *
+ * The first occurence of '&' in the passed string is changed to '_'
+ *
+ * \param label the string to convert
+ * \return pointer to modified string, has to be free'd after usage
+ *
+ */
+static 
+char * gtkChgMnemonic( char *label )
+{
+	char *ptr;
+	char *cp;
+	
+	cp = strdup( label );
+	
+	ptr = strchr( cp, '&' );
+	if( ptr )
+		*ptr = '_';
+		
+	return( cp );	
+}
+
 
 /*
  *****************************************************************************
@@ -364,68 +388,130 @@ Pushing the second button (if present) returns 'FALSE'.
 	return wNotice3( msg, yes, no, NULL );
 }
 
-
-
+/** \brief Popup a notice box with three buttons.
+ *
+ * Popup up a notice box with three buttons.
+ * When this notice box is displayed the application is paused and
+ * will not response to other actions.
+ *
+ * Pushing the first button returns 1
+ * Pushing the second button returns 0
+ * Pushing the third button returns -1
+ *
+ * \param msg Text to display in message box
+ * \param yes First button label
+ * \param no  Second label (or 'NULL')
+ * \param cancel Third button label (or 'NULL') 
+ *
+ * \returns 1, 0 or -1
+ */
+ 
 EXPORT int wNotice3(
 		const char * msg,		/* Message */
-		const char * yes,		/* First button label */
-		const char * no,		/* Second label (or 'NULL') */
-		const char * cancel )
-/*
-Popup up a notice box with three buttons.
-When this notice box is displayed the application is paused and
-will not response to other actions.
-
-Pushing the first button returns 1
-Pushing the second button returns 0
-Pushing the third button returns -1
-*/
+		const char * affirmative,		/* First button label */
+		const char * cancel,		/* Second label (or 'NULL') */
+		const char * alternate )
 {
 	notice_win *nw;
 	GtkWidget * vbox;
 	GtkWidget * hbox;
+	GtkWidget * hbox1;
+	GtkWidget * image;
 	nw = &noticeW;
+	
+	char *aff = NULL;
+	char *can = NULL;
+	char *alt = NULL;
+	
 #ifndef GTK1
 		nw->win = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 		/*gtk_window_set_decorated( GTK_WINDOW(nw->win), FALSE );*/
 #else
 		nw->win = gtk_window_new( GTK_WINDOW_DIALOG );
 #endif
-		gtk_window_position( GTK_WINDOW(nw->win), GTK_WIN_POS_CENTER );
-		vbox = gtk_vbox_new( FALSE, 5 );
-		gtk_widget_show( vbox );
-		gtk_container_add( GTK_CONTAINER(nw->win), vbox );
-		nw->label = gtk_label_new(msg);
-		gtk_widget_show( nw->label );
-		gtk_box_pack_start( GTK_BOX(vbox), nw->label, TRUE, TRUE, 0 );
-		hbox = gtk_hbutton_box_new();
-		gtk_box_pack_start( GTK_BOX(vbox), hbox, TRUE, TRUE, 0 );
-		gtk_button_box_set_layout( GTK_BUTTON_BOX(hbox), GTK_BUTTONBOX_SPREAD );
-		gtk_button_box_set_child_size( GTK_BUTTON_BOX(hbox), 85, 25 );
-		gtk_widget_show(hbox);
-		nw->butt[0] = gtk_button_new_with_label(yes);
-		gtk_container_add( GTK_CONTAINER(hbox), nw->butt[0] );
-		gtk_signal_connect( GTK_OBJECT(nw->butt[0]), "clicked", GTK_SIGNAL_FUNC(doNotice), (void*)1 );
-		gtk_widget_show( nw->butt[0] );
-		if ( no ) {
-			nw->butt[1] = gtk_button_new_with_label(no);
-			gtk_container_add( GTK_CONTAINER(hbox), nw->butt[1] );
-			gtk_signal_connect( GTK_OBJECT(nw->butt[1]), "clicked", GTK_SIGNAL_FUNC(doNotice), (void*)0 );
-			gtk_widget_show( nw->butt[1] );
-			if ( cancel ) {
-				nw->butt[2] = gtk_button_new_with_label(cancel);
-				gtk_container_add( GTK_CONTAINER(hbox), nw->butt[2] );
-				gtk_signal_connect( GTK_OBJECT(nw->butt[2]), "clicked", GTK_SIGNAL_FUNC(doNotice), (void*)-1 );
-				gtk_widget_show( nw->butt[2] );
-			}
-		}
-		gtk_widget_show( nw->win );
-		if ( gtkMainW ) {
-			gtk_window_set_transient_for( GTK_WINDOW(nw->win), GTK_WINDOW( gtkMainW->gtkwin) );
-			gdk_window_set_group( nw->win->window, gtkMainW->gtkwin->window );
-		}
-		gtkDoModal( NULL, TRUE );
-		return noticeValue;
+	gtk_window_position( GTK_WINDOW(nw->win), GTK_WIN_POS_CENTER );
+	gtk_container_set_border_width (GTK_CONTAINER (nw->win), 0);
+	gtk_window_set_resizable (GTK_WINDOW (nw->win), FALSE);
+	gtk_window_set_modal (GTK_WINDOW (nw->win), TRUE);
+	gtk_window_set_type_hint (GTK_WINDOW (nw->win), GDK_WINDOW_TYPE_HINT_DIALOG);
+		
+	vbox = gtk_vbox_new( FALSE, 12 );
+	gtk_widget_show( vbox );
+	gtk_container_add( GTK_CONTAINER(nw->win), vbox );
+	gtk_container_set_border_width (GTK_CONTAINER (vbox), 12);
+		
+	hbox = gtk_hbox_new( FALSE, 12 );
+	gtk_box_pack_start( GTK_BOX(vbox), hbox, TRUE, TRUE, 0 );
+	gtk_widget_show(hbox);
+
+ 	image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_WARNING, GTK_ICON_SIZE_DIALOG);
+  gtk_widget_show (image);
+  gtk_box_pack_start (GTK_BOX (hbox), image, TRUE, TRUE, 0);
+  gtk_misc_set_alignment (GTK_MISC (image), 0, 0);
+
+	/* create the text label, allow GTK to wrap and allow for markup (for future enhancements) */
+	nw->label = gtk_label_new(msg);
+	gtk_widget_show( nw->label );
+	gtk_box_pack_end (GTK_BOX (hbox), nw->label, TRUE, TRUE, 0);
+	gtk_label_set_use_markup (GTK_LABEL (nw->label), FALSE);
+	gtk_label_set_line_wrap (GTK_LABEL (nw->label), TRUE);
+	gtk_misc_set_alignment (GTK_MISC (nw->label), 0, 0);
+
+	/* this hbox will include the button bar */
+	hbox1 = gtk_hbox_new (TRUE, 0);
+	gtk_widget_show (hbox1);
+  gtk_box_pack_start (GTK_BOX (vbox), hbox1, FALSE, TRUE, 0);
+
+	/* add the respective buttons */
+	aff = gtkChgMnemonic(affirmative);
+	nw->butt[ 0 ] = gtk_button_new_with_mnemonic (aff);
+	gtk_widget_show (nw->butt[ 0 ]);
+	gtk_box_pack_end (GTK_BOX (hbox1), nw->butt[ 0 ], TRUE, TRUE, 0);
+ 	gtk_container_set_border_width (GTK_CONTAINER (nw->butt[ 0 ]), 3);
+	gtk_signal_connect( GTK_OBJECT(nw->butt[0]), "clicked", GTK_SIGNAL_FUNC(doNotice), (void*)1 );
+  GTK_WIDGET_SET_FLAGS (nw->butt[ 0 ], GTK_CAN_DEFAULT);
+
+	if( cancel ) {
+		can = gtkChgMnemonic(cancel);
+		nw->butt[ 1 ] = gtk_button_new_with_mnemonic (can);
+ 		gtk_widget_show (nw->butt[ 1 ]);
+  	gtk_box_pack_end (GTK_BOX (hbox1), nw->butt[ 1 ], TRUE, TRUE, 0);
+	  gtk_container_set_border_width (GTK_CONTAINER (nw->butt[ 1 ]), 3);
+		gtk_signal_connect( GTK_OBJECT(nw->butt[1]), "clicked", GTK_SIGNAL_FUNC(doNotice), (void*)0 );
+	  GTK_WIDGET_SET_FLAGS (nw->butt[ 1 ], GTK_CAN_DEFAULT);
+
+		if( alternate ) {
+			alt = gtkChgMnemonic(alternate);
+			nw->butt[ 2 ] = gtk_button_new_with_mnemonic (alt);
+			gtk_widget_show (nw->butt[ 2 ]);
+			gtk_box_pack_start (GTK_BOX (hbox1), nw->butt[ 2 ], TRUE, TRUE, 0);
+			gtk_container_set_border_width (GTK_CONTAINER (nw->butt[ 2 ]), 3);
+			gtk_signal_connect( GTK_OBJECT(nw->butt[2]), "clicked", GTK_SIGNAL_FUNC(doNotice), (void*)-1 );
+		  GTK_WIDGET_SET_FLAGS (nw->butt[ 2 ], GTK_CAN_DEFAULT);
+ 		}
+	}	
+
+  gtk_widget_grab_default (nw->butt[ 0 ]);
+  gtk_widget_grab_focus (nw->butt[ 0 ]);
+
+	gtk_widget_show( nw->win );
+
+	if ( gtkMainW ) {
+		gtk_window_set_transient_for( GTK_WINDOW(nw->win), GTK_WINDOW( gtkMainW->gtkwin) );
+/*		gdk_window_set_group( nw->win->window, gtkMainW->gtkwin->window ); */
+	}
+	gtkDoModal( NULL, TRUE );
+	
+	if( aff )
+		free( aff );
+		
+	if( can )
+		free( can );
+		
+	if( alt )
+		free( alt );		
+		
+	return noticeValue;
 }
 
 
