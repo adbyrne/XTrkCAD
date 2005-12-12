@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.1 2005-12-07 15:47:03 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.2 2005-12-12 19:00:16 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -805,7 +805,6 @@ static int SaveTracks(
 	DoSaveTracks( pathName );
 	wMenuListAdd( fileList_ml, 0, fileName, MyStrdup(pathName) );
 	checkPtMark = changed = 0;
-	SetWindowTitle();
 	strcpy( curPathName, pathName );
 	curFileName = &curPathName[fileName-pathName];
 	if (doAfterSave)
@@ -826,6 +825,7 @@ EXPORT void DoSave( doSaveCallBack_p after )
 	} else {
 		SaveTracks( curPathName, curFileName, NULL );
 	}
+	SetWindowTitle();
 }
 
 EXPORT void DoSaveAs( doSaveCallBack_p after )
@@ -835,6 +835,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, "Save Tracks",
 			sSourceFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, curDirName );
+	SetWindowTitle();
 }
 
 EXPORT void DoLoad( void )
