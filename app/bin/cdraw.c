@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cdraw.c,v 1.1 2005-12-07 15:47:38 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cdraw.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1115,7 +1115,7 @@ static void DrawDlgUpdate(
 		BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, (wIndex_t)*(long*)valueP ), (wList_p)drawBenchOrientPD.control );
 }
 
-EXPORT void InitCmdDraw( void )
+EXPORT void InitCmdDraw( wMenu_p menu )
 {
 	int inx1, inx2;
 	drawStuff_t * dsp;
@@ -1133,7 +1133,7 @@ EXPORT void InitCmdDraw( void )
 		for ( inx2=0; inx2<dsp->cnt; inx2++ ) {
 			ddp = &dsp->data[inx2];
 			icon = wIconCreatePixMap( ddp->xpm );
-			AddCommandButton( CmdDraw, ddp->helpKey, ddp->cmdName, icon, LEVEL0_50, IC_STICKY|IC_POPUP2, ddp->acclKey, (void*)ddp->OP );
+			AddMenuButton( menu, CmdDraw, ddp->helpKey, ddp->cmdName, icon, LEVEL0_50, IC_STICKY|IC_POPUP2, ddp->acclKey, (void*)ddp->OP );
 		}
 		ButtonGroupEnd();
 	}

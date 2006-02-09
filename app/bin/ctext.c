@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctext.c,v 1.1 2005-12-07 15:46:53 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctext.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  *
  * TEXT
  *
@@ -230,9 +230,9 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 
 #include "text.xpm"
 
-void InitCmdText( void )
+void InitCmdText( wMenu_p menu )
 {
-	AddCommandButton( CmdText, "cmdText", "Text", wIconCreatePixMap(text_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
+	AddMenuButton( menu, CmdText, "cmdText", "Text", wIconCreatePixMap(text_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
 	textPopupM = MenuRegister( "Text Font" );
 	wMenuPushCreate( textPopupM, "", "Fonts...", 0, (wMenuCallBack_p)SelectFont, NULL );
 	Dt.size = (CSIZE_T)wSelectedFontSize();

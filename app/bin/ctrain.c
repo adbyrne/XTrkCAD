@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.2 2005-12-08 17:11:50 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.3 2006-02-09 17:11:28 m_fischer Exp $
  *
  * TRAIN
  *
@@ -2510,13 +2510,13 @@ static void TrainFunc(
 }
 
 
-EXPORT void InitCmdTrain( void )
+EXPORT void InitCmdTrain( wMenu_p menu )
 {
 	log_trainMove = LogFindIndex( "trainMove" );
 	log_trainPlayback = LogFindIndex( "trainPlayback" );
 	trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_xpm);
 	ParamRegister( &trainPG );
-	AddCommandButton( CmdTrain, "cmdTrain", "Train", wIconCreatePixMap(train_xpm), LEVEL0_50, IC_POPUP2|IC_LCLICK|IC_RCLICK, 0, NULL );
+	AddMenuButton( menu, CmdTrain, "cmdTrain", "Train", wIconCreatePixMap(train_xpm), LEVEL0_50, IC_POPUP2|IC_LCLICK|IC_RCLICK, 0, NULL );
 	stopI = wIconCreatePixMap(stop_xpm);
 	goI = wIconCreatePixMap(go_xpm);
 	trainPauseB = AddToolbarButton( "cmdTrainPause", stopI, IC_MODETRAIN_ONLY, CmdTrainStopGo, NULL );

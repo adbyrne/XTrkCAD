@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.1 2005-12-07 15:47:10 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -111,12 +111,16 @@ int bEnablePrices = 0;
 EXPORT char * MakeWindowTitle( char * name )
 {
 	static char title[STR_SHORT_SIZE];
-	sprintf( title, "%s %s", sProdName, name );
+	sprintf( title, "%s", name );
 	return title;
 }
 
-
 static addButtonCallBack_t easementP;
+
+void InitCmdEasement( void )
+{
+	easementP = EasementInit();
+}
 void DoEasementRedir( void )
 {
 	if (easementP)
@@ -185,74 +189,8 @@ BOOL_T Initialize( void )
 
 	InitCarDlg();
 
-	cmdGroup = BG_EASE;
-#ifdef NOFLEX
-	easementP = EasementInit();
-	/*structDesignerP = structDesignerInit();*/
-#endif
-
-	cmdGroup = BG_SNAP;
-	InitSnapGridButtons();
-
-	cmdGroup = BG_TRKCRT|BG_BIGGAP;
-#ifdef NOFLEX
-	InitCmdStraight();
-	InitCmdCurve();
-	InitCmdTurnout();
-	InitCmdHandLaidTurnout();
-	InitCmdTurntable();
-	InitCmdParallel();
-#endif
-
 	memset( message, 0, sizeof message );
 	
-	cmdGroup = BG_TRKMOD;
-#ifdef NOFLEX
-	InitCmdModify();
-	InitCmdJoin();
-#endif
-	InitCmdPull();
-	InitCmdSplit();
-#ifdef NOFLEX
-	InitCmdElevation();
-	InitCmdProfile();
-#endif
-	InitCmdMoveDescription();
-
-	cmdGroup = BG_SELECT;
-	InitCmdDescribe();
-	InitCmdSelect();
-
-	cmdGroup = BG_TRKGRP;
-	InitCmdMove();
-	InitCmdDelete();
-	InitCmdTunnel();
-	InitCmdAboveBelow();
-#ifdef LATER
-	InitCmdEnumerate();
-	InitCmdExport();
-#endif
-
-	cmdGroup = BG_TRAIN|BG_BIGGAP;
-	InitCmdTrain();
-
-	cmdGroup = BG_MISCCRT|BG_BIGGAP;
-	InitCmdText();
-	InitCmdDraw();
-	InitCmdNote();
-	InitCmdStruct();
-
-	cmdGroup = BG_RULER;
-	InitCmdRuler();
-
-	cmdGroup = BG_LAYER|BG_BIGGAP;
-	InitLayers();
-
-	cmdGroup = BG_HOTBAR;
-	InitHotBar();
-
-	/*InitCmdPrint();*/
-
 	return TRUE;
 }
 

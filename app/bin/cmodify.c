@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmodify.c,v 1.1 2005-12-07 15:46:54 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmodify.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  *
  * TRACK MODIFY
  */
@@ -388,9 +388,9 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 
 #include "extend.xpm"
 
-void InitCmdModify( void )
+void InitCmdModify( wMenu_p menu )
 {
-	modifyCmdInx = AddCommandButton( CmdModify, "cmdModify", "Modify", wIconCreatePixMap(extend_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_MODIFY, NULL );
+	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", "Modify", wIconCreatePixMap(extend_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_MODIFY, NULL );
 	log_modify = LogFindIndex( "modify" );
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ccurve.c,v 1.1 2005-12-07 15:47:36 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ccurve.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  *
  * CURVE
  *
@@ -704,25 +704,30 @@ static STATUS_T CmdCircle2( wAction_t action, coOrd pos )
 
 
 
-EXPORT void InitCmdCurve( void )
+EXPORT void InitCmdCurve( wMenu_p menu )
 {
 
 	ButtonGroupBegin( "Curve Track", "cmdCircleSetCmd", "Curve Tracks" );
-	AddCommandButton( CmdCurve, "cmdCurveEndPt", "Curve from End-Pt", wIconCreatePixMap( curve1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE1, (void*)0 );
-	AddCommandButton( CmdCurve, "cmdCurveTangent", "Curve from Tangent", wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE2, (void*)1 );
-	AddCommandButton( CmdCurve, "cmdCurveCenter", "Curve from Center", wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE3, (void*)2 );
-	AddCommandButton( CmdCurve, "cmdCurveChord", "Curve from Chord", wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE4, (void*)3 );
+	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", "Curve from End-Pt", wIconCreatePixMap( curve1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE1, (void*)0 );
+	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", "Curve from Tangent", wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE2, (void*)1 );
+	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", "Curve from Center", wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE3, (void*)2 );
+	AddMenuButton( menu, CmdCurve, "cmdCurveChord", "Curve from Chord", wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE4, (void*)3 );
 	ButtonGroupEnd();
 
 	ButtonGroupBegin( "Circle Track", "cmdCurveSetCmd", "Circle Tracks" );
-	AddCommandButton( CmdCircle, "cmdCircleFixedRadius", "Fixed Radius Circle", wIconCreatePixMap( circle1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, (void*)0 );
-	AddCommandButton( CmdCircle, "cmdCircleTangent", "Circle from Tangent", wIconCreatePixMap( circle2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, (void*)1 );
-	AddCommandButton( CmdCircle, "cmdCircleCenter", "Circle from Center", wIconCreatePixMap( circle3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, (void*)2 );
+	AddMenuButton( menu, CmdCircle, "cmdCircleFixedRadius", "Fixed Radius Circle", wIconCreatePixMap( circle1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE1, (void*)0 );
+	AddMenuButton( menu, CmdCircle, "cmdCircleTangent", "Circle from Tangent", wIconCreatePixMap( circle2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE2, (void*)1 );
+	AddMenuButton( menu, CmdCircle, "cmdCircleCenter", "Circle from Center", wIconCreatePixMap( circle3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CIRCLE3, (void*)2 );
 	ButtonGroupEnd();
 
-	AddCommandButton( CmdHelix, "cmdHelix", "Helix", wIconCreatePixMap(helix_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_HELIX, NULL );
 	ParamRegister( &circleRadiusPG );
 	ParamCreateControls( &circleRadiusPG, NULL );
+
+}
+
+EXPORT void InitCmdHelix( wMenu_p menu )
+{
+	AddMenuButton( menu, CmdHelix, "cmdHelix", "Helix", wIconCreatePixMap(helix_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_HELIX, NULL );
 	ParamRegister( &helixPG );
 	RegisterChangeNotification( ChangeHelixW );
 

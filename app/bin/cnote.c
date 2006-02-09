@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cnote.c,v 1.1 2005-12-07 15:46:50 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cnote.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -391,10 +391,10 @@ static STATUS_T CmdNote( wAction_t action, coOrd pos )
 #include "note.bmp"
 #include "cnote.xpm"
 
-void InitCmdNote( void )
+void InitCmdNote( wMenu_p menu )
 {
 	ParamRegister( &notePG );
-	AddCommandButton( CmdNote, "cmdNote", "Note", wIconCreatePixMap(cnote_xpm), LEVEL0_50, IC_POPUP2, ACCL_NOTE, NULL );
+	AddMenuButton( menu, CmdNote, "cmdNote", "Note", wIconCreatePixMap(cnote_xpm), LEVEL0_50, IC_POPUP2, ACCL_NOTE, NULL );
 }
 
 void InitTrkNote( void )

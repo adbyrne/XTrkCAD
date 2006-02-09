@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.1 2005-12-07 15:47:10 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -92,38 +92,40 @@ void InitTrkTrack( void );
 void InitTrkTurnout( void );
 void InitTrkTurntable( void );
 
-void InitCmdCurve( void );
-void InitCmdDraw( void );
-void InitCmdElevation( void );
-void InitCmdJoin( void );
-void InitCmdProfile( void );
-void InitCmdPull( void );
+void InitCmdCurve( wMenu_p menu );
+void InitCmdHelix( wMenu_p menu );
+void InitCmdDraw( wMenu_p menu );
+void InitCmdElevation( wMenu_p menu );
+void InitCmdJoin( wMenu_p menu );
+void InitCmdProfile( wMenu_p menu );
+void InitCmdPull( wMenu_p menu );
 void InitCmdTighten( void );
-void InitCmdModify( void );
-void InitCmdMove( void );
-void InitCmdMoveDescription( void );
-void InitCmdStraight( void );
-void InitCmdDescribe( void );
-void InitCmdSelect( void );
+void InitCmdModify( wMenu_p menu );
+void InitCmdMove( wMenu_p menu );
+void InitCmdMoveDescription( wMenu_p menu );
+void InitCmdStraight( wMenu_p menu );
+void InitCmdDescribe( wMenu_p menu );
+void InitCmdSelect( wMenu_p menu );
 void InitCmdDelete( void );
-void InitCmdSplit( void );
+void InitCmdSplit( wMenu_p menu );
 void InitCmdTunnel( void );
-void InitCmdRuler( void );
-void InitCmdMove( void );
-void InitCmdParallel( void );
-wIndex_t InitCmdPrint( void );
+void InitCmdRuler( wMenu_p menu );
+
+void InitCmdParallel( wMenu_p menu );
+wIndex_t InitCmdPrint( wMenu_p menu );
 void InitCmdTableEdge( void );
-void InitCmdText( void );
-void InitCmdTrain( void );
-void InitCmdTurnout( void );
-void InitCmdHandLaidTurnout( void );
-void InitCmdTurntable( void );
-void InitCmdNote( void );
+void InitCmdText( wMenu_p menu );
+void InitCmdTrain( wMenu_p menu );
+void InitCmdTurnout( wMenu_p menu );
+void InitCmdHandLaidTurnout( wMenu_p menu );
+void InitCmdTurntable( wMenu_p menu );
+void InitCmdNote( wMenu_p menu );
 void InitCmdUndo( void );
-void InitCmdStruct( void );
+void InitCmdStruct( wMenu_p menu );
 void InitCmdAboveBelow( void );
 void InitCmdEnumerate( void );
 void InitCmdExport( void );
+void InitCmdEasement( void );
 
 char * MakeWindowTitle( char * );
 addButtonCallBack_t EasementInit( void );

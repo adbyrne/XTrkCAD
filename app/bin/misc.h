@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.1 2005-12-07 15:47:25 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -239,11 +239,12 @@ void LayoutToolBar( void );
 #define IC_MODETRAIN_ONLY		(1<<13)
 #define IC_WANT_MOVE	(1<<14)
 #define IC_PLAYBACK_PUSH		(1<<15)
-wIndex_t InitCommand( procCommand_t, char *, char *,  int, long, long );
+wIndex_t InitCommand( wMenu_p, procCommand_t, char *, char *,  int, long, long );
 void AddToolbarControl( wControl_p, long );
 BOOL_T CommandEnabled( wIndex_t );
 wButton_p AddToolbarButton( char*, wIcon_p, long, wButtonCallBack_p, void * context );
 wIndex_t AddCommandButton( procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
+wIndex_t AddMenuButton( wMenu_p, procCommand_t, char*, char*, wIcon_p, int, long, long, void* );
 void PlaybackButtonMouse( wIndex_t );
 void ButtonGroupBegin( char *, char *, char * );
 void ButtonGroupEnd( void );
@@ -307,7 +308,7 @@ addButtonCallBack_t CustomMgrInit( void );
 addButtonCallBack_t PriceListInit( void );
 addButtonCallBack_t ParamFilesInit( void );
 
-wIndex_t InitGrid( void );
+wIndex_t InitGrid( wMenu_p menu );
 
 void SnapPos( coOrd * );
 void DrawSnapGrid( drawCmd_p, coOrd, BOOL_T );

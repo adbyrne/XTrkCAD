@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.1 2005-12-07 15:46:50 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -438,9 +438,9 @@ static STATUS_T CmdDescribe( wAction_t action, coOrd pos )
 
 #include "describe.xpm"
 
-void InitCmdDescribe( void )
+void InitCmdDescribe( wMenu_p menu )
 {
-	describeCmdInx = AddCommandButton( CmdDescribe, "cmdDescribe", "Describe", wIconCreatePixMap(describe_xpm),
+	describeCmdInx = AddMenuButton( menu, CmdDescribe, "cmdDescribe", "Properties...", wIconCreatePixMap(describe_xpm),
 				LEVEL0, IC_CANCEL|IC_POPUP, ACCL_DESCRIBE, NULL );
 	RegisterChangeNotification( DescChange );
 	ParamRegister( &describePG );

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturntbl.c,v 1.1 2005-12-07 15:47:17 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturntbl.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  *
  * TURNTABLE
  *
@@ -818,9 +818,9 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 #include "turntbl.xpm"
 
 
-EXPORT void InitCmdTurntable( void )
+EXPORT void InitCmdTurntable( wMenu_p menu )
 {
-	AddCommandButton( CmdTurntable, "cmdTurntable", "Turntable", wIconCreatePixMap(turntbl_xpm), LEVEL0_50, IC_STICKY, ACCL_TURNTABLE, NULL );
+	AddMenuButton( menu, CmdTurntable, "cmdTurntable", "Turntable", wIconCreatePixMap(turntbl_xpm), LEVEL0_50, IC_STICKY, ACCL_TURNTABLE, NULL );
 }
 
 

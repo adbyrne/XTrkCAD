@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cpull.c,v 1.1 2005-12-07 15:46:51 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cpull.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  *
  * Pull and Tighten commands
  *
@@ -655,8 +655,8 @@ static STATUS_T CmdPull(
 
 #include "pull.xpm"
 
-void InitCmdPull( void )
+void InitCmdPull( wMenu_p menu )
 {
-	AddCommandButton( CmdPull, "cmdConnect", "Connect Sectional Tracks", wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2, ACCL_CONNECT, NULL );
+	AddMenuButton( menu, CmdPull, "cmdConnect", "Connect Sectional Tracks", wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2, ACCL_CONNECT, NULL );
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstruct.c,v 1.1 2005-12-07 15:47:34 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstruct.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  *
  * T_STRUCTURE
  *
@@ -898,10 +898,10 @@ static STATUS_T CmdStructureHotBar(
 #ifdef STRUCTCMD
 #include "struct.xpm"
 
-EXPORT void InitCmdStruct( void )
+EXPORT void InitCmdStruct( wMenu_p menu )
 {
-	AddCommandButton( CmdStructure, "cmdStructure", "Structure", wIconCreatePixMap(struct_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
-	structureHotBarCmdInx = AddCommandButton( CmdStructureHotBar, "cmdStructureHotBar", "", NULL, LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, 0, NULL );
+	AddMenuButton( menu, CmdStructure, "cmdStructure", "Structure", wIconCreatePixMap(struct_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
+	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar, "cmdStructureHotBar", "", NULL, LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, 0, NULL );
 	ParamRegister( &structurePG );
 }
 #endif

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.1 2005-12-07 15:47:19 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  *
  * SELECT
  *
@@ -1693,9 +1693,9 @@ static void SetMoveMode( char * line )
 }
 
 
-EXPORT void InitCmdSelect( void )
+EXPORT void InitCmdSelect( wMenu_p menu )
 {
-	selectCmdInx = AddCommandButton( CmdSelect, "cmdSelect", "Select", wIconCreatePixMap(select_xpm),
+	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", "Select", wIconCreatePixMap(select_xpm),
 				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU, ACCL_SELECT, NULL );
 	endpt_bm = wDrawBitMapCreate( mainD.d, bmendpt_width, bmendpt_width, 7, 7, bmendpt_bits );
 	angle_bm[0] = wDrawBitMapCreate( mainD.d, bma90_width, bma90_width, 7, 7, bma90_bits );
@@ -1745,19 +1745,19 @@ EXPORT void InitCmdTunnel( void )
 }
 
 
-EXPORT void InitCmdMoveDescription( void )
+EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
-	AddCommandButton( CmdMoveDescription, "cmdMoveLabel", "Move Description", wIconCreatePixMap(movedesc_xpm),
+	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", "Move Description", wIconCreatePixMap(movedesc_xpm),
 				LEVEL0, IC_STICKY|IC_POPUP|IC_CMDMENU, ACCL_MOVEDESC, NULL );
 }
 
 
-EXPORT void InitCmdMove( void )
+EXPORT void InitCmdMove( wMenu_p menu )
 {
-	moveCmdInx = AddCommandButton( CmdMove, "cmdMove", "Move", wIconCreatePixMap(move_xpm),
+	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", "Move", wIconCreatePixMap(move_xpm),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_MOVE, NULL );
-	rotateCmdInx = AddCommandButton( CmdRotate, "cmdRotate", "Rotate", wIconCreatePixMap(rotate_xpm),
+	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", "Rotate", wIconCreatePixMap(rotate_xpm),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_ROTATE, NULL );
-	/*flipCmdInx =*/ AddCommandButton( CmdFlip, "cmdFlip", "Flip", wIconCreatePixMap(flip_xpm),
+	/*flipCmdInx =*/ AddMenuButton( menu, CmdFlip, "cmdFlip", "Flip", wIconCreatePixMap(flip_xpm),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
 }

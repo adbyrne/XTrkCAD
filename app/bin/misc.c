@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.2 2005-12-11 17:22:31 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.3 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -91,11 +91,8 @@ EXPORT wButton_p redoB;
 EXPORT wIndex_t checkPtMark = 0;
 
 EXPORT wMenu_p demoM;
-static wMenu_p commandsM;
 EXPORT wMenu_p popup1M, popup2M;
 EXPORT wMenu_p popup1aM, popup2aM;
-static long commandsMLength = 0;
-static long commandsMLengthMax = 18;
 
 
 static wIndex_t curCommand = 0;
@@ -1400,7 +1397,8 @@ EXPORT wIndex_t AddCommandControl(
 #endif
 
 
-EXPORT wIndex_t AddCommandButton(
+EXPORT wIndex_t AddMenuButton(
+		wMenu_p menu,
 		procCommand_t command,
 		char * helpKey,
 		char * nameStr,
@@ -1433,12 +1431,7 @@ EXPORT wIndex_t AddCommandButton(
 			buttonGroupPopupM = wMenuPopupCreate( mainW, buttonGroupMenuTitle );
 			AddToolbarButton( buttonGroupHelpKey, openbuttIcon, IC_ABUT, (wButtonCallBack_p)wMenuPopupShow, (void*)buttonGroupPopupM );
 			newButtonGroup = TRUE;
-			commandsMLength++;
-			if ( commandsMLength == commandsMLengthMax ) {
-				commandsM = wMenuMenuCreate( commandsM, "", "More" );
-				commandsMLength = 1;
-			}
-			commandsSubmenu = wMenuMenuCreate( commandsM, "", buttonGroupMenuTitle );
+			commandsSubmenu = wMenuMenuCreate( menu, "", buttonGroupMenuTitle );
 			popup1Submenu = wMenuMenuCreate( ((options&IC_POPUP2)?popup1aM:popup1M), "", buttonGroupMenuTitle );
 			popup2Submenu = wMenuMenuCreate( ((options&IC_POPUP2)?popup2aM:popup2M), "", buttonGroupMenuTitle );
 		}
@@ -1468,12 +1461,7 @@ EXPORT wIndex_t AddCommandButton(
 		p1m = popup1Submenu;
 		p2m = popup2Submenu;
 	} else {
-		commandsMLength++;
-		if ( commandsMLength == commandsMLengthMax ) {
-			commandsM = wMenuMenuCreate( commandsM, "", "More" );
-			commandsMLength = 1;
-		}
-		tm = commandsM;
+		tm = menu; 
 		p1m = (options&IC_POPUP2)?popup1aM:popup1M;
 		p2m = (options&IC_POPUP2)?popup2aM:popup2M;
 	}
@@ -1492,8 +1480,8 @@ EXPORT wIndex_t AddCommandButton(
 }
 
 
-
 EXPORT wIndex_t InitCommand(
+		wMenu_p menu,
 		procCommand_t command,
 		char * nameStr,
 		char * bits,
@@ -1507,7 +1495,7 @@ EXPORT wIndex_t InitCommand(
 		icon = wIconCreateBitMap( 16, 16, bits, wDrawColorBlack );
 	strcpy( helpKey, "cmd" );
 	strcat( helpKey, nameStr );
-	return AddCommandButton( command, helpKey, nameStr, icon, reqLevel, options, acclKey, NULL );
+	return AddMenuButton( menu, command, helpKey, nameStr, icon, reqLevel, options, acclKey, NULL );
 }
 
 /*--------------------------------------------------------------------*/
@@ -1968,7 +1956,8 @@ static void MiscMenuItemCreate(
 		char * label,
 		long acclKey,
 		void * func,
-		long option )
+		long option,
+		void * context )
 {
 	wMenuPush_p mp;
 	mp = wMenuPushCreate( m1, name, label, acclKey, ParamMenuPush, &menuPLs[menuPG.paramCnt] );
@@ -1979,6 +1968,8 @@ static void MiscMenuItemCreate(
 	menuPLs[menuPG.paramCnt].valueP = func;
 	menuPLs[menuPG.paramCnt].nameStr = name;
 	menuPLs[menuPG.paramCnt].option = option;
+	menuPLs[menuPG.paramCnt].context = context;
+	
 	if ( name ) GetBalloonHelpStr( name );
 	menuPG.paramCnt++;
 }
@@ -2041,46 +2032,278 @@ static void SetAccelKey(
       wAttachAccelKey( key, mode, func, context );
 }
 
+#include "zoomin.xpm"
+#include "zoom.xpm"
+#include "zoomout.xpm"
+#include "undo.xpm"
+#include "redo.xpm"
+#include "partlist.xpm"
+#include "export.xpm"
+#include "import.xpm"
+
+static struct {
+		char * name;
+		long value;
+		} zoomList[] = {
+				{ "1:1", 1 },
+				{ "2:1", 2 },
+				{ "3:1", 3 },
+				{ "4:1", 4 },
+				{ "6:1", 6 },
+				{ "8:1", 8 },
+				{ "10:1", 10 },
+				{ "12:1", 12 },
+				{ "16:1", 16 },
+				{ "20:1", 20 },
+				{ "24:1", 24 },
+				{ "28:1", 28 },
+				{ "32:1", 32 },
+				{ "36:1", 36 },
+				{ "40:1", 40 },
+				{ "48:1", 48 },
+				{ "56:1", 56 },
+				{ "64:1", 64 },
+				{ "128:1", 128 },
+				{ "256:1", 256 },
+		};
+
 
 static void CreateMenus( void )
 {
-	wMenu_p fileM, editM, viewM, toolsM, optionM, windowM, macroM, helpM, toolbarM, messageListM;
+	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM, messageListM, manageM, addM, changeM, drawM;
+	wMenu_p zoomM;
+	int inx;
+	wIcon_p bm_p;
 
 	fileM = wMenuBarAdd( mainW, "menuFile", "&File" );
 	editM = wMenuBarAdd( mainW, "menuEdit", "&Edit" );
 	viewM = wMenuBarAdd( mainW, "menuView", "&View" );
-	toolsM = wMenuBarAdd( mainW, "menuTools", "&Tools" );
-	commandsM = wMenuBarAdd( mainW, "menuCommands", "&Commands" );
+	addM = wMenuBarAdd( mainW, "menuAdd", "&Add" );
+	changeM = wMenuBarAdd( mainW, "menuChange", "&Change" );
+	drawM = wMenuBarAdd( mainW, "menuDraw", "&Draw" );
+/*	commandsM = wMenuBarAdd( mainW, "menuCommands", "&Commands" ); */
+	manageM = wMenuBarAdd( mainW, "menuManage", "&Manage" );
 	optionM = wMenuBarAdd( mainW, "menuOption", "&Options" );
 	macroM = wMenuBarAdd( mainW, "menuMacro", "&Macro" );
 	windowM = wMenuBarAdd( mainW, "menuWindow", "&Window" );
 	helpM = wMenuBarAdd( mainW, "menuHelp", "&Help" );
 
-	/*
-	 * WINDOW MENU
-	 */
-	wMenuPushCreate( windowM, "menuWindow", "Main", 0, (wMenuCallBack_p)wShow, mainW );
-	winList_mi = wMenuListCreate( windowM, "menuWindow", -1, DoShowWindow );
+	/* 
+	 * POPUP MENUS
+	 */ 
 
+	popup1M = wMenuPopupCreate( mainW, "Commands" );
+	popup2M = wMenuPopupCreate( mainW, "Commands" );
+	wMenuPushCreate( popup1M, "cmdPaste", "Paste", 0, (wMenuCallBack_p)EditPaste, NULL );
+	wMenuSeparatorCreate( popup1M );
+	MiscMenuItemCreate( popup1M, popup2M, "cmdUndo", "Undo", 0, (wMenuCallBack_p)UndoUndo, 0, (void *)0 );
+	MiscMenuItemCreate( popup1M, popup2M, "cmdRedo", "Redo", 0, (wMenuCallBack_p)UndoRedo, 0, (void *)0 );
+	wMenuPushCreate( popup1M, "cmdZoomIn", "Zoom In", 0, (wMenuCallBack_p)DoZoomUp, (void*)1 );
+	wMenuPushCreate( popup2M, "cmdZoomIn", "Zoom In", 0, (wMenuCallBack_p)DoZoomUp, (void*)1 );
+	wMenuPushCreate( popup1M, "cmdZoomOut", "Zoom Out", 0, (wMenuCallBack_p)DoZoomDown, (void*)1 );
+	wMenuPushCreate( popup2M, "cmdZoomOut", "Zoom Out", 0, (wMenuCallBack_p)DoZoomDown, (void*)1 );
+	MiscMenuItemCreate( popup1M, popup2M, "cmdGridEnable", "SnapGrid Enable", 0, (wMenuCallBack_p)SnapGridEnable, 0, (void *)0 );
+	MiscMenuItemCreate( popup1M, popup2M, "cmdGridShow", "SnapGrid Show", 0, (wMenuCallBack_p)SnapGridShow, 0, (void *)0 );
+	wMenuSeparatorCreate( popup1M );
+	wMenuSeparatorCreate( popup2M );
+	MiscMenuItemCreate( popup2M, NULL, "cmdCopy", "Copy", 0, (wMenuCallBack_p)EditCopy, 0, (void *)0 );
+	MiscMenuItemCreate( popup1M, popup2M, "cmdPaste", "Paste", 0, (wMenuCallBack_p)EditPaste, 0, (void *)0 );
+	MiscMenuItemCreate( popup2M, NULL, "cmdDeselectAll", "Deselect All", 0, (wMenuCallBack_p)SetAllTrackSelect, 0, (void *)0 );
+	wMenuPushCreate( popup2M, "cmdMove", "Move", 0, (wMenuCallBack_p)DoCommandBIndirect, &moveCmdInx );
+	wMenuPushCreate( popup2M, "cmdRotate", "Rotate", 0, (wMenuCallBack_p)DoCommandBIndirect, &rotateCmdInx );
+	MiscMenuItemCreate( popup2M, NULL, "cmdTunnel", "Tunnel", 0, (wMenuCallBack_p)SelectTunnel, 0, (void *)0 );
+	wMenuSeparatorCreate( popup1M );
+	wMenuSeparatorCreate( popup2M );
+	MiscMenuItemCreate( popup2M, NULL, "cmdDelete", "Delete", 0, (wMenuCallBack_p)SelectDelete, 0, (void *)0 );
+	wMenuSeparatorCreate( popup2M );
+	popup1aM = wMenuMenuCreate( popup1M, "", "More" );
+	popup2aM = wMenuMenuCreate( popup2M, "", "More" );
+
+	cmdGroup = BG_ZOOM;
+	AddToolbarButton( "cmdZoomIn", wIconCreatePixMap(zoomin_xpm), IC_MODETRAIN_TOO,
+		(addButtonCallBack_t)DoZoomUp, NULL );
+	bm_p = wIconCreatePixMap(zoom_xpm);
+	zoomM = wMenuPopupCreate( mainW, "" );
+	AddToolbarButton( "cmdZoom", wIconCreatePixMap(zoom_xpm), IC_MODETRAIN_TOO, (wButtonCallBack_p)wMenuPopupShow, zoomM );
+	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
+		wMenuPushCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
+	}
+	AddToolbarButton( "cmdZoomOut", wIconCreatePixMap(zoomout_xpm), IC_MODETRAIN_TOO,
+		(addButtonCallBack_t)DoZoomDown, NULL );
+
+	cmdGroup = BG_UNDO;
+	undoB = AddToolbarButton( "cmdUndo", wIconCreatePixMap(undo_xpm), 0, (addButtonCallBack_t)UndoUndo, NULL );
+	redoB = AddToolbarButton( "cmdRedo", wIconCreatePixMap(redo_xpm), 0, (addButtonCallBack_t)UndoRedo, NULL );
+	wControlActive( (wControl_p)undoB, FALSE );
+	wControlActive( (wControl_p)redoB, FALSE );
+ 
+
+	/*
+	 * FILE MENU
+	 */
+	MiscMenuItemCreate( fileM, NULL, "menuFile-clear", "&New", ACCL_NEW, (wMenuCallBack_p)DoClear, 0, (void *)0 );
+	wMenuPushCreate( fileM, "menuFile-load", "&Open ...", ACCL_OPEN, (wMenuCallBack_p)ChkLoad, NULL );
+	wMenuSeparatorCreate( fileM );
+
+	wMenuPushCreate( fileM, "menuFile-save", "&Save", ACCL_SAVE, (wMenuCallBack_p)DoSave, NULL );
+	wMenuPushCreate( fileM, "menuFile-saveAs", "Save &As ...", ACCL_SAVEAS, (wMenuCallBack_p)DoSaveAs, NULL );
+
+	wMenuSeparatorCreate( fileM );
+	MiscMenuItemCreate( fileM, NULL, "printSetup", "P&rint Setup ...", ACCL_PRINTSETUP, (wMenuCallBack_p)wPrintSetup, 0, (void *)0 );
+	printCmdInx = InitCmdPrint( fileM );
+/*	wMenuPushCreate( fileM, "cmdPrint", "&Print", ACCL_PRINT, (wMenuCallBack_p)DoCommandBIndirect, &printCmdInx ); */
+	wMenuSeparatorCreate( fileM );
+	MiscMenuItemCreate( fileM, NULL, "cmdImport", "&Import", ACCL_IMPORT, (wMenuCallBack_p)DoImport, 0, (void *)0 );
+	MiscMenuItemCreate( fileM, NULL, "cmdOutputbitmap", "Export to &Bitmap", ACCL_PRINTBM, (wMenuCallBack_p)OutputBitMapInit(), 0, (void *)0 );
+	MiscMenuItemCreate( fileM, NULL, "cmdExport", "E&xport", ACCL_EXPORT, (wMenuCallBack_p)DoExport, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( fileM, NULL, "cmdExportDXF", "Export D&XF", ACCL_EXPORTDXF, (wMenuCallBack_p)DoExportDXF, IC_SELECTED, (void *)0 );
+	wMenuSeparatorCreate( fileM );
+
+	MiscMenuItemCreate( fileM, NULL, "cmdPrmfile", "Parameter &Files ...", ACCL_PARAMFILES, ParamFilesInit(), 0, (void *)0 );
+	MiscMenuItemCreate( fileM, NULL, "cmdFileNote", "No&tes ...", ACCL_NOTES, (wMenuCallBack_p)DoNote, 0, (void *)0 );
+
+	wMenuSeparatorCreate( fileM );
+	fileList_ml = wMenuListCreate( fileM, "menuFileList", NUM_FILELIST, ChkFileList );
+	wMenuSeparatorCreate( fileM );
+	wMenuPushCreate( fileM, "menuFile-quit", "E&xit", 0,
+		(wMenuCallBack_p)DoQuit, NULL );
+
+	/*
+	 * EDIT MENU
+	 */
+	MiscMenuItemCreate( editM, NULL, "cmdUndo", "&Undo", ACCL_UNDO, (wMenuCallBack_p)UndoUndo, 0, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdRedo", "R&edo", ACCL_REDO, (wMenuCallBack_p)UndoRedo, 0, (void *)0 );
+	wMenuSeparatorCreate( editM );
+	MiscMenuItemCreate( editM, NULL, "cmdCut", "Cu&t", ACCL_CUT, (wMenuCallBack_p)EditCut, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdCopy", "&Copy", ACCL_COPY, (wMenuCallBack_p)EditCopy, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdPaste", "&Paste", ACCL_PASTE, (wMenuCallBack_p)EditPaste, 0, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdDelete", "De&lete", ACCL_DELETE, (wMenuCallBack_p)SelectDelete, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdMoveToCurrentLayer", "Move To Current Layer", ACCL_MOVCURLAYER, (wMenuCallBack_p)MoveSelectedTracksToCurrentLayer, IC_SELECTED, (void *)0 );
+
+
+	wMenuSeparatorCreate( editM );
+	menuPLs[menuPG.paramCnt].context = (void*)1;
+	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", "Select &All", ACCL_SELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, (void *)1 );
+	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer", "Select Current Layer", ACCL_SETCURLAYER, (wMenuCallBack_p)SelectCurrentLayer, 0, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", "&Deselect All", ACCL_DESELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, (void *)0 );
+
+	wMenuSeparatorCreate( editM );
+	MiscMenuItemCreate( editM, NULL, "cmdTunnel", "Tu&nnel", ACCL_TUNNEL, (wMenuCallBack_p)SelectTunnel, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdAbove", "A&bove", ACCL_ABOVE, (wMenuCallBack_p)SelectAbove, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdBelow", "Belo&w", ACCL_BELOW, (wMenuCallBack_p)SelectBelow, IC_SELECTED, (void *)0 );
+	
+	wMenuSeparatorCreate( editM );
+	MiscMenuItemCreate( editM, NULL, "cmdWidth0", "Thin Tracks", ACCL_THIN, (wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdWidth2", "Medium Tracks", ACCL_MEDIUM, (wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, (void *)2 );
+	MiscMenuItemCreate( editM, NULL, "cmdWidth3", "Thick Tracks", ACCL_THICK, (wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, (void *)3 );
+
+	/*
+	 * VIEW MENU
+	 */
+	wMenuPushCreate( viewM, "menuEdit-zoomIn", "Zoom &In", ACCL_ZOOMIN, (wMenuCallBack_p)DoZoomUp, (void*)1 );
+	wMenuPushCreate( viewM, "menuEdit-zoomOut", "Zoom &Out", ACCL_ZOOMOUT, (wMenuCallBack_p)DoZoomDown, (void*)1 );
+	wMenuSeparatorCreate( viewM );
+
+	wMenuPushCreate( viewM, "menuEdit-redraw", "&Redraw", ACCL_REDRAW, (wMenuCallBack_p)MainRedraw, NULL );
+	wMenuPushCreate( viewM, "menuEdit-redraw", "Redraw All", ACCL_REDRAWALL, (wMenuCallBack_p)DoRedraw, NULL );
+	wMenuSeparatorCreate( viewM );
+
+	snapGridEnableMI = wMenuToggleCreate( viewM, "cmdGridEnable", "Enable SnapGrid", ACCL_SNAPENABLE,
+		0, (wMenuToggleCallBack_p)SnapGridEnable, NULL );
+	snapGridShowMI = wMenuToggleCreate( viewM, "cmdGridShow", "Show SnapGrid", ACCL_SNAPSHOW,
+		FALSE, (wMenuToggleCallBack_p)SnapGridShow, NULL );
+/*	wMenuPushCreate( viewM, "cmdGrid", "Change &Grid ...", ACCL_GRIDW, (wMenuCallBack_p)DoCommandBIndirect, &gridCmdInx ); */
+	gridCmdInx = InitGrid( viewM );
+	wMenuSeparatorCreate( viewM );
+
+	toolbarM = wMenuMenuCreate( viewM, "toolbarM", "&Tool Bar" );
+	CreateToolbarM( toolbarM );
+
+  cmdGroup = BG_EASE;
+	InitCmdEasement();
+	
+	cmdGroup = BG_SNAP;
+	InitSnapGridButtons();
+
+	/*
+	 * ADD MENU
+	 */
+
+	cmdGroup = BG_TRKCRT|BG_BIGGAP;	 
+ 	InitCmdStraight( addM );
+	InitCmdCurve( addM );
+	InitCmdJoin( addM );
+	InitCmdParallel( addM );
+	InitCmdTurnout( addM );
+	InitCmdHandLaidTurnout( addM );
+	InitCmdStruct( addM );
+	InitCmdHelix( addM );
+	InitCmdTurntable( addM );
+	
+	
+	/*
+	 * CHANGE MENU
+	 */
+	cmdGroup = BG_SELECT;
+	InitCmdDescribe( changeM );
+	InitCmdSelect( changeM );
+	wMenuSeparatorCreate( changeM );
+
+	cmdGroup = BG_TRKGRP;
+	InitCmdMove( changeM );
+	InitCmdDelete();
+	InitCmdTunnel();
+	InitCmdAboveBelow();
+	
+	cmdGroup = BG_TRKMOD; 
+	if (extraButtons)
+		MiscMenuItemCreate( changeM, NULL, "loosen", "&Loosen Tracks", ACCL_LOOSEN, (wMenuCallBack_p)LoosenTracks, IC_SELECTED, (void *)0 );
+
+	InitCmdModify( changeM );
+	InitCmdPull( changeM );
+	InitCmdSplit( changeM );
+	InitCmdMoveDescription( changeM );
+	wMenuSeparatorCreate( changeM );
+
+	MiscMenuItemCreate( changeM, NULL, "cmdAddElevations", "Raise/Lower Elevations", ACCL_CHGELEV, (wMenuCallBack_p)ShowAddElevations, IC_SELECTED, (void *)0 );
+	InitCmdElevation( changeM );
+	InitCmdProfile( changeM );
+
+	MiscMenuItemCreate( changeM, NULL, "cmdClearElevations", "Clear Elevations", ACCL_CLRELEV, (wMenuCallBack_p)ClearElevations, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( changeM, NULL, "cmdElevation", "Recompute Elevations", 0, (wMenuCallBack_p)RecomputeElevations, 0, (void *)0 );
+	ParamRegister( &addElevPG );
+
+	wMenuSeparatorCreate( changeM );
+	MiscMenuItemCreate( changeM, NULL, "cmdRescale", "Change Scale", 0, (wMenuCallBack_p)DoRescale, IC_SELECTED, (void *)0 );
+	
+	/* 
+	 * DRAW MENU
+	 */ 
+	cmdGroup = BG_MISCCRT;
+	InitCmdDraw( drawM );
+	InitCmdText( drawM );
+	InitCmdNote( drawM );
+
+	cmdGroup = BG_RULER;
+	InitCmdRuler( drawM );
+
+	 
 	/*
 	 * OPTION MENU
 	 */
-	MiscMenuItemCreate( optionM, NULL, "cmdLayout", "L&ayout ...", ACCL_LAYOUTW, LayoutInit(), IC_MODETRAIN_TOO );
-	MiscMenuItemCreate( optionM, NULL, "cmdDisplay", "&Display ...", ACCL_DISPLAYW, DisplayInit(), IC_MODETRAIN_TOO );
-	MiscMenuItemCreate( optionM, NULL, "cmdCmdopt", "Co&mmand ...", ACCL_CMDOPTW, CmdoptInit(), IC_MODETRAIN_TOO );
+	MiscMenuItemCreate( optionM, NULL, "cmdLayout", "L&ayout ...", ACCL_LAYOUTW, LayoutInit(), IC_MODETRAIN_TOO, (void *)0 );
+	MiscMenuItemCreate( optionM, NULL, "cmdDisplay", "&Display ...", ACCL_DISPLAYW, DisplayInit(), IC_MODETRAIN_TOO, (void *)0 );
+	MiscMenuItemCreate( optionM, NULL, "cmdCmdopt", "Co&mmand ...", ACCL_CMDOPTW, CmdoptInit(), IC_MODETRAIN_TOO, (void *)0 );
 	if ( bEnableFlex )
-		MiscMenuItemCreate( optionM, NULL, "cmdEasement", "&Easements ...", ACCL_EASEW, (wMenuCallBack_p)DoEasementRedir, IC_MODETRAIN_TOO );
-	MiscMenuItemCreate( optionM, NULL, "fontSelW", "&Fonts ...", ACCL_FONTW, (wMenuCallBack_p)SelectFont, IC_MODETRAIN_TOO );
-	wMenuPushCreate( optionM, "cmdGrid", "&Grid ...", ACCL_GRIDW, (wMenuCallBack_p)DoCommandBIndirect, &gridCmdInx );
-	snapGridEnableMI = wMenuToggleCreate( optionM, "cmdGridEnable", "Enable SnapGrid", ACCL_SNAPENABLE,
-		0, (wMenuToggleCallBack_p)SnapGridEnable, NULL );
-	MiscMenuItemCreate( optionM, NULL, "cmdSticky", "Stic&ky ...", ACCL_STICKY, (wMenuCallBack_p)DoSticky, IC_MODETRAIN_TOO );
+		MiscMenuItemCreate( optionM, NULL, "cmdEasement", "&Easements ...", ACCL_EASEW, (wMenuCallBack_p)DoEasementRedir, IC_MODETRAIN_TOO, (void *)0 );
+	MiscMenuItemCreate( optionM, NULL, "fontSelW", "&Fonts ...", ACCL_FONTW, (wMenuCallBack_p)SelectFont, IC_MODETRAIN_TOO, (void *)0 );
+	MiscMenuItemCreate( optionM, NULL, "cmdSticky", "Stic&ky ...", ACCL_STICKY, (wMenuCallBack_p)DoSticky, IC_MODETRAIN_TOO, (void *)0 );
 	if (extraButtons) {
 		menuPLs[menuPG.paramCnt].context = debugW;
-		MiscMenuItemCreate( optionM, NULL, "cmdDebug", "&Debug ...", 0, (wMenuCallBack_p)wShow, IC_MODETRAIN_TOO );
+		MiscMenuItemCreate( optionM, NULL, "cmdDebug", "&Debug ...", 0, (wMenuCallBack_p)wShow, IC_MODETRAIN_TOO, (void *)0 );
 	}
-	MiscMenuItemCreate( optionM, NULL, "cmdPref", "&Preferences ...", ACCL_PREFERENCES, PrefInit(), IC_MODETRAIN_TOO );
-	MiscMenuItemCreate( optionM, NULL, "cmdColor", "&Colors ...", ACCL_COLORW, ColorInit(), IC_MODETRAIN_TOO );
+	MiscMenuItemCreate( optionM, NULL, "cmdPref", "&Preferences ...", ACCL_PREFERENCES, PrefInit(), IC_MODETRAIN_TOO, (void *)0 );
+	MiscMenuItemCreate( optionM, NULL, "cmdColor", "&Colors ...", ACCL_COLORW, ColorInit(), IC_MODETRAIN_TOO, (void *)0 );
 
 	/*
 	 * MACRO MENU
@@ -2089,45 +2312,11 @@ static void CreateMenus( void )
 	wMenuPushCreate( macroM, "cmdDemo", "&Play Back ...", ACCL_PLAYBACK, DoPlayBack, NULL );
 
 
-	/* 
-	 * COMMANDS
+	/*
+	 * WINDOW MENU
 	 */
-	popup1M = wMenuPopupCreate( mainW, "Commands" );
-	popup2M = wMenuPopupCreate( mainW, "Commands" );
-#ifdef LATER
-	for ( inx = 0; inx<commandCnt; inx++ ) {
-		if ( /*commandList[inx].control &&*/ commandList[inx].cmdProc ) {
-			commandList[inx].menu = 
-			wMenuPushCreate( commandsM, commandList[inx].helpKey,
-						commandList[inx].labelStr,
-						commandList[inx].acclKey, DoCommandB, (void*)inx );
-		}
-	}
-#endif
-	wMenuPushCreate( popup1M, "cmdPaste", "Paste", 0, (wMenuCallBack_p)EditPaste, NULL );
-	wMenuSeparatorCreate( popup1M );
-	MiscMenuItemCreate( popup1M, popup2M, "cmdUndo", "Undo", 0, (wMenuCallBack_p)UndoUndo, 0 );
-	MiscMenuItemCreate( popup1M, popup2M, "cmdRedo", "Redo", 0, (wMenuCallBack_p)UndoRedo, 0 );
-	wMenuPushCreate( popup1M, "cmdZoomIn", "Zoom In", 0, (wMenuCallBack_p)DoZoomUp, (void*)1 );
-	wMenuPushCreate( popup2M, "cmdZoomIn", "Zoom In", 0, (wMenuCallBack_p)DoZoomUp, (void*)1 );
-	wMenuPushCreate( popup1M, "cmdZoomOut", "Zoom Out", 0, (wMenuCallBack_p)DoZoomDown, (void*)1 );
-	wMenuPushCreate( popup2M, "cmdZoomOut", "Zoom Out", 0, (wMenuCallBack_p)DoZoomDown, (void*)1 );
-	MiscMenuItemCreate( popup1M, popup2M, "cmdGridEnable", "SnapGrid Enable", 0, (wMenuCallBack_p)SnapGridEnable, 0 );
-	MiscMenuItemCreate( popup1M, popup2M, "cmdGridShow", "SnapGrid Show", 0, (wMenuCallBack_p)SnapGridShow, 0 );
-	wMenuSeparatorCreate( popup1M );
-	wMenuSeparatorCreate( popup2M );
-	MiscMenuItemCreate( popup2M, NULL, "cmdCopy", "Copy", 0, (wMenuCallBack_p)EditCopy, 0 );
-	MiscMenuItemCreate( popup1M, popup2M, "cmdPaste", "Paste", 0, (wMenuCallBack_p)EditPaste, 0 );
-	MiscMenuItemCreate( popup2M, NULL, "cmdDeselectAll", "Deselect All", 0, (wMenuCallBack_p)SetAllTrackSelect, 0 );
-	wMenuPushCreate( popup2M, "cmdMove", "Move", 0, (wMenuCallBack_p)DoCommandBIndirect, &moveCmdInx );
-	wMenuPushCreate( popup2M, "cmdRotate", "Rotate", 0, (wMenuCallBack_p)DoCommandBIndirect, &rotateCmdInx );
-	MiscMenuItemCreate( popup2M, NULL, "cmdTunnel", "Tunnel", 0, (wMenuCallBack_p)SelectTunnel, 0 );
-	wMenuSeparatorCreate( popup1M );
-	wMenuSeparatorCreate( popup2M );
-	MiscMenuItemCreate( popup2M, NULL, "cmdDelete", "Delete", 0, (wMenuCallBack_p)SelectDelete, 0 );
-	wMenuSeparatorCreate( popup2M );
-	popup1aM = wMenuMenuCreate( popup1M, "", "More" );
-	popup2aM = wMenuMenuCreate( popup2M, "", "More" );
+	wMenuPushCreate( windowM, "menuWindow", "Main", 0, (wMenuCallBack_p)wShow, mainW );
+	winList_mi = wMenuListCreate( windowM, "menuWindow", -1, DoShowWindow );
 
 	/*
 	 * HELP MENU
@@ -2143,102 +2332,37 @@ static void CreateMenus( void )
 	wMenuSeparatorCreate( helpM );
 	wMenuPushCreate( helpM, "about", "About", 0, (wMenuCallBack_p)wShow, aboutW );
 
-
 	/*
-	 * FILE MENU
+	 * MANAGE MENU
 	 */
-#ifdef _WINDOWS
-	MiscMenuItemCreate( fileM, NULL, "menuFile-clear", "&New", ACCL_NEW, (wMenuCallBack_p)DoClear, 0 );
-	wMenuPushCreate( fileM, "menuFile-load", "&Open ...", ACCL_OPEN, (wMenuCallBack_p)ChkLoad, NULL );
-	wMenuPushCreate( fileM, "menuFile-save", "&Save", ACCL_SAVE, (wMenuCallBack_p)DoSave, NULL );
-	wMenuPushCreate( fileM, "menuFile-saveAs", "Save &As ...", ACCL_SAVEAS, (wMenuCallBack_p)DoSaveAs, NULL );
-#else
-	wMenuPushCreate( fileM, "menuFile-save", "&Save", ACCL_SAVE, (wMenuCallBack_p)DoSave, NULL );
-	wMenuPushCreate( fileM, "menuFile-saveAs", "Save &As ...", ACCL_SAVEAS, (wMenuCallBack_p)DoSaveAs, NULL );
-	MiscMenuItemCreate( fileM, NULL, "menuFile-clear", "&New", ACCL_NEW, (wMenuCallBack_p)DoClear, 0 );
-	wMenuPushCreate( fileM, "menuFile-load", "&Open ...", ACCL_OPEN, (wMenuCallBack_p)ChkLoad, NULL );
-#endif
-	if (bParamFiles) {
-		MiscMenuItemCreate( fileM, NULL, "cmdPrmfile", "Parameter &Files ...", ACCL_PARAMFILES, ParamFilesInit(), 0 );
-		MiscMenuItemCreate( fileM, NULL, "cmdPricelist", "Price List...", ACCL_PRICELIST, PriceListInit(), 0 );
-	}
-	wMenuSeparatorCreate( fileM );
-	wMenuPushCreate( fileM, "cmdPrint", "&Print", ACCL_PRINT, (wMenuCallBack_p)DoCommandBIndirect, &printCmdInx );
-	MiscMenuItemCreate( fileM, NULL, "printSetup", "P&rint Setup ...", ACCL_PRINTSETUP, (wMenuCallBack_p)wPrintSetup, 0 );
-	MiscMenuItemCreate( fileM, NULL, "cmdOutputbitmap", "Print to &Bitmap", ACCL_PRINTBM, (wMenuCallBack_p)OutputBitMapInit(), 0 );
-	MiscMenuItemCreate( fileM, NULL, "cmdEnumerate", "Parts &List ...", ACCL_PARTSLIST, (wMenuCallBack_p)EnumerateTracks, IC_SELECTED );
-	MiscMenuItemCreate( fileM, NULL, "cmdFileNote", "No&tes ...", ACCL_NOTES, (wMenuCallBack_p)DoNote, 0 );
-	wMenuSeparatorCreate( fileM );
-	fileList_ml = wMenuListCreate( fileM, "menuFileList", NUM_FILELIST, ChkFileList );
-	wMenuSeparatorCreate( fileM );
-	wMenuPushCreate( fileM, "menuFile-quit", "E&xit", 0,
-		(wMenuCallBack_p)DoQuit, NULL );
 
-	/*
-	 * EDIT MENU
-	 */
-	MiscMenuItemCreate( editM, NULL, "cmdUndo", "&Undo", ACCL_UNDO, (wMenuCallBack_p)UndoUndo, 0 );
-	MiscMenuItemCreate( editM, NULL, "cmdRedo", "R&edo", ACCL_REDO, (wMenuCallBack_p)UndoRedo, 0 );
-	wMenuSeparatorCreate( editM );
-	MiscMenuItemCreate( editM, NULL, "cmdCut", "Cu&t", ACCL_CUT, (wMenuCallBack_p)EditCut, IC_SELECTED );
-	MiscMenuItemCreate( editM, NULL, "cmdCopy", "&Copy", ACCL_COPY, (wMenuCallBack_p)EditCopy, IC_SELECTED );
-	MiscMenuItemCreate( editM, NULL, "cmdPaste", "&Paste", ACCL_PASTE, (wMenuCallBack_p)EditPaste, 0 );
-	MiscMenuItemCreate( editM, NULL, "cmdDelete", "De&lete", ACCL_DELETE, (wMenuCallBack_p)SelectDelete, IC_SELECTED );
-	MiscMenuItemCreate( editM, NULL, "cmdTunnel", "Tu&nnel", ACCL_TUNNEL, (wMenuCallBack_p)SelectTunnel, IC_SELECTED );
-	MiscMenuItemCreate( editM, NULL, "cmdAbove", "A&bove", ACCL_ABOVE, (wMenuCallBack_p)SelectAbove, IC_SELECTED );
-	MiscMenuItemCreate( editM, NULL, "cmdBelow", "Belo&w", ACCL_BELOW, (wMenuCallBack_p)SelectBelow, IC_SELECTED );
-	wMenuSeparatorCreate( editM );
-	menuPLs[menuPG.paramCnt].context = (void*)0;
-	MiscMenuItemCreate( editM, NULL, "cmdWidth0", "Thin Tracks", ACCL_THIN, (wMenuCallBack_p)SelectTrackWidth, IC_SELECTED );
-	menuPLs[menuPG.paramCnt].context = (void*)2;
-	MiscMenuItemCreate( editM, NULL, "cmdWidth2", "Medium Tracks", ACCL_MEDIUM, (wMenuCallBack_p)SelectTrackWidth, IC_SELECTED );
-	menuPLs[menuPG.paramCnt].context = (void*)3;
-	MiscMenuItemCreate( editM, NULL, "cmdWidth3", "Thick Tracks", ACCL_THICK, (wMenuCallBack_p)SelectTrackWidth, IC_SELECTED );
-	wMenuSeparatorCreate( editM );
-	menuPLs[menuPG.paramCnt].context = (void*)1;
-	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", "Select &All", ACCL_SELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0 );
+	cmdGroup = BG_TRAIN|BG_BIGGAP;
+	InitCmdTrain( manageM );
+	wMenuSeparatorCreate( manageM );
 
-	/*
-	 * TOOLS MENU
-	 */
-	MiscMenuItemCreate( toolsM, NULL, "cmdImport", "&Import", ACCL_IMPORT, (wMenuCallBack_p)DoImport, 0 );
-	MiscMenuItemCreate( toolsM, NULL, "cmdExport", "E&xport", ACCL_EXPORT, (wMenuCallBack_p)DoExport, IC_SELECTED );
-	MiscMenuItemCreate( toolsM, NULL, "cmdExportDXF", "Export D&XF", ACCL_EXPORTDXF, (wMenuCallBack_p)DoExportDXF, IC_SELECTED );
-	wMenuSeparatorCreate( toolsM );
-	if (extraButtons)
-		MiscMenuItemCreate( toolsM, NULL, "loosen", "&Loosen Tracks", ACCL_LOOSEN, (wMenuCallBack_p)LoosenTracks, IC_SELECTED );
-	if (bEnableFlex) {
-		InitNewTurnRedir( wMenuMenuCreate( toolsM, "cmdTurnoutNew", "Tur&nout Designer" ) );
-		MiscMenuItemCreate( toolsM, NULL, "cmdCustmgm", "Custom Management...", ACCL_CUSTMGM, CustomMgrInit(), 0 );
-	}
-	MiscMenuItemCreate( toolsM, NULL, "cmdCarInventory", "Car Inventory", ACCL_CARINV, (wMenuCallBack_p)DoCarDlg, IC_MODETRAIN_TOO );
-	MiscMenuItemCreate( toolsM, NULL, "cmdGroup", "&Group", ACCL_GROUP, (wMenuCallBack_p)DoGroup, IC_SELECTED );
-	MiscMenuItemCreate( toolsM, NULL, "cmdUngroup", "&Ungroup", ACCL_UNGROUP, (wMenuCallBack_p)DoUngroup, IC_SELECTED );
-	MiscMenuItemCreate( toolsM, NULL, "cmdRefreshCompound", "Update Turnouts and Structures", 0, (wMenuCallBack_p)DoRefreshCompound, 0 );
-	MiscMenuItemCreate( toolsM, NULL, "cmdRescale", "Rescale", 0, (wMenuCallBack_p)DoRescale, IC_SELECTED );
-	wMenuSeparatorCreate( toolsM );
+	InitNewTurnRedir( wMenuMenuCreate( manageM, "cmdTurnoutNew", "Tur&nout Designer..." ) );
+	
+	MiscMenuItemCreate( manageM, NULL, "cmdGroup", "&Group", ACCL_GROUP, (wMenuCallBack_p)DoGroup, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( manageM, NULL, "cmdUngroup", "&Ungroup", ACCL_UNGROUP, (wMenuCallBack_p)DoUngroup, IC_SELECTED, (void *)0 );
 
-	MiscMenuItemCreate( toolsM, NULL, "cmdLayer", "Layers ...", ACCL_LAYERS, InitLayersDialog(), 0 );
-	MiscMenuItemCreate( toolsM, NULL, "cmdSelectCurrentLayer", "Select Current Layer", ACCL_SETCURLAYER, (wMenuCallBack_p)SelectCurrentLayer, 0 );
-	MiscMenuItemCreate( toolsM, NULL, "cmdMoveToCurrentLayer", "Move To Current Layer", ACCL_MOVCURLAYER, (wMenuCallBack_p)MoveSelectedTracksToCurrentLayer, IC_SELECTED );
+	MiscMenuItemCreate( manageM, NULL, "cmdCustmgm", "Custom Management...", ACCL_CUSTMGM, CustomMgrInit(), 0, (void *)0 );
+	MiscMenuItemCreate( manageM, NULL, "cmdRefreshCompound", "Update Turnouts and Structures", 0, (wMenuCallBack_p)DoRefreshCompound, 0, (void *)0 );
 
-	wMenuSeparatorCreate( toolsM );
-	MiscMenuItemCreate( toolsM, NULL, "cmdClearElevations", "Clear Elevations", ACCL_CLRELEV, (wMenuCallBack_p)ClearElevations, IC_SELECTED );
-	MiscMenuItemCreate( toolsM, NULL, "cmdAddElevations", "Raise/Lower Elevations", ACCL_CHGELEV, (wMenuCallBack_p)ShowAddElevations, IC_SELECTED );
-	MiscMenuItemCreate( toolsM, NULL, "cmdElevation", "Recompute Elevations", 0, (wMenuCallBack_p)RecomputeElevations, 0 );
-	ParamRegister( &addElevPG );
+	MiscMenuItemCreate( manageM, NULL, "cmdCarInventory", "Car Inventory", ACCL_CARINV, (wMenuCallBack_p)DoCarDlg, IC_MODETRAIN_TOO, (void *)0 );
+	
+	wMenuSeparatorCreate( manageM );
 
-	/*
-	 * VIEW MENU
-	 */
-	wMenuPushCreate( viewM, "menuEdit-redraw", "&Redraw", ACCL_REDRAW, (wMenuCallBack_p)MainRedraw, NULL );
-	wMenuPushCreate( viewM, "menuEdit-redraw", "Redraw All", ACCL_REDRAWALL, (wMenuCallBack_p)DoRedraw, NULL );
-	wMenuPushCreate( viewM, "menuEdit-zoomIn", "Zoom &In", ACCL_ZOOMIN, (wMenuCallBack_p)DoZoomUp, (void*)1 );
-	wMenuPushCreate( viewM, "menuEdit-zoomOut", "Zoom &Out", ACCL_ZOOMOUT, (wMenuCallBack_p)DoZoomDown, (void*)1 );
-	snapGridShowMI = wMenuToggleCreate( viewM, "cmdGridShow", "Show SnapGrid", ACCL_SNAPSHOW,
-		FALSE, (wMenuToggleCallBack_p)SnapGridShow, NULL );
-	toolbarM = wMenuMenuCreate( viewM, "toolbarM", "&Tool Bar" );
-	CreateToolbarM( toolbarM );
+	MiscMenuItemCreate( manageM, NULL, "cmdLayer", "Layers ...", ACCL_LAYERS, InitLayersDialog(), 0, (void *)0 );
+	wMenuSeparatorCreate( manageM );
+	 
+	MiscMenuItemCreate( manageM, NULL, "cmdEnumerate", "Parts &List ...", ACCL_PARTSLIST, (wMenuCallBack_p)EnumerateTracks, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( manageM, NULL, "cmdPricelist", "Price List...", ACCL_PRICELIST, PriceListInit(), 0, (void *)0 );
+
+	cmdGroup = BG_LAYER|BG_BIGGAP;
+	InitLayers();
+
+	cmdGroup = BG_HOTBAR;
+	InitHotBar();
 
 #ifdef LATER
 #ifdef WINDOWS
@@ -2284,43 +2408,6 @@ static void LoadFileList( void )
 		wMenuListAdd( fileList_ml, 0, fileName+1, pathName );
 	}
 }
-
-
-#include "zoomin.xpm"
-#include "zoom.xpm"
-#include "zoomout.xpm"
-#include "undo.xpm"
-#include "redo.xpm"
-#include "partlist.xpm"
-#include "export.xpm"
-#include "import.xpm"
-
-static struct {
-		char * name;
-		long value;
-		} zoomList[] = {
-				{ "1:1", 1 },
-				{ "2:1", 2 },
-				{ "3:1", 3 },
-				{ "4:1", 4 },
-				{ "6:1", 6 },
-				{ "8:1", 8 },
-				{ "10:1", 10 },
-				{ "12:1", 12 },
-				{ "16:1", 16 },
-				{ "20:1", 20 },
-				{ "24:1", 24 },
-				{ "28:1", 28 },
-				{ "32:1", 32 },
-				{ "36:1", 36 },
-				{ "40:1", 40 },
-				{ "48:1", 48 },
-				{ "56:1", 56 },
-				{ "64:1", 64 },
-				{ "128:1", 128 },
-				{ "256:1", 256 },
-		};
-
 
 EXPORT void InitCmdEnumerate( void )
 {
@@ -2381,9 +2468,6 @@ EXPORT wWin_p wMain(
 	char * initialFile;
 	const char * pref;
 	coOrd roomSize;
-	wMenu_p zoomM;
-	int inx;
-	wIcon_p bm_p;
 	long oldToolbarMax;
 	long newToolbarMax;
 	char *cp;
@@ -2463,7 +2547,7 @@ LOG1( log_init, ( "initCustom\n" ) )
 	 */
 LOG1( log_init, ( "create main window\n" ) )
 	strcpy( Title1, sProdName );
-	sprintf( message, "%s(%s) - Untitled", sProdName, sVersion );
+	sprintf( message, "Unnamed Trackplan - %s(%s)", sProdName, sVersion );
 	wSetBalloonHelp( balloonHelp );
 	mainW = wWinMainCreate( sProdNameLower, 600, 350, "xtrkcadW", message, "main",
 				F_RESIZE|F_MENUBAR|F_NOTAB|F_RECALLPOS,
@@ -2503,8 +2587,8 @@ LOG1( log_init, ( "fileInit\n" ) )
 	FileInit();
 
 	CreateAboutW();
-	wWinShow( mainW, TRUE );
-	wFlush();
+/*	wWinShow( mainW, TRUE );
+	wFlush(); */
 	wWinShow( aboutW, TRUE );
 	wFlush();
 
@@ -2523,17 +2607,16 @@ LOG1( log_init, ( "set roomsize\n" ) )
 	 */
 LOG1( log_init, ( "initInfoBar\n" ) )
 	InitInfoBar();
-	/*wWinShow( mainW, TRUE );*/
-	wFlush();
+/*	wWinShow( mainW, TRUE ); */
 	InfoMessage( "Misc2 Init..." );
-	wFlush();
+/*	wFlush(); */
 LOG1( log_init, ( "misc2Init\n" ) )
 	Misc2Init();
 
 	RotateDialogInit();
 
 	InfoMessage( "Initializing commands" );
-	wFlush();
+/*	wFlush(); */
 LOG1( log_init, ( "paramInit\n" ) )
 	ParamInit();
 LOG1( log_init, ( "initTrkTrack\n" ) )
@@ -2543,43 +2626,15 @@ LOG1( log_init, ( "initTrkTrack\n" ) )
 	 * MENUS
 	 */
 	InfoMessage( "Initializing menus" );
-	wFlush();
+/*	wFlush(); */
 LOG1( log_init, ( "createMenus\n" ) )
-	wPrefGetInteger( "misc", "command-menu-length", &commandsMLengthMax, commandsMLengthMax );
 	CreateMenus();
 
 
-#ifdef LATER
-	cmdGroup = BG_SELECT;
-	InitCmdDescribe();
-	InitCmdSelect();
-#endif
 
-LOG1( log_init, ( "zoom and undo buttons\n" ) )
-	cmdGroup = BG_ZOOM;
-	AddToolbarButton( "cmdZoomIn", wIconCreatePixMap(zoomin_xpm), IC_MODETRAIN_TOO,
-		(addButtonCallBack_t)DoZoomUp, NULL );
-	bm_p = wIconCreatePixMap(zoom_xpm);
-	zoomM = wMenuPopupCreate( mainW, "" );
-	AddToolbarButton( "cmdZoom", wIconCreatePixMap(zoom_xpm), IC_MODETRAIN_TOO, (wButtonCallBack_p)wMenuPopupShow, zoomM );
-	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
-		wMenuPushCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
-	}
-	AddToolbarButton( "cmdZoomOut", wIconCreatePixMap(zoomout_xpm), IC_MODETRAIN_TOO,
-		(addButtonCallBack_t)DoZoomDown, NULL );
-
-	cmdGroup = BG_UNDO;
-	undoB = AddToolbarButton( "cmdUndo", wIconCreatePixMap(undo_xpm), 0, (addButtonCallBack_t)UndoUndo, NULL );
-	redoB = AddToolbarButton( "cmdRedo", wIconCreatePixMap(redo_xpm), 0, (addButtonCallBack_t)UndoRedo, NULL );
-	wControlActive( (wControl_p)undoB, FALSE );
-	wControlActive( (wControl_p)redoB, FALSE );
- 
 LOG1( log_init, ( "initialize\n" ) )
 	if (!Initialize())
 		return NULL;
-	printCmdInx = InitCmdPrint();
-	gridCmdInx = InitGrid();
-
 	ParamRegister( &menuPG );
 	ParamRegister( &stickyPG );
 
@@ -2608,7 +2663,7 @@ LOG1( log_init, ( "drawInit\n" ) )
 
 	MacroInit();
 	InfoMessage( "Reading parameter files" );
-	wFlush();
+/*	wFlush(); */
 LOG1( log_init, ( "paramFileInit\n" ) )
 	if (!ParamFileInit())
 		return NULL;
@@ -2635,10 +2690,14 @@ LOG1( log_init, ( "the end\n" ) )
 	EnableCommands();
 LOG1( log_init, ( "Initialization complete\n" ) )
 	InfoMessage( "Initialization complete" );
-	wFlush();
-	wWinShow( aboutW, FALSE );
+/*	wFlush(); */
 	RegisterChangeNotification( ToolbarChange );
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
+
+	wWinShow( mainW, TRUE );
+	wFlush();
+	wWinShow( aboutW, FALSE );
+
 	ParamRegister( &tipPG );
 	if (showTipAtStart)
 		ShowTip();

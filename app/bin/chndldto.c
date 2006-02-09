@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/chndldto.c,v 1.1 2005-12-07 15:46:57 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/chndldto.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  *
  * CURVE
  *
@@ -362,7 +362,7 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 
 #include "hndldto.xpm"
 
-EXPORT void InitCmdHandLaidTurnout( void )
+EXPORT void InitCmdHandLaidTurnout( wMenu_p menu )
 {
-	AddCommandButton( CmdHandLaidTurnout, "cmdHandLaidTurnout", "HandLaidTurnout", wIconCreatePixMap(hndldto_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
+	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", "HandLaidTurnout", wIconCreatePixMap(hndldto_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
 }

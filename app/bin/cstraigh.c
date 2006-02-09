@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstraigh.c,v 1.1 2005-12-07 15:46:54 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstraigh.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -98,7 +98,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 
 #include "straight.xpm"
 
-void InitCmdStraight( void )
+void InitCmdStraight( wMenu_p menu )
 {
-	AddCommandButton( CmdStraight, "cmdStraight", "Straight Track", wIconCreatePixMap(straight_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_STRAIGHT, NULL );
+	AddMenuButton( menu, CmdStraight, "cmdStraight", "Straight Track", wIconCreatePixMap(straight_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_STRAIGHT, NULL );
 }

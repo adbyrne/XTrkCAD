@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.1 2005-12-07 15:47:16 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  *
  * T_TURNOUT
  *
@@ -2411,10 +2411,10 @@ static STATUS_T CmdTurnoutHotBar(
 #include "turnout.xpm"
 
 
-EXPORT void InitCmdTurnout( void )
+EXPORT void InitCmdTurnout( wMenu_p menu )
 {
-	AddCommandButton( CmdTurnout, "cmdTurnout", "Turnout", wIconCreatePixMap(turnout_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_TURNOUT, NULL );
-	turnoutHotBarCmdInx = AddCommandButton( CmdTurnoutHotBar, "cmdTurnoutHotBar", "", NULL, LEVEL0_50, IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, 0, NULL );
+	AddMenuButton( menu, CmdTurnout, "cmdTurnout", "Turnout", wIconCreatePixMap(turnout_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_TURNOUT, NULL );
+	turnoutHotBarCmdInx = AddMenuButton( menu, CmdTurnoutHotBar, "cmdTurnoutHotBar", "", NULL, LEVEL0_50, IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, 0, NULL );
 	RegisterChangeNotification( TurnoutChange );
 	ParamRegister( &turnoutPG );
 	log_turnout = LogFindIndex( "turnout" );

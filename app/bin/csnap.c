@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.1 2005-12-07 15:46:53 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -767,7 +767,7 @@ EXPORT STATUS_T CmdGrid(
 }
 
 
-EXPORT wIndex_t InitGrid( void )
+EXPORT wIndex_t InitGrid( wMenu_p menu )
 {
 	ParamRegister( &gridPG );
 	RegisterChangeNotification( GridChange );
@@ -781,7 +781,7 @@ EXPORT wIndex_t InitGrid( void )
 	snapGridPopupM = MenuRegister( "Snap Grid Rotate" );
 	AddRotateMenu( snapGridPopupM, SnapGridRotate );
 	GridButtonUpdate( 0 );
-	return InitCommand( CmdGrid, "Grid", NULL, LEVEL0, IC_CMDMENU, 0 );
+	return InitCommand( menu, CmdGrid, "Change Grid...", NULL, LEVEL0, IC_CMDMENU, 0 );
 }
 
 

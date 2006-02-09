@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/acclkeys.h,v 1.1 2005-12-07 15:47:10 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/acclkeys.h,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -101,6 +101,7 @@
 #define ACCL_CUT		(WCTL+'x')
 #define ACCL_PASTE		(WCTL+'v')
 #define ACCL_SELECTALL	(WCTL+WSHIFT+'a')
+#define ACCL_DESELECTALL	(WALT+WSHIFT+'a')
 #define ACCL_THIN		(WCTL+'1')
 #define ACCL_MEDIUM		(WCTL+'2')
 #define ACCL_THICK		(WCTL+'3')

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cjoin.c,v 1.1 2005-12-07 15:47:39 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cjoin.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  *
  * JOINS
  *
@@ -891,9 +891,9 @@ errorReturn:
 
 #include "join.xpm"
 
-void InitCmdJoin( void )
+void InitCmdJoin( wMenu_p menu )
 {
-	joinCmdInx = AddCommandButton( CmdJoin, "cmdJoin", "Join", wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_JOIN, NULL );
+	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoin", "Join", wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_JOIN, NULL );
 	log_join = LogFindIndex( "join" );
 }
 

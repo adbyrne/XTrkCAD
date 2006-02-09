@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprofile.c,v 1.1 2005-12-07 15:47:37 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprofile.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1340,14 +1340,14 @@ static void ProfileChange( long changes )
 
 #include "profile.xpm"
 
-EXPORT void InitCmdProfile( void )
+EXPORT void InitCmdProfile( wMenu_p menu )
 {
 	log_profile = LogFindIndex( "profile" );
 	ParamRegister( &profilePG );
 #ifdef LATER
 	AddPlaybackProc( "PROFILEMOUSE", (playbackProc_p)profilePlayback, NULL );
 #endif
-	AddCommandButton( CmdProfile, "cmdProfile", "Profile", wIconCreatePixMap(profile_xpm), LEVEL0_50, IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_PROFILE, NULL );
+	AddMenuButton( menu, CmdProfile, "cmdProfile", "Profile", wIconCreatePixMap(profile_xpm), LEVEL0_50, IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_PROFILE, NULL );
 	profilePopupM = MenuRegister( "Profile Mode" );
 	profilePopupToggles[0] = wMenuToggleCreate( profilePopupM, "", "Define", 0, FALSE, ProfileSubCommand, (void*)0 );
 	profilePopupToggles[1] = wMenuToggleCreate( profilePopupM, "", "Ignore", 0, FALSE, ProfileSubCommand, (void*)1 );
