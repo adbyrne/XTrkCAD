@@ -1,5 +1,5 @@
 #
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/Makefile,v 1.1 2005-12-07 15:48:42 rc-flyer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/Makefile,v 1.2 2006-02-15 21:23:30 rc-flyer Exp $
 #
 
 #GTKDIR=/usr/src/x/gtk/gtk+-1.0.6
@@ -138,3 +138,21 @@ rcssrc:
 
 clean:
 	rm -f *.a
+
+
+
+$(LIB)(gtkbutton.o): gtkbutton.c gtkint.h
+$(LIB)(gtkcolor.o): gtkcolor.c gtkint.h square10.bmp
+$(LIB)(gtkdraw.o): gtkdraw.c gtkint.h /usr/include/gtk-2.0/gdk/gdkkeysyms.h
+$(LIB)(gtkfilsel.o): gtkfilsel.c gtkint.h
+$(LIB)(gtkfont.o): gtkfont.c /usr/include/X11/Xlib.h ../include/wlib.h gtkint.h bold.bmp italic.bmp
+$(LIB)(gtkhelp.o): gtkhelp.c gtkint.h
+$(LIB)(gtklist.o): gtklist.c gtkint.h
+$(LIB)(gtkmenu.o): gtkmenu.c gtkint.h
+$(LIB)(gtkmisc.o): gtkmisc.c gtkint.h
+$(LIB)(gtksimple.o): gtksimple.c gtkint.h
+$(LIB)(gtksingle.o): gtksingle.c gtkint.h
+$(LIB)(gtktext.o): gtktext.c gtkint.h
+$(LIB)(gtkwindow.o): gtkwindow.c gtkint.h
+$(LIB)(psprint.o): psprint.c ../include/wlib.h dynarr.h
+$(LIB)(wpref.o): wpref.c ../include/wlib.h dynarr.h

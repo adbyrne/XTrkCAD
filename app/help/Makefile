@@ -151,13 +151,13 @@ dmpbmp.o: dmpbmp.c
 
 mkshg: mkshg.o readpng.o
 	cc -o mkshg mkshg.o readpng.o -lpng -lz -lm
-mkshg.o: mkshg.c
+mkshg.o: mkshg.c readpng.h
 	cc -g -c mkshg.c
 dmppng: dmppng.o readpng.o
 	cc -o dmppng dmppng.o readpng.o -lpng -lz -lm
 dmppng.o: dmppng.c
 	cc -g -c dmppng.c
-readpng.o: readpng.c
+readpng.o: readpng.c png.h readpng.h
 	cc -g -c readpng.c
 
 src:
@@ -180,3 +180,8 @@ clean:
 	rm -f bllnhlp.c bllnhlp.out genhelp genmessages messages.h messages.hlpsrc mkxpmbutt pageorder 
 	rm -f prochelp xtrkcad.help xtrkcad.text
 	rm -fr html  png.d
+
+
+
+bllnhlp.o: bllnhlp.c wlib.h
+prochelp.o: prochelp.c readpng.h
