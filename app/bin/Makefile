@@ -1,5 +1,5 @@
 
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.1 2005-12-07 15:46:51 rc-flyer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.2 2006-02-15 21:22:57 rc-flyer Exp $
 #
 
 CC = gcc
@@ -399,3 +399,93 @@ clean:
 	rm -f xtrkcad.a xtrkcadd.a
 	rm -f xtrkcad.o xtrkcadd.o messages.h bllnhlp.c 
 	rm -f *.exe
+
+#$(OBJS):	$(HDRS)
+
+#$(LIBOBJS):	$(HDRS)
+
+
+$(LIB)(bllnhlp.o): bllnhlp.c $(WLIB)/include/wlib.h
+$(LIB)(ccurve.o): ccurve.c track.h ccurve.h cstraigh.h cjoin.h helix.xpm curve1.xpm curve2.xpm \
+	curve3.xpm curve4.xpm circle1.xpm circle2.xpm circle3.xpm
+$(LIB)(cdraw.o): cdraw.c track.h ccurve.h drawgeom.h dline.xpm ddimlin.xpm dbench.xpm \
+	dtbledge.xpm dcurve1.xpm dcurve2.xpm dcurve3.xpm dcurve4.xpm \
+	dcircle2.xpm dcircle3.xpm dflcrcl2.xpm dflcrcl3.xpm dbox.xpm \
+	dfilbox.xpm dpoly.xpm dfilpoly.xpm
+$(LIB)(celev.o): celev.c track.h cselect.h elev.xpm
+$(LIB)(cgroup.o): cgroup.c track.h compound.h shrtpath.h
+$(LIB)(chndldto.o): chndldto.c track.h ccurve.h cstraigh.h cjoin.h compound.h hndldto.xpm
+$(LIB)(chotbar.o): chotbar.c track.h compound.h hotbarl.bmp hotbarr.bmp
+$(LIB)(cjoin.o): cjoin.c track.h ccurve.h cstraigh.h cjoin.h join.xpm
+$(LIB)(cmisc.o): cmisc.c track.h describe.xpm
+$(LIB)(cmisc2.o): cmisc2.c track.h bridge.bmp
+$(LIB)(cmodify.o): cmodify.c track.h cjoin.h ccurve.h cstraigh.h extend.xpm
+$(LIB)(cnote.o): cnote.c track.h note.bmp cnote.xpm
+
+cnvdsgn.o: cnvdsgn.c common.h utility.h
+
+$(LIB)(compound.o): compound.c track.h compound.h shrtpath.h cjoin.h
+$(LIB)(cparalle.o): cparalle.c track.h ccurve.h cstraigh.h parallel.xpm
+$(LIB)(cprint.o): cprint.c track.h
+$(LIB)(cprofile.o): cprofile.c track.h cselect.h shrtpath.h profile.xpm
+$(LIB)(cpull.o): cpull.c track.h cselect.h compound.h pull.xpm
+$(LIB)(cruler.o): cruler.c track.h ruler.xpm
+$(LIB)(cselect.o): cselect.c track.h ccurve.h compound.h bmendpt.bmp bma0.bmp bma45.bmp \
+	bma90.bmp bma135.bmp select.xpm delete.xpm tunnel.xpm move.xpm \
+	rotate.xpm flip.xpm movedesc.xpm
+$(LIB)(csnap.o): csnap.c track.h cross0.bmp bigdot.bmp snapcurs.bmp snapvis.bmp
+$(LIB)(csplit.o): csplit.c track.h splittrk.xpm
+$(LIB)(cstraigh.o): cstraigh.c track.h cstraigh.h straight.xpm
+$(LIB)(cstruct.o): cstruct.c track.h compound.h struct.xpm
+$(LIB)(ctext.o): ctext.c track.h text.xpm
+$(LIB)(ctodesgn.o): ctodesgn.c track.h ccurve.h cstraigh.h compound.h toreg.lin tocrv.lin \
+	towye.lin to3way.lin toxing.lin tosslip.lin todslip.lin torcross.lin \
+	tolcross.lin todcross.lin tostrsct.lin tocrvsct.lin tostrsct.lin \
+	tostrsct.lin
+$(LIB)(ctrain.o): ctrain.c track.h trackx.h ctrain.h compound.h train.xpm stop.xpm go.xpm \
+	exit.xpm newcar.xpm zero.xpm
+$(LIB)(cturnout.o): cturnout.c track.h ccurve.h cstraigh.h compound.h cjoin.h turnout.xpm
+$(LIB)(cturntbl.o): cturntbl.c track.h cstraigh.h turntbl.xpm
+$(LIB)(cundo.o): cundo.c track.h trackx.h
+
+custom.o: custom.c track.h version.h common.h misc.h fileio.h cjoin.h xtc64.bmp \
+	xtc16.bmp
+
+$(LIB)(dbench.o): dbench.c track.h bo_edge.xpm bo_flat.xpm bo_ll.xpm bo_lr.xpm bo_lld.xpm \
+	bo_lrd.xpm bo_llu.xpm bo_lru.xpm bo_lli.xpm bo_lri.xpm bo_t.xpm \
+	bo_tr.xpm bo_tl.xpm bo_ti.xpm
+$(LIB)(dbitmap.o): dbitmap.c track.h
+$(LIB)(dcar.o): dcar.c track.h ctrain.h carpart.xpm carproto.xpm
+$(LIB)(dcmpnd.o): dcmpnd.c track.h compound.h shrtpath.h turnout.xpm struct.xpm
+$(LIB)(dcustmgm.o): dcustmgm.c track.h
+$(LIB)(dease.o): dease.c track.h ccurve.h cstraigh.h cjoin.h enone.xpm esharp.xpm \
+	egtsharp.xpm enormal.xpm eltbroad.xpm ebroad.xpm egtbroad.xpm
+$(LIB)(denum.o): denum.c track.h
+$(LIB)(dlayer.o): dlayer.c track.h l1.bmp l2.bmp l3.bmp l4.bmp l5.bmp l6.bmp l7.bmp l8.bmp \
+	l9.bmp l10.bmp l11.bmp l12.bmp l13.bmp l14.bmp l15.bmp l16.bmp \
+	l17.bmp l18.bmp l19.bmp l20.bmp k1.bmp k2.bmp k3.bmp k4.bmp k5.bmp \
+	k6.bmp k7.bmp k8.bmp k9.bmp k10.bmp k11.bmp k12.bmp k13.bmp k14.bmp \
+	k15.bmp k16.bmp k17.bmp k18.bmp k19.bmp k20.bmp
+$(LIB)(doption.o): doption.c track.h ccurve.h
+$(LIB)(dpricels.o): dpricels.c track.h compound.h
+$(LIB)(dprmfile.o): dprmfile.c track.h mtbox.bmp chkbox.bmp
+$(LIB)(draw.o): draw.c track.h utility.h misc.h draw.h
+$(LIB)(drawgeom.o): drawgeom.c track.h ccurve.h compound.h drawgeom.h
+$(LIB)(elev.o): elev.c track.h shrtpath.h ccurve.h
+$(LIB)(fileio.o): fileio.c track.h version.h common.h utility.h draw.h misc.h compound.h
+$(LIB)(lprintf.o): lprintf.c track.h
+$(LIB)(macro.o): macro.c track.h version.h common.h utility.h draw.h misc.h compound.h \
+	arrow0.bmp arrow3.bmp arrows.bmp flash.bmp
+$(LIB)(misc.o): misc.c track.h common.h utility.h draw.h misc.h cjoin.h compound.h \
+	openbutt.xpm zoomin.xpm zoom.xpm zoomout.xpm undo.xpm redo.xpm \
+	partlist.xpm export.xpm import.xpm
+$(LIB)(misc2.o): misc2.c track.h common.h utility.h draw.h misc.h cjoin.h compound.h
+$(LIB)(param.o): param.c track.h common.h utility.h misc.h compound.h square10.bmp
+$(LIB)(shrtpath.o): shrtpath.c track.h shrtpath.h
+$(LIB)(tcurve.o): tcurve.c track.h ccurve.h cstraigh.h cjoin.h
+$(LIB)(tease.o): tease.c track.h ccurve.h cstraigh.h cjoin.h
+$(LIB)(track.o): track.c track.h ccurve.h cstraigh.h cjoin.h compound.h trackx.h above.xpm \
+	below.xpm
+$(LIB)(trkseg.o): trkseg.c track.h cjoin.h
+$(LIB)(tstraigh.o): tstraigh.c track.h cstraigh.h
+$(LIB)(utility.o): utility.c common.h utility.h
