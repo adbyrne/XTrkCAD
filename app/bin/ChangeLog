@@ -1,0 +1,29 @@
+Feb, 22nd, 2006
+
+	NEW FEATURE: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc.c, misc2.c, doption.c Scale and gauge are two independant seetings
+		now.
+	
+	NEW FEATURE: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc.c, cselect.c Add new function 'Invert Selection' which inverts
+		the selection state of all visible objects on the layout
+	
+	NEW FEATURE: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc.c Add new function 'Revert' to main menu, implemented in ChkRevert
+		acclkeys.h Added Ctrl-r as accelerator for 'Revert'
+	
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		cselect.c Optimized performance for 'Select Connected' operation
+
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		bllnhelp.c: removed inconsistencies in usage of 'track' and 'object'
+		
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc.c: moved 'Join' command to 'Change' menu
+		
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		fileio.c Setting locale to portable 'C' before reading/writing parameters
+		and trackplans to prevent problems with locales that use comma as decimal
+		separator ( eg. Germany ) 
+
+	BUGFIX: 

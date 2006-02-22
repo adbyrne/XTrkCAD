@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.1 2005-12-07 15:48:50 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.2 2006-02-22 19:20:11 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -52,10 +52,10 @@ EXPORT const char * wGetAppLibDir(
 /*
 */
 {
-	DIR *dirp;
 	char * cp, *ep;
 	char msg[BUFSIZ*2];
 	char envvar[80];
+	struct stat buf;
 
 	if (appLibDir[0] != '\0') {
 		return appLibDir;
@@ -66,8 +66,7 @@ EXPORT const char * wGetAppLibDir(
 	strcpy( ep, "LIB" );
 	ep = getenv( envvar );
 	if (ep != NULL) {
-		if ((dirp=opendir( ep )) != NULL ) {
-			closedir( dirp );
+		if ((stat( ep, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
 			strncpy( appLibDir, ep, sizeof appLibDir );
 			return appLibDir;
 		}
@@ -75,25 +74,23 @@ EXPORT const char * wGetAppLibDir(
 
 	strcpy( appLibDir, "/usr/lib/" );
 	strcat( appLibDir, wAppName );
-	if ((dirp=opendir( appLibDir )) != NULL ) {
-		closedir( dirp );
+	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
 		return appLibDir;
 	}
 
 	strcpy( appLibDir, "/usr/local/lib/" );
 	strcat( appLibDir, wAppName );
-	if ((dirp=opendir( appLibDir )) != NULL ) {
-		closedir( dirp );
+	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
 		return appLibDir;
 	}
 
 	sprintf( msg,
-		"%s cannot find the program install directory.\n"
-		"The program must be installed in:\n"
+		"%s cannot find the directory containing the configuration files.\n\n"
+		"Make sure that these files installed are in either \n"
 		"  /usr/lib/%s or\n"
 		"  /usr/local/lib/%s\n"
-		"or the install directory must be pointed to by the\n"
-		"environment variable %s",
+		"If this is not possible, the environment variable %s must contain "
+		"the name of the correct directory!",
 		wAppName, wAppName, wAppName, envvar );
 	wNotice( msg, "Ok", NULL );
 	appLibDir[0] = '\0';

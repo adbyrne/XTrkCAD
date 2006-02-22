@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.1 2005-12-07 15:48:48 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.2 2006-02-22 19:20:11 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -424,7 +424,7 @@ static int window_redraw(
 }
 
 static wBool_t need_redraw;
-#ifdef GTK1
+ #ifdef GTK1
 static wBool_t kludge88 = 0;
 static int fixed_draw_event(
 		GtkWidget * widget,
@@ -440,7 +440,7 @@ static int fixed_draw_event(
 		return window_redraw( win, FALSE );
 	}
 }
-#endif
+ #endif 
 
 static int fixed_expose_event(
 		GtkWidget * widget,
@@ -458,7 +458,6 @@ static int window_configure_event(
 		GdkEventConfigure * event,
 		wWin_p win )
 {
-	GtkRequisition requisition;
 	wPos_t h;
 
 	if (win==NULL)
@@ -470,7 +469,6 @@ static int window_configure_event(
 	if (win->option&F_RESIZE) {
 		if ( event->width < 10 || event->height < 10 )
 			return TRUE;
-		gtk_widget_size_request( win->gtkwin, &requisition );
 		if (win->w != event->width || win->h != event->height) {
 			win->w = event->width;
 			win->h = event->height;
@@ -499,6 +497,7 @@ static int window_configure_event(
 			}
 #endif
 		}
+		need_redraw = TRUE;
 	} else if (win->w != event->width || win->h != event->height) {
 #ifndef GTK1
 /*		gtk_widget_set_size_request( GTK_WIDGET(win->gtkwin), win->w, win->h );
@@ -506,10 +505,10 @@ static int window_configure_event(
 #else
 		gtk_widget_set_usize( GTK_WIDGET(win->gtkwin), win->w, win->h );
 		gtk_widget_set_usize( GTK_WIDGET(win->widget), win->w, win->h );
+		need_redraw = TRUE;		
 #endif
 	}
-	need_redraw = TRUE;
-	return TRUE;
+	return FALSE;
 }
 
 
@@ -706,12 +705,12 @@ static wWin_p wWinCommonCreate(
 						GTK_SIGNAL_FUNC (destroy), w);
 	gtk_signal_connect (GTK_OBJECT (w->widget), "expose_event",
 						GTK_SIGNAL_FUNC (fixed_expose_event), w);
-#ifdef GTK1
+#ifdef GTK1 
 	gtk_signal_connect (GTK_OBJECT (w->widget), "draw",
 						GTK_SIGNAL_FUNC (fixed_draw_event), w);
-#endif
+#endif 
 	gtk_signal_connect (GTK_OBJECT (w->gtkwin), "configure_event",
-						GTK_SIGNAL_FUNC (window_configure_event), w);
+						GTK_SIGNAL_FUNC (window_configure_event), w); 
 	gtk_signal_connect (GTK_OBJECT (w->gtkwin), "key_press_event",
 						GTK_SIGNAL_FUNC (window_char_event), w);
 	gtk_signal_connect (GTK_OBJECT (w->gtkwin), "key_release_event",

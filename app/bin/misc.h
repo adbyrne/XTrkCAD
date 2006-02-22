@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.3 2006-02-22 19:20:11 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -53,6 +53,8 @@ typedef void (*addButtonCallBack_t)(void*);
 extern long adjTimer;
 
 typedef int SCALEINX_T;
+typedef int GAUGEINX_T;
+typedef int SCALEDESCINX_T;
 
 extern int log_error;
 
@@ -82,6 +84,8 @@ extern long descriptionFontSize;
 extern long units;
 extern long angleSystem;
 extern SCALEINX_T curScaleInx;
+extern GAUGEINX_T curGaugeInx;
+extern SCALEDESCINX_T curScaleDescInx;
 extern DIST_T trackGauge;
 extern DIST_T curScaleRatio;
 extern char * curScaleName;

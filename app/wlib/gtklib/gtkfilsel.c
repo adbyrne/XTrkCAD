@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfilsel.c,v 1.1 2005-12-07 15:48:48 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfilsel.c,v 1.2 2006-02-22 19:20:11 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -212,7 +212,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		*cp++ = '/';
 		*cp = 0;
 	}
-	gtk_file_selection_set_filename( GTK_FILE_SELECTION(fs->window), name );
+	gtk_file_selection_set_filename( GTK_FILE_SELECTION(fs->window), name ); 
 	if ( fs->patts && fs->patts[0] )
 		gtk_file_selection_complete( GTK_FILE_SELECTION(fs->window), fs->patts[0] );
 	gtk_widget_show( fs->window );

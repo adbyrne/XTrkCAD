@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.1 2005-12-07 15:47:00 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.2 2006-02-22 19:20:10 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -99,18 +99,30 @@ static coOrd newSize;
 
 static paramData_t layoutPLs[] = {
 	{ PD_FLOAT, &newSize.x, "roomsizeX", PDO_NOPREF|PDO_DIM|PDO_NOPSHUPD|PDO_DRAW, &r1_9999999, "Room Width", 0, (void*)(CHANGE_MAIN|CHANGE_MAP) },
-	{ PD_FLOAT, &newSize.y, "roomsizeY", PDO_NOPREF|PDO_DIM|PDO_NOPSHUPD|PDO_DRAW, &r1_9999999, "Height", 0, (void*)(CHANGE_MAIN|CHANGE_MAP) },
+	{ PD_FLOAT, &newSize.y, "roomsizeY", PDO_NOPREF|PDO_DIM|PDO_NOPSHUPD|PDO_DRAW|PDO_DLGHORZ, &r1_9999999, "Height", 0, (void*)(CHANGE_MAIN|CHANGE_MAP) },
 	{ PD_STRING, &Title1, "title1", PDO_NOPSHUPD, NULL, "Title" },
 	{ PD_STRING, &Title2, "title2", PDO_NOPSHUPD, NULL, "" },
-	{ PD_DROPLIST, &curScaleInx, "scale", PDO_NOPREF|PDO_NOPSHUPD|PDO_NORECORD, NULL, "Scale", 0, (void*)(CHANGE_SCALE) } };
+	{ PD_DROPLIST, &curScaleDescInx, "scale", PDO_NOPREF|PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT, (void *)120, "Scale / Gauge", 0, (void*)(CHANGE_SCALE) },
+	{ PD_DROPLIST, &curGaugeInx, "gauge", PDO_NOPREF |PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT|PDO_DLGHORZ, (void *)120, " /", 0, (void *)(CHANGE_SCALE) }};
+	
+
 static paramGroup_t layoutPG = { "layout", PGO_RECORD|PGO_PREFMISC, layoutPLs, sizeof layoutPLs/sizeof layoutPLs[0] };
 
+static void LayoutDlgUpdate( paramGroup_p pg, int inx, void * valueP );
 
 
 static void LayoutOk( void * junk )
 {
 	long changes;
+	
 	changes = GetChanges( &layoutPG );
+	
+	/* [mf Nov. 15, 2005] Get the gauge/scale settings */
+	if (changes & CHANGE_SCALE) {
+		SetScaleGauge( curScaleDescInx, curGaugeInx );
+	}
+	/* [mf Nov. 15, 2005] end */
+	
 	if (changes & CHANGE_MAP) {
 		SetRoomSize( newSize );
 	}
@@ -131,8 +143,9 @@ static void DoLayout( void * junk )
 {
 	newSize = mapD.size;
 	if (layoutW == NULL) {
-		layoutW = ParamCreateDialog( &layoutPG, MakeWindowTitle("Layout Options"), "Ok", LayoutOk, wHide, TRUE, NULL, 0, NULL );
+		layoutW = ParamCreateDialog( &layoutPG, MakeWindowTitle("Layout Options"), "Ok", LayoutOk, wHide, TRUE, NULL, 0, LayoutDlgUpdate );
 		LoadScaleList( (wList_p)layoutPLs[4].control );
+		LoadGaugeList( (wList_p)layoutPLs[5].control, curScaleDescInx ); /* set correct gauge list here */
 	}
 	ParamLoadControls( &layoutPG );
 	wShow( layoutW );
@@ -146,6 +159,21 @@ EXPORT addButtonCallBack_t LayoutInit( void )
 	RegisterChangeNotification( LayoutChange );
 	return &DoLayout;
 }
+
+/* [mf Nov. 15, 2005] Catch changes done in the LayoutDialog */
+static void
+LayoutDlgUpdate( 
+	paramGroup_p pg, 
+	int inx,
+	void * valueP )
+{
+	/* did the scale change ? */
+	if( inx == 4 ) {
+		LoadGaugeList( (wList_p)layoutPLs[5].control, *((int *)valueP) );
+	}	
+}
+
+/* [mf Nov. 15, 2005] end */
 
 /****************************************************************************
  *

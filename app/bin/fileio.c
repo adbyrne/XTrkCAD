@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.2 2005-12-12 19:00:16 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.3 2006-02-22 19:20:10 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -39,6 +39,7 @@
 #include <sys/stat.h>
 #endif
 #include <stdarg.h>
+#include <locale.h>
 
 #include "track.h"
 #include "version.h"
@@ -423,6 +424,7 @@ EXPORT BOOL_T ReadParams(
 	long checkSum=0;
 	BOOL_T checkSummed;
 	long paramVersion = -1;
+	char *oldLocale = NULL;
 
 	if (dirName) {
 		strcpy( paramFileName, dirName );
@@ -437,7 +439,9 @@ EXPORT BOOL_T ReadParams(
 	curSubContents = curContents;
 
 LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
-
+	
+	oldLocale = setlocale(LC_ALL, "C");
+	
 	paramFile = fopen( paramFileName, "r" );
 	if (paramFile == NULL) {
 		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Parameter", paramFileName, strerror(errno) );
@@ -507,6 +511,9 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 		}
 	}
 	if (paramFile)fclose( paramFile );
+	
+	if( oldLocale ) setlocale( LC_ALL, oldLocale );
+	
 	return TRUE;
 }
 
@@ -569,9 +576,9 @@ void SetWindowTitle( void )
 {
 	if ( changed > 2 || inPlayback )
 		return;
-	sprintf( message, "%s(%s) - %s%s", sProdName, sVersion,
-		(curFileName==NULL||curFileName[0]=='\0')?"Untitled":curFileName,
-		changed>0?"*":"" );
+	sprintf( message, "%s%s - %s(%s)",
+		(curFileName==NULL||curFileName[0]=='\0')?"Unnamed Trackplan":curFileName,
+		changed>0?"*":"", sProdName, sVersion );
 	wWinSetTitle( mainW, message );
 }
 
@@ -604,6 +611,9 @@ static BOOL_T ReadTrackFile(
 	coOrd roomSize;
 	long scale;
 	char * cp;
+	char *oldLocale = NULL;
+	
+	oldLocale = setlocale( LC_ALL, "C" );
 
 	paramFile = fopen( pathName, "r" );
 	if (paramFile == NULL) {
@@ -694,6 +704,9 @@ static BOOL_T ReadTrackFile(
 		}
 	}
 	if (paramFile)fclose(paramFile);
+
+	if( oldLocale ) setlocale( LC_ALL, oldLocale );
+	
 	paramFile = NULL;
 	InfoMessage( "%d", count );
 	return TRUE;
@@ -762,10 +775,16 @@ static BOOL_T DoSaveTracks(
 	FILE * f;
 	time_t clock;
 	BOOL_T rc = TRUE;
-
+	char *oldLocale = NULL;
+	
+	oldLocale = setlocale( LC_ALL, "C" );
+	
 	f = fopen( fileName, "w" );
 	if (f==NULL) {
 		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Track", fileName, strerror(errno) );
+		
+		if( oldLocale ) setlocale( LC_ALL, oldLocale );
+		
 		return FALSE;
 	}
 	wSetCursor( wCursorWait );
@@ -786,6 +805,8 @@ static BOOL_T DoSaveTracks(
 	if ( !rc )
 		NoticeMessage( MSG_WRITE_FAILURE, "Ok", NULL, strerror(errno), fileName );
 	fclose(f);
+	if( oldLocale ) setlocale( LC_ALL, oldLocale );
+
 	checkPtMark = changed;
 	wSetCursor( wCursorNormal );
 	return rc;

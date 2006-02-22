@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.2 2005-12-11 17:20:42 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.3 2006-02-22 19:20:11 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -202,8 +202,10 @@ void * gtkAlloc(
 		for ( ; *labelStr; labelStr++ )
 			if ( *labelStr != '&' )
 				*cp++ = *labelStr;
-			else
-				gtkAccelChar = labelStr[1];
+			else {
+/*				*cp++ = '_';
+				gtkAccelChar = labelStr[1]; */
+			}	
 		*cp = 0;
 	}
 	w->doneProc = NULL;

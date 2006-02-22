@@ -27,6 +27,7 @@ BOOL_T importMove;
 extern int incrementalDrawLimit;
 extern long selectedTrackCount;
 
+void InvertTrackSelect( void * );
 void SetAllTrackSelect( BOOL_T );
 void SelectTunnel( void );
 void SelectRecount( void );

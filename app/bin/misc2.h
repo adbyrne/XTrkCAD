@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.h,v 1.1 2005-12-07 15:47:09 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.h,v 1.2 2006-02-22 19:20:11 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -67,10 +67,13 @@ void GetScaleEasementValues( DIST_T *, DIST_T * );
 tieData_p GetScaleTieData( SCALEINX_T );
 SCALEINX_T LookupScale( const char * );
 BOOL_T DoSetScale( const char * );
+
+void SetScaleGauge( SCALEDESCINX_T, GAUGEINX_T );
 void ScaleLengthIncrement( SCALEINX_T, DIST_T );
 void LoadScaleList( wList_p );
+void LoadGaugeList( wList_p, SCALEDESCINX_T );
 BOOL_T CompatibleScale( BOOL_T, SCALEINX_T, SCALEINX_T );
-
+BOOL_T DoSetScaleDesc( void );
 typedef char LAYER_T;
 LAYER_T curLayer;
 long layerCount;

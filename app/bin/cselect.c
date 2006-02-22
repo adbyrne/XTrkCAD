@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.3 2006-02-22 19:20:10 m_fischer Exp $
  *
  * SELECT
  *
@@ -147,6 +147,34 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 	}
 }
 
+/* \brief Invert selected state of all visible objects
+ *
+ * \param none
+ * \return none
+ */
+ 
+EXPORT void InvertTrackSelect( void *ptr )
+{
+	track_p trk;
+
+	trk = NULL;
+	while ( TrackIterate( &trk ) ) {
+		if (GetLayerVisible( GetTrkLayer( trk ))) {
+			if (GetTrkSelected(trk))
+			{
+				ClrTrkBits( trk, TB_SELECTED );
+				selectedTrackCount--;
+			}	
+			else	
+				SetTrkBits( trk, TB_SELECTED );
+				selectedTrackCount++;
+		}
+	}
+	
+	SelectedTrackCountChange();
+	MainRedraw();
+}
+
 
 static void SelectOneTrack(
 		track_p trk,
@@ -189,14 +217,13 @@ static void SelectConnectedTracks(
 			}
 		}
 		if (!GetTrkSelected(trk)) {
-			wDrawDelayUpdate( mainD.d, TRUE );
 			SelectOneTrack( trk, TRUE );
-			wDrawDelayUpdate( mainD.d, FALSE );
-			wFlush();
 			InfoCount( inx+1 );
 		}
 		SetTrkBits(trk, TB_SELECTED);
 	}
+	wDrawDelayUpdate( mainD.d, TRUE );	
+	wFlush();	
 	InfoCount( trackCount );
 }
 

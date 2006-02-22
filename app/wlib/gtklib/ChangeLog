@@ -1,0 +1,11 @@
+
+	NEW FEATURE: 
+	
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		wpref.c: Optimized the checking for directories in wGetAppLibDir and
+		rephrased the error message if initialization files cannot be found
+		
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtkwindow.c: Fixed resizing problems when enlarging dialog boxes
+		
+	BUGFIX: 

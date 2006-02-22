@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmenu.c,v 1.1 2005-12-07 15:48:46 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmenu.c,v 1.2 2006-02-22 19:20:11 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -111,7 +111,7 @@ static void pushMenuItem(
 	if (gdk_pointer_is_grabbed()) {
 		gdk_pointer_ungrab(0);
 	}
-	wFlush();
+/*	wFlush(); */
 	if (m->recursion)
 		return;
 	switch (m->mtype) {
@@ -159,10 +159,10 @@ static wMenuItem_p createMenuItem(
 		mi->menu_item = gtk_separator_menu_item_new();
 		break;
 	case M_TOGGLE:
-		mi->menu_item = gtk_check_menu_item_new_with_label(gtkConvertInput(mi->labelStr));
+		mi->menu_item = gtk_check_menu_item_new_with_mnemonic(gtkConvertInput(mi->labelStr));
 		break;
 	default:
-		mi->menu_item = gtk_menu_item_new_with_label(gtkConvertInput(mi->labelStr));
+		mi->menu_item = gtk_menu_item_new_with_mnemonic(gtkConvertInput(mi->labelStr));
 		break;
 	}
 	if (mi->menu_item) {

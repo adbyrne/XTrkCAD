@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.3 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.4 2006-02-22 19:20:10 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -450,6 +450,21 @@ EXPORT void Confirm( char * label2, doSaveCallBack_p after )
 static void ChkLoad( void )
 {
 	Confirm("Load", DoLoad);
+}
+
+static void ChkRevert( void )
+{
+	int rc;
+	
+	if( changed) {
+		rc = wNotice( "Do you want to return to the last saved state?\n\n"
+									"Revert will cause all changes done since last save to be lost.",
+									"&Revert", "&Cancel" );
+		if( rc ) {
+			/* load the file */
+			LoadTracks( curPathName, curFileName, NULL );
+		} 								
+	}
 }
 
 
@@ -2147,7 +2162,7 @@ static void CreateMenus( void )
 
 	wMenuPushCreate( fileM, "menuFile-save", "&Save", ACCL_SAVE, (wMenuCallBack_p)DoSave, NULL );
 	wMenuPushCreate( fileM, "menuFile-saveAs", "Save &As ...", ACCL_SAVEAS, (wMenuCallBack_p)DoSaveAs, NULL );
-
+	wMenuPushCreate( fileM, "menuFile-revert", "Revert", ACCL_REVERT, (wMenuCallBack_p)ChkRevert, NULL );
 	wMenuSeparatorCreate( fileM );
 	MiscMenuItemCreate( fileM, NULL, "printSetup", "P&rint Setup ...", ACCL_PRINTSETUP, (wMenuCallBack_p)wPrintSetup, 0, (void *)0 );
 	printCmdInx = InitCmdPrint( fileM );
@@ -2186,7 +2201,7 @@ static void CreateMenus( void )
 	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", "Select &All", ACCL_SELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, (void *)1 );
 	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer", "Select Current Layer", ACCL_SETCURLAYER, (wMenuCallBack_p)SelectCurrentLayer, 0, (void *)0 );
 	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", "&Deselect All", ACCL_DESELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, (void *)0 );
-
+	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", "&Invert Selection", 0L, (wMenuCallBack_p)InvertTrackSelect, 0, (void *)0 );
 	wMenuSeparatorCreate( editM );
 	MiscMenuItemCreate( editM, NULL, "cmdTunnel", "Tu&nnel", ACCL_TUNNEL, (wMenuCallBack_p)SelectTunnel, IC_SELECTED, (void *)0 );
 	MiscMenuItemCreate( editM, NULL, "cmdAbove", "A&bove", ACCL_ABOVE, (wMenuCallBack_p)SelectAbove, IC_SELECTED, (void *)0 );
@@ -2232,7 +2247,6 @@ static void CreateMenus( void )
 	cmdGroup = BG_TRKCRT|BG_BIGGAP;	 
  	InitCmdStraight( addM );
 	InitCmdCurve( addM );
-	InitCmdJoin( addM );
 	InitCmdParallel( addM );
 	InitCmdTurnout( addM );
 	InitCmdHandLaidTurnout( addM );
@@ -2260,6 +2274,7 @@ static void CreateMenus( void )
 		MiscMenuItemCreate( changeM, NULL, "loosen", "&Loosen Tracks", ACCL_LOOSEN, (wMenuCallBack_p)LoosenTracks, IC_SELECTED, (void *)0 );
 
 	InitCmdModify( changeM );
+	InitCmdJoin( changeM );
 	InitCmdPull( changeM );
 	InitCmdSplit( changeM );
 	InitCmdMoveDescription( changeM );
@@ -2675,6 +2690,10 @@ LOG1( log_init, ( "Reset\n" ) )
 	/*
 	 * SCALE
 	 */
+
+	/* Set up the data for scale and gauge description */
+	DoSetScaleDesc();
+	 
 	pref = wPrefGetString( "misc", "scale" );
 	DoSetScale( pref );
 
