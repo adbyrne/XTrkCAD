@@ -1,3 +1,9 @@
+Feb. 26th, 2006
+
+	NEW FEATURE: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc.c, cselect.c, 'Select orphaned track' command added to set all 
+		unconnected track pieces.
+
 Feb, 22nd, 2006
 
 	NEW FEATURE: Martin Fischer <m_fischer@users.sourceforge.net>

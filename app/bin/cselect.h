@@ -28,6 +28,7 @@ extern int incrementalDrawLimit;
 extern long selectedTrackCount;
 
 void InvertTrackSelect( void * );
+void OrphanedTrackSelect( void * );
 void SetAllTrackSelect( BOOL_T );
 void SelectTunnel( void );
 void SelectRecount( void );

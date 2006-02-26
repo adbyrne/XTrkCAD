@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.3 2006-02-22 19:20:10 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.4 2006-02-26 12:32:56 m_fischer Exp $
  *
  * SELECT
  *
@@ -171,6 +171,39 @@ EXPORT void InvertTrackSelect( void *ptr )
 		}
 	}
 	
+	SelectedTrackCountChange();
+	MainRedraw();
+}
+
+/* \brief Select orphaned (ie single) track pieces
+ *
+ * \param none
+ * \return none
+ */
+ 
+EXPORT void OrphanedTrackSelect( void *ptr )
+{
+	track_p trk;
+	EPINX_T ep;
+	int cnt ;
+		
+	trk = NULL;
+	
+	while( TrackIterate( &trk ) ) {
+		cnt = 0;
+		if( GetLayerVisible( GetTrkLayer( trk ))) {
+			for( ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
+				if( GetTrkEndTrk( trk, ep ) )
+					cnt++;				
+			}
+			
+			if( !cnt && GetTrkEndPtCnt( trk )) {
+				SetTrkBits( trk, TB_SELECTED );
+				DrawTrackAndEndPts( trk, wDrawColorBlack );
+				selectedTrackCount++;			
+			}		
+		}
+	}
 	SelectedTrackCountChange();
 	MainRedraw();
 }

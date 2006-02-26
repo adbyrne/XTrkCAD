@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.4 2006-02-22 19:20:10 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.5 2006-02-26 12:32:56 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2202,6 +2202,7 @@ static void CreateMenus( void )
 	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer", "Select Current Layer", ACCL_SETCURLAYER, (wMenuCallBack_p)SelectCurrentLayer, 0, (void *)0 );
 	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", "&Deselect All", ACCL_DESELECTALL, (wMenuCallBack_p)SetAllTrackSelect, 0, (void *)0 );
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", "&Invert Selection", 0L, (wMenuCallBack_p)InvertTrackSelect, 0, (void *)0 );
+	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned", "Select Stranded Track", 0L, (wMenuCallBack_p)OrphanedTrackSelect, 0, (void *)0 );
 	wMenuSeparatorCreate( editM );
 	MiscMenuItemCreate( editM, NULL, "cmdTunnel", "Tu&nnel", ACCL_TUNNEL, (wMenuCallBack_p)SelectTunnel, IC_SELECTED, (void *)0 );
 	MiscMenuItemCreate( editM, NULL, "cmdAbove", "A&bove", ACCL_ABOVE, (wMenuCallBack_p)SelectAbove, IC_SELECTED, (void *)0 );
