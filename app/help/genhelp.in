@@ -17,18 +17,18 @@ cmdClearElevations	Removes elevation from Selected tracks
 cmdCmdopt	Command Options dialog
 cmdColor	Controls colors
 cmdConnect	Connect two tracks
-cmdCopy	Copy selected tracks to clipboard
+cmdCopy	Copy selected objects to clipboard
 cmdCurveCenter	Create curved track from center	cmdCurve
 cmdCurveChord	Create curved track from chord	cmdCurve
 cmdCurveEndPt	Create curved track from end-point	cmdCurve
 cmdCurveSetCmd	Set Curve Track creation mode	cmdCurve
 cmdCurveTangent	Create curved track from tangent	cmdCurve
 cmdCustmgm	Manipulate Custom designer entries
-cmdCut	Moves selected tracks to clipboard
-cmdDelete	Delete track
+cmdCut	Moves selected objects to clipboard
+cmdDelete	Delete objects
 cmdDemo	Playback demos
-cmdDescribe	Describe track
-cmdDeselectAll	Deselect all selected tracks	cmdSelect
+cmdDescribe	Describe objects
+cmdDeselectAll	Deselect all selected objects	cmdSelect
 cmdDisplay	Change Display parameters
 cmdDrawBench	Create benchwork	cmdDraw
 cmdDrawBox	Create a box	cmdDraw
@@ -57,7 +57,7 @@ cmdDrawShapeSetCmd	Set Shape drawing command	cmdDraw
 cmdDrawTableEdge	Draw table edge	cmdDraw
 cmdEasement	Easement menu
 cmdElevation	Change Elevations
-cmdEnumerate	Generate a Parts List of selected tracks
+cmdEnumerate	Generate a Parts List of selected objects
 cmdExport	Export a .xti file
 cmdExportDXF	Export a DXF file
 cmdFileNote	General note about the layout
@@ -96,14 +96,14 @@ cmdLayerSet	Selects the current drawing layer	cmdLayer
 cmdLayout	Layout parameters
 #cmdLoosen	Disconnect tracks at loose joints	nohelp
 cmdModify	Modify or extend a track
-cmdMove	Move selected tracks
+cmdMove	Move selected objects
 cmdMoveLabel	Move a label
-cmdMoveToCurrentLayer	Move selected tracks to current layer
+cmdMoveToCurrentLayer	Move selected objects to current layer
 cmdNote	Place a note on the layout
 cmdOutputbitmap	Print a BitMap
 cmdParallel	Create a parallel track
 cmdParameter	Register	register
-cmdPaste	Copy tracks from clipboard
+cmdPaste	Copy objects from clipboard
 cmdPref	Perferences dialog
 cmdPricelist	Display prices of turnouts, sectional tracks and structures
 cmdPrint	Print the layout
@@ -116,10 +116,12 @@ cmdRefreshCompound	Update selected Turnout and Structure definitions
 cmdRescale	Rescale selected objects
 cmdRotate	Rotate selected object(s)
 cmdRuler	Show a ruler
-cmdSelect	Select tracks
-cmdSelectAll	Selects all tracks on the layout	cmdSelect
-cmdSelectCurrentLayer	Selects all tracks in the current Layer	layer
+cmdSelect	Select objects
+cmdSelectAll	Selects all objects on the layout	cmdSelect
+cmdSelectCurrentLayer	Selects all objects in the current Layer	layer
+cmdSelectInvert	Invert current selection
 cmdSplitTrack	Split a track
+cmdSelectOrphaned Select stranded (unconnected) track pieces
 cmdSticky	Choose which commands are sticky
 cmdStraight	Create straight track
 cmdStructure	Place a structure on the layout
@@ -148,11 +150,12 @@ cmdZoomOut	Increase drawing scale	editZoomOut
 #
 menuFile	File Menu
 menuFile-save	Save layout
-menuFile-saveAs	Save layout
+menuFile-saveAs	Save layout under a new name 
 menuFile-clear	New layout
 menuFile-enum	Generate parts list
 menuFile-load	Load a layout
 menuFile-quit	Exit the program
+menuFile-revert	Revert to last saved state of layout plan
 #
 editM	Edit menu
 menuEdit-redraw	Redraw layout
