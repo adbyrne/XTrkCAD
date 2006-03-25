@@ -121,7 +121,7 @@ cmdSelectAll	Selects all objects on the layout	cmdSelect
 cmdSelectCurrentLayer	Selects all objects in the current Layer	layer
 cmdSelectInvert	Invert current selection
 cmdSplitTrack	Split a track
-cmdSelectOrphaned Select stranded (unconnected) track pieces
+cmdSelectOrphaned	Select stranded (unconnected) track pieces
 cmdSticky	Choose which commands are sticky
 cmdStraight	Create straight track
 cmdStructure	Place a structure on the layout
@@ -398,6 +398,7 @@ layout-roomsizeY	Specifies the size of the room (in inches or centimeters)	cmdLa
 layout-title1	Specifies the Title of the layout.  This appears on Gaudy printouts	cmdLayout
 layout-title2	Specifies the Title of the layout.  This appears on Gaudy printouts	cmdLayout
 layout-scale	Specifies the Modelling Scale	cmdLayout
+layout-gauge	Specifies the rail gauge, ie. the distance between the rails	cmdLayout
 #
 newcar-road	Roadname	cmdTrain
 newcar-number	Car Number	cmdTrain
