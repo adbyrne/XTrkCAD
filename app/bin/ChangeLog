@@ -1,3 +1,9 @@
+Mar 02nd, 2006
+
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		cturnout.c Improvements to the select turnout dialog, new turnout is drawn
+		blue
+
 Feb. 26th, 2006
 
 	NEW FEATURE: Martin Fischer <m_fischer@users.sourceforge.net>

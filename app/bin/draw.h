@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.h,v 1.1 2005-12-07 15:47:18 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.h,v 1.2 2006-03-25 08:47:37 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -116,6 +116,7 @@ extern wDrawColor drawColorPurple;
 extern wDrawColor drawColorGold;
 #define wDrawColorBlack drawColorBlack
 #define wDrawColorWhite drawColorWhite
+#define wDrawColorBlue  drawColorBlue
 
 extern wDrawColor markerColor;
 extern wDrawColor borderColor;
