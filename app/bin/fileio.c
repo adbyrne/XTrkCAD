@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.3 2006-02-22 19:20:10 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.4 2006-03-26 12:02:50 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -40,6 +40,7 @@
 #endif
 #include <stdarg.h>
 #include <locale.h>
+#include <dirent.h>
 
 #include "track.h"
 #include "version.h"
@@ -869,22 +870,134 @@ EXPORT void DoLoad( void )
 
 EXPORT void DoCheckPoint( void )
 {
-	int len;
+	int rc; 
+	
 	if (checkPointingW == NULL) {
 		ParamRegister( &checkPointingPG );
 		checkPointingW = ParamCreateDialog( &checkPointingPG, MakeWindowTitle("Check Pointing"), NULL, NULL, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
-		len = strlen( workingDir ) + 1 + strlen( sCheckPointF ) + 1;
-		checkPtFileName1 = (char*)MyMalloc(len);
-		sprintf( checkPtFileName1, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPointF );
-		checkPtFileName2 = (char*)MyMalloc(len);
-		sprintf( checkPtFileName2, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPoint1F );
 	}
 	rename( checkPtFileName1, checkPtFileName2 );
 	wShow( checkPointingW );
-	DoSaveTracks( checkPtFileName1 );
+	rc = DoSaveTracks( checkPtFileName1 );
+	
+	/* could the check point file be written ok? */
+	if( rc ) {
+		/* yes, delete the backup copy of the checkpoint file */
+		remove( checkPtFileName2 );
+	} else {
+		/* no, rename the backup copy back to the checkpoint file name */
+		rename( checkPtFileName2, checkPtFileName1 );		
+	}		
 	wHide( checkPointingW );
 }
 
+/* \brief Remove all temporary files before exiting
+ *
+ * \param none
+ * \return none
+ *
+ * When the program terminates normally through the exit choice, files 
+ * that are created temporarily are removed: xtrkcad.ckp
+ * 
+ */
+ 
+EXPORT void CleanupFiles( void )
+{
+	if( checkPtFileName1 )
+		remove( checkPtFileName1 );
+}	
+
+/* \brief Check for existance of checkpoint file 
+ *
+ * \param none
+ * \return TRUE if exists, FALSE otherwise
+ *
+ * Existance of a checkpoint file means that XTrkCAD was not properly 
+ * terminated.
+ * 
+ */
+
+EXPORT int ExistsCheckpoint( void )
+{
+	int len;
+	char *pattern = sCheckPointF;
+	char *search;
+	
+	struct stat fileStat;
+
+	len = strlen( workingDir ) + 1 + strlen( sCheckPointF ) + 1;
+	checkPtFileName1 = (char*)MyMalloc(len);
+	sprintf( checkPtFileName1, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPointF );
+	checkPtFileName2 = (char*)MyMalloc(len);
+	sprintf( checkPtFileName2, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPoint1F );	
+
+	len = strlen( workingDir ) + 1 + strlen( pattern ) + 1;
+	search = (char*)MyMalloc(len);
+	sprintf( search, "%s%s%s", workingDir, FILE_SEP_CHAR, pattern );
+
+	if( !stat( search, &fileStat ) ) {
+		MyFree( search );
+		return TRUE;
+	} else {
+		MyFree( search );
+		return FALSE;
+	}	
+
+
+#ifdef LATER
+	DIR *dir;
+
+	dir = opendir( search );
+	MyFree( search );
+	
+	if( dir )	{
+		closedir( dir );
+		return TRUE;
+	} else {
+		return FALSE;
+	}	
+#endif	
+
+}
+
+/* \brief Load checkpoint file 
+ *
+ * \param none
+ * \return TRUE if exists, FALSE otherwise
+ *
+ */
+
+EXPORT int LoadCheckpoint( void )
+{
+	int len;
+	char *search;
+	
+	paramVersion = -1;
+	wSetCursor( wCursorWait );
+
+	len = strlen( workingDir ) + 1 + strlen( sCheckPointF ) + 1;
+	search = (char*)MyMalloc(len);
+	sprintf( search, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPointF );
+
+	if (ReadTrackFile( search, search + strlen(search) - strlen( sCheckPointF ), TRUE, TRUE, TRUE )) {
+		ResolveIndex();
+
+		RecomputeElevations();
+		AttachTrains();
+		DoChangeNotification( CHANGE_ALL );
+		DoUpdateTitles();
+	}
+
+	Reset();
+	wSetCursor( wCursorNormal );
+
+	strcpy( curPathName, "" );
+	curFileName = curPathName;
+	SetWindowTitle();
+	changed = TRUE;
+	MyFree( search );
+	return TRUE;
+}
 
 /*****************************************************************************
  *

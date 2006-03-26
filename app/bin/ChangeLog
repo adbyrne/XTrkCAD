@@ -1,3 +1,15 @@
+Mar 26th, 2006
+
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc.c, fileio,c, draw.c If the application crashed the user can decide
+		to resume work at the last state saved in a checkpoint file
+		checkpoint files (ckp and ck1) are removed on normal exit
+
+Mar 25th, 2006
+
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc2.c prevent warning in DoSetScaleDesc
+
 Mar 02nd, 2006
 
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>

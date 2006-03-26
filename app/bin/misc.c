@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.5 2006-02-26 12:32:56 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.6 2006-03-26 12:02:50 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -510,12 +510,17 @@ EXPORT void SaveState( void )
 	LogClose();
 }
 
-
+/*
+ * Clean up befor quitting
+ */
 static int quitting;
 static void DoQuitAfter( void )
 {
 	changed = 0;
 	SaveState();
+
+	CleanupFiles();
+		
 	quitting = TRUE;
 }
 
@@ -1799,8 +1804,6 @@ static paramData_t tipPLs[] = {
 	{   PD_BUTTON, ShowTip, "next", 0, NULL, "Next" } };
 static paramGroup_t tipPG = { "tip", 0, tipPLs, sizeof tipPLs/sizeof tipPLs[0] };
 
-
-
 static void CreateTipW( void )
 {
 	FILE * tipF;
@@ -2473,6 +2476,29 @@ static void CreateAboutW( void )
 	ParamLoadMessage( &aboutPG, I_ABOUTVERSION, sAboutProd );
 }
 
+/* \brief Give user the option to continue work after crash
+ *
+ * \param none
+ * \return none
+ *
+ * This function gives the user the option to load the checkpoint 
+ * file to continue working after a crash.
+ * 
+ */
+ 
+static void OfferCheckpoint( void ) 
+{
+	int ret;
+	
+	/* sProdName */
+	ret = wNotice( "Program was not terminated properly. Do you want to resume working on the previous trackplan?", "Resume", "Ignore" );
+	if( ret ) {
+		/* load the checkpoint file */ 
+		LoadCheckpoint();	
+	}
+
+}
+
 
 EXPORT wWin_p wMain(
 		int argc,
@@ -2721,6 +2747,11 @@ LOG1( log_init, ( "Initialization complete\n" ) )
 	ParamRegister( &tipPG );
 	if (showTipAtStart)
 		ShowTip();
+
+	/* check for existing checkpoint file */
+	if (ExistsCheckpoint())
+		OfferCheckpoint();
+
 	inMainW = FALSE;
 	return mainW;
 }

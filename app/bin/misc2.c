@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.2 2006-02-22 19:20:11 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.3 2006-03-26 12:02:50 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -393,7 +393,7 @@ EXPORT BOOL_T DoSetScaleDesc( void )
 	SCALEINX_T scaleInx;
 	SCALEINX_T work;
 	SCALEDESCINX_T descInx;
-	scaleDesc_p s;
+	scaleDesc_p s = NULL;
 	gaugeInfo_p g; 
 	char *cp;
 	DIST_T ratio;

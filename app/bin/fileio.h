@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.h,v 1.1 2005-12-07 15:47:03 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.h,v 1.2 2006-03-26 12:02:50 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -91,12 +91,16 @@ void DoSaveAs( doSaveCallBack_p );
 void DoLoad( void );
 void DoFileList( int, char *, void * );
 void DoCheckPoint( void );
+void CleanupFiles( void );
+int ExistsCheckpoint( void );
+int LoadCheckpoint( void );
 void DoImport( void );
 void DoExport( void );
 void DoExportDXF( void );
 BOOL_T EditCopy( void );
 BOOL_T EditCut( void );
 BOOL_T EditPaste( void );
+
 
 void DoRecord( void * );
 void AddPlaybackProc( char *, playbackProc_p, void * );

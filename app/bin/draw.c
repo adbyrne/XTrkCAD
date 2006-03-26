@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.1 2005-12-07 15:47:18 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.2 2006-03-26 12:02:50 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1256,6 +1256,8 @@ EXPORT void MainProc( wWin_p win, winProcEvent e, void * data )
 		if (changed &&
 			NoticeMessage( MSG_SAVE_CHANGES, "Save", "Quit"))
 			DoSave(NULL);
+			
+		CleanupFiles();	
 		SaveState();
 		break;
 	default:
