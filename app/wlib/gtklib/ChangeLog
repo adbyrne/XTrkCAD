@@ -1,5 +1,6 @@
-
-	NEW FEATURE: 
+Mar, 29th 2006	
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtkmisc.c, gtkbutton.c, gtksimple.c: small changes to help Solaris port
 	
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		wpref.c: Optimized the checking for directories in wGetAppLibDir and
