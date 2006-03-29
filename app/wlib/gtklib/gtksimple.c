@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksimple.c,v 1.1 2005-12-07 15:48:43 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksimple.c,v 1.2 2006-03-29 19:36:39 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -320,7 +320,7 @@ wBox_p wBoxCreate(
 		parent->gc = gdk_gc_new( parent->gtkwin->window );
 		gdk_gc_copy( parent->gc, parent->gtkwin->style->base_gc[GTK_STATE_NORMAL] );
 		parent->gc_linewidth = 0;
-		gdk_gc_set_line_attributes( parent->gc, parent->gc_linewidth, GDK_SOLID, GDK_CAP_BUTT, GDK_JOIN_MITER );
+		gdk_gc_set_line_attributes( parent->gc, parent->gc_linewidth, GDK_LINE_SOLID, GDK_CAP_BUTT, GDK_JOIN_MITER );
 	}
 	b->repaintProc = boxRepaint;
 	gtkAddButton( (wControl_p)b );

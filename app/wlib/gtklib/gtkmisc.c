@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.3 2006-02-22 19:20:11 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.4 2006-03-29 19:36:39 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -465,7 +465,7 @@ EXPORT int wNotice3(
   gtk_box_pack_start (GTK_BOX (vbox), hbox1, FALSE, TRUE, 0);
 
 	/* add the respective buttons */
-	aff = gtkChgMnemonic(affirmative);
+	aff = gtkChgMnemonic( (char *) affirmative);
 	nw->butt[ 0 ] = gtk_button_new_with_mnemonic (aff);
 	gtk_widget_show (nw->butt[ 0 ]);
 	gtk_box_pack_end (GTK_BOX (hbox1), nw->butt[ 0 ], TRUE, TRUE, 0);
@@ -474,7 +474,7 @@ EXPORT int wNotice3(
   GTK_WIDGET_SET_FLAGS (nw->butt[ 0 ], GTK_CAN_DEFAULT);
 
 	if( cancel ) {
-		can = gtkChgMnemonic(cancel);
+		can = gtkChgMnemonic( (char *) cancel);
 		nw->butt[ 1 ] = gtk_button_new_with_mnemonic (can);
  		gtk_widget_show (nw->butt[ 1 ]);
   	gtk_box_pack_end (GTK_BOX (hbox1), nw->butt[ 1 ], TRUE, TRUE, 0);
@@ -483,7 +483,7 @@ EXPORT int wNotice3(
 	  GTK_WIDGET_SET_FLAGS (nw->butt[ 1 ], GTK_CAN_DEFAULT);
 
 		if( alternate ) {
-			alt = gtkChgMnemonic(alternate);
+			alt = gtkChgMnemonic( (char *) alternate);
 			nw->butt[ 2 ] = gtk_button_new_with_mnemonic (alt);
 			gtk_widget_show (nw->butt[ 2 ]);
 			gtk_box_pack_start (GTK_BOX (hbox1), nw->butt[ 2 ], TRUE, TRUE, 0);
@@ -813,7 +813,7 @@ Alarm for <count> milliseconds.
 	gtkPaused = TRUE;
 	if (alarmTimer)
 		gtk_timeout_remove( alarmTimer );
-	alarmTimer = gtk_timeout_add( count, doAlarm, (GtkFunction)func );
+	alarmTimer = gtk_timeout_add( count, doAlarm, (void *) (GtkFunction)func );
 }
 
 
