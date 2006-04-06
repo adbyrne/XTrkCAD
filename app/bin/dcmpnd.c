@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcmpnd.c,v 1.1 2005-12-07 15:47:01 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcmpnd.c,v 1.2 2006-04-06 15:19:07 m_fischer Exp $
  *
  * Compound tracks: Turnouts and Structures
  *
@@ -163,7 +163,7 @@ void DoUpdateTitles( void )
 		return;
 	if (updateTitleW == NULL) {
 		ParamRegister( &updateTitlePG );
-		updateTitlePLs[I_UPDATELOAD].valueP = ParamFilesInit();
+		updateTitlePLs[I_UPDATELOAD].valueP = (void*)ParamFilesInit();
 		updateTitleW = ParamCreateDialog( &updateTitlePG, MakeWindowTitle("Update Title"), "Update", UpdateTitleUpdate, UpdateTitleCancel, TRUE, NULL, 0, NULL );
 		RegisterChangeNotification( UpdateTitleChange );
 	}

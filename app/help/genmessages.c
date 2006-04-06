@@ -21,6 +21,9 @@
 #ifdef WINDOWS
 #include <stdlib.h>
 #endif
+#if defined (__sun) && defined (__SVR4)
+#include <stdlib.h>
+#endif
 
 
 typedef struct helpMsg_t * helpMsg_p;

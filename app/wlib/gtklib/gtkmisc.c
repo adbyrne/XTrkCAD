@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.4 2006-03-29 19:36:39 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.5 2006-04-06 15:19:08 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -774,23 +774,6 @@ EXPORT wBool_t gtkHandleAccelKey(
 static wBool_t gtkPaused = FALSE;
 static int alarmTimer = 0;
 
-#ifdef ALTPAUSE
-static void (*oldAlarm)(int);
-
-void pauseAlarm( int sig )
-{
-	if (gtkPaused) {
-		gtkPaused = FALSE;
-		gtk_window_return(0);
-	}
-	signal( SIGALRM, oldAlarm );
-}
-
-
-Frame wPauseF = 0;
-#endif
-
-
 static gint doAlarm(
 		gpointer data )
 {
@@ -845,42 +828,24 @@ EXPORT void wPause(
 Pause for <count> milliseconds.
 */
 {
-#ifdef ALTPAUSE
-	struct itimerval itimer;
-	int rc;
-	itimer.it_value.tv_sec = count / 1000;
-	itimer.it_value.tv_usec = count % 1000;
-	itimer.it_interval.tv_sec = 0;
-	itimer.it_interval.tv_usec = 0;
-	oldAlarm = signal( SIGALRM, pauseAlarm );
-	if ((int)oldAlarm < 0) {
-		perror( "wPause:signal" );
-		return;
-	}
-	gtkPaused = TRUE;
-	rc = setitimer( ITIMER_REAL, &itimer, NULL );
-	if (rc == -1) {
-		perror( "wPause:setitimer" );
-		return;
-	}
-	gtk_window_loop( wPauseF );
-
-#else
 	struct timeval timeout;
-	int mask, oldmask;
-
+	sigset_t signal_mask;
+	sigset_t oldsignal_mask;
+	
 	if (gdk_display)
 		XFlush( gdk_display );
 	timeout.tv_sec = count/1000;
 	timeout.tv_usec = (count%1000)*1000;
-	mask = sigmask(SIGIO);
-	mask |= sigmask(SIGALRM);
-	oldmask = sigblock(mask);
+	
+	sigemptyset( &signal_mask );
+	sigaddset( &signal_mask, SIGIO );
+	sigaddset( &signal_mask, SIGALRM );	
+	sigprocmask( SIG_BLOCK, &signal_mask, &oldsignal_mask );
+	
 	if (select( 0, NULL, NULL, NULL, &timeout ) == -1) {
 		perror("wPause:select");
 	}
-	sigsetmask(oldmask);
-#endif
+	sigprocmask( SIG_BLOCK, &oldsignal_mask, NULL );
 }
 
 

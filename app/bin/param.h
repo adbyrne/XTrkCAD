@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.h,v 1.1 2005-12-07 15:47:33 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.h,v 1.2 2006-04-06 15:19:07 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -72,8 +72,8 @@ typedef enum {
 #define PDO_DLGCMDBUTTON		(1L<<27)
 #define PDO_DLGIGNORE			(1L<<28)
 
-#define PDO_DLGRESIZEW			(1L<<30)
-#define PDO_DLGRESIZEH			(1L<<31)
+#define PDO_DLGRESIZEW			(1L<<29)
+#define PDO_DLGRESIZEH			(1L<<30)
 #define PDO_DLGRESIZE			(PDO_DLGRESIZEW|PDO_DLGRESIZEH)
 
 #define PDO_NOACT		(PDO_NOPSHACT|PDO_NOUPDACT)
@@ -218,7 +218,7 @@ extern BOOL_T paramTogglePlaybackHilite;
 		(PD).valueP = FUNC; \
 		if ( HS ) GetBalloonHelpStr(HS);
 
-#define PD_F_ALT_CANCELLABEL	(1L<<31)
+#define PD_F_ALT_CANCELLABEL	(1L<<30)
 wWin_p ParamCreateDialog( paramGroup_p, char *, char *, paramActionOkProc, paramActionCancelProc, BOOL_T, paramLayoutProc, long, paramChangeProc );
 void ParamCreateControls( paramGroup_p, paramChangeProc );
 void ParamLayoutDialog( paramGroup_p );

@@ -18,6 +18,9 @@
  */
 
 #include <stdio.h>
+#if defined (__sun) && defined (__SVR4)
+#include <stdlib.h>
+#endif
 
 int main ( int argc, char * argv[] ) {
 

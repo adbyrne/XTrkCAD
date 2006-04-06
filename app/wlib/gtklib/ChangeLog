@@ -1,3 +1,7 @@
+Mar, 30th 2006	
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtkmisc.c: changed wPause to use SYSV signal handling funtions	
+
 Mar, 29th 2006	
 	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		gtkmisc.c, gtkbutton.c, gtksimple.c: small changes to help Solaris port

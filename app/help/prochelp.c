@@ -21,6 +21,9 @@
 #include <string.h>
 #include <math.h>
 #include <stdlib.h>
+#if defined (__sun) && defined (__SVR4)
+#include <ctype.h>
+#endif
 #include "readpng.h"
 
 #define PROGNAME	"prochelp"
@@ -479,12 +482,12 @@ void dumpBytes( char * buff, long size, FILE * outF )
 }
 
 
-void conv24to8( long * colorTab, char * buff, int channels, int width24, int width8, int height )
+void conv24to8( long * colorTab, unsigned char * buff, int channels, int width24, int width8, int height )
 {
 	long * lastColor, *cp;
 	long color;
-	char * ip;
-	char *op;
+	unsigned char * ip;
+	unsigned char *op;
 	int h, w;
 	lastColor = colorTab;
 	memset( colorTab, 0, 1024 );
@@ -493,18 +496,18 @@ void conv24to8( long * colorTab, char * buff, int channels, int width24, int wid
 		ip = buff+(width24*h);
 		op = buff+(width8*h);
 		for (w=0; w<width24; w+=channels,op++ ) {
-			color = ((long)(unsigned char)(ip[0]))<<16;
-			color += ((long)(unsigned char)(ip[1]))<<8;
-			color += ((long)(unsigned char)(ip[2]));
+			color =  ((long)(ip[0]))<<16;
+			color += ((long)(ip[1]))<<8;
+			color += ((long)(ip[2]));
 			ip += channels;
 			for ( cp=colorTab; cp<lastColor; cp++ ) {
 				if (color == *cp) {
-					*op = (char)(cp-colorTab);
+					*op = (unsigned char)(cp-colorTab);
 					goto nextPixel;
 				}
 			}
 			if (lastColor < &colorTab[256]) {
-				*op = (char)(lastColor-colorTab);
+				*op = (unsigned char)(lastColor-colorTab);
 				*lastColor++ = color;
 			} else {
 				*op = 0;
@@ -720,7 +723,8 @@ void dumpPng(
 {
 	FILE * pngF;
 	int rc;
-	unsigned long image_width, image_height, image_rowbytes, width8, h;
+	unsigned long image_rowbytes, width8, h;
+	long image_width, image_height;
 	int image_channels;
 	unsigned char * image_data;
 	double display_exponent = 1.0;
@@ -744,7 +748,7 @@ void dumpPng(
 		perror( fileName );
 		return;
 	}
-        if ((rc = readpng_init(pngF, &image_width, &image_height)) != 0) {
+        if ((rc = readpng_init(pngF, (long *) &image_width, (long *) &image_height)) != 0) {
             switch (rc) {
                 case 1:
                     fprintf(stderr, PROGNAME
@@ -788,10 +792,10 @@ void dumpPng(
 	fprintf( outF, "28000000%0.8lx%0.8lx%0.4x%0.4x000000000000000000000000000000000000000000000000\n",
 		L(image_width), L(image_height), S(bmih_planes), S(8/*bmih.colors*/) );
 	width8 = ((image_width+3)/4)*4;
-	conv24to8( colorTab, image_data, image_channels, image_width*image_channels, width8, image_height );
-	dumpBytes( (char*)colorTab, 1024, outF );
+	conv24to8( colorTab, (char *) image_data, image_channels, image_width*image_channels, width8, image_height );
+	dumpBytes( (char *)colorTab, 1024, outF );
 	for ( h=0; h<image_height; h++ ) {
-		dumpBytes( image_data+(h)*width8, (int)width8, outF );
+		dumpBytes( (char *) image_data+(h)*width8, (int)width8, outF );
 	}
 	fprintf( outF, "030000000000\n" );
 	fprintf( outF, "}\n" );

@@ -2,7 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-
+#if defined (__sun) && defined (__SVR4)
+#include <ctype.h>
+#endif
 
 int dumpUnknownRoadnames;
 int updateRoadnames;
