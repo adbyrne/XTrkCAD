@@ -55,9 +55,8 @@ static double FindCenter(
 static void buildDesignerLines( FILE * inf, FILE * outf )
 {
 	char line[80];
-	int i, j;
-	int num;
-	int maxY;
+	int j;
+	double num;
 	double radius;
 	coOrd p0, p1, q0, q1, pc;
 	double a0, a1;

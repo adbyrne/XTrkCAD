@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.5 2006-05-26 14:21:40 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.6 2006-05-26 17:31:44 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -35,9 +35,12 @@
 #ifdef WINDOWS
 #include <io.h>
 #include <windows.h>
+	#if _MSC_VER >=1400
+		#define strdup _strdup
+	#endif
 #else
-#include <sys/stat.h>
 #endif
+#include <sys/stat.h>
 #include <stdarg.h>
 #include <locale.h>
 

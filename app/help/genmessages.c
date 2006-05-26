@@ -20,6 +20,9 @@
 #include <string.h>
 #ifdef WINDOWS
 #include <stdlib.h>
+	#if _MSC_VER >=1400
+		#define strdup _strdup
+	#endif
 #endif
 #if defined (__sun) && defined (__SVR4)
 #include <stdlib.h>

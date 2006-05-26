@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/lprintf.c,v 1.1 2005-12-07 15:47:28 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/lprintf.c,v 1.2 2006-05-26 17:31:44 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -43,7 +43,7 @@ EXPORT dynArr_t logTable_da;
 
 static FILE * logFile;
 static char * logFileName;
-EXPORT long logClock = 0;
+EXPORT time_t logClock = 0;
 static BOOL_T logInitted = FALSE;
 static long logLineNumber;
 

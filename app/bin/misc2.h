@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.h,v 1.2 2006-02-22 19:20:11 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.h,v 1.3 2006-05-26 17:31:44 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -38,7 +38,7 @@ typedef struct {
 		} logTable_t;
 extern dynArr_t logTable_da;
 #define logTable(N) DYNARR_N( logTable_t, logTable_da, N )
-long logClock;
+time_t logClock;
 void LogOpen( char * );
 void LogClose( void );
 void LogSet( char *, int );

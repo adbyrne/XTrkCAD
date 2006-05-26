@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.1 2005-12-07 15:47:01 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.2 2006-05-26 17:31:44 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -109,7 +109,7 @@ static void ComputePause( void )
 	struct _timeb tim;
 	long secs, msecs;
 	_ftime( &tim );
-	secs = tim.time - lastTim.time;
+	secs = (long)(tim.time - lastTim.time);
 	if (secs > 10 || secs < 0)
 		return;
 	msecs = secs * 1000;

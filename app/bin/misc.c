@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.7 2006-04-06 15:19:07 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.8 2006-05-26 17:31:44 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -36,6 +36,9 @@
 #include <windows.h>
 #define R_OK (02)
 #define access _access
+#if _MSC_VER >1300
+	#define strdup _strdup
+#endif
 #else
 #include <sys/stat.h>
 #endif

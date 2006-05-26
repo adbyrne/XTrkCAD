@@ -68,7 +68,7 @@ void process( mode_e mode, FILE * inFile, FILE * outFile )
 		lineNum++;
 		if (line[0] == '#')
 			continue;
-		len = strlen( line );
+		len = (int)strlen( line );
 		if (line[len-1] == '\n' ) len--;
 		if (line[len-1] == '\r' ) len--;
 		line[len] = '\0';

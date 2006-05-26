@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/compound.c,v 1.1 2005-12-07 15:47:08 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/compound.c,v 1.2 2006-05-26 17:31:44 m_fischer Exp $
  *
  * Compound tracks: Turnouts and Structures
  *
@@ -28,7 +28,9 @@
 #include "compound.h"
 #include "shrtpath.h"
 #include "cjoin.h"
-
+#if _MSC_VER >=1400
+#define strdup _strdup
+#endif
 
 /*****************************************************************************
  *

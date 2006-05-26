@@ -7,6 +7,10 @@
 #include <stdio.h>
 #include "mswint.h"
 
+#if _MSC_VER >=1400
+	#define stricmp _stricmp
+#endif
+
 char * mswStrdup( const char * );
 static char appLibDirName[1024];
 static char appWorkDirName[1024];
