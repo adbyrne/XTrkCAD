@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.4 2006-03-26 12:02:50 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.5 2006-05-26 14:21:40 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -40,7 +40,6 @@
 #endif
 #include <stdarg.h>
 #include <locale.h>
-#include <dirent.h>
 
 #include "track.h"
 #include "version.h"
