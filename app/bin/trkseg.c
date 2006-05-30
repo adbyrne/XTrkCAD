@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/trkseg.c,v 1.1 2005-12-07 15:46:55 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/trkseg.c,v 1.2 2006-05-30 16:11:55 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1571,6 +1571,7 @@ EXPORT void DrawSegsO(
 					color1 = normalColor;
 				if ( segPtr->color == wDrawColorWhite )
 					break;
+				p0.x = p0.y = p1.x = p1.y = 0;
 				DrawCurvedTrack( d,
 					c,
 					fabs(segPtr->u.c.radius),
