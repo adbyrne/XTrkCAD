@@ -1,0 +1,4 @@
+Oct, 13 2006 mswmisc.c 
+	BUGFIX Bob Blackwell 
+		Fixed a problem with 'No' and 'Cancel' buttons being mixed up
+
