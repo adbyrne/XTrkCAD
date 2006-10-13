@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.1 2005-12-07 15:48:57 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.2 2006-10-13 15:33:57 m_fischer Exp $
  */
 
 #include <windows.h>
@@ -1806,7 +1806,7 @@ int wNotice3(
 	res = MessageBox( mswHWnd, msg, "Notice", MB_TASKMODAL|MB_YESNOCANCEL );
 	if ( res == IDOK || res == IDYES )
 		return 1;
-	else if ( res == IDCANCEL )
+	else if ( res == IDNO )
 		return -1;
 	else
 		return 0;
