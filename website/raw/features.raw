@@ -1,0 +1,31 @@
+@TITLE=Features@
+
+$Date: 2007-01-06 17:23:27 $
+<div class="title">Main Features of XTrkCAD</div>
+	<p>
+		<span class="hilite">XTrkCad</span> makes designing a model railroad layout
+		easy. Main features of <span class="hilite">XTrkCad</span> are:
+		<ul>
+			<li>support for any scale or gauge
+			<li>on-line demonstrations, extensive help, tips and error message explanations 
+			<li>straight and curved flex-track segments 
+			<li>turnouts, crossings (and sectional track such as Atlas Snaptrack) 
+			<li>parallel straight and curved tracks 
+			<li>turntables (user defined diameter and angles) 
+			<li>track circles and tangent tracks 
+			<li>two tracks either by moving the track or by adding flextrack
+			<li>automatic easement calculation 
+			<li>tunnels (hidden tracks) 
+			<li>undo the last ten commands 
+			<li>direct manipulation of track position or dimensions from keyboard
+			<li>moving and rotating any group of objects 
+			<li>drawing lines, arcs and filled shapes (for showing river edges etc.) 
+			<li>drawing table edges, bench work and dimension lines 
+			<li>annotation with text and notes 
+			<li>on-screen ruler for measurements 
+			<li>printout of trackplan in any scale, even fullsize
+			<li>inventory of rolling stock 
+			<li>train simulation
+			<li>up to 99 layers
+		</ul>
+	</p>

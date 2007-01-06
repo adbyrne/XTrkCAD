@@ -1,0 +1,84 @@
+@TITLE=File Formats@
+
+$Date: 2007-01-06 17:23:27 $
+
+<div class="title">Scale Definition</div>
+	<p>
+	The SCALE definition looks like:
+	
+		<div class="code"><pre>
+
+SCALE O, 48.0, 1.1770
+      1536,24,960
+      2016,30,1200
+      2592,36,1440
+		</pre></div>
+		<dl>
+			<dt>O</dt>
+			<dd> is the name of the scale,</dd> 
+			<dt>48.0</dt> 
+			<dd> is the ratio and</dd>
+			<dt>1.1770</dt> 
+			<dd>is the track gauge in inches.</dt>
+			<dt>Easement</dt>
+			<dd>
+				The next 3 line define the R, X, and L values for Sharp, Normal and
+				Broad easement curves.  This are in prototype inches. You can copy
+				these from another scale which close to the desired scale.  The exact
+				values are not critical.
+			</dd>
+		</dl>		
+	</p>
+	<div class="author">
+		Posted on Monday 31st October 2005
+	</div>
+
+<div class="title">Parameter File</div>
+	<p>
+	
+		The parameter file is not meant to be edited manually.  However the lines are
+		(and subject to change):
+		<dl>
+			<dt>U</dt>
+		  <dd>
+				this is the information entered on the turnout designer dialog for this
+				definition
+			</dd>
+		  <dt>P</dt>
+			<dd>
+				define the Paths thru the turnout, the numbers specify the track segments,
+				numbered from 1
+			</dd>	
+		  <dt>E</dt>
+			<dd>
+				are the turnout's End-Points (X, Y, Angle)
+			</dd>
+			<dt>S</dt>
+			<dd>
+				is a straight track segment (color, line width,  X1, Y1, X2, Y2)
+			</dd>
+			<dt>C</dt>
+			<dd>
+				is a curved track segment (color, line width,  Radius, Center-X, Center-Y,
+				Starting Angle, Angular Length)
+			</dd>	
+		  <dt>L3</dt>
+			<dd>
+				is a straight line (color, line width, X1, Y1, Z1, X2, Y2, Z2)
+			</dd>	
+		  <dt>A3</dt>
+			<dd>
+				is a curved line (color, line width, Radius, Center-X, Center-Y,
+				Center-Z, Starting Angle, Angular Length)
+				Color and line width are not used for track segments (and are 0)
+				A negative radius in a Curved track segment means the path thru the segment is
+				flipped
+				<br>
+				Color for lines is the RGB value encoded as (Red*65536+Green*256+Blue)
+				Z values are always 0 (for now)
+			</dd>
+		</dl>
+	</p>
+	<div class="author">
+		Posted on 25th February 2001
+	</div>		

@@ -1,0 +1,16 @@
+  </div>
+  <div id="footer">
+		Design and &copy; 2005 Martin Fischer<br>
+		URL: http://xtrkcad-fork.sourceforge.net/@FILENAME@.html<br>			
+		Last update: 
+		@EVAL(" \
+		@mn = ( 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ); \
+		$write=(stat('@FILENAME@.raw'))[9]; \
+		($day, $month, $year)=(localtime((stat('@FILENAME@.raw'))[9]))[3,4,5]; \
+		$mdate = sprintf '%s %02d, %04d', $mn[$month],$day,$year+1900; \
+		")@	
+	</div>
+<!-- Based on a design by Shady-Sock ( http://www.oswd.org/userinfo.phtml?user=Shady-Sock ). Email ( sani.sarip@gmail.com ). -->
+</div>
+</body>
+</html>

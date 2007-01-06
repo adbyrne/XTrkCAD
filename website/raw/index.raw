@@ -1,0 +1,45 @@
+@TITLE=Homepage@
+
+$Date: 2007-01-06 17:23:27 $
+<div class="title">About XTrkCAD</div>
+	<p>
+		<span class="hilite">XTrkCad</span> is a CAD program for designing 
+		model railroad layouts. Using it, you can
+		<ul>
+		<li>design layouts in any scale and gauge,
+		<li>use the predefined libraries for many popular brands of 
+		turnouts to help you get started easily,
+		<li>add your own favorite components, 
+		<li>manipulate track much like you would 
+		with actual flex-track to modify, extend and join tracks 
+		and turnouts,
+		<li>test your design by running trains.
+		</ul>
+		<p>
+		Learning  <span class="hilite">XTrkCad</span> is made easy with the 
+		extensive on-line help and demonstrations. 
+		<br>
+		<span class="hilite">XTrkCad</span> is available on Windows and on LINUX.
+		Being a open source project, you won't even have to pay for it!
+		</p>
+	</p>
+
+<div class="title">News</div>
+<div class="subtitle">Moving in...</div>
+<p>
+    Finally the project started moving into our cyberspace home
+    at Sourceforge.
+</p>
+<div class="author">
+
+    Posted on Wednesday 07th December 2005
+</div>
+<div class="subtitle">Project Started</div>
+<p>
+	This project is a fork of the original <a href="http://www.sillub.com/">
+	open source project</a> that seems to be dormant at the moment.
+</p>
+<div class="author">
+		Posted on Friday 04th November 2005
+</div>
+
