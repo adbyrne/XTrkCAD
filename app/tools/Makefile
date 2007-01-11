@@ -1,8 +1,12 @@
 MISC=Makefile
 SRCS=checkall diffall fetchall markall makeall mkrlse mkrlse.bat roall mkwinrlse
 
-all:
+all: addcrlf src rcssrc
 
+
+addcrlf: addcrlf.c
+	$(CC) -o addcrlf addcrlf.c -lm
+	
 src:
 	@echo $(MISC) $(SRCS)
 
