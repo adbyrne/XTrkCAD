@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/addcrlf.c,v 1.1 2007-01-11 19:26:48 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/addcrlf.c,v 1.2 2007-01-14 16:10:16 m_fischer Exp $
  *
  * convert text by adding / removing cr+lf 
  *
@@ -182,7 +182,7 @@ void
 determineType(char* filename) 
 {
 	FILE *in;
-   char ch;
+   int ch;
 	int crcount = 0;
 	int lfcount = 0;
 	
@@ -193,6 +193,10 @@ determineType(char* filename)
    }
 
    ch = getc( in );
+	if( ch == EOF ) {
+		printf( "Error: file could not be read: %s\n", filename );
+		return;
+	}	
 
    while( !feof( in ))
 	{
