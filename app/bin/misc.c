@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.8 2006-05-26 17:31:44 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.9 2007-01-14 08:43:32 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/compound.c,v 1.2 2006-05-26 17:31:44 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/compound.c,v 1.3 2007-01-14 08:43:32 m_fischer Exp $
  *
  * Compound tracks: Turnouts and Structures
  *

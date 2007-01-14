@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswcolor.c,v 1.1 2005-12-07 15:48:51 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswcolor.c,v 1.2 2007-01-14 08:43:32 m_fischer Exp $
  */
 
 #include <windows.h>
