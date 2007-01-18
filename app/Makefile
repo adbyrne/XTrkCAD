@@ -35,3 +35,12 @@ clean:
 	rm -fr wlib/mswlib/Release
 	rm -fr mswrel
 	find . -name cscope.out -exec rm {} \; 
+	rm -fr srcdox doxygen.log
+
+# the following (re)generates source code documentation.
+# There are a host of dependencis to be properly determined and specified.
+# For now just do it on demand.
+
+.PHONY:  srcdox
+srcdox:
+	doxygen xtrkcad-fork-Doxyfile
