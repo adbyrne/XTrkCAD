@@ -1,10 +1,8 @@
 #
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/Makefile,v 1.2 2006-02-15 21:23:30 rc-flyer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/Makefile,v 1.3 2007-01-18 18:34:54 m_fischer Exp $
 #
 
-#GTKDIR=/usr/src/x/gtk/gtk+-1.0.6
-GTK1INCL=`gtk-config --cflags`
-GTK2INCL=-I/usr/include/gtk-2.0 -I/usr/include/pango-1.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/cairo
+GTKINCL=`pkg-config --cflags gtk+-2.0`
 
 COPTS = -Wall
 CINCLS = -I../include $(GTKINCL)
@@ -80,28 +78,28 @@ update: product debug
 update2: product2 debug2
 
 debug:
-	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTK1INCL)" CFLAGS="-g -DDEBUG -DGTK1" VER=d LIB=gtklibd.a gtklibd.a
+	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-g -DDEBUG -DGTK1" VER=d LIB=gtklibd.a gtklibd.a
 
 product:
-	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTK1INCL)" CFLAGS="-O2 -DFASTRACK -DGTK1" VER= LIB=gtklib.a gtklib.a
+	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-O2 -DFASTRACK -DGTK1" VER= LIB=gtklib.a gtklib.a
 
 profile:
-	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTK1INCL)" CFLAGS="-pg -O2 -DFASTRACK -DGTK1" VER=p LIB=gtklibp.a gtklibp.a
+	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-pg -O2 -DFASTRACK -DGTK1" VER=p LIB=gtklibp.a gtklibp.a
 
 checked:
-	$(MAKE) CC="checkergcc" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTK1INCL)" CFLAGS="-O2 -DFASTRACK -DGTK1" VER=c LIB=gtklibc.a gtklibc.a
+	$(MAKE) CC="checkergcc" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-O2 -DFASTRACK -DGTK1" VER=c LIB=gtklibc.a gtklibc.a
 
 debug2:
-	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTK2INCL)" CFLAGS="-g -DDEBUG" VER=d LIB=gtk2libd.a gtk2libd.a
+	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-g -DDEBUG" VER=d LIB=gtk2libd.a gtk2libd.a
 
 product2:
-	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTK2INCL)" CFLAGS="-O2 -DFASTRACK" VER= LIB=gtk2lib.a gtk2lib.a
+	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-O2 -DFASTRACK" VER= LIB=gtk2lib.a gtk2lib.a
 
 profile2:
-	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTK2INCL)" CFLAGS="-pg -O2 -DFASTRACK" VER=p LIB=gtk2libp.a gtk2libp.a
+	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-pg -O2 -DFASTRACK" VER=p LIB=gtk2libp.a gtk2libp.a
 
 checked2:
-	$(MAKE) CC="checkergcc" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTK2INCL)" CFLAGS="-O2 -DFASTRACK" VER=c LIB=gtk2libc.a gtk2libc.a
+	$(MAKE) CC="checkergcc" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-O2 -DFASTRACK" VER=c LIB=gtk2libc.a gtk2libc.a
 
 gtkfilsel: gtkfilsel.c
 	$(CC) $(CFLAGS) $(CINCLS) -g -DTEST gtkfilsel.c
