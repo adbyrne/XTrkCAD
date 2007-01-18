@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw.c,v 1.1 2005-12-07 15:48:42 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw.c,v 1.2 2007-01-18 19:29:50 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -375,7 +375,7 @@ EXPORT int wLoadFont(
 	fi = gdk_font_load( tmp );
 	/*wWinSetBusy( bd->parent, FALSE );*/
 	if (fi == 0) {
-		wNotice( tmp, "Can't load!", NULL );
+		fprintf(stderr, "Can't load font %s\n", tmp);
 		return FALSE;
 	}
 	fontCache = fontCache->prev;
