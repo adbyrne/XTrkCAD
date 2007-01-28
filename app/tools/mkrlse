@@ -1,29 +1,36 @@
 #!/bin/sh
 
 if [ $# -lt 1 ] ; then
-	echo mkrlse RLSE
+	echo
+	echo ERROR: Execute with $0 rel
+	echo
+	echo Example: $0 401
+	echo where \<401\> is the release of XTrkCad to be packaged. 
+	echo During execution of this script, the directory xtrkcad-\<rel\> is 
+	echo created and all necessary files are collected into that directory.
+	echo After that RPM is run to build the install package. After successful
+	echo build, the files are deleted again.
+	echo
+	echo Execute from directory xtrkcad\\4.0.0
+	echo
 	exit 1
 fi
 RLSE=$1
-if [ \! -d ~/xtrkcad/$RLSE ] ; then
-	echo ~/xtrkcad/$RLSE does not exist
-	exit 1
-fi
+DEST=xtrkcad-$RLSE
 
-cd ~/xtrkcad/$RLSE
-rm -fr install xtrkcad
 mkdir xtrkcad
 mkdir xtrkcad/demos
 mkdir xtrkcad/examples
 mkdir xtrkcad/html
 mkdir xtrkcad/params
+
+
 cp lib/xtrkcad.xtq xtrkcad/
 cp lib/xtrkcad.bug xtrkcad/
 cp lib/xtrkcad.enh xtrkcad/
 cp lib/xtrkcad.fix xtrkcad/
 cp lib/xtrkcad.upd xtrkcad/
-cp lib/register.* xtrkcad/
-cp lib/aareadme.txt xtrkcad/
+cp lib/aareadme.txt xtrkcad/Readme.txt
 cp help/xtrkcad.help xtrkcad/
 cp help/xtrkcad.tip xtrkcad/
 cp lib/examples/*.xtc xtrkcad/examples/
@@ -34,12 +41,29 @@ cp bin/xtc64.xpm xtrkcad/
 #cp bin/xtrkcad-libc5 xtrkcad/
 cp help/html/*.html xtrkcad/html/
 cp help/html/*.png xtrkcad/html/
+cp COPYING xtrkcad/
 chmod 444 xtrkcad/*/*
-chmod 444 xtrkcad/{aareadme.txt,register.*,xtc64.xpm,xtrkcad.*}
+chmod 444 xtrkcad/{Readme.txt,COPYING,xtc64.xpm,xtrkcad.*}
 chmod 777 xtrkcad/{demos,examples,html,params}
 chmod 555 xtrkcad/xtrkcad
 RLSE=`echo $RLSE | sed -e 's/r//' -e 's/_/./g'`
-tar cvfz xtrkcad-linux-elf.${RLSE}.tar.gz xtrkcad
+echo Release ist $RLSE
+tar cvfz  xtrkcad-linux-elf.${RLSE}.tar.gz xtrkcad 
 
-cd lib
-make rpm
+D=`pwd`; # D=`dirname $D`; D=`basename $D`;
+echo D = $D
+V=`echo $RLSE | sed -e 's/^r//' -e 's/_/./g'`;
+echo V = $V
+sed -e "s#RLSEDIR#$D#g" -e "s#RLSEVER#$V#g"  lib/xtrkcad.spec.head > ./xtrkcad.spec
+
+find xtrkcad -type f -print | sed 's/^/\/usr\/local\/lib\//' | sed '/html/s/^/%doc /' | sed '/xtrkcad.help/s/^/%doc /'>> ./xtrkcad.spec
+
+mkdir -p ./install/usr/local/lib
+mv  ./xtrkcad ./install/usr/local/lib/xtrkcad
+rpmbuild -bb xtrkcad.spec
+mkdir $DEST
+mv ./install/xtrkcad*\.rpm ./$DEST
+mv ./xtrkcad-linux-elf.${RLSE}.tar.gz ./$DEST
+
+rm -rf ./install
+rm -f xtrkcad.spec

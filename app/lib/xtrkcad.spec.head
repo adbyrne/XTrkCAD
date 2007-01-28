@@ -1,13 +1,13 @@
-BuildRoot: /home/jbayer/xtrkcad/RLSEDIR/install
+BuildRoot: RLSEDIR/install
 Name: xtrkcad
 Version: RLSEVER
 Release: 1
 Summary: XTrkCad Model Railroad CAD
-License: commercial
+License: GPL
 Group: Applications/Engineering
-Vendor: Sillub Technology
+Vendor: XTrkCad Fork Project
 
-%define _rpmdir /home/jbayer/xtrkcad/RLSEDIR/install/
+%define _rpmdir RLSEDIR/install/
 %define _rpmfilename %%{NAME}-%%{VERSION}-%%{RELEASE}.%%{ARCH}.rpm
 
 %pre
