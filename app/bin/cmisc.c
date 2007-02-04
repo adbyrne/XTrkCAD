@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+/** \file cmisc.c
+ * Handlimg of the 'Describe' dialog
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.3 2007-02-04 17:06:24 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -269,6 +271,17 @@ static void DescribeLayout(
 }
 
 
+/**
+ * Creation and modification of the Describe dialog box is handled here. As the number
+ * of values for a track element depends on the specific type, this dialog is dynamically
+ * updated to hsow the changable parameters only
+ * 
+ * \param IN title Description of the selected part, shown in window title bar
+ * \param IN trk Track element to be described
+ * \param IN data
+ * \param IN update
+ *
+ */
 void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update )
 {
 	int inx;

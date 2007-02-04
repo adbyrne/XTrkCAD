@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.1 2005-12-07 15:47:33 rc-flyer Exp $
+/** \file param.c
+ * Handle all the dialog box creation stuff.
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.2 2007-02-04 17:06:24 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -632,6 +634,9 @@ EXPORT void ParamLoadControl(
 }
 
 
+/** Load all the controls in a parameter group.
+* \param IN pointer to parameter group to be loaded
+*/
 EXPORT void ParamLoadControls(
 		paramGroup_p pg )
 {
@@ -2591,6 +2596,10 @@ EXPORT wWin_p ParamCreateDialog(
 }
 
 
+/** Resize dialog window for the contained fields. 
+* \param IN OUT Prameter Group
+*
+*/
 EXPORT void ParamLayoutDialog(
 		paramGroup_p pg )
 {
