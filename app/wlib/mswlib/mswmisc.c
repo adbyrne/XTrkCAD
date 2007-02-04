@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.2 2006-10-13 15:33:57 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.3 2007-02-04 17:13:34 m_fischer Exp $
  */
 
 #include <windows.h>
@@ -2263,7 +2263,7 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	int inx;
 	wWin_p w;
-	wControl_p b;
+	wControl_p b, oldW;
 	int child = ((GetWindowLong( hWnd, GWL_STYLE) & WS_CHILD) != 0);
 	POS_T newW, newH;
 	RECT rect;
@@ -2448,14 +2448,21 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 			/* TAB - jump to next control */
 			if ( w->focusChainNext ) {
 				for ( b = w->focusChainNext->focusChainNext;
-					  b!=w->focusChainNext && !IsWindowVisible(b->hWnd) && !IsWindowEnabled(b->hWnd);
-					  b=b->focusChainNext );
+				      b!=w->focusChainNext;
+					  b=b->focusChainNext ) {
+						if( IsWindowVisible(b->hWnd) && IsWindowEnabled(b->hWnd))
+							break;
+				}
+				oldW = w->focusChainNext;
 				w->focusChainNext = b;
 				if (!inMainWndProc) {
 					inMainWndProc = TRUE;
-					SetFocus( b->hWnd );
-					if (b->type == B_BUTTON)
-						InvalidateRect( b->hWnd, NULL, TRUE );
+					SetFocus( b->hWnd );					
+/*					if( b->type == B_BUTTON)
+						InvalidateRect( b->hWnd, NULL, TRUE ); */
+					if( oldW->type == B_BUTTON) 						
+						InvalidateRect( oldW->hWnd, NULL, TRUE );
+
 					inMainWndProc = FALSE;
 				}
 			}
@@ -2463,6 +2470,7 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 		}
 		/* Not a Draw control */
 		MessageBeep( MB_ICONHAND );
+		return 0L;
 		break;					   
 
 	case WM_ENABLE:

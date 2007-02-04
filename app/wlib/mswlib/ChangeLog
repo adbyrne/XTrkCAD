@@ -1,3 +1,8 @@
+Feb, 04th 2007	
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswmisc.c fixed protection fault when Tabbing through describe dialog	
+			  See xtrkcad-fork Bug 1651117
+
 Oct, 13 2006 mswmisc.c 
 	BUGFIX Bob Blackwell 
 		Fixed a problem with 'No' and 'Cancel' buttons being mixed up
