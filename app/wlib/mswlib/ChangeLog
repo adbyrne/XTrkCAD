@@ -1,3 +1,7 @@
+Feb, 05th 2007
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswmisc.c fixed protection fault when pressing ESC in describe dialog
+
 Feb, 04th 2007	
 	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswmisc.c fixed protection fault when Tabbing through describe dialog	

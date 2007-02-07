@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.3 2007-02-04 17:13:34 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.4 2007-02-07 18:18:23 m_fischer Exp $
  */
 
 #include <windows.h>
@@ -2421,6 +2421,7 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 					break;
 				}
 			}
+			mswSetTrigger( (wControl_p)TRIGGER_TIMER, NULL );
 			return 0L;
 		case 0x20:
 			/* SPC - push current button with focus */
