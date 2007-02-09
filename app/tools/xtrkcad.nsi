@@ -98,7 +98,8 @@ Section "XTrkCAD (required)" program
 ;  WriteINIStr "$DOCUMENTS\xtrkcad.ini"	file paramdir "$INSTDIR\params\"				
 
   CreateDirectory "$SMPROGRAMS\XTrkCAD4"
-  CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCAD.lnk" "$INSTDIR\xtrkcad.exe" "" "$INSTDIR\xtrkcad.exe" 0
+  CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad.lnk" "$INSTDIR\xtrkcad.exe" "" "$INSTDIR\xtrkcad.exe" 0
+  CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad Help.lnk" "winhelp.exe" "$INSTDIR\xtrkcad.hlp" "$INSTDIR\xtrkcad.exe" 0
   CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad ReadMe.lnk" "notepad.exe" "$INSTDIR\ReadMe.txt" 	
   CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   
@@ -109,8 +110,8 @@ Section "XTrkCAD (required)" program
   ; Write the uninstall keys for Windows
 
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "DisplayName" "XTrkCAD Model Railroad Design Software"
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "DisplayIcon" '"$INSTDIR\uninstall.exe"'
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "UninstallString" "$INSTDIR\uninstall.exe"
+  WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "DisplayIcon" "$INSTDIR\uninstall.exe"
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "NoModify" 1
   WriteRegDWORD HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "NoRepair" 1
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "URLInfoAbout" "http://www.xtrkcad.org/" 
