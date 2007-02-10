@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkcolor.c,v 1.1 2005-12-07 15:48:44 rc-flyer Exp $
+/** \file gtkcolor.c
+ * code for the color selection dialog and color button
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkcolor.c,v 1.2 2007-02-10 07:30:04 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -19,7 +21,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <malloc.h>
@@ -356,17 +358,17 @@ typedef struct {
 static void doColorButton(
 		void * data )
 {
-	colorData_t * cd = (colorData_t*)data;
+	colorData_t * cd = (colorData_t *)data; 
 	wDrawColor newColor;
 
 	newColor = cd->color;
 	if (wColorSelect( cd->labelStr, &newColor )) {
-		cd->color = newColor;
+		cd->color = newColor; 
 		wColorSelectButtonSetColor( cd->button, newColor );
 		if (cd->valueP)
-			*cd->valueP = newColor;
+			*(cd->valueP) = newColor;
 		if (cd->action)
-			cd->action( cd->data, newColor );
+			cd->action( cd->data, newColor ); 
 	}
 }
 
@@ -388,7 +390,20 @@ wDrawColor wColorSelectButtonGetColor(
 	return ((colorData_t*)((wControl_p)bb)->data)->color;
 }
 
-
+/** Create the button showing the current paint color and starting the color selection dialog. 
+ * \param IN parent parent window
+ * \param IN x x coordinate
+ * \param IN Y y coordinate
+ * \param IN helpStr balloon help string 
+ * \param IN labelStr Button label ???
+ * \param IN option
+ * \param IN width
+ * \param IN valueP Current color ??? 
+ * \param IN action Button callback procedure
+ * \param IN data ???
+ * \return bb handle for created button
+ */
+ 
 wButton_p wColorSelectButtonCreate(
 		wWin_p	parent,
 		wPos_t	x,
@@ -405,7 +420,7 @@ wButton_p wColorSelectButtonCreate(
 	wIcon_p bm;
 	colorData_t * cd;
 	bm = wIconCreateBitMap( square10_width, square10_height, square10_bits, (valueP?*valueP:0) );
-	cd = malloc( sizeof *cd );
+	cd = malloc( sizeof( colorData_t ));
 	cd->valueP = valueP;
 	cd->action = action;
 	cd->data = data;
