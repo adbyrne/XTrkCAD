@@ -24,10 +24,5 @@ Windows:
 
 Outstanding problems:
 
-This version is build against gtk-2 and there is 1 known problem
-
-1) If you expand a window, buttons and messages are truncated at the former boundary
-   Try dragging on the edge of the main window and notice that the buttons on the button bar
-   are truncated.  This might be a problem in wlib/gtklib/gtkwindow.c or gtkmisc.c.
 
 MS-Windows build instructions are pending
