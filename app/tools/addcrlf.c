@@ -1,7 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/addcrlf.c,v 1.2 2007-01-14 16:10:16 m_fischer Exp $
+/**
+ * \file addcrlf.c Convert text between DOS, UNIX and MAC
  *
- * convert text by adding / removing cr+lf 
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/addcrlf.c,v 1.3 2007-02-12 18:54:42 m_fischer Exp $
  *
  * This is heavily based on flip by Craig Stuart Sapp <craig@ccrma.stanford.edu>
  * Web Address:   http://www-ccrma.stanford.edu/~craig/utility/flip/flip.cpp 
