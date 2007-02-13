@@ -1,7 +1,7 @@
 /**
  * \file addcrlf.c Convert text between DOS, UNIX and MAC
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/addcrlf.c,v 1.5 2007-02-13 19:40:06 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/addcrlf.c,v 1.6 2007-02-13 19:43:32 m_fischer Exp $
  *
  * This is heavily based on flip by Craig Stuart Sapp <craig@ccrma.stanford.edu>
  * Web Address:   http://www-ccrma.stanford.edu/~craig/utility/flip/flip.cpp 
@@ -229,7 +229,7 @@ void
 exitUsage( char* commandName ) 
 {
    printf( "\nUsage: %s [-h] | [-t infile] | [[-u|-d|-m] infile outfile]\n"
-           "   Converts ASCII files between Unix, MS-DOS/Windows, or Macintosh newline formats\n\n"
+           "   Converts ASCII file between Unix, MS-DOS/Windows, or Macintosh newline formats\n\n"
            "   Options: \n"
            "      -u  =  convert file to Unix newline format (newline)\n"
            "      -d  =  convert file to MS-DOS/Windows newline format (linefeed + newline)\n"
