@@ -1,7 +1,7 @@
 /**
  * \file addcrlf.c Convert text between DOS, UNIX and MAC
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/addcrlf.c,v 1.3 2007-02-12 18:54:42 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/addcrlf.c,v 1.4 2007-02-13 19:28:26 m_fischer Exp $
  *
  * This is heavily based on flip by Craig Stuart Sapp <craig@ccrma.stanford.edu>
  * Web Address:   http://www-ccrma.stanford.edu/~craig/utility/flip/flip.cpp 
@@ -228,15 +228,15 @@ determineType(char* filename)
 void 
 exitUsage( char* commandName ) 
 {
-   printf( "\nUsage: %s [-h] | [-t infilename] | [[-u|-d|-m] outfilename]\n"
+   printf( "\nUsage: %s [-h] | [-t infilename] | [[-u|-d|-m] infile outfile]\n"
            "   Converts ASCII files between Unix, MS-DOS/Windows, or Macintosh newline formats\n\n"
            "   Options: \n"
-           "      -u  =  convert file(s) to Unix newline format (newline)\n"
-           "      -d  =  convert file(s) to MS-DOS/Windows newline format (linefeed + newline)\n"
-           "      -m  =  convert file(s) to Macintosh newline format (linefeed)\n"
+           "      -u  =  convert file to Unix newline format (newline)\n"
+           "      -d  =  convert file to MS-DOS/Windows newline format (linefeed + newline)\n"
+           "      -m  =  convert file to Macintosh newline format (linefeed)\n"
            "      -t  =  display current file type, no file modifications\n"
-			  "      -h  =  show this help\n", 
-			  commandName );
+	   "      -h  =  show this help\n", 
+	   commandName );
 
    exit(1);
 }

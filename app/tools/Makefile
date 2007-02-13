@@ -5,7 +5,7 @@ all: addcrlf src rcssrc
 
 
 addcrlf: addcrlf.c
-	$(CC) -o addcrlf addcrlf.c -lm
+	$(CC) -g -o addcrlf addcrlf.c -lm
 	
 src:
 	@echo $(MISC) $(SRCS)
