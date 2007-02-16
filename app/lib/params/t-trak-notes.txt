@@ -1,0 +1,16 @@
+CONTENTS T-Trak standard modules
+# Created by Jim Nealand, Kennesaw, GA Feb 2007 jim@casadiego.com
+# Contains module definitions that can be used to determine a T-Trak layout for a show
+# Contains the following module sizes
+# - Single wide 12 1/8 wide by 8.5 deep
+# - Single wide 12 1/8 wide by 8.5 deep with track feeders
+# - Single wide 12 1/8 wide by 8.5 deep with double crossover
+# - Single wide 12 1/8 wide by 12 deep
+# - Single wide 12 1/8 wide by 12 deep with track feeders
+# - Double wide 24 1/4 wide by 12 deep
+# - Double wide 24 1/4 wide by 12 deep with #6 RH Turnout
+# - Double wide 24 1/4 wide by 12 deep with #6 LH Turnout
+# - Junction Module
+# - Triple wide 36 3/8 wide by 18.5 deep with a Turntable (JN custom module)
+# - 8 foot by 30 inch wide banquet table
+#
