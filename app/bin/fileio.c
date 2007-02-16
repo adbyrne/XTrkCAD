@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.6 2006-05-26 17:31:44 m_fischer Exp $
+/** \file fileio.c
+ * Loading and saving files. Handles trackplans as well as DXF export. 
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.7 2007-02-16 07:24:15 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -162,13 +164,27 @@ EXPORT char * GetNextLine( void )
 }
 
 
-EXPORT void InputError(
+/**
+ * Show an error message if problems occur during loading of a param or layout file. 
+ * The user has the choice to cancel the operation or to continue. If operation is
+ * canceled the open file is closed.
+ *
+ * \param IN msg error message
+ * \param IN showLine set to true if current line should be included in error message
+ * \param IN ... variable number additional error information
+ * \return TRUE to continue, FALSE to abort operation
+ *
+ */
+ 
+EXPORT int InputError(
 		char * msg,
 		BOOL_T showLine,
 		... )
 {
 	va_list ap;
 	char * mp = message;
+	int ret;
+	
 	mp += sprintf( message, "INPUT ERROR: %s:%d\n",
 		paramFileName, paramLineNum );
 	va_start( ap, showLine );
@@ -179,10 +195,12 @@ EXPORT void InputError(
 		strcpy( mp, paramLine );
 	}
 	strcat( mp, "\nDo you want to continue?" );
-	if (!wNotice( message, "Continue", "Stop" )) {
-		if ( paramFile ) fclose(paramFile);
+	if (!(ret = wNotice( message, "Continue", "Stop" ))) {
+		if ( paramFile )
+			fclose(paramFile);
 		paramFile = NULL;
 	}
+	return ret;
 }
 
 
@@ -574,6 +592,11 @@ EXPORT char * PutTitle( char * cp )
 	return title;
 }
 
+/**
+ * Set the title of the main window. After loading a file or changing a design
+ * this function is called to set the filename and the changed mark in the title
+ * bar.
+ */
 
 void SetWindowTitle( void )
 {
@@ -602,6 +625,16 @@ static paramGroup_t checkPointingPG = { "checkpoint", 0, checkPointingPLs, sizeo
 static char * checkPtFileName1;
 static char * checkPtFileName2;
 
+/** Read the layout design.
+ *
+ * \param IN pathName filename including directory
+ * \param IN fileName pointer to filename part in pathName
+ * \param IN full
+ * \param IN noSetCurDir if FALSE current diurectory is changed to file location
+ * \param IN complain  if FALSE error messages are supressed
+ *
+ * \return FALSE in case of load error
+ */
 
 static BOOL_T ReadTrackFile(
 		const char * pathName,
@@ -615,6 +648,7 @@ static BOOL_T ReadTrackFile(
 	long scale;
 	char * cp;
 	char *oldLocale = NULL;
+	int ret = TRUE;
 	
 	oldLocale = setlocale( LC_ALL, "C" );
 
@@ -624,13 +658,7 @@ static BOOL_T ReadTrackFile(
 			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "XTrkCad", pathName, strerror(errno) );
 		return FALSE;
 	}
-	if (!noSetCurDir)
-		SetCurDir( pathName, fileName );
-	if (full) {
-		strcpy( curPathName, pathName );
-		curFileName = &curPathName[fileName-pathName];
-		SetWindowTitle();
-	}
+
 	paramLineNum = 0;
 	strcpy( paramFileName, fileName );
 
@@ -645,7 +673,8 @@ static BOOL_T ReadTrackFile(
 		paramLineNum++;
 		if (strlen(paramLine) == (sizeof paramLine) -1 &&
 			paramLine[(sizeof paramLine)-1] != '\n') {
-			InputError( "Line too long", TRUE );
+			if( !(ret = InputError( "Line too long", TRUE )))				
+				break;
 		}
 		Stripcr( paramLine );
 		if (paramLine[0] == '#' ||
@@ -676,7 +705,8 @@ static BOOL_T ReadTrackFile(
 				break;
 			}
 		} else if (!full) {
-			InputError( "unknown command", TRUE );
+			if( !(ret = InputError( "unknown command", TRUE )))
+				break;
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
 			strcpy( Title1, &paramLine[7] );
 			/*wStringSetValue( title1PD.control, Title1 );*/
@@ -689,11 +719,13 @@ static BOOL_T ReadTrackFile(
 				/*wFloatSetValue( roomSizeXPD.control, PutDim(roomSize.x) );*/
 				/*wFloatSetValue( roomSizeYPD.control, PutDim(roomSize.y) );*/
 			} else {
-				InputError( "ROOMSIZE: bad value", TRUE );
+				if( !(ret = InputError( "ROOMSIZE: bad value", TRUE )))
+					break;
 			}
 		} else if (strncmp( paramLine, "SCALE ", 6 ) == 0) {
 			if ( !DoSetScale( paramLine+5 ) ) {
-				InputError( "SCALE: bad value", TRUE );
+				if( !(ret = InputError( "SCALE: bad value", TRUE )))
+					break;
 			}
 		} else if (strncmp( paramLine, "MAPSCALE ", 9 ) == 0) {
 			scale = atol( paramLine+9 );
@@ -703,16 +735,30 @@ static BOOL_T ReadTrackFile(
 		} else if (strncmp( paramLine, "LAYERS ", 7 ) == 0) {
 			ReadLayers( paramLine+7 );
 		} else {
-			InputError( "unknown command", TRUE );
+			if( !(ret = InputError( "unknown command", TRUE )))
+				break;
 		}
 	}
-	if (paramFile)fclose(paramFile);
+	
+	if (paramFile)
+		fclose(paramFile);
+
+	if( ret ) {
+		if (!noSetCurDir)
+			SetCurDir( pathName, fileName );
+
+		if (full) {
+			strcpy( curPathName, pathName );
+			curFileName = &curPathName[fileName-pathName];
+			SetWindowTitle();
+		}
+	}	
 
 	if( oldLocale ) setlocale( LC_ALL, oldLocale );
 	
 	paramFile = NULL;
 	InfoMessage( "%d", count );
-	return TRUE;
+	return ret;
 }
 
 
@@ -893,14 +939,13 @@ EXPORT void DoCheckPoint( void )
 	wHide( checkPointingW );
 }
 
-/* \brief Remove all temporary files before exiting
+/* Remove all temporary files before exiting.When the program terminates 
+ * normally through the exit choice, files that are created temporarily are removed: 
+ * xtrkcad.ckp
  *
  * \param none
  * \return none
  *
- * When the program terminates normally through the exit choice, files 
- * that are created temporarily are removed: xtrkcad.ckp
- * 
  */
  
 EXPORT void CleanupFiles( void )
@@ -909,13 +954,11 @@ EXPORT void CleanupFiles( void )
 		remove( checkPtFileName1 );
 }	
 
-/* \brief Check for existance of checkpoint file 
+/* Check for existance of checkpoint file. Existance of a checkpoint file means that XTrkCAD was not properly 
+ * terminated.
  *
  * \param none
  * \return TRUE if exists, FALSE otherwise
- *
- * Existance of a checkpoint file means that XTrkCAD was not properly 
- * terminated.
  * 
  */
 

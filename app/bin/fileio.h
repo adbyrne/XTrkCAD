@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.h,v 1.2 2006-03-26 12:02:50 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.h,v 1.3 2007-02-16 07:24:15 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -64,7 +64,7 @@ char * GetNextLine( void );
 
 BOOL_T GetArgs( char *, char *, ... );
 BOOL_T ParseRoomSize( char *, coOrd * );
-void InputError( char *, BOOL_T, ... );
+int InputError( char *, BOOL_T, ... );
 void SyntaxError( char *, wIndex_t, wIndex_t );
 
 void AddParam( char *, readParam_t );
