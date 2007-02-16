@@ -144,8 +144,8 @@ cmdWidth0	Draw tracks with thin lines	editM
 cmdWidth2	Draw tracks with medium lines	editM
 cmdWidth3	Draw tracks with thick lines	editM
 cmdZoom	Change drawing scale	editZoom
-cmdZoomIn	Decrease drawing scale	editZoomIn
-cmdZoomOut	Increase drawing scale	editZoomOut
+cmdZoomIn	Zoom in	editZoomIn
+cmdZoomOut	Zoom out	editZoomOut
 #
 #
 menuFile	File Menu
@@ -159,8 +159,8 @@ menuFile-revert	Revert to last saved state of layout plan
 #
 editM	Edit menu
 menuEdit-redraw	Redraw layout
-menuEdit-zoomIn	Increase drawing scale
-menuEdit-zoomOut	Decrease drawing scale
+menuEdit-zoomIn	Zoom in
+menuEdit-zoomOut	Zoom out
 #
 toolsM	Tools menu
 #
