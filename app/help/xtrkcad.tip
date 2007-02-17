@@ -7,8 +7,7 @@ A number of example layouts are provided.  These files are located in the 'examp
 
 When installed, the program measures all units in inches.  You can change this on the "Options|Preferences" dialog by changing the Units item to Metric instead of English.
 
-You can change the overall size of your layout on the "Options|Layout" dialog.\
-Note: unregistered users are restricted to a maximum room size of 96 by 48 inches.
+You can change the overall size of your layout on the "Options|Layout" dialog.
 
 When installed, the default command is the Describe command.  More experienced users will probably want to change this to the Select command.  You can do this on the "Options|Command Options" dialog.
 
@@ -162,9 +161,9 @@ Use the Train Odometer to measure distances along the track.
 Holding down the Shift key when clicking the Zoom In or Zoom Out button will zoom to a programmed Drawing Scale.  \
 Holding down the Shift and Control keys when clicking a Zoom button will set it's program Zoom to the current Drawing Scale.
 
-You can trim the ends of Turnous by holding down the Shift key when using the Split command.
+You can trim the ends of turnouts by holding down the Shift key when using the Split command.
 
-The Split command can be used to create Block Gaps at End-Points between two tracks.  \
+The Split command can be used to create Block Gaps at end points between two tracks.  \
 Either rail or both rails can be gapped, which are drawn as thick lines.
 
 Trains will 'crash' if they hit another car when travelling faster than the 'Max Coupling Speed' (on the Command Options dialog).  \
@@ -197,7 +196,7 @@ Lengths and distances cn be displayed in a variety of units and formats such as 
 
 Tracks that are too steep or curve too tightly are drawn in the Expection color (Purple by default).  \
 This helps to identify potential problem areas.  \
-The Maximum Grade and Minimum Radius are set on the Preferences dialog.
+The maximum grade and minimum radius are set on the Preferences dialog.
 
 The Flip command produces a mirror-image of the selected tracks.  \
 If possible, right-hand turnouts are relabeled as left-hand turnouts (and vice versa).
