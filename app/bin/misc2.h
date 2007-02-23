@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.h,v 1.3 2006-05-26 17:31:44 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.h,v 1.4 2007-02-23 16:50:03 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -62,10 +62,17 @@ typedef struct {
 		} tieData_t, *tieData_p;
 DIST_T GetScaleTrackGauge( SCALEINX_T );
 DIST_T GetScaleRatio( SCALEINX_T );
+DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi );
 char * GetScaleName( SCALEINX_T );
+SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx );
+
+char *GetScaleDesc( SCALEDESCINX_T inx );
+char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx );
 void GetScaleEasementValues( DIST_T *, DIST_T * );
 tieData_p GetScaleTieData( SCALEINX_T );
 SCALEINX_T LookupScale( const char * );
+BOOL_T GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *gaugeInx);
+
 BOOL_T DoSetScale( const char * );
 
 void SetScaleGauge( SCALEDESCINX_T, GAUGEINX_T );

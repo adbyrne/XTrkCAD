@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.3 2006-03-26 12:02:50 m_fischer Exp $
+/** \file misc2.c
+ * Management of information about scales and gauges plus rprintf.
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.4 2007-02-23 16:50:03 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -174,10 +176,10 @@ EXPORT long includeSameGaugeTurnouts = FALSE;
 static SCALEINX_T demoScaleInx = -1;
 
 
-/* this struct holds a gauge description */
+/** this struct holds a gauge description */
 typedef struct {
-		char * gauge;		/* ptr to textual description eg. 'n3' */
-		SCALEINX_T scale;	/* index of complete information in scaleInfo_da */
+		char * gauge;		/** ptr to textual description eg. 'n3' */
+		SCALEINX_T scale;	/** index of complete information in scaleInfo_da */
 		wIndex_t index;
 		} gaugeInfo_t;
 
@@ -185,12 +187,12 @@ EXPORT typedef gaugeInfo_t * gaugeInfo_p;
 
 EXPORT GAUGEINX_T curGaugeInx = -1;
 
-/* this struct holds a scale description */
+/** this struct holds a scale description */
 typedef struct {
-		char *scaleDesc;	/* ptr to textual description eg. 'HO' */
-		SCALEINX_T scale;	/* index of complete information (standard gauge) in scaleInfo_da  */
+		char *scaleDesc;	/** ptr to textual description eg. 'HO' */
+		SCALEINX_T scale;	/** index of complete information (standard gauge) in scaleInfo_da  */
 		wIndex_t index;
-		dynArr_t gauges_da;	/* known gauges to this scale */
+		dynArr_t gauges_da;	/** known gauges to this scale */
 		} scaleDesc_t;
 
 EXPORT typedef scaleDesc_t *scaleDesc_p;
@@ -198,7 +200,41 @@ static dynArr_t scaleDesc_da;
 #define scaleDesc(N) DYNARR_N( scaleDesc_t, scaleDesc_da, N )
 EXPORT SCALEDESCINX_T curScaleDescInx = -1;
 
+/**
+ * Get the ratio from a scale description. Each member in the list of scale descriptions is
+ * linked to an entry in the simple linear list of all scales/gauges. From there the ratio is
+ * fetched and returned. Note that there is no error checking on parameters!
+ *
+ * \param IN sdi index into list of scale descriptions
+ * \return ratio for scale
+ */
 
+EXPORT DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi )
+{
+	return GetScaleRatio( scaleDesc(sdi).scale );
+}
+
+/**
+ * Get the index into the linear list from a scale description and a gauge. All information about a 
+ * scale/ gauge combination is stored in a linear list. The index in that list for a given scale and the
+ * gauge is returned by this function. Note that there is no error checking on parameters!
+ *
+ * \param IN scaleInx index into list of scale descriptions
+ * \param IN gaugeInx index into list of gauges available for this scale 
+ * \return  index into master list of scale/gauge combinations
+ */
+
+EXPORT SCALEINX_T GetScaleInx( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
+{
+	scaleDesc_t s;
+	gaugeInfo_p g;
+
+	s = scaleDesc(scaleInx);
+   g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
+
+	return g->scale;
+
+}
 EXPORT DIST_T GetScaleTrackGauge( SCALEINX_T si )
 {
 	return scaleInfo(si).gauge;
@@ -251,6 +287,22 @@ EXPORT tieData_p GetScaleTieData( SCALEINX_T si )
 	return &scaleInfo(si).tieData;
 }
 
+EXPORT char *GetScaleDesc( SCALEDESCINX_T inx )
+{
+	return scaleDesc(inx).scaleDesc;
+}
+
+EXPORT char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
+{
+	scaleDesc_t s;
+	gaugeInfo_p g;
+
+	s = scaleDesc(scaleInx);
+   g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
+
+	return g->gauge;
+}
+
 EXPORT SCALEINX_T LookupScale( const char * name )
 {
 	wIndex_t si;
@@ -301,6 +353,45 @@ EXPORT BOOL_T CompatibleScale(
 	return FALSE;
 }
 
+/** Split the scale and the gauge description for a given combination. Eg HOn3 will be 
+ * split to HO and n3.
+ * \param IN scaleInx scale/gauge combination
+ * \param OUT scaleDescInx  scale part
+ * \param OUT gaugeInx gauge part
+ * \return TRUE
+ */
+
+EXPORT BOOL_T
+GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *gaugeInx)
+{
+	int i, j;
+	char *scaleName = GetScaleName( scaleInx );
+	dynArr_t gauges_da;
+	
+	for( i = 0; i < scaleDesc_da.cnt; i++ ) {
+		char *t = strchr( scaleDesc(i).scaleDesc, ' ' );
+		/* are the first characters (which describe the scale) identical? */
+		if( !strncmp( scaleDesc(i).scaleDesc, scaleName, t - scaleDesc(i).scaleDesc )) {
+			/* if yes, are we talking about the same ratio */
+		 	if( scaleInfo(scaleDesc(i).scale).ratio == curScaleRatio ) {
+				/* yes, we found the right scale descriptor, so now look for the gauge */
+				*scaleDescInx = i;
+				gauges_da = scaleDesc(i).gauges_da;
+				*gaugeInx = 0;
+				for( j = 0; j < gauges_da.cnt; j++ ) {
+					gaugeInfo_p ptr = &(DYNARR_N( gaugeInfo_t, gauges_da, j ));
+					if( scaleInfo(ptr->scale).gauge == GetScaleTrackGauge( scaleInx )) {
+						*gaugeInx = j;
+						break;
+					}	
+				}
+				break;
+			}	
+		}
+	}	
+	
+	return TRUE;
+}
 
 static void SetScale(
 		SCALEINX_T newScaleInx )
@@ -323,27 +414,29 @@ static void SetScale(
 	
 	curScaleDescInx = 0;
 	
-	for( i = 0; i < scaleDesc_da.cnt; i++ ) {
-		char *t = strchr( scaleDesc(i).scaleDesc, ' ' );
-		/* are the first characters (which describe the scale) identical? */
-		if( !strncmp( scaleDesc(i).scaleDesc, curScaleName, t - scaleDesc(i).scaleDesc )) {
-			/* if yes, are we talking about the same ratio */
-		 	if( scaleInfo(scaleDesc(i).scale).ratio == curScaleRatio ) {
-				/* yes, we found the right scale descriptor, so now look for the gauge */
-				curScaleDescInx = i;
-				gauges_da = scaleDesc(curScaleDescInx).gauges_da;
-				curGaugeInx = 0;
-				for( j = 0; j < gauges_da.cnt; j++ ) {
-					gaugeInfo_p ptr = &(DYNARR_N( gaugeInfo_t, gauges_da, j ));
-					if( scaleInfo(ptr->scale).gauge == trackGauge ) {
-						curGaugeInx = j;
-						break;
-					}	
-				}
-				break;
-			}	
-		}
-	}	
+	GetScaleGauge( curScaleInx, &curScaleDescInx, &curGaugeInx );
+	
+//	for( i = 0; i < scaleDesc_da.cnt; i++ ) {
+//		char *t = strchr( scaleDesc(i).scaleDesc, ' ' );
+//		/* are the first characters (which describe the scale) identical? */
+//		if( !strncmp( scaleDesc(i).scaleDesc, curScaleName, t - scaleDesc(i).scaleDesc )) {
+//			/* if yes, are we talking about the same ratio */
+//		 	if( scaleInfo(scaleDesc(i).scale).ratio == curScaleRatio ) {
+//				/* yes, we found the right scale descriptor, so now look for the gauge */
+//				curScaleDescInx = i;
+//				gauges_da = scaleDesc(curScaleDescInx).gauges_da;
+//				curGaugeInx = 0;
+//				for( j = 0; j < gauges_da.cnt; j++ ) {
+//					gaugeInfo_p ptr = &(DYNARR_N( gaugeInfo_t, gauges_da, j ));
+//					if( scaleInfo(ptr->scale).gauge == trackGauge ) {
+//						curGaugeInx = j;
+//						break;
+//					}	
+//				}
+//				break;
+//			}	
+//		}
+//	}	
 	
 	wPrefSetString( "misc", "scale", curScaleName );
 	sprintf( minTrackRadiusPrefS, "minTrackRadius-%s", curScaleName );

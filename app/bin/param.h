@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.h,v 1.2 2006-04-06 15:19:07 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.h,v 1.3 2007-02-23 16:50:03 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -36,7 +36,7 @@ typedef enum {
 		PD_COMBOLIST,
 		PD_BUTTON,
 		PD_COLORLIST,
-		PD_MESSAGE,
+		PD_MESSAGE,					/* static text */
 		PD_DRAW,
 		PD_TEXT,
 		PD_MENU,
@@ -62,7 +62,7 @@ typedef enum {
 #define PDO_DLGBOXEND			(1L<<16)
 #define PDO_DLGRESETMARGIN		(1L<<17)
 #define PDO_DLGIGNORELABELWIDTH (1L<<18)
-#define PDO_DLGHORZ				(1L<<20)
+#define PDO_DLGHORZ				(1L<<20)  /* arrange on same line as previous element */
 #define PDO_DLGNEWCOLUMN		(1L<<21)
 #define PDO_DLGNOLABELALIGN		(1L<<22)
 #define PDO_LISTINDEX			(1L<<23)

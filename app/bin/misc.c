@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.9 2007-01-14 08:43:32 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.10 2007-02-23 16:50:03 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2480,14 +2480,12 @@ static void CreateAboutW( void )
 	ParamLoadMessage( &aboutPG, I_ABOUTVERSION, sAboutProd );
 }
 
-/* \brief Give user the option to continue work after crash
+/* Give user the option to continue work after crash. This function gives the user 
+ * the option to load the checkpoint file to continue working after a crash.
  *
  * \param none
  * \return none
  *
- * This function gives the user the option to load the checkpoint 
- * file to continue working after a crash.
- * 
  */
  
 static void OfferCheckpoint( void ) 

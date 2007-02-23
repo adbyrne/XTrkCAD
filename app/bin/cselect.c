@@ -1,7 +1,6 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.4 2006-02-26 12:32:56 m_fischer Exp $
+/** \file Handle selecting / unselecting track and basic operations on the selection
  *
- * SELECT
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.5 2007-02-23 16:50:03 m_fischer Exp $
  *
  */
 
@@ -147,7 +146,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 	}
 }
 
-/* \brief Invert selected state of all visible objects
+/* Invert selected state of all visible objects.
  *
  * \param none
  * \return none
@@ -175,7 +174,7 @@ EXPORT void InvertTrackSelect( void *ptr )
 	MainRedraw();
 }
 
-/* \brief Select orphaned (ie single) track pieces
+/* Select orphaned (ie single) track pieces.
  *
  * \param none
  * \return none
@@ -545,24 +544,34 @@ EXPORT void WriteSelectedTracksToTempSegs( void )
 	tempSegDrawFuncs.options = oldOptions;
 }
 
+static char rescaleFromScale[20];
+static char rescaleFromGauge[20];
+
 static char * rescaleToggleLabels[] = { "Scale", "Ratio", NULL };
 static long rescaleMode;
-static wIndex_t rescaleFromInx;
+static wIndex_t rescaleFromScaleInx;
+static wIndex_t rescaleFromGaugeInx;
+static wIndex_t rescaleToScaleInx;
+static wIndex_t rescaleToGaugeInx;
 static wIndex_t rescaleToInx;
-static long rescaleChangeGauge;
+static long rescaleNoChangeDim = FALSE;
 static FLOAT_T rescalePercent;
-static char * rescaleChangeGaugeLabels[] = { "Change Track Gauge", NULL };
+static char * rescaleChangeDimLabels[] = { "Do not resize track", NULL };
 static paramFloatRange_t r0o001_10000 = { 0.001, 10000.0 };
 static paramData_t rescalePLs[] = {
 #define I_RESCALE_MODE		(0)
-		{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, "By", BC_HORZ|BC_NOBORDER },
-#define I_RESCALE_FROM		(1)
-		{ PD_DROPLIST, &rescaleFromInx, "from", PDO_NOPREF|PDO_LISTINDEX, NULL, "From" },
-#define I_RESCALE_TO		(2)
-		{ PD_DROPLIST, &rescaleToInx, "to", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, "  To" },
-#define I_RESCALE_CHANGE	(3)
-		{ PD_TOGGLE, &rescaleChangeGauge, "change-gauge", 0, &rescaleChangeGaugeLabels, "", BC_HORZ|BC_NOBORDER },
-#define I_RESCALE_PERCENT	(4)
+		{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, "Rescale by:", BC_HORZ|BC_NOBORDER },
+#define I_RESCALE_FROM_SCALE		(1)
+		{ PD_STRING, rescaleFromScale, "fromS", PDO_NOPREF, (void *)100, "From:" },
+#define I_RESCALE_FROM_GAUGE		(2)
+		{ PD_STRING, rescaleFromGauge, "fromG", PDO_NOPREF|PDO_DLGHORZ, (void *)100, " / " },		
+#define I_RESCALE_TO_SCALE		   (3)
+		{ PD_DROPLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, (void *)100, "To: " },
+#define I_RESCALE_TO_GAUGE		   (4)
+		{ PD_DROPLIST, &rescaleToGaugeInx, "toG", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, " / " },
+#define I_RESCALE_CHANGE	(5)
+		{ PD_TOGGLE, &rescaleNoChangeDim, "change-dim", 0, &rescaleChangeDimLabels, "", BC_HORZ|BC_NOBORDER },
+#define I_RESCALE_PERCENT	(6)
 		{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, "Ratio" },
 		{ PD_MESSAGE, "%", NULL, PDO_DLGHORZ } };
 static paramGroup_t rescalePG = { "rescale", 0, rescalePLs, sizeof rescalePLs/sizeof rescalePLs[0] };
@@ -603,9 +612,12 @@ static BOOL_T RescaleDoIt( track_p trk, BOOL_T junk )
 				DisconnectTracks( trk, ep, trk1, ep1 );
 			}
 		}
-		RescaleTrack( trk, rescalePercent/100.0, rescaleShift );
+		/* should the track dimensions ie. length or radius be changed as well? */
+		if( rescaleNoChangeDim == 0 )
+			RescaleTrack( trk, rescalePercent/100.0, rescaleShift );
 	}
-	if ( rescaleMode==0 && rescaleChangeGauge!=0 )
+	
+	if ( rescaleMode==0 )
 		SetTrkScale( trk, rescaleToInx );
 	getboundsCount++;
 	return TRUE;
@@ -650,12 +662,15 @@ static void RescaleDlgOk(
 		getboundsHi.y -= d;
 		getboundsLo.y -= d;
 	}
-	if ( getboundsHi.x > mapD.size.x ||
-		 getboundsHi.y > mapD.size.y ) {
+	if ( rescaleNoChangeDim == 0 && 
+	     (getboundsHi.x > mapD.size.x ||
+		   getboundsHi.y > mapD.size.y )) {
 		NoticeMessage( MSG_RESCALE_TOO_BIG, "Ok", NULL, FormatDistance(getboundsHi.x), FormatDistance(getboundsHi.y) );
 	}
 	rescaleShift.x = (getboundsLo.x+getboundsHi.x)/2.0 - center.x*ratio;
 	rescaleShift.y = (getboundsLo.y+getboundsHi.y)/2.0 - center.y*ratio;
+	
+	rescaleToInx = GetScaleInx( rescaleToScaleInx, rescaleToGaugeInx );
 	DoSelectedTracks( RescaleDoIt );
 	DoRedraw();
 	wHide( rescalePG.win );
@@ -669,35 +684,97 @@ static void RescaleDlgUpdate(
 {
 	switch (inx) {
 	case I_RESCALE_MODE:
-		wControlShow( pg->paramPtr[I_RESCALE_FROM].control, rescaleMode==0 );
-		wControlShow( pg->paramPtr[I_RESCALE_TO].control, rescaleMode==0 );
+		wControlShow( pg->paramPtr[I_RESCALE_FROM_SCALE].control, rescaleMode==0 );
+		wControlActive( pg->paramPtr[I_RESCALE_FROM_SCALE].control, FALSE ); 
+		wControlShow( pg->paramPtr[I_RESCALE_TO_SCALE].control, rescaleMode==0 );
+		wControlShow( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, rescaleMode==0 );
+		wControlActive( pg->paramPtr[I_RESCALE_FROM_GAUGE].control, FALSE ); 
+		wControlShow( pg->paramPtr[I_RESCALE_TO_GAUGE].control, rescaleMode==0 );
 		wControlShow( pg->paramPtr[I_RESCALE_CHANGE].control, rescaleMode==0 );
 		wControlActive( pg->paramPtr[I_RESCALE_PERCENT].control, rescaleMode==1 );
 		if ( rescaleMode!=0 )
 			break;
-	case I_RESCALE_FROM:
-	case I_RESCALE_TO:
-		rescalePercent = GetScaleRatio(rescaleFromInx)/GetScaleRatio(rescaleToInx)*100.0;
+	case I_RESCALE_TO_SCALE:
+		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, *((int *)valueP) );		
+		ParamLoadControl( pg, I_RESCALE_TO_SCALE );		
+		rescalePercent = GetScaleDescRatio(rescaleFromScaleInx)/GetScaleDescRatio(rescaleToScaleInx)*100.0;
+		wControlActive( pg->paramPtr[I_RESCALE_CHANGE].control, (rescaleFromScaleInx != rescaleToScaleInx) );
 		ParamLoadControl( pg, I_RESCALE_PERCENT );
+		break;
+	case I_RESCALE_TO_GAUGE:
+		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
+		break;
+	case I_RESCALE_FROM_SCALE:
+		ParamLoadControl( pg, I_RESCALE_FROM_SCALE );
+		break;
+	case I_RESCALE_FROM_GAUGE:	
+		ParamLoadControl( pg, I_RESCALE_FROM_GAUGE );
 		break;
 	case -1:
 		break;
 	}
-	ParamDialogOkActive( pg, rescalePercent!=100.0 || (rescaleMode==0&&rescaleChangeGauge!=0) );
+	ParamDialogOkActive( pg, rescalePercent!=100.0 || rescaleFromGaugeInx != rescaleToGaugeInx );
 }
 
+/**
+ * Get the scale gauge information for the selected track pieces.  
+ * FIXME: special cases like tracks pieces with different gauges or scale need to be handled
+ *
+ * \param IN trk track element
+ * \param IN junk
+ * \return TRUE;
+ */
+ 
+static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T junk )
+{
+	char *scaleName;
+	SCALEINX_T scale;
+	SCALEDESCINX_T scaleInx;
+	GAUGEINX_T gaugeInx;
+	
+	scale = GetTrkScale( trk );
+	scaleName = GetScaleName( scale );
+	if( strcmp( scaleName, "*" )) {
+		GetScaleGauge( scale, &scaleInx, &gaugeInx );
+		strcpy( rescaleFromScale,GetScaleDesc( scaleInx ));
+		strcpy( rescaleFromGauge, GetGaugeDesc( scaleInx, gaugeInx ));
+		
+		rescaleFromScaleInx = scaleInx;
+		rescaleFromGaugeInx = gaugeInx;
+		rescaleToScaleInx = scaleInx;
+		rescaleToGaugeInx = gaugeInx;
+	}	
+	
+	return TRUE;
+}
+
+/**
+ * Bring up the rescale dialog. The dialog for rescaling the selected pieces
+ * of track is created if necessary and shown. Handling of user input is done via
+ * RescaleDlgUpdate()
+ */
 
 EXPORT void DoRescale( void )
 {
 	if ( rescalePG.win == NULL ) {
 		ParamCreateDialog( &rescalePG, MakeWindowTitle("Rescale"), "Ok", RescaleDlgOk, wHide, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
-		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_FROM].control );
-		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO].control );
-		rescaleFromInx = curScaleInx;
-		rescaleToInx = curScaleInx;
+		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO_SCALE].control );
+		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, curScaleDescInx ); /* set correct gauge list here */
+		rescaleFromScaleInx = curScaleInx;
+		rescaleToScaleInx = curScaleInx;
 		rescalePercent = 100.0;
 	}
+
+	DoSelectedTracks( SelectedScaleGauge );
+
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_MODE, &rescaleMode );
+
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_GAUGE, rescaleFromGauge );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScale );
+
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_SCALE, &rescaleToScaleInx );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_TO_GAUGE, &rescaleToGaugeInx );
+	
 	wShow( rescalePG.win );
 }
 
