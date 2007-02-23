@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.1 2005-12-07 15:48:43 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.2 2007-02-23 16:51:11 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -356,7 +356,7 @@ void wSelectStandardFont( int fontNum )
 	curFontWeight = 0;
 	curFontSlant = 0;
 	fontSelectMode = 1;
-	wSelectFont(fontNum==F_TIMES?"Standad Serif Font":"Standard San-Serif Font");
+	wSelectFont(fontNum==F_TIMES?"Standard Serif Font":"Standard San-Serif Font");
 	standardFonts[fontNum] = curFontInx;
 	wPrefSetString( "gtkfont", fontNum==F_TIMES?"serif":"sanserif", fontInfo(curFontInx).faceName );
 	curFontInx = oldFontInx;
