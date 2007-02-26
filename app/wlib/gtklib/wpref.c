@@ -1,5 +1,6 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.2 2006-02-22 19:20:11 m_fischer Exp $
+/** \file wpref.c Handle loading and saving preferences.
+ * 
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.3 2007-02-26 06:43:35 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -49,8 +50,17 @@ static char appWorkDir[BUFSIZ];
 
 EXPORT const char * wGetAppLibDir(
 		void )
-/*
-*/
+/** Find the directory where configuration files, help, demos etc are installed. 
+ *  XTrkCad expects all these readonly files to be installed in either 
+ *  /usr/lib/xtrkcad or /usr/local/lib/xtrkcad In any other cases, the environment
+ *  variable XTRKCADLIB can be used to pass the correct directory. 
+ *  The search order is:
+ *  1. directory specified by XTRKCADLIB
+ *  2. /usr/lib/xtrkcad
+ *  3. /usr/local/lib/xtrkcad
+ *  
+ *  \return pointer to directory name
+ */
 {
 	char * cp, *ep;
 	char msg[BUFSIZ*2];
@@ -85,12 +95,12 @@ EXPORT const char * wGetAppLibDir(
 	}
 
 	sprintf( msg,
-		"%s cannot find the directory containing the configuration files.\n\n"
-		"Make sure that these files installed are in either \n"
+		"The required configuration files could not be located in the expected directories.\n\n"
+		"Usually this is an installation problem. Make sure that these files are installed in either \n"
 		"  /usr/lib/%s or\n"
 		"  /usr/local/lib/%s\n"
 		"If this is not possible, the environment variable %s must contain "
-		"the name of the correct directory!",
+		"the name of the correct directory.",
 		wAppName, wAppName, wAppName, envvar );
 	wNotice( msg, "Ok", NULL );
 	appLibDir[0] = '\0';

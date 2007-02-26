@@ -1,6 +1,10 @@
+Feb 25, 2007
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		wpref.c: Rephrased error message  for lib-directory not found
+
 Feb 23, 2007
 	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
-		gtkfont.c: Type in window title corrected
+		gtkfont.c: Typo in window title corrected
 
 Version 4.0.1
 =============
