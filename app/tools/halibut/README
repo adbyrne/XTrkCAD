@@ -1,0 +1,36 @@
+HALIBUT Readme
+==============
+
+This version of Halibut has been adapted to the needs of the XTrkCad
+Project. It is based on version 1 of Halibut. 
+
+The original version is available at:
+
+http://www.chiark.greenend.org.uk/~sgtatham/halibut/
+
+This site also has the full documentation.
+
+XTrkCad Modifications
+---------------------
+
+The following changes have been made:
+
+1. Backends - only the HTML backend is included
+
+2. \f: Emphasize more
+	This formating instruction is similar to the \e. It is usually rendered
+	as bold on HTML
+	
+	Example: Here is some \f{bold text}.
+	
+	Nesting of \e and \f is unsupported.
+	
+3 \G: Include graphic
+	This instruction is used to include bitmaps into the document. Note that
+	there are no checks for presence of the file nor whether its a valid
+	graphics format. 
+	
+	\G just takes the filename as a parameter.
+	
+	Example: Include a bitmap here \G{png.d/bitmap.png}.
+	
