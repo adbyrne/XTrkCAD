@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.2 2006-03-26 12:02:50 m_fischer Exp $
+/** \file draw.c
+ * Basic drawing functions.
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.3 2007-04-11 18:07:23 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -132,6 +134,11 @@ typedef enum { mouseNone, mouseLeft, mouseRight, mouseLeftPending } mouseState_e
 static mouseState_e mouseState;
 
 static int delayUpdate = 1;
+
+static char xLabel[] = "X : ";
+static char yLabel[] = "Y : ";
+static char zoomLabel[] = "Zoom : ";
+
 
 /****************************************************************************
  *
@@ -744,8 +751,15 @@ static wPos_t info_xm_offset = 2;
 static wControl_p curInfoControl[NUM_INFOCTL];
 static wPos_t curInfoLabelWidth[NUM_INFOCTL];
 
+/**
+ * Determine the width of a mouse pointer position string ( coordinate plus label ).
+ *
+ * \return width of position string
+ */
 static wPos_t GetInfoPosWidth( void )
 {
+	wPos_t labelWidth;
+	
 	DIST_T dist;
 		if ( mapD.size.x > mapD.size.y )
 			dist = mapD.size.x;
@@ -767,9 +781,16 @@ static wPos_t GetInfoPosWidth( void )
 			else if ( dist >= 1*12 )
 				dist = 9.0*12.0+11.0+3.0/4.0-1.0/64.0;
 		}
-		return wLabelWidth( FormatDistance(dist) );
+		
+		labelWidth = (wLabelWidth( xLabel ) > wLabelWidth( yLabel ) ? wLabelWidth( xLabel ):wLabelWidth( yLabel ));
+			
+		return wLabelWidth( FormatDistance(dist) ) + labelWidth;
 }
 
+/**
+ * Initialize the status line at the bottom of the window.
+ * 
+ */
 
 EXPORT void InitInfoBar( void )
 {
@@ -779,8 +800,10 @@ EXPORT void InitInfoBar( void )
 	y = height - infoHeight;
 	y -= 19; /* Kludge for MSW */
 		infoD.pos_w = GetInfoPosWidth() + 2;
-		infoD.scale_w = wLabelWidth( "999:1" )+6;
-		infoD.count_w = wLabelWidth( "9999" )+6;
+		infoD.scale_w = wLabelWidth( "999:1" ) + wLabelWidth( zoomLabel ) + 6;
+		/* we do not use the count label for the moment */
+/*		infoD.count_w = wLabelWidth( "9999" )+6; */
+		infoD.count_w = 0;
 	infoD.info_w = width - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 45;
 	if (infoD.info_w <= 0) {
 		infoD.info_w = 10;
@@ -790,16 +813,18 @@ EXPORT void InitInfoBar( void )
 	boxH = infoHeight-5;
 		x = 0;
 		infoD.scale_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.scale_w, boxH );
-		infoD.scale_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarScale", infoD.scale_w-six, "" ); 
+		infoD.scale_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarScale", infoD.scale_w-six, zoomLabel ); 
 		x += infoD.scale_w + 10;
+/* we do not use the count label for the moment
 		infoD.count_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.count_w, boxH );
 		infoD.count_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarCount", infoD.count_w-six, "" ); 
 		x += infoD.count_w + 10;
+*/
 		infoD.posX_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-		infoD.posX_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosX", infoD.pos_w-six, "" ); 
+		infoD.posX_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosX", infoD.pos_w-six, xLabel ); 
 		x += infoD.pos_w + 5;
 		infoD.posY_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-		infoD.posY_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosY", infoD.pos_w-six, "" ); 
+		infoD.posY_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosY", infoD.pos_w-six, yLabel ); 
 		x += infoD.pos_w + 10;
 		infoD.info_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.info_w, boxH );
 		infoD.info_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarStatus", infoD.info_w-six, "" ); 
@@ -834,9 +859,11 @@ static void SetInfoBar( void )
 		wControlSetPos( (wControl_p)infoD.scale_b, x, yb );
 		wControlSetPos( (wControl_p)infoD.scale_m, x+info_xm_offset, ym );
 		x += infoD.scale_w + 10;
+/* remove count window
 		wControlSetPos( (wControl_p)infoD.count_b, x, yb );
 		wControlSetPos( (wControl_p)infoD.count_m, x+info_xm_offset, ym );
 		x += infoD.count_w + 10;
+*/		
 		wControlSetPos( (wControl_p)infoD.posX_b, x, yb );
 		wControlSetPos( (wControl_p)infoD.posX_m, x+info_xm_offset, ym );
 		x += infoD.pos_w + 5;
@@ -865,16 +892,18 @@ static void SetInfoBar( void )
 static void InfoScale( void )
 {
 	if (mainD.scale >= 1)
-		sprintf( message, "%0.0f:1", mainD.scale );
+		sprintf( message, "%s%0.0f:1", zoomLabel, mainD.scale );
 	else
-		sprintf( message, "1:%0.0f", floor(1/mainD.scale+0.5) );
+		sprintf( message, "%s1:%0.0f", zoomLabel, floor(1/mainD.scale+0.5) );
 	wMessageSetValue( infoD.scale_m, message );
 }
 
 EXPORT void InfoCount( wIndex_t count )
 {
+/*
 	sprintf( message, "%d", count );
 	wMessageSetValue( infoD.count_m, message );
+*/	
 }
 
 EXPORT void InfoPos( coOrd pos )
@@ -885,9 +914,9 @@ EXPORT void InfoPos( coOrd pos )
 #endif
 	wPos_t x, y;
 
-	sprintf( message, "%s", FormatDistance(pos.x) );
+	sprintf( message, "%s%s", xLabel, FormatDistance(pos.x) );
 	wMessageSetValue( infoD.posX_m, message );
-	sprintf( message, "%s", FormatDistance(pos.y) );
+	sprintf( message, "%s%s", yLabel, FormatDistance(pos.y) );
 	wMessageSetValue( infoD.posY_m, message );
 #ifdef LATER
 	wDrawGetSize( mainD.d, &ww, &hh );

@@ -1,3 +1,9 @@
+Apr 11, 2007
+
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		draw.c: changed layout of status bar to include labels. 
+		Part count is no longer shown.
+		
 Feb 23, 2007
 	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		cmisc.c, cselect.c rescale / resize works again. UI change to 
