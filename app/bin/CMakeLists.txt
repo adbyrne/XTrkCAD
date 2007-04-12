@@ -23,7 +23,7 @@ GENERATE_LIN(tostrsct)
 GENERATE_LIN(towye)
 GENERATE_LIN(toxing)
 
-SET(SOURCES
+SET(LIN_SOURCES
 	${CMAKE_CURRENT_BINARY_DIR}/to3way.lin
 	${CMAKE_CURRENT_BINARY_DIR}/tocrv.lin
 	${CMAKE_CURRENT_BINARY_DIR}/tocrvsct.lin
@@ -36,6 +36,10 @@ SET(SOURCES
 	${CMAKE_CURRENT_BINARY_DIR}/tostrsct.lin
 	${CMAKE_CURRENT_BINARY_DIR}/towye.lin
 	${CMAKE_CURRENT_BINARY_DIR}/toxing.lin
+	)
+
+SET(SOURCES
+	${LIN_SOURCES}
 	ccurve.c
 	cdraw.c
 	celev.c
@@ -105,4 +109,17 @@ ADD_EXECUTABLE(xtrackcad xtrackcad.c)
 TARGET_LINK_LIBRARIES(xtrackcad xtrackcad-lib)
 TARGET_LINK_LIBRARIES(xtrackcad xtrackcad-wlib)
 TARGET_LINK_LIBRARIES(xtrackcad ${GTK_LIBRARIES})
+
+ADD_EXECUTABLE(mkturnout
+	${LIN_SOURCES}
+	ctodesgn.c
+	utility.c
+	)
+TARGET_LINK_LIBRARIES(mkturnout m)
+SET_TARGET_PROPERTIES(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
+
+INSTALL(TARGETS xtrackcad mkturnout xtrackcad-lib
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib
+	)
 
