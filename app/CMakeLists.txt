@@ -1,0 +1,13 @@
+PROJECT(XTrackCAD)
+
+# where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+IF(NOT WIN32)
+	INCLUDE(FindGTK)
+ENDIF(NOT WIN32)
+
+ADD_SUBDIRECTORY(wlib)
+ADD_SUBDIRECTORY(help)
+ADD_SUBDIRECTORY(bin)
+

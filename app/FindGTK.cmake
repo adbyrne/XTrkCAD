@@ -1,0 +1,3 @@
+INCLUDE(FindPkgConfig)
+PKG_CHECK_MODULES(GTK "gtk+-2.0")
+
