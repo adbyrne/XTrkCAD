@@ -1,3 +1,5 @@
+PROJECT(help)
+
 ADD_EXECUTABLE(genmessages genmessages.c)
 GET_TARGET_PROPERTY(genmessages_EXE genmessages LOCATION)
 
