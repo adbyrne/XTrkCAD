@@ -21,3 +21,7 @@ ADD_CUSTOM_COMMAND(
 INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
 ADD_LIBRARY(xtrackcad-help ${CMAKE_CURRENT_BINARY_DIR}/messages.h ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c)
 
+INSTALL(FILES
+	xtrkcad.tip
+	DESTINATION share
+	)
