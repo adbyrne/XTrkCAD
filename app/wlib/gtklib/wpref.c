@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.3 2007-02-26 06:43:35 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.4 2007-04-30 14:24:49 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -101,7 +101,7 @@ EXPORT const char * wGetAppLibDir(
 		"  /usr/local/lib/%s\n"
 		"If this is not possible, the environment variable %s must contain "
 		"the name of the correct directory.",
-		wAppName, wAppName, wAppName, envvar );
+		wAppName, wAppName, envvar );
 	wNotice( msg, "Ok", NULL );
 	appLibDir[0] = '\0';
 	wExit(0);
