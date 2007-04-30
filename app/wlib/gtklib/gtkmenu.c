@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmenu.c,v 1.2 2006-02-22 19:20:11 m_fischer Exp $
+/** \file gtkmenu.c
+ * Menu creation and handling stuff.
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmenu.c,v 1.3 2007-04-30 14:26:19 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -44,7 +46,7 @@ extern char gtkAccelChar;
  *****************************************************************************
  */
 
-typedef enum { M_MENU, M_SEPARATOR, M_PUSH, M_LIST, M_LISTITEM, M_TOGGLE } mtype_e;
+typedef enum { M_MENU, M_SEPARATOR, M_PUSH, M_LIST, M_LISTITEM, M_TOGGLE, M_RADIO } mtype_e;
 typedef enum { MM_BUTT, MM_MENU, MM_BAR, MM_POPUP } mmtype_e;
 
 
@@ -64,6 +66,7 @@ struct wMenu_t {
 	MOBJ_COMMON
 	mmtype_e mmtype;
 	wMenuItem_p first, last;
+	GSList *radioGroup;			/* in case menu holds a radio button group */
 	GtkWidget * menu;
 	wMenuTraceCallBack_p traceFunc;
 	void * traceData;
@@ -76,6 +79,13 @@ struct wMenuPush_t {
 	wMenuCallBack_p action;
 	wBool_t enabled;
 	};
+
+struct wMenuRadio_t {
+	MOBJ_COMMON
+	wMenuCallBack_p action;
+	wBool_t enabled;
+	};
+
 
 typedef struct wMenuListItem_t * wMenuListItem_p;
 
@@ -130,6 +140,14 @@ static void pushMenuItem(
 			mt->action( mt->set, mt->data );
 		}
 		break;
+	case M_RADIO:
+		/* NOTE: action is only called when radio button is activated, not when deactivated */
+		if ( ((wMenuRadio_p)m)->enabled == FALSE )
+			wBeep();
+		else
+			if( ((GtkCheckMenuItem *)widget)->active == TRUE )
+				((wMenuRadio_p)m)->action( ((wMenuRadio_p)m)->data );
+		break;	
 	case M_MENU:
 		return;
 	default:
@@ -161,6 +179,10 @@ static wMenuItem_p createMenuItem(
 	case M_TOGGLE:
 		mi->menu_item = gtk_check_menu_item_new_with_mnemonic(gtkConvertInput(mi->labelStr));
 		break;
+	case M_RADIO:
+		mi->menu_item = gtk_radio_menu_item_new_with_mnemonic(m->radioGroup, gtkConvertInput(mi->labelStr));
+		m->radioGroup = gtk_radio_menu_item_get_group (GTK_RADIO_MENU_ITEM (mi->menu_item));
+		break;			
 	default:
 		mi->menu_item = gtk_menu_item_new_with_mnemonic(gtkConvertInput(mi->labelStr));
 		break;
@@ -168,8 +190,9 @@ static wMenuItem_p createMenuItem(
 	if (mi->menu_item) {
 		if (m)
 			gtk_menu_append( GTK_MENU(m->menu), mi->menu_item );
+
 		gtk_signal_connect( GTK_OBJECT(mi->menu_item), "activate",
-					GTK_SIGNAL_FUNC(pushMenuItem), mi );
+				GTK_SIGNAL_FUNC(pushMenuItem), mi );
  		gtk_widget_show(mi->menu_item);
 	}
 	if (m) {
@@ -277,6 +300,33 @@ static void setAcclKey( wWin_p w, GtkWidget * menu, GtkWidget * menu_item, int a
 	}
 }
 
+/*-----------------------------------------------------------------*/
+
+wMenuRadio_p wMenuRadioCreate(
+	wMenu_p m, 
+	const char * helpStr,
+	const char * labelStr,
+	long acclKey,
+	wMenuCallBack_p action,
+	void 	*data )
+{
+	wMenuRadio_p mi;
+
+	mi = (wMenuRadio_p)createMenuItem( m, M_RADIO, helpStr, labelStr, sizeof *mi );
+	if (m->mmtype == MM_POPUP && !testMenuPopup)
+		return mi;
+	setAcclKey( m->parent, m->menu, mi->menu_item, acclKey );
+	mi->action = action;
+	mi->data = data;
+	mi->enabled = TRUE;
+	return mi;
+}
+
+void wMenuRadioSetActive( 
+	wMenuRadio_p mi )
+{
+	gtk_check_menu_item_set_active( (GtkCheckMenuItem *)mi->menu_item, TRUE ); 
+}	 		
 
 /*-----------------------------------------------------------------*/
 
