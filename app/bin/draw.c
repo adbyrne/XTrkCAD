@@ -1,7 +1,7 @@
 /** \file draw.c
  * Basic drawing functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.3 2007-04-11 18:07:23 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.4 2007-04-30 14:29:17 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -138,6 +138,35 @@ static int delayUpdate = 1;
 static char xLabel[] = "X : ";
 static char yLabel[] = "Y : ";
 static char zoomLabel[] = "Zoom : ";
+
+static struct {
+		char * name;
+		long value;
+		wMenuRadio_p pdRadio;
+		wMenuRadio_p btRadio;
+		} zoomList[] = {
+				{ "1:1", 1 },
+				{ "2:1", 2 },
+				{ "3:1", 3 },
+				{ "4:1", 4 },
+				{ "6:1", 6 },
+				{ "8:1", 8 },
+				{ "10:1", 10 },
+				{ "12:1", 12 },
+				{ "16:1", 16 },
+				{ "20:1", 20 },
+				{ "24:1", 24 },
+				{ "28:1", 28 },
+				{ "32:1", 32 },
+				{ "36:1", 36 },
+				{ "40:1", 40 },
+				{ "48:1", 48 },
+				{ "56:1", 56 },
+				{ "64:1", 64 },
+				{ "128:1", 128 },
+				{ "256:1", 256 },
+};
+
 
 
 /****************************************************************************
@@ -1619,7 +1648,75 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
 }
 
+/**
+ * Initialize the menu for setting zoom factors. Besides creating the list of radio buttons
+ * the button for the current scale is activated.
+ * 
+ * \param IN zoomM			Menu to which radio button is added
+ * \param IN zoomSubM	Second menu to which radio button is added, ignored if NULL
+ *
+ */
 
+EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM )
+{
+	int inx;
+	
+	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
+		zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
+		if( zoomSubM )
+			zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
+
+/*		if( mainD.scale == zoomList[inx].value ) {
+			wMenuRadioSetActive( zoomList[inx].btRadio );		
+			if( zoomSubM )
+				wMenuRadioSetActive( zoomList[inx].pdRadio ); 
+		}	*/
+	}
+}
+
+/**
+ * Set radio button(s) corresponding to current scale.
+ * 
+ * \param IN scale		current scale
+ *
+ */
+
+static void SetZoomRadio( DIST_T scale )
+{
+	int inx;
+	long curScale = scale;
+	
+	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
+		if( curScale == zoomList[inx].value ) {
+			wMenuRadioSetActive( zoomList[inx].btRadio );		
+			if( zoomList[inx].pdRadio )
+				wMenuRadioSetActive( zoomList[inx].pdRadio );
+		}	
+	}
+	
+}	
+
+/**
+ * Find current scale 
+ *
+ * \param IN scale current scale
+ * \return index in scale table or -1 if error
+ *
+ */
+ 
+static int ScaleInx(  DIST_T scale )
+{
+	int inx;
+	long curScale = scale;
+	
+	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
+		if( curScale == zoomList[inx].value ) {
+			return inx;
+		}	
+	}
+	return -1;	
+}
+	
 static void DoNewScale( DIST_T scale )
 {
 	char tmp[20];
@@ -1648,6 +1745,8 @@ static void DoNewScale( DIST_T scale )
 		mainD.dpi = floor( (mainD.dpi + scale/2)/scale) * scale;
 	}
 	tempD.dpi = mainD.dpi;
+
+	SetZoomRadio( scale ); 
 	InfoScale();
 	SetMainSize();
 	mainD.orig.x = mainCenter.x - mainD.size.x/2.0;
@@ -1670,8 +1769,12 @@ LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
 EXPORT void DoZoomUp( void * mode )
 {
 	long newScale;
+	int i;
+	
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
-		DoNewScale( mainD.scale / 2.0 );
+		i = ScaleInx( mainD.scale );
+		if( i>= 1 )
+			DoNewScale( zoomList[ i - 1 ].value );			
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomin", &newScale, 4 );
 		DoNewScale( newScale );
@@ -1685,8 +1788,12 @@ EXPORT void DoZoomUp( void * mode )
 EXPORT void DoZoomDown( void  * mode)
 {
 	long newScale;
+	int i;
+	
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
-		DoNewScale( mainD.scale * 2.0 );
+		i = ScaleInx( mainD.scale );
+		if( i>= 0 && i < sizeof zoomList/sizeof zoomList[0] )
+			DoNewScale( zoomList[ i + 1 ].value );			
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomout", &newScale, 16 );
 		DoNewScale( newScale );
@@ -1699,7 +1806,8 @@ EXPORT void DoZoomDown( void  * mode)
 
 EXPORT void DoZoom( void * scale )
 {
-	DoNewScale( (DIST_T)(double)(long)scale );
+	if( (DIST_T)(double)(long)scale != mainD.scale )
+		DoNewScale( (DIST_T)(double)(long)scale );
 }
 
 
@@ -2271,6 +2379,8 @@ EXPORT void DrawInit( int initialZoom )
 	AddPlaybackProc( "MOUSE ", (playbackProc_p)PlaybackMain, NULL );
 
 	rulerFp = wStandardFont( F_HELV, FALSE, FALSE );
+
+	SetZoomRadio( mainD.scale ); 
 	InfoScale();
 	SetInfoBar();
 	InfoPos( zero );

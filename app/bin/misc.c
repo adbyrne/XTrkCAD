@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.10 2007-02-23 16:50:03 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.11 2007-04-30 14:29:17 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1913,15 +1913,15 @@ EXPORT void AddRotateMenu(
 		wMenu_p m,
 		rotateDialogCallBack_t func )
 {
-	wMenuPushCreate( m, "", "180°", 0, func, (void*)180 );
-	wMenuPushCreate( m, "", "90° CW", 0, func, (void*)(long)(90) );
-	wMenuPushCreate( m, "", "45° CW", 0, func, (void*)(long)(45) );
-	wMenuPushCreate( m, "", "30° CW", 0, func, (void*)(long)(30) );
-	wMenuPushCreate( m, "", "15° CW", 0, func, (void*)(long)(15) );
-	wMenuPushCreate( m, "", "15° CCW", 0, func, (void*)(long)(360-15) );
-	wMenuPushCreate( m, "", "30° CCW", 0, func, (void*)(long)(360-30) );
-	wMenuPushCreate( m, "", "45° CCW", 0, func, (void*)(long)(360-45) );
-	wMenuPushCreate( m, "", "90° CCW", 0, func, (void*)(long)(360-90) );
+	wMenuPushCreate( m, "", "180° ", 0, func, (void*)180 );
+	wMenuPushCreate( m, "", "90°  CW", 0, func, (void*)(long)(90) );
+	wMenuPushCreate( m, "", "45°  CW", 0, func, (void*)(long)(45) );
+	wMenuPushCreate( m, "", "30°  CW", 0, func, (void*)(long)(30) );
+	wMenuPushCreate( m, "", "15°  CW", 0, func, (void*)(long)(15) );
+	wMenuPushCreate( m, "", "15°  CCW", 0, func, (void*)(long)(360-15) );
+	wMenuPushCreate( m, "", "30°  CCW", 0, func, (void*)(long)(360-30) );
+	wMenuPushCreate( m, "", "45°  CCW", 0, func, (void*)(long)(360-45) );
+	wMenuPushCreate( m, "", "90°  CCW", 0, func, (void*)(long)(360-90) );
 	wMenuPushCreate( m, "", "Enter Angle ...", 0, (wMenuCallBack_p)StartRotateDialog, (void*)func );
 }
 
@@ -2063,38 +2063,10 @@ static void SetAccelKey(
 #include "export.xpm"
 #include "import.xpm"
 
-static struct {
-		char * name;
-		long value;
-		} zoomList[] = {
-				{ "1:1", 1 },
-				{ "2:1", 2 },
-				{ "3:1", 3 },
-				{ "4:1", 4 },
-				{ "6:1", 6 },
-				{ "8:1", 8 },
-				{ "10:1", 10 },
-				{ "12:1", 12 },
-				{ "16:1", 16 },
-				{ "20:1", 20 },
-				{ "24:1", 24 },
-				{ "28:1", 28 },
-				{ "32:1", 32 },
-				{ "36:1", 36 },
-				{ "40:1", 40 },
-				{ "48:1", 48 },
-				{ "56:1", 56 },
-				{ "64:1", 64 },
-				{ "128:1", 128 },
-				{ "256:1", 256 },
-		};
-
-
 static void CreateMenus( void )
 {
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM, messageListM, manageM, addM, changeM, drawM;
-	wMenu_p zoomM;
-	int inx;
+	wMenu_p zoomM, zoomSubM, defcmdM;
 	wIcon_p bm_p;
 
 	fileM = wMenuBarAdd( mainW, "menuFile", "&File" );
@@ -2103,7 +2075,6 @@ static void CreateMenus( void )
 	addM = wMenuBarAdd( mainW, "menuAdd", "&Add" );
 	changeM = wMenuBarAdd( mainW, "menuChange", "&Change" );
 	drawM = wMenuBarAdd( mainW, "menuDraw", "&Draw" );
-/*	commandsM = wMenuBarAdd( mainW, "menuCommands", "&Commands" ); */
 	manageM = wMenuBarAdd( mainW, "menuManage", "&Manage" );
 	optionM = wMenuBarAdd( mainW, "menuOption", "&Options" );
 	macroM = wMenuBarAdd( mainW, "menuMacro", "&Macro" );
@@ -2147,9 +2118,11 @@ static void CreateMenus( void )
 	bm_p = wIconCreatePixMap(zoom_xpm);
 	zoomM = wMenuPopupCreate( mainW, "" );
 	AddToolbarButton( "cmdZoom", wIconCreatePixMap(zoom_xpm), IC_MODETRAIN_TOO, (wButtonCallBack_p)wMenuPopupShow, zoomM );
-	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
-		wMenuPushCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
-	}
+/*	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
+		miZoom = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
+
+		wMenuPushCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value ); 
+	} */
 	AddToolbarButton( "cmdZoomOut", wIconCreatePixMap(zoomout_xpm), IC_MODETRAIN_TOO,
 		(addButtonCallBack_t)DoZoomDown, NULL );
 
@@ -2224,8 +2197,11 @@ static void CreateMenus( void )
 	 * VIEW MENU
 	 */
 	wMenuPushCreate( viewM, "menuEdit-zoomIn", "Zoom &In", ACCL_ZOOMIN, (wMenuCallBack_p)DoZoomUp, (void*)1 );
+	zoomSubM = wMenuMenuCreate( viewM, "menuEdit-zoomTo", "&Zoom" );
 	wMenuPushCreate( viewM, "menuEdit-zoomOut", "Zoom &Out", ACCL_ZOOMOUT, (wMenuCallBack_p)DoZoomDown, (void*)1 );
 	wMenuSeparatorCreate( viewM );
+
+	InitCmdZoom( zoomM, zoomSubM );
 
 	wMenuPushCreate( viewM, "menuEdit-redraw", "&Redraw", ACCL_REDRAW, (wMenuCallBack_p)MainRedraw, NULL );
 	wMenuPushCreate( viewM, "menuEdit-redraw", "Redraw All", ACCL_REDRAWALL, (wMenuCallBack_p)DoRedraw, NULL );
@@ -2266,6 +2242,11 @@ static void CreateMenus( void )
 	/*
 	 * CHANGE MENU
 	 */
+	defcmdM = wMenuMenuCreate( changeM, "defaultCmd", "Default Command" );
+	
+	wMenuRadioCreate( defcmdM, "defCmd", "Properties", 0, NULL, "0" ); 
+	wMenuRadioCreate( defcmdM, "defCmd", "Select", 0, NULL, "1" ); 
+	
 	cmdGroup = BG_SELECT;
 	InitCmdDescribe( changeM );
 	InitCmdSelect( changeM );

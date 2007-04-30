@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.h,v 1.2 2006-03-25 08:47:37 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.h,v 1.3 2007-04-30 14:29:17 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -184,6 +184,9 @@ void DrawInit( int );
 void DoZoomUp( void * );
 void DoZoomDown( void * );
 void DoZoom( void * );
+
+void InitCmdZoom( wMenu_p, wMenu_p );
+
 void InfoPos( coOrd );
 void InfoCount( wIndex_t );
 void SetMessage( char * );
