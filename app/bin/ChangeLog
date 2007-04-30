@@ -1,3 +1,10 @@
+Apr 30, 2007
+
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		draw.c, misc.c, draw.h: use radio buttons for selecting zoom factor
+		zoom in and out goes through all available zoom factors step by step
+		setting zoom is available from the pulldown menu as well		
+
 Apr 11, 2007
 
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
