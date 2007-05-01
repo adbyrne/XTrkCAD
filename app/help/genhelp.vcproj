@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WINDOWS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;WINDOWS;_CRT_SECURE_NO_DEPRECATE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -90,6 +90,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="nmake /f VCpostbuildMakefile"
 			/>
 		</Configuration>
 		<Configuration
