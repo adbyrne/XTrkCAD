@@ -33,7 +33,7 @@ Controls colors
 :cmdConnect
 Connect two tracks
 :cmdCopy
-Copy selected tracks to clipboard
+Copy selected objects to clipboard
 :cmdCurveCenter
 Create curved track from center
 :cmdCurveChord
@@ -47,15 +47,15 @@ Create curved track from tangent
 :cmdCustmgm
 Manipulate Custom designer entries
 :cmdCut
-Moves selected tracks to clipboard
+Moves selected objects to clipboard
 :cmdDelete
-Delete track
+Delete objects
 :cmdDemo
 Playback demos
 :cmdDescribe
-Describe track
+Describe objects
 :cmdDeselectAll
-Deselect all selected tracks
+Deselect all selected objects
 :cmdDisplay
 Change Display parameters
 :cmdDrawBench
@@ -113,7 +113,7 @@ Easement menu
 :cmdElevation
 Change Elevations
 :cmdEnumerate
-Generate a Parts List of selected tracks
+Generate a Parts List of selected objects
 :cmdExport
 Export a .xti file
 :cmdExportDXF
@@ -147,11 +147,11 @@ Layout parameters
 :cmdModify
 Modify or extend a track
 :cmdMove
-Move selected tracks
+Move selected objects
 :cmdMoveLabel
 Move a label
 :cmdMoveToCurrentLayer
-Move selected tracks to current layer
+Move selected objects to current layer
 :cmdNote
 Place a note on the layout
 :cmdOutputbitmap
@@ -161,7 +161,7 @@ Create a parallel track
 :cmdParameter
 Register
 :cmdPaste
-Copy tracks from clipboard
+Copy objects from clipboard
 :cmdPref
 Perferences dialog
 :cmdPricelist
@@ -187,13 +187,17 @@ Rotate selected object(s)
 :cmdRuler
 Show a ruler
 :cmdSelect
-Select tracks
+Select objects
 :cmdSelectAll
-Selects all tracks on the layout
+Selects all objects on the layout
 :cmdSelectCurrentLayer
-Selects all tracks in the current Layer
+Selects all objects in the current Layer
+:cmdSelectInvert
+Invert current selection
 :cmdSplitTrack
 Split a track
+:cmdSelectOrphaned
+Select stranded (unconnected) track pieces
 :cmdSticky
 Choose which commands are sticky
 :cmdStraight
@@ -237,15 +241,15 @@ Draw tracks with thick lines
 :cmdZoom
 Change drawing scale
 :cmdZoomIn
-Decrease drawing scale
+Zoom in
 :cmdZoomOut
-Increase drawing scale
+Zoom out
 :menuFile
 File Menu
 :menuFile-save
 Save layout
 :menuFile-saveAs
-Save layout
+Save layout under a new name 
 :menuFile-clear
 New layout
 :menuFile-enum
@@ -254,14 +258,16 @@ Generate parts list
 Load a layout
 :menuFile-quit
 Exit the program
+:menuFile-revert
+Revert to last saved state of layout plan
 :editM
 Edit menu
 :menuEdit-redraw
 Redraw layout
 :menuEdit-zoomIn
-Increase drawing scale
+Zoom in
 :menuEdit-zoomOut
-Decrease drawing scale
+Zoom out
 :toolsM
 Tools menu
 :menuView
@@ -594,6 +600,8 @@ Specifies the Title of the layout.  This appears on Gaudy printouts
 Specifies the Title of the layout.  This appears on Gaudy printouts
 :layout-scale
 Specifies the Modelling Scale
+:layout-gauge
+Specifies the rail gauge, ie. the distance between the rails
 :newcar-road
 Roadname
 :newcar-number

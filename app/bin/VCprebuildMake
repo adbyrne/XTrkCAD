@@ -1,30 +1,44 @@
 
+
 all:	toreg.lin tocrv.lin towye.lin to3way.lin toxing.lin tosslip.lin todslip.lin torcross.lin tolcross.lin todcross.lin tostrsct.lin messages.h tocrvsct.lin
+
 
 toreg.lin: Release\cnvdsgn.exe toreg.src
 	.\Release\cnvdsgn.exe < toreg.src > toreg.lin
+
 tocrv.lin: Release\cnvdsgn.exe tocrv.src
 	.\Release\cnvdsgn.exe < tocrv.src > tocrv.lin
+
 towye.lin: Release\cnvdsgn.exe towye.src
 	.\Release\cnvdsgn.exe < towye.src > towye.lin
+
 to3way.lin: Release\cnvdsgn.exe to3way.src
 	.\Release\cnvdsgn.exe < to3way.src > to3way.lin
+
 toxing.lin: Release\cnvdsgn.exe toxing.src
 	.\Release\cnvdsgn.exe < toxing.src > toxing.lin
+
 tosslip.lin: Release\cnvdsgn.exe tosslip.src
 	.\Release\cnvdsgn.exe < tosslip.src > tosslip.lin
+
 todslip.lin: Release\cnvdsgn.exe todslip.src
 	.\Release\cnvdsgn.exe < todslip.src > todslip.lin
+
 torcross.lin: Release\cnvdsgn.exe torcross.src
 	.\Release\cnvdsgn.exe < torcross.src > torcross.lin
+
 tolcross.lin: Release\cnvdsgn.exe tolcross.src
 	.\Release\cnvdsgn.exe < tolcross.src > tolcross.lin
+
 todcross.lin: Release\cnvdsgn.exe todcross.src
 	.\Release\cnvdsgn.exe < todcross.src > todcross.lin
+
 tostrsct.lin: Release\cnvdsgn.exe tostrsct.src
 	.\Release\cnvdsgn.exe < tostrsct.src > tostrsct.lin
+
 tocrvsct.lin: Release\cnvdsgn.exe tocrvsct.src
 	.\Release\cnvdsgn.exe < tocrvsct.src > tocrvsct.lin
 
 messages.h:
 	copy ..\help\messages.h
+	
