@@ -1288,9 +1288,18 @@ Turnouts are composed of individual Straight and Curved segments.  Segments that
 $BUpdate Turnout and Structures$ - $Xreplaces|cmdRefreshSpecial$ any $Xselected|cmdSelect$ $BTurnouts$ and $BStructures$ with the definitions from updated $XParameter Files|cmdPrmfile$.
 ?LI
 ?HcmdRescale
-$BRescale$ - is used to change the size of the $Xselected|cmdSelect$ objects.  
-The amount to resize can be specified by the Modeling Scale (convert from HO to O scale) or by Ratio (by 181.5%).
-If resizing by Modeling Scale then the Track Gauge can be changed as well.  Otherwise, only the size of the selected object is changed.
+$BRescale$ - is used to change the size and gauge of the $Xselected|cmdSelect$ objects.  
+The amount to resize can be specified 
+?LSo
+?LI
+by the modeling scale (convert from HO to O scale)
+?LI
+by the modeled gauge (convert from standard gauge to narrow gauge, or
+?LI
+by ratio (by 181.5%).
+?LE
+If resizing by modeling scale then the track dimensions (ie. lengths and radii) will be changed as well.
+An option is available to disable this resizing of the selected objects.
 ?LI
 $BLayers$ - displays the $XLayer|cmdLayer$ dialog.
 ?LI
