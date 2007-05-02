@@ -15,7 +15,7 @@
  *****************************************************************************
  */
 
-typedef enum { M_MENU, M_SEPARATOR, M_PUSH, M_LIST, M_LISTITEM, M_TOGGLE } mtype_e;
+typedef enum { M_MENU, M_SEPARATOR, M_PUSH, M_LIST, M_LISTITEM, M_TOGGLE, M_RADIO } mtype_e;
 typedef enum { MM_BUTT, MM_MENU, MM_BAR, MM_POPUP } mmtype_e;
 
 typedef struct wMenuItem_t * wMenuItem_p;
@@ -51,6 +51,13 @@ struct wMenuPush_t {
 		wBool_t enabled;
 		};
 
+struct wMenuRadio_t {
+		MOBJ_COMMON
+		wMenu_p mparent;
+		wMenuCallBack_p action;
+		long acclKey;
+		wBool_t enabled;
+		};
 struct wMenuToggle_t {
 		MOBJ_COMMON
 		wMenu_p mparent;
@@ -293,7 +300,68 @@ void wAttachAccelKey(
  *****************************************************************************
  */
 
+wMenuRadio_p wMenuRadioCreate(
+		wMenu_p m, 
+		const char * helpStr,
+		const char * labelStr,
+		long acclKey,
+		wMenuCallBack_p action,
+		void	*data )
+{
+	wMenuRadio_p mi;
+	int rc;
+	char label[80];
+	char *cp;
+	char ac;
+	UINT vk;
+	long modifier;
 
+	mi = (wMenuRadio_p)createMenuItem( m, M_RADIO, helpStr, labelStr, sizeof *mi );
+	mi->action = action;
+	mi->data = data;
+	mi->mparent = m;
+	mi->acclKey = acclKey;
+	mi->enabled = TRUE;
+	strcpy( label, mi->labelStr );
+	modifier = 0;
+	if ( acclKey != 0 ) {
+		DYNARR_APPEND( acclTable_t, acclTable_da, 10 );
+		cp = label + strlen( label );
+		*cp++ = '\t';
+		if (acclKey & WCTL ) {
+			strcpy( cp, "Ctrl+" );
+			cp += 5;
+			modifier |= WKEY_CTRL;
+		}
+		if (acclKey & WALT ) {
+			strcpy( cp, "Alt+" );
+			cp += 4;
+			modifier |= WKEY_ALT;
+		}
+		if (acclKey & WSHIFT ) {
+			strcpy( cp, "Shift+" );
+			cp += 6;
+			modifier |= WKEY_SHIFT;
+		}
+		*cp++ = toupper( (char)(acclKey & 0xFF) );
+		*cp++ = '\0';
+		ac = (char)(acclKey & 0xFF);
+		if (isalpha(ac)) {
+			ac = tolower( ac );
+		}
+		vk = VkKeyScan( ac );
+		if ( vk & 0xFF00 )
+			modifier |= WKEY_SHIFT;
+		acclTable(acclTable_da.cnt-1).acclKey = (modifier<<8) | (vk&0x00FF);
+		acclTable(acclTable_da.cnt-1).mp = (wMenuPush_p)mi;
+	}
+	rc = AppendMenu( m->menu, MF_STRING, mi->index, label );
+	return mi;
+}
+
+void wMenuRadioSetActive(wMenuRadio_p mi )
+{
+}
 
 
 wMenuPush_p wMenuPushCreate(

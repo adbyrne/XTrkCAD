@@ -1,7 +1,7 @@
 /** \file draw.c
  * Basic drawing functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.4 2007-04-30 14:29:17 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.5 2007-05-02 18:56:37 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1684,7 +1684,7 @@ EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM )
 static void SetZoomRadio( DIST_T scale )
 {
 	int inx;
-	long curScale = scale;
+	long curScale = (long)scale;
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
 		if( curScale == zoomList[inx].value ) {
@@ -1707,7 +1707,7 @@ static void SetZoomRadio( DIST_T scale )
 static int ScaleInx(  DIST_T scale )
 {
 	int inx;
-	long curScale = scale;
+	long curScale = (long)scale;
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
 		if( curScale == zoomList[inx].value ) {
