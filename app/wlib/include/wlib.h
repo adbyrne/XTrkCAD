@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.1 2005-12-07 15:48:58 rc-flyer Exp $
+/** \file wlib.h
+ * Commaon definitions and declarations for the wlib library
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.2 2007-05-02 17:32:56 m_fischer Exp $
  */
 
 #ifndef WIN_H
@@ -36,6 +38,7 @@ typedef struct wMessage_t   * wMessage_p;
 typedef struct wLine_t      * wLine_p;
 typedef struct wMenuList_t  * wMenuList_p;
 typedef struct wMenuPush_t  * wMenuPush_p;
+typedef struct wMenuRadio_t * wMenuRadio_p;
 typedef struct wMenuToggle_t* wMenuToggle_p;
 typedef struct wBox_t       * wBox_p;
 typedef struct wIcon_t      * wIcon_p;
@@ -564,10 +567,14 @@ wMenu_p wMenuBarAdd(		wWin_p, const char *, const char * );
 
 wMenuPush_p wMenuPushCreate(	wMenu_p, const char *, const char *, long,
 				wMenuCallBack_p, void * );
+wMenuRadio_p wMenuRadioCreate(	wMenu_p, const char *, const char *, long,
+				wMenuCallBack_p, void * );
+
 wMenu_p wMenuMenuCreate(	wMenu_p, const char *, const char * );
 wMenu_p wMenuPopupCreate(	wWin_p, const char * );
 void wMenuSeparatorCreate(	wMenu_p );
 wMenuList_p wMenuListCreate(	wMenu_p, const char *, int, wMenuListCallBack_p );
+void wMenuRadioSetActive( wMenuRadio_p );
 void wMenuPushEnable(		wMenuPush_p, wBool_t );
 void wMenuListAdd(		wMenuList_p, int, const char *, const void * );
 void wMenuListDelete(		wMenuList_p, const char * );
