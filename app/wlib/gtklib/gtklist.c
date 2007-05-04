@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtklist.c,v 1.1 2005-12-07 15:48:44 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtklist.c,v 1.2 2007-05-04 18:37:59 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -854,6 +854,20 @@ EXPORT wList_p wListCreate(
 }
 #endif
 
+/** Create a drop down list. The drop down is created and intialized with the supplied values.
+ *
+ *		\param IN parent Parent window 
+ *		\param IN x, X-position
+ *		\param IN y	 Y-position
+ *		\param IN helpStr Help string 
+ *		\param IN labelStr Label
+ *		\param IN option Options 
+ *		\param IN number Number of displayed entries
+ *		\param IN width Width 
+ *		\param IN valueP Selected index
+ *		\param IN action Callback
+ *		\param IN data Context 
+ */
 
 EXPORT wList_p wDropListCreate(
 		wWin_p	parent,		/* Parent window */
