@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.4 2007-02-07 18:18:23 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.5 2007-05-09 20:29:57 m_fischer Exp $
  */
 
 #include <windows.h>
@@ -2842,6 +2842,8 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 	dw = GetTextExtent( hDc, "AXqypj", 6 );
 	mswEditHeight = HIWORD(dw)+2;
 	ReleaseDC( 0, hDc );
+
+	mswCreateCheckBitmaps();
 
 #ifdef HELPSTR
 	helpStrF = fopen( "C:\\dave\\helpstr.lst", "w" );

@@ -1,3 +1,5 @@
+#define OEMRESOURCE
+
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
@@ -82,6 +84,17 @@ struct wMenuListItem_t {
 		wMenuListCallBack_p action;
 		};
 
+#define UNCHECK (0)
+#define CHECK	(1)
+#define RADIOCHECK (2)
+#define RADIOUNCHECK (3)
+
+static 	HBITMAP checked;
+static	HBITMAP unchecked;
+static  HBITMAP checkedRadio;
+static 	HBITMAP uncheckedRadio;
+
+
 /*
  *****************************************************************************
  *
@@ -300,6 +313,142 @@ void wAttachAccelKey(
  *****************************************************************************
  */
 
+HBITMAP GetMyCheckBitmaps(UINT fuCheck) 
+{ 
+    COLORREF crBackground;  /* background color */                 
+    HBRUSH hbrBackground;   /* background brush */                 
+    HBRUSH hbrTargetOld;    /* original background brush */
+    HDC hdcSource;          /* source device context */       
+    HDC hdcTarget;          /* target device context */          
+    HBITMAP hbmpCheckboxes; /* handle to check-box bitmap */
+    BITMAP bmCheckbox;      /* structure for bitmap data */      
+    HBITMAP hbmpSourceOld;  /* handle to original source bitmap */
+    HBITMAP hbmpTargetOld;  /* handle to original target bitmap */
+    HBITMAP hbmpCheck;      /* handle to check-mark bitmap */
+    RECT rc;                /* rectangle for check-box bitmap */    
+    WORD wBitmapX;          /* width of check-mark bitmap */       
+    WORD wBitmapY;          /* height of check-mark bitmap */      
+ 
+    /* Get the menu background color and create a solid brush 
+       with that color. */
+ 
+    crBackground = GetSysColor(COLOR_MENU); 
+    hbrBackground = CreateSolidBrush(crBackground); 
+ 
+    /* Create memory device contexts for the source and 
+       destination bitmaps. */
+ 
+    hdcSource = CreateCompatibleDC((HDC) NULL); 
+    hdcTarget = CreateCompatibleDC(hdcSource); 
+ 
+    /* Get the size of the system default check-mark bitmap and 
+       create a compatible bitmap of the same size. */
+ 
+    wBitmapX = GetSystemMetrics(SM_CXMENUCHECK); 
+    wBitmapY = GetSystemMetrics(SM_CYMENUCHECK); 
+ 
+    hbmpCheck = CreateCompatibleBitmap(hdcSource, wBitmapX, 
+        wBitmapY); 
+ 
+    /* Select the background brush and bitmap into the target DC. */
+ 
+    hbrTargetOld = SelectObject(hdcTarget, hbrBackground); 
+    hbmpTargetOld = SelectObject(hdcTarget, hbmpCheck); 
+ 
+    /* Use the selected brush to initialize the background color 
+       of the bitmap in the target device context. */
+ 
+    PatBlt(hdcTarget, 0, 0, wBitmapX, wBitmapY, PATCOPY); 
+ 
+    /* Load the predefined check box bitmaps and select it 
+       into the source DC. */
+ 
+    hbmpCheckboxes = LoadBitmap((HINSTANCE) NULL, 
+        (LPTSTR) OBM_CHECKBOXES); 
+ 
+    hbmpSourceOld = SelectObject(hdcSource, hbmpCheckboxes); 
+ 
+    /* Fill a BITMAP structure with information about the 
+       check box bitmaps, and then find the upper-left corner of 
+       the unchecked check box or the checked check box. */
+ 
+    GetObject(hbmpCheckboxes, sizeof(BITMAP), &bmCheckbox); 
+ 
+	switch( fuCheck ) {
+		
+	case UNCHECK:
+        rc.left = 0; 
+        rc.right = (bmCheckbox.bmWidth / 4); 
+		rc.top = 0; 
+		rc.bottom = (bmCheckbox.bmHeight / 3); 
+		break;  
+	case CHECK:  
+        rc.left = (bmCheckbox.bmWidth / 4); 
+        rc.right = (bmCheckbox.bmWidth / 4) * 2; 
+	    rc.top = 0; 
+	    rc.bottom = (bmCheckbox.bmHeight / 3); 
+		break;
+	case RADIOCHECK:
+        rc.left = (bmCheckbox.bmWidth / 4); 
+        rc.right = (bmCheckbox.bmWidth / 4) * 2; 
+		rc.top = (bmCheckbox.bmHeight / 3) + 1;
+	    rc.bottom = (bmCheckbox.bmHeight / 3) * 2; 
+		break;
+	case RADIOUNCHECK:
+		rc.top = (bmCheckbox.bmHeight / 3) + 1;
+	    rc.bottom = (bmCheckbox.bmHeight / 3) * 2; 
+        rc.left = 0; 
+        rc.right = (bmCheckbox.bmWidth / 4); 
+
+		break;
+	}
+    
+    /* Copy the appropriate bitmap into the target DC. If the 
+       check-box bitmap is larger than the default check-mark 
+       bitmap, use StretchBlt to make it fit; otherwise, just 
+       copy it. */
+ 
+    if (((rc.right - rc.left) > (int) wBitmapX) || 
+            ((rc.bottom - rc.top) > (int) wBitmapY)) 
+    {
+        StretchBlt(hdcTarget, 0, 0, wBitmapX, wBitmapY, 
+            hdcSource, rc.left, rc.top, rc.right - rc.left, 
+            rc.bottom - rc.top, SRCCOPY); 
+    }
+ 
+    else 
+    {
+        BitBlt(hdcTarget, 0, 0, rc.right - rc.left, 
+            rc.bottom - rc.top, 
+            hdcSource, rc.left, rc.top, SRCCOPY); 
+    }
+ 
+    /* Select the old source and destination bitmaps into the 
+       source and destination DCs, and then delete the DCs and 
+       the background brush. */
+ 
+    SelectObject(hdcSource, hbmpSourceOld); 
+    SelectObject(hdcTarget, hbrTargetOld); 
+    hbmpCheck = SelectObject(hdcTarget, hbmpTargetOld); 
+ 
+    DeleteObject(hbrBackground); 
+    DeleteObject(hdcSource); 
+    DeleteObject(hdcTarget); 
+ 
+    /* Return a handle to the new check-mark bitmap. */
+ 
+    return hbmpCheck; 
+} 
+
+void mswCreateCheckBitmaps()
+{
+	checked = GetMyCheckBitmaps( CHECK );
+	unchecked = GetMyCheckBitmaps( UNCHECK );
+	checkedRadio = GetMyCheckBitmaps( RADIOCHECK );
+	uncheckedRadio = GetMyCheckBitmaps( RADIOUNCHECK );
+
+}
+
 wMenuRadio_p wMenuRadioCreate(
 		wMenu_p m, 
 		const char * helpStr,
@@ -356,12 +505,18 @@ wMenuRadio_p wMenuRadioCreate(
 		acclTable(acclTable_da.cnt-1).mp = (wMenuPush_p)mi;
 	}
 	rc = AppendMenu( m->menu, MF_STRING, mi->index, label );
+
+	/* add the correct bitmaps for radio buttons */
+
+    rc = SetMenuItemBitmaps(m->menu, mi->index, FALSE, uncheckedRadio, checkedRadio ); 
+
 	return mi;
 }
 
 void wMenuRadioSetActive(wMenuRadio_p mi )
 {
-}
+	CheckMenuItem( mi->mparent->menu, mi->index, MF_BYCOMMAND | MF_CHECKED );
+} 
 
 
 wMenuPush_p wMenuPushCreate(
