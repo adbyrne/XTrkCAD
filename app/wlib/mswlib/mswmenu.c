@@ -7,6 +7,7 @@
 #include <commdlg.h>
 #include <math.h>
 #include <ctype.h>
+#include <assert.h>
 #include "mswint.h"
 
 /*
@@ -22,6 +23,10 @@ typedef enum { MM_BUTT, MM_MENU, MM_BAR, MM_POPUP } mmtype_e;
 
 typedef struct wMenuItem_t * wMenuItem_p;
 
+struct radioButtonGroup {
+		int firstButton;	/* id of first button in group */
+		int lastButton;		/* id of last button in group */	
+};
 
 /* NOTE: first field must be the same as WOBJ_COMMON */
 #define MOBJ_COMMON \
@@ -39,6 +44,7 @@ struct wMenu_t {
 		MOBJ_COMMON
 		mmtype_e mmtype;
 		wMenuItem_p first, last;
+		struct radioButtonGroup *radioGroup;
 		HMENU menu;
 		wButton_p button;
 		wMenuTraceCallBack_p traceFunc;
@@ -148,6 +154,10 @@ static LRESULT menuPush(
 		case M_LISTITEM:
 			if (((wMenuListItem_p)m)->action)
 				((wMenuListItem_p)m)->action(0, "", ((wMenuListItem_p)m)->data);
+			break;
+		case M_RADIO:
+			if (((wMenuRadio_p)m)->action)
+				((wMenuRadio_p)m)->action(((wMenuRadio_p)m)->data);
 			break;
 		}
 		return 0L;
@@ -510,12 +520,26 @@ wMenuRadio_p wMenuRadioCreate(
 
     rc = SetMenuItemBitmaps(m->menu, mi->index, FALSE, uncheckedRadio, checkedRadio ); 
 
+	if( m->radioGroup == NULL ) {
+		m->radioGroup = malloc( sizeof( struct radioButtonGroup ));
+		assert( m->radioGroup );
+		m->radioGroup->firstButton = mi->index;
+	} else {
+		m->radioGroup->lastButton = mi->index;
+	}
+
 	return mi;
 }
 
 void wMenuRadioSetActive(wMenuRadio_p mi )
 {
-	CheckMenuItem( mi->mparent->menu, mi->index, MF_BYCOMMAND | MF_CHECKED );
+	BOOL rc;
+
+	rc = CheckMenuRadioItem( mi->mparent->menu, 
+							 mi->mparent->radioGroup->firstButton, 
+							 mi->mparent->radioGroup->lastButton,
+							 mi->index,
+							 MF_BYCOMMAND );
 } 
 
 
