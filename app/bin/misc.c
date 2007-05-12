@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.11 2007-04-30 14:29:17 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.12 2007-05-12 15:01:51 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2118,11 +2118,6 @@ static void CreateMenus( void )
 	bm_p = wIconCreatePixMap(zoom_xpm);
 	zoomM = wMenuPopupCreate( mainW, "" );
 	AddToolbarButton( "cmdZoom", wIconCreatePixMap(zoom_xpm), IC_MODETRAIN_TOO, (wButtonCallBack_p)wMenuPopupShow, zoomM );
-/*	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
-		miZoom = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
-
-		wMenuPushCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value ); 
-	} */
 	AddToolbarButton( "cmdZoomOut", wIconCreatePixMap(zoomout_xpm), IC_MODETRAIN_TOO,
 		(addButtonCallBack_t)DoZoomDown, NULL );
 
@@ -2146,7 +2141,6 @@ static void CreateMenus( void )
 	wMenuSeparatorCreate( fileM );
 	MiscMenuItemCreate( fileM, NULL, "printSetup", "P&rint Setup ...", ACCL_PRINTSETUP, (void*)(wMenuCallBack_p)wPrintSetup, 0, (void *)0 );
 	printCmdInx = InitCmdPrint( fileM );
-/*	wMenuPushCreate( fileM, "cmdPrint", "&Print", ACCL_PRINT, (wMenuCallBack_p)DoCommandBIndirect, &printCmdInx ); */
 	wMenuSeparatorCreate( fileM );
 	MiscMenuItemCreate( fileM, NULL, "cmdImport", "&Import", ACCL_IMPORT, (void*)(wMenuCallBack_p)DoImport, 0, (void *)0 );
 	MiscMenuItemCreate( fileM, NULL, "cmdOutputbitmap", "Export to &Bitmap", ACCL_PRINTBM, (void*)(wMenuCallBack_p)OutputBitMapInit(), 0, (void *)0 );
@@ -2211,7 +2205,6 @@ static void CreateMenus( void )
 		0, (wMenuToggleCallBack_p)SnapGridEnable, NULL );
 	snapGridShowMI = wMenuToggleCreate( viewM, "cmdGridShow", "Show SnapGrid", ACCL_SNAPSHOW,
 		FALSE, (wMenuToggleCallBack_p)SnapGridShow, NULL );
-/*	wMenuPushCreate( viewM, "cmdGrid", "Change &Grid ...", ACCL_GRIDW, (wMenuCallBack_p)DoCommandBIndirect, &gridCmdInx ); */
 	gridCmdInx = InitGrid( viewM );
 	wMenuSeparatorCreate( viewM );
 
