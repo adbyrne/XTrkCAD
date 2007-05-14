@@ -284,7 +284,7 @@ TURNOUT HO "Atlas	Extension	85x"
 	C 0 0.000000 -18.000000 0.000000 18.000000 170.000000 10.000000
 	END
 # Straight Section Design by Victor Bobier - 3.750000
-TURNOUT HO "Atlas 843 Bumper Track"
+TURNOUT HO "Atlas	Bumper Track	843"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	S 0 0 0.000000 0.000000 3.750000 0.000000
