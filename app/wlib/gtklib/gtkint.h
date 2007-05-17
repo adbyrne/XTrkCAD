@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.1 2005-12-07 15:48:48 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.2 2007-05-17 13:25:44 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -55,6 +55,7 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 #define WOBJ_COMMON \
 		wType_e type; \
 		wControl_p next; \
+		wControl_p synonym; \
 		wWin_p parent; \
 		wPos_t origX, origY; \
 		wPos_t realX, realY; \

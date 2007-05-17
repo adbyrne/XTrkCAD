@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbutton.c,v 1.2 2006-03-29 19:36:39 m_fischer Exp $
+/** \file gtkbutton.c
+ * Toolbar button creation and handling
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbutton.c,v 1.3 2007-05-17 13:25:44 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -127,8 +129,6 @@ static void pushButt(
 		b->recursion--;
 	}
 }
-
-int test2 = 0;
 
 wButton_p wButtonCreate(
 		wWin_p	parent,

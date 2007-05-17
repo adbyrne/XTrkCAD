@@ -1,7 +1,7 @@
 /** \file wlib.h
  * Commaon definitions and declarations for the wlib library
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.2 2007-05-02 17:32:56 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.3 2007-05-17 13:26:14 m_fischer Exp $
  */
 
 #ifndef WIN_H
@@ -186,6 +186,8 @@ void wControlSetBalloonText(	wControl_p, const char * );
 void wControlSetContext(	wControl_p, void * );
 void wControlHilite(		wControl_p, wBool_t );
 
+void wControlLinkedSet( wControl_p b1, wControl_p b2 );
+void wControlLinkedActive( wControl_p b, int active );
 
 /*------------------------------------------------------------------------------
  *
