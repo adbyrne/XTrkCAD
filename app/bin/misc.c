@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.12 2007-05-12 15:01:51 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.13 2007-05-17 13:33:13 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -90,6 +90,9 @@ EXPORT wBool_t extraButtons = FALSE;
 
 EXPORT wButton_p undoB;
 EXPORT wButton_p redoB;
+
+EXPORT wButton_p zoomUpB;
+EXPORT wButton_p zoomDownB;
 
 EXPORT wIndex_t checkPtMark = 0;
 
@@ -2066,8 +2069,10 @@ static void SetAccelKey(
 static void CreateMenus( void )
 {
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM, messageListM, manageM, addM, changeM, drawM;
-	wMenu_p zoomM, zoomSubM, defcmdM;
+	wMenu_p zoomM, zoomSubM;
 	wIcon_p bm_p;
+
+	wMenuPush_p zoomInM, zoomOutM;
 
 	fileM = wMenuBarAdd( mainW, "menuFile", "&File" );
 	editM = wMenuBarAdd( mainW, "menuEdit", "&Edit" );
@@ -2113,12 +2118,14 @@ static void CreateMenus( void )
 	popup2aM = wMenuMenuCreate( popup2M, "", "More" );
 
 	cmdGroup = BG_ZOOM;
-	AddToolbarButton( "cmdZoomIn", wIconCreatePixMap(zoomin_xpm), IC_MODETRAIN_TOO,
+	zoomUpB = AddToolbarButton( "cmdZoomIn", wIconCreatePixMap(zoomin_xpm), IC_MODETRAIN_TOO,
 		(addButtonCallBack_t)DoZoomUp, NULL );
+
 	bm_p = wIconCreatePixMap(zoom_xpm);
 	zoomM = wMenuPopupCreate( mainW, "" );
 	AddToolbarButton( "cmdZoom", wIconCreatePixMap(zoom_xpm), IC_MODETRAIN_TOO, (wButtonCallBack_p)wMenuPopupShow, zoomM );
-	AddToolbarButton( "cmdZoomOut", wIconCreatePixMap(zoomout_xpm), IC_MODETRAIN_TOO,
+
+	zoomDownB = AddToolbarButton( "cmdZoomOut", wIconCreatePixMap(zoomout_xpm), IC_MODETRAIN_TOO,
 		(addButtonCallBack_t)DoZoomDown, NULL );
 
 	cmdGroup = BG_UNDO;
@@ -2141,6 +2148,7 @@ static void CreateMenus( void )
 	wMenuSeparatorCreate( fileM );
 	MiscMenuItemCreate( fileM, NULL, "printSetup", "P&rint Setup ...", ACCL_PRINTSETUP, (void*)(wMenuCallBack_p)wPrintSetup, 0, (void *)0 );
 	printCmdInx = InitCmdPrint( fileM );
+/*	wMenuPushCreate( fileM, "cmdPrint", "&Print", ACCL_PRINT, (wMenuCallBack_p)DoCommandBIndirect, &printCmdInx ); */
 	wMenuSeparatorCreate( fileM );
 	MiscMenuItemCreate( fileM, NULL, "cmdImport", "&Import", ACCL_IMPORT, (void*)(wMenuCallBack_p)DoImport, 0, (void *)0 );
 	MiscMenuItemCreate( fileM, NULL, "cmdOutputbitmap", "Export to &Bitmap", ACCL_PRINTBM, (void*)(wMenuCallBack_p)OutputBitMapInit(), 0, (void *)0 );
@@ -2190,12 +2198,16 @@ static void CreateMenus( void )
 	/*
 	 * VIEW MENU
 	 */
-	wMenuPushCreate( viewM, "menuEdit-zoomIn", "Zoom &In", ACCL_ZOOMIN, (wMenuCallBack_p)DoZoomUp, (void*)1 );
+	zoomInM = wMenuPushCreate( viewM, "menuEdit-zoomIn", "Zoom &In", ACCL_ZOOMIN, (wMenuCallBack_p)DoZoomUp, (void*)1 );
 	zoomSubM = wMenuMenuCreate( viewM, "menuEdit-zoomTo", "&Zoom" );
-	wMenuPushCreate( viewM, "menuEdit-zoomOut", "Zoom &Out", ACCL_ZOOMOUT, (wMenuCallBack_p)DoZoomDown, (void*)1 );
+	zoomOutM = wMenuPushCreate( viewM, "menuEdit-zoomOut", "Zoom &Out", ACCL_ZOOMOUT, (wMenuCallBack_p)DoZoomDown, (void*)1 );
 	wMenuSeparatorCreate( viewM );
 
 	InitCmdZoom( zoomM, zoomSubM );
+
+	/* these menu choices and toolbar buttons are synonymous and should be treated as such */
+	wControlLinkedSet( (wControl_p)zoomInM, (wControl_p)zoomUpB );
+	wControlLinkedSet( (wControl_p)zoomOutM, (wControl_p)zoomDownB ); 
 
 	wMenuPushCreate( viewM, "menuEdit-redraw", "&Redraw", ACCL_REDRAW, (wMenuCallBack_p)MainRedraw, NULL );
 	wMenuPushCreate( viewM, "menuEdit-redraw", "Redraw All", ACCL_REDRAWALL, (wMenuCallBack_p)DoRedraw, NULL );
@@ -2205,6 +2217,7 @@ static void CreateMenus( void )
 		0, (wMenuToggleCallBack_p)SnapGridEnable, NULL );
 	snapGridShowMI = wMenuToggleCreate( viewM, "cmdGridShow", "Show SnapGrid", ACCL_SNAPSHOW,
 		FALSE, (wMenuToggleCallBack_p)SnapGridShow, NULL );
+/*	wMenuPushCreate( viewM, "cmdGrid", "Change &Grid ...", ACCL_GRIDW, (wMenuCallBack_p)DoCommandBIndirect, &gridCmdInx ); */
 	gridCmdInx = InitGrid( viewM );
 	wMenuSeparatorCreate( viewM );
 
@@ -2235,11 +2248,6 @@ static void CreateMenus( void )
 	/*
 	 * CHANGE MENU
 	 */
-	defcmdM = wMenuMenuCreate( changeM, "defaultCmd", "Default Command" );
-	
-	wMenuRadioCreate( defcmdM, "defCmd", "Properties", 0, NULL, "0" ); 
-	wMenuRadioCreate( defcmdM, "defCmd", "Select", 0, NULL, "1" ); 
-	
 	cmdGroup = BG_SELECT;
 	InitCmdDescribe( changeM );
 	InitCmdSelect( changeM );

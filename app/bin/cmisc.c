@@ -1,7 +1,7 @@
 /** \file cmisc.c
  * Handlimg of the 'Describe' dialog
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.3 2007-02-04 17:06:24 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.4 2007-05-17 13:33:13 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -453,7 +453,7 @@ static STATUS_T CmdDescribe( wAction_t action, coOrd pos )
 
 void InitCmdDescribe( wMenu_p menu )
 {
-	describeCmdInx = AddMenuButton( menu, CmdDescribe, "cmdDescribe", "Properties...", wIconCreatePixMap(describe_xpm),
+	describeCmdInx = AddMenuButton( menu, CmdDescribe, "cmdDescribe", "Properties", wIconCreatePixMap(describe_xpm),
 				LEVEL0, IC_CANCEL|IC_POPUP, ACCL_DESCRIBE, NULL );
 	RegisterChangeNotification( DescChange );
 	ParamRegister( &describePG );

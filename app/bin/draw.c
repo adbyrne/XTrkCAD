@@ -1,7 +1,7 @@
 /** \file draw.c
  * Basic drawing functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.6 2007-05-12 15:01:51 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.7 2007-05-17 13:33:13 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -831,7 +831,6 @@ EXPORT void InitInfoBar( void )
 		infoD.pos_w = GetInfoPosWidth() + 2;
 		infoD.scale_w = wLabelWidth( "999:1" ) + wLabelWidth( zoomLabel ) + 6;
 		/* we do not use the count label for the moment */
-/*		infoD.count_w = wLabelWidth( "9999" )+6; */
 		infoD.count_w = 0;
 	infoD.info_w = width - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 45;
 	if (infoD.info_w <= 0) {
@@ -844,11 +843,6 @@ EXPORT void InitInfoBar( void )
 		infoD.scale_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.scale_w, boxH );
 		infoD.scale_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarScale", infoD.scale_w-six, zoomLabel ); 
 		x += infoD.scale_w + 10;
-/* we do not use the count label for the moment
-		infoD.count_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.count_w, boxH );
-		infoD.count_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarCount", infoD.count_w-six, "" ); 
-		x += infoD.count_w + 10;
-*/
 		infoD.posX_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
 		infoD.posX_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosX", infoD.pos_w-six, xLabel ); 
 		x += infoD.pos_w + 5;
@@ -888,11 +882,6 @@ static void SetInfoBar( void )
 		wControlSetPos( (wControl_p)infoD.scale_b, x, yb );
 		wControlSetPos( (wControl_p)infoD.scale_m, x+info_xm_offset, ym );
 		x += infoD.scale_w + 10;
-/* remove count window
-		wControlSetPos( (wControl_p)infoD.count_b, x, yb );
-		wControlSetPos( (wControl_p)infoD.count_m, x+info_xm_offset, ym );
-		x += infoD.count_w + 10;
-*/		
 		wControlSetPos( (wControl_p)infoD.posX_b, x, yb );
 		wControlSetPos( (wControl_p)infoD.posX_m, x+info_xm_offset, ym );
 		x += infoD.pos_w + 5;
@@ -1649,8 +1638,7 @@ LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
 }
 
 /**
- * Initialize the menu for setting zoom factors. Besides creating the list of radio buttons
- * the button for the current scale is activated.
+ * Initialize the menu for setting zoom factors. 
  * 
  * \param IN zoomM			Menu to which radio button is added
  * \param IN zoomSubM	Second menu to which radio button is added, ignored if NULL
@@ -1665,6 +1653,7 @@ EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM )
 		zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
 		if( zoomSubM )
 			zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
+
 	}
 }
 
@@ -1682,12 +1671,16 @@ static void SetZoomRadio( DIST_T scale )
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
 		if( curScale == zoomList[inx].value ) {
+		
 			wMenuRadioSetActive( zoomList[inx].btRadio );		
 			if( zoomList[inx].pdRadio )
 				wMenuRadioSetActive( zoomList[inx].pdRadio );
-		}	
+
+			/* activate / deactivate zoom buttons when appropriate */				
+			wControlLinkedActive( (wControl_p)zoomUpB, ( inx != 0 ) );
+			wControlLinkedActive( (wControl_p)zoomDownB, ( inx < (sizeof zoomList/sizeof zoomList[0] - 1)));			
+		}
 	}
-	
 }	
 
 /**
@@ -1768,7 +1761,8 @@ EXPORT void DoZoomUp( void * mode )
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
 		if( i>= 1 )
-			DoNewScale( zoomList[ i - 1 ].value );			
+			DoNewScale( zoomList[ i - 1 ].value );	
+
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomin", &newScale, 4 );
 		DoNewScale( newScale );
@@ -1788,6 +1782,7 @@ EXPORT void DoZoomDown( void  * mode)
 		i = ScaleInx( mainD.scale );
 		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 ))
 			DoNewScale( zoomList[ i + 1 ].value );			
+			
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomout", &newScale, 16 );
 		DoNewScale( newScale );

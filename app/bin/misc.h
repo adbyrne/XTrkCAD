@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.3 2006-02-22 19:20:11 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.4 2007-05-17 13:33:13 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -185,6 +185,8 @@ extern coOrd zero;
 extern wBool_t extraButtons;
 extern wButton_p undoB;
 extern wButton_p redoB;
+extern wButton_p zoomUpB;			/** ZoomUp button on toolbar */
+extern wButton_p zoomDownB;		/** ZoomDown button on toolbar */ 
 // extern wButton_p easementB;
 extern wIndex_t checkPtMark;
 extern wMenu_p demoM;
