@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.5 2007-05-09 20:29:57 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.6 2007-05-19 08:13:54 m_fischer Exp $
  */
 
 #include <windows.h>
@@ -1397,6 +1397,54 @@ void wControlSetHelp(
 		b->helpStr = NULL;
 }
 
+
+/**
+ * Add control to circular list of synonymous controls. Synonymous controls are kept in sync by 
+ * calling wControlLinkedActive for one member of the list 
+ *
+ * \param IN  first control
+ * \param IN  second control
+ * \return    none
+ */
+ 
+void wControlLinkedSet( wControl_p b1, wControl_p b2 )
+{
+	b2->synonym = b1->synonym;
+	if( b2->synonym == NULL )
+		b2->synonym = b1;
+		
+	b1->synonym = b2;
+} 	
+
+/**
+ * Activate/deactivate a group of synonymous controls.
+ *
+ * \param IN  control
+ * \param IN  state
+ * \return    none
+ */
+ 
+void wControlLinkedActive( wControl_p b, int active )
+{
+	wControl_p savePtr = b;
+
+	if( savePtr->type == B_MENUITEM )
+		wMenuPushEnable( (wMenuPush_p)savePtr, active );
+	else 	
+		wControlActive( savePtr, active );		
+
+	savePtr = savePtr->synonym;
+
+	while( savePtr && savePtr != b ) {	
+
+		if( savePtr->type == B_MENUITEM )
+			wMenuPushEnable( (wMenuPush_p)savePtr, active );
+		else 	
+			wControlActive( savePtr, active );		
+
+		savePtr = savePtr->synonym;
+	}	
+}
 
 void wControlShow( wControl_p b, BOOL_T show )
 {

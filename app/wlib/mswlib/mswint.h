@@ -77,6 +77,7 @@ extern callBacks_t *mswCallBacks[CALLBACK_CNT];
 #define WOBJ_COMMON \
 		wType_e type; \
 		wControl_p next; \
+		wControl_p synonym; \
 		wWin_p parent; \
 		POS_T x, y; \
 		POS_T w, h; \
