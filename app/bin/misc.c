@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.13 2007-05-17 13:33:13 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.14 2007-06-15 16:02:51 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -547,6 +547,10 @@ static void DoQuit( void )
 static void DoClearAfter( void )
 {
 	ClearTracks();
+	
+	/* set all layers to their default properties and set current layer to 0 */
+	DefaultLayerProperties();
+	
 	checkPtMark = 0;
 	Reset();
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
@@ -2664,7 +2668,8 @@ LOG1( log_init, ( "initialize\n" ) )
 	ParamRegister( &menuPG );
 	ParamRegister( &stickyPG );
 
-	ResetLayers();
+	/* initialize the layers */
+	DefaultLayerProperties();
 LOG1( log_init, ( "loadFileList\n" ) )
 	LoadFileList();
 	AddPlaybackProc( "MENU", MenuPlayback, NULL );

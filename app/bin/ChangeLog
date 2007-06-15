@@ -1,3 +1,20 @@
+Jun 15, 2007
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		dlayer.c: layer buttons now are push buttons, that have an 
+		'pressed' state when layer is visible.
+		
+Jun 15, 2007
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		dlayer.c, fileio.c, misc.c: settings for the layers can now 
+		be saved in the preferences. On opening a new layout or upon
+		startup of XTrkCad these settings are automatically loaded.
+
+May 18, 2007
+
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		draw.c misc.c: disable zoom up and zoom down buttons when
+		end of list is reached
+
 Apr 30, 2007
 
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>

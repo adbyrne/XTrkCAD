@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.h,v 1.4 2007-02-23 16:50:03 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.h,v 1.5 2007-06-15 16:02:51 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -81,7 +81,7 @@ void LoadScaleList( wList_p );
 void LoadGaugeList( wList_p, SCALEDESCINX_T );
 BOOL_T CompatibleScale( BOOL_T, SCALEINX_T, SCALEINX_T );
 BOOL_T DoSetScaleDesc( void );
-typedef char LAYER_T;
+typedef int LAYER_T;
 LAYER_T curLayer;
 long layerCount;
 wDrawColor GetLayerColor( LAYER_T );
@@ -91,6 +91,10 @@ BOOL_T GetLayerOnMap( LAYER_T );
 char * GetLayerName( LAYER_T );
 BOOL_T ReadLayers( char * );
 BOOL_T WriteLayers( FILE * );
+
+/* dlayers.c */
+void UpdateLayerLists( void );
+void DefaultLayerProperties(void);
 void ResetLayers( void );
 void SaveLayers( void );
 void RestoreLayers( void );

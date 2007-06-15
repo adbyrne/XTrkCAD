@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.h,v 1.3 2007-02-23 16:50:03 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.h,v 1.4 2007-06-15 16:02:51 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -59,17 +59,17 @@ typedef enum {
 #define PDO_DLGSTARTBTNS		(1L<<13)
 #define PDO_DLGWIDE				(1L<<14)
 #define PDO_DLGNARROW			(1L<<15)
-#define PDO_DLGBOXEND			(1L<<16)
-#define PDO_DLGRESETMARGIN		(1L<<17)
+#define PDO_DLGBOXEND			(1L<<16)	 /** draw recessed frame around the controls */
+#define PDO_DLGRESETMARGIN		(1L<<17)	 /** position control on the left ?*/
 #define PDO_DLGIGNORELABELWIDTH (1L<<18)
-#define PDO_DLGHORZ				(1L<<20)  /* arrange on same line as previous element */
+#define PDO_DLGHORZ				(1L<<20)  /** arrange on same line as previous element */
 #define PDO_DLGNEWCOLUMN		(1L<<21)
 #define PDO_DLGNOLABELALIGN		(1L<<22)
 #define PDO_LISTINDEX			(1L<<23)
 #define PDO_DLGSETY				(1L<<24)
 #define PDO_DLGIGNOREX			(1L<<25)
 #define PDO_DLGUNDERCMDBUTT		(1L<<26)
-#define PDO_DLGCMDBUTTON		(1L<<27)
+#define PDO_DLGCMDBUTTON		(1L<<27)	/** arrange button on the right with the default buttons */
 #define PDO_DLGIGNORE			(1L<<28)
 
 #define PDO_DLGRESIZEW			(1L<<29)

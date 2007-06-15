@@ -392,6 +392,9 @@ layer-onmap	Layer is drawn on Map window	cmdLayer
 layer-button-count	Number of layer buttons to show	cmdLayer
 layer-object-count	Number of objects in this layer	cmdLayer
 layer-ok		cmdLayer
+layer-reset	Load layer configuration from default	cmdLayer
+layer-save	Save current layer configuration as default	cmdLayer
+layer-clear	Overwrite layer configuration with system default values	cmdLayer
 #
 layout-roomsizeX	Specifies the size of the room (in inches or centimeters)	cmdLayout
 layout-roomsizeY	Specifies the size of the room (in inches or centimeters)	cmdLayout

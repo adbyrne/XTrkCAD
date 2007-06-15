@@ -1,7 +1,7 @@
 /** \file fileio.c
  * Loading and saving files. Handles trackplans as well as DXF export. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.7 2007-02-16 07:24:15 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.8 2007-06-15 16:02:51 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -776,7 +776,7 @@ EXPORT int LoadTracks(
 	wSetCursor( wCursorWait );
 	Reset();
 	ClearTracks();
-	ResetLayers();
+	DefaultLayerProperties();
 	checkPtMark = changed = 0;
 	UndoSuspend();
 	useCurrentLayer = FALSE;
