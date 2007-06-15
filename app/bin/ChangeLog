@@ -1,4 +1,8 @@
 Jun 15, 2007
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		dlayer.c: fixed function prototype for Windows compile
+
+Jun 15, 2007
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		dlayer.c: layer buttons now are push buttons, that have an 
 		'pressed' state when layer is visible.

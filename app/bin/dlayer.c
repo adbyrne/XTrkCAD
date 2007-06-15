@@ -1,7 +1,7 @@
 /** \file dlayer.c
  * Functions and dialogs for handling layers.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.2 2007-06-15 16:02:50 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.3 2007-06-15 16:30:14 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -550,7 +550,7 @@ LayerPrefSave( void )
  */
 
 static void
-LayerPrefLoad()
+LayerPrefLoad( void )
 {
 	
 	int inx;

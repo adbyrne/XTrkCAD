@@ -590,6 +590,12 @@ Layer is drawn on Map window
 Number of layer buttons to show
 :layer-object-count
 Number of objects in this layer
+:layer-reset
+Load layer configuration from default
+:layer-save
+Save current layer configuration as default
+:layer-clear
+Overwrite layer configuration with system default values
 :layout-roomsizeX
 Specifies the size of the room (in inches or centimeters)
 :layout-roomsizeY
@@ -738,12 +744,16 @@ Description of Object
 Part Nuber of Object
 :rescale-toggle
 Rescale by Scale Conversion or by Ratio
-:rescale-from
+:rescale-fromS
 Original Scale of the selected objects
-:rescale-to
+:rescale-fromG
+Original Gauge of the selected obkects
+:rescale-toS
 New Scale of the selected objects
-:rescale-change-gauge
-Change track gauge to new Scale
+:rescale-toG
+New Gauge of the selected objects
+:rescale-change-dim
+Change track dimensions to new scale
 :rescale-ratio
 Change size by this amount
 :rgbcolor-snapgrid
