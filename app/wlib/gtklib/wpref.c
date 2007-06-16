@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.4 2007-04-30 14:24:49 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.5 2007-06-16 13:50:32 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -38,6 +38,7 @@
 extern char wAppName[];
 static char appLibDir[BUFSIZ];
 static char appWorkDir[BUFSIZ];
+static char userHomeDir[BUFSIZ];
 
 /*
  *******************************************************************************
@@ -139,6 +140,30 @@ EXPORT const char * wGetAppWorkDir(
 		}
 	}
 	return appWorkDir;
+}
+
+/**
+ * Get the user's home directory. The environment variable HOME is
+ * assumed to contain the proper directory.
+ *
+ * \return    pointer to the user's home directory
+ */
+
+EXPORT const char *wGetUserHomeDir( void )
+{
+	char *homeDir;
+	
+	if( userHomeDir[ 0 ] != '\0' )
+		return userHomeDir;
+		
+	if ((homeDir = getenv( "HOME" )) == NULL) {
+		wNotice( "HOME is not set", "Exit", NULL);
+		wExit(0);
+	} else {
+		strcpy( userHomeDir, homeDir );
+	}	
+
+	return userHomeDir;
 }
 
 

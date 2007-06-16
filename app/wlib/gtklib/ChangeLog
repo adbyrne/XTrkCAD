@@ -1,3 +1,7 @@
+Jun 16, 2007
+	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		wpref.c: added wGetUserHomeDir() 
+		
 Feb 25, 2007
 	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		wpref.c: Rephrased error message  for lib-directory not found

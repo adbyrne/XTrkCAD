@@ -1,3 +1,8 @@
+Jun 16, 2007
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		fileio.c: default directory for storing files is the user's 
+		home directory now.
+		
 Jun 15, 2007
 	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		dlayer.c: fixed function prototype for Windows compile

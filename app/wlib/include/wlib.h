@@ -1,7 +1,7 @@
 /** \file wlib.h
  * Commaon definitions and declarations for the wlib library
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.3 2007-05-17 13:26:14 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.4 2007-06-16 13:50:32 m_fischer Exp $
  */
 
 #ifndef WIN_H
@@ -63,6 +63,7 @@ extern long wDebugFont;
 
 const char * wGetAppLibDir(			void );
 const char * wGetAppWorkDir(			void );
+const char * wGetUserHomeDir( void );
 wBool_t wCheckExecutable(		void );
 
 void wBeep(			void );
