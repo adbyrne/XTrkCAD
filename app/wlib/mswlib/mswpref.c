@@ -6,14 +6,15 @@
 #include <math.h>
 #include <stdio.h>
 #include "mswint.h"
+#include <shlobj.h>
 
 #if _MSC_VER >=1400
 	#define stricmp _stricmp
 #endif
 
 char * mswStrdup( const char * );
-static char appLibDirName[1024];
-static char appWorkDirName[1024];
+static char appLibDirName[MAX_PATH];
+static char appWorkDirName[MAX_PATH];
 
 
 const char * wGetAppLibDir( void )
@@ -29,6 +30,20 @@ const char * wGetAppLibDir( void )
 }
 
 
+/**
+ * Gets the working directory for the application. At least the INI file is stored here. 
+ * The working directory can be specified manually by creating a file called xtrkcad0.ini
+ * in the application lib dir (the directory where the .EXE is located). 
+ *
+ * [workdir]
+ *		path=somepath
+ * 
+ * when somepath is set to the keyword "installdir", the install directory for the EXE is
+ * used.
+ *
+ * If no xtrkcad0.ini could be found, the user settings directory (appdata) is used.
+ *
+ */
 const char * wGetAppWorkDir( void )
 {
 	char *cp;
@@ -48,10 +63,14 @@ const char * wGetAppWorkDir( void )
 		}
 		return appWorkDirName;
 	}
-	if (GetWindowsDirectory( appWorkDirName, sizeof appWorkDirName ) == 0) {
-			wNotice( "Cannot get windows working directory", "Exit", NULL );
+
+	if (SHGetSpecialFolderPath( NULL, mswTmpBuff, CSIDL_APPDATA, 0 ) == 0 ) {
+			wNotice( "Cannot get user's profile directory", "Exit", NULL );
 			wExit(0);
+	} else {
+		sprintf( appWorkDirName, "%s\\%s", mswTmpBuff, "xtrkcad" );
 	}
+
 	return appWorkDirName;
 }
 
