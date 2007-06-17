@@ -1,3 +1,7 @@
+Jun 17, 2007
+	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswpref.c: added wGetUserHomeDir() 
+
 Jun, 16 2007
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswpref.c working directory is in the user profile directory tree now

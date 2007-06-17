@@ -74,6 +74,22 @@ const char * wGetAppWorkDir( void )
 	return appWorkDirName;
 }
 
+/** Get the user's home directory.  The environment variable HOME is
+ * assumed to contain the proper directory.
+ *
+ * \return    pointer to the user's home directory
+ */
+
+const char *wGetUserHomeDir( void )
+{
+	if (SHGetSpecialFolderPath( NULL, mswTmpBuff, CSIDL_PERSONAL, 0 ) == 0 ) {
+		wNotice( "Cannot get user's home directory", "Exit", NULL );
+		wExit(0);
+		return( NULL );
+	} else {
+		return( mswTmpBuff );
+	}
+}
 
 typedef struct {
 		char * section;
