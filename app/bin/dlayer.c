@@ -1,7 +1,7 @@
 /** \file dlayer.c
  * Functions and dialogs for handling layers.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.3 2007-06-15 16:30:14 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.4 2007-06-18 05:49:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -343,9 +343,10 @@ static paramData_t layerPLs[] = {
 #define I_COUNT (6)
 	 { PD_STRING, NULL, "object-count", PDO_NOPREF|PDO_DLGBOXEND, (void*)(80), "Count", BO_READONLY },
 	 { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, "Number of Layer Buttons" },
-	 { PD_BUTTON, DoLayerOp, "reset", PDO_DLGRESETMARGIN, 0, "Load Defaults", 0, (void *)ENUMLAYER_RELOAD },
-	 { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, "Save Defaults", 0, (void *)ENUMLAYER_SAVE }, 
-	 { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, "Reset", 0, (void *)ENUMLAYER_CLEAR }, 	 
+	 { PD_MESSAGE, "Personal Preferences", NULL, PDO_DLGRESETMARGIN, (void *)180 },
+	 { PD_BUTTON, DoLayerOp, "reset", PDO_DLGRESETMARGIN, 0, "Load", 0, (void *)ENUMLAYER_RELOAD },
+	 { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, "Save", 0, (void *)ENUMLAYER_SAVE }, 
+	 { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, "Restore Defaults", 0, (void *)ENUMLAYER_CLEAR }, 	 
 	 };
 	 
 static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof layerPLs[0] };
