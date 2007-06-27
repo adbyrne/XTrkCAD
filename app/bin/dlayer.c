@@ -1,7 +1,7 @@
 /** \file dlayer.c
  * Functions and dialogs for handling layers.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.4 2007-06-18 05:49:33 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.5 2007-06-27 18:44:45 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -52,7 +52,7 @@ static LAYER_T layerCurrent = NUM_LAYERS;
 static BOOL_T layoutLayerChanged = FALSE;
 
 static wIcon_p show_layer_bmps[NUM_BUTTONS];		
-static wIcon_p hide_layer_bmps[NUM_BUTTONS];
+/*static wIcon_p hide_layer_bmps[NUM_BUTTONS]; */
 static wButton_p layer_btns[NUM_BUTTONS];	/**< layer buttons on toolbar */
 
 /** Layer selector on toolbar */
@@ -203,13 +203,11 @@ static void FlipLayer( void * arg )
 	layers[(int)l].visible = visible;
 	if (l<NUM_BUTTONS) {
 		wButtonSetBusy( layer_btns[(int)l], visible != 0 );
-/*		wButtonSetLabel( layer_btns[(int)l], (char*)(visible?show_layer_bmps[(int)l]:hide_layer_bmps[(int)l]) ); */
+		wButtonSetLabel( layer_btns[(int)l], (char *)show_layer_bmps[(int)l]); 
 	}
 	RedrawLayer( l, TRUE );
 }
 
-
-/*void SetLayer( void * arg )*/
 static void SetCurrLayer( wIndex_t inx, const char * name, wIndex_t op, void * listContext, void * arg )
 {
 	LAYER_T newLayer = (LAYER_T)(long)inx;
@@ -242,59 +240,38 @@ static void SetLayerColor( int inx, wDrawColor color )
 	if ( color != layers[inx].color ) {
 		if (inx < NUM_BUTTONS) {
 			wIconSetColor( show_layer_bmps[inx], color );
-			wIconSetColor( hide_layer_bmps[inx], color );
-			wButtonSetLabel( layer_btns[inx], (char*)(layers[inx].visible?show_layer_bmps[inx]:hide_layer_bmps[inx]) );
+			wButtonSetLabel( layer_btns[inx], (char*)show_layer_bmps[inx] ); 
 		}
 		layers[inx].color = color;
 		layoutLayerChanged = TRUE;
 	}
 }
 
+ 
+#include "bitmaps/l1.xbm"
+#include "bitmaps/l2.xbm"
+#include "bitmaps/l3.xbm"
+#include "bitmaps/l4.xbm"
+#include "bitmaps/l5.xbm"
+#include "bitmaps/l6.xbm"
+#include "bitmaps/l7.xbm"
+#include "bitmaps/l8.xbm"
+#include "bitmaps/l9.xbm"
+#include "bitmaps/l10.xbm"
+#include "bitmaps/l11.xbm"
+#include "bitmaps/l12.xbm"
+#include "bitmaps/l13.xbm"
+#include "bitmaps/l14.xbm"
+#include "bitmaps/l15.xbm"
+#include "bitmaps/l16.xbm"
+#include "bitmaps/l17.xbm"
+#include "bitmaps/l18.xbm"
+#include "bitmaps/l19.xbm"
+#include "bitmaps/l20.xbm"
 
-#include "l1.bmp"
-#include "l2.bmp"
-#include "l3.bmp"
-#include "l4.bmp"
-#include "l5.bmp"
-#include "l6.bmp"
-#include "l7.bmp"
-#include "l8.bmp"
-#include "l9.bmp"
-#include "l10.bmp"
-#include "l11.bmp"
-#include "l12.bmp"
-#include "l13.bmp"
-#include "l14.bmp"
-#include "l15.bmp"
-#include "l16.bmp"
-#include "l17.bmp"
-#include "l18.bmp"
-#include "l19.bmp"
-#include "l20.bmp"
-#include "k1.bmp"
-#include "k2.bmp"
-#include "k3.bmp"
-#include "k4.bmp"
-#include "k5.bmp"
-#include "k6.bmp"
-#include "k7.bmp"
-#include "k8.bmp"
-#include "k9.bmp"
-#include "k10.bmp"
-#include "k11.bmp"
-#include "k12.bmp"
-#include "k13.bmp"
-#include "k14.bmp"
-#include "k15.bmp"
-#include "k16.bmp"
-#include "k17.bmp"
-#include "k18.bmp"
-#include "k19.bmp"
-#include "k20.bmp"
 static char * show_layer_bits[NUM_BUTTONS] = { l1_bits, l2_bits, l3_bits, l4_bits, l5_bits, l6_bits, l7_bits, l8_bits, l9_bits, l10_bits,
  l11_bits, l12_bits, l13_bits, l14_bits, l15_bits, l16_bits, l17_bits, l18_bits, l19_bits, l20_bits };
-static char * hide_layer_bits[NUM_BUTTONS] = { k1_bits, k2_bits, k3_bits, k4_bits, k5_bits, k6_bits, k7_bits, k8_bits, k9_bits, k10_bits,
- k11_bits, k12_bits, k13_bits, k14_bits, k15_bits, k16_bits, k17_bits, k18_bits, k19_bits, k20_bits };
+ 
 static EXPORT long layerRawColorTab[] = {
 		wRGB(  0,  0,255),      /* blue */
 		wRGB(  0,  0,128),      /* dk blue */
@@ -342,12 +319,12 @@ static paramData_t layerPLs[] = {
 	 { PD_TOGGLE, &layerOnMap, "onmap", PDO_NOPREF|PDO_DLGHORZ, onMapLabels, "On Map", BC_HORZ|BC_NOBORDER },
 #define I_COUNT (6)
 	 { PD_STRING, NULL, "object-count", PDO_NOPREF|PDO_DLGBOXEND, (void*)(80), "Count", BO_READONLY },
-	 { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, "Number of Layer Buttons" },
 	 { PD_MESSAGE, "Personal Preferences", NULL, PDO_DLGRESETMARGIN, (void *)180 },
 	 { PD_BUTTON, DoLayerOp, "reset", PDO_DLGRESETMARGIN, 0, "Load", 0, (void *)ENUMLAYER_RELOAD },
 	 { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, "Save", 0, (void *)ENUMLAYER_SAVE }, 
 	 { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, "Restore Defaults", 0, (void *)ENUMLAYER_CLEAR }, 	 
-	 };
+	 { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, "Number of Layer Buttons" },	 
+};
 	 
 static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof layerPLs[0] };
 
@@ -373,7 +350,7 @@ LayerSystemDefaults( void )
 }
 
 /**
- * Load the layer lists. 
+ * Load the layer listboxes in Manage Layers and the Toolbar with up-to-date information. 
  */
 
 EXPORT void LoadLayerLists()
@@ -513,7 +490,6 @@ LayerPrefSave( void )
 		/* if a name is set that is not the default value or a color different from the default has been set,
 		    information about the layer needs to be saved */
 		if( (layers[inx].name[0] && inx != 0 ) || 
-/*			 (inx == 0 && strcmp( layers[inx].name, "Main" )) ||	*/
 			 layers[inx].frozen || (!layers[inx].onMap) || (!layers[inx].visible) || 
 			 layers[inx].color != layerColorTab[inx%COUNT(layerColorTab)])
 		{
@@ -599,11 +575,13 @@ LayerPrefLoad( void )
 }
 
 /**
- * Count the number of elements on a layer
+ * Count the number of elements on a layer.
+ * NOTE: This function has been implemented but not actually been tested. As it might prove useful in the 
+ * future I left it in place. So you have been warned!
  * \param IN layer to count
  * \return number of elements
  */
-
+/*
 static int LayerCount( int layer ) 
 {
 	track_p trk;
@@ -618,6 +596,7 @@ static int LayerCount( int layer )
 	
 	return count;
 }			
+*/
 
 /**
  *	Count the number of objects on each layer and store result in layers data structure.
@@ -786,7 +765,6 @@ EXPORT void RestoreLayers( void )
 			label = layers[inx].name;
 		}
 		wControlSetBalloonText( (wControl_p)layer_btns[inx], label );
-		wButtonSetLabel( layer_btns[inx], (char*)(layers[inx].visible?show_layer_bmps[inx]:hide_layer_bmps[inx]) );
 	}
 	if (layerL) {
 		ParamLoadControls( &layerPG );
@@ -929,7 +907,6 @@ EXPORT void InitLayers( void )
 	/* create the bitmaps for the layer buttons */
 	for ( i = 0; i<NUM_BUTTONS; i++ ) {
 		show_layer_bmps[i] = wIconCreateBitMap( l1_width, l1_height, show_layer_bits[i], layerColorTab[i%(COUNT(layerColorTab))] );
-		hide_layer_bmps[i] = wIconCreateBitMap( l1_width, l1_height, hide_layer_bits[i], layerColorTab[i%(COUNT(layerColorTab))] );
 		layers[i].color = layerColorTab[i%(COUNT(layerColorTab))];
 	}
 	

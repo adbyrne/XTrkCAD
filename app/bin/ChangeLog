@@ -1,3 +1,8 @@
+Jun 27, 2007
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		dlayer.c: some cleanup and modified layer buttons. Also all 
+		layer buttons where moved to the bitmaps directory.
+		
 Jun 16, 2007
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		fileio.c: default directory for storing files is the user's 
@@ -9,7 +14,7 @@ Jun 15, 2007
 
 Jun 15, 2007
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
-		dlayer.c: layer buttons now are push buttons, that have an 
+		dlayer.c: layer buttons now are push buttons that are in
 		'pressed' state when layer is visible.
 		
 Jun 15, 2007
