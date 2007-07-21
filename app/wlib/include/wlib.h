@@ -1,7 +1,7 @@
 /** \file wlib.h
  * Commaon definitions and declarations for the wlib library
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.4 2007-06-16 13:50:32 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.5 2007-07-21 18:33:04 m_fischer Exp $
  */
 
 #ifndef WIN_H
@@ -411,7 +411,11 @@ typedef int wAction_t;
 #define wActionRUp		(7)
 #define wActionText		(8)
 #define wActionExtKey		(9)
-#define wActionLast		wActionExtKey
+#define wActionWheelUpUp (10)
+#define wActionWheelUpDown (11)
+#define wActionWheelDownUp (12)
+#define wActionWheelDownDown (13)
+#define wActionLast		wActionWheelDownDown
 
 
 #define wRGB(R,G,B)\
