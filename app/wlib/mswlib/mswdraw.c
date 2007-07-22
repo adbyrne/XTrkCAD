@@ -1,13 +1,15 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswdraw.c,v 1.2 2007-01-14 08:43:32 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswdraw.c,v 1.3 2007-07-22 17:02:46 m_fischer Exp $
  */
 
+#define _WIN32_WINNT 0x0500		/* for wheel mouse supposrt */
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
+#include <winuser.h>
 
 #ifdef WIN32
 #define wFont_t tagLOGFONTA
@@ -1359,7 +1361,6 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		if (b->hWnd)
 			UpdateWindow(b->hWnd);
 		return 0;
-
 	case WM_CHAR:
 		b = (wDraw_p)mswMapIndex( inx );
 		extChar = wAccelKey_None;
@@ -1436,6 +1437,29 @@ long FAR PASCAL XEXPORT mswDrawPush(
 	return DefWindowProc( hWnd, message, wParam, lParam );
 }
 
+
+static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
+{
+	wAction_t action;
+
+	switch( message ) {
+	case WM_MOUSEWHEEL:
+		/* handle mouse wheel events */
+		/* fwKeys = GET_KEYSTATE_WPARAM(wParam); modifier keys are currently ignored */
+		if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
+			action = wActionWheelUp;
+		} else {
+			action = wActionWheelDown;
+		}
+		if (b->action)
+			b->action( b, b->data, action, 0, 0 );
+		return 0;
+	}
+
+	return DefWindowProc( hWnd, message, wParam, lParam );
+}
+
+
 static void drawDoneProc( wControl_p b )
 {
 	wDraw_p d = (wDraw_p)b;
@@ -1473,7 +1497,7 @@ static void drawDoneProc( wControl_p b )
 static callBacks_t drawCallBacks = {
 		NULL,
 		drawDoneProc,
-		NULL };
+		drawMsgProc };
 
 wDraw_p drawList = NULL;
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.4 2007-05-17 13:33:13 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.5 2007-07-22 17:02:43 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -134,6 +134,8 @@ extern long programMode;
 #define C_RMOVE			wActionRDrag
 #define C_RUP			wActionRUp
 #define C_TEXT			wActionText
+#define C_WUP			wActionWheelUp
+#define C_WDOWN			wActionWheelDown
 #define C_INIT			(wActionLast+1)
 #define C_START			(wActionLast+2)
 #define C_REDRAW		(wActionLast+3)

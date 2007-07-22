@@ -1,7 +1,8 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.6 2007-05-19 08:13:54 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.7 2007-07-22 17:02:46 m_fischer Exp $
  */
 
+#define _WIN32_WINNT 0x0500
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
@@ -2327,7 +2328,15 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 	wAccelKey_e extChar;
 
 	switch (message) {
-
+	case WM_MOUSEWHEEL:
+		inx = GetWindowWord( hWnd, 0 );
+		b = getControlFromCursor( hWnd, NULL );
+		if( b && b->type == B_DRAW )
+			if (mswCallBacks[b->type] != NULL &&
+				mswCallBacks[b->type]->messageProc)
+				return mswCallBacks[b->type]->messageProc( (wControl_p)b, hWnd,
+								message, wParam, lParam );
+		return( 0 );
 	case WM_COMMAND:
 	case WM_MEASUREITEM:
 	case WM_DRAWITEM:
@@ -2880,7 +2889,7 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 #else
 	mswLabelFont = GetStockObject( ANSI_VAR_FONT );
 #endif
-
+	
 	hDc = GetDC( 0 );
 	mswScale = GetDeviceCaps( hDc, LOGPIXELSX ) / 96.0;
 	if ( mswScale < 1.0 )

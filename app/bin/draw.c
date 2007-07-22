@@ -1,7 +1,7 @@
 /** \file draw.c
  * Basic drawing functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.7 2007-05-17 13:33:13 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.8 2007-07-22 17:02:43 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2173,6 +2173,12 @@ static void DoMouse( wAction_t action, coOrd pos )
 		case C_RUP:
 			InfoPos( pos );
 			/*DrawTempTrack();*/
+			break;
+		case C_WUP:
+			DoZoomUp((void *)1L);			
+			break;
+		case C_WDOWN:
+			DoZoomDown((void *)1L);
 			break;
 		default:
 			NoticeMessage( MSG_DOMOUSE_BAD_OP, "Ok", NULL, action&0xFF );

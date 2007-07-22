@@ -1,3 +1,7 @@
+Jul 22, 2007
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		draw.c: the mouse wheel can be used for zooming in and out
+
 Jun 27, 2007
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		dlayer.c: some cleanup and modified layer buttons. Also all 
