@@ -1,5 +1,5 @@
 #
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/Makefile,v 1.4 2007-02-10 07:30:04 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/Makefile,v 1.5 2007-07-24 16:14:53 m_fischer Exp $
 #
 
 GTKINCL=`pkg-config --cflags gtk+-2.0`
@@ -100,7 +100,7 @@ product2:
 #	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-O2 -DFASTRACK" VER= LIB=gtk2lib.a gtk2lib.a
 
 profile2:
-	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-DFASTRACK" VER= LIB=gtk2lib.a gtk2lib.a
+	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-pg -DFASTRACK" VER= LIB=gtk2libp.a gtk2libp.a
 #	$(MAKE) CC="$(CC)" COPTS="$(COPTS)" CINCLS="$(CINCLS) $(GTKINCL)" CFLAGS="-O2 -DFASTRACK" VER= LIB=gtk2lib.a gtk2lib.a
 
 checked2:
