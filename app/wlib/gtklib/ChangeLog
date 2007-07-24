@@ -1,5 +1,9 @@
+Jul 24, 2007 
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtkdraw.c: added support for wheel mouse    
+
 Jun 16, 2007
-	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		wpref.c: added wGetUserHomeDir() 
 		
 Feb 25, 2007

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw.c,v 1.2 2007-01-18 19:29:50 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw.c,v 1.3 2007-07-24 15:09:57 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -869,6 +869,41 @@ static gint draw_configure_event(
 	return FALSE;
 }
 
+static const char * actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "RDown", "RDrag", "RUp", "Text", "ExtKey", "WUp", "WDown" };
+
+/**
+ * Handler for scroll events, ie mouse wheel activity
+ */
+
+static gint draw_scroll_event(
+		GtkWidget *widget,
+		GdkEventScroll *event,
+		wDraw_p bd)
+{
+	wAction_t action;
+
+	switch( event->direction ) {
+	case GDK_SCROLL_UP:
+		action = wActionWheelUp;
+		break;
+	case GDK_SCROLL_DOWN:	
+		action = wActionWheelDown;
+		break;	
+	default:
+		action = 0;
+		break;
+	}	
+
+	if (action != 0) {
+		if (drawVerbose >= 2)
+			printf( "%s[%dx%d]\n", actionNames[action], bd->lastX, bd->lastY );
+		bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
+	}
+	
+	return TRUE;
+}
+
+
 
 static gint draw_leave_event(
 		GtkWidget *widget,
@@ -879,7 +914,9 @@ static gint draw_leave_event(
 }
 
 
-static const char * actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "RDown", "RDrag", "RUp", "Text", "ExtKey" };
+/**
+ * Handler for mouse button clicks.
+ */
 
 static gint draw_button_event(
 		GtkWidget *widget,
@@ -894,14 +931,14 @@ static gint draw_button_event(
 	bd->lastY = OUTMAPY(bd, event->y);
 
 	switch ( event->button ) {
-	case 1: 
+	case 1: /* left mouse button */
 		action = event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp;
 		/*bd->action( bd, bd->context, event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp, bd->lastX, bd->lastY );*/
 		break;
-	case 3: 
+	case 3: /* right mouse button */
 		action = event->type==GDK_BUTTON_PRESS?wActionRDown:wActionRUp;
 		/*bd->action( bd, bd->context, event->type==GDK_BUTTON_PRESS?wActionRDown:wActionRUp, bd->lastX, bd->lastY );*/
-		break;
+		break;	
 	}
 	if (action != 0) {
 		if (drawVerbose >= 2)
@@ -1051,6 +1088,8 @@ EXPORT wDraw_p wDrawCreate(
 						   (GtkSignalFunc) draw_button_event, bd);
 	gtk_signal_connect (GTK_OBJECT (bd->widget), "button_release_event",
 						   (GtkSignalFunc) draw_button_event, bd);
+	gtk_signal_connect (GTK_OBJECT (bd->widget), "scroll_event",
+						   (GtkSignalFunc) draw_scroll_event, bd);
 	gtk_signal_connect_after (GTK_OBJECT (bd->widget), "key_press_event",
 						   (GtkSignalFunc) draw_char_event, bd);
 	gtk_signal_connect (GTK_OBJECT (bd->widget), "leave_notify_event",
@@ -1060,6 +1099,7 @@ EXPORT wDraw_p wDrawCreate(
 							  | GDK_LEAVE_NOTIFY_MASK
 							  | GDK_BUTTON_PRESS_MASK
 							  | GDK_BUTTON_RELEASE_MASK
+/*							  | GDK_SCROLL_MASK */
 							  | GDK_POINTER_MOTION_MASK
 							  | GDK_POINTER_MOTION_HINT_MASK
 							  | GDK_KEY_PRESS_MASK
