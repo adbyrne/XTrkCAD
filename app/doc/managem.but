@@ -1,0 +1,626 @@
+\H{manageM} Manage Menu
+
+\b
+\f{Train} - Run trains on the designed layout
+
+\b
+\f{Turnout Designer} - displays a menu list of Turnout Designer (\k{cmdTurnoutNew}) dialogs.
+
+\b
+\f{Group} - creates a \f{Structure} or \f{Turnout} definition from the selected (\k{cmdSelect}) objects.
+See the \f{Group} command (\k{cmdGroup}) for details.
+
+\b
+\f{Ungroup} - breaks apart any selected (\k{cmdSelect}) turnouts and structures into their basic lines 
+(\k{cmdDraw}) and track segments.
+
+\b 
+\f{Custom Management} - displays the \f{Custom Management} (\k{cmdCustmgm}) 
+dialog to manipulate custom turnout, structure and rolling stock designs.
+
+\b 
+\f{Update Turnout and Structures} - replaces (\k{cmdRefreshSpecial}) any selected (\k{cmdSelect}) 
+\f{Turnouts} and \f{Structures} with the definitions from updated \f{parameter files} (\k{cmdPrmfile}).
+
+\b 
+\f{Car Inventory} - displays the dialog (\k{cmdCarinv}) to update your list of cars and locomotives.
+
+\b 
+\f{Layers} - displays the Layer (\k{cmdLayer}) dialog.
+
+\b 
+\f{Parts List} - Invokes the Parts List (\k{cmdEnum}) command.  
+This command produces a list of all selected turnouts and sectional tracks and the total length of flextrack.
+
+\b 
+\f{Price List} - Displays the \f{Price List} (\k{cmdPricelist}) dialog to specify prices for tracks and structures.
+
+\rule
+
+\S{cmdTrain} Train
+\G{png.d/btrain.png}
+ 
+The \f{Train} command lets you place and run Trains on the layout.
+
+During this command, the Tool Bar and Hot Bar are changed.
+Most of the Tool Bar buttons are replaced by the \e{Go/Stop} and \e{Exit} buttons.
+The \e{Go/Stop} button toggles between Pausing all Trains and allowing Trains to Run.
+The \e{Exit} button terminates the Train Simulation and returns to Layout Design mode.
+
+\#{?Gtrainbar}
+
+\S2{} Selecting New Cars
+
+The Hot Bar contains the Cars and Locomotives which are have not been placed on the Layout.
+Cars are created and managed using the Car Inventory (\k{cmdCarinv}) dialog.
+
+Each item on the Hot Bar can represent a group of Cars.
+Cars can be grouped by Prototype, Manufacturer and/or Part Number.
+They can also be listed as individual Car Items.
+This grouping is controlled by \e{Car Labels} Drop Down List on the Display (\k{cmdDisplay}) dialog.
+
+To place a Car, select it from the Hot Bar.
+If the Hot Bar is displaying Cars in groups (and not as individual Car Items) then a Drop Down List is displayed on the Status Bar (\k{mainW}) containing the individual Car Items in that group.
+
+\G{png.d/bnewcar.png}
+If you are not displaying the Hot Bar, then the \e{New Car} button will be shown on the Tool Bar.
+Pressing this button will display the Drop Down List on the Status Bar (\k{mainW}) containing all of your Car Items that have not yet been placed on the layout.
+
+\S2{} Placing Cars
+
+Once you have selected a new Car, or have selected an existing Car on the Layout, you can position it by dragging it on the Layout.
+If the Car is coupled to other Cars then the whole set of Cars is moved.
+If you place the Car on a Track, then Car (and the other coupled Cars) will be aligned along the track.
+
+Note: if you move the tracks but not the cars (or vice-versa) using the Move (\k{cmdMove}) or Rotate (\k{cmdRotate}) commands the cars will not remain attached to the tracks.  If the cars are moved close to a track, then they will be aligned when the \e{Train Simulation} command is next invoked.
+
+\S2{} Coupling Cars
+
+If you move a Car along a track to another Car then the Cars will be coupled together.
+To uncouple Cars, Right-Click between the Cars and select Uncouple from the pop-up menu.
+
+\S2{} Trains
+
+A Train consists of one or more Locomotives coupled to other Cars.
+One Locomotive will be the \e{MU Master} for the Train.
+The \e{MU Master} can be changed by Right-Clicking on a Locomotive and selecting \e{MU Master} from the pop-up menu.
+The \e{MU Master} is drawn with a solid Yellow head light indicating the direction is moving.
+If a Train is split by uncoupling between Locomotives, then two Trains will be created, each with their own \e{MU Master}
+
+\S2{} Train Control
+
+\#{?Gtrain}
+
+The \e{Train Control} dialog is used to set the speed and direction of Trains.
+The dialog contains a list of Trains (listed by their \e{MU Master} Locomotive).
+Before each Train on the list is either a Red circle (indicating the Train is stopped) or a Green circle (indicating the Train is moving).
+
+Any number of Trains can be running, although it might be difficult to keep track of more than a few.
+
+For the selected Train, the Train Control dialog lists
+
+\b 
+Train status: indicating that the Train is moving, is paused or the reason if the Train is stopped.
+
+\b 
+The position of the Train
+
+\b 
+A slider which controls the speed of the Train in Scale Miles-Per-Hour or Kilometers-Per-Hour.
+
+\b 
+The Odometer which measures the total distance travelled by the train, which can be reset by pressing the \e{0} button.
+
+\b 
+The \e{Find} button which positions the Main Window (\k{mainW}) to show the Train.
+If the Train on a track that is hidden and Trains on Hidden Track (\k{cmdDisplay}) is set to \e{Hide}, then the Train will be made visible until the next time it moves.
+
+\b 
+The \e{Follow} toggle button which causes the Main Window (\k{mainW}) to follow the Train as it moves.
+The \e{Follow} toggle can only be set on one Train at a time, and it is cleared if you press the \e{Find} button or otherwise manually move the main canvas.
+
+\b 
+The \e{Auto Reverse} toggle button which causes the Train to change direction when it hits the end of a track.
+
+\b 
+The Direction radio button group which controls the direction (\e{Forward} or \e{Reverse}) of the Train.
+
+\b 
+The \e{Stop} button which sets the Train's speed to 0.
+
+
+\S2{} Train Operation
+
+Once a Train is moving, it will continue to move until it is Stopped manually, hits the end of track or an open Turnout.
+If the Train 'runs into' other Cars, those Cars will be coupled to the Train.
+If Train's speed is faster than the Max Coupling Speed (\k{cmdCmdopt}) then the Train will crash and must be manually moved back onto the track.
+
+If two Trains are coupled, one of the two \e{MU Masters} will be chosen as the \e{MU Master} for the combined Train.
+
+The motion of all Trains can be Paused by clicking the \e{Go/Stop} button on the Main Window Tool Bar.
+Pressing the \e{Escape} key has the same effect as clicking on the \e{Stop} button.
+This allows you set Turnout positions or make other changes.
+When Train command starts, the \e{Go/Stop} button is in the \e{Stop} position and must be clicked before Trains move.
+
+\S2{} Turnouts and Turntables
+
+Turnout positions are indicated by Red lines connecting the End-Points on the route through the Turnout.
+Trains will follow this route through the Turnout.
+If you Shift-Left-Click on the Turnout, the next position will used and Red line changed to indicate the new position.
+
+Turntables can be turned by Shift-Left-Clicking on the End-Point you want the Turntable to move to.
+To turn the Turntable 180°, Shift-Left-Click on the End-Point again.
+
+
+\S{cmdTurnoutNew} Turnout Designer
+
+The \f{Turnout Designer}
+allows you to define new turnouts and sectional track pieces.
+
+The \f{Turnout Designer} uses a number of different dialogs 
+(one for each type of turnout or sectional track).
+
+This dialog is for a regular turnout.
+
+\G{png.d/turndes.png}
+
+Each dialog shows a diagram of the turnout and has fields to enter dimensions.  
+The dimensions should be as accurate as possible.  
+The various types of dimensions are:
+
+\b 
+\f{Length} - measured from the base of the turnout to the centerline at the end of 
+the turnout.  
+Length is measured parallel to the centerline of the straight leg of the turnout.  
+For track that ends on a curve (such as the curved leg of a regular turnout) 
+measure the distance from the base to each rail and average the values.
+
+\b 
+\f{Offset} - measured from the centerline of the straight leg of the turnout to 
+the centerline of the track at the end of the turnout.
+
+\b 
+\f{Angle} - angle at the end of turnout to the centerline of the straight leg 
+of the turnout.  
+This angle may not be the same as the \e{Frog} angle of the turnout if the rails curve past the \e{Frog}.  
+The \f{Frog Number|Degrees} Radio button group controls whether the value is 
+expressed in Frog Number or Degrees.
+
+\b 
+\f{Manufacturer} - name of the Manufacturer
+
+\b 
+\f{Description} - description of the turnout including size and rail code number (eg. 'Left Hand #4'). This information
+is shown when a place the mouse pointer over the respective symbol on th \f{Toolbar}. Therefor it should be made sure
+that the data entered here are helpful in finding the correct turnout. 
+
+\b 
+\f{#} - part number (eg. '999-123').  
+
+\b 
+\f{Roadbed Width} - if greater than the track gauge then lines are drawn along the edges of the turnout 
+to represent the attached roadbed available on some types of sectional track and turnouts.
+
+\b 
+\f{Line Width} - the width of the roadbed lines, measured in pixels when the layout 
+drawing scale (\k{viewM}) is 1:1.
+
+\b 
+\f{Color} - color of the roadbed lines.
+
+The rail height (\e{Code}) can be added to the \f{Manufacturer} (eg. Peco-55) or the \f{Description} (eg. Medium Right, Code 55).
+
+The scale is the current scale from the \f{Scale Drop Down List} on the \f{Layout} dialog (\k{cmdLayout}).  
+
+\f{Manufacturer}, \f{Description} and \f{Part Number (#)} comprise the title of the turnout.
+These values are used in the \f{Turnout Selection dialog} (\k{cmdTurnout}) and the \f{Parts List} (\k{cmdEnum}).
+For regular and curved turnouts there are separate \f{Descriptions} and \f{Part Numbers} 
+for the right and left hand turnouts.
+
+The \f{Print} button prints a full size diagram of the turnout.  
+You can use this to check your dimensions and make any required changes.  
+You should expect to make several printouts as you refine your dimensions.
+
+The \f{Ok} button completes the design.  
+The new turnout is added to the list in the \f{Turnout Selection} dialog.  
+The turnout data is saved in the \c{xtrkcad.cus} (\k{directories}) file for the next time 
+you use XTrkCad.  
+Please consider contributing this information for others to use via the online addresses.
+You can change the parameters or title of existing designs by using the \f{Custom Management} (\k{cmdCustmgm}) dialog.
+
+The \f{Cancel} button removes the \f{Turnout Designer} dialog.
+
+\S{desTurnouts} Creating Turnout Designs
+
+It is best to start by marking the endpoints of the turnout on a piece of 
+paper.  
+Extend the curved leg of the turnout (try attaching a straight sectional track) 
+and measure the angle.  
+Frog numbers are easiest to calculate.
+
+Enter your data and press \f{Print}, if you have an accurate printer.  
+Check the dimensions of the turnout against the printout and make adjustments 
+as necessary.  
+Concentrate on the lengths and offsets first, then adjust the angles.
+
+The resulting turnout is an approximation.  
+In particular the curves will not be correct, but this is not important for 
+placing turnouts.
+
+You can use the Group (\k{cmdGroup}) command to add cosmetic details to the \f{Turnout} definitions.
+
+\S{cmdGroup}Group Dialog
+
+The \f{Group} command combines the selected (\k{cmdSelect}) Lines and Shapes (\k{cmdDraw}) to create structures 
+(\k{cmdHotBar}).
+You can give the structure (\k{cmdHotBar}) a title consisting of manufacturer, description and part number on the 
+\f{Group} dialog.
+
+\G{png.d/cgroup.png}
+
+The title will be prepopulated with the title of the last \f{Structure} you \f{ungrouped} (\k{manageM}).
+
+You can include \f{Turnouts}, \f{Sectional}, \f{Straight} or \f{Curved} tracks in the selected
+objects which allows you to add cosmetic details to a \f{Turnout} definitions, or create a new
+\f{Turnout} definition. This can also be used to if there are fixed track locations on a structure, like on 
+an engine shed. 
+
+To modify a \f{Structure} or \f{Turnout} definition, first place the object on the layout, 
+select and then \f{Ungroup} the object.
+Now the parts of the object can be edited using the \f{Modify} (\k{cmdModify}), \f{Draw} (\k{cmdDraw}) or other commands.
+Once completed, select the object parts and use the \f{Group} command to 
+update the definition (or create a new one by changing the title).
+
+The \f{Group} dialog shows the title (manufacturer, description and part number) of the new definition.
+The initial values are based on any selected turnouts and structures or on the last object \f{Ungrouped} (\k{cmdUngroup}).
+The dialog also contains a toggle button, \f{Replace with new group?} 
+which is used if you want to replace the selected objects with the new definition.
+
+The definition data will be added to the \c{xtrkcad.cus} (\k{directories}) file for later use.
+Please consider contributing this information for others to use.
+
+If you modify a definition from a XTrkCad Library parameter file, the new definition 
+will replace the existing definition on the \f{Hotbar} (\k{cmdHotBar}), otherwise it will be added 
+to the end of the \f{Hotbar}.
+You can use the \f{Custom Management} (\k{cmdCustmgm}) dialog to change the title or delete custom definitions.
+
+\S{cmdUngroup} Ungroup
+
+\f{Ungroup} allows existing definitions to be modified and the resulting objects recombined with the \f{Group} (\k{cmdGroup}) 
+command to update the definition.
+Turnouts are composed of individual straight and curved segments.  
+Segments that form the points (\k{generalTerms}) 
+of the turnout remain combined as an \e{Ungrouped Turnout}, and the other segments are replaced by 
+straight and curved tracks.
+
+\S{cmdCustmgm} Custom Management
+
+The \f{Custom Management} dialog allows you change the properties of turnouts, sectional track, structures,
+car parts and prototypes you have designed with the \f{Turnout Designer} (\k{cmdTurnoutNew}), \f{Group} 
+(\k{cmdGroup}) or \f{Car} (\k{cmdCarpart}) commands.
+You can also move selected objects to a \f{Parameter File} (\k{cmdPrmfile}).
+
+\G{png.d/custmgm.png}
+
+The \f{Edit} button invokes the appropiate designer or editor dialog for the selected item.
+This button is disabled if more than one (or no) object is selected.
+
+\b 
+The \f{Turnout Designer} (\k{cmdTurnoutNew}) is used to modify the selected turnout design.
+If you wish to modify cosmetic details on a turnout or sectional track use the \f{Group}
+(\k{cmdGroup}) command to add them to an existing definition.
+
+\b 
+\f{Structures} and old \f{Turnout Designs} use the \f{Rename Dialog} to change the Manufacturer, 
+Description or Part Number values.
+For these objects the \f{Edit} button's label changes to \f{Rename}.
+\f{Structures} are not edited using this dialog but by using the \f{Ungroup} (\k{cmdGroup}) and 
+\f{Group} (\k{cmdGroup}) commands.
+
+\b 
+The \f{Car} (\k{cmdCarpart}) dialog is used to modify \f{Car Prototype} and \f{Car Parts}.
+
+The \f{Delete} button removes the selected entries from the \c{xtrkcad.cus} (\k{directories}) 
+file when you exit the dialog.
+
+The \f{Move To} buttom moves the selected entries to a \f{Parameter File} (\k{cmdPrmfile}).
+If the \f{Parameter File} does not currently exist than you will be prompted to supply a 
+contents desciption line for the file.  In case the parameter file already exists, the 
+selected entries are appended to this file.
+
+The \f{New} buttons invokes the Car (\k{cmdCarpart}) dialog to create a new \f{Car Prototype} or \f{Car Part}.
+
+\S{cmdCarinv} Car Inventory
+
+This dialog is used to manage your list of cars and locomotives.
+
+\G{png.d/carinv.png}
+
+The main part of this dialog contains a detailed list of each car and locomotive in your inventory.
+The list can be sorted on different columns by selecting column names in the \f{Sort Drop Down Lists}
+along the top of the dialog.
+The width of the columns can be adjusted by \c{LEFT+DRAG} on the lines between the column titles.
+
+Cars are placed on the layout by using the \f{Train Simulation} (\k{cmdTrain}) command.
+
+The \f{Find} button will center the \f{Main Window} (\k{mainW}) on the selected car.
+This button is only enabled for cars which are on the Layout (indicated by \f{Layout} in the Location column).
+If the car on a track that is hidden and \f{Trains on Hidden Track} (\k{cmdDisplay}) is set to \f{Hide}, 
+then the car (and any attached cars) will be made visible.
+
+The \f{Edit} button invokes the \f{Car} dialog (\k{cmdCarpart}) to modify the selected car.
+This button is disabled if more than one (or no) car is selected of if the selected car is on the Layout.
+This dialog is also used to \f{Add} a new Car.
+
+The \f{Delete} button removes the selected cars from your inventory.
+This button is disabled if any of the selected cars are on the layout.
+
+The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value (CSV)} file.
+This file format can be read and written by many applications. It can be used to transfer car inventory data between
+differen applications.
+This file contains the following columns 
+(the first four are required when Importing):
+
+\b 
+\e{Scale} - example: HO, HOn3, N, O etc
+
+\b 
+\e{Manufacturer} and \e{Partno}
+
+\b 
+\e{Prototype} - example: GP40
+
+\b 
+\e{Index} - an unique numeric identifier (optional)
+
+\b 
+\e{Roadname}, \e{Repmark} and \e{Number} - example: Burlington Northern, BN, 1234
+
+\b 
+\e{Type} - one of the following: 10101(Diesel), 10201(Steam), 10301(Electric), 30100(Freight), 50100(Passenger), 70100(M-O-W) or 90100(Other)
+
+\b 
+\e{Options} - 2(Locomotives), 4 (Body Mounted Couplers)
+
+\b 
+\e{CarLength}, \e{CarWidth}, \e{CoupledLength} and \e{TruckCenter} - car dimensions in inches
+
+\b 
+\e{Color} - encoded as (Red * 65535 + Green * 256 + Blue)
+
+\b 
+\e{PurchPrice}, \e{CurrPrice}, \e{PurchDate} and \e{ServiceDate} - numeric values
+
+\b 
+\e{Condition} - 100(Mint), 80(Excellent), 60(Good), 40(Fair), 20(Poor) or 0(N/A)
+
+\b 
+\e{Notes} - free form text
+
+The \f{List} button creates a text file listing your inventory.
+
+\S{cmdCarpart} Car
+
+This dialog is used to create and edit Car Items.  It is also used to create and edit 
+Car Part and Prototype definitions. It dialog is invoked from the \f{Car Inventory} 
+(\k{cmdCarinv}) and the \f{Custom Management} (\k{cmdCustmgm}) dialogs.
+
+This dialog can be used for to enter either \f{Car Items}, \f{Car Part Definitions} 
+or \f{Prototype} definitions.
+
+The \f{Add} button creates a new definition.  
+The dialog remains open so you can enter multiple definitions.  
+You can \f{Close} the dialog when you are finished.  If you are editing an existing definition 
+then the Add button will be replaced by the \f{Update} button which 
+updates the selected definition and closes the dialog.
+
+The \f{New} button on the \f{Car Item} dialog invokes the \f{Car Part} or \f{Car Prototype} dialog 
+which you can use to create new part or prototype definitions for your cars.
+The \f{New} button on the \f{Car Part} dialog invokes the \f{Car Prototype} dialog.
+
+\f{Car Item dialog}
+
+\G{png.d/caritem.png}
+
+The dialog contains:
+
+\b 
+\f{Car Description} which contains lists of \f{Manufacturer}, \f{Prototype} and \f{Part Number} 
+which are used to select the Car Part.
+The \f{Manufacturer} list contains the entries \f{Custom} and \f{Unknown} for special Car Parts.  
+For these entries you can enter the \f{Part Number} and \f{Description} fields.
+If the manufacturer of your car is not listed in the \f{Manufacturer} list you can type in the new name.
+Also, if the \f{Part} is not listed you can enter a new part number.
+The new part will be added to the list of Custom Car Parts (\k{cmdCustmgm}).
+
+\b 
+The \f{Mode} Radio button group lets you choose between the \f{Information} controls 
+described here or the \f{Customize} controls described in the next section.
+You would use the \f{Customize} option to change Roadname, Number or Color if you have 
+repainted the car or to adjust the dimensions.
+
+\b 
+Details about the individual car item such as \f{Index}, \f{Price} and \f{Condition}, \f{Dates} and \f{Notes}.  
+The \f{Index} value must be unique for all car items.
+
+To enter multiple \f{New Cars} you can set the \f{Quantity} field to a value greater than one.  
+The \f{Numbers} Radio button group specifies whether the new car's numbers 
+will be sequential (such as 1234, 1235, ...) or repeated.
+
+\b 
+\f{Message Line} which will contain instructions if there any fields that need to be completed.
+
+\f{Car Part dialog}
+
+\G{png.d/carpart.png}
+
+This dialog is similiar the the \f{Car Item} dialog except that the \f{Car Item Information} section is not displayed.
+The \f{Manufacturer} Drop Down List is editable so you can enter a new manufacturer, and you must enter a \f{Part Number}.
+If you are adding a new car part, the \f{Part Number} field will be incremented 
+(if it is a numeric value) so you can enter a number of car parts.
+
+The middle section contains:
+
+\b 
+The \f{Road}, \f{Reporting Mark}, \f{Number} and \f{Color}.
+You can choose a \f{Roadname} from the list of known roadnames or enter a new value.  
+If known, the \e{reporting mark} (roadname abbreviation) is filled in.
+
+\b 
+\f{Car Dimensions} which contain the major dimensions of the car and how the coupler is mounted on the car.
+The \f{Coupler Length} is measured from the edge of the car body to the pulling face of the coupler.
+It is equivalent to half the separation between two coupled cars.
+
+When entering values, the \c{p} key will convert a prototype measurement to a scale measurement.
+
+The length dimensions have the following relationship, so changing one value will affect the others:
+
+\c Coupled Length = Car Length + 2 * Coupler Length
+
+\b 
+A diagram is displayed showing the position of the trucks and couplers.
+
+\f{Car Prototype dialog}
+
+\G{png.d/carproto.png}
+
+This dialog is used to create or edit prototype definitions.
+
+The first section contains the name of the \f{Prototype} and its \f{Type}.
+
+If this dialog was invoked from the \f{Car Item} or \f{Car Part} dialog then the prototype diagram will 
+be copied from the selected part. Otherwise, the prototype is drawn as the default image 
+which is a simple blue rectangle or, if it is a locomotive, with one end angled.
+
+The \f{Import} button creates a prototype definition from the selected (\k{cmdSelect}) lines and shapes.
+To use this, first create a set of shapes (\f{Filled Rectangles, Polygons, Circles, Lines} etc) 
+using the Draw (\k{cmdDraw}) commands on the main canvas.
+\f{Select} the shapes and use the \f{Import} button.
+The \f{Reset} button will reset the figure to the default image.
+
+If this dialog is invoked by the \f{New} button on the \f{Car} or \f{Car Part} dialog then the 
+initial image will be copied from the prototype displayed on those dialogs.
+You can use this to make variations of existing prototypes.
+
+The \f{Color} control on the \f{Car Part} dialog will replace any color of the 
+\f{Imported} shapes which is not Black or a shade of gray with the selected hue.
+
+The \f{Flip} button flips the diagram horizontally.  For locomotives, the forward direction is to the right.
+
+Unlike the other dialogs, dimensions in this dialog are in prototype units.
+When entering values, the \c{s} key will convert a scale measurement to a prototype measurement.
+
+\S{cmdRefreshSpecial} Update Turnouts and Structures
+
+This command updates (or refreshes) selected turnouts, sectional tracks and structures on your layout
+with the current definitions from the loaded parameter files (\k{cmdPrmfile}).
+Each selected object that is found in a parameter file is updated with the current definition. 
+
+If an object can not be found or if the new definition does not fit (same number of endpoints and all the 
+endpoints have the same position and angle) then a dialog is displayed which contains suitable 
+definitions that you can choose from.
+You can \f{Skip} the current object or \f{Cancel} to skip all the remaining objects.
+
+If an object has been updated then it is unselected, otherwise it will remain selected at the end of this command.
+
+\S{cmdLayer} Layers Dialog
+
+Each object is contained in a layer.
+Objects which are created independently of other objects (such as straight tracks (\k{cmdStraight}) or 
+text (\k{cmdText})) are created in the current layer.
+Objects which are associated with other objects (such as tracks created by the \f{Modify} (\k{cmdModify}) 
+or \f{Join} (\k{cmdJoin}) commands) are created in the same layer as the associated object(s).
+
+The \f{Layers} dialog allows you to change various attributes of each of the 99 possible \f{layers}.
+
+Note: these attributes are stored with the current layout.  They are not applied when you change layouts.
+
+\G{png.d/dlayer.png}
+
+The drop down list at the top of the dialog selects the \f{Layer} you are interested in.
+Non-empty layers are preceeded by a \c{+}.
+
+The \f{Name} edit box contains the name of the \f{Layer}.  
+This name is listed in the \f{Current Layer} drop down list on the 
+\f{Toolbar} (\k{mainW}).  Also the \f{Name} is displayed as the
+balloon help for the corresponding \f{Layer Button}.
+
+The \f{Color} button specifies the color of tracks if \f{Layer Colors} (
+\k{cmdDisplay}) radio button on the \f{Display} dialog is checked.
+
+The \f{Visible} checkbox controls whether the \f{Layer} is drawn on the Main (\k{mainW}) window.
+
+The \f{Frozen} checkbox indicates that tracks in that \f{Layer} can not be modified or deleted.
+
+The \f{On Map} checkbox controls whether the \f{Layer} is drawn on the Map (\k{cmdMap}) window.
+
+You cannot uncheck \f{Visible} or check \f{Frozen} for the \f{Current Layer}.
+
+The \f{Count} field displays the number of objects in this Layer.
+
+The bottom of the dialog contains the \f{Number of Layer Buttons} integer edit box. 
+This controls the number of \f{Layer Buttons} displayed on the \f{Toolbar} (\k{mainW}). These buttons
+make it easy to switch between layers. The maximum number of \f{Layer Buttons} that can be displayed is 20.
+Therefore you should use layers one to twenty for objects which you will be showing and hiding frequently.
+
+\G{png.d/blayer.png}
+
+The \f{Layer Buttons} on the Toolbar (\k{mainW}) control which layer is the 
+\f{current Layer} and which \f{Layers} are displayed on the Main Canvas. These
+buttons are a short cut for the \f{Visible} checkbox on the \f{Layers} dialog for the corresponding layer.
+
+The current layer is selected by picking a value from the drop down layer list.
+If the Layer you've selected was not visible, it will be shown.
+
+You can hide (or show if not visible) the different layers by pushing one of the 
+\f{Layer Buttons} on the Toolbar (if you have configured the toolbar (\k{toolbarM}) to show the Layer buttons).
+If a layer is not visible then the corresponding layer button will be dimmed and the underscore will be removed.
+You cannot hide the current layer.
+
+The color of each layer button shows the color that will be used to draw tracks in that layer, if
+you select \f{Color Layers} (\k{cmdDisplay}) on the \f{Display} dialog.
+
+\f{Note:} on systems that are restricted to 256 colors not all possible colors may be displayed on the button faces.
+In this case, Windows chooses the closest matching color which may be the same as the button background color.
+In this case the number on the button will not be visible, however the correct color will be used to color objects 
+in that layer.
+
+Any selected objects are unselected when the Layer is set to not visible.
+If a layer is not visible, you cannot select objects in the Layer.
+It is as if the objects do not exist until you show the layer again.
+
+The \f{Move To Current Layer} command on Edit menu (\k{editM}) will move all 
+selected (\k{cmdSelect}) tracks to the current Layer.
+
+Objects are drawn on the map window, if the Layer they are on has \f{On Map} checked.
+
+\S{cmdEnum} Parts List
+
+The \f{Parts List} command
+produces a list of all selected (\k{cmdSelect}) turnouts, sectional track, benchwork and computes 
+the total length of selected flex-track.
+
+\#{?Gwenum}
+
+The \f{Parts List} window \e{File} menu has commands to save the list to a file, or to print it.  
+The \f{Close} menu item terminates the \f{Parts List} command.
+
+The dialog will list the prices of the objects if \e{Prices} Toggle Button is checked.
+You can set the prices with Price List (\k{cmdPricelist}) dialog.
+
+Hint: use the \f{Parts List} command to measure the length of tracks.
+
+\S{cmdPricelist} Price List
+
+The \f{Price List} dialog allows you to enter the prices of Turnouts, Sectional Track and Structures.  
+Only the objects from the loaded Parameter Files (\k{cmdPrmfile}) or \e{Custom Designs} for 
+the current Scale (\k{cmdLayout}) are listed.
+
+\#{?Gpricels}
+
+The price of Selected object can be changed in the \e{Cost} Edit box.
+
+The price of a length of \e{Flex Track} for the current Scale (\k{cmdLayout}) is listed at the bottom of the dialog.  You can specify the \e{Length} in \e{Inches} or \e{Centimeters}.  To specify the price for other \e{Scales} change Scale (\k{cmdLayout}) on the Layout (\k{cmdLayout}) window.
+
+The Parts List (\k{cmdEnum}) dialog will list the Prices of the selected objects if \e{Prices} Radio Button on the dialog is checked.
+

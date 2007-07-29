@@ -1,0 +1,747 @@
+\A{} Reference Section
+
+\H{lbl17} Keyboard Shortcuts
+
+\S{commands} Accelerator Keys
+
+Accelerator keys invoking commands are listed below (\k{cmdAcclKeys})
+
+\b 
+\e{Control-N} - Create a New layout
+
+\b 
+\e{Control-O} - Open layout file
+
+\b 
+\e{Control-S} - Save the current layout
+
+\b 
+\e{Control-A} - Save As another file
+
+\b 
+\e{Control-Alt-S} - Manipulate Parameter Files (\k{cmdPrmfile})
+
+\b 
+\e{Control-Alt-Q} - Update Prices (\k{cmdPricelist})
+
+\b 
+\e{Control-P} - Print (\k{cmdPrint}) Command
+
+\b 
+\e{Control-Shift-Q} - Print Bitmap (\k{cmdOutputbitmap})
+
+\b 
+\e{Control-Alt-L} - Generate a Parts List (\k{cmdEnum})
+
+\b 
+\e{Control-Alt-T} - Edit the layout description (Note (\k{cmdNote}))
+
+\b 
+\e{Control-Z}, \e{Shift-Backspace} - Undo the last command
+
+\b 
+\e{Control-R} - \e{R}edo the last undone command
+
+\b 
+\e{Control-X}, \e{Shift-Delete} - Cut the select objects
+
+\b 
+\e{Control-C}, \e{Control-Insert} - Copy the select objects to the clipboard
+
+\b 
+\e{Control-V}, \e{Shift-Insert} - Paste from the clipboard to the layout
+
+\b 
+\e{Delete}, \e{Control-D} - Delete the selected objects
+
+\b 
+\e{Control-Shift-T} - Hide the selected tracks in a Tunnel
+
+\b 
+\e{Control-1} - Draw the selected tracks with thin lines
+
+\b 
+\e{Control-2} - Draw the selected tracks with medium lines
+
+\b 
+\e{Control-3} - Draw the selected tracks with thick lines
+
+\b 
+\e{Control-Shift-A} - Select all objects
+
+\b 
+\e{Control-Alt-I} - Import from a \e{.xti} file
+
+\b 
+\e{Control-Alt-X} - Export selected objects to a \e{.xti} file
+
+\b 
+\e{Control-Alt-U} - Custom Management (\k{cmdCustmgm}) dialog
+
+\b 
+\e{Control-Shift-G} - Group (\k{cmdGroup}) objects
+
+\b 
+\e{Control-Shift-U} - Ungroup (\k{cmdGroup}) objects
+
+\b 
+\e{Control-Alt-Y} - Layers (\k{cmdLayer}) dialog
+
+\b 
+\e{Control-L} - Redraw the main window
+
+\b 
+\e{Control-+}, \e{Page Down} - Zoom in
+
+\b 
+\e{Control--}, \e{Page Up} - Zoom out
+
+\b 
+\e{Control-Alt-A} - Layout (\k{cmdLayout}) dialog
+
+\b 
+\e{Control-Alt-D} - Display (\k{cmdDisplay}) dialog
+
+\b 
+\e{Control-Alt-M} - Command Options (\k{cmdCmdopt}) dialog
+
+\b 
+\e{Control-Alt-F} - Font (\k{fontSelW}) dialog
+
+\b 
+\e{Control-Alt-G} - Snap Grid (\k{cmdGrid}) dialog
+
+\b 
+\e{Control-Alt-K} - Sticky (\k{cmdSticky}) commands dialog
+
+\b 
+\e{Control-Alt-P} - Preferences (\k{cmdPref}) dialog
+
+\b 
+\e{Control-Alt-C} - Colors (\k{cmdRgbcolor}) dialog
+
+\b 
+\e{Control-Alt-R} - Record a macro (\k{macroM}) file
+
+\b 
+\e{Control-Alt-B} - Play Back a macro (\k{macroM}) file
+
+\b 
+\e{Control-Shift-B} - Move Selected tracks Above others
+
+\b 
+\e{Control-Shift-W} - Move Selected tracks Below others
+
+\S{lbl19} Main Drawing Canvas Keyboard Short Cuts
+
+These actions take effect if the Main Drawing Canvas has keyboard focus.
+
+\b 
+\e{Up Arrow} - Move the Canvas Up
+
+\b 
+\e{Down Arrow} - Move the Canvas Down
+
+\b 
+\e{Right Arrow} - Move the Canvas Right
+
+\b 
+\e{Left Arrow} - Move the Canvas Left
+
+\S{lbl20} Hot Bar Keyboard Short Cuts
+
+These actions take effect if the Hot Bar has keyboard focus.
+
+\b 
+\e{1} \e{2} ... \e{9}, \e{0} - Set the relative position of the Hot Bar.
+
+\b 
+\e{Right Arrow} - Move the Hot Bar one entry Right
+
+\b 
+\e{Left Arrow} - Move the Hot Bar one entry Left
+
+\b 
+\e{Shift-Right Arrow} - Move the Hot Bar multiple entries Right
+
+\b 
+\e{Shift-Left Arrow} - Move the Hot Bar multiple entries Left
+
+\b 
+\e{Right-Click} - Popup menu of Hot Bar contents
+
+\H{cmdAcclKeys} Mouse Actions
+
+For all commands, \e{Right-Click} displays the command selection popup menu.
+For some commands (noted below), \e{Shift-Right-Click} displays a command option popup menu.
+The operation of \e{Right-Click} and \e{Shift-Right-Click} can be reversed by an item on the Command Options (\k{cmdCmdopt}) dialog.
+
+The accelerator key for each command is listed after the command name.
+
+\b 
+Straight Track Command (\k{cmdStraight}) (\e{Control-G})
+
+\b 
+\e{Left-Drag} - Place 1st and 2nd End-Points
+
+\b 
+Curved Track Commands (\k{cmdCurve})
+
+\b 
+\e{(Control-4)} - Drag from 1st End-Point in curve direction
+
+\b 
+\e{(Control-5)} - Drag from 1st End-Point to Center
+
+\b 
+\e{(Control-6)} - Drag from Center to 1st End-Point
+
+\b 
+\e{(Control-7)} - Drag from 1st End-Point to 2nd End-Point (chord)
+
+\b 
+Circle Track Command (\k{cmdCircle})
+
+\b 
+\e{(Control-8)} - Position fixed radius circle
+
+\b 
+\e{(Control-9)} - Drag from circle edge to Center
+
+\b 
+\e{(Control-0)} - Drag from Center to circle edge
+
+\b 
+Helix Track Command (\k{cmdHelix}) (\e{Control-Shift-H})
+
+\b 
+\e{Left-Drag} - position Helix
+
+\b 
+Turnout Command (\k{cmdTurnout}) (\e{Control-T})
+
+\b 
+\e{Left-Drag} - Place Turnout
+
+\b 
+\e{Shift-Left-Drag} - Suppress auto-adjustment positioning when placing Turnouts
+
+\b 
+\e{Shift-Left-Click} - Choose next Active End-Point when placing Turnouts
+
+\b 
+\e{Right-Drag} - Rotate
+\#{?LI}
+
+\b 
+Shift-Right-Click (\k{mouseB}) - Command Options: rotate by specified amount
+
+\b 
+Handlaid Turnout Command (\k{cmdHandLaidTurnout}) (\e{Control-Shift-I})
+
+\b 
+\e{1st Left-Drag} - define Frog position and angle
+
+\b 
+\e{2nd Left-Drag} - define Points position
+
+\b 
+Turntable Command (\k{cmdTurntable}) (\e{Control-Shift-N})
+
+\b 
+\e{Left-Drag} - position Turntable
+
+\b 
+Parallel Command (\k{cmdParallel}) (\e{Control-Shift-P})
+
+\b 
+\e{Left-Drag} - position Parallel track relative to selected track
+
+\b 
+Modify Command (\k{cmdModify}) (\e{Control-M})
+
+\b 
+\e{Left-Drag} - Change length or make tangent to curve
+
+\b 
+\e{Shift-Left-Drag} - Change radius
+
+\b 
+\e{Right-Drag} - Extend track
+
+\b 
+Join Command (\k{cmdJoin}) (\e{Control-J})
+
+\b 
+\e{Left-Drag} - Join tracks
+
+\b 
+\e{Shift-Left-Click} - Move selected tracks to join with unselected End-Point
+
+\b 
+Connect Command (\k{cmdConnect}) (\e{Control-Shift-J})
+
+\b 
+\e{Left-Click} - Select End-Points to connect
+
+\b 
+\e{Shift-Left-Click} - Remove adjustments starting from an unconnected End-Point
+
+\b 
+Split Track Command (\k{cmdSplitTrack}) (\e{Control-Shift-S})
+
+\b 
+\e{Left-Click} - If at End-Point: disconnect track, otherwise: split track
+
+\b 
+\e{Shift-Left-Click} - As above, plus trim turnouts
+
+\b 
+Shift-Right-Click (\k{mouseB}) - Change block gaps
+
+\b 
+Elevation Command (\k{cmdElev}) (\e{Control-Shift-E})
+
+\b 
+\e{Left-Click} - Choose End-Point
+
+\b 
+\e{Right-Drag} - Move Elevation Marker
+
+\b 
+\e{Shift-Left-Click} - Split track and choose End-Point
+
+\b 
+Profile Command (\k{cmdProfile}) (\e{Control-Shift-F})
+
+\b 
+\e{Left-Click} - Add tracks to path from path end to chosen End-Point
+
+\b 
+Shift-Right-Click (\k{mouseB}) - Command Options: change Elevation type
+
+\b 
+Move Description Command (\k{cmdMoveLabel}) (\e{Control-Shift-Z})
+
+\b 
+\e{Left-Drag} - Move Description
+
+\b 
+Shift-Right-Click (\k{mouseB}) - Toggle Label display for Curved, Helix and Turnout tracks.
+
+\b 
+Describe Command (\k{cmdDescribe}) (\e{Control-?})
+
+\b 
+\e{Left-Click} - Display property sheet for the object
+
+\b 
+Select Command (\k{cmdSelect}) (\e{Control-E})
+
+\b 
+\e{Left-Click} - Select (or unselect) the object
+
+\b 
+\e{Left-Drag} - Select all objects within the highlighted area
+
+\b 
+\e{Shift-Left-Click} - Select all objects connected to object
+
+\b 
+\e{Shift-Left-Drag} - Move the selected objects
+
+\b 
+\e{Control-Left-Drag} - Move labels
+
+\b 
+\e{Right-Drag} - Unselect all objects within the highlighted area
+
+\b 
+\e{Shift-Right-Drag} - Rotate the selected objects
+
+\b 
+\e{Control-Shift-Right-Drag} - rotate Selected objects in increments of 15°
+
+\b 
+Shift-Right-Click (\k{mouseB}) - Command Options: how to draw moving objects and rotate by specified amount
+
+\b 
+Move Command (\k{cmdMove}) (\e{Control-Shift-M})
+
+\b 
+\e{Left-Drag} - move Selected objects
+
+\b 
+Shift-Right-Click (\k{mouseB}) - Command Options: how to draw moving objects
+
+\b 
+Rotate Command (\k{cmdRotate}) (\e{Control-Shift-R})
+
+\b 
+\e{Left-Drag} - rotate Selected objects
+
+\b 
+\e{Control-Left-Drag} - rotate Selected objects in increments of 15°
+
+\b 
+Shift-Right-Click (\k{mouseB}) - Command Options: how to draw moving objects and rotate by specified amount
+
+\b 
+Flip Command (\k{cmdFlip})
+
+\b 
+\e{Left-Drag} - draw Mirror line
+
+\S{} Train Simulation Command (\k{cmdTrain})
+
+\b 
+\e{Left-Drag} - move a Car or Train
+
+\b 
+\e{Shift-Left-Click} - switch a \e{Turnout} or rotate a \e{Turntable}
+
+\b 
+\e{Right-Click} - Command Options: uncouple car, flip or delete cars or Trains, set MU Master
+
+\S{} Text Command (\k{cmdText}) (\e{Control-Shift-X})
+
+\b 
+\e{Left-Drag} - position text
+
+\b 
+Shift-Right-Click (\k{mouseB}) - Command Options: change Font
+
+\S{} Draw Commands (\k{cmdDraw})
+
+\S2{} Draw Straight Objects
+
+\b 
+\e{(Control-Shift-1)} - Draw Straight Line
+
+\b 
+\e{(Control-Shift-D)} - Draw Dimension Line
+
+\b 
+\e{(Control-B)} - Draw Benchwork
+
+\b 
+\e{(Control-Shift-3)} - Draw Table Edge
+
+\S2{} Draw Curved Lines
+
+\b 
+\e{(Control-Shift-4)} - from End-Point in direction of Curve
+
+\b 
+\e{(Control-Shift-5)} - from End-Point to center
+
+\b 
+\e{(Control-Shift-6)} - from center to End-Point
+
+\b 
+\e{(Control-Shift-7)} - from chord
+
+\S2{} Draw Circles
+
+\b 
+\e{(Control-Shift-9)} - outline from edge to center
+
+\b 
+\e{(Control-Shift-0)} - outline from center to edge
+
+\b 
+\e{(Control-Alt-9)} - filled from edge to center
+
+\b 
+\e{(Control-Alt-0)} - filled from center to edge
+
+\S2{} Draw Shapes
+
+\b 
+\e{(Control-Shift-[)} - Box outline
+
+\b 
+\e{(Control-Alt-[)} - filled Box
+
+\b 
+\e{(Control-Shift-2)} - Polyline
+
+\b 
+\e{(Control-Alt-2)} - Filled Polygon
+
+\#{?LI}
+
+\S2{} Note Command (\k{cmdNote}) (\e{Control-Alt-N})
+
+\b 
+\e{Left-Drag} - position Note
+
+\S2{} Structure Command (\k{cmdStructure}) (\e{Control-Shift-C})
+
+\b 
+\e{Left-Drag} - Place Structure
+
+\b 
+\e{Right-Drag} - Rotate
+
+\b 
+\c{Shift-Right-Click} (\k{mouseB}) - Command Options: rotate by specified amount
+
+\S2{} Ruler Command (\k{cmdRuler})
+
+\b 
+\e{Left-Drag} - position Ruler
+
+\S2{} Print Command (\k{cmdPrint}) (\e{Control-P})
+
+\b 
+\c{Left-Click} - select or unselect pages
+
+\b 
+\e{Shift-Left-Drag} - move Print grid
+
+\b 
+\e{Shift-Right-Drag} - rotate Print grid
+
+\b 
+\e{Shift-Right-Click} (\k{mouseB}) - Command Options: rotate by specified amount
+
+
+\S2{} Snap Grid Command (\k{cmdGrid}) (\e{Control-Alt-G})
+
+\b 
+\e{Left-Drag} - move Snap Grid
+
+\b 
+\e{Right-Drag} - rotate Snap Grid
+
+\b 
+Shift-Right-Click (\k{mouseB}) - Command Options: rotate by specified amount
+
+\A{} Upgrade from earlier XTrkCad versions
+
+\H{cmdUpdatetitle} Update Titles
+
+\#{?Gupdttl}
+
+The 2.0.0 version of XTrkCad introduced a change in the way Turnouts and Structures are named.
+The new method splits the title into 3 parts: Manufacturer, Description and Part Number.
+
+To help you when upgrading to the new version, XTrkCad detects, when loading an
+old XTrkCad layout file, if the layout uses Turnouts and Structures that have
+titles in the old format.  If so this dialog is displayed which allows you
+to change the titles in your layout to the new format.
+
+The title of each different type of Turnout is collected and presented in this
+dialog.  Simply select the Turnout on the list that matches the one displayed and
+click 'Update'.  Repeat for each type of Turnout in your layout.
+
+If there is no matching Turnout, click on Ignore.  The Turnout will retain the
+old name as the Description, with a blank Manufacturer and Part Number.
+
+Click Cancel to continue loading the file without updating the titles.
+
+If you Save your file without updating all the titles you will not be able to
+update the titles later.
+
+If you are looking at old files without making changes then Click on Cancel to load the file without Updates.
+
+Not updating the titles prevents the customization of the way titles are presented in various lists and 
+on the layout.  Basic operation of XTrkCad is not affected.
+
+\A{glossary} Glossary
+
+\H{windowTerms} Window Terms
+
+\e{Note}: Menu and submenu items are indicated by \e{File>Open}, which means 
+select the \e{File} menu and then select the \e{Open} menu item.
+
+\dt Balloon Help
+
+\dd short help message which is displayed as you move the pointer over a control.
+
+\dt Canvas 
+
+\dd an area within a window where objects are drawn.
+
+\dt Check Box 
+
+\dd a button with a small square indicator to the left of its text.
+A check mark appears in the indicator when the button is selected.
+
+\dt Click
+
+\dd press and then release the left mouse button.
+
+\dt Dialog 
+
+\dd a type of window in which you input information.
+
+\dt Drag
+
+\dd press and hold down the left mouse button and move the mouse to 
+'drag' the cursor on the screen.
+
+\dt Drop Down List 
+
+\dd a listbox which is only displayed when you click on the 'drop-down' button.
+
+\dt Edit Box 
+
+\dd an area where you can enter a String, Integer or Floating Point value.
+
+\dt Highlighted 
+
+\dd an area on the Canvas which is in inverse-video.
+
+\dt Left-Click 
+
+\dd same a \e{Click}, used in contexts where \e{Right-Click} is also used.
+
+\dt Left-Drag 
+
+\dd same a \e{Drag}, used in contexts where \e{Right-Drag} is also used.
+
+\dt Shift+Left+Click 
+
+\dd Left+Click while holding down the \e{Shift} key.
+
+\dt Press 
+ 
+\dd click on a button.
+
+\dt Radio Button
+
+\dd a button with a small round indicator to the left of its text.
+The indicator is filled when the button is selected.
+
+\dt Radio Button Group
+
+\dd a group of radio buttons which indicate mutually exclusive choices.
+
+\dt Resizing Border 
+
+\dd a thick border around resizable windows that you can use to change the window size.
+
+\dt Right+Click 
+
+\dd press and then release the right mouse button.
+
+\dt Right+Drag 
+
+\dd press and hold down the right mouse button and move the mouse to 
+'drag' the cursor on the screen.
+
+\dt Shift+Right-Click 
+
+\dd Right-Click while holding down the \e{Shift} key.
+
+
+\dt Select
+
+\dd click on an object to indicate you want to do something with it.
+
+\H{generalTerms} General XTrkCad Terms
+
+
+\dt Endpoint
+
+\dd One of the most important concepts in XTrkCad is the endpoint.  
+A piece of flextrack has an endpoint at each end.  
+An endpoint has a position and an angle and it can be connected to other endpoints.  
+The endpoints control where the track is placed 
+and how it is connected.
+
+\lcont{ 
+Turnouts have several endpoints (normally 3).  
+Turntables have a varying number.
+}
+
+\dt Active endpoint
+
+\dd when placing a turnout, the endpoint which is used as a 
+'handle' when moved along other tracks.
+
+\dt Selected endpoint
+
+\dd when selecting track for various reasons the 
+selected endpoint is the one closest to the selection point.
+
+\dt Unconnected endpoint 
+
+\dd an endpoint which is not connected to another.
+
+\dt Auto-connect
+
+\dd when placing turnouts (\k{cmdHotBar}) and creating parallel 
+(\k{cmdParallel}) tracks, the new track will automatically be connected to other tracks 
+if the tracks are aligned properly.
+
+\dt Error Message
+
+\dd an error message displayed in the Status Bar (\k{mainW}) 
+accompanied by a beep.
+
+\dt Info Message 
+
+\dd an informational message displayed in the Status Bar (\k{mainW}).
+
+\dt Object 
+
+\dd an item on the layout, such as a track segment, table edge, line, note or text.
+
+\dt Flextrack
+
+\dd prefabricated track which may be formed into any suitable shape.  This term is also used for handlaid track.
+
+\dt S-Curve
+
+\dd a curve which bends in one direction and then the other, forming an S-like shape.
+
+\dt Sectional Track 
+
+\dd prefabricated track which cannot be bent, split or changed.
+
+\dt Track Segment
+
+\dd any piece of flextrack, turnout or sectional track.
+
+\dt Turnout
+
+\dd track which can switch the train between two or more paths.  In XTrkCad, 
+\e{Turnouts} also include sectional Tracks, crossings and forms of prefabricated (non-flex) track.
+
+\dt Turnout Frog  
+
+\dd the place on the turnout track where one rail crosses the other.
+
+\dt Turnout Points
+
+\dd the part of the Turnout that moves to select a path.
+
+\dt Easement 
+
+\dd a section of track with gradually changing radius which is used to smoothly 
+connect tracks of differing radii.  Also known as spiral transition curves.
+
+\A{warranty} Warranty and Copying
+
+XTrkCad is Copyright 2003 by Sillub Technology.
+
+\H{lbl11} Warranty
+
+XTrkCad is provided "as is" without warranty of any kind, either express or 
+implied, including, but not limited to warranties of merchantability or 
+fitness for a particular purpose.  
+In no event will Sillub Technology be liable for any damages, including incidental or 
+consequential damages, arising out of the use of the program, even if advised of 
+the possibility of such damages.
+
+
+\#{?cCopying and Distribution|||}
+
+\H{lbl12} Copying and Distribution
+
+You may make copies of XTrkCad and associated files and freely distribute 
+them, provided all files you receive are distributed.
+

@@ -1,0 +1,118 @@
+\H{editM} Edit Menu
+
+The \f{Edit Menu} shows commands affecting the \f{Main Canvas} (\k{mainW}).
+
+\b 
+\f{Undo} - Undoes the last command.
+Up to the last 10 commands can be undone.  
+If there are no commands to be undone, then the \f{Undo} item is disabled.
+The \f{Undo} command can also be invoked by the \f{Undo} button (below).
+
+\b 
+\f{Redo} - Undoes the last Undo command.
+The \f{Redo} command can also be invoked by the \f{Redo} button (below).
+
+\b 
+\f{Cut} - Moves the selected objects to the clipboard.
+
+\b 
+\f{Copy} - Copies the selected objects to the clipboard.
+
+\b 
+\f{Paste} - Copies the contents of the clipboard to the layout. The newly pasted parts are in \f{Selected} state
+and can easily be moved into place. Any previously selected objects are unselected.
+
+\b 
+\f{Delete} - Deletes the selected objects.
+
+\b 
+\f{Move To Current Layer} - move all selected objects to the current Layer (\k{cmdLayer}).
+
+\b 
+\f{Select All} - Selects all objects on the layout.
+
+\b 
+\f{Select Current Layer} - selects all objects in the current Layer (\k{cmdLayer}).
+
+\b
+\f{Deselect All} - unselects all objects on the layout. The same action can be achieved by
+pressing the ESC key.
+
+\b
+\f{Invert Selection} - selects all unselected objects and unselects all previously selected objects.
+
+\b
+\f{Select Stranded Track} - selects all track pieces that are not connected to any other objects. This helps cleaning 
+up a drawing after many changes have been made. 
+
+\b 
+\f{Tunnel} - Hides or unhides the selected tracks.
+
+\b 
+\f{Thin, Medium and Thick Track} - set the width of rails of selected tracks.
+
+For more information on working with selected objects, see the Select (\k{cmdSelect}) command.
+
+\rule
+
+\S{cmdUndo} Undo and Redo
+\G{png.d/bgundo.png}
+
+The \f{Undo} and \f{Redo} buttons invoke the same actions as the \f{Edit} menu items.
+The name of last command will be displayed as the Balloon Help (\k{windowTerms}) for the \e{Undo} button.
+The name of last undone command will be displayed as the Balloon Help for the \e{Redo} button.
+
+\S{cmdDelete} Delete
+
+The \c{DELETE} button will delete selected objects.
+Remember, you can \f{Undo} (\k{editM}) the delete.
+
+Deleting a track that is connected to an Easement (\k{cmdEasement}) causes the 
+easement to be deleted as well.
+
+The \f{Delete} key invokes the Delete command.
+
+\S{cmdTunnel} Tunnel (Hide Tracks)
+
+\G{png.d/btunnel.png}
+
+The \f{Tunnel} command is used to hide selected (\k{cmdSelect}) tracks (as in a tunnel).
+
+Select the tracks you want to hide in a tunnel.  
+Selecting a hidden track 'unhides' it.
+
+A tunnel portal is drawn where a hidden track connects with an 'unhidden' track.
+You can split (\k{cmdSplitTrack}) a track to place a tunnel portal at a particular spot.
+
+The \f{Draw Tunnels} Radio button group on the \f{Options>Display} dialog (\k{cmdDisplay}) controls 
+whether hidden tracks are not drawn, drawn as dashed lines or drawn 
+as normal lines.
+
+\S{cmdAboveBelow} Above/Below
+
+These commands move the selected objects (\k{cmdSelect}) to the \f{Top} or \f{Bottom} of the drawing order.
+The effect is to make the objects appear in front or behind other objects.
+This is most useful when dealing with filled shapes (\k{cmdDraw}).
+
+Selected objects moved \f{Below} are unselected.
+
+\rule
+
+\S{} Additional Accelerator Keys
+
+Additional accelerator keys perform the following:
+
+\b 
+SHIFT-BACKSPACE - Undo
+
+\b 
+CONTROL-INSERT - Copy
+
+\b 
+SHIFT-INSERT - Paste
+
+\b 
+SHIFT-DELETE - Cut
+
+\b
+ESC - Deselect All

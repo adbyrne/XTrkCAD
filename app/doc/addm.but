@@ -1,0 +1,265 @@
+\H{addM} Add Menu
+
+The \f{Add Menu} has all the actions related to adding track pieces to the layout. 
+
+\b
+\f{Straight Track} - lay straight track pieces of arbitrary lengths 
+
+\b
+\f{Curved Track} - lay curved track pieces using different modes for selecting start and endpoints and
+radius (\k{cmdCurve}). 
+
+\b
+\f{Circle Track} - place a circle of track by selecting radius, tangent and or
+center (\k{cmdCircle}).
+
+\b
+\f{Parallel} - create parallel track to existing flextrack, straight or curved.
+
+\b
+\f{Turnout} - select a turnout or a piece of fixed track and place on layout.
+
+\b
+\f{Handlaid Turnout} - lay a turnout in place on the layout. 
+
+\b
+\f{Structure} - Add a prefined structure to the layout. 
+
+\b
+\f{Helix} - Add a helix.
+
+\b
+\f{Turntable} - Place a turntable.
+
+\rule
+
+\S{cmdStraight} Straight Track
+\G{png.d/bstraigh.png}
+
+The straight track is a created by selecting the first endpoint and then 
+dragging the cursor to the where you want the second endpoint.
+
+If the Snap Grid (\k{cmdGrid}) is enabled then the endpoints will be constrained to the grid.
+
+\S{cmdCurve} Curved Track
+\G{png.d/bcurve.png}
+
+Creating a curve is a two step operation.  
+The four methods (with their accelerator keys) used to create a Curved Track are:
+
+\b 
+\G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release.
+Click and Drag to position the second endpoint.
+
+\b 
+\G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release. 
+Click and Drag to position the second endpoint.
+
+\b 
+\G{png.d/bcurve3.png} (\c{Control-6}) Drag from the Center of the Curved track to one of the endpoints and release. 
+Click and Drag to position the second endpoint.
+
+\b 
+\G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.
+Click on the center of the track and Drag to form the Curve.
+
+
+The button to the left of the Curved track button selects which method will be invoked by the Toolbar button.
+
+In all cases, two Red arrow heads will be drawn after the first step to indicate where you can Drag to complete the second step.
+
+A straight track will be created if the second endpoint is lined up with the 
+first endpoint.
+
+If the Snap Grid (\k{cmdGrid}) is enabled then the endpoints will be constrained to the grid.
+
+Optionally, the curve center point and radius can be displayed for the Curve.
+This is enabled by the Move Label (\k{cmdMoveLabel}) command.
+
+\S{cmdCircle} Circle Track
+\G{png.d/bcircle.png}
+
+A circle track is a special form of a curved track that extends 360° and has 
+no endpoints.  
+The three methods (with their accelerator keys) used to create a Circle Track are:
+
+\b 
+\G{png.d/bcircl1.png} (\c{Control-8}) Use the Fixed Radius specified on the \e{Circle Radius} control displayed on the Status Bar (\k{mainW}).  Drag the Circle track into position.
+
+\b 
+\G{png.d/bcircl2.png} (\c{Control-9}) Drag from the edge of the Circle track to the Center.
+
+\b 
+\G{png.d/bcircl3.png} (\c{Control-0}) Drag from the Center of the Circle track to the edge.
+
+The button to the left of the Circle track button selects which method will be invoked by the Toolbar button.
+
+If the Snap Grid (\k{cmdGrid}) is enabled then the Circle center will be constrained to the grid.
+
+Circle tracks are useful for fitting curves into corners and other tight places.  
+Also, they are good to establish initial layouts and finding out "what will fit".
+
+You can join to and from circles, after which they become curved tracks.
+
+\S{cmdParallel} Parallel Track
+\G{png.d/bparalle.png}
+
+You can create a new track parallel to any straight, curved or easement track.
+
+The \f{Parallel Separation} control displays the current separation between 
+parallel tracks.  
+You can change this value before selecting a track.  
+The value must be greater than 0.0.
+
+Select the track you want to parallel, and the new parallel track will appear 
+beside it.  
+You control which side the new track will be on by moving the cursor from one 
+side to the other of the selected track.
+
+This is very useful for creating sidings and yards.
+
+You cannot create tracks parallel to turnouts or 
+sectional track.
+
+It is possible to create tracks that abut 
+(the endpoints are very close and aligned).
+These endpoints will be automatically connected.
+
+\S{cmdTurnout} Turnouts and Sectional Track
+\G{png.d/bturnout.png}
+
+Turnouts (and sectional track) are created by the \f{Turnout} command.  
+When you select the turnout command, the \f{Turnout Selection} dialog is 
+displayed which contains a list of available turnouts and sectional track for the 
+current scale (\k{cmdLayout}) and a diagram of the selected turnout.
+
+You can use the Parameter File Dialog (\k{cmdPrmfile}) to control what turnouts are available.
+
+\G{png.d/turnsel.png}
+
+Select a turnout from the scrolling list.  
+A picture of the selected turnout is drawn in the diagram canvas.  
+You can pick the Active endpoint (\k{generalTerms}) by clicking on an 
+endpoint in the diagram.  
+The Active endpoint (\k{generalTerms}) is indicated by a highlighted square.
+
+The \f{New} button invokes the 
+Turnout Designer (\k{cmdTurnoutNew}) dialog.  
+This button displays a popup-menu list of various types of turnouts and 
+sectional track.
+
+The \f{Turnout Selection} window will disappear while dragging on the layout if
+the \f{Hide} Check Box on the dialog is set.
+This is useful if you have a small screen.
+
+See the Hot Bar (\k{cmdHotBar}) command for details on placing Turnouts on the layout.
+
+\S{cmdHandLaidTurnout} Handlaid Turnouts
+\G{png.d/bhndldto.png}
+
+Handlaid turnouts are created by specifying 3 values:
+
+\b 
+position of the Frog (\k{generalTerms})
+
+\b 
+angle of the \e{Frog} (the frog number)
+
+\b 
+position of the Points (\k{generalTerms})
+
+First select the position for the Frog (\k{generalTerms}) on an existing track and then \e{Drag} away to specify the angle of the \e{Frog}.
+The angle in degrees and equivalent frog number is displayed on the status bar.
+When you release, the line indicating the angle jumps to one side of the track to show you the center line of the new leg of the turnout.
+
+Next \e{Click} and \e{Drag} to position the Points (\k{generalTerms}) for the turnout.  As you \e{Drag}, tracks will be drawn showing the turnout.  When you release the turnout is created.
+
+You cannot place the \e{Frog} or \e{Points} on a turnout, circle or helix.  However, you can create overlapping Handlaid Turnouts.
+
+There are constraints on where you can place the \e{Points} in relation to the \e{Frog}.
+You cannot place the \e{Points} too close the \e{Frog}.
+When placing Handlaid Turnout on a curved track you may get unexpected results, especially when placing the \e{Points} a long way from the \e{Frog}.
+Try changing the \e{Frog} angle to get different results.
+
+Note: the drawing is an approximation to show the location of the \e{Points} and \e{Frog}.
+The piece of track considered (by XTrkCad) to be a Handlaid Turnout is a short section of track located at the \e{Points} and extending towards the \e{Frogs}.
+Other track segments are created between the \e{Points} and \e{Frog} and a short straight segment is drawn after the \e{Frog}.
+These other segments are independent of the turnout and can be removed or modified, although this is probably not a good idea.
+
+\S{cmdStructure} Structure
+\G{png.d/bstruct.png}
+
+The \f{Structure} command places diagrams of structures (buildings, bridges and other scenic elements) on the layout.
+The operation is similar to the Turnout (\k{cmdTurnout}) command.
+
+\G{png.d/strsel.png}
+
+When you select a structure from the list, its diagram is drawn in the diagram
+canvas.  The dimensions are also listed on the dialog.
+
+The \f{Structure Selection} dialog will disappear while dragging on the layout if
+the \f{Hide} Check Box on the dialog is set.
+This is useful if you have a small screen.
+
+See the Hot Bar (\k{cmdHotBar}) command for details on placing Structures on the layout.
+
+\f{Structures} are placed on the layout in same way as \f{turnouts} except that there is no \e{Active Endpoint} 
+and structures do not align with existing tracks.
+
+\S{cmdHelix} Helix Track
+\G{png.d/bhelix.png}
+
+A helix track is used to change the elevation of track in a restricted space.
+A helix is drawn as a circle of track, but in 3 dimensions it would resemble a cork screw or the pattern of threads on a bolt.
+
+\G{png.d/chelix.png}
+
+A helix is defined by the number of \e{Turns} and \e{Radius}.
+
+The helix dialog allows you to calculate these values based other parameters such as the \e{Elevation Difference}, \e{Grade} and \e{Vertical Separation}.
+The \e{Angular Separation} is the difference in degrees between the tracks entering and exiting the helix.
+Changing any of these values effects other values.
+For example, increasing the \e{Radius} decreases the \e{Grade}.
+Changing the number of \e{Turns} affects the \e{Vertical Separation} and either the \e{Radius} or \e{Grade}.
+
+In the case where different parameters could be affected
+(for instance changing \e{Elevation Difference} can affect \e{Radius} or \e{Grade})
+the last parameter you changed will be preserved.
+If you set the \e{Grade} and then \e{Elevation Difference} then the \e{Radius} will be adjusted.
+
+Changing \e{Vertical Separation} affects \e{Turns} which must be an integer value (no fractions), and this in turn affects the \e{Vertical Separation}.
+When you set \e{Vertical Separation} you are specifying the minimum separation which is adjusted upwards to the actual value.
+
+Note: only the \e{Radius} and \e{Turns} are used when creating the helix.
+After joining the helix to other tracks, you will want to establish the heights of the endpoints at each end of the helix.
+You can use the Elevation (\k{cmdElev}) command to do this.
+
+A helix is placed the same way as a Circle Track (\k{cmdCircle}) with the addition that you specify the number of turns as well the as the radius of the helix.  Then the helix is dragged into position on the layout.
+
+You can join to a helix in the same way you join to a circle.  However, once joined the helix is still drawn as a circle of track.
+
+A label for the helix is drawn at it's the center.
+If the elevations are set (either by a Defined Elevation point or connecting to a Defined Elevation point) for the two ends of the helix then the label contains the computed grade and vertical separation between layers as well as the number of turns and total length.
+The label can be moved or turned off by the Move Label (\k{cmdMoveLabel}) command.
+
+\S{cmdTurntable} Turntables
+\G{png.d/bturntbl.png}
+
+Turntables of specified diameter are created with 
+the \f{Turntable} command.
+
+The \e{Turntable Diameter} control is
+displayed on the Status Bar (\k{mainW}).  
+You can change this value before dragging the turntable into position.
+
+The \f{Modify command} (\k{cmdModify}) can be 
+used to create turntable stall tracks.  
+Select the turntable and drag the stall track to the proper angle and length.  
+You can also connect to a turntable with the \f{Join command} (\k{cmdJoin}).
+
+The \f{Turntable Angle} control on the Command Options (\k{cmdCmdopt}) dialog controls how 
+closely you can place tracks connected to a turntable.  
+If you want to create stall tracks every 7.5°, set the \f{Turntable Angle} 
+control to 7.5 and place the track as close to each other as allowed.  
+XTrkCad makes sure they will be separated by the correct angle.
+

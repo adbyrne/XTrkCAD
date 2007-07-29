@@ -1,0 +1,9 @@
+\cfg{html-contents-filename}{index.html}
+\cfg{html-mshtmlhelp-project}{xtrkcad.hhp}
+\cfg{html-mshtmlhelp-chm}{xtrkcad.chm}
+\cfg{html-mshtmlhelp-contents}{xtrkcad.hhc}
+\cfg{html-leaf-level}{infinite}
+\cfg{html-leaf-contains-contents}{false}
+\cfg{html-suppress-address}{true}
+\cfg{html-suppress-navlinks}{true}
+\cfg{html-contents-depth}{0}{2}

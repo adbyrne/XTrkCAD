@@ -1,0 +1,70 @@
+/**************************************************************************
+Background colour, fonts, margins, all are done here
+**************************************************************************/
+body {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+/*	font-size: 11px;*/
+/*	line-height: 130%; */
+	background-color: #FFFFFF;
+}
+
+
+code {
+	font-family: Courier, Monospace;
+}
+	
+a:link, a:visited, a:active {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+	color: #FF9900;
+}
+
+h1 {
+	color: #FF9900;
+	font-family: "Lucida Sans", Arial, Geneva, Helvetica, Helv, "Myriad Web", Syntax, sans-serif;
+	font-size: 130%;
+	font-weight: normal;
+	text-decoration: none; 
+	padding: 3px 6px; 
+	background-color: #fff7e0;
+	border-bottom: 1px solid #F1F1F1; 
+	border-right: 1px solid #F1F1F1;
+	
+}
+
+h2, h3 {
+	color: #FF9900;
+	font-family: "Lucida Sans", Arial, Geneva, Helvetica, Helv, "Myriad Web", Syntax, sans-serif;
+	font-weight: normal;
+	text-decoration: none; 
+	padding: 3px 6px; 
+
+}
+
+h2 {
+	font-size: 115%;
+}
+
+h3 {
+	font-size: 100%;
+	margin-left: 20px;
+}
+
+p, pre {
+	margin-left: 20px;
+}
+
+ul, ol {
+	margin-left: 20px;
+}		
+
+dt {
+	font-weight: bold:
+}
+
+dd {
+	margin-left: 40px;
+}	

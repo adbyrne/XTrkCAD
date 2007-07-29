@@ -1,0 +1,152 @@
+\H{drawM} Draw Menu
+
+Functions for drawing basic shapes and objects like lines and curves can be accessed from this menu.
+
+\b
+\f{Straight Lines} - draw straight objects
+
+\b
+\f{Curved Lines} - are created in the same manner as curved tracks.
+
+\b
+\f{Circle Lines} - draw empty or filled circles 
+
+\b
+\f{Shapes} - boxes and polylines
+
+\b
+\f{Text} - 
+
+\b
+\f{Note} - attaches notes to places on the layout.
+
+\b
+\f{Ruler} - create ruler and set visibility (\k{cmdRuler})
+
+\rule
+
+\S{cmdDraw} Line Drawing
+\G{png.d/bdraw.png} 
+
+The \e{Draw} commands are used to draw lines, arcs and other shapes. 
+These can be used to represent water edges, bridges and other scenic features.
+
+There are 4 command buttons on the toolbar used to draw Straight Objects, Curved Lines, Circles and other Shapes.
+Each command button is followed by a button that changes the action (and Icon) on the command button.
+
+Some commands display controls on the Status Line (\k{mainW}) to change line width, color or other attributes of the object.
+
+The \e{Draw} commands are used to draw lines, arcs and other shapes. 
+These can be used to represent water edges, bridges and other scenic features.
+
+There are 4 command buttons on the toolbar used to draw Straight Objects, Curved Lines, Circles and other Shapes.
+Each command button is followed by a button that changes the action (and Icon) on the command button.
+
+Some commands display controls on the Status Line (\k{mainW}) to change line width, color or other attributes of the object.
+
+\S{cmdStraightL} Straight Lines 
+
+Straight Objects are created by \c{LEFT-DRAGGING} (\k{windowTerms}) on the layout.
+If \e{Draw Straight Objects} is Sticky (\k{cmdSticky}), \e{Shift-Left-Drag} will use the End-Point of the previous line as the starting point.
+
+\b 
+\G{png.d/dline.png} Creates a \f{Straight Line} of specified color and width.
+
+\b 
+\G{png.d/ddimlin.png} Creates a \f{Dimension Line} of various sizes.
+
+\b 
+\G{png.d/dbench.png} Creates \f{Benchwork} using different types and orientation of lumber.
+
+\b 
+\G{png.d/dtbledge.png} Creates a \f{Table Edge}
+
+\S{cmdCurvedL} Curved Lines
+
+\f{Curved Lines} are created in the same manner as curved tracks.
+
+\b 
+\G{png.d/dcurve1.png} Select the start of the curve and drag in the direction of the curve.
+
+\b 
+\G{png.d/dcurve2.png} Select one end of the curve and drag to the center.
+
+\b 
+\G{png.d/dcurve3.png} Select the center of the curve and drag to one end.
+
+\b 
+\G{png.d/dcurve4.png} Drag from one end of the curve to the other to form the chord of the curve.
+
+Next drag on the Red arrows to adjust the curve.
+
+\S{cmdCircleL} Circles and Filled Circles
+
+\f{Circles} and \f{Filled Circles} are created by selecting either the center position 
+or a point on the edge of the circle and dragging to specify the radius.
+
+\b 
+\G{png.d/dcircle2.png} 
+\G{png.d/dflcrcl2.png} Select a point on the edge of the circle and drag to the center.
+
+\b 
+\G{png.d/dcircle3.png}
+\G{png.d/dflcrcl3.png} Select the center and drag to set the radius.
+
+
+\S{cmdShapes} Shapes
+
+Shapes are drawn by:
+
+\b 
+\G{png.d/dbox.png}
+\G{png.d/dfilbox.png} \f{Boxes} and \f{Filled Boxes} are created by selecting one corner and dragging the opposite corner.
+A \f{Box} is composed of four lines which may be individually deleted.
+
+\b 
+\G{png.d/dpoly.png} 
+\G{png.d/dfilpoly.png} \f{Poly Lines} and \f{Polygons} are created by \c{LEFT-DRAGGING}, and a corner 
+is placed when you release the left mouse button.
+The \f{Poly} shape is finished by pressing the \c{SPACE} key or by selecting another operation.
+
+\S{cmdText} Text
+\G{png.d/btext.png} 
+
+The \f{Text} command lets you enter text on the layout at the selected position.
+
+The font size can be changed by the Font Size drop list on the \f{Statusbar} (\k{overW}).
+The font size is scaled along with everything else on the layout so text is 
+always the same relative size as other layout objects.
+
+The font can be selected by the \f{Font Selection} (\k{fontSelW}) dialog invoked by 
+the \f{Options>Fonts} menu item or by \c{SHIFT-RIGHT-CLICK} (\k{mouseB}).
+
+You can use the \f{Describe} (\k{cmdDescribe}) command to modify the contents of existing \f{Text} objects.
+
+Note: loading fonts (or changing sizes) can take a noticeable amount of time.
+
+\S{cmdNote} Note
+\G{png.d/bnote.png}
+
+The \f{Notepad} command allows you to attach notes to selected places on the 
+layout.
+
+Click and drag on the Main Canvas (\k{mainW}) to place the note.
+
+When you release, the \e{Note Editor} dialog is displayed.  
+You can enter the note in the text area.
+
+When in Describe (\k{cmdDescribe}) mode, clicking on a \e{Note} will display the 
+\e{Property Sheet} to let you read or modify the note.  
+
+\S{cmdRuler} Ruler
+\G{png.d/bruler.png} 
+
+The \f{Ruler} command displays a ruler on the layout.  
+Click where you want the ruler to begin and drag the cursor to measure 
+distances from the origin.  
+The measured length is displayed in the \f{Statusbar} (\k{overW}).
+
+You can use the \f{Modify} (\k{cmdModify}) command to change the length of the \f{Ruler}.
+
+Subsequent clicks on the \f{Ruler} button will hide or display the ruler.
+
