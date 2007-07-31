@@ -1,0 +1,38 @@
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.1 2007-07-31 17:32:21 m_fischer Exp $
+#
+# Makefile for halibut based documentation
+#
+
+HALIBUT = ..\tools\halibut\halibut
+
+all: help
+
+BUTFILES = \
+	chmconf.but \
+	intro.but \
+	mainw.but \
+	filem.but \
+	editm.but \
+	viewm.but \
+	addm.but \
+	changem.but \
+	drawm.but \
+	managem.but \
+	optionm.but \
+	win_help.but \
+	map_hot.but \
+	appendix.but
+
+help: xtrkcad.chm
+
+xtrkcad.chm: xtrkcad.hhp
+	-2 hhc $*
+	
+xtrkcad.hhp: $(BUTFILES)
+	$(HALIBUT) $**
+	
+clean:
+	del *.html
+	del xtrkcad.hhp
+	del xtrkcad.hhc
+	del xtrkcad.chm
