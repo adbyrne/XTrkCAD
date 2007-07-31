@@ -1,4 +1,4 @@
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/Makefile,v 1.1 2007-07-30 16:27:30 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/Makefile,v 1.2 2007-07-31 18:33:15 m_fischer Exp $
 #
 # Makefile for halibut based documentation
 #
@@ -27,3 +27,8 @@ help: index.html
 
 index.html: $(BUTFILES)
 	$(HALIBUT) $^
+
+clean:
+	rm *.html
+	rm xtrkcad.hhp
+	rm xtrkcad.hhc
