@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.7 2007-07-22 17:02:46 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.8 2007-08-02 18:27:50 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -10,6 +10,7 @@
 #include <commdlg.h>
 #include <math.h>
 #include <stdio.h>
+#include <htmlhelp.h>
 #include "mswint.h"
 
 int __cdecl _heapwalk(_HEAPINFO *);
@@ -118,6 +119,7 @@ static int balloonHelpEnable = TRUE;
 static wControl_p balloonControlButton = NULL;
 
 static BOOL_T helpInitted = FALSE;
+static DWORD dwCookie;
 
 #define CONTROL_BASE (1)
 typedef struct {
@@ -849,7 +851,7 @@ wWin_p wWinMainCreate(
 	}
 	libDir = wGetAppLibDir();
 	helpFile = (char*)malloc( strlen(libDir) + 1 + strlen(appName) + 1+3+1 );
-	wsprintf( helpFile, "%s\\%s.hlp", libDir, appName );
+	wsprintf( helpFile, "%s\\%s.chm", libDir, appName );
 
 	wPrefGetInteger( "msw tweak", "ThickFont", &mswThickFont, 0 );
 
@@ -1890,9 +1892,14 @@ void wHelp(
 
 void doHelpMenu( void * context )
 {
+	if( !helpInitted ) {
+		HtmlHelp( NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
+	}
+	
 	switch ((int)(long)context) {
 	case 1: /* Contents */
-		WinHelp( mswHWnd, helpFile, HELP_CONTENTS, (DWORD)0 );
+		HtmlHelp( mswHWnd, helpFile, HH_DISPLAY_TOC, (DWORD_PTR)NULL );
+/*		WinHelp( mswHWnd, helpFile, HELP_CONTENTS, (DWORD)0 ); */
 		break;
 	case 2: /* Search */
 		WinHelp( mswHWnd, helpFile, HELP_CONTENTS, (DWORD)0 );
