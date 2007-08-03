@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.8 2007-08-02 18:27:50 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.9 2007-08-03 16:31:23 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -10,6 +10,7 @@
 #include <commdlg.h>
 #include <math.h>
 #include <stdio.h>
+#include <assert.h>
 #include <htmlhelp.h>
 #include "mswint.h"
 
@@ -1867,46 +1868,49 @@ int wNotice3(
 void wHelp(
 		const char * topic )
 {
-	const char * cp;
-	char command[80], *cq;
-	int rc;
+	char *pszHelpTopic;
+	HWND hwndHelp;
+
 	if (!helpInitted) {
+		HtmlHelp( NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
 		helpInitted = TRUE;
 	}
-		rc = WinHelp( mswHWnd, helpFile, HELP_CONTENTS, 0L );
-	wsprintf( command, "JumpId(\"%s.hlp\",\"", appName );
-	for ( cp = topic, cq = command+strlen(command); *cp; cq++,cp++ ) {
-		if ( *cq == '-' )
-			*cq = '_';
-		else
-			*cq = toupper(*cp);
-	}
-	*cq++ = '"';																	 
-	*cq++ = ')';
-	*cq++ = '\0';
-	rc = WinHelp( mswHWnd, helpFile, HELP_COMMAND, (DWORD)command );
-	if (rc == 0)
-		wNotice( command, "Ok", NULL );
+/*	             "c:\\help.chm::/intro.htm>mainwin", */
+	/* attention: always adapt constant value (10) to needed number of formatting characters */
+	pszHelpTopic = malloc( strlen( helpFile ) + strlen( topic ) + 10 );
+	assert( pszHelpTopic != NULL );	
+
+	sprintf( pszHelpTopic, "%s::/%s.html", helpFile, topic );
+	hwndHelp = HtmlHelp(mswHWnd, pszHelpTopic, HH_DISPLAY_TOPIC, (DWORD_PTR)NULL);
+	if( !hwndHelp )
+		wNotice( pszHelpTopic, "Ok", NULL );
+
+	free( pszHelpTopic );
 }
 
 
 void doHelpMenu( void * context )
 {
+	HH_FTS_QUERY ftsQuery;
+	
 	if( !helpInitted ) {
 		HtmlHelp( NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
+		helpInitted = TRUE;
 	}
 	
 	switch ((int)(long)context) {
 	case 1: /* Contents */
 		HtmlHelp( mswHWnd, helpFile, HH_DISPLAY_TOC, (DWORD_PTR)NULL );
-/*		WinHelp( mswHWnd, helpFile, HELP_CONTENTS, (DWORD)0 ); */
 		break;
 	case 2: /* Search */
-		WinHelp( mswHWnd, helpFile, HELP_CONTENTS, (DWORD)0 );
-		WinHelp( mswHWnd, helpFile, HELP_COMMAND, (DWORD)(LPCSTR)"Search()" );
-		break;
-	case 3: /* Help on Help */
-		WinHelp( mswHWnd, "WINHELP.HLP", HELP_INDEX, 0L );
+		ftsQuery.cbStruct = sizeof( ftsQuery );
+		ftsQuery.fExecute = FALSE;
+		ftsQuery.fStemmedSearch = FALSE;
+		ftsQuery.fTitleOnly = FALSE;
+		ftsQuery.pszSearchQuery = NULL;
+		ftsQuery.pszWindow = NULL;
+
+		HtmlHelp( mswHWnd, helpFile, HH_DISPLAY_SEARCH,(DWORD)&ftsQuery );
 		break;
 	default:
 		return;
@@ -1919,7 +1923,6 @@ void wMenuAddHelp(
 {
 	wMenuPushCreate( m, NULL, "&Contents", 0, doHelpMenu, (void*)1 );
 	wMenuPushCreate( m, NULL, "&Search for Help on...", 0, doHelpMenu, (void*)2 );
-	wMenuPushCreate( m, NULL, "&How to Use Help", 0, doHelpMenu, (void*)3 );
 }
 
 
@@ -2966,6 +2969,9 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 			DispatchMessage( &msg );
 		}
 	}
+
+	if( helpInitted == TRUE )
+		HtmlHelp( NULL, NULL, HH_UNINITIALIZE, (DWORD)dwCookie);
 
 #ifdef CONTROL3D
 	Ctl3dUnregister( hinstCurrent );

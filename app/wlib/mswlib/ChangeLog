@@ -1,7 +1,11 @@
+Aug 03, 2007
+	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswmisc.c: use HTML Help as the help system
+
 Jul 22, 2007
 	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswdraw.c, mswmisc.c: added support for mouse wheel in
-		th drawing area 
+		the drawing area 
 
 Jun 17, 2007
 	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
