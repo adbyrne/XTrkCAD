@@ -1,7 +1,7 @@
 /** \file param.c
  * Handle all the dialog box creation stuff.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.2 2007-02-04 17:06:24 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.3 2007-08-04 16:37:23 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2550,7 +2550,10 @@ EXPORT wWin_p ParamCreateDialog(
 	if ( (winOption&F_RESIZE) != 0 )
 		winOption |= F_RECALLSIZE;
 
-	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, group->nameStr, title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
+	sprintf( helpStr, "cmd%s", group->nameStr );
+	helpStr[3] = toupper(helpStr[3]);
+
+	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
 
 	if ( okLabel && okProc ) {
 		sprintf( helpStr, "%s-ok", group->nameStr );
@@ -2561,7 +2564,7 @@ EXPORT wWin_p ParamCreateDialog(
 	}
 	if ( needHelpButton ) {
 		sprintf( helpStr, "cmd%s", group->nameStr );
-		helpStr[3] = toupper(helpStr[3]);
+		helpStr[3] = toupper(helpStr[3]); 
 		lastB = group->helpB = wButtonCreate( group->win, 0, 0, NULL, "Help", 0, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
 	}
 

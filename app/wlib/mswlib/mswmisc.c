@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.9 2007-08-03 16:31:23 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.10 2007-08-04 16:39:05 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -904,6 +904,9 @@ wWin_p wWinPopupCreate(
 	w = winCommonCreate( parent?parent->hWnd:mswHWnd, W_POPUP, option,
 						  "MswPopUpWindow",
 						  style, labelStr, winProc, x, y, data, nameStr, &showCmd );
+
+	w->helpStr = mswStrdup( helpStr );
+
 	sysMenu = GetSystemMenu( w->hWnd, FALSE );
 	if (sysMenu) {
 		DeleteMenu( sysMenu, SC_RESTORE, MF_BYCOMMAND );
@@ -1026,11 +1029,15 @@ int mswTranslateAccelerator(
 		}
 	}
 	if ( acclKey == (long)VK_F1 ) {
-		if (!b)
-			return 0;
 		closeBalloonHelp();
-		if (b->helpStr)
-			wHelp( b->helpStr );
+		if (!b && win) {
+			wHelp( win->helpStr );
+		} else {
+			if (b->helpStr)
+				wHelp( b->helpStr ); 
+			else if (b->parent)
+				wHelp( b->parent->nameStr ); 
+		}
 		return 1;
 	}
 	/*acclKey = translateExtKey( (WORD)acclKey );*/
@@ -1880,8 +1887,9 @@ void wHelp(
 	pszHelpTopic = malloc( strlen( helpFile ) + strlen( topic ) + 10 );
 	assert( pszHelpTopic != NULL );	
 
-	sprintf( pszHelpTopic, "%s::/%s.html", helpFile, topic );
-	hwndHelp = HtmlHelp(mswHWnd, pszHelpTopic, HH_DISPLAY_TOPIC, (DWORD_PTR)NULL);
+/*	sprintf( pszHelpTopic, "%s::/%s.html", helpFile, topic ); */
+	sprintf( pszHelpTopic, "/%s.html", topic );
+	hwndHelp = HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOPIC, (DWORD_PTR)pszHelpTopic);
 	if( !hwndHelp )
 		wNotice( pszHelpTopic, "Ok", NULL );
 
