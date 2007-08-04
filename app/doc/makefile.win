@@ -1,4 +1,4 @@
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.1 2007-07-31 17:32:21 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.2 2007-08-04 16:41:47 m_fischer Exp $
 #
 # Makefile for halibut based documentation
 #
@@ -23,7 +23,13 @@ BUTFILES = \
 	map_hot.but \
 	appendix.but
 
-help: xtrkcad.chm
+help: ..\bin\Debug\xtrkcad.chm ..\bin\Release\xtrkcad.chm
+	
+..\bin\Debug\xtrkcad.chm: xtrkcad.chm
+	copy .\xtrkcad.chm ..\bin\Debug\xtrkcad.chm	
+
+..\bin\Release\xtrkcad.chm: xtrkcad.chm
+	copy .\xtrkcad.chm ..\bin\Release\xtrkcad.chm	
 
 xtrkcad.chm: xtrkcad.hhp
 	-2 hhc $*
