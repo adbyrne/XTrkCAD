@@ -1,34 +1,35 @@
 \title XTrkCad 4.0.1 User's Manual
 
-\cfg{html-head-end}{<link rel="stylesheet" type="text/css" href="style.css">}
+\C{index} Introduction To XTrkCad
 
-\C{lbl0} Introduction To XTrkCad
-
-XTrkCad is a computer-aided-design program for designing model railroad layouts.It is designed 
-to be easy to use and lets you manipulate tracks much as you would with real track.
+XTrkCad is a computer-aided design program that can be used to design model railroad layouts.  XTrkCad has been developed with ease of use in mind. With it, segments of track can be manipulated in much the same way as real track sections are.
 
 Using it, you can
 
 \b Design layouts in any scale and gauge,
 
+
 \b Use the predefined libraries for many popular brands of turnouts to help you get started easily,
+
 
 \b Add your own favorite components,
 
+
 \b Manipulate track much like you would with actual flex-track to modify, extend and join tracks and turnouts,
+
 
 \b Spiral \e{transition curves} (easements) can be automatically generated whenever the track radius changes.
 
+
 \b Test your design by running trains, including picking them up and moving them with the mouse.
 
-\b At any point you can print the design in a scale of your choice. 
-When printed in 1:1 scale the printout can be used as a template for laying the track to build your dream layout.
 
-New users should run the demonstrations (via the \f{Help>Demos} menu) to get an overview of the many features of the program.
-A number of example layout designs are also available.
+\b At any point you can print the design in a scale of your choice. When printed in 1:1 scale the printout can be used as a template for laying the track to build your dream layout.
 
-Be sure to visit our web page for the latest news and updates:
-\W{http://www.xtrkcad.org/}{XTrkCad Fork Website}
+
+New users should run the demonstrations (via the \f{Help>Demos} menu) to get an overview of the many features of the program. A number of example layout designs are also available.
+
+Be sure to visit the project web page for latest news and updates: \W{http://www.xtrkcad.org/}{XTrkCad Fork Website}
 
 \H{lbl1} Installation
 
@@ -38,15 +39,13 @@ XTrkCad is shipped as a self-installing self-expanding program (executable).
 
 \n Open the directory to which you downloaded or copied your new version of XTrkCad in Windows Explorer.
 
-\n Start the installation program by double clicking on \c{XTC401.EXE}.
+\n Start the installation program by double clicking on \f{XTC401.EXE}.
 
 \n Follow the steps in the installation program.
 
-\n The installation lets you define the the directory to which XTrkCad is installed. If necessary this directory 
-is created automatically. 
+\n The installation lets you define the the directory to which XTrkCad is installed. The directory is created automatically if it doesn't already exist.
 
-\n A program folder named XTrkCad containing the program and some additional documentation will be created 
-during the installation process. 
+\n A program folder named XTrkCad containing the program and some additional documentation will be created during the installation process. 
 
 \S{lbl6} Linux Installation
  
@@ -75,13 +74,11 @@ If you install XTrkCad into another directory, set the \c{XTRKCADLIB} environmen
 
 \f{Typographic Conventions}
 
-Throughout this manual the following typographic conventions are used to 
-make finding information easier:
+Throughout this manual the following typographic conventions are used to make finding information easier:
 
 \f{Bold} shows menu, file or dialog item titles. 
 
-\c{Monospaced} shows commands or text entries by user. On entry fields 
-the spelling given has to be followed exactly.
+\c{Monospaced} shows commands or text entries by user. On entry fields the spelling given has to be followed exactly.
 
 \e{Italic} marks a new expression, usually followed by a short description
 
@@ -97,63 +94,42 @@ the spelling given has to be followed exactly.
 
 \G{png.d/main.png}
 
-When XTrkCad starts, it displays the \f{Main} (\k{mainW}) and \f{Map} (\k{cmdMap}) windows.
-The \f{Map} window is used to change the origin of the \f{Main} window when the entire layout
-cannot be displayed at one time.
+When XTrkCad starts, it displays the \f{Main} (\k{mainW}) and \f{Map} (\k{cmdMap}) windows. The \f{Map} window is used to change the origin of the \f{Main} window when the entire layout cannot be displayed at one time.
 
-The Menu bar across the top of the \f{Main} window contains standard Windows menus.
-Some of these are particularly useful to the new user:
+The Menu bar across the top of the \f{Main} window contains standard Windows menus. Some of these are particularly useful to the new user:
 
-\b 
-The \f{File>Open} menu opens existing layout files.
-When first installed, the default directory contains some example programs you can look at.
+\b The \f{File>Open} menu opens existing layout files. When first installed, the default directory contains some example programs you can look at.
 
-\b 
-The \f{File>Exit} menu exits XTrkCad.  You can also exit by selecting the System menu in the upper left corner of the Window.
+\b The \f{File>Exit} menu exits XTrkCad.  You can also exit by selecting the System menu in the upper left corner of the Window.
 
-\b 
-The \f{Options>Setup} menu specifies the working scale and overall room size.
+\b The \f{Options>Setup} menu specifies the working scale and overall room size.
 
-\b 
-The \f{Options|Preferences} menu specifies some less frequently changed items.
+\b The \f{Options|Preferences} menu specifies some less frequently changed items.
 You can use this menu to choose Metric units (\k{cmdPref}).
 
-\b 
-The \f{Help} menu can be used to read the XTrkCad Help file.
-Also, the \f{Help>Demo} menu selects a number of demonstrations which illustrate
-various features of XTrkCad.
+\b The \f{Help} menu can be used to read the XTrkCad Help file. Also, the \f{Help>Demo} menu selects a number of demonstrations which illustrate various features of XTrkCad.
 
 \H{generaloperation} General Operation
 
 \S{mouseB} Mouse Buttons
 
-XTrkCad uses the left and right mouse buttons when manipulating tracks and
-other objects on the layout.
-Their meaning depends on the particular command but in general:
+XTrkCad uses the left and right mouse buttons when manipulating tracks and other objects on the layout. Their meaning depends on the particular command but in general:
 
-\b 
-\c{LEFT+CLICK} - selects an object or an End-Point.
+\b \c{LEFT+CLICK} - selects an object or an end point.
 
-\b 
-\c{LEFT+DRAG} - modifies an object, such as extending it.
+\b \c{LEFT+DRAG} - modifies an object, such as extending it.
 
-\b 
-\c{RIGHT+CLICK} - displays a popup-menu of commands.
+\b \c{RIGHT+CLICK} - displays a popup-menu of commands.
 
-\b 
-\c{SHIFT+RIGHT+CLICK} - displays a popup-menu of command options (for some commands).
+\b \c{SHIFT+RIGHT+CLICK} - displays a popup-menu of command options (for some commands).
 
-Note: the operation of \c{RIGHT+CLICK} and \c{SHIFT+RIGHT+CLICK} can be flipped by \f{Right Click} item on the \f{Command Options} (\k{cmdCmdopt}) dialog.
-This documentation will refer to \f{SHIFT+RIGHT+CLICK} as the default operation which displays a popup-menu of command options.
+Note: the operation of \c{RIGHT+CLICK} and \c{SHIFT+RIGHT+CLICK} can be flipped by \f{Right Click} item on the \f{Command Options} (\k{cmdCmdopt}) dialog. This documentation will refer to \f{SHIFT+RIGHT+CLICK} as the default operation which displays a popup-menu of command options.
 
-When Moving and Rotating ( Placing Turnouts and Structures,
-Moving the Print and Snap Grids, ... ):
+When Moving and Rotating ( Placing Turnouts and Structures, Moving the Print and Snap Grids, ... ):
 
-\b 
-\c{LEFT+DRAG} - moves the objects or grid.
+\b \c{LEFT+DRAG} - moves the objects or grid.
 
-\b 
-\c{RIGHT+DRAG} - rotates the objects or grid about the pivot point, which is
+\b \c{RIGHT+DRAG} - rotates the objects or grid about the pivot point, which is
 the point you started the drag operation.
 
 Some commands use the \c{SHIFT} or \c{CONTROL} key to modify the meaning of button presses.
@@ -162,34 +138,23 @@ Some commands use the \c{SHIFT} or \c{CONTROL} key to modify the meaning of butt
 
 Most dialogs have three standard buttons:
 
-\b 
-\f{Ok} - Completes the dialog, and the layout is updated with the current changes.
+\b \f{Ok} - Completes the dialog, and the layout is updated with the current changes.
 
-\b 
-\f{Cancel} - Cancels the dialog, and the layout is reverted to its
-previous state.
+\b \f{Cancel} - Cancels the dialog, and the layout is reverted to its previous state.
 
-\b 
-\f{Help} - Invokes the on-line help for the current command or dialog.
+\b \f{Help} - Invokes the on-line help for the current command or dialog.
 
 \S{enterValue} Entering Values
 
-Lengths and Distances can be entered in a variety of formats such as \e{12ft 4 1/2in}, 
-\e{12' 4.5"}, \e{148.500}, \e{1.234m}, \e{123.4cm} or \e{1234mm}.
-Pressing the Equal Sign (\c{=}) key after the entry will reformat the value to your preferred length format (\k{cmdPref}).
-You can also press the \c{p} key to convert a prototype measurement to a scale measurement by dividing by the 
-ratio for the current scale. The \c{s} key will convert a scale measurement to a prototype measurement.
+Lengths and Distances can be entered in a variety of formats such as \e{12ft 4 1/2in}, \e{12' 4.5"}, \e{148.500}, \e{1.234m}, \e{123.4cm} or \e{1234mm}. Pressing the Equal Sign (\c{=}) key after the entry will reformat the value to your preferred length format (\k{cmdPref}). You can also press the \c{p} key to convert a prototype measurement to a scale measurement by dividing by the  ratio for the current scale. The \c{s} key will convert a scale measurement to a prototype measurement.
 
 \S{lbl10} Accelerator Keys
 
-Most commands have accelerator keys (\k{commands}) defined which allow you to invoke the command
-directly (instead of using the menus or the buttons on the \f{Toolbar} (\k{mainW})).
+Most commands have accelerator keys (\k{commands}) defined which allow you to invoke the command directly (instead of using the menus or the buttons on the \f{Toolbar} (\k{mainW})).
 
 The \c{RETURN} key has the same effect as pressing the \f{Ok} button on the current dialog.
 
-The \c{ESCAPE} key cancels the current command.
-All selected tracks are unselected.
-The \f{Describe} (\k{cmdDescribe}) or \f{Select} (\k{cmdSelect}) command becomes the current command.
+The \c{ESCAPE} key cancels the current command. All selected tracks are unselected. The \f{Describe} (\k{cmdDescribe}) or \f{Select} (\k{cmdSelect}) command becomes the current command.
 
 The \c{PAGE UP} and \c{PAGE DOWN} keys will zoom out or zoom in.
 
@@ -201,24 +166,15 @@ The \c{DELETE} key invokes the \f{Delete} (\k{cmdDelete}) command.
 
 This section lists some things that can improve the performance of XTrkCad.
 
-\b 
-To speed up initialization, remove unused parameter files (Parameter Files (\k{cmdPrmfile}) dialog).
+\b To speed up initialization, remove unused parameter files (Parameter Files (\k{cmdPrmfile}) dialog).
 
-\b 
-During moves and rotates, draw tracks \f{Simply} or as \f{Endpoints}, (the \f{Command Options} (\k{cmdCmdopt}) dialog).
-Also \f{Zoom In} (\k{viewM}) to reduce the number of tracks that are being displayed.
+\b During moves and rotates, draw tracks \f{Simply} or as \f{End Points}, (the \f{Command Options} (\k{cmdCmdopt}) dialog). Also \f{Zoom In} (\k{viewM}) to reduce the number of tracks that are being displayed.
 
-\b 
-If you have to move a lot of track a large distance, create a temporary track at the destination and use the
-\f{Join} (\k{cmdJoin}) command to move the selected track to join with the temporary track.  Then remove the temporary track.
+\b If you have to move a lot of track a large distance, create a temporary track at the destination and use the \f{Join} (\k{cmdJoin}) command to move the selected track to join with the temporary track.  Then remove the temporary track.
 
-\b 
-Close the \f{Map} window if you don't need it to move about the layout.  The \f{Window} (\k{windowM}) menu can be used 
-reopen it.
+\b Close the \f{Map} window if you don't need it to move about the layout.  The \f{Window} (\k{windowM}) menu can be used reopen it.
 
-\b 
-On the \f{Display \k{cmdDisplay}} dialog turn off drawing \f{Endpoints}, decrease the \f{Two Rail Scale}, 
-increase \f{Min Grid Spacing}, set \f{Draw Ties} to \f{None} and turn off \f{Live Map}.
+\b On the \f{Display \k{cmdDisplay}} dialog turn off drawing \f{End Points}, decrease the \f{Two Rail Scale}, increase \f{Min Grid Spacing}, set \f{Draw Ties} to \f{None} and turn off \f{Live Map}.
 
 \H{directories} Files and Directories
 
@@ -226,94 +182,51 @@ increase \f{Min Grid Spacing}, set \f{Draw Ties} to \f{None} and turn off \f{Liv
 
 XTrkCad uses two directories on your system:
 
-\b 
-The \e{XTrkCad Install} directory, which contains the data and parameter files used by XTrkCad.
+\b The \e{XTrkCad Install} directory, which contains the data and parameter files used by XTrkCad.
 
-\b 
-The \e{XTrkCad Working} directory, which contains configuration and Check Point files.
+\b The \e{XTrkCad Working} directory, which contains configuration and Check Point files.
 
 On MS-Windows the \e{Install} and \e{Working} directories are set when you install XTrkCad.
 
-On Linux the \e{Install} directory is usually 
-\c{/usr/local/lib/xtrkcad/}, 
-but you can change this by defining the \c{XTRKCADLIB} environment variable before starting XTrkCad. 
-The working directory is \c{\{HOME\}/.xtrkcad/}.
+On Linux the \e{Install} directory is usually \c{/usr/local/lib/xtrkcad/}, but you can change this by defining the \c{XTRKCADLIB} environment variable before starting XTrkCad. The working directory is \c{\{HOME\}/.xtrkcad/}.
 
-Layout files (\c{*.xtc}) and export (\k{cmdExport}) files (\c{*.xti}) can be saved anywhere 
-you wish, as specified in the \f{Save File} and \f{Open File} dialogs.
+Layout files (\c{*.xtc}) and export (\k{cmdExport}) files (\c{*.xti}) can be saved anywhere you wish, as specified in the \f{Save File} and \f{Open File} dialogs.
 
 Example layouts can be found in the \c{example} directory under the XTrkCad install directory.
 
 \S{installDir}Install directory
 
-\b 
-\c{xtrkcad.xtq} is the main parameter file which contains
-definitions for each scale.
-It also includes turnout definitions for the demos and lists the playback (\e{.xtr}) files for the demos.
+\b \c{xtrkcad.xtq} is the main parameter file which contains definitions for each scale. It also includes turnout definitions for the demos and lists the playback (\e{.xtr}) files for the demos.
 
-\b 
-\c{params} directory contains \c{*.xtp} files which are the XTrkCad Library parameter files.
-These files (\c{atlasn.xtp, pecon55.xtp, ...}) contain definitions for 
-turnouts, sectional track pieces and structures.
-These files to be used are selected in the \f{Parameter Files (\k{cmdPrmfile})} dialog.
+\b \c{params} directory contains \c{*.xtp} files which are the XTrkCad Library parameter files. These files (\c{atlasn.xtp, pecon55.xtp, ...}) contain definitions for turnouts, sectional track pieces and structures. These files to be used are selected in the \f{Parameter Files (\k{cmdPrmfile})} dialog.
 
-\b 
-\c{xtrkcad.hlp} (on MS-Windows) or \c{xtrkcad.help} (on Linux) 
-is the XTrkCad help file.
+\b \c{xtrkcad.hlp} (on MS-Windows) or \c{xtrkcad.help} (on Linux) is the XTrkCad help file.
 
-\b 
-\c{xtrkcad.exe} (MS-Windows) 
-or \c{xtrkcad} (Linux) 
-is the XTrkCad program.
+\b \c{xtrkcad.exe} (MS-Windows) or \c{xtrkcad} (Linux) is the XTrkCad program.
 
-\b 
-\c{xtrkcad.tip} contains the ITip of the Day information accessible from the \f{Help} menu 
-or shown during startup.
+\b \c{xtrkcad.tip} contains the ITip of the Day information accessible from the \f{Help} menu or shown during startup.
 
-\b 
-\c{xtrkcad.upd} contains the list of parameter files supplied with XTrkCad
+\b \c{xtrkcad.upd} contains the list of parameter files supplied with XTrkCad
 
-\b 
-\c{xtrkcad0.ini} specifies the location of the XTrkCad working directory (MS-Windows only).
+\b \c{xtrkcad0.ini} specifies the location of the XTrkCad working directory (MS-Windows only).
 
-\b 
-\c{demos} directory contains \c{*.xtr} which are the XTrkCad demonstration files which can be run 
-via the \f{Help>Demos} menu item.
+\b \c{demos} directory contains \c{*.xtr} which are the XTrkCad demonstration files which can be run via the \f{Help>Demos} menu item.
 
-\b 
-\c{examples} directory contain some example \c{.xtc} files
+\b \c{examples} directory contain some example \c{.xtc} files
 
 \S{workDir}Working directory
 
-\b 
-\c{xtrkcad.ckp} are the \e{check-point} files created 
-periodically while running XTrkCad.  
-If your system XTrkCad hangs or crashes you get the choice of loading the checkpoint file and so 
-recover (most of) your
-work by saving it to your current layout file.
+\b \c{xtrkcad.ckp} are the \e{check-point} files created periodically while running XTrkCad.  If your system XTrkCad hangs or crashes you get the choice of loading the checkpoint file and so recover (most of) yourwork by saving it to your current layout file.
 
-\lcont{
-The check-point frequency is set by the \f{Options>Preference>Check Pointing} field.
-}
+\lcont{The check-point frequency is set by the \f{Options>Preference>Check Pointing} field.}
 
-\b 
-The \c{xtrkcad.cus} file contains parameter information.  
-This is mostly information created 
-by the \f{Turnout Designer} dialogs (\k{cmdTurnoutNew}) and \f{Group} (\k{cmdGroup}) command.
-You can use the \f{Edit>Custom Management} dialog to manipulate these parameters.
+\b The \c{xtrkcad.cus} file contains parameter information. This is mostly information created by the \f{Turnout Designer} dialogs (\k{cmdTurnoutNew}) and \f{Group} (\k{cmdGroup}) command. You can use the \f{Edit>Custom Management} dialog to manipulate these parameters.
 
-\b 
-The \c{xtrkcad.ini} (on MS-Windows) 
-or the \c{xtrkcad.rc} (on Linux) 
-file contains various parameter settings from each use of XTrkCad.  
-Most changes you make (such as scale, room size, window position) are saved 
-in this file for the next time you use XTrkCad.
+\b The \c{xtrkcad.ini} (on MS-Windows) or the \c{xtrkcad.rc} (on Linux) file contains various parameter settings from each use of XTrkCad. Most changes you make (such as scale, room size, window position) are saved in this file for the next time you use XTrkCad.
 
 \H{lbl15} Removing XTrkCad
 
-Remove XTrkCad by deleting the \e{XTrkCad Install} directory, 
-deleting any \c{xtrkcad.*} files from the \e{Working} directory, 
-and deleting any \e{*.xtc} and \e{*.xti} files.
+Remove XTrkCad by deleting the \e{XTrkCad Install} directory, deleting any \c{xtrkcad.*} files from the \e{Working} directory, and deleting any \e{*.xtc} and \e{*.xti} files.
 
 On MS-Windows, you can also use the \f{Uninstall} icon in the XTrkCad program group.
 
@@ -323,13 +236,9 @@ If you encounter a new bug please report it by opening a bug report via the \f{P
 
 \W{http://sourceforge.net/projects/xtrkcad-fork}{XTrkCad Fork Project Site}
 
-Please indicate what you were doing, what you expected to happen and 
-what did happen.  
+Please indicate what you were doing, what you expected to happen and what did happen.  
 
-If you can recreate the problem you can use \f{Macro>Record} 
-to record what happened.  
-Try to isolate the problem by creating a minimal layout and recording as 
-few commands as possible.  
+If you can recreate the problem you can use \f{Macro>Record} to record what happened. Try to isolate the problem by creating a minimal layout and recording as few commands as possible.  
 
 We also welcome any suggestions for improvements to XTrkCad via this website.
 
@@ -337,20 +246,12 @@ We also welcome any suggestions for improvements to XTrkCad via this website.
 
 XTrkCad generates three types of messages:
 
-\b \e{Notices}, which appear in their own window and require you to press a button 
-to make a choice or dismiss them.
+\b \e{Notices}, which appear in their own window and require you to press a button to make a choice or dismiss them.
 
-\b \e{Error messages}, which appear in the \f{Statusbar} (\k{mainW}) and 
-are accompanied by a beep.
+\b \e{Error messages}, which appear in the \f{Statusbar} (\k{mainW}) and are accompanied by a beep.
 
-\b \e{Information messages}, which appear in the \f{Statusbar} (\k{mainW}) 
-without a beep.
+\b \e{Information messages}, which appear in the \f{Statusbar} (\k{mainW}) without a beep.
 
-The \f{Recent Messages} menu item on the \f{Help} (\k{helpM}) menu contains a list of the most recent messages.
-Selecting one of the entries presents information on the particular message.
-The notation \e{abc|xyx} indicates the message can appear with either of the values (\e{abc} or \e{xyz}).
-Items in \e{UPPERCASE} indicate numeric (such as lengths) or string (such as filenames) values.
+The \f{Recent Messages} menu item on the \f{Help} (\k{helpM}) menu contains a list of the most recent messages. Selecting one of the entries presents information on the particular message. The notation \e{abc|xyx} indicates the message can appear with either of the values (\e{abc} or \e{xyz}). Items in \e{UPPERCASE} indicate numeric (such as lengths) or string (such as filenames) values.
 
-\# 
-\e{Notices} and \e{Error messages} you might encounter are listed here with a explanation.
-\S{messagesList} Messages Explanations
+\# \e{Notices} and \e{Error messages} you might encounter are listed here with a explanation. \S{messagesList} Messages Explanations
