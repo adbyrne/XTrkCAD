@@ -1,5 +1,5 @@
 #
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/Makefile,v 1.5 2007-07-24 16:14:53 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/Makefile,v 1.6 2007-08-31 15:18:45 m_fischer Exp $
 #
 
 GTKINCL=`pkg-config --cflags gtk+-2.0`
@@ -25,6 +25,7 @@ OBJS = \
 	gtksingle.o \
 	gtkwindow.o \
 	gtktext.o \
+	gtksplash.o \
 	wpref.o \
 	psprint.o 
 
@@ -58,6 +59,7 @@ LIBOBJS = \
 	$(LIB)(gtksingle.o) \
 	$(LIB)(gtktext.o) \
 	$(LIB)(gtkwindow.o) \
+	$(LIB)(gtksplash.o) \
 	$(LIB)(wpref.o) \
 	$(LIB)(psprint.o)
 
@@ -158,5 +160,6 @@ $(LIB)(gtksimple.o): gtksimple.c gtkint.h
 $(LIB)(gtksingle.o): gtksingle.c gtkint.h
 $(LIB)(gtktext.o): gtktext.c gtkint.h
 $(LIB)(gtkwindow.o): gtkwindow.c gtkint.h
+$(LIB)(gtksplash.o): gtksplash.c gtkint.h
 $(LIB)(psprint.o): psprint.c ../include/wlib.h dynarr.h
 $(LIB)(wpref.o): wpref.c ../include/wlib.h dynarr.h

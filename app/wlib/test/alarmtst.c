@@ -48,12 +48,12 @@ wWin_p wMain( int argc, char * argv[] )
     wWin_p mainW;
     wMenu_p m;
 
-    mainW = wWinMainCreate( "Fred", 60, 40, "Help", "Main", F_MENUBAR, NULL, NULL );
+    mainW = wWinMainCreate( "Fred", 60, 40, "Help", "Main", "", F_MENUBAR, NULL, NULL );
     m = wMenuBarAdd( mainW, NULL, "Cmd" );
-    wMenuPushCreate( m, NULL, "Alarm", doCmd, (void*)1 );
-    wMenuPushCreate( m, NULL, "Pause", doCmd, (void*)2 );
-    wMenuPushCreate( m, NULL, "Stop", doCmd, (void*)3 );
-    wMenuPushCreate( m, NULL, "Exit", doCmd, (void*)4 );
+    wMenuPushCreate( m, NULL, "Alarm", 0, doCmd, (void*)1 );
+    wMenuPushCreate( m, NULL, "Pause", 0, doCmd, (void*)2 );
+    wMenuPushCreate( m, NULL, "Stop", 0, doCmd, (void*)3 );
+    wMenuPushCreate( m, NULL, "Exit", 0, doCmd, (void*)4 );
     msgP = wMessageCreate( mainW, 2, 2, NULL, 40, tickM );
     return mainW;
 }
