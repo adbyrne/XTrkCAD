@@ -7,7 +7,7 @@
 \cfg{html-template-filename}{%k.html}
 \cfg{html-template-fragment}{%k}
 
-\cfg{html-mshtmlhelp-chm}{Windows Help/xtrkcad.chm}
+\cfg{html-mshtmlhelp-chm}{xtrkcad.chm}
 \cfg{html-mshtmlhelp-project}{xtrkcad.hhp}
 \cfg{html-mshtmlhelp-contents}{xtrkcad.hhc}
 
