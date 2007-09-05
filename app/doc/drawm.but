@@ -26,6 +26,7 @@ Functions for drawing basic shapes and objects like lines and curves can be acce
 \rule
 
 \S{cmdDraw} Line Drawing
+
 \G{png.d/bdraw.png} 
 
 The \e{Draw} commands are used to draw lines, arcs and other shapes. 
@@ -109,6 +110,7 @@ is placed when you release the left mouse button.
 The \f{Poly} shape is finished by pressing the \c{SPACE} key or by selecting another operation.
 
 \S{cmdText} Text
+
 \G{png.d/btext.png} 
 
 The \f{Text} command lets you enter text on the layout at the selected position.
@@ -125,6 +127,7 @@ You can use the \f{Describe} (\k{cmdDescribe}) command to modify the contents of
 Note: loading fonts (or changing sizes) can take a noticeable amount of time.
 
 \S{cmdNote} Note
+
 \G{png.d/bnote.png}
 
 The \f{Notepad} command allows you to attach notes to selected places on the 
@@ -139,6 +142,7 @@ When in Describe (\k{cmdDescribe}) mode, clicking on a \e{Note} will display the
 \e{Property Sheet} to let you read or modify the note.  
 
 \S{cmdRuler} Ruler
+
 \G{png.d/bruler.png} 
 
 The \f{Ruler} command displays a ruler on the layout.  

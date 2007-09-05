@@ -54,6 +54,8 @@ The \f{Layout} dialog, displayed by the Options (\k{optionM}) menu, contains ite
 The \f{Display} dialog, displayed by the Options (\k{optionM}) menu, contains 
 items controlling the display of objects on the Main window.
 
+\G{png.d/displayopt.png}
+
 \b 
 \f{Draw Tunnel} - how to draw hidden tracks (\k{cmdTunnel}), 
 either not at all, as dashed lines or as normal solid lines (which might be faster).
@@ -243,6 +245,8 @@ This will generate the worst case easement which is two easement curves
 placed end to end.
 
 \S{fontSelW} Font Selection
+
+\G{png.d/fonts.png}
 
 \#{?+xvfontsel.hlpsrc}
 

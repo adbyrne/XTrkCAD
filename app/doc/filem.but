@@ -4,25 +4,21 @@ The \f{File Menu} shows file oriented commands to load and save the layout.
 
 \b 
 \f{New} - Clears the current layout.  
-In case there are any unsaved changes on the current plan, a warning popup will be displaid and you'll have the option 
-to cancel the operation.
+In case there are any unsaved changes on the current plan, a warning popup will be displaid and you'll have the option to cancel the operation.
 
 \b 
 \f{Open} - Displays the \f{File Open} dialog to open an existing XTrkCad file.  
-In case there are any unsaved changes on the current plan, a warning popup will be displaid and you'll have the option 
-to cancel the operation.
+In case there are any unsaved changes on the current plan, a warning popup will be displaid and you'll have the option to cancel the operation.
 
 \b 
 \f{Save} - Saves the layout under the current file name.  
-If there is no current file then the \f{File Save} dialog is shown to let you choose a 
-file name.
+If there is no current file then the \f{File Save} dialog is shown to let you choose a file name.
 
 \b 
 \f{Save As} - Like save, but always shows the \f{File Save} dialog.
 
 \b
-\f{Revert} - allows you to undo all changes and return to the last saved state of your 
-layout plan. 
+\f{Revert} - allows you to undo all changes and return to the last saved state of your layout plan. 
 
 \b 
 \f{Print Setup} - Shows the Printer Setup Dialog (\k{printSetup}).
@@ -31,8 +27,7 @@ layout plan.
 \f{Print} - Invokes the Print command (\k{cmdPrint}).
 
 \b
-\f{Import} - displays a file selection dialog to choose a XTrkCad Import (\k{cmdExport}) file. This can
-be used to transfer parts like a yard design from one layout design to another. 
+\f{Import} - displays a file selection dialog to choose a XTrkCad Import (\k{cmdExport}) file. This can be used to transfer parts like a yard design from one layout design to another. 
 
 \b 
 \f{Export to BitMap} - Creates a bitmap file (\k{cmdOutputbitmap}) of the layout. 
@@ -48,12 +43,7 @@ be used to transfer parts like a yard design from one layout design to another.
 \f{Parameter Files} - Displays the \f{Parameter Files} dialog (\k{cmdPrmfile}) to choose parameter files.
 
 \b 
-\f{Notes} - Displays a simple notepad editor which you can use to enter information 
-about the layout.  
-Typically this could include prototype, period, theme, layout style, height, 
-construction, type of track and turnouts used, control system and anything 
-else of interest.  (There is also a \f{Note} command (\k{cmdNote}) which allows 
-attaching notes to particular parts of the layout.)
+\f{Notes} - Displays a simple notepad editor which you can use to enter information about the layout. Typically this could include prototype, period, theme, layout style, height, construction, type of track and turnouts used, control system and anything else of interest.  (There is also a \f{Note} command (\k{cmdNote}) which allows attaching notes to particular parts of the layout.)
 
 \b 
 \f{File List} - List of the five most recently used XTrkCad files.
@@ -71,32 +61,24 @@ Parameter Files are loaded and unloaded with the \f{Parameter Files} dialog.
 
 \G{png.d/prmfile.png}
 
-The dialog contains a list of parameter files.  Each file is preceded by a 
-checked box (the file is loaded) or an unchecked box (the file is unloaded).
-Definitions in loaded files appear on the \f{Hot Bar} (\k{cmdHotBar}) (if they are for the current scale).
-If you \e{unload} a file, then the definitions are removed from the selection lists and the \f{Hot Bar}.
-You can \e{reload} an unloaded file (the \f{Unload} button is changed to \f{Reload} if you select an unloaded file).
+The dialog contains a list of parameter files.  Each file is preceded by a checked box (the file is loaded) or an unchecked box (the file is unloaded). Definitions in loaded files appear on the \f{Hot Bar} (\k{cmdHotBar}) (if they are for the current scale). If you \e{unload} a file, then the definitions are removed from the selection lists and the \f{Hot Bar}. You can \e{reload} an unloaded file (the \f{Unload} button is changed to \f{Reload} if you select an unloaded file).
 
 \e{Unloaded} files are removed from the list when XTrkCad terminates.
 
-Files can be listed by either their file name or by their contents description.
-This is controlled by the \f{Show File Names} check box.
+Files can be listed by either their file name or by their contents description. This is controlled by the \f{Show File Names} check box.
 
 The \f{Browse} button allows you to load other \e{parameter files} such as provided by other users or downloaded from the Internet.
 
-When first installed, all available parameter files are loaded.
-You can unload parameter files you don't use to speed up XTrkCad startup time.
+When first installed, all available parameter files are loaded. You can unload parameter files you don't use to speed up XTrkCad startup time.
 
 The order in this list controls the order of turnouts and structures on the \f{Hot Bar} (\k{cmdHotBar}).
 You can move a parameter file to the end of the list by \e{Unloading} it, and then loading it via the \f{Browse} button.
 
 \S{cmdPrint} Print
 
-The \f{Print} command (\f{File>Print}) can print all or a 
-portion of the layout.
+The \f{Print} command (\f{File>Print}) can print all or a portion of the layout.
 
-When you select the \f{Print} command, a grid is drawn on the layout which 
-represents each printed page.  
+When you select the \f{Print} command, a grid is drawn on the layout which represents each printed page.  
 Clicking on the layout will select (or unselect) pages to be printed.
 
 \G{png.d/print.png}
@@ -120,9 +102,7 @@ The size of each page is controlled by:
 \b 
 \f{Format} - Portrait or Landscape.
 
-You can manually enter the \f{Width} and \f{Height} values to override the 
-maximum values.  
-You cannot enter values larger than the page size times the \e{Scale}.
+You can manually enter the \f{Width} and \f{Height} values to override the maximum values.  You cannot enter values larger than the page size times the \e{Scale}.
 
 The \f{Print Order} option controls the printing order of the pages.
 Relative to the Print Grid:
@@ -134,11 +114,7 @@ Relative to the Print Grid:
 \f{Reverse} order is Rows first, Left to Right, Bottom to Top.
 
 Whether tracks are printed with one or two lines (representing the center line and rails) depends on the \f{Print Scale}.
-If this value is smaller than or equal to twice the Two Rail Scale (\k{cmdPref}) on the Display (\k{cmdDisplay}) dialog 
-then tracks are drawn with two lines.
-This corresponds to the way tracks are drawn on the main window,
-adjusted to account for the greater resolution of most printers.
-At 1:1 tracks are also drawn with a center line.
+If this value is smaller than or equal to twice the Two Rail Scale (\k{cmdPref}) on the Display (\k{cmdDisplay}) dialog then tracks are drawn with two lines. This corresponds to the way tracks are drawn on the main window, adjusted to account for the greater resolution of most printers. At 1:1 tracks are also drawn with a center line.
 
 The other options:
 
@@ -151,8 +127,7 @@ This allows the printouts to abut without trimming.
 
 \b 
 \f{Print Registration Marks} - at 1:1 scale, print location markers every 3" (or 10cm).
-This option is only enabled at 1:1.
-This is useful for aligning multiple pages printed at different angles.
+This option is only enabled at 1:1. This is useful for aligning multiple pages printed at different angles.
 
 \b 
 \f{Print Snap Grid} - if the Snap Grid (\k{cmdGrid}) is visible then it may be drawn on the printout.
@@ -198,36 +173,57 @@ Also set \f{Engineering Data} to add the Layout Title, Scale and other data for 
 Use layers (\k{cmdLayer}) to control which tracks are visible (and printed).
 Put benchwork, scenery or different tracks levels in separate layers and hide the layers you are not working with.
 
-To transfer the drawing to the layout without printing at 1:1, make
-the Snap Grid (\k{cmdGrid}) visible and orient it to match your room or
-layout table.
-Check the \f{Print Snap Grid} toggle and use the printed grid to transfer
-measurements to your layout space.
+To transfer the drawing to the layout without printing at 1:1, make the Snap Grid (\k{cmdGrid}) visible and orient it to match your room or layout table.
+
+Check the \f{Print Snap Grid} toggle and use the printed grid to transfer measurements to your layout space.
 You may want to change the color (\k{cmdRgbcolor}) of the \f{Snap Grid} to make it more visible on the printout.
 
-When you print multiple pages you can check \f{Ignore Page Margins}
-so pages can be placed next to each other.
-The tracks will line up
-correctly without trimming or overlapping the pages. 
+When you print multiple pages you can check \f{Ignore Page Margins} so pages can be placed next to each other. The tracks will line up correctly without trimming or overlapping the pages. 
 Note: depending on your printer there will be an unprintable margin around the edge of the page.
 
-If you print at 1:1 for direct transfer to the sub-roadbed,
-check \f{Print Roadbed Outline} and set \f{Width} to show lines for making cuts.
+If you print at 1:1 for direct transfer to the sub-roadbed, check \f{Print Roadbed Outline} and set \f{Width} to show lines for making cuts.
 
-If you make printouts in strips at different angles at 1:1 (to follow tracks around a curve), 
-check \e{Print Registration Marks} to be able to align the separate strips.
+If you make printouts in strips at different angles at 1:1 (to follow tracks around a curve), check \e{Print Registration Marks} to be able to align the separate strips.
 
 \S{printSetup} Printer Setup
 
 \S2{MS-Windows} Microsoft Windows
 
-XTrkCad uses the system Printer Setup dialog.
+\G{png.d/printset_win.png}
+
+The Windows \f{Printer Setup} dialog allows you to configure the application's use of the printer.
+
+The \f{Printer Setup} window contains:
+
+\b 
+\f{Name} - a drop down list for selection of a particular printer.  Entries in this list are defined by \c{Windows}.
+
+\b 
+\f{Status} - the current status of the selected printer.
+
+\b 
+\f{Type} - the type and model of printer selected.
+
+\b 
+\f{Where} - The location of the prionter if it's defined in the printers properties.
+
+\b 
+\f{Comment} - Any comments defined that are defined in the printers properties.
+
+\b 
+\f{Paper Size} - a list of various North American and European paper sizes.
+
+\b 
+\f{Paper Source} - a list of various paper tray locations associated with the selected printer.
+
+\b 
+\f{Orientation} - a Radio button to select either Landscape or Portrait format.
 
 \S2{Linux} Linux
 
 \G{png.d/printset.png}
 
-The \f{Printer Setup} dialog allows you configure the application's use of the printer.
+The \f{Printer Setup} dialog allows you to configure the application's use of the printer.
 
 The \f{Printer Setup} window contains:
 
@@ -297,6 +293,9 @@ You can change the \e{font alias} mapping by using the \f{X Font} and \f{PS Font
 \S{cmdImport} Import
 
 Importing displays a file selection dialog to specify the file to import.
+
+\G{png.d/import.png}
+
 After imorting the objects from the file, the imported objects are in selected state and therefore are 
 drawn in red. This allows you to easily move and rotate the imported objects
 to their final position.
@@ -337,3 +336,5 @@ it is a Windows Bitmap (.BMP) file, on Linux it is a X11 Pixmap (.XPM) file.
 
 Exporting displays a file selection dialog to specify the file name for the exported objects.
 All selected (\k{cmdSelect}) objects are exported into one file.
+
+\G{png.d/exportfile.png}

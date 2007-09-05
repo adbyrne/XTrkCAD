@@ -60,6 +60,7 @@ to.
 \rule
 
 \S{cmdDescribe} Properties
+
 \G{png.d/bdescrib.png}
 
 The \f{Properties} button will cancel any other command in progress.  
@@ -78,6 +79,7 @@ Note: the Default Command radio button on the \f{Command Options} (\k{cmdCmdopt}
 the \f{Select} (\k{cmdSelect}) command is used as the default command.
 
 \S{cmdSelect} Select 
+
 \G{png.d/bselect.png}
 
 The \f{Select} button will cancel any other command in progress.
@@ -167,6 +169,7 @@ the \e{Select} command is used as the default command.
 Pressing the \e{Escape} key will deselect all selected tracks.
 
 \S{cmdMove} Move Tracks
+
 \G{png.d/bmove.png}
 
 This command moves selected objects (\k{cmdSelect}).
@@ -192,6 +195,7 @@ structures are drawn as outlines, no End-Points or lines are drawn
 \f{End Points} - only the End-Points are drawn (as stars).
 
 \S{cmdRotate} Rotate Tracks
+
 \G{png.d/brotate.png}
 
 This command rotates selected objects (\k{cmdSelect}).  Click on the layout at the origin of the rotation and then 
@@ -207,6 +211,7 @@ To use the \f{Align} popup-menu item, first click on a selected object
 and then drag on an unselected object.  The selected object will be rotated so that the first selected point is parallel.
 
 \S{cmdFlip} Flip
+
 \G{png.d/bflip.png}
 
 This command flips selected objects (\k{cmdSelect}). Click and drag on the layout to create a line. 
@@ -220,6 +225,7 @@ If a matching turnout is not found then the turnout title is prepended with \f{F
 You can use the \f{Describe} (\k{cmdDescribe}) command to change title of \e{Flipped} turnouts.
 
 \S{cmdModify} Modify
+
 \G{png.d/bmodify.png}
 
 The \f{Modify} command is used to change existing tracks and to extend them with new tracks.
@@ -290,6 +296,7 @@ If \f{easements} (\k{cmdEasement}) are enabled then an easement curve
 will be generated (if required) to connect the old and new tracks.
 
 \S{cmdJoin} Join
+
 \G{png.d/bjoin.png}
 
 Any two tracks can be joined together.  
@@ -343,6 +350,7 @@ tracks are moved and rotated so the End-Points are aligned.
 See the Demos for examples of how to join tracks.
 
 \S{cmdConnect} Connect Sectional Tracks
+
 \G{png.d/bconnect.png}
 
 This command is used with \e{Sectional Track}.
@@ -367,6 +375,7 @@ disconnect them and then use \f{Connect} command with \c{SHIFT-LEFT-CLICK} on th
 End-Points to tighten the connections between the tracks. 
 
 \S{cmdSplitTrack} Split Track
+
 \G{png.d/bsplit.png}
 
 The \f{Split} command splits a track into two pieces at the selected point.  
@@ -391,6 +400,7 @@ change the \e{block gaps} for the End-Point.  A block gap is drawn as a thick li
 Either or both rails can be gapped.
 
 \S{cmdMoveLabel} Move Description
+
 \G{png.d/bmovedes.png}
 
 This command is used to move Elevations, Grades and Stations (\k{cmdElev}), 
@@ -413,6 +423,7 @@ The entered value is added to all Defined Elevations on the Selected tracks.
 A negative value will lower the Elevations.
 
 \S{cmdElev} Elevations
+
 \G{png.d/belev.png}
 
 The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, you 

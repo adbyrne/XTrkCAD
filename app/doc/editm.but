@@ -56,6 +56,7 @@ For more information on working with selected objects, see the Select (\k{cmdSel
 \rule
 
 \S{cmdUndo} Undo and Redo
+
 \G{png.d/bgundo.png}
 
 The \f{Undo} and \f{Redo} buttons invoke the same actions as the \f{Edit} menu items.

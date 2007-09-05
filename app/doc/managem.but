@@ -38,6 +38,7 @@ This command produces a list of all selected turnouts and sectional tracks and t
 \rule
 
 \S{cmdTrain} Train
+
 \G{png.d/btrain.png}
  
 The \f{Train} command lets you place and run Trains on the layout.

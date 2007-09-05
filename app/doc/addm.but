@@ -34,6 +34,7 @@ center (\k{cmdCircle}).
 \rule
 
 \S{cmdStraight} Straight Track
+
 \G{png.d/bstraigh.png}
 
 The straight track is a created by selecting the first endpoint and then 
@@ -42,26 +43,20 @@ dragging the cursor to the where you want the second endpoint.
 If the Snap Grid (\k{cmdGrid}) is enabled then the endpoints will be constrained to the grid.
 
 \S{cmdCurve} Curved Track
-\G{png.d/bcurve.png}
 
-Creating a curve is a two step operation.  
-The four methods (with their accelerator keys) used to create a Curved Track are:
+\G{png.d/bcurve.png} Creating a curve is a two step operation.  The four methods (with their accelerator keys) used to create a Curved Track are:
 
 \b 
-\G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release.
-Click and Drag to position the second endpoint.
+\G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release.  Click and Drag to position the second endpoint.
 
 \b 
-\G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release. 
-Click and Drag to position the second endpoint.
+\G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release.  Click and Drag to position the second endpoint.
 
 \b 
-\G{png.d/bcurve3.png} (\c{Control-6}) Drag from the Center of the Curved track to one of the endpoints and release. 
-Click and Drag to position the second endpoint.
+\G{png.d/bcurve3.png} (\c{Control-6}) Drag from the Center of the Curved track to one of the endpoints and release.  Click and Drag to position the second endpoint.
 
 \b 
-\G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.
-Click on the center of the track and Drag to form the Curve.
+\G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.  Click on the center of the track and Drag to form the Curve.
 
 
 The button to the left of the Curved track button selects which method will be invoked by the Toolbar button.
@@ -77,6 +72,7 @@ Optionally, the curve center point and radius can be displayed for the Curve.
 This is enabled by the Move Label (\k{cmdMoveLabel}) command.
 
 \S{cmdCircle} Circle Track
+
 \G{png.d/bcircle.png}
 
 A circle track is a special form of a curved track that extends 360° and has 
@@ -102,6 +98,7 @@ Also, they are good to establish initial layouts and finding out "what will fit"
 You can join to and from circles, after which they become curved tracks.
 
 \S{cmdParallel} Parallel Track
+
 \G{png.d/bparalle.png}
 
 You can create a new track parallel to any straight, curved or easement track.
@@ -126,6 +123,7 @@ It is possible to create tracks that abut
 These endpoints will be automatically connected.
 
 \S{cmdTurnout} Turnouts and Sectional Track
+
 \G{png.d/bturnout.png}
 
 Turnouts (and sectional track) are created by the \f{Turnout} command.  
@@ -155,6 +153,7 @@ This is useful if you have a small screen.
 See the Hot Bar (\k{cmdHotBar}) command for details on placing Turnouts on the layout.
 
 \S{cmdHandLaidTurnout} Handlaid Turnouts
+
 \G{png.d/bhndldto.png}
 
 Handlaid turnouts are created by specifying 3 values:
@@ -187,6 +186,7 @@ Other track segments are created between the \e{Points} and \e{Frog} and a short
 These other segments are independent of the turnout and can be removed or modified, although this is probably not a good idea.
 
 \S{cmdStructure} Structure
+
 \G{png.d/bstruct.png}
 
 The \f{Structure} command places diagrams of structures (buildings, bridges and other scenic elements) on the layout.
@@ -207,12 +207,13 @@ See the Hot Bar (\k{cmdHotBar}) command for details on placing Structures on the
 and structures do not align with existing tracks.
 
 \S{cmdHelix} Helix Track
+
 \G{png.d/bhelix.png}
 
 A helix track is used to change the elevation of track in a restricted space.
 A helix is drawn as a circle of track, but in 3 dimensions it would resemble a cork screw or the pattern of threads on a bolt.
 
-\G{png.d/chelix.png}
+\G{png.d/ahelix.png}
 
 A helix is defined by the number of \e{Turns} and \e{Radius}.
 
@@ -243,6 +244,7 @@ If the elevations are set (either by a Defined Elevation point or connecting to 
 The label can be moved or turned off by the Move Label (\k{cmdMoveLabel}) command.
 
 \S{cmdTurntable} Turntables
+
 \G{png.d/bturntbl.png}
 
 Turntables of specified diameter are created with 
