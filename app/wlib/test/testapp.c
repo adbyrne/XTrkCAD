@@ -1,7 +1,7 @@
 /** \file testapp.c
  * Small test application to demonstrate functionality of the XTrkCad windowing library wlib
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/test/testapp.c,v 1.1 2007-08-31 15:18:47 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/test/testapp.c,v 1.2 2007-09-14 16:17:24 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -51,8 +51,10 @@ wWin_p wMain( int argc, char * argv[] )
 {
 
 	wWin_p mainW;
-   wMenu_p menu1;
-   wMenu_p menu2;
+	wMenu_p menu1;
+	wMenu_p menu2;
+	int i;
+	char buffer[ 80 ];
 
 	/* add a splash window */
 	wCreateSplash( WINDOWTITLE,			/* name of application to show */
@@ -60,9 +62,9 @@ wWin_p wMain( int argc, char * argv[] )
 					 );	
 
 	wFlush();									/* make sure splash window is shown */
-	
+
 	/* create main window */	
-   mainW = wWinMainCreate( APPNAME, 	/* application name  */
+    mainW = wWinMainCreate( APPNAME, 	/* application name  */
 	 								200, 			/* position x */
 									100, 			/* position y */
 									"Help", 		/* help topic */
@@ -72,10 +74,11 @@ wWin_p wMain( int argc, char * argv[] )
 									NULL, 		/* window callback function */
 									NULL 			/* pointer to user data */
 									);
-									
+
+	wWinShow( mainW, FALSE );
 
 	/* add a submenu */ 	
-   menu1 = wMenuBarAdd( mainW, 			/* parent window */
+    menu1 = wMenuBarAdd( mainW, 			/* parent window */
 								NULL, 			/* help topic */
 								"File" 			/* submenu title */
 							 );	
@@ -103,14 +106,20 @@ wWin_p wMain( int argc, char * argv[] )
 						 );									
 	
 	/* create a second submenu */
-   menu2 = wMenuBarAdd( mainW, 			/* parent window */
+    menu2 = wMenuBarAdd( mainW, 			/* parent window */
 								NULL, 			/* help topic */
 								"Help" 			/* submenu title */
 							 );	
 
-	wPause( 1000L );							/* wait for one seconds */
-	
+	for( i = 5; i > 0; i-- ) {
+		sprintf(buffer, "Countdown %d", i );
+		wSetSplashInfo( buffer );
+		wPause( 1000L );
+	}
+ 
+	wWinShow( mainW, TRUE );
+	wPause ( 2000L );
 	wDestroySplash();							/* remove the splash window again */
 	
-   return mainW;
+	return mainW;
 }

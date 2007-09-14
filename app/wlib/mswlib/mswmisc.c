@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.10 2007-08-04 16:39:05 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.11 2007-09-14 16:17:24 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -1775,29 +1775,48 @@ static wAlarmCallBack_p alarmFunc;
 static setTriggerCallback_p triggerFunc;
 static wControl_p triggerControl;
 
+/*
+ * Wait until the pause timer expires. During that time, the message loop is
+ * handled and queued messages are processed 
+ */
+
 static void pausedLoop( void )
 {
 	MSG msg;
 	while (paused && GetMessage( &msg, NULL, 0, 0 )) {
-		if (
+		if ( (mswWin) &&
 #ifdef DOTRANSACCEL
 			 (!TranslateAccelerator( mswWin->hWnd, hMswAccel, &msg )) &&
 #endif
 			 (!mswTranslateAccelerator( mswWin->hWnd, &msg )) ) {
 			TranslateMessage( &msg );
-			DispatchMessage( &msg );
 		}
+		DispatchMessage( &msg );
 	}
 }
 
+/**
+ *	Timer callback function for the pause timer. The only purpose of this 
+ *  timer proc is to clear the waiting flag and kill the timer itself.
+ */
+void CALLBACK TimerProc( HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime )
+{
+	if (idEvent == PAUSE_TIMER) {				
+		paused = FALSE;
+		KillTimer( hWnd, PAUSE_TIMER );
+	} 
+}
 
-void wPause(
-		long msec )
+/**
+ * Pause the application for a specified time. 
+ */
+
+void wPause( long msec )
 {
 	paused = TRUE;
 	if (msec > 65000L)
 		msec = 65000L;
-	pauseTimer = SetTimer( mswHWnd, PAUSE_TIMER, (UINT)msec, NULL );
+	pauseTimer = SetTimer( mswHWnd, PAUSE_TIMER, (UINT)msec, TimerProc );
 	if (pauseTimer == 0)
 		mswFail("wPause: No timers");
 	else
@@ -2636,10 +2655,7 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 		break;
 
 	case WM_TIMER:
-		if (wParam == PAUSE_TIMER) {				/* WIN32??? */
-			paused = FALSE;
-			KillTimer( hWnd, pauseTimer );
-		} else if (wParam == ALARM_TIMER) {
+		if (wParam == ALARM_TIMER) {
 			KillTimer( mswHWnd, alarmTimer );
 			alarmFunc();
 		} else if (wParam == TRIGGER_TIMER) {

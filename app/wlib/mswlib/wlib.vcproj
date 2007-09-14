@@ -565,6 +565,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\mswsplash.c"
+				>
+			</File>
+			<File
 				RelativePath="Mswtext.c"
 				>
 				<FileConfiguration
@@ -595,15 +599,19 @@
 				RelativePath="Wcolors.h"
 				>
 			</File>
-			<File
-				RelativePath="..\include\wlib.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
+			<File
+				RelativePath="..\include\wcolors.h"
+				>
+			</File>
+			<File
+				RelativePath="..\include\wlib.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

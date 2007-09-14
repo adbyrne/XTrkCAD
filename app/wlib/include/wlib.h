@@ -1,7 +1,7 @@
 /** \file wlib.h
  * Commaon definitions and declarations for the wlib library
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.8 2007-08-31 15:18:46 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.9 2007-09-14 16:17:23 m_fischer Exp $
  */
 
 #ifndef WIN_H
@@ -158,6 +158,7 @@ void wWinDoCancel(		wWin_p );
 void wWinBlockEnable(		wBool_t );
 
 int wCreateSplash( char *appName, char *appVer );
+int wSetSplashInfo( char *msg );
 void wDestroySplash( void );
 
 /*------------------------------------------------------------------------------
