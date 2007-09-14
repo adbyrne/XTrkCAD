@@ -208,6 +208,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\lib\logo.bmp $(OutDir)"
 			/>
 		</Configuration>
 	</Configurations>

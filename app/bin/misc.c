@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.14 2007-06-15 16:02:51 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.15 2007-09-14 16:19:11 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2616,11 +2616,7 @@ LOG1( log_init, ( "create main window\n" ) )
 LOG1( log_init, ( "fileInit\n" ) )
 	FileInit();
 
-	CreateAboutW();
-/*	wWinShow( mainW, TRUE );
-	wFlush(); */
-	wWinShow( aboutW, TRUE );
-	wFlush();
+	wCreateSplash( sProdName, sVersion );
 
 	if (!initialFile) {
 		WDOUBLE_T tmp;
@@ -2637,16 +2633,13 @@ LOG1( log_init, ( "set roomsize\n" ) )
 	 */
 LOG1( log_init, ( "initInfoBar\n" ) )
 	InitInfoBar();
-/*	wWinShow( mainW, TRUE ); */
-	InfoMessage( "Misc2 Init..." );
-/*	wFlush(); */
+	wSetSplashInfo( "Misc2 Init..." );
 LOG1( log_init, ( "misc2Init\n" ) )
 	Misc2Init();
 
 	RotateDialogInit();
 
-	InfoMessage( "Initializing commands" );
-/*	wFlush(); */
+	wSetSplashInfo( "Initializing commands" );
 LOG1( log_init, ( "paramInit\n" ) )
 	ParamInit();
 LOG1( log_init, ( "initTrkTrack\n" ) )
@@ -2655,8 +2648,7 @@ LOG1( log_init, ( "initTrkTrack\n" ) )
 	/*
 	 * MENUS
 	 */
-	InfoMessage( "Initializing menus" );
-/*	wFlush(); */
+	wSetSplashInfo( "Initializing menus" );
 LOG1( log_init, ( "createMenus\n" ) )
 	CreateMenus();
 
@@ -2693,8 +2685,7 @@ LOG1( log_init, ( "drawInit\n" ) )
 	DrawInit( initialZoom );
 
 	MacroInit();
-	InfoMessage( "Reading parameter files" );
-/*	wFlush(); */
+	wSetSplashInfo( "Reading parameter files" );
 LOG1( log_init, ( "paramFileInit\n" ) )
 	if (!ParamFileInit())
 		return NULL;
@@ -2724,19 +2715,17 @@ LOG1( log_init, ( "Reset\n" ) )
 LOG1( log_init, ( "the end\n" ) )
 	EnableCommands();
 LOG1( log_init, ( "Initialization complete\n" ) )
-	InfoMessage( "Initialization complete" );
-/*	wFlush(); */
+	wSetSplashInfo( "Initialization complete" );
 	RegisterChangeNotification( ToolbarChange );
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
 
 	wWinShow( mainW, TRUE );
-	wFlush();
-	wWinShow( aboutW, FALSE );
+	wDestroySplash();    
 
-	ParamRegister( &tipPG );
-	if (showTipAtStart)
-		ShowTip();
-
+	ParamRegister( &tipPG );     
+	if (showTipAtStart)  
+		ShowTip(); 
+ 
 	/* check for existing checkpoint file */
 	if (ExistsCheckpoint())
 		OfferCheckpoint();
