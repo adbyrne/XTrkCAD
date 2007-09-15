@@ -1,3 +1,7 @@
+Sep 15, 2007 
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtksplash.c: added splash window for program startup
+
 Jul 24, 2007 
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		gtkdraw.c: added support for wheel mouse    
