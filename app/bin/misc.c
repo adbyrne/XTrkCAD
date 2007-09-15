@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.15 2007-09-14 16:19:11 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.16 2007-09-15 14:26:02 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1875,6 +1875,51 @@ static void ShowTip( void )
 	wShow( tipW );
 }
 
+/*--------------------------------------------------------------------*/
+
+static drawCmd_t aboutD = {
+		NULL,
+		&screenDrawFuncs,
+		0,
+		1.0,
+		0.0,
+		{0.0,0.0}, {0.0,0.0},
+		Pix2CoOrd, CoOrd2Pix };
+
+static paramDrawData_t aboutDrawData = { ICON_WIDTH, ICON_HEIGHT, (wDrawRedrawCallBack_p)RedrawAbout, NULL, &aboutD };
+#define COPYRIGHT "Copyright (c) 2005 Sillub Technology"
+static paramData_t aboutPLs[] = {
+#define I_ABOUTDRAW				(0)
+	{   PD_DRAW, NULL, "about", PDO_NOPSHUPD, &aboutDrawData, NULL, 0 },
+#define I_ABOUTVERSION			(1)
+	{   PD_MESSAGE, NULL, NULL, PDO_DLGNEWCOLUMN, NULL, NULL, 0 },
+#define I_ABOUTCOPYRIGHT		(2)
+	{   PD_MESSAGE, COPYRIGHT, NULL, 0, NULL, NULL, 0 },
+#define I_ABOUTREGTO			(3)
+	{   PD_MESSAGE, NULL, NULL, PDO_DLGUNDERCMDBUTT, (void*)250, NULL, 0 } };
+static paramGroup_t aboutPG = { "about", 0, aboutPLs, sizeof aboutPLs/sizeof aboutPLs[0] };
+
+/** 
+ *	Create and show the About window.
+ */
+
+static void CreateAboutW( void *ptr )
+{
+	wPos_t w;
+	char * copyright = COPYRIGHT;
+	
+	if( !aboutW ) {
+		w = wLabelWidth( copyright );
+		aboutPLs[I_ABOUTVERSION].winData = (void*)w;
+		aboutPLs[I_ABOUTCOPYRIGHT].winData = (void*)w;
+		ParamRegister( &aboutPG );
+		aboutW = ParamCreateDialog( &aboutPG, MakeWindowTitle("About"), "Ok", (paramActionOkProc)wHide, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
+		RedrawAbout( aboutD.d, NULL, ICON_WIDTH, ICON_HEIGHT );
+		ParamLoadMessage( &aboutPG, I_ABOUTVERSION, sAboutProd );
+	} 
+		
+	wShow( aboutW );
+}	
 
 /*--------------------------------------------------------------------*/
 
@@ -1920,15 +1965,15 @@ EXPORT void AddRotateMenu(
 		wMenu_p m,
 		rotateDialogCallBack_t func )
 {
-	wMenuPushCreate( m, "", "180° ", 0, func, (void*)180 );
-	wMenuPushCreate( m, "", "90°  CW", 0, func, (void*)(long)(90) );
-	wMenuPushCreate( m, "", "45°  CW", 0, func, (void*)(long)(45) );
-	wMenuPushCreate( m, "", "30°  CW", 0, func, (void*)(long)(30) );
-	wMenuPushCreate( m, "", "15°  CW", 0, func, (void*)(long)(15) );
-	wMenuPushCreate( m, "", "15°  CCW", 0, func, (void*)(long)(360-15) );
-	wMenuPushCreate( m, "", "30°  CCW", 0, func, (void*)(long)(360-30) );
-	wMenuPushCreate( m, "", "45°  CCW", 0, func, (void*)(long)(360-45) );
-	wMenuPushCreate( m, "", "90°  CCW", 0, func, (void*)(long)(360-90) );
+	wMenuPushCreate( m, "", "180 ", 0, func, (void*)180 );
+	wMenuPushCreate( m, "", "90  CW", 0, func, (void*)(long)(90) );
+	wMenuPushCreate( m, "", "45  CW", 0, func, (void*)(long)(45) );
+	wMenuPushCreate( m, "", "30  CW", 0, func, (void*)(long)(30) );
+	wMenuPushCreate( m, "", "15  CW", 0, func, (void*)(long)(15) );
+	wMenuPushCreate( m, "", "15  CCW", 0, func, (void*)(long)(360-15) );
+	wMenuPushCreate( m, "", "30  CCW", 0, func, (void*)(long)(360-30) );
+	wMenuPushCreate( m, "", "45  CCW", 0, func, (void*)(long)(360-45) );
+	wMenuPushCreate( m, "", "90  CCW", 0, func, (void*)(long)(360-90) );
 	wMenuPushCreate( m, "", "Enter Angle ...", 0, (wMenuCallBack_p)StartRotateDialog, (void*)func );
 }
 
@@ -2339,7 +2384,7 @@ static void CreateMenus( void )
 	wMenuPushCreate( helpM, "cmdTip", "Tip of the Day...", 0, (wMenuCallBack_p)ShowTip, NULL );
 	demoM = wMenuMenuCreate( helpM, "cmdDemo", "&Demos" );
 	wMenuSeparatorCreate( helpM );
-	wMenuPushCreate( helpM, "about", "About", 0, (wMenuCallBack_p)wShow, aboutW );
+	wMenuPushCreate( helpM, "about", "About", 0, (wMenuCallBack_p)CreateAboutW, NULL );
 
 	/*
 	 * MANAGE MENU
@@ -2428,42 +2473,6 @@ EXPORT void InitCmdExport( void )
 {
 	AddToolbarButton( "cmdExport", wIconCreatePixMap(export_xpm), IC_SELECTED|IC_ACCLKEY, (addButtonCallBack_t)DoExport, NULL );
 	AddToolbarButton( "cmdImport", wIconCreatePixMap(import_xpm), IC_ACCLKEY, (addButtonCallBack_t)DoImport, NULL );
-}
-
-
-static drawCmd_t aboutD = {
-		NULL,
-		&screenDrawFuncs,
-		0,
-		1.0,
-		0.0,
-		{0.0,0.0}, {0.0,0.0},
-		Pix2CoOrd, CoOrd2Pix };
-
-static paramDrawData_t aboutDrawData = { ICON_WIDTH, ICON_HEIGHT, (wDrawRedrawCallBack_p)RedrawAbout, NULL, &aboutD };
-#define COPYRIGHT "Copyright (c) 2005 Sillub Technology"
-static paramData_t aboutPLs[] = {
-#define I_ABOUTDRAW				(0)
-	{   PD_DRAW, NULL, "about", PDO_NOPSHUPD, &aboutDrawData, NULL, 0 },
-#define I_ABOUTVERSION			(1)
-	{   PD_MESSAGE, NULL, NULL, PDO_DLGNEWCOLUMN, NULL, NULL, 0 },
-#define I_ABOUTCOPYRIGHT		(2)
-	{   PD_MESSAGE, COPYRIGHT, NULL, 0, NULL, NULL, 0 },
-#define I_ABOUTREGTO			(3)
-	{   PD_MESSAGE, NULL, NULL, PDO_DLGUNDERCMDBUTT, (void*)250, NULL, 0 } };
-static paramGroup_t aboutPG = { "about", 0, aboutPLs, sizeof aboutPLs/sizeof aboutPLs[0] };
-
-static void CreateAboutW( void )
-{
-	wPos_t w;
-	char * copyright = COPYRIGHT;
-	w = wLabelWidth( copyright );
-	aboutPLs[I_ABOUTVERSION].winData = (void*)w;
-	aboutPLs[I_ABOUTCOPYRIGHT].winData = (void*)w;
-	ParamRegister( &aboutPG );
-	aboutW = ParamCreateDialog( &aboutPG, MakeWindowTitle("About"), "Ok", (paramActionOkProc)wHide, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
-	RedrawAbout( aboutD.d, NULL, ICON_WIDTH, ICON_HEIGHT );
-	ParamLoadMessage( &aboutPG, I_ABOUTVERSION, sAboutProd );
 }
 
 /* Give user the option to continue work after crash. This function gives the user 
