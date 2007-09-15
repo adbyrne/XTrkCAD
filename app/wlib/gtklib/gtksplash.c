@@ -1,7 +1,7 @@
 /** \file gtksplash.c
  * Handling of the Splash Window functions
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksplash.c,v 1.1 2007-08-31 15:18:45 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksplash.c,v 1.2 2007-09-15 14:22:55 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -34,7 +34,10 @@
 
 #include "gtkint.h"
 
+#define LOGOFILENAME "logo.bmp"
+
 static GtkWidget *window;	/** splash window handle */
+static GtkWidget *message;	/** window handle for progress message */
 
 /**
  * Create the splash window shown during startup. The function loads the logo 
@@ -52,6 +55,7 @@ wCreateSplash( char *appName, char *appVer )
    GtkWidget *image;
    GtkWidget *label;
 	char *temp;
+	char logoPath[BUFSIZ];
 
 	/* create the basic window */
    window = gtk_window_new (GTK_WINDOW_POPUP);
@@ -67,7 +71,8 @@ wCreateSplash( char *appName, char *appVer )
    gtk_container_add (GTK_CONTAINER (window), vbox);
 
 	/* add the logo image to the top of the splash window */
-   image = gtk_image_new_from_file ("logo.gif");
+	sprintf( logoPath, "%s/" LOGOFILENAME, wGetAppLibDir());
+	image = gtk_image_new_from_file ( logoPath );
    gtk_widget_show (image);
    gtk_box_pack_start (GTK_BOX (vbox), image, TRUE, TRUE, 0);
    gtk_misc_set_alignment (GTK_MISC (image), 0, 0);
@@ -78,9 +83,7 @@ wCreateSplash( char *appName, char *appVer )
 	if( !temp )
 		return( FALSE );
 		
-	strcpy( temp, appName );
-	strcat( temp, " " );
-	strcat( temp, appVer );
+	sprintf( temp, "%s %s", appName, appVer );	
 	
    label = gtk_label_new ( temp );
    gtk_widget_show (label);
@@ -88,7 +91,7 @@ wCreateSplash( char *appName, char *appVer )
 /*   GTK_WIDGET_SET_FLAGS (label, GTK_CAN_FOCUS); */
    gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_FILL);
    gtk_label_set_selectable (GTK_LABEL (label), FALSE);
-   gtk_misc_set_padding (GTK_MISC (label), 5, 5);
+   gtk_misc_set_padding (GTK_MISC (label), 6, 2);
 
 	free( temp );
 
@@ -96,12 +99,30 @@ wCreateSplash( char *appName, char *appVer )
    gtk_widget_show (label);
    gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
    gtk_label_set_line_wrap (GTK_LABEL (label), FALSE);
-   gtk_misc_set_padding (GTK_MISC (label), 5, 5);
+   gtk_misc_set_padding (GTK_MISC (label), 6, 2);
    gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_START);
+	message = label;	
 
 	gtk_widget_show( window );
 	
    return( TRUE );
+}
+
+/**
+ * Update the progress message inside the splash window
+ * msg	text message to display
+ * return nonzero if ok
+ */ 
+
+int 
+wSetSplashInfo( char *msg )
+{
+	if( msg ) {
+		gtk_label_set_text( (GtkLabel *)message, msg );
+		wFlush();
+		return TRUE;
+	}
+	return FALSE;
 }
 
 /**
