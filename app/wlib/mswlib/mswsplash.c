@@ -246,7 +246,9 @@ int
 wSetSplashInfo( char *msg )
 {
 	if( msg ) {
-		return( SetWindowText( GetDlgItem( hSplash, IDMESSAGE ), msg ));
+		SetWindowText( GetDlgItem( hSplash, IDMESSAGE ), msg );
+		wFlush();
+		return TRUE;
 	}
 	wFlush();
 	return FALSE;
