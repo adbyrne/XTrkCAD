@@ -324,6 +324,7 @@ text_fontsize=cmdText
 tip_text=cmdTip
 tip_showatstart=cmdTip
 tip_next=cmdTip
+tip_prev=cmdTip
 tip_ok=cmdTip
 train_newcar_index=cmdTrain
 train_list=cmdTrain

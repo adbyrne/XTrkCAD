@@ -806,6 +806,8 @@ Useful information about the program
 Show Tip of the Day every time the program starts
 :tip-next
 Show the next Tip of the Day
+:tip-prev
+Show the previous Tip of the Day
 :toolbarM
 Controls which Command Buttons are displayed
 :train-newcar-index

@@ -1,7 +1,7 @@
 /** \file smalldlg.c
  * Several simple and smaller dialogs. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.1 2007-09-23 16:13:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.2 2007-09-23 16:54:31 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -36,8 +36,6 @@
 #ifdef WINDOWS
 #include <io.h>
 #include <windows.h>
-/* #define R_OK (02) */
-/* #define access _access */
 #if _MSC_VER >1300
 	#define strdup _strdup
 #endif
@@ -95,6 +93,9 @@ static void CreateTipW( void )
 	if (tipF == NULL) {
 		DYNARR_APPEND( char *, tips_da, 1 );
 		tips(0) = "No tips are available";
+/*	TODO: enable buttons only if tips are available
+		wControlActive( prev, FALSE );
+		wControlActive( next, FALSE ); */
 	} else {
 		/* read all the tips from the file */
 		while (fgets( buff, sizeof buff, tipF )) {
@@ -170,7 +171,7 @@ void ShowTip( long flags )
 			else
 				tipNum--;	
 		} else {
-			if (tipNum == tips_da.cnt - 1)
+			if (tipNum >= tips_da.cnt - 1)
 				tipNum = 0;
 			else
 				tipNum++;	

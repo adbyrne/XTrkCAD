@@ -208,7 +208,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\lib\logo.bmp $(OutDir)"
+				CommandLine="copy ..\lib\logo.bmp $(OutDir)&#x0D;&#x0A;copy ..\doc\xtrkcad.chm $(OutDir)"
 			/>
 		</Configuration>
 	</Configurations>
@@ -1493,6 +1493,10 @@
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\smalldlg.c"
+				>
 			</File>
 			<File
 				RelativePath="tcurve.c"
