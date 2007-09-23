@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.16 2007-09-15 14:26:02 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.17 2007-09-23 16:13:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -51,6 +51,7 @@
 #include "misc.h"
 #include "cjoin.h"
 #include "compound.h"
+#include "smalldlg.h"
 
 extern wBalloonHelp_t balloonHelp[];
 #ifdef DEBUG
@@ -1799,84 +1800,6 @@ static void ShowAddElevations( void )
 
 /*--------------------------------------------------------------------*/
 
-static wWin_p tipW;
-static long showTipAtStart = 1;
-static void ShowTip(void);
-static dynArr_t tips_da;
-#define tips(N) DYNARR_N( char *, tips_da, N )
-
-static char * tipLabels[] = { "Show Tip at Start", NULL };
-static paramTextData_t tipTextData = { 40, 10 };
-static paramData_t tipPLs[] = {
-#define I_TIPTEXT		(0)
-#define tipT			((wText_p)tipPLs[I_TIPTEXT].control)
-	{   PD_TEXT, NULL, "text", 0, &tipTextData, NULL, BO_READONLY|BT_CHARUNITS },
-	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER },
-	{   PD_BUTTON, ShowTip, "next", 0, NULL, "Next" } };
-static paramGroup_t tipPG = { "tip", 0, tipPLs, sizeof tipPLs/sizeof tipPLs[0] };
-
-static void CreateTipW( void )
-{
-	FILE * tipF;
-	char buff[4096];
-	char * cp;
-
-	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle("Tip of the Day"), "Ok", (paramActionOkProc)wHide, NULL, FALSE, NULL, 0, NULL );
-
-	sprintf( buff, "%s%s%s.tip", libDir, FILE_SEP_CHAR, sProdNameLower );
-	tipF = fopen( buff, "r" );
-	if (tipF == NULL) {
-		DYNARR_APPEND( char *, tips_da, 1 );
-		tips(0) = "No tips are available";
-	} else {
-		while (fgets( buff, sizeof buff, tipF )) {
-			if (buff[0] == '#')
-				continue;
-			cp = buff+strlen(buff)-1;
-			if (*cp=='\n') cp--;
-			if (*cp=='\r') cp--;
-			if (cp < buff)
-				continue;
-			cp[1] = 0;
-			while (*cp=='\\') {
-				*cp++ = '\n';
-				if (!fgets( cp, (sizeof buff) - (cp-buff), tipF )) {
-					return;
-				}
-				if (*cp=='#')
-					continue;
-				cp += strlen(cp)-1;
-				if (*cp=='\n') cp--;
-				if (*cp=='\r') cp--;
-				cp[1] = 0;
-			}
-			DYNARR_APPEND( char *, tips_da, 10 );
-			tips(tips_da.cnt-1) = strdup( buff );
-		}
-	}
-}
-
-
-static void ShowTip( void )
-{
-	long tipNum;
-	
-	if (tipW == NULL) {
-		CreateTipW();
-	}
-	ParamLoadControls( &tipPG );
-	wTextClear( tipT );
-	wPrefGetInteger( "misc", "tip-number", &tipNum, 0 );
-	if (tipNum >= tips_da.cnt)
-		tipNum = 0;
-	wTextAppend( tipT, tips(tipNum) );
-	tipNum++;
-	wPrefSetInteger( "misc", "tip-number", tipNum );
-	wShow( tipW );
-}
-
-/*--------------------------------------------------------------------*/
-
 static drawCmd_t aboutD = {
 		NULL,
 		&screenDrawFuncs,
@@ -1887,7 +1810,7 @@ static drawCmd_t aboutD = {
 		Pix2CoOrd, CoOrd2Pix };
 
 static paramDrawData_t aboutDrawData = { ICON_WIDTH, ICON_HEIGHT, (wDrawRedrawCallBack_p)RedrawAbout, NULL, &aboutD };
-#define COPYRIGHT "Copyright (c) 2005 Sillub Technology"
+#define COPYRIGHT "Copyright (c) 2007 Sillub Technology and XTrkCad Team"
 static paramData_t aboutPLs[] = {
 #define I_ABOUTDRAW				(0)
 	{   PD_DRAW, NULL, "about", PDO_NOPSHUPD, &aboutDrawData, NULL, 0 },
@@ -2381,7 +2304,7 @@ static void CreateMenus( void )
 	messageList_ml = wMenuListCreate( messageListM, "messageListM", 10, ShowMessageHelp );
 	wMenuListAdd( messageList_ml, 0, MESSAGE_LIST_EMPTY, NULL );
 	wMenuSeparatorCreate( helpM );
-	wMenuPushCreate( helpM, "cmdTip", "Tip of the Day...", 0, (wMenuCallBack_p)ShowTip, NULL );
+	wMenuPushCreate( helpM, "cmdTip", "Tip of the Day...", 0, (wMenuCallBack_p)ShowTip, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP));
 	demoM = wMenuMenuCreate( helpM, "cmdDemo", "&Demos" );
 	wMenuSeparatorCreate( helpM );
 	wMenuPushCreate( helpM, "about", "About", 0, (wMenuCallBack_p)CreateAboutW, NULL );
@@ -2589,7 +2512,7 @@ LOG1( log_init, ( "create main window\n" ) )
 	sprintf( message, "Unnamed Trackplan - %s(%s)", sProdName, sVersion );
 	wSetBalloonHelp( balloonHelp );
 	mainW = wWinMainCreate( sProdNameLower, 600, 350, "xtrkcadW", message, "main",
-				F_RESIZE|F_MENUBAR|F_NOTAB|F_RECALLPOS,
+				F_RESIZE|F_MENUBAR|F_NOTAB|F_RECALLPOS|F_HIDE,
 				MainProc, NULL );
 	if ( mainW == NULL )
 		return NULL;
@@ -2729,11 +2652,14 @@ LOG1( log_init, ( "Initialization complete\n" ) )
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
 
 	wWinShow( mainW, TRUE );
+	mapVisible = TRUE;
+	wShow( mapW ); 
 	wDestroySplash();    
 
-	ParamRegister( &tipPG );     
-	if (showTipAtStart)  
-		ShowTip(); 
+	/* this has to be called before ShowTip() */
+	InitSmallDlg();
+
+	ShowTip(SHOWTIP_NEXTTIP); 
  
 	/* check for existing checkpoint file */
 	if (ExistsCheckpoint())

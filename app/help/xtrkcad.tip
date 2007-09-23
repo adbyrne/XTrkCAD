@@ -187,12 +187,12 @@ This can reversed by using the Right Click toggle button on the Command Options 
 The Align item on the Rotate command options menu will let you Align selected objects with any unselected object.  \
 The selected objects are rotated so the first point is parallel to the second point you selected.
 
-Print To Bitmap allows you to print the track Centerline.  \
+Print To Bitmap allows you to print the track center line.  \
 This is useful if you later print the bitmap full size as a template when laying track.
 
 You can export the selected tracks to a DXF file which can be read by most CAD programs.
 
-Lengths and distances cn be displayed in a variety of units and formats such as 1' 10 3/4", 1ft 10.75in or 22.750.  In Metric mode, distances can be displayed as millimeters, centimeters or meters.  See the Length Format item on the Preferences dialog.
+Lengths and distances can be displayed in a variety of units and formats such as 1' 10 3/4", 1ft 10.75in or 22.750.  In Metric mode, distances can be displayed as millimeters, centimeters or meters.  See the Length Format item on the Preferences dialog.
 
 Tracks that are too steep or curve too tightly are drawn in the Expection color (Purple by default).  \
 This helps to identify potential problem areas.  \
@@ -210,7 +210,7 @@ Dimension lines show the distance between two points.
 A variety of Benchwork (rectangular, L-girder and T-girder) can be drawn.  \
 Use the Below command to move the Benchwork below the track for proper display.
 
-The Turnout Designer dialogs allow you to specify the width of any attached roadber.  \
+The Turnout Designer dialogs allow you to specify the width of any attached roadbed.  \
 As well, the color and thickness of the lines used to represent the roadbed can be specified.
 
 The Color dialog (on the Options menu) is used to change the color of different objects on the display.  \

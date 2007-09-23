@@ -530,6 +530,7 @@ text-fontsize	Controls the size of the entered text	cmdText
 tip-text	Useful information about the program	cmdTip
 tip-showatstart	Show Tip of the Day every time the program starts	cmdTip
 tip-next	Show the next Tip of the Day	cmdTip
+tip-prev	Show the previous Tip of the Day	cmdTip
 tip-ok		cmdTip
 #
 toolbarM	Controls which Command Buttons are displayed

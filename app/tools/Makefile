@@ -34,10 +34,10 @@ RM = /usr/local/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /usr/local/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/martin/xtc/xtrkcad/4.0.0/tools
+CMAKE_SOURCE_DIR = /home/martin/xtc/xtrkcad/app/tools
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/martin/xtc/xtrkcad/4.0.0/tools
+CMAKE_BINARY_DIR = /home/martin/xtc/xtrkcad/app/tools
 
 # Include the progress variables for this target.
 include CMakeFiles/progress.make
@@ -63,9 +63,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/xtc/xtrkcad/4.0.0/tools/CMakeFiles $(CMAKE_ALL_PROGRESS)
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/xtc/xtrkcad/app/tools/CMakeFiles $(CMAKE_ALL_PROGRESS)
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/xtc/xtrkcad/4.0.0/tools/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/martin/xtc/xtrkcad/app/tools/CMakeFiles 0
 
 # The main clean target
 clean:

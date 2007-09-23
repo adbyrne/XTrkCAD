@@ -1,5 +1,5 @@
 
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.3 2007-07-19 18:13:58 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.4 2007-09-23 16:13:53 m_fischer Exp $
 #
 
 CC = gcc
@@ -65,6 +65,7 @@ MISCOBJS = \
 	misc.o \
 	misc2.o \
 	param.o \
+	smalldlg.o \
 	shrtpath.o \
 	tcurve.o \
 	tease.o \
@@ -259,6 +260,7 @@ LIBOBJS = \
 	$(LIB)(misc.o) \
 	$(LIB)(misc2.o) \
 	$(LIB)(param.o) \
+	$(LIB)(smalldlg.o) \
 	$(LIB)(shrtpath.o) \
 	$(LIB)(tcurve.o) \
 	$(LIB)(tease.o) \
@@ -477,11 +479,12 @@ $(LIB)(fileio.o): fileio.c track.h version.h common.h utility.h draw.h misc.h co
 $(LIB)(lprintf.o): lprintf.c track.h
 $(LIB)(macro.o): macro.c track.h version.h common.h utility.h draw.h misc.h compound.h \
 	arrow0.bmp arrow3.bmp arrows.bmp flash.bmp
-$(LIB)(misc.o): misc.c track.h common.h utility.h draw.h misc.h cjoin.h compound.h \
+$(LIB)(misc.o): misc.c smalldlg.h track.h common.h utility.h draw.h misc.h cjoin.h compound.h \
 	openbutt.xpm zoomin.xpm zoom.xpm zoomout.xpm undo.xpm redo.xpm \
 	partlist.xpm export.xpm import.xpm
 $(LIB)(misc2.o): misc2.c track.h common.h utility.h draw.h misc.h cjoin.h compound.h
 $(LIB)(param.o): param.c track.h common.h utility.h misc.h compound.h square10.bmp
+$(LIB)(smalldlg.o): smalldlg.c smalldlg.h common.h draw.h misc.h param.h custom.h param.h
 $(LIB)(shrtpath.o): shrtpath.c track.h shrtpath.h
 $(LIB)(tcurve.o): tcurve.c track.h ccurve.h cstraigh.h cjoin.h
 $(LIB)(tease.o): tease.c track.h ccurve.h cstraigh.h cjoin.h

@@ -1,7 +1,7 @@
 /** \file draw.c
  * Basic drawing functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.8 2007-07-22 17:02:43 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.9 2007-09-23 16:13:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2379,8 +2379,6 @@ EXPORT void DrawInit( int initialZoom )
 	InfoScale();
 	SetInfoBar();
 	InfoPos( zero );
-	mapVisible = TRUE;
-	wShow( mapW );
 	RegisterChangeNotification( DrawChange );
 #ifdef LATER
 	wAttachAccelKey( wAccelKey_Pgup, 0, (wAccelKeyCallBack_p)doZoomUp, NULL );

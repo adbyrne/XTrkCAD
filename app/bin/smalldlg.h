@@ -1,7 +1,7 @@
-/** \file filename.c
- * This file shows the conventions used for inline documentation.
+/** \file smalldlg.h
+ * Definitions and declarations for the small dialog box functions. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/HACKING,v 1.2 2007-09-23 16:13:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.h,v 1.1 2007-09-23 16:13:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,14 +22,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-int global; 	/**< this is a global variable */
+#ifndef SMALLDLG_H
+#define SMALLDLG_H
 
-/**
- * Brief description of function. And some more words about 
- * this function bla bla bla
- *
- * \param IN  varname1 this is a variable
- * \param OUT varname2 and another one that is modified
- * \return    describe the return value
- */
+#define SHOWTIP_NEXTTIP (0L)
+#define SHOWTIP_PREVTIP (1L)
+#define SHOWTIP_FORCESHOW (2L)
 
+void InitSmallDlg( void );
+void ShowTip( long flags );
+
+#endif

@@ -1,7 +1,7 @@
 /** \file wlib.h
  * Commaon definitions and declarations for the wlib library
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.9 2007-09-14 16:17:23 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.10 2007-09-23 16:13:53 m_fischer Exp $
  */
 
 #ifndef WIN_H
@@ -135,6 +135,7 @@ typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 #define F_RECALLSIZE	(1L<<10)
 #define F_TOP		(1L<<11)
 #define F_CENTER	(1L<<12)
+#define F_HIDE		(1L<<12)
 
 wWin_p wWinMainCreate(	        const char *, wPos_t, wPos_t, const char *, const char *, const char *,
 				long, wWinCallBack_p, void * );
