@@ -14,12 +14,20 @@
  *****************************************************************************
  */
 
+/**
+ * factors by which fonts are resized if nonstandard text height is used
+ */
+
+#define SCALE_LARGE 1.6
+#define SCALE_SMALL 0.8
+
 #ifdef CONTROL3D
 static int messageHeight = 18;
 #endif
 
 struct wMessage_t {
 		WOBJ_COMMON
+		long flags;
 		const char * message;
 		};
 
@@ -30,33 +38,57 @@ static void repaintMessage(
 {
 	wMessage_p bm = (wMessage_p)b;
 	HDC hDc;
-#ifndef WIN32
-	HBRUSH oldBrush, newBrush;
-#endif
 	RECT rect;
 	HFONT hFont;
+	LOGFONT msgFont;
+	double scale = 1.0;
 
 	hDc = GetDC( hWnd );
+
 	if ( !mswThickFont )
 		hFont = SelectObject( hDc, mswLabelFont );
-	rect.bottom = bm->y+bm->h;
-	rect.right = bm->x+bm->w;
+
+	switch( wMessageSetFont( ((wMessage_p)b)->flags )) 
+	{
+		case BM_LARGE:
+			scale = SCALE_LARGE;
+			break;
+		case BM_SMALL:
+			scale = SCALE_SMALL;
+			break;
+	}
+
+	/* is a non-standard text height required? */	 
+	if( scale != 1.0 )
+	{
+		/* if yes, get information about the standard font used */
+		GetObject( GetStockObject( DEFAULT_GUI_FONT ), sizeof( LOGFONT ), &msgFont );
+
+		/* change the height */
+		msgFont.lfHeight = (long)((double)msgFont.lfHeight * scale); 
+
+		/* create and activate the new font */
+		hFont = SelectObject( hDc, CreateFontIndirect( &msgFont ) );
+	} else {
+		if ( !mswThickFont )
+			hFont = SelectObject( hDc, mswLabelFont );
+	}
+
+	rect.bottom = (long)(bm->y+( scale * bm->h ));
+	rect.right = (long)(bm->x+( scale * bm->w ));
 	rect.top = bm->y;
 	rect.left = bm->x;
-#ifdef WIN32
+
 	SetBkColor( hDc, GetSysColor( COLOR_BTNFACE ) );
 	ExtTextOut( hDc, bm->x, bm->y, ETO_CLIPPED|ETO_OPAQUE, &rect, bm->message, strlen( bm->message ), NULL );
-#else
-	newBrush = CreateSolidBrush( GetSysColor( COLOR_BTNFACE ) );
-	oldBrush = SelectObject( hDc, newBrush );
-	FillRect( hDc, &rect, newBrush );
-	DeleteObject( SelectObject( hDc, oldBrush ) );
-	SetBkColor( hDc, GetSysColor( COLOR_BTNFACE ) );
-	if (bm->message)
-		TextOut( hDc, bm->x, bm->y, bm->message, strlen( bm->message ) );
-#endif
-	if ( !mswThickFont )
-		SelectObject( hDc, hFont );
+
+	if( scale != 1.0 )
+		/* in case we did create a new font earlier, delete it now */
+		DeleteObject( SelectObject( hDc, GetStockObject( DEFAULT_GUI_FONT )));
+	else 
+		if ( !mswThickFont )
+			SelectObject( hDc, hFont );
+
 	ReleaseDC( hWnd, hDc );
 }
 #endif
@@ -90,12 +122,19 @@ void wMessageSetWidth(
 }
 
 
-wPos_t wMessageGetHeight( void )
+wPos_t wMessageGetHeight( long flags )
 {
 #ifdef CONTROL3D
 	return messageHeight;
 #else
-	return mswEditHeight - 4;
+	double scale = 1.0;
+
+	if( flags & BM_LARGE )
+		scale = SCALE_LARGE;
+	if( flags & BM_SMALL )
+		scale = SCALE_SMALL;
+
+	return((wPos_t)((mswEditHeight - 4) * scale ));
 #endif
 }
 
@@ -115,16 +154,18 @@ static callBacks_t messageCallBacks = {
 #endif
 
 
-wMessage_p wMessageCreate(
+wMessage_p wMessageCreateEx(
 		wWin_p	parent,
 		POS_T	x,
 		POS_T	y,
 		const char	* helpStr,
 		POS_T	width,
-		const char	*message )
+		const char	*message,
+		long	flags )
 {
 	wMessage_p b;
 	int index;
+	
 #ifdef CONTROL3D
 	RECT rect;
 #endif
@@ -133,6 +174,7 @@ wMessage_p wMessageCreate(
 	mswComputePos( (wControl_p)b, x, y );
 	b->option |= BO_READONLY;
 	b->message = mswStrdup( message );
+	b->flags = flags;
 
 #ifdef CONTROL3D
 	if ( width <= 0	 && strlen(b->message) > 0 ) {
@@ -158,7 +200,7 @@ wMessage_p wMessageCreate(
 	b->h = rect.bottom - rect.top;
 #else
 	b->w = width;
-	b->h = mswEditHeight-4;
+	b->h = wMessageGetHeight( flags ) + 1;
 
 	repaintMessage( ((wControl_p)parent)->hWnd, (wControl_p)b );
 #endif

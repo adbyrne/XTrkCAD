@@ -1,7 +1,7 @@
 /** \file draw.c
  * Basic drawing functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.9 2007-09-23 16:13:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.10 2007-09-28 16:59:13 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -825,7 +825,7 @@ EXPORT void InitInfoBar( void )
 {
 	wPos_t width, height, y, yb, ym, x, boxH;
 	wWinGetSize( mainW, &width, &height );
-	infoHeight = 3 + wMessageGetHeight() + 3;
+	infoHeight = 3 + wMessageGetHeight( 0L ) + 3;
 	y = height - infoHeight;
 	y -= 19; /* Kludge for MSW */
 		infoD.pos_w = GetInfoPosWidth() + 2;
