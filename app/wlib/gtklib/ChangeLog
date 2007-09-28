@@ -1,3 +1,10 @@
+Sep 28, 2007 
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtksimple.c: wMessageCreate has been extended to 
+		wMessageCreateEx. New function allows addung flags. Setting 
+		a large or a small font are first uses. Added a compatibility
+		macro wMessageCreate for older code. 
+
 Sep 15, 2007 
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		gtksplash.c: added splash window for program startup

@@ -1,7 +1,7 @@
 /** \file param.c
  * Handle all the dialog box creation stuff.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.3 2007-08-04 16:37:23 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.4 2007-09-28 11:17:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2147,7 +2147,7 @@ static void ParamCreateControl(
 				w = wLabelWidth( pd->valueP );
 			else
 				w = 150;
-			pd->control = (wControl_p)wMessageCreate( win, xx, yy, pd->winLabel, w, pd->valueP?pd->valueP:" " );
+			pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, pd->winLabel, w, pd->valueP?pd->valueP:" ", pd->winOption );
 			break;
 		case PD_BUTTON:
 			pd->control = (wControl_p)wButtonCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption, 0, ParamButtonPush, pd );
@@ -2565,7 +2565,7 @@ EXPORT wWin_p ParamCreateDialog(
 	if ( needHelpButton ) {
 		sprintf( helpStr, "cmd%s", group->nameStr );
 		helpStr[3] = toupper(helpStr[3]); 
-		lastB = group->helpB = wButtonCreate( group->win, 0, 0, NULL, "Help", 0, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
+		lastB = group->helpB = wButtonCreate( group->win, 0, 0, NULL, "Help", BB_HELP, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
 	}
 
 	LOG( log_hotspot, 1, ( "mkshg ${PNG2DIR}/%s.png ${SHGDIR}/%s.shg << EOF\n", group->nameStr, group->nameStr ) )

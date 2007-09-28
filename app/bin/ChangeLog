@@ -1,3 +1,8 @@
+Sep 28, 2007
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc.c, smalldlg.c: Use large message for tip of the day 
+		teaser line. Changed to a more generous spacing in dialogs.
+
 Sep 23, 2007
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		misc.c, smalldlg.c: separated tip window code into new 

@@ -1,7 +1,7 @@
 /** \file smalldlg.c
  * Several simple and smaller dialogs. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.2 2007-09-23 16:54:31 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.3 2007-09-28 11:17:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -64,7 +64,7 @@ static paramTextData_t tipTextData = { 40, 10 };
 static paramData_t tipPLs[] = {
 #define I_TIPTEXT		(1)
 #define tipT			((wText_p)tipPLs[I_TIPTEXT].control)
-	{   PD_MESSAGE, "Did you know...", NULL, 0, NULL, NULL, 0 },
+	{   PD_MESSAGE, "Did you know...", NULL, 0, NULL, NULL, BM_LARGE },
 	{   PD_TEXT, NULL, "text", 0, &tipTextData, NULL, BO_READONLY|BT_CHARUNITS },
 	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, "Previous Tip", 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },	
 	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, "Next Tip", 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
@@ -148,7 +148,7 @@ static void CreateTipW( void )
  * the last tip shown is retrieved from the preferences and the next tip is 
  * selected. At the end, the index of the shown tip is saved into the preferences.
  *
- * IN flags see definitions in smalldlg.h for possible values
+ * \param IN flags see definitions in smalldlg.h for possible values
  *
  */
 

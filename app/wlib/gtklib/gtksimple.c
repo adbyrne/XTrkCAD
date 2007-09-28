@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksimple.c,v 1.2 2006-03-29 19:36:39 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksimple.c,v 1.3 2007-09-28 11:17:34 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -27,7 +27,7 @@
 
 #include "gtkint.h"
 
-int windowxxx = 0;
+static int windowxxx = 0;
 /*
  *****************************************************************************
  *
@@ -71,17 +71,32 @@ EXPORT wPos_t wMessageGetHeight(
 	return 14;
 }
 
+/**
+ * Craate a window for a simple text. 
+ *
+ * \param IN parent Handle of parent window
+ * \param IN x position in x direction
+ * \param IN y position in y direction
+ * \param IN labelStr ???
+ * \param IN width horizontal size of window
+ * \param IN message message to display ( null terminated )
+ * \param IN flags display options
+ * \return handle for created window
+ */
 
-EXPORT wMessage_p wMessageCreate(
+EXPORT wMessage_p wMessageCreateEx(
 		wWin_p	parent,
 		wPos_t	x,
 		wPos_t	y,
 		const char 	* labelStr,
 		wPos_t	width,
-		const char	*message )
+		const char	*message, 
+		long flags )
 {
 	wMessage_p b;
 	GtkRequisition requisition;
+	PangoFontDescription *fontDesc;
+	int fontSize;
 
 	b = (wMessage_p)gtkAlloc( parent, B_MESSAGE, x, y, NULL, sizeof *b, NULL );
 	gtkComputePos( (wControl_p)b );
@@ -89,21 +104,36 @@ EXPORT wMessage_p wMessageCreate(
 	b->labelWidth = width;
 
 	b->labelWidget = gtk_label_new( message?gtkConvertInput(message):"" );
+
+	/* do we need to set a special font? */
+	if( wMessageSetFont( flags ))	{
+		/* get the current font descriptor */
+		fontDesc = (b->labelWidget)->style->font_desc;
+		
+		fontSize = PANGO_SCALE;
+		/* get the current font size */
+		fontSize = pango_font_description_get_size( fontDesc );
+		
+		/* calculate the new font size */
+		if( flags & BM_LARGE ) {
+			pango_font_description_set_size( fontDesc, fontSize * 1.4 );
+		} else {
+			pango_font_description_set_size( fontDesc, fontSize * 0.7 );
+		}			
+		
+		/* set the new font size */
+		gtk_widget_modify_font( (GtkWidget *)b->labelWidget, fontDesc );
+	}
+	
+	
 	b->widget = gtk_fixed_new();
 	gtk_widget_size_request( GTK_WIDGET(b->labelWidget), &requisition );
 	gtk_container_add( GTK_CONTAINER(b->widget), b->labelWidget );
-#ifndef GTK1
+	
 	gtk_widget_set_size_request( b->widget, width?width:requisition.width, requisition.height );
-#else
-	gtk_widget_set_usize( b->widget, width?width:requisition.width, requisition.height );
-#endif
 	gtkControlGetSize( (wControl_p)b );
-#ifndef GTK1
 	gtk_fixed_put( GTK_FIXED(parent->widget), b->widget, b->realX, b->realY );
-#else
-	gtk_container_add( GTK_CONTAINER(parent->widget), b->widget );
-	gtk_widget_set_uposition( b->widget, b->realX, b->realY );
-#endif
+
 	gtk_widget_show( b->widget );
 	gtk_widget_show( b->labelWidget );
 	gtkAddButton( (wControl_p)b );

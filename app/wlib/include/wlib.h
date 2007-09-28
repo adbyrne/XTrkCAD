@@ -1,7 +1,7 @@
 /** \file wlib.h
  * Commaon definitions and declarations for the wlib library
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.10 2007-09-23 16:13:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.11 2007-09-28 11:17:34 m_fischer Exp $
  */
 
 #ifndef WIN_H
@@ -205,6 +205,7 @@ typedef void (*wButtonCallBack_p)( void * );
 /* Creation Options */
 #define BB_DEFAULT	(1L<<5)
 #define BB_CANCEL	(1L<<6)
+#define BB_HELP (1L<<7)
 
 wButton_p wButtonCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				wPos_t, wButtonCallBack_p, void * );
@@ -322,8 +323,22 @@ void wListSetSize(		wList_p, wPos_t, wPos_t );
  * Messages
  */
 
+#define BM_LARGE (1L<<24)
+#define BM_SMALL (1L<<25)
+
+#define wMessageSetFont( x ) ( x & (BM_LARGE | BM_SMALL ))
+
+#ifndef WINDOWS
+#define wMessageCreate( w, p1, p2, l, p3, m ) wMessageCreateEx( w, p1, p2, l, p3, m, 0 )
+
+wMessage_p wMessageCreateEx(	wWin_p, wPos_t, wPos_t, const char *,
+				wPos_t, const char *, long );
+#else
+
 wMessage_p wMessageCreate(	wWin_p, wPos_t, wPos_t, const char *,
 				wPos_t, const char * );
+#endif
+
 void wMessageSetValue(		wMessage_p, const char * );
 void wMessageSetWidth(		wMessage_p, wPos_t );
 wPos_t wMessageGetHeight(	void );

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.17 2007-09-23 16:13:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.18 2007-09-28 11:17:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -113,13 +113,13 @@ EXPORT DIST_T easeR = 0.0;
 EXPORT DIST_T easeL = 0.0;
 EXPORT coOrd cmdMenuPos;
 
-EXPORT wPos_t DlgSepLeft = 3;
-EXPORT wPos_t DlgSepMid = 10;
-EXPORT wPos_t DlgSepRight = 3;
-EXPORT wPos_t DlgSepTop = 3;
-EXPORT wPos_t DlgSepBottom = 3;
-EXPORT wPos_t DlgSepNarrow = 4;
-EXPORT wPos_t DlgSepWide = 14;
+EXPORT wPos_t DlgSepLeft = 12;
+EXPORT wPos_t DlgSepMid = 18;
+EXPORT wPos_t DlgSepRight = 12;
+EXPORT wPos_t DlgSepTop = 12;
+EXPORT wPos_t DlgSepBottom = 12;
+EXPORT wPos_t DlgSepNarrow = 6;
+EXPORT wPos_t DlgSepWide = 12;
 EXPORT wPos_t DlgSepFrmLeft = 4;
 EXPORT wPos_t DlgSepFrmRight = 4;
 EXPORT wPos_t DlgSepFrmTop = 4;

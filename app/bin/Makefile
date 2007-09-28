@@ -1,5 +1,5 @@
 
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.4 2007-09-23 16:13:53 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.5 2007-09-28 11:17:33 m_fischer Exp $
 #
 
 CC = gcc
@@ -81,7 +81,7 @@ LIB = xtrkcad$(VER).a
 
 WLIBS = $(WLIB)/gtklib/gtk2lib$(VER).a
 
-GTKLIBS = -lgtk-x11-2.0 -lgdk-x11-2.0 -lglib-2.0
+GTKLIBS = -lgtk-x11-2.0 -lgdk-x11-2.0 -lglib-2.0 -lpango-1.0
 XLIBS = -L/usr/X11R6/lib -lX11
 
 LIBS = $(WLIBS) $(GTKLIBS) $(XLIBS) -lm
@@ -472,7 +472,7 @@ $(LIB)(dlayer.o): dlayer.c track.h bitmaps/l1.xbm bitmaps/l2.xbm bitmaps/l3.xbm 
 $(LIB)(doption.o): doption.c track.h ccurve.h
 $(LIB)(dpricels.o): dpricels.c track.h compound.h
 $(LIB)(dprmfile.o): dprmfile.c track.h mtbox.bmp chkbox.bmp
-$(LIB)(draw.o): draw.c track.h utility.h misc.h draw.h
+$(LIB)(draw.o): draw.c track.h utility.h misc.h draw.h $(WLIB)/include/wlib.h
 $(LIB)(drawgeom.o): drawgeom.c track.h ccurve.h compound.h drawgeom.h
 $(LIB)(elev.o): elev.c track.h shrtpath.h ccurve.h
 $(LIB)(fileio.o): fileio.c track.h version.h common.h utility.h draw.h misc.h compound.h
@@ -483,7 +483,7 @@ $(LIB)(misc.o): misc.c smalldlg.h track.h common.h utility.h draw.h misc.h cjoin
 	openbutt.xpm zoomin.xpm zoom.xpm zoomout.xpm undo.xpm redo.xpm \
 	partlist.xpm export.xpm import.xpm
 $(LIB)(misc2.o): misc2.c track.h common.h utility.h draw.h misc.h cjoin.h compound.h
-$(LIB)(param.o): param.c track.h common.h utility.h misc.h compound.h square10.bmp
+$(LIB)(param.o): param.c track.h common.h utility.h misc.h compound.h $(WLIB)/include/wlib.h square10.bmp
 $(LIB)(smalldlg.o): smalldlg.c smalldlg.h common.h draw.h misc.h param.h custom.h param.h
 $(LIB)(shrtpath.o): shrtpath.c track.h shrtpath.h
 $(LIB)(tcurve.o): tcurve.c track.h ccurve.h cstraigh.h cjoin.h

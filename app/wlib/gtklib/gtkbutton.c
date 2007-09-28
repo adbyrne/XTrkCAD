@@ -1,7 +1,7 @@
 /** \file gtkbutton.c
  * Toolbar button creation and handling
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbutton.c,v 1.3 2007-05-17 13:25:44 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbutton.c,v 1.4 2007-09-28 11:17:34 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -148,6 +148,7 @@ wButton_p wButtonCreate(
 	gtkComputePos( (wControl_p)b );
 
 	b->widget = gtk_toggle_button_new();
+				
 	gtk_signal_connect (GTK_OBJECT(b->widget), "clicked",
 						GTK_SIGNAL_FUNC(pushButt), b );
 	if (width > 0)
