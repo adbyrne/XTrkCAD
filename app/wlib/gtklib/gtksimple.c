@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksimple.c,v 1.3 2007-09-28 11:17:34 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksimple.c,v 1.4 2007-09-28 17:12:44 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -66,7 +66,7 @@ EXPORT void wMessageSetWidth(
 
 
 EXPORT wPos_t wMessageGetHeight(
-		void )
+		long flags )
 {
 	return 14;
 }
@@ -110,7 +110,6 @@ EXPORT wMessage_p wMessageCreateEx(
 		/* get the current font descriptor */
 		fontDesc = (b->labelWidget)->style->font_desc;
 		
-		fontSize = PANGO_SCALE;
 		/* get the current font size */
 		fontSize = pango_font_description_get_size( fontDesc );
 		
