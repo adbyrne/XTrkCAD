@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/acclkeys.h,v 1.3 2006-02-22 19:20:10 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/acclkeys.h,v 1.4 2007-10-10 07:03:38 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -85,7 +85,7 @@
 #define ACCL_OPEN		(WCTL+'o')
 #define ACCL_SAVE		(WCTL+'s')
 #define ACCL_SAVEAS		(WCTL+'a')
-#define ACCL_REVERT  (WCTL+'r')
+#define ACCL_REVERT  (0)
 #define ACCL_PARAMFILES (WALT+WCTL+'s')
 #define ACCL_PRICELIST	(WALT+WCTL+'q')
 #define ACCL_PRINT		(WCTL+'p')

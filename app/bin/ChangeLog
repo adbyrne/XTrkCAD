@@ -1,3 +1,13 @@
+Oct 10, 2007
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		csnap.c cprint.c, misc.c: Accelerator keys for Print and 
+		Snap Grid Dialog work again. 
+		
+Oct 10, 2007
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		acclkeys.h: Revert and Redo used the same accelerator key. 
+		Fixed, Revert doesn't have an acclerator now. 
+
 Sep 28, 2007
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		misc.c, smalldlg.c: Use large message for tip of the day 

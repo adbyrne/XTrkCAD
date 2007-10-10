@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprint.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprint.c,v 1.3 2007-10-10 07:03:38 m_fischer Exp $
  *
  * PRINT
  *
@@ -1183,7 +1183,7 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	RegisterChangeNotification( PrintChange );
 	printGridPopupM = MenuRegister( "Print Grid Rotate" );
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
-	return InitCommand( menu, CmdPrint, "Print...", NULL, LEVEL0, IC_LCLICK|IC_POPUP2|IC_CMDMENU, 0 );
+	return InitCommand( menu, CmdPrint, "Print...", NULL, LEVEL0, IC_LCLICK|IC_POPUP2|IC_CMDMENU, ACCL_PRINT );
 }
 
 /*****************************************************************************

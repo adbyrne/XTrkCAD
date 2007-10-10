@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.18 2007-09-28 11:17:33 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.19 2007-10-10 07:03:39 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2120,7 +2120,6 @@ static void CreateMenus( void )
 	wMenuSeparatorCreate( fileM );
 	MiscMenuItemCreate( fileM, NULL, "printSetup", "P&rint Setup ...", ACCL_PRINTSETUP, (void*)(wMenuCallBack_p)wPrintSetup, 0, (void *)0 );
 	printCmdInx = InitCmdPrint( fileM );
-/*	wMenuPushCreate( fileM, "cmdPrint", "&Print", ACCL_PRINT, (wMenuCallBack_p)DoCommandBIndirect, &printCmdInx ); */
 	wMenuSeparatorCreate( fileM );
 	MiscMenuItemCreate( fileM, NULL, "cmdImport", "&Import", ACCL_IMPORT, (void*)(wMenuCallBack_p)DoImport, 0, (void *)0 );
 	MiscMenuItemCreate( fileM, NULL, "cmdOutputbitmap", "Export to &Bitmap", ACCL_PRINTBM, (void*)(wMenuCallBack_p)OutputBitMapInit(), 0, (void *)0 );
@@ -2189,14 +2188,13 @@ static void CreateMenus( void )
 		0, (wMenuToggleCallBack_p)SnapGridEnable, NULL );
 	snapGridShowMI = wMenuToggleCreate( viewM, "cmdGridShow", "Show SnapGrid", ACCL_SNAPSHOW,
 		FALSE, (wMenuToggleCallBack_p)SnapGridShow, NULL );
-/*	wMenuPushCreate( viewM, "cmdGrid", "Change &Grid ...", ACCL_GRIDW, (wMenuCallBack_p)DoCommandBIndirect, &gridCmdInx ); */
 	gridCmdInx = InitGrid( viewM );
 	wMenuSeparatorCreate( viewM );
 
 	toolbarM = wMenuMenuCreate( viewM, "toolbarM", "&Tool Bar" );
 	CreateToolbarM( toolbarM );
 
-  cmdGroup = BG_EASE;
+   cmdGroup = BG_EASE;
 	InitCmdEasement();
 	
 	cmdGroup = BG_SNAP;
