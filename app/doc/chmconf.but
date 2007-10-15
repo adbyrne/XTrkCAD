@@ -7,9 +7,10 @@
 \cfg{html-template-filename}{%k.html}
 \cfg{html-template-fragment}{%k}
 
-\cfg{html-mshtmlhelp-chm}{xtrkcad.chm}
 \cfg{html-mshtmlhelp-project}{xtrkcad.hhp}
+\cfg{html-mshtmlhelp-chm}{xtrkcad.chm}
 \cfg{html-mshtmlhelp-contents}{xtrkcad.hhc}
+\cfg{html-mshtmlhelp-index}{xtrkcad.hhk}
 
 \cfg{html-contents-depth}{0}{2}
 

@@ -1,4 +1,4 @@
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.4 2007-10-01 08:07:19 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.5 2007-10-15 17:25:55 m_fischer Exp $
 #
 # Makefile for halibut based documentation
 #
@@ -36,3 +36,4 @@ clean:
 	del xtrkcad.hhp
 	del xtrkcad.hhc
 	del xtrkcad.chm
+	del xtrkcad.hhk

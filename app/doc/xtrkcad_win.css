@@ -10,34 +10,20 @@ BODY {
 	font-weight: normal;
 	}
 
-code {
-	text-decoration: none;
-	font-family: "Courier New", Courier, monospace;
-	font-size: 9pt;
-	color: Black;
-	font-weight: bold;
-}
-
 A:link {
 	text-decoration: none;
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 9pt;
 	color: Blue;
 	font-weight: bold;
 }          /* unvisited link */
 
 A:visited {
 	text-decoration: none;
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 9pt;
 	color: 336666;
 	font-weight: bold;
 }        /* visited links */
 
 A:active { 
 	text-decoration: none;
-	font-family: Verdana, Arial, Helvetica;
-	font-size: 9pt;
 	font-weight: bold;	
 	color: red;
 	}        /* active links */
@@ -49,7 +35,6 @@ a:hover {
 
 H1 {
 	text-align: left;
-	font-family: Verdana, Arial, Helvetica;
 	font-size: large;
 	font-style: italic;
 	font-weight: bold;
@@ -58,7 +43,6 @@ H1 {
 
 H2 {
 	text-align: left;
-	font-family: Verdana, Arial, Helvetica;
 	font-size: medium;
 	font-style: italic;
 	font-weight: bold;
@@ -67,20 +51,8 @@ H2 {
 
 H3 {
 	text-align: left;
-	font-family: Verdana, Arial, Helvetica;
 	font-size: small;
 	font-style: italic;
 	font-weight: bold;
 	padding: 3px 6px;
 }
-
-
-p, pre {margin-left: 30px;}
-
-ul {list-style: disc;}		
-
-ol {list-style: decimal}	
-	
-dt {font-weight: bold;}
-
-dd {margin-left: 40px;}	
