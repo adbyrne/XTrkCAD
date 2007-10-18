@@ -1,7 +1,7 @@
 /** \file fileio.c
  * Loading and saving files. Handles trackplans as well as DXF export. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.9 2007-06-16 13:50:32 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.10 2007-10-18 16:48:06 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -55,6 +55,7 @@
 #include "compound.h"
 
 /*#define TIME_READTRACKFILE*/
+#define FIOMAXLOCALELEN		30		/* Max locale string length. */
 
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
@@ -446,6 +447,7 @@ EXPORT BOOL_T ReadParams(
 	BOOL_T checkSummed;
 	long paramVersion = -1;
 	char *oldLocale = NULL;
+	char szOldLocale[FIOMAXLOCALELEN] = "";
 
 	if (dirName) {
 		strcpy( paramFileName, dirName );
@@ -460,12 +462,22 @@ EXPORT BOOL_T ReadParams(
 	curSubContents = curContents;
 
 LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
-	
-	oldLocale = setlocale(LC_ALL, "C");
-	
+
+	oldLocale = setlocale(LC_ALL, NULL);
+	if (oldLocale)
+	{
+		strcpy(szOldLocale, oldLocale);
+		oldLocale = szOldLocale;
+	}
+	setlocale(LC_ALL, "C");
+
 	paramFile = fopen( paramFileName, "r" );
 	if (paramFile == NULL) {
 		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Parameter", paramFileName, strerror(errno) );
+
+		/* Reset the locale settings */
+		if (oldLocale) setlocale(LC_ALL, oldLocale);
+
 		return FALSE;
 	}
 	paramCheckSum = key;
@@ -489,7 +501,11 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 			while (*cp && isspace(*cp)) cp++;
 			if (!*cp) {
 				InputError( "INCLUDE - no file name", TRUE );
-				if (paramFile)fclose( paramFile );
+
+				/* Close file and reset the locale settings */
+				if (paramFile) fclose(paramFile);
+				if (oldLocale) setlocale(LC_ALL, oldLocale);
+
 				return FALSE;
 			}
 			oldFile = paramFile;
@@ -528,6 +544,11 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 	if ( key ) {
 		if ( !checkSummed || checkSum != paramCheckSum ) {
 			NoticeMessage( MSG_PROG_CORRUPTED, "Ok", NULL, paramFileName );
+
+			/* Close file and reset the locale settings */
+			if (paramFile) fclose(paramFile);
+			if (oldLocale) setlocale(LC_ALL, oldLocale);
+
 			return FALSE;
 		}
 	}
@@ -648,14 +669,25 @@ static BOOL_T ReadTrackFile(
 	long scale;
 	char * cp;
 	char *oldLocale = NULL;
+	char szOldLocale[FIOMAXLOCALELEN] = "";
 	int ret = TRUE;
-	
-	oldLocale = setlocale( LC_ALL, "C" );
+
+	oldLocale = setlocale(LC_ALL, NULL);
+	if (oldLocale)
+	{
+		strcpy(szOldLocale, oldLocale);
+		oldLocale = szOldLocale;
+	}
+	setlocale(LC_ALL, "C");
 
 	paramFile = fopen( pathName, "r" );
 	if (paramFile == NULL) {
 		if ( complain )
 			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "XTrkCad", pathName, strerror(errno) );
+
+		/* Reset the locale settings */
+		if (oldLocale) setlocale(LC_ALL, oldLocale);
+
 		return FALSE;
 	}
 
@@ -825,9 +857,16 @@ static BOOL_T DoSaveTracks(
 	time_t clock;
 	BOOL_T rc = TRUE;
 	char *oldLocale = NULL;
-	
-	oldLocale = setlocale( LC_ALL, "C" );
-	
+	char szOldLocale[FIOMAXLOCALELEN] = "";
+
+	oldLocale = setlocale(LC_ALL, NULL);
+	if (oldLocale)
+	{
+		strcpy(szOldLocale, oldLocale);
+		oldLocale = szOldLocale;
+	}
+	setlocale(LC_ALL, "C");
+
 	f = fopen( fileName, "w" );
 	if (f==NULL) {
 		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Track", fileName, strerror(errno) );
