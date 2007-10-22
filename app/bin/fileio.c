@@ -1,7 +1,7 @@
 /** \file fileio.c
  * Loading and saving files. Handles trackplans as well as DXF export. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.10 2007-10-18 16:48:06 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.11 2007-10-22 05:49:57 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -473,10 +473,10 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 
 	paramFile = fopen( paramFileName, "r" );
 	if (paramFile == NULL) {
-		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Parameter", paramFileName, strerror(errno) );
-
 		/* Reset the locale settings */
 		if (oldLocale) setlocale(LC_ALL, oldLocale);
+
+		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Parameter", paramFileName, strerror(errno) );
 
 		return FALSE;
 	}
@@ -543,11 +543,11 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 	}
 	if ( key ) {
 		if ( !checkSummed || checkSum != paramCheckSum ) {
-			NoticeMessage( MSG_PROG_CORRUPTED, "Ok", NULL, paramFileName );
-
 			/* Close file and reset the locale settings */
 			if (paramFile) fclose(paramFile);
 			if (oldLocale) setlocale(LC_ALL, oldLocale);
+			
+			NoticeMessage( MSG_PROG_CORRUPTED, "Ok", NULL, paramFileName );
 
 			return FALSE;
 		}
@@ -682,11 +682,11 @@ static BOOL_T ReadTrackFile(
 
 	paramFile = fopen( pathName, "r" );
 	if (paramFile == NULL) {
-		if ( complain )
-			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "XTrkCad", pathName, strerror(errno) );
-
 		/* Reset the locale settings */
 		if (oldLocale) setlocale(LC_ALL, oldLocale);
+
+		if ( complain )
+			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "XTrkCad", pathName, strerror(errno) );
 
 		return FALSE;
 	}
@@ -869,10 +869,10 @@ static BOOL_T DoSaveTracks(
 
 	f = fopen( fileName, "w" );
 	if (f==NULL) {
-		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Track", fileName, strerror(errno) );
-		
 		if( oldLocale ) setlocale( LC_ALL, oldLocale );
 		
+		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Track", fileName, strerror(errno) );
+			
 		return FALSE;
 	}
 	wSetCursor( wCursorWait );
