@@ -1,7 +1,7 @@
 /** \file dlayer.c
  * Functions and dialogs for handling layers.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.5 2007-06-27 18:44:45 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.6 2007-10-30 19:41:22 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -322,7 +322,7 @@ static paramData_t layerPLs[] = {
 	 { PD_MESSAGE, "Personal Preferences", NULL, PDO_DLGRESETMARGIN, (void *)180 },
 	 { PD_BUTTON, DoLayerOp, "reset", PDO_DLGRESETMARGIN, 0, "Load", 0, (void *)ENUMLAYER_RELOAD },
 	 { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, "Save", 0, (void *)ENUMLAYER_SAVE }, 
-	 { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, "Restore Defaults", 0, (void *)ENUMLAYER_CLEAR }, 	 
+	 { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, "Defaults", 0, (void *)ENUMLAYER_CLEAR }, 	 
 	 { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, "Number of Layer Buttons" },	 
 };
 	 
@@ -385,7 +385,7 @@ EXPORT void LoadLayerLists()
  *	dialog, this function is called. The parameter identifies the button pressed and
  * the operation is performed. 
  *
- * \param IN  identifier for the button prerssed
+ * \param[IN] data identifier for the button prerssed
  * \return    
  */
 

@@ -1,3 +1,7 @@
+Oct 29, 2007
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		dlayer.c: Shortened button text to 'Defaults' 
+
 Oct 10, 2007
 	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		csnap.c cprint.c, misc.c: Accelerator keys for Print and 
