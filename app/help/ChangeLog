@@ -1,0 +1,5 @@
+Nov 10, 2007
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		genhelp.c: Added option to create gettext enabled C source.
+
+

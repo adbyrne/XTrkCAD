@@ -23,7 +23,9 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef enum { MSWPOPUP, XVINFO, BALLOONHELP, HPJALIAS, ALIASREF, ALIASDEF, DEFINE } mode_e;
+#define I18NHEADERFILE "xtci18n.h"
+
+typedef enum { MSWPOPUP, XVINFO, BALLOONHELP, HPJALIAS, ALIASREF, ALIASDEF, DEFINE, BALLOONHELPI18N } mode_e;
 
 void remap_minus( char * cp )
 {
@@ -48,8 +50,13 @@ void process( mode_e mode, FILE * inFile, FILE * outFile )
 	case XVINFO:
 		break;
 	case BALLOONHELP:
+	case BALLOONHELPI18N:
+		fputs( "/*\n * DO NOT EDIT! This file has been automatically created by genhelp.\n * Changes to this file will be overwritten.\n */\n", outFile );
 		fprintf( outFile, "#include <stdio.h>\n" );
 		fprintf( outFile, "#include \"wlib.h\"\n" );
+		if( mode == BALLOONHELPI18N )
+			fprintf( outFile, "#include \"" I18NHEADERFILE "\"\n" );
+			
 		fprintf( outFile, "wBalloonHelp_t balloonHelp[] = {\n\n" );
 		break;
 	case HPJALIAS:
@@ -107,8 +114,12 @@ void process( mode_e mode, FILE * inFile, FILE * outFile )
 			    fprintf( outFile, ":%s\n%s\n", line, contents );
 			break;
 		case BALLOONHELP:
+		case BALLOONHELPI18N:
 			if ( *contents )
-			    fprintf( outFile, "\t{ \"%s\", \"%s\" },\n", line, contents );
+				if( mode == BALLOONHELP )
+			   	fprintf( outFile, "\t{ \"%s\", \"%s\" },\n", line, contents );
+				else
+			   	fprintf( outFile, "\t{ \"%s\", N_(\"%s\") },\n", line, contents );					
 			else
 			    fprintf( outFile, "\t{ \"%s\" },\n", line );
 			break;
@@ -140,6 +151,7 @@ void process( mode_e mode, FILE * inFile, FILE * outFile )
 		fprintf( outFile, ":\n" );
 		break;
 	case BALLOONHELP:
+	case BALLOONHELPI18N:
 		fprintf( outFile, "\n	{ NULL, NULL } };\n" );
 		break;
 	case HPJALIAS:
@@ -169,6 +181,8 @@ int main ( int argc, char * argv[] )
 		mode = XVINFO;
 	else if ( strcmp( argv[1], "-bh" ) == 0 )
 		mode = BALLOONHELP;
+	else if ( strcmp( argv[1], "-bhi" ) == 0 )
+		mode = BALLOONHELPI18N;
 	else if ( strcmp( argv[1], "-hpj" ) == 0 )
 		mode = HPJALIAS;
 	else if ( strcmp( argv[1], "-aliasref" ) == 0 )
