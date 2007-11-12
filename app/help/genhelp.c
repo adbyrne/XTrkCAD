@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define I18NHEADERFILE "xtci18n.h"
+#define I18NHEADERFILE "i18n.h"
 
 typedef enum { MSWPOPUP, XVINFO, BALLOONHELP, HPJALIAS, ALIASREF, ALIASDEF, DEFINE, BALLOONHELPI18N } mode_e;
 

@@ -1,5 +1,8 @@
+Nov 12, 2007
+  FIX: Mikko Nissinen <mni77@users.sourceforge.net>
+    genhelp.c: Changed internationalization header file name from xtci18n.h to
+    i18n.h.
+
 Nov 10, 2007
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		genhelp.c: Added option to create gettext enabled C source.
-
-
