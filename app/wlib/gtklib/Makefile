@@ -1,8 +1,8 @@
 #
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/Makefile,v 1.6 2007-08-31 15:18:45 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/Makefile,v 1.7 2007-11-12 18:53:15 m_fischer Exp $
 #
 
-GTKINCL=`pkg-config --cflags gtk+-2.0`
+GTKINCL=`pkg-config --cflags libgtkhtml-2.0`
 
 COPTS = -Wall
 CINCLS = -I../include $(GTKINCL)
@@ -29,9 +29,7 @@ OBJS = \
 	wpref.o \
 	psprint.o 
 
-
-LIBS = -lgtk -lgdk -lglib -lXext -lX11 -lm
-#LIBS = $(GTKDIR)/gtk/.libs/libgtk.a  $(GTKDIR)/gdk/.libs/libgdk.a $(GTKDIR)/glib/.libs/libglib.a -lXext -lX11 -lm
+LIBS = `pkg-config --libs libgtkhtml-2.0`
 
 CSRCS = $(OBJS:.o=.c)
 HDRS = gtkint.h dynarr.h

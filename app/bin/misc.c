@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.19 2007-10-10 07:03:39 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.20 2007-11-12 18:53:14 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2296,14 +2296,22 @@ static void CreateMenus( void )
 	/*
 	 * HELP MENU
 	 */
+	 
+	/* main help window */ 
 	wMenuAddHelp( helpM );
+
+	/* help on recent messages */
 	wMenuSeparatorCreate( helpM );
 	messageListM = wMenuMenuCreate( helpM, "menuHelpRecentMessages", "Recent Messages" );
 	messageList_ml = wMenuListCreate( messageListM, "messageListM", 10, ShowMessageHelp );
 	wMenuListAdd( messageList_ml, 0, MESSAGE_LIST_EMPTY, NULL );
+
+	/* tip of the day */
 	wMenuSeparatorCreate( helpM );
 	wMenuPushCreate( helpM, "cmdTip", "Tip of the Day...", 0, (wMenuCallBack_p)ShowTip, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP));
 	demoM = wMenuMenuCreate( helpM, "cmdDemo", "&Demos" );
+
+	/* about window */
 	wMenuSeparatorCreate( helpM );
 	wMenuPushCreate( helpM, "about", "About", 0, (wMenuCallBack_p)CreateAboutW, NULL );
 

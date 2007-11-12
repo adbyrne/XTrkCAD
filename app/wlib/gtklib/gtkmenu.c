@@ -1,7 +1,7 @@
 /** \file gtkmenu.c
  * Menu creation and handling stuff.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmenu.c,v 1.3 2007-04-30 14:26:19 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmenu.c,v 1.4 2007-11-12 18:53:15 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -759,8 +759,15 @@ wMenu_p wMenuCreate(
 	return m;
 }
 
+/**
+ * Add a drop-down menu to the menu bar. 
+ *
+ * \param[IN] w main window handle 
+ * \param[IN] helpStr unused (should be help topic )
+ * \param[IN] labelStr label for the drop-down menu 
+ * \return    pointer to the created drop-down menu
+ */
 
-/*-----------------------------------------------------------------*/
 
 wMenu_p wMenuBarAdd(
 	wWin_p w,
@@ -770,32 +777,30 @@ wMenu_p wMenuBarAdd(
 	wMenu_p m;
 	GtkWidget * menuItem;
 	static GtkAccelGroup * accel_group = NULL;
+	
 	m = gtkAlloc( w, B_MENU, 0, 0, labelStr, sizeof *m, NULL );
 	m->mmtype = MM_BAR;
 	m->realX = 0;
 	m->realY = 0;
+	
 	menuItem = gtk_menu_item_new_with_label( gtkConvertInput(m->labelStr) );
 	m->menu = gtk_menu_new();
 	gtk_menu_item_set_submenu( GTK_MENU_ITEM(menuItem), m->menu );
-	if ( strcmp(labelStr, "Help" ) )
-		gtk_menu_item_right_justify( GTK_MENU_ITEM(menuItem) );
-	/*else
-		gtk_menu_item_left_justify( GTK_MENU_ITEM(menuItem) );*/
 	gtk_menu_bar_append( GTK_MENU_BAR(w->menubar), menuItem );
 	gtk_widget_show( menuItem );
+
 	m->w = 0;
 	m->h = 0;
+	
+	/* TODO: why is help not supported here? */
 	/*gtkAddHelpString( m->panel_item, helpStr );*/
+	
 	if ( gtkAccelChar ) {
 		if ( accel_group == NULL ) {
 			accel_group = gtk_accel_group_new();
 			gtk_window_add_accel_group( GTK_WINDOW(w->gtkwin), accel_group );
 		}
-#ifndef GTK1
 		gtk_widget_add_accelerator( menuItem, "activate", accel_group, tolower(gtkAccelChar), GDK_MOD1_MASK, GTK_ACCEL_LOCKED );
-#else
-		gtk_widget_add_accelerator( menuItem, "activate_item", accel_group, tolower(gtkAccelChar), GDK_MOD1_MASK, GTK_ACCEL_LOCKED );
-#endif
 	}
 	return m;
 }

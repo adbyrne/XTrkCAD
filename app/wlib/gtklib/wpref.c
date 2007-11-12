@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.5 2007-06-16 13:50:32 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.6 2007-11-12 18:53:15 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -231,13 +231,18 @@ static void readPrefs( void )
 	fclose( prefFile );
 }
 
+/**
+ * Store a string in the user preferences.
+ *
+ * \param section IN section in preferences file
+ * \param name IN name of parameter
+ * \param sval IN value to save
+ */
 
 EXPORT void wPrefSetString(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		const char * sval )		/* Value */
-/*
-*/
 {
 	prefs_t * p;
 
@@ -281,13 +286,18 @@ EXPORT const char * wPrefGetString(
 	return NULL;
 }
 
+/**
+ * Store an integer value in the user preferences.
+ *
+ * \param section IN section in preferences file
+ * \param name IN name of parameter
+ * \param lval IN value to save
+ */
 
 EXPORT void wPrefSetInteger(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		long lval )		/* Value */
-/*
-*/
 {
 	char tmp[20];
 
@@ -295,14 +305,21 @@ EXPORT void wPrefSetInteger(
 	wPrefSetString( section, name, tmp );
 }
 
+/**
+ * Read an integer value from the user preferences.
+ *
+ * \param section IN section in preferences file
+ * \param name IN name of parameter
+ * \param res OUT resulting value
+ * \param default IN default value
+ * \return TRUE if value differs from default, FALSE if the same
+ */
 
 EXPORT wBool_t wPrefGetInteger(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		long * res,		/* Address of result */
 		long def )		/* Default value */
-/*
-*/
 {
 	const char * cp;
     char *cp1;

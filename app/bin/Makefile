@@ -1,5 +1,5 @@
 
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.5 2007-09-28 11:17:33 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.6 2007-11-12 18:53:14 m_fischer Exp $
 #
 
 CC = gcc
@@ -81,7 +81,8 @@ LIB = xtrkcad$(VER).a
 
 WLIBS = $(WLIB)/gtklib/gtk2lib$(VER).a
 
-GTKLIBS = -lgtk-x11-2.0 -lgdk-x11-2.0 -lglib-2.0 -lpango-1.0
+#GTKLIBS = -lgtk-x11-2.0 -lgdk-x11-2.0 -lglib-2.0 -lpango-1.0
+GTKLIBS = `pkg-config --libs libgtkhtml-2.0`
 XLIBS = -L/usr/X11R6/lib -lX11
 
 LIBS = $(WLIBS) $(GTKLIBS) $(XLIBS) -lm
