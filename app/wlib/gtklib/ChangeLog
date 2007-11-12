@@ -1,4 +1,11 @@
 Nov 12, 2007
+	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
+		gtksimple.c: wMessageCreateEx -> Reset the pango font size back
+		to normal before returning the function. All dialogs created after
+		the tip of the day dialog had incorrectly positioned labels,
+		because the width of the text was calculated with the large font.
+
+Nov 12, 2007
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		gtkhelp.c: Converted help system to gtkhtml-2. This allows to
 		us standard HTML files to be used for help documentation.

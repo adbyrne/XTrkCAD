@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksimple.c,v 1.4 2007-09-28 17:12:44 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksimple.c,v 1.5 2007-11-12 21:55:45 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -123,8 +123,7 @@ EXPORT wMessage_p wMessageCreateEx(
 		/* set the new font size */
 		gtk_widget_modify_font( (GtkWidget *)b->labelWidget, fontDesc );
 	}
-	
-	
+
 	b->widget = gtk_fixed_new();
 	gtk_widget_size_request( GTK_WIDGET(b->labelWidget), &requisition );
 	gtk_container_add( GTK_CONTAINER(b->widget), b->labelWidget );
@@ -136,6 +135,15 @@ EXPORT wMessage_p wMessageCreateEx(
 	gtk_widget_show( b->widget );
 	gtk_widget_show( b->labelWidget );
 	gtkAddButton( (wControl_p)b );
+
+	/* Reset font size to normal */
+	if( wMessageSetFont( flags ))	{
+		if( flags & BM_LARGE ) {
+			pango_font_description_set_size(fontDesc, fontSize);
+		} else {
+			pango_font_description_set_size(fontDesc, fontSize);
+		}
+	}
 	return b;
 }
 
