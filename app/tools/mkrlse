@@ -11,7 +11,7 @@ if [ $# -lt 1 ] ; then
 	echo After that RPM is run to build the install package. After successful
 	echo build, the files are deleted again.
 	echo
-	echo Execute from directory xtrkcad\\4.0.0
+	echo Execute from directory xtrkcad\\app
 	echo
 	exit 1
 fi
@@ -22,6 +22,7 @@ mkdir xtrkcad
 mkdir xtrkcad/demos
 mkdir xtrkcad/examples
 mkdir xtrkcad/html
+mkdir xtrkcad/html/png.d
 mkdir xtrkcad/params
 
 
@@ -31,23 +32,24 @@ cp lib/xtrkcad.enh xtrkcad/
 cp lib/xtrkcad.fix xtrkcad/
 cp lib/xtrkcad.upd xtrkcad/
 cp lib/aareadme.txt xtrkcad/Readme.txt
-cp help/xtrkcad.help xtrkcad/
+cp lib/logo.bmp xtrkcad/logo.bmp
+#cp help/xtrkcad.help xtrkcad/
 cp help/xtrkcad.tip xtrkcad/
 cp lib/examples/*.xtc xtrkcad/examples/
 cp lib/params/*.xtp xtrkcad/params/
 cp lib/demos/dm*.xtr xtrkcad/demos/
 cp bin/xtrkcad xtrkcad/
 cp bin/xtc64.xpm xtrkcad/
-#cp bin/xtrkcad-libc5 xtrkcad/
-cp help/html/*.html xtrkcad/html/
-cp help/html/*.png xtrkcad/html/
+cp doc/*.html xtrkcad/html/
+cp doc/xtrkcad_lin.css xtrkcad/html/
+cp doc/png.d/*.png xtrkcad/html/png.d/
 cp COPYING xtrkcad/
 chmod 444 xtrkcad/*/*
-chmod 444 xtrkcad/{Readme.txt,COPYING,xtc64.xpm,xtrkcad.*}
-chmod 777 xtrkcad/{demos,examples,html,params}
+chmod 444 xtrkcad/{Readme.txt,COPYING,xtc64.xpm,logo.bmp,xtrkcad.*}
+chmod 777 xtrkcad/{demos,examples,html,params,html/png.d}
 chmod 555 xtrkcad/xtrkcad
 RLSE=`echo $RLSE | sed -e 's/r//' -e 's/_/./g'`
-echo Release ist $RLSE
+echo Building release $RLSE
 tar cvfz  xtrkcad-linux-elf.${RLSE}.tar.gz xtrkcad 
 
 D=`pwd`; # D=`dirname $D`; D=`basename $D`;
@@ -56,7 +58,8 @@ V=`echo $RLSE | sed -e 's/^r//' -e 's/_/./g'`;
 echo V = $V
 sed -e "s#RLSEDIR#$D#g" -e "s#RLSEVER#$V#g"  lib/xtrkcad.spec.head > ./xtrkcad.spec
 
-find xtrkcad -type f -print | sed 's/^/\/usr\/local\/lib\//' | sed '/html/s/^/%doc /' | sed '/xtrkcad.help/s/^/%doc /'>> ./xtrkcad.spec
+#find xtrkcad -type f -print | sed 's/^/\/usr\/local\/lib\//' | sed '/html/s/^/%doc /' | sed '/xtrkcad.help/s/^/%doc /'>> ./xtrkcad.spec
+find xtrkcad -type f -print | sed 's/^/\/usr\/local\/lib\//' >> ./xtrkcad.spec
 
 mkdir -p ./install/usr/local/lib
 mv  ./xtrkcad ./install/usr/local/lib/xtrkcad

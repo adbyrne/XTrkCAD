@@ -1,7 +1,7 @@
 /** \file filename.c
  * This file shows the conventions used for inline documentation.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/HACKING,v 1.2 2007-09-23 16:13:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/HACKING,v 1.3 2007-11-13 19:31:12 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -28,8 +28,8 @@ int global; 	/**< this is a global variable */
  * Brief description of function. And some more words about 
  * this function bla bla bla
  *
- * \param IN  varname1 this is a variable
- * \param OUT varname2 and another one that is modified
+ * \param varname1 IN this is a variable
+ * \param varname2 OUT and another one that is modified
  * \return    describe the return value
  */
 
