@@ -59,7 +59,7 @@ echo V = $V
 sed -e "s#RLSEDIR#$D#g" -e "s#RLSEVER#$V#g"  lib/xtrkcad.spec.head > ./xtrkcad.spec
 
 #find xtrkcad -type f -print | sed 's/^/\/usr\/local\/lib\//' | sed '/html/s/^/%doc /' | sed '/xtrkcad.help/s/^/%doc /'>> ./xtrkcad.spec
-find xtrkcad -type f -print | sed 's/^/\/usr\/local\/lib\//' >> ./xtrkcad.spec
+find xtrkcad -type f -print | sed 's/^/\/usr\/local\/lib\//' | sed '/html/s/^/%doc /' >> ./xtrkcad.spec
 
 mkdir -p ./install/usr/local/lib
 mv  ./xtrkcad ./install/usr/local/lib/xtrkcad
