@@ -1,590 +1,1189 @@
-\H{changeM}Change Menu
+\# Notes:
+\#
+\# The "\u000" command is used to format the output. These commands causes a blank line to appear between "bulleted" or "described" items.
+\#
+\# The "\u00B0" command gives proper format to the degree sign.
 
-The \f{Change Menu} has all functions related to modifying objects that already are on the drawing.
+\H{changeM}\i{Change Menu}
 
-\b
-\f{Properties} - sets XTrkCad into \e{Describe} mode. Whenever an object is clicked on while in this mode, the 
-\f{Properties} dialog is opened. This allows you to make direct manipulations like setting the position or orientation.
+\G{png.d/mchange.png} 
 
-\b
-\f{Select} - sets XTrkCad into \e{Select} mode. Whenever an object is clicked on while in this mode, this selection state of this
-object is reversed. When is was unselected it is selected now, and vice versa. Other than in many graphics applications, the list of 
-selected objects is always extended. To unselect all objects press the ESC key or use \f{Deselect All} from the \f{Edit} (\k{editM}) 
-menu. 
+The \f{Change Menu} has all functions related to modifying objects that exist on the layout drawing.
 
-\b
-\f{Move} - move selected objects. 
+\dd \f{Change Scale} - change model scale and / or gauge of layout design. (\K{cmdRescale})
 
-\b
-\f{Rotate} - rotate selected objects.
+\u000
 
-\b
-\f{Flip} - flip (mirror) selected objects.
+\dd \f{Clear Elevations} - remove elevation parameters from selected track(s).
 
-\b
-\f{Modify} - modify existing track.
+\u000
 
-\b
-\f{Join} - Connect two separate pieces of track. This can be used to move one of the pieces to the endpoint of the other or to create 
-a connection by laying a strech of flextrack.
+\dd \f{Connect Sectional Tracks} - creates a connection between sectional track pieces by slightly moving the select piece(s) and the pieces they connect to.
 
-\b
-\f{Connect Sectional Tracks} - create a connection between sectional track pieces by slightly moving them and the pieces they connect
-to.
+\u000
 
-\b
-\f{Split Track} - cuts a piece of track into two connected pieces.
+\dd \f{Elevation} - define an elevation at specified track location (\K{cmdElev}).
 
-\b
-\f{Move Description} - move the endpoint description of a track pieces to another place.
+\u000
 
-\b 
-\f{Raise/Lower Elevations} - raise or lower the elevations of the selected tracks.
+\dd \f{Flip} - turn selected object(s) over or around.
 
-\b
-\f{Elevations} - define elevations to track pieces (\k{cmdElev}).
+\u000
 
-\b
-\f{Profile} - display the elevation profile of a definable stretch of track (\k{cmdProfile}).
+\dd \f{Join} - connect two separate pieces of track. This command can be used to move one of the pieces of track to the endpoint of the other or to create a connection by laying a stretch of flex-track.
 
-\b 
-\f{Clear Elevations} - remove the elevations for the selected tracks.
+\u000
 
-\b 
-\f{Recompute Elevations} - performs a global recomputation of dynamic elevations.  
-\f{Note:} it should not be necessary to use this item as elevations are recomputed as required.
+\dd \f{Modify} - modify an existing track.
 
-\b
-\f{Change Scale} - change the model scale and / or gauge. (\k{cmdRescale})
+\u000
+
+\dd \f{Move} - move selected object(s). 
+
+\u000
+
+\dd \f{Move Description} - move the endpoint description of a track piece to another location.
+
+\u000
+
+\dd \f{Profile} - display the elevation profile of a definable stretch of track (\K{cmdProfile}).
+
+\u000
+
+\dd \f{Properties} - sets \e{XTrkCad} into \e{Describe} mode. Whenever an object is clicked on while in this mode, the \f{Properties} dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation.
+
+\u000
+
+\dd \f{Raise/Lower Elevations} - raise or lower elevation of selected tracks.
+
+\u000
+
+\dd \f{Rotate} - rotate selected object(s).
+
+\u000
+
+\dd \f{Recompute Elevations} - performs a global re-computation of dynamic elevations. It should not be necessary to issue this command as elevations are recomputed as required.
+
+\u000
+
+\dd \f{Select} - sets \e{XTrkCad} into \e{Select} mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use \f{Deselect All} from the \f{Edit} (\K{editM}) menu or \f{Deselect All} from the \f{Pop-up} menu (\K{cmdAcclKeys}).
+
+\u000
+
+\dd \f{Split Track} - the \f{Split Track} command can be used in one of two ways;
+
+\lcont{
+
+\u000
+
+\b split a section of flex-track into two connected pieces at the point where a \e{Left-Click} is invoked or;
+
+\b disconnect turnouts or sectional track pieces at their point of connection.
+
+}
 
 \rule
 
-\S{cmdDescribe} Properties
-
-\G{png.d/bdescrib.png}
-
-The \f{Properties} button will cancel any other command in progress.  
-Any auxiliary dialogs are closed and the main window is restored.
-
-Clicking on any object while in \f{Properties} mode will display the Property Sheet for the object 
-listing such things as its position, size, color and layer as appropriate for each type of object.
-Certain values can be changed to modify the object.
-If a track is connected to other tracks, then some values (ie. End Point positions) can not be changed.
-
-The object is highlighted by a grey area.
-
-Most commands return to \f{Properties} mode then they terminate unless the command is sticky (\k{cmdSticky}).
-
-Note: the Default Command radio button on the \f{Command Options} (\k{cmdCmdopt}) dialog controls whether the \f{Properties} or
-the \f{Select} (\k{cmdSelect}) command is used as the default command.
-
-\S{cmdSelect} Select 
-
-\G{png.d/bselect.png}
-
-The \f{Select} button will cancel any other command in progress.
-Any auxiliary windows are closed and the main window is restored.
-
-\b 
-\c{LEFT-CLICK} - selects an object (or unselects a selected object).
-
-\b 
-\c{SHIFT-LEFT-CLICK} - selects all unselected tracks connected to the track you select.
-Selection stops at selected tracks.
-Caution: This can select all tracks on the layout.
-
-\b 
-\c{LEFT-DRAG} - highlights an area, and all objects within the area are selected.
-
-\b 
-\c{RIGHT-CLICK} - displays a popup-menu of commands.
-
-\b 
-\c{SHIFT-RIGHT-CLICK} (\k{mouseB}) - displays a popup-menu of options controlling how objects are drawn during moves and rotates (below).  If there are selected objects then additional menu items allow you to rotate the selected objects by various angles.
-
-\b 
-\c{RIGHT-DRAG} - highlights an area, and all objects within the area are unselected.
-
-\b 
-\c{SHIFT-LEFT-DRAG} - moves the selected objects (the Move (\k{cmdMove}) command).
-
-\b 
-\c{SHIFT-RIGHT-DRAG} - rotates the selected objects (the \f{Rotate} (\k{cmdRotate}) command).
-If you press the \c{CONTROL} key while dragging then rotation will be done in increments of 15°.
-
-\b 
-\c{CONTROL-LEFT-DRAG} - moves turnout and elevations labels (the \f{Move Description} (\k{cmdMoveLabel}) command).
-
-Also the \f{Select All} menu item on the Edit (\k{editM}) menu selects all objects on the layout.
-
-\f{Selected} objects are drawn in red. (unless changed in the \f{Color} (\k{cmdRgbcolor}) dialog).
-
-Note: To select a Filled Shape (\k{cmdDraw}), click on its edge.
-
-Connections between selected and unselected tracks will be broken when 
-selected tracks are moved.  
-If the Drawing Scale is 8:1 or smaller, these about-to-be broken connections are marked with 
-a red X.
-
-The following commands operate on the objects you have selected:
-
-\b 
-\f{Move} (\k{cmdMove}) the selected objects.
-
-\b 
-\f{Rotate} (\k{cmdRotate}) the selected objects.
-
-\b 
-\f{Flip} (\k{cmdFlip}) (mirrors) the selected objects.
-
-\b 
-\f{Delete} (\k{cmdDelete}) selected objects.
-
-\b 
-\f{Hide} (or unhide) in a Tunnel (\k{cmdTunnel}).
-
-\b 
-\f{Move} Above or Below (\k{cmdAboveBelow}).
-
-\b 
-\f{Parts List} (\k{cmdEnum}) of the selected objects.
-
-\b 
-\f{Change} the width of the tracks' rails.
-
-\b 
-\f{Export} (\k{cmdExport}) the selected objects.
-
-\b 
-Creates a structure or turnout definition from \f{Grouped} (\k{cmdGroup}) objects.
-
-\b 
-\f{Rescale} (\k{cmdRescale}) the selected objects.
-
-In addition the \f{Cut}, \f{Copy} and \f{Paste} commands on the \f{Edit} (\k{editM}) menu operate on the selected objects.
-
-Note: the Default Command radio button on the Command Options (\k{cmdCmdopt}) dialog controls whether the Describe (\k{cmdDescribe}) or
-the \e{Select} command is used as the default command.
-
-Pressing the \e{Escape} key will deselect all selected tracks.
-
-\S{cmdMove} Move Tracks
-
-\G{png.d/bmove.png}
-
-This command moves selected objects (\k{cmdSelect}).
-\c{LEFT-DRAG} on the layout to move the tracks.
-
-This operation can also be invoked by \c{SHIFT-LEFT-DRAG} from the \f{Select} (\k{cmdSelect}) command.
-
-\c{SHIFT-RIGHT-CLICK} (\k{mouseB}) displays a popup-menu controlling how objects are drawn during moves.
-
-\f{Note:} The \f{Draw Moving Tracks} Radio box on the \f{Command Options} (\k{cmdCmdopt}) dialog 
-selects how objects are drawn during drags to move or rotate objects.
-This can be time-consuming when using a large number of objects.
-The options are:
-
-\b 
-\f{Normal} - objects are drawn normally.
-
-\b 
-\f{Simple} - objects are drawn using one line (instead of two when zoomed in), 
-structures are drawn as outlines, no End-Points or lines are drawn
-
-\b 
-\f{End Points} - only the End-Points are drawn (as stars).
-
-\S{cmdRotate} Rotate Tracks
-
-\G{png.d/brotate.png}
-
-This command rotates selected objects (\k{cmdSelect}).  Click on the layout at the origin of the rotation and then 
-\c{LEFT-DRAG} to rotate the tracks.
-If you press the \c{CONTROL} key while dragging then rotation will be done in increments of 15°.
-
-This operation can also be invoked by the \c{SHIFT-RIGHT-DRAG} from the \f{Select} (\k{cmdSelect}).
-
-\c{SHIFT-RIGHT-CLICK} (\k{mouseB}) displays a popup-menu of options controlling how objects are drawn during rotates.
-Additional menu items allow you to rotate the selected objects by various angles.
-
-To use the \f{Align} popup-menu item, first click on a selected object 
-and then drag on an unselected object.  The selected object will be rotated so that the first selected point is parallel.
-
-\S{cmdFlip} Flip
-
-\G{png.d/bflip.png}
-
-This command flips selected objects (\k{cmdSelect}). Click and drag on the layout to create a line. 
-Selected objects will be flipped as if the line was a mirror.
-
-Since the objects are mirrored, Turnout titles are modified.
-Right Hand Turnouts become Left Hand Turnouts and vice versa.
-Certain Turnouts (Wye, Three-Way and Crossings) are symmetrical and these titles are not changed.
-Otherwise the currently loaded \f{Parameter Files} (\k{cmdPrmfile}) are searched for a turnout that matches the flipped turnout.
-If a matching turnout is not found then the turnout title is prepended with \f{Flipped}.
-You can use the \f{Describe} (\k{cmdDescribe}) command to change title of \e{Flipped} turnouts.
-
-\S{cmdModify} Modify
-
-\G{png.d/bmodify.png}
-
-The \f{Modify} command is used to change existing tracks and to extend them with new tracks.
-This command works with an unconnected endpoint of a track.
-
-Either the left mouse button (for changing length or creating a tangent track) or
-the right mouse button (for extending with a new track) is used to select the
-unconnected endpoint.
-
-Any tracks that are created during the \f{Modify} command will have the following properties 
-inherited from the first track: selected state, hidden state, scale, track gauge and layer.
-
-\S2{lbl24} Changing Track Length:
-
-\c{LEFT-DRAG} (\k{windowTerms}) is used to change the length of a track segment,
- (or table edge, benchwork, dimension line or line).
-
-\c{LEFT-DRAGGING} the End-Point of a turnout (or other sectional track) causes a 
-straight track to be created from the selected End-Point to the cursor.
-
-You can change the length of a curve to form an almost complete circle if 
-you drag the cursor almost to the other endpoint.  
-Going past the other endpoint creates a very small curve.  
-You cannot create a curve of greater than 360°.
-
-\c{LEFT-DRAGGING} the endpoint of a \f{Table Edge} (\k{cmdDraw}) allows you to move the endpoint to a new position.
-If you move close to the endpoint of another \f{Table Edge} then the endpoint will be moved to it. 
-
-\S2{lbl25} Creating a Tangent to a Curve:
-
-If you \c{LEFT-DRAG} beyond the radius of a 
-\f{Curved track} (\k{cmdCurve}) (but not a \f{Circle} (\k{cmdCircle}))
-a tangent to the curve will be created.
-
-This will begin when the distance from the curved track center to the cursor is
-greater than 110% of the radius.
-If you then move the cursor within the radius of the curve then the \e{Changing Track Length}
-mode is in effect.
-
-The curve is shortened or lengthened as required.  
-
-If \f{Easements} (\k{cmdEasement}) are enabled then an easement curve 
-will be generated (if required) to connect the old and new tracks.
-
-
-\S2{lbl26} Changing Track Radius:
-
-\c{SHIFT-LEFT-DRAG} is used to change the Radius of \f{Straight} or \f{Curved} track segment.
-
-Hold down the \c{SHIFT} key and select the unconnected endpoint or a track.  
-The other endpoint must be connected to another track.  
-Now \c{DRAG} the unconnected endpoint to change the radius of the track. 
-Straight tracks can be made into curved tracks and vice versa.
-
-\S2{lbl27} Extending a Track:
-
-\c{RIGHT-DRAG} (\k{windowTerms}) is used to 
-extend a track with a straight or curved track.  
-The selected endpoint determines the position and angle of the first 
-endpoint of the new track.  
-The cursor is dragged to set the second endpoint.
-This is similar to creating a curved track (\k{cmdCurve}).
-
-A curved or straight track will be created, depending on the position of the 
-second endpoint.
-
-If \f{easements} (\k{cmdEasement}) are enabled then an easement curve 
-will be generated (if required) to connect the old and new tracks.
-
-\S{cmdJoin} Join
-
-\G{png.d/bjoin.png}
-
-Any two tracks can be joined together.  
-XTrkCad ensures that the connecting track is aligned properly.
-
-\S{lbl28} Joining With New Track
-
-\c{LEFT-CLICK} to select the first unconnected End-Point.  
-A red dot will be drawn to remind which track you selected.  
-Then \f{LEFT-DRAG} to select the second unconnected End-Point and drag along the track to vary the radius 
-of the connecting track.
-
-XTrkCad moves the End-Points of the selected tracks as necessary to meet the connecting curve.  
-In some cases the connecting track will be straight.  
-If the selected End-Points are close to each other and aligned then the two 
-are connected directly.
-
-If enabled,
-Easements (\k{cmdEasement}) 
-will be automatically generated between 
-tracks of differing radii.  
-When using easements, there is a minimum radius as specified in the \e{Easement} dialog.  
-You are not allowed to join tracks with less then this radius and the 
-connecting track's radius must be greater than the minimum radius.
-
-If there any errors while joining tracks (such moving beyond the end of a
-track or using a curve with a radius smaller than the Easement radius),
-then the joint track will be drawn in Red.
-This serves as a visual cue that the connecting track can not be created.
-
-Any tracks that are created during the Join command will have the following 
-properties inherited from the first track: selected state, hidden state, scale, track gauge and Layer.
-
-Turnouts and Sectional (\k{cmdHotBar}) tracks can be joined to other tracks.  
-XTrkCad extends the selected End-Point with a straight track to use in 
-making the connection.  
-
-You can join to a Turntable (\k{cmdTurntable}), 
-but the turntable must be used as the second End-Point.
-
-You also join to or from a Circle (\k{cmdCircle}) which converts the Circle into a Curved track.
-
-\S2{lbl29} Moving To Join Tracks
-
-You can move selected (\k{cmdSelect}) tracks to join with another track.  All the selected
-tracks are moved and rotated so the End-Points are aligned.
-
-\c{SHIFT-LEFT-CLICK} on two unconnected End-Points.  One must be \e{selected} and the other
-\f{unselected}.  The two End-Points will be joined by moving the \e{selected} tracks.
-
-See the Demos for examples of how to join tracks.
-
-\S{cmdConnect} Connect Sectional Tracks
-
-\G{png.d/bconnect.png}
-
-This command is used with \e{Sectional Track}.
-
-Occasionally pieces of
-sectional track do not line up exactly, especially when creating figure-8's or passing sidings.
-When laying out the actual track you can compensate for this by adjusting the individual tracks to provide a bit of slack.
-This command simulates this process.
-
-Click on each End-Point of the tracks you trying to connect.
-Tracks will be moved slightly to overcome the gap.
-If the gap is too large, the connection will fail, and you should try using other track pieces in your layout.
-
-XTrkCad adjusts the positions of tracks connected to the tracks up to a track with more than two connections.
-See the Demo for details.
-
-If one (or both) the selected tracks is an adjustable section (such as Kato's Adjustable Track #20-050) 
-then length of the track is changed to fill the gap.
-
-You can undo the effect of the \f{Connect} command by splitting (\k{cmdSplitTrack}) the track to 
-disconnect them and then use \f{Connect} command with \c{SHIFT-LEFT-CLICK} on the unconnected 
-End-Points to tighten the connections between the tracks. 
-
-\S{cmdSplitTrack} Split Track
-
-\G{png.d/bsplit.png}
-
-The \f{Split} command splits a track into two pieces at the selected point.  
-
-If you select an End-Point of a track then the tracks are disconnected.
-Otherwise, the track is split at the selected point, but the two tracks
-remain connected.
-To split and disconnect at a point, \f{split} the track twice, (first splits and the second disconnects).
-
-You cannot create a track shorter than the Minimum Track Length (\k{cmdPref}).
-
-This command is useful for placing tunnel portals or Elevation Points (\k{cmdElev}) at specific places.
-
-Normally, you can not split a Turnout.  
-If you hold the \c{SHIFT} key then you can \f{Trim} a turnout which replaces the portion of the 
-Turnout between the split point and the End-Point with \e{flex-track}.
-For Turnouts with more than one set of Turnout Points (\k{generalTerms}), 
-such as a Slip Switch or Scissors Crossover, you can not select a point between the \e{Points}.
-
-\c{SHIFT-RIGHT-CLICK} (\k{mouseB}) displays a popup menu which can be used to 
-change the \e{block gaps} for the End-Point.  A block gap is drawn as a thick line at the End-Point.
-Either or both rails can be gapped.
-
-\S{cmdMoveLabel} Move Description
-
-\G{png.d/bmovedes.png}
-
-This command is used to move Elevations, Grades and Stations (\k{cmdElev}), 
-Curved Track (\k{cmdCurve}), Helix (\k{cmdHelix}) or Turnout (\k{cmdHotBar}) Labels.
-
-Drag the Label to a new position.  The Label's new position is relative to the 
-End-Point or Turnout and will move along with the track if the track is moved.
-
-This operation can also be invoked by the \c{CONTROL-LEFT-DRAG} from the Select (\k{cmdSelect}) command.
-
-\c{SHIFT-RIGHT-CLICK} (\k{mouseB}) is used to toggle the display of individual Curved Track (\k{cmdCurve}),
- Helix (\k{cmdHelix}) or Turnout (\k{cmdHotBar}) Labels.
-
-\S{cmdRaiseElev} Raise/Lower Elevation
-
-\#{?Gdchgelev}
-
-This command allows you to change the elevation of all selected tracks. 
-The entered value is added to all Defined Elevations on the Selected tracks. 
-A negative value will lower the Elevations.
-
-\S{cmdElev} Elevations
-
-\G{png.d/belev.png}
-
-The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, you 
-can click on the respective endpoint to set its elevation properties. The endpoint on which you
-work is indicated with a big red dot. 
-
-\G{png.d/celev.png}
-
-An endpoint can have one of several elevation types:
-
-\b 
-\f{None} - no elevation defined.
-
-\b 
-\f{Defined} - a defined elevation at a specified height.
-
-\b 
-\f{Hidden} - a defined elevation but not displayed on the layout.
-
-\b 
-\f{Computed} - height is based on height of closest neighbors.
-
-\b 
-\f{Grade} - grade is based on height of closest neighbors.
-
-\b 
-\f{Ignored} - Endpoint is not considered in computations.
-
-\b 
-\f{Station} - assigns a name to the Endpoint.
-
-\f{Note:} Each endpoint can have only one of these attributes.
-For example, an endpoint can not be a Defined Elevation and a Station at the same time.
-
-When an endpoint is selected on the layout by Left-Click, it is highlighted by a large red dot and its 
-elevation type and values are displayed in the dialog.
-
-Additionally, \f{Defined Elevation} endpoints are indicated on the layout by gold colored dots.
-\f{Ignored Elevation} endpoints are indicated by blue colored dots.
-
-\c{SHIFT-LEFT-CLICK} splits the track at the specified point to add an elevation point to the middle of a track.
-
-The grade at the specified endpoint is displayed next to the \f{Grade} radio button.
-For \f{Defined Elevation} endpoints, the grade on each side of the endpoint is displayed.
-
-\f{Defined Elevation} endpoints are used to specify fixed heights of track endpoints.
-Typically, this would be where grade changes or where clearances must be maintained.
-Between \f{Defined Elevation} endpoints you can place \f{Computed} Elevations and \f{Grade} markers.
-These values are not entered directly but are Computed Dynamically based on the \f{Defined Elevations} of connected tracks.
-This allows you to label elevations at intermediate endpoints without having the enter specific values.
-You can also place \f{Computed} markers between a \f{Defined Elevation} point and the end of a track.
-
-\f{Stations} are used to provide information for the Profile (\k{cmdProfile}) command.
-
-All \f{Elevation} (including \f{Grade} and \f{Station}) labels are drawn on the layout outlined in boxes.  
-These may be moved by the \f{Move Description} (\k{cmdMoveLabel}) command.  In addition, \f{Grade} labels 
-have an arrow indicating the upwards direction.
-
-\S2{computingelevations} Computing Dynamic Elevations
-
-Elevations of Tracks are computed in following steps.  
-The colors listed in each step are used as the background color of the
-Track Elevation Markers (if they are enabled (\k{cmdDisplay})).
-
-\b 
-The Shortest Paths between all \e{Defined Elevations} are computed.  
-A Path stops at \e{Ignored} or \e{Defined} End-Points.
-The Elevation of any Turnouts on these Paths with more than two connections 
-are computed as the average Elevation inversely weighted by distance along the tracks to the
-\e{Defined Elevation} points (\e{Blue}).
-
-\b 
-The Elevation of any other tracks on the Shortest Paths are computed based on the distance along the tracks from the Turnouts computed in the first step and/or the \e{Defined Elevation} points (\e{Purple}).
-
-\b 
-The Elevation of any remaining tracks is computed based on the average Elevation
-of the tracks found in the first two steps that they
-are (directly or indirectly) connected to,
-inversely weighted by geometric distance (\e{Gold}).
-
-\b 
-Any remaining tracks are not connected to a \e{Defined Elevation} and do not have an Elevation.
-
-The Elevation Computation is performed incrementally every time the layout is changed to keep all elevations
-in sync.
-The performance of the computation is affected by the placement of the \e{Defined Elevation} End-Points 
-and the number of Paths between them.
-Place the \e{Defined Elevations} at points where tracks begin to branch 
-(such as the throat of a yard or at the ends of a siding).
-Also, use \e{Defined Elevations} to break the layout into areas so 
-recomputation has fewer tracks and Paths to deal with.
-
-\S{cmdProfile} Profile
-
-The \f{Profile} dialog draws a profile showing elevations, distances and grades for a path on the layout.
-
-\G{png.d/cprofile.png}
-
-Choose a path by Left-Clicking on endpoints.
-As each endpoint is chosen, the path is extended via the shortest route.
-Selecting the end of the path trims the path back to a last \f{Defined Elevation} point (if any, otherwise the pathp is cleared).
-
-If no route is possible an error message is displayed.
-There are several reasons why this might happen:
-
-\b 
-The tracks are not connected.  Check this by Shift-Left-Clicking on one track using the \f{Select} command (\k{cmdSelect}).
-
-This selects all tracks connected (directly or indirectly). See if the other track is selected.
-
-\b 
-One of the endpoints on the route is \f{Ignored} (\k{cmdElev}).  Look for blue dots on the expected 
-pathp when using the Profile or \f{Elevation} (\k{cmdElev}) commands.
-
-\b 
-The only route connects to a section of track that is already on the path and is not the end of the path.
-Remove the end of the path until the connected track is not on the path.
-
-The path is drawn in the Profile Color (\k{cmdRgbcolor}) (default Purple) on the layout.
-
-If the shortest path is not what you want, you can choose endpoints that are closer to the end of the path.
-Also, you can \f{Ignore} (\k{cmdElev}) endpoints to prevent the path from choosing a route through that endpoint.
-Shift-Right-Click (\k{mouseB}) displays a popup-menu that allows you to change the specified endpoint to be a \f{Defined},
- \f{Ignored} or \f{None} Elevation endpoint.
-
-Each \f{Defined Elevation} endpoint on the path is drawn as a Vertical bar, labeled with its height and distance 
-from the beginning of the path.
-
-The \f{Grade} between points is displayed between the vertical bars.
-The \f{Grade} line is drawn in Blue if that portion of the path does not contain more than one 
-Shortest Path between Defined Elevation endpoints.
-Otherwise it is drawn in Red, to indicate the grade is an average and the actual grade may vary for any particular track segment.
-See Computing Dynamic Elevation (\k{computingelevations}) for more details.
-
-Names defines via \f{Stations} on the path are displayed along the bottom of the \f{Profile}.
-
-You can change the heights of \f{Defined Elevations} by Left-Dragging on the profile window.
-As you \f{Drag}, the new elevation and grades to each side are displayed at the bottom of the profile dialog.
-
-The \f{Done} button closes the dialog.
-
-The \f{Clear} button removes all points from the path.
-
-The \f{Print} button prints the dialog.  The aspect ratio is preserved on the print-out.
-You will probably want to print in landscape format.
 
 \S{cmdRescale} Change Scale
 
 \G{png.d/rescale.png}
 
-\f{Change Scale} is used to change the size and gauge of the selected (\k{cmdSelect}) objects.  
-The amount to resize can be specified 
+\f{Change Scale} is used to change the size and gauge of selected (\K{cmdSelect}) objects. The amount to resize can be specified
 
-\b 
-by the modeling scale (eg. convert from HO to O scale)
+\u000
 
-\b 
-by the modeled gauge (eg. convert from standard gauge to narrow gauge), or
+\b by the modeling scale, e.g., convert from HO to O scale
 
-\b 
-by ratio (by 181.5%).
+\b by the modeled gauge, e.g., convert from standard gauge to narrow gauge, or
 
-If resizing by modeling scale then the track dimensions (ie. lengths and radii) will be changed as well.
-An option is available to disable this resizing of the selected objects.
+\b by ratio (by 181.5%).
+
+If resizing by modeling scale then track dimensions, e.g., lengths and radii, will be changed as well.  An option is available to disable the resizing of the selected objects.
+
+\rule
+
+
+\S{clrElev} Clear Elevations
+
+The \f{Clear Elevations} command is used to remove elevation points from selected track on the layout.
+
+Using the \f{Select} command, select the track that is to have its elevation settings cleared then select \f{Change>Clear Elevations} from the menu  bar to clear elevations of selected track.
+
+\rule
+
+
+\S{cmdConnect} Connect Sectional Tracks
+
+\G{png.d/bconnect.png}
+
+This command is used exclusively with \e{Sectional Track}.
+
+Occasionally pieces of sectional track do not line up exactly, especially when creating figure-8's or passing sidings.  When laying out the actual track you can compensate for this by adjusting the individual tracks to provide a bit of slack.  This command simulates that process.
+
+Click on the endpoint of each track you're trying to connect.  Tracks will move slightly in an attempt to overcome the gap.  If the gap is too large, the connection will fail. If this occurs, try using other track pieces in your layout.
+
+\e{XTrkCad} adjusts the positions of tracks connected to the tracks up to a track with more than two connections.  See the Demo for details.
+
+If one (or both) the selected tracks is an adjustable section (such as Kato's Adjustable Track #20-050) then the length of the track is changed to fill the gap.
+
+You can undo the effect of the \f{Connect} command by splitting (\K{splitDisconnect}) the track to disconnect it then using the \e{Shift+Left-Click} \f{Connect} command on the unconnected endpoints to tighten connections between the tracks.
+
+\rule
+
+
+\S{cmdElev} Elevation
+
+\G{png.d/belev.png}
+
+The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, you can click on the respective endpoint to set its elevation properties. The endpoint on which you work is indicated with a big red dot.
+
+\G{png.d/celev.png}
+
+An endpoint can have one of several elevation types:
+
+\u000
+
+\b \f{None} - no elevation defined.
+
+\b \f{Defined} - a defined elevation at a specified height.
+
+\b \f{Hidden} - a defined elevation but not displayed on the layout.
+
+\b \f{Computed} - height is based on height of closest neighbors.
+
+\b \f{Grade} - grade is based on height of closest neighbors.
+
+\b \f{Ignored} - endpoint is not considered in computations.
+
+\b \f{Station} - assigns a name to the endpoint.
+
+\f{Note:} Only one of these attributes can be assigned to an endpoint.  For example, an endpoint can not be defined as a Grade and a Station at the same time.
+
+When an endpoint is selected on the layout by \e{Left-Click}, it is highlighted by a large red dot and its elevation type and values are displayed in the dialog.
+
+Additionally, \f{Defined Elevation} endpoints are indicated on the layout by gold colored dots. \f{Ignored Elevation} endpoints are indicated by blue colored dots.
+
+\e{Shift+Left-Click} splits the track at the specified point and adds an elevation point.
+
+The grade at the specified endpoint is displayed next to the \f{Grade} radio button. For \f{Defined Elevation} endpoints, the grade on each side of the endpoint is displayed.
+
+\f{Defined Elevation} endpoints are used to specify fixed heights of track endpoints. Typically, this would be where a grade changes or where clearances must be maintained. \f{Computed} Elevations and \f{Grade} markers can place between \f{Defined Elevation} endpoints. These values are not entered directly but are computed dynamically based on \f{Defined Elevations} of connected tracks. This allows labeling of elevations at intermediate endpoints without having the enter specific values.  \f{Computed} markers can also placed between a \f{Defined Elevation} point and the end of a track.
+
+\f{Stations} are used to provide information for the Profile (\K{cmdProfile}) command.
+
+All \f{Elevation} labels (including \f{Grade} and \f{Station}) are drawn on the layout in outlined boxes.  These may be moved by the \f{Move Description} (\K{cmdMoveLabel}) command.  In addition, \f{Grade} labels have an arrow indicating the upwards direction.
+
+\rule
+
+
+\S2{computeElevations} Computing Dynamic Elevations
+
+Elevations of Tracks are computed in following steps.  The colors listed in each step are used as the background color of the Track Elevation Markers (if they are enabled (\K{cmdDisplay})).
+
+\b The Shortest Paths between all \e{Defined Elevations} are computed.  A Path stops at \e{Ignored} or \e{Defined} endpoints.  The Elevation of any Turnouts on these Paths with more than two connections are computed as the average Elevation inversely weighted by distance along the tracks to the \e{Defined Elevation} points (\e{Blue}).
+
+\u000
+
+\b The Elevation of any other tracks on the Shortest Paths are computed based on the distance along the tracks from the Turnouts computed in the first step and/or the \e{Defined Elevation} points (\e{Purple}).
+
+\u000
+
+\b The Elevation of any remaining tracks is computed based on the average Elevation of the tracks found in the first two steps that they are (directly or indirectly) connected to, inversely weighted by geometric distance (\e{Gold}).
+
+\u000
+
+\b Any remaining tracks are not connected to a \e{Defined Elevation} and do not have an Elevation.
+
+The elevation computation is performed incrementally every time the layout is changed to keep all elevations in sync. The performance of the computation is affected by the placement of the \e{Defined Elevation} endpoints and the number of Paths between them. Place the \e{Defined Elevations} at points where tracks begin to branch (such as the throat of a yard or at the ends of a siding). Also, use \e{Defined Elevations} to break the layout into areas so recomputation has fewer tracks and Paths to deal with.
+
+\rule
+
+
+\S{cmdFlip} Flip
+
+\G{png.d/bflip.png}
+
+This command turns selected objects over or around, effectively mirroring the object .
+
+\n Prior to invoking this command visualize how the selected object(s) will be flipped and determine where to draw a reference line that will act as an axis or anchor point for the flipped object(s).
+
+\lcont{
+
+\u000
+
+\dd \G{png.d/flip1.png} \G{png.d/flip2.png}
+
+\u000
+
+}
+
+\n Invoked the \f{Flip} command then \e{Left-Click} on one end of the reference line visualized in the proceeding step. Holding the \e{Left} mouse button, \e{Drag} the cursor across the layout to form the line visualized earlier.
+
+\lcont{
+
+\u000
+
+\dd \G{png.d/flip3.png} \G{png.d/flip4.png}
+
+\u000
+
+}
+
+\n Once a line of desired length and orientation appears, release the mouse button. The selected object(s) will then flip around the line as if it were a mirror.
+
+Since flipped objects are mirrored, turnout titles may be modified during the flip process. Right hand turnouts will become left hand turnouts and vice versa. Such is the case in this example.
+
+Certain turnouts, such as a Wye's, Three-Way or Crossings are symmetrical and thus titles for this type of objects are not changed. If a title change is necessary the currently loaded \f{Parameter Files} (\K{cmdPrmfile}) are searched for a turnout that matches the flipped turnout.  If a match is not found, the turnout's title is prefixed with \f{Flipped}. The \f{Properties} (\K{cmdDescribe}) command be used to change the title of such turnouts.
+
+\rule
+
+
+\S{cmdJoin} Join
+
+\G{png.d/bjoin.png}
+
+The \f{Join} command is used to bring together and connect any two segments of track. During the join process, \e{XTrkCad} ensures the connecting tracks are properly aligned.
+
+See \f{Help>Demo} (\K{cmdDemo}) for examples of how to join tracks.
+
+For detail about;
+
+\dd Using curved flex-track to join track segments refer to \K{joinTrackCurve}.
+
+\u000
+
+\dd Using straight flex-track to join track segments refer to \K{joinTrackStraight}.
+
+\u000
+
+\dd Moving one segment of track to join with another refer to \K{joinTrackMove}.
+
+\rule
+
+
+\S2{joinTrackCurve} Using Curved Flex-Track
+
+This method of joining track may be used where tracks are joined with a 'simple curve', e.g. one which uses a curve in a single direction as opposed to using reverse curves (\K{generalTerms}).
+
+\u000
+
+\dd \G{png.d/joincrv1.png}
+
+\u000
+
+\n Start the join process by clicking on the Join button (\G{png.d/bjoin.png}).
+
+\lcont{
+
+\u000
+
+\G{png.d/joincrv2.png}
+
+\u000
+
+}
+
+\n \e{Left-Click} the endpoint of one of the two tracks being joined. A red dot will appear as a reminder of which track has been selected.
+
+\lcont{
+
+\u000
+
+\G{png.d/joincrv4.png}
+
+\u000
+
+}
+
+\n Move the mouse pointer over the endpoint of the other track then \e{Left-Click} and hold the mouse button down. A track connecting the two endpoints will appear. If the track appears in black (and you are happy with the curve as its drawn), release the mouse button.
+
+\lcont{
+
+\u000
+
+\G{png.d/joincrv3.png}
+
+\u000
+
+}
+
+\n If the track appears in red, it means \e{XTrkCad} can't determine how to connect the first track with the second. If this occurs, while holding the left mouse button, drag the mouse back toward the first track until the connecting track appears in black. If the connecting track remains red, drag the mouse in the opposite direction until the connecting track turns black. Once the connecting track turns black, release the mouse button to finalize the \e{Join} command.
+
+\lcont{
+
+\u000
+
+\G{png.d/joincrv5.png}
+
+\u000
+
+}
+
+Throughout the above, the exact shape of the curve can be adjust by dragging the mouse around while keeping the left mouse button held down.
+
+Sometimes, no matter where you drag the mouse, the curve stays red and the tracks cannot be connected. This means the resulting curve is tighter than the minimum track radius set in the \e{Preferences dialog} (\K{cmdPref}). If desired, this setting can be adjusted from the \e{Preferences dialog} using the \f{Options>Preferences} menu selection to raise the dialog. If changing the minimum track radius is not a desired option then it will be necessary to relocate one of the tracks that you're attempting to join.
+
+You may also find that \e{XTrkCad} will not create the connecting curve in the exact shape you want. If this happens it may be necessary to either move one of the end points or draw a partial curve (or straight) and try again.
+
+If enabled, Easements (\K{cmdEasement}) will be automatically generated between tracks of differing radii. When using easements, there is a minimum radius as specified in the \e{Easement} dialog. It's not possible to join tracks with less then this radius and the connecting track's radius must be greater than the minimum radius.
+
+If any errors occur while joining tracks (such as moving beyond the end of a track or using a curve with a radius smaller than the Easement radius), then the joint track will be drawn in Red (The default colour of Exception Track errors. See \K{cmdRgbcolor} for detail). This colouring serves as visual indication for a connecting track that doesn't meet minimum specified parameters (\K{cmdPref}).
+
+Any tracks created during the \f{Join} command will have the following properties inherited from the first track: selected state, hidden state, scale, track gauge and Layer.
+
+A join can be made to or from a circle (\K{cmdCircle}) of track. Joining a track with a circle will cause the circle to be converted into a curved track.
+
+For detail about;
+
+\dd Using straight flex-track to join track segments refer to \K{joinTrackStraight}.
+
+\u000
+
+\dd Moving one segment of track to join with another refer to \K{joinTrackMove}.
+
+
+\rule
+
+
+\S2{joinTrackStraight} Using Straight Flex-Track
+
+This method of joining track may be used where the endpoints of the two tracks to be joined are on the same horizontal (\c{X}) or vertical (\c{Y}) axis.
+
+\u000
+
+\dd \G{png.d/joinstrt1.png}
+
+\u000
+
+\n Start the join process by clicking on the Join button (\G{png.d/bjoin.png}).
+
+\lcont{
+
+\u000
+
+\G{png.d/joinstrt2.png}
+
+\u000
+
+}
+
+\n \e{Left-Click} the endpoint of one of the two tracks being joined. A red dot will appear as a reminder of which track has been selected.
+
+\lcont{
+
+\u000
+
+\G{png.d/joinstrt3.png}
+
+\u000
+
+}
+
+\n Move the mouse pointer over the endpoint of the other track then \e{Left-Click}. A track connecting the two endpoints will appear.
+
+When this command is used to join;
+
+\b two flex-track endpoints, one long section of flex-track without joints will result.
+
+\b two sectional track endpoints, a section of flex-track will be created between and used to join the two sectional track endpoints.
+
+\b one flex-track endpoint with one sectional track endpoint, the section of flex-track will be extended and joined with the sectional track endpoint.
+
+Any tracks created during the \f{Join} command will have the following properties inherited from the first track: selected state, hidden state, scale, track gauge and Layer.
+
+Turnouts and Sectional (\K{cmdHotBar}) tracks can be joined to other tracks. \e{XTrkCad} extends the selected endpoint with a straight track when making the connection.  
+
+A Turntable (\K{cmdTurntable}) can be joined however it must be used as the second endpoint.
+
+For detail about;
+
+\dd Using curved flex-track to join track segments refer to \K{joinTrackCurve}.
+
+\u000
+
+\dd Moving one segment of track to join with another refer to \K{joinTrackMove}.
+
+
+\rule
+
+
+\S2{joinTrackMove} By Moving Track
+
+This method of joining track may be used to move, align and join one section of track with another.
+
+\u000
+
+\dd \G{png.d/joinmove1.png}
+
+\u000
+
+\n Before initiating the \f{Join} command, the track that will be moved, aligned then joined must be selected using the \f{Select} command (\K{cmdSelect}).
+
+\lcont{
+
+\u000
+
+\G{png.d/joinmove2.png}
+
+\u000
+
+}
+
+\n Once the track to be moved is selected, start the join process by clicking on the Join button (\G{png.d/bjoin.png}).
+
+\lcont{
+
+\u000
+
+\G{png.d/joinmove3.png}
+
+\u000
+
+}
+
+\n \e{Shift+Left-Click} the endpoint of one of the two tracks being joined. A red dot will appear as a reminder of which track has been selected.
+
+\lcont{
+
+\u000
+
+\G{png.d/joinmove4.png}
+
+\u000
+
+}
+
+\n Move the mouse pointer over the endpoint of the other track then \e{Shift+Left-Click}. The selected track will be moved, aligned then joined to the stationary section of track. 
+
+For detail about;
+
+\dd Using curved flex-track to join track segments refer to \K{joinTrackCurve}.
+
+\u000
+
+\dd Using straight flex-track to join track segments refer to \K{joinTrackStraight}.
+
+\rule
+
+
+\S{cmdModify} Modify
+
+\G{png.d/bmodify.png}
+
+The \f{Modify} command is used to change characteristics of or extend existing track by adding new track. This command works with any unconnected track endpoint.
+
+The \f{Modify} command can be invoked using the \f{Change>Modify} menu item, the \f{Modify} button or the menu raised by a \e{Right-Click} over the \f{Main Canvas}.
+
+Either the left mouse button (for changing length or creating a tangent track) or the right mouse button (for extending with a new track) is used to modify the unconnected endpoint.
+
+The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.  A \e{Box} is treated as 4 Lines.
+
+\e{Curved Lines} are modified in same manner as curved track.
+
+Selecting a corner of a \e{Poly Line}, \e{Filled Box} or \e{Polygon} moves that corner to a new position, and if moved close to a neighboring corner will merge the two corners and delete the edge between them. Selecting an edge will create a corner that can be dragged to a new position.
+
+Any tracks created during the \f{Modify} command will have the following properties inherited from the first track: selected state, hidden state, scale, track gauge and Layer. 
+
+For detail about;
+
+\dd Changing track length refer to \K{chgTrackLength}.
+
+\u000
+
+\dd Creating a tangent to a curve refer to \K{createTangent}
+
+\u000
+
+\dd Changing track radius refer to \K{chgTrackRadius}
+
+\u000
+
+\dd Extending track length refer to \K{extendTrack}
+
+\rule
+
+
+\S2{chgTrackLength} Changing Track Length
+
+\n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
+
+\lcont{\u000}
+
+\n With the mouse pointer hovering over the endpoint of the object to be modified, \e{Left+Drag} (\K{windowTerms}) to change the length of the track segment, table edge, bench-work, dimension line or line.
+
+\lcont{\u000}
+
+\e{Left+Drag}ging the endpoint of a turnout (or other sectional track) causes a straight length of flex-track to be created from the selected endpoint to the cursor.
+
+\e{Left+Drag}ging the endpoint of a \f{Table Edge} (\K{cmdDraw}) allows the endpoint to be moved to a new position. If the endpoint is moved close to another \f{Table Edge} then the endpoint will be moved to it.
+
+The length of a curved track can be changed to form an almost complete circle by selecting one endpoint of the curved track then dragging the cursor to the other endpoint. Going past the other endpoint creates a very small curve. Curves greater than 360\u00B0 cannot be created.
+
+For detail about;
+
+\dd Creating a tangent to a curve refer to \K{createTangent}
+
+\u000
+
+\dd Changing track radius refer to \K{chgTrackRadius}
+
+\u000
+
+\dd Extending track length refer to \K{extendTrack}
+
+\rule
+
+
+\S2{createTangent} Creating a Tangent to a Curve
+
+\n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
+
+\lcont{\u000}
+
+\n With the mouse pointer hovering over the endpoint of the object to be modified, \e{Left+Drag} (\K{windowTerms}) to change the length of the track segment.
+
+If a \e{Left+Drag} is continued beyond the radius of a curved track (\K{cmdCurve}) (not a Circle) a tangent to the curve will be created.
+
+Creation of the tangent begins when the distance from the curved track center to the cursor is greater than 110% of the radius.  If the cursor is moved within the radius of the curve then the current command exits and the \e{Changing Track Length} (\K{chgTrackLength}) command is executed instead.
+
+If \f{Easements} (\K{cmdEasement}) are enabled then an easement curve will be generated (if required) to connect the old and new tracks.
+
+For detail about;
+
+\dd Changing track length refer to \K{chgTrackLength}.
+
+\u000
+
+\dd Changing track radius refer to \K{chgTrackRadius}
+
+\u000
+
+\dd Extending track length refer to \K{extendTrack}
+
+\rule
+
+
+\S2{chgTrackRadius} Changing Track Radius
+
+This command is used to change the radius of a curved track or to curve a section of straight track.
+
+\n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
+
+\lcont{\u000}
+
+\n \e{Shift+Left+Drag} the unconnected endpoint of a curved track to change the radius of track segment. Alternately, \e{Shift+Left+Drag} the unconnected endpoint of a straight track to add a radius to the track segment.
+
+\lcont{
+
+\u000
+
+\b For this command to work, the endpoint opposite that being manipulated must be connected to another track.
+
+\u000
+
+}
+
+This command can be used to change straight tracks into curved track and vice versa.
+
+For detail about;
+
+\dd Changing track length refer to \K{chgTrackLength}.
+
+\u000
+
+\dd Creating a tangent to a curve refer to \K{createTangent}
+
+\u000
+
+\dd Extending track length refer to \K{extendTrack}
+
+\rule
+
+
+\S2{extendTrack} Extending Track Length
+
+This command is used to extend the length of a straight or curved section of track.
+
+\n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
+
+\lcont{\u000}
+
+\n With the mouse pointer hovering over the endpoint of the object to be modified, \e{Right+Drag} (\K{windowTerms}) to extend the length of the track segment.
+
+\lcont{\u000}
+
+The selected endpoint determines the position and angle of the first endpoint of the new track. The cursor is dragged to set the second endpoint. A curved or straight track will be created, depending on the position of the second endpoint.
+
+If \f{easements} (\K{cmdEasement}) are enabled then an easement curve will be generated (if required) to connect the old and new tracks.
+
+For detail about;
+
+\dd Changing track length refer to \K{chgTrackLength}.
+
+\u000
+
+\dd Creating a tangent to a curve refer to \K{createTangent}
+
+\u000
+
+\dd Changing track radius refer to \K{chgTrackRadius}
+
+\rule
+
+
+\S{cmdMove} Move
+
+\G{png.d/bmove.png}
+
+This command is used to move selected (\K{cmdSelect}) objects around the layout.
+
+
+The \f{Move} command can be invoked using the \f{Change>Move} menu item or the \f{Move} button and from the menu that's raised by a \e{Right-Click} over the \f{Main Canvas} or by the \e{Shift+Left+Drag} command when in \f{Select} mode.
+
+Successful use of this command requires selection of the object(s) to be moved before attempting to move it. An object is selected by using the \e{Left-Click} command. A group of connected objects can be selected using the \e{Shift+Left-Click} command.
+
+A pop-up menu with commands controlling how objects are drawn during moves can be activated by entering a \e{Shift+Right-Click} command while hovering over the \f{Main Canvas}
+
+\G{png.d/mmovedraw.png}
+
+\e{Left+Drag} is used to move the selected object(s) around the layout.
+
+\f{Note:} The \f{Draw Moving Tracks} Radio box on the \f{Command Options} (\K{cmdCmdopt}) dialog can also be used to select how objects are drawn during drags to move or rotate objects. The options for this feature are:
+
+\b \f{Normal} - objects are drawn normally. This can be time-consuming when using a slow machine and moving a large number of objects.
+
+\u000
+
+\b \f{Simple} - objects are drawn using one line (instead of two when zoomed in). Structures are drawn as outlines, no endpoints or lines are drawn.
+
+\u000
+
+\b \f{Endpoints} - only the endpoints are drawn (as stars).
+
+\rule
+
+
+\S{cmdMoveLabel} Move Description
+
+\G{png.d/bmovedes.png}
+
+This command is used to move Elevation, Grade, Station (\K{cmdElev}), Curved Track (\K{cmdCurve}), Helix (\K{cmdHelix}) or Turnout (\K{cmdHotBar}) Labels.
+
+The \f{Move Description} command can be invoked using the \f{Change>Move Description} menu item, the \f{Move Description} button or the menu raised by a \e{Right-Click} over the \f{Main Canvas}.
+
+Click the \f{Move Description} button to activate the \f{Move Description} command. Use \e{Left+Drag} to move the label to a new position. Once moved, the label becomes fixed in a position relative to the object. Subsequent moves of that object will cause the label to move as well.
+
+This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select mode (\K{cmdSelect}).
+
+\e{Shift+Right-Click} (\K{cmdAcclKeys}) can be used to toggle display of individual Curved Track, Helix or Turnout Labels.
+
+\rule
+
+
+\S{cmdProfile} Profile
+
+The \f{Profile} dialog draws a profile showing elevations, distances and grades for a path on the layout.
+
+\G{png.d/dcprofile.png}
+
+Choose a path by using \e{Left-Click} on endpoints.  As each endpoint is chosen, the path is extended via the shortest route.  Selecting the end of the path trims the path back to a last \f{Defined Elevation} point (if any, otherwise the path is cleared).
+
+If no route is possible an error message is displayed.  There are several reasons why this might happen:
+
+\b The tracks are not connected. Check this by using \e{Shift+Left-Click} on one track using the \f{Select} command (\K{cmdSelect}). This selects all tracks connected (directly or indirectly). See if the other track is selected.
+
+\u000
+
+\b One of the endpoints on the route is \f{Ignored} (\K{cmdElev}).  Look for blue dots on the expected path when using the Profile or \f{Elevation} (\K{cmdElev}) commands.
+
+\u000
+
+\b The only route connects to a section of track that is already on the path and is not the end of the path. Remove the end of the path until the connected track is not on the path.
+
+The path is drawn in the Profile Color (\K{cmdRgbcolor}) (default Purple) on the layout.
+
+If the shortest path is not what you want, you can choose endpoints that are closer to the end of the path.  Also, you can \f{Ignore} (\K{cmdElev}) endpoints to prevent the path from choosing a route through that endpoint.  Shift+Right-Click (\K{cmdAcclKeys}) displays a pop-up menu that allows you to change the specified endpoint to be a \f{Defined}, \f{Ignored} or \f{None} Elevation endpoint.
+
+Each \f{Defined Elevation} endpoint on the path is drawn as a Vertical bar, labeled with its height and distance from the beginning of the path.
+
+The \f{Grade} between points is displayed between the vertical bars.  The \f{Grade} line is drawn in Blue if that portion of the path does not contain more than one Shortest Path between Defined Elevation endpoints.  Otherwise it is drawn in Red, to indicate the grade is an average and the actual grade may vary for any particular track segment.  See Computing Dynamic Elevation (\K{computeElevations}) for more details.
+
+\f{Stations} on the path are displayed along the bottom of the \f{Profile}.
+
+The heights of \f{Defined Elevations} can be changed by using \e{Left+Drag} on the profile window.  As you \f{Drag}, the new elevation and grades to each side are displayed at the bottom of the profile dialog.
+
+The \f{Done} button closes the dialog.
+
+The \f{Clear} button preserves elevation settings established along the current profile path, removes all profile points and leaves the \f{Profile} dialog open for selection of the next set of profile points. This function is useful when there's a need to view elevations along multiple profile paths.
+
+The \f{Print} button prints the dialog.  The aspect ratio is preserved on the print-out.  You will probably want to print in landscape format.
+
+\rule
+
+
+\S{cmdDescribe} Properties
+
+\G{png.d/bdescrib.png}
+
+Clicking on the \f{Properties} (Describe Mode) button cancels all active commands, closes any open dialog windows and places focus on the main window.
+
+A \e{Left-Click} on an object while in \f{Properties} mode causes a properties dialog window to appear. The properties dialog contains information pertaining to the selected objects position, size, color and layer as appropriate for each type of object. Certain values can be changed to modify the object. If a track is connected to other tracks, then some values, e.g., endpoint positions, can not be changed.
+
+\G{png.d/dproperties.png}
+
+The selected object is highlighted by a grey area.
+
+\G{png.d/dpropertieshighlight.png}
+
+Most commands return to \f{Properties} mode then they terminate unless the command is sticky (\K{cmdSticky}).
+
+Note: the Default Command radio button on the \f{Command Options} (\K{cmdCmdopt}) dialog controls whether the \f{Properties} or the \f{Select} (\K{cmdSelect}) command is used as the default command.
+
+\rule
+
+
+\S{cmdRaiseElev} Raise or Lower Elevation
+
+This command allows you to raise or lower the elevation of all selected tracks.
+
+\G{png.d/dchgelev.png}
+
+The entered value is added to all Defined Elevations on the Selected tracks.  A negative value will lower the Elevations.
+
+\rule
+
+
+\S{cmdRotate} Rotate
+
+\G{png.d/brotate.png}
+
+This command is used to rotate selected (\K{cmdSelect}) objects.
+
+The \f{Rotate} command can be invoked using the \f{Change>Rotate} menu item, the \f{Rotate} button, the menu raised by a \e{Right-Click} over the \f{Main Canvas} or by the \e{Shift+Right+Drag} command when in \f{Select} mode.
+
+Successful use of this command requires selection of the object(s) to be rotated before attempting to rotate it. An object is selected by using the \e{Left-Click} command. A group of connected objects can be selected using the \e{Shift+Left-Click} command.
+
+A pop-up menu with commands controlling how objects move during the \f{Rotate} function can be activated by entering a \e{Shift+Right-Click} command while hovering over the \f{Main Canvas}.
+
+\G{png.d/mrotatemove.png}
+
+Rotation can be achieved using one of the following methods;
+
+\u000
+
+\dd \e{Left+Drag} using the mouse. See \K{rotateByMouse} for detail.
+
+\u000
+
+\dd Selecting fixed or specified degrees of rotation using a \e{Right-Click} menu. See \K{rotateByMenu} for detail.
+
+\u000
+
+\dd Aligning the selected object with another object on the layout. See \K{rotateByAlign} for detail.
+
+\rule
+
+
+\S2{rotateByMouse} Using Mouse
+
+Rotate An Object Using the Mouse
+
+\n \f{Select} the object(s) to be rotated.
+
+\lcont{\u000}
+
+\n Click the \f{Rotate} button (\G{png.d/brotate.png}) to activate the \f{Rotate} function.
+
+\lcont{\u000}
+
+\n Visualize an axis point on the object that's to be rotated then place the mouse pointer over that point.
+
+\lcont{\u000}
+
+\n Click and hold the left mouse button then drag (\e{Left+Drag}) the mouse away from the axis point to create a "handle". This handle will be used to rotate the object. While continuing to hold the left mouse button, drag (\e{Left+Drag}) the handle in the desired direction of rotation. \f{Note:} If the \e{Ctrl} key is pressed in conjunction with \e{Left+Drag}, the object will rotate in increments of 15\u00B0.
+
+\lcont{\u000}
+
+\n Release the mouse key once desired rotation is obtained.
+
+\u000
+
+Rotation can also be achieved through use of one of these alternate methods;
+
+\u000
+
+\dd Selecting fixed or specified degrees of rotation using a \e{Right-Click} menu. See \K{rotateByMenu} for detail.
+
+\u000
+
+\dd Aligning the selected object with another object on the layout. See \K{rotateByAlign} for detail.
+
+\rule
+
+
+\S2{rotateByMenu} Using Degree's of Rotation
+
+Rotate An Object Using Fixed or Specified Degree's of Rotation
+
+A pop-up menu with additional menu items allows you to \f{Rotate} the selected object(s) through various predefined angles or through any angle you specify. The \f{Rotate} command is executed as follows;
+
+\n \f{Select} the object(s) to be rotated.
+
+\lcont{\u000}
+
+\n Click the \f{Rotate} button (\G{png.d/brotate.png}) to activate the \f{Rotate} function.
+
+\lcont{\u000}
+
+\n With the mouse pointer hovering over the object to be rotated, \e{Shift+Right-Click} to raise the Rotate menu then select the desired degree and direction of rotation from the list of predefined angles (180\u00B0, 90\u00B0 CW, 45\u00B0 CW, 30\u00B0 CW, 15\u00B0 CW, 15\u00B0 CCW, 30\u00B0 CCW, 45\u00B0 CCW, 90\u00B0 CCW). 
+
+\lcont{
+
+\u000
+
+\G{png.d/mrotatefixed.png}
+
+\u000
+
+Alternately, any angle may be entered by \e{Left-Click}ing the \f{Enter Angle...} menu item then entering a desired angle in the Rotate dialog window that appears.
+
+\G{png.d/drotateangle.png}
+
+\u000
+
+}
+
+Rotation can also be achieved through use of one of these alternate methods;
+
+\u000
+
+\dd \e{Left+Drag} using the mouse. See \K{rotateByMouse} for detail.
+
+\u000
+
+\dd Aligning the selected object with another object on the layout. See \K{rotateByAlign} for detail.
+
+\rule
+
+
+\S2{rotateByAlign} Aligned With Another Object
+
+Rotate and Align An Object With Another Object
+
+A pop-up menu with additional menu items allows you to \f{Align} the selected object(s) with any other object on the layout. The \f{Align} command is executed as follows;
+
+\n \f{Select} the object(s) to be rotated.
+
+\lcont{\u000}
+
+\n Click the \f{Rotate} button (\G{png.d/brotate.png}) to activate the \f{Rotate} function.
+
+\lcont{\u000}
+
+\n With the mouse pointer hovering over the object to be rotated, \e{Shift+Right-Click} to raise the Rotate menu then select \f{Align}.
+
+\lcont{
+
+\u000
+
+\G{png.d/mrotatealign.png}
+
+\u000
+
+}
+
+\n \e{Left-Click} on the (selected) object that is to be rotated.
+
+\lcont{\u000}
+
+\n \e{Left-Click} on the object with which you want the selected object aligned. The selected object will rotate to align with the reference object.
+
+\u000
+
+Rotation can also be achieved through use of one of these alternate methods;
+
+\u000
+
+\dd \e{Left+Drag} using the mouse. See \K{rotateByMouse} for detail.
+
+\u000
+
+\dd Selecting fixed or specified degrees of rotation using a \e{Right-Click} menu. See \K{rotateByMenu} for detail.
+
+\rule
+
+
+\S{cmdSelect} Select 
+
+\G{png.d/bselect.png}
+
+Clicking on the \f{Select} button cancels all active commands, closes any open dialog windows and places focus on the main window.
+
+In combination with the mouse, the \f{Select} command can be used as follows;
+
+\dd \e{Left-Click} - selects an object (or unselects a selected object). Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog).
+
+\u000
+
+\dd \e{Shift+Left-Click} - selects all unselected tracks connected to the track you select.  Selection stops at selected tracks.  Caution: This can select all tracks on the layout.
+
+\u000
+
+\dd \e{Left+Drag} - highlights an area, and all objects within the area are selected.
+
+\u000
+
+\dd \e{Right-Click} - displays a pop-up menu of commands.
+
+\lcont{
+
+\u000
+
+\G{png.d/mselect.png} or \G{png.d/mselected.png}
+
+\u000
+
+}
+
+\u000
+
+\dd \e{Shift+Right-Click} (\K{cmdAcclKeys}) - displays a pop-up menu of options controlling how objects are drawn during moves and rotates (below).  If there are selected objects then additional menu items allow you to rotate the selected objects by various angles.
+
+\u000
+
+\dd \e{Right+Drag} - highlights an area, and all objects within the area are unselected.
+
+\u000
+
+\dd \e{Shift+Left-Click+Drag} - moves the selected objects (the Move (\K{cmdMove}) command).
+
+\u000
+
+\dd \e{Shift+Right-Click+Drag} - rotates the selected objects (the \f{Rotate} (\K{cmdRotate}) command).
+
+\lcont{
+
+\b If the \e{Ctrl} key is pressed while dragging then rotation will occur in 15\u00B0 increments.
+
+}
+
+\u000
+
+\dd \e{Ctrl+Left-Click+Drag} - moves turnout and elevations labels (Also see the \f{Move Description} (\K{cmdMoveLabel}) command).
+
+\u000
+
+The following commands operate on the objects you have selected:
+
+\b \f{Move} (\K{cmdMove}) the selected objects.
+
+\b \f{Rotate} (\K{cmdRotate}) the selected objects.
+
+\b \f{Flip} (\K{cmdFlip}) (mirrors) the selected objects.
+
+\b \f{Delete} (\K{cmdDelete}) selected objects.
+
+\b \f{Hide} (or unhide) in a Tunnel (\K{cmdTunnel}).
+
+\b \f{Move} Above or Below (\K{cmdAboveBelow}).
+
+\b \f{Parts List} (\K{cmdEnum}) of the selected objects.
+
+\b \f{Change} the width of the tracks' rails.
+
+\b \f{Export} (\K{cmdExport}) the selected objects.
+
+\b Creates a structure or turnout definition from \f{Grouped} (\K{cmdGroup}) objects.
+
+\b \f{Rescale} (\K{cmdRescale}) the selected objects.
+
+The \f{Cut}, \f{Copy} and \f{Paste} commands found on the \f{Edit} (\K{editM}) menu will also operate on selected objects.
+
+Notes:
+
+\b A Filled Shape (\K{cmdDraw}) can be selected by clicking on its edge.
+
+\u000
+
+\b Connections between selected and unselected tracks will be broken when selected tracks are moved.  If the Drawing Scale is 8:1 or smaller, these about-to-be broken connections are marked with a red X.
+
+\u000
+
+\b The \f{Select All} item on the Edit (\K{editM}) menu can be used to select all objects on the layout.
+
+\u000
+
+\b The Default Command radio button on the Command Options (\K{cmdCmdopt}) dialog controls whether the \e{Properties} (\K{cmdDescribe}) or \e{Select} command is used as the default command.
+
+\u000
+
+\b Pressing the \e{Escape} key will deselect all selected tracks.
+
+\rule
+
+
+\S{cmdSplitTrack} Split Track
+
+\G{png.d/bsplit.png}
+
+The \f{Split} command provides several functions. It can be used to disconnect the joint between two sections of connected track, to divide a section of track into two pieces at a selected point or to place block gaps at an existing joint.
+
+For detail about;
+
+\u000
+
+\dd Disconnecting the joint between two sections of track see \K{splitDisconnect}.
+
+\u000
+
+\dd Dividing a section of track into two connected pieces see \K{splitDivide}.
+
+\u000
+
+\dd Creating block gaps at an existing joint see \K{splitBlockGap}.
+
+\rule
+
+
+\S2{splitDisconnect} Disconnect Joint
+
+Disconnecting a joint between two pieces of connected track;
+
+\n Click the \f{Split} button (\G{png.d/bsplit.png}) to activate the \f{Split} command.
+
+\lcont{\u000} 
+
+\n Place the mouse pointer over the joint between the two track endpoints then \e{Left-Click}.
+
+\lcont{\u000}
+
+\dd When the \f{Split} command completes, the joint at the two track endpoints will show three lines rather than one. The three lines represent abutted, disconnected track endpoints.
+
+\u000
+
+\dd \G{png.d/splitConnect.png}
+
+\dd \e{Joint prior to split}
+
+\u000
+
+\dd \G{png.d/splitDisconnect.png}
+
+\dd \e{Joint following split}
+
+\u000
+
+For detail about;
+
+\u000
+
+\dd Dividing a section of track into two connected pieces see \K{splitDivide}.
+
+\u000
+
+\dd Creating block gaps at an existing joint see \K{splitBlockGap}.
+
+\rule
+
+
+\S2{splitDivide} Divide Track
+
+Dividing a section of track into two connected pieces;
+
+\n Click the \f{Split} button (\G{png.d/bsplit.png}) to activate the \f{Split} command.
+
+\lcont{\u000} 
+
+\n Place the mouse pointer over the point on the track where the it should be divided then \e{Left-Click}.
+
+\lcont{\u000}
+
+\dd When the \f{Split} command completes, a connected joint will appear in the track at the point of selection. To split and disconnect at a point, execute the \f{Split} track command twice. The first command will split the track, the second command will disconnect it.
+
+\u000
+
+\dd \G{png.d/splitNotYet.png}
+
+\dd \e{Track prior to split}
+
+\u000
+
+\dd \G{png.d/splitConnect.png}
+
+\dd \e{Track following split}
+
+\u000
+
+It's not possible to create a track shorter than the \e{Minimum Track Length} (\K{cmdPref}).
+
+This command is useful for placing tunnel portals or elevation points (\K{cmdElev}) at specific track locations.
+
+Normally a turnout cannot be split however, if the \e{Shift} key is held when executing this command then the turnout can be \e{trim}med. \e{Trim}ming replaces the portion of track between the split point and the turnouts endpoint with flex-track. For turnouts with more than one set of points (\K{generalTerms}), such as a slip switch or scissors crossover, a \e{trim} point cannot be selected between the \e{points} of the turnout.
+
+For detail about;
+
+\u000
+
+\dd Disconnecting the joint between two sections of track see \K{splitDisconnect}.
+
+\u000
+
+\dd Creating block gaps at an existing joint see \K{splitBlockGap}.
+
+\rule
+
+
+\S2{splitBlockGap} Adding \i{Block Gaps}
+
+The \f{Split} command can be used to add block gaps (\K{generalTerms}) at the point where two track endpoints join. Block gaps are drawn as a thick line and can be placed in either of the rails or both if total isolation is required.
+
+\dd \G{png.d/blockNone.png}
+
+\dd \e{No Block Gaps}
+
+\u000
+
+\dd \G{png.d/blockTop.png}
+
+\dd \e{Block Gap in top rail}
+
+\u000
+
+\dd \G{png.d/blockBottom.png}
+
+\dd \e{Block Gap in bottom rail}
+
+\u000
+
+\dd \G{png.d/blockBoth.png}
+ 
+\dd \e{Block Gaps in both rails}
+
+\u000
+
+After executing the \f{Split} command use the \e{Shift+Right-Click} command to display one of two pop-up menus which can be used to add, change or remove \e{block gaps} for the selected endpoint.
+
+\dd \G{png.d/msplitblock.png}
+
+\dd \e{This menu appears if track runs in a horizontal direction.}
+
+\u000
+
+\dd \G{png.d/msplitblockLR.png}
+
+\dd \e{This menu appears if track runs in a vertical direction.}
+
+\u000
+
+For detail about;
+
+\u000
+
+\dd Disconnecting the joint between two sections of track see \K{splitDisconnect}.
+
+\u000
+
+\dd Dividing a section of track into two connected pieces see \K{splitDivide}.
+
+\rule

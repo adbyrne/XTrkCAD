@@ -12,6 +12,10 @@
 \cfg{html-mshtmlhelp-contents}{xtrkcad.hhc}
 \cfg{html-mshtmlhelp-index}{xtrkcad.hhk}
 
-\cfg{html-contents-depth}{0}{2}
+\cfg{html-contents-depth}{0}{0}
+\cfg{html-contents-depth}{1}{0}
+\cfg{html-contents-depth}{2}{0}
+\cfg{html-contents-depth}{3}{0}
+\cfg{html-contents-depth}{4}{0}
 
 \cfg{html-head-end}{<link rel="stylesheet" type="text/css" href="xtrkcad_win.css">}

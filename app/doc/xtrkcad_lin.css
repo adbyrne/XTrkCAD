@@ -1,40 +1,29 @@
-/**************************************************************************
-Window Help File colour, fonts, margins, all are done here
-**************************************************************************/
+/************************************************************************************
+LINUX Help File colour and fonts are done here. Halibut controls margins, line spacing and indents.
+*************************************************************************************/
 
 BODY {
-	background: White;
-	font-family:  Verdana, Arial, Helvetica;
+	background: #F5F5DC;
+	font-family: Verdana, Arial, Helvetica;
 	font-size: 100%;
 	color: #000000;
 	font-weight: normal;
-	}
-
-code {
-	text-decoration: none;
-	font-family: "Courier New", Courier, monospace;
-	font-size: 9pt;
-	color: Black;
-	font-weight: bold;
 }
 
 A:link {
 	text-decoration: none;
-	font-family: Verdana, Arial, Helvetica;
 	color: Blue;
 	font-weight: bold;
 }          /* unvisited link */
 
 A:visited {
 	text-decoration: none;
-	font-family: Verdana, Arial, Helvetica;
 	color: 336666;
 	font-weight: bold;
 }        /* visited links */
 
 A:active { 
 	text-decoration: none;
-	font-family: Verdana, Arial, Helvetica;
 	font-weight: bold;	
 	color: red;
 	}        /* active links */
@@ -46,7 +35,6 @@ a:hover {
 
 H1 {
 	text-align: left;
-	font-family: Verdana, Arial, Helvetica;
 	font-size: large;
 	font-style: italic;
 	font-weight: bold;
@@ -55,7 +43,6 @@ H1 {
 
 H2 {
 	text-align: left;
-	font-family: Verdana, Arial, Helvetica;
 	font-size: medium;
 	font-style: italic;
 	font-weight: bold;
@@ -64,20 +51,8 @@ H2 {
 
 H3 {
 	text-align: left;
-	font-family: Verdana, Arial, Helvetica;
 	font-size: small;
 	font-style: italic;
 	font-weight: bold;
 	padding: 3px 6px;
 }
-
-
-p, pre {margin-left: 30px;}
-
-ul {list-style: disc;}		
-
-ol {list-style: decimal}	
-	
-dt {font-weight: bold;}
-
-dd {margin-left: 40px;}	

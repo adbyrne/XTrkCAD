@@ -7,18 +7,20 @@ ELSE (UNIX)
 ENDIF (UNIX)	
 
 SET( butfiles ${butfiles}
-				  ${CMAKE_CURRENT_SOURCE_DIR}/intro.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/mainw.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/filem.but 
+				  ${CMAKE_CURRENT_SOURCE_DIR}/intro.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/addm.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/changem.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/drawm.but
 				  ${CMAKE_CURRENT_SOURCE_DIR}/editm.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/viewm.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/addm.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/changem.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/drawm.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/managem.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/optionm.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/win_help.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/map_hot.but 
+				  ${CMAKE_CURRENT_SOURCE_DIR}/filem.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/helpm.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/hotbar.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/macrom.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/managem.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/optionm.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/statusbar.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/view_winm.but
+				  ${CMAKE_CURRENT_SOURCE_DIR}/navigation.but 
 				  ${CMAKE_CURRENT_SOURCE_DIR}/appendix.but )
 
 ADD_CUSTOM_COMMAND(

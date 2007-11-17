@@ -1,14 +1,14 @@
-/**************************************************************************
-Window Help File colour, fonts, margins, all are done here
-**************************************************************************/
+/************************************************************************************
+Window Help File colour and fonts are done here. Halibut controls margins, line spacing and indents.
+*************************************************************************************/
 
 BODY {
-	background: White;
-	font-family:  Verdana, Arial, Helvetica;
+	background: #F5F5DC;
+	font-family: Verdana, Arial, Helvetica;
 	font-size: 9pt;
 	color: #000000;
 	font-weight: normal;
-	}
+}
 
 A:link {
 	text-decoration: none;

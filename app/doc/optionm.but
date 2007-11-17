@@ -1,232 +1,271 @@
-\H{optionM} Options Menu
+\# Notes:
+\#
+\# The "\u000" command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
+\#
+\# The "\u00B0" command gives proper format to the degree sign.
+
+\H{optionM}\i{Options Menu}
 
 \G{png.d/moptions.png}
+
 The \f{Options Menu} shows commands to change configuration options.
 
-\b 
-\f{Layout} - Displays the layout (\k{cmdLayout}) dialog.
+\dd \f{Colors} - Displays the Colors (\K{cmdRgbcolor}) dialog.
 
-\b 
-\f{Display} - Displays the Display (\k{cmdDisplay}) dialog.
+\u000
 
-\b 
-\f{Command} - Displays the Command Options (\k{cmdCmdopt}) dialog.
+\dd \f{Command} - Displays the Command Options (\K{cmdCmdopt}) dialog.
 
-\b 
-\f{Easement} - Displays the 
-easement (\k{cmdEasement}) dialog which controls how easements 
-(spiral transition curves) are used to join tracks.
+\u000
 
-\b 
-\f{Fonts} - Displays the font selection (\k{fontSelW}) dialog
-which selects the 
-font used by the text (\k{cmdText}) command.
-This command is only available on UNIX based systems. 
+\dd \f{Display} - Displays the Display (\K{cmdDisplay}) dialog.
 
-\b 
-\f{Sticky} - Displays the Sticky Commands (\k{cmdSticky}) dialog.
+\u000
 
-\b 
-\f{Preferences} - Displays the Preferences (\k{cmdPref}) dialog.
+\dd \f{Easement} - Displays the easement (\K{cmdEasement}) dialog which controls how easements (spiral transition curves) are used to join tracks.
 
-\b 
-\f{Colors} - Displays the Colors (\k{cmdRgbcolor}) dialog.
+\u000
 
-\S{cmdLayout} Layout Dialog
+\dd \f{Fonts} - Displays the font selection (\K{fontSelW}) dialog which selects the font used by the text (\K{cmdText}) command.  This command is only available on UNIX based systems. 
 
-\G{png.d/layout.png}
-The \f{Layout} dialog, displayed by the Options (\k{optionM}) menu, contains items controlling the current layout.
+\u000
 
-\b 
-\f{Room Width} and \f{Height} - in inches or centimeters (this effects the size of the Map Window (\k{cmdMap})).
+\dd \f{Layout} - Displays the layout (\K{cmdLayout}) dialog.
 
-\b 
-\f{Title} - 2 lines of information that will be shown on any printout of your layout design. 
+\u000
 
-\b 
-\f{Scale} - currently being used.
+\dd \f{Preferences} - Displays the Preferences (\K{cmdPref}) dialog.
 
-\b
-\f{Gauge} - track gauge being used. 
+\u000
 
-\S{cmdDisplay} Display Dialog
+\dd \f{Sticky} - Displays the Sticky Commands (\K{cmdSticky}) dialog.
 
-The \f{Display} dialog, displayed by the Options (\k{optionM}) menu, contains 
-items controlling the display of objects on the Main window.
+\rule
 
-\G{png.d/displayopt.png}
 
-\b 
-\f{Draw Tunnel} - how to draw hidden tracks (\k{cmdTunnel}), 
-either not at all, as dashed lines or as normal solid lines (which might be faster).
+\S{cmdRgbcolor} Colors Dialog
 
-\b 
-\f{Draw EndPts} - when to draw endpoints between connected track: never, 
-only for turnouts or for all tracks.
+The \f{Colors} dialog is invoked from the Options (\K{optionM}) menu
 
-\b 
-\f{Label Enable} - individual control over whether to display various types of labels.  
-You may want to turn some of these off if your layout is too cluttered.
+\G{png.d/colorw.png}
 
-\b 
-\f{Turnouts} - the title of each turnout and sectional track.
+The \f{Colors} dialog controls the color that various objects are drawn.
 
-\b 
-\f{Lengths} - the length of flextrack attached to ends of turnouts.
+\dd \f{Border} - Sets color of Rulers, Room Boundaries and Table Edges.
 
-\b 
-\f{EndPt Elevations} - Elevation markers attached to endpoints.
+\u000
 
-\b 
-\e{Track Elevations} - Computed elevations at the center of each track.
+\dd \f{Exception Track} - Sets color of \e{Exceptional Tracks} (\K{cmdPref}). Those which exceed the specified grade or are have a radius smaller than the minimum set.
 
-\b 
-\e{Cars} - Reporting mark labels on cars.
+\u000
 
-\b 
-\f{Label Font Size} - controls the size of Labels on the layout.
+\dd \f{Marker} - Sets color of short lines drawn on the Ruler of the Main (\K{mainW}) window to indicate cursor position.
 
-\b 
-\f{Label Scale} - draw labels only when the drawing Scale is smaller or equal to this value.
+\u000
 
-\b 
-\f{Layout Labels} - controls the format of titles for turnouts and structures displayed on the Layout.
+\dd \f{Normal Tracks} - Sets color of normal track.
 
-\b 
-\f{Color Layers} - when set, tracks and/or non-tracks (lines, table edges and structures) 
-are drawn with color of the tayer (\k{cmdLayer}) they belong to.
+\u000
 
-\b 
-\f{Two Rail Scale} - draw tracks using two lines when the drawing Scale is smaller than this value.
+\dd \f{Primary Axis} - Sets color of the large cross displayed when positioning the \f{Snap Grid} (\K{cmdGrid}) or the \f{Print Grid} (\K{cmdPrint}).
 
-\b 
-\f{Draw Ties} - how to draw ties under the rails when the drawing Scale is smaller than half of the \f{Two Rail Scale}.
+\u000
 
-\b 
-\f{Min Grid Spacing} - minimum distance between \f{Grid} (\k{cmdGrid}) lines (in pixels).
-If the grid lines are closer then drawing them is suppressed.
+\dd \f{Profile Path} - color of the path when using the \f{Profile} (\K{cmdProfile}) command.
 
-\b 
-\f{Balloon Help} - disables the display of \f{Balloon Help} (\k{windowTerms}) which usually is shown
-when the cursor is placed over a control.
+\u000
 
-\b 
-\f{Hotbar Labels} - controls the format of titles for objects on the \f{Hotbar} (\k{cmdHotBar}).
+\dd \f{Secondary Axis} - Sets color of the large cross displayed when positioning the \f{Snap Grid} (\K{cmdGrid}) or the \f{Print Grid} (\K{cmdPrint}).
 
-\b 
-\f{Map Scale} - scale of the Map (\k{cmdMap}) window.
-Increase this value to make the \f{Map} window smaller when working with large layouts.
-\f{Note:} you cannot make the \f{Map} window larger than the screen.
+\u000
 
-\b 
-\f{Live Map} - if checked then the Main Window (\k{mainW}) will be updated as you
-drag on the \f{Map Window} (\k{cmdMap}).
-Note that this can be slow.
+\dd \f{Selected Tracks} - Sets color of Selected track.
 
-\b 
-\f{Car Labels} - controls the grouping and display of \f{Cars} on the \f{Hotbar} (\k{cmdHotBar}) during the \f{Train}
- (\k{cmdTrain}) command. This can be a combination of \f{Prototype}, \f{Manufacturer}, \f{Part Number} and \f{Item}.
+\u000
 
-\b 
-\f{Trains On Hidden Track} - controls whether trains (\k{cmdTrain}) on invisible layers (\k{cmdLayer}) or 
-hidden tracks (\k{cmdTunnel}) (if hidden tracks are not drawn) are displayed.
+\dd \f{Snap Grid} - the Grid displayed by the \f{Grid} (\K{cmdGrid}) dialog.
+
+\u000
+
+\dd \f{Track Ties} - color of ties (if drawn).
+
+\rule
+
 
 \S{cmdCmdopt} Command Option Dialog
 
+The \f{Command Option} dialog is invoked from the Options (\K{optionM}) menu
+
 \G{png.d/cmdopt.png}
-The \f{Command Option} dialog, displayed by the Options (\k{optionM}) menu, contains items 
-controlling behavior of some commands.
 
-\b 
-\f{Draw Moving Tracks} - how to draw tracks during move and rotate operations, see the \f{Select} (\k{cmdSelect}) command.
+The \f{Command Option} dialog contains items which control the behavior of some commands.
 
-\b 
-\f{Turntable Angle} - minimum angle between adjacent tracks connected to a 
-\f{Turntable} (\k{cmdTurntable}).
+\dd \f{Draw Moving Tracks} - how to draw tracks during move and rotate operations. See  \K{cmdSelect} and \K{cmdMove} for additional detail.
 
-\b 
-\f{Default Command} - selects the \f{Describe} (\k{cmdDescribe}) or \f{Select} (\k{cmdSelect})
-as the default command which is invoked when any other command (if not \f{Sticky} (\k{cmdSticky})) is canceled or 
-completed.
+\u000
 
-\b 
-\f{Max Coupling Speed} - trains (\k{cmdTrain}) moving faster than this speed will crash 
-when running into other trains or hitting the end of a track or an open turnout.
-Crashed trains must be manually moved back onto the track.
+\dd \f{Default Command} - selects the \f{Properties} (\K{cmdDescribe}) or \f{Select} (\K{cmdSelect}) as the default command which is invoked when any other command (if not \f{Sticky} (\K{cmdSticky})) is canceled or completed.
 
-\b 
-\f{Right Click} - will either display a popup-menu of available commands or 
-command-specific options depending on whether the \f{Shift} key is being held down or not.  
-This option allows you to choose which operation occurs.
+\u000
 
-\S{cmdEasement} Easements
+\dd \f{Max Coupling Speed} - trains (\K{cmdTrain}) moving faster than this speed will crash when running into other trains or hitting the end of a track or an open turnout.  Crashed trains must be manually moved back onto the track.
 
-Easements (or spiral transition curves) can be used to connect tracks with 
-differing radii.  
-This ensures a smooth transition from one track to another and helps prevent 
-jerky motion.
+\u000
 
-Easements can be created every time you \f{Join} (\k{cmdJoin}) tracks, 
-\f{Extend} (\k{cmdModify}) a track or create a \f{Tangent} (\k{cmdModify}) track.  
-Easements require the possibility to create track with arbitrary radii. Therefore easements
-are not possible if sectional track should be used. So it is best to turn \f{Easements} 
-off when using sectional track.
+\dd \e{Right-Click} - will either display a pop-up menu of available commands or command-specific options depending on whether the \e{Shift} key is being held down or not.  This option allows you to choose which operation occurs.
 
-When using easements, an error message will be generated if the tracks have a radius 
-that is too small or are too short for the transition curve.
+\u000
 
-The \f{Easement} dialog is invoked from the Options (\k{optionM}) menu.
+\dd \f{Turntable Angle} - minimum angle between adjacent tracks connected to a \f{Turntable} (\K{cmdTurntable}).
 
-\G{png.d/easew.png}
+\rule
 
-\b 
-\f{Value} - allows fine tuning of the easement parameters 
-(restricted to values >= 0.5).
 
-\b 
-\f{R} - minimum radius of the curved track.
+\S{cmdDisplay} Display Dialog
 
-\b 
-\f{X} - offset between a straight and curved track.
+The \f{Display} dialog is invoked from the Options (\K{optionM}) menu
 
-\b 
-\f{L} - length of the transition track.
+\G{png.d/displayopt.png}
 
-\b 
-Radio button group with \f{None}, \f{Sharp}, \f{Normal} and \f{Broad} - corresponding 
-to \f{Value}s of 0, 0.5, 1.0 and 2.0.  
-Select \f{None} to turn off easements.
+The \f{Display} dialog contains items which control the display of objects on the Main window.
 
-\f{R}, \f{X} and \f{L} values are read-only.
+\dd \f{Balloon Help} - disables the display of \f{Balloon Help} (\K{windowTerms}) which usually is shown when the cursor is placed over a control.
 
-These values indicate the case of joining a straight 
-track with a curve of radius \f{R}.  
-The two tracks are separated by the offset \f{X}, and the easement curve extends 
-for \f{L/2} inches or centimeters to each side of the endpoints.
+\u000
+
+\dd \f{Car Labels} - controls the grouping and display of \f{Cars} on the \f{Hot Bar} (\K{cmdHotBar}) during the \f{Train} (\K{cmdTrain}) command.  This can be a combination of \f{Prototype}, \f{Manufacturer}, \f{Part Number} and \f{Item}.
+
+\u000
+
+\dd \f{Color Layers} - when set, tracks and/or non-tracks (lines, table edges and structures) are drawn with color of the layer (\K{cmdLayer}) they belong to.
+
+\u000
+
+\dd \f{Draw EndPts} - when to draw endpoints between connected track: never, only for turnouts or for all tracks.
+
+\u000
+
+\dd \f{Draw Ties} - how to draw ties under the rails when the drawing Scale is smaller than half of the \f{Two Rail Scale}.
+
+\u000
+
+\dd \f{Draw Tunnel} - how to draw hidden tracks (\K{cmdTunnel}), either not at all, as dashed lines or as normal solid lines (which might be faster).
+
+\u000
+
+\dd \f{Hot Bar Labels} - controls the format of titles for objects on the \f{Hot Bar} (\K{cmdHotBar}).
+
+\u000
+
+\dd \f{Label Enable} - individual control over whether to display various types of labels.  You may want to turn some of these off if your layout is too cluttered.
+
+\lcont{
+
+\u000
+
+\b \e{Cars} - Reporting mark labels on cars.
+
+\b \e{EndPt Elevations} - Elevation markers attached to endpoints.
+
+\b \e{Lengths} - Length of flex-track attached to ends of turnouts.
+
+\b \e{Track Descriptions} - Title of each turnout and sectional track.
+
+\b \e{Track Elevations} - Computed elevations at the center of each track.
+
+}
+
+\u000
+
+\dd \f{Label Font Size} - controls font size for Labels on layout.
+
+\u000
+
+\dd \f{Layout Labels} - controls the format of titles for turnouts and structures displayed on the Layout.
+
+\u000
+
+\dd \f{Label Scale} - draw labels only when the drawing Scale is smaller or equal to this value.
+
+\u000
+
+\dd \f{Live Map} - if checked then the Main Window (\K{mainW}) will be updated as you drag on the \f{Map Window} (\K{cmdMap}).  Note that this can be slow.
+
+\u000
+
+\dd \f{Map Scale} - scale of the Map (\K{cmdMap}) window.  Increase this value to make the \f{Map} window smaller when working with large layouts.  \f{Note:} you cannot make the \f{Map} window larger than the screen.
+
+\u000
+
+\dd \f{Min Grid Spacing} - minimum distance between \f{Grid} (\K{cmdGrid}) lines (in pixels).  If the grid lines are closer then drawing them is suppressed.
+
+\u000
+
+\dd \f{Trains On Hidden Track} - controls whether trains (\K{cmdTrain}) on invisible layers (\K{cmdLayer}) or hidden tracks (\K{cmdTunnel}) (if hidden tracks are not drawn) are displayed.
+
+\u000
+
+\dd \f{Two Rail Scale} - draw tracks using two lines when the drawing Scale is smaller than this value.
+
+\rule
+
+
+\S{cmdEasement} \i{Easements}
+
+Easements are special sections of gradually curving track used to connect straight and curved tracks (or two curved tracks). Easements reduce the effects of sudden changes in track curves which can cause jerky motion and derailments.
+
+Easements can be created every time you \f{Join} (\K{cmdJoin}) tracks, \f{Extend} (\K{extendTrack}) a track or create a \f{Tangent} (\K{createTangent}) track.
+
+When using easements, an error message will be generated if tracks have a radius that is too small or are too short for the transition curve.
+
+The \f{Easement} dialog is invoked from the Options (\K{optionM}) menu.
+
+\dd \G{png.d/easew.png}
+
+\u000
+
+\dd \f{Value} - allows fine tuning of the easement parameters (restricted to values >= 0.5).
+
+\u000
+
+\dd \f{R} - minimum radius of the curved track.
+
+\u000
+
+\dd \f{X} - offset between a straight and curved track.
+
+\u000
+
+\dd \f{L} - length of the transition track.
+
+\u000
+
+\dd Radio button group with \f{None}, \f{Sharp}, \f{Normal} and \f{Broad}. Corresponding \f{Value}s for these buttons are 0, 0.5, 1.0 and 2.0. Select \f{None} to turn easements off.
+
+The values \f{R}, \f{X} and \f{L} are read-only.
+
+These values indicate the worst case of joining a straight track with a curve of radius \f{R}. The two tracks are separated by the offset \f{X} while the easement curve extends for \f{L/2} inches or centimeters to each side of the endpoints.
 
 The formula used to draw easements is:
 
-\c x = l*l*l / (6*R*L)
-\c r = L*R/l
+\c          x = l * l * l / (6 * R * L)
+\e                               b   b
+\c          r = L * R/l
+\e              b   b
 
 where
 
-\b 
-\f{l} is the distance along the tangent to the easement.
+\b \f{l} is the distance along the tangent to the easement.
 
-\b 
-\f{R} is the final radius of the easement.
+\b \f{R} is the final radius of the easement.
 
-\b 
-\f{L} is the total length of the easement along the tangent.
+\b \f{L} is the total length of the easement along the tangent.
 
-\b 
-\f{x} is the offset from the tangent at \f{l}.
+\b \f{x} is the offset from the tangent at \f{l}.
 
-\b 
-\f{r} is the radius of easement curve at \f{l}.
+\b \f{r} is the radius of easement curve at \f{l}.
 
-The Easement Button on the Main Window (\k{mainW}) changes its label to indicate the current easement value.
+The Easement Button (\G{png.d/beasement.png}) on the Main Window (\K{mainW}) changes its label to indicate the current easement value.
 
 The following diagrams illustrates the \f{R}, \f{X} and \f{L} values and the resulting easement curve.
 
@@ -234,124 +273,131 @@ The following diagrams illustrates the \f{R}, \f{X} and \f{L} values and the res
 
 \G{png.d/easeex2.png}
 
-If you use curves with radius larger than \f{R} or are connecting two curves 
-(that bend in the same direction) then the easement curve will be shorter and 
-the offset smaller.  
-If the computed offset is small then no easement is generated.  
+If curves with a radius larger than \f{R} or two curves (that bend in the same direction) are being connecting then the easement curve will be shorter and the offset smaller.  If the computed offset is small then no easement is generated.  
 
-A curved track that bends in one direction and then bends in the opposite 
-direction is an \e{S-curve}.  
-This will generate the worst case easement which is two easement curves 
-placed end to end.
+A curved track that bends in one direction and then bends in the opposite direction is an \e{S-curve}.  This will generate the worst case easement which is two easement curves placed end to end.
+
+Refer to instruction in \k{EasementsSectional} when using sectional track.
+
+\rule
+
+
+\S2{EasementsSectional} \i{Easements and Sectional Track}
+
+Easements require the possibility of creating track with arbitrary radii. Therefore easements are not possible if sectional track is used. It is best to turn \f{Easements} off when using sectional track.
+
+\rule
+
 
 \S{fontSelW} Font Selection
 
+The font selection dialog allows selection of the font used by the text (\K{cmdText}) command.  This command is valid only on UNIX based systems.
+
 \G{png.d/fonts.png}
 
-\#{?+xvfontsel.hlpsrc}
+\rule
 
-\S{cmdSticky} Sticky Dialog
 
-By default, when commands complete, the defined default command (\k{cmdDescribe}) becomes active.
-If the command is \f{sticky}, then it remains active after completion.
+\S{cmdLayout} Layout Dialog
 
-The \f{Sticky} dialog controls which commands are \f{sticky}.
+The \f{Layout Options} dialog, displayed by the Options (\K{optionM}) menu, contains items controlling the current layout.
 
-\G{png.d/sticky.png}
+\dd \G{png.d/layout.png}
+
+\u000
+
+\dd \f{Gauge} - Drop down menu used to select track gauge.
+
+\u000
+
+\dd \f{Height} - Height of layout drawing which, depending on the \f{Unit} setting (English or Metric) established in the \f{Preferences} dialog (\K{cmdPref}), is measured in inches or centimeters.
+
+\u000
+
+\dd \f{Room Width} - Width of layout drawing which, depending on the \f{Unit} setting (English or Metric) established in the \f{Preferences} dialog (\K{cmdPref}), is measured in inches or centimeters.
+
+\u000
+
+\dd \f{Scale} - Drop down menu used to select track scale.
+
+\u000
+
+\dd \f{Title} - Two lines that can be used to enter a title and description for the layout. Information entered in these fields will be shown on any printout of your layout design.
+
+\rule
+
 
 \S{cmdPref} Preferences Dialog
 
-\G{png.d/pref.png}
 This dialog controls some parameters which likely will not be changed frequently.
 
-\b 
-\f{Check-Point} - how often the layout is automatically saved to the 
-checkpoint file (\k{directories}). Setting this value to 0 disables writing the Checkpoint file.
+\dd \G{png.d/pref.png}
 
-\b 
-\f{Units} - chooses English (inches) or Metric (centimeters) measurements.
+\dd \f{Angles} - controls the angle system. \f{Polar}: 0\u00B0 is up and angles are measured clockwise, or \f{Cartesian}: 0\u00B0 is to the right and angles are measured counter-clockwise.
 
-\b 
-\f{Length Format} - controls how lengths are displayed.  Combinations of 
-feet and inches (or meters, centimeters and millimeters) with decimal or fractional parts are supported.
-\f{Note:} lengths can be entered in any format and are converted on entry.
+\u000
 
-\b 
-\f{Angles} - controls the angle system. \f{Polar}: 0° is up and angles are measured clockwise, or
-\f{Cartesian}: 0° is to the right and angles are measured counter-clockwise.
+\dd \f{Auto Pan} - if enabled, dragging near the edge of the Main Canvas (\K{mainW}) will cause the canvas to move to follow the mouse.
 
-\b 
-\f{Minimum Track Length} - specifies the minimum length of a track.
-Shorter tracks will not be created.
+\u000
 
-\b 
-\f{Connection Distance} - the maximum distance between endpoints that can be connected.
-This affects the \f{Join} (\k{cmdJoin}) command and auto-connection during
-\f{Parallel} (\k{cmdParallel})
-commands and placing \f{Turnouts} (\k{cmdHotBar}).
-Changing this value is not recommended.
+\dd \f{Check-Point} - how often the layout is automatically saved to the checkpoint file (\K{workDir}). Setting this value to 0 disables writing the Checkpoint file.
 
-\b 
-\f{Connection Angle} - as above for the angle between endpoints.
+\u000
 
-\b 
-\f{Drag Distance} - controls how far you can move the cursor (in pixels) 
-before XTrkCad considers the action to be a drag instead of a click.
+\dd \f{Connection Angle} - as above for the angle between endpoints.
 
-\b 
-\f{Drag Timeout} - controls how long you can hold a mouse button down (in milliseconds) 
-before XTrkCad considers the action to be a drag instead of a click.
+\u000
 
-\b 
-\f{Auto Pan} - if enabled, dragging near the edge of the Main Canvas (\k{mainW}) will cause the canvas to 
-move to follow the mouse.
+\dd \f{Connection Distance} - the maximum distance between endpoints that can be connected.  This affects the \f{Join} (\K{cmdJoin}) command and auto-connection during \f{Parallel} (\K{cmdParallel}) commands and placing \f{Turnouts} (\K{cmdHotBar}).  The default value for this field is 0.100 inches or 0.254 CM. Changing this value is not recommended.
 
-\b 
-\e{List Labels} - controls the format of titles for turnouts and structures displayed in lists 
-(such as the \f{Parts List} (\k{cmdEnum})).
+\u000
 
-\b 
-\f{Minimum Track Radius} - Curved tracks with less than this radius are drawn in the exceptional (\k{cmdRgbcolor}) color.
+\dd \f{Drag Distance} - controls how far you can move the cursor (in pixels) before \e{XTrkCad} considers the action to be a drag instead of a click.
 
-\b 
-\f{Maximum Track Grade} - Tracks with more than this grade are drawn in the exceptional (\k{cmdRgbcolor}) color.
+\u000
 
-\b 
-\f{Train Update Delay} - number of milliseconds between updates in the \f{Train Simulation} (\k{cmdTrain}) mode.  
-A lower value will generate a smoother display but reduces system responsiveness.
+\dd \f{Drag Timeout} - controls how long you can hold a mouse button down (in milliseconds) before \e{XTrkCad} considers the action to be a drag instead of a click.
 
-\S{cmdRgbcolor} Colors Dialog
+\u000
 
-\G{png.d/colorw.png}
+\dd \f{Length Format} - controls how lengths are displayed.  Combinations of feet and inches (or meters, centimeters and millimeters) with support for decimal or fractional measures. \f{Note:} lengths can be entered in any format and are converted on entry.
 
-The \f{Colors} dialog controls how various objects are drawn.
+\u000
 
-\b 
-\f{Snap Grid} - the Grid displayed by the \f{Grid} (\k{cmdGrid}) dialog.
+\dd \f{List Labels} - controls the format of titles for turnouts and structures displayed in lists (such as the \f{Parts List} (\K{cmdEnum})).
 
-\b 
-\f{Marker} - the short lines drawn on the Ruler of the Main (\k{mainW}) window to indicate
-cursor position.
+\u000
 
-\b 
-\f{Border} - the Rulers, Room Boundaries and Table Edges.
+\dd \f{Maximum Track Grade} - Tracks with more than this grade are drawn in the exceptional (\K{cmdRgbcolor}) color.
 
-\b 
-\f{Primary and Secondary Axis} - the large cross displayed when positioning
-the \f{Snap Grid} (\k{cmdGrid}) or the \f{Print Grid} (\k{cmdPrint}).
+\u000
 
-\b 
-\f{Normal and Selected Tracks} - color of tracks.
+\dd \f{Minimum Track Length} - specifies the minimum length of a track.  Shorter tracks will not be created.
 
-\b 
-\f{Profile Path} - color of the path when using the \f{Profile} (\k{cmdProfile}) command.
+\u000
 
-\b 
-\f{Exception Track} - color of \e{Exceptional Tracks} (\k{cmdPref}) which exceed the specified 
-grade or are curved to a smaller than the minimum radius.
+\dd \f{Minimum Track Radius} - Curved tracks with less than this radius are drawn in the exceptional (\K{cmdRgbcolor}) color.
 
-\b 
-\f{Track Ties} - color of ties (if drawn).
+\u000
 
-Note: on 256 color displays the button color may not be the same as the color 
-on the layout due to differences in the way colors are rendered on buttons.
+\dd \f{Train Update Delay} - number of milliseconds between updates in the \f{Train Simulation} (\K{cmdTrain}) mode.  A lower value will generate a smoother display but reduces system responsiveness.
+
+\u000
+
+\dd \f{Units} - choose between English (inches) or Metric (centimeters) measurements.
+
+\rule
+
+
+\S{cmdSticky} Sticky Dialog
+
+By default, when commands complete, the defined \f{Default Command} (\K{cmdCmdopt}) becomes active.  If a command is \f{sticky}, the defined \f{Default Command} is ignored and the current command remains active after completion.
+
+The \f{Sticky} dialog controls which commands remain active after completion.
+
+\G{png.d/sticky.png}
+
+Selecting a command makes it \f{sticky}. Un-selecting a command causes the defined \f{Default Command} to become active after command completion.
+
+\rule

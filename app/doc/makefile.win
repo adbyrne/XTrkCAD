@@ -1,4 +1,4 @@
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.5 2007-10-15 17:25:55 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.6 2007-11-17 15:06:57 m_fischer Exp $
 #
 # Makefile for halibut based documentation
 #
@@ -10,17 +10,19 @@ all: help
 BUTFILES = \
 	chmconf.but \
 	intro.but \
-	mainw.but \
-	filem.but \
-	editm.but \
-	viewm.but \
 	addm.but \
 	changem.but \
 	drawm.but \
+	editm.but \
+	filem.but \
+	helpm.but \
+	hotbar.but \
+	macrom.but \
 	managem.but \
 	optionm.but \
-	win_help.but \
-	map_hot.but \
+	statusbar.but\
+	view_winm.but \
+	navigation.but\
 	appendix.but
 
 help: xtrkcad.chm
@@ -36,4 +38,3 @@ clean:
 	del xtrkcad.hhp
 	del xtrkcad.hhc
 	del xtrkcad.chm
-	del xtrkcad.hhk
