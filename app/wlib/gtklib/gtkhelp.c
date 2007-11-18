@@ -1,7 +1,7 @@
 /** \file gtkhelp.c
  * Balloon help ( tooltips) and main help functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.2 2007-11-12 18:53:15 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.3 2007-11-18 17:53:21 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -712,7 +712,6 @@ LinkClicked(HtmlDocument *doc, const gchar *uri, void *ptr )
 	
 	AddToHistory((GtkWidget *)ptr, (char *)uri ); 
 
-	printf( "requested link: %s\n", uri );
 	LoadHtml( outView, docCont, uri );
 
    return;
@@ -736,8 +735,6 @@ UrlRequested(HtmlDocument *doc, const gchar *uri, HtmlStream *stream, gpointer d
    char *buffer;
    int handle;
    int len;
-  
-   printf( "requested uri: %s\n", uri );
   
    filename = malloc( strlen( directory ) + strlen( uri ) + 1 );
    assert( filename != NULL );
@@ -786,11 +783,6 @@ DestroyHelpWindow( GtkWidget *win, GdkEvent *event, void *ptr )
 	
 	gint x, y;
 	
-	/* free all memory allocated */
-	for( i = 0; i < MAXHISTORYSIZE; i++ )
-		if( sHtmlHistory.url[ i ] )
-			free( sHtmlHistory.url[ i ] );
-
 	/* get the slider position and save it */
 	widget = lookup_widget( win, PANED );
 	i = gtk_paned_get_position( GTK_PANED( widget ));

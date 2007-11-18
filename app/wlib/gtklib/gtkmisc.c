@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.6 2007-05-17 13:25:44 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.7 2007-11-18 17:53:21 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -864,14 +864,13 @@ unsigned long wGetTimer( void )
  * Add control to circular list of synonymous controls. Synonymous controls are kept in sync by 
  * calling wControlLinkedActive for one member of the list 
  *
- * \param IN  first control
- * \param IN  second control
+ * \param b1 IN  first control
+ * \param b2 IN  second control
  * \return    none
  */
  
 EXPORT void wControlLinkedSet( wControl_p b1, wControl_p b2 )
 {
-	wControl_p savePtr;
 	
 	b2->synonym = b1->synonym;
 	if( b2->synonym == NULL )
@@ -883,8 +882,8 @@ EXPORT void wControlLinkedSet( wControl_p b1, wControl_p b2 )
 /**
  * Activate/deactivate a group of synonymous controls.
  *
- * \param IN  control
- * \param IN  state
+ * \param b IN  control
+ * \param active IN  state
  * \return    none
  */
  

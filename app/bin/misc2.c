@@ -1,7 +1,7 @@
 /** \file misc2.c
  * Management of information about scales and gauges plus rprintf.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.4 2007-02-23 16:50:03 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.5 2007-11-18 17:53:21 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -355,9 +355,9 @@ EXPORT BOOL_T CompatibleScale(
 
 /** Split the scale and the gauge description for a given combination. Eg HOn3 will be 
  * split to HO and n3.
- * \param IN scaleInx scale/gauge combination
- * \param OUT scaleDescInx  scale part
- * \param OUT gaugeInx gauge part
+ * \param scaleInx IN  scale/gauge combination
+ * \param scaleDescInx OUT  scale part
+ * \param  gaugeInx OUT gauge part
  * \return TRUE
  */
 
@@ -393,12 +393,15 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 	return TRUE;
 }
 
+/**
+ * Setup XTrkCad for the newly selected scale/gauge combination.
+ *
+ * \param newScaleInx IN the index of the selected scale/gauge combination
+ */
+ 
 static void SetScale(
 		SCALEINX_T newScaleInx )
 {	
-	SCALEDESCINX_T i;
-	GAUGEINX_T j;
-	dynArr_t gauges_da;
 	
 	if ( curScaleInx >= 0 )
 		wPrefSetFloat( "misc", minTrackRadiusPrefS, minTrackRadius );
@@ -415,28 +418,6 @@ static void SetScale(
 	curScaleDescInx = 0;
 	
 	GetScaleGauge( curScaleInx, &curScaleDescInx, &curGaugeInx );
-	
-//	for( i = 0; i < scaleDesc_da.cnt; i++ ) {
-//		char *t = strchr( scaleDesc(i).scaleDesc, ' ' );
-//		/* are the first characters (which describe the scale) identical? */
-//		if( !strncmp( scaleDesc(i).scaleDesc, curScaleName, t - scaleDesc(i).scaleDesc )) {
-//			/* if yes, are we talking about the same ratio */
-//		 	if( scaleInfo(scaleDesc(i).scale).ratio == curScaleRatio ) {
-//				/* yes, we found the right scale descriptor, so now look for the gauge */
-//				curScaleDescInx = i;
-//				gauges_da = scaleDesc(curScaleDescInx).gauges_da;
-//				curGaugeInx = 0;
-//				for( j = 0; j < gauges_da.cnt; j++ ) {
-//					gaugeInfo_p ptr = &(DYNARR_N( gaugeInfo_t, gauges_da, j ));
-//					if( scaleInfo(ptr->scale).gauge == trackGauge ) {
-//						curGaugeInx = j;
-//						break;
-//					}	
-//				}
-//				break;
-//			}	
-//		}
-//	}	
 	
 	wPrefSetString( "misc", "scale", curScaleName );
 	sprintf( minTrackRadiusPrefS, "minTrackRadius-%s", curScaleName );
@@ -469,18 +450,17 @@ EXPORT BOOL_T DoSetScale(
 	return TRUE;
 }
 
-/* \brief Setup the data structures for scale and gauge.
-*
-*	\param none
-* \return TRUE
-*
-*  XTC reads 'scales' into an dynamic array, but doesn't differentiate between scale and gauge.
-*  This da is split into an dynamic array of scales. Each scale holds a dynamic array of gauges,
-*  with at least one gauge per scale (ie standard gauge)
-*
-*  For usage in the dialogs, a textual description for each scale or gauge is provided
-*
-*/
+/** 
+ * Setup the data structures for scale and gauge. XTC reads 'scales' into an dynamic array, 
+ * but doesn't differentiate between scale and gauge.
+ * This da is split into an dynamic array of scales. Each scale holds a dynamic array of gauges,
+ * with at least one gauge per scale (ie standard gauge)
+ *
+ * For usage in the dialogs, a textual description for each scale or gauge is provided
+ *
+ * \return TRUE
+ */
+ 
 EXPORT BOOL_T DoSetScaleDesc( void )
 {
 	SCALEINX_T scaleInx;
