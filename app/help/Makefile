@@ -25,7 +25,8 @@ PNGS = \
 	images.orig/turndes.png images.orig/turnsel.png \
 	images.orig/updttl.png images.orig/wenum.png images.orig/wmain.png images.orig/wmap.png
 
-all: ../bin/bllnhlp.c xtrkcad.help xtrkcad.text html/xtrkcad.html ../bin/messages.h mkxpmbutt pageorder
+all: ../bin/bllnhlp.c ../bin/messages.h
+#all: ../bin/bllnhlp.c xtrkcad.help xtrkcad.text html/xtrkcad.html ../bin/messages.h mkxpmbutt pageorder
 
 bllnhlp.c: genhelp.in genhelp
 	./genhelp -bh genhelp.in bllnhlp.out
@@ -43,7 +44,7 @@ bllnhlp.c: genhelp.in genhelp
 	fi
 
 messages.h messages.hlpsrc: messages.in genmessages
-	./genmessages < messages.in
+	./genmessages messages.in messages.but
 
 ../bin/messages.h: messages.h
 	@if [ ! -f ../bin/messages.h ] ; then \
@@ -56,39 +57,39 @@ messages.h messages.hlpsrc: messages.in genmessages
 	fi ; \
 	fi
 
-popups.rtf: genhelp.in genhelp
-	./genhelp -msw genhelp.in popups.rtf
+#popups.rtf: genhelp.in genhelp
+#	./genhelp -msw genhelp.in popups.rtf
 
-xtrkcad.info: genhelp.in genhelp
-	./genhelp -xv genhelp.in xtrkcad.info
+#xtrkcad.info: genhelp.in genhelp
+#	./genhelp -xv genhelp.in xtrkcad.info
 
-xtrkcad.help: xtrkcad.hlpsrc messages.hlpsrc prochelp messages.hlpsrc
-	./prochelp -xv -C unix xtrkcad.hlpsrc xtrkcad.help
+#xtrkcad.help: xtrkcad.hlpsrc messages.hlpsrc prochelp messages.hlpsrc
+#	./prochelp -xv -C unix xtrkcad.hlpsrc xtrkcad.help
 
-xtchelp.d/xtrkcad.hpj: genhelp.in genhelp xtrkcad.hpj.first xtrkcad.hpj.last
-	@if [ ! -d xtchelp.d ] ; then mkdir xtchelp.d ; fi
-	./genhelp -hpj genhelp.in popups.ali
-	cat xtrkcad.hpj.first popups.ali xtrkcad.hpj.last > xtchelp.d/xtrkcad.hpj
+#xtchelp.d/xtrkcad.hpj: genhelp.in genhelp xtrkcad.hpj.first xtrkcad.hpj.last
+#	@if [ ! -d xtchelp.d ] ; then mkdir xtchelp.d ; fi
+#	./genhelp -hpj genhelp.in popups.ali
+#	cat xtrkcad.hpj.first popups.ali xtrkcad.hpj.last > xtchelp.d/xtrkcad.hpj
 
-xtchelp: xtchelp.d/xtrkcad.hpj mkshgs mkshg
-	./mkshgs
-	@make xtchelp.d/xtrkcad.rtf
+#xtchelp: xtchelp.d/xtrkcad.hpj mkshgs mkshg
+#	./mkshgs
+#	@make xtchelp.d/xtrkcad.rtf
 
-checkshgs:
-	@make bmps
-	@for BMP in bmps.d/*.bmp ; do \
-		SHG=`echo $$BMP|sed -e 's/\.bmp/.shg/' -e 's/bmps.d/winhelp.d/'`; \
-		if [ ! -f $$SHG -o $$BMP -nt $$SHG ] ; then \
-			echo update $$SHG ; \
-		fi \
-	done
+#checkshgs:
+#	@make bmps
+#	@for BMP in bmps.d/*.bmp ; do \
+#		SHG=`echo $$BMP|sed -e 's/\.bmp/.shg/' -e 's/bmps.d/winhelp.d/'`; \
+#		if [ ! -f $$SHG -o $$BMP -nt $$SHG ] ; then \
+#			echo update $$SHG ; \
+#		fi \
+#	done
 	
-xtchelp.d/xtrkcad.rtf: xtrkcad.hlpsrc messages.hlpsrc prochelp popups.rtf mswhead.rtf mswtail.rtf
-	@if [ ! -d xtchelp.d ] ; then mkdir xtchelp.d ; fi
-	( cat mswhead.rtf ; \
-	  ./prochelp -mswhelp -C msw xtrkcad.hlpsrc - ; \
-	  cat popups.rtf mswtail.rtf ) | \
-	  sed 's/{\\b XTrkCad}/{\\b\\i XTrkCad}/g' > xtchelp.d/xtrkcad.rtf
+#xtchelp.d/xtrkcad.rtf: xtrkcad.hlpsrc messages.hlpsrc prochelp popups.rtf mswhead.rtf mswtail.rtf
+#	@if [ ! -d xtchelp.d ] ; then mkdir xtchelp.d ; fi
+#	( cat mswhead.rtf ; \
+#	  ./prochelp -mswhelp -C msw xtrkcad.hlpsrc - ; \
+#	  cat popups.rtf mswtail.rtf ) | \
+#	  sed 's/{\\b XTrkCad}/{\\b\\i XTrkCad}/g' > xtchelp.d/xtrkcad.rtf
 
 #bmps:
 #	@if [ ! -d bmps.d ] ; then mkdir bmps.d ; fi
@@ -100,43 +101,43 @@ xtchelp.d/xtrkcad.rtf: xtrkcad.hlpsrc messages.hlpsrc prochelp popups.rtf mswhea
 #		fi \
 #	done
 
-pngs: mkpngbutt mkxpmbutt
-	@if [ ! -d png.d ] ; then mkdir png.d ; fi
-	./mkpngs
+#pngs: mkpngbutt mkxpmbutt
+#	@if [ ! -d png.d ] ; then mkdir png.d ; fi
+#	./mkpngs
 
-xtcword: #pngs
-	@make xtcword.d/xtcword.rtf
+#xtcword: #pngs
+#	@make xtcword.d/xtcword.rtf
 
-xtcword.d/xtcword.rtf: xtrkcad.hlpsrc messages.hlpsrc prochelp mswhead.rtf mswtail.rtf # png.d/*.png images.orig/*.png
-	@if [ ! -d xtcword.d ] ; then mkdir xtcword.d ; fi
-	@( sed 's/fs20/fs22/g' mswhead.rtf ; \
-	  ./prochelp -mswword -C msw -toc -d png.d -d images.orig -ml 0.50 -mr 0.50 -mg 0.25 -mb 0.25 -mt 0.25 xtrkcad.hlpsrc - ; \
-	  cat mswtail.rtf ) | \
-	  sed 's/{\\b XTrkCad}/{\\b\\i XTrkCad}/g' > xtcword.d/xtcword.rtf
+#xtcword.d/xtcword.rtf: xtrkcad.hlpsrc messages.hlpsrc prochelp mswhead.rtf mswtail.rtf # png.d/*.png images.orig/*.png
+#	@if [ ! -d xtcword.d ] ; then mkdir xtcword.d ; fi
+#	@( sed 's/fs20/fs22/g' mswhead.rtf ; \
+#	  ./prochelp -mswword -C msw -toc -d png.d -d images.orig -ml 0.50 -mr 0.50 -mg 0.25 -mb 0.25 -mt 0.25 xtrkcad.hlpsrc - ; \
+#	  cat mswtail.rtf ) | \
+#	  sed 's/{\\b XTrkCad}/{\\b\\i XTrkCad}/g' > xtcword.d/xtcword.rtf
 
-test.rtf:
-	( sed 's/fs20/fs22/g' mswhead.rtf ; \
-	  ./prochelp -mswword -C msw -toc -d png.d -d images.orig -ml 0.50 -mr 0.50 -mg 0.25 -mb 0.25 -mt 0.25 test.hlpsrc - ; \
-	  cat mswtail.rtf ) | \
-	  sed 's/{\\b XTrkCad}/{\\b\\i XTrkCad}/g' > xtcword.d/test.rtf
+#test.rtf:
+#	( sed 's/fs20/fs22/g' mswhead.rtf ; \
+#	  ./prochelp -mswword -C msw -toc -d png.d -d images.orig -ml 0.50 -mr 0.50 -mg 0.25 -mb 0.25 -mt 0.25 test.hlpsrc - ; \
+#	  cat mswtail.rtf ) | \
+#	  sed 's/{\\b XTrkCad}/{\\b\\i XTrkCad}/g' > xtcword.d/test.rtf
 
-xtrkcad.text: xtrkcad.hlpsrc messages.hlpsrc prochelp
-	./prochelp -text -C unix xtrkcad.hlpsrc xtrkcad.text
+#xtrkcad.text: xtrkcad.hlpsrc messages.hlpsrc prochelp
+#	./prochelp -text -C unix xtrkcad.hlpsrc xtrkcad.text
 
-html/xtrkcad.html: xtrkcad.hlpsrc messages.hlpsrc prochelp
-	@rm -rf html
-	mkdir html
-	@cd html ; ln -s ../png.d/*.png ../images.orig/*.png ./
-	cd html ; ../prochelp -html -C unix -d .. xtrkcad.hlpsrc xtrkcad
+#html/xtrkcad.html: xtrkcad.hlpsrc messages.hlpsrc prochelp
+#	@rm -rf html
+#	mkdir html
+#	@cd html ; ln -s ../png.d/*.png ../images.orig/*.png ./
+#	cd html ; ../prochelp -html -C unix -d .. xtrkcad.hlpsrc xtrkcad
 
-prochelp: prochelp.c readpng.c
-	cc -g -o prochelp prochelp.c readpng.c -lpng -lz -lm
+#prochelp: prochelp.c readpng.c
+#	cc -g -o prochelp prochelp.c readpng.c -lpng -lz -lm
 
-mkxmpbutt: mkxmpbutt.c
-	cc -g -o mkxmpbutt mkxmpbutt.c
+#mkxmpbutt: mkxmpbutt.c
+#	cc -g -o mkxmpbutt mkxmpbutt.c
 
-pageorder: pageorder.c
-	cc -g -o pageorder pageorder.c
+#pageorder: pageorder.c
+#	cc -g -o pageorder pageorder.c
 
 genhelp: genhelp.c
 	cc -g -o genhelp genhelp.c
@@ -144,21 +145,21 @@ genhelp: genhelp.c
 genmessages: genmessages.c
 	cc -g -o genmessages genmessages.c
 
-dmpbmp: dmpbmp.o
-	cc -o dmpbmp dmpbmp.o
-dmpbmp.o: dmpbmp.c
-	cc -g -c dmpbmp.c
+#dmpbmp: dmpbmp.o
+#	cc -o dmpbmp dmpbmp.o
+#dmpbmp.o: dmpbmp.c
+#	cc -g -c dmpbmp.c
 
-mkshg: mkshg.o readpng.o
-	cc -o mkshg mkshg.o readpng.o -lpng -lz -lm
-mkshg.o: mkshg.c readpng.h
-	cc -g -c mkshg.c
-dmppng: dmppng.o readpng.o
-	cc -o dmppng dmppng.o readpng.o -lpng -lz -lm
-dmppng.o: dmppng.c
-	cc -g -c dmppng.c
-readpng.o: readpng.c png.h readpng.h
-	cc -g -c readpng.c
+#mkshg: mkshg.o readpng.o
+#	cc -o mkshg mkshg.o readpng.o -lpng -lz -lm
+#mkshg.o: mkshg.c readpng.h
+#	cc -g -c mkshg.c
+#dmppng: dmppng.o readpng.o
+#	cc -o dmppng dmppng.o readpng.o -lpng -lz -lm
+#dmppng.o: dmppng.c
+#	cc -g -c dmppng.c
+#readpng.o: readpng.c png.h readpng.h
+#	cc -g -c readpng.c
 
 src:
 	@echo $(SRCS) $(PNGS)

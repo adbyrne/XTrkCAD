@@ -5,14 +5,18 @@ update: debug product
 
 debug:
 	(cd wlib/gtklib; make debug2;)
-	(cd help; make pngs; make;)
+	(cd tools; make;)
+	(cd help; make;)
+	(cd doc; make; )
 	(cd lib/params; make;)
 	(cd lib; make;)
 	(cd bin; make debug;)
 
 product:
 	(cd wlib/gtklib; make product2;)
-	(cd help; make pngs; make;)
+	(cd tools; cmake .; make;)
+	(cd help; make;)
+	(cd doc; make;)
 	(cd lib/params; make;)
 	(cd lib; make;)
 	(cd bin; make product;)
