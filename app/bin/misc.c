@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.20 2007-11-12 18:53:14 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.21 2007-11-21 06:35:59 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -43,6 +43,7 @@
 #include <sys/stat.h>
 #endif
 #include <stdarg.h>
+#include <locale.h>
 
 #include "track.h"
 #include "common.h"
@@ -2443,6 +2444,9 @@ EXPORT wWin_p wMain(
 	initialZoom = 0;
 	initialFile = NULL;
 
+	/* set the program locale to standard while i18n efforts are still ongoing */
+	setlocale( LC_ALL, "C" );
+	
 	/*
 	 * ARGUMENTS
 	 */
