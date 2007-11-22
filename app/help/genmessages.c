@@ -25,6 +25,7 @@
 	#endif
 #endif
 
+#define I18NHEADERFILE "i18n.h"
 
 typedef struct helpMsg_t * helpMsg_p;
 typedef struct helpMsg_t {
@@ -45,7 +46,7 @@ struct transTbl {
 
 /* translation table for unicode sequences understood by Halibut */
 struct transTbl toUnicode = {
-       "°\0",
+       "ï¿½\0",
       { "\\u00B0",
 		  "\\0"  }
 };
@@ -161,7 +162,7 @@ int main( int argc, char * argv[] )
 	FILE * hdrF;
 	FILE *inF;
 	FILE *outF;
-	
+
 	char buff[256];
 	char * cp;
 	int inFileIdx;
@@ -174,24 +175,26 @@ int main( int argc, char * argv[] )
 #ifndef FLAGS	
 	int flags; 
 #endif
+	int i18n = 0;
+
 	/* check argument count */
 	if ( argc < 3 || argc > 4 ) {
 		fprintf( stderr, "Usage: %s [-i18n] INFILE OUTFILE\n\n", argv[0] );
 		fprintf( stderr, "       -i18n is used to generate a include file with gettext support.\n\n" );
 		exit(1);
 	}
-	
+
 	/* check options */
 	if( argc == 4 ) {
 		if( !strcmp(argv[ 1 ], "-i18n")){
-			fprintf( stderr, "Option is not supported yet!\n" );
-			exit( 1 );
-		}	
+			i18n = 1;
+			inFileIdx = 2;	/* second argument is input file */
+		}
 		/* inFileIdx = 2;  skip over option argument */
 	} else {
 		inFileIdx = 1;	/* first argument is input file */
 	}	
-	
+
 	/* open the file for reading */
 	inF = fopen( argv[ inFileIdx ], "r" );
 	if( !inF ) {
@@ -212,7 +215,11 @@ int main( int argc, char * argv[] )
 			fprintf( stderr, "Could not open %s for writing!\n", argv[ inFileIdx ] );
 			exit( 1 );
 	}		
-							
+
+	/* Include i18n header, if needed */
+	if (i18n)
+		fprintf( hdrF, "#include \"" I18NHEADERFILE "\"\n\n" );
+
 	while ( fgets( buff, sizeof buff, inF ) ) {
 	
 		/* skip comment lines */
@@ -250,13 +257,22 @@ int main( int argc, char * argv[] )
 			/* the whole message has been read */
 			if (msgHelp[0]==0) {
 				/* no help text is included */
-				fprintf( hdrF, "#define %s \"%s\"\n", msgName, msgTitle );
+				if (i18n)
+					fprintf( hdrF, "#define %s N_(\"%s\")\n", msgName, msgTitle );
+				else
+					fprintf( hdrF, "#define %s \"%s\"\n", msgName, msgTitle );
 			} else if (msgAlt[0]) {
 				/* a help text and an alternate description are included */
-				fprintf( hdrF, "#define %s \"%s\\t%s\\t%s\"\n", msgName, msgName, msgAlt, msgTitle );
+				if (i18n)
+					fprintf( hdrF, "#define %s N_(\"%s\\t%s\\t%s\")\n", msgName, msgName, msgAlt, msgTitle );
+				else
+					fprintf( hdrF, "#define %s \"%s\\t%s\\t%s\"\n", msgName, msgName, msgAlt, msgTitle );
 			} else {
 				/* a help text but no alternate description are included */
-				fprintf( hdrF, "#define %s \"%s\\t%s\"\n", msgName, msgName, msgTitle );
+				if (i18n)
+					fprintf( hdrF, "#define %s N_(\"%s\\t%s\")\n", msgName, msgName, msgTitle );
+				else
+					fprintf( hdrF, "#define %s \"%s\\t%s\"\n", msgName, msgName, msgTitle );
 			}
 			
 			/* save the help text for later use */
