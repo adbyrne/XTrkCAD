@@ -1,5 +1,5 @@
 MESSAGE MSG_WRITE_FAILURE
-Error \"%s\" occured while writing %s.
+Error "%s" occured while writing %s.
 Please check disk space and system status.
 END
 
@@ -861,7 +861,7 @@ END
 
 # doption.c
 MESSAGE MSG_SETUP_ROOMSIZE
-Room size greater than 96\" x 48\" only available with Level 1
+Room size greater than 96" x 48" only available with Level 1
 HELP
 Unregistered versions of this program are limited to a maximum Room Size of
 96" by 48".

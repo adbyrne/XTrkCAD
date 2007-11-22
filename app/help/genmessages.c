@@ -46,7 +46,7 @@ struct transTbl {
 
 /* translation table for unicode sequences understood by Halibut */
 struct transTbl toUnicode = {
-       "ï¿½\0",
+       "°\0",
       { "\\u00B0",
 		  "\\0"  }
 };
@@ -62,7 +62,7 @@ struct transTbl toC = {
 
 
 char *
-translateString( char *srcString, struct transTbl *trTbl )
+TranslateString( char *srcString, struct transTbl *trTbl )
 {
 	char *destString;
    char *cp;
@@ -128,17 +128,14 @@ void dumpHelp( FILE *hlpsrcF )
 	/* sort in alphabetical order */
 	qsort( helpMsgs, helpMsgCnt, sizeof helpMsgs[0], cmpHelpMsg );
 
-	/* write the start of the help source */
-	fprintf( hlpsrcF, "\\A{messages} Error Messages\n\n" );
-
 	/* now save all the help messages */
 	for ( inx=0; inx<helpMsgCnt; inx++ ) {
 	
-		transStr = translateString( helpMsgs[inx].title, &toUnicode );
-		fprintf( hlpsrcF, "\\H{%s} %s\n\n", helpMsgs[inx].key, transStr );
+		transStr = TranslateString( helpMsgs[inx].title, &toUnicode );
+		fprintf( hlpsrcF, "\\S{%s} %s\n\n", helpMsgs[inx].key, transStr );
 		free( transStr );
 		
-		transStr = translateString( helpMsgs[inx].help, &toUnicode );
+		transStr = TranslateString( helpMsgs[inx].help, &toUnicode );
 		fprintf( hlpsrcF, "%s\n\n", transStr );
 		free( transStr );		
 #ifdef LATER
@@ -172,6 +169,7 @@ int main( int argc, char * argv[] )
 	char msgTitle[1024];
 	char msgTitle1[1024];
 	char msgHelp[4096];
+	char *tName, *tAlt, *tTitle;
 #ifndef FLAGS	
 	int flags; 
 #endif
@@ -255,25 +253,36 @@ int main( int argc, char * argv[] )
 			mode = m_help;
 		} else if ( strncmp( buff, "END", 3 ) == 0 ) {
 			/* the whole message has been read */
+			
+			/* create escape sequences */
+			tName = TranslateString( msgName, &toC );
+			tTitle = TranslateString( msgTitle, &toC );	
+			tAlt = TranslateString( msgAlt, &toC );
+			
 			if (msgHelp[0]==0) {
 				/* no help text is included */
 				if (i18n)
-					fprintf( hdrF, "#define %s N_(\"%s\")\n", msgName, msgTitle );
+					fprintf( hdrF, "#define %s N_(\"%s\")\n", tName, tTitle );
 				else
-					fprintf( hdrF, "#define %s \"%s\"\n", msgName, msgTitle );
+					fprintf( hdrF, "#define %s \"%s\"\n", tName, tTitle );
 			} else if (msgAlt[0]) {
 				/* a help text and an alternate description are included */
 				if (i18n)
-					fprintf( hdrF, "#define %s N_(\"%s\\t%s\\t%s\")\n", msgName, msgName, msgAlt, msgTitle );
+					fprintf( hdrF, "#define %s N_(\"%s\\t%s\\t%s\")\n", tName, tName, tAlt, tTitle );
 				else
-					fprintf( hdrF, "#define %s \"%s\\t%s\\t%s\"\n", msgName, msgName, msgAlt, msgTitle );
+					fprintf( hdrF, "#define %s \"%s\\t%s\\t%s\"\n", tName, tName, tAlt, tTitle );
 			} else {
 				/* a help text but no alternate description are included */
 				if (i18n)
-					fprintf( hdrF, "#define %s N_(\"%s\\t%s\")\n", msgName, msgName, msgTitle );
+					fprintf( hdrF, "#define %s N_(\"%s\\t%s\")\n", tName, tName, tTitle );
 				else
-					fprintf( hdrF, "#define %s \"%s\\t%s\"\n", msgName, msgName, msgTitle );
+					fprintf( hdrF, "#define %s \"%s\\t%s\"\n", tName, tName, tTitle );
 			}
+			
+			/*free temp stzrings */
+			free( tName );
+			free( tTitle );
+			free( tAlt );
 			
 			/* save the help text for later use */
 			if (msgHelp[0]) {

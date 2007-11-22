@@ -25,7 +25,7 @@ PNGS = \
 	images.orig/turndes.png images.orig/turnsel.png \
 	images.orig/updttl.png images.orig/wenum.png images.orig/wmain.png images.orig/wmap.png
 
-all: ../bin/bllnhlp.c ../bin/messages.h
+all: ../bin/bllnhlp.c ../bin/messages.h ../doc/messages.but
 #all: ../bin/bllnhlp.c xtrkcad.help xtrkcad.text html/xtrkcad.html ../bin/messages.h mkxpmbutt pageorder
 
 bllnhlp.c: genhelp.in genhelp
@@ -54,6 +54,17 @@ messages.h messages.hlpsrc: messages.in genmessages
 		echo no change in messages.h; \
 	else \
 		cp -v messages.h ../bin/messages.h ; \
+	fi ; \
+	fi
+	
+../doc/messages.but: messages.but	
+	@if [ ! -f ../doc/messages.but ] ; then \
+		cp -v messages.but ../doc/messages.but ; \
+	else \
+	if diff messages.but ../doc/messages.but > /dev/null 2>&1 ; then \
+		echo no change in messages.but; \
+	else \
+		cp -v messages.but ../doc/messages.but ; \
 	fi ; \
 	fi
 
