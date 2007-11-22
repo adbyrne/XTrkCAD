@@ -1,0 +1,1192 @@
+\# Notes:
+\#
+\# The "\u000" command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
+\#
+\# The "\u00B0" command gives proper format to the degree sign.
+
+\C{navigation} Navigation
+
+The Main Window includes a title bar along the top that describes the contents of the window, followed by a tool bar that contains user interface buttons. Most of the window's remaining area is used to display the layout.
+
+Most windows can be opened, closed, resized, minimized, and moved around the screen. The close, minimize, and zoom buttons are located on the right side of the title bar. Minimizing a window will close the contents of the window, but store a reference to it in the Task bar. Closing a window will make it disappear completely (so you may be asked to save your changes first). To move a window, click on the title bar and drag the window where you want it. To resize a window, either click the Zoom button 
+
+
+\H{mainW} \i{Main Window Overview}
+
+\dt Main Window Overview
+
+\u000
+
+\dd \G{png.d/main1.png}
+
+\u000
+
+\dd The size of the main window can be changed by dragging on the resizing borders.
+
+\u000
+
+\dd Minimizing the \e{Main Window} will minimize all \e{XTrkCad} windows.
+
+\u000
+
+\dt The \f{Main Window} contains (from the top down):
+
+\u000
+
+\dt \e{Title bar}
+
+\dd \G{png.d/title.png}
+
+\u000
+
+\dd Current filename, \e{XTrkCad} version number, and window manager buttons. An asterisk (*) after the filename indicates that there are unsaved changes.
+
+\u000
+
+\dt \e{Menu Bar}
+
+\dd \G{png.d/menu.png}
+
+\u000
+
+\dd Contains from left to right;
+
+\lcont{
+
+\b File (\K{fileM})
+
+\b Edit (\K{editM})
+
+\b View (\K{viewM})
+
+\b Add (\K{addM})
+
+\b Change (\K{changeM})
+
+\b Draw (\K{cmdDraw})
+
+\b Manage (\K{manageM})
+
+\b Options (\K{optionM})
+
+\b Macro (\K{macroM})
+
+\b Window (\K{windowM}) and;
+
+\b Help (\K{helpM}) menu buttons.
+
+}
+
+\u000
+
+\dt \e{Tool Bar}
+
+\dd \G{png.d/toolbar.png}
+
+\u000
+
+\dd Manipulate track and other objects
+
+\u000
+
+\dt \e{Hot Bar} (\K{cmdHotBar})
+
+\dd \G{png.d/hotbar.png}
+
+\u000
+
+\dd Scrolling list of Turnouts and Structures
+
+\u000
+
+\dt \e{Main Canvas}
+
+\dd \G{png.d/maincanvas.png} 
+
+\u000
+
+\dd Main drawing area with rulers along each side.
+
+\u000
+
+\dd The \f{Main Canvas} is where all tracks and objects are drawn.
+
+\u000
+
+\dd The scale of the \f{Main Canvas} can be changed using the;
+
+\lcont{
+
+\b \f{Zoom} selections (\K{cmdZoom}) under the \f{View} (\K{viewM}) menu
+
+\b \f{Zoom} buttons on the \f{Tool-bar}
+
+\b Mouse Wheel
+
+\b PAGE UP and PAGE DOWN keys.
+
+}
+
+\u000
+ 
+\dd Tracks will be drawn with two lines and ties if you zoom in. When the drawing scale is 1:1 a dashed centerline is also drawn for each track.
+
+\u000
+
+\dd The ARROW keys move the \f{Canvas} left, right, up or down.
+
+\u000
+
+\dt \e{Map Window}
+
+\dd \G{png.d/map.png}
+
+\u000
+
+\dd You can change which portion of the layout is displayed by using the \f{Map Window} (\K{cmdMap}).
+
+\u000
+
+\dt \e{Status Bar}
+
+\dd \G{png.d/statusbar.png}
+
+\u000
+
+\dd  Contains from left to right;
+
+\lcont{
+
+\b Drawing scale of the Main Canvas,
+
+\b X position of the cursor,
+
+\b Y position of the cursor,
+
+\b Status and informational messages
+
+}
+
+\rule
+
+
+\H{generaloperation} General Operation \I{Dialogs}
+
+Most Windows open with three standard dialog buttons:
+
+\dd \f{Cancel} - Cancels dialog. Layout reverts back to its previous state.
+
+\u000
+
+\dd \f{Help} - Invokes on-line help for current command or dialog.
+
+\u000
+
+\dd \f{OK} - Completes the dialog action. Layout is updated with current changes.
+
+\rule
+
+
+\S{enterValue} \i{Entering Values}
+
+Lengths and Distances can be entered in a variety of formats;
+
+\dd \e{12ft 4 1/2in, 12' 4.5", 148.500, 1.234m, 123.4cm or 1234mm} are all valid values.
+
+\u000
+
+\dd Pressing the Equal Sign (\c{=}) key after an entry will reformat the value entered to your preferred length format (\K{cmdPref}).
+
+\u000
+
+\dd Pressing the "\c{p}" key after an entry will convert a prototype measurement to a scale measurement by dividing the value entered by the ratio for the current scale.
+
+\u000
+
+\dd Pressing the "\c{s}" key after an entry will convert a scale measurement to a prototype measurement.
+
+\rule
+
+\S{cmdMap} \i{Map Window}
+
+\G{png.d/map.png}
+
+The \e{Map Window} area shows the complete layout at a reduced scale.  A highlighted (reverse video) area shows what portion is visible in the Main Window (\K{mainW}).  The highlighted area can be Left+Dragged (\K{windowTerms}) around the layout to change the origin of the Main Canvas.  The highlighted area changes size as Zoom In (\K{viewM}) and Zoom Out (\K{viewM}) are selected.
+
+You can also Right+Drag (\K{windowTerms}) on the Map window to set the origin and scale of the Main Canvas.
+
+The size of the \e{Map Window} changes when you change the Room Size (see \K{cmdLayout}).  You can also change the Map Scale (\K{cmdDisplay}) on the Display (\K{cmdDisplay}) dialog to change the size of the \e{Map Window}.
+
+If you close the \e{Map Window}, you can reopen it by the \e{Window} menu.
+
+
+\rule
+
+\H{kbshortcuts} \i{Keyboard Shortcuts} \I{Shortcut Keys}
+
+The term Shortcut key refers to specific key combinations which are used to accomplish an action which otherwise would be accomplished by moving a MOUSE and /or selecting from a Menu. Shortcut keys are often key combinations consisting of the letter key pressed along with the Alt or Ctrl key.
+
+Instead of using the menus or the buttons on the \f{Tool-bar} (\K{mainW}), most \e{XTrkCad} commands may be invoked through use of Shortcut keys.
+
+\dd The \c{RETURN} key has the same effect as pressing the \f{OK} button on the current dialog.
+
+\u000
+
+\dd The \c{ESCAPE} key cancels the current command.  All selected tracks are unselected.  The \f{Properties} (\K{cmdDescribe}) or \f{Select} (\K{cmdSelect}) command becomes the current command.
+
+\u000
+
+\dd The \c{PAGE UP} and \c{PAGE DOWN} keys will zoom out or zoom in.
+
+\u000
+
+\dd The \c{ARROWS} key will pan the canvas right, left, up and down.
+
+\u000
+
+\dd The \c{DELETE} key invokes the \f{Delete} (\K{cmdDelete}) command.
+
+Several Shortcut key commands are used in conjunction with the mouse. These commands are listed in \K{cmdAcclKeys}.
+
+\rule
+
+
+\S{cmdAdd} Add Commands
+
+\dt Add Commands
+
+\u000
+
+\dd Create
+
+\lcont{
+
+\b Circle track from
+
+\lcont{
+
+\b center - \e{Ctrl+0}
+
+\b fixed radius circle - \e{Ctrl+8}
+
+\b tangent - \e{Ctrl+9}
+
+}
+
+\b Curve track from
+
+\lcont{
+
+\b center - \e{Ctrl+6}
+
+\b chord - \e{Ctrl+7}
+
+\b endpoint - \e{Ctrl+4}
+
+\b tangent - \e{Ctrl+5}
+
+}
+
+\b Hand laid turnout - \e{Ctrl+Shift+I}
+
+\b Straight track - \e{Ctrl+G}
+
+\b Turntable - \e{Ctrl+Shift+N}
+
+}
+
+\u000
+
+\dd Helix dialog and construction tool - \e{Ctrl+Shift+H}
+
+\u000
+
+\dd Structure dialog - \e{Ctrl+Shift+C}
+
+\u000
+
+\dd Turnout dialog - \e{Ctrl+T}
+
+\u000
+
+\rule
+
+
+\S{cmdChange} Change Commands
+
+\dt Change Commands
+
+\u000
+
+\dd Connect two sectional tracks - \e{Ctrl+Shift+J}
+
+\u000
+
+\dd Elevation dialog - \e{Ctrl+Shift+E}
+
+\u000
+
+\dd Join two tracks - \e{Ctrl+J}
+
+\u000
+
+\dd Properties dialog - \e{Ctrl+?}
+
+\u000
+
+\dd Modify or extend track - \e{Ctrl+M}
+
+\u000
+
+\dd Move
+
+\lcont{
+
+\b description - \e{Ctrl+Shift+Z}
+
+\b selected object - \e{Ctrl+Shift+M}
+
+\u000
+
+}
+
+\dd Profile dialog - \e{Ctrl+Shift+F}
+
+\u000
+
+\dd Rotate selected object - \e{Ctrl+Shift+R}
+
+\u000
+
+\dd Select tool - \e{Ctrl+E}
+
+\u000
+
+\dd Split flex track - \e{Ctrl+Shift+S}
+
+\u000
+
+\rule
+
+
+\S{kbshortcutdraw} Draw Commands
+
+\S2{addText} Add Text
+
+Add Text
+
+\dd Add Text to drawing area - \e{Ctrl+Shift+X}
+
+\rule
+
+
+\S2{cmdDrawCircle} Draw Circles
+
+Draw Circles
+
+\dd Draw circle outline from
+
+\lcont{
+
+\b center to tangent point (Edge) - \e{Ctrl+Shift+0}
+
+\b tangent point (Edge) to center - \e{Ctrl+Shift+9}
+
+}
+
+\u000
+
+\dd Draw circle filled from
+
+\lcont{
+
+\b center to tangent point (Edge) - \e{Ctrl+Alt+0}
+
+\b tangent point (Edge) to center - \e{Ctrl+Alt+9}
+
+}
+
+\rule
+
+
+\S2{cmdDrawCurve} Draw Curved Lines
+
+Draw Curved Lines
+
+\dd Draw curved lines from;
+
+\lcont{
+
+\b center to endpoint - \e{Ctrl+Shift+6}
+
+\b chord - \e{Ctrl+Shift+7}
+
+\b endpoint in direction of curve - \e{Ctrl+Shift+4}
+
+\b endpoint to center - \e{Ctrl+Shift+5}
+
+}
+
+\rule
+
+
+\S2{cmdDrawShape} Draw Shapes
+
+Draw Shapes
+
+\dd Draw shape
+
+\lcont{
+
+\b Box outline - \e{Ctrl+Shift+[}
+
+\b Filled Box - \e{Ctrl+Alt+[}
+
+\b Filled Polygon - \e{Ctrl+Alt+2}
+
+\b Poly-line - \e{Ctrl+Shift+2}
+
+}
+
+\rule
+
+
+\S2{cmdDrawStraight} Draw Straight Objects
+
+Draw Straight Objects
+
+\dd Draw straight object
+
+\lcont{
+
+\b \i{Bench-work} - \e{Ctrl+B}
+
+\b Dimension Line - \e{Ctrl+Shift+D}
+
+\b Straight Line - \e{Ctrl+Shift+1}
+
+\b Table Edge - \e{Ctrl+Shift+)}
+
+}
+
+\rule
+
+
+\S2{NoteDialog} Note Dialog
+
+Note Dialog
+
+\dd Note dialog (\K{cmdNote}) - \e{Ctrl+Alt+N}
+
+\rule
+
+
+\S{cmdEdit} Edit Commands
+
+\dt Edit Commands
+
+\u000
+
+\dd Copy select objects to the clipboard - \e{Ctrl+C} or \e{Ctrl+Insert}
+
+\u000
+
+\dd Cut select objects - \e{Ctrl+X} or \e{Shift+Delete}
+
+\u000
+
+\dd Draw selected tracks with
+
+\lcont{
+
+\b thin lines - \e{Ctrl+1}
+
+\b medium lines - \e{Ctrl+2}
+
+\b thick lines - \e{Ctrl+3}
+
+\u000
+
+}
+
+\dd Delete selected object(s) - \e{Delete} or \e{Ctrl+D}
+
+\u000
+
+\dd Deselect all objects - \e{Alt+Shift+A} or \e{Esc}
+
+\u000
+
+\dd Hide selected tracks in a Tunnel - \e{Ctrl+Shift+T}
+
+\u000
+
+\dd Move Selected tracks
+
+\lcont{
+
+\b above others - \e{Ctrl+Shift+B}
+
+\b below others - \e{Ctrl+Shift+W}
+
+\u000
+
+}
+
+\dd Paste from clipboard to layout - \e{Ctrl+V} or \e{Shift+Insert}
+
+\u000
+
+\dd Redo last undone command - \e{Ctrl+R}
+
+\u000
+
+\dd Select all objects - \e{Ctrl+Shift+A}
+
+\u000
+
+\dd Undo last command - \e{Ctrl+Z} or \e{Shift+Backspace}
+
+\rule
+
+
+\S{cmdFile} File Commands
+
+\dt File Commands
+
+\u000
+
+\dd Create a new layout - \e{Ctrl+N}
+
+\u000
+
+\dd Edit layout description Note (\K{cmdNote}) - \e{Ctrl+Alt+T}
+
+\u000
+
+\dd Export
+
+\lcont{
+
+\b Selected objects to a \e{.xti} file - \e{Ctrl+Alt+X}
+
+\b To Bitmap (\K{cmdOutputbitmap}) - \e{Ctrl+Shift+Q}
+
+\u000
+
+}
+
+\dd Import from a \e{.xti} file - \e{Ctrl+Alt+I}
+
+\u000
+
+\dd Manipulate Parameter Files (\K{cmdPrmfile}) - \e{Ctrl+Alt+S}
+
+\u000
+
+\dd Open layout file - \e{Ctrl+O}
+
+\u000
+
+\dd Print Command (\K{cmdPrint}) - \e{Ctrl+P}
+
+\u000
+
+\dd Save As another file - \e{Ctrl+A}
+
+\u000
+
+\dd Save the current layout - \e{Ctrl+S}
+
+\rule
+
+
+\S{kbshortcutHotBar} \i{Hot Bar}
+
+\dt Hot Bar
+
+\u000
+
+\dd These actions take effect if the Hot Bar has keyboard focus.
+
+\lcont{
+
+\b Move Hot Bar multiple entries
+
+\lcont{
+
+\b left - \e{Shift+Left Arrow}
+
+\b right - \e{Shift+Right Arrow}
+
+\u000
+
+}
+
+\b Move Hot Bar one entry
+
+\lcont{
+
+\b left - \e{Left Arrow}
+
+\b right - \e{Right Arrow}
+
+\u000
+
+}
+
+\b Pop-up menu of Hot Bar contents - \e{Right-Click}
+
+\u000
+
+\b Set relative position of Hot Bar - \e{1, 2 ... 9, 0}
+
+}
+
+
+\S{cmdMacro} Macro Commands
+
+\dt Macro Commands
+
+\u000
+
+\dd Play Back a macro file (\K{macroM}) - \e{Ctrl+Alt+B}
+
+\u000
+
+\dd Record a macro file (\K{macroM}) - \e{Ctrl+Alt+R}
+
+\u000
+
+\rule
+
+
+\S{kbshortcutMainCanvas} \i{Main Drawing Canvas}
+
+\dt Main Drawing Canvas
+
+\u000
+
+\dd These actions take effect if the Main Drawing Canvas has keyboard focus.
+
+\lcont{
+
+\u000
+
+\dd Move Canvas:
+
+\lcont{
+
+\b Down - \e{Down Arrow}
+
+\b Left - \e{Left Arrow}
+
+\b Right - \e{Right Arrow}
+
+\b Up - \e{Up Arrow}
+
+}
+
+}
+
+\rule
+
+\S{cmdManage} Manage Commands
+
+\dt Manage Commands
+
+\u000
+
+\dd Car Inventory dialog - \e{Ctrl+Alt+V}
+
+\u000
+
+\dd Custom Management dialog (\K{cmdCustmgm}) - \e{Ctrl+Alt+U}
+
+\u000
+
+\dd Generate a Parts List (\K{cmdEnum}) - \e{Ctrl+Alt+L}
+
+\u000
+
+\dd Group objects (\K{cmdGroup}) - \e{Ctrl+Shift+G}
+
+\u000
+
+\dd Layers dialog (\K{cmdLayer}) - \e{Ctrl+Alt+Y}
+
+\u000
+
+\dd Ungroup objects (\K{cmdGroup}) - \e{Ctrl+Shift+U}
+
+\u000
+
+\dd Update Prices (\K{cmdPricelist}) - \e{Ctrl+Alt+Q}
+
+\rule
+
+
+\S{cmdOption} Option Commands
+
+\dt Options Commands
+
+\u000
+
+\dd Colors dialog (\K{cmdRgbcolor}) - \e{Ctrl+Alt+C}
+
+\u000
+
+\dd Command Options dialog (\K{cmdCmdopt}) - \e{Ctrl+Alt+M}
+
+\u000
+
+\dd Display dialog (\K{cmdDisplay}) - \e{Ctrl+Alt+D}
+
+\u000
+
+\dd Easement Options dialog - \e{Ctrl+Alt+E}
+
+\u000
+
+\dd Font dialog (\K{fontSelW}) - \e{Ctrl+Alt+F}
+
+\u000
+
+\dd Layout dialog (\K{cmdLayout}) - \e{Ctrl+Alt+A}
+
+\u000
+
+\dd Preferences dialog (\K{cmdPref}) - \e{Ctrl+Alt+P}
+
+\u000
+
+\dd Sticky commands dialog (\K{cmdSticky}) - \e{Ctrl+Alt+K}
+
+\rule
+
+\S{cmdView} View Commands
+
+\dt View Commands
+
+\u000
+
+\dd Redraw
+
+\lcont{
+
+\b all - \e{Ctrl+Shift+L}
+
+\b main window - \e{Ctrl+L}
+
+}
+
+\u00
+
+\dd Snap Grid dialog (\K{cmdGrid}) - \e{Ctrl+Alt+G}
+
+\u00
+
+\dd Zoom
+
+\lcont{
+
+\b in - \e{Ctrl++, Page Down}
+
+\b out - \e{Ctrl+-, Page Up}
+
+}
+
+\rule
+
+
+\H{cmdAcclKeys} \i{Mouse Actions}
+
+\dt \e{XTrkCad} uses the left and right mouse buttons when manipulating tracks and other objects on the layout.  Their meaning depends on the particular command but in general:
+
+\u00
+
+\dd \e{Left-Click} - selects an object or an endpoint.
+
+\u00
+
+\dd \e{Left+Drag} - modifies an object, such as extending it.
+
+\u00
+
+\dd \e{Right-Click} - displays a pop-up menu of commands.
+
+\u00
+
+\dd \e{Shift+Right-Click} - displays a pop-up menu of command options (for some commands).
+
+\u00
+
+\dd \e{Rotate Wheel} - zooms drawing area in and out.
+
+\u000
+
+\u000
+
+\dt When Moving and Rotating ( Placing Turnouts and Structures, Moving the Print and Snap Grids, ... ):
+
+\u00
+
+\dd \e{(Left+Drag)} - moves the objects or grid.
+
+\u00
+
+\dd \e{(Right+Drag)} - rotates the objects or grid about the pivot point, which is
+the point you started the drag operation.
+
+Some commands use the \c{Shift} or \c{Ctrl} key to modify the meaning of button presses.
+
+\rule
+
+
+\S{mouseBcmd} Mouse Commands
+
+For all commands, \e{Right-Click} displays the command selection pop-up menu.  For some commands (noted below), \e{Shift+Right-Click} displays a command option pop-up menu.  The operation of \e{Right-Click} and \e{Shift+Right-Click} can be reversed by an item on the Command Options (\K{cmdCmdopt}) dialog.
+
+The Shortcut key for each command is listed after the command name.
+
+
+\dt Circle Track Command (\K{cmdCircle})
+
+\dd Drag from
+
+\lcont{
+
+\b center to circle tangent point (Edge) - \e{Ctrl+0}
+
+\b circle tangent point (Edge) to center - \e{Ctrl+9}
+
+}
+
+\dd Position fixed radius circle - \e{Ctrl+8}
+
+\u000
+
+
+\dt Connect Command (\K{cmdConnect}) - \e{Ctrl+Shift+J}
+
+\dd Remove adjustments starting from an unconnected endpoint - \e{Shift+Left-Click}
+
+\dd Select endpoints to connect - \e{Left-Click}
+
+\u000
+
+
+\dt Curved Track Commands (\K{cmdCurve})
+
+\dd Drag from 1st endpoint
+
+\lcont{
+
+\b in curve direction - \e{Ctrl+4}
+
+\b to Center - \e{Ctrl+5}
+
+\b to 2nd endpoint (Chord) - \e{Ctrl+7}
+
+}
+
+\dd Drag from Center to 1st endpoint - \e{Ctrl+6}
+
+\u000
+
+
+\dt Properties Command (\K{cmdDescribe}) - \e{Ctrl+?}
+
+\dd Display property sheet for the object - \e{Left-Click}
+
+\u000
+
+
+\dt Elevation Command (\K{cmdElev}) - \e{Ctrl+Shift+E}
+
+\dd Choose endpoint - \e{Left-Click}
+
+\dd Move Elevation Marker - \e{Right+Drag}
+
+\dd Split track and choose endpoint - \e{Shift+Left-Click}
+
+\u000
+
+
+\dt Flip Command (\K{cmdFlip})
+
+\dd Draw Mirror line - \e{Left+Drag}
+
+\u000
+
+
+\dt Hand-laid Turnout Command (\K{cmdHandLaidTurnout}) - \e{Ctrl+Shift+I}
+
+\dd Define
+
+\lcont{
+
+\b frog position and angle - \e{(1st Left+Drag)}
+
+\b points position - \e{(2nd Left+Drag)}
+
+}
+
+\u000
+
+
+\dt Helix Track Command (\K{cmdHelix}) - \e{Ctrl+Shift+H}
+
+\dd Position Helix - \e{(Left+Drag)}
+
+\u000
+
+
+\dt Join Command (\K{cmdJoin}) - \e{Ctrl+J}
+
+\dd Join tracks - \e{(Left+Drag)}
+
+\dd Move selected tracks to join with unselected endpoint - \e{Shift+Left-Click}
+
+\u000
+
+
+\dt Modify Command (\K{cmdModify}) - \e{Ctrl+M}
+
+\dd Change
+
+\lcont{
+
+\b length or make tangent to curve - \e{Left+Drag}
+
+\b radius - \e{Shift+Left+Drag}
+
+}
+
+\dd Extend track - \e{Right+Drag}
+
+\u000
+
+
+\dt Move Command (\K{cmdMove}) - \e{Ctrl+Shift+M}
+
+\dd Command Options: how to draw moving objects (\K{cmdAcclKeys}) - \e{Shift+Right-Click}
+
+\dd Move Selected objects - \e{Left+Drag}
+
+\u000
+
+
+\dt Move Description Command (\K{cmdMoveLabel}) - \e{Ctrl+Shift+Z}
+
+\dd Move Description - \e{Left+Drag}
+
+\dd Toggle Label display for Curved, Helix and Turnout tracks (\K{cmdAcclKeys}). - \e{Shift+Right-Click}
+
+\u000
+
+
+\dt Note Command (\K{cmdNote}) - \e{Ctrl+Alt+N}
+
+\dd Position Note - \e{Left+Drag}
+
+\u000
+
+
+\dt Parallel Command (\K{cmdParallel}) - \e{Ctrl+Shift+P}
+
+\dd Position Parallel track relative to selected track - \e{(Left+Drag)}
+
+\u000
+
+
+\dt Print Command (\K{cmdPrint}) - \e{Ctrl+P}
+
+\dd Command Options: rotate by specified amount (\K{cmdAcclKeys}) - \e{(Shift+Right-Click)}
+
+\dd Move Print grid - \e{Shift+Left+Drag}
+
+\dd Rotate Print grid - \e{Shift+Right+Drag}
+
+\dd Select or unselect pages - \e{Left-Click}
+
+\u000
+
+
+\dt Profile Command (\K{cmdProfile}) - \e{Ctrl+Shift+F}
+
+\dd Add tracks to path from path end to chosen endpoint - \e{(Left-Click)}
+
+\dd Command Options: change Elevation type - \e{(Shift+Right-Click)} (\K{cmdAcclKeys})
+
+\u000
+
+
+\dt Rotate Command (\K{cmdRotate}) - \e{Ctrl+Shift+R}
+
+\dd Command Options: how to draw moving objects and rotate by specified amount (\K{cmdAcclKeys}) - \e{Shift+Right-Click}
+
+\dd Rotate Selected objects - \e{Left+Drag}
+
+\lcont{
+
+\b in increments of 15\u00B0 - \e{Ctrl+Left+Drag}
+
+}
+
+\u000
+
+
+\dt Ruler Command - \K{cmdRuler}
+
+\dd Position Ruler - \e{Left+Drag}
+
+\u000
+
+
+\dt Select Command (\K{cmdSelect}) - \e{Ctrl+E}
+
+\dd Command Options: how to draw moving objects and rotate by specified amount (\K{cmdAcclKeys}) - \e{Shift+Right-Click}
+
+\dd Move
+
+\lcont{
+
+\b selected objects - \e{Shift+Left+Drag}
+
+\b labels - \e{Ctrl+Left+Drag}
+
+}
+
+\dd Unselect all objects within the highlighted area - \e{Right+Drag}
+
+\dd Rotate selected objects - \e{Shift+Right+Drag}
+
+\lcont{
+
+\b in increments of 15\u00B0 - \e{Ctrl+Shift+Right+Drag}
+
+}
+
+\dd Select (or unselect) the object - \e{Left-Click}
+
+\dd Select all objects
+
+\lcont{
+
+\b connected to object - \e{Shift+Left+Click}
+
+\b within the highlighted area - \e{Left+Drag}
+
+}
+
+\u000
+
+
+\dt Snap Grid Command (\K{cmdGrid}) - \e{Ctrl+Alt+G}
+
+\dd Command Options: rotate by specified amount (\K{cmdAcclKeys}) - \e{Shift+Right-Click}
+
+\dd Move Snap Grid - \e{Left+Drag}
+
+\dd Rotate Snap Grid - \e{Right+Drag}
+
+\u000
+
+
+\dt Split Track Command (\K{cmdSplitTrack}) - \e{Ctrl+Shift+S}
+
+\dd As above, plus trim turnouts - \e{Shift+Left-Click}
+
+\dd Change block gaps (\K{cmdAcclKeys}) - \e{Shift+Right-Click}
+
+\dd If at endpoint: disconnect track, otherwise: split track - \e{Left-Click}
+
+\u000
+
+
+\dt \i{Straight Track} Command (\K{cmdStraight}) - \e{Ctrl+G}
+
+\dd Place 1st and 2nd endpoints - \e{Left+Drag}
+
+\u000
+
+
+\dt Structure Command (\K{cmdStructure}) - \e{Ctrl+Shift+C}
+
+\dd Command Options: rotate by specified amount (\K{cmdAcclKeys}) - \e{Shift+Right-Click}
+
+\dd Place Structure - \e{Left+Drag}
+
+\dd Rotate - \e{Right+Drag}
+
+\u000
+
+
+\dt Text Command (\K{cmdText}) - \e{Ctrl+Shift+X}
+
+\dd Command Options: change Font (\K{cmdAcclKeys}) - \e{Shift+Right-Click}
+
+\dd Position text - \e{Left+Drag}
+
+\u000
+
+
+\dt Train Simulation Command - \K{cmdTrain}
+
+\dd Command Options: uncouple car, flip or delete cars or Trains, set MU Master - \e{Right-Click}
+
+\dd Move a Car or Train - \e{Left+Drag}
+
+\dd Switch a \e{Turnout} or rotate a \e{Turntable} - \e{Shift+Left-Click}
+
+\u000
+
+
+\dt Turntable Command (\K{cmdTurntable}) - \e{Ctrl+Shift+N}
+
+\dd Position Turntable - \e{Left+Drag}
+
+\u000
+
+
+\dt Turnout Command (\K{cmdTurnout}) - \e{Ctrl+T}
+
+\dd Choose next Active endpoint when placing Turnouts - \e{Shift+Left-Click}
+
+\dd Command Options: rotate by specified amount (\K{cmdAcclKeys}) - \e{Shift+Right-Click}
+
+\dd Place Turnout - \e{Left+Drag}
+
+\dd Rotate - \e{Right+Drag}
+
+\dd Suppress auto-adjustment positioning when placing Turnouts - \e{Shift+Left+Drag}
+
+\rule
+
+\H{messagesList} \i{Messages}
+
+\e{XTrkCad} generates three types of messages:
+
+\dd \e{Notices}, which appear in their own window and require you to press a button to make a choice or dismiss them.
+
+\u000
+
+\dd \e{Error messages}, which appear in the \f{Status-bar} (\K{mainW}) and are accompanied by a beep.
+
+\u000
+
+\dd \e{Information messages}, which appear in the \f{Status-bar} (\K{mainW}) without a beep.
+
+\u000
+
+\dd \e{Notices} and \e{Error messages} that might be encounter are listed here with a explanation. The \f{Recent Messages} menu item on the \f{Help} (\K{helpM}) menu contains a list of the most recent messages.  Selecting one of the entries presents information on the particular message.
+
+\u000
+
+\dd The notation \e{abc|xyx} indicates the message can appear with either of the values (\e{abc} or \e{xyz}).  Items in \e{UPPERCASE} indicate numeric (such as lengths) or string (such as filenames) values.
+
+\u000
+
+\u000
+
