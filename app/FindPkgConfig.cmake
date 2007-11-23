@@ -317,18 +317,18 @@ endmacro(_pkg_check_modules_internal)
 ###
 macro(pkg_check_modules _prefix _module0)
   # check cached value
-  if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})
+#  if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})
     _pkgconfig_parse_options   (_pkg_modules _pkg_is_required "${_module0}" ${ARGN})
     _pkg_check_modules_internal("${_pkg_is_required}" 0 "${_prefix}" ${_pkg_modules})
 
-    _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
-  endif(NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})
+#    _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
+#  endif(NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})
 endmacro(pkg_check_modules)
 
 ###
 macro(pkg_search_module _prefix _module0)
   # check cached value
-  if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})
+#  if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})
     set(_pkg_modules_found 0)
     _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required "${_module0}" ${ARGN})
 
@@ -351,8 +351,8 @@ macro(pkg_search_module _prefix _module0)
       endif(${_pkg_is_required})
     endif(NOT ${_prefix}_FOUND)
     
-    _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
-  endif(NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})  
+#    _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
+#  endif(NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION})  
 endmacro(pkg_search_module)
 
 ### Local Variables:
