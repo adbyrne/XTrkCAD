@@ -46,7 +46,7 @@ struct transTbl {
 
 /* translation table for unicode sequences understood by Halibut */
 struct transTbl toUnicode = {
-       "°\0",
+       "\xB0\0",
       { "\\u00B0",
 		  "\\0"  }
 };
@@ -54,8 +54,9 @@ struct transTbl toUnicode = {
 /* translation table for escape sequences understood by C compiler */
 
 struct transTbl toC = {
-      "\\\"\0",
-      { "\\\\",
+      "\n\\\"\0", 
+      { "\\n",		
+		"\\\\",
       "\\\"",
 		"\\0" }
 };
@@ -253,7 +254,7 @@ int main( int argc, char * argv[] )
 			mode = m_help;
 		} else if ( strncmp( buff, "END", 3 ) == 0 ) {
 			/* the whole message has been read */
-			
+
 			/* create escape sequences */
 			tName = TranslateString( msgName, &toC );
 			tTitle = TranslateString( msgTitle, &toC );	
@@ -306,7 +307,7 @@ int main( int argc, char * argv[] )
 						strcat( msgAlt, "..." );
 					}
 					/* add a newline to the first part */
-					strcat( msgTitle, "\\n" );
+					strcat( msgTitle, "\n" );
 				}
 				/* now save the buffer into the message title */
 				strcat( msgTitle, buff );

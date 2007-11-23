@@ -1,3 +1,8 @@
+Nov 23, 2007
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		genmessages.c, Fixed handling of \n escape sequence in header file output
+
+
 Nov 22, 2007
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		genmessages.c, Makefile, messages.in: build messages in Halibut format
