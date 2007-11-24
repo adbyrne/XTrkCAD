@@ -1,0 +1,36 @@
+\# Notes:
+\#
+\# The "\u000" command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
+\#
+
+\H{macroM} Macro Menu
+
+\G{png.d/mmacro.png}
+
+The \f{Macro Menu} shows commands that can be used to \f{Record} and \f{Playback} commands.
+
+\dd \f{Record} - Displays the \f{Record} dialog (after prompting for a file name). The current layout state and most subsequent actions will be saved in the recording file.
+
+\lcont{
+
+\u000
+
+\b Messages can be inserted into the recording file by pressing the \f{Message} button on the \f{Record} dialog then entering a message in the text display.
+
+\u000
+
+\b Press the \f{End} button to end entry of the message and resume recording.
+
+\u000
+
+\b Press the \f{Stop} button to stop recording.
+
+}
+
+\u000
+
+\dd \f{Playback} - Displays the \f{Playback} dialog (after prompting for a file name). This is used to playback previously recorded sessions. \f{Note:} the layout state will be saved during playbacks and restored after.
+
+The \f{Record} command is useful if it becomes necessary to report a bug in \e{XTrkCad}.
+
+\rule

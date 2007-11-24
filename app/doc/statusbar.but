@@ -1,0 +1,29 @@
+\# Notes:
+\#
+\# The "\u000" command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
+\#
+
+\H{cmdStatusbar} Status Bar
+
+The \e{Status Bar} contains:
+
+\dd The Line Width and Color for \e{Straight Line}, \e{Curved Line}, \e{Circle}, \e{Box} or \e{Poly Line} objects. The Line Width is specified in pixels for the current Drawing Scale. Zooming (\K{viewM}) in or out causes the lines to be drawn wider or narrower.
+
+\u000
+
+\dd The Color for \e{Filled Circles} or \e{Polygons}.
+
+\u000
+
+\dd The size of a \e{Dimension Line} (\e{Tiny}, \e{Small}, \e{Medium} or \e{Large})
+
+\u000
+
+\dd The type, size and orientation of lumber used for \e{Bench-work} (regular rectangular, L-Girder or T-Girder).
+
+
+\u000
+
+If the \e{Ctrl} key is held down while creating or modifying lines and shapes then the cursor will be attracted to other objects.
+
+\rule

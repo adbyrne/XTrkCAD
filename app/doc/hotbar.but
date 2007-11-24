@@ -1,0 +1,48 @@
+\# Notes:
+\#
+\# The "\u000" command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
+\#
+
+\H{cmdHotBar} Hot Bar
+
+\G{png.d/hotbar.png}
+
+The \e{Hot Bar} is a scrolling list of all the turnouts, sectional track and structures available through the Turnout (\K{cmdTurnout}) and Structure (\K{cmdStructure}) commands. The Description and/or Part Number under each object can be displayed by enabling the \e{Hot Bar Labels} radio button on the Display (\K{cmdDisplay}) dialog.
+
+The arrow buttons on either side of the \e{Hot bar} move the list one object to the right or left. Holding down the Shift key will move the list by greater amounts.  About eight Shift+Clicks are required to move the list through the entire range of objects. Also, pressing the keys \e{1} through \e{9} and \e{0} will cause the \e{Hot Bar} to jump relative spots on the list.
+
+A \e{Right-Click} over the \e{Hot Bar} will display a pop-up menu listing the contents of the \e{Hot Bar}. Selecting an item from this list causes the \e{Hot Bar} to jump to the relative spot on the list.
+
+Objects on the \e{Hot Bar} are placed on the drawing canvas by first clicking on the object, \e{Dragging} it the Main window, positioning it then pressing the \e{Space} key to set it in place.
+
+\rule
+
+
+\S{hbStructures} Structures
+
+\e{Structures} are placed on the layout in the same way as turnouts (\K{hbTurnouts}) except no active endpoint exists and they do not align with existing track.
+
+Refer to \K{cmdStructure} for information pertaining to use of the \e{Structure} dialog.
+
+\rule
+
+
+\S{hbTurnouts} Turnouts
+
+\e{Turnouts} have an active endpoint (\K{generalTerms}) which is the handle used to position the \e{Turnout}.  You can change the \e{active endpoint} by a \e{Shift+Left-Click} which causes the next endpoint to become Active.
+
+If you \e{Left+Drag} a turnout onto a track, the active endpoint (\K{generalTerms}) is aligned with the selected track.  On flex-track, you can flip the turnout by moving the cursor from one side of the track centerline to the other.  On another turnout, the new turnout will be placed at the endpoint closest to the cursor.
+
+\e{XTrkCad} will automatically connect the turnout's endpoints to any other tracks they are aligned with.  The number of endpoints that will be connected is displayed on the Status Bar, as well as the Maximum displacement between these endpoints and the tracks they will be connected to. \e{XTrkCad} will adjust the position of the Turnout to give you the best fit for locating the turnout.  You can override this adjustment by holding down the \e{Shift} key while \e{Dragging}.
+
+\e{Right+Drag} (\K{windowTerms}) can be used to rotate the turnout on the layout. \e{Shift+Right-Click} (\K{cmdAcclKeys}) displays a pop-up menu allowing you to rotate the turnout by various angles.
+
+When you press the \e{Space} key, the turnout is positioned on the layout.  Any tracks that are aligned with any of the turnout's endpoints will be connected to the turnout automatically. If you are using the Turnout (\K{cmdTurnout}) command then you can also click the \e{OK} button on the dialog.
+
+If you choose another turnout or change commands after beginning to place a turnout on the layout, the turnout will be created as if it is attached to another track.  Otherwise it will be removed.
+
+If the Drawing Scale is smaller or equal to the Label Scale (\K{cmdDisplay}) then Turnouts will be labeled with their description when drawn.  The individual labels can be can be turned off by the Move Description(\K{cmdMoveLabel}) command, or all Turnout labels can be disabled by using the Display (\K{cmdDisplay}) dialog.  As well, the length of any connected Flex-track will be indicated at each endpoint.
+
+Refer to \K{cmdTurnout} for information pertaining to use of the \e{Turnout} dialog.
+
+\rule

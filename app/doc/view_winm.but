@@ -1,0 +1,138 @@
+\# Notes:
+\#
+\# The "\u000" command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
+\#
+
+\H{viewM} \i{View Menu}
+
+\G{png.d/mview.png}
+
+The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\K{mainW}).
+
+\dd \f{Change Grid} - Displays the \f{Snap Grid} dialog.  The \f{Snap Grid} forces the cursor (for some commands) to be on a grid to control track placement.
+
+\u000
+
+\dd \f{Enable SnapGrid} - Enables (or disables) the \f{Snap Grid} (\K{cmdGrid}).
+
+\u000
+
+\dd \f{Redraw} - Redraws the \f{Main Canvas}.
+
+\u000
+
+\dd \f{Redraw All} - Redraws the \f{Main Canvas} and the \f{Map Window} (\K{cmdMap}).
+
+\u000
+
+\dd \f{Show Snap-Grid} - Toggles display of the \f{Snap Grid} on and off.
+
+\u000
+
+\dd \f{Tool-bar} - Command button groups displayed on the \f{Tool-bar} are selected using the Tool-bar Configuration Menu (\K{toolbarM}).
+
+\u000
+
+\dd \G{png.d/mzoomscale.png}
+
+\u000
+
+\dd \f{Zoom} - This sub-menu is used to select a specific drawing scale ratio for the \f{Main Canvas}.
+
+\u000
+
+\dd \f{Zoom In} - Increases magnification of the \f{Main Canvas}.
+
+\u000
+
+\dd \f{Zoom Out} - Decreases magnification of the \f{Main Canvas}.
+
+\u000
+
+When zooming in or out, the corresponding highlighted area of the \f{Map Window} (\K{cmdMap}) changes size to match that which appears on the \f{Main Canvas} (\K{mainW}).
+
+\rule
+
+\S{cmdGrid} Grid Dialog
+
+The \f{Grid} dialog, displayed by \f{Change Grid} on the View (\K{viewM}) menu, specifies the origin, angle and other parameters of the Snap Grid.  The Snap Grid controls the position of the cursor during the \f{Curve} (\K{cmdCurve}), \f{Circle} (\K{cmdCircle}), \f{Modify} (\K{cmdModify}), \f{Straight} (\K{cmdStraight}), \f{Line Drawing} (\K{cmdDraw}) and \f{Turntable} (\K{cmdTurntable}) commands.
+
+\G{png.d/grid.png}
+
+The \f{Grid} dialog contains controls affecting the horizontal and vertical snap grid lines.  Each dimension can be independently controlled.
+
+\dd The \f{Spacing} value specifies the distance between major grid lines, which are drawn as solid lines on the layout.
+
+\u000
+
+\dd The \f{Divisions} value adds the minor Grid lines between the major Grid lines, which are drawn as a series of dots on the layout.  Specifying a value of 0 or 1 as the division value removes the minor grid lines.
+
+\u000
+
+\dd The Grid can be enabled or disabled in each dimension via the \f{Enable} check box.
+
+The origin and angle of the Grid can be adjusted directly or by dragging on the layout.  \e{Left+Drag} moves the origin of the Grid, and \e{Right+Drag} rotates the grid.  \e{Shift+Right-Click} (\K{cmdAcclKeys}) displays a pop-up menu allowing rotation of the grid by various predefined angles.
+
+Whether the Snap Grid is drawn is controlled by the \f{Show} check-box.  Also, if the layout is Zoomed Out (\K{viewM}) the minor and major grid lines may be too close together to be drawn.  The minimum pixel distance between grid lines is controlled by the \f{Min Grid Spacing} value on the \f{Display} (\K{cmdDisplay}) dialog.
+
+\f{Note:} on slow machines drawing the Grid can take noticeable time.  Performance can be improved by selecting a larger value for \f{Min Grid Spacing}.
+
+\G{png.d/bgsnap.png} \f{Grid Buttons} on the Tool-bar (\K{mainW}) can be used to Enable/Disable and to Show/Hide the Snap Grid.
+
+\rule
+
+\S{toolbarM}Tool-bar Configuration
+
+\G{png.d/mtoolbar.png}
+
+Command button groups displayed on the \f{Tool-bar} are selected using the Tool-bar Configuration Menu (\K{toolbarM}). If none of the command button groups are selected, the \f{Tool-bar} is not shown.
+
+\rule
+
+
+\S{cmdZoom} \i{Zoom}
+
+\G{png.d/bgzoom.png}
+
+The \f{Zoom In} and \f{Zoom Out} actions can also be accessed using buttons on the Tool Bar.  The Mouse Wheel, PAGE DOWN and PAGE UP keys can also be used to zoom in and out.
+
+Holding down the Shift key while clicking the \f{Zoom In} or \f{Zoom Out} buttons sets the Drawing Scale to a \e{Programmed Zoom} value.
+
+\dd \e{\i{Programmed Zoom}}
+
+\lcont{
+
+\u000
+
+\b The \e{Programmed Zoom} value for the \f{Zoom In} button is set to the current Drawing Scale by holding down the Shift and Ctrl keys while clicking on the \f{Zoom In} button.
+
+\u000
+
+\b The \e{Programmed Zoom} value for the \f{Zoom Out} button is set to the current Drawing Scale by holding down the Shift and Ctrl keys while clicking on the \f{Zoom Out} button.
+
+}
+
+Normally a zoom in more of more than 1:1 is not possible, however if the Ctrl key is held down while the \f{Zoom In} button is pressed a zoom less that 1:1 can be achieved. This function is useful when working on detail.
+
+Pressing the middle Zoom button on the Tool Bar pop-ups a list of Zoom factors that can be select from.
+
+\rule
+
+
+\H{windowM} Window Menu
+
+\G{png.d/mwindow.png}
+
+The \f{Window Menu} typically contains selections for bringing any open window into view. It's used as follows;
+
+\dd \e{XTrkCad} permits multiple dialog windows to be open at any one time. When a large number of windows are open it can become difficult to locate and bring a specific window into focus. Use the \f{Window Menu} function to select and bring the desired window to the top of the screen.
+
+\u000
+
+\dd \G{png.d/openwindows.png}
+
+\u000
+
+\dd Apart from bringing the \f{Map Window} (\K{cmdMap}) to the foreground, the \f{Map} menu item can also be used to re-opened a closed \f{Map Window}.
+
+\rule
