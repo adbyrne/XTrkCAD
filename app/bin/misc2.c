@@ -1,7 +1,7 @@
 /** \file misc2.c
  * Management of information about scales and gauges plus rprintf.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.5 2007-11-18 17:53:21 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.6 2007-11-24 19:48:21 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -28,7 +28,9 @@
 #include <unistd.h>
 #include <dirent.h>
 #endif
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>

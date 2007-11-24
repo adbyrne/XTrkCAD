@@ -1,7 +1,7 @@
 /** \file smalldlg.c
  * Several simple and smaller dialogs. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.3 2007-09-28 11:17:33 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.4 2007-11-24 19:48:21 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,7 +24,9 @@
  */
 
 #include <stdio.h>
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>

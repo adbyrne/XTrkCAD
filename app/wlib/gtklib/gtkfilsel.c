@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfilsel.c,v 1.2 2006-02-22 19:20:11 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfilsel.c,v 1.3 2007-11-24 19:48:21 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -29,7 +29,9 @@
 #endif
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <unistd.h>
 #include <string.h>
 

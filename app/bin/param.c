@@ -1,7 +1,7 @@
 /** \file param.c
  * Handle all the dialog box creation stuff.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.4 2007-09-28 11:17:33 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.5 2007-11-24 19:48:21 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -28,7 +28,9 @@
 #include <unistd.h>
 #include <dirent.h>
 #endif
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>

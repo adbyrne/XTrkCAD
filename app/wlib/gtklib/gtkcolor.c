@@ -1,7 +1,7 @@
 /** \file gtkcolor.c
  * code for the color selection dialog and color button
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkcolor.c,v 1.2 2007-02-10 07:30:04 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkcolor.c,v 1.3 2007-11-24 19:48:21 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,7 +24,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <unistd.h>
 #include <stdlib.h>
 

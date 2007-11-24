@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.21 2007-11-21 06:35:59 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.22 2007-11-24 19:48:21 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -26,7 +26,9 @@
 #include <unistd.h>
 #include <dirent.h>
 #endif
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <math.h>
 #include <ctype.h>
 #include <string.h>

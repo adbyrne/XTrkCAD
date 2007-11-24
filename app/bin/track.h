@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.h,v 1.1 2005-12-07 15:47:23 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.h,v 1.2 2007-11-24 19:48:21 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -30,7 +30,9 @@
 #include <unistd.h>
 #endif
 #include <math.h>
+#ifndef __APPLE__
 #include <malloc.h>
+#endif
 #include <string.h>
 
 #include "wlib.h"

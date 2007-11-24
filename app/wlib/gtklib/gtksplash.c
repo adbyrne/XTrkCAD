@@ -1,7 +1,7 @@
 /** \file gtksplash.c
  * Handling of the Splash Window functions
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksplash.c,v 1.2 2007-09-15 14:22:55 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksplash.c,v 1.3 2007-11-24 19:48:21 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -61,7 +61,7 @@ wCreateSplash( char *appName, char *appVer )
    window = gtk_window_new (GTK_WINDOW_POPUP);
    gtk_window_set_title (GTK_WINDOW (window), appName); 
    gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER);
-   gtk_window_set_modal (GTK_WINDOW (window), TRUE);
+//   gtk_window_set_modal (GTK_WINDOW (window), TRUE);
    gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
    gtk_window_set_type_hint (GTK_WINDOW (window), GDK_WINDOW_TYPE_HINT_SPLASHSCREEN);
    gtk_window_set_focus_on_map (GTK_WINDOW (window), FALSE);
