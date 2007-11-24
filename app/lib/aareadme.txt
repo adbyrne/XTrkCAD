@@ -53,7 +53,7 @@ The MS-Windows version of XTrkCad is shipped as a self-extracting/
 self-installing program using the NSIS Installer from Nullsoft Inc.
 
 1) From the WinXP Explorer (or the Run command on the Start menu)
-   execute XTC401.EXE.
+   execute XTC402.EXE.
    You will be prompted for a destination directory.  A new program group
    with XTrkCad icons will be created.
 2) Open the XTrkCad program by double clicking on the icon and try it.
@@ -67,7 +67,7 @@ A new program group named XTrkCad 4 will be created in the Start menu.
 4. Installation on Linux
 ========================
 
-0) You will need libc6, X11R6, GTK+2.0
+0) You will need libc6, X11R6, GTK+2.0, gtkhtml2
 1) cd /usr/local/lib
 2) tar xvfz ${TMPDIR}/xtrkcad-linux-elf.4.0.1.tar.gz
    ; where TMPDIR is where you downloaded XTrkCad
@@ -81,68 +81,59 @@ A new program group named XTrkCad 4 will be created in the Start menu.
 5. Upgrade Information
 ======================
 
-Version 4 of XTrkCad introduces a new way of handling checkpoint files. 
-This will allow resuming your work after a system crash much easier than 
-before. 
+5.1 Windows Version
+-------------------
 
-If you start XTrkCad V.4 the first time after an upgrade from a earlier 
-version, a popup with the question:
-"Program was not terminated properly. Do you want to resume working on the 
-previous trackplan?"
-
-Select "Ignore" only if you're sure that the work from your last session 
-has been correctly saved. If uncertain or restarting after an earlier 
-failure select "Resume".
-
+The main initialization file xtrkcad.ini is no longer stored in the Windows
+directory but in the user's settings. During the installation the file is 
+copied to the new location so your settings remain intact.
 
 6. New features in this release
 ===============================
 
-Probably the biggest change in this version of XTrkCad is the new structure
-of the main menu. After starting XTrkCad, you'll see the following items in 
-the main menu:
+- Program Help files have been extensively reworked and reformatted. The help 
+system has been converted to HTML format. 
+- Zooming in and out from a drawing can now be controlled with a wheel mouse.
+- Colors and the flag settings for the layers can now	be saved in the 
+preferences. On opening a new layout or upon	startup of XTrkCad these settings 
+are automatically loaded.
+- XTrkCad now has a real splash window during startup
 
-File - Open, save, print layouts, parameter files handling
-Edit - Select, deselect, cut and paste, edit visual properties of track
-View - Zoom in and out, grid operations, refresh screen
-Add - Place new track pieces: straight, curved, turnouts etc.
-Change - Change existing track: flip, rotate, move, elevation etc.  
-Draw - Add basic objects like lines, benchwork, text
-Manage - Custom management, turnout designer, run trains
-Options - Change settings for the application or the layout
-Macro - Record or playback macros
-Windows - Select active window, reopen map window if closed
-Help - Access the user documentation
-
-All functionality available in earlier versions of XTrkCad can still be 
-found under these menu topics. 
-
-The following functions have been added in this version of XTrkCad:
-
-File | Revert - Revert to last saved state of the layout plan.
-Edit | Invert selection - invert the selection state of all visible objects
-Edit | Select Stranded Track - Select all track pieces that are not 
-connected to any other piece of track. May be useful for cleaning up.
-
-NOTES:
-
-1) Check ChangeLog in the installation directory for further change 
-   information
-2) Look at the XTrkCad help file (either via the Help menu in XTrkCad or by
-   opening the XTrkCad help icon).
-3) Try the demos, via the Help|Demos menu in XTrkCad.
 
 7. New or updated parameter files
 ==========================
 
 The following parameter files have been added or updated with this release:
 
-Atlas N Code 55 Track - Dwyane Ward
-Design Preservation Model N Structures - Ralph Boyd
-Kato N Unitrack - Ralph Boyd
-Model Power N Structures - Ralph Boyd
-Peco N Code 55 Track - Andrew Crosland
-Peco HOn30/OO9 Track - Martin Fischer
+atlaso2rail.xtp
+br.xtp               British Rolling Stock
+eu.xtp
+atl100ho.xtp			Atlas HO Code 100
+rocho100.xtp			Roco HO Code 
+AtlasTrueTrk.xtp		Atlas HO True Track
+nmra-0-lapped.xtp		Lapped O scale turnouts
+LionelFasttrack.xtp	Lionel Fasttrack
+amb-n.xtp				American Model Builders N Structures
+dpm-ho.xtp           Design Preservation Model HO Structures
+dpm-n.xtp            Design Preservation Model N Structures
+mtl-z.xtp            Microtraisn Z Scale Track
+peco-O-Bullhead.xtp  Peco O Scale Track
+tomix-n.xtp          Tomix N Scale Track
+toolkit-n.xtp        Useful Shapes and Tools for N Scale
+kato-ho.xtp          KAT HO Track
+atlasn55.xtp         Atlas N Code 55 Track 
+LifeLike-N.xtp       Lifelike N Track
+kato-n-DblTrk.xtp    Kato N Double Track
+atl83ho.xtp          Atlas Code 83 HO Track
+atlascho.xtp         Atlas HO Track
+atlascn.xtp          Atlas N Track
+smltown.xtp          Smalltown HO Structures
+mrklnhoc.xtp         Maerklin HO C-Track
+wlthho83.xtp         Walthers Code 83 HO Track
+mp-n.xtp             Model Power N Structures
+bach-n.xtp           Bachmann N Scale Structures
+walth-n.xtp          Walthers N Scale Structures
+
 
 8. Where to go for support
 ==========================
