@@ -1,4 +1,4 @@
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.6 2007-11-17 15:06:57 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.7 2007-11-25 16:10:14 m_fischer Exp $
 #
 # Makefile for halibut based documentation
 #
@@ -22,7 +22,8 @@ BUTFILES = \
 	optionm.but \
 	statusbar.but\
 	view_winm.but \
-	navigation.but\
+	navigation.but \
+	messages.but \
 	appendix.but
 
 help: xtrkcad.chm
@@ -32,9 +33,13 @@ xtrkcad.chm: xtrkcad.hhp
 	
 xtrkcad.hhp: $(BUTFILES)
 	$(HALIBUT) $**
+
+messages.but: ..\help\messages.but
+	copy ..\help\messages.but messages.but	
 	
 clean:
 	del *.html
 	del xtrkcad.hhp
 	del xtrkcad.hhc
 	del xtrkcad.chm
+	

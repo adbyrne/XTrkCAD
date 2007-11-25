@@ -92,11 +92,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\helpm.but"
+				>
+			</File>
+			<File
+				RelativePath=".\hotbar.but"
+				>
+			</File>
+			<File
 				RelativePath=".\intro.but"
 				>
 			</File>
 			<File
-				RelativePath=".\mainw.but"
+				RelativePath=".\macrom.but"
 				>
 			</File>
 			<File
@@ -108,7 +116,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\map_hot.but"
+				RelativePath=".\navigation.but"
 				>
 			</File>
 			<File
@@ -116,11 +124,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\viewm.but"
+				RelativePath=".\statusbar.but"
 				>
 			</File>
 			<File
-				RelativePath=".\win_help.but"
+				RelativePath=".\view_winm.but"
 				>
 			</File>
 		</Filter>
