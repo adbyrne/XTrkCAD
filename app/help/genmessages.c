@@ -68,7 +68,7 @@ TranslateString( char *srcString, struct transTbl *trTbl )
 	char *destString;
    char *cp;
    char *cp2;
-   int bufLen = strlen( srcString ) + 1;
+   size_t bufLen = strlen( srcString ) + 1;
    char *idx;
 
    /* calculate the expected result length */

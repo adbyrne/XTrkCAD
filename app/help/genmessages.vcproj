@@ -92,7 +92,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Build the messages.h file"
-				CommandLine="$(OutDir)\$(TargetName) &lt; messages.in"
+				CommandLine="$(OutDir)\$(TargetName) messages.in messages.but"
 			/>
 		</Configuration>
 		<Configuration
