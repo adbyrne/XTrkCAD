@@ -37,9 +37,9 @@ current releases.
 
 Copying:
 
-XTrkCad is copyrighted by Dave Bullis and licensed as free software under 
-the terms of the GNU General Public License which you can find in the file 
-COPYING.
+XTrkCad is copyrighted by Dave Bullis and Martin Fischer and licensed as 
+free software under the terms of the GNU General Public License which 
+you can find in the file COPYING.
 
 
 3. Installation on Windows
@@ -87,6 +87,7 @@ A new program group named XTrkCad 4 will be created in the Start menu.
 The main initialization file xtrkcad.ini is no longer stored in the Windows
 directory but in the user's settings. During the installation the file is 
 copied to the new location so your settings remain intact.
+
 
 6. New features in this release
 ===============================

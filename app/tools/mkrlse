@@ -48,7 +48,7 @@ chmod 444 xtrkcad/*/*
 chmod 444 xtrkcad/{Readme.txt,COPYING,xtc64.xpm,logo.bmp,xtrkcad.*}
 chmod 777 xtrkcad/{demos,examples,html,params,html/png.d}
 chmod 555 xtrkcad/xtrkcad
-RLSE=`echo $RLSE | sed -e 's/r//' -e 's/_/./g'`
+RLSE=`echo $RLSE | sed  -e 's/_/./g'`
 echo Building release $RLSE
 tar cvfz  xtrkcad-linux-elf.${RLSE}.tar.gz xtrkcad 
 
