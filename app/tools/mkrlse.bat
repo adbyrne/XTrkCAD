@@ -2,13 +2,12 @@
 
 if .%1 == . goto parametererror
 
-:doit
-
 mkdir .\xtrkcad-%1
 mkdir .\xtrkcad-%1\demos
 mkdir .\xtrkcad-%1\examples
 mkdir .\xtrkcad-%1\params
 copy .\bin\Release\xtrkcad.exe xtrkcad-%1
+copy .\lib\logo.bmp xtrkcad-%1
 tools\addcrlf -d .\COPYING xtrkcad-%1\COPYING
 
 echo Copying the parameter files
@@ -47,8 +46,15 @@ endlocal
 setlocal
 cd .\help
 ..\tools\addcrlf -d xtrkcad.tip ..\xtrkcad-%1\xtrkcad.tip
-copy .\xtrkcad.hlp ..\xtrkcad-%1\xtrkcad.hlp
-cd ..\bin
+endlocal
+
+setlocal
+cd .\doc
+copy .\xtrkcad.chm ..\xtrkcad-%1\xtrkcad.chm
+endlocal 
+
+setlocal
+cd .\bin
 ..\tools\addcrlf -d ChangeLog ..\xtrkcad-%1\ChangeLog
 endlocal
 
@@ -57,6 +63,7 @@ cd xtrkcad-%1
 makensis /Drel=%1 /NOCD ../tools/xtrkcad.nsi
 copy xtcinst.exe xtc%1.exe
 del xtcinst.exe
+
 del /q examples\*.*
 rmdir examples
 del /q demos\*.*
@@ -67,10 +74,10 @@ del COPYING
 del xtrkcad.exe
 del xtrkcad.xtq 
 del xtrkcad.enh 
-del xtrkcad.upd 
 del xtrkcad.ini 
-del xtrkcad.hlp
+del xtrkcad.chm
 del xtrkcad.tip
+del logo.bmp
 del ReadMe.txt
 del ChangeLog
 endlocal
@@ -83,11 +90,12 @@ echo ERROR: Execute with %0 rel
 echo.
 echo Example: %0 401
 echo where <401> is the release of XTrkCad to be packaged. 
-echo During execution of this script, the directory xtrkcad-<rel> is echo created and all necessary files are collected into that directory.
+echo During execution of this script, the directory xtrkcad-<rel> is 
+echo created and all necessary files are collected into that directory.
 echo After that NSIS is run to build the install package. After successful
 echo build, the files are deleted again.
 echo.
-echo Execute from directory xtrkcad\4.0.0
+echo Execute from directory xtrkcad\app
 echo.
 
 :end

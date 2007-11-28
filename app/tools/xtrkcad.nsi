@@ -65,9 +65,14 @@ Section "XTrkCAD (required)" program
   File "ReadMe.txt"
   File "xtrkcad.xtq"
   File "xtrkcad.tip"	
-  File "xtrkcad.hlp"
+  File "xtrkcad.chm"
+  File "logo.bmp"	
   File "ChangeLog"	
-
+  
+  ; remove the older help file if it does exist
+  IfFileExists $INSTDIR\xtrkcad.hlp 0 +2
+	Delete $INSTDIR\xtrkcad.hlp
+  
   ; add the parameter files	
   SetOutPath "$INSTDIR\params"
   File "params\*.*"		
@@ -95,14 +100,43 @@ Section "XTrkCAD (required)" program
 ;  Delete "$DOCUMENTS\xtrkcad.new"
 ;
 ; 
-;  WriteINIStr "$DOCUMENTS\xtrkcad.ini"	file paramdir "$INSTDIR\params\"				
+;  WriteINIStr "$DOCUMENTS\xtrkcad.ini"	file paramdir "$INSTDIR\params\"
+;
+; Does an INI file exist?
+;  If yes, the program has been run before, so leave it alone
+;  If no, try to find an INI file in the former locations and copy it to the new place ( application settings)
+;
+  IfFileExists $APPDATA\xtrkcad\xtrkcad.ini NoOldIni 0
+     
+; find the INI file location
+;
+; the default location is the Windows directory
+    StrCpy $1 $WINDIR
+;
+; the user can select this select by configuring an xtrkcad0.ini, so look for this next 
+    IfFileExists $INSTDIR\xtrkcad0.ini 0 NoIni
+	  ReadINIStr $1 $INSTDIR\xtrkcad0.ini workdir path
+	
+NoIni:	
+;  In case an ini file exists in this location, copy it to the new location
+    IfFileExists $1\xtrkcad.ini 0 NoOldIni	
+	  CopyFiles $1\xtrkcad.ini $APPDATA\xtrkcad
+	
+	  IfFileExists $1\xtrkcad.cus 0 +2 
+		CopyFiles $1\xtrkcad.cus $APPDATA\xtrkcad
+	
+	  IfFileExists $1\xtrkcad.cu1 0 +2 
+		CopyFiles $1\xtrkcad.cu1 $APPDATA\xtrkcad
+	
+	  IfFileExists $1\xtrkcad.ckp 0 +2 
+		CopyFiles $1\xtrkcad.ckp $APPDATA\xtrkcad	
 
+NoOldIni:
   CreateDirectory "$SMPROGRAMS\XTrkCAD4"
   CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad.lnk" "$INSTDIR\xtrkcad.exe" "" "$INSTDIR\xtrkcad.exe" 0
-  CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad Help.lnk" "winhelp.exe" "$INSTDIR\xtrkcad.hlp" "$INSTDIR\xtrkcad.exe" 0
+  CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad Help.lnk" "$INSTDIR\xtrkcad.chm" "" "" 0
   CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad ReadMe.lnk" "notepad.exe" "$INSTDIR\ReadMe.txt" 	
   CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
-  
   
   ; Write the installation path into the registry
   WriteRegStr HKLM SOFTWARE\XTrkCAD "Install_Dir" "$INSTDIR"
@@ -183,7 +217,7 @@ Section "Uninstall"
   Delete $INSTDIR\ReadMe.txt
   Delete $INSTDIR\xtrkcad.xtq
   Delete $INSTDIR\xtrkcad.tip"	
-  Delete $INSTDIR\xtrkcad.hlp"
+  Delete $INSTDIR\xtrkcad.chm"
   Delete $INSTDIR\ChangeLog"	
   Delete $INSTDIR\xtrkcad.gid
 

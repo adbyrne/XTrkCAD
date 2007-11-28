@@ -52,7 +52,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\wlib\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;WINDOWS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;WINDOWS;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -79,6 +79,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="htmlhelp.lib"
 				OutputFile=".\Release/xtrkcad.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -208,7 +209,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\lib\logo.bmp $(OutDir)&#x0D;&#x0A;copy ..\doc\xtrkcad.chm $(OutDir)"
+				CommandLine="copy ..\lib\logo.bmp $(OutDir)&#x0D;&#x0A;copy ..\doc\xtrkcad.chm $(OutDir)&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>

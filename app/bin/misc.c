@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.22 2007-11-24 19:48:21 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.23 2007-11-28 18:07:10 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1813,7 +1813,7 @@ static drawCmd_t aboutD = {
 		Pix2CoOrd, CoOrd2Pix };
 
 static paramDrawData_t aboutDrawData = { ICON_WIDTH, ICON_HEIGHT, (wDrawRedrawCallBack_p)RedrawAbout, NULL, &aboutD };
-#define COPYRIGHT "Copyright (c) 2007 Sillub Technology and XTrkCad Team"
+#define COPYRIGHT "XTrkCad is a CAD (computer-aided design) program for designing Model Railroad layouts."
 static paramData_t aboutPLs[] = {
 #define I_ABOUTDRAW				(0)
 	{   PD_DRAW, NULL, "about", PDO_NOPSHUPD, &aboutDrawData, NULL, 0 },
