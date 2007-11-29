@@ -1,7 +1,7 @@
 /** \file gtkhelp.c
  * Balloon help ( tooltips) and main help functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.3 2007-11-18 17:53:21 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.4 2007-11-29 21:13:25 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -995,6 +995,7 @@ EXPORT void wHelp( const char * topic )
    LoadHtml( view, docContents, htmlFile );
 
    gtk_widget_show_all (wHelpWindow);
+	gtk_window_present( wHelpWindow );
 }
 
 /**
