@@ -1,3 +1,7 @@
+Dec. 01, 2007
+	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>	
+		acclkeys.h: removed non-working accelerator key for deselect all
+
 Nov. 30, 2007
 	FIX: Timothy M. Shead
 		misc.c: make sure that font initialization is run first
