@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.3 2007-11-24 19:48:21 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.4 2007-12-01 15:33:52 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -385,6 +385,11 @@ void fontToggleSlantButton( void* junk )
 #include "bold.bmp"
 #include "italic.bmp"
 
+void wInitializeFonts()
+{
+	if(!fontInitted)
+		fontInit( FALSE );
+}
 
 void wSelectFont(
 	const char * title )

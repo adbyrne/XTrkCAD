@@ -1,7 +1,7 @@
 /** \file wlib.h
  * Commaon definitions and declarations for the wlib library
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.12 2007-09-28 16:59:14 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.13 2007-12-01 15:33:52 m_fischer Exp $
  */
 
 #ifndef WIN_H
@@ -500,6 +500,7 @@ void wDrawRestoreImage(		wDraw_p );
  *
  * Fonts
  */
+void wInitializeFonts();
 void wSelectFont(		const char * );
 wFontSize_t wSelectedFontSize(	void );
 #define F_TIMES	(1)

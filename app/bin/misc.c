@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.23 2007-11-28 18:07:10 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.24 2007-12-01 15:33:52 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2556,6 +2556,10 @@ LOG1( log_init, ( "create main window\n" ) )
 	toolbarSet |= newToolbarMax & ~oldToolbarMax;
 	wPrefSetInteger( "misc", "max-toolbarset", newToolbarMax );
 	wPrefSetInteger( "misc", "toolbarset", toolbarSet );
+
+LOG1( log_init, ( "fontInit\n"))
+
+	wInitializeFonts();
 
 LOG1( log_init, ( "fileInit\n" ) )
 	FileInit();

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswdraw.c,v 1.3 2007-07-22 17:02:46 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswdraw.c,v 1.4 2007-12-01 15:33:52 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500		/* for wheel mouse supposrt */
@@ -774,6 +774,10 @@ void wDrawString(
 static const char * wCurFont( void )
 {
 	return logFont.lfFaceName;
+}
+
+void wInitializeFonts()
+{
 }
 
 wFont_p wStandardFont( int family, wBool_t bold, wBool_t italic )
