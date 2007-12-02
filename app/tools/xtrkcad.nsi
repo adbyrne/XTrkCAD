@@ -95,7 +95,6 @@ Section "XTrkCAD (required)" program
 ; INI file does not exist at this point, test whether the directory exists and create if necessary
 ;  	
 	IfFileExists $APPDATA\xtrkcad\. DirExists 0
-		MessageBox MB_OK "Create directory in profile"
 		CreateDirectory $APPDATA\xtrkcad
 
 DirExists:		  
