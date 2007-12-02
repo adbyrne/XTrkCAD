@@ -19,7 +19,7 @@ The \f{Demos} command (\K{cmdDemo}) opens a cascading menu which invokes various
 
 \dd \e{Recent Messages}
 
-The \f{Recent Messages} command opens a cascading menu containing recent error messages and notices you have received. Selecting one of them displays additional information about the message (\K{messagesList}).
+The \f{Recent Messages} command opens a cascading menu containing recent error messages and notices you have received. Selecting one of them displays additional information about the message (\K{messageList}).
 
 \dd \G{png.d/dtipofday.png}
 

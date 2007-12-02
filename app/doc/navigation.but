@@ -219,8 +219,8 @@ The size of the \e{Map Window} changes when you change the Room Size (see \K{cmd
 
 If you close the \e{Map Window}, you can reopen it by the \e{Window} menu.
 
-
 \rule
+
 
 \H{kbshortcuts} \i{Keyboard Shortcuts} \I{Shortcut Keys}
 
@@ -1163,30 +1163,3 @@ The Shortcut key for each command is listed after the command name.
 \dd Suppress auto-adjustment positioning when placing Turnouts - \e{Shift+Left+Drag}
 
 \rule
-
-\H{messagesList} \i{Messages}
-
-\e{XTrkCad} generates three types of messages:
-
-\dd \e{Notices}, which appear in their own window and require you to press a button to make a choice or dismiss them.
-
-\u000
-
-\dd \e{Error messages}, which appear in the \f{Status-bar} (\K{mainW}) and are accompanied by a beep.
-
-\u000
-
-\dd \e{Information messages}, which appear in the \f{Status-bar} (\K{mainW}) without a beep.
-
-\u000
-
-\dd \e{Notices} and \e{Error messages} that might be encounter are listed here with a explanation. The \f{Recent Messages} menu item on the \f{Help} (\K{helpM}) menu contains a list of the most recent messages.  Selecting one of the entries presents information on the particular message.
-
-\u000
-
-\dd The notation \e{abc|xyx} indicates the message can appear with either of the values (\e{abc} or \e{xyz}).  Items in \e{UPPERCASE} indicate numeric (such as lengths) or string (such as filenames) values.
-
-\u000
-
-\u000
-

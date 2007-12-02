@@ -177,6 +177,8 @@ The font size can be changed by the Font Size drop list on the \f{Status-bar} (\
 
 The font can be selected by the \f{Font Selection} (\K{fontSelW}) dialog invoked by the \f{Options>Fonts} menu item or by \e{Shift+Right-Click} (\K{cmdAcclKeys}).
 
+The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \e{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \e{Left-Click+Drag}ing the text to any desired postion on the layout.
+
 The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents of existing \f{Text} objects.
 
 Note: loading fonts (or changing sizes) can take a noticeable amount of time.

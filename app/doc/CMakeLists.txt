@@ -21,8 +21,10 @@ SET( butfiles ${butfiles}
 				  ${CMAKE_CURRENT_SOURCE_DIR}/statusbar.but
 				  ${CMAKE_CURRENT_SOURCE_DIR}/view_winm.but
 				  ${CMAKE_CURRENT_SOURCE_DIR}/navigation.but 
-				  ${CMAKE_CURRENT_SOURCE_DIR}/messages.but	
-				  ${CMAKE_CURRENT_SOURCE_DIR}/appendix.but )
+				  ${CMAKE_CURRENT_SOURCE_DIR}/appendix.but 
+				  ${CMAKE_CURRENT_SOURCE_DIR}/messages.but 
+				  ${CMAKE_CURRENT_SOURCE_DIR}/upgrade.but 
+				  ${CMAKE_CURRENT_SOURCE_DIR}/warranty.but )
 
 ADD_CUSTOM_COMMAND(
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/index.html

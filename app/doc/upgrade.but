@@ -1,0 +1,44 @@
+\A{upgrades} Upgrade From Earlier \e{XTrkCad} Version
+
+This section contains helpful information regarding program changes and the effects such may have with respect to layout files made with previous versions of \e{XTrkCad}.
+
+\rule
+
+\H{cmdUpdatetitle} Version 2.x
+
+\e{Updated Titles}
+
+\G{png.d/updttl.png}
+
+Version 2.0.0 of \e{XTrkCad} introduced a change in the way Turnouts and Structures are named. The new method splits the title into 3 parts: Manufacturer, Description and Part Number.
+
+To help you when upgrading to the new version, when loading an old \e{XTrkCad} layout file, \e{XTrkCad} detects if the layout uses Turnouts and Structures that have titles in the old format.  If so this dialog is displayed which allows you to change the titles in your layout to the new format.
+
+The title of each different type of Turnout is collected and presented in this dialog.  Simply select the Turnout on the list that matches the one displayed and click 'Update'.  Repeat for each type of Turnout in your layout.
+
+If there is no matching Turnout, click on Ignore.  The Turnout will retain the old name as the Description, with a blank Manufacturer and Part Number.
+
+Click Cancel to continue loading the file without updating the titles.
+
+If you Save your file without updating all the titles you will not be able to update the titles later.
+
+If you are looking at old files without making changes then Click on Cancel to load the file without Updates.
+
+Not updating the titles prevents the customization of the way titles are presented in various lists and on the layout.  Basic operation of \e{XTrkCad} is not affected.
+
+\rule
+
+
+\H{updatechkptfile} Version 4.x
+
+\e{Check-point Files}
+
+Version 4 of \e{XTrkCad} introduces a new way of handling check-point files. This will allow resuming your work after a system crash much easier than before. 
+
+If you start \e{XTrkCad} V.4 the first time after an upgrade from a earlier version, a pop-up with the question: "Program was not terminated properly. Do you want to resume working on the 
+previous track plan?"
+
+Select "Ignore" only if you're sure that the work from your last session has been correctly saved. If uncertain or restarting after an earlier failure select "Resume".
+
+\rule
+

@@ -66,7 +66,7 @@ The \f{Edit} button invokes the \f{Car} dialog (\K{cmdCarpart}) to modify the se
 
 The \f{Delete} button removes the selected cars from your inventory.  This button is disabled if any of the selected cars are on the layout.
 
-The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value (CSV)} file.  This file format can be read and written by many applications. It can be used to transfer car inventory data between different applications.  This file contains the following columns (the first four are required when Importing):
+The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value (CSV)} file.  This file format can be read and written by many applications. It can be used to transfer car inventory data between different applications. This file contains the following columns (the first four are required when Importing):
 
 \dd \e{Scale} - example: HO, HOn3, N, O etc
 
@@ -266,9 +266,7 @@ Unlike the other dialogs, dimensions in this dialog are in prototype units.  Whe
 
 \S{cmdCustmgm} Custom Management
 
-The \f{Custom Management} dialog allows you change the properties of turnouts, sectional track, structures,
-car parts and prototypes you have designed with the \f{Turnout Designer} (\K{cmdTurnoutNew}), \f{Group} 
-(\K{cmdGroup}) or \f{Car} (\K{cmdCarpart}) commands.  You can also move selected objects to a \f{Parameter File} (\K{cmdPrmfile}).
+The \f{Custom Management} dialog allows you change the properties of turnouts, sectional track, structures, car parts and prototypes you have designed with the \f{Turnout Designer} (\K{cmdTurnoutNew}), \f{Group} (\K{cmdGroup}) or \f{Car} (\K{cmdCarpart}) commands.  You can also move selected objects to a \f{Parameter File} (\K{cmdPrmfile}).
 
 \G{png.d/custmgm.png}
 
@@ -304,11 +302,13 @@ You can include \f{Turnouts}, \f{Sectional}, \f{Straight} or \f{Curved} tracks i
 
 To modify a \f{Structure} or \f{Turnout} definition, first place the object on the layout, select and then \f{Ungroup} the object.  Now the parts of the object can be edited using the \f{Modify} (\K{cmdModify}), \f{Draw} (\K{cmdDraw}) or other commands.  Once completed, select the object parts and use the \f{Group} command to update the definition (or create a new one by changing the title).
 
-The \f{Group} dialog shows the title (manufacturer, description and part number) of the new definition.  The initial values are based on any selected turnouts and structures or on the last object \f{Ungrouped} (\K{cmdUngroup}).  The dialog also contains a toggle button, \f{Replace with new group?} which is used if you want to replace the selected objects with the new definition.
+The \f{Group} dialog shows the Manufacturer, Description and part number (Title) of the new definition. Initial values are based on selected turnouts and structures or on the last \f{Ungroup}ed object (\K{cmdUngroup}). The dialog also contains a toggle button (\f{Replace with new group}?), which is used if you want to replace the selected objects with the new definition. All fields listed in this dialog window must contain data.
 
 The definition data will be added to the \c{xtrkcad.cus} (\K{directories}) file for later use. Please consider contributing this information for others to use.
 
 If you modify a definition from a \e{XTrkCad} Library parameter file, the new definition will replace the existing definition on the \f{Hot Bar} (\K{cmdHotBar}), otherwise it will be added to the end of the \f{Hot Bar}. You can use the \f{Custom Management} (\K{cmdCustmgm}) dialog to change the title or delete custom definitions.
+
+\f{Note:} There is a limit of 128 track segments in a group.
 
 \rule
 

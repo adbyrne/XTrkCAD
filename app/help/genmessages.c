@@ -1,5 +1,6 @@
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
+ *						2007 Martin Fischer
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -125,6 +126,8 @@ void dumpHelp( FILE *hlpsrcF )
 {
 	int inx;
 	char *transStr;
+	
+	fprintf( hlpsrcF, "\n\n\\H{messageList} \\i{Message Explanations}\n\n" );
 
 	/* sort in alphabetical order */
 	qsort( helpMsgs, helpMsgCnt, sizeof helpMsgs[0], cmpHelpMsg );
@@ -138,20 +141,10 @@ void dumpHelp( FILE *hlpsrcF )
 		
 		transStr = TranslateString( helpMsgs[inx].help, &toUnicode );
 		fprintf( hlpsrcF, "%s\n\n", transStr );
-		free( transStr );		
-#ifdef LATER
-		fprintf( hlpsrcF, "\\H{" );
-		unescapeString ( hlpsrcF, helpMsgs[inx].key );
-		fprintf( hlpsrcF, "} " );
-
-		unescapeString( hlpsrcF, helpMsgs[inx].title );
-		fprintf( hlpsrcF, "\n\n" );
-
-		unescapeString ( hlpsrcF, helpMsgs[inx].help );
-
-		fprintf( hlpsrcF, "\n\n" );
-#endif
+		free( transStr );			
 	}
+	
+	fprintf( hlpsrcF, "\n\n\\rule\n\n" );
 }
 
 
