@@ -94,9 +94,11 @@ Section "XTrkCAD (required)" program
   
 ; INI file does not exist at this point, test whether the directory exists and create if necessary
 ;  	
-	IfFileExiste $APPDATA\xtrkcad\. DirExists 0
-		  MKDir $APPDATA\xtrkcad
-     
+	IfFileExists $APPDATA\xtrkcad\. DirExists 0
+		MessageBox MB_OK "Create directory in profile"
+		CreateDirectory $APPDATA\xtrkcad
+
+DirExists:		  
 ; find the old INI file location
 ;
 ; the default location is the Windows directory, start there 

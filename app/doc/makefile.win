@@ -1,4 +1,4 @@
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.7 2007-11-25 16:10:14 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/doc/makefile.win,v 1.8 2007-12-02 14:48:18 m_fischer Exp $
 #
 # Makefile for halibut based documentation
 #
@@ -23,8 +23,10 @@ BUTFILES = \
 	statusbar.but\
 	view_winm.but \
 	navigation.but \
+	appendix.but \
 	messages.but \
-	appendix.but
+	upgrade.but \
+	warranty.but
 
 help: xtrkcad.chm
 	
