@@ -1,9 +1,10 @@
 ; xtrkcad.nsi
 ;
 ; This script is based on example1.nsi, but it remembers the directory, 
-; has uninstall support and (optionally) installs start menu shortcuts.
+; has uninstall support and installs start menu shortcuts.
 ;
-; It will install xtrkcad into a directory that the user selects,
+; It will install xtrkcad into a directory that the user selects, create
+; a file association and the necessary shortcuts in the start menu
 
 ;--------------------------------
 ;Include Modern UI
@@ -85,40 +86,32 @@ Section "XTrkCAD (required)" program
   SetOutPath "$INSTDIR\examples"
   File "examples\*.*"		
 
-  ; add the ini file
-;
-; adding and customizing the ini file will be done later - some changes
-; in XTC needed as well (use user's directories instead of Windows system dir)
-;
-;  SetOutPath "$DOCUMENTS"
-;
-;  File "/oname=xtrkcad.new" "release\xtrkcad.ini" 
-;
-;  IfFileExists "$DOCUMENTS\xtrkcad.ini" +2 0
-;    Rename "$DOCUMENTS\xtrkcad.new" "$DOCUMENTS\xtrkcad.ini"
-;
-;  Delete "$DOCUMENTS\xtrkcad.new"
-;
-; 
-;  WriteINIStr "$DOCUMENTS\xtrkcad.ini"	file paramdir "$INSTDIR\params\"
-;
 ; Does an INI file exist?
 ;  If yes, the program has been run before, so leave it alone
 ;  If no, try to find an INI file in the former locations and copy it to the new place ( application settings)
 ;
   IfFileExists $APPDATA\xtrkcad\xtrkcad.ini NoOldIni 0
+  
+; INI file does not exist at this point, test whether the directory exists and create if necessary
+;  	
+	IfFileExiste $APPDATA\xtrkcad\. DirExists 0
+		  MKDir $APPDATA\xtrkcad
      
-; find the INI file location
+; find the old INI file location
 ;
-; the default location is the Windows directory
+; the default location is the Windows directory, start there 
+;
     StrCpy $1 $WINDIR
+
+; the user can select the directory select by configuring an xtrkcad0.ini, so look for this next 
 ;
-; the user can select this select by configuring an xtrkcad0.ini, so look for this next 
     IfFileExists $INSTDIR\xtrkcad0.ini 0 NoIni
 	  ReadINIStr $1 $INSTDIR\xtrkcad0.ini workdir path
 	
 NoIni:	
+
 ;  In case an ini file exists in this location, copy it to the new location
+;
     IfFileExists $1\xtrkcad.ini 0 NoOldIni	
 	  CopyFiles $1\xtrkcad.ini $APPDATA\xtrkcad
 	
@@ -131,6 +124,10 @@ NoIni:
 	  IfFileExists $1\xtrkcad.ckp 0 +2 
 		CopyFiles $1\xtrkcad.ckp $APPDATA\xtrkcad	
 
+; at this point, the ini file does exist in the user's roaming profile directory
+; continue installation with setting up the menu short cuts
+;
+
 NoOldIni:
   CreateDirectory "$SMPROGRAMS\XTrkCAD4"
   CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad.lnk" "$INSTDIR\xtrkcad.exe" "" "$INSTDIR\xtrkcad.exe" 0
@@ -138,11 +135,12 @@ NoOldIni:
   CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad ReadMe.lnk" "notepad.exe" "$INSTDIR\ReadMe.txt" 	
   CreateShortCut "$SMPROGRAMS\XTrkCAD4\XTrkCad Uninstall.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\uninstall.exe" 0
   
-  ; Write the installation path into the registry
+; Write the installation path into the registry
+; 
   WriteRegStr HKLM SOFTWARE\XTrkCAD "Install_Dir" "$INSTDIR"
   
-  ; Write the uninstall keys for Windows
-
+; Write the uninstall keys for Windows
+;
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "DisplayName" "XTrkCAD Model Railroad Design Software"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "UninstallString" "$INSTDIR\uninstall.exe"
   WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\XTrkCAD" "DisplayIcon" "$INSTDIR\uninstall.exe"
