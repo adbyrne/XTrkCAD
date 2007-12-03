@@ -60,7 +60,7 @@ All description fields present in the Turnout
 Designer must contain appropraite information.
 Correct inappropriate values and try again.
 HELP
-Turnout descriptions should be as accurate as possible. All description fields listed in the \f{Turnout Designer} must contain appropraite information.
+Turnout descriptions should be as accurate as possible. All description fields listed in the \f{Turnout Designer} must contain appropriate information.
 
 Refer to \k{cmdTurnoutNew} for detail.
 
@@ -484,7 +484,7 @@ END
 
 # cturntbl.c
 MESSAGE MSG_NO_ROOM_BTW_TRKS
-Insufficient space between exisitng stall tracks.
+Insufficient space between existing stall tracks.
 HELP
 There is insufficient space between the two existing turntable stall tracks to place a new stall track. Either place the new stall track on a different part of the turntable or decrease the \e{Turntable Angle} using the \f{Command Options} dialog.
 
@@ -864,7 +864,7 @@ END
 MESSAGE MSG_SEL_POS_FIRST
 Select position prior to entering Text.
 HELP
-The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \e{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \e{Left-Click+Drag}ing the text to any desired postion on the layout.
+The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \e{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \e{Left-Click+Drag}ing the text to any desired position on the layout.
 
 Refer to \k{cmdText} for detail.
 
@@ -970,11 +970,7 @@ The following column in the Car Import file will be ignored:
 HELP
 An invalid column in the Car Import file will be ignored. Valid column names are:
 
-\e{Index}, \e{Scale}, \e{Manufacturer}, \e{Type}, \e{Partno}, \e{Prototype}, 
-\e{Description}, \e{Roadname}, \e{Repmark}, \e{Number}, \e{Options}, 
-\e{CarLength}, \e{CarWidth}, \e{CoupledLength}, \e{TruckCenter}, \e{Color}, 
-\e{PurchPrice}, \e{CurrPrice}, \e{Condition}, \e{PurchDate}, \e{ServiceDate} 
-and \e{Notes}.
+\e{Index}, \e{Scale}, \e{Manufacturer}, \e{Type}, \e{Partno}, \e{Prototype}, \e{Description}, \e{Roadname}, \e{Repmark}, \e{Number}, \e{Options}, \e{CarLength}, \e{CarWidth}, \e{CoupledLength}, \e{TruckCenter}, \e{Color}, \e{PurchPrice}, \e{CurrPrice}, \e{Condition}, \e{PurchDate}, \e{ServiceDate} and \e{Notes}.
 
 Refer to \k{cmdCarinv} for detail.
 
@@ -1595,6 +1591,10 @@ MESSAGE MSG_MOVED_BEYOND_END_TRK
 Moved beyond the end of the track
 #NOHELP
 END
+
+
+
+
 
 
 ############################################################
