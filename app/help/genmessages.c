@@ -154,7 +154,7 @@ int main( int argc, char * argv[] )
 	FILE *inF;
 	FILE *outF;
 
-	char buff[256];
+	char buff[ 4096 ];
 	char * cp;
 	int inFileIdx;
 	enum {m_init, m_title, m_alt, m_help } mode = m_init;
@@ -243,6 +243,7 @@ int main( int argc, char * argv[] )
 			mode = m_title;
 		} else if ( strncmp( buff, "ALT", 3 ) == 0 ) {
 			mode = m_alt;
+			msgAlt[0] = 0;			
 		} else if ( strncmp( buff, "HELP", 4 ) == 0 ) {
 			mode = m_help;
 		} else if ( strncmp( buff, "END", 3 ) == 0 ) {
@@ -306,7 +307,12 @@ int main( int argc, char * argv[] )
 				strcat( msgTitle, buff );
 			} else if (mode == m_alt) {
 				/* an alternate text was explicitly specified, save */
-				strcpy( msgAlt, buff );
+				if( msgAlt[ 0 ] ) {
+					strcat( msgAlt, " " );
+					strcat( msgAlt, buff );
+				} else {					
+					strcpy( msgAlt, buff );
+				}	
 			} else if (mode == m_help) {
 				/* we are reading the help text, save in buffer */
 				strcat( msgHelp, buff );
