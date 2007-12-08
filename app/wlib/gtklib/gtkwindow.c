@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.3 2007-09-23 16:13:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.4 2007-12-08 02:04:57 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -28,8 +28,6 @@
 #include <unistd.h>
 #include <string.h>
 
-#include <X11/X.h>
-#include <X11/Xlib.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>

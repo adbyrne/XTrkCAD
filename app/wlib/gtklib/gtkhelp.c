@@ -1,7 +1,7 @@
 /** \file gtkhelp.c
  * Balloon help ( tooltips) and main help functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.4 2007-11-29 21:13:25 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.5 2007-12-08 02:06:11 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -33,8 +33,6 @@
 #include <assert.h>
 #include <fcntl.h>
 
-#include <X11/X.h>
-#include <X11/Xlib.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
