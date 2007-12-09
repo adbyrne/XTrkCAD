@@ -11,9 +11,6 @@ HELP
 The frog or points of a hand-laid turnout cannot be placed on a turnout, circle or helix track. Choose a straight or curved section of track or use the \f{Split} command to create a curve from the circle track.
 
 Refer to \k{cmdHandLaidTurnout} for detail regarding hand laid turnouts or \k{cmdSplitTrack} for detail regarding the \f{Split} command.
-
-\rule
-
 END
 
 # cselect.c
@@ -24,9 +21,6 @@ HELP
 This operation cannot be executed as segments of Selected track are present on a frozen layer. Track changes or deletions may be performed only on unfrozen layers. Deselect objects that appear on frozen layers or unfreeze the layers.
 
 Refer to \k{cmdLayer} for detail.
-
-\rule
-
 END
 
 # ccurve.c
@@ -34,9 +28,6 @@ MESSAGE MSG_HELIX_TURNS_GTR_0
 A Helix must have one or more loops of track.
 HELP
 A Helix cannot be created with less than one complete loop of track. Anything less than one loop is considered a section of curved track.
-
-\rule
-
 END
 
 # ctext.c
@@ -49,23 +40,17 @@ HELP
 A large font has been selected. Large fonts (or changing fonts sizes) may take a noticeable amount of time to load.
 
 Refer to \k{cmdText} for detail.
-
-\rule
-
 END
 
 # ctodesgn.c
 MESSAGE MSG_TODSGN_DESC_NONBLANK
 All description fields present in the Turnout
-Designer must contain appropraite information.
+Designer must contain appropriate information.
 Correct inappropriate values and try again.
 HELP
 Turnout descriptions should be as accurate as possible. All description fields listed in the \f{Turnout Designer} must contain appropriate information.
 
 Refer to \k{cmdTurnoutNew} for detail.
-
-\rule
-
 END
 
 # cgroup.c:groupOk
@@ -76,9 +61,6 @@ HELP
 The \f{Group} dialog shows the Manufacturer, Description and part number (Title) of the new definition. Initial values are based on selected turnouts and structures or on the last \f{Ungroup}ed object. The dialog also contains a toggle button (\f{Replace with new group}?), which is used if you want to replace the selected objects with the new definition. All fields listed in this dialog window must contain data.
 
 Refer to \k{cmdGroup} for detail.
-
-\rule
-
 END
 
 # ctodesgn.c
@@ -89,18 +71,12 @@ HELP
 Turnout dimensions should be as accurate as possible. All values specified in the \f{Turnout Designer} must be greater than 0.
 
 Refer to \k{cmdTurnoutNew} for detail.
-
-\rule
-
 END
 
 MESSAGE MSG_CURVE_OUT_OF_RANGE
 Angle must be between 0° and 360°.
 HELP
 The angle specified for a curve must be between 0\u00B0 and 360\u00B0.
-
-\rule
-
 END
 
 # dcustmgm.c
@@ -114,9 +90,6 @@ HELP
 You are about to delete a custom turnout or structure design from the \f{Custom Design} file (\c{xtrkcad.cus}) file. This action cannot be undone.
 
 Refer to \k{installDir} and \k{workDir} for an explanation of the files used by \e{XTrkCad}.
-
-\rule
-
 END
 
 # dbitmap.c
@@ -124,9 +97,6 @@ MESSAGE MSG_WBITMAP_FAILED
 Bitmap create or write function failed.
 HELP
 Your attempt to create or write a Bitmap file failed. This could be due to the Bitmap being too large or a lack of system resources. Try creating a smaller Bitmap or freeing system resources by closing other applications and dialog windows.
-
-\rule
-
 END
 
 # dbitmap.c
@@ -136,9 +106,6 @@ HELP
 A Bitmap must be less than 32000 pixels in height or width. Try increasing the DPI (or DPCM) value. 
 
 Refer to \k{cmdOutputbitmap} for detail.
-
-\rule
-
 END
 
 # cprofile.c
@@ -148,9 +115,6 @@ HELP
 In the \f{Profile} command, the \f{Elevation} mode for this \e{endpoint} can be change only if it is \f{Defined}, \f{Ignored} or \f{None}. The \f{Elevation} command can be used to change this \e{endpoint}.
 
 Refer to \k{cmdElev} for detail.
-
-\rule
-
 END
 
 # csnap.c
@@ -160,9 +124,6 @@ HELP
 Before the horizontal or vertical \f{Snap Grid} can be \f{Enable}d, the corresponding \e{Spacing} value(s) on the \f{Grid} dialog must be set to a value greater than 0.
 
 Refer to \k{cmdGrid} for detail.
-
-\rule
-
 END
 
 # dlayer.c
@@ -172,9 +133,6 @@ HELP
 The current \f{Layer} is where most new objects are created. It's not possible to freeze this layer, since it would not be able to create objects. Change the current \f{Layer} to some other \f{Layer} before trying to freeze this Layer.
 
 Refer to \k{cmdLayer} for detail.
-
-\rule
-
 END
 
 # cgroup.c:doGroup
@@ -182,9 +140,6 @@ MESSAGE MSG_CANT_GROUP_BUMPER1
 Cannot Group Bumper Track. The track has been unselected.
 HELP
 Bumper tracks (tracks with 1 endpoint) are not supported by the Group command.
-
-\rule
-
 END
 
 # cgroup.c:doGroup
@@ -194,9 +149,6 @@ HELP
 Group objects are formed from Straight, Curved, Turnout or Sectional track. The selected objects include a track which is not one of these. Reselect the objects, including only track segments of these types.
 
 Refer to \k{cmdGroup} for detail.
-
-\rule
-
 END
 
 # dlayer.c
@@ -206,9 +158,6 @@ HELP
 The current \f{Layer} is where most new objects are created. It's not possible to hide this layer, since it would not be possible to see the objects. Change the current \f{Layer} to some other \f{Layer} before trying to hide this Layer.
 
 Refer to \k{cmdLayer} for detail.
-
-\rule
-
 END
 
 # cjoin.c track.c:getTrackParams/PARAMS_..._JOIN
@@ -218,9 +167,6 @@ HELP
 You are trying to \f{Join} two \e{easement} curves. This can be achieved only if the two curves abut and are aligned. Otherwise, you can delete the \e{easement} curves and try to \f{Join} to connected tracks.
 
 Refer to \k{cmdJoin} for detail.
-
-\rule
-
 END
 
 # cjoin.c
@@ -232,9 +178,6 @@ HELP
 To \f{Join} one track with another, the \e{endpoints} selected for connection cannot be connected with any other track. Pick another track with an unconnected \e{endpoint} or disconnect one of the \e{endpoints} using the  \f{Split} command.
 
 Refer to \k{cmdJoin} for detail regarding the \f{Join} command or \k{cmdSplitTrack} for detail regarding the \f{Split} command.
-
-\rule
-
 END
 
 # cturntbl.c
@@ -244,9 +187,6 @@ HELP
 You cannot select a \f{Turntable} as the second track in \f{Join} command. If you wish to \f{Join} to a \f{Turntable} then select the \f{Turntable} as the first track in the \f{Join} command.
 
 Refer to \k{cmdJoin} for detail.
-
-\rule
-
 END
 
 # cjoin.c
@@ -256,9 +196,6 @@ HELP
 You are trying to \f{Join} a section of track with itself. Different tracks must selected when using the \f{Join} command.
 
 Refer to \k{cmdJoin} for detail.
-
-\rule
-
 END
 
 # cjoin.c
@@ -268,9 +205,6 @@ HELP
 These tracks cannot be joined as they are parallel to each other and the selected \e{endpoints}, point in opposite directions. To \f{Join} these two tracks, pick \e{endpoints} that point in the same direction.
 
 Refer to \k{cmdJoin} for detail.
-
-\rule
-
 END
 
 # dprmfile.c
@@ -282,9 +216,6 @@ HELP
 During the processing of \f{Parameter Files} after updating to a new version of \e{XTrkCad}, one of updated \f{Parameter Files} could not be found. Check that the installation had no errors. You can use the \f{Parameter Files} dialog to locate the parameter file.
 
 Refer to \k{cmdPrmfile} for detail.
-
-\rule
-
 END
 
 # dlayer.c
@@ -294,9 +225,6 @@ HELP
 The current \f{Layer} is where most new objects are created. It's not possible to select a frozen \f{Layer}, since it would not be possible to create objects. Unfreeze this \f{Layer} before trying to make this the current \f{Layer}.
 
 Refer to \k{cmdLayer} for detail.
-
-\rule
-
 END
 
 # csnap.c
@@ -306,9 +234,6 @@ HELP
 Before the \f{Snap Grid} can be \f{Show}n, corresponding horizontal or vertical \e{Spacing} value(s) on the \f{Grid} dialog must be set to a value greater than 0.
 
 Refer to \k{cmdGrid} for detail.
-
-\rule
-
 END
 
 # track.c
@@ -320,9 +245,6 @@ HELP
 This type of track cannot be \f{Split}. Only Straight, Curved, Circle and Easement tracks can be \f{Split}. To \f{Split} a Turnout, hold down the Shift key then \e{Left-Click} on the position where the track should be \f{Split}.
 
 Refer to \k{cmdSplitTrack} for detail.
-
-\rule
-
 END
 
 # dcustmgm.c
@@ -332,18 +254,12 @@ ALT
 Cannot write to parameter file: FILENAME
 HELP
 The specified parameter file can not be written to. Make sure the file and or directory is not marked as read only.
-
-\rule
-
 END
 
 MESSAGE MSG_CARIMP_DUP_INDEX
 Car Index number duplicated.
 HELP
 Each Car in your inventory must have a unique index value. If a duplicate index number is found during the \f{Import} process it will be replaced with a new, unused value.
-
-\rule
-
 END
 
 # doption.c
@@ -353,9 +269,6 @@ HELP
 The parameters \e{Minimum Track Length}, \e{Connection Angle} and \e{Connection Distance} have minimum values that cannot be set to smaller values. The minimum values are 0.1"/0.254cm, 1\u00B0 and 0.1"/0.254cm respectively.
 
 Refer to \k{cmdPref} for detail.
-
-\rule
-
 END
 
 # fileio.c
@@ -365,9 +278,6 @@ HELP
 An attempt was made to \f{Paste} an object onto the layout however the Copy/Paste buffer was empty. This error generally occurs when the \f{Paste} command is executed without first executing the \f{Copy} command.
 
 Refer to \k{editM} for detail.
-
-\rule
-
 END
 
 # ctodesgn.c
@@ -376,9 +286,6 @@ Crossover length is too short. Correct
 inappropriate value(s) and try again.
 HELP
 The length of crossover segments must be greater than the track gauge.
-
-\rule
-
 END
 
 # curves
@@ -386,9 +293,6 @@ MESSAGE MSG_CURVE_TOO_LARGE
 Curved track is too large.
 HELP
 The length of the curved track is limited to sum of the room dimensions.  This limitation prevents creation of curves that are unreasonably large. Adjust the mouse position to create a smaller Curve.
-
-\rule
-
 END
 
 # ctodesgn.c
@@ -401,9 +305,6 @@ HELP
 The definition you're attempting to create uses the same name as an existing definition. Saving  the definition with the same name will cause \e{XTrkCad} to replace the existing definition, making the existing definition inaccessible. If the previous definition must be preserved, then choose a different name for the new definition. If necessary, the \f{Custom Management} dialog can be used to change definition names.
 
 Refer to \k{cmdCustmgm} for detail.
-
-\rule
-
 END
 
 # draw.c
@@ -411,9 +312,6 @@ MESSAGE MSG_SAVE_CHANGES
 Do you want to save the changes made to your Layout?
 HELP
 The \f{Exit} command was selected without first saving changes that have been made to the layout. This notice gives you the chance to save your changes before the program ends.
-
-\rule
-
 END
 
 MESSAGE MSG_CARIMP_DUP_COLUMNS
@@ -424,9 +322,6 @@ The \f{Car Import} function reads car values from a Comma-Separated-Value (CSV) 
 It appears the CSV file that you're attempting to \f{Import} contains more than one row of column headers. Review the CSV files content and ensure only one row of header data exists.
 
 Refer to \k{cmdCarinv} for detail.
-
-\rule
-
 END
 
 # cprofile.c
@@ -436,9 +331,6 @@ HELP
 An \e{endpoint} that is already on the \f{Profile Path} has been selected. Select a different \e{endpoint}; one that is on a track that is not drawn in Purple.
 
 Refer to \k{cmdProfile} for detail.
-
-\rule
-
 END
 
 # fileio.c
@@ -450,9 +342,6 @@ HELP
 The layout file that you're attempting to load was created using a newer version of \e{XTrkCad}. In order to load this file it will be necessary to upgrade your version of \e{XTrkCad} to at least the version identified within the error message.
 
 Take full advantage of the latest features within \e{XTrkCad} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrkCad} Fork Website} and downloading the latest release.
-
-\rule
-
 END
 
 #fileio.c
@@ -464,9 +353,6 @@ HELP
 The layout file that you're attempting to load was created using a newer version of \e{XTrkCad}. In order to load this file it will be necessary to upgrade your version of \e{XTrkCad} to at least the version identified within the error message.
 
 Take full advantage of the latest features within \e{XTrkCad} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrkCad} Fork Website} and downloading the latest release.
-
-\rule
-
 END
 
 # chndldto.c
@@ -477,9 +363,6 @@ HELP
 The frog angle prevents points from being placed on this side of the frog. Place points on opposite side of frog or retry this command and create the frog in the opposite direction.
 
 Refer to \k{cmdHandLaidTurnout} for detail.
-
-\rule
-
 END
 
 # cturntbl.c
@@ -489,9 +372,6 @@ HELP
 There is insufficient space between the two existing turntable stall tracks to place a new stall track. Either place the new stall track on a different part of the turntable or decrease the \e{Turntable Angle} using the \f{Command Options} dialog.
 
 Refer to \k{cmdTurntable} for detail regarding turntables or \k{cmdCmdopt} for detail regarding the \f{Command Options} dialog and \e{Turntable Angle}s.
-
-\rule
-
 END
 
 # track.c:connectTracks
@@ -501,9 +381,6 @@ ALT
 Joining tracks with differing elevations (N.NNN)
 HELP
 You are connecting two \e{endpoints} which differ in heights by N.NNN. The elevation of the connection will be the average of the two heights. You should check if this is a problem.
-
-\rule
-
 END
 
 # cselect.c:cmdMoveDescription
@@ -523,18 +400,12 @@ Check the \f{Display Options} dialog (\f{Options>Display}) to determine if;
 \u000
 
 Refer to \k{cmdMoveLabel} for detail regarding \f{Description} movement or \k{cmdDisplay} for detail regarding \f{Display} attributes.
-
-\rule
-
 END
 
 MESSAGE MSG_OBJECT_TOO_SHORT
 Length of object is too short.
 HELP
 The specified length for the object being modified is too short. Increase the objects length.
-
-\rule
-
 END
 
 # cprint.c
@@ -546,24 +417,17 @@ HELP
 Values for \f{Page Width} and \f{Height} can be manually entered thus overriding maximum values. For example, smaller values could be specified if each printed page is to contain an integral number of feet. Values larger than the selected paper size multiplied by the \e{Scale} cannot be entered.
 
 Refer to \k{cmdPrint} for detail.
-
-\rule
-
 END
 
 # dprmfile.c
 MESSAGE MSG_PRMFIL_NO_CONTENTS
 New Parameter File has no CONTENTS line: %s
 ALT
-New Parameter File has no CONTENTS line: FILENAME
-Please report this error to the XTrkCad project development team at Sourceforge.
+New Parameter File has no CONTENTS line: FILENAME.
 HELP
 Each \f{Parameter Files} contains a line which identifies the contents. The specified file is missing this line.
 
-Please report this error to the \e{XTrkCad} project development team at Sourceforge. The process for reporting errors is outlined in \k{bugs}.
-
-\rule
-
+Please report this error to the \e{XTrkCad} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 MESSAGE MSG_NO_CARS
@@ -574,9 +438,6 @@ HELP
 No Cars are defined for the current scale. Use the  dialog to select cars of the current scale and add them to the \f{Car Inventory}.
 
 Refer to \k{cmdCarinv} for detail.
-
-\rule
-
 END
 
 # dcar.c
@@ -589,9 +450,6 @@ HELP
 No \f{Car Prototypes} are defined. Load a car prototype definition file (such as protoam.xtp) using the \f{Parameter Files} dialog or create a prototype definition using the \f{Car Prototype} dialog.
 
 Refer to \k{cmdPrmfile} for detail regarding the \f{Parameter Files} or \k{carprototype} for detail regarding the \f{Car Prototype} dialog.
-
-\rule
-
 END
 
 MESSAGE MSG_CARIMP_NO_DATA
@@ -600,9 +458,6 @@ HELP
 The \f{Car Import} function reads car values from a Comma-Separated-Value (CSV) file. The import file must contain headers for at least the \e{Scale}, \e{Prototype}, \e{Manufacturer} and \e{Partno} columns. In addition, information relative to at least one car must be included in the file otherwise this error occurs.
 
 Refer to \k{cmdCarinv} for detail.
-
-\rule
-
 END
 
 # cprint.c
@@ -612,9 +467,6 @@ HELP
 Pages are selected for printing by clicking on the print grid on the layout. Use the \f{Zoom Out} command to bring more of the layout into view (\K{cmdZoom}). The print grid can be moved using the \e{Shift+Left+Drag} command or rotated using the \e{Shift+Right+Drag} command.
 
 Refer to \k{cmdPrint} for detail.
-
-\rule
-
 END
 
 # cprofile.c
@@ -624,9 +476,6 @@ HELP
 There is no path of track between the end of the \f{Profile} and the \e{endpoint} you have clicked on.
 
 Refer to the \k{cmdProfile} for detail.
-
-\rule
-
 END
 
 # dprmfile.c
@@ -638,9 +487,6 @@ HELP
 The parameter file for \f{CONTENTS} has been moved or deleted. Use the \f{Parameter Files} dialog to locate the \f{Parameter Files}.
 
 Refer to \k{cmdPrmfile} for detail.
-
-\rule
-
 END
 
 # various
@@ -650,9 +496,6 @@ HELP
 The current command operates on \f{Select}ed tracks of which there are none. \f{Select} the desired track and try the command again.
 
 Refer to \k{cmdSelect} for detail.
-
-\rule
-
 END
 
 # dcmpnd.c:refreshCompound
@@ -666,9 +509,6 @@ The \f{Update Turnouts and Structures} command updates (or refreshes) selected t
 If an object can not be found or if the new definition does not fit (same number of endpoints and all the endpoints have the same position and angle) then a dialog is displayed which contains suitable definitions that you can choose from. In the case of turnouts, this list is populated with turnouts having the same number of endpoints as the selected turnout. If turnouts with the same number of endpoints exist then this message is displayed.
 
 Refer to \k{cmdRefreshSpecial} for detail.
-
-\rule
-
 END
 
 # dcar.c
@@ -679,9 +519,6 @@ HELP
 Numeric values on the \f{Car Description} dialog (Car Length, Car Width, Truck Centers, Coupled Length and Coupler Length) must be greater than zero.
 
 Refer to \k{cmdTrain} for detail.
-
-\rule
-
 END
 
 MESSAGE MSG_MOVE_OUT_OF_BOUNDS
@@ -690,9 +527,6 @@ HELP
 The last operation moved the object outside of room boundaries; room width and height. The \f{Undo} command can be used to move the object back.
 
 Refer to \k{cmdLayout} for detail regarding room boundaries and \k{cmdUndo} for detail regarding the \f{Undo} command.
-
-\rule
-
 END
 
 # cparalle.c
@@ -702,9 +536,6 @@ HELP
 A parallel track with a separation of 0 or less cannot be created. Specify a positive value in the \f{Separation} field that appears in the Status Bar.
 
 Refer to \k{cmdParallel} for detail.
-
-\rule
-
 END
 
 # dcar.c
@@ -716,9 +547,6 @@ HELP
 The \e{Part} definition you're attempting to create uses the same Manufacturer and Part Number as an existing definition. Saving the definition with the same Manufacturer and Part Number will cause \e{XTrkCad} to update the existing definition. If the previous definition must be preserved, then choose a different Part Number for the new definition.
 
 Refer to \k{carpart} for detail.
-
-\rule
-
 END
 
 # param.c
@@ -730,9 +558,6 @@ HELP
 This error is most likely caused by trying to \f{Playback} an incompatible \e{XTrkCad} recording or demo file.
 
 Refer to \k{macroM} for detail.
-
-\rule
-
 END
 
 # macro.c
@@ -744,9 +569,6 @@ HELP
 The layout file that you're attempting to load was created using a newer version of \e{XTrkCad}. In order to load this file it will be necessary to upgrade your version of \e{XTrkCad} to at least the version identified within the error message.
 
 Take full advantage of the latest features within \e{XTrkCad} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrkCad} Fork Website} and downloading the latest release.
-
-\rule
-
 END
 
 # draw.c
@@ -758,9 +580,6 @@ HELP
 This error is most likely caused by trying to \f{Playback} an incompatible \e{XTrkCad} recording or demo file.
 
 Refer to \k{macroM} for detail.
-
-\rule
-
 END
 
 # chndldto.c
@@ -770,9 +589,6 @@ HELP
 The points are being placed too close to the frog. Move the points away from the frog and try again.
 
 Refer to \k{cmdHandLaidTurnout} for detail.
-
-\rule
-
 END
 
 # drawgeom.c
@@ -780,9 +596,6 @@ MESSAGE MSG_POLY_SHAPES_3_SIDES
 Poly shapes must have at least 3 sides.
 HELP
 Polygons and Poly Lines must have at least 3 sides. By moving one of the corners close to another corner you're attempting to merge the corners and create a Poly shape with only 2 sides. Try moving the other corner to the new position first.
-
-\rule
-
 END
 
 # dcar.c
@@ -794,9 +607,6 @@ HELP
 The \e{Prototype} definition you're attempting to create uses the same name as an existing definition. Saving the definition with the same name will cause \e{XTrkCad} to update the existing definition. If the previous definition must be preserved, then choose a different Part Number for the new definition.
 
 Refer to \k{carprototype} for detail.
-
-\rule
-
 END
 
 # ccurve.c
@@ -804,9 +614,6 @@ MESSAGE MSG_RADIUS_GTR_0
 Radius must be greater than 0.
 HELP
 It's not possible to create a Circle or Helix with a radius of 0\u00B0 or less. Specify a positive value in the \f{Radius} field that appears in the Status Bar.
-
-\rule
-
 END
 
 #cselect.c
@@ -818,9 +625,6 @@ HELP
 While using the \f{Change Scale} command to enlarge the layout, \e{XTrkCad} determined that rescaled tracks do not fit within the layout rooms parameters. Using the \f{Layout} dialog, the rooms parameters (Height and width) should be set so as to accommodate the rescaled track.
 
 Refer to \k{cmdLayout} for detail regarding \f{Layout} options or \k{cmdRescale} for detail regarding the \f{Change Scale} command.
-
-\rule
-
 END
 
 MESSAGE MSG_CARIMP_MISSING_COLUMNS
@@ -829,9 +633,6 @@ HELP
 The \f{Car Import} function reads car values from a Comma-Separated-Value (CSV) file. The import file must contain headers for at least the \e{Scale}, \e{Prototype}, \e{Manufacturer} and \e{Partno} columns. In addition, the following column headers may also be included: \e{Index}, \e{Type}, \e{Description}, \e{Roadname}, \e{Repmark}, \e{Number}, \e{Options}, \e{CarLength}, \e{CarWidth}, \e{CoupledLength}, \e{TruckCenter}, \e{Color}, \e{PurchPrice}, \e{CurrPrice}, \e{Condition}, \e{PurchDate}, \e{ServiceDate} and \e{Notes}.
 
 Refer to \k{cmdCarinv} for detail.
-
-\rule
-
 END
 
 # cjoin.c
@@ -843,9 +644,6 @@ HELP
 The \f{Move To Join} command moves the selected tracks so an \e{endpoint} is joined with the \e{endpoint} of an unselected track. If you choose the selected \e{endpoint} first then you must choose an unselected \e{endpoint} second, and vice versa.
 
 Refer to \k{joinTrackMove} for detail.
-
-\rule
-
 END
 
 # cprint.c
@@ -855,9 +653,6 @@ HELP
 During execution of the \f{Print} command an attempted was made to select a page that's outside the layouts boundaries.
 
 Refer to \k{cmdLayout} for detail regarding layout boundaries or \k{cmdPrint} for detail regarding the \f{Print} command.
-
-\rule
-
 END
 
 # ctext.c
@@ -867,9 +662,6 @@ HELP
 The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \e{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \e{Left-Click+Drag}ing the text to any desired position on the layout.
 
 Refer to \k{cmdText} for detail.
-
-\rule
-
 END
 
 # dcar.c
@@ -882,9 +674,6 @@ HELP
 The \f{Import} command (Button) on the \f{Car Prototype} dialog is used to create the image of an car from the shapes selected on the layout prior to opening the \f{Car Prototype} dialog. The car is assumed to be oriented horizontally so its length must be greater than its height. The selected shapes do not meet this requirement.
 
 Refer to \k{carprototype} for detail.
-
-\rule
-
 END
 
 # cpull.c
@@ -895,9 +684,6 @@ HELP
 The \f{Connect} command is used to remove small gaps that may result when using sectional track. The chosen sectional track \e{endpoints} must be close together and nearly aligned. The selected tracks deviate too much or are too far apart from each other.
 
 Refer to \k{cmdConnect} for detail.
-
-\rule
-
 END
 
 # misc.c
@@ -906,10 +692,7 @@ Specified command disabled.
 HELP
 The specified command has been disabled in error.
 
-Please report this error to the \e{XTrkCad} project development team at Sourceforge. The process for reporting errors is outlined in \k{bugs}.
-
-\rule
-
+Please report this error to the \e{XTrkCad} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 # cturnout.c:splitTurnout
@@ -917,9 +700,6 @@ MESSAGE MSG_SPLIT_POS_BTW_MERGEPTS
 Split position between Turnout Points
 HELP
 The \f{Split} position must be between an endpoint and the position where the turnout's track segments diverge (the turnout points). Select a position closer to the endpoint.
-
-\rule
-
 END
 
 # cturnout.c:splitTurnoutCheckPath
@@ -927,9 +707,6 @@ MESSAGE MSG_SPLIT_PATH_NOT_UNIQUE
 Split position not on unique path
 HELP
 The \f{Split} position must be between an endpoint and the position where the turnout's track segments diverge (the turnout points). Select a position closer to the endpoint.
-
-\rule
-
 END
 
 MESSAGE MSG_CARIMP_MISSING_DIMS
@@ -943,9 +720,6 @@ HELP
 The car import file does not specify car dimensions and the specified \e{Partno} can not be found. Edit the import file and either add car dimensions or add/update the \e{Partno}. This will allow \e{XTrkCad} to locate information for the car being imported.
 
 Refer to \k{cmdCarinv} for detail.
-
-\rule
-
 END
 
 MESSAGE MSG_CARIMP_MISSING_PARTNO
@@ -958,9 +732,6 @@ HELP
 The car import file must contain headers for at least the \e{Scale}, \e{Prototype}, \e{Manufacturer} and \e{Partno} columns. In addition, car information relative to these columns must be included in each line of the file otherwise this error will occur.
 
 Refer to \k{cmdCarinv} for detail.
-
-\rule
-
 END
 
 MESSAGE MSG_CARIMP_IGNORED_COLUMN
@@ -973,9 +744,6 @@ An invalid column in the Car Import file will be ignored. Valid column names are
 \e{Index}, \e{Scale}, \e{Manufacturer}, \e{Type}, \e{Partno}, \e{Prototype}, \e{Description}, \e{Roadname}, \e{Repmark}, \e{Number}, \e{Options}, \e{CarLength}, \e{CarWidth}, \e{CoupledLength}, \e{TruckCenter}, \e{Color}, \e{PurchPrice}, \e{CurrPrice}, \e{Condition}, \e{PurchDate}, \e{ServiceDate} and \e{Notes}.
 
 Refer to \k{cmdCarinv} for detail.
-
-\rule
-
 END
 
 # ctrain.c
@@ -986,9 +754,6 @@ HELP
 The position of a turnout or turntable cannot be changed while occupied by a train.
 
 Refer to \k{cmdTrain}, \e{Turnouts and Turntables} for detail.
-
-\rule
-
 END
 
 # cstruct.c
@@ -1007,9 +772,6 @@ This error occurs when;
 Using the \f{File>Parameter Files} menu, check which Parameter files are loaded. Ensure the scale of the loaded files match that of the layout. Alternately a new Structure could be created using the \f{Group} command.
 
 Refer to \k{cmdPrmfile} for detail regarding \f{Parameter File}s or \k{cmdGroup} for detail regarding the \f{Group} command.
-
-\rule
-
 END
 
 # cturnout.c
@@ -1029,9 +791,6 @@ This error occurs when;
 Using the \f{File>Parameter Files} menu, check which Parameter files are loaded. Ensure the scale of the loaded files match that of the layout. Alternately a new turnout could be created using the \f{Turnout Designer} command.
 
 Refer to \k{cmdPrmfile} for detail regarding \f{Parameter File}s or \k{cmdTurnoutNew} for detail regarding the \f{Turnout Designer} command.
-
-\rule
-
 END
 
 # track.c:pickUnconnectedEndPt
@@ -1041,9 +800,6 @@ HELP
 The current command operates on the unconnected \e{endpoint} of a track, but the \e{endpoints} of the chosen track are all connected to other tracks. Use the \f{Split} command to disconnect the desired \e{endpoint} of this track or choose another track.
 
 Refer to \k{cmdSplitTrack} for detail.
-
-\rule
-
 END
 
 # cpull.c
@@ -1053,9 +809,6 @@ HELP
 The \f{Connect} command operates by adding small gaps between other track to make up for the larger gap between the tracks you have selected. In this case you are attempting to close a loop of track with to few sections. Try creating a loop with more sectional track pieces.
 
 Refer to \k{cmdConnect} for detail.
-
-\rule
-
 END
 
 # cundo.c
@@ -1065,9 +818,6 @@ HELP
 Either the \f{Undo} command has not been used or another command has been used since, thus no Undo operations are available to be undone.
 
 Refer to \k{cmdUndo} for detail.
-
-\rule
-
 END
 
 # cundo.c
@@ -1077,9 +827,6 @@ HELP
 Either no operations have been performed since the current file was opened or all previous operations (up to 10) have been undone.
 
 Refer to \k{cmdUndo} for detail.
-
-\rule
-
 END
 
 # cgroup.c:groupOk
@@ -1089,9 +836,6 @@ HELP
 A group is limited to a maximum of 128 track segments. The number of segments within the selected group of tracks exceed this number. Select a smaller number of tracks then try again.
 
 Refer to \k{cmdGroup} for detail.
-
-\rule
-
 END
 
 # cmodify.c
@@ -1099,9 +843,6 @@ MESSAGE MSG_CANNOT_CHANGE
 Track cannot be changed.
 HELP
 Modifications can only be made to straight or curved tracks.
-
-\rule
-
 END
 
 # cturntbl.c
@@ -1111,9 +852,6 @@ HELP
 An attempt has been made to create the \e{endpoint} of a track within the radius of the \f{Turntable}. Move the \e{endpoint} of the track (mouse pointer) outside of the radius of the \f{Turntable}.
 
 Refer to \k{cmdTurntable} for detail.
-
-\rule
-
 END
 
 # chndldto.c
@@ -1123,9 +861,6 @@ HELP
 The track angle at the current point position does not intersect with the angle of the diverging leg of the new turnout. The points need to be relocated to a position that will allow the angle of the track to intersect the angle of the diverging leg of the new turnout.
 
 Refer to \k{cmdHandLaidTurnout} for detail.
-
-\rule
-
 END
 
 # various
@@ -1137,9 +872,6 @@ HELP
 The operation will create a track that is shorter than the minimum length specified on the \f{Preferences} dialog. Adjust the position of the mouse to increase the length of the track by moving away from the \e{endpoint}.
 
 Refer to \k{cmdPref} for detail.
-
-\rule
-
 END
 
 # various
@@ -1147,15 +879,12 @@ MESSAGE MSG_RADIUS_LSS_EASE_MIN
 Track radius (%s) is smaller than
 easement minimum (%s).
 ALT
-Track radius (N.NNN) is smaller
-than easement minimum (N.NNN).
+Track radius (N.NNN) is smaller than
+easement minimum (N.NNN).
 HELP
 An attempt was made to create a curved track with a radius smaller than the minimum specified in the \f{Easement} dialog. Try moving the mouse to different position, creating a curve with a larger radius.
 
 Refer to \k{cmdEasement} for detail.
-
-\rule
-
 END
 
 # track.c
@@ -1165,9 +894,6 @@ HELP
 This operation cannot be executed as the selected track is present on a frozen layer. Track modifications may be performed only on unfrozen layers. Move the object to a \f{Layer} that's not frozen or unfreeze the layer.
 
 Refer to \k{cmdLayer} for detail.
-
-\rule
-
 END
 
 #ctodesgn.c
@@ -1179,9 +905,6 @@ HELP
 Turnout definitions can include lines and other shapes that represent switch machines, switch stands, roadbed or other objects. Such items can be include when editing Turnout definitions. These same items can also be removed if there's a need to start over again.
 
 Refer to \k{cmdCustmgm} for detail.
-
-\rule
-
 END
 
 # cturntbl.c
@@ -1189,9 +912,6 @@ MESSAGE MSG_TURNTABLE_DIAM_GTR_0
 Turntable diameter must greater than 0.
 HELP
 It's not possible to create a turntable with a diameter of less than or equal to 0. Specify a positive value in the \f{Diameter} field that appears in the Status Bar.
-
-\rule
-
 END
 
 # cundo.c
@@ -1199,26 +919,22 @@ MESSAGE MSG_UNDO_ASSERT
 Undo assertion failure %s:%d
 Val = %ld(%lx)
 %s
-Please report this error to the XTrkCad project development team at Sourceforge.
+Please report this error to the XTrkCad project development team at SourceForge.
 HELP
-Please report this error to the \e{XTrkCad} project development team at Sourceforge. The process for reporting errors is outlined in \k{bugs}.
-
-\rule
-
+Please report this error to the \e{XTrkCad} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 # fileio.c
 MESSAGE MSG_PROG_CORRUPTED
-%s has been corrupted.
+Critical file damaged!
 
-Please reinstall software.
+%s is corrupt.
+
+Please reinstall software. 
 HELP
-A critical file is corrupt. Unfortunately it will be necessary to reinstall the software or contact the XTrkCad project development team at Sourceforge in order to overcome this error.
+A critical file is corrupt. Unfortunately it will be necessary to reinstall the software or contact the XTrkCad project development team at SourceForge in order to overcome this error.
 
-Please report this error to the \e{XTrkCad} project development team at Sourceforge. The process for reporting errors is outlined in \k{bugs}.
-
-\rule
-
+Please report this error to the \e{XTrkCad} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 # track.c
@@ -1228,9 +944,6 @@ ALT
 [X Y] is not a track
 HELP
 The current command operates on a track object and a track was not found at the current location (given as X and Y).
-
-\rule
-
 END
 
 # dbitmap.c
@@ -1242,9 +955,6 @@ HELP
 Bitmaps can use a large amount of system resources. They may also take a long time to generate and create a large file.
 
 Refer to \k{cmdOutputbitmap} for detail.
-
-\rule
-
 END
 
 

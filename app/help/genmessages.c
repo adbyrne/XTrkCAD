@@ -142,9 +142,10 @@ void dumpHelp( FILE *hlpsrcF )
 		transStr = TranslateString( helpMsgs[inx].help, &toUnicode );
 		fprintf( hlpsrcF, "%s\n\n", transStr );
 		free( transStr );			
+
+		fprintf( hlpsrcF, "\n\n\\rule\n\n" );
 	}
 	
-	fprintf( hlpsrcF, "\n\n\\rule\n\n" );
 }
 
 

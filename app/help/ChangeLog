@@ -1,3 +1,7 @@
+Dec 09, 2007
+	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		genmessages.c: corrected parsing problems 
+
 Dec 03, 2007
 	FIX: Bob Blackwell
 		genmessages.in: corrected spelling errors
