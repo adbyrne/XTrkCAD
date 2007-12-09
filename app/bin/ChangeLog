@@ -1,3 +1,7 @@
+Dec 08, 2007
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		xtrkcad.ico: create a new color icon
+
 Dec. 01, 2007
 	BUGFIX: Martin Fischer <m_fischer@users.sourceforge.net>	
 		acclkeys.h: removed non-working accelerator key for deselect all
