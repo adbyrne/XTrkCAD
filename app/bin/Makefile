@@ -1,5 +1,5 @@
 
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.6 2007-11-12 18:53:14 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.7 2007-12-12 20:08:32 m_fischer Exp $
 #
 
 CC = gcc
@@ -465,7 +465,7 @@ $(LIB)(dcustmgm.o): dcustmgm.c track.h
 $(LIB)(dease.o): dease.c track.h ccurve.h cstraigh.h cjoin.h enone.xpm esharp.xpm \
 	egtsharp.xpm enormal.xpm eltbroad.xpm ebroad.xpm egtbroad.xpm
 $(LIB)(denum.o): denum.c track.h
-$(LIB)(dlayer.o): dlayer.c track.h bitmaps/l1.xbm bitmaps/l2.xbm bitmaps/l3.xbm bitmaps/l4.xbm \
+$(LIB)(dlayer.o): dlayer.c track.h misc2.h bitmaps/l1.xbm bitmaps/l2.xbm bitmaps/l3.xbm bitmaps/l4.xbm \
 	bitmaps/l5.xbm bitmaps/l6.xbm bitmaps/l7.xbm bitmaps/l8.xbm \
 	bitmaps/l9.xbm bitmaps/l10.xbm bitmaps/l11.xbm bitmaps/l12.xbm \
 	bitmaps/l13.xbm bitmaps/l14.xbm bitmaps/l15.xbm bitmaps/l16.xbm \

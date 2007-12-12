@@ -1,7 +1,7 @@
 /** \file dlayer.c
  * Functions and dialogs for handling layers.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.6 2007-10-30 19:41:22 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.7 2007-12-12 20:08:32 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -134,7 +134,7 @@ static int oldColorMap[][3] = {
 
 static void DoLayerOp( void * data );
 static void UpdateLayerDlg(void);
-static void LoadLayerLists();
+/* static void LoadLayerLists(); */
 static void LayerSetCounts();
 static void InitializeLayers( void LayerInitFunc( void ), int newCurrLayer );
 static void LayerPrefSave( void );
@@ -353,7 +353,7 @@ LayerSystemDefaults( void )
  * Load the layer listboxes in Manage Layers and the Toolbar with up-to-date information. 
  */
 
-EXPORT void LoadLayerLists()
+EXPORT void LoadLayerLists( void )
 {
 	int inx;
 	 

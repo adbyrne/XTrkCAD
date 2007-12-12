@@ -1,7 +1,7 @@
 /** \file fileio.c
  * Loading and saving files. Handles trackplans as well as DXF export. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.11 2007-10-22 05:49:57 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.12 2007-12-12 20:08:32 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -104,6 +104,47 @@ static int Copyfile( char * fn1, char * fn2 )
 	return 0;
 }
 #endif
+
+/**
+ * Save the old locale and set to new. 
+ *
+ * \param newlocale IN the new locale to set
+ * \return    pointer to the old locale
+ */
+
+static char *
+SaveLocale( char *newLocale )
+{
+	char *oldLocale;
+	char *saveLocale = NULL;
+	
+	/* get old locale setting */
+	oldLocale = setlocale(LC_ALL, NULL);
+
+	/* allocate memory to save */
+	if (oldLocale)
+		saveLocale = strdup( oldLocale );
+		
+	setlocale(LC_ALL, newLocale );
+
+	return( saveLocale );
+}
+
+/**
+ * Restore a previously saved locale.
+ *
+ * \param locale IN return value from earlier call to SaveLocale
+ */
+
+static void
+RestoreLocale( char * locale )
+{
+	if( locale ) {
+		setlocale( LC_ALL, locale );
+		free( locale );
+	}	
+}
+
 
 /****************************************************************************
  *
@@ -672,19 +713,13 @@ static BOOL_T ReadTrackFile(
 	char szOldLocale[FIOMAXLOCALELEN] = "";
 	int ret = TRUE;
 
-	oldLocale = setlocale(LC_ALL, NULL);
-	if (oldLocale)
-	{
-		strcpy(szOldLocale, oldLocale);
-		oldLocale = szOldLocale;
-	}
-	setlocale(LC_ALL, "C");
+	oldLocale = SaveLocale( "C" );
 
 	paramFile = fopen( pathName, "r" );
 	if (paramFile == NULL) {
 		/* Reset the locale settings */
-		if (oldLocale) setlocale(LC_ALL, oldLocale);
-
+		RestoreLocale( oldLocale );
+		
 		if ( complain )
 			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "XTrkCad", pathName, strerror(errno) );
 
@@ -786,7 +821,7 @@ static BOOL_T ReadTrackFile(
 		}
 	}	
 
-	if( oldLocale ) setlocale( LC_ALL, oldLocale );
+	RestoreLocale( oldLocale );
 	
 	paramFile = NULL;
 	InfoMessage( "%d", count );
@@ -808,7 +843,8 @@ EXPORT int LoadTracks(
 	wSetCursor( wCursorWait );
 	Reset();
 	ClearTracks();
-	DefaultLayerProperties();
+/*	DefaultLayerProperties(); */
+	ResetLayers();
 	checkPtMark = changed = 0;
 	UndoSuspend();
 	useCurrentLayer = FALSE;
@@ -826,6 +862,7 @@ EXPORT int LoadTracks(
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
+		LoadLayerLists();
 	}
 	UndoResume();
 	/*DoRedraw();*/
@@ -857,19 +894,13 @@ static BOOL_T DoSaveTracks(
 	time_t clock;
 	BOOL_T rc = TRUE;
 	char *oldLocale = NULL;
-	char szOldLocale[FIOMAXLOCALELEN] = "";
+	char szOldLocale[FIOMAXLOCALELEN];
 
-	oldLocale = setlocale(LC_ALL, NULL);
-	if (oldLocale)
-	{
-		strcpy(szOldLocale, oldLocale);
-		oldLocale = szOldLocale;
-	}
-	setlocale(LC_ALL, "C");
+	oldLocale = SaveLocale( "C" );
 
 	f = fopen( fileName, "w" );
 	if (f==NULL) {
-		if( oldLocale ) setlocale( LC_ALL, oldLocale );
+		RestoreLocale( oldLocale );
 		
 		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Track", fileName, strerror(errno) );
 			
@@ -893,7 +924,8 @@ static BOOL_T DoSaveTracks(
 	if ( !rc )
 		NoticeMessage( MSG_WRITE_FAILURE, "Ok", NULL, strerror(errno), fileName );
 	fclose(f);
-	if( oldLocale ) setlocale( LC_ALL, oldLocale );
+
+	RestoreLocale( oldLocale );
 
 	checkPtMark = changed;
 	wSetCursor( wCursorNormal );
