@@ -1,3 +1,7 @@
+Dec 13, 2007
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>	
+		fileio.c: fixed segfault when locale is saved 
+
 Dec. 12. 2007
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>	
 		dlayer.c: layers lists are updated properly after file is loaded
