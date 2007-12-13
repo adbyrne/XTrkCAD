@@ -1,5 +1,5 @@
 
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.7 2007-12-12 20:08:32 m_fischer Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/Makefile,v 1.8 2007-12-13 19:40:51 m_fischer Exp $
 #
 
 CC = gcc
@@ -45,6 +45,7 @@ MISCOBJS = \
 	cturnout.o \
 	cturntbl.o \
 	cundo.o \
+	custom.o \
 	dbench.o \
 	dbitmap.o \
 	dcar.o \
@@ -241,6 +242,7 @@ LIBOBJS = \
 	$(LIB)(cturnout.o) \
 	$(LIB)(cturntbl.o) \
 	$(LIB)(cundo.o) \
+	$(LIB)(custom.o) \
 	$(LIB)(dbench.o) \
 	$(LIB)(dbitmap.o) \
 	$(LIB)(dcar.o) \
@@ -316,7 +318,7 @@ xtrkcad$(VER)-static: $(LIB) xtrkcad$(VER).o
 	$(CC) $(LDFLAGS) -o xtrkcad$(VER)-static misc.o xtrkcad$(VER).o $(LIB) $(LIBS) -lXext
 	rm -f misc.o
 
-xtrkcad$(VER).o: custom.c
+xtrkcad$(VER).o: custom.c version.h
 	$(CC) -c $(CFLAGS) $(COPTS) $(CINCLS) -o xtrkcad$(VER).o custom.c
 
 wintest: wintest.o xvdraw.o
@@ -452,7 +454,7 @@ $(LIB)(cturnout.o): cturnout.c track.h ccurve.h cstraigh.h compound.h cjoin.h tu
 $(LIB)(cturntbl.o): cturntbl.c track.h cstraigh.h turntbl.xpm
 $(LIB)(cundo.o): cundo.c track.h trackx.h
 
-custom.o: custom.c track.h version.h common.h misc.h fileio.h cjoin.h xtc64.bmp \
+$(LIB)(custom.o): custom.c track.h version.h common.h misc.h fileio.h cjoin.h xtc64.bmp \
 	xtc16.bmp
 
 $(LIB)(dbench.o): dbench.c track.h bo_edge.xpm bo_flat.xpm bo_ll.xpm bo_lr.xpm bo_lld.xpm \
@@ -480,7 +482,7 @@ $(LIB)(fileio.o): fileio.c track.h version.h common.h utility.h draw.h misc.h co
 $(LIB)(lprintf.o): lprintf.c track.h
 $(LIB)(macro.o): macro.c track.h version.h common.h utility.h draw.h misc.h compound.h \
 	arrow0.bmp arrow3.bmp arrows.bmp flash.bmp
-$(LIB)(misc.o): misc.c smalldlg.h track.h common.h utility.h draw.h misc.h cjoin.h compound.h \
+$(LIB)(misc.o): misc.c version.h smalldlg.h track.h common.h utility.h draw.h misc.h cjoin.h compound.h \
 	openbutt.xpm zoomin.xpm zoom.xpm zoomout.xpm undo.xpm redo.xpm \
 	partlist.xpm export.xpm import.xpm
 $(LIB)(misc2.o): misc2.c track.h common.h utility.h draw.h misc.h cjoin.h compound.h
