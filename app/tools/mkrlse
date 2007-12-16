@@ -33,7 +33,6 @@ cp lib/xtrkcad.fix xtrkcad/
 cp lib/xtrkcad.upd xtrkcad/
 cp lib/aareadme.txt xtrkcad/Readme.txt
 cp lib/logo.bmp xtrkcad/logo.bmp
-#cp help/xtrkcad.help xtrkcad/
 cp help/xtrkcad.tip xtrkcad/
 cp lib/examples/*.xtc xtrkcad/examples/
 cp lib/params/*.xtp xtrkcad/params/
@@ -58,7 +57,6 @@ V=`echo $RLSE | sed -e 's/^r//' -e 's/_/./g'`;
 echo V = $V
 sed -e "s#RLSEDIR#$D#g" -e "s#RLSEVER#$V#g"  lib/xtrkcad.spec.head > ./xtrkcad.spec
 
-#find xtrkcad -type f -print | sed 's/^/\/usr\/local\/lib\//' | sed '/html/s/^/%doc /' | sed '/xtrkcad.help/s/^/%doc /'>> ./xtrkcad.spec
 find xtrkcad -type f -print | sed 's/^/\/usr\/local\/lib\//' | sed '/html/s/^/%doc /' >> ./xtrkcad.spec
 
 mkdir -p ./install/usr/local/lib
