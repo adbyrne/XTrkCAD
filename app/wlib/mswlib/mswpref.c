@@ -68,7 +68,7 @@ const char * wGetAppWorkDir( void )
 			wNotice( "Cannot get user's profile directory", "Exit", NULL );
 			wExit(0);
 	} else {
-		sprintf( appWorkDirName, "%s\\%s", mswTmpBuff, "xtrkcad" );
+		sprintf( appWorkDirName, "%s\\%s", mswTmpBuff, "XTrackCad" );
 	}
 
 	return appWorkDirName;

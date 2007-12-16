@@ -90,12 +90,12 @@ Section "XTrkCAD (required)" program
 ;  If yes, the program has been run before, so leave it alone
 ;  If no, try to find an INI file in the former locations and copy it to the new place ( application settings)
 ;
-  IfFileExists $APPDATA\xtrkcad\xtrkcad.ini NoOldIni 0
+  IfFileExists $APPDATA\XTrackCad\xtrkcad.ini NoOldIni 0
   
 ; INI file does not exist at this point, test whether the directory exists and create if necessary
 ;  	
-	IfFileExists $APPDATA\xtrkcad\. DirExists 0
-		CreateDirectory $APPDATA\xtrkcad
+	IfFileExists $APPDATA\XTrackCad\. DirExists 0
+		CreateDirectory $APPDATA\XTrackCad
 
 DirExists:		  
 ; find the old INI file location
@@ -114,16 +114,16 @@ NoIni:
 ;  In case an ini file exists in this location, copy it to the new location
 ;
     IfFileExists $1\xtrkcad.ini 0 NoOldIni	
-	  CopyFiles $1\xtrkcad.ini $APPDATA\xtrkcad
+	  CopyFiles $1\xtrkcad.ini $APPDATA\XTrackCad
 	
 	  IfFileExists $1\xtrkcad.cus 0 +2 
-		CopyFiles $1\xtrkcad.cus $APPDATA\xtrkcad
+		CopyFiles $1\xtrkcad.cus $APPDATA\XTrackCad
 	
 	  IfFileExists $1\xtrkcad.cu1 0 +2 
-		CopyFiles $1\xtrkcad.cu1 $APPDATA\xtrkcad
+		CopyFiles $1\xtrkcad.cu1 $APPDATA\XTrackCad
 	
 	  IfFileExists $1\xtrkcad.ckp 0 +2 
-		CopyFiles $1\xtrkcad.ckp $APPDATA\xtrkcad	
+		CopyFiles $1\xtrkcad.ckp $APPDATA\XTrackCad
 
 ; at this point, the ini file does exist in the user's roaming profile directory
 ; continue installation with setting up the menu short cuts

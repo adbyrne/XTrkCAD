@@ -1,3 +1,7 @@
+Dec 16, 2007
+	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswpref.c: us XTrackCad as directory name for configuration files
+
 Aug 03, 2007
 	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswmisc.c: use HTML Help as the help system
