@@ -216,4 +216,6 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 
 \dd The notation \e{abc|xyx} indicates the message can appear with either of the values (\e{abc} or \e{xyz}).  Items in \e{UPPERCASE} indicate numeric (such as lengths) or string (such as filenames) values.
 
+\K{messageList} provides detail explanation of each information or error message.
+
 \rule

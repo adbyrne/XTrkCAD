@@ -6,12 +6,11 @@
 
 \# Identify XTrkCad Version, Microsoft Windows software installation package name and Copyright information
 
-\define{XTCVer} Version 4.02rc2
+\define{XTCVer} Version 4.02
 
-\define{XTCWinPack} xtc402rc2.exe
+\define{XTCWinPack} xtc402.exe
 
-\define{XTCCopyRight} Copyright 2003, Sillub Technology
-\u0000
+\define{XTCCopyRight} Copyright 2003, Sillub Technology and
 Copyright 2007, Bob Blackwell and Martin Fischer
 
 

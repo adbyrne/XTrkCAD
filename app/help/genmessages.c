@@ -127,7 +127,7 @@ void dumpHelp( FILE *hlpsrcF )
 	int inx;
 	char *transStr;
 	
-	fprintf( hlpsrcF, "\n\n\\H{messageList} \\i{Message Explanations}\n\n" );
+	fprintf( hlpsrcF, "\n\n\\H{messageList} Message Explanations\n\n" );
 
 	/* sort in alphabetical order */
 	qsort( helpMsgs, helpMsgCnt, sizeof helpMsgs[0], cmpHelpMsg );
