@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.4 2007-12-08 02:04:57 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.5 2007-12-30 22:40:53 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -661,7 +661,7 @@ static wWin_p wWinCommonCreate(
 
 	/* center window on top of parent window */
 	if( option & F_CENTER )
-		gtk_window_set_position( w->gtkwin, GTK_WIN_POS_CENTER_ON_PARENT );
+		gtk_window_set_position(GTK_WINDOW(w->gtkwin), GTK_WIN_POS_CENTER_ON_PARENT );
 				
 	w->widget = gtk_fixed_new();
 	if (w->widget == 0) abort();
