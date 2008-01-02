@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.1 2005-12-07 15:47:23 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.2 2008-01-02 19:31:12 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -108,6 +108,18 @@ EXPORT DIST_T GetTrkDistance( track_cp trk, coOrd pos )
 	return trackCmds( GetTrkType(trk) )->distance( trk, &pos );
 }
 
+/**
+ * Check whether the track passed as parameter is close to an existing piece. Track
+ * pieces that aren't visible (in a tunnel or on an invisble layer) can be ignored,
+ * depending on flag. If there is a track closeby, the passed track is moved to that 
+ * position. This implements the snap feature.
+ *
+ * \param fp IN/OUT the old and the new position
+ * \param complain IN show error message if there is no other piece of track
+ * \param track IN 
+ * \param ignoreHidden IN decide whether hidden track is ignored or not
+ * \return   NULL if there is no track, pointer to track otherwise 
+ */
 
 EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignoreHidden )
 {
@@ -152,6 +164,12 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 	}
 	return NULL;
 }
+
+/**
+ * Check whether the track passed as parameter is close to an existing piece. Track
+ * pieces that aren't visible (in a tunnel or on an invisble layer) are ignored,
+ * This function is basically a wrapper function to OnTrack2().
+ */
 
 
 EXPORT track_p OnTrack( coOrd * fp, BOOL_T complain, BOOL_T track )

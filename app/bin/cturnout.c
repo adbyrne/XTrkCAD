@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.3 2006-03-25 08:47:37 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.4 2008-01-02 19:31:12 m_fischer Exp $
  *
  * T_TURNOUT
  *
@@ -2076,7 +2076,13 @@ static void TurnoutRotate( void * pangle )
 	Dto.state = 1;
 }
 	
-
+/**
+ * Process the mouse events for laying track.
+ *
+ * \param action IN event type
+ * \param pos    IN mouse position 
+ * \return    		next state
+ */
 
 EXPORT STATUS_T CmdTurnoutAction(
 		wAction_t action,
@@ -2325,7 +2331,15 @@ static STATUS_T CmdTurnout(
 
 #endif
 
-
+/**
+ * Event procedure for the hotbar.
+ *
+ * \param op   IN requested function
+ * \param data IN	pointer to info on selected element	
+ * \param d    IN
+ * \param origP IN
+ * \return   
+ */
 
 static char * CmdTurnoutHotBarProc(
 		hotBarProc_e op,
@@ -2335,10 +2349,10 @@ static char * CmdTurnoutHotBarProc(
 {
 	turnoutInfo_t * to = (turnoutInfo_t*)data;
 	switch ( op ) {
-	case HB_SELECT:
-		CmdTurnoutAction( C_FINISH, zero );
+	case HB_SELECT:		/* new element is selected */
+		CmdTurnoutAction( C_FINISH, zero ); 		/* finish current operation */
 		curTurnout = to;
-		DoCommandB( (void*)turnoutHotBarCmdInx );
+		DoCommandB( (void*)turnoutHotBarCmdInx ); /* continue with new turnut / structure */
 		return NULL;
 	case HB_LISTTITLE:
 		FormatCompoundTitle( listLabels, to->title );
@@ -2372,6 +2386,13 @@ EXPORT void AddHotBarTurnouts( void )
 	}
 }
 
+/**
+ * Handle mouse events for laying track when initiated from hotbar.
+ *
+ * \param action IN mouse event type
+ * \param pos IN mouse position
+ * \return    next state of operation
+ */
 
 static STATUS_T CmdTurnoutHotBar(
 		wAction_t action,
