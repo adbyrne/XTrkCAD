@@ -25,8 +25,8 @@
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
 
-CVSROOT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} m_fischer@users.sourceforge.net
-DEFAULT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} yg2004@schmalpur.inka.de
+CVSROOT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} yg2004@schmalspur.inka.de 
+DEFAULT /cvsroot/sitedocs/CVSROOT/cvstools/syncmail %{sVv} yg2004@schmalspur.inka.de
  
 
 
