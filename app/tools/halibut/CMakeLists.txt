@@ -1,15 +1,33 @@
-# first create the charset library
-add_subdirectory(charset)
+SET(SOURCES
+	biblio.c 
+	bk_html.c 
+	contents.c 
+	deflate.c 
+	error.c
+	halibut.h 
+	help.c 
+	index.c 
+	input.c
+	in_pf.c 
+	in_afm.c 
+	psdata.c 
+	bk_paper.c
+	keywords.c 
+	licence.c 
+	main.c 
+	malloc.c
+	misc.c 
+	tree234.c 
+	tree234.h 
+	ustring.c
+	version 
+	version.c 
+	wcwidth.c
+	)
 
-include_directories( charset )
+INCLUDE_DIRECTORIES(charset)
+ADD_EXECUTABLE(halibut ${SOURCES})
+TARGET_LINK_LIBRARIES(halibut xtrkcad-charset)
 
-set(halibutsrcs biblio.c bk_html.c contents.c deflate.c error.c)
-set(halibutsrcs ${halibutsrcs} halibut.h help.c index.c input.c)
-set(halibutsrcs ${halibutsrcs} in_pf.c in_afm.c psdata.c bk_paper.c)
-set(halibutsrcs ${halibutsrcs} keywords.c licence.c main.c malloc.c)
-set(halibutsrcs ${halibutsrcs} misc.c tree234.c tree234.h ustring.c)
-set(halibutsrcs ${halibutsrcs} version version.c wcwidth.c)
+ADD_SUBDIRECTORY(charset)
 
-add_executable(halibut ${halibutsrcs})
-
-target_link_libraries(halibut charset)

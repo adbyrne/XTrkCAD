@@ -38,8 +38,17 @@ SET(LIN_SOURCES
 	${CMAKE_CURRENT_BINARY_DIR}/toxing.lin
 	)
 
+GET_TARGET_PROPERTY(genhelp_EXE genhelp LOCATION)
+
+ADD_CUSTOM_COMMAND(
+       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
+       DEPENDS genhelp ${help_SOURCE_DIR}/genhelp.in
+       COMMAND ${genhelp_EXE} -bh ${help_SOURCE_DIR}/genhelp.in ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
+       )
+
 SET(SOURCES
 	${LIN_SOURCES}
+	bllnhlp.c
 	ccurve.c
 	cdraw.c
 	celev.c
@@ -86,10 +95,10 @@ SET(SOURCES
 	fileio.c
 	lprintf.c
 	macro.c
-	misc.c
 	misc2.c
 	param.c
 	shrtpath.c
+	smalldlg.c
 	tcurve.c
 	tease.c
 	track.c
@@ -102,13 +111,14 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${help_BINARY_DIR})
 INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
 
-ADD_LIBRARY(xtrackcad-lib SHARED ${SOURCES})
-TARGET_LINK_LIBRARIES(xtrackcad-lib xtrackcad-help)
+LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
+LINK_DIRECTORIES(${GTKHTML_LIBRARY_DIRS})
 
-ADD_EXECUTABLE(xtrackcad xtrackcad.c)
+ADD_LIBRARY(xtrackcad-lib ${SOURCES})
+
+ADD_EXECUTABLE(xtrackcad misc.c)
 TARGET_LINK_LIBRARIES(xtrackcad xtrackcad-lib)
 TARGET_LINK_LIBRARIES(xtrackcad xtrackcad-wlib)
-TARGET_LINK_LIBRARIES(xtrackcad ${GTK_LIBRARIES})
 
 ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}
@@ -118,8 +128,7 @@ ADD_EXECUTABLE(mkturnout
 TARGET_LINK_LIBRARIES(mkturnout m)
 SET_TARGET_PROPERTIES(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
 
-INSTALL(TARGETS xtrackcad mkturnout xtrackcad-lib
+INSTALL(TARGETS xtrackcad mkturnout
 	RUNTIME DESTINATION bin
-	LIBRARY DESTINATION lib
 	)
 

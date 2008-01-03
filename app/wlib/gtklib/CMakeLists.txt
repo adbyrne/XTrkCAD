@@ -1,15 +1,35 @@
-FILE(GLOB SOURCES *.c)
 FILE(GLOB HEADERS *.h)
+
+SET(SOURCES
+	gtkbutton.c
+	gtkcolor.c
+	gtkfilsel.c
+	gtkfont.c
+	gtkhelp.c
+	gtklist.c
+	gtkmenu.c
+	gtkmisc.c
+	gtksimple.c
+	gtksingle.c
+	gtksplash.c
+	gtktext.c
+	gtkwindow.c
+	psprint.c
+	wpref.c
+	)
+
+IF(XTRKCAD_USE_GTK_CAIRO)
+	SET(SOURCES ${SOURCES} gtkdraw-cairo.c)
+ELSE(XTRKCAD_USE_GTK_CAIRO)
+	SET(SOURCES ${SOURCES} gtkdraw.c)
+ENDIF(XTRKCAD_USE_GTK_CAIRO)
 
 SET_SOURCE_FILES_PROPERTIES(wpref.c PROPERTIES COMPILE_FLAGS -DEXPORT=)
 
 INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${GTKHTML_INCLUDE_DIRS})
 
-ADD_LIBRARY(xtrackcad-wlib SHARED ${HEADERS} ${SOURCES})
-
-INSTALL(TARGETS xtrackcad-wlib
-	RUNTIME DESTINATION bin
-	LIBRARY DESTINATION lib
-	)
+ADD_LIBRARY(xtrackcad-wlib ${HEADERS} ${SOURCES})
+TARGET_LINK_LIBRARIES(xtrackcad-wlib ${GTK_LIBRARIES})
+TARGET_LINK_LIBRARIES(xtrackcad-wlib ${GTKHTML_LIBRARIES})
 

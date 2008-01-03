@@ -1,5 +1,6 @@
-add_subdirectory(halibut)
+ADD_EXECUTABLE(addcrlf addcrlf.c)
 
-add_executable(addcrlf addcrlf.c)
+ADD_EXECUTABLE(bin2c bin2c.c)
 
-add_executable(bin2c bin2c.c)
+ADD_SUBDIRECTORY(halibut)
+

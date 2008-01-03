@@ -9,6 +9,7 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad.ini ${CMAKE_CURRENT_BINARY_DI
 INSTALL(FILES 
 	COPYING
 	aareadme.txt
+	logo.bmp
 	xtrkcad.bug
 	xtrkcad.enh
 	xtrkcad.fix
