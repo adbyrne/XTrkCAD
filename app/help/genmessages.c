@@ -127,6 +127,8 @@ void dumpHelp( FILE *hlpsrcF )
 	int inx;
 	char *transStr;
 	
+	fputs( "/#\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n", hlpsrcF );
+
 	fprintf( hlpsrcF, "\n\n\\H{messageList} Message Explanations\n\n" );
 
 	/* sort in alphabetical order */
