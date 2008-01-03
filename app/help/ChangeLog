@@ -1,5 +1,9 @@
+Jan 03. 2008
+	IMPROVEMENT: Martin Fischer 
+		genmessages.c: added warning message
+
 Dec 09, 2007
-	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		genmessages.c: corrected parsing problems 
 
 Dec 03, 2007
