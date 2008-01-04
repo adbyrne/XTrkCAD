@@ -1,4 +1,51 @@
 PROJECT(XTrkCAD)
 
+# where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/app)
+
+# Setup high-level build options ...
+IF(WIN32)
+	# We require some recent fixes on Win32
+	CMAKE_MINIMUM_REQUIRED(VERSION 2.4.7 FATAL_ERROR)
+
+	SET(XTRKCAD_USE_GTK_DEFAULT OFF)
+	SET(XTRKCAD_USE_GTK_CAIRO_DEFAULT OFF)
+ELSE(WIN32)
+	SET(XTRKCAD_USE_GTK_DEFAULT ON)
+	SET(XTRKCAD_USE_GTK_CAIRO_DEFAULT OFF)
+ENDIF(WIN32)
+
+OPTION(XTRKCAD_USE_GTK "Use GTK for the graphical user interface back-end" ${XTRKCAD_USE_GTK_DEFAULT})
+OPTION(XTRKCAD_USE_GTK_CAIRO "Use Cairo for high-quality antialiased rendering" ${XTRKCAD_USE_GTK_CAIRO_DEFAULT})
+
+# Hide the advanced stuff ...
+MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
+MARK_AS_ADVANCED(EXECUTABLE_OUTPUT_PATH)
+MARK_AS_ADVANCED(LIBRARY_OUTPUT_PATH)
+MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES)
+MARK_AS_ADVANCED(CMAKE_OSX_SYSROOT)
+
+# Test for dependencies ...
+INCLUDE(FindPkgConfig)
+
+IF(XTRKCAD_USE_GTK)
+	PKG_CHECK_MODULES(GTK REQUIRED "gtk+-2.0")
+	PKG_CHECK_MODULES(GTKHTML REQUIRED "libgtkhtml-2.0")
+ENDIF(XTRKCAD_USE_GTK)
+
+# Setup some global platform-specific options ...
+IF(WIN32)
+	ADD_DEFINITIONS(-DWINDOWS)
+ENDIF(WIN32)
+
+# Enable use of a configuration file ...
+ADD_DEFINITIONS(-DHAVE_CONFIG_H)
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-config.h)
+
+# Setup some global options for installation ...
+SET(XTRKCAD_BIN_INSTALL_DIR "bin")
+SET(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad")
+
+# Setup the rest of the build ...
 ADD_SUBDIRECTORY(app)
 

@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.6 2007-11-12 18:53:15 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.7 2008-01-04 06:16:13 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -35,6 +35,10 @@
 #define FALSE	(0)
 #endif
 
+#ifdef HAVE_CONFIG_H
+#include "xtrkcad-config.h"
+#endif
+
 extern char wAppName[];
 static char appLibDir[BUFSIZ];
 static char appWorkDir[BUFSIZ];
@@ -49,16 +53,13 @@ static char userHomeDir[BUFSIZ];
  */
 
 
-EXPORT const char * wGetAppLibDir(
-		void )
+EXPORT const char * wGetAppLibDir( void )
 /** Find the directory where configuration files, help, demos etc are installed. 
- *  XTrkCad expects all these readonly files to be installed in either 
- *  /usr/lib/xtrkcad or /usr/local/lib/xtrkcad In any other cases, the environment
- *  variable XTRKCADLIB can be used to pass the correct directory. 
  *  The search order is:
- *  1. directory specified by XTRKCADLIB
- *  2. /usr/lib/xtrkcad
- *  3. /usr/local/lib/xtrkcad
+ *  1. Directory specified by the XTRKCADLIB environment variable
+ *  2. Directory specified by XTRKCAD_INSTALL_PREFIX/share/xtrkcad
+ *  3. /usr/lib/xtrkcad
+ *  4. /usr/local/lib/xtrkcad
  *  
  *  \return pointer to directory name
  */
@@ -83,6 +84,16 @@ EXPORT const char * wGetAppLibDir(
 		}
 	}
 
+#ifdef HAVE_CONFIG_H
+	strcpy(appLibDir, XTRKCAD_INSTALL_PREFIX);
+	strcat(appLibDir, "/share/");
+	strcat(appLibDir, wAppName);
+
+	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
+		return appLibDir;
+	}
+#endif
+
 	strcpy( appLibDir, "/usr/lib/" );
 	strcat( appLibDir, wAppName );
 	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
@@ -96,8 +107,9 @@ EXPORT const char * wGetAppLibDir(
 	}
 
 	sprintf( msg,
-		"The required configuration files could not be located in the expected directories.\n\n"
+		"The required configuration files could not be located in the expected location.\n\n"
 		"Usually this is an installation problem. Make sure that these files are installed in either \n"
+		"  " XTRKCAD_INSTALL_PREFIX "/share/xtrkcad or\n"
 		"  /usr/lib/%s or\n"
 		"  /usr/local/lib/%s\n"
 		"If this is not possible, the environment variable %s must contain "

@@ -16,5 +16,5 @@ INSTALL(FILES
 	${CMAKE_CURRENT_BINARY_DIR}/xtrkcad.ini
 	xtrkcad.spec.head
 	xtrkcad.xtq
-	DESTINATION share
+	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 	)
