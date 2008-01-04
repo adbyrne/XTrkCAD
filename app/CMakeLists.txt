@@ -1,5 +1,3 @@
-PROJECT(XTrackCAD)
-
 IF(WIN32)
 	# We require some recent fixes on Win32
 	CMAKE_MINIMUM_REQUIRED(VERSION 2.4.7 FATAL_ERROR)
