@@ -20,7 +20,7 @@ SET(SOURCES
 	mswtext.c
 	)
 
-ADD_LIBRARY(xtrackcad-wlib ${HEADERS} ${SOURCES})
+ADD_LIBRARY(xtrkcad-wlib ${HEADERS} ${SOURCES})
 
-TARGET_LINK_LIBRARIES(xtrackcad-wlib Htmlhelp)
+TARGET_LINK_LIBRARIES(xtrkcad-wlib Htmlhelp)
 

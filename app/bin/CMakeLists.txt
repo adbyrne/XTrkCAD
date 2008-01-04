@@ -116,16 +116,16 @@ INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
 LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
 LINK_DIRECTORIES(${GTKHTML_LIBRARY_DIRS})
 
-ADD_LIBRARY(xtrackcad-lib ${SOURCES})
+ADD_LIBRARY(xtrkcad-lib ${SOURCES})
 
-# This ensures that messages.h has been generated before we build xtrackcad-lib
-ADD_DEPENDENCIES(xtrackcad-lib Help)
+# This ensures that messages.h has been generated before we build xtrkcad-lib
+ADD_DEPENDENCIES(xtrkcad-lib Help)
 
-ADD_EXECUTABLE(xtrackcad WIN32
+ADD_EXECUTABLE(xtrkcad WIN32
 	misc.c 
 	)
-TARGET_LINK_LIBRARIES(xtrackcad xtrackcad-lib)
-TARGET_LINK_LIBRARIES(xtrackcad xtrackcad-wlib)
+TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
+TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
 
 ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}
@@ -138,7 +138,7 @@ IF(NOT WIN32)
 ENDIF(NOT WIN32)
 
 INSTALL(
-	TARGETS xtrackcad mkturnout
+	TARGETS xtrkcad mkturnout
 	RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
 
