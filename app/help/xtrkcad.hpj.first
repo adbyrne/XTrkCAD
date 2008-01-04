@@ -1,6 +1,6 @@
 ;
 [OPTIONS]
-TITLE=XTrkCad - Help
+TITLE=XTrkCad - Online Help 
 COMPRESS=TRUE
 REPORT=ON
 ERRORLOG=xtc31.err
