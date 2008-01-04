@@ -1,6 +1,8 @@
 ADD_EXECUTABLE(cnvdsgn cnvdsgn.c utility.c)
-TARGET_LINK_LIBRARIES(cnvdsgn m)
 GET_TARGET_PROPERTY(cnvdsgn_EXE cnvdsgn LOCATION)
+IF(NOT WIN32)
+	TARGET_LINK_LIBRARIES(cnvdsgn m)
+ENDIF(NOT WIN32)
 
 MACRO(GENERATE_LIN lin_name)
 	ADD_CUSTOM_COMMAND(
@@ -116,7 +118,12 @@ LINK_DIRECTORIES(${GTKHTML_LIBRARY_DIRS})
 
 ADD_LIBRARY(xtrackcad-lib ${SOURCES})
 
-ADD_EXECUTABLE(xtrackcad misc.c)
+# This ensures that messages.h has been generated before we build xtrackcad-lib
+ADD_DEPENDENCIES(xtrackcad-lib Help)
+
+ADD_EXECUTABLE(xtrackcad WIN32
+	misc.c 
+	)
 TARGET_LINK_LIBRARIES(xtrackcad xtrackcad-lib)
 TARGET_LINK_LIBRARIES(xtrackcad xtrackcad-wlib)
 
@@ -125,10 +132,11 @@ ADD_EXECUTABLE(mkturnout
 	ctodesgn.c
 	utility.c
 	)
-TARGET_LINK_LIBRARIES(mkturnout m)
 SET_TARGET_PROPERTIES(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
+IF(NOT WIN32)
+	TARGET_LINK_LIBRARIES(mkturnout m)
+ENDIF(NOT WIN32)
 
 INSTALL(TARGETS xtrackcad mkturnout
 	RUNTIME DESTINATION bin
 	)
-

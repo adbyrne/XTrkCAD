@@ -1,5 +1,10 @@
 PROJECT(XTrackCAD)
 
+IF(WIN32)
+	# We require some recent fixes on Win32
+	CMAKE_MINIMUM_REQUIRED(VERSION 2.4.7 FATAL_ERROR)
+ENDIF(WIN32)
+
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -29,6 +34,11 @@ IF(XTRKCAD_USE_GTK)
 	PKG_CHECK_MODULES(GTK REQUIRED "gtk+-2.0")
 	PKG_CHECK_MODULES(GTKHTML REQUIRED "libgtkhtml-2.0")
 ENDIF(XTRKCAD_USE_GTK)
+
+# Setup some global platform-specific options ...
+IF(WIN32)
+	ADD_DEFINITIONS(-DWINDOWS)
+ENDIF(WIN32)
 
 # Setup the rest of the build ...
 ADD_SUBDIRECTORY(wlib)

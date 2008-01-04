@@ -36,10 +36,11 @@ ADD_CUSTOM_COMMAND(
 	DEPENDS ${butfiles}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
 	COMMAND ${CMAKE_COMMAND} -E remove *
-	COMMAND ${halibut_EXE} ${butfiles}
+	COMMAND "${halibut_EXE}" ${butfiles}
 	)
 
 ADD_CUSTOM_TARGET(help-html ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
+ADD_DEPENDENCIES(help-html halibut)
 
 ADD_CUSTOM_TARGET(clean-html
 	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
