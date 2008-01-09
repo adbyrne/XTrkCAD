@@ -20,12 +20,24 @@ static char appWorkDirName[MAX_PATH];
 const char * wGetAppLibDir( void )
 {
 	char *cp;
-	if ( appLibDirName[0] == 0 ) {
-		GetModuleFileName( mswHInst, appLibDirName, sizeof appLibDirName );
-		cp = strrchr( appLibDirName, '\\' );
-		if (cp)
-			*cp = '\0';
+	char module_name[MAX_PATH];
+
+	if (appLibDirName[0] != '\0') {
+		return appLibDirName;
 	}
+
+	GetModuleFileName( mswHInst, module_name, sizeof module_name );
+	cp = strrchr( module_name, '\\' );
+	if (cp)
+		*cp = '\0';
+
+#ifdef HAVE_CONFIG_H
+	strcpy(appLibDirName, module_name);
+	strcat(appLibDirName, "\\..\\share\\xtrkcad");
+	return appLibDirName;
+#endif	
+
+	strcpy(appLibDirName, module_name);
 	return appLibDirName;
 }
 
