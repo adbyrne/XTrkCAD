@@ -1,7 +1,7 @@
 /** \file fileio.c
  * Loading and saving files. Handles trackplans as well as DXF export. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.13 2007-12-13 19:10:59 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.14 2008-01-15 11:46:03 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -53,6 +53,7 @@
 #include "draw.h"
 #include "misc.h"
 #include "compound.h"
+#include "i18n.h"
 
 /*#define TIME_READTRACKFILE*/
 
@@ -111,7 +112,7 @@ static int Copyfile( char * fn1, char * fn2 )
  * \return    pointer to the old locale
  */
 
-static char *
+char *
 SaveLocale( char *newLocale )
 {
 	char *oldLocale;
@@ -135,7 +136,7 @@ SaveLocale( char *newLocale )
  * \param locale IN return value from earlier call to SaveLocale
  */
 
-static void
+void
 RestoreLocale( char * locale )
 {
 	if( locale ) {
@@ -235,8 +236,8 @@ EXPORT int InputError(
 		*mp++ = '\n';
 		strcpy( mp, paramLine );
 	}
-	strcat( mp, "\nDo you want to continue?" );
-	if (!(ret = wNotice( message, "Continue", "Stop" ))) {
+	strcat( mp, _("\nDo you want to continue?") );
+	if (!(ret = wNotice( message, _("Continue"), _("Stop") ))) {
 		if ( paramFile )
 			fclose(paramFile);
 		paramFile = NULL;
@@ -269,11 +270,16 @@ EXPORT BOOL_T GetArgs(
 	char * ps;
 	char ** qp;
 	va_list ap;
+	char *oldLocale = NULL;
+
+	oldLocale = SaveLocale("C");
+
 	cp = line;
 	va_start( ap, format );
 	for (argNo=1;*format;argNo++,format++) {
 		while (isspace(*cp)) cp++;
 		if (!*cp && strchr( "XZYzc", *format ) == NULL ) {
+			RestoreLocale(oldLocale);
 			InputError( "Arg %d: EOL unexpected", TRUE, argNo );
 			return FALSE;
 		}
@@ -281,6 +287,7 @@ EXPORT BOOL_T GetArgs(
 		case '0':
 			(void)strtol( cp, &cq, 10 );
 			if (cp == cq) {
+				RestoreLocale(oldLocale);
 				InputError( "Arg %d: expected integer", TRUE, argNo );
 				return FALSE;
 			}
@@ -302,6 +309,7 @@ EXPORT BOOL_T GetArgs(
 			pi = va_arg( ap, int * );
 			*pi = (int)strtol( cp, &cq, 10 );
 			if (cp == cq) {
+				RestoreLocale(oldLocale);
 				InputError( "Arg %d: expected integer", TRUE, argNo );
 				return FALSE;
 			}
@@ -311,6 +319,7 @@ EXPORT BOOL_T GetArgs(
 			pi = va_arg( ap, int * );
 			*pi = (int)strtol( cp, &cq, 10 );
 			if (cp == cq) {
+				RestoreLocale(oldLocale);
 				InputError( "Arg %d: expected integer", TRUE, argNo );
 				return FALSE;
 			}
@@ -320,6 +329,7 @@ EXPORT BOOL_T GetArgs(
 			pf = va_arg( ap, FLOAT_T * );
 			*pf = (FLOAT_T)strtol( cp, &cq, 10 );
 			if (cp == cq) {
+				RestoreLocale(oldLocale);
 				InputError( "Arg %d: expected integer", TRUE, argNo );
 				return FALSE;
 			}
@@ -333,6 +343,7 @@ EXPORT BOOL_T GetArgs(
 			pl = va_arg( ap, long * );
 			*pl = strtol( cp, &cq, 10 );
 			if (cp == cq) {
+				RestoreLocale(oldLocale);
 				InputError( "Arg %d: expected integer", TRUE, argNo );
 				return FALSE;
 			}
@@ -342,6 +353,7 @@ EXPORT BOOL_T GetArgs(
 			pf = va_arg( ap, FLOAT_T * );
 			*pf = strtod( cp, &cq );
 			if (cp == cq) {
+				RestoreLocale(oldLocale);
 				InputError( "Arg %d: expected float", TRUE, argNo );
 				return FALSE;
 			}
@@ -353,6 +365,7 @@ EXPORT BOOL_T GetArgs(
 			if ( paramVersion >= 9 ) {
 				*pf = strtod( cp, &cq );
 				if (cp == cq) {
+					RestoreLocale(oldLocale);
 					InputError( "Arg %d: expected float", TRUE, argNo );
 					return FALSE;
 				}
@@ -367,12 +380,14 @@ EXPORT BOOL_T GetArgs(
 			pp = va_arg( ap, coOrd * );
 			p.x = strtod( cp, &cq );
 			if (cp == cq) {
+				RestoreLocale(oldLocale);
 				InputError( "Arg %d: expected float", TRUE, argNo );
 				return FALSE;
 			}
 			cp = cq;
 			p.y = strtod( cp, &cq );
 			if (cp == cq) {
+				RestoreLocale(oldLocale);
 				InputError( "Arg %d: expected float", TRUE, argNo );
 				return FALSE;
 			}
@@ -431,6 +446,7 @@ EXPORT BOOL_T GetArgs(
 		}
 	}
 	va_end( ap );
+	RestoreLocale(oldLocale);
 	return TRUE;
 }
 
@@ -509,7 +525,7 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 		/* Reset the locale settings */
 		RestoreLocale( oldLocale );
 
-		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Parameter", paramFileName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Parameter"), paramFileName, strerror(errno) );
 
 		return FALSE;
 	}
@@ -580,7 +596,7 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 			if (paramFile) fclose(paramFile);
 			RestoreLocale( oldLocale );
 			
-			NoticeMessage( MSG_PROG_CORRUPTED, "Ok", NULL, paramFileName );
+			NoticeMessage( MSG_PROG_CORRUPTED, _("Ok"), NULL, paramFileName );
 
 			return FALSE;
 		}
@@ -610,9 +626,16 @@ static void ReadCustom( void )
 }
 
 
-EXPORT FILE * OpenCustom( char * mode )
+/*
+ * Open the file and then set the locale to "C". Old locale will be copied to
+ * oldLocale. After the required file I/O is done, the caller must call
+ * CloseCustom() with the same locale value that was returned in oldLocale by
+ * this function.
+ */
+EXPORT FILE * OpenCustom( char *mode )
 {
 	FILE * ret = NULL;
+
 	if (inPlayback)
 		return NULL;
 	if ( *mode == 'w' )
@@ -620,9 +643,10 @@ EXPORT FILE * OpenCustom( char * mode )
 	if (customPath) {
 		ret = fopen( customPath, mode );
 		if (ret == NULL) {
-			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Custom", customPath, strerror(errno) );
+			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Custom"), customPath, strerror(errno) );
 		}
 	}
+
 	return ret;
 }
 
@@ -641,7 +665,7 @@ EXPORT char * PutTitle( char * cp )
 		cp++;
 	}
 	if ( *cp )
-		NoticeMessage( "putTitle: title too long: %s", "Ok", NULL, title );
+		NoticeMessage( _("putTitle: title too long: %s"), _("Ok"), NULL, title );
 	*tp = '\0';
 	return title;
 }
@@ -657,7 +681,7 @@ void SetWindowTitle( void )
 	if ( changed > 2 || inPlayback )
 		return;
 	sprintf( message, "%s%s - %s(%s)",
-		(curFileName==NULL||curFileName[0]=='\0')?"Unnamed Trackplan":curFileName,
+		(curFileName==NULL||curFileName[0]=='\0')?_("Unnamed Trackplan"):curFileName,
 		changed>0?"*":"", sProdName, sVersion );
 	wWinSetTitle( mainW, message );
 }
@@ -673,7 +697,7 @@ static struct wFilSel_t * saveFile_fs;
 
 static wWin_p checkPointingW;
 static paramData_t checkPointingPLs[] = {
-   {    PD_MESSAGE, "Check Pointing" } };
+   {    PD_MESSAGE, N_("Check Pointing") } };
 static paramGroup_t checkPointingPG = { "checkpoint", 0, checkPointingPLs, sizeof checkPointingPLs/sizeof checkPointingPLs[0] };
 
 static char * checkPtFileName1;
@@ -710,9 +734,9 @@ static BOOL_T ReadTrackFile(
 	if (paramFile == NULL) {
 		/* Reset the locale settings */
 		RestoreLocale( oldLocale );
-		
+
 		if ( complain )
-			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "XTrkCad", pathName, strerror(errno) );
+			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "XTrkCad", pathName, strerror(errno) );
 
 		return FALSE;
 	}
@@ -752,14 +776,14 @@ static BOOL_T ReadTrackFile(
 				while (*cp && isspace(*cp)) cp++;
 			if ( paramVersion > iParamVersion ) {
 				if (cp && *cp) {
-					NoticeMessage( MSG_UPGRADE_VERSION1, "Ok", NULL, paramVersion, iParamVersion, sProdName, cp );
+					NoticeMessage( MSG_UPGRADE_VERSION1, _("Ok"), NULL, paramVersion, iParamVersion, sProdName, cp );
 				} else {
-					NoticeMessage( MSG_UPGRADE_VERSION2, "Ok", NULL, paramVersion, iParamVersion, sProdName );
+					NoticeMessage( MSG_UPGRADE_VERSION2, _("Ok"), NULL, paramVersion, iParamVersion, sProdName );
 				}
 				break;
 			}
 			if ( paramVersion < iMinParamVersion ) {
-				NoticeMessage( MSG_BAD_FILE_VERSION, "Ok", NULL, paramVersion, iMinParamVersion, sProdName );
+				NoticeMessage( MSG_BAD_FILE_VERSION, _("Ok"), NULL, paramVersion, iMinParamVersion, sProdName );
 				break;
 			}
 		} else if (!full) {
@@ -891,9 +915,9 @@ static BOOL_T DoSaveTracks(
 	f = fopen( fileName, "w" );
 	if (f==NULL) {
 		RestoreLocale( oldLocale );
+
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), fileName, strerror(errno) );
 		
-		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Track", fileName, strerror(errno) );
-			
 		return FALSE;
 	}
 	wSetCursor( wCursorWait );
@@ -912,7 +936,7 @@ static BOOL_T DoSaveTracks(
 	rc &= WriteTracks( f );
 	rc &= fprintf(f, "END\n")>0;
 	if ( !rc )
-		NoticeMessage( MSG_WRITE_FAILURE, "Ok", NULL, strerror(errno), fileName );
+		NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName );
 	fclose(f);
 
 	RestoreLocale( oldLocale );
@@ -950,7 +974,7 @@ EXPORT void DoSave( doSaveCallBack_p after )
 	doAfterSave = after;
 	if (curPathName[0] == 0) {
 		if (saveFile_fs == NULL)
-			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, "Save Tracks",
+			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
 				sSourceFilePattern, SaveTracks, NULL );
 		wFilSelect( saveFile_fs, curDirName );
 	} else {
@@ -963,7 +987,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 {
 	doAfterSave = after;
 	if (saveFile_fs == NULL)
-		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, "Save Tracks",
+		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
 			sSourceFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, curDirName );
 	SetWindowTitle();
@@ -971,7 +995,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 
 EXPORT void DoLoad( void )
 {
-	loadFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, "Open Tracks",
+	loadFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Open Tracks"),
 		sSourceFilePattern, LoadTracks, NULL );
 	wFilSelect( loadFile_fs, curDirName );
 }
@@ -983,7 +1007,7 @@ EXPORT void DoCheckPoint( void )
 	
 	if (checkPointingW == NULL) {
 		ParamRegister( &checkPointingPG );
-		checkPointingW = ParamCreateDialog( &checkPointingPG, MakeWindowTitle("Check Pointing"), NULL, NULL, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
+		checkPointingW = ParamCreateDialog( &checkPointingPG, MakeWindowTitle(_("Check Pointing")), NULL, NULL, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
 	}
 	rename( checkPtFileName1, checkPtFileName2 );
 	wShow( checkPointingW );
@@ -1130,7 +1154,7 @@ static int ImportTracks(
 	Reset();
 	SetAllTrackSelect( FALSE );
 	ImportStart();
-	UndoStart( "Import Tracks", "importTracks" );
+	UndoStart( _("Import Tracks"), "importTracks" );
 	useCurrentLayer = TRUE;
 	ReadTrackFile( pathName, fileName, FALSE, FALSE, TRUE );
 	ImportEnd();
@@ -1148,7 +1172,7 @@ static int ImportTracks(
 EXPORT void DoImport( void )
 {
 	if (importFile_fs == NULL)
-		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, "Import Tracks",
+		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Tracks"),
 			sImportFilePattern, ImportTracks, NULL );
 
 	wFilSelect( importFile_fs, curDirName );
@@ -1166,7 +1190,7 @@ static int DoExportTracks(
 	SetCurDir( pathName, fileName );
 	f = fopen( pathName, "w" );
 	if (f==NULL) {
-		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Export", fileName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Export"), fileName, strerror(errno) );
 		return FALSE;
 	}
 	wSetCursor( wCursorWait );
@@ -1190,7 +1214,7 @@ EXPORT void DoExport( void )
 		return;
 	}
 	if (exportFile_fs == NULL)
-		exportFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, "Export Tracks",
+		exportFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Export Tracks"),
 				sImportFilePattern, DoExportTracks, NULL );
 
 	wFilSelect( exportFile_fs, curDirName );
@@ -1302,7 +1326,7 @@ static int DoExportDXFTracks(
 	SetCurDir( pathName, fileName );
 	dxfF = fopen( pathName, "w" );
 	if (dxfF==NULL) {
-		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "DXF", fileName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "DXF", fileName, strerror(errno) );
 		return FALSE;
 	}
 	wSetCursor( wCursorWait );
@@ -1367,7 +1391,7 @@ void DoExportDXF( void )
 		return;
 	}
 	if (exportDXFFile_fs == NULL)
-		exportDXFFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, "Export to DXF",
+		exportDXFFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Export to DXF"),
 				sDXFFilePattern, DoExportDXFTracks, NULL );
 
 	wFilSelect( exportDXFFile_fs, curDirName );
@@ -1377,20 +1401,26 @@ EXPORT BOOL_T EditCopy( void )
 {
 	FILE * f;
 	time_t clock;
+	char *oldLocale = NULL;
+
 	if (selectedTrackCount <= 0) {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 		return FALSE;
 	}
 	f = fopen( clipBoardN, "w" );
 	if (f == NULL) {
-		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Clipboard", clipBoardN, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Clipboard"), clipBoardN, strerror(errno) );
 		return FALSE;
 	}
+
+	oldLocale = SaveLocale("C");
+
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
 	ExportTracks(f);
 	fprintf(f, "END\n");
+	RestoreLocale(oldLocale);
 	fclose(f);
 	return TRUE;
 }
@@ -1408,14 +1438,18 @@ EXPORT BOOL_T EditCut( void )
 EXPORT BOOL_T EditPaste( void )
 {
 	BOOL_T rc = TRUE;
+	char *oldLocale = NULL;
+
+	oldLocale = SaveLocale("C");
+
 	wSetCursor( wCursorWait );
 	Reset();
 	SetAllTrackSelect( FALSE );
 	ImportStart();
-	UndoStart( "Paste", "paste" );
+	UndoStart( _("Paste"), "paste" );
 	useCurrentLayer = TRUE;
 	if ( !ReadTrackFile( clipBoardN, sClipboardF, FALSE, TRUE, FALSE ) ) {
-		NoticeMessage( MSG_CANT_PASTE, "Continue", NULL );
+		NoticeMessage( MSG_CANT_PASTE, _("Continue"), NULL );
 		rc = FALSE;
 	}
 	ImportEnd();
@@ -1426,6 +1460,7 @@ EXPORT BOOL_T EditPaste( void )
 	DoCommandB( (void*)selectCmdInx );
 	SelectRecount();
 	UpdateAllElevations();
+	RestoreLocale(oldLocale);
 	return rc;
 }
 

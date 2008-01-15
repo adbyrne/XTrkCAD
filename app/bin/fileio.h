@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.h,v 1.3 2007-02-16 07:24:15 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.h,v 1.4 2008-01-15 11:46:03 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -116,4 +116,8 @@ void PopupRegister( void * );
 void FileInit( void );
 BOOL_T ParamFileInit( void );
 BOOL_T MacroInit( void );
+
+char *SaveLocale( char *newLocale );
+void RestoreLocale( char * locale );
+
 #endif

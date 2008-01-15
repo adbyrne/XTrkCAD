@@ -42,10 +42,16 @@ SET(LIN_SOURCES
 
 GET_TARGET_PROPERTY(genhelp_EXE genhelp LOCATION)
 
+IF(XTRKCAD_USE_GETTEXT)
+	SET(GENHELP_OPTS "-bhi")
+ELSE(XTRKCAD_USE_GETTEXT)
+	SET(GENHELP_OPTS "-bh")
+ENDIF(XTRKCAD_USE_GETTEXT)
+
 ADD_CUSTOM_COMMAND(
        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
        DEPENDS genhelp ${help_SOURCE_DIR}/genhelp.in
-       COMMAND ${genhelp_EXE} -bh ${help_SOURCE_DIR}/genhelp.in ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
+       COMMAND ${genhelp_EXE} ${GENHELP_OPTS} ${help_SOURCE_DIR}/genhelp.in ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
        )
 
 SET(SOURCES
@@ -95,6 +101,7 @@ SET(SOURCES
 	drawgeom.c
 	elev.c
 	fileio.c
+	i18n.c
 	lprintf.c
 	macro.c
 	misc2.c
@@ -141,4 +148,3 @@ INSTALL(
 	TARGETS xtrkcad mkturnout
 	RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
-

@@ -1,3 +1,8 @@
+Jan 15, 2008
+	IMPROVEMENT: Mikko Nissinen <mni77@users.sourceforge.net>
+		Basic gettext support added.
+			CMakeLists.txt
+
 Nov 30, 2007
 	FIX: Timothy M. Shead
 		gtkfont.c: make sure that font initialization is run first

@@ -1,3 +1,19 @@
+Jan 15, 2008
+	IMPROVEMENT: Mikko Nissinen <mni77@users.sourceforge.net>
+		Basic gettext support added. Gettext is initialized in misc.c:wMain().
+		The initialization routine is defined in i18n.[ch] along with all
+		other gettext definitions.
+			CMakeLists.txt
+			fileio.[ch]
+			i18n.[ch]
+			misc.c
+		Also the following CMakeLists were modified for gettext:
+			xtrkcad/CMakeLists.txt
+			xtrkcad/app/CMakeLists.txt
+			xtrkcad/app/help/CMakeLists.txt
+			xtrkcad/app/i18n/CMakeLists.txt (Initial import)
+			xtrkcad/app/wlib/gtklib/CMakeLists.txt
+
 Dec 13, 2007
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>	
 		fileio.c: fixed segfault when locale is saved 
