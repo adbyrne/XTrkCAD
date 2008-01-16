@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.7 2007-11-18 17:53:21 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.8 2008-01-16 18:50:32 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -620,6 +620,15 @@ char * gtkConvertInput( const char * inString )
 	const char * cp;
 	char * cq;
 	int extCharCnt, inCharCnt;
+
+	/* Already UTF-8 encoded? */
+	if (g_utf8_validate(inString, -1, NULL))
+		/* Yes, do not double-convert */
+		return (char*)inString;
+#ifdef VERBOSE
+	fprintf(stderr, "gtkConvertInput(%s): Invalid UTF-8, converting...\n", inString);
+#endif
+
 	for ( cp=inString, extCharCnt=0; *cp; cp++ ) {
 		if ( ((*cp)&0x80) != 0 )
 			extCharCnt++;
