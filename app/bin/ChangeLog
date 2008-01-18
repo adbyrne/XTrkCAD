@@ -1,3 +1,8 @@
+Jan 18, 2008
+	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
+		dcar.c: CarInvSaveText() Car list text file is now created to
+		selected path instead of current working directory.
+
 Jan 15, 2008
 	IMPROVEMENT: Mikko Nissinen <mni77@users.sourceforge.net>
 		Basic gettext support added. Gettext is initialized in misc.c:wMain().

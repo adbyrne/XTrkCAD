@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcar.c,v 1.1 2005-12-07 15:47:14 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcar.c,v 1.2 2008-01-18 16:47:47 mni77 Exp $
  *
  * TRAIN
  *
@@ -4187,7 +4187,10 @@ static int CarInvSaveText(
 	char * cp0, * cp1;
 	int len;
 
-	f = fopen( fileName, "w" );
+	if ( pathName == NULL )
+		return TRUE;
+	SetCurDir( pathName, fileName );
+	f = fopen( pathName, "w" );
 	if ( f == NULL ) {
 		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Car Inventory", fileName, strerror(errno) );
 		return FALSE;
