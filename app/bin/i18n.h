@@ -16,7 +16,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifdef XTC_USE_GETTEXT
+#include "xtrkcad-config.h"
+
+#ifdef XTRKCAD_USE_GETTEXT
 /* Use gettext */
 #include <libintl.h>
 #include <string.h>
@@ -30,6 +32,6 @@
 #define _(String)             String
 #define gettext_noop(String)  String
 #define N_(String)            String
-#endif /* XTC_USE_GETTEXT */
+#endif /* XTRKCAD_USE_GETTEXT */
 
 void InitGettext( void );

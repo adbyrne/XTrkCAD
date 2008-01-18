@@ -17,6 +17,7 @@
  */
 
 #include "i18n.h"
+
 #include <locale.h>
 #include <stdio.h>
 
@@ -25,14 +26,16 @@
  */
 void InitGettext( void )
 {
-#ifdef XTC_USE_GETTEXT
+#ifdef XTRKCAD_USE_GETTEXT
 	setlocale(LC_ALL, "");
-	bindtextdomain(PACKAGE, LOCALEDIR);
-	textdomain(PACKAGE);
+	bindtextdomain(XTRKCAD_PACKAGE, XTRKCAD_LOCALE_DIR);
+	bind_textdomain_codeset(XTRKCAD_PACKAGE, "UTF-8");
+	textdomain(XTRKCAD_PACKAGE);
 
 #ifdef VERBOSE
 	printf(_("Gettext initialized (PACKAGE=%s, LOCALEDIR=%s, LC_ALL=%s).\n"),
-			PACKAGE, LOCALEDIR, setlocale(LC_ALL, NULL));
+			XTRKCAD_PACKAGE, XTRKCAD_LOCALE_DIR, setlocale(LC_ALL, NULL));
 #endif
-#endif /* XTC_USE_GETTEXT */
+
+#endif /* XTRKCAD_USE_GETTEXT */
 }
