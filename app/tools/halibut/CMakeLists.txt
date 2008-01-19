@@ -20,7 +20,6 @@ SET(SOURCES
 	tree234.c 
 	tree234.h 
 	ustring.c
-	version 
 	version.c 
 	wcwidth.c
 	)
