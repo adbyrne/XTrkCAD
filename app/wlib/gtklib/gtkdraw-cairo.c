@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.1 2008-01-03 03:44:56 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.2 2008-01-20 20:41:16 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -894,6 +894,10 @@ EXPORT void wDrawSetSize(
 		fprintf(stderr,"resizeDraw: no client data\n");
 		return;
 	}
+
+	/* Negative values crashes the program */
+	if (w < 0 || h < 0)
+		return;
 
 	repaint = (w != bd->w || h != bd->h);
 	bd->w = w;

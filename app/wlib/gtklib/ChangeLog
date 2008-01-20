@@ -1,3 +1,10 @@
+Jan 20, 2008
+	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
+		gtkdraw.c/gtkdraw-cairo.c: wDrawSetSize(): Return immediately,
+		if given width or height is negative. Negative values crashed
+		the program. This can be seen at least in Add Turnout and Add
+		Structure dialogs by resizing the dialog vertically smaller.
+
 Jan 16, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		gtkmisc.c: gtkConvertInput(): If the input string is already
