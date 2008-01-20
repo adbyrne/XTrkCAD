@@ -30,10 +30,8 @@ IF(XTRKCAD_USE_GTK)
 	PKG_CHECK_MODULES(GTKHTML REQUIRED "libgtkhtml-2.0")
 ENDIF(XTRKCAD_USE_GTK)
 
-IF(XTRKCAD_USE_GETTEXT)
-	# "bin/i18n.h" is widely used
-	INCLUDE_DIRECTORIES(bin)
-ENDIF(XTRKCAD_USE_GETTEXT)
+# "bin/i18n.h" is widely used
+INCLUDE_DIRECTORIES(bin)
 
 # Setup the rest of the build ...
 ADD_SUBDIRECTORY(wlib)
