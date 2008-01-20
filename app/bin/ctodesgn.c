@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctodesgn.c,v 1.1 2005-12-07 15:47:27 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctodesgn.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  *
  * T_TURNOUT
  *
@@ -32,6 +32,7 @@
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "compound.h"
+#include "i18n.h"
 
 #define TURNOUTDESIGNER			"CTURNOUT DESIGNER"
 
@@ -102,7 +103,7 @@ static long newTurnAngleMode = 1;
 static char newTurnRightDesc[STR_SIZE], newTurnLeftDesc[STR_SIZE];
 static char newTurnRightPartno[STR_SIZE], newTurnLeftPartno[STR_SIZE];
 static char newTurnManufacturer[STR_SIZE];
-static char *newTurnAngleModeLabels[] = { "Frog #", "Degrees", NULL };
+static char *newTurnAngleModeLabels[] = { N_("Frog #"), N_("Degrees"), NULL };
 static DIST_T newTurnRoadbedWidth;
 static long newTurnRoadbedLineWidth = 0;
 static wDrawColor roadbedColor;
@@ -125,29 +126,29 @@ static DIST_T radii[10] = { 0.0 };
 static paramData_t turnDesignPLs[] = {
 #define I_TOLENGTH			(0)
 #define I_TO_FIRST_FLOAT	(0)
-	{ PD_FLOAT, &newTurnLen1, "len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, "Length" },
-	{ PD_FLOAT, &newTurnLen2, "len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, "Length" },
-	{ PD_FLOAT, &newTurnLen0, "len0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, "Length" },
+	{ PD_FLOAT, &newTurnLen1, "len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnLen2, "len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnLen0, "len0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
 #define I_TOOFFSET			(3)
-	{ PD_FLOAT, &newTurnOff1, "off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, "Offset" },
-	{ PD_FLOAT, &newTurnOff2, "off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, "Offset" },
+	{ PD_FLOAT, &newTurnOff1, "off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnOff2, "off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Offset") },
 #define I_TOANGLE			(5)
-	{ PD_FLOAT, &newTurnAngle1, "angle1", PDO_DLGIGNORELABELWIDTH, &r0_360, "Angle" },
+	{ PD_FLOAT, &newTurnAngle1, "angle1", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
 #define I_TO_LAST_FLOAT		(6)
-	{ PD_FLOAT, &newTurnAngle2, "angle2", PDO_DLGIGNORELABELWIDTH, &r0_360, "Angle" },
+	{ PD_FLOAT, &newTurnAngle2, "angle2", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
 #define I_TOMANUF			(7)
-	{ PD_STRING, &newTurnManufacturer, "manuf", 0, NULL, "Manufacturer" },
+	{ PD_STRING, &newTurnManufacturer, "manuf", 0, NULL, N_("Manufacturer") },
 #define I_TOLDESC			(8)
-	{ PD_STRING, &newTurnLeftDesc, "desc1", 0, NULL, "Left Description" },
-	{ PD_STRING, &newTurnLeftPartno, "partno1", PDO_DLGHORZ, NULL, " #" },
+	{ PD_STRING, &newTurnLeftDesc, "desc1", 0, NULL, N_("Left Description") },
+	{ PD_STRING, &newTurnLeftPartno, "partno1", PDO_DLGHORZ, NULL, N_(" #") },
 #define I_TORDESC			(10)
-	{ PD_STRING, &newTurnRightDesc, "desc2", 0, NULL, "Right Description" },
-	{ PD_STRING, &newTurnRightPartno, "partno2", PDO_DLGHORZ, NULL, " #" },
-	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", 0, &r0_100, "Roadbed Width" },
-	{ PD_LONG, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DLGHORZ, &i0_100, "Line Width" },
-	{ PD_COLORLIST, &roadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, "Color" },
-	{ PD_BUTTON, NewTurnOk, "done", PDO_DLGCMDBUTTON, NULL, "Ok" },
-	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, "Print Setup" },
+	{ PD_STRING, &newTurnRightDesc, "desc2", 0, NULL, N_("Right Description") },
+	{ PD_STRING, &newTurnRightPartno, "partno2", PDO_DLGHORZ, NULL, N_(" #") },
+	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", 0, &r0_100, N_("Roadbed Width") },
+	{ PD_LONG, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DLGHORZ, &i0_100, N_("Line Width") },
+	{ PD_COLORLIST, &roadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
+	{ PD_BUTTON, NewTurnOk, "done", PDO_DLGCMDBUTTON, NULL, N_("Ok") },
+	{ PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup") },
 #define I_TOANGMODE			(17)
 	{ PD_RADIO, &newTurnAngleMode, "angleMode", 0, newTurnAngleModeLabels }
 	};
@@ -176,10 +177,10 @@ static wLines_t RegLines[] = {
 #include "toreg.lin"
 		};
 static toDesignFloat_t RegFloats[] = {
-{ { 175, 10 }, I_TOLENGTH+0, "Length", "Diverging Length", Dim_e },
-{ { 400, 28 }, I_TOANGLE+0, "Angle", "Diverging Angle", Frog_e },
-{ { 325, 68 }, I_TOOFFSET+0, "Offset", "Diverging Offset", Dim_e },
-{ { 100, 120 }, I_TOLENGTH+2, "Length", "Overall Length", Dim_e },
+{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Diverging Length"), Dim_e },
+{ { 400, 28 }, I_TOANGLE+0, N_("Angle"), N_("Diverging Angle"), Frog_e },
+{ { 325, 68 }, I_TOOFFSET+0, N_("Offset"), N_("Diverging Offset"), Dim_e },
+{ { 100, 120 }, I_TOLENGTH+2, N_("Length"), N_("Overall Length"), Dim_e },
 		};
 static signed char RegPaths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 0,
@@ -189,7 +190,7 @@ static toDesignSchema_t RegSchema = {
 		"030" "310" "341" "420" }; 
 static toDesignDesc_t RegDesc = {
 		NTO_REGULAR,
-		"Regular Turnout",
+		N_("Regular Turnout"),
 		2,
 		sizeof RegLines/sizeof RegLines[0], RegLines,
 		sizeof RegFloats/sizeof RegFloats[0], RegFloats,
@@ -199,12 +200,12 @@ static wLines_t CrvLines[] = {
 #include "tocrv.lin"
 		};
 static toDesignFloat_t CrvFloats[] = {
-{ { 175, 10 }, I_TOLENGTH+0, "Length", "Inner Length", Dim_e },
-{ { 375, 12 }, I_TOANGLE+0, "Angle", "Inner Angle", Frog_e },
-{ { 375, 34 }, I_TOOFFSET+0, "Offset", "Inner Offset", Dim_e },
-{ { 400, 62 }, I_TOANGLE+1, "Angle", "Outer Angle", Frog_e },
-{ { 400, 84 }, I_TOOFFSET+1, "Offset", "Outer Offset", Dim_e },
-{ { 175, 120 }, I_TOLENGTH+1, "Length", "Outer Length", Dim_e } };
+{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Inner Length"), Dim_e },
+{ { 375, 12 }, I_TOANGLE+0, N_("Angle"), N_("Inner Angle"), Frog_e },
+{ { 375, 34 }, I_TOOFFSET+0, N_("Offset"), N_("Inner Offset"), Dim_e },
+{ { 400, 62 }, I_TOANGLE+1, N_("Angle"), N_("Outer Angle"), Frog_e },
+{ { 400, 84 }, I_TOOFFSET+1, N_("Offset"), N_("Outer Offset"), Dim_e },
+{ { 175, 120 }, I_TOLENGTH+1, N_("Length"), N_("Outer Length"), Dim_e } };
 static signed char Crv1Paths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 4, 5, 0, 0,
 		'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 2, 3, 0, 0, 0 };
@@ -226,7 +227,7 @@ static toDesignSchema_t Crv3Schema = {
 
 static toDesignDesc_t CrvDesc = {
 		NTO_CURVED,
-		"Curved Turnout",
+		N_("Curved Turnout"),
 		2,
 		sizeof CrvLines/sizeof CrvLines[0], CrvLines,
 		sizeof CrvFloats/sizeof CrvFloats[0], CrvFloats,
@@ -237,12 +238,12 @@ static wLines_t WyeLines[] = {
 #include "towye.lin"
 		};
 static toDesignFloat_t WyeFloats[] = {
-{ { 175, 10 }, I_TOLENGTH+0, "Length", "Left Length", Dim_e },
-{ { 400, 28 }, I_TOANGLE+0, "Angle", "Left Angle", Frog_e },
-{ { 325, 68 }, I_TOOFFSET+0, "Offset", "Left Offset", Dim_e },
-{ { 325, 115 }, I_TOOFFSET+1, "Offset", "Right Offset", Dim_e },
-{ { 400, 153 }, I_TOANGLE+1, "Angle", "Right Angle", Frog_e },
-{ { 175, 170 }, I_TOLENGTH+1, "Length", "Right Length", Dim_e },
+{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Left Length"), Dim_e },
+{ { 400, 28 }, I_TOANGLE+0, N_("Angle"), N_("Left Angle"), Frog_e },
+{ { 325, 68 }, I_TOOFFSET+0, N_("Offset"), N_("Left Offset"), Dim_e },
+{ { 325, 115 }, I_TOOFFSET+1, N_("Offset"), N_("Right Offset"), Dim_e },
+{ { 400, 153 }, I_TOANGLE+1, N_("Angle"), N_("Right Angle"), Frog_e },
+{ { 175, 170 }, I_TOLENGTH+1, N_("Length"), N_("Right Length"), Dim_e },
 		};
 static signed char Wye1Paths[] = {
 		'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
@@ -264,7 +265,7 @@ static toDesignSchema_t Wye3Schema = {
 		"030" "341" "410" "350" "562" "620" };
 static toDesignDesc_t WyeDesc = {
 		NTO_WYE,
-		"Wye Turnout",
+		N_("Wye Turnout"),
 		1,
 		sizeof WyeLines/sizeof WyeLines[0], WyeLines,
 		sizeof WyeFloats/sizeof WyeFloats[0], WyeFloats,
@@ -274,13 +275,13 @@ static wLines_t ThreewayLines[] = {
 #include "to3way.lin"
 		};
 static toDesignFloat_t ThreewayFloats[] = {
-{ { 175, 10 }, I_TOLENGTH+0, "Length", "Left Length", Dim_e },
-{ { 400, 28 }, I_TOANGLE+0, "Angle", "Left Angle", Frog_e },
-{ { 325, 68 }, I_TOOFFSET+0, "Offset", "Left Offset", Dim_e },
-{ { 100, 90 }, I_TOLENGTH+2, "Length", "Length", Dim_e },
-{ { 325, 115 }, I_TOOFFSET+1, "Offset", "Right Offset", Dim_e },
-{ { 400, 153 }, I_TOANGLE+1, "Angle", "Right Angle", Frog_e },
-{ { 175, 170 }, I_TOLENGTH+1, "Length", "Right Length", Dim_e },
+{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Left Length"), Dim_e },
+{ { 400, 28 }, I_TOANGLE+0, N_("Angle"), N_("Left Angle"), Frog_e },
+{ { 325, 68 }, I_TOOFFSET+0, N_("Offset"), N_("Left Offset"), Dim_e },
+{ { 100, 90 }, I_TOLENGTH+2, N_("Length"), N_("Length"), Dim_e },
+{ { 325, 115 }, I_TOOFFSET+1, N_("Offset"), N_("Right Offset"), Dim_e },
+{ { 400, 153 }, I_TOANGLE+1, N_("Angle"), N_("Right Angle"), Frog_e },
+{ { 175, 170 }, I_TOLENGTH+1, N_("Length"), N_("Right Length"), Dim_e },
 		};
 static signed char Tri1Paths[] = {
 		'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
@@ -305,7 +306,7 @@ static toDesignSchema_t Tri3Schema = {
 		"030" "341" "410" "350" "562" "620" "570" };
 static toDesignDesc_t ThreewayDesc = {
 		NTO_3WAY,
-		"3-way Turnout",
+		N_("3-way Turnout"),
 		1,
 		sizeof ThreewayLines/sizeof ThreewayLines[0], ThreewayLines,
 		sizeof ThreewayFloats/sizeof ThreewayFloats[0], ThreewayFloats,
@@ -315,9 +316,9 @@ static wLines_t CrossingLines[] = {
 #include "toxing.lin"
 		};
 static toDesignFloat_t CrossingFloats[] = {
-{ { 329, 30 }, I_TOLENGTH+0, "Length", "Length", Dim_e },
-{ { 370, 90 }, I_TOANGLE+0, "Angle", "Angle", Frog_e },
-{ { 329, 150 }, I_TOLENGTH+1, "Length", "Length", Dim_e } };
+{ { 329, 30 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
+{ { 370, 90 }, I_TOANGLE+0, N_("Angle"), N_("Angle"), Frog_e },
+{ { 329, 150 }, I_TOLENGTH+1, N_("Length"), N_("Length"), Dim_e } };
 static signed char CrossingPaths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 2, 0, 0, 0 };
 static toDesignSchema_t CrossingSchema = {
@@ -325,7 +326,7 @@ static toDesignSchema_t CrossingSchema = {
 		"010" "230" };
 static toDesignDesc_t CrossingDesc = {
 		NTO_CROSSING,
-		"Crossing",
+		N_("Crossing"),
 		1,
 		sizeof CrossingLines/sizeof CrossingLines[0], CrossingLines,
 		sizeof CrossingFloats/sizeof CrossingFloats[0], CrossingFloats,
@@ -335,9 +336,9 @@ static wLines_t SingleSlipLines[] = {
 #include "tosslip.lin"
 		};
 static toDesignFloat_t SingleSlipFloats[] = {
-{ { 329, 30 }, I_TOLENGTH+0, "Length", "Length", Dim_e },
-{ { 370, 90 }, I_TOANGLE+0, "Angle", "Angle", Frog_e },
-{ { 329, 155 }, I_TOLENGTH+1, "Length", "Length", Dim_e } };
+{ { 329, 30 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
+{ { 370, 90 }, I_TOANGLE+0, N_("Angle"), N_("Angle"), Frog_e },
+{ { 329, 155 }, I_TOLENGTH+1, N_("Length"), N_("Length"), Dim_e } };
 static signed char SingleSlipPaths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 3, 4, 0, 0,
 		'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 5, 4, 0, 0, 0 };
@@ -346,7 +347,7 @@ static toDesignSchema_t SingleSlipSchema = {
 		"040" "410" "250" "530" "451" };
 static toDesignDesc_t SingleSlipDesc = {
 		NTO_S_SLIP,
-		"Single Slipswitch",
+		N_("Single Slipswitch"),
 		1,
 		sizeof SingleSlipLines/sizeof SingleSlipLines[0], SingleSlipLines,
 		sizeof SingleSlipFloats/sizeof SingleSlipFloats[0], SingleSlipFloats,
@@ -356,9 +357,9 @@ static wLines_t DoubleSlipLines[] = {
 #include "todslip.lin"
 		};
 static toDesignFloat_t DoubleSlipFloats[] = {
-{ { 329, 30 }, I_TOLENGTH+0, "Length", "Length", Dim_e },
-{ { 370, 90 }, I_TOANGLE+0, "Angle", "Angle", Frog_e },
-{ { 329, 155 }, I_TOLENGTH+1, "Length", "Length", Dim_e } };
+{ { 329, 30 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
+{ { 370, 90 }, I_TOANGLE+0, N_("Angle"), N_("Angle"), Frog_e },
+{ { 329, 155 }, I_TOLENGTH+1, N_("Length"), N_("Length"), Dim_e } };
 static signed char DoubleSlipPaths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 3, 0, 4, 5, 6, 0, 0,
 		'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 7, 6, 0, 4, 8, 3, 0, 0, 0 };
@@ -367,7 +368,7 @@ static toDesignSchema_t DoubleSlipSchema = {
 		"040" "460" "610" "270" "750" "530" "451" "762" };
 static toDesignDesc_t DoubleSlipDesc = {
 		NTO_D_SLIP,
-		"Double Slipswitch",
+		N_("Double Slipswitch"),
 		1,
 		sizeof DoubleSlipLines/sizeof DoubleSlipLines[0], DoubleSlipLines,
 		sizeof DoubleSlipFloats/sizeof DoubleSlipFloats[0], DoubleSlipFloats,
@@ -377,8 +378,8 @@ static wLines_t RightCrossoverLines[] = {
 #include "torcross.lin"
 		};
 static toDesignFloat_t RightCrossoverFloats[] = {
-{ { 200, 10 }, I_TOLENGTH+0, "Length", "Length", Dim_e },
-{ { 90, 85 }, I_TOOFFSET+0, "Separation", "Separation", Dim_e } };
+{ { 200, 10 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
+{ { 90, 85 }, I_TOOFFSET+0, N_("Separation"), N_("Separation"), Dim_e } };
 static signed char RightCrossoverPaths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 3, 4, 0, 0,
 		'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 3, 5, 6, 7, 2, 0, 0, 0 };
@@ -387,7 +388,7 @@ static toDesignSchema_t RightCrossoverSchema = {
 		"060" "610" "280" "830" "892" "970" "761" };
 static toDesignDesc_t RightCrossoverDesc = {
 		NTO_R_CROSSOVER,
-		"Right Crossover",
+		N_("Right Crossover"),
 		1,
 		sizeof RightCrossoverLines/sizeof RightCrossoverLines[0], RightCrossoverLines,
 		sizeof RightCrossoverFloats/sizeof RightCrossoverFloats[0], RightCrossoverFloats,
@@ -397,8 +398,8 @@ static wLines_t LeftCrossoverLines[] = {
 #include "tolcross.lin"
 		};
 static toDesignFloat_t LeftCrossoverFloats[] = {
-{ { 200, 10 }, I_TOLENGTH+0, "Length", "Length", Dim_e },
-{ { 90, 85 }, I_TOOFFSET+0, "Separation", "Separation", Dim_e } };
+{ { 200, 10 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
+{ { 90, 85 }, I_TOOFFSET+0, N_("Separation"), N_("Separation"), Dim_e } };
 static signed char LeftCrossoverPaths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 0, 3, 4, 0, 0,
 		'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 5, 6, 7, 4, 0, 0, 0 };
@@ -407,7 +408,7 @@ static toDesignSchema_t LeftCrossoverSchema = {
 		"040" "410" "2A0" "A30" "451" "5B0" "BA2" };
 static toDesignDesc_t LeftCrossoverDesc = {
 		NTO_L_CROSSOVER,
-		"Left Crossover",
+		N_("Left Crossover"),
 		1,
 		sizeof LeftCrossoverLines/sizeof LeftCrossoverLines[0], LeftCrossoverLines,
 		sizeof LeftCrossoverFloats/sizeof LeftCrossoverFloats[0], LeftCrossoverFloats,
@@ -417,8 +418,8 @@ static wLines_t DoubleCrossoverLines[] = {
 #include "todcross.lin"
 		};
 static toDesignFloat_t DoubleCrossoverFloats[] = {
-{ { 200, 10 }, I_TOLENGTH+0, "Length", "Length", Dim_e },
-{ { 90, 85 }, I_TOOFFSET+0, "Separation", "Separation", Dim_e } };
+{ { 200, 10 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e },
+{ { 90, 85 }, I_TOOFFSET+0, N_("Separation"), N_("Separation"), Dim_e } };
 static signed char DoubleCrossoverPaths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 2, 3, 0, 4, 5, 6, 0, 0,
 		'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 7, 8, 9, 6, 0, 4, 10, 11, 12, 3, 0, 0, 0 };
@@ -427,7 +428,7 @@ static toDesignSchema_t DoubleCrossoverSchema = {
 		"040" "460" "610" "280" "8A0" "A30" "451" "5B0" "BA2" "892" "970" "761" };
 static toDesignDesc_t DoubleCrossoverDesc = {
 		NTO_D_CROSSOVER,
-		"Double Crossover",
+		N_("Double Crossover"),
 		1,
 		sizeof DoubleCrossoverLines/sizeof DoubleCrossoverLines[0], DoubleCrossoverLines,
 		sizeof DoubleCrossoverFloats/sizeof DoubleCrossoverFloats[0], DoubleCrossoverFloats,
@@ -437,7 +438,7 @@ static wLines_t StrSectionLines[] = {
 #include "tostrsct.lin"
 		};
 static toDesignFloat_t StrSectionFloats[] = {
-{ { 200, 10 }, I_TOLENGTH+0, "Length", "Length", Dim_e } };
+{ { 200, 10 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e } };
 static signed char StrSectionPaths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 0, 0 };
 static toDesignSchema_t StrSectionSchema = {
@@ -445,7 +446,7 @@ static toDesignSchema_t StrSectionSchema = {
 		"010" };
 static toDesignDesc_t StrSectionDesc = {
 		NTO_STR_SECTION,
-		"Straight Section",
+		N_("Straight Section"),
 		1,
 		sizeof StrSectionLines/sizeof StrSectionLines[0], StrSectionLines,
 		sizeof StrSectionFloats/sizeof StrSectionFloats[0], StrSectionFloats,
@@ -455,8 +456,8 @@ static wLines_t CrvSectionLines[] = {
 #include "tocrvsct.lin"
 		};
 static toDesignFloat_t CrvSectionFloats[] = {
-{ { 225, 90 }, I_TOLENGTH+0, "Radius", "Radius", Dim_e },
-{ { 225, 140}, I_TOANGLE+0, "Angle (Degrees)", "Angle", Angle_e } };
+{ { 225, 90 }, I_TOLENGTH+0, N_("Radius"), N_("Radius"), Dim_e },
+{ { 225, 140}, I_TOANGLE+0, N_("Angle (Degrees)"), N_("Angle"), Angle_e } };
 static signed char CrvSectionPaths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 0, 0 };
 static toDesignSchema_t CrvSectionSchema = {
@@ -464,7 +465,7 @@ static toDesignSchema_t CrvSectionSchema = {
 		"011" };
 static toDesignDesc_t CrvSectionDesc = {
 		NTO_CRV_SECTION,
-		"Curved Section",
+		N_("Curved Section"),
 		1,
 		sizeof CrvSectionLines/sizeof CrvSectionLines[0], CrvSectionLines,
 		sizeof CrvSectionFloats/sizeof CrvSectionFloats[0], CrvSectionFloats,
@@ -475,7 +476,7 @@ static wLines_t BumperLines[] = {
 #include "tostrsct.lin"
 		};
 static toDesignFloat_t BumperFloats[] = {
-{ { 200, 10 }, I_TOLENGTH+0, "Length", "Length", Dim_e } };
+{ { 200, 10 }, I_TOLENGTH+0, N_("Length"), N_("Length"), Dim_e } };
 static signed char BumperPaths[] = {
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 0, 0, 0 };
 static toDesignSchema_t BumperSchema = {
@@ -483,7 +484,7 @@ static toDesignSchema_t BumperSchema = {
 		"010" };
 static toDesignDesc_t BumperDesc = {
 		NTO_BUMPER,
-		"Bumper Section",
+		N_("Bumper Section"),
 		1,
 		sizeof StrSectionLines/sizeof StrSectionLines[0], StrSectionLines,
 		sizeof BumperFloats/sizeof BumperFloats[0], BumperFloats,
@@ -493,9 +494,9 @@ static wLines_t TurntableLines[] = {
 #include "tostrsct.lin"
 		};
 static toDesignFloat_t TurntableFloats[] = {
-{ { 200, 10 }, I_TOOFFSET+0, "Offset", "Count", 0 },
-{ { 200, 10 }, I_TOLENGTH+0, "Length", "Radius1", Dim_e },
-{ { 200, 10 }, I_TOLENGTH+1, "Length", "Radius2", Dim_e } };
+{ { 200, 10 }, I_TOOFFSET+0, N_("Offset"), N_("Count"), 0 },
+{ { 200, 10 }, I_TOLENGTH+0, N_("Length"), N_("Radius1"), Dim_e },
+{ { 200, 10 }, I_TOLENGTH+1, N_("Length"), N_("Radius2"), Dim_e } };
 static signed char TurntablePaths[] = {
 		'1', 0, 1, 0, 0,
 		'2', 0, 2, 0, 0,
@@ -575,7 +576,7 @@ static toDesignSchema_t TurntableSchema = {
 		"010" "020" "030" "040" "050" "060" "070" "080" "090" "0A0" "0B0" };
 static toDesignDesc_t TurntableDesc = {
 		NTO_TURNTABLE,
-		"Turntable Section",
+		N_("Turntable Section"),
 		1,
 		sizeof StrSectionLines/sizeof StrSectionLines[0], StrSectionLines,
 		sizeof TurntableFloats/sizeof TurntableFloats[0], TurntableFloats,
@@ -1036,7 +1037,7 @@ static BOOL_T ComputeCurve(
 	FindIntersection( &Px, *p0, 90.0, Pf, 90.0-angle );
 	d = FindDistance( Px, Pf )-newTurnTrackGauge;
 	if (Px.x < newTurnTrackGauge || d < 0.0) {
-		NoticeMessage( MSG_TODSGN_NO_CONVERGE, "Ok", NULL );
+		NoticeMessage( MSG_TODSGN_NO_CONVERGE, _("Ok"), NULL );
 		return FALSE;
 	}
 	if (Px.x-newTurnTrackGauge < d)
@@ -1084,7 +1085,7 @@ static toDesignSchema_t * LoadSegs(
 		DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 		for ( i=0; i<dp->floatCnt; i++ )
 			if ( *(FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP) == 0.0 ) {
-				NoticeMessage( MSG_TODSGN_VALUES_GTR_0, "Ok", NULL );
+				NoticeMessage( MSG_TODSGN_VALUES_GTR_0, _("Ok"), NULL );
 				return NULL;
 			}
 
@@ -1197,7 +1198,7 @@ static toDesignSchema_t * LoadSegs(
 			DYNARR_SET( trkEndPt_t, tempEndPts_da, 4 );
 			d = (newTurnLen1)/2.0 - newTurnTrackGauge;
 			if (d < 0.0) {
-				NoticeMessage( MSG_TODSGN_CROSSOVER_TOO_SHORT, "Ok", NULL );
+				NoticeMessage( MSG_TODSGN_CROSSOVER_TOO_SHORT, _("Ok"), NULL );
 				return NULL;
 			}
 			angle1 = R2D( atan2( (newTurnOff1), d ) );
@@ -1407,11 +1408,11 @@ static void NewTurnPrint(
 			wDrawString( newTurnout_d.d, POSX(3.0),
 						POSY(6.75), 0.0, message, fp, 40,
 						wDrawColorBlack, 0 );
-			sprintf( message, "%s Designer", curDesign->label );
+			sprintf( message, _("%s Designer"), _(curDesign->label) );
 			wDrawString( newTurnout_d.d, POSX(3.0),
 						POSY(6.25), 0.0, message, fp, 30,
 						wDrawColorBlack, 0 );
-			sprintf( message, "Page %d x %d (of %d x %d)", i+1, j+1, ii, jj );
+			sprintf( message, "%s %d x %d (of %d x %d)", _("Page"), i+1, j+1, ii, jj );
 			wDrawString( newTurnout_d.d, POSX(3.0),
 						POSY(5.75), 0.0, message, fp, 20,
 						wDrawColorBlack, 0 );
@@ -1419,7 +1420,7 @@ static void NewTurnPrint(
 			for ( p=0; p<curDesign->floatCnt; p++ ) {
 				tmpR = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[p].index].valueP);
 				sprintf( message, "%s: %s",
-						(curDesign->floats[p].mode!=Frog_e||newTurnAngleMode!=0)?curDesign->floats[p].printLabel:"Frog Number",
+						(curDesign->floats[p].mode!=Frog_e||newTurnAngleMode!=0)?_(curDesign->floats[p].printLabel):_("Frog Number"),
 						curDesign->floats[p].mode==Dim_e?
 							 FormatDistance(tmpR):
 							 FormatFloat(tmpR) );
@@ -1490,13 +1491,14 @@ static void NewTurnOk( void * context )
 	FLOAT_T flt;
 	wIndex_t segCnt;
 	char * customInfoP;
-	
+	char *oldLocale = NULL;
+
 	if ((pp=LoadSegs( curDesign, TRUE, &pathLen )) == NULL)
 		return;
 
 	if ( (curDesign->strCnt >= 1 && newTurnLeftDesc[0] == 0) ||
 		 (curDesign->strCnt >= 2 && newTurnRightDesc[0] == 0) ) {
-		NoticeMessage( MSG_TODSGN_DESC_NONBLANK, "Ok", NULL );
+		NoticeMessage( MSG_TODSGN_DESC_NONBLANK, _("Ok"), NULL );
 		return;
 	}
 
@@ -1504,9 +1506,10 @@ static void NewTurnOk( void * context )
 #ifndef MKTURNOUT
 	if ( customTurnout1 == NULL &&
 		 ( foundR || FindCompound( FIND_TURNOUT, newTurnScaleName, message ) ) ) {
-		if ( !NoticeMessage( MSG_TODSGN_REPLACE, "Yes", "No" ) )
+		if ( !NoticeMessage( MSG_TODSGN_REPLACE, _("Yes"), _("No") ) )
 			return;
 	}
+	oldLocale = SaveLocale("C");
 #endif
 
 	f = OpenCustom("a");
@@ -1643,6 +1646,7 @@ static void NewTurnOk( void * context )
 #ifndef MKTURNOUT
 	if (f)
 		fclose(f);
+	RestoreLocale(oldLocale);
 	includeNontrackSegments = TRUE;
 	wHide( newTurnW );
 	DoChangeNotification( CHANGE_PARAMS );
@@ -1701,7 +1705,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		turnDesignPLs[I_TORDESC+1].winData =
 			(void*)partnoWidth;
 		partnoWidth += wLabelWidth( " # " );
-		newTurnW = ParamCreateDialog( &turnDesignPG, "Turnout Designer", "Print", NewTurnPrint, NewTurnCancel, TRUE, TurnDesignLayout, F_BLOCK, NULL );
+		newTurnW = ParamCreateDialog( &turnDesignPG, _("Turnout Designer"), _("Print"), NewTurnPrint, NewTurnCancel, TRUE, TurnDesignLayout, F_BLOCK, NULL );
 		for ( inx=0; inx<(sizeof designDescs/sizeof designDescs[0]); inx++ ) {
 			designDescs[inx]->lineC = wLineCreate( turnDesignPG.win, NULL, designDescs[inx]->lineCnt, designDescs[inx]->lines );
 			wControlShow( (wControl_p)designDescs[inx]->lineC, FALSE );
@@ -1711,7 +1715,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		if ( curDesign )
 			wControlShow( (wControl_p)curDesign->lineC, FALSE );
 		curDesign = newDesign;
-		sprintf( message, "%s %s Designer", sProdName, curDesign->label );
+		sprintf( message, _("%s %s Designer"), sProdName, _(curDesign->label) );
 		wWinSetTitle( newTurnW, message );
 		for ( inx=I_TO_FIRST_FLOAT; inx<=I_TO_LAST_FLOAT; inx++ ) {
 			turnDesignPLs[inx].option |= PDO_DLGIGNORE;
@@ -1719,7 +1723,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		}
 		for ( inx=0; inx<curDesign->floatCnt; inx++ ) {
 			turnDesignPLs[curDesign->floats[inx].index].option &= ~PDO_DLGIGNORE;
-			wControlSetLabel( turnDesignPLs[curDesign->floats[inx].index].control, curDesign->floats[inx].winLabel );
+			wControlSetLabel( turnDesignPLs[curDesign->floats[inx].index].control, _(curDesign->floats[inx].winLabel) );
 			wControlShow( turnDesignPLs[curDesign->floats[inx].index].control, TRUE );
 		}
 		wControlShow( turnDesignPLs[I_TORDESC+0].control, curDesign->strCnt>1 );
@@ -1747,15 +1751,15 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 				turnDesignHeight = h;
 		}
 		if ( curDesign->strCnt > 1 ) {
-			w = wLabelWidth( "Right Description" );
-			wControlSetLabel( turnDesignPLs[I_TOLDESC].control, "Left Description" );
-			turnDesignPLs[I_TOLDESC].winLabel = "Left Description";
+			w = wLabelWidth( _("Right Description") );
+			wControlSetLabel( turnDesignPLs[I_TOLDESC].control, _("Left Description") );
+			turnDesignPLs[I_TOLDESC].winLabel = N_("Left Description");
 			turnDesignPLs[I_TORDESC+0].option &= ~PDO_DLGIGNORE;
 			turnDesignPLs[I_TORDESC+1].option &= ~PDO_DLGIGNORE;
 		} else {
-			w = wLabelWidth( "Manufacturer" );
-			wControlSetLabel( turnDesignPLs[I_TOLDESC].control, "Description" );
-			turnDesignPLs[I_TOLDESC].winLabel = "Description";
+			w = wLabelWidth( _("Manufacturer") );
+			wControlSetLabel( turnDesignPLs[I_TOLDESC].control, _("Description") );
+			turnDesignPLs[I_TOLDESC].winLabel = N_("Description");
 			turnDesignPLs[I_TORDESC+0].option |= PDO_DLGIGNORE;
 			turnDesignPLs[I_TORDESC+1].option |= PDO_DLGIGNORE;
 		}
@@ -1780,7 +1784,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 static void ShowTurnoutDesigner( void * context )
 {
 	if (recordF)
-		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", ((toDesignDesc_t*)context)->label );
+		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", _(((toDesignDesc_t*)context)->label) );
 	newTurnScaleName = curScaleName;
 	newTurnTrackGauge = trackGauge;
 	SetupTurnoutDesignerW( (toDesignDesc_t*)context );
@@ -1820,7 +1824,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 		return;
 	for ( i=0; i<(sizeof designDescs/sizeof designDescs[0]); i++ ) {
 		dp = designDescs[i];
-		if ( strcmp( type, dp->label ) == 0 ) {
+		if ( strcmp( type, _(dp->label) ) == 0 ) {
 			break;
 		}
 	}
@@ -1981,7 +1985,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 
 	includeNontrackSegments = TRUE;
 	if ( segsDiff ) {
-		if ( NoticeMessage( MSG_SEGMENTS_DIFFER, "Yes", "No" ) <= 0 ) {
+		if ( NoticeMessage( MSG_SEGMENTS_DIFFER, _("Yes"), _("No") ) <= 0 ) {
 			includeNontrackSegments = FALSE;
 		}
 	} else {
@@ -2000,9 +2004,9 @@ EXPORT void InitNewTurn( wMenu_p m )
 	int i;
 	ParamRegister( &turnDesignPG );
 	for ( i=0; i<(sizeof designDescs/sizeof designDescs[0]); i++ ) {
-		wMenuPushCreate( m, NULL, designDescs[i]->label, 0,
+		wMenuPushCreate( m, NULL, _(designDescs[i]->label), 0,
 				ShowTurnoutDesigner, (void*)designDescs[i] );
-		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, designDescs[i]->label );
+		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, _(designDescs[i]->label) );
 		AddPlaybackProc( message, (playbackProc_p)ShowTurnoutDesigner, designDescs[i] );
 	}
 	roadbedColor = wDrawColorBlack;
@@ -2058,7 +2062,7 @@ int NoticeMessage( char * msg, char * yes, char * no, ... )
 	return 0;
 }
 
-FILE * OpenCustom( char * mode )
+FILE * OpenCustom( char * mode)
 {
 	return stdout;
 }

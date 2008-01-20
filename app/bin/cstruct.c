@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstruct.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstruct.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  *
  * T_STRUCTURE
  *
@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include "track.h"
 #include "compound.h"
+#include "i18n.h"
 
 EXPORT TRKTYP_T T_STRUCTURE = -1;
 
@@ -58,9 +59,9 @@ static long hideStructureWindow;
 static void RedrawStructure(void);
 
 static wPos_t structureListWidths[] = { 80, 80, 220 };
-static const char * structureListTitles[] = { "Manufacturer", "Part No", "Description" };
+static const char * structureListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
 static paramListData_t listData = { 13, 400, 3, structureListWidths, structureListTitles };
-static const char * hideLabels[] = { "Hide", NULL };
+static const char * hideLabels[] = { N_("Hide"), NULL };
 static paramDrawData_t structureDrawData = { 490, 200, (wDrawRedrawCallBack_p)RedrawStructure, NULL, &structureD };
 static paramData_t structurePLs[] = {
 #define I_LIST	(0)
@@ -315,7 +316,7 @@ static trackCmd_t structureCmds = {
 		FlipCompound };
 
 static paramData_t pierPLs[] = {
-	{	PD_DROPLIST, &pierListInx, "inx", 0, (void*)50, "Pier Number" } };
+	{	PD_DROPLIST, &pierListInx, "inx", 0, (void*)50, N_("Pier Number") } };
 static paramGroup_t pierPG = { "structure-pier", 0, pierPLs, sizeof pierPLs/sizeof pierPLs[0] };
 #define pierL ((wList_p)pierPLs[0].control)
 
@@ -342,7 +343,7 @@ static void ShowPierL( void )
 		wListSetIndex( pierL, currInx );
 		controls[0] = (wControl_p)pierL;
 		controls[1] = NULL;
-		labels[0] = "Pier Number";
+		labels[0] = N_("Pier Number");
 		InfoSubstituteControls( controls, labels );
 	} else {
 		InfoSubstituteControls( NULL, NULL );
@@ -427,11 +428,11 @@ LOG( log_structure, 2, ( "SelStructure(%s)\n", (curStructure?curStructure->title
 	structureD.orig.y = (curStructure->size.y + curStructure->orig.y) - structureD.size.y + trackGauge;
 	DrawSegs( &structureD, zero, 0.0, curStructure->segs, curStructure->segCnt,
 					 0.0, wDrawColorBlack );
-	sprintf( message, "Scale %d:1", (int)structureD.scale );
+	sprintf( message, _("Scale %d:1"), (int)structureD.scale );
 	ParamLoadMessage( &structurePG, I_MSGSCALE, message );
-	sprintf( message, "Width %s", FormatDistance(curStructure->size.x) );
+	sprintf( message, _("Width %s"), FormatDistance(curStructure->size.x) );
 	ParamLoadMessage( &structurePG, I_MSGWIDTH, message );
-	sprintf( message, "Height %s", FormatDistance(curStructure->size.y) );
+	sprintf( message, _("Height %s"), FormatDistance(curStructure->size.y) );
 	ParamLoadMessage( &structurePG, I_MSGHEIGHT, message );
 }
 
@@ -529,7 +530,7 @@ static void NewStructure( void )
 	}
 	DrawSegs( &tempD, Dst.pos, Dst.angle,
 		curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
-	UndoStart( "Place Structure", "newStruct" );
+	UndoStart( _("Place Structure"), "newStruct" );
 	titleLen = strlen( curStructure->title );
 	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, 0, "", curStructure->segCnt, curStructure->segs );
 	xx = GetTrkExtraData(trk);
@@ -639,7 +640,7 @@ EXPORT STATUS_T CmdStructureAction(
 		Dst.state = 1;
 		DrawSegs( &tempD, Dst.pos, Dst.angle,
 					curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
-		InfoMessage( "Drag to place" );
+		InfoMessage( _("Drag to place") );
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -666,7 +667,7 @@ EXPORT STATUS_T CmdStructureAction(
 					curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
 		origPos = Dst.pos;
 		origAngle = Dst.angle;
-		InfoMessage( "Drag to rotate" );
+		InfoMessage( _("Drag to rotate") );
 		validAngle = FALSE;
 		return C_CONTINUE;
 
@@ -687,7 +688,7 @@ EXPORT STATUS_T CmdStructureAction(
 			Dst.angle = NormalizeAngle( origAngle + angle );
 			Rotate( &Dst.pos, rot0, angle );
 		}
-		InfoMessage( "Angle = %0.3f", Dst.angle );
+		InfoMessage( _("Angle = %0.3f"), Dst.angle );
 		DrawLine( &tempD, rot0, rot1, 0, wDrawColorBlack );
 		DrawSegs( &tempD, Dst.pos, Dst.angle,
 				curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
@@ -755,7 +756,7 @@ static STATUS_T CmdStructure(
 
 	case C_START:
 		if (structureW == NULL) {
-			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle("Structure"), "Ok", (paramActionOkProc)DoStructOk, (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE, StructureDlgUpdate );
+			structureW = ParamCreateDialog( &structurePG, MakeWindowTitle(_("Structure")), _("Ok"), (paramActionOkProc)DoStructOk, (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE, StructureDlgUpdate );
 			RegisterChangeNotification( structureChange );
 		}
 		ParamDialogOkActive( &structurePG, FALSE );
@@ -764,7 +765,7 @@ static STATUS_T CmdStructure(
 		wShow( structureW );
 		structureChange( CHANGE_PARAMS );
 		if (curStructure == NULL) {
-			NoticeMessage( MSG_STRUCT_NO_STRUCTS, "Ok", NULL );
+			NoticeMessage( MSG_STRUCT_NO_STRUCTS, _("Ok"), NULL );
 			return C_TERMINATE;
 		}
 		if (structureIndex > 0 && structurePtr) {
@@ -772,7 +773,7 @@ static STATUS_T CmdStructure(
 			wListSetIndex( structureListL, structureIndex );
 			RedrawStructure();
 		}
-		InfoMessage( "Select Structure and then drag to place");
+		InfoMessage( _("Select Structure and then drag to place"));
 		ParamLoadControls( &structurePG );
 		ParamGroupRecord( &structurePG );
 		return CmdStructureAction( action, pos );
@@ -790,7 +791,7 @@ static STATUS_T CmdStructure(
 	case C_UP:
 		if (hideStructureWindow)
 			wShow( structureW );
-		InfoMessage( "Left drag to move, right drag to rotate, or press Return or click Ok to finalize" );
+		InfoMessage( _("Left drag to move, right drag to rotate, or press Return or click Ok to finalize") );
 		return CmdStructureAction( action, pos );
 		return C_CONTINUE;
 
@@ -866,18 +867,18 @@ static STATUS_T CmdStructureHotBar(
 	case C_START:
 		structureChange( CHANGE_PARAMS );
 		if (curStructure == NULL) {
-			NoticeMessage( MSG_STRUCT_NO_STRUCTS, "Ok", NULL );
+			NoticeMessage( MSG_STRUCT_NO_STRUCTS, _("Ok"), NULL );
 			return C_TERMINATE;
 		}
 		FormatCompoundTitle( listLabels|LABEL_DESCR, curStructure->title );
-		InfoMessage( "Place %s and draw into position", message );
+		InfoMessage( _("Place %s and draw into position"), message );
 		ParamLoadControls( &structurePG );
 		ParamGroupRecord( &structurePG );
 		return CmdStructureAction( action, pos );
 
 	case C_RUP:
 	case C_UP:
-		InfoMessage( "Left drag to move, right drag to rotate, or press Return or click Ok to finalize" );
+		InfoMessage( _("Left drag to move, right drag to rotate, or press Return or click Ok to finalize") );
 		return CmdStructureAction( action, pos );
 
 	case C_TEXT:
@@ -900,7 +901,7 @@ static STATUS_T CmdStructureHotBar(
 
 EXPORT void InitCmdStruct( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdStructure, "cmdStructure", "Structure", wIconCreatePixMap(struct_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
+	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"), wIconCreatePixMap(struct_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
 	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar, "cmdStructureHotBar", "", NULL, LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, 0, NULL );
 	ParamRegister( &structurePG );
 }

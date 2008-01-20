@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dprmfile.c,v 1.1 2005-12-07 15:47:36 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dprmfile.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,7 @@
 
 #include <time.h>
 #include "track.h"
+#include "i18n.h"
 
 /****************************************************************************
  *
@@ -83,7 +84,7 @@ static BOOL_T UpdateParamFiles( void )
 	if ( updateF == NULL )
 		return FALSE;
 	if ( fgets( message, sizeof message, updateF ) == NULL ) {
-		NoticeMessage( "short file: xtrkcad.upd", "Ok", NULL ); 
+		NoticeMessage( "short file: xtrkcad.upd", _("Ok"), NULL ); 
 		return FALSE;
 	}
 	wPrefGetInteger( "file", "updatetime", &lastTime, 0 );
@@ -94,10 +95,10 @@ static BOOL_T UpdateParamFiles( void )
 	fileNameP = fileName+strlen(fileName);
 	while ( ( fgets( fileNameP, (fileName+sizeof fileName)-fileNameP, updateF ) ) != NULL ) {
 		Stripcr( fileNameP );
-		InfoMessage( "Updating %s", fileNameP );
+		InfoMessage( _("Updating %s"), fileNameP );
 		paramF = fopen( fileName, "r" );
 		if ( paramF == NULL ) {
-			NoticeMessage( MSG_PRMFIL_OPEN_NEW, "Ok", NULL, fileName );
+			NoticeMessage( MSG_PRMFIL_OPEN_NEW, _("Ok"), NULL, fileName );
 			continue;
 		}
 		contents = NULL;
@@ -110,7 +111,7 @@ static BOOL_T UpdateParamFiles( void )
 		}
 		fclose( paramF );
 		if (contents == NULL) {
-			NoticeMessage( MSG_PRMFIL_NO_CONTENTS, "Ok", NULL, fileName );
+			NoticeMessage( MSG_PRMFIL_NO_CONTENTS, _("Ok"), NULL, fileName );
 			continue;
 		}
 		cp = wPrefGetString( "Parameter File Map", contents );
@@ -152,7 +153,7 @@ EXPORT void ReadParamFiles( void )
 		InfoMessage( "Parameters for %s", contents );
 		fileName = wPrefGetString( "Parameter File Map", contents );
 		if (fileName==NULL || *fileName=='\0') {
-			NoticeMessage( MSG_PRMFIL_NO_MAP, "Ok", NULL, contents );
+			NoticeMessage( MSG_PRMFIL_NO_MAP, _("Ok"), NULL, contents );
 			continue;
 		}
 		DYNARR_APPEND( paramFileInfo_t, paramFileInfo_da, 10 );
@@ -213,7 +214,7 @@ static void ParamFileAction( void * );
 static void ParamFileBrowse( void * );
 
 static paramListData_t paramFileListData = { 10, 370 };
-static char * paramFileLabels[] = { "Show File Names", NULL };
+static char * paramFileLabels[] = { N_("Show File Names"), NULL };
 static paramData_t paramFilePLs[] = {
 #define I_PRMFILLIST	(0)
 #define paramFileL				((wList_p)paramFilePLs[I_PRMFILLIST].control)
@@ -222,8 +223,8 @@ static paramData_t paramFilePLs[] = {
 	{	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_PRMFILACTION	(2)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
-	{	PD_BUTTON, ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, "Unload" },
-	{	PD_BUTTON, ParamFileBrowse, "browse", 0, NULL, "Browse ..." } };
+	{	PD_BUTTON, ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_("Unload") },
+	{	PD_BUTTON, ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") } };
 
 static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };
 
@@ -326,7 +327,7 @@ static void UpdateParamFileButton(
 	if (fileInx < 0 || fileInx >= paramFileInfo_da.cnt)
 		return;
 	wButtonSetLabel( paramFileActionB,
-		paramFileInfo(fileInx).deleted?"Reload":"Unload" );
+		paramFileInfo(fileInx).deleted?_("Reload"):_("Unload") );
 }
 
 
@@ -427,8 +428,8 @@ static void DoParamFiles( void * junk )
 			strcpy( curParamDir, libDir );
 		mtbox_bm = wIconCreateBitMap( mtbox_width, mtbox_height, mtbox_bits, drawColorBlack );
 		chkbox_bm = wIconCreateBitMap( chkbox_width, chkbox_height, chkbox_bits, drawColorBlack );
-		paramFileW = ParamCreateDialog( &paramFilePG, MakeWindowTitle("Parameter Files"), "Ok", ParamFileOk, ParamFileCancel, TRUE, NULL, 0, ParamFileDlgUpdate );
-		paramFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, "Load Parameters", "Parameter files|*.xtp", LoadParamFile, NULL );
+		paramFileW = ParamCreateDialog( &paramFilePG, MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, ParamFileCancel, TRUE, NULL, 0, ParamFileDlgUpdate );
+		paramFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Load Parameters"), _("Parameter files|*.xtp"), LoadParamFile, NULL );
 		ParamFileLoadList();
 	}
 	ParamLoadControls( &paramFilePG );

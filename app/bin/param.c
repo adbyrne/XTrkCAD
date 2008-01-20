@@ -1,7 +1,7 @@
 /** \file param.c
  * Handle all the dialog box creation stuff.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.5 2007-11-24 19:48:21 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.6 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -45,12 +45,14 @@
 #include <errno.h>
 #endif
 #include <stdarg.h>
+#include <locale.h>
 
 #include "track.h"
 #include "common.h"
 #include "utility.h"
 #include "misc.h"
 #include "compound.h"
+#include "i18n.h"
 
 
 /* Bogus reg vars */
@@ -86,56 +88,56 @@ typedef struct {
 		} colorTab_t[];
 
 static colorTab_t colorTab = {
-				{ wRGB(	 0,	 0,	 0), "Black" },
+				{ wRGB(	 0,	 0,	 0), N_("Black") },
 
-				{ wRGB(	 0,	 0,128), "Dark Blue" },
-				{ wRGB( 70,130,180), "Steel Blue" },
-				{ wRGB( 65,105,225), "Royal Blue" },
-				{ wRGB(	 0,	 0,255), "Blue" },
-				{ wRGB(	 0,191,255), "Deep Sky Blue" },
-				{ wRGB(125,206,250), "Light Sky Blue" },
-				{ wRGB(176,224,230), "Powder Blue" },
+				{ wRGB(	 0,	 0,128), N_("Dark Blue") },
+				{ wRGB( 70,130,180), N_("Steel Blue") },
+				{ wRGB( 65,105,225), N_("Royal Blue") },
+				{ wRGB(	 0,	 0,255), N_("Blue") },
+				{ wRGB(	 0,191,255), N_("Deep Sky Blue") },
+				{ wRGB(125,206,250), N_("Light Sky Blue") },
+				{ wRGB(176,224,230), N_("Powder Blue") },
 
-				{ wRGB(	 0,128,128), "Dark Aqua" },
-				{ wRGB(127,255,212), "Aquamarine" },
-				{ wRGB(	 0,255,255), "Aqua" },
+				{ wRGB(	 0,128,128), N_("Dark Aqua") },
+				{ wRGB(127,255,212), N_("Aquamarine") },
+				{ wRGB(	 0,255,255), N_("Aqua") },
 
-				{ wRGB(	 0,128,	 0), "Dark Green" },
-				{ wRGB( 34,139, 34), "Forest Green" },
-				{ wRGB( 50,205, 50), "Lime Green" },
-				{ wRGB(	 0,255,	 0), "Green" },
-				{ wRGB(124,252,	 0), "Lawn Green" },
-				{ wRGB(152,251,152), "Pale Green" },
+				{ wRGB(	 0,128,	 0), N_("Dark Green") },
+				{ wRGB( 34,139, 34), N_("Forest Green") },
+				{ wRGB( 50,205, 50), N_("Lime Green") },
+				{ wRGB(	 0,255,	 0), N_("Green") },
+				{ wRGB(124,252,	 0), N_("Lawn Green") },
+				{ wRGB(152,251,152), N_("Pale Green") },
 
-				{ wRGB(128,128,	 0), "Dark Yellow" },
-				{ wRGB(255,127, 80), "Coral" },
-				{ wRGB(255,165,	 0), "Orange" },
-				{ wRGB(255,215,	 0), "Gold" },
-				{ wRGB(255,255,	 0), "Yellow" },
+				{ wRGB(128,128,	 0), N_("Dark Yellow") },
+				{ wRGB(255,127, 80), N_("Coral") },
+				{ wRGB(255,165,	 0), N_("Orange") },
+				{ wRGB(255,215,	 0), N_("Gold") },
+				{ wRGB(255,255,	 0), N_("Yellow") },
 
-				{ wRGB(139, 69, 19), "Saddle Brown" },
-				{ wRGB(165, 42, 42), "Brown" },
-				{ wRGB(210,105, 30), "Chocolate" },
-				{ wRGB(188,143,143), "Rosy Brown" },
-				{ wRGB(210,180,140), "Tan" },
-				{ wRGB(245,245,220), "Beige" },
+				{ wRGB(139, 69, 19), N_("Saddle Brown") },
+				{ wRGB(165, 42, 42), N_("Brown") },
+				{ wRGB(210,105, 30), N_("Chocolate") },
+				{ wRGB(188,143,143), N_("Rosy Brown") },
+				{ wRGB(210,180,140), N_("Tan") },
+				{ wRGB(245,245,220), N_("Beige") },
 
 
-				{ wRGB(128,	 0,	 0), "Dark Red" },
-				{ wRGB(255, 99, 71), "Tomato" },
-				{ wRGB(255,	 0,	 0), "Red" },
-				{ wRGB(255,105,180), "Hot Pink" },
-				{ wRGB(255,192,203), "Pink" },
+				{ wRGB(128,	 0,	 0), N_("Dark Red") },
+				{ wRGB(255, 99, 71), N_("Tomato") },
+				{ wRGB(255,	 0,	 0), N_("Red") },
+				{ wRGB(255,105,180), N_("Hot Pink") },
+				{ wRGB(255,192,203), N_("Pink") },
 
-				{ wRGB(128,	 0,128), "Dark Purple" },
-				{ wRGB(176, 48, 96), "Maroon" },
-				{ wRGB(160, 32,240), "Purple2" },
-				{ wRGB(255,	 0,255), "Purple" },
-				{ wRGB(238,130,238), "Violet" },
+				{ wRGB(128,	 0,128), N_("Dark Purple") },
+				{ wRGB(176, 48, 96), N_("Maroon") },
+				{ wRGB(160, 32,240), N_("Purple2") },
+				{ wRGB(255,	 0,255), N_("Purple") },
+				{ wRGB(238,130,238), N_("Violet") },
 
-				{ wRGB( 64, 64, 64), "Dark Gray" },
-				{ wRGB(128,128,128), "Gray" },
-				{ wRGB(192,192,192), "Light Gray" } };
+				{ wRGB( 64, 64, 64), N_("Dark Gray") },
+				{ wRGB(128,128,128), N_("Gray") },
+				{ wRGB(192,192,192), N_("Light Gray") } };
 static wIcon_p colorTabBitMaps[ sizeof colorTab/sizeof colorTab[0] ];
 #include "square10.bmp"
 
@@ -177,21 +179,21 @@ static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 	int len;
 	*numP = 0;
 	if ( cp == NULL ) {
-		getNumberError = "Unexpected End Of String";
+		getNumberError = N_("Unexpected End Of String");
 		return FALSE;
 	}
 	while ( isspace(*cp) ) cp++;
 	*numP = strtol( cp, &cq, 10 );
 	if ( cp==cq ) {
 		*cpp = cp;
-		getNumberError = "Expected digit";
+		getNumberError = N_("Expected digit");
 		return FALSE;
 	}
 	len = cq-cp;
 	if ( lenP )
 		*lenP = len;
 	if ( len > 9 ) {
-		getNumberError = "Overflow";
+		getNumberError = N_("Overflow");
 		return FALSE;
 	}
 	while ( isspace(*cq) ) cq++;
@@ -204,10 +206,17 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 	long n0=0, f1, f2;
 	int l1;
 	char * cp = NULL;
+	struct lconv *lc;
 
 	while ( isspace(**cpp) ) (*cpp)++;
-	if ( **cpp != '.' && !GetDigitStr( cpp, &n0, NULL ) ) return FALSE;
-	if ( **cpp == '.' ) {
+
+	/* Find out the decimal separator of the current locale */
+	lc = localeconv();
+
+	if ( **cpp != lc->decimal_point[0]
+			&& !GetDigitStr( cpp, &n0, NULL ) )
+		return FALSE;
+	if ( **cpp == lc->decimal_point[0] ) {
 		(*cpp)++;
 		if ( !isdigit(**cpp) ) {
 			*hasFract = FALSE;
@@ -232,7 +241,7 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 		if ( !GetDigitStr( cpp, &f2, &l1 ) ) return FALSE;
 		if ( f2 == 0 ) {
 			(*cpp) -= l1;
-			getNumberError = "Divide by 0";
+			getNumberError = N_("Divide by 0");
 			return FALSE; /* div by 0 */
 		}
 		*numP = ((FLOAT_T)n0)+((FLOAT_T)f1)/((FLOAT_T)f2);
@@ -240,7 +249,7 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 	} else {
 		if ( cp != NULL ) {
 			*cpp = cp;
-			getNumberError = "Expected /";
+			getNumberError = N_("Expected /");
 			return FALSE; /* 999 999 ?? */
 		} else {
 			*hasFract = FALSE;
@@ -298,7 +307,7 @@ static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
 	} else if ( tolower((*cpp)[0]) == 'i' && tolower((*cpp)[1]) == 'n' ) {
 		(*cpp) += 2;
 	} else {
-		getNumberError = "Invalid Units Indicator";
+		getNumberError = N_("Invalid Units Indicator");
 		return FALSE;
 	}
 	while ( isspace(**cpp) ) (*cpp)++;
@@ -312,7 +321,7 @@ static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
 		while ( isspace(**cpp) ) (*cpp)++;
 	}
 	if ( **cpp ) {
-		getNumberError = "Expected End Of String";
+		getNumberError = N_("Expected End Of String");
 		return FALSE;
 	}
 	if ( neg )
@@ -335,7 +344,7 @@ EXPORT FLOAT_T DecodeFloat(
 		valF = strtod( cp1, &cp2 );
 		if ( *cp2 != 0 ) {
 			/*wStringSetHilight( strCtrl, cp2-cp0, -1 );*/
-			sprintf( decodeErrorStr, "Invalid Number" );
+			sprintf( decodeErrorStr, _("Invalid Number") );
 			*validP = FALSE;
 			return 0.0;
 		}
@@ -383,7 +392,7 @@ EXPORT FLOAT_T DecodeDistance(
 			wStringSetValue( strCtrl, FormatDistance( valF ) );
 	} else {
 /*fprintf( stderr, "Gd( @%s ) error=%s\n", cp1, getNumberError );*/
-		sprintf( decodeErrorStr, "%s @ %s", getNumberError, *cp1?cp1:"End Of String" );
+		sprintf( decodeErrorStr, "%s @ %s", _(getNumberError), *cp1?cp1:_("End Of String") );
 		/*wStringSetHilight( strCtrl, cp1-cp0, -1 ); */
 		valF =	0.0;
 	}
@@ -621,7 +630,7 @@ EXPORT void ParamLoadControl(
 			p->oldD.s = MyStrdup( (char*)p->valueP );
 			break;
 		case PD_MESSAGE:
-			wMessageSetValue( (wMessage_p)p->control, (char*)p->valueP );
+			wMessageSetValue( (wMessage_p)p->control, _((char*)p->valueP) );
 			break;
 		case PD_TEXT:
 			wTextClear( (wText_p)p->control );
@@ -1359,18 +1368,18 @@ static void ParamIntegerPush( const char * val, void * dp )
 
 	wControlSetBalloon( p->control, 0, -5, NULL );
 	if ( val == cp ) {
-		wControlSetBalloon( p->control, 0, -5, "Invalid Number" );
+		wControlSetBalloon( p->control, 0, -5, _("Invalid Number") );
 		return;
 	}
 	irangeP = (paramIntegerRange_t*)p->winData;
 	if ( ( (irangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valL > irangeP->high ) ||
 		 ( (irangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valL < irangeP->low ) ) {
 		if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
-			sprintf( message, "Enter a value > %ld", irangeP->low );
+			sprintf( message, _("Enter a value > %ld"), irangeP->low );
 		else if ( (irangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_LOW )
-			 sprintf( message, "Enter a value < %ld", irangeP->high );
+			 sprintf( message, _("Enter a value < %ld"), irangeP->high );
 		else
-			 sprintf( message, "Enter a value between %ld and %ld", irangeP->low, irangeP->high );
+			 sprintf( message, _("Enter a value between %ld and %ld"), irangeP->low, irangeP->high );
 		wControlSetBalloon( p->control, 0, -5, message );
 		return;
 	}
@@ -1410,13 +1419,13 @@ static void ParamFloatPush( const char * val, void * dp )
 	if ( ( (frangeP->rangechecks&PDO_NORANGECHECK_HIGH) == 0 && valF > frangeP->high ) ||
 		 ( (frangeP->rangechecks&PDO_NORANGECHECK_LOW) == 0 && valF < frangeP->low ) ) {
 		if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_HIGH )
-			sprintf( message, "Enter a value > %s",
+			sprintf( message, _("Enter a value > %s"),
 				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low) );
 		else if ( (frangeP->rangechecks&(PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW)) == PDO_NORANGECHECK_LOW )
-			 sprintf( message, "Enter a value < %s",
+			 sprintf( message, _("Enter a value < %s"),
 				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
 		else
-			 sprintf( message, "Enter a value between %s and %s",
+			 sprintf( message, _("Enter a value between %s and %s"),
 				(p->option&PDO_DIM)?FormatDistance(frangeP->low):FormatFloat(frangeP->low),
 				(p->option&PDO_DIM)?FormatDistance(frangeP->high):FormatFloat(frangeP->high) );
 		wControlSetBalloon( p->control, 0, -5, message );
@@ -1785,7 +1794,7 @@ static void ParamPlayback( char * line )
 						} else {
 							valL = wListFindValue( (wList_p)p->control, valS );
 							if (valL < 0) {
-								NoticeMessage( MSG_PLAYBACK_LISTENTRY, "Ok", NULL, line );
+								NoticeMessage( MSG_PLAYBACK_LISTENTRY, _("Ok"), NULL, line );
 								break;
 							}
 							wListSetIndex( (wList_p)p->control, (wIndex_t)valL );
@@ -1907,10 +1916,10 @@ static void ParamPlayback( char * line )
 	}
 	ParamHilite( pg->win, (wControl_p)button, FALSE );
 	if ( !button )
-		NoticeMessage( "Unknown PARAM: %s", "Ok", NULL, line );
+		NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
 	return;
   }
-  NoticeMessage( "Unknown PARAM: %s", "Ok", NULL, line );
+  NoticeMessage( "Unknown PARAM: %s", _("Ok"), NULL, line );
 }
 
 
@@ -2025,20 +2034,20 @@ static void ParamCheck( char * line )
 		if ( hasError ) {
 			f = fopen( "error.log", "a" );
 			if ( f==NULL ) {
-				NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "PARAMCHECK LOG", "error.log", strerror(errno) );
+				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "PARAMCHECK LOG", "error.log", strerror(errno) );
 			} else {
 				fprintf( f, "CHECK: %s:%d: %s-%s: exp: %s, act=%s\n",
 						paramFileName, paramLineNum, pg->nameStr, p->nameStr, expVal, actVal );
 				fclose( f );
 			}
 			if ( paramCheckShowErrors )
-				NoticeMessage( "CHECK: %d: %s-%s: exp: %s, act=%s", "Ok", NULL, paramLineNum, pg->nameStr, p->nameStr, expVal, actVal );
+				NoticeMessage( "CHECK: %d: %s-%s: exp: %s, act=%s", _("Ok"), NULL, paramLineNum, pg->nameStr, p->nameStr, expVal, actVal );
 			paramCheckErrorCount++;
 		}
 		return;
 	 }
   }
-  NoticeMessage( "Unknown PARAMCHECK: %s", "Ok", NULL, line );
+  NoticeMessage( "Unknown PARAMCHECK: %s", _("Ok"), NULL, line );
 }
 
 /*
@@ -2077,22 +2086,22 @@ static void ParamCreateControl(
 		case PD_FLOAT:
 			floatRangeP = pd->winData;
 			w = floatRangeP->width?floatRangeP->width:100;
-			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption, w, NULL, 0, ParamFloatPush, pd );
+			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, NULL, 0, ParamFloatPush, pd );
 			break;
 		case PD_LONG:
 			integerRangeP = pd->winData;
 			w = integerRangeP->width?integerRangeP->width:100;
-			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
+			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, NULL, 0, ParamIntegerPush, pd );
 			break;
 		case PD_STRING:
 			w = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)250;
-			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush, pd );
+			pd->control = (wControl_p)wStringCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, w, (pd->option&PDO_NOPSHUPD)?NULL:pd->valueP, 0, ParamStringPush, pd );
 			break;
 		case PD_RADIO:
-			pd->control = (wControl_p)wRadioCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
+			pd->control = (wControl_p)wRadioCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
 			break;
 		case PD_TOGGLE:
-			pd->control = (wControl_p)wToggleCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
+			pd->control = (wControl_p)wToggleCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, pd->winData, NULL, ParamChoicePush, pd );
 			break;
 		case PD_LIST:
 			listDataP = (paramListData_t*)pd->winData;
@@ -2123,7 +2132,7 @@ static void ParamCreateControl(
 					}
 				}
 			}
-			pd->control = (wControl_p)wListCreate( win, xx, yy, helpStr, pd->winLabel,
+			pd->control = (wControl_p)wListCreate( win, xx, yy, helpStr, _(pd->winLabel),
 				pd->winOption, listDataP->number, listDataP->width, listDataP->colCnt,
 				(listDataP->colCnt>1?colWidths:NULL),
 				(listDataP->colCnt>1?colRightJust:NULL),
@@ -2132,34 +2141,34 @@ static void ParamCreateControl(
 			break;
 		case PD_DROPLIST:
 			w = pd->winData?(wPos_t)(long)pd->winData:(wPos_t)100;
-			pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption, 10, w, NULL, ParamListPush, pd );
+			pd->control = (wControl_p)wDropListCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 10, w, NULL, ParamListPush, pd );
 			break;
 		case PD_COMBOLIST:
 			listDataP = (paramListData_t*)pd->winData;
-			pd->control = (wControl_p)wComboListCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption, listDataP->number, listDataP->width, NULL, ParamListPush, pd );
+			pd->control = (wControl_p)wComboListCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, listDataP->number, listDataP->width, NULL, ParamListPush, pd );
 			listDataP->height = wControlGetHeight( pd->control );
 			break;
 		case PD_COLORLIST:
-			pd->control = (wControl_p)wColorSelectButtonCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption, 0, NULL, ParamColorSelectPush, pd );
+			pd->control = (wControl_p)wColorSelectButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd );
 			break;
 		case PD_MESSAGE:
 			if ( pd->winData > 0 )
 				w = (wPos_t)(long)pd->winData;
 			else if (pd->valueP)
-				w = wLabelWidth( pd->valueP );
+				w = wLabelWidth( _(pd->valueP) );
 			else
 				w = 150;
-			pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, pd->winLabel, w, pd->valueP?pd->valueP:" ", pd->winOption );
+			pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, _(pd->winLabel), w, pd->valueP?_(pd->valueP):" ", pd->winOption );
 			break;
 		case PD_BUTTON:
-			pd->control = (wControl_p)wButtonCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption, 0, ParamButtonPush, pd );
+			pd->control = (wControl_p)wButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, ParamButtonPush, pd );
 			break;
 		case PD_MENU:
-			menu = wMenuCreate( win, xx, yy, helpStr, pd->winLabel, pd->winOption );
+			menu = wMenuCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption );
 			pd->control = (wControl_p)menu;
 			break;
 		case PD_MENUITEM:
-			pd->control = (wControl_p)wMenuPushCreate( menu, helpStr, pd->winLabel, 0, ParamMenuPush, pd );
+			pd->control = (wControl_p)wMenuPushCreate( menu, helpStr, _(pd->winLabel), 0, ParamMenuPush, pd );
 			break;
 		case PD_DRAW:
 			drawDataP = pd->winData;
@@ -2320,7 +2329,7 @@ static void LayoutControls(
 			 pd->type!=PD_BUTTON &&
 			 pd->type!=PD_MENU &&
 			 pd->type!=PD_MENUITEM) {
-			w = wLabelWidth( pd->winLabel );
+			w = wLabelWidth( _(pd->winLabel) );
 			if ( w > controlK.orig.x )
 				controlK.orig.x = w;
 		}
@@ -2365,7 +2374,7 @@ static void LayoutControls(
 			else if ( (pd->option&PDO_DLGNARROW)== 0)
 				controlK.orig.x += 3;
 			if ( pd->winLabel && ( pd->type!=PD_BUTTON ) )
-				controlK.orig.x += wLabelWidth( pd->winLabel );
+				controlK.orig.x += wLabelWidth( _(pd->winLabel) );
 		} else if ( inx != 0 ) {
 			controlK.orig.x = columnK.orig.x + labelW[inx];
 			controlK.orig.y = controlK.term.y;
@@ -2540,7 +2549,7 @@ EXPORT wWin_p ParamCreateDialog(
 	char helpStr[STR_SHORT_SIZE];
 	wPos_t w0, h0;
 	wButton_p lastB = NULL;
-	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?"Close":"Cancel");
+	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
 
 	winOption &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
@@ -2567,7 +2576,7 @@ EXPORT wWin_p ParamCreateDialog(
 	if ( needHelpButton ) {
 		sprintf( helpStr, "cmd%s", group->nameStr );
 		helpStr[3] = toupper(helpStr[3]); 
-		lastB = group->helpB = wButtonCreate( group->win, 0, 0, NULL, "Help", BB_HELP, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
+		lastB = group->helpB = wButtonCreate( group->win, 0, 0, NULL, _("Help"), BB_HELP, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
 	}
 
 	LOG( log_hotspot, 1, ( "mkshg ${PNG2DIR}/%s.png ${SHGDIR}/%s.shg << EOF\n", group->nameStr, group->nameStr ) )

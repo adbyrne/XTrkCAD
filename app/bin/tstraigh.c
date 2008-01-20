@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tstraigh.c,v 1.1 2005-12-07 15:47:10 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tstraigh.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,7 @@
 
 #include "track.h"
 #include "cstraigh.h"
+#include "i18n.h"
 
 /*******************************************************************************
  *
@@ -72,15 +73,15 @@ static struct {
 		} strData;
 typedef enum { E0, Z0, E1, Z1, LN, AN, GR, PV, LY } strDesc_e;
 static descData_t strDesc[] = {
-/*E0*/	{ DESC_POS, "End Pt 1: X", &strData.endPt[0] },
-/*Z0*/	{ DESC_DIM, "Z", &strData.elev[0] },
-/*E1*/	{ DESC_POS, "End Pt 2: X", &strData.endPt[1] },
-/*Z1*/	{ DESC_DIM, "Z", &strData.elev[1] },
-/*LN*/	{ DESC_DIM, "Length", &strData.length },
-/*AN*/	{ DESC_ANGLE, "Angle", &strData.angle },
-/*GR*/	{ DESC_FLOAT, "Grade", &strData.grade },
-/*PV*/	{ DESC_PIVOT, "Pivot", &strData.pivot },
-/*LY*/	{ DESC_LAYER, "Layer", NULL },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &strData.endPt[0] },
+/*Z0*/	{ DESC_DIM, N_("Z"), &strData.elev[0] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &strData.endPt[1] },
+/*Z1*/	{ DESC_DIM, N_("Z"), &strData.elev[1] },
+/*LN*/	{ DESC_DIM, N_("Length"), &strData.length },
+/*AN*/	{ DESC_ANGLE, N_("Angle"), &strData.angle },
+/*GR*/	{ DESC_FLOAT, N_("Grade"), &strData.grade },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &strData.pivot },
+/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
 		{ DESC_NULL } };
 
 
@@ -220,7 +221,7 @@ static void UpdateStraight( track_p trk, int inx, descData_p descUpd, BOOL_T fin
 static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 {
 	int fix0, fix1;
-	sprintf( str, "Straight Track(%d): Layer=%d Length=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]", GetTrkIndex(trk),
+	sprintf( str, _("Straight Track(%d): Layer=%d Length=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"), GetTrkIndex(trk),
 		GetTrkLayer(trk)+1,
 		FormatDistance(FindDistance( GetTrkEndPos(trk,0), GetTrkEndPos(trk,1) )),
 		GetTrkEndPosXY(trk,0), GetTrkEndAngle(trk,0),
@@ -250,7 +251,7 @@ static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 				  fix0?DESC_PIVOT_FIRST:
 				  fix1?DESC_PIVOT_SECOND:
 				  DESC_PIVOT_MID;
-	DoDescribe( "Straight Track", trk, strDesc, UpdateStraight );
+	DoDescribe( _("Straight Track"), trk, strDesc, UpdateStraight );
 }
 
 static DIST_T DistanceStraight( track_p t, coOrd * p )
@@ -453,7 +454,7 @@ BOOL_T ExtendStraightToJoin(
 		if (aa > connectAngle)
 			return FALSE;
 	}
-	UndoStart( "Extending Straight Track", "ExtendStraightToJoin( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
+	UndoStart( _("Extending Straight Track"), "ExtendStraightToJoin( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
 	UndoModify( trk0 );
 	UndoModify( trk1 );
 	trk2 = trk0x = trk1x = NULL;
@@ -525,21 +526,21 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		tempSegs(0).width = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, 1-ep );
 		tempSegs_da.cnt = 1;
-		InfoMessage( "Drag to change track length" );
+		InfoMessage( _("Drag to change track length") );
 
 	case C_MOVE:
 		d = FindDistance( tempSegs(0).u.l.pos[0], pos );
 		valid = TRUE;
 		if ( d <= minLength ) {
 			if (action == C_MOVE)
-				ErrorMessage( MSG_TRK_TOO_SHORT, "Straight ", PutDim(fabs(minLength-d)) );
+				ErrorMessage( MSG_TRK_TOO_SHORT, _("Straight "), PutDim(fabs(minLength-d)) );
 			valid = FALSE;
 			return C_CONTINUE;
 		}
 		Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk, ep ), d );
 		tempSegs_da.cnt = 1;
 		if (action == C_MOVE)
-			InfoMessage( "Straight: Length=%s Angle=%0.3f",
+			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 					FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
 		return C_CONTINUE;
 

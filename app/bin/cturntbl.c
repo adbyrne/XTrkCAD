@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturntbl.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturntbl.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  *
  * TURNTABLE
  *
@@ -25,6 +25,7 @@
 
 #include "track.h"
 #include "cstraigh.h"
+#include "i18n.h"
 
 static TRKTYP_T T_TURNTABLE = -1;
 
@@ -43,7 +44,7 @@ EXPORT ANGLE_T turntableAngle = 0.0;
 static paramFloatRange_t r1_100 = { 1.0, 100.0, 100 };
 static paramData_t turntablePLs[] = {
 #define turntableDiameterPD		(turntablePLs[0])
-	{	PD_FLOAT, &turntableDiameter, "diameter", PDO_DIM|PDO_NOPREF, &r1_100, "Diameter" } };
+	{	PD_FLOAT, &turntableDiameter, "diameter", PDO_DIM|PDO_NOPREF, &r1_100, N_("Diameter") } };
 static paramGroup_t turntablePG = { "turntable", 0, turntablePLs, sizeof turntablePLs/sizeof turntablePLs[0] };
 
 
@@ -235,10 +236,10 @@ static struct {
 		} trntblData;
 typedef enum { OR, RA, EC, LY } trntblDesc_e;
 static descData_t trntblDesc[] = {
-/*OR*/	{ DESC_POS, "Origin: X", &trntblData.orig },
-/*RA*/	{ DESC_DIM, "Diameter", &trntblData.diameter },
-/*EC*/	{ DESC_LONG, "# EndPt", &trntblData.epCnt },
-/*LY*/	{ DESC_LAYER, "Layer", NULL },
+/*OR*/	{ DESC_POS, N_("Origin: X"), &trntblData.orig },
+/*RA*/	{ DESC_DIM, N_("Diameter"), &trntblData.diameter },
+/*EC*/	{ DESC_LONG, N_("# EndPt"), &trntblData.epCnt },
+/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
 		{ DESC_NULL } };
 
 
@@ -268,7 +269,7 @@ static void UpdateTurntable( track_p trk, int inx, descData_p descUpd, BOOL_T fi
 static void DescribeTurntable( track_p trk, char * str, CSIZE_T len )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	sprintf( str, "Turntable(%d): Layer=%d Center=[%s %s] Diameter=%s #EP=%d",
+	sprintf( str, _("Turntable(%d): Layer=%d Center=[%s %s] Diameter=%s #EP=%d"),
 				GetTrkIndex(trk), GetTrkLayer(trk)+1,
 				FormatDistance(xx->pos.x), FormatDistance(xx->pos.y),
 				FormatDistance(xx->radius * 2.0), GetTrkEndPtCnt(trk) );
@@ -282,7 +283,7 @@ static void DescribeTurntable( track_p trk, char * str, CSIZE_T len )
 		trntblData.epCnt>0?DESC_RO:0;
 	trntblDesc[EC].mode = DESC_RO;
 	trntblDesc[LY].mode = DESC_RO;
-	DoDescribe( "Turntable", trk, trntblDesc, UpdateTurntable );
+	DoDescribe( _("Turntable"), trk, trntblDesc, UpdateTurntable );
 }
 
 static void DeleteTurntable( track_p t )
@@ -540,7 +541,7 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 		TurntableGetCenter( trk, &ttCenter, &ttRadius );
 		tempSegs(0).type = SEG_STRTRK;
 		tempSegs(0).width = 0;
-		InfoMessage( "Drag to create stall track" );
+		InfoMessage( _("Drag to create stall track") );
 
 	case C_MOVE:
 		valid = FALSE;
@@ -555,7 +556,7 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 			Translate( &tempSegs(0).u.l.pos[0], ttCenter, angle, ttRadius );
 			Translate( &tempSegs(0).u.l.pos[1], ttCenter, angle, r );
 			if (action == C_MOVE)
-				InfoMessage( "Straight Track: Length=%s Angle=%0.3f",
+				InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
 						FormatDistance( r-ttRadius ), PutAngle( angle ) );
 			tempSegs_da.cnt = 1;
 			valid = TRUE;
@@ -762,7 +763,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		ParamGroupRecord( &turntablePG );
 		controls[0] = turntableDiameterPD.control;
 		controls[1] = NULL;
-		labels[0] = "Diameter";
+		labels[0] = N_("Diameter");
 		InfoSubstituteControls( controls, labels );
 		/*InfoMessage( "Place Turntable");*/
 		return C_CONTINUE;
@@ -775,7 +776,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		}
 		controls[0] = turntableDiameterPD.control;
 		controls[1] = NULL;
-		labels[0] = "Diameter";
+		labels[0] = N_("Diameter");
 		InfoSubstituteControls( controls, labels );
 		ParamLoadData( &turntablePG );
 		pos0 = pos;
@@ -792,7 +793,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 	case C_UP:
 		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		SnapPos( &pos );
-		UndoStart( "Create Turntable", "NewTurntable" );
+		UndoStart( _("Create Turntable"), "NewTurntable" );
 		t = NewTurntable( pos, turntableDiameter/2.0 );
 		UndoEnd();
 		DrawNewTrack(t);
@@ -820,7 +821,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 
 EXPORT void InitCmdTurntable( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdTurntable, "cmdTurntable", "Turntable", wIconCreatePixMap(turntbl_xpm), LEVEL0_50, IC_STICKY, ACCL_TURNTABLE, NULL );
+	AddMenuButton( menu, CmdTurntable, "cmdTurntable", _("Turntable"), wIconCreatePixMap(turntbl_xpm), LEVEL0_50, IC_STICKY, ACCL_TURNTABLE, NULL );
 }
 
 

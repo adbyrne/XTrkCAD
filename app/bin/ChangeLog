@@ -1,3 +1,15 @@
+Jan 21, 2008
+	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
+		Gettext support added. The following 48 files were modified:
+		ccurve.c, cdraw.c, celev.c, cgroup.c, chndldto.c, cjoin.c, cmisc.c,
+		cmisc2.c, cmodify.c, cnote.c, compound.c, cparalle.c, cpull.c,
+		cruler.c, cselect.c, csnap.c, csplit.c, cstraigh.c, cstruct.c,
+		ctext.c, ctodesgn.c, ctrain.c, cturnout.c, cturntbl.c, cundo.c,
+		custom.c, dbench.c, dbitmap.c, dcar.c, dcmpnd.c, dcustmgm.c, dease.c,
+		denum.c, dlayer.c, doption.c, dpricels.c, dprmfile.c, draw.c,
+		drawgeom.c, misc2.c, param.c, smalldlg.c, tcurve.c, tease.c, track.c,
+		tstraigh.c
+
 Jan 18, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		dcar.c: CarInvSaveText() Car list text file is now created to

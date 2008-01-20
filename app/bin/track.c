@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.2 2008-01-02 19:31:12 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -28,6 +28,7 @@
 #include "cstraigh.h"
 #include "cjoin.h"
 #include "compound.h"
+#include "i18n.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
@@ -206,7 +207,7 @@ EXPORT void EnumerateTracks( void )
 		return;
 	}
 
-	enumerateMaxDescLen = strlen( "Description" );
+	enumerateMaxDescLen = strlen("Description");
 
 	TRK_ITERATE( trk ) {
 		if (GetTrkSelected(trk) && trackCmds(trk->type)->enumerate != NULL)
@@ -214,7 +215,7 @@ EXPORT void EnumerateTracks( void )
 	}
 
 	EnumerateStart();
-	
+
 	for (inx=1; inx<trackCmds_da.cnt; inx++)
 		if (trackCmds(inx)->enumerate != NULL)
 			trackCmds(inx)->enumerate( NULL );
@@ -913,7 +914,7 @@ EXPORT void ResolveIndex( void )
 			if (trk->endPt[ep].index >= 0) {
 				trk->endPt[ep].track = FindTrack( trk->endPt[ep].index );
 				if (trk->endPt[ep].track == NULL) {
-					NoticeMessage( MSG_RESOLV_INDEX_BAD_TRK, "Continue", NULL, trk->index, ep, trk->endPt[ep].index );
+					NoticeMessage( MSG_RESOLV_INDEX_BAD_TRK, _("Continue"), NULL, trk->index, ep, trk->endPt[ep].index );
 				}
 			}
 	AuditTracks( "readTracks" );
@@ -1032,7 +1033,7 @@ EXPORT void SelectAbove( void )
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 		return;
 	}
-	UndoStart( "Move Objects Above", "above" );
+	UndoStart( _("Move Objects Above"), "above" );
 	xtrk = NULL;
 	ExciseSelectedTracks( &xtrk, &ltrk );
 	if (xtrk) {
@@ -1052,7 +1053,7 @@ EXPORT void SelectBelow( void )
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 		return;
 	}
-	UndoStart( "Mode Objects Below", "below" );
+	UndoStart( _("Mode Objects Below"), "below" );
 	xtrk = NULL;
 	ExciseSelectedTracks( &xtrk, &ltrk );
 	if (xtrk) {
@@ -1255,7 +1256,7 @@ static void AuditPrint( char * msg )
 		sprintf( message, "%s%s%s", workingDir, FILE_SEP_CHAR, sAuditF );
 		auditFile = fopen( message, "a+" );
 		if (auditFile == NULL) {
-			NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Audit", message, strerror(errno) );
+			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Audit"), message, strerror(errno) );
 			auditIgnore = TRUE;
 			return;
 		}
@@ -1269,9 +1270,9 @@ static void AuditPrint( char * msg )
 	fprintf(auditFile, msg );
 	if (auditIgnore)
 		return;
-	NoticeMessage( MSG_AUDIT_PRINT_MSG, "Ok", NULL, msg );
+	NoticeMessage( MSG_AUDIT_PRINT_MSG, _("Ok"), NULL, msg );
 	if (++auditCount>10) {
-		if (NoticeMessage( MSG_AUDIT_PRINT_IGNORE, "Yes", "No" ) )
+		if (NoticeMessage( MSG_AUDIT_PRINT_IGNORE, _("Yes"), _("No") ) )
 			auditIgnore = TRUE;
 		auditCount = 0;
 	}
@@ -1368,7 +1369,7 @@ nextEndPt:;
 	InfoCount( trackCount );
 	if (auditFile != NULL) {
 	if (auditStop)
-		if (NoticeMessage( MSG_AUDIT_WRITE_FILE, "Yes", "No")) {
+		if (NoticeMessage( MSG_AUDIT_WRITE_FILE, _("Yes"), _("No"))) {
 			fprintf( auditFile, "# before undo\n" );
 			WriteTracks(auditFile);
 			Rdump( auditFile );
@@ -1382,7 +1383,7 @@ nextEndPt:;
 				fprintf( auditFile, "# undo stack is empty\n" );
 			}
 		}
-		if (NoticeMessage( MSG_AUDIT_ABORT, "Yes", "No")) {
+		if (NoticeMessage( MSG_AUDIT_ABORT, _("Yes"), _("No"))) {
 			AuditDebug();
 			exit(1);
 		}
@@ -1528,14 +1529,14 @@ EXPORT void LoosenTracks( void )
 			if (d > distanceEpsilon || a > angleEpsilon*2.0) {
 				DisconnectTracks( trk, ep0, trk1, ep1 );
 				count++;
-				InfoMessage( "%d Track(s) loosened", count );
+				InfoMessage( _("%d Track(s) loosened"), count );
 			}
 		}
 	}
 	if (count)
 		MainRedraw();
 	else
-		InfoMessage("No tracks loosened");
+		InfoMessage(_("No tracks loosened"));
 }
 
 EXPORT void ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1 )
@@ -1545,11 +1546,11 @@ EXPORT void ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx
 	coOrd pos0, pos1;
 
 	if ( !IsTrack(trk0) ) {
-		NoticeMessage( "Connecting a non-track(%d) to (%d)", "Continue", NULL, GetTrkIndex(trk0), GetTrkIndex(trk1) );
+		NoticeMessage( _("Connecting a non-track(%d) to (%d)"), _("Continue"), NULL, GetTrkIndex(trk0), GetTrkIndex(trk1) );
 		return;
 	}
 	if ( !IsTrack(trk1) ) {
-		NoticeMessage( "Connecting a non-track(%d) to (%d)", "Continue", NULL, GetTrkIndex(trk1), GetTrkIndex(trk0) );
+		NoticeMessage( _("Connecting a non-track(%d) to (%d)"), _("Continue"), NULL, GetTrkIndex(trk1), GetTrkIndex(trk0) );
 		return;
 	}
 	pos0 = trk0->endPt[inx0].pos;
@@ -1569,7 +1570,7 @@ LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f
 		PrintEndPt( logFile, trk1, 1 );???*/
 		LogPrintf("\n");
 #endif
-		NoticeMessage( MSG_CONNECT_TRK, "Continue", NULL, trk0->index, inx0, trk1->index, inx1, d, a );
+		NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
 	}
 	UndoModify( trk0 );
 	UndoModify( trk1 );
@@ -1610,7 +1611,7 @@ EXPORT BOOL_T ConnectAbuttingTracks(
 						(180.0+connectAngle/2.0) );
 	if ( a < connectAngle && 
 		 d < connectDistance ) {
-		UndoStart( "Join Abutting Tracks", "ConnectAbuttingTracks( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
+		UndoStart( _("Join Abutting Tracks"), "ConnectAbuttingTracks( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
 		DrawEndPt( &mainD, trk0, ep0, wDrawColorWhite );
 		DrawEndPt( &mainD, trk1, ep1, wDrawColorWhite );
 		ConnectTracks( trk0, ep0,
@@ -1631,7 +1632,7 @@ EXPORT ANGLE_T GetAngleAtPoint( track_p trk, coOrd pos, EPINX_T *ep0, EPINX_T *e
 	if ((getAngleCmd = trackCmds(trk->type)->getAngle) != NULL)
 		return getAngleCmd( trk, pos, ep0, ep1 );
 	else {
-		NoticeMessage( MSG_GAAP_BAD_TYPE, "Continue", NULL, trk->type, trk->index );
+		NoticeMessage( MSG_GAAP_BAD_TYPE, _("Continue"), NULL, trk->type, trk->index );
 		return 0;
 	}
 }
@@ -1677,7 +1678,7 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 
 #ifdef LATER
 	} else if ( IsTurnout(trk) ) {
-			ErrorMessage( MSG_CANT_SPLIT_TRK, "Turnout" );
+			ErrorMessage( MSG_CANT_SPLIT_TRK, _("Turnout") );
 			return FALSE;
 #endif
 
@@ -1856,21 +1857,21 @@ EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action, coOrd pos
 		tempSegs(0).type = SEG_STRTRK;
 		tempSegs(0).width = 0;
 		tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, ep );
-		InfoMessage( "Drag to change track length" );
+		InfoMessage( _("Drag to change track length") );
 
 	case C_MOVE:
 		d = FindDistance( tempSegs(0).u.l.pos[0], pos );
 		valid = TRUE;
 		if ( d <= minLength ) {
 			if (action == C_MOVE)
-				ErrorMessage( MSG_TRK_TOO_SHORT, "Connecting ", PutDim(fabs(minLength-d)) );
+				ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
 			valid = FALSE;
 			return C_CONTINUE;
 		}
 		Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk, ep ), d );
 		tempSegs_da.cnt = 1;
 		if (action == C_MOVE)
-			InfoMessage( "Straight: Length=%s Angle=%0.3f",
+			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 					FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
 		return C_CONTINUE;
 
@@ -1913,7 +1914,7 @@ EXPORT BOOL_T GetTrackParams( int inx, track_p trk, coOrd pos, trackParams_t * p
 		switch ( inx ) {
 		case PARAMS_1ST_JOIN:
 		case PARAMS_2ND_JOIN:
-			ErrorMessage( MSG_JOIN_TRK, (inx==PARAMS_1ST_JOIN?"First":"Second") );
+			ErrorMessage( MSG_JOIN_TRK, (inx==PARAMS_1ST_JOIN?_("First"):_("Second")) );
 			break;
 		case PARAMS_EXTEND:
 			ErrorMessage( MSG_CANT_EXTEND );

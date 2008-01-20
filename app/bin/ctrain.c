@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.3 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.4 2008-01-20 23:29:15 mni77 Exp $
  *
  * TRAIN
  *
@@ -33,6 +33,7 @@
 #include "trackx.h"
 #include "ctrain.h"
 #include "compound.h"
+#include "i18n.h"
 
 EXPORT long programMode;
 EXPORT long maxCouplingSpeed = 100;
@@ -166,13 +167,13 @@ static struct {
 		} carData;
 typedef enum { IT, PN, AN, LN, WD, DE, NM } carDesc_e;
 static descData_t carDesc[] = {
-/*IT*/	{ DESC_LONG, "Index", &carData.index },
-/*PN*/	{ DESC_POS, "Position", &carData.pos },
-/*AN*/	{ DESC_ANGLE, "Angle", &carData.angle },
-/*LN*/	{ DESC_DIM, "Length", &carData.length },
-/*WD*/	{ DESC_DIM, "Width", &carData.width },
-/*DE*/	{ DESC_STRING, "Description", &carData.desc },
-/*NM*/	{ DESC_STRING, "Rep Marks", &carData.number },
+/*IT*/	{ DESC_LONG, N_("Index"), &carData.index },
+/*PN*/	{ DESC_POS, N_("Position"), &carData.pos },
+/*AN*/	{ DESC_ANGLE, N_("Angle"), &carData.angle },
+/*LN*/	{ DESC_DIM, N_("Length"), &carData.length },
+/*WD*/	{ DESC_DIM, N_("Width"), &carData.width },
+/*DE*/	{ DESC_STRING, N_("Description"), &carData.desc },
+/*NM*/	{ DESC_STRING, N_("Rep Marks"), &carData.number },
 		{ DESC_NULL } };
 
 static void UpdateCar(
@@ -193,7 +194,7 @@ static void UpdateCar(
 		if ( !titleChanged )
 			return;
 		if ( needUndoStart )
-			UndoStart( "Change Track", "Change Track" );
+			UndoStart( _("Change Track"), "Change Track" );
 		UndoModify( trk );
 		UndrawNewTrack( trk );
 		DrawNewTrack( trk );
@@ -236,7 +237,7 @@ static void DescribeCar(
 	carDesc[WD].mode = DESC_RO;
 	carDesc[DE].mode =
 	carDesc[NM].mode = DESC_RO;
-	DoDescribe( "Car", trk, carDesc, UpdateCar );
+	DoDescribe( _("Car"), trk, carDesc, UpdateCar );
 }
 
 
@@ -540,8 +541,8 @@ static paramDrawData_t speedParamData = { SLIDER_WIDTH, SLIDER_HEIGHT, SpeedRedr
 #ifndef WINDOWS
 static paramListData_t listData = { 3, 120 };
 #endif
-static char * trainFollowMeLabels[] = { "Follow", NULL };
-static char * trainAutoReverseLabels[] = { "Auto Reverse", NULL };
+static char * trainFollowMeLabels[] = { N_("Follow"), NULL };
+static char * trainAutoReverseLabels[] = { N_("Auto Reverse"), NULL };
 static paramData_t trainPLs[] = {
 #define I_LIST				(0)
 #ifdef WINDOWS
@@ -560,15 +561,15 @@ static paramData_t trainPLs[] = {
 #define I_ZERO				(5)
 	  { PD_BUTTON, NULL, "zeroDistance", PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGHORZ, NULL, NULL, BO_ICON },
 #define I_GOTO				(6)
-	  { PD_BUTTON, NULL, "goto", PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGWIDE, NULL, "Find" },
+	  { PD_BUTTON, NULL, "goto", PDO_NOPSHUPD|PDO_NOPREF|PDO_DLGWIDE, NULL, N_("Find") },
 #define I_FOLLOW			(7)
 	  { PD_TOGGLE, NULL, "follow", PDO_NOPREF|PDO_DLGWIDE, trainFollowMeLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_AUTORVRS			(8)
 	  { PD_TOGGLE, NULL, "autoreverse", PDO_NOPREF, trainAutoReverseLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_DIR				(9)
-	  { PD_BUTTON, NULL, "direction", PDO_NOPREF|PDO_DLGWIDE, NULL, "Forward", 0 },
+	  { PD_BUTTON, NULL, "direction", PDO_NOPREF|PDO_DLGWIDE, NULL, N_("Forward"), 0 },
 #define I_STOP				(10)
-	  { PD_BUTTON, NULL, "stop", PDO_DLGWIDE, NULL, "Stop" },
+	  { PD_BUTTON, NULL, "stop", PDO_DLGWIDE, NULL, N_("Stop") },
 #define I_SPEED				(11)
 	  { PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, (void*)(SLIDER_WIDTH*2) } };
 
@@ -703,33 +704,33 @@ static void ControllerDialogSync(
 		autoReverse = xx->autoReverse;
 		if ( xx->trvTrk.trk == NULL ) {
 			if ( xx->status == ST_Crashed )
-				statusMsg = "Crashed";
+				statusMsg = _("Crashed");
 			else
-				statusMsg = "Not on Track";
+				statusMsg = _("Not on Track");
 		} else if ( xx->speed > 0 ) {
 			if ( trainsState == TRAINS_STOP )
-				statusMsg = "Trains Paused";
+				statusMsg = _("Trains Paused");
 			else
-				statusMsg = "Running";
+				statusMsg = _("Running");
 		} else {
 			switch (xx->status ) {
 			case ST_EndOfTrack:
-				statusMsg = "End of Track";
+				statusMsg = _("End of Track");
 				break;
 			case ST_OpenTurnout:
-				statusMsg = "Open Turnout";
+				statusMsg = _("Open Turnout");
 				break;
 			case ST_StopManual:
-				statusMsg = "Manual Stop";
+				statusMsg = _("Manual Stop");
 				break;
 			case ST_NoRoom:
-				statusMsg = "No Room";
+				statusMsg = _("No Room");
 				break;
 			case ST_Crashed:
-				statusMsg = "Crashed";
+				statusMsg = _("Crashed");
 				break;
 			default:
-				statusMsg = "Unknown Status";
+				statusMsg = _("Unknown Status");
 				break;
 			}
 		}
@@ -738,7 +739,7 @@ static void ControllerDialogSync(
 		dir = 0;
 		followMe = FALSE;
 		autoReverse = FALSE;
-		ParamLoadMessage( dlg->trainPGp, I_STATUS, "No trains" );
+		ParamLoadMessage( dlg->trainPGp, I_STATUS, _("No trains") );
 	}
 	if ( dlg->followMe != followMe ) {
 		dlg->followMe = followMe;
@@ -750,7 +751,7 @@ static void ControllerDialogSync(
 	}
 	if ( dlg->direction != dir ) {
 		dlg->direction = dir;
-		wButtonSetLabel( (wButton_p)dlg->trainPGp->paramPtr[I_DIR].control, (dlg->direction?"Reverse":"Forward") );
+		wButtonSetLabel( (wButton_p)dlg->trainPGp->paramPtr[I_DIR].control, (dlg->direction?_("Reverse"):_("Forward")) );
 	}
 	if ( dlg->train ) {
 		if ( dlg->posS[0] == '\0' ||
@@ -1007,7 +1008,7 @@ static void ControllerDialogUpdate(
 		if ( dlg->train == NULL ) return;
 		xx = GetTrkExtraData(dlg->train);
 		dlg->direction = xx->direction = !xx->direction;
-		wButtonSetLabel( (wButton_p)pg->paramPtr[I_DIR].control, (dlg->direction?"Reverse":"Forward") );
+		wButtonSetLabel( (wButton_p)pg->paramPtr[I_DIR].control, (dlg->direction?_("Reverse"):_("Forward")) );
 		SetTrainDirection( dlg->train );
 		DrawAllCars();
 		break;
@@ -1056,10 +1057,10 @@ static trainControlDlg_p CreateTrainControlDlg( void )
 	PLp[I_FOLLOW].context = dlg;
 	PLp[I_AUTORVRS].valueP = &dlg->autoReverse;
 	PLp[I_AUTORVRS].context = dlg;
-	title = MyStrdup( "Train Control XXX" );
-	sprintf( title, "Train Control %d", ++numTrainDlg );
+	title = MyStrdup( _("Train Control XXX") );
+	sprintf( title, _("Train Control %d"), ++numTrainDlg );
 	dlg->trainPGp = &trainPG;
-	dlg->win = ParamCreateDialog( dlg->trainPGp, "Train Control", NULL, NULL, NULL, FALSE, NULL, 0, ControllerDialogUpdate );
+	dlg->win = ParamCreateDialog( dlg->trainPGp, _("Train Control"), NULL, NULL, NULL, FALSE, NULL, 0, ControllerDialogUpdate );
 	return dlg;
 }
 
@@ -1997,7 +1998,7 @@ static coOrd trainFuncPos;
 static wButton_p trainPauseB;
 
 #ifdef LATER
-static char * newCarLabels[3] = { "Road", "Number", NULL };
+static char * newCarLabels[3] = { N_("Road"), N_("Number"), NULL };
 #endif
 
 static STATUS_T CmdTrain( wAction_t action, coOrd pos )
@@ -2023,7 +2024,7 @@ static STATUS_T CmdTrain( wAction_t action, coOrd pos )
 		doDrawTurnoutPosition = 1;
 		DoChangeNotification( CHANGE_PARAMS|CHANGE_TOOLBAR );
 		if ( CarAvailableCount() <= 0 ) {
-			if ( NoticeMessage( MSG_NO_CARS, "Yes", "No" ) > 0 ) {
+			if ( NoticeMessage( MSG_NO_CARS, _("Yes"), _("No") ) > 0 ) {
 				DoCarDlg();
 				DoChangeNotification( CHANGE_PARAMS );
 			}
@@ -2034,7 +2035,7 @@ static STATUS_T CmdTrain( wAction_t action, coOrd pos )
 		curTrainDlg->train = NULL;
 #ifdef LATER
 		if ( trainW == NULL )
-			trainW = ParamCreateDialog( MakeWindowTitle("Train"), NULL, trainPGp );
+			trainW = ParamCreateDialog( MakeWindowTitle(_("Train")), NULL, trainPGp );
 		ParamLoadControls( trainPGp );
 		wListClear( (wList_p)trainPLs[0].control );
 #endif
@@ -2516,7 +2517,7 @@ EXPORT void InitCmdTrain( wMenu_p menu )
 	log_trainPlayback = LogFindIndex( "trainPlayback" );
 	trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_xpm);
 	ParamRegister( &trainPG );
-	AddMenuButton( menu, CmdTrain, "cmdTrain", "Train", wIconCreatePixMap(train_xpm), LEVEL0_50, IC_POPUP2|IC_LCLICK|IC_RCLICK, 0, NULL );
+	AddMenuButton( menu, CmdTrain, "cmdTrain", _("Train"), wIconCreatePixMap(train_xpm), LEVEL0_50, IC_POPUP2|IC_LCLICK|IC_RCLICK, 0, NULL );
 	stopI = wIconCreatePixMap(stop_xpm);
 	goI = wIconCreatePixMap(go_xpm);
 	trainPauseB = AddToolbarButton( "cmdTrainPause", stopI, IC_MODETRAIN_ONLY, CmdTrainStopGo, NULL );
@@ -2526,20 +2527,20 @@ EXPORT void InitCmdTrain( wMenu_p menu )
 	T_CAR = InitObject( &carCmds );
 
 #ifdef LATER
-	trainPGp = ParamCreateGroup( "trainW", "train", 0, trainPLs, sizeof trainPLs/sizeof trainPLs[0], NULL, 0, "Ok", trainOk, wHide );
+	trainPGp = ParamCreateGroup( "trainW", "train", 0, trainPLs, sizeof trainPLs/sizeof trainPLs[0], NULL, 0, _("Ok"), trainOk, wHide );
 	ParamRegister( trainPGp );
 #endif
 
 	trainPopupM = MenuRegister( "Train Commands" );
-	trainPopupMI[DO_UNCOUPLE]   = wMenuPushCreate( trainPopupM, "", "Uncouple", 0, TrainFunc, (void*)DO_UNCOUPLE );
-	trainPopupMI[DO_FLIPCAR]    = wMenuPushCreate( trainPopupM, "", "Flip Car", 0, TrainFunc, (void*)DO_FLIPCAR );
-	trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate( trainPopupM, "", "Flip Train", 0, TrainFunc, (void*)DO_FLIPTRAIN );
-	trainPopupMI[DO_MUMASTER]   = wMenuPushCreate( trainPopupM, "", "MU Master", 0, TrainFunc, (void*)DO_MUMASTER );
-	trainPopupMI[DO_CHANGEDIR]  = wMenuPushCreate( trainPopupM, "", "Change Direction", 0, TrainFunc, (void*)DO_CHANGEDIR );
-	trainPopupMI[DO_STOP]       = wMenuPushCreate( trainPopupM, "", "Stop", 0, TrainFunc, (void*)DO_STOP );
+	trainPopupMI[DO_UNCOUPLE]   = wMenuPushCreate( trainPopupM, "", _("Uncouple"), 0, TrainFunc, (void*)DO_UNCOUPLE );
+	trainPopupMI[DO_FLIPCAR]    = wMenuPushCreate( trainPopupM, "", _("Flip Car"), 0, TrainFunc, (void*)DO_FLIPCAR );
+	trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate( trainPopupM, "", _("Flip Train"), 0, TrainFunc, (void*)DO_FLIPTRAIN );
+	trainPopupMI[DO_MUMASTER]   = wMenuPushCreate( trainPopupM, "", _("MU Master"), 0, TrainFunc, (void*)DO_MUMASTER );
+	trainPopupMI[DO_CHANGEDIR]  = wMenuPushCreate( trainPopupM, "", _("Change Direction"), 0, TrainFunc, (void*)DO_CHANGEDIR );
+	trainPopupMI[DO_STOP]       = wMenuPushCreate( trainPopupM, "", _("Stop"), 0, TrainFunc, (void*)DO_STOP );
 	wMenuSeparatorCreate( trainPopupM );
-	trainPopupMI[DO_DELCAR]     = wMenuPushCreate( trainPopupM, "", "Delete Car", 0, TrainFunc, (void*)DO_DELCAR );
-	trainPopupMI[DO_DELTRAIN]   = wMenuPushCreate( trainPopupM, "", "Delete Train", 0, TrainFunc, (void*)DO_DELTRAIN );
+	trainPopupMI[DO_DELCAR]     = wMenuPushCreate( trainPopupM, "", _("Delete Car"), 0, TrainFunc, (void*)DO_DELCAR );
+	trainPopupMI[DO_DELTRAIN]   = wMenuPushCreate( trainPopupM, "", _("Delete Train"), 0, TrainFunc, (void*)DO_DELTRAIN );
 
 #ifdef LATER
 	ParamRegister( &newCarPG );

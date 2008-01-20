@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmodify.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmodify.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  *
  * TRACK MODIFY
  */
@@ -26,6 +26,7 @@
 #include "cjoin.h"
 #include "ccurve.h"
 #include "cstraigh.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -79,7 +80,7 @@ static STATUS_T CmdModify(
 	switch (action&0xFF) {
 
 	case C_START:
-		InfoMessage( "Select track to modify" );
+		InfoMessage( _("Select track to modify") );
 		Dex.Trk = NULL;
 		tempSegs_da.cnt = 0;
 		/*ChangeParameter( &easementPD );*/
@@ -117,7 +118,7 @@ static STATUS_T CmdModify(
 				trk = trk1;
 			}
 			if (trk1) {
-				UndoStart( "Change Track", "Change( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
+				UndoStart( _("Change Track"), "Change( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 				inx = GetEndPtConnectedToMe( trk1, trk );
 				DeleteTrack(Dex.Trk, TRUE);
 				if ( !GetTrkEndTrk( trk1, inx ) ) {
@@ -162,7 +163,7 @@ static STATUS_T CmdModify(
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		tempSegs_da.cnt = 0;
 		SnapPos( &pos );
-		UndoStart( "Modify Track", "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
+		UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 		UndoModify( Dex.Trk );
 		rc = ModifyTrack( Dex.Trk, C_UP, pos );
 		UndoEnd();
@@ -194,7 +195,7 @@ CHANGE_TRACK:
 				Translate( &Dex.pos00x, Dex.pos00, Dex.angle, 10.0 );
 LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
 							Dex.params.ep, Dex.pos00.x, Dex.pos00.y, Dex.angle ) )
-				InfoMessage( "Drag to create new track segment" );
+				InfoMessage( _("Drag to create new track segment") );
 			} else {
 				return C_ERROR;
 			}
@@ -247,12 +248,12 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 			tempSegs_da.cnt = 1;
 			Dex.valid = TRUE;
 			if (action != C_RDOWN)
-				InfoMessage( "Straight Track: Length=%s Angle=%0.3f",
+				InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
 					FormatDistance( FindDistance( Dex.curveData.pos1, Dex.pos01 ) ),
 					PutAngle( FindAngle( Dex.pos01, Dex.curveData.pos1 ) ) );
 		} else if ( curveType == curveTypeNone ) {
 			if (action != C_RDOWN)
-				InfoMessage( "Back" );
+				InfoMessage( _("Back") );
 			return C_CONTINUE;
 		} else if ( curveType == curveTypeCurve ) {
 			Dex.r1 = Dex.curveData.curveRadius;
@@ -311,7 +312,7 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 				a = NormalizeAngle( Dex.curveData.a0+Dex.curveData.a1+90.0 );
 			Dex.valid = TRUE;
 			if (action != C_RDOWN)
-				InfoMessage( "Curve Track: Radius=%s Length=%s Angle=%0.3f",
+				InfoMessage( _("Curve Track: Radius=%s Length=%s Angle=%0.3f"),
 					FormatDistance( Dex.curveData.curveRadius ),
 					FormatDistance( Dex.curveData.curveRadius * d),
 					Dex.curveData.a1 );
@@ -326,7 +327,7 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 		if (Dex.Trk == NULL) return C_CONTINUE;
 		if (!Dex.valid)
 			return C_CONTINUE;
-		UndoStart( "Extend Track", "Extend( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
+		UndoStart( _("Extend Track"), "Extend( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 		trk = NULL;
 		curveType = Dex.curveData.type;
    
@@ -390,8 +391,6 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 
 void InitCmdModify( wMenu_p menu )
 {
-	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", "Modify", wIconCreatePixMap(extend_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_MODIFY, NULL );
+	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"), wIconCreatePixMap(extend_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_MODIFY, NULL );
 	log_modify = LogFindIndex( "modify" );
 }
-
-

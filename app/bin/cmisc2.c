@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc2.c,v 1.2 2006-02-15 19:05:27 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc2.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -21,6 +21,7 @@
  */
 
 #include "track.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -48,6 +49,6 @@ static STATUS_T CmdBridge( wAction_t action, coOrd pos )
 void InitCmdMisc2( wMenu_p menu )
 {
 	if (extraButtons) {
-		InitCommand( menu, CmdBridge, "Bridge", bridge_bits, LEVEL2, IC_STICKY, ACCL_BRIDGE );
+		InitCommand( menu, CmdBridge, N_("Bridge"), bridge_bits, LEVEL2, IC_STICKY, ACCL_BRIDGE );
 	}
 }

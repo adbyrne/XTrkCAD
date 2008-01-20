@@ -1,7 +1,7 @@
 /** \file draw.c
  * Basic drawing functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.11 2007-11-24 19:48:21 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.12 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -44,6 +44,8 @@
 #include "utility.h"
 #include "misc.h"
 #include "draw.h"
+#include "i18n.h"
+#include "fileio.h"
 
 static void DrawRoomWalls( wBool_t );
 EXPORT void DrawMarkers( void );
@@ -995,11 +997,11 @@ EXPORT void InfoSubstituteControls(
 	wMessageSetValue( infoD.info_m, "" );
 	wControlShow( (wControl_p)infoD.info_m, FALSE );
 	for ( inx=0; controls[inx]; inx++ ) {
-		curInfoLabelWidth[inx] = wLabelWidth(labels[inx]);
+		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
 		x += curInfoLabelWidth[inx];
 		wControlSetPos( controls[inx], x, y );
 		x += wControlGetWidth( controls[inx] );
-		wControlSetLabel( controls[inx], labels[inx] );
+		wControlSetLabel( controls[inx], _(labels[inx]) );
 		wControlShow( controls[inx], TRUE );
 		curInfoControl[inx] = controls[inx];
 		x += 3;
@@ -1303,7 +1305,7 @@ EXPORT void MainProc( wWin_p win, winProcEvent e, void * data )
 		break;
 	case wQuit_e:
 		if (changed &&
-			NoticeMessage( MSG_SAVE_CHANGES, "Save", "Quit"))
+			NoticeMessage( MSG_SAVE_CHANGES, _("Save"), _("Quit")))
 			DoSave(NULL);
 			
 		CleanupFiles();	
@@ -1770,7 +1772,7 @@ EXPORT void DoZoomUp( void * mode )
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomin", (long)mainD.scale );
-		InfoMessage( "Zoom In Program Value %ld:1", (long)mainD.scale );
+		InfoMessage( _("Zoom In Program Value %ld:1"), (long)mainD.scale );
 	}
 }
 
@@ -1790,7 +1792,7 @@ EXPORT void DoZoomDown( void  * mode)
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomout", (long)mainD.scale );
-		InfoMessage( "Zoom Out Program Value %ld:1", (long)mainD.scale );
+		InfoMessage( _("Zoom Out Program Value %ld:1"), (long)mainD.scale );
 	}
 }
 
@@ -2183,7 +2185,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 			DoZoomDown((void *)1L);
 			break;
 		default:
-			NoticeMessage( MSG_DOMOUSE_BAD_OP, "Ok", NULL, action&0xFF );
+			NoticeMessage( MSG_DOMOUSE_BAD_OP, _("Ok"), NULL, action&0xFF );
 			break;
 		}
 		if (delayUpdate)
@@ -2284,8 +2286,13 @@ static wBool_t PlaybackMain( char * line )
 	int rc;
 	int action;
 	coOrd pos;
+	char *oldLocale = NULL;
 
-	if ( (rc=sscanf( line, "%d " SCANF_FLOAT_FORMAT SCANF_FLOAT_FORMAT, &action, &pos.x, &pos.y)) != 3) {
+	oldLocale = SaveLocale("C");
+	rc=sscanf( line, "%d " SCANF_FLOAT_FORMAT SCANF_FLOAT_FORMAT, &action, &pos.x, &pos.y);
+	RestoreLocale(oldLocale);
+
+	if (rc != 3) {
 		SyntaxError( "MOUSE", rc, 3 );
 	} else {
 		PlaybackMouse( DoMouse, &mainD, (wAction_t)action, pos, wDrawColorBlack );
@@ -2367,7 +2374,7 @@ EXPORT void DrawInit( int initialZoom )
 	/*w = (wPos_t)((mapD.size.x/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	/*h = (wPos_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	ParamRegister( &mapPG );
-	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle("Map"), NULL, NULL, NULL, FALSE, NULL, 0, MapDlgUpdate );
+	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, NULL, FALSE, NULL, 0, MapDlgUpdate );
 	ChangeMapScale();
 
 	log_pan = LogFindIndex( "pan" );

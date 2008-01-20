@@ -1,6 +1,6 @@
 /** \file Handle selecting / unselecting track and basic operations on the selection
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.5 2007-02-23 16:50:03 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.6 2008-01-20 23:29:15 mni77 Exp $
  *
  */
 
@@ -33,6 +33,7 @@
 #include "bma45.bmp"
 #include "bma90.bmp"
 #include "bma135.bmp"
+#include "i18n.h"
 
 
 #define SETMOVEMODE "MOVEMODE"
@@ -301,7 +302,7 @@ EXPORT void SelectTrackWidth( void* width )
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 		return;
 	}
-	UndoStart( "Change Track Width", "trackwidth" );
+	UndoStart( _("Change Track Width"), "trackwidth" );
 	trk = NULL;
 	wDrawDelayUpdate( mainD.d, TRUE );
 	while ( TrackIterate( &trk ) ) {
@@ -322,7 +323,7 @@ EXPORT void SelectDelete( void )
 	if (SelectedTracksAreFrozen())
 		return;
 	if (selectedTrackCount>0) {
-		UndoStart( "Delete Tracks", "delete" );
+		UndoStart( _("Delete Tracks"), "delete" );
 		wDrawDelayUpdate( mainD.d, TRUE );
 		wDrawDelayUpdate( mapD.d, TRUE );
 		DoSelectedTracks( DeleteTrack );
@@ -374,7 +375,7 @@ EXPORT void SelectTunnel( void )
 		return;
 	if (selectedTrackCount>0) {
 		flipHiddenDoSelectRecount = FALSE;
-		UndoStart( "Hide Tracks (Tunnel)", "tunnel" );
+		UndoStart( _("Hide Tracks (Tunnel)"), "tunnel" );
 		wDrawDelayUpdate( mainD.d, TRUE );
 		DoSelectedTracks( FlipHidden );
 		wDrawDelayUpdate( mainD.d, FALSE );
@@ -413,7 +414,7 @@ EXPORT void MoveSelectedTracksToCurrentLayer( void )
 	if (SelectedTracksAreFrozen())
 		return;
 		if (selectedTrackCount>0) {
-			UndoStart( "Move To Current Layer", "changeLayer" );
+			UndoStart( _("Move To Current Layer"), "changeLayer" );
 			DoSelectedTracks( SetLayer );
 			UndoEnd();
 		} else {
@@ -452,7 +453,7 @@ EXPORT void ClearElevations( void )
 	if (SelectedTracksAreFrozen())
 		return;
 	if (selectedTrackCount>0) {
-		UndoStart( "Clear Elevations", "clear elevations" );
+		UndoStart( _("Clear Elevations"), "clear elevations" );
 		DoSelectedTracks( ClearElevation );
 		UpdateAllElevations();
 		UndoEnd();
@@ -496,7 +497,7 @@ EXPORT void AddElevations( DIST_T delta )
 		return;
 	if (selectedTrackCount>0) {
 		elevDelta = delta;
-		UndoStart( "Add Elevations", "add elevations" );
+		UndoStart( _("Add Elevations"), "add elevations" );
 		DoSelectedTracks( AddElevation );
 		UndoEnd();
 	} else {
@@ -511,7 +512,7 @@ EXPORT void DoRefreshCompound( void )
 	if (SelectedTracksAreFrozen())
 		return;
 	if (selectedTrackCount>0) {
-		UndoStart( "Refresh Compound", "refresh compound" );
+		UndoStart( _("Refresh Compound"), "refresh compound" );
 		DoSelectedTracks( RefreshCompound );
 		RefreshCompound( NULL, FALSE );
 		UndoEnd();
@@ -547,7 +548,7 @@ EXPORT void WriteSelectedTracksToTempSegs( void )
 static char rescaleFromScale[20];
 static char rescaleFromGauge[20];
 
-static char * rescaleToggleLabels[] = { "Scale", "Ratio", NULL };
+static char * rescaleToggleLabels[] = { N_("Scale"), N_("Ratio"), NULL };
 static long rescaleMode;
 static wIndex_t rescaleFromScaleInx;
 static wIndex_t rescaleFromGaugeInx;
@@ -556,23 +557,23 @@ static wIndex_t rescaleToGaugeInx;
 static wIndex_t rescaleToInx;
 static long rescaleNoChangeDim = FALSE;
 static FLOAT_T rescalePercent;
-static char * rescaleChangeDimLabels[] = { "Do not resize track", NULL };
+static char * rescaleChangeDimLabels[] = { N_("Do not resize track"), NULL };
 static paramFloatRange_t r0o001_10000 = { 0.001, 10000.0 };
 static paramData_t rescalePLs[] = {
 #define I_RESCALE_MODE		(0)
-		{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, "Rescale by:", BC_HORZ|BC_NOBORDER },
+		{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, N_("Rescale by:"), BC_HORZ|BC_NOBORDER },
 #define I_RESCALE_FROM_SCALE		(1)
-		{ PD_STRING, rescaleFromScale, "fromS", PDO_NOPREF, (void *)100, "From:" },
+		{ PD_STRING, rescaleFromScale, "fromS", PDO_NOPREF, (void *)100, N_("From:") },
 #define I_RESCALE_FROM_GAUGE		(2)
 		{ PD_STRING, rescaleFromGauge, "fromG", PDO_NOPREF|PDO_DLGHORZ, (void *)100, " / " },		
 #define I_RESCALE_TO_SCALE		   (3)
-		{ PD_DROPLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, (void *)100, "To: " },
+		{ PD_DROPLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, (void *)100, N_("To: ") },
 #define I_RESCALE_TO_GAUGE		   (4)
 		{ PD_DROPLIST, &rescaleToGaugeInx, "toG", PDO_NOPREF|PDO_LISTINDEX|PDO_DLGHORZ, NULL, " / " },
 #define I_RESCALE_CHANGE	(5)
 		{ PD_TOGGLE, &rescaleNoChangeDim, "change-dim", 0, &rescaleChangeDimLabels, "", BC_HORZ|BC_NOBORDER },
 #define I_RESCALE_PERCENT	(6)
-		{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, "Ratio" },
+		{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, N_("Ratio") },
 		{ PD_MESSAGE, "%", NULL, PDO_DLGHORZ } };
 static paramGroup_t rescalePG = { "rescale", 0, rescalePLs, sizeof rescalePLs/sizeof rescalePLs[0] };
 
@@ -631,7 +632,7 @@ static void RescaleDlgOk(
 	DIST_T d;
 	FLOAT_T ratio = rescalePercent/100.0;
 
-	UndoStart( "Rescale Tracks", "Rescale" );
+	UndoStart( _("Rescale Tracks"), "Rescale" );
 	getboundsCount = 0;
 	DoSelectedTracks( GetboundsDoIt );
 	center.x = (getboundsLo.x+getboundsHi.x)/2.0;
@@ -665,7 +666,7 @@ static void RescaleDlgOk(
 	if ( rescaleNoChangeDim == 0 && 
 	     (getboundsHi.x > mapD.size.x ||
 		   getboundsHi.y > mapD.size.y )) {
-		NoticeMessage( MSG_RESCALE_TOO_BIG, "Ok", NULL, FormatDistance(getboundsHi.x), FormatDistance(getboundsHi.y) );
+		NoticeMessage( MSG_RESCALE_TOO_BIG, _("Ok"), NULL, FormatDistance(getboundsHi.x), FormatDistance(getboundsHi.y) );
 	}
 	rescaleShift.x = (getboundsLo.x+getboundsHi.x)/2.0 - center.x*ratio;
 	rescaleShift.y = (getboundsLo.y+getboundsHi.y)/2.0 - center.y*ratio;
@@ -757,7 +758,7 @@ static BOOL_T SelectedScaleGauge( track_p trk, BOOL_T junk )
 EXPORT void DoRescale( void )
 {
 	if ( rescalePG.win == NULL ) {
-		ParamCreateDialog( &rescalePG, MakeWindowTitle("Rescale"), "Ok", RescaleDlgOk, wHide, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
+		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"), RescaleDlgOk, wHide, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
 		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO_SCALE].control );
 		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, curScaleDescInx ); /* set correct gauge list here */
 		rescaleFromScaleInx = curScaleInx;
@@ -783,9 +784,9 @@ EXPORT void DoRescale( void )
 #define MOVE_FAST		(1)
 #define MOVE_QUICK		(2)
 static char *quickMoveMsgs[] = {
-		"Draw moving track normally",
-		"Draw moving track simply",
-		"Draw moving track as end-points" };
+		N_("Draw moving track normally"),
+		N_("Draw moving track simply"),
+		N_("Draw moving track as end-points") };
 static wMenuToggle_p quickMove1M[3];
 static wMenuToggle_p quickMove2M[3];
 
@@ -1078,7 +1079,7 @@ void MoveToJoin(
 	coOrd base;
 	ANGLE_T angle;
 
-	UndoStart( "Move To Join", "Move To Join" );
+	UndoStart( _("Move To Join"), "Move To Join" );
 		base = GetTrkEndPos(trk0,ep0);
 		orig = GetTrkEndPos(trk1, ep1 );
 		base.x = orig.x - base.x;
@@ -1114,14 +1115,14 @@ static STATUS_T CmdMove(
 			if (SelectedTracksAreFrozen()) {
 				return C_TERMINATE;
 			}
-			InfoMessage( "Drag to move selected tracks" );
+			InfoMessage( _("Drag to move selected tracks") );
 			state = 0;
 			break;
 		case C_DOWN:
 			if (SelectedTracksAreFrozen()) {
 				return C_TERMINATE;
 			}
-			UndoStart( "Move Tracks", "move" );
+			UndoStart( _("Move Tracks"), "move" );
 			base = zero;
 			orig = pos;
 			GetMovedTracks(quickMove != MOVE_QUICK);
@@ -1176,7 +1177,7 @@ int rotateAlignState = 0;
 static void RotateAlign( void )
 {
 	rotateAlignState = 1;
-	InfoMessage( "Click on selected object to align" );
+	InfoMessage( _("Click on selected object to align") );
 }
 
 static STATUS_T CmdRotate(
@@ -1204,7 +1205,7 @@ static STATUS_T CmdRotate(
 			if (SelectedTracksAreFrozen()) {
 				return C_TERMINATE;
 			}
-			InfoMessage( "Drag to rotate selected tracks" );
+			InfoMessage( _("Drag to rotate selected tracks") );
 			wMenuPushEnable( rotateAlignMI, TRUE );
 			rotateAlignState = 0;
 			break;
@@ -1213,7 +1214,7 @@ static STATUS_T CmdRotate(
 			if (SelectedTracksAreFrozen()) {
 				return C_TERMINATE;
 			}
-			UndoStart( "Rotate Tracks", "rotate" );
+			UndoStart( _("Rotate Tracks"), "rotate" );
 			if ( rotateAlignState == 0 ) {
 				drawnAngle = FALSE;
 				angle = 0;
@@ -1230,7 +1231,7 @@ static STATUS_T CmdRotate(
 				angle1 = NormalizeAngle( GetAngleAtPoint( trk, pos, NULL, NULL ) );
 				if ( rotateAlignState == 1 ) {
 					if ( !GetTrkSelected(trk) ) {
-						NoticeMessage( MSG_1ST_TRACK_MUST_BE_SELECTED, "Ok", NULL );
+						NoticeMessage( MSG_1ST_TRACK_MUST_BE_SELECTED, _("Ok"), NULL );
 					} else {
 						base = pos;
 						baseAngle = angle1;
@@ -1252,7 +1253,7 @@ static STATUS_T CmdRotate(
 							angle = NormalizeAngle( angle + 180.0 );
 /*printf( "angle 1 = %0.3f\n", angle );*/
 						if ( angle1 > 180.0 ) angle1 -= 180.0;
-						InfoMessage( "Angle %0.3f", angle1 );
+						InfoMessage( _("Angle %0.3f"), angle1 );
 					}
 					GetMovedTracks(TRUE);
 					SetMoveD( FALSE, orig, angle );
@@ -1282,7 +1283,7 @@ static STATUS_T CmdRotate(
 				if ( NormalizeAngle( FindAngle( pos, pos1 ) - angle1 ) < 180.0 )
 					angle = NormalizeAngle( angle + 180.0 );
 				if ( angle1 > 180.0 ) angle1 -= 180.0;
-				InfoMessage( "Angle %0.3f", angle1 );
+				InfoMessage( _("Angle %0.3f"), angle1 );
 				SetMoveD( FALSE, orig, angle );
 /*printf( "angle 2 = %0.3f\n", angle );*/
 				DrawMovedTracks();
@@ -1311,9 +1312,9 @@ static STATUS_T CmdRotate(
 				SetMoveD( FALSE, orig, angle );
 				DrawMovedTracks();
 #ifdef DRAWCOUNT
-				InfoMessage( "   Angle %0.3f #%ld", angle, drawCount );
+				InfoMessage( _("   Angle %0.3f #%ld"), angle, drawCount );
 #else
-				InfoMessage( "   Angle %0.3f", angle );
+				InfoMessage( _("   Angle %0.3f"), angle );
 #endif
 				wFlush();
 				drawEnable = TRUE;
@@ -1323,7 +1324,7 @@ static STATUS_T CmdRotate(
 			state = 0;
 			if ( rotateAlignState == 1 ) {
 				if ( trk && GetTrkSelected(trk) ) {
-					InfoMessage( "Click on the 2nd Unselected object" );
+					InfoMessage( _("Click on the 2nd Unselected object") );
 					rotateAlignState = 2;
 				}
 				return C_CONTINUE;
@@ -1365,7 +1366,7 @@ static void QuickRotate( void* pangle )
 	wDrawDelayUpdate( mainD.d, TRUE );
 	GetMovedTracks(FALSE);
 	DrawSelectedTracksD( &mainD, wDrawColorWhite );
-	UndoStart( "Rotate Tracks", "Rotate Tracks" );
+	UndoStart( _("Rotate Tracks"), "Rotate Tracks" );
 	MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, cmdMenuPos, angle );
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
@@ -1377,7 +1378,7 @@ static track_p moveDescTrk;
 static void ChangeDescFlag( wBool_t set, void * mode )
 {
 	wDrawDelayUpdate( mainD.d, TRUE );
-	UndoStart( "Toggle Label", "Modedesc( T%d )", GetTrkIndex(moveDescTrk) );
+	UndoStart( _("Toggle Label"), "Modedesc( T%d )", GetTrkIndex(moveDescTrk) );
 	UndoModify( moveDescTrk );
 	UndrawNewTrack( moveDescTrk );
 	if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC ) == 0 )
@@ -1406,7 +1407,7 @@ STATUS_T CmdMoveDescription(
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_TERMINATE;
 		}
-		InfoMessage( "Select and drag a description" );
+		InfoMessage( _("Select and drag a description") );
 		break;
 	case C_DOWN:
 		if ( labelWhen < 2 || mainD.scale > labelScale )
@@ -1448,7 +1449,7 @@ STATUS_T CmdMoveDescription(
 			}
 		}
 		if (trk != NULL) {
-			UndoStart( "Move Label", "Modedesc( T%d )", GetTrkIndex(trk) );
+			UndoStart( _("Move Label"), "Modedesc( T%d )", GetTrkIndex(trk) );
 			UndoModify( trk );
 		}
 	case C_MOVE:
@@ -1473,7 +1474,7 @@ STATUS_T CmdMoveDescription(
 		if ( ! QueryTrack( moveDescTrk, Q_HAS_DESC ) ) break;
 		if ( moveDescM == NULL ) {
 			moveDescM = MenuRegister( "Move Desc Toggle" );
-			moveDescMI = wMenuToggleCreate( moveDescM, "", "Show Description", 0, TRUE, ChangeDescFlag, NULL );
+			moveDescMI = wMenuToggleCreate( moveDescM, "", _("Show Description"), 0, TRUE, ChangeDescFlag, NULL );
 		}
 		wMenuToggleSet( moveDescMI, ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC ) == 0 );
 		wMenuPopupShow( moveDescM );
@@ -1554,7 +1555,7 @@ static STATUS_T CmdFlip(
 			}
 			if (SelectedTracksAreFrozen())
 				return C_TERMINATE;
-			InfoMessage( "Drag to mark mirror line" );
+			InfoMessage( _("Drag to mark mirror line") );
 			break;
 		case C_DOWN:
 			state = 1;
@@ -1568,11 +1569,11 @@ static STATUS_T CmdFlip(
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
 			pos1 = pos;
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
-			InfoMessage( "Angle %0.2f", FindAngle( pos0, pos1 ) );
+			InfoMessage( _("Angle %0.2f"), FindAngle( pos0, pos1 ) );
 			return C_CONTINUE;
 		case C_UP:
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
-			UndoStart( "Flip Tracks", "flip" );
+			UndoStart( _("Flip Tracks"), "flip" );
 			FlipTracks( pos0, FindAngle( pos0, pos1 ) );
 			state = 0;
 			return C_TERMINATE;
@@ -1734,7 +1735,7 @@ static STATUS_T CmdSelect(
 
 	switch (action) {
 	case C_START:
-		InfoMessage( "Select tracks" );
+		InfoMessage( _("Select tracks") );
 #ifdef LATER
 		if ((!importMove) && selectedTrackCount > 0) {
 			SetAllTrackSelect( FALSE );
@@ -1832,7 +1833,7 @@ static void SetMoveMode( char * line )
 
 EXPORT void InitCmdSelect( wMenu_p menu )
 {
-	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", "Select", wIconCreatePixMap(select_xpm),
+	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"), wIconCreatePixMap(select_xpm),
 				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU, ACCL_SELECT, NULL );
 	endpt_bm = wDrawBitMapCreate( mainD.d, bmendpt_width, bmendpt_width, 7, 7, bmendpt_bits );
 	angle_bm[0] = wDrawBitMapCreate( mainD.d, bma90_width, bma90_width, 7, 7, bma90_bits );
@@ -1845,16 +1846,16 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 		moveMode = MAXMOVEMODE;
 
 	selectPopup1M = MenuRegister( "Move Draw Mode" );
-	quickMove1M[0] = wMenuToggleCreate( selectPopup1M, "", "Normal", 0, quickMove==0, ChangeQuickMove, (void *) 0 );
-	quickMove1M[1] = wMenuToggleCreate( selectPopup1M, "", "Simple", 0, quickMove==1, ChangeQuickMove, (void *) 1 );
-	quickMove1M[2] = wMenuToggleCreate( selectPopup1M, "", "End Points", 0, quickMove==2, ChangeQuickMove, (void *) 2 );
+	quickMove1M[0] = wMenuToggleCreate( selectPopup1M, "", _("Normal"), 0, quickMove==0, ChangeQuickMove, (void *) 0 );
+	quickMove1M[1] = wMenuToggleCreate( selectPopup1M, "", _("Simple"), 0, quickMove==1, ChangeQuickMove, (void *) 1 );
+	quickMove1M[2] = wMenuToggleCreate( selectPopup1M, "", _("End Points"), 0, quickMove==2, ChangeQuickMove, (void *) 2 );
 	selectPopup2M = MenuRegister( "Move Draw Mode " );
-	quickMove2M[0] = wMenuToggleCreate( selectPopup2M, "", "Normal", 0, quickMove==0, ChangeQuickMove, (void *) 0 );
-	quickMove2M[1] = wMenuToggleCreate( selectPopup2M, "", "Simple", 0, quickMove==1, ChangeQuickMove, (void *) 1 );
-	quickMove2M[2] = wMenuToggleCreate( selectPopup2M, "", "End Points", 0, quickMove==2, ChangeQuickMove, (void *) 2 );
+	quickMove2M[0] = wMenuToggleCreate( selectPopup2M, "", _("Normal"), 0, quickMove==0, ChangeQuickMove, (void *) 0 );
+	quickMove2M[1] = wMenuToggleCreate( selectPopup2M, "", _("Simple"), 0, quickMove==1, ChangeQuickMove, (void *) 1 );
+	quickMove2M[2] = wMenuToggleCreate( selectPopup2M, "", _("End Points"), 0, quickMove==2, ChangeQuickMove, (void *) 2 );
 	wMenuSeparatorCreate( selectPopup2M );
 	AddRotateMenu( selectPopup2M, QuickRotate );
-	rotateAlignMI = wMenuPushCreate( selectPopup2M, "", "Align", 0, (wMenuCallBack_p)RotateAlign, NULL );
+	rotateAlignMI = wMenuPushCreate( selectPopup2M, "", _("Align"), 0, (wMenuCallBack_p)RotateAlign, NULL );
 	ParamRegister( &rescalePG );
 }
 
@@ -1875,7 +1876,7 @@ EXPORT void InitCmdTunnel( void )
 	icon = wIconCreatePixMap( tunnel_xpm );
 	AddToolbarButton( "cmdTunnel", icon, IC_SELECTED|IC_POPUP, (addButtonCallBack_t)SelectTunnel, NULL );
 #ifdef LATER
-	tunnelCmdInx = AddButton( "cmdTunnel", "Tunnel",
+	tunnelCmdInx = AddButton( "cmdTunnel", _("Tunnel"),
 		(addButtonCallBack_t)SelectTunnel, NULL, IC_SELECTED|IC_POPUP, NULL, LEVEL0_50, ACCL_TUNNEL,
 		(wControl_p)wButtonCreate(mainW, 0, 0, "cmdTunnel", (char*)bm_p, BO_ICON, 0, (wButtonCallBack_p)SelectTunnel, 0 ) );
 #endif
@@ -1884,17 +1885,17 @@ EXPORT void InitCmdTunnel( void )
 
 EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", "Move Description", wIconCreatePixMap(movedesc_xpm),
+	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"), wIconCreatePixMap(movedesc_xpm),
 				LEVEL0, IC_STICKY|IC_POPUP|IC_CMDMENU, ACCL_MOVEDESC, NULL );
 }
 
 
 EXPORT void InitCmdMove( wMenu_p menu )
 {
-	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", "Move", wIconCreatePixMap(move_xpm),
+	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"), wIconCreatePixMap(move_xpm),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_MOVE, NULL );
-	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", "Rotate", wIconCreatePixMap(rotate_xpm),
+	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"), wIconCreatePixMap(rotate_xpm),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_ROTATE, NULL );
-	/*flipCmdInx =*/ AddMenuButton( menu, CmdFlip, "cmdFlip", "Flip", wIconCreatePixMap(flip_xpm),
+	/*flipCmdInx =*/ AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"), wIconCreatePixMap(flip_xpm),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
 }

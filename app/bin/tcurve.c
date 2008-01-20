@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tcurve.c,v 1.1 2005-12-07 15:46:52 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tcurve.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  *
  * CURVE
  *
@@ -27,6 +27,7 @@
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
+#include "i18n.h"
 
 static TRKTYP_T T_CURVE = -1;
 
@@ -222,13 +223,13 @@ static void DrawCurveDescription(
 			elevValid = FALSE;
 		fp = wStandardFont( F_TIMES, FALSE, FALSE );
 		if (elevValid)
-			sprintf( message, "Helix: turns=%ld length=%s grade=%0.1f%% sep=%s",
+			sprintf( message, _("Helix: turns=%ld length=%s grade=%0.1f%% sep=%s"),
 				xx->helixTurns,
 				FormatDistance(dist),
 				grade*100.0,
 				FormatDistance(sep) );
 		else
-			sprintf( message, "Helix: turns=%ld length=%s",
+			sprintf( message, _("Helix: turns=%ld length=%s"),
 				xx->helixTurns,
 				FormatDistance(dist) );
 		DrawBoxedString( BOX_BOX, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
@@ -334,21 +335,21 @@ static struct {
 		} crvData;
 typedef enum { E0, Z0, E1, Z1, CE, RA, TU, SE, LN, AL, A1, A2, GR, PV, LY } crvDesc_e;
 static descData_t crvDesc[] = {
-/*E0*/	{ DESC_POS, "End Pt 1: X", &crvData.endPt[0] },
-/*Z0*/	{ DESC_DIM, "Z", &crvData.elev[0] },
-/*E1*/	{ DESC_POS, "End Pt 2: X", &crvData.endPt[1] },
-/*Z1*/	{ DESC_DIM, "Z", &crvData.elev[1] },
-/*CE*/	{ DESC_POS, "Center: X", &crvData.center },
-/*RA*/	{ DESC_DIM, "Radius", &crvData.radius },
-/*TU*/	{ DESC_LONG, "Turns", &crvData.turns },
-/*SE*/	{ DESC_DIM, "Separation", &crvData.separation },
-/*LN*/	{ DESC_DIM, "Length", &crvData.length },
-/*AL*/	{ DESC_FLOAT, "Angular Length", &crvData.angle },
-/*A1*/	{ DESC_ANGLE, "CCW Angle", &crvData.angle0 },
-/*A2*/	{ DESC_ANGLE, "CW Angle", &crvData.angle1 },
-/*GR*/	{ DESC_FLOAT, "Grade", &crvData.grade },
-/*PV*/	{ DESC_PIVOT, "Pivot", &crvData.pivot },
-/*LY*/	{ DESC_LAYER, "Layer", NULL },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &crvData.endPt[0] },
+/*Z0*/	{ DESC_DIM, N_("Z"), &crvData.elev[0] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &crvData.endPt[1] },
+/*Z1*/	{ DESC_DIM, N_("Z"), &crvData.elev[1] },
+/*CE*/	{ DESC_POS, N_("Center: X"), &crvData.center },
+/*RA*/	{ DESC_DIM, N_("Radius"), &crvData.radius },
+/*TU*/	{ DESC_LONG, N_("Turns"), &crvData.turns },
+/*SE*/	{ DESC_DIM, N_("Separation"), &crvData.separation },
+/*LN*/	{ DESC_DIM, N_("Length"), &crvData.length },
+/*AL*/	{ DESC_FLOAT, N_("Angular Length"), &crvData.angle },
+/*A1*/	{ DESC_ANGLE, N_("CCW Angle"), &crvData.angle0 },
+/*A2*/	{ DESC_ANGLE, N_("CW Angle"), &crvData.angle1 },
+/*GR*/	{ DESC_FLOAT, N_("Grade"), &crvData.grade },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &crvData.pivot },
+/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
 		{ DESC_NULL } };
 
 static void UpdateCurve( track_p trk, int inx, descData_p descUpd, BOOL_T final )
@@ -516,7 +517,7 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 	d = xx->radius * 2.0 * M_PI * a1 / 360.0;
 	if (xx->helixTurns > 0) {
 		d += (xx->helixTurns-(xx->circle?1:0)) * xx->radius * 2.0 * M_PI;
-		sprintf( str, "Helix Track(%d): Layer=%d Radius=%s Turns=%ld Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]",
+		sprintf( str, _("Helix Track(%d): Layer=%d Radius=%s Turns=%ld Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
 				GetTrkIndex(trk),
 				GetTrkLayer(trk)+1,
 				FormatDistance(xx->radius),
@@ -526,7 +527,7 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 				GetTrkEndPosXY(trk,0), GetTrkEndAngle(trk,0),
 				GetTrkEndPosXY(trk,1), GetTrkEndAngle(trk,1) );
 	} else {
-		sprintf( str, "Curved Track(%d): Layer=%d Radius=%s Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]",
+		sprintf( str, _("Curved Track(%d): Layer=%d Radius=%s Length=%s Center=[%s,%s] EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"),
 				GetTrkIndex(trk),
 				GetTrkLayer(trk)+1,
 				FormatDistance(xx->radius),
@@ -602,13 +603,13 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 	if ( xx->helixTurns ) {
 		if ( !xx->circle )
 			crvDesc[SE].mode = DESC_RO;
-		DoDescribe( "Helix Track", trk, crvDesc, UpdateCurve );
+		DoDescribe( _("Helix Track"), trk, crvDesc, UpdateCurve );
 	} else if ( xx->circle ) {
 		crvDesc[TU].mode |= DESC_IGNORE;
-		DoDescribe( "Circle Track", trk, crvDesc, UpdateCurve );
+		DoDescribe( _("Circle Track"), trk, crvDesc, UpdateCurve );
 	} else {
 		crvDesc[TU].mode |= DESC_IGNORE;
-		DoDescribe( "Curved Track", trk, crvDesc, UpdateCurve );
+		DoDescribe( _("Curved Track"), trk, crvDesc, UpdateCurve );
 	}
 }
 
@@ -765,7 +766,7 @@ static BOOL_T SplitCurve( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	track_p trk1;
 
 	if ( xx->helixTurns > 0 ) {
-		ErrorMessage( MSG_CANT_SPLIT_TRK, "Helix" );
+		ErrorMessage( MSG_CANT_SPLIT_TRK, _("Helix") );
 		return FALSE;
 	}
 	a = FindAngle( xx->pos, pos );
@@ -962,7 +963,7 @@ static BOOL_T MergeCurve(
 	GetCurveAngles( &a00, &a01, trk0 );
 	GetCurveAngles( &a10, &a11, trk1 );
 
-	UndoStart( "Merge Curves", "MergeCurve( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
+	UndoStart( _("Merge Curves"), "MergeCurve( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
 	UndoModify( trk0 );
 	UndrawNewTrack( trk0 );
 	trk2 = GetTrkEndTrk( trk1, 1-ep1 );
@@ -1029,7 +1030,7 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 		tempSegs(0).u.c.a0 = arcA0;
 		tempSegs(0).u.c.a1 = arcA1;
 		tempSegs_da.cnt = 1;
-		InfoMessage( "Drag to change angle or create tangent" );
+		InfoMessage( _("Drag to change angle or create tangent") );
 	case C_MOVE:
 		if (xx->helixTurns>0)
 			return C_CONTINUE;
@@ -1062,13 +1063,13 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 				d = arcRadius * tempSegs(0).u.c.a1 * 2.0*M_PI/360.0;
 				d -= jointD.d0;
 				if ( d <= minLength) {
-					ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
+					ErrorMessage( MSG_TRK_TOO_SHORT, _("Curved "), PutDim(fabs(minLength-d)) );
 					return C_CONTINUE;
 				}
 				d = FindDistance( tangentOrig, tangentEnd );
 				d -= jointD.d1;
 				if ( d <= minLength) {
-					ErrorMessage( MSG_TRK_TOO_SHORT, "Tangent ", PutDim(fabs(minLength-d)) );
+					ErrorMessage( MSG_TRK_TOO_SHORT, _("Tangent "), PutDim(fabs(minLength-d)) );
 					return C_CONTINUE;
 				}
 				tempSegs(1).type = SEG_STRTRK;
@@ -1077,7 +1078,7 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 				tempSegs(1).u.l.pos[1] = tangentEnd;
 				tempSegs_da.cnt = 2;
 				if (action == C_MOVE)
-					InfoMessage( "Tangent track: Length %s Angle %0.3f",
+					InfoMessage( _("Tangent track: Length %s Angle %0.3f"),
 						FormatDistance( d ),
 						PutAngle( FindAngle( tangentOrig, tangentEnd ) ) );
 			} else {
@@ -1094,12 +1095,12 @@ static STATUS_T ModifyCurve( track_p trk, wAction_t action, coOrd pos )
 				}
 				d = arcRadius*tempSegs(0).u.c.a1*2.0*M_PI/360.0;
 				if ( d <= minLength ) {
-					ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim( fabs(minLength-d) ) );
+					ErrorMessage( MSG_TRK_TOO_SHORT, _("Curved "), PutDim( fabs(minLength-d) ) );
 					return C_CONTINUE;
 				}
 				tempSegs_da.cnt = 1;
 				if (action == C_MOVE)
-					InfoMessage( "Curved: Radius=%s Length=%s Angle=%0.3f",
+					InfoMessage( _("Curved: Radius=%s Length=%s Angle=%0.3f"),
 								FormatDistance( arcRadius ), FormatDistance( d ),
 								tempSegs(0).u.c.a1 );
 			}

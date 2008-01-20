@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cdraw.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cdraw.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,7 +23,7 @@
 #include "track.h"
 #include "ccurve.h"
 #include "drawgeom.h"
-
+#include "i18n.h"
 
 
 static long fontSizeList[] = {
@@ -72,11 +72,11 @@ EXPORT void UpdateFontSizeList(
 		if ( message[0] != '\0' ) {
 			fontSize = atol( message );
 			if ( fontSize <= 0 ) {
-				NoticeMessage( "Font Size must be > 0", "Ok", NULL );
+				NoticeMessage( _("Font Size must be > 0"), _("Ok"), NULL );
 				sprintf( message, "%ld", *fontSizeR );
 				wListSetValue( list, message );
 			} else {
-				if ( fontSize <= 500 || NoticeMessage( MSG_LARGE_FONT, "Yes", "No" ) > 0 ) {
+				if ( fontSize <= 500 || NoticeMessage( MSG_LARGE_FONT, _("Yes"), _("No") ) > 0 ) {
 				
 					*fontSizeR = fontSize;
 					/*LoadFontSizeList( list, *fontSizeR );*/
@@ -181,26 +181,26 @@ static struct {
 		} drawData;
 typedef enum { E0, E1, CE, RA, LN, AL, A1, A2, VC, LW, CO, BE, OR, DS, TP, TA, TS, TX, PV, LY } drawDesc_e;
 static descData_t drawDesc[] = {
-/*E0*/	{ DESC_POS, "End Pt 1: X", &drawData.endPt[0] },
-/*E1*/	{ DESC_POS, "End Pt 2: X", &drawData.endPt[1] },
-/*CE*/	{ DESC_POS, "Center: X", &drawData.center },
-/*RA*/	{ DESC_DIM, "Radius", &drawData.radius },
-/*LN*/	{ DESC_DIM, "Length", &drawData.length },
-/*AL*/	{ DESC_FLOAT, "Angle", &drawData.angle },
-/*A1*/	{ DESC_ANGLE, "CCW Angle", &drawData.angle0 },
-/*A2*/	{ DESC_ANGLE, "CW Angle", &drawData.angle1 },
-/*VC*/	{ DESC_LONG, "Point Count", &drawData.pointCount },
-/*LW*/	{ DESC_LONG, "Line Width", &drawData.lineWidth },
-/*CO*/	{ DESC_COLOR, "Color", &drawData.color },
-/*BE*/	{ DESC_LIST, "Lumber", &drawData.benchChoice },
-/*OR*/	{ DESC_LIST, "Orientation", &drawData.benchOrient },
-/*DS*/	{ DESC_LIST, "Size", &drawData.dimenSize },
-/*TP*/	{ DESC_POS, "Origin: X", &drawData.endPt[0] },
-/*TA*/	{ DESC_FLOAT, "Angle", &drawData.angle },
-/*TS*/	{ DESC_EDITABLELIST, "Font Size", &drawData.fontSizeInx },
-/*TX*/	{ DESC_STRING, "Text", &drawData.text },
-/*PV*/	{ DESC_PIVOT, "Pivot", &drawData.pivot },
-/*LY*/	{ DESC_LAYER, "Layer", NULL },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &drawData.endPt[0] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &drawData.endPt[1] },
+/*CE*/	{ DESC_POS, N_("Center: X"), &drawData.center },
+/*RA*/	{ DESC_DIM, N_("Radius"), &drawData.radius },
+/*LN*/	{ DESC_DIM, N_("Length"), &drawData.length },
+/*AL*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle },
+/*A1*/	{ DESC_ANGLE, N_("CCW Angle"), &drawData.angle0 },
+/*A2*/	{ DESC_ANGLE, N_("CW Angle"), &drawData.angle1 },
+/*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
+/*LW*/	{ DESC_LONG, N_("Line Width"), &drawData.lineWidth },
+/*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color },
+/*BE*/	{ DESC_LIST, N_("Lumber"), &drawData.benchChoice },
+/*OR*/	{ DESC_LIST, N_("Orientation"), &drawData.benchOrient },
+/*DS*/	{ DESC_LIST, N_("Size"), &drawData.dimenSize },
+/*TP*/	{ DESC_POS, N_("Origin: X"), &drawData.endPt[0] },
+/*TA*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle },
+/*TS*/	{ DESC_EDITABLELIST, N_("Font Size"), &drawData.fontSizeInx },
+/*TX*/	{ DESC_STRING, N_("Text"), &drawData.text },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot },
+/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
 		{ DESC_NULL } };
 int drawSegInx;
 
@@ -404,17 +404,17 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[E1].mode = 0;
 		switch (segPtr->type) {
 		case SEG_STRLIN:
-			title = "Straight Line";
+			title = _("Straight Line");
 			break;
 		case SEG_DIMLIN:
-			title = "Dimension Line";
+			title = _("Dimension Line");
 			drawDesc[CO].mode = DESC_IGNORE;
 			drawDesc[LW].mode = DESC_IGNORE;
 			drawData.dimenSize = (wIndex_t)segPtr->u.l.option;
 			drawDesc[DS].mode = 0;
 			break;
 		case SEG_BENCH:
-			title = "Lumber";
+			title = _("Lumber");
 			drawDesc[LW].mode = DESC_IGNORE;
 			drawDesc[BE].mode =
 			drawDesc[OR].mode = 0;
@@ -422,7 +422,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			drawData.benchOrient = (wIndex_t)(segPtr->u.l.option&0xFF);
 			break;
 		case SEG_TBLEDGE:
-			title = "Table Edge";
+			title = _("Table Edge");
 			drawDesc[CO].mode = DESC_IGNORE;
 			drawDesc[LW].mode = DESC_IGNORE;
 			break;
@@ -434,7 +434,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[CE].mode =
 		drawDesc[RA].mode = 0;
 		if ( segPtr->u.c.a1 >= 360.0 ) {
-			title = "Circle";
+			title = _("Circle");
 		} else {
 			drawData.angle = segPtr->u.c.a1;
 			drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
@@ -442,7 +442,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			drawDesc[AL].mode =
 			drawDesc[A1].mode =
 			drawDesc[A2].mode = 0;
-			title = "Curved Line";
+			title = _("Curved Line");
 		}
 		break;
 	case SEG_FILCRCL:
@@ -451,18 +451,18 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[CE].mode =
 		drawDesc[RA].mode = 0;
 		drawDesc[LW].mode = DESC_IGNORE;
-		title = "Filled Circle";
+		title = _("Filled Circle");
 		break;
 	case SEG_POLY:
 		drawData.pointCount = segPtr->u.p.cnt;
 		drawDesc[VC].mode = DESC_RO;
-		title = "Poly Line";
+		title = _("Poly Line");
 		break;
 	case SEG_FILPOLY:
 		drawData.pointCount = segPtr->u.p.cnt;
 		drawDesc[VC].mode = DESC_RO;
 		drawDesc[LW].mode = DESC_IGNORE;
-		title = "Polygon";
+		title = _("Polygon");
 		break;
 	case SEG_TEXT:
 		REORIGIN( drawData.endPt[0], segPtr->u.t.pos, xx->angle, xx->orig );
@@ -480,13 +480,13 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 #endif
 		drawDesc[CO].mode =
 		drawDesc[LW].mode = DESC_IGNORE;
-		title = "Text";
+		title = _("Text");
 		break;
 	default:
 		AbortProg( "bad seg type" );
 	}
 
-	sprintf( str, "%s: Layer=%d", title, GetTrkLayer(trk)+1 );
+	sprintf( str, _("%s: Layer=%d"), title, GetTrkLayer(trk)+1 );
 
 	DoDescribe( title, trk, drawDesc, UpdateDraw );
 	if ( segPtr->type==SEG_BENCH && drawDesc[BE].control0!=NULL && drawDesc[OR].control0!=NULL) {
@@ -497,10 +497,10 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	}
 	if ( segPtr->type==SEG_DIMLIN && drawDesc[DS].control0!=NULL ) {
 		wListClear( (wList_p)drawDesc[DS].control0 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, "Tiny", NULL, (void*)0 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, "Small", NULL, (void*)1 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, "Medium", NULL, (void*)2 );
-		wListAddValue( (wList_p)drawDesc[DS].control0, "Large", NULL, (void*)3 );
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Tiny"), NULL, (void*)0 );
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Small"), NULL, (void*)1 );
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Medium"), NULL, (void*)2 );
+		wListAddValue( (wList_p)drawDesc[DS].control0, _("Large"), NULL, (void*)3 );
 		wListSetIndex( (wList_p)drawDesc[DS].control0, drawData.dimenSize );
 	}
 	if ( segPtr->type==SEG_TEXT && drawDesc[TS].control0!=NULL ) {
@@ -767,7 +767,7 @@ static void DrawOk( void * context )
 			cnt++;
 	if (cnt == 0)
 		return;
-	UndoStart( "Create Lines", "newDraw" );
+	UndoStart( _("Create Lines"), "newDraw" );
 	for ( sp=&DrawLineSegs(0); sp < &DrawLineSegs(drawCmdContext.Segs_da.cnt); sp++ ) {
 		if (sp->type != ' ') {
 			t = NewTrack( 0, T_DRAW, 0, sizeof *xx + sizeof *(trkSeg_p)0 );
@@ -800,13 +800,13 @@ static wIndex_t benchInx;
 static paramIntegerRange_t i0_100 = { 0, 100, 25 };
 static paramData_t drawPLs[] = {
 #define drawWidthPD				(drawPLs[0])
-	{ PD_LONG, &drawCmdContext.Width, "linewidth", PDO_NORECORD, &i0_100, "Line Width" }, 
+	{ PD_LONG, &drawCmdContext.Width, "linewidth", PDO_NORECORD, &i0_100, N_("Line Width") }, 
 #define drawColorPD				(drawPLs[1])
-	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, "Color" },
+	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchColorPD		(drawPLs[2])
-	{ PD_COLORLIST, &benchColor, "benchcolor", PDO_NORECORD, NULL, "Color" },
+	{ PD_COLORLIST, &benchColor, "benchcolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchChoicePD		(drawPLs[3])
-	{ PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)80, "Lumber Type" },
+	{ PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)80, N_("Lumber Type") },
 #define drawBenchOrientPD		(drawPLs[4])
 #ifdef WINDOWS
 	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)45, "", 0 },
@@ -814,28 +814,28 @@ static paramData_t drawPLs[] = {
 	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)105, "", 0 },
 #endif
 #define drawDimArrowSizePD		(drawPLs[5])
-	{ PD_DROPLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, (void*)80, "Size" } };
+	{ PD_DROPLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, (void*)80, N_("Size") } };
 static paramGroup_t drawPG = { "draw", 0, drawPLs, sizeof drawPLs/sizeof drawPLs[0] };
 
 static char * objectName[] = {
-		"Straight",
-		"Dimension",
-		"Lumber",
-		"Table Edge",
-		"Curved",
-		"Curved",
-		"Curved",
-		"Curved",
-		"Circle",
-		"Circle",
-		"Circle",
-		"Box",
-		"Polyline",
-		"Filled Circle",
-		"Filled Circle",
-		"Filled Circle",
-		"Filled Box",
-		"Polygon",
+		N_("Straight"),
+		N_("Dimension"),
+		N_("Lumber"),
+		N_("Table Edge"),
+		N_("Curved"),
+		N_("Curved"),
+		N_("Curved"),
+		N_("Curved"),
+		N_("Circle"),
+		N_("Circle"),
+		N_("Circle"),
+		N_("Box"),
+		N_("Polyline"),
+		N_("Filled Circle"),
+		N_("Filled Circle"),
+		N_("Filled Circle"),
+		N_("Filled Box"),
+		N_("Polygon"),
 		NULL};
 
 static STATUS_T CmdDraw( wAction_t action, coOrd pos )
@@ -859,7 +859,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		drawDimArrowSizePD.option |= PDO_NORECORD;
 		drawCmdContext.Op = (wIndex_t)(long)commandContext;
 		if ( drawCmdContext.Op < 0 || drawCmdContext.Op > OP_LAST ) {
-			NoticeMessage( "cmdDraw: Op %d", "Ok", NULL, drawCmdContext.Op );
+			NoticeMessage( "cmdDraw: Op %d", _("Ok"), NULL, drawCmdContext.Op );
 			drawCmdContext.Op = OP_LINE;
 		}
 		/*DrawGeomOp( (void*)(drawCmdContext.Op>=0?drawCmdContext.Op:OP_LINE) );*/
@@ -877,9 +877,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			controls[0] = drawWidthPD.control;
 			controls[1] = drawColorPD.control;
 			controls[2] = NULL;
-			sprintf( labelName, "%s Line Width", objectName[drawCmdContext.Op] );
+			sprintf( labelName, _("%s Line Width"), _(objectName[drawCmdContext.Op]) );
 			labels[0] = labelName;
-			labels[1] = "Color";
+			labels[1] = N_("Color");
 			InfoSubstituteControls( controls, labels );
 			drawWidthPD.option &= ~PDO_NORECORD;
 			drawColorPD.option &= ~PDO_NORECORD;
@@ -890,7 +890,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_FILLPOLY:
 			controls[0] = drawColorPD.control;
 			controls[1] = NULL;
-			sprintf( labelName, "%s Color", objectName[drawCmdContext.Op] );
+			sprintf( labelName, _("%s Color"), _(objectName[drawCmdContext.Op]) );
 			labels[0] = labelName;
 			ParamLoadControls( &drawPG );
 			InfoSubstituteControls( controls, labels );
@@ -901,9 +901,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			controls[1] = drawBenchOrientPD.control;
 			controls[2] = drawBenchColorPD.control;
 			controls[3] = NULL;
-			labels[0] = "Lumber Type";
+			labels[0] = N_("Lumber Type");
 			labels[1] = "";
-			labels[2] = "Color";
+			labels[2] = N_("Color");
 			if ( wListGetCount( (wList_p)drawBenchChoicePD.control ) == 0 )
 				BenchLoadLists( (wList_p)drawBenchChoicePD.control, (wList_p)drawBenchOrientPD.control );
 #ifdef LATER
@@ -921,12 +921,12 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_DIMLINE:
 			controls[0] = drawDimArrowSizePD.control;
 			controls[1] = NULL;
-			labels[0] = "Dimension Line Size";
+			labels[0] = N_("Dimension Line Size");
 			if ( wListGetCount( (wList_p)drawDimArrowSizePD.control ) == 0 ) {
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, "Tiny", NULL, NULL );
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, "Small", NULL, NULL );
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, "Medium", NULL, NULL );
-				wListAddValue( (wList_p)drawDimArrowSizePD.control, "Large", NULL, NULL );
+				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Tiny"), NULL, NULL );
+				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Small"), NULL, NULL );
+				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Medium"), NULL, NULL );
+				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Large"), NULL, NULL );
 			}
 			ParamLoadControls( &drawPG );
 			InfoSubstituteControls( controls, labels );
@@ -934,7 +934,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			break;
 		case OP_TBLEDGE:
 			InfoSubstituteControls( NULL, NULL );
-			InfoMessage( "Drag to create Table Edge" );
+			InfoMessage( _("Drag to create Table Edge") );
 			drawColorPD.option &= ~PDO_NORECORD;
 			break;
 		default:
@@ -1024,27 +1024,27 @@ typedef struct {
 		} drawData_t;
 
 static drawData_t dlineCmds[] = {
-		{ dline_xpm, OP_LINE, "Line", "Draw Line", "cmdDrawLine", ACCL_DRAWLINE },
-		{ ddimlin_xpm, OP_DIMLINE, "Dimension Line", "Draw Dimension Line", "cmdDrawDimLine", ACCL_DRAWDIMLINE },
-		{ dbench_xpm, OP_BENCH, "Benchwork", "Draw Benchwork", "cmdDrawBench", ACCL_DRAWBENCH },
-		{ dtbledge_xpm, OP_TBLEDGE, "Table Edge", "Draw Table Edge", "cmdDrawTableEdge", ACCL_DRAWTBLEDGE } };
+		{ dline_xpm, OP_LINE, N_("Line"), N_("Draw Line"), "cmdDrawLine", ACCL_DRAWLINE },
+		{ ddimlin_xpm, OP_DIMLINE, N_("Dimension Line"), N_("Draw Dimension Line"), "cmdDrawDimLine", ACCL_DRAWDIMLINE },
+		{ dbench_xpm, OP_BENCH, N_("Benchwork"), N_("Draw Benchwork"), "cmdDrawBench", ACCL_DRAWBENCH },
+		{ dtbledge_xpm, OP_TBLEDGE, N_("Table Edge"), N_("Draw Table Edge"), "cmdDrawTableEdge", ACCL_DRAWTBLEDGE } };
 static drawData_t dcurveCmds[] = {
-		{ dcurve1_xpm, OP_CURVE1, "Curve End", "Draw Curve from End", "cmdDrawCurveEndPt", ACCL_DRAWCURVE1 },
-		{ dcurve2_xpm, OP_CURVE2, "Curve Tangent", "Draw Curve from Tangent", "cmdDrawCurveTangent", ACCL_DRAWCURVE2 },
-		{ dcurve3_xpm, OP_CURVE3, "Curve Center", "Draw Curve from Center", "cmdDrawCurveCenter", ACCL_DRAWCURVE3 },
-		{ dcurve4_xpm, OP_CURVE4, "Curve Chord", "Draw Curve from Chord", "cmdDrawCurveChord", ACCL_DRAWCURVE4 } };
+		{ dcurve1_xpm, OP_CURVE1, N_("Curve End"), N_("Draw Curve from End"), "cmdDrawCurveEndPt", ACCL_DRAWCURVE1 },
+		{ dcurve2_xpm, OP_CURVE2, N_("Curve Tangent"), N_("Draw Curve from Tangent"), "cmdDrawCurveTangent", ACCL_DRAWCURVE2 },
+		{ dcurve3_xpm, OP_CURVE3, N_("Curve Center"), N_("Draw Curve from Center"), "cmdDrawCurveCenter", ACCL_DRAWCURVE3 },
+		{ dcurve4_xpm, OP_CURVE4, N_("Curve Chord"), N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4 } };
 static drawData_t dcircleCmds[] = {
 		/*{ dcircle1_xpm, OP_CIRCLE1, "Circle Fixed Radius", "Draw Fixed Radius Circle", "cmdDrawCircleFixedRadius", ACCL_DRAWCIRCLE1 },*/
-		{ dcircle2_xpm, OP_CIRCLE2, "Circle Tangent", "Draw Circle from Tangent", "cmdDrawCircleTangent", ACCL_DRAWCIRCLE2 },
-		{ dcircle3_xpm, OP_CIRCLE3, "Circle Center", "Draw Circle from Center", "cmdDrawCircleCenter", ACCL_DRAWCIRCLE3 },
+		{ dcircle2_xpm, OP_CIRCLE2, N_("Circle Tangent"), N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE2 },
+		{ dcircle3_xpm, OP_CIRCLE3, N_("Circle Center"), N_("Draw Circle from Center"), "cmdDrawCircleCenter", ACCL_DRAWCIRCLE3 },
 		/*{ dflcrcl1_xpm, OP_FILLCIRCLE1, "Circle Filled Fixed Radius", "Draw Fixed Radius Filled Circle", "cmdDrawFilledCircleFixedRadius", ACCL_DRAWFILLCIRCLE1 },*/
-		{ dflcrcl2_xpm, OP_FILLCIRCLE2, "Circle Filled Tangent", "Draw Filled Circle from Tangent", "cmdDrawFilledCircleTangent", ACCL_DRAWFILLCIRCLE2 },
-		{ dflcrcl3_xpm, OP_FILLCIRCLE3, "Circle Filled Center", "Draw Filled Circle from Center", "cmdDrawFilledCircleCenter", ACCL_DRAWFILLCIRCLE3 } };
+		{ dflcrcl2_xpm, OP_FILLCIRCLE2, N_("Circle Filled Tangent"), N_("Draw Filled Circle from Tangent"), "cmdDrawFilledCircleTangent", ACCL_DRAWFILLCIRCLE2 },
+		{ dflcrcl3_xpm, OP_FILLCIRCLE3, N_("Circle Filled Center"), N_("Draw Filled Circle from Center"), "cmdDrawFilledCircleCenter", ACCL_DRAWFILLCIRCLE3 } };
 static drawData_t dshapeCmds[] = {
-		{ dbox_xpm, OP_BOX, "Box", "Draw Box", "cmdDrawBox", ACCL_DRAWBOX },
-		{ dfilbox_xpm, OP_FILLBOX, "Filled Box", "Draw Filled Box", "cmdDrawFilledBox", ACCL_DRAWFILLBOX },
-		{ dpoly_xpm, OP_POLY, "Poly Line", "Draw Polyline", "cmdDrawPolyline", ACCL_DRAWPOLYLINE },
-		{ dfilpoly_xpm, OP_FILLPOLY, "Polygon", "Draw Polygon", "cmdDrawPolygon", ACCL_DRAWPOLYGON } };
+		{ dbox_xpm, OP_BOX, N_("Box"), N_("Draw Box"), "cmdDrawBox", ACCL_DRAWBOX },
+		{ dfilbox_xpm, OP_FILLBOX, N_("Filled Box"), N_("Draw Filled Box"), "cmdDrawFilledBox", ACCL_DRAWFILLBOX },
+		{ dpoly_xpm, OP_POLY, N_("Poly Line"), N_("Draw Polyline"), "cmdDrawPolyline", ACCL_DRAWPOLYLINE },
+		{ dfilpoly_xpm, OP_FILLPOLY, N_("Polygon"), N_("Draw Polygon"), "cmdDrawPolygon", ACCL_DRAWPOLYGON } };
 
 typedef struct {
 		char * helpKey;
@@ -1060,10 +1060,10 @@ static drawStuff_t drawStuff[4];
 
 
 static drawStuff_t drawStuff[4] = {
-		{ "cmdDrawLineSetCmd", "Straight Objects", "Draw Straight Objects", 4, dlineCmds },
-		{ "cmdDrawCurveSetCmd", "Curved Lines", "Draw Curved Lines", 4, dcurveCmds },
-		{ "cmdDrawCircleSetCmd", "Circle Lines", "Draw Circles", 4, dcircleCmds },
-		{ "cmdDrawShapeSetCmd", "Shapes", "Draw Shapes", 4, dshapeCmds} };
+		{ "cmdDrawLineSetCmd", N_("Straight Objects"), N_("Draw Straight Objects"), 4, dlineCmds },
+		{ "cmdDrawCurveSetCmd", N_("Curved Lines"), N_("Draw Curved Lines"), 4, dcurveCmds },
+		{ "cmdDrawCircleSetCmd", N_("Circle Lines"), N_("Draw Circles"), 4, dcircleCmds },
+		{ "cmdDrawShapeSetCmd", N_("Shapes"), N_("Draw Shapes"), 4, dshapeCmds} };
 		
 
 #ifdef LATER
@@ -1129,11 +1129,11 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 
 	for ( inx1=0; inx1<4; inx1++ ) {
 		dsp = &drawStuff[inx1];
-		ButtonGroupBegin( dsp->menuTitle, dsp->helpKey, dsp->stickyLabel );
+		ButtonGroupBegin( _(dsp->menuTitle), dsp->helpKey, _(dsp->stickyLabel) );
 		for ( inx2=0; inx2<dsp->cnt; inx2++ ) {
 			ddp = &dsp->data[inx2];
 			icon = wIconCreatePixMap( ddp->xpm );
-			AddMenuButton( menu, CmdDraw, ddp->helpKey, ddp->cmdName, icon, LEVEL0_50, IC_STICKY|IC_POPUP2, ddp->acclKey, (void*)ddp->OP );
+			AddMenuButton( menu, CmdDraw, ddp->helpKey, _(ddp->cmdName), icon, LEVEL0_50, IC_STICKY|IC_POPUP2, ddp->acclKey, (void*)ddp->OP );
 		}
 		ButtonGroupEnd();
 	}
@@ -1141,7 +1141,7 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 	ParamRegister( &drawPG );
 	RegisterChangeNotification( ChangeDraw );
 #ifdef LATER
-		InitCommand( cmdDraw, "Draw", draw_bits, LEVEL0_50, IC_POPUP|IC_CMDMENU, ACCL_DRAW );
+		InitCommand( cmdDraw, N_("Draw"), draw_bits, LEVEL0_50, IC_POPUP|IC_CMDMENU, ACCL_DRAW );
 #endif
 }
 

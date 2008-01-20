@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/celev.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/celev.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,7 @@
 
 #include "track.h"
 #include "cselect.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -40,7 +41,8 @@ static track_p elevTrk;
 static EPINX_T elevEp;
 static BOOL_T elevUndo = FALSE;
 
-static char * elevModeLabels[] = { "None", "Defined", "Hidden", "Computed", "Grade", "Station", "Ignore", NULL };
+static char * elevModeLabels[] = { N_("None"), N_("Defined"), N_("Hidden"),
+	N_("Computed"), N_("Grade"), N_("Station"), N_("Ignore"), NULL };
 static paramFloatRange_t r_1000_1000 = { -1000, 1000 };
 
 static paramData_t elevationPLs[] = {
@@ -118,7 +120,7 @@ static void DoElevRadio( long mode, void * context )
 		if ( !( (rc0 == FDE_DEF && rc1 == FDE_DEF) ||
 				(rc0 == FDE_DEF && rc1 == FDE_END) ||
 				(rc0 == FDE_END && rc1 == FDE_DEF) ) ) {
-			ParamLoadMessage( &elevationPG, I_MSG, "There are no reachable Defined Elevations" );
+			ParamLoadMessage( &elevationPG, I_MSG, _("There are no reachable Defined Elevations") );
 			ParamLoadControl( &elevationPG, I_MODE );
 			return;
 		}
@@ -163,7 +165,7 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 			if ( !( (rc0 == FDE_DEF && rc1 == FDE_DEF) ||
 					(rc0 == FDE_DEF && rc1 == FDE_END) ||
 					(rc0 == FDE_END && rc1 == FDE_DEF) ) ) {
-				ParamLoadMessage( &elevationPG, I_MSG, "There are no reachable Defined Elevations" );
+				ParamLoadMessage( &elevationPG, I_MSG, _("There are no reachable Defined Elevations") );
 				ParamLoadControl( &elevationPG, I_MODE );
 				return;
 			}
@@ -199,7 +201,7 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 		}
 	}
 	if (elevUndo == FALSE) {
-		UndoStart( "Set Elevation", "Set Elevation" );
+		UndoStart( _("Set Elevation"), "Set Elevation" );
 		elevUndo = TRUE;
 	}
 	pos = GetTrkEndPos( elevTrk, elevEp );
@@ -304,15 +306,15 @@ if (oldElevationEvaluation) {
 	rc0 = FindDefinedElev( trk, ep, dir, FALSE, &elev0, &dist0 );
 	rc1 = FindDefinedElev( trk, ep, 1-dir, FALSE, &elev1, &dist1 );
 	if ( rc0 == FDE_DEF ) {
-		sprintf( message, "Elev = %s", FormatDistance(elev0) );
+		sprintf( message, _("Elev = %s"), FormatDistance(elev0) );
 		ParamLoadMessage( elev1ElevM, message );
-		sprintf( message, "Dist = %s", FormatDistance(dist0) );
+		sprintf( message, _("Dist = %s"), FormatDistance(dist0) );
 		ParamLoadMessage( elev1DistM, message );
 #ifdef LATER
 		if (dist0 > 0.1)
 			sprintf( message, "%0.1f%%", elev0/dist0 );
 		else
-			sprintf( message, "Undefined" );
+			sprintf( message, _("Undefined") );
 		ParamLoadMessage( elev1GradeM, message );
 #endif
 	} else {
@@ -321,15 +323,15 @@ if (oldElevationEvaluation) {
 		/*ParamLoadMessage( elev1GradeM, "" );*/
 	}
 	if ( rc1 == FDE_DEF ) {
-		sprintf( message, "Elev = %s", FormatDistance(elev1) );
+		sprintf( message, _("Elev = %s"), FormatDistance(elev1) );
 		ParamLoadMessage( elev2ElevM, message );
-		sprintf( message, "Dist = %s", FormatDistance(dist1) );
+		sprintf( message, _("Dist = %s"), FormatDistance(dist1) );
 		ParamLoadMessage( elev2DistM, message );
 #ifdef LATER
 		if (dist1 > 0.1)
 			sprintf( message, "%0.1f%%", elev1/dist1 );
 		else
-			sprintf( message, "Undefined" );
+			sprintf( message, _("Undefined") );
 		ParamLoadMessage( elev2GradeM, message );
 #endif
 	} else {
@@ -370,17 +372,17 @@ if (oldElevationEvaluation) {
 				if (dist>0.1)
 					sprintf( message, "%0.1f%%", fabs((elev-elevX)/dist)*100.0 );
 				else
-					sprintf( message, "Undefined" );
+					sprintf( message, _("Undefined") );
 				if ( (trk1=GetTrkEndTrk(trk,ep)) && (ep1=GetEndPtConnectedToMe(trk1,trk))>=0 ) {
 					elev = GetElevation(trk1);
 					dist = GetTrkLength(trk1,ep1,-1);
 					if (dist>0.1)
 						sprintf( message+strlen(message), " - %0.1f%%", fabs((elev-elevX)/dist)*100.0 );
 					else
-						sprintf( message+strlen(message), " - Undefined" );
+						sprintf( message+strlen(message), " - %s", _("Undefined") );
 				}
 			} else {
-				strcpy( message, "Undefined" );
+				strcpy( message, _("Undefined") );
 			}
 		}
 		ParamLoadMessage( &elevationPG, I_GRADE, message );
@@ -402,7 +404,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	switch (action) {
 	case C_START:
 		if ( elevW == NULL )
-			elevW = ParamCreateDialog( &elevationPG, MakeWindowTitle("Elevation"), "Done", DoElevDone, NULL, TRUE, LayoutElevW, 0, DoElevUpdate );
+			elevW = ParamCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")), _("Done"), DoElevDone, NULL, TRUE, LayoutElevW, 0, DoElevUpdate );
 		elevModeV = 0;
 		elevHeightV = 0.0;
 		elevStationV[0] = 0;
@@ -414,7 +416,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		ParamControlActive( &elevationPG, I_STATION, FALSE );
 		ParamLoadMessage( &elevationPG, I_COMPUTED, "" );
 		ParamLoadMessage( &elevationPG, I_GRADE, "" );
-		InfoMessage( "Select End-Point" );
+		InfoMessage( _("Select End-Point") );
 		HilightElevations( TRUE );
 		elevTrk = NULL;
 		elevUndo = FALSE;
@@ -430,7 +432,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		}
 		if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 			ep0 = PickEndPoint( pos, trk0 );
-			UndoStart( "Split Track", "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
+			UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 			oldTrackCount = trackCount;
 			if (!SplitTrack( trk0, pos, ep0, &trk1, FALSE ))
 				return C_CONTINUE;
@@ -468,6 +470,6 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 EXPORT void InitCmdElevation( wMenu_p menu )
 {
 	ParamRegister( &elevationPG );
-	AddMenuButton( menu, CmdElevation, "cmdElevation", "Elevation", wIconCreatePixMap(elev_xpm), LEVEL0_50, IC_POPUP|IC_LCLICK, ACCL_ELEVATION, NULL );
+	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"), wIconCreatePixMap(elev_xpm), LEVEL0_50, IC_POPUP|IC_LCLICK, ACCL_ELEVATION, NULL );
 }
 

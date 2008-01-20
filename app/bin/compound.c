@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/compound.c,v 1.3 2007-01-14 08:43:32 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/compound.c,v 1.4 2008-01-20 23:29:15 mni77 Exp $
  *
  * Compound tracks: Turnouts and Structures
  *
@@ -28,6 +28,8 @@
 #include "compound.h"
 #include "shrtpath.h"
 #include "cjoin.h"
+#include "i18n.h"
+
 #if _MSC_VER >=1400
 #define strdup _strdup
 #endif
@@ -507,19 +509,19 @@ static struct {
 		} compoundData;
 typedef enum { E0, Z0, E1, Z1, GR, OR, AN, MN, NM, PN, EC, SC, LY } compoundDesc_e;
 static descData_t compoundDesc[] = {
-/*E0*/	{ DESC_POS, "End Pt 1: X", &compoundData.endPt[0] },
-/*Z0*/	{ DESC_DIM, "Z", &compoundData.elev[0] },
-/*E1*/	{ DESC_POS, "End Pt 2: X", &compoundData.endPt[1] },
-/*Z1*/	{ DESC_DIM, "Z", &compoundData.elev[1] },
-/*GR*/	{ DESC_FLOAT, "Grade", &compoundData.grade },
-/*OR*/	{ DESC_POS, "Origin: X", &compoundData.orig },
-/*AN*/	{ DESC_ANGLE, "Angle", &compoundData.angle },
-/*MN*/	{ DESC_STRING, "Manufacturer", &compoundData.manuf },
-/*NM*/	{ DESC_STRING, "Name", &compoundData.name },
-/*PN*/	{ DESC_STRING, "Part No", &compoundData.partno },
-/*EC*/	{ DESC_LONG, "# End Pt", &compoundData.epCnt },
-/*SC*/	{ DESC_LONG, "# Segments", &compoundData.segCnt },
-/*LY*/	{ DESC_LAYER, "Layer", NULL },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &compoundData.endPt[0] },
+/*Z0*/	{ DESC_DIM, N_("Z"), &compoundData.elev[0] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &compoundData.endPt[1] },
+/*Z1*/	{ DESC_DIM, N_("Z"), &compoundData.elev[1] },
+/*GR*/	{ DESC_FLOAT, N_("Grade"), &compoundData.grade },
+/*OR*/	{ DESC_POS, N_("Origin: X"), &compoundData.orig },
+/*AN*/	{ DESC_ANGLE, N_("Angle"), &compoundData.angle },
+/*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf },
+/*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name },
+/*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno },
+/*EC*/	{ DESC_LONG, N_("# End Pt"), &compoundData.epCnt },
+/*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt },
+/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
 		{ DESC_NULL } };
 
 
@@ -587,7 +589,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		if ( ! titleChanged )
 			return;
 		if ( needUndoStart )
-		   UndoStart( "Change Track", "Change Track" );
+		   UndoStart( _("Change Track"), "Change Track" );
 		UndoModify( trk );
 		GetBoundingBox( trk, &hi, &lo );
 		if ( labelScale >= mainD.scale &&
@@ -675,13 +677,13 @@ void DescribeCompound(
 	FormatCompoundTitle( listLabelsOption, xtitle(xx) );
 	if (message[0] == '\0')
 		FormatCompoundTitle( listLabelsOption|LABEL_DESCR, xtitle(xx) );
-	strcpy( str, GetTrkTypeName( trk ) );
+	strcpy( str, _(GetTrkTypeName( trk )) );
 	str++;
 	while (*str) {
 		*str = tolower(*str);
 		str++;
 	}
-	sprintf( str, "(%d): Layer=%d %s",
+	sprintf( str, _("(%d): Layer=%d %s"),
 		GetTrkIndex(trk), GetTrkLayer(trk)+1, message );
 
 	epCnt = GetTrkEndPtCnt(trk);
@@ -768,10 +770,10 @@ void DescribeCompound(
 					compoundData.grade = 0.0;
 			}
 		}
-		DoDescribe( compoundData.epCnt>2?"Turnout":"Sectional Track", trk, compoundDesc, UpdateCompound );
+		DoDescribe( compoundData.epCnt>2?_("Turnout"):_("Sectional Track"), trk, compoundDesc, UpdateCompound );
 	} else {
 		compoundDesc[EC].mode |= DESC_IGNORE;
-		DoDescribe( "Structure", trk, compoundDesc, UpdateCompound );
+		DoDescribe( _("Structure"), trk, compoundDesc, UpdateCompound );
 	}
 }
 

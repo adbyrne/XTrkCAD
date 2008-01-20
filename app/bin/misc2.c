@@ -1,7 +1,7 @@
 /** \file misc2.c
  * Management of information about scales and gauges plus rprintf.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.6 2007-11-24 19:48:21 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.7 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -43,6 +43,7 @@
 #include "misc.h"
 #include "cjoin.h"
 #include "compound.h"
+#include "i18n.h"
 
 EXPORT long units = 0;
 EXPORT long checkPtInterval = 10;
@@ -408,7 +409,7 @@ static void SetScale(
 	if ( curScaleInx >= 0 )
 		wPrefSetFloat( "misc", minTrackRadiusPrefS, minTrackRadius );
 	if (newScaleInx < 0 && newScaleInx >= scaleInfo_da.cnt) {
-		NoticeMessage( MSG_BAD_SCALE_INDEX, "Ok", NULL, (int)newScaleInx );
+		NoticeMessage( MSG_BAD_SCALE_INDEX, _("Ok"), NULL, (int)newScaleInx );
 		return;
 	}
 	curScaleInx = (SCALEINX_T)newScaleInx;

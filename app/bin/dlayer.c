@@ -1,7 +1,7 @@
 /** \file dlayer.c
  * Functions and dialogs for handling layers.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.7 2007-12-12 20:08:32 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.8 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -25,6 +25,7 @@
 #include <assert.h>
 
 #include "track.h"
+#include "i18n.h"
 
 
 /*****************************************************************************
@@ -195,7 +196,7 @@ static void FlipLayer( void * arg )
 		return;
 	if ( l == curLayer && layers[(int)l].visible) {
 		wButtonSetBusy( layer_btns[(int)l], layers[(int)l].visible );
-		NoticeMessage( MSG_LAYER_HIDE, "Ok", NULL );
+		NoticeMessage( MSG_LAYER_HIDE, _("Ok"), NULL );
 		return;
 	}
 	RedrawLayer( l, FALSE );
@@ -212,7 +213,7 @@ static void SetCurrLayer( wIndex_t inx, const char * name, wIndex_t op, void * l
 {
 	LAYER_T newLayer = (LAYER_T)(long)inx;
 	if (layers[(int)newLayer].frozen) {
-		NoticeMessage( MSG_LAYER_SEL_FROZEN, "Ok", NULL );
+		NoticeMessage( MSG_LAYER_SEL_FROZEN, _("Ok"), NULL );
 		wListSetIndex( setLayerL, curLayer );
 		return;
 	}
@@ -308,24 +309,24 @@ static paramData_t layerPLs[] = {
 #define I_LIST	(0)
 	 { PD_DROPLIST, NULL, "layer", PDO_LISTINDEX|PDO_DLGNOLABELALIGN, (void*)250 },
 #define I_NAME	(1)
-	 { PD_STRING, layerName, "name", PDO_NOPREF, (void*)(250-54), "Name" },
+	 { PD_STRING, layerName, "name", PDO_NOPREF, (void*)(250-54), N_("Name") },
 #define I_COLOR	(2)
-	 { PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, "Color" },
+	 { PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, N_("Color") },
 #define I_VIS	(3)
-	 { PD_TOGGLE, &layerVisible, "visible", PDO_NOPREF, visibleLabels, "Visible", BC_HORZ|BC_NOBORDER },
+	 { PD_TOGGLE, &layerVisible, "visible", PDO_NOPREF, visibleLabels, N_("Visible"), BC_HORZ|BC_NOBORDER },
 #define I_FRZ	(4)
-	 { PD_TOGGLE, &layerFrozen, "frozen", PDO_NOPREF|PDO_DLGHORZ, frozenLabels, "Frozen", BC_HORZ|BC_NOBORDER },
+	 { PD_TOGGLE, &layerFrozen, "frozen", PDO_NOPREF|PDO_DLGHORZ, frozenLabels, N_("Frozen"), BC_HORZ|BC_NOBORDER },
 #define I_MAP	(5)
-	 { PD_TOGGLE, &layerOnMap, "onmap", PDO_NOPREF|PDO_DLGHORZ, onMapLabels, "On Map", BC_HORZ|BC_NOBORDER },
+	 { PD_TOGGLE, &layerOnMap, "onmap", PDO_NOPREF|PDO_DLGHORZ, onMapLabels, N_("On Map"), BC_HORZ|BC_NOBORDER },
 #define I_COUNT (6)
-	 { PD_STRING, NULL, "object-count", PDO_NOPREF|PDO_DLGBOXEND, (void*)(80), "Count", BO_READONLY },
-	 { PD_MESSAGE, "Personal Preferences", NULL, PDO_DLGRESETMARGIN, (void *)180 },
-	 { PD_BUTTON, DoLayerOp, "reset", PDO_DLGRESETMARGIN, 0, "Load", 0, (void *)ENUMLAYER_RELOAD },
-	 { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, "Save", 0, (void *)ENUMLAYER_SAVE }, 
-	 { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, "Defaults", 0, (void *)ENUMLAYER_CLEAR }, 	 
-	 { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, "Number of Layer Buttons" },	 
+	 { PD_STRING, NULL, "object-count", PDO_NOPREF|PDO_DLGBOXEND, (void*)(80), N_("Count"), BO_READONLY },
+	 { PD_MESSAGE, N_("Personal Preferences"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
+	 { PD_BUTTON, DoLayerOp, "reset", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, (void *)ENUMLAYER_RELOAD },
+	 { PD_BUTTON, DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, (void *)ENUMLAYER_SAVE }, 
+	 { PD_BUTTON, DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, (void *)ENUMLAYER_CLEAR }, 	 
+	 { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },	 
 };
-	 
+
 static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof layerPLs[0] };
 
 #define layerL	((wList_p)layerPLs[I_LIST].control)
@@ -340,7 +341,7 @@ LayerSystemDefaults( void )
 	int inx;
 	
 	for ( inx=0;inx<NUM_LAYERS; inx++ ) {
-		strcpy( layers[inx].name, inx==0?"Main":"" );
+		strcpy( layers[inx].name, inx==0?_("Main"):"" );
 		layers[inx].visible = TRUE;
 		layers[inx].frozen = FALSE;
 		layers[inx].onMap = TRUE;
@@ -443,7 +444,7 @@ UpdateLayerDlg()
 	/* finally show the layer buttons with ballon text */
 	for( inx = 0; inx < NUM_BUTTONS; inx++ ) {
 		wButtonSetBusy( layer_btns[inx], layers[inx].visible != 0 );
-		wControlSetBalloonText( (wControl_p)layer_btns[inx], (layers[inx].name[0] != '\0' ? layers[inx].name :"Show/Hide Layer" ));
+		wControlSetBalloonText( (wControl_p)layer_btns[inx], (layers[inx].name[0] != '\0' ? layers[inx].name :_("Show/Hide Layer") ));
 	}
 }
 
@@ -639,12 +640,12 @@ static void LayerUpdate( void )
 	if (layerCurrent < 0 || layerCurrent >= NUM_LAYERS)
 		return;
 	if (layerCurrent == curLayer && layerFrozen) {
-		NoticeMessage( MSG_LAYER_FREEZE, "Ok", NULL );
+		NoticeMessage( MSG_LAYER_FREEZE, _("Ok"), NULL );
 		layerFrozen = FALSE;
 		ParamLoadControl( &layerPG, I_FRZ );
 	}
 	if (layerCurrent == curLayer && !layerVisible) {
-		NoticeMessage( MSG_LAYER_HIDE, "Ok", NULL );
+		NoticeMessage( MSG_LAYER_HIDE, _("Ok"), NULL );
 		layerVisible = TRUE;
 		ParamLoadControl( &layerPG, I_VIS );
 	}
@@ -659,7 +660,7 @@ static void LayerUpdate( void )
 		if (strlen(layers[(int)layerCurrent].name)>0)
 			wControlSetBalloonText( (wControl_p)layer_btns[(int)layerCurrent], layers[(int)layerCurrent].name );
 		else
-			wControlSetBalloonText( (wControl_p)layer_btns[(int)layerCurrent], "Show/Hide Layer" );
+			wControlSetBalloonText( (wControl_p)layer_btns[(int)layerCurrent], _("Show/Hide Layer") );
 	}
 	redraw = ( layerColor != layers[(int)layerCurrent].color ||
 			   (BOOL_T)layerVisible != layers[(int)layerCurrent].visible );
@@ -703,7 +704,7 @@ EXPORT void ResetLayers( void )
 {
 	int inx;
 	for ( inx=0;inx<NUM_LAYERS; inx++ ) {
-		strcpy( layers[inx].name, inx==0?"Main":"" );
+		strcpy( layers[inx].name, inx==0?_("Main"):"" );
 		layers[inx].visible = TRUE;
 		layers[inx].frozen = FALSE;
 		layers[inx].onMap = TRUE;
@@ -713,9 +714,9 @@ EXPORT void ResetLayers( void )
 			wButtonSetLabel( layer_btns[inx], (char*)show_layer_bmps[inx] );
 		}
 	}
-	wControlSetBalloonText( (wControl_p)layer_btns[0], "Main" );
+	wControlSetBalloonText( (wControl_p)layer_btns[0], _("Main") );
 	for ( inx=1; inx<NUM_BUTTONS; inx++ ) {
-		wControlSetBalloonText( (wControl_p)layer_btns[inx], "Show/Hide Layer" );
+		wControlSetBalloonText( (wControl_p)layer_btns[inx], _("Show/Hide Layer") );
 	}
 	curLayer = 0;
 	layerVisible = TRUE;
@@ -757,9 +758,9 @@ EXPORT void RestoreLayers( void )
 		SetLayerColor( inx, color );
 		if ( layers[inx].name[0] == '\0' ) {
 			if ( inx == 0 ) {
-				label = "Main";
+				label = _("Main");
 			} else {
-				label = "Show/Hide Layer";
+				label = _("Show/Hide Layer");
 			}
 		} else {
 			label = layers[inx].name;
@@ -816,7 +817,7 @@ static void LayerDlgUpdate(
 static void DoLayer( void * junk )
 {
 	if (layerW == NULL)
-		layerW = ParamCreateDialog( &layerPG, MakeWindowTitle("Layers"), "Done", LayerOk, NULL, TRUE, NULL, 0, LayerDlgUpdate );
+		layerW = ParamCreateDialog( &layerPG, MakeWindowTitle(_("Layers")), _("Done"), LayerOk, NULL, TRUE, NULL, 0, LayerDlgUpdate );
 
 	/* set the globals to the values for the current layer */
 	UpdateLayerDlg();
@@ -924,7 +925,7 @@ EXPORT void InitLayers( void )
 				BO_ICON, 0, (wButtonCallBack_p)FlipLayer, (void*)i );
 			
 			/* add the help text */
-			wControlSetBalloonText( (wControl_p)layer_btns[i], "Show/Hide Layer" );
+			wControlSetBalloonText( (wControl_p)layer_btns[i], _("Show/Hide Layer") );
 			
 			/* put on toolbar */
 			AddToolbarControl( (wControl_p)layer_btns[i], IC_MODETRAIN_TOO );
@@ -932,7 +933,7 @@ EXPORT void InitLayers( void )
 			/* set state of button */
 			wButtonSetBusy( layer_btns[i], 1 );
 		}
-		sprintf( message, "%2d : %s", i+1, (i==0?"Main":"") );
+		sprintf( message, "%2d : %s", i+1, (i==0?_("Main"):"") );
 		wListAddValue( setLayerL, message, NULL, (void*)i );
 	}
 	AddPlaybackProc( "SETCURRLAYER", PlaybackCurrLayer, NULL );

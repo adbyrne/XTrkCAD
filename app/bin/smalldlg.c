@@ -1,7 +1,7 @@
 /** \file smalldlg.c
  * Several simple and smaller dialogs. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.4 2007-11-24 19:48:21 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.5 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -53,6 +53,7 @@
 #include "param.h"
 
 #include "smalldlg.h"
+#include "i18n.h"
 
 static wWin_p tipW;					/**< window handle for tip dialog */
 static long showTipAtStart = 1;	/**< flag for visibility */
@@ -60,16 +61,16 @@ static long showTipAtStart = 1;	/**< flag for visibility */
 static dynArr_t tips_da;			/**< dynamic array for all tips */
 #define tips(N) DYNARR_N( char *, tips_da, N )
 
-static char * tipLabels[] = { "Show tips at start", NULL };
+static char * tipLabels[] = { N_("Show tips at start"), NULL };
 static paramTextData_t tipTextData = { 40, 10 };
 
 static paramData_t tipPLs[] = {
 #define I_TIPTEXT		(1)
 #define tipT			((wText_p)tipPLs[I_TIPTEXT].control)
-	{   PD_MESSAGE, "Did you know...", NULL, 0, NULL, NULL, BM_LARGE },
+	{   PD_MESSAGE, N_("Did you know..."), NULL, 0, NULL, NULL, BM_LARGE },
 	{   PD_TEXT, NULL, "text", 0, &tipTextData, NULL, BO_READONLY|BT_CHARUNITS },
-	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, "Previous Tip", 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },	
-	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, "Next Tip", 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
+	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },	
+	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
 	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }};
 
 static paramGroup_t tipPG = { "tip", 0, tipPLs, sizeof tipPLs/sizeof tipPLs[0] };
@@ -85,7 +86,7 @@ static void CreateTipW( void )
 	char buff[4096];
 	char * cp;
 
-	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle("Tip of the Day"), "Ok", (paramActionOkProc)wHide, NULL, FALSE, NULL, F_CENTER, NULL );
+	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle(_("Tip of the Day")), _("Ok"), (paramActionOkProc)wHide, NULL, FALSE, NULL, F_CENTER, NULL );
 
 	/* open the tip file */
 	sprintf( buff, "%s%s%s.tip", libDir, FILE_SEP_CHAR, sProdNameLower );
@@ -94,7 +95,7 @@ static void CreateTipW( void )
 	/* if tip file could not be opened, the only tip is an error message for the situation */
 	if (tipF == NULL) {
 		DYNARR_APPEND( char *, tips_da, 1 );
-		tips(0) = "No tips are available";
+		tips(0) = N_("No tips are available");
 /*	TODO: enable buttons only if tips are available
 		wControlActive( prev, FALSE );
 		wControlActive( next, FALSE ); */
@@ -179,7 +180,7 @@ void ShowTip( long flags )
 				tipNum++;	
 		}		
 
-		wTextAppend( tipT, tips(tipNum) );
+		wTextAppend( tipT, _(tips(tipNum)) );
 
 		wPrefSetInteger( "misc", "tip-number", tipNum );
 		wShow( tipW );

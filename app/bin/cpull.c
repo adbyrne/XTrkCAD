@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cpull.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cpull.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  *
  * Pull and Tighten commands
  *
@@ -27,6 +27,7 @@
 #include "track.h"
 #include "cselect.h"
 #include "compound.h"
+#include "i18n.h"
 
 /*
  * pull track endpoint together
@@ -434,7 +435,7 @@ printf("%2d: X%0.3f Y%0.3f\n", inx, amount.x, amount.y );
 			cnt++;
 		}
 	}
-	InfoMessage( "%d tracks moved", cnt );
+	InfoMessage( _("%d tracks moved"), cnt );
 }
 
 
@@ -469,7 +470,7 @@ static void PullTracks(
 		ErrorMessage( MSG_TOO_FAR_APART_DIVERGE );
 		return;
 	}
-	UndoStart( "Pull Tracks", "PullTracks(T%d[%d] T%d[%d] D%0.3f A%0.3F )", GetTrkIndex(trk1), ep1, GetTrkIndex(trk2), ep2, d, a );
+	UndoStart( _("Pull Tracks"), "PullTracks(T%d[%d] T%d[%d] D%0.3f A%0.3F )", GetTrkIndex(trk1), ep1, GetTrkIndex(trk2), ep2, d, a );
 	
 	DYNARR_RESET( section_t, section_da );
 	e1 = e2 = GetConnectedTracks( trk1, ep1, trk2, ep2 );
@@ -495,7 +496,7 @@ static void PullTracks(
 	} else {
 		if ( e1 == loopEnd ) {
 			if (section_da.cnt <= 3) {
-				NoticeMessage( MSG_PULL_FEW_SECTIONS, "Ok", NULL );
+				NoticeMessage( MSG_PULL_FEW_SECTIONS, _("Ok"), NULL );
 				return;
 			}
 			cnt1 = section_da.cnt/2;
@@ -510,11 +511,11 @@ static void PullTracks(
 			MoveSectionTracks();
 		} else {
 			if (rc == DIST_FAULT) {
-				NoticeMessage( MSG_PULL_ERROR_1, "Ok", NULL );
+				NoticeMessage( MSG_PULL_ERROR_1, _("Ok"), NULL );
 			} else if (rc == ANGLE_FAULT) {
-				NoticeMessage( MSG_PULL_ERROR_2, "Ok", NULL );
+				NoticeMessage( MSG_PULL_ERROR_2, _("Ok"), NULL );
 			} else {
-				NoticeMessage( MSG_PULL_ERROR_3, "Ok", NULL );
+				NoticeMessage( MSG_PULL_ERROR_3, _("Ok"), NULL );
 			}
 			return;
 		}
@@ -543,7 +544,7 @@ static void TightenTracks(
 	coOrd p0, p1;
 	ANGLE_T a0, a1;
 	int cnt;
-	UndoStart("Tighten Tracks", "TightenTracks(T%d[%d])", GetTrkIndex(trk), ep );
+	UndoStart(_("Tighten Tracks"), "TightenTracks(T%d[%d])", GetTrkIndex(trk), ep );
 	while ( (ep2=GetNextTrk(trk,ep,&trk1,&ep1,0)) >= 0 && trk1 != NULL ) {
 		trk = trk1;
 		ep = ep1;
@@ -579,7 +580,7 @@ printf("T%d [%0.3f %0.3f %0.3f]\n", GetTrkIndex(trk1), p1.x, p1.y, a1 );
 		if (ep<0)
 			AbortProg( "tightenTracks: can't happen" );
 	}
-	InfoMessage( "%d tracks moved", cnt );
+	InfoMessage( _("%d tracks moved"), cnt );
 }
 
 
@@ -596,7 +597,7 @@ static STATUS_T CmdPull(
 	switch (action) {
 
 	case C_START:
-		InfoMessage( "Select first End-Point to connect" );
+		InfoMessage( _("Select first End-Point to connect") );
 		trk1 = NULL;
 		return C_CONTINUE;
 
@@ -607,7 +608,7 @@ static STATUS_T CmdPull(
 					if ((ep1 = PickUnconnectedEndPoint( pos, trk1 )) < 0) {
 						 trk1 = NULL;
 					} else {
-						InfoMessage( "Select second End-Point to connect" );
+						InfoMessage( _("Select second End-Point to connect") );
 					}
 				}
 			} else {
@@ -657,6 +658,5 @@ static STATUS_T CmdPull(
 
 void InitCmdPull( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdPull, "cmdConnect", "Connect Sectional Tracks", wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2, ACCL_CONNECT, NULL );
+	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Sectional Tracks"), wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2, ACCL_CONNECT, NULL );
 }
-

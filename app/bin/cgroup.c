@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cgroup.c,v 1.1 2005-12-07 15:47:07 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cgroup.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  *
  * Compound tracks: Group
  *
@@ -27,6 +27,7 @@
 #include "track.h"
 #include "compound.h"
 #include "shrtpath.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -572,7 +573,7 @@ EXPORT void DoUngroup( void )
 	groupPartno[0] = 0;
 	ungroupCnt = 0;
 	oldTrackCount = trackCount;
-	UndoStart( "Ungroup Object", "Ungroup Objects" );
+	UndoStart( _("Ungroup Object"), "Ungroup Objects" );
 	lastTrackIndex = max_index;
 	groupCompoundCount = 0;
 	while ( TrackIterate( &trk ) ) {
@@ -584,9 +585,9 @@ EXPORT void DoUngroup( void )
 		}
 	}
 	if ( ungroupCnt )
-		InfoMessage( "%d objects ungrouped", ungroupCnt );
+		InfoMessage( _("%d objects ungrouped"), ungroupCnt );
 	else
-		InfoMessage( "No objects ungrouped" );
+		InfoMessage( _("No objects ungrouped") );
 }
 
 
@@ -595,15 +596,15 @@ static drawCmd_t groupD = {
 		NULL, &tempSegDrawFuncs, DC_GROUP, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
 static long groupSegCnt;
 static long groupReplace;
-char * groupReplaceLabels[] = { "Replace with new group?", NULL };
+char * groupReplaceLabels[] = { N_("Replace with new group?"), NULL };
 
 static wWin_p groupW;
 static paramIntegerRange_t r0_999999 = { 0, 999999 };
 static paramData_t groupPLs[] = {
-/*0*/ { PD_STRING, groupManuf, "manuf", PDO_NOPREF, (void*)350, "Manufacturer" },
-/*1*/ { PD_STRING, groupDesc, "desc", PDO_NOPREF, (void*)230, "Description" },
-/*2*/ { PD_STRING, groupPartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH, (void*)100, "#" },
-/*3*/ { PD_LONG, &groupSegCnt, "segcnt", PDO_NOPREF, &r0_999999, "# Segments", BO_READONLY },
+/*0*/ { PD_STRING, groupManuf, "manuf", PDO_NOPREF, (void*)350, N_("Manufacturer") },
+/*1*/ { PD_STRING, groupDesc, "desc", PDO_NOPREF, (void*)230, N_("Description") },
+/*2*/ { PD_STRING, groupPartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH, (void*)100, N_("#") },
+/*3*/ { PD_LONG, &groupSegCnt, "segcnt", PDO_NOPREF, &r0_999999, N_("# Segments"), BO_READONLY },
 /*4*/ { PD_TOGGLE, &groupReplace, "replace", 0, groupReplaceLabels, "", BC_HORZ|BC_NOBORDER } };
 static paramGroup_t groupPG = { "group", 0, groupPLs, sizeof groupPLs/sizeof groupPLs[0] };
 
@@ -943,6 +944,7 @@ static void GroupOk( void * junk )
 	PATHPTR_T path;
 	int pathLen;
 	signed char pathChar;
+	char *oldLocale = NULL;
 
 #ifdef SEGMAP
 	DYNARR_RESET( char, segMap_da );
@@ -957,13 +959,13 @@ static void GroupOk( void * junk )
 
 	ParamUpdate( &groupPG );
 	if ( groupManuf[0]==0 || groupDesc[0]==0 || groupPartno[0]==0 ) {
-		NoticeMessage2( 0, MSG_GROUP_NONBLANK, "Ok", NULL );
+		NoticeMessage2( 0, MSG_GROUP_NONBLANK, _("Ok"), NULL );
 		return;
 	}
 	sprintf( message, "%s\t%s\t%s", groupManuf, groupDesc, groupPartno );
 	if ( strcmp( message, groupTitle ) != 0 ) {
 		if ( FindCompound( FIND_TURNOUT|FIND_STRUCT, curScaleName, message ) )
-			if ( !NoticeMessage2( 1, MSG_TODSGN_REPLACE, "Yes", "No" ) )
+			if ( !NoticeMessage2( 1, MSG_TODSGN_REPLACE, _("Yes"), _("No") ) )
 				return;
 		strcpy( groupTitle, message );
 	}
@@ -1004,7 +1006,7 @@ static void GroupOk( void * junk )
 					*segPtr = tempSegs( segCnt );
 					if ( tempSegs_da.cnt != segCnt+1 ||
 						 !IsSegTrack(segPtr) ) {
-						NoticeMessage2( 0, MSG_CANNOT_GROUP_TRACK, "Ok", NULL );
+						NoticeMessage2( 0, MSG_CANNOT_GROUP_TRACK, _("Ok"), NULL );
 						wHide( groupW );
 						return;
 					}
@@ -1019,7 +1021,7 @@ static void GroupOk( void * junk )
 
 	if ( groupTrk_da.cnt>0 ) {
 		if ( groupTrk_da.cnt > 128 ) {
-			NoticeMessage( MSG_TOOMANYSEGSINGROUP, "Ok", NULL );
+			NoticeMessage( MSG_TOOMANYSEGSINGROUP, _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );
 			wHide( groupW );
 			return;
@@ -1058,7 +1060,7 @@ static void GroupOk( void * junk )
 			}
 		}
 		if ( tempEndPts_da.cnt <= 0 ) {
-			NoticeMessage( "No endpts", "Ok", NULL );
+			NoticeMessage( _("No endpts"), _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );
 			wHide( groupW );
 			return;
@@ -1084,7 +1086,7 @@ static void GroupOk( void * junk )
 			}
 		}
 		if ( inx < groupTrk_da.cnt ) {
-			NoticeMessage2( 0, cp, "Ok", NULL, GetTrkIndex( trk ) );
+			NoticeMessage2( 0, cp, _("Ok"), NULL, GetTrkIndex( trk ) );
 			DrawTrack( trk, &mainD, wDrawColorWhite );
 			ClrTrkBits( trk, TB_SELECTED );
 			/* TODO redraw the endpt of the trks this one is connected to */
@@ -1143,7 +1145,7 @@ static void GroupOk( void * junk )
 		 * Flip paths so they align
 		 */
 		if ( path_da.cnt == 0 ) {
-			NoticeMessage( "No paths", "Ok", NULL );
+			NoticeMessage( _("No paths"), _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );
 			wHide( groupW );
 			return;
@@ -1468,6 +1470,7 @@ groupSimpleTurnout:
 #endif
 		f = OpenCustom("a");
 		if (f && to) {
+			oldLocale = SaveLocale("C");
 			rc &= fprintf( f, "TURNOUT %s \"%s\"\n", curScaleName, PutTitle(to->title) )>0;
 #ifdef LATER
 			if ( to->customInfo )
@@ -1476,7 +1479,7 @@ groupSimpleTurnout:
 			rc &= WriteCompoundPathsEndPtsSegs( f, path, trackSegs_da.cnt, &trackSegs(0), tempEndPts_da.cnt, &tempEndPts(0) );
 		}
 		if ( groupReplace ) {
-			UndoStart( "Group Tracks", "group" );
+			UndoStart( _("Group Tracks"), "group" );
 			orig.x = - orig.x;
 			orig.y = - orig.y;
 			for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
@@ -1521,6 +1524,7 @@ groupSimpleTurnout:
 		to = CreateNewStructure( curScaleName, groupTitle, tempSegs_da.cnt, &tempSegs(0), TRUE );
 		f = OpenCustom("a");
 		if (f && to) {
+			oldLocale = SaveLocale("C");
 			rc &= fprintf( f, "STRUCTURE %s \"%s\"\n", curScaleName, PutTitle(groupTitle) )>0;
 #ifdef LATER
 			if ( to->customInfo )
@@ -1529,7 +1533,7 @@ groupSimpleTurnout:
 			rc &= WriteSegs( f, tempSegs_da.cnt, &tempSegs(0) );
 		}
 		if ( groupReplace ) {
-			UndoStart( "Group Tracks", "group" );
+			UndoStart( _("Group Tracks"), "group" );
 			trk = NULL;
 			while ( TrackIterate( &trk ) ) {
 				if ( GetTrkSelected( trk ) ) {
@@ -1547,6 +1551,7 @@ groupSimpleTurnout:
 		}
 	}
 	if (f) fclose(f);
+	RestoreLocale(oldLocale);
 	DoChangeNotification( CHANGE_PARAMS );
 	wHide( groupW );
 	wDrawDelayUpdate( mainD.d, FALSE );
@@ -1584,7 +1589,7 @@ EXPORT void DoGroup( void )
 		log_group = LogFindIndex( "group" );
 	if ( !groupW ) {
 		ParamRegister( &groupPG );
-		groupW = ParamCreateDialog( &groupPG, MakeWindowTitle("Group Objects"), "Ok", GroupOk, wHide, TRUE, NULL, F_BLOCK, NULL );
+		groupW = ParamCreateDialog( &groupPG, MakeWindowTitle(_("Group Objects")), _("Ok"), GroupOk, wHide, TRUE, NULL, F_BLOCK, NULL );
 		groupD.dpi = mainD.dpi;
 	}
 	ParamLoadControls( &groupPG );

@@ -22,6 +22,7 @@
 #include "ccurve.h"
 #include "compound.h"
 #include "drawgeom.h"
+#include "i18n.h"
 
 /*EXPORT drawContext_t * drawContext;*/
 static long drawGeomCurveMode;
@@ -67,7 +68,7 @@ static void EndPoly( drawContext_t * context, int cnt )
 	segPtr->u.p.pts = pts;
 	segPtr->u.p.angle = 0.0;
 	segPtr->u.p.orig = zero;
-	UndoStart( "Create Lines", "newDraw" );
+	UndoStart( _("Create Lines"), "newDraw" );
 	trk = MakeDrawFromSeg( zero, 0.0, segPtr );
 	DrawNewTrack( trk );
 	tempSegs_da.cnt = 0;
@@ -82,7 +83,7 @@ static void DrawGeomOk( void )
 
 	if (tempSegs_da.cnt <= 0)
 		return;
-	UndoStart( "Create Lines", "newDraw" );
+	UndoStart( _("Create Lines"), "newDraw" );
 	for ( inx=0; inx<tempSegs_da.cnt; inx++ ) {
 		trk = MakeDrawFromSeg( zero, 0.0, &tempSegs(inx) );
 		DrawNewTrack( trk );
@@ -153,7 +154,7 @@ STATUS_T DrawGeomMouse(
 				tempSegs(0).u.l.option = 0;
 			}
 			tempSegs_da.cnt = 0;
-			context->message( "Drag to place next end point" );
+			context->message( _("Drag to place next end point") );
 			break;
 		case OP_TBLEDGE:
 			if ( lastValid && ( MyGetKeyState() & WKEY_SHIFT ) ) {
@@ -166,7 +167,7 @@ STATUS_T DrawGeomMouse(
 			tempSegs(0).width = (mainD.scale<=16)?(3/context->D->dpi*context->D->scale):0;
 			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 			tempSegs_da.cnt = 0;
-			context->message( "Drag to place next end point" );
+			context->message( _("Drag to place next end point") );
 			break;
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
@@ -198,7 +199,7 @@ STATUS_T DrawGeomMouse(
 			tempSegs(0).u.c.a1 = 360;
 			tempSegs(0).u.c.radius = 0;
 			tempSegs(0).u.c.center = pos;
-			context->message( "Drag to set radius" );
+			context->message( _("Drag to set radius") );
 			break;
 		case OP_FILLBOX:
 			width = 0;
@@ -211,7 +212,7 @@ STATUS_T DrawGeomMouse(
 				tempSegs(inx).u.l.pos[0] = tempSegs(inx).u.l.pos[1] = pos;
 			}
 			tempSegs_da.cnt = 0;
-			context->message( "Drag set box size" );
+			context->message( _("Drag set box size") );
 			break;
 		case OP_POLY:
 		case OP_FILLPOLY:
@@ -253,7 +254,7 @@ STATUS_T DrawGeomMouse(
 		case OP_DIMLINE:
 		case OP_BENCH:
 			tempSegs(0).u.l.pos[1] = pos1;
-			context->message( "Length = %s, Angle = %0.2f",
+			context->message( _("Length = %s, Angle = %0.2f"),
 						FormatDistance(FindDistance( pos0, pos1 )),
 						PutAngle(FindAngle( pos0, pos1 )) );
 			tempSegs_da.cnt = 1;
@@ -262,7 +263,7 @@ STATUS_T DrawGeomMouse(
 		case OP_FILLPOLY:
 			tempSegs(tempSegs_da.cnt-1).type = SEG_STRLIN;
 			tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pos;
-			context->message( "Length = %s, Angle = %0.2f",
+			context->message( _("Length = %s, Angle = %0.2f"),
 						FormatDistance(FindDistance( tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos )),
 						PutAngle(FindAngle( tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos )) );
 			break;
@@ -279,12 +280,12 @@ STATUS_T DrawGeomMouse(
 					tempSegs(0).u.l.pos[0] = pos0;
 					tempSegs(0).u.l.pos[1] = context->ArcData.pos1;
 					tempSegs_da.cnt = 1;
-					context->message( "Straight Line: Length=%s Angle=%0.3f",
+					context->message( _("Straight Line: Length=%s Angle=%0.3f"),
 							FormatDistance(FindDistance( pos0, context->ArcData.pos1 )),
 							PutAngle(FindAngle( pos0, context->ArcData.pos1 )) );
 				} else if (context->ArcData.type == curveTypeNone) {
 					tempSegs_da.cnt = 0;
-					context->message( "Back" );
+					context->message( _("Back") );
 				} else if (context->ArcData.type == curveTypeCurve) {
 					tempSegs(0).type = SEG_CRVLIN;
 					tempSegs(0).u.c.center = context->ArcData.curvePos;
@@ -302,7 +303,7 @@ STATUS_T DrawGeomMouse(
 						context->D->funcs->options = oldOptions;
 						return C_CONTINUE;
 					}
-					context->message( "Curved Line: Radius=%s Angle=%0.3f Length=%s",
+					context->message( _("Curved Line: Radius=%s Angle=%0.3f Length=%s"),
 							FormatDistance(context->ArcData.curveRadius), context->ArcData.a1,
 							FormatDistance(context->ArcData.curveRadius*d) );
 				}
@@ -317,7 +318,7 @@ STATUS_T DrawGeomMouse(
 		case OP_CIRCLE3:
 		case OP_FILLCIRCLE3:
 			tempSegs(0).u.c.radius = FindDistance( pos0, pos1 );
-			context->message( "Radius = %s",
+			context->message( _("Radius = %s"),
 						FormatDistance(FindDistance( pos0, pos1 )) );
 			break;
 		case OP_BOX:
@@ -327,7 +328,7 @@ STATUS_T DrawGeomMouse(
 			tempSegs(1).u.l.pos[1].x = tempSegs(2).u.l.pos[0].x = pos.x;
 			tempSegs(1).u.l.pos[1].y = tempSegs(2).u.l.pos[0].y = 
 			tempSegs(2).u.l.pos[1].y = tempSegs(3).u.l.pos[0].y = pos.y;
-			context->message( "Width = %s, Height = %s",
+			context->message( _("Width = %s, Height = %s"),
 						FormatDistance(fabs(pos1.x - pos0.x)), FormatDistance(fabs(pos1.y - pos0.y)) );
 			break;
 		}
@@ -361,7 +362,7 @@ STATUS_T DrawGeomMouse(
 				CreateCurve( C_UP, pos, TRUE, context->Color, width, drawGeomCurveMode, context->message );
 				DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 				segCnt = tempSegs_da.cnt;
-				context->message( "Drag on Red arrows to adjust curve" );
+				context->message( _("Drag on Red arrows to adjust curve") );
 				context->D->funcs->options = oldOptions;
 				return C_CONTINUE;
 			} else {
@@ -604,7 +605,7 @@ STATUS_T DrawGeomModify(
 		case SEG_DIMLIN:
 		case SEG_BENCH:
 			tempSegs(0).u.l.pos[segEp] = pos;
-			InfoMessage( "Length = %0.3f Angle = %0.3f", FindDistance( tempSegs(0).u.l.pos[segEp], tempSegs(0).u.l.pos[1-segEp] ), FindAngle( tempSegs(0).u.l.pos[1-segEp], tempSegs(0).u.l.pos[segEp] ) );
+			InfoMessage( _("Length = %0.3f Angle = %0.3f"), FindDistance( tempSegs(0).u.l.pos[segEp], tempSegs(0).u.l.pos[1-segEp] ), FindAngle( tempSegs(0).u.l.pos[1-segEp], tempSegs(0).u.l.pos[segEp] ) );
 			break;
 			pos.x -= orig.x;
 			pos.y -= orig.y;

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.4 2008-01-02 19:31:12 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.5 2008-01-20 23:29:15 mni77 Exp $
  *
  * T_TURNOUT
  *
@@ -29,6 +29,7 @@
 #include "cstraigh.h"
 #include "compound.h"
 #include "cjoin.h"
+#include "i18n.h"
 
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
@@ -64,9 +65,9 @@ static void RedrawTurnout(void);
 static void SelTurnoutEndPt( wIndex_t, coOrd );
 
 static wPos_t turnoutListWidths[] = { 80, 80, 220 };
-static const char * turnoutListTitles[] = { "Manufacturer", "Part No", "Description" };
+static const char * turnoutListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
 static paramListData_t listData = { 13, 400, 3, turnoutListWidths, turnoutListTitles };
-static const char * hideLabels[] = { "Hide", NULL };
+static const char * hideLabels[] = { N_("Hide"), NULL };
 static paramDrawData_t turnoutDrawData = { 490, 200, (wDrawRedrawCallBack_p)RedrawTurnout, SelTurnoutEndPt, &turnoutD };
 static paramData_t turnoutPLs[] = {
 #define I_LIST		(0)
@@ -77,7 +78,7 @@ static paramData_t turnoutPLs[] = {
 	{   PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_DLGRESIZE, &turnoutDrawData, NULL, 0 },
 #define I_NEW		(2)
 #define turnoutNewM     ((wMenu_p)turnoutPLs[I_NEW].control)
-	{   PD_MENU, NULL, "new", PDO_DLGCMDBUTTON, NULL, "New" },
+	{   PD_MENU, NULL, "new", PDO_DLGCMDBUTTON, NULL, N_("New") },
 #define I_HIDE		(3)
 #define turnoutHideT    ((wChoice_p)turnoutPLs[I_HIDE].control)
 	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, /*CAST_AWAY_CONST*/(void*)hideLabels, NULL, BC_NOBORDER } };
@@ -187,7 +188,7 @@ EXPORT wIndex_t CheckPaths(
 			else if (*pp >= 'A' && *pp <= 'Z')
 				*pp -= 'A' - 10;
 			if (*pp < 0 || *pp > segCnt) {
-				InputError( "Turnout path[%d:%d] out of bounds: %d",
+				InputError( _("Turnout path[%d:%d] out of bounds: %d"),
 						FALSE, pc, ps, *pp);
 				return -1;
 			}
@@ -199,12 +200,12 @@ EXPORT wIndex_t CheckPaths(
 				GetSegInxEP( pp[0], &segInx[0], &segEp[0] );
 				GetSegInxEP( pp[1], &segInx[1], &segEp[1] );
 				if ( !IsSegTrack( &segs[segInx[0]] ) ) {
-					InputError( "Turnout path[%d] %d is not a track segment",
+					InputError( _("Turnout path[%d] %d is not a track segment"),
 						FALSE, pc, pp[0] );
 					return -1;
 				}
 				if ( !IsSegTrack( &segs[segInx[1]] ) ) {
-					InputError( "Turnout path[%d] %d is not a track segment",
+					InputError( _("Turnout path[%d] %d is not a track segment"),
 						FALSE, pc, pp[1] );
 					return -1;
 				}
@@ -212,7 +213,7 @@ EXPORT wIndex_t CheckPaths(
 						GetSegEndPt( &segs[segInx[0]], 1-segEp[0], FALSE, NULL ),
 						GetSegEndPt( &segs[segInx[1]], segEp[1], FALSE, NULL ) );
 				if (d > MIN_TURNOUT_SEG_CONNECT_DIST) {
-					InputError( "Turnout path[%d] %d-%d not connected: %0.3f",
+					InputError( _("Turnout path[%d] %d-%d not connected: %0.3f"),
 						FALSE, pc, pp[0], pp[1], d );
 					return -1;
 				}
@@ -248,7 +249,7 @@ static BOOL_T ReadTurnoutParam(
 						&to->u.adjustable.minD, &to->u.adjustable.maxD );
 				
 			} else {
-				InputError("Unknown special case", TRUE);
+				InputError(_("Unknown special case"), TRUE);
 			}
 		}
 		if (tempCustom[0] != '\0') {
@@ -354,7 +355,7 @@ EXPORT BOOL_T ConnectAdjustableTracks(
 	a = NormalizeAngle( a1 - a2 + 180.0 + connectAngle/2.0);
 	if (a>connectAngle)
 		return FALSE;
-	UndoStart( "Connect Adjustable Tracks", "changeAdjustableEndPt" );
+	UndoStart( _("Connect Adjustable Tracks"), "changeAdjustableEndPt" );
 	maxD = 0.0;
 	if (adj1) {
 		p1 = GetTrkEndPos( trk1, 1-ep1 );
@@ -880,7 +881,7 @@ static BOOL_T SplitTurnout(
 	trkSeg_t newSeg;
 
 	if ( (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
-		ErrorMessage( MSG_CANT_SPLIT_TRK, "Turnout" );
+		ErrorMessage( MSG_CANT_SPLIT_TRK, _("Turnout") );
 		return FALSE;
 	}
 
@@ -913,7 +914,7 @@ static BOOL_T SplitTurnout(
 		}
 		pp++;
 	}
-	ErrorMessage( "splitTurnout: can't find segment" );
+	ErrorMessage( _("splitTurnout: can't find segment") );
 	return FALSE;
 foundSeg:
 
@@ -1323,7 +1324,7 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 			tempSegs(0).width = 0;
 			tempSegs(0).u.l.pos[0] = GetTrkEndPos( trk, 1-ep );
 			tempSegs_da.cnt = 1;
-			InfoMessage( "Drag to change track length" );
+			InfoMessage( _("Drag to change track length") );
 
 		case C_MOVE:
 			d = FindDistance( tempSegs(0).u.l.pos[0], pos );
@@ -1334,7 +1335,7 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 			Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk, ep ), d );
 			tempSegs_da.cnt = 1;
 			if (action == C_MOVE)
-				InfoMessage( "Length=%s", FormatDistance( d ) );
+				InfoMessage( _("Length=%s"), FormatDistance( d ) );
 			return C_CONTINUE;
 	
 		case C_UP:
@@ -1480,7 +1481,7 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 
 
 static trackCmd_t turnoutCmds = {
-		"TURNOUT ",
+		N_("TURNOUT "),
 		DrawTurnout,
 		DistanceCompound,
 		DescribeCompound,
@@ -1827,12 +1828,12 @@ static void PlaceTurnout(
 	}
 	if ( connCnt1 > 0 ) {
 		FormatCompoundTitle( listLabels, curTurnout->title );
-		InfoMessage( "%d connections, max distance %0.3f (%s)",
+		InfoMessage( _("%d connections, max distance %0.3f (%s)"),
 				connCnt1, PutDim(maxD1), message );
 	} else {
 		Dto.trk = NULL;
 		FormatCompoundTitle( listLabels, curTurnout->title );
-		InfoMessage( "0 connections (%s)", message );
+		InfoMessage( _("0 connections (%s)"), message );
 		p = curTurnout->endPt[(int)curTurnoutEp].pos;
 		Rotate( &p, zero, Dto.angle );
 		Dto.pos.x = pos.x - p.x;
@@ -1872,7 +1873,7 @@ static void AddTurnout( void )
 
 	DrawSegs( &tempD, Dto.pos, Dto.angle,
 		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
-	UndoStart( "Place New Turnout", "addTurnout" );
+	UndoStart( _("Place New Turnout"), "addTurnout" );
 	titleLen = strlen( curTurnout->title );
 #ifdef LATER
 	newTrk = NewTrack( 0, T_TURNOUT, curTurnout->endCnt, sizeof (*xx) + 1 );
@@ -2131,7 +2132,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		return C_CONTINUE;
 
 	case C_UP:
-		InfoMessage( "Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel" );
+		InfoMessage( _("Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
 		return C_CONTINUE;
 
 	case C_RDOWN:
@@ -2178,7 +2179,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 			Rotate( &Dto.pos, Dto.rot0, angle );
 		}
 		FormatCompoundTitle( listLabels, curTurnout->title );
-		InfoMessage( "Angle = %0.3f (%s)", PutAngle( NormalizeAngle(Dto.angle + 90.0) ), message );
+		InfoMessage( _("Angle = %0.3f (%s)"), PutAngle( NormalizeAngle(Dto.angle + 90.0) ), message );
 		DrawLine( &tempD, Dto.rot0, Dto.rot1, 0, wDrawColorBlack );
 		DrawSegs( &tempD, Dto.pos, Dto.angle,
 				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
@@ -2187,7 +2188,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 	case C_RUP:
 		if ( curTurnout == NULL ) return C_CONTINUE;
 		DrawLine( &tempD, Dto.rot0, Dto.rot1, 0, wDrawColorBlack );
-		InfoMessage( "Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel" );
+		InfoMessage( _("Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
 		return C_CONTINUE;
 
 	case C_LCLICK:
@@ -2268,7 +2269,7 @@ static STATUS_T CmdTurnout(
 	case C_START:
 		if (turnoutW == NULL) {
 /*			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle("Turnout"), "Ok", , (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE|F_RECALLSIZE, TurnoutDlgUpdate ); */
-			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle("Turnout"), "Close", (paramActionOkProc)TurnoutOk, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate ); 
+			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle(_("Turnout")), _("Close"), (paramActionOkProc)TurnoutOk, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate ); 
 			InitNewTurnRedir( turnoutNewM );
 		}
 /*		ParamDialogOkActive( &turnoutPG, FALSE ); */
@@ -2277,7 +2278,7 @@ static STATUS_T CmdTurnout(
 		wShow( turnoutW );
 		TurnoutChange( CHANGE_PARAMS|CHANGE_SCALE );
 		if (curTurnout == NULL) {
-			NoticeMessage2( 0, MSG_TURNOUT_NO_TURNOUT, "Ok", NULL );
+			NoticeMessage2( 0, MSG_TURNOUT_NO_TURNOUT, _("Ok"), NULL );
 			return C_TERMINATE;
 		}
 		if (turnoutIndex > 0 && turnoutPtr) {
@@ -2285,7 +2286,7 @@ static STATUS_T CmdTurnout(
 			wListSetIndex( turnoutListL, turnoutIndex );
 			RedrawTurnout();
 		}
-		InfoMessage( "Pick turnout and active End Point, then place on the layout");
+		InfoMessage( _("Pick turnout and active End Point, then place on the layout"));
 		ParamLoadControls( &turnoutPG );
 		ParamGroupRecord( &turnoutPG );
 		return CmdTurnoutAction( action, pos );
@@ -2303,7 +2304,7 @@ static STATUS_T CmdTurnout(
 	case C_RUP:
 		if (hideTurnoutWindow)
 			wShow( turnoutW );
-		InfoMessage( "Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel" );
+		InfoMessage( _("Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
 		return CmdTurnoutAction( action, pos );
 
 	case C_LCLICK:
@@ -2404,18 +2405,18 @@ static STATUS_T CmdTurnoutHotBar(
 	case C_START:
 		TurnoutChange( CHANGE_PARAMS|CHANGE_SCALE );
 		if (curTurnout == NULL) {
-			NoticeMessage2( 0, MSG_TURNOUT_NO_TURNOUT, "Ok", NULL );
+			NoticeMessage2( 0, MSG_TURNOUT_NO_TURNOUT, _("Ok"), NULL );
 			return C_TERMINATE;
 		}
 		FormatCompoundTitle( listLabels|LABEL_DESCR, curTurnout->title );
-		InfoMessage( "Place %s and draw into position", message );
+		InfoMessage( _("Place %s and draw into position"), message );
 		ParamLoadControls( &turnoutPG );
 		ParamGroupRecord( &turnoutPG );
 		return CmdTurnoutAction( action, pos );
 
 	case C_UP:
 	case C_RUP:
-		InfoMessage( "Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel" );
+		InfoMessage( _("Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
 		return CmdTurnoutAction( action, pos );
 
 	case C_TEXT:
@@ -2438,7 +2439,7 @@ static STATUS_T CmdTurnoutHotBar(
 
 EXPORT void InitCmdTurnout( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdTurnout, "cmdTurnout", "Turnout", wIconCreatePixMap(turnout_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_TURNOUT, NULL );
+	AddMenuButton( menu, CmdTurnout, "cmdTurnout", _("Turnout"), wIconCreatePixMap(turnout_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_TURNOUT, NULL );
 	turnoutHotBarCmdInx = AddMenuButton( menu, CmdTurnoutHotBar, "cmdTurnoutHotBar", "", NULL, LEVEL0_50, IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, 0, NULL );
 	RegisterChangeNotification( TurnoutChange );
 	ParamRegister( &turnoutPG );
@@ -2452,7 +2453,7 @@ EXPORT void InitTrkTurnout( void )
 	T_TURNOUT = InitObject( &turnoutCmds );
 
 	/*InitDebug( "Turnout", &debugTurnout );*/
-	AddParam( "TURNOUT ", ReadTurnoutParam );
+	AddParam( N_("TURNOUT "), ReadTurnoutParam );
 }
 
 #ifdef TEST

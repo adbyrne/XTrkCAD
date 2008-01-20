@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.1 2005-12-07 15:46:50 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,7 @@
 
 #include <time.h>
 #include "track.h"
+#include "i18n.h"
 
 /****************************************************************************
  *
@@ -40,14 +41,14 @@ static void DoEnumOp( void * );
 static long enableListPrices;
 
 static paramTextData_t enumTextData = { 80, 24 };
-static char * priceLabels[] = { "Prices", NULL };
+static char * priceLabels[] = { N_("Prices"), NULL };
 static paramData_t enumPLs[] = {
 #define I_ENUMTEXT		(0)
 #define enumT			((wText_p)enumPLs[I_ENUMTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &enumTextData, NULL, BT_CHARUNITS|BT_FIXEDFONT },
-	{   PD_BUTTON, DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, "Save As ...", 0, (void*)ENUMOP_SAVE },
-	{   PD_BUTTON, DoEnumOp, "print", 0, NULL, "Print", 0, (void*)ENUMOP_PRINT },
-	{   PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, "Print Setup", 0, NULL },
+	{   PD_BUTTON, DoEnumOp, "save", PDO_DLGCMDBUTTON, NULL, N_("Save As ..."), 0, (void*)ENUMOP_SAVE },
+	{   PD_BUTTON, DoEnumOp, "print", 0, NULL, N_("Print"), 0, (void*)ENUMOP_PRINT },
+	{   PD_BUTTON, wPrintSetup, "printsetup", 0, NULL, N_("Print Setup"), 0, NULL },
 #define I_ENUMLISTPRICE	(4)
 	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, priceLabels, NULL, BC_HORZ|BC_NOBORDER } };
 static paramGroup_t enumPG = { "enum", 0, enumPLs, sizeof enumPLs/sizeof enumPLs[0] };
@@ -129,8 +130,8 @@ void EnumerateStart(void)
 	char * cp;
 	if (enumW == NULL) {
 		ParamRegister( &enumPG );
-		enumW = ParamCreateDialog( &enumPG, MakeWindowTitle("Parts List"), NULL, NULL, wHide, TRUE, NULL, F_RESIZE, EnumDlgUpdate );
-		enumFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, "Parts List", sPartsListFilePattern, DoEnumSave, NULL );
+		enumW = ParamCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")), NULL, NULL, wHide, TRUE, NULL, F_RESIZE, EnumDlgUpdate );
+		enumFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Parts List"), sPartsListFilePattern, DoEnumSave, NULL );
 	}
 
 	wTextClear( enumT );
@@ -217,4 +218,3 @@ void EnumerateEnd(void)
 	ParamLoadControls( &enumPG );
 	wShow( enumW );
 }
-

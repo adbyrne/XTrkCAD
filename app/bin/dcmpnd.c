@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcmpnd.c,v 1.2 2006-04-06 15:19:07 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcmpnd.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  *
  * Compound tracks: Turnouts and Structures
  *
@@ -27,6 +27,7 @@
 #include "track.h"
 #include "compound.h"
 #include "shrtpath.h"
+#include "i18n.h"
 
 
 /*****************************************************************************
@@ -66,9 +67,9 @@ static paramData_t updateTitlePLs[] = {
 #define I_UPDATELIST	(10)
 #define updateTitleL	((wList_p)updateTitlePLs[I_UPDATELIST].control)
 	{	PD_DROPLIST, NULL, "sel", PDO_NOPREF, (void*)400 },
-	{	PD_BUTTON, UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, "Ignore" },
+	{	PD_BUTTON, UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
 #define I_UPDATELOAD	(12)
-	{	PD_BUTTON, NULL, "load", 0, NULL, "Load" } };
+	{	PD_BUTTON, NULL, "load", 0, NULL, N_("Load") } };
 static paramGroup_t updateTitlePG = { "updatetitle", 0, updateTitlePLs, sizeof updateTitlePLs/sizeof updateTitlePLs[0] };
 
 
@@ -101,7 +102,7 @@ static void UpdateTitleNext( void )
 	if (updateTitleInx >= updateTitles_da.cnt) {
 		wHide( updateTitleW );
 		updateWVisible = FALSE;
-		InfoMessage( "Updating definitions, please wait" );
+		InfoMessage( _("Updating definitions, please wait") );
 		cnt = 0;
 		trk = NULL;
 		while (TrackIterate( &trk ) ) {
@@ -164,7 +165,7 @@ void DoUpdateTitles( void )
 	if (updateTitleW == NULL) {
 		ParamRegister( &updateTitlePG );
 		updateTitlePLs[I_UPDATELOAD].valueP = (void*)ParamFilesInit();
-		updateTitleW = ParamCreateDialog( &updateTitlePG, MakeWindowTitle("Update Title"), "Update", UpdateTitleUpdate, UpdateTitleCancel, TRUE, NULL, 0, NULL );
+		updateTitleW = ParamCreateDialog( &updateTitlePG, MakeWindowTitle(_("Update Title")), _("Update"), UpdateTitleUpdate, UpdateTitleCancel, TRUE, NULL, 0, NULL );
 		RegisterChangeNotification( UpdateTitleChange );
 	}
 	updateTitleInx = -1;
@@ -225,7 +226,7 @@ static BOOL_T CheckCompoundEndPoint(
 		pos.y = - pos.y;
 	d = FindDistance( pos, to->endPt[toEp].pos );
 	if ( d > connectDistance ) {
-		sprintf( message, "End-Point #%d of the selected and actual turnouts are not close", toEp );
+		sprintf( message, _("End-Point #%d of the selected and actual turnouts are not close"), toEp );
 		return FALSE;
 	}
 	a = GetTrkEndAngle( trk, trkEp );
@@ -234,7 +235,7 @@ static BOOL_T CheckCompoundEndPoint(
 		a2 = 180.0 - a2;
 	a = NormalizeAngle( a - xx->angle - a2 + connectAngle/2.0 );
 	if ( a > connectAngle ) {
-		sprintf( message, "End-Point #%d of the selected and actual turnouts are not aligned", toEp );
+		sprintf( message, _("End-Point #%d of the selected and actual turnouts are not aligned"), toEp );
 		return FALSE;
 	}
 	return TRUE;
@@ -253,7 +254,7 @@ static BOOL_T RefreshCompound1(
 
 	epCnt = GetTrkEndPtCnt(trk);
 	if ( epCnt != to->endCnt ) {
-		strcpy( message, "The selected Turnout had a differing number of End-Points" );
+		strcpy( message, _("The selected Turnout had a differing number of End-Points") );
 		return FALSE;
 	}
 	ok = TRUE;
@@ -314,7 +315,7 @@ static paramData_t refreshSpecialPLs[] = {
 		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, (void*)380 },
 #define REFRESH_L		(3)
 		{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
-		{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, "Skip" } };
+		{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
 static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, sizeof refreshSpecialPLs/sizeof refreshSpecialPLs[0] };
 static void RefreshSpecialOk(
 		void * junk )
@@ -346,7 +347,7 @@ EXPORT BOOL_T RefreshCompound(
 	SCALEINX_T scale;
 
 	if ( trk == NULL ) {
-		InfoMessage( "%d Track(s) refreshed", refreshCompoundCnt );
+		InfoMessage( _("%d Track(s) refreshed"), refreshCompoundCnt );
 		refreshCompoundCnt = 0;
 		for ( inx=0; inx<refreshSpecial_da.cnt; inx++ )
 			if ( refreshSpecial(inx).name != NULL &&
@@ -386,9 +387,9 @@ EXPORT BOOL_T RefreshCompound(
 		return TRUE;
 	if ( refreshSpecialPG.win == NULL ) {
 		ParamRegister( &refreshSpecialPG );
-		ParamCreateDialog( &refreshSpecialPG, MakeWindowTitle("Refresh Turnout/Structure"), "Ok", RefreshSpecialOk, RefreshSpecialCancel, TRUE, NULL, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
+		ParamCreateDialog( &refreshSpecialPG, MakeWindowTitle(_("Refresh Turnout/Structure")), _("Ok"), RefreshSpecialOk, RefreshSpecialCancel, TRUE, NULL, F_BLOCK|F_RESIZE|F_RECALLSIZE, NULL );
 	}
-	ParamLoadMessage( &refreshSpecialPG, REFRESH_M1, "Choose a Turnout/Structure to replace:" );
+	ParamLoadMessage( &refreshSpecialPG, REFRESH_M1, _("Choose a Turnout/Structure to replace:") );
 	ParamLoadMessage( &refreshSpecialPG, REFRESH_M2, "" );
 	refreshSpecialInx = -1;
 	wListClear( (wList_p)refreshSpecialPLs[REFRESH_L].control );
@@ -397,7 +398,8 @@ EXPORT BOOL_T RefreshCompound(
 	else
 		to = StructAdd( listLabels, scale, (wList_p)refreshSpecialPLs[REFRESH_L].control, NULL );
 	if ( to == NULL ) {
-		NoticeMessage( MSG_NO_TURNOUTS_AVAILABLE, "Ok", NULL, GetTrkEndPtCnt(trk)>0?"Turnouts":"Structures" );
+		NoticeMessage( MSG_NO_TURNOUTS_AVAILABLE, _("Ok"), NULL,
+									GetTrkEndPtCnt(trk)>0 ? _("Turnouts") : _("Structures") );
 		return FALSE;
 	}
 	FormatCompoundTitle( listLabels, xx->title );
@@ -426,7 +428,7 @@ EXPORT BOOL_T RefreshCompound(
 			return TRUE;
 		}
 		ParamLoadMessage( &refreshSpecialPG, REFRESH_M1, message );
-		ParamLoadMessage( &refreshSpecialPG, REFRESH_M2, "Choose another Turnout/Structure to replace:" );
+		ParamLoadMessage( &refreshSpecialPG, REFRESH_M2, _("Choose another Turnout/Structure to replace:") );
 	}
 	return TRUE;
 }
@@ -444,9 +446,9 @@ static char renamePartno[STR_SIZE];
 static turnoutInfo_t * renameTo;
 
 static paramData_t renamePLs[] = {
-/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF, (void*)350, "Manufacturer" },
-/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF, (void*)230, "Description" },
-/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH, (void*)100, "#" } };
+/*0*/ { PD_STRING, renameManuf, "manuf", PDO_NOPREF, (void*)350, N_("Manufacturer") },
+/*1*/ { PD_STRING, renameDesc, "desc", PDO_NOPREF, (void*)230, N_("Description") },
+/*2*/ { PD_STRING, renamePartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH, (void*)100, N_("#") } };
 static paramGroup_t renamePG = { "rename", 0, renamePLs, sizeof renamePLs/sizeof renamePLs[0] };
 
 
@@ -530,7 +532,7 @@ static int CompoundCustMgmProc(
 			strncpy( renamePartno, nP, nL ); renamePartno[nL] = 0;
 			if ( !renamePG.win ) {
 				ParamRegister( &renamePG );
-				ParamCreateDialog( &renamePG, MakeWindowTitle("Rename Object"), "Ok", RenameOk, wHide, TRUE, NULL, F_BLOCK, NULL );
+				ParamCreateDialog( &renamePG, MakeWindowTitle(_("Rename Object")), _("Ok"), RenameOk, wHide, TRUE, NULL, F_BLOCK, NULL );
 			}
 			ParamLoadControls( &renamePG );
 			wShow( renamePG.win );

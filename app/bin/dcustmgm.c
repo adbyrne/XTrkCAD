@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcustmgm.c,v 1.1 2005-12-07 15:46:56 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcustmgm.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,8 @@
 
 #include "track.h"
 #include <errno.h>
+#include "i18n.h"
+
 #ifdef WINDOWS
 #include <io.h>
 #define F_OK	(0)
@@ -40,22 +42,23 @@ static void CustomDelete( void * action );
 static void CustomExport( void * action );
 static void CustomDone( void * action );
 static wPos_t customListWidths[] = { 18, 100, 30, 80, 220 };
-static const char * customListTitles[] = { "", "Manufacturer", "Scale", "Part No", "Description" };
+static const char * customListTitles[] = { "", N_("Manufacturer"),
+	N_("Scale"), N_("Part No"), N_("Description") };
 static paramListData_t customListData = { 10, 400, 5, customListWidths, customListTitles };
 static paramData_t customPLs[] = {
 #define I_CUSTOMLIST	(0)
 #define customSelL		((wList_p)customPLs[I_CUSTOMLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &customListData, NULL, BL_MANY },
 #define I_CUSTOMEDIT	(1)
-	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, "Edit" },
+	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CUSTOMDEL		(2)
-	{	PD_BUTTON, CustomDelete, "delete", 0, NULL, "Delete" },
+	{	PD_BUTTON, CustomDelete, "delete", 0, NULL, N_("Delete") },
 #define I_CUSTOMCOPYTO	(3)
-	{	PD_BUTTON, CustomExport, "export", 0, NULL, "Move To" },
+	{	PD_BUTTON, CustomExport, "export", 0, NULL, N_("Move To") },
 #define I_CUSTOMNEW		(4)
-	{	PD_MENU, NULL, "new", PDO_DLGWIDE, NULL, "New" },
-	{	PD_MENUITEM, CarDlgAddDesc, "new-part-mi", 0, NULL, "Car Part" },
-	{	PD_MENUITEM, CarDlgAddProto, "new-proto-mi", 0, NULL, "Car Prototype" }
+	{	PD_MENU, NULL, "new", PDO_DLGWIDE, NULL, N_("New") },
+	{	PD_MENUITEM, CarDlgAddDesc, "new-part-mi", 0, NULL, N_("Car Part") },
+	{	PD_MENUITEM, CarDlgAddProto, "new-proto-mi", 0, NULL, N_("Car Prototype") }
   } ;
 static paramGroup_t customPG = { "custmgm", 0, customPLs, sizeof customPLs/sizeof customPLs[0] };
 
@@ -84,7 +87,7 @@ static void CustomDlgUpdate(
 			  linx++ );
 		if ( linx < lcnt ) {
 			context = (custMgmContext_p)wListGetItemContext( (wList_p)pg->paramPtr[inx].control, linx );
-			wButtonSetLabel( (wButton_p)customPLs[I_CUSTOMEDIT].control, context->proc( CUSTMGM_CAN_EDIT, context->data )?"Edit":"Rename" );
+			wButtonSetLabel( (wButton_p)customPLs[I_CUSTOMEDIT].control, context->proc( CUSTMGM_CAN_EDIT, context->data )?_("Edit"):_("Rename") );
 			ParamControlActive( &customPG, I_CUSTOMEDIT, TRUE );
 		} else {
 			ParamControlActive( &customPG, I_CUSTOMEDIT, FALSE );
@@ -130,7 +133,7 @@ static void CustomDelete( void * action )
 
 	if ( selcnt <= 0 )
 		return;
-	if ( (!NoticeMessage2( 1, MSG_CUSTMGM_DELETE_CONFIRM, "Yes", "No", selcnt ) ) )
+	if ( (!NoticeMessage2( 1, MSG_CUSTMGM_DELETE_CONFIRM, _("Yes"), _("No"), selcnt ) ) )
 		return;
 	cnt = wListGetCount( (wList_p)customPLs[0].control );
 	for ( inx=0; inx<cnt; inx++ ) {
@@ -151,7 +154,7 @@ EXPORT FILE * customMgmF;
 static char custMgmContentsStr[STR_SIZE];
 static BOOL_T custMgmProceed;
 static paramData_t custMgmContentsPLs[] = {
-	{ PD_STRING, custMgmContentsStr, "label", 0, (void*)400, "Label" } };
+	{ PD_STRING, custMgmContentsStr, "label", 0, (void*)400, N_("Label") } };
 static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, sizeof custMgmContentsPLs/sizeof custMgmContentsPLs[0] };
 
 static void CustMgmContentsOk( void * junk )
@@ -179,13 +182,13 @@ static int CustomDoExport(
 	if ( rc != -1 ) {
 		rc = access( pathName, W_OK );
 		if ( rc == -1 ) {
-			NoticeMessage( MSG_CUSTMGM_CANT_WRITE, "Ok", NULL, pathName );
+			NoticeMessage( MSG_CUSTMGM_CANT_WRITE, _("Ok"), NULL, pathName );
 			return FALSE;
 		}
 		custMgmProceed = TRUE;
 	} else {
 		if ( custMgmContentsPG.win == NULL ) {
-			ParamCreateDialog( &custMgmContentsPG, MakeWindowTitle("Contents Label"), "Ok", CustMgmContentsOk, wHide, TRUE, NULL, F_BLOCK, NULL );
+			ParamCreateDialog( &custMgmContentsPG, MakeWindowTitle(_("Contents Label")), _("Ok"), CustMgmContentsOk, wHide, TRUE, NULL, F_BLOCK, NULL );
 		}
 		custMgmProceed = FALSE;
 		wShow( custMgmContentsPG.win );
@@ -194,7 +197,7 @@ static int CustomDoExport(
 		return FALSE;
 	customMgmF = fopen( pathName, "a" );
 	if ( customMgmF == NULL ) {
-		NoticeMessage( MSG_CUSTMGM_CANT_WRITE, "Ok", NULL, pathName );
+		NoticeMessage( MSG_CUSTMGM_CANT_WRITE, _("Ok"), NULL, pathName );
 		return FALSE;
 	}
 	if ( rc == -1 )
@@ -207,7 +210,7 @@ static int CustomDoExport(
 		context = (custMgmContext_p)wListGetItemContext( customSelL, inx );
 		if ( context == NULL ) continue;
 		if (!context->proc( CUSTMGM_DO_COPYTO, context->data )) {
-			NoticeMessage( MSG_WRITE_FAILURE, "Ok", NULL, strerror(errno), pathName );
+			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), pathName );
 			fclose( customMgmF );
 			return FALSE;
 		}
@@ -227,15 +230,18 @@ static int CustomDoExport(
 static void CustomExport( void * junk )
 {
 	if ( customMgmExport_fs == NULL )
-		customMgmExport_fs = wFilSelCreate( mainW, FS_UPDATE, 0, "Move To XTP",
-				"Parameter File|*.xtp", CustomDoExport, NULL );
+		customMgmExport_fs = wFilSelCreate( mainW, FS_UPDATE, 0, _("Move To XTP"),
+				_("Parameter File|*.xtp"), CustomDoExport, NULL );
 	wFilSelect( customMgmExport_fs, curDirName );
 }
 
 
 static void CustomDone( void * action )
 {
-	FILE * f = OpenCustom( "w" );
+	char *oldLocale = NULL;
+	FILE * f = OpenCustom("w");
+
+	oldLocale = SaveLocale("C");
 
 	if (f == NULL) {
 		wHide( customPG.win );
@@ -244,6 +250,7 @@ static void CustomDone( void * action )
 	CompoundCustomSave(f);
 	CarCustomSave(f);
 	fclose(f);
+	RestoreLocale(oldLocale);
 	wHide( customPG.win );
 }
 
@@ -335,7 +342,7 @@ static void CustMgmChange( long changes )
 static void DoCustomMgr( void * junk )
 {
 	if (customPG.win == NULL) {
-		ParamCreateDialog( &customPG, MakeWindowTitle("Custom Update"), "Done", CustomDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
+		ParamCreateDialog( &customPG, MakeWindowTitle(_("Custom Update")), _("Done"), CustomDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
 	} else {
 		wListClear( customSelL );
 	}

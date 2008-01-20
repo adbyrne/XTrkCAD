@@ -1,7 +1,7 @@
 /** \file cmisc.c
  * Handlimg of the 'Describe' dialog
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.4 2007-05-17 13:33:13 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.5 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,6 +23,7 @@
  */
 
 #include "track.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -49,7 +50,7 @@ static wPos_t describeCmdButtonEnd;
 static paramFloatRange_t rdata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
 static paramIntegerRange_t idata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
 static paramTextData_t tdata = { 300, 150 };
-static char * pivotLabels[] = { "First", "Middle", "Second", NULL };
+static char * pivotLabels[] = { N_("First"), N_("Middle"), N_("Second"), NULL };
 static paramData_t describePLs[] = {
 #define I_FLOAT_0		(0)
 	{ PD_FLOAT, NULL, "F1", 0, &rdata },
@@ -110,7 +111,7 @@ static paramData_t describePLs[] = {
 #define I_TEXT_N		I_TEXT_0+1
 
 #define I_PIVOT_0		I_TEXT_N
-	{ PD_RADIO, NULL, "P1", 0, pivotLabels, "Pivot", BC_HORZ|BC_NOBORDER, 0 }
+	{ PD_RADIO, NULL, "P1", 0, pivotLabels, N_("Pivot"), BC_HORZ|BC_NOBORDER, 0 }
 #define I_PIVOT_N		I_PIVOT_0+1
 	};
 
@@ -149,7 +150,7 @@ static void DescribeUpdate(
 	if ( (ddp->mode&DESC_NOREDRAW) == 0 )
 		DrawDescHilite();
 	if ( !descUndoStarted ) {
-		UndoStart( "Change Track", "Change Track" );
+		UndoStart( _("Change Track"), "Change Track" );
 		descUndoStarted = TRUE;
 	}
 	UndoModify( descTrk );
@@ -305,7 +306,7 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 	describeW_posy = 0;
 	if ( describePG.win == NULL ) {
 		/* SDB 5.13.2005 */
-		ParamCreateDialog( &describePG, "Description", "Done", DescOk,
+		ParamCreateDialog( &describePG, _("Description"), _("Done"), DescOk,
 			(paramActionCancelProc) DescribeCancel,
 			TRUE, DescribeLayout, F_RECALLPOS,
 			DescribeUpdate );
@@ -327,7 +328,7 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 	for ( ddp=data; ddp->type != DESC_NULL; ddp++ ) {
 		if ( ddp->mode&DESC_IGNORE )
 			continue;
-		label = ddp->label;
+		label = _(ddp->label);
 #ifdef NEEDSTAR
 		if ( ((ddp->mode|ro_mode)&DESC_RO) == 0 ) {
 			sprintf( message, "%s *", label );
@@ -351,7 +352,7 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 			break;
 		case DESC_LAYER:
 			if ( GetLayerFrozen(GetTrkLayer(descTrk)) )
-				sprintf( message, "Frozen %2.2d - %s", GetTrkLayer(descTrk)+1, GetLayerName(GetTrkLayer(descTrk)) );
+				sprintf( message, "%s %2.2d - %s", _("Frozen"), GetTrkLayer(descTrk)+1, GetLayerName(GetTrkLayer(descTrk)) );
 			else
 				sprintf( message, "%2.2d - %s", GetTrkLayer(descTrk)+1, GetLayerName(GetTrkLayer(descTrk)) );
 			wStringSetValue( (wString_p)ddp->control0, message );
@@ -406,7 +407,7 @@ static STATUS_T CmdDescribe( wAction_t action, coOrd pos )
 
 	switch (action) {
 	case C_START:
-		InfoMessage( "Select track to describe" );
+		InfoMessage( _("Select track to describe") );
 		descUndoStarted = FALSE;
 		return C_CONTINUE;
 
@@ -453,7 +454,7 @@ static STATUS_T CmdDescribe( wAction_t action, coOrd pos )
 
 void InitCmdDescribe( wMenu_p menu )
 {
-	describeCmdInx = AddMenuButton( menu, CmdDescribe, "cmdDescribe", "Properties", wIconCreatePixMap(describe_xpm),
+	describeCmdInx = AddMenuButton( menu, CmdDescribe, "cmdDescribe", _("Properties"), wIconCreatePixMap(describe_xpm),
 				LEVEL0, IC_CANCEL|IC_POPUP, ACCL_DESCRIBE, NULL );
 	RegisterChangeNotification( DescChange );
 	ParamRegister( &describePG );

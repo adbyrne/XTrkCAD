@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/chndldto.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/chndldto.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  *
  * CURVE
  *
@@ -29,6 +29,7 @@
 #include "cjoin.h"
 #include "compound.h"
 #include <math.h>
+#include "i18n.h"
 
 #define PTRACE(X)
 
@@ -64,7 +65,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 	switch (action) {
 
 	case C_START:
-		InfoMessage( "Place frog and drag angle" );
+		InfoMessage( _("Place frog and drag angle") );
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		Dhlt.state = 0;
 		Dhlt.normalT = NULL;
@@ -81,13 +82,13 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			if ((Dhlt.normalT = OnTrack( &pos, TRUE, TRUE )) == NULL)
 				break;
 			if ( QueryTrack( Dhlt.normalT, Q_NOT_PLACE_FROGPOINTS ) ) {
-				ErrorMessage( MSG_CANT_PLACE_FROGPOINTS, "frog" );
+				ErrorMessage( MSG_CANT_PLACE_FROGPOINTS, _("frog") );
 				Dhlt.normalT = NULL;
 				break;
 			}
 			Dhlt.normalP = Dhlt.reverseP = Dhlt.reverseP1 = pos;
 			Dhlt.normalA = GetAngleAtPoint( Dhlt.normalT, Dhlt.normalP, NULL, NULL );
-			InfoMessage( "Drag to set angle" );
+			InfoMessage( _("Drag to set angle") );
 			DrawLine( &tempD, Dhlt.reverseP, Dhlt.reverseP1, 0, wDrawColorBlack );
 			Dhlt.state = 1;
 			pointC = pointP = pointP1 = reverseC = zero;
@@ -128,12 +129,12 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 				Dhlt.frogNo = 0.0;
 			if (action == C_MOVE) {
 				if (Dhlt.frogNo != 0) {
-					InfoMessage( "Angle = %0.2f Frog# = %0.2f", Dhlt.frogA, Dhlt.frogNo );
+					InfoMessage( _("Angle = %0.2f Frog# = %0.2f"), Dhlt.frogA, Dhlt.frogNo );
 				} else {
-					InfoMessage( "Frog angle is too close to 0" );
+					InfoMessage( _("Frog angle is too close to 0") );
 				}
 			} else {
-				InfoMessage( "Select point position" );
+				InfoMessage( _("Select point position") );
 				Dhlt.state = 2;
 				Translate( &Dhlt.reverseP, Dhlt.reverseP, Dhlt.normalA+(right?+90:-90), trackGauge );
 				Translate( &Dhlt.reverseP1, Dhlt.reverseP1, Dhlt.normalA+(right?+90:-90), trackGauge );
@@ -147,7 +148,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			if ((pointT = OnTrack( &pointP, TRUE, TRUE )) == NULL)
 				break;
 			if ( QueryTrack( pointT, Q_NOT_PLACE_FROGPOINTS ) ) {
-				ErrorMessage( MSG_CANT_PLACE_FROGPOINTS, "points" );
+				ErrorMessage( MSG_CANT_PLACE_FROGPOINTS, _("points") );
 				break;
 			}
 			dist = FindDistance( Dhlt.normalP, pointP );
@@ -172,7 +173,7 @@ PTRACE(( "r=%c a=%0.1f ", right?'T':'F', angle ))
 			if ((trk = OnTrack( &off, TRUE, TRUE )) == NULL)
 				break;
 			if ( QueryTrack( trk, Q_NOT_PLACE_FROGPOINTS ) ) {
-				ErrorMessage( MSG_CANT_PLACE_FROGPOINTS, "points" );
+				ErrorMessage( MSG_CANT_PLACE_FROGPOINTS, _("points") );
 				break;
 			}
 			off = pointP;
@@ -269,11 +270,11 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 			}
 			if (action != C_UP) {
 				dist = FindDistance( pointP, Dhlt.normalP );
-				InfoMessage( "Length = %0.2f Angle = %0.2f Frog# = %0.2f", dist, Dhlt.frogA, Dhlt.frogNo );
+				InfoMessage( _("Length = %0.2f Angle = %0.2f Frog# = %0.2f"), dist, Dhlt.frogA, Dhlt.frogNo );
 				DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 				return C_CONTINUE;
 			}
-			UndoStart( "Create Hand Laid Turnout", "Hndldto( T%d[%d] )", GetTrkIndex(pointT), pointEp0 );
+			UndoStart( _("Create Hand Laid Turnout"), "Hndldto( T%d[%d] )", GetTrkIndex(pointT), pointEp0 );
 			UndoModify( pointT );
 			if (!SplitTrack( pointT, pointP, pointEp0, &trk1, TRUE ))
 				break;
@@ -364,5 +365,5 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 
 EXPORT void InitCmdHandLaidTurnout( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", "HandLaidTurnout", wIconCreatePixMap(hndldto_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
+	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", _("HandLaidTurnout"), wIconCreatePixMap(hndldto_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
 }

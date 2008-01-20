@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprofile.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprofile.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,6 +24,7 @@
 #include "cselect.h"
 #include <math.h>
 #include "shrtpath.h"
+#include "i18n.h"
 
 
 /*
@@ -452,7 +453,7 @@ static void DoProfilePrint( void * junk )
 	coOrd screenSize;
 	coOrd textsize;
 
-	if (!wPrintDocStart( "Profile", 1, &copies ))
+	if (!wPrintDocStart( _("Profile"), 1, &copies ))
 		return;
 	printProfileD.d = wPrintPageStart();
 	if (printProfileD.d == NULL)
@@ -468,7 +469,7 @@ static void DoProfilePrint( void * junk )
 	screenRatio = screenSize.y/screenSize.x;
 	printProfileD.size.x = w;
 	printProfileD.size.y = h;
-	sprintf( message, "%s Profile: %s", sProdName, Title1 );
+	sprintf( message, _("%s Profile: %s"), sProdName, Title1 );
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	DrawTextSize( &mainD, message, fp, 24, FALSE, &textsize );
 	titleH = textsize.y + 6.0/mainD.dpi;
@@ -544,8 +545,8 @@ static paramData_t profilePLs[] = {
 	{	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &profileDrawData },
 #define I_PROFILEMSG			(1)
 	{	PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, (void*)300 },
-	{	PD_BUTTON, DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL, "Clear" },
-	{	PD_BUTTON, DoProfilePrint, "print", 0, NULL, "Print" } };
+	{	PD_BUTTON, DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL, N_("Clear") },
+	{	PD_BUTTON, DoProfilePrint, "print", 0, NULL, N_("Print") } };
 static paramGroup_t profilePG = { "profile", 0, profilePLs, sizeof profilePLs/sizeof profilePLs[0] };
 
 
@@ -616,7 +617,7 @@ static void SelProfileW(
 		}
 		if (inx >= profElem_da.cnt)
 			inx = profElem_da.cnt-1;
-		sprintf(message, "Elev = %0.1f", PutDim(elev) );
+		sprintf(message, _("Elev = %0.1f"), PutDim(elev) );
 		ParamLoadMessage( &profilePG, I_PROFILEMSG, message );
 		oldElev = elev;
 		ProfileTempDraw( inx, elev );
@@ -626,17 +627,17 @@ static void SelProfileW(
 			break;
 		ProfileTempDraw( inx, oldElev );
 		if (profElem_da.cnt == 1 ) {
-			sprintf(message, "Elev = %0.1f", PutDim(elev) );
+			sprintf(message, _("Elev = %0.1f"), PutDim(elev) );
 		} else if (inx == 0) {
-			sprintf( message, "Elev=%0.2f %0.1f%%",
+			sprintf( message, _("Elev=%0.2f %0.1f%%"),
 				PutDim(elev),
 				fabs( profElem(inx+1).elev-elev ) / (profElem(inx+1).dist-profElem(inx).dist) * 100.0 );
 		} else if (inx == profElem_da.cnt-1) {
-			sprintf( message, "%0.1f%% Elev = %0.2f",
+			sprintf( message, _("%0.1f%% Elev = %0.2f"),
 				fabs( profElem(inx-1).elev-elev ) / (profElem(inx).dist-profElem(inx-1).dist) * 100.0,
 				PutDim(elev) );
 		} else {
-			sprintf( message, "%0.1f%% Elev = %0.2f %0.1f%%",
+			sprintf( message, _("%0.1f%% Elev = %0.2f %0.1f%%"),
 				fabs( profElem(inx-1).elev-elev ) / (profElem(inx).dist-profElem(inx-1).dist) * 100.0,
 				PutDim(elev),
 				fabs( profElem(inx+1).elev-elev ) / (profElem(inx+1).dist-profElem(inx).dist) * 100.0 );
@@ -647,7 +648,7 @@ static void SelProfileW(
 		break;
 	case C_UP:
 		if (profileUndo == FALSE) {
-			UndoStart( "Profile Command", "Profile - set elevation" );
+			UndoStart( _("Profile Command"), "Profile - set elevation" );
 			profileUndo = TRUE;
 		}
 		if (profElem(inx).trk) {
@@ -655,7 +656,7 @@ static void SelProfileW(
 		}
 		profElem(inx).elev = oldElev;
 		RedrawProfileW();
-		ParamLoadMessage( &profilePG, I_PROFILEMSG, "Drag to change Elevation" );
+		ParamLoadMessage( &profilePG, I_PROFILEMSG, _("Drag to change Elevation") );
 		inx = -1;
 		break;
 	default:
@@ -719,9 +720,9 @@ static void DoProfileClear( void * junk )
 static void DoProfileChangeMode( void * junk )
 {
 	if (profElem_da.cnt<=0) {
-		InfoMessage( "Select a Defined Elevation to start Profile" );
+		InfoMessage( _("Select a Defined Elevation to start Profile") );
 	} else {
-		InfoMessage( "Select a Defined Elevation to extend Profile" );
+		InfoMessage( _("Select a Defined Elevation to extend Profile") );
 	}
 }
 
@@ -1198,7 +1199,7 @@ static void ProfileSubCommand( wBool_t set, void* pcmd )
 		return;
 	if (profileUndo==0) {
 		profileUndo = TRUE;
-		UndoStart("Profile Command", "Profile");
+		UndoStart(_("Profile Command"), "Profile");
 	}
 	radius = 0.05*mainD.scale;
 	if ( radius < trackGauge/2.0 )
@@ -1251,12 +1252,12 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 			profileColorFill = drawColorAqua;
 			DrawTextSize( &mainD, "999", wStandardFont( F_HELV, FALSE, FALSE ), screenProfileFontSize, FALSE, &textsize );
 			labelH = textsize.y;
-			profileW = ParamCreateDialog( &profilePG, MakeWindowTitle("Profile"), "Done", DoProfileDone, (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE, NULL );
+			profileW = ParamCreateDialog( &profilePG, MakeWindowTitle(_("Profile")), _("Done"), DoProfileDone, (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE, NULL );
 		}
 		ParamLoadControls( &profilePG );
 		ParamGroupRecord( &profilePG );
 		wShow( profileW );
-		ParamLoadMessage( &profilePG, I_PROFILEMSG, "Drag to change Elevation" );
+		ParamLoadMessage( &profilePG, I_PROFILEMSG, _("Drag to change Elevation") );
 		HilightProfileElevations( TRUE );
 		profElem_da.cnt = 0;
 		station_da.cnt = 0;
@@ -1266,7 +1267,7 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 		pathStartTrk = NULL;
 		SetAllTrackSelect( FALSE );
 		profileUndo = FALSE;
-		InfoMessage( "Select a Defined Elevation to start profile" );
+		InfoMessage( _("Select a Defined Elevation to start profile") );
 		return C_CONTINUE;
 	case C_LCLICK:
 		InfoMessage( "" );
@@ -1347,11 +1348,10 @@ EXPORT void InitCmdProfile( wMenu_p menu )
 #ifdef LATER
 	AddPlaybackProc( "PROFILEMOUSE", (playbackProc_p)profilePlayback, NULL );
 #endif
-	AddMenuButton( menu, CmdProfile, "cmdProfile", "Profile", wIconCreatePixMap(profile_xpm), LEVEL0_50, IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_PROFILE, NULL );
+	AddMenuButton( menu, CmdProfile, "cmdProfile", _("Profile"), wIconCreatePixMap(profile_xpm), LEVEL0_50, IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_PROFILE, NULL );
 	profilePopupM = MenuRegister( "Profile Mode" );
-	profilePopupToggles[0] = wMenuToggleCreate( profilePopupM, "", "Define", 0, FALSE, ProfileSubCommand, (void*)0 );
-	profilePopupToggles[1] = wMenuToggleCreate( profilePopupM, "", "Ignore", 0, FALSE, ProfileSubCommand, (void*)1 );
-	profilePopupToggles[2] = wMenuToggleCreate( profilePopupM, "", "None", 0, FALSE, ProfileSubCommand, (void*)2 );
+	profilePopupToggles[0] = wMenuToggleCreate( profilePopupM, "", _("Define"), 0, FALSE, ProfileSubCommand, (void*)0 );
+	profilePopupToggles[1] = wMenuToggleCreate( profilePopupM, "", _("Ignore"), 0, FALSE, ProfileSubCommand, (void*)1 );
+	profilePopupToggles[2] = wMenuToggleCreate( profilePopupM, "", _("None"), 0, FALSE, ProfileSubCommand, (void*)2 );
 	RegisterChangeNotification( ProfileChange );
 }
-

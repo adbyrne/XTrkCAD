@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -46,6 +46,7 @@
 #include "misc.h"
 #include "fileio.h"
 #include "cjoin.h"
+#include "i18n.h"
 
 #define Product "XTrkCad"
 #define product "xtrkcad"
@@ -65,9 +66,9 @@ char * sProdNameUpper = PRODUCT;
 
 char * sEnvExtra = PRODUCT "EXTRA";
 
-char * sTurnoutDesignerW = Product " Turnout Designer";
+char * sTurnoutDesignerW = Product N_(" Turnout Designer");
 
-char * sAboutProd = Product "  Version " Version;
+char * sAboutProd = Product N_("  Version ") Version;
 
 char * sCustomF = product ".cus";
 char * sCheckPointF = product ".ckp";
@@ -77,13 +78,13 @@ char * sParamQF = product "." KEYCODE "tq";
 char * sUndoF = product ".und";
 char * sAuditF = product ".aud";
 
-char * sSourceFilePattern = "XTrkCad Files|*.xtc";
-char * sImportFilePattern = Product " Import Files|*." KEYCODE "ti";
-char * sDXFFilePattern = Product " DXF Files|*.dxf";
-char * sRecordFilePattern = Product " Record Files|*." KEYCODE "tr";
-char * sNoteFilePattern = Product " Note Files|*.not";
-char * sLogFilePattern = Product " Log Files|*.log";
-char * sPartsListFilePattern = Product " PartsList Files|*.log";
+char * sSourceFilePattern = N_("XTrkCad Files|*.xtc");
+char * sImportFilePattern = Product N_(" Import Files|*.") KEYCODE "ti";
+char * sDXFFilePattern = Product N_(" DXF Files|*.dxf");
+char * sRecordFilePattern = Product N_(" Record Files|*.") KEYCODE "tr";
+char * sNoteFilePattern = Product N_(" Note Files|*.not");
+char * sLogFilePattern = Product N_(" Log Files|*.log");
+char * sPartsListFilePattern = Product N_(" PartsList Files|*.log");
 
 char * sVersion = Version;
 int iParamVersion = PARAMVERSION;

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dbench.c,v 1.1 2005-12-07 15:46:52 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dbench.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -21,6 +21,7 @@
  */
 
 #include "track.h"
+#include "i18n.h"
 
 
 /*****************************************************************************
@@ -34,7 +35,7 @@
 #define B_LGRIDER		(1)
 #define B_TGRIDER		(2)
 
-static char *benchTypeS[] = { "", " L-Girder", " T-Girder" };
+static char *benchTypeS[] = { "", N_(" L-Girder"), N_(" T-Girder") };
 
 #include "bo_edge.xpm"
 #include "bo_flat.xpm"
@@ -57,22 +58,22 @@ typedef struct {
 		wIcon_p icon;
 		} orientData_t;
 static orientData_t rectOrientD[] = {
-		{ "On Edge", bo_edge_xpm },
-		{ "Flat", bo_flat_xpm } };
+		{ N_("On Edge"), bo_edge_xpm },
+		{ N_("Flat"), bo_flat_xpm } };
 static orientData_t lgirderOrientD[] = {
-		{ "Left", bo_ll_xpm },
-		{ "Right", bo_lr_xpm },
-		{ "Left-Down", bo_lld_xpm },
-		{ "Right-Down", bo_lrd_xpm },
-		{ "Left-Up", bo_llu_xpm },
-		{ "Right-Up", bo_lru_xpm },
-		{ "Left-Inverted", bo_lli_xpm },
-		{ "Right-Inverted", bo_lri_xpm } };
+		{ N_("Left"), bo_ll_xpm },
+		{ N_("Right"), bo_lr_xpm },
+		{ N_("Left-Down"), bo_lld_xpm },
+		{ N_("Right-Down"), bo_lrd_xpm },
+		{ N_("Left-Up"), bo_llu_xpm },
+		{ N_("Right-Up"), bo_lru_xpm },
+		{ N_("Left-Inverted"), bo_lli_xpm },
+		{ N_("Right-Inverted"), bo_lri_xpm } };
 static orientData_t tgirderOrientD[] = {
-		{ "Normal", bo_t_xpm },
-		{ "Right", bo_tr_xpm },
-		{ "Left", bo_tl_xpm },
-		{ "Inverted", bo_ti_xpm } };
+		{ N_("Normal"), bo_t_xpm },
+		{ N_("Right"), bo_tr_xpm },
+		{ N_("Left"), bo_tl_xpm },
+		{ N_("Inverted"), bo_ti_xpm } };
 
 static struct {
 		int cnt;
@@ -103,7 +104,7 @@ EXPORT void BenchUpdateOrientationList(
 		wListAddValue( list, NULL, op->icon, op );
 #else
 		/* gtk_combo_find is upset if we try to put anything other that a label on a list */
-		wListAddValue( list, op->name, NULL, op );
+		wListAddValue( list, _(op->name), NULL, op );
 #endif
    }
    wListSetIndex( list, 0 );
@@ -138,7 +139,7 @@ static void AddBenchTypes(
 		bt->height0 = strtol( cq=cp, &cp, 10 );
 		bt->height1 = strtol( cq=cp, &cp, 10 );
 		if ( cp == cq ) {
-			NoticeMessage( "Bad BenchType for %s:\n%s", "Continue", NULL, key, value );
+			NoticeMessage( _("Bad BenchType for %s:\n%s"), _("Continue"), NULL, key, value );
 			benchType_da.cnt--;
 			return;
 		}
@@ -322,7 +323,7 @@ EXPORT void BenchGetDesc(
 	sprintf( desc, "%s%s %s",
 		(type==B_LGRIDER?"L - ":type==B_TGRIDER?"T - ":""),
 		name,
-		orientD[type].data[(int)orient].name );
+		_(orientD[type].data[(int)orient].name) );
 }
 
 typedef struct {

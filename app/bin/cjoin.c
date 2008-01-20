@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cjoin.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cjoin.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  *
  * JOINS
  *
@@ -29,7 +29,7 @@
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
-
+#include "i18n.h"
 
 
 static int log_join = 0;
@@ -161,7 +161,7 @@ LOG( log_join, 2, ("    = CURVE @ Pc=[%0.3f %0.3f] R=%0.3f A0=%0.3f A1=%0.3f Fli
 	d = D2R(res->arcA1);
 	if (d < 0.0)
 		d = 2*M_PI + d;
-	InfoMessage( "Curved Track: Radius=%s Length=%s",
+	InfoMessage( _("Curved Track: Radius=%s Length=%s"),
 				FormatDistance(res->arcR), FormatDistance(res->arcR*d) );
 	return TRUE;
 
@@ -205,7 +205,7 @@ LOG( log_join, 3, ("     p1=[%0.3f %0.3f] aa=%0.3f a=%0.3f\n",
 /* Straight: */
 		PointOnCircle( &pt, pos0, r0, a1);
 LOG( log_join, 2, ("    = STRAIGHT [%0.3f %0.3f] [%0.3f %0.3f]\n", pt.x, pt.y, pos1.x, pos1.y ) )
-		InfoMessage( "Straight Track: Length=%s Angle=%0.3f",
+		InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
 				FormatDistance(FindDistance( pt, pos1 )), PutAngle(FindAngle( pt, pos1 )) );
 		res->type = curveTypeStraight;
 		res->pos[0]=pt;
@@ -247,7 +247,7 @@ LOG( log_join, 3, ("       A0=%0.3f A1=%0.3f R=%0.3f\n", res->arcA0, res->arcA1,
 		d = D2R(res->arcA1);
 		if (d < 0.0)
 			d = 2*M_PI + d;
-		InfoMessage( "Curved Track: Radius=%s Length=%s Angle=%0.3f",
+		InfoMessage( _("Curved Track: Radius=%s Length=%s Angle=%0.3f"),
 				FormatDistance(res->arcR), FormatDistance(res->arcR*d), PutAngle(res->arcA1) );
 		res->type = curveTypeCurve;
 	}
@@ -343,7 +343,7 @@ LOG( log_join, 2, (" Move P0 X%0.3f A%0.3f  P1 X%0.3f A%0.3f\n",
 		if (Dj.inp[inx].params.type == curveTypeStraight ) {
 			d = FindDistance( Dj.inp[inx].params.lineOrig, Dj.inp_pos[inx] );
 			if (d < Dj.jointD[inx].d0) {
-				InfoMessage( "Track (%d) is too short for transition-curve by %0.3f", 
+				InfoMessage( _("Track (%d) is too short for transition-curve by %0.3f"), 
 						GetTrkIndex(Dj.inp[inx].trk),
 						PutDim(fabs(Dj.jointD[inx].d0-d)) );
 				return FALSE;
@@ -360,7 +360,7 @@ LOG( log_join, 2, (" Move P0 X%0.3f A%0.3f  P1 X%0.3f A%0.3f\n",
 	}
 	d -= l;
 	if ( d <= minLength ) {
-		InfoMessage( "Connecting track is too short by %0.3f", PutDim(fabs(minLength-d)) );
+		InfoMessage( _("Connecting track is too short by %0.3f"), PutDim(fabs(minLength-d)) );
 		return FALSE;
 	}
 
@@ -404,14 +404,15 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 		if (Dj.joinMoveState == 0) {
 			Dj.joinMoveState++;
 			InfoMessage( GetTrkSelected(Dj.inp[0].trk)?
-				"Click on an unselected End-Point":
-				"Click on a selected End-Point" );
+				_("Click on an unselected End-Point"):
+				_("Click on a selected End-Point") );
 			Dj.inp[0].pos = pos;
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			return C_CONTINUE;
 		}
 		if ( GetTrkSelected(Dj.inp[0].trk) == GetTrkSelected(Dj.inp[1].trk) ) {
-			ErrorMessage( MSG_2ND_TRK_NOT_SEL_UNSEL, GetTrkSelected(Dj.inp[0].trk)?"un":"" );
+			ErrorMessage( MSG_2ND_TRK_NOT_SEL_UNSEL, GetTrkSelected(Dj.inp[0].trk)
+					?  _("unselected") : _("selected") );
 			return C_CONTINUE;
 		}
 		DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
@@ -446,7 +447,7 @@ static STATUS_T CmdJoin(
 	switch (action) {
 
 	case C_START:
-		InfoMessage( "Left click - join with track, Shift Left click - move to join" );
+		InfoMessage( _("Left click - join with track, Shift Left click - move to join") );
 		Dj.state = 0;
 		Dj.joinMoveState = 0;
 		/*ParamGroupRecord( &easementPG );*/
@@ -477,7 +478,7 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			if (!GetTrackParams( PARAMS_1ST_JOIN, Dj.inp[0].trk, pos, &Dj.inp[0].params ))
 				return C_CONTINUE;
 			Dj.inp[0].realType = GetTrkType(Dj.inp[0].trk);
-			InfoMessage( "Select 2nd track" );
+			InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			return C_CONTINUE;
@@ -504,12 +505,12 @@ LOG( log_join, 1, ("      2nd track %d, @[%0.3f %0.3f] EP0=%d EP1=%d\n",
 						Dj.inp[0].params.ep, Dj.inp[1].params.ep ) )
 LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			if ( GetTrkEndTrk(Dj.inp[0].trk,Dj.inp[0].params.ep) != NULL) {
-				ErrorMessage( MSG_TRK_ALREADY_CONN, "First" );
+				ErrorMessage( MSG_TRK_ALREADY_CONN, _("First") );
 				return C_CONTINUE;
 			}
 			if ( Dj.inp[1].params.ep >= 0 &&
 				 GetTrkEndTrk(Dj.inp[1].trk,Dj.inp[1].params.ep) != NULL) {
-				ErrorMessage( MSG_TRK_ALREADY_CONN, "Second" );
+				ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
 				return C_CONTINUE;
 			}
 
@@ -600,7 +601,7 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 printf("pos=[%0.3f,%0.3f] lineOrig=[%0.3f,%0.3f], angle=%0.3f = off=[%0.3f,%0.3f], beyond=%0.3f\n",
 pos.x, pos.y, Dj.inp[1].params.lineOrig.x, Dj.inp[1].params.lineOrig.y, Dj.inp[1].params.angle, off.x, off.y, beyond );
 #endif
-			InfoMessage( "Beyond end of 2nd track" );
+			InfoMessage( _("Beyond end of 2nd track") );
 			goto errorReturn;
 		}
 		Dj.inp_pos[0] = Dj.jRes.pos[0];
@@ -635,7 +636,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 			FindPos( &off, &beyond, Dj.inp_pos[0], Dj.inp[0].params.lineOrig,
 					 Dj.inp[0].params.angle, 100000.0 );
 			if (beyond < 0.0) {
-				InfoMessage("Beyond end of 1st track");
+				InfoMessage(_("Beyond end of 1st track"));
 				goto errorReturn;
 				/*Dj.jRes.type = curveTypeNone;
 				return C_CONTINUE;*/
@@ -659,7 +660,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 		}
 		d -= Dj.jointD[0].d0;
 		if ( d <= minLength ) {
-			ErrorMessage( MSG_TRK_TOO_SHORT, "First ", PutDim(fabs(minLength-d)) );
+			ErrorMessage( MSG_TRK_TOO_SHORT, _("First "), PutDim(fabs(minLength-d)) );
 			goto errorReturn;
 			/*Dj.jRes.type = curveTypeNone;
 			return C_CONTINUE;*/
@@ -686,7 +687,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 		}
 		d -= Dj.jointD[1].d0;
 		if ( d <= minLength ) {
-			ErrorMessage( MSG_TRK_TOO_SHORT, "Second ", PutDim(fabs(minLength-d)) );
+			ErrorMessage( MSG_TRK_TOO_SHORT, _("Second "), PutDim(fabs(minLength-d)) );
 			goto errorReturn;
 			/*Dj.jRes.type = curveTypeNone;
 			return C_CONTINUE;*/
@@ -700,7 +701,7 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 				d = FindDistance( Dj.jRes.pos[0], Dj.jRes.pos[1] );
 			}
 			if ( d < l ) {
-				ErrorMessage( MSG_TRK_TOO_SHORT, "Connecting ", PutDim(fabs(minLength-d)) );
+				ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
 				goto errorReturn;
 				/*Dj.jRes.type = curveTypeNone;
 				return C_CONTINUE;*/
@@ -777,7 +778,7 @@ errorReturn:
 		if (Dj.state == 0)
 			return C_CONTINUE;
 		if (Dj.state == 1) {
-			InfoMessage( "Select 2nd track" );
+			InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
 		}
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorBlack );
@@ -786,10 +787,10 @@ errorReturn:
 		if (Dj.jRes.type == curveTypeNone) {
 			Dj.state = 1;
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
-			InfoMessage( "Select 2nd track" );
+			InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
 		}
-		UndoStart( "Join Tracks", "newJoin" );
+		UndoStart( _("Join Tracks"), "newJoin" );
 		switch (Dj.jRes.type) {
 		case curveTypeStraight:
 			trk = NewStraightTrack( Dj.jRes.pos[0], Dj.jRes.pos[1] );
@@ -853,12 +854,13 @@ errorReturn:
 		if (Dj.joinMoveState == 0) {
 			Dj.joinMoveState++;
 			InfoMessage( GetTrkSelected(Dj.inp[0].trk)?
-				"Click on an unselected End-Point":
-				"Click on a selected End-Point" );
+				_("Click on an unselected End-Point"):
+				_("Click on a selected End-Point") );
 			return C_CONTINUE;
 		}
 		if ( GetTrkSelected(Dj.inp[0].trk) == GetTrkSelected(Dj.inp[1].trk) ) {
-			ErrorMessage( MSG_2ND_TRK_NOT_SEL_UNSEL, GetTrkSelected(Dj.inp[0].trk)?"un":"" );
+			ErrorMessage( MSG_2ND_TRK_NOT_SEL_UNSEL, GetTrkSelected(Dj.inp[0].trk)
+					? _("unselected") : _("selected") );
 			return C_CONTINUE;
 		}
 		if (GetTrkSelected(Dj.inp[0].trk))
@@ -893,7 +895,7 @@ errorReturn:
 
 void InitCmdJoin( wMenu_p menu )
 {
-	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoin", "Join", wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_JOIN, NULL );
+	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoin", _("Join"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_JOIN, NULL );
 	log_join = LogFindIndex( "join" );
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.3 2007-10-10 07:03:39 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.4 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -21,6 +21,7 @@
  */
 
 #include "track.h"
+#include "i18n.h"
 
 
 /*****************************************************************************
@@ -509,15 +510,15 @@ static paramFloatRange_t r_1000_1000	= { -1000.0, 1000.0, 80 };
 static paramFloatRange_t r0_360			= { 0.0, 360.0, 80 };
 static char *gridLabels[]				= { "", NULL };
 static paramData_t gridPLs[] = {
-	{	PD_MESSAGE, "Horz", NULL, 0, (void*)60 },
+	{	PD_MESSAGE, N_("Horz"), NULL, 0, (void*)60 },
 #define I_HORZSPACING	(1)
-	{	PD_FLOAT, &grid.Horz.Spacing, "horzspacing", PDO_DIM, &r0_999999, "Spacing" },
+	{	PD_FLOAT, &grid.Horz.Spacing, "horzspacing", PDO_DIM, &r0_999999, N_("Spacing") },
 #define I_HORZDIVISION	(2)
-	{	PD_LONG, &grid.Horz.Division, "horzdivision", 0, &i0_1000, "Divisions" },
+	{	PD_LONG, &grid.Horz.Division, "horzdivision", 0, &i0_1000, N_("Divisions") },
 #define I_HORZENABLE	(3)
 #define gridHorzEnableT ((wChoice_p)gridPLs[I_HORZENABLE].control)
-	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, gridLabels, "Enable", BC_HORZ|BC_NOBORDER },
-	{	PD_MESSAGE, "Vert", NULL, PDO_DLGNEWCOLUMN|PDO_DLGWIDE, (void*)60},
+	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, gridLabels, N_("Enable"), BC_HORZ|BC_NOBORDER },
+	{	PD_MESSAGE, N_("Vert"), NULL, PDO_DLGNEWCOLUMN|PDO_DLGWIDE, (void*)60},
 #define I_VERTSPACING	(5)
 	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_DIM, &r0_999999, NULL },
 #define I_VERTDIVISION	(6)
@@ -526,14 +527,14 @@ static paramData_t gridPLs[] = {
 #define gridVertEnableT ((wChoice_p)gridPLs[I_VERTENABLE].control)
 	{	PD_TOGGLE, &grid.Vert.Enable, "vertenable", 0, gridLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_VALUEX		(8)
-	{	PD_FLOAT, &grid.Orig.x, "origx", PDO_DIM|PDO_DLGNEWCOLUMN|PDO_DLGWIDE, &r_1000_1000, "X" },
+	{	PD_FLOAT, &grid.Orig.x, "origx", PDO_DIM|PDO_DLGNEWCOLUMN|PDO_DLGWIDE, &r_1000_1000, N_("X") },
 #define I_VALUEY		(9)
-	{	PD_FLOAT, &grid.Orig.y, "origy", PDO_DIM, &r_1000_1000, "Y" },
+	{	PD_FLOAT, &grid.Orig.y, "origy", PDO_DIM, &r_1000_1000, N_("Y") },
 #define I_VALUEA		(10)
-	{	PD_FLOAT, &grid.Angle, "origa", PDO_ANGLE, &r0_360, "A" },
+	{	PD_FLOAT, &grid.Angle, "origa", PDO_ANGLE, &r0_360, N_("A") },
 #define I_SHOW			(11)
 #define gridShowT		((wChoice_p)gridPLs[I_SHOW].control)
-	{	PD_TOGGLE, &grid.Show, "show", PDO_DLGIGNORELABELWIDTH, gridLabels, "Show", BC_HORZ|BC_NOBORDER } };
+	{	PD_TOGGLE, &grid.Show, "show", PDO_DLGIGNORELABELWIDTH, gridLabels, N_("Show"), BC_HORZ|BC_NOBORDER } };
 
 static paramGroup_t gridPG = { "grid", PGO_RECORD, gridPLs, sizeof gridPLs/sizeof gridPLs[0] };
 
@@ -570,7 +571,7 @@ static void GridOk( void * junk )
 	ParamLoadData( &gridPG );
 	if ( ( grid.Horz.Enable && grid.Horz.Spacing <= 0.0) ||
 		 ( grid.Vert.Enable && grid.Vert.Spacing <= 0.0) ) {
-		NoticeMessage( MSG_GRID_ENABLE_SPACE_GTR_0, "Ok", NULL );
+		NoticeMessage( MSG_GRID_ENABLE_SPACE_GTR_0, _("Ok"), NULL );
 		return;
 	}
 	if ( grid.Horz.Spacing <= 0.0 &&
@@ -703,7 +704,7 @@ EXPORT STATUS_T CmdGrid(
 
 	case C_START:
 		if (gridW == NULL) {
-			gridW = ParamCreateDialog( &gridPG, MakeWindowTitle("Snap Grid"), "Ok", GridOk, (paramActionCancelProc)Reset, TRUE, NULL, 0, GridDlgUpdate );
+			gridW = ParamCreateDialog( &gridPG, MakeWindowTitle(_("Snap Grid")), _("Ok"), GridOk, (paramActionCancelProc)Reset, TRUE, NULL, 0, GridDlgUpdate );
 		}
 		oldGrid = grid;
 		ParamLoadControls( &gridPG );
@@ -781,7 +782,7 @@ EXPORT wIndex_t InitGrid( wMenu_p menu )
 	snapGridPopupM = MenuRegister( "Snap Grid Rotate" );
 	AddRotateMenu( snapGridPopupM, SnapGridRotate );
 	GridButtonUpdate( 0 );
-	return InitCommand( menu, CmdGrid, "Change Grid...", NULL, LEVEL0, IC_CMDMENU, ACCL_GRIDW );
+	return InitCommand( menu, CmdGrid, N_("Change Grid..."), NULL, LEVEL0, IC_CMDMENU, ACCL_GRIDW );
 }
 
 

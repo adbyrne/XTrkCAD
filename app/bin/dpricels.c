@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dpricels.c,v 1.1 2005-12-07 15:46:56 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dpricels.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,7 @@
 
 #include "track.h"
 #include "compound.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -42,7 +43,7 @@ DIST_T priceListFlexCostV;
 
 static paramFloatRange_t priceListCostData = { 0.0, 9999.99, 80 };
 static wPos_t priceListColumnWidths[] = { -60, 200 };
-static const char * priceListColumnTitles[] = { "Price", "Item" };
+static const char * priceListColumnTitles[] = { N_("Price"), N_("Item") };
 static paramListData_t priceListListData = { 10, 400, 2, priceListColumnWidths, priceListColumnTitles };
 static paramFloatRange_t priceListFlexData = { 0.0, 999.99, 80 };
 static paramData_t priceListPLs[] = {
@@ -56,8 +57,8 @@ static paramData_t priceListPLs[] = {
 #define priceListSelL			((wList_p)priceListPLs[I_PRICELSLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_NOPREF|PDO_NOPSHUPD, &priceListListData },
 #define I_PRICELSFLEXLEN		(3)
-	{	PD_FLOAT, &priceListFlexLengthV, "flexlen", PDO_NOPREF|PDO_NOPSHUPD|PDO_DIM|PDO_DLGRESETMARGIN, &priceListFlexData, "Flex Track" },
-	{	PD_MESSAGE, "costs", NULL, PDO_DLGHORZ },
+	{	PD_FLOAT, &priceListFlexLengthV, "flexlen", PDO_NOPREF|PDO_NOPSHUPD|PDO_DIM|PDO_DLGRESETMARGIN, &priceListFlexData, N_("Flex Track") },
+	{	PD_MESSAGE, N_("costs"), NULL, PDO_DLGHORZ },
 #define I_PRICELSFLEXCOST		(6)
 	{	PD_FLOAT, &priceListFlexCostV, "flexcost", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, &priceListFlexData } };
 static paramGroup_t priceListPG = { "pricelist", 0, priceListPLs, sizeof priceListPLs/sizeof priceListPLs[0] };
@@ -151,7 +152,7 @@ static void PriceListDlgUpdate(
 static void DoPriceList( void * junk )
 {
 	if (priceListW == NULL)
-		priceListW = ParamCreateDialog( &priceListPG, MakeWindowTitle("Price List"), "Done", PriceListOk, NULL, TRUE, NULL, 0, PriceListDlgUpdate );
+		priceListW = ParamCreateDialog( &priceListPG, MakeWindowTitle(_("Price List")), _("Done"), PriceListOk, NULL, TRUE, NULL, 0, PriceListDlgUpdate );
 	wShow( priceListW );
 	PriceListChange( CHANGE_SCALE|CHANGE_PARAMS );
 }

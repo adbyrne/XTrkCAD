@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dease.c,v 1.1 2005-12-07 15:46:50 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dease.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  *
  * Easement Button Hdlrs
  *
@@ -28,6 +28,7 @@
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
+#include "i18n.h"
 
 static wButton_p easementB;
 
@@ -59,17 +60,17 @@ static void SetEasement( DIST_T, void * );
 static void EasementOk( void );
 static void EasementCancel( void );
 
-static char *easementChoiceLabels[] = { "None", "Sharp", "Normal", "Broad", NULL };
+static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), NULL };
 static paramFloatRange_t r0o5_2 = { 0.5, 2.0, 60 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0, 60 };
 static paramFloatRange_t r0_10 = { 0.0, 10.0, 60 };
 static long easeM;
 static paramData_t easementPLs[] = {
 #define I_EASEVAL		(0)
-	{	PD_FLOAT, &easementVal, "val", PDO_NOPSHUPD, &r0o5_2, "Value" },
-	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_100, "R", BO_READONLY },
-	{	PD_FLOAT, &easeX, "x", PDO_DIM|PDO_DLGHORZ, &r0_10, "X", BO_READONLY },
-	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, "L", BO_READONLY },
+	{	PD_FLOAT, &easementVal, "val", PDO_NOPSHUPD, &r0o5_2, N_("Value") },
+	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_100, N_("R"), BO_READONLY },
+	{	PD_FLOAT, &easeX, "x", PDO_DIM|PDO_DLGHORZ, &r0_10, N_("X"), BO_READONLY },
+	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, N_("L"), BO_READONLY },
 #define I_EASESEL		(4)
 	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORZ|BC_NONE } };
 static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, sizeof easementPLs/sizeof easementPLs[0] };
@@ -216,7 +217,7 @@ static void LayoutEasementW(
 static void DoEasement( void * junk )
 {
 	if (easementW == NULL) {
-		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle("Easement"), "Ok", (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel, TRUE, LayoutEasementW, 0, EasementDlgUpdate );
+		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")), _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel, TRUE, LayoutEasementW, 0, EasementDlgUpdate );
 		SetEasement( easementVal, (void*)TRUE );
 	}
 	oldEasementVal = easementVal;

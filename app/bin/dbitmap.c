@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dbitmap.c,v 1.1 2005-12-07 15:47:21 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dbitmap.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -21,6 +21,7 @@
  */
 
 #include "track.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -61,7 +62,7 @@ static int SaveBitmapFile(
 
 	bitmap_d.d = wBitMapCreate( (wPos_t)bitmap_w, (wPos_t)bitmap_h, 8 );
 	if (bitmap_d.d == (wDraw_p)0) {
-		NoticeMessage( MSG_WBITMAP_FAILED, "Ok", NULL );
+		NoticeMessage( MSG_WBITMAP_FAILED, _("Ok"), NULL );
 		return FALSE;
 	}
 	y0 = y1 = 0.0;
@@ -95,11 +96,11 @@ static int SaveBitmapFile(
 		p[0].y = mapD.size.y + (y1+0.05)*bitmap_d.scale;
 		DrawString( &bitmap_d, p[0], 0.0, Title2, fp, fs*bitmap_d.scale, wDrawColorBlack );
 		fp_bi = wStandardFont( F_TIMES, TRUE, TRUE );
-		DrawTextSize( &mainD, "Drawn with ", fp, fs, FALSE, &textsize );
+		DrawTextSize( &mainD, _("Drawn with "), fp, fs, FALSE, &textsize );
 		DrawTextSize( &mainD, sProdName, fp_bi, fs, FALSE, &textsize1 );
 		p[0].x = (bitmap_d.size.x - ((textsize.x+textsize1.x)*bitmap_d.scale))/2.0 + bitmap_d.orig.x;
 		p[0].y = -(y0+0.23)*bitmap_d.scale;
-		DrawString( &bitmap_d, p[0], 0.0, "Drawn with ", fp, fs*bitmap_d.scale, wDrawColorBlack );
+		DrawString( &bitmap_d, p[0], 0.0, _("Drawn with "), fp, fs*bitmap_d.scale, wDrawColorBlack );
 		p[0].x += (textsize.x*bitmap_d.scale);
 		DrawString( &bitmap_d, p[0], 0.0, sProdName, fp_bi, fs*bitmap_d.scale, wDrawColorBlack );
 	}
@@ -109,16 +110,16 @@ static int SaveBitmapFile(
 		 (wPos_t)(mapD.size.x/bitmap_d.scale*bitmap_d.dpi),
 		 (wPos_t)(mapD.size.y/bitmap_d.scale*bitmap_d.dpi) );
 	wSetCursor( wCursorWait );
-	InfoMessage( "Drawing tracks to BitMap" );
+	InfoMessage( _("Drawing tracks to BitMap") );
 	DrawSnapGrid( &bitmap_d, mapD.size, TRUE );
 	if ( (outputBitMapTogglesV&4) )
 		bitmap_d.options |= DC_CENTERLINE;
 	else
 		bitmap_d.options &= ~DC_CENTERLINE;
 	DrawTracks( &bitmap_d, bitmap_d.scale, bitmap_d.orig, bitmap_d.size );
-	InfoMessage( "Writing BitMap to file" );
+	InfoMessage( _("Writing BitMap to file") );
 	if ( wBitMapWriteFile( bitmap_d.d, pathName ) == FALSE ) {
-		NoticeMessage( MSG_WBITMAP_FAILED, "Ok", NULL );
+		NoticeMessage( MSG_WBITMAP_FAILED, _("Ok"), NULL );
 		return FALSE;
 	}
 	InfoMessage( "" );
@@ -137,18 +138,19 @@ static int SaveBitmapFile(
 
 static wWin_p outputBitMapW;
 
-static char *bitmapTogglesLabels[] = { "Print Titles", "Print Borders", "Print Centerline", NULL };
+static char *bitmapTogglesLabels[] = { N_("Print Titles"), N_("Print Borders"),
+	N_("Print Centerline"), NULL };
 static paramFloatRange_t r0o1_100 = { 0.1, 100.0, 60 };
 
 static paramData_t outputBitMapPLs[] = {
 #define I_TOGGLES		(0)
 	{   PD_TOGGLE, &outputBitMapTogglesV, "toggles", 0, bitmapTogglesLabels },
 #define I_DENSITY		(1)
-	{   PD_FLOAT, &outputBitMapDensity, "density", PDO_DLGRESETMARGIN, &r0o1_100, "    dpi" },
+	{   PD_FLOAT, &outputBitMapDensity, "density", PDO_DLGRESETMARGIN, &r0o1_100, N_("    dpi") },
 #define I_MSG1			(2)
-	{   PD_MESSAGE, "Bitmap : 99999 by 99999 pixels", NULL, PDO_DLGRESETMARGIN|PDO_DLGUNDERCMDBUTT|PDO_DLGWIDE, (void*)180 },
+	{   PD_MESSAGE, N_("Bitmap : 99999 by 99999 pixels"), NULL, PDO_DLGRESETMARGIN|PDO_DLGUNDERCMDBUTT|PDO_DLGWIDE, (void*)180 },
 #define I_MSG2			(3)
-	{   PD_MESSAGE, "Approximate file size: 999.9Mb", NULL, PDO_DLGUNDERCMDBUTT, (void*)180 } };
+	{   PD_MESSAGE, N_("Approximate file size: 999.9Mb"), NULL, PDO_DLGUNDERCMDBUTT, (void*)180 } };
 
 static paramGroup_t outputBitMapPG = { "outputbitmap", 0, outputBitMapPLs, sizeof outputBitMapPLs/sizeof outputBitMapPLs[0] };
 
@@ -178,15 +180,15 @@ static void OutputBitMapComputeSize( void )
 	bitmap_d.size.y = mapD.size.y + (Bborder+Tborder)*bitmap_d.scale;
 	bitmap_w = (long)(bitmap_d.size.x/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
 	bitmap_h = (long)(bitmap_d.size.y/bitmap_d.scale*bitmap_d.dpi)/*+1*/;
-	sprintf( message, "Bitmap : %ld by %ld pixels", bitmap_w, bitmap_h );
+	sprintf( message, _("Bitmap : %ld by %ld pixels"), bitmap_w, bitmap_h );
 	ParamLoadMessage( &outputBitMapPG, I_MSG1, message );
 	size = bitmap_w * bitmap_h;
 	if ( size < 1e4 )
-		sprintf( message, "Approximate file size : %0.0f", size );
+		sprintf( message, _("Approximate file size : %0.0f"), size );
 	else if ( size < 1e6 )
-		sprintf( message, "Approximate file size : %0.1fKb", (size+50.0)/1e3 );
+		sprintf( message, _("Approximate file size : %0.1fKb"), (size+50.0)/1e3 );
 	else
-		sprintf( message, "Approximate file size : %0.1fMb", (size+5e4)/1e6 );
+		sprintf( message, _("Approximate file size : %0.1fMb"), (size+5e4)/1e6 );
 	ParamLoadMessage( &outputBitMapPG, I_MSG2, message );
 }
 
@@ -195,21 +197,21 @@ static void OutputBitMapOk( void * junk )
 {
 	FLOAT_T size;
 	if (bitmap_w>32000 || bitmap_h>32000) {
-		NoticeMessage( MSG_BITMAP_TOO_LARGE, "Ok", NULL );
+		NoticeMessage( MSG_BITMAP_TOO_LARGE, _("Ok"), NULL );
 		return;
 	}
 	size = bitmap_w * bitmap_h;
 	if (size >= 1000000) {
-		if (NoticeMessage(MSG_BITMAP_SIZE_WARNING, "Yes", "Cancel" )==0)
+		if (NoticeMessage(MSG_BITMAP_SIZE_WARNING, _("Yes"), _("Cancel") )==0)
 			return;
 	}
 	wHide( outputBitMapW );
 	if (bitmap_fs == NULL)
-		bitmap_fs = wFilSelCreate( mainW, FS_SAVE, 0, "Save Bitmap",
+		bitmap_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Bitmap"),
 #ifdef WINDOWS
-				"Bitmap files|*.bmp",
+				_("Bitmap files|*.bmp"),
 #else
-				"Bitmap files|*.xpm",
+				_("Bitmap files|*.xpm"),
 #endif
 				SaveBitmapFile, NULL );
 	wFilSelect( bitmap_fs, curDirName );
@@ -230,7 +232,7 @@ static void OutputBitMapChange( long changes )
 static void DoOutputBitMap( void * junk )
 {
 	if (outputBitMapW == NULL) {
-		outputBitMapW = ParamCreateDialog( &outputBitMapPG, MakeWindowTitle("BitMap"), "Ok", OutputBitMapOk, wHide, TRUE, NULL, 0, (paramChangeProc)OutputBitMapComputeSize );
+		outputBitMapW = ParamCreateDialog( &outputBitMapPG, MakeWindowTitle(_("BitMap")), _("Ok"), OutputBitMapOk, wHide, TRUE, NULL, 0, (paramChangeProc)OutputBitMapComputeSize );
 	}
 	ParamLoadControls( &outputBitMapPG );
 	ParamGroupRecord( &outputBitMapPG );

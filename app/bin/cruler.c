@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cruler.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cruler.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -21,6 +21,7 @@
  */
 
 #include "track.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -137,5 +138,5 @@ STATUS_T ModifyRuler(
 
 void InitCmdRuler( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdRuler, "cmdRuler", "Ruler", wIconCreatePixMap(ruler_xpm), LEVEL0, IC_STICKY|IC_NORESTART, ACCL_RULER, NULL );
+	AddMenuButton( menu, CmdRuler, "cmdRuler", _("Ruler"), wIconCreatePixMap(ruler_xpm), LEVEL0, IC_STICKY|IC_NORESTART, ACCL_RULER, NULL );
 }

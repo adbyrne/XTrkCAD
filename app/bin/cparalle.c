@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cparalle.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cparalle.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  *
  * PARALLEL
  *
@@ -26,6 +26,7 @@
 #include "track.h"
 #include "ccurve.h"
 #include "cstraigh.h"
+#include "i18n.h"
 
 static struct {
 		track_p Trk;
@@ -37,7 +38,7 @@ static DIST_T parSeparation = 1.0;
 static paramFloatRange_t r_0o1_100 = { 0.1, 100.0, 100 };
 static paramData_t parSepPLs[] = {
 #define parSepPD (parSepPLs[0])
-	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NOPREF|PDO_NOPREF, &r_0o1_100, "Separation" } };
+	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NOPREF|PDO_NOPREF, &r_0o1_100, N_("Separation") } };
 static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, sizeof parSepPLs/sizeof parSepPLs[0] };
 
 
@@ -67,7 +68,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		ParamGroupRecord( &parSepPG );
 		controls[0] = parSepPD.control;
 		controls[1] = NULL;
-		labels[0] = "Separation";
+		labels[0] = N_("Separation");
 		InfoSubstituteControls( controls, labels );
 		/*InfoMessage( "Select track" );*/
 		return C_CONTINUE;
@@ -79,7 +80,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		}
 		controls[0] = parSepPD.control;
 		controls[1] = NULL;
-		labels[0] = "Separation";
+		labels[0] = N_("Separation");
 		InfoSubstituteControls( controls, labels );
 		ParamLoadData( &parSepPG );
 		Dpa.orig = pos;
@@ -132,7 +133,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 					t1 = NULL;
 			}
 		}
-		UndoStart( "Create Parallel Track", "newParallel" );
+		UndoStart( _("Create Parallel Track"), "newParallel" );
 		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, &t, NULL, NULL ) ) {
 			return C_TERMINATE;
 		}
@@ -176,6 +177,6 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 
 EXPORT void InitCmdParallel( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdParallel, "cmdParallel", "Parallel", wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_PARALLEL, NULL );
+	AddMenuButton( menu, CmdParallel, "cmdParallel", _("Parallel"), wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_PARALLEL, NULL );
 	ParamRegister( &parSepPG );
 }

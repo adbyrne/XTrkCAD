@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctext.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctext.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  *
  * TEXT
  *
@@ -24,6 +24,7 @@
  */
 
 #include "track.h"
+#include "i18n.h"
 
 
 track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize );
@@ -52,7 +53,7 @@ static struct {
 
 static paramData_t textPLs[] = {
 #define textPD (textPLs[0])
-		{ PD_DROPLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, "Font Size", BL_EDITABLE } };
+		{ PD_DROPLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE } };
 static paramGroup_t textPG = { "text", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
 
 
@@ -117,7 +118,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		ParamGroupRecord( &textPG );
 		controls[0] = textPD.control;
 		controls[1] = NULL;
-		labels[0] = "Font Size";
+		labels[0] = N_("Font Size");
 		InfoSubstituteControls( controls, labels );
 		return C_CONTINUE;
 		break;
@@ -148,7 +149,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 	case C_TEXT:
 		if (Dt.state == 0) {
-			NoticeMessage( MSG_SEL_POS_FIRST, "Ok", NULL );
+			NoticeMessage( MSG_SEL_POS_FIRST, _("Ok"), NULL );
 			return C_CONTINUE;
 		}
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
@@ -166,7 +167,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			}
 			break;
 		case '\015':
-			UndoStart( "Create Text", "newText - CR" );
+			UndoStart( _("Create Text"), "newText - CR" );
 			t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size );
 			UndoEnd();
 			DrawNewTrack(t); 
@@ -204,7 +205,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
 			Dt.state = 0;
 			if (Dt.len) {
-				UndoStart( "Create Text", "newText - OK" );
+				UndoStart( _("Create Text"), "newText - OK" );
 				t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size );
 				UndoEnd();
 				DrawNewTrack(t);
@@ -232,9 +233,9 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 
 void InitCmdText( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdText, "cmdText", "Text", wIconCreatePixMap(text_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
+	AddMenuButton( menu, CmdText, "cmdText", _("Text"), wIconCreatePixMap(text_xpm), LEVEL0_50, IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_TEXT, NULL );
 	textPopupM = MenuRegister( "Text Font" );
-	wMenuPushCreate( textPopupM, "", "Fonts...", 0, (wMenuCallBack_p)SelectFont, NULL );
+	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, (wMenuCallBack_p)SelectFont, NULL );
 	Dt.size = (CSIZE_T)wSelectedFontSize();
 	ParamRegister( &textPG );
 }

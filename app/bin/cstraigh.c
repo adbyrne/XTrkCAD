@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstraigh.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstraigh.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,7 @@
 
 #include "track.h"
 #include "cstraigh.h"
+#include "i18n.h"
 
 /*******************************************************************************
  *
@@ -45,13 +46,13 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	switch (action) {
 
 	case C_START:
-		InfoMessage( "Place 1st end point of Straight track" );
+		InfoMessage( _("Place 1st end point of Straight track") );
 		return C_CONTINUE;
 
 	case C_DOWN:
 		SnapPos( &pos );
 		Dl.pos0 = pos;
-		InfoMessage( "Drag to place 2nd end point" );
+		InfoMessage( _("Drag to place 2nd end point") );
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
@@ -63,7 +64,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	case C_MOVE:
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		SnapPos( &pos );
-		InfoMessage( "Straight Track Length=%s Angle=%0.3f",
+		InfoMessage( _("Straight Track Length=%s Angle=%0.3f"),
 				FormatDistance(FindDistance( Dl.pos0, pos )),
 				PutAngle(FindAngle( Dl.pos0, pos )) );
 		tempSegs(0).u.l.pos[1] = pos;
@@ -79,7 +80,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		   ErrorMessage( MSG_TRK_TOO_SHORT, "Straight ", PutDim(fabs(minLength-dist)) );
 		   return C_TERMINATE;
 		}
-		UndoStart( "Create Straight Track", "newStraight" );
+		UndoStart( _("Create Straight Track"), "newStraight" );
 		t = NewStraightTrack( Dl.pos0, pos );
 		UndoEnd();
 		DrawNewTrack(t);
@@ -100,5 +101,5 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 
 void InitCmdStraight( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdStraight, "cmdStraight", "Straight Track", wIconCreatePixMap(straight_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_STRAIGHT, NULL );
+	AddMenuButton( menu, CmdStraight, "cmdStraight", _("Straight Track"), wIconCreatePixMap(straight_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_STRAIGHT, NULL );
 }

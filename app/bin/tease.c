@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tease.c,v 1.1 2005-12-07 15:47:06 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tease.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  *
  * TRANSISTION-CURVES (JOINTS)
  *
@@ -68,6 +68,7 @@ do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
+#include "i18n.h"
 
 static TRKTYP_T T_EASEMENT = -1;
 
@@ -493,19 +494,19 @@ static struct {
 		} jointData;
 typedef enum { E0, Z0, E1, Z1, OR, AL, RR, LL, L0, L1, GR, PV, LY } jointDesc_e;
 static descData_t jointDesc[] = {
-/*E0*/	{ DESC_POS, "End Pt 1: X", &jointData.endPt[0] },
-/*Z0*/	{ DESC_DIM, "Z", &jointData.elev[0] },
-/*E1*/	{ DESC_POS, "End Pt 2: X", &jointData.endPt[1] },
-/*Z1*/	{ DESC_DIM, "Z", &jointData.elev[1] },
-/*OR*/	{ DESC_POS, "Origin: X", &jointData.orig },
-/*AL*/	{ DESC_ANGLE, "Angle", &jointData.angle },
-/*RR*/	{ DESC_DIM, "R", &jointData.r },
-/*LL*/	{ DESC_DIM, "L", &jointData.l },
-/*L0*/	{ DESC_DIM, "l0", &jointData.l0 },
-/*L1*/	{ DESC_DIM, "l1", &jointData.l1 },
-/*GR*/	{ DESC_FLOAT, "Grade", &jointData.grade },
-/*PV*/	{ DESC_PIVOT, "Pivot", &jointData.pivot },
-/*LY*/	{ DESC_LAYER, "Layer", NULL },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &jointData.endPt[0] },
+/*Z0*/	{ DESC_DIM, N_("Z"), &jointData.elev[0] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &jointData.endPt[1] },
+/*Z1*/	{ DESC_DIM, N_("Z"), &jointData.elev[1] },
+/*OR*/	{ DESC_POS, N_("Origin: X"), &jointData.orig },
+/*AL*/	{ DESC_ANGLE, N_("Angle"), &jointData.angle },
+/*RR*/	{ DESC_DIM, N_("R"), &jointData.r },
+/*LL*/	{ DESC_DIM, N_("L"), &jointData.l },
+/*L0*/	{ DESC_DIM, N_("l0"), &jointData.l0 },
+/*L1*/	{ DESC_DIM, N_("l1"), &jointData.l1 },
+/*GR*/	{ DESC_FLOAT, N_("Grade"), &jointData.grade },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &jointData.pivot },
+/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
 		{ DESC_NULL } };
 
 static void UpdateJoint( track_p trk, int inx, descData_p descUpd, BOOL_T final )
@@ -541,7 +542,7 @@ static void DescribeJoint(
 	struct extraData *xx = GetTrkExtraData(trk);
 	int fix0, fix1;
 
-	sprintf( str, "Joint Track(%d): Layer=%d Length=%0.3f EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]", GetTrkIndex(trk),
+	sprintf( str, _("Joint Track(%d): Layer=%d Length=%0.3f EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"), GetTrkIndex(trk),
 		GetTrkLayer(trk)+1,
 		GetLengthJoint( trk ),
 		GetTrkEndPosXY(trk,0), GetTrkEndAngle(trk,0),
@@ -585,7 +586,7 @@ static void DescribeJoint(
 						fix1?DESC_PIVOT_SECOND:
 						DESC_PIVOT_MID;
 
-	DoDescribe( "Easement Track", trk, jointDesc, UpdateJoint );
+	DoDescribe( _("Easement Track"), trk, jointDesc, UpdateJoint );
 }
 
 static void GetJointPos(
@@ -1030,7 +1031,7 @@ static void SplitJointA(
 
 	if (!xx->Scurve) {
 		if (l < xx->l0 || l > xx->l1) {
-			NoticeMessage2( 0, "splitJoint: ! %0.3f <= %0.3f <= %0.3f", "Ok", NULL, xx->l0, l, xx->l1 );
+			NoticeMessage2( 0, "splitJoint: ! %0.3f <= %0.3f <= %0.3f", _("Ok"), NULL, xx->l0, l, xx->l1 );
 			if ( l < xx->l0 ) l = xx->l0;
 			else if ( l > xx->l1 ) l = xx->l1;
 		}
@@ -1251,7 +1252,7 @@ static BOOL_T MergeJoint(
 		 FindDistance( xx0->pos, xx1->pos ) > connectDistance )
 		return FALSE;
 
-	UndoStart( "Merge Easements", "MergeJoint( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
+	UndoStart( _("Merge Easements"), "MergeJoint( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
 	UndoModify( trk0 );
 	UndrawNewTrack( trk0 );
 	trk2 = GetTrkEndTrk( trk1, 1-ep1 );
@@ -1316,7 +1317,7 @@ static BOOL_T QueryJoint( track_p trk, int query )
 			if ( FindDistance( xx->pos, GetTrkEndPos(trk,0) ) <= minLength ||
 				 FindDistance( xx->pos, GetTrkEndPos(trk,1) ) <= minLength )
 				return FALSE;
-			UndoStart( "Split Easement Curve", "queryJoint T%d Scurve", GetTrkIndex(trk) );
+			UndoStart( _("Split Easement Curve"), "queryJoint T%d Scurve", GetTrkIndex(trk) );
 			SplitTrack( trk, xx->pos, 0, &trk1, FALSE );
 		}
 		return TRUE;

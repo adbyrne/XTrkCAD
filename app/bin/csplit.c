@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csplit.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csplit.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -21,6 +21,7 @@
  */
 
 #include "track.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -41,7 +42,7 @@ static void ChangeSplitEPMode( wBool_t set, void * mode )
 	long option;
 	int inx0, inx;
 
-	UndoStart( "Set Block Gaps", "Set Block Gaps" );
+	UndoStart( _("Set Block Gaps"), "Set Block Gaps" );
 	DrawEndPt( &mainD, splitTrkTrk[0], splitTrkEP[0], wDrawColorWhite );
 	DrawEndPt( &mainD, splitTrkTrk[1], splitTrkEP[1], wDrawColorWhite );
 	for ( inx0=0; inx0<2; inx0++ ) {
@@ -68,7 +69,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 
 	switch (action) {
 	case C_START:
-		InfoMessage( "Select track to split" );
+		InfoMessage( _("Select track to split") );
 	case C_DOWN:
 	case C_MOVE:
 		return C_CONTINUE;
@@ -86,7 +87,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			if (ep0 < 0) {
 				return C_CONTINUE;
 			}
-			UndoStart( "Split Track", "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
+			UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 			oldTrackCount = trackCount;
 			SplitTrack( trk0, pos, ep0, &trk1, FALSE );
 			UndoEnd();
@@ -101,15 +102,15 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		if ( splitPopupM[0] == NULL ) {
 			splitPopupM[0] = MenuRegister( "End Point Mode R-L" );
-			splitPopupMI[0][0] = wMenuToggleCreate( splitPopupM[0], "", "None", 0, TRUE, ChangeSplitEPMode, (void*)0 );
-			splitPopupMI[0][1] = wMenuToggleCreate( splitPopupM[0], "", "Left", 0, FALSE, ChangeSplitEPMode, (void*)1 );
-			splitPopupMI[0][2] = wMenuToggleCreate( splitPopupM[0], "", "Right", 0, FALSE, ChangeSplitEPMode, (void*)2 );
-			splitPopupMI[0][3] = wMenuToggleCreate( splitPopupM[0], "", "Both", 0, FALSE, ChangeSplitEPMode, (void*)3 );
+			splitPopupMI[0][0] = wMenuToggleCreate( splitPopupM[0], "", _("None"), 0, TRUE, ChangeSplitEPMode, (void*)0 );
+			splitPopupMI[0][1] = wMenuToggleCreate( splitPopupM[0], "", _("Left"), 0, FALSE, ChangeSplitEPMode, (void*)1 );
+			splitPopupMI[0][2] = wMenuToggleCreate( splitPopupM[0], "", _("Right"), 0, FALSE, ChangeSplitEPMode, (void*)2 );
+			splitPopupMI[0][3] = wMenuToggleCreate( splitPopupM[0], "", _("Both"), 0, FALSE, ChangeSplitEPMode, (void*)3 );
 			splitPopupM[1] = MenuRegister( "End Point Mode T-B" );
-			splitPopupMI[1][0] = wMenuToggleCreate( splitPopupM[1], "", "None", 0, TRUE, ChangeSplitEPMode, (void*)0 );
-			splitPopupMI[1][1] = wMenuToggleCreate( splitPopupM[1], "", "Top", 0, FALSE, ChangeSplitEPMode, (void*)1 );
-			splitPopupMI[1][2] = wMenuToggleCreate( splitPopupM[1], "", "Bottom", 0, FALSE, ChangeSplitEPMode, (void*)2 );
-			splitPopupMI[1][3] = wMenuToggleCreate( splitPopupM[1], "", "Both", 0, FALSE, ChangeSplitEPMode, (void*)3 );
+			splitPopupMI[1][0] = wMenuToggleCreate( splitPopupM[1], "", _("None"), 0, TRUE, ChangeSplitEPMode, (void*)0 );
+			splitPopupMI[1][1] = wMenuToggleCreate( splitPopupM[1], "", _("Top"), 0, FALSE, ChangeSplitEPMode, (void*)1 );
+			splitPopupMI[1][2] = wMenuToggleCreate( splitPopupM[1], "", _("Bottom"), 0, FALSE, ChangeSplitEPMode, (void*)2 );
+			splitPopupMI[1][3] = wMenuToggleCreate( splitPopupM[1], "", _("Both"), 0, FALSE, ChangeSplitEPMode, (void*)3 );
 		}
 		splitTrkEP[0] = PickEndPoint( pos, splitTrkTrk[0] );
 		angle = NormalizeAngle(GetTrkEndAngle( splitTrkTrk[0], splitTrkEP[0] ));
@@ -149,6 +150,6 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 
 void InitCmdSplit( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", "Split Track", wIconCreatePixMap(splittrk_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_CMDMENU, ACCL_SPLIT, NULL );
+	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"), wIconCreatePixMap(splittrk_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_CMDMENU, ACCL_SPLIT, NULL );
 }
 

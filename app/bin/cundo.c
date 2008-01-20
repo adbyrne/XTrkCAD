@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cundo.c,v 1.1 2005-12-07 15:46:54 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cundo.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -26,6 +26,7 @@
 #include <errno.h>
 #include "track.h"
 #include "trackx.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -146,11 +147,11 @@ static BOOL_T UndoFail( char * cause, long val, char * fileName, int lineNumber 
 	FILE * outf;
 	time_t clock;
 	char temp[STR_SIZE];
-	NoticeMessage( MSG_UNDO_ASSERT, "Ok", NULL, fileName, lineNumber, val, val, cause );
+	NoticeMessage( MSG_UNDO_ASSERT, _("Ok"), NULL, fileName, lineNumber, val, val, cause );
 	sprintf( temp, "%s%s%s", workingDir, FILE_SEP_CHAR, sUndoF );
 	outf = fopen( temp, "a+" );
 	if ( outf == NULL ) {
-		NoticeMessage( MSG_OPEN_FAIL, "Ok", NULL, "Undo Trace", temp, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Ok"), NULL, _("Undo Trace"), temp, strerror(errno) );
 		return FALSE;
 	}
 	time( &clock );
@@ -484,18 +485,18 @@ static void SetButtons( BOOL_T undoSetting, BOOL_T redoSetting )
 		redoButtonEnabled = redoSetting;
 	}
 	if (undoSetting) {
-		sprintf( undoHelp, "Undo: %s", undoStack[undoHead].label );
+		sprintf( undoHelp, _("Undo: %s"), undoStack[undoHead].label );
 		wControlSetBalloonText( (wControl_p)undoB, undoHelp );
 	} else {
-		wControlSetBalloonText( (wControl_p)undoB, "Undo last command" );
+		wControlSetBalloonText( (wControl_p)undoB, _("Undo last command") );
 	}
 	if (redoSetting) {
 		index = undoHead;
 		INC_UNDO_INX(index);
-		sprintf( redoHelp, "Redo: %s", undoStack[index].label );
+		sprintf( redoHelp, _("Redo: %s"), undoStack[index].label );
 		wControlSetBalloonText( (wControl_p)redoB, redoHelp );
 	} else {
-		wControlSetBalloonText( (wControl_p)redoB, "Redo last undo" );
+		wControlSetBalloonText( (wControl_p)redoB, _("Redo last undo") );
 	}
 }
 

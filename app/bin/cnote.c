@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cnote.c,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cnote.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -21,6 +21,7 @@
  */
 
 #include "track.h"
+#include "i18n.h"
 
 /*****************************************************************************
  *
@@ -92,10 +93,10 @@ static void NoteOk( void * junk )
 void DoNote( void )
 {
 	if ( noteW == NULL ) {
-		noteW = ParamCreateDialog( &notePG, MakeWindowTitle("Note"), "Ok", NoteOk, NULL, FALSE, NULL, F_RESIZE, NULL );
+		noteW = ParamCreateDialog( &notePG, MakeWindowTitle(_("Note")), _("Ok"), NoteOk, NULL, FALSE, NULL, F_RESIZE, NULL );
 	}
 	wTextClear( noteT );
-	wTextAppend( noteT, mainText?mainText:"Replace this text with your layout notes" );
+	wTextAppend( noteT, mainText?mainText:_("Replace this text with your layout notes") );
 	wTextSetReadonly( noteT, FALSE );
 	wShow( noteW );
 }
@@ -144,8 +145,8 @@ static struct {
 		} noteData;
 typedef enum { OR, LY, TX } noteDesc_e;
 static descData_t noteDesc[] = {
-/*OR*/	{ DESC_POS, "Position", &noteData.pos },
-/*LY*/	{ DESC_LAYER, "Layer", NULL },
+/*OR*/	{ DESC_POS, N_("Position"), &noteData.pos },
+/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
 /*TX*/	{ DESC_TEXT, NULL, NULL },
 		{ DESC_NULL } };
 
@@ -164,7 +165,7 @@ static void UpdateNote( track_p trk, int inx, descData_p descUpd, BOOL_T needUnd
 	case -1:
 		if ( wTextGetModified((wText_p)noteDesc[TX].control0) ) {
 			if ( needUndoStart )
-				UndoStart( "Change Track", "Change Track" );
+				UndoStart( _("Change Track"), "Change Track" );
 			UndoModify( trk );
 			MyFree( xx->text );
 			len = wTextGetSize( (wText_p)noteDesc[TX].control0 );
@@ -199,7 +200,7 @@ static void DescribeNote( track_p trk, char * str, CSIZE_T len )
 	noteDesc[OR].mode = 0;
 	noteDesc[TX].mode = 0;
 	noteDesc[LY].mode = DESC_RO;
-	DoDescribe( "Note", trk, noteDesc, UpdateNote );
+	DoDescribe( _("Note"), trk, noteDesc, UpdateNote );
 }
 
 static void DeleteNote( track_p t )
@@ -354,7 +355,7 @@ static STATUS_T CmdNote( wAction_t action, coOrd pos )
 
 	switch (action) {
 	case C_START:
-		InfoMessage( "Place a note on the layout" );
+		InfoMessage( _("Place a note on the layout") );
 		return C_CONTINUE;
 	case C_DOWN:
 		DrawBitMap( &tempD, pos, note_bm, normalColor );
@@ -367,12 +368,12 @@ static STATUS_T CmdNote( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 		break;
 	case C_UP:
-		UndoStart( "New Note", "New Note" );
+		UndoStart( _("New Note"), "New Note" );
 		trk = NewNote( -1, pos, 2 );
 		DrawNewTrack( trk );
 		xx = GetTrkExtraData(trk);
 		xx->text = (char*)MyMalloc( 40 );
-		strcpy( xx->text, "Replace this text with your note" );
+		strcpy( xx->text, _("Replace this text with your note") );
 		inDescribeCmd = TRUE;
 		DescribeNote( trk, message, sizeof message );
 		inDescribeCmd = FALSE;
@@ -394,7 +395,7 @@ static STATUS_T CmdNote( wAction_t action, coOrd pos )
 void InitCmdNote( wMenu_p menu )
 {
 	ParamRegister( &notePG );
-	AddMenuButton( menu, CmdNote, "cmdNote", "Note", wIconCreatePixMap(cnote_xpm), LEVEL0_50, IC_POPUP2, ACCL_NOTE, NULL );
+	AddMenuButton( menu, CmdNote, "cmdNote", _("Note"), wIconCreatePixMap(cnote_xpm), LEVEL0_50, IC_POPUP2, ACCL_NOTE, NULL );
 }
 
 void InitTrkNote( void )
