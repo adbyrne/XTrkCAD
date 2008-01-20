@@ -1,3 +1,8 @@
+Jan 21, 2008
+	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
+		messages.in: MSG_2ND_TRK_NOT_SEL_UNSEL -> "...%sselected" changed
+		to "...%s" for internationalization reasons.
+
 Jan 03. 2008
 	IMPROVEMENT: Martin Fischer 
 		genmessages.c: added warning message

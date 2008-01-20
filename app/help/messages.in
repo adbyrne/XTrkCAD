@@ -637,7 +637,7 @@ END
 
 # cjoin.c
 MESSAGE MSG_2ND_TRK_NOT_SEL_UNSEL
-Second track must be %sselected.
+Second track must be %s.
 ALT
 Second track must be selected|unselected
 HELP
