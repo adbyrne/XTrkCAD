@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtklist.c,v 1.2 2007-05-04 18:37:59 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtklist.c,v 1.3 2008-01-20 22:32:22 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -27,6 +27,7 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include "gtkint.h"
+#include "i18n.h"
 
 #define ROW_HEIGHT (15)
 #define PIX_TEXT_SEP (5)
@@ -1039,12 +1040,15 @@ EXPORT wList_p wListCreate(
 
 	gtkComputePos( (wControl_p)bl );
 
-	if ( colTitles ) {
-		bl->list = (GtkWidget*)gtk_clist_new_with_titles( bl->colCnt, (char**)colTitles );
-	} else {
-		bl->list = (GtkWidget*)gtk_clist_new( bl->colCnt );
-	}
+	bl->list = (GtkWidget*)gtk_clist_new( bl->colCnt );
 	if (bl->list == 0) abort();
+	if (colTitles)
+	{
+		for (col = 0; col < colCnt; col++)
+			gtk_clist_set_column_title(GTK_CLIST(bl->list), col, _(((char*)colTitles[col])));
+		gtk_clist_column_titles_show(GTK_CLIST(bl->list));
+	}
+
 	bl->widget = gtk_scrolled_window_new( NULL, NULL );
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (bl->widget),
 				GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
@@ -1070,6 +1074,7 @@ EXPORT wList_p wListCreate(
 	gtk_clist_set_selection_mode( GTK_CLIST(bl->list), (option&BL_MANY)?GTK_SELECTION_MULTIPLE:GTK_SELECTION_BROWSE );
 	gtk_container_set_focus_vadjustment (GTK_CONTAINER (bl->list),
 				gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (bl->widget)));
+
 	gtk_widget_show( bl->list );
 
 #ifndef GTK1
@@ -1086,5 +1091,3 @@ EXPORT wList_p wListCreate(
 	gtkAddHelpString( bl->widget, helpStr );
 	return bl;
 }
-
-

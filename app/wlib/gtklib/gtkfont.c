@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.4 2007-12-01 15:33:52 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.5 2008-01-20 22:32:22 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -34,6 +34,7 @@
 
 #include "wlib.h"
 #include "gtkint.h"
+#include "i18n.h"
 
 extern Display * gdk_display;
 
@@ -99,7 +100,7 @@ static long oldFontSlant = -1;
 static void doFontOk( void )
 {
 	if (fontInfo(newFontInx).fullName[newFontWeight][newFontSlant] == NULL) {
-		wNotice( "No font selected", "Continue", NULL );
+		wNotice( _("No font selected"), _("Continue"), NULL );
 		return;
 	}
 	if ( curFontWeight != newFontWeight ||
@@ -157,7 +158,7 @@ static void selectAttr( void )
 	const char * oldFontName;
 	const char * newFontName;
 	if (fontInfo_da.cnt==0) {
-		wNotice( "No fonts", "Continue", NULL );
+		wNotice( _("No fonts"), _("Continue"), NULL );
 		wDrawClear( font_d );
 		return;
 	}
@@ -329,11 +330,11 @@ static wBool_t fontInit( wBool_t getPref )
 			stdFontInx = i;
 	}
 	if ( standardFonts[F_TIMES] < 0 ) {
-		wNotice( "Can't find standard Serif font.\nPlease choose a font", "Continue", NULL );
+		wNotice( _("Can't find standard Serif font.\nPlease choose a font"), _("Continue"), NULL );
 		wSelectStandardFont( F_TIMES );
 	}
 	if ( standardFonts[F_HELV] < 0 ) {
-		wNotice( "Can't find standard San-Serif font.\nPlease choose a font", "Continue", NULL );
+		wNotice( _("Can't find standard San-Serif font.\nPlease choose a font"), _("Continue"), NULL );
 		wSelectStandardFont( F_HELV );
 	}
 	findFont( wPrefGetString( "font", "name" ) );
@@ -400,7 +401,7 @@ void wSelectFont(
 	if (!fontInitted)
 		fontInit( FALSE );
 	if (fontSelW == NULL) {
-		fontSelW = wWinPopupCreate( NULL, 2, 2, "fontSelW", "Font Select", "xvfontsel", F_AUTOSIZE|F_RECALLPOS|F_BLOCK, NULL, NULL );
+		fontSelW = wWinPopupCreate( NULL, 2, 2, "fontSelW", _("Font Select"), "xvfontsel", F_AUTOSIZE|F_RECALLPOS|F_BLOCK, NULL, NULL );
 
 		fontWeightBM = wIconCreateBitMap( bold_width, bold_height, bold_bits, wDrawColorBlack );
 		fontWeightB = wButtonCreate( fontSelW,	2, 2, "fontSelWeight", (const char*)fontWeightBM, BO_ICON, 0, fontToggleWeightButton, NULL );
@@ -413,8 +414,8 @@ void wSelectFont(
 								10, 185, NULL, selectFace, NULL );
 		x = 2 + wControlGetWidth( (wControl_p)fontListB ) + 10;
 
-		fontOkB = wButtonCreate( fontSelW, x, 2, "fontSelOk", "Ok", 2, 0, (wButtonCallBack_p)doFontOk, NULL );
-		fontCancelB = wButtonCreate( fontSelW, x, -4, "fontSelCancel", "Cancel", 0, 0, (wButtonCallBack_p)doFontCancel, NULL );
+		fontOkB = wButtonCreate( fontSelW, x, 2, "fontSelOk", _("Ok"), 2, 0, (wButtonCallBack_p)doFontOk, NULL );
+		fontCancelB = wButtonCreate( fontSelW, x, -4, "fontSelCancel", _("Cancel"), 0, 0, (wButtonCallBack_p)doFontCancel, NULL );
 		x += wControlGetWidth( (wControl_p)fontOkB );
 		y = wControlGetPosY( (wControl_p)fontListB ) + wControlGetHeight( (wControl_p)fontListB ) + 4;
 		font_d = wDrawCreate( fontSelW, 2, y, "fontSelSample", 0, x, 50, NULL, fontRedraw, NULL );
@@ -430,7 +431,7 @@ void wSelectFont(
 	wControlActive( (wControl_p)fontWeightB, fontSelectMode==0 );
 	wControlActive( (wControl_p)fontSlantB, fontSelectMode==0 );
 	if (fontInfo_da.cnt == 0) {
-		wNotice( "No fonts", "Continue", NULL);
+		wNotice( _("No fonts"), _("Continue"), NULL);
 		return;
 	}
 	newFontInx = curFontInx;

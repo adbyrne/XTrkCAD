@@ -1,7 +1,7 @@
 /** \file gtkhelp.c
  * Balloon help ( tooltips) and main help functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.6 2007-12-30 22:40:53 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.7 2008-01-20 22:32:22 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -39,6 +39,7 @@
 #include <libgtkhtml/gtkhtml.h>
 
 #include "gtkint.h"
+#include "i18n.h"
 
 /* globals and defines related to the HTML help window */
 
@@ -359,7 +360,7 @@ void gtkAddHelpString(
 	string = malloc( strlen(wAppName) + 5 + strlen(helpStr) + 1 );
 	sprintf( string, "%sHelp/%s", wAppName, helpStr );
 	if (tooltips)
-		gtk_tooltips_set_tip( tooltips, widget, bhp->value, string );
+		gtk_tooltips_set_tip( tooltips, widget, _(bhp->value), string );
 	gtk_object_set_data( GTK_OBJECT( widget ), HelpDataKey, string );
 	if (listHelpStrings)
 		printf( "HELPSTR - %s\n", string );
@@ -866,7 +867,7 @@ CreateHelpWindow (void)
 	gtk_window_resize( (GtkWindow *)wHelpWindow, w, h );
 	gtk_window_move( (GtkWindow *)wHelpWindow, x, y );
 
-   gtk_window_set_title (GTK_WINDOW (wHelpWindow), "XTrkCad Help");
+   gtk_window_set_title (GTK_WINDOW (wHelpWindow), _("XTrkCad Help"));
 
 	g_signal_connect( G_OBJECT( wHelpWindow ), "delete-event", G_CALLBACK( DestroyHelpWindow ), NULL );
 
@@ -903,7 +904,7 @@ CreateHelpWindow (void)
    gtk_box_pack_start (GTK_BOX (hbox1), image2, TRUE, FALSE, 0);
    gtk_misc_set_alignment (GTK_MISC (image2), 0, 0);
 
-   label18 = gtk_label_new ("Home");
+   label18 = gtk_label_new (_("Home"));
    gtk_widget_show (label18);
    gtk_box_pack_end (GTK_BOX (hbox1), label18, TRUE, TRUE, 0);
    gtk_misc_set_alignment (GTK_MISC (label18), 0, 0.5);
@@ -1030,5 +1031,5 @@ DoHelpMenu( void *data )
 
 void wMenuAddHelp( wMenu_p m )
 {
-	wMenuPushCreate( m, NULL, "&Contents", 0, DoHelpMenu, (void*)1 );
+	wMenuPushCreate( m, NULL, _("&Contents"), 0, DoHelpMenu, (void*)1 );
 }

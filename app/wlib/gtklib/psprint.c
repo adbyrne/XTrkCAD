@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/psprint.c,v 1.2 2007-11-24 19:48:21 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/psprint.c,v 1.3 2008-01-20 22:32:22 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -34,6 +34,8 @@
 #include <math.h>
 #include "wlib.h"
 #include "dynarr.h"
+#include "i18n.h"
+
 #ifndef TRUE
 #define TRUE	(1)
 #define FALSE	(0)
@@ -704,7 +706,7 @@ gsave\n\
 	fprintf( psFile, "/Times-Bold findfont %0.3f scalefont setfont\n",
 				P2I(16) );
 
-	sprintf( tmp, "Page %d", pageCount );
+	sprintf( tmp, _("Page %d"), pageCount );
 	wMessageSetValue( printAbortM, tmp );
 	wFlush();
 
@@ -751,18 +753,18 @@ wPrinterStream_p wPrinterOpen( void )
 	if (curPrinter == 0 ) {
 		wWinShow( printFileW, TRUE );
 		if ( sPrintFileName[0] == '\0' ) {
-			wNotice( "No file name specified", "Ok", NULL );
+			wNotice( _("No file name specified"), _("Ok"), NULL );
 			return NULL;
 		}
 		if ( access(sPrintFileName, F_OK ) == 0 ) {
-			sprintf( tmp, "%s exists", sPrintFileName );
-			if (!wNotice( tmp, "Overwrite", "Cancel" ))
+			sprintf( tmp, _("%s exists"), sPrintFileName );
+			if (!wNotice( tmp, _("Overwrite"), _("Cancel") ))
 				return NULL;
 		}
 		f = fopen( sPrintFileName, "w" );
 		if (f == NULL) {
-			strcat( sPrintFileName, ": cannot open" );
-			wNotice( sPrintFileName, "Ok", NULL );
+			strcat( sPrintFileName, _(": cannot open") );
+			wNotice( sPrintFileName, _("Ok"), NULL );
 			return NULL;
 		}
 		fn = sPrintFileName;
@@ -774,8 +776,8 @@ wPrinterStream_p wPrinterOpen( void )
 		cmdOrFile = PRINT_COMMAND;
 	}
 	if (f == NULL) {
-		strcat( sPrintFileName, ": cannot open" );
-		wNotice( sPrintFileName, "Ok", NULL );
+		strcat( sPrintFileName, _(": cannot open") );
+		wNotice( sPrintFileName, _("Ok"), NULL );
 		return NULL;
 	}
 	p = (wPrinterStream_p)malloc( sizeof *p );
@@ -828,9 +830,9 @@ statusdict begin /jobname (<stdin>) def end\n\
 	(long)floor((papers[curPaper].w-margins(curMargin).r)*72),
 	(long)floor((papers[curPaper].h-margins(curMargin).t)*72) );
 	printContinue = TRUE;
-	sprintf( tmp, "Now printing %s", title );
+	sprintf( tmp, _("Now printing %s"), title );
 	wMessageSetValue( printAbortT, tmp );
-	wMessageSetValue( printAbortM, "Page 1" );
+	wMessageSetValue( printAbortM, _("Page 1") );
 	pageCount = 0;
 	wWinShow( printAbortW, TRUE );
 	if (copiesP)
@@ -879,7 +881,7 @@ static void pTestPage( void )
 	curPrinter = newPPrinter;
 	curMargin0 = curMargin;
 	curMargin = 0;
-	wPrintDocStart( "Printer Margin Test Page", 1, NULL );
+	wPrintDocStart( _("Printer Margin Test Page"), 1, NULL );
 	curMargin = curMargin0;
 	w = papers[curPaper].w;
 	h = papers[curPaper].h;
@@ -999,13 +1001,13 @@ static void addPrinterOk( const char * str, void * context )
 {
 	char tmp[80];
 	if (strlen(addPrinterName) == 0 || strlen(addPrinterCommand) == 0) {
-		wNotice( "Enter both printer name and command", "Ok", NULL );
+		wNotice( _("Enter both printer name and command"), _("Ok"), NULL );
 		return;
 	}
 	if (printerDefine)
 		printerDefine( addPrinterName, addPrinterCommand );
 	else
-		wNotice( "Can not save New Printer definition", "Ok", NULL );
+		wNotice( _("Can not save New Printer definition"), _("Ok"), NULL );
 	sprintf( tmp, "%s=%s", addPrinterName, addPrinterCommand );
 	wPrintNewPrinter( tmp );
 }
@@ -1027,13 +1029,13 @@ static void addMarginOk( const char * str, void * context )
 {
 	margins_t * m;
 	if (strlen(addMarginName) == 0) {
-		wNotice( "Enter printer name", "Ok", NULL );
+		wNotice( _("Enter printer name"), _("Ok"), NULL );
 		return;
 	}
 	if (marginDefine)
 		marginDefine( addMarginName, tBorder, bBorder, rBorder, lBorder );
 	else
-		wNotice( "Can not save New Margin definition", "Ok", NULL );
+		wNotice( _("Can not save New Margin definition"), _("Ok"), NULL );
 	DYNARR_APPEND( margins_t, margins_da, 10 );
 	m = &margins(margins_da.cnt-1);
 	m->name = strdup( addMarginName );
@@ -1066,7 +1068,7 @@ static wLines_t lines[] = {
 		{ 1, 160, 110, 177, 110 } };
 #endif
 
-static const char * printFmtLabels[]  = { "Portrait", "Landscape", NULL };
+static const char * printFmtLabels[]  = { N_("Portrait"), N_("Landscape"), NULL };
 
 static struct {
 		const char * xfontname, * psfontname;
@@ -1163,13 +1165,13 @@ static void printInit( void )
 		wPrefSetFloat( WPRINTFONT, "factor", fontSizeFactor );
 	}
 
-	x = wLabelWidth( "Paper Size" )+4;
-	printSetupW = wWinPopupCreate( NULL, 4, 4, "printSetupW",  "Print Setup", "xvprintsetup", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
-	optPrinterB = wDropListCreate( printSetupW, x, -4, "printSetupPrinter", "Printer", 0, 4, 100, &newPPrinter, NULL, NULL );
+	x = wLabelWidth( _("Paper Size") )+4;
+	printSetupW = wWinPopupCreate( NULL, 4, 4, "printSetupW",  _("Print Setup"), "xvprintsetup", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
+	optPrinterB = wDropListCreate( printSetupW, x, -4, "printSetupPrinter", _("Printer"), 0, 4, 100, &newPPrinter, NULL, NULL );
 #ifdef LATER
-	wButtonCreate( printSetupW, -10, 2, "printSetupPrinter", "New", 0, 0, newPrinter, NULL );
+	wButtonCreate( printSetupW, -10, 2, "printSetupPrinter", _("New"), 0, 0, newPrinter, NULL );
 #endif
-	optPaperSizeB = wDropListCreate( printSetupW, x, -4, "printSetupPaper", "Paper Size", 0, 4, 100, &newPPaper, NULL, NULL );
+	optPaperSizeB = wDropListCreate( printSetupW, x, -4, "printSetupPaper", _("Paper Size"), 0, 4, 100, &newPPaper, NULL, NULL );
 	y = wControlGetPosY( (wControl_p)optPaperSizeB ) + wControlGetHeight( (wControl_p)optPaperSizeB ) + 10;
 	for ( i=0; i<sizeof lines / sizeof lines[0]; i++ ) {
 		lines[i].x0 += x;
@@ -1179,48 +1181,48 @@ static void printInit( void )
 	}
 	wLineCreate( printSetupW, NULL, sizeof lines / sizeof lines[0], lines );
 	optTopMargin = wFloatCreate( printSetupW, x+35,  y, "printSetupMargin", NULL, 0, 50, 0.0, 1.0, &tBorder, (wFloatCallBack_p)doChangeMargin, NULL );
-	optLeftMargin = wFloatCreate( printSetupW,  x, y+50, "printSetupMargin", "Margin", 0, 50, 0.0, 1.0, &lBorder, (wFloatCallBack_p)doChangeMargin, NULL );
+	optLeftMargin = wFloatCreate( printSetupW,  x, y+50, "printSetupMargin", _("Margin"), 0, 50, 0.0, 1.0, &lBorder, (wFloatCallBack_p)doChangeMargin, NULL );
 	optRightMargin = wFloatCreate( printSetupW, x+70, y+50, "printSetupMargin", NULL, 0, 50, 0.0, 1.0, &rBorder, (wFloatCallBack_p)doChangeMargin, NULL );
 	optBottomMargin = wFloatCreate( printSetupW, x+35, y+100, "printSetupMargin", NULL, 0, 50, 0.0, 1.0, &bBorder, (wFloatCallBack_p)doChangeMargin, NULL );
 	optMarginB = wDropListCreate( printSetupW, x, -5, "printSetupMargin", NULL, BL_EDITABLE, 4, 100, NULL, doMarginSel, NULL );
 	optMarginDelB = wButtonCreate( printSetupW, wControlGetPosX((wControl_p)optMarginB)+wControlGetWidth((wControl_p)optMarginB)+5, wControlGetPosY((wControl_p)optMarginB), "printSetupMarginDelete", "Delete", 0, 0, (wButtonCallBack_p)doMarginDelete, NULL );
 #ifdef LATER
-	wButtonCreate( printSetupW, -10, wControlGetPosY((wControl_p)optMarginB), "printSetupMargin", "New", 0, 0, newMargin, NULL );
+	wButtonCreate( printSetupW, -10, wControlGetPosY((wControl_p)optMarginB), "printSetupMargin", _("New"), 0, 0, newMargin, NULL );
 #endif
-	optFormat = wRadioCreate( printSetupW, x, -5, "printSetupFormat", "Format", BC_HORZ,
+	optFormat = wRadioCreate( printSetupW, x, -5, "printSetupFormat", _("Format"), BC_HORZ,
 				printFmtLabels, &printFormat, NULL, NULL );
-	optXFontL = wDropListCreate( printSetupW, x, -6, "printSetupXFont", "X Font", 0, 4, 200, &optXFontX, doSetOptXFont, NULL );
-	optPSFontS = wStringCreate( printSetupW, x, -4, "printSetupPSFont", "PS Font", 0, 200, optPSFont, 0, doSetOptPSFont, NULL ); 
-	optFontSizeFactor = wFloatCreate( printSetupW, x, -4, "printSetupFontSizeFactor", "Factor", 0, 50, 0.5, 2.0, &fontSizeFactor, (wFloatCallBack_p)NULL, NULL );
+	optXFontL = wDropListCreate( printSetupW, x, -6, "printSetupXFont", _("X Font"), 0, 4, 200, &optXFontX, doSetOptXFont, NULL );
+	optPSFontS = wStringCreate( printSetupW, x, -4, "printSetupPSFont", _("PS Font"), 0, 200, optPSFont, 0, doSetOptPSFont, NULL ); 
+	optFontSizeFactor = wFloatCreate( printSetupW, x, -4, "printSetupFontSizeFactor", _("Factor"), 0, 50, 0.5, 2.0, &fontSizeFactor, (wFloatCallBack_p)NULL, NULL );
 	y = wControlGetPosY( (wControl_p)optFontSizeFactor ) + wControlGetHeight( (wControl_p)optFontSizeFactor ) + 10;
 	x = wControlGetPosX( (wControl_p)optPrinterB ) + wControlGetWidth( (wControl_p)optPrinterB ) + 10;
-	wButtonCreate( printSetupW,	  x, 4, "printSetupOk", "Ok", 0, 0, (wButtonCallBack_p)pSetupOk, NULL );
-	wButtonCreate( printSetupW, x, -4, "printSetupCancel", "Cancel", 0, 0, (wButtonCallBack_p)pSetupCancel, NULL );
-	wButtonCreate( printSetupW, x, -14, "printSetupTest", "Print Test Page", 0, 0, (wButtonCallBack_p)pTestPage, NULL );
+	wButtonCreate( printSetupW,	  x, 4, "printSetupOk", _("Ok"), 0, 0, (wButtonCallBack_p)pSetupOk, NULL );
+	wButtonCreate( printSetupW, x, -4, "printSetupCancel", _("Cancel"), 0, 0, (wButtonCallBack_p)pSetupCancel, NULL );
+	wButtonCreate( printSetupW, x, -14, "printSetupTest", _("Print Test Page"), 0, 0, (wButtonCallBack_p)pTestPage, NULL );
 
 #ifdef LATER
-	addPrinterW = wWinPopupCreate( printSetupW, 2, 2, "printSetupPrinter", "Add Printer", "xvaddprinter", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
+	addPrinterW = wWinPopupCreate( printSetupW, 2, 2, "printSetupPrinter", _("Add Printer"), "xvaddprinter", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
 	addPrinterN = wStringCreate( addPrinterW, 100, -3, "printSetupPrinter",
-				"Name: ", 0, 150, addPrinterName, sizeof addPrinterName,
+				_("Name: "), 0, 150, addPrinterName, sizeof addPrinterName,
 				addPrinterOk, NULL );
 	addPrinterC = wStringCreate( addPrinterW, 100, -3, "printSetupPrinter",
-				"Command: ", 0, 150, addPrinterCommand, sizeof addPrinterCommand,
+				_("Command: "), 0, 150, addPrinterCommand, sizeof addPrinterCommand,
 				addPrinterOk, NULL );
 
-	addMarginW = wWinPopupCreate( printSetupW, 2, 2, "printSetupMargin", "Add Margin", "xvaddmargin", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
+	addMarginW = wWinPopupCreate( printSetupW, 2, 2, "printSetupMargin", _("Add Margin"), "xvaddmargin", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
 	addMarginN = wStringCreate( addMarginW, 100, -3, "printSetupMargin",
-				"Name: ", 0, 150, addMarginName, sizeof addMarginName,
+				_("Name: "), 0, 150, addMarginName, sizeof addMarginName,
 				addMarginOk, NULL );
 #endif
 
-	printFileW = wWinPopupCreate( printSetupW, 2, 2, "printFileNameW", "Print To File", "xvprinttofile", F_BLOCK|F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
+	printFileW = wWinPopupCreate( printSetupW, 2, 2, "printFileNameW", _("Print To File"), "xvprinttofile", F_BLOCK|F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
 	wStringCreate( printFileW, 100, 3, "printFileName",
-				"File Name? ", 0, 150, sPrintFileName, sizeof sPrintFileName,
+				_("File Name? "), 0, 150, sPrintFileName, sizeof sPrintFileName,
 				NULL, NULL  );
-	wButtonCreate( printFileW, -4, 3, "printFileNameOk", "Ok", BB_DEFAULT, 0, printFileNameSel, NULL );
+	wButtonCreate( printFileW, -4, 3, "printFileNameOk", _("Ok"), BB_DEFAULT, 0, printFileNameSel, NULL );
 
-	newFontAliasW = wWinPopupCreate( printSetupW, 2, 2, "printFontAliasW", "Font Alias", "xvfontalias", F_BLOCK|F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
-	wMessageCreate( newFontAliasW, 0, 0, NULL, 200, "Enter a post-script font name for:" );
+	newFontAliasW = wWinPopupCreate( printSetupW, 2, 2, "printFontAliasW", _("Font Alias"), "xvfontalias", F_BLOCK|F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
+	wMessageCreate( newFontAliasW, 0, 0, NULL, 200, _("Enter a post-script font name for:") );
 	newFontAliasXFntB = wMessageCreate( newFontAliasW, 0, -3, NULL, 200, "" );
 	wStringCreate( newFontAliasW, 0, -3, "printFontAlias", NULL, 0, 200, NULL, 0, newFontAliasSel, NULL );
 
@@ -1232,10 +1234,10 @@ static void printInit( void )
 		}
 	}
 
-	printAbortW = wWinPopupCreate( printSetupW, 2, 2, "printAbortW", "Printing", "xvprintabort", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
-	printAbortT = wMessageCreate( printAbortW, 0, 0, "printAbortW", 200, "Now printing" );
+	printAbortW = wWinPopupCreate( printSetupW, 2, 2, "printAbortW", _("Printing"), "xvprintabort", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
+	printAbortT = wMessageCreate( printAbortW, 0, 0, "printAbortW", 200, _("Now printing") );
 	printAbortM = wMessageCreate( printAbortW, 0, -4, "printAbortW", 200, NULL );
-	wButtonCreate( printAbortW, 0, 80, "printAbortW", "Abort Print", 0,  0, printAbort, NULL );
+	wButtonCreate( printAbortW, 0, 80, "printAbortW", _("Abort Print"), 0,  0, printAbort, NULL );
 
 	for (i=0;i<sizeof fontmap/sizeof fontmap[0]; i++) {
 		cp = wPrefGetString( WFONT, fontmap[i].xfontname );

@@ -1,7 +1,7 @@
 /** \file gtkbutton.c
  * Toolbar button creation and handling
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbutton.c,v 1.4 2007-09-28 11:17:34 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbutton.c,v 1.5 2008-01-20 22:32:22 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -28,6 +28,7 @@
 #include <gdk/gdk.h>
 
 #include "gtkint.h"
+#include "i18n.h"
 
 #define MIN_BUTTON_WIDTH (80)
 
@@ -350,7 +351,7 @@ EXPORT wChoice_p wRadioCreate(
 	if (b->widget == 0) abort();
 	for ( label=labels; *label; label++ ) {
 		butt = gtk_radio_button_new_with_label( 
-				butt0?gtk_radio_button_group(GTK_RADIO_BUTTON(butt0)):NULL, *label );
+				butt0?gtk_radio_button_group(GTK_RADIO_BUTTON(butt0)):NULL, _(*label) );
 		if (butt0==NULL)
 			butt0 = butt;
 		gtk_box_pack_start( GTK_BOX(b->widget), butt, TRUE, TRUE, 0 );
@@ -432,7 +433,7 @@ wChoice_p wToggleCreate(
 		b->widget = gtk_vbox_new( FALSE, 10 );
 	if (b->widget == 0) abort();
 	for ( label=labels; *label; label++ ) {
-		butt = gtk_check_button_new_with_label( *label );
+		butt = gtk_check_button_new_with_label(_(*label));
 		gtk_box_pack_start( GTK_BOX(b->widget), butt, TRUE, TRUE, 0 );
 		gtk_widget_show( butt );
 		gtk_signal_connect (GTK_OBJECT(butt), "toggled",

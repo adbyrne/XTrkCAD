@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.7 2008-01-04 06:16:13 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.8 2008-01-20 22:32:22 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -30,6 +30,8 @@
 
 #include "wlib.h"
 #include "dynarr.h"
+#include "i18n.h"
+
 #ifndef TRUE
 #define TRUE	(1)
 #define FALSE	(0)
@@ -107,15 +109,15 @@ EXPORT const char * wGetAppLibDir( void )
 	}
 
 	sprintf( msg,
-		"The required configuration files could not be located in the expected location.\n\n"
+		_("The required configuration files could not be located in the expected location.\n\n"
 		"Usually this is an installation problem. Make sure that these files are installed in either \n"
-		"  " XTRKCAD_INSTALL_PREFIX "/share/xtrkcad or\n"
+		"  %s/share/xtrkcad or\n"
 		"  /usr/lib/%s or\n"
 		"  /usr/local/lib/%s\n"
 		"If this is not possible, the environment variable %s must contain "
-		"the name of the correct directory.",
-		wAppName, wAppName, envvar );
-	wNotice( msg, "Ok", NULL );
+		"the name of the correct directory."),
+		XTRKCAD_INSTALL_PREFIX, wAppName, wAppName, envvar );
+	wNotice( msg, _("Ok"), NULL );
 	appLibDir[0] = '\0';
 	wExit(0);
 	return NULL;
@@ -134,20 +136,20 @@ EXPORT const char * wGetAppWorkDir(
 		return appWorkDir;
 
 	if ((homeDir = getenv( "HOME" )) == NULL) {
-		wNotice( "HOME is not set", "Exit", NULL);
+		wNotice( _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	}
 	sprintf( appWorkDir, "%s/.%s", homeDir, wAppName );
 	if ( (dirp = opendir(appWorkDir)) != NULL ) {
 		closedir(dirp);
 	} else {
-		sprintf( tmp, "Creating %s", appWorkDir );
-		if( !wNotice( tmp, "Ok", "Exit" ) ) {
+		sprintf( tmp, _("Creating %s"), appWorkDir );
+		if( !wNotice( tmp, _("Ok"), _("Exit") ) ) {
 			wExit(0);
 		}
 		if ( mkdir( appWorkDir, 0777 ) == -1 ) {
-			sprintf( tmp, "Cannot create %s", appWorkDir );
-			wNotice( tmp, "Exit", NULL );
+			sprintf( tmp, _("Cannot create %s"), appWorkDir );
+			wNotice( tmp, _("Exit"), NULL );
 			wExit(0);
 		}
 	}
@@ -169,7 +171,7 @@ EXPORT const char *wGetUserHomeDir( void )
 		return userHomeDir;
 		
 	if ((homeDir = getenv( "HOME" )) == NULL) {
-		wNotice( "HOME is not set", "Exit", NULL);
+		wNotice( _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	} else {
 		strcpy( userHomeDir, homeDir );
@@ -218,14 +220,14 @@ static void readPrefs( void )
 			continue;
 		np = strchr( sp, '.' );
 		if (np == NULL) {
-			wNotice( tmp, "Continue", NULL );
+			wNotice( tmp, _("Continue"), NULL );
 			continue;
 		}
 		*np++ = '\0';
 		while ( *np==' ' || *np=='\t' ) np++;
 		vp = strchr( np, ':' );
 		if (vp == NULL) {
-			wNotice( tmp, "Continue", NULL );
+			wNotice( tmp, _("Continue"), NULL );
 			continue;
 		}
 		*vp++ = '\0';

@@ -1,3 +1,12 @@
+Jan 21, 2008
+	ENH: Gettext support added. Modified files:
+		gtkbutton.c
+		gtkfont.c
+		gtkhelp.c
+		gtklist.c
+		psprint.c
+		wpref.c
+
 Jan 20, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		gtkdraw.c/gtkdraw-cairo.c: wDrawSetSize(): Return immediately,
