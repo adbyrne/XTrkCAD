@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.25 2008-01-15 11:46:03 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.26 2008-01-22 14:31:14 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -55,6 +55,9 @@
 #include "compound.h"
 #include "smalldlg.h"
 #include "i18n.h"
+#include <locale.h>
+
+char *userLocale = NULL;
 
 extern wBalloonHelp_t balloonHelp[];
 #ifdef DEBUG
@@ -2442,12 +2445,18 @@ EXPORT wWin_p wMain(
 	long oldToolbarMax;
 	long newToolbarMax;
 	char *cp;
+	char *oldLocale = NULL;
 
 	initialZoom = 0;
 	initialFile = NULL;
 
 	/* Initialize gettext */
 	InitGettext();
+
+	/* Save user locale */
+	oldLocale = setlocale(LC_ALL, NULL);
+	if (oldLocale)
+		userLocale = strdup( oldLocale );
 
 	/*
 	 * ARGUMENTS

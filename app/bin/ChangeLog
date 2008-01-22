@@ -1,3 +1,8 @@
+Jan 22, 2008
+	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
+		misc.c: Save user locale when program initializes.
+		macro.c: Gettext support added.
+
 Jan 21, 2008
 	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
 		Gettext support added. The following 48 files were modified:

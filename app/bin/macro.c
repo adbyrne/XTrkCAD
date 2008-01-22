@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.2 2006-05-26 17:31:44 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.3 2008-01-22 14:31:14 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -43,6 +43,7 @@
 #else
 #include <sys/timeb.h>
 #endif
+#include <locale.h>
 
 #include "track.h"
 #include "version.h"
@@ -51,9 +52,12 @@
 #include "draw.h"
 #include "misc.h"
 #include "compound.h"
+#include "i18n.h"
 
 EXPORT long adjTimer;
 static void DemoInitValues( void );
+
+extern char *userLocale;
 
 /*****************************************************************************
  *
@@ -71,13 +75,13 @@ static paramTextData_t recordTextData = { 50, 16 };
 static paramData_t recordPLs[] = {
 #define I_RECSTOP		(0)
 #define recStopB		((wButton_p)recordPLs[I_RECSTOP].control)
-	{   PD_BUTTON, DoRecordButton, "stop", PDO_NORECORD, NULL, "Stop", 0, (void*)0 },
+	{   PD_BUTTON, DoRecordButton, "stop", PDO_NORECORD, NULL, N_("Stop"), 0, (void*)0 },
 #define I_RECMESSAGE	(1)
 #define recMsgB ((wButton_p)recordPLs[I_RECMESSAGE].control)
-	{   PD_BUTTON, DoRecordButton, "message", PDO_NORECORD|PDO_DLGHORZ, NULL, "Message", 0, (void*)2 },
+	{   PD_BUTTON, DoRecordButton, "message", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Message"), 0, (void*)2 },
 #define I_RECEND		(2)
 #define recEndB ((wButton_p)recordPLs[I_RECEND].control)
-	{   PD_BUTTON, DoRecordButton, "end", PDO_NORECORD|PDO_DLGHORZ, NULL, "End", BO_DISABLED, (void*)4 },
+	{   PD_BUTTON, DoRecordButton, "end", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("End"), BO_DISABLED, (void*)4 },
 #define I_RECTEXT		(3)
 #define recordT			((wText_p)recordPLs[I_RECTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &recordTextData, NULL, BT_CHARUNITS|BO_READONLY} };
@@ -156,7 +160,7 @@ static int StartRecord( const char * pathName, const char * fileName, void * con
 	SetCurDir( pathName, fileName );
 	recordF = fopen(pathName, "w");
 	if (recordF==NULL) {
-		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Recording", fileName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Recording"), fileName, strerror(errno) );
 		return FALSE;
 	}
 	time(&clock);
@@ -190,7 +194,9 @@ static void DoRecordButton( void * context )
 
 	switch( (int)(long)context ){
 	case 0: /* Stop */
-		fprintf( recordF, "CLEAR\nMESSAGE\nEnd of Playback.  Hit Step to exit\nEND\nSTEP\n" );
+		fprintf( recordF, "CLEAR\nMESSAGE\n");
+		fprintf( recordF, N_("End of Playback.  Hit Step to exit\n"));
+		fprintf( recordF, "END\nSTEP\n" );
 		fclose( recordF );
 		recordF = NULL;
 		wHide( recordW );
@@ -253,7 +259,7 @@ static void DoRecordButton( void * context )
 EXPORT void DoRecord( void * context )
 {
 	if (recordW == NULL) {
-		char * title = MakeWindowTitle("Record");
+		char * title = MakeWindowTitle(_("Record"));
 		recordW = ParamCreateDialog( &recordPG, title, NULL, NULL, NULL, FALSE, NULL, F_RESIZE, NULL );
 		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern, StartRecord, NULL );
 	}
@@ -583,16 +589,16 @@ static paramTextData_t demoTextData = { 50, 16 };
 static paramData_t demoPLs[] = {
 #define I_DEMOSTEP		(0)
 #define demoStep		((wButton_p)demoPLs[I_DEMOSTEP].control)
-	{   PD_BUTTON, DoDemoButton, "step", PDO_NORECORD, NULL, "Step", BB_DEFAULT, (void*)0 },
+	{   PD_BUTTON, DoDemoButton, "step", PDO_NORECORD, NULL, N_("Step"), BB_DEFAULT, (void*)0 },
 #define I_DEMONEXT		(1)
 #define demoNext		((wButton_p)demoPLs[I_DEMONEXT].control)
-	{   PD_BUTTON, DoDemoButton, "next", PDO_NORECORD|PDO_DLGHORZ, NULL, "Next", 0, (void*)1 },
+	{   PD_BUTTON, DoDemoButton, "next", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Next"), 0, (void*)1 },
 #define I_DEMOQUIT		(2)
 #define demoQuit		((wButton_p)demoPLs[I_DEMOQUIT].control)
-	{   PD_BUTTON, DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, "Quit", BB_CANCEL, (void*)3 },
+	{   PD_BUTTON, DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Quit"), BB_CANCEL, (void*)3 },
 #define I_DEMOSPEED		(3)
 #define demoSpeedL		((wList_p)demoPLs[I_DEMOSPEED].control)
-	{   PD_DROPLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, (void*)80, "Speed" },
+	{   PD_DROPLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, (void*)80, N_("Speed") },
 #define I_DEMOTEXT		(4)
 #define demoT			((wText_p)demoPLs[I_DEMOTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY} };
@@ -732,7 +738,7 @@ EXPORT void PlaybackMessage(
 		char * line )
 {
 	char * cp;
-	wTextAppend( demoT, line );
+	wTextAppend( demoT, _(line) );
 	if ( documentCopy && documentFile ) {
 		if (strncmp(line, "__________", 10) != 0) {
 			for (cp=line; *cp; cp++) {
@@ -804,7 +810,7 @@ static void Playback( void )
 	}
 	while (TRUE) {
 		if ( paramFile == NULL ||
-			 fgets(paramLine, 256, paramFile) == NULL ) {
+			 fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
 			paramTogglePlaybackHilite = FALSE;
 			ClearPlaybackCursor();
 			CloseDemoWindows();
@@ -822,9 +828,10 @@ static void Playback( void )
 			strcpy( paramFileName, demoList(curDemo).fileName );
 			paramFile = fopen( paramFileName, "r" );
 			if ( paramFile == NULL ) {
-				NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Demo", paramFileName, strerror(errno) );
+				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), paramFileName, strerror(errno) );
 				return;
 			}
+
 			playbackColor=wDrawColorBlack;
 			paramLineNum = 0;
 			wWinSetTitle( demoW, demoList( curDemo ).title );
@@ -836,8 +843,8 @@ static void Playback( void )
 			RulerRedraw( TRUE );
 			DoChangeNotification( CHANGE_ALL );
 			CompoundClearDemoDefns();
-			if ( fgets(paramLine, 256, paramFile) == NULL ) {
-				NoticeMessage( MSG_CANT_READ_DEMO, "Continue", NULL, sProdName, paramFileName );
+			if ( fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
+				NoticeMessage( MSG_CANT_READ_DEMO, _("Continue"), NULL, sProdName, paramFileName );
 				fclose( paramFile );
 				paramFile = NULL;
 				return;
@@ -889,7 +896,7 @@ static void Playback( void )
 			didPause = FALSE;
 			wWinTop( demoW );
 			demoWinOnTop = TRUE;
-			while ( ( fgets( paramLine, 256, paramFile ) ) != NULL ) {
+			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
 				if ( strncmp(paramLine, "END", 3) == 0 )
 					break;
@@ -922,11 +929,11 @@ static void Playback( void )
 		} else if (strncmp( paramLine, "VERSION", 7 ) == 0) {
 			paramVersion = atol( paramLine+8 );
 			if ( paramVersion > iParamVersion ) {
-				NoticeMessage( MSG_PLAYBACK_VERSION_UPGRADE, "Ok", NULL, paramVersion, iParamVersion, sProdName );
+				NoticeMessage( MSG_PLAYBACK_VERSION_UPGRADE, _("Ok"), NULL, paramVersion, iParamVersion, sProdName );
 				break;
 			}
 			if ( paramVersion < iMinParamVersion ) {
-				NoticeMessage( MSG_PLAYBACK_VERSION_DOWNGRADE, "Ok", NULL, paramVersion, iMinParamVersion, sProdName );
+				NoticeMessage( MSG_PLAYBACK_VERSION_DOWNGRADE, _("Ok"), NULL, paramVersion, iMinParamVersion, sProdName );
 				break;
 			}
 		} else if (strncmp( paramLine, "ORIG ", 5 ) == 0) {
@@ -1003,10 +1010,10 @@ static void Playback( void )
 			playbackTimer = wGetTimer();
 		} else if (strncmp( paramLine, "TIMEEND", 7 ) == 0 ) {
 			if (playbackTimer == 0) {
-				NoticeMessage( MSG_PLAYBACK_TIMEEND, "Ok", NULL );
+				NoticeMessage( MSG_PLAYBACK_TIMEEND, _("Ok"), NULL );
 			} else {
 				playbackTimer = wGetTimer() - playbackTimer;
-				sprintf( message, "Elapsed time %lu\n", playbackTimer );
+				sprintf( message, _("Elapsed time %lu\n"), playbackTimer );
 				wTextAppend( demoT, message );
 				playbackTimer = 0;
 			}
@@ -1037,7 +1044,7 @@ static void Playback( void )
 		} else if (strncmp( paramLine, "DOCUMENT OFF", 12 ) == 0 ) {
 			documentCopy = FALSE;
 		} else if (strncmp( paramLine, "DOCUMENT COPY", 13 ) == 0 ) {
-			while ( ( fgets( paramLine, 256, paramFile ) ) != NULL ) {
+			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
 				if ( strncmp(paramLine, "END", 3) == 0 )
 					break;
@@ -1109,7 +1116,7 @@ static void Playback( void )
 				playbackKeyState = 0;
 			}
 			if (inx == playbackProc_da.cnt) {
-				NoticeMessage( MSG_PLAYBACK_UNK_CMD, "Ok", NULL, paramLineNum, paramLine );
+				NoticeMessage( MSG_PLAYBACK_UNK_CMD, _("Ok"), NULL, paramLineNum, paramLine );
 			}
 		}
 		lastCmd = thisCmd;
@@ -1140,9 +1147,10 @@ static int StartPlayback( const char * pathName, const char * fileName, void * c
 	SetCurDir( pathName, fileName );
 	paramFile = fopen( pathName, "r" );
 	if ( paramFile == NULL ) {
-		NoticeMessage( MSG_OPEN_FAIL, "Continue", NULL, "Playback", pathName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Playback"), pathName, strerror(errno) );
 		return FALSE;
 	}
+
 	strcpy( paramFileName, pathName );
 
 	PlaybackSetup();
@@ -1150,6 +1158,7 @@ static int StartPlayback( const char * pathName, const char * fileName, void * c
 	UndoSuspend();
 	wWinBlockEnable( FALSE );
 	Playback();
+
 	return TRUE;
 }
 
@@ -1209,15 +1218,15 @@ static void DemoDlgUpdate(
 
 static void CreateDemoW( void )
 {
-	char * title = MakeWindowTitle("Demo");
+	char * title = MakeWindowTitle(_("Demo"));
 	demoW = ParamCreateDialog( &demoPG, title, NULL, NULL, NULL, FALSE, NULL, F_RESIZE, DemoDlgUpdate );
 
-	wListAddValue( demoSpeedL, "Slowest", NULL, (void*)0 );
-	wListAddValue( demoSpeedL, "Slow", NULL, (void*)1 );
-	wListAddValue( demoSpeedL, "Normal", NULL, (void*)2 );
-	wListAddValue( demoSpeedL, "Fast", NULL, (void*)3 );
-	wListAddValue( demoSpeedL, "Faster", NULL, (void*)4 );
-	wListAddValue( demoSpeedL, "Fastest", NULL, (void*)5 );
+	wListAddValue( demoSpeedL, _("Slowest"), NULL, (void*)0 );
+	wListAddValue( demoSpeedL, _("Slow"), NULL, (void*)1 );
+	wListAddValue( demoSpeedL, _("Normal"), NULL, (void*)2 );
+	wListAddValue( demoSpeedL, _("Fast"), NULL, (void*)3 );
+	wListAddValue( demoSpeedL, _("Faster"), NULL, (void*)4 );
+	wListAddValue( demoSpeedL, _("Fastest"), NULL, (void*)5 );
 	wListSetIndex( demoSpeedL, (wIndex_t)playbackSpeed );
 	playbackFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, title, sRecordFilePattern, StartPlayback, NULL );
 }
@@ -1227,7 +1236,7 @@ EXPORT void DoPlayBack( void * context )
 {
 	if (demoW == NULL)
 		CreateDemoW();
-	wButtonSetLabel( demoNext, "Save" );
+	wButtonSetLabel( demoNext, _("Save") );
 	wFilSelect( playbackFile_fs, curDirName );
 }
 
@@ -1335,7 +1344,7 @@ static void DemoInitValues( void )
 	strcpy( scaleName, "DEMO" );
 	DoSetScale( scaleName );
 	if ( paramPlaybackProc == NULL ) {
-		wNotice( "Can not find PARAMETER playback proc", "Ok", NULL );
+		wNotice( _("Can not find PARAMETER playback proc"), _("Ok"), NULL );
 		return;
 	}
 	for ( cpp = demoInitParams; *cpp; cpp++ )
@@ -1348,10 +1357,10 @@ static void DoDemo( void * demoNumber )
 
 	if (demoW == NULL)
 		CreateDemoW();
-	wButtonSetLabel( demoNext, "Next" );
+	wButtonSetLabel( demoNext, _("Next") );
 	curDemo = (int)(long)demoNumber;
 	if ( curDemo < 0 || curDemo >= demoList_da.cnt ) {
-		NoticeMessage( MSG_DEMO_BAD_NUM, "Ok", NULL, curDemo );
+		NoticeMessage( MSG_DEMO_BAD_NUM, _("Ok"), NULL, curDemo );
 		return;
 	}
 	PlaybackSetup();
@@ -1366,10 +1375,17 @@ static BOOL_T ReadDemo(
 {
 		static wMenu_p m;
 		char * cp;
+		char *oldLocale = NULL;
+
 		if ( m == NULL )
 			m = demoM;
+
 		if ( strncmp( line, "DEMOGROUP ", 10 ) == 0 ) {
-			m = wMenuMenuCreate( demoM, NULL, line+10 );
+			if (userLocale)
+				oldLocale = SaveLocale(userLocale);
+			m = wMenuMenuCreate( demoM, NULL, _(line+10) );
+			if (oldLocale)
+				RestoreLocale(oldLocale);
 		} else if ( strncmp( line, "DEMO ", 5 ) == 0 ) {
 			if (line[5] != '"')
 				goto error;
@@ -1382,12 +1398,16 @@ static BOOL_T ReadDemo(
 			if ( strlen(cp)==0 )
 				goto error;
 			DYNARR_APPEND( demoList_t, demoList_da, 10 );
-			demoList( demoList_da.cnt-1 ).title = MyStrdup( line+6 );
+			if (userLocale)
+				oldLocale = SaveLocale(userLocale);
+			demoList( demoList_da.cnt-1 ).title = MyStrdup( _(line+6) );
 			demoList( demoList_da.cnt-1 ).fileName =
 				(char*)MyMalloc( strlen(libDir) + 1 + 5 + 1 + strlen(cp) + 1 );
 			sprintf( demoList( demoList_da.cnt-1 ).fileName, "%s%s%s%s%s",
 				libDir, FILE_SEP_CHAR, "demos", FILE_SEP_CHAR, cp );
-			wMenuPushCreate( m, NULL, line+6, 0, DoDemo, (void*)(demoList_da.cnt-1) );
+			wMenuPushCreate( m, NULL, _(line+6), 0, DoDemo, (void*)(demoList_da.cnt-1) );
+			if (oldLocale)
+				RestoreLocale(oldLocale);
 		}
 		return TRUE;
 error:
