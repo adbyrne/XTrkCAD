@@ -1,3 +1,7 @@
+Jan 22, 2008
+	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
+		gtkwindow.c: wExit(): Free user locale before exit.
+
 Jan 21, 2008
 	ENH: Gettext support added. Modified files:
 		gtkbutton.c

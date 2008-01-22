@@ -1,3 +1,7 @@
+Jan 22, 2008
+	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
+		mswmisc.c: WinMain(): Free user locale before exit.
+
 Dec 16, 2007
 	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswpref.c: us XTrackCad as directory name for configuration files

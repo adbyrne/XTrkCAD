@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.11 2007-09-14 16:17:24 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.12 2008-01-22 14:37:14 mni77 Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -151,6 +151,8 @@ static wBool_t mswWinBlockEnabled = TRUE;
 
 static FILE * dumpControlsF;
 static int dumpControls;
+
+extern char *userLocale;
 
 /*
  *****************************************************************************
@@ -3001,6 +3003,11 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 	Ctl3dUnregister( hinstCurrent );
 #endif
 
+	if (userLocale)
+	{
+		free(userLocale);
+		userLocale = NULL;
+	}
 
 	return msg.wParam;
 }

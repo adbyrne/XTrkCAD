@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.5 2007-12-30 22:40:53 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.6 2008-01-22 14:37:14 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -45,6 +45,7 @@ wWin_p gtkMainW;
 #define MIN_WIN_HEIGHT (50)
 
 extern wBool_t listHelpStrings;
+extern char *userLocale;
 		
 static wControl_p firstWin = NULL, lastWin;
 
@@ -872,6 +873,13 @@ The main window call-back function is called with 'wQuit_e'.
 	wPrefFlush();
 	if (gtkMainW && gtkMainW->winProc != NULL)
 		gtkMainW->winProc( gtkMainW, wQuit_e, gtkMainW->data );
+
+	if (userLocale)
+	{
+		free(userLocale);
+		userLocale = NULL;
+	}
+
 	exit( rc );
 	/*gtk_main_quit();*/
 }
