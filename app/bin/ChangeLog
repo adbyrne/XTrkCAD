@@ -1,4 +1,8 @@
 Jan 23, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		fileio.c: increase precision for roomsize to 6 digits .
+
+Jan 23, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		param.c: ParamPlayback(): If parameter type is PD_FLOAT, then use the
 		locale "C" during atof().

@@ -1,7 +1,7 @@
 /** \file fileio.c
  * Loading and saving files. Handles trackplans as well as DXF export. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.14 2008-01-15 11:46:03 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.15 2008-01-23 20:07:13 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -929,7 +929,7 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "TITLE1 %s\n", Title1 )>0;
 	rc &= fprintf(f, "TITLE2 %s\n", Title2 )>0;
 	rc &= fprintf(f, "MAPSCALE %ld\n", (long)mapD.scale )>0;
-	rc &= fprintf(f, "ROOMSIZE %0.1f x %0.1f\n", mapD.size.x, mapD.size.y )>0;
+	rc &= fprintf(f, "ROOMSIZE %0.6f x %0.6f\n", mapD.size.x, mapD.size.y )>0;
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
