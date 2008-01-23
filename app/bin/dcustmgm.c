@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcustmgm.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcustmgm.c,v 1.3 2008-01-23 21:55:01 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -241,12 +241,11 @@ static void CustomDone( void * action )
 	char *oldLocale = NULL;
 	FILE * f = OpenCustom("w");
 
-	oldLocale = SaveLocale("C");
-
 	if (f == NULL) {
 		wHide( customPG.win );
 		return;
 	}
+	oldLocale = SaveLocale("C");
 	CompoundCustomSave(f);
 	CarCustomSave(f);
 	fclose(f);

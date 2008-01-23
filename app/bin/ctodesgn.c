@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctodesgn.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctodesgn.c,v 1.3 2008-01-23 21:55:01 mni77 Exp $
  *
  * T_TURNOUT
  *
@@ -1784,7 +1784,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 static void ShowTurnoutDesigner( void * context )
 {
 	if (recordF)
-		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", _(((toDesignDesc_t*)context)->label) );
+		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", ((toDesignDesc_t*)context)->label );
 	newTurnScaleName = curScaleName;
 	newTurnTrackGauge = trackGauge;
 	SetupTurnoutDesignerW( (toDesignDesc_t*)context );
@@ -2006,7 +2006,7 @@ EXPORT void InitNewTurn( wMenu_p m )
 	for ( i=0; i<(sizeof designDescs/sizeof designDescs[0]); i++ ) {
 		wMenuPushCreate( m, NULL, _(designDescs[i]->label), 0,
 				ShowTurnoutDesigner, (void*)designDescs[i] );
-		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, _(designDescs[i]->label) );
+		sprintf( message, "%s SHOW %s", TURNOUTDESIGNER, designDescs[i]->label );
 		AddPlaybackProc( message, (playbackProc_p)ShowTurnoutDesigner, designDescs[i] );
 	}
 	roadbedColor = wDrawColorBlack;
