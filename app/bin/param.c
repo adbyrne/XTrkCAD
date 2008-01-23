@@ -1,7 +1,7 @@
 /** \file param.c
  * Handle all the dialog box creation stuff.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.6 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.7 2008-01-23 19:49:51 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1699,6 +1699,7 @@ static void ParamPlayback( char * line )
 	wAction_t a;
 	coOrd pos;
 	char * valS;
+	char *oldLocale = NULL;
 
 	if ( strncmp( line, "GROUP ", 6 ) == 0 ) {
 #ifdef PGPROC
@@ -1834,7 +1835,9 @@ static void ParamPlayback( char * line )
 				}
 				break;
 			case PD_FLOAT:
+				oldLocale = SaveLocale("C");
 				valF = valF1 = atof( line+len );
+				RestoreLocale(oldLocale);
 				if (p->valueP)
 					*(FLOAT_T*)p->valueP = valF;
 				if (p->option&PDO_DIM) {
