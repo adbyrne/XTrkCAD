@@ -1,3 +1,8 @@
+Jan 24,2008
+	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		wpref.c: increase floting point precision when storing floats in rc
+		file
+
 Jan 22, 2008
 	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
 		gtkwindow.c: wExit(): Free user locale before exit.

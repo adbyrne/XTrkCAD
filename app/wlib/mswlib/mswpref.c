@@ -199,7 +199,7 @@ void wPrefSetFloat(
 {
 	char tmp[20];
 
-	sprintf(tmp, "%0.3f", lval );
+	sprintf(tmp, "%0.6f", lval );
 	wPrefSetString( section, name, tmp );
 }
 

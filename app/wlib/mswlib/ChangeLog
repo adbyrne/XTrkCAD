@@ -1,10 +1,15 @@
+Jan 24,2008
+	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswpref.c: increase floting point precision when storing floats in INI
+		file
+
 Jan 22, 2008
 	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
 		mswmisc.c: WinMain(): Free user locale before exit.
 
 Dec 16, 2007
 	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
-		mswpref.c: us XTrackCad as directory name for configuration files
+		mswpref.c: use XTrackCad as directory name for configuration files
 
 Aug 03, 2007
 	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>

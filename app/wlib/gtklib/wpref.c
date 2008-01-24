@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.8 2008-01-20 22:32:22 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.9 2008-01-24 19:14:03 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -351,19 +351,34 @@ EXPORT wBool_t wPrefGetInteger(
 	return TRUE;
 }
 
+/**
+ * Save a float value in the preferences file. 
+ *
+ * \param section IN the file section into which the value should be saved
+ * \param name IN the name of the preference
+ * \param lval IN the value
+ */
 
 EXPORT void wPrefSetFloat(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		double lval )		/* Value */
-/*
-*/
 {
 	char tmp[20];
 
-	sprintf(tmp, "%0.3f", lval );
+	sprintf(tmp, "%0.6f", lval );
 	wPrefSetString( section, name, tmp );
 }
+
+/**
+ * Read a float from the preferencesd file.
+ *
+ * \param section IN the file section from which the value should be read
+ * \param name IN the name of the preference
+ * \param res OUT pointer for the value
+ * \param def IN	default value
+ * \return TRUE if value was read, FALSE if default value is used
+ */
 
 
 EXPORT wBool_t wPrefGetFloat(
@@ -371,8 +386,6 @@ EXPORT wBool_t wPrefGetFloat(
 		const char * name,		/* Name */
 		double * res,		/* Address of result */
 		double def )		/* Default value */
-/*
-*/
 {
 	const char * cp;
     char *cp1;
