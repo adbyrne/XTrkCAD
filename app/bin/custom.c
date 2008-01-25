@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.4 2008-01-25 20:01:54 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -48,7 +48,7 @@
 #include "cjoin.h"
 #include "i18n.h"
 
-#define Product "XTrkCad"
+#define Product "XTrackCAD"
 #define product "xtrkcad"
 #define PRODUCT "XTRKCAD"
 #define Version VERSION
@@ -78,7 +78,7 @@ char * sParamQF = product "." KEYCODE "tq";
 char * sUndoF = product ".und";
 char * sAuditF = product ".aud";
 
-char * sSourceFilePattern = N_("XTrkCad Files|*.xtc");
+char * sSourceFilePattern = N_("XTrackCAD Files|*.xtc");
 char * sImportFilePattern = Product N_(" Import Files|*.") KEYCODE "ti";
 char * sDXFFilePattern = Product N_(" DXF Files|*.dxf");
 char * sRecordFilePattern = Product N_(" Record Files|*.") KEYCODE "tr";

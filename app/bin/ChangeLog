@@ -1,3 +1,8 @@
+Jan 25, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		custom.c, version.h: Changed product name to XTrackCAD and version 
+		to 4.1.0b1
+		
 Jan 23, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		ctodesgn.c: Removed '_()' around turnout label from InitNewTurn()
