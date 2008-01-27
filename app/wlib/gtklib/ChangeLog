@@ -1,3 +1,7 @@
+Jan, 27, 2008
+	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
+		gtkwindows.c: fixed problem with missing scroll bars
+
 Jan 24,2008
 	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		wpref.c: increase floting point precision when storing floats in rc

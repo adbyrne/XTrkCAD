@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.6 2008-01-22 14:37:14 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.7 2008-01-27 15:51:12 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -219,7 +219,6 @@ window <win> is closed by calling 'wWinShow(<win>,FALSE)'.
 				}
 			}
 		}
-		win->firstShow = FALSE;
 		if ( !win->shown ) {
 			gtk_widget_show( win->gtkwin );
 			gtk_widget_show( win->widget );
@@ -229,6 +228,21 @@ window <win> is closed by calling 'wWinShow(<win>,FALSE)'.
 			gtk_widget_set_sensitive( GTK_WIDGET(win->gtkwin), TRUE );
 		win->shown = show;
 		win->modalLevel = 0;
+
+		/* Kludge:
+		 * For some mystical reason, vertical scrollbar in the Add Turnout and
+		 * Add Structure dialog doesn't show unless the dialog window is resized
+		 * horizontally. This is now done programmatically in two steps:
+		 * 	1) In wWinCommonCreate() resize window w+1 and h+1.
+		 *  2) In wWinShow() resize back to original.
+		 */
+		if (win->firstShow && win != gtkMainW)
+		{
+			wFlush();
+			gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w-1, win->h-1);
+		}
+		win->firstShow = FALSE;
+
 		if ( (!gtkBlockEnabled) || (win->option & F_BLOCK) == 0) {
 			wFlush();
 		} else {
@@ -758,6 +772,16 @@ static wWin_p wWinCommonCreate(
 	/*gtk_widget_show( w->gtkwin );*/
 	gtk_widget_show( w->widget );
 	gtk_widget_realize( w->gtkwin );
+
+	/* Kludge:
+	 * For some mystical reason, vertical scrollbar in the Add Turnout and
+	 * Add Structure dialog doesn't show unless the dialog window is resized
+	 * horizontally. This is now done programmatically in two steps:
+	 * 	1) In wWinCommonCreate() resize window w+1 and h+1.
+	 *  2) In wWinShow() resize back to original.
+	 */
+	if (w != gtkMainW)
+		gtk_window_resize(GTK_WINDOW(w->gtkwin), w->w+1, w->h+1);
 
 	w->busy = FALSE;
 	return w;
