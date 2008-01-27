@@ -271,7 +271,7 @@ custmgm-ok	Update custom file and close	cmdCustmgm
 #
 demo-step	Executes the next step of the demo	cmdDemo
 demo-next	Skip to next demo	cmdDemo
-demo-quit	Stops the demonstration and returns you to XTrkCad	cmdDemo
+demo-quit	Stops the demonstration and returns you to XTrackCAD	cmdDemo
 demo-speed	Select speed of Playback	cmdDemo
 demo-text	This is where comments about the demo are displayed	cmdDemo
 #
@@ -415,8 +415,8 @@ outputbitmap-toggles	Specifies whether Layout Titles, Borders or Track Centerlin
 #
 parallel-separation	Specifies the separation between parallel tracks	cmdParallel
 #
-parameter-name	Enter your name as specified in the XTrkCad Registration Notice	register
-parameter-key	Enter the key value as specified in the XTrkCad Registration Notice	register
+parameter-name	Enter your name as specified in the XTrackCAD Registration Notice	register
+parameter-key	Enter the key value as specified in the XTrackCAD Registration Notice	register
 parameter-ok	Validates the name and key.  Terminates the registration command	register
 #
 pref-checkpoint	Specifies the check point frequency	cmdPref
