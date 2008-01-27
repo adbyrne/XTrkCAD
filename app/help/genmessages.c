@@ -204,7 +204,7 @@ int main( int argc, char * argv[] )
 			exit( 1 );
 	}		
 
-	fputs( "/*\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n", hdrF );
+	fputs( "/*\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n */\n", hdrF );
 	
 	/* open the help file to generate */
 	outF = fopen( argv[ inFileIdx + 1 ], "w" );
