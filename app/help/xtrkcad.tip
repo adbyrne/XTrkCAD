@@ -1,9 +1,9 @@
-XTrkCad provides demonstrations on most of the program's features.  The demos can be run by clicking on the Help menu on the Main window and then selecting Demos.
+XTrackCAD provides demonstrations on most of the program's features.  The demos can be run by clicking on the Help menu on the Main window and then selecting Demos.
 
 The notation "Menu|Item" is used in the documentation (and the on-line demos and tips) to indicate the selection of a menu item.\
 For example File|Open means to open the menu by clicking on File on the menu bar of the Main window and then selecting the Open item from that menu.
 
-A number of example layouts are provided.  These files are located in the 'examples' directory where you installed XTrkCad.  The "File|Open" command will open that directory when first used.
+A number of example layouts are provided.  These files are located in the 'examples' directory where you installed XTrackCAD.  The "File|Open" command will open that directory when first used.
 
 When installed, the program measures all units in inches.  You can change this on the "Options|Preferences" dialog by changing the Units item to Metric instead of English.
 
@@ -48,8 +48,8 @@ The Easement dialog is used to control easements.
 When creating stall tracks for a turntable, you usually want the the stall tracks to be spaced evenly.\
 The "Turntable Angle" item on "Options|Command Options" dialog can be used specify the minimum angle between stall tracks.
 
-XTrkCad periodically saves the current layout in a check point file.  The 'Check Point' item on the 'Options|Preferences' dialog controls how often the file is saved.\
-You can recover your working file after a system crash by copying the checkpoint file (xtrkcad.ckp in the XTrkCad Working directory) to file.xtc
+XTrackCAD periodically saves the current layout in a check point file.  The 'Check Point' item on the 'Options|Preferences' dialog controls how often the file is saved.\
+You can recover your working file after a system crash by copying the checkpoint file (xtrkcad.ckp in the XTrackCAD Working directory) to file.xtc
 
 The Parallel command is helpful to layout yards and sidings.  If the Parallel track abuts with an existing track, it is automatically connected.
 
@@ -75,7 +75,7 @@ You can give each layer a name (by using the Layer dialog).  This name will be d
 You can remove groups of buttons or the Hot Bar from the Main window to give you more room if you are not using some features.  Also, the number of Layer buttons displayed is controlled by the Layers dialog.
 
 The size of the Map window is controlled by the overall size of the room (specified on the Layout dialog) and the Map Scale (on the Display dialog).  You can make the Map window larger (or smaller) by decreasing (or increasing) the Map Scale.\
-XTrkCad will prevent you from making the Map window too small or too large.
+XTrackCAD will prevent you from making the Map window too small or too large.
 
 You can unload parameter files you are not using by the Parameter Files dialog.  This removes unused Turnout and Structure definitions from the Hot Bar and makes the program start faster.
 
