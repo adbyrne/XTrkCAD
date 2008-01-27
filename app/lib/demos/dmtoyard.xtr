@@ -98,7 +98,7 @@ _________________________________________
 
 The Status bar displays the number of auto-connections that will be made and the maximum offset.
 
-XTrkCad adjusts the turnout position for the best fit to minimize any connection offset
+XTrackCAD adjusts the turnout position for the best fit to minimize any connection offset
 END
 STEP
 MOUSE 4 29.625 2.667

@@ -5,14 +5,14 @@ PARAMETER display description-fontsize 18
 REDRAW
 RESET
 MESSAGE
-Welcome to the XTrkCad demonstration.
+Welcome to the XTrackCAD demonstration.
 
-This will show some the features of XTrkCad in an automated presentation.  This window contains a number of controls and a message area (which I hope you are reading now). 
+This will show some the features of XTrackCAD in an automated presentation.  This window contains a number of controls and a message area (which I hope you are reading now). 
 
 The controls are:
 Step - advances to the next step of the demo.
 Next - skips ahead to the next demo.
-Quit - exits the demo and returns to XTrkCad.
+Quit - exits the demo and returns to XTrackCAD.
 Speed - controls the speed of the demo.
 
 Click Step now for the next message.
@@ -31,7 +31,7 @@ CLEAR
 MESSAGE
 The various controls are disabled when it would be inappropiate to click on them.  When the demo is running the Step button is disabled.  When the demo is paused the Step button is enabled and you can click it when you are ready to view the next part of the demo.
 
-You can click on Quit to return to XTrkCad at any time.
+You can click on Quit to return to XTrackCAD at any time.
 
 You can adjust the speed of the demonstration with the Speed control.
 =========================================
@@ -60,7 +60,7 @@ REDRAW
 MESSAGE
 The demos are designed to fit within a certain sized window.
 
-For best results, change the size of the main XTrkCad window so the box shape is completely visible.
+For best results, change the size of the main XTrackCAD window so the box shape is completely visible.
 
 You can do this by clicking and dragging on a corner of the window.
 END
@@ -72,7 +72,7 @@ CLEAR
 MESSAGE
 This is the end of the introductory demo.
 
-Please click Step for the next demo or click Quit to return to XTrkCad.
+Please click Step for the next demo or click Quit to return to XTrackCAD.
 =========================================
 END
 STEP

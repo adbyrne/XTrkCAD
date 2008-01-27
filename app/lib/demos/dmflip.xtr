@@ -162,7 +162,7 @@ REDRAW
 MESSAGE
 _________________________________________
 
-Note that the turnout title has been changed from the Medium Right to Medium Left.   When turnouts are flipped, XTrkCad will try to find a matching turnout and if found will change the name.
+Note that the turnout title has been changed from the Medium Right to Medium Left.   When turnouts are flipped, XTrackCAD will try to find a matching turnout and if found will change the name.
 END
 STEP
 COMMAND Describe

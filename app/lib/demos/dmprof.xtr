@@ -286,7 +286,7 @@ ORIG 2 20 5
 MESSAGE
 Now we need to increase the separation where the tracks cross.
 
-The two Elevations you see here are Computed Elevations which means XTrkCad dynamically computes the Elevation based on the Elevations of connecting tracks.
+The two Elevations you see here are Computed Elevations which means XTrackCAD dynamically computes the Elevation based on the Elevations of connecting tracks.
 
 First make the lower End-Point a Defined Elevation point using Shift-Right-Click and the Profile Options menu.  You will see the End-Point marked by a Gold dot and a new line is added to the Profile dialog.
 END

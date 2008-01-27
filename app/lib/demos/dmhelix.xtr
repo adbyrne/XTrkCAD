@@ -153,7 +153,7 @@ _________________________________________
 
 Next, we assign elevations to the 2 End-Points of the helix.  This will determine the grade and separation between the helix coils.
 
-Note: we could set the elevations anywhere along the connecting tracks instead.  XTrkCad treats a helix as a single length of track for elevations.
+Note: we could set the elevations anywhere along the connecting tracks instead.  XTrackCAD treats a helix as a single length of track for elevations.
 END
 STEP
 MOUSE 2 15.125 1.125

@@ -29,7 +29,7 @@ STRAIGHT 5 0 0 0 0 N 2
 REDRAW
 RESET
 MESSAGE
-XTrkCad can help find tracks that are curved too sharply or are too steep.  These tracks are Exception tracks and are drawn in the Exception track color.
+XTrackCAD can help find tracks that are curved too sharply or are too steep.  These tracks are Exception tracks and are drawn in the Exception track color.
 
 In this example we have a curved track with radius of 9" and a straight track with a grade of 3.8%.
  

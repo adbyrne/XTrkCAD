@@ -215,7 +215,7 @@ _________________________________________
 
 We picked an End-Point on the upper track.
 
-XTrkCad has computed the Elevation (2.34") at this point based on the Elevation at the siding and a combination of the of the first Elevations.
+XTrackCAD has computed the Elevation (2.34") at this point based on the Elevation at the siding and a combination of the of the first Elevations.
 
 We create a Computed Elevation here that will be automatically adjusted whenever the other Elevations are changed.
 END
