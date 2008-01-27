@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcar.c,v 1.4 2008-01-27 09:42:00 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcar.c,v 1.5 2008-01-27 19:17:18 tshead Exp $
  *
  * TRAIN
  *
@@ -4760,6 +4760,8 @@ static void CarInvLoadItem(
    "Purch Price", "Curr Price", "Condition", "Purch Date", "Service Date", "Location", "Notes" */
 	char *condition;
 	char *location;
+	char *manuf;
+	char *road;
 	char notes[100];
 	tabString_t tabs[7];
 
@@ -4783,8 +4785,8 @@ static void CarInvLoadItem(
 	else
 		location = N_("Shelf");
 
-	char *manuf = TabStringDup(&tabs[T_MANUF]);
-	char *road = TabStringDup(&tabs[T_ROADNAME]);
+	manuf = TabStringDup(&tabs[T_MANUF]);
+	road = TabStringDup(&tabs[T_ROADNAME]);
 	sprintf( message, "%ld\t%s\t%s\t%.*s\t%s\t%.*s%s%.*s\t%s\t%.*s%s%.*s\t%0.2f\t%0.2f\t%s\t%ld\t%ld\t%s\t%s",
 				item->index, GetScaleName(item->scaleInx),
 				_(manuf),
