@@ -1,5 +1,9 @@
 Jan 27, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc.c, fileio.c: fixed product name
+		
+Jan 27, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		dcar.c: corrected problem in CarPartWrite()
 		
 Jan 25, 2008

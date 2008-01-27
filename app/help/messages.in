@@ -89,7 +89,8 @@ NNN definition(s)?
 HELP
 You are about to delete a custom turnout or structure design from the \f{Custom Design} file (\c{xtrkcad.cus}) file. This action cannot be undone.
 
-Refer to \k{installDir} and \k{workDir} for an explanation of the files used by \e{XTrkCad}.
+Refer to \k{installDir} and \k{workDir} for an explanation of the files used by
+\e{XTrackCAD}.
 END
 
 # dbitmap.c
@@ -213,7 +214,8 @@ Cannot open New Parameter File: %s
 ALT
 Cannot open New Parameter File: FILENAME
 HELP
-During the processing of \f{Parameter Files} after updating to a new version of \e{XTrkCad}, one of updated \f{Parameter Files} could not be found. Check that the installation had no errors. You can use the \f{Parameter Files} dialog to locate the parameter file.
+During the processing of \f{Parameter Files} after updating to a new version of
+\e{XTrackCAD}, one of updated \f{Parameter Files} could not be found. Check that the installation had no errors. You can use the \f{Parameter Files} dialog to locate the parameter file.
 
 Refer to \k{cmdPrmfile} for detail.
 END
@@ -302,7 +304,8 @@ definition replaces the existing definition.
 
 Do you want to continue?
 HELP
-The definition you're attempting to create uses the same name as an existing definition. Saving  the definition with the same name will cause \e{XTrkCad} to replace the existing definition, making the existing definition inaccessible. If the previous definition must be preserved, then choose a different name for the new definition. If necessary, the \f{Custom Management} dialog can be used to change definition names.
+The definition you're attempting to create uses the same name as an existing
+definition. Saving  the definition with the same name will cause \e{XTrackCAD} to replace the existing definition, making the existing definition inaccessible. If the previous definition must be preserved, then choose a different name for the new definition. If necessary, the \f{Custom Management} dialog can be used to change definition names.
 
 Refer to \k{cmdCustmgm} for detail.
 END
@@ -339,9 +342,10 @@ File version %ld is greater than supported
 version %d. You need to upgrade %s
 to at least version %s.
 HELP
-The layout file that you're attempting to load was created using a newer version of \e{XTrkCad}. In order to load this file it will be necessary to upgrade your version of \e{XTrkCad} to at least the version identified within the error message.
+The layout file that you're attempting to load was created using a newer version
+of \e{XTrackCAD}. In order to load this file it will be necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
 
-Take full advantage of the latest features within \e{XTrkCad} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrkCad} Fork Website} and downloading the latest release.
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
 END
 
 #fileio.c
@@ -350,9 +354,10 @@ File version %ld is greater than supported
 version %d. You need to upgrade your
 version of %s
 HELP
-The layout file that you're attempting to load was created using a newer version of \e{XTrkCad}. In order to load this file it will be necessary to upgrade your version of \e{XTrkCad} to at least the version identified within the error message.
+The layout file that you're attempting to load was created using a newer version of \e{XTrackCAD}. In order to load this file it will be
+necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
 
-Take full advantage of the latest features within \e{XTrkCad} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrkCad} Fork Website} and downloading the latest release.
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
 END
 
 # chndldto.c
@@ -427,7 +432,7 @@ New Parameter File has no CONTENTS line: FILENAME.
 HELP
 Each \f{Parameter Files} contains a line which identifies the contents. The specified file is missing this line.
 
-Please report this error to the \e{XTrkCad} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
+Please report this error to the \e{XTrackCAD} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 MESSAGE MSG_NO_CARS
@@ -544,7 +549,8 @@ Part Number for this Manufacturer already exists.
 
 Do you want to update it?
 HELP
-The \e{Part} definition you're attempting to create uses the same Manufacturer and Part Number as an existing definition. Saving the definition with the same Manufacturer and Part Number will cause \e{XTrkCad} to update the existing definition. If the previous definition must be preserved, then choose a different Part Number for the new definition.
+The \e{Part} definition you're attempting to create uses the same Manufacturer and Part Number as an existing definition. Saving the
+definition with the same Manufacturer and Part Number will cause \e{XTrakCAD} to update the existing definition. If the previous definition must be preserved, then choose a different Part Number for the new definition.
 
 Refer to \k{carpart} for detail.
 END
@@ -555,7 +561,7 @@ Playback: Cannot find list entry: %s
 ALT
 Playback: Cannot find list entry: NAME
 HELP
-This error is most likely caused by trying to \f{Playback} an incompatible \e{XTrkCad} recording or demo file.
+This error is most likely caused by trying to \f{Playback} an incompatible \e{XTrackCAD} recording or demo file.
 
 Refer to \k{macroM} for detail.
 END
@@ -566,9 +572,10 @@ Playback file version %ld is
 greater than supported version %d
 You need to upgrade your version of %s
 HELP
-The layout file that you're attempting to load was created using a newer version of \e{XTrkCad}. In order to load this file it will be necessary to upgrade your version of \e{XTrkCad} to at least the version identified within the error message.
+The layout file that you're attempting to load was created using a newer version of \e{XTrackCAD}. In order to load this file it will be
+necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
 
-Take full advantage of the latest features within \e{XTrkCad} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrkCad} Fork Website} and downloading the latest release.
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
 END
 
 # draw.c
@@ -577,7 +584,7 @@ Playback: unknown action %d
 ALT
 Playback: unknown action NNN
 HELP
-This error is most likely caused by trying to \f{Playback} an incompatible \e{XTrkCad} recording or demo file.
+This error is most likely caused by trying to \f{Playback} an incompatible \e{XTrackCAD} recording or demo file.
 
 Refer to \k{macroM} for detail.
 END
@@ -604,7 +611,8 @@ Prototype name already exists.
 
 Do you want to update it?
 HELP
-The \e{Prototype} definition you're attempting to create uses the same name as an existing definition. Saving the definition with the same name will cause \e{XTrkCad} to update the existing definition. If the previous definition must be preserved, then choose a different Part Number for the new definition.
+The \e{Prototype} definition you're attempting to create uses the same name as an existing definition. Saving the definition with the
+same name will cause \e{XTrackCAD} to update the existing definition. If the previous definition must be preserved, then choose a different Part Number for the new definition.
 
 Refer to \k{carprototype} for detail.
 END
@@ -622,7 +630,7 @@ Rescaled tracks do not fit within layouts room parameters
 (Height and width). The layouts room parameters should be
 set to at least %s by %s.
 HELP
-While using the \f{Change Scale} command to enlarge the layout, \e{XTrkCad} determined that rescaled tracks do not fit within the layout rooms parameters. Using the \f{Layout} dialog, the rooms parameters (Height and width) should be set so as to accommodate the rescaled track.
+While using the \f{Change Scale} command to enlarge the layout, \e{XTrackCAD} determined that rescaled tracks do not fit within the layout rooms parameters. Using the \f{Layout} dialog, the rooms parameters (Height and width) should be set so as to accommodate the rescaled track.
 
 Refer to \k{cmdLayout} for detail regarding \f{Layout} options or \k{cmdRescale} for detail regarding the \f{Change Scale} command.
 END
@@ -692,7 +700,7 @@ Specified command disabled.
 HELP
 The specified command has been disabled in error.
 
-Please report this error to the \e{XTrkCad} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
+Please report this error to the \e{XTrackCAD} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 # cturnout.c:splitTurnout
@@ -717,7 +725,8 @@ Car Part description can not be found.
 
 Do you wish to continue importing other Cars?
 HELP
-The car import file does not specify car dimensions and the specified \e{Partno} can not be found. Edit the import file and either add car dimensions or add/update the \e{Partno}. This will allow \e{XTrkCad} to locate information for the car being imported.
+The car import file does not specify car dimensions and the specified \e{Partno} can not be found. Edit the import file and either add
+car dimensions or add/update the \e{Partno}. This will allow \e{XTrackCAD} to locate information for the car being imported.
 
 Refer to \k{cmdCarinv} for detail.
 END
@@ -919,9 +928,9 @@ MESSAGE MSG_UNDO_ASSERT
 Undo assertion failure %s:%d
 Val = %ld(%lx)
 %s
-Please report this error to the XTrkCad project development team at SourceForge.
+Please report this error to the XTrackCAD project development team at SourceForge.
 HELP
-Please report this error to the \e{XTrkCad} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
+Please report this error to the \e{XTrackCAD} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 # fileio.c
@@ -932,9 +941,9 @@ Critical file damaged!
 
 Please reinstall software. 
 HELP
-A critical file is corrupt. Unfortunately it will be necessary to reinstall the software or contact the XTrkCad project development team at SourceForge in order to overcome this error.
+A critical file is corrupt. Unfortunately it will be necessary to reinstall the software or contact the XTrackCAD project development team at SourceForge in order to overcome this error.
 
-Please report this error to the \e{XTrkCad} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
+Please report this error to the \e{XTrackCAD} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 # track.c

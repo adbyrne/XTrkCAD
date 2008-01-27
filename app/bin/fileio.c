@@ -1,7 +1,7 @@
 /** \file fileio.c
  * Loading and saving files. Handles trackplans as well as DXF export. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.15 2008-01-23 20:07:13 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.16 2008-01-27 15:52:36 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -736,7 +736,7 @@ static BOOL_T ReadTrackFile(
 		RestoreLocale( oldLocale );
 
 		if ( complain )
-			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "XTrkCad", pathName, strerror(errno) );
+			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, sProdName, pathName, strerror(errno) );
 
 		return FALSE;
 	}

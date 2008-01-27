@@ -203,6 +203,8 @@ int main( int argc, char * argv[] )
 			fprintf( stderr, "Could not open messages.h for writing!\n" );
 			exit( 1 );
 	}		
+
+	fputs( "/*\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n", hdrF );
 	
 	/* open the help file to generate */
 	outF = fopen( argv[ inFileIdx + 1 ], "w" );

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.26 2008-01-22 14:31:14 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.27 2008-01-27 15:52:37 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1816,7 +1816,7 @@ static drawCmd_t aboutD = {
 		Pix2CoOrd, CoOrd2Pix };
 
 static paramDrawData_t aboutDrawData = { ICON_WIDTH, ICON_HEIGHT, (wDrawRedrawCallBack_p)RedrawAbout, NULL, &aboutD };
-#define COPYRIGHT N_("XTrkCad is a CAD (computer-aided design) program for designing Model Railroad layouts.")
+#define COPYRIGHT N_("\nXTrackCAD is a CAD (computer-aided design) program\nfor designing model railroad layouts.")
 static paramData_t aboutPLs[] = {
 #define I_ABOUTDRAW				(0)
 	{   PD_DRAW, NULL, "about", PDO_NOPSHUPD, &aboutDrawData, NULL, 0 },

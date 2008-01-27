@@ -1,7 +1,7 @@
 BuildRoot: RLSEDIR/install
 Name: xtrkcad
 Version: RLSEVER
-Release: 1
+Release: 2
 Summary: XTrkCad Model Railroad CAD
 License: GPL
 Group: Applications/Engineering
