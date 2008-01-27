@@ -55,5 +55,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-config.h.in ${CMAKE_CURRENT_B
 
 # Setup the rest of the build ...
 ADD_SUBDIRECTORY(app)
+ADD_SUBDIRECTORY(distribution)
 ADD_SUBDIRECTORY(docs)
 
