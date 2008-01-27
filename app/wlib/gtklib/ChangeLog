@@ -1,3 +1,7 @@
+Jan 27, 2008
+	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
+		gtkhelp.c: String XTrkCad changed to XTrackCAD.
+
 Jan, 27, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		gtkwindows.c: fixed problem with missing scroll bars

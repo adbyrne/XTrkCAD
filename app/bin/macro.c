@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.3 2008-01-22 14:31:14 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.4 2008-01-27 21:01:26 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1249,7 +1249,7 @@ EXPORT void DoPlayBack( void * context )
  */
 
 static char * demoInitParams[] = {
-		"layout title1 XTrkCad",
+		"layout title1 XTrackCAD",
 		"layout title2 Demo",
 		"GROUP layout",
 		"display tunnels 1",

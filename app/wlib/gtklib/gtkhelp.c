@@ -1,7 +1,7 @@
 /** \file gtkhelp.c
  * Balloon help ( tooltips) and main help functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.7 2008-01-20 22:32:22 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.8 2008-01-27 21:01:20 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -46,7 +46,7 @@
 #define  HTMLERRORTEXT "<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=US-ASCII\">" \
 								"<title>Help Error</title><body><h1>Error - help information can not be found.</h1><p>" \
 								"The help information you requested cannot be found on this system.<br>Usually this " \
-								"is an installation problem, Make sure that XTrkCad and the included HTML files are " \
+								"is an installation problem, Make sure that XTrackCAD and the included HTML files are " \
 								"installed properly and can be found via the XTRKCADLIB environment variable. Also make " \
 								"sure that the user has sufficient access rights to read these files.</p></body></html>" 
 
@@ -830,6 +830,7 @@ CreateHelpWindow (void)
 	int x, y;
 	int w = 0, h = 0;
   	const char *pref;
+	char title[100]; 
 
    wHelpWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -867,7 +868,7 @@ CreateHelpWindow (void)
 	gtk_window_resize( (GtkWindow *)wHelpWindow, w, h );
 	gtk_window_move( (GtkWindow *)wHelpWindow, x, y );
 
-   gtk_window_set_title (GTK_WINDOW (wHelpWindow), _("XTrkCad Help"));
+   gtk_window_set_title (GTK_WINDOW (wHelpWindow), _("XTrackCAD Help"));
 
 	g_signal_connect( G_OBJECT( wHelpWindow ), "delete-event", G_CALLBACK( DestroyHelpWindow ), NULL );
 
