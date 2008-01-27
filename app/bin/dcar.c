@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcar.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcar.c,v 1.4 2008-01-27 09:42:00 m_fischer Exp $
  *
  * TRAIN
  *
@@ -1026,11 +1026,11 @@ static BOOL_T CarPartWrite(
 {
 	BOOL_T rc = TRUE;
 	char *oldLocale = NULL;
+	carPartParent_p parentP=partP->parent;
+	tabString_t tabs[7];
 
 	oldLocale = SaveLocale("C");
 
-	carPartParent_p parentP=partP->parent;
-	tabString_t tabs[7];
 	TabStringExtract( partP->title, 7, tabs );
 	sprintf( message, "%s\t%s\t%.*s\t%.*s\t%.*s\t%.*s\t%.*s",
 		parentP->manuf, parentP->proto,

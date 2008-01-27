@@ -1,3 +1,7 @@
+Jan 27, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		dcar.c: corrected problem in CarPartWrite()
+		
 Jan 25, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		custom.c, version.h: Changed product name to XTrackCAD and version 
