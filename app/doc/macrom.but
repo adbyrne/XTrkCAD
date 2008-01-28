@@ -31,6 +31,6 @@ The \f{Macro Menu} shows commands that can be used to \f{Record} and \f{Playback
 
 \dd \f{Playback} - Displays the \f{Playback} dialog (after prompting for a file name). This is used to playback previously recorded sessions. \f{Note:} the layout state will be saved during playbacks and restored after.
 
-The \f{Record} command is useful if it becomes necessary to report a bug in \e{XTrkCad}.
+The \f{Record} command is useful if it becomes necessary to report a bug in \e{XTrackCAD}.
 
 \rule

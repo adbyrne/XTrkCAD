@@ -140,7 +140,7 @@ You cannot place the \e{Frog} or \e{Points} on a turnout, circle or helix.  Howe
 
 There are constraints on where you can place the \e{Points} in relation to the \e{Frog}.  You cannot place the \e{Points} too close the \e{Frog}.  When placing Hand-laid Turnout on a curved track you may get unexpected results, especially when placing the \e{Points} a long way from the \e{Frog}.  Try changing the \e{Frog} angle to get different results.
 
-Note: the drawing is an approximation to show the location of the \e{Points} and \e{Frog}.  The piece of track considered (by \e{XTrkCad}) to be a Hand-laid Turnout is a short section of track located at the \e{Points} and extending toward the \e{Frogs}.  Other track segments are created between the \e{Points} and \e{Frog} and a short straight segment is drawn after the \e{Frog}.  These other segments are independent of the turnout and can be removed or modified, although this is probably not a good idea.
+Note: the drawing is an approximation to show the location of the \e{Points} and \e{Frog}.  The piece of track considered (by \e{XTrackCAD}) to be a Hand-laid Turnout is a short section of track located at the \e{Points} and extending toward the \e{Frogs}.  Other track segments are created between the \e{Points} and \e{Frog} and a short straight segment is drawn after the \e{Frog}.  These other segments are independent of the turnout and can be removed or modified, although this is probably not a good idea.
 
 \rule
 
@@ -256,6 +256,6 @@ The \e{Turntable Diameter} control (Visible in the Status Bar) displays the curr
 
 The \f{Modify command} (\K{cmdModify}) can be used to create turntable stall tracks.  Select the turntable and drag the stall track to the proper angle and length.  You can also connect to a turntable with the \f{Join command} (\K{cmdJoin}).
 
-The \f{Turntable Angle} control on the Command Options (\K{cmdCmdopt}) dialog controls how closely you can place tracks connected to a turntable.  If you want to create stall tracks every 7.5\u00B0, set the \f{Turntable Angle} control to 7.5 and place the track as close to each other as allowed.  \e{XTrkCad} makes sure they will be separated by the correct angle.
+The \f{Turntable Angle} control on the Command Options (\K{cmdCmdopt}) dialog controls how closely you can place tracks connected to a turntable.  If you want to create stall tracks every 7.5\u00B0, set the \f{Turntable Angle} control to 7.5 and place the track as close to each other as allowed.  \e{XTrackCAD} makes sure they will be separated by the correct angle.
 
 \rule

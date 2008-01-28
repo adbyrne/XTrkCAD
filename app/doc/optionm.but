@@ -353,11 +353,11 @@ This dialog controls some parameters which likely will not be changed frequently
 
 \u000
 
-\dd \f{Drag Distance} - controls how far you can move the cursor (in pixels) before \e{XTrkCad} considers the action to be a drag instead of a click.
+\dd \f{Drag Distance} - controls how far you can move the cursor (in pixels) before \e{XTrackCAD} considers the action to be a drag instead of a click.
 
 \u000
 
-\dd \f{Drag Timeout} - controls how long you can hold a mouse button down (in milliseconds) before \e{XTrkCad} considers the action to be a drag instead of a click.
+\dd \f{Drag Timeout} - controls how long you can hold a mouse button down (in milliseconds) before \e{XTrackCAD} considers the action to be a drag instead of a click.
 
 \u000
 

@@ -25,7 +25,7 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \u000
 
-\dd Minimizing the \e{Main Window} will minimize all \e{XTrkCad} windows.
+\dd Minimizing the \e{Main Window} will minimize all \e{XTrackCAD} windows.
 
 \u000
 
@@ -39,7 +39,7 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \u000
 
-\dd Current filename, \e{XTrkCad} version number, and window manager buttons. An asterisk (*) after the filename indicates that there are unsaved changes.
+\dd Current filename, \e{XTrackCAD} version number, and window manager buttons. An asterisk (*) after the filename indicates that there are unsaved changes.
 
 \u000
 
@@ -226,7 +226,7 @@ If you close the \e{Map Window}, you can reopen it by the \e{Window} menu.
 
 The term Shortcut key refers to specific key combinations which are used to accomplish an action which otherwise would be accomplished by moving a MOUSE and /or selecting from a Menu. Shortcut keys are often key combinations consisting of the letter key pressed along with the Alt or Ctrl key.
 
-Instead of using the menus or the buttons on the \f{Tool-bar} (\K{mainW}), most \e{XTrkCad} commands may be invoked through use of Shortcut keys.
+Instead of using the menus or the buttons on the \f{Tool-bar} (\K{mainW}), most \e{XTrackCAD} commands may be invoked through use of Shortcut keys.
 
 \dd The \c{RETURN} key has the same effect as pressing the \f{OK} button on the current dialog.
 
@@ -801,7 +801,7 @@ Note Dialog
 
 \H{cmdAcclKeys} \i{Mouse Actions}
 
-\dt \e{XTrkCad} uses the left and right mouse buttons when manipulating tracks and other objects on the layout.  Their meaning depends on the particular command but in general:
+\dt \e{XTrackCAD} uses the left and right mouse buttons when manipulating tracks and other objects on the layout.  Their meaning depends on the particular command but in general:
 
 \u00
 

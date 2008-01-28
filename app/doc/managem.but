@@ -306,7 +306,7 @@ The \f{Group} dialog shows the Manufacturer, Description and part number (Title)
 
 The definition data will be added to the \c{xtrkcad.cus} (\K{directories}) file for later use. Please consider contributing this information for others to use.
 
-If you modify a definition from a \e{XTrkCad} Library parameter file, the new definition will replace the existing definition on the \f{Hot Bar} (\K{cmdHotBar}), otherwise it will be added to the end of the \f{Hot Bar}. You can use the \f{Custom Management} (\K{cmdCustmgm}) dialog to change the title or delete custom definitions.
+If you modify a definition from a \e{XTrackCAD} Library parameter file, the new definition will replace the existing definition on the \f{Hot Bar} (\K{cmdHotBar}), otherwise it will be added to the end of the \f{Hot Bar}. You can use the \f{Custom Management} (\K{cmdCustmgm}) dialog to change the title or delete custom definitions.
 
 \f{Note:} There is a limit of 128 track segments in a group.
 
@@ -338,11 +338,11 @@ You cannot uncheck \f{Visible} or check \f{Frozen} for the \f{Current Layer}.
 
 The \f{Count} field displays the number of objects in the selected Layer.
 
-The \f{Save} button stores layer attributes in the \c{xtrkcad.ini} file so they may be loaded into an existing or new file. Once saved and unless reset to \e{XTrkCad} \f{Default}, modified layer information is applied to each new file.
+The \f{Save} button stores layer attributes in the \c{xtrkcad.ini} file so they may be loaded into an existing or new file. Once saved and unless reset to \e{XTrackCAD} \f{Default}, modified layer information is applied to each new file.
 
 The \f{Load} button reads layer attributes from the \c{xtrkcad.ini} file then applies it to each layer of the current layout file.
 
-The \f{Defaults} button restores layer attributes to default \e{XTrkCad} settings.
+The \f{Defaults} button restores layer attributes to default \e{XTrackCAD} settings.
 
 The bottom of the dialog contains the \f{Number of Layer Buttons} integer edit box.  This controls the number of \f{Layer Buttons} displayed on the \f{Tool-bar} (\K{mainW}). These buttons make it easy to switch between layers. The maximum number of \f{Layer Buttons} that can be displayed is 20.  Therefore you should use layers one to twenty for objects which you will be showing and hiding frequently.
 
@@ -596,7 +596,7 @@ The scale is the current scale from the \f{Scale Drop Down List} on the \f{Layou
 
 The \f{Print} button prints a full size diagram of the turnout.  You can use this to check your dimensions and make any required changes.  You should expect to make several printouts as you refine your dimensions.
 
-The \f{OK} button completes the design.  The new turnout is added to the list in the \f{Turnout Selection} dialog.  The turnout data is saved in the \c{xtrkcad.cus} (\K{directories}) file for the next time you use \e{XTrkCad}.  Please consider contributing this information for others to use via the on-line addresses. You can change the Parameters or Title of existing designs by using the \f{Custom Management} (\K{cmdCustmgm}) dialog.
+The \f{OK} button completes the design.  The new turnout is added to the list in the \f{Turnout Selection} dialog.  The turnout data is saved in the \c{xtrkcad.cus} (\K{directories}) file for the next time you use \e{XTrackCAD}.  Please consider contributing this information for others to use via the on-line addresses. You can change the Parameters or Title of existing designs by using the \f{Custom Management} (\K{cmdCustmgm}) dialog.
 
 The \f{Cancel} button removes the \f{Turnout Designer} dialog.
 

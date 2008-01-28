@@ -4,7 +4,7 @@
 \#
 
 
-\# Identify XTrkCad Version, Microsoft Windows software installation package name and Copyright information
+\# Identify XTrackCAD Version, Microsoft Windows software installation package name and Copyright information
 
 \define{XTCVer} Version 4.02
 
@@ -24,7 +24,7 @@ Copyright 2007, Bob Blackwell and Martin Fischer
 
 \IM{Export}{Export to Bitmap}{Export to DXF} Export
 
-\IM{Window Terms}{XTrkCad Terms} Glossary
+\IM{Window Terms}{XTrackCAD Terms} Glossary
 
 \IM{Install directory}{Linux Installation}{Microsoft Windows Installation} Installation
 
@@ -43,7 +43,7 @@ Copyright 2007, Bob Blackwell and Martin Fischer
 
 \# >>>>>>>>>> Manual Begin's Here <<<<<<<<<<
 
-\title \e{XTrkCad} User's Manual
+\title \e{XTrackCAD} User's Manual
 
 \G{png.d/xtrkcad_logo.gif}
 
@@ -54,9 +54,9 @@ Copyright 2007, Bob Blackwell and Martin Fischer
 \rule
 
 
-\C{index} Introduction To \e{XTrkCad}
+\C{index} Introduction To \e{XTrackCAD}
 
-\e{XTrkCad} is a CAD (computer-aided design) program for designing Model Railroad layouts. \e{XTrkCad} supports any scale, has libraries of popular brands of turnouts and sectional track (plus you add your own easily), can automatically use spiral transition curves when joining track and has extensive on-line help and demonstrations. \e{XTrkCad} lets you manipulate track much like you would with actual flex-track to modify, extend and join tracks and turnouts. Additional features include tunnels, 'post-it' notes, on-screen ruler, parts list, 99 drawing layers, undo/redo commands, bench-work, 'Print to Bitmap', elevations, train simulation and car inventory. 
+\e{XTrackCAD} is a CAD (computer-aided design) program for designing Model Railroad layouts. \e{XTrackCAD} supports any scale, has libraries of popular brands of turnouts and sectional track (plus you add your own easily), can automatically use spiral transition curves when joining track and has extensive on-line help and demonstrations. \e{XTrackCAD} lets you manipulate track much like you would with actual flex-track to modify, extend and join tracks and turnouts. Additional features include tunnels, 'post-it' notes, on-screen ruler, parts list, 99 drawing layers, undo/redo commands, bench-work, 'Print to Bitmap', elevations, train simulation and car inventory. 
 
 Using it, you can
 
@@ -90,28 +90,28 @@ Using it, you can
 
 New users should run the demonstrations (via the \f{Help>Demos} menu) to get an overview of the many features of the program.  A number of example layout designs are also available.
 
-Be sure to visit the project web page for latest news and updates: \W{http://www.xtrkcad.org/}{\e{XTrkCad} Fork Website}
+Be sure to visit the project web page for latest news and updates: \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website}
 
 \rule
 
 
-\H{whyXTrkCad} Why Choose \e{XTrkCad}
+\H{whyXTrackCAD} Why Choose \e{XTrackCAD}
 
-\f{Why Choose XTrkCad}
+\f{Why Choose XTrackCAD}
 
 \f{Easy to use}
 
-As much as possible, \e{XTrkCad} is designed to operate the same as pencil and paper: create tracks by simply dragging the mouse, place turnouts anywhere on existing tracks, use circles for initial design and create stall tracks by drawing from the turntable. 
+As much as possible, \e{XTrackCAD} is designed to operate the same as pencil and paper: create tracks by simply dragging the mouse, place turnouts anywhere on existing tracks, use circles for initial design and create stall tracks by drawing from the turntable. 
 
-You don't have to be an expert CAD user to make the most of \e{XTrkCad}. You don't specify line lengths or angles, just draw. 
+You don't have to be an expert CAD user to make the most of \e{XTrackCAD}. You don't specify line lengths or angles, just draw. 
 
-\e{XTrkCad} deals with tracks as tracks, not line segments. Tracks are connected to each other and can be drawn showing endpoints of turnouts and other components. As you zoom in, both rails are drawn. 
+\e{XTrackCAD} deals with tracks as tracks, not line segments. Tracks are connected to each other and can be drawn showing endpoints of turnouts and other components. As you zoom in, both rails are drawn. 
 
 On-line demonstrations show the actual operation of many of the program's features. Extensive help is available for all commands and operations. 
 
 \f{Packed with features}
 
-\e{XTrkCad} is designed from the ground up to be a complete tool for Model Railroad layout design. 
+\e{XTrackCAD} is designed from the ground up to be a complete tool for Model Railroad layout design. 
 
 \dt \e{Train Simulation and Car Inventory}
 
@@ -151,7 +151,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd As Turnouts are dragged over existing tracks they are automatically aligned. \e{XTrkCad} searches for any other tracks that align with each of the Turnout's Endpoints, and shows you the number of connections that will be made and the maximum offset as you position the Turnout. Just adjust the Turnout's position to minimize the offset to ensure the best fit. 
+\dd As Turnouts are dragged over existing tracks they are automatically aligned. \e{XTrackCAD} searches for any other tracks that align with each of the Turnout's Endpoints, and shows you the number of connections that will be made and the maximum offset as you position the Turnout. Just adjust the Turnout's position to minimize the offset to ensure the best fit. 
 
 \u000
 
@@ -165,7 +165,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd \e{XTrkCad} allows up to 99 layers and the first 20 layers can have their own button to control visibility. Each layer can have a name which is displayed as the balloon help for the layer button. 
+\dd \e{XTrackCAD} allows up to 99 layers and the first 20 layers can have their own button to control visibility. Each layer can have a name which is displayed as the balloon help for the layer button. 
 
 \u000
 
@@ -175,7 +175,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \dt \e{Elevations and Profile}
 
-\dd Elevations are one of the most powerful features of \e{XTrkCad}. 
+\dd Elevations are one of the most powerful features of \e{XTrackCAD}. 
 
 \u000
 
@@ -183,7 +183,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd \e{XTrkCad} lets you define the elevation of any Endpoint on the layout. You can also have \e{XTrkCad} automatically compute the elevation and grade between defined elevation points. You can define the elevation at the bottom and top of a sloped track, then have \e{XTrkCad} compute the elevation at each riser position between. 
+\dd \e{XTrackCAD} lets you define the elevation of any Endpoint on the layout. You can also have \e{XTrackCAD} automatically compute the elevation and grade between defined elevation points. You can define the elevation at the bottom and top of a sloped track, then have \e{XTrackCAD} compute the elevation at each riser position between. 
 
 \u000
 
@@ -197,13 +197,13 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd \e{XTrkCad} can use Easements anytime the radius of the track changes. The Modify and Join commands will automatically insert Easement Track segments whenever needed. Each Easement is computed based on the radius of the neighboring tracks. You don't even have to think about it! 
+\dd \e{XTrackCAD} can use Easements anytime the radius of the track changes. The Modify and Join commands will automatically insert Easement Track segments whenever needed. Each Easement is computed based on the radius of the neighboring tracks. You don't even have to think about it! 
 
 \u000
 
 \dt \e{Flexible and Powerful Printing}
 
-\dd Printing is an important part of a layout design program, and \e{XTrkCad} has a flexible Print command to get your design onto the layout. 
+\dd Printing is an important part of a layout design program, and \e{XTrackCAD} has a flexible Print command to get your design onto the layout. 
 
 \u000
 
@@ -235,7 +235,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \dt \e{Turnout and Structure Creation}
 
-\dd \e{XTrkCad} comes with Turnout, Sectional Track and Structure Parameter Files for many brands of tracks and accessories. However, your brand may not supplied. The Turnout Designer dialogs and the Group command make it easy to add your own custom definitions. 
+\dd \e{XTrackCAD} comes with Turnout, Sectional Track and Structure Parameter Files for many brands of tracks and accessories. However, your brand may not supplied. The Turnout Designer dialogs and the Group command make it easy to add your own custom definitions. 
 
 \u000
 
@@ -253,7 +253,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd The \e{XTrkCad} Draw command is used to draw lines (straight, curved and circles) and shapes (filled boxes, circles and polygons). These can be different colors and lines can have different widths. These are useful for drawing scenic features (rivers, bridges, mountains). 
+\dd The \e{XTrackCAD} Draw command is used to draw lines (straight, curved and circles) and shapes (filled boxes, circles and polygons). These can be different colors and lines can have different widths. These are useful for drawing scenic features (rivers, bridges, mountains). 
 
 \u000
 
@@ -279,13 +279,13 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd You can enter the price of each type of Turnout, Sectional Track and Structure, plus the length and price of flex-track. \e{XTrkCad} will compute the price of each types and the grand total. The total number of flex-track sections is also listed. 
+\dd You can enter the price of each type of Turnout, Sectional Track and Structure, plus the length and price of flex-track. \e{XTrackCAD} will compute the price of each types and the grand total. The total number of flex-track sections is also listed. 
 
 \u000
 
 \dt \e{Support for Sectional Track}
 
-\dd Numerous Sectional Track Parameter Files are included with \e{XTrkCad} (Atlas, Marklin, Peco, ...). The Hot Bar allows easy selection. 
+\dd Numerous Sectional Track Parameter Files are included with \e{XTrackCAD} (Atlas, Marklin, Peco, ...). The Hot Bar allows easy selection. 
 
 \u000
 
@@ -297,10 +297,10 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrkCad} features.
+Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrackCAD} features.
 
 
-\H{keyFeatures} Key \e{XTrkCad} Features
+\H{keyFeatures} Key \e{XTrackCAD} Features
 
 \b Annotate with text and notes
 
@@ -431,9 +431,9 @@ Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrkCad} featur
 \rule
 
 
-\H{addFeatures} Additional \e{XTrkCad} Features
+\H{addFeatures} Additional \e{XTrackCAD} Features
 
-\e{XTrkCad} has many other carefully selected features: 
+\e{XTrackCAD} has many other carefully selected features: 
 
 \b Sections of track can be hidden, which can be drawn as dashed lines, or completely hidden. A Tunnel Portal is drawn when a hidden track connects with normal track.
 
@@ -521,15 +521,15 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \H{installSoftware} Installation
 
-\e{XTrkCad} is designed to operate under Linux or MS Windows. Information within this section of the manual pertains to installation of the application in either of these environments.
+\e{XTrackCAD} is designed to operate under Linux or MS Windows. Information within this section of the manual pertains to installation of the application in either of these environments.
 
 \rule
 
 \S{MSWinInstall} \i{Microsoft Windows Installation}
 
-\e{XTrkCad} is shipped as a self-installing self-expanding program (executable).
+\e{XTrackCAD} is shipped as a self-installing self-expanding program (executable).
 
-\n Using Windows Explorer, locate the directory in which you downloaded or copied your new version of \e{XTrkCad}.
+\n Using Windows Explorer, locate the directory in which you downloaded or copied your new version of \e{XTrackCAD}.
 
 \lcont{\u000}
 
@@ -541,7 +541,7 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \lcont{\u000}
 
-\n The installation lets you define the directory in which \e{XTrkCad} is installed.  The directory is created automatically if it doesn't already exist.
+\n The installation lets you define the directory in which \e{XTrackCAD} is installed.  The directory is created automatically if it doesn't already exist.
 
 \lcont{\u000}
 
@@ -559,7 +559,7 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \c	rpm -ihv xtrkcad-\e{VVV}.i386.rpm
 
-\dd Replace \e{-ihv} with \e{-Uhv} to upgrade an existing \e{XTrkCad} installation.
+\dd Replace \e{-ihv} with \e{-Uhv} to upgrade an existing \e{XTrackCAD} installation.
 
 \u000
 
@@ -580,7 +580,7 @@ Throughout this manual the following typographic conventions are used to make fi
 \c	cd /usr/local/bin
 \c	ln -s /usr/local/lib/xtrkcad/xtrkcad xtrkcad
 
-\dd If you install \e{XTrkCad} into another directory, set the \c{XTRKCADLIB} environment variable to point to that directory.
+\dd If you install \e{XTrackCAD} into another directory, set the \c{XTRKCADLIB} environment variable to point to that directory.
 
 }
 
@@ -590,11 +590,11 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \G{png.d/main.png}
 
-When \e{XTrkCad} starts, it displays the \f{Main} (\K{mainW}) and \f{Map} (\K{cmdMap}) windows.  The \f{Map} window is used to change the origin of the \f{Main} window when the entire layout cannot be displayed at one time.
+When \e{XTrackCAD} starts, it displays the \f{Main} (\K{mainW}) and \f{Map} (\K{cmdMap}) windows.  The \f{Map} window is used to change the origin of the \f{Main} window when the entire layout cannot be displayed at one time.
 
 The Menu bar across the top of the \f{Main} window contains standard Windows menus.  Some of these are particularly useful to the new user:
 
-\b The \f{File>Exit} menu exits \e{XTrkCad}.  You can also exit by selecting the System menu in the upper left corner of the Window.
+\b The \f{File>Exit} menu exits \e{XTrackCAD}.  You can also exit by selecting the System menu in the upper left corner of the Window.
 
 \u000
 
@@ -602,7 +602,7 @@ The Menu bar across the top of the \f{Main} window contains standard Windows men
 
 \u000
 
-\b The \f{Help} menu can be used to read the \e{XTrkCad} Help file.  Also, the \f{Help>Demos} menu selects a number of demonstrations which illustrate various features of \e{XTrkCad}.
+\b The \f{Help} menu can be used to read the \e{XTrackCAD} Help file.  Also, the \f{Help>Demos} menu selects a number of demonstrations which illustrate various features of \e{XTrackCAD}.
 
 \u000
 
@@ -618,7 +618,7 @@ You can use this menu to choose Metric units (\K{cmdPref}).
 
 \H{performance} Performance Issues
 
-This section lists some things that can improve the performance of \e{XTrkCad}.
+This section lists some things that can improve the performance of \e{XTrackCAD}.
 
 \b To speed up initialization, remove unused parameter files (See \f{Parameter Files} dialog - \K{cmdPrmfile}).
 
@@ -648,21 +648,21 @@ Information within this section of the manual identifies installation directory 
 
 \S{dirOverview} \i{Directories Overview}
 
-\e{XTrkCad} uses two directories on your system:
+\e{XTrackCAD} uses two directories on your system:
 
-\b The \e{XTrkCad Install} directory, which contains the data and parameter files used by \e{XTrkCad}.
+\b The \e{XTrackCAD Install} directory, which contains the data and parameter files used by \e{XTrackCAD}.
 
 \u000
 
-\b The \e{XTrkCad Working} directory, which contains configuration and Check Point files.
+\b The \e{XTrackCAD Working} directory, which contains configuration and Check Point files.
 
-On MS-Windows the \e{Install} and \e{Working} directories are set when you install \e{XTrkCad}.
+On MS-Windows the \e{Install} and \e{Working} directories are set when you install \e{XTrackCAD}.
 
-On Linux the \e{Install} directory is usually \c{/usr/local/lib/xtrkcad/}, but you can change this by defining the \c{XTRKCADLIB} environment variable before starting \e{XTrkCad}. The working directory is \c{\{HOME\}/.xtrkcad/}.
+On Linux the \e{Install} directory is usually \c{/usr/local/lib/xtrkcad/}, but you can change this by defining the \c{XTRKCADLIB} environment variable before starting \e{XTrackCAD}. The working directory is \c{\{HOME\}/.xtrkcad/}.
 
 Layout files (\c{*.xtc}) and export (\K{cmdExport}) files (\c{*.xti}) can be saved anywhere you wish, as specified in the \f{Save File} and \f{Open File} dialogs.
 
-Example layouts can be found in the \c{example} directory under the \e{XTrkCad} install directory.
+Example layouts can be found in the \c{example} directory under the \e{XTrackCAD} install directory.
 
 \rule
 
@@ -672,15 +672,15 @@ Example layouts can be found in the \c{example} directory under the \e{XTrkCad} 
 
 \u000
 
-\b \c{params} directory contains \c{*.xtp} files which are the \e{XTrkCad} Library parameter files.  These files (\c{atlasn.xtp, pecon55.xtp, ...}) contain definitions for turnouts, sectional track pieces and structures.  These files to be used are selected in the \f{Parameter Files (\K{cmdPrmfile})} dialog.
+\b \c{params} directory contains \c{*.xtp} files which are the \e{XTrackCAD} Library parameter files.  These files (\c{atlasn.xtp, pecon55.xtp, ...}) contain definitions for turnouts, sectional track pieces and structures.  These files to be used are selected in the \f{Parameter Files (\K{cmdPrmfile})} dialog.
 
 \u000
 
-\b \c{xtrkcad.chm} (on MS-Windows) or \c{xtrkcad.help} (on Linux) is the \e{XTrkCad} help file.
+\b \c{xtrkcad.chm} (on MS-Windows) or \c{xtrkcad.help} (on Linux) is the \e{XTrackCAD} help file.
 
 \u000
 
-\b \c{xtrkcad.exe} (MS-Windows) or \c{xtrkcad} (Linux) is the \e{XTrkCad} program.
+\b \c{xtrkcad.exe} (MS-Windows) or \c{xtrkcad} (Linux) is the \e{XTrackCAD} program.
 
 \u000
 
@@ -688,15 +688,15 @@ Example layouts can be found in the \c{example} directory under the \e{XTrkCad} 
 
 \u000
 
-\b \c{xtrkcad.upd} contains the list of parameter files supplied with \e{XTrkCad}
+\b \c{xtrkcad.upd} contains the list of parameter files supplied with \e{XTrackCAD}
 
 \u000
 
-\b \c{xtrkcad0.ini} specifies the location of the \e{XTrkCad} working directory (MS-Windows only).
+\b \c{xtrkcad0.ini} specifies the location of the \e{XTrackCAD} working directory (MS-Windows only).
 
 \u000
 
-\b \c{demos} directory contains \c{*.xtr} which are the \e{XTrkCad} demonstration files which can be run via the \f{Help>Demos} menu item.
+\b \c{demos} directory contains \c{*.xtr} which are the \e{XTrackCAD} demonstration files which can be run via the \f{Help>Demos} menu item.
 
 \u000
 
@@ -706,7 +706,7 @@ Example layouts can be found in the \c{example} directory under the \e{XTrkCad} 
 
 \S{workDir} \i{Working Directory}
 
-\b \c{xtrkcad.ckp} are the \e{check-point} files created periodically while running \e{XTrkCad}.  If your system \e{XTrkCad} hangs or crashes you get the choice of loading the checkpoint file and so recover (most of) your work by saving it to your current layout file.
+\b \c{xtrkcad.ckp} are the \e{check-point} files created periodically while running \e{XTrackCAD}.  If your system \e{XTrackCAD} hangs or crashes you get the choice of loading the checkpoint file and so recover (most of) your work by saving it to your current layout file.
 
 \lcont{
 
@@ -718,15 +718,15 @@ The check-point frequency is set by the \e{Check Point} field found in the \f{Pr
 
 \u000
 
-\b The \c{xtrkcad.ini} (on MS-Windows) or the \c{xtrkcad.rc} (on Linux) file contains various parameter settings from each use of \e{XTrkCad}.  Most changes you make (such as scale, room size, window position) are saved in this file for the next time you use \e{XTrkCad}.
+\b The \c{xtrkcad.ini} (on MS-Windows) or the \c{xtrkcad.rc} (on Linux) file contains various parameter settings from each use of \e{XTrackCAD}.  Most changes you make (such as scale, room size, window position) are saved in this file for the next time you use \e{XTrackCAD}.
 
 \rule
 
-\H{uninstall} \i{Removing \e{XTrkCad}}
+\H{uninstall} \i{Removing \e{XTrackCAD}}
 
-Remove \e{XTrkCad} by deleting the \e{XTrkCad Install} directory, deleting any \c{xtrkcad.*} files from the \e{Working} directory, and deleting any \e{*.xtc} and \e{*.xti} files.
+Remove \e{XTrackCAD} by deleting the \e{XTrackCAD Install} directory, deleting any \c{xtrkcad.*} files from the \e{Working} directory, and deleting any \e{*.xtc} and \e{*.xti} files.
 
-On MS-Windows, you can also use the \f{Uninstall} icon in the \e{XTrkCad} program group.
+On MS-Windows, you can also use the \f{Uninstall} icon in the \e{XTrackCAD} program group.
 
 \rule
 
@@ -740,7 +740,7 @@ This section of the manual describes how and where to report a bug or seek an en
 
 \S{bugs} Reporting \i{Bugs}
 
-If you encounter an unreported bug please submit detail regarding such to the \f{Bug Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&atid=781978}{\e{XTrkCad} Fork Project Site}.
+If you encounter an unreported bug please submit detail regarding such to the \f{Bug Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&atid=781978}{\e{XTrackCAD} Fork Project Site}.
 
 \f{Be sure to provide the three basic elements of a bug report:} What you were doing at the time the bug occurred,  what you expected to happen and what actually happened. This detail will help developers replicate the error, find and correct the offending code.
 
@@ -748,7 +748,7 @@ If you encounter an unreported bug please submit detail regarding such to the \f
 
 \u000
 
-\dd After completing installation of  \e{XTrkCad} on a Dell Dimension PC with 128 MB of memory running Windows ME, the following error occurred when attempting to edit a Text Label;
+\dd After completing installation of  \e{XTrackCAD} on a Dell Dimension PC with 128 MB of memory running Windows ME, the following error occurred when attempting to edit a Text Label;
 
 \u000
 
@@ -756,7 +756,7 @@ If you encounter an unreported bug please submit detail regarding such to the \f
 
 \u000
 
-\dd Selecting either "Yes" or "No" results in a Windows error and \e{XTrkCad} closes.
+\dd Selecting either "Yes" or "No" results in a Windows error and \e{XTrackCAD} closes.
 
 \u000
 
@@ -768,7 +768,7 @@ If you encounter an unreported bug please submit detail regarding such to the \f
 
 \f{Always search the bug database first.} Advice so good, we'll repeat it twice. Always search the bug database first. The odds are good that if you've found a problem, someone else found it too. If you spend a few minutes of your time making sure that you're not filing a duplicate bug, that's a few more minutes someone can spend helping to fix that bug rather than sorting out duplicate bug reports.
 
-\f{If you don't understand an error message, ask for help.} Don't report an error message you don't understand as a bug. There are a lot of places you can ask for help in understanding what is going on before you can claim that an error message you do not understand is a bug. (Once you've understood the error message and have a good suggestion for a way to make the error message clearer, you might consider reporting it as a  \W{http://sourceforge.net/tracker/?group_id=151737&atid=781981}{\e{XTrkCad} Feature Request}).
+\f{If you don't understand an error message, ask for help.} Don't report an error message you don't understand as a bug. There are a lot of places you can ask for help in understanding what is going on before you can claim that an error message you do not understand is a bug. (Once you've understood the error message and have a good suggestion for a way to make the error message clearer, you might consider reporting it as a  \W{http://sourceforge.net/tracker/?group_id=151737&atid=781981}{\e{XTrackCAD} Feature Request}).
 
 \f{Be brief, but don't leave any important details out.} This is a fine line to walk. But there are some general guidelines:
 
@@ -776,7 +776,7 @@ Remember the three basics: what you were doing, what you expected to happen, and
 
 If you can recreate the problem the \f{Macro>Record} command can be used to record what happened.  Try to isolate the problem by creating a minimal layout and recording as few commands as possible.
 
-\f{Don't report bugs about old versions.} Every time a new version of \e{XTrkCad} is released, many enhancements are added and known bugs are fixed. If you're using a version of \e{XTrkCad} that's more than two revisions older than the latest version, you should upgrade to the latest version to make sure the bug you are experiencing still exists. (It's not a bad idea to upgrade even if your version is only a version behind the most current one.)
+\f{Don't report bugs about old versions.} Every time a new version of \e{XTrackCAD} is released, many enhancements are added and known bugs are fixed. If you're using a version of \e{XTrackCAD} that's more than two revisions older than the latest version, you should upgrade to the latest version to make sure the bug you are experiencing still exists. (It's not a bad idea to upgrade even if your version is only a version behind the most current one.)
 
 \f{Only report one problem in each bug report.} If you encounter two or more bugs that don't appear to be related create a separate bug report for each one. This makes the task of managing work assignments easier and may result in a quicker fix for the problem.
 
@@ -785,6 +785,6 @@ If you can recreate the problem the \f{Macro>Record} command can be used to reco
 
 \S{enhancements} \i{Enhancement Requests}
 
-Suggestions for improvements are encouraged and welcome. Submit your suggestion to the \e{XTrkCad} \f{Feature Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&atid=781981}{\e{XTrkCad} Fork Project Site} or the \e{XTrkCad} \f{Wikka Wish List} located at the \W{http://www.xtrkcad.org/Wikka/WishList}{\e{XTrkCAD} Wiki: WishList}.
+Suggestions for improvements are encouraged and welcome. Submit your suggestion to the \e{XTrackCAD} \f{Feature Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&atid=781981}{\e{XTrackCAD} Fork Project Site} or the \e{XTrackCAD} \f{Wikka Wish List} located at the \W{http://www.xtrkcad.org/Wikka/WishList}{\e{XTrackCAD} Wiki: WishList}.
 
 \rule

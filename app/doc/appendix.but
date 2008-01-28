@@ -12,9 +12,9 @@
 
 The best way to move your design from computer to roadbed is to print out a full scale copy (or portions) of the layout. During the print process the orientation of the print grid can be adjusted so the printout will line up with the tracks. 
 
-If you have cut-sheet printer (like a laser or ink-jet) set the Ignore Page Margins toggle on the print dialog. Normally there is an unprintable margin around the edge of the page and \e{XTrkCad} only prints on the printable area, which means you would have to trim or overlay the pages. Setting the Ignore Page Margins toggle makes \e{XTrkCad} ignore this margin so you can just abut the paper. Also, turn on Print Roadbed Outline and set your roadbed width. 
+If you have cut-sheet printer (like a laser or ink-jet) set the Ignore Page Margins toggle on the print dialog. Normally there is an unprintable margin around the edge of the page and \e{XTrackCAD} only prints on the printable area, which means you would have to trim or overlay the pages. Setting the Ignore Page Margins toggle makes \e{XTrackCAD} ignore this margin so you can just abut the paper. Also, turn on Print Roadbed Outline and set your roadbed width. 
 
-If you have a continuous form printer (like a dot matrix) you can print a series of pages to form a continuous strip as long as you need. I use an old wide carriage printer that was being thrown out and can print 8' by 13.2" strips. Accuracy is not critical, 9-pin will do fine. You may need to experiment with setting the Landscape/Portrait modes on the Printer Setup and the Print dialogs and rotating the Print Grid to get the pages in the correct orientation. In particular I've found it best to set the Printer Setup dialog to Portrait mode and select Landscape Page Format on the \e{XTrkCad} Printer dialog. 
+If you have a continuous form printer (like a dot matrix) you can print a series of pages to form a continuous strip as long as you need. I use an old wide carriage printer that was being thrown out and can print 8' by 13.2" strips. Accuracy is not critical, 9-pin will do fine. You may need to experiment with setting the Landscape/Portrait modes on the Printer Setup and the Print dialogs and rotating the Print Grid to get the pages in the correct orientation. In particular I've found it best to set the Printer Setup dialog to Portrait mode and select Landscape Page Format on the \e{XTrackCAD} Printer dialog. 
 
 Once you have a full scale print-out of your layout (or portion, if you have a larger layout you don't want to do it all at once) you need to transfer this to the roadbed. Here's two methods that can be used:
 
@@ -29,7 +29,7 @@ Once you have a full scale print-out of your layout (or portion, if you have a l
 
 \H{faqsHotBar} Hot Bar Items Missing!
 
-\f{After installing XTrkCad the Hot Bar is not active; the arrows to the left and the right of the Hot Bar are a grey colour instead of black, the Hot Bar is blank and also does not scroll.}
+\f{After installing XTrackCAD the Hot Bar is not active; the arrows to the left and the right of the Hot Bar are a grey colour instead of black, the Hot Bar is blank and also does not scroll.}
 
 There's nothing wrong, you just need to load a track or structure Parameter file. Open the \f{Parameter dialog} window (\f{File>Parameter}) then click on Browse. A list of \c{*.xtp} files with names like \c{atlasn55.xtp} should appear. Select whichever file or files are appropriate for your needs then click the OK button. Click OK on the Parameter File dialog and you should now have objects displayed on the Hot Bar.
 
@@ -51,7 +51,7 @@ Notes:
 
 }
 
-\n When a new layout is created or when \e{XTrkCad} is started for the first time, the scale of the layout defaults to N scale. Do not forget to change the scale in order to see tracks from other scales in the Hot Bar!
+\n When a new layout is created or when \e{XTrackCAD} is started for the first time, the scale of the layout defaults to N scale. Do not forget to change the scale in order to see tracks from other scales in the Hot Bar!
 
 \rule
 
@@ -71,12 +71,12 @@ In cases where Layer Buttons are affected the number on the button may not be vi
 
 \f{How do I join tracks, place turnouts, build a yard etc?}
 
-First take a look at the help file. Then try the demos (\f{Help>Demos} menu). This should answer a lot of questions on how to use \e{XTrkCad}. Please visit \W{http://www.xtrkcad.org/Wikka/HomePage}{The XTrkCad Wiki} if you need help, especially if you find the documentation unclear or think some area needs improvement.
+First take a look at the help file. Then try the demos (\f{Help>Demos} menu). This should answer a lot of questions on how to use \e{XTrackCAD}. Please visit \W{http://www.xtrkcad.org/Wikka/HomePage}{The XTrackCAD Wiki} if you need help, especially if you find the documentation unclear or think some area needs improvement.
 
 
 \A{glossary} Glossary
 
-This section contains a helpful listing of Window and \e{XTrkCad} terminology.
+This section contains a helpful listing of Window and \e{XTrackCAD} terminology.
 
 \rule
 
@@ -129,7 +129,7 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 \rule
 
 
-\H{generalTerms} \i{XTrkCad Terms}
+\H{generalTerms} \i{XTrackCAD Terms}
 
 \f{Active Endpoint} - when placing a turnout, the endpoint which is used as a 'handle' when moved along other tracks.
 
@@ -139,7 +139,7 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 
 \f{Easement} - special sections of gradually curving track used to connect straight and curved tracks (or two curved tracks). Easements reduce the effects of sudden changes in track curves which can cause derailments. They also look great!
 
-\f{Endpoint} - One of the most important concepts in \e{XTrkCad} is the endpoint.  A piece of flex-track has an endpoint at each end.  An endpoint has a position and an angle and it can be connected to other endpoints.  The endpoints control where the track is placed and how it is connected.
+\f{Endpoint} - One of the most important concepts in \e{XTrackCAD} is the endpoint.  A piece of flex-track has an endpoint at each end.  An endpoint has a position and an angle and it can be connected to other endpoints.  The endpoints control where the track is placed and how it is connected.
 
 \b Turnouts have several endpoints (normally 3).
 
@@ -179,7 +179,7 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 
 \f{Turnout} - A piece of track that allows a train to go from one track to another. Called a switch on a real railroad. Referred to by number. For example, a no. 6 turnout spreads one unit for each six units of travel measured from the frog (the point at which two rails join to form a V).
 
-\b In \e{XTrkCad}, \e{Turnouts} also include sectional Tracks, crossings and forms of prefabricated (non-flex) track.
+\b In \e{XTrackCAD}, \e{Turnouts} also include sectional Tracks, crossings and forms of prefabricated (non-flex) track.
 
 \f{Turnout Frog} - the place on the turnout track where one rail crosses the other.
 
@@ -196,7 +196,7 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 
 \H{messageType} \i{Message Types}
 
-\e{XTrkCad} generates three types of messages:
+\e{XTrackCAD} generates three types of messages:
 
 \dd \e{Notices}, which appear in their own window and require you to press a button to make a choice or dismiss them.
 

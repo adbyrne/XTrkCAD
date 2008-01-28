@@ -1,6 +1,6 @@
 \# Notes:
 \#
-\# The command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
+\# The "\u000" command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
 \#
 
 \H{helpM} Help Menu
@@ -13,7 +13,7 @@ The \f{Help Menu} displays information on various topics. The contents of the me
 
 \dd \e{Demo Menu}
 
-The \f{Demos} command (\K{cmdDemo}) opens a cascading menu which invokes various demonstrations of \e{XTrkCad} features.
+The \f{Demos} command (\K{cmdDemo}) opens a cascading menu which invokes various demonstrations of \e{XTrackCAD} features.
 
 \dd \G{png.d/mhelprecent.png}
 
@@ -25,7 +25,7 @@ The \f{Recent Messages} command opens a cascading menu containing recent error m
 
 \dd \e{Tip of The Day}
 
-The \f{Tip of the Day} item displays a useful tip about the operation of \e{XTrkCad}. By default, a new tip is displayed each time you start the program.
+The \f{Tip of the Day} item displays a useful tip about the operation of \e{XTrackCAD}. By default, a new tip is displayed each time you start the program.
 
 \rule
 
@@ -36,7 +36,7 @@ of choices to demonstrate various features and commands.
 
 \G{png.d/mhelpdemos.png}
 
-In demonstration mode \e{XTrkCad} is driven by a script file (such as created by the \f{Record} (\K{macroM}) command). The cursor is simulated on the Main Window (\K{mainW}) and the \e{XTrkCad} windows (except the \f{Demo} window) are inactive. Also, simulated input on dialogs is indicated by a border momentarily drawn around the control.
+In demonstration mode \e{XTrackCAD} is driven by a script file (such as created by the \f{Record} (\K{macroM}) command). The cursor is simulated on the Main Window (\K{mainW}) and the \e{XTrackCAD} windows (except the \f{Demo} window) are inactive. Also, simulated input on dialogs is indicated by a border momentarily drawn around the control.
 
 The \f{Demo} dialog is displayed which contains a number of control buttons and a text area that shows comments on the demonstration being run.
 

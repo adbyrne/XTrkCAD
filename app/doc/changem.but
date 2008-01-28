@@ -50,7 +50,7 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Properties} - sets \e{XTrkCad} into \e{Describe} mode. Whenever an object is clicked on while in this mode, the \f{Properties} dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation.
+\dd \f{Properties} - sets \e{XTrackCAD} into \e{Describe} mode. Whenever an object is clicked on while in this mode, the \f{Properties} dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation.
 
 \u000
 
@@ -66,7 +66,7 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Select} - sets \e{XTrkCad} into \e{Select} mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use \f{Deselect All} from the \f{Edit} (\K{editM}) menu or \f{Deselect All} from the \f{Pop-up} menu (\K{cmdAcclKeys}).
+\dd \f{Select} - sets \e{XTrackCAD} into \e{Select} mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use \f{Deselect All} from the \f{Edit} (\K{editM}) menu or \f{Deselect All} from the \f{Pop-up} menu (\K{cmdAcclKeys}).
 
 \u000
 
@@ -123,7 +123,7 @@ Occasionally pieces of sectional track do not line up exactly, especially when c
 
 Click on the endpoint of each track you're trying to connect.  Tracks will move slightly in an attempt to overcome the gap.  If the gap is too large, the connection will fail. If this occurs, try using other track pieces in your layout.
 
-\e{XTrkCad} adjusts the positions of tracks connected to the tracks up to a track with more than two connections.  See the Demo for details.
+\e{XTrackCAD} adjusts the positions of tracks connected to the tracks up to a track with more than two connections.  See the Demo for details.
 
 If one (or both) the selected tracks is an adjustable section (such as Kato's Adjustable Track #20-050) then the length of the track is changed to fill the gap.
 
@@ -243,7 +243,7 @@ Certain turnouts, such as a Wye's, Three-Way or Crossings are symmetrical and th
 
 \G{png.d/bjoin.png}
 
-The \f{Join} command is used to bring together and connect any two segments of track. During the join process, \e{XTrkCad} ensures the connecting tracks are properly aligned.
+The \f{Join} command is used to bring together and connect any two segments of track. During the join process, \e{XTrackCAD} ensures the connecting tracks are properly aligned.
 
 See \f{Help>Demo} (\K{cmdDemo}) for examples of how to join tracks.
 
@@ -308,7 +308,7 @@ This method of joining track may be used where tracks are joined with a 'simple 
 
 }
 
-\n If the track appears in red, it means \e{XTrkCad} can't determine how to connect the first track with the second. If this occurs, while holding the left mouse button, drag the mouse back toward the first track until the connecting track appears in black. If the connecting track remains red, drag the mouse in the opposite direction until the connecting track turns black. Once the connecting track turns black, release the mouse button to finalize the \e{Join} command.
+\n If the track appears in red, it means \e{XTrackCAD} can't determine how to connect the first track with the second. If this occurs, while holding the left mouse button, drag the mouse back toward the first track until the connecting track appears in black. If the connecting track remains red, drag the mouse in the opposite direction until the connecting track turns black. Once the connecting track turns black, release the mouse button to finalize the \e{Join} command.
 
 \lcont{
 
@@ -324,7 +324,7 @@ Throughout the above, the exact shape of the curve can be adjust by dragging the
 
 Sometimes, no matter where you drag the mouse, the curve stays red and the tracks cannot be connected. This means the resulting curve is tighter than the minimum track radius set in the \e{Preferences dialog} (\K{cmdPref}). If desired, this setting can be adjusted from the \e{Preferences dialog} using the \f{Options>Preferences} menu selection to raise the dialog. If changing the minimum track radius is not a desired option then it will be necessary to relocate one of the tracks that you're attempting to join.
 
-You may also find that \e{XTrkCad} will not create the connecting curve in the exact shape you want. If this happens it may be necessary to either move one of the end points or draw a partial curve (or straight) and try again.
+You may also find that \e{XTrackCAD} will not create the connecting curve in the exact shape you want. If this happens it may be necessary to either move one of the end points or draw a partial curve (or straight) and try again.
 
 If enabled, Easements (\K{cmdEasement}) will be automatically generated between tracks of differing radii. When using easements, there is a minimum radius as specified in the \e{Easement} dialog. It's not possible to join tracks with less then this radius and the connecting track's radius must be greater than the minimum radius.
 
@@ -392,7 +392,7 @@ When this command is used to join;
 
 Any tracks created during the \f{Join} command will have the following properties inherited from the first track: selected state, hidden state, scale, track gauge and Layer.
 
-Turnouts and Sectional (\K{cmdHotBar}) tracks can be joined to other tracks. \e{XTrkCad} extends the selected endpoint with a straight track when making the connection.  
+Turnouts and Sectional (\K{cmdHotBar}) tracks can be joined to other tracks. \e{XTrackCAD} extends the selected endpoint with a straight track when making the connection.  
 
 A Turntable (\K{cmdTurntable}) can be joined however it must be used as the second endpoint.
 
