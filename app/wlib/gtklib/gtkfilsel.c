@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfilsel.c,v 1.3 2007-11-24 19:48:21 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfilsel.c,v 1.4 2008-01-28 07:15:23 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -36,6 +36,7 @@
 #include <string.h>
 
 #include "gtkint.h"
+#include "i18n.h"
 
 /* #define FILSELWAIT */
 
@@ -125,8 +126,8 @@ static int file_selection_ok (
 		}
 		if ( access( tmp, F_OK ) == 0 && fs->mode == FS_SAVE ) {
 			cp = tmp+strlen(tmp);
-			strcat(cp, " exists\nDo you want to overwrite it?" );
-			if ( wNotice( tmp, "Yes", "No" ) <= 0 )
+			strcat(cp, _(" exists\nDo you want to overwrite it?") );
+			if ( wNotice( tmp, _("Yes"), _("No") ) <= 0 )
 				return 0;
 			*cp = '\0';
 		}

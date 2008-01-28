@@ -1,4 +1,8 @@
 Jan 28, 2008
+	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
+		gtkfilsel.c: Gettext support added.
+
+Jan 28, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		gtkwindow.c: Dynamically allocate and form some global translatable
 		strings.
