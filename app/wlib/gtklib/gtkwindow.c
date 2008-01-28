@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.7 2008-01-27 15:51:12 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.8 2008-01-28 06:23:02 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -903,6 +903,7 @@ The main window call-back function is called with 'wQuit_e'.
 		free(userLocale);
 		userLocale = NULL;
 	}
+	CleanupCustom();
 
 	exit( rc );
 	/*gtk_main_quit();*/

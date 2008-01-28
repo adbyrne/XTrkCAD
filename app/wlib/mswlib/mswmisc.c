@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.12 2008-01-22 14:37:14 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.13 2008-01-28 06:23:01 mni77 Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -3008,6 +3008,7 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 		free(userLocale);
 		userLocale = NULL;
 	}
+	CleanupCustom();
 
 	return msg.wParam;
 }

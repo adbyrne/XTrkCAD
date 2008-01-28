@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.2 2006-02-09 17:11:28 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.3 2008-01-28 06:23:02 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -79,6 +79,7 @@ extern int bParamFiles;
 extern int bEnablePrices;
 
 void InitCustom( void );
+void CleanupCustom( void );
 
 void InitTrkCurve( void );
 void InitTrkDraw( void );

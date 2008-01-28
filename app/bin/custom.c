@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.4 2008-01-25 20:01:54 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.5 2008-01-28 06:23:02 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -66,9 +66,9 @@ char * sProdNameUpper = PRODUCT;
 
 char * sEnvExtra = PRODUCT "EXTRA";
 
-char * sTurnoutDesignerW = Product N_(" Turnout Designer");
+char * sTurnoutDesignerW = NULL;
 
-char * sAboutProd = Product N_("  Version ") Version;
+char * sAboutProd = NULL;
 
 char * sCustomF = product ".cus";
 char * sCheckPointF = product ".ckp";
@@ -78,13 +78,13 @@ char * sParamQF = product "." KEYCODE "tq";
 char * sUndoF = product ".und";
 char * sAuditF = product ".aud";
 
-char * sSourceFilePattern = N_("XTrackCAD Files|*.xtc");
-char * sImportFilePattern = Product N_(" Import Files|*.") KEYCODE "ti";
-char * sDXFFilePattern = Product N_(" DXF Files|*.dxf");
-char * sRecordFilePattern = Product N_(" Record Files|*.") KEYCODE "tr";
-char * sNoteFilePattern = Product N_(" Note Files|*.not");
-char * sLogFilePattern = Product N_(" Log Files|*.log");
-char * sPartsListFilePattern = Product N_(" PartsList Files|*.log");
+char * sSourceFilePattern = NULL;
+char * sImportFilePattern = NULL;
+char * sDXFFilePattern = NULL;
+char * sRecordFilePattern = NULL;
+char * sNoteFilePattern = NULL;
+char * sLogFilePattern = NULL;
+char * sPartsListFilePattern = NULL;
 
 char * sVersion = Version;
 int iParamVersion = PARAMVERSION;
@@ -198,4 +198,103 @@ BOOL_T Initialize( void )
 
 void InitCustom( void )
 {
+	char buf[STR_SHORT_SIZE];
+
+	/* Initialize some localized strings */
+	if (sTurnoutDesignerW == NULL)
+	{
+		sprintf(buf, _("%s Turnout Designer"), Product);
+		sTurnoutDesignerW = strdup(buf);
+	}
+	if (sAboutProd == NULL)
+	{
+		sprintf(buf, _("%s Version %s"), Product, Version);
+		sAboutProd = strdup(buf);
+	}
+	if (sSourceFilePattern == NULL)
+	{
+		sprintf(buf, _("%s Files|*.xtc"), Product);
+		sSourceFilePattern = strdup(buf);
+	}
+	if (sImportFilePattern == NULL)
+	{
+		sprintf(buf, _("%s Import Files|*.%sti"), Product, KEYCODE);
+		sImportFilePattern = strdup(buf);
+	}
+	if (sDXFFilePattern == NULL)
+	{
+		sprintf(buf, _("%s Import Files|*.%sti"), Product, KEYCODE);
+		sDXFFilePattern = strdup(buf);
+	}
+	if (sRecordFilePattern == NULL)
+	{
+		sprintf(buf, _("%s Record Files|*.%str"), Product, KEYCODE);
+		sRecordFilePattern = strdup(buf);
+	}
+	if (sNoteFilePattern == NULL)
+	{
+		sprintf(buf, _("%s Note Files|*.not"), Product);
+		sNoteFilePattern = strdup(buf);
+	}
+	if (sLogFilePattern == NULL)
+	{
+		sprintf(buf, _("%s Log Files|*.log"), Product);
+		sLogFilePattern = strdup(buf);
+	}
+	if (sPartsListFilePattern == NULL)
+	{
+		sprintf(buf, _("%s PartsList Files|*.log"), Product);
+		sPartsListFilePattern = strdup(buf);
+	}
+}
+
+
+void CleanupCustom( void )
+{
+	/* Free dynamically allocated strings */
+	if (sTurnoutDesignerW)
+	{
+		free(sTurnoutDesignerW);
+		sTurnoutDesignerW = NULL;
+	}
+	if (sAboutProd)
+	{
+		free(sAboutProd);
+		sAboutProd = NULL;
+	}
+	if (sSourceFilePattern)
+	{
+		free(sSourceFilePattern);
+		sSourceFilePattern = NULL;
+	}
+	if (sImportFilePattern)
+	{
+		free(sImportFilePattern);
+		sImportFilePattern = NULL;
+	}
+	if (sDXFFilePattern)
+	{
+		free(sDXFFilePattern);
+		sDXFFilePattern = NULL;
+	}
+	if (sRecordFilePattern)
+	{
+		free(sRecordFilePattern);
+		sRecordFilePattern = NULL;
+	}
+	if (sNoteFilePattern)
+	{
+		free(sNoteFilePattern);
+		sNoteFilePattern = NULL;
+	}
+	if (sLogFilePattern)
+	{
+		free(sLogFilePattern);
+		sLogFilePattern = NULL;
+	}
+	if (sPartsListFilePattern)
+	{
+		free(sPartsListFilePattern);
+		sPartsListFilePattern = NULL;
+	}
 }
