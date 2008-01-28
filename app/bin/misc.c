@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.27 2008-01-27 15:52:37 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.28 2008-01-28 06:34:08 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -668,7 +668,7 @@ static void NextWindow( void )
 
 EXPORT void SelectFont( void )
 {
-	wSelectFont(_("XTrkCad Font"));
+	wSelectFont(_("XTrackCAD Font"));
 }
 
 /*****************************************************************************
