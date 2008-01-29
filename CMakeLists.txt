@@ -61,7 +61,7 @@ SET(XTRKCAD_PACKAGE "xtrkcad")
 SET(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad")
 
 # Enable use of a configuration file ...
-ADD_DEFINITIONS(-DHAVE_CONFIG_H)
+ADD_DEFINITIONS(-DXTRKCAD_CMAKE_BUILD)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-config.h)
 
 # Setup the rest of the build ...

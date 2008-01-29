@@ -31,7 +31,7 @@ const char * wGetAppLibDir( void )
 	if (cp)
 		*cp = '\0';
 
-#ifdef HAVE_CONFIG_H
+#ifdef XTRKCAD_CMAKE_BUILD
 	strcpy(appLibDirName, module_name);
 	strcat(appLibDirName, "\\..\\share\\xtrkcad");
 	return appLibDirName;

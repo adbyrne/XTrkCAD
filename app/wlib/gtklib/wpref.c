@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.9 2008-01-24 19:14:03 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.10 2008-01-29 04:10:25 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -37,7 +37,7 @@
 #define FALSE	(0)
 #endif
 
-#ifdef HAVE_CONFIG_H
+#ifdef XTRKCAD_CMAKE_BUILD
 #include "xtrkcad-config.h"
 #endif
 
@@ -86,7 +86,7 @@ EXPORT const char * wGetAppLibDir( void )
 		}
 	}
 
-#ifdef HAVE_CONFIG_H
+#ifdef XTRKCAD_CMAKE_BUILD
 	strcpy(appLibDir, XTRKCAD_INSTALL_PREFIX);
 	strcat(appLibDir, "/share/");
 	strcat(appLibDir, wAppName);
