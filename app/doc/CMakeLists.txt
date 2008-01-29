@@ -6,8 +6,10 @@ ELSE (UNIX)
 	SET( butfiles ${CMAKE_CURRENT_SOURCE_DIR}/chmconf.but )
 ENDIF (UNIX)	
 
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/intro.but.in ${CMAKE_CURRENT_BINARY_DIR}/intro.but)
+
 SET(butfiles ${butfiles}
-	${CMAKE_CURRENT_SOURCE_DIR}/intro.but
+	${CMAKE_CURRENT_BINARY_DIR}/intro.but
 	${CMAKE_CURRENT_SOURCE_DIR}/addm.but
 	${CMAKE_CURRENT_SOURCE_DIR}/changem.but
 	${CMAKE_CURRENT_SOURCE_DIR}/drawm.but
