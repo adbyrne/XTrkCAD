@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.2 2008-01-20 20:41:16 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.3 2008-01-29 06:26:42 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1294,6 +1294,9 @@ wDraw_p wBitMapCreate(          wPos_t w, wPos_t h, int arg )
 		return FALSE;
 	}
 	gdk_gc_copy( bd->gc, gtkMainW->gtkwin->style->base_gc[GTK_STATE_NORMAL] );
+
+	bd->cairo = gdk_cairo_create(bd->pixmap);
+
 	wDrawClear( bd );
 	return bd;
 }
