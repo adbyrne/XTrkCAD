@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.2 2007-05-17 13:25:44 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.3 2008-02-01 19:34:27 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -161,16 +161,24 @@ void gtkPrintColorMap( FILE *, int, int );
 int gtkMapPixel( long );
 
 /* psprint.c */
-typedef struct wPrinterStream_t * wPrinterStream_p;
+typedef struct {
+		wIndex_t cmdOrFile;
+		FILE * f;
+		} wPrinterStream_t;
+typedef wPrinterStream_t * wPrinterStream_p;
+
+
+/* typedef struct wPrinterStream_t * wPrinterStream_p; */
 wPrinterStream_p wPrinterOpen( void );
-void wPrinterWrite( wPrinterStream_p, const char *, int );
+void wPrinterWrite( wPrinterStream_p p, char * buff, int siz );
 void wPrinterClose( wPrinterStream_p );
 void psPrintLine( wPos_t, wPos_t, wPos_t, wPos_t,
 				wDrawWidth, wDrawLineType_e, wDrawColor, wDrawOpts );
 void psPrintArc( wPos_t, wPos_t, wPos_t, double, double, int,
 				wDrawWidth, wDrawLineType_e, wDrawColor, wDrawOpts );
-void psPrintString( wPos_t, wPos_t, double, const char *,
-				wFont_p, double, wDrawColor, wDrawOpts );
+void psPrintString( wPos_t x, wPos_t y, double a, char * s,
+				wFont_p fp,	double fs,	wDrawColor color,	wDrawOpts opts );
+
 void psPrintFillRectangle( wPos_t, wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
 void psPrintFillPolygon( wPos_t [][2], int, wDrawColor, wDrawOpts );
 void psPrintFillCircle( wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/psprint.c,v 1.3 2008-01-20 22:32:22 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/psprint.c,v 1.4 2008-02-01 19:34:27 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -32,8 +32,13 @@
 #include <malloc.h>
 #endif
 #include <math.h>
+#include <locale.h>
+
+#include <gtk/gtk.h>
+
+#include "gtkint.h"
 #include "wlib.h"
-#include "dynarr.h"
+/* #include "dynarr.h" */
 #include "i18n.h"
 
 #ifndef TRUE
@@ -43,7 +48,7 @@
 
 #define MM(m) ((m)/25.4)
 
-char * gtkFontTranslate( wFont_p );
+/* char * gtkFontTranslate( wFont_p ); */
 extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
 
@@ -59,7 +64,7 @@ extern wDrawColor wDrawColorBlack;
 #define PRINT_PORTRAIT  (0)
 #define PRINT_LANDSCAPE (1)
  
-#define max(a,b) ((a)>(b) ? (a) : (b))
+/* #define MAXIMUM(a,b) ((a)>(b) ? (a) : (b)) */
 #define min(a,b) ((a)<(b) ? (a) : (b))
 #define PPI (72.0)
 #define P2I( P ) ((P)/PPI)
@@ -81,12 +86,13 @@ extern wDrawColor wDrawColorBlack;
 
 extern struct wDraw_t psPrint_d;
 
+/*
 typedef struct {
 		wIndex_t cmdOrFile;
 		FILE * f;
 		} wPrinterStream_t;
 typedef wPrinterStream_t * wPrinterStream_p;
-
+*/
 static wBool_t printContinue;
 static wWin_p printAbortW;
 static wMessage_p printAbortT;
@@ -220,6 +226,27 @@ dynArr_t margins_da;
 static void printFileNameSel( void * junk );
 static void printInit( void );
 
+/**
+ * This function does a normal printf but uses the default C locale as decimal separator.
+ *
+ * \param temple IN printf-like format string 
+ * ... IN parameters according to format string
+ * \return    describe the return value
+ */
+
+static void
+psPrintf (FILE *ps, const char *template, ...)
+{
+	va_list ap;
+  
+  	setlocale( LC_NUMERIC, "C" );
+		   
+   va_start( ap, template );
+   vfprintf( ps, template, ap );
+   va_end( ap );
+	
+  	setlocale( LC_NUMERIC, "" );	
+}
 
 void wPrintSetup( wPrintSetupCallBack_p callback )
 {
@@ -332,10 +359,15 @@ static wIndex_t wPrintNewMargin(
 	int rc;
 	DYNARR_APPEND( margins_t, margins_da, 10 );
 	m = &margins(margins_da.cnt-1);
+	
+	setlocale( LC_NUMERIC, "C" );
 	if ((rc=sscanf( value, "%lf %lf %lf %lf", &m->t, &m->b, &m->r, &m->l ))!=4) {
 		margins_da.cnt--;
+		setlocale( LC_NUMERIC, "" );
 		return FALSE;
 	}
+	setlocale( LC_NUMERIC, "" );
+	
 	m->name = strdup( name );
 	if (optMarginB)
 		wListAddValue( optMarginB, name, NULL, NULL );
@@ -448,7 +480,7 @@ static void setLineType(
 
 	if (lineWidth != currLineWidth) {
 		currLineWidth = lineWidth;
-		fprintf( psFile, "%0.3f setlinewidth\n", currLineWidth/DPI );
+		psPrintf( psFile, "%0.3f setlinewidth\n", currLineWidth/PPI );
 	}
 
 	if (lineType == wDrawLineDash)
@@ -459,10 +491,10 @@ static void setLineType(
 		currentLT = want;
 		switch (want) {
 		case PS_LT_DASH:
-			fprintf( psFile, "[%0.3f %0.3f] 0 setdash\n", P2I(2), P2I(2) );
+			psPrintf( psFile, "[%0.3f %0.3f] 0 setdash\n", P2I(2), P2I(2) );
 			break;
 		case PS_LT_SOLID:
-			fprintf( psFile, "[] 0 setdash\n" );
+			psPrintf( psFile, "[] 0 setdash\n" );
 			break;
 		}
 	}
@@ -500,7 +532,7 @@ void psPrintLine(
 		return;
 	psSetColor(color);
 	setLineType( width, lineType, opts );
-	fprintf(psFile,
+	psPrintf(psFile,
 				"%0.3f %0.3f moveto %0.3f %0.3f lineto closepath stroke\n",
 				D2I(x0), D2I(y0), D2I(x1), D2I(y1) );
 }
@@ -531,7 +563,7 @@ void psPrintArc(
 	angle0 = 90.0-angle0;
 	while (angle0 < 0.0) angle0 += 360.0;
 	while (angle0 >= 360.0) angle0 -= 360.0;
-	fprintf(psFile,
+	psPrintf(psFile,
 		"newpath %0.3f %0.3f %0.3f %0.3f %0.3f arc stroke\n",
 		D2I(x0), D2I(y0), D2I(r), angle1, angle0 );
 }
@@ -548,7 +580,7 @@ void psPrintFillRectangle(
 	if (opts&wDrawOptTemp)
 		return;
 	psSetColor(color);
-	fprintf(psFile,
+	psPrintf(psFile,
 				"%0.3f %0.3f moveto %0.3f %0.3f lineto closepath fill\n",
 				D2I(x0), D2I(y0), D2I(x1), D2I(y1) );
 }
@@ -566,10 +598,10 @@ void psPrintFillPolygon(
 	if (opts&wDrawOptTemp)
 		return;
 	psSetColor(color);
-	fprintf( psFile, "%0.3f %0.3f moveto ", D2I(p[0][0]), D2I(p[0][1]) );
+	psPrintf( psFile, "%0.3f %0.3f moveto ", D2I(p[0][0]), D2I(p[0][1]) );
 	for (inx=0; inx<cnt; inx++)
-		fprintf( psFile, "%0.3f %0.3f lineto ", D2I(p[inx][0]), D2I(p[inx][1]) );
-	fprintf( psFile, "closepath fill\n" );
+		psPrintf( psFile, "%0.3f %0.3f lineto ", D2I(p[inx][0]), D2I(p[inx][1]) );
+	psPrintf( psFile, "closepath fill\n" );
 }
 
 
@@ -584,7 +616,7 @@ void psPrintFillCircle(
 	if (opts&wDrawOptTemp)
 		return;
 	psSetColor(color);
-	fprintf(psFile,
+	psPrintf(psFile,
 		"newpath %0.3f %0.3f %0.3f 0.0 360.0 arc fill\n",
 		D2I(x0), D2I(y0), D2I(r) );
 }
@@ -612,22 +644,22 @@ void psPrintString(
 		return;
 	psSetColor( color );
 	setLineType(currLineWidth, wDrawLineSolid, opts);
-	fprintf(psFile,
+	psPrintf(psFile,
 		"/%s findfont %0.3f scalefont setfont\n"
 		"gsave\n"
 		"%0.3f %0.3f translate %0.3f rotate 0 0 moveto\n(",
 		findPSFont(fp), fs, D2I(x), D2I(y), a );
 	for (cp=s; *cp; cp++) {
 		if (*cp == '(' || *cp == ')')
-			fprintf(psFile, "\\" );
-		fprintf(psFile, "%c", *cp);
+			psPrintf(psFile, "\\" );
+		psPrintf(psFile, "%c", *cp);
 	}
-	fprintf(psFile, ") show\ngrestore\n" );
+	psPrintf(psFile, ") show\ngrestore\n" );
 }
 
 void wPrintClip( wPos_t x, wPos_t y, wPos_t w, wPos_t h )
 {
-	fprintf( psFile, "\
+	psPrintf( psFile, "\
 %0.3f %0.3f moveto \n\
 %0.3f %0.3f lineto \n\
 %0.3f %0.3f lineto \n\
@@ -680,6 +712,12 @@ static void printAbort( void * context )
 	wWinShow( printAbortW, FALSE );
 }
 
+/**
+ * Initialize new page.
+ *
+ * \return    ???
+ */
+
 
 wDraw_p wPrintPageStart( void )
 {
@@ -687,23 +725,25 @@ wDraw_p wPrintPageStart( void )
 
 	if (psFile == NULL)
 		return NULL;
+		
 	pageCount++;
-	fprintf( psFile, "\
-%%Page: %d %d\n\
-save\n\
-gsave\n\
-0 setlinewidth\n\
-",
-		pageCount, (totalPageCount>0?totalPageCount:pageCount) );
+	psPrintf( psFile, 
+	 			"%%Page: %d %d\n" \
+				"save\n" \
+				"gsave\n" \
+				"0 setlinewidth\n",
+				pageCount, 
+				(totalPageCount>0?totalPageCount:pageCount) );
 
 	if (printFormat == PRINT_LANDSCAPE) {
-		fprintf(psFile, "%0.3f %0.3f translate -90 rotate\n", lBorder*PPI, (papers[curPaper].h-tBorder)*PPI);
+		psPrintf(psFile, "%0.3f %0.3f translate -90 rotate\n", lBorder*PPI, (papers[curPaper].h-tBorder)*PPI);
 	} else {
-		fprintf(psFile, "%0.3f %0.3f translate 0 rotate\n", lBorder*PPI, bBorder*PPI);
+		psPrintf(psFile, "%0.3f %0.3f translate 0 rotate\n", lBorder*PPI, bBorder*PPI);
 	}
 		
-	fprintf( psFile, "72.0 72.0 scale\n" );
-	fprintf( psFile, "/Times-Bold findfont %0.3f scalefont setfont\n",
+	psPrintf( psFile, "%0.1f %0.1f scale\n", PPI, PPI );
+	
+	psPrintf( psFile, "/Times-Bold findfont %0.3f scalefont setfont\n",
 				P2I(16) );
 
 	sprintf( tmp, _("Page %d"), pageCount );
@@ -714,14 +754,21 @@ gsave\n\
 	return &psPrint_d;
 }
 
+/**
+ * End of page
+ *
+ * \param p IN ignored
+ * \return    always printContinue
+ */
+
 
 wBool_t wPrintPageEnd( wDraw_p p )
 {
-	fprintf(psFile, "\
-grestore\n\
-restore\n\
-showpage\n\
-" );
+	psPrintf( psFile,
+				"grestore\n" \
+				"restore\n" \
+				"showpage\n" );
+				
 	return printContinue;
 }
 
@@ -731,9 +778,34 @@ showpage\n\
  *
  */
 
+/**
+ * Allow the user to enter a new file name and location for the file.
+ * Thanks to Andrew Krause's great book Foundations of GTK+ Development 
+ * for this code snippet.
+ *
+ * \param junk IN ignored
+ */
+
 static void printFileNameSel( void * junk )
 {
-	wWinShow( printFileW, FALSE );
+  GtkWidget *dialog;
+  gchar *filename;
+  gint result;
+  
+  dialog = gtk_file_chooser_dialog_new (_("Print to file ..."), (GtkWindow *)printSetupW->gtkwin,
+                                        GTK_FILE_CHOOSER_ACTION_SAVE,
+                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+                                        GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+                                        NULL);
+
+  result = gtk_dialog_run (GTK_DIALOG (dialog));
+  if (result == GTK_RESPONSE_ACCEPT)
+  {
+    filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
+	 strcpy( sPrintFileName, filename );
+  }
+  
+  gtk_widget_destroy (dialog);
 }
 
 
@@ -751,7 +823,8 @@ wPrinterStream_p wPrinterOpen( void )
 	f = NULL;
 	curPsFont = NULL;
 	if (curPrinter == 0 ) {
-		wWinShow( printFileW, TRUE );
+/*		wWinShow( printFileW, TRUE ); */
+		printFileNameSel( NULL );
 		if ( sPrintFileName[0] == '\0' ) {
 			wNotice( _("No file name specified"), _("Ok"), NULL );
 			return NULL;
@@ -800,6 +873,15 @@ void wPrinterClose( wPrinterStream_p p )
 		pclose( p->f );
 }
 
+/**
+ * Start a new Postscript document
+ *
+ * \param title IN title of document ( name of layout )
+ * \param fTotalPageCount IN number of pages to print
+ * \param copiesP OUT ???
+ * \return TRUE if successful
+ */
+
 wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 {
 	char tmp[80];
@@ -810,25 +892,24 @@ wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 		return FALSE;
 	psFile = psFileStream->f;
 
-	fprintf( psFile, "\
-%%!PS-Adobe-1.0\n\
-%%%%DocumentFonts: Courier\n\
-%%%%Title: <stdin> (trkcad)\n\
-%%%%Creator: xtrkcad\n\
-%%%%Pages: (atend)\n\
-%%%%BoundingBox: %ld %ld %ld %ld\n\
-%%%%EndComments\n\
-\n\
-/mp_stm usertime def\n\
-/mp_pgc statusdict begin pagecount end def\n\
-statusdict begin /jobname (<stdin>) def end\n\
-%%%%EndProlog\n\
-0 setlinecap\n\
-", 
-	(long)floor(margins(curMargin).l*72),
-	(long)floor(margins(curMargin).b*72),
-	(long)floor((papers[curPaper].w-margins(curMargin).r)*72),
-	(long)floor((papers[curPaper].h-margins(curMargin).t)*72) );
+	psPrintf( psFile, "%%!PS-Adobe-1.0\n" \
+						  "%%%%DocumentFonts: Courier\n" \
+						  "%%%%Title: %s\n" \
+						  "%%%%Creator: XTrackCAD\n" \
+                    "%%%%Pages: (atend)\n" \
+                    "%%%%BoundingBox: %ld %ld %ld %ld\n" \
+                    "%%%%EndComments\n\n" \
+						  "/mp_stm usertime def\n" \
+						  "/mp_pgc statusdict begin pagecount end def\n" \
+                    "statusdict begin /jobname (<stdin>) def end\n" \
+                    "%%%%EndProlog\n" \
+                    "0 setlinecap\n", 
+							title,
+        					(long)floor(margins(curMargin).l*72),
+							(long)floor(margins(curMargin).b*72),
+							(long)floor((papers[curPaper].w-margins(curMargin).r)*72),
+							(long)floor((papers[curPaper].h-margins(curMargin).t)*72) );
+							
 	printContinue = TRUE;
 	sprintf( tmp, _("Now printing %s"), title );
 	wMessageSetValue( printAbortT, tmp );
@@ -845,11 +926,11 @@ void wPrintDocEnd( void )
 {
 	if (psFile == NULL)
 		return;
-	fprintf( psFile, "\
-%%Trailer\n\
-%%Pages: %d\n\
-",
-		pageCount );
+		
+	psPrintf( psFile, 
+				"%%Trailer\n%%Pages: %d\n",
+				pageCount );
+				
 	wPrinterClose( psFileStream );
 	wWinShow( printAbortW, FALSE );
 }
@@ -863,10 +944,13 @@ wBool_t wPrintQuit( void )
 
 static void pLine( double x0, double y0, double x1, double y1 )
 {
-	fprintf( psFile, "%0.3f %0.3f moveto %0.3f %0.3f lineto stroke\n",
+	psPrintf( psFile, "%0.3f %0.3f moveto %0.3f %0.3f lineto stroke\n",
 		x0, y0, x1, y1 );	
 }
 
+/**
+ * Generate a test page that helps setting up printer margins.
+ */
 
 static void pTestPage( void )
 {
@@ -887,54 +971,54 @@ static void pTestPage( void )
 	h = papers[curPaper].h;
 	if ( psFile == NULL )
 		return;
-	fprintf( psFile, "72.0 72.0 scale\n");
-	fprintf( psFile, "0.0 setlinewidth\n");
+	psPrintf( psFile, "72.0 72.0 scale\n");
+	psPrintf( psFile, "0.0 setlinewidth\n");
 
-#define MAX (100)
+#define MAXIMUM (100)
 
-	fprintf( psFile, "/Times-Roman findfont 0.06 scalefont setfont\n" );
-	for ( i=5; i<=MAX; i+=5 ) {
+	psPrintf( psFile, "/Times-Roman findfont 0.06 scalefont setfont\n" );
+	for ( i=5; i<=MAXIMUM; i+=5 ) {
 		x0 = ((double)i)/100;
 		pLine( 0.5, x0, w-0.5, x0 );
 		pLine( 0.5, h-x0, w-0.5, h-x0 );
 		pLine( x0, 0.5, x0, h-0.5 );
 		pLine( w-x0, 0.5, w-x0, h-0.5 );
 
-		fprintf( psFile, "%0.3f %0.3f moveto (%0.2f) show\n",
-				1.625 + x0*5 - 0.05, 0.2+MAX/100.0, x0 );
-		pLine( 1.625 + x0*5, (0.2+MAX/100.0), 1.625 + x0*5, x0 );
-		fprintf( psFile, "%0.3f %0.3f moveto (%0.2f) show\n",
-				1.625 + x0*5 - 0.05, h-(0.2+MAX/100.0)-0.05, x0 );
-		pLine( 1.625 + x0*5, h-(0.2+MAX/100.0), 1.625 + x0*5, h-x0 );
+		psPrintf( psFile, "%0.3f %0.3f moveto (%0.2f) show\n",
+				1.625 + x0*5 - 0.05, 0.2+MAXIMUM/100.0, x0 );
+		pLine( 1.625 + x0*5, (0.2+MAXIMUM/100.0), 1.625 + x0*5, x0 );
+		psPrintf( psFile, "%0.3f %0.3f moveto (%0.2f) show\n",
+				1.625 + x0*5 - 0.05, h-(0.2+MAXIMUM/100.0)-0.05, x0 );
+		pLine( 1.625 + x0*5, h-(0.2+MAXIMUM/100.0), 1.625 + x0*5, h-x0 );
 
-		fprintf( psFile, "%0.3f %0.3f moveto (%0.2f) show\n",
-				(0.2+MAX/100.0), 1.625 + x0*5-0.020, x0 );
-		pLine( (0.2+MAX/100.0), 1.625 + x0*5, x0, 1.625 + x0*5 );
-		fprintf( psFile, "%0.3f %0.3f moveto (%0.2f) show\n",
-				w-(0.2+MAX/100.0)-0.10, 1.625 + x0*5-0.020, x0 );
-		pLine( w-(0.2+MAX/100.0), 1.625 + x0*5, w-x0, 1.625 + x0*5 );
+		psPrintf( psFile, "%0.3f %0.3f moveto (%0.2f) show\n",
+				(0.2+MAXIMUM/100.0), 1.625 + x0*5-0.020, x0 );
+		pLine( (0.2+MAXIMUM/100.0), 1.625 + x0*5, x0, 1.625 + x0*5 );
+		psPrintf( psFile, "%0.3f %0.3f moveto (%0.2f) show\n",
+				w-(0.2+MAXIMUM/100.0)-0.10, 1.625 + x0*5-0.020, x0 );
+		pLine( w-(0.2+MAXIMUM/100.0), 1.625 + x0*5, w-x0, 1.625 + x0*5 );
 	}
 
-	fprintf( psFile, "/Times-Bold findfont 0.20 scalefont setfont\n" );
-	fprintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-2.0, "Printer Margin Setup" );
-	fprintf( psFile, "/Times-Roman findfont 0.12 scalefont setfont\n" );
-	fprintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-2.15, 
+	psPrintf( psFile, "/Times-Bold findfont 0.20 scalefont setfont\n" );
+	psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-2.0, "Printer Margin Setup" );
+	psPrintf( psFile, "/Times-Roman findfont 0.12 scalefont setfont\n" );
+	psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-2.15, 
 		"Enter the position of the first visible line for each margin on the Printer Setup dialog");
 	if ( curMargin < margins_da.cnt )
-		fprintf( psFile, "%0.3f %0.3f moveto ("
+		psPrintf( psFile, "%0.3f %0.3f moveto ("
 			"Current margins for the %s printer are: Top: %0.3f, Left: %0.3f, Right: %0.3f, Bottom: %0.3f"
 			") show\n", 2.0, h-2.30,
 			margins(curMargin).name, margins(curMargin).t, margins(curMargin).l, margins(curMargin).r, margins(curMargin).b );
 
 
-	fprintf( psFile, "/Times-Bold findfont 0.20 scalefont setfont\n" );
-	fprintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-3.0, "Font Map" );
+	psPrintf( psFile, "/Times-Bold findfont 0.20 scalefont setfont\n" );
+	psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-3.0, "Font Map" );
 	for (i=j=0; 0.2*j < h-5.0 && (psFont = wPrefGetSectionItem( WFONT, &i, &xFont )) != NULL; j++ ) {
 		if ( psFont[0] == '\0' ) continue;
-		fprintf( psFile, "/Times-Roman findfont 0.12 scalefont setfont\n" );
-		fprintf( psFile, "%0.3f %0.3f moveto (%s -> %s) show\n", 2.0, h-3.15-0.15*j, xFont, psFont );
-		fprintf( psFile, "/%s findfont 0.12 scalefont setfont\n", psFont );
-		fprintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 5.5, h-3.15-0.15*j, "ABCD wxyz 0123 -+$!" );
+		psPrintf( psFile, "/Times-Roman findfont 0.12 scalefont setfont\n" );
+		psPrintf( psFile, "%0.3f %0.3f moveto (%s -> %s) show\n", 2.0, h-3.15-0.15*j, xFont, psFont );
+		psPrintf( psFile, "/%s findfont 0.12 scalefont setfont\n", psFont );
+		psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 5.5, h-3.15-0.15*j, "ABCD wxyz 0123 -+$!" );
 	}
 	x0 = 0.5;
 	run = TRUE;
@@ -947,7 +1031,7 @@ static void pTestPage( void )
 		}
 		for ( j = 1; j<5; j++ ) {
 			y0 = ((double)(i+j))/100;
-			for (k=0; k<MAX/25; k++) {
+			for (k=0; k<MAXIMUM/25; k++) {
 				pLine( x0, y0+k*0.25, x1, y0+k*0.25 );
 				pLine( x0, h-y0-k*0.25, x1, h-y0-k*0.25 );
 			}
@@ -969,7 +1053,7 @@ static void pTestPage( void )
 		}
 		for ( j = 1; j<5; j++ ) {
 			x0 = ((double)(i+j))/100;
-			for (k=0; k<MAX/25; k++) {
+			for (k=0; k<MAXIMUM/25; k++) {
 			   pLine( x0+k*0.25, y0, x0+k*0.25, y1 );
 			   pLine( w-x0-k*0.25, y0, w-x0-k*0.25, y1 );
 			}
@@ -980,7 +1064,7 @@ static void pTestPage( void )
 		   i = 0;
 	}
 
-	fprintf( psFile, "showpage\n");
+	psPrintf( psFile, "showpage\n");
 	wPrintDocEnd();
 	curPrinter = oldPrinter;
 }

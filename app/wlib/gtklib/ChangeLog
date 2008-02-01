@@ -1,3 +1,8 @@
+Feb 01. 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		psprint.c, gtkint.h: added file selector for print to file, made
+		Postscript digit representation independent of current locale
+		
 Jan 28, 2008
 	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
 		gtkfilsel.c: Gettext support added.
