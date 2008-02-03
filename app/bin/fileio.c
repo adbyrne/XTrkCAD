@@ -1,7 +1,7 @@
 /** \file fileio.c
  * Loading and saving files. Handles trackplans as well as DXF export. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.16 2008-01-27 15:52:36 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.17 2008-02-03 08:49:50 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -886,6 +886,13 @@ EXPORT int LoadTracks(
 	return TRUE;
 }
 
+/**
+ * Load the layout specified by data. Filename may contain a full
+ * path.
+ * \param index IN ignored
+ * \param label IN ignored
+ * \param data IN filename 
+ */
 
 EXPORT void DoFileList(
 		int index,
@@ -1024,7 +1031,8 @@ EXPORT void DoCheckPoint( void )
 	wHide( checkPointingW );
 }
 
-/* Remove all temporary files before exiting.When the program terminates 
+/**
+ * Remove all temporary files before exiting.When the program terminates 
  * normally through the exit choice, files that are created temporarily are removed: 
  * xtrkcad.ckp
  *
@@ -1039,7 +1047,8 @@ EXPORT void CleanupFiles( void )
 		remove( checkPtFileName1 );
 }	
 
-/* Check for existance of checkpoint file. Existance of a checkpoint file means that XTrkCAD was not properly 
+/**
+ * Check for existance of checkpoint file. Existance of a checkpoint file means that XTrkCAD was not properly 
  * terminated.
  *
  * \param none
@@ -1090,9 +1099,9 @@ EXPORT int ExistsCheckpoint( void )
 
 }
 
-/* \brief Load checkpoint file 
+/**
+ * Load checkpoint file 
  *
- * \param none
  * \return TRUE if exists, FALSE otherwise
  *
  */

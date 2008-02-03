@@ -1,3 +1,7 @@
+Feb 03, 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		messages.in: added tooltip for new option 'onstartup'
+		
 Jan 27, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		messages.in: new product name is XTrackCAD

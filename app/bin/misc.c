@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.28 2008-01-28 06:34:08 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.29 2008-02-03 08:49:50 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -94,6 +94,8 @@ EXPORT long paramVersion = -1;
 EXPORT coOrd zero = { 0.0, 0.0 };
 
 EXPORT wBool_t extraButtons = FALSE;
+
+EXPORT long onStartup;
 
 EXPORT wButton_p undoB;
 EXPORT wButton_p redoB;
@@ -494,6 +496,9 @@ static void ChkFileList( int index, const char * label, void * data )
 	Confirm( _("Load"), AfterFileList );
 }
 
+/**
+ * Save information about current files and some settings to preferences file. 
+ */
 
 EXPORT void SaveState( void )
 {
@@ -508,6 +513,9 @@ EXPORT void SaveState( void )
 	wPrefSetInteger( "draw", "mainheight", height );
 	RememberParamFiles();
 	ParamUpdatePrefs();
+	
+	wPrefSetString( "misc", "lastlayout", curPathName );
+	
 	if ( fileList_ml ) {
 		strcpy( file, "file" );
 		file[5] = 0;
@@ -2446,6 +2454,7 @@ EXPORT wWin_p wMain(
 	long newToolbarMax;
 	char *cp;
 	char *oldLocale = NULL;
+	long resumeLayout;
 
 	initialZoom = 0;
 	initialFile = NULL;
@@ -2660,6 +2669,17 @@ LOG1( log_init, ( "Reset\n" ) )
 	 
 	pref = wPrefGetString( "misc", "scale" );
 	DoSetScale( pref );
+
+	/* see whether last layout should be reopened on startup */   
+	wPrefGetInteger( "DialogItem", "pref-onstartup", &onStartup, 0 );
+	
+	/* if work is to be resumed and no filename was given on startup, load last layout */
+	if( (onStartup == 0) && !initialFile ) {
+		initialFile = (char*)wPrefGetString( "misc", "lastlayout" );
+		/* if preference is empty, no file is to be loaded */
+		if( !*initialFile )
+			initialFile = NULL;
+	}	
 
 	if (initialFile) {
 		DoFileList( 0, NULL, initialFile );

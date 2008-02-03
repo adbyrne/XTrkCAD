@@ -430,9 +430,10 @@ pref-dragpixels	How far you can move the mouse before its considered a drag	cmdP
 pref-dragtimeout	How long you can hold a mouse button down before its considered a drag	cmdPref
 pref-autoPan	Move the Main canvas if you drag near the edge	cmdPref
 pref-listlabels	Label elements for lists	cmdPref
-pref-mintrackradius	Tracks with tighter radius than this are Exceptional	cmdPref
-pref-maxtrackgrade	Tracks with grades steeper than this are Exceptional	cmdPref
+pref-mintrackradius	Tracks with tighter radius than this are exceptional	cmdPref
+pref-maxtrackgrade	Tracks with grades steeper than this are exceptional	cmdPref
 pref-trainpause	Delay (in mS) between updating train movements	cmdPref
+pref-onstartup	Resume work on last layout or start with new layout	cmdPref
 pref-ok		cmdPref
 #
 pricelist-cost	Updated cost of current selected item	cmdPricelist

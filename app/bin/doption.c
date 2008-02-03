@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.4 2008-02-03 08:49:50 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -351,6 +351,7 @@ extern long trainPause;
 static wIndex_t distanceFormatInx;
 static char * unitsLabels[] = { N_("English"), N_("Metric"), NULL };
 static char * angleSystemLabels[] = { N_("Polar"), N_("Cartesian"), NULL };
+static char * startOptions[] = { N_("load last layout"), N_("start with blank layout"), NULL };
 static char * autoPanLabels[] = { "", NULL };
 
 static paramData_t prefPLs[] = {
@@ -369,7 +370,10 @@ static paramData_t prefPLs[] = {
 	{ PD_FLOAT, &minTrackRadius, "mintrackradius", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r1_10000, N_("Minimum Track Radius"), 0, (void*)(CHANGE_MAIN) },
 		/*minTrackRadiusPrefS*/
 	{ PD_FLOAT, &maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD, &r0_90 , N_("Maximum Track Grade"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000 , N_("Train Update Delay"), 0, 0 } };
+	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000 , N_("Train Update Delay"), 0, 0 },
+	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT, startOptions, N_("On Program Startup"), 0, NULL }
+	
+	};
 static paramGroup_t prefPG = { "pref", PGO_RECORD|PGO_PREFMISC, prefPLs, sizeof prefPLs/sizeof prefPLs[0] };
 
 

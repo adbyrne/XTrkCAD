@@ -1,3 +1,8 @@
+Feb 03, 2008
+	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
+		misc.c, misc.h doption.c: on startup last file can now be loaded automatically.
+		This behavior is controled by an option in the preferences dialog.
+
 Jan 28, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		misc.c: Product name changed in font selection dialog.

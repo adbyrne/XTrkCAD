@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.5 2007-07-22 17:02:43 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.6 2008-02-03 08:49:50 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -82,6 +82,7 @@ extern long listLabels;
 extern long layoutLabels;
 extern long descriptionFontSize;
 extern long units;
+extern long onStartup;
 extern long angleSystem;
 extern SCALEINX_T curScaleInx;
 extern GAUGEINX_T curGaugeInx;
