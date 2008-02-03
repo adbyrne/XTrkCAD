@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprint.c,v 1.4 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprint.c,v 1.5 2008-02-03 08:52:31 m_fischer Exp $
  *
  * PRINT
  *
@@ -340,7 +340,8 @@ static void PrintGaudyBox(
 	/*GetTitle();*/
 	time(&clock);
 	tm = localtime(&clock);
-	strftime( dat, sizeof dat, "%a %y %b %d", tm );
+/*	strftime( dat, sizeof dat, "%a %y %b %d", tm ); */
+	strftime( dat, STR_SIZE, "%x", tm );
 
 	smiggin = wDrawGetDPI( print_d.d );
 	if (smiggin>4.0)

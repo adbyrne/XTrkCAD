@@ -1,5 +1,9 @@
 Feb 03, 2008
-	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		cprint.c: printout of date is correctly localized now.
+
+Feb 03, 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		misc.c, misc.h doption.c: on startup last file can now be loaded automatically.
 		This behavior is controled by an option in the preferences dialog.
 
