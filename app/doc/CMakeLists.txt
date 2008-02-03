@@ -60,6 +60,11 @@ IF(XTRKCAD_USE_GTK)
 		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/html
 		)
 
+	INSTALL(
+		FILES xtrkcad_lin.css
+		DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/html
+		)
+
 # Otherwise, we're using the Win32 back-end, so generate a compiled HTML help file
 ELSE(XTRKCAD_USE_GTK)
 
