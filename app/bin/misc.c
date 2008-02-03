@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.29 2008-02-03 08:49:50 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.30 2008-02-03 18:12:02 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2676,12 +2676,9 @@ LOG1( log_init, ( "Reset\n" ) )
 	/* if work is to be resumed and no filename was given on startup, load last layout */
 	if( (onStartup == 0) && !initialFile ) {
 		initialFile = (char*)wPrefGetString( "misc", "lastlayout" );
-		/* if preference is empty, no file is to be loaded */
-		if( !*initialFile )
-			initialFile = NULL;
 	}	
 
-	if (initialFile) {
+	if (initialFile && strlen(initialFile)) {
 		DoFileList( 0, NULL, initialFile );
 	}
 
