@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cnote.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cnote.c,v 1.4 2008-02-04 12:05:54 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -187,9 +187,9 @@ static void DescribeNote( track_p trk, char * str, CSIZE_T len )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
 
-	strcpy( str, "Note: " );
-	len -= 6;
-	str += 6;
+	strcpy( str, _("Note: ") );
+	len -= strlen(_("Note: "));
+	str += strlen(_("Note: "));
 	strncpy( str, xx->text, len );
 	for (;*str;str++) {
 		if (*str=='\n')

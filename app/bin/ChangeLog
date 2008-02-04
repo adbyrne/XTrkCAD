@@ -1,3 +1,7 @@
+Feb 04, 2008
+	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
+		cnote.c: Minor fix to internationalization.
+
 Feb 03, 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		cprint.c: printout of date is correctly localized now.
