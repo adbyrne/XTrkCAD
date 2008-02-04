@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.8 2008-01-16 18:50:32 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.9 2008-02-04 00:37:12 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -29,15 +29,11 @@
 #include <string.h>
 #include <locale.h>
 
-#include <X11/X.h>
-#include <X11/Xlib.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
 
 #include "gtkint.h"
-
-extern Display * gdk_display;
 
 wWin_p gtkMainW;
 
@@ -352,8 +348,7 @@ EXPORT void wBeep(
 Beep!
 */
 {
-	if (gdk_display)
-		XBell( gdk_display, 0 );
+	gdk_display_beep(gdk_display_get_default());
 }
 
 typedef struct {
@@ -526,9 +521,7 @@ Flushs all commands to the Window.
 	while ( gtk_events_pending() )
 		gtk_main_iteration();
 
-	if (gdk_display)
-		/*XFlush( gtkGlobalDisplay );*/
-		XSync( gdk_display, FALSE );
+	gdk_display_sync(gdk_display_get_default());
 }
 
 
@@ -841,8 +834,8 @@ Pause for <count> milliseconds.
 	sigset_t signal_mask;
 	sigset_t oldsignal_mask;
 	
-	if (gdk_display)
-		XFlush( gdk_display );
+	gdk_display_sync(gdk_display_get_default());
+	
 	timeout.tv_sec = count/1000;
 	timeout.tv_usec = (count%1000)*1000;
 	
