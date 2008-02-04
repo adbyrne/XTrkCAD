@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.30 2008-02-03 18:12:02 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.31 2008-02-04 18:02:54 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1654,7 +1654,7 @@ void MenuPlayback( char * line )
 			mainD.CoOrd2Pix( &mainD, pos, &x, &y );
 			MovePlaybackCursor( &mainD, x, y );
 			oldMarker = cmdMenuPos = pos;
-			wMenuAction( mt->menu, itemName );
+			wMenuAction( mt->menu, _(itemName) );
 			return;
 		}
 	}

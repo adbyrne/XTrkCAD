@@ -1,5 +1,9 @@
 Feb 04, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
+		misc.c: Fixed an internationalization bug in MenuPlayback.
+
+Feb 04, 2008
+	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		cnote.c: Minor fix to internationalization.
 
 Feb 03, 2008
