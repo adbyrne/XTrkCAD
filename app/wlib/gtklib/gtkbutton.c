@@ -1,7 +1,7 @@
 /** \file gtkbutton.c
  * Toolbar button creation and handling
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbutton.c,v 1.6 2008-02-06 04:29:06 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbutton.c,v 1.7 2008-02-06 09:50:32 mni77 Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -345,9 +345,9 @@ EXPORT wChoice_p wRadioCreate(
 	gtkComputePos( (wControl_p)b );
 
 	if (option&BC_HORZ)
-		b->widget = gtk_hbox_new( FALSE, 10 );
+		b->widget = gtk_hbox_new( FALSE, 0 );
 	else
-		b->widget = gtk_vbox_new( FALSE, 10 );
+		b->widget = gtk_vbox_new( FALSE, 0 );
 	if (b->widget == 0) abort();
 	for ( label=labels; *label; label++ ) {
 		butt = gtk_radio_button_new_with_label( 
