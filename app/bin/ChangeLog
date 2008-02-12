@@ -1,4 +1,8 @@
 Feb 04, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		CMakeLists.txt: Fix missing icon problem for Windows exe 
+
+Feb 04, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		misc.c: Fixed an internationalization bug in MenuPlayback.
 

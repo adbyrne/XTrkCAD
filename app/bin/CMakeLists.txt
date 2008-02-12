@@ -131,6 +131,7 @@ ADD_DEPENDENCIES(xtrkcad-lib Help)
 
 ADD_EXECUTABLE(xtrkcad WIN32
 	misc.c 
+	xtrkcad.rc
 	)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
