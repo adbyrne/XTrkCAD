@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dbitmap.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dbitmap.c,v 1.3 2008-02-14 19:49:19 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -129,7 +129,7 @@ static int SaveBitmapFile(
 }
 
 
-
+
 /*******************************************************************************
  *
  * Output BitMap Dialog
