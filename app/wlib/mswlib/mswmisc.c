@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.13 2008-01-28 06:23:01 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.14 2008-02-16 08:15:54 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -13,8 +13,6 @@
 #include <assert.h>
 #include <htmlhelp.h>
 #include "mswint.h"
-
-int __cdecl _heapwalk(_HEAPINFO *);
 
 #define OFN_LONGFILENAMES		0x00200000L
 
@@ -153,6 +151,7 @@ static FILE * dumpControlsF;
 static int dumpControls;
 
 extern char *userLocale;
+
 
 /*
  *****************************************************************************

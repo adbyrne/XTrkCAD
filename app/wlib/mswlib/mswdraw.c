@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswdraw.c,v 1.4 2007-12-01 15:33:52 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswdraw.c,v 1.5 2008-02-16 08:15:54 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500		/* for wheel mouse supposrt */
@@ -1501,7 +1501,7 @@ static void drawDoneProc( wControl_p b )
 static callBacks_t drawCallBacks = {
 		NULL,
 		drawDoneProc,
-		drawMsgProc };
+		(messageCallback_p)drawMsgProc };
 
 wDraw_p drawList = NULL;
 

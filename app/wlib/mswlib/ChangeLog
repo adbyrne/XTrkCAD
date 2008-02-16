@@ -1,3 +1,7 @@
+Jan 24,2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswdraw.c, mswmisc.c: fixed some compiler warnings 
+
 Jan 28, 2008
 	FIX: Mikko Nissinen <mni77@users.sourceforge.net>
 		mswmisc.c: Dynamically allocate and form some global translatable
