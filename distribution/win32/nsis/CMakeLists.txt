@@ -5,5 +5,11 @@ SET(CPACK_PACKAGE_ICON "${NATIVE_CURRENT_SOURCE_DIR}\\\\headerimage.bmp")
 SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\xtrkcad.exe")
 SET(CPACK_NSIS_HELP_LINK "http://www.xtrkcad.org")
 
+SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
+    "SetShellVarContext current
+	IfFileExists \\\"$APPDATA\\\\XTrackCad\\\\.\\\" +3 0
+	CreateDirectory \\\"$APPDATA\\\\XTrackCad\\\"
+	MessageBox MB_OK \\\"$APPDATA\\\\XTrackCad\\\"" )
+	
 INCLUDE(CPack)
 
