@@ -7,7 +7,11 @@ SET(CPACK_NSIS_HELP_LINK "http://www.xtrkcad.org")
 
 SET(CPACK_NSIS_EXTRA_INSTALL_COMMANDS
 	"; add part specific to XTrackCAD installation
-	!include \\\"${NATIVE_CURRENT_SOURCE_DIR}\\\\xtrkcad.nsh\\\"")
- 	
+	!include \\\"${NATIVE_CURRENT_SOURCE_DIR}\\\\install.nsh\\\"")
+	
+SET(CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS
+	"; add part specific to XTrackCAD uninstall
+	!include \\\"${NATIVE_CURRENT_SOURCE_DIR}\\\\uninstall.nsh\\\"")
+	
 INCLUDE(CPack)
 
