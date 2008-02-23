@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/common.h,v 1.1 2005-12-07 15:47:16 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/common.h,v 1.2 2008-02-23 07:27:15 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -112,6 +112,10 @@ typedef struct {
 #define strncasecmp _strnicmp
 #else
 #define FAR
+#endif
+
+#if _MSC_VER >1300
+	#define strdup _strdup
 #endif
 
 #endif
