@@ -1,3 +1,7 @@
+Feb 23,2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswpref.c: Create the correct full path for shared data directory
+
 Jan 24,2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswdraw.c, mswmisc.c: fixed some compiler warnings 

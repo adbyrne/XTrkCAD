@@ -16,6 +16,12 @@ char * mswStrdup( const char * );
 static char appLibDirName[MAX_PATH];
 static char appWorkDirName[MAX_PATH];
 
+/**
+ * Get the location of the shared files (parameters, help file, etc. ): This location is
+ * derived from the modulename, ie. the directory where the exe is installed.
+ * For an instalaltion directory of somedir/bin/xtrkcad.exe the library directory is
+ * somedir/share/xtrkcad/
+ */
 
 const char * wGetAppLibDir( void )
 {
@@ -34,6 +40,7 @@ const char * wGetAppLibDir( void )
 #ifdef XTRKCAD_CMAKE_BUILD
 	strcpy(appLibDirName, module_name);
 	strcat(appLibDirName, "\\..\\share\\xtrkcad");
+	_fullpath( appLibDirName, appLibDirName, MAX_PATH );
 	return appLibDirName;
 #endif	
 
