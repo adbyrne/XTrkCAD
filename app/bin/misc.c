@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.31 2008-02-04 18:02:54 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.32 2008-02-24 14:28:35 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2454,7 +2454,6 @@ EXPORT wWin_p wMain(
 	long newToolbarMax;
 	char *cp;
 	char *oldLocale = NULL;
-	long resumeLayout;
 
 	initialZoom = 0;
 	initialFile = NULL;
