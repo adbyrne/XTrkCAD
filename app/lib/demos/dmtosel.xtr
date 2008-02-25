@@ -272,10 +272,10 @@ BIGPAUSE
 CLEAR
 MESSAGE
 
-Pressing Cancel ends the <Turnout> command.
+Pressing Close ends the <Turnout> command.
 END
 STEP
-PARAMETER turnout cancel
+PARAMETER turnout ok
 MESSAGE
 =========================================
 END
