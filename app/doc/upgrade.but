@@ -1,3 +1,8 @@
+\# Notes:
+\#
+\# The "\u000" command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
+\#
+
 \A{upgrades} Upgrade From Earlier \e{XTrackCAD} Version
 
 This section contains helpful information regarding program changes and the effects such may have with respect to layout files made with previous versions of \e{XTrackCAD}.
@@ -6,7 +11,7 @@ This section contains helpful information regarding program changes and the effe
 
 \H{cmdUpdatetitle} Version 2.x
 
-\e{Updated Titles}
+\f{Updated Titles}
 
 \G{png.d/updttl.png}
 
@@ -29,9 +34,9 @@ Not updating the titles prevents the customization of the way titles are present
 \rule
 
 
-\H{updatechkptfile} Version 4.0.x
+\H{v4.0.x_revisions} Version 4.0.x
 
-\e{Check-point Files}
+\f{Check-point Files}
 
 Version 4 of \e{XTrkCad} introduces a new way of handling check-point files. This will allow resuming your work after a system crash much easier than before. 
 
@@ -40,5 +45,55 @@ previous track plan?"
 
 Select "Ignore" only if you're sure that the work from your last session has been correctly saved. If uncertain or restarting after an earlier failure select "Resume".
 
+\u000
+
+\f{Help System}
+
+The built in help system has been converted to a much more flexible and widely used HTML format. With many new graphics and extensively rewritten text the help information is now up-to-date with recent development.
+
+\f{Layer Colour Settings}
+
+Your personal layer color settings are now stored in your preferences. This allows you to apply the same settings to other layouts you design.
+
+\f{Parameter Files Updated}
+
+Thanks to Ralph Boyd, Dwayne Ward, Casey Sterbenz and others, many new and updated parameter files were added to this release.
+
+\f{Wheel mouse}
+
+The wheel on a wheel mouse can now be used to zoom in and out on a layout design.
+
 \rule
 
+
+\H{v4.1.x_revisions} Version 4.1.x
+
+\f{Internationalization}
+
+Internationalization or the ability to localize XTrackCAD for use with various languages was adopted during this version upgrade. XTrackCAD is now available with balloon help and daily tips written in US English and Finish. The XTrackCAD development team welcomes anyone who wishes to volunteer with translation of various support files. Let them know by submitting an offer to assist to the \e{XTrackCAD} \f{Feature Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&atid=781981}{\e{XTrackCAD} Fork Project Site} or the \e{XTrackCAD} \f{Wikka Wish List} located at the \W{http://www.xtrkcad.org/Wikka/WishList}{\e{XTrackCAD} Wiki: WishList}.
+
+\f{Minor Fixes and Enhancements}
+
+\b A small bug preventing Zooms of less than 1:1 (Refer to \K{cmdZoom} for detail.) was accidentally introduced in version 4.0.1. This problem has been corrected in version 4.1.x.
+
+\u000
+
+\b A small bug introduced when new scale definitions were added to XTrkCad 4.0.2 broke the file format for some scales (eg., N UK). This problem has been corrected in version 4.1.x.
+
+\u000
+
+\b Some users of the Linux based application reported the \e{Sticky Commands} menu would exceed screen length. Spacing between \e{Sticky Commands} options has been improved in order to prevent this problem.
+
+\u000
+
+\b We've no idea when certain demo's broke however thanks to the work of Mikko Nissinen, many broken demos are now fixed.
+
+\u000
+
+\f{Name Change}
+
+With release of this version XTrackCAD there's been a subtle change in the spelling and punctuation of the applications name. From this version forward, the application will be know as XTrackCAD. Please note the spelling and capitalization of the name.
+
+Why was the name changed? This release gives XTrackCAD developers an opportunity to included a much sought after feature; Internationalization (Through i18n). On the surface this doesn't sound that big however having the ability to internationalize or localize the product has great advantages for all users. Not only is there great potential for the application to become available to a larger audience, our hope it that the developer pool will expand which should result in more features being added to the application.
+
+\rule
