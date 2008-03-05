@@ -1,0 +1,23 @@
+/* XPM */
+static char * dtbledge_xpm[] = {
+"16 16 4 1",
+"o	c #FFFFFFFFFFFF",
+".	c #000000000000",
+" 	c #0000FFFF0000",
+"X	c #861782078617",
+"               .",
+"              ..",
+"              .X",
+"             ..X",
+"            ..XX",
+"            .XXX",
+"           ..XXX",
+"          ..XXXX",
+"          .XXXXo",
+"         ..XXXXo",
+"         .XXXXoo",
+"..........XXXooo",
+"..........XXXooo",
+"XXXXXXXX..XXoooo",
+"XXXXXXXX..Xooooo",
+"XXXXXXXX..Xooooo"};

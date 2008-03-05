@@ -1,0 +1,23 @@
+/* XPM */
+static char*carproto_xpm[]={
+"16 16 4 1",
+". c #ffffffffffff",
+"c c #ffff00000000",
+"a c #00000000ffff",
+"# c #000000000000",
+"....a.......a...",
+"...aa..aa..aa...",
+"..aaa..aa.aaa...",
+"...aa......aa...",
+"...aa..aa..aa...",
+"...aa..aa..aa...",
+"..aaaa....aaaa..",
+".cccccccccccccc.",
+".cccccccccccccc.",
+".cccccccccccccc.",
+".cccccccccccccc.",
+"#cccccccccccccc#",
+"..#.#......#.#..",
+".#.#.#....#.#.#.",
+"..#.#......#.#..",
+"................"};

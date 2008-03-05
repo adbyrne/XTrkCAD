@@ -1,0 +1,23 @@
+/* XPM */
+static char * flip_xpm[] = {
+"16 16 4 1",
+"#	c #ffffffffffff",
+".	c #0000ffffffff",
+"b	c #000000000000",
+"a	c #ffff00000000",
+".######a#######b",
+"..#####a######bb",
+"...####a#####bbb",
+"....###a####bbbb",
+".....##a###bbbbb",
+"......#a##bbbbbb",
+".......a#bbbbbbb",
+".......abbbbbbbb",
+".......abbbbbbbb",
+".......a#bbbbbbb",
+"......#a##bbbbbb",
+".....##a###bbbbb",
+"....###a####bbbb",
+"...####a#####bbb",
+"..#####a######bb",
+".######a#######b"};

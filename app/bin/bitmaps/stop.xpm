@@ -1,0 +1,22 @@
+/* XPM */
+static char * stop_xpm[] = {
+"16 16 3 1",
+" 	c #FFFFFFFFFFFF",
+"X	c #000000000000",
+"o	c #FFFF00000000",
+"    XXXXXXX     ",
+"   XXXXXXXXX    ",
+"  XXoooooooXX   ",
+" XXoooooooooXX  ",
+"XXoooooooooooXX ",
+"XXoooooooooooXX ",
+"XXoooooooooooXX ",
+"XXoooooooooooXX ",
+"XXoooooooooooXX ",
+"XXoooooooooooXX ",
+"XXoooooooooooXX ",
+" XXoooooooooXX  ",
+"  XXoooooooXX   ",
+"   XXXXXXXXX    ",
+"    XXXXXXX     ",
+"                "};

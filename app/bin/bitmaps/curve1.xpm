@@ -1,0 +1,23 @@
+/* XPM */
+static char * curve1_xpm[] = {
+"16 16 4 1",
+" 	c #FFFFFFFFFFFF",
+".	c #FFFF00000000",
+"X	c #000000000000",
+"o	c #861782078617",
+"            .   ",
+"           ...  ",
+"          . . . ",
+"         .  .X .",
+"       X  XX.XX ",
+"       oXXX .X  ",
+"    X XXX XX.XX ",
+"     X  X.  .X .",
+"    XooX X. . . ",
+"   X  X    ...  ",
+" XoX X X    .   ",
+"  XoX           ",
+" X  XX          ",
+" X X            ",
+"XXXXX           ",
+" X X            "};
