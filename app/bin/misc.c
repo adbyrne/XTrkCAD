@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.32 2008-02-24 14:28:35 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.33 2008-03-06 19:35:13 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1350,7 +1350,7 @@ EXPORT void PlaybackButtonMouse(
 }
 
 
-#include "openbutt.xpm"
+#include "bitmaps/openbutt.xpm"
 static char * buttonGroupMenuTitle;
 static char * buttonGroupHelpKey;
 static char * buttonGroupStickyLabel;
@@ -2043,14 +2043,14 @@ static void SetAccelKey(
       wAttachAccelKey( key, mode, func, context );
 }
 
-#include "zoomin.xpm"
-#include "zoom.xpm"
-#include "zoomout.xpm"
-#include "undo.xpm"
-#include "redo.xpm"
-#include "partlist.xpm"
-#include "export.xpm"
-#include "import.xpm"
+#include "bitmaps/zoomin.xpm"
+#include "bitmaps/zoom.xpm"
+#include "bitmaps/zoomout.xpm"
+#include "bitmaps/undo.xpm"
+#include "bitmaps/redo.xpm"
+#include "bitmaps/partlist.xpm"
+#include "bitmaps/export.xpm"
+#include "bitmaps/import.xpm"
 
 static void CreateMenus( void )
 {

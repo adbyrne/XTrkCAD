@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstraigh.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstraigh.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -97,7 +97,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 }
 
 
-#include "straight.xpm"
+#include "bitmaps/straight.xpm"
 
 void InitCmdStraight( wMenu_p menu )
 {

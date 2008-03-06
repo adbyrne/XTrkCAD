@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcar.c,v 1.5 2008-01-27 19:17:18 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcar.c,v 1.6 2008-03-06 19:35:07 m_fischer Exp $
  *
  * TRAIN
  *
@@ -5110,8 +5110,8 @@ static int CarProtoCustMgmProc(
 }
 
 
-#include "carpart.xpm"
-#include "carproto.xpm"
+#include "bitmaps/carpart.xpm"
+#include "bitmaps/carproto.xpm"
 
 EXPORT void CarCustMgmLoad( void )
 {

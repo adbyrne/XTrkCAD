@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/celev.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/celev.c,v 1.4 2008-03-06 19:35:05 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -465,7 +465,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 
 
 
-#include "elev.xpm"
+#include "bitmaps/elev.xpm"
 
 EXPORT void InitCmdElevation( wMenu_p menu )
 {

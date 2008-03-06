@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctext.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctext.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
  *
  * TEXT
  *
@@ -229,7 +229,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 }
 
 
-#include "text.xpm"
+#include "bitmaps/text.xpm"
 
 void InitCmdText( wMenu_p menu )
 {

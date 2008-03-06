@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dbench.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dbench.c,v 1.3 2008-03-06 19:35:07 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -37,20 +37,20 @@
 
 static char *benchTypeS[] = { "", N_(" L-Girder"), N_(" T-Girder") };
 
-#include "bo_edge.xpm"
-#include "bo_flat.xpm"
-#include "bo_ll.xpm"
-#include "bo_lr.xpm"
-#include "bo_lld.xpm"
-#include "bo_lrd.xpm"
-#include "bo_llu.xpm"
-#include "bo_lru.xpm"
-#include "bo_lli.xpm"
-#include "bo_lri.xpm"
-#include "bo_t.xpm"
-#include "bo_tr.xpm"
-#include "bo_tl.xpm"
-#include "bo_ti.xpm"
+#include "bitmaps/bo_edge.xpm"
+#include "bitmaps/bo_flat.xpm"
+#include "bitmaps/bo_ll.xpm"
+#include "bitmaps/bo_lr.xpm"
+#include "bitmaps/bo_lld.xpm"
+#include "bitmaps/bo_lrd.xpm"
+#include "bitmaps/bo_llu.xpm"
+#include "bitmaps/bo_lru.xpm"
+#include "bitmaps/bo_lli.xpm"
+#include "bitmaps/bo_lri.xpm"
+#include "bitmaps/bo_t.xpm"
+#include "bitmaps/bo_tr.xpm"
+#include "bitmaps/bo_tl.xpm"
+#include "bitmaps/bo_ti.xpm"
 
 typedef struct {
 		char * name;

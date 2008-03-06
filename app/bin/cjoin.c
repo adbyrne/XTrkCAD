@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cjoin.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cjoin.c,v 1.4 2008-03-06 19:35:05 m_fischer Exp $
  *
  * JOINS
  *
@@ -891,7 +891,7 @@ errorReturn:
  *
  */
 
-#include "join.xpm"
+#include "bitmaps/join.xpm"
 
 void InitCmdJoin( wMenu_p menu )
 {

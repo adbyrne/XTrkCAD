@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ccurve.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ccurve.c,v 1.4 2008-03-06 19:35:04 m_fischer Exp $
  *
  * CURVE
  *
@@ -694,14 +694,14 @@ static STATUS_T CmdCircle2( wAction_t action, coOrd pos )
 
 
 
-#include "helix.xpm"
-#include "curve1.xpm"
-#include "curve2.xpm"
-#include "curve3.xpm"
-#include "curve4.xpm"
-#include "circle1.xpm"
-#include "circle2.xpm"
-#include "circle3.xpm"
+#include "bitmaps/helix.xpm"
+#include "bitmaps/curve1.xpm"
+#include "bitmaps/curve2.xpm"
+#include "bitmaps/curve3.xpm"
+#include "bitmaps/curve4.xpm"
+#include "bitmaps/circle1.xpm"
+#include "bitmaps/circle2.xpm"
+#include "bitmaps/circle3.xpm"
 
 
 

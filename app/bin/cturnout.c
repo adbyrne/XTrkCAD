@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.5 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.6 2008-03-06 19:35:06 m_fischer Exp $
  *
  * T_TURNOUT
  *
@@ -2434,7 +2434,7 @@ static STATUS_T CmdTurnoutHotBar(
 }
 
 #ifdef TURNOUTCMD
-#include "turnout.xpm"
+#include "bitmaps/turnout.xpm"
 
 
 EXPORT void InitCmdTurnout( wMenu_p menu )

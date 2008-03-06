@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cruler.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cruler.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -134,7 +134,7 @@ STATUS_T ModifyRuler(
 }
 
 
-#include "ruler.xpm"
+#include "bitmaps/ruler.xpm"
 
 void InitCmdRuler( wMenu_p menu )
 {

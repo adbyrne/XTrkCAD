@@ -1,6 +1,6 @@
 /** \file Handle selecting / unselecting track and basic operations on the selection
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.6 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.7 2008-03-06 19:35:06 m_fischer Exp $
  *
  */
 
@@ -1812,13 +1812,13 @@ static STATUS_T CmdSelect(
 }
 
 
-#include "select.xpm"
-#include "delete.xpm"
-#include "tunnel.xpm"
-#include "move.xpm"
-#include "rotate.xpm"
-#include "flip.xpm"
-#include "movedesc.xpm"
+#include "bitmaps/select.xpm"
+#include "bitmaps/delete.xpm"
+#include "bitmaps/tunnel.xpm"
+#include "bitmaps/move.xpm"
+#include "bitmaps/rotate.xpm"
+#include "bitmaps/flip.xpm"
+#include "bitmaps/movedesc.xpm"
 
 
 static void SetMoveMode( char * line )

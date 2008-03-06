@@ -1,7 +1,7 @@
 /** \file cmisc.c
  * Handlimg of the 'Describe' dialog
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.5 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.6 2008-03-06 19:35:05 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -450,7 +450,7 @@ static STATUS_T CmdDescribe( wAction_t action, coOrd pos )
 
 
 
-#include "describe.xpm"
+#include "bitmaps/describe.xpm"
 
 void InitCmdDescribe( wMenu_p menu )
 {

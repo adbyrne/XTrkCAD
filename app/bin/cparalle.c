@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cparalle.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cparalle.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
  *
  * PARALLEL
  *
@@ -173,7 +173,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 }
 
 
-#include "parallel.xpm"
+#include "bitmaps/parallel.xpm"
 
 EXPORT void InitCmdParallel( wMenu_p menu )
 {

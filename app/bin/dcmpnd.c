@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcmpnd.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcmpnd.c,v 1.4 2008-03-06 19:35:08 m_fischer Exp $
  *
  * Compound tracks: Turnouts and Structures
  *
@@ -565,8 +565,8 @@ static int CompoundCustMgmProc(
 }
 
 
-#include "turnout.xpm"
-#include "struct.xpm"
+#include "bitmaps/turnout.xpm"
+#include "bitmaps/struct.xpm"
 
 EXPORT void CompoundCustMgmLoad( void )
 {

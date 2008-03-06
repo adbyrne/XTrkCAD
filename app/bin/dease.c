@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dease.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dease.c,v 1.3 2008-03-06 19:35:08 m_fischer Exp $
  *
  * Easement Button Hdlrs
  *
@@ -238,13 +238,13 @@ static void EasementChange( long changes )
 }
 
 
-#include "enone.xpm"
-#include "esharp.xpm"
-#include "egtsharp.xpm"
-#include "enormal.xpm"
-#include "eltbroad.xpm"
-#include "ebroad.xpm"
-#include "egtbroad.xpm"
+#include "bitmaps/enone.xpm"
+#include "bitmaps/esharp.xpm"
+#include "bitmaps/egtsharp.xpm"
+#include "bitmaps/enormal.xpm"
+#include "bitmaps/eltbroad.xpm"
+#include "bitmaps/ebroad.xpm"
+#include "bitmaps/egtbroad.xpm"
 
 
 EXPORT addButtonCallBack_t EasementInit( void )

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cdraw.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cdraw.c,v 1.4 2008-03-06 19:35:04 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -995,24 +995,24 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	}
 }
 
-#include "dline.xpm"
-#include "ddimlin.xpm"
-#include "dbench.xpm"
-#include "dtbledge.xpm"
-#include "dcurve1.xpm"
-#include "dcurve2.xpm"
-#include "dcurve3.xpm"
-#include "dcurve4.xpm"
-/*#include "dcircle1.xpm"*/
-#include "dcircle2.xpm"
-#include "dcircle3.xpm"
-/*#include "dflcrcl1.xpm"*/
-#include "dflcrcl2.xpm"
-#include "dflcrcl3.xpm"
-#include "dbox.xpm"
-#include "dfilbox.xpm"
-#include "dpoly.xpm"
-#include "dfilpoly.xpm"
+#include "bitmaps/dline.xpm"
+#include "bitmaps/ddimlin.xpm"
+#include "bitmaps/dbench.xpm"
+#include "bitmaps/dtbledge.xpm"
+#include "bitmaps/dcurve1.xpm"
+#include "bitmaps/dcurve2.xpm"
+#include "bitmaps/dcurve3.xpm"
+#include "bitmaps/dcurve4.xpm"
+/*#include "bitmaps/dcircle1.xpm"*/
+#include "bitmaps/dcircle2.xpm"
+#include "bitmaps/dcircle3.xpm"
+/*#include "bitmaps/dflcrcl1.xpm"*/
+#include "bitmaps/dflcrcl2.xpm"
+#include "bitmaps/dflcrcl3.xpm"
+#include "bitmaps/dbox.xpm"
+#include "bitmaps/dfilbox.xpm"
+#include "bitmaps/dpoly.xpm"
+#include "bitmaps/dfilpoly.xpm"
 
 typedef struct {
 		char **xpm;

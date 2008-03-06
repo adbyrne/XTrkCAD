@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.4 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.5 2008-03-06 19:35:06 m_fischer Exp $
  *
  * TRAIN
  *
@@ -2324,12 +2324,12 @@ EXPORT STATUS_T CmdCarDescAction(
 	return CmdTrain( action, pos );
 }
 
-#include "train.xpm"
-#include "stop.xpm"
-#include "go.xpm"
-#include "exit.xpm"
-#include "newcar.xpm"
-#include "zero.xpm"
+#include "bitmaps/train.xpm"
+#include "bitmaps/stop.xpm"
+#include "bitmaps/go.xpm"
+#include "bitmaps/exit.xpm"
+#include "bitmaps/newcar.xpm"
+#include "bitmaps/zero.xpm"
 
 
 static void CmdTrainStopGo( void * junk )

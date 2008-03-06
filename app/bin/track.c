@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.4 2008-03-06 19:35:13 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1083,8 +1083,8 @@ EXPORT void SelectBelow( void )
 }
 
 
-#include "above.xpm"
-#include "below.xpm"
+#include "bitmaps/above.xpm"
+#include "bitmaps/below.xpm"
 
 EXPORT void InitCmdAboveBelow( void )
 {

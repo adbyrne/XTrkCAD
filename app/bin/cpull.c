@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cpull.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cpull.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
  *
  * Pull and Tighten commands
  *
@@ -654,7 +654,7 @@ static STATUS_T CmdPull(
 
 
 
-#include "pull.xpm"
+#include "bitmaps/pull.xpm"
 
 void InitCmdPull( wMenu_p menu )
 {
