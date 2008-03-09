@@ -1,0 +1,3 @@
+Mar 10, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		CMakeLists.txt, mkstruct.c: create param files from structure definitions
