@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc2.c,v 1.3 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc2.c,v 1.4 2008-03-10 18:59:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -44,7 +44,7 @@ static STATUS_T CmdBridge( wAction_t action, coOrd pos )
 
 
 
-#include "bridge.bmp"
+#include "bitmaps/bridge.xbm"
 
 void InitCmdMisc2( wMenu_p menu )
 {

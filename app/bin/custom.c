@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.5 2008-01-28 06:23:02 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.6 2008-03-10 18:59:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -144,11 +144,11 @@ void InitNewTurnRedir( wMenu_p m )
 #endif
 }
 
-#include "xtc64.bmp"
+#include "bitmaps/xtc64.xbm"
 #define icon64_width	xtc64_width
 #define icon64_height	xtc64_height
 #define icon64_bits		xtc64_bits
-#include "xtc16.bmp"
+#include "bitmaps/xtc16.xbm"
 #define icon16_width	xtc16_width
 #define icon16_height	xtc16_height
 #define icon16_bits		xtc16_bits

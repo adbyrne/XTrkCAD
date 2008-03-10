@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cnote.c,v 1.5 2008-03-06 19:35:05 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cnote.c,v 1.6 2008-03-10 18:59:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -389,7 +389,7 @@ static STATUS_T CmdNote( wAction_t action, coOrd pos )
 }
 
 
-#include "note.bmp"
+#include "bitmaps/note.xbm"
 #include "bitmaps/cnote.xpm"
 
 void InitCmdNote( wMenu_p menu )

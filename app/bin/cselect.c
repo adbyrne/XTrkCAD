@@ -1,6 +1,6 @@
 /** \file Handle selecting / unselecting track and basic operations on the selection
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.7 2008-03-06 19:35:06 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.8 2008-03-10 18:59:53 m_fischer Exp $
  *
  */
 
@@ -28,11 +28,11 @@
 #define PRIVATE_EXTRADATA
 #include "compound.h"
 
-#include "bmendpt.bmp"
-#include "bma0.bmp"
-#include "bma45.bmp"
-#include "bma90.bmp"
-#include "bma135.bmp"
+#include "bitmaps/bmendpt.xbm"
+#include "bitmaps/bma0.xbm"
+#include "bitmaps/bma45.xbm"
+#include "bitmaps/bma90.xbm"
+#include "bitmaps/bma135.xbm"
 #include "i18n.h"
 
 

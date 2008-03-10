@@ -1,7 +1,7 @@
 /** \file param.c
  * Handle all the dialog box creation stuff.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.7 2008-01-23 19:49:51 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.8 2008-03-10 18:59:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -139,7 +139,7 @@ static colorTab_t colorTab = {
 				{ wRGB(128,128,128), N_("Gray") },
 				{ wRGB(192,192,192), N_("Light Gray") } };
 static wIcon_p colorTabBitMaps[ sizeof colorTab/sizeof colorTab[0] ];
-#include "square10.bmp"
+#include "bitmaps/square10.xbm"
 
 static BOOL_T colorTabInitted = FALSE;
 

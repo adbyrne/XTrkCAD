@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.4 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.5 2008-03-10 18:59:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -34,11 +34,11 @@ EXPORT long minGridSpacing = 3;
 
 #define CROSSTICK
 #ifdef CROSSTICK
-#include "cross0.bmp"
+#include "bitmaps/cross0.xbm"
 static wDrawBitMap_p cross0_bm;
 #endif
 
-#include "bigdot.bmp"
+#include "bitmaps/bigdot.xbm"
 static wDrawBitMap_p bigdot_bm;
 
 EXPORT void MapGrid(
@@ -799,8 +799,8 @@ EXPORT void SnapGridShow( void )
 	GridButtonUpdate( CHK_SHOW );
 }
 
-#include "snapcurs.bmp"
-#include "snapvis.bmp"
+#include "bitmaps/snapcurs.xbm"
+#include "bitmaps/snapvis.xbm"
 
 EXPORT void InitSnapGridButtons( void )
 {

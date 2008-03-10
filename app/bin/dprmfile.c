@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dprmfile.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dprmfile.c,v 1.3 2008-03-10 18:59:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -412,8 +412,8 @@ static void ParamFileDlgUpdate(
 }
 
 
-#include "mtbox.bmp"
-#include "chkbox.bmp"
+#include "bitmaps/mtbox.xbm"
+#include "bitmaps/chkbox.xbm"
 static void DoParamFiles( void * junk )
 {
 	wIndex_t listInx;

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.4 2008-01-27 21:01:26 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.5 2008-03-10 18:59:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -278,10 +278,10 @@ static wDrawColor playbackColor;
 static drawCmd_p playbackD;
 static wPos_t playbackX, playbackY;
 
-#include "arrow0.bmp"
-#include "arrow3.bmp"
-#include "arrows.bmp"
-#include "flash.bmp"
+#include "bitmaps/arrow0.xbm"
+#include "bitmaps/arrow3.xbm"
+#include "bitmaps/arrows.xbm"
+#include "bitmaps/flash.xbm"
 
 static wDrawColor rightDragColor;
 static wDrawColor leftDragColor;

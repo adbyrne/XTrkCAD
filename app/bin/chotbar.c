@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/chotbar.c,v 1.1 2005-12-07 15:47:02 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/chotbar.c,v 1.2 2008-03-10 18:59:53 m_fischer Exp $
  *
  * HOT BAR
  *
@@ -31,8 +31,8 @@
 EXPORT DIST_T curBarScale = -1;
 EXPORT long hotBarLabels = 0;
 
-#include "hotbarl.bmp"
-#include "hotbarr.bmp"
+#include "bitmaps/hotbarl.xbm"
+#include "bitmaps/hotbarr.xbm"
 
 static wButton_p hotBarLeftB = NULL;
 static wButton_p hotBarRightB = NULL;
