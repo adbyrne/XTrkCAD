@@ -1,3 +1,8 @@
+Mar 17, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswchoic.c: Label size was not calculated correctly for radio button
+		options.
+
 Feb 23,2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswpref.c: Create the correct full path for shared data directory

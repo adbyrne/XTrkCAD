@@ -266,6 +266,7 @@ static wChoice_p choiceCreate(
 	int pw, ph;
 	int index;
 	char * helpStrCopy;
+	HFONT hFont;
 
 	b = mswAlloc( parent, type, mswStrdup(labelStr), sizeof *b, data, &index );
 	mswComputePos( (wControl_p)b, x, y );
@@ -306,7 +307,6 @@ static wChoice_p choiceCreate(
 				mswFail( "choiceCreate button" );
 				return b;
 			}
-			/*SelectObject( hButt, mswLabelFont );*/
 			(*butts)->x = b->x+pw;
 			(*butts)->y = b->y+ph;
 			if (b->hWnd == 0)
@@ -317,8 +317,13 @@ static wChoice_p choiceCreate(
 #endif
 			hDc = GetDC( hButt );
 			lab_l = strlen(*lp);
+			
+			if (!mswThickFont) {hFont = SelectObject( hDc, mswLabelFont );}
 			dw = GetTextExtent( hDc, CAST_AWAY_CONST *lp, lab_l );
-			w = LOWORD(dw) + CHOICE_MIN_WIDTH;
+			if (!mswThickFont) {SelectObject( hDc, hFont );}
+		
+			w = LOWORD(dw) + CHOICE_MIN_WIDTH; 
+
 			if (w > maxW)
 				maxW = w;
 			SetBkMode( hDc, TRANSPARENT );
@@ -337,7 +342,7 @@ static wChoice_p choiceCreate(
 			oldChoiceItemProc = (XWNDPROC)GetWindowLong( (*butts)->hWnd, GWL_WNDPROC );
 			SetWindowLong( (*butts)->hWnd, GWL_WNDPROC, (LONG)newChoiceItemProc );
 			if ( !mswThickFont )
-				SendMessage( (*butts)->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L );
+				SendMessage( (*butts)->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L ); 
 	}
 	*butts = NULL;
 	switch (b->type) {
