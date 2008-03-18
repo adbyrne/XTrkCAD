@@ -254,9 +254,7 @@ carinv-savetext	Create a text list of the Car Items	cmdCarInvertory
 circle-radius	Specifies the radius of the circle track	cmdCircle
 #
 cmdopt-move-quick	How to draw track being moved/rotated	cmdCmdopt
-cmdopt-turntable-angle	Specifies the minimum angle between tracks connected to a turntable	cmdCmdopt
 cmdopt-preselect	Default command is Describe or Select	cmdCmdopt
-cmdopt-coupling-speed-max	Trains will crash above this speed	cmdTrain
 cmdopt-rightclickmode	Action to invoke on Right-Click	cmdCmdopt
 cmdopt-ok		cmdCmdopt
 #
@@ -311,21 +309,22 @@ describe-LE1
 describe-T1	
 describe-P1	
 #
+display-autoPan	Move the Main canvas if you drag near the edge	cmdDisplay
+display-color-layers	Color tracks or other objects by layer
 display-tunnels	Controls the drawing of hidden tracks	cmdDisplay
 display-endpt	Controls the drawing of End-Points	cmdDisplay
-display-labelenable	Enable labels for Turnouts, Flextrack Lengths and Elevations	cmdDisplay
-display-description-fontsize	Font size for labels on layout	cmdDisplay
-display-labelscale	When to label Turnout, Flextrack Lengths and Elevations	cmdDisplay
-display-layoutlabels	Label elements on layout	cmdDisplay
-display-color-layers	Color tracks or other objects by layer
-display-tworailscale	Drawing scale when to draw tracks with 2 rails	cmdDisplay
 display-tiedraw	How to draw track ties	cmdDisplay
-display-mingridspacing	Minimum distance (in pixels) between grid lines/ticks	cmdDisplay
-display-balloonhelp	Enable/Disable balloon popup help windows	cmdDisplay
-display-hotbarlabels	Label elements on the Hot Bar	cmdDisplay
+display-tworailscale	Drawing scale when to draw tracks with 2 rails	cmdDisplay
 display-mapscale	Drawing scale of the map window	cmdDisplay
 display-livemap	Whether the main layout is updated while dragging on the Map	cmdDisplay
+display-labelenable	Enable labels for Turnouts, Flextrack Lengths and Elevations	cmdDisplay
+display-labelscale	When to label Turnout, Flextrack Lengths and Elevations	cmdDisplay
+display-description-fontsize	Font size for labels on layout	cmdDisplay
+display-hotbarlabels	Label elements on the Hot Bar	cmdDisplay
+display-layoutlabels	Label elements on layout	cmdDisplay
+display-listlabels	Label elements for lists	cmdDisplay
 display-carhotbarlabels	How to group cars on the Train Hot Bar	cmdDisplay
+display-trainpause	Delay (in mS) between updating train movements	cmdDisplay
 display-hideTrainsInTunnels	Don't show trains in tunnels when tunnels are hidden	cmdDisplay
 #display-ok	Update the display	cmdDisplay
 display-ok		cmdDisplay
@@ -398,10 +397,12 @@ layer-clear	Overwrite layer configuration with system default values	cmdLayer
 #
 layout-roomsizeX	Specifies the size of the room (in inches or centimeters)	cmdLayout
 layout-roomsizeY	Specifies the size of the room (in inches or centimeters)	cmdLayout
-layout-title1	Specifies the Title of the layout.  This appears on Gaudy printouts	cmdLayout
-layout-title2	Specifies the Title of the layout.  This appears on Gaudy printouts	cmdLayout
+layout-title1	Specifies the layout Title that will appear on printouts	cmdLayout
+layout-title2	Specifies the layout Subtitle that will appear on printouts	cmdLayout
 layout-scale	Specifies the Modelling Scale	cmdLayout
 layout-gauge	Specifies the rail gauge, ie. the distance between the rails	cmdLayout
+layout-mintrackradius	Specifies minimum track radius (in inches or centimeters). Tracks with a smaller radius are considered exceptional.	cmdLayout
+layout-maxtrackgrade	Specifies maximum track elevation expressed as a percent (%). Tracks with a larger elevation are considered exceptional.	cmdLayout
 #
 newcar-road	Roadname	cmdTrain
 newcar-number	Car Number	cmdTrain
@@ -419,20 +420,19 @@ parameter-name	Enter your name as specified in the XTrackCAD Registration Notice
 parameter-key	Enter the key value as specified in the XTrackCAD Registration Notice	register
 parameter-ok	Validates the name and key.  Terminates the registration command	register
 #
-pref-checkpoint	Specifies the check point frequency	cmdPref
+pref-anglesystem	0° is up or to the right	cmdPref
 pref-units	Choose english (inches) or metric (centimeters)	cmdPref
 pref-dstfmt	How to display length measurements	cmdPref
-pref-anglesystem	0° is up or to the right	cmdPref
 pref-minlength	Do not create tracks to be shorter than this value	cmdPref
 pref-connectdistance	Maximum distance between connected end points	cmdPref
 pref-connectangle	Minimum angle between connected End-Points	cmdPref
+pref-turntable-angle	Specifies the minimum angle between tracks connected to a turntable	cmdPref
+pref-coupling-speed-max	Trains will crash above this speed	cmdPref
+pref-balloonhelp	Enable/Disable balloon popup help windows	cmdPref
 pref-dragpixels	How far you can move the mouse before its considered a drag	cmdPref
 pref-dragtimeout	How long you can hold a mouse button down before its considered a drag	cmdPref
-pref-autoPan	Move the Main canvas if you drag near the edge	cmdPref
-pref-listlabels	Label elements for lists	cmdPref
-pref-mintrackradius	Tracks with tighter radius than this are exceptional	cmdPref
-pref-maxtrackgrade	Tracks with grades steeper than this are exceptional	cmdPref
-pref-trainpause	Delay (in mS) between updating train movements	cmdPref
+pref-mingridspacing	Minimum distance (in pixels) between grid lines/ticks	cmdPref
+pref-checkpoint	Specifies the Check Point frequency; number of modifications made since the last save.	cmdPref
 pref-onstartup	Resume work on last layout or start with new layout	cmdPref
 pref-ok		cmdPref
 #

@@ -1,3 +1,8 @@
+Mar 18, 2008
+	FIX: Bob Blackwell
+		doption.c: rearrange option settings in display / command / preferences 
+		dialog
+
 Feb 04, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		CMakeLists.txt: Fix missing icon problem for Windows exe 

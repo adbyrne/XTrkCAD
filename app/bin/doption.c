@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.4 2008-02-03 08:49:50 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.5 2008-03-18 07:34:43 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -88,7 +88,7 @@ static void OptionDlgCancel(
 	UpdateQuickMove(NULL);
 	wHide( win );
 }
-
+
 /****************************************************************************
  *
  * Layout Dialog
@@ -100,11 +100,14 @@ static coOrd newSize;
 
 static paramData_t layoutPLs[] = {
 	{ PD_FLOAT, &newSize.x, "roomsizeX", PDO_NOPREF|PDO_DIM|PDO_NOPSHUPD|PDO_DRAW, &r1_9999999, N_("Room Width"), 0, (void*)(CHANGE_MAIN|CHANGE_MAP) },
-	{ PD_FLOAT, &newSize.y, "roomsizeY", PDO_NOPREF|PDO_DIM|PDO_NOPSHUPD|PDO_DRAW|PDO_DLGHORZ, &r1_9999999, N_("Height"), 0, (void*)(CHANGE_MAIN|CHANGE_MAP) },
-	{ PD_STRING, &Title1, "title1", PDO_NOPSHUPD, NULL, N_("Title") },
-	{ PD_STRING, &Title2, "title2", PDO_NOPSHUPD, NULL, "" },
-	{ PD_DROPLIST, &curScaleDescInx, "scale", PDO_NOPREF|PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT, (void *)120, N_("Scale / Gauge"), 0, (void*)(CHANGE_SCALE) },
-	{ PD_DROPLIST, &curGaugeInx, "gauge", PDO_NOPREF |PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT|PDO_DLGHORZ, (void *)120, " /", 0, (void *)(CHANGE_SCALE) }};
+	{ PD_FLOAT, &newSize.y, "roomsizeY", PDO_NOPREF|PDO_DIM|PDO_NOPSHUPD|PDO_DRAW|PDO_DLGHORZ, &r1_9999999, N_("    Height"), 0, (void*)(CHANGE_MAIN|CHANGE_MAP) },
+	{ PD_STRING, &Title1, "title1", PDO_NOPSHUPD, NULL, N_("Layout Title") },
+	{ PD_STRING, &Title2, "title2", PDO_NOPSHUPD, NULL, N_("Subtitle") },
+	{ PD_DROPLIST, &curScaleDescInx, "scale", PDO_NOPREF|PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT, (void *)120, N_("Scale"), 0, (void*)(CHANGE_SCALE) },
+	{ PD_DROPLIST, &curGaugeInx, "gauge", PDO_NOPREF |PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT|PDO_DLGHORZ, (void *)120, "     Gauge", 0, (void *)(CHANGE_SCALE) },
+	{ PD_FLOAT, &minTrackRadius, "mintrackradius", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN) },
+	{ PD_FLOAT, &maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD|PDO_DLGHORZ, &r0_90 , N_(" Max Track Grade"), 0, (void*)(CHANGE_MAIN) }
+	};
 	
 
 static paramGroup_t layoutPG = { "layout", PGO_RECORD|PGO_PREFMISC, layoutPLs, sizeof layoutPLs/sizeof layoutPLs[0] };
@@ -175,7 +178,7 @@ LayoutDlgUpdate(
 }
 
 /* [mf Nov. 15, 2005] end */
-
+
 /****************************************************************************
  *
  * Display Dialog
@@ -184,37 +187,41 @@ LayoutDlgUpdate(
 
 static wWin_p displayW;
 
+static char * autoPanLabels[] = { N_("Auto Pan"), NULL };
 static char * drawTunnelLabels[] = { N_("Hide"), N_("Dash"), N_("Normal"), NULL };
 static char * drawEndPtLabels3[] = { N_("None"), N_("Turnouts"), N_("All"), NULL };
-static char * drawEndPtLabels2[] = { N_("Off"), N_("On"), NULL };
-static char *labelEnableLabels[] = { N_("Track Descriptions"), N_("Lengths"), N_("EndPt Elevations"), N_("Track Elevations"), N_("Cars"), NULL };
-static char * colorLayersLabels[] = { N_("Tracks"), N_("Other"), NULL };
 static char * tiedrawLabels[] = { N_("None"), N_("Outline"), N_("Solid"), NULL };
-static char * enableBalloonHelpLabels[] = { N_("Enable"), NULL };
-static char * liveMapLabels[] = { N_("Live"), NULL };
-static char * preSelectLabels[] = { N_("Describe"), N_("Select"), NULL };
-static char * listLabelsLabels[] = { N_("Manuf"), N_("Part No"), N_("Descr"), NULL };
+static char * labelEnableLabels[] = { N_("Track Descriptions"), N_("Lengths"), N_("EndPt Elevations"), N_("Track Elevations"), N_("Cars"), NULL };
 static char * hotBarLabelsLabels[] = { N_("Part No"), N_("Descr"), NULL };
-static char * hideTrainsInTunnelsLabels[] = { N_("Hide"), NULL };
+static char * listLabelsLabels[] = { N_("Manuf"), N_("Part No"), N_("Descr"), NULL };
+static char * colorLayersLabels[] = { N_("Tracks"), N_("Other"), NULL };
+static char * liveMapLabels[] = { N_("Live Map"), NULL };
+static char * hideTrainsInTunnelsLabels[] = { N_("Hide Trains On Hidden Track"), NULL };
+
+static char * drawEndPtLabels2[] = { N_("Off"), N_("On"), NULL };
+
+extern long trainPause;
 
 static paramData_t displayPLs[] = {
+	{ PD_TOGGLE, &colorLayers, "color-layers", PDO_NOPSHUPD|PDO_DRAW, colorLayersLabels, N_("Color Layers"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &drawTunnel, "tunnels", PDO_NOPSHUPD|PDO_DRAW, drawTunnelLabels, N_("Draw Tunnel"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &drawEndPtV, "endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtLabels3, N_("Draw EndPts"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_64, N_("Label Scale"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT, listLabelsLabels, N_("Layout Labels"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_TOGGLE, &colorLayers, "color-layers", PDO_NOPSHUPD|PDO_DRAW, colorLayersLabels, N_("Color Layers"), BC_HORZ, (void*)(CHANGE_MAIN) },
+	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORZ, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD|PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
-	{ PD_TOGGLE, &enableBalloonHelp, "balloonhelp", PDO_NOPSHUPD, enableBalloonHelpLabels, N_("Balloon Help"), BC_HORZ },
-	{ PD_TOGGLE, &hotBarLabels, "hotbarlabels", PDO_NOPSHUPD, hotBarLabelsLabels, N_("Hot Bar Labels"), BC_HORZ, (void*)(CHANGE_TOOLBAR) },
 	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, (void*)(CHANGE_MAP) },
-	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, N_("Live Map"), BC_HORZ },
+	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, (void*)(CHANGE_MAIN) },
+	{ PD_LONG, &labelScale, "labelscale", PDO_NOPSHUPD, &i0_64, N_("Label Scale"), 0, (void*)(CHANGE_MAIN) },
+	{ PD_LONG, &descriptionFontSize, "description-fontsize", PDO_NOPSHUPD, &i1_1000, N_("Label Font Size"), 0, (void*)(CHANGE_MAIN) },
+	{ PD_TOGGLE, &hotBarLabels, "hotbarlabels", PDO_NOPSHUPD, hotBarLabelsLabels, N_("Hot Bar Labels"), BC_HORZ, (void*)(CHANGE_TOOLBAR) },
+	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, listLabelsLabels, N_("Layout Labels"), BC_HORZ, (void*)(CHANGE_MAIN) },
+	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD, listLabelsLabels, N_("List Labels"), BC_HORZ, (void*)(CHANGE_PARAMS) },
 #define I_HOTBARLABELS	(14)
 	{ PD_DROPLIST, &carHotbarModeInx, "carhotbarlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_LISTINDEX, (void*)250, N_("Car Labels"), 0, (void*)CHANGE_SCALE },
-	{ PD_TOGGLE, &hideTrainsInTunnels, "hideTrainsInTunnels", PDO_NOPSHUPD, hideTrainsInTunnelsLabels, N_("Trains On Hidden Track"), BC_HORZ } };
+	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000 , N_("Train Update Delay"), 0, 0 },
+	{ PD_TOGGLE, &hideTrainsInTunnels, "hideTrainsInTunnels", PDO_NOPSHUPD, hideTrainsInTunnelsLabels, "", BC_HORZ }
+ };
 static paramGroup_t displayPG = { "display", PGO_RECORD|PGO_PREFMISC, displayPLs, sizeof displayPLs/sizeof displayPLs[0] };
 
 
@@ -268,7 +275,7 @@ EXPORT addButtonCallBack_t DisplayInit( void )
 #endif
 	return &DoDisplay;
 }
-
+
 /****************************************************************************
  *
  * Command Options Dialog
@@ -277,28 +284,26 @@ EXPORT addButtonCallBack_t DisplayInit( void )
 
 static wWin_p cmdoptW;
 
-static char *moveQlabels[] = {
+static char * moveQlabels[] = {
 		N_("Normal"),
 		N_("Simple"),
 		N_("End-Points"),
 		NULL };
+		
+static char * preSelectLabels[] = { N_("Describe"), N_("Select"), NULL };
+
 #ifdef HIDESELECTIONWINDOW
 static char * hideSelectionWindowLabels[] = { N_("Hide"), NULL };
 #endif
-static char * rightClickLabels[] = {
-		N_("Normal: Command List, Shift: Command Options"),
-		N_("Normal: Command Options, Shift: Command List"),
-		NULL };
+static char * rightClickLabels[] = {N_("Normal: Command List, Shift: Command Options"), N_("Normal: Command Options, Shift: Command List"), NULL };
 
 EXPORT paramData_t cmdoptPLs[] = {
 	{ PD_RADIO, &quickMove, "move-quick", PDO_NOPSHUPD, moveQlabels, N_("Draw Moving Tracks"), BC_HORZ },
-	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
 	{ PD_RADIO, &preSelect, "preselect", PDO_NOPSHUPD, preSelectLabels, N_("Default Command"), BC_HORZ },
 #ifdef HIDESELECTIONWINDOW
 	{ PD_TOGGLE, &hideSelectionWindow, PDO_NOPSHUPD, hideSelectionWindowLabels, N_("Hide Selection Window"), BC_HORZ },
 #endif
-	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
-	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT, rightClickLabels, N_("Right Click"), 0 }
+	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, rightClickLabels, N_("Right Click"), 0 }
 	};
 static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD|PGO_PREFMISC, cmdoptPLs, sizeof cmdoptPLs/sizeof cmdoptPLs[0] };
 
@@ -337,7 +342,7 @@ EXPORT addButtonCallBack_t CmdoptInit( void )
 	RegisterChangeNotification( CmdoptChange );
 	return &DoCmdopt;
 }
-
+
 /****************************************************************************
  *
  * Preferences
@@ -346,33 +351,29 @@ EXPORT addButtonCallBack_t CmdoptInit( void )
 
 static wWin_p prefW;
 static long displayUnits;
-extern long trainPause;
 
 static wIndex_t distanceFormatInx;
 static char * unitsLabels[] = { N_("English"), N_("Metric"), NULL };
 static char * angleSystemLabels[] = { N_("Polar"), N_("Cartesian"), NULL };
-static char * startOptions[] = { N_("load last layout"), N_("start with blank layout"), NULL };
-static char * autoPanLabels[] = { "", NULL };
+static char * enableBalloonHelpLabels[] = { N_("Balloon Help"), NULL };
+static char * startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"), NULL };
 
 static paramData_t prefPLs[] = {
-	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point") },
+	{ PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD, angleSystemLabels, N_("Angles"), BC_HORZ },
 	{ PD_RADIO, &units, "units", PDO_NOPSHUPD|PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORZ, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
 #define I_DSTFMT		(2)
 	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_NOPSHUPD|PDO_LISTINDEX, (void*)150, N_("Length Format"), 0, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
-	{ PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD, angleSystemLabels, N_("Angles"), BC_HORZ },
 	{ PD_FLOAT, &minLength, "minlength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Minimum Track Length") },
 	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance"), },
 	{ PD_FLOAT, &connectAngle, "connectangle", PDO_NOPSHUPD, &r1_10, N_("Connection Angle") },
+	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
+	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
+	{ PD_TOGGLE, &enableBalloonHelp, "balloonhelp", PDO_NOPSHUPD, enableBalloonHelpLabels, "", BC_HORZ },
 	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD|PDO_DRAW, &r1_1000, N_("Drag Distance") },
 	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Timeout") },
-	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, N_("Auto Pan"), BC_HORZ, NULL },
-	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT, listLabelsLabels, N_("List Labels"), BC_HORZ, (void*)(CHANGE_PARAMS) },
-	{ PD_FLOAT, &minTrackRadius, "mintrackradius", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r1_10000, N_("Minimum Track Radius"), 0, (void*)(CHANGE_MAIN) },
-		/*minTrackRadiusPrefS*/
-	{ PD_FLOAT, &maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD, &r0_90 , N_("Maximum Track Grade"), 0, (void*)(CHANGE_MAIN) },
-	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000 , N_("Train Update Delay"), 0, 0 },
-	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT, startOptions, N_("On Program Startup"), 0, NULL }
-	
+	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD|PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
+	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point") },
+	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD, startOptions, N_("On Program Startup"), 0, NULL }
 	};
 static paramGroup_t prefPG = { "pref", PGO_RECORD|PGO_PREFMISC, prefPLs, sizeof prefPLs/sizeof prefPLs[0] };
 
@@ -382,19 +383,19 @@ typedef struct {
 		long fmt;
 	} dstFmts_t;
 static dstFmts_t englishDstFmts[] = {
-		{ N_("999.999"),					DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
-		{ N_("999.99"),						DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
-		{ N_("999.9"),						DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
-		{ N_("999 7/8"),					DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|3 },
-		{ N_("999 63/64"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|6 },
+		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
+		{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
+		{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
+		{ N_("999 7/8"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|3 },
+		{ N_("999 63/64"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_FRC|6 },
 		{ N_("999' 11.999\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|3 },
-		{ N_("999' 11.99\""),			DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|2 },
-		{ N_("999' 11.9\""),			DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|1 },
+		{ N_("999' 11.99\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|2 },
+		{ N_("999' 11.9\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_NUM|1 },
 		{ N_("999' 11 7/8\""),		DISTFMT_FMT_SHRT|DISTFMT_FRACT_FRC|3 },
 		{ N_("999' 11 63/64\""),	DISTFMT_FMT_SHRT|DISTFMT_FRACT_FRC|6 },
 		{ N_("999ft 11.999in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|3 },
 		{ N_("999ft 11.99in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|2 },
-		{ N_("999ft 11.9in"),			DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|1 },
+		{ N_("999ft 11.9in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|1 },
 		{ N_("999ft 11 7/8in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|3 },
 		{ N_("999ft 11 63/64in"),	DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|6 },
 		{ NULL, 0 } };
@@ -402,10 +403,10 @@ static dstFmts_t metricDstFmts[] = {
 		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
 		{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
 		{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
-		{ N_("999.999mm"),		DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|3 },
+		{ N_("999.999mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|3 },
 		{ N_("999.99mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|2 },
 		{ N_("999.9mm"),			DISTFMT_FMT_MM|DISTFMT_FRACT_NUM|1 },
-		{ N_("999.999cm"),		DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|3 },
+		{ N_("999.999cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|3 },
 		{ N_("999.99cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|2 },
 		{ N_("999.9cm"),			DISTFMT_FMT_CM|DISTFMT_FRACT_NUM|1 },
 		{ N_("999.999m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|3 },
@@ -516,7 +517,7 @@ EXPORT long GetDistanceFormat( void )
 		distanceFormatInx--;
 	 return dstFmts[units][distanceFormatInx].fmt;
 }
-
+
 /*****************************************************************************
  *
  *  Color
