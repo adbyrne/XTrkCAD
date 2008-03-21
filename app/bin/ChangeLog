@@ -1,3 +1,7 @@
+Mar 21, 2008
+	FIX: Bob Blackwell
+		doption.c: uppdated labels in option dialogs
+
 Mar 18, 2008
 	FIX: Bob Blackwell
 		doption.c: rearrange option settings in display / command / preferences 

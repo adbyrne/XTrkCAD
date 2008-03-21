@@ -108,15 +108,7 @@ The \f{Command Option} dialog contains items which control the behavior of some 
 
 \u000
 
-\dd \f{Max Coupling Speed} - trains (\K{cmdTrain}) moving faster than this speed will crash when running into other trains or hitting the end of a track or an open turnout.  Crashed trains must be manually moved back onto the track.
-
-\u000
-
 \dd \e{Right-Click} - will either display a pop-up menu of available commands or command-specific options depending on whether the \e{Shift} key is being held down or not.  This option allows you to choose which operation occurs.
-
-\u000
-
-\dd \f{Turntable Angle} - minimum angle between adjacent tracks connected to a \f{Turntable} (\K{cmdTurntable}).
 
 \rule
 
@@ -129,7 +121,7 @@ The \f{Display} dialog is invoked from the Options (\K{optionM}) menu
 
 The \f{Display} dialog contains items which control the display of objects on the Main window.
 
-\dd \f{Balloon Help} - disables the display of \f{Balloon Help} (\K{windowTerms}) which usually is shown when the cursor is placed over a control.
+\dd \f{Auto Pan} - if enabled, dragging near the edge of the Main Canvas (\K{mainW}) will cause the canvas to move to follow the mouse.
 
 \u000
 
@@ -150,6 +142,10 @@ The \f{Display} dialog contains items which control the display of objects on th
 \u000
 
 \dd \f{Draw Tunnel} - how to draw hidden tracks (\K{cmdTunnel}), either not at all, as dashed lines or as normal solid lines (which might be faster).
+
+\u000
+
+\dd \f{Hide Trains On Hidden Track} - controls whether trains (\K{cmdTrain}) on invisible layers (\K{cmdLayer}) or hidden tracks (\K{cmdTunnel}) (if hidden tracks are not drawn) are displayed.
 
 \u000
 
@@ -189,6 +185,10 @@ The \f{Display} dialog contains items which control the display of objects on th
 
 \u000
 
+\dd \f{List Labels} - controls the format of titles for turnouts and structures displayed in lists (such as the \f{Parts List} (\K{cmdEnum})).
+
+\u000
+
 \dd \f{Live Map} - if checked then the Main Window (\K{mainW}) will be updated as you drag on the \f{Map Window} (\K{cmdMap}).  Note that this can be slow.
 
 \u000
@@ -197,11 +197,7 @@ The \f{Display} dialog contains items which control the display of objects on th
 
 \u000
 
-\dd \f{Min Grid Spacing} - minimum distance between \f{Grid} (\K{cmdGrid}) lines (in pixels).  If the grid lines are closer then drawing them is suppressed.
-
-\u000
-
-\dd \f{Trains On Hidden Track} - controls whether trains (\K{cmdTrain}) on invisible layers (\K{cmdLayer}) or hidden tracks (\K{cmdTunnel}) (if hidden tracks are not drawn) are displayed.
+\dd \f{Train Update Delay} - number of milliseconds between updates in the \f{Train Simulation} (\K{cmdTrain}) mode.  A lower value will generate a smoother display but reduces system responsiveness.
 
 \u000
 
@@ -322,7 +318,15 @@ The \f{Layout Options} dialog, displayed by the Options (\K{optionM}) menu, cont
 
 \u000
 
-\dd \f{Title} - Two lines that can be used to enter a title and description for the layout. Information entered in these fields will be shown on any printout of your layout design.
+\dd \f{Title} - Two lines that can be used to enter title and subtitle descriptions for the layout. Information entered in these fields will be shown on any printout of your layout design.
+
+\u000
+
+\dd \f{Maximum Track Grade} - Specifies maximum track elevation expressed as a percent (%). Tracks with a larger elevation are considered exceptional and drawn in the exception (\K{cmdRgbcolor}) color.
+
+\u000
+
+\dd \f{Minimum Track Radius} - Specifies minimum track radius (in inches or centimeters). Curved tracks with a smaller radius are considered exceptional and drawn in the exception (\K{cmdRgbcolor}) color.
 
 \rule
 
@@ -339,11 +343,11 @@ This dialog controls some parameters which likely will not be changed frequently
 
 \u000
 
-\dd \f{Auto Pan} - if enabled, dragging near the edge of the Main Canvas (\K{mainW}) will cause the canvas to move to follow the mouse.
+\dd \f{Balloon Help} - disables the display of \f{Balloon Help} (\K{windowTerms}) which usually is shown when the cursor is placed over a control.
 
 \u000
 
-\dd \f{Check-Point} - how often the layout is automatically saved to the checkpoint file (\K{workDir}). Setting this value to 0 disables writing the Checkpoint file.
+\dd \f{Check Point} - specifies the Check Point frequency; the number of modifications made to the layout since the last save. The layout is automatically saved to the Check Point file (\K{workDir}) when the Check Point frequency is reached. Setting this value to 0 disables use of the Checkpoint file.
 
 \u000
 
@@ -367,19 +371,15 @@ This dialog controls some parameters which likely will not be changed frequently
 
 \u000
 
-\dd \f{List Labels} - controls the format of titles for turnouts and structures displayed in lists (such as the \f{Parts List} (\K{cmdEnum})).
+\dd \f{Max Coupling Speed} - trains (\K{cmdTrain}) moving faster than this speed will crash when running into other trains or hitting the end of a track or an open turnout.  Crashed trains must be manually moved back onto the track.
 
 \u000
 
-\dd \f{Maximum Track Grade} - Tracks with more than this grade are drawn in the exceptional (\K{cmdRgbcolor}) color.
+\dd \f{Min Grid Spacing} - minimum distance between \f{Grid} (\K{cmdGrid}) lines (in pixels).  If the grid lines are closer then drawing them is suppressed.
 
 \u000
 
-\dd \f{Minimum Track Length} - specifies the minimum length of a track.  Shorter tracks will not be created.
-
-\u000
-
-\dd \f{Minimum Track Radius} - Curved tracks with less than this radius are drawn in the exceptional (\K{cmdRgbcolor}) color.
+\dd \f{Min Track Length} - specifies the minimum length of a track.  Shorter tracks will not be created.
 
 \u000
 
@@ -387,7 +387,7 @@ This dialog controls some parameters which likely will not be changed frequently
 
 \u000
 
-\dd \f{Train Update Delay} - number of milliseconds between updates in the \f{Train Simulation} (\K{cmdTrain}) mode.  A lower value will generate a smoother display but reduces system responsiveness.
+\dd \f{Turntable Angle} - minimum angle between adjacent tracks connected to a \f{Turntable} (\K{cmdTurntable}).
 
 \u000
 

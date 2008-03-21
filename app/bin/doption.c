@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.5 2008-03-18 07:34:43 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.6 2008-03-21 08:20:00 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -363,7 +363,7 @@ static paramData_t prefPLs[] = {
 	{ PD_RADIO, &units, "units", PDO_NOPSHUPD|PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORZ, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
 #define I_DSTFMT		(2)
 	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_NOPSHUPD|PDO_LISTINDEX, (void*)150, N_("Length Format"), 0, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
-	{ PD_FLOAT, &minLength, "minlength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Minimum Track Length") },
+	{ PD_FLOAT, &minLength, "minlength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Min Track Length") },
 	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance"), },
 	{ PD_FLOAT, &connectAngle, "connectangle", PDO_NOPSHUPD, &r1_10, N_("Connection Angle") },
 	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
