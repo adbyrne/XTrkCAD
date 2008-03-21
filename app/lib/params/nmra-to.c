@@ -1,5 +1,5 @@
 /*
- *	$Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/nmra-to.c,v 1.1 2005-12-07 15:48:05 rc-flyer Exp $
+ *	$Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/nmra-to.c,v 1.2 2008-03-21 13:52:00 m_fischer Exp $
  */
 
 
@@ -7,7 +7,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
-#ifndef _MSDOS
+#ifndef WINDOWS
 #include <unistd.h>
 #else
 #define M_PI 3.14159265358979323846

@@ -1,14 +1,39 @@
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#if defined (__sun) && defined (__SVR4)
 #include <ctype.h>
-#endif
 
 int dumpUnknownRoadnames;
 int updateRoadnames;
 int newRoadnameCnt;
+
+
+#if _MSC_VER > 1300
+	#define stricmp _stricmp
+	#define strnicmp _strnicmp
+	#define strdup _strdup
+
+#endif
+
 
 typedef struct {
 	char * key;
@@ -70,11 +95,11 @@ void readRoadnameMap(
 	char * mapFile )
 {
 	FILE * mapF;
-	char line[256], *cp1;
+	char line[256];
 	int len;
 	int currLen = 0;
 	roadname_p r_p;
-	char * cp, cq;
+	char * cp;
 	mapF = fopen( mapFile, "r" );
 	if ( mapF == NULL ) {
 		perror( mapFile );
@@ -129,7 +154,7 @@ char * lookupMap(
 {
 	int inx;
 	for ( inx=0; inx<map->cnt; inx++ )
-		if ( strcasecmp( key, map->map[inx].key ) == 0 )
+		if ( stricmp( key, map->map[inx].key ) == 0 )
 			return map->map[inx].value;
 	return NULL;
 }
@@ -140,7 +165,6 @@ map_t roadnameMap;
 long lookupColor(
 	char * colorS )
 {
-	char valueS;
 	if ( colorS == NULL || colorS[0] == '\0' )
 		return 0x823F00;
 	if ( !isdigit( colorS[0] ) )
@@ -171,7 +195,7 @@ void canonicalize( char * name )
 	for ( cp=cq=name; *cp; cp++ ) {
 		if ( *cp== '.' || *cp == ',' || *cp == '-' ) {
 			*cp = ' ';
-		} else if ( strncasecmp( cp, " and ", 5 ) == 0 ) {
+		} else if ( strnicmp( cp, " and ", 5 ) == 0 ) {
 			cp[1] = '&';
 			cp[2] = ' ';
 			cp[3] = ' ';
@@ -193,14 +217,14 @@ void lookupRoadname(
 {
 	roadname_p r_p1, r_p2;
 	canonicalize( key );
-	if ( key == NULL || key[0] == '\0' || strncasecmp( key, "undec", 5 ) == 0 ) {
+	if ( key == NULL || key[0] == '\0' || strnicmp( key, "undec", 5 ) == 0 ) {
 		roadnameS[0] = '\0';
 		repmarkS[0] = '\0';
 		return;
 	}
 	for ( r_p1 = roadnames; r_p1; r_p1 = r_p1->next ) {
 		for ( r_p2 = r_p1; r_p2; r_p2 = r_p2->alias ) {
-			if ( strcasecmp( key, r_p2->name ) == 0 ) {
+			if ( stricmp( key, r_p2->name ) == 0 ) {
 				if ( r_p1->name[0] != '?' )
 					strcpy( repmarkS, r_p1->name );
 				else
@@ -250,7 +274,6 @@ void processFile(
 	char line[1024];
 	char manuf[256];
 	char proto[256];
-	char part[256];
 	char desc[256];
 	long color;
 	char scale[256];
@@ -262,13 +285,8 @@ void processFile(
 	int option = 0;
 	int type = 30100;
 	int lineNumber = 0;
-	char * partnoS;
-	char * descS;
 	char roadnameS[256];
 	char repmarkS[256];
-	char * roadS;
-	char * numberS;
-	char * colorS;
 	int len;
 	int inx;
 	char * cp, *cq;
@@ -297,15 +315,15 @@ void processFile(
 		len = strlen(line);
 		if ( line[len-1] == '\n' )
 			line[len-1] = '\0';
-		if ( strncasecmp( line, "scale=", 6 ) == 0 ) {
+		if ( strnicmp( line, "scale=", 6 ) == 0 ) {
 			strcpy( scale, line+6 );
-			if ( strcasecmp( scale, "N" ) == 0 )
+			if ( stricmp( scale, "N" ) == 0 )
 				ratio = 160.0;
-			else if ( strcasecmp( scale, "HO" ) == 0 )
+			else if ( stricmp( scale, "HO" ) == 0 )
 				ratio = 87.1;
-			else if ( strcasecmp( scale, "O" ) == 0 )
+			else if ( stricmp( scale, "O" ) == 0 )
 				ratio = 48.0;
-			else if ( strcasecmp( scale, "S" ) == 0 )
+			else if ( stricmp( scale, "S" ) == 0 )
 				ratio = 64.0;
 			else {
 				fprintf( stderr, "%d: Unknown scale %s\n", lineNumber, scale );
@@ -313,9 +331,9 @@ void processFile(
 			}
 			width = 120.0/ratio;
 			couplerLength = 16.0/ratio;
-		} else if ( strncasecmp( line, "contents=", 9 ) == 0 ) {
+		} else if ( strnicmp( line, "contents=", 9 ) == 0 ) {
 			fprintf( outF, "CONTENTS %s\n", line+9 );
-		} else if ( strncasecmp( line, "order=", 6 ) == 0 ) {
+		} else if ( strnicmp( line, "order=", 6 ) == 0 ) {
 			partX = descX = roadX = numbX = colorX = 0;
 			for ( cp=line+6; *cp; cp++ ) {
 				switch (*cp) {
@@ -326,55 +344,55 @@ void processFile(
 				case '0': break;
 				}
 			}
-		} else if ( strncasecmp( line, "manuf=", 6 ) == 0 ) {
+		} else if ( strnicmp( line, "manuf=", 6 ) == 0 ) {
 			strcpy( manuf, line+6 );
-		} else if ( strncasecmp( line, "type=", 5 ) == 0 ) {
-			if ( strcasecmp( line+5, "diesel" ) == 0 ){
+		} else if ( strnicmp( line, "type=", 5 ) == 0 ) {
+			if ( stricmp( line+5, "diesel" ) == 0 ){
 				option = 1;
 				type = 10101;
-			} else if ( strcasecmp( line+5, "steam" ) == 0 ){
+			} else if ( stricmp( line+5, "steam" ) == 0 ){
 				option = 1;
 				type = 10201;
-			} else if ( strcasecmp( line+5, "electric" ) == 0 ){
+			} else if ( stricmp( line+5, "electric" ) == 0 ){
 				option = 1;
 				type = 10301;
-			} else if ( strcasecmp( line+5, "freight" ) == 0 ){
+			} else if ( stricmp( line+5, "freight" ) == 0 ){
 				option = 0;
 				type = 30100;
-			} else if ( strcasecmp( line+5, "passenger" ) == 0 ){
+			} else if ( stricmp( line+5, "passenger" ) == 0 ){
 				option = 0;
 				type = 50100;
-			} else if ( strcasecmp( line+5, "m-o-w" ) == 0 ){
+			} else if ( stricmp( line+5, "m-o-w" ) == 0 ){
 				option = 0;
 				type = 70100;
-			} else if ( strcasecmp( line+5, "other" ) == 0 ){
+			} else if ( stricmp( line+5, "other" ) == 0 ){
 				option = 0;
 				type = 90100;
 			} else  {
 				fprintf( stderr, "%d: Unknown type: %s\n", lineNumber, line+5 );
 			}
-		} else if ( strncasecmp( line, "proto=", 6 ) == 0 ) {
+		} else if ( strnicmp( line, "proto=", 6 ) == 0 ) {
 			strcpy( proto, line+6 );
 			desc[0] = '\0';
-		} else if ( strncasecmp( line, "desc=", 5 ) == 0 ) {
+		} else if ( strnicmp( line, "desc=", 5 ) == 0 ) {
 			strcpy( desc, line+5 );
-		} else if ( strncasecmp( line, "length=", 7 ) == 0 ) {
+		} else if ( strnicmp( line, "length=", 7 ) == 0 ) {
 			length = atof( line+7 );
 			truckCenter = length * 0.75;
-		} else if ( strncasecmp( line, "protolength=", 12 ) == 0 ) {
+		} else if ( strnicmp( line, "protolength=", 12 ) == 0 ) {
 			length = atof( line+12 );
 			length = length / ratio;
 			truckCenter = length * 0.75;
-		} else if ( strncasecmp( line, "width=", 6 ) == 0 ) {
+		} else if ( strnicmp( line, "width=", 6 ) == 0 ) {
 			width = atof( line+6 );
-		} else if ( strncasecmp( line, "protowidth=", 11 ) == 0 ) {
+		} else if ( strnicmp( line, "protowidth=", 11 ) == 0 ) {
 			width = atof( line+11 );
 			width = width * 12.0 / ratio;
-		} else if ( strncasecmp( line, "truckcenter=", 12 ) == 0 ) {
+		} else if ( strnicmp( line, "truckcenter=", 12 ) == 0 ) {
 			truckCenter = atof( line+12 );
-		} else if ( strncasecmp( line, "couplerlength=", 14 ) == 0 ) {
+		} else if ( strnicmp( line, "couplerlength=", 14 ) == 0 ) {
 			couplerLength = atof( line+14 );
-		} else if ( strncasecmp( line, "part=", 5 ) == 0 ) {
+		} else if ( strnicmp( line, "part=", 5 ) == 0 ) {
 			if ( length == 0.000 )
 				continue;
 			cp = line+5;
@@ -411,6 +429,8 @@ void processFile(
 
 int main ( int argc, char * argv[] )
 {
+	char *exename = argv[ 0 ];
+
 	argv++;
 	argc--;
 	
@@ -427,6 +447,8 @@ int main ( int argc, char * argv[] )
 		fprintf( stderr, "Usage: %s [-r] <file>.car <file>.xtp\n", "mkcarpart" );
 		exit(1);
 	}
+
+	printf(  "executing %s %s %s\n", exename, argv[ 0 ], argv[ 1 ] );
 	readMap( "color.tab", &colorMap );
 	readRoadnameMap( "roadname.tab" );
 	processFile( argv[0], argv[1] );
