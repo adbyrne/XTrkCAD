@@ -1,0 +1,1506 @@
+CONTENTS=Atlas N Scale Diesel Engines
+MANUF=Atlas
+SCALE=N
+ORDER=#RDN
+TYPE=diesel
+COUPLERLENGTH=0.200
+#############################################
+#
+# RS1
+#
+#############################################
+PROTO=RS1
+DESC=
+LENGTH=3.825
+PART=4400%Undecorated%Friction bearing truck
+PART=4401%Undecorated%Roller bearing truck
+PART=4402%Santa Fe%%2396
+PART=4403%Santa Fe%%2394
+PART=4404%Pennsylvania RR%%5906
+PART=4405%Pennsylvania RR%%9914
+PART=4406%SOO Line%%2368
+PART=4407%Baltimore & Ohio%%9185
+PART=4408%New Haven%%667
+PART=4409%GM&O%%1108
+PART=4410%Spokane Portland & Seattle%%50
+PART=4411%Amtrak%%44
+PART=4412%Southern%%405
+PART=4413%Great Northern%%183
+PART=44000%Undecorated%Friction Bearing Trucks
+PART=44001%Undecorated%Roller Bearing Trucks
+PART=44002%Santa Fe%%2396
+PART=44003%Santa Fe%%2397
+PART=44004%Jersey Central%%1201
+PART=44005%Jersey Central%%1204
+PART=44006%Great Northern%%184
+PART=44007%Great Northern%%185
+PART=44008%Minneapolis & St. Louis%%246
+PART=44009%Minneapolis & St. Louis%%845
+PART=44010%New York Central%%8101
+PART=44011%New York Central%%8103
+PART=44012%Rutland%%401
+PART=44013%Rutland%%403
+PART=44014%Chesapeake & Ohio%%5114
+PART=44015%Chesapeake & Ohio%%5115
+PART=44016%Chicago & North Western%%1067
+PART=44017%Chicago & North Western%%1069
+PART=44018%Long Island%%461
+PART=44019%Long Island%%467
+PART=44020%Milwaukee Rd.%%1676
+PART=44021%Milwaukee Rd.%%1677
+PART=44022%Minneapolis & St. Louis%%222
+PART=44023%Minneapolis & St. Louis%%227
+PART=44024%Northern Pacific%%801
+PART=44025%Northern Pacific%%803
+PART=44026%Penn Central%%9915
+PART=44027%Penn Central%%9926
+PART=44028%Susquehanna%%254
+PART=44029%Susquehanna%%256
+PART=44032%Pennsylvania%%5621
+PART=44033%Pennsylvania%%5632
+PART=44034%Rock Island%%735
+PART=44035%Rock Island%%748
+PART=44036%Soo Line%%350
+PART=44037%Soo Line%%352
+PART=44038%Chicago & Northwestern%%212
+PART=44039%Chicago & Northwestern%%222
+PART=44040%Green Mountain%%405
+PART=44041%Long Island%%464
+PART=44042%Long Island%%466
+PART=44043%New Haven%%661
+PART=44044%New Haven%%668
+PART=44045%Rock Island%%742
+PART=44046%Rock Island%%744
+PART=44047%Susquehanna%%246
+PART=44048%Susquehanna%%250
+#############################################
+#
+# RS3
+#
+#############################################
+PROTO=RS3
+DESC=
+PROTOLENGTH=672
+PART=4200%Undecorated%2 Windows Both Sides
+PART=4201%PRR%%5546
+PART=4202%N&W%%307
+PART=4203%RI%%485
+PART=4204%L&N%%118
+PART=4205%Conrail%%5307
+PART=4210%C&O%%5600
+PART=4211%D&H%%4075
+PART=4212%Milw Road%%16AS 
+PART=4213%NYC%%5348
+PART=4214%SCL%%1201
+PART=4215%Cotton Belt%%2813
+PART=4220%NYC%%8233
+PART=4221%D&H%%4079
+PART=4222%EL%%1039
+PART=4250%Reading%%496
+PART=4251%LV%%214
+PART=4252%CNJ%%1553
+PART=4253%B&M%%  
+PART=4254%Conrail%%9946
+PART=4255%Lehigh & NE%%654
+PART=4256%WM%%185
+PART=42000%Undecorated
+PART=42001%BN%%4068
+PART=42002%BN%%4082
+PART=42003%CN%%3032
+PART=42004%CN%%3039
+PART=42005%CNW%%1614
+PART=42006%CNW%%1617
+PART=42007%NH%%553
+PART=42008%NH%%555
+PART=42009%DRGW%%5200
+PART=42010%DRGW%%5203
+PART=42011%Southern%%2037
+PART=42012%Southern%%2043
+PART=42014%CP%%8436
+PART=42015%CP%%8441
+PART=42016%Erie%%929
+PART=42017%Erie%%1012
+PART=42018%PRR%%8482
+PART=42019%PRR%%8825
+PART=42020%Boston & Maine%%1539
+PART=42021%Boston & Maine%%1545
+PART=42022%GN%%228
+PART=42023%GN%%232
+PART=42024%Rock Island%%497
+PART=42025%Rock Island%%495
+PART=42026%Southern%%2050
+PART=42027%Southern%%2059
+PART=42028%CP Rail%%8426
+PART=42029%CP Rail%%8449
+PART=42030%New Haven%%520
+PART=42031%New Haven%%528
+PART=42032%New York Central%%8323
+PART=42033%New York Central%%8328
+PART=42034%Cotton Belt%%352
+PART=42035%Cotton Belt%%355
+PART=42036%Canadian National%%1807
+PART=42037%Canadian National%%1812
+PART=42038%Chicago & Northwestern%%1614
+PART=42039%Chicago & Northwestern%%1616
+PART=42040%Delaware & Hudson%%4067
+PART=42041%Delaware & Hudson%%4069
+PART=42042%Norfolk & Western%%300
+PART=42043%Norfolk & Western%%303
+PART=42044%Providence & Worcester%%161
+PART=42045%Providence & Worcester%%164
+#############################################
+#
+# RS4/5
+#
+#############################################
+PROTO=RS4/5
+DESC=
+PROTOLENGTH=671.75
+PART=4230%Undecorated
+PART=4231%ATSF%%2157
+PART=4232%PRR%%8448
+PART=4233%CNW%%1689
+PART=4234%SP%%5305
+PART=42300%Undecorated
+PART=42301%Jersey Central%%1604
+PART=42302%Jersey Central%%1607
+PART=42303%ATSF%%2102
+PART=42304%ATSF%%2138
+PART=42305%Southern Pacific%%5294
+PART=42306%Southern Pacific%%5301
+PART=42307%ATSF%%2138
+PART=42308%ATSF%%2159
+PART=42309%Penn Central%%6802
+PART=42310%Penn Central%%6805
+PART=42311%Southern Pacific%%5302
+PART=42312%Southern Pacific%%5307
+#############################################
+#
+# RS11
+#
+#############################################
+PROTO=RS11
+DESC=
+LENGTH=3.938
+PART=4260%Undecorated
+PART=4261%Pennsylvania RR%%8619
+PART=4262%Burlington Northern%%4185
+PART=4263%New York Central%%8000
+PART=4264%Louisville & Nashville%%956
+PART=4265%Southern Pacific%%5721
+PART=4266%Central Vermont%%3609
+PART=4267%Conrail%%7651
+PART=4268%Norfolk & Western%%348
+PART=42601%Delaware & Hudson%%5001
+PART=42602%Delaware & Hudson%%5005
+PART=42603%Maine Central%%801
+PART=42604%Maine Central%%802
+PART=42605%Northern Pacific%%910
+PART=42606%Northern Pacific%%911
+PART=42607%Southern Pacific%%2908
+PART=42608%Southern Pacific%%2918
+#############################################
+#
+# RSD12
+#
+#############################################
+PROTO=RSD12
+DESC=
+PROTOLENGTH=644
+PART=4280%Undecorated
+PART=4281%B&O%%2016
+PART=4282%Nickel Plate Road%%332
+PART=4283%Norfolk & Western%%252
+PART=4284%Pennsylvania RR%%8663
+#############################################
+#
+# GP7
+#
+#############################################
+PROTO=GP7
+DESC=
+LENGTH=3.900
+PART=4300%Undecorated
+PART=4301%Atlantic Coast Line%%109
+PART=4302%Santa Fe%%2707
+PART=4303%Burlington
+PART=4304%Great Northern%%616
+PART=4305%MKT%%98
+PART=4306%Pennsylvania RR%%8501
+PART=4307%New York Central%%5601
+PART=48000%Undecorated%w/ Dynamic Brakes
+PART=48001%Undecorated%w/o Dynamic Brakes
+PART=48002%Atlantic Coast Line%%107
+PART=48003%Atlantic Coast Line%%121
+PART=48004%Atlantic Coast Line
+PART=48008%Burlington Northern%%1574
+PART=48009%Burlington Northern%%1586
+PART=48010%Burlington Northern
+PART=48014%Chicago Northwestern%%1518
+PART=48015%Chicago Northwestern%%1525
+PART=48016%Chicago Northwestern
+PART=48017%DRGW%%5100
+PART=48018%DRGW%%5103
+PART=48019%DRGW
+PART=48020%Erie%%1218
+PART=48021%Erie%%1225
+PART=48022%Erie
+PART=48023%Erie
+PART=48027%Pennsylvania RR%%8798
+PART=48028%Pennsylvania RR%%8801
+PART=48029%Pennsylvania RR
+PART=48005%Boston & Maine%%1557
+PART=48006%Boston & Maine%%1559
+PART=48007%Boston & Maine
+PART=48011%Canadian Pacific%%8409
+PART=48012%Canadian Pacific%%8411
+PART=48013%Canadian Pacific%%No#
+PART=48024%Great Northern%%611
+PART=48025%Great Northern%%624
+PART=48026%Great Northern
+PART=48030%Santa Fe%%2693
+PART=48031%Santa Fe%%2696
+PART=48032%Santa Fe
+PART=48033%SOO Line%%376
+PART=48034%SOO Line%%382
+PART=48035%SOO Line
+#============================================
+DESC=Phase 1
+#============================================
+PART=48036%Central of Gerogeia%%106
+PART=48037%Central of Georgia%%107
+PART=48038%Central of Georgia
+PART=48039%Burlington%%208
+PART=48040%Burlington%%225
+PART=48041%Burlington
+PART=48042%EMD Demonstrator%%100
+PART=48043%EMD Demonstrator%%200
+PART=48044%EMD Demonstrator%%300
+PART=48045%Maine Central%%561
+PART=48046%Maine Central%%564
+PART=48047%Maine Central
+PART=48049%Bangor & Aroostook%%62
+PART=48051%Erie Lackawanna%%1211
+PART=48052%Erie Lackawanna%%1213
+PART=48054%Santa Fe%%2676
+PART=48055%Santa Fe%%2681
+PART=48058%Southern%%2163
+PART=48059%Southern%%2172
+#============================================
+DESC=Phase 2
+#============================================
+PART=48200%Undecorated%w/o Dynamic Brakes
+PART=48201%Undecorated%w/ Dynamic Brakes
+PART=48208%Conrail%%5980
+PART=48209%Conrail%%5863
+PART=48210%Conrail
+PART=48211%Conrail
+PART=48215%New York Central%%5810
+PART=49216%New York Central%%5698
+PART=48217%New York Central
+PART=48218%New York Central
+PART=48222%Santa Fe%%2794
+PART=48223%Santa Fe%%2863
+PART=48224%Santa Fe
+PART=48225%Santa Fe
+PART=48226%Southern%%2071
+PART=48227%Southern%%2190
+PART=48228%Southern
+PART=48229%Southern
+PART=48236%Western Pacific%%702
+PART=48237%Western Pacific%%710
+PART=48238%Western Pacific
+PART=48202%Bangor & Aroostook%%72
+PART=48203%Bangor & Aroostook%%75
+PART=48204%Bangor & Aroostook
+PART=48205%Burlington Route%%265
+PART=48206%Burlington Route%%267
+PART=48207%Burlington Route
+PART=48212%Erie Lackawanna%%1241
+PART=48213%Erie Lackawanna%%1246
+PART=48214%Erie Lackawanna
+PART=48219%Northern Pacific%%565
+PART=48220%Northern Pacific%%568
+PART=48221%Northern Pacific%%No#
+PART=48230%Union Pacific%%107
+PART=48231%Union Pacific%%120
+PART=48232%Union Pacific
+PART=48233%Wabash%%475
+PART=48234%Wabash%%483
+PART=48235%Wabash
+#############################################
+#
+# GP9
+#
+#############################################
+PROTO=GP9
+DESC=Phase 1
+LENGTH=3.900
+PART=4330%Undecorated
+PART=4331%Baltimore & Ohio%%676
+PART=4332%Canadian National%%4502
+PART=4333%DRGW%%5922
+PART=4334%New Haven%%1206
+PART=4335%Norfolk & Western%%810
+PART=4336%Pennsylvania RR%%7006
+PART=4337%Union Pacific%%298
+#============================================
+DESC=Phase 2
+#============================================
+PART=48300%Undecorated%w/o Dynamic Brakes
+PART=48301%Undecorated%w Dynamic Brakes
+PART=48302%B&O%%6471
+PART=48303%B&O%%6505
+PART=48304%B&O
+PART=48305%Canadian National&&4504
+PART=48306%Canadian National&&4508
+PART=48307%Canadian National
+PART=48308%Detroit, Toledo & Ironton%%984
+PART=48309%Detroit, Toledo & Ironton%%987
+PART=48310%Detroit, Toledo & Ironton
+PART=48311%Florida East Coast%%653
+PART=48312%Florida East Coast%%665
+PART=48313%Florida East Coast
+PART=48314%Great Northern%%714
+PART=48315%Great Northern%%733
+PART=48316%Great Northern
+PART=48317%Louisville & Nashville%%507
+PART=48318%Louisville & Nashville%%508
+PART=48319%Louisville & Nashville
+PART=48320%Milwaukee Road%%217
+PART=48321%Milwaukee Road%%253
+PART=48322%Milwaukee Road
+PART=48323%New Haven%%1218
+PART=48324%NJ%%1224
+PART=48325%NH
+PART=48326%Seaboard Air Line%%1913
+PART=48327%Seaboard Air Line%%1974
+PART=48328%Seaboard Air Line
+PART=48329%Southern Pacific%%240
+PART=48330%Southern Pacific%%5780
+PART=48331%Southern Pacific
+PART=48332%Union Pacific%%173
+PART=48333%Union Pacific%%198
+PART=48334%Union Pacific
+#============================================
+DESC=Torpedo Tubes
+#============================================
+PART=48401%B&O%%748
+PART=48402%B&O%%751
+PART=48403%B&O%%
+PART=48404%Burlington Northern%%1881
+PART=48405%Burlington Northern%%1901
+PART=48406%Burlington Northern
+PART=48407%Grand Trunk Western%%4913
+PART=48408%Grand Trunk Western%%4917
+PART=48409%Grand Trunk Western
+PART=48410%Milwaukee Road%%203
+PART=48411%Milwaukee Road%%205
+PART=48412%Milwaukee Road
+PART=48413%New Your Central%%5946
+PART=48414%New Your Central%%5947
+PART=48415%New Your Central
+PART=48416%Nickel Plate Road%%481
+PART=48417%Nickel Plate Road%%484
+PART=48418%Nickel Plate Road
+PART=48419%Southern Pacific%%5622
+PART=48420%Southern Pacific%%5625
+PART=48421%Southern Pacific
+#############################################
+#
+# GP38
+#
+#############################################
+PROTO=GP38
+DESC=
+PROTOLENGTH=767
+PART=48900%Undecorated%w/o Dynamic Brakes
+PART=48901%Undecorated%w/ Dynamic Brakes
+PART=48902%Clinchfield%%2002
+PART=48903%Clinchfield%%2000
+PART=48905%Detroit, Toledo & Ironton%%201
+PART=48906%Detroit, Toldedo & Ironton%%204
+PART=48908%Maine Central%%261
+PART=48909%Maine Central%%263
+PART=48911%Missouri Pacific%%854
+PART=48912%Missouri Pacific%%855
+PART=48914%Norfolk Southern%%2001
+PART=48915%Norfolk Southern%%2007
+PART=49800%Undecorated%w/o Dynamic Brakes
+PART=49801%Undecorated%w/ Dynamic Brakes
+PART=49802%Alaska RR%%2003
+PART=49803%Alaska RR%%2005
+PART=49805%Santa Fe%%3501
+PART=49806%Santa Fe%%3520
+PART=49808%Baltimore & Ohio%%4811
+PART=49809%Baltimore & Ohio%%4819
+PART=49811%BNSF%%2158
+PART=49812%BNSF%%2177
+PART=49814%CSX%%2112
+PART=49815%CSX%%2121
+PART=49817%GM & O%%709
+PART=49818%GM & O%%713
+PART=49820%New England Central%%9528
+PART=49821%New England Central%%9537
+PART=49823%Burlington Northern%%2161
+PART=49824%Burlington Northern%%2175
+PART=49826%Chessie System- B & O%%4806
+PART=49827%Chessie System - B & O%%4829
+PART=49829%Conrail%%7883
+PART=49830%Conrail%%7894
+PART=49832%Frisco%%636
+PART=49833%Frisco%%638
+PART=49835%Union Pacific%%1974
+PART=49836%Union Pacific%%1977
+#============================================
+DESC=Early Version
+#============================================
+PART=48920%Maine Central%%253
+PART=48921%Maine Central%%260
+PART=49853%Buffalo & Pittsburgh%%2000
+PART=49854%Chesapeake & Ohio%%4823
+PART=49855%Chesapeake & Ohio%%4825
+PART=49857%Genesee & Wyoming%%51
+PART=49858%BNSF%%2238
+PART=49859%BNSF%%2248
+PART=48917%Bangor & Aroostook%%84
+PART=48918%Bangor & Aroostook%%85
+#============================================
+DESC=High Hood
+#============================================
+PART=49838%CSX (MOW)%%9660
+PART=49839%CSX (MOW)%%9664
+PART=49840%Undecorated
+PART=49841%Southern
+PART=49842%Southern
+PART=49844%Norfolk Southern%%2758
+PART=49845%Norfolk Southern%%2761
+PART=49847%Pittsburgh & Lake Erie%%2025
+PART=49848%Pittsburgh & Lake Erie%%2028
+PART=49850%Santa Fe%%3515
+PART=49851%Santa Fe%%3524
+#############################################
+#
+# U25B
+#
+#############################################
+PROTO=U25B
+DESC=
+LENGTH=4.175
+PART=4450%Undecorated%Phase 11a
+PART=4451%ATSF%%1604
+PART=4452%PRR%%2527
+PART=4453%UP%%640
+PART=4454%Conrail%%2627
+PART=4455%C&O%%2500
+PART=4456%C&O%%2537
+PART=4457%Frisco%%812
+PART=4458%Frisco%%814
+PART=4459%SP%%6706
+PART=4460%SP%%6714
+PART=4461%Wabash%%502
+PART=4462%Wabash%%505
+PART=4470%Undecorated%Phase 11b
+PART=4471%BN%%5424
+PART=4472%EL%%2501
+PART=4473%Seaboard Sys%%1613
+PART=4474%RI%%224
+PART=4475%NYC%%2525
+PART=4476%NYC%%2529
+PART=4477%NH%%2502
+PART=4478%NH%%2509
+PART=4479%GN%%2500
+PART=4480%GN%%2502
+PART=4481%CB&Q%%100
+PART=4482%CB&Q%%105
+PART=44500%Undecorated%Phase 2A
+PART=44501%Chessie C & O%%8108
+PART=44502%Chessie C & O%%8127
+PART=44503%ATSF%%6603
+PART=44504%ATSF%%6609
+PART=44700%Undecorated%Phase 2B
+PART=44701%EL%%2510
+PART=44702%EL%%2512
+PART=44703%RI%%214
+PART=44704%RI%%222
+#============================================
+DESC=With DCC Decoder
+#============================================
+PART=44591%Chessie C & O%%8108
+PART=44592%Chessie C & O%%8127
+PART=44593%ATSF%%6603
+PART=44594%ATSF%%6609
+PART=44791%EL%%2510
+PART=44792%EL%%2512
+PART=44793%RI%%214
+PART=44794%RI%%222
+#############################################
+#
+# GP30
+#
+#############################################
+PROTO=GP30
+DESC=
+PROTOLENGTH=674
+PART=4701%Undecorated%w/Nose Headlight
+PART=4702%Burlington Northern%%2248
+PART=4703%Burlington Northern%%2251
+PART=4704%CP Rail%%5000
+PART=4705%CP Rail%%5001
+PART=4706%DRGW%%3014
+PART=4707%DRGW%%3027
+PART=4708%Southern Pacific%%5013
+PART=4709%Southern Pacific%%5017
+PART=4710%Cotton Belt%%5006
+PART=4711%Cotton Belt%%5009
+PART=4721%Undecorated%w/o Nose Headlight
+PART=4722%Santa Fe%%3235
+PART=4723%Santa Fe%%3276
+PART=4724%Conrail%%2206
+PART=4725%Conrail%%2235
+PART=4726%CSX%%4229
+PART=4727%CSX%%4233
+PART=4728%Union Pacific%%702
+PART=4729%Union Pacific%%717
+PART=4730%Great Northern%%3001
+PART=4731%Great Northern%%3012
+PART=4732%Santa Fe%%1249
+PART=4733%Santa Fe%%1283
+PART=4734%Pennsylvania RR%%2222
+PART=4735%Pennsylvania RR%%2243
+PART=4736%Burlington Northern%%2814
+PART=4737%Burlington Northern%%2833
+PART=4738%C&O%%3027
+PART=4739%C&O%%3031
+PART=47500%Undecorated%w/nose headlight
+PART=47501%Undecorated%w/o nose headlight
+PART=47502%CB&Q%%975
+PART=47503%CB&Q%%977
+PART=47504%Kansas City Southern%%4109
+PART=47505%Kansas City Southern%%4117
+PART=47506%Seaboard Air Line%%501
+PART=47507%Seaboard Air Line%%511
+PART=47512%BNSF%%2800
+PART=47513%BNSF%%2804
+PART=47514%Penn Central%%2242
+PART=47515%Penn Central%%2246
+PART=47516%Union Pacific%%704
+PART=47517%Union Pacific%%707
+#############################################
+#
+# GP35
+#
+#############################################
+PROTO=GP35
+DESC=
+LENGTH=3.931
+PART=4600%Undecorated%w/o Dynamic Brakes
+PART=4601%Undecorated%w/ Dynamic Brakes
+PART=4602%Santa Fe%%1305
+PART=4603%Santa Fe%%1317
+PART=4604%Conrail%%2370
+PART=4605%Conrail%%3625
+PART=4606%B&O%%3501
+PART=4607%B&O%%3519
+PART=4608%Burlington Northern%%2503
+PART=4609%Burlington Northern%%2527
+PART=4610%New York Central%%6125
+PART=4611%New York Central%%6127
+PART=4612%CB&Q%%978
+PART=4613%CB&Q%%980
+PART=4614%Southern Pacific%%6525
+PART=4615%Southern Pacific%%6544
+PART=4616%Cotton Belt%%6501
+PART=4617%Western Pacific%%3004
+PART=4618%Western Pacific%%3007
+PART=4619%Western Maryland%%3576
+PART=4620%Western Maryland%%3578
+PART=4621%Union Pacific%%762
+PART=4622%Union Pacific%%763
+PART=4625%Undecorated%w/o Dynamic Brakes
+PART=4626%Undecorated%w/ Dynamic Brakes
+PART=4627%CP Rail%%5002
+PART=4628%CP Rail%%5013
+PART=4629%Erie Lackawanna%%2551
+PART=4630%Erie Lackawanna%%2560
+PART=4631%Union Pacific%%740
+PART=4632%Union Pacific%%757
+PART=4633%Pennsylvania RR%%2287
+PART=4634%Pennsylvania RR%%2294
+PART=4635%Norfolk & Western%%1303
+PART=4636%Norfolk & Western%%1306
+PART=4637%Canadian National%%4000
+PART=4638%Canadian National%%4001
+PART=4639%Reading%%3626
+PART=4640%Reading%%3652
+PART=4641%DRGW%%3029
+PART=4642%DRGW%%3034
+PART=4643%DRGW%%3031
+PART=4644%DRGW%%3035
+PART=4645%Canadian Pacific%w/ Dynamic Brakes%%5016
+PART=4646%Canadian Pacific%%5019
+PART=46500%Undecorated%w/o Dynamic Brakes
+PART=46501%Undecorated%w/ Dynamic Brakes
+PART=46502%BNSF%%2540
+PART=46503%Chicago Northwestern%%828
+PART=46504%Chicago Northwestern%%836
+PART=46505%Montana Rail Link%%401
+PART=46506%Montana Rail Link%%402
+PART=46507%Canadian Pacific%%5022
+PART=46508%Canadian Pacific%%5025
+PART=46511%CSX%%4346
+PART=46512%CSX%%4355
+PART=46513%Great Northern%%3019
+PART=46514%Great Northern%%3023
+PART=46515%Soo Line%%722
+PART=46516%Soo Line%%731
+#############################################
+#
+# GP40
+#
+#############################################
+PROTO=GP40
+DESC=
+LENGTH=4.125
+PART=48500%Undecorated%w/o Dynamic brakes
+PART=48501%Undecorated%w/ Dynamic brakes
+PART=48502%Burlington Northern%%3022
+PART=48503%Burlington Northern%%3036
+PART=48504%Burlington Northern
+PART=48508%Chicago Northwestern%%5504
+PART=48509%Chicago Northwestern%%5511
+PART=48510%Chicago Northwestern
+PART=48511%Canadian National%%4006
+PART=48512%Canadian National%%4008
+PART=48513%Canadian National
+PART=48514%Cotton Belt%%7601
+PART=48515%Cotton Belt%%7606
+PART=48516%Cotton Belt
+PART=48517%Conrail%%3021
+PART=48518%Conrail%%3054
+PART=48519%Conrail
+PART=48520%CB&Q%%623
+PART=48521%CB&Q%%639
+PART=48522%CB&Q
+PART=48523%DRGW%%3056
+PART=48524%DRGW%%3073
+PART=48525%DRGW
+PART=48526%Louisville & Nashville%%3002
+PART=48527%Louisville & Nashville%%3012
+PART=48528%Louisville & Nashville
+PART=48529%MKT%%172
+PART=48530%MKT%%188
+PART=48531%MKT
+PART=48532%New York Central%%3003
+PART=48533%New York Central%%3042
+PART=48534%New York Central
+PART=48535%UP%%669
+PART=48536%UP%%670
+PART=48537%UP
+PART=48538%Milwaukee Rd.%%2026
+PART=48539%Milwaukee Rd.%%2034
+PART=48541%RF & P%%122
+PART=48542%RF & P%%124
+PART=48544%Southern Pacific%%3059
+PART=48545%Southern Pacific%%7122
+PART=48547%Western Pacific%%3508
+PART=48548%Western Pacific%%3511
+PART=48550%Wisconsin Central%%3005
+PART=48551%Wisconsin Central%%3006
+PART=48553%Guilford (MEC)%%310
+PART=48554%Guilford (MEC)%%312
+PART=48556%Rio Grande%%3131
+PART=48557%Rio Grande%%3141
+PART=48559%Rock Island%%382
+PART=48562%Burlington Route%%622
+PART=48563%Burlington Route%%630
+PART=48566%Illinois Central Gulf%%3036
+PART=48568%New York Central%%3083
+PART=48569%New York Central%%3090
+PART=53901%Union Pacific%%610
+PART=53902%Union Pacific%%622
+PART=53904%Western Pacific%%3510
+PART=53905%Western Pacific%%3514
+PART=53907%Amtrak%%657
+PART=53908%Amtrak%%658
+PART=53909%Amtrak%%660
+PART=53910%Florida East Coast%%401
+PART=53911%Florida East Coast%%405
+PART=53912%Florida East Coast%%408
+PART=53913%Vermont Railway%%301
+PART=53914%Green Mountain%%305
+PART=53915%Rio Grande%%3082
+PART=53916%Rio Grande%%3084
+PART=53917%Rio Grande%%3087
+PART=53918%Susquehanna%%3040
+#############################################
+#
+# GP40-2
+#
+#############################################
+PROTO=GP40-2
+DESC=
+LENGTH=4.125
+PART=48600%Undecorated%w/o Dynamic Brakes
+PART=48601%Undecorated%w Dynamic Brakes
+PART=48602%Alaska RR%%3014
+PART=48603%Alaska RR%%3015
+PART=48604%Boston & Maine%%310
+PART=48605%Boston & Maine%%315
+PART=48606%Boston & Maine
+PART=48607%Conrail%%3387
+PART=48608%Conrail%%3400
+PART=48609%Conrail
+PART=48610%CSX%%6221
+PART=48611%CSX%%6400
+PART=48612%CSX
+PART=48613%Florida East Coast%%417
+PART=48614%Florida East Coast%%420
+PART=48615%Grand Trunk Western%%6407
+PART=48616%Grand Trunk Western%%6412
+PART=48617%Grand Trunk Western
+PART=48618%Reading%%3671
+PART=48619%Reading%%3673
+PART=48620%Reading
+PART=48621%Southern Pacific%%7616
+PART=48622%Southern Pacific%%7623
+PART=48623%Southern Pacific
+PART=48624%Union Pacific%%910
+PART=48625%Union Pacific%%912
+PART=48626%Union Pacific
+PART=48627%Western Pacific%%3545
+PART=48628%Western Pacific%%3548
+PART=48629%Western Pacific
+PART=48630%Conrail%%3372
+PART=48631%Conrail%%3385
+PART=48633%Chessie System%%4103
+PART=48634%Chessie System%%4108
+PART=48636%Southern Pacific%%7621
+PART=48637%Southern Pacific%%7626
+PART=48639%Norfolk Southern%%3013
+PART=48640%Norfolk Southern%%3021
+PART=48642%CSX%%6211
+PART=48643%CSX%%6218
+PART=48680%Boston & Maine%%317
+PART=48681%Conrail%%3403
+PART=48682%CSX%%6318
+PART=48683%Southern Pacific%%7652
+PART=48684%Union Pacific%%913
+#############################################
+#
+# SD7
+#
+#############################################
+PROTO=SD7
+DESC=
+PROTOLENGTH=648
+PART=4500%Undecorated%w/o Dynamic Brakes
+PART=4501%Undecorated%w/ Dynamic Brakes
+PART=4502%DRGW%%5300
+PART=4503%DRGW%%5302
+PART=4504%SP%%1431
+PART=4505%SP%%1442
+PART=4506%B&O%%761
+PART=4507%B&O%%764
+PART=4508%Bessemer & LE%%453
+PART=4509%Bessemer & LE%%801
+PART=4510%GN%%550
+PART=4511%GN%%568
+PART=4512%UP%%457
+PART=4513%UP%%458
+PART=4514%Chessie B&O%%1826
+PART=4515%Chessie B&O%%1828
+PART=4516%BN%%6022
+PART=4517%BN%%6047
+PART=53602%Baltimore & Ohio%%1826
+PART=53603%Baltimore & Ohio%%1829
+PART=53604%Burlington Route%%317
+PART=53605%Burlington Route%%318
+PART=53606%Conrail%%6998
+PART=53607%Conrail%%6999
+PART=53608%Milwaukee Rd.%%509
+PART=53609%Milwaukee Rd.%%510
+PART=53610%Rio Grande%%5300
+PART=53611%Rio Grande%%5301
+PART=53612%Southern Pacific%%5308
+PART=53613%Southern Pacific%%5329
+#============================================
+DESC=With DCC Decoder
+#============================================
+PART=53640%Rio Grande%%5300
+PART=53641%Rio Grande%%5301
+PART=53642%Southern Pacific%%5308
+PART=53643%Southern Pacific%%5329
+#############################################
+#
+# SD9
+#
+#############################################
+PROTO=SD9
+DESC=With DCC Decoder
+PROTOLENGTH=678
+PART=4525%Undecorated%w/o Dynamic Brakes
+PART=4526%Undecorated%w/ Dynamic brakes
+PART=4527%PRR%%7607
+PART=4528%PRR%%7621
+PART=4529%Conrail%%6915
+PART=4530%Conrail%%6921
+PART=4531%CB&Q%%329
+PART=4532%CB&Q%%374
+PART=4533%N&W%%2349
+PART=4534%N&W%%2351
+PART=4535%Southern%%198H 
+PART=4536%Southern%%199A 
+PART=4537%Nickel Plate%%345
+PART=4538%Nickel Plate%%351
+PART=4539%SP%%5392
+PART=4540%SP%%5417
+PART=4541%GN%%579
+PART=4542%GN%%583
+PART=4543%CNW%%1702
+PART=4544%CNW%%1722
+PART=53502%BNSF%%6108
+PART=53503%Chessie System B & O%%1834
+PART=53504%Chessie System B & O%%1831
+PART=53505%Duluth Missabe & Iron Range%%111
+PART=53506%Duluth Missabe & Iron Range%%117
+PART=53507%Great Northern%%576
+PART=53508%Great Northern%%582
+PART=53509%Norfolk Southern%%52
+PART=53510%Norfolk Southern%%55
+PART=53511%Southern Pacific%%4341
+PART=53512%Southern Pacific%%4409
+#############################################
+#
+# SD35
+#
+#############################################
+PROTO=SD35
+DESC=
+PROTOLENGTH=728.5
+#============================================
+DESC=Low Hood Version
+#============================================
+PART=49410%Undecorated
+PART=49411%Undecorated
+PART=49412%Chessie B&O%%7413
+PART=49413%Chessie C&O%%7421
+PART=49414%Chessie C&O
+PART=49415%Conrail%%6002
+PART=49416%Conrail%%6045
+PART=49417%Conrail
+PART=49418%L & N%%1201
+PART=49419%L & N%%1213
+PART=49420%L & N 
+PART=49421%PRR%%6018
+PART=49422%PRR%%6025
+PART=49423%PRR 
+PART=49424%SP%%6904
+PART=49425%SP%%6915
+PART=49426%SP
+PART=49427%Western Maryland%%7434
+PART=49428%Western Maryland%%7435
+PART=49429%Western Maryland
+PART=49433%Jersey Central%%2504
+PART=49434%Jersey Central%%2511
+PART=49435%Jersey Central
+PART=49436%Penn Central%%6018
+PART=49437%Penn Central%%6031
+PART=49438%Penn Central
+PART=49439%Atlantic Coast Line%%1014
+PART=49440%Atlantic Coast Line%%1021
+PART=49441%Atlantic Coast Line
+PART=49442%CSX%%4527
+PART=49443%CSX%%4586
+PART=49444%CSX
+PART=44449%Montana Rail Line%%703
+PART=49445%Baltimore & Ohio%%7409
+PART=49446%Baltimore & Ohio%%7418
+PART=49448%Montana Rail Link%%702
+PART=49451%Seaboard Coast Line%%1907
+PART=49452%Seaboard Coast Line%%1910
+PART=49454%Western Maryland%%7432
+PART=49455%Western Maryland%%7433
+#============================================
+DESC=High Hood Version
+#============================================
+PART=49400%Undecorated
+PART=49401%Montana Rail Link%%701
+PART=49402%Montana Rail Link%%705
+PART=49403%Montana Rail Link
+PART=49404%Norfolk & Western%%1505
+PART=49405%Norfolk & Western%%1521
+PART=49406%Norfolk & Western
+PART=49407%Southen%%215K 
+PART=49408%Southern%%3008A 
+PART=49409%Southern
+PART=49430%N & W%%1550
+PART=49431%N & W%%1554
+PART=49432%N & W
+PART=49458%Central of Georgia%%217
+PART=49459%Central of Georgia%%221
+#============================================
+DESC=Low Hood, With DCC Decoder
+#============================================
+PART=49476%Chessie B & O%%7413
+PART=49477%Chessie C & O%%7421
+PART=49478%Conrail%%6002
+PART=49479%Conrail%%6045
+PART=49480%L & N%%1201
+PART=49481%L & N%%1213
+PART=49482%Pennsylvania%%6018
+PART=49483%Pennsylvania%%6025
+PART=49484%Southern Pacific%%6904
+PART=49485%Southern Pacific%%6915
+PART=49486%Western Maryland%%7434
+PART=49487%Western Maryland%%7435
+PART=49496%CSX%%4527
+PART=49497%CSX%%4586
+#============================================
+DESC=High Hood, With DCC Decoder
+#============================================
+PART=49470%Montana Rail Link%%701
+PART=49471%Montana Rail Link%%705
+PART=49472%Norfolk & Western%%1505
+PART=49473%Norfolk & Western%%1521
+PART=49474%Southern%%215K 
+PART=49475%Southern%%3008A 
+PART=49488%Norfolk & Western%%1550
+PART=49489%Norfolk & Western%%1554
+#############################################
+#
+# SD50
+#
+#############################################
+PROTO=SD50
+DESC=
+LENGTH=5.025
+PART=49300%Undecorated
+PART=49301%Chessie B&O%%8587
+PART=49302%Chessie C&O%%8625
+PART=49303%Chessie
+PART=49304%Missouri Pacific%%5010
+PART=49305%Missouri Pacific%%5025
+PART=49306%Missouri Pacific
+PART=49307%Rio Grande%%5506
+PART=49308%Rio Grande%%5510
+PART=49309%Rio Grande
+PART=49310%Seaboard Sys.%%8531
+PART=49311%Seaboard Sys.%%8613
+PART=49312%Seaboard Sys.
+PART=49313%Conrail%%6707
+PART=49314%CSX%%8655
+PART=49315%CSX%%8673
+PART=49316%Norfolk Southern%%5426
+PART=49317%Norfolk Southern%%5448
+PART=49319%Southern Pacific%%5513
+PART=49320%Southern Pacific%%5516
+PART=49323%Conrail Quality%%6704
+PART=49324%Conrail Quality%%6726
+PART=49326%CSX%%8555
+PART=49327%CSX%%8563
+PART=49329%Reading, Blue Mtn. & Northern%%5022
+PART=49330%Reading, Blue Mtn. & Northern%%5033
+PART=49332%Rio Grande%%5503
+PART=49333%Rio Grande%%5507
+PART=49334%Rio Grande
+#============================================
+DESC=With DCC Decoder
+#============================================
+PART=49350%Chessie B&O%%8587
+PART=49351%Chessie C&O%%8625
+PART=49352%Missouri Pacific%%5010
+PART=49353%Missouri Pacific%%5025
+PART=49354%Rio Grande%%5506
+PART=49355%Rio Grande%%5510
+PART=49356%Seaboard System%%8531
+PART=49357%Seaboard System%%8613
+#############################################
+#
+# SD60
+#
+#############################################
+PROTO=SD60
+DESC=
+LENGTH=5.025
+PART=49000%Undecorated
+PART=49001%BN%%8300
+PART=49002%BN%%8301
+PART=49003%BN%%8302
+PART=49004%CNW%%8012
+PART=49005%CNW%%8034
+PART=49006%CNW
+PART=49007%CR%%6845
+PART=49008%CR%%6858
+PART=49009%CR%% 
+PART=49010%CSX%%8700
+PART=49011%CSX%%8703
+PART=49012%CSX%% 
+PART=49013%EMD%%1
+PART=49014%EMD%%2
+PART=49015%EMD%%4
+PART=49016%NS%%6603
+PART=49017%NS%%6634
+PART=49018%NS 
+PART=49019%Oakway%%9025
+PART=49020%Oakway%%9058
+PART=49021%Oakway 
+PART=49022%SOO%%6044
+PART=49023%SOO%%6049
+PART=49024%SOO 
+PART=49025%UP%%6001
+PART=49026%UP%%6028
+PART=49027%UP
+PART=49028%Kansas City Southern%%718
+PART=49029%Kansas City Southern%%722
+#============================================
+DESC=With DCC Decoder
+#============================================
+PART=49101%BN%%8300
+PART=49102%BN%%8301
+PART=49103%BN%%8302
+PART=49104%CNW%%8012
+PART=49105%CNW%%8034
+PART=49106%CR%%6845
+PART=49107%CR%%6858
+PART=49108%CSX%%8700
+PART=49109%CSX%%8703
+PART=49110%EMD%%1
+PART=49111%EMD%%2
+PART=49112%EMD%%4
+PART=49113%NS%%6603
+PART=49114%NS%%6634
+PART=49115%Oakway%%9025
+PART=49116%Oakway%%9058
+PART=49117%SOO%%6044
+PART=49118%SOO%%6049
+PART=49119%UP%%6001
+PART=49120%UP%%6028
+#############################################
+#
+# SD60M
+#
+#############################################
+PROTO=SD60M
+DESC=
+LENGTH=5.025
+PART=49200%Undecorated%3 Window Cab
+PART=49201%SOO%%6058
+PART=49202%SOO%%6061
+PART=49203%SOO
+PART=49204%Union Pacific%%6220
+PART=49205%Union Pacific%%6253
+PART=49206%Union Pacific
+PART=49207%Burlington Northern%%9206
+PART=49208%Burlington Northern%%9213
+PART=49210%Union Pacific%%2265
+PART=49211%Union Pacific%%2380
+PART=49250%Undecorated%2 Window Cab
+PART=49251%Burlington Northern%%9255
+PART=49252%Burlington Northern%%9276
+PART=49253%Burlington Northern
+PART=49254%Burlington Northern Santa Fe%%9297
+PART=49255%Conrail%%5512
+PART=49256%Conrail%%5555
+PART=49257%Conrail
+PART=49258%Burlington Northern Santa Fe%%9277
+PART=49259%Burlington Northern Santa Fe%%9299
+PART=49260%CSX%%8759
+PART=49261%CSX%%8783
+PART=49263%Norfolk Southern%%6765
+PART=49264%Norfolk Southern%%6782
+PART=49266%Union Pacific%%6288
+PART=49267%Union Pacific%%6293
+#============================================
+DESC=With DCC Decoder
+#============================================
+PART=49231%SOO Line%%6058
+PART=49232%SOO Line%%6061
+PART=49233%Union Pacific%%6220
+PART=49234%Union Pacific%%6253
+PART=49281%Burlington Northern%%9255
+PART=49282%Burlington Northern%%9276
+PART=49283%Burlington Northern Santa Fe%%9297
+PART=49284%Conrail%%5512
+PART=49285%Conrail%%5555
+#############################################
+#
+# Trainmaster
+#
+#############################################
+PROTO=Trainmaster
+DESC=
+PROTOLENGTH=792
+PART=49500%Undecorated%Single Headlight
+PART=49501%Undecorated%Single/Dual Headlight
+PART=49502%Erie Lackawanna%%1853
+PART=49503%Erie Lackawanna%%1857
+PART=49504%Erie Lackawanna
+PART=49505%Erie Lackawanna%%854
+PART=49506%Erie Lackawanna%%859
+PART=49507%Erie Lackawanna
+PART=49508%Fairbanks Demo%%TM-1 
+PART=49509%Fairbanks Demo%%TM-2 
+PART=49510%Fairbanks Demo%%TM-3 
+PART=49511%Fairbanks Demo%%TM-4 
+PART=49512%Wabash%%550
+PART=49513%Wabash%%551
+PART=49530%Undecorated%Single Headlight
+PART=49531%Undecorated%Dual Headlight
+PART=49532%Jersey Central%%2402
+PART=49533%Jersey Central%%2405
+PART=49534%Jersey Central
+PART=49535%Southern Pacific%%4802
+PART=49536%Southern Pacific%%4805
+PART=49537%Southern Pacific
+PART=49538%Reading%%802
+PART=49539%Reading%%805
+PART=49540%Reading
+PART=49541%Virginian%%51
+PART=49542%Virginian%%55
+PART=49543%Virginian
+PART=49560%Undecorated%Single Headlight
+PART=49562%Canadian Pacific%%8905
+PART=49563%Canadian Pacific%%8907
+PART=49564%Canadian Pacific
+PART=49565%Pennsylvania RR%%8703
+PART=49566%Pennsylvania RR%%8705
+PART=49567%Pennsylvania RR
+PART=49600%Erie Lackawanna%%1853
+PART=49601%Erie Lackawanna%%1857
+PART=49630%Jersey Central%%2402
+PART=49631%Jersey Central%%2405
+PART=49632%Southern Pacific%%4802
+PART=49633%Southern Pacific%%4805
+PART=49660%Canadian Pacific%%8905
+PART=49661%Canadian Pacific%%8907
+PART=49662%Pennsylvania RR%%8703
+PART=49663%Pennsylvania RR%%8705
+#============================================
+DESC=With DCC Decoder
+#============================================
+PART=49602%Erie Lackawanna%%854
+PART=49603%Erie Lackawanna%%859
+PART=49604%Fairbanks Demo%%TM-1 
+PART=49605%Fairbanks Demo%%TM-2 
+PART=49606%Fairbanks Demo%%TM-3 
+PART=49607%Fairbanks Demo%%TM-4 
+PART=49608%Wabash%%550
+PART=49609%Wabash%%551
+PART=49634%Reading%%802
+PART=49635%Reading%%805
+PART=49636%Virginian%%51
+PART=49637%Virginian%%55
+#############################################
+#
+# B23-7
+#
+#############################################
+PROTO=B23-7
+DESC=
+PROTOLENGTH=714
+PART=49700%Undecorated%w/ FB-2 Trucks, Low Nose
+PART=49701%Undecorated%w/ AA-R Trucks, Low Nose
+PART=49702%Undecorated%w/ FB-2 Trucks, Low Nose
+PART=49703%Undecorated%w/ Blomberg trucks, Low Nose
+PART=49704%Undecorated%w/ FB-2 Trucks, High Nose
+PART=49705%Undecorated%w/ FB-2 Trucks, Low Nose
+PART=49706%Santa Fe%%6365
+PART=49707%Santa Fe%%6390
+PART=49708%Santa Fe
+PART=49709%BNSF%%4252
+PART=49710%BNSF%%4265
+PART=49711%BNSF
+PART=49712%Conrail%%1913
+PART=49713%Conrail%%1928
+PART=49714%Conrail
+PART=49715%CSX%%3102
+PART=49716%CSX%%3106
+PART=49717%CSX
+PART=49718%Norfolk Southern%%3982
+PART=49719%Norfolk Southern%%4002
+PART=49720%Norfolk Southern
+PART=49721%Southern%%4011j 
+PART=49722%Southern%%4023w 
+PART=49723%Southern
+PART=49724%Southern Pacific%%5100
+PART=49725%Southern Pacific%%5112
+PART=49726%Southern Pacific
+PART=49727%Union Pacific%%121
+PART=49728%Union Pacific%%137
+PART=49729%Union Pacific
+#============================================
+DESC=With DCC Decoder
+#============================================
+PART=49770%Santa Fe%%6365
+PART=49771%Santa Fe%%6390
+PART=49772%BNSF%%4252
+PART=49773%BNSF%%4265
+PART=49774%Conrail%%1913
+PART=49775%Conrail%%1928
+PART=49776%CSX%%3102
+PART=49778%Norfolk Southern%%3982
+PART=49779%Norfolk Southern%%4002
+PART=49780%Southern%%4011j 
+PART=49781%Southern%%4023w 
+PART=49782%Southern Pacific%%5100
+PART=49784%Union Pacific%%121
+PART=49785%Union Pacific%%137
+#############################################
+#
+# Dash 8
+#
+#############################################
+PROTO=Dash 8
+DESC=32BWH
+PROTOLENGTH=796
+PART=48830%Undecorated
+PART=48831%Amtrak%%505
+PART=48832%Amtrak%%509
+PART=48834%Amtrak%%506
+PART=48835%Amtrak%%515
+PART=48837%Amtrak California%%2051
+PART=48838%Amtrak Calafornia%%2052
+#============================================
+DESC=40B
+#============================================
+PART=48700%Undecorated
+PART=48701%Burlington Northern Santa Fe%%8601
+PART=48702%Burlington Northenr Santa Fe%%8607
+PART=48704%Santa Fe%%7412
+PART=48705%Santa Fe%%7428
+PART=48707%Conrail%%5068
+PART=48708%Conrail%%5076
+PART=48710%CSX%%5933
+PART=48711%CSX%%5937
+PART=48713%LMX%%8526
+PART=48714%LMX%%8577
+PART=48716%Susquehanna%%4002
+PART=48717%Susquehanna%%4008
+PART=48719%Norfolk Southern%%4805
+PART=48720%Norfolk Southern%%4814
+PART=48722%Cotton Belt%%8076
+PART=48723%Cotton Belt%%8087
+PART=48725%Union Pacific%%5673
+PART=48726%Union Pacific%%5698
+PART=48728%BC Rail%%3901
+PART=48729%BC Rail%%3902
+PART=48731%BNSF- Santa Fe%%8610
+PART=48732%BNSF - Santa Fe%%8615
+PART=48733%Conrail Quality%%5077
+PART=48734%Conrail Quality%%5086
+PART=48736%CSX-Susquehanna%%5939
+PART=48737%CSX- Susquehanna%%5942
+PART=48756%Union Pacific w/Lenz Decoder%%5673
+#============================================
+DESC=40BW
+#============================================
+PART=48800%Undecorated%w/ Standard Cab
+PART=48801%Undecorated%w/ Gull Wing Cab
+PART=48802%Santa Fe%%502
+PART=48803%Santa Fe%%518
+PART=48805%BNSF%%557
+PART=48806%BNSF%%573
+PART=48808%BNSF%%509
+PART=48809%BNSF%%546
+PART=48811%BNSF%%539
+PART=48812%BNSF%%558
+PART=48814%Santa Fe%%563
+PART=48815%Santa Fe%%578
+#############################################
+#
+# H15-44
+#
+#############################################
+PROTO=H15-44
+DESC=
+PROTOLENGTH=612
+PART=52000%Undecorated%w/ Early Loewy body & cab w/body mounted handrails
+PART=52001%Central of Georgia%%101
+PART=52002%Central of Georgia%%104
+PART=52004%Jersey Central%%1506
+PART=52007%Rock Island%%400
+PART=52008%Rock Island%%401
+PART=52009%Union Pacific%%1325
+PART=52010%Union Pacific%%1328
+#============================================
+DESC=Early Body & Cab w/Body Mounted Handrails
+#============================================
+PART=52022%Kansas City Southern%%40
+PART=52023%Kansas City Southern%%41
+PART=52024%Rio Grande%%150
+PART=52025%Rio Grande%%151
+PART=52026%Rio Grande%%152
+PART=52039%Akron Canton & Youngstown%%200
+PART=52040%Jersey Central%Stripes%1506
+PART=52041%Jersey Central%Stripes%1510
+PART=52043%MKT%%1591
+PART=52044%Monon%%45
+PART=52045%Monon%%46
+#############################################
+#
+# H16-44
+#
+#############################################
+PROTO=H16-44
+DESC=
+PROTOLENGTH=612
+PART=52012%New York Central%%7002
+PART=52013%New York Central%%7004
+PART=52015%Santa Fe%%2803
+PART=52016%Santa Fe%%2804
+PART=52018%Undecorated%w/ Early Loewy Body & cab w/sill mounted handrails
+#============================================
+DESC=Early Body & Cab w/Sill Mounted Handrails
+#============================================
+PART=52027%New Haven%%594
+PART=52028%New Haven%%596
+#============================================
+DESC=Early Body & Square Window Cab w/Body Mounted Handrails  
+#============================================
+PART=52030%Pennsyvlania%%8807
+PART=52031%Pennsyvlania%%8809
+#============================================
+DESC=Early Body & Square Window Cab w/Sill Mounted Handrails
+#============================================
+PART=52033%Southern%%2147
+PART=52034%Southern%%2151
+PART=52046%Long Island%%1504
+PART=52047%Long Island%%1508
+PART=52049%MKT%%1733
+PART=52051%New Haven%%591
+PART=52052%New Haven%%598
+PART=52054%Santa Fe%%3007
+PART=52055%Santa Fe%%3011
+#============================================
+DESC=Late Body & Square Window Cab w/Sill Mounted Handrails 
+#============================================
+PART=52036%Lackawanna%%930
+PART=52037%Lackawanna%%934
+#============================================
+DESC=Late Body/Square Window Cab w/Body & Sill Mounted Handrails 
+#============================================
+PART=52057%Erie Lackawanna%%1932
+PART=52058%Erie Lackawanna%%1935
+#############################################
+#
+# VO-1000
+#
+#############################################
+PROTO=VO-1000
+DESC=With Step Guards 
+PROTOLENGTH=586
+PART=50000%Undecorated
+PART=50001%Santa Fe%%2223
+PART=50003%Atlantic Coast Line%%606
+PART=50004%Atlantic Coast Line%%607
+PART=50006%Southern Pacific%%1329
+PART=50007%Southern Pacific%%1379
+PART=50009%Lehigh Valley%%135
+PART=50010%Lehigh Valley%%137
+PART=50012%Santa Fe%%2207
+PART=50013%Southern Pacific%%1374
+PART=50014%Southern Pacific%%1377
+PART=50015%Lehigh Valley%%136
+PART=50016%Lehigh Valley%%139
+PART=50017%Pennsylvania%%5917
+PART=50018%Pennsylvania%%5918
+PART=50020%Reading%%83
+PART=50021%Reading%%86
+PART=50023%Rock Island%%760
+PART=50024%Rock Island%%761
+PART=50026%Western Maryland%%128
+PART=50027%Western Maryland%%132
+PART=51030%Union Pacific%%1200
+PART=51031%Union Pacific%%1203
+#============================================
+DESC=Without Step Guards
+#============================================
+PART=51000%Undecorated
+PART=51003%Milwaukee Rd.%%935
+PART=51004%Milwaukee Rd.%%939
+PART=51006%Burlington Route%%9367
+PART=51007%Burlington Route%%9370
+PART=51009%Great Northern%%140
+PART=51010%Great Northern%%144
+PART=51012%New York Central%%8604
+PART=51013%New York Central%%8607
+PART=51016%Milwaukee Road%%933
+PART=51017%Milwaukee Road%%938
+PART=51018%Burlington Route/CB & Q%%9358
+PART=51019%Burlington Route/CB & Q%%9366
+PART=51020%Great Northern%%141
+PART=51021%Great Northern%%143
+PART=51022%New York Central%%8601
+PART=51023%New York Central%%8606
+PART=51024%Western Pacific%%581
+PART=51025%Western Pacific%%583
+PART=51027%Northern Pacific%%422
+PART=51028%Norhern Pacific%%427
+PART=51033%United States Army%%7139
+PART=51034%United States Army%%7153
+#============================================
+DESC=With DCC Decoder
+#============================================
+PART=50701%New York Central%%2223
+PART=51701%New York Central%%2234
+#############################################
+#
+# SD24
+#
+#############################################
+PROTO=SD24
+DESC=
+PROTOLENGTH=678
+PART=54404%Burlington%%502
+PART=54405%Burlington%%506
+PART=54407%Santa Fe%%947
+PART=54408%Santa Fe%%968
+PART=54410%Southern%%6306
+PART=54411%Southern%%6314
+PART=54413%Union Pacific%%401
+PART=54414%Union Pacific%%416
+PART=54422%Southern%%6308
+PART=54423%Southern%%6321
+#############################################
+#
+# C-628
+#
+#############################################
+PROTO=C-628
+DESC=Phase 1
+PROTOLENGTH=776
+PART=54001%Atlantic Coast Line%%2004
+PART=54002%Atlantic Coast Line%%2007
+PART=54004%Louisville & Nashville%%1405
+PART=54005%Louisville & Nashville%%1407
+PART=54007%Pennsylvania%%6302
+PART=54008%Pennsylvania%%6305
+PART=54010%Southern Pacific%%7102
+PART=54011%Southern Pacific%%7103
+#============================================
+DESC=Phase 2A
+#============================================
+PART=54031%Delaware & Hudson%%611
+PART=54032%Delaware & Hudson%%615
+PART=54061%Lehigh Valley%%626
+PART=54062%Lehigh Valley%%628
+#============================================
+DESC=Phase 2B
+#============================================
+PART=54064%Lehigh Valley%%625
+PART=54065%Lehigh Valley%%631
+#############################################
+#
+# C-630
+#
+#############################################
+PROTO=C-630
+DESC=
+PROTOLENGTH=776
+PART=54223%Conrail%%6770
+PART=54224%Conrail%%6776
+PART=54226%Louisville & Nashville%%1426
+PART=54227%Louisville & Nashville%%1432
+PART=54229%Pennsylvania%%6316
+PART=54230%Pennsylvania%%6324
