@@ -1,7 +1,24 @@
 /*
- *	$Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/nmra-to.c,v 1.2 2008-03-21 13:52:00 m_fischer Exp $
+ *	$Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/nmra-to.c,v 1.3 2008-03-25 20:17:21 m_fischer Exp $
  */
 
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -14,6 +31,9 @@
 #define strncasecmp strnicmp
 #endif
 #include <stdlib.h>
+
+#define DELIMITER " \t\r\n"
+#define BUFSIZE 1024
 
 #define SIN(A) sin(D2R(A))
 #define COS(A) cos(D2R(A))
@@ -160,59 +180,100 @@ int main ( int argc, char * argv[] )
     double a10, a11, a20, a21;
     coOrd q0, q1, q2, q3, q1c, q2c;
 
+	char *buffer = malloc( BUFSIZE );
+	char *inFile, *outFile;
+	FILE *fIn, *fOut;
+
     q0.x = q0.y = 0.0;
-    if (argc != 12) {
-	fprintf(stderr,"Usage: %s SCALE DESC TG P2 P4 P6 P8 P11 P18 P20 P21\n", argv[0]);
-	exit(1);
-    }
-    argv++;
-    scale = *argv++;
-    desc = *argv++;
-    tg = atof(*argv++);
-    q1.x = getval(*argv++);
-    q1.y = getval(*argv++);
-    pr = getval(*argv++);
-    l = getval(*argv++);
-    crr = getval(*argv++);
-    fa = getval(*argv++);
-    tl = getval(*argv++);
-    hl = getval(*argv++);
 
-    t = floor(fa);
-    fa = t + (fa-t)/60*100;
+	if( argc != 3 )
+	{
+		fprintf( stderr, 
+			     "Usage: %1 nmraturnoutdata paramfile\n\n"
+				 "The data file is read line by line and turnout defimitions\n"
+				 "are created in the param file.\n\n",
+				 argv[ 0 ] );
+		exit( 1 );
+	}
 
-    q2.x = l-tl;
-    q2.y = tg-tl*TAN(fa);
-    q3.x = l+hl;
-    q3.y = tg+hl*SIN(fa);
-    computeCurve( q0, q1, -pr, &q1c, &a10, &a11 );
-    computeCurve( q1, q2, -crr, &q2c, &a20, &a21 );
+	inFile = malloc( strlen( argv[ 1 ] ));
+	strcpy( inFile, argv[ 1 ] );
 
-    printf("#NMRA-Std TO %0.3f %0.3f %0.3f %0.3f %0.3f %0.3f %0.3f %0.3f\n",
-	q1.x, q1.y, pr, l, crr, fa, tl, hl );
+	outFile = malloc( strlen( argv[ 2 ] ));	
+	strcpy( outFile, argv[ 2 ] );
 
-    printf("TURNOUT %s \"NMRA %s\t#%s Right\t%sR\"\n", scale, scale, desc, desc);
-    printf("\tP \"Normal\" 1\n");
-    printf("\tP \"Reverse\" 2 3 4\n");
-    printf("\tE 0.000000 0.000000 270.000000\n");
-    printf("\tE %0.6f 0.000000 90.000000\n", l+hl);
-    printf("\tE %0.6f %0.6f %0.6f\n", q3.x, -q3.y, 90.0+fa);
-    printf("\tS 0 0 0.000000 0.000000 %0.6f 0.000000\n", l+hl);
-    printf("\tC 0 0 %0.6f %0.6f %0.6f %0.6f %0.6f\n", pr, q1c.x, -q1c.y, normalizeAngle(180-a10-a11), a11 );
-    printf("\tC 0 0 %0.6f %0.6f %0.6f %0.6f %0.6f\n", crr, q2c.x, -q2c.y, normalizeAngle(180-a20-a21), a21 );
-    printf("\tS 0 0 %0.6f %0.6f %0.6f %0.6f\n", q2.x, -q2.y, q3.x, -q3.y );
-    printf("\tEND\n");
+	fIn = fopen( inFile, "r" );
+	if( !fIn ) {
+		fprintf( stderr, "Could not open the definition %s\n", inFile );
+		exit( 1 );
+	}
 
-    printf("TURNOUT %s \"NMRA %s\t#%s Left\t%sL\"\n", scale, scale, desc, desc);
-    printf("\tP \"Normal\" 1\n");
-    printf("\tP \"Reverse\" 2 3 4\n");
-    printf("\tE 0.000000 0.000000 270.000000\n");
-    printf("\tE %0.6f 0.000000 90.000000\n", l+hl);
-    printf("\tE %0.6f %0.6f %0.6f\n", q3.x, q3.y, 90.0-fa);
-    printf("\tS 0 0 0.000000 0.000000 %0.6f 0.000000\n", l+hl);
-    printf("\tC 0 0 %0.6f %0.6f %0.6f %0.6f %0.6f\n", -pr, q1c.x, q1c.y, a10, a11 );
-    printf("\tC 0 0 %0.6f %0.6f %0.6f %0.6f %0.6f\n", -crr, q2c.x, q2c.y, a20, a21 );
-    printf("\tS 0 0 %0.6f %0.6f %0.6f %0.6f\n", q2.x, q2.y, q3.x, q3.y );
-    printf("\tEND\n");
+	fOut = fopen( outFile, "w" );
+	if( !fOut ) {
+		fprintf( stderr, "Could not create the structures in %s\n", outFile );
+		exit( 1 );
+	}
+
+	if( fgets( buffer, BUFSIZE, fIn ))
+	{
+		printf( "Creating %s from %s\n", buffer + strlen("CONTENTS " ), inFile );
+		fputs( buffer, fOut );
+	}
+	while(fgets(buffer, BUFSIZE, fIn ))
+	{
+		if( buffer[ 0 ] == '#' ) {
+			fputs( buffer, fOut );
+			continue;
+		}
+
+	    scale = strtok( buffer, DELIMITER );
+		desc = strtok( NULL, DELIMITER );
+		tg = atof(strtok( NULL, DELIMITER ));
+		q1.x = getval(strtok( NULL, DELIMITER ));
+		q1.y = getval(strtok( NULL, DELIMITER ));
+		pr = getval(strtok( NULL, DELIMITER ));
+		l = getval(strtok( NULL, DELIMITER ));
+		crr = getval(strtok( NULL, DELIMITER ));
+		fa = getval(strtok( NULL, DELIMITER ));
+		tl = getval(strtok( NULL, DELIMITER ));
+		hl = getval(strtok( NULL, DELIMITER ));
+
+		t = floor(fa);
+		fa = t + (fa-t)/60*100;
+
+		q2.x = l-tl;
+		q2.y = tg-tl*TAN(fa);
+		q3.x = l+hl;
+		q3.y = tg+hl*SIN(fa);
+		computeCurve( q0, q1, -pr, &q1c, &a10, &a11 );
+		computeCurve( q1, q2, -crr, &q2c, &a20, &a21 );
+
+		fprintf( fOut, "#NMRA-Std TO %0.3f %0.3f %0.3f %0.3f %0.3f %0.3f %0.3f %0.3f\n",
+			q1.x, q1.y, pr, l, crr, fa, tl, hl );
+
+		fprintf( fOut, "TURNOUT %s \"NMRA %s\t#%s Right\t%sR\"\n", scale, scale, desc, desc);
+		fprintf( fOut, "\tP \"Normal\" 1\n");
+		fprintf( fOut, "\tP \"Reverse\" 2 3 4\n");
+		fprintf( fOut, "\tE 0.000000 0.000000 270.000000\n");
+		fprintf( fOut, "\tE %0.6f 0.000000 90.000000\n", l+hl);
+		fprintf( fOut, "\tE %0.6f %0.6f %0.6f\n", q3.x, -q3.y, 90.0+fa);
+		fprintf( fOut, "\tS 0 0 0.000000 0.000000 %0.6f 0.000000\n", l+hl);
+		fprintf( fOut, "\tC 0 0 %0.6f %0.6f %0.6f %0.6f %0.6f\n", pr, q1c.x, -q1c.y, normalizeAngle(180-a10-a11), a11 );
+		fprintf( fOut, "\tC 0 0 %0.6f %0.6f %0.6f %0.6f %0.6f\n", crr, q2c.x, -q2c.y, normalizeAngle(180-a20-a21), a21 );
+		fprintf( fOut, "\tS 0 0 %0.6f %0.6f %0.6f %0.6f\n", q2.x, -q2.y, q3.x, -q3.y );
+		fprintf( fOut, "\tEND\n");
+
+		fprintf( fOut, "TURNOUT %s \"NMRA %s\t#%s Left\t%sL\"\n", scale, scale, desc, desc);
+		fprintf( fOut, "\tP \"Normal\" 1\n");
+		fprintf( fOut, "\tP \"Reverse\" 2 3 4\n");
+		fprintf( fOut, "\tE 0.000000 0.000000 270.000000\n");
+		fprintf( fOut, "\tE %0.6f 0.000000 90.000000\n", l+hl);
+		fprintf( fOut, "\tE %0.6f %0.6f %0.6f\n", q3.x, q3.y, 90.0-fa);
+		fprintf( fOut, "\tS 0 0 0.000000 0.000000 %0.6f 0.000000\n", l+hl);
+		fprintf( fOut, "\tC 0 0 %0.6f %0.6f %0.6f %0.6f %0.6f\n", -pr, q1c.x, q1c.y, a10, a11 );
+		fprintf( fOut, "\tC 0 0 %0.6f %0.6f %0.6f %0.6f %0.6f\n", -crr, q2c.x, q2c.y, a20, a21 );
+		fprintf( fOut, "\tS 0 0 %0.6f %0.6f %0.6f %0.6f\n", q2.x, q2.y, q3.x, q3.y );
+		fprintf( fOut, "\tEND\n");
+	}
     exit(0);
 }

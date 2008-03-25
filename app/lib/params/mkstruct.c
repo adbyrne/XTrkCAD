@@ -1,7 +1,7 @@
 /** \file mkstruct.c
  * Build utility to create simple rectangular structure definitions from a data file. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/mkstruct.c,v 1.2 2008-03-09 18:10:34 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/mkstruct.c,v 1.3 2008-03-25 20:17:21 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -72,11 +72,6 @@ int main ( int argc, char * argv [] )
 
 	outFile = malloc( strlen( argv[ 2 ] ));	
 	strcpy( outFile, argv[ 2 ] );
-
-//	if( ptr = strrchr( outFile, '.' ))				/* do we already have an extension? */
-//		strcpy( ptr, ".xtp" );						/* if yes, replace with xtp */
-//	else
-//		strcat( outFile, ".xtp" );					/* if no, add xtp */
 
 	fIn = fopen( inFile, "r" );
 	if( !fIn ) {

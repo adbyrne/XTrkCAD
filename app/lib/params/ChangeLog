@@ -1,3 +1,11 @@
+Mar 25, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		CMakeLists.txt, nmra-to.c: Create turnout definitions from text files
+		
+Mar 21, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		CMakeLists.txt, mkcarpart.c: Create car definitions from text files
+		
 Mar 10, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		CMakeLists.txt, mkstruct.c: create param files from structure definitions
