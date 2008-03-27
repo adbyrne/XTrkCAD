@@ -1,7 +1,7 @@
 /** \file mkstruct.c
  * Build utility to create simple rectangular structure definitions from a data file. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/mkstruct.c,v 1.3 2008-03-25 20:17:21 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/mkstruct.c,v 1.4 2008-03-27 18:06:52 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -86,7 +86,10 @@ int main ( int argc, char * argv [] )
 	}
 
 	if( fgets( buffer, BUFSIZE, fIn ))
+	{
 		fputs( buffer, fOut );
+		printf( "Creating %s\n", buffer + 9 );
+	}
 	
 	while(fgets(buffer, BUFSIZE, fIn ))
 	{

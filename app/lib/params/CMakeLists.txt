@@ -1,11 +1,17 @@
-# FILE(GLOB C_FILES *.c)
-# FILE(GLOB TO_FILES *.to)
+
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/CMakeLists.txt,v 1.6 2008-03-27 18:06:52 m_fischer Exp $
+#
+# CMakeList for the params directory
+#
+# Several xtp files are created from text definitions, all xtp files and the 
+# created xtp files are installed.
+#
+
 FILE(GLOB XTP_FILES *.xtp)
 
 SET( outFiles )
-#
+
 #  create param files from car definitions
-#
 
 ADD_EXECUTABLE( mkcarpart mkcarpart.c )
 GET_TARGET_PROPERTY(mkcarpart_EXE mkcarpart LOCATION)
@@ -22,21 +28,16 @@ FOREACH(infileName ${inFiles})
     ADD_CUSTOM_COMMAND(OUTPUT "${outfile}"
         COMMAND ${mkcarpart_EXE} "${infile}" "${outfile}"
         DEPENDS "${infile}" mkcarpart
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMENT "create car definitions")
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     # Finally remember the output file for dependencies
     SET(outFiles ${outFiles} "${outfile}")
 ENDFOREACH(infileName)
 
-#
 # create param files from  structure definitions
-#
 
-# create the tool
 ADD_EXECUTABLE( mkstruct mkstruct.c )
 GET_TARGET_PROPERTY(mkstruct_EXE mkstruct LOCATION)
 
-# find all struct files
 FILE(GLOB inFiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/*.struct")
 
 # define build commands for all struct files
@@ -50,17 +51,13 @@ FOREACH(infileName ${inFiles})
     ADD_CUSTOM_COMMAND(OUTPUT "${outfile}"
         COMMAND ${mkstruct_EXE} "${infile}" "${outfile}"
         DEPENDS "${infile}" mkstruct
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMENT "Convert structure definitions ${infileName}")
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" )
     # Finally remember the output file for dependencies
     SET(outFiles ${outFiles} "${outfile}")
 ENDFOREACH(infileName)
 
-#
-# create turnouts from definition file
-#
+# create turnouts from NMRA definition file
 
-# create the tool
 ADD_EXECUTABLE( nmra-to nmra-to.c )
 GET_TARGET_PROPERTY(nmra-to_EXE nmra-to LOCATION)
 
@@ -78,18 +75,16 @@ FOREACH(infileName ${inFiles})
     ADD_CUSTOM_COMMAND(OUTPUT "${outfile}"
         COMMAND ${nmra-to_EXE} "${infile}" "${outfile}"
         DEPENDS "${infile}" nmra-to
-		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        COMMENT "Convert turnout definitions ${infileName}")
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     # Finally remember the output file for dependencies
     SET(outFiles ${outFiles} "${outfile}")
 ENDFOREACH(infileName)
 
 
 ADD_CUSTOM_TARGET(xtpfiles ALL DEPENDS ${outFiles})
-	 
+
 INSTALL(
-#	FILES ${C_FILES} ${CAR_FILES} ${STRUCT_FILES} ${TAB_FILES} ${TO_FILES} ${XTP_FILES}
-	FILES ${XTP_FILES} ${outFiles}
+	FILES ${XTP_FILES} t-trak-notes.txt ${outFiles}
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/params
 	)
 

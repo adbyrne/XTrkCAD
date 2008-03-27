@@ -1,5 +1,5 @@
 /*
- *	$Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/nmra-to.c,v 1.3 2008-03-25 20:17:21 m_fischer Exp $
+ *	$Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/nmra-to.c,v 1.4 2008-03-27 18:06:52 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -216,7 +216,7 @@ int main ( int argc, char * argv[] )
 
 	if( fgets( buffer, BUFSIZE, fIn ))
 	{
-		printf( "Creating %s from %s\n", buffer + strlen("CONTENTS " ), inFile );
+		printf( "Creating %s\n", buffer + strlen("CONTENTS " ) );
 		fputs( buffer, fOut );
 	}
 	while(fgets(buffer, BUFSIZE, fIn ))

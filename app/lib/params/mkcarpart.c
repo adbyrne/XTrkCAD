@@ -333,6 +333,7 @@ void processFile(
 			couplerLength = 16.0/ratio;
 		} else if ( strnicmp( line, "contents=", 9 ) == 0 ) {
 			fprintf( outF, "CONTENTS %s\n", line+9 );
+			printf( "Creating %s\n", line + 9 );
 		} else if ( strnicmp( line, "order=", 6 ) == 0 ) {
 			partX = descX = roadX = numbX = colorX = 0;
 			for ( cp=line+6; *cp; cp++ ) {
@@ -448,7 +449,6 @@ int main ( int argc, char * argv[] )
 		exit(1);
 	}
 
-	printf(  "executing %s %s %s\n", exename, argv[ 0 ], argv[ 1 ] );
 	readMap( "color.tab", &colorMap );
 	readRoadnameMap( "roadname.tab" );
 	processFile( argv[0], argv[1] );
