@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.5 2008-03-10 18:59:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.6 2008-03-27 08:30:04 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -40,6 +40,8 @@ static wDrawBitMap_p cross0_bm;
 
 #include "bitmaps/bigdot.xbm"
 static wDrawBitMap_p bigdot_bm;
+
+#define DEFAULTGRIDSPACING (1.0)
 
 EXPORT void MapGrid(
 		coOrd orig,
@@ -770,6 +772,10 @@ EXPORT STATUS_T CmdGrid(
 
 EXPORT wIndex_t InitGrid( wMenu_p menu )
 {
+	grid.Horz.Spacing = DEFAULTGRIDSPACING;
+	grid.Vert.Spacing = DEFAULTGRIDSPACING;
+	grid.Horz.Enable = 1;
+	grid.Vert.Enable = 1;
 	ParamRegister( &gridPG );
 	RegisterChangeNotification( GridChange );
 	if ( grid.Horz.Enable && grid.Horz.Spacing <= 0.0 )
