@@ -1,3 +1,7 @@
+Mar 29, 2008
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswbutt.c: new look for toolbar buttons
+		
 Mar 17, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswchoic.c: Label size was not calculated correctly for radio button
@@ -17,7 +21,7 @@ Jan 28, 2008
 		strings.
 
 Jan 24,2008
-	IMPROVMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswpref.c: increase floting point precision when storing floats in INI
 		file
 

@@ -37,7 +37,15 @@ void mswButtPush(
 	if ( ((wButton_p)b)->action )
 		((wButton_p)b)->action( ((wButton_p)b)->data );
 }
-		
+
+/**
+ * Paint function for toolbar buttons
+ * 
+ * \param hButtDc IN valid device context
+ * \param bm IN bitmap to add to button
+ * \param selected IN selected state of button
+ * \param disabled IN disabled state of button
+ */
 
 static void drawButton(
 		HDC hButtDc,
@@ -50,51 +58,106 @@ static void drawButton(
 	RECT rect;
 	COLORREF color1, color2;
 	POS_T offw=5, offh=5;
+	TRIVERTEX        vert[2] ;
+	GRADIENT_RECT    gRect;
+
+	COLORREF colL;
+	COLORREF colD;
+	COLORREF colF;
 
 #define LEFT (0)
 #define RIGHT (bm->w+10)
 #define TOP (0)
 #define BOTTOM (bm->h+10)
-	
-		PatBlt( hButtDc, LEFT, TOP, RIGHT, BOTTOM, WHITENESS );
-		rect.top = TOP;
-		rect.left = LEFT;
-		rect.right = RIGHT;
-		rect.bottom = BOTTOM;
 
-		newBrush = CreateSolidBrush( GetSysColor( selected?COLOR_BTNSHADOW:COLOR_BTNFACE ) );
-		newPen = CreatePen( PS_SOLID, 0, GetSysColor( COLOR_BTNFACE ) );
-		oldBrush = SelectObject( hButtDc, newBrush );
-		oldPen = SelectObject( hButtDc, newPen );
-		FillRect( hButtDc, &rect, newBrush );
-		FrameRect( hButtDc, &rect, GetStockObject(BLACK_BRUSH) );
-		color1 = GetSysColor( selected ? COLOR_BTNSHADOW : COLOR_BTNHIGHLIGHT );
-		newPen = CreatePen( PS_SOLID, 0, color1 );
-		DeleteObject( SelectObject( hButtDc, newPen ) );
-		MoveTo( hButtDc, LEFT+1,		TOP+1 );
-		LineTo( hButtDc, RIGHT-1,		TOP+1 );
-		MoveTo( hButtDc, LEFT+1,		TOP+2 );
-		LineTo( hButtDc, LEFT+1,		BOTTOM-1 );
-		if (!selected) {
-			MoveTo( hButtDc, LEFT+2,	TOP+2 );
-			LineTo( hButtDc, RIGHT-1-2, TOP+2 );
-			MoveTo( hButtDc, LEFT+2,	TOP+3 );
-			LineTo( hButtDc, LEFT+2,	BOTTOM-1-2 );
-			color1=GetSysColor( selected ? COLOR_BTNFACE : COLOR_BTNSHADOW );
-			newPen = CreatePen( PS_SOLID, 0, color1 );
-			DeleteObject( SelectObject( hButtDc, newPen ) );
-			MoveTo( hButtDc, RIGHT-2-1, TOP+2 );
-			LineTo( hButtDc, RIGHT-2-1, BOTTOM-1 );
-			MoveTo( hButtDc, RIGHT-2,	TOP+1 );
-			LineTo( hButtDc, RIGHT-2,	BOTTOM-1 );
-			MoveTo( hButtDc, LEFT+2,	BOTTOM-2-1 );
-			LineTo( hButtDc, RIGHT-2-1, BOTTOM-2-1 );
-			MoveTo( hButtDc, LEFT+1,	BOTTOM-2 );
-			LineTo( hButtDc, RIGHT-2-1, BOTTOM-2 );
+	/* get the lightest and the darkest color to use */
+	colL = GetSysColor( COLOR_BTNHIGHLIGHT );
+	colD = GetSysColor( COLOR_BTNSHADOW );
+	colF = GetSysColor( COLOR_BTNFACE );
+
+	/* define the rectangle for the button */
+	rect.top = TOP;
+	rect.left = LEFT;
+	rect.right = RIGHT;
+	rect.bottom = BOTTOM;
+
+	/* fill the button with the face color */
+	newBrush = CreateSolidBrush( colF );
+	oldBrush = SelectObject( hButtDc, newBrush );
+	FillRect( hButtDc, &rect, newBrush );
+	DeleteObject( SelectObject( hButtDc, oldBrush ) );
+
+	/* disabled button remain flat */
+	if( !disabled )
+	{
+		/* select colors for the gradient */
+		if( selected ) {
+			color1 = colD;
+			color2 = colL;
+		} else {
+			color1 = colL;
+			color2 = colD;
 		}
-		DeleteObject( SelectObject( hButtDc, oldBrush ) );
-		DeleteObject( SelectObject( hButtDc, oldPen ) );
 
+#define GRADIENT_WIDTH 6
+
+		/* 
+			first draw the top gradient 
+			this always ends in the button face color 
+			starting color depends on button state (selected or not) 
+		*/
+		vert [0] .x      = LEFT;
+		vert [0] .y      = TOP;
+		vert [0] .Red    = GetRValue( color1 )* 256;
+		vert [0] .Green  = GetGValue( color1 )* 256;
+		vert [0] .Blue   = GetBValue( color1 )* 256;
+		vert [0] .Alpha  = 0x0000;
+		vert [1] .x      = RIGHT;
+		vert [1] .y      = TOP + GRADIENT_WIDTH; 
+		vert [1] .Red    = GetRValue( colF )* 256;
+		vert [1] .Green  = GetGValue( colF )* 256;
+		vert [1] .Blue   = GetBValue( colF )* 256;
+		vert [1] .Alpha  = 0x0000;
+		
+		gRect.UpperLeft  = 0;
+		gRect.LowerRight = 1;
+		
+		GradientFill(hButtDc, vert, 2, &gRect, 1, GRADIENT_FILL_RECT_V);
+
+		/* 
+			now draw the bottom gradient 
+			this always starts with the button face color 
+			ending color depends on button state (selected or not) 
+		*/
+		vert [0] .x      = LEFT;
+		vert [0] .y      = BOTTOM - GRADIENT_WIDTH;
+		vert [0] .Red    = GetRValue( colF )* 256;
+		vert [0] .Green  = GetGValue( colF )* 256;
+		vert [0] .Blue   = GetBValue( colF )* 256;
+		vert [0] .Alpha  = 0x0000;
+		vert [1] .x      = RIGHT;
+		vert [1] .y      = BOTTOM; 
+		vert [1] .Red    = GetRValue( color2 )* 256;
+		vert [1] .Green  = GetGValue( color2 )* 256;
+		vert [1] .Blue   = GetBValue( color2 )* 256;
+		vert [1] .Alpha  = 0x0000;
+		gRect.UpperLeft  = 0;
+		gRect.LowerRight = 1;
+		GradientFill(hButtDc, vert, 2, &gRect, 1, GRADIENT_FILL_RECT_V);
+
+	}
+
+	/* draw delimiting lines in shadow color */
+	newPen = CreatePen( PS_SOLID, 0, colD );
+	oldPen = SelectObject( hButtDc, newPen );
+
+	MoveTo( hButtDc, LEFT, TOP );
+	LineTo( hButtDc, LEFT, BOTTOM );
+	MoveTo( hButtDc, RIGHT, TOP );
+	LineTo( hButtDc, RIGHT, BOTTOM );
+	
+	DeleteObject( SelectObject( hButtDc, oldPen ) );
+		
 	if ( disabled ) {
 		color1 = GetSysColor( COLOR_BTNSHADOW );
 		color2 = RGB(255,255,255);
