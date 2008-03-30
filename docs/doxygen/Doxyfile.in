@@ -25,7 +25,7 @@ DOXYFILE_ENCODING      = UTF-8
 # The PROJECT_NAME tag is a single word (or a sequence of words surrounded 
 # by quotes) that should identify the project.
 
-PROJECT_NAME           = XTrkCAD
+PROJECT_NAME           = XTrackCAD
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. 
 # This could be handy for archiving the generated documentation or 
@@ -38,7 +38,7 @@ PROJECT_NUMBER         = @XTRKCAD_VERSION@
 # If a relative path is entered, it will be relative to the location 
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = @doxygen_BINARY_DIR@
+OUTPUT_DIRECTORY       = "@doxygen_BINARY_DIR@"
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 
 # 4096 sub-directories (in 2 levels) under the output directory of each output 
@@ -123,7 +123,7 @@ FULL_PATH_NAMES        = YES
 # If left blank the directory from which doxygen is run is used as the 
 # path to strip.
 
-STRIP_FROM_PATH        = 
+STRIP_FROM_PATH        = "@XTrkCAD_SOURCE_DIR@/app/"
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of 
 # the path mentioned in the documentation of a class, which tells 
@@ -472,9 +472,9 @@ WARN_LOGFILE           = ./doxygen.log
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = @XTrkCAD_SOURCE_DIR@/app/bin \
-                         @XTrkCAD_SOURCE_DIR@/app/wlib/gtklib \
-                         @XTrkCAD_SOURCE_DIR@/app/wlib/include/wlib.h
+INPUT                  = "@XTrkCAD_SOURCE_DIR@/app/bin" \
+                         "@XTrkCAD_SOURCE_DIR@/app/wlib/@XTrkCAD_WLIB_DIR@" \
+                         "@XTrkCAD_SOURCE_DIR@/app/wlib/include/wlib.h"
 
 # This tag can be used to specify the character encoding of the source files that 
 # doxygen parses. Internally doxygen uses the UTF-8 encoding, which is also the default 
