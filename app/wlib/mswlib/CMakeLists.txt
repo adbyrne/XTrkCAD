@@ -22,5 +22,5 @@ SET(SOURCES
 
 ADD_LIBRARY(xtrkcad-wlib ${HEADERS} ${SOURCES})
 
-TARGET_LINK_LIBRARIES(xtrkcad-wlib Htmlhelp)
+TARGET_LINK_LIBRARIES(xtrkcad-wlib Htmlhelp msimg32)
 
