@@ -1,3 +1,7 @@
+Apr 05, 2008
+	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswmisc,.c mswint.c: improved XPM support
+		
 Mar 29, 2008
 	IMPROVEMENT: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswbutt.c: new look for toolbar buttons

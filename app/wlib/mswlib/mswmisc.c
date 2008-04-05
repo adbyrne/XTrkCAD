@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.14 2008-02-16 08:15:54 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.15 2008-04-05 13:08:14 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -13,6 +13,12 @@
 #include <assert.h>
 #include <htmlhelp.h>
 #include "mswint.h"
+
+#if _MSC_VER > 1300
+	#define stricmp _stricmp
+	#define strnicmp _strnicmp
+	#define strdup _strdup
+#endif
 
 #define OFN_LONGFILENAMES		0x00200000L
 
@@ -307,6 +313,19 @@ void mswRepaintLabel( HWND hWnd, wControl_p b )
 }
 
 
+/**
+ * Draw a bitmap to the screen.
+ *
+ * \param hDc IN device context 
+ * \param offw IN horizontal offset
+ * \param offh IN vertical offset
+ * \param bm IN icon to draw
+ * \param disabled IN draw in disabled state
+ * \param color1 IN for two color bitmaps: foreground color enabled state
+ * \param color2 IN for two color bitmaps: foreground color disabled state
+ *
+ */
+
 void mswDrawIcon(
 		HDC hDc,
 		int offw,
@@ -342,21 +361,29 @@ void mswDrawIcon(
 		SetROP2( hDc, R2_COPYPEN );
 		memset( colorMap, 0, sizeof colorMap );
 		for ( i=0; i<bm->colorcnt; i++ ) {
-			color = wDrawGetRGB( bm->colormap[i].color );
-			color = ((color>>16)&0x0000FF) | (color&0x00FF00) | ((color<<16)&0xFF0000);
+			if( bm->colormap[i].color == 0xFF000000 )		/* color == transparent? */
+				color = GetSysColor( COLOR_BTNFACE );		/* yes, use button face */
+			else
+			{
+				color = wDrawGetRGB( bm->colormap[i].color );	/* otherwise select color */
+				color = ((color>>16)&0x0000FF) | (color&0x00FF00) | ((color<<16)&0xFF0000);
+			}
 			colorMap[bm->colormap[i].key] = color;
-			/*colorMap[bm->colormap[i].key] = mswGetColor(bm->colormap[i].color);*/
 		}
 		row_p = bm->bits;
 		for ( j = 0; j < h; j++ ) {
 			for ( i = 0; i < w; i++ ) {
-				if ( row_p[j][i] != bm->colormap[0].key ) {
-					if ( disabled ) {
-						SetPixel( hDc, i+offw, j+offh, color1 );
-						SetPixel( hDc, i+1+offw, j+1+offh, color2 );
-					} else {
-						SetPixel( hDc, i+offw, j+offh, colorMap[row_p[j][i]] );
-					}
+				if ( disabled ) {
+					color = colorMap[row_p[j][i]];
+					/* convert plain black to a dark grey to take care of simple shapes */
+					if( !color )
+						color = 0x00666666;
+					byt = (GetRValue( color ) + GetGValue( color ) + GetBValue( color ))/3;
+						
+					color = RGB( byt, byt, byt );
+					SetPixel( hDc, i+offw, j+offh, color );
+				} else {
+					SetPixel( hDc, i+offw, j+offh, colorMap[row_p[j][i]] );
 				}
 			}
 		}
@@ -1347,34 +1374,68 @@ wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor col
 	return ip;
 }
 
+/**
+ * Load a pixmap. This functions interprets a XPM icon contained in a
+ * char array. Supported format are 1 or two byte per pixel and #rrggbb
+ * or #rrrrggggbbbb color specification. Color 'None' is interpreted as
+ * transparency, othe symbloic names are not supported.
+ * NOTE: the pased variable s modified during the conversion, So this functon
+ * cannot be called twice with same variable. 
+ *
+ * \param pm IN / OUT  XPM variable
+ * \return    pointer to icon 
+ */
+
 wIcon_p wIconCreatePixMap( char *pm[] )
 {
 	wIcon_p ip;
-	int col, r, g, b;
+	int col, r, g, b, len;
 	long rgb;
 	char buff[3];
 	char * cp, * cq;
 
 	ip = (wIcon_p)malloc( sizeof *ip );
 	memset( ip, 0, sizeof *ip );
-	ip->type = mswIcon_pixmap;
 	cp = pm[0];
-	ip->w = (int)strtol(cp, &cq, 10 );
-	ip->h = (int)strtol(cq, &cp, 10 );
-	ip->colorcnt = (int)strtol(cp, &cq, 10 );
+	
 	ip->type = mswIcon_pixmap;
+	ip->w = (int)strtol(cp, &cq, 10 );			/* width of image */
+	ip->h = (int)strtol(cq, &cp, 10 );			/* height of image */
+	ip->colorcnt = (int)strtol(cp, &cq, 10 );	/* number of colors used */
+	ip->numchars = (int)strtol(cq, &cp, 10 );	/* get number of chars per pixel */
+
 	ip->colormap = (wIconColorMap_t*)malloc( ip->colorcnt * sizeof ip->colormap[0] );
 	for ( col=0; col<ip->colorcnt; col++ ) {
-		ip->colormap[col].key = pm[col+1][0];
-		buff[2] = 0;
-		memcpy( buff, &pm[col+1][5], 2 );
-		r = (int)strtol(buff, &cp, 16);
-		memcpy( buff, &pm[col+1][9], 2 );
-		g = (int)strtol(buff, &cp, 16);
-		memcpy( buff, &pm[col+1][13], 2 );
-		b = (int)strtol(buff, &cp, 16);
-		rgb = wRGB( r, g, b );
-		ip->colormap[col].color = wDrawFindColor( rgb );
+
+		if( ip->numchars == 1 )
+			ip->colormap[col].key = (unsigned)pm[col+1][0];
+		else if( ip->numchars == 2 )
+				ip->colormap[col].key = ((unsigned *)pm[col+1])[ 0 ];
+		
+		cp = strtok( pm[col+1] + ip->numchars, "\t " );	/* cp points to color type */
+		assert( *cp == 'c' );					/* should always be color */
+		
+		cp = strtok( NULL, "\t " );				/* go to next token, the color definition itself */
+
+		if( *cp == '#' ) {						/* is this a hex RGB specification? */
+			len = strlen( cp+1 ) / 3;
+			assert( len == 4 || len == 2 );	/* expecting three 3 char or 4 char values */	
+			buff[2] = 0;						/* if yes, extract the values */
+			memcpy( buff, cp + 1, 2 );
+			r = (int)strtol(buff, &cq, 16);
+			memcpy( buff, cp + 1 + len, 2 );
+			g = (int)strtol(buff, &cq, 16);
+			memcpy( buff, cp + 1 + 2 * len, 2 );
+			b = (int)strtol(buff, &cq, 16);
+
+			rgb = wRGB( r, g, b );
+			ip->colormap[col].color = wDrawFindColor( rgb );
+		} else {
+			if( !stricmp( cp, "none" ))			/* special case transparency*/
+				ip->colormap[col].color = 0xFF000000;
+			else 
+				assert( *cp == '#' );				/* if no, abort for the moment */
+		}
 	}
 	ip->color = 0;
 	ip->bits = &pm[1+ip->colorcnt];

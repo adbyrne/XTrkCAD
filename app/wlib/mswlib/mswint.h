@@ -96,19 +96,20 @@ struct wControl_t {
 		};
 
 typedef struct {
-		unsigned char key;
+		unsigned key;
 		wDrawColor color;
 		} wIconColorMap_t;
 #define mswIcon_bitmap (1)
 #define mswIcon_pixmap (2)
 struct wIcon_t {
 		int type;
-		wPos_t w;
-		wPos_t h;
+		wPos_t w;				/**< width */
+		wPos_t h;				/**< height */
 		wDrawColor color;
-		int colorcnt;
+		int colorcnt;			/**< number of colors */
+		int numchars;			/**< number of chars per pixel */
 		wIconColorMap_t *colormap;
-		const void * bits;
+		const void * bits;		/**< pointer to pixel information */
 		};
 
 struct wDraw_t {
