@@ -1,7 +1,7 @@
 /* XPM */
 static char * dline_xpm[] = {
 "16 16 3 1",
-" 	c #FFFFFFFFFFFF",
+" 	c None",
 ".	c #FFFF00000000",
 "X	c #000000000000",
 "           .....",

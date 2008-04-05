@@ -1,22 +1,25 @@
 /* XPM */
-static char * cnote_xpm[] = {
+static char *cnote[] = {
+/* columns rows colors chars-per-pixel */
 "16 16 3 1",
-".	c #FFFFFFFFFFFF",
-" 	c #000000000000",
-"X	c #FFFFFFFF0000",
-"          ......",
-" XXXXXXXX  .....",
-" XXXXXX X X ....",
-" XXXXXX X XX ...",
-" XXXXXX X XXX ..",
-" XXXXXX X      .",
-" XXXXXX XXXXXX .",
-" XXXXXX XXXXXX .",
-" XXXXXX XXXXXX .",
-" XXXXXX XXXXXX .",
-" XXXXXX XXXXXX .",
-" XXXXXXXXXXXXX .",
-" XXXXXX XXXXXX .",
-" XXXXXXXXXXXXX .",
-" XXXXXXXXXXXXX .",
-"               ."};
+"  c black",
+". c yellow",
+"X c None",
+/* pixels */
+"          XXXXXX",
+" ........  XXXXX",
+" ...... . . XXXX",
+" ...... . .. XXX",
+" ...... . ... XX",
+" ...... .      X",
+" ...... ...... X",
+" ...... ...... X",
+" ...... ...... X",
+" ...... ...... X",
+" ...... ...... X",
+" ............. X",
+" ...... ...... X",
+" ............. X",
+" ............. X",
+"               X"
+};

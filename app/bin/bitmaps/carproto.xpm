@@ -1,7 +1,7 @@
 /* XPM */
 static char*carproto_xpm[]={
 "16 16 4 1",
-". c #ffffffffffff",
+". c None",
 "c c #ffff00000000",
 "a c #00000000ffff",
 "# c #000000000000",
