@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.33 2008-03-06 19:35:13 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.34 2008-04-05 13:13:19 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2046,8 +2046,9 @@ static void SetAccelKey(
 #include "bitmaps/zoomin.xpm"
 #include "bitmaps/zoom.xpm"
 #include "bitmaps/zoomout.xpm"
-#include "bitmaps/undo.xpm"
-#include "bitmaps/redo.xpm"
+#include "bitmaps/edit-undo.xpm"
+//#include "bitmaps/undo.xpm"
+#include "bitmaps/edit-redo.xpm"
 #include "bitmaps/partlist.xpm"
 #include "bitmaps/export.xpm"
 #include "bitmaps/import.xpm"
@@ -2056,7 +2057,7 @@ static void CreateMenus( void )
 {
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM, messageListM, manageM, addM, changeM, drawM;
 	wMenu_p zoomM, zoomSubM;
-	wIcon_p bm_p;
+//	wIcon_p bm_p;
 
 	wMenuPush_p zoomInM, zoomOutM;
 
@@ -2107,7 +2108,7 @@ static void CreateMenus( void )
 	zoomUpB = AddToolbarButton( "cmdZoomIn", wIconCreatePixMap(zoomin_xpm), IC_MODETRAIN_TOO,
 		(addButtonCallBack_t)DoZoomUp, NULL );
 
-	bm_p = wIconCreatePixMap(zoom_xpm);
+//	bm_p = wIconCreatePixMap(zoom_xpm);
 	zoomM = wMenuPopupCreate( mainW, "" );
 	AddToolbarButton( "cmdZoom", wIconCreatePixMap(zoom_xpm), IC_MODETRAIN_TOO, (wButtonCallBack_p)wMenuPopupShow, zoomM );
 
@@ -2115,8 +2116,9 @@ static void CreateMenus( void )
 		(addButtonCallBack_t)DoZoomDown, NULL );
 
 	cmdGroup = BG_UNDO;
-	undoB = AddToolbarButton( "cmdUndo", wIconCreatePixMap(undo_xpm), 0, (addButtonCallBack_t)UndoUndo, NULL );
-	redoB = AddToolbarButton( "cmdRedo", wIconCreatePixMap(redo_xpm), 0, (addButtonCallBack_t)UndoRedo, NULL );
+	undoB = AddToolbarButton( "cmdUndo", wIconCreatePixMap(edit_undo), 0, (addButtonCallBack_t)UndoUndo, NULL );
+	redoB = AddToolbarButton( "cmdRedo", wIconCreatePixMap(edit_redo), 0, (addButtonCallBack_t)UndoRedo, NULL );
+
 	wControlActive( (wControl_p)undoB, FALSE );
 	wControlActive( (wControl_p)redoB, FALSE );
  
