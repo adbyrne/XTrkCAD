@@ -80,7 +80,7 @@ PART=44048%Susquehanna%%250
 #############################################
 PROTO=RS3
 DESC=
-PROTOLENGTH=672
+PROTOLENGTH=671.75
 PART=4200%Undecorated%2 Windows Both Sides
 PART=4201%PRR%%5546
 PART=4202%N&W%%307
@@ -181,7 +181,7 @@ PART=42312%Southern Pacific%%5307
 #############################################
 PROTO=RS11
 DESC=
-LENGTH=3.938
+PROTOLENGTH=630
 PART=4260%Undecorated
 PART=4261%Pennsylvania RR%%8619
 PART=4262%Burlington Northern%%4185
@@ -661,7 +661,7 @@ PART=46516%Soo Line%%731
 #############################################
 PROTO=GP40
 DESC=
-LENGTH=4.125
+PROTOLENGTH=738
 PART=48500%Undecorated%w/o Dynamic brakes
 PART=48501%Undecorated%w/ Dynamic brakes
 PART=48502%Burlington Northern%%3022
@@ -1248,11 +1248,11 @@ PART=49784%Union Pacific%%121
 PART=49785%Union Pacific%%137
 #############################################
 #
-# Dash 8
+# Dash 8-32BWH
 #
 #############################################
-PROTO=Dash 8
-DESC=32BWH
+PROTO=Dash 8-32BWH
+DESC=
 PROTOLENGTH=796
 PART=48830%Undecorated
 PART=48831%Amtrak%%505
@@ -1261,9 +1261,14 @@ PART=48834%Amtrak%%506
 PART=48835%Amtrak%%515
 PART=48837%Amtrak California%%2051
 PART=48838%Amtrak Calafornia%%2052
-#============================================
-DESC=40B
-#============================================
+#############################################
+#
+# Dash 8-40B
+#
+#############################################
+PROTO=Dash 8-40B
+DESC=
+PROTOLENGTH=796
 PART=48700%Undecorated
 PART=48701%Burlington Northern Santa Fe%%8601
 PART=48702%Burlington Northenr Santa Fe%%8607
@@ -1292,9 +1297,14 @@ PART=48734%Conrail Quality%%5086
 PART=48736%CSX-Susquehanna%%5939
 PART=48737%CSX- Susquehanna%%5942
 PART=48756%Union Pacific w/Lenz Decoder%%5673
-#============================================
-DESC=40BW
-#============================================
+#############################################
+#
+# Dash 8-40BW
+#
+#############################################
+PROTO=Dash 8-40BW
+DESC=
+PROTOLENGTH=796
 PART=48800%Undecorated%w/ Standard Cab
 PART=48801%Undecorated%w/ Gull Wing Cab
 PART=48802%Santa Fe%%502
@@ -1464,10 +1474,10 @@ PART=54422%Southern%%6308
 PART=54423%Southern%%6321
 #############################################
 #
-# C-628
+# C628
 #
 #############################################
-PROTO=C-628
+PROTO=C628
 DESC=Phase 1
 PROTOLENGTH=776
 PART=54001%Atlantic Coast Line%%2004
@@ -1492,10 +1502,10 @@ PART=54064%Lehigh Valley%%625
 PART=54065%Lehigh Valley%%631
 #############################################
 #
-# C-630
+# C630
 #
 #############################################
-PROTO=C-630
+PROTO=C630
 DESC=
 PROTOLENGTH=776
 PART=54223%Conrail%%6770
