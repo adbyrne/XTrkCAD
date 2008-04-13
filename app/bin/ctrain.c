@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.5 2008-03-06 19:35:06 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.6 2008-04-13 07:55:13 m_fischer Exp $
  *
  * TRAIN
  *
@@ -2539,8 +2539,8 @@ EXPORT void InitCmdTrain( wMenu_p menu )
 	trainPopupMI[DO_CHANGEDIR]  = wMenuPushCreate( trainPopupM, "", _("Change Direction"), 0, TrainFunc, (void*)DO_CHANGEDIR );
 	trainPopupMI[DO_STOP]       = wMenuPushCreate( trainPopupM, "", _("Stop"), 0, TrainFunc, (void*)DO_STOP );
 	wMenuSeparatorCreate( trainPopupM );
-	trainPopupMI[DO_DELCAR]     = wMenuPushCreate( trainPopupM, "", _("Delete Car"), 0, TrainFunc, (void*)DO_DELCAR );
-	trainPopupMI[DO_DELTRAIN]   = wMenuPushCreate( trainPopupM, "", _("Delete Train"), 0, TrainFunc, (void*)DO_DELTRAIN );
+	trainPopupMI[DO_DELCAR]     = wMenuPushCreate( trainPopupM, "", _("Remove Car"), 0, TrainFunc, (void*)DO_DELCAR );
+	trainPopupMI[DO_DELTRAIN]   = wMenuPushCreate( trainPopupM, "", _("Remove Train"), 0, TrainFunc, (void*)DO_DELTRAIN );
 
 #ifdef LATER
 	ParamRegister( &newCarPG );
