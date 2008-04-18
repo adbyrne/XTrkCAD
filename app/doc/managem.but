@@ -62,7 +62,7 @@ Cars are placed on the layout by using the \f{Train Simulation} (\K{cmdTrain}) c
 
 The \f{Find} button will center the \f{Main Window} (\K{mainW}) on the selected car.  This button is only enabled for cars which are on the Layout (indicated by \f{Layout} in the Location column).  If the car on a track that is hidden and \f{Trains on Hidden Track} (\K{cmdDisplay}) is set to \f{Hide}, then the car (and any attached cars) will be made visible.
 
-The \f{Edit} button invokes the \f{Car} dialog (\K{cmdCarpart}) to modify the selected car.  This button is disabled if more than one (or no) car is selected of if the selected car is on the Layout.  This dialog is also used to \f{Add} a new Car.
+The \f{Edit} button invokes the \f{Car} dialog (\K{cmdCarpart}) to modify the selected car.  This button is disabled if more than one (or no) car is selected or if the selected car is on the Layout.  This dialog is also used to \f{Add} a new Car. Refer to \K{faqsPrototype} if an error occurs when attempting to add inventory to this list.
 
 The \f{Delete} button removes the selected cars from your inventory.  This button is disabled if any of the selected cars are on the layout.
 
@@ -448,7 +448,29 @@ The Parts List (\K{cmdEnum}) dialog lists prices for selected objects if the \e{
 
 \dt \e{Coupling Cars}
 
-\dd If a Car is moved along a track to another Car then the Cars will be coupled together.  To uncouple Cars, Right-Click between the Cars and select Uncouple from the pop-up menu.
+\dd If a Car is moved along a track to another Car then the Cars will be coupled together.
+
+\u000
+
+\dt \e{Uncoupling Cars}
+
+\dd  To uncouple Cars, Right-Click between the Cars then select \e{Uncouple} from the pop-up menu.
+
+\u000
+
+\dd \G{png.d/mtrainmanagement.png}
+
+\u000
+
+\dt \e{Change Train or Car Orientation}
+
+\dd  The orientation of a Train or Car can be reversed by Right-Click over the appropriate object then selecting either \e{Flip Train} or \e{Flip Car} from the pop-up menu.
+
+\u000
+
+\dt \e{Remove Train or Car From Layout}
+
+\dd  To remove a Train or Car from the layout, Right-Click over the appropriate object then select either \e{Remove Train} or \e{Remove Car} from the pop-up menu.
 
 \u000
 

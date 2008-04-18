@@ -383,7 +383,7 @@ This dialog controls some parameters which likely will not be changed frequently
 
 \u000
 
-\dd \f{On Program Startup} - if set to \q{load last layout}, \e{XTrackCAD} will automatically re-open the layout file that was open when \e{XTrackCAD} last closed. Selecting \q{start with a blank layout} opens a blank layout canvas.
+\dd \f{On Program Startup} - if set to \q{Load Last Layout}, \e{XTrackCAD} will automatically re-open the layout file that was open when \e{XTrackCAD} last closed. Selecting \q{Start New Layout} opens a blank layout canvas.
 
 \u000
 

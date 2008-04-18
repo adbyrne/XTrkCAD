@@ -56,6 +56,21 @@ Notes:
 \rule
 
 
+\H{faqsPrototype} Unable to Add Cars to Inventory!
+
+\f{After installing} \e{XTrackCAD} \f{you're unable to add cars to the Car Inventory list; a message stating "No Car Prototypes are defined...." appears when you attempt to add cars to the Car Inventory list.}
+
+There's nothing wrong, you just need to load a Prototype definition file.
+
+\e{XTrackCAD} includes a parameter file which defines many common North American Prototypes. The file is named \c{protoam.xtp}. It's loaded into \e{XTrackCAD} in the same way that a track, structure or car Parameter file would be loaded.
+
+\b Open the \f{Parameter dialog} window (\f{File>Parameter}) then click on Browse. Scroll through the list of \c{*.xtp} files to locate the file named \c{protoam.xtp}. Select this file then click the OK button. Click OK on the Parameter File dialog to complete installation of the prototype file. You should now be able to add cars to the Car Inventory list.
+
+Other prototype definitions can be created using the Car Prototype dialog. Refer to \K{carprototype} for detail.
+
+\rule
+
+
 \H{faqsButtonColor} Button Bar Icons Missing or Obscure
 
 \f{Why are Button Bar icons missing or obscure?}

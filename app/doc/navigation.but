@@ -843,9 +843,9 @@ Some commands use the \c{Shift} or \c{Ctrl} key to modify the meaning of button 
 \rule
 
 
-\S{mouseBcmd} Mouse Commands
+\S{mouseBcmd} Context Sensitive Menus
 
-For all commands, \e{Right-Click} displays the command selection pop-up menu.  For some commands (noted below), \e{Shift+Right-Click} displays a command option pop-up menu.  The operation of \e{Right-Click} and \e{Shift+Right-Click} can be reversed by an item on the Command Options (\K{cmdCmdopt}) dialog.
+For all commands listed below, a \e{Right-Click} will display a context sensitive pop-up command list menu.  For some commands (noted below), a \e{Shift+Right-Click} will display a context sensitive pop-up command options menu.  The operation of \e{Right-Click} and \e{Shift+Right-Click} can be reversed by an item on the Command Options (\K{cmdCmdopt}) dialog.
 
 The Shortcut key for each command is listed after the command name.
 
@@ -1037,7 +1037,7 @@ The Shortcut key for each command is listed after the command name.
 \u000
 
 
-\dt Ruler Command - \K{cmdRuler}
+\dt Ruler Command (\K{cmdRuler})
 
 \dd Position Ruler - \e{Left+Drag}
 
@@ -1132,9 +1132,9 @@ The Shortcut key for each command is listed after the command name.
 \u000
 
 
-\dt Train Simulation Command - \K{cmdTrain}
+\dt Train Simulation Command (\K{cmdTrain})
 
-\dd Command Options: uncouple car, flip or delete cars or Trains, set MU Master - \e{Right-Click}
+\dd Command Options: uncouple car, flip or remove cars or Trains, set MU Master - \e{Right-Click}
 
 \dd Move a Car or Train - \e{Left+Drag}
 

@@ -70,15 +70,35 @@ The wheel on a wheel mouse can now be used to zoom in and out on a layout design
 
 \f{Internationalization}
 
-Internationalization or the ability to localize XTrackCAD for use with various languages was adopted during this version upgrade. XTrackCAD is now available with balloon help and daily tips written in US English and Finish. The XTrackCAD development team welcomes anyone who wishes to volunteer with translation of various support files. Let them know by submitting an offer to assist to the \e{XTrackCAD} \f{Feature Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&atid=781981}{\e{XTrackCAD} Fork Project Site} or the \e{XTrackCAD} \f{Wikka Wish List} located at the \W{http://www.xtrkcad.org/Wikka/WishList}{\e{XTrackCAD} Wiki: WishList}.
+Internationalization or the ability to localize \e{XTrackCAD} for use with various languages was adopted during this version upgrade. \e{XTrackCAD} is now available with balloon help and daily tips written in US English and Finish. The \e{XTrackCAD} development team welcomes anyone who wishes to volunteer with translation of various support files. Let them know by submitting an offer to assist to the \e{XTrackCAD} \f{Feature Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&atid=781981}{\e{XTrackCAD} Fork Project Site} or the \e{XTrackCAD} \f{Wikka Wish List} located at the \W{http://www.xtrkcad.org/Wikka/WishList}{\e{XTrackCAD} Wiki: WishList}.
 
 \f{Minor Fixes and Enhancements}
+
+\b Thanks to Martin Fischer, the Button Bar has a much cleaner and sharper look.
+
+\u000
+
+\b Several selections within various Option Menus (Layout, Display, Command and Preferences) have been re-arranged. In some case the order or grouping of menu items changed. In other cases menu items were move to a different menu; still within the sub-set of Option Menus. Our hope is that we've made it easier to locate parameter settings that in past were difficult to locate.
+
+\u000
+
+\b An new option that allows \e{XTrackCAD} to automatically re-open the last layout file has been added to the \f{Options>Preferences} menu. For detail refer to the \q{On Program Startup} item found in \K{cmdPref}.
+
+\u000
+
+\b Significant updates were made to Atlas N and HO scale car data parameter files.
+
+\u000
+
+\b \e{XTrackCAD} users reported difficulty when attempting to activate grid lines in version 4.02. The problem was noticeable only on new installations. A default grid size of zero was found to be the cause of the problem. The default grid size has been changed to 1 thus eliminating the problem.
+
+\u000
 
 \b A small bug preventing Zooms of less than 1:1 (Refer to \K{cmdZoom} for detail.) was accidentally introduced in version 4.0.1. This problem has been corrected in version 4.1.x.
 
 \u000
 
-\b A small bug introduced when new scale definitions were added to XTrkCad 4.0.2 broke the file format for some scales (eg., N UK). This problem has been corrected in version 4.1.x.
+\b When new scale definitions were added to XTrkCad 4.0.2, a small bug broke the file format for some scales (eg., N UK). This problem has been corrected in version 4.1.x.
 
 \u000
 
@@ -92,8 +112,8 @@ Internationalization or the ability to localize XTrackCAD for use with various l
 
 \f{Name Change}
 
-With release of this version XTrackCAD there's been a subtle change in the spelling and punctuation of the applications name. From this version forward, the application will be know as XTrackCAD. Please note the spelling and capitalization of the name.
+With release of this version of \e{XTrackCAD} there's been a subtle change in the spelling and punctuation of the applications name. From this version forward, the application will be know as \e{XTrackCAD}. Please note the spelling and capitalization of the name.
 
-Why was the name changed? This release gives XTrackCAD developers an opportunity to included a much sought after feature; Internationalization (Through i18n). On the surface this doesn't sound that big however having the ability to internationalize or localize the product has great advantages for all users. Not only is there great potential for the application to become available to a larger audience, our hope it that the developer pool will expand which should result in more features being added to the application.
+Why was the name changed? This release gives \e{XTrackCAD} developers an opportunity to included a much sought after feature; Internationalization (Through i18n). On the surface this doesn't sound that big however having the ability to internationalize or localize the product has great advantages for all users. Not only is there great potential for the application to become available to a larger audience, our hope it that the developer pool will expand which should result in more features being added to the application.
 
 \rule
