@@ -55,7 +55,7 @@ The \f{Colors} dialog controls the color that various objects are drawn.
 
 \u000
 
-\dd \f{Exception Track} - Sets color of \e{Exceptional Tracks} (\K{cmdPref}). Those which exceed the specified grade or are have a radius smaller than the minimum set.
+\dd \f{Exception Track} - Sets color of \e{Exceptional Tracks} (\K{cmdLayout}). Those which exceed the specified grade or are have a radius smaller than the minimum set.
 
 \u000
 
@@ -83,7 +83,7 @@ The \f{Colors} dialog controls the color that various objects are drawn.
 
 \u000
 
-\dd \f{Snap Grid} - the Grid displayed by the \f{Grid} (\K{cmdGrid}) dialog.
+\dd \f{Snap Grid} - the Grid displayed by the \f{Snap Grid} (\K{cmdGrid}) dialog.
 
 \u000
 

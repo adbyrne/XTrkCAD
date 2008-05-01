@@ -66,7 +66,7 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Select} - sets \e{XTrackCAD} into \e{Select} mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use \f{Deselect All} from the \f{Edit} (\K{editM}) menu or \f{Deselect All} from the \f{Pop-up} menu (\K{cmdAcclKeys}).
+\dd \f{Select} - sets \e{XTrackCAD} into \e{Select} mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use \f{Deselect All} from the \f{Edit} (\K{editM}) menu or \f{Deselect All} from the \f{Pop-up} menu (\K{mouseBcmd}).
 
 \u000
 

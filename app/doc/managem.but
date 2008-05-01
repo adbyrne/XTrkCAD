@@ -276,7 +276,7 @@ The \f{Edit} button invokes the appropriate designer or editor dialog for the se
 
 \u000
 
-\dd \f{Structures} and old \f{Turnout Designs} use the \f{Rename Dialog} to change the Manufacturer,  Description or Part Number values.  For these objects the \f{Edit} button's label changes to \f{Rename}. \f{Structures} are not edited using this dialog but by using the \f{Ungroup} (\K{cmdGroup}) and \f{Group} (\K{cmdGroup}) commands.
+\dd \f{Structures} and old \f{Turnout Designs} use the \f{Rename Dialog} to change the Manufacturer,  Description or Part Number values.  For these objects the \f{Edit} button's label changes to \f{Rename}. \f{Structures} are not edited using this dialog but by using the \f{Ungroup} (\K{cmdUngroup}) and \f{Group} (\K{cmdGroup}) commands.
 
 \u000
 
@@ -326,7 +326,7 @@ The drop down list at the top of the dialog selects the \f{Layer} you are intere
 
 The \f{Name} edit box contains the name of the \f{Layer}.  This name is listed in the \f{Current Layer} drop down list on the \f{Tool-bar} (\K{mainW}).  Also the \f{Name} is displayed as the balloon help for the corresponding \f{Layer Button}.
 
-The \f{Color} button specifies the color of tracks if \f{Layer Colors} (\K{cmdDisplay}) radio button on the \f{Display} dialog is checked.
+The \f{Color} button specifies the color of tracks if \f{Color Layers} (\K{cmdDisplay}) radio button on the \f{Display} dialog is checked.
 
 The \f{Visible} check-box controls whether the \f{Layer} is drawn on the Main (\K{mainW}) window.
 
@@ -514,7 +514,7 @@ The Parts List (\K{cmdEnum}) dialog lists prices for selected objects if the \e{
 
 \u000
 
-\dd The \e{Find} button which positions the Main Window (\K{mainW}) to show the Train.  If the Train on a track that is hidden and Trains on Hidden Track (\K{cmdDisplay}) is set to \e{Hide}, then the Train will be made visible until the next time it moves.
+\dd The \e{Find} button which positions the Main Window (\K{mainW}) to show the Train.  If the Trains on a track that's hidden and Hide Trains on Hidden Track (\K{cmdDisplay}) is \e{Enabled} then the Train will be made visible until the next time it moves.
 
 \u000
 
@@ -538,7 +538,7 @@ The Parts List (\K{cmdEnum}) dialog lists prices for selected objects if the \e{
 
 \dt \e{Train Operation}
 
-\dd Once a Train is moving, it will continue to move until it is Stopped manually, hits the end of track or an open Turnout.  If the Train 'runs into' other Cars, those Cars will be coupled to the Train.  If Trains speed is faster than the Max Coupling Speed (\K{cmdCmdopt}) then the Train will crash and must be manually moved back onto the track.
+\dd Once a Train is moving, it will continue to move until it is Stopped manually, hits the end of track or an open Turnout.  If the Train 'runs into' other Cars, those Cars will be coupled to the Train.  If Trains speed is faster than the Max Coupling Speed (\K{cmdPref}) then the Train will crash and must be manually moved back onto the track.
 
 \u000
 

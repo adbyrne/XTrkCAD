@@ -118,7 +118,7 @@ Additional Shortcut keys perform the following:
 
 \G{png.d/bdelete.png}
 
-The \f{Delete} button is used to delete selected objects.  Remember, the \f{Undo} (\K{editM}) command can be used to restore a delete object.
+The \f{Delete} button is used to delete selected objects.  Remember, the \f{Undo} (\K{editM} or \K{cmdUndo}) command can be used to restore a delete object.
 
 Deleting a track that is connected to an easement (\K{cmdEasement}) causes the easement to be deleted as well.
 

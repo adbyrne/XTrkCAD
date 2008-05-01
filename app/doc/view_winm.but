@@ -71,9 +71,21 @@ The \f{Grid} dialog contains controls affecting the horizontal and vertical snap
 
 \dd The Grid can be enabled or disabled in each dimension via the \f{Enable} check box.
 
+\u000
+
+\dd The \f{X} and \f{Y} coordinates relate to the anchor point of the X and Y Axis. Default values for \f{X} and \f{Y} are zero (0). Entering a value of one for \f{X} causes the Main grid line on the Drawing Canvas to shift left one unit. Entering a value of two causes the Main grid line to shift by two units and so on. The \f{Y} axis is affected in the similar manner except the grid moves down rather than left.
+
+\u000
+
+\dd Negative values can be used for X and Y values. Using such cause the Main Grid to shift right for the X Axis and up for the Y Axis.
+
+\u000
+
+\dd The A coordinate relates to the Angle of grid rotation. The default value for this coordinate is zero. Entering a value greater than 0 and less than 90 will cause the Main Grid to rotate clockwise by the number of degrees entered. Entering a negative value causes the grid to rotate counter-clockwise.
+
 The origin and angle of the Grid can be adjusted directly or by dragging on the layout.  \e{Left+Drag} moves the origin of the Grid, and \e{Right+Drag} rotates the grid.  \e{Shift+Right-Click} (\K{cmdAcclKeys}) displays a pop-up menu allowing rotation of the grid by various predefined angles.
 
-Whether the Snap Grid is drawn is controlled by the \f{Show} check-box.  Also, if the layout is Zoomed Out (\K{viewM}) the minor and major grid lines may be too close together to be drawn.  The minimum pixel distance between grid lines is controlled by the \f{Min Grid Spacing} value on the \f{Display} (\K{cmdDisplay}) dialog.
+Whether the Snap Grid is drawn is controlled by the \f{Show} check-box.  Also, if the layout is Zoomed Out (\K{cmdZoom}) the minor and major grid lines may be too close together to be drawn.  The minimum pixel distance between grid lines is controlled by the \f{Min Grid Spacing} value on the \f{Preferences} (\K{cmdPref}) dialog.
 
 \f{Note:} on slow machines drawing the Grid can take noticeable time.  Performance can be improved by selecting a larger value for \f{Min Grid Spacing}.
 

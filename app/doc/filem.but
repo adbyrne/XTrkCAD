@@ -21,7 +21,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Export to DXF} - Exports the selected objects to a file in DXF format (\K{glossary}). The exported file can then be imported into other CAD programs.
+\dd \f{Export to DXF} - Exports the selected objects to a file in DXF format (\K{generalTerms}). The exported file can then be imported into other CAD programs.
 
 \u000
 
@@ -192,7 +192,7 @@ The \f{Print} dialog contains a number of control areas:
 
 }
 
-Whether tracks are printed with one or two lines (representing the center line and rails) depends on the \f{Print Scale}.  If this value is smaller than or equal to twice the Two Rail Scale (\K{cmdPref}) on the Display (\K{cmdDisplay}) dialog then tracks are drawn with two lines. This corresponds to the way tracks are drawn on the main window, adjusted to account for the greater resolution of most printers. At 1:1 tracks are also drawn with a center line.
+Whether tracks are printed with one or two lines (representing the center line and rails) depends on the \f{Print Scale}.  If this value is smaller than or equal to twice the Two Rail Scale on the Display (\K{cmdDisplay}) dialog then tracks are drawn with two lines. This corresponds to the way tracks are drawn on the main window, adjusted to account for the greater resolution of most printers. At 1:1 tracks are also drawn with a center line.
 
 \dt Other options:
 

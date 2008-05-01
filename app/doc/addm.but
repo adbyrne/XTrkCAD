@@ -256,6 +256,6 @@ The \e{Turntable Diameter} control (Visible in the Status Bar) displays the curr
 
 The \f{Modify command} (\K{cmdModify}) can be used to create turntable stall tracks.  Select the turntable and drag the stall track to the proper angle and length.  You can also connect to a turntable with the \f{Join command} (\K{cmdJoin}).
 
-The \f{Turntable Angle} control on the Command Options (\K{cmdCmdopt}) dialog controls how closely you can place tracks connected to a turntable.  If you want to create stall tracks every 7.5\u00B0, set the \f{Turntable Angle} control to 7.5 and place the track as close to each other as allowed.  \e{XTrackCAD} makes sure they will be separated by the correct angle.
+The \f{Turntable Angle} control on the Preferences (\K{cmdPref}) dialog controls how closely you can place tracks connected to a turntable.  If you want to create stall tracks every 7.5\u00B0, set the \f{Turntable Angle} control to 7.5 and place the track as close to each other as allowed.  \e{XTrackCAD} makes sure they will be separated by the correct angle.
 
 \rule
