@@ -371,7 +371,7 @@ PART=9395%Spokane Portland & Seattle%%321
 #############################################
 PROTO=Dash 8-32BWH
 DESC=
-PROTOLENGTH=796
+PROTOLENGTH=745
 PART=7261%Undecorated
 PART=7261%Amtrak%%514
 PART=7262%Amtrak%%516
@@ -404,7 +404,7 @@ PART=9866%Amtrak California%%2052
 #############################################
 PROTO=Dash 8-40B
 DESC=
-PROTOLENGTH=796
+PROTOLENGTH=744
 PART=7200%Undecorated 
 PART=7201%GE Demonstrator%%808
 PART=7202%Providence & Worcester%%3901
@@ -526,7 +526,7 @@ PART=9838%Susquehanna%%4044
 #############################################
 PROTO=Dash 8-40BW
 DESC=
-PROTOLENGTH=796
+PROTOLENGTH=744
 PART=7230%Undecorated%Standard Cab
 PART=7231%Undecorated%Gull Wing Cag
 PART=7232%BNSF%%539
@@ -577,7 +577,7 @@ PART=9835%Santa Fe
 #############################################
 PROTO=Dash 8-40C
 DESC=
-PROTOLENGTH=796
+PROTOLENGTH=808
 PART=7600%Undecorated%Phase 1
 PART=7601%Undecorated%Phase 2
 PART=7605%Chicago & North Western%%8501
@@ -670,7 +670,7 @@ PART=9664%Union Pacific 'Yellow Sill Stripe'%%9279
 #############################################
 PROTO=Dash 8-40CW
 DESC=
-PROTOLENGTH=796
+PROTOLENGTH=808
 PART=7602%Undecorated%CSX/UP Style
 PART=7603%Undecorated%Santa Fe Style
 PART=7604%Undecorated%Conrail Style
@@ -765,7 +765,7 @@ PART=9699%Undecorated%Conrail Style
 #############################################
 PROTO=FP7
 DESC=Older Run, Made in Austria 1980's
-PROTOLENGTH=656
+PROTOLENGTH=624
 PART=7042%Union Pacific%%912
 PART=7043%Pennsylvania RR%%9834
 PART=7046%Seaboard
@@ -1629,7 +1629,7 @@ PART=8480%Western Maryland%%189
 #############################################
 PROTO=RS4/5
 DESC=
-PROTOLENGTH=671.75
+PROTOLENGTH=624
 PART=7029%Chesapeake & Ohio%%5572
 PART=7030%Chesapeake & Ohio%%5575
 PART=7031%Jersey Central%%1601
@@ -1972,7 +1972,7 @@ PART=7942%Santa Fe
 #############################################
 PROTO=SD35
 DESC=Low Hood, With DCC Decoder
-PROTOLENGTH=728.5
+PROTOLENGTH=678
 PART=9200%Undecorated
 PART=9201%CSX%%4527
 PART=9202%CSX%%4586

@@ -80,7 +80,7 @@ PART=44048%Susquehanna%%250
 #############################################
 PROTO=RS3
 DESC=
-PROTOLENGTH=671.75
+PROTOLENGTH=624
 PART=4200%Undecorated%2 Windows Both Sides
 PART=4201%PRR%%5546
 PART=4202%N&W%%307
@@ -877,7 +877,7 @@ PART=53512%Southern Pacific%%4409
 #############################################
 PROTO=SD35
 DESC=
-PROTOLENGTH=728.5
+PROTOLENGTH=678
 #============================================
 DESC=Low Hood Version
 #============================================
@@ -1253,7 +1253,7 @@ PART=49785%Union Pacific%%137
 #############################################
 PROTO=Dash 8-32BWH
 DESC=
-PROTOLENGTH=796
+PROTOLENGTH=745
 PART=48830%Undecorated
 PART=48831%Amtrak%%505
 PART=48832%Amtrak%%509
@@ -1268,7 +1268,7 @@ PART=48838%Amtrak Calafornia%%2052
 #############################################
 PROTO=Dash 8-40B
 DESC=
-PROTOLENGTH=796
+PROTOLENGTH=744
 PART=48700%Undecorated
 PART=48701%Burlington Northern Santa Fe%%8601
 PART=48702%Burlington Northenr Santa Fe%%8607
@@ -1304,7 +1304,7 @@ PART=48756%Union Pacific w/Lenz Decoder%%5673
 #############################################
 PROTO=Dash 8-40BW
 DESC=
-PROTOLENGTH=796
+PROTOLENGTH=744
 PART=48800%Undecorated%w/ Standard Cab
 PART=48801%Undecorated%w/ Gull Wing Cab
 PART=48802%Santa Fe%%502
