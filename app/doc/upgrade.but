@@ -86,7 +86,53 @@ Internationalization or the ability to localize \e{XTrackCAD} for use with vario
 
 \u000
 
-\b Significant updates were made to Atlas N and HO scale car data parameter files.
+\b Significant updates were made to the Atlas N and HO scale parameter files. Diesel engine and freight car information is now contained in four separate parameter files; Atlas HO Scale Cars (\e{atlascho.xtp}), Atlas HO Scale Diesel Engines (\e{atlaseho.xtp}), Atlas N Scale Cars (\e{atlascn.xtp}) and Atlas N Scale Diesel Engines (\e{atlasen.xtp}).
+
+\u000
+
+\b Twenty-one prototypes were added to the American Prototype parameter file (\e{protoam.xtp}). The additional prototypes are;
+
+\lcont{
+
+\u000
+
+\b Diesel Engines
+
+\lcont{
+
+\b Dash 8-32BWH, Dash 8-40B, Dash 8-40BW, Dash 8-40C
+
+\b FP7A
+
+\b H15-44, H16-44, H15/16-44
+
+\b RS4/5
+
+\b RSD12
+
+\b S1, S2, S3, S4
+
+\b SD35, SDP35
+
+}
+
+\u000
+
+\b Freight Cars
+
+\lcont{
+
+\b Caboose, NE-6
+
+\b Flat, 42'
+
+\b Tank, 55' and Tank, 65'
+
+\b Reefer, 36'
+
+}
+
+}
 
 \u000
 
