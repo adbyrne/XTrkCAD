@@ -34,6 +34,10 @@ int newRoadnameCnt;
 
 #endif
 
+#ifndef WIN32
+	#define stricmp strcasecmp
+	#define strnicmp strncasecmp
+#endif // !WIN32
 
 typedef struct {
 	char * key;

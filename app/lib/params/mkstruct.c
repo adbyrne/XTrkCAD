@@ -1,7 +1,7 @@
 /** \file mkstruct.c
  * Build utility to create simple rectangular structure definitions from a data file. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/mkstruct.c,v 1.4 2008-03-27 18:06:52 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/mkstruct.c,v 1.5 2008-06-01 03:16:09 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -29,9 +29,14 @@
 #define BUFSIZE 1024
 
 #if _MSC_VER > 1300
-#define stricmp _stricmp
-#define strnicmp _strnicmp
+	#define stricmp _stricmp
+	#define strnicmp _strnicmp
 #endif
+
+#ifndef WIN32
+	#define stricmp strcasecmp
+	#define strnicmp strncasecmp
+#endif // !WIN32
 
 int main ( int argc, char * argv [] )
 {
