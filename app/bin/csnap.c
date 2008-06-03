@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.6 2008-03-27 08:30:04 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.7 2008-06-03 15:43:58 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -427,8 +427,9 @@ typedef struct {
 		ANGLE_T Angle;
 		long Show;
 		} gridHVData;
-static gridHVData grid;
 
+static gridHVData grid = { { 1.0, 0, 1 },
+						   { 1.0, 0, 1 } };
 
 EXPORT void SnapPos( coOrd * pos )
 {
@@ -770,12 +771,15 @@ EXPORT STATUS_T CmdGrid(
 }
 
 
+/**
+ * Initialize the user interface for the grid functions. 
+ *
+ * \param menu IN pulldown to which the grid function will be added
+ * \return    created command button
+*/
+
 EXPORT wIndex_t InitGrid( wMenu_p menu )
 {
-	grid.Horz.Spacing = DEFAULTGRIDSPACING;
-	grid.Vert.Spacing = DEFAULTGRIDSPACING;
-	grid.Horz.Enable = 1;
-	grid.Vert.Enable = 1;
 	ParamRegister( &gridPG );
 	RegisterChangeNotification( GridChange );
 	if ( grid.Horz.Enable && grid.Horz.Spacing <= 0.0 )

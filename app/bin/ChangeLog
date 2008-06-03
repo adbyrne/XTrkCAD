@@ -1,3 +1,8 @@
+Jun 03, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		cselect.c: fixed bug when rescale same piece several times
+		csnap.c: initialize grid spacing value
+		
 Apr 13, 2008
 	ENH: Bob Blackwell
 		ctrain.c: updated label text

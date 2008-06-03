@@ -1,6 +1,6 @@
 /** \file Handle selecting / unselecting track and basic operations on the selection
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.8 2008-03-10 18:59:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.9 2008-06-03 15:43:58 m_fischer Exp $
  *
  */
 
@@ -696,7 +696,9 @@ static void RescaleDlgUpdate(
 		if ( rescaleMode!=0 )
 			break;
 	case I_RESCALE_TO_SCALE:
-		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, *((int *)valueP) );		
+		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, *((int *)valueP) );
+		rescaleToGaugeInx = 0;
+		ParamLoadControl( pg, I_RESCALE_TO_GAUGE );
 		ParamLoadControl( pg, I_RESCALE_TO_SCALE );		
 		rescalePercent = GetScaleDescRatio(rescaleFromScaleInx)/GetScaleDescRatio(rescaleToScaleInx)*100.0;
 		wControlActive( pg->paramPtr[I_RESCALE_CHANGE].control, (rescaleFromScaleInx != rescaleToScaleInx) );
