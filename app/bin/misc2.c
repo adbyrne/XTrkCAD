@@ -1,7 +1,7 @@
 /** \file misc2.c
  * Management of information about scales and gauges plus rprintf.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.7 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.8 2008-06-04 07:12:36 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -369,6 +369,7 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 {
 	int i, j;
 	char *scaleName = GetScaleName( scaleInx );
+	DIST_T scaleRatio = GetScaleRatio( scaleInx );
 	dynArr_t gauges_da;
 	
 	for( i = 0; i < scaleDesc_da.cnt; i++ ) {
@@ -376,7 +377,7 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 		/* are the first characters (which describe the scale) identical? */
 		if( !strncmp( scaleDesc(i).scaleDesc, scaleName, t - scaleDesc(i).scaleDesc )) {
 			/* if yes, are we talking about the same ratio */
-		 	if( scaleInfo(scaleDesc(i).scale).ratio == curScaleRatio ) {
+		 	if( scaleInfo(scaleDesc(i).scale).ratio == scaleRatio ) {
 				/* yes, we found the right scale descriptor, so now look for the gauge */
 				*scaleDescInx = i;
 				gauges_da = scaleDesc(i).gauges_da;
