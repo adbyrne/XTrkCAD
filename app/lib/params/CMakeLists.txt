@@ -1,5 +1,5 @@
 
-# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/CMakeLists.txt,v 1.7 2008-06-01 03:16:09 tshead Exp $
+# $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/CMakeLists.txt,v 1.8 2008-06-04 18:19:44 m_fischer Exp $
 #
 # CMakeList for the params directory
 #
@@ -59,7 +59,6 @@ ENDFOREACH(infileName)
 # create turnouts from NMRA definition file
 
 ADD_EXECUTABLE( nmra-to nmra-to.c )
-TARGET_LINK_LIBRARIES( nmra-to m )
 GET_TARGET_PROPERTY(nmra-to_EXE nmra-to LOCATION)
 
 # find all turnout files
