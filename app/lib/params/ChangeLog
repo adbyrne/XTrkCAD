@@ -1,6 +1,6 @@
 Jun 04, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
-		CMakeLists.txt: remove reference to m.lib 
+		CMakeLists.txt: remove reference to m.lib for Win32 
 		
 Mar 25, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
