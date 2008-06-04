@@ -1,6 +1,6 @@
 /** \file Handle selecting / unselecting track and basic operations on the selection
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.9 2008-06-03 15:43:58 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.10 2008-06-04 07:06:11 m_fischer Exp $
  *
  */
 
@@ -713,6 +713,9 @@ static void RescaleDlgUpdate(
 	case I_RESCALE_FROM_GAUGE:	
 		ParamLoadControl( pg, I_RESCALE_FROM_GAUGE );
 		break;
+	case I_RESCALE_CHANGE:
+		ParamLoadControl( pg, I_RESCALE_CHANGE );
+		break;
 	case -1:
 		break;
 	}
@@ -771,6 +774,7 @@ EXPORT void DoRescale( void )
 	DoSelectedTracks( SelectedScaleGauge );
 
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_MODE, &rescaleMode );
+	RescaleDlgUpdate( &rescalePG, I_RESCALE_CHANGE, &rescaleMode );
 
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_GAUGE, rescaleFromGauge );
 	RescaleDlgUpdate( &rescalePG, I_RESCALE_FROM_SCALE, rescaleFromScale );

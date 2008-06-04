@@ -1,3 +1,7 @@
+Jun 04, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		cselect.c: Rescale dialog wasn't updated correctly
+
 Jun 03. 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		CMakeLists.txt: find getext on Win32
