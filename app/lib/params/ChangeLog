@@ -1,3 +1,7 @@
+Jun 09, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		nmra-to.c: remove some useless code
+
 Jun 04, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		CMakeLists.txt: remove reference to m.lib for Win32 

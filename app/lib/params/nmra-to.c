@@ -1,5 +1,5 @@
 /*
- *	$Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/nmra-to.c,v 1.4 2008-03-27 18:06:52 m_fischer Exp $
+ *	$Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/nmra-to.c,v 1.5 2008-06-09 19:34:06 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -181,7 +181,6 @@ int main ( int argc, char * argv[] )
     coOrd q0, q1, q2, q3, q1c, q2c;
 
 	char *buffer = malloc( BUFSIZE );
-	char *inFile, *outFile;
 	FILE *fIn, *fOut;
 
     q0.x = q0.y = 0.0;
@@ -196,21 +195,15 @@ int main ( int argc, char * argv[] )
 		exit( 1 );
 	}
 
-	inFile = malloc( strlen( argv[ 1 ] ));
-	strcpy( inFile, argv[ 1 ] );
-
-	outFile = malloc( strlen( argv[ 2 ] ));	
-	strcpy( outFile, argv[ 2 ] );
-
-	fIn = fopen( inFile, "r" );
+	fIn = fopen( argv[ 1 ], "r" );
 	if( !fIn ) {
-		fprintf( stderr, "Could not open the definition %s\n", inFile );
+		fprintf( stderr, "Could not open the definition %s\n", argv[ 1 ] );
 		exit( 1 );
 	}
 
-	fOut = fopen( outFile, "w" );
+	fOut = fopen( argv[ 2 ], "w" );
 	if( !fOut ) {
-		fprintf( stderr, "Could not create the structures in %s\n", outFile );
+		fprintf( stderr, "Could not create the structures in %s\n", argv[ 2 ] );
 		exit( 1 );
 	}
 
