@@ -1,7 +1,7 @@
 /** \file mkstruct.c
  * Build utility to create simple rectangular structure definitions from a data file. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/mkstruct.c,v 1.5 2008-06-01 03:16:09 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/lib/params/mkstruct.c,v 1.6 2008-06-10 20:27:21 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -44,8 +44,6 @@ int main ( int argc, char * argv [] )
 	double x;
 	double y;
 	int cm = 0;
-	char *inFile;
-	char *outFile;
 	FILE *fIn, *fOut;
 	int count = 0;
 	char *buffer = malloc( BUFSIZE );
@@ -72,21 +70,15 @@ int main ( int argc, char * argv [] )
 		exit( 1 );
 	}
 
-	inFile = malloc( strlen( argv[ 1 ] ));
-	strcpy( inFile, argv[ 1 ] );
-
-	outFile = malloc( strlen( argv[ 2 ] ));	
-	strcpy( outFile, argv[ 2 ] );
-
-	fIn = fopen( inFile, "r" );
+	fIn = fopen( argv[ 1 ], "r" );
 	if( !fIn ) {
-		fprintf( stderr, "Could not open the definition %s\n", inFile );
+		fprintf( stderr, "Could not open the definition %s\n", argv[ 1 ] );
 		exit( 1 );
 	}
 
-	fOut = fopen( outFile, "w" );
+	fOut = fopen( argv[ 2 ], "w" );
 	if( !fOut ) {
-		fprintf( stderr, "Could not create the structures in %s\n", outFile );
+		fprintf( stderr, "Could not create the structures in %s\n", argv[ 2 ] );
 		exit( 1 );
 	}
 
