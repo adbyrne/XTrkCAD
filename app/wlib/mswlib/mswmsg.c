@@ -74,7 +74,7 @@ static void repaintMessage(
 			hFont = SelectObject( hDc, mswLabelFont );
 	}
 
-	rect.bottom = (long)(bm->y+( scale * bm->h ));
+	rect.bottom = (long)(bm->y+( bm->h ));
 	rect.right = (long)(bm->x+( scale * bm->w ));
 	rect.top = bm->y;
 	rect.left = bm->x;
