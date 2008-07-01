@@ -1,7 +1,7 @@
 /** \file gtksplash.c
  * Handling of the Splash Window functions
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksplash.c,v 1.3 2007-11-24 19:48:21 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksplash.c,v 1.4 2008-07-01 18:55:21 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -61,23 +61,24 @@ wCreateSplash( char *appName, char *appVer )
    window = gtk_window_new (GTK_WINDOW_POPUP);
    gtk_window_set_title (GTK_WINDOW (window), appName); 
    gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER);
-//   gtk_window_set_modal (GTK_WINDOW (window), TRUE);
    gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
    gtk_window_set_type_hint (GTK_WINDOW (window), GDK_WINDOW_TYPE_HINT_SPLASHSCREEN);
+#if GTK_MINOR_VERSION > 5
    gtk_window_set_focus_on_map (GTK_WINDOW (window), FALSE);
+#endif
 
-	vbox = gtk_vbox_new (FALSE, 0);
+   vbox = gtk_vbox_new (FALSE, 0);
    gtk_widget_show (vbox);
    gtk_container_add (GTK_CONTAINER (window), vbox);
 
-	/* add the logo image to the top of the splash window */
-	sprintf( logoPath, "%s/" LOGOFILENAME, wGetAppLibDir());
-	image = gtk_image_new_from_file ( logoPath );
+   /* add the logo image to the top of the splash window */
+   sprintf( logoPath, "%s/" LOGOFILENAME, wGetAppLibDir());
+   image = gtk_image_new_from_file ( logoPath );
    gtk_widget_show (image);
    gtk_box_pack_start (GTK_BOX (vbox), image, TRUE, TRUE, 0);
    gtk_misc_set_alignment (GTK_MISC (image), 0, 0);
 
-	/* put the product name into the window */
+   /* put the product name into the window */
 	
 	temp = malloc( strlen( appName ) + strlen( appVer ) + 2 );
 	if( !temp )
@@ -88,7 +89,6 @@ wCreateSplash( char *appName, char *appVer )
    label = gtk_label_new ( temp );
    gtk_widget_show (label);
    gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
-/*   GTK_WIDGET_SET_FLAGS (label, GTK_CAN_FOCUS); */
    gtk_label_set_justify (GTK_LABEL (label), GTK_JUSTIFY_FILL);
    gtk_label_set_selectable (GTK_LABEL (label), FALSE);
    gtk_misc_set_padding (GTK_MISC (label), 6, 2);
@@ -100,8 +100,10 @@ wCreateSplash( char *appName, char *appVer )
    gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
    gtk_label_set_line_wrap (GTK_LABEL (label), FALSE);
    gtk_misc_set_padding (GTK_MISC (label), 6, 2);
+#if GTK_MINOR_VERSION > 5   
    gtk_label_set_ellipsize (GTK_LABEL (label), PANGO_ELLIPSIZE_START);
-	message = label;	
+#endif   
+   message = label;	
 
 	gtk_widget_show( window );
 	

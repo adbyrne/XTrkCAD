@@ -1,3 +1,7 @@
+Jul 01, 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtksplash.c: added #ifdef's for backward compatibility to GTK 2.4
+		
 Feb 01. 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		psprint.c, gtkint.h: added file selector for print to file, made
