@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.15 2008-04-05 13:08:14 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.16 2008-07-11 16:48:57 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -2705,7 +2705,9 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 			break;
 		if (w->type == W_MAIN) {
 			/* It's the big one! */
-			wExit( 0 );
+			/* call main window procedure for processing of shutdown */
+			if( w->winProc )
+				(w->winProc( w, wClose_e, NULL ));
 			return 0L;
 		}
 
