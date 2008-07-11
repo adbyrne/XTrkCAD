@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.34 2008-04-05 13:13:19 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.35 2008-07-11 16:56:37 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -545,8 +545,12 @@ static void DoQuitAfter( void )
 		
 	quitting = TRUE;
 }
-
-static void DoQuit( void )
+/**
+ * Process shutdown request. This function is called when the user requests
+ * to close the application. Before shutting down confirmation is gotten to 
+ * prevent data loss.
+ */
+void DoQuit( void )
 {
 	Confirm(_("Quit"), DoQuitAfter );
 	if ( quitting ) {
@@ -557,7 +561,6 @@ static void DoQuit( void )
 		wExit(0);
 	}
 }
-
 
 static void DoClearAfter( void )
 {
@@ -2047,7 +2050,6 @@ static void SetAccelKey(
 #include "bitmaps/zoom.xpm"
 #include "bitmaps/zoomout.xpm"
 #include "bitmaps/edit-undo.xpm"
-//#include "bitmaps/undo.xpm"
 #include "bitmaps/edit-redo.xpm"
 #include "bitmaps/partlist.xpm"
 #include "bitmaps/export.xpm"

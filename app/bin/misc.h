@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.6 2008-02-03 08:49:50 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.7 2008-07-11 16:56:37 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -217,6 +217,7 @@ void ErrorMessage( char *, ... );
 void InfoMessage( char *, ... );
 int NoticeMessage( char *, char*, char *, ... );
 int NoticeMessage2( int, char *, char*, char *, ... );
+void DoQuit( void );
 
 void wShow( wWin_p );
 void wHide( wWin_p );

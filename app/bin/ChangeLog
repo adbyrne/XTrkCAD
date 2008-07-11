@@ -1,3 +1,7 @@
+Jul 10, 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc.c, misc.h, draw.c: allow user to cancel close request
+		
 Jun 04, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		cselect.c: Rescale dialog wasn't updated correctly
