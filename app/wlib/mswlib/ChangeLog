@@ -1,3 +1,8 @@
+Jul 11, 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswchoic.c: i18n support
+		mswmenu.c, mswmisc.c: code cleanup and added comments
+		
 Jul 10, 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswmisc.c: allow user to cancel window close request

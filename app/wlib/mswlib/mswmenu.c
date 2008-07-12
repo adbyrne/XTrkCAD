@@ -210,12 +210,12 @@ static wMenuItem_p createMenuItem(
 	}
 	mi->mnext = NULL;
 	mi->labelStr = mswStrdup( labelStr );
-	if (helpStr != NULL) {
-		char *string;
-		string = malloc( strlen(helpStr) + 1 );
-		strcpy( string, helpStr );
-		/*xv_set(mi->menu_item, XV_HELP_DATA, string, 0 );*/
-	}
+//	if (helpStr != NULL) {
+//		char *string;
+//		string = malloc( strlen(helpStr) + 1 );
+//		strcpy( string, helpStr );
+//		/*xv_set(mi->menu_item, XV_HELP_DATA, string, 0 );*/
+//	}
 	mswCallBacks[B_MENUITEM] = &menuItemCallBacks;
 	return mi;
 }

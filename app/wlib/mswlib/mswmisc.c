@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.16 2008-07-11 16:48:57 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.17 2008-07-12 20:30:02 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -879,7 +879,8 @@ wWin_p wWinMainCreate(
 		return NULL;
 	}
 	libDir = wGetAppLibDir();
-	helpFile = (char*)malloc( strlen(libDir) + 1 + strlen(appName) + 1+3+1 );
+	/* length of path + \ + length of filename + . + length of extension + \0 */
+	helpFile = (char*)malloc( strlen(libDir) + 1 + strlen(appName) + 1 + 3 + 1 );
 	wsprintf( helpFile, "%s\\%s.chm", libDir, appName );
 
 	wPrefGetInteger( "msw tweak", "ThickFont", &mswThickFont, 0 );
@@ -2967,7 +2968,6 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 	rc = Ctl3dAutoSubclass( hinstCurrent );
 	rc = Ctl3dColorChange();
 #endif
-
 	if (!hinstPrevious)
 		if (!InitApplication(hinstCurrent))
 			return FALSE;

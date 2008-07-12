@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
+#include "i18n.h"
 #include "mswint.h"
 
 /*
@@ -23,7 +24,7 @@ static XWNDPROC newChoiceItemProc;
 typedef struct {
 		WOBJ_COMMON
 		wChoice_p owner;
-		} * wChoiceItem_p;
+		} wChoiceItem_t, * wChoiceItem_p;
 
 struct wChoice_t {
 		WOBJ_COMMON
@@ -297,9 +298,9 @@ static wChoice_p choiceCreate(
 		helpStrCopy = mswStrdup( helpStr );
 	for (lp = b->labels, cnt=0; *lp; lp++, cnt++, butts++ ) {
 			*butts = (wChoiceItem_p)mswAlloc( parent, B_CHOICEITEM,
-				mswStrdup(*lp), sizeof *butts[cnt], data, &index );
+				mswStrdup(_(*lp)), sizeof( wChoiceItem_t ), data, &index );
 			(*butts)->owner = b;
-			(*butts)->hWnd = hButt = CreateWindow( "BUTTON", *lp,
+			(*butts)->hWnd = hButt = CreateWindow( "BUTTON", (*butts)->labelStr,
 						bs | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), b->x+pw, b->y+ph,
 						80, CHOICE_HEIGHT,
 						((wControl_p)parent)->hWnd, (HMENU)index, mswHInst, NULL );
