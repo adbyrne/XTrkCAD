@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.35 2008-07-11 16:56:37 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.36 2008-07-12 11:14:11 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2676,15 +2676,6 @@ LOG1( log_init, ( "Reset\n" ) )
 	/* see whether last layout should be reopened on startup */   
 	wPrefGetInteger( "DialogItem", "pref-onstartup", &onStartup, 0 );
 	
-	/* if work is to be resumed and no filename was given on startup, load last layout */
-	if( (onStartup == 0) && !initialFile ) {
-		initialFile = (char*)wPrefGetString( "misc", "lastlayout" );
-	}	
-
-	if (initialFile && strlen(initialFile)) {
-		DoFileList( 0, NULL, initialFile );
-	}
-
 	/*
 	 * THE END
 	 */
@@ -2706,6 +2697,15 @@ LOG1( log_init, ( "Initialization complete\n" ) )
 
 	ShowTip(SHOWTIP_NEXTTIP); 
  
+	/* if work is to be resumed and no filename was given on startup, load last layout */
+	if( (onStartup == 0) && !initialFile ) {
+		initialFile = (char*)wPrefGetString( "misc", "lastlayout" );
+	}	
+
+	if (initialFile && strlen(initialFile)) {
+		DoFileList( 0, NULL, initialFile );
+	}
+
 	/* check for existing checkpoint file */
 	if (ExistsCheckpoint())
 		OfferCheckpoint();
