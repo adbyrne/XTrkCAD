@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.8 2008-01-28 06:23:02 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.9 2008-07-12 10:52:03 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -398,9 +398,7 @@ static gint window_delete_event(
 			b->doneProc( b );
 	if (win->winProc) {
 		win->winProc( win, wClose_e, win->data );
-		if (win == gtkMainW)
-			wExit(0);
-		else
+		if (win != gtkMainW)
 			wWinShow( win, FALSE );
 	}
 	return (TRUE);

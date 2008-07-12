@@ -1,4 +1,8 @@
 Jul 11, 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtkwindow.c: closing app can now be canceled by the user
+
+Jul 11, 2008
 	ENH: Steve DeCaux
 		gtdraw-cairo.c: convert strings to UTF8
 
