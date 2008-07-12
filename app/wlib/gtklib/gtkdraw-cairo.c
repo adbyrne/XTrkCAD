@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.3 2008-01-29 06:26:42 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.4 2008-07-12 07:12:25 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -455,7 +455,6 @@ EXPORT int wLoadFont(
 	return TRUE;
 }
 
-
 EXPORT void gtkDrawString(
 		wDraw_p bd,
 		wPos_t x, wPos_t y,
@@ -467,6 +466,8 @@ EXPORT void gtkDrawString(
 	GdkGC * gc;
 	GdkRectangle update_rect;
 	wPos_t w;
+	char tmp[80];
+	char * utf8;
 
 	gc = selectGC( bd, 0, wDrawLineSolid, color, opts );
 	x = INMAPX(bd,x);
@@ -477,7 +478,17 @@ EXPORT void gtkDrawString(
 	cairo_t* const cairo = selectContext(bd, 0, wDrawLineSolid, color, opts);
 	cairo_move_to(cairo, x, y);
 	cairo_set_font_size(cairo, fs);
-	cairo_show_text(cairo, s);
+
+	utf8 = g_convert (s, -1, "UTF-8", "ISO-8859-1", 
+                            NULL, NULL,NULL);
+	if (wDebugFont>=2) {
+		sprintf( tmp, "Input String : %s", s );
+		fprintf(stderr, "%s\n", tmp );
+		
+		sprintf( tmp, "Cairo String : %s", utf8);
+		fprintf(stderr, "%s\n", tmp );
+	}
+	cairo_show_text(cairo, utf8);
 
 	if ( bd->delayUpdate || bd->widget == NULL) return;
 	update_rect.x = x-1;
@@ -486,6 +497,7 @@ EXPORT void gtkDrawString(
 	update_rect.height = bd->font->ascent+bd->font->descent+2;
 	gtk_widget_draw( bd->widget, &update_rect );
 }
+
 
 EXPORT void wDrawString(
 		wDraw_p bd,

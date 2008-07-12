@@ -1,3 +1,7 @@
+Jul 11, 2008
+	ENH: Steve DeCaux
+		gtdraw-cairo.c: convert strings to UTF8
+
 Jul 01, 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		gtksplash.c: added #ifdef's for backward compatibility to GTK 2.4
