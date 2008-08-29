@@ -1,3 +1,7 @@
+Aug 29, 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		genhelp.in: fixed typo
+		
 Feb 03, 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		messages.in: added tooltip for new option 'onstartup'

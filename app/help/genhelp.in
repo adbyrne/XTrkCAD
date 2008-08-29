@@ -493,7 +493,7 @@ rename-ok		cmdCustmgm
 #
 rescale-toggle	Rescale by Scale Conversion or by Ratio	cmdRescale
 rescale-fromS	Original Scale of the selected objects	cmdRescale
-rescale-fromG	Original Gauge of the selected obkects	cmdRescale
+rescale-fromG	Original Gauge of the selected objects	cmdRescale
 rescale-toS	New Scale of the selected objects	cmdRescale
 rescale-toG	New Gauge of the selected objects	cmdRescale
 rescale-change-dim	Change track dimensions to new scale	cmdRescale
