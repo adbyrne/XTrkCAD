@@ -1,7 +1,7 @@
 /** \file draw.c
  * Basic drawing functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.13 2008-07-11 16:56:37 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.14 2008-08-29 19:45:59 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -145,30 +145,33 @@ static char zoomLabel[] = "Zoom : ";
 
 static struct {
 		char * name;
-		long value;
+		double value;
 		wMenuRadio_p pdRadio;
 		wMenuRadio_p btRadio;
 		} zoomList[] = {
-				{ "1:1", 1 },
-				{ "2:1", 2 },
-				{ "3:1", 3 },
-				{ "4:1", 4 },
-				{ "6:1", 6 },
-				{ "8:1", 8 },
-				{ "10:1", 10 },
-				{ "12:1", 12 },
-				{ "16:1", 16 },
-				{ "20:1", 20 },
-				{ "24:1", 24 },
-				{ "28:1", 28 },
-				{ "32:1", 32 },
-				{ "36:1", 36 },
-				{ "40:1", 40 },
-				{ "48:1", 48 },
-				{ "56:1", 56 },
-				{ "64:1", 64 },
-				{ "128:1", 128 },
-				{ "256:1", 256 },
+				{ "1:10", 1.0 / 10.0 },
+				{ "1:5", 1.0 / 5.0 },
+				{ "1:2", 1.0 / 2.0 },
+				{ "1:1", 1.0 },
+				{ "2:1", 2.0 },
+				{ "3:1", 3.0 },
+				{ "4:1", 4.0 },
+				{ "6:1", 6.0 },
+				{ "8:1", 8.0 },
+				{ "10:1", 10.0 },
+				{ "12:1", 12.0 },
+				{ "16:1", 16.0 },
+				{ "20:1", 20.0 },
+				{ "24:1", 24.0 },
+				{ "28:1", 28.0 },
+				{ "32:1", 32.0 },
+				{ "36:1", 36.0 },
+				{ "40:1", 40.0 },
+				{ "48:1", 48.0 },
+				{ "56:1", 56.0 },
+				{ "64:1", 64.0 },
+				{ "128:1", 128.0 },
+				{ "256:1", 256.0 },
 };
 
 
@@ -1658,10 +1661,11 @@ EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM )
 	int inx;
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
-		zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
-		if( zoomSubM )
-			zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void*)zoomList[inx].value );
-
+		if( zoomList[ inx ].value >= 1.0 ) {
+			zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void *)(&(zoomList[inx].value)));
+			if( zoomSubM )
+				zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom", zoomList[inx].name, 0, DoZoom, (void *)(&(zoomList[inx].value)));
+		}
 	}
 }
 
@@ -1702,28 +1706,26 @@ static void SetZoomRadio( DIST_T scale )
 static int ScaleInx(  DIST_T scale )
 {
 	int inx;
-	long curScale = (long)scale;
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
-		if( curScale == zoomList[inx].value ) {
+		if( scale == zoomList[inx].value ) {
 			return inx;
 		}	
 	}
 	return -1;	
 }
+
+/**
+ * Set up for new drawing scale. After the scale was changed, eg. via zoom button, everything 
+ * is set up for the new scale. 
+ *
+ * \param scale IN new scale
+ */
 	
 static void DoNewScale( DIST_T scale )
 {
 	char tmp[20];
-	if ((MyGetKeyState()&WKEY_CTRL) == 0) {
-		if (scale < 1.0)
-			scale = 1.0;
-		scale = floor(scale);
-	} else {
-		if (scale < 1.0/64.0)
-			scale = 1.0/64.0;
-	}
- 
+
 	if (scale > MAX_MAIN_SCALE)
 		scale = MAX_MAIN_SCALE;
 
@@ -1761,6 +1763,12 @@ LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
 }
 
 
+/**
+ * User selected zoom in, via mouse wheel, button or pulldown.
+ *
+ * \param mode IN FALSE if zoom button was activated, TRUE if activated via popup or mousewheel
+ */
+
 EXPORT void DoZoomUp( void * mode )
 {
 	long newScale;
@@ -1768,9 +1776,14 @@ EXPORT void DoZoomUp( void * mode )
 	
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
-		if( i>= 1 )
-			DoNewScale( zoomList[ i - 1 ].value );	
-
+		/* 
+		 * Zooming into macro mode happens when we are at scale 1:1. 
+		 * To jump into macro mode, the CTRL-key has to be pressed and held.
+		 */
+		if( mainD.scale != 1.0 || (mainD.scale == 1.0 && (MyGetKeyState()&WKEY_CTRL))) {
+			if( i ) 
+				DoNewScale( zoomList[ i - 1 ].value );	
+		}
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomin", &newScale, 4 );
 		DoNewScale( newScale );
@@ -1780,6 +1793,12 @@ EXPORT void DoZoomUp( void * mode )
 	}
 }
 
+
+/**
+ * User selected zoom out, via mouse wheel, button or pulldown.
+ *
+ * \param mode IN FALSE if zoom button was activated, TRUE if activated via popup or mousewheel
+ */
 
 EXPORT void DoZoomDown( void  * mode)
 {
@@ -1800,11 +1819,20 @@ EXPORT void DoZoomDown( void  * mode)
 	}
 }
 
+/**
+ * Zoom to user selected value. This is the callback function for the 
+ * user-selectable preset zoom values. 
+ *
+ * \param IN scale current pScale
+ *
+ */
 
-EXPORT void DoZoom( void * scale )
+EXPORT void DoZoom( DIST_T *pScale )
 {
-	if( (DIST_T)(double)(long)scale != mainD.scale )
-		DoNewScale( (DIST_T)(double)(long)scale );
+	DIST_T scale = *pScale;
+
+	if( scale != mainD.scale )
+		DoNewScale( scale );
 }
 
 
