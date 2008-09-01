@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.36 2008-07-12 11:14:11 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.37 2008-09-01 17:40:39 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1688,7 +1688,14 @@ static void DoSticky( void )
 }
 /*--------------------------------------------------------------------*/
 
+/* 
+ * These array control the choices available in the Toolbar setup.
+ * For each choice, the text is given and the respective mask is 
+ * specified in the following array. 
+ * Note: text and choices must be given in the same order.
+ */
 static char *AllToolbarLabels[] = {
+		N_("File Buttons"),
 		N_("Zoom Buttons"),
 		N_("Undo Buttons"),
 		N_("Easement Button"),
@@ -1704,6 +1711,7 @@ static char *AllToolbarLabels[] = {
 		N_("Hot Bar"),
 		NULL };
 static long AllToolbarMasks[] = {
+		1<<BG_FILE, 
 		1<<BG_ZOOM,
 		1<<BG_UNDO,
 		1<<BG_EASE,
@@ -1716,10 +1724,17 @@ static long AllToolbarMasks[] = {
 		1<<BG_MISCCRT,
 		1<<BG_RULER,
 		1<<BG_LAYER,
-		1<<BG_HOTBAR };
+		1<<BG_HOTBAR};
 
+/*
+ * for some reason, there is a separate set for non -flextrack.
+ * This seems to be for historical reasons (different licenses?)
+ * It might be worth to find out whether this is still needed and 
+ * the code could be cleaned up.
+ */
 
 static char *NonflexToolbarLabels[] = {
+		N_("File Buttons"),
 		N_("Zoom Buttons"),
 		N_("Undo Buttons"),
 		N_("SnapGrid Buttons"),
@@ -1733,6 +1748,7 @@ static char *NonflexToolbarLabels[] = {
 		N_("Hot Bar"),
 		NULL };
 static long NonflexToolbarMasks[] = {
+		1<<BG_FILE, 
 		1<<BG_ZOOM,
 		1<<BG_UNDO,
 		1<<BG_SNAP,
@@ -1744,7 +1760,6 @@ static long NonflexToolbarMasks[] = {
 		1<<BG_RULER,
 		1<<BG_LAYER,
 		1<<BG_HOTBAR };
-
 
 
 static void ToolbarAction( wBool_t set, void * data )
@@ -1760,6 +1775,12 @@ static void ToolbarAction( wBool_t set, void * data )
 		fprintf( recordF, "PARAMETER %s %s %ld", "misc", "toolbarset", toolbarSet );
 }
 
+/**
+ * Create the Toolbar configuration submenu. Based on two arrays of descriptions and
+ * masks, the toolbar submenu is created dynamically.
+ *
+ * \param toolbarM IN menu to which the toogles will be added
+ */
 
 static void CreateToolbarM( wMenu_p toolbarM )
 {
@@ -2054,6 +2075,9 @@ static void SetAccelKey(
 #include "bitmaps/partlist.xpm"
 #include "bitmaps/export.xpm"
 #include "bitmaps/import.xpm"
+#include "bitmaps/document-new.xpm"
+#include "bitmaps/document-save.xpm"
+#include "bitmaps/document-open.xpm"
 
 static void CreateMenus( void )
 {
@@ -2081,8 +2105,6 @@ static void CreateMenus( void )
 
 	popup1M = wMenuPopupCreate( mainW, _("Commands") );
 	popup2M = wMenuPopupCreate( mainW, _("Commands") );
-	wMenuPushCreate( popup1M, "cmdPaste", _("Paste"), 0, (wMenuCallBack_p)EditPaste, NULL );
-	wMenuSeparatorCreate( popup1M );
 	MiscMenuItemCreate( popup1M, popup2M, "cmdUndo", _("Undo"), 0, (void*)(wMenuCallBack_p)UndoUndo, 0, (void *)0 );
 	MiscMenuItemCreate( popup1M, popup2M, "cmdRedo", _("Redo"), 0, (void*)(wMenuCallBack_p)UndoRedo, 0, (void *)0 );
 	wMenuPushCreate( popup1M, "cmdZoomIn", _("Zoom In"), 0, (wMenuCallBack_p)DoZoomUp, (void*)1 );
@@ -2106,11 +2128,15 @@ static void CreateMenus( void )
 	popup1aM = wMenuMenuCreate( popup1M, "", _("More") );
 	popup2aM = wMenuMenuCreate( popup2M, "", _("More") );
 
+	cmdGroup = BG_FILE;
+	AddToolbarButton( "menuFile-clear", wIconCreatePixMap(document_new), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoClear, NULL );
+	AddToolbarButton( "menuFile-load", wIconCreatePixMap(document_open), IC_MODETRAIN_TOO, (addButtonCallBack_t)ChkLoad, NULL );
+	AddToolbarButton( "menuFile-save", wIconCreatePixMap(document_save), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoSave, NULL );
+
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton( "cmdZoomIn", wIconCreatePixMap(zoomin_xpm), IC_MODETRAIN_TOO,
 		(addButtonCallBack_t)DoZoomUp, NULL );
 
-//	bm_p = wIconCreatePixMap(zoom_xpm);
 	zoomM = wMenuPopupCreate( mainW, "" );
 	AddToolbarButton( "cmdZoom", wIconCreatePixMap(zoom_xpm), IC_MODETRAIN_TOO, (wButtonCallBack_p)wMenuPopupShow, zoomM );
 
