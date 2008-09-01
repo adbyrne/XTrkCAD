@@ -32,6 +32,10 @@ IF(WIN32)
 	ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 ENDIF(WIN32)
 
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
+
 OPTION(XTRKCAD_USE_GTK "Use GTK for the graphical user interface back-end" ${XTRKCAD_USE_GTK_DEFAULT})
 OPTION(XTRKCAD_USE_GTK_CAIRO "Use Cairo for high-quality antialiased rendering" ${XTRKCAD_USE_GTK_CAIRO_DEFAULT})
 OPTION(XTRKCAD_USE_GETTEXT "Use gettext for internationalization" ${XTRKCAD_USE_GETTEXT_DEFAULT})
