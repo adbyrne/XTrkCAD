@@ -1,3 +1,8 @@
+Sep 05, 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		misc.c, cselect.c, track.c: create full partlist
+		when no track is selected 
+		
 Sep 01, 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		misc.c, common.h: add new toolbar icons for file ops

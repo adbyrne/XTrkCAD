@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.4 2008-03-06 19:35:13 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.5 2008-09-05 08:08:15 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -200,17 +200,15 @@ EXPORT void EnumerateTracks( void )
 {
 	track_p trk;
 	TRKINX_T inx;
-	/*char dat[20];*/
-
-	if (selectedTrackCount<=0) {
-		ErrorMessage( MSG_NO_SELECTED_TRK );
-		return;
-	}
 
 	enumerateMaxDescLen = strlen("Description");
 
 	TRK_ITERATE( trk ) {
-		if (GetTrkSelected(trk) && trackCmds(trk->type)->enumerate != NULL)
+		/* 
+		 *	process track piece if none are selected (list all) or if it is one of the
+		 *	selected pieces (list only selected )
+		 */
+		if ((!selectedTrackCount || GetTrkSelected(trk)) && trackCmds(trk->type)->enumerate != NULL)
 			trackCmds(trk->type)->enumerate( trk );
 	}
 

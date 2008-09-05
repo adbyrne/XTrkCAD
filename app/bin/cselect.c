@@ -1,6 +1,7 @@
-/** \file Handle selecting / unselecting track and basic operations on the selection
+/** \file cselect.c
+ * Handle selecting / unselecting track and basic operations on the selection
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.10 2008-06-04 07:06:11 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.11 2008-09-05 08:08:15 m_fischer Exp $
  *
  */
 
@@ -73,7 +74,7 @@ static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color );
  *
  */
 
-EXPORT long selectedTrackCount = 0;
+EXPORT long selectedTrackCount = 0;	/**< number of currently selected track components */
 
 static void SelectedTrackCountChange( void )
 {

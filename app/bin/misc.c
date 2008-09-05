@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.37 2008-09-01 17:40:39 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.38 2008-09-05 08:08:15 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2382,7 +2382,7 @@ static void CreateMenus( void )
 	MiscMenuItemCreate( manageM, NULL, "cmdLayer", _("Layers ..."), ACCL_LAYERS, (void*)InitLayersDialog(), 0, (void *)0 );
 	wMenuSeparatorCreate( manageM );
 	 
-	MiscMenuItemCreate( manageM, NULL, "cmdEnumerate", _("Parts &List ..."), ACCL_PARTSLIST, (void*)(wMenuCallBack_p)EnumerateTracks, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( manageM, NULL, "cmdEnumerate", _("Parts &List ..."), ACCL_PARTSLIST, (void*)(wMenuCallBack_p)EnumerateTracks, 0, (void *)0 );
 	MiscMenuItemCreate( manageM, NULL, "cmdPricelist", _("Price List..."), ACCL_PRICELIST, (void*)PriceListInit(), 0, (void *)0 );
 
 	cmdGroup = BG_LAYER|BG_BIGGAP;
