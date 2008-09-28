@@ -1,3 +1,7 @@
+Sep 28, 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		Added USA-G.xtp created by Dwyane Ward
+		
 Jun 10, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		mkstruct.c: remove some useless code
