@@ -1,8 +1,12 @@
+May 08, 2009 
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		atl83ho.xtp, BachmannEZ-HO.xtp, BachmannEZ-N.xtp, 
+		FastTrack-HO.xtp: added or updated by Dwayne Ward
+		
 Oct 02, 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		AtlasTrueTrackN.xtp created by Dwayne Ward
 		
-
 Oct 02, 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		Peco-On30.xtp and RocoGeoLineHO.xtp created by Dwayne Ward
@@ -14,7 +18,7 @@ Sep 28, 2008
 Jun 10, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		mkstruct.c: remove some useless code
-
+		
 Jun 09, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		nmra-to.c: remove some useless code
