@@ -1,3 +1,7 @@
+May 8, 2009
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		de_DE.pot CMakeLists.txt: partially completed German translation
+		
 Jan 22, 2008
 	ENH: Mikko Nissinen <mni77@users.sourceforge.net>
 		stripmsg.c: New utility to strip translatable strings from
