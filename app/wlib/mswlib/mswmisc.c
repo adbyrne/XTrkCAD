@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.17 2008-07-12 20:30:02 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.18 2009-05-08 15:28:54 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <htmlhelp.h>
 #include "mswint.h"
+#include "i18n.h"
 
 #if _MSC_VER > 1300
 	#define stricmp _stricmp
@@ -1925,6 +1926,43 @@ void wBeep( void )
 	MessageBeep( MB_OK );
 }
 
+/**
+ * Show a notification window with a yes/no reply and an icon.
+ *
+ * \param type IN type of message: Information, Warning, Error
+ * \param msg  IN message to display
+ * \param yes  IN text for accept button
+ * \param no   IN text for cancel button
+ * \return    True when accept was selected, false otherwise
+ */
+
+int wNoticeEx(
+		int type, 
+		const char * msg,
+		const char * yes,
+		const char * no )
+{
+	int res;
+	UINT flag;
+	char *headline;
+
+	switch( type ) {
+		case NT_INFORMATION:
+			flag = MB_ICONINFORMATION;
+			headline = _("Information");
+			break;
+		case NT_WARNING:
+			flag = MB_ICONWARNING;
+			headline = _("Warning");
+			break;
+		case NT_ERROR:
+			flag = MB_ICONERROR;
+			headline = _("Error");
+			break;
+	}
+	res = MessageBox( mswHWnd, msg, headline, flag | MB_TASKMODAL|((no==NULL)?MB_OK:MB_YESNO) );
+	return res == IDOK || res == IDYES;
+}
 
 int wNotice(
 		const char * msg,
@@ -2087,10 +2125,10 @@ if (newHelp) {
 			pt.x = screenWidth-(w+2);
 		if (pt.x < 0)
 			pt.x = 0;
-		SetWindowPos( balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+2, h+2,
+		SetWindowPos( balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+6, h+4,
 						SWP_SHOWWINDOW|SWP_NOACTIVATE );
-		SetBkColor( hDc, RGB( 255, 255, 0 ) );
-		TextOut( hDc, 0, 0, hs, strlen(hs) );
+		SetBkColor( hDc, GetSysColor( COLOR_INFOBK ));
+		TextOut( hDc, 2, 1, hs, strlen(hs) );
 		SelectObject( hDc, hFont );
 		ReleaseDC( balloonHelpHWnd, hDc );
 }
@@ -2139,10 +2177,10 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 			pt.x = screenWidth-(w+2);
 		if (pt.x < 0)
 			pt.x = 0;
-		SetWindowPos( balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+2, h+2,
+		SetWindowPos( balloonHelpHWnd, HWND_TOPMOST, pt.x, pt.y, w+6, h+4,
 						SWP_SHOWWINDOW|SWP_NOACTIVATE );
-		SetBkColor( hDc, RGB( 255, 255, 0 ) );
-		TextOut( hDc, 0, 0, msg, strlen(msg) );
+		SetBkColor( hDc, GetSysColor( COLOR_INFOBK ) ); 
+		TextOut( hDc, 2, 1, msg, strlen(msg) );
 		SelectObject( hDc, hFont );
 		ReleaseDC( balloonHelpHWnd, hDc );
 
@@ -2912,8 +2950,9 @@ static BOOL InitApplication( HINSTANCE hinstCurrent )
 	wc.hInstance = hinstCurrent;
 	wc.hIcon = 0;
 	wc.hCursor = 0;
-	wc.hbrBackground = CreateSolidBrush( RGB(255, 255, 0) );
+	/* wc.hbrBackground = CreateSolidBrush( RGB(255, 255, 236) ); */
 	/*wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);*/
+	wc.hbrBackground = CreateSolidBrush( GetSysColor( COLOR_INFOBK ) ); 
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = "MswBalloonHelp";
 	if (!RegisterClass(&wc)) {
@@ -3027,7 +3066,6 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 		mswFail( "CreateWindow(BALLOONHELP)" );
 	} else {
 		hDc = GetDC( balloonHelpHWnd );
-		SetBkColor( hDc, RGB( 255, 255, 0 ) );
 		/* We need to remember this because the hDc gets changed somehow,
 		/* and we when we select the oldFont back in we don't get newFont */
 		balloonHelpNewFont = CreateFont( - balloonHelpFontSize, 0, 0, 0, 0, 0,

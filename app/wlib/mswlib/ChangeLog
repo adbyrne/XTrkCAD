@@ -1,3 +1,11 @@
+May 08, 2009
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswmisc.c, wlib.h: add new message box with icon
+		
+Sep 05, 2008
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswmisc.c: enhance look of tooltip
+		
 Jul 11, 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswchoic.c: i18n support

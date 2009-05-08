@@ -1,7 +1,7 @@
 /** \file wlib.h
  * Commaon definitions and declarations for the wlib library
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.13 2007-12-01 15:33:52 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.14 2009-05-08 15:28:54 m_fischer Exp $
  */
 
 #ifndef WIN_H
@@ -70,6 +70,14 @@ void wBeep(			void );
 wBool_t wNotice(		const char *, const char *, const char * );
 int wNotice3(			const char *, const char *, const char *, const char * );
 void wHelp(			const char * );
+
+#define NT_INFORMATION 1
+#define NT_WARNING	   2
+#define NT_ERROR	   4
+
+wBool_t wNoticeEx( int type, const char * msg, const char * yes, const char * no );
+
+
 
 void wSetBalloonHelp ( wBalloonHelp_t * );
 void wEnableBalloonHelp ( int );
@@ -658,4 +666,5 @@ const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index, co
 void wPrefFlush(		void );
 void wPrefReset(		void );
 
+void CleanupCustom( void );
 #endif

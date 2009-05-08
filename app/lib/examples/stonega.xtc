@@ -1,10 +1,10 @@
-#XTrkCad Version: 4.0.2b1, Date: Thu Sep 27 20:04:13 2007
+#XTrackCAD Version: 4.1.0b1, Date: Tue Apr 15 21:12:09 2008
 
 VERSION 10 3.0.0
 TITLE1 Stonega Branch
 TITLE2 Based on RMC March 2007
 MAPSCALE 18
-ROOMSIZE 72.0 x 48.0
+ROOMSIZE 72.000000 x 48.000000
 SCALE HO
 LAYERS 0 1 0 1 255 0 0 0 0 "Main"
 LAYERS 1 1 0 1 14577421 0 0 0 0 "Structures"

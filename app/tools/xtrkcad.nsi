@@ -159,20 +159,18 @@ NoOldIni:
   !define Index "Line${__LINE__}"
   ReadRegStr $1 HKCR ".xtc" ""
   StrCmp $1 "" "${Index}-NoBackup"
-    StrCmp $1 "XTrkCAD.Design" "${Index}-NoBackup"
+    StrCmp $1 "XTrackCAD.Design" "${Index}-NoBackup"
       WriteRegStr HKCR ".xtc" "backup_val" $1
   "${Index}-NoBackup:"
-    WriteRegStr HKCR ".xtc" "" "XTrkCAD.Design"
-    ReadRegStr $0 HKCR "XTrkCAD.Design" ""
+    WriteRegStr HKCR ".xtc" "" "XTrackCAD.Design"
+    ReadRegStr $0 HKCR "XTrackCAD.Design" ""
     StrCmp $0 "" 0 "${Index}-Skip"
-      WriteRegStr HKCR "XTrkCAD.Design" "" "XTrkCAD Layout Design"
-      WriteRegStr HKCR "XTrkCAD.Design\shell" "" "open"
-      WriteRegStr HKCR "XTrkCAD.Design\DefaultIcon" "" "$INSTDIR\xtrkcad.exe,0"
+      WriteRegStr HKCR "XTrackCAD.Design" "" "XTrkCAD Layout Design"
+      WriteRegStr HKCR "XTrackCAD.Design\shell" "" "open"
+      WriteRegStr HKCR "XTrackCAD.Design\DefaultIcon" "" "$INSTDIR\bin\xtrkcad.exe,0"
     "${Index}-Skip:"
-    WriteRegStr HKCR "XTrkCAD.Design\shell\open\command" "" '$INSTDIR\xtrkcad.exe "%1"'
-;    WriteRegStr HKCR "XTrkCAD.Design\shell\edit" "" "Edit Options File"
-;    WriteRegStr HKCR "XTrkCAD.Design\shell\edit\command" "" '$INSTDIR\xtrkcad.exe "%1"'
- 
+    WriteRegStr HKCR "XTrackCAD.Design\shell\open\command" "" '$INSTDIR\bin\xtrkcad.exe "%1"'
+
   System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
   
   !undef Index

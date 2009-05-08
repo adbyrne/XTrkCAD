@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.38 2008-09-05 08:08:15 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.39 2009-05-08 15:28:54 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -473,7 +473,7 @@ static void ChkRevert( void )
 	int rc;
 	
 	if( changed) {
-		rc = wNotice( _("Do you want to return to the last saved state?\n\n"
+		rc = wNoticeEx( NT_WARNING, _("Do you want to return to the last saved state?\n\n"
 									"Revert will cause all changes done since last save to be lost."),
 									_("&Revert"), _("&Cancel") );
 		if( rc ) {

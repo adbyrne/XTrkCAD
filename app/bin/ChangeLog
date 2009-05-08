@@ -1,3 +1,8 @@
+May 08, 2009
+	NH: Martin Fischer <m_fischer@users.sourceforge.net>
+		fileio.c, misc.c: use new message box with icon
+		
+
 Oct 11, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		draw.h: fixed prototype for DoZoom as suggested by 

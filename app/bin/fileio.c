@@ -1,7 +1,7 @@
 /** \file fileio.c
  * Loading and saving files. Handles trackplans as well as DXF export. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.17 2008-02-03 08:49:50 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.18 2009-05-08 15:28:54 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -237,7 +237,7 @@ EXPORT int InputError(
 		strcpy( mp, paramLine );
 	}
 	strcat( mp, _("\nDo you want to continue?") );
-	if (!(ret = wNotice( message, _("Continue"), _("Stop") ))) {
+	if (!(ret = wNoticeEx( NT_ERROR, message, _("Continue"), _("Stop") ))) {
 		if ( paramFile )
 			fclose(paramFile);
 		paramFile = NULL;
