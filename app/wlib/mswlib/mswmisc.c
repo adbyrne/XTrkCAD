@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.18 2009-05-08 15:28:54 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.19 2009-05-15 18:16:16 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -876,7 +876,7 @@ wWin_p wWinMainCreate(
 	error = WritePrivateProfileString( "mswtest", "test", "ok", mswProfileFile );
 	if ( error <= 0 ) {
 		sprintf( mswTmpBuff, "Can not write to %s.\nPlease make sure the directory exists and is writable", mswProfileFile );
-		wNotice( mswTmpBuff, "Ok", NULL );
+		wNoticeEx( NT_ERROR, mswTmpBuff, "Ok", NULL );
 		return NULL;
 	}
 	libDir = wGetAppLibDir();
@@ -1974,6 +1974,16 @@ int wNotice(
 	return res == IDOK || res == IDYES;
 }
 
+/**
+ * Show a notification window with three choices and an icon.
+ *
+ * \param msg  IN message to display
+ * \param yes  IN text for yes button
+ * \param no   IN text for no button
+ * \param cancel IN  text for cancel button
+ * \return    1 for yes, -1 for no, 0 for cancel
+ */
+
 
 int wNotice3(
 		const char * msg,
@@ -1982,7 +1992,7 @@ int wNotice3(
 		const char * cancel )
 {
 	int res;
-	res = MessageBox( mswHWnd, msg, "Notice", MB_TASKMODAL|MB_YESNOCANCEL );
+	res = MessageBox( mswHWnd, msg, _("Notice"), MB_ICONQUESTION | MB_TASKMODAL|MB_YESNOCANCEL );
 	if ( res == IDOK || res == IDYES )
 		return 1;
 	else if ( res == IDNO )
@@ -2011,7 +2021,7 @@ void wHelp(
 	sprintf( pszHelpTopic, "/%s.html", topic );
 	hwndHelp = HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOPIC, (DWORD_PTR)pszHelpTopic);
 	if( !hwndHelp )
-		wNotice( pszHelpTopic, "Ok", NULL );
+		wNoticeEx( NT_ERROR, pszHelpTopic, "Ok", NULL );
 
 	free( pszHelpTopic );
 }

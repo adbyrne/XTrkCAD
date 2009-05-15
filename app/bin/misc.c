@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.39 2009-05-08 15:28:54 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.40 2009-05-15 18:16:15 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -294,10 +294,10 @@ EXPORT void AbortProg(
 	vsprintf( message, msg, ap );
 	va_end( ap );
 	if (abort2) {
-		wNotice( message, _("ABORT"), NULL );
+		wNoticeEx( NT_ERROR, message, _("ABORT"), NULL );
 	} else {
 		strcat( message, _("\nDo you want to save your layout?") );
-		rc = wNotice( message, _("Ok"), _("ABORT") );
+		rc = wNoticeEx( NT_ERROR, message, _("Ok"), _("ABORT") );
 		if (rc) {
 			DoSaveAs( (doSaveCallBack_p)abort );
 		} else {
@@ -347,7 +347,7 @@ static void ShowMessageHelp( int index, const char * label, void * data )
 	cp = strchr( msgSrc, '\t' );
 	if (cp==NULL) {
 		sprintf( msgKey, _("No help for %s"), msgSrc );
-		wNotice( msgKey, _("Ok"), NULL );
+		wNoticeEx( NT_INFORMATION, msgKey, _("Ok"), NULL );
 		return;
 	}
 	memcpy( msgKey, msgSrc, cp-msgSrc );
@@ -434,7 +434,7 @@ EXPORT int NoticeMessage2( int playbackRC, char * format, char * yes, char * no,
 	format = ParseMessage( format );
 	vsprintf( message2, format, ap );
 	va_end( ap );
-	return wNotice( message2, yes, no );
+	return wNoticeEx( NT_INFORMATION, message2, yes, no );
 }
 
 /*****************************************************************************
@@ -1025,7 +1025,7 @@ LOG( log_command, 4, ( "    COMMAND returns %d\n", rc ) )
 				"you are currently making. Do you want to update?"),
 				_("Yes"), _("No"), _("Cancel") );
 			else
-				rc = wNotice(
+				rc = wNoticeEx( NT_WARNING,
 				_("Cancelling the current command will undo the changes\n"
 				"you are currently making. Do you want to update?"),
 				_("Yes"), _("No") );
@@ -2461,7 +2461,9 @@ static void OfferCheckpoint( void )
 	int ret;
 	
 	/* sProdName */
-	ret = wNotice( _("Program was not terminated properly. Do you want to resume working on the previous trackplan?"), _("Resume"), _("Ignore") );
+	ret = wNoticeEx( NT_INFORMATION,
+					 _("Program was not terminated properly. Do you want to resume working on the previous trackplan?"), 
+					 _("Resume"), _("Ignore") );
 	if( ret ) {
 		/* load the checkpoint file */ 
 		LoadCheckpoint();	

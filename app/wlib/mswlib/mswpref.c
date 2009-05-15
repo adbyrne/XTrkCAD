@@ -84,7 +84,7 @@ const char * wGetAppWorkDir( void )
 	}
 
 	if (SHGetSpecialFolderPath( NULL, mswTmpBuff, CSIDL_APPDATA, 0 ) == 0 ) {
-			wNotice( "Cannot get user's profile directory", "Exit", NULL );
+			wNoticeEx( NT_ERROR, "Cannot get user's profile directory", "Exit", NULL );
 			wExit(0);
 	} else {
 		sprintf( appWorkDirName, "%s\\%s", mswTmpBuff, "XTrackCad" );
@@ -102,7 +102,7 @@ const char * wGetAppWorkDir( void )
 const char *wGetUserHomeDir( void )
 {
 	if (SHGetSpecialFolderPath( NULL, mswTmpBuff, CSIDL_PERSONAL, 0 ) == 0 ) {
-		wNotice( "Cannot get user's home directory", "Exit", NULL );
+		wNoticeEx( NT_ERROR, "Cannot get user's home directory", "Exit", NULL );
 		wExit(0);
 		return( NULL );
 	} else {

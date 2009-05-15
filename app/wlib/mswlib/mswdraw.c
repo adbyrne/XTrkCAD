@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswdraw.c,v 1.5 2008-02-16 08:15:54 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswdraw.c,v 1.6 2009-05-15 18:16:16 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500		/* for wheel mouse supposrt */
@@ -1624,12 +1624,12 @@ wDraw_p wBitMapCreate( wPos_t w, wPos_t h, int planes )
 	hDc = GetDC(mswHWnd);
 	d->hDc = CreateCompatibleDC( hDc ); 
 	if ( d->hDc == (HDC)0 ) {
-		wNotice( "CreateBitMap: CreateDC fails", "Ok", NULL );
+		wNoticeEx( NT_ERROR, "CreateBitMap: CreateDC fails", "Ok", NULL );
 		return FALSE;
 	}
 	d->hBm = CreateCompatibleBitmap( hDc, d->w, d->h );
 	if ( d->hBm == (HBITMAP)0 ) {
-		wNotice( "CreateBitMap: CreateBM fails", "Ok", NULL );
+		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM fails", "Ok", NULL );
 		return FALSE;
 	}
 	d->hasPalette = (GetDeviceCaps(hDc,RASTERCAPS ) & RC_PALETTE) != 0;
@@ -1684,7 +1684,7 @@ wBool_t wBitMapWriteFile( wDraw_p d, const char * fileName )
 		return FALSE;
 	f = wFileOpen( fileName, "wb" );
 	if (!f) {
-		wNotice( fileName, "Ok", NULL );
+		wNoticeEx( NT_ERROR, fileName, "Ok", NULL );
 		return FALSE;
 	}
 	ww = ((d->w +3) / 4) * 4;
@@ -1707,7 +1707,7 @@ wBool_t wBitMapWriteFile( wDraw_p d, const char * fileName )
 	SelectObject( d->hDc, d->hBmOld );
 	rc = GetDIBits( d->hDc, d->hBm, 0, 1, NULL, (BITMAPINFO*)&bmi, DIB_RGB_COLORS );
 	if ( rc == 0 ) {
-		wNotice( "WriteBitMap: Can't get bitmapinfo from Bitmap", "Ok", NULL );
+		wNoticeEx( NT_ERROR, "WriteBitMap: Can't get bitmapinfo from Bitmap", "Ok", NULL );
 		return FALSE;
 	}
 	bmi.bmih.biClrUsed = 256;
@@ -1716,7 +1716,7 @@ wBool_t wBitMapWriteFile( wDraw_p d, const char * fileName )
 	chunk = 32000/ww;
 	pixels = (char*)malloc( ww*chunk );
 	if ( pixels == NULL ) {
-		wNotice( "WriteBitMap: no memory", "OK", NULL );
+		wNoticeEx( NT_ERROR, "WriteBitMap: no memory", "OK", NULL );
 		return FALSE;
 	}
 	for (j=0;j<d->h;j+=chunk) {
@@ -1725,12 +1725,12 @@ wBool_t wBitMapWriteFile( wDraw_p d, const char * fileName )
 		rc = GetDIBits( d->hDc, d->hBm, j, chunk, pixels, (BITMAPINFO*)&bmi, DIB_RGB_COLORS );
 		if ( rc == 0 ) 
 		if ( rc == 0 ) {
-			wNotice( "WriteBitMap: Can't get bits from Bitmap", "Ok", NULL );
+			wNoticeEx( NT_ERROR, "WriteBitMap: Can't get bits from Bitmap", "Ok", NULL );
 			return FALSE;
 		}
 		rc = fwrite( pixels, 1, ww*chunk, f );
 		if (rc != ww*chunk) {
-			wNotice("WriteBitMap: Bad fwrite", "Ok", NULL);
+			wNoticeEx( NT_ERROR, "WriteBitMap: Bad fwrite", "Ok", NULL);
 		}
 	}
 	free( pixels );

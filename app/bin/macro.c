@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.5 2008-03-10 18:59:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.6 2009-05-15 18:16:15 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1344,7 +1344,7 @@ static void DemoInitValues( void )
 	strcpy( scaleName, "DEMO" );
 	DoSetScale( scaleName );
 	if ( paramPlaybackProc == NULL ) {
-		wNotice( _("Can not find PARAMETER playback proc"), _("Ok"), NULL );
+		wNoticeEx( NT_INFORMATION, _("Can not find PARAMETER playback proc"), _("Ok"), NULL );
 		return;
 	}
 	for ( cpp = demoInitParams; *cpp; cpp++ )

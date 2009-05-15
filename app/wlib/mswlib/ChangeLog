@@ -1,4 +1,8 @@
-May 08, 2009
+May 15, 2009
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswdraw.c, mswmisc.c, mswpref.c: more message boxes with icon
+
+		May 08, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswmisc.c, wlib.h: add new message box with icon
 		
