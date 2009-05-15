@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksingle.c,v 1.1 2005-12-07 15:48:44 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksingle.c,v 1.2 2009-05-15 18:54:20 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -295,10 +295,10 @@ static void floatActivated(
 	if (s != NULL) {
 		v = strtod( s, &cp );
 		if (*cp != '\n' && *cp != '\0') {
-			wNotice( "The value you have entered is not a valid number\nPlease try again", "Ok", NULL );
+			wNoticeEx( NT_ERROR, "The value you have entered is not a valid number\nPlease try again", "Ok", NULL );
 		} else if (v < b->low || v > b->high) {
 			sprintf( val_s, "Please enter a value between %0.3f and %0.3f", b->low, b->high );
-			wNotice( val_s, "Ok", NULL );
+			wNoticeEx( NT_ERROR, val_s, "Ok", NULL );
 		} else {
 			if (debugWindow >= 2) printf("floatActivated( %0.3f )\n", v );
 			b->oldValue = v;
@@ -520,10 +520,10 @@ static void integerActivated(
 	if (s != NULL) {
 		v = strtod( s, &cp );
 		if (*cp != '\n' && *cp != '\0') {
-			wNotice( "The value you have entered is not a valid number\nPlease try again", "Ok", NULL );
+			wNoticeEx( NT_ERROR, "The value you have entered is not a valid number\nPlease try again", "Ok", NULL );
 		} else if (v < b->low || v > b->high) {
 			sprintf( val_s, "Please enter a value between %ld and %ld", b->low, b->high );
-			wNotice( val_s, "Ok", NULL );
+			wNoticeEx( NT_ERROR, val_s, "Ok", NULL );
 		} else {
 			if (debugWindow >= 2) printf("integerActivated( %ld )\n", v );
 			b->oldValue = v;

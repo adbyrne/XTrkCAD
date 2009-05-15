@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.9 2008-02-04 00:37:12 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.10 2009-05-15 18:54:20 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -34,6 +34,7 @@
 #include <gdk/gdkkeysyms.h>
 
 #include "gtkint.h"
+#include "i18n.h"
 
 wWin_p gtkMainW;
 
@@ -366,6 +367,55 @@ static void doNotice(
 	noticeValue = value;
 	gtk_widget_destroy( noticeW.win );
 	gtkDoModal( NULL, FALSE );
+}
+
+/**
+ * Show a notification window with a yes/no reply and an icon.
+ *
+ * \param type IN type of message: Information, Warning, Error
+ * \param msg  IN message to display
+ * \param yes  IN text for accept button
+ * \param no   IN text for cancel button
+ * \return    True when accept was selected, false otherwise
+ */
+
+int wNoticeEx( int type, 
+       		const char * msg,
+       		const char * yes,
+       		const char * no )
+{
+	
+	int res;
+	unsigned flag;
+	char *headline;
+	GtkWidget *dialog;
+
+	switch( type ) {
+		case NT_INFORMATION:
+			flag = GTK_MESSAGE_INFO;
+			headline = _("Information");
+			break;
+		case NT_WARNING:
+			flag = GTK_MESSAGE_WARNING;
+			headline = _("Warning");
+			break;
+		case NT_ERROR:
+			flag = GTK_MESSAGE_ERROR;
+			headline = _("Error");
+			break;
+	}
+	
+	dialog = gtk_message_dialog_new( gtkMainW->gtkwin,  
+					 GTK_DIALOG_DESTROY_WITH_PARENT,
+					 flag,
+      					 ((no==NULL)?GTK_BUTTONS_OK:GTK_BUTTONS_YES_NO),
+					 msg );
+	gtk_window_set_title( GTK_WINDOW(dialog), headline );
+	  
+	res = gtk_dialog_run( GTK_DIALOG(dialog));
+	gtk_widget_destroy( dialog );
+      
+	return res == GTK_RESPONSE_OK  || res == GTK_RESPONSE_YES; 
 }
 
 

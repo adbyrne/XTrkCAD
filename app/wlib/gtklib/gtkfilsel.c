@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfilsel.c,v 1.4 2008-01-28 07:15:23 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfilsel.c,v 1.5 2009-05-15 18:54:20 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -127,7 +127,7 @@ static int file_selection_ok (
 		if ( access( tmp, F_OK ) == 0 && fs->mode == FS_SAVE ) {
 			cp = tmp+strlen(tmp);
 			strcat(cp, _(" exists\nDo you want to overwrite it?") );
-			if ( wNotice( tmp, _("Yes"), _("No") ) <= 0 )
+			if ( wNoticeEx( NT_WARNING, tmp, _("Yes"), _("No") ) <= 0 )
 				return 0;
 			*cp = '\0';
 		}

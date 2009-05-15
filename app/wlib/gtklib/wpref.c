@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.10 2008-01-29 04:10:25 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.11 2009-05-15 18:54:20 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -117,7 +117,7 @@ EXPORT const char * wGetAppLibDir( void )
 		"If this is not possible, the environment variable %s must contain "
 		"the name of the correct directory."),
 		XTRKCAD_INSTALL_PREFIX, wAppName, wAppName, envvar );
-	wNotice( msg, _("Ok"), NULL );
+	wNoticeEx( NT_ERROR, msg, _("Ok"), NULL );
 	appLibDir[0] = '\0';
 	wExit(0);
 	return NULL;
@@ -136,7 +136,7 @@ EXPORT const char * wGetAppWorkDir(
 		return appWorkDir;
 
 	if ((homeDir = getenv( "HOME" )) == NULL) {
-		wNotice( _("HOME is not set"), _("Exit"), NULL);
+		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	}
 	sprintf( appWorkDir, "%s/.%s", homeDir, wAppName );
@@ -144,12 +144,12 @@ EXPORT const char * wGetAppWorkDir(
 		closedir(dirp);
 	} else {
 		sprintf( tmp, _("Creating %s"), appWorkDir );
-		if( !wNotice( tmp, _("Ok"), _("Exit") ) ) {
+		if( !wNoticeEx( NT_INFORMATION, tmp, _("Ok"), _("Exit") ) ) {
 			wExit(0);
 		}
 		if ( mkdir( appWorkDir, 0777 ) == -1 ) {
 			sprintf( tmp, _("Cannot create %s"), appWorkDir );
-			wNotice( tmp, _("Exit"), NULL );
+			wNoticeEx( NT_ERROR, tmp, _("Exit"), NULL );
 			wExit(0);
 		}
 	}
@@ -171,7 +171,7 @@ EXPORT const char *wGetUserHomeDir( void )
 		return userHomeDir;
 		
 	if ((homeDir = getenv( "HOME" )) == NULL) {
-		wNotice( _("HOME is not set"), _("Exit"), NULL);
+		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	} else {
 		strcpy( userHomeDir, homeDir );
@@ -220,14 +220,14 @@ static void readPrefs( void )
 			continue;
 		np = strchr( sp, '.' );
 		if (np == NULL) {
-			wNotice( tmp, _("Continue"), NULL );
+			wNoticeEx( NT_INFORMATION, tmp, _("Continue"), NULL );
 			continue;
 		}
 		*np++ = '\0';
 		while ( *np==' ' || *np=='\t' ) np++;
 		vp = strchr( np, ':' );
 		if (vp == NULL) {
-			wNotice( tmp, _("Continue"), NULL );
+			wNoticeEx( NT_INFORMATION, tmp, _("Continue"), NULL );
 			continue;
 		}
 		*vp++ = '\0';

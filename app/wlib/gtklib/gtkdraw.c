@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw.c,v 1.5 2008-01-20 20:41:16 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw.c,v 1.6 2009-05-15 18:54:20 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1161,12 +1161,12 @@ wDraw_p wBitMapCreate(          wPos_t w, wPos_t h, int arg )
 
 	bd->pixmap = gdk_pixmap_new( gtkMainW->widget->window, w, h, -1 );
 	if ( bd->pixmap == NULL ) {
-		wNotice( "CreateBitMap: pixmap_new failed", "Ok", NULL );
+		wNoticeEx( NT_ERROR, "CreateBitMap: pixmap_new failed", "Ok", NULL );
 		return FALSE;
 	}
 	bd->gc = gdk_gc_new( gtkMainW->gtkwin->window );
 	if ( bd->gc == NULL ) {
-		wNotice( "CreateBitMap: gc_new failed", "Ok", NULL );
+		wNoticeEx( NT_ERROR, "CreateBitMap: gc_new failed", "Ok", NULL );
 		return FALSE;
 	}
 	gdk_gc_copy( bd->gc, gtkMainW->gtkwin->style->base_gc[GTK_STATE_NORMAL] );
@@ -1194,7 +1194,7 @@ wBool_t wBitMapWriteFile(       wDraw_p d, const char * fileName )
 	/*image = gdk_image_new( GDK_IMAGE_NORMAL, visual, d->w, d->h );*/
 	image = gdk_image_get( (GdkWindow*)d->pixmap, 0, 0, d->w, d->h );
 	if (!image) {
-		wNotice( "WriteBitMap: image_get failed", "Ok", NULL );
+		wNoticeEx( NT_ERROR, "WriteBitMap: image_get failed", "Ok", NULL );
 		return FALSE;
 	}
 

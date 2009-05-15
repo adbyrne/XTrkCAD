@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/psprint.c,v 1.4 2008-02-01 19:34:27 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/psprint.c,v 1.5 2009-05-15 18:54:20 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -826,18 +826,18 @@ wPrinterStream_p wPrinterOpen( void )
 /*		wWinShow( printFileW, TRUE ); */
 		printFileNameSel( NULL );
 		if ( sPrintFileName[0] == '\0' ) {
-			wNotice( _("No file name specified"), _("Ok"), NULL );
+			wNoticeEx( NT_ERROR, _("No file name specified"), _("Ok"), NULL );
 			return NULL;
 		}
 		if ( access(sPrintFileName, F_OK ) == 0 ) {
 			sprintf( tmp, _("%s exists"), sPrintFileName );
-			if (!wNotice( tmp, _("Overwrite"), _("Cancel") ))
+			if (!wNoticeEx( NT_INFORMATION, tmp, _("Overwrite"), _("Cancel") ))
 				return NULL;
 		}
 		f = fopen( sPrintFileName, "w" );
 		if (f == NULL) {
 			strcat( sPrintFileName, _(": cannot open") );
-			wNotice( sPrintFileName, _("Ok"), NULL );
+			wNoticeEx( NT_ERROR, sPrintFileName, _("Ok"), NULL );
 			return NULL;
 		}
 		fn = sPrintFileName;
@@ -850,7 +850,7 @@ wPrinterStream_p wPrinterOpen( void )
 	}
 	if (f == NULL) {
 		strcat( sPrintFileName, _(": cannot open") );
-		wNotice( sPrintFileName, _("Ok"), NULL );
+		wNoticeEx( NT_ERROR, sPrintFileName, _("Ok"), NULL );
 		return NULL;
 	}
 	p = (wPrinterStream_p)malloc( sizeof *p );

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.5 2008-01-20 22:32:22 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.6 2009-05-15 18:54:20 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -100,7 +100,7 @@ static long oldFontSlant = -1;
 static void doFontOk( void )
 {
 	if (fontInfo(newFontInx).fullName[newFontWeight][newFontSlant] == NULL) {
-		wNotice( _("No font selected"), _("Continue"), NULL );
+		wNoticeEx( NT_ERROR, _("No font selected"), _("Continue"), NULL );
 		return;
 	}
 	if ( curFontWeight != newFontWeight ||
@@ -158,7 +158,7 @@ static void selectAttr( void )
 	const char * oldFontName;
 	const char * newFontName;
 	if (fontInfo_da.cnt==0) {
-		wNotice( _("No fonts"), _("Continue"), NULL );
+		wNoticeEx( NT_ERROR, _("No fonts"), _("Continue"), NULL );
 		wDrawClear( font_d );
 		return;
 	}
@@ -330,11 +330,11 @@ static wBool_t fontInit( wBool_t getPref )
 			stdFontInx = i;
 	}
 	if ( standardFonts[F_TIMES] < 0 ) {
-		wNotice( _("Can't find standard Serif font.\nPlease choose a font"), _("Continue"), NULL );
+		wNoticeEx( NT_ERROR, _("Can't find standard Serif font.\nPlease choose a font"), _("Continue"), NULL );
 		wSelectStandardFont( F_TIMES );
 	}
 	if ( standardFonts[F_HELV] < 0 ) {
-		wNotice( _("Can't find standard San-Serif font.\nPlease choose a font"), _("Continue"), NULL );
+		wNoticeEx( NT_ERROR, _("Can't find standard San-Serif font.\nPlease choose a font"), _("Continue"), NULL );
 		wSelectStandardFont( F_HELV );
 	}
 	findFont( wPrefGetString( "font", "name" ) );
@@ -431,7 +431,7 @@ void wSelectFont(
 	wControlActive( (wControl_p)fontWeightB, fontSelectMode==0 );
 	wControlActive( (wControl_p)fontSlantB, fontSelectMode==0 );
 	if (fontInfo_da.cnt == 0) {
-		wNotice( _("No fonts"), _("Continue"), NULL);
+		wNoticeEx( NT_ERROR, _("No fonts"), _("Continue"), NULL);
 		return;
 	}
 	newFontInx = curFontInx;

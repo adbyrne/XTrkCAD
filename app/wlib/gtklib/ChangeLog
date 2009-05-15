@@ -1,3 +1,10 @@
+
+
+May 15, 2009
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtkwindow.c, gtkmisc.c, psprint.c, gtktext.c
+		gtkfilsel.c, gtksingle.c: new message box with icon
+
 Jul 11, 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		gtkwindow.c: closing app can now be canceled by the user

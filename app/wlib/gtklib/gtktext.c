@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtktext.c,v 1.1 2005-12-07 15:48:48 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtktext.c,v 1.2 2009-05-15 18:54:20 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -207,7 +207,7 @@ EXPORT wBool_t wTextSave(
 
 	f = fopen( fileName, "w" );
 	if (f==NULL) {
-		wNotice( fileName, "Ok", NULL );
+		wNoticeEx( NT_ERROR, fileName, "Ok", NULL );
 		return FALSE;
 	}
 #ifdef USE_TEXTVIEW
