@@ -1,28 +1,98 @@
-Welcome to XTrkCad source.
+OVERVIEW
+========
 
-Building from source:
+The following instructions detail building XTrackCAD using CMake. CMake is a
+cross-platform build system, available at http://www.cmake.org∞, that can be
+used to generate builds for a variety of build tools ranging from "make" to
+Visual Studio and XCode. Using CMake you can build XTrackCAD on Windows,
+GNU/Linux, and Mac OSX using the build tool(s) of your choice.
 
-Linux:
+Building XTrkCAD on GNU/Linux
+-----------------------------
 
-From the top level directory
-    make
-    cd lib
-    export XTRKCADLIB=`pwd`
-    ln -s ../help/xtrkcad.help .
-    cd ../bin
-    ./xtrkcad
+* Obtain the current sources from CVS; I assume that they are located at
+  "~/src/xtrkcad".
+* Create a separate build directory; for these instructions I assume that
+  your build directory is "~/build/xtrkcad".
+* Run CMake from the build directory, passing it the path to the source
+  directory:
 
-Windows:
+  $ cd ~/build/xtrkcad
+  $ ccmake ~/src/xtrkcad
 
-    Get and install gnu sed for Windows.  Suggest URL is:
- 		http://gnuwin32.sourceforge.net/packages/sed.htm
-	Link to the setup program is at the bottom of the page
+* Press the "c" key to configure the build. After a few moments you will see
+  four options to configure: CMAKE_BUILD_TYPE, CMAKE_INSTALL_PREFIX,
+  XTRKCAD_USE_GTK, and XTRKCAD_USE_GTK_CAIRO.
+* Use CMAKE_BUILD_TYPE to control the build type. Enter "Debug" for a debug
+  build, "Release" for a release build, etc.
+* Use CMAKE_INSTALL_PREFIX to control where the software will be installed.
+  For this example, I assume "~/install/xtrkcad".
+* Use XTRKCAD_USE_GETTEXT to add new locales (language translations). Choose
+  "OFF" to use XTrackCAD's default language (English). Refre to
+  http://www.xtrkcad.org/Wikka/Internationalization∞ for additional information.
+* Use XTRKCAD_USE_GTK to control the user-interface back-end. Choose "OFF"
+  for Windows, "ON" for all other platforms.
+* Use XTRKCAD_USE_GTK_CAIRO to enable optional high-quality antialiased
+  Cairo rendering for the GTK back-end. This option has no effect unless you are
+  using the GTK back-end.
+* If you made any changes, press the "c" key again to update your new
+  configuration.
+* Once everything is configured to your satisfaction, press the "g" key to
+  generate makefiles for your build.
+* Compile XTrkCad using your new build:
 
-	The VC project assumes that it is installed in:
+  $ make
 
-		C:\Program Files\gnuwin32\bin\
+* Install the new binary:
 
-Outstanding problems:
+  $ make install
 
+* Run the installed binary:
+  $ ~/install/xtrkcad/bin/xtrkcad
 
-MS-Windows build instructions are pending
+Building XTrkCAD on Mac OSX
+---------------------------
+
+* You will need to install the following dependencies - I recommend using
+  http://www.macports.org∞ to obtain them:
+    o GTK2
+    o gtkhtml (might also be called libgtkhtml)
+    o gnome-icon-theme 
+* Once the prerequisites are installed the build instructions are the same
+  as for the GNU/Linux build, above.
+* Remember that to run XTrkCAD on OSX, you need to have X11 running with
+  your DISPLAY set.
+
+Building XTrkCAD on Windows
+---------------------------
+
+* Obtain the current sources from CVS; I assume that they are located at
+  "c:/src/xtrkcad".
+* Use the Windows Start menu to run CMake.
+* Specify the source and build directories in the CMake window. You must
+  provide a build directory outside the source tree - I use "c:/build/xtrkcad".
+* Press the "Configure" button to configure the build. You will be prompted
+  for the type of build to generate. Choose your desired tool - I used "Visual
+  Studio 7 .Net 2003". After a few moments you will see three options to
+  configure: CMAKE_INSTALL_PREFIX, XTRKCAD_USE_GTK, and XTRKCAD_USE_GTK_CAIRO.
+* Use CMAKE_INSTALL_PREFIX to control where the software will be installed.
+  The default "c:/Program Files/XTrkCAD" is a good choice.
+* Use XTRKCAD_USE_GETTEXT to add new locales (language translations). Choose
+  "OFF" to use XTrackCAD's default language (English). Refer to
+  http://www.xtrkcad.org/Wikka/Internationalization∞ for additional information.
+* Use XTRKCAD_USE_GTK to control the user-interface back-end. Choose "OFF"
+  for Windows, "ON" for all other platforms.
+* Use XTRKCAD_USE_GTK_CAIRO to enable optional high-quality antialiased
+  Cairo rendering for the GTK back-end. This option has no effect unless you are
+  using the GTK back-end.
+* If you made any changes, press the "Configure" button again to update your
+  new configuration.
+* Once everything is configured to your satisfaction, press the "OK" button
+  to generate project files for your build.
+* Compile XTrkCad using the new project files. For example, start MSVC and
+  open the "XTrkCAD.sln" solution file which is located in your build directory.
+* Build the "BUILD_ALL" project to build the software.
+* Build the "INSTALL" project to install the software.
+* Run XTrkCAD by double-clicking its icon located in the install directory -
+  for example: c:/Program Files/XTrkCAD/bin/xtrkcad.exe.
+
