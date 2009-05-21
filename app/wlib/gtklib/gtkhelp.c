@@ -1,7 +1,7 @@
 /** \file gtkhelp.c
  * Balloon help ( tooltips) and main help functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.8 2008-01-27 21:01:20 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.9 2009-05-21 13:41:38 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -31,6 +31,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <errno.h>
 #include <fcntl.h>
 
 #include <gtk/gtk.h>
@@ -45,10 +46,11 @@
 
 #define  HTMLERRORTEXT "<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=US-ASCII\">" \
 								"<title>Help Error</title><body><h1>Error - help information can not be found.</h1><p>" \
-								"The help information you requested cannot be found on this system.<br>Usually this " \
-								"is an installation problem, Make sure that XTrackCAD and the included HTML files are " \
-								"installed properly and can be found via the XTRKCADLIB environment variable. Also make " \
-								"sure that the user has sufficient access rights to read these files.</p></body></html>" 
+								"The help information you requested cannot be found on this system.<br><pre>%s: %s</pre><p>" \
+								"Usually this is an installation problem, Make sure that XTrackCAD and the included " \
+								"HTML files are installed properly and can be found via the XTRKCADLIB environment " \
+								"variable. Also make sure that the user has sufficient access rights to read these" \
+ 								"files.</p></body></html>" 
 
 
 #define SLIDERPOSDEFAULT 180		/**< default value for slider position */
@@ -442,6 +444,7 @@ LoadHtml( GtkWidget *view, HtmlDocument *doc, const char *file )
 	char *copyOfUrl;
 	char *htmlFile;
  	char *buffer;
+	char *errtext;
   	int handle;
   	int len;
 
@@ -483,9 +486,15 @@ LoadHtml( GtkWidget *view, HtmlDocument *doc, const char *file )
 			close( handle );	
 
 	   } else {
-			/* file could not be opened, display the error page instead */  
-	   	html_document_write_stream( doc, HTMLERRORTEXT, strlen( HTMLERRORTEXT ));
-
+			/* file could not be opened, display the error page instead */
+			errtext = strerror( errno );
+			buffer = malloc( strlen( HTMLERRORTEXT ) + strlen( errtext ) + strlen ( htmlFile ));
+			assert( buffer != NULL );
+			if( buffer ) {
+				sprintf( buffer, HTMLERRORTEXT, htmlFile, errtext );
+				html_document_write_stream( doc, buffer, strlen( buffer ));
+				free( buffer );
+			}	
 	   }
   
 

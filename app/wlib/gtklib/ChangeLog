@@ -1,4 +1,6 @@
-
+May 21, 2009
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtkhelp.c: better error message
 
 May 15, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
