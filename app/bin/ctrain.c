@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.6 2008-04-13 07:55:13 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.7 2009-05-25 19:00:04 m_fischer Exp $
  *
  * TRAIN
  *
@@ -604,6 +604,8 @@ static void SpeedRedraw(
 	wPos_t y, pts[4][2];
 	trainControlDlg_p dlg = (trainControlDlg_p)context;
 	struct extraData * xx;
+	wDrawColor drawColor; 
+
 	wDrawClear( d );
 	if ( dlg == NULL || dlg->train == NULL ) return;
 	xx = GetTrkExtraData( dlg->train );
@@ -612,11 +614,25 @@ static void SpeedRedraw(
 	if ( xx->speed < 0 )
 		xx->speed = 0;
 	y = (wPos_t)(xx->speed/MAX_SPEED*((SLIDER_HEIGHT-SLIDER_THICKNESS))+SLIDER_THICKNESS/2);
+
+	drawColor  = wDrawFindColor( wRGB(  160, 160, 160) );
 	pts[0][1] = pts[1][1] = y-SLIDER_THICKNESS/2;
 	pts[2][1] = pts[3][1] = y+SLIDER_THICKNESS/2;
 	pts[0][0] = pts[3][0] = 0;
 	pts[1][0] = pts[2][0] = SLIDER_WIDTH;
-	wDrawFilledPolygon( d, pts, 4, wDrawColorBlack, 0 );
+	wDrawFilledPolygon( d, pts, 4, drawColor, 0 );
+
+	drawColor  = wDrawFindColor( wRGB(  220, 220, 220) );
+	pts[0][1] = pts[1][1] = y+SLIDER_THICKNESS/2;
+	pts[2][1] = pts[3][1] = y;
+	pts[0][0] = pts[3][0] = 0;
+	pts[1][0] = pts[2][0] = SLIDER_WIDTH;
+	wDrawFilledPolygon( d, pts, 4, drawColor, 0 );
+	
+	wDrawLine( d, 0, y, SLIDER_WIDTH, y, 1, wDrawLineSolid, drawColorRed, 0 );
+	wDrawLine( d, 0, y+SLIDER_THICKNESS/2, SLIDER_WIDTH, y+SLIDER_THICKNESS/2, 1, wDrawLineSolid, drawColorBlack, 0 );
+	wDrawLine( d, 0, y-SLIDER_THICKNESS/2, SLIDER_WIDTH, y-SLIDER_THICKNESS/2, 1, wDrawLineSolid, drawColorBlack, 0 );
+	
 	sprintf( dlg->speedS, "%3d", (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6) );
 	ParamLoadMessage( dlg->trainPGp, I_SPEED, dlg->speedS );
 	LOG( log_trainPlayback, 3, ( "Speed = %d\n", (int)xx->speed ) );
@@ -2047,8 +2063,8 @@ static STATUS_T CmdTrain( wAction_t action, coOrd pos )
 		/*MainRedraw();*/
 		/*wDrawSaveImage( mainD.d );*/
 		/*trainEnable = FALSE;*/
-		trainsState = TRAINS_STOP;
-		wButtonSetLabel( trainPauseB, (char*)stopI );
+		RestartTrains();
+		wButtonSetLabel( trainPauseB, (char*)goI );
 		trainTime0 = 0;
 		AttachTrains();
 		DrawAllCars();

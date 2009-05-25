@@ -1,5 +1,11 @@
 May 25, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>	
+		ctrain.c: change default for train running to 'Go'
+		beautify throttle slider
+		
+
+May 25, 2009
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>	
 		cturnout.c, track.c, track.h,utility.c, cparalle.c
 		parallel command also works for straight pieces of 
 		sectional track
