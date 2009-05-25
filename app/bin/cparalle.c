@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cparalle.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cparalle.c,v 1.5 2009-05-25 18:11:03 m_fischer Exp $
  *
  * PARALLEL
  *
@@ -93,7 +93,11 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		}
 		/* in case query has changed things (eg joint) */
-		Dpa.Trk = OnTrack( &Dpa.orig, TRUE, TRUE );
+		/* 
+		 * this seems to cause problems so I commented it out
+		 * until further investigation shows the necessity
+		 */
+		//Dpa.Trk = OnTrack( &Dpa.orig, TRUE, TRUE ); 
 		tempSegs_da.cnt = 0;
 
 	case C_MOVE:
@@ -103,12 +107,12 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 			Dpa.Trk = NULL;
 			return C_CONTINUE;
 		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack ); 
 		return C_CONTINUE;
 
 	case C_UP:
 		if (Dpa.Trk == NULL) return C_CONTINUE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack ); 
 		p = p0;
 		if ((t0=OnTrack( &p, FALSE, TRUE )) != NULL) {
 			ep0 = PickEndPoint( p, t0 );

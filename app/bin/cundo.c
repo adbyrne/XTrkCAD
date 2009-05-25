@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cundo.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cundo.c,v 1.3 2009-05-25 18:11:03 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -151,7 +151,7 @@ static BOOL_T UndoFail( char * cause, long val, char * fileName, int lineNumber 
 	sprintf( temp, "%s%s%s", workingDir, FILE_SEP_CHAR, sUndoF );
 	outf = fopen( temp, "a+" );
 	if ( outf == NULL ) {
-		NoticeMessage( MSG_OPEN_FAIL, _("Ok"), NULL, _("Undo Trace"), temp, strerror(errno) );
+		NoticeMessage(  MSG_OPEN_FAIL, _("Ok"), NULL, _("Undo Trace"), temp, strerror(errno) );
 		return FALSE;
 	}
 	time( &clock );

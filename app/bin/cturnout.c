@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.6 2008-03-06 19:35:06 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.7 2009-05-25 18:11:03 m_fischer Exp $
  *
  * T_TURNOUT
  *
@@ -1405,6 +1405,11 @@ static BOOL_T QueryTurnout( track_p trk, int query )
 	case Q_HAS_DESC:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
 		return TRUE;
+	case Q_CAN_PARALLEL:
+		if( GetTrkEndPtCnt( trk ) == 2 && fabs( GetTrkEndAngle( trk, 0 ) - GetTrkEndAngle( trk, 1 )) == 180.0 )
+			return TRUE;
+		else
+			return FALSE;
 	case Q_CAN_NEXT_POSITION:
 		return ( GetTrkEndPtCnt(trk) > 2 );
 	default:
@@ -1479,6 +1484,99 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 	*angleR = trvtrk.angle;
 }
 
+/**
+ * Create a parallel track for a turnout.
+ * 
+ *
+ * \param trk IN existing track
+ * \param pos IN ??
+ * \param sep IN distance between existing and new track
+ * \param newTrk OUT new track piece
+ * \param p0R OUT starting point of new piece
+ * \param p1R OUT ending point of new piece
+ * \return    always TRUE
+ */
+
+static BOOL_T MakeParallelTurnout(
+		track_p trk,
+		coOrd pos,
+		DIST_T sep,
+		track_p * newTrk,
+		coOrd * p0R,
+		coOrd * p1R )
+{
+	ANGLE_T angle = GetTrkEndAngle(trk,1);
+	struct extraData *xx, *yy;
+	coOrd *endPts;
+	trkEndPt_p endPt;
+	int i;
+	int option;
+	DIST_T d;
+
+	if ( NormalizeAngle( FindAngle( GetTrkEndPos(trk,0), pos ) - GetTrkEndAngle(trk,1) ) < 180.0 )
+		angle += 90;
+	else
+		angle -= 90; 
+
+	/*
+	 * get all endpoints of current piece and translate them for the new piece
+	 */
+	endPts = MyMalloc( GetTrkEndPtCnt( trk ) * sizeof( coOrd ));
+	for( i = 0; i < GetTrkEndPtCnt( trk ); i++) {
+		Translate( &(endPts[ i ]), GetTrkEndPos( trk, i ), angle, sep );
+	}
+
+	/*
+	 * get information about the current piece and copy data 
+	 */
+
+	if( newTrk ) {
+		endPt = MyMalloc( GetTrkEndPtCnt( trk ) * sizeof( trkEndPt_t ));
+		endPt[ 0 ].pos = endPts[ 0 ];
+		endPt[ 0 ].angle = GetTrkEndAngle( trk, 0 );
+		endPt[ 1 ].pos = endPts[ 1 ];
+		endPt[ 1 ].angle = GetTrkEndAngle( trk, 1 ); 
+
+		yy = GetTrkExtraData(trk);
+
+		*newTrk = NewCompound( T_TURNOUT, 0, endPt[ 0 ].pos, endPt[ 0 ].angle + 90.0, yy->title, 2, endPt, yy->pathLen, (char *)yy->paths, yy->segCnt, yy->segs );
+		xx = GetTrkExtraData(*newTrk);
+		xx->customInfo = yy->customInfo;
+
+		/*	if (connection((int)curTurnoutEp).trk) {
+			CopyAttributes( connection((int)curTurnoutEp).trk, newTrk );
+			SetTrkScale( newTrk, curScaleInx );
+		} */
+		xx->special = yy->special;
+		xx->u = yy->u;
+
+		SetDescriptionOrig( *newTrk );
+		xx->descriptionOff = zero;
+		xx->descriptionSize = zero;
+
+		SetTrkElev(*newTrk, GetTrkElevMode(trk), GetTrkElev(trk));
+		GetTrkEndElev( trk, 0, &option, &d );
+		SetTrkEndElev( *newTrk, 0, option, d, NULL );
+		GetTrkEndElev( trk, 1, &option, &d );
+		SetTrkEndElev( *newTrk, 1, option, d, NULL );
+
+		MyFree( endPt );
+	} else { 
+		/* draw some temporary track while command is in process */
+		tempSegs(0).color = wDrawColorBlack;
+		tempSegs(0).width = 0;
+		tempSegs_da.cnt = 1;
+		tempSegs(0).type = SEG_STRTRK;
+		tempSegs(0).u.l.pos[0] = endPts[ 0 ];
+		tempSegs(0).u.l.pos[1] = endPts[ 1 ];
+	}
+
+	if ( p0R ) *p0R = endPts[ 0 ];
+	if ( p1R ) *p1R = endPts[ 1 ];
+
+	MyFree( endPts );
+	return TRUE;
+}
 
 static trackCmd_t turnoutCmds = {
 		N_("TURNOUT "),
@@ -1508,7 +1606,8 @@ static trackCmd_t turnoutCmds = {
 		FlipCompound,
 		DrawTurnoutPositionIndicator,
 		AdvanceTurnoutPositionIndicator,
-		CheckTraverseTurnout };
+		CheckTraverseTurnout,
+		MakeParallelTurnout };
 
 
 #ifdef TURNOUTCMD

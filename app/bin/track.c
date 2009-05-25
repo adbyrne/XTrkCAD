@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.5 2008-09-05 08:08:15 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.6 2009-05-25 18:11:03 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -516,6 +516,11 @@ EXPORT void SetTrkElev( track_p trk, int mode, DIST_T elev )
 EXPORT int GetTrkElevMode( track_p trk )
 {
 	return trk->elevMode;
+}
+
+EXPORT DIST_T GetTrkElev( track_p trk )
+{
+	return trk->elev;
 }
 
 

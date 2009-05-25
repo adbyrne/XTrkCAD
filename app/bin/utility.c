@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/utility.c,v 1.1 2005-12-07 15:47:39 rc-flyer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/utility.c,v 1.2 2009-05-25 18:11:03 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -119,6 +119,14 @@ void Rotate( coOrd *p, coOrd orig, double angle )
 }
 
 
+/**
+ * Translate coordinates.
+ *
+ * \param res OUT new (translated) position
+ * \param orig IN old position
+ * \param a IN angle
+ * \param d IN distance
+ */
 
 void Translate( coOrd *res, coOrd orig, double a, double d )
 {

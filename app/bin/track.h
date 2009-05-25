@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.h,v 1.2 2007-11-24 19:48:21 tshead Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.h,v 1.3 2009-05-25 18:11:03 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -442,6 +442,7 @@ BOOL_T IsTrackDeleted( track_p );
 #define SetTrkVisible(T,V)		((V)?SetTrkBits(T,TB_VISIBLE):ClrTrkBits(T,TB_VISIBLE))
 int ClrAllTrkBits( int );
 
+void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
 void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
 int GetTrkEndElevMode( track_p, EPINX_T );
 int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
@@ -452,6 +453,7 @@ char * GetTrkEndElevStation( track_p, EPINX_T );
 #define EndPtIsStationElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_STATION)
 void SetTrkElev( track_p, int, DIST_T );
 int GetTrkElevMode( track_p );
+DIST_T GetTrkElev( track_p trk );
 void ClearElevPath( void );
 BOOL_T GetTrkOnElevPath( track_p, DIST_T * elev );
 void SetTrkLayer( track_p, int );
