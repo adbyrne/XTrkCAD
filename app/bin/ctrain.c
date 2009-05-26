@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.7 2009-05-25 19:00:04 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.8 2009-05-26 19:17:52 m_fischer Exp $
  *
  * TRAIN
  *
@@ -2341,11 +2341,11 @@ EXPORT STATUS_T CmdCarDescAction(
 }
 
 #include "bitmaps/train.xpm"
-#include "bitmaps/stop.xpm"
-#include "bitmaps/go.xpm"
 #include "bitmaps/exit.xpm"
 #include "bitmaps/newcar.xpm"
 #include "bitmaps/zero.xpm"
+#include "bitmaps/ballgreen.xpm"
+#include "bitmaps/ballred.xpm"
 
 
 static void CmdTrainStopGo( void * junk )
@@ -2534,8 +2534,8 @@ EXPORT void InitCmdTrain( wMenu_p menu )
 	trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_xpm);
 	ParamRegister( &trainPG );
 	AddMenuButton( menu, CmdTrain, "cmdTrain", _("Train"), wIconCreatePixMap(train_xpm), LEVEL0_50, IC_POPUP2|IC_LCLICK|IC_RCLICK, 0, NULL );
-	stopI = wIconCreatePixMap(stop_xpm);
-	goI = wIconCreatePixMap(go_xpm);
+	stopI = wIconCreatePixMap( ballred );
+	goI = wIconCreatePixMap( ballgreen );
 	trainPauseB = AddToolbarButton( "cmdTrainPause", stopI, IC_MODETRAIN_ONLY, CmdTrainStopGo, NULL );
 	AddToolbarButton( "cmdTrainExit", wIconCreatePixMap(exit_xpm), IC_MODETRAIN_ONLY, CmdTrainExit, NULL );
 	newcarB = AddToolbarButton( "cmdTrainNewCar", wIconCreatePixMap(newcar_xpm), IC_MODETRAIN_ONLY, CarItemLoadList, NULL );
