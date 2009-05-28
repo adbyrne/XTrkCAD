@@ -1,3 +1,7 @@
+May 28, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswmisc.c: wrong options for wNotice fixed
+		
 May 15, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswdraw.c, mswmisc.c, mswpref.c: more message boxes with icon

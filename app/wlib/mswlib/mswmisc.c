@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.19 2009-05-15 18:16:16 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.20 2009-05-28 20:34:49 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -1992,7 +1992,7 @@ int wNotice3(
 		const char * cancel )
 {
 	int res;
-	res = MessageBox( mswHWnd, msg, _("Notice"), MB_ICONQUESTION | MB_TASKMODAL|MB_YESNOCANCEL );
+	res = MessageBox( mswHWnd, msg, _("Warning"), MB_ICONWARNING | MB_TASKMODAL|MB_YESNOCANCEL );
 	if ( res == IDOK || res == IDYES )
 		return 1;
 	else if ( res == IDNO )
