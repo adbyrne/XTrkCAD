@@ -2,5 +2,17 @@ ADD_EXECUTABLE(addcrlf addcrlf.c)
 
 ADD_EXECUTABLE(bin2c bin2c.c)
 
+SET ( SOURCES listxtp.c )
+
+IF (WIN32)
+	SET ( SOURCES
+		  ${SOURCES}	
+		  dirent.c)
+		  
+	INCLUDE_DIRECTORIES( BEFORE ${CMAKE_CURRENT_SOURCE_DIR})	  
+ENDIF (WIN32)
+				 
+ADD_EXECUTABLE( listxtp ${SOURCES})
+
 ADD_SUBDIRECTORY(halibut)
 
