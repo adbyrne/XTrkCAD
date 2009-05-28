@@ -33,7 +33,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{New} - Clears the current layout.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation.
+\dd \G{png.d/bnew.png} \f{New} - Clears the current layout.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation.
 
 \u000
 
@@ -41,7 +41,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Open} - Displays the \f{File Open} dialog which allows an existing \e{XTrackCAD} file to be selected and opened.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation.
+\dd \G{png.d/bopen.png} \f{Open} - Displays the \f{File Open} dialog which allows an existing \e{XTrackCAD} file to be selected and opened.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation.
 
 \u000
 
@@ -61,7 +61,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Save} - Saves the layout under the current file name.  If a filename has not yet been assigned then the \f{File Save} dialog is shown so you enter a file name.
+\dd \G{png.d/bsave.png} \f{Save} - Saves the layout under the current file name.  If a filename has not yet been assigned then the \f{File Save} dialog is shown so you enter a file name.
 
 \u000
 
