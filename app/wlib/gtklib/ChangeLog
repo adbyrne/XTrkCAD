@@ -1,3 +1,7 @@
+May 29, 2008
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtkmisc.c: bug fix in wNoticeEx
+
 May 21, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		gtkhelp.c: better error message

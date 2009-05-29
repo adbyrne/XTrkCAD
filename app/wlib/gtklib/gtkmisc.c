@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.10 2009-05-15 18:54:20 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.11 2009-05-29 15:53:21 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -389,6 +389,7 @@ int wNoticeEx( int type,
 	unsigned flag;
 	char *headline;
 	GtkWidget *dialog;
+	GtkWindow *parent = GTK_WINDOW_TOPLEVEL;
 
 	switch( type ) {
 		case NT_INFORMATION:
@@ -405,7 +406,10 @@ int wNoticeEx( int type,
 			break;
 	}
 	
-	dialog = gtk_message_dialog_new( gtkMainW->gtkwin,  
+	if( gtkMainW )
+		parent = GTK_WINDOW( gtkMainW->gtkwin);
+	
+	dialog = gtk_message_dialog_new( parent,  
 					 GTK_DIALOG_DESTROY_WITH_PARENT,
 					 flag,
       					 ((no==NULL)?GTK_BUTTONS_OK:GTK_BUTTONS_YES_NO),
