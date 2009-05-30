@@ -1,3 +1,7 @@
+May 30, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtklist.c: fixed the 'missing scrollbar' bug - finally!
+
 May 29, 2008
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		gtkmisc.c: bug fix in wNoticeEx

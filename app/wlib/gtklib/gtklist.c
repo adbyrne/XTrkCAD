@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtklist.c,v 1.3 2008-01-20 22:32:22 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtklist.c,v 1.4 2009-05-30 11:11:26 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -477,6 +477,7 @@ If list is created with 'BL_
 	GdkPixmap * pixmap = NULL;
 	GdkBitmap * bitmap;
 	static char ** texts;
+	GtkAdjustment *adj;
 
 	if (b->list == 0) abort();
 	b->recursion++;
@@ -493,6 +494,21 @@ If list is created with 'BL_
 	} else {
 		parseLabelStr( labelStr, b->colCnt, &texts );
 		gtk_clist_append( GTK_CLIST(b->list), texts );
+		
+		/* 
+		 * this has taken forever to find out: the adjustment has to be notified 
+		 * about the list change by the program. So we need to get the current alignment.
+		 * increment the upper value and then inform the scrolled window about the update.
+		 * The upper value is increased only if the current value is smaller than the size
+		 * of the list box. 
+		 */
+		
+		adj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(b->widget));
+		
+		if( adj->upper < adj->step_increment * (b->count+1)) {
+			adj->upper += adj->step_increment;
+			gtk_adjustment_changed( adj );
+		}	
 		if ( bm ) {
 			pixmap = gtkMakeIcon( b->widget, bm, &bitmap );
 			gtk_clist_set_pixtext( GTK_CLIST(b->list), b->count, 0, texts[0], 5, pixmap, bitmap );
@@ -835,8 +851,8 @@ EXPORT wList_p wListCreate(
 	gtk_signal_connect( GTK_OBJECT(b->list), "select_row", GTK_SIGNAL_FUNC(selectCList), b );
 	gtk_signal_connect( GTK_OBJECT(b->list), "unselect_row", GTK_SIGNAL_FUNC(unselectCList), b );
 	gtk_list_set_selection_mode( GTK_LIST(b->list), (option&BL_MANY)?GTK_SELECTION_MULTIPLE:GTK_SELECTION_BROWSE );
-	gtk_container_set_focus_vadjustment (GTK_CONTAINER (b->list),
-				gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (b->widget)));
+/*	gtk_container_set_focus_vadjustment (GTK_CONTAINER (b->list),
+				gtk_scrolled_window_get_vadjustment (GTK_SCROLLED_WINDOW (b->widget))); */
 	gtk_widget_show( b->list );
 
 #ifndef GTK1
@@ -1052,8 +1068,8 @@ EXPORT wList_p wListCreate(
 	bl->widget = gtk_scrolled_window_new( NULL, NULL );
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (bl->widget),
 				GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
-	gtk_container_add( GTK_CONTAINER(bl->widget), bl->list );
-	/*gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(bl->widget), bl->list ); */
+	/* gtk_container_add( GTK_CONTAINER(bl->widget), bl->list ); */
+	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(bl->widget), bl->list ); 
 	if (width == 0)
 		width = 100;
 	for ( col=0; col<colCnt; col++ ) {
