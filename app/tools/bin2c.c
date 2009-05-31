@@ -38,7 +38,7 @@ void Upper_chars(char *buffer)
 }
 
 
-void main( int argc, char **argv )
+int main( int argc, char **argv )
 {
     FILE *source,*dest;     
 	 unsigned char  Dummy[BUF_LEN];     
@@ -54,13 +54,13 @@ void main( int argc, char **argv )
 			puts("USAGE: bin2C  <BINARY file name> <TARGET file name> <STRUCT name>");       
 			puts("\n <STRUCT > = name of the C structure in the destination file name.\n"); 
 			puts(" <TARGET > = without extension '.h' it will be added by program."); 
-			exit(EXIT_SUCCESS);
+			return EXIT_SUCCESS;
 		}
       else
       {
       	puts("Bad arguments !!! You must give me all the parameters !!!!\n"
          	  "Type 'bin2c -h' to read the help !!!! ");       
-			exit(EXIT_SUCCESS);
+			return EXIT_SUCCESS;
 	   }
 
     }
@@ -68,7 +68,7 @@ void main( int argc, char **argv )
     if( (source=fopen( argv[1], "rb" )) == NULL )
     {
       printf("ERROR : I can't find source file   %s\n",argv[1]);       
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
     }
 
     strcpy(Dummy,argv[2]);     
@@ -77,7 +77,7 @@ void main( int argc, char **argv )
     if( (dest=fopen( Dummy, "wb+" )) == NULL )
     {
       printf("ERROR : I can't open destination file   %s\n",Dummy);
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	 }
 
 
@@ -94,7 +94,7 @@ void main( int argc, char **argv )
 	 if( ferror( dest ))
     {
     	printf( "ERROR writing on target file:  %s\n",argv[2] ); 
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	 }
 
 
@@ -119,7 +119,7 @@ void main( int argc, char **argv )
      
     fprintf(dest,"\n};\n\n");
 	 
-	 exit( EXIT_SUCCESS );
+	return EXIT_SUCCESS;
 }
 
 
