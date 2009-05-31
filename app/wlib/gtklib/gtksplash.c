@@ -1,7 +1,7 @@
 /** \file gtksplash.c
  * Handling of the Splash Window functions
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksplash.c,v 1.4 2008-07-01 18:55:21 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksplash.c,v 1.5 2009-05-31 14:48:58 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -58,7 +58,8 @@ wCreateSplash( char *appName, char *appVer )
 	char logoPath[BUFSIZ];
 
 	/* create the basic window */
-   window = gtk_window_new (GTK_WINDOW_POPUP);
+   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	gtk_window_set_decorated( GTK_WINDOW (window), FALSE );
    gtk_window_set_title (GTK_WINDOW (window), appName); 
    gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_CENTER);
    gtk_window_set_resizable (GTK_WINDOW (window), FALSE);
