@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.11 2009-05-29 15:53:21 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.12 2009-05-31 13:13:40 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -121,10 +121,10 @@ GdkPixmap* gtkMakeIcon(
 	const char * bits;
 
 	if ( ip->gtkIconType == gtkIcon_pixmap ) {
-		pixmapData = (char**)ip->bits;
+/*		pixmapData = (char**)ip->bits;
 		oldline1 = pixmapData[1];
 		pixmapData[1] = newline1;
-		newline1[0] = oldline1[0];
+		newline1[0] = oldline1[0]; */
 		pixmap = gdk_pixmap_create_from_xpm_d( gtkMainW->gtkwin->window, mask, NULL, (char**)ip->bits );
  	return pixmap;
 	}

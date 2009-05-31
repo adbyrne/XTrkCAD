@@ -1,3 +1,7 @@
+May 31, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtkmisc.c: fixed problem with some icons
+		
 May 30, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		gtklist.c: fixed the 'missing scrollbar' bug - finally!
