@@ -1,7 +1,7 @@
 /** \file listxtp.c
  * Create a contents list of all parameter files
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/listxtp.c,v 1.1 2009-05-28 20:25:23 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/tools/listxtp.c,v 1.2 2009-05-31 21:55:37 tshead Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -39,6 +39,11 @@
 #endif
 
 #define CONTENTSCOMMAND "CONTENTS"
+
+#ifndef WIN32
+	#define stricmp strcasecmp
+	#define strnicmp strncasecmp
+#endif // !WIN32
 
 /*
  * needed for qsort
