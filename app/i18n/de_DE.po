@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: xtrkcad 4.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-04-27 08:20+0200\n"
-"PO-Revision-Date: 2009-05-21 21:51+0100\n"
+"PO-Revision-Date: 2009-06-01 16:21+0100\n"
 "Last-Translator: Martin Fischer <m_fischer@users.sourceforge.net>\n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -3170,7 +3170,7 @@ msgstr "%d Gleise bearbeitet"
 
 #: ../bin/dcmpnd.c:390
 msgid "Refresh Turnout/Structure"
-msgstr "Weichen/Gebäude neuladen"
+msgstr "Weichen/Gebäude neu laden"
 
 #: ../bin/dcmpnd.c:392
 msgid "Choose a Turnout/Structure to replace:"
@@ -3788,7 +3788,7 @@ msgstr "Durchsuchen..."
 
 #: ../bin/dprmfile.c:330
 msgid "Reload"
-msgstr "Neuladen"
+msgstr "Neu laden"
 
 #: ../bin/dprmfile.c:431
 msgid "Parameter Files"
@@ -5118,9 +5118,8 @@ msgid "Merge Curves"
 msgstr "Kurven zusammenfassen"
 
 #: ../bin/tcurve.c:1033
-#, fuzzy
 msgid "Drag to change angle or create tangent"
-msgstr "Ziehen um die Gleislänge zu ändern"
+msgstr "Ziehen um den Winkel zu ändern oder eine Tangente zu erstellen"
 
 #: ../bin/tcurve.c:1066
 #: ../bin/tcurve.c:1098
@@ -5218,13 +5217,12 @@ msgid "Straight "
 msgstr "Gerade "
 
 #: ../wlib/gtklib/gtkfilsel.c:129
-#, fuzzy
 msgid ""
 " exists\n"
 "Do you want to overwrite it?"
 msgstr ""
-"\n"
-"Wollen Sie fortsetzen?"
+"existiert.\n"
+"Wollen Sie diese überschreiben?"
 
 #: ../wlib/gtklib/gtkfont.c:103
 msgid "No font selected"
@@ -6472,14 +6470,12 @@ msgid "Create a straight line"
 msgstr "Eine gerade Linie erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:62
-#, fuzzy
 msgid "Set Line drawing command"
-msgstr "Initialisiere Befehle"
+msgstr "Wähle Befehl um Linien zu zeichnen"
 
 #: ../../../../build/app/bin/bllnhlp.c:63
-#, fuzzy
 msgid "Set Shape drawing command"
-msgstr "Zeichenmaßstab ändern"
+msgstr "Wähle Befehl um Formen zu zeichnen"
 
 #: ../../../../build/app/bin/bllnhlp.c:64
 msgid "Draw table edge"
@@ -9045,9 +9041,8 @@ msgid "First change the Radius...\n"
 msgstr ""
 
 #: ../../../../build/app/i18n/custmsg.h:284
-#, fuzzy
 msgid "and the the Angular Length.\n"
-msgstr "Länge des Wagen eingeben"
+msgstr "und den Winkelabstand.\n"
 
 #: ../../../../build/app/i18n/custmsg.h:285
 msgid "Now Select both tracks...\n"
