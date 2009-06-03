@@ -1,5 +1,5 @@
 # Setup global packaging parameters ...
-SET(CPACK_PACKAGE_DESCRIPTION "XTrkCAD is a CAD program for designing model railroad layouts.")
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "XTrackCAD is a CAD program for designing model railroad layouts.")
 SET(CPACK_PACKAGE_EXECUTABLES "xtrkcad;XTrkCAD ${XTRKCAD_VERSION}")
 SET(CPACK_PACKAGE_FILE_NAME "xtrkcad-setup-${XTRKCAD_VERSION}")
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "XTrkCAD ${XTRKCAD_VERSION}")
