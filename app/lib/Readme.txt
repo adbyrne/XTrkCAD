@@ -85,7 +85,7 @@ No special considerations to be taken.
 ===============================
 
 - Drawing parallels for straight pieces of fixed track is now supported
-- Create full parts list when no track is selected
+- Create complete parts list when no track is selected
 - Add toolbar icons for New, Load and Save Layout. Enable via View->Toolbar
 - Close can now be canceled
 - Regrouping of settings in the Display, Command, Preferences dialogs 
