@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.20 2009-05-28 20:34:49 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.21 2009-06-05 20:23:40 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -1378,14 +1378,12 @@ wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor col
 
 /**
  * Load a pixmap. This functions interprets a XPM icon contained in a
- * char array. Supported format are 1 or two byte per pixel and #rrggbb
+ * char array. Supported format are one or two byte per pixel and #rrggbb
  * or #rrrrggggbbbb color specification. Color 'None' is interpreted as
- * transparency, othe symbloic names are not supported.
- * NOTE: the pased variable s modified during the conversion, So this functon
- * cannot be called twice with same variable. 
+ * transparency, other symbolic names are not supported.
  *
- * \param pm IN / OUT  XPM variable
- * \return    pointer to icon 
+ * \param pm IN XPM variable
+ * \return    pointer to icon, call free() if not needed anymore. 
  */
 
 wIcon_p wIconCreatePixMap( char *pm[] )
@@ -1394,7 +1392,7 @@ wIcon_p wIconCreatePixMap( char *pm[] )
 	int col, r, g, b, len;
 	long rgb;
 	char buff[3];
-	char * cp, * cq;
+	char * cp, * cq, * ptr;
 
 	ip = (wIcon_p)malloc( sizeof *ip );
 	memset( ip, 0, sizeof *ip );
@@ -1408,20 +1406,21 @@ wIcon_p wIconCreatePixMap( char *pm[] )
 
 	ip->colormap = (wIconColorMap_t*)malloc( ip->colorcnt * sizeof ip->colormap[0] );
 	for ( col=0; col<ip->colorcnt; col++ ) {
+		ptr = strdup( pm[col+1] );				/* create duplicate for input string*/
 
 		if( ip->numchars == 1 )
-			ip->colormap[col].key = (unsigned)pm[col+1][0];
+			ip->colormap[col].key = (unsigned)ptr[0];
 		else if( ip->numchars == 2 )
-				ip->colormap[col].key = ((unsigned *)pm[col+1])[ 0 ];
+				ip->colormap[col].key = ((unsigned *)ptr)[ 0 ];
 		
-		cp = strtok( pm[col+1] + ip->numchars, "\t " );	/* cp points to color type */
+		cp = strtok( ptr + ip->numchars, "\t " );	/* cp points to color type */
 		assert( *cp == 'c' );					/* should always be color */
 		
 		cp = strtok( NULL, "\t " );				/* go to next token, the color definition itself */
 
 		if( *cp == '#' ) {						/* is this a hex RGB specification? */
 			len = strlen( cp+1 ) / 3;
-			assert( len == 4 || len == 2 );	/* expecting three 3 char or 4 char values */	
+			assert( len == 4 || len == 2 );		/* expecting three 2 char or 4 char values */	
 			buff[2] = 0;						/* if yes, extract the values */
 			memcpy( buff, cp + 1, 2 );
 			r = (int)strtol(buff, &cq, 16);
@@ -1438,6 +1437,7 @@ wIcon_p wIconCreatePixMap( char *pm[] )
 			else 
 				assert( *cp == '#' );				/* if no, abort for the moment */
 		}
+		free( ptr );
 	}
 	ip->color = 0;
 	ip->bits = &pm[1+ip->colorcnt];
