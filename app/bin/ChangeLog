@@ -1,3 +1,7 @@
+Jun 06, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		draw.c: fix compiler warning
+		
 May 26, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		ctrain.c: update icons
