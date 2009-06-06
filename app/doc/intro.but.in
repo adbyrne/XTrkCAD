@@ -10,6 +10,10 @@
 
 \define{XTCWinPack} xtrkcad-setup-@XTRKCAD_VERSION@.exe
 
+\define{XTCRPMPack} xtrkcad-setup-@XTRKCAD_VERSION@.i386.rpm
+
+\define{XTCStgzPack} xtrkcad-setup-@XTRKCAD_VERSION@.i386.sh
+
 \define{XTCCopyRight} Copyright 2003, Sillub Technology and
 Copyright 2007, Bob Blackwell and Martin Fischer
 
@@ -550,39 +554,38 @@ Throughout this manual the following typographic conventions are used to make fi
 \rule
 
 \S{LinuxInstall} \i{Linux Installation}
+
+\e{XTrackCAD} for LINUX is shipped as a RPM file and a self-extracting archive (executable). 
  
-\n Installing from an .rpm file
+\n Installing from an RPM file
 
 \lcont{
 
-\dd After downloading the .rpm file, do
+\dd After downloading the rpm file, do
 
-\c	rpm -ihv xtrkcad-\e{VVV}.i386.rpm
+\dd \c{rpm -ihv \XTCRPMPack}
 
-\dd Replace \e{-ihv} with \e{-Uhv} to upgrade an existing \e{XTrackCAD} installation.
+\dd Replace \c{-ihv} with \c{-Uhv} to upgrade an existing \e{XTrackCAD} installation.
 
 \u000
 
 }
 
 
-\n Installing from a .tar.gz file
+\n Installing from the self-extracting archive.
 
 \lcont{
 
-\dd Open a command line then 
+\dd After downloading open a command line then 
 
-\c	cd /usr/local/lib
-\c	tar xvfz xtrkcad-linux-elf.VVV.tar.gz
+\dd \c{./\XTCStgzPack --prefix=/usr/local --exclude-subdir} 
 
-\dd This will create a directory named \c{xtrkcad} and untar all files into it.
-
-\c	cd /usr/local/bin
-\c	ln -s /usr/local/lib/xtrkcad/xtrkcad xtrkcad
-
-\dd If you install \e{XTrackCAD} into another directory, set the \c{XTRKCADLIB} environment variable to point to that directory.
+\dd This will install the executable in /usr/local/bin. A directory named \c{xtrkcad} will be created in 
+/usr/local/share and all files will be unpacked into it.
 
 }
+
+If you install \e{XTrackCAD} into another directory, set the \c{XTRKCADLIB} environment variable to point to that directory.
 
 \rule
 
