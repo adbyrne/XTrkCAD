@@ -578,7 +578,7 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \dd After downloading open a command line then 
 
-\dd \c{./\XTCStgzPack --prefix=/ --exclude-subdir} 
+\dd \c{./\XTCStgzPack --prefix=/usr/local --exclude-subdir} 
 
 \dd This will install the executable in /usr/local/bin. A directory named \c{xtrkcad} will be created in 
 /usr/local/share and all files will be unpacked into it.
