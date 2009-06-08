@@ -1,3 +1,8 @@
+Jun 08, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		genmessages.c: fixed problem with line endings, correct warning
+		for the but output file
+
 Aug 29, 2008
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		genhelp.in: fixed typo

@@ -127,7 +127,7 @@ void dumpHelp( FILE *hlpsrcF )
 	int inx;
 	char *transStr;
 	
-	fputs( "/#\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n", hlpsrcF );
+	fputs( "\\#\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n", hlpsrcF );
 
 	fprintf( hlpsrcF, "\n\n\\H{messageList} Message Explanations\n\n" );
 
@@ -223,11 +223,14 @@ int main( int argc, char * argv[] )
 		if ( buff[0] == '#' )
 			continue;
 			
-		/* remove trailing newline */	
+		/* remove trailing whitespaces */	
 		cp = buff+strlen(buff)-1;
-		if (*cp=='\n') *cp = 0;
-		
-		
+		/* if (*cp=='\n')  */
+		while( isspace(*cp)) {
+			*cp = '\0';
+			cp--;
+		}	
+				
 		if ( strncmp( buff, "MESSAGE ", 8 ) == 0 ) {
 
 			/* skip any spaces */
