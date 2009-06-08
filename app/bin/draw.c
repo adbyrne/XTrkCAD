@@ -1,7 +1,7 @@
 /** \file draw.c
  * Basic drawing functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.15 2009-06-06 13:04:49 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.16 2009-06-08 18:47:16 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2374,8 +2374,8 @@ EXPORT void DrawInit( int initialZoom )
 	h -= toolbarHeight+infoHeight;
 	if ( w <= 0 ) w = 1;
 	if ( h <= 0 ) h = 1;
-	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "mainDraw", BD_TICKS,
-				w, h, &mainD,
+	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "", BD_TICKS,
+												w, h, &mainD,
 				(wDrawRedrawCallBack_p)MainRedraw, DoMousew );
 
 	if (initialZoom == 0) {
