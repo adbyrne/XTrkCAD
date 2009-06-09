@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #ifdef WINDOWS
 	#if _MSC_VER >=1400
 		#define strdup _strdup

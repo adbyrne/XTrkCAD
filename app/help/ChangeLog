@@ -1,3 +1,7 @@
+Jun 09, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		genmessages.c: add include file for issspace()
+		
 Jun 08, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		genmessages.c: fixed problem with line endings, correct warning
