@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw.c,v 1.6 2009-05-15 18:54:20 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw.c,v 1.7 2009-06-09 19:20:31 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -428,7 +428,7 @@ EXPORT void wDrawString(
 {
 	const char * font;
 	if ( bd == &psPrint_d ) {
-		psPrintString( x, y, a, s, fp, fs, color, opts );
+		psPrintString( x, y, a, (char *)s, fp, fs, color, opts );
 		return;
 	}
 	font = gtkFontTranslate( fp );

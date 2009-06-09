@@ -1,7 +1,7 @@
 /** \file gtkhelp.c
  * Balloon help ( tooltips) and main help functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.9 2009-05-21 13:41:38 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.10 2009-06-09 19:20:31 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -177,7 +177,7 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 	wPos_t x, y;
 	wPos_t w, h;
 	wPos_t xx, yy;
-	const char * msgConverted;
+	const char * msgConverted;	
 	if (balloonVisible && balloonB == b &&
 		balloonDx == dx && balloonDy == dy && balloonMsg == msg )
 		return;

@@ -1,3 +1,6 @@
+Jun 09, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		gtkdraw.c: Fix compiler warning
 May 31, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		gtksplash.c: popups during startup are now shown above 
