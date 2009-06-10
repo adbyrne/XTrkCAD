@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctodesgn.c,v 1.3 2008-01-23 21:55:01 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctodesgn.c,v 1.4 2009-06-10 06:55:12 m_fischer Exp $
  *
  * T_TURNOUT
  *
@@ -1061,7 +1061,9 @@ static toDesignSchema_t * LoadSegs(
 	wIndex_t s;
 	int i, p, p0, p1;
 	DIST_T d;
+#ifndef MKTURNOUT
 	wIndex_t pathLen;
+#endif
 	toDesignSchema_t * pp;
 	char *segOrder;
 	coOrd pos;
@@ -1487,7 +1489,9 @@ static void NewTurnOk( void * context )
 	int i;
 	BOOL_T foundR=FALSE;
 	char * cp;
+#ifndef MKTURNOUT
 	turnoutInfo_t *to;
+#endif
 	FLOAT_T flt;
 	wIndex_t segCnt;
 	char * customInfoP;
@@ -2033,7 +2037,7 @@ EXPORT void AbortProg(
 		... )
 {
 	static BOOL_T abort2 = FALSE;
-	int rc;
+//	int rc;
 	va_list ap;
 	va_start( ap, msg );
 	vsprintf( message, msg, ap );
@@ -2267,7 +2271,7 @@ struct {
 
 int main ( int argc, char * argv[] )
 {
-	char * cmd;
+//	char * cmd;
 	double radius, radius2;
 	int inx, cnt;
 	double ang, x0, y0, x1, y1;
