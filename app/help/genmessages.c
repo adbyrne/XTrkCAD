@@ -223,15 +223,14 @@ int main( int argc, char * argv[] )
 		/* skip comment lines */
 		if ( buff[0] == '#' )
 			continue;
-			
+
 		/* remove trailing whitespaces */	
 		cp = buff+strlen(buff)-1;
-		/* if (*cp=='\n')  */
-		while( isspace(*cp)) {
+		while( cp >= buff && isspace(*cp)) {
 			*cp = '\0';
 			cp--;
-		}	
-				
+		}
+
 		if ( strncmp( buff, "MESSAGE ", 8 ) == 0 ) {
 
 			/* skip any spaces */
