@@ -9,6 +9,7 @@ to contact me write to EMAIL: [[Email Removed]]
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #define BUF_LEN  1024
 #define LINE     12

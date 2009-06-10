@@ -1,3 +1,7 @@
+Jun 10, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		ctodesgn.c: remove unneeded local variables
+
 Jun 08, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		draw.c: no tooltip for the main drawing area
