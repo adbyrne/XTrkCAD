@@ -1,5 +1,5 @@
-XTrackCad is a CAD program for designing Model Railroad layouts.
-XTrackCad supports any scale, has libraries of popular brands of x
+XTrackCAD is a CAD program for designing Model Railroad layouts.
+XTrackCAD supports any scale, has libraries of popular brands of x
 turnouts and sectional track (plus you add your own easily), can
 automatically use spiral transition curves when joining track
 and has extensive on-line help and demonstrations.  

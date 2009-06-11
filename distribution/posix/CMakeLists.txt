@@ -1,4 +1,5 @@
 # Setup packaging ...
+SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "XTrackCAD is a CAD program for designing model railroad layouts.")
 SET(CPACK_GENERATOR "RPM")
 SET(CPACK_RPM_PACKAGE_ARCHITECTURE "i386")
 SET(CPACK_RPM_PACKAGE_LICENSE "GPL")
