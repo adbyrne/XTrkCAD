@@ -4,8 +4,8 @@ VERSION 10
 DEMOINIT
 ORIG 4.000 0.000 0.000
 PARAMETER display description-fontsize 64
-PARAMETER pref mintrackradius 9.000000
-PARAMETER pref maxtrackgrade 5.000000
+PARAMETER layout mintrackradius 9.000000
+PARAMETER layout maxtrackgrade 5.000000
 CURVE 1 0 128 0 0 N 2 9.328210 12.681510 0 9.000000 0 -0.662481 0.508964
 	T 3 10.311823 3.735421 83.725592
 	E 0.736918 15.362872 17.333261
@@ -35,16 +35,16 @@ In this example we have a curved track with radius of 9" and a straight track wi
  
 END
 STEP
-PARAMETER misc cmdPref
+PARAMETER misc cmdLayout
 MESSAGE
 _________________________________________
 
-The Preferences dialog shows the Minimum Track Radius is 9" and the Maximum Track Grade is 5%.
+The Layout dialog shows the Minimum Track Radius is 9" and the Maximum Track Grade is 5%.
 END
 STEP
-PARAMETER pref mintrackradius 9.000000
-PARAMETER pref maxtrackgrade 5.000000
-PARAMETER pref ok
+PARAMETER layout mintrackradius 9.000000
+PARAMETER layout maxtrackgrade 5.000000
+PARAMETER layout ok
 MESSAGE
 _________________________________________
 

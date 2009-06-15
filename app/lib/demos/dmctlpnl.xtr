@@ -123,7 +123,7 @@ Also, we will use a 1/8" grid to lay out our controls.
 First, we will set up the Snap Grid for 1" grid lines and 8 divisions.
 END
 STEP
-COMMAND Grid
+COMMAND Change Grid...
 STEP
 PARAMETER grid vertspacing 1.000000
 PARAMETER grid horzspacing 1.000000

@@ -149,14 +149,14 @@ Now we are going to convert from one scale to another.
 END
 STEP
 PARAMETER rescale toggle 0
-PARAMETER rescale to 2 HO
+PARAMETER rescale toS 4 HO
 MESSAGE
 _________________________________________
 
 We will convert everything from N scale to HO scale...
 END
 STEP
-PARAMETER rescale change-gauge 1
+#PARAMETER rescale change-gauge 1
 MESSAGE
 and change the track gauge as well.
 END

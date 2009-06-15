@@ -19,7 +19,7 @@ _________________________________________
 
 You can resize and move the Turnout Selection dialog if it obscures the other windows.
 
-First we place a turnout on the main-line.
+First we place a turnout on the main line.
 END
 STEP
 PARAMETER turnout list 0 Peco-55	SL-E395F	Medium Right
@@ -29,7 +29,6 @@ MOUSE 3 36.417 1.917
 BIGPAUSE
 MOUSE 4 36.417 1.917
 PARAMETER turnout ok
-PARAMETER turnout cancel
 RESET
 MESSAGE
 _________________________________________
@@ -45,7 +44,7 @@ MOUSE 4 8.167 5.833
 MESSAGE
 _________________________________________
 
-Now create a track parallel to the main-line.  Make sure the separation is reasonable for your scale.
+Now create a track parallel to the main line.  Make sure the separation is reasonable for your scale.
 END
 STEP
 COMMAND Parallel
@@ -103,7 +102,6 @@ END
 STEP
 MOUSE 4 29.625 2.667
 PARAMETER turnout ok
-PARAMETER turnout cancel
 #RESET
 MESSAGE
 _________________________________________
@@ -141,7 +139,6 @@ MOUSE 3 21.750 4.000
 BIGPAUSE
 MOUSE 4 21.750 4.000
 PARAMETER turnout ok
-PARAMETER turnout cancel
 #RESET
 #COMMAND Select
 MOUSE 2 22.688 4.438
