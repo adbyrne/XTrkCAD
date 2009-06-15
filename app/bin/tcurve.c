@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tcurve.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tcurve.c,v 1.3 2009-06-15 19:29:57 m_fischer Exp $
  *
  * CURVE
  *
@@ -215,12 +215,14 @@ static void DrawCurveDescription(
 		if ( (!xx->circle) &&
 			 ComputeElev( trk, 0, FALSE, &elev0, NULL ) &&
 			 ComputeElev( trk, 1, FALSE, &elev1, NULL ) ) {
-			elevValid = TRUE;
-			grade = fabs((elev1-elev0)/dist);
-			sep = grade*(xx->radius*M_PI*2.0);
+			if( elev0 == elev1 )
+				elevValid = FALSE;
+			else {
+				elevValid = TRUE;
+				grade = fabs((elev1-elev0)/dist);
+				sep = grade*(xx->radius*M_PI*2.0);
+			}
 		}
-		if (elev0 == elev1)
-			elevValid = FALSE;
 		fp = wStandardFont( F_TIMES, FALSE, FALSE );
 		if (elevValid)
 			sprintf( message, _("Helix: turns=%ld length=%s grade=%0.1f%% sep=%s"),

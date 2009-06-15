@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.6 2009-05-15 18:16:15 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.7 2009-06-15 19:29:57 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1261,8 +1261,8 @@ static char * demoInitParams[] = {
 		"display color-layers 0",
 		"display tworailscale 16",
 		"display tiedraw 0",
-		"display mingridspacing 5",
-		"display balloonhelp 1",
+		"pref mingridspacing 5",
+		"pref balloonhelp 1",
 		"display hotbarlabels 1",
 		"display mapscale 64",
 		"display livemap 0",
@@ -1270,9 +1270,9 @@ static char * demoInitParams[] = {
 		"display hideTrainsInTunnels 0",
 		"GROUP display",
 		"cmdopt move-quick 0",
-		"cmdopt turntable-angle 7.500",
+		"pref turntable-angle 7.500",
 		"cmdopt preselect 1",
-		"cmdopt coupling-speed-max 100",
+		"pref coupling-speed-max 100",
 		"cmdopt rightclickmode 0",
 		"GROUP cmdopt",
 		"pref checkpoint 0",
@@ -1284,11 +1284,11 @@ static char * demoInitParams[] = {
 		"pref connectangle 1.000",
 		"pref dragpixels 20",
 		"pref dragtimeout 500",
-		"pref autoPan 0",
-		"pref listlabels 7",
-		"pref mintrackradius 1.000",
-		"pref maxtrackgrade 5.000",
-		"pref trainpause 300",
+		"display autoPan 0",
+		"display listlabels 7",
+		"layout mintrackradius 1.000",
+		"layout maxtrackgrade 5.000",
+		"display trainpause 300",
 		"GROUP pref",
 		"rgbcolor snapgrid 65280",
 		"rgbcolor marker 16711680",

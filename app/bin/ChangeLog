@@ -1,3 +1,20 @@
+Jun 15, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		tcurve.c, drawgeom.c: fix variable initialization 
+		problems.
+		
+Jun 14, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		macro.c: make demos work again with new dialogs
+
+Jun 13, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		dlayer.c: "changed" state of layout is updated with 
+		layer changes. (DonDASA)
+
+Version 4.0.3
+=============
+
 Jun 10, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		ctodesgn.c: remove unneeded local variables
@@ -19,7 +36,6 @@ May 25, 2009
 		ctrain.c: change default for train running to 'Go'
 		beautify throttle slider
 		
-
 May 25, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>	
 		cturnout.c, track.c, track.h,utility.c, cparalle.c

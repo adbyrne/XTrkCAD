@@ -563,6 +563,7 @@ STATUS_T DrawGeomModify(
 /*fprintf( stderr, "Inserting vertix before %d\n", polyInx );*/
 			}
 			points(polyInx) = pos;
+			p1=p0;
 			break;
 		default:
 			ASSERT( FALSE ); /* CHECKME */

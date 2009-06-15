@@ -1,7 +1,7 @@
 /** \file dlayer.c
  * Functions and dialogs for handling layers.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.8 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.9 2009-06-15 19:29:57 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -235,6 +235,12 @@ static void PlaybackCurrLayer( char * line )
 	SetCurrLayer( layer, NULL, 0, NULL, NULL );
 }
 
+/**
+ * Change the color of a layer.
+ *
+ * \param inx IN layer to change
+ * \param color IN new color
+ */
 
 static void SetLayerColor( int inx, wDrawColor color )
 {
@@ -409,6 +415,8 @@ static void DoLayerOp( void * data )
 	if( layoutLayerChanged ) {
 		MainProc( mainW, wResize_e, NULL );
 		layoutLayerChanged = FALSE;
+		changed = TRUE;
+		SetWindowTitle();
 	}	
 }
 
@@ -572,7 +580,7 @@ LayerPrefLoad( void )
 						
 			prefString = strtok( NULL, ",");
 		}
-	}		
+	}
 }
 
 /**
@@ -633,6 +641,11 @@ DefaultLayerProperties(void)
 	}	
 }
 
+/**
+ * Update all UI elements after selecting a layer.
+ *
+ */
+
 static void LayerUpdate( void )
 {
 	BOOL_T redraw;
@@ -649,11 +662,23 @@ static void LayerUpdate( void )
 		layerVisible = TRUE;
 		ParamLoadControl( &layerPG, I_VIS );
 	}
+	
+	if( strcmp( layers[(int)layerCurrent].name, layerName ) ||
+		layerColor != layers[(int)layerCurrent].color || 
+		layers[(int)layerCurrent].visible != (BOOL_T)layerVisible ||
+		layers[(int)layerCurrent].frozen != (BOOL_T)layerFrozen ||
+		layers[(int)layerCurrent].onMap != (BOOL_T)layerOnMap ) {
+		
+			changed = TRUE;
+			SetWindowTitle();
+	}
+
 	if ( layerL ) {
 		strncpy( layers[(int)layerCurrent].name, layerName, sizeof layers[(int)layerCurrent].name );
 		sprintf( message, "%2d %c %s", (int)layerCurrent+1, layers[(int)layerCurrent].objCount>0?'+':'-', layers[(int)layerCurrent].name );
 		wListSetValues( layerL, layerCurrent, message, NULL, NULL );
 	}
+
 	sprintf( message, "%2d : %s", (int)layerCurrent+1, layers[(int)layerCurrent].name );
 	wListSetValues( setLayerL, layerCurrent, message, NULL, NULL );
 	if (layerCurrent < NUM_BUTTONS) {
@@ -666,6 +691,7 @@ static void LayerUpdate( void )
 			   (BOOL_T)layerVisible != layers[(int)layerCurrent].visible );
 	if ( (!layerRedrawMap) && redraw)
 		RedrawLayer( (LAYER_T)layerCurrent, FALSE );
+
 	SetLayerColor( layerCurrent, layerColor );
 
 	if (layerCurrent<NUM_BUTTONS && layers[(int)layerCurrent].visible!=(BOOL_T)layerVisible) {
@@ -775,8 +801,11 @@ EXPORT void RestoreLayers( void )
 }
 
 /**
- *	This function is called when the Done button on the layer dialog is pressed. It hides the layer dialog and
- * updates the layer information
+ * This function is called when the Done button on the layer dialog is pressed. It hides the layer dialog and
+ * updates the layer information.
+ *
+ * \param IN ignored
+ *
  */
  
 static void LayerOk( void * junk )
@@ -824,6 +853,7 @@ static void DoLayer( void * junk )
 	
 	layerRedrawMap = FALSE;
 	wShow( layerW );
+
 	layoutLayerChanged = FALSE;
 }
 
