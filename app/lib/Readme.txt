@@ -68,13 +68,14 @@ A new program group named XTrackCad 4 will be created in the Start menu.
 ========================
 
 0) You will need libc6, X11R6, GTK+2.0, gtkhtml2
-1) cd /usr/local/lib
-2) tar xvfz ${TMPDIR}/xtrkcad-linux-elf.4.0.1.tar.gz
-   ; where TMPDIR is where you downloaded XTrackCad
-3) ln -s /usr/local/lib/xtrkcad/xtrkcad /usr/local/bin/xtrkcad ; optional
-4) you can use xtrkcad/xtc64.xpm as an icon for XTrackCad if supported by
-   your window manager
-5) Try it out by running: /usr/local/bin/xtrkcad
+1) Build instructions can be found on http://www.xtrkcad.org/
+2) Place the executable into a directory in your path eg. /usr/local/bin
+3) The content of the lib/ directory needs to be placed in /usr/local/share/xtrkcad,
+	so do: 
+	> mkdir /usr/local/share/xtrkcad
+	> cp -r ./lib/* /usr/local/share/xtrkcad
+4) Try it out by running: /usr/local/bin/xtrkcad
+
 
 5. Upgrade Information
 ======================
