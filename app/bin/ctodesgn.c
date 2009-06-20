@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctodesgn.c,v 1.4 2009-06-10 06:55:12 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctodesgn.c,v 1.5 2009-06-20 09:20:49 m_fischer Exp $
  *
  * T_TURNOUT
  *
@@ -144,7 +144,7 @@ static paramData_t turnDesignPLs[] = {
 #define I_TORDESC			(10)
 	{ PD_STRING, &newTurnRightDesc, "desc2", 0, NULL, N_("Right Description") },
 	{ PD_STRING, &newTurnRightPartno, "partno2", PDO_DLGHORZ, NULL, N_(" #") },
-	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", 0, &r0_100, N_("Roadbed Width") },
+	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", PDO_DIM, &r0_100, N_("Roadbed Width") },
 	{ PD_LONG, &newTurnRoadbedLineWidth, "roadbedLineWidth", PDO_DLGHORZ, &i0_100, N_("Line Width") },
 	{ PD_COLORLIST, &roadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
 	{ PD_BUTTON, NewTurnOk, "done", PDO_DLGCMDBUTTON, NULL, N_("Ok") },
