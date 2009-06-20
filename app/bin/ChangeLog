@@ -1,3 +1,8 @@
+Jun 20, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		ctodesgn.c: convert roadbed width as necessary 
+		(Robert Myers)
+
 Jun 15, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		tcurve.c, drawgeom.c: fix variable initialization 
