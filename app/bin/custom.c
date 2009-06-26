@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.6 2008-03-10 18:59:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.7 2009-06-26 17:08:19 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -195,6 +195,9 @@ BOOL_T Initialize( void )
 	return TRUE;
 }
 
+/**
+ * Initialize siome localized strings for filename patterns etc. 
+ */
 
 void InitCustom( void )
 {
@@ -223,8 +226,7 @@ void InitCustom( void )
 	}
 	if (sDXFFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Import Files|*.%sti"), Product, KEYCODE);
-		sDXFFilePattern = strdup(buf);
+		sDXFFilePattern = strdup(_("Data Exchange Format Files|*.dxf"));
 	}
 	if (sRecordFilePattern == NULL)
 	{
@@ -243,7 +245,7 @@ void InitCustom( void )
 	}
 	if (sPartsListFilePattern == NULL)
 	{
-		sprintf(buf, _("%s PartsList Files|*.log"), Product);
+		sprintf(buf, _("%s PartsList Files|*.txt"), Product);
 		sPartsListFilePattern = strdup(buf);
 	}
 }

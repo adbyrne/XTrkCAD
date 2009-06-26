@@ -1,3 +1,7 @@
+Jun 26, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		custom.c: correct handling of export file extensions
+
 Jun 20, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		ctodesgn.c: convert roadbed width as necessary 
