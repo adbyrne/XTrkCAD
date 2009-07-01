@@ -75,7 +75,6 @@ SET(SOURCES
 	chotbar.c
 	cjoin.c
 	cmisc.c
-	cmisc2.c
 	cmodify.c
 	cnote.c
 	compound.c

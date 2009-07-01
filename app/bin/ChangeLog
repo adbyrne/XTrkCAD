@@ -1,3 +1,7 @@
+Jul 01, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		CMakeList.txt: remove dependency from unneeded cmisc2.c
+		
 Jun 26, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		custom.c: correct handling of export file extensions
