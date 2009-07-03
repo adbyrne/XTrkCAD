@@ -124,6 +124,7 @@ The following parameter files have been added or updated with this release:
 
 Fast Tracks N-scale Turnouts, Wyes, 3-ways, Crossovers and Slip Switches 
 (FastTrack_n.xtp)
+HO Scale Turnouts from German Prototypes (prototype-de.xtp)
 
 8. Where to go for support
 ==========================
@@ -142,3 +143,4 @@ http://www.sourceforge.net/groups/xtrkcad-fork/
 
 
 Thanks for your interest in XTrackCad.
+
