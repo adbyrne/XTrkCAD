@@ -1,3 +1,7 @@
+Jul 05, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		track.c: Bug fix #2816663: Block gaps are not printed
+		
 Jul 01, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		CMakeList.txt: remove dependency from unneeded cmisc2.c

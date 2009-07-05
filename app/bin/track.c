@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.6 2009-05-25 18:11:03 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.7 2009-07-05 15:11:02 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2545,6 +2545,15 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 	DrawBoxedString( style, d, pp, message, fp, (wFontSize_t)descriptionFontSize, color, a );
 }
 
+/**
+ * Draw track endpoints. The correct track endpoint (connected, unconnected etc.)
+ * is drawn to the track
+ *
+ * \param d IN drawing functions to use (depends on print, draw to screen etc.)
+ * \param trk IN track for which endpoints are drawn
+ * \param ep IN index of endpoint to draw
+ * \param color IN color to use
+ */
 
 EXPORT void DrawEndPt(
 		drawCmd_p d,
@@ -2648,7 +2657,7 @@ EXPORT void DrawEndPt(
 				(drawEndPtV == 2) ) {
 		Translate( &p0, p, a, trackGauge );
 		width = 0;
-		if ( d == &mainD && (GetTrkEndOption(trk,ep)&EPOPT_GAPPED) != 0 )
+		if ( d != &mapD && d != &tempD && (GetTrkEndOption(trk,ep)&EPOPT_GAPPED) != 0 )
 			width = (wDrawWidth)ceil(trackGauge*d->dpi/2.0/d->scale);
 		DrawLine( d, p0, p, width, color );
 	} else {
