@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: xtrkcad 4.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2008-04-27 08:20+0200\n"
-"PO-Revision-Date: 2009-06-01 16:21+0100\n"
+"PO-Revision-Date: 2009-07-05 17:08+0100\n"
 "Last-Translator: Martin Fischer <m_fischer@users.sourceforge.net>\n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -4690,7 +4690,7 @@ msgstr "Übergangsbögen..."
 #: ../bin/misc.c:2289
 #: ../bin/misc.org.c:2301
 msgid "&Fonts ..."
-msgstr "Zeichensätze..."
+msgstr "Schri&ftarten..."
 
 #: ../bin/misc.c:2290
 #: ../bin/misc.org.c:2302
@@ -7147,7 +7147,7 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:282
 msgid "Font size for labels on layout"
-msgstr ""
+msgstr "Zecihengrösse für Beschriftungen"
 
 #: ../../../../build/app/bin/bllnhlp.c:283
 msgid "Label elements on the Hot Bar"
