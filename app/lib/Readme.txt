@@ -107,15 +107,7 @@ No special considerations to be taken.
 6. New features in this release
 ===============================
 
-- Drawing parallels for straight pieces of fixed track is now supported
-- Create complete parts list when no track is selected
-- Add toolbar icons for New, Load and Save Layout. Enable via View->Toolbar
-- Close can now be canceled
-- Regrouping of settings in the Display, Command, Preferences dialogs 
-- Last layout is loaded on program startup. This behaviour can be controlled 
-  via an option in the Options>Preferences dialog.
-- Higher precision calculations for room size
-- Internationalization Finnish and German are supported (LINUX only)
+This is a bugfix release. No new features were added.
 
 7. New or updated parameter files
 =================================
@@ -125,6 +117,7 @@ The following parameter files have been added or updated with this release:
 Fast Tracks N-scale Turnouts, Wyes, 3-ways, Crossovers and Slip Switches 
 (FastTrack_n.xtp)
 HO Scale Turnouts from German Prototypes (prototype-de.xtp)
+Walthers Cornerstone HO Structures (walth-ho.xtp)
 
 8. Where to go for support
 ==========================
