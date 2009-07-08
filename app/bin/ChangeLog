@@ -1,4 +1,8 @@
 Jul 08, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		cblock.c, cswitchmotor.c: make compile under MSVC
+
+Jul 08, 2009
 	ENH: Robert Heller
 		cblock.c, cswitchmotor.c: new functionality for layout 
 		control: blocks and switchmotors

@@ -4,6 +4,9 @@
  * Created by Robert Heller on Sat Mar 14 10:39:56 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
+ * Modification History: Revision 1.1  2009/07/08 18:40:27  m_fischer
+ * Modification History: Add switchmotor and block for layout control
+ * Modification History:
  * Modification History: Revision 1.1  2002/07/28 14:03:50  heller
  * Modification History: Add it copyright notice headers
  * Modification History:
@@ -482,8 +485,9 @@ static STATUS_T CmdSwitchMotorDelete( wAction_t action, coOrd pos )
 
 static STATUS_T CmdSwitchMotor (wAction_t action, coOrd pos )
 {
-	fprintf(stderr,"*** CmdSwitchMotor(%08x,{%f,%f})\n",action,pos.x,pos.y);
 	wIndex_t switchmotorIndex;
+
+	fprintf(stderr,"*** CmdSwitchMotor(%08x,{%f,%f})\n",action,pos.x,pos.y);
 
 	switch ((long)commandContext) {
 	case SWITCHMOTOR_CREATE: return CmdSwitchMotorCreate(action,pos);
