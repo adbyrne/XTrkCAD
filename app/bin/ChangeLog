@@ -1,3 +1,11 @@
+Jul 08, 2009
+	ENH: Robert Heller
+		cblock.c, cswitchmotor.c: new functionality for layout 
+		control: blocks and switchmotors
+
+Version 4.0.3a
+==============
+
 Jul 05, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		track.c: Bug fix #2816663: Block gaps are not printed

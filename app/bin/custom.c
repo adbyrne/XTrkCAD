@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.7 2009-06-26 17:08:19 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.8 2009-07-08 18:40:27 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -187,6 +187,8 @@ BOOL_T Initialize( void )
 	InitTrkText();
 	InitTrkDraw();
 	InitTrkNote();
+	InitTrkBlock();
+	InitTrkSwitchMotor();
 
 	InitCarDlg();
 

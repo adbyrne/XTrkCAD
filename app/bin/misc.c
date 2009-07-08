@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.40 2009-05-15 18:16:15 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.41 2009-07-08 18:40:27 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2255,6 +2255,8 @@ static void CreateMenus( void )
 	InitCmdTurnout( addM );
 	InitCmdHandLaidTurnout( addM );
 	InitCmdStruct( addM );
+	InitCmdBlock( addM );
+	InitCmdSwitchMotor( addM );
 	InitCmdHelix( addM );
 	InitCmdTurntable( addM );
 	

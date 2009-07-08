@@ -1,7 +1,7 @@
 /** \file cmisc.c
  * Handlimg of the 'Describe' dialog
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.6 2008-03-06 19:35:05 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.7 2009-07-08 18:40:27 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -87,7 +87,8 @@ static paramData_t describePLs[] = {
 	{ PD_STRING, NULL, "S1", 0, (void*)300 },
 	{ PD_STRING, NULL, "S2", 0, (void*)300 },
 	{ PD_STRING, NULL, "S3", 0, (void*)300 },
-#define I_STRING_N		I_STRING_0+3
+	{ PD_STRING, NULL, "S4", 0, (void*)300 },
+#define I_STRING_N		I_STRING_0+4
 
 #define I_LAYER_0		I_STRING_N
 	{ PD_STRING, NULL, "Y1", 0, (void*)150 },

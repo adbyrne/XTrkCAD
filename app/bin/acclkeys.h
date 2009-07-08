@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/acclkeys.h,v 1.5 2007-12-01 16:08:12 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/acclkeys.h,v 1.6 2009-07-08 18:40:27 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -144,5 +144,14 @@
 #define ACCL_PLAYBACK	(WALT+WCTL+'b')
 
 #define ACCL_BRIDGE		(0)
+
+/* Blocks */
+#define ACCL_BLOCK1	(WALT+WSHIFT+'b')
+#define ACCL_BLOCK2	(WALT+WCTL+WSHIFT+'b')
+#define ACCL_BLOCK3	(0)
+/* Switch Motors */
+#define ACCL_SWITCHMOTOR1 (WSHIFT+'s')
+#define ACCL_SWITCHMOTOR2 (WALT+WSHIFT+'s')
+#define ACCL_SWITCHMOTOR3 (0)
 
 #endif

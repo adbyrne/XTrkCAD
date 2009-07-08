@@ -67,6 +67,7 @@ ADD_CUSTOM_COMMAND(
 SET(SOURCES
 	${LIN_SOURCES}
 	bllnhlp.c
+	cblock.c
 	ccurve.c
 	cdraw.c
 	celev.c
@@ -88,6 +89,7 @@ SET(SOURCES
 	csplit.c
 	cstraigh.c
 	cstruct.c
+	cswitchmotor.c
 	ctext.c
 	ctodesgn.c
 	ctrain.c
