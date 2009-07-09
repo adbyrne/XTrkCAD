@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.6 2008-03-21 08:20:00 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.7 2009-07-09 18:29:42 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -266,8 +266,6 @@ static void DoDisplay( void * junk )
 
 EXPORT addButtonCallBack_t DisplayInit( void )
 {
-	if (!bEnableFlex)
-		displayPLs[1].winData = drawEndPtLabels2;
 	ParamRegister( &displayPG );
 	wEnableBalloonHelp( (int)enableBalloonHelp );
 #ifdef LATER

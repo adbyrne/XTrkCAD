@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.3 2009-07-09 18:29:42 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -107,7 +107,7 @@ void EnumerateList(
 	char * cp;
 	int len;
 	sprintf( message, "%5ld | %s\n", count, desc );
-	if (bEnablePrices && enableListPrices) {
+	if (enableListPrices) {
 		cp = message + strlen( message )-1;
 		len = enumerateMaxDescLen-strlen(desc);
 		if (len<0) len = 0;
@@ -165,7 +165,7 @@ void EnumerateStart(void)
 
 	enumerateTotal = 0.0;
 
-	if (bEnablePrices && enableListPrices) {
+	if (enableListPrices) {
 		sprintf( message, "Count | Description" );
 		cp = message + strlen( message );
 		len = enumerateMaxDescLen-strlen( "Description");
@@ -180,7 +180,7 @@ void EnumerateStart(void)
 	sprintf( message, "------+");
 	cp = message+strlen(message);
 	memset( cp, '-', enumerateMaxDescLen+2 );
-	if (bEnablePrices && enableListPrices)
+	if (enableListPrices)
 		strcpy( cp+enumerateMaxDescLen+2, "+--------+----------\n");
 	else {
 		*(cp+enumerateMaxDescLen+2) = '\n';
@@ -198,7 +198,7 @@ void EnumerateEnd(void)
 	sprintf( message, "------+" );
 	cp = message+strlen(message);
 	memset( cp, '-', enumerateMaxDescLen+2 );
-	if (bEnablePrices && enableListPrices)
+	if (enableListPrices)
 		strcpy( cp+enumerateMaxDescLen+2, "+--------+----------\n");
 	else {
 		*(cp+enumerateMaxDescLen+2) = '\n';
@@ -206,7 +206,7 @@ void EnumerateEnd(void)
 	}
 	wTextAppend( enumT, message );
 
-	if (bEnablePrices && enableListPrices) {
+	if (enableListPrices) {
 		len = enumerateMaxDescLen-strlen( "Total");
 		memset ( message, ' ', len+1 );
 		cp = message+len+1;

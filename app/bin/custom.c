@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.8 2009-07-08 18:40:27 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.9 2009-07-09 18:29:42 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -53,10 +53,6 @@
 #define PRODUCT "XTRKCAD"
 #define Version VERSION
 #define KEYCODE "x"
-#define NOFLEX
-#define ENABLEFLEX
-#define ENABLEPARAMFILES
-#define ENABLEPRICES
 #define PARAMKEY		(0)
 
 
@@ -90,24 +86,6 @@ char * sVersion = Version;
 int iParamVersion = PARAMVERSION;
 int iMinParamVersion = MINPARAMVERSION;
 long lParamKey = PARAMKEY;
-
-#ifdef ENABLEFLEX
-int bEnableFlex = 1;
-#else
-int bEnableFlex = 0;
-#endif
-
-#ifdef ENABLEPARAMFILES
-int bParamFiles = 1;
-#else
-int bParamFiles = 0;
-#endif
-
-#ifdef ENABLEPRICES
-int bEnablePrices = 1;
-#else
-int bEnablePrices = 0;
-#endif
 
 EXPORT char * MakeWindowTitle( char * name )
 {

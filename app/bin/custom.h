@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.4 2008-03-06 19:35:07 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.5 2009-07-09 18:29:42 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -75,9 +75,7 @@ extern int iParamVersion;
 extern int iMinParamVersion;
 extern long lParamKey;
 
-extern int bEnableFlex;
-extern int bParamFiles;
-extern int bEnablePrices;
+//extern int bEnablePrices;
 
 void InitCustom( void );
 void CleanupCustom( void );

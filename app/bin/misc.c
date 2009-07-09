@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.41 2009-07-08 18:40:27 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.42 2009-07-09 18:29:42 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1726,42 +1726,6 @@ static long AllToolbarMasks[] = {
 		1<<BG_LAYER,
 		1<<BG_HOTBAR};
 
-/*
- * for some reason, there is a separate set for non -flextrack.
- * This seems to be for historical reasons (different licenses?)
- * It might be worth to find out whether this is still needed and 
- * the code could be cleaned up.
- */
-
-static char *NonflexToolbarLabels[] = {
-		N_("File Buttons"),
-		N_("Zoom Buttons"),
-		N_("Undo Buttons"),
-		N_("SnapGrid Buttons"),
-		N_("Modify Track Buttons"),
-		N_("Describe/Select"),
-		N_("Track Group Buttons"),
-		N_("Train Group Buttons"),
-		N_("Create Misc Buttons"),
-		N_("Ruler Button"),
-		N_("Layer Buttons"),
-		N_("Hot Bar"),
-		NULL };
-static long NonflexToolbarMasks[] = {
-		1<<BG_FILE, 
-		1<<BG_ZOOM,
-		1<<BG_UNDO,
-		1<<BG_SNAP,
-		1<<BG_TRKMOD,
-		1<<BG_SELECT,
-		1<<BG_TRKGRP,
-		1<<BG_TRAIN,
-		1<<BG_MISCCRT,
-		1<<BG_RULER,
-		1<<BG_LAYER,
-		1<<BG_HOTBAR };
-
-
 static void ToolbarAction( wBool_t set, void * data )
 {
 	long mask = (long)data;
@@ -1789,15 +1753,9 @@ static void CreateToolbarM( wMenu_p toolbarM )
 	char **labels;
 	wBool_t set;
 
-	if (bEnableFlex) {
-		cnt = sizeof(AllToolbarMasks)/sizeof(AllToolbarMasks[0]);
-		masks = AllToolbarMasks;
-		labels = AllToolbarLabels;
-	} else {
-		cnt = sizeof(NonflexToolbarMasks)/sizeof(NonflexToolbarMasks[0]);
-		masks = NonflexToolbarMasks;
-		labels = NonflexToolbarLabels;
-	}
+	cnt = sizeof(AllToolbarMasks)/sizeof(AllToolbarMasks[0]);
+	masks = AllToolbarMasks;
+	labels = AllToolbarLabels;
 	for (inx=0; inx<cnt; inx++,masks++,labels++) {
 		set = ( toolbarSet & *masks ) != 0;
 		wMenuToggleCreate( toolbarM, "toolbarM", _(*labels), 0, set, ToolbarAction, (void*)*masks );
@@ -2315,8 +2273,7 @@ static void CreateMenus( void )
 	MiscMenuItemCreate( optionM, NULL, "cmdLayout", _("L&ayout ..."), ACCL_LAYOUTW, (void*)LayoutInit(), IC_MODETRAIN_TOO, (void *)0 );
 	MiscMenuItemCreate( optionM, NULL, "cmdDisplay", _("&Display ..."), ACCL_DISPLAYW, (void*)DisplayInit(), IC_MODETRAIN_TOO, (void *)0 );
 	MiscMenuItemCreate( optionM, NULL, "cmdCmdopt", _("Co&mmand ..."), ACCL_CMDOPTW, (void*)CmdoptInit(), IC_MODETRAIN_TOO, (void *)0 );
-	if ( bEnableFlex )
-		MiscMenuItemCreate( optionM, NULL, "cmdEasement", _("&Easements ..."), ACCL_EASEW, (void*)(wMenuCallBack_p)DoEasementRedir, IC_MODETRAIN_TOO, (void *)0 );
+	MiscMenuItemCreate( optionM, NULL, "cmdEasement", _("&Easements ..."), ACCL_EASEW, (void*)(wMenuCallBack_p)DoEasementRedir, IC_MODETRAIN_TOO, (void *)0 );
 	MiscMenuItemCreate( optionM, NULL, "fontSelW", _("&Fonts ..."), ACCL_FONTW, (void*)(wMenuCallBack_p)SelectFont, IC_MODETRAIN_TOO, (void *)0 );
 	MiscMenuItemCreate( optionM, NULL, "cmdSticky", _("Stic&ky ..."), ACCL_STICKY, (void*)(wMenuCallBack_p)DoSticky, IC_MODETRAIN_TOO, (void *)0 );
 	if (extraButtons) {

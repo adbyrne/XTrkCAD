@@ -1,3 +1,8 @@
+Jul 09, 2009
+	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
+		custom.c, misc.c, denum.c, doption.c: remove some 
+		obsolete flags
+
 Jul 08, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		cblock.c, cswitchmotor.c: make compile under MSVC
