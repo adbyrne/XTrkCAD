@@ -2,6 +2,7 @@ FILE(GLOB HEADERS *.h)
 
 SET(SOURCES
 #	checksum.c
+	getopt.c
 	mswbox.c
 	mswbutt.c
 	mswchksm.c

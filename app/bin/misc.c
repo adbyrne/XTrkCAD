@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.42 2009-07-09 18:29:42 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.43 2009-07-10 17:04:25 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -36,6 +36,7 @@
 #ifdef WINDOWS
 #include <io.h>
 #include <windows.h>
+#include "getopt.h"
 #define R_OK (02)
 #define access _access
 #if _MSC_VER >1300
@@ -2435,6 +2436,7 @@ EXPORT wWin_p wMain(
 		int argc,
 		char * argv[] )
 {
+	int c;
 	char * logFileName = NULL;
 	int log_init = 0;
 	int initialZoom;
@@ -2460,59 +2462,37 @@ EXPORT wWin_p wMain(
 	/*
 	 * ARGUMENTS
 	 */
-#ifdef VERBOSE
-	lprintf( "argc = %d\n", argc );
-#endif
-	argv++; argc--;
-	while (argc-- > 0) {
-#ifdef VERBOSE
-		lprintf( "*argv = %s\n", *argv );
-#endif
 
-#ifdef WINDOWS
-#define OPTIONCHAR '/'
-#else
-#define OPTIONCHAR '-'
-#endif
+	opterr = 0;
 
-		if ((*argv)[0] != OPTIONCHAR) {
-			if ( argc == 0 ) {
-				initialFile = *argv;
-				break;
-			} else {
-				NoticeMessage( MSG_BAD_OPTION, _("Ok"), NULL, *argv );
-			}
-		}
-		switch ( (*argv)[1] ) {
-		case 'd':
-			cp = strchr( &(*argv)[2], '=' );
+	while ((c = getopt (argc, argv, "vl:d:")) != -1)
+    switch (c) {
+		case 'v':					/* verbose flag  */
+			verbose++;
+            break;
+		case 'd':					/* define loglevel for a group */
+			cp = strchr( optarg, '=' );
 			if ( cp != NULL ) {
 				*cp++ = '\0';
-				LogSet( &(*argv)[2], atoi(cp) );
+				LogSet( optarg, atoi(cp) );
 			} else {
-				LogSet( &(*argv)[2], 1 );
+				LogSet( optarg, 1 );
 			}
 			break;
-		case 'l':
-			logFileName = &(*argv)[2];
+		case 'l':					/* define log filename */
+			logFileName = strdup(optarg);
 			break;
-		case 'v':
-			verbose++;
+        case '?':
+		case ':':
+			NoticeMessage( MSG_BAD_OPTION, _("Ok"), NULL, argv[ optind - 1 ] );
+			exit( 1 );
 			break;
-#ifdef LATER
-		} else if ( strncmp( (*argv)+1, "dir", 3 ) == 0 ) {
-			if ( *((*argv)+4) == '=' ) {
-				appDir = &(*argv)[5];
-			} else {
-				appDir = "";
-			}
-#endif
-		default:
-			NoticeMessage( MSG_BAD_OPTION, _("Ok"), NULL, *argv );
-			break;
-		}
-		argv++;
-	}
+        default:
+            abort ();
+    }
+	if( optind < argc )
+		initialFile = strdup( argv[ optind ] );
+
 	extraButtons = ( getenv(sEnvExtra) != NULL );
 	LogOpen( logFileName );
 	log_init = LogFindIndex( "init" );

@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.21 2009-06-05 20:23:40 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.22 2009-07-10 17:04:25 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -3065,7 +3065,7 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 		for ( ; *cp && *cp != termChar; cp++ );
 		*cp++ = 0;
 	}
-	mswWin = wMain( argc, (char**)argv );
+	mswWin = wMain( --argc, (char**)argv );
 	if (mswWin == NULL)
 		return 0;
 

@@ -1,3 +1,8 @@
+Jul 10, 2009
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswmisc.c: initialize the argument array properly
+		CMakeLists.txt, getopt.c: add getopt() 
+		
 Jun 05, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswmisc.c: GPF when loading XPM icons fixed
