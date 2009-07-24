@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.3 2008-02-01 19:34:27 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.4 2009-07-24 15:58:24 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -102,7 +102,8 @@ struct wIcon_t {
 		const void * bits;
 		};
 
-extern char wAppName[256];
+extern char wAppName[];
+extern char wConfigName[];
 extern int gtkIgnoreEvents;
 extern int gtkColorDepth;
 extern wDrawColor wDrawColorWhite;

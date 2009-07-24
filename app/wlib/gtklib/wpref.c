@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.11 2009-05-15 18:54:20 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.12 2009-07-24 15:58:24 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -42,6 +42,7 @@
 #endif
 
 extern char wAppName[];
+extern char wConfigName[];
 static char appLibDir[BUFSIZ];
 static char appWorkDir[BUFSIZ];
 static char userHomeDir[BUFSIZ];
@@ -209,7 +210,7 @@ static void readPrefs( void )
 
 	prefInitted = TRUE;
 	workDir = wGetAppWorkDir();
-	sprintf( tmp, "%s/%s.rc", workDir, wAppName );
+	sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
 	prefFile = fopen( tmp, "r" );
 	if (prefFile == NULL)
 		return;
@@ -427,6 +428,11 @@ EXPORT const char * wPrefGetSectionItem(
 	return NULL;
 }
 
+/**
+ * Save the configuration to a file. The config parameters are held and updated in an array.
+ * To make the settings persistant, this function has to be called. 
+ *
+ */
 
 EXPORT void wPrefFlush(
 		void )
@@ -442,7 +448,7 @@ EXPORT void wPrefFlush(
 		return;
 	
 	workDir = wGetAppWorkDir();
-	sprintf( tmp, "%s/%s.rc", workDir, wAppName );
+	sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
 	prefFile = fopen( tmp, "w" );
 	if (prefFile == NULL)
 		return;

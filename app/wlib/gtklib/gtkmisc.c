@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.12 2009-05-31 13:13:40 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.13 2009-07-24 15:58:24 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -41,6 +41,7 @@ wWin_p gtkMainW;
 long debugWindow = 0;
 
 char wAppName[256];
+char wConfigName[ 256 ];
 
 #define FOUR		(4)
 #ifndef GTK1

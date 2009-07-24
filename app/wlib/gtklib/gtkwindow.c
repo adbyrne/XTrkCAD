@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.9 2008-07-12 10:52:03 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.10 2009-07-24 15:58:24 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -819,6 +819,21 @@ Create an Icon from a X-bitmap.
 	}
 }
 
+/**
+ * Initialize the application's main window. This function does the necessary initialization 
+ * of the application including creation of the main window.
+ *
+ * \param name IN internal name of the application. Used for filenames etc. 
+ * \param x    IN Initial window width
+ * \param y    IN Initial window height
+ * \param helpStr IN Help topic string
+ * \param labelStr IN window title
+ * \param nameStr IN Window name
+ * \param option IN options for window creation
+ * \param winProc IN pointer to main window procedure
+ * \param data IN User context
+ * \return    window handle or NULL on error
+ */
 
 EXPORT wWin_p wWinMainCreate(
 		const char * name,		/* Application name */
@@ -836,7 +851,19 @@ Create the main application window.
 Must be be called once.
 */
 {
-	strncpy( wAppName, name, sizeof wAppName );
+	char *pos;
+
+	if( pos = strchr( name, ';' )) {
+		/* if found, split application name and configuration name */
+		strncpy( wAppName, name, pos - name );
+		wAppName[ pos - name ] = '\0';
+		strcpy( wConfigName, pos + 1 );
+	} else {
+		/* if not found, application name and configuration name are same */
+		strcpy( wAppName, name );
+		strcpy( wConfigName, name );
+	}
+
 	gtkMainW = wWinCommonCreate( NULL, W_MAIN, x, y, labelStr, nameStr, option, winProc, data );
 
 	wDrawColorWhite = wDrawFindColor( 0xFFFFFF );
