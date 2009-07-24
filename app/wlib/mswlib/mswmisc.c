@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.22 2009-07-10 17:04:25 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.23 2009-07-24 15:07:53 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -168,7 +168,7 @@ extern char *userLocale;
  *****************************************************************************
  */
 
-#ifdef WIN32
+
 DWORD GetTextExtent(
 		HDC hDc,
 		CHAR * str,
@@ -178,7 +178,6 @@ DWORD GetTextExtent(
 		GetTextExtentPoint( hDc, str, len, &size );
 		return size.cx + (size.cy<<16);
 }
-#endif
 
 
 static char * controlNames[] = {
@@ -228,49 +227,6 @@ static UINT curSysRes = 100;
 static UINT curGdiRes = 100;
 static UINT curUsrRes = 100;
 static UINT curMinRes = 100;
-
-void mswCheckResources( void )
-{
-#ifndef WIN32
-/* not needed on WIN32 */
-	UINT sysRes, gdiRes, usrRes, minRes, style;
-	char msg[80];
-	char * cp;
-	sysRes = GetFreeSystemResources( GFSR_SYSTEMRESOURCES );
-	gdiRes = GetFreeSystemResources( GFSR_GDIRESOURCES );
-	usrRes = GetFreeSystemResources( GFSR_USERRESOURCES );
-	minRes = sysRes;
-	if (gdiRes < minRes)
-		minRes = gdiRes;
-	if (usrRes < minRes)
-		minRes = usrRes;
-	if (minRes < curMinRes) {
-		style = 0;
-		if ( (minRes <= 5 && curMinRes > 5) ) {
-			style = MB_ICONHAND;
-			cp = "Danger";
-		} else if ( (minRes <= 10 && curMinRes > 10) ) {
-			style = MB_ICONEXCLAMATION;
-			cp = "Warning";
-		} else if ( (minRes <= 20 && curMinRes > 20) ) {
-			style = MB_ICONINFORMATION;
-			cp = "Note";
-		}
-		if (style) {
-			 sprintf( msg, "%s - low resources\n%2d System\n%2d Gdi\n%2d User",
-						cp, sysRes, gdiRes, usrRes );
-			 MessageBox( NULL, msg, appName, MB_TASKMODAL|MB_OK|style );
-		}
-		curMinRes = minRes;
-	}
-	if (sysRes < curSysRes)
-		curSysRes = sysRes;
-	if (gdiRes < curGdiRes)
-		curGdiRes = gdiRes;
-	if (usrRes < curUsrRes)
-		curUsrRes = usrRes;
-#endif
-}
 
 
 wControl_p mswMapIndex( INDEX_T inx )
@@ -424,8 +380,6 @@ void * mswAlloc(
 		int * index )
 {
 	wControl_p w = (wControl_p)calloc( 1, size );
-	mswCheckResources();
-
 
 	if (w == NULL)
 		abort();
@@ -845,6 +799,21 @@ static wWin_p winCommonCreate(
 #endif
 	return win;
 }
+/**
+ * Initialize the application's main window. This function does the necessary initialization 
+ * of the application including creation of the main window.
+ *
+ * \param name IN internal name of the application. Used for filenames etc. 
+ * \param x    IN size 
+ * \param y    IN size 
+ * \param helpStr IN ??
+ * \param labelStr IN window title
+ * \param nameStr IN ??
+ * \param option IN options for window creation
+ * \param winProc IN pointer to main window procedure
+ * \param data IN ??
+ * \return    window handle or NULL on error
+ */
 
 wWin_p wWinMainCreate(
 		const char * name,
@@ -865,14 +834,34 @@ wWin_p wWinMainCreate(
 	int error;
 	HDC hDc;
 	TEXTMETRIC tm;
+	char *pos;
+	char * configName;
 
-	appName = (char*)malloc( strlen(name)+1 );
-	strcpy( appName, name );
+	/* check for configuration name */
+	if( pos = strchr( name, ';' )) {
+		/* if found, split application name and configuration name */
+		appName = (char *)malloc( pos - name + 1 );
+		strncpy( appName, name, pos - name );
+		appName[ pos - name ] = '\0';
+		configName = (char *)malloc( strlen( name ) + 1 );
+		strcpy( configName, pos + 1 );
+	} else {
+		/* if not found, application name and configuration name are same */
+		appName = (char*)malloc( strlen(name)+1 );
+		configName  = (char*)malloc( strlen(name)+1 );
+		strcpy( appName, name );
+		strcpy( configName, name );
+	}
+
 	appDir = wGetAppWorkDir();
-	if ( appDir == NULL )
+	if ( appDir == NULL ) {
+		free( configName );
 		return NULL;
-	mswProfileFile = (char*)malloc( strlen(appDir)+1+strlen(appName)+1+3+1 );
-	wsprintf( mswProfileFile, "%s\\%s.ini", appDir, appName );
+	}
+	mswProfileFile = (char*)malloc( strlen(appDir)+1+strlen(configName)+1+3+1 );
+	wsprintf( mswProfileFile, "%s\\%s.ini", appDir, configName );
+	free( configName );
+
 	error = WritePrivateProfileString( "mswtest", "test", "ok", mswProfileFile );
 	if ( error <= 0 ) {
 		sprintf( mswTmpBuff, "Can not write to %s.\nPlease make sure the directory exists and is writable", mswProfileFile );
@@ -2231,35 +2220,7 @@ FILE * wFileOpen(
 		const char * fileName,
 		const char * mode )
 {
-#ifdef WIN32
 		return fopen( fileName, mode );
-#else
-	HFILE hf;
-	FILE * f;
-	switch (mode[0]) {
-	case 'r':
-		hf = _lopen( fileName, READ );
-		break;
-	case 'w':
-		hf = _lcreat( fileName, 0 );
-		break;
-	case 'a':
-		hf = _lopen( fileName, WRITE );
-		if (hf != HFILE_ERROR) {
-			_llseek( hf, 0L, 2 );
-		} else {
-			hf = _lcreat( fileName, 0 );
-		}
-		break;
-	default:
-		mswFail( "wFileOpen: bad mode" );
-		return NULL;
-	}
-	if ( hf == HFILE_ERROR )
-		return NULL;
-	f = fdopen( hf, mode );
-	return f;
-#endif
 }
 
 
@@ -2466,11 +2427,6 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 	RECT rect;
 	PAINTSTRUCT ps;
 	HWND hWnd2;
-#ifdef CONTROL3D
-#ifndef WIN32
-	HBRUSH hBrush;
-#endif
-#endif
 	LRESULT ret;
 	HDC hDc;
 	wAccelKey_e extChar;
@@ -2637,13 +2593,8 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 					inMainWndProc = TRUE;
 					if (mswCallBacks[b->type] != NULL &&
 						mswCallBacks[b->type]->messageProc) {
-#ifdef WIN32
 						ret = mswCallBacks[b->type]->messageProc( b, b->hWnd,
 								WM_COMMAND, MAKELPARAM( LOWORD(wParam), BN_CLICKED), (LPARAM)(b->hWnd) );
-#else
-						ret = mswCallBacks[b->type]->messageProc( b, b->hWnd,
-								WM_COMMAND, wParam, MAKELPARAM( b->hWnd, BN_CLICKED ) );
-#endif
 					}
 					inMainWndProc = FALSE;
 					break;
@@ -2799,21 +2750,6 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 			needToDoPendingShow = FALSE;
 		}
 		break;
-
-#ifdef CONTROL3D
-	case WM_SYSCOLORCHANGE:
-		Ctl3dColorChange();
-		break;
-
-#ifndef WIN32
-	case WM_CTLCOLOR:
-		hBrush = Ctl3dCtlColorEx( message, wParam, lParam );
-		if (hBrush != (HBRUSH)0)
-			return (long)(WORD)hBrush;
-		else
-			return DefWindowProc( hWnd, message, wParam, lParam );
-#endif
-#endif
 
 	case 51:
 		count51++;
@@ -3000,23 +2936,12 @@ int FAR PASCAL filterFunc( int nCode, WORD wParam, DWORD lParam )
 int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszCmdLine, int nCmdShow )
 {
 	MSG msg;
-#ifndef WIN32
-	HOOKPROC filterFunc_pi;
-#endif
-#ifdef CONTROL3D
-	BOOL rc;
-#endif
 	HDC hDc;
 	char * argv[20], * cp;
 	int argc = 0;
 	TEXTMETRIC tm;
 	DWORD dw;
 
-#ifdef CONTROL3D
-	rc = Ctl3dRegister( hinstCurrent );
-	rc = Ctl3dAutoSubclass( hinstCurrent );
-	rc = Ctl3dColorChange();
-#endif
 	if (!hinstPrevious)
 		if (!InitApplication(hinstCurrent))
 			return FALSE;
@@ -3031,12 +2956,8 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 	mMenuH = GetSystemMetrics( SM_CYMENU ) + 1;
 	screenWidth = GetSystemMetrics( SM_CXSCREEN );
 	screenHeight = GetSystemMetrics( SM_CYSCREEN );
-#ifdef WIN32
 	mswLabelFont = GetStockObject( DEFAULT_GUI_FONT );
-#else
-	mswLabelFont = GetStockObject( ANSI_VAR_FONT );
-#endif
-	
+
 	hDc = GetDC( 0 );
 	mswScale = GetDeviceCaps( hDc, LOGPIXELSX ) / 96.0;
 	if ( mswScale < 1.0 )
@@ -3049,12 +2970,7 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 
 	mswCreateCheckBitmaps();
 
-#ifdef HELPSTR
-	helpStrF = fopen( "C:\\dave\\helpstr.lst", "w" );
-#endif
-
-	argv[argc++] = "app";
-	for ( cp=(char*)lpszCmdLine; *cp; ) {
+	for ( cp=(char*)GetCommandLine(); *cp; ) {
 		char termChar = ' ';
 		while ( *cp == ' ' ) cp++;
 		if ( *cp == '"' ) {
@@ -3063,9 +2979,16 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 		}
 		argv[argc++] = cp;
 		for ( ; *cp && *cp != termChar; cp++ );
-		*cp++ = 0;
+		/* reached end of line? */
+		if( *cp ) {
+			/* no, terminate argument and continue */
+			*cp++ = 0;
+		} else {
+			/* terminate array as expected */
+			argv[ argc ] = NULL;
+		}
 	}
-	mswWin = wMain( --argc, (char**)argv );
+	mswWin = wMain( argc, (char**)argv );
 	if (mswWin == NULL)
 		return 0;
 
@@ -3083,12 +3006,6 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 		balloonHelpOldFont = SelectObject( hDc, balloonHelpNewFont );
 		ReleaseDC( balloonHelpHWnd, hDc );
 	}
-
-#ifndef WIN32
-	/* F1 works without this on WIN32 */
-	filterFunc_pi = MakeProcInstance( filterFunc, hinstCurrent );
-	filterFunc_h = SetWindowsHookEx( WH_MSGFILTER, filterFunc_pi, hinstCurrent, GetCurrentTask() );
-#endif
 
 	mswRedrawAll();
 	SetCursor( LoadCursor( NULL, IDC_ARROW ) );
@@ -3108,10 +3025,6 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 
 	if( helpInitted == TRUE )
 		HtmlHelp( NULL, NULL, HH_UNINITIALIZE, (DWORD)dwCookie);
-
-#ifdef CONTROL3D
-	Ctl3dUnregister( hinstCurrent );
-#endif
 
 	if (userLocale)
 	{

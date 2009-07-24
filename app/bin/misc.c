@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.43 2009-07-10 17:04:25 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.44 2009-07-24 15:07:52 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2447,9 +2447,12 @@ EXPORT wWin_p wMain(
 	long newToolbarMax;
 	char *cp;
 	char *oldLocale = NULL;
+	char buffer[ STR_SIZE ];
+	unsigned int i;
 
 	initialZoom = 0;
 	initialFile = NULL;
+	strcpy( buffer, sProdNameLower );
 
 	/* Initialize gettext */
 	InitGettext();
@@ -2465,8 +2468,26 @@ EXPORT wWin_p wMain(
 
 	opterr = 0;
 
-	while ((c = getopt (argc, argv, "vl:d:")) != -1)
+	while ((c = getopt (argc, argv, "vl:d:c:")) != -1)
     switch (c) {
+		case 'c':					/* configuration name */
+			/* test for valid filename */
+			for( i = 0; i < strlen( optarg ); i++ ) {
+				if( !isalnum( optarg[ i ]) && optarg[ i ] != '.' ) {
+					NoticeMessage( MSG_BAD_OPTION, _("Ok"), NULL, optarg );
+					exit( 1 );
+				}
+			}			
+			/* append delimiter and argument to configuration name */
+			if( strlen( optarg ) < STR_SIZE - strlen( ";" ) - strlen( buffer ) - 1 ){
+				strcat( buffer, ";" );
+				strcat( buffer, optarg );
+			}
+			else {
+				NoticeMessage( MSG_BAD_OPTION, _("Ok"), NULL, optarg );
+				exit( 1 );
+			}
+			break;
 		case 'v':					/* verbose flag  */
 			verbose++;
             break;
@@ -2483,8 +2504,10 @@ EXPORT wWin_p wMain(
 			logFileName = strdup(optarg);
 			break;
         case '?':
-		case ':':
 			NoticeMessage( MSG_BAD_OPTION, _("Ok"), NULL, argv[ optind - 1 ] );
+			exit( 1 );
+		case ':':
+			NoticeMessage( "Missing parameter for %s", _("Ok"), NULL, argv[ optind - 1 ] );
 			exit( 1 );
 			break;
         default:
@@ -2500,7 +2523,6 @@ EXPORT wWin_p wMain(
 	log_error = LogFindIndex( "error" );
 	log_command = LogFindIndex( "command" );
 
-
 LOG1( log_init, ( "initCustom\n" ) )
 	InitCustom();
 
@@ -2511,7 +2533,7 @@ LOG1( log_init, ( "create main window\n" ) )
 	strcpy( Title1, sProdName );
 	sprintf( message, _("Unnamed Trackplan - %s(%s)"), sProdName, sVersion );
 	wSetBalloonHelp( balloonHelp );
-	mainW = wWinMainCreate( sProdNameLower, 600, 350, "xtrkcadW", message, "main",
+	mainW = wWinMainCreate( buffer, 600, 350, "xtrkcadW", message, "main",
 				F_RESIZE|F_MENUBAR|F_NOTAB|F_RECALLPOS|F_HIDE,
 				MainProc, NULL );
 	if ( mainW == NULL )

@@ -1,7 +1,15 @@
+Jul 24, 2009
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswmisc.c: correct initialization for argv, add option
+		to select configuration file, remove obsolete Win16 code 
+		
 Jul 10, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswmisc.c: initialize the argument array properly
 		CMakeLists.txt, getopt.c: add getopt() 
+
+Version 4.0.3a
+==============
 		
 Jun 05, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
