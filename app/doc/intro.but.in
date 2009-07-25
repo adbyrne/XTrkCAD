@@ -555,23 +555,8 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \S{LinuxInstall} \i{Linux Installation}
 
-\e{XTrackCAD} for LINUX is shipped as a RPM file and a self-extracting archive (executable). 
+\e{XTrackCAD} for LINUX is shipped as a self-extracting archive (executable). 
  
-\n Installing from an RPM file
-
-\lcont{
-
-\dd After downloading the rpm file, do
-
-\dd \c{rpm -ihv \XTCRPMPack}
-
-\dd Replace \c{-ihv} with \c{-Uhv} to upgrade an existing \e{XTrackCAD} installation.
-
-\u000
-
-}
-
-
 \n Installing from the self-extracting archive.
 
 \lcont{
@@ -588,6 +573,60 @@ Throughout this manual the following typographic conventions are used to make fi
 If you install \e{XTrackCAD} into another directory, set the \c{XTRKCADLIB} environment variable to point to that directory.
 
 \rule
+
+\H{startSoftware} \i{Start the Program}
+
+The \e{XTrackCAD} executable is named xtrkcad.exe on Windows and xtrkcad on Linux.
+
+\f{Command Line}
+
+On Windows:
+
+\c xtrkcad [/c config] [/v] [/l logfile] [/d logcontrol] layoutfile
+
+On Linux:
+
+\c xtrkcad [-c config] [-v] [-l logfile] [-d logcontrol] layoutfile
+
+\f{Command line parameters}
+
+\dt \c{c config}
+
+\dd configuration to use. This allows you to have several distinct configurations (eg. 
+parameter files, display options).
+
+\u000
+
+\dt \c{layoutfile}
+
+\dd filename for the layout to load. 
+This parameter takes precedence over the option to resume with the last layout (\K{cmdPref}).
+
+\f{Debugging Parameters}
+
+The following parameters are for debugging purposes and are mainly of interest to the 
+developers.
+
+\dt \c{v}
+
+\dd verbose mode.
+
+\u000
+
+\dt \c{d logcontrol}
+
+\dd specifies the amount of logging. The argument logcontrol has the format \c{logmodule[=level]}.
+logmodule defines the functionality that should be logged, the optional level specifies the loglevel.
+Defaults are no modules are logged and loglevel is 1 if omitted from logonctrol parameter.
+
+\u000
+
+\dt \c{l logfile}
+
+\dd set logfile, only needed in conjunction with the debug option.
+
+
+
 
 \H{introQT} Quick Tour
 
@@ -659,7 +698,9 @@ Information within this section of the manual identifies installation directory 
 
 \b The \e{XTrackCAD Working} directory, which contains configuration and Check Point files.
 
-On MS-Windows the \e{Install} and \e{Working} directories are set when you install \e{XTrackCAD}.
+On MS Windows the \e{Install} directory is set when you install \e{XTrackCAD}. All data files (parameters, 
+demos, examples) can be found in the \c{share/xtrkcad} subdirectory underneath the \e{Install} directory. 
+The \e{Working} directory is in your personal profile.
 
 On Linux the \e{Install} directory is usually \c{/usr/local/lib/xtrkcad/}, but you can change this by defining the \c{XTRKCADLIB} environment variable before starting \e{XTrackCAD}. The working directory is \c{\{HOME\}/.xtrkcad/}.
 
@@ -679,7 +720,7 @@ Example layouts can be found in the \c{example} directory under the \e{XTrackCAD
 
 \u000
 
-\b \c{xtrkcad.chm} (on MS-Windows) or \c{xtrkcad.help} (on Linux) is the \e{XTrackCAD} help file.
+\b \c{xtrkcad.chm} (on MS-Windows) is the \e{XTrackCAD} help file.
 
 \u000
 
@@ -688,10 +729,6 @@ Example layouts can be found in the \c{example} directory under the \e{XTrackCAD
 \u000
 
 \b \c{xtrkcad.tip} contains the Tip of the Day information accessible from the \f{Help} menu or shown during startup.
-
-\u000
-
-\b \c{xtrkcad.upd} contains the list of parameter files supplied with \e{XTrackCAD}
 
 \u000
 
