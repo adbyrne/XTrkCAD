@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.12 2009-07-24 15:58:24 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.13 2009-07-29 17:07:12 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -124,10 +124,17 @@ EXPORT const char * wGetAppLibDir( void )
 	return NULL;
 }
 
+/**
+ * Get the working directory for the application. This directory is used for storing
+ * internal files including rc files. If it doesn't exist, the directory is created
+ * silently.
+ *
+ * \return    pointer to the working directory
+ */
+
+
 EXPORT const char * wGetAppWorkDir(
 		void )
-/*
-*/
 {
 	char tmp[BUFSIZ+20];
 	char * homeDir;
@@ -144,10 +151,6 @@ EXPORT const char * wGetAppWorkDir(
 	if ( (dirp = opendir(appWorkDir)) != NULL ) {
 		closedir(dirp);
 	} else {
-		sprintf( tmp, _("Creating %s"), appWorkDir );
-		if( !wNoticeEx( NT_INFORMATION, tmp, _("Ok"), _("Exit") ) ) {
-			wExit(0);
-		}
 		if ( mkdir( appWorkDir, 0777 ) == -1 ) {
 			sprintf( tmp, _("Cannot create %s"), appWorkDir );
 			wNoticeEx( NT_ERROR, tmp, _("Exit"), NULL );
