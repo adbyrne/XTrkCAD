@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcustmgm.c,v 1.3 2008-01-23 21:55:01 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcustmgm.c,v 1.4 2009-07-30 16:58:42 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -173,6 +173,7 @@ static int CustomDoExport(
 	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
 	wIndex_t inx, cnt;
 	custMgmContext_p context = NULL;
+	char *oldLocale = NULL;
 
 	if ( selcnt <= 0 )
 		return FALSE;
@@ -200,6 +201,9 @@ static int CustomDoExport(
 		NoticeMessage( MSG_CUSTMGM_CANT_WRITE, _("Ok"), NULL, pathName );
 		return FALSE;
 	}
+
+	oldLocale = SaveLocale("C");
+
 	if ( rc == -1 )
 		fprintf( customMgmF, "CONTENTS %s\n", custMgmContentsStr );
 
@@ -212,6 +216,7 @@ static int CustomDoExport(
 		if (!context->proc( CUSTMGM_DO_COPYTO, context->data )) {
 			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), pathName );
 			fclose( customMgmF );
+			RestoreLocale(oldLocale);
 			return FALSE;
 		}
 		context->proc( CUSTMGM_DO_DELETE, context->data );
@@ -221,6 +226,7 @@ static int CustomDoExport(
 		cnt--;
 	}
 	fclose( customMgmF );
+	RestoreLocale(oldLocale);
 	LoadParamFile( pathName, fileName, NULL );
 	DoChangeNotification( CHANGE_PARAMS );
 	return TRUE;
