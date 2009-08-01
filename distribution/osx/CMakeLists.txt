@@ -16,7 +16,6 @@ INSTALL(DIRECTORY
 INSTALL(FILES
   ${MACPORTS_DIR}/etc/pango/pangorc
   ${MACPORTS_DIR}/etc/pango/pango.modules
-  ${MACPORTS_DIR}/etc/pango/pangox.aliases
   DESTINATION etc/pango
   )
 

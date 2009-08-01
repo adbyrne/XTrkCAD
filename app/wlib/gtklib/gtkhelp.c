@@ -1,7 +1,7 @@
 /** \file gtkhelp.c
  * Balloon help ( tooltips) and main help functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.10 2009-06-09 19:20:31 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.11 2009-08-01 03:59:13 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -174,6 +174,7 @@ void wEnableBalloonHelp( int enable )
 
 void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 {
+	PangoLayout * layout;
 	wPos_t x, y;
 	wPos_t w, h;
 	wPos_t xx, yy;
@@ -208,7 +209,8 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 	balloonMsg = msg;
 	gtk_widget_hide( balloonF );
 #ifndef GTK1
-	w = gdk_string_width( gtk_style_get_font(gtk_widget_get_style(balloonPI)), msg );
+    layout = gtk_widget_create_pango_layout( balloonPI, msg );
+    pango_layout_get_pixel_size( layout, &w, &h );
 #else
 	w = gdk_string_width( balloonPI->style->font, msgConverted );
 #endif

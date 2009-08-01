@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.6 2009-05-15 18:54:20 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.7 2009-08-01 03:59:02 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -30,13 +30,9 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "X11/Xlib.h"
-
 #include "wlib.h"
 #include "gtkint.h"
 #include "i18n.h"
-
-extern Display * gdk_display;
 
 #ifndef TRUE
 #define TRUE (1)
@@ -85,8 +81,6 @@ typedef struct {
 static dynArr_t fontInfo_da;
 #define fontInfo(N) DYNARR_N(fontInfo_t,fontInfo_da,N)
 
-static long fontClock = 1;
-
 static long curFontInx;
 static long curFontWeight;
 static long curFontSlant;
@@ -110,7 +104,6 @@ static void doFontOk( void )
 		curFontWeight = newFontWeight;
 		curFontSlant = newFontSlant;
 	}
-	fontClock++;
 	wWinShow( fontSelW, FALSE );
 	wPrefSetString( "font", "name", fontInfo(curFontInx).fullName[curFontWeight][curFontSlant] );
 	wPrefSetInteger( "font", "size", fontSize );
@@ -125,8 +118,7 @@ static void doFontCancel( void )
 
 
 void gtkDrawString( wDraw_p, wPos_t, wPos_t, const char *, wFontSize_t, wDrawColor, wDrawOpts );
-double fontSize1 = 50.0;
-wDrawColor black;
+static wDrawColor black;
 
 static void fontRedraw( wDraw_p b, void * context, wPos_t w, wPos_t y )
 {
@@ -138,18 +130,6 @@ static void fontRedraw( wDraw_p b, void * context, wPos_t w, wPos_t y )
 		return;
 	gtkDrawString( b, 0, 8, sampleText, (double)fontSize, black, 0 );
 }
-
-#ifdef LATER
-static void fontProc( wWin_p win, winProcEvent e, void * context )
-{
-	switch( e ) {
-	case wRedraw_e:
-		fontRedraw( font_d, NULL, 0, 0 );
-		break;
-	default:
-	}
-}
-#endif
 
 
 static void selectAttr( void )
@@ -236,7 +216,7 @@ static int cmpFontName( const void * a, const void * b )
 }
 
 
-void findFont( const char * fontName )
+static void findFont( const char * fontName )
 {
 	int f, w, s;
 	if ( fontName == NULL )
@@ -258,9 +238,17 @@ static wBool_t fontInitted = FALSE;
 
 static wBool_t fontInit( wBool_t getPref )
 {
-	char ** fonts, *fn, *fw, *fs;
-	char fontName[80], fullName[80];
-	int count, i;
+	PangoFontFamily **families;
+	gint n_families;
+	PangoFontFace **faces;
+	int n_faces;
+	int i, j, k;
+	char ** fonts;
+	const char *familyName, *faceName;
+	PangoFontDescription *fontDesc;
+	PangoWeight weight;
+	PangoStyle style;
+	char fullName[1024];
 	long ifw, ifs;
 	FILE * f=NULL;
 	long stdFontInx;
@@ -273,48 +261,47 @@ static wBool_t fontInit( wBool_t getPref )
 	black = wDrawFindColor( 0 );
 	if (wDebugFont >= 2)
 		f = fopen( "fonts.lst", "w" );
-	fonts = XListFonts( gdk_display, "-*-*-*-*-*-*-0-0-*-*-*-0-iso8859-*", 1000, &count );
-	for (i=0;i<count;i++) {
+	pango_context_list_families(gtk_widget_get_pango_context(GTK_WIDGET(gtkMainW->gtkwin)), &families, &n_families);
+	for (i=0; i<n_families; i++) {
+		familyName = pango_font_family_get_name(families[i]);
 		if (wDebugFont >= 2)
-			fprintf( f, "%s\n", fonts[i]+1 );
-		strncpy( fontName, fonts[i]+1, sizeof fontName );
-		strtok( fontName, "-" );
-		fn = strtok( NULL, "-" );
-		fw = strtok( NULL, "-" );
-		fs = strtok( NULL, "-" );
-		if ((!fn) || (!fw) || (!fs))
-			continue;
-		if (strcasecmp( fw, "medium" ) == 0 )
-			ifw = FW_MEDIUM;
-		else if (strcasecmp( fw, "bold" ) == 0 )
-			ifw = FW_BOLD;
-		else if (strcasecmp( fw, "demibold" ) == 0 )
-			ifw = FW_BOLD;
-		else if (strcasecmp( fw, "light" ) == 0 )
-			ifw = FW_MEDIUM;
-		else {
-			if (wDebugFont >= 1)
-				fprintf( stderr, "Unknown font weight: %s\n", fw );
-			continue;
+			fprintf( f, "%s\n", familyName );
+		pango_font_family_list_faces(families[i], &faces, &n_faces);
+		for (j=0; j<n_faces; ++j) {
+			fontDesc = pango_font_face_describe(faces[j]);
+			weight = pango_font_description_get_weight(fontDesc);
+			style = pango_font_description_get_style(fontDesc);
+			faceName = pango_font_face_get_face_name(faces[j]);
+			if (weight == PANGO_WEIGHT_NORMAL)
+				ifw = FW_MEDIUM;
+			else if (weight == PANGO_WEIGHT_BOLD)
+				ifw = FW_BOLD;
+			else {
+				if (wDebugFont >= 1)
+					fprintf( stderr, "Unsuported font weight: %d\n", weight );
+				pango_font_description_free(fontDesc);
+				continue;
+			}
+			if (style == PANGO_STYLE_NORMAL)
+				ifs = FS_REGULAR;
+			else if (style == PANGO_STYLE_ITALIC)
+				ifs = FS_ITALIC;
+			else {
+				if (wDebugFont >= 1)
+					fprintf( stderr, "Unsuported font slant: %d\n", style );
+				continue;
+				pango_font_description_free(fontDesc);
+			}
+			sprintf( fullName, "[%s] [%s] []", familyName, faceName );
+			addFont( familyName, ifw, ifs, fullName );
+			pango_font_description_free(fontDesc);
 		}
-		if (strcasecmp( fs, "r" ) == 0 )
-			ifs = FS_REGULAR;
-		else if (strcasecmp( fs, "o" ) == 0 )
-			ifs = FS_ITALIC;
-		else if (strcasecmp( fs, "i" ) == 0 )
-			ifs = FS_ITALIC;
-		else {
-			if (wDebugFont >= 1)
-				fprintf( stderr, "Unknown font slant: %s\n", fs );
-			continue;
-		}
-		sprintf( fullName, "%s-%s-%s", fn, fw, fs );
-		addFont( fn, ifw, ifs, fullName );
+		g_free(faces);
 	}
+	g_free(families);
 	if (wDebugFont >= 2)
 		fclose(f);
-	XFreeFontNames( fonts );
-	qsort( fontInfo_da.ptr, fontInfo_da.cnt, sizeof *(fontInfo_t*)NULL, cmpFontName );/**/
+	qsort( fontInfo_da.ptr, fontInfo_da.cnt, sizeof *(fontInfo_t*)NULL, cmpFontName );
 
 	standardFonts[F_TIMES] = -1;
 	standardFonts[F_HELV] = -1;
@@ -368,7 +355,7 @@ void wSelectStandardFont( int fontNum )
 	fontSelectMode = 0;
 }
 
-void fontToggleWeightButton( void* junk )
+static void fontToggleWeightButton( void* junk )
 {
 	newFontWeight = !newFontWeight;
 	wButtonSetBusy( fontWeightB, newFontWeight != 0 );
@@ -376,7 +363,7 @@ void fontToggleWeightButton( void* junk )
 }
 
 
-void fontToggleSlantButton( void* junk )
+static void fontToggleSlantButton( void* junk )
 {
 	newFontSlant = !newFontSlant;
 	wButtonSetBusy( fontSlantB, newFontSlant != 0 );
@@ -495,18 +482,13 @@ wFont_p wStandardFont( int face, wBool_t bold, wBool_t italic )
 	return f;
 }
 
-int wFontClock( void )
-{
-	return fontClock;
-}
-
 #ifdef TEST
-void doSel( wButton_p b )
+static void doSel( wButton_p b )
 {
 	wSelectFont("Test");
 }
 
-void Init( INT_T argc, char * argv[] )
+static void Init( INT_T argc, char * argv[] )
 {
 }
 #endif
