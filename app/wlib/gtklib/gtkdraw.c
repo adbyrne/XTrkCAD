@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw.c,v 1.7 2009-06-09 19:20:31 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw.c,v 1.8 2009-08-07 03:32:06 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -34,7 +34,7 @@
 #include "gdk/gdkkeysyms.h"
 
 long wDebugFont = 0;
-long drawVerbose = 0;
+static long drawVerbose = 0;
 
 struct wDrawBitMap_t {
 		int w;
@@ -60,11 +60,11 @@ struct wDraw_t {
 		GdkGC * gc;
 		wDrawWidth lineWidth;
 		wDrawOpts opts;
-		GdkFont * font;
+		PangoFontDescription * fontDesc;
 		wPos_t maxW;
 		wPos_t maxH;
- 	unsigned long lastColor;
- 	wBool_t lastColorInverted;
+		unsigned long lastColor;
+		wBool_t lastColorInverted;
 		const char * helpStr;
 
 		wPos_t lastX;
@@ -73,14 +73,7 @@ struct wDraw_t {
 		wBool_t delayUpdate;
 		};
 
-wBool_t auto_expand = FALSE;
-wBool_t auto_shrink = FALSE;
-
-int xvIgnoreEvents = FALSE;
-
 struct wDraw_t psPrint_d;
-
-int wFontClock( void );
 
 /*****************************************************************************
  *
@@ -290,13 +283,16 @@ EXPORT void wDrawPoint(
 
 static double fontFactor = 1.0;
 
+/* TODO: figure out what this formula means and document it */
+#define FONTSIZE_TO_PANGOSIZE(fs) ((gint) (fs * fontFactor + .5))
+
 #define FC_SIZE (6)
 typedef struct fontCache_t * fontCache_p;
 struct fontCache_t {
 		fontCache_p next, prev;
 		const char * name;
 		int size;
-		GdkFont * fi;
+		PangoFontDescription * fd;
 		};
 static struct fontCache_t fontCacheList[FC_SIZE];
 static fontCache_p fontCache = NULL;
@@ -325,8 +321,8 @@ EXPORT int wLoadFont(
 		int force )
 {
 	int size;
-	GdkFont * fi;
-	char tmp[80];
+	PangoFontDescription * fd;
+	char tmp[1024];
 	fontCache_p fc;
 
 	if (fontName == NULL)
@@ -337,12 +333,13 @@ EXPORT int wLoadFont(
 		for ( fc = fontCache; fc < fontCache+FC_SIZE; fc++ ) {
 			fc->next = fc+1;
 			fc->prev = fc-1;
+            fc->name = NULL;
 		}
 		fontCache->prev = fontCache+FC_SIZE-1;
 		fontCache->prev->next = fontCache;
 	}
 
-	size = (int)(fs*fontFactor+0.5);
+	size = FONTSIZE_TO_PANGOSIZE(fs);
 	if (size <= 1)
 		return FALSE;
 	if (!force) {
@@ -362,7 +359,7 @@ EXPORT int wLoadFont(
 					if (wDebugFont>=3)
 						printFontCache("LRU shuffle");
 				}
-				bd->font = f->fi;
+				bd->fontDesc = f->fd;
 				return TRUE;
 			}
 			f = f->next;
@@ -370,21 +367,15 @@ EXPORT int wLoadFont(
 				break;
 		}
 	}
-	/*wWinSetBusy( bd->parent, TRUE );*/
-	sprintf( tmp, "-*-%s-*-*-%d-*-*-*-*-*-iso8859-*", fontName, size );
+	sprintf( tmp, "%s %d", fontName, size );
 	if (wDebugFont >= 2)
-		fprintf(stderr, "loadFont %s\n", tmp );
-	fi = gdk_font_load( tmp );
-	/*wWinSetBusy( bd->parent, FALSE );*/
-	if (fi == 0) {
-		fprintf(stderr, "Can't load font %s\n", tmp);
-		return FALSE;
-	}
+		fprintf(stderr, "loadFont \"%s\"\n", tmp);
+	fd = pango_font_description_from_string( tmp );
 	fontCache = fontCache->prev;
-	fontCache->fi = fi;
+	fontCache->fd = fd;
 	fontCache->size = size;
 	fontCache->name = fontName;
-	bd->font = fi;
+	bd->fontDesc = fd;
 	if (wDebugFont>=2)
 		printFontCache("Load");
 	return TRUE;
@@ -400,19 +391,49 @@ EXPORT void gtkDrawString(
 		wDrawOpts opts )
 {
 	GdkGC * gc;
+	PangoLayout *layout;
 	GdkRectangle update_rect;
 	wPos_t w;
-
+	wPos_t h;
+	PangoContext * context;
+	PangoFontMetrics * metrics;
+	gint ascent;
+	gint descent;
+	gchar * utf8;
+	gint size = FONTSIZE_TO_PANGOSIZE(fs);
+	
 	gc = selectGC( bd, 0, wDrawLineSolid, color, opts );
 	x = INMAPX(bd,x);
 	y = INMAPY(bd,y);
-	w = gdk_string_width( bd->font, s );
-	gdk_draw_string( bd->pixmap, bd->font, gc, x, y, s );
+	
+	utf8 = g_convert (s, -1, "UTF-8", "ISO-8859-1", NULL, NULL, NULL);
+	
+	// draw text
+	layout = gtk_widget_create_pango_layout( bd->widget, utf8);
+	pango_layout_set_font_description(layout, bd->fontDesc);
+	pango_font_description_set_size(bd->fontDesc,
+									FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
+	if (wDebugFont >= 3)
+		fprintf(stderr, "drawing text: \"%s\", fontsize=%lf, fontname=\"%s\"\n",
+				utf8, fs, pango_font_description_to_string(bd->fontDesc));
+	pango_layout_get_pixel_size(layout, &w, &h);
+	gdk_draw_layout(bd->pixmap, gc, x, y, layout);
+	
+	// width, height, ascent and descent
+	context = gtk_widget_get_pango_context(bd->widget);
+	metrics = pango_context_get_metrics(context, bd->fontDesc,
+										pango_context_get_language(context));
+	ascent  = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
+	descent = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
+	pango_font_metrics_unref(metrics);
+	
+	g_object_unref(layout);
+	
 	if ( bd->delayUpdate || bd->widget == NULL) return;
 	update_rect.x = x-1;
-	update_rect.y = y-bd->font->ascent-1;
+	update_rect.y = y-ascent-1;
 	update_rect.width = w;
-	update_rect.height = bd->font->ascent+bd->font->descent+2;
+	update_rect.height = ascent+descent+2;
 	gtk_widget_draw( bd->widget, &update_rect );
 }
 
@@ -446,33 +467,48 @@ EXPORT void wDrawGetTextSize(
 		wFont_p fp,
 		wFontSize_t fs )
 {
-	gint textWidth;
-	int len = strlen(s);
-	GdkGC * gc;
+	int textWidth;
+	int textHeight;
 	const char * font;
-	gint lbearing, rbearing, ascent, descent;
-
+	PangoFontDescription * fontDesc;
+	PangoLayout * layout;
+	PangoContext * context;
+	PangoFontMetrics * metrics;
+	gint ascent;
+	gint descent;
+	gchar * utf8;
+	
 	*w = 0;
 	*h = 0;
-	gc = selectGC( bd, 0, wDrawLineSolid, wDrawColorBlack, 0 );
 	font = gtkFontTranslate( fp );
 	if ( !wLoadFont( bd, font, fs, FALSE ) )
 		return;
-
-	textWidth = gdk_text_width( bd->font, s, len );
-	*w = textWidth;
-	*h = bd->font->ascent;
-	*d = bd->font->descent;
-
-	gdk_text_extents( bd->font, s, len, &lbearing, &rbearing, &textWidth, &ascent, &descent );
-	*w = textWidth;
-	*h = ascent;
-	*d = descent;
-#ifdef LATER
+	
+	utf8 = g_convert (s, -1, "UTF-8", "ISO-8859-1", NULL, NULL, NULL);
+	
+	// draw text in a temporary layout
+	layout = gtk_widget_create_pango_layout(bd->widget, utf8);
+	pango_layout_set_font_description(layout, bd->fontDesc);
+	pango_font_description_set_size(bd->fontDesc,
+									FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
+	
+	// width, height, ascent and descent
+	pango_layout_get_pixel_size(layout, &textWidth, &textHeight);
+	context = gtk_widget_get_pango_context(bd->widget);
+	metrics = pango_context_get_metrics(context, bd->fontDesc,
+										pango_context_get_language(context));
+	ascent  = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
+	descent = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
+	pango_font_metrics_unref(metrics);
+	
+	g_object_unref(layout);
+	
+	*w = (wPos_t) textWidth;
+	*h = (wPos_t) ascent;
+	*d = (wPos_t) descent;
+	
 	if (debugWindow >= 3)
-		fprintf(stderr,"f.asc=%d, f.desc=%d, tw=%d (%d %d)\n",
-			bd->font->ascent, bd->font->descent, textWidth, *w, *h );
-#endif
+		fprintf(stderr,"text metrics: w=%d, h=%d, d=%d\n", *w, *h, *d);
 }
 
 
@@ -787,11 +823,7 @@ EXPORT void wDrawSetSize(
 	repaint = (w != bd->w || h != bd->h);
 	bd->w = w;
 	bd->h = h;
-#ifndef GTK1
 	gtk_widget_set_size_request( bd->widget, w, h );
-#else
-	gtk_widget_set_usize( bd->widget, w, h );
-#endif
 	if (repaint) {
 		if (bd->pixmap)
 			gdk_pixmap_unref( bd->pixmap );
@@ -1079,11 +1111,7 @@ EXPORT wDraw_p wDrawCreate(
 
 	bd->widget = gtk_drawing_area_new();
 	gtk_drawing_area_size( GTK_DRAWING_AREA(bd->widget), width, height );
-#ifndef GTK1
 	gtk_widget_set_size_request( GTK_WIDGET(bd->widget), width, height );
-#else
-	gtk_widget_set_usize( GTK_WIDGET(bd->widget), width, height );
-#endif
 	gtk_signal_connect (GTK_OBJECT (bd->widget), "expose_event",
 						   (GtkSignalFunc) draw_expose_event, bd);
 	gtk_signal_connect (GTK_OBJECT(bd->widget),"configure_event",
@@ -1115,12 +1143,7 @@ EXPORT wDraw_p wDrawCreate(
 	bd->maxW = bd->w = width;
 	bd->maxH = bd->h = height;
 
-#ifndef GTK1
 	gtk_fixed_put( GTK_FIXED(parent->widget), bd->widget, bd->realX, bd->realY );
-#else
-	gtk_container_add( GTK_CONTAINER(parent->widget), bd->widget );
-	gtk_widget_set_uposition( bd->widget, bd->realX, bd->realY );
-#endif
 	gtkControlGetSize( (wControl_p)bd );
 	gtk_widget_realize( bd->widget );
 	bd->pixmap = gdk_pixmap_new( bd->widget->window, width, height, -1 );
