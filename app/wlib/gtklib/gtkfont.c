@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.7 2009-08-01 03:59:02 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.8 2009-08-07 03:31:05 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -278,7 +278,7 @@ static wBool_t fontInit( wBool_t getPref )
 				ifw = FW_BOLD;
 			else {
 				if (wDebugFont >= 1)
-					fprintf( stderr, "Unsuported font weight: %d\n", weight );
+					fprintf( stderr, "Unsuported font weight (%d) for \"%s %s\"\n", weight, familyName, faceName );
 				pango_font_description_free(fontDesc);
 				continue;
 			}
@@ -288,11 +288,13 @@ static wBool_t fontInit( wBool_t getPref )
 				ifs = FS_ITALIC;
 			else {
 				if (wDebugFont >= 1)
-					fprintf( stderr, "Unsuported font slant: %d\n", style );
+					fprintf( stderr, "Unsuported font slant (%d) for \"%s %s\"\n", style, familyName, faceName );
 				continue;
 				pango_font_description_free(fontDesc);
 			}
-			sprintf( fullName, "[%s] [%s] []", familyName, faceName );
+			sprintf( fullName, "%s %s", familyName, faceName );
+			if (wDebugFont >= 2)
+				fprintf( f, "  %s\n", fullName );
 			addFont( familyName, ifw, ifs, fullName );
 			pango_font_description_free(fontDesc);
 		}
@@ -307,10 +309,9 @@ static wBool_t fontInit( wBool_t getPref )
 	standardFonts[F_HELV] = -1;
 	stdFontInx = -1;
 	for ( i=0;i<fontInfo_da.cnt;i++ ) {
-		if (strcmp(fontInfo(i).faceName, stdSerifName?stdSerifName:"times")==0) {
-			curFontInx = newFontInx = i;
+		if (strcasecmp(fontInfo(i).faceName, stdSerifName?stdSerifName:"times")==0) {
 			standardFonts[F_TIMES] = i;
-		} else if ( strcmp(fontInfo(i).faceName, stdSanserifName?stdSanserifName:"helvetica") == 0 )
+		} else if ( strcasecmp(fontInfo(i).faceName, stdSanserifName?stdSanserifName:"helvetica") == 0 )
 			standardFonts[F_HELV] = i;
 		if ( stdFontInx < 0 &&
 			 fontInfo(i).fullName[0][0] != NULL )
