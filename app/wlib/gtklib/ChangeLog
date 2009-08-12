@@ -1,5 +1,5 @@
 Aug 12, 2009
-	ENH: 
+	ENH: Matthew Sheets
 		wpref.c: initialize with system default config from /etc 
 Jul 29, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
