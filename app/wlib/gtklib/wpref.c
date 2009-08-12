@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.13 2009-07-29 17:07:12 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.14 2009-08-12 19:02:19 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -155,6 +155,20 @@ EXPORT const char * wGetAppWorkDir(
 			sprintf( tmp, _("Cannot create %s"), appWorkDir );
 			wNoticeEx( NT_ERROR, tmp, _("Exit"), NULL );
 			wExit(0);
+		} else {
+			/* 
+			 * check for default configuration file and copy to 
+			 * the workdir if it exists
+			 */
+			struct stat stFileInfo;
+			char appEtcConfig[BUFSIZ];
+			sprintf( appEtcConfig, "/etc/%s.rc", wAppName );
+			
+			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
+				char copyConfigCmd[(BUFSIZ * 2) + 3];
+				sprintf( copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir );
+				system( copyConfigCmd );
+			}
 		}
 	}
 	return appWorkDir;
