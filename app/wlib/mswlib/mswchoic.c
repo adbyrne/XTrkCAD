@@ -296,9 +296,9 @@ static wChoice_p choiceCreate(
 	maxW = 0;
 	if (helpStr)
 		helpStrCopy = mswStrdup( helpStr );
-	for (lp = b->labels, cnt=0; *lp; lp++, cnt++, butts++ ) {
+	for (lp = b->labels, cnt=0; *lp; lp++, cnt++, butts++ ) {			
 			*butts = (wChoiceItem_p)mswAlloc( parent, B_CHOICEITEM,
-				mswStrdup(_(*lp)), sizeof( wChoiceItem_t ), data, &index );
+				mswStrdup(_((char *)*lp)), sizeof( wChoiceItem_t ), data, &index );
 			(*butts)->owner = b;
 			(*butts)->hWnd = hButt = CreateWindow( "BUTTON", (*butts)->labelStr,
 						bs | WS_CHILD | WS_VISIBLE | mswGetBaseStyle(parent), b->x+pw, b->y+ph,

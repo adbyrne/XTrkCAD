@@ -183,3 +183,6 @@ int mswGetColorList( RGBQUAD * );
 int mswGetPaletteClock( void );
 HPALETTE mswPalette;
 HPALETTE mswCreatePalette( void );
+
+/* gwin32.c*/
+char *g_win32_getlocale (void);
