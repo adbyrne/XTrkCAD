@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.9 2009-07-09 18:29:42 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.10 2009-08-16 13:07:14 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -114,13 +114,6 @@ void DoStructDesignerRedir( void )
 		structDesignerP(NULL);
 }
 #endif
-
-void InitNewTurnRedir( wMenu_p m )
-{
-#ifdef ENABLEFLEX
-	InitNewTurn(m);
-#endif
-}
 
 #include "bitmaps/xtc64.xbm"
 #define icon64_width	xtc64_width

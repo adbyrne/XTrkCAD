@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.7 2009-05-25 18:11:03 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.8 2009-08-16 13:07:14 m_fischer Exp $
  *
  * T_TURNOUT
  *
@@ -2369,7 +2369,7 @@ static STATUS_T CmdTurnout(
 		if (turnoutW == NULL) {
 /*			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle("Turnout"), "Ok", , (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE|F_RECALLSIZE, TurnoutDlgUpdate ); */
 			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle(_("Turnout")), _("Close"), (paramActionOkProc)TurnoutOk, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate ); 
-			InitNewTurnRedir( turnoutNewM );
+			InitNewTurn( turnoutNewM );
 		}
 /*		ParamDialogOkActive( &turnoutPG, FALSE ); */
 		turnoutIndex = wListGetIndex( turnoutListL );
