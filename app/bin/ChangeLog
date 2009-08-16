@@ -1,3 +1,12 @@
+Aug 16, 2009
+	FIX:  Martin Fischer <m_fischer@users.sourceforge.net>
+		CMakeLists.txt cprint.c denum.c i18n.c i18n.h misc.c
+		Improve internationalization support, use simple gettext on Win32
+
+Aug 16, 2009
+	FIX:  Martin Fischer <m_fischer@users.sourceforge.net>
+		custom.c cturnout.c: Code cleanup
+		
 Jul 30, 2009
 	FIX: Martin Fischer <m_fischer@users.sourceforge.net>
 		dcustmgm.c: set locale when exporting to parameter

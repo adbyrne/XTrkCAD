@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.44 2009-07-24 15:07:52 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.45 2009-08-16 13:26:41 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2037,6 +2037,7 @@ static void SetAccelKey(
 #include "bitmaps/document-new.xpm"
 #include "bitmaps/document-save.xpm"
 #include "bitmaps/document-open.xpm"
+#include "bitmaps/document-print.xpm"
 
 static void CreateMenus( void )
 {
@@ -2091,6 +2092,7 @@ static void CreateMenus( void )
 	AddToolbarButton( "menuFile-clear", wIconCreatePixMap(document_new), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoClear, NULL );
 	AddToolbarButton( "menuFile-load", wIconCreatePixMap(document_open), IC_MODETRAIN_TOO, (addButtonCallBack_t)ChkLoad, NULL );
 	AddToolbarButton( "menuFile-save", wIconCreatePixMap(document_save), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoSave, NULL );
+//	AddToolbarButton( "menuFile-print", wIconCreatePixMap(document_print_xpm), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoPrint, NULL );
 
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton( "cmdZoomIn", wIconCreatePixMap(zoomin_xpm), IC_MODETRAIN_TOO,
@@ -2327,7 +2329,7 @@ static void CreateMenus( void )
 	InitCmdTrain( manageM );
 	wMenuSeparatorCreate( manageM );
 
-	InitNewTurnRedir( wMenuMenuCreate( manageM, "cmdTurnoutNew", _("Tur&nout Designer...") ) );
+	InitNewTurn( wMenuMenuCreate( manageM, "cmdTurnoutNew", _("Tur&nout Designer...") ) );
 	
 	MiscMenuItemCreate( manageM, NULL, "cmdGroup", _("&Group"), ACCL_GROUP, (void*)(wMenuCallBack_p)DoGroup, IC_SELECTED, (void *)0 );
 	MiscMenuItemCreate( manageM, NULL, "cmdUngroup", _("&Ungroup"), ACCL_UNGROUP, (void*)(wMenuCallBack_p)DoUngroup, IC_SELECTED, (void *)0 );

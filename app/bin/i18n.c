@@ -17,6 +17,7 @@
  */
 
 #include "i18n.h"
+#include "wlib.h"
 
 #include <locale.h>
 #include <stdio.h>

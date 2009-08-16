@@ -1,8 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprint.c,v 1.5 2008-02-03 08:52:31 m_fischer Exp $
+/** \file cprint.c
+ * Printing functions. 
  *
- * PRINT
- *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprint.c,v 1.6 2009-08-16 13:26:41 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -325,6 +324,13 @@ static drawCmd_t page_d = {
 		Pix2CoOrd, CoOrd2Pix };
 
 
+/**
+ * Print the basic layout for a trackplan. This includes the frame and some
+ * information like room size, print scale etc..
+ *
+ * \param roomSize IN size of the layout  
+ */
+
 static void PrintGaudyBox(
 		coOrd roomSize )
 {
@@ -340,7 +346,6 @@ static void PrintGaudyBox(
 	/*GetTitle();*/
 	time(&clock);
 	tm = localtime(&clock);
-/*	strftime( dat, sizeof dat, "%a %y %b %d", tm ); */
 	strftime( dat, STR_SIZE, "%x", tm );
 
 	smiggin = wDrawGetDPI( print_d.d );
@@ -379,8 +384,6 @@ static void PrintGaudyBox(
 	p00.x = pageW-((157.0/72.0)+0.05); p00.y = 0.5+0.25+0.05;
 	DrawString( &page_d, p00, 0.0, dat, fp, 16.0, wDrawColorBlack );
 	p00.y = 0.5+0.05;
-	/*DrawString( &page_d, p00,
-				0.0, (regName[0]?regName:"UNREGISTERED"), fp, 16.0, wDrawColorBlack );*/
 
 	DrawTextSize( &mainD, Title1, fp, 16.0, FALSE, &textsize );
 	p00.x = (pageW/2.0)-(textsize.x/2.0);
@@ -1175,7 +1178,6 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 	}
 	return C_CONTINUE;
 }
-
 
 EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 {

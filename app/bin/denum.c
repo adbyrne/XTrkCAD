@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.3 2009-07-09 18:29:42 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.4 2009-08-16 13:26:41 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -106,7 +106,7 @@ void EnumerateList(
 {
 	char * cp;
 	int len;
-	sprintf( message, "%5ld | %s\n", count, desc );
+	sprintf( message, "%*ld | %s\n", strlen(_("Count")), count, desc );
 	if (enableListPrices) {
 		cp = message + strlen( message )-1;
 		len = enumerateMaxDescLen-strlen(desc);
@@ -114,10 +114,10 @@ void EnumerateList(
 		memset( cp, ' ', len );
 		cp += len;
 		if (price > 0.0) {
-			sprintf( cp, " |%7.2f |%9.2f\n", price, price*count );
+			sprintf( cp, " | %7.2f |%9.2f\n", price, price*count );
 			enumerateTotal += price*count;
 		} else {
-			sprintf( cp, " |        |\n" );
+			sprintf( cp, " | %-*s |\n", max( 7, strlen( _("Each"))), " " );
 		}
 	}
 	wTextAppend( enumT, message );
@@ -126,8 +126,9 @@ void EnumerateList(
 void EnumerateStart(void)
 {
 	time_t clock;
-	int len;
+	struct tm *tm;
 	char * cp;
+
 	if (enumW == NULL) {
 		ParamRegister( &enumPG );
 		enumW = ParamCreateDialog( &enumPG, MakeWindowTitle(_("Parts List")), NULL, NULL, wHide, TRUE, NULL, F_RESIZE, EnumDlgUpdate );
@@ -136,7 +137,7 @@ void EnumerateStart(void)
 
 	wTextClear( enumT );
 
-	sprintf( message, "%s Parts List\n\n", sProdName);
+	sprintf( message, _("%s Parts List\n\n"), sProdName);
 	wTextAppend( enumT, message );
 
 	message[0] = '\0';
@@ -158,59 +159,65 @@ void EnumerateStart(void)
 	}
 
 	time(&clock);
-/*    tm = localtime(&clock);
-	strftime( dat, sizeof dat, "%a %y %b %d", tm );*/
-	sprintf( message, "%s\n", ctime(&clock) );
+    tm = localtime(&clock);
+	strftime( message, STR_LONG_SIZE, "%x\n", tm );
 	wTextAppend( enumT, message );
 
 	enumerateTotal = 0.0;
 
-	if (enableListPrices) {
-		sprintf( message, "Count | Description" );
-		cp = message + strlen( message );
-		len = enumerateMaxDescLen-strlen( "Description");
-		memset( cp, ' ', len );
-		cp += len;
-		sprintf( cp, " |   Each | Extended\n" );
-	} else {
-		sprintf( message, "Count | Description\n" );
-	}
+	if( strlen( _("Description")) > (unsigned)enumerateMaxDescLen )
+		enumerateMaxDescLen = strlen( _("Description" ));
+
+	/* create the table header */
+	sprintf( message, "%s | %-*s", _("Count"), enumerateMaxDescLen, _("Description"));
+
+	if( enableListPrices )
+		sprintf( message+strlen(message), " | %-*s | %-*s\n", max( 7, strlen( _("Each"))), _("Each"), max( 9, strlen(_("Extended"))), _("Extended"));
+	else 
+		strcat( message, "\n" );
 	wTextAppend( enumT, message );
 
-	sprintf( message, "------+");
-	cp = message+strlen(message);
-	memset( cp, '-', enumerateMaxDescLen+2 );
-	if (enableListPrices)
-		strcpy( cp+enumerateMaxDescLen+2, "+--------+----------\n");
-	else {
-		*(cp+enumerateMaxDescLen+2) = '\n';
-		*(cp+enumerateMaxDescLen+3) = '\0';
-	}
-	wTextAppend( enumT, message );
+	/* underline the header */
+	cp = message;
+	while( *cp && *cp != '\n' )			
+		if( *cp == '|' )
+			*cp++ = '+';
+		else
+			*cp++ = '-';
 
+	wTextAppend( enumT, message );
 }
+/**
+ * End of parts list. Print the footer line and the totals if necessary.
+ */
 
 void EnumerateEnd(void)
 {
 	int len;
 	char * cp;
 	ScaleLengthEnd();
-	sprintf( message, "------+" );
+	
+	memset( message, '\0', STR_LONG_SIZE );
+	memset( message, '-', strlen(_("Count")) + 1 );
+	strcpy( message + strlen(_("Count")) + 1, "+");
 	cp = message+strlen(message);
 	memset( cp, '-', enumerateMaxDescLen+2 );
-	if (enableListPrices)
-		strcpy( cp+enumerateMaxDescLen+2, "+--------+----------\n");
-	else {
+	if (enableListPrices){
+		strcpy( cp+enumerateMaxDescLen+2, "+-" );
+		memset( cp+enumerateMaxDescLen+4, '-', max( 7, strlen( _("Each"))));
+		strcat( cp, "-+-");
+		memset( message+strlen( message ), '-', max( 9, strlen(_("Extended"))));
+	} else {
 		*(cp+enumerateMaxDescLen+2) = '\n';
 		*(cp+enumerateMaxDescLen+3) = '\0';
 	}
 	wTextAppend( enumT, message );
 
 	if (enableListPrices) {
-		len = enumerateMaxDescLen-strlen( "Total");
-		memset ( message, ' ', len+1 );
-		cp = message+len+1;
-		sprintf( cp, "                Total |%9.2f\n", enumerateTotal );
+		len = strlen( message ) - strlen( _("Total")) - max( 9, strlen(_("Extended"))) + 2 ;
+		memset ( message, ' ', len );
+		cp = message+len;
+		sprintf( cp, ("%s |%9.2f\n"), _("Total"), enumerateTotal );
 		wTextAppend( enumT, message );
 	}
 	wTextSetPosition( enumT, 0 );
