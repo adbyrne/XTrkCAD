@@ -566,6 +566,7 @@ LRESULT listProc(
 	HPEN hPen;
 	HBRUSH hBrush;
 	WPARAM notification;
+	COLORREF col;
 
 	if (bl) switch( message ) {
 	
@@ -743,7 +744,12 @@ LRESULT listProc(
 					Rectangle( lpdis->hDC, rc1.left, rc1.top, rc1.right, rc1.bottom );
 					DeleteObject( SelectObject( lpdis->hDC, hPen ) );
 					DeleteObject( SelectObject( lpdis->hDC, hBrush ) );
-					mswDrawIcon( lpdis->hDC, rc1.left+2, rc.top+0, ldp->bm, 0, mswGetColor( mswPalette!=NULL, ldp->bm->color ), mswGetColor( mswPalette!=NULL, ldp->bm->color ) );
+
+					col = RGB(	(ldp->bm->colormap[ 1 ]).rgbRed, 
+								(ldp->bm->colormap[ 1 ]).rgbGreen,
+								(ldp->bm->colormap[ 1 ]).rgbBlue );
+					mswDrawIcon( lpdis->hDC, rc1.left+2, rc.top+0, ldp->bm, 0, col, col);
+
 					rc1.left += ldp->bm->w+6;
 					colWidth -= ldp->bm->w+6;
 				}

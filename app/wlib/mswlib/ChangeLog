@@ -1,3 +1,9 @@
+Sep 02, 2009
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		mswbutt.c, mswint.h, mswlist.c mswmisc.c:
+		 including true
+		transparency
+	
 Aug 16, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		gwin32.c mswchoic.c mswint.h simple-gettext.c CMakeLists.txt:

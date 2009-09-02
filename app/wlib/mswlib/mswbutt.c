@@ -158,15 +158,8 @@ static void drawButton(
 	
 	DeleteObject( SelectObject( hButtDc, oldPen ) );
 		
-	if ( disabled ) {
-		color1 = GetSysColor( COLOR_BTNSHADOW );
-		color2 = RGB(255,255,255);
-	} else {
-		color1 = wDrawGetRGB( bm->color );
-		color1 = ((color1>>16)&0x0000FF) | (color1&0x00FF00) | ((color1<<16)&0xFF0000);
-		/*color1 = mswGetColor( bm->color );*/
-		color2 = GetSysColor( COLOR_BTNFACE );
-	}
+	color2 = GetSysColor( COLOR_BTNSHADOW );
+	color1 = RGB( bm->colormap[ 1 ].rgbRed, bm->colormap[ 1 ].rgbGreen, bm->colormap[ 1 ].rgbBlue );
 
 	if (selected) {
 		offw++; offh++;

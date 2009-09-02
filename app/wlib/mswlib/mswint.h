@@ -101,15 +101,16 @@ typedef struct {
 		} wIconColorMap_t;
 #define mswIcon_bitmap (1)
 #define mswIcon_pixmap (2)
+
 struct wIcon_t {
 		int type;
 		wPos_t w;				/**< width */
 		wPos_t h;				/**< height */
 		wDrawColor color;
 		int colorcnt;			/**< number of colors */
-		int numchars;			/**< number of chars per pixel */
-		wIconColorMap_t *colormap;
-		const void * bits;		/**< pointer to pixel information */
+		RGBQUAD *colormap;
+		char *pixels;			/**< pointer to pixel information */
+		int transparent;		/**< index of transparent color */
 		};
 
 struct wDraw_t {

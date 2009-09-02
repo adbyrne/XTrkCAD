@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.23 2009-07-24 15:07:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.24 2009-09-02 18:34:03 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -292,61 +292,100 @@ void mswDrawIcon(
 		COLORREF color1,
 		COLORREF color2 )
 {
-	int i, j;
+	int i;
 	int byt;
-	int w=bm->w, h=bm->h;
-	const char *byts_p;
-	unsigned const char **row_p;
-	COLORREF colorMap[256], color;
+	BITMAPINFO *bmiInfo;
+	COLORREF col;
 
-	if ( bm->type == mswIcon_bitmap ) {
-		byts_p = bm->bits;
-		for ( j = 0; j < h; j++ ) {
-			byt = (0xFF & *byts_p++) | 0x100;
-			for ( i = 0; i < w; i++ ) {
-				if (byt == 1)
-					byt = (0xFF & *byts_p++) | 0x100;
-				if ( byt & 0x1 ) {
-					SetPixel( hDc, i+offw, j+offh, color1 );
-					if (disabled)
-						SetPixel( hDc, i+1+offw, j+1+offh, color2 );
-				}
-				byt >>= 1;
-			}
-		}
-	} else if ( bm->type == mswIcon_pixmap ) {
-		SetROP2( hDc, R2_COPYPEN );
-		memset( colorMap, 0, sizeof colorMap );
-		for ( i=0; i<bm->colorcnt; i++ ) {
-			if( bm->colormap[i].color == 0xFF000000 )		/* color == transparent? */
-				color = GetSysColor( COLOR_BTNFACE );		/* yes, use button face */
-			else
-			{
-				color = wDrawGetRGB( bm->colormap[i].color );	/* otherwise select color */
-				color = ((color>>16)&0x0000FF) | (color&0x00FF00) | ((color<<16)&0xFF0000);
-			}
-			colorMap[bm->colormap[i].key] = color;
-		}
-		row_p = bm->bits;
-		for ( j = 0; j < h; j++ ) {
-			for ( i = 0; i < w; i++ ) {
-				if ( disabled ) {
-					color = colorMap[row_p[j][i]];
-					/* convert plain black to a dark grey to take care of simple shapes */
-					if( !color )
-						color = 0x00666666;
-					byt = (GetRValue( color ) + GetGValue( color ) + GetBValue( color ))/3;
-						
-					color = RGB( byt, byt, byt );
-					SetPixel( hDc, i+offw, j+offh, color );
-				} else {
-					SetPixel( hDc, i+offw, j+offh, colorMap[row_p[j][i]] );
-				}
-			}
-		}
+    /* draw the bitmap by dynamically creating a Windows DIB in memory */
+
+    bmiInfo = malloc( sizeof( BITMAPINFO ) + (bm->colorcnt - 1) * sizeof( RGBQUAD ));
+    if( !bmiInfo ) {
+        fprintf( stderr, "could not allocate memory for bmiInfo\n" );
+        abort();
+    }
+
+    /* initialize bitmap header from XPM information */
+    bmiInfo->bmiHeader.biSize = sizeof( bmiInfo->bmiHeader );
+    bmiInfo->bmiHeader.biWidth = bm->w;
+    bmiInfo->bmiHeader.biHeight = bm->h;
+    bmiInfo->bmiHeader.biPlanes = 1;
+    if( bm->type == mswIcon_bitmap )
+        bmiInfo->bmiHeader.biBitCount = 1;
+    else 
+        bmiInfo->bmiHeader.biBitCount = 8;							/* up to 256 colors */
+    bmiInfo->bmiHeader.biCompression = BI_RGB;						/* no compression */
+    bmiInfo->bmiHeader.biSizeImage = 0;
+    bmiInfo->bmiHeader.biXPelsPerMeter = 0;
+    bmiInfo->bmiHeader.biYPelsPerMeter = 0;
+    bmiInfo->bmiHeader.biClrUsed = bm->colorcnt;					/* number of colors used */
+    bmiInfo->bmiHeader.biClrImportant = bm->colorcnt;
+
+	/*
+	 * create a transparency mask and paint to screen
+	 */ 
+	if( bm->type == mswIcon_bitmap ) {
+		memset( &bmiInfo->bmiColors[ 0 ], 0xFF, sizeof( RGBQUAD ));
+		memset( &bmiInfo->bmiColors[ 1 ], 0, sizeof( RGBQUAD ));
 	} else {
-		abort();
+		memset( bmiInfo->bmiColors, 0, bm->colorcnt * sizeof( RGBQUAD ));
+		memset( &bmiInfo->bmiColors[ bm->transparent ], 0xFF, sizeof( RGBQUAD ));
 	}
+	StretchDIBits(hDc, offw, offh,
+        bmiInfo->bmiHeader.biWidth,
+        bmiInfo->bmiHeader.biHeight,
+        0, 0,
+        bmiInfo->bmiHeader.biWidth,
+        bmiInfo->bmiHeader.biHeight,
+        bm->pixels, bmiInfo, 				
+        DIB_RGB_COLORS, SRCAND);
+	
+	/* now paint the bitmap with transparent set to black */
+	if( bm->type == mswIcon_bitmap ) {
+		if( disabled ) {   
+			col = color2;
+		} else {
+			col = color1;
+		}
+		memset( &bmiInfo->bmiColors[ 0 ], 0, sizeof( RGBQUAD ));
+                bmiInfo->bmiColors[ 1 ].rgbRed = GetRValue( col );
+                bmiInfo->bmiColors[ 1 ].rgbGreen = GetGValue( col );
+                bmiInfo->bmiColors[ 1 ].rgbBlue = GetBValue( col );
+    } else {
+		if( disabled ) {
+			/* create a gray scale palette */
+			for( i = 0; i < bm->colorcnt; i ++ ) {
+				byt = ( 30 * bm->colormap[ i ].rgbRed + 
+					    59 * bm->colormap[ i ].rgbGreen + 
+						11 * bm->colormap[ i ].rgbBlue )/100;
+        
+				/* if totally black, use a dark gray */
+				if( byt == 0 )
+					byt = 0x66;
+				
+				bmiInfo->bmiColors[ i ].rgbRed = byt;
+				bmiInfo->bmiColors[ i ].rgbGreen = byt;
+				bmiInfo->bmiColors[ i ].rgbBlue = byt;
+			}
+	    } else {
+            /* copy the palette */
+            memcpy( (void *)bmiInfo->bmiColors, (void *)bm->colormap, bm->colorcnt * sizeof( RGBQUAD ));
+        }
+		memset( &bmiInfo->bmiColors[ bm->transparent ], 0, sizeof( RGBQUAD ));
+    }
+    
+    /* show the bitmap */
+    StretchDIBits(hDc, offw, offh,
+            bmiInfo->bmiHeader.biWidth,
+            bmiInfo->bmiHeader.biHeight,
+            0, 0,
+            bmiInfo->bmiHeader.biWidth,
+            bmiInfo->bmiHeader.biHeight,
+            bm->pixels, bmiInfo, 				
+            DIB_RGB_COLORS, SRCPAINT);
+
+    /* forget the data */
+    free( bmiInfo );
 }
 
 
@@ -1352,21 +1391,86 @@ unsigned long wGetTimer( void )
 	return (unsigned long)GetTickCount();
 }
 
+/**
+ * Create a two color bitmap. This creates a two color icon. Pixels set to 1 are painted 
+ * in the specified color, pixels set to 0 are transparent
+ * in order to convert the format, a lot of bit fiddling is necessary. The order of 
+ * scanlines needs to be reversed and the bit order (high order - low order) is reversed 
+ * as well.
+ * \param w IN width in pixels
+ * \param h IN height in pixels
+ * \param bits IN pixel data
+ * \param color IN color for foreground
+ * \return    pointer to icon
+ */
 
 wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor color )
 {
+	int lineLength;
+	int i, j;
+	unsigned char *dest;
+	static unsigned char revbits[] = { 0, 0x08, 0x04, 0x0C, 0x02, 0x0A, 0x06, 0x0E, 0x01, 0x09, 0x05, 0x0D, 0x03, 0x0B, 0x07, 0x0F };  
+	unsigned long col = wDrawGetRGB( color );
+
 	wIcon_p ip;
 	ip = (wIcon_p)malloc( sizeof *ip );
+	if( !ip ) {
+		fprintf( stderr, "Couldn't allocate memory for bitmap header.\n" );
+		abort();
+	}
+
+	memset( ip, 0, sizeof *ip );
 	ip->type = mswIcon_bitmap;
 	ip->w = w;
 	ip->h = h;
-	ip->color = color;
-	ip->bits = bits;
+	ip->colorcnt = 2;
+
+	/* set up our two color palette */
+	ip->colormap = malloc( 2 * sizeof( RGBQUAD ));
+
+	ip->colormap[ 1 ].rgbBlue = col & 0xFF;
+	ip->colormap[ 1 ].rgbRed = (col>>16) & 0xFF;
+	ip->colormap[ 1 ].rgbGreen = (col>>8) & 0xFF;
+	ip->colormap[ 1 ].rgbReserved = 0;	
+
+	color = GetSysColor( COLOR_BTNFACE );
+	ip->colormap[ 0 ].rgbBlue = GetBValue( color );
+	ip->colormap[ 0 ].rgbRed = GetRValue( color );
+	ip->colormap[ 0 ].rgbGreen = GetGValue( color );
+	ip->colormap[ 0 ].rgbReserved = 0;	
+
+	lineLength = (((( ip->w + 7 ) / 8 ) + 3 ) >> 2 ) << 2;
+	ip->pixels = malloc( lineLength * ip->h );
+	if( !ip->pixels ) {
+		fprintf( stderr, "Couldn't allocate memory for pixel data.\n" );
+		abort();
+	}
+
+	/* 
+	 * copy the bits from source to the buffer, at this time the order of
+	 * scanlines is reversed by starting with the last source line.
+	 */
+	for( i = 0; i < ip->h; i++ ) {
+		dest = ip->pixels + i * lineLength;
+		memcpy( dest, bits + ( ip->h - i - 1 ) * (( ip->w + 7) / 8), ( ip->w + 7 ) / 8 );
+
+		/*
+		 * and now, the bit order is changed, this is done via a lookup table
+		 */
+		for( j = 0; j < lineLength; j++ )
+		{
+			unsigned byte = dest[ j ];
+			unsigned low = byte & 0x0F;
+			unsigned high = (byte & 0xF0) >> 4;
+			dest[ j ] = revbits[ low ]<<4 | revbits[ high ];
+		}
+	}
+
 	return ip;
 }
 
 /**
- * Load a pixmap. This functions interprets a XPM icon contained in a
+ * Create a pixmap. This functions interprets a XPM icon contained in a
  * char array. Supported format are one or two byte per pixel and #rrggbb
  * or #rrrrggggbbbb color specification. Color 'None' is interpreted as
  * transparency, other symbolic names are not supported.
@@ -1375,34 +1479,53 @@ wIcon_p wIconCreateBitMap( wPos_t w, wPos_t h, const char * bits, wDrawColor col
  * \return    pointer to icon, call free() if not needed anymore. 
  */
 
-wIcon_p wIconCreatePixMap( char *pm[] )
+wIcon_p wIconCreatePixMap( char *pm[])
 {
 	wIcon_p ip;
 	int col, r, g, b, len;
-	long rgb;
+	int width, height;
 	char buff[3];
 	char * cp, * cq, * ptr;
+	int i, j, k;
+	int lineLength;
+	unsigned *keys;
+	unsigned numchars;
+	unsigned pixel;
 
 	ip = (wIcon_p)malloc( sizeof *ip );
-	memset( ip, 0, sizeof *ip );
-	cp = pm[0];
-	
-	ip->type = mswIcon_pixmap;
-	ip->w = (int)strtol(cp, &cq, 10 );			/* width of image */
-	ip->h = (int)strtol(cq, &cp, 10 );			/* height of image */
-	ip->colorcnt = (int)strtol(cp, &cq, 10 );	/* number of colors used */
-	ip->numchars = (int)strtol(cq, &cp, 10 );	/* get number of chars per pixel */
+	if( !ip ) {
+		fprintf( stderr, "Couldn't allocate memory for bitmap header.\n" );
+		abort();
+	}
 
-	ip->colormap = (wIconColorMap_t*)malloc( ip->colorcnt * sizeof ip->colormap[0] );
-	for ( col=0; col<ip->colorcnt; col++ ) {
+	memset( ip, 0, sizeof *ip );
+	ip->type = mswIcon_pixmap;
+
+	/* extract values */
+	cp = pm[0];
+	width = (int)strtol(cp, &cq, 10 );			/* width of image */
+	height = (int)strtol(cq, &cq, 10 );			/* height of image */
+	col = (int)strtol(cq, &cq, 10 );			/* number of colors used */
+	numchars = (int)strtol(cq, &cq, 10 );		/* get number of chars per pixel */
+	
+	ip->colormap = malloc( col * sizeof( RGBQUAD ));
+	ip->w = width;	
+	ip->h = height;
+	ip->colorcnt = col;								/* number of colors used */
+
+	keys = malloc( sizeof( unsigned ) * col );
+
+	for ( col=0; col<(int)ip->colorcnt; col++ ) {
 		ptr = strdup( pm[col+1] );				/* create duplicate for input string*/
 
-		if( ip->numchars == 1 )
-			ip->colormap[col].key = (unsigned)ptr[0];
-		else if( ip->numchars == 2 )
-				ip->colormap[col].key = ((unsigned *)ptr)[ 0 ];
+		if( numchars == 1 ) {
+			keys[ col ] = (unsigned)ptr[0];
+		}
+		else if( numchars == 2 ) {
+				keys[ col ] = (unsigned) ( ptr[ 0 ] + ptr[ 1 ] * 256 );
+		}
 		
-		cp = strtok( ptr + ip->numchars, "\t " );	/* cp points to color type */
+		cp = strtok( ptr + numchars, "\t " );	/* cp points to color type */
 		assert( *cp == 'c' );					/* should always be color */
 		
 		cp = strtok( NULL, "\t " );				/* go to next token, the color definition itself */
@@ -1418,24 +1541,75 @@ wIcon_p wIconCreatePixMap( char *pm[] )
 			memcpy( buff, cp + 1 + 2 * len, 2 );
 			b = (int)strtol(buff, &cq, 16);
 
-			rgb = wRGB( r, g, b );
-			ip->colormap[col].color = wDrawFindColor( rgb );
+			ip->colormap[ col ].rgbBlue = b;
+			ip->colormap[ col ].rgbGreen = g;
+			ip->colormap[ col ].rgbRed = r;
+			ip->colormap[ col ].rgbReserved = 0;
+
 		} else {
-			if( !stricmp( cp, "none" ))			/* special case transparency*/
-				ip->colormap[col].color = 0xFF000000;
+			if( !stricmp( cp, "none" )) {			/* special case transparency*/
+				ip->transparent = col;
+			}
 			else 
 				assert( *cp == '#' );				/* if no, abort for the moment */
 		}
 		free( ptr );
 	}
-	ip->color = 0;
-	ip->bits = &pm[1+ip->colorcnt];
+
+	/* get memory for the pixel data */
+	/* dword align begin of line */
+	lineLength = ((ip->w + 3 ) >> 2 ) << 2;
+	ip->pixels = malloc( lineLength * ip->h );
+	if( !ip->pixels ) {
+		fprintf( stderr, "Couldn't allocate memory for pixel data.\n" );
+		abort();
+	}
+
+	/* 
+	   convert the XPM pixel data to indexes into color table
+	   at the same time the order of rows is reversed 
+	   Win32 should be able to do that but I couldn't find out
+	   how, so this is coded by hand. 
+	*/
+
+	/* for all rows */
+	for( i = 0; i < ip->h; i++ ) {
+		
+		cq = ip->pixels + lineLength * i;
+		/* get the next row */
+		cp = pm[ ip->h - i + ip->colorcnt ];
+		/* for all pixels in row */
+		for( j = 0; j < ip->w; j++ ) {
+			/* get the pixel info */
+			if( numchars == 1 )
+				pixel = ( unsigned )*cp;
+			else
+				pixel = (unsigned) (*cp + *(cp+1)*256);
+			cp += numchars;
+
+			/* look up pixel info in color table */
+			k = 0;
+			while( pixel != keys[ k ] )
+				k++;
+
+			/* save the index into color table */
+			*(cq + j) = k;
+		}
+	}		
+	free( keys );
+		
 	return ip;
 }
 
 void wIconSetColor( wIcon_p ip, wDrawColor color )
 {
-	ip->color = color;
+	unsigned long col = wDrawGetRGB( color );
+
+	if( ip->type == mswIcon_bitmap ) {
+		ip->colormap[ 1 ].rgbBlue = col & 0xFF;
+		ip->colormap[ 1 ].rgbRed = (col>>16) & 0xFF;
+		ip->colormap[ 1 ].rgbGreen = (col>>8) & 0xFF;
+	}
 }
 
 
