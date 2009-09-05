@@ -4,6 +4,9 @@
  * Created by Robert Heller on Thu Mar 12 09:43:02 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
+ * Modification History: Revision 1.2  2009/07/08 19:13:58  m_fischer
+ * Modification History: Make compile under MSVC
+ * Modification History:
  * Modification History: Revision 1.1  2009/07/08 18:40:27  m_fischer
  * Modification History: Add switchmotor and block for layout control
  * Modification History:
@@ -34,7 +37,7 @@
  *     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  * 
  *  T_BLOCK
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.2 2009-07-08 19:13:58 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.3 2009-09-05 16:40:53 m_fischer Exp $
  */
 
 #include <ctype.h>
@@ -629,20 +632,18 @@ static STATUS_T CmdBlock (wAction_t action, coOrd pos )
 	}
 }
 	
-#include "bitmaps/block.xpm"
-
-#include "bitmaps/block1.xpm"
-#include "bitmaps/block2.xpm"
-#include "bitmaps/block3.xpm"
+#include "bitmaps/blocknew.xpm"
+#include "bitmaps/blockedit.xpm"
+#include "bitmaps/blockdel.xpm"
 
 EXPORT void InitCmdBlock( wMenu_p menu )
 {
 	blockName[0] = '\0';
 	blockScript[0] = '\0';
 	ButtonGroupBegin( _("Block"), "cmdBlockSetCmd", _("Blocks") );
-	AddMenuButton( menu, CmdBlock, "cmdBlockCreate", _("Create Block"), wIconCreatePixMap(block1_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_BLOCK1, (void*)BLOCK_CREATE );
-	AddMenuButton( menu, CmdBlock, "cmdBlockEdit", _("Edit Block"), wIconCreatePixMap(block2_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_BLOCK2, (void*)BLOCK_EDIT );
-	AddMenuButton( menu, CmdBlock, "cmdBlockDelete", _("Delete Block"), wIconCreatePixMap(block3_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_BLOCK3, (void*)BLOCK_DELETE );
+	AddMenuButton( menu, CmdBlock, "cmdBlockCreate", _("Create Block"), wIconCreatePixMap(blocknew_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_BLOCK1, (void*)BLOCK_CREATE );
+	AddMenuButton( menu, CmdBlock, "cmdBlockEdit", _("Edit Block"), wIconCreatePixMap(blockedit_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_BLOCK2, (void*)BLOCK_EDIT );
+	AddMenuButton( menu, CmdBlock, "cmdBlockDelete", _("Delete Block"), wIconCreatePixMap(blockdel_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_BLOCK3, (void*)BLOCK_DELETE );
 	ButtonGroupEnd();
 	ParamRegister( &blockPG );
 }

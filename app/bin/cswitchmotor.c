@@ -4,6 +4,9 @@
  * Created by Robert Heller on Sat Mar 14 10:39:56 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
+ * Modification History: Revision 1.2  2009/07/08 19:13:58  m_fischer
+ * Modification History: Make compile under MSVC
+ * Modification History:
  * Modification History: Revision 1.1  2009/07/08 18:40:27  m_fischer
  * Modification History: Add switchmotor and block for layout control
  * Modification History:
@@ -497,11 +500,11 @@ static STATUS_T CmdSwitchMotor (wAction_t action, coOrd pos )
 	}
 }
 	
-#include "bitmaps/switchmotor.xpm"
+//#include "bitmaps/switchmotor.xpm"
 
-#include "bitmaps/switchmotor1.xpm"
-#include "bitmaps/switchmotor2.xpm"
-#include "bitmaps/switchmotor3.xpm"
+#include "bitmaps/switchmnew.xpm"
+#include "bitmaps/switchmedit.xpm"
+#include "bitmaps/switchmdel.xpm"
 
 EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 {
@@ -510,9 +513,9 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 	switchmotorReverse[0] = '\0';
 	switchmotorPointSense[0] = '\0';
 	ButtonGroupBegin( _("SwitchMotor"), "cmdSwitchMotorSetCmd", _("Switch Motors") );
-	AddMenuButton( menu, CmdSwitchMotor, "cmdSwitchMotorCreate", _("Create Switch Motor"), wIconCreatePixMap(switchmotor1_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_SWITCHMOTOR1, (void*)SWITCHMOTOR_CREATE );
-	AddMenuButton( menu, CmdSwitchMotor, "cmdSwitchMotorEdit", _("Edit Switch Motor"), wIconCreatePixMap(switchmotor2_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_SWITCHMOTOR2, (void*)SWITCHMOTOR_EDIT );
-	AddMenuButton( menu, CmdSwitchMotor, "cmdSwitchMotorDelete", _("Delete Switch Motor"), wIconCreatePixMap(switchmotor3_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_SWITCHMOTOR3, (void*)SWITCHMOTOR_DELETE );
+	AddMenuButton( menu, CmdSwitchMotor, "cmdSwitchMotorCreate", _("Create Switch Motor"), wIconCreatePixMap(switchmnew_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_SWITCHMOTOR1, (void*)SWITCHMOTOR_CREATE );
+	AddMenuButton( menu, CmdSwitchMotor, "cmdSwitchMotorEdit", _("Edit Switch Motor"), wIconCreatePixMap(switchmedit_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_SWITCHMOTOR2, (void*)SWITCHMOTOR_EDIT );
+	AddMenuButton( menu, CmdSwitchMotor, "cmdSwitchMotorDelete", _("Delete Switch Motor"), wIconCreatePixMap(switchmdel_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_SWITCHMOTOR3, (void*)SWITCHMOTOR_DELETE );
 	ButtonGroupEnd();
 	ParamRegister( &switchmotorPG );
 }

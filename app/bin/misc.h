@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.7 2008-07-11 16:56:37 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.8 2009-09-05 16:40:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -380,3 +380,9 @@ void CarDlgAddProto( void );
 void CarDlgAddDesc( void );
 void AttachTrains( void );
 #endif
+
+/* cblock.c */
+void InitCmdBlock( wMenu_p menu );
+
+/* cswitchmotor.c */
+void InitCmdSwitchMotor( wMenu_p menu );

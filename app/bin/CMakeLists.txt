@@ -63,7 +63,6 @@ ADD_CUSTOM_COMMAND(
 SET(SOURCES
 	${LIN_SOURCES}
 	bllnhlp.c
-	cblock.c
 	ccurve.c
 	cdraw.c
 	celev.c
@@ -85,7 +84,6 @@ SET(SOURCES
 	csplit.c
 	cstraigh.c
 	cstruct.c
-	cswitchmotor.c
 	ctext.c
 	ctodesgn.c
 	ctrain.c
@@ -122,6 +120,14 @@ SET(SOURCES
 	tstraigh.c
 	utility.c
 	)
+
+IF(XTRKCAD_USE_LAYOUTCONTROL)
+	SET(SOURCES
+		${SOURCES}
+		cblock.c
+		cswitchmotor.c
+		)
+ENDIF(XTRKCAD_USE_LAYOUTCONTROL)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})

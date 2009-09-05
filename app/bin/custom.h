@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.5 2009-07-09 18:29:42 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.6 2009-09-05 16:40:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -41,6 +41,7 @@
 #define BG_TRAIN		(12)
 #define BG_COUNT		(13)
 #define BG_FILE			(14)
+#define BG_CONTROL		(15)
 #define BG_BIGGAP		(1<<8)
 extern int cmdGroup;
 

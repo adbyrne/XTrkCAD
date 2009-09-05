@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.45 2009-08-16 13:26:41 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.46 2009-09-05 16:40:53 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1702,6 +1702,9 @@ static char *AllToolbarLabels[] = {
 		N_("Easement Button"),
 		N_("SnapGrid Buttons"),
 		N_("Create Track Buttons"),
+#ifdef XTRKCAD_USE_LAYOUTCONTROL
+		N_("Layout Control Elements"),
+#endif
 		N_("Modify Track Buttons"),
 		N_("Describe/Select"),
 		N_("Track Group Buttons"),
@@ -1718,6 +1721,9 @@ static long AllToolbarMasks[] = {
 		1<<BG_EASE,
 		1<<BG_SNAP,
 		1<<BG_TRKCRT,
+#ifdef XTRKCAD_USE_LAYOUTCONTROL
+		1<<BG_CONTROL, 
+#endif
 		1<<BG_TRKMOD,
 		1<<BG_SELECT,
 		1<<BG_TRKGRP,
@@ -2216,11 +2222,14 @@ static void CreateMenus( void )
 	InitCmdTurnout( addM );
 	InitCmdHandLaidTurnout( addM );
 	InitCmdStruct( addM );
-	InitCmdBlock( addM );
-	InitCmdSwitchMotor( addM );
 	InitCmdHelix( addM );
 	InitCmdTurntable( addM );
-	
+
+#ifdef XTRKCAD_USE_LAYOUTCONTROL
+	cmdGroup = BG_CONTROL;
+	InitCmdBlock( addM );
+	InitCmdSwitchMotor( addM );
+#endif	
 	
 	/*
 	 * CHANGE MENU

@@ -36,9 +36,11 @@ if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
+SET(XTRKCAD_USE_LAYOUTCONTROL_DEFAULT OFF)
 OPTION(XTRKCAD_USE_GTK "Use GTK for the graphical user interface back-end" ${XTRKCAD_USE_GTK_DEFAULT})
 OPTION(XTRKCAD_USE_GTK_CAIRO "Use Cairo for high-quality antialiased rendering" ${XTRKCAD_USE_GTK_CAIRO_DEFAULT})
 OPTION(XTRKCAD_USE_GETTEXT "Use gettext for internationalization" ${XTRKCAD_USE_GETTEXT_DEFAULT})
+OPTION(XTRKCAD_USE_LAYOUTCONTROL "Include layout control commands" ${XTRKCAD_USE_LAYOUTCONTROL_DEFAULT})
 
 IF(APPLE)
 	OPTION(XTRKCAD_USE_PACKAGEMAKER "Generate an OSX PackageMaker package for distribution." OFF)
