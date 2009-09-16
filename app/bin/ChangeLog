@@ -1,3 +1,7 @@
+Sep 16, 2009
+	FIX:  Martin Fischer <m_fischer@users.sourceforge.net>
+		cblock.c, cswitchmotor.c: remove some unused locals
+		
 Aug 16, 2009
 	FIX:  Martin Fischer <m_fischer@users.sourceforge.net>
 		CMakeLists.txt cprint.c denum.c i18n.c i18n.h misc.c

@@ -4,6 +4,9 @@
  * Created by Robert Heller on Thu Mar 12 09:43:02 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
+ * Modification History: Revision 1.3  2009/09/05 16:40:53  m_fischer
+ * Modification History: Make layout control commands a build-time choice
+ * Modification History:
  * Modification History: Revision 1.2  2009/07/08 19:13:58  m_fischer
  * Modification History: Make compile under MSVC
  * Modification History:
@@ -37,7 +40,7 @@
  *     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  * 
  *  T_BLOCK
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.3 2009-09-05 16:40:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.4 2009-09-16 18:32:24 m_fischer Exp $
  */
 
 #include <ctype.h>
@@ -244,10 +247,9 @@ static BOOL_T blockCheckContigiousPath()
 {
 	EPINX_T ep, epCnt, epN;
 	int inx;
-	coOrd orig, size;
 	track_p trk, trk1;
 	DIST_T dist;
-	ANGLE_T angle, angleN;
+	ANGLE_T angle;
 	int pathElemStart = 0;
 	coOrd endPtOrig = zero;
 	BOOL_T IsConnectedP;
@@ -302,7 +304,6 @@ static void DeleteBlock ( track_p t )
 static BOOL_T WriteBlock ( track_p t, FILE * f )
 {
 	BOOL_T rc = TRUE;
-	EPINX_T ep, epCnt;
 	wIndex_t iTrack;
 	blockData_p xx = GetblockData(t);
 
@@ -495,7 +496,6 @@ static void BlockOk ( void * junk )
 static void NewBlockDialog()
 {
 	track_p trk = NULL;
-	TRKTYP_T trkType;
 
 	fprintf(stderr,"*** NewBlockDialog()\n");
 	blockElementCount = 0;
@@ -578,7 +578,6 @@ static STATUS_T CmdBlockEdit( wAction_t action, coOrd pos )
 static STATUS_T CmdBlockDelete( wAction_t action, coOrd pos )
 {
 	track_p trk,btrk;
-	char msg[STR_SIZE];
 	blockData_p xx;
 	
 	switch (action) {
@@ -620,8 +619,6 @@ static STATUS_T CmdBlockDelete( wAction_t action, coOrd pos )
 
 static STATUS_T CmdBlock (wAction_t action, coOrd pos )
 {
-	wIndex_t blockIndex;
-
 	fprintf(stderr,"*** CmdBlock(%08x,{%f,%f})\n",action,pos.x,pos.y);
 
 	switch ((long)commandContext) {

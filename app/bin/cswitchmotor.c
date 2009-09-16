@@ -4,6 +4,9 @@
  * Created by Robert Heller on Sat Mar 14 10:39:56 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
+ * Modification History: Revision 1.3  2009/09/05 16:40:53  m_fischer
+ * Modification History: Make layout control commands a build-time choice
+ * Modification History:
  * Modification History: Revision 1.2  2009/07/08 19:13:58  m_fischer
  * Modification History: Make compile under MSVC
  * Modification History:
@@ -269,7 +272,7 @@ static void ReadSwitchMotor ( char * line )
 {
 	TRKINX_T trkindex;
 	wIndex_t index;
-	track_p trk, strk;
+	track_p trk;
 	switchmotorData_p xx;
 	char *name, *normal, *reverse, *pointsense;
 
@@ -446,7 +449,6 @@ static STATUS_T CmdSwitchMotorEdit( wAction_t action, coOrd pos )
 static STATUS_T CmdSwitchMotorDelete( wAction_t action, coOrd pos )
 {
 	track_p trk,btrk;
-	char msg[STR_SIZE];
 	switchmotorData_p xx;
 	
 	switch (action) {
@@ -488,7 +490,6 @@ static STATUS_T CmdSwitchMotorDelete( wAction_t action, coOrd pos )
 
 static STATUS_T CmdSwitchMotor (wAction_t action, coOrd pos )
 {
-	wIndex_t switchmotorIndex;
 
 	fprintf(stderr,"*** CmdSwitchMotor(%08x,{%f,%f})\n",action,pos.x,pos.y);
 
