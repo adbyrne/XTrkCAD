@@ -1,8 +1,13 @@
+Sep 20. 2009
+	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
+		CMakeLists.txt, mswbitmap.c, mswmisc.c, mswint.h:
+		new source file for bitmap functions, added bitmap 
+		control to controls available to the application
+		
 Sep 02, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		mswbutt.c, mswint.h, mswlist.c mswmisc.c:
-		 including true
-		transparency
+		improved XPM reading including true transparency
 	
 Aug 16, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>

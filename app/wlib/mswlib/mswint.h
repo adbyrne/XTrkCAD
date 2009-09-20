@@ -51,7 +51,8 @@ typedef enum {
 		B_LIST, B_DROPLIST, B_COMBOLIST,
 		B_RADIO, B_TOGGLE,
 		B_DRAW, B_TEXT, B_MESSAGE, B_LINES,
-		B_MENUITEM, B_CHOICEITEM, B_BOX } wType_e;
+		B_MENUITEM, B_CHOICEITEM, B_BOX, 
+		B_BITMAP } wType_e;
 
 typedef void (*repaintProcCallback_p)( HWND, wControl_p );
 typedef void (*doneProcCallback_p)( wControl_p b );
@@ -158,7 +159,6 @@ void * mswAlloc( wWin_p, wType_e, const char *, int, void *, int * );
 void mswComputePos( wControl_p, wPos_t, wPos_t );
 void mswAddButton( wControl_p, BOOL_T, const char * );
 void mswRepaintLabel( HWND, wControl_p );
-void mswDrawIcon( HDC, int, int, wIcon_p, int, COLORREF, COLORREF );
 int mswRegister( wControl_p );
 void mswUnregister( int );
 void mswChainFocus( wControl_p );
@@ -184,6 +184,10 @@ int mswGetColorList( RGBQUAD * );
 int mswGetPaletteClock( void );
 HPALETTE mswPalette;
 HPALETTE mswCreatePalette( void );
+
+/* mswbitmaps.c */
+void deleteBitmaps( void );
+void mswDrawIcon( HDC, int, int, wIcon_p, int, COLORREF, COLORREF );
 
 /* gwin32.c*/
 char *g_win32_getlocale (void);

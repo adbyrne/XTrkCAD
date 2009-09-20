@@ -5,6 +5,7 @@ SET(SOURCES
 	getopt.c
 	mswbox.c
 	mswbutt.c
+	mswbitmap.c
 	mswchksm.c
 	mswchoic.c
 	mswcolor.c
