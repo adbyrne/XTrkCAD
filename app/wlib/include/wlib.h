@@ -1,7 +1,7 @@
 /** \file wlib.h
  * Commaon definitions and declarations for the wlib library
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.15 2009-08-16 13:19:20 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.16 2009-09-20 15:22:47 m_fischer Exp $
  */
 
 #ifndef WIN_H
@@ -52,6 +52,7 @@ typedef struct wBox_t       * wBox_p;
 typedef struct wIcon_t      * wIcon_p;
 typedef struct wDrawBitMap_t * wDrawBitMap_p;
 typedef struct wFont_t      * wFont_p;
+typedef struct wBitmap_t	* wBitmap_p;
 typedef int wDrawWidth;
 typedef int wDrawColor;
 
@@ -119,6 +120,7 @@ void wGetDisplaySize(		wPos_t*, wPos_t* );
 wIcon_p wIconCreateBitMap(	wPos_t, wPos_t, const char * bits, wDrawColor );
 wIcon_p wIconCreatePixMap(	char *[] );
 void wIconSetColor(		wIcon_p, wDrawColor );
+void wIconDraw( wDraw_p d, wIcon_p bm, wPos_t x, wPos_t y );
 
 void wConvertToCharSet(		char *, int );
 void wConvertFromCharSet(	char *, int );
@@ -675,4 +677,12 @@ void wPrefFlush(		void );
 void wPrefReset(		void );
 
 void CleanupCustom( void );
+
+/*------------------------------------------------------------------------------
+ *
+ * Bitmap Controls
+ */
+
+wControl_p wBitmapCreate( wWin_p parent, wPos_t xx, wPos_t yy, long options, wIcon_p iconP );
+
 #endif
