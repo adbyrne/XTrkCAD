@@ -1,7 +1,7 @@
 /** \file smalldlg.h
  * Definitions and declarations for the small dialog box functions. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.h,v 1.1 2007-09-23 16:13:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.h,v 1.2 2009-09-21 18:24:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -29,7 +29,10 @@
 #define SHOWTIP_PREVTIP (1L)
 #define SHOWTIP_FORCESHOW (2L)
 
+extern wWin_p aboutW;
+
 void InitSmallDlg( void );
 void ShowTip( long flags );
+void CreateAboutW( void *ptr );
 
 #endif

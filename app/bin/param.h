@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.h,v 1.5 2007-09-28 11:17:33 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.h,v 1.6 2009-09-21 18:24:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -40,7 +40,8 @@ typedef enum {
 		PD_DRAW,
 		PD_TEXT,
 		PD_MENU,
-		PD_MENUITEM
+		PD_MENUITEM,
+		PD_BITMAP
 		} parameterType;
 
 #define PDO_DIM					(1L<<0)

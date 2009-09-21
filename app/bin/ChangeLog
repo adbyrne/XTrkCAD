@@ -1,3 +1,8 @@
+Sep 21, 2009
+	ENH:  Martin Fischer <m_fischer@users.sourceforge.net>
+		custom.c, misc.c, param.c, param.h, smalldlg.c smalldlg.h:
+		New 'About' dialog
+
 Sep 16, 2009
 	FIX:  Martin Fischer <m_fischer@users.sourceforge.net>
 		cblock.c, cswitchmotor.c: remove some unused locals

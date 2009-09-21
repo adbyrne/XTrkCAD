@@ -1,7 +1,7 @@
 /** \file smalldlg.c
  * Several simple and smaller dialogs. 
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.5 2008-01-20 23:29:15 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.6 2009-09-21 18:24:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -55,8 +55,10 @@
 #include "smalldlg.h"
 #include "i18n.h"
 
+wWin_p aboutW;
 static wWin_p tipW;					/**< window handle for tip dialog */
-static long showTipAtStart = 1;	/**< flag for visibility */
+
+static long showTipAtStart = 1;		/**< flag for visibility */
 
 static dynArr_t tips_da;			/**< dynamic array for all tips */
 #define tips(N) DYNARR_N( char *, tips_da, N )
@@ -186,6 +188,48 @@ void ShowTip( long flags )
 		wShow( tipW );
 	}	
 }
+
+/*--------------------------------------------------------------------*/
+
+#include "bitmaps/xtc.xpm"
+
+static paramTextData_t aboutTextData = { 70, 10 };
+
+#define DESCRIPTION N_("XTrackCAD is a CAD (computer-aided design) program for designing model railroad layouts.")
+static paramData_t aboutPLs[] = {
+#define I_ABOUTDRAW				(0)
+	{   PD_BITMAP, NULL, "about", PDO_NOPSHUPD, NULL, NULL, 0 },
+#define I_ABOUTVERSION			(1)
+	{   PD_MESSAGE, NULL, NULL, PDO_DLGNEWCOLUMN, NULL, NULL, BM_LARGE },
+#define I_COPYRIGHT				 (2)
+#define COPYRIGHT_T			((wText_p)aboutPLs[I_COPYRIGHT].control)
+	{   PD_TEXT, NULL, NULL, PDO_DLGRESIZE, &aboutTextData, NULL, BT_CHARUNITS }
+};
+static paramGroup_t aboutPG = { "about", 0, aboutPLs, sizeof aboutPLs/sizeof aboutPLs[0] };
+
+/** 
+ *	Create and show the About window.
+ */
+
+void CreateAboutW( void *ptr )
+{
+	char *copyright = sAboutProd;
+	
+	if( !aboutW ) {
+		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap( xtc_xpm );
+		ParamRegister( &aboutPG );
+		aboutW = ParamCreateDialog( &aboutPG, MakeWindowTitle(_("About")), _("Ok"), (paramActionOkProc)wHide, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
+		ParamLoadMessage( &aboutPG, I_ABOUTVERSION, sAboutProd );
+		wTextAppend( COPYRIGHT_T, DESCRIPTION );
+		wTextAppend( COPYRIGHT_T, "\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2007 by Martin Fischer and Bob Blackwell." );
+		wTextAppend( COPYRIGHT_T, "\n\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)");
+		wTextAppend( COPYRIGHT_T, "\n\nContributions by: Robert Heller, Mikko Nissinen, Timothy M. Shead, Daniel Luis Spagnol" );
+		wTextAppend( COPYRIGHT_T, "\n\nParameter Files by: Ralph Boyd, Dwayne Ward" );
+
+	} 
+		
+	wShow( aboutW );
+}	
 
 /*--------------------------------------------------------------------*/
 

@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.11 2009-09-05 16:40:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.12 2009-09-21 18:24:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -115,40 +115,9 @@ void DoStructDesignerRedir( void )
 }
 #endif
 
-#include "bitmaps/xtc64.xbm"
-#define icon64_width	xtc64_width
-#define icon64_height	xtc64_height
-#define icon64_bits		xtc64_bits
-#include "bitmaps/xtc16.xbm"
-#define icon16_width	xtc16_width
-#define icon16_height	xtc16_height
-#define icon16_bits		xtc16_bits
-
-#if ICON_WIDTH != icon64_width
-error
-#endif
-#if ICON_HEIGHT != icon64_height
-error
-#endif
-
-void RedrawAbout(
-		wDraw_p d,
-		void * context,
-		wPos_t w,
-		wPos_t h )
-{
-	static wDrawBitMap_p aboutBM = NULL;
-	if (aboutBM == NULL)
-		aboutBM = wDrawBitMapCreate( d, w, h, 0, 0, icon64_bits );
-	wDrawClear( d );
-	wDrawBitMap( d, aboutBM, 0, 0, wDrawColorBlack, 0 );
-}
 
 BOOL_T Initialize( void )
 {
-	wWinSetBigIcon( mainW, wIconCreateBitMap(icon64_width, icon64_height, icon64_bits, wDrawColorBlack) );
-	wWinSetSmallIcon( mainW, wIconCreateBitMap(icon16_width, icon16_height, icon16_bits, wDrawColorBlack) );
-
 	InitTrkCurve();
 	InitTrkStraight();
 	InitTrkEase();

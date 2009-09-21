@@ -1,7 +1,7 @@
 /** \file param.c
  * Handle all the dialog box creation stuff.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.8 2008-03-10 18:59:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.9 2009-09-21 18:24:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -46,7 +46,7 @@
 #endif
 #include <stdarg.h>
 #include <locale.h>
-
+#include <wlib.h>
 #include "track.h"
 #include "common.h"
 #include "utility.h"
@@ -1137,6 +1137,7 @@ EXPORT void ParamRegister( paramGroup_p pg )
 		case PD_TEXT:
 		case PD_MENU:
 		case PD_MENUITEM:
+		case PD_BITMAP:
 			break;
 		}
 	}
@@ -1222,6 +1223,7 @@ EXPORT void ParamUpdatePrefs( void )
 		case PD_TEXT:
 		case PD_MENU:
 		case PD_MENUITEM:
+		case PD_BITMAP:
 			break;
 		}
 	  }
@@ -2070,6 +2072,8 @@ static void ParamCreateControl(
 	paramDrawData_t * drawDataP;
 	paramTextData_t * textDataP;
 	paramListData_t * listDataP;
+	wIcon_p iconP;
+
 	wWin_p win;
 	wPos_t w;
 	wPos_t colWidth;
@@ -2186,6 +2190,10 @@ static void ParamCreateControl(
 			pd->control = (wControl_p)wTextCreate( win, xx, yy, helpStr, NULL, pd->winOption, textDataP->width, textDataP->height );
 			if ( (pd->winOption&BO_READONLY) == 0 )
 				wTextSetReadonly( (wText_p)pd->control, FALSE );
+			break;
+		case PD_BITMAP:
+			iconP = pd->winData;
+			pd->control = (wControl_p)wBitmapCreate( win, xx, yy, pd->winOption, iconP );
 			break;
 		default:
 			AbortProg( "paramCreatePG" );

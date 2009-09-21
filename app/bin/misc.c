@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.46 2009-09-05 16:40:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.47 2009-09-21 18:24:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -137,7 +137,6 @@ EXPORT wPos_t DlgSepFrmBottom = 4;
 static int verbose = 0;
 
 static wMenuList_p winList_mi;
-static wWin_p aboutW;
 static BOOL_T inMainW = TRUE;
 
 static long stickySet;
@@ -1800,52 +1799,6 @@ static void ShowAddElevations( void )
 		addElevW = ParamCreateDialog( &addElevPG, MakeWindowTitle(_("Change Elevations")), _("Change"), DoAddElev, wHide, FALSE, NULL, 0, NULL );
 	wShow( addElevW );
 }
-
-/*--------------------------------------------------------------------*/
-
-static drawCmd_t aboutD = {
-		NULL,
-		&screenDrawFuncs,
-		0,
-		1.0,
-		0.0,
-		{0.0,0.0}, {0.0,0.0},
-		Pix2CoOrd, CoOrd2Pix };
-
-static paramDrawData_t aboutDrawData = { ICON_WIDTH, ICON_HEIGHT, (wDrawRedrawCallBack_p)RedrawAbout, NULL, &aboutD };
-#define COPYRIGHT N_("\nXTrackCAD is a CAD (computer-aided design) program\nfor designing model railroad layouts.")
-static paramData_t aboutPLs[] = {
-#define I_ABOUTDRAW				(0)
-	{   PD_DRAW, NULL, "about", PDO_NOPSHUPD, &aboutDrawData, NULL, 0 },
-#define I_ABOUTVERSION			(1)
-	{   PD_MESSAGE, NULL, NULL, PDO_DLGNEWCOLUMN, NULL, NULL, 0 },
-#define I_ABOUTCOPYRIGHT		(2)
-	{   PD_MESSAGE, COPYRIGHT, NULL, 0, NULL, NULL, 0 },
-#define I_ABOUTREGTO			(3)
-	{   PD_MESSAGE, NULL, NULL, PDO_DLGUNDERCMDBUTT, (void*)250, NULL, 0 } };
-static paramGroup_t aboutPG = { "about", 0, aboutPLs, sizeof aboutPLs/sizeof aboutPLs[0] };
-
-/** 
- *	Create and show the About window.
- */
-
-static void CreateAboutW( void *ptr )
-{
-	wPos_t w;
-	char * copyright = COPYRIGHT;
-	
-	if( !aboutW ) {
-		w = wLabelWidth( copyright );
-		aboutPLs[I_ABOUTVERSION].winData = (void*)w;
-		aboutPLs[I_ABOUTCOPYRIGHT].winData = (void*)w;
-		ParamRegister( &aboutPG );
-		aboutW = ParamCreateDialog( &aboutPG, MakeWindowTitle(_("About")), _("Ok"), (paramActionOkProc)wHide, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
-		RedrawAbout( aboutD.d, NULL, ICON_WIDTH, ICON_HEIGHT );
-		ParamLoadMessage( &aboutPG, I_ABOUTVERSION, sAboutProd );
-	} 
-		
-	wShow( aboutW );
-}	
 
 /*--------------------------------------------------------------------*/
 
