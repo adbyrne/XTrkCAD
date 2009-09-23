@@ -1,6 +1,7 @@
 FILE(GLOB HEADERS *.h)
 
 SET(SOURCES
+	gtkbitmap.c
 	gtkbutton.c
 	gtkcolor.c
 	gtkfilsel.c
