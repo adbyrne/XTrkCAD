@@ -1,3 +1,8 @@
+Sep 22, 2009
+	FIX: Daniel Spagnol
+		CMakeLists.txt gtkbitmap.c gtkint.h: file created as a workaround to
+		get the source compiled under POSIX and OSX after wCreateBitmap
+		feature
 Aug 12, 2009
 	ENH: Matthew Sheets
 		wpref.c: initialize with system default config from /etc 
