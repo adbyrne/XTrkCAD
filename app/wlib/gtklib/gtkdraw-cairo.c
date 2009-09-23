@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.7 2009-08-07 03:31:05 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.8 2009-09-23 03:38:36 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -487,11 +487,9 @@ EXPORT void gtkDrawString(
 	if (wDebugFont >= 3)
 		fprintf(stderr, "drawing text: \"%s\", fontsize=%lf, fontname=\"%s\"\n",
 				utf8, fs, pango_font_description_to_string(bd->fontDesc));
-	pango_layout_get_pixel_size(layout, &w, &h);
-	cairo_move_to(cairo, x, y);
-	pango_cairo_show_layout(cairo, layout);
 	
 	// width, height, ascent and descent
+	pango_layout_get_pixel_size(layout, &w, &h);
 	context = gtk_widget_get_pango_context(bd->widget);
 	metrics = pango_context_get_metrics(context, bd->fontDesc,
 										pango_context_get_language(context));
@@ -499,6 +497,9 @@ EXPORT void gtkDrawString(
 	descent = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
 	pango_font_metrics_unref(metrics);
 	
+	cairo_move_to(cairo, x, y-ascent);
+	pango_cairo_show_layout(cairo, layout);
+
 	g_object_unref(layout);
 	
 	if ( bd->delayUpdate || bd->widget == NULL) return;
