@@ -1,3 +1,7 @@
+Sep 23, 2009
+	FIX: Martin Fischer  <m_fischer@users.sourceforge.net>
+		gtkbitmap.c gtkmisc.c: implement wCreateBitmap
+
 Sep 22, 2009
 	FIX: Daniel Spagnol
 		gtkdraw-cairo.c: text in layout and selection were not aligned

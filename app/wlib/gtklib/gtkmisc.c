@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.13 2009-07-24 15:58:24 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.14 2009-09-23 18:57:29 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -644,6 +644,7 @@ wIcon_p wIconCreatePixMap( char *pm[] )
 	ip->bits = pm;
 	return ip;
 }
+
 
 void wIconSetColor( wIcon_p ip, wDrawColor color )
 {

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbitmap.c,v 1.1 2009-09-23 02:51:51 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbitmap.c,v 1.2 2009-09-23 18:57:29 m_fischer Exp $
  */
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2009 Daniel Spagnol
@@ -34,6 +34,9 @@
 
 struct wBitmap_t {
 	WOBJ_COMMON
+	GdkPixmap *pixmap;
+	GdkBitmap *mask;
+	
 };
 
 /**
@@ -47,20 +50,23 @@ struct wBitmap_t {
  */
 
 wControl_p
-wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long option, wIcon_p iconP )
+wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
 {
-	wBitmap_p control;
-	
-	control = (wBitmap_p)gtkAlloc( parent, B_BITMAP, x, y, NULL, sizeof( struct wBitmap_t ), iconP );
-	gtkComputePos( (wControl_p)control );
-	control->option = option;
-	
-	/* TODO: implement me */
-	control->widget = NULL;
-	
-	control->h = iconP->h;
-	control->w = iconP->w;
-	control->data = iconP;
-	
-	return (wControl_p)control;
+	wBitmap_p bt;
+	GdkPixmap *pixmap; 
+	GdkBitmap *mask = malloc( 1024 );
+
+	bt = gtkAlloc( parent, B_BITMAP, x, y, NULL, sizeof *bt, NULL );
+	gtkComputePos( (wControl_p)bt );
+	bt->w = iconP->w;
+	bt->h = iconP->h;
+	bt->option = options;
+	gtkComputePos( (wControl_p)bt );
+
+	bt->pixmap = gdk_pixmap_create_from_xpm_d( parent->widget->window, &mask, NULL, (gchar **)iconP->bits );
+	bt->mask = mask;
+	bt->widget = gtk_image_new_from_pixmap( bt->pixmap, bt->mask );
+
+	return( (wControl_p)bt );
 }
+
