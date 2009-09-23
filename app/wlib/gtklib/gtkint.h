@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.4 2009-07-24 15:58:24 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.5 2009-09-23 02:56:18 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -47,7 +47,8 @@ typedef enum {
 		B_LIST, B_DROPLIST, B_COMBOLIST,
 		B_RADIO, B_TOGGLE,
 		B_DRAW, B_MENU, B_MULTITEXT, B_MESSAGE, B_LINES,
-		B_MENUITEM, B_BOX } wType_e;
+		B_MENUITEM, B_BOX,
+		B_BITMAP } wType_e;
 
 typedef void (*repaintProcCallback_p)( wControl_p );
 typedef void (*doneProcCallback_p)( wControl_p b );
