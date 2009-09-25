@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksimple.c,v 1.5 2007-11-12 21:55:45 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksimple.c,v 1.6 2009-09-25 05:38:15 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -72,7 +72,7 @@ EXPORT wPos_t wMessageGetHeight(
 }
 
 /**
- * Craate a window for a simple text. 
+ * Create a window for a simple text. 
  *
  * \param IN parent Handle of parent window
  * \param IN x position in x direction
@@ -111,13 +111,13 @@ EXPORT wMessage_p wMessageCreateEx(
 		fontDesc = (b->labelWidget)->style->font_desc;
 		
 		/* get the current font size */
-		fontSize = pango_font_description_get_size( fontDesc );
+		fontSize = PANGO_PIXELS(pango_font_description_get_size( fontDesc ));
 		
 		/* calculate the new font size */
 		if( flags & BM_LARGE ) {
-			pango_font_description_set_size( fontDesc, fontSize * 1.4 );
+			pango_font_description_set_size( fontDesc, fontSize * 1.4 * PANGO_SCALE );
 		} else {
-			pango_font_description_set_size( fontDesc, fontSize * 0.7 );
+			pango_font_description_set_size( fontDesc, fontSize * 0.7 * PANGO_SCALE );
 		}			
 		
 		/* set the new font size */
@@ -139,9 +139,9 @@ EXPORT wMessage_p wMessageCreateEx(
 	/* Reset font size to normal */
 	if( wMessageSetFont( flags ))	{
 		if( flags & BM_LARGE ) {
-			pango_font_description_set_size(fontDesc, fontSize);
+			pango_font_description_set_size(fontDesc, fontSize * PANGO_SCALE);
 		} else {
-			pango_font_description_set_size(fontDesc, fontSize);
+			pango_font_description_set_size(fontDesc, fontSize * PANGO_SCALE);
 		}
 	}
 	return b;

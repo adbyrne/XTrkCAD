@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.8 2009-09-23 03:38:36 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.9 2009-09-25 05:38:15 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -33,7 +33,6 @@
 #include "gtkint.h"
 #include "gdk/gdkkeysyms.h"
 
-long wDebugFont = 0;
 static long drawVerbose = 0;
 
 struct wDrawBitMap_t {
@@ -60,7 +59,6 @@ struct wDraw_t {
 		GdkGC * gc;
 		wDrawWidth lineWidth;
 		wDrawOpts opts;
-		PangoFontDescription * fontDesc;
 		wPos_t maxW;
 		wPos_t maxH;
 		unsigned long lastColor;
@@ -346,170 +344,6 @@ EXPORT void wDrawPoint(
  *
  ******************************************************************************/
 
-static double fontFactor = 1.0;
-
-/* TODO: figure out what this formula means and document it */
-#define FONTSIZE_TO_PANGOSIZE(fs) ((gint) (fs * fontFactor + .5))
-
-#define FC_SIZE (6)
-typedef struct fontCache_t * fontCache_p;
-struct fontCache_t {
-		fontCache_p next, prev;
-		const char * name;
-		int size;
-		PangoFontDescription * fd;
-		};
-static struct fontCache_t fontCacheList[FC_SIZE];
-static fontCache_p fontCache = NULL;
-
-
-static void printFontCache( const char * title )
-{
-	fontCache_p f = fontCache;
-	printf("FC(%s):", title );
-	while (1) {
-		if (f->name)
-			printf(" %s:%d", f->name, f->size );
-		else
-			printf(" unused");
-		f = f->next;
-		if (f==fontCache)
-			break;
-	}
-	printf("\n");
-}
-
-EXPORT int wLoadFont(
-		wDraw_p bd,
-		const char * fontName,
-		wFontSize_t fs,
-		int force )
-{
-	int size;
-	PangoFontDescription * fd;
-	char tmp[1024];
-	fontCache_p fc;
-
-	if (fontName == NULL)
-		return FALSE;
-
-	if (fontCache == NULL) {
-		fontCache = fontCacheList;
-		for ( fc = fontCache; fc < fontCache+FC_SIZE; fc++ ) {
-			fc->next = fc+1;
-			fc->prev = fc-1;
-            fc->name = NULL;
-		}
-		fontCache->prev = fontCache+FC_SIZE-1;
-		fontCache->prev->next = fontCache;
-	}
-
-	size = FONTSIZE_TO_PANGOSIZE(fs);
-	if (size <= 1)
-		return FALSE;
-	if (!force) {
-		fontCache_p f = fontCache;
-		while ( 1 ) {
-			if (f->name == NULL)
-				break;
-			if ( strcmp( f->name, fontName ) == 0 && f->size == size ) {
-				if (f != fontCache) {
-					f->prev->next = f->next;
-					f->next->prev = f->prev;
-					f->next = fontCache;
-					f->prev = fontCache->prev;
-					fontCache->prev->next = f;
-					fontCache->prev = f;
-					fontCache = f;
-					if (wDebugFont>=3)
-						printFontCache("LRU shuffle");
-				}
-				bd->fontDesc = f->fd;
-				return TRUE;
-			}
-			f = f->next;
-			if ( f == fontCache )
-				break;
-		}
-	}
-	sprintf( tmp, "%s %d", fontName, size );
-	if (wDebugFont >= 2)
-		fprintf(stderr, "loadFont \"%s\"\n", tmp);
-	fd = pango_font_description_from_string( tmp );
-	fontCache = fontCache->prev;
-	fontCache->fd = fd;
-	fontCache->size = size;
-	fontCache->name = fontName;
-	bd->fontDesc = fd;
-	if (wDebugFont>=2)
-		printFontCache("Load");
-	return TRUE;
-}
-
-
-EXPORT void gtkDrawString(
-		wDraw_p bd,
-		wPos_t x, wPos_t y,
-		const char * s,
-		wFontSize_t fs,
-		wDrawColor color,
-		wDrawOpts opts )
-{
-	PangoLayout *layout;
-	GdkRectangle update_rect;
-	wPos_t w;
-	wPos_t h;
-	PangoContext * context;
-	PangoFontMetrics * metrics;
-	gint ascent;
-	gint descent;
-	gchar * utf8;
-	gint size = FONTSIZE_TO_PANGOSIZE(fs);
-	
-	x = INMAPX(bd,x);
-	y = INMAPY(bd,y);
-
-	utf8 = g_convert (s, -1, "UTF-8", "ISO-8859-1", 
-					  NULL, NULL,NULL);
-	if (wDebugFont>=2) {
-		fprintf(stderr, "Input String : %s\n", s );
-		
-		fprintf(stderr, "Cairo String : %s\n", utf8 );
-	}
-	
-	// draw text
-	cairo_t* const cairo = selectContext(bd, 0, wDrawLineSolid, color, opts);
-	layout = pango_cairo_create_layout(cairo);
-	pango_layout_set_text(layout, utf8, -1);
-	pango_layout_set_font_description(layout, bd->fontDesc);
-	pango_font_description_set_size(bd->fontDesc,
-									FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
-	if (wDebugFont >= 3)
-		fprintf(stderr, "drawing text: \"%s\", fontsize=%lf, fontname=\"%s\"\n",
-				utf8, fs, pango_font_description_to_string(bd->fontDesc));
-	
-	// width, height, ascent and descent
-	pango_layout_get_pixel_size(layout, &w, &h);
-	context = gtk_widget_get_pango_context(bd->widget);
-	metrics = pango_context_get_metrics(context, bd->fontDesc,
-										pango_context_get_language(context));
-	ascent  = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
-	descent = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
-	pango_font_metrics_unref(metrics);
-	
-	cairo_move_to(cairo, x, y-ascent);
-	pango_cairo_show_layout(cairo, layout);
-
-	g_object_unref(layout);
-	
-	if ( bd->delayUpdate || bd->widget == NULL) return;
-	update_rect.x = x-1;
-	update_rect.y = y-ascent-1;
-	update_rect.width = w;
-	update_rect.height = ascent+descent+2;
-	gtk_widget_draw( bd->widget, &update_rect );
-}
-
 EXPORT void wDrawString(
 		wDraw_p bd,
 		wPos_t x, wPos_t y,
@@ -520,15 +354,37 @@ EXPORT void wDrawString(
 		wDrawColor color,
 		wDrawOpts opts )
 {
-	const char * font;
+	PangoLayout *layout;
+	GdkRectangle update_rect;
+	int w;
+	int h;
+	gint ascent;
+	gint descent;
+	
 	if ( bd == &psPrint_d ) {
 		psPrintString( x, y, a, (char *) s, fp, fs, color, opts );
 		return;
 	}
-	font = gtkFontTranslate( fp );
-	if ( !wLoadFont( bd, font, fs, FALSE ) )
-		return;
-	gtkDrawString( bd, x, y, s, fs, color, opts );
+	
+	x = INMAPX(bd,x);
+	y = INMAPY(bd,y);
+	
+	/* draw text */
+	cairo_t* const cairo = selectContext(bd, 0, wDrawLineSolid, color, opts);
+	layout = gtkFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
+									  (int *) &w, (int *) &h,
+									  (int *) &ascent, (int *) &descent);
+	
+	cairo_move_to(cairo, x, y - ascent);
+	pango_cairo_show_layout(cairo, layout);
+	gtkFontDestroyPangoLayout(layout);
+	
+	if (bd->delayUpdate || bd->widget == NULL) return;
+	update_rect.x      = (gint) x - 1;
+	update_rect.y      = (gint) y - (gint) ascent - 1;
+	update_rect.width  = (gint) w + 2;
+	update_rect.height = (gint) ascent + (gint) descent + 2;
+	gtk_widget_draw(bd->widget, &update_rect);
 }
 
 EXPORT void wDrawGetTextSize(
@@ -542,46 +398,23 @@ EXPORT void wDrawGetTextSize(
 {
 	int textWidth;
 	int textHeight;
-	const char * font;
-	PangoFontDescription * fontDesc;
-	PangoLayout * layout;
-	PangoContext * context;
-	PangoFontMetrics * metrics;
-	gint ascent;
-	gint descent;
-	gchar * utf8;
+	int ascent;
+	int descent;
 	
 	*w = 0;
 	*h = 0;
-	font = gtkFontTranslate( fp );
-	if ( !wLoadFont( bd, font, fs, FALSE ) )
-		return;
 	
-	utf8 = g_convert (s, -1, "UTF-8", "ISO-8859-1", NULL, NULL, NULL);
-	
-	// draw text in a temporary layout
-	layout = gtk_widget_create_pango_layout(bd->widget, utf8);
-	pango_layout_set_font_description(layout, bd->fontDesc);
-	pango_font_description_set_size(bd->fontDesc,
-									FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
-	
-	// width, height, ascent and descent
-	pango_layout_get_pixel_size(layout, &textWidth, &textHeight);
-	context = gtk_widget_get_pango_context(bd->widget);
-	metrics = pango_context_get_metrics(context, bd->fontDesc,
-										pango_context_get_language(context));
-	ascent  = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
-	descent = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
-	pango_font_metrics_unref(metrics);
-	
-	g_object_unref(layout);
+	gtkFontDestroyPangoLayout(
+		gtkFontCreatePangoLayout(bd->widget, NULL, fp, fs, s,
+								 &textWidth, (int *) &textHeight,
+								 (int *) &ascent, (int *) &descent));
 	
 	*w = (wPos_t) textWidth;
 	*h = (wPos_t) ascent;
 	*d = (wPos_t) descent;
 	
 	if (debugWindow >= 3)
-		fprintf(stderr,"text metrics: w=%d, h=%d, d=%d\n", *w, *h, *d);
+		fprintf(stderr, "text metrics: w=%d, h=%d, d=%d\n", *w, *h, *d);
 }
 
 
@@ -590,9 +423,6 @@ EXPORT void wDrawGetTextSize(
  * Basic Drawing Functions
  *
 *******************************************************************************/
-
- 
-
 
 EXPORT void wDrawFilledRectangle(
 		wDraw_p bd,

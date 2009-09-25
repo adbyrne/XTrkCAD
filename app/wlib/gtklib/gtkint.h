@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.5 2009-09-23 02:56:18 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.6 2009-09-25 05:38:15 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -150,6 +150,9 @@ void gtkTextThaw( wText_p );
 
 /* gtkfont.c */
 const char * gtkFontTranslate( wFont_p );
+PangoLayout *gtkFontCreatePangoLayout( GtkWidget *, void *cairo,
+									  wFont_p, wFontSize_t, const char *,
+									  int *, int *, int *, int * );
 
 /* gtkbutton.c */
 void gtkButtonDoAction( wButton_p );

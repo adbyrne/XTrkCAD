@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.8 2009-08-07 03:31:05 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.9 2009-09-25 05:38:15 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -39,23 +39,21 @@
 #define FALSE (0)
 #endif
 
-static wDraw_p font_d;
+/*
+ * Macro for debug purposes. Possible debug macro values:
+ *
+ *   0 - no messages to console (use this value when building in release mode)
+ *   1 - send errors
+ *   2 - send details
+ *   3 - send more details
+ */
+#define WLIB_FONT_DEBUG 0
 
-static char sampleText[] = "AbCdE0129!@$&()[]{}";
+static gchar sampleText[] = "AbCdE0129!@$&()[]{}";
 
-static wWin_p fontSelW;
-static wButton_p fontOkB;
-static wButton_p fontCancelB;
-static wButton_p fontWeightB;
-static wButton_p fontSlantB;
-static wInteger_p fontSizeB;
-static wList_p fontListB;
-static int fontSelectMode = 0;
+static GtkWidget *fontSelectionDialog;
 
-static long fontSize = 18;
 
-int wLoadFont( wDraw_p, const char *, double, int );
-
 /*****************************************************************************
  * FONT HANDLERS
  */
@@ -67,429 +65,231 @@ int wLoadFont( wDraw_p, const char *, double, int );
 
 
 struct wFont_t {
-		wIndex_t fi;
-		wBool_t bold;
-		wBool_t italic;
+		PangoFontDescription *fontDescription;
 		};
-static wIndex_t standardFonts[3];
 
-typedef struct {
-		const char * faceName;
-		const char * fullName[2][2];
-		struct wFont_t font[2][2];
-		} fontInfo_t;
-static dynArr_t fontInfo_da;
-#define fontInfo(N) DYNARR_N(fontInfo_t,fontInfo_da,N)
-
-static long curFontInx;
-static long curFontWeight;
-static long curFontSlant;
-static long newFontInx;
-static long newFontWeight;
-static long newFontSlant;
-static long oldFontWeight = -1;
-static long oldFontSlant = -1;
+static wFont_p standardFonts[F_HELV-F_TIMES+1][2][2];
+static wFont_p curFont = NULL;
 
 
-static void doFontOk( void )
+static void fontSelectionDialogCallback(GtkFontSelectionDialog *fontSelectionDialog, gint response, gpointer data)
 {
-	if (fontInfo(newFontInx).fullName[newFontWeight][newFontSlant] == NULL) {
-		wNoticeEx( NT_ERROR, _("No font selected"), _("Continue"), NULL );
-		return;
+	gchar *fontName;
+	
+	switch (response)
+	{
+		case GTK_RESPONSE_APPLY: /* once the apply button is hidden, this should not be used */
+		case GTK_RESPONSE_OK:
+			fontName = gtk_font_selection_dialog_get_font_name(fontSelectionDialog);
+			wPrefSetString( "font", "name", fontName );
+			g_free(curFont->fontDescription);
+			curFont->fontDescription = pango_font_description_from_string(fontName);
+#if WLIB_FONT_DEBUG >= 2
+			fprintf(stderr, "new font selection:\n");
+			fprintf(stderr, "  font name \"%s\"\n", fontName);
+			fprintf(stderr, "  font size is absolute %d\n", pango_font_description_get_size_is_absolute(curFont->fontDescription));
+#endif
+			g_free(fontName);
+			break;
+		default:
+			gtk_widget_hide(GTK_WIDGET(fontSelectionDialog));
 	}
-	if ( curFontWeight != newFontWeight ||
-		 curFontSlant != newFontSlant ||
-		 curFontInx != newFontInx ) {
-		curFontInx = newFontInx;
-		curFontWeight = newFontWeight;
-		curFontSlant = newFontSlant;
-	}
-	wWinShow( fontSelW, FALSE );
-	wPrefSetString( "font", "name", fontInfo(curFontInx).fullName[curFontWeight][curFontSlant] );
-	wPrefSetInteger( "font", "size", fontSize );
+	if (response == GTK_RESPONSE_OK)
+		gtk_widget_hide(GTK_WIDGET(fontSelectionDialog));
 }
-
-static void doFontCancel( void )
-{
-	wWinShow( fontSelW, FALSE );
-	wButtonSetBusy( fontWeightB, curFontWeight==0 );
-	wButtonSetBusy( fontSlantB, curFontSlant==0 );
-}
-
-
-void gtkDrawString( wDraw_p, wPos_t, wPos_t, const char *, wFontSize_t, wDrawColor, wDrawOpts );
-static wDrawColor black;
-
-static void fontRedraw( wDraw_p b, void * context, wPos_t w, wPos_t y )
-{
-	wDrawClear( b );
-	if (fontInfo(newFontInx).fullName[newFontWeight][newFontSlant] == NULL )
-		return;
-	if ( ! wLoadFont( b, fontInfo(newFontInx).fullName[newFontWeight][newFontSlant],
-				(double)fontSize, TRUE ) )
-		return;
-	gtkDrawString( b, 0, 8, sampleText, (double)fontSize, black, 0 );
-}
-
-
-static void selectAttr( void )
-{
-	int i;
-	const char * oldFontName;
-	const char * newFontName;
-	if (fontInfo_da.cnt==0) {
-		wNoticeEx( NT_ERROR, _("No fonts"), _("Continue"), NULL );
-		wDrawClear( font_d );
-		return;
-	}
-	wControlShow( (wControl_p)fontListB, FALSE );
-	for (i=0;i<fontInfo_da.cnt;i++) {
-		newFontName = fontInfo(i).fullName[newFontWeight][newFontSlant];
-		if (oldFontWeight != -1 && oldFontSlant != -1 )
-			oldFontName = fontInfo(i).fullName[oldFontWeight][oldFontSlant];
-		else
-			oldFontName = NULL;
-		if ( (newFontName == NULL ) != (oldFontName == NULL) ) {
-			wListSetActive( fontListB, i, newFontName != NULL );
-		}
-	}
-	wControlShow( (wControl_p)fontListB, TRUE );
-	if (fontInfo(newFontInx).fullName[newFontWeight][newFontSlant]) {
-		wControlActive( (wControl_p)fontOkB, TRUE );
-		wListSetIndex( fontListB, newFontInx );
-	} else {
-		wControlActive( (wControl_p)fontOkB, FALSE );
-		wListSetIndex( fontListB, -1 );
-	}
-	if ( fontSelectMode == 0 ) {
-		wControlActive( (wControl_p)fontWeightB, 
-			fontInfo(newFontInx).fullName[1-newFontWeight][newFontSlant] != NULL);
-		wControlActive( (wControl_p)fontSlantB, 
-			fontInfo(newFontInx).fullName[newFontWeight][1-newFontSlant] != NULL);
-	}
-	oldFontWeight = newFontWeight;
-	oldFontSlant = newFontSlant;
-	fontRedraw( font_d, NULL, 0, 0 );
-}
-
-
-static void selectFace( wIndex_t index, const char * name, wIndex_t junk3, void * listData, void * itemData )
-{
-	newFontInx = (int)itemData;
-	fontRedraw( font_d, NULL, 0, 0 );
-	wControlActive( (wControl_p)fontOkB, TRUE );
-	if ( fontSelectMode == 0 ) {
-		wControlActive( (wControl_p)fontWeightB, 
-			fontInfo(newFontInx).fullName[1-newFontWeight][newFontSlant] != NULL);
-		wControlActive( (wControl_p)fontSlantB, 
-			fontInfo(newFontInx).fullName[newFontWeight][1-newFontSlant] != NULL);
-	}
-}
-
-
-static wBool_t addFont( const char * faceName, long fw, long fs, const char * fullName )
-{
-	int i, rc;
-
-	for (i=0;i<fontInfo_da.cnt;i++)
-		if ((rc=strcasecmp( fontInfo(i).faceName, faceName )) == 0) {
-			if (fontInfo(i).fullName[fw][fs]) {
-				if (wDebugFont >= 1)
-					fprintf(stderr,"dup font %s %s\n",
-						fontInfo(i).fullName[fw][fs], fullName );
-				return FALSE;
-			}
-			goto found;
-		}
-	DYNARR_ADD( fontInfo_t, fontInfo_da, 10 );
-	i = fontInfo_da.cnt-1;
-	fontInfo(i).faceName = strdup( faceName );
-	memset( &fontInfo(i).fullName, 0, sizeof ((fontInfo_t*)NULL)->fullName );
-found:
-	fontInfo(i).fullName[fw][fs] = strdup( fullName );
-	return TRUE;
-}
-
-static int cmpFontName( const void * a, const void * b )
-{
-	return strcasecmp( ((fontInfo_t*)a)->faceName, ((fontInfo_t*)b)->faceName );
-}
-
-
-static void findFont( const char * fontName )
-{
-	int f, w, s;
-	if ( fontName == NULL )
-		return;
-	for ( f=0; f<fontInfo_da.cnt; f++ )
-		for ( s=0; s<2; s++ )
-			for ( w=0; w<2; w++ )
-				if ( fontInfo(f).fullName[w][s] &&
-					 strcmp( fontInfo(f).fullName[w][s], fontName ) == 0 ) {
-					curFontInx = f;
-					curFontWeight = w;
-					curFontSlant = s;
-					return;
-				}
-}
-
 
 static wBool_t fontInitted = FALSE;
 
-static wBool_t fontInit( wBool_t getPref )
+static wBool_t fontInit()
 {
-	PangoFontFamily **families;
-	gint n_families;
-	PangoFontFace **faces;
-	int n_faces;
+	const char *fontNames[] = {
+		"times 18",
+		"times italic 18",
+		"times bold 18",
+		"times bold italic 18",
+		"helvetica 18",
+		"helvetica oblique 18",
+		"helvetica bold 18",
+		"helvetica bold oblique 18",
+	};
+	
+	int s = 0;
 	int i, j, k;
-	char ** fonts;
-	const char *familyName, *faceName;
-	PangoFontDescription *fontDesc;
-	PangoWeight weight;
-	PangoStyle style;
-	char fullName[1024];
-	long ifw, ifs;
-	FILE * f=NULL;
-	long stdFontInx;
-	const char * stdSerifName;
-	const char * stdSanserifName;
-
-	stdSerifName = wPrefGetString( "gtkfont", "serif" );
-	stdSanserifName = wPrefGetString( "gtkfont", "sanserif" );
-	fontInitted = TRUE;
-	black = wDrawFindColor( 0 );
-	if (wDebugFont >= 2)
-		f = fopen( "fonts.lst", "w" );
-	pango_context_list_families(gtk_widget_get_pango_context(GTK_WIDGET(gtkMainW->gtkwin)), &families, &n_families);
-	for (i=0; i<n_families; i++) {
-		familyName = pango_font_family_get_name(families[i]);
-		if (wDebugFont >= 2)
-			fprintf( f, "%s\n", familyName );
-		pango_font_family_list_faces(families[i], &faces, &n_faces);
-		for (j=0; j<n_faces; ++j) {
-			fontDesc = pango_font_face_describe(faces[j]);
-			weight = pango_font_description_get_weight(fontDesc);
-			style = pango_font_description_get_style(fontDesc);
-			faceName = pango_font_face_get_face_name(faces[j]);
-			if (weight == PANGO_WEIGHT_NORMAL)
-				ifw = FW_MEDIUM;
-			else if (weight == PANGO_WEIGHT_BOLD)
-				ifw = FW_BOLD;
-			else {
-				if (wDebugFont >= 1)
-					fprintf( stderr, "Unsuported font weight (%d) for \"%s %s\"\n", weight, familyName, faceName );
-				pango_font_description_free(fontDesc);
-				continue;
+	
+	for (i = F_TIMES; i <= F_HELV; ++i) {
+		for (j = FW_MEDIUM; j <= FW_BOLD; ++j) {
+			for (k = FS_REGULAR; k <= FS_ITALIC; ++k) {
+				PangoFontDescription *fontDescription = pango_font_description_from_string(fontNames[s++]);
+				wFont_p standardFont = (wFont_p) malloc(sizeof(struct wFont_t));
+				standardFont->fontDescription = fontDescription;
+				standardFonts[i-F_TIMES][j][k] = standardFont;
 			}
-			if (style == PANGO_STYLE_NORMAL)
-				ifs = FS_REGULAR;
-			else if (style == PANGO_STYLE_ITALIC)
-				ifs = FS_ITALIC;
-			else {
-				if (wDebugFont >= 1)
-					fprintf( stderr, "Unsuported font slant (%d) for \"%s %s\"\n", style, familyName, faceName );
-				continue;
-				pango_font_description_free(fontDesc);
-			}
-			sprintf( fullName, "%s %s", familyName, faceName );
-			if (wDebugFont >= 2)
-				fprintf( f, "  %s\n", fullName );
-			addFont( familyName, ifw, ifs, fullName );
-			pango_font_description_free(fontDesc);
 		}
-		g_free(faces);
 	}
-	g_free(families);
-	if (wDebugFont >= 2)
-		fclose(f);
-	qsort( fontInfo_da.ptr, fontInfo_da.cnt, sizeof *(fontInfo_t*)NULL, cmpFontName );
-
-	standardFonts[F_TIMES] = -1;
-	standardFonts[F_HELV] = -1;
-	stdFontInx = -1;
-	for ( i=0;i<fontInfo_da.cnt;i++ ) {
-		if (strcasecmp(fontInfo(i).faceName, stdSerifName?stdSerifName:"times")==0) {
-			standardFonts[F_TIMES] = i;
-		} else if ( strcasecmp(fontInfo(i).faceName, stdSanserifName?stdSanserifName:"helvetica") == 0 )
-			standardFonts[F_HELV] = i;
-		if ( stdFontInx < 0 &&
-			 fontInfo(i).fullName[0][0] != NULL )
-			stdFontInx = i;
+	
+	if (curFont == NULL) {
+		curFont = (wFont_p) malloc(sizeof(struct wFont_t));
+		if (curFont == NULL)
+			return FALSE;
+		const char *fontName = wPrefGetString("font", "name");
+		curFont->fontDescription = pango_font_description_from_string(fontName ? fontName : "helvetica 18");
 	}
-	if ( standardFonts[F_TIMES] < 0 ) {
-		wNoticeEx( NT_ERROR, _("Can't find standard Serif font.\nPlease choose a font"), _("Continue"), NULL );
-		wSelectStandardFont( F_TIMES );
-	}
-	if ( standardFonts[F_HELV] < 0 ) {
-		wNoticeEx( NT_ERROR, _("Can't find standard San-Serif font.\nPlease choose a font"), _("Continue"), NULL );
-		wSelectStandardFont( F_HELV );
-	}
-	findFont( wPrefGetString( "font", "name" ) );
-	wPrefGetInteger( "font", "size", &fontSize, fontSize );
+	
+	fontInitted = TRUE;
 	return TRUE;
 }
 
-void wSelectStandardFont( int fontNum )
-{
-	long oldFontInx = curFontInx;
-	long oldFontWeight = curFontWeight;
-	long oldFontSlant = curFontSlant;
-	int inx;
 
-	curFontInx = 0;
-	for ( inx=0; inx<fontInfo_da.cnt; inx++ ) {
-		if ( fontInfo(inx).fullName[0][0] != NULL ) {
-			curFontInx = inx;
-			break;
-		}
+static double fontFactor = 1.0;
+
+/* TODO: figure out what this formula means and document it */
+#define FONTSIZE_TO_PANGOSIZE(fs) ((gint) ((fs) * (fontFactor) + .5))
+
+PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
+                                      void *cairo,
+                                      wFont_p fp,
+                                      wFontSize_t fs,
+                                      const char *s,
+                                      int *width_p,
+                                      int *height_p,
+                                      int *ascent_p,
+                                      int *descent_p)
+{
+	if (!fontInitted)
+		fontInit();
+	
+	PangoLayout *layout = NULL;
+	
+	gchar *utf8 = g_convert((const gchar *) s, -1, "UTF-8", "ISO-8859-1", 
+							NULL, NULL,NULL);
+	
+	if (cairo != NULL) {
+		layout = pango_cairo_create_layout((cairo_t *) cairo);
+		pango_layout_set_text(layout, utf8, -1);
 	}
-	curFontWeight = 0;
-	curFontSlant = 0;
-	fontSelectMode = 1;
-	wSelectFont(fontNum==F_TIMES?"Standard Serif Font":"Standard San-Serif Font");
-	standardFonts[fontNum] = curFontInx;
-	wPrefSetString( "gtkfont", fontNum==F_TIMES?"serif":"sanserif", fontInfo(curFontInx).faceName );
-	curFontInx = oldFontInx;
-	curFontWeight = oldFontWeight;
-	curFontSlant = oldFontSlant;
-	fontSelectMode = 0;
+	else
+		layout = gtk_widget_create_pango_layout(widget, utf8);
+	
+	if (fp == NULL)
+		fp = curFont;
+	
+	PangoFontDescription *fontDescription = fp->fontDescription;
+	
+	PangoContext *context;
+	PangoFontMetrics *metrics;
+	
+	/* set attributes */
+	pango_font_description_set_size(fontDescription,
+									FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
+	pango_layout_set_font_description(layout, fontDescription);
+	
+	/* get layout measures */
+	pango_layout_get_pixel_size(layout, width_p, height_p);
+	context = gtk_widget_get_pango_context(widget);
+	metrics = pango_context_get_metrics(context, fontDescription,
+										pango_context_get_language(context));
+	*ascent_p  = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
+	*descent_p = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
+	pango_font_metrics_unref(metrics);
+	
+#if WLIB_FONT_DEBUG >= 3
+	fprintf(stderr, "font layout created:\n");
+	fprintf(stderr, "  widget:         %p\n", widget);
+	fprintf(stderr, "  font size:      %f\n", fs);
+	fprintf(stderr, "  layout text:    \"%s\" (utf8)\n", utf8);
+	fprintf(stderr, "  layout width:   %d\n", *width_p);
+	fprintf(stderr, "  layout height:  %d\n", *height_p);
+	fprintf(stderr, "  layout ascent:  %d (pixels)\n", *ascent_p);
+	fprintf(stderr, "  layout descent: %d (pixels)\n", *descent_p);
+#endif
+	
+	g_free(utf8);
+	
+	return layout;
 }
 
-static void fontToggleWeightButton( void* junk )
+void gtkFontDestroyPangoLayout(PangoLayout *layout)
 {
-	newFontWeight = !newFontWeight;
-	wButtonSetBusy( fontWeightB, newFontWeight != 0 );
-	selectAttr();
+	g_object_unref(G_OBJECT(layout));
 }
-
-
-static void fontToggleSlantButton( void* junk )
-{
-	newFontSlant = !newFontSlant;
-	wButtonSetBusy( fontSlantB, newFontSlant != 0 );
-	selectAttr();
-}
-
-#include "bold.bmp"
-#include "italic.bmp"
 
 void wInitializeFonts()
 {
-	if(!fontInitted)
-		fontInit( FALSE );
+	if (!fontInitted)
+		fontInit();
 }
 
 void wSelectFont(
 	const char * title )
 {
-	int i;
-	wPos_t x, y;
-	wIcon_p fontWeightBM, fontSlantBM;
 	if (!fontInitted)
-		fontInit( FALSE );
-	if (fontSelW == NULL) {
-		fontSelW = wWinPopupCreate( NULL, 2, 2, "fontSelW", _("Font Select"), "xvfontsel", F_AUTOSIZE|F_RECALLPOS|F_BLOCK, NULL, NULL );
-
-		fontWeightBM = wIconCreateBitMap( bold_width, bold_height, bold_bits, wDrawColorBlack );
-		fontWeightB = wButtonCreate( fontSelW,	2, 2, "fontSelWeight", (const char*)fontWeightBM, BO_ICON, 0, fontToggleWeightButton, NULL );
-		fontSlantBM = wIconCreateBitMap( italic_width, italic_height, italic_bits, wDrawColorBlack );
-		fontSlantB = wButtonCreate( fontSelW,	-4, 2, "fontSelSlant", (const char*)fontSlantBM, BO_ICON, 0, fontToggleSlantButton, NULL );
-		fontSizeB = wIntegerCreate( fontSelW,	-4, 2, "fontSelSize", NULL, 0,
-								80, 1, 100, &fontSize, (wIntegerCallBack_p)selectAttr, NULL );
-
-		fontListB = wDropListCreate( fontSelW, 2, -4, "fontSelList", NULL, 0,
-								10, 185, NULL, selectFace, NULL );
-		x = 2 + wControlGetWidth( (wControl_p)fontListB ) + 10;
-
-		fontOkB = wButtonCreate( fontSelW, x, 2, "fontSelOk", _("Ok"), 2, 0, (wButtonCallBack_p)doFontOk, NULL );
-		fontCancelB = wButtonCreate( fontSelW, x, -4, "fontSelCancel", _("Cancel"), 0, 0, (wButtonCallBack_p)doFontCancel, NULL );
-		x += wControlGetWidth( (wControl_p)fontOkB );
-		y = wControlGetPosY( (wControl_p)fontListB ) + wControlGetHeight( (wControl_p)fontListB ) + 4;
-		font_d = wDrawCreate( fontSelW, 2, y, "fontSelSample", 0, x, 50, NULL, fontRedraw, NULL );
-
-		for (i=0;i<fontInfo_da.cnt;i++) {
-			wListAddValue( fontListB, fontInfo(i).faceName, NULL, (void*)i );
-			if (fontInfo(i).fullName[0][0] == NULL)
-				wListSetActive( fontListB, i, FALSE );
-		}
+		fontInit();
+	
+	if (fontSelectionDialog == NULL) {
+		fontSelectionDialog = gtk_font_selection_dialog_new(_("Font Select"));
+		gtk_window_set_position(GTK_WINDOW(fontSelectionDialog), GTK_WIN_POS_MOUSE);
+		gtk_window_set_modal(GTK_WINDOW(fontSelectionDialog), TRUE);
+		gtk_font_selection_dialog_set_preview_text(GTK_FONT_SELECTION_DIALOG(fontSelectionDialog), sampleText);
+		g_signal_connect(G_OBJECT(fontSelectionDialog), "response", G_CALLBACK(fontSelectionDialogCallback), NULL);
+		gtk_signal_connect(GTK_OBJECT(fontSelectionDialog), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroyed), &fontSelectionDialog);
 	}
-	wControlActive( (wControl_p)fontCancelB, fontSelectMode==0 );
-	wControlActive( (wControl_p)fontSizeB, fontSelectMode==0 );
-	wControlActive( (wControl_p)fontWeightB, fontSelectMode==0 );
-	wControlActive( (wControl_p)fontSlantB, fontSelectMode==0 );
-	if (fontInfo_da.cnt == 0) {
-		wNoticeEx( NT_ERROR, _("No fonts"), _("Continue"), NULL);
-		return;
+	gtk_window_set_title(GTK_WINDOW(fontSelectionDialog), title);
+	
+	if (curFont != NULL) {
+		gchar *fontName = pango_font_description_to_string(curFont->fontDescription);
+		gtk_font_selection_dialog_set_font_name(GTK_FONT_SELECTION_DIALOG(fontSelectionDialog), fontName);
+		g_free(fontName);
 	}
-	newFontInx = curFontInx;
-	newFontWeight = curFontWeight;
-	newFontSlant = curFontSlant;
-	wButtonSetBusy( fontWeightB, newFontWeight!=0 );
-	wButtonSetBusy( fontSlantB, newFontSlant!=0 );
-	selectAttr();
-	wWinSetTitle( fontSelW, title );
-	wWinShow( fontSelW, TRUE );
+	
+	gtk_widget_show(fontSelectionDialog);
 }
 
-
-static const char * wCurFont( void )
+static wFont_p gtkSelectedFont( void )
 {
 	if (!fontInitted)
-		fontInit( FALSE );
-	if (fontInfo_da.cnt == 0 ||
-		fontInfo(curFontInx).fullName[curFontWeight][curFontSlant] == NULL)
-		return "times-medium-r";
-	return fontInfo(curFontInx).fullName[curFontWeight][curFontSlant];
+		fontInit();
+	
+	return curFont;
 }
-
 
 wFontSize_t wSelectedFontSize( void )
 {
-	return (wFontSize_t) fontSize;
+	if (!fontInitted)
+		fontInit();
+	
+	return (wFontSize_t) PANGO_PIXELS(pango_font_description_get_size(curFont->fontDescription));
 }
 
-
-const char * gtkFontTranslate(
-		wFont_p fp )
+const char *gtkFontTranslate( wFont_p fp )
 {
+	static gchar *fontName = NULL;
+	
+	if (fontName != NULL)
+		g_free(fontName);
+	
+	if (!fontInitted)
+		fontInit();
+	
 	if (fp == NULL)
-		return wCurFont();
-	return fontInfo(fp->fi).fullName[fp->bold][fp->italic];
-}
+		fp = gtkSelectedFont();
+	
+	if (fp == NULL)
+		fp = standardFonts[F_TIMES][FW_MEDIUM][FS_REGULAR];
+	
+	fontName = pango_font_description_to_string(fp->fontDescription);
+	
+#if WLIB_FONT_DEBUG >= 2
+	fprintf(stderr, "font translation: ");
+	fprintf(stderr, "  \"%s\"\n", fontName);
+#endif
 
+	return (const char *) fontName;
+}
 
 wFont_p wStandardFont( int face, wBool_t bold, wBool_t italic )
 {
-	wFont_p f;
 	if (!fontInitted)
-		fontInit( FALSE );
-	if (fontInfo(standardFonts[face]).fullName[bold][italic]) {
-		f = &(fontInfo(standardFonts[face]).font[bold][italic]);
-		f->fi = standardFonts[face];
-		f->bold = bold;
-		f->italic = italic;
-	} else if (fontInfo(standardFonts[face]).fullName[FALSE][FALSE]) {
-		f = &(fontInfo(standardFonts[face]).font[FALSE][FALSE]);
-		f->fi = standardFonts[face];
-		f->bold = FALSE;
-		f->italic = FALSE;
-	} else {
-		f = &(fontInfo(0).font[FALSE][FALSE]);
-		f->fi = 0;
-		f->bold = FALSE;
-		f->italic = FALSE;
-	}
-	return f;
+		fontInit();
+	
+	return standardFonts[face-F_TIMES][bold][italic];
 }
-
-#ifdef TEST
-static void doSel( wButton_p b )
-{
-	wSelectFont("Test");
-}
-
-static void Init( INT_T argc, char * argv[] )
-{
-}
-#endif

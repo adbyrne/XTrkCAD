@@ -1,7 +1,7 @@
 /** \file wlib.h
  * Commaon definitions and declarations for the wlib library
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.16 2009-09-20 15:22:47 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.17 2009-09-25 05:38:15 dspagnol Exp $
  */
 
 #ifndef WIN_H
@@ -524,7 +524,6 @@ wFontSize_t wSelectedFontSize(	void );
 #define F_TIMES	(1)
 #define F_HELV	(2)
 wFont_p wStandardFont(		int, wBool_t, wBool_t );
-void wSelectStandardFont(	int );
 
 
 /*------------------------------------------------------------------------------
