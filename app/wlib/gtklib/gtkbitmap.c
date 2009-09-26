@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbitmap.c,v 1.2 2009-09-23 18:57:29 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbitmap.c,v 1.3 2009-09-26 01:08:34 dspagnol Exp $
  */
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2009 Daniel Spagnol
@@ -54,7 +54,7 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
 {
 	wBitmap_p bt;
 	GdkPixmap *pixmap; 
-	GdkBitmap *mask = malloc( 1024 );
+	GdkBitmap *mask;
 
 	bt = gtkAlloc( parent, B_BITMAP, x, y, NULL, sizeof *bt, NULL );
 	gtkComputePos( (wControl_p)bt );

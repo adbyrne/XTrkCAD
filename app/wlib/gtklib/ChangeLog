@@ -1,4 +1,8 @@
 Sep 25, 2009
+	FIX: Daniel Spagnol
+		EXC_BAD_ACCESS when displaying about dialog
+
+Sep 25, 2009
 	ENH: Daniel Spagnol
 		gtkdraw-cairo.c gtkdraw.c gtkfont.c gtkint.h gtksimple.c wlib.h:
 		replace the old font select dialog with the GTK standard one, and some 
