@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.9 2009-09-25 05:38:15 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.10 2009-09-26 15:50:26 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -82,7 +82,7 @@ static void fontSelectionDialogCallback(GtkFontSelectionDialog *fontSelectionDia
 		case GTK_RESPONSE_OK:
 			fontName = gtk_font_selection_dialog_get_font_name(fontSelectionDialog);
 			wPrefSetString( "font", "name", fontName );
-			g_free(curFont->fontDescription);
+			pango_font_description_free(curFont->fontDescription);
 			curFont->fontDescription = pango_font_description_from_string(fontName);
 #if WLIB_FONT_DEBUG >= 2
 			fprintf(stderr, "new font selection:\n");
@@ -142,7 +142,6 @@ static wBool_t fontInit()
 
 static double fontFactor = 1.0;
 
-/* TODO: figure out what this formula means and document it */
 #define FONTSIZE_TO_PANGOSIZE(fs) ((gint) ((fs) * (fontFactor) + .5))
 
 PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
@@ -160,8 +159,7 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
 	
 	PangoLayout *layout = NULL;
 	
-	gchar *utf8 = g_convert((const gchar *) s, -1, "UTF-8", "ISO-8859-1", 
-							NULL, NULL,NULL);
+	gchar *utf8 = g_locale_to_utf8((const gchar *) s, -1, NULL, NULL, NULL);
 	
 	if (cairo != NULL) {
 		layout = pango_cairo_create_layout((cairo_t *) cairo);
@@ -170,10 +168,7 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
 	else
 		layout = gtk_widget_create_pango_layout(widget, utf8);
 	
-	if (fp == NULL)
-		fp = curFont;
-	
-	PangoFontDescription *fontDescription = fp->fontDescription;
+	PangoFontDescription *fontDescription = (fp ? fp : curFont)->fontDescription;
 	
 	PangoContext *context;
 	PangoFontMetrics *metrics;
@@ -274,7 +269,7 @@ const char *gtkFontTranslate( wFont_p fp )
 		fp = gtkSelectedFont();
 	
 	if (fp == NULL)
-		fp = standardFonts[F_TIMES][FW_MEDIUM][FS_REGULAR];
+		fp = standardFonts[0][FW_MEDIUM][FS_REGULAR];
 	
 	fontName = pango_font_description_to_string(fp->fontDescription);
 	
