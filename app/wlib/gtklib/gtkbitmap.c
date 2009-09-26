@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbitmap.c,v 1.3 2009-09-26 01:08:34 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbitmap.c,v 1.4 2009-09-26 04:03:04 dspagnol Exp $
  */
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2009 Daniel Spagnol
@@ -57,11 +57,21 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
 	GdkBitmap *mask;
 
 	bt = gtkAlloc( parent, B_BITMAP, x, y, NULL, sizeof *bt, NULL );
-	gtkComputePos( (wControl_p)bt );
 	bt->w = iconP->w;
 	bt->h = iconP->h;
 	bt->option = options;
 	gtkComputePos( (wControl_p)bt );
+
+	/*
+	 * Depending on the platform, parent->widget->window might still be null 
+	 * at this point. The window allocation should be forced before creating
+	 * the pixmap.
+	 * By the way, parent->widget->window should not be accessed directly.
+	 * The function gtk_widget_get_window should be used instead, but it
+	 * creates a non wanted dependency to GTK+-2.14.
+	 */
+	if ( parent->widget->window == NULL )
+		gtk_widget_realize( parent->widget ); /* force allocation, if pending */
 
 	bt->pixmap = gdk_pixmap_create_from_xpm_d( parent->widget->window, &mask, NULL, (gchar **)iconP->bits );
 	bt->mask = mask;
