@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbitmap.c,v 1.4 2009-09-26 04:03:04 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbitmap.c,v 1.5 2009-09-27 04:28:03 dspagnol Exp $
  */
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2009 Daniel Spagnol
@@ -34,9 +34,6 @@
 
 struct wBitmap_t {
 	WOBJ_COMMON
-	GdkPixmap *pixmap;
-	GdkBitmap *mask;
-	
 };
 
 /**
@@ -53,30 +50,48 @@ wControl_p
 wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
 {
 	wBitmap_p bt;
-	GdkPixmap *pixmap; 
+	GdkPixmap *pixmap;
 	GdkBitmap *mask;
-
+	GdkColor *transparent;
+	
 	bt = gtkAlloc( parent, B_BITMAP, x, y, NULL, sizeof *bt, NULL );
 	bt->w = iconP->w;
 	bt->h = iconP->h;
 	bt->option = options;
-	gtkComputePos( (wControl_p)bt );
-
+	
 	/*
 	 * Depending on the platform, parent->widget->window might still be null 
 	 * at this point. The window allocation should be forced before creating
 	 * the pixmap.
-	 * By the way, parent->widget->window should not be accessed directly.
-	 * The function gtk_widget_get_window should be used instead, but it
-	 * creates a non wanted dependency to GTK+-2.14.
 	 */
 	if ( parent->widget->window == NULL )
 		gtk_widget_realize( parent->widget ); /* force allocation, if pending */
-
-	bt->pixmap = gdk_pixmap_create_from_xpm_d( parent->widget->window, &mask, NULL, (gchar **)iconP->bits );
-	bt->mask = mask;
-	bt->widget = gtk_image_new_from_pixmap( bt->pixmap, bt->mask );
-
+	
+	transparent = &gtk_widget_get_style(parent->widget)->bg[GTK_STATE_NORMAL];
+	pixmap = gdk_pixmap_create_from_xpm_d( parent->widget->window, &mask, transparent, (gchar **)iconP->bits );
+	
+	/*
+	 * FIXME: Depending on the platform, the image is not displayed when using
+	 * the mask. When using NULL as parameter, the image is always displayed.
+	 * In my case, under GTK+-2.16-quartz, the image is not displayed when 
+	 * using the mask.
+	 *
+	 * We have the same problem in gtkSetLabel function (gtkbutton.c).
+	 */
+	GtkWidget *image = gtk_image_new_from_pixmap( pixmap, /*mask*/NULL );
+	gtk_widget_show( image );
+	
+	bt->widget = gtk_fixed_new();
+	gtk_widget_show( bt->widget );
+	gtk_container_add( GTK_CONTAINER(bt->widget), image );
+	
+	gtkComputePos( (wControl_p)bt );
+	gtkControlGetSize( (wControl_p)bt );
+	gtk_fixed_put( GTK_FIXED( parent->widget ), bt->widget, bt->realX, bt->realY );
+	
+	g_object_unref( pixmap );
+	g_object_unref( mask );
+	
 	return( (wControl_p)bt );
 }
 

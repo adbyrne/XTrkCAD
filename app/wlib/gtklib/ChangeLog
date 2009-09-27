@@ -1,10 +1,14 @@
+Sep 27, 2009
+	FIX: Daniel Spagnol
+		gtkbitmap.c: image in about dialog box was not being displayed
+
 Sep 26, 2009
 	FIX: Daniel Spagnol
 		gtkfont: deallocate PangoFontDescription using the right function
 
 Sep 25, 2009
 	FIX: Daniel Spagnol
-		gtkbitmap: EXC_BAD_ACCESS when displaying about dialog
+		gtkbitmap.c: EXC_BAD_ACCESS when displaying about dialog
 
 Sep 25, 2009
 	ENH: Daniel Spagnol
