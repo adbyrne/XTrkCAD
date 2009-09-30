@@ -22,7 +22,6 @@ rm -rf "$XTRKCAD_TEMP"
 mkdir -p "$XTRKCAD_ETC/pango"
 sed -e 's|/opt/local/etc|'"$XTRKCAD_ETC|g" "$XTRKCAD_RESOURCES/etc/pango/pangorc" > "$XTRKCAD_ETC/pango/pangorc"
 sed -e 's|/opt/local|\"'"$XTRKCAD_RESOURCES|g" -e "s/\.so/.so\"/g" "$XTRKCAD_RESOURCES/etc/pango/pango.modules" > "$XTRKCAD_ETC/pango/pango.modules"
-cp -f "$XTRKCAD_RESOURCES/etc/pango/pangox.aliases" "$XTRKCAD_ETC/pango/pangox.aliases"
 
 export "DYLD_LIBRARY_PATH=$XTRKCAD_RESOURCES/lib"
 export "FONTCONFIG_PATH=$XTRKCAD_RESOURCES/etc/fonts"
