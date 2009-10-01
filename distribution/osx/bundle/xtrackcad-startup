@@ -8,6 +8,8 @@ XTRKCAD_BUNDLE="`echo "$0" | sed -e 's/\/Contents\/MacOS\/XTrackCAD//'`"
 XTRKCAD_RESOURCES="$XTRKCAD_BUNDLE/Contents/Resources"
 XTRKCAD_TEMP="/tmp/xtrkcad/$UID"
 XTRKCAD_ETC="$XTRKCAD_TEMP/etc"
+XTRKCAD_GDK_PIXBUF_MODULE_FILE="$XTRKCAD_ETC/gtk-2.0/gdk-pixbuf.loaders"
+XTRKCAD_GTK_IM_MODULE_FILE="$XTRKCAD_ETC/gtk-2.0/gtk.immodules"
 XTRKCAD_PANGO_RC_FILE="$XTRKCAD_ETC/pango/pangorc"
 
 echo "XTrackCAD: Starting $0"
@@ -19,12 +21,17 @@ rm -rf "$XTRKCAD_TEMP"
 # Because the bundle could be located anywhere at runtime, we have to
 # create temporary copies of the Pango configuration files that
 # reflect our current location
+mkdir -p "$XTRKCAD_ETC/gtk-2.0"
+sed -e 's|/opt/local|'"$XTRKCAD_RESOURCES|g" "$XTRKCAD_RESOURCES/etc/gtk-2.0/gdk-pixbuf.loaders" > "$XTRKCAD_GDK_PIXBUF_MODULE_FILE"
+sed -e 's|/opt/local|'"$XTRKCAD_RESOURCES|g" "$XTRKCAD_RESOURCES/etc/gtk-2.0/gtk.immodules" > "$XTRKCAD_GTK_IM_MODULE_FILE"
 mkdir -p "$XTRKCAD_ETC/pango"
 sed -e 's|/opt/local/etc|'"$XTRKCAD_ETC|g" "$XTRKCAD_RESOURCES/etc/pango/pangorc" > "$XTRKCAD_ETC/pango/pangorc"
 sed -e 's|/opt/local|\"'"$XTRKCAD_RESOURCES|g" -e "s/\.so/.so\"/g" "$XTRKCAD_RESOURCES/etc/pango/pango.modules" > "$XTRKCAD_ETC/pango/pango.modules"
 
 export "DYLD_LIBRARY_PATH=$XTRKCAD_RESOURCES/lib"
 export "FONTCONFIG_PATH=$XTRKCAD_RESOURCES/etc/fonts"
+export "GDK_PIXBUF_MODULE_FILE=$XTRKCAD_GDK_PIXBUF_MODULE_FILE"
+export "GTK_IM_MODULE_FILE=$XTRKCAD_GTK_IM_MODULE_FILE"
 export "PANGO_RC_FILE=$XTRKCAD_PANGO_RC_FILE"
 export "PATH=$XTRKCAD_RESOURCES/bin:$PATH"
 export "XTRKCADLIB=$XTRKCAD_RESOURCES/share/xtrkcad"
