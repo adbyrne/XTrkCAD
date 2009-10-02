@@ -1,7 +1,7 @@
 /** \file gtkhelp.c
  * Balloon help ( tooltips) and main help functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.11 2009-08-01 03:59:13 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkhelp.c,v 1.12 2009-10-02 04:30:32 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -145,11 +145,6 @@ static wControl_p balloonB;
 static wPos_t balloonDx, balloonDy;
 static wBool_t balloonVisible = FALSE;
 static wControl_p balloonHelpB;
-#ifdef GTK
-static const char * balloonHelpString;
-static long balloonHelpTimeOut = 500;
-static wBalloonHelp_t * currBalloonHelp;
-#endif
 static GtkTooltips * tooltips;
 
 
@@ -208,12 +203,9 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 	balloonB = b;
 	balloonMsg = msg;
 	gtk_widget_hide( balloonF );
-#ifndef GTK1
-    layout = gtk_widget_create_pango_layout( balloonPI, msg );
+    layout = gtk_widget_create_pango_layout( balloonPI, msgConverted );
     pango_layout_get_pixel_size( layout, &w, &h );
-#else
-	w = gdk_string_width( balloonPI->style->font, msgConverted );
-#endif
+	g_object_unref(G_OBJECT(layout));
 	h = 16;
 	gdk_window_get_position( GTK_WIDGET(b->parent->gtkwin)->window, &x, &y );
 	gdk_window_get_origin( GTK_WIDGET(b->parent->gtkwin)->window, &x, &y );

@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.10 2009-09-26 15:50:26 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.11 2009-10-02 04:30:32 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -159,7 +159,7 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
 	
 	PangoLayout *layout = NULL;
 	
-	gchar *utf8 = g_locale_to_utf8((const gchar *) s, -1, NULL, NULL, NULL);
+	gchar *utf8 = gtkConvertInput(s);
 	
 	if (cairo != NULL) {
 		layout = pango_cairo_create_layout((cairo_t *) cairo);
@@ -197,8 +197,6 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
 	fprintf(stderr, "  layout ascent:  %d (pixels)\n", *ascent_p);
 	fprintf(stderr, "  layout descent: %d (pixels)\n", *descent_p);
 #endif
-	
-	g_free(utf8);
 	
 	return layout;
 }
