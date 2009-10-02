@@ -42,7 +42,7 @@ void Upper_chars(char *buffer)
 int main( int argc, char **argv )
 {
     FILE *source,*dest;     
-	 unsigned char  Dummy[BUF_LEN];     
+	 char Dummy[BUF_LEN];     
 	 int buffer;
 	 int c;      
 	 
