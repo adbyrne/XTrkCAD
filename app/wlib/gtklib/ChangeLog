@@ -1,3 +1,8 @@
+Oct 02, 2009
+	FIX: Daniel Spagnol
+		gtkdraw-cairo.c: linux crashed due to a cairo context access after its 
+		drawable destruction
+
 Sep 27, 2009
 	FIX: Daniel Spagnol
 		gtkbitmap.c: image in about dialog box was not being displayed
