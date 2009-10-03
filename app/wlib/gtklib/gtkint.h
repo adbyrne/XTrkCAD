@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.6 2009-09-25 05:38:15 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.7 2009-10-03 04:49:01 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -156,7 +156,7 @@ PangoLayout *gtkFontCreatePangoLayout( GtkWidget *, void *cairo,
 
 /* gtkbutton.c */
 void gtkButtonDoAction( wButton_p );
-void gtkSetLabel( GtkWidget*, long, const char *, GtkLabel**, GtkPixmap** );
+void gtkSetLabel( GtkWidget*, long, const char *, GtkLabel**, GtkWidget** );
 
 /* gtkcolor.c */
 void gtkGetColorMap( void );

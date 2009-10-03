@@ -1,7 +1,7 @@
 /** \file gtkmenu.c
  * Menu creation and handling stuff.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmenu.c,v 1.4 2007-11-12 18:53:15 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmenu.c,v 1.5 2009-10-03 04:49:01 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -71,7 +71,7 @@ struct wMenu_t {
 	wMenuTraceCallBack_p traceFunc;
 	void * traceData;
 	GtkLabel * labelG;
-	GtkPixmap * pixmapG;
+	GtkWidget * imageG;
 	};
 
 struct wMenuPush_t {
@@ -104,7 +104,6 @@ struct wMenuListItem_t {
 struct wMenuToggle_t {
 	MOBJ_COMMON
 	wMenuToggleCallBack_p action;
-	/*const char * realLabelStr;*/
 	wBool_t enabled;
 	wBool_t set;
 	};
@@ -225,22 +224,14 @@ static void setAcclKey( wWin_p w, GtkWidget * menu, GtkWidget * menu_item, int a
 	if (accel_alpha_group == NULL) {
 		accel_alpha_group = gtk_accel_group_new();
 		/*gtk_accel_group_set_mod_mask( accel_group, GDK_SHIFT_MASK|GDK_CONTROL_MASK|GDK_MOD1_MASK );*/
-#ifndef GTK1
 		gtk_window_add_accel_group(GTK_WINDOW(gtkMainW->gtkwin), accel_alpha_group );
-#else
-		gtk_accel_group_attach (accel_alpha_group, GTK_OBJECT (gtkMainW->gtkwin));
-#endif
 	}
 	if (accel_nonalpha_group == NULL) {
 		oldmods = gtk_accelerator_get_default_mod_mask();
 		gtk_accelerator_set_default_mod_mask( GDK_CONTROL_MASK | GDK_MOD1_MASK );
 		accel_nonalpha_group = gtk_accel_group_new();
 		/*gtk_accel_group_set_mod_mask( accel_group, GDK_SHIFT_MASK|GDK_CONTROL_MASK|GDK_MOD1_MASK );*/
-#ifndef GTK1
 		gtk_window_add_accel_group(GTK_WINDOW(gtkMainW->gtkwin), accel_nonalpha_group );
-#else
-		gtk_accel_group_attach (accel_nonalpha_group, GTK_OBJECT (gtkMainW->gtkwin));
-#endif
 		gtk_accelerator_set_default_mod_mask( oldmods );
 	}
  
@@ -657,7 +648,6 @@ wMenuToggle_p wMenuToggleCreate(
 	mt->action = action;
 	mt->data = data;
 	mt->enabled = TRUE;
-	/*mt->realLabelStr = (char*)malloc( strlen( labelStr ) + 5 );*/
 	mt->parentMenu = m;
 	wMenuToggleSet( mt, set );
 	
@@ -698,7 +688,7 @@ void wMenuToggleEnable(
 /*-----------------------------------------------------------------*/
 
 void wMenuSetLabel( wMenu_p m, const char * labelStr) {
-	gtkSetLabel( m->widget, m->option, labelStr, &m->labelG, &m->pixmapG );
+	gtkSetLabel( m->widget, m->option, labelStr, &m->labelG, &m->imageG );
 }
 
 
@@ -742,12 +732,7 @@ wMenu_p wMenuCreate(
 	((GtkOptionMenu*)m->widget)->height = 16;
 #endif
 	
-#ifndef GTK1
 	gtk_fixed_put( GTK_FIXED(parent->widget), m->widget, m->realX, m->realY );
-#else
-	gtk_container_add( GTK_CONTAINER(parent->widget), m->widget );
-	gtk_widget_set_uposition( m->widget, m->realX, m->realY );
-#endif
 	gtkControlGetSize( (wControl_p)m );
 	if ( m->w < 80 && (m->option&BO_ICON)==0) {
 		m->w = 80;

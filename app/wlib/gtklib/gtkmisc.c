@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.14 2009-09-23 18:57:29 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkmisc.c,v 1.15 2009-10-03 04:49:01 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -120,38 +120,38 @@ GdkPixmap* gtkMakeIcon(
 	int row,col,wb;
 	long rgb;
 	const char * bits;
-
+	GdkColor *transparent;
+	
+	transparent = &gtk_widget_get_style( gtkMainW->gtkwin )->bg[GTK_WIDGET_STATE( gtkMainW->gtkwin )];
+	
 	if ( ip->gtkIconType == gtkIcon_pixmap ) {
-/*		pixmapData = (char**)ip->bits;
-		oldline1 = pixmapData[1];
-		pixmapData[1] = newline1;
-		newline1[0] = oldline1[0]; */
-		pixmap = gdk_pixmap_create_from_xpm_d( gtkMainW->gtkwin->window, mask, NULL, (char**)ip->bits );
- 	return pixmap;
+		pixmap = gdk_pixmap_create_from_xpm_d( gtkMainW->gtkwin->window, mask, transparent, (char**)ip->bits );
 	}
-	wb = (ip->w+7)/8;
-	pixmapData = (char**)malloc( (3+ip->h) * sizeof *pixmapData );
-	pixmapData[0] = line0;
-	rgb = wDrawGetRGB(ip->color);
-	sprintf( line0, " %d %d 2 1", ip->w, ip->h );
-	sprintf( line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb>>16)&0xFF, (rgb>>8)&0xFF, rgb&0xFF );
-	pixmapData[1] = ". c None s None";
-	pixmapData[2] = line2;
-	bits = ip->bits;
-	for (row = 0; row<ip->h; row++ ) {
-		pixmapData[row+3] = (char*)malloc( (ip->w+1) * sizeof **pixmapData );
-		for (col = 0; col<ip->w; col++ ) {
-			if ( bits[ row*wb+(col>>3) ] & (1<<(col&07)) ) {
-				pixmapData[row+3][col] = '#';
-			} else {
-				pixmapData[row+3][col] = '.';
+	else {
+		wb = (ip->w+7)/8;
+		pixmapData = (char**)malloc( (3+ip->h) * sizeof *pixmapData );
+		pixmapData[0] = line0;
+		rgb = wDrawGetRGB(ip->color);
+		sprintf( line0, " %d %d 2 1", ip->w, ip->h );
+		sprintf( line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb>>16)&0xFF, (rgb>>8)&0xFF, rgb&0xFF );
+		pixmapData[1] = ". c None s None";
+		pixmapData[2] = line2;
+		bits = ip->bits;
+		for (row = 0; row<ip->h; row++ ) {
+			pixmapData[row+3] = (char*)malloc( (ip->w+1) * sizeof **pixmapData );
+			for (col = 0; col<ip->w; col++ ) {
+				if ( bits[ row*wb+(col>>3) ] & (1<<(col&07)) ) {
+					pixmapData[row+3][col] = '#';
+				} else {
+					pixmapData[row+3][col] = '.';
+				}
 			}
+			pixmapData[row+3][ip->w] = 0;
 		}
-		pixmapData[row+3][ip->w] = 0;
-	}
-	pixmap = gdk_pixmap_create_from_xpm_d( gtkMainW->gtkwin->window, mask, NULL, pixmapData );
-	for (row = 0; row<ip->h; row++ ) {
-		free( pixmapData[row+3] );
+		pixmap = gdk_pixmap_create_from_xpm_d( gtkMainW->gtkwin->window, mask, transparent, pixmapData );
+		for (row = 0; row<ip->h; row++ ) {
+			free( pixmapData[row+3] );
+		}
 	}
 	return pixmap;
 }

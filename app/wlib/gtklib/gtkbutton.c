@@ -1,7 +1,7 @@
 /** \file gtkbutton.c
  * Toolbar button creation and handling
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbutton.c,v 1.7 2008-02-06 09:50:32 mni77 Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkbutton.c,v 1.8 2009-10-03 04:49:01 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -43,7 +43,7 @@
 struct wButton_t {
 		WOBJ_COMMON
 		GtkLabel * labelG;
-		GtkPixmap * pixmapG;
+		GtkWidget * imageG;
 		wButtonCallBack_p action;
 		int busy;
 		int recursion;
@@ -63,45 +63,55 @@ void gtkSetLabel(
 		long option,
 		const char * labelStr,
 		GtkLabel * * labelG,
-		GtkPixmap * * pixmapG )
+		GtkWidget * * imageG )
 {
-
 	wIcon_p bm;
 	GdkPixmap * pixmap;
 	GdkBitmap * mask;
 	GtkWidget * hbox;
 	if (widget == 0) abort();
 	if (labelStr){
-		 if (option&BO_ICON) {
-			 bm = (wIcon_p)labelStr;
-			 pixmap = gtkMakeIcon( widget, bm, &mask );
-			 if (*pixmapG==NULL) {
-				*pixmapG = (GtkPixmap*)gtk_pixmap_new( pixmap, mask );
-				hbox = gtk_hbox_new( FALSE, 0 );
-				gtk_container_add( GTK_CONTAINER(hbox), (GtkWidget*)*pixmapG );
-				gtk_container_add( GTK_CONTAINER(widget), hbox );
-				/*gtk_container_add( GTK_CONTAINER(widget), (GtkWidget*)*pixmapG );*/
+		if (option&BO_ICON) {
+			bm = (wIcon_p)labelStr;
+			pixmap = gtkMakeIcon( widget, bm, &mask );
+			if (*imageG==NULL) {
+				hbox = gtk_vbox_new( FALSE, 0 );
 				gtk_widget_show( hbox );
-				gtk_widget_show( (GtkWidget*)*pixmapG );
-			 } else {
-				 gtk_pixmap_set( *pixmapG, pixmap, mask );
-			 }
-			 gdk_pixmap_unref( pixmap );
-			 gdk_bitmap_unref( mask );
-		 } else {
+				gtk_container_add( GTK_CONTAINER( widget ), hbox );
+/*
+ * Workaround for OSX with GTK-Quartz:
+ * Pixmaps are not rendered when using the mask.
+ */
+#ifndef GDK_WINDOWING_QUARTZ
+				*imageG = gtk_image_new_from_pixmap( pixmap, mask );
+#else
+				*imageG = gtk_image_new_from_pixmap( pixmap, NULL );
+#endif
+				gtk_widget_show( *imageG );
+				gtk_container_add( GTK_CONTAINER( hbox ), *imageG );
+			} else {
+#ifndef GDK_WINDOWING_QUARTZ
+				gtk_image_set_from_pixmap( GTK_IMAGE(*imageG), pixmap, mask );
+#else
+				gtk_image_set_from_pixmap( GTK_IMAGE(*imageG), pixmap, NULL );
+#endif
+			}
+			gdk_pixmap_unref( pixmap );
+			gdk_bitmap_unref( mask );
+		} else {
 			if (*labelG==NULL) {
 				*labelG = (GtkLabel*)gtk_label_new( gtkConvertInput(labelStr) );
 				gtk_container_add( GTK_CONTAINER(widget), (GtkWidget*)*labelG );
 				gtk_widget_show( (GtkWidget*)*labelG );
 			} else {
-				 gtk_label_set( *labelG, gtkConvertInput(labelStr) );
+				gtk_label_set( *labelG, gtkConvertInput(labelStr) );
 			}
-		 }
+		}
 	}
 }
 
 void wButtonSetLabel( wButton_p bb, const char * labelStr) {
-	gtkSetLabel( bb->widget, bb->option, labelStr, &bb->labelG, &bb->pixmapG );
+	gtkSetLabel( bb->widget, bb->option, labelStr, &bb->labelG, &bb->imageG );
 }
 
 
@@ -153,19 +163,10 @@ wButton_p wButtonCreate(
 	gtk_signal_connect (GTK_OBJECT(b->widget), "clicked",
 						GTK_SIGNAL_FUNC(pushButt), b );
 	if (width > 0)
-#ifndef GTK1
 		gtk_widget_set_size_request( b->widget, width, -1 );
-#else
-		gtk_widget_set_usize( b->widget, width, -1 );
-#endif
 	wButtonSetLabel( b, labelStr );
 
-#ifndef GTK1
 	gtk_fixed_put( GTK_FIXED(parent->widget), b->widget, b->realX, b->realY );
-#else
-	gtk_container_add( GTK_CONTAINER(parent->widget), b->widget );
-	gtk_widget_set_uposition( b->widget, b->realX, b->realY );
-#endif
 	if (option & BB_DEFAULT) {
 		GTK_WIDGET_SET_FLAGS( b->widget, GTK_CAN_DEFAULT );
 		gtk_widget_grab_default( b->widget );
@@ -174,11 +175,7 @@ wButton_p wButtonCreate(
 	gtkControlGetSize( (wControl_p)b );
 	if (width == 0 && b->w < MIN_BUTTON_WIDTH && (b->option&BO_ICON)==0) {
 		b->w = MIN_BUTTON_WIDTH;
-#ifndef GTK1
 		gtk_widget_set_size_request( b->widget, b->w, b->h );
-#else
-		gtk_widget_set_usize( b->widget, b->w, b->h );
-#endif
 	}
 	gtk_widget_show( b->widget );
 	gtkAddButton( (wControl_p)b );
@@ -380,12 +377,7 @@ EXPORT wChoice_p wRadioCreate(
 		b->h += 2;
 	}
 
-#ifndef GTK1
 	gtk_fixed_put( GTK_FIXED(parent->widget), b->widget, b->realX, b->realY );
-#else
-	gtk_container_add( GTK_CONTAINER(parent->widget), b->widget );
-	gtk_widget_set_uposition( b->widget, b->realX, b->realY );
-#endif
 	gtkControlGetSize( (wControl_p)b );
 	if (labelStr)
 		b->labelW = gtkAddLabel( (wControl_p)b, labelStr );
@@ -455,12 +447,7 @@ wChoice_p wToggleCreate(
 		b->h += 2;
 	}
 
-#ifndef GTK1
 	gtk_fixed_put( GTK_FIXED(parent->widget), b->widget, b->realX, b->realY );
-#else
-	gtk_container_add( GTK_CONTAINER(parent->widget), b->widget );
-	gtk_widget_set_uposition( b->widget, b->realX, b->realY );
-#endif
 	gtkControlGetSize( (wControl_p)b );
 	if (labelStr)
 		b->labelW = gtkAddLabel( (wControl_p)b, labelStr );
