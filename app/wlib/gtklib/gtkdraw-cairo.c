@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.9 2009-09-25 05:38:15 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.10 2009-10-03 04:12:57 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1157,6 +1157,8 @@ wDraw_p wBitMapCreate(          wPos_t w, wPos_t h, int arg )
 
 wBool_t wBitMapDelete(          wDraw_p d )
 {
+	cairo_destroy( d->cairo );
+	d->cairo = NULL;
 	gdk_pixmap_unref( d->pixmap );
 	d->pixmap = NULL;
 	return TRUE;
