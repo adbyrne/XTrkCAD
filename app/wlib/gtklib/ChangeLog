@@ -1,5 +1,10 @@
 Oct 03, 2009
 	FIX: Daniel Spagnol
+		gtkdraw-cairo.c: linux still crashed due to a cairo context access
+		after its drawable destruction
+
+Oct 03, 2009
+	FIX: Daniel Spagnol
 		gtkbutton.c gtkint.h gtkmenu.c gtkmisc.c: workaround for OSX with
 		GTK-Quartz -> pixmaps are not rendered when using the mask;
 		and replaced gtk_pixmap_new deprecated function with
