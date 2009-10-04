@@ -1,7 +1,7 @@
 /** \file misc2.c
  * Management of information about scales and gauges plus rprintf.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.8 2008-06-04 07:12:36 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.9 2009-10-04 16:46:39 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -406,7 +406,8 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 static void SetScale(
 		SCALEINX_T newScaleInx )
 {	
-	
+	sprintf( minTrackRadiusPrefS, "minTrackRadius-%s", curScaleName );
+
 	if ( curScaleInx >= 0 )
 		wPrefSetFloat( "misc", minTrackRadiusPrefS, minTrackRadius );
 	if (newScaleInx < 0 && newScaleInx >= scaleInfo_da.cnt) {
@@ -424,7 +425,6 @@ static void SetScale(
 	GetScaleGauge( curScaleInx, &curScaleDescInx, &curGaugeInx );
 	
 	wPrefSetString( "misc", "scale", curScaleName );
-	sprintf( minTrackRadiusPrefS, "minTrackRadius-%s", curScaleName );
 	wPrefGetFloat( "misc", minTrackRadiusPrefS, &minTrackRadius, curScale->R[0] );
 }
 

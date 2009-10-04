@@ -1,3 +1,7 @@
+Oct 04, 2009
+	FIX: Martin Fischer
+		misc2.c: minimum radius is correctly changed
+
 Oct 03, 2009
 	FIX: Daniel Spagnol
 		chotbar.c: hotbar redraw too slow under gtk-quartz
