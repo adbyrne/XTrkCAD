@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.4 2009-08-16 13:26:41 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.5 2009-10-10 03:34:29 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -56,6 +56,15 @@ static paramGroup_t enumPG = { "enum", 0, enumPLs, sizeof enumPLs/sizeof enumPLs
 static struct wFilSel_t * enumFile_fs;
 
 
+static int count_utf8_chars(char *s) {
+	int i = 0, j = 0;
+	while (s[i]) {
+		if ((s[i] & 0xc0) != 0x80) j++;
+		i++;
+	}
+	return j;
+}
+
 static int DoEnumSave(
 		const char * pathName,
 		const char * fileName,
@@ -106,7 +115,7 @@ void EnumerateList(
 {
 	char * cp;
 	int len;
-	sprintf( message, "%*ld | %s\n", strlen(_("Count")), count, desc );
+	sprintf( message, "%*ld | %s\n", count_utf8_chars(_("Count")), count, desc );
 	if (enableListPrices) {
 		cp = message + strlen( message )-1;
 		len = enumerateMaxDescLen-strlen(desc);
@@ -117,7 +126,7 @@ void EnumerateList(
 			sprintf( cp, " | %7.2f |%9.2f\n", price, price*count );
 			enumerateTotal += price*count;
 		} else {
-			sprintf( cp, " | %-*s |\n", max( 7, strlen( _("Each"))), " " );
+			sprintf( cp, " | %-*s |\n", (int) max( 7, count_utf8_chars( _("Each"))), " " );
 		}
 	}
 	wTextAppend( enumT, message );
@@ -165,14 +174,14 @@ void EnumerateStart(void)
 
 	enumerateTotal = 0.0;
 
-	if( strlen( _("Description")) > (unsigned)enumerateMaxDescLen )
-		enumerateMaxDescLen = strlen( _("Description" ));
+	if( count_utf8_chars( _("Description")) > (unsigned)enumerateMaxDescLen )
+		enumerateMaxDescLen = count_utf8_chars( _("Description" ));
 
 	/* create the table header */
 	sprintf( message, "%s | %-*s", _("Count"), enumerateMaxDescLen, _("Description"));
 
 	if( enableListPrices )
-		sprintf( message+strlen(message), " | %-*s | %-*s\n", max( 7, strlen( _("Each"))), _("Each"), max( 9, strlen(_("Extended"))), _("Extended"));
+		sprintf( message+strlen(message), " | %-*s | %-*s\n", (int) max( 7, count_utf8_chars( _("Each"))), _("Each"), (int) max( 9, count_utf8_chars(_("Extended"))), _("Extended"));
 	else 
 		strcat( message, "\n" );
 	wTextAppend( enumT, message );

@@ -1,3 +1,9 @@
+Oct 09, 2009
+	FIX: Daniel Spagnol
+		denum.c: application crash due to a double value used as a "%*" sprintf
+		argument. scenario is "Manage" -> "Parts List..." -> "Price" (checkbox).
+		denum.c: added a character counter function for utf-8 strings
+
 Oct 04, 2009
 	FIX: Martin Fischer
 		misc2.c: minimum radius is correctly changed
