@@ -4,6 +4,7 @@ PROJECT(i18n)
 SET(XTRKCAD_LOCALE_IDS
 	de_DE
 	fi
+	pt_BR
 	)
 
 # Misc variables
@@ -11,6 +12,7 @@ SET(XTC_LOCALE_TARGETS )
 SET(POTFILE "${i18n_BINARY_DIR}/${XTRKCAD_PACKAGE}.pot")
 SET(XGTKEYWORDS
 	--keyword=_
+	--keyword=p_
 	--keyword=N_)
 
 # Programs
@@ -56,7 +58,7 @@ FOREACH(localeid ${XTRKCAD_LOCALE_IDS})
 
 	# Merge .pot file changes to .po file
 	ADD_CUSTOM_TARGET(msgmerge-${localeid}
-		COMMAND ${XTC_MSGMERGE} -s -U ${POFILE} ${POTFILE}
+		COMMAND ${XTC_MSGMERGE} -U --backup=none ${POFILE} ${POTFILE}
 		DEPENDS ${POTFILE} ${POFILE}
 		)
 

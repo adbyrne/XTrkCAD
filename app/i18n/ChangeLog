@@ -1,3 +1,11 @@
+Oct 14, 2009
+	ENH: Daniel Spagnol
+		pt_BR.po CMakeLists.txt: partially completed Brazilian Portuguese
+		translation (57%)
+		CMakeLists.txt: text context support added
+	FIX: Daniel Spagnol
+		CMakeLists.txt: macosx ".po" file creation failed
+
 May 8, 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		de_DE.pot CMakeLists.txt: partially completed German translation
