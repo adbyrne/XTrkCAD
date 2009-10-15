@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.7 2009-07-09 18:29:42 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.8 2009-10-15 04:21:15 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -104,7 +104,7 @@ static paramData_t layoutPLs[] = {
 	{ PD_STRING, &Title1, "title1", PDO_NOPSHUPD, NULL, N_("Layout Title") },
 	{ PD_STRING, &Title2, "title2", PDO_NOPSHUPD, NULL, N_("Subtitle") },
 	{ PD_DROPLIST, &curScaleDescInx, "scale", PDO_NOPREF|PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT, (void *)120, N_("Scale"), 0, (void*)(CHANGE_SCALE) },
-	{ PD_DROPLIST, &curGaugeInx, "gauge", PDO_NOPREF |PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT|PDO_DLGHORZ, (void *)120, "     Gauge", 0, (void *)(CHANGE_SCALE) },
+	{ PD_DROPLIST, &curGaugeInx, "gauge", PDO_NOPREF |PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT|PDO_DLGHORZ, (void *)120, N_("     Gauge"), 0, (void *)(CHANGE_SCALE) },
 	{ PD_FLOAT, &minTrackRadius, "mintrackradius", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN) },
 	{ PD_FLOAT, &maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD|PDO_DLGHORZ, &r0_90 , N_(" Max Track Grade"), 0, (void*)(CHANGE_MAIN) }
 	};
