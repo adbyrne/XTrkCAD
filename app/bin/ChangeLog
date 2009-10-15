@@ -1,3 +1,9 @@
+Oct 14, 2009
+	ENH: Daniel Spagnol
+		chotbar.c: undone Oct 03, 2009 changes due to gtk+-2.18 fixed it for us.
+		Actually gtk+-2.18 fixed all surface drawing performance issues for
+		quartz.
+
 Oct 09, 2009
 	FIX: Daniel Spagnol
 		denum.c: application crash due to a double value used as a "%*" sprintf

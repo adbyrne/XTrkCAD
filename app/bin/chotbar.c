@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/chotbar.c,v 1.3 2009-10-03 19:43:45 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/chotbar.c,v 1.4 2009-10-15 03:54:32 dspagnol Exp $
  *
  * HOT BAR
  *
@@ -103,7 +103,6 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 	}
 	if ( hotBarLabels && !hotBarFp )
 		hotBarFp = wStandardFont( F_HELV, FALSE, FALSE );
-	wDrawDelayUpdate(hotBarD.d, TRUE);
 	for ( inx=hotBarCurrStart; inx < hotBarMap_da.cnt; inx++ ) {
 		tbm = &hotBarMap(inx);
 		barScale = tbm->barScale;
@@ -130,7 +129,6 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 			DrawString( &hotBarD, orig, 0.0, tbm->proc( HB_BARTITLE, tbm->context, NULL, NULL ), hotBarFp, hotBarFs*barScale, drawColorBlack );
 		}
 	}
-	wDrawDelayUpdate(hotBarD.d, FALSE);
 	hotBarCurrEnd = inx;
 	if (hotBarCurrSelect >= hotBarCurrStart && hotBarCurrSelect < hotBarCurrEnd )
 		HotBarHighlight( hotBarCurrSelect );
