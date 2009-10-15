@@ -28,6 +28,8 @@
 
 	#define _(String)             ((String && strlen(String) > 0) \
 		                          ? gettext(String) : String)
+	#define p_(Context, String)   ((Context && strlen(Context) > 0) \
+								  ? pgettext(Context, String) : _(String))
 	#define gettext_noop(String)  String
 	#define N_(String)            gettext_noop(String)
 
