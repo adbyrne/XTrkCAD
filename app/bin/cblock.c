@@ -4,6 +4,9 @@
  * Created by Robert Heller on Thu Mar 12 09:43:02 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
+ * Modification History: Revision 1.4  2009/09/16 18:32:24  m_fischer
+ * Modification History: Remove unused locals
+ * Modification History:
  * Modification History: Revision 1.3  2009/09/05 16:40:53  m_fischer
  * Modification History: Make layout control commands a build-time choice
  * Modification History:
@@ -40,7 +43,7 @@
  *     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  * 
  *  T_BLOCK
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.4 2009-09-16 18:32:24 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.5 2009-11-23 19:46:16 rheller Exp $
  */
 
 #include <ctype.h>
@@ -142,7 +145,7 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUn
 	char *newName, *newScript;
 	BOOL_T changed, nChanged, sChanged;
 
-	fprintf(stderr,"*** UpdateBlock(): needUndoStart = %d\n",needUndoStart);
+	LOG( log_block, 1, ("*** UpdateBlock(): needUndoStart = %d\n",needUndoStart))
 	if ( inx == -1 ) {
 		nChanged = sChanged = changed = FALSE;
 		thename = wStringGetValue( (wString_p)blockDesc[NM].control0 );
@@ -192,7 +195,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 	track_p lastTrk = NULL;
 	long listLabelsOption = listLabels;
 
-	fprintf(stderr,"*** DescribeBlock(): trk is T%d\n",GetTrkIndex(trk));
+	LOG( log_block, 1, ("*** DescribeBlock(): trk is T%d\n",GetTrkIndex(trk)))
 	FormatCompoundTitle( listLabelsOption, xx->name );
 	if (message[0] == '\0')
 		FormatCompoundTitle( listLabelsOption|LABEL_DESCR, xx->name );
@@ -230,15 +233,14 @@ static blockDebug (track_p trk)
 {
 	wIndex_t iTrack;
 	blockData_p xx = GetblockData(trk);
-	fprintf(stderr,"*** blockDebug(): trk = %08x\n",trk);
-	fprintf(stderr,"*** blockDebug(): Index = %d\n",GetTrkIndex(trk));
-	fprintf(stderr,"*** blockDebug(): name = \"%s\"\n",xx->name);
-	fprintf(stderr,"*** blockDebug(): script = \"%s\"\n",xx->script);
-	fprintf(stderr,"*** blockDebug(): numTracks = %d\n",xx->numTracks);
+	LOG( log_block, 1, ("*** blockDebug(): trk = %08x\n",trk))
+	LOG( log_block, 1, ("*** blockDebug(): Index = %d\n",GetTrkIndex(trk)))
+	LOG( log_block, 1, ("*** blockDebug(): name = \"%s\"\n",xx->name))
+	LOG( log_block, 1, ("*** blockDebug(): script = \"%s\"\n",xx->script))
+	LOG( log_block, 1, ("*** blockDebug(): numTracks = %d\n",xx->numTracks))
 	for (iTrack = 0; iTrack < xx->numTracks; iTrack++) {
-		fprintf(stderr,"*** blockDebug(): trackList[%d] = T%d, ",iTrack,
-				GetTrkIndex((&(xx->trackList))[iTrack]));
-		fprintf(stderr,"%s\n",GetTrkTypeName((&(xx->trackList))[iTrack]));
+		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, ",iTrack,GetTrkIndex((&(xx->trackList))[iTrack])))
+		LOG( log_block, 1, ("%s\n",GetTrkTypeName((&(xx->trackList))[iTrack])))
 	}
 	
 }
@@ -329,7 +331,7 @@ static void ReadBlock ( char * line )
 	trkEndPt_p endPtP;
 	char *name, *script;
 
-	fprintf(stderr,"*** ReadBlock: line is '%s'\n",line);
+	LOG( log_block, 1, ("*** ReadBlock: line is '%s'\n",line))
 	if (!GetArgs(line+6,"dqq",&index,&name,&script)) {
 		return;
 	}
@@ -360,7 +362,7 @@ static void ReadBlock ( char * line )
 	xx->script = script;
 	xx->numTracks = blockTrk_da.cnt;
 	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
-		fprintf(stderr,"*** ReadBlock(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack)));
+		LOG( log_block, 1, ("*** ReadBlock(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack))))
 		(&(xx->trackList))[iTrack] = blockTrk(iTrack);
 	}
 	blockDebug(trk);	
@@ -433,7 +435,7 @@ static void BlockOk ( void * junk )
 	EPINX_T ep;
 	trkEndPt_p endPtP;
 
-	fprintf(stderr,"*** BlockOk()\n");
+	LOG( log_block, 1, ("*** BlockOk()\n"))
 	DYNARR_RESET( track_p *, blockTrk_da );
 
 	ParamUpdate( &blockPG );
@@ -450,7 +452,7 @@ static void BlockOk ( void * junk )
 		if ( GetTrkSelected( trk ) ) {
 			if ( IsTrack(trk) ) {
 				DYNARR_APPEND( track_p *, blockTrk_da, 10 );
-				fprintf(stderr,"*** BlockOk(): adding track T%d\n",GetTrkIndex(trk));
+				LOG( log_block, 1, ("*** BlockOk(): adding track T%d\n",GetTrkIndex(trk)))
 				blockTrk(blockTrk_da.cnt-1) = trk;
 			}
 		}
@@ -472,7 +474,7 @@ static void BlockOk ( void * junk )
 		}
 		UndoStart( _("Create Block"), "Create Block" );
 		/* Create a block object */
-		fprintf(stderr,"*** BlockOk(): %d tracks in block\n",blockTrk_da.cnt);
+		LOG( log_block, 1, ("*** BlockOk(): %d tracks in block\n",blockTrk_da.cnt))
 		trk = NewTrack(0, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(track_p)*(blockTrk_da.cnt-1))+1);
 		for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
 			endPtP = &tempEndPts(ep);
@@ -483,7 +485,7 @@ static void BlockOk ( void * junk )
 		xx->script = MyStrdup(blockScript);
 		xx->numTracks = blockTrk_da.cnt;
 		for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
-			fprintf(stderr,"*** BlockOk(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack)));
+			LOG( log_block, 1, ("*** BlockOk(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack))))
 			(&(xx->trackList))[iTrack] = blockTrk(iTrack);
 		}
 		blockDebug(trk);
@@ -497,7 +499,7 @@ static void NewBlockDialog()
 {
 	track_p trk = NULL;
 
-	fprintf(stderr,"*** NewBlockDialog()\n");
+	LOG( log_block, 1, ("*** NewBlockDialog()\n"))
 	blockElementCount = 0;
 
 	while ( TrackIterate( &trk ) ) {
@@ -530,7 +532,7 @@ static void NewBlockDialog()
 
 static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 {
-	fprintf(stderr,"*** CmdBlockAction(%08x,{%f,%f})\n",action,pos.x,pos.y);
+	LOG( log_block, 1, ("*** CmdBlockAction(%08x,{%f,%f})\n",action,pos.x,pos.y))
 	switch (action & 0xFF) {
 	case C_START:
 		fprintf(stderr,"*** CmdBlockCreate(): C_START\n");		

@@ -4,6 +4,9 @@
  * Created by Robert Heller on Sat Mar 14 10:39:56 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
+ * Modification History: Revision 1.4  2009/09/16 18:32:24  m_fischer
+ * Modification History: Remove unused locals
+ * Modification History:
  * Modification History: Revision 1.3  2009/09/05 16:40:53  m_fischer
  * Modification History: Make layout control commands a build-time choice
  * Modification History:
@@ -54,32 +57,9 @@ EXPORT TRKTYP_T T_SWITCHMOTOR = -1;
 static int log_switchmotor = 0;
 
 #ifdef SWITCHMOTORCMD
-static void NoDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
-		       wDrawColor color ) {}
-static void NoDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
-		      ANGLE_T angle1, BOOL_T drawCenter, wDrawWidth width, 
-		      wDrawColor color ) {}
-static void NoDrawString( drawCmd_p d, coOrd p, ANGLE_T a, char * s,
-			  wFont_p fp, FONTSIZE_T fontSize, wDrawColor color ) {}
-static void NoDrawBitMap( drawCmd_p d, coOrd p, wDrawBitMap_p bm,
-			  wDrawColor color) {}
-static void NoDrawFillPoly( drawCmd_p d, int cnt, coOrd * pts,
-			    wDrawColor color ) {}
-static void NoDrawFillCircle( drawCmd_p d, coOrd p, DIST_T r,
-			      wDrawColor color ) {}
-
-static drawFuncs_t noDrawFuncs = {
-	0,
-	NoDrawLine,
-	NoDrawArc,
-	NoDrawString,
-	NoDrawBitMap,
-	NoDrawFillPoly,
-	NoDrawFillCircle };
-
 static drawCmd_t switchmotorD = {
 	NULL,
-	&noDrawFuncs,
+	&screenDrawFuncs,
 	0,
 	1.0,
 	0.0,
@@ -120,8 +100,26 @@ static switchmotorData_p GetswitchmotorData ( track_p trk )
 	return (switchmotorData_p) GetTrkExtraData(trk);
 }
 
+#include "bitmaps/switchmotormark.xbm"
+static wDrawBitMap_p switchmotormark_bm = NULL;
+
 static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
 {
+	coOrd p;
+	if (switchmotormark_bm == NULL) {
+		switchmotormark_bm =
+			wDrawBitMapCreate( mainD.d,
+					   switchmotormark_width, 
+					   switchmotormark_height, 16, 16, 
+					   switchmotormark_bits);
+	}
+	switchmotorData_p data_p = GetswitchmotorData(t);
+	struct extraData *xx = GetTrkExtraData(data_p->turnout);
+	coOrd orig = xx->orig;
+	ANGLE_T angle = xx->angle;
+	Translate (&p, orig, -angle , 2 );
+	Translate (&p, p, 90-angle, 2);
+	DrawBitMap(d, p, switchmotormark_bm, color);
 }
 
 static struct {
@@ -148,7 +146,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd, BOOL_T 
 	char *newName, *newNormal, *newReverse, *newPointSense;
 	BOOL_T changed, nChanged, norChanged, revChanged, psChanged;
 
-	fprintf(stderr,"*** UpdateSwitchMotor(): needUndoStart = %d\n",needUndoStart);
+	LOG( log_switchmotor, 1, ("*** UpdateSwitchMotor(): needUndoStart = %d\n",needUndoStart))
 	if ( inx == -1 ) {
 		nChanged = norChanged = revChanged = psChanged = changed = FALSE;
 		thename = wStringGetValue( (wString_p)switchmotorDesc[NM].control0 );
@@ -206,7 +204,7 @@ static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
 	switchmotorData_p xx = GetswitchmotorData(trk);
 	long listLabelsOption = listLabels;
 
-	fprintf(stderr,"*** DescribeSwitchMotor(): trk is T%d\n",GetTrkIndex(trk));
+	LOG( log_switchmotor, 1, ("*** DescribeSwitchMotor(): trk is T%d\n",GetTrkIndex(trk)))
 	FormatCompoundTitle( listLabelsOption, xx->name );
 	if (message[0] == '\0')
 		FormatCompoundTitle( listLabelsOption|LABEL_DESCR, xx->name );
@@ -238,14 +236,14 @@ static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
 static switchmotorDebug (track_p trk)
 {
 	switchmotorData_p xx = GetswitchmotorData(trk);
-	fprintf(stderr,"*** switchmotorDebug(): trk = %08x\n",trk);
-	fprintf(stderr,"*** switchmotorDebug(): Index = %d\n",GetTrkIndex(trk));
-	fprintf(stderr,"*** switchmotorDebug(): name = \"%s\"\n",xx->name);
-	fprintf(stderr,"*** switchmotorDebug(): normal = \"%s\"\n",xx->normal);
-	fprintf(stderr,"*** switchmotorDebug(): reverse = \"%s\"\n",xx->reverse);
-	fprintf(stderr,"*** switchmotorDebug(): pointsense = \"%s\"\n",xx->pointsense);
-	fprintf(stderr,"*** switchmotorDebug(): turnout = = T%d, %s\n",
-			GetTrkIndex(xx->turnout), GetTrkTypeName(xx->turnout));
+	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): trk = %08x\n",trk))
+	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): Index = %d\n",GetTrkIndex(trk)))
+	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): name = \"%s\"\n",xx->name))
+	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): normal = \"%s\"\n",xx->normal))
+	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): reverse = \"%s\"\n",xx->reverse))
+	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): pointsense = \"%s\"\n",xx->pointsense))
+	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): turnout = T%d, %s\n",
+			GetTrkIndex(xx->turnout), GetTrkTypeName(xx->turnout)))
 }
 
 static void DeleteSwitchMotor ( track_p trk )
@@ -262,7 +260,7 @@ static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
 	BOOL_T rc = TRUE;
 	switchmotorData_p xx = GetswitchmotorData(t);
 
-	rc &= fprintf(f, "SWITCHMOTOR %d %d \"%s\" \"%s\" \"%s\" \"%s\" \"%s\"\n",
+	rc &= fprintf(f, "SWITCHMOTOR %d %d \"%s\" \"%s\" \"%s\" \"%s\"\n",
 		GetTrkIndex(t), GetTrkIndex(xx->turnout), xx->name,
 		xx->normal, xx->reverse, xx->pointsense)>0;
 	return rc;
@@ -276,7 +274,7 @@ static void ReadSwitchMotor ( char * line )
 	switchmotorData_p xx;
 	char *name, *normal, *reverse, *pointsense;
 
-	fprintf(stderr,"*** ReadSwitchMotor: line is '%s'\n",line);
+	LOG( log_switchmotor, 1, ("*** ReadSwitchMotor: line is '%s'\n",line))
 	if (!GetArgs(line+12,"ddqqqq",&index,&trkindex,&name,&normal,&reverse,&pointsense)) {
 		return;
 	}
@@ -348,7 +346,7 @@ static void SwitchMotorOk ( void * junk )
 	switchmotorData_p xx;
 	track_p trk;
 	
-	fprintf(stderr,"*** SwitchMotorOk()\n");
+	LOG( log_switchmotor, 1, ("*** SwitchMotorOk()\n"))
 	ParamUpdate (&switchmotorPG );
 	if ( switchmotorName[0]==0 ) {
 		NoticeMessage( 0, "Switchmotor must have a name!", _("Ok"));
@@ -371,7 +369,7 @@ static void SwitchMotorOk ( void * junk )
 
 static void NewSwitchMotorDialog(track_p trk)
 {
-	fprintf(stderr,"*** NewSwitchMotorDialog()\n");
+	LOG( log_switchmotor, 1, ("*** NewSwitchMotorDialog()\n"))
 
 	switchmotorTurnout = trk;
 	if ( log_switchmotor < 0 ) log_switchmotor = LogFindIndex( "switchmotor" );
@@ -388,7 +386,7 @@ static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 {
 	track_p trk;
 	
-	fprintf(stderr,"*** CmdSwitchMotorCreate(%08x,{%f,%f})\n",action,pos.x,pos.y);
+	LOG( log_switchmotor, 1, ("*** CmdSwitchMotorCreate(%08x,{%f,%f})\n",action,pos.x,pos.y))
 	switch (action & 0xFF) {
 	case C_START:
 		InfoMessage( _("Select a turnout") );
@@ -491,7 +489,7 @@ static STATUS_T CmdSwitchMotorDelete( wAction_t action, coOrd pos )
 static STATUS_T CmdSwitchMotor (wAction_t action, coOrd pos )
 {
 
-	fprintf(stderr,"*** CmdSwitchMotor(%08x,{%f,%f})\n",action,pos.x,pos.y);
+	LOG( log_switchmotor, 1, ("*** CmdSwitchMotor(%08x,{%f,%f})\n",action,pos.x,pos.y))
 
 	switch ((long)commandContext) {
 	case SWITCHMOTOR_CREATE: return CmdSwitchMotorCreate(action,pos);

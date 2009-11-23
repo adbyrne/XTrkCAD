@@ -6,6 +6,10 @@ cmdAbout	About box dialog
 cmdAbove	Move Selected object to top
 cmdAddElevations	Raise or Lower all Selected tracks
 cmdBelow	Move Selected object to bottom
+cmdBlockCreate	Create Block
+cmdBlockDelete	Delete Block
+cmdBlockEdit	Edit Block
+cmdBlockSetCmd	Block
 cmdCarDesc	Create a new Car/Loco description
 cmdCarInventory	Manage your Car and Loco Inventory
 cmdCircleCenter	Create track circle from center	cmdCircle
@@ -125,6 +129,10 @@ cmdSelectOrphaned	Select stranded (unconnected) track pieces
 cmdSticky	Choose which commands are sticky
 cmdStraight	Create straight track
 cmdStructure	Place a structure on the layout
+cmdSwitchMotorCreate	Create Switch Motor
+cmdSwitchMotorDelete	Delete Switch Motor
+cmdSwitchMotorEdit	Edit Switch Motor
+cmdSwitchMotorSetCmd	Switch Motors
 cmdText	Enter text on the layout
 cmdTextSize	Controls the size of the entered text	cmdText
 #cmdTighten	Remove slack from connected tracks
