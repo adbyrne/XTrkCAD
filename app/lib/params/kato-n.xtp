@@ -355,7 +355,7 @@ TURNOUT N  "Kato Unitrack	S60R {incl w/4}	"
 	L 11579568 0.053333 0.000000 -0.445774 2.362204 -0.445774
 	END
 # Regular Turnout Design by Dave Bullis - 7.312 0.963 15.000 7.312
-TURNOUT N  "Kato Unitrack	Turnout	6-L	20-202"
+TURNOUT N  "Kato Unitrack	Turnout 6-L	20-202"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -366,7 +366,7 @@ TURNOUT N  "Kato Unitrack	Turnout	6-L	20-202"
 	L 11579568 0.053333 0.000000 -0.445774 7.322834 -0.445774
 	A 11579568 0.053333 -27.822226 0.003000 28.268000 164.993000 15.014000
 	END
-TURNOUT N  "Kato Unitrack	Turnout	6-R	20-203"
+TURNOUT N  "Kato Unitrack	Turnout 6-R	20-203"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
