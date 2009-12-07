@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.11 2009-10-02 04:30:32 dspagnol Exp $
+/** \file gtkfont.c
+ * Font selection and loading.
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.12 2009-12-07 19:31:31 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -160,12 +162,19 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
 	PangoLayout *layout = NULL;
 	
 	gchar *utf8 = gtkConvertInput(s);
-	
+
+/* RPH -- pango_cairo_create_layout() is missing in CentOS 4.8.
+          CentOS 4.8 only has GTK 2.4.13 and Pango 1.6.0 and does not have
+          libpangocairo at all.
+          pango_cairo_create_layout() was introduced with Pango 1.10. */
+
+#if PANGO_VERSION_MAJOR >= 1 && PANGO_VERSION_MINOR >= 10	
 	if (cairo != NULL) {
 		layout = pango_cairo_create_layout((cairo_t *) cairo);
 		pango_layout_set_text(layout, utf8, -1);
 	}
 	else
+#endif
 		layout = gtk_widget_create_pango_layout(widget, utf8);
 	
 	PangoFontDescription *fontDescription = (fp ? fp : curFont)->fontDescription;
