@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.7 2009-10-03 04:49:01 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.8 2009-12-12 17:16:08 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -35,11 +35,7 @@
 
 #include "dynarr.h"
 
-#define PANEL_GC_KEY    101  /* any arbitrary number */
-
 extern wWin_p gtkMainW;
-
-extern int gtkTrace;
 
 typedef enum {
 		W_MAIN, W_POPUP,
@@ -70,24 +66,20 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		doneProcCallback_p doneProc; \
 		void * data;
 
-#ifndef LATER
 struct wWin_t {
 		WOBJ_COMMON
-		GtkWidget *gtkwin;
+		GtkWidget *gtkwin;             /**< GTK window */ 
 		wPos_t lastX, lastY;
 		wControl_p first, last;
-		wPos_t menuW;
-		wWinCallBack_p winProc;
-		wBool_t shown;
-		const char * nameStr;
-		wBool_t firstShow;
-		GtkWidget * menubar;
-		GdkGC * gc;
-		int gc_linewidth;
+		wWinCallBack_p winProc;        /**< window procedure */
+		wBool_t shown;                 /**< visibility state */
+		const char * nameStr;          /**< window name (not title) */
+		GtkWidget * menubar;           /**< menubar handle (if exists) */
+		GdkGC * gc;                    /**< graphics context */
+		int gc_linewidth;              /**< ??? */
 		wBool_t busy;
 		int modalLevel;
 		};
-#endif
 
 struct wControl_t {
 		WOBJ_COMMON
@@ -105,8 +97,6 @@ struct wIcon_t {
 
 extern char wAppName[];
 extern char wConfigName[];
-extern int gtkIgnoreEvents;
-extern int gtkColorDepth;
 extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
 
@@ -172,8 +162,6 @@ typedef struct {
 		} wPrinterStream_t;
 typedef wPrinterStream_t * wPrinterStream_p;
 
-
-/* typedef struct wPrinterStream_t * wPrinterStream_p; */
 wPrinterStream_p wPrinterOpen( void );
 void wPrinterWrite( wPrinterStream_p p, char * buff, int siz );
 void wPrinterClose( wPrinterStream_p );

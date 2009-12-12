@@ -1,5 +1,7 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.10 2009-07-24 15:58:24 m_fischer Exp $
+/** \file gtkwindow.c
+ * Basic window handling stuff.
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.11 2009-12-12 17:16:08 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -34,8 +36,6 @@
 
 #include "gtkint.h"
 
-
-
 wWin_p gtkMainW;
 
 #define FOUR	(4)
@@ -44,17 +44,13 @@ wWin_p gtkMainW;
 #define MIN_WIN_WIDTH (50)
 #define MIN_WIN_HEIGHT (50)
 
+#define SECTIONWINDOWSIZE  "gtklib window size"
+#define SECTIONWINDOWPOS   "gtklib window pos"
+
 extern wBool_t listHelpStrings;
-extern char *userLocale;
 		
 static wControl_p firstWin = NULL, lastWin;
-
-int gtkColorDepth = 1;
-
 static int keyState;
-
-int gtkTrace = 0;
-
 static wBool_t gtkBlockEnabled = TRUE;
 
 /*
@@ -65,6 +61,41 @@ static wBool_t gtkBlockEnabled = TRUE;
  *****************************************************************************
  */
 
+/**
+ * Get the window size from the resource (.rc) file.  The size is saved under the key 
+ * SECTIONWINDOWSIZE.window name
+ *
+ * \param win IN window
+ * \param nameStr IN window name
+ */
+
+static void getWinSize( wWin_p win, const char * nameStr )
+{
+	int w, h;
+	const char *cp;
+    char *cp1, *cp2;
+
+	if ( (win->option&F_RESIZE) &&
+		 (win->option&F_RECALLPOS) &&
+		 (cp = wPrefGetString( SECTIONWINDOWSIZE, nameStr)) &&
+		 (w = strtod( cp, &cp1 ), cp != cp1) &&
+		 (h = strtod( cp1, &cp2 ), cp1 != cp2) ) {
+		if (w < 10)
+			w = 10;
+		if (h < 10)
+			h = 10;
+		win->w = win->origX = w;
+		win->h = win->origY = h;
+		win->option &= ~F_AUTOSIZE;
+	}
+}
+
+/**
+ * Save the window size to the resource (.rc) file.  The size is saved under the key 
+ * SECTIONWINDOWSIZE.window name
+ *
+ * \param win IN window
+ */
 
 static void saveSize( wWin_p win )
 {
@@ -73,10 +104,16 @@ static void saveSize( wWin_p win )
 		 (win->option&F_RECALLPOS) &&
 		 GTK_WIDGET_VISIBLE( GTK_WIDGET(win->gtkwin) ) ) {
 		sprintf( pos_s, "%d %d", win->w, win->h-(FOUR + ((win->option&F_MENUBAR)?MENUH:0) ) );
-		wPrefSetString( "gtklib window size", win->nameStr, pos_s );
+		wPrefSetString( SECTIONWINDOWSIZE, win->nameStr, pos_s );
 	}
 }
 
+/**
+ * Get the window position from the resource (.rc) file.  The position is saved under the key 
+ * SECTIONWINDOWPOS.window name
+ *
+ * \param win IN window
+ */
 
 static void getPos( wWin_p win )
 {
@@ -86,36 +123,35 @@ static void getPos( wWin_p win )
 	wPos_t gtkDisplayWidth = gdk_screen_width();
 	wPos_t gtkDisplayHeight = gdk_screen_height();
 
-		if ( (win->option&F_RECALLPOS) &&
-			 (!win->shown) ) {
-			if ((cp = wPrefGetString( "gtklib window pos", win->nameStr))) {
-				x = strtod( cp, &cp1 );
-				if (cp == cp1)
-					return;
-				y = strtod( cp1, &cp2 );
-				if (cp2 == cp1)
-					return;
-				if ( y > gtkDisplayHeight-win->h )
-					y = gtkDisplayHeight-win->h;
-				if ( x > gtkDisplayWidth-win->w )
-					x = gtkDisplayWidth-win->w;
-				if ( x <= 0 )
-					x = 1;
-				if ( y <= 0 )
-					y = 1;
-				gtk_widget_set_uposition( win->gtkwin, x, y );
-				gdk_window_move_resize( GTK_WIDGET(win->gtkwin)->window, x, y, win->w, win->h );
-			}
-#ifdef GTK1
-		} else if ( win->option&F_CENTER ) {
-			x = (gtkDisplayWidth - win->w)/2;
-			y = (gtkDisplayHeight - win->h)/2;
-			gtk_widget_set_uposition( win->gtkwin, x, y );
-			gdk_window_move_resize( GTK_WIDGET(win->gtkwin)->window, x, y, win->w, win->h );
-#endif
+	if ( (win->option&F_RECALLPOS) &&
+			(!win->shown) ) {
+		if ((cp = wPrefGetString( SECTIONWINDOWPOS, win->nameStr))) {
+			x = strtod( cp, &cp1 );
+			if (cp == cp1)
+				return;
+			y = strtod( cp1, &cp2 );
+			if (cp2 == cp1)
+				return;
+			if ( y > gtkDisplayHeight-win->h )
+				y = gtkDisplayHeight-win->h;
+			if ( x > gtkDisplayWidth-win->w )
+				x = gtkDisplayWidth-win->w;
+			if ( x <= 0 )
+				x = 1;
+			if ( y <= 0 )
+				y = 1;
+			gtk_window_move( GTK_WINDOW(win->gtkwin), x, y );
+			gtk_window_resize( GTK_WINDOW(win->gtkwin), win->w, win->h );
 		}
+	}
 }
 
+/**
+ * Save the window position to the resource (.rc) file.  The position is saved under the key 
+ * SECTIONWINDOWPOS.window name
+ *
+ * \param win IN window
+ */
 
 static void savePos( wWin_p win )
 {
@@ -126,18 +162,22 @@ static void savePos( wWin_p win )
 		x -= 5;
 		y -= 25;
 		sprintf( pos_s, "%d %d", x, y );
-		wPrefSetString( "gtklib window pos", win->nameStr, pos_s );
+		wPrefSetString( SECTIONWINDOWPOS, win->nameStr, pos_s );
 	}
 }
 
+/**
+ * Returns the dimensions of <win>.
+ *
+ * \param win IN window handle
+ * \param width OUT width of window
+ * \param height OUT height of window minus menu bar size
+ */
 
 EXPORT void wWinGetSize(
 		wWin_p win,		/* Window */
 		wPos_t * width,		/* Returned window width */
 		wPos_t * height )	/* Returned window height */
-/*
-Returns the dimensions of <win>.
-*/
 {
 	GtkRequisition requisition;
 	wPos_t w, h;
@@ -154,41 +194,40 @@ Returns the dimensions of <win>.
 	*height = h - FOUR - ((win->option&F_MENUBAR)?MENUH:0);
 }
 
+/**
+ * Sets the dimensions of <w> to <widht> and <height>.
+ *
+ * \param win IN window
+ * \param width IN new width
+ * \param height IN new height
+ */
 
 EXPORT void wWinSetSize(
 		wWin_p win,		/* Window */
 		wPos_t width,		/* Window width */
 		wPos_t height )		/* Window height */
-/*
-Sets the dimensions of <w> to <widht> and <height>.
-*/
 {
 	win->busy = TRUE;
 	win->w = width;
 	win->h = height + FOUR + ((win->option&F_MENUBAR)?MENUH:0);
-#ifndef GTK1
 	gtk_widget_set_size_request( win->gtkwin, win->w, win->h );
-	gtk_widget_set_size_request( win->widget, win->w, win->h );
-#else
-	gtk_widget_set_usize( win->gtkwin, win->w, win->h );
-	gtk_widget_set_usize( win->widget, win->w, win->h );
-#endif
-	gtk_widget_queue_resize( win->gtkwin );
-	gtk_widget_queue_resize( win->widget );
+	gtk_widget_set_size_request( win->widget, win->w, win->h ); 
 	win->busy = FALSE;
+
 }
 
+/**
+ * Shows or hides window <win>. If <win> is created with 'F_BLOCK' option then the applications other
+ * windows are disabled and 'wWinShow' doesnot return until the window <win> is closed by calling 
+ * 'wWinShow(<win>,FALSE)'.
+ *
+ * \param win IN window
+ * \param show IN visibility state
+ */
 
 EXPORT void wWinShow(
 		wWin_p win,		/* Window */
 		wBool_t show )		/* Command */
-/*
-Shows or hides window <win>.
-
-If <win> is created with 'F_BLOCK' option then the applications other
-windows are disabled and 'wWinShow' doesnot return until the
-window <win> is closed by calling 'wWinShow(<win>,FALSE)'.
-*/
 {
 	GtkRequisition requisition;
 	if (debugWindow >= 2) printf("Set Show %s\n", win->labelStr?win->labelStr:"No label" );
@@ -196,26 +235,13 @@ window <win> is closed by calling 'wWinShow(<win>,FALSE)'.
 	if (show) {
 		keyState = 0;
 		getPos( win );
-#ifdef LATER
-		if (win->shown) {
-			gtk_widget_hide( win->gtkwin );
-			wFlush();
-		}
-#endif
 		if ( win->option & F_AUTOSIZE ) {
 			gtk_widget_size_request( win->gtkwin, &requisition );
 			if ( requisition.width != win->w || requisition.height != win->h ) {
-#ifndef GTK1
 				gtk_widget_set_size_request( win->gtkwin, win->w, win->h );
 				gtk_widget_set_size_request( win->widget, win->w, win->h );
 				if (win->option&F_MENUBAR) {
 					gtk_widget_set_size_request( win->menubar, win->w, MENUH );
-#else
-				gtk_widget_set_usize( win->gtkwin, win->w, win->h );
-				gtk_widget_set_usize( win->widget, win->w, win->h );
-				if (win->option&F_MENUBAR) {
-					gtk_widget_set_usize( win->menubar, win->w, MENUH );
-#endif
 				}
 			}
 		}
@@ -228,20 +254,6 @@ window <win> is closed by calling 'wWinShow(<win>,FALSE)'.
 			gtk_widget_set_sensitive( GTK_WIDGET(win->gtkwin), TRUE );
 		win->shown = show;
 		win->modalLevel = 0;
-
-		/* Kludge:
-		 * For some mystical reason, vertical scrollbar in the Add Turnout and
-		 * Add Structure dialog doesn't show unless the dialog window is resized
-		 * horizontally. This is now done programmatically in two steps:
-		 * 	1) In wWinCommonCreate() resize window w+1 and h+1.
-		 *  2) In wWinShow() resize back to original.
-		 */
-		if (win->firstShow && win != gtkMainW)
-		{
-			wFlush();
-			gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w-1, win->h-1);
-		}
-		win->firstShow = FALSE;
 
 		if ( (!gtkBlockEnabled) || (win->option & F_BLOCK) == 0) {
 			wFlush();
@@ -261,6 +273,11 @@ window <win> is closed by calling 'wWinShow(<win>,FALSE)'.
 	}
 }
 
+/**
+ * Block windows against user interactions. Done during demo mode etc.
+ *
+ * \param enabled IN blocked if TRUE
+ */
 
 EXPORT void wWinBlockEnable(
 		wBool_t enabled )
@@ -268,32 +285,43 @@ EXPORT void wWinBlockEnable(
 	gtkBlockEnabled = enabled;
 }
 
+/**
+ * Returns whether the window is visible.
+ *
+ * \param win IN window
+ * \return    TRUE if visible, FALSE otherwise
+ */
 
 EXPORT wBool_t wWinIsVisible(
 		wWin_p win )
-/*
-Returns whether the window is visible.
-*/
 {
 	return win->shown;
 }
 
+/**
+ * Sets the title of <win> to <title>.
+ *
+ * \param varname1 IN window
+ * \param varname2 IN new title
+ */
+
 EXPORT void wWinSetTitle(
 		wWin_p win,		/* Window */
 		const char * title )		/* New title */
-/*
-Sets the title of <win> to <title>.
-*/
 {
 	gtk_window_set_title( GTK_WINDOW(win->gtkwin), title );
 }
 
+/**
+ * Sets the window <win> to busy or not busy. Sets the cursor accordingly
+ *
+ * \param varname1 IN window
+ * \param varname2 IN TRUE if busy, FALSE otherwise
+ */
+
 EXPORT void wWinSetBusy(
 		wWin_p win,		/* Window */
 		wBool_t busy )		/* Command */
-/*
-Sets the window <win> to busy or not busy.
-*/
 {
 	GdkCursor * cursor;
 	if (win->gtkwin == 0) abort();
@@ -339,11 +367,15 @@ EXPORT void gtkDoModal(
 	}
 }
 
+/**
+ * Returns the Title of <win>.
+ *
+ * \param win IN window
+ * \return    pointer to window title
+ */
+
 EXPORT const char * wWinGetTitle(
 	 wWin_p win )			/* Window */
-/*
-Returns the Title of <win>.
-*/
 {
 	return win->labelStr;
 }
@@ -404,13 +436,6 @@ static gint window_delete_event(
 	return (TRUE);
 }
 
-/* another callback */
-static void destroy (GtkWidget *widget, gpointer data)
-{
-	/*gtk_main_quit ();*/
-}
-
-
 static int window_redraw(
 		wWin_p win,
 		wBool_t doWinProc )
@@ -425,33 +450,8 @@ static int window_redraw(
 			b->repaintProc( b );
 	}
 
-#ifdef LATER
-	if (doWinProc && win->winProc) {
-		win->winProc( win, wRedraw_e, win->data );
-	}
-#endif
-
 	return FALSE;
 }
-
-static wBool_t need_redraw;
- #ifdef GTK1
-static wBool_t kludge88 = 0;
-static int fixed_draw_event(
-		GtkWidget * widget,
-		GdkEvent * event,
-		wWin_p win )
-{
-	if (need_redraw) {
-		need_redraw = FALSE;
-		return window_redraw( win, TRUE );
-	} else if (kludge88) {
-		return FALSE;
-	} else {
-		return window_redraw( win, FALSE );
-	}
-}
- #endif 
 
 static int fixed_expose_event(
 		GtkWidget * widget,
@@ -487,42 +487,22 @@ static int window_configure_event(
 				win->w = MIN_WIN_WIDTH;
 			if ( win->h < MIN_WIN_HEIGHT )
 				win->h = MIN_WIN_HEIGHT;
-#ifndef GTK1
-/*			gtk_widget_set_size_request( GTK_WIDGET(win->widget), win->w, win->h );
-			gtk_widget_set_size_request( GTK_WIDGET(win->gtkwin), win->w, win->h );*/
 			if (win->option&F_MENUBAR)
-				gtk_widget_set_size_request( win->menubar, win->w, MENUH );
-#else
-			gtk_widget_set_usize( GTK_WIDGET(win->gtkwin), win->w, win->h );
-			gtk_widget_set_usize( GTK_WIDGET(win->widget), win->w, win->h );
-			if (win->option&F_MENUBAR)
-				gtk_widget_set_usize( win->menubar, win->w, MENUH );
-#endif
+				gtk_widget_set_size_request( win->menubar, win->w, MENUH ); 
+
 			if (win->busy==FALSE && win->winProc) {
 				win->winProc( win, wResize_e, win->data );
 			}
-#ifdef LATER
-			for (butt=win->first; butt != NULL; butt = butt->next) {
-				if (butt->repaintProc)
-					butt->repaintProc( butt );
-			}
-#endif
 		}
-		need_redraw = TRUE;
-	} else if (win->w != event->width || win->h != event->height) {
-#ifndef GTK1
-/*		gtk_widget_set_size_request( GTK_WIDGET(win->gtkwin), win->w, win->h );
-		gtk_widget_set_size_request( GTK_WIDGET(win->widget), win->w, win->h );*/
-#else
-		gtk_widget_set_usize( GTK_WIDGET(win->gtkwin), win->w, win->h );
-		gtk_widget_set_usize( GTK_WIDGET(win->widget), win->w, win->h );
-		need_redraw = TRUE;		
-#endif
-	}
+	} 
 	return FALSE;
 }
 
-
+/**
+ * Get current state of shift, ctrl or alt keys.
+ *
+ * \return    or'ed value of WKEY_SHIFT, WKEY_CTRL and WKEY_ALT depending on state
+ */
 
 int wGetKeyState( void )
 {
@@ -581,18 +561,6 @@ static gint window_char_event(
 				}
 			}
 		}
-#ifdef LATER
- This does not work if some control has KB focus because we will call its action
- proc after the window has gone away
-		if ( event->keyval == GDK_Return ) {
-			for ( bb=win->first; bb; bb=bb->next ) {
-				if ( bb->type == B_BUTTON && (bb->option&BB_DEFAULT ) ) {
-					gtkButtonDoAction( (wButton_p)bb );
-					return TRUE;
-				}
-			}
-		}
-#endif
 	}
 	if ( gtkHandleAccelKey( event ) ) {
 		return TRUE;
@@ -610,28 +578,6 @@ static gint window_char_event(
  *******************************************************************************
  */
 
-
-
-static void getWinSize( wWin_p win, const char * nameStr )
-{
-	int w, h;
-	const char *cp;
-    char *cp1, *cp2;
-
-	if ( (win->option&F_RESIZE) &&
-		 (win->option&F_RECALLPOS) &&
-		 (cp = wPrefGetString( "gtklib window size", nameStr)) &&
-		 (w = strtod( cp, &cp1 ), cp != cp1) &&
-		 (h = strtod( cp1, &cp2 ), cp1 != cp2) ) {
-		if (w < 10)
-			w = 10;
-		if (h < 10)
-			h = 10;
-		win->w = win->origX = w;
-		win->h = win->origY = h;
-		win->option &= ~F_AUTOSIZE;
-	}
-}
 
 
 static wWin_p wWinCommonCreate(
@@ -660,13 +606,9 @@ static wWin_p wWinCommonCreate(
 	if ( winType == W_MAIN ) {
 		w->gtkwin = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 	} else {
-#ifndef GTK1
 		w->gtkwin = gtk_window_new( GTK_WINDOW_TOPLEVEL );
 		if ( gtkMainW )
 			gtk_window_set_transient_for( GTK_WINDOW(w->gtkwin), GTK_WINDOW(gtkMainW->gtkwin) );
-#else
-		w->gtkwin = gtk_window_new( GTK_WINDOW_DIALOG );
-#endif
 	}
 	
 	if( option & F_HIDE )
@@ -683,11 +625,7 @@ static wWin_p wWinCommonCreate(
 		w->menubar = gtk_menu_bar_new();
 		gtk_container_add( GTK_CONTAINER(w->widget), w->menubar );
 		gtk_widget_show( w->menubar );
-#ifndef GTK1
 		gtk_widget_set_size_request( w->menubar, -1, MENUH );
-#else
-		gtk_widget_set_usize( w->menubar, -1, MENUH );
-#endif
 	}
 
 	gtk_container_add( GTK_CONTAINER(w->gtkwin), w->widget );
@@ -700,17 +638,10 @@ static wWin_p wWinCommonCreate(
 	} else {
 		w->w = w->realX = w->origX;
 		w->h = w->realY = w->origY+h;
-#ifndef GTK1
 		gtk_widget_set_size_request( w->gtkwin, w->w, w->h );
 		gtk_widget_set_size_request( w->widget, w->w, w->h );
 		if (w->option&F_MENUBAR) {
 			gtk_widget_set_size_request( w->menubar, w->w, MENUH );
-#else
-		gtk_widget_set_usize( w->gtkwin, w->w, w->h );
-		gtk_widget_set_usize( w->widget, w->w, w->h );
-		if (w->option&F_MENUBAR) {
-			gtk_widget_set_usize( w->menubar, w->w, MENUH );
-#endif
 		}
 	}
 
@@ -720,14 +651,8 @@ static wWin_p wWinCommonCreate(
 
 	gtk_signal_connect (GTK_OBJECT (w->gtkwin), "delete_event",
 						GTK_SIGNAL_FUNC (window_delete_event), w);
-	gtk_signal_connect (GTK_OBJECT (w->gtkwin), "destroy",
-						GTK_SIGNAL_FUNC (destroy), w);
 	gtk_signal_connect (GTK_OBJECT (w->widget), "expose_event",
 						GTK_SIGNAL_FUNC (fixed_expose_event), w);
-#ifdef GTK1 
-	gtk_signal_connect (GTK_OBJECT (w->widget), "draw",
-						GTK_SIGNAL_FUNC (fixed_draw_event), w);
-#endif 
 	gtk_signal_connect (GTK_OBJECT (w->gtkwin), "configure_event",
 						GTK_SIGNAL_FUNC (window_configure_event), w); 
 	gtk_signal_connect (GTK_OBJECT (w->gtkwin), "key_press_event",
@@ -736,18 +661,18 @@ static wWin_p wWinCommonCreate(
 						GTK_SIGNAL_FUNC (window_char_event), w);
 	gtk_widget_set_events (w->widget, GDK_EXPOSURE_MASK );
 	gtk_widget_set_events ( GTK_WIDGET(w->gtkwin), GDK_EXPOSURE_MASK|GDK_KEY_PRESS_MASK|GDK_KEY_RELEASE_MASK );
-#ifdef LATER
-							  | GDK_LEAVE_NOTIFY_MASK
-							  | GDK_BUTTON_PRESS_MASK
-							  | GDK_KEY_PRESS_MASK
-							  | GDK_KEY_RELEASE_MASK
-							  | GDK_POINTER_MOTION_MASK
-							  | GDK_POINTER_MOTION_HINT_MASK);
-#endif
 
+	/**
+     * \todo { set_policy is deprecated and should be replaced by set_resizable. In order to do that
+     * the library has to be cleared up from calls to set_size_request as these set the minimum widget size 
+     * to the current size preventing the user from re-sizing the window to a smaller size. At least this
+     * is my current assumption ;-) }
+     */
 	if (w->option & F_RESIZE) {
 		gtk_window_set_policy( GTK_WINDOW(w->gtkwin), TRUE, TRUE, TRUE );
+//		gtk_window_set_resizable( GTK_WINDOW(w->gtkwin), TRUE );
 	} else {
+//		gtk_window_set_resizable( GTK_WINDOW(w->gtkwin), FALSE );
 		gtk_window_set_policy( GTK_WINDOW(w->gtkwin), FALSE, FALSE, TRUE );
 	}
 	
@@ -759,7 +684,6 @@ static wWin_p wWinCommonCreate(
 		gtk_window_set_title( GTK_WINDOW(w->gtkwin), labelStr );
 	if (listHelpStrings)
 		printf( "WINDOW - %s\n", nameStr?nameStr:"<NULL>" );
-	w->firstShow = TRUE;
 
 	if (firstWin) {
 		lastWin->next = (wControl_p)w;
@@ -767,24 +691,17 @@ static wWin_p wWinCommonCreate(
 		firstWin = (wControl_p)w;
 	}
 	lastWin = (wControl_p)w;
-	/*gtk_widget_show( w->gtkwin );*/
 	gtk_widget_show( w->widget );
 	gtk_widget_realize( w->gtkwin );
-
-	/* Kludge:
-	 * For some mystical reason, vertical scrollbar in the Add Turnout and
-	 * Add Structure dialog doesn't show unless the dialog window is resized
-	 * horizontally. This is now done programmatically in two steps:
-	 * 	1) In wWinCommonCreate() resize window w+1 and h+1.
-	 *  2) In wWinShow() resize back to original.
-	 */
-	if (w != gtkMainW)
-		gtk_window_resize(GTK_WINDOW(w->gtkwin), w->w+1, w->h+1);
 
 	w->busy = FALSE;
 	return w;
 }
 
+/**
+ * \todo { investigate and implement this function for setting the correct icon as necessary.
+ * It looks like these functions are never called at the moment. }
+ */
 
 EXPORT void wWinSetBigIcon(
 		wWin_p win,		/* Main window */
@@ -802,6 +719,12 @@ Create an Icon from a X-bitmap.
 	gdk_bitmap_unref( mask );
 #endif
 }
+
+
+/**
+ * \todo { investigate and implement this function for setting the correct icon as necessary.
+ * It looks like these functions are never called at the moment. }
+ */
 
 
 EXPORT void wWinSetSmallIcon(
@@ -837,19 +760,14 @@ Create an Icon from a X-bitmap.
 
 EXPORT wWin_p wWinMainCreate(
 		const char * name,		/* Application name */
-		wPos_t x,		/* Initial window width */
-		wPos_t y,		/* Initial window height */
-		const char * helpStr,		/* Help topic string */
+		wPos_t x,				/* Initial window width */
+		wPos_t y,				/* Initial window height */
+		const char * helpStr,	/* Help topic string */
 		const char * labelStr,	/* Window title */
-		const char * nameStr,		/* Window name */
-		long option,		/* Options */
+		const char * nameStr,	/* Window name */
+		long option,			/* Options */
 		wWinCallBack_p winProc,	/* Call back function */
-		void * data )		/* User context */
-/*
-Create the main application window.
-
-Must be be called once.
-*/
+		void * data )			/* User context */
 {
 	char *pos;
 
@@ -873,19 +791,31 @@ Must be be called once.
 	return gtkMainW;
 }
 
+/**
+ * Create a new popup window.
+ *
+ * \param parent IN Parent window (may be NULL)
+ * \param x IN Initial window width
+ * \param y IN Initial window height
+ * \param helpStr IN Help topic string
+ * \param labelStr IN Window title
+ * \param nameStr IN Window name
+ * \param option IN Options
+ * \param winProc IN call back function
+ * \param data IN User context information
+ * \return    handle for new window
+ */
 
 EXPORT wWin_p wWinPopupCreate(
-		wWin_p parent,		/* Parent window (may be NULL) */
-		wPos_t x,		/* Initial window width */
-		wPos_t y,		/* Initial window height */
-		const char * helpStr,		/* Help topic string */
-		const char * labelStr,	/* Window title */
-		const char * nameStr,		/* Window name */
-		long option,		/* Options */
-		wWinCallBack_p winProc,	/* Call back function */
-		void * data )		/* User context */
-/*
-*/
+		wWin_p parent,		
+		wPos_t x,		
+		wPos_t y,		
+		const char * helpStr,
+		const char * labelStr,
+		const char * nameStr,
+		long option,	
+		wWinCallBack_p winProc,
+		void * data )		
 {
 	wWin_p win;
 
@@ -895,22 +825,24 @@ EXPORT wWin_p wWinPopupCreate(
 		parent = gtkMainW;
 	}
 	win = wWinCommonCreate( parent, W_POPUP, x, y, labelStr, nameStr, option, winProc, data );
-	/*gtk_window_set_transient_for( GTK_WINDOW( win->gtkwin), GTK_WINDOW( gtkMainW->gtkwin) );*/
 	gdk_window_set_group( win->gtkwin->window, gtkMainW->gtkwin->window );
 
 	return win;
 }
 
 
+/**
+ * Terminates the applicaton with code <rc>. Before closing the main window
+ * call back is called with wQuit_e. The program is terminated without exiting
+ * the main message loop.
+ *
+ * \param rc IN exit code
+ * \return    never returns
+ */
 
 
 EXPORT void wExit(
 		int rc )		/* Application return code */
-/*
-Terminates the applicaton with code <rc>.
-
-The main window call-back function is called with 'wQuit_e'.
-*/
 {
 	wWin_p win;
 	for ( win = (wWin_p)firstWin; win; win = (wWin_p)win->next ) {
@@ -922,14 +854,6 @@ The main window call-back function is called with 'wQuit_e'.
 	wPrefFlush();
 	if (gtkMainW && gtkMainW->winProc != NULL)
 		gtkMainW->winProc( gtkMainW, wQuit_e, gtkMainW->data );
-
-	if (userLocale)
-	{
-		free(userLocale);
-		userLocale = NULL;
-	}
-	CleanupCustom();
-
+	
 	exit( rc );
-	/*gtk_main_quit();*/
 }

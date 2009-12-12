@@ -1,3 +1,8 @@
+Dec 12, 2009
+	FIX: Martin Fischer
+		gtkint.h, gtkwindow.c: refactoring, remove unused globals and
+		added some comments.
+		
 Dec 07, 2010
 	FIX: Martin Fischer / Robert Heller
 		gtkfont.c: use newer Pango functions only after checking for correct
