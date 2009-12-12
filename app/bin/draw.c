@@ -1,7 +1,7 @@
 /** \file draw.c
  * Basic drawing functions.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.16 2009-06-08 18:47:16 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.17 2009-12-12 17:20:59 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1313,6 +1313,7 @@ EXPORT void MainProc( wWin_p win, winProcEvent e, void * data )
 			
 		CleanupFiles();	
 		SaveState();
+		CleanupCustom();
 		break;
 	case wClose_e:
 		/* shutdown the application */

@@ -1,3 +1,8 @@
+Dec 12, 2009
+	FIX: Martin Fischer
+		draw.c, custom.c: refactoring, move some functionality from the lowlevel
+		library to the more appropriate core application modules
+		
 Oct 14, 2009
 	ENH: Daniel Spagnol
 		chotbar.c: undone Oct 03, 2009 changes due to gtk+-2.18 fixed it for us.

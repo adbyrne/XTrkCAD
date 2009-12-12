@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.12 2009-09-21 18:24:33 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.13 2009-12-12 17:20:59 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -86,6 +86,8 @@ char * sVersion = Version;
 int iParamVersion = PARAMVERSION;
 int iMinParamVersion = MINPARAMVERSION;
 long lParamKey = PARAMKEY;
+
+extern char *userLocale;
 
 EXPORT char * MakeWindowTitle( char * name )
 {
@@ -242,5 +244,10 @@ void CleanupCustom( void )
 	{
 		free(sPartsListFilePattern);
 		sPartsListFilePattern = NULL;
+	}
+	if (userLocale)
+	{
+		free(userLocale);
+		userLocale = NULL;
 	}
 }
