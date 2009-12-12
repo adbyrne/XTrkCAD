@@ -1,5 +1,5 @@
  /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.25 2009-09-20 14:55:54 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.26 2009-12-12 17:18:22 m_fischer Exp $
  */
 
 #define _WIN32_WINNT 0x0500
@@ -2791,13 +2791,6 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 
 	if( helpInitted == TRUE )
 		HtmlHelp( NULL, NULL, HH_UNINITIALIZE, (DWORD)dwCookie);
-
-	if (userLocale)
-	{
-		free(userLocale);
-		userLocale = NULL;
-	}
-	CleanupCustom();
 
 	return msg.wParam;
 }

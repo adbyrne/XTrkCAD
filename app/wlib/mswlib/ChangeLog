@@ -1,3 +1,8 @@
+Dec 12, 2009
+	FIX: Martin Fischer
+		mswmisc.c: minor refactoring to stay compatible with the 
+		work on gtkwindow.c
+
 Sep 20. 2009
 	ENH: Martin Fischer <m_fischer@users.sourceforge.net>
 		CMakeLists.txt, mswbitmap.c, mswmisc.c, mswint.h:
