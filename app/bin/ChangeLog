@@ -1,3 +1,7 @@
+Dec 19, 2009 
+	FIX: Robert Heller
+		cswitchmotor.c: Patch to fix Visual C++ compile error
+	
 Dec 12, 2009
 	FIX: Martin Fischer
 		draw.c, custom.c: refactoring, move some functionality from the lowlevel

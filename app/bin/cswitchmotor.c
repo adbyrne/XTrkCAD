@@ -4,6 +4,9 @@
  * Created by Robert Heller on Sat Mar 14 10:39:56 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
+ * Modification History: Revision 1.5  2009/11/23 19:46:16  rheller
+ * Modification History: Block and Switchmotor updates
+ * Modification History:
  * Modification History: Revision 1.4  2009/09/16 18:32:24  m_fischer
  * Modification History: Remove unused locals
  * Modification History:
@@ -106,6 +109,11 @@ static wDrawBitMap_p switchmotormark_bm = NULL;
 static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
 {
 	coOrd p;
+	switchmotorData_p data_p = GetswitchmotorData(t);
+	struct extraData *xx = GetTrkExtraData(data_p->turnout);
+	coOrd orig = xx->orig;
+	ANGLE_T angle = xx->angle;
+
 	if (switchmotormark_bm == NULL) {
 		switchmotormark_bm =
 			wDrawBitMapCreate( mainD.d,
@@ -113,10 +121,6 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
 					   switchmotormark_height, 16, 16, 
 					   switchmotormark_bits);
 	}
-	switchmotorData_p data_p = GetswitchmotorData(t);
-	struct extraData *xx = GetTrkExtraData(data_p->turnout);
-	coOrd orig = xx->orig;
-	ANGLE_T angle = xx->angle;
 	Translate (&p, orig, -angle , 2 );
 	Translate (&p, p, 90-angle, 2);
 	DrawBitMap(d, p, switchmotormark_bm, color);
