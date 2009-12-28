@@ -1,3 +1,7 @@
+Dec 298, 2009
+	FIX: Martin Fischer
+		denum.c: remove signed / unsigned mismatch
+
 Dec 19, 2009 
 	FIX: Robert Heller
 		cswitchmotor.c: Patch to fix Visual C++ compile error

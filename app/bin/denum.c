@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.5 2009-10-10 03:34:29 dspagnol Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.6 2009-12-28 20:48:06 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -174,7 +174,7 @@ void EnumerateStart(void)
 
 	enumerateTotal = 0.0;
 
-	if( count_utf8_chars( _("Description")) > (unsigned)enumerateMaxDescLen )
+	if( count_utf8_chars( _("Description")) > enumerateMaxDescLen )
 		enumerateMaxDescLen = count_utf8_chars( _("Description" ));
 
 	/* create the table header */
