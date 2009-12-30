@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.47 2009-09-21 18:24:33 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.48 2009-12-30 12:02:39 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -96,7 +96,7 @@ EXPORT coOrd zero = { 0.0, 0.0 };
 
 EXPORT wBool_t extraButtons = FALSE;
 
-EXPORT long onStartup;
+EXPORT long onStartup;		/**< controls behaviour after startup: load last layout if zero, else start with blank canvas */
 
 EXPORT wButton_p undoB;
 EXPORT wButton_p redoB;
@@ -2403,8 +2403,8 @@ EXPORT wWin_p wMain(
 	int c;
 	char * logFileName = NULL;
 	int log_init = 0;
-	int initialZoom;
-	char * initialFile;
+	int initialZoom = 0;
+	char * initialFile = NULL;
 	const char * pref;
 	coOrd roomSize;
 	long oldToolbarMax;
@@ -2414,8 +2414,6 @@ EXPORT wWin_p wMain(
 	char buffer[ STR_SIZE ];
 	unsigned int i;
 
-	initialZoom = 0;
-	initialFile = NULL;
 	strcpy( buffer, sProdNameLower );
 
 	/* Initialize gettext */
@@ -2651,7 +2649,7 @@ LOG1( log_init, ( "Initialization complete\n" ) )
 	ShowTip(SHOWTIP_NEXTTIP); 
  
 	/* if work is to be resumed and no filename was given on startup, load last layout */
-	if( (onStartup == 0) && !initialFile ) {
+	if( (onStartup == 0) && (!initialFile || !strlen(initialFile))) {
 		initialFile = (char*)wPrefGetString( "misc", "lastlayout" );
 	}	
 

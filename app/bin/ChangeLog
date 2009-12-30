@@ -1,4 +1,8 @@
-Dec 298, 2009
+Dec 30, 2009
+	FIX: Martin Fischer
+		misc.c: make load last layout option work
+		
+Dec 29, 2009
 	FIX: Martin Fischer
 		denum.c: remove signed / unsigned mismatch
 
