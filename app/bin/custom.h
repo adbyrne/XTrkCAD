@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.6 2009-09-05 16:40:53 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.7 2010-01-01 13:24:59 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -92,6 +92,8 @@ void InitTrkText( void );
 void InitTrkTrack( void );
 void InitTrkTurnout( void );
 void InitTrkTurntable( void );
+void InitTrkBlock( void );
+void InitTrkSwitchMotor( void );
 
 void InitCmdCurve( wMenu_p menu );
 void InitCmdHelix( wMenu_p menu );

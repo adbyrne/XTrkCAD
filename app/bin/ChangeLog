@@ -1,3 +1,7 @@
+Jan 01, 2010 
+	FIX: Martin Fischer
+		custom.c, custom.h: fix compile warnings
+
 Dec 30, 2009
 	FIX: Martin Fischer
 		misc.c: make load last layout option work

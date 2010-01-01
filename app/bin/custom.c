@@ -1,6 +1,6 @@
 #define RENAME_H
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.13 2009-12-12 17:20:59 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.14 2010-01-01 13:24:59 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -117,6 +117,11 @@ void DoStructDesignerRedir( void )
 }
 #endif
 
+/**
+ * Initialize track commands
+ *
+ * \return    always TRUE
+ */
 
 BOOL_T Initialize( void )
 {
