@@ -1,5 +1,25 @@
- /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.26 2009-12-12 17:18:22 m_fischer Exp $
+/** \file mswmisc.c
+ * Basic windows functions and main entry point for application.
+ *
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.27 2010-01-09 11:57:52 m_fischer Exp $
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis, 2009 Martin Fischer
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
 #define _WIN32_WINNT 0x0500
@@ -49,9 +69,7 @@ char * mswStrdup( const char * );
 long debugWindow = 0;
 HINSTANCE mswHInst;
 HWND mswHWnd = (HWND)0;
-#ifdef DOTRANSACCEL
-static HACCEL hMswAccel;
-#endif
+
 const char *mswDrawWindowClassName = "DRAWWINDOW";
 char mswTmpBuff[1024];
 int mswEditHeight;
@@ -220,12 +238,12 @@ void mswFail( const char * where )
 	MessageBox( NULL, mswTmpBuff, "FAIL", MB_TASKMODAL|MB_OK );
 	doDumpControls();
 }
-
+/*
 static UINT curSysRes = 100;
 static UINT curGdiRes = 100;
 static UINT curUsrRes = 100;
 static UINT curMinRes = 100;
-
+*/
 
 wControl_p mswMapIndex( INDEX_T inx )
 {
@@ -407,21 +425,10 @@ void mswAddButton(
 		return;
 	b->helpStr = mswStrdup( helpStr );
 	
-	/*if ( b->hWnd )*/
-/*		LABELFONTSELECT*/
 #ifdef HELPSTR
 	if (helpStrF)
 		fprintf( helpStrF, "HELPSTR - %s\n", helpStr?helpStr:"<>" );
 #endif
-#ifdef LATER
-	if (b->hWnd) {
-		hDc = GetDC( b->hWnd );
-		SelectPalette( hDc, mswPalette, 0 );
-		rc = RealizePalette( hDc );
-		ReleaseDC( b->hWnd, hDc );
-	}
-#endif
-
 }
 
 
@@ -1588,7 +1595,7 @@ static wAlarmCallBack_p alarmFunc;
 static setTriggerCallback_p triggerFunc;
 static wControl_p triggerControl;
 
-/*
+/**
  * Wait until the pause timer expires. During that time, the message loop is
  * handled and queued messages are processed 
  */
@@ -1597,11 +1604,7 @@ static void pausedLoop( void )
 {
 	MSG msg;
 	while (paused && GetMessage( &msg, NULL, 0, 0 )) {
-		if ( (mswWin) &&
-#ifdef DOTRANSACCEL
-			 (!TranslateAccelerator( mswWin->hWnd, hMswAccel, &msg )) &&
-#endif
-			 (!mswTranslateAccelerator( mswWin->hWnd, &msg )) ) {
+		if ( (mswWin) && (!mswTranslateAccelerator( mswWin->hWnd, &msg )) ) {
 			TranslateMessage( &msg );
 		}
 		DispatchMessage( &msg );
@@ -1766,7 +1769,6 @@ void wHelp(
 	pszHelpTopic = malloc( strlen( helpFile ) + strlen( topic ) + 10 );
 	assert( pszHelpTopic != NULL );	
 
-/*	sprintf( pszHelpTopic, "%s::/%s.html", helpFile, topic ); */
 	sprintf( pszHelpTopic, "/%s.html", topic );
 	hwndHelp = HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOPIC, (DWORD_PTR)pszHelpTopic);
 	if( !hwndHelp )
@@ -2173,6 +2175,10 @@ static wControl_p getControlFromCursor( HWND hWnd, wWin_p * winR )
 	return b;	
 }
 
+/**
+ * Window function for the main window and all popup windows. 
+ *
+ */
 
 LRESULT 
 FAR 
@@ -2613,6 +2619,13 @@ MainWndProc( HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
  *****************************************************************************
  */
 
+/**
+ * Register window classes used by the application. These are the main window, 
+ * the popup windows, the tooltip window and the drawing area. 
+ *
+ * \param hinstCurrent IN application instance
+ * \return    FALSE in case of error, else TRUE
+ */
 
 static BOOL InitApplication( HINSTANCE hinstCurrent )
 {
@@ -2625,12 +2638,8 @@ static BOOL InitApplication( HINSTANCE hinstCurrent )
 	wc.cbWndExtra = 4;
 	wc.hInstance = hinstCurrent;			
 	wc.hIcon = LoadIcon( hinstCurrent, "MSWAPPICON" );
-	wc.hCursor = NULL; /*LoadCursor( NULL, IDC_ARROW );*/
-#ifdef CONTROL3D
-	wc.hbrBackground = CreateSolidBrush( GetSysColor(COLOR_BTNFACE) );
-#else
+	wc.hCursor = NULL; 
 	wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
-#endif
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = "MswMainWindow";
 	if (!RegisterClass(&wc)) {
@@ -2645,7 +2654,7 @@ static BOOL InitApplication( HINSTANCE hinstCurrent )
 	wc.cbWndExtra = 8;
 	wc.hInstance = hinstCurrent;
 	wc.hIcon = LoadIcon( NULL, "wAppIcon" );
-	wc.hCursor = NULL; /*LoadCursor( NULL, IDC_ARROW );*/
+	wc.hCursor = NULL; 
 	wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
 	wc.lpszMenuName = "GenericMenu";
 	wc.lpszClassName = "MswPopUpWindow";
@@ -2662,8 +2671,6 @@ static BOOL InitApplication( HINSTANCE hinstCurrent )
 	wc.hInstance = hinstCurrent;
 	wc.hIcon = 0;
 	wc.hCursor = 0;
-	/* wc.hbrBackground = CreateSolidBrush( RGB(255, 255, 236) ); */
-	/*wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);*/
 	wc.hbrBackground = CreateSolidBrush( GetSysColor( COLOR_INFOBK ) ); 
 	wc.lpszMenuName = NULL;
 	wc.lpszClassName = "MswBalloonHelp";
@@ -2683,28 +2690,19 @@ static BOOL InitApplication( HINSTANCE hinstCurrent )
 	return TRUE;
 }
 
-
-HHOOK filterFunc_h;
-
-int FAR PASCAL filterFunc( int nCode, WORD wParam, DWORD lParam )
-{
-	LPMSG lpmsg = (LPMSG)lParam;
-	if ((nCode == MSGF_DIALOGBOX || nCode == MSGF_MENU) &&
-		lpmsg->message == WM_KEYDOWN && lpmsg->wParam == VK_F1 ) {
-		PostMessage(mswWin->hWnd, WM_F1DOWN, nCode, 0L );
-	}
-	CallNextHookEx( filterFunc_h, nCode, wParam, lParam );
-	return 0;
-}
-
-
+/**
+ * Standard entry point for the app. Nothing special, 
+ * create some window classes, initialize some global 
+ * variables with system information, call the application main
+ * and finally process the message queue.
+ */
 
 int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszCmdLine, int nCmdShow )
 {
 	MSG msg;
 	HDC hDc;
-	char * argv[20], * cp;
-	int argc = 0;
+	char **argv;
+	int argc;
 	TEXTMETRIC tm;
 	DWORD dw;
 
@@ -2736,24 +2734,13 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 
 	mswCreateCheckBitmaps();
 
-	for ( cp=(char*)GetCommandLine(); *cp; ) {
-		char termChar = ' ';
-		while ( *cp == ' ' ) cp++;
-		if ( *cp == '"' ) {
-			termChar = '"';
-			cp++;
-		}
-		argv[argc++] = cp;
-		for ( ; *cp && *cp != termChar; cp++ );
-		/* reached end of line? */
-		if( *cp ) {
-			/* no, terminate argument and continue */
-			*cp++ = 0;
-		} else {
-			/* terminate array as expected */
-			argv[ argc ] = NULL;
-		}
-	}
+	/* 
+	   get the command line parameters in standard C style and pass them to the main function. The
+	   globals are predefined by Visual C
+	*/
+	argc = __argc;
+	argv = __argv;
+
 	mswWin = wMain( argc, (char**)argv );
 	if (mswWin == NULL)
 		return 0;
@@ -2773,17 +2760,9 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 		ReleaseDC( balloonHelpHWnd, hDc );
 	}
 
-	mswRedrawAll();
 	SetCursor( LoadCursor( NULL, IDC_ARROW ) );
-#ifdef DOTRANSACCEL
-	hMswAccel = LoadAccelerators( hinstCurrent, "msw-accel" );
-#endif
 	while (GetMessage( &msg, NULL, 0, 0 )) {
-		if (
-#ifdef DOTRANSACCEL
-			 (!TranslateAccelerator( mswWin->hWnd, hMswAccel, &msg )) &&
-#endif
-			 (!mswTranslateAccelerator( mswWin->hWnd, &msg )) ) {
+		if (!mswTranslateAccelerator( mswWin->hWnd, &msg )) {
 			TranslateMessage( &msg );
 			DispatchMessage( &msg );
 		}
@@ -2793,19 +2772,4 @@ int PASCAL WinMain( HINSTANCE hinstCurrent, HINSTANCE hinstPrevious, LPSTR lpszC
 		HtmlHelp( NULL, NULL, HH_UNINITIALIZE, (DWORD)dwCookie);
 
 	return msg.wParam;
-}
-
-BOOL FAR PASCAL About( HWND hDlg, WORD message, WPARAM wParam, LPARAM lParam )
-{
-	switch (message) {
-	case WM_INITDIALOG:
-		return TRUE;
-	case WM_COMMAND:		
-		if (WCMD_PARAM_ID == IDOK || WCMD_PARAM_ID == IDCANCEL) {
-			EndDialog( hDlg,TRUE );
-			return TRUE;
-		}
-		break;
-	}
-	return FALSE;
 }

@@ -1,3 +1,8 @@
+Jan 09, 2010
+	ENH: Martin Fischer
+		mswmisc.c: get command line parameter handling correct
+		plus some refactoring 
+		
 Dec 12, 2009
 	FIX: Martin Fischer
 		mswmisc.c: minor refactoring to stay compatible with the 
