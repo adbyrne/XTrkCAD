@@ -1,3 +1,7 @@
+Jan 14, 2010
+	FIX: Martin Fischer
+		rocon.xtp: length of 22207 is 0.677165 inch
+
 Jan 02, 2010
 	ENH: Dwayne Ward
 		O-atlaso3rail.xtp: added
