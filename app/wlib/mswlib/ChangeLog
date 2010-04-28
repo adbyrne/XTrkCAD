@@ -1,3 +1,8 @@
+Apr 28, 2010
+	FIX: Daniel Spagnol
+		mswmisc.c: now, wGetAppLibDir can be called before wWinMainCreate is 
+		called.
+
 Jan 09, 2010
 	ENH: Martin Fischer
 		mswmisc.c: get command line parameter handling correct

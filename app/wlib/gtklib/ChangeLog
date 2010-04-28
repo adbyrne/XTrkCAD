@@ -1,3 +1,8 @@
+Apr 28, 2010
+	FIX: Daniel Spagnol
+		gtkwindow.c, wpref.c: now, wGetAppLibDir can be called before  
+		wWinMainCreate is called.
+
 Dec 12, 2009
 	FIX: Martin Fischer
 		gtkint.h, gtkwindow.c: refactoring, remove unused globals and

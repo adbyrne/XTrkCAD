@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.48 2009-12-30 12:02:39 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.49 2010-04-28 04:04:39 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2415,6 +2415,9 @@ EXPORT wWin_p wMain(
 	unsigned int i;
 
 	strcpy( buffer, sProdNameLower );
+
+	/* Initialize application name */
+	wInitAppName(buffer);
 
 	/* Initialize gettext */
 	InitGettext();

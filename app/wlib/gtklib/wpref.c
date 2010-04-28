@@ -1,6 +1,6 @@
 /** \file wpref.c Handle loading and saving preferences.
  * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.14 2009-08-12 19:02:19 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.15 2010-04-28 04:04:38 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -47,6 +47,11 @@ static char appLibDir[BUFSIZ];
 static char appWorkDir[BUFSIZ];
 static char userHomeDir[BUFSIZ];
 
+EXPORT void wInitAppName(char *appName)
+{
+	strcpy(wAppName, appName);
+}
+
 /*
  *******************************************************************************
  *

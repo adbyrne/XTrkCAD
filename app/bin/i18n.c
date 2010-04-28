@@ -29,13 +29,16 @@ void InitGettext( void )
 {
 #ifdef XTRKCAD_USE_GETTEXT
 	setlocale(LC_ALL, "");
-	bindtextdomain(XTRKCAD_PACKAGE, XTRKCAD_LOCALE_DIR);
+	char directory[2048];
+	strcpy(directory, wGetAppLibDir());
+	strcat(directory, "/locale");
+	bindtextdomain(XTRKCAD_PACKAGE, directory);
 	bind_textdomain_codeset(XTRKCAD_PACKAGE, "UTF-8");
 	textdomain(XTRKCAD_PACKAGE);
 
 #ifdef VERBOSE
 	printf(_("Gettext initialized (PACKAGE=%s, LOCALEDIR=%s, LC_ALL=%s).\n"),
-			XTRKCAD_PACKAGE, XTRKCAD_LOCALE_DIR, setlocale(LC_ALL, NULL));
+			XTRKCAD_PACKAGE, directory, setlocale(LC_ALL, NULL));
 #endif
 
 #endif /* XTRKCAD_USE_GETTEXT */

@@ -1,7 +1,7 @@
 /** \file gtkwindow.c
  * Basic window handling stuff.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.11 2009-12-12 17:16:08 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkwindow.c,v 1.12 2010-04-28 04:04:38 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -773,12 +773,9 @@ EXPORT wWin_p wWinMainCreate(
 
 	if( pos = strchr( name, ';' )) {
 		/* if found, split application name and configuration name */
-		strncpy( wAppName, name, pos - name );
-		wAppName[ pos - name ] = '\0';
 		strcpy( wConfigName, pos + 1 );
 	} else {
 		/* if not found, application name and configuration name are same */
-		strcpy( wAppName, name );
 		strcpy( wConfigName, name );
 	}
 

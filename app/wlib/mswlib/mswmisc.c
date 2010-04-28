@@ -1,7 +1,7 @@
 /** \file mswmisc.c
  * Basic windows functions and main entry point for application.
  *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.27 2010-01-09 11:57:52 m_fischer Exp $
+ * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.28 2010-04-28 04:04:38 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -652,6 +652,14 @@ static wWin_p winCommonCreate(
 #endif
 	return win;
 }
+
+void wInitAppName(char *_appName)
+{
+	appName = (char *)malloc( strlen(_appName) + 1 );
+	strcpy(appName, _appName);
+}
+
+
 /**
  * Initialize the application's main window. This function does the necessary initialization 
  * of the application including creation of the main window.
@@ -693,16 +701,11 @@ wWin_p wWinMainCreate(
 	/* check for configuration name */
 	if( pos = strchr( name, ';' )) {
 		/* if found, split application name and configuration name */
-		appName = (char *)malloc( pos - name + 1 );
-		strncpy( appName, name, pos - name );
-		appName[ pos - name ] = '\0';
 		configName = (char *)malloc( strlen( name ) + 1 );
 		strcpy( configName, pos + 1 );
 	} else {
 		/* if not found, application name and configuration name are same */
-		appName = (char*)malloc( strlen(name)+1 );
 		configName  = (char*)malloc( strlen(name)+1 );
-		strcpy( appName, name );
 		strcpy( configName, name );
 	}
 

@@ -1,3 +1,10 @@
+Apr 28, 2010 
+	FIX: Daniel Spagnol
+		i18n.c, misc.c: replaced hard-coded XTRKCAD_LOCALE_DIR path with 
+		'locale' based on application library directory (XTRKCAD_LOCALE_DIR is 
+		defined at makefiles generation time and does not reflect the place 
+		where the application is actually installed)
+
 Jan 01, 2010 
 	FIX: Martin Fischer
 		custom.c, custom.h: fix compile warnings
