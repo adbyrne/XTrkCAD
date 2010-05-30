@@ -1,3 +1,8 @@
+May 30, 2010
+	FIX: Martin Fischer
+		fl-profi.xtp: corrected 36 degree crossing
+		LionelFastTrack.xtp: corrected 12065 and 12066 30 degree turnout
+
 Jan 14, 2010
 	FIX: Martin Fischer
 		rocon.xtp: length of 22207 is 0.677165 inch
