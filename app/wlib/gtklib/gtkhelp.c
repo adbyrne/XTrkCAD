@@ -512,16 +512,16 @@ void initialize_buttons (GtkWidget *main_vbox, GtkWidget *content_hpane) {
         GtkWidget *contents_button;
 
         // define and attach signals to buttons
-        back_button = gtk_button_new_with_label("Back");
+        back_button = gtk_button_new_with_label(_("Back"));
         g_signal_connect(back_button, "clicked", G_CALLBACK(back_button_clicked), G_OBJECT(main_view));
 
-        forward_button = gtk_button_new_with_label("Forward");
+        forward_button = gtk_button_new_with_label(_("Forward"));
         g_signal_connect(forward_button, "clicked", G_CALLBACK(forward_button_clicked), G_OBJECT(main_view));
 
-        home_button = gtk_button_new_with_label("Home");
+        home_button = gtk_button_new_with_label(_("Home"));
         g_signal_connect(home_button, "clicked", G_CALLBACK(home_button_clicked), G_OBJECT(main_view));
 
-        contents_button = gtk_button_new_with_label("Contents");
+        contents_button = gtk_button_new_with_label(_("Contents"));
         g_signal_connect(contents_button, "clicked", G_CALLBACK(contents_button_clicked), G_OBJECT(content_hpane));
 
         // button layout
