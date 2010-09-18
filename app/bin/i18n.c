@@ -30,7 +30,12 @@ void InitGettext( void )
 #ifdef XTRKCAD_USE_GETTEXT
 	setlocale(LC_ALL, "");
 	char directory[2048];
+#ifdef XTRKCAD_CMAKE_BUILD
+	strcpy(directory, XTRKCAD_INSTALL_PREFIX);
+	strcat(directory, "/share");
+#else
 	strcpy(directory, wGetAppLibDir());
+#endif
 	strcat(directory, "/locale");
 	bindtextdomain(XTRKCAD_PACKAGE, directory);
 	bind_textdomain_codeset(XTRKCAD_PACKAGE, "UTF-8");
