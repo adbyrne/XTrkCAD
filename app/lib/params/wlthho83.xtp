@@ -22,7 +22,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #4 RH Turnout	948-8802"
 	C 0 0.000000 18.344611 0.649527 -18.344611 0.000076 14.477676
 	S 0 0.000000 5.235800 -0.582530 8.597000 -1.450400
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #5 LH Turnout	849-8891"
+TURNOUT HO "Walthers/Shinohara	Code 83 #5 LH Turnout	948-8891"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -33,7 +33,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #5 LH Turnout	849-8891"
 	C 0 0.000000 -27.791345 0.649637 27.791345 168.462955 11.537121
 	S 0 0.000000 6.207941 0.561514 10.354300 1.407900
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #5 RH Turnout	849-8892"
+TURNOUT HO "Walthers/Shinohara	Code 83 #5 RH Turnout	948-8892"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -44,7 +44,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #5 RH Turnout	849-8892"
 	C 0 0.000000 27.791345 0.649489 -27.791345 0.000076 11.537121
 	S 0 0.000000 6.207941 -0.561514 10.354300 -1.407900
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #6 LH Turnout	849-8803"
+TURNOUT HO "Walthers/Shinohara	Code 83 #6 LH Turnout	948-8803"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -55,7 +55,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #6 LH Turnout	849-8803"
 	C 0 0.000000 -32.810529 0.649644 32.810529 170.405848 9.594228
 	S 0 0.000000 6.118107 0.458926 11.311000 1.336700
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #6 RH Turnout	849-8804"
+TURNOUT HO "Walthers/Shinohara	Code 83 #6 RH Turnout	948-8804"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -66,7 +66,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #6 RH Turnout	849-8804"
 	C 0 0.000000 32.810529 0.649469 -32.810529 0.000076 9.594228
 	S 0 0.000000 6.118107 -0.458926 11.311000 -1.336700
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #8 LH Turnout	849-8805"
+TURNOUT HO "Walthers/Shinohara	Code 83 #8 LH Turnout	948-8805"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -77,7 +77,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #8 LH Turnout	849-8805"
 	C 0 0.000000 -44.898758 0.649660 44.898758 172.819162 7.180914
 	S 0 0.000000 6.262063 0.352167 13.874000 1.311200
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #8 RH Turnout	849-8806"
+TURNOUT HO "Walthers/Shinohara	Code 83 #8 RH Turnout	948-8806"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -88,7 +88,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #8 RH Turnout	849-8806"
 	C 0 0.000000 44.898758 0.649421 -44.898758 0.000076 7.180914
 	S 0 0.000000 6.262063 -0.352167 13.874000 -1.311200
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #10 LH Turnout	849-8884"
+TURNOUT HO "Walthers/Shinohara	Code 83 #10 LH Turnout	948-8884"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -99,7 +99,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #10 LH Turnout	849-8884"
 	C 0 0.000000 -40.068410 0.649653 40.068410 174.260749 5.739327
 	S 0 0.000000 4.656547 0.200856 15.530000 1.293700
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #10 RH Turnout	849-8885"
+TURNOUT HO "Walthers/Shinohara	Code 83 #10 RH Turnout	948-8885"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -110,7 +110,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #10 RH Turnout	849-8885"
 	C 0 0.000000 40.068410 0.649441 -40.068410 0.000076 5.739327
 	S 0 0.000000 4.656547 -0.200856 15.530000 -1.293700
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #6 Three-Way Turnout	849-8808"
+TURNOUT HO "Walthers/Shinohara	Code 83 #6 Three-Way Turnout	948-8808"
 	P "Left" 1 2 3
 	P "Normal" 1 6
 	P "Right" 1 4 5
@@ -125,7 +125,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #6 Three-Way Turnout	849-8808"
 	S 0 0.000000 9.253697 -0.722069 13.425200 -1.427200
 	S 0 0.000000 0.649600 0.000000 13.425200 0.000000
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #6 Dbl Crossover	849-8812"
+TURNOUT HO "Walthers/Shinohara	Code 83 #6 Dbl Crossover	948-8812"
 	P "Normal" 1 2 3 0 4 5 6
 	P "Reverse" 1 7 8 9 6 0 4 10 11 12 3
 	E 0.000000 0.000000 270.000000
@@ -147,7 +147,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #6 Dbl Crossover	849-8812"
 	END
 
 SUBCONTENTS Walthers/Shinohara HO-Scale Code 83 - Slip Turnouts
-TURNOUT HO "Walthers/Shinohara	Code 83 #6 Dbl Slip	849-8814"
+TURNOUT HO "Walthers/Shinohara	Code 83 #6 Dbl Slip	948-8814"
 	P "Normal" 1 2 3 0 4 5 6
 	P "Reverse" 1 7 6 0 4 8 3
 	E 0.000000 0.000000 270.000000
@@ -163,7 +163,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #6 Dbl Slip	849-8814"
 	C 0 0.000000 76.490836 1.299241 -76.490836 0.000076 9.594228
 	C 0 0.000000 -76.490836 14.137555 76.490819 180.000076 9.594228
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #8 Dbl Slip	849-8896"
+TURNOUT HO "Walthers/Shinohara	Code 83 #8 Dbl Slip	948-8896"
 	P "Normal" 1 2 3 0 4 5 6
 	P "Reverse" 1 7 6 0 4 8 3
 	E 0.000000 0.000000 270.000000
@@ -284,7 +284,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #8 Right-Hand (32/36) Turnout	948-8829"
 
 
 SUBCONTENTS Walthers/Shinohara HO-Scale Code 83 - Wye Turnouts
-TURNOUT HO "Walthers/Shinohara	Code 83 #2 Wye Turnout	849-8887"
+TURNOUT HO "Walthers/Shinohara	Code 83 #2 Wye Turnout	948-8887"
 	P "Left" 1 2 3
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
@@ -296,7 +296,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #2 Wye Turnout	849-8887"
 	C 0 0.000000 14.279335 0.649543 -14.279335 0.000076 14.477676
 	S 0 0.000000 4.219470 -0.453438 5.826000 -0.868250
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #2 1/2 Wye Turnout	849-8890"
+TURNOUT HO "Walthers/Shinohara	Code 83 #2 1/2 Wye Turnout	948-8890"
 	P "Left" 1 2 3
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
@@ -308,7 +308,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #2 1/2 Wye Turnout	849-8890"
 	C 0 0.000000 21.292013 0.649515 -21.292013 0.000076 11.537121
 	S 0 0.000000 4.908058 -0.430197 7.086600 -0.874900
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #3 Wye Turnout	849-8893"
+TURNOUT HO "Walthers/Shinohara	Code 83 #3 Wye Turnout	948-8893"
 	P "Left" 1 2 3
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
@@ -320,7 +320,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #3 Wye Turnout	849-8893"
 	C 0 0.000000 25.058275 0.649500 -25.058275 0.000076 9.594228
 	S 0 0.000000 4.826045 -0.350494 7.795300 -0.852400
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #4 Wye Turnout	849-8807"
+TURNOUT HO "Walthers/Shinohara	Code 83 #4 Wye Turnout	948-8807"
 	P "Left" 1 2 3
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
@@ -332,7 +332,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #4 Wye Turnout	849-8807"
 	C 0 0.000000 46.482453 0.649415 -46.482453 0.000076 7.180914
 	S 0 0.000000 6.460029 -0.364589 9.346000 -0.728200
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 #5 Wye Turnout	849-8883"
+TURNOUT HO "Walthers/Shinohara	Code 83 #5 Wye Turnout	948-8883"
 	P "Left" 1 2 3
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
@@ -346,7 +346,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 #5 Wye Turnout	849-8883"
 	END
 
 SUBCONTENTS Walthers/Shinohara HO-Scale Code 83 - Crossings
-TURNOUT HO "Walthers/Shinohara	Code 83 30 Crossing	849-830"
+TURNOUT HO "Walthers/Shinohara	Code 83 30 Crossing	948-830"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 5.321000 0.000000 90.000000
@@ -355,7 +355,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 30 Crossing	849-830"
 	S 0 0.000000 0.000000 0.000000 5.321000 0.000000
 	S 0 0.000000 0.356437 1.330246 4.964563 -1.330246
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 45 Crossing	849-831"
+TURNOUT HO "Walthers/Shinohara	Code 83 45 Crossing	948-831"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 4.218000 0.000000 90.000000
@@ -364,7 +364,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 45 Crossing	849-831"
 	S 0 0.000000 0.000000 0.000000 4.218000 0.000000
 	S 0 0.000000 0.617709 1.491285 3.600291 -1.491285
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 60 Crossing	849-832"
+TURNOUT HO "Walthers/Shinohara	Code 83 60 Crossing	948-832"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 4.301000 0.000000 90.000000
@@ -373,7 +373,7 @@ TURNOUT HO "Walthers/Shinohara	Code 83 60 Crossing	849-832"
 	S 0 0.000000 0.000000 0.000000 4.301000 0.000000
 	S 0 0.000000 1.075246 1.862385 3.225754 -1.862385
 	END
-TURNOUT HO "Walthers/Shinohara	Code 83 90 Crossing	849-833"
+TURNOUT HO "Walthers/Shinohara	Code 83 90 Crossing	948-833"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 2.896000 0.000000 90.000000
@@ -384,13 +384,13 @@ TURNOUT HO "Walthers/Shinohara	Code 83 90 Crossing	849-833"
 	END
 
 SUBCONTENTS Walthers/Shinohara HO-Scale Code 83 - Misc Track
-TURNOUT HO "Walthers/Shinohara	Transition Track Code 100-83	849-897"
+TURNOUT HO "Walthers/Shinohara	Transition Track Code 100-83	948-897"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.000000 0.000000 90.000000
 	S 0 0.000000 0.000000 0.000000 6.000000 0.000000
 	END
-TURNOUT HO "Walthers/Shinohara	Transition Track Code 83-70	849-898"
+TURNOUT HO "Walthers/Shinohara	Transition Track Code 83-70	948-898"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.000000 0.000000 90.000000
