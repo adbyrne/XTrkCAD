@@ -185,6 +185,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x + Dt.textLen;
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
 		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
+		MainRedraw();
 		return C_CONTINUE;
 	case C_REDRAW:
 		if (Dt.state == 1) {
@@ -199,6 +200,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			Dt.state = 0;
 		}
 		InfoSubstituteControls( NULL, NULL );
+		MainRedraw();
 		return C_TERMINATE;
 	case C_OK:
 		if (Dt.state != 0) {

@@ -378,7 +378,12 @@ EXPORT void wDrawString(
 	layout = gtkFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
 									  (int *) &w, (int *) &h,
 									  (int *) &ascent, (int *) &descent);
-	
+
+	/* cairo does not support the old method of text removal by overwrite; force always write here and
+           refresh on cancel event */
+	GdkColor* const gcolor = gtkGetColor(color, TRUE);
+	cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
+
 	cairo_move_to(cairo, x, y - ascent);
 	pango_cairo_show_layout(cairo, layout);
 	gtkFontDestroyPangoLayout(layout);
