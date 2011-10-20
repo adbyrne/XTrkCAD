@@ -1145,11 +1145,11 @@ msgstr "Verbinde "
 
 #: ../bin/cjoin.c:793
 msgid "Join Tracks"
-msgstr "Gleise verbinden"
+msgstr "Gleise zusammenfügen"
 
 #: ../bin/cjoin.c:898
 msgid "Join"
-msgstr "Verbinden"
+msgstr "Gleise zusammenfügen"
 
 #: ../bin/cmisc.c:53
 msgid "Middle"
@@ -3314,7 +3314,7 @@ msgstr "Zimmerbreite"
 
 #: ../bin/doption.c:103
 msgid "    Height"
-msgstr "    Länge"
+msgstr "    -länge"
 
 #: ../bin/doption.c:104
 msgid "Layout Title"
@@ -6327,7 +6327,7 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:26
 msgid "Connect two tracks"
-msgstr "Zwei Gleise verbinden"
+msgstr "Zwei Festgleise verbinden"
 
 #: ../../../../build/app/bin/bllnhlp.c:27
 msgid "Copy selected objects to clipboard"
@@ -6511,7 +6511,7 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:73
 msgid "Enable snap grid"
-msgstr ""
+msgstr "Fangraster aktivieren"
 
 #: ../../../../build/app/bin/bllnhlp.c:74
 msgid "Show snap grid"
@@ -6535,7 +6535,7 @@ msgstr "Importieren einer .xti-Datei"
 
 #: ../../../../build/app/bin/bllnhlp.c:79
 msgid "Join two tracks"
-msgstr "Zwei Gleise verbinden"
+msgstr "Zwei Gleise zusammenfügen"
 
 #: ../../../../build/app/bin/bllnhlp.c:80
 msgid "Change Layers"
@@ -7047,7 +7047,7 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:221
 msgid "How to draw track being moved/rotated"
-msgstr ""
+msgstr "Festlegen wie Gleise gezeichnet werden, sobald sie bewegt/rotiert werden"
 
 #: ../../../../build/app/bin/bllnhlp.c:222
 msgid "Default command is Describe or Select"
@@ -7055,7 +7055,7 @@ msgstr "Standardbefehl ist Eigenschaften oder Auswählen"
 
 #: ../../../../build/app/bin/bllnhlp.c:223
 msgid "Action to invoke on Right-Click"
-msgstr ""
+msgstr "Festlegen welche Aktion beim Rechtsklick erfolgen soll"
 
 #: ../../../../build/app/bin/bllnhlp.c:225
 msgid "Contents Label for new Parameter file"
@@ -7107,7 +7107,7 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:272
 msgid "Move the Main canvas if you drag near the edge"
-msgstr ""
+msgstr "Bewegen den Hauptzeichenbereich wenn in der nähe der Ecken gezogen wird."
 
 #: ../../../../build/app/bin/bllnhlp.c:273
 msgid "Color tracks or other objects by layer"
@@ -7115,15 +7115,15 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:274
 msgid "Controls the drawing of hidden tracks"
-msgstr ""
+msgstr "Steuert das Zeichnen von versteckten Gleisen"
 
 #: ../../../../build/app/bin/bllnhlp.c:275
 msgid "Controls the drawing of End-Points"
-msgstr ""
+msgstr "Steuert das Zeichnen von Endpunkten"
 
 #: ../../../../build/app/bin/bllnhlp.c:276
 msgid "How to draw track ties"
-msgstr ""
+msgstr "Steuert das Zeichnen der Schwellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:277
 msgid "Drawing scale when to draw tracks with 2 rails"
@@ -7131,15 +7131,15 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:278
 msgid "Drawing scale of the map window"
-msgstr ""
+msgstr "Zeichenmaßstab des Kartenfenster"
 
 #: ../../../../build/app/bin/bllnhlp.c:279
 msgid "Whether the main layout is updated while dragging on the Map"
-msgstr ""
+msgstr "Aktualisierung des Gleisplans wenn in der Karte gezogen wird."
 
 #: ../../../../build/app/bin/bllnhlp.c:280
 msgid "Enable labels for Turnouts, Flextrack Lengths and Elevations"
-msgstr ""
+msgstr "Zeige Beschriftungen für Weichen, Flexgleise und Steigungen"
 
 #: ../../../../build/app/bin/bllnhlp.c:281
 msgid "When to label Turnout, Flextrack Lengths and Elevations"
@@ -7147,31 +7147,31 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:282
 msgid "Font size for labels on layout"
-msgstr "Zecihengrösse für Beschriftungen"
+msgstr "Zeichengrösse für Beschriftungen im Gleisplan"
 
 #: ../../../../build/app/bin/bllnhlp.c:283
 msgid "Label elements on the Hot Bar"
-msgstr ""
+msgstr "Beschriftungselemente des Teilekatalogs"
 
 #: ../../../../build/app/bin/bllnhlp.c:284
 msgid "Label elements on layout"
-msgstr ""
+msgstr "Beschriftungselemente im Gleisplan"
 
 #: ../../../../build/app/bin/bllnhlp.c:285
 msgid "Label elements for lists"
-msgstr ""
+msgstr "Beschriftungselemente in den Listen"
 
 #: ../../../../build/app/bin/bllnhlp.c:286
 msgid "How to group cars on the Train Hot Bar"
-msgstr ""
+msgstr "Gruppierung der Waggen im Teilekatalog"
 
 #: ../../../../build/app/bin/bllnhlp.c:287
 msgid "Delay (in mS) between updating train movements"
-msgstr ""
+msgstr "Aktualisierungsintervall (in ms) der Zugbewegungen"
 
 #: ../../../../build/app/bin/bllnhlp.c:288
 msgid "Don't show trains in tunnels when tunnels are hidden"
-msgstr ""
+msgstr "Zeige keine Züge in Tunnels wenn Tunnel verborgen sind"
 
 #: ../../../../build/app/bin/bllnhlp.c:290
 msgid "Width of the lines"
@@ -7375,31 +7375,31 @@ msgstr ""
 #: ../../../../build/app/bin/bllnhlp.c:348
 #: ../../../../build/app/bin/bllnhlp.c:349
 msgid "Specifies the size of the room (in inches or centimeters)"
-msgstr ""
+msgstr "Größenangabe des Raums (in Zentimeter oder Inch)"
 
 #: ../../../../build/app/bin/bllnhlp.c:350
 msgid "Specifies the layout Title that will appear on printouts"
-msgstr ""
+msgstr "Angabe eines Layout Titels welcher auf Ausdrücken erscheint"
 
 #: ../../../../build/app/bin/bllnhlp.c:351
 msgid "Specifies the layout Subtitle that will appear on printouts"
-msgstr ""
+msgstr "Angabe eines Layout Untertitels welcher auf Ausdrücken erscheint"
 
 #: ../../../../build/app/bin/bllnhlp.c:352
 msgid "Specifies the Modelling Scale"
-msgstr ""
+msgstr "Angabe des Modellbahnmaßstabs"
 
 #: ../../../../build/app/bin/bllnhlp.c:353
 msgid "Specifies the rail gauge, ie. the distance between the rails"
-msgstr ""
+msgstr "Angabe der Spurweite, d.h. der Abstand zwischen den Schienen"
 
 #: ../../../../build/app/bin/bllnhlp.c:354
 msgid "Specifies minimum track radius (in inches or centimeters). Tracks with a smaller radius are considered exceptional."
-msgstr ""
+msgstr "Angabe des minimalen Gleisradius (in Zentimeter oder Inch). Gleise mit geringerem Radius werden als Ausnahme angesehen."
 
 #: ../../../../build/app/bin/bllnhlp.c:355
 msgid "Specifies maximum track elevation expressed as a percent (%). Tracks with a larger elevation are considered exceptional."
-msgstr ""
+msgstr "Angabe der maximalen Gleissteigung in %. Gleise mit größerer Steigung werden als Ausnahme angesehen."
 
 #: ../../../../build/app/bin/bllnhlp.c:358
 msgid "This is the body of the Note.  To change this select Modify from the File Menu"
