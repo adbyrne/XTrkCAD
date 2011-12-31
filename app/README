@@ -2,7 +2,7 @@ OVERVIEW
 ========
 
 The following instructions detail building XTrackCAD using CMake. CMake is a
-cross-platform build system, available at http://www.cmake.org∞, that can be
+cross-platform build system, available at http://www.cmake.org, that can be
 used to generate builds for a variety of build tools ranging from "make" to
 Visual Studio and XCode. Using CMake you can build XTrackCAD on Windows,
 GNU/Linux, and Mac OSX using the build tool(s) of your choice.
@@ -28,13 +28,16 @@ Building XTrkCAD on GNU/Linux
 * Use CMAKE_INSTALL_PREFIX to control where the software will be installed.
   For this example, I assume "~/install/xtrkcad".
 * Use XTRKCAD_USE_GETTEXT to add new locales (language translations). Choose
-  "OFF" to use XTrackCAD's default language (English). Refre to
-  http://www.xtrkcad.org/Wikka/Internationalization∞ for additional information.
+  "OFF" to use XTrackCAD's default language (English). Refer to
+  http://www.xtrkcad.org/Wikka/Internationalization for additional information.
 * Use XTRKCAD_USE_GTK to control the user-interface back-end. Choose "OFF"
   for Windows, "ON" for all other platforms.
 * Use XTRKCAD_USE_GTK_CAIRO to enable optional high-quality antialiased
   Cairo rendering for the GTK back-end. This option has no effect unless you are
   using the GTK back-end.
+* Use XTRKCAD_USE_DOXYGEN to enable the production of type, function, etc.,
+  documentation from the the source code. Requires doxygen if enabled.
+  Enable if and only if you intend to hack on the code. 
 * If you made any changes, press the "c" key again to update your new
   configuration.
 * Once everything is configured to your satisfaction, press the "g" key to
@@ -48,13 +51,22 @@ Building XTrkCAD on GNU/Linux
   $ make install
 
 * Run the installed binary:
+
   $ ~/install/xtrkcad/bin/xtrkcad
+
+* If XTRKCAD_USE_DOXYGEN was enabled:
+
+  $ make docs-doxygen
+  
+  to create the internals documentation. Read this documentation by pointing 
+  your web browser at ~/build/xtrkcad/docs/doxygen/html/index.html.
+
 
 Building XTrkCAD on Mac OSX
 ---------------------------
 
 * You will need to install the following dependencies - I recommend using
-  http://www.macports.org∞ to obtain them:
+  http://www.macports.org to obtain them:
     o GTK2
     o gtkhtml (might also be called libgtkhtml)
     o gnome-icon-theme 
@@ -79,12 +91,15 @@ Building XTrkCAD on Windows
   The default "c:/Program Files/XTrkCAD" is a good choice.
 * Use XTRKCAD_USE_GETTEXT to add new locales (language translations). Choose
   "OFF" to use XTrackCAD's default language (English). Refer to
-  http://www.xtrkcad.org/Wikka/Internationalization∞ for additional information.
+  http://www.xtrkcad.org/Wikka/Internationalization for additional information.
 * Use XTRKCAD_USE_GTK to control the user-interface back-end. Choose "OFF"
   for Windows, "ON" for all other platforms.
 * Use XTRKCAD_USE_GTK_CAIRO to enable optional high-quality antialiased
   Cairo rendering for the GTK back-end. This option has no effect unless you are
   using the GTK back-end.
+* Use XTRKCAD_USE_DOXYGEN to enable the production of type, function, etc.,
+  documentation from the the source code. Requires doxygen if enabled.
+  Enable if and only if you intend to hack on the code. 
 * If you made any changes, press the "Configure" button again to update your
   new configuration.
 * Once everything is configured to your satisfaction, press the "OK" button
