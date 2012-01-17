@@ -1,50 +1,50 @@
-CONTENTS Märklin 1-Scale Turnouts
-# From 'Märklin	Complete Program 1994/95 E'
+CONTENTS MÃ¤rklin 1-Scale Turnouts
+# From 'MÃ¤rklin	Complete Program 1994/95 E'
 # Straight Section Design by Dave Bullis - 11.811024
-TURNOUT 1  "Märklin	Straight 300mm	5903"
+TURNOUT 1  "MÃ¤rklin	Straight 300mm	5903"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 11.811024 0.000000 90.000000
 	S 0 0 0.000000 0.000000 11.811000 0.000000
 	END
-TURNOUT 1  "Märklin	Straight 150mm	5917"
+TURNOUT 1  "MÃ¤rklin	Straight 150mm	5917"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 5.905512 0.000000 90.000000
 	S 0 0 0.000000 0.000000 5.906000 0.000000
 	END
-TURNOUT 1  "Märklin	Straight 80.4mm	5904"
+TURNOUT 1  "MÃ¤rklin	Straight 80.4mm	5904"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.165354 0.000000 90.000000
 	S 0 0 0.000000 0.000000 3.165000 0.000000
 	END
-TURNOUT 1  "Märklin	Straight 59.5mm	5916"
+TURNOUT 1  "MÃ¤rklin	Straight 59.5mm	5916"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.342520 0.000000 90.000000
 	S 0 0 0.000000 0.000000 2.343000 0.000000
 	END
 # Curved Section Design by Dave Bullis - 23.622047 30.000000
-TURNOUT 1  "Märklin	Curved R600mm 30°	5922"
+TURNOUT 1  "MÃ¤rklin	Curved R600mm 30Â°	5922"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 11.811023 -3.164754 120.000000
 	C 0 0 23.622000 0.000000 -23.622000 0.000000 30.000000
 	END
-TURNOUT 1  "Märklin	Curved R1020mm 22.5°	5935"
+TURNOUT 1  "MÃ¤rklin	Curved R1020mm 22.5Â°	5935"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 15.367602 -3.056806 112.500000
 	C 0 0 40.157000 0.000000 -40.157000 0.000000 22.500000
 	END
-TURNOUT 1  "Märklin	Curved R1176mm 22.5°	5936"
+TURNOUT 1  "MÃ¤rklin	Curved R1176mm 22.5Â°	5936"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 17.717942 -3.524318 112.500000
 	C 0 0 46.299000 0.000000 -46.299000 0.000000 22.500000
 	END
-TURNOUT 1  "Märklin	Short Right Turnout	5966"
+TURNOUT 1  "MÃ¤rklin	Short Right Turnout	5966"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -53,7 +53,7 @@ TURNOUT 1  "Märklin	Short Right Turnout	5966"
 	S 0 0 0.000000 0.000000 11.811000 0.000000
 	C 0 0 23.622000 0.000000 -23.622000 0.000000 30.000000
 	END
-TURNOUT 1  "Märklin	Short Left Turnout	5965"
+TURNOUT 1  "MÃ¤rklin	Short Left Turnout	5965"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -62,7 +62,7 @@ TURNOUT 1  "Märklin	Short Left Turnout	5965"
 	S 0 0 0.000000 0.000000 11.811000 0.000000
 	C 0 0 -23.622000 0.000000 23.622000 150.000000 30.000000
 	END
-TURNOUT 1  "Märklin	Medium Right Turnout	5977"
+TURNOUT 1  "MÃ¤rklin	Medium Right Turnout	5977"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -71,7 +71,7 @@ TURNOUT 1  "Märklin	Medium Right Turnout	5977"
 	S 0 0 0.000000 0.000000 15.374000 0.000000
 	C 0 0 40.157000 0.000000 -40.157000 0.000000 22.500000
 	END
-TURNOUT 1  "Märklin	Medium Left Turnout	5976"
+TURNOUT 1  "MÃ¤rklin	Medium Left Turnout	5976"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
