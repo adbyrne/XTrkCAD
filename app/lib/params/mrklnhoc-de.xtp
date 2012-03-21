@@ -327,7 +327,7 @@ TURNOUT HO "Märklin C-Gleis	Weiche rechts 236.1mm R=1114.6mm 12.1°	24712"
 	END
 
 SUBCONTENTS Märklin C-Gleis Kreuzungen
-TURNOUT HO "Märklin C-Gleis Kreuzung 188.3mm 24.3°	24640"
+TURNOUT HO "Märklin C-Gleis	Kreuzung 188.3mm 24.3°	24640"
 	U "Kreuzung" "XtrkCad" "Märklin C-Gleis" "Kreuzung 188.3mm 24.3°" "24640" 7.413386 24.300000 7.413386
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
@@ -341,7 +341,7 @@ TURNOUT HO "Märklin C-Gleis Kreuzung 188.3mm 24.3°	24640"
 	L 8421376 0.030000 0.653386 2.240000 3.900000 0.787400
 	L 8421376 0.030000 6.760000 -2.240000 3.513386 -0.787400
 	END
-TURNOUT HO "Märklin C-Gleis Kreuzung 103.3mm 48.6°	24649"
+TURNOUT HO "Märklin C-Gleis	Kreuzung 103.3mm 48.6°	24649"
 	U "Kreuzung" "XtrkCad" "Märklin C-Gleis" "Kreuzung 103.3mm 48.6°" "24649" 4.066929 48.600000 4.066929
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
