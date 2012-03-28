@@ -2006,10 +2006,10 @@ static paramData_t carDlgPLs[] = {
 	{ PD_MESSAGE, NULL, NULL, PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN|PDO_DLGBOXEND, (void*)450 },
 #define I_CD_NEW                (D+1)
 	{ PD_MENU, NULL, "new-menu", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, (void*)0 },
-	{ PD_MENUITEM, CarDlgNewDesc, "new-part-mi", 0, NULL, N_("Car Part"), 0, (void*)0 },
-	{ PD_MENUITEM, CarDlgNewProto, "new-proto-mi", 0, NULL, N_("Car Prototype"), 0, (void*)0 },
+	{ PD_MENUITEM, (void*)CarDlgNewDesc, "new-part-mi", 0, NULL, N_("Car Part"), 0, (void*)0 },
+	{ PD_MENUITEM, (void*)CarDlgNewProto, "new-proto-mi", 0, NULL, N_("Car Prototype"), 0, (void*)0 },
 #define I_CD_NEWPROTO           (D+4)
-	{ PD_BUTTON, CarDlgNewProto, "new", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, (void*)0 } };
+	{ PD_BUTTON, (void*)CarDlgNewProto, "new", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, (void*)0 } };
 
 static paramGroup_t carDlgPG = { "carpart", 0, carDlgPLs, sizeof carDlgPLs/sizeof carDlgPLs[0] };
 
@@ -4099,17 +4099,17 @@ static paramData_t carInvPLs[] = {
 #define I_CI_LIST		(S+0)
 	{ PD_LIST, &carInvInx, "list", PDO_LISTINDEX|PDO_DLGRESIZE|PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN, &carInvListData, NULL, BO_READONLY|BL_MANY },
 #define I_CI_EDIT		(S+1)
-	{ PD_BUTTON, CarInvDlgEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{ PD_BUTTON, (void*)CarInvDlgEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CI_ADD		(S+2)
-	{ PD_BUTTON, CarInvDlgAdd, "add", 0, NULL, N_("Add"), 0, 0 },
+	{ PD_BUTTON, (void*)CarInvDlgAdd, "add", 0, NULL, N_("Add"), 0, 0 },
 #define I_CI_DELETE		(S+3)
-	{ PD_BUTTON, CarInvDlgDelete, "delete", PDO_DLGWIDE, NULL, N_("Delete") },
+	{ PD_BUTTON, (void*)CarInvDlgDelete, "delete", PDO_DLGWIDE, NULL, N_("Delete") },
 #define I_CI_IMPORT_CSV	(S+4)
-	{ PD_BUTTON, CarInvDlgImportCsv, "import", PDO_DLGWIDE, NULL, N_("Import") },
+	{ PD_BUTTON, (void*)CarInvDlgImportCsv, "import", PDO_DLGWIDE, NULL, N_("Import") },
 #define I_CI_EXPORT_CSV	(S+5)
-	{ PD_BUTTON, CarInvDlgExportCsv, "export", 0, NULL, N_("Export") },
+	{ PD_BUTTON, (void*)CarInvDlgExportCsv, "export", 0, NULL, N_("Export") },
 #define I_CI_PRINT		(S+6)
-	{ PD_BUTTON, CarInvDlgSaveText, "savetext", 0, NULL, N_("List") } };
+	{ PD_BUTTON, (void*)CarInvDlgSaveText, "savetext", 0, NULL, N_("List") } };
 static paramGroup_t carInvPG = { "carinv", 0, carInvPLs, sizeof carInvPLs/sizeof carInvPLs[0] };
 
 static carItem_p CarInvDlgFindCurrentItem( void )

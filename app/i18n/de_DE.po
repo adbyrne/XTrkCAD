@@ -104,7 +104,7 @@ msgstr "Windungen"
 
 #: ../bin/ccurve.c:391
 msgid "Angular Separation"
-msgstr ""
+msgstr "Winkelabstand"
 
 #: ../bin/ccurve.c:392
 #: ../bin/celev.c:45
@@ -321,14 +321,6 @@ msgstr "Schriftgröße muss größer als 0 sein"
 #: ../bin/misc.c:1941
 #: ../bin/misc.c:2493
 #: ../bin/misc.c:2521
-#: ../bin/misc.org.c:300
-#: ../bin/misc.org.c:350
-#: ../bin/misc.org.c:1682
-#: ../bin/misc.org.c:1853
-#: ../bin/misc.org.c:1877
-#: ../bin/misc.org.c:1941
-#: ../bin/misc.org.c:2505
-#: ../bin/misc.org.c:2533
 #: ../bin/misc2.c:412
 #: ../bin/param.c:1798
 #: ../bin/param.c:1922
@@ -370,9 +362,6 @@ msgstr "Ok"
 #: ../bin/misc.c:1023
 #: ../bin/misc.c:1028
 #: ../bin/misc.c:1093
-#: ../bin/misc.org.c:1023
-#: ../bin/misc.org.c:1028
-#: ../bin/misc.org.c:1093
 #: ../bin/track.c:1275
 #: ../bin/track.c:1372
 #: ../bin/track.c:1386
@@ -395,9 +384,6 @@ msgstr "Ja"
 #: ../bin/misc.c:1023
 #: ../bin/misc.c:1028
 #: ../bin/misc.c:1093
-#: ../bin/misc.org.c:1023
-#: ../bin/misc.org.c:1028
-#: ../bin/misc.org.c:1093
 #: ../bin/track.c:1275
 #: ../bin/track.c:1372
 #: ../bin/track.c:1386
@@ -594,6 +580,10 @@ msgstr "Gerade Linie"
 #: ../bin/cdraw.c:410
 #: ../bin/cdraw.c:1028
 msgid "Dimension Line"
+msgstr "Maßstablinie"
+
+#: ../bin/cdraw.c:1028
+msgid "Draw Dimension Line"
 msgstr "Zeichne Maßlinie"
 
 #: ../bin/cdraw.c:425
@@ -721,10 +711,6 @@ msgstr "Linie"
 #: ../bin/cdraw.c:1027
 msgid "Draw Line"
 msgstr "Zeichne Linie"
-
-#: ../bin/cdraw.c:1028
-msgid "Draw Dimension Line"
-msgstr "Zeichne MaÃŸlinie"
 
 #: ../bin/cdraw.c:1029
 #: ../../../../build/app/i18n/custmsg.h:53
@@ -885,13 +871,11 @@ msgstr "Bahnhof"
 #: ../bin/cprofile.c:1354
 #: ../bin/dcmpnd.c:70
 #: ../bin/misc.c:2435
-#: ../bin/misc.org.c:2447
 msgid "Ignore"
 msgstr "Ignorieren"
 
 #: ../bin/celev.c:123
 #: ../bin/celev.c:168
-#, fuzzy
 msgid "There are no reachable Defined Elevations"
 msgstr "Ziehen um die Höhe zu ändern"
 
@@ -1149,7 +1133,7 @@ msgstr "Gleise zusammenfügen"
 
 #: ../bin/cjoin.c:898
 msgid "Join"
-msgstr "Gleise zusammenfügen"
+msgstr "Verbinden"
 
 #: ../bin/cmisc.c:53
 msgid "Middle"
@@ -1378,7 +1362,7 @@ msgstr "Max."
 
 #: ../bin/cprint.c:115
 msgid "Height"
-msgstr "Zimmerlänge"
+msgstr "Seitenhöhe"
 
 #: ../bin/cprint.c:116
 msgid "Snap Shot"
@@ -1415,7 +1399,6 @@ msgstr "Einstellungen"
 #: ../bin/cprint.c:137
 #: ../bin/cprofile.c:548
 #: ../bin/misc.c:580
-#: ../bin/misc.org.c:580
 msgid "Clear"
 msgstr "Löschen"
 
@@ -1538,7 +1521,7 @@ msgstr "Zweiten Endpunkt für Verbindung auswählen"
 
 #: ../bin/cpull.c:661
 msgid "Connect Sectional Tracks"
-msgstr "Festgleise verbinden"
+msgstr "Gleisstücke verbinden"
 
 #: ../bin/cruler.c:141
 #: ../../../../build/app/i18n/custmsg.h:51
@@ -1559,13 +1542,11 @@ msgstr "Gleise verbergen (Tunnel)"
 
 #: ../bin/cselect.c:417
 #: ../bin/misc.c:2164
-#: ../bin/misc.org.c:2176
 msgid "Move To Current Layer"
 msgstr "Auf aktuelle Ebene verschieben"
 
 #: ../bin/cselect.c:456
 #: ../bin/misc.c:2262
-#: ../bin/misc.org.c:2274
 msgid "Clear Elevations"
 msgstr "Höhen löschen"
 
@@ -1640,7 +1621,6 @@ msgid "Move Tracks"
 msgstr "Gleise verschieben"
 
 #: ../bin/cselect.c:1180
-#, fuzzy
 msgid "Click on selected object to align"
 msgstr "Ausgewählte Objekte spiegeln"
 
@@ -1731,7 +1711,6 @@ msgstr "Ausrichten"
 
 #: ../bin/cselect.c:1879
 #: ../bin/misc.c:2098
-#: ../bin/misc.org.c:2103
 msgid "Tunnel"
 msgstr "Tunnel"
 
@@ -1741,15 +1720,12 @@ msgstr "Beschreibungen verschieben"
 
 #: ../bin/cselect.c:1895
 #: ../bin/misc.c:2096
-#: ../bin/misc.org.c:2101
 msgid "Move"
 msgstr "Verschieben"
 
 #: ../bin/cselect.c:1897
 #: ../bin/misc.c:1877
 #: ../bin/misc.c:2097
-#: ../bin/misc.org.c:1877
-#: ../bin/misc.org.c:2102
 #: ../../../../build/app/i18n/custmsg.h:58
 msgid "Rotate"
 msgstr "Drehen"
@@ -1862,7 +1838,6 @@ msgstr "Verstecken"
 
 #: ../bin/cstruct.c:319
 #: ../bin/cstruct.c:346
-#, fuzzy
 msgid "Pier Number"
 msgstr "Bestellnummer"
 
@@ -2567,7 +2542,7 @@ msgstr "Grafik in Datei speichern"
 
 #: ../bin/dbitmap.c:141
 msgid "Print Titles"
-msgstr "Ãœberschriften ausgeben"
+msgstr "Überschriften ausgeben"
 
 #: ../bin/dbitmap.c:141
 msgid "Print Borders"
@@ -2612,8 +2587,6 @@ msgstr "Ungefähre Dateigrösse : %0.1fMb"
 #: ../bin/dbitmap.c:205
 #: ../bin/misc.c:1023
 #: ../bin/misc.c:1093
-#: ../bin/misc.org.c:1023
-#: ../bin/misc.org.c:1093
 #: ../bin/param.c:2555
 #: ../wlib/gtklib/gtkfont.c:418
 #: ../wlib/gtklib/psprint.c:834
@@ -2998,7 +2971,7 @@ msgstr "Wagen aktualisiert"
 
 #: ../bin/dcar.c:3812
 msgid " and Part"
-msgstr " and Teil"
+msgstr " und Teil"
 
 #: ../bin/dcar.c:3839
 #, c-format
@@ -3022,7 +2995,7 @@ msgstr "%s Vorbild: %s%s."
 
 #: ../bin/dcar.c:3857
 msgid ". Enter new values or press Close"
-msgstr ". Neue Werte eingeben oder Abbruck drücken"
+msgstr ". Neue Werte eingeben oder Abbruch drücken"
 
 #: ../bin/dcar.c:3976
 msgid "New Car Part"
@@ -3080,7 +3053,6 @@ msgstr "Bearbeiten"
 #: ../bin/dcar.c:4106
 #: ../bin/dcustmgm.c:55
 #: ../bin/misc.c:2101
-#: ../bin/misc.org.c:2106
 msgid "Delete"
 msgstr "Löschen"
 
@@ -3097,7 +3069,6 @@ msgstr "Auflisten"
 #: ../bin/dcar.c:4225
 #: ../bin/dcar.c:4955
 #: ../bin/misc.c:2349
-#: ../bin/misc.org.c:2361
 msgid "Car Inventory"
 msgstr "Wagenverzeichnis"
 
@@ -3113,7 +3084,7 @@ msgstr "Wagen importieren"
 #: ../bin/dcar.c:4630
 #: ../bin/dcar.c:4751
 msgid "Comma-Separated-Values|*.csv"
-msgstr ""
+msgstr "durch-Kommata getrente Werte|*.csv"
 
 #: ../bin/dcar.c:4699
 #: ../bin/dcar.c:4750
@@ -3132,8 +3103,6 @@ msgstr "Regal"
 #: ../bin/dlayer.c:324
 #: ../bin/misc.c:468
 #: ../bin/misc.c:496
-#: ../bin/misc.org.c:468
-#: ../bin/misc.org.c:496
 msgid "Load"
 msgstr "Laden"
 
@@ -3219,9 +3188,8 @@ msgid "Parameter File|*.xtp"
 msgstr "Parameterdateien|*.xtp"
 
 #: ../bin/dcustmgm.c:344
-#, fuzzy
 msgid "Custom Update"
-msgstr "Anpassen"
+msgstr "Anpassungen hinzufügen"
 
 #: ../bin/dease.c:63
 msgid "Sharp"
@@ -3247,7 +3215,7 @@ msgstr "L"
 
 #: ../bin/dease.c:220
 msgid "Easement"
-msgstr "Ãœbergangsbogen"
+msgstr "Übergangsbogen"
 
 #: ../bin/denum.c:44
 msgid "Prices"
@@ -3323,6 +3291,10 @@ msgstr "Gleisplantitel"
 #: ../bin/doption.c:105
 msgid "Subtitle"
 msgstr "Untertitel"
+
+#: ../bin/doption.c:107
+msgid "Gauge"
+msgstr "Spurweite"
 
 #: ../bin/doption.c:108
 msgid "Min Track Radius"
@@ -3501,7 +3473,7 @@ msgstr "Endpunkte"
 #: ../bin/doption.c:293
 #: ../../../../build/app/i18n/custmsg.h:12
 msgid "Describe"
-msgstr "Beschreiben"
+msgstr "Eigenschaften"
 
 #: ../bin/doption.c:298
 msgid "Normal: Command List, Shift: Command Options"
@@ -3549,7 +3521,7 @@ msgstr "Kartesisch"
 
 #: ../bin/doption.c:358
 msgid "Balloon Help"
-msgstr "Tooltipps"
+msgstr "Sprechblasen"
 
 #: ../bin/doption.c:359
 msgid "Load Last Layout"
@@ -3577,11 +3549,11 @@ msgstr "Mindestgleislänge"
 
 #: ../bin/doption.c:367
 msgid "Connection Distance"
-msgstr ""
+msgstr "Verbindungs Abstand"
 
 #: ../bin/doption.c:368
 msgid "Connection Angle"
-msgstr ""
+msgstr "Verbindungs Winkel"
 
 #: ../bin/doption.c:369
 msgid "Turntable Angle"
@@ -3596,9 +3568,8 @@ msgid "Drag Distance"
 msgstr "Zeichne Entfernung"
 
 #: ../bin/doption.c:373
-#, fuzzy
 msgid "Drag Timeout"
-msgstr "Schwellen zeichnen"
+msgstr "Abriss Zeitverzögerung"
 
 #: ../bin/doption.c:374
 msgid "Min Grid Spacing"
@@ -3805,7 +3776,6 @@ msgstr "Parameterdateien|*.xtp"
 #: ../bin/draw.c:1308
 #: ../bin/macro.c:598
 #: ../bin/misc.c:551
-#: ../bin/misc.org.c:551
 msgid "Quit"
 msgstr "Verlassen"
 
@@ -3922,8 +3892,6 @@ msgstr "Zwischenablage"
 #: ../bin/fileio.c:1458
 #: ../bin/misc.c:2081
 #: ../bin/misc.c:2094
-#: ../bin/misc.org.c:2086
-#: ../bin/misc.org.c:2099
 msgid "Paste"
 msgstr "Einfügen"
 
@@ -4005,19 +3973,15 @@ msgid "Can not find PARAMETER playback proc"
 msgstr "Kann die PARAMETER Wiedergabeprozedur nicht finden"
 
 #: ../bin/misc.c:152
-#: ../bin/misc.org.c:152
 msgid "No Messages"
 msgstr "Keine Nachrichten"
 
 #: ../bin/misc.c:297
 #: ../bin/misc.c:300
-#: ../bin/misc.org.c:297
-#: ../bin/misc.org.c:300
 msgid "ABORT"
 msgstr "ABBRUCH"
 
 #: ../bin/misc.c:299
-#: ../bin/misc.org.c:299
 msgid ""
 "\n"
 "Do you want to save your layout?"
@@ -4026,13 +3990,11 @@ msgstr ""
 "Wollen Sie Ihren Gleisplan speichern?"
 
 #: ../bin/misc.c:349
-#: ../bin/misc.org.c:349
 #, c-format
 msgid "No help for %s"
 msgstr "Hilfe für %s nicht gefunden"
 
 #: ../bin/misc.c:452
-#: ../bin/misc.org.c:452
 msgid ""
 "Save changes to the layout design before closing?\n"
 "\n"
@@ -4044,25 +4006,19 @@ msgstr ""
 
 #: ../bin/misc.c:454
 #: ../bin/misc.c:2132
-#: ../bin/misc.org.c:454
-#: ../bin/misc.org.c:2144
 msgid "&Save"
 msgstr "&Speichern"
 
 #: ../bin/misc.c:454
 #: ../bin/misc.c:478
-#: ../bin/misc.org.c:454
-#: ../bin/misc.org.c:478
 msgid "&Cancel"
 msgstr "&Abbruch"
 
 #: ../bin/misc.c:454
-#: ../bin/misc.org.c:454
 msgid "&Don't Save"
 msgstr "&Nicht speichern"
 
 #: ../bin/misc.c:476
-#: ../bin/misc.org.c:476
 msgid ""
 "Do you want to return to the last saved state?\n"
 "\n"
@@ -4072,23 +4028,19 @@ msgstr ""
 "Durch das Zurücksetzen werden alle Ãnderungen seit dem letzen Speichern verloren gehen."
 
 #: ../bin/misc.c:478
-#: ../bin/misc.org.c:478
 msgid "&Revert"
 msgstr "Zurücksetzen"
 
 #: ../bin/misc.c:679
-#: ../bin/misc.org.c:679
 msgid "XTrackCAD Font"
 msgstr "XTrackCAD Font"
 
 #: ../bin/misc.c:761
-#: ../bin/misc.org.c:761
 #, c-format
 msgid "No balloon help for %s\n"
 msgstr "Kein Tooltip für %s vorhanden\n"
 
 #: ../bin/misc.c:763
-#: ../bin/misc.org.c:763
 #: ../../../../build/app/bin/bllnhlp.c:531
 #: ../../../../build/app/bin/bllnhlp.c:532
 #: ../../../../build/app/bin/bllnhlp.c:534
@@ -4155,9 +4107,6 @@ msgstr "Keine Hilfe vorhanden"
 #: ../bin/misc.c:1021
 #: ../bin/misc.c:1026
 #: ../bin/misc.c:1091
-#: ../bin/misc.org.c:1021
-#: ../bin/misc.org.c:1026
-#: ../bin/misc.org.c:1091
 msgid ""
 "Cancelling the current command will undo the changes\n"
 "you are currently making. Do you want to update?"
@@ -4166,655 +4115,497 @@ msgstr ""
 "Änderungen zurücknehmen. Soll aktualisiert werden?"
 
 #: ../bin/misc.c:1682
-#: ../bin/misc.org.c:1682
 msgid "Sticky Commands"
 msgstr "Wiederholte Befehle"
 
-#: ../bin/misc.c:1689
-#: ../bin/misc.c:1720
-#: ../bin/misc.org.c:1689
-#: ../bin/misc.org.c:1720
+#: ../bin/misc.c:1698
+msgid "File Buttons"
+msgstr "Dateischaltflächen"
+
+#: ../bin/misc.c:1699
 msgid "Zoom Buttons"
-msgstr ""
+msgstr "Lupenknöpfe"
 
-#: ../bin/misc.c:1690
-#: ../bin/misc.c:1721
-#: ../bin/misc.org.c:1690
-#: ../bin/misc.org.c:1721
-#, fuzzy
+#: ../bin/misc.c:1700
 msgid "Undo Buttons"
-msgstr "Rückgängig: %s"
+msgstr "Rückgängig/Wiederholen"
 
-#: ../bin/misc.c:1691
-#: ../bin/misc.org.c:1691
+#: ../bin/misc.c:1701
 msgid "Easement Button"
 msgstr "Übergangsbogen"
 
-#: ../bin/misc.c:1692
-#: ../bin/misc.c:1722
-#: ../bin/misc.org.c:1692
-#: ../bin/misc.org.c:1722
-#, fuzzy
+#: ../bin/misc.c:1702
 msgid "SnapGrid Buttons"
 msgstr "Fangraster"
 
-#: ../bin/misc.c:1693
-#: ../bin/misc.org.c:1693
+#: ../bin/misc.c:1703
 msgid "Create Track Buttons"
 msgstr "Erstelle Gleise"
 
-#: ../bin/misc.c:1694
-#: ../bin/misc.c:1723
-#: ../bin/misc.org.c:1694
-#: ../bin/misc.org.c:1723
+#: ../bin/misc.c:1707
 msgid "Modify Track Buttons"
 msgstr "Verändere Gleise"
 
-#: ../bin/misc.c:1695
-#: ../bin/misc.c:1724
-#: ../bin/misc.org.c:1695
-#: ../bin/misc.org.c:1724
+#: ../bin/misc.c:1708
 msgid "Describe/Select"
-msgstr "Beschreiben/Auswählen"
+msgstr "Eigenschaften/Auswählen"
 
-#: ../bin/misc.c:1696
-#: ../bin/misc.c:1725
-#: ../bin/misc.org.c:1696
-#: ../bin/misc.org.c:1725
-#, fuzzy
+#: ../bin/misc.c:1709
 msgid "Track Group Buttons"
-msgstr "Gleisbeschreibungen"
+msgstr "Objekt Werkzeuge"
 
-#: ../bin/misc.c:1697
-#: ../bin/misc.c:1726
-#: ../bin/misc.org.c:1697
-#: ../bin/misc.org.c:1726
+#: ../bin/misc.c:1710
 msgid "Train Group Buttons"
-msgstr ""
+msgstr "Zugbetrieb"
 
-#: ../bin/misc.c:1698
-#: ../bin/misc.c:1727
-#: ../bin/misc.org.c:1698
-#: ../bin/misc.org.c:1727
+#: ../bin/misc.c:1711
 msgid "Create Misc Buttons"
-msgstr ""
+msgstr "Zeichnen/Schrift  Werkzeuge"
 
-#: ../bin/misc.c:1699
-#: ../bin/misc.c:1728
-#: ../bin/misc.org.c:1699
-#: ../bin/misc.org.c:1728
+#: ../bin/misc.c:1712
 msgid "Ruler Button"
 msgstr "Linealschaltfläche"
 
-#: ../bin/misc.c:1700
-#: ../bin/misc.c:1729
-#: ../bin/misc.org.c:1700
-#: ../bin/misc.org.c:1729
+#: ../bin/misc.c:1713
 msgid "Layer Buttons"
-msgstr "Ebenenschaltflächen"
+msgstr "Ebenenknöpfe"
 
-#: ../bin/misc.c:1701
-#: ../bin/misc.c:1730
-#: ../bin/misc.org.c:1701
-#: ../bin/misc.org.c:1730
+#: ../bin/misc.c:1714
 msgid "Hot Bar"
 msgstr "Teilekatalog"
 
 #: ../bin/misc.c:1811
-#: ../bin/misc.org.c:1811
 #: ../../../../build/app/bin/bllnhlp.c:66
 msgid "Change Elevations"
 msgstr "Höhen ändern"
 
 #: ../bin/misc.c:1811
-#: ../bin/misc.org.c:1811
 msgid "Change"
-msgstr "Ãndern"
-
-#: ../bin/misc.c:1827
-#: ../bin/misc.org.c:1827
-msgid ""
-"\n"
-"XTrackCAD is a CAD (computer-aided design) program\n"
-"for designing model railroad layouts."
-msgstr ""
-"\n"
-"XTrackCAD ist ein CAD (Computer-unterstützter Entwurf) Programm\n"
-"zum Entwerfen von Modelleisenbahnanlagen."
+msgstr "Ändern"
 
 #: ../bin/misc.c:1853
 #: ../bin/misc.c:2331
-#: ../bin/misc.org.c:1853
-#: ../bin/misc.org.c:2343
 msgid "About"
 msgstr "Über"
 
 #: ../bin/misc.c:1870
-#: ../bin/misc.org.c:1870
 msgid "Angle:"
 msgstr "Winkel:"
 
 #: ../bin/misc.c:1905
-#: ../bin/misc.org.c:1905
 msgid "180 "
 msgstr "180 "
 
 #: ../bin/misc.c:1906
-#: ../bin/misc.org.c:1906
 msgid "90  CW"
 msgstr "90 Uhrzeiger"
 
 #: ../bin/misc.c:1907
-#: ../bin/misc.org.c:1907
 msgid "45  CW"
 msgstr "45 Uhrzeiger"
 
 #: ../bin/misc.c:1908
-#: ../bin/misc.org.c:1908
 msgid "30  CW"
 msgstr "30 Uhrzeiger"
 
 #: ../bin/misc.c:1909
-#: ../bin/misc.org.c:1909
 msgid "15  CW"
 msgstr "15 Uhrzeiger"
 
 #: ../bin/misc.c:1910
-#: ../bin/misc.org.c:1910
 msgid "15  CCW"
 msgstr "15 gegen Uhr"
 
 #: ../bin/misc.c:1911
-#: ../bin/misc.org.c:1911
 msgid "30  CCW"
 msgstr "30 gehen Uhr"
 
 #: ../bin/misc.c:1912
-#: ../bin/misc.org.c:1912
 msgid "45  CCW"
 msgstr "45 gegen Uhr"
 
 #: ../bin/misc.c:1913
-#: ../bin/misc.org.c:1913
 msgid "90  CCW"
 msgstr "90 gegen Uhr"
 
 #: ../bin/misc.c:1914
-#: ../bin/misc.org.c:1914
 msgid "Enter Angle ..."
 msgstr "Winkel eingeben..."
 
 #: ../bin/misc.c:1941
-#: ../bin/misc.org.c:1941
 msgid "Debug"
 msgstr "Fehlersuche (Debug)"
 
 #: ../bin/misc.c:2063
-#: ../bin/misc.org.c:2068
 msgid "&File"
 msgstr "&Datei"
 
 #: ../bin/misc.c:2064
-#: ../bin/misc.org.c:2069
 msgid "&Edit"
 msgstr "&Bearbeiten"
 
 #: ../bin/misc.c:2065
-#: ../bin/misc.org.c:2070
 msgid "&View"
 msgstr "&Ansicht"
 
 #: ../bin/misc.c:2066
-#: ../bin/misc.org.c:2071
 msgid "&Add"
 msgstr "&Hinzufügen"
 
 #: ../bin/misc.c:2067
-#: ../bin/misc.org.c:2072
 msgid "&Change"
-msgstr "&Ãndern"
+msgstr "&Ändern"
 
 #: ../bin/misc.c:2068
-#: ../bin/misc.org.c:2073
 msgid "&Draw"
 msgstr "&Zeichnen"
 
 #: ../bin/misc.c:2069
-#: ../bin/misc.org.c:2074
 msgid "&Manage"
 msgstr "&Verwalten"
 
 #: ../bin/misc.c:2070
-#: ../bin/misc.org.c:2075
 msgid "&Options"
-msgstr "&Einstellungen"
+msgstr "&Optionen"
 
 #: ../bin/misc.c:2071
-#: ../bin/misc.org.c:2076
 msgid "&Macro"
 msgstr "&Makro"
 
 #: ../bin/misc.c:2072
-#: ../bin/misc.org.c:2077
 msgid "&Window"
 msgstr "&Fenster"
 
 #: ../bin/misc.c:2073
-#: ../bin/misc.org.c:2078
 msgid "&Help"
 msgstr "&Hilfe"
 
 #: ../bin/misc.c:2079
 #: ../bin/misc.c:2080
-#: ../bin/misc.org.c:2084
-#: ../bin/misc.org.c:2085
 msgid "Commands"
 msgstr "Befehle"
 
 #: ../bin/misc.c:2083
-#: ../bin/misc.org.c:2088
 msgid "Undo"
 msgstr "Rückgängig"
 
 #: ../bin/misc.c:2084
-#: ../bin/misc.org.c:2089
 msgid "Redo"
 msgstr "Wiederholen"
 
 #: ../bin/misc.c:2085
 #: ../bin/misc.c:2086
-#: ../bin/misc.org.c:2090
-#: ../bin/misc.org.c:2091
 msgid "Zoom In"
 msgstr "Zoom größer"
 
 #: ../bin/misc.c:2087
 #: ../bin/misc.c:2088
-#: ../bin/misc.org.c:2092
-#: ../bin/misc.org.c:2093
 msgid "Zoom Out"
 msgstr "Zoom kleiner"
 
 #: ../bin/misc.c:2089
-#: ../bin/misc.org.c:2094
 msgid "SnapGrid Enable"
 msgstr "Fangraster aktivieren"
 
 #: ../bin/misc.c:2090
-#: ../bin/misc.org.c:2095
 msgid "SnapGrid Show"
 msgstr "Fangraster anzeigen"
 
 #: ../bin/misc.c:2093
-#: ../bin/misc.org.c:2098
 msgid "Copy"
 msgstr "Kopiere"
 
 #: ../bin/misc.c:2095
-#: ../bin/misc.org.c:2100
 msgid "Deselect All"
 msgstr "Alles Abwählen"
 
 #: ../bin/misc.c:2103
 #: ../bin/misc.c:2104
-#: ../bin/misc.org.c:2108
-#: ../bin/misc.org.c:2109
 msgid "More"
 msgstr "Weiter"
 
 #: ../bin/misc.c:2128
-#: ../bin/misc.org.c:2140
 msgid "&New"
 msgstr "&Neu"
 
 #: ../bin/misc.c:2129
-#: ../bin/misc.org.c:2141
 msgid "&Open ..."
 msgstr "&Öffnen..."
 
 #: ../bin/misc.c:2133
-#: ../bin/misc.org.c:2145
 msgid "Save &As ..."
 msgstr "Speichern &unter..."
 
 #: ../bin/misc.c:2134
-#: ../bin/misc.org.c:2146
 msgid "Revert"
 msgstr "Neu laden"
 
 #: ../bin/misc.c:2136
-#: ../bin/misc.org.c:2148
 msgid "P&rint Setup ..."
 msgstr "Druckereinstellungen..."
 
 #: ../bin/misc.c:2139
-#: ../bin/misc.org.c:2151
 msgid "&Import"
 msgstr "Import"
 
 #: ../bin/misc.c:2140
-#: ../bin/misc.org.c:2152
 msgid "Export to &Bitmap"
 msgstr "Export als Bitmap"
 
 #: ../bin/misc.c:2141
-#: ../bin/misc.org.c:2153
 msgid "E&xport"
 msgstr "Export"
 
 #: ../bin/misc.c:2142
-#: ../bin/misc.org.c:2154
 msgid "Export D&XF"
 msgstr "Export als DXF"
 
 #: ../bin/misc.c:2145
-#: ../bin/misc.org.c:2157
 msgid "Parameter &Files ..."
 msgstr "Parameterdateien..."
 
 #: ../bin/misc.c:2146
-#: ../bin/misc.org.c:2158
 msgid "No&tes ..."
 msgstr "Notizen..."
 
 #: ../bin/misc.c:2151
-#: ../bin/misc.org.c:2163
 msgid "E&xit"
 msgstr "Beenden"
 
 #: ../bin/misc.c:2157
-#: ../bin/misc.org.c:2169
 msgid "&Undo"
 msgstr "Rückgängig"
 
 #: ../bin/misc.c:2158
-#: ../bin/misc.org.c:2170
 msgid "R&edo"
 msgstr "Wiederholen"
 
 #: ../bin/misc.c:2160
-#: ../bin/misc.org.c:2172
 msgid "Cu&t"
 msgstr "Ausschneiden"
 
 #: ../bin/misc.c:2161
-#: ../bin/misc.org.c:2173
 msgid "&Copy"
 msgstr "Kopieren"
 
 #: ../bin/misc.c:2162
-#: ../bin/misc.org.c:2174
 msgid "&Paste"
 msgstr "Einfügen"
 
 #: ../bin/misc.c:2163
-#: ../bin/misc.org.c:2175
 msgid "De&lete"
 msgstr "Löschen"
 
 #: ../bin/misc.c:2169
-#: ../bin/misc.org.c:2181
 msgid "Select &All"
 msgstr "Alles auswählen"
 
 #: ../bin/misc.c:2170
-#: ../bin/misc.org.c:2182
 msgid "Select Current Layer"
 msgstr "Aktuelle Ebene auswählen"
 
 #: ../bin/misc.c:2171
-#: ../bin/misc.org.c:2183
 msgid "&Deselect All"
 msgstr "Alles abwählen"
 
 #: ../bin/misc.c:2172
-#: ../bin/misc.org.c:2184
 msgid "&Invert Selection"
 msgstr "Auswahl umkehren"
 
 #: ../bin/misc.c:2173
-#: ../bin/misc.org.c:2185
 msgid "Select Stranded Track"
 msgstr "Vereinzelte Gleise auswählen"
 
 #: ../bin/misc.c:2175
-#: ../bin/misc.org.c:2187
 msgid "Tu&nnel"
 msgstr "Tunnel"
 
 #: ../bin/misc.c:2176
-#: ../bin/misc.org.c:2188
 msgid "A&bove"
 msgstr "Darüber"
 
 #: ../bin/misc.c:2177
-#: ../bin/misc.org.c:2189
 msgid "Belo&w"
 msgstr "Darunter"
 
 #: ../bin/misc.c:2180
-#: ../bin/misc.org.c:2192
 msgid "Thin Tracks"
 msgstr "Dünne Gleise"
 
 #: ../bin/misc.c:2181
-#: ../bin/misc.org.c:2193
 msgid "Medium Tracks"
 msgstr "Mittlere Gleise"
 
 #: ../bin/misc.c:2182
-#: ../bin/misc.org.c:2194
 msgid "Thick Tracks"
 msgstr "Dicke Gleise"
 
 #: ../bin/misc.c:2187
-#: ../bin/misc.org.c:2199
 msgid "Zoom &In"
 msgstr "Zoom größer"
 
 #: ../bin/misc.c:2188
-#: ../bin/misc.org.c:2200
 msgid "&Zoom"
 msgstr "&Zoom"
 
 #: ../bin/misc.c:2189
-#: ../bin/misc.org.c:2201
 msgid "Zoom &Out"
 msgstr "Zoom kleiner"
 
 #: ../bin/misc.c:2198
-#: ../bin/misc.org.c:2210
 msgid "&Redraw"
 msgstr "Neu zeichnen"
 
 #: ../bin/misc.c:2199
-#: ../bin/misc.org.c:2211
 msgid "Redraw All"
 msgstr "Alles neu zeichnen"
 
 #: ../bin/misc.c:2202
-#: ../bin/misc.org.c:2214
 msgid "Enable SnapGrid"
 msgstr "Fangraster aktivieren"
 
 #: ../bin/misc.c:2204
-#: ../bin/misc.org.c:2216
 msgid "Show SnapGrid"
 msgstr "Fangraster zeigen"
 
 #: ../bin/misc.c:2209
-#: ../bin/misc.org.c:2221
 msgid "&Tool Bar"
-msgstr "Werkzeugleiste"
+msgstr "Werkzeugleiste anpassen"
 
 #: ../bin/misc.c:2249
-#: ../bin/misc.org.c:2261
 msgid "&Loosen Tracks"
 msgstr "Gleise lockern"
 
 #: ../bin/misc.c:2258
-#: ../bin/misc.org.c:2270
 msgid "Raise/Lower Elevations"
 msgstr "Höhen auf/ab"
 
 #: ../bin/misc.c:2263
-#: ../bin/misc.org.c:2275
 msgid "Recompute Elevations"
 msgstr "Höhen neu berechnen"
 
 #: ../bin/misc.c:2267
-#: ../bin/misc.org.c:2279
 msgid "Change Scale"
 msgstr "Maßstab ändern"
 
 #: ../bin/misc.c:2284
-#: ../bin/misc.org.c:2296
 msgid "L&ayout ..."
 msgstr "Gleisplan..."
 
 #: ../bin/misc.c:2285
-#: ../bin/misc.org.c:2297
 msgid "&Display ..."
 msgstr "Anzeige..."
 
 #: ../bin/misc.c:2286
-#: ../bin/misc.org.c:2298
 msgid "Co&mmand ..."
 msgstr "Befehl..."
 
 #: ../bin/misc.c:2288
-#: ../bin/misc.org.c:2300
 msgid "&Easements ..."
 msgstr "Übergangsbögen..."
 
 #: ../bin/misc.c:2289
-#: ../bin/misc.org.c:2301
 msgid "&Fonts ..."
 msgstr "Schri&ftarten..."
 
 #: ../bin/misc.c:2290
-#: ../bin/misc.org.c:2302
 msgid "Stic&ky ..."
 msgstr "Dauerhaft..."
 
 #: ../bin/misc.c:2293
-#: ../bin/misc.org.c:2305
 msgid "&Debug ..."
 msgstr "&Fehlersuche"
 
 #: ../bin/misc.c:2295
-#: ../bin/misc.org.c:2307
 msgid "&Preferences ..."
 msgstr "Einstellungen..."
 
 #: ../bin/misc.c:2296
-#: ../bin/misc.org.c:2308
 msgid "&Colors ..."
 msgstr "Farben..."
 
 #: ../bin/misc.c:2301
-#: ../bin/misc.org.c:2313
 msgid "&Record ..."
 msgstr "Aufzeichnen..."
 
 #: ../bin/misc.c:2302
-#: ../bin/misc.org.c:2314
 msgid "&Play Back ..."
 msgstr "Wiedergeben..."
 
 #: ../bin/misc.c:2308
-#: ../bin/misc.org.c:2320
 msgid "Main window"
 msgstr "Hauptfenster"
 
 #: ../bin/misc.c:2320
-#: ../bin/misc.org.c:2332
 msgid "Recent Messages"
 msgstr "Letzte Mitteilungen"
 
 #: ../bin/misc.c:2326
-#: ../bin/misc.org.c:2338
 msgid "Tip of the Day..."
 msgstr "Tipp des Tages..."
 
 #: ../bin/misc.c:2327
-#: ../bin/misc.org.c:2339
 msgid "&Demos"
 msgstr "&Demos"
 
 #: ../bin/misc.c:2341
-#: ../bin/misc.org.c:2353
 msgid "Tur&nout Designer..."
 msgstr "Weichendesigner..."
 
 #: ../bin/misc.c:2343
-#: ../bin/misc.org.c:2355
 msgid "&Group"
 msgstr "&Gruppierung"
 
 #: ../bin/misc.c:2344
-#: ../bin/misc.org.c:2356
 msgid "&Ungroup"
 msgstr "Gruppierung aufheben"
 
 #: ../bin/misc.c:2346
-#: ../bin/misc.org.c:2358
 msgid "Custom Management..."
-msgstr ""
+msgstr "Anpassungs Verwaltung..."
 
 #: ../bin/misc.c:2347
-#: ../bin/misc.org.c:2359
 msgid "Update Turnouts and Structures"
 msgstr "Weichen und Gebäude aktualisieren"
 
 #: ../bin/misc.c:2353
-#: ../bin/misc.org.c:2365
 msgid "Layers ..."
 msgstr "Ebenen..."
 
 #: ../bin/misc.c:2356
-#: ../bin/misc.org.c:2368
 msgid "Parts &List ..."
 msgstr "Teile&liste..."
 
 #: ../bin/misc.c:2357
-#: ../bin/misc.org.c:2369
 msgid "Price List..."
 msgstr "Preisliste..."
 
 #: ../bin/misc.c:2435
-#: ../bin/misc.org.c:2447
 msgid "Program was not terminated properly. Do you want to resume working on the previous trackplan?"
 msgstr "Das Programm wurde nicht ordnungsgemäss beendet. Wollen Sie die Bearbeitung des vorherigen Gleisplans fortsetzen?"
 
 #: ../bin/misc.c:2435
-#: ../bin/misc.org.c:2447
 msgid "Resume"
 msgstr "Fortsetzen"
 
 #: ../bin/misc.c:2542
-#: ../bin/misc.org.c:2554
 #, c-format
 msgid "Unnamed Trackplan - %s(%s)"
 msgstr "Unbenannter Gleisplan - %s(%s)"
 
 #: ../bin/misc.c:2608
-#: ../bin/misc.org.c:2620
 msgid "Initializing commands"
 msgstr "Initialisiere Befehle"
 
 #: ../bin/misc.c:2617
-#: ../bin/misc.org.c:2629
 msgid "Initializing menus"
 msgstr "Initialisiere Menüs"
 
 #: ../bin/misc.c:2654
-#: ../bin/misc.org.c:2666
 msgid "Reading parameter files"
 msgstr "Einlesen der Parameterdateien"
 
 #: ../bin/misc.c:2692
-#: ../bin/misc.org.c:2704
 msgid "Initialization complete"
 msgstr "Initialisierung beendet"
 
@@ -4847,9 +4638,8 @@ msgid "Light Sky Blue"
 msgstr "Helles Himmelblau"
 
 #: ../bin/param.c:99
-#, fuzzy
 msgid "Powder Blue"
-msgstr "Tiefdunkelblau"
+msgstr "Hellblau"
 
 #: ../bin/param.c:101
 msgid "Dark Aqua"
@@ -4860,7 +4650,6 @@ msgid "Aquamarine"
 msgstr "Aquamarin"
 
 #: ../bin/param.c:103
-#, fuzzy
 msgid "Aqua"
 msgstr "Wasserblau"
 
@@ -4921,9 +4710,8 @@ msgid "Chocolate"
 msgstr "Schokolade"
 
 #: ../bin/param.c:121
-#, fuzzy
 msgid "Rosy Brown"
-msgstr "Braun"
+msgstr "Braun Rosa"
 
 #: ../bin/param.c:122
 msgid "Tan"
@@ -5057,29 +4845,39 @@ msgstr "Einen Wert zwischen %s und %s eingeben"
 msgid "Help"
 msgstr "Hilfe"
 
-#: ../bin/smalldlg.c:64
+#: ../bin/smalldlg.c:66
 msgid "Show tips at start"
 msgstr "Tipps beim Start anzeigen"
 
-#: ../bin/smalldlg.c:70
+#: ../bin/smalldlg.c:72
 msgid "Did you know..."
 msgstr "Wussten Sie schon..."
 
-#: ../bin/smalldlg.c:72
+#: ../bin/smalldlg.c:74
 msgid "Previous Tip"
 msgstr "Vorheriger Tipp"
 
-#: ../bin/smalldlg.c:73
+#: ../bin/smalldlg.c:75
 msgid "Next Tip"
 msgstr "Nächster Tipp"
 
-#: ../bin/smalldlg.c:89
+#: ../bin/smalldlg.c:91
 msgid "Tip of the Day"
 msgstr "Tipp des Tages"
 
-#: ../bin/smalldlg.c:98
+#: ../bin/smalldlg.c:100
 msgid "No tips are available"
 msgstr "Es sind keine Tipps verfügbar"
+
+#: ../bin/smalldlg.c:198
+msgid ""
+"\n"
+"XTrackCAD is a CAD (computer-aided design) program\n"
+"for designing model railroad layouts."
+msgstr ""
+"\n"
+"XTrackCAD ist ein CAD (Computer-unterstützter Entwurf) Programm\n"
+"zum Entwerfen von Modelleisenbahnanlagen."
 
 #: ../bin/tcurve.c:226
 #, c-format
@@ -5193,9 +4991,8 @@ msgid "Connecting a non-track(%d) to (%d)"
 msgstr "Verbinde ein sonstiges Objekt (%d) mit einem Gleis (%d)"
 
 #: ../bin/track.c:1614
-#, fuzzy
 msgid "Join Abutting Tracks"
-msgstr "Gleise verbinden"
+msgstr "angrenzende Gleise verbinden"
 
 #: ../bin/track.c:1874
 #: ../bin/tstraigh.c:543
@@ -5719,7 +5516,6 @@ msgid "MSG_NO_PATH_TO_EP\tNo path between Profile and selected endpoint."
 msgstr ""
 
 #: ../../../../build/app/help/messages.h:57
-#, fuzzy, c-format
 msgid "MSG_PRMFIL_NO_MAP\tNo Parameter File Map for CONTENTS\tNo Parameter File Map for %s"
 msgstr "MSG_PRMFIL_OPEN_NEW\tDie neue Parameterdatei DATEINAME kann nicht geöffnet werden.\tDie neue Parameterdatei %s kann nicht geöffnet werden."
 
@@ -5790,6 +5586,9 @@ msgid ""
 "\n"
 "Do you want to update it?"
 msgstr ""
+"MSG_CARPROTO_DUPNAME\tEin Vorbild mit diesem Namen existiert bereits....\tEin Vorbild mit diesem Namen existiert bereits.\n"
+"\n"
+"Wollen Sie dieses Vorbild überschreiben?"
 
 #: ../../../../build/app/help/messages.h:70
 msgid "MSG_RADIUS_GTR_0\tRadius must be greater than 0."
@@ -6142,6 +5941,9 @@ msgid ""
 "\n"
 "Are you sure you want to Close?"
 msgstr ""
+"Sie haben Änderungen an diesem Objekt vorgenommen\n"
+"\n"
+"Wollen Sie diesen Dialog wirklich beenden?"
 
 #: ../../../../build/app/help/messages.h:129
 #, c-format
@@ -6283,7 +6085,7 @@ msgstr "Ausgewählte Objekte ganz nach oben"
 
 #: ../../../../build/app/bin/bllnhlp.c:15
 msgid "Raise or Lower all Selected tracks"
-msgstr ""
+msgstr "Alle ausgewählten Gleise anheben oder absenken"
 
 #: ../../../../build/app/bin/bllnhlp.c:16
 msgid "Move Selected object to bottom"
@@ -6307,11 +6109,11 @@ msgstr "Erstelle Gleiskreis mit festgelegtem Radius"
 
 #: ../../../../build/app/bin/bllnhlp.c:21
 msgid "Set Circle Track creation mode"
-msgstr "Modus für Gleiskreis auswählen"
+msgstr "Wähle Befehl um Gleisbögen zu erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:22
 msgid "Create track circle from tangent"
-msgstr ""
+msgstr "Erstelle Gleiskreis von Tangente"
 
 #: ../../../../build/app/bin/bllnhlp.c:23
 msgid "Removes elevation from Selected tracks"
@@ -6327,7 +6129,7 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:26
 msgid "Connect two tracks"
-msgstr "Zwei Festgleise verbinden"
+msgstr "Gleise zusammenfügen"
 
 #: ../../../../build/app/bin/bllnhlp.c:27
 msgid "Copy selected objects to clipboard"
@@ -6347,7 +6149,7 @@ msgstr "Erstelle Gleisbogen von Endpunkt"
 
 #: ../../../../build/app/bin/bllnhlp.c:31
 msgid "Set Curve Track creation mode"
-msgstr ""
+msgstr "Wähle Befehl um Gleiskreis zu erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:32
 msgid "Create curved track from tangent"
@@ -6391,7 +6193,7 @@ msgstr "Ein Viereck erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:42
 msgid "Set Circle drawing command"
-msgstr ""
+msgstr "Wähle Befehl um Kreise zu zeichnen"
 
 #: ../../../../build/app/bin/bllnhlp.c:43
 msgid "Create a circle"
@@ -6407,11 +6209,11 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:46
 msgid "Draw a circle line from tangent"
-msgstr ""
+msgstr "Zeichne Kreis von Tangente"
 
 #: ../../../../build/app/bin/bllnhlp.c:47
 msgid "Set Curve drawing command"
-msgstr ""
+msgstr "Wähle Befehl um gebogene Linien zu zeichnen"
 
 #: ../../../../build/app/bin/bllnhlp.c:48
 msgid "Create a curved line"
@@ -6419,19 +6221,19 @@ msgstr "Eine gebogene Linie erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:49
 msgid "Create a curved line from End"
-msgstr ""
+msgstr "gebogene Linie von einem Endpunkt erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:50
 msgid "Create a curved line from center"
-msgstr ""
+msgstr "gebogene Linie vom Mittelpunkt aus erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:51
 msgid "Create a curved line from chord"
-msgstr "Erstelle Bogen von einer Sehne"
+msgstr "gebogene Linie von einer Sehne erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:52
 msgid "Create a curved line from tangent"
-msgstr ""
+msgstr "gebogene Linie von einer Tangente erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:53
 msgid "Create a dimension line"
@@ -6455,11 +6257,11 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:58
 msgid "Draw a filled circle from tangent"
-msgstr ""
+msgstr "Zeichne gefüllten Kreis von Tangente"
 
 #: ../../../../build/app/bin/bllnhlp.c:59
 msgid "Create a filled polygon"
-msgstr ""
+msgstr "Ein gefültes Polygon erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:60
 msgid "Create a polyline"
@@ -6519,11 +6321,11 @@ msgstr "Fangraster anzeigen"
 
 #: ../../../../build/app/bin/bllnhlp.c:75
 msgid "Create a structure from a Group of objects"
-msgstr "Ein Gebäude aus einer Gruppe ausgewählter Objekte erstellen"
+msgstr "Objekte zu einer Gruppierung zusammen fassen"
 
 #: ../../../../build/app/bin/bllnhlp.c:76
 msgid "Create a hand-laid turnout"
-msgstr ""
+msgstr "Handgemachte Weiche erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:77
 msgid "Create a track helix"
@@ -6647,7 +6449,7 @@ msgstr "Vereinzelte (nicht verbundene) Gleisstücke auswählen"
 
 #: ../../../../build/app/bin/bllnhlp.c:110
 msgid "Choose which commands are sticky"
-msgstr ""
+msgstr "Auswahl dauerhafter Befehle"
 
 #: ../../../../build/app/bin/bllnhlp.c:111
 msgid "Create straight track"
@@ -6664,7 +6466,7 @@ msgstr "Text auf den Gleisplan"
 #: ../../../../build/app/bin/bllnhlp.c:114
 #: ../../../../build/app/bin/bllnhlp.c:459
 msgid "Controls the size of the entered text"
-msgstr ""
+msgstr "Auswahl der Schriftgröße für einzugebenden Text"
 
 #: ../../../../build/app/bin/bllnhlp.c:115
 msgid "Tip of the Day window"
@@ -6688,11 +6490,11 @@ msgstr "Zugbetrieb beenden"
 
 #: ../../../../build/app/bin/bllnhlp.c:120
 msgid "Hide/Unhide a track"
-msgstr "Verbergen/Zeigen eine Gleises"
+msgstr "Verbergen/Zeigen eines Gleises"
 
 #: ../../../../build/app/bin/bllnhlp.c:121
 msgid "Place a turnout or sectional track"
-msgstr ""
+msgstr "Weiche oder Gleis platzieren"
 
 #: ../../../../build/app/bin/bllnhlp.c:122
 msgid "Create a new turnout definition"
@@ -6724,7 +6526,7 @@ msgstr "Gleise mit dicken Linien zeichnen"
 
 #: ../../../../build/app/bin/bllnhlp.c:130
 msgid "Change drawing scale"
-msgstr "Zeichenmaßstab ändern"
+msgstr "Zeichenmaßstab auswählen"
 
 #: ../../../../build/app/bin/bllnhlp.c:131
 #: ../../../../build/app/bin/bllnhlp.c:143
@@ -6789,11 +6591,6 @@ msgstr "Menü für Anzeigefuinktionen"
 msgid "Toolbar configuration"
 msgstr ""
 
-#: ../../../../build/app/bin/bllnhlp.c:149
-#, fuzzy
-msgid "Options menu"
-msgstr "&Einstellungen"
-
 #: ../../../../build/app/bin/bllnhlp.c:150
 msgid "Playback/Record commands"
 msgstr "Aufzeichnungs- und Wiedergabebefehle"
@@ -6812,11 +6609,11 @@ msgstr "Aktuellste Fehlermeldungen und Erläuterungen"
 
 #: ../../../../build/app/bin/bllnhlp.c:154
 msgid "Move Hot Bar left"
-msgstr ""
+msgstr "Schnellauswahl nach links bewegen"
 
 #: ../../../../build/app/bin/bllnhlp.c:155
 msgid "Move Hot Bar right"
-msgstr ""
+msgstr "Schnellauswahl nach rechts bewegen"
 
 #: ../../../../build/app/bin/bllnhlp.c:156
 msgid "Total track count"
@@ -6967,7 +6764,7 @@ msgstr "Kupplungslänge vom Ende des Wagen"
 
 #: ../../../../build/app/bin/bllnhlp.c:196
 msgid "Diagram of Car"
-msgstr ""
+msgstr "Diagram der Lokomotive oder Wagens"
 
 #: ../../../../build/app/bin/bllnhlp.c:197
 msgid "Item Index Number"
@@ -7004,7 +6801,7 @@ msgstr "Anmerkungen zu dem Wagen"
 #: ../../../../build/app/bin/bllnhlp.c:206
 #: ../../../../build/app/bin/bllnhlp.c:207
 msgid "Create a new car Part or Prototype definitions"
-msgstr ""
+msgstr "Einen neuen Lokomotiven oder Wagen Prototyp erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:208
 msgid "Finds the selected Car Item on the layout"
@@ -7015,11 +6812,11 @@ msgstr "Suche den ausgewählten Wagen auf der Anlage"
 #: ../../../../build/app/bin/bllnhlp.c:211
 #: ../../../../build/app/bin/bllnhlp.c:212
 msgid "Sort the Item list"
-msgstr ""
+msgstr "Sortierung auswählen"
 
 #: ../../../../build/app/bin/bllnhlp.c:214
 msgid "Edit the selected Car Item"
-msgstr ""
+msgstr "markierte Lokomotive oder Wagen bearbeiten"
 
 #: ../../../../build/app/bin/bllnhlp.c:215
 msgid "Add a new Car Item"
@@ -7027,23 +6824,23 @@ msgstr "Neuen Wagen hinzufügen"
 
 #: ../../../../build/app/bin/bllnhlp.c:216
 msgid "Delete the selected Car Items"
-msgstr ""
+msgstr "Markierte Lokomotiven oder Wagen löschen"
 
 #: ../../../../build/app/bin/bllnhlp.c:217
 msgid "Import a Car Item .csv file"
-msgstr ""
+msgstr "Lokomotiven oder Wagen aus einer .csv Datei importieren"
 
 #: ../../../../build/app/bin/bllnhlp.c:218
 msgid "Export a Car Item .csv file"
-msgstr ""
+msgstr "Exportieren der markierten Lokomotiven oder Wagen in eine .csv Datei"
 
 #: ../../../../build/app/bin/bllnhlp.c:219
 msgid "Create a text list of the Car Items"
-msgstr ""
+msgstr "Textdatei der Lokomotiven oder Wagen erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:220
 msgid "Specifies the radius of the circle track"
-msgstr ""
+msgstr "gibt den Radius des Gleiskreises an"
 
 #: ../../../../build/app/bin/bllnhlp.c:221
 msgid "How to draw track being moved/rotated"
@@ -7059,15 +6856,15 @@ msgstr "Festlegen welche Aktion beim Rechtsklick erfolgen soll"
 
 #: ../../../../build/app/bin/bllnhlp.c:225
 msgid "Contents Label for new Parameter file"
-msgstr ""
+msgstr "Inhaltsbeschreibung für neue Parameterdatei"
 
 #: ../../../../build/app/bin/bllnhlp.c:226
 msgid "List of custom designed turnouts and structures"
-msgstr ""
+msgstr "Liste der individual entwickelten Weichen und Strukturen"
 
 #: ../../../../build/app/bin/bllnhlp.c:227
 msgid "Invoke designer editor"
-msgstr ""
+msgstr "Vorbild bearbeiten"
 
 #: ../../../../build/app/bin/bllnhlp.c:228
 msgid "Remove selected entries"
@@ -7075,27 +6872,27 @@ msgstr "Ausgewählte Einträge löschen"
 
 #: ../../../../build/app/bin/bllnhlp.c:229
 msgid "Copy selected entries to Parameter File"
-msgstr ""
+msgstr "Ausgewählte Einträge in eine Parameterdatei verschieben"
 
 #: ../../../../build/app/bin/bllnhlp.c:230
 msgid "Create a New part or prototype"
-msgstr ""
+msgstr "Neues Teil oder Prototype erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:231
 msgid "Update custom file and close"
-msgstr ""
+msgstr "Anpassungs Verwaltung speichern und schliessen"
 
 #: ../../../../build/app/bin/bllnhlp.c:232
 msgid "Executes the next step of the demo"
-msgstr ""
+msgstr "Nächsten Schritt der momentanen Demo anzeigen"
 
 #: ../../../../build/app/bin/bllnhlp.c:233
 msgid "Skip to next demo"
-msgstr ""
+msgstr "zum nächstes Demo Kapitel springen"
 
 #: ../../../../build/app/bin/bllnhlp.c:234
 msgid "Stops the demonstration and returns you to XTrackCAD"
-msgstr ""
+msgstr "Demonstrations Modus verlassen und zu XTrackCAD zurückkehren"
 
 #: ../../../../build/app/bin/bllnhlp.c:235
 msgid "Select speed of Playback"
@@ -7103,7 +6900,7 @@ msgstr "Wiedergabegeschwindigkeit auswählen"
 
 #: ../../../../build/app/bin/bllnhlp.c:236
 msgid "This is where comments about the demo are displayed"
-msgstr ""
+msgstr "Kommentar zu Demos anzeigen"
 
 #: ../../../../build/app/bin/bllnhlp.c:272
 msgid "Move the Main canvas if you drag near the edge"
@@ -7111,7 +6908,7 @@ msgstr "Bewegen den Hauptzeichenbereich wenn in der nähe der Ecken gezogen wird
 
 #: ../../../../build/app/bin/bllnhlp.c:273
 msgid "Color tracks or other objects by layer"
-msgstr ""
+msgstr "Gleise / Objekte in Ebenen einfärben "
 
 #: ../../../../build/app/bin/bllnhlp.c:274
 msgid "Controls the drawing of hidden tracks"
@@ -7175,11 +6972,11 @@ msgstr "Zeige keine Züge in Tunnels wenn Tunnel verborgen sind"
 
 #: ../../../../build/app/bin/bllnhlp.c:290
 msgid "Width of the lines"
-msgstr ""
+msgstr "Breite der Linien"
 
 #: ../../../../build/app/bin/bllnhlp.c:291
 msgid "Color of the lines"
-msgstr ""
+msgstr "Linien Farbe"
 
 #: ../../../../build/app/bin/bllnhlp.c:292
 msgid "List of types of Lumber"
@@ -7223,7 +7020,7 @@ msgstr "Auswahl der Übergangsbögen vervollständigen"
 
 #: ../../../../build/app/bin/bllnhlp.c:302
 msgid "Type of elevation"
-msgstr "Typ des Höhenpunktes"
+msgstr "Typ des Höhendpunktes"
 
 #: ../../../../build/app/bin/bllnhlp.c:303
 msgid "Height of End Point"
@@ -7239,7 +7036,7 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:306
 msgid "Specify a name for an End-Point"
-msgstr ""
+msgstr "Einen Namen für einen Endpunkt vergeben"
 
 #: ../../../../build/app/bin/bllnhlp.c:308
 msgid "Print parts list"
@@ -7257,40 +7054,40 @@ msgstr "Stückliste in Datei speichern"
 
 #: ../../../../build/app/bin/bllnhlp.c:311
 msgid "This is the list of parts for the layout"
-msgstr ""
+msgstr "Dies ist die Teileliste für diesen Gleisplan"
 
 #: ../../../../build/app/bin/bllnhlp.c:312
 msgid "Enable prices on the Parts List"
-msgstr ""
+msgstr "Preise in der Teileliste anzeigen"
 
 #: ../../../../build/app/bin/bllnhlp.c:313
 #: ../../../../build/app/bin/bllnhlp.c:316
 msgid "Spacing between major grid lines"
-msgstr ""
+msgstr "Abstand der Haupt Raster Linien einstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:314
 #: ../../../../build/app/bin/bllnhlp.c:317
 msgid "Allows the spacing to be subdivided"
-msgstr ""
+msgstr "stellt die Unterteilung von Zwischenmarkierungen ein"
 
 #: ../../../../build/app/bin/bllnhlp.c:315
 #: ../../../../build/app/bin/bllnhlp.c:318
 msgid "Specifies if positions are snaped in this direction"
-msgstr ""
+msgstr "Einschalten des Fangrasters für diese Ausrichtung"
 
 #: ../../../../build/app/bin/bllnhlp.c:319
 #: ../../../../build/app/bin/bllnhlp.c:320
 #: ../../../../build/app/bin/bllnhlp.c:321
 msgid "Shows the origin and angle of the grid"
-msgstr ""
+msgstr "gibt den Ausgangspunkt und Winkel des Rasters an"
 
 #: ../../../../build/app/bin/bllnhlp.c:322
 msgid "Specifies if the grid is shown"
-msgstr ""
+msgstr "Anzeige des Rasters an oder aus"
 
 #: ../../../../build/app/bin/bllnhlp.c:323
 msgid "Completes the grid specification"
-msgstr ""
+msgstr "Raster Anpassung speichern und beenden"
 
 #: ../../../../build/app/bin/bllnhlp.c:327
 msgid "Number of segments in Group"
@@ -7342,15 +7139,15 @@ msgstr "Farbe der Ebene"
 
 #: ../../../../build/app/bin/bllnhlp.c:339
 msgid "Layer is drawn on Main window"
-msgstr ""
+msgstr "Ebene im Hauptfenster darstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:340
 msgid "Layer cannot be changed"
-msgstr ""
+msgstr "Ebene schützen - kann nicht mehr geändert werden"
 
 #: ../../../../build/app/bin/bllnhlp.c:341
 msgid "Layer is drawn on Map window"
-msgstr ""
+msgstr "Ebene im Kartenfenster anzeigen"
 
 #: ../../../../build/app/bin/bllnhlp.c:342
 msgid "Number of layer buttons to show"
@@ -7358,19 +7155,19 @@ msgstr "Anzahl der Ebenenknöpfe"
 
 #: ../../../../build/app/bin/bllnhlp.c:343
 msgid "Number of objects in this layer"
-msgstr ""
+msgstr "Anzahl von Objekten in dieser Ebene"
 
 #: ../../../../build/app/bin/bllnhlp.c:345
 msgid "Load layer configuration from default"
-msgstr ""
+msgstr "Persönliche Einstellungen für Ebenen laden"
 
 #: ../../../../build/app/bin/bllnhlp.c:346
 msgid "Save current layer configuration as default"
-msgstr ""
+msgstr "momentane Einstellung für Ebenen speichern"
 
 #: ../../../../build/app/bin/bllnhlp.c:347
 msgid "Overwrite layer configuration with system default values"
-msgstr ""
+msgstr "Einstellung für Ebenen auf Systemvorgabe zurück setzen"
 
 #: ../../../../build/app/bin/bllnhlp.c:348
 #: ../../../../build/app/bin/bllnhlp.c:349
@@ -7430,60 +7227,60 @@ msgid "Validates the name and key.  Terminates the registration command"
 msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:367
-msgid "0° is up or to the right"
-msgstr ""
+msgid "0° grade is up or to the right"
+msgstr "Winkel Ausrichtung: Polar im Uhrzeigersinn / Kartesisch entgegen dem Uhrzeigersinn"
 
 #: ../../../../build/app/bin/bllnhlp.c:368
 msgid "Choose english (inches) or metric (centimeters)"
-msgstr ""
+msgstr "Einheiten auswählen: Englisch für Inches oder Metrisch für Zentimeter"
 
 #: ../../../../build/app/bin/bllnhlp.c:369
 msgid "How to display length measurements"
-msgstr ""
+msgstr "Längenformat auswählen"
 
 #: ../../../../build/app/bin/bllnhlp.c:370
 msgid "Do not create tracks to be shorter than this value"
-msgstr ""
+msgstr "Keine Gleise kürzer als diese Mindestlänge erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:371
 msgid "Maximum distance between connected end points"
-msgstr ""
+msgstr "Maximale Distanz zwischen verbundenen Endpunkten"
 
 #: ../../../../build/app/bin/bllnhlp.c:372
 msgid "Minimum angle between connected End-Points"
-msgstr ""
+msgstr "kleinster Winkel zwischen verbundenen Endpunkten"
 
 #: ../../../../build/app/bin/bllnhlp.c:373
 msgid "Specifies the minimum angle between tracks connected to a turntable"
-msgstr ""
+msgstr "kleinster Winkel beim Anschluss von Gleisen an eine Drehscheibe"
 
 #: ../../../../build/app/bin/bllnhlp.c:374
 msgid "Trains will crash above this speed"
-msgstr ""
+msgstr "Züge entgleisen oberhalb dieser Geschwindigkeit"
 
 #: ../../../../build/app/bin/bllnhlp.c:375
 msgid "Enable/Disable balloon popup help windows"
-msgstr ""
+msgstr "ein/ausschalten von Erklärungs Hilfen"
 
 #: ../../../../build/app/bin/bllnhlp.c:376
 msgid "How far you can move the mouse before its considered a drag"
-msgstr ""
+msgstr "Wie weit kann die Maus bewegt werden, bevor abreißen angenommen wird"
 
 #: ../../../../build/app/bin/bllnhlp.c:377
 msgid "How long you can hold a mouse button down before its considered a drag"
-msgstr ""
+msgstr "Wie lange kann ein Mausknopf gedrückt bleiben, bevor abreißen angenommen wird"
 
 #: ../../../../build/app/bin/bllnhlp.c:378
 msgid "Minimum distance (in pixels) between grid lines/ticks"
-msgstr ""
+msgstr "Mindestabstand (in Pixeln) zwischen Raster und Linien"
 
 #: ../../../../build/app/bin/bllnhlp.c:379
 msgid "Specifies the Check Point frequency; number of modifications made since the last save."
-msgstr ""
+msgstr "Anzahl von Änderungen bevor eine neue automatische Sicherung statt findet"
 
 #: ../../../../build/app/bin/bllnhlp.c:380
 msgid "Resume work on last layout or start with new layout"
-msgstr ""
+msgstr "Letzten Gleisplan bearbeiten, oder einen neuen Gleisplan erstellen"
 
 #: ../../../../build/app/bin/bllnhlp.c:382
 msgid "Updated cost of current selected item"
@@ -7497,31 +7294,31 @@ msgstr ""
 #: ../../../../build/app/bin/bllnhlp.c:386
 #: ../../../../build/app/bin/bllnhlp.c:387
 msgid "Price of specified length of flex-track"
-msgstr ""
+msgstr "Preis für die angegebene Länge des Flex-Gleises"
 
 #: ../../../../build/app/bin/bllnhlp.c:389
 msgid "Controls the reduction (scale) of the printout"
-msgstr ""
+msgstr "Einstellung des Reduktions Maßstabs für den Ausdruck."
 
 #: ../../../../build/app/bin/bllnhlp.c:390
 msgid "Scaled page width (Scale times physical page width)"
-msgstr ""
+msgstr "Seitenbreite angeben (Maßstab mal physikalischer Papierbreite)"
 
 #: ../../../../build/app/bin/bllnhlp.c:391
 msgid "Sets page size to the maximum (based on scale and physical page size)"
-msgstr ""
+msgstr "Setzt die Papiergröße auf das Maximum (basierend auf Maßstab und physikalischer Papiergröße)"
 
 #: ../../../../build/app/bin/bllnhlp.c:392
 msgid "Scaled page height (Scale times physical page height)"
-msgstr ""
+msgstr "Seitenhöhe angeben (Maßstab mal physikalischer Papierhöhe)"
 
 #: ../../../../build/app/bin/bllnhlp.c:393
 msgid "Sets scale, origin and angle for a one page printout of the layout"
-msgstr ""
+msgstr "Stellt Maßstab, Ausrichtung und Winkel für den momentan angezeigten Gleisplan ein"
 
 #: ../../../../build/app/bin/bllnhlp.c:394
 msgid "Print page in Portrait or Landscape format"
-msgstr ""
+msgstr "Drucke im Hochformat oder Querformat"
 
 #: ../../../../build/app/bin/bllnhlp.c:395
 msgid "Order of printing pages"
@@ -7529,15 +7326,15 @@ msgstr "Druckreihenfolge"
 
 #: ../../../../build/app/bin/bllnhlp.c:396
 msgid "Print Title, Date, Author and other information at bottom of page?"
-msgstr ""
+msgstr "Drucke Titel, Datum Autor und andere Informationen am Ende der Seite?"
 
 #: ../../../../build/app/bin/bllnhlp.c:397
 msgid "Ignore unprintable page margins?"
-msgstr ""
+msgstr "nicht druckbare Seitenränder ignorieren?"
 
 #: ../../../../build/app/bin/bllnhlp.c:398
 msgid "Print Registration Marks at 1:1?"
-msgstr ""
+msgstr "Drucke Positionierungshilfen im 1:1 Maßstab?"
 
 #: ../../../../build/app/bin/bllnhlp.c:399
 msgid "Print Snap Grid?"
@@ -7545,7 +7342,7 @@ msgstr "Fangraster drucken?"
 
 #: ../../../../build/app/bin/bllnhlp.c:400
 msgid "Print Rulers on all page edges?"
-msgstr ""
+msgstr "Lineale an allen Seitenecken drucken?"
 
 #: ../../../../build/app/bin/bllnhlp.c:401
 msgid "Print Roadbed Outline?"
@@ -7559,7 +7356,7 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:405
 msgid "Resets the origin and angle to 0"
-msgstr ""
+msgstr "Ausrichtung und Winkel auf 0 zurücksetzen"
 
 #: ../../../../build/app/bin/bllnhlp.c:407
 msgid "Deselects all pages"
@@ -7567,7 +7364,7 @@ msgstr "Alle Seiten abwählen"
 
 #: ../../../../build/app/bin/bllnhlp.c:409
 msgid "Print selected pages and terminates the print command"
-msgstr ""
+msgstr "Ausdrucken der ausgewählten Seiten und Drcken Dialog schließen"
 
 #: ../../../../build/app/bin/bllnhlp.c:410
 msgid "List of loaded and unloaded parameter files"
@@ -7651,7 +7448,7 @@ msgstr "Ursprüngliche Spurweite der ausgewählten Objekte"
 
 #: ../../../../build/app/bin/bllnhlp.c:433
 msgid "New Scale of the selected objects"
-msgstr "Neur Maßstab der ausgewählten Objekte"
+msgstr "Neuer Maßstab der ausgewählten Objekte"
 
 #: ../../../../build/app/bin/bllnhlp.c:434
 msgid "New Gauge of the selected objects"
@@ -7746,7 +7543,6 @@ msgid "Complete structure placement"
 msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:458
-#, fuzzy
 msgid "Choose a Pier number"
 msgstr "Bestellnummer eingeben"
 
@@ -7768,7 +7564,7 @@ msgstr "Gehe zum vorherigen Tipp des Tages"
 
 #: ../../../../build/app/bin/bllnhlp.c:465
 msgid "Controls which Command Buttons are displayed"
-msgstr ""
+msgstr "ein oder ausblenden von Kommando Knöpfen in der Werkzeugleiste"
 
 #: ../../../../build/app/bin/bllnhlp.c:466
 msgid "List of Cars"
@@ -7841,7 +7637,7 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:486
 msgid "Specifies if angles are entered as Frog Numbers or in degrees"
-msgstr ""
+msgstr "auswählen ob Winkel als Herzstück Nummern oder in Grad angegeben werden"
 
 #: ../../../../build/app/bin/bllnhlp.c:487
 #: ../../../../build/app/bin/bllnhlp.c:488
@@ -7870,7 +7666,7 @@ msgstr "Erstellt einen Probeausdruck der Weiche"
 
 #: ../../../../build/app/bin/bllnhlp.c:500
 msgid "Color of Roadbed lines"
-msgstr ""
+msgstr "Farbe der Gleisbettlinien"
 
 #: ../../../../build/app/bin/bllnhlp.c:501
 msgid "Width of Roadbed lines"
@@ -7942,7 +7738,7 @@ msgstr ""
 
 #: ../../../../build/app/bin/bllnhlp.c:523
 msgid "Displays the Print Setup window to change printers, orientation, paper size, etc."
-msgstr ""
+msgstr "Ruft das Drucker Dialog Fenster auf, um Drucker und oder Papier Einstellungen vornehmen zu können."
 
 #: ../../../../build/app/bin/bllnhlp.c:524
 msgid "Closes this dialog"
@@ -7986,11 +7782,11 @@ msgstr "Dialoge"
 
 #: ../../../../build/app/i18n/custmsg.h:10
 msgid "Moving about"
-msgstr ""
+msgstr "Zoom & Pan"
 
 #: ../../../../build/app/i18n/custmsg.h:11
 msgid "Describe and Select"
-msgstr "Beschreiben und Auswählen"
+msgstr "Eigenschaften und Auswählen"
 
 #: ../../../../build/app/i18n/custmsg.h:14
 msgid "Simple tracks"
@@ -8046,16 +7842,15 @@ msgstr "Kreis zu Kreis"
 
 #: ../../../../build/app/i18n/custmsg.h:27
 msgid "Joining to turntables"
-msgstr ""
+msgstr "Drehscheiben verbinden"
 
 #: ../../../../build/app/i18n/custmsg.h:28
 msgid "Easements"
 msgstr "Übergangsbögen"
 
 #: ../../../../build/app/i18n/custmsg.h:29
-#, fuzzy
 msgid "Abutting tracks"
-msgstr "Gleise verbinden"
+msgstr "angrenzende Gleise"
 
 #: ../../../../build/app/i18n/custmsg.h:30
 msgid "Move to Join"
@@ -8067,19 +7862,19 @@ msgstr "Auswählen und Positionieren"
 
 #: ../../../../build/app/i18n/custmsg.h:33
 msgid "Building a yard throat."
-msgstr ""
+msgstr "Einen Bahnhof einrichten"
 
 #: ../../../../build/app/i18n/custmsg.h:34
 msgid "Designing turnouts"
-msgstr ""
+msgstr "Weichen konstruieren"
 
 #: ../../../../build/app/i18n/custmsg.h:35
 msgid "Group and Ungroup"
-msgstr ""
+msgstr "Zusammenfassen und Zerlegen"
 
 #: ../../../../build/app/i18n/custmsg.h:36
 msgid "Triming Turnout Ends"
-msgstr ""
+msgstr "Weichenenden verändern"
 
 #: ../../../../build/app/i18n/custmsg.h:37
 msgid "Handlaid Turnouts"
@@ -8099,11 +7894,11 @@ msgstr "Verschiedene Gleismodifikationen"
 
 #: ../../../../build/app/i18n/custmsg.h:42
 msgid "Delete and Undo"
-msgstr ""
+msgstr "Löschen und Rückgängig machen"
 
 #: ../../../../build/app/i18n/custmsg.h:43
 msgid "Splitting and Tunnels"
-msgstr ""
+msgstr "Auftrennen und Tunnels"
 
 #: ../../../../build/app/i18n/custmsg.h:45
 msgid "Helix tracks"
@@ -8115,11 +7910,11 @@ msgstr "Fehlerhafte Gleise"
 
 #: ../../../../build/app/i18n/custmsg.h:48
 msgid "Connect and Tighten - a siding"
-msgstr ""
+msgstr "Abstellgleis verbinden"
 
 #: ../../../../build/app/i18n/custmsg.h:49
 msgid "Connect and Tighten - figure-8"
-msgstr ""
+msgstr "Verbinden und Zusammenfügen"
 
 #: ../../../../build/app/i18n/custmsg.h:50
 msgid "Other commands"
@@ -8143,11 +7938,11 @@ msgstr "Vielecke"
 
 #: ../../../../build/app/i18n/custmsg.h:57
 msgid "Modifying Poly-Shapes"
-msgstr ""
+msgstr "Polygone modifizieren"
 
 #: ../../../../build/app/i18n/custmsg.h:60
 msgid "Control Panels (New)"
-msgstr ""
+msgstr "Stellpulte einzeichnen"
 
 #: ../../../../build/app/i18n/custmsg.h:62
 msgid "The unconnected End-Points of a straight or curved track can be changed with the 'Modify Track' command.\n"
@@ -8790,9 +8585,8 @@ msgid "The unconnected End-Point of any track can be extended with the <Modify> 
 msgstr ""
 
 #: ../../../../build/app/i18n/custmsg.h:222
-#, fuzzy
 msgid "Select the End-Point and Right-Drag.\n"
-msgstr "Endpunkt auswählen"
+msgstr "Endpunkt auswählen und mit rechter Maustaste ziehen.\n"
 
 #: ../../../../build/app/i18n/custmsg.h:223
 msgid "The extending track can be straight...\n"
@@ -9082,7 +8876,7 @@ msgstr ""
 
 #: ../../../../build/app/i18n/custmsg.h:294
 msgid "To Remove the definitions, use the Custom Management dialog on the Tools menu.\n"
-msgstr ""
+msgstr "Um Definitionen zu löschen benutzen Sie die \"Anpassungs Verwaltung\" im \"Verwalten\" Menü.\n"
 
 #: ../../../../build/app/i18n/custmsg.h:295
 msgid "Select the definitions you added and Delete them.\n"
@@ -9098,9 +8892,8 @@ msgid "We will be creating a helix with a Elevation Difference of 12\", Grade of
 msgstr ""
 
 #: ../../../../build/app/i18n/custmsg.h:298
-#, fuzzy
-msgid "First set the Elevation Difference to 12\"\n"
-msgstr "Höhenunterschied"
+msgid "First set the Elevation Difference to 12\n"
+msgstr "als erstes Höhenunterschied auf 12 setzen\n"
 
 #: ../../../../build/app/i18n/custmsg.h:299
 #, fuzzy
@@ -9621,20 +9414,19 @@ msgstr ""
 
 #: ../../../../build/app/i18n/custmsg.h:428
 msgid "You can move or resize the Profile dialog now if you want.\n"
-msgstr ""
+msgstr "Das Höhenprofil Fenster kann nun vergrößert werden.\n"
 
 #: ../../../../build/app/i18n/custmsg.h:429
 msgid "To show the Profile you need to select a Path on the tracks of your layout.\n"
-msgstr ""
+msgstr "Um das Höhenprofil anzeigen zu können muss eine Strecke in Ihrem Plan ausgewählt werden.\n"
 
 #: ../../../../build/app/i18n/custmsg.h:430
-#, fuzzy
 msgid "Select a Defined Elevation point (marked by Gold dots).\n"
-msgstr "Eine festgelegte Höhe auswählen, um das Höhenprofil zu beginnen"
+msgstr "Eine beliebigen Punkt festgelegen, um das Höhenprofil zu beginnen.\n"
 
 #: ../../../../build/app/i18n/custmsg.h:431
 msgid "We will start with the right end of the siding.\n"
-msgstr ""
+msgstr "Wir starten am rechten Ende des Abstellgleises.\n"
 
 #: ../../../../build/app/i18n/custmsg.h:432
 msgid "The second Point is at the left end of the siding.  The Path will be drawn in Purple on the layout.\n"
@@ -10195,50 +9987,55 @@ msgstr ""
 
 #: ../../../../build/app/i18n/custmsg.h:571
 msgid "XTrackCAD provides demonstrations on most of the program's features.  The demos can be run by clicking on the Help menu on the Main window and then selecting Demos."
-msgstr ""
+msgstr "XTrackCAD verfügt über Demos der meisten Funktionen. Diese Demos können abgespielt werden indem im Hilfe Menü des Hauptfensters der Punkt \"Demos\" ausgewählt wird."
 
 #: ../../../../build/app/i18n/custmsg.h:572
 msgid ""
 "The notation \"Menu|Item\" is used in the documentation (and the on-line demos and tips) to indicate the selection of a menu item.\n"
 "For example File|Open means to open the menu by clicking on File on the menu bar of the Main window and then selecting the Open item from that menu."
-msgstr ""
+msgstr "Die Darstellunsgart \"Menü|Unterpunkt\" wird in der Dokumentation den Online Demos und im Tipp des Tages verwendet, sie dient dazu die Selektion eines Unterpunktes zu beschreiben.\n"
+"\"Datei|Öffnen\" bedeutet zum Beispiel in der Menüleiste des Hauptfensters auf Datei zu klicken und dann im aufgehenden Untermenü auf die Auswahl Punkt Öffnen."
 
 #: ../../../../build/app/i18n/custmsg.h:573
 msgid "A number of example layouts are provided.  These files are located in the 'examples' directory where you installed XTrackCAD.  The \"File|Open\" command will open that directory when first used."
-msgstr ""
+msgstr "Einige Beispiel Gleisplänen stehen zu Ihrer Verfügung, diese wurden im Unterverzeichnis 'examples' im Haupverzeichnis von XTrackCAD installiert. Über den Dialog \"Datei|Öffnen\" können diese geladen werden."
 
 #: ../../../../build/app/i18n/custmsg.h:574
 msgid "When installed, the program measures all units in inches.  You can change this on the \"Options|Preferences\" dialog by changing the Units item to Metric instead of English."
-msgstr ""
+msgstr "Nach Installation werden sämtliche Einheiten in Inches dargestellt. Diese Einstellung können Sie über den Dialog \"Optionen|Einstellungen\" ändern, indem Sie von Englisch auf Metrisch wechseln."
 
 #: ../../../../build/app/i18n/custmsg.h:575
 msgid "You can change the overall size of your layout on the \"Options|Layout\" dialog."
-msgstr ""
+msgstr "Die Gesamtgröße Ihres Gleisplans kann über den Dialog \"Optionen|Gleisplan\" eingestellt werden."
 
 #: ../../../../build/app/i18n/custmsg.h:576
 msgid "When installed, the default command is the Describe command.  More experienced users will probably want to change this to the Select command.  You can do this on the \"Options|Command Options\" dialog."
-msgstr ""
+msgstr "Nach Installation ist der Standardbefehl das \"Eigenschaften\" Kommando. Erfahrene Benutzer möchten dies vielleicht in das \"Auswählen\" Kommando ändern. Dies kann über den Dialog \"Optionen|Befehl\" unter Standardbefehl erfolgen."
 
 #: ../../../../build/app/i18n/custmsg.h:577
 msgid "Set your modeling scale on the \"Options|Layout\" dialog.  This controls the Turnouts and Structures that are available, Easement values and track gauge."
-msgstr ""
+msgstr "Stellen Sie im \"Optionen|Gleisplan\" Dialog Maßstab und Spurweite für Ihren Gleisplan ein. Diese Grundeinstellung sollte unbedingt als erstes vorgenommen werden, damit der neu eingestellte Maßstab mit dem Maßstab der geladenen Parameterdatei übereinstimmt."
 
 #: ../../../../build/app/i18n/custmsg.h:578
 msgid "When Selecting tracks, the connection between Selected and Unselected tracks is marked by a Red X.  This indicates points where the connection between tracks will be broken if you Move or Rotate the Selected tracks."
-msgstr ""
+msgstr "Bei ausgewählten Gleisen wird die Verbindung des Gleises durch ein rotes X markiert, genau an dieser Stelle wird das Gleis getrennt wenn es verschoben oder gedreht wird."
 
 #: ../../../../build/app/i18n/custmsg.h:579
 msgid ""
 "You can change orientation of the pages on the Print command by moving or rotating the Print Grid.\n"
 "Shift-Left-Drag moves the grid and Shift-Right-Drag rotates the grid."
 msgstr ""
+"Die Ausrichtung von auszudruckenden Seiten kann geändert werden indem das Druckraster bewegt oder rotiert wird.\n"
+"Shift Taste nach links ziehen bewegt das Raster, Shift Taste nach rechts ziehen rotiert das Raster."
 
 #: ../../../../build/app/i18n/custmsg.h:580
 msgid ""
 "You can add track to any unconnected End-Point with the Modify command.\n"
 "Hold down the Shift key and click on the End-Point and drag away to create a new track segment attached to the End-Point.\n"
 "Repeat with the new End-Point to create flowing tracks."
-msgstr ""
+msgstr "Gleise können zu jedem unverbundenen Endpunkt mit \"Verändern\" hinzugefügt werden.\n"
+"Um einen neuen Gleisabschnitt zu erstellen, markieren Sie einen Endpunkt, halten Sie dann die Shift-Taste gedrückt während Sie den Gleisabschnitt verschieben.\n"
+"Wiederhohlen Sie diese Aktion mit diesem neuen Endpunkt um Gleisabschnitte weiter zu zerlegen."
 
 #: ../../../../build/app/i18n/custmsg.h:581
 msgid ""
@@ -10248,9 +10045,15 @@ msgid ""
 "   End-Point to the Center\n"
 "  the 1st to 2nd End-Point\n"
 "Then drag on one of the Red arrows to create the final shape of the curve.\n"
-"\n"
 "You can click on the small button to the left of the Curve command button to change the method."
 msgstr ""
+"gebogene Gleise können auf vier verschiedene Weisen erstellt werden:\n"
+"  vom ersten Endpunkt in Richtung der Kurve\n"
+"  von Mitte des Gleisbogens zum 1. Endpunkt\n"
+"  vom Endpunkt zur Mitte hin\n"
+"  vom ersten zum zweiten Endpunkt\n"
+"Ziehen Sie dann an einem der beiden roten Pfeile um die endgültige Kurve zu modellieren.\n"
+"Die verschiedenen Methoden zur Gleisbogenerstellung können ausgewählt werden durch anklicken des Knopfes rechts neben dem Kurfenknopf in der Werkzeugleiste."
 
 #: ../../../../build/app/i18n/custmsg.h:582
 msgid ""
@@ -10262,6 +10065,13 @@ msgid ""
 "  dragging from an edge to the Center\n"
 "You can click on the small button to the left of the Circle command button to change the method."
 msgstr ""
+"Gleiskreise ermöglichen einen schnellen Weg die Aufteilung Ihres Gleisplans in den vorhanden Platz einzuteilen. Erstellen Sie Gleiskreise mit üblichen Radien und platzieren Sie diese in Ecken oder an beliebigen Stellen Ihres Hauptgleises an denen ein Richtungswechsel statt finden soll. Dies wird Ihnen helfen einen ersten Überblick von Ihrem gesamten Gleisplan zu erhalten.\n"
+"\n"
+"Gleiskreise können wie folgt erzeugt werden:\n"
+"  mit einem festgelegten Radius\n"
+"  durch ziehen aus der Mitte zur Kante\n"
+"  durch ziehen von der Kante zur Mitte\n"
+"Die verschiedenen Methoden zur Gleiskreiserstellung können ausgewählt werden durch anklicken des Knopfes rechts neben dem Greisknopf in der Werkzeugleiste."
 
 #: ../../../../build/app/i18n/custmsg.h:583
 msgid ""
@@ -10269,26 +10079,32 @@ msgid ""
 "Easements are created with Joining or Extending Tracks.\n"
 "The Easement dialog is used to control easements."
 msgstr ""
+"Übergangsbögen werden benutzt wenn gerades Gleis stufenweise bei sich änderndem Radius in kurviges Gleis ändert, Dies verbessert die Benutzbarkeit und verschönert das Erscheinungsbild.\n"
+"Übergangsbögen werden erstellt indem sie an vorhandene Gleise angeängt werden.\n"
+"Die Schaltfläche \"Easement None\" wird verwendet um die Einstellungen für Übergangsbögen vornehmen zu können."
 
 #: ../../../../build/app/i18n/custmsg.h:584
 msgid "\"Help|Recent Messages\" shows the last error and warning messages that were generated by the program.  Also an explanation of each message is displayed."
-msgstr ""
+msgstr "\"Hilfe|Letzte Mitteilungen\" zeigt die letzen Fehler/Warnungen an die vom Programm veruhrsacht wurden. Weiterhin wird eine Erklärung zu jeder Meldung angezeigt."
 
 #: ../../../../build/app/i18n/custmsg.h:585
 msgid ""
 "When creating stall tracks for a turntable, you usually want the the stall tracks to be spaced evenly.\n"
 "The \"Turntable Angle\" item on \"Options|Command Options\" dialog can be used specify the minimum angle between stall tracks."
 msgstr ""
+"Beim Anschluss von Endgleisen an eine Drehscheibe, möchte man diese üblicherweise gleichmäßig anschließen.\n"
+"Der Punkt \"Drehscheibenwinkel\" im Dialog \"Optionen|Einstellungen\" kann dazu benutzt werden den kleinst möglichen Winkel, beim Anschluss solcher Gleise einzustellen."
 
 #: ../../../../build/app/i18n/custmsg.h:586
 msgid ""
 "XTrackCAD periodically saves the current layout in a check point file.  The 'Check Point' item on the 'Options|Preferences' dialog controls how often the file is saved.\n"
 "You can recover your working file after a system crash by copying the checkpoint file (xtrkcad.ckp in the XTrackCAD Working directory) to file.xtc"
-msgstr ""
+msgstr "XTrackCAD sichert ständig ihre aktuelle Arbeit in eine temporäre Datei. Im Feld 'Sicherungskopie' unter dem Menüpunkt 'Optonen|Einstellungen' können Sie die Häufigkeit dieser automatischen Sicherung festlegen.\n"
+"Nach einem System/Programm Absturz kopieren Sie einfach die Datei xtrkcad.ckp (im Arbeitsverzeichnis von XTrackCAD) nach <Geisplan>.xtc"
 
 #: ../../../../build/app/i18n/custmsg.h:587
 msgid "The Parallel command is helpful to layout yards and sidings.  If the Parallel track abuts with an existing track, it is automatically connected."
-msgstr ""
+msgstr "Das Parallel Kommando ist nützlich um Bahnhöfe und Abstellgeise zu erstellen. Falls sich ein parallel Gleis mit einem existierenden Gleis fast berührt wird dieses automatisch verbunden."
 
 #: ../../../../build/app/i18n/custmsg.h:588
 msgid ""
@@ -10296,22 +10112,31 @@ msgid ""
 "Shift-Left-Drag moves tracks and Shift-Right-Drag rotates them.\n"
 "Control-Left-Drag can move labels."
 msgstr ""
+"Gleise können verschoben oder rotiert werden indem sie mit Hilfe des \"Ändern|Auswählen\" Kommandos ausgewählt werden und dann druch gleichzeitiges festhalten der Shift-Taste und einer Maustaste bewegt werden.\n"
+"Shift und linke Maustaste verschiebt ein Gleis.\n"
+"Shift und rechte Maustaste rotiert ein Gleis.\n"
+"Steuerung und linke Maustaste verschiebt Beschreibungen."
 
 #: ../../../../build/app/i18n/custmsg.h:589
 msgid "You can move and rotate the Snap Grid to align with existing track or benchwork."
-msgstr ""
+msgstr "Das Fangraster kann bewegt oder gedreht werden um es an Gleisen oder Aufbauten ausrichten zu können."
 
 #: ../../../../build/app/i18n/custmsg.h:590
 msgid ""
 "Use the Parts List command to measure track length.\n"
 "Select the tracks you want to measure and then click on the Parts List button.  The report will list the total of length of the selected flex-track.  You will have to add in the length of any Turnouts."
 msgstr ""
+"Der Dialog \"Verwalten|Teileliste\" kann dazu benutzt werden Gleislängen zu messen.\n"
+"Markieren Sie die zu messenden Gleise und wählen Sie den Teileliste Punkt. Die auftauchende Liste zeigt die Länge der ausgewählten Gleise an. Die Länge der Weichen muss hinzugezählt werden.\n"
+"Hinweis: Dies funktioniert nur für Flex-Gleise!"
 
 #: ../../../../build/app/i18n/custmsg.h:591
 msgid ""
 "The length of flex-track attached to each Turnout is displayed on layout near the end-points of the Turnouts.\n"
 "Make sure 'Lengths' option of the 'Label Enable' toggle button on the Display dialog is selected."
 msgstr ""
+"Die Länge von Flex-Gleis welches mit Weichen verbunden ist wird in der Nähe des Endpunktes der Weiche angezeigt.\n"
+"Stellen Sie sicher das der Auswahlpunkt \"Längen\" im Dialog \"Optionen|Anzeige\" ausgewählt ist."
 
 #: ../../../../build/app/i18n/custmsg.h:592
 msgid ""
@@ -10319,126 +10144,144 @@ msgid ""
 "Select the track at the beginning and end of the section.  The total length of track will be displayed on the Profile window in the lower right corner.\n"
 "Note: the Profile selects the shortest path between the two selected tracks, which might not be the path you are interested in.  In this case, select the first track and then select other tracks along the path."
 msgstr ""
+"Das Kommando \"Höhenprofil\" im Menü \"Ändern\" kann dazu benutzt werden um die Länge einer zusammenhängenden Gleissektion heraus zu finden.\n"
+"Markieren Sie den Anfang und das Ende dieser Sektion. Die totale Länge dieser Gleissektion wird in der unteren rechten Ecke des Höhenprofil Fensters angezeigt.\n"
+"Hinweis: Das Höhenprofil wählt immer den kürzesten Weg zwischen beiden markierten Gleisen, möglicherweise ist dies aber nicht die Länge an der Sie interresiert sind. In diesem Fall wählen Sie einfach den gleichen Startpunkt und den nächst frührer möglichen Endpunkt aus."
 
 #: ../../../../build/app/i18n/custmsg.h:593
 msgid ""
 "Layers can be used to contain different groups of tracks or other features.  You might use one layer for the main-line, another of staging tracks and another of benchwork.\n"
 "You can give each layer a name (by using the Layer dialog).  This name will be displayed as the Balloon Help for the corresponding Layer button, if you have Balloon Help enabled on the Display dialog."
 msgstr ""
+"Ebenen können dazu benutzt werden um verschiedene Stockwerke oder Funktionen darstellen zu können. Eine Ebene kann z.B. für das Hauptgleis verwendet werden, eine weitere für Schattenbahnhöfe und eine weitere für Aufbauten und oder Tunnnel.\n"
+"Jeder Ebene kann ein Name über den \"Verwalten|Ebenen\" Dialog zugewiesen werden. Falls die Auswahl \"Sprechblasen\" im Menü \"Optionen|Einstellungen\" aktiviert wurde, wird dieser vergebene Name in der Werkzeugleiste für diese Ebene angezeigt."
 
 #: ../../../../build/app/i18n/custmsg.h:594
 msgid "You can remove groups of buttons or the Hot Bar from the Main window to give you more room if you are not using some features.  Also, the number of Layer buttons displayed is controlled by the Layers dialog."
-msgstr ""
+msgstr "Die Werkzeugleiste kann über den Dialog \"Anzeige|Werkzeugleiste anpassen\" verändert werden um mehr Platz im Hauptfenster zur Verfügung zu stellen. Die Anzahl der Ebenenknöpfe wird über den Dialog \"Verwalten|Ebenen\" eingestellt."
 
 #: ../../../../build/app/i18n/custmsg.h:595
 msgid ""
 "The size of the Map window is controlled by the overall size of the room (specified on the Layout dialog) and the Map Scale (on the Display dialog).  You can make the Map window larger (or smaller) by decreasing (or increasing) the Map Scale.\n"
 "XTrackCAD will prevent you from making the Map window too small or too large."
 msgstr ""
+"Die Größe des Kartenfensters wird in Abhängigkeit zur eingestellten Gesamtgröße des Raums kontrolliert. Die Gesamtgröße des Raums wird über den Dialog \"Optionen|Gleisplan\", der Maßstab des Kartenfensters über die Auswahl \"Kartenmaßstab\" im Dialog \"Optionen|Anzeige\" eingestellt. Die Größe des Kartenfensters kann verändert werden, indem der Wert für Kartenmaßstab entweder erhöht oder verkleinert wird.\n"
+"XTrackCAD lässt keine zu kleinen/großen Werte für das Kartenfenster zu."
 
 #: ../../../../build/app/i18n/custmsg.h:596
 msgid "You can unload parameter files you are not using by the Parameter Files dialog.  This removes unused Turnout and Structure definitions from the Hot Bar and makes the program start faster."
-msgstr ""
+msgstr "Damit Gleise in der Schnellauswahl auftauchen ist es nötig eine Gleis Parameterdatei für Ihren Gleisplan zu laden, im Dialog \"Datei|Parameterdateien\" können Sie die für Ihr Gleis nötige Parameterdatei laden. Nicht mehr benötigte Parameterdateien können über den gleichen Dialog entladen werden. Hierdurch werden nicht mehr benötigte Weichen/Gleise von der Schnellauswahl gelöscht was das Programm schneller starten läßt."
 
 #: ../../../../build/app/i18n/custmsg.h:597
 msgid "Right-Click on the Main window displays a menu list of commands as an alternative to pressing the buttons on the tool bar or using the menu accelerator keys."
-msgstr ""
+msgstr "alternativ zur Werkzeugleiste oder den Menütasten kann durch rechts Klick im Hauptfenster ein weiteres Kommando Menü benutzt werden."
 
 #: ../../../../build/app/i18n/custmsg.h:598
 msgid "Holding down the Shift key while you Right-Click will display options for the current command (if any)."
-msgstr ""
+msgstr "Bleibt die Shift Taste gedrückt während Sie ein Kommando ausgewählt haben werden (wenn vorhanden) Optionen für dieses Kommando angezeigt."
 
 #: ../../../../build/app/i18n/custmsg.h:599
 msgid ""
 "Right-Click on the Hot Bar displays a menu of the different groups of objects which you can use to jump to the group you are interested in.\n"
 "Pressing a numeric key (1-9 and 0) moves the Hot Bar to corresponding position (1 is the start, 5 is half way, 0 is the end)."
 msgstr ""
+"Rechts Klick in der Schnellauswahl öffnet ein Menü mit verschiedenen Objektgruppen, diese können benutzt werden um schnell zu dieser Art von Gleisen zu springen.\n"
+"Durch drücken von Zahlen in der Schnellauswahl (1-9 und 0) kann auch die entsprechende Position der Gleisauswahl geändert werden, hierbei kennzeichnet 1 die erste Gleisauswahl, 5 gibt die Mitte der Auswahl an und 0 das Ende."
 
 #: ../../../../build/app/i18n/custmsg.h:600
 msgid ""
 "Right-Drag on the Map window sets the origin and scale of the Main window.\n"
 "The Main window will be centered on the spot where you started the Draw and how far you Drag will control how large an area you can see on the Main window."
 msgstr ""
+"Durch ziehen mit der rechten Maustaste im Kartenfenster wird der Focus und Maßstab im Hauptfenster eingestellt.\n"
+"Das Hauptfenster wird hierbei aufgrund der markierten Auswahl im Kartenfenster zentriert dargestellt."
 
 #: ../../../../build/app/i18n/custmsg.h:601
 msgid "To refresh the Main window, press Control-L (hold down the 'Ctrl' key and then press the 'l' key)."
-msgstr ""
+msgstr "Um die Darstellung im Hauptfenster zu erneuern, benutzen Sie Strg+L (halten Die die Steuernung Taste gedrückt und tippen Sie den Buchstaben 'l')."
 
 #: ../../../../build/app/i18n/custmsg.h:602
 msgid "The File menu contains a list of the last 5 layouts you were working on."
-msgstr ""
+msgstr "Der Dialog \"Datei\" enthält eine Liste der letzten 5 Gleispläne die Sie geöffnet hatten."
 
 #: ../../../../build/app/i18n/custmsg.h:603
 msgid "The Print command can optionally print lines representing the roadbed for all tracks.  This is useful when printing full size (1:1) for cutting roadbed."
-msgstr ""
+msgstr "Im  \"Drucken\" Dialog kann, die Auswahl \"Gleisbettung drucken\" ausgewählt werden, um im (1:1) Maßstab Gleisbettvorlagen ausdrucken zu können."
 
 #: ../../../../build/app/i18n/custmsg.h:604
 msgid "Pressing the 'Esc' key cancels the current command and invokes the default command, (which is either Describe or Select)."
-msgstr ""
+msgstr "Durch drücken der 'ESC' Taste wird der momentane Befehl abgebrochen und automatisch der Standardbefehl aktiviert, (was entweder Eigenschaften oder Auswählen ist)."
 
 #: ../../../../build/app/i18n/custmsg.h:605
 msgid ""
 "When moving or rotating tracks on slow machines or with a large number of tracks, you can improve performance by changing the way tracks are drawn while being moved.\n"
 "Shift-Right click will display a menu containing options to draw tracks normally, as simple lines or just draw end-points."
 msgstr ""
+"Auf langsamen Computern oder bei hoher Anzahl von Gleisen, kann die Art und Weise wie Gleise neu gezeichnet werden verändert werden.\n"
+"Nachdem Gleise markiert wurden, kann durch festhalten der Shift-Taste und einem rechts Klick mit der Maus in einem Options Menü ausgewählt werden wie die Gleise dargestellt werden sollen: Normal, Einfach oder nur als Endpunkte."
 
 #: ../../../../build/app/i18n/custmsg.h:606
 msgid "The colors of different parts of the Main window can be changed with the Colors dialog.  In particular, the Snap Grid color can be changed to make it more visible when printed."
-msgstr ""
+msgstr "Farben der verschiedenen Baugruppen im Hauptfenster können über den Dialog \"Optionen|Farben\" verändert werden. Im Besonderen kann die Farbe des Fangrasters geändert werden um es beim ausdrucken besser sichtbar machen zu können."
 
 #: ../../../../build/app/i18n/custmsg.h:607
 msgid ""
 "By default objects are drawn in their normal colors.  Tracks will be drawn in Black.  Objects can also be drawn in the color according to their Layer.  The color of a Layer is displayed on the corresponding Layer button.\n"
 "The Display dialog 'Color Layers' item has separate toggles for Tracks and non-Tracks."
 msgstr ""
+"Üblicherweise werden Objekte in Ihren voreingestellten Farben gezeichnet. Gleise werden in schwarz dargestellt. Objekte können in den Farben ihrer jeweiligen Ebenen dargestellt werden. Die Farbe einer Ebene wird auf ihrem zugehörigen Ebenenknopf angezeigt.\n"
+"Die Auswahl \"Ebenenfarben\" im Dialog \"Optionen|Anzeige\" besitzt jeweils für Gleise und Sonstige eine getrente Möglichkeit zur Aktivierung von Farben."
 
 #: ../../../../build/app/i18n/custmsg.h:608
 msgid "Each Layer can be drawn or hidden by the 'Visible' toggle on the Layers dialog.  "
-msgstr ""
+msgstr "Jede Ebene kann im Dialog \"Verwalten|Ebenen\" verborgen oder angezeigt werden."
 
 #: ../../../../build/app/i18n/custmsg.h:609
 msgid ""
 "Short cut Layer buttons can also be displayed on the tool bar for up to the first 20 layers.\n"
 "This buttons allow to Show or Hide the layers."
-msgstr ""
+msgstr "Ebenenknöpfe können für die ersten 20 Ebenen in der Werkzeugleiste dargestellt werden, diese Nummernknöpfe können dazu benutzt werden um Ebenen zu verbergen oder anzuzeigen."
 
 #: ../../../../build/app/i18n/custmsg.h:610
 msgid "The name of the Layer is the Balloon Help for the Layer button."
-msgstr ""
+msgstr "Der Name einer Ebene wird in der Sprechblase der jeweiligen Ebene angezeigt."
 
 #: ../../../../build/app/i18n/custmsg.h:611
 msgid "The playback speed of the Demos can be changed by using Speed drop down list on the Demo window."
-msgstr ""
+msgstr "Die Wiedergabegeschwindigkeit von Demos kann durch den Auswahlreiter rechts oben im Demo Fenster eingestellt werden."
 
 #: ../../../../build/app/i18n/custmsg.h:612
 msgid "Many of the commands and dialogs can be invoked by special key combinations called Menu-Accelerators.  These are listed on the Menus next to the command name.  For example, Control-P will invoke the Print command."
-msgstr ""
+msgstr "Viele Kommandos oder Menü Dialoge können über Tastaturkürzel aufgerufen werden. Diese Kürzel werden rechts (wenn verfügbar) neben jedem Kommando angezeigt. Zum Beispiel: Strg+P im Menü \"Datei|Drucke\" ruft den Drucken Dialog auf."
 
 #: ../../../../build/app/i18n/custmsg.h:613
 msgid ""
 "The Connect command is used to join Sectional track pieces that don't quite fit together.\n"
 "This command works by adding small gaps between other tracks to move the selected End-Points closer together."
-msgstr ""
+msgstr "Das \"Gleisstücke verbinden\" Kommando im Dialog \"Ändern\" wird verwendet um Gleisstücke die nicht verbunden sind miteinander zu verbinden. Dies wird erreicht indem kleine Lücken bei andern Gleisen eingefügt werden damit die beiden Endpunkte miteinander verbunden werden können."
 
 #: ../../../../build/app/i18n/custmsg.h:614
 msgid ""
 "To copy a group of objects: Select the objects, press Control-C (or select Copy from the Edit menu), press Control-V (or select Paste from the Edit menu).\n"
 "The selected tracks will be copied to the layout and you can Move or Rotate them into position."
 msgstr ""
+"Um eine Gruppe von Objekten zu kopieren: Selektieren Sie diese, drücken Sie Strg+C (oder wählen Sie \"Kopieren\" im Menü \"Bearbeiten\" aus), drücken Sie Strg+V (oder wählen Sie \"Einfügen\" im Menü \"Bearbeiten\" aus).\n"
+"Die kopierten Objekte werden in den Gleisplan eingefügt und können dann verschoben oder rotiert werden und somit in Position gebracht werden."
 
 #: ../../../../build/app/i18n/custmsg.h:615
 msgid "In the Rotate (or Select) commands you can press Shift-Right-Click to display the Rotate menu which allows you to rotate the selected objects by a specific angle."
-msgstr ""
+msgstr "Bei Benutzung der Kommandos \"Rotieren\" oder \"Auswählen\" kann durch gedrückt halten der Shift-Taste und rechts Klick mit der Maustaste in einem auftauchenden Optionsmenü der Winkel zum rotieren eines Objekts ausgewählt werden."
 
 #: ../../../../build/app/i18n/custmsg.h:616
 msgid "You can use the Move-To-Join option of the Join command (hold down the Shift key) to move a group of Selected tracks to attach with some unselected End-Point."
-msgstr ""
+msgstr "Das \"Verbinden\" Kommando im Menü \"Ändern\" besitzt eine Option um eine Gruppe von ausgewählten Gleisen mit einem nicht vorher spezifizierten Endpunkt verbinden zu können. Markieren Sie zunächst die zu verbindenen Gleise, wählen Sie als nächstes den Dialog \"Ändern|Verbinden\", halten Sie nun die Shift-Taste gedrückt während Sie bei gedrückter linker Maustaste die markierte Gruppe von Gleisen zum Zielpunkt führen, durch nochmaliges drücken der linken Maustaste werden die selektierten Gleise dem Endpunkt hinzugefügt."
 
 #: ../../../../build/app/i18n/custmsg.h:617
 msgid ""
 "The Price List dialog (on the File Menu) is used to specify the prices of each type of Turnout, Sectional Track and Structure.  Also, the length and price of flex-track pieces can be specified for each scale.\n"
 "This values will be used on the Parts List report to generate total cost of the selected objects."
-msgstr ""
+msgstr "Der Dialog \"Verwalten|Preisliste\" kann verwendet werden, um Preise für jedes Gleis, Weiche oder andere Gegenstände einzugeben. Weiterhin können auch Länge und Preis für Flex-Gleise für jeden beliebigen Maßstab eingegeben werden.\n"
+"Die angegebenen Preise werden verwendet um die Gesamtkosten im Dialog \"Verwalten|Teileliste\" auflisten zu können."
 
 #: ../../../../build/app/i18n/custmsg.h:618
 msgid ""
@@ -10448,78 +10291,88 @@ msgid ""
 "\n"
 "You can also use a Polygon to represent aisles. "
 msgstr ""
+"Wasserbereiche können durch Polygone mit Hilfe des \"Zeichnen|Formen|Zeichne Polyline\" in der entspechenden Farbe erstellt werden.\n"
+"Das \"Verändern\" Kommando kann benutzt werden um Ecken an diesen Polygonen hinzu zu fügen oder zu löschen um diese besser der Form des Wassers anpassen zu können.\n"
+"\n"
+"Polylinien können auch dazu verwendet werden um Flussläufe darzustellen."
 
 #: ../../../../build/app/i18n/custmsg.h:619
 msgid ""
 "When you create Benchwork you can move it below other objects by Selecting the Benchwork and use the Below command.\n"
 "Also, put Benchwork in a separate Layer so you can hide it if desired."
 msgstr ""
+"erstellte Aufbauten können unter andere Objekte verschoben werden, indem man das \"Darunter\" Kommando aus dem Menü \"Bearbeiten\" verwendet.\n"
+"Weiterhin sollten Sie Aufbauten auf speraten Ebenen darstellen, sie können somit sehr leicht im Bedarfsfall versteckt werden, indem man die zugehöhrige Ebene einfach ein oder ausblendet."
 
 #: ../../../../build/app/i18n/custmsg.h:620
 msgid "You can enter Distances and Lengths using any format regardless of the Length Format on the Preferences dialog."
-msgstr ""
+msgstr "Längen können unabhänig der voreingestellten Werte im \"Optionen|Einstellungen\" Dialog eingegeben werden."
 
 #: ../../../../build/app/i18n/custmsg.h:621
 msgid "You can enter Metric values when English is the default Units and vice versa."
-msgstr ""
+msgstr "Metrische Werte können eingegeben werden auch wenn die Einstellung für Einheiten Englisch gewählt ist."
 
 #: ../../../../build/app/i18n/custmsg.h:622
 msgid "When entering Distances and Lengths you can press the '=' key to redisplay the value in the default format."
-msgstr ""
+msgstr "Bei Eingabe von Entfernungen und Längen können Sie '=' Zeichen verwenden um den Wert im voreingestellten Format anzuzeigen."
 
 #: ../../../../build/app/i18n/custmsg.h:623
 msgid "You can also press the 's' key to convert a Prototype measurement to a Scale measurement y dividing by the ratio for the current scale."
-msgstr ""
+msgstr "Sie können die Taste 's' benutzen um eine Muster Messung in eine Maßstab Messung zu verwandeln, die Taste 'y' gibt hierbei den Teiler Faktor des momentanen Maßstabs an."
 
 #: ../../../../build/app/i18n/custmsg.h:624
 msgid "The 'p' key will convert a Scale measurement to a Prototype measurement."
-msgstr ""
+msgstr "Die Taste 'p' konvertiert eine Maßstab Messung in eine Muster Messung."
 
 #: ../../../../build/app/i18n/custmsg.h:625
 msgid "You can place cars on the layout using the Train Simulation command to check clearance points, track to track separation and coupling."
-msgstr ""
+msgstr "Lokomotiven können im Gleisplan über den Zugbetrieb Knopf plaziert werden um Weichenübergänge, Gleis zu Gleis Verbindungen oder ankuppeln simulieren zu können."
 
 #: ../../../../build/app/i18n/custmsg.h:626
 msgid "Use the MoveTo button on the Custom Management dialog to move your custom Turnout, Structure and Car definitions to a .XTP parameter file."
-msgstr ""
+msgstr "Benutzen Sie den \"Verschieben nach\" Knopf im \"Verwalten|Anpassungs Verwaltung\" Menü um selbst erstellte Weichen, Strukturen oder Wagen Definitionen in eine .XTP Parameter Datei zu verschieben."
 
 #: ../../../../build/app/i18n/custmsg.h:627
 msgid "If you are printing multiple pages on a continuous feed printer (such a Dot Matrix) you can change the Page Order if necessary to print pages out in proper order."
-msgstr ""
+msgstr "Falls Sie einen Drucker mit endlos Papier verwenden, können Sie die Reihenfolge der Seiten ändern um diese in der richtigen Reihenfolge auszudrucken."
 
 #: ../../../../build/app/i18n/custmsg.h:628
 msgid "On the Car Item and Car Part dialogs, you can enter custom values for Manufacturer, Part and Road by typing the new value directly into the Drop Down List."
-msgstr ""
+msgstr "Im Dialog \"Verwalten|Wagenverzeichnis\" können eigene Werte für Hersteller, Artikelnummer und Straße direkt in der angezeigten Liste eingegeben werden."
 
 #: ../../../../build/app/i18n/custmsg.h:629
 msgid ""
 "On the Car Item dialog, you can change the Road, Number, Color and other values for a Car.  This is useful if you repaint or renumber a car. \n"
 "You can also change the Coupler Mounting and Coupler Length if you change the couplers."
-msgstr ""
+msgstr "Im Dialog \"Verwalten|Wagenverzeichnis\" können eigene Werte für Zugnummern, Farbe und andere Werte vergeben werden. Dies is nützlich wenn Sie beispielsweise einen Wagen umlackiert oder eine neue Rollnummer vergeben haben. \n"
+"Weiterhin kann die Kupplungsaufhängung und auch deren Länge verändert werden."
 
 #: ../../../../build/app/i18n/custmsg.h:630
 msgid "You can Export your Car Inventory to a file in Comma-Separated-Value format which can be read by most spread-sheet programs."
-msgstr ""
+msgstr "Ihr Wagen/Lokbestand kann in eine, druch Kommata getrennte, Textdatei exportiert werden, welche von allen gänigen Tabellenkalkulations Programmen eingelesen werden kann."
 
 #: ../../../../build/app/i18n/custmsg.h:631
 msgid "Use the Train Odometer to measure distances along the track."
-msgstr ""
+msgstr "Benutzen Sie den Zugsteckenzähler um Entfernungen auf dem Gleis messen zu können."
 
 #: ../../../../build/app/i18n/custmsg.h:632
 msgid ""
 "Holding down the Shift key when clicking the Zoom In or Zoom Out button will zoom to a programmed Drawing Scale.  \n"
 "Holding down the Shift and Control keys when clicking a Zoom button will set it's program Zoom to the current Drawing Scale."
 msgstr ""
+"klicken Sie die Lupenknöpfe an während die Shift Taste gedrückt ist focusiert das Programm auf einen vorher festgelegten Maßstab.  \n"
+"durch gleichzeitiges Festhalten der Strg + Shift Tasten kann durch anklicken der jeweiligen Lupenknöpfe wird die Einstellung der Vergrößer/kleinerung festgelegt."
 
 #: ../../../../build/app/i18n/custmsg.h:633
 msgid "You can trim the ends of turnouts by holding down the Shift key when using the Split command."
-msgstr ""
+msgstr "bei Benutzung des \"Gleis auftrennen\" Kommandos, kann man durch festhalten der Shift Taste das Ende einer Weiche anpassen."
 
 #: ../../../../build/app/i18n/custmsg.h:634
 msgid ""
 "The Split command can be used to create Block Gaps at end points between two tracks.  \n"
 "Either rail or both rails can be gapped, which are drawn as thick lines."
-msgstr ""
+msgstr "Der Dialog \"Ändern|Gleis auftrennen\" kann benutzt werden um Blockabstände an Endpunkten von zwei Gleisen einzufügen.  \n"
+"Abstände können entweder an einem oder beiden Enden eingefügt werden, diese werden durch dicke Linien gekennzeichnet."
 
 #: ../../../../build/app/i18n/custmsg.h:635
 msgid ""
@@ -10527,116 +10380,141 @@ msgid ""
 "They will also 'crash' if they hit the end of the track or an open turnout.  \n"
 "Crashed trains must be manually moved back onto the track."
 msgstr ""
+"Züge 'entgleisen' wenn sie auf ein anderes Fahrzeug treffen oder sie beim Ankuppeln schneller unterwegs sind wie die maximal eingestellte Kuppelgeschwindigkeit (einstellbar über \"Optionen|Einstellungen\").  \n"
+"Außerdem werden sie 'entgleisen' sobald sie auf ein totes Gleisende oder eine offene Weiche treffen.  \n"
+"Entgleiste Züge müssen von Hand wieder auf das Gleis zurück gestellt werden."
 
 #: ../../../../build/app/i18n/custmsg.h:636
 msgid "You can add new track segments to a turnout definition or create a definition from individual tracks using the Group command."
-msgstr ""
+msgstr "das Auswählen Kommando kann verwendet werden um Teilabschnitte an vorhandenes Gleis anzuhängen oder einen neuen Teilabschnitt zu erstellen indem einzelne Gleise zusammengeführt werden."
 
 #: ../../../../build/app/i18n/custmsg.h:637
 msgid ""
 "The center point and radius of Curved and Circle tracks can optionally be drawn.  \n"
 "This feature is toggled by using the Move Label command and doing a Shift-Left-Click on the track."
 msgstr ""
+"Der Mittelpunkt von Kurven oder Kreisen kann auch angezeigt werden.  \n"
+"Diese Option kann ein/ausgeschaltet werden durch festhalten der Shift Taste bei gleichzeitigem links Klick der Maus."
 
 #: ../../../../build/app/i18n/custmsg.h:638
 msgid "Turnout, Curved and Helix track labels can be individually turned on and off by doing a Shift-Right-Click on the track when using the Move Label command."
-msgstr ""
+msgstr "Weichen, Kurven und Gleiswendel Beschreibungen können einzeln an und aus geschaltet werden. Halten Sie hierzu die Shift Taste gedrückt während Sie das Kommando \"Ändern|Beschreibungen verschieben\" verwenden und klicken Sie mit der rechten Maustaste auf die jeweilige Beschreibung."
 
 #: ../../../../build/app/i18n/custmsg.h:639
 msgid "You can use the Describe command to change the font size of Text objects."
-msgstr ""
+msgstr "Das Kommando \"Ändern|Eigenschaften\" wird verwendet um die Schriftgröße von Textobjekten zu ändern."
 
 #: ../../../../build/app/i18n/custmsg.h:640
 msgid "You can use the Describe command to change the size of Dimension Line labels."
-msgstr ""
+msgstr "Das Kommando \"Ändern|Eigenschaften\" wird verwendet um die Größe von Dimensions Linien Beschreibungen zu ändern."
 
 #: ../../../../build/app/i18n/custmsg.h:641
 msgid ""
 "Normally Right-Click displays a popup menu of commands and Shift-Right-Click displays options for the current command.  \n"
 "This can reversed by using the Right Click toggle button on the Command Options dialog."
 msgstr ""
+"normalerweise wird durch einen rechts Klick im Gleisplan ein Kommando Menü angezeigt, bei festhalten der Shift-Taste und einem vorher ausgewählten Kommando wird ein optionales Menü für das jeweilige Kommando angezeigt.  \n"
+"Dieses Verhalten kann vertauscht werden indem der rechts Umschalter aus dem Kommando Dialog verwendet wird."
 
 #: ../../../../build/app/i18n/custmsg.h:642
 msgid ""
 "The Align item on the Rotate command options menu will let you Align selected objects with any unselected object.  \n"
 "The selected objects are rotated so the first point is parallel to the second point you selected."
 msgstr ""
+"Die Auswahl \"Ausrichten\" im Optionsmenü des \"Drehen\" Kommandos kann ausgewählte Objekte an nicht ausgewählten Objekten ausrichten.  \n"
+"Die ausgewählten Objekte werden so rotiert dass der erste Auswahlpunkt parallel zum zweiten Auswahlpunkt erscheint."
 
 #: ../../../../build/app/i18n/custmsg.h:643
 msgid ""
 "Print To Bitmap allows you to print the track center line.  \n"
 "This is useful if you later print the bitmap full size as a template when laying track."
 msgstr ""
+"Speichern als Bitmap ermöglicht das mitspeichern der Gleismitte.  \n"
+"Dies ist nützlich falls Sie später diese Bitmap in voller Größe ausdrucken wollen um sie als Gleisvorlage verwenden zu können."
 
 #: ../../../../build/app/i18n/custmsg.h:644
 msgid "You can export the selected tracks to a DXF file which can be read by most CAD programs."
-msgstr ""
+msgstr "Sie können markierte Gleise in eine DXF Datei exportieren, welche von den meisten CAD Programmen lesbar ist."
 
 #: ../../../../build/app/i18n/custmsg.h:645
 msgid "Lengths and distances can be displayed in a variety of units and formats such as 1' 10 3/4\", 1ft 10.75in or 22.750.  In Metric mode, distances can be displayed as millimeters, centimeters or meters.  See the Length Format item on the Preferences dialog."
-msgstr ""
+msgstr "Längen und Entfernungen können in einer Vielzahl von Einheiten und Formaten dargestellt werden dies sind z.B 1' 10 3/4\" 10.75in oder 22.750. Bei der Auswahl von metrischen Einheiten werden Entfernungen und Längen in Millimetern, Zentimetern oder Metern dargestellt. Diese Einstellung kann in der Auswahl \"Einheiten\" im Dialog \"Optionen|Einstellungen\" vorgenommen werden."
 
 #: ../../../../build/app/i18n/custmsg.h:646
 msgid ""
 "Tracks that are too steep or curve too tightly are drawn in the Expection color (Purple by default).  \n"
 "This helps to identify potential problem areas.  \n"
 "The maximum grade and minimum radius are set on the Preferences dialog."
-msgstr ""
+msgstr "Gleise die zu abschüssig sind oder zu enge Radien haben werden in einer Ausnahme Farbe dargestellt (üblicherweise Lila). \n"
+"Dies hilft um Problembereiche aufzufinden. \n"
+"Die maximale Steigung und der minimale Radius werden im Eingenschaften Dialog eingestellt."
 
 #: ../../../../build/app/i18n/custmsg.h:647
 msgid ""
 "The Flip command produces a mirror-image of the selected tracks.  \n"
 "If possible, right-hand turnouts are relabeled as left-hand turnouts (and vice versa)."
-msgstr ""
+msgstr "Das \"Spiegeln\" Kommando im Menü \"Ändern\" spiegelt ausgewählte Gleise.   \n"
+"Falls möglich werden rechte Weichen in linke Weichen umbenannt oder linke in rechte."
 
 #: ../../../../build/app/i18n/custmsg.h:648
 msgid ""
 "Then Ungroup command will break turnouts and structures into individual track, line and shape segments.  \n"
 "You can modify each segment and add new ones.  \n"
 "Then use the Group command to update the definition."
-msgstr ""
+msgstr "Das Kommando \"Verwalten|Gruppierung aufheben\" trennt Weichen und oder Strukturen in einzelne Gleise, Linien oder Segmente auf.  \n"
+"Sie können nun jedes einzelne Segment modifizieren neue hinzufügen usw.  \n"
+"Danach benutzen Sie das Kommando \"Verwalten|Gruppieren\" um Ihre neue Definition wieder als Gruppierung zusammen zu fügen."
 
 #: ../../../../build/app/i18n/custmsg.h:649
 msgid "Dimension lines show the distance between two points."
-msgstr ""
+msgstr "Maßlinien zeigen die Entfernung zwischen zwei Punkten an."
 
 #: ../../../../build/app/i18n/custmsg.h:650
 msgid ""
 "A variety of Benchwork (rectangular, L-girder and T-girder) can be drawn.  \n"
 "Use the Below command to move the Benchwork below the track for proper display."
-msgstr ""
+msgstr "Eine Vielzahl Unterbauten kann dargestellt werden (Rechteckformen, L-Träger und T-Träger).  \n"
+"Das Kommando \"Darunter\" im Menü \"Bearbeiten\" wird benutzt um Unterbauten korrekt unter den Gleise darstellen zu können."
 
 #: ../../../../build/app/i18n/custmsg.h:651
 msgid ""
 "The Turnout Designer dialogs allow you to specify the width of any attached roadbed.  \n"
 "As well, the color and thickness of the lines used to represent the roadbed can be specified."
 msgstr ""
+"Der Weichendesigner ermöglicht die Angabe der Spurbreite von jedem beliebigen Gleisbett.  \n"
+"Desweitern können Farbe und Stärke der Linien angegeben in denen das Gleisbett dargestellt wird."
 
 #: ../../../../build/app/i18n/custmsg.h:652
 msgid ""
 "The Color dialog (on the Options menu) is used to change the color of different objects on the display.  \n"
 "You can change the color of the Snap Grid and Borders, as well as Normal, Selected and Exception tracks."
 msgstr ""
+"Der Dialog \"Optionen|Farben\" wird benutzt um die Farben für verschiedene Objekte einzustellen.  \n"
+"Die Farbe des Fangrasters, Ränder sowohl als auch für normale selektierte und Ausnahme Gleise können angegeben werden."
 
 #: ../../../../build/app/i18n/custmsg.h:653
 msgid ""
 "You can draw tracks with wider lines for rails.  \n"
 "Select the tracks and use Medium or Thick Tracks on the Edit menu."
 msgstr ""
+"Schienen können mit breiteren Linien für Gleise gezeichnet werden.  \n"
+"Wählen Sie hierzu Mittlere Gleise oder Dicke Gleise im Bearbeiten Menü aus."
 
 #: ../../../../build/app/i18n/custmsg.h:654
 msgid ""
 "Many objects on the layout have labels: Turnouts/Helix/Curved Titles, Track Lenghts, End-Point Elevations, Track Elevations and Cars.  \n"
 "You can turn these labels on or off with the Label Enable toggle buttons on the Display options dialog."
 msgstr ""
+"Viele Objekte im Gleisplan besitzen Beschreibungen: Weichen/Gleiswendel/Kurven Gleislängen Endpunkte Höhenangaben usw.  \n"
+"Sie können diese Beschreibungen über den Dialog \"Optionen|Anzeige\" ein oder ausschalten."
 
 #: ../../../../build/app/i18n/custmsg.h:655
 msgid "If you hold down the Control key when using the Rotate command, the rotation will be down in increments of 15°."
-msgstr ""
+msgstr "Durch festhalten der Strg Taste wird beim Drehen Kommando, die Rotation um jeweils 15° verringert."
 
 #: ../../../../build/app/i18n/custmsg.h:656
 msgid "When using the Rotate command, Shift-Right-Click displays a menu allowing you to rotate by specific amounts or to align the selected objects with another object."
-msgstr ""
+msgstr "Beim benutzen des Drehen Kommandos kann durch halten der Shift Taste aus einem Menü die Rotation des Objektes ausgewählt werden oder das Objekt kann anhand eines anderen Objektes ausgerichtet werden."
 
 #~ msgid "Scale / Gauge"
 #~ msgstr "Maßstab / Spurweite"

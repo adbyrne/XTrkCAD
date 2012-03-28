@@ -50,15 +50,15 @@ static paramData_t customPLs[] = {
 #define customSelL		((wList_p)customPLs[I_CUSTOMLIST].control)
 	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &customListData, NULL, BL_MANY },
 #define I_CUSTOMEDIT	(1)
-	{	PD_BUTTON, CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
+	{	PD_BUTTON, (void*)CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CUSTOMDEL		(2)
-	{	PD_BUTTON, CustomDelete, "delete", 0, NULL, N_("Delete") },
+	{	PD_BUTTON, (void*)CustomDelete, "delete", 0, NULL, N_("Delete") },
 #define I_CUSTOMCOPYTO	(3)
-	{	PD_BUTTON, CustomExport, "export", 0, NULL, N_("Move To") },
+	{	PD_BUTTON, (void*)CustomExport, "export", 0, NULL, N_("Move To") },
 #define I_CUSTOMNEW		(4)
 	{	PD_MENU, NULL, "new", PDO_DLGWIDE, NULL, N_("New") },
-	{	PD_MENUITEM, CarDlgAddDesc, "new-part-mi", 0, NULL, N_("Car Part") },
-	{	PD_MENUITEM, CarDlgAddProto, "new-proto-mi", 0, NULL, N_("Car Prototype") }
+	{	PD_MENUITEM, (void*)CarDlgAddDesc, "new-part-mi", 0, NULL, N_("Car Part") },
+	{	PD_MENUITEM, (void*)CarDlgAddProto, "new-proto-mi", 0, NULL, N_("Car Prototype") }
   } ;
 static paramGroup_t customPG = { "custmgm", 0, customPLs, sizeof customPLs/sizeof customPLs[0] };
 

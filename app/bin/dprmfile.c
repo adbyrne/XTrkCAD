@@ -223,8 +223,8 @@ static paramData_t paramFilePLs[] = {
 	{	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_PRMFILACTION	(2)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
-	{	PD_BUTTON, ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_("Unload") },
-	{	PD_BUTTON, ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") } };
+	{	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_("Unload") },
+	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") } };
 
 static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };
 

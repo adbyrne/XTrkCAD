@@ -75,13 +75,13 @@ static paramTextData_t recordTextData = { 50, 16 };
 static paramData_t recordPLs[] = {
 #define I_RECSTOP		(0)
 #define recStopB		((wButton_p)recordPLs[I_RECSTOP].control)
-	{   PD_BUTTON, DoRecordButton, "stop", PDO_NORECORD, NULL, N_("Stop"), 0, (void*)0 },
+	{   PD_BUTTON, (void*)DoRecordButton, "stop", PDO_NORECORD, NULL, N_("Stop"), 0, (void*)0 },
 #define I_RECMESSAGE	(1)
 #define recMsgB ((wButton_p)recordPLs[I_RECMESSAGE].control)
-	{   PD_BUTTON, DoRecordButton, "message", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Message"), 0, (void*)2 },
+	{   PD_BUTTON, (void*)DoRecordButton, "message", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Message"), 0, (void*)2 },
 #define I_RECEND		(2)
 #define recEndB ((wButton_p)recordPLs[I_RECEND].control)
-	{   PD_BUTTON, DoRecordButton, "end", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("End"), BO_DISABLED, (void*)4 },
+	{   PD_BUTTON, (void*)DoRecordButton, "end", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("End"), BO_DISABLED, (void*)4 },
 #define I_RECTEXT		(3)
 #define recordT			((wText_p)recordPLs[I_RECTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &recordTextData, NULL, BT_CHARUNITS|BO_READONLY} };
@@ -589,13 +589,13 @@ static paramTextData_t demoTextData = { 50, 16 };
 static paramData_t demoPLs[] = {
 #define I_DEMOSTEP		(0)
 #define demoStep		((wButton_p)demoPLs[I_DEMOSTEP].control)
-	{   PD_BUTTON, DoDemoButton, "step", PDO_NORECORD, NULL, N_("Step"), BB_DEFAULT, (void*)0 },
+	{   PD_BUTTON, (void*)DoDemoButton, "step", PDO_NORECORD, NULL, N_("Step"), BB_DEFAULT, (void*)0 },
 #define I_DEMONEXT		(1)
 #define demoNext		((wButton_p)demoPLs[I_DEMONEXT].control)
-	{   PD_BUTTON, DoDemoButton, "next", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Next"), 0, (void*)1 },
+	{   PD_BUTTON, (void*)DoDemoButton, "next", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Next"), 0, (void*)1 },
 #define I_DEMOQUIT		(2)
 #define demoQuit		((wButton_p)demoPLs[I_DEMOQUIT].control)
-	{   PD_BUTTON, DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Quit"), BB_CANCEL, (void*)3 },
+	{   PD_BUTTON, (void*)DoDemoButton, "quit", PDO_NORECORD|PDO_DLGHORZ, NULL, N_("Quit"), BB_CANCEL, (void*)3 },
 #define I_DEMOSPEED		(3)
 #define demoSpeedL		((wList_p)demoPLs[I_DEMOSPEED].control)
 	{   PD_DROPLIST, &playbackSpeed, "speed", PDO_NORECORD|PDO_LISTINDEX|PDO_DLGHORZ, (void*)80, N_("Speed") },

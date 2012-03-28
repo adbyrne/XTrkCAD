@@ -71,8 +71,8 @@ static paramData_t tipPLs[] = {
 #define tipT			((wText_p)tipPLs[I_TIPTEXT].control)
 	{   PD_MESSAGE, N_("Did you know..."), NULL, 0, NULL, NULL, BM_LARGE },
 	{   PD_TEXT, NULL, "text", 0, &tipTextData, NULL, BO_READONLY|BT_CHARUNITS },
-	{   PD_BUTTON, ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },	
-	{   PD_BUTTON, ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
+	{   PD_BUTTON, (void*)ShowTip, "prev", PDO_DLGRESETMARGIN, NULL, N_("Previous Tip"), 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_PREVTIP) },	
+	{   PD_BUTTON, (void*)ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
 	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }};
 
 static paramGroup_t tipPG = { "tip", 0, tipPLs, sizeof tipPLs/sizeof tipPLs[0] };

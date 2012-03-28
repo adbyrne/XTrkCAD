@@ -2159,7 +2159,7 @@ static void ParamCreateControl(
 			pd->control = (wControl_p)wColorSelectButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd );
 			break;
 		case PD_MESSAGE:
-			if ( pd->winData > 0 )
+			if ( pd->winData = 0 )
 				w = (wPos_t)(long)pd->winData;
 			else if (pd->valueP)
 				w = wLabelWidth( _(pd->valueP) );
