@@ -523,6 +523,7 @@ void wDrawRestoreImage(		wDraw_p );
 void wInitializeFonts();
 void wSelectFont(		const char * );
 wFontSize_t wSelectedFontSize(	void );
+void wSetSelectionFontSize(int);
 #define F_TIMES	(1)
 #define F_HELV	(2)
 wFont_p wStandardFont(		int, wBool_t, wBool_t );

@@ -79,6 +79,8 @@ EXPORT void UpdateFontSizeList(
 				if ( fontSize <= 500 || NoticeMessage( MSG_LARGE_FONT, _("Yes"), _("No") ) > 0 ) {
 				
 					*fontSizeR = fontSize;
+					/* inform gtkfont dialog from change */
+					wSetSelectedFontSize((int)fontSize);
 					/*LoadFontSizeList( list, *fontSizeR );*/
 				} else {
 					sprintf( message, "%ld", *fontSizeR );

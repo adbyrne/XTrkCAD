@@ -65,6 +65,10 @@ static GtkWidget *fontSelectionDialog;
 #define FS_REGULAR	(0)
 #define FS_ITALIC	(1)
 
+/* absoluteFontSize was introduced to keep the font size information synchron
+ * between the Dt.size of ctext.c and it's drop list on the status bar and
+ * the font size coming from the gtk font dialog which is located in this file */
+int absoluteFontSize = 18;
 
 struct wFont_t {
 		PangoFontDescription *fontDescription;
@@ -86,9 +90,11 @@ static void fontSelectionDialogCallback(GtkFontSelectionDialog *fontSelectionDia
 			wPrefSetString( "font", "name", fontName );
 			pango_font_description_free(curFont->fontDescription);
 			curFont->fontDescription = pango_font_description_from_string(fontName);
+			absoluteFontSize = (pango_font_description_get_size(curFont->fontDescription))/PANGO_SCALE;
 #if WLIB_FONT_DEBUG >= 2
 			fprintf(stderr, "new font selection:\n");
 			fprintf(stderr, "  font name \"%s\"\n", fontName);
+			fprintf(stderr, "  font size is %d\n",pango_font_description_get_size(curFont->fontDescription)/PANGO_SCALE);
 			fprintf(stderr, "  font size is absolute %d\n", pango_font_description_get_size_is_absolute(curFont->fontDescription));
 #endif
 			g_free(fontName);
@@ -135,6 +141,7 @@ static wBool_t fontInit()
 			return FALSE;
 		const char *fontName = wPrefGetString("font", "name");
 		curFont->fontDescription = pango_font_description_from_string(fontName ? fontName : "helvetica 18");
+		absoluteFontSize = (int) PANGO_PIXELS(pango_font_description_get_size(curFont->fontDescription));
 	}
 	
 	fontInitted = TRUE;
@@ -199,6 +206,7 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
 #if WLIB_FONT_DEBUG >= 3
 	fprintf(stderr, "font layout created:\n");
 	fprintf(stderr, "  widget:         %p\n", widget);
+	//fprintf(stderr, "  font description:%p\n", fp);
 	fprintf(stderr, "  font size:      %f\n", fs);
 	fprintf(stderr, "  layout text:    \"%s\" (utf8)\n", utf8);
 	fprintf(stderr, "  layout width:   %d\n", *width_p);
@@ -238,6 +246,10 @@ void wSelectFont(
 	gtk_window_set_title(GTK_WINDOW(fontSelectionDialog), title);
 	
 	if (curFont != NULL) {
+		/* the curFont description contains the latest font info 
+		 * which is depended on the current scale
+		 * overwrite it with the absoluteFontSize */ 
+		pango_font_description_set_size(curFont->fontDescription,FONTSIZE_TO_PANGOSIZE(absoluteFontSize) * PANGO_SCALE);
 		gchar *fontName = pango_font_description_to_string(curFont->fontDescription);
 		gtk_font_selection_dialog_set_font_name(GTK_FONT_SELECTION_DIALOG(fontSelectionDialog), fontName);
 		g_free(fontName);
@@ -259,8 +271,19 @@ wFontSize_t wSelectedFontSize( void )
 	if (!fontInitted)
 		fontInit();
 	
-	return (wFontSize_t) PANGO_PIXELS(pango_font_description_get_size(curFont->fontDescription));
+#if WLIB_FONT_DEBUG >= 3
+			fprintf(stderr, "the font size of current font description is: %d\n",pango_font_description_get_size(curFont->fontDescription)/PANGO_SCALE);
+			fprintf(stderr, "the font size of absoluteFontSize is: %d\n",absoluteFontSize); 
+#endif
+	
+	//return (wFontSize_t) PANGO_PIXELS(pango_font_description_get_size(curFont->fontDescription));
+	return absoluteFontSize;
 }
+
+void wSetSelectedFontSize(int size){
+	absoluteFontSize = (wFontSize_t)size;
+}
+	
 
 const char *gtkFontTranslate( wFont_p fp )
 {

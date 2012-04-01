@@ -100,6 +100,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 
 	switch (action & 0xFF) {
 	case C_START:
+		/* check if font size was updated by the preferences dialog */
+		Dt.size = (CSIZE_T)wSelectedFontSize();
 		Dt.state = 0;
 		Dt.cursPos0 = Dt.cursPos1 = zero;
 		Dt.len = 0;
