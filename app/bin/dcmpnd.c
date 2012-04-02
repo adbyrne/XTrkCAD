@@ -67,7 +67,7 @@ static paramData_t updateTitlePLs[] = {
 #define I_UPDATELIST	(10)
 #define updateTitleL	((wList_p)updateTitlePLs[I_UPDATELIST].control)
 	{	PD_DROPLIST, NULL, "sel", PDO_NOPREF, (void*)400 },
-	{	PD_BUTTON, UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
+	{	PD_BUTTON, (void*)UpdateTitleIgnore, "ignore", PDO_DLGCMDBUTTON, NULL, N_("Ignore") },
 #define I_UPDATELOAD	(12)
 	{	PD_BUTTON, NULL, "load", 0, NULL, N_("Load") } };
 static paramGroup_t updateTitlePG = { "updatetitle", 0, updateTitlePLs, sizeof updateTitlePLs/sizeof updateTitlePLs[0] };
@@ -199,7 +199,6 @@ EXPORT void UpdateTitleMark(
 	ut->new = NULL;
 }
 
-
 /*****************************************************************************
  *
  * Refresh Compound
@@ -315,7 +314,7 @@ static paramData_t refreshSpecialPLs[] = {
 		{ PD_MESSAGE, NULL, NULL, 0/*PDO_DLGRESIZEW*/, (void*)380 },
 #define REFRESH_L		(3)
 		{ PD_LIST, &refreshSpecialInx, "list", PDO_LISTINDEX|PDO_NOPREF|PDO_DLGRESIZE, &refreshSpecialListData, NULL, BO_READONLY },
-		{ PD_BUTTON, RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
+		{ PD_BUTTON, (void*)RefreshSkip, "skip", PDO_DLGCMDBUTTON, NULL, N_("Skip") } };
 static paramGroup_t refreshSpecialPG = { "refreshSpecial", 0, refreshSpecialPLs, sizeof refreshSpecialPLs/sizeof refreshSpecialPLs[0] };
 static void RefreshSpecialOk(
 		void * junk )
@@ -430,10 +429,8 @@ EXPORT BOOL_T RefreshCompound(
 		ParamLoadMessage( &refreshSpecialPG, REFRESH_M1, message );
 		ParamLoadMessage( &refreshSpecialPG, REFRESH_M2, _("Choose another Turnout/Structure to replace:") );
 	}
-	return TRUE;
 }
 
-
 /*****************************************************************************
  *
  * Custom Management Support
