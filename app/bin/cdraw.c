@@ -25,6 +25,7 @@
 #include "drawgeom.h"
 #include "i18n.h"
 
+extern void wSetSelectedFontSize(int size);
 
 static long fontSizeList[] = {
 		4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36,
