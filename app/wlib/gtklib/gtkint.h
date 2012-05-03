@@ -121,6 +121,7 @@ char * gtkConvertOutput( const char * );
 void gtkDoModal( wWin_p, wBool_t );
 
 /* gtkhelp.c */
+void load_into_view( char *, int );
 void gtkAddHelpString( GtkWidget *, const char * );
 void gtkHelpHideBalloon( void );
 

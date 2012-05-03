@@ -110,9 +110,9 @@ static paramFloatRange_t r0_360 = { 0, 360 };
 static paramData_t printPLs[] = {
 /*0*/ { PD_LONG, &iPrintScale, "scale", 0, &rminScale_999, N_("Print Scale"), 0, (void*)1 },
 /*1*/ { PD_FLOAT, &newPrintGrid.size.x, "pagew", PDO_DIM|PDO_SMALLDIM|PDO_NORECORD|PDO_NOPREF, &r1_, N_("Page Width"), 0, (void*)2 },
-/*2*/ { PD_BUTTON, PrintMaxPageSize, "max", PDO_DLGHORZ, NULL, N_("Max") },
+/*2*/ { PD_BUTTON, (void*)PrintMaxPageSize, "max", PDO_DLGHORZ, NULL, N_("Max") },
 /*3*/ { PD_FLOAT, &newPrintGrid.size.y, "pageh", PDO_DIM|PDO_SMALLDIM|PDO_NORECORD|PDO_NOPREF, &r1_, N_("Height"), 0, (void*)2 },
-/*4*/ { PD_BUTTON, PrintSnapShot, "snapshot", PDO_DLGHORZ, NULL, N_("Snap Shot") },
+/*4*/ { PD_BUTTON, (void*)PrintSnapShot, "snapshot", PDO_DLGHORZ, NULL, N_("Snap Shot") },
 /*5*/ { PD_RADIO, &printFormat, "format", 0, printFormatLabels, N_("Page Format"), BC_HORZ|BC_NOBORDER, (void*)1 },
 /*6*/ { PD_RADIO, &printOrder, "order", PDO_DLGBOXEND, printOrderLabels, N_("Print Order"), BC_HORZ|BC_NOBORDER },
 
@@ -130,10 +130,10 @@ static paramData_t printPLs[] = {
 /*13*/{ PD_FLOAT, &printRoadbedWidth, "roadbedWidth", PDO_DIM|PDO_DLGBOXEND, &r0_, N_("Width") },
 /*14*/{ PD_FLOAT, &newPrintGrid.orig.x, "origx", PDO_DIM|PDO_DLGRESETMARGIN, &r_10_99999, N_("Origin: X"), 0, (void*)2 },
 /*15*/ { PD_FLOAT, &newPrintGrid.orig.y, "origy", PDO_DIM, &r_10_99999, N_("Y"), 0, (void*)2 },
-/*16*/ { PD_BUTTON, DoResetGrid, "reset", PDO_DLGHORZ, NULL, N_("Reset") },
+/*16*/ { PD_BUTTON, (void*)DoResetGrid, "reset", PDO_DLGHORZ, NULL, N_("Reset") },
 /*17*/ { PD_FLOAT, &newPrintGrid.angle, "origa", PDO_ANGLE|PDO_DLGBOXEND, &r0_360, N_("Angle"), 0, (void*)2 },
-/*18*/ { PD_BUTTON, DoPrintSetup, "setup", PDO_DLGCMDBUTTON, NULL, N_("Setup") },
-/*19*/ { PD_BUTTON, PrintClear, "clear", 0, NULL, N_("Clear") },
+/*18*/ { PD_BUTTON, (void*)DoPrintSetup, "setup", PDO_DLGCMDBUTTON, NULL, N_("Setup") },
+/*19*/ { PD_BUTTON, (void*)PrintClear, "clear", 0, NULL, N_("Clear") },
 #define I_PAGECNT		(20)
 /*20*/ { PD_MESSAGE, N_("0 pages"), NULL, 0, (void*)80 },
 /*21*/ { PD_MESSAGE, N_("selected"), NULL, 0, (void*)80 } };
@@ -1176,7 +1176,6 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 	default:
 		return C_CONTINUE;
 	}
-	return C_CONTINUE;
 }
 
 EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
