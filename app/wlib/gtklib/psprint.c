@@ -226,10 +226,103 @@ dynArr_t margins_da;
 static void printFileNameSel( void * junk );
 static void printInit( void );
 
+/*
+ * Stuff related to determining the list of fonts used in the
+ * Postscript file. A simple linked-list is used to implement a
+ * stack. Everything is specialized to this application.
+ */
+
 /**
- * This function does a normal printf but uses the default C locale as decimal separator.
+ * Nodes of the \a fontsUsed list.
+ */
+struct list_node {
+  struct list_node *next;
+  char *data;
+} ;
+
+/**
+ * Pointer to the \a fontsUsed list.
+ */
+static struct list_node *fontsUsed = NULL;
+
+
+/**
+ * Pushes its argument on to the \a fontsUsed list.
+ * \param item - IN pointer to a string to put on the list
+ * \return nothing
+ */
+void fontsUsedPush( const char *item) {
+  struct list_node *newitem;
+  newitem = malloc(sizeof(struct list_node));
+  if (newitem ==  NULL) exit (2);
+  newitem->next=fontsUsed;
+  newitem->data = strdup(item);
+  if (newitem->data == NULL) exit(3);
+  fontsUsed=newitem;
+}
+
+/**
+ * Pops the top node from the \a fontsUsed list.
+ * Note that  a pointer to the complete node is returned. The
+ * caller is responsible for freeing both the data and the list
+ * node when it is finished using them.
+ * \return pointer to the list node.
+ */
+struct list_node * fontsUsedPop() {
+  struct list_node *item;
+  if (fontsUsed == NULL) return NULL;
+  item = fontsUsed;
+  fontsUsed = item->next;
+  return item ;
+}
+
+/**
+ * \a fontsUsed list (re-)initializer.
+ */
+void fontsUsedInit() {
+  struct list_node *p;
+  while ((p=fontsUsedPop()) != NULL) {
+    free(p->data);
+    free(p);
+  }
+  fontsUsed=NULL;
+}
+
+/**
+ * Checks if \a s is already in \a fontsUsed list.
+ * \param s - IN  string to be checked.
+ * \return TRUE if found, FALSE if not.
+ */
+int fontsUsedContains( const char *s ) {
+  struct list_node *ptr;
+  ptr = fontsUsed;
+  while ( ptr != NULL ) {
+    if ( strcmp(s, ptr->data) == 0 ) return TRUE;
+    ptr= ptr->next;
+  }
+  return FALSE ;
+}
+
+/**
+ * Adds the \a fontName to the list of fonts being used.
+ * Only if it is not already in the list.
+ * 
+ * This function should be called anywhere the string "findfont"
+ * is being emitted to the Postscript file.
+ * \param \a fontName IN - string contaning the name to add.
+ */
+void addFontName( const char * fontName){
+  if (fontsUsedContains(fontName)) return;
+  fontsUsedPush(fontName);
+}
+
+/* ***************************************** */ 
+
+/**
+ * This function does a normal printf but uses the default C
+ * locale as decimal separator.
  *
- * \param temple IN printf-like format string 
+ * \param template IN printf-like format string 
  * ... IN parameters according to format string
  * \return    describe the return value
  */
@@ -649,6 +742,7 @@ void psPrintString(
 		"gsave\n"
 		"%0.3f %0.3f translate %0.3f rotate 0 0 moveto\n(",
 		findPSFont(fp), fs, D2I(x), D2I(y), a );
+	addFontName(findPSFont(fp));
 	for (cp=s; *cp; cp++) {
 		if (*cp == '(' || *cp == ')')
 			psPrintf(psFile, "\\" );
@@ -717,8 +811,6 @@ static void printAbort( void * context )
  *
  * \return    ???
  */
-
-
 wDraw_p wPrintPageStart( void )
 {
 	char tmp[80];
@@ -731,7 +823,8 @@ wDraw_p wPrintPageStart( void )
 	 			"%%%%Page: %d %d\n" \
 				"save\n" \
 				"gsave\n" \
-				"0 setlinewidth\n",
+				"0 setlinewidth\n"\
+		                "0 setlinecap\n",
 				pageCount, 
 				(totalPageCount>0?totalPageCount:pageCount) );
 
@@ -745,7 +838,7 @@ wDraw_p wPrintPageStart( void )
 	
 	psPrintf( psFile, "/Times-Bold findfont %0.3f scalefont setfont\n",
 				P2I(16) );
-
+	addFontName("Times-Bold");
 	sprintf( tmp, _("Page %d"), pageCount );
 	wMessageSetValue( printAbortM, tmp );
 	wFlush();
@@ -877,6 +970,11 @@ void wPrinterClose( wPrinterStream_p p )
 /**
  * Start a new Postscript document
  *
+ * Opens the output file and emits the Adobe DSC Prolog comments,
+ * etc.  Note that the 3.0 in "PS-Adobe-3.0" refers to the
+ * version of the Document Structuring Conventions Specification,
+ * not to the Postscript language level.
+ *
  * \param title IN title of document ( name of layout )
  * \param fTotalPageCount IN number of pages to print
  * \param copiesP OUT ???
@@ -886,6 +984,7 @@ void wPrinterClose( wPrinterStream_p p )
 wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 {
 	char tmp[80];
+	pageCount = 0;
 	totalPageCount = fTotalPageCount;
 	psFile = NULL;
 	psFileStream = wPrinterOpen();
@@ -893,19 +992,23 @@ wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 		return FALSE;
 	psFile = psFileStream->f;
 
-	psPrintf( psFile, "%%!PS-Adobe-1.0\n" \
-	       	    "%%%%DocumentFonts: (atend)\n" \
-		    "%%%%Title: %s\n" \
-		    "%%%%Creator: XTrackCAD\n" \
-                    "%%%%Pages: (atend)\n" \
-                    "%%%%BoundingBox: %ld %ld %ld %ld\n" \
-                    "%%%%EndComments\n\n" \
-		    "%%%%Prolog\n" \
-		    "/mp_stm usertime def\n" \
-       		    "/mp_pgc statusdict begin pagecount end def\n" \
-                    "statusdict begin /jobname (<stdin>) def end\n" \
-                    "%%%%EndProlog\n" \
-                    "0 setlinecap\n", 
+	/* Initialize the list of fonts used  */
+	fontsUsedInit(); /* in case a document had been
+				 produced earlier */
+
+	psPrintf( psFile, 
+		    "%%!PS-Adobe-3.0\n\
+%%%%DocumentFonts: (atend)\n\
+%%%%Title: %s\n\
+%%%%Creator: XTrackCAD\n\
+%%%%Pages: (atend)\n\
+%%%%BoundingBox: %ld %ld %ld %ld\n\
+%%%%EndComments\n\n\
+%%%%Prolog\n\
+/mp_stm usertime def\n\
+/mp_pgc statusdict begin pagecount end def\n\
+statusdict begin /jobname (<stdin>) def end\n\
+%%%%EndProlog\n", \
 	       	    title,
 		    (long)floor(margins(curMargin).l*72),
 		    (long)floor(margins(curMargin).b*72),
@@ -913,7 +1016,7 @@ wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 		    (long)floor((papers[curPaper].h-margins(curMargin).t)*72) );
 							
 	printContinue = TRUE;
-	sprintf( tmp, _("Now printing %s"), title );
+	sprintf( tmp, ("Now printing %s"), title );
 	wMessageSetValue( printAbortT, tmp );
 	wMessageSetValue( printAbortM, _("Page 1") );
 	pageCount = 0;
@@ -923,20 +1026,44 @@ wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 	return TRUE;
 }
 
+/**
+ * Outputs the Adobe Document Structure Comments.
+ * These are needed at the
+ * end of a Postscript document destined for modern (2012) print
+ * spoolers. E.g. CUPS
+ */
 
 void wPrintDocEnd( void )
 {
+        struct list_node *p;
+        int i;
 	if (psFile == NULL)
 		return;
 		
 	psPrintf( psFile, 
 				"%%%%Trailer\n%%%%Pages: %d\n",
 				pageCount );
-	psPrintf( psFile, "%%%%DocumentFonts: Helvetica\n" );
-	/*Above needs to be replaced with a function to print
-	  all used fonts, 4 per line with %%+ continuation
-	  comments */
+
+	/* Postscript lines are <255 chars so print fonts list 4
+	   per line
+	*/
+	psPrintf( psFile, "%%%%DocumentFonts: " );
+	p = fontsUsed;
+	i = 0;
+	while ((p=fontsUsedPop()) != NULL) {
+	  if ((i % 4) == 0 ) psPrintf( psFile, "\n%%%%+    ");
+	  psPrintf( psFile, " %s", p->data);
+	  free(p->data);
+	  free(p);
+	  i++;
+	}
+	psPrintf( psFile, "\n");
+
 	psPrintf( psFile, "%%%%EOF\n");
+	/* Reset the fonts list to empty for the next document. 
+	*/
+	fontsUsedInit();
+
 	wPrinterClose( psFileStream );
 	wWinShow( printAbortW, FALSE );
 }
@@ -978,12 +1105,11 @@ static void pTestPage( void )
 	h = papers[curPaper].h;
 	if ( psFile == NULL )
 		return;
-	psPrintf( psFile, "72.0 72.0 scale\n");
-	psPrintf( psFile, "0.0 setlinewidth\n");
 
 #define MAXIMUM (100)
 
 	psPrintf( psFile, "/Times-Roman findfont 0.06 scalefont setfont\n" );
+	addFontName("Times-Roman");
 	for ( i=5; i<=MAXIMUM; i+=5 ) {
 		x0 = ((double)i)/100;
 		pLine( 0.5, x0, w-0.5, x0 );
@@ -1007,8 +1133,10 @@ static void pTestPage( void )
 	}
 
 	psPrintf( psFile, "/Times-Bold findfont 0.20 scalefont setfont\n" );
+	addFontName("Times-Bold");
 	psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-2.0, "Printer Margin Setup" );
 	psPrintf( psFile, "/Times-Roman findfont 0.12 scalefont setfont\n" );
+	addFontName("Times-Roman");
 	psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-2.15, 
 		"Enter the position of the first visible line for each margin on the Printer Setup dialog");
 	if ( curMargin < margins_da.cnt )
@@ -1019,12 +1147,15 @@ static void pTestPage( void )
 
 
 	psPrintf( psFile, "/Times-Bold findfont 0.20 scalefont setfont\n" );
+	addFontName("Times-Bold");
 	psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-3.0, "Font Map" );
 	for (i=j=0; 0.2*j < h-5.0 && (psFont = wPrefGetSectionItem( WFONT, &i, &xFont )) != NULL; j++ ) {
 		if ( psFont[0] == '\0' ) continue;
 		psPrintf( psFile, "/Times-Roman findfont 0.12 scalefont setfont\n" );
+		addFontName("Times-Roman");
 		psPrintf( psFile, "%0.3f %0.3f moveto (%s -> %s) show\n", 2.0, h-3.15-0.15*j, xFont, psFont );
 		psPrintf( psFile, "/%s findfont 0.12 scalefont setfont\n", psFont );
+		addFontName(psFont);
 		psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 5.5, h-3.15-0.15*j, "ABCD wxyz 0123 -+$!" );
 	}
 	x0 = 0.5;
@@ -1071,7 +1202,8 @@ static void pTestPage( void )
 		   i = 0;
 	}
 
-	psPrintf( psFile, "showpage\n");
+	/*	psPrintf( psFile, "showpage\n"); */
+	wPrintPageEnd(NULL);
 	wPrintDocEnd();
 	curPrinter = oldPrinter;
 }
