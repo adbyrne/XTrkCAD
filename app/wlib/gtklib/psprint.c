@@ -728,7 +728,7 @@ wDraw_p wPrintPageStart( void )
 		
 	pageCount++;
 	psPrintf( psFile, 
-	 			"%%Page: %d %d\n" \
+	 			"%%%%Page: %d %d\n" \
 				"save\n" \
 				"gsave\n" \
 				"0 setlinewidth\n",
@@ -767,7 +767,8 @@ wBool_t wPrintPageEnd( wDraw_p p )
 	psPrintf( psFile,
 				"grestore\n" \
 				"restore\n" \
-				"showpage\n" );
+				"showpage\n"\
+		  		"%%%%EndPage\n");
 				
 	return printContinue;
 }
@@ -893,22 +894,23 @@ wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 	psFile = psFileStream->f;
 
 	psPrintf( psFile, "%%!PS-Adobe-1.0\n" \
-						  "%%%%DocumentFonts: Courier\n" \
-						  "%%%%Title: %s\n" \
-						  "%%%%Creator: XTrackCAD\n" \
+	       	    "%%%%DocumentFonts: (atend)\n" \
+		    "%%%%Title: %s\n" \
+		    "%%%%Creator: XTrackCAD\n" \
                     "%%%%Pages: (atend)\n" \
                     "%%%%BoundingBox: %ld %ld %ld %ld\n" \
                     "%%%%EndComments\n\n" \
-						  "/mp_stm usertime def\n" \
-						  "/mp_pgc statusdict begin pagecount end def\n" \
+		    "%%%%Prolog\n" \
+		    "/mp_stm usertime def\n" \
+       		    "/mp_pgc statusdict begin pagecount end def\n" \
                     "statusdict begin /jobname (<stdin>) def end\n" \
                     "%%%%EndProlog\n" \
                     "0 setlinecap\n", 
-							title,
-        					(long)floor(margins(curMargin).l*72),
-							(long)floor(margins(curMargin).b*72),
-							(long)floor((papers[curPaper].w-margins(curMargin).r)*72),
-							(long)floor((papers[curPaper].h-margins(curMargin).t)*72) );
+	       	    title,
+		    (long)floor(margins(curMargin).l*72),
+		    (long)floor(margins(curMargin).b*72),
+		    (long)floor((papers[curPaper].w-margins(curMargin).r)*72),
+		    (long)floor((papers[curPaper].h-margins(curMargin).t)*72) );
 							
 	printContinue = TRUE;
 	sprintf( tmp, _("Now printing %s"), title );
@@ -928,9 +930,13 @@ void wPrintDocEnd( void )
 		return;
 		
 	psPrintf( psFile, 
-				"%%Trailer\n%%Pages: %d\n",
+				"%%%%Trailer\n%%%%Pages: %d\n",
 				pageCount );
-				
+	psPrintf( psFile, "%%%%DocumentFonts: Helvetica\n" );
+	/*Above needs to be replaced with a function to print
+	  all used fonts, 4 per line with %%+ continuation
+	  comments */
+	psPrintf( psFile, "%%%%EOF\n");
 	wPrinterClose( psFileStream );
 	wWinShow( printAbortW, FALSE );
 }
@@ -966,6 +972,7 @@ static void pTestPage( void )
 	curMargin0 = curMargin;
 	curMargin = 0;
 	wPrintDocStart( _("Printer Margin Test Page"), 1, NULL );
+	wPrintPageStart();
 	curMargin = curMargin0;
 	w = papers[curPaper].w;
 	h = papers[curPaper].h;
