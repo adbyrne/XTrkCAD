@@ -602,7 +602,7 @@ void psSetColor(
 
 	newColor = wDrawGetRGB( color );
 	if (newColor != currColor) {
-		fprintf( psFile, "%0.3f %0.3f %0.3f setrgbcolor\n",
+		psPrintf( psFile, "%0.3f %0.3f %0.3f setrgbcolor\n",
 				(float)((newColor>>16)&0xFF)/256.0,
 				(float)((newColor>>8)&0xFF)/256.0,
 				(float)((newColor)&0xFF)/256.0 );
