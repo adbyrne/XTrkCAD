@@ -68,7 +68,7 @@ Building XTrkCAD on Mac OSX
 * You will need to install the following dependencies - I recommend using
   http://www.macports.org to obtain them:
     o GTK2
-    o gtkhtml (might also be called libgtkhtml)
+    o webkit
     o gnome-icon-theme 
 * Once the prerequisites are installed the build instructions are the same
   as for the GNU/Linux build, above.
