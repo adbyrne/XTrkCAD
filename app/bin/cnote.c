@@ -372,9 +372,7 @@ static STATUS_T CmdNote( wAction_t action, coOrd pos )
 		trk = NewNote( -1, pos, 2 );
 		DrawNewTrack( trk );
 		xx = GetTrkExtraData(trk);
-		const char* tmpPtrText = _("Replace this text with your note");
-		xx->text = (char*)MyMalloc( strlen(tmpPtrText) + 1 );
-		strcpy( xx->text, tmpPtrText);
+		xx->text = strdup(_("Replace this text with your note"));
 		inDescribeCmd = TRUE;
 		DescribeNote( trk, message, sizeof message );
 		inDescribeCmd = FALSE;

@@ -801,6 +801,11 @@ wFontSize_t wSelectedFontSize( void )
 	return fontSize;
 }
 
+void wSetSelectedFontSize(int size)
+{
+	fontSize = (wFontSize_t)size;
+}
+
 /*
  *****************************************************************************
  *
