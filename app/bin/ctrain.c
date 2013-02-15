@@ -1642,6 +1642,7 @@ static BOOL_T MoveTrain(
 	DIST_T length;
 	track_p car1;
 	int dir1;
+	int measured;		/* make sure the distance is only measured once per train */
 
 	if ( train == NULL )
 		return FALSE;
@@ -1696,10 +1697,15 @@ static BOOL_T MoveTrain(
 	dir1 = 0;
 	GetTrainLength2( &car1, &dir1 );
 	dir1 = 1-dir1;
+
+	measured = FALSE;
 	WALK_CARS_START( car1, xx1, dir1 );
-		if ( CarItemIsLoco(xx1->item) )
+		if ( CarItemIsLoco(xx1->item) && !measured ) {
 			xx->distance += dist0;
+			measured = TRUE;
+		}
 	WALK_CARS_END( car1, xx1, dir1 );
+	
 	if ( train == followTrain ) {
 		if ( followCenter.x != mainCenter.x ||
 			 followCenter.y != mainCenter.y ) {
