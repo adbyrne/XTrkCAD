@@ -47,6 +47,12 @@
 #endif
 #include <stdarg.h>
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 #include "track.h"
 #include "common.h"
 #include "utility.h"
@@ -1119,7 +1125,7 @@ LOG( log_command, 3, ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ) 
 		if ( buttonList[buttInx].cmdInx != curCommand ) {
 			wButtonSetLabel( (wButton_p)buttonList[buttInx].control, (char*)commandList[curCommand].icon );
 			wControlSetHelp( buttonList[buttInx].control, GetBalloonHelpStr(commandList[curCommand].helpKey) );
-			wControlSetContext( buttonList[buttInx].control, (void*)curCommand );
+			wControlSetContext( buttonList[buttInx].control, (void*)(intptr_t)curCommand );
 			buttonList[buttInx].cmdInx = curCommand;
 		}
 		wButtonSetBusy( (wButton_p)buttonList[commandList[curCommand].buttInx].control, TRUE );
@@ -1151,7 +1157,7 @@ static void DoCommandBIndirect( void * cmdInxP )
 {
 	wIndex_t cmdInx;
 	cmdInx = *(wIndex_t*)cmdInxP;
-	DoCommandB( (void*)cmdInx );
+	DoCommandB( (void*)(intptr_t)cmdInx );
 }
 
 
@@ -1318,7 +1324,7 @@ EXPORT wButton_p AddToolbarButton(
 			if ( action != DoCommandB && menuPLs[inx].valueP == (void*)action ) {
 				context = &menuPLs[inx];
 				action = ParamMenuPush;
-				menuPLs[inx].context = (void*)buttonCnt;
+				menuPLs[inx].context = (void*)(intptr_t)buttonCnt;
 				menuPLs[inx].option |= IC_PLAYBACK_PUSH;
 				break;
 			}
@@ -1471,7 +1477,7 @@ EXPORT wIndex_t AddMenuButton(
 			buttInx = buttonCnt-2;
 		} else {
 			buttInx = buttonCnt;
-			AddToolbarButton( helpKey, icon, options, (wButtonCallBack_p)DoCommandB, (void*)commandCnt );
+			AddToolbarButton( helpKey, icon, options, (wButtonCallBack_p)DoCommandB, (void*)(intptr_t)commandCnt );
 			buttonList[buttInx].cmdInx = commandCnt;
 		}
 		if ( buttonGroupMenuTitle!=NULL && buttonGroupPopupM==NULL ) {
@@ -1505,7 +1511,7 @@ EXPORT wIndex_t AddMenuButton(
 	}
 	if ( buttonGroupPopupM ) {
 		commandList[cmdInx].menu[0] = 
-		wMenuPushCreate( buttonGroupPopupM, helpKey, GetBalloonHelpStr(helpKey), 0, DoCommandB, (void*)cmdInx );
+		wMenuPushCreate( buttonGroupPopupM, helpKey, GetBalloonHelpStr(helpKey), 0, DoCommandB, (void*)(intptr_t)cmdInx );
 		tm = commandsSubmenu;
 		p1m = popup1Submenu;
 		p2m = popup2Submenu;
@@ -1515,14 +1521,14 @@ EXPORT wIndex_t AddMenuButton(
 		p2m = (options&IC_POPUP2)?popup2aM:popup2M;
 	}
 	commandList[cmdInx].menu[1] = 
-	wMenuPushCreate( tm, helpKey, nameStr, acclKey, DoCommandB, (void*)cmdInx );
+	wMenuPushCreate( tm, helpKey, nameStr, acclKey, DoCommandB, (void*)(intptr_t)cmdInx );
 	if ( (options & (IC_POPUP|IC_POPUP2)) ) {
 		if ( !(options & IC_SELECTED) ) {
 			commandList[cmdInx].menu[2] = 
-			wMenuPushCreate( p1m, helpKey, nameStr, 0, DoCommandB, (void*)cmdInx );
+			wMenuPushCreate( p1m, helpKey, nameStr, 0, DoCommandB, (void*)(intptr_t)cmdInx );
 		}
 		commandList[cmdInx].menu[3] = 
-		wMenuPushCreate( p2m, helpKey, nameStr, 0, DoCommandB, (void*)cmdInx );
+		wMenuPushCreate( p2m, helpKey, nameStr, 0, DoCommandB, (void*)(intptr_t)cmdInx );
 	}
 
 	return cmdInx;
@@ -1601,7 +1607,7 @@ EXPORT void PlaybackCommand(
 				wButtonSetBusy( (wButton_p)buttonList[buttInx].control, FALSE );
 				wFlush();
 			}
-			DoCommandB( (void*)inx );
+			DoCommandB( (void*)(intptr_t)inx );
 		}
 	}
 }

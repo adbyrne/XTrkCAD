@@ -31,6 +31,11 @@
 #include "cjoin.h"
 #include "i18n.h"
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
 
@@ -2452,7 +2457,7 @@ static char * CmdTurnoutHotBarProc(
 	case HB_SELECT:		/* new element is selected */
 		CmdTurnoutAction( C_FINISH, zero ); 		/* finish current operation */
 		curTurnout = to;
-		DoCommandB( (void*)turnoutHotBarCmdInx ); /* continue with new turnut / structure */
+		DoCommandB( (void*)(intptr_t)turnoutHotBarCmdInx ); /* continue with new turnut / structure */
 		return NULL;
 	case HB_LISTTITLE:
 		FormatCompoundTitle( listLabels, to->title );

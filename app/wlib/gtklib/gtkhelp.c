@@ -34,6 +34,12 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
@@ -702,7 +708,7 @@ EXPORT void wHelp( const char * topic )
 static void 
 DoHelpMenu( void *data )
 {
-	int func = (int)data;
+	int func = (intptr_t)data;
 	
 	switch( func )
 	{

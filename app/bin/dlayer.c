@@ -27,6 +27,11 @@
 #include "track.h"
 #include "i18n.h"
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
 
 /*****************************************************************************
  *
@@ -222,7 +227,7 @@ static void SetCurrLayer( wIndex_t inx, const char * name, wIndex_t op, void * l
 	if ( curLayer < 0 || curLayer >= NUM_LAYERS )
 		curLayer = 0;
 	if ( !layers[(int)curLayer].visible )
-		FlipLayer( (void*)inx );
+		FlipLayer( (void*)(intptr_t)inx );
 	if ( recordF )
 		fprintf( recordF, "SETCURRLAYER %d\n", inx );
 }
@@ -952,7 +957,7 @@ EXPORT void InitLayers( void )
 		   sprintf( message, "cmdLayerShow%d", i );
 		   layer_btns[i] = wButtonCreate( mainW, 0, 0, message,
 				(char*)(show_layer_bmps[i]),
-				BO_ICON, 0, (wButtonCallBack_p)FlipLayer, (void*)i );
+				BO_ICON, 0, (wButtonCallBack_p)FlipLayer, (void*)(intptr_t)i );
 			
 			/* add the help text */
 			wControlSetBalloonText( (wControl_p)layer_btns[i], _("Show/Hide Layer") );
@@ -964,7 +969,7 @@ EXPORT void InitLayers( void )
 			wButtonSetBusy( layer_btns[i], 1 );
 		}
 		sprintf( message, "%2d : %s", i+1, (i==0?_("Main"):"") );
-		wListAddValue( setLayerL, message, NULL, (void*)i );
+		wListAddValue( setLayerL, message, NULL, (void*)(intptr_t)i );
 	}
 	AddPlaybackProc( "SETCURRLAYER", PlaybackCurrLayer, NULL );
 	AddPlaybackProc( "LAYERS", (playbackProc_p)ReadLayers, NULL );

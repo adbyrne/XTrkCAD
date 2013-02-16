@@ -28,6 +28,12 @@
 #include "compound.h"
 #include "i18n.h"
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 EXPORT TRKTYP_T T_STRUCTURE = -1;
 
 #define STRUCTCMD
@@ -822,7 +828,7 @@ static char * CmdStructureHotBarProc(
 	case HB_SELECT:
 		CmdStructureAction( C_FINISH, zero );
 		curStructure = to;
-		DoCommandB( (void*)structureHotBarCmdInx );
+		DoCommandB( (void*)(intptr_t)structureHotBarCmdInx );
 		return NULL;
 	case HB_LISTTITLE:
 		FormatCompoundTitle( listLabels, to->title );

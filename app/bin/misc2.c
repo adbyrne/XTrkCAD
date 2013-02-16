@@ -36,6 +36,12 @@
 #include <string.h>
 #include <stdarg.h>
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 #include "track.h"
 #include "common.h"
 #include "utility.h"
@@ -640,7 +646,7 @@ EXPORT void LoadScaleList( wList_p scaleList )
 	wIndex_t inx;
 	for (inx=0; inx<scaleDesc_da.cnt-(extraButtons?0:1); inx++) {
 		scaleDesc(inx).index =
-				wListAddValue( scaleList, scaleDesc(inx).scaleDesc, NULL, (void*)inx );
+				wListAddValue( scaleList, scaleDesc(inx).scaleDesc, NULL, (void*)(intptr_t)inx );
 	}
 }
 
@@ -658,7 +664,7 @@ EXPORT void LoadGaugeList( wList_p gaugeList, SCALEDESCINX_T scale )
 
 	wListClear( gaugeList );			/* remove old list in case */	
 	for (inx=0; inx<gauges_da_p->cnt; inx++) {		
-		(g[inx]).index = wListAddValue( gaugeList, (g[inx]).gauge, NULL, (void*)(g[inx]).scale ); 
+		(g[inx]).index = wListAddValue( gaugeList, (g[inx]).gauge, NULL, (void*)(intptr_t)(g[inx]).scale ); 
 	}
 }
 
