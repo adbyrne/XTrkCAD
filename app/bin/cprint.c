@@ -394,7 +394,7 @@ static void PrintGaudyBox(
 	p00.y = 0.50+0.05;
 	DrawString( &page_d, p00, 0.0, Title2, fp, 16.0, wDrawColorBlack );
 
-	sprintf( dat, _("PrintScale %ld:1   Room %s x %s   Model Scale %s   File %s"),
+	sprintf( dat, _("PrintScale 1:%ld   Room %s x %s   Model Scale %s   File %s"),
 		(long)printScale, 
 		FormatDistance( roomSize.x ),
 		FormatDistance( roomSize.y ),
