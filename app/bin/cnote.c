@@ -352,6 +352,7 @@ static STATUS_T CmdNote( wAction_t action, coOrd pos )
 	static coOrd oldPos;
 	track_p trk;
 	struct extraData * xx;
+	const char* tmpPtrText;
 
 	switch (action) {
 	case C_START:
@@ -372,7 +373,11 @@ static STATUS_T CmdNote( wAction_t action, coOrd pos )
 		trk = NewNote( -1, pos, 2 );
 		DrawNewTrack( trk );
 		xx = GetTrkExtraData(trk);
-		xx->text = strdup(_("Replace this text with your note"));
+	
+		tmpPtrText = _("Replace this text with your note");
+		xx->text = (char*)MyMalloc( strlen(tmpPtrText) + 1 );
+		strcpy( xx->text, tmpPtrText);
+	
 		inDescribeCmd = TRUE;
 		DescribeNote( trk, message, sizeof message );
 		inDescribeCmd = FALSE;
