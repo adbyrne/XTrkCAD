@@ -24,6 +24,12 @@
 #include "track.h"
 #include "i18n.h"
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 /****************************************************************************
  *
  * Param File Management
@@ -241,7 +247,7 @@ static void ParamFileLoadList( void )
 			strcpy( message, ((!paramFileSel) && paramFileInfo(fileInx).contents)?
 						paramFileInfo(fileInx).contents:
 						paramFileInfo(fileInx).name );
-			wListAddValue( paramFileL, message, (paramFileInfo(fileInx).deleted)?mtbox_bm:chkbox_bm, (void*)fileInx );
+			wListAddValue( paramFileL, message, (paramFileInfo(fileInx).deleted)?mtbox_bm:chkbox_bm, (void*)(intptr_t)fileInx );
 		}
 	}
 	wListSetIndex( paramFileL, listInx );
@@ -301,7 +307,7 @@ EXPORT int LoadParamFile(
 			strcpy( message, ((!paramFileSel) && paramFileInfo(curParamFileIndex).contents)?
 						paramFileInfo(curParamFileIndex).contents:
 						paramFileInfo(curParamFileIndex).name );
-			wListAddValue( paramFileL, message, chkbox_bm, (void*)curParamFileIndex );
+			wListAddValue( paramFileL, message, chkbox_bm, (void*)(intptr_t)curParamFileIndex );
 			wListSetIndex( paramFileL, wListGetCount(paramFileL)-1 );
 		}
 	}
@@ -345,7 +351,7 @@ static void ParamFileAction( void * junk )
 	strcpy( message, ((!paramFileSel) && paramFileInfo(fileInx).contents)?
 					 paramFileInfo(fileInx).contents:
 					 paramFileInfo(fileInx).name );
-	wListSetValues( paramFileL, listInx, message, (paramFileInfo(fileInx).deleted)?mtbox_bm:chkbox_bm, (void*)fileInx );
+	wListSetValues( paramFileL, listInx, message, (paramFileInfo(fileInx).deleted)?mtbox_bm:chkbox_bm, (void*)(intptr_t)fileInx );
 #endif
 	DoChangeNotification( CHANGE_PARAMS );
 	UpdateParamFileButton( fileInx );

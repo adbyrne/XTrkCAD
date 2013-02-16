@@ -46,6 +46,12 @@
 #include <stdarg.h>
 #include <locale.h>
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 #include "track.h"
 #include "version.h"
 #include "common.h"
@@ -1172,7 +1178,7 @@ static int ImportTracks(
 	wSetCursor( wCursorNormal );
 	paramVersion = paramVersionOld;
 	importMove = TRUE;
-	DoCommandB( (void*)selectCmdInx );
+	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	return TRUE;
 }
@@ -1466,7 +1472,7 @@ EXPORT BOOL_T EditPaste( void )
 	EnableCommands();
 	wSetCursor( wCursorNormal );
 	importMove = TRUE;
-	DoCommandB( (void*)selectCmdInx );
+	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	UpdateAllElevations();
 	RestoreLocale(oldLocale);

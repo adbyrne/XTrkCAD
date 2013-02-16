@@ -28,6 +28,12 @@
 #endif
 #include <ctype.h>
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 #include "track.h"
 #include "ctrain.h"
 #include "i18n.h"
@@ -1529,7 +1535,7 @@ EXPORT void CarItemLoadList( void * junk )
 		if ( item->car && !IsTrackDeleted(item->car) )
 			continue;
 		cp = CarItemDescribe( item, 0, NULL );
-		wListAddValue( (wList_p)newCarPLs[0].control, cp, NULL, (void*)inx );
+		wListAddValue( (wList_p)newCarPLs[0].control, cp, NULL, (void*)(intptr_t)inx );
 	}
 	/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
 	wListSetIndex( (wList_p)newCarPLs[0].control, 0 );
@@ -1572,11 +1578,11 @@ static char * CarItemHotbarProc(
 				if ( item->car && !IsTrackDeleted(item->car) )
 					continue;
 				cp = CarItemDescribe( item, mode, NULL );
-				wListAddValue( (wList_p)newCarPLs[0].control, cp, NULL, (void*)inx );
+				wListAddValue( (wList_p)newCarPLs[0].control, cp, NULL, (void*)(intptr_t)inx );
 			}
 			/*wListSetValue( (wList_p)newCarPLs[0].control, "Select a car" );*/
 			wListSetIndex( (wList_p)newCarPLs[0].control, 0 );
-			cp = CarItemHotbarProc( HB_BARTITLE, (void*)carItemInx, NULL, NULL );
+			cp = CarItemHotbarProc( HB_BARTITLE, (void*)(intptr_t)carItemInx, NULL, NULL );
 			strncpy( newCarLabel1, cp, sizeof newCarLabel1 );
 			ParamLoadControls( &newCarPG );
 			ParamGroupRecord( &newCarPG );
@@ -1646,7 +1652,7 @@ EXPORT void AddHotBarCarDesc( void )
 			orig = zero;
 			size.x = item1->dim.carLength;
 			size.y = item1->dim.carWidth;
-			AddHotBarElement( FormatCarTitle( item1, carHotbarContents[carHotbarModeInx] ), size, orig, FALSE, (60.0*12.0/curScaleRatio), (void*)inx, CarItemHotbarProc );
+			AddHotBarElement( FormatCarTitle( item1, carHotbarContents[carHotbarModeInx] ), size, orig, FALSE, (60.0*12.0/curScaleRatio), (void*)(intptr_t)inx, CarItemHotbarProc );
 		}
 		item0 = item1;
 	}
@@ -2561,7 +2567,7 @@ LOG( log_carDlgList, 4, ( "    loading typelist\n" ) )
 	wListClear( (wList_p)carDlgPLs[I_CD_PROTOKIND_LIST].control );
 	for ( currTypeInx=0; currTypeInx<N_TYPELISTMAP; currTypeInx++ ) {
 		if ( typeCount[currTypeInx] > 0 ) {
-			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOKIND_LIST].control, _(typeListMap[currTypeInx].name), NULL, (void*)currTypeInx );
+			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PROTOKIND_LIST].control, _(typeListMap[currTypeInx].name), NULL, (void*)(intptr_t)currTypeInx );
 			if ( currTypeInx == listTypeInx ) {
 LOG( log_carDlgList, 4, ( "        current = %d\n", listInx ) )
 				carDlgKindInx = listInx;

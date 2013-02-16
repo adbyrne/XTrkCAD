@@ -27,6 +27,11 @@
 #include "track.h"
 #include "compound.h"
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
 
 EXPORT DIST_T curBarScale = -1;
 EXPORT long hotBarLabels = 0;
@@ -351,7 +356,7 @@ EXPORT void AddHotBarElement(
 	coOrd textsize;
 
 		if ( contentsLabel && strncmp(contentsLabel, curContentsLabel, sizeof curContentsLabel) != 0 ) {
-			wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, (void*)hotBarMap_da.cnt );
+			wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, (void*)(intptr_t)hotBarMap_da.cnt );
 			strncpy( curContentsLabel, contentsLabel, sizeof curContentsLabel );
 		}
 			 

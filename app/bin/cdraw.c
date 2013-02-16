@@ -25,6 +25,12 @@
 #include "drawgeom.h"
 #include "i18n.h"
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 extern void wSetSelectedFontSize(int size);
 
 static long fontSizeList[] = {
@@ -1136,7 +1142,7 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 		for ( inx2=0; inx2<dsp->cnt; inx2++ ) {
 			ddp = &dsp->data[inx2];
 			icon = wIconCreatePixMap( ddp->xpm );
-			AddMenuButton( menu, CmdDraw, ddp->helpKey, _(ddp->cmdName), icon, LEVEL0_50, IC_STICKY|IC_POPUP2, ddp->acclKey, (void*)ddp->OP );
+			AddMenuButton( menu, CmdDraw, ddp->helpKey, _(ddp->cmdName), icon, LEVEL0_50, IC_STICKY|IC_POPUP2, ddp->acclKey, (void *)(intptr_t)ddp->OP );
 		}
 		ButtonGroupEnd();
 	}

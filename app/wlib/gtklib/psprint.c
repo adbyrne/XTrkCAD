@@ -34,6 +34,12 @@
 #include <math.h>
 #include <locale.h>
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 #include <gtk/gtk.h>
 
 #include "gtkint.h"
@@ -402,7 +408,7 @@ static wBool_t wPrintNewPrinter(
 		name = cp;
 	}
 	if (optPrinterB) {
-		wListAddValue( optPrinterB, printers(printers_da.cnt-1).name, NULL, (void*)(printers_da.cnt-1) );
+		wListAddValue( optPrinterB, printers(printers_da.cnt-1).name, NULL, (void*)(intptr_t)(printers_da.cnt-1) );
 		if ( prefName && strcasecmp( prefName, name ) == 0 ) {
 			curPrinter = printers_da.cnt-1;
 			wListSetIndex( optPrinterB, curPrinter );
@@ -1450,7 +1456,7 @@ static void printInit( void )
 	wStringCreate( newFontAliasW, 0, -3, "printFontAlias", NULL, 0, 200, NULL, 0, newFontAliasSel, NULL );
 
 	for (i=0; papers[i].name; i++ ) {
-		wListAddValue( optPaperSizeB, papers[i].name, NULL, (void*)i );
+		wListAddValue( optPaperSizeB, papers[i].name, NULL, (void*)(intptr_t)i );
 		if ( prefPaper && strcasecmp( prefPaper, papers[i].name ) == 0 ) {
 			curPaper = i;
 			wListSetIndex( optPaperSizeB, i );

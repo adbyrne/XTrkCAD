@@ -45,6 +45,12 @@
 #endif
 #include <locale.h>
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 #include "track.h"
 #include "version.h"
 #include "common.h"
@@ -1405,7 +1411,7 @@ static BOOL_T ReadDemo(
 				(char*)MyMalloc( strlen(libDir) + 1 + 5 + 1 + strlen(cp) + 1 );
 			sprintf( demoList( demoList_da.cnt-1 ).fileName, "%s%s%s%s%s",
 				libDir, FILE_SEP_CHAR, "demos", FILE_SEP_CHAR, cp );
-			wMenuPushCreate( m, NULL, _(line+6), 0, DoDemo, (void*)(demoList_da.cnt-1) );
+			wMenuPushCreate( m, NULL, _(line+6), 0, DoDemo, (void*)(intptr_t)(demoList_da.cnt-1) );
 			if (oldLocale)
 				RestoreLocale(oldLocale);
 		}

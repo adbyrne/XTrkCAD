@@ -27,6 +27,12 @@
 #include <stdlib.h>
 #endif
 
+#ifdef _WIN32
+typedef signed short intptr_t
+#else
+#include <stdint.h>
+#endif
+
 #include <ctype.h>
 #include "track.h"
 #include "ccurve.h"
@@ -1707,7 +1713,7 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		partnoWidth = wLabelWidth( "999-99999-9999" );
 		turnDesignPLs[I_TOLDESC+1].winData =
 		turnDesignPLs[I_TORDESC+1].winData =
-			(void*)partnoWidth;
+			(void*)(intptr_t)partnoWidth;
 		partnoWidth += wLabelWidth( " # " );
 		newTurnW = ParamCreateDialog( &turnDesignPG, _("Turnout Designer"), _("Print"), NewTurnPrint, NewTurnCancel, TRUE, TurnDesignLayout, F_BLOCK, NULL );
 		for ( inx=0; inx<(sizeof designDescs/sizeof designDescs[0]); inx++ ) {
