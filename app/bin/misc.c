@@ -47,11 +47,7 @@
 #endif
 #include <stdarg.h>
 
-#ifdef _WIN32
-typedef signed short intptr_t
-#else
 #include <stdint.h>
-#endif
 
 #include "track.h"
 #include "common.h"

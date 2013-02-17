@@ -34,11 +34,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
-#ifdef _WIN32
-typedef signed short intptr_t
-#else
 #include <stdint.h>
-#endif
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>

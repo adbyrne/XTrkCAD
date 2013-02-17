@@ -34,11 +34,7 @@
 #include <math.h>
 #include <locale.h>
 
-#ifdef _WIN32
-typedef signed short intptr_t
-#else
 #include <stdint.h>
-#endif
 
 #include <gtk/gtk.h>
 

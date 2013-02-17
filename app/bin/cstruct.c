@@ -28,11 +28,7 @@
 #include "compound.h"
 #include "i18n.h"
 
-#ifdef _WIN32
-typedef signed short intptr_t
-#else
 #include <stdint.h>
-#endif
 
 EXPORT TRKTYP_T T_STRUCTURE = -1;
 

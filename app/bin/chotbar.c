@@ -27,11 +27,7 @@
 #include "track.h"
 #include "compound.h"
 
-#ifdef _WIN32
-typedef signed short intptr_t
-#else
 #include <stdint.h>
-#endif
 
 EXPORT DIST_T curBarScale = -1;
 EXPORT long hotBarLabels = 0;

@@ -27,11 +27,7 @@
 #include <stdlib.h>
 #endif
 
-#ifdef _WIN32
-typedef signed short intptr_t
-#else
 #include <stdint.h>
-#endif
 
 #include <ctype.h>
 #include "track.h"
