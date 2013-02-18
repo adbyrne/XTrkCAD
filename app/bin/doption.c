@@ -171,9 +171,27 @@ LayoutDlgUpdate(
 	int inx,
 	void * valueP )
 {
+	char prefString[ 100 ];
+	char scaleDesc[ 100 ];
+
 	/* did the scale change ? */
 	if( inx == 4 ) {
 		LoadGaugeList( (wList_p)layoutPLs[5].control, *((int *)valueP) );
+		// set the first entry as default, usually the standard gauge for a scale
+		wListSetIndex( (wList_p)layoutPLs[5].control, 0 );
+
+		// get the minimum radius
+		// get the selected scale first
+		wListGetValues((wList_p)layoutPLs[4].control, scaleDesc, 99, NULL, NULL );
+		// split of the name from the scale
+		strtok( scaleDesc, " " );
+
+		// now get the minimum track radius
+		sprintf( prefString, "minTrackRadius-%s", scaleDesc );
+		wPrefGetFloat( "misc", prefString, &minTrackRadius, 0.0 );
+		
+		// put the scale's minimum value into the dialog
+		wStringSetValue( (wString_p)layoutPLs[6].control, FormatDistance( minTrackRadius ) );
 	}	
 }
 
