@@ -10,8 +10,10 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
 Building XTrkCAD on GNU/Linux
 -----------------------------
 
-* Obtain the current sources from CVS; I assume that they are located at
+* Obtain the current sources from Mercurial; I assume that they are located at
   "~/src/xtrkcad".
+  Note that the correct URL for read-only access to Mercurial is
+  http://xtrkcad-fork.hg.sourceforge.net:8000/hgroot/xtrkcad-fork/xtrkcad
 * Create a separate build directory; for these instructions I assume that
   your build directory is "~/build/xtrkcad".
 * Run CMake from the build directory, passing it the path to the source
@@ -78,8 +80,10 @@ Building XTrkCAD on Mac OSX
 Building XTrkCAD on Windows
 ---------------------------
 
-* Obtain the current sources from CVS; I assume that they are located at
+* Obtain the current sources from Mercurial; I assume that they are located at
   "c:/src/xtrkcad".
+  Note that the correct URL for read-only access to Mercurial is
+  http://xtrkcad-fork.hg.sourceforge.net:8000/hgroot/xtrkcad-fork/xtrkcad  
 * Use the Windows Start menu to run CMake.
 * Specify the source and build directories in the CMake window. You must
   provide a build directory outside the source tree - I use "c:/build/xtrkcad".
