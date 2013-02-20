@@ -347,7 +347,7 @@ static void CustMgmChange( long changes )
 static void DoCustomMgr( void * junk )
 {
 	if (customPG.win == NULL) {
-		ParamCreateDialog( &customPG, MakeWindowTitle(_("Custom Update")), _("Done"), CustomDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
+		ParamCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
 	} else {
 		wListClear( customSelL );
 	}

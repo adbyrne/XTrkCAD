@@ -2298,7 +2298,7 @@ static void CreateMenus( void )
 	MiscMenuItemCreate( manageM, NULL, "cmdGroup", _("&Group"), ACCL_GROUP, (void*)(wMenuCallBack_p)DoGroup, IC_SELECTED, (void *)0 );
 	MiscMenuItemCreate( manageM, NULL, "cmdUngroup", _("&Ungroup"), ACCL_UNGROUP, (void*)(wMenuCallBack_p)DoUngroup, IC_SELECTED, (void *)0 );
 
-	MiscMenuItemCreate( manageM, NULL, "cmdCustmgm", _("Custom Management..."), ACCL_CUSTMGM, (void*)CustomMgrInit(), 0, (void *)0 );
+	MiscMenuItemCreate( manageM, NULL, "cmdCustmgm", _("Custom defined parts..."), ACCL_CUSTMGM, (void*)CustomMgrInit(), 0, (void *)0 );
 	MiscMenuItemCreate( manageM, NULL, "cmdRefreshCompound", _("Update Turnouts and Structures"), 0, (void*)(wMenuCallBack_p)DoRefreshCompound, 0, (void *)0 );
 
 	MiscMenuItemCreate( manageM, NULL, "cmdCarInventory", _("Car Inventory"), ACCL_CARINV, (void*)(wMenuCallBack_p)DoCarDlg, IC_MODETRAIN_TOO, (void *)0 );
