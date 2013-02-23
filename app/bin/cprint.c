@@ -372,7 +372,7 @@ static void PrintGaudyBox(
 	p01.y = 1.0;
 	p00.x = 0.05; p00.y = 0.5+0.05;
 	fp = wStandardFont( F_TIMES, TRUE, TRUE );
-	DrawString( &page_d, p00, 0.0, sProdName, fp, 40.0, wDrawColorBlack );
+	DrawString( &page_d, p00, 0.0, sProdName, fp, 30.0, wDrawColorBlack );
 
 	p00.y = 0.5; p01.y = 1.0;
 	p00.x = p01.x = (157.0/72.0)+0.1;
