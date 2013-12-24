@@ -65,7 +65,7 @@ static void buildDesignerLines( FILE * inf, FILE * outf )
 	while ( fgets( line, sizeof line, inf ) != NULL ) {
 		
 		if ( strncmp( line, "ARROW", 5 ) == 0 ) {
-			if ( sscanf( line, "ARROW, %lf, %lf, %lf, %lf, %lf",
+			if ( sscanf( line, "ARROW, %lf, %lf, %lf, %lf",
 						&p0.x, &p0.y, &p1.x, &p1.y ) != 4) {
 				fprintf( stderr, "SYNTAX: %s", line );
 				exit (1);
