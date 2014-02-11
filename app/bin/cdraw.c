@@ -483,7 +483,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 #else
 		drawDesc[TA].mode = DESC_RO;
 #endif
-		drawDesc[CO].mode =
+        drawDesc[CO].mode = 0;  /*Allow Text color setting*/
 		drawDesc[LW].mode = DESC_IGNORE;
 		title = _("Text");
 		break;
