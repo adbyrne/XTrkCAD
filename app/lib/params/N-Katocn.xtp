@@ -1,0 +1,73 @@
+CONTENTS Kato N-scale Rolling Stock
+CARPART N "Kato	Baggage, 60'	California Zephyr Silver Cayote	106-055 (1)	Chicago Burlington & Quincy	CB&Q	905" 0 50100 4.500 0.750 0 0 3.763 4.900 12632256
+CARPART N "Kato	Baggage, 60'		106-1052 (6)	Great Northern	GN	279" 0 50100 4.500 0.750 0 0 3.763 4.900 8388608
+CARPART N "Kato	Baggage, 60'	Super Chief	106-6002 (1)	Atchison Topeka & Santa Fe	ATSF	3456" 0 50100 4.500 0.750 0 0 3.763 4.900 12632256
+CARPART N "Kato	Box, 60'	Amtrak Material Handling Car	106-3509 (1)	Amtrak	AMTRAK	1507" 0 30100 4.550 0.787 0 0 3.469 4.950 12632256
+CARPART N "Kato	Box, 60'	Amtrak Material Handling Car	106-3509 (2)	Amtrak	AMTRAK	1524" 0 30100 4.550 0.787 0 0 3.469 4.950 12632256
+CARPART N "Kato	Coach, 85'	California Zephyr Vista Dome Silver Bridle	106-055 (2)	Chicago Burlington & Quincy	CB&Q	4716" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Coach, 85'	California Zephyr Vista Dome Silver Colt /w Conductor's room	106-055 (3)	Denver & Rio Grande Western	DRGW	1106" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Coach, 85'	California Zephyr Vista Dome Silver Scout	106-055 (4)	Western Pacific	WP	816" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Coach, 85'		106-1052 (8)	Great Northern	GN	1215" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Coach, 85'		106-1053 (1)	Great Northern	GN	1330" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Coach, 85'	Big Home Pass	106-1053 (2)	Great Northern	GN	1230" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Coach, 85'	Phase IV	106-3504 Phase IV AMTRAK 34010	Amtrak	AMTRAK	34010" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Diner, 85'	California Zephyr Silver Banquet	106-055 (8)	Denver & Rio Grande Western	DRGW	1115" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Diner, 85'	 Lake Wenatchee	106-1051 (10)	Great Northern	GN	1251" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Diner, 85'	Super Chief	106-6001 (1)	Atchison Topeka & Santa Fe	ATSF	603" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	F3A	EMD Cab A	176-1203	Western Pacific	WP	803" 2 10101 3.631 0.750 0 0 2.881 4.031 16744512
+CARPART N "Kato	F3B	EMD	176-1208	Western Pacific	WP	" 2 10101 3.525 0.750 0 0 2.775 3.925 16744512
+CARPART N "Kato	F7A	EMD Double Headlight	106-0416 (1)	Great Northern	GN	3648" 2 10101 3.000 0.667 0 0 1.917 3.400 8388608
+CARPART N "Kato	F7A	EMD Double Headlight Warbonnet	176-2121	Atchison Topeka & Santa Fe	ATSF	300" 2 10101 3.000 0.667 0 0 1.917 3.400 16711680
+CARPART N "Kato	F7B	EMD	106-0416 (2)	Great Northern	GN	" 2 10101 3.000 0.667 0 0 1.917 3.400 8388608
+CARPART N "Kato	F7B	EMD Warbonnet	176-2211	Atchison Topeka & Santa Fe	ATSF	" 2 10101 3.000 0.667 0 0 1.917 3.400 16711680
+CARPART N "Kato	Hopper, 45'	BethGon Coalporter	106-4006 (3)	Burlington Northern	BN	533791" 0 30100 3.450 0.794 0 0 2.712 3.850 32768
+CARPART N "Kato	Hopper, 45'	BethGon Coalporter	106-4606  (4)	Burlington Northern	BN	534834" 0 30100 3.450 0.794 0 0 2.712 3.850 32768
+CARPART N "Kato	Hopper, 45'	BethGon Coalporter	106-4606 (1)	Burlington Northern	BN	533443" 0 30100 3.450 0.794 0 0 2.712 3.850 32768
+CARPART N "Kato	Hopper, 45'	BethGon Coalporter	106-4606 (2)	Burlington Northern	BN	533538" 0 30100 3.450 0.794 0 0 2.712 3.850 32768
+CARPART N "Kato	Hopper, 45'	BethGon Coalporter	106-4606 (5)	Burlington Northern	BN	534580" 0 30100 3.450 0.794 0 0 2.712 3.850 32768
+CARPART N "Kato	Hopper, 45'	BethGon Coalporter	106-4606 (6)	Burlington Northern	BN	534566" 0 30100 3.450 0.794 0 0 2.712 3.850 32768
+CARPART N "Kato	Hopper, 45'	BethGon Coalporter	106-4606 (7)	Burlington Northern	BN	534795" 0 30100 3.450 0.794 0 0 2.712 3.850 32768
+CARPART N "Kato	Hopper, 45'	BethGon Coalporter	106-4606 (8)	Burlington Northern	BN	534800" 0 30100 3.450 0.794 0 0 2.712 3.850 32768
+CARPART N "Kato	Intermodel A-B	Double Stack Rear B	1 Double Stack Rear B DTTX 732750 06-6114-B	DTTX	DTTX	732753-B" 0 30100 4.250 0.750 0 0 3.513 4.650 16776960
+CARPART N "Kato	Intermodel A-B	Double Stack Header A	106-6114-A	DTTX	DTTX	732753-A" 0 30100 4.250 0.750 0 0 3.513 4.650 16776960
+CARPART N "Kato	Intermodel A-B	Double Stack Rear B	106-6114-B Double Stack Rear B DTTX 732753-B 	DTTX	DTTX	732753-B" 0 30100 4.250 0.750 0 0 3.513 4.650 16776960
+CARPART N "Kato	Intermodel A-B	Double Stack Header A	106-6115-A Double Stack Header A DTTX 732750-A	DTTX	DTTX	732750-A" 0 30100 4.250 0.750 0 0 3.513 4.650 16776960
+CARPART N "Kato	Intermodel A-B	Double Stack Rear B	106-6115-B Double Stack Rear B DTTX 732753-B	DTTX	DTTX	732750-B" 0 30100 4.250 0.750 0 0 3.513 4.650 16776960
+CARPART N "Kato	Intermodel A-B	Double Stack Rear B	106-6115-B Set 2	DTTX	DTTX	" 0 30100 4.250 0.750 0 0 3.513 4.650 16776960
+CARPART N "Kato	Intermodel A-B	Double Stack Header A	12100020	DTTX	DTTX	732753" 0 30100 4.250 0.750 0 0 3.513 4.650 16776960
+CARPART N "Kato	Intermodel A-B	Double Stack Rear B	12100021	DTTX	DTTX	732750" 0 30100 4.250 0.750 0 0 3.513 4.650 16776960
+CARPART N "Kato	Intermodel C	Double Stack Center C	106-6114-C	DTTX	DTTX	732753-C" 0 30100 3.833 0.750 0 0 3.096 4.233 16776960
+CARPART N "Kato	Intermodel C	Double Stack Center C	106-6115-C Double Stack Center C DTTX 732750-C	DTTX	DTTX	732750-C" 0 30100 3.833 0.750 0 0 3.096 4.233 16776960
+CARPART N "Kato	Intermodel C	Double Stack Center C	12100022	DTTX	DTTX	732753" 0 30100 3.833 0.750 0 0 3.096 4.233 16776960
+CARPART N "Kato	Lounge, 85'	Super Chief	106-6002 (4)	Atchison Topeka & Santa Fe	ATSF	1341" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Mikado 2-8-2	USRA 2-3-2-Heavy Mikado Burlington Route	126-0211	Chicago Burlington & Quincy	CB&Q	5510" 2 10201 5.083 0.750 0 0 4.346 5.483 0
+CARPART N "Kato	NW2	EMD Everywhere West Burlington Route	176-4355	Chicago Burlington & Quincy	CB&Q	9208" 2 10101 2.583 0.750 0 0 1.846 2.983 12632256
+CARPART N "Kato	Observation, 85'	California Zephyr Dome Silver Solarium	106-055 (11)	Chicago Burlington & Quincy	CB&Q	377" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Observation, 85'	Grand Coulee	106-1051 (12)	Great Northern	GN	1197" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Observation, 85'	Super Chief	106-6001 (2)	Atchison Topeka & Santa Fe	ATSF	Vista Canyon" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	P42 Genesis	Phase IV	176-6002	Amtrak	AMTRAK	97" 2 10101 6.000 0.750 0 0 5.263 6.400 33023
+CARPART N "Kato	Pleasure Dome, 85'	California Zephyr Buffet Silver Chalet	106-055 (5)	Western Pacific	WP	831" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Pleasure Dome, 85'		106-1051	Great Northern	GN	1321" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Pleasure Dome, 85'		106-1051 (2)  GN 1330	Great Northern	GN	1330" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Pleasure Dome, 85'		106-1051 (9)  GN 1321	Great Northern	GN	1321" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Pleasure Dome, 85'		106-1052 (5)	Great Northern	GN	1325" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Pleasure Dome, 85'	Super Chief	106-6001 (4)	Atchison Topeka & Santa Fe	ATSF	501" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	RPO, 50'	Super Chief	106-6002 (3)	Atchison Topeka & Santa Fe	ATSF	87" 0 50100 3.750 0.750 0 0 3.013 4.150 12632256
+CARPART N "Kato	RPO, 85'		106-1052 (7)	Great Northern	GN	41" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	SD40-2	EMD Freight Road Locomotive	176-8203a	Burlington Northern Santa Fe	BNSF	6744" 2 10101 4.850 0.769 0 0 3.263 5.250 16744448
+CARPART N "Kato	SD40-2	EMD Freight Road Locomotive	176-8204	Burlington Northern Santa Fe	BNSF	6762" 2 10101 4.850 0.769 0 0 3.263 5.250 16744448
+CARPART N "Kato	Sleeper, 85'	California Zephyr 10-6 Silver Point	106-0055 (6)	Chicago Burlington & Quincy	CB&Q	423" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	California Zephyr 10-6 Silver Gorge	106-055 (10)	Denver & Rio Grande Western	DRGW	1132" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	California Zephyr 10-6 Silver Surf	106-055 (7)	Western Pacific	WP	867" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	California Zephyr 16 Sec Silver Maple	106-055 (9)	Chicago Burlington & Quincy	CB&Q	400" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	Haret Pass	106-1051 (11)	Great Northern	GN	1376" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Sleeper, 85'	Bih Home Pass	106-1053 (3)	Great Northern	GN	1379" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Sleeper, 85'	Lewis & Clark Pass	106-1053 (4)	Great Northern	GN	1384" 0 50100 6.450 0.750 0 0 5.713 6.850 8388608
+CARPART N "Kato	Sleeper, 85'	Phase IV	106-3504	Amtrak	AMTRAK	32000" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	Phase IV	106-3504 Phase IV AMTRAK 	Amtrak	AMTRAK	32026" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	Super Chief, ACF 4-4-2	106-6001 (3)	Atchison Topeka & Santa Fe	ATSF	Regal Crest" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	Super Chief, ADF 10-6	106-6002 (2)	Atchison Topeka & Santa Fe	ATSF	Palm Stream" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	Super Chief, ACF 4-4-2	106-6003 (2)	Atchison Topeka & Santa Fe	ATSF	Regal Hunt" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	Super Chief, ACF 10-6	106-6003 (3)	Atchison Topeka & Santa Fe	ATSF	Palm Top" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	Super Chief, ACF 10-6	106-6003 (4)	Atchison Topeka & Santa Fe	ATSF	Palm Haven" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256
+CARPART N "Kato	Sleeper, 85'	Super Chief, ACF 4-4-2	106-6603 (1)	Atchison Topeka & Santa Fe	ATSF	Regal Gate" 0 50100 6.450 0.750 0 0 5.713 6.850 12632256

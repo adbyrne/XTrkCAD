@@ -86,7 +86,7 @@ TURNOUT N  "Atlas True-Track	Terminal Curve 15.50R 22.5°	2416"
 
 SUBCONTENTS Atlas True-Track N-Scale Crossings
 TURNOUT N  "Atlas True-Track	90° Crossing	2420"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 2.000000 0.000000 90.000000
 	E 1.000000 1.000000 0.000000
