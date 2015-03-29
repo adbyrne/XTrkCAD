@@ -35,5 +35,5 @@ ENDIF(XTRKCAD_USE_GETTEXT)
 
 ADD_LIBRARY(xtrkcad-wlib ${HEADERS} ${SOURCES})
 
-TARGET_LINK_LIBRARIES(xtrkcad-wlib Htmlhelp msimg32)
+TARGET_LINK_LIBRARIES(xtrkcad-wlib Htmlhelp msimg32 shlwapi)
 

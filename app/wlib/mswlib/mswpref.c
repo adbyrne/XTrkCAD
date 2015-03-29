@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "mswint.h"
 #include <shlobj.h>
+#include <Shlwapi.h>
 
 #if _MSC_VER >=1400
 	#define stricmp _stricmp
@@ -88,6 +89,12 @@ const char * wGetAppWorkDir( void )
 			wExit(0);
 	} else {
 		sprintf( appWorkDirName, "%s\\%s", mswTmpBuff, "XTrackCad" );
+		if( !PathIsDirectory( appWorkDirName )) {
+			if( !CreateDirectory( appWorkDirName, NULL )) {
+				wNoticeEx( NT_ERROR, "Cannot create user's profile directory", "Exit", NULL );
+				wExit(0);
+			}
+		}
 	}
 
 	return appWorkDirName;
