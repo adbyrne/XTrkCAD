@@ -1309,7 +1309,7 @@ EXPORT void DrawTrackElev( track_cp trk, drawCmd_p d, BOOL_T drawIt )
 	}
 	if ( !drawIt )
 		color = wDrawColorWhite;
-	sprintf( message, "%0.2f", PutDim(elev) );
+	sprintf( message, "%s", FormatDistance(elev));
 	fp = wStandardFont( F_HELV, FALSE, FALSE );
 	DrawBoxedString( BOX_INVERT, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0 );
 }

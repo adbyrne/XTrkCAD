@@ -2494,6 +2494,7 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 	ANGLE_T a=0;
 	int style = BOX_BOX;
 	BOOL_T gradeOk = TRUE;
+	char *elevStr;
 
 	if ((labelEnable&LABELENABLE_ENDPT_ELEV)==0)
 		return;
@@ -2516,10 +2517,11 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 			gradeOk = FALSE;
 		}
 		if ((elev->option&ELEV_MASK)==ELEV_COMP) {
-			sprintf( message, "%0.2f", PutDim(elev0) );
+			elevStr = FormatDistance(elev0);
 			elev->u.height = elev0;
 		} else if (gradeOk) {
 			sprintf( message, "%0.1f%%", fabs(grade*100.0) );
+			elevStr = message;
 			a = GetTrkEndAngle( trk, ep );
 			style = BOX_ARROW;
 			if (grade <= -0.001)
@@ -2528,21 +2530,21 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 				style = BOX_BOX;
 			elev->u.height = grade;
 		} else {
-			sprintf( message, "????%%" );
+			elevStr = "????%%";
 		}
 		break;
 	case ELEV_DEF:
-		sprintf( message, "%0.2f", PutDim(elev->u.height) );
+		elevStr = FormatDistance( elev->u.height);
 		break;
 	case ELEV_STATION:
-		strcpy( message, elev->u.name );
+		elevStr = elev->u.name;
 		break;
 	default:
 		return;
 	}
 	pp.x += elev->doff.x;
 	pp.y += elev->doff.y;
-	DrawBoxedString( style, d, pp, message, fp, (wFontSize_t)descriptionFontSize, color, a );
+	DrawBoxedString( style, d, pp, elevStr, fp, (wFontSize_t)descriptionFontSize, color, a );
 }
 
 /**
