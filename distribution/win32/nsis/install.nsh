@@ -8,7 +8,7 @@ CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrkCad ReadMe.lnk" "notepad.exe" 
 ;	
 ;  create file association
 ;
-; back up old value of .opt
+; back up old value of .xtc
   !define Index "Line${__LINE__}"
   ReadRegStr $1 HKCR ".xtc" ""
   StrCmp $1 "" "${Index}-NoBackup"
