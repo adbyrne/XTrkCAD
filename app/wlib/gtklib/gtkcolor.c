@@ -256,22 +256,6 @@ EXPORT int gtkMapPixel(
 	return colorMap(wDrawColorBlack).colorChar;
 }
 
-
-EXPORT void gtkPrintColorMap(
-		FILE * f,
-		int w,
-		int h )
-{
-	wDrawColor color;
-	int cnt = colorMap_da.cnt;
-	if (cnt > (0x7E - ' ') )
-		cnt = 0x7E - ' ';
-	fprintf( f, "\"%d %d %d 1\"\n", w, h, cnt );
-	fprintf( f, "/* colors */\n" );
-	for ( color = 0; color < colorMap_da.cnt; color++ ) {
-		fprintf( f, "\"%c c #%6.6x\",\n", colorMap(color).colorChar, (int)colorMap(color).rgb );
-	}
-}
 
 /*
  *****************************************************************************

@@ -225,7 +225,9 @@ void CreateAboutW( void *ptr )
 		wTextAppend( COPYRIGHT_T, "\n\nIcons by: Tango Desktop Project (http://tango.freedesktop.org)");
 		wTextAppend( COPYRIGHT_T, "\n\nContributions by: Robert Heller, Mikko Nissinen, Timothy M. Shead, Daniel Luis Spagnol" );
 		wTextAppend( COPYRIGHT_T, "\n\nParameter Files by: Ralph Boyd, Dwayne Ward" );
-
+		wTextAppend( COPYRIGHT_T, "\n\nuthash Copyright notice:" );
+		wTextAppend( COPYRIGHT_T, "\nCopyright (c) 2005-2015, Troy D. Hanson  http://troydhanson.github.com/uthash/");
+		wTextAppend( COPYRIGHT_T, "\nAll rights reserved.");
 	} 
 		
 	wShow( aboutW );

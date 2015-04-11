@@ -15,6 +15,7 @@ SET(SOURCES
 	gtksplash.c
 	gtktext.c
 	gtkwindow.c
+	gtkxpm.c
 	psprint.c
 	wpref.c
 	)
