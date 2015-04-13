@@ -30,7 +30,7 @@
 #include <unistd.h>
 #endif
 #include <math.h>
-#ifndef __APPLE__
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #include <string.h>

@@ -24,7 +24,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#ifndef __APPLE__
+#ifdef HAVE_MALLOC_C
 #include <malloc.h>
 #endif
 #include <math.h>

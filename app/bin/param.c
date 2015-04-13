@@ -28,7 +28,7 @@
 #include <unistd.h>
 #include <dirent.h>
 #endif
-#ifndef __APPLE__
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
 #include <math.h>

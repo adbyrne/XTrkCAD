@@ -134,6 +134,10 @@ INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
 INCLUDE_DIRECTORIES(${help_BINARY_DIR})
 INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
 
+# find libintl.h and use it
+find_path ( INTL_PATH libintl.h )
+INCLUDE_DIRECTORIES(${INTL_PATH})
+
 LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
 LINK_DIRECTORIES(${GTK_WEBKIT_LIBRARY_DIRS})
 
@@ -159,6 +163,12 @@ IF(NOT WIN32)
 	TARGET_LINK_LIBRARIES(mkturnout m)
 	TARGET_LINK_LIBRARIES(xtrkcad m)
 ENDIF(NOT WIN32)
+
+# Link libintl for systems where it is a separate library
+find_library( INTL_LIBRARY intl )
+if(INTL_LIBRARY)
+  target_link_libraries( mkturnout ${INTL_LIBRARY} )
+endif(INTL_LIBRARY)
 
 INSTALL(
 	TARGETS xtrkcad

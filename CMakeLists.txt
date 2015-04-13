@@ -74,6 +74,11 @@ IF(XTRKCAD_USE_PACKAGEMAKER)
 	ENDIF(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
 ENDIF(XTRKCAD_USE_PACKAGEMAKER)
 
+# Test for headers and libraries for portability ...
+
+INCLUDE (CheckIncludeFiles)
+CHECK_INCLUDE_FILES (malloc.h HAVE_MALLOC_H)
+
 # Setup some global options for installation ...
 SET(XTRKCAD_MAJOR_VERSION "4")
 SET(XTRKCAD_MINOR_VERSION "2")

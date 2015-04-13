@@ -44,6 +44,8 @@
 #include "gtkint.h"
 #include "i18n.h"
 
+void load_into_view (char *file, int requested_view);	// Prototype to please clang.
+
 /* globals and defines related to the HTML help window */
 
 #define  HTMLERRORTEXT "<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=US-ASCII\">" \
