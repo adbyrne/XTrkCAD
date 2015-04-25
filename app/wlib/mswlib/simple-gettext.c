@@ -475,12 +475,12 @@ bindtextdomain( char *domainname, char *dirname )
 	if( dirname[ strlen(dirname) ] == '/' )
 		dirname[ strlen(dirname) ] = '\0';
 
-	/* allocate buffer for filename, 10 bytes should be enough for extension etc. */
-	dir = malloc( strlen( domainname ) + strlen( dirname ) + strlen( loc ) + 10 );
+	/* allocate buffer for filename, 20 bytes should be enough for extension etc. */
+	dir = malloc( strlen( domainname ) + strlen( dirname ) + strlen( loc ) + 20 );
 	
 	if( dir ) {
 		/* create the full filename */
-		sprintf( dir, "%s/%s/%s.mo", dirname, loc, domainname );
+		sprintf( dir, "%s/%s/LC_MESSAGES/%s.mo", dirname, loc, domainname );
 		/* load the file */
 		set_gettext_file( dir, NULL );
 		free( dir );

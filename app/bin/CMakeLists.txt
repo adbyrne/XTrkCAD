@@ -136,7 +136,9 @@ INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
 
 # find libintl.h and use it
 find_path ( INTL_PATH libintl.h )
-INCLUDE_DIRECTORIES(${INTL_PATH})
+if(INTL_PATH)
+	INCLUDE_DIRECTORIES(${INTL_PATH})
+endif(INTL_PATH)
 
 LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
 LINK_DIRECTORIES(${GTK_WEBKIT_LIBRARY_DIRS})
@@ -159,16 +161,19 @@ ADD_EXECUTABLE(mkturnout
 	utility.c
 	)
 SET_TARGET_PROPERTIES(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
+
 IF(NOT WIN32)
 	TARGET_LINK_LIBRARIES(mkturnout m)
 	TARGET_LINK_LIBRARIES(xtrkcad m)
-ENDIF(NOT WIN32)
-
-# Link libintl for systems where it is a separate library
-find_library( INTL_LIBRARY intl )
-if(INTL_LIBRARY)
-  target_link_libraries( mkturnout ${INTL_LIBRARY} )
-endif(INTL_LIBRARY)
+	
+	# Link libintl for systems where it is a separate library
+	find_library( INTL_LIBRARY intl )
+	if(INTL_LIBRARY)
+		target_link_libraries( mkturnout ${INTL_LIBRARY} )
+	endif(INTL_LIBRARY)
+ELSE(NOT WIN32)
+	TARGET_LINK_LIBRARIES(mkturnout xtrkcad-wlib)
+ENDIF(NOT WIN32)	
 
 INSTALL(
 	TARGETS xtrkcad

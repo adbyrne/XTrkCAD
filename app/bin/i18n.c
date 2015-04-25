@@ -28,8 +28,8 @@
 void InitGettext( void )
 {
 #ifdef XTRKCAD_USE_GETTEXT
-	setlocale(LC_ALL, "");
 	char directory[2048];
+	setlocale(LC_ALL, "");
 #ifdef XTRKCAD_CMAKE_BUILD
 	strcpy(directory, XTRKCAD_INSTALL_PREFIX);
 	strcat(directory, "/share");
