@@ -3,22 +3,23 @@ Window Help File colour and fonts are done here. Halibut controls margins, line 
 *************************************************************************************/
 
 BODY {
-	background: #F5F5DC;
-	font-family: Verdana, Arial, Helvetica;
+	background: white;
+	font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
 	font-size: 9pt;
-	color: #000000;
+	color: #333;
 	font-weight: normal;
+	line-height: 1.4em;
 }
 
 A:link {
 	text-decoration: none;
-	color: Blue;
+	color: #7DA1BF;
 	font-weight: bold;
 }          /* unvisited link */
 
 A:visited {
 	text-decoration: none;
-	color: 336666;
+	color: #1d4e89;
 	font-weight: bold;
 }        /* visited links */
 
@@ -30,7 +31,7 @@ A:active {
 
 a:hover {
 	text-decoration: underline;
-	color:red;
+	color: #F69256;
 	}
 
 H1 {
