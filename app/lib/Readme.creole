@@ -99,7 +99,7 @@ environment variable to point to that directory.
 
 In order to prevent problems when moving files between different platforms, the symbol '½' was
 removed from the scale definitions and parameter files for narrow gauge definitions. 
-As customary 'n30' is used instead.  
+As customary '.5' or the corresponding gauge in inches eg. 30 is used instead.  
 Layouts using the old definition can be still be loaded. Use the 'Layout Parameter' dialog to 
 set the updated definition. 
 

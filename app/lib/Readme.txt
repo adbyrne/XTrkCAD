@@ -1,4 +1,4 @@
- XTrackCAD 4.2.0
+   XTrackCAD 4.2.0
 
 This file contains installation instructions and up-to-date
 information regarding XTrackCad.
@@ -106,10 +106,10 @@ the XTRKCADLIB environment variable to point to that directory.
 
 In order to prevent problems when moving files between different
 platforms, the symbol '½' was removed from the scale definitions and
-parameter files for narrow gauge definitions. As customary 'n30' is
-used instead. Layouts using the old definition can be still be
-loaded. Use the 'Layout Parameter' dialog to set the updated
-definition.
+parameter files for narrow gauge definitions. As customary '.5' or
+the corresponding gauge in inches eg. 30 is used instead. Layouts
+using the old definition can be still be loaded. Use the 'Layout
+Parameter' dialog to set the updated definition.
 
   Bugs fixed
 
@@ -206,13 +206,9 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
  - Obtain the current sources from Mercurial; I assume that they are
    stored locally at "/src/xtrkcad". Note that the correct URL for
    read-only access to Mercurial is
-
-  
-  
-  
-  
   
    http://xtrkcad-fork.hg.sourceforge.net:8000/hgroot/xtrkcad-fork/xtrkcad
+   
  - Create a separate build directory; for these instructions I
    assume that your build directory is "/build/xtrkcad".
  - Run CMake from the build directory, passing it the path to the
@@ -280,13 +276,9 @@ pointing your web browser at
  - Obtain the current sources from Mercurial; I assume that they are
    stored locally at "c:/src/xtrkcad". Note that the correct URL for
    read-only access to Mercurial is
-
-  
-  
-  
-  
   
    http://xtrkcad-fork.hg.sourceforge.net:8000/hgroot/xtrkcad-fork/xtrkcad
+   
  - Use the Windows Start menu to run CMake.
  - Specify the source and build directories in the CMake window.
    You must provide a build directory outside the source tree - I use
@@ -331,8 +323,8 @@ pointing your web browser at
 The following web addresses will be helpful for any questions or bug
 reports
 
-The Yahoo!Group mailing list
- The project website for the open source development
- The official Sourceforge site
+ - The Yahoo!Group mailing list
+ - The project website for the open source development
+ - The official Sourceforge site
 
 Thanks for your interest in XTrackCAD.
