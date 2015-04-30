@@ -25,6 +25,12 @@ INSTALL(DIRECTORY
   USE_SOURCE_PERMISSIONS
   )
 
+INSTALL(DIRECTORY
+  ${MACPORTS_DIR}/etc/gdk-pixbuf-2.0
+  DESTINATION lib
+  USE_SOURCE_PERMISSIONS
+  )
+
 INSTALL(FILES
   ${MACPORTS_DIR}/etc/pango/pangorc
   ${MACPORTS_DIR}/etc/pango/pango.modules
@@ -35,6 +41,13 @@ INSTALL(FILES
   ${MACPORTS_DIR}/etc/fonts/fonts.conf
   ${MACPORTS_DIR}/etc/fonts/fonts.dtd
   DESTINATION etc/fonts
+  )
+
+INSTALL(FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/yosemite-fix/libiconv.2.dylib
+  ${CMAKE_CURRENT_SOURCE_DIR}/yosemite-fix/libxml2.2.dylib
+  ${CMAKE_CURRENT_SOURCE_DIR}/yosemite-fix/libz.1.dylib
+  DESTINATION lib
   )
 
 # Generate bundles ...
