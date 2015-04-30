@@ -44,11 +44,11 @@ INSTALL(FILES
   )
 
 INSTALL(FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/yosemite-fix/libiconv.2.dylib
   ${CMAKE_CURRENT_SOURCE_DIR}/yosemite-fix/libxml2.2.dylib
   ${CMAKE_CURRENT_SOURCE_DIR}/yosemite-fix/libz.1.dylib
+  ${CMAKE_CURRENT_SOURCE_DIR}/yosemite-fix/libiconv.2.dylib
   DESTINATION lib
-  )
+)
 
 # Generate bundles ...
 ADD_SUBDIRECTORY(bundle)
