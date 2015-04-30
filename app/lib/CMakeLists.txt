@@ -12,9 +12,6 @@ INSTALL(FILES
 	COPYING
 	Readme.txt
 	logo.bmp
-	xtrkcad.bug
-	xtrkcad.enh
-	xtrkcad.fix
 	xtrkcad.xtq
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 	)
