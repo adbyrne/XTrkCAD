@@ -37,6 +37,19 @@ INSTALL(FILES
   DESTINATION etc/fonts
   )
 
+INSTALL(DIRECTORY
+  ${MACPORTS_DIR}/lib/gdk-pixbuf-2.0
+  DESTINATION lib
+  USE_SOURCE_PERMISSIONS
+  )
+
+INSTALL(FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/yosemite-fix/libxml2.2.dylib
+  ${CMAKE_CURRENT_SOURCE_DIR}/yosemite-fix/libz.1.dylib
+  ${CMAKE_CURRENT_SOURCE_DIR}/yosemite-fix/libiconv.2.dylib
+  DESTINATION lib
+)
+
 # Generate bundles ...
 ADD_SUBDIRECTORY(bundle)
 
