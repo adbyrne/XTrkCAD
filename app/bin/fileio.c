@@ -969,7 +969,8 @@ static int SaveTracks(
 	DoSaveTracks( pathName );
 	wMenuListAdd( fileList_ml, 0, fileName, MyStrdup(pathName) );
 	checkPtMark = changed = 0;
-	strcpy( curPathName, pathName );
+	if (curPathName != pathName)
+	  strcpy( curPathName, pathName );
 	curFileName = &curPathName[fileName-pathName];
 	if (doAfterSave)
 		doAfterSave();
