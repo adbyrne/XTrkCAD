@@ -233,13 +233,14 @@ static struct {
 		coOrd orig;
 		DIST_T diameter;
 		long epCnt;
+		LAYER_T layerNumber;
 		} trntblData;
 typedef enum { OR, RA, EC, LY } trntblDesc_e;
 static descData_t trntblDesc[] = {
 /*OR*/	{ DESC_POS, N_("Origin: X"), &trntblData.orig },
 /*RA*/	{ DESC_DIM, N_("Diameter"), &trntblData.diameter },
 /*EC*/	{ DESC_LONG, N_("# EndPt"), &trntblData.epCnt },
-/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &trntblData.layerNumber },
 		{ DESC_NULL } };
 
 
@@ -257,6 +258,9 @@ static void UpdateTurntable( track_p trk, int inx, descData_p descUpd, BOOL_T fi
 	case RA:
 		if ( trntblData.diameter > 2.0 )
 			xx->radius = trntblData.diameter/2.0;
+		break;
+	case LY:
+		SetTrkLayer( trk, trntblData.layerNumber );
 		break;
 	default:
 		break;
@@ -277,12 +281,13 @@ static void DescribeTurntable( track_p trk, char * str, CSIZE_T len )
 	trntblData.orig = xx->pos;
 	trntblData.diameter = xx->radius*2.0;
 	trntblData.epCnt = GetTrkEndPtCnt(trk);
+	trntblData.layerNumber = GetTrkLayer(trk);
 
 	trntblDesc[OR].mode =
 	trntblDesc[RA].mode =
 		trntblData.epCnt>0?DESC_RO:0;
 	trntblDesc[EC].mode = DESC_RO;
-	trntblDesc[LY].mode = DESC_RO;
+	trntblDesc[LY].mode = DESC_NOREDRAW;
 	DoDescribe( _("Turntable"), trk, trntblDesc, UpdateTurntable );
 }
 

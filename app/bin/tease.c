@@ -491,6 +491,7 @@ static struct {
 		DIST_T l1;
 		FLOAT_T grade;
 		descPivot_t pivot;
+		LAYER_T layerNumber;
 		} jointData;
 typedef enum { E0, Z0, E1, Z1, OR, AL, RR, LL, L0, L1, GR, PV, LY } jointDesc_e;
 static descData_t jointDesc[] = {
@@ -506,7 +507,7 @@ static descData_t jointDesc[] = {
 /*L1*/	{ DESC_DIM, N_("l1"), &jointData.l1 },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &jointData.grade },
 /*PV*/	{ DESC_PIVOT, N_("Pivot"), &jointData.pivot },
-/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &jointData.layerNumber },
 		{ DESC_NULL } };
 
 static void UpdateJoint( track_p trk, int inx, descData_p descUpd, BOOL_T final )
@@ -525,6 +526,9 @@ static void UpdateJoint( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 		jointDesc[GR].mode |= DESC_CHANGE;
 		jointDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
 		return;
+	case LY:
+		SetTrkLayer( trk, jointData.layerNumber );
+		break;
 	default:
 		return;
 	}
@@ -560,6 +564,7 @@ static void DescribeJoint(
 	jointData.l = xx->L;
 	jointData.l0 = xx->l0;
 	jointData.l1 = xx->l1;
+	jointData.layerNumber = GetTrkLayer(trk);
 	ComputeElev( trk, 0, FALSE, &jointData.elev[0], NULL );
 	ComputeElev( trk, 1, FALSE, &jointData.elev[1], NULL );
 	if ( jointData.length > minLength )
@@ -580,7 +585,7 @@ static void DescribeJoint(
 	jointDesc[Z1].mode = (EndPtIsDefinedElev(trk,1)?0:DESC_RO)|DESC_NOREDRAW;
 	jointDesc[GR].mode = DESC_RO;
 	jointDesc[PV].mode = (fix0|fix1)?DESC_IGNORE:0;
-	jointDesc[LY].mode = DESC_RO;
+	jointDesc[LY].mode = DESC_NOREDRAW;
 	jointData.pivot = (fix0&fix1)?DESC_PIVOT_NONE:
 						fix0?DESC_PIVOT_FIRST:
 						fix1?DESC_PIVOT_SECOND:

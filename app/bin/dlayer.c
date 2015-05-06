@@ -36,7 +36,6 @@
  *
  */
 
-#define NUM_LAYERS		(99)
 #define NUM_BUTTONS		(20)
 #define LAYERPREF_FROZEN  (1)
 #define LAYERPREF_ONMAP	  (2)

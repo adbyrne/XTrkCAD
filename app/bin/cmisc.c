@@ -23,6 +23,7 @@
  */
 
 #include "track.h"
+#include "common.h"
 #include "i18n.h"
 
 /*****************************************************************************
@@ -91,7 +92,7 @@ static paramData_t describePLs[] = {
 #define I_STRING_N		I_STRING_0+4
 
 #define I_LAYER_0		I_STRING_N
-	{ PD_STRING, NULL, "Y1", 0, (void*)150 },
+	{ PD_DROPLIST, NULL, "Y1", 0, (void*)150, NULL, 0 },
 #define I_LAYER_N		I_LAYER_0+1
 
 #define I_COLOR_0		I_LAYER_N
@@ -215,7 +216,7 @@ static struct {
 /*COLOR*/		{ PD_LONG,	0,		   I_COLOR_0, I_COLOR_N },
 /*DIM*/			{ PD_FLOAT, PDO_DIM,   I_FLOAT_0, I_FLOAT_N },
 /*PIVOT*/		{ PD_RADIO, 0,		   I_PIVOT_0, I_PIVOT_N },
-/*LAYER*/		{ PD_STRING,0,		   I_LAYER_0, I_LAYER_N },
+/*LAYER*/		{ PD_DROPLIST,PDO_LISTINDEX,	   I_LAYER_0, I_LAYER_N },
 /*STRING*/		{ PD_STRING,0,		   I_STRING_0, I_STRING_N },
 /*TEXT*/		{ PD_TEXT,	PDO_DLGNOLABELALIGN, I_TEXT_0, I_TEXT_N },
 /*LIST*/		{ PD_DROPLIST, PDO_LISTINDEX,	   I_LIST_0, I_LIST_N },
@@ -284,6 +285,7 @@ static void DescribeLayout(
  * \param IN update
  *
  */
+static wList_p setLayerL;
 void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update )
 {
 	int inx;
@@ -321,6 +323,7 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 		wControlShow( describePLs[inx].control, FALSE );
 	}
 	ro_mode = (GetLayerFrozen(GetTrkLayer(trk))?DESC_RO:0);
+	if (ro_mode)
 	for ( ddp=data; ddp->type != DESC_NULL; ddp++ ) {
 		if ( ddp->mode&DESC_IGNORE )
 			continue;
@@ -352,11 +355,22 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 			wControlActive( ddp->control1, ((ddp->mode|ro_mode)&DESC_RO)==0 );
 			break;
 		case DESC_LAYER:
-			if ( GetLayerFrozen(GetTrkLayer(descTrk)) )
+/*			if ( GetLayerFrozen(GetTrkLayer(descTrk)) )
 				sprintf( message, "%s %2.2d - %s", _("Frozen"), GetTrkLayer(descTrk)+1, GetLayerName(GetTrkLayer(descTrk)) );
 			else
 				sprintf( message, "%2.2d - %s", GetTrkLayer(descTrk)+1, GetLayerName(GetTrkLayer(descTrk)) );
-			wStringSetValue( (wString_p)ddp->control0, message );
+			wStringSetValue( (wString_p)ddp->control0, message );*/
+			
+		//	setLayerL = wDropListCreate( describePG.win, 0, describeW_posy, "cmdLayerSet", NULL, 0, 10, 200, NULL, ChangeTrackLayer, NULL );
+		//	wControlSetBalloonText( (wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet") );
+		//	AddToolbarControl( (wControl_p)setLayerL, IC_MODETRAIN_TOO );
+			for ( inx = 0; inx<NUM_LAYERS; inx++ ) {
+				if (!GetLayerFrozen(inx))				// Avoid Frozen layers.
+				{
+					sprintf( message, "%2d : %s", inx+1,  GetLayerName(inx) );
+					wListAddValue( ddp->control0, message, NULL, (void*)inx );
+				}
+			}
 			break;
 		default:
 			break;

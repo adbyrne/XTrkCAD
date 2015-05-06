@@ -506,6 +506,7 @@ static struct {
 		long segCnt;
 		FLOAT_T grade;
 		DIST_T length;
+		LAYER_T layerNumber;
 		} compoundData;
 typedef enum { E0, Z0, E1, Z1, GR, OR, AN, MN, NM, PN, EC, SC, LY } compoundDesc_e;
 static descData_t compoundDesc[] = {
@@ -521,7 +522,7 @@ static descData_t compoundDesc[] = {
 /*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno },
 /*EC*/	{ DESC_LONG, N_("# End Pt"), &compoundData.epCnt },
 /*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt },
-/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &compoundData.layerNumber },
 		{ DESC_NULL } };
 
 
@@ -647,6 +648,9 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		compoundDesc[GR].mode |= DESC_CHANGE;
 		compoundDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
 		break;
+	case LY:
+		SetTrkLayer( trk, compoundData.layerNumber);
+		break;
 	default:
 		break;
 	}
@@ -731,6 +735,7 @@ void DescribeCompound(
 	compoundData.epCnt = GetTrkEndPtCnt(trk);
 	compoundData.segCnt = xx->segCnt;
 	compoundData.length = 0;
+	compoundData.layerNumber = GetTrkLayer( trk );
 	compoundDesc[E0].mode =
 	compoundDesc[Z0].mode =
 	compoundDesc[E1].mode =
@@ -743,7 +748,7 @@ void DescribeCompound(
 	compoundDesc[PN].mode = 0 /*DESC_NOREDRAW*/;
 	compoundDesc[EC].mode =
 	compoundDesc[SC].mode =
-	compoundDesc[LY].mode = DESC_RO;
+	compoundDesc[LY].mode = DESC_NOREDRAW;
 	if ( compoundData.epCnt ) {
 		if ( compoundData.epCnt <=2 ) {
 			if ( GetTrkEndTrk(trk,0) || (compoundData.epCnt==2 && GetTrkEndTrk(trk,1)) )

@@ -28,6 +28,8 @@
 #define FALSE	(0)
 #endif
 
+#define NUM_LAYERS		(99)
+
 typedef double FLOAT_T;
 typedef double POS_T;
 typedef double DIST_T;

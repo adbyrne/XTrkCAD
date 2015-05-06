@@ -334,6 +334,7 @@ static struct {
 		ANGLE_T angle;
 		FLOAT_T grade;
 		descPivot_t pivot;
+		LAYER_T layerNumber;
 		} crvData;
 typedef enum { E0, Z0, E1, Z1, CE, RA, TU, SE, LN, AL, A1, A2, GR, PV, LY } crvDesc_e;
 static descData_t crvDesc[] = {
@@ -351,7 +352,7 @@ static descData_t crvDesc[] = {
 /*A2*/	{ DESC_ANGLE, N_("CW Angle"), &crvData.angle1 },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &crvData.grade },
 /*PV*/	{ DESC_PIVOT, N_("Pivot"), &crvData.pivot },
-/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &crvData.layerNumber },
 		{ DESC_NULL } };
 
 static void UpdateCurve( track_p trk, int inx, descData_p descUpd, BOOL_T final )
@@ -472,6 +473,9 @@ static void UpdateCurve( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 			crvDesc[SE].mode |= DESC_CHANGE;
 		}
 		return;
+	case LY:
+		SetTrkLayer( trk, crvData.layerNumber);
+		break;
 	default:
 		AbortProg( "updateCurve: Bad inx %d", inx );
 	}
@@ -551,6 +555,7 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 	crvData.angle0 = NormalizeAngle( a0 );
 	crvData.angle1 = NormalizeAngle( a0+a1);
 	crvData.angle = a1;
+	crvData.layerNumber = GetTrkLayer(trk);
 	if ( !xx->circle ) {
 		ComputeElev( trk, 0, FALSE, &crvData.elev[0], NULL );
 		ComputeElev( trk, 1, FALSE, &crvData.elev[1], NULL );
@@ -584,7 +589,7 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 	crvDesc[A1].mode = fix0?DESC_RO:0;
 	crvDesc[A2].mode = fix1?DESC_RO:0;
 	crvDesc[PV].mode = (fix0|fix1)?DESC_IGNORE:0;
-	crvDesc[LY].mode = DESC_RO;
+	crvDesc[LY].mode = DESC_NOREDRAW;
 	crvData.pivot = (fix0&fix1)?DESC_PIVOT_NONE:
 					fix0?DESC_PIVOT_FIRST:
 					fix1?DESC_PIVOT_SECOND:

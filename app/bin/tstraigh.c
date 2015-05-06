@@ -70,6 +70,7 @@ static struct {
 		ANGLE_T angle;
 		FLOAT_T grade;
 		descPivot_t pivot;
+		LAYER_T layerNumber;
 		} strData;
 typedef enum { E0, Z0, E1, Z1, LN, AN, GR, PV, LY } strDesc_e;
 static descData_t strDesc[] = {
@@ -81,7 +82,7 @@ static descData_t strDesc[] = {
 /*AN*/	{ DESC_ANGLE, N_("Angle"), &strData.angle },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &strData.grade },
 /*PV*/	{ DESC_PIVOT, N_("Pivot"), &strData.pivot },
-/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &strData.layerNumber },
 		{ DESC_NULL } };
 
 
@@ -206,6 +207,9 @@ static void UpdateStraight( track_p trk, int inx, descData_p descUpd, BOOL_T fin
 		}
 		break;
 #endif
+	case LY:
+		SetTrkLayer( trk, strData.layerNumber);
+		break;
 	default:
 		return;
 	}
@@ -233,6 +237,7 @@ static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 	ComputeElev( trk, 0, FALSE, &strData.elev[0], NULL );
 	ComputeElev( trk, 1, FALSE, &strData.elev[1], NULL );
 	strData.length = FindDistance( strData.endPt[0], strData.endPt[1] );
+	strData.layerNumber = GetTrkLayer(trk);
 	if ( strData.length > minLength )
 		strData.grade = fabs( (strData.elev[0]-strData.elev[1])/strData.length )*100.0;
 	else
@@ -246,7 +251,7 @@ static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 	strDesc[LN].mode = (fix0&fix1)?DESC_RO:0;
 	strDesc[AN].mode = (fix0|fix1)?DESC_RO:0;
 	strDesc[PV].mode = (fix0|fix1)?DESC_IGNORE:0;
-	strDesc[LY].mode = DESC_RO;
+	strDesc[LY].mode = DESC_NOREDRAW;
 	strData.pivot = (fix0&fix1)?DESC_PIVOT_NONE:
 				  fix0?DESC_PIVOT_FIRST:
 				  fix1?DESC_PIVOT_SECOND:
