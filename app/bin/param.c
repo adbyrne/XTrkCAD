@@ -258,7 +258,7 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 	}
 	return TRUE;
 }
-
+extern wIndex_t distanceFormatInx;   // distanceFormatInx
 
 static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
 {
@@ -266,6 +266,7 @@ static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
 	BOOL_T neg = FALSE;
 	BOOL_T hasFract;
 	BOOL_T expectInch = FALSE;
+	long distanceFormat;
 
 	while ( isspace(**cpp) ) (*cpp)++;
 	if ( (*cpp)[0] == '\0' ) {
@@ -277,9 +278,22 @@ static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
 		(*cpp)++;
 	}
 	if ( !GetNumberStr( cpp, &n1, &hasFract ) ) return FALSE;
+	
+	distanceFormat = GetDistanceFormat();
+	
+	
 	if ( (*cpp)[0] == '\0' ) { /* EOL */
 		if ( units==UNITS_METRIC )
+		{
 		   n1 = n1/2.54;
+		   if ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_MM)
+			   n1 /= 10;
+		   if ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_M)
+			   n1 *= 100;
+		} else {
+			if (((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_SHRT) || ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_LONG))
+				n1 *= 12;
+		}
 		if ( neg )
 			n1 = -n1;
 		*distP = n1;
@@ -290,7 +304,7 @@ static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
 		(*cpp) += 1;
 		expectInch = !hasFract;
 	} else if ( tolower((*cpp)[0]) == 'f' && tolower((*cpp)[1]) == 't' ) {
-		n1 *= 12;
+		n1 *= 12.0;
 		(*cpp) += 2;
 		expectInch = !hasFract;
 	} else if ( tolower((*cpp)[0]) == 'c' && tolower((*cpp)[1]) == 'm' ) {
@@ -1018,7 +1032,7 @@ static long ParamRestore( paramGroup_p pg )
 	return ParamIntRestore( pg, 0 );
 }
 #endif
-
+
 /****************************************************************************
  *
  *
@@ -2159,7 +2173,7 @@ static void ParamCreateControl(
 			pd->control = (wControl_p)wColorSelectButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd );
 			break;
 		case PD_MESSAGE:
-			if ( pd->winData = 0 )
+			if ( pd->winData != 0 )
 				w = (wPos_t)(long)pd->winData;
 			else if (pd->valueP)
 				w = wLabelWidth( _(pd->valueP) );
