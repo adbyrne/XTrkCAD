@@ -149,7 +149,7 @@ static long printFormat = PRINT_LANDSCAPE;
 static double currLineWidth = 0;
 
 static long curPrinter = 0;
-static char sPrintFileName[40];
+static char *sPrintFileName;
 static long curMargin = 0;
 
 static const char * prefName;
@@ -884,26 +884,43 @@ wBool_t wPrintPageEnd( wDraw_p p )
 
 static void printFileNameSel( void * junk )
 {
-  GtkWidget *dialog;
-  gchar *filename;
-  gint result;
+	GtkWidget *dialog;
+	gchar *filename;
+	gint result;
   
-  dialog = gtk_file_chooser_dialog_new (_("Print to file ..."), (GtkWindow *)printSetupW->gtkwin,
-                                        GTK_FILE_CHOOSER_ACTION_SAVE,
-                                        GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-                                        GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-                                        NULL);
+	dialog = gtk_file_chooser_dialog_new (_("Print to file ..."), (GtkWindow *)printSetupW->gtkwin,
+								GTK_FILE_CHOOSER_ACTION_SAVE,
+								GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+								GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+								NULL);
 
-  result = gtk_dialog_run (GTK_DIALOG (dialog));
-  if (result == GTK_RESPONSE_ACCEPT)
-  {
-    filename = gtk_file_chooser_get_filename (GTK_FILE_CHOOSER (dialog));
-	 strcpy( sPrintFileName, filename );
-  }
+	result = gtk_dialog_run (GTK_DIALOG (dialog));
+	if (result == GTK_RESPONSE_ACCEPT)
+	{
+		filename = gtk_file_chooser_get_filename ( GTK_FILE_CHOOSER ( dialog ));
+		if( filename ) {
+			sPrintFileName = malloc( strlen( filename ) + 1 );
+			if( sPrintFileName ) {
+				strcpy( sPrintFileName, filename );
+			}	 
+			else {
+				fputs( "Insufficient memory for printing to file\n", stderr );
+				abort();
+			}	 
+			g_free( filename );
+		}
+	}
   
-  gtk_widget_destroy (dialog);
+	gtk_widget_destroy (dialog);
 }
 
+
+/* 
+ * open the printer output stream. In case print to file is selected, the filename for
+ * the print out is fetched from the user and the file opened.
+ *
+ * \return    the printer stream
+ */ 
 
 wPrinterStream_p wPrinterOpen( void )
 {
@@ -919,8 +936,13 @@ wPrinterStream_p wPrinterOpen( void )
 	f = NULL;
 	curPsFont = NULL;
 	if (curPrinter == 0 ) {
-/*		wWinShow( printFileW, TRUE ); */
+
 		printFileNameSel( NULL );
+		
+		// did the user cancel the file dialog? If yes, cancel operation
+		if( !sPrintFileName ) {
+			return( NULL );
+		}	
 		if ( sPrintFileName[0] == '\0' ) {
 			wNoticeEx( NT_ERROR, _("No file name specified"), _("Ok"), NULL );
 			return NULL;
@@ -967,6 +989,12 @@ void wPrinterClose( wPrinterStream_p p )
 		fclose( p->f );
 	else
 		pclose( p->f );
+	
+	// free the filename again
+	if( sPrintFileName ) {
+		free( sPrintFileName );
+		sPrintFileName = NULL;
+	}
 }
 
 /**
