@@ -234,7 +234,7 @@ static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
 	switchmotorDesc[NOR].mode =
 	switchmotorDesc[REV].mode =
 	switchmotorDesc[PS].mode = DESC_NOREDRAW;
-	DoDescribe(_("Switch Motor"), trk, switchmotorDesc, UpdateSwitchMotor );
+	DoDescribe(_("Switch motor"), trk, switchmotorDesc, UpdateSwitchMotor );
 }
 
 static switchmotorDebug (track_p trk)
@@ -353,7 +353,7 @@ static void SwitchMotorOk ( void * junk )
 	LOG( log_switchmotor, 1, ("*** SwitchMotorOk()\n"))
 	ParamUpdate (&switchmotorPG );
 	if ( switchmotorName[0]==0 ) {
-		NoticeMessage( 0, "Switchmotor must have a name!", _("Ok"));
+		NoticeMessage( 0, "Switch motor must have a name!", _("Ok"));
 		return;
 	}
 	wDrawDelayUpdate( mainD.d, TRUE );
@@ -379,7 +379,7 @@ static void NewSwitchMotorDialog(track_p trk)
 	if ( log_switchmotor < 0 ) log_switchmotor = LogFindIndex( "switchmotor" );
 	if ( !switchmotorW ) {
 		ParamRegister( &switchmotorPG );
-		switchmotorW = ParamCreateDialog (&switchmotorPG, MakeWindowTitle(_("Create Switch Motor")), _("Ok"), SwitchMotorOk, wHide, TRUE, NULL, F_BLOCK, NULL );
+		switchmotorW = ParamCreateDialog (&switchmotorPG, MakeWindowTitle(_("Create switch motor")), _("Ok"), SwitchMotorOk, wHide, TRUE, NULL, F_BLOCK, NULL );
 		switchmotorD.dpi = mainD.dpi;
 	}
 	ParamLoadControls( &switchmotorPG );
@@ -432,7 +432,7 @@ static STATUS_T CmdSwitchMotorEdit( wAction_t action, coOrd pos )
 		}
 		btrk = FindSwitchMotor( trk );
 		if ( !btrk ) {
-			ErrorMessage( _("Not a SwitchMotor!") );
+			ErrorMessage( _("Not a switch motor!") );
 			return C_CONTINUE;
 		}
 		DescribeTrack (btrk, msg, sizeof msg );
@@ -463,12 +463,12 @@ static STATUS_T CmdSwitchMotorDelete( wAction_t action, coOrd pos )
 		}
 		btrk = FindSwitchMotor( trk );
 		if ( !btrk ) {
-			ErrorMessage( _("Not a Switch Motor!") );
+			ErrorMessage( _("Not a switch motor!") );
 			return C_CONTINUE;
 		}
 		/* Confirm Delete SwitchMotor */
 		xx = GetswitchmotorData(btrk);
-		if ( NoticeMessage( _("Really delete Switch Motor %s?"), _("Yes"), _("No"), xx->name) ) {
+		if ( NoticeMessage( _("Really delete switch motor %s?"), _("Yes"), _("No"), xx->name) ) {
 			UndoStart( _("Delete Switch Motor"), "delete" );			
 			DeleteTrack (btrk, FALSE);
 			UndoEnd();

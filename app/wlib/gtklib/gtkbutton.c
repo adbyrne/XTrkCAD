@@ -66,38 +66,42 @@ void gtkSetLabel(
 		GtkWidget * * imageG )
 {
 	wIcon_p bm;
+	GdkPixbuf *pixbuf;
+	
 	GdkPixmap * pixmap;
 	GdkBitmap * mask;
+	
 	GtkWidget * hbox;
 	if (widget == 0) abort();
 	if (labelStr){
 		if (option&BO_ICON) {
 			bm = (wIcon_p)labelStr;
-			pixmap = gtkMakeIcon( widget, bm, &mask );
-			if (*imageG==NULL) {
-				hbox = gtk_vbox_new( FALSE, 0 );
-				gtk_widget_show( hbox );
-				gtk_container_add( GTK_CONTAINER( widget ), hbox );
-/*
- * Workaround for OSX with GTK-Quartz:
- * Pixmaps are not rendered when using the mask.
- */
-#ifndef GDK_WINDOWING_QUARTZ
-				*imageG = gtk_image_new_from_pixmap( pixmap, mask );
-#else
-				*imageG = gtk_image_new_from_pixmap( pixmap, NULL );
-#endif
-				gtk_widget_show( *imageG );
-				gtk_container_add( GTK_CONTAINER( hbox ), *imageG );
+			
+			// for XPM files use the pixbuf functions
+			if( bm->gtkIconType == gtkIcon_pixmap ) {
+				pixbuf = gdk_pixbuf_new_from_xpm_data( (const char**)bm->bits );
+				if (*imageG==NULL) {
+					*imageG = gtk_image_new_from_pixbuf( pixbuf );
+					gtk_container_add( GTK_CONTAINER( widget ), *imageG );
+					gtk_widget_show( *imageG );
+				} else {
+					gtk_image_set_from_pixbuf( GTK_IMAGE(*imageG), pixbuf );
+				}
+				g_object_unref( pixbuf );
 			} else {
-#ifndef GDK_WINDOWING_QUARTZ
-				gtk_image_set_from_pixmap( GTK_IMAGE(*imageG), pixmap, mask );
-#else
-				gtk_image_set_from_pixmap( GTK_IMAGE(*imageG), pixmap, NULL );
-#endif
+				// otherwise use the conversion to XPM
+				/** \todo { Should use the way via a pixbuf as well } */
+				pixmap = gtkMakeIcon( widget, bm, &mask );
+				if (*imageG==NULL) {
+					*imageG = gtk_image_new_from_pixmap( pixmap, NULL );
+					gtk_widget_show( *imageG );
+					gtk_container_add( GTK_CONTAINER( widget ), *imageG );
+				} else {
+					gtk_image_set_from_pixmap( GTK_IMAGE(*imageG), pixmap, NULL );
+				}
+				gdk_pixmap_unref( pixmap );
+				gdk_bitmap_unref( mask );
 			}
-			gdk_pixmap_unref( pixmap );
-			gdk_bitmap_unref( mask );
 		} else {
 			if (*labelG==NULL) {
 				*labelG = (GtkLabel*)gtk_label_new( gtkConvertInput(labelStr) );

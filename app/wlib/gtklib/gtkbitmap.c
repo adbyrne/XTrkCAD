@@ -50,9 +50,7 @@ wControl_p
 wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
 {
 	wBitmap_p bt;
-	GdkPixmap *pixmap;
-	GdkBitmap *mask;
-	GdkColor *transparent;
+	GdkPixbuf *pixbuf;
 	
 	bt = gtkAlloc( parent, B_BITMAP, x, y, NULL, sizeof *bt, NULL );
 	bt->w = iconP->w;
@@ -66,31 +64,21 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
 	 */
 	if ( parent->widget->window == NULL )
 		gtk_widget_realize( parent->widget ); /* force allocation, if pending */
+
+	pixbuf = gdk_pixbuf_new_from_xpm_data( (const char**)iconP->bits );
+	GtkWidget *image = gtk_image_new_from_pixbuf( pixbuf );
 	
-	transparent = &gtk_widget_get_style(parent->widget)->bg[GTK_STATE_NORMAL];
-	pixmap = gdk_pixmap_create_from_xpm_d( parent->widget->window, &mask, transparent, (gchar **)iconP->bits );
-	
-	/*
-	 * FIXME: Depending on the platform, the image is not displayed when using
-	 * the mask. When using NULL as parameter, the image is always displayed.
-	 * In my case, under GTK+-2.16-quartz, the image is not displayed when 
-	 * using the mask.
-	 *
-	 * We have the same problem in gtkSetLabel function (gtkbutton.c).
-	 */
-	GtkWidget *image = gtk_image_new_from_pixmap( pixmap, /*mask*/NULL );
-	gtk_widget_show( image );
+   gtk_widget_show( image );
 	
 	bt->widget = gtk_fixed_new();
+	gtk_container_add( GTK_CONTAINER(bt->widget), image );	
 	gtk_widget_show( bt->widget );
-	gtk_container_add( GTK_CONTAINER(bt->widget), image );
-	
+		
 	gtkComputePos( (wControl_p)bt );
 	gtkControlGetSize( (wControl_p)bt );
 	gtk_fixed_put( GTK_FIXED( parent->widget ), bt->widget, bt->realX, bt->realY );
 	
-	g_object_unref( pixmap );
-	g_object_unref( mask );
+	g_object_unref( pixbuf );
 	
 	return( (wControl_p)bt );
 }
