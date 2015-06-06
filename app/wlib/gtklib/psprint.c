@@ -74,6 +74,8 @@ extern wDrawColor wDrawColorBlack;
 #define DPI (1440.0)
 #define D2I( D ) (((double)(D))/DPI)
 
+#define CENTERMARK_LENGTH 60
+
 #define WFONT		"WFONT"
 #define WPRINTER	"WPRINTER"
 #define WMARGIN		"WMARGIN"
@@ -632,6 +634,18 @@ void psPrintLine(
 				D2I(x0), D2I(y0), D2I(x1), D2I(y1) );
 }
 
+/**
+ * Print an arc around a specified center
+ *
+ * \param x0, y0 IN  center of arc
+ * \param r IN radius
+ * \param angle0, angle1 IN start and end angle
+ * \param drawCenter draw marking for center
+ * \param width line width
+ * \param lineType
+ * \param color color
+ * \param opts ?
+ */
 
 void psPrintArc(
 		wPos_t x0, wPos_t y0,
@@ -661,6 +675,16 @@ void psPrintArc(
 	psPrintf(psFile,
 		"newpath %0.3f %0.3f %0.3f %0.3f %0.3f arc stroke\n",
 		D2I(x0), D2I(y0), D2I(r), angle1, angle0 );
+	
+	if( drawCenter ) {
+		psPrintf(psFile,
+			"%0.3f %0.3f moveto %0.3f %0.3f lineto closepath stroke\n",
+			D2I(x0 - CENTERMARK_LENGTH / 2), D2I(y0), D2I(x0 + CENTERMARK_LENGTH / 2), D2I(y0) );
+		psPrintf(psFile,
+			"%0.3f %0.3f moveto %0.3f %0.3f lineto closepath stroke\n",
+			D2I(x0), D2I(y0 - CENTERMARK_LENGTH / 2), D2I(x0), D2I(y0 + CENTERMARK_LENGTH / 2) );
+
+	}	
 }
 
 

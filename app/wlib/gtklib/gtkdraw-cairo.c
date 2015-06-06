@@ -32,6 +32,9 @@
 #include "gtkint.h"
 #include "gdk/gdkkeysyms.h"
 
+
+#define CENTERMARK_LENGTH (6)
+
 static long drawVerbose = 0;
 
 struct wDrawBitMap_t {
@@ -257,6 +260,21 @@ EXPORT void wDrawLine(
 	gtk_widget_draw( bd->widget, &update_rect );
 }
 
+/**
+ * Draw an arc around a specified center
+ *
+ * \param bd IN ?
+ * \param x0, y0 IN  center of arc
+ * \param r IN radius
+ * \param angle0, angle1 IN start and end angle
+ * \param drawCenter draw marking for center
+ * \param width line width
+ * \param lineType
+ * \param color color
+ * \param opts ?
+ */
+
+
 EXPORT void wDrawArc(
 		wDraw_p bd,
 		wPos_t x0, wPos_t y0,
@@ -283,22 +301,37 @@ EXPORT void wDrawArc(
 	y = INMAPY(bd,y0+r);
 	w = 2*r;
 	h = 2*r;
-	if (drawCenter)
-		gdk_draw_point( bd->pixmap, gc, INMAPX(bd, x0 ), INMAPY(bd, y0 ) );
-
+	
+	// remove the old arc
 	gdk_draw_arc( bd->pixmap, gc, FALSE, x, y, w, h, (int)((-angle0 + 90)*64.0), (int)(-angle1*64.0) );
-
+	
+	// and its center point
+	if (drawCenter) {
+		x = INMAPX(bd,x0);
+		y = INMAPY(bd,y0);
+		gdk_draw_line( bd->pixmap, gc, x - ( CENTERMARK_LENGTH/2), y, x + ( CENTERMARK_LENGTH/2), y );
+		gdk_draw_line( bd->pixmap, gc, x, y - ( CENTERMARK_LENGTH/2), x, y + ( CENTERMARK_LENGTH/2));
+	}
+	
+	// now create the new arc
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, width, lineType, color, opts);
 	cairo_new_path(cairo);
 
+	// its center point marker
 	if(drawCenter)
 	{
-		cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), 0.75, 0, 2 * M_PI);
-		cairo_stroke(cairo);
+		// draw a small crosshair to mark the center of the curve
+		cairo_move_to(cairo,  INMAPX(bd, x0 - (CENTERMARK_LENGTH / 2)), INMAPY(bd, y0 ));
+		cairo_line_to(cairo, INMAPX(bd, x0 + (CENTERMARK_LENGTH / 2)), INMAPY(bd, y0 ));
+		cairo_move_to(cairo, INMAPX(bd, x0), INMAPY(bd, y0 - (CENTERMARK_LENGTH / 2 )));
+		cairo_line_to(cairo, INMAPX(bd, x0) , INMAPY(bd, y0  + (CENTERMARK_LENGTH / 2)));
+		cairo_new_sub_path( cairo );
 	}
 
+	// draw the curve itself
 	cairo_arc_negative(cairo, INMAPX(bd, x0), INMAPY(bd, y0), r, (angle0 - 90 + angle1) * (M_PI / 180.0), (angle0 - 90) * (M_PI / 180.0));
 	cairo_stroke(cairo);
+	
 	gtkDrawDestroyCairoContext(cairo);
 
 	if ( bd->delayUpdate || bd->widget == NULL) return;
