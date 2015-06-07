@@ -37,6 +37,7 @@ static long tmpOp = 0x990066;
 static long setOp = 0x8800c6;
 static long clrOp = 0xbb0226;
 
+#define CENTERMARK_LENGTH 6
 
 #ifdef SLOW
 static wPos_t XPIX2INCH( wDraw_p d, int ix )
@@ -309,8 +310,20 @@ static double mswasin( double x, double h )
 	return angle;
 }
 
+/**
+ * Draw an arc around a specified center
+ *
+ * \param d IN ?
+ * \param px, py IN  center of arc
+ * \param r IN radius
+ * \param a0, a1 IN start and end angle
+ * \param drawCenter draw marking for center
+ * \param dw line width
+ * \param lt line type
+ * \param dc color
+ * \param dopt ?
+ */
 
-static double pseudoCurveLen = 20;
 
 void wDrawArc(
 		wDraw_p d,
@@ -326,7 +339,7 @@ void wDrawArc(
 		wDrawOpts dopt )
 {
 	int i, cnt;
-	POINT p0, p1, ps, pe, pp0, pp1, pp2;
+	POINT p0, p1, ps, pe, pp0, pp1, pp2, pc;
 	double psx, psy, pex, pey, len, aa;
 	RECT rect;
 	int needMoveTo;
@@ -367,13 +380,6 @@ void wDrawArc(
 			fakeArc = TRUE;
 	}
 	if ( fakeArc ) {
-#ifdef LATER
-		len /= pseudoCurveLen;
-		len += 1;
-		if (len > 1000)
-		   len = 1000;
-		cnt = (int)len;
-#endif
 		cnt = (int)a1;
 		if ( cnt <= 0 ) cnt = 1;
 		if ( cnt > 360 ) cnt = 360;
@@ -390,12 +396,6 @@ void wDrawArc(
 			pp2.x = pp1.x = XINCH2PIX( d, (wPos_t)psx );
 			pp2.y = pp1.y = YINCH2PIX( d, (wPos_t)psy );
 			if ( clip0( &pp0, &pp1, d ) ) {
-#ifdef LATER
-			if ( (pp0.x >= 0 && pp0.x < d->w &&
-				  pp0.y >= 0 && pp0.y < d->h) ||
-				 (pp1.x >= 0 && pp1.x < d->w &&
-				  pp1.y >= 0 && pp1.y < d->h) ) {
-#endif
 				if (needMoveTo) {
 					MoveTo( d->hDc, pp0.x, pp0.y );
 					needMoveTo = FALSE;
@@ -414,6 +414,27 @@ void wDrawArc(
 			Arc( d->hDc, p0.x, p1.y, p1.x, p0.y, ps.x, ps.y, pe.x, pe.y );
 		}
 	}
+
+	// should the center of the arc be drawn?
+	if( drawCenter ) {
+			
+			// calculate the center coordinates
+			pc.x = XINCH2PIX( d, px );
+			pc.y = YINCH2PIX( d, py );
+			// now draw the crosshair
+			MoveTo( d->hDc, pc.x - CENTERMARK_LENGTH/2, pc.y );
+			LineTo( d->hDc, pc.x + CENTERMARK_LENGTH/2, pc.y );
+			MoveTo( d->hDc, pc.x, pc.y - CENTERMARK_LENGTH/2 );
+			LineTo( d->hDc, pc.x, pc.y + CENTERMARK_LENGTH/2 );
+			
+			// invalidate the area of the crosshair
+			rect.top  = pc.y - CENTERMARK_LENGTH / 2 - 1;
+			rect.bottom  = pc.y + CENTERMARK_LENGTH / 2 + 1;
+			rect.left = pc.x - CENTERMARK_LENGTH / 2 - 1;
+			rect.right = pc.x + CENTERMARK_LENGTH / 2 + 1;
+			myInvalidateRect( d, &rect );
+	}
+
 	if (d->hWnd) {
 		dw++;
 		a1 += a0;
@@ -438,6 +459,7 @@ void wDrawArc(
 		rect.left -= dw;
 		rect.right += dw;
 		myInvalidateRect( d, &rect );
+
 	}
 }
 
