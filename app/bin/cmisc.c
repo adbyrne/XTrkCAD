@@ -364,7 +364,8 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 		//	setLayerL = wDropListCreate( describePG.win, 0, describeW_posy, "cmdLayerSet", NULL, 0, 10, 200, NULL, ChangeTrackLayer, NULL );
 		//	wControlSetBalloonText( (wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet") );
 		//	AddToolbarControl( (wControl_p)setLayerL, IC_MODETRAIN_TOO );
-			for ( inx = 0; inx<NUM_LAYERS; inx++ ) {
+           wListClear(ddp->control0);  // Rebuild list on each invovation
+           for ( inx = 0; inx<NUM_LAYERS; inx++ ) {
 				if (!GetLayerFrozen(inx))				// Avoid Frozen layers.
 				{
 					sprintf( message, "%2d : %s", inx+1,  GetLayerName(inx) );
