@@ -1,0 +1,2 @@
+* Wed Jun 10 2015  Martin Fischer <m_fischer@users.sf.net> 
+- Initial RPM build configuration 
