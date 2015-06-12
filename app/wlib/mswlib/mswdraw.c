@@ -119,6 +119,17 @@ void wDrawDelayUpdate(
 {
 }
 
+/**
+ * Sets the proper pen and composition for the next drawing operation
+ * 
+ *
+ * \param hDc IN device context
+ * \param d IN ???
+ * \param dw IN line width
+ * \param lt IN line type (dashed, solid, ...)
+ * \param dc IN color
+ * \param dopt IN ????
+ */
 
 static void setDrawMode(
 		HDC hDc,
@@ -154,6 +165,10 @@ static void setDrawMode(
 	SetROP2( hDc, mode );
 	if ( d == d0 && mode == mode0 && dw0 == dw && lt == lt0 && dc == dc0 )
 		return;
+
+	// make sure that the line width is at least 1!
+	if( !dw ) 
+		dw++;
 
 	d0 = d; mode0 = mode; dw0 = dw; lt0 = lt; dc0 = dc;
 
