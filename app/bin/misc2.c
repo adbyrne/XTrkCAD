@@ -434,16 +434,20 @@ static void SetScale(
 	wPrefGetFloat( "misc", minTrackRadiusPrefS, &minTrackRadius, curScale->R[0] );
 }
 
+/**
+ * Check the new scale value and update the program if a valid scale was passed
+ *
+ * \param newScale IN the name of the new scale
+ * \returns TRUE if valid, FALSE otherwise
+ */
 
 EXPORT BOOL_T DoSetScale(
 		const char * newScale )
 {
 	SCALEINX_T scale;
 	char * cp;
-	int i30 = 29;
+	BOOL_T found = FALSE;
  
-	curScaleInx = 0;
-	i30++;
 	if ( newScale != NULL ) {
 		cp = CAST_AWAY_CONST newScale+strlen(newScale)-1;
 		while ( *cp=='\n' || *cp==' ' || *cp=='\t' ) cp--; 
@@ -452,12 +456,17 @@ EXPORT BOOL_T DoSetScale(
 		for (scale = 0; scale<scaleInfo_da.cnt; scale++) {
 			if (strcasecmp( scaleInfo(scale).scale, newScale ) == 0) {
 				curScaleInx = scale;
+				found = TRUE;
 				break;
 			}
 		}
+		// was a valid scale given?
+		if( found ) {
+			DoChangeNotification( CHANGE_SCALE );
+		}
 	}
-	DoChangeNotification( CHANGE_SCALE );
-	return TRUE;
+	
+	return found;
 }
 
 /** 

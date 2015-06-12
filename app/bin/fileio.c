@@ -257,13 +257,21 @@ EXPORT void SyntaxError(
 		TRUE, event, actual, expected );
 }
 
+/**
+ * Parse a line in XTrackCAD's file format
+ *
+ * \param line IN line to parse
+ * \param format IN ???
+ * 
+ * \return FALSE in case of parsing error, TRUE on success
+ */
 
 EXPORT BOOL_T GetArgs(
 		char * line,
 		char * format,
 		... )
 {
-	char * cp, * cq;
+	unsigned char * cp, * cq;
 	int argNo;
 	long * pl;
 	int * pi;

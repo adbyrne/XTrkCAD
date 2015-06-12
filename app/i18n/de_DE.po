@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: xtrkcad 4.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-05-24 10:32+0200\n"
-"PO-Revision-Date: 2015-05-27 18:58+0100\n"
+"PO-Revision-Date: 2015-06-12 12:27+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "Language: de\n"
@@ -5635,7 +5635,7 @@ msgid ""
 "Please check your %s.xtq file"
 msgstr ""
 "Maßstab %s ist ungültig.\n"
-"Bitte prüfen Sie dei Datei %s.xtq\" "
+"Bitte prüfen Sie die Datei %s.xtq "
 
 #: ../../../build/app/help/messages.h:137
 msgid "Cannot extend a helix"
@@ -8501,7 +8501,7 @@ msgstr "Jetzt erstellen wir in der Ecke der Anlage eine Gleiswendel, die zwei Gl
 #: ../../../build/app/i18n/custmsg.h:297
 #, c-format
 msgid "We will be creating a helix with a Elevation Difference of 12\", Grade of 1.5% and limit the Vertical Separation to at least 2\".\n"
-msgstr "Wir werden eine Gleiswendel erstellen, die einen Höhenunterschied von 12\" ermöglicht, und mit einer Steigung von 1.5 Prozent eine Differenz zwischen den Windungen von mindestens 2\" erreicht.\n"
+msgstr ""
 
 #: ../../../build/app/i18n/custmsg.h:298
 msgid "First set the Elevation Difference to 12\"\n"
