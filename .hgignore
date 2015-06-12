@@ -1,3 +1,5 @@
 # hg uses this global ignore file for all tree-wide ignores
 .DS_Store
 .project
+syntax: glob
+*.mo
