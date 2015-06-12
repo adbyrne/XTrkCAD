@@ -96,7 +96,7 @@ static paramData_t describePLs[] = {
 #define I_LAYER_N		I_LAYER_0+1
 
 #define I_COLOR_0		I_LAYER_N
-	{ PD_COLORLIST, NULL, "C1" },
+	{ PD_COLORLIST, NULL, "C1", 0, NULL, N_("Color") },
 #define I_COLOR_N		I_COLOR_0+1
 
 #define I_LIST_0		I_COLOR_N

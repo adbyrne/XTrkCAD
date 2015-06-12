@@ -37,7 +37,7 @@
 EXPORT wDrawColor wDrawColorWhite;
 EXPORT wDrawColor wDrawColorBlack;
 
-#define RGB(R,G,B) ( (((long)((R)&0xFF))<<16) | (((long)((G)&0xFF))<<8) | ((long)((B)&0xFF)) )
+#define RGB(R,G,B) ( ((long)(255&0xFF))<<24 | (((long)((R)&0xFF))<<16) | (((long)((G)&0xFF))<<8) | ((long)((B)&0xFF)) )
 
 #define MAX_COLOR_DISTANCE (3)
 
@@ -50,10 +50,8 @@ typedef struct {
 		long rgb;
 		int colorChar;
 		} colorMap_t;
-static dynArr_t colorMap_da;
-#define colorMap(N) DYNARR_N( colorMap_t, colorMap_da, N )
+static GArray *colorMap_garray = NULL; // Change to use glib array
 
-#ifdef LATER
 static colorMap_t colorMap[] = {
 		{ 255, 255, 255 },	/* White */
 		{   0,   0,   0 },	/* Black */
@@ -101,7 +99,7 @@ static colorMap_t colorMap[] = {
 		{  64,  64,  64 },	/* Gray */
 		{  80,  80,  80 },	/* Gray */
 		{  96,  96,  96 },	/* Gray */
- 	{ 112, 112, 122 },	/* Gray */
+ 	    { 112, 112, 122 },	/* Gray */
 		{ 128, 128, 128 },	/* Gray */
 		{ 144, 144, 144 },	/* Gray */
 		{ 160, 160, 160 },	/* Gray */
@@ -112,7 +110,6 @@ static colorMap_t colorMap[] = {
 		{ 240, 240, 240 },	/* Gray */
 		{   0,   0,   0 }	/* BlackPixel */
  	};
-#endif
 
 #define NUM_GRAYS (16)
 
@@ -153,6 +150,36 @@ void gtkGetColorMap( void )
 	return;
 }
 
+void init_colorMapValue( colorMap_t * t) {
+    
+    t->rgb = RGB( t->red, t->green, t->blue );
+    t->normalColor.red = t->red*65535/255;
+    t->normalColor.green = t->green*65535/255;
+    t->normalColor.blue = t->blue*65535/255;
+    gdk_color_alloc( gtkColorMap, &t->normalColor );
+    t->invertColor = t->normalColor;
+    t->invertColor.pixel ^= g_array_index(colorMap_garray, colorMap_t, wDrawColorWhite).normalColor.pixel;
+    t->colorChar = lastColorChar++;
+    if (lastColorChar >= 0x7F)
+        lastColorChar = '!'+1;
+    else if (lastColorChar == '"')
+        lastColorChar++;
+    
+}
+
+
+void init_colorMap( void )
+{
+    colorMap_garray = g_array_sized_new(TRUE, TRUE, sizeof(colorMap_t), sizeof(colorMap)/sizeof(colorMap_t));
+    g_array_append_vals(colorMap_garray, &colorMap, sizeof(colorMap)/sizeof(colorMap_t));
+    
+    int gint;
+    
+    for(gint=0; gint<colorMap_garray->len; gint++) {
+        init_colorMapValue(&g_array_index(colorMap_garray, colorMap_t, gint));
+    }
+}
+
 
 EXPORT wDrawColor wDrawFindColor(
 		long rgb0 )
@@ -170,50 +197,54 @@ EXPORT wDrawColor wDrawFindColor(
 	g0 = (int)(rgb0>>8)&0xFF;
 	b0 = (int)(rgb0)&0xFF;
 	d0 = 256*3;
-
-	for (cm_p=&colorMap(0); cm_p<&colorMap(colorMap_da.cnt); cm_p++ ) {
-		rgb1 = cm_p->rgb;
-		d1 = abs(r0-cm_p->red) + abs(g0-cm_p->green) + abs(b0-cm_p->blue);
-		if (d1 == 0)
-			return cm_p-&colorMap(0);
-		if (d1 < d0) {
+    
+    // Initialize garray if needed
+    if (colorMap_garray == NULL) {
+        init_colorMap();
+    }
+    
+    int gint;
+    
+    // Iterate over entire garray
+    for (gint=0; gint<colorMap_garray->len; gint++) {
+        cm_p = &g_array_index(colorMap_garray, colorMap_t, gint);
+        rgb1 = cm_p->rgb;
+        d1 = abs(r0-cm_p->red) + abs(g0-cm_p->green) + abs(b0-cm_p->blue);
+        if (d1 == 0)
+            return gint;
+        if (d1 < d0) {
 			d0 = d1;
-			cc = cm_p-&colorMap(0);
-		}
-	}
-	if (d0 <= MAX_COLOR_DISTANCE) {
-		return cc;
-	}
-	DYNARR_APPEND( colorMap_t, colorMap_da, 10 );
-	cm_p = &colorMap(colorMap_da.cnt-1);
-	cm_p->red = r0;
-	cm_p->green = g0;
-	cm_p->blue = b0;
-	cm_p->rgb = RGB( cm_p->red, cm_p->green, cm_p->blue );
-	cm_p->normalColor.red = cm_p->red*65535/255;
-	cm_p->normalColor.green = cm_p->green*65535/255;
-	cm_p->normalColor.blue = cm_p->blue*65535/255;
-	gdk_color_alloc( gtkColorMap, &cm_p->normalColor );
-	cm_p->invertColor = cm_p->normalColor;
-	cm_p->invertColor.pixel ^= colorMap(wDrawColorWhite).normalColor.pixel;
-	cm_p->colorChar = lastColorChar++;
-	if (lastColorChar >= 0x7F)
-		lastColorChar = '!'+1;
-	else if (lastColorChar == '"')
-		lastColorChar++;
-	return colorMap_da.cnt-1;
+		  	cc = gint;
+        }
+	  }
+    if (d0 <= MAX_COLOR_DISTANCE) {
+        return cc;
+    }
+    // No good value - so add one
+    colorMap_t tempMapValue;
+	//DYNARR_APPEND( colorMap_t, colorMap_da, 10 );
+	tempMapValue.red = r0;
+	tempMapValue.green = g0;
+	tempMapValue.blue = b0;
+    init_colorMapValue(&tempMapValue);
+    g_array_append_val(colorMap_garray,tempMapValue);
+	return gint;
 }
-
 
 
 EXPORT long wDrawGetRGB(
 		wDrawColor color )
 {
 	gtkGetColorMap();
+    
+    if(colorMap_garray == NULL)
+        init_colorMap();
 
-	if (color < 0 || color >= colorMap_da.cnt)
+	if (color < 0 || color > colorMap_garray->len)
 		abort();
-	return colorMap(color).rgb;
+    colorMap_t * colorMap_e;
+    colorMap_e = &g_array_index(colorMap_garray, colorMap_t, color);
+	return colorMap_e->rgb;
 }
 
 
@@ -222,13 +253,19 @@ EXPORT GdkColor* gtkGetColor(
 		wBool_t normal )
 {
 	gtkGetColorMap();
+    
+    if(colorMap_garray == NULL)
+        init_colorMap();
 
-	if (color < 0 || color >= colorMap_da.cnt)
+	if (color < 0 || color > colorMap_garray->len)
 		abort();
-	if ( normal )
-		return &colorMap(color).normalColor;
+    colorMap_t * colorMap_e;
+    colorMap_e = &g_array_index(colorMap_garray, colorMap_t, color);
+	
+    if ( normal )
+		return &colorMap_e->normalColor;
 	else
-		return &colorMap(color).invertColor;
+		return &colorMap_e->invertColor;
 }
 
 
@@ -236,24 +273,34 @@ EXPORT int gtkGetColorChar(
 		wDrawColor color )
 {
 	/*gtkGetColorMap();*/
+    if(colorMap_garray == NULL)
+        init_colorMap();
 
-	if (color < 0 || color >= colorMap_da.cnt)
+	if (color < 0 || color > colorMap_garray->len)
 		abort();
-	return colorMap(color).colorChar;
+    colorMap_t * colorMap_e;
+    colorMap_e = &g_array_index(colorMap_garray, colorMap_t, color);
+	return colorMap_e->colorChar;
 }
 
 
 EXPORT int gtkMapPixel( 
 		long pixel )
 {
-	colorMap_t * cm_p;
+	colorMap_t * mapValue;
+    int gint;
+    
+    if(colorMap_garray == NULL)
+        init_colorMap();
 	
-	for (cm_p=&colorMap(0); cm_p<&colorMap(colorMap_da.cnt); cm_p++ ) {
-		if ( cm_p->normalColor.pixel == pixel ) {
-			return cm_p->colorChar;
+	for (gint=0; gint<colorMap_garray->len; gint++ ) {
+        mapValue = &g_array_index(colorMap_garray, colorMap_t, gint);
+        if ( mapValue->normalColor.pixel == pixel ) {
+			return mapValue->colorChar;
 		}
 	}
-	return colorMap(wDrawColorBlack).colorChar;
+    mapValue = &g_array_index(colorMap_garray, colorMap_t, wDrawColorBlack);
+	return mapValue->colorChar;
 }
 
 
@@ -298,7 +345,7 @@ EXPORT wBool_t wColorSelect(
 {
 	static GtkWidget * colorSelectD = NULL;
 	long rgb;
-	gdouble colors[3];
+	gdouble colors[4];  // Remember opacity!
 
 	if (colorSelectD == NULL) {
 		colorSelectD = gtk_color_selection_dialog_new( title );
@@ -308,16 +355,25 @@ EXPORT wBool_t wColorSelect(
 	} else {
 		gtk_window_set_title( GTK_WINDOW(colorSelectD), title );
 	}
-	colors[0] = colorMap(*color).red/255.0;
-	colors[1] = colorMap(*color).green/255.0;
-	colors[2] = colorMap(*color).blue/255.0;
+    
+    colorMap_t * colorMap_e;
+    
+    if (!colorMap_garray) {
+        init_colorMap();
+    }
+    
+    colorMap_e = &g_array_index(colorMap_garray, colorMap_t, *color);
+    colors[0] = colorMap_e->red/255.0;
+	colors[1] = colorMap_e->green/255.0;
+	colors[2] = colorMap_e->blue/255.0;
+    colors[3] = 1.0;                   // Override to Fully opaque
 	gtk_color_selection_set_color( GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(colorSelectD)->colorsel), colors );
 	gtk_widget_show( colorSelectD );
 	gtkDoModal( NULL, TRUE );
 	if (colorSelectValid) {
 		gtk_color_selection_get_color( GTK_COLOR_SELECTION(GTK_COLOR_SELECTION_DIALOG(colorSelectD)->colorsel), colors );
 		rgb = RGB( (int)(colors[0]*255), (int)(colors[1]*255), (int)(colors[2]*255) );
-		*color = wDrawFindColor( rgb );
+        * color = wDrawFindColor( rgb );
 		return TRUE;
 	}
 	return FALSE;
