@@ -27,7 +27,7 @@
 #include "i18n.h"
 
 
-track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize );
+track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize, wDrawColor color );
 
 void LoadFontSizeList( wList_p, long );
 void UpdateFontSizeList( long *, wList_p, wIndex_t );
@@ -49,11 +49,15 @@ static struct {
 		long size;
 		wIndex_t fontSizeInx;
 		char text[STR_SIZE];
+        wDrawColor color;
 		} Dt;
 
 static paramData_t textPLs[] = {
 #define textPD (textPLs[0])
-		{ PD_DROPLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE } };
+		{ PD_DROPLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE },
+#define colorPD (textPLs[1])
+        { PD_COLORLIST, &Dt.color, "color", PDO_NORECORD, NULL, N_("Color") }
+        };
 static paramGroup_t textPG = { "text", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
 
 
@@ -67,8 +71,8 @@ static void TextDlgUpdate(
 	switch (inx) {
 	case 0:
 		if ( Dt.state == 1 ) {
-			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
+			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
+			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 		}
 		UpdateFontSizeList( &Dt.size, (wList_p)textPLs[0].control, Dt.fontSizeInx );
 		/*wWinSetBusy( mainW, TRUE );*/
@@ -82,8 +86,8 @@ static void TextDlgUpdate(
 		if ( Dt.state == 1 ) {
 			Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x+Dt.textLen;
 			Dt.cursPos1.y = Dt.pos.y+Dt.cursHeight;
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
+			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		}
 		break;
 	}
@@ -94,15 +98,15 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 {
 	track_p t;
 	unsigned char c;
-	wControl_p controls[2];
-	char * labels[1];
+	wControl_p controls[3];
+	char * labels[2];
 	coOrd size;
 
 	switch (action & 0xFF) {
 	case C_START:
 		/* check if font size was updated by the preferences dialog */
 		Dt.size = (CSIZE_T)wSelectedFontSize();
-		Dt.state = 0;
+        Dt.state = 0;
 		Dt.cursPos0 = Dt.cursPos1 = zero;
 		Dt.len = 0;
 		Dt.textLen = 0;
@@ -119,33 +123,35 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		LoadFontSizeList( (wList_p)textPD.control, Dt.size );
 		ParamGroupRecord( &textPG );
 		controls[0] = textPD.control;
-		controls[1] = NULL;
+		controls[1] = colorPD.control;
+        controls[2] = 0;
 		labels[0] = N_("Font Size");
+        labels[1] = N_("Color");
 		InfoSubstituteControls( controls, labels );
 		return C_CONTINUE;
 		break;
 	case C_DOWN:
 		if (Dt.state != 0) {
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
+			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		}
 		Dt.pos = pos;
 		Dt.cursPos0.y = Dt.cursPos1.y = pos.y;
 		Dt.cursPos0.x = Dt.cursPos1.x = pos.x + Dt.textLen;
 		Dt.cursPos1.y += Dt.cursHeight;
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
+		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		Dt.state = 1;
 		return C_CONTINUE;
 	case C_MOVE:
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
+		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		Dt.pos = pos;
 		Dt.cursPos0.y = Dt.cursPos1.y = pos.y;
 		Dt.cursPos0.x = Dt.cursPos1.x = pos.x + Dt.textLen;
 		Dt.cursPos1.y += Dt.cursHeight;
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
+		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		return C_CONTINUE;
 	case C_UP:
 		return C_CONTINUE;
@@ -154,8 +160,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			NoticeMessage( MSG_SEL_POS_FIRST, _("Ok"), NULL );
 			return C_CONTINUE;
 		}
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
+		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		c = (unsigned char)(action >> 8);
 /*lprintf("C=%x\n", c);*/
 		switch (c) {
@@ -170,7 +176,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			break;
 		case '\015':
 			UndoStart( _("Create Text"), "newText - CR" );
-			t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size );
+			t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color );
 			UndoEnd();
 			DrawNewTrack(t); 
 			Dt.state = 0;
@@ -185,20 +191,20 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		DrawTextSize( &mainD, Dt.text, NULL, Dt.size, TRUE, &size );
 		Dt.textLen = size.x;
 		Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x + Dt.textLen;
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
+		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		MainRedraw();
 		return C_CONTINUE;
 	case C_REDRAW:
 		if (Dt.state == 1) {
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
+			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		}
 		return C_CONTINUE;
 	case C_CANCEL:
 		if (Dt.state != 0) {
-			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorBlack );
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
+			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
+			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 			Dt.state = 0;
 		}
 		InfoSubstituteControls( NULL, NULL );
@@ -206,11 +212,11 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 	case C_OK:
 		if (Dt.state != 0) {
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
+			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 			Dt.state = 0;
 			if (Dt.len) {
 				UndoStart( _("Create Text"), "newText - OK" );
-				t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size );
+				t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color );
 				UndoEnd();
 				DrawNewTrack(t);
 			}
@@ -241,6 +247,7 @@ void InitCmdText( wMenu_p menu )
 	textPopupM = MenuRegister( "Text Font" );
 	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, (wMenuCallBack_p)SelectFont, NULL );
 	Dt.size = (CSIZE_T)wSelectedFontSize();
+    Dt.color = wDrawColorBlack;
 	ParamRegister( &textPG );
 }
 
