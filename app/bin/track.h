@@ -53,6 +53,7 @@ extern track_p tempTrack;
 extern wIndex_t trackCount;
 extern long drawTunnel;
 extern long drawEndPtV;
+extern long centerDrawMode;
 extern wDrawColor selectedColor;
 extern wDrawColor normalColor;
 extern BOOL_T useCurrentLayer;

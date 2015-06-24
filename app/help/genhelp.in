@@ -322,6 +322,7 @@ display-color-layers	Color tracks or other objects by layer
 display-tunnels	Controls the drawing of hidden tracks	cmdDisplay
 display-endpt	Controls the drawing of End-Points	cmdDisplay
 display-tiedraw	How to draw track ties	cmdDisplay
+display-centerdraw	Show crosshair at center of curves	cmdDisplay
 display-tworailscale	Drawing scale when to draw tracks with 2 rails	cmdDisplay
 display-mapscale	Drawing scale of the map window	cmdDisplay
 display-livemap	Whether the main layout is updated while dragging on the Map	cmdDisplay

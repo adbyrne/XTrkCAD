@@ -56,6 +56,8 @@ EXPORT wIndex_t trackCount;
 
 EXPORT long drawEndPtV = 2;
 
+EXPORT long centerDrawMode = FALSE;			/**< flag to control drawing of circle centers */
+
 static BOOL_T exportingTracks = FALSE;
 
 EXPORT signed char * pathPtr;
@@ -2190,9 +2192,9 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 	if (color == wDrawColorBlack)
 		color = normalColor;
 	if ( d->scale >= scale2rail ) {
-		DrawArc( d, p, r, a0, a1, (d->scale<32)?1:0, width, color );
+		DrawArc( d, p, r, a0, a1, ((d->scale<32) && centerDrawMode) ? 1 : 0, width, color );
 	} else if (d->options & DC_QUICK) {
-		DrawArc( d, p, r, a0, a1, (d->scale<32)?1:0, 0, color );
+		DrawArc( d, p, r, a0, a1, ((d->scale<32) && centerDrawMode) ? 1 : 0, 0, color );
 	} else {
 		if ( (d->scale <= 1 && (d->options&DC_SIMPLE)==0) || (d->options&DC_CENTERLINE)!=0 ) {
 			long options = d->options;
@@ -2201,7 +2203,7 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 			d->options = options;
 		}
 		DrawArc( d, p, r+trackGauge/2.0, a0, a1, 0, width, color );
-		DrawArc( d, p, r-trackGauge/2.0, a0, a1, 1, width, color );
+		DrawArc( d, p, r-trackGauge/2.0, a0, a1, (centerDrawMode? 1: 0), width, color );
 		if ( (d->options&DC_PRINT) && roadbedWidth > trackGauge && d->scale <= scale2rail/2 ) {
 			 wDrawWidth rbw = (wDrawWidth)floor(roadbedLineWidth*(d->dpi/d->scale)+0.5);
 			 if ( options&DTS_RIGHT ) {
