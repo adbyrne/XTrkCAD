@@ -141,6 +141,10 @@ The \f{Display} dialog contains items which control the display of objects on th
 
 \u000
 
+\dd \f{Draw Centers} - enable or disable drawing of center markings (ie. crosshairs) for curved track.
+
+\u000
+
 \dd \f{Draw Tunnel} - how to draw hidden tracks (\K{cmdTunnel}), either not at all, as dashed lines or as normal solid lines (which might be faster).
 
 \u000

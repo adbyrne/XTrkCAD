@@ -53,6 +53,7 @@ extern track_p tempTrack;
 extern wIndex_t trackCount;
 extern long drawTunnel;
 extern long drawEndPtV;
+extern long centerDrawMode;
 extern wDrawColor selectedColor;
 extern wDrawColor normalColor;
 extern BOOL_T useCurrentLayer;
@@ -494,6 +495,7 @@ BOOL_T ComputeElev( track_p, EPINX_T, BOOL_T, DIST_T *, DIST_T * );
 #define DTS_THICK2		(1<<2)
 #define DTS_THICK3		(1<<3)
 #define DTS_TIES		(1<<4)
+#define DTS_NOCENTER	(1<<5)
 
 void DrawCurvedTies( drawCmd_p, track_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, wDrawColor );
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_p, DIST_T, wDrawColor, long );
