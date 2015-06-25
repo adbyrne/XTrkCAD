@@ -157,7 +157,6 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
         MainRedraw();
         return C_CONTINUE;
 	case C_UP:
-        MainRedraw();
 		return C_CONTINUE;
 	case C_TEXT:
 		if (Dt.state == 0) {
@@ -225,6 +224,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			}
 		}
 		InfoSubstituteControls( NULL, NULL );
+        MainRedraw();
 		return C_TERMINATE;
 
 	case C_FINISH:

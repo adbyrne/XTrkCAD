@@ -848,7 +848,8 @@ LOG( log_command, 2, ( "COMMAND CANCEL %s\n", commandList[curCommand].helpKey ) 
 		!inPlayback ) {
 		DoCheckPoint();
 		checkPtMark = changed;
-	} 
+	}
+    MainRedraw();
 	EnableCommands();
 	ResetMouseState();
 LOG( log_command, 1, ( "COMMAND RESET %s\n", commandList[curCommand].helpKey ) )
@@ -987,6 +988,7 @@ LOG( log_command, 4, ( "    COMMAND returns %d\n", rc ) )
 		 (commandList[curCommand].stickyMask & stickySet) ) {
 		tempSegs_da.cnt = 0;
 		UpdateAllElevations();
+        MainRedraw();
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
 		}
