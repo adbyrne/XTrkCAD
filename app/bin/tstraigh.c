@@ -547,12 +547,15 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		if (action == C_MOVE)
 			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 					FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
+        MainRedraw();
 		return C_CONTINUE;
 
 	case C_UP:
 		if (valid)
 			AdjustStraightEndPt( trk, ep, tempSegs(0).u.l.pos[1] );
-		DrawNewTrack( trk );
+		tempSegs_da.cnt = 0;
+        DrawNewTrack( trk );
+        MainRedraw();
 		return C_TERMINATE;
 
 	default:

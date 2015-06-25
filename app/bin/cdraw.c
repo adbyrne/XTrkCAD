@@ -230,7 +230,8 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	if ( inx == -1 )
 		return;
 	segPtr = &xx->segs[drawSegInx];
-	UndrawNewTrack( trk );
+    MainRedraw();
+	//UndrawNewTrack( trk );
 	switch ( inx ) {
 	case LW:
 		segPtr->width = drawData.lineWidth/mainD.dpi;
@@ -601,7 +602,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 	STATUS_T rc;
 
 	if (action == C_DOWN) {
-		UndrawNewTrack( trk );
+		//UndrawNewTrack( trk );
 	}
 	if ( action == C_MOVE )
 		ignoredDraw = trk;

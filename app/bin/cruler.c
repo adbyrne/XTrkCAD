@@ -76,6 +76,7 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 		Dr.state = DR_ON;
 		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
 		InfoMessage( "0.0" );
+        MainRedraw();
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -83,10 +84,12 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 		Dr.pos1 = pos;
 		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
 		InfoMessage( "%s", FormatDistance( FindDistance( Dr.pos0, Dr.pos1 ) ) );
+        MainRedraw();
 		return C_CONTINUE;
 
 	case C_UP:
 		inError = TRUE;
+        MainRedraw();
 		return C_TERMINATE;
 
 	case C_REDRAW:
@@ -125,6 +128,7 @@ STATUS_T ModifyRuler(
 		}
 		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
 		InfoMessage( "%s", FormatDistance( FindDistance( Dr.pos0, Dr.pos1 ) ) );
+        MainRedraw();
 		return C_CONTINUE;
 	case C_UP:
 		return C_CONTINUE;

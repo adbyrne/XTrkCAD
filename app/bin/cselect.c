@@ -1137,6 +1137,7 @@ static STATUS_T CmdMove(
 			DrawMovedTracks();
 			drawCount = 0;
 			state = 1;
+            MainRedraw();
 			return C_CONTINUE;
 		case C_MOVE:
 			drawEnable = enableMoveDraw;
@@ -1152,6 +1153,7 @@ static STATUS_T CmdMove(
 			InfoMessage( "   [%s %s]", FormatDistance(base.x), FormatDistance(base.y) );
 #endif
 			drawEnable = TRUE;
+            MainRedraw();
 			return C_CONTINUE;
 		case C_UP:
 			state = 0;
@@ -1267,6 +1269,7 @@ static STATUS_T CmdRotate(
 					DrawMovedTracks();
 				}
 			}
+            MainRedraw();
 			return C_CONTINUE;
 		case C_MOVE:
 			if ( rotateAlignState == 1 )
@@ -1294,6 +1297,7 @@ static STATUS_T CmdRotate(
 				SetMoveD( FALSE, orig, angle );
 /*printf( "angle 2 = %0.3f\n", angle );*/
 				DrawMovedTracks();
+                MainRedraw();
 				return C_CONTINUE;
 			}
 			if ( FindDistance( orig, pos ) > (6.0/75.0)*mainD.scale ) {
@@ -1326,6 +1330,7 @@ static STATUS_T CmdRotate(
 				wFlush();
 				drawEnable = TRUE;
 			}
+            MainRedraw();
 			return C_CONTINUE;
 		case C_UP:
 			state = 0;
@@ -1345,6 +1350,7 @@ static STATUS_T CmdRotate(
 				DrawMovedTracks();
 				MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, orig, angle );
 			}
+            MainRedraw();
 			return C_TERMINATE;
 
 		case C_CMDMENU:
@@ -1541,6 +1547,7 @@ static void FlipTracks(
 	wSetCursor( wCursorNormal );
 	UndoEnd();
 	InfoCount( trackCount );
+    MainRedraw();
 }
 
 
@@ -1571,18 +1578,21 @@ static STATUS_T CmdFlip(
 			}
 			pos0 = pos1 = pos;
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
+            MainRedraw();
 			return C_CONTINUE;
 		case C_MOVE:
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
 			pos1 = pos;
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
 			InfoMessage( _("Angle %0.2f"), FindAngle( pos0, pos1 ) );
+            MainRedraw();
 			return C_CONTINUE;
 		case C_UP:
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
 			UndoStart( _("Flip Tracks"), "flip" );
 			FlipTracks( pos0, FindAngle( pos0, pos1 ) );
 			state = 0;
+            MainRedraw();
 			return C_TERMINATE;
 
 #ifdef LATER

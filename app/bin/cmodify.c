@@ -136,6 +136,7 @@ static STATUS_T CmdModify(
 			rc = C_CONTINUE;
 		}
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+        MainRedraw();
 		return rc;
 
 	case C_MOVE:
@@ -152,6 +153,7 @@ static STATUS_T CmdModify(
 			Dex.Trk = NULL;
 		}
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+        MainRedraw();
 		return rc;
 
 
@@ -167,6 +169,8 @@ static STATUS_T CmdModify(
 		UndoModify( Dex.Trk );
 		rc = ModifyTrack( Dex.Trk, C_UP, pos );
 		UndoEnd();
+        MainRedraw();
+        changeTrackMode = FALSE;
 		return rc;
 
 	case C_RDOWN:
@@ -201,6 +205,7 @@ LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
 			}
 		}
 		Dex.first = TRUE;
+        MainRedraw();
 #ifdef LATER
 		return C_CONTINUE;
 #endif
@@ -318,6 +323,7 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 					Dex.curveData.a1 );
 		}
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+        MainRedraw();
 		return C_CONTINUE;
 
 	case C_RUP:
@@ -333,11 +339,12 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
    
 		if ( curveType == curveTypeStraight ) {
 			if ( Dex.params.type == curveTypeStraight && Dex.params.len > 0 ) {
-				UndrawNewTrack( Dex.Trk );
+				//UndrawNewTrack( Dex.Trk );
 				UndoModify( Dex.Trk );
 				AdjustStraightEndPt( Dex.Trk, Dex.params.ep, Dex.curveData.pos1 );
 				UndoEnd();
 				DrawNewTrack(Dex.Trk );
+                MainRedraw();
 				return C_TERMINATE;
 			}
 			trk = NewStraightTrack( Dex.pos01, Dex.curveData.pos1 );
@@ -355,18 +362,19 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 		} else {
 			return C_ERROR;
 		}
-		UndrawNewTrack( Dex.Trk );
+		//UndrawNewTrack( Dex.Trk );
 		CopyAttributes( Dex.Trk, trk );
 		JoinTracks( Dex.Trk, Dex.params.ep, Dex.pos00, trk, inx, Dex.pos01, &Dex.jointD );
 		UndoEnd();
 		DrawNewTrack( trk );
 		DrawNewTrack( Dex.Trk );
 		Dex.Trk = NULL;
+        MainRedraw();
 		return C_TERMINATE;
 
 	case C_REDRAW:
 		if ( (!changeTrackMode) && Dex.Trk && !QueryTrack( Dex.Trk,	 Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK ) )
-			UndrawNewTrack( Dex.Trk );
+		   UndrawNewTrack( Dex.Trk );
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
