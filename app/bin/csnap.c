@@ -310,7 +310,7 @@ EXPORT void DrawGrid(
 		vMinCnt1 = (int)(Vdivision/f);
 		vMinSpacing *= f;
 	}
-
+    
 	bigdot = ( hMinSpacing*dpi > 10 && vMinSpacing*dpi > 10 );
 	for ( hMaj=hMajCnt0; hMaj<hMajCnt1; hMaj++ ) {
 		for ( vMaj=vMajCnt0; vMaj<vMajCnt1; vMaj++ ) {
@@ -323,6 +323,7 @@ EXPORT void DrawGrid(
 			}
 		}
 	}
+    
 
 done:
 	wSetCursor( wCursorNormal );

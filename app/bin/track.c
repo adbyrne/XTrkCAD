@@ -958,6 +958,7 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 		}
 	}
 	UndoDelete( trk );
+    MainRedraw();
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
 	InfoCount( trackCount );

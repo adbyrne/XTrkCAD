@@ -1541,7 +1541,7 @@ static BOOL_T CheckCoupling(
 		} else {
 			speed1 = 0;
 		}
-		speed = (long)fabs( speed0 + speed1 );
+		speed = (long)labs( speed0 + speed1 );
 		LOG( log_trainMove, 2, ( "coupling speed=%ld\n", speed ) )
 		if ( speed > maxCouplingSpeed ) {
 			CrashTrain( car0, dir0, &trvTrk0, speed, FALSE );
@@ -2244,6 +2244,7 @@ static STATUS_T CmdTrain( wAction_t action, coOrd pos )
 			}
 			programMode = MODE_TRAIN;
 			trk0 = NULL;
+            MainRedraw(); //Make sure track is redrawn after switch thrown
 		} else {
 			trk0 = FindCar( &pos );
 			if ( trk0 == NULL )
@@ -2524,6 +2525,7 @@ static void TrainFunc(
 		}
 		break;
 	}
+    MainRedraw();  //Redraw if Train altered
 
 	if ( trainsState == TRAINS_PAUSE ) {
 		RestartTrains();
