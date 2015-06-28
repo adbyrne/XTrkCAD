@@ -66,6 +66,7 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 			Dr.state = DR_OFF;
 			break;
 		}
+        MainRedraw();
 		return C_CONTINUE;
 
 	case C_DOWN:
