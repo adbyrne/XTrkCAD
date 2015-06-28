@@ -91,6 +91,15 @@ static void DrawGeomOk( void )
 	tempSegs_da.cnt = 0;
 }
 
+/**
+ * Create and draw a graphics primitive (lines, arc, circle). The complete handling of mouse 
+ * movements and clicks during the editing process is done here. 
+ *
+ * \param action IN mouse action 
+ * \param pos IN position of mouse pointer
+ * \param context IN/OUT parameters for drawing op 
+ * \return next command state
+ */
 
 STATUS_T DrawGeomMouse(
 		wAction_t action,
@@ -108,7 +117,7 @@ STATUS_T DrawGeomMouse(
 	BOOL_T createTrack;
 	long oldOptions;
 
-	width = context->Width/context->D->dpi*context->D->scale;
+	width = context->Width/context->D->dpi;
 
 	switch (action&0xFF) {
 
