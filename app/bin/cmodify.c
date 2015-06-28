@@ -120,7 +120,8 @@ static STATUS_T CmdModify(
 			if (trk1) {
 				UndoStart( _("Change Track"), "Change( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 				inx = GetEndPtConnectedToMe( trk1, trk );
-				DeleteTrack(Dex.Trk, TRUE);
+                Dex.Trk = NULL;
+                DeleteTrack(trk, TRUE);
 				if ( !GetTrkEndTrk( trk1, inx ) ) {
 					Dex.Trk = trk1;
 					Dex.pos00 = GetTrkEndPos( Dex.Trk, inx );
