@@ -239,6 +239,22 @@ static callBacks_t choiceItemCallBacks = {
 		NULL,
 		choiceItemProc };
 
+/**
+ * Creates choice buttons. This function is used to create a group of 
+ * radio buttons and checkboxes.
+ *
+ * \param type IN type of button
+ * \param parent IN parent window
+ * \param x, y IN position of group
+ * \param helpStr IN index string to find help
+ * \param labelStr IN label for group
+ * \param option IN ?
+ * \param labels IN labels for individual choices
+ * \param valueP OUT pointer for return value
+ * \param action IN ?
+ * \param data IN ?
+ * \return    created choice button group
+ */
 
 static wChoice_p choiceCreate(
 		wType_e type,
@@ -313,14 +329,12 @@ static wChoice_p choiceCreate(
 			if (b->hWnd == 0)
 				b->hWnd = (*butts)->hWnd;
 			(*butts)->helpStr = helpStrCopy;
-#ifdef CONTROL3D
-			Ctl3dSubclassCtl( hButt );
-#endif
+
 			hDc = GetDC( hButt );
-			lab_l = strlen(*lp);
+			lab_l = strlen((*butts)->labelStr);
 			
 			if (!mswThickFont) {hFont = SelectObject( hDc, mswLabelFont );}
-			dw = GetTextExtent( hDc, CAST_AWAY_CONST *lp, lab_l );
+			dw = GetTextExtent( hDc, (char *)((*butts)->labelStr), lab_l );
 			if (!mswThickFont) {SelectObject( hDc, hFont );}
 		
 			w = LOWORD(dw) + CHOICE_MIN_WIDTH; 
@@ -363,17 +377,11 @@ static wChoice_p choiceCreate(
 	b->w = pw;
 	b->h = ph;								  
 
-#ifdef WIN32
 #define FRAME_STYLE		SS_ETCHEDFRAME
-#else
-#define FRAME_STYLE		SS_BLACKFRAME
-#endif
+
 	if ((b->option & BC_NOBORDER)==0) {
 		b->hBorder = CreateWindow( "STATIC", NULL, WS_CHILD | WS_VISIBLE | FRAME_STYLE,
 			b->x, b->y, pw, ph, ((wControl_p)parent)->hWnd, 0, mswHInst, NULL );
-#ifdef CONTROL3D
-		Ctl3dSubclassCtl( b->hBorder );
-#endif
 	}
 	mswAddButton( (wControl_p)b, TRUE, helpStr );
 	mswCallBacks[ B_CHOICEITEM ] = &choiceItemCallBacks;
