@@ -169,7 +169,7 @@ static STATUS_T CmdModify(
 		UndoModify( Dex.Trk );
 		rc = ModifyTrack( Dex.Trk, C_UP, pos );
 		UndoEnd();
-        changeTrackMode = FALSE;
+        //changeTrackMode = FALSE;
         Dex.Trk = NULL;
         MainRedraw();
         

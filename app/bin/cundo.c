@@ -739,7 +739,8 @@ BOOL_T UndoUndo( void )
 LOG( log_undo, 1, ( "    undoUndo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doCount, undoCount, us->newCnt, us->modCnt, us->delCnt ) )
 	if (recordUndo) Rprintf( "Undo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doCount, undoCount, us->newCnt, us->modCnt, us->delCnt );
 
-	redrawAll = (us->newCnt+us->modCnt) > incrementalDrawLimit;
+	//redrawAll = (us->newCnt+us->modCnt) > incrementalDrawLimit;
+    redrawAll = TRUE;
 	if (!redrawAll) {
 		for (trk=us->newTrks; trk; trk=trk->next )
 			UndrawNewTrack( trk );
@@ -815,7 +816,8 @@ BOOL_T UndoRedo( void )
 LOG( log_undo, 1, ( "    undoRedo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doCount, undoCount, us->newCnt, us->modCnt, us->delCnt ) )
 	if (recordUndo) Rprintf( "Redo[%d] d:%d u:%d N:%d M:%d D:%d\n", undoHead, doCount, undoCount, us->newCnt, us->modCnt, us->delCnt );
 
-	redrawAll = (us->newCnt+us->modCnt) > incrementalDrawLimit;
+	//redrawAll = (us->newCnt+us->modCnt) > incrementalDrawLimit;
+    redrawAll = TRUE;
 	if (!redrawAll) {
 		RedrawInStream( &redoStream, us->redoStart, us->redoEnd, FALSE );
 	}
