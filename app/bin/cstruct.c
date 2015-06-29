@@ -652,6 +652,7 @@ EXPORT STATUS_T CmdStructureAction(
 		PlaceStructure( rot0, pos, origPos, &Dst.pos, &Dst.angle );
 		DrawSegs( &tempD, Dst.pos, Dst.angle,
 				curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
+        MainRedraw();
 		InfoMessage( "[ %0.3f %0.3f ]", pos.x - origPos.x, pos.y - origPos.y );
 		return C_CONTINUE;
 
@@ -699,6 +700,7 @@ EXPORT STATUS_T CmdStructureAction(
 	case C_RUP:
 		DrawLine( &tempD, rot0, rot1, 0, wDrawColorBlack );
 	case C_UP:
+        MainRedraw();
 		return C_CONTINUE;
 
 	case C_CMDMENU:
