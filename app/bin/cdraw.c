@@ -346,7 +346,8 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		UNREORIGIN( segPtr->u.t.pos, drawData.endPt[0], xx->angle, xx->orig );
 		break;
 	case TA:
-		segPtr->u.t.angle = NormalizeAngle( drawData.angle0-xx->angle );
+		//segPtr->u.t.angle = NormalizeAngle( drawData.angle );
+		xx->angle = NormalizeAngle( drawData.angle );
 		break;
 	case TS:
 		fontSize = (long)segPtr->u.t.fontSize;
@@ -472,7 +473,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		break;
 	case SEG_TEXT:
 		REORIGIN( drawData.endPt[0], segPtr->u.t.pos, xx->angle, xx->orig );
-		drawData.angle = NormalizeAngle( segPtr->u.t.angle+segPtr->u.t.angle );
+		//drawData.angle = NormalizeAngle( segPtr->u.t.angle );
+		drawData.angle = NormalizeAngle( xx->angle );
 		strncpy( drawData.text, segPtr->u.t.string, sizeof drawData.text );
 		/*drawData.fontSize = segPtr->u.t.fontSize;*/
 		/*(char*)drawDesc[TX].valueP = segPtr->u.t.string;*/
