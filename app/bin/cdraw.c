@@ -1171,6 +1171,19 @@ BOOL_T ReadTableEdge( char * line )
 	return TRUE;
 }
 
+/**
+ * Create a new segment for text. The data are stored in a trk structure.
+ * Storage for the string is dynamically allocated. 
+ *
+ * \param index IN of new element
+ * \param pos IN coordinates of element
+ * \param angle IN orientation 
+ * \param text IN text itself
+ * \param textSize IN font size in pts
+ * \param color IN text color
+ * \return    the newly allocated trk structure
+ */
+
 EXPORT track_p NewText(
 		wIndex_t index,
 		coOrd pos,
@@ -1185,7 +1198,7 @@ EXPORT track_p NewText(
 	tempSeg.color = color;
 	tempSeg.width = 0;
 	tempSeg.u.t.pos = zero;
-	tempSeg.u.t.angle = 0.0;
+	tempSeg.u.t.angle = angle;
 	tempSeg.u.t.fontP = NULL;
 	tempSeg.u.t.fontSize = textSize;
 	tempSeg.u.t.string = MyStrdup( text );
