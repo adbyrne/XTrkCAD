@@ -396,6 +396,7 @@ EXPORT void wDrawString(
 	int h;
 	gint ascent;
 	gint descent;
+	double angle = -M_PI * a / 180.0;
 	
 	if ( bd == &psPrint_d ) {
 		psPrintString( x, y, a, (char *) s, fp, fs, color, opts );
@@ -407,6 +408,11 @@ EXPORT void wDrawString(
 	
 	/* draw text */
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid, color, opts);
+	
+	cairo_save( cairo );
+	cairo_translate( cairo, x, y );
+	cairo_rotate( cairo, angle );
+
 	layout = gtkFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
 									  (int *) &w, (int *) &h,
 									  (int *) &ascent, (int *) &descent);
@@ -416,16 +422,23 @@ EXPORT void wDrawString(
 	GdkColor* const gcolor = gtkGetColor(color, TRUE);
 	cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
 
-	cairo_move_to(cairo, x, y - ascent);
+	cairo_move_to( cairo, 0, -ascent );
+	
 	pango_cairo_show_layout(cairo, layout);
 	gtkFontDestroyPangoLayout(layout);
+	cairo_restore( cairo );
 	gtkDrawDestroyCairoContext(cairo);
 	
 	if (bd->delayUpdate || bd->widget == NULL) return;
-	update_rect.x      = (gint) x - 1;
+	
+	/* recalculate the area to be updated 
+	 * for simplicity sake I added plain text height ascent and descent,
+	 * mathematically correct would be to use the trigonometrical functions as well 
+	 */ 
+	update_rect.x      = (gint) x - ascent - descent - 1;
 	update_rect.y      = (gint) y - (gint) ascent - 1;
-	update_rect.width  = (gint) w + 2;
-	update_rect.height = (gint) ascent + (gint) descent + 2;
+	update_rect.width  = (gint) (w * cos( angle ) + 2 + ascent + descent);
+	update_rect.height = (gint) (w * sin( angle ) + ascent + descent + 2 );
 	gtk_widget_draw(bd->widget, &update_rect);
 }
 

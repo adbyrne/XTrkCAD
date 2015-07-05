@@ -335,9 +335,6 @@ static void DDrawString(
 		wDrawColor color )
 {
 	wPos_t x, y;
-#ifndef WINDOWS
-	a = 0.0;
-#endif
 	if (d == &mapD && !mapVisible)
 		return;
 	fontSize /= d->scale;
