@@ -2553,7 +2553,8 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 
 /**
  * Draw track endpoints. The correct track endpoint (connected, unconnected etc.)
- * is drawn to the track
+ * is drawn to the track. In case the endpoint is on the transition into a
+ * tunnel, a tunnel portal is drawn.
  *
  * \param d IN drawing functions to use (depends on print, draw to screen etc.)
  * \param trk IN track for which endpoints are drawn
@@ -2576,7 +2577,8 @@ EXPORT void DrawEndPt(
 	wDrawWidth width;
 	wDrawWidth width2;
 
-	width2 = (wDrawWidth)(2.0*(d->dpi/75.0));
+	// line width for the tunnel portal, make sure it is rounded correctly
+	width2 = (wDrawWidth)round((2.0 * d->dpi)/75.0);
 	if (d->funcs->options&wDrawOptTemp)
 		return;
 	if ( trk && QueryTrack( trk, Q_NODRAWENDPT ) )
@@ -2621,7 +2623,9 @@ EXPORT void DrawEndPt(
 		sepBoundary = TRUE;
 	}
 
+	// is the endpoint a transition into a tunnel?
 	if (GetTrkVisible(trk) && (!GetTrkVisible(trk1))) {
+		// yes, draw tunnel portal
 		Translate( &p0, p, a, trackGauge );
 		Translate( &p1, p, a+180, trackGauge );
 		DrawLine( d, p0, p1, width2, color );

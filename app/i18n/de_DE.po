@@ -1168,7 +1168,7 @@ msgstr "Zu druckende Seiten auswählen oder ziehen um das Druckraster zu verschi
 
 #: ../bin/cprint.c:1189
 msgid "Print..."
-msgstr "Drucke..."
+msgstr "Drucken..."
 
 #: ../bin/cprofile.c:456 ../bin/cprofile.c:1255 ../bin/cprofile.c:1351
 #: ../../../build/app/bin/bllnhlp.c:101 ../../../build/app/i18n/custmsg.h:40
@@ -6983,7 +6983,7 @@ msgstr "Alle Seiten abwählen"
 
 #: ../../../build/app/bin/bllnhlp.c:417
 msgid "Print selected pages and terminates the print command"
-msgstr "Ausdrucken der ausgewählten Seiten und Drcken Dialog schließen"
+msgstr "Ausdrucken der ausgewählten Seiten und den Dialog Drucken schließen"
 
 #: ../../../build/app/bin/bllnhlp.c:418
 msgid "List of loaded and unloaded parameter files"
