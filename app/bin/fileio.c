@@ -1454,6 +1454,12 @@ EXPORT BOOL_T EditCut( void )
 	return TRUE;
 }
 
+/**
+ * Paste clipboard content. XTrackCAD uses a disk file as clipboard replacement. This file is read and the
+ * content is inserted.
+ * 
+ * \return    TRUE if success, FALSE on error (file not found)
+ */
 
 EXPORT BOOL_T EditPaste( void )
 {

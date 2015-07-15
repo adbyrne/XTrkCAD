@@ -199,6 +199,7 @@ STATUS_T GridAction( wAction_t, coOrd, coOrd *, DIST_T * );
 
 void ResetMouseState( void );
 void FakeDownMouseState( void );
+void GetMousePosition( int  *x, int *y );
 void RecordMouse( char *, wAction_t, POS_T, POS_T );
 extern long playbackDelay;
 void MovePlaybackCursor( drawCmd_p, wPos_t, wPos_t );

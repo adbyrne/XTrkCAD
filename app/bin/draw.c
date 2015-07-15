@@ -136,6 +136,7 @@ EXPORT BOOL_T inError = FALSE;
 
 typedef enum { mouseNone, mouseLeft, mouseRight, mouseLeftPending } mouseState_e;
 static mouseState_e mouseState;
+static int mousePositionx, mousePositiony;	/**< position of mouse pointer */
 
 static int delayUpdate = 1;
 
@@ -2070,6 +2071,22 @@ EXPORT void FakeDownMouseState( void )
 	mouseState = mouseLeftPending;
 }
 
+/**
+ * Return the current position of the mouse pointer in drawing coordinates.
+ *
+ * \param x OUT pointer x position
+ * \param y OUT pointer y position
+ * \return 
+ */
+
+void
+GetMousePosition( int *x, int *y )
+{
+	if( x && y ) {
+		*x = mousePositionx;
+		*y = mousePositiony;
+	}
+}
 
 static void DoMouse( wAction_t action, coOrd pos )
 {
@@ -2311,6 +2328,9 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 		}
 	}
 	mainD.Pix2CoOrd( &mainD, x, y, &pos );
+	mousePositionx = x;
+	mousePositiony = y;
+
 	DoMouse( action, pos );
 }
 

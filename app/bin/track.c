@@ -29,6 +29,7 @@
 #include "cjoin.h"
 #include "compound.h"
 #include "i18n.h"
+#include "draw.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
@@ -51,6 +52,8 @@ static int log_readTracks = 0;
  */
 
 #define DRAW_TUNNEL_NONE		(0)
+
+#define CLOSETOTHEEDGE			(10)		/**< minimum distance between paste position and edge of window */
 
 EXPORT wIndex_t trackCount;
 
@@ -1182,7 +1185,29 @@ EXPORT void ImportEnd( void )
 	track_p to_firstOld;
 	wIndex_t trackCountOld;
 	track_p trk;
+	coOrd pos;
+	wPos_t x, y;
+	wPos_t ww, hh;
+	double ymax = 0.0;
 
+	// get the current mouse position
+	GetMousePosition( &x, &y );
+	mainD.Pix2CoOrd( &mainD, x, y, &pos );
+	
+	// get the size of the drawing area
+	wDrawGetSize( mainD.d, &ww, &hh );
+
+	// in case the pointer is close to the edge or above the drawing area
+	// recalculate the destination position so the pasted part remains visible
+	if( abs( y - hh ) < CLOSETOTHEEDGE  ) {
+		for ( trk=*importTrack; trk; trk=trk->next ) {
+			if (!IsTrackDeleted(trk) && trk->hi.y > ymax ) {
+				ymax = trk->hi.y;
+			}
+		}
+		pos.y -= ymax;
+	}
+	
 	to_firstOld = to_first;
 	to_first = *importTrack;
 	trackCountOld = trackCount;
@@ -1190,11 +1215,12 @@ EXPORT void ImportEnd( void )
 	to_first = to_firstOld;
 	RenumberTracks();
 	DrawMapBoundingBox( FALSE );
+
+	// move the imported track into place
 	for ( trk=*importTrack; trk; trk=trk->next ) if (!IsTrackDeleted(trk)) {
-		MoveTrack( trk, mainD.orig );
+		MoveTrack( trk, pos );// mainD.orig );
 		trk->bits |= TB_SELECTED;
 		DrawTrack( trk, &mainD, wDrawColorBlack );
-		DrawTrack( trk, &mapD, wDrawColorBlack );
 	}
 	DrawMapBoundingBox( TRUE );
 	importTrack = NULL; 
