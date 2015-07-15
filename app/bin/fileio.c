@@ -1198,6 +1198,16 @@ EXPORT void DoImport( void )
 	wFilSelect( importFile_fs, curDirName );
 }
 
+
+/**
+ * Export the selected track pieces
+ *
+ * \param pathname IN full path and filename for export file
+ * \param filename IN pointer to filename part *within* pathname
+ * \param data IN unused
+ * \return FALSE on error, TRUE on success
+ */
+
 static int DoExportTracks(
 		const char * pathName,
 		const char * fileName,
@@ -1205,6 +1215,8 @@ static int DoExportTracks(
 {
 	FILE * f;
 	time_t clock;
+	char *oldLocale = NULL;
+
 	if (pathName == NULL)
 		return TRUE;
 	SetCurDir( pathName, fileName );
@@ -1213,6 +1225,9 @@ static int DoExportTracks(
 		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Export"), fileName, strerror(errno) );
 		return FALSE;
 	}
+
+	oldLocale = SaveLocale("C");
+	
 	wSetCursor( wCursorWait );
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
@@ -1220,6 +1235,9 @@ static int DoExportTracks(
 	ExportTracks( f );
 	fprintf(f, "END\n");
 	fclose(f);
+	
+	RestoreLocale( oldLocale );
+
 	Reset();
 	wSetCursor( wCursorNormal );
 	UpdateAllElevations();
@@ -1341,6 +1359,8 @@ static int DoExportDXFTracks(
 		void * data )
 {
 	time_t clock;
+	char *oldLocale;
+
 	if (pathName == NULL)
 		return TRUE;
 	SetCurDir( pathName, fileName );
@@ -1349,6 +1369,8 @@ static int DoExportDXFTracks(
 		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "DXF", fileName, strerror(errno) );
 		return FALSE;
 	}
+
+	oldLocale = SaveLocale( "C" );
 	wSetCursor( wCursorWait );
 	time(&clock);
 	fprintf(dxfF,"\
@@ -1398,6 +1420,7 @@ static int DoExportDXFTracks(
 	fprintf(dxfF,"  0\nENDSEC\n");
 	fprintf(dxfF,"  0\nEOF\n");
 	fclose(dxfF);
+	RestoreLocale( oldLocale );
 	Reset();
 	wSetCursor( wCursorNormal );
 	return TRUE;
