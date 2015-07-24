@@ -23,6 +23,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <math.h>
 #include "track.h"
 #include "ccurve.h"
 #include "cstraigh.h"
@@ -39,6 +40,11 @@
 
 #ifndef WINDOWS
 #include <errno.h>
+#else
+// starting from Visual Studio 2015 round is in the runtime library, fake otherwise
+#if ( _MSC_VER < 1900 )
+#define round(x) floor((x)+0.5)
+#endif
 #endif
 
 static int log_track = 0;
