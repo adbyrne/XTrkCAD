@@ -122,6 +122,17 @@ EXPORT coOrd GetSegEndPt(
 	return pos;
 }
 
+/**
+ * Caclulate the bounding box for a string. 
+ *
+ * \param coOrd IN position of text
+ * \param angle IN text angle
+ * \param str IN the string
+ * \param fs IN size of font
+ * \param loR OUT bottom left corner
+ * \param hiR OUT top right corner
+ * \return    describe the return value
+ */
 
 EXPORT void GetTextBounds(
 		coOrd pos,
@@ -133,17 +144,21 @@ EXPORT void GetTextBounds(
 {
 	coOrd size;
 	POS_T descent;
-	DrawTextSize2( &mainD, str, NULL, fs, FALSE, &size, &descent );
-#ifdef WINDOWS
-	{
 	coOrd lo, hi;
 	coOrd p[4];
 	int i;
+
+	DrawTextSize2( &mainD, str, NULL, fs, FALSE, &size, &descent );
+	
+	// set up the corners of the rectangle
 	p[0].x = p[3].x = 0.0;
 	p[1].x = p[2].x = size.x;
 	p[0].y = p[1].y = -descent;
 	p[2].y = p[3].y = size.y;
+	
 	lo = hi = zero;
+	
+	// rotate each point
 	for ( i=1; i<4; i++ ) {
 		Rotate( &p[i], zero, angle );
 		if ( p[i].x < lo.x ) lo.x = p[i].x;
@@ -151,17 +166,12 @@ EXPORT void GetTextBounds(
 		if ( p[i].x > hi.x ) hi.x = p[i].x;
 		if ( p[i].y > hi.y ) hi.y = p[i].y;
 	}
+	
+	// now recaclulate the corners
 	loR->x = pos.x + lo.x;
 	loR->y = pos.y + lo.y;
 	hiR->x = pos.x + hi.x;
 	hiR->y = pos.y + hi.y;
-	}
-#else
-	loR->x = pos.x;
-	loR->y = pos.y-descent;
-	hiR->x = pos.x+size.x;
-	hiR->y = pos.y+size.y;
-#endif
 }
 
 

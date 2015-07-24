@@ -480,12 +480,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		/*(char*)drawDesc[TX].valueP = segPtr->u.t.string;*/
 		drawDesc[TP].mode =
 		drawDesc[TS].mode =
-		drawDesc[TX].mode = 0;
-#ifdef WINDOWS
-		drawDesc[TA].mode = 0;
-#else
-		drawDesc[TA].mode = DESC_RO;
-#endif
+		drawDesc[TX].mode = 
+		drawDesc[TA].mode = 
         drawDesc[CO].mode = 0;  /*Allow Text color setting*/
 		drawDesc[LW].mode = DESC_IGNORE;
 		title = _("Text");

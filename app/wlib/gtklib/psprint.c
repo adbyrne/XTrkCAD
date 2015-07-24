@@ -577,7 +577,7 @@ static void setLineType(
 
 	if (lineWidth != currLineWidth) {
 		currLineWidth = lineWidth;
-		psPrintf( psFile, "%0.3f setlinewidth\n", currLineWidth/PPI );
+		psPrintf( psFile, "%0.3f setlinewidth\n", currLineWidth / (PPI*10) );
 	}
 
 	if (lineType == wDrawLineDash)
@@ -850,7 +850,7 @@ wDraw_p wPrintPageStart( void )
 				"save\n" \
 				"gsave\n" \
 				"0 setlinewidth\n"\
-		                "0 setlinecap\n",
+		                "1 setlinecap\n",
 				pageCount, 
 				(totalPageCount>0?totalPageCount:pageCount) );
 
