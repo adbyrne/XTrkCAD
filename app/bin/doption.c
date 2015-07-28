@@ -68,9 +68,6 @@ static void OptionDlgUpdate(
 	if ( inx < 0 ) return;
 	if ( pg->paramPtr[inx].valueP == &enableBalloonHelp ) {
 		wEnableBalloonHelp((wBool_t)*(long*)valueP);
-	} else if ( pg->paramPtr[inx].valueP == &minTrackRadius ) {
-		sprintf( message, "minTrackRadius-%s", curScaleName );
-		wPrefSetFloat( "misc", message, minTrackRadius );
 	} else if ( pg->paramPtr[inx].valueP == &quickMove ) {
 		quickMoveOld = (int)quickMove;
 		quickMove = *(long*)valueP;
@@ -105,7 +102,7 @@ static paramData_t layoutPLs[] = {
 	{ PD_STRING, &Title2, "title2", PDO_NOPSHUPD, NULL, N_("Subtitle") },
 	{ PD_DROPLIST, &curScaleDescInx, "scale", PDO_NOPREF|PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT, (void *)120, N_("Scale"), 0, (void*)(CHANGE_SCALE) },
 	{ PD_DROPLIST, &curGaugeInx, "gauge", PDO_NOPREF |PDO_NOPSHUPD|PDO_NORECORD|PDO_NOUPDACT|PDO_DLGHORZ, (void *)120, N_("     Gauge"), 0, (void *)(CHANGE_SCALE) },
-	{ PD_FLOAT, &minTrackRadius, "mintrackradius", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN) },
+	{ PD_FLOAT, &minTrackRadius, "mintrackradius", PDO_DIM|PDO_NOPSHUPD|PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN|CHANGE_LIMITS) },
 	{ PD_FLOAT, &maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD|PDO_DLGHORZ, &r0_90 , N_(" Max Track Grade"), 0, (void*)(CHANGE_MAIN) }
 	};
 	
@@ -118,6 +115,7 @@ static void LayoutDlgUpdate( paramGroup_p pg, int inx, void * valueP );
 static void LayoutOk( void * junk )
 {
 	long changes;
+	char prefString[ 30 ];
 	
 	changes = GetChanges( &layoutPG );
 	
@@ -130,8 +128,15 @@ static void LayoutOk( void * junk )
 	if (changes & CHANGE_MAP) {
 		SetRoomSize( newSize );
 	}
+
 	wHide( layoutW );
 	DoChangeNotification(changes);
+
+	if( changes & CHANGE_LIMITS ) {
+		// now set the minimum track radius
+		sprintf( prefString, "minTrackRadius-%s", curScaleName );
+		wPrefSetFloat( "misc", prefString, minTrackRadius );
+	}
 }
 
 
@@ -149,8 +154,8 @@ static void DoLayout( void * junk )
 	if (layoutW == NULL) {
 		layoutW = ParamCreateDialog( &layoutPG, MakeWindowTitle(_("Layout Options")), _("Ok"), LayoutOk, wHide, TRUE, NULL, 0, LayoutDlgUpdate );
 		LoadScaleList( (wList_p)layoutPLs[4].control );
-		LoadGaugeList( (wList_p)layoutPLs[5].control, curScaleDescInx ); /* set correct gauge list here */
 	}
+	LoadGaugeList( (wList_p)layoutPLs[5].control, curScaleDescInx ); /* set correct gauge list here */
 	ParamLoadControls( &layoutPG );
 	wShow( layoutW );
 }

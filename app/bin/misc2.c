@@ -408,11 +408,6 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 static void SetScale(
 		SCALEINX_T newScaleInx )
 {	
-	if ( curScaleInx >= 0 && curScaleName ) {
-		// save the minimum radius of the old scale
-		sprintf( minTrackRadiusPrefS, "minTrackRadius-%s", curScaleName );
-		wPrefSetFloat( "misc", minTrackRadiusPrefS, minTrackRadius );
-	}
 	if (newScaleInx < 0 && newScaleInx >= scaleInfo_da.cnt) {
 		NoticeMessage( MSG_BAD_SCALE_INDEX, _("Ok"), NULL, (int)newScaleInx );
 		return;
