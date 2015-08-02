@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cundo.c,v 1.3 2009-05-25 18:11:03 m_fischer Exp $
+/** \file cundo.c
+ * Undo / redo functions. 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -34,7 +34,7 @@
  *
  */
 
-static int log_undo;
+static int log_undo = 0;	/**< loglevel, can only be set at compile time */
 
 #define UNDO_STACK_SIZE (10)
 
@@ -94,11 +94,13 @@ static BOOL_T needAttachTrains = FALSE;
 
 void UndoResume( void )
 {
+	LOG( log_undo, 1, ( "UndoResume()\n" ) )
 	undoActive = TRUE;
 }
 
 void UndoSuspend( void )
 {
+	LOG( log_undo, 1, ( "UndoSuspend()\n" ) )
 	undoActive = FALSE;
 }
 
@@ -678,16 +680,22 @@ LOG( log_undo, 2, ( "    UndoDelete( T%d, E%d, X%ld )\n", trk->index, trk->endCn
 
 BOOL_T UndoNew( track_p trk )
 {
-	undoStack_p us = &undoStack[undoHead];
-	if (!undoActive) return TRUE;
+	undoStack_p us; 
+	if (!undoActive) 
+		return TRUE;
+
 LOG( log_undo, 2, ( "    UndoNew( T%d )\n", trk->index ) )
-	if (recordUndo) Rprintf( " NEW T%d @%lx\n", trk->index, (long)trk );
+	
+	if (recordUndo) 
+		Rprintf( " NEW T%d @%lx\n", trk->index, (long)trk );
 	UASSERT(undoCount==0, undoCount);
 	UASSERT(undoHead >= 0, undoHead);
+	us = &undoStack[undoHead];
 	trk->new = TRUE;
 	if (us->newTrks == NULL)
 		us->newTrks = trk;
 	us->newCnt++;
+	
 	return TRUE;
 }
 

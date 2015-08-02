@@ -1129,6 +1129,8 @@ EXPORT int LoadCheckpoint( void )
 	search = (char*)MyMalloc(len);
 	sprintf( search, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPointF );
 
+	UndoSuspend();
+
 	if (ReadTrackFile( search, search + strlen(search) - strlen( sCheckPointF ), TRUE, TRUE, TRUE )) {
 		ResolveIndex();
 
@@ -1139,6 +1141,8 @@ EXPORT int LoadCheckpoint( void )
 	}
 
 	Reset();
+	UndoResume();
+
 	wSetCursor( wCursorNormal );
 
 	strcpy( curPathName, "" );
