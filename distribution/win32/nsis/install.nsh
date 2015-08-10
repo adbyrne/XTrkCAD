@@ -18,12 +18,9 @@ CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrkCad ReadMe.lnk" "notepad.exe" 
   
 ; create the new association  
     WriteRegStr HKCR ".xtc" "" "XTrackCAD.Design"
-    ReadRegStr $0 HKCR "XTrackCAD.Design" ""
-    StrCmp $0 "" 0 "${Index}-Skip"
-      WriteRegStr HKCR "XTrackCAD.Design" "" "XTrackCAD Layout Design"
-      WriteRegStr HKCR "XTrackCAD.Design\shell" "" "open"
-      WriteRegStr HKCR "XTrackCAD.Design\DefaultIcon" "" "$INSTDIR\bin\xtrkcad.exe,0"
-    "${Index}-Skip:"
+    WriteRegStr HKCR "XTrackCAD.Design" "" "XTrackCAD Layout Design"
+    WriteRegStr HKCR "XTrackCAD.Design\shell" "" "open"
+    WriteRegStr HKCR "XTrackCAD.Design\DefaultIcon" "" "$INSTDIR\bin\xtrkcad.exe,0"
     WriteRegStr HKCR "XTrackCAD.Design\shell\open\command" "" '$INSTDIR\bin\xtrkcad.exe "%1"'
 	
   System::Call 'Shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
