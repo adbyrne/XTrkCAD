@@ -34,6 +34,7 @@ ENDIF(WIN32)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
+	cmake_policy(SET CMP0026 OLD)
 endif(COMMAND cmake_policy)
 
 SET(XTRKCAD_USE_DOXYGEN_DEFAULT OFF)
