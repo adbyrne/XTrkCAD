@@ -1,7 +1,5 @@
 /** \file param.c
  * Handle all the dialog box creation stuff.
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.c,v 1.9 2009-09-21 18:24:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1411,6 +1409,14 @@ static void ParamIntegerPush( const char * val, void * dp )
 		p->group->changeProc( p->group, p-p->group->paramPtr, &valL);
 }
 
+/**
+ * Checks the entered value in a float field. Accepts data entered in the different
+ * formats for dimensions. Compares the value against limits if specified in that
+ * entry field description.
+ *
+ * \param val IN the vale to check
+ * \param dp  IN the field description
+ */
 
 static void ParamFloatPush( const char * val, void * dp )
 {
@@ -1455,7 +1461,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	}
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*((FLOAT_T*)(p->valueP)) = valF;
-	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
+	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( val ))
 		p->group->changeProc( p->group, p-p->group->paramPtr, &valF );
 }
 
