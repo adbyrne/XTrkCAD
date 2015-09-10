@@ -1,7 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.c,v 1.8 2009-05-26 19:17:52 m_fischer Exp $
- *
- * TRAIN
+/** \file ctrain.c
+ * Functions related to running trains
  *
  */
 
@@ -571,7 +569,7 @@ static paramData_t trainPLs[] = {
 #define I_STOP				(10)
 	  { PD_BUTTON, NULL, "stop", PDO_DLGWIDE, NULL, N_("Stop") },
 #define I_SPEED				(11)
-	  { PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, (void*)(SLIDER_WIDTH*2) } };
+	  { PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, (void *)120 } };
 
 static paramGroup_t trainPG = { "train", 0, trainPLs, sizeof trainPLs/sizeof trainPLs[0] };
 
@@ -594,6 +592,15 @@ static wIndex_t FindLoco(
 	return -1;
 }
 
+/**
+ * Update the speed display when running trains. Draw the slider in the 
+ * correct position and update the odometer. 
+ *
+ * \param d IN drawing area for slider
+ * \param d IN the dialog
+ * \param w, h IN unused?
+ * \return    describe the return value
+ */
 
 static void SpeedRedraw(
 		wDraw_p d,
@@ -633,7 +640,7 @@ static void SpeedRedraw(
 	wDrawLine( d, 0, y+SLIDER_THICKNESS/2, SLIDER_WIDTH, y+SLIDER_THICKNESS/2, 1, wDrawLineSolid, drawColorBlack, 0 );
 	wDrawLine( d, 0, y-SLIDER_THICKNESS/2, SLIDER_WIDTH, y-SLIDER_THICKNESS/2, 1, wDrawLineSolid, drawColorBlack, 0 );
 	
-	sprintf( dlg->speedS, "%3d", (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6) );
+	sprintf( dlg->speedS, "%3d %s", (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6), (units==UNITS_ENGLISH?"mph":"km/h") );
 	ParamLoadMessage( dlg->trainPGp, I_SPEED, dlg->speedS );
 	LOG( log_trainPlayback, 3, ( "Speed = %d\n", (int)xx->speed ) );
 }
