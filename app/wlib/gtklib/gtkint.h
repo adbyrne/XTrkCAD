@@ -177,4 +177,7 @@ void psPrintFillRectangle( wPos_t, wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts
 void psPrintFillPolygon( wPos_t [][2], int, wDrawColor, wDrawOpts );
 void psPrintFillCircle( wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
 
+
+void ApplySettings( GtkPrintOperation *op );
+void SaveSettings( GtkPrintOperation *op );
 #endif

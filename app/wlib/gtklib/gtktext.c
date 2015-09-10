@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtktext.c,v 1.2 2009-05-15 18:54:20 m_fischer Exp $
+/** \file gtktext.c
+ * Multi-line Text Boxes
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,7 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <math.h>
+#include "i18n.h"
 #include "gtkint.h"
 
 /*
@@ -32,13 +33,18 @@
  */
 #define USE_TEXTVIEW
 
-/*
- *****************************************************************************
- *
- * Multi-line Text Boxes
- *
- *****************************************************************************
- */
+
+struct PrintData {
+	wText_p	tb;
+	gint lines_per_page;
+	gdouble font_size; 
+	gchar **lines;
+	gint total_lines;
+	gint total_pages;
+};
+
+#define HEADER_HEIGHT 20.0
+#define HEADER_GAP 8.5
 
 struct wText_t {
 		WOBJ_COMMON
@@ -232,42 +238,224 @@ EXPORT wBool_t wTextSave(
 	fclose(f);
 	return TRUE;
 }
+/**
+ * Begin the printing by retrieving the contents of the text box and
+ * count the lines of text. 
+ * 
+ * \param operation IN the GTK print operation
+ * \param context IN print context
+ * \param pd IN data structure for user data
+ * 
+ */
+ 
+static void
+begin_print (GtkPrintOperation *operation, 
+             GtkPrintContext *context,
+             struct PrintData *pd)
+{
+	gchar *contents;
+	gdouble height;
+		
+	contents =  gtkGetText( pd->tb );
+	pd->lines = g_strsplit (contents, "\n", 0);
 
+	/* Count the total number of lines in the file. */
+	/* ignore the header lines */
+	pd->total_lines = 6;
+	while (pd->lines[pd->total_lines] != NULL)
+		pd->total_lines++;
+  
+	/* Based on the height of the page and font size, calculate how many lines can be 
+	* rendered on a single page. A padding of 3 is placed between lines as well.
+	* Space for page header, table header and footer lines is subtracted from the total size
+	*/
+	height = gtk_print_context_get_height (context) - (pd->font_size + 3) - 2 * ( HEADER_HEIGHT + HEADER_GAP );
+	pd->lines_per_page = floor (height / (pd->font_size + 3));
+	pd->total_pages = (pd->total_lines - 1) / pd->lines_per_page + 1;
+	gtk_print_operation_set_n_pages (operation, pd->total_pages);
+	
+	free( contents );
+}
+
+/**
+ * Draw the page, which includes a header with the file name and page number along
+ * with one page of text with a font of "Monospace 10". 
+ * 
+ * \param operation IN the GTK print operation
+ * \param context IN print context
+ * \param page_nr IN page to print
+ * \param pd IN data structure for user data
+ * 
+ * 
+ */
+ 
+static void
+draw_page (GtkPrintOperation *operation,
+           GtkPrintContext *context,
+           gint page_nr,
+           struct PrintData *pd )
+{
+	cairo_t *cr;
+	PangoLayout *layout;
+	gdouble width, text_height, height;
+	gint line, i, text_width, layout_height;
+	PangoFontDescription *desc;
+	gchar *page_str;
+
+	cr = gtk_print_context_get_cairo_context (context);
+	width = gtk_print_context_get_width (context);
+	
+	layout = gtk_print_context_create_pango_layout (context);
+	desc = pango_font_description_from_string ("Monospace");
+	pango_font_description_set_size (desc, pd->font_size * PANGO_SCALE);
+
+	/* 
+	 * render the header line with document type parts list on left and
+	 * first line of layout title on right 
+	 */ 
+	 
+	pango_layout_set_font_description (layout, desc);
+	pango_layout_set_text (layout, pd->lines[ 0 ], -1); 	// document type
+	pango_layout_set_width (layout, -1);
+	pango_layout_set_alignment (layout, PANGO_ALIGN_LEFT);
+	pango_layout_get_size (layout, NULL, &layout_height);
+	text_height = (gdouble) layout_height / PANGO_SCALE;
+
+	cairo_move_to (cr, 0, (HEADER_HEIGHT - text_height) / 2);
+	pango_cairo_show_layout (cr, layout);
+
+	pango_layout_set_text (layout, pd->lines[ 2 ], -1);		// layout title 
+	pango_layout_get_size (layout, &text_width, NULL);
+	pango_layout_set_alignment (layout, PANGO_ALIGN_RIGHT);
+
+	cairo_move_to (cr, width - (text_width / PANGO_SCALE), 
+                 (HEADER_HEIGHT - text_height) / 2);
+	pango_cairo_show_layout (cr, layout);
+
+	/* Render the column header */
+	cairo_move_to (cr, 0, HEADER_HEIGHT + HEADER_GAP + pd->font_size + 3 );
+	pango_layout_set_text (layout, pd->lines[ 6 ], -1);
+	pango_cairo_show_layout (cr, layout);
+	cairo_rel_move_to (cr, 0, pd->font_size + 3 );
+	pango_layout_set_text (layout, pd->lines[ 7 ], -1);
+	pango_cairo_show_layout (cr, layout);
+	
+	/* Render the page text with the specified font and size. */  
+	cairo_rel_move_to (cr, 0, pd->font_size + 3 );
+	line = page_nr * pd->lines_per_page + 8;
+	for (i = 0; i < pd->lines_per_page && line < pd->total_lines; i++) 
+	{
+		pango_layout_set_text (layout, pd->lines[line], -1);
+		pango_cairo_show_layout (cr, layout);
+		cairo_rel_move_to (cr, 0, pd->font_size + 3);
+		line++;
+	}
+
+	/* 
+	 * Render the footer line with date on the left and page number 
+	 * on the right
+	 */
+	pango_layout_set_text (layout, pd->lines[ 5 ], -1); 	// date
+	pango_layout_set_width (layout, -1);
+	pango_layout_set_alignment (layout, PANGO_ALIGN_LEFT);
+	pango_layout_get_size (layout, NULL, &layout_height);
+	text_height = (gdouble) layout_height / PANGO_SCALE;
+
+	height = gtk_print_context_get_height (context);
+	cairo_move_to (cr, 0, height - ((HEADER_HEIGHT - text_height) / 2));
+	pango_cairo_show_layout (cr, layout);
+
+	page_str = g_strdup_printf (_("%d of %d"), page_nr + 1, pd->total_pages); // page number
+	pango_layout_set_text( layout, page_str, -1 );
+	pango_layout_get_size (layout, &text_width, NULL);
+	pango_layout_set_alignment (layout, PANGO_ALIGN_RIGHT);
+
+	cairo_move_to (cr, width - (text_width / PANGO_SCALE), 
+                 height - ((HEADER_HEIGHT - text_height) / 2));
+	pango_cairo_show_layout (cr, layout);
+
+	g_free (page_str);
+	g_object_unref (layout);
+	pango_font_description_free (desc);
+}
+
+/**
+ * Clean up after the printing operation since it is done. 
+ *
+ * \param operation IN the GTK print operation
+ * \param context IN print context
+ * \param pd IN data structure for user data
+ * 
+ * 
+ */
+static void
+end_print (GtkPrintOperation *operation, 
+           GtkPrintContext *context,
+           struct PrintData *pd)
+{
+	g_strfreev (pd->lines);
+	free( pd );
+}
+
+/**
+ * Print the content of a multi line text box. This function is only used
+ * for printing the parts list. So it makes some assumptions on the structure
+ * and the content. Change if the multi line entry is changed.
+ * The deprecated gtk_text is not supported by this function. 
+ * 
+ * Thanks to Andrew Krause's book for a good starting point.
+ *
+ * \param bt IN the text field
+ * \return    TRUE on success, FALSE on error
+ */
 
 EXPORT wBool_t wTextPrint(
 		wText_p bt )
 {
-	wPrinterStream_p f;
-#ifndef USE_TEXTVIEW
-	int siz, pos, cnt;
-#endif
-	char * cp;
+	GtkPrintOperation *operation;
+	GtkWidget *dialog;
+	GError *error = NULL;
+	gint res;
+	struct PrintData *data;
 
-	f = wPrinterOpen();
-	if (f==NULL) {
-		return FALSE;
-	}
-#ifdef USE_TEXTVIEW
-	cp = gtkGetText( bt );
-	wPrinterWrite( f, cp, strlen(cp) );
-	free(cp);
+	/* Create a new print operation, applying saved print settings if they exist. */
+	operation = gtk_print_operation_new ();
+	ApplySettings( operation );
+  
+	data = malloc(sizeof( struct PrintData));
+	data->font_size = 10.0;
+	data->tb = bt;
 
-#else
-	siz = gtk_text_get_length( GTK_TEXT(bt->text) );
-	pos = 0;
-	cnt = BUFSIZ;
-	while (pos<siz) {
-		if (pos+cnt>siz)
-			 cnt = siz-pos;
-		cp = gtk_editable_get_chars( GTK_EDITABLE(bt->text), pos, pos+cnt );
-		if (cp == NULL)
-			break;
-		wPrinterWrite( f, cp, cnt );
-		free(cp);
-		pos += cnt;
+	g_signal_connect (G_OBJECT (operation), "begin_print", 
+		                G_CALLBACK (begin_print), (gpointer) data);
+	g_signal_connect (G_OBJECT (operation), "draw_page", 
+		                G_CALLBACK (draw_page), (gpointer) data);
+	g_signal_connect (G_OBJECT (operation), "end_print", 
+		                G_CALLBACK (end_print), (gpointer) data);
+
+	/* Run the default print operation that will print the selected file. */
+	res = gtk_print_operation_run (operation, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG, 
+									GTK_WINDOW(gtkMainW->gtkwin), &error);
+
+	/* If the print operation was accepted, save the new print settings. */
+	if (res == GTK_PRINT_OPERATION_RESULT_APPLY)
+	{
+		SaveSettings( operation );
 	}
-#endif
-	wPrinterClose(f);
+	/* Otherwise, report that the print operation has failed. */
+	else if (error)
+	{
+		dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin), 
+                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+                                     GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+				                             error->message);
+    
+		g_error_free (error);
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (dialog);     
+	}
+	g_object_unref (operation);
+  
 	return TRUE;
 }
 

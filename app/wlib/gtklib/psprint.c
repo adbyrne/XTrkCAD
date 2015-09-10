@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/psprint.c,v 1.5 2009-05-15 18:54:20 m_fischer Exp $
+/** \file print.c
+ * Printing functions
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -87,6 +87,11 @@ extern wDrawColor wDrawColorBlack;
  * VARIABLES
  *
  */
+
+#define PAGESETTINGS "xtrkcad.page"			/**< filename for page settings */
+#define PRINTSETTINGS "xtrkcad.printer"		/**< filename for printer settings */
+static GtkPrintSettings *settings;			/**< current printer settings */
+static GtkPageSetup *page_setup;			/**< current paper settings */
 
 extern struct wDraw_t psPrint_d;
 
@@ -345,15 +350,43 @@ psPrintf (FILE *ps, const char *template, ...)
   	setlocale( LC_NUMERIC, "" );	
 }
 
+/**
+ * Page setup function
+ * this function bla bla bla
+ *
+ * \param callback IN unused?
+ */
+ 
 void wPrintSetup( wPrintSetupCallBack_p callback )
 {
-	printInit();
-	newPPrinter = curPrinter;
-	newPPaper = curPaper;
-	printSetupCallBack = callback;
-	wListSetIndex( optPrinterB, newPPrinter );
-	wListSetIndex( optPaperSizeB, newPPaper );
-	wWinShow( printSetupW, TRUE );
+	GtkPageSetup *new_page_setup;
+	gchar *filename;
+	GError *err;
+	GtkWidget *dialog;
+	
+	filename = g_build_filename( wGetAppWorkDir(), PAGESETTINGS, NULL );
+	if( !page_setup )
+		page_setup = gtk_page_setup_new_from_file( filename, &err );
+				 
+	ApplySettings( NULL );
+
+	new_page_setup = gtk_print_run_page_setup_dialog (GTK_WINDOW (gtkMainW->gtkwin),
+														page_setup, settings);
+	if (page_setup)
+		g_object_unref (page_setup);
+		
+	page_setup = new_page_setup;	
+//	g_error_free( err );
+	gtk_page_setup_to_file( page_setup, filename, NULL );
+	g_free( filename );
+	
+	//printInit();
+	//newPPrinter = curPrinter;
+	//newPPaper = curPaper;
+	//printSetupCallBack = callback;
+	//wListSetIndex( optPrinterB, newPPrinter );
+	//wListSetIndex( optPaperSizeB, newPPaper );
+	//wWinShow( printSetupW, TRUE );
 }
 
 static void pSetupOk( void )
@@ -796,6 +829,72 @@ closepath clip newpath\n",
  * PAGE FUNCTIONS
  *
  */
+
+
+/**
+ * Initialize printer using the saved settings
+ *
+ * \param op IN print operation to initialize
+ */
+
+void
+ApplySettings( GtkPrintOperation *op )
+{
+	gchar *filename;
+	GError *err;
+	GtkWidget *dialog;
+	
+	filename = g_build_filename( wGetAppWorkDir(), PRINTSETTINGS, NULL );
+	
+	if( !(settings = gtk_print_settings_new_from_file( filename, &err ))) {
+/*	{
+		dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin), 
+                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+                                     GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+				                             err->message);
+    
+		g_error_free (err);
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (dialog);     
+	}*/
+	}
+	if (settings != NULL) {
+		if( op )
+			gtk_print_operation_set_print_settings (op, settings);
+	}
+}
+
+/**
+ * Save the printer settings.
+ *
+ * \param op IN printer operation
+ */
+
+void 
+SaveSettings( GtkPrintOperation *op )
+{
+	GError *err;
+	gchar *filename;
+	GtkWidget *dialog;
+	
+    if (settings != NULL)
+		g_object_unref (settings);
+    settings = g_object_ref (gtk_print_operation_get_print_settings (op));
+    
+    filename = g_build_filename( wGetAppWorkDir(), PRINTSETTINGS, NULL );
+    if( !gtk_print_settings_to_file( settings, filename, &err )) {
+		dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin), 
+                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+                                     GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+				                             err->message);
+    
+		g_error_free (err);
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (dialog);     
+	}
+	g_free( filename );	
+}
+
 
 void wPrintGetPageSize(
 		double * w,
