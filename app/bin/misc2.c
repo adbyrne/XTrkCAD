@@ -203,7 +203,8 @@ typedef struct {
 EXPORT typedef scaleDesc_t *scaleDesc_p;
 static dynArr_t scaleDesc_da;
 #define scaleDesc(N) DYNARR_N( scaleDesc_t, scaleDesc_da, N )
-EXPORT SCALEDESCINX_T curScaleDescInx = -1;
+
+EXPORT SCALEDESCINX_T curScaleDescInx;
 
 /**
  * Get the ratio from a scale description. Each member in the list of scale descriptions is
