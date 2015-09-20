@@ -3172,11 +3172,11 @@ msgstr "Mindestgleislänge"
 
 #: ../bin/doption.c:383
 msgid "Connection Distance"
-msgstr "Verbindungs Abstand"
+msgstr "Verbindungsabstand"
 
 #: ../bin/doption.c:384
 msgid "Connection Angle"
-msgstr "Verbindungs Winkel"
+msgstr "Verbindungswinkel"
 
 #: ../bin/doption.c:385
 msgid "Turntable Angle"
@@ -5260,8 +5260,8 @@ msgid ""
 "Parameter File"
 msgstr ""
 "MSG_TURNOUT_NO_TURNOUT\tIn der Weichenauswahl gibt es keine Weichen, die ausgewählt werden können...\tIn der Weichenauswahl gibt es keine Weichen, die ausgewählt werden können.\n"
-"Bitte den Maßstab prüfen, über den Menupunkt <Hinzufügen | Weichendesigner> eine Weiche anlegen oder\n"
-"eine Parameter-Datei unter <Datei|Parameter Dateien> laden."
+"Bitte den Maßstab prüfen, über den Menupunkt <Verwalten | Weichendesigner> eine Weiche anlegen oder\n"
+"eine Parameter-Datei unter <Datei|Parameterdateien...> laden."
 
 #: ../../../build/app/help/messages.h:87
 msgid "MSG_NO_UNCONN_EP\tThere are no unconnected end points for this track"

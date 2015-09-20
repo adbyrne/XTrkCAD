@@ -97,7 +97,7 @@ END
 MESSAGE MSG_WBITMAP_FAILED
 Bitmap create or write function failed.
 HELP
-Your attempt to create or write a Bitmap file failed. This could be due to the Bitmap being too large or a lack of system resources. Try creating a smaller Bitmap or freeing system resources by closing other applications and dialog windows.
+Your attempt to create or write a bitmap file failed. This could be due to the bitmap being too large or a lack of system resources. Try creating a smaller Bitmap or freeing system resources by closing other applications and dialog windows.
 END
 
 # dbitmap.c
@@ -787,7 +787,7 @@ END
 MESSAGE MSG_TURNOUT_NO_TURNOUT
 There are no turnouts to choose from in the turnout
 selection list.  Please check your SCALE, select the
-<Add|Turnout Designer> menu to enter a new turnout
+<Manage|Turnout Designer> menu to enter a new turnout
 or select the <File|Parameter Files> menu to load a
 Parameter File
 HELP

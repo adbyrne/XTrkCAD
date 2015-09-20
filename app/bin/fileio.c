@@ -1537,10 +1537,7 @@ EXPORT void FileInit( void )
 	if (pref != NULL) {
 		strcpy( curDirName, pref );
 	} else {
-/*		sprintf( curDirName, "%s%sexamples", libDir, FILE_SEP_CHAR ); */
-		pref = wGetUserHomeDir();
-		if( pref )
-			strcpy( curDirName, pref );
+		sprintf( curDirName, "%s%sexamples", libDir, FILE_SEP_CHAR ); 
 	}
 }
 
