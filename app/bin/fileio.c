@@ -800,10 +800,12 @@ static BOOL_T ReadTrackFile(
 			if( !(ret = InputError( "unknown command", TRUE )))
 				break;
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
-			strcpy( Title1, &paramLine[7] );
+			strncpy( Title1, &paramLine[7], TITLEMAXLEN );
+			Title1[ TITLEMAXLEN - 1 ] = '\0';
 			/*wStringSetValue( title1PD.control, Title1 );*/
 		} else if (strncmp( paramLine, "TITLE2 ", 7 ) == 0) {
-			strcpy( Title2, &paramLine[7] );
+			strncpy( Title2, &paramLine[7], TITLEMAXLEN );
+			Title2[ TITLEMAXLEN - 1 ] = '\0';
 			/*wStringSetValue( title2PD.control, Title2 );*/
 		} else if (strncmp( paramLine, "ROOMSIZE", 8 ) == 0) {
 			if ( ParseRoomSize( paramLine+8, &roomSize ) ) {

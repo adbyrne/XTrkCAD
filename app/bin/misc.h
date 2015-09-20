@@ -46,6 +46,9 @@ typedef void (*addButtonCallBack_t)(void*);
 #define STR_LONG_SIZE	(1024)
 
 #define CAST_AWAY_CONST (char*)
+
+#define TITLEMAXLEN (40)
+
 /*
  * Globals
  */
