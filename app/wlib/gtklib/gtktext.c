@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtktext.c,v 1.2 2009-05-15 18:54:20 m_fischer Exp $
+/** \file gtktext.c
+ * Multi line text entry 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -69,6 +69,16 @@ EXPORT void wTextClear(
 	bt->changed = FALSE;
 }
 
+/**
+ * Add text to a multiline text field. Font is selected as requested. 
+ * Bold is supported if the flags BT_BOLD is set as flags for the entry 
+ * field. For bold, pango text markup is used
+ * 
+ *
+ * \param bt IN the text field
+ * \param text IN text to add
+ */
+ 
 EXPORT void wTextAppend(
 		wText_p bt,
 		const char * text )
@@ -76,6 +86,7 @@ EXPORT void wTextAppend(
 #ifdef USE_TEXTVIEW
 	GtkTextBuffer * tb;
 	GtkTextIter ti1, ti2;
+//	PangoFontDescription    *pfd;
 #else
 	static GdkFont * fixedRegularFont = NULL;
 	static GdkFont * fixedBoldFont = NULL;
@@ -91,6 +102,14 @@ EXPORT void wTextAppend(
 	if (bt->text == 0) abort();
 #ifdef USE_TEXTVIEW
 	tb = gtk_text_view_get_buffer( GTK_TEXT_VIEW(bt->text) );
+	//if ((bt->option&BT_FIXEDFONT)) {
+		///* creating PangoFontDescription from string, specified in entry */
+		//pfd = pango_font_description_from_string("Monospace");
+		///* setting label's font */
+		//gtk_widget_modify_font(GTK_WIDGET(tb), pfd);
+		///* freeing PangoFontDescription, cause it has been copied by prev. call */
+		//pango_font_description_free(pfd);
+	//}	
 #else
 	if ((bt->option&BT_FIXEDFONT)) {
 		if (fixedRegularFont==NULL)
@@ -383,7 +402,21 @@ static void textChanged(
 	bt->changed = TRUE;
 }
 
-
+/**
+ * Create a multi line text entry widget. The created widget is 
+ * configured as requested by the BT_* flags. This includes Monospaced
+ * font for BT_FIXEDFONT, readonly for BT_READONLY and a markup for 
+ * bold when setup via BT_BOLD.
+ *
+ * \param parent IN parent window
+ * \param x,y IN position 
+ * \param helpstr IN label for linking into help system
+ * \param labelStr IN label
+ * \param option IN widget options 
+ * \param width, height IN size of widget
+ * \return  handle for new widget 
+ */
+ 
 EXPORT wText_p wTextCreate(
 		wWin_p	parent,
 		wPos_t	x,
@@ -397,6 +430,7 @@ EXPORT wText_p wTextCreate(
 	wText_p bt;
 #ifdef USE_TEXTVIEW
 	GtkTextBuffer * tb;
+	PangoFontDescription    *pfd;
 #else
 	GtkRequisition requisition;
 #endif
@@ -419,6 +453,14 @@ EXPORT wText_p wTextCreate(
 	gtk_text_buffer_create_tag( tb, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
 /*	gtk_text_buffer_create_tag( tb, "italic", "style", PANGO_STYLE_ITALIC, NULL); */
 /*	gtk_text_buffer_create_tag( tb, "bolditalic", "weight", PANGO_WEIGHT_BOLD, "style", PANGO_STYLE_ITALIC, NULL); */
+	if ((bt->option & BT_FIXEDFONT)) {
+		/* creating PangoFontDescription from string, specified in entry */
+		pfd = pango_font_description_from_string("Monospace");
+		/* setting label's font */
+		gtk_widget_modify_font(GTK_WIDGET(bt->text), pfd);
+		/* freeing PangoFontDescription, cause it has been copied by prev. call */
+		pango_font_description_free(pfd);
+	}	
 	bt->vscroll = gtk_vscrollbar_new( GTK_TEXT_VIEW(bt->text)->vadjustment );
 	if (bt->vscroll == 0) abort();
 #else

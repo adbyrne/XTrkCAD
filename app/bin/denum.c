@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/denum.c,v 1.6 2009-12-28 20:48:06 m_fischer Exp $
+/** \file denum.c
+ * Creating and showing the parts list.
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -198,6 +198,9 @@ void EnumerateStart(void)
 }
 /**
  * End of parts list. Print the footer line and the totals if necessary.
+ * \todo These formatting instructions could be re-written in an easier 
+ * to understand fashion using the possibilities of the printf formatting
+ * and some string functions.
  */
 
 void EnumerateEnd(void)
@@ -216,6 +219,7 @@ void EnumerateEnd(void)
 		memset( cp+enumerateMaxDescLen+4, '-', max( 7, strlen( _("Each"))));
 		strcat( cp, "-+-");
 		memset( message+strlen( message ), '-', max( 9, strlen(_("Extended"))));
+		*(message + strlen( message )) = '\n';
 	} else {
 		*(cp+enumerateMaxDescLen+2) = '\n';
 		*(cp+enumerateMaxDescLen+3) = '\0';
@@ -223,7 +227,7 @@ void EnumerateEnd(void)
 	wTextAppend( enumT, message );
 
 	if (enableListPrices) {
-		len = strlen( message ) - strlen( _("Total")) - max( 9, strlen(_("Extended"))) + 2 ;
+		len = strlen( message ) - strlen( _("Total")) - max( 9, strlen(_("Extended"))) - 4 ;
 		memset ( message, ' ', len );
 		cp = message+len;
 		sprintf( cp, ("%s |%9.2f\n"), _("Total"), enumerateTotal );

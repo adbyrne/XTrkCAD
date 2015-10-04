@@ -2841,7 +2841,7 @@ msgstr "Speichern unter..."
 
 #: ../bin/denum.c:129 ../bin/denum.c:184 ../bin/denum.c:216
 msgid "Each"
-msgstr "Je"
+msgstr "Einzel"
 
 #: ../bin/denum.c:143 ../bin/denum.c:144
 msgid "Parts List"
@@ -2858,7 +2858,7 @@ msgstr ""
 
 #: ../bin/denum.c:184 ../bin/denum.c:218 ../bin/denum.c:226
 msgid "Extended"
-msgstr "Erweitert"
+msgstr "Gesamt"
 
 #: ../bin/denum.c:226 ../bin/denum.c:229
 msgid "Total"
