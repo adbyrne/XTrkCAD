@@ -4,7 +4,7 @@ SET(SOURCES
 	gtkbitmap.c
 	gtkbutton.c
 	gtkcolor.c
-	gtkfilsel.c
+	filesel.c
 	gtkfont.c
 	gtkhelp.c
 	gtklist.c
