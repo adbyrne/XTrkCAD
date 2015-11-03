@@ -33,49 +33,49 @@
 (use 0testprof.xtc - 6 tracks connected 0:0:1 1:0:1 2:0:1 3:0:1 4:0:1 5:0:1 6:0:1)
 
 		PreCond Action  PostCond
-		
+
 / empty -> creating single pt
 A1      -  -    10      10 -
 A2      -  -    20      20 11
 A3      -  -    11      11 20
-		
+
 / single pt -> delete
 B1      10 -    10      -  -
 B2      20 11   20      -  -
 B3      20 11   11      -  -
-		
+
 / single pt at EOT - extend
 C1      10 -    11      10 11 {1}
 C2      10 -    20      10 11 {1}
 C3      10 -    41      10 41 {1234}
 C4      10 -    50      10 41 {1234}
-		
+
 / single pt at mid track - extend
 D1      31 40   11      31 20 {32}
 D2      31 40   20      31 20 {32}
 D3      31 40   51      40 51 {45}
 D4      31 40   61      40 61 {456}
 D5      31 40   10      31 10 {321}
-		
+
 / length=2, delete end
 E1      30 41   30      40 41 {4}
 E2      30 41   21      40 41 {4}
 E3      30 41   41      30 31 {3}
 E4      30 41   50      30 31 {3}
-		
+
 / length=1, delete end
 F1      30 31   30      31 -
 F2      30 31   21      31 -
 F3      30 31   31      30 -
 F4      30 31   40      30 -
-		
+
 / length=1, extend
 G1      30 31   11      20 31 {23}
 G2      30 31   10      10 31 {123}
 G3      30 31   51      30 51 {345}
 G4      30 31   60      30 51 {345}
 G5      30 31   61      30 61 {3456}
-		
+
 / length=2, extend
 H1      30 41   11      20 41 {234}
 H2      30 41   10      10 41 {1234}
@@ -117,7 +117,7 @@ track_p pathEndTrk;
 EPINX_T pathEndEp;
 
 #define PASSERT( F, X, R ) if ( ! (X) ) { ErrorMessage( MSG_PASSERT, F, __LINE__, #X ); return R; }
-#define NOP 
+#define NOP
 
 typedef struct {
 		track_p trk;
@@ -426,7 +426,7 @@ static void RedrawProfileW( void )
 	D->size.y += prof.minE;
 #endif
 
-	DrawProfile( &screenProfileD, screenProfileFontSize, 
+	DrawProfile( &screenProfileD, screenProfileFontSize,
 #ifdef WINDOWS
 		printVert
 #else
@@ -444,6 +444,21 @@ static drawCmd_t printProfileD = {
 		0.0,
 		{0.0,0.0}, {1.0,1.0},
 		ProfilePix2CoOrd, ProfileCoOrd2Pix };
+
+/**
+ * This is the print function for the track height profile. The paper
+ * orientation is based in on the orientation of the display windows.
+ * Eg. is the windows is wider than high, the printout will be in
+ * landscape.
+ * \todo Rework the layout of the printout
+ * This function is (at least for me) hard to comprehend with all the
+ * fiddling around with the ccordinates. Also the filled area is a
+ * waste of toner or ink.
+ *
+ * \param junk IN
+ * \return
+ */
+
 static void DoProfilePrint( void * junk )
 {
 	coOrd size, p[4];
@@ -740,7 +755,7 @@ static BOOL_T PathListEmpty( void )
 static BOOL_T PathListSingle( void )
 {
 	return pathStartTrk != NULL &&
-		   ( pathEndTrk == NULL || 
+		   ( pathEndTrk == NULL ||
 			 ( GetTrkEndTrk(pathEndTrk,pathEndEp) == pathStartTrk &&
 			   GetTrkEndTrk(pathStartTrk,pathStartEp) == pathEndTrk ) );
 }
@@ -1112,7 +1127,7 @@ if (log_profile>=1) {
 		pathEndEp = epP;
 LOG( log_profile, 2, ("Adding first element\n") )
 
-	} else if ( PathListSingle() && 
+	} else if ( PathListSingle() &&
 				( ( trkN == pathStartTrk && epN == pathStartEp ) ||
 				  ( trkP && trkP == pathStartTrk && epP == pathStartEp ) ) ) {
 		pathStartTrk = pathEndTrk = NULL;
@@ -1210,13 +1225,13 @@ static void ProfileSubCommand( wBool_t set, void* pcmd )
 		DrawFillCircle( &tempD, pos, radius,
 			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
 	if ( (mode&ELEV_MASK)==ELEV_DEF )
-		
+
 	DrawEndPt2( &mainD, profilePopupTrk, profilePopupEp, drawColorWhite );
 	elev = 0.0;
 	switch (cmd) {
 	case 0:
 		/* define */
-		ComputeElev( profilePopupTrk, profilePopupEp, TRUE, &elev, NULL ); 
+		ComputeElev( profilePopupTrk, profilePopupEp, TRUE, &elev, NULL );
 		mode = ELEV_DEF|ELEV_VISIBLE;
 		break;
 	case 1:
@@ -1299,7 +1314,7 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 		}
 #ifdef LATER
 		InfoMessage( "" );
-		if ((trk0 = OnTrack( &pos, TRUE, TRUE )) == NULL) 
+		if ((trk0 = OnTrack( &pos, TRUE, TRUE )) == NULL)
 			return C_CONTINUE;
 		ep0 = PickEndPoint( pos, trk0 );
 		if (ep0 < 0)

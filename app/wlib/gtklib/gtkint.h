@@ -68,7 +68,7 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 
 struct wWin_t {
 		WOBJ_COMMON
-		GtkWidget *gtkwin;             /**< GTK window */ 
+		GtkWidget *gtkwin;             /**< GTK window */
 		wPos_t lastX, lastY;
 		wControl_p first, last;
 		wWinCallBack_p winProc;        /**< window procedure */
@@ -176,6 +176,34 @@ void psPrintString( wPos_t x, wPos_t y, double a, char * s,
 void psPrintFillRectangle( wPos_t, wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
 void psPrintFillPolygon( wPos_t [][2], int, wDrawColor, wDrawOpts );
 void psPrintFillCircle( wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
+
+struct wDraw_t {
+		WOBJ_COMMON
+		void * context;
+		wDrawActionCallBack_p action;
+		wDrawRedrawCallBack_p redraw;
+
+		GdkPixmap * pixmap;
+		GdkPixmap * pixmapBackup;
+
+		double dpi;
+
+		GdkGC * gc;
+		wDrawWidth lineWidth;
+		wDrawOpts opts;
+		wPos_t maxW;
+		wPos_t maxH;
+		unsigned long lastColor;
+		wBool_t lastColorInverted;
+		const char * helpStr;
+
+		wPos_t lastX;
+		wPos_t lastY;
+
+		wBool_t delayUpdate;
+		cairo_t *printContext;
+		cairo_surface_t *curPrintSurface;
+		};
 
 
 void ApplySettings( GtkPrintOperation *op );

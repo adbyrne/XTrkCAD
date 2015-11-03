@@ -47,31 +47,31 @@ struct wDrawBitMap_t {
 		GdkBitmap * mask;
 		};
 
-struct wDraw_t {
-		WOBJ_COMMON
-		void * context;
-		wDrawActionCallBack_p action;
-		wDrawRedrawCallBack_p redraw;
+//struct wDraw_t {
+		//WOBJ_COMMON
+		//void * context;
+		//wDrawActionCallBack_p action;
+		//wDrawRedrawCallBack_p redraw;
 
-		GdkPixmap * pixmap;
-		GdkPixmap * pixmapBackup;
+		//GdkPixmap * pixmap;
+		//GdkPixmap * pixmapBackup;
 
-		double dpi;
+		//double dpi;
 
-		GdkGC * gc;
-		wDrawWidth lineWidth;
-		wDrawOpts opts;
-		wPos_t maxW;
-		wPos_t maxH;
-		unsigned long lastColor;
-		wBool_t lastColorInverted;
-		const char * helpStr;
+		//GdkGC * gc;
+		//wDrawWidth lineWidth;
+		//wDrawOpts opts;
+		//wPos_t maxW;
+		//wPos_t maxH;
+		//unsigned long lastColor;
+		//wBool_t lastColorInverted;
+		//const char * helpStr;
 
-		wPos_t lastX;
-		wPos_t lastY;
+		//wPos_t lastX;
+		//wPos_t lastY;
 
-		wBool_t delayUpdate;
-		};
+		//wBool_t delayUpdate;
+		//};
 
 struct wDraw_t psPrint_d;
 
@@ -98,7 +98,7 @@ struct wDraw_t psPrint_d;
  *
 *******************************************************************************/
 
- 
+
 
 static GdkGC * selectGC(
 		wDraw_p bd,
@@ -301,10 +301,10 @@ EXPORT void wDrawArc(
 	y = INMAPY(bd,y0+r);
 	w = 2*r;
 	h = 2*r;
-	
+
 	// remove the old arc
 	gdk_draw_arc( bd->pixmap, gc, FALSE, x, y, w, h, (int)((-angle0 + 90)*64.0), (int)(-angle1*64.0) );
-	
+
 	// and its center point
 	if (drawCenter) {
 		x = INMAPX(bd,x0);
@@ -312,7 +312,7 @@ EXPORT void wDrawArc(
 		gdk_draw_line( bd->pixmap, gc, x - ( CENTERMARK_LENGTH/2), y, x + ( CENTERMARK_LENGTH/2), y );
 		gdk_draw_line( bd->pixmap, gc, x, y - ( CENTERMARK_LENGTH/2), x, y + ( CENTERMARK_LENGTH/2));
 	}
-	
+
 	// now create the new arc
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, width, lineType, color, opts);
 	cairo_new_path(cairo);
@@ -331,7 +331,7 @@ EXPORT void wDrawArc(
 	// draw the curve itself
 	cairo_arc_negative(cairo, INMAPX(bd, x0), INMAPY(bd, y0), r, (angle0 - 90 + angle1) * (M_PI / 180.0), (angle0 - 90) * (M_PI / 180.0));
 	cairo_stroke(cairo);
-	
+
 	gtkDrawDestroyCairoContext(cairo);
 
 	if ( bd->delayUpdate || bd->widget == NULL) return;
@@ -341,7 +341,7 @@ EXPORT void wDrawArc(
 	update_rect.width = w+2+width+width;
 	update_rect.height = h+2+width+width;
 	gtk_widget_draw( bd->widget, &update_rect );
-		
+
 }
 
 EXPORT void wDrawPoint(
@@ -397,18 +397,18 @@ EXPORT void wDrawString(
 	gint ascent;
 	gint descent;
 	double angle = -M_PI * a / 180.0;
-	
+
 	if ( bd == &psPrint_d ) {
 		psPrintString( x, y, a, (char *) s, fp, fs, color, opts );
 		return;
 	}
-	
+
 	x = INMAPX(bd,x);
 	y = INMAPY(bd,y);
-	
+
 	/* draw text */
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid, color, opts);
-	
+
 	cairo_save( cairo );
 	cairo_translate( cairo, x, y );
 	cairo_rotate( cairo, angle );
@@ -423,18 +423,18 @@ EXPORT void wDrawString(
 	cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
 
 	cairo_move_to( cairo, 0, -ascent );
-	
+
 	pango_cairo_show_layout(cairo, layout);
 	gtkFontDestroyPangoLayout(layout);
 	cairo_restore( cairo );
 	gtkDrawDestroyCairoContext(cairo);
-	
+
 	if (bd->delayUpdate || bd->widget == NULL) return;
-	
-	/* recalculate the area to be updated 
+
+	/* recalculate the area to be updated
 	 * for simplicity sake I added plain text height ascent and descent,
-	 * mathematically correct would be to use the trigonometrical functions as well 
-	 */ 
+	 * mathematically correct would be to use the trigonometrical functions as well
+	 */
 	update_rect.x      = (gint) x - ascent - descent - 1;
 	update_rect.y      = (gint) y - (gint) ascent - 1;
 	update_rect.width  = (gint) (w * cos( angle ) + 2 + ascent + descent);
@@ -455,19 +455,19 @@ EXPORT void wDrawGetTextSize(
 	int textHeight;
 	int ascent;
 	int descent;
-	
+
 	*w = 0;
 	*h = 0;
-	
+
 	gtkFontDestroyPangoLayout(
 		gtkFontCreatePangoLayout(bd->widget, NULL, fp, fs, s,
 								 &textWidth, (int *) &textHeight,
 								 (int *) &ascent, (int *) &descent));
-	
+
 	*w = (wPos_t) textWidth;
 	*h = (wPos_t) ascent;
 	*d = (wPos_t) descent;
-	
+
 	if (debugWindow >= 3)
 		fprintf(stderr, "text metrics: w=%d, h=%d, d=%d\n", *w, *h, *d);
 }
@@ -670,7 +670,7 @@ EXPORT wDrawBitMap_p wDrawBitMapCreate(
 		const char * fbits )
 {
 	wDrawBitMap_p bm;
-	
+
 	bm = (wDrawBitMap_p)malloc( sizeof *bm );
 	bm->w = w;
 	bm->h = h;
@@ -738,7 +738,7 @@ EXPORT void wDrawBitMap(
 				}
 			}
 #ifdef LATER
-	gdk_draw_pixmap(bd->pixmap, gc, 
+	gdk_draw_pixmap(bd->pixmap, gc,
 		bm->pixmap,
 		0, 0,
 		x, y,
@@ -752,7 +752,7 @@ EXPORT void wDrawBitMap(
 	update_rect.height = bm->h;
 	gtk_widget_draw( bd->widget, &update_rect );
 }
- 
+
 
 /*******************************************************************************
  *
@@ -760,7 +760,7 @@ EXPORT void wDrawBitMap(
  *
 *******************************************************************************/
 
- 
+
 
 EXPORT void wDrawSaveImage(
 		wDraw_p bd )
@@ -795,7 +795,7 @@ EXPORT void wDrawRestoreImage(
 				0, 0,
 				0, 0,
 				bd->w, bd->h );
-		
+
 		if ( bd->delayUpdate || bd->widget == NULL ) return;
 		update_rect.x = 0;
 		update_rect.y = 0;
@@ -849,13 +849,19 @@ EXPORT void wDrawGetSize(
 	*h = bd->h-2;
 }
 
+/**
+ * Return the resolution of a device in dpi
+ *
+ * \param d IN the device
+ * \return    the resolution in dpi
+ */
 
 EXPORT double wDrawGetDPI(
 		wDraw_p d )
 {
-	if (d == &psPrint_d)
-		return 1440.0;
-	else
+	//if (d == &psPrint_d)
+		//return 1440.0;
+	//else
 		return d->dpi;
 }
 
@@ -927,20 +933,20 @@ static gint draw_scroll_event(
 	case GDK_SCROLL_UP:
 		action = wActionWheelUp;
 		break;
-	case GDK_SCROLL_DOWN:	
+	case GDK_SCROLL_DOWN:
 		action = wActionWheelDown;
-		break;	
+		break;
 	default:
 		action = 0;
 		break;
-	}	
+	}
 
 	if (action != 0) {
 		if (drawVerbose >= 2)
 			printf( "%s[%dx%d]\n", actionNames[action], bd->lastX, bd->lastY );
 		bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
 	}
-	
+
 	return TRUE;
 }
 
@@ -979,7 +985,7 @@ static gint draw_button_event(
 	case 3: /* right mouse button */
 		action = event->type==GDK_BUTTON_PRESS?wActionRDown:wActionRUp;
 		/*bd->action( bd, bd->context, event->type==GDK_BUTTON_PRESS?wActionRDown:wActionRUp, bd->lastX, bd->lastY );*/
-		break;	
+		break;
 	}
 	if (action != 0) {
 		if (drawVerbose >= 2)
@@ -1009,7 +1015,7 @@ static gint draw_motion_event(
 		y = event->y;
 		state = event->state;
 	}
-		 
+
 	if (state & GDK_BUTTON1_MASK) {
 		action = wActionLDrag;
 	} else if (state & GDK_BUTTON3_MASK) {
@@ -1062,9 +1068,9 @@ static gint draw_char_event(
 	case GDK_F10:       extKey = wAccelKey_F10; break;
 	case GDK_F11:       extKey = wAccelKey_F11; break;
 	case GDK_F12:       extKey = wAccelKey_F12; break;
-	default: ; 
+	default: ;
 	}
-	
+
 	if (extKey != wAccelKey_None) {
 		if ( gtkFindAccelKey( event ) == NULL ) {
 			bd->action( bd, bd->context, wActionExtKey + ((int)extKey<<8), bd->lastX, bd->lastY );

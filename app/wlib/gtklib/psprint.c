@@ -1,9 +1,9 @@
 /** \file print.c
- * Printing functions
+ * Printing functions using GTK's print API
  */
 
 /*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 2005 Dave Bullis
+ *  Copyright (C) 2015 Martin Fischer
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -37,6 +37,8 @@
 #include <stdint.h>
 
 #include <gtk/gtk.h>
+#include <gtk/gtkprintunixdialog.h>
+#include <gtk/gtkprintjob.h>
 
 #include "gtkint.h"
 #include "wlib.h"
@@ -50,7 +52,6 @@
 
 #define MM(m) ((m)/25.4)
 
-/* char * gtkFontTranslate( wFont_p ); */
 extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
 
@@ -60,13 +61,9 @@ extern wDrawColor wDrawColorBlack;
  *
  */
 
-#define PRINT_COMMAND (0)
-#define PRINT_FILE (1)
-
 #define PRINT_PORTRAIT  (0)
 #define PRINT_LANDSCAPE (1)
- 
-/* #define MAXIMUM(a,b) ((a)>(b) ? (a) : (b)) */
+
 #define min(a,b) ((a)<(b) ? (a) : (b))
 #define PPI (72.0)
 #define P2I( P ) ((P)/PPI)
@@ -92,16 +89,11 @@ extern wDrawColor wDrawColorBlack;
 #define PRINTSETTINGS "xtrkcad.printer"		/**< filename for printer settings */
 static GtkPrintSettings *settings;			/**< current printer settings */
 static GtkPageSetup *page_setup;			/**< current paper settings */
+static GtkPrinter *selPrinter;				/**< printer selected by user */
+static GtkPrintJob *curPrintJob;			/**< currently active print job */
 
 extern struct wDraw_t psPrint_d;
 
-/*
-typedef struct {
-		wIndex_t cmdOrFile;
-		FILE * f;
-		} wPrinterStream_t;
-typedef wPrinterStream_t * wPrinterStream_p;
-*/
 static wBool_t printContinue;
 static wWin_p printAbortW;
 static wMessage_p printAbortT;
@@ -127,17 +119,6 @@ static long optXFontX;
 static const char * optXFont;
 static char optPSFont[200];
 
-#ifdef LATER
-static char addPrinterName[80];
-static char addPrinterCommand[80];
-static wWin_p addPrinterW;
-static wString_p addPrinterN;
-static wString_p addPrinterC;
-static char addMarginName[80];
-static wWin_p addMarginW;
-static wString_p addMarginN;
-#endif
-
 static FILE * psFile;
 static wPrinterStream_p psFileStream;
 static wIndex_t pageCount;
@@ -147,13 +128,14 @@ static long newPPrinter;
 static long newPPaper;
 static wPrintSetupCallBack_p printSetupCallBack;
 
-static double tBorder;
-static double rBorder;
-static double lBorder;
-static double bBorder;
+static double paperWidth;		/**< physical paper width */
+static double paperHeight;		/**< physical paper height */
+static double tBorder;			/**< top margin */
+static double rBorder;			/**< right margin */
+static double lBorder;			/**< left margin */
+static double bBorder;			/**< bottom margin */
 
 static long printFormat = PRINT_LANDSCAPE;
-static double currLineWidth = 0;
 
 static long curPrinter = 0;
 static char *sPrintFileName;
@@ -166,12 +148,9 @@ static const char * prefFormat;
 
 static char newMarginName[256];
 
-typedef enum { PS_LT_SOLID, PS_LT_DASH } PS_LT_E;
-static PS_LT_E currentLT = PS_LT_SOLID;
-
 static double fontSizeFactor = 1.0;
 
-static struct { 
+static struct {
 		const char * name;
 		double w, h;
 		} papers[] = {
@@ -232,7 +211,7 @@ typedef struct {
 dynArr_t margins_da;
 #define margins(N) DYNARR_N(margins_t,margins_da,N)
 
-static void printFileNameSel( void * junk );
+//static void printFileNameSel( void * junk );
 static void printInit( void );
 
 /*
@@ -277,25 +256,25 @@ void fontsUsedPush( const char *item) {
  * node when it is finished using them.
  * \return pointer to the list node.
  */
-struct list_node * fontsUsedPop() {
-  struct list_node *item;
-  if (fontsUsed == NULL) return NULL;
-  item = fontsUsed;
-  fontsUsed = item->next;
-  return item ;
-}
+//struct list_node * fontsUsedPop() {
+  //struct list_node *item;
+  //if (fontsUsed == NULL) return NULL;
+  //item = fontsUsed;
+  //fontsUsed = item->next;
+  //return item ;
+//}
 
-/**
- * \a fontsUsed list (re-)initializer.
- */
-void fontsUsedInit() {
-  struct list_node *p;
-  while ((p=fontsUsedPop()) != NULL) {
-    free(p->data);
-    free(p);
-  }
-  fontsUsed=NULL;
-}
+///**
+ //* \a fontsUsed list (re-)initializer.
+ //*/
+//void fontsUsedInit() {
+  //struct list_node *p;
+  //while ((p=fontsUsedPop()) != NULL) {
+    //free(p->data);
+    //free(p);
+  //}
+  //fontsUsed=NULL;
+//}
 
 /**
  * Checks if \a s is already in \a fontsUsed list.
@@ -315,7 +294,7 @@ int fontsUsedContains( const char *s ) {
 /**
  * Adds the \a fontName to the list of fonts being used.
  * Only if it is not already in the list.
- * 
+ *
  * This function should be called anywhere the string "findfont"
  * is being emitted to the Postscript file.
  * \param \a fontName IN - string contaning the name to add.
@@ -325,13 +304,13 @@ void addFontName( const char * fontName){
   fontsUsedPush(fontName);
 }
 
-/* ***************************************** */ 
+/* ***************************************** */
 
 /**
  * This function does a normal printf but uses the default C
  * locale as decimal separator.
  *
- * \param template IN printf-like format string 
+ * \param template IN printf-like format string
  * ... IN parameters according to format string
  * \return    describe the return value
  */
@@ -340,53 +319,40 @@ static void
 psPrintf (FILE *ps, const char *template, ...)
 {
 	va_list ap;
-  
+
   	setlocale( LC_NUMERIC, "C" );
-		   
-   va_start( ap, template );
-   vfprintf( ps, template, ap );
-   va_end( ap );
-	
-  	setlocale( LC_NUMERIC, "" );	
+
+   //va_start( ap, template );
+   //vfprintf( ps, template, ap );
+   //va_end( ap );
+
+  	setlocale( LC_NUMERIC, "" );
 }
 
 /**
  * Page setup function
- * this function bla bla bla
  *
  * \param callback IN unused?
  */
- 
+
 void wPrintSetup( wPrintSetupCallBack_p callback )
 {
 	GtkPageSetup *new_page_setup;
 	gchar *filename;
 	GError *err;
 	GtkWidget *dialog;
-	
-	filename = g_build_filename( wGetAppWorkDir(), PAGESETTINGS, NULL );
-	if( !page_setup )
-		page_setup = gtk_page_setup_new_from_file( filename, &err );
-				 
+
+	printInit( );
+
 	ApplySettings( NULL );
 
 	new_page_setup = gtk_print_run_page_setup_dialog (GTK_WINDOW (gtkMainW->gtkwin),
 														page_setup, settings);
 	if (page_setup)
 		g_object_unref (page_setup);
-		
-	page_setup = new_page_setup;	
-//	g_error_free( err );
-	gtk_page_setup_to_file( page_setup, filename, NULL );
-	g_free( filename );
-	
-	//printInit();
-	//newPPrinter = curPrinter;
-	//newPPaper = curPaper;
-	//printSetupCallBack = callback;
-	//wListSetIndex( optPrinterB, newPPrinter );
-	//wListSetIndex( optPaperSizeB, newPPaper );
-	//wWinShow( printSetupW, TRUE );
+
+	page_setup = new_page_setup;
+	SaveSettings( NULL );
 }
 
 static void pSetupOk( void )
@@ -475,10 +441,10 @@ static void doMarginSel(
 	bBorder = p->b;
 	rBorder = p->r;
 	lBorder = p->l;
-	wFloatSetValue( optTopMargin, tBorder ); 
-	wFloatSetValue( optBottomMargin, bBorder ); 
-	wFloatSetValue( optRightMargin, rBorder ); 
-	wFloatSetValue( optLeftMargin, lBorder ); 
+	wFloatSetValue( optTopMargin, tBorder );
+	wFloatSetValue( optBottomMargin, bBorder );
+	wFloatSetValue( optRightMargin, rBorder );
+	wFloatSetValue( optLeftMargin, lBorder );
 }
 
 static wIndex_t wPrintNewMargin(
@@ -489,7 +455,7 @@ static wIndex_t wPrintNewMargin(
 	int rc;
 	DYNARR_APPEND( margins_t, margins_da, 10 );
 	m = &margins(margins_da.cnt-1);
-	
+
 	setlocale( LC_NUMERIC, "C" );
 	if ((rc=sscanf( value, "%lf %lf %lf %lf", &m->t, &m->b, &m->r, &m->l ))!=4) {
 		margins_da.cnt--;
@@ -497,7 +463,7 @@ static wIndex_t wPrintNewMargin(
 		return FALSE;
 	}
 	setlocale( LC_NUMERIC, "" );
-	
+
 	m->name = strdup( name );
 	if (optMarginB)
 		wListAddValue( optMarginB, name, NULL, NULL );
@@ -508,10 +474,10 @@ static wIndex_t wPrintNewMargin(
 		bBorder = m->b;
 		rBorder = m->r;
 		lBorder = m->l;
-		wFloatSetValue( optTopMargin, tBorder ); 
-		wFloatSetValue( optBottomMargin, bBorder ); 
-		wFloatSetValue( optRightMargin, rBorder ); 
-		wFloatSetValue( optLeftMargin, lBorder ); 
+		wFloatSetValue( optTopMargin, tBorder );
+		wFloatSetValue( optBottomMargin, bBorder );
+		wFloatSetValue( optRightMargin, rBorder );
+		wFloatSetValue( optLeftMargin, lBorder );
 	}
 	return TRUE;
 }
@@ -568,83 +534,63 @@ static void newFontAliasSel( const char * alias, void * data )
 }
 
 
-static const char * findPSFont( wFont_p fp )
-{
-    const char *f;
-	static const char * oldXFont = NULL;
-	
-	curXFont = gtkFontTranslate(fp);
-	if (curXFont != NULL &&
-		oldXFont != NULL &&
-		strcasecmp(oldXFont, curXFont) == 0 &&
-		curPsFont != NULL )
-		return curPsFont;
-	if (curXFont == NULL) 
-		return "Times-Roman";
-	oldXFont = curXFont;
-	printInit();
-	f = wPrefGetString( WFONT, curXFont );
-	if (f)
-		return curPsFont = f;
-	wMessageSetValue( newFontAliasXFntB, curXFont );
-	wWinShow( newFontAliasW, TRUE );
-	return curPsFont;
-}
 
 /*****************************************************************************
  *
  * BASIC PRINTING
  *
  */
- 
+
+
+/**
+ * set the current line type for printing operations
+ *
+ * \param lineWidth IN new line width
+ * \param lineType IN flag for line type (dashed or full)
+ * \param opts IN unused
+ * \return
+ */
+
+
 static void setLineType(
 		double lineWidth,
 		wDrawLineType_e lineType,
 		wDrawOpts opts )
 {
-	PS_LT_E want;
+	cairo_t *cr = psPrint_d.printContext;
+	double dashLength = 2.0;
 
 	if (lineWidth < 0.0) {
 		lineWidth = P2I(-lineWidth)*2.0;
 	}
 
-	if (lineWidth != currLineWidth) {
-		currLineWidth = lineWidth;
-		psPrintf( psFile, "%0.3f setlinewidth\n", currLineWidth / (PPI*10) );
-	}
+	// make sure that there is a minimum line width used
+	if ( lineWidth == 0.0 )
+		lineWidth = 1.0;
+
+	/** \todo need to find out the correct units for line width */
+	cairo_set_line_width( cr, lineWidth );
 
 	if (lineType == wDrawLineDash)
-		want = PS_LT_DASH;
-	else
-		want = PS_LT_SOLID;
-	if (want != currentLT) {
-		currentLT = want;
-		switch (want) {
-		case PS_LT_DASH:
-			psPrintf( psFile, "[%0.3f %0.3f] 0 setdash\n", P2I(2), P2I(2) );
-			break;
-		case PS_LT_SOLID:
-			psPrintf( psFile, "[] 0 setdash\n" );
-			break;
-		}
-	}
+		cairo_set_dash( cr, NULL, 0, 0.0 );
 }
 
+/**
+ * set the color for the following print operations
+ *
+ * \param color IN the new color
+ * \return
+ */
 
-void psSetColor(
+static void psSetColor(
 		wDrawColor color )
 {
-	static long currColor = 0;
-	long newColor;
+	cairo_t *cr = psPrint_d.printContext;
+	GdkColor* const gcolor = gtkGetColor(color, TRUE);
 
-	newColor = wDrawGetRGB( color );
-	if (newColor != currColor) {
-		psPrintf( psFile, "%0.3f %0.3f %0.3f setrgbcolor\n",
-				(float)((newColor>>16)&0xFF)/256.0,
-				(float)((newColor>>8)&0xFF)/256.0,
-				(float)((newColor)&0xFF)/256.0 );
-		currColor = newColor;
-	}
+	cairo_set_source_rgb(cr, gcolor->red / 65535.0,
+							 gcolor->green / 65535.0,
+							 gcolor->blue / 65535.0);
 }
 
 
@@ -662,9 +608,11 @@ void psPrintLine(
 		return;
 	psSetColor(color);
 	setLineType( width, lineType, opts );
-	psPrintf(psFile,
-				"%0.3f %0.3f moveto %0.3f %0.3f lineto closepath stroke\n",
-				D2I(x0), D2I(y0), D2I(x1), D2I(y1) );
+	cairo_move_to( psPrint_d.printContext,
+					x0, paperHeight * psPrint_d.dpi - y0 );
+	cairo_line_to( psPrint_d.printContext,
+					x1, paperHeight * psPrint_d.dpi - y1 );
+	cairo_stroke( psPrint_d.printContext );
 }
 
 /**
@@ -691,12 +639,16 @@ void psPrintArc(
 		wDrawColor color,
 		wDrawOpts opts )
 {
+	cairo_t *cr = psPrint_d.printContext;
+
 	if (color == wDrawColorWhite)
 		return;
 	if (opts&wDrawOptTemp)
 		return;
+
 	psSetColor(color);
 	setLineType(width, lineType, opts);
+
 	if (angle1 >= 360.0)
 		angle1 = 359.999;
 	angle1 = 90.0-(angle0+angle1);
@@ -705,19 +657,18 @@ void psPrintArc(
 	angle0 = 90.0-angle0;
 	while (angle0 < 0.0) angle0 += 360.0;
 	while (angle0 >= 360.0) angle0 -= 360.0;
-	psPrintf(psFile,
-		"newpath %0.3f %0.3f %0.3f %0.3f %0.3f arc stroke\n",
-		D2I(x0), D2I(y0), D2I(r), angle1, angle0 );
-	
-	if( drawCenter ) {
-		psPrintf(psFile,
-			"%0.3f %0.3f moveto %0.3f %0.3f lineto closepath stroke\n",
-			D2I(x0 - CENTERMARK_LENGTH / 2), D2I(y0), D2I(x0 + CENTERMARK_LENGTH / 2), D2I(y0) );
-		psPrintf(psFile,
-			"%0.3f %0.3f moveto %0.3f %0.3f lineto closepath stroke\n",
-			D2I(x0), D2I(y0 - CENTERMARK_LENGTH / 2), D2I(x0), D2I(y0 + CENTERMARK_LENGTH / 2) );
 
-	}	
+	// draw the curve
+	cairo_arc( cr, x0, y0, r, angle1 * M_PI / 180.0, angle0 * M_PI / 180.0 );
+
+	if( drawCenter ) {
+		// draw crosshair for center of curve
+		cairo_move_to( cr, x0 - CENTERMARK_LENGTH / 2, y0 );
+		cairo_line_to( cr, x0 + CENTERMARK_LENGTH / 2, y0 );
+		cairo_move_to( cr, x0, y0 - CENTERMARK_LENGTH / 2 );
+		cairo_line_to( cr, x0, y0 + CENTERMARK_LENGTH / 2 );
+	}
+	cairo_stroke( psPrint_d.printContext );
 }
 
 
@@ -737,6 +688,15 @@ void psPrintFillRectangle(
 				D2I(x0), D2I(y0), D2I(x1), D2I(y1) );
 }
 
+/**
+ * Print a filled polygon
+ *
+ * \param p IN a list of x and y coordinates
+ * \param cnt IN the number of ponts
+ * \param color IN fill color
+ * \param opts IN options
+ * \return
+ */
 
 void psPrintFillPolygon(
 		wPos_t p[][2],
@@ -745,15 +705,19 @@ void psPrintFillPolygon(
 		wDrawOpts opts )
 {
 	int inx;
+	cairo_t *cr = psPrint_d.printContext;
+
 	if (color == wDrawColorWhite)
 		return;
 	if (opts&wDrawOptTemp)
 		return;
+
 	psSetColor(color);
-	psPrintf( psFile, "%0.3f %0.3f moveto ", D2I(p[0][0]), D2I(p[0][1]) );
+
+	cairo_move_to( cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ] );
 	for (inx=0; inx<cnt; inx++)
-		psPrintf( psFile, "%0.3f %0.3f lineto ", D2I(p[inx][0]), D2I(p[inx][1]) );
-	psPrintf( psFile, "closepath fill\n" );
+		cairo_line_to( cr, p[ inx ][ 0 ], p[ inx ][ 1 ] );
+	cairo_fill( cr );
 }
 
 
@@ -774,6 +738,20 @@ void psPrintFillCircle(
 }
 
 
+/**
+ * Print a string at the given position using specified font and text size.
+ *
+ * \param x IN x position
+ * \param y IN y position
+ * \param a IN angle of baseline in degrees. Positive is clockwise, 0 is direction of positive x axis
+ * \param s IN string to print
+ * \param fp IN font
+ * \param fs IN font size
+ * \param color IN text color
+ * \param opts IN ???
+ * \return
+ */
+
 void psPrintString(
 		wPos_t x, wPos_t y,
 		double a,
@@ -784,30 +762,44 @@ void psPrintString(
 		wDrawOpts opts )
 {
 	char * cp;
+	cairo_t *cr;
+	PangoLayout *layout;
+	PangoFontDescription *desc;
+	double text_height, text_width, w, h;
+	int height, width;
+	GdkColor* const gcolor = gtkGetColor(color, TRUE);
 
-	fs = P2I(fs*fontSizeFactor);
-	if (fs < 0.05*72.0/1440.0)
-		return;
-#ifdef NOWHITE
 	if (color == wDrawColorWhite)
 		return;
-#endif
-	if (opts&wDrawOptTemp)
-		return;
-	psSetColor( color );
-	setLineType(currLineWidth, wDrawLineSolid, opts);
-	psPrintf(psFile,
-		"/%s findfont %0.3f scalefont setfont\n"
-		"gsave\n"
-		"%0.3f %0.3f translate %0.3f rotate 0 0 moveto\n(",
-		findPSFont(fp), fs, D2I(x), D2I(y), a );
-	addFontName(findPSFont(fp));
-	for (cp=s; *cp; cp++) {
-		if (*cp == '(' || *cp == ')')
-			psPrintf(psFile, "\\" );
-		psPrintf(psFile, "%c", *cp);
-	}
-	psPrintf(psFile, ") show\ngrestore\n" );
+
+	cr = psPrint_d.printContext;
+
+	cairo_save( cr );
+
+	cairo_translate( cr, x, paperHeight * psPrint_d.dpi - y  );
+	cairo_rotate( cr, -a * M_PI / 180.0  );
+
+	layout = pango_cairo_create_layout( cr );
+	/** \todo use a getter function instead of double conversion */
+	desc = pango_font_description_from_string (gtkFontTranslate( fp ));
+	pango_font_description_set_size(desc, fs * PANGO_SCALE);
+
+	/*
+	 *
+	 */
+
+	pango_layout_set_font_description (layout, desc);
+	pango_layout_set_text (layout, s, -1);
+	pango_layout_set_width (layout, -1);
+	pango_layout_set_alignment (layout, PANGO_ALIGN_LEFT);
+	pango_layout_get_size (layout, &width, &height);
+	text_height = (gdouble) height / PANGO_SCALE;
+	text_width = (gdouble) width / PANGO_SCALE;
+
+	cairo_set_source_rgb(cr, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
+
+	pango_cairo_show_layout (cr, layout);
+	cairo_restore( cr );
 }
 
 void wPrintClip( wPos_t x, wPos_t y, wPos_t w, wPos_t h )
@@ -830,98 +822,178 @@ closepath clip newpath\n",
  *
  */
 
+/**
+ * Get the paper dimensions and margins and setup the internal variables
+ * \return
+ */
+
+static void
+WlibGetPaperSize( void )
+{
+	bBorder = gtk_page_setup_get_bottom_margin( page_setup, GTK_UNIT_INCH );
+	tBorder = gtk_page_setup_get_top_margin( page_setup, GTK_UNIT_INCH );
+	lBorder = gtk_page_setup_get_left_margin( page_setup, GTK_UNIT_INCH );
+	rBorder = gtk_page_setup_get_right_margin( page_setup, GTK_UNIT_INCH );
+	paperHeight = gtk_page_setup_get_paper_height( page_setup, GTK_UNIT_INCH );
+	paperWidth = gtk_page_setup_get_paper_width( page_setup, GTK_UNIT_INCH );
+}
 
 /**
- * Initialize printer using the saved settings
+ * Initialize printer und paper selection using the saved settings
  *
- * \param op IN print operation to initialize
+ * \param op IN print operation to initialize. If NULL only the global
+ * 				settings are loaded.
  */
 
 void
 ApplySettings( GtkPrintOperation *op )
 {
 	gchar *filename;
-	GError *err;
+	GError *err = NULL;
 	GtkWidget *dialog;
-	
+
 	filename = g_build_filename( wGetAppWorkDir(), PRINTSETTINGS, NULL );
-	
+
 	if( !(settings = gtk_print_settings_new_from_file( filename, &err ))) {
-/*	{
-		dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin), 
-                                     GTK_DIALOG_DESTROY_WITH_PARENT,
-                                     GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+		if( err->code != G_FILE_ERROR_NOENT ) {
+			// ignore file not found error as defaults will be used
+			dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin),
+											 GTK_DIALOG_DESTROY_WITH_PARENT,
+											 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 				                             err->message);
-    
+			gtk_dialog_run (GTK_DIALOG (dialog));
+			gtk_widget_destroy (dialog);
+		}
 		g_error_free (err);
-		gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_destroy (dialog);     
-	}*/
 	}
-	if (settings != NULL) {
-		if( op )
+	g_free( filename );
+
+	if (settings && op )
 			gtk_print_operation_set_print_settings (op, settings);
+
+	err = NULL;
+	filename = g_build_filename( wGetAppWorkDir(), PAGESETTINGS, NULL );
+	if( !(page_setup = gtk_page_setup_new_from_file( filename, &err ))) {
+		// ignore file not found error as defaults will be used
+		if( err->code != G_FILE_ERROR_NOENT ) {
+			dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin),
+											 GTK_DIALOG_DESTROY_WITH_PARENT,
+											 GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+				                             err->message);
+			gtk_dialog_run (GTK_DIALOG (dialog));
+			gtk_widget_destroy (dialog);
+		}
+		g_error_free (err);
+	} else {
+		// on success get the paper dimensions
+		bBorder = gtk_page_setup_get_bottom_margin( page_setup, GTK_UNIT_INCH );
+		tBorder = gtk_page_setup_get_top_margin( page_setup, GTK_UNIT_INCH );
+		lBorder = gtk_page_setup_get_left_margin( page_setup, GTK_UNIT_INCH );
+		rBorder = gtk_page_setup_get_right_margin( page_setup, GTK_UNIT_INCH );
+		paperHeight = gtk_page_setup_get_paper_height( page_setup, GTK_UNIT_INCH );
+		paperWidth = gtk_page_setup_get_paper_width( page_setup, GTK_UNIT_INCH );
 	}
+	g_free( filename );
+
+	if( page_setup && op )
+		gtk_print_operation_set_default_page_setup (op, page_setup);
+
 }
 
 /**
- * Save the printer settings.
+ * Save the printer settings. If op is not NULL the settings are retrieved
+ * from the print operation. Otherwise the state of the globals is saved.
  *
- * \param op IN printer operation
+ * \param op IN printer operation. If NULL the glabal variables are used
  */
 
-void 
+void
 SaveSettings( GtkPrintOperation *op )
 {
-	GError *err;
+	GError *err = NULL;
 	gchar *filename;
 	GtkWidget *dialog;
-	
-    if (settings != NULL)
-		g_object_unref (settings);
-    settings = g_object_ref (gtk_print_operation_get_print_settings (op));
-    
+
+	if( op ) {
+		if (settings != NULL)
+			g_object_unref (settings);
+		settings = g_object_ref (gtk_print_operation_get_print_settings (op));
+	}
     filename = g_build_filename( wGetAppWorkDir(), PRINTSETTINGS, NULL );
     if( !gtk_print_settings_to_file( settings, filename, &err )) {
-		dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin), 
+		dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin),
                                      GTK_DIALOG_DESTROY_WITH_PARENT,
                                      GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
 				                             err->message);
-    
+
 		g_error_free (err);
 		gtk_dialog_run (GTK_DIALOG (dialog));
-		gtk_widget_destroy (dialog);     
+		gtk_widget_destroy (dialog);
 	}
-	g_free( filename );	
+	g_free( filename );
+
+	if( op ) {
+		if (page_setup != NULL)
+			g_object_unref (page_setup);
+		page_setup = g_object_ref (gtk_print_operation_get_default_page_setup (op));
+	}
+    filename = g_build_filename( wGetAppWorkDir(), PAGESETTINGS, NULL );
+    if( !gtk_page_setup_to_file( page_setup, filename, &err )) {
+		dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin),
+                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+                                     GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+				                             err->message);
+
+		g_error_free (err);
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (dialog);
+	}
+	g_free( filename );
+
 }
 
+/**
+ * Get the paper size. The size returned is the printable area of the
+ * currently selected paper, ie. the physical size minus the margins.
+ * \param w OUT printable width of the paper in inches
+ * \param h OUT printable height of the paper in inches
+ * \return
+ */
 
 void wPrintGetPageSize(
 		double * w,
 		double * h )
 {
-	printInit();
-	if (printFormat == PRINT_LANDSCAPE) {
-		*w = papers[curPaper].h - tBorder - bBorder;
-		*h = papers[curPaper].w - lBorder - rBorder;
-	} else {
-		*w = papers[curPaper].w - lBorder - rBorder;
-		*h = papers[curPaper].h - tBorder - bBorder;
-	}
+	// if necessary load the settings
+	if( !settings )
+		ApplySettings( NULL );
+
+	WlibGetPaperSize();
+
+	*w = paperWidth -lBorder - rBorder;
+	*h = paperHeight - tBorder - bBorder;
 }
+
+/**
+ * Get the paper size. The size returned is the physical size of the
+ * currently selected paper.
+ * \param w OUT physical width of the paper in inches
+ * \param h OUT physical height of the paper in inches
+ * \return
+ */
 
 void wPrintGetPhysSize(
 		double * w,
 		double * h )
 {
-	printInit();
-	if (printFormat == PRINT_LANDSCAPE) {
-		*w = papers[curPaper].h;
-		*h = papers[curPaper].w;
-	} else {
-		*w = papers[curPaper].w;
-		*h = papers[curPaper].h;
-	}
+	// if necessary load the settings
+	if( !settings )
+		ApplySettings( NULL );
+
+	WlibGetPaperSize();
+
+	*w = paperWidth;
+	*h = paperHeight;
 }
 
 
@@ -934,41 +1006,12 @@ static void printAbort( void * context )
 /**
  * Initialize new page.
  *
- * \return    ???
+ * \return   print context for the print operation
  */
 wDraw_p wPrintPageStart( void )
 {
-	char tmp[80];
-
-	if (psFile == NULL)
-		return NULL;
-		
 	pageCount++;
-	psPrintf( psFile, 
-	 			"%%%%Page: %d %d\n" \
-				"save\n" \
-				"gsave\n" \
-				"0 setlinewidth\n"\
-		                "1 setlinecap\n",
-				pageCount, 
-				(totalPageCount>0?totalPageCount:pageCount) );
 
-	if (printFormat == PRINT_LANDSCAPE) {
-		psPrintf(psFile, "%0.3f %0.3f translate -90 rotate\n", lBorder*PPI, (papers[curPaper].h-tBorder)*PPI);
-	} else {
-		psPrintf(psFile, "%0.3f %0.3f translate 0 rotate\n", lBorder*PPI, bBorder*PPI);
-	}
-		
-	psPrintf( psFile, "%0.1f %0.1f scale\n", PPI, PPI );
-	
-	psPrintf( psFile, "/Times-Bold findfont %0.3f scalefont setfont\n",
-				P2I(16) );
-	addFontName("Times-Bold");
-	sprintf( tmp, _("Page %d"), pageCount );
-	wMessageSetValue( printAbortM, tmp );
-	wFlush();
-
-	currLineWidth = 0;
 	return &psPrint_d;
 }
 
@@ -982,12 +1025,8 @@ wDraw_p wPrintPageStart( void )
 
 wBool_t wPrintPageEnd( wDraw_p p )
 {
-	psPrintf( psFile,
-				"grestore\n" \
-				"restore\n" \
-				"showpage\n"\
-		  		"%%%%EndPage\n");
-				
+	cairo_show_page( psPrint_d.printContext );
+
 	return printContinue;
 }
 
@@ -999,226 +1038,156 @@ wBool_t wPrintPageEnd( wDraw_p p )
 
 /**
  * Allow the user to enter a new file name and location for the file.
- * Thanks to Andrew Krause's great book Foundations of GTK+ Development 
+ * Thanks to Andrew Krause's great book Foundations of GTK+ Development
  * for this code snippet.
  *
  * \param junk IN ignored
  */
 
-static void printFileNameSel( void * junk )
-{
-	GtkWidget *dialog;
-	gchar *filename;
-	gint result;
-  
-	dialog = gtk_file_chooser_dialog_new (_("Print to file ..."), (GtkWindow *)printSetupW->gtkwin,
-								GTK_FILE_CHOOSER_ACTION_SAVE,
-								GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-								GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-								NULL);
+//static void printFileNameSel( void * junk )
+//{
+	//GtkWidget *dialog;
+	//gchar *filename;
+	//gint result;
 
-	result = gtk_dialog_run (GTK_DIALOG (dialog));
-	if (result == GTK_RESPONSE_ACCEPT)
-	{
-		filename = gtk_file_chooser_get_filename ( GTK_FILE_CHOOSER ( dialog ));
-		if( filename ) {
-			sPrintFileName = malloc( strlen( filename ) + 1 );
-			if( sPrintFileName ) {
-				strcpy( sPrintFileName, filename );
-			}	 
-			else {
-				fputs( "Insufficient memory for printing to file\n", stderr );
-				abort();
-			}	 
-			g_free( filename );
-		}
-	}
-  
-	gtk_widget_destroy (dialog);
-}
+	//dialog = gtk_file_chooser_dialog_new (_("Print to file ..."), (GtkWindow *)printSetupW->gtkwin,
+								//GTK_FILE_CHOOSER_ACTION_SAVE,
+								//GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
+								//GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
+								//NULL);
 
+	//result = gtk_dialog_run (GTK_DIALOG (dialog));
+	//if (result == GTK_RESPONSE_ACCEPT)
+	//{
+		//filename = gtk_file_chooser_get_filename ( GTK_FILE_CHOOSER ( dialog ));
+		//if( filename ) {
+			//sPrintFileName = malloc( strlen( filename ) + 1 );
+			//if( sPrintFileName ) {
+				//strcpy( sPrintFileName, filename );
+			//}
+			//else {
+				//fputs( "Insufficient memory for printing to file\n", stderr );
+				//abort();
+			//}
+			//g_free( filename );
+		//}
+	//}
 
-/* 
- * open the printer output stream. In case print to file is selected, the filename for
- * the print out is fetched from the user and the file opened.
- *
- * \return    the printer stream
- */ 
-
-wPrinterStream_p wPrinterOpen( void )
-{
-	char * fn;
-	char sPrintCmdName[80];
-	char tmp[80+8];
-	FILE * f;
-	wIndex_t cmdOrFile;
-	wPrinterStream_p p;
-
-	printInit();
-	pageCount = 0;
-	f = NULL;
-	curPsFont = NULL;
-	if (curPrinter == 0 ) {
-
-		printFileNameSel( NULL );
-		
-		// did the user cancel the file dialog? If yes, cancel operation
-		if( !sPrintFileName ) {
-			return( NULL );
-		}	
-		if ( sPrintFileName[0] == '\0' ) {
-			wNoticeEx( NT_ERROR, _("No file name specified"), _("Ok"), NULL );
-			return NULL;
-		}
-		if ( access(sPrintFileName, F_OK ) == 0 ) {
-			sprintf( tmp, _("%s exists"), sPrintFileName );
-			if (!wNoticeEx( NT_INFORMATION, tmp, _("Overwrite"), _("Cancel") ))
-				return NULL;
-		}
-		f = fopen( sPrintFileName, "w" );
-		if (f == NULL) {
-			strcat( sPrintFileName, _(": cannot open") );
-			wNoticeEx( NT_ERROR, sPrintFileName, _("Ok"), NULL );
-			return NULL;
-		}
-		fn = sPrintFileName;
-		cmdOrFile = PRINT_FILE;
-	} else {
-		sprintf( sPrintCmdName, printers(curPrinter).cmd, printers(curPrinter).name );
-		f = popen( sPrintCmdName, "w" );
-		fn = sPrintCmdName;
-		cmdOrFile = PRINT_COMMAND;
-	}
-	if (f == NULL) {
-		strcat( sPrintFileName, _(": cannot open") );
-		wNoticeEx( NT_ERROR, sPrintFileName, _("Ok"), NULL );
-		return NULL;
-	}
-	p = (wPrinterStream_p)malloc( sizeof *p );
-	p->f = f;
-	p->cmdOrFile = cmdOrFile;
-	return p;
-}
-
-
-void wPrinterWrite( wPrinterStream_p p, char * buff, int siz )
-{
-	fwrite( buff, 1, siz, p->f );
-}
-
-void wPrinterClose( wPrinterStream_p p )
-{
-	if (p->cmdOrFile == PRINT_FILE)
-		fclose( p->f );
-	else
-		pclose( p->f );
-	
-	// free the filename again
-	if( sPrintFileName ) {
-		free( sPrintFileName );
-		sPrintFileName = NULL;
-	}
-}
+	//gtk_widget_destroy (dialog);
+//}
 
 /**
- * Start a new Postscript document
- *
- * Opens the output file and emits the Adobe DSC Prolog comments,
- * etc.  Note that the 3.0 in "PS-Adobe-3.0" refers to the
- * version of the Document Structuring Conventions Specification,
- * not to the Postscript language level.
+ * Start a new document
  *
  * \param title IN title of document ( name of layout )
- * \param fTotalPageCount IN number of pages to print
+ * \param fTotalPageCount IN number of pages to print (unused)
  * \param copiesP OUT ???
- * \return TRUE if successful
+ * \return TRUE if successful, FALSE if cancelled by user
  */
 
 wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 {
-	char tmp[80];
-	pageCount = 0;
-	totalPageCount = fTotalPageCount;
-	psFile = NULL;
-	psFileStream = wPrinterOpen();
-	if (psFileStream == NULL)
-		return FALSE;
-	psFile = psFileStream->f;
+	GtkWidget *printDialog;
+	gint res;
+	cairo_surface_type_t surface_type;
 
-	/* Initialize the list of fonts used  */
-	fontsUsedInit(); /* in case a document had been
-				 produced earlier */
+	printDialog = gtk_print_unix_dialog_new( title, GTK_WINDOW(gtkMainW->gtkwin));
 
-	psPrintf( psFile, 
-		    "%%!PS-Adobe-3.0\n\
-%%%%DocumentFonts: (atend)\n\
-%%%%Title: %s\n\
-%%%%Creator: XTrackCAD\n\
-%%%%Pages: (atend)\n\
-%%%%BoundingBox: %ld %ld %ld %ld\n\
-%%%%EndComments\n\n\
-%%%%Prolog\n\
-/mp_stm usertime def\n\
-/mp_pgc statusdict begin pagecount end def\n\
-statusdict begin /jobname (<stdin>) def end\n\
-%%%%EndProlog\n", \
-	       	    title,
-		    (long)floor(margins(curMargin).l*72),
-		    (long)floor(margins(curMargin).b*72),
-		    (long)floor((papers[curPaper].w-margins(curMargin).r)*72),
-		    (long)floor((papers[curPaper].h-margins(curMargin).t)*72) );
-							
-	printContinue = TRUE;
-	sprintf( tmp, ("Now printing %s"), title );
-	wMessageSetValue( printAbortT, tmp );
-	wMessageSetValue( printAbortM, _("Page 1") );
-	pageCount = 0;
-	wWinShow( printAbortW, TRUE );
+	// load the settings
+	ApplySettings( NULL );
+
+	// and apply them to the printer dialog
+	gtk_print_unix_dialog_set_settings( (GtkPrintUnixDialog *)printDialog, settings );
+	gtk_print_unix_dialog_set_page_setup( (GtkPrintUnixDialog *)printDialog, page_setup );
+
+	res = gtk_dialog_run( (GtkDialog *)printDialog );
+	if( res == GTK_RESPONSE_OK ) {
+		selPrinter = gtk_print_unix_dialog_get_selected_printer( (GtkPrintUnixDialog *)printDialog );
+
+		if( settings )
+			g_object_unref (settings);
+		settings = gtk_print_unix_dialog_get_settings( (GtkPrintUnixDialog *)printDialog );
+
+		if( page_setup )
+			g_object_unref( page_setup );
+		page_setup = gtk_print_unix_dialog_get_page_setup( (GtkPrintUnixDialog *)printDialog );
+
+		curPrintJob = gtk_print_job_new( title,
+							 selPrinter,
+							 settings,
+							 page_setup );
+
+		psPrint_d.curPrintSurface = gtk_print_job_get_surface( curPrintJob,
+								   NULL );
+		psPrint_d.printContext = cairo_create( psPrint_d.curPrintSurface );
+//		g_object_unref( curPrintSurface );
+
+		//update the paper dimensions
+		WlibGetPaperSize();
+
+		/* for the file based surfaces the resolution is 72 dpi (see documentation) */
+		surface_type = cairo_surface_get_type( psPrint_d.curPrintSurface );
+		if( surface_type == CAIRO_SURFACE_TYPE_PDF ||
+			surface_type == CAIRO_SURFACE_TYPE_PS  ||
+			surface_type == CAIRO_SURFACE_TYPE_SVG )
+			psPrint_d.dpi = 72;
+		else
+			psPrint_d.dpi = (double)gtk_print_settings_get_resolution( settings );
+
+		SaveSettings( NULL );
+	}
+	gtk_widget_destroy (printDialog);
+
 	if (copiesP)
 		*copiesP = 1;
-	return TRUE;
+
+	if( res != GTK_RESPONSE_OK )
+		return FALSE;
+	else
+		return TRUE;
 }
 
 /**
- * Outputs the Adobe Document Structure Comments.
- * These are needed at the
- * end of a Postscript document destined for modern (2012) print
- * spoolers. E.g. CUPS
+ * Callback for job finished event. Destroys the cairo context.
+ *
+ * \param job IN unused
+ * \param data IN unused
+ * \param err IN if != NULL, an error dialog ist displayed
+ * \return
+ */
+
+void
+doPrintJobFinished( GtkPrintJob *job, void *data, GError *err )
+{
+	GtkWidget *dialog;
+
+	cairo_destroy( psPrint_d.printContext );
+	if( err ) {
+		dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin),
+                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+                                     GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+				                             err->message);
+
+		g_error_free (err);
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (dialog);
+	}
+}
+/**
+ * Finish the print operation
+ * \return
  */
 
 void wPrintDocEnd( void )
 {
-        struct list_node *p;
-        int i;
-	if (psFile == NULL)
-		return;
-		
-	psPrintf( psFile, 
-				"%%%%Trailer\n%%%%Pages: %d\n",
-				pageCount );
+	cairo_surface_finish( psPrint_d.curPrintSurface );
 
-	/* Postscript lines are <255 chars so print fonts list 4
-	   per line
-	*/
-	psPrintf( psFile, "%%%%DocumentFonts: " );
-	p = fontsUsed;
-	i = 0;
-	while ((p=fontsUsedPop()) != NULL) {
-	  if ((i % 4) == 0 ) psPrintf( psFile, "\n%%%%+    ");
-	  psPrintf( psFile, " %s", p->data);
-	  free(p->data);
-	  free(p);
-	  i++;
-	}
-	psPrintf( psFile, "\n");
+	gtk_print_job_send( curPrintJob,
+						doPrintJobFinished,
+						NULL,
+						NULL );
 
-	psPrintf( psFile, "%%%%EOF\n");
-	/* Reset the fonts list to empty for the next document. 
-	*/
-	fontsUsedInit();
-
-	wPrinterClose( psFileStream );
-	wWinShow( printAbortW, FALSE );
+//	wWinShow( printAbortW, FALSE );
 }
 
 
@@ -1231,7 +1200,7 @@ wBool_t wPrintQuit( void )
 static void pLine( double x0, double y0, double x1, double y1 )
 {
 	psPrintf( psFile, "%0.3f %0.3f moveto %0.3f %0.3f lineto stroke\n",
-		x0, y0, x1, y1 );	
+		x0, y0, x1, y1 );
 }
 
 /**
@@ -1290,7 +1259,7 @@ static void pTestPage( void )
 	psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-2.0, "Printer Margin Setup" );
 	psPrintf( psFile, "/Times-Roman findfont 0.12 scalefont setfont\n" );
 	addFontName("Times-Roman");
-	psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-2.15, 
+	psPrintf( psFile, "%0.3f %0.3f moveto (%s) show\n", 2.0, h-2.15,
 		"Enter the position of the first visible line for each margin on the Printer Setup dialog");
 	if ( curMargin < margins_da.cnt )
 		psPrintf( psFile, "%0.3f %0.3f moveto ("
@@ -1362,88 +1331,12 @@ static void pTestPage( void )
 }
 
 
-#ifdef LATER
-static void newPrinter( void * context )
-{
-	wStringSetValue( addPrinterN, "" );
-	wStringSetValue( addPrinterC, "" );
-	addPrinterName[0] = 0;
-	addPrinterCommand[0] = 0;
-	wWinShow( addPrinterW, TRUE );
-}
-
-
-static void addPrinterOk( const char * str, void * context )
-{
-	char tmp[80];
-	if (strlen(addPrinterName) == 0 || strlen(addPrinterCommand) == 0) {
-		wNotice( _("Enter both printer name and command"), _("Ok"), NULL );
-		return;
-	}
-	if (printerDefine)
-		printerDefine( addPrinterName, addPrinterCommand );
-	else
-		wNotice( _("Can not save New Printer definition"), _("Ok"), NULL );
-	sprintf( tmp, "%s=%s", addPrinterName, addPrinterCommand );
-	wPrintNewPrinter( tmp );
-}
-
-
-static void newMargin( void * context )
-{
-	wStringSetValue( addMarginN, "" );
-	addMarginName[0] = 0;
-	wWinShow( addMarginW, TRUE );
-	gtkSetReadonly((wControl_p)optTopMargin,FALSE);
-	gtkSetReadonly((wControl_p)optBottomMargin,FALSE);
-	gtkSetReadonly((wControl_p)optLeftMargin,FALSE);
-	gtkSetReadonly((wControl_p)optRightMargin,FALSE);
-}
-
-
-static void addMarginOk( const char * str, void * context )
-{
-	margins_t * m;
-	if (strlen(addMarginName) == 0) {
-		wNotice( _("Enter printer name"), _("Ok"), NULL );
-		return;
-	}
-	if (marginDefine)
-		marginDefine( addMarginName, tBorder, bBorder, rBorder, lBorder );
-	else
-		wNotice( _("Can not save New Margin definition"), _("Ok"), NULL );
-	DYNARR_APPEND( margins_t, margins_da, 10 );
-	m = &margins(margins_da.cnt-1);
-	m->name = strdup( addMarginName );
-	m->t = tBorder;
-	m->b = bBorder;
-	m->r = rBorder;
-	m->l = lBorder;
-	wListAddValue( optMarginB, addMarginName, NULL, NULL );
-	gtkSetReadonly((wControl_p)optTopMargin,TRUE);
-	gtkSetReadonly((wControl_p)optBottomMargin,TRUE);
-	gtkSetReadonly((wControl_p)optLeftMargin,TRUE);
-	gtkSetReadonly((wControl_p)optRightMargin,TRUE);
-}
-#endif
-
 
 static wLines_t lines[] = {
 		{ 1,  25,  11,  95,  11 },
 		{ 1,  95,  11,  95, 111 },
 		{ 1,  95, 111,  25, 111 },
 		{ 1,  25, 111,  25,  11 }};
-#ifdef LATER
-		{ 1,  97,  10, 125,  10 },
-		{ 1, 160,  10, 177,  10 },
-		{ 1,  97,  10,  97,  50 },
-		{ 1,  97,  67,  97, 110 },
-		{ 1, 177,  10, 177,  50 },
-		{ 1, 177,  67, 177, 110 },
-		{ 1,  97, 110, 125, 110 },
-		{ 1, 160, 110, 177, 110 } };
-#endif
-
 static const char * printFmtLabels[]  = { N_("Portrait"), N_("Landscape"), NULL };
 
 static struct {
@@ -1544,9 +1437,7 @@ static void printInit( void )
 	x = wLabelWidth( _("Paper Size") )+4;
 	printSetupW = wWinPopupCreate( NULL, 4, 4, "printSetupW",  _("Print Setup"), "xvprintsetup", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
 	optPrinterB = wDropListCreate( printSetupW, x, -4, "printSetupPrinter", _("Printer"), 0, 4, 100, &newPPrinter, NULL, NULL );
-#ifdef LATER
-	wButtonCreate( printSetupW, -10, 2, "printSetupPrinter", _("New"), 0, 0, newPrinter, NULL );
-#endif
+
 	optPaperSizeB = wDropListCreate( printSetupW, x, -4, "printSetupPaper", _("Paper Size"), 0, 4, 100, &newPPaper, NULL, NULL );
 	y = wControlGetPosY( (wControl_p)optPaperSizeB ) + wControlGetHeight( (wControl_p)optPaperSizeB ) + 10;
 	for ( i=0; i<sizeof lines / sizeof lines[0]; i++ ) {
@@ -1562,13 +1453,11 @@ static void printInit( void )
 	optBottomMargin = wFloatCreate( printSetupW, x+35, y+100, "printSetupMargin", NULL, 0, 50, 0.0, 1.0, &bBorder, (wFloatCallBack_p)doChangeMargin, NULL );
 	optMarginB = wDropListCreate( printSetupW, x, -5, "printSetupMargin", NULL, BL_EDITABLE, 4, 100, NULL, doMarginSel, NULL );
 	optMarginDelB = wButtonCreate( printSetupW, wControlGetPosX((wControl_p)optMarginB)+wControlGetWidth((wControl_p)optMarginB)+5, wControlGetPosY((wControl_p)optMarginB), "printSetupMarginDelete", "Delete", 0, 0, (wButtonCallBack_p)doMarginDelete, NULL );
-#ifdef LATER
-	wButtonCreate( printSetupW, -10, wControlGetPosY((wControl_p)optMarginB), "printSetupMargin", _("New"), 0, 0, newMargin, NULL );
-#endif
+
 	optFormat = wRadioCreate( printSetupW, x, -5, "printSetupFormat", _("Format"), BC_HORZ,
 				printFmtLabels, &printFormat, NULL, NULL );
 	optXFontL = wDropListCreate( printSetupW, x, -6, "printSetupXFont", _("X Font"), 0, 4, 200, &optXFontX, doSetOptXFont, NULL );
-	optPSFontS = wStringCreate( printSetupW, x, -4, "printSetupPSFont", _("PS Font"), 0, 200, optPSFont, 0, doSetOptPSFont, NULL ); 
+	optPSFontS = wStringCreate( printSetupW, x, -4, "printSetupPSFont", _("PS Font"), 0, 200, optPSFont, 0, doSetOptPSFont, NULL );
 	optFontSizeFactor = wFloatCreate( printSetupW, x, -4, "printSetupFontSizeFactor", _("Factor"), 0, 50, 0.5, 2.0, &fontSizeFactor, (wFloatCallBack_p)NULL, NULL );
 	y = wControlGetPosY( (wControl_p)optFontSizeFactor ) + wControlGetHeight( (wControl_p)optFontSizeFactor ) + 10;
 	x = wControlGetPosX( (wControl_p)optPrinterB ) + wControlGetWidth( (wControl_p)optPrinterB ) + 10;
@@ -1576,39 +1465,26 @@ static void printInit( void )
 	wButtonCreate( printSetupW, x, -4, "printSetupCancel", _("Cancel"), 0, 0, (wButtonCallBack_p)pSetupCancel, NULL );
 	wButtonCreate( printSetupW, x, -14, "printSetupTest", _("Print Test Page"), 0, 0, (wButtonCallBack_p)pTestPage, NULL );
 
-#ifdef LATER
-	addPrinterW = wWinPopupCreate( printSetupW, 2, 2, "printSetupPrinter", _("Add Printer"), "xvaddprinter", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
-	addPrinterN = wStringCreate( addPrinterW, 100, -3, "printSetupPrinter",
-				_("Name: "), 0, 150, addPrinterName, sizeof addPrinterName,
-				addPrinterOk, NULL );
-	addPrinterC = wStringCreate( addPrinterW, 100, -3, "printSetupPrinter",
-				_("Command: "), 0, 150, addPrinterCommand, sizeof addPrinterCommand,
-				addPrinterOk, NULL );
 
-	addMarginW = wWinPopupCreate( printSetupW, 2, 2, "printSetupMargin", _("Add Margin"), "xvaddmargin", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
-	addMarginN = wStringCreate( addMarginW, 100, -3, "printSetupMargin",
-				_("Name: "), 0, 150, addMarginName, sizeof addMarginName,
-				addMarginOk, NULL );
-#endif
 
-	printFileW = wWinPopupCreate( printSetupW, 2, 2, "printFileNameW", _("Print To File"), "xvprinttofile", F_BLOCK|F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
-	wStringCreate( printFileW, 100, 3, "printFileName",
-				_("File Name? "), 0, 150, sPrintFileName, sizeof sPrintFileName,
-				NULL, NULL  );
-	wButtonCreate( printFileW, -4, 3, "printFileNameOk", _("Ok"), BB_DEFAULT, 0, printFileNameSel, NULL );
+	//printFileW = wWinPopupCreate( printSetupW, 2, 2, "printFileNameW", _("Print To File"), "xvprinttofile", F_BLOCK|F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
+	//wStringCreate( printFileW, 100, 3, "printFileName",
+				//_("File Name? "), 0, 150, sPrintFileName, sizeof sPrintFileName,
+				//NULL, NULL  );
+	//wButtonCreate( printFileW, -4, 3, "printFileNameOk", _("Ok"), BB_DEFAULT, 0, printFileNameSel, NULL );
 
-	newFontAliasW = wWinPopupCreate( printSetupW, 2, 2, "printFontAliasW", _("Font Alias"), "xvfontalias", F_BLOCK|F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
-	wMessageCreate( newFontAliasW, 0, 0, NULL, 200, _("Enter a post-script font name for:") );
-	newFontAliasXFntB = wMessageCreate( newFontAliasW, 0, -3, NULL, 200, "" );
-	wStringCreate( newFontAliasW, 0, -3, "printFontAlias", NULL, 0, 200, NULL, 0, newFontAliasSel, NULL );
+	//newFontAliasW = wWinPopupCreate( printSetupW, 2, 2, "printFontAliasW", _("Font Alias"), "xvfontalias", F_BLOCK|F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
+	//wMessageCreate( newFontAliasW, 0, 0, NULL, 200, _("Enter a post-script font name for:") );
+	//newFontAliasXFntB = wMessageCreate( newFontAliasW, 0, -3, NULL, 200, "" );
+	//wStringCreate( newFontAliasW, 0, -3, "printFontAlias", NULL, 0, 200, NULL, 0, newFontAliasSel, NULL );
 
-	for (i=0; papers[i].name; i++ ) {
-		wListAddValue( optPaperSizeB, papers[i].name, NULL, (void*)(intptr_t)i );
-		if ( prefPaper && strcasecmp( prefPaper, papers[i].name ) == 0 ) {
-			curPaper = i;
-			wListSetIndex( optPaperSizeB, i );
-		}
-	}
+	//for (i=0; papers[i].name; i++ ) {
+		//wListAddValue( optPaperSizeB, papers[i].name, NULL, (void*)(intptr_t)i );
+		//if ( prefPaper && strcasecmp( prefPaper, papers[i].name ) == 0 ) {
+			//curPaper = i;
+			//wListSetIndex( optPaperSizeB, i );
+		//}
+	//}
 
 	printAbortW = wWinPopupCreate( printSetupW, 2, 2, "printAbortW", _("Printing"), "xvprintabort", F_AUTOSIZE|F_RECALLPOS, NULL, NULL );
 	printAbortT = wMessageCreate( printAbortW, 0, 0, "printAbortW", 200, _("Now printing") );
@@ -1621,17 +1497,17 @@ static void printInit( void )
 			wPrefSetString( WFONT, fontmap[i].xfontname, fontmap[i].psfontname );
 	}
 
-	cp = wPrefGetString( WPRINTER, "1" );
-	if (!cp)
-		wPrefSetString( WPRINTER, "1", "lp=lpr -P%s" );
-	wPrintNewPrinter( "FILE" );
-	for (i=1; ;i++) {
-		sprintf( num, "%d", i );
-		cp = wPrefGetString( WPRINTER, num );
-		if (!cp)
-			break;
-		wPrintNewPrinter(cp);
-	}
+	//cp = wPrefGetString( WPRINTER, "1" );
+	//if (!cp)
+		//wPrefSetString( WPRINTER, "1", "lp=lpr -P%s" );
+	//wPrintNewPrinter( "FILE" );
+	//for (i=1; ;i++) {
+		//sprintf( num, "%d", i );
+		//cp = wPrefGetString( WPRINTER, num );
+		//if (!cp)
+			//break;
+		//wPrintNewPrinter(cp);
+	//}
 
 	for (i=0;i<sizeof pagemargins/sizeof pagemargins[0]; i++) {
 		cp = wPrefGetString( WMARGIN, pagemargins[i].name );
