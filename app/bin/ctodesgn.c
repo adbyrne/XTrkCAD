@@ -1,7 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctodesgn.c,v 1.5 2009-06-20 09:20:49 m_fischer Exp $
- *
- * T_TURNOUT
+/* \file ctodesgn.c
+ * T_TURNOUT Designer
  *
  */
 
@@ -1830,7 +1828,7 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 		return;
 	for ( i=0; i<(sizeof designDescs/sizeof designDescs[0]); i++ ) {
 		dp = designDescs[i];
-		if ( strcmp( type, _(dp->label) ) == 0 ) {
+		if ( strcmp( type, dp->label ) == 0 ) {
 			break;
 		}
 	}

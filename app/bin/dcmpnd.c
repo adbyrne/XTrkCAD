@@ -1,6 +1,4 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcmpnd.c,v 1.4 2008-03-06 19:35:08 m_fischer Exp $
- *
+/* \file dcmpnd.c
  * Compound tracks: Turnouts and Structures
  *
  */
