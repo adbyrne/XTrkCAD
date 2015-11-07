@@ -191,6 +191,7 @@ static void DescOk( void * junk )
 	wHide( describePG.win );
 	if ( descTrk )
 		DrawDescHilite();
+
 	descUpdateFunc( descTrk, -1, descData, !descUndoStarted );
 	descTrk = NULL;
 	if (descUndoStarted) {
@@ -292,17 +293,10 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 	descData_p ddp;
 	char * label;
 	int ro_mode;
-#ifdef NEEDSTAR
-	static wPos_t star_width = -1;
-#endif
 
 	if (!inDescribeCmd)
 		return;
 
-#ifdef NEEDSTAR
-	if ( star_width < 0 )
-		star_width = wLabelWidth( " *" );
-#endif
 	descTrk = trk;
 	descData = data;
 	descUpdateFunc = update;
@@ -313,9 +307,6 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 			(paramActionCancelProc) DescribeCancel,
 			TRUE, DescribeLayout, F_RECALLPOS,
 			DescribeUpdate );
-
-		/* ParamCreateDialog( &describePG, "Description", "Done", DescOk, NULL,
-			     TRUE, DescribeLayout, F_RECALLPOS, DescribeUpdate ); */
 		describeCmdButtonEnd = wControlBelow( (wControl_p)describePG.helpB );
 	}
 	for ( inx=0; inx<sizeof describePLs/sizeof describePLs[0]; inx++ ) {
@@ -324,21 +315,16 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 	}
 	ro_mode = (GetLayerFrozen(GetTrkLayer(trk))?DESC_RO:0);
 	if (ro_mode)
-	for ( ddp=data; ddp->type != DESC_NULL; ddp++ ) {
-		if ( ddp->mode&DESC_IGNORE )
-			continue;
-		ddp->mode |= ro_mode;
-	}
+		for ( ddp=data; ddp->type != DESC_NULL; ddp++ ) {
+			if ( ddp->mode&DESC_IGNORE )
+				continue;
+			ddp->mode |= ro_mode;
+		}
 	for ( ddp=data; ddp->type != DESC_NULL; ddp++ ) {
 		if ( ddp->mode&DESC_IGNORE )
 			continue;
 		label = _(ddp->label);
-#ifdef NEEDSTAR
-		if ( ((ddp->mode|ro_mode)&DESC_RO) == 0 ) {
-			sprintf( message, "%s *", label );
-			label = message;
-		}
-#endif
+
 		ddp->posy = describeW_posy;
 		ddp->control0 = AllocateButt( ddp, ddp->valueP, label, (ddp->type == DESC_POS?3:3) );
 		wControlActive( ddp->control0, ((ddp->mode|ro_mode)&DESC_RO)==0 );
@@ -346,24 +332,11 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 		case DESC_POS:
 			ddp->control1 = AllocateButt( ddp,
 				&((coOrd*)(ddp->valueP))->y,
-#ifdef NEEDSTAR
-				((ddp->mode|ro_mode)&DESC_RO) == 0?"Y *":"Y",
-#else
 				"Y",
-#endif
 				3 );
 			wControlActive( ddp->control1, ((ddp->mode|ro_mode)&DESC_RO)==0 );
 			break;
 		case DESC_LAYER:
-/*			if ( GetLayerFrozen(GetTrkLayer(descTrk)) )
-				sprintf( message, "%s %2.2d - %s", _("Frozen"), GetTrkLayer(descTrk)+1, GetLayerName(GetTrkLayer(descTrk)) );
-			else
-				sprintf( message, "%2.2d - %s", GetTrkLayer(descTrk)+1, GetLayerName(GetTrkLayer(descTrk)) );
-			wStringSetValue( (wString_p)ddp->control0, message );*/
-			
-		//	setLayerL = wDropListCreate( describePG.win, 0, describeW_posy, "cmdLayerSet", NULL, 0, 10, 200, NULL, ChangeTrackLayer, NULL );
-		//	wControlSetBalloonText( (wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet") );
-		//	AddToolbarControl( (wControl_p)setLayerL, IC_MODETRAIN_TOO );
            wListClear(ddp->control0);  // Rebuild list on each invovation
            for ( inx = 0; inx<NUM_LAYERS; inx++ ) {
 				if (!GetLayerFrozen(inx))				// Avoid Frozen layers.
