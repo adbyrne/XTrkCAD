@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cdraw.c,v 1.4 2008-03-06 19:35:04 m_fischer Exp $
+/** \file cdraw.c
+ * Drawing of geometric elements
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -183,6 +183,7 @@ static struct {
 		descPivot_t pivot;
 		wIndex_t fontSizeInx;
 		char text[STR_SIZE];
+		LAYER_T layer;
 		} drawData;
 typedef enum { E0, E1, CE, RA, LN, AL, A1, A2, VC, LW, CO, BE, OR, DS, TP, TA, TS, TX, PV, LY } drawDesc_e;
 static descData_t drawDesc[] = {
@@ -205,7 +206,7 @@ static descData_t drawDesc[] = {
 /*TS*/	{ DESC_EDITABLELIST, N_("Font Size"), &drawData.fontSizeInx },
 /*TX*/	{ DESC_STRING, N_("Text"), &drawData.text },
 /*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot },
-/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &drawData.layer },
 		{ DESC_NULL } };
 int drawSegInx;
 
@@ -362,6 +363,9 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			/*(char*)drawDesc[TX].valueP = segPtr->u.t.string;*/
 		}
 		break;
+	case LY:
+		SetTrkLayer( trk, drawData.layer);
+		break;
 	default:
 		AbortProg( "bad op" );
 	}
@@ -390,7 +394,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	drawDesc[CO].mode = 0;
 	drawData.lineWidth = (long)floor(segPtr->width*mainD.dpi+0.5);
 	drawDesc[LW].mode = 0;
-	drawDesc[LY].mode = DESC_RO;
+	drawDesc[LY].mode = DESC_NOREDRAW;
 	drawDesc[BE].mode =
 	drawDesc[OR].mode =
 	drawDesc[DS].mode = DESC_IGNORE;
