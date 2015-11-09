@@ -91,9 +91,9 @@ EXPORT void Rdump( FILE * outf )
 {
 	fprintf( outf, "Record Buffer:\n" );
 	rbuff[RBUFF_SIZE] = '\0';
-	fprintf( outf, rbuff+roff );
+	fprintf( outf, "%s", rbuff+roff );
 	rbuff[roff] = '\0';
-	fprintf( outf, rbuff );
+	fprintf( outf, "%s", rbuff );
 	memset( rbuff, 0, sizeof rbuff );
 	roff = 0;
 }

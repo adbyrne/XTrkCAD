@@ -1406,7 +1406,7 @@ static void NewTurnPrint(
 			newTurnout_d.d = wPrintPageStart();
 			newTurnout_d.dpi = wDrawGetDPI(newTurnout_d.d);
 
-			sprintf( message, sProdName );
+			sprintf( message, "%s", sProdName );
 			wDrawString( newTurnout_d.d, POSX(3.0),
 						POSY(6.75), 0.0, message, fp, 40,
 						wDrawColorBlack, 0 );
@@ -2042,7 +2042,7 @@ EXPORT void AbortProg(
 	va_start( ap, msg );
 	vsprintf( message, msg, ap );
 	va_end( ap );
-	fprintf( stderr, message );
+	fprintf( stderr, "%s", message );
 	abort();
 }
 

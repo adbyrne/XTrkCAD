@@ -414,7 +414,7 @@ int wNoticeEx( int type,
 					 GTK_DIALOG_DESTROY_WITH_PARENT,
 					 flag,
       					 ((no==NULL)?GTK_BUTTONS_OK:GTK_BUTTONS_YES_NO),
-					 msg );
+					 "%s", msg );
 	gtk_window_set_title( GTK_WINDOW(dialog), headline );
 	  
 	res = gtk_dialog_run( GTK_DIALOG(dialog));
