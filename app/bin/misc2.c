@@ -1,7 +1,5 @@
 /** \file misc2.c
  * Management of information about scales and gauges plus rprintf.
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.c,v 1.9 2009-10-04 16:46:39 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -190,7 +188,7 @@ typedef struct {
 
 EXPORT typedef gaugeInfo_t * gaugeInfo_p;
 
-EXPORT GAUGEINX_T curGaugeInx = -1;
+EXPORT GAUGEINX_T curGaugeInx = 0;
 
 /** this struct holds a scale description */
 typedef struct {
