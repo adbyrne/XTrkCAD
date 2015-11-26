@@ -1,6 +1,4 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/chotbar.c,v 1.4 2009-10-15 03:54:32 dspagnol Exp $
- *
+/** \file chotbar.c
  * HOT BAR
  *
  */
@@ -296,13 +294,13 @@ EXPORT void HotBarCancel( void )
 		HotBarHighlight( hotBarCurrSelect );
 	hotBarCurrSelect = -1;
 }
-		
+
 
 static BOOL_T HotBarSelectPlayback( char * line )
 {
 	int inx;
 	hotBarMap_t * tbm;
-	while (*line && isspace(*line) ) line++;
+	while (*line && isspace((unsigned char)*line) ) line++;
 	for ( inx=0; inx<hotBarMap_da.cnt; inx++ ) {
 		tbm = &hotBarMap(inx);
 		if ( strcmp( tbm->proc( HB_FULLTITLE, tbm->context, NULL, NULL ), line) == 0) {
@@ -355,7 +353,7 @@ EXPORT void AddHotBarElement(
 			wMenuListAdd( hotBarML, hotBarMLcnt++, contentsLabel, (void*)(intptr_t)hotBarMap_da.cnt );
 			strncpy( curContentsLabel, contentsLabel, sizeof curContentsLabel );
 		}
-			 
+
 		if (barScale <= 0) {
 			if (isTrack)
 				barScale = (trackGauge>0.1)?trackGauge*24:10;
@@ -381,7 +379,7 @@ EXPORT void AddHotBarElement(
 			tbm->labelW = textsize.x+5/hotBarD.dpi;
 			if ( tbm->labelW > tbm->w ) {
 				tbm->w = tbm->labelW;
-			}	
+			}
 		}
 		hotBarWidth += tbm->w;
 }

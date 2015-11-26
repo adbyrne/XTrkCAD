@@ -23,7 +23,7 @@
 #ifndef MISC_H
 #define MISC_H
 
-#define EXPORT 
+#define EXPORT
 
 #include "acclkeys.h"
 
@@ -192,7 +192,7 @@ extern wBool_t extraButtons;
 extern wButton_p undoB;
 extern wButton_p redoB;
 extern wButton_p zoomUpB;			/** ZoomUp button on toolbar */
-extern wButton_p zoomDownB;		/** ZoomDown button on toolbar */ 
+extern wButton_p zoomDownB;		/** ZoomDown button on toolbar */
 // extern wButton_p easementB;
 extern wIndex_t checkPtMark;
 extern wMenu_p demoM;
@@ -229,7 +229,7 @@ void DefaultProc( wWin_p, winProcEvent, void * );
 void SelectFont();
 
 void CheckRoomSize( BOOL_T );
-char * GetBalloonHelpStr( char* );
+const char * GetBalloonHelpStr( char* );
 void EnableCommands( void );
 void Reset( void );
 void ResetIfNotSticky( void );
@@ -313,11 +313,11 @@ void OutputBitMap( void );
 wDrawColor snapGridColor;
 
 addButtonCallBack_t ColorInit( void );
-addButtonCallBack_t PrefInit( void ); 
-addButtonCallBack_t LayoutInit( void ); 
-addButtonCallBack_t DisplayInit( void ); 
-addButtonCallBack_t CmdoptInit( void ); 
-addButtonCallBack_t OutputBitMapInit( void ); 
+addButtonCallBack_t PrefInit( void );
+addButtonCallBack_t LayoutInit( void );
+addButtonCallBack_t DisplayInit( void );
+addButtonCallBack_t CmdoptInit( void );
+addButtonCallBack_t OutputBitMapInit( void );
 addButtonCallBack_t CustomMgrInit( void );
 addButtonCallBack_t PriceListInit( void );
 addButtonCallBack_t ParamFilesInit( void );

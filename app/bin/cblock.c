@@ -1,6 +1,5 @@
-/* 
- * ------------------------------------------------------------------
- * cblock.c - Implement blocks: a group of trackwork with a single occ. detector
+/** \file cblock.c
+ * Implement blocks: a group of trackwork with a single occ. detector
  * Created by Robert Heller on Thu Mar 12 09:43:02 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
@@ -22,26 +21,26 @@
  * ------------------------------------------------------------------
  * Contents:
  * ------------------------------------------------------------------
- *  
+ *
  *     Generic Project
  *     Copyright (C) 2005  Robert Heller D/B/A Deepwoods Software
  * 			51 Locke Hill Road
  * 			Wendell, MA 01379-9728
- * 
+ *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation; either version 2 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     This program is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with this program; if not, write to the Free Software
  *     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- * 
+ *
  *  T_BLOCK
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cblock.c,v 1.5 2009-11-23 19:46:16 rheller Exp $
  */
@@ -62,7 +61,7 @@ static int log_block = 0;
 static void NoDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
 		       wDrawColor color ) {}
 static void NoDrawArc(drawCmd_p d, coOrd p, DIST_T r, ANGLE_T angle0,
-		      ANGLE_T angle1, BOOL_T drawCenter, wDrawWidth width, 
+		      ANGLE_T angle1, BOOL_T drawCenter, wDrawWidth width,
 		      wDrawColor color ) {}
 static void NoDrawString( drawCmd_p d, coOrd p, ANGLE_T a, char * s,
 			  wFont_p fp, FONTSIZE_T fontSize, wDrawColor color ) {}
@@ -202,7 +201,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 	strcpy( str, _(GetTrkTypeName( trk )) );
 	str++;
 	while (*str) {
-		*str = tolower(*str);
+		*str = tolower((unsigned char)*str);
 		str++;
 	}
 	sprintf( str, _("(%d): Layer=%d %s"),
@@ -226,7 +225,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 	blockDesc[NM].mode =
 	blockDesc[SC].mode = DESC_NOREDRAW;
 	DoDescribe(_("Block"), trk, blockDesc, UpdateBlock );
-	
+
 }
 
 static blockDebug (track_p trk)
@@ -242,7 +241,7 @@ static blockDebug (track_p trk)
 		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, ",iTrack,GetTrkIndex((&(xx->trackList))[iTrack])))
 		LOG( log_block, 1, ("%s\n",GetTrkTypeName((&(xx->trackList))[iTrack])))
 	}
-	
+
 }
 
 static BOOL_T blockCheckContigiousPath()
@@ -293,7 +292,7 @@ static BOOL_T blockCheckContigiousPath()
 		}
 		if (!IsConnectedP && blockTrk_da.cnt > 1) return FALSE;
 	}
-	return TRUE;				
+	return TRUE;
 }
 
 static void DeleteBlock ( track_p t )
@@ -337,7 +336,7 @@ static void ReadBlock ( char * line )
 	}
 	DYNARR_RESET( track_p , blockTrk_da );
 	while ( (cp = GetNextLine()) != NULL ) {
-		while (isspace(*cp)) cp++;
+		while (isspace((unsigned char)*cp)) cp++;
 		if ( strncmp( cp, "END", 3 ) == 0 ) {
 			break;
 		}
@@ -365,7 +364,7 @@ static void ReadBlock ( char * line )
 		LOG( log_block, 1, ("*** ReadBlock(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack))))
 		(&(xx->trackList))[iTrack] = blockTrk(iTrack);
 	}
-	blockDebug(trk);	
+	blockDebug(trk);
 }
 
 
@@ -407,7 +406,7 @@ static trackCmd_t blockCmds = {
 };
 
 
-	
+
 #ifdef BLOCKCMD
 static BOOL_T TrackInBlock (track_p trk, track_p blk) {
 	wIndex_t iTrack;
@@ -492,7 +491,7 @@ static void BlockOk ( void * junk )
 		UndoEnd();
 	}
 	wHide( blockW );
-		
+
 }
 
 static void NewBlockDialog()
@@ -535,7 +534,7 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 	LOG( log_block, 1, ("*** CmdBlockAction(%08x,{%f,%f})\n",action,pos.x,pos.y))
 	switch (action & 0xFF) {
 	case C_START:
-		fprintf(stderr,"*** CmdBlockCreate(): C_START\n");		
+		fprintf(stderr,"*** CmdBlockCreate(): C_START\n");
 		NewBlockDialog();
 		return C_TERMINATE;
 	default:
@@ -549,7 +548,7 @@ static STATUS_T CmdBlockEdit( wAction_t action, coOrd pos )
 {
 	track_p trk,btrk;
 	char msg[STR_SIZE];
-	
+
 	switch (action) {
 	case C_START:
 		InfoMessage( _("Select a track") );
@@ -581,7 +580,7 @@ static STATUS_T CmdBlockDelete( wAction_t action, coOrd pos )
 {
 	track_p trk,btrk;
 	blockData_p xx;
-	
+
 	switch (action) {
 	case C_START:
 		InfoMessage( _("Select a track") );
@@ -598,7 +597,7 @@ static STATUS_T CmdBlockDelete( wAction_t action, coOrd pos )
 		/* Confirm Delete Block */
 		xx = GetblockData(btrk);
 		if ( NoticeMessage( _("Really delete block %s?"), _("Yes"), _("No"), xx->name) ) {
-			UndoStart( _("Delete Block"), "delete" );			
+			UndoStart( _("Delete Block"), "delete" );
 			DeleteTrack (btrk, FALSE);
 			UndoEnd();
 			return C_TERMINATE;
@@ -630,7 +629,7 @@ static STATUS_T CmdBlock (wAction_t action, coOrd pos )
 	default: return C_TERMINATE;
 	}
 }
-	
+
 #include "bitmaps/blocknew.xpm"
 #include "bitmaps/blockedit.xpm"
 #include "bitmaps/blockdel.xpm"

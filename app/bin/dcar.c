@@ -1,6 +1,4 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcar.c,v 1.6 2008-03-06 19:35:07 m_fischer Exp $
- *
+/** \file dcar.c
  * TRAIN
  *
  */
@@ -90,7 +88,7 @@ typedef struct {
 		long			serviceDate;
 		char			* notes;
 		} carData_t;
-		
+
 struct carItem_t {
 		long			index;
 		SCALEINX_T		scaleInx;
@@ -149,7 +147,7 @@ static void TabStringExtract(
 	}
 }
 
-	
+
 static char * TabStringDup(
 		tabString_t * tab )
 {
@@ -656,10 +654,10 @@ static BOOL_T CarProtoRead(
 	long type;
 	carDim_t dim;
 
-	if ( !GetArgs( line+9, "qllff00ff", 
+	if ( !GetArgs( line+9, "qllff00ff",
 		&desc, &options, &type, &dim.carLength, &dim.carWidth, &dim.truckCenter, &dim.coupledLength ) )
 		return FALSE;
-	if ( !ReadSegs() ) 
+	if ( !ReadSegs() )
 		return FALSE;
 	CarProtoNew( NULL, curParamFileIndex, desc, options, type, &dim, tempSegs_da.cnt, &tempSegs(0) );
 	return TRUE;
@@ -837,7 +835,7 @@ static roadnameMap_p LoadRoadnameList(
 		return NULL;
 	if ( TabStringCmp( "undecorated", roadnameTab ) == 0 )
 		return NULL;
-	
+
 	cmp_key.name = roadnameTab->ptr;
 	cmp_key.len = roadnameTab->len;
 	roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, sizeof *(roadnameMap_p)0 );
@@ -845,7 +843,7 @@ static roadnameMap_p LoadRoadnameList(
 		roadnameMapP->roadname = TabStringDup(roadnameTab);
 		roadnameMapP->repmark = TabStringDup(repmarkTab);
 		roadnameMapChanged = TRUE;
-	} else if ( repmarkTab->len > 0 && 
+	} else if ( repmarkTab->len > 0 &&
 				( roadnameMapP->repmark == NULL || roadnameMapP->repmark[0] == '\0' ) ) {
 		roadnameMapP->repmark = TabStringDup(repmarkTab);
 		roadnameMapChanged = TRUE;
@@ -1013,7 +1011,7 @@ static BOOL_T CarPartRead(
 	carDim_t dim;
 	long rgb;
 
-	if ( !GetArgs( line+8, "sqllff00ffl", 
+	if ( !GetArgs( line+8, "sqllff00ffl",
 		scale, &title, &options, &type, &dim.carLength, &dim.carWidth, &dim.truckCenter, &dim.coupledLength, &rgb ) )
 		return FALSE;
 	CarPartNew( NULL, curParamFileIndex, LookupScale(scale), title, options, type, &dim, wDrawFindColor(rgb) );
@@ -1036,10 +1034,10 @@ static BOOL_T CarPartWrite(
 	TabStringExtract( partP->title, 7, tabs );
 	sprintf( message, "%s\t%s\t%.*s\t%.*s\t%.*s\t%.*s\t%.*s",
 		parentP->manuf, parentP->proto,
-		tabs[T_DESC].len, tabs[T_DESC].ptr, 
-		tabs[T_PART].len, tabs[T_PART].ptr, 
-		tabs[T_ROADNAME].len, tabs[T_ROADNAME].ptr, 
-		tabs[T_REPMARK].len, tabs[T_REPMARK].ptr, 
+		tabs[T_DESC].len, tabs[T_DESC].ptr,
+		tabs[T_PART].len, tabs[T_PART].ptr,
+		tabs[T_ROADNAME].len, tabs[T_ROADNAME].ptr,
+		tabs[T_REPMARK].len, tabs[T_REPMARK].ptr,
 		tabs[T_NUMBER].len, tabs[T_NUMBER].ptr );
 	rc &= fprintf( f, "CARPART %s \"%s\"", GetScaleName(partP->parent->scale), PutTitle(message) )>0;
 	rc &= fprintf( f, " %ld %ld %0.3f %0.3f 0 0 %0.3f %0.3f %ld\n",
@@ -1060,7 +1058,7 @@ static BOOL_T CarDescCustomSave(
 	int partX;
 	carPart_p partP;
 	BOOL_T rc = TRUE;
- 
+
 	for ( parentX=0; parentX<carPartParent_da.cnt; parentX++ ) {
 		parentP = carPartParent(parentX);
 		for ( partX=0; partX<parentP->parts_da.cnt; partX++ ) {
@@ -1196,7 +1194,7 @@ EXPORT BOOL_T CarItemRead(
 	ANGLE_T angle;
 	wIndex_t index;
 
-	if ( !GetArgs( line+4, "lsqll" "ff00ffl" "fflll000000c", 
+	if ( !GetArgs( line+4, "lsqll" "ff00ffl" "fflll000000c",
 		&itemIndex, scale, &title, &options, &type,
 		&dim.carLength, &dim.carWidth, &dim.truckCenter, &dim.coupledLength, &rgb,
 		&purchPrice, &currPrice, &condition, &purchDate, &serviceDate, &cp ) )
@@ -1308,10 +1306,10 @@ EXPORT void CarItemGetSegs(
 	tabString_t tabs[7];
 	trkSeg_t * segPtr;
 	DIST_T ratio = GetScaleRatio(item->scaleInx);
-	
+
 	TabStringExtract( item->title, 7, tabs );
 	TabStringCpy( message, &tabs[T_PROTO] );
-	protoP = CarProtoLookup( message, FALSE, FALSE, 0.0, 0.0 ); 
+	protoP = CarProtoLookup( message, FALSE, FALSE, 0.0, 0.0 );
 	if ( protoP != NULL ) {
 		item->segCnt = protoP->segCnt;
 		segPtr = protoP->segPtr;
@@ -1582,7 +1580,7 @@ static char * CarItemHotbarProc(
 			strncpy( newCarLabel1, cp, sizeof newCarLabel1 );
 			ParamLoadControls( &newCarPG );
 			ParamGroupRecord( &newCarPG );
- 
+
 			InfoSubstituteControls( newCarControls, newCarLabels );
 			wWinGetSize( mainW, &w, &h );
 			w -= wControlGetPosX( newCarControls[0] ) + 4;
@@ -2179,7 +2177,7 @@ static carDlgAction_e item2partActions[] = {
 						A_ClrManuf,
 				A_SPartnoSel,
 				A_ShowControls, A_Return };
-static carDlgAction_e part2itemActions[] = { 
+static carDlgAction_e part2itemActions[] = {
 				A_IsNewPart, 2+0,
 				A_Else, 1,
 						A_PopTitleAndTypeinx,
@@ -2468,7 +2466,7 @@ static BOOL_T CarDlgLoadProtoList(
 	char * firstName;
 	int typeCount[N_TYPELISTMAP];
 	int listTypeInx, currTypeInx;
-	
+
 	listTypeInx = -1;
 	carDlgProtoInx = -1;
 	firstName = NULL;
@@ -2481,7 +2479,7 @@ LOG( log_carDlgList, 3, ( "CarDlgLoadProtoList( %s, %d, %s )\n    carDlgProtoStr
 		if ( listTypeInx < 0 && carDlgProtoStr[0] && (protoP=CarProtoFind(carDlgProtoStr)) )
 			listTypeInx = CarProtoFindTypeCode(protoP->type);
 		if ( listTypeInx < 0 )
-			listTypeInx = CarProtoFindTypeCode(carProto(0)->type); 
+			listTypeInx = CarProtoFindTypeCode(carProto(0)->type);
 		for ( inx=0; inx<carProto_da.cnt; inx++ ) {
 			protoP = carProto(inx);
 			currTypeInx = CarProtoFindTypeCode(protoP->type);
@@ -2638,7 +2636,7 @@ static BOOL_T CarDlgLoadPartList( carPartParent_p parentP )
 		TabStringExtract( partP->title, 7, tabs );
 		ConstructPartDesc( tabs );
 		lastPart.paramFileIndex = partP->paramFileIndex;
-		if ( message[0] && IsParamValid(partP->paramFileIndex) && 
+		if ( message[0] && IsParamValid(partP->paramFileIndex) &&
 			 ( lastPart.title == NULL || Cmp_part( &lastPart, partP ) != 0 ) ) {
 			listInx = wListAddValue( (wList_p)carDlgPLs[I_CD_PARTNO_LIST].control, message, NULL, (void*)partP );
 			if ( carDlgPartnoInx<0 &&
@@ -3193,7 +3191,7 @@ static BOOL_T CheckCarDlgItemIndex( long * index )
 {
 	BOOL_T found = TRUE;
 	BOOL_T updated = FALSE;
- 
+
 	int inx;
 	carItem_p item;
 	while ( found ) {
@@ -4293,7 +4291,7 @@ static int CarInvSaveText(
 				fprintf( f, " %*s", widths[5], " " );
 			}
 		}
-		if ( widths[6] > 0 ) { 
+		if ( widths[6] > 0 ) {
 			if ( item->data.condition != 0 ) {
 				fprintf( f, " %-*.*s", widths[6], widths[6], condListMap[MapCondition(item->data.condition)].name );
 			} else {
@@ -4390,7 +4388,7 @@ static int ParseCsvLine(
 	int rc, len;
 
 	cp = line;
-	for ( cq=cp+strlen(cp)-1; cq>cp&&isspace(*cq); cq-- );
+	for ( cq=cp+strlen(cp)-1; cq>cp&&isspace((unsigned char)*cq); cq-- );
 	cq[1] = '\0';
 	for ( elem=0; elem<max_elem; elem++ ) {
 		tabs[elem].ptr = "";
@@ -4553,7 +4551,7 @@ static int CarInvImportCsv(
 		dim.truckCenter = TabGetFloat( &tabs[M_TRKCENTER] );
 		partP = NULL;
 		if ( tabs[M_MANUF].len > 0 && tabs[M_PARTNO].len > 0 )
-			partP = CarPartFind( tabs[M_MANUF].ptr, tabs[M_MANUF].len, tabs[M_PARTNO].ptr, tabs[M_PARTNO].len, scale ); 
+			partP = CarPartFind( tabs[M_MANUF].ptr, tabs[M_MANUF].len, tabs[M_PARTNO].ptr, tabs[M_PARTNO].len, scale );
 		if ( partP ) {
 			TabStringExtract( partP->title, 7, partTabs );
 			if ( tabs[M_PROTO].len == 0 && partTabs[T_PROTO].len > 0 ) { tabs[M_PROTO].ptr = partTabs[T_PROTO].ptr; tabs[M_PROTO].len = partTabs[T_PROTO].len; }
@@ -4644,11 +4642,11 @@ static void CsvFormatString(
 	if ( *str && len ) {
 		fputc( '"', f );
 		for ( ; *str && len; str++,len-- ) {
-			if ( !iscntrl( *str ) ) {
+			if ( !iscntrl((unsigned char) *str ) ) {
 				if ( *str == '"' )
 					fputc( '"', f );
 				fputc( *str, f );
-			} else if ( *str == '\n' && str[1] && len > 1 ) { 
+			} else if ( *str == '\n' && str[1] && len > 1 ) {
 				fprintf( f, "<NL>" );
 			}
 		}

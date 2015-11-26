@@ -1,5 +1,5 @@
 /** \file fileio.c
- * Loading and saving files. Handles trackplans as well as DXF export. 
+ * Loading and saving files. Handles trackplans as well as DXF export.
  *
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.18 2009-05-08 15:28:54 m_fischer Exp $
  */
@@ -108,7 +108,7 @@ static int Copyfile( char * fn1, char * fn2 )
 #endif
 
 /**
- * Save the old locale and set to new. 
+ * Save the old locale and set to new.
  *
  * \param newlocale IN the new locale to set
  * \return    pointer to the old locale
@@ -119,14 +119,14 @@ SaveLocale( char *newLocale )
 {
 	char *oldLocale;
 	char *saveLocale = NULL;
-	
+
 	/* get old locale setting */
 	oldLocale = setlocale(LC_ALL, NULL);
 
 	/* allocate memory to save */
 	if (oldLocale)
 		saveLocale = strdup( oldLocale );
-		
+
 	setlocale(LC_ALL, newLocale );
 
 	return( saveLocale );
@@ -144,7 +144,7 @@ RestoreLocale( char * locale )
 	if( locale ) {
 		setlocale( LC_ALL, locale );
 		free( locale );
-	}	
+	}
 }
 
 
@@ -209,7 +209,7 @@ EXPORT char * GetNextLine( void )
 
 
 /**
- * Show an error message if problems occur during loading of a param or layout file. 
+ * Show an error message if problems occur during loading of a param or layout file.
  * The user has the choice to cancel the operation or to continue. If operation is
  * canceled the open file is closed.
  *
@@ -219,7 +219,7 @@ EXPORT char * GetNextLine( void )
  * \return TRUE to continue, FALSE to abort operation
  *
  */
- 
+
 EXPORT int InputError(
 		char * msg,
 		BOOL_T showLine,
@@ -228,7 +228,7 @@ EXPORT int InputError(
 	va_list ap;
 	char * mp = message;
 	int ret;
-	
+
 	mp += sprintf( message, "INPUT ERROR: %s:%d\n",
 		paramFileName, paramLineNum );
 	va_start( ap, showLine );
@@ -262,7 +262,7 @@ EXPORT void SyntaxError(
  *
  * \param line IN line to parse
  * \param format IN ???
- * 
+ *
  * \return FALSE in case of parsing error, TRUE on success
  */
 
@@ -271,7 +271,7 @@ EXPORT BOOL_T GetArgs(
 		char * format,
 		... )
 {
-	unsigned char * cp, * cq;
+	char * cp, * cq;
 	int argNo;
 	long * pl;
 	int * pi;
@@ -287,7 +287,7 @@ EXPORT BOOL_T GetArgs(
 	cp = line;
 	va_start( ap, format );
 	for (argNo=1;*format;argNo++,format++) {
-		while (isspace(*cp)) cp++;
+		while (isspace((unsigned char)*cp)) cp++;
 		if (!*cp && strchr( "XZYzc", *format ) == NULL ) {
 			RestoreLocale(oldLocale);
 			InputError( "Arg %d: EOL unexpected", TRUE, argNo );
@@ -406,8 +406,8 @@ EXPORT BOOL_T GetArgs(
 			break;
 		case 's':
 			ps = va_arg( ap, char * );
-			while (isspace(*cp)) cp++;
-			while (*cp && !isspace(*cp)) *ps++ = *cp++;
+			while (isspace((unsigned char)*cp)) cp++;
+			while (*cp && !isspace((unsigned char)*cp)) *ps++ = *cp++;
 			*ps++ = '\0';
 			break;
 		case 'q':
@@ -445,7 +445,7 @@ EXPORT BOOL_T GetArgs(
 			break;
 		case 'c':
 			qp = va_arg( ap, char * * );
-			while (isspace(*cp)) cp++;
+			while (isspace((unsigned char)*cp)) cp++;
 			if (*cp)
 				*qp = cp;
 			else
@@ -470,7 +470,7 @@ EXPORT wBool_t ParseRoomSize(
 	size.x = strtod( s, &cp );
 	if (cp != s) {
 		s = cp;
-		while (isspace(*s)) s++;
+		while (isspace((unsigned char)*s)) s++;
 		if (*s == 'x' || *s == 'X') {
 			size.y = strtod( ++s, &cp );
 			if (cp != s) {
@@ -557,7 +557,7 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 			/* empty paramLine */
 		} else if (strncmp( paramLine, "INCLUDE ", 8 ) == 0) {
 			cp = &paramLine[8];
-			while (*cp && isspace(*cp)) cp++;
+			while (*cp && isspace((unsigned char)*cp)) cp++;
 			if (!*cp) {
 				InputError( "INCLUDE - no file name", TRUE );
 
@@ -605,16 +605,16 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 			/* Close file and reset the locale settings */
 			if (paramFile) fclose(paramFile);
 			RestoreLocale( oldLocale );
-			
+
 			NoticeMessage( MSG_PROG_CORRUPTED, _("Ok"), NULL, paramFileName );
 
 			return FALSE;
 		}
 	}
 	if (paramFile)fclose( paramFile );
-	
+
 	RestoreLocale( oldLocale );
-	
+
 	return TRUE;
 }
 
@@ -765,7 +765,7 @@ static BOOL_T ReadTrackFile(
 		paramLineNum++;
 		if (strlen(paramLine) == (sizeof paramLine) -1 &&
 			paramLine[(sizeof paramLine)-1] != '\n') {
-			if( !(ret = InputError( "Line too long", TRUE )))				
+			if( !(ret = InputError( "Line too long", TRUE )))
 				break;
 		}
 		Stripcr( paramLine );
@@ -783,7 +783,7 @@ static BOOL_T ReadTrackFile(
 		} else if (strncmp( paramLine, "VERSION ", 8 ) == 0) {
 			paramVersion = strtol( paramLine+8, &cp, 10 );
 			if (cp)
-				while (*cp && isspace(*cp)) cp++;
+				while (*cp && isspace((unsigned char)*cp)) cp++;
 			if ( paramVersion > iParamVersion ) {
 				if (cp && *cp) {
 					NoticeMessage( MSG_UPGRADE_VERSION1, _("Ok"), NULL, paramVersion, iParamVersion, sProdName, cp );
@@ -833,7 +833,7 @@ static BOOL_T ReadTrackFile(
 				break;
 		}
 	}
-	
+
 	if (paramFile)
 		fclose(paramFile);
 
@@ -846,10 +846,10 @@ static BOOL_T ReadTrackFile(
 			curFileName = &curPathName[fileName-pathName];
 			SetWindowTitle();
 		}
-	}	
+	}
 
 	RestoreLocale( oldLocale );
-	
+
 	paramFile = NULL;
 	InfoMessage( "%d", count );
 	return ret;
@@ -903,7 +903,7 @@ EXPORT int LoadTracks(
  * path.
  * \param index IN ignored
  * \param label IN ignored
- * \param data IN filename 
+ * \param data IN filename
  */
 
 EXPORT void DoFileList(
@@ -936,7 +936,7 @@ static BOOL_T DoSaveTracks(
 		RestoreLocale( oldLocale );
 
 		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Track"), fileName, strerror(errno) );
-		
+
 		return FALSE;
 	}
 	wSetCursor( wCursorWait );
@@ -1023,8 +1023,8 @@ EXPORT void DoLoad( void )
 
 EXPORT void DoCheckPoint( void )
 {
-	int rc; 
-	
+	int rc;
+
 	if (checkPointingW == NULL) {
 		ParamRegister( &checkPointingPG );
 		checkPointingW = ParamCreateDialog( &checkPointingPG, MakeWindowTitle(_("Check Pointing")), NULL, NULL, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
@@ -1032,41 +1032,41 @@ EXPORT void DoCheckPoint( void )
 	rename( checkPtFileName1, checkPtFileName2 );
 	wShow( checkPointingW );
 	rc = DoSaveTracks( checkPtFileName1 );
-	
+
 	/* could the check point file be written ok? */
 	if( rc ) {
 		/* yes, delete the backup copy of the checkpoint file */
 		remove( checkPtFileName2 );
 	} else {
 		/* no, rename the backup copy back to the checkpoint file name */
-		rename( checkPtFileName2, checkPtFileName1 );		
-	}		
+		rename( checkPtFileName2, checkPtFileName1 );
+	}
 	wHide( checkPointingW );
 }
 
 /**
- * Remove all temporary files before exiting.When the program terminates 
- * normally through the exit choice, files that are created temporarily are removed: 
+ * Remove all temporary files before exiting.When the program terminates
+ * normally through the exit choice, files that are created temporarily are removed:
  * xtrkcad.ckp
  *
  * \param none
  * \return none
  *
  */
- 
+
 EXPORT void CleanupFiles( void )
 {
 	if( checkPtFileName1 )
 		remove( checkPtFileName1 );
-}	
+}
 
 /**
- * Check for existance of checkpoint file. Existance of a checkpoint file means that XTrkCAD was not properly 
+ * Check for existance of checkpoint file. Existance of a checkpoint file means that XTrkCAD was not properly
  * terminated.
  *
  * \param none
  * \return TRUE if exists, FALSE otherwise
- * 
+ *
  */
 
 EXPORT int ExistsCheckpoint( void )
@@ -1074,14 +1074,14 @@ EXPORT int ExistsCheckpoint( void )
 	int len;
 	char *pattern = sCheckPointF;
 	char *search;
-	
+
 	struct stat fileStat;
 
 	len = strlen( workingDir ) + 1 + strlen( sCheckPointF ) + 1;
 	checkPtFileName1 = (char*)MyMalloc(len);
 	sprintf( checkPtFileName1, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPointF );
 	checkPtFileName2 = (char*)MyMalloc(len);
-	sprintf( checkPtFileName2, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPoint1F );	
+	sprintf( checkPtFileName2, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPoint1F );
 
 	len = strlen( workingDir ) + 1 + strlen( pattern ) + 1;
 	search = (char*)MyMalloc(len);
@@ -1093,7 +1093,7 @@ EXPORT int ExistsCheckpoint( void )
 	} else {
 		MyFree( search );
 		return FALSE;
-	}	
+	}
 
 
 #ifdef LATER
@@ -1101,19 +1101,19 @@ EXPORT int ExistsCheckpoint( void )
 
 	dir = opendir( search );
 	MyFree( search );
-	
+
 	if( dir )	{
 		closedir( dir );
 		return TRUE;
 	} else {
 		return FALSE;
-	}	
-#endif	
+	}
+#endif
 
 }
 
 /**
- * Load checkpoint file 
+ * Load checkpoint file
  *
  * \return TRUE if exists, FALSE otherwise
  *
@@ -1123,7 +1123,7 @@ EXPORT int LoadCheckpoint( void )
 {
 	int len;
 	char *search;
-	
+
 	paramVersion = -1;
 	wSetCursor( wCursorWait );
 
@@ -1233,7 +1233,7 @@ static int DoExportTracks(
 	}
 
 	oldLocale = SaveLocale("C");
-	
+
 	wSetCursor( wCursorWait );
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
@@ -1241,7 +1241,7 @@ static int DoExportTracks(
 	ExportTracks( f );
 	fprintf(f, "END\n");
 	fclose(f);
-	
+
 	RestoreLocale( oldLocale );
 
 	Reset();
@@ -1486,7 +1486,7 @@ EXPORT BOOL_T EditCut( void )
 /**
  * Paste clipboard content. XTrackCAD uses a disk file as clipboard replacement. This file is read and the
  * content is inserted.
- * 
+ *
  * \return    TRUE if success, FALSE on error (file not found)
  */
 
@@ -1539,7 +1539,7 @@ EXPORT void FileInit( void )
 	if (pref != NULL) {
 		strcpy( curDirName, pref );
 	} else {
-		sprintf( curDirName, "%s%sexamples", libDir, FILE_SEP_CHAR ); 
+		sprintf( curDirName, "%s%sexamples", libDir, FILE_SEP_CHAR );
 	}
 }
 

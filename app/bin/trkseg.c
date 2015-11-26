@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/trkseg.c,v 1.2 2006-05-30 16:11:55 m_fischer Exp $
+/** \file trkseg.c
+ * Modification and drawing of track segments
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -123,7 +123,7 @@ EXPORT coOrd GetSegEndPt(
 }
 
 /**
- * Caclulate the bounding box for a string. 
+ * Caclulate the bounding box for a string.
  *
  * \param coOrd IN position of text
  * \param angle IN text angle
@@ -149,15 +149,15 @@ EXPORT void GetTextBounds(
 	int i;
 
 	DrawTextSize2( &mainD, str, NULL, fs, FALSE, &size, &descent );
-	
+
 	// set up the corners of the rectangle
 	p[0].x = p[3].x = 0.0;
 	p[1].x = p[2].x = size.x;
 	p[0].y = p[1].y = -descent;
 	p[2].y = p[3].y = size.y;
-	
+
 	lo = hi = zero;
-	
+
 	// rotate each point
 	for ( i=1; i<4; i++ ) {
 		Rotate( &p[i], zero, angle );
@@ -166,7 +166,7 @@ EXPORT void GetTextBounds(
 		if ( p[i].x > hi.x ) hi.x = p[i].x;
 		if ( p[i].y > hi.y ) hi.y = p[i].y;
 	}
-	
+
 	// now recaclulate the corners
 	loR->x = pos.x + lo.x;
 	loR->y = pos.y + lo.y;
@@ -199,17 +199,17 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 			REORIGIN( p1, GetSegEndPt( segPtr, 1, FALSE, NULL ), angle, xlat )
 			if (p0.x < p1.x) {
 				lo->x = p0.x;
-				hi->x = p1.x; 
+				hi->x = p1.x;
 			} else {
 				lo->x = p1.x;
-				hi->x = p0.x; 
+				hi->x = p0.x;
 			}
 			if (p0.y < p1.y) {
 				lo->y = p0.y;
-				hi->y = p1.y; 
+				hi->y = p1.y;
 			} else {
 				lo->y = p1.y;
-				hi->y = p0.y; 
+				hi->y = p0.y;
 			}
 			if ( segPtr->type == SEG_CRVTRK ||
 				 segPtr->type == SEG_CRVLIN ) {
@@ -761,7 +761,7 @@ EXPORT ANGLE_T GetAngleSegs(
  *
  * Color
  *
- ****************************************************************************/ 
+ ****************************************************************************/
 
 typedef struct {
 		FLOAT_T h, s, v;
@@ -948,7 +948,7 @@ EXPORT void RecolorSegs(
  *
  * Input/Output
  *
- ****************************************************************************/ 
+ ****************************************************************************/
 
 
 static void AppendPath( signed char c )
@@ -984,7 +984,7 @@ EXPORT BOOL_T ReadSegs( void )
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 	pathCnt = 0;
 	while ( (cp = GetNextLine()) != NULL ) {
-		while (isspace(*cp)) cp++;
+		while (isspace((unsigned char)*cp)) cp++;
 		hasElev = FALSE;
 		if ( strncmp( cp, "END", 3 ) == 0 ) {
 			rc = TRUE;
@@ -1188,7 +1188,7 @@ EXPORT BOOL_T ReadSegs( void )
 			}
 			break;
 		case SEG_PATH:
-			while (isspace(*cp)) cp++;
+			while (isspace((unsigned char)*cp)) cp++;
 			if (*cp == '\"') cp++;
 			while ( *cp != '\"') AppendPath((signed char)*cp++);
 			AppendPath(0);
@@ -1455,7 +1455,7 @@ EXPORT void DrawDimLine(
 		p.y += fy*y;
 		DrawLine( d, p, p1, 0, color );
 }
-		
+
 EXPORT void DrawSegsO(
 		drawCmd_p d,
 		track_p trk,

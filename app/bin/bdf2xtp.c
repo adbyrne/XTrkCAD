@@ -1,5 +1,5 @@
-/*
- *		$Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/bdf2xtp.c,v 1.1 2005-12-07 15:46:58 rc-flyer Exp $
+/** \file bdf2xtp
+ *	Bdf2xtp translates .bdf files (which are source files for Winrail track libraries) to .xtp files
  */
 
 
@@ -154,7 +154,7 @@ double findAngle( coOrd p0, coOrd p1 )
 
 
 /* Where do we expect each input line? */
-typedef enum { 
+typedef enum {
 		CLS_NULL,
 		CLS_START,
 		CLS_END,
@@ -215,22 +215,22 @@ tokenDesc_t tokens[] = {
 		{ "EndStraight", CLS_END, ACT_DONE, NULL },
 		{ "Curve", CLS_START, ACT_CURVE, "SSNNN" },
 		{ "EndCurve", CLS_END, ACT_DONE, NULL },
-		{ "Turnout_Left", CLS_START, ACT_TURNOUT_LEFT, "SSN" }, 
-		{ "Turnout_Right", CLS_START, ACT_TURNOUT_RIGHT, "SSN" }, 
+		{ "Turnout_Left", CLS_START, ACT_TURNOUT_LEFT, "SSN" },
+		{ "Turnout_Right", CLS_START, ACT_TURNOUT_RIGHT, "SSN" },
 		{ "EndTurnout", CLS_END, ACT_DONE, NULL },
 		{ "CurvedTurnout_Left", CLS_START, ACT_CURVEDTURNOUT_LEFT, "SSN" },
 		{ "CurvedTurnout_Right", CLS_START, ACT_CURVEDTURNOUT_RIGHT, "SSN" },
-		{ "ThreeWayTurnout", CLS_START, ACT_THREEWAYTURNOUT, "SSN" }, 
-		{ "Crossing_Left", CLS_START, ACT_CROSSING_LEFT, "SSNNNN" }, 
-		{ "Crossing_Right", CLS_START, ACT_CROSSING_RIGHT, "SSNNNN" }, 
-		{ "DoubleSlip_Left", CLS_START, ACT_DOUBLESLIP_LEFT, "SSNNNNN" }, 
-		{ "DoubleSlip_Right", CLS_START, ACT_DOUBLESLIP_RIGHT, "SSNNNNN" }, 
-		{ "Crossing_Symetric", CLS_START, ACT_CROSSING_SYMMETRIC, "SSNNN" }, 
-		{ "DoubleSlip_Symetric", CLS_START, ACT_DOUBLESLIP_SYMMETRIC, "SSNNNN" }, 
+		{ "ThreeWayTurnout", CLS_START, ACT_THREEWAYTURNOUT, "SSN" },
+		{ "Crossing_Left", CLS_START, ACT_CROSSING_LEFT, "SSNNNN" },
+		{ "Crossing_Right", CLS_START, ACT_CROSSING_RIGHT, "SSNNNN" },
+		{ "DoubleSlip_Left", CLS_START, ACT_DOUBLESLIP_LEFT, "SSNNNNN" },
+		{ "DoubleSlip_Right", CLS_START, ACT_DOUBLESLIP_RIGHT, "SSNNNNN" },
+		{ "Crossing_Symetric", CLS_START, ACT_CROSSING_SYMMETRIC, "SSNNN" },
+		{ "DoubleSlip_Symetric", CLS_START, ACT_DOUBLESLIP_SYMMETRIC, "SSNNNN" },
 		{ "EndCrossing", CLS_END, ACT_DONE, NULL },
-		{ "Turntable", CLS_START, ACT_TURNTABLE, "SSNNNN" }, 
+		{ "Turntable", CLS_START, ACT_TURNTABLE, "SSNNNN" },
 		{ "EndTurntable", CLS_END, ACT_ENDTURNTABLE, NULL },
-		{ "TravellingPlatform", CLS_START, ACT_TRANSFERTABLE, "SSNNNNN" }, 
+		{ "TravellingPlatform", CLS_START, ACT_TRANSFERTABLE, "SSNNNNN" },
 		{ "EndTravellingPlatform", CLS_END, ACT_ENDTRANSFERTABLE, NULL },
 		{ "Track", CLS_START, ACT_TRACK, "SSN" },
 		{ "EndTrack", CLS_END, ACT_DONE, NULL },
@@ -255,22 +255,22 @@ tokenDesc_t tokens[] = {
 		{ "EndGerade", CLS_END, ACT_DONE, NULL },
 		{ "Bogen", CLS_START, ACT_CURVE, "SSNNN" },
 		{ "EndBogen", CLS_END, ACT_DONE, NULL },
-		{ "Weiche_links", CLS_START, ACT_TURNOUT_LEFT, "SSN" }, 
-		{ "Weiche_Rechts", CLS_START, ACT_TURNOUT_RIGHT, "SSN" }, 
+		{ "Weiche_links", CLS_START, ACT_TURNOUT_LEFT, "SSN" },
+		{ "Weiche_Rechts", CLS_START, ACT_TURNOUT_RIGHT, "SSN" },
 		{ "EndWeiche", CLS_END, ACT_DONE, NULL },
 		{ "Bogenweiche_Links", CLS_START, ACT_CURVEDTURNOUT_LEFT, "SSN" },
 		{ "Bogenweiche_Rechts", CLS_START, ACT_CURVEDTURNOUT_RIGHT, "SSN" },
-		{ "Dreiwegweiche", CLS_START, ACT_THREEWAYTURNOUT, "SSN" }, 
-		{ "Kreuzung_Links", CLS_START, ACT_CROSSING_LEFT, "SSNNNN" }, 
-		{ "Kreuzung_Rechts", CLS_START, ACT_CROSSING_RIGHT, "SSNNNN" }, 
-		{ "DKW_Links", CLS_START, ACT_DOUBLESLIP_LEFT, "SSNNNNN" }, 
-		{ "DKW_Rechts", CLS_START, ACT_DOUBLESLIP_RIGHT, "SSNNNNN" }, 
-		{ "Kreuzung_Symmetrisch", CLS_START, ACT_CROSSING_SYMMETRIC, "SSNNN" }, 
-		{ "DKW_Symmetrisch", CLS_START, ACT_DOUBLESLIP_SYMMETRIC, "SSNNNN" }, 
+		{ "Dreiwegweiche", CLS_START, ACT_THREEWAYTURNOUT, "SSN" },
+		{ "Kreuzung_Links", CLS_START, ACT_CROSSING_LEFT, "SSNNNN" },
+		{ "Kreuzung_Rechts", CLS_START, ACT_CROSSING_RIGHT, "SSNNNN" },
+		{ "DKW_Links", CLS_START, ACT_DOUBLESLIP_LEFT, "SSNNNNN" },
+		{ "DKW_Rechts", CLS_START, ACT_DOUBLESLIP_RIGHT, "SSNNNNN" },
+		{ "Kreuzung_Symmetrisch", CLS_START, ACT_CROSSING_SYMMETRIC, "SSNNN" },
+		{ "DKW_Symmetrisch", CLS_START, ACT_DOUBLESLIP_SYMMETRIC, "SSNNNN" },
 		{ "EndKreuzung", CLS_END, ACT_DONE, NULL },
-		{ "Drehscheibe", CLS_START, ACT_TURNTABLE, "SSNNNN" }, 
+		{ "Drehscheibe", CLS_START, ACT_TURNTABLE, "SSNNNN" },
 		{ "EndDrehscheibe", CLS_END, ACT_ENDTURNTABLE, NULL },
-		{ "Schiebebuehne", CLS_START, ACT_TRANSFERTABLE, "SSNNNNN" }, 
+		{ "Schiebebuehne", CLS_START, ACT_TRANSFERTABLE, "SSNNNNN" },
 		{ "EndSchiebebuehne", CLS_END, ACT_ENDTRANSFERTABLE, NULL },
 		{ "Schiene", CLS_START, ACT_TRACK, "SSN" },
 		{ "EndSchiene", CLS_END, ACT_DONE, NULL },
@@ -362,7 +362,7 @@ int isclose( coOrd a, coOrd b )
 
 
 void searchSegs( segs_t * sp, int ep )
-/* Recursively search the segs looking for the next segement that begins 
+/* Recursively search the segs looking for the next segement that begins
    where this (sp->pos[ep]) one ends.  We mark the ones we have already
    used (sp->mark).
    Returns when we can't continue.
@@ -618,7 +618,7 @@ char * getLine( void )
 			lineLen = cp-line;
 		}
 		cp = line;
-		while ( isspace(*cp) ) {
+		while ( isspace((unsigned char)*cp) ) {
 			cp++;
 			lineLen--;
 		}
@@ -1118,7 +1118,7 @@ void parse( void )
 				switch( tp->args[inx] ) {
 				case 'S':
 					args[inx].string = sp;
-					while (isspace(*cp)) cp++;
+					while (isspace((unsigned char)*cp)) cp++;
 					if (*cp != '"') {
 						fprintf( stderr, "%d: expected a \": %s\n", lineCount, cp );
 						goto nextLine;

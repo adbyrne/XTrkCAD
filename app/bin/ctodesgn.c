@@ -40,7 +40,7 @@
 
 /*****************************************
  *
- *   TURNOUT DESIGNER 
+ *   TURNOUT DESIGNER
  *
  */
 
@@ -187,7 +187,7 @@ static signed char RegPaths[] = {
 		'R', 'e', 'v', 'e', 'r', 's', 'e', 0, 1, 3, 4, 0, 0, 0 };
 static toDesignSchema_t RegSchema = {
 		RegPaths,
-		"030" "310" "341" "420" }; 
+		"030" "310" "341" "420" };
 static toDesignDesc_t RegDesc = {
 		NTO_REGULAR,
 		N_("Regular Turnout"),
@@ -248,7 +248,7 @@ static toDesignFloat_t WyeFloats[] = {
 static signed char Wye1Paths[] = {
 		'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
 		'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 0, 0, 0 };
-static toDesignSchema_t Wye1Schema = { 
+static toDesignSchema_t Wye1Schema = {
 		Wye1Paths,
 		"030" "341" "410" "362" "620" };
 static signed char Wye2Paths[] = {
@@ -287,7 +287,7 @@ static signed char Tri1Paths[] = {
 		'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
 		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 6, 0, 0,
 		'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 0, 0, 0 };
-static toDesignSchema_t Tri1Schema = { 
+static toDesignSchema_t Tri1Schema = {
 		Tri1Paths,
 		"030" "341" "410" "362" "620" "370" };
 static signed char Tri2Paths[] = {
@@ -1099,7 +1099,7 @@ static toDesignSchema_t * LoadSegs(
 				return NULL;
 			radii[0] = - radii[0];
 			points[0].x = points[0].y = points[1].y = 0.0;
-			points[1].x = (newTurnLen0); 
+			points[1].x = (newTurnLen0);
 			points[2].y = (newTurnOff1);
 			points[2].x = (newTurnLen1);
 			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
@@ -1146,7 +1146,7 @@ static toDesignSchema_t * LoadSegs(
 			radii[0] = - radii[0];
 			points[0].x = points[0].y = 0.0;
 			points[1].y = (newTurnOff1);
-			points[1].x = (newTurnLen1); 
+			points[1].x = (newTurnLen1);
 			points[2].y = -(newTurnOff2);
 			points[2].x = (newTurnLen2);
 			points[7].y = 0;
@@ -1343,7 +1343,7 @@ static void NewTurnPrint(
 		{ 0.0, 0.0 },
 		{ 0.0, 0.0 },
 		Pix2CoOrd, CoOrd2Pix };
-	
+
 	if ((pp=LoadSegs( curDesign, TRUE, NULL )) == NULL)
 		return;
 	if (includeNontrackSegments && customTurnout1)
@@ -2104,11 +2104,11 @@ EXPORT void ComputeCurvedSeg(
 EXPORT char * Strcpytrimed( char * dst, char * src, BOOL_T double_quotes )
 {
 	char * cp;
-	while (*src && isspace(*src) ) src++;
+	while (*src && isspace((unsigned char)*src) ) src++;
 	if (!*src)
 		return dst;
 	cp = src+strlen(src)-1;
-	while ( cp>src && isspace(*cp) ) cp--;
+	while ( cp>src && isspace((unsigned char)*cp) ) cp--;
 	while ( src<=cp ) {
 		if (*src == '"' && double_quotes)
 			*dst++ = '"';
@@ -2331,7 +2331,7 @@ int main ( int argc, char * argv[] )
 	}
 	strcpy( newTurnManufacturer, *argv++ );
 	specialLine[0] = '\0';
-	switch (tolower((*argv++)[0])) {
+	switch (tolower((unsigned char)(*argv++)[0])) {
 	case 'b':
 		if (argc != 7) Usage(argc0,argv0);
 		strcpy( newTurnLeftDesc, *argv++ );
@@ -2364,7 +2364,7 @@ int main ( int argc, char * argv[] )
 		strcpy( newTurnLeftPartno, *argv++ );
 		newTurnLen1 = GetDim(atof( *argv++ ));
 		newTurnAngle1 = atof( *argv++ );
-		curDesign = &CrvSectionDesc;	
+		curDesign = &CrvSectionDesc;
 		NewTurnOk( &CrvSectionDesc );
 		break;
 	case 'r':

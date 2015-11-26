@@ -374,7 +374,7 @@ static void SetCarBoundingBox(
 			hi.y = p[inx].y;
 	}
 	SetBoundingBox( car, hi, lo );
-	
+
 }
 
 
@@ -593,8 +593,8 @@ static wIndex_t FindLoco(
 }
 
 /**
- * Update the speed display when running trains. Draw the slider in the 
- * correct position and update the odometer. 
+ * Update the speed display when running trains. Draw the slider in the
+ * correct position and update the odometer.
  *
  * \param d IN drawing area for slider
  * \param d IN the dialog
@@ -611,7 +611,7 @@ static void SpeedRedraw(
 	wPos_t y, pts[4][2];
 	trainControlDlg_p dlg = (trainControlDlg_p)context;
 	struct extraData * xx;
-	wDrawColor drawColor; 
+	wDrawColor drawColor;
 
 	wDrawClear( d );
 	if ( dlg == NULL || dlg->train == NULL ) return;
@@ -635,18 +635,18 @@ static void SpeedRedraw(
 	pts[0][0] = pts[3][0] = 0;
 	pts[1][0] = pts[2][0] = SLIDER_WIDTH;
 	wDrawFilledPolygon( d, pts, 4, drawColor, 0 );
-	
+
 	wDrawLine( d, 0, y, SLIDER_WIDTH, y, 1, wDrawLineSolid, drawColorRed, 0 );
 	wDrawLine( d, 0, y+SLIDER_THICKNESS/2, SLIDER_WIDTH, y+SLIDER_THICKNESS/2, 1, wDrawLineSolid, drawColorBlack, 0 );
 	wDrawLine( d, 0, y-SLIDER_THICKNESS/2, SLIDER_WIDTH, y-SLIDER_THICKNESS/2, 1, wDrawLineSolid, drawColorBlack, 0 );
-	
+
 	sprintf( dlg->speedS, "%3d %s", (int)(units==UNITS_ENGLISH?xx->speed:xx->speed*1.6), (units==UNITS_ENGLISH?"mph":"km/h") );
 	ParamLoadMessage( dlg->trainPGp, I_SPEED, dlg->speedS );
 	LOG( log_trainPlayback, 3, ( "Speed = %d\n", (int)xx->speed ) );
 }
 
 
-static void SpeedAction( 
+static void SpeedAction(
 		wAction_t action,
 		coOrd pos )
 {
@@ -717,7 +717,7 @@ static void ControllerDialogSync(
 	} else {
 		wListSetIndex( (wList_p)dlg->trainPGp->paramPtr[I_LIST].control, -1 );
 	}
-		
+
 	if ( dlg->train ) {
 		xx = GetTrkExtraData(dlg->train);
 		dir = xx->direction==0?0:1;
@@ -954,7 +954,7 @@ static void SetTrainDirection(
 	struct extraData *xx, *xx0=GetTrkExtraData(train);
 	int dir, dir0;
 	track_p car;
-	
+
 	car = train;
 	for ( dir0 = 0; dir0 < 2; dir0++ ) {
 		dir = dir0;
@@ -1140,7 +1140,7 @@ if ( top1 != top2 ) {
 			hi.y = lo.y + size.x;
 			if ( !OFF_MAIND( lo, hi ) )
 				DrawCar( car, &mainD, wDrawColorBlack );
-		} 
+		}
 	}
 	wDrawDelayUpdate( mainD.d, FALSE );
 	drawCarEnable = drawCarEnable1;
@@ -1208,7 +1208,7 @@ static track_p FindCar(
 	track_p trk, trk1;
 	DIST_T dist1 = 100000, dist;
 	struct extraData * xx;
- 
+
 	trk1 = NULL;
 	for ( trk=NULL; TrackIterate(&trk); ) {
 		if ( GetTrkType(trk) == T_CAR ) {
@@ -1458,7 +1458,7 @@ static void CrashTrain(
 		FlipTraverseTrack( &xx->trvTrk );
 	PlaceCars( car, 1-dir, speed, flip );
 	if ( flip )
-		speed = - speed; 
+		speed = - speed;
 	xx->trvTrk.angle = NormalizeAngle( xx->trvTrk.angle - speed );
 	xx->trvTrk.trk = NULL;
 	PlaceCar( car );
@@ -1712,7 +1712,7 @@ static BOOL_T MoveTrain(
 			measured = TRUE;
 		}
 	WALK_CARS_END( car1, xx1, dir1 );
-	
+
 	if ( train == followTrain ) {
 		if ( followCenter.x != mainCenter.x ||
 			 followCenter.y != mainCenter.y ) {
@@ -2057,7 +2057,7 @@ static STATUS_T CmdTrain( wAction_t action, coOrd pos )
 				DoCarDlg();
 				DoChangeNotification( CHANGE_PARAMS );
 			}
-		} 
+		}
 		EnableCommands();
 		if ( curTrainDlg == NULL )
 			curTrainDlg = CreateTrainControlDlg();
@@ -2090,7 +2090,7 @@ static STATUS_T CmdTrain( wAction_t action, coOrd pos )
 		wControlShow( (wControl_p)newcarB, (toolbarSet&(1<<BG_HOTBAR)) == 0 );
 		currCarItemPtr = NULL;
 		return C_CONTINUE;
-		
+
 	case C_TEXT:
 		if ( Dtrain.state == 0 )
 			return C_CONTINUE;
@@ -2288,7 +2288,7 @@ static STATUS_T CmdTrain( wAction_t action, coOrd pos )
 		if ( !inPlayback )
 			wMenuPopupShow( trainPopupM );
 		return C_CONTINUE;
-			
+
 	case C_REDRAW:
 #ifdef LATER
 		if (Dtrain.state == 1 && !suppressTrainRedraw) {
@@ -2381,8 +2381,8 @@ static void CmdTrainStopGo( void * junk )
 
 static BOOL_T TrainStopGoPlayback( char * line )
 {
-	while (*line && isspace(*line) ) line++;
-	if ( (strcasecmp( line, "STOP" ) == 0) != (trainsState == TRAINS_STOP) ) 
+	while (*line && isspace((unsigned char)*line) ) line++;
+	if ( (strcasecmp( line, "STOP" ) == 0) != (trainsState == TRAINS_STOP) )
 		CmdTrainStopGo(NULL);
 	return TRUE;
 }

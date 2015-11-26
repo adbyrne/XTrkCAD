@@ -1,6 +1,5 @@
-/* 
- * ------------------------------------------------------------------
- * cswitchmotor.c - Switch Motors
+/** \file cswitchmotor.c
+ * Switch Motors
  * Created by Robert Heller on Sat Mar 14 10:39:56 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
@@ -25,27 +24,27 @@
  * ------------------------------------------------------------------
  * Contents:
  * ------------------------------------------------------------------
- *  
+ *
  *     Generic Project
  *     Copyright (C) 2005  Robert Heller D/B/A Deepwoods Software
  * 			51 Locke Hill Road
  * 			Wendell, MA 01379-9728
- * 
+ *
  *     This program is free software; you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation; either version 2 of the License, or
  *     (at your option) any later version.
- * 
+ *
  *     This program is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- * 
+ *
  *     You should have received a copy of the GNU General Public License
  *     along with this program; if not, write to the Free Software
  *     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- * 
- *  
+ *
+ *
  */
 
 #include <ctype.h>
@@ -117,8 +116,8 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
 	if (switchmotormark_bm == NULL) {
 		switchmotormark_bm =
 			wDrawBitMapCreate( mainD.d,
-					   switchmotormark_width, 
-					   switchmotormark_height, 16, 16, 
+					   switchmotormark_width,
+					   switchmotormark_height, 16, 16,
 					   switchmotormark_bits);
 	}
 	Translate (&p, orig, -angle , 2 );
@@ -137,8 +136,8 @@ static struct {
 typedef enum { NM, NOR, REV, PS, TO } switchmotorDesc_e;
 static descData_t switchmotorDesc[] = {
 /*NM */  { DESC_STRING, N_("Name"), &switchmotorData.name },
-/*NOR*/  { DESC_STRING, N_("Normal"), &switchmotorData.normal },	
-/*REV*/  { DESC_STRING, N_("Reverse"), &switchmotorData.reverse },	
+/*NOR*/  { DESC_STRING, N_("Normal"), &switchmotorData.normal },
+/*REV*/  { DESC_STRING, N_("Reverse"), &switchmotorData.reverse },
 /*PS */  { DESC_STRING, N_("Point Sense"), &switchmotorData.pointsense },
 /*TO */  { DESC_LONG, N_("Turnout"), &switchmotorData.turnout },
 	 { DESC_NULL } };
@@ -215,7 +214,7 @@ static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
 	strcpy( str, _(GetTrkTypeName( trk )) );
 	str++;
 	while (*str) {
-		*str = tolower(*str);
+		*str = tolower((unsigned char)*str);
 		str++;
 	}
 	sprintf( str, _("(%d): Layer=%d %s"),
@@ -230,7 +229,7 @@ static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
 	switchmotorData.pointsense[STR_LONG_SIZE-1] = '\0';
 	switchmotorData.turnout = GetTrkIndex(xx->turnout);
 	switchmotorDesc[TO].mode = DESC_RO;
-	switchmotorDesc[NM].mode = 
+	switchmotorDesc[NM].mode =
 	switchmotorDesc[NOR].mode =
 	switchmotorDesc[REV].mode =
 	switchmotorDesc[PS].mode = DESC_NOREDRAW;
@@ -334,7 +333,7 @@ static trackCmd_t switchmotorCmds = {
 static track_p FindSwitchMotor (track_p trk)
 {
 	track_p a_trk;
-	switchmotorData_p xx;	
+	switchmotorData_p xx;
 
 	for (a_trk = NULL; TrackIterate( &a_trk ) ;) {
 		if (GetTrkType(a_trk) == T_SWITCHMOTOR) {
@@ -349,7 +348,7 @@ static void SwitchMotorOk ( void * junk )
 {
 	switchmotorData_p xx;
 	track_p trk;
-	
+
 	LOG( log_switchmotor, 1, ("*** SwitchMotorOk()\n"))
 	ParamUpdate (&switchmotorPG );
 	if ( switchmotorName[0]==0 ) {
@@ -389,7 +388,7 @@ static void NewSwitchMotorDialog(track_p trk)
 static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 {
 	track_p trk;
-	
+
 	LOG( log_switchmotor, 1, ("*** CmdSwitchMotorCreate(%08x,{%f,%f})\n",action,pos.x,pos.y))
 	switch (action & 0xFF) {
 	case C_START:
@@ -412,7 +411,7 @@ static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 	default:
 		return C_CONTINUE;
 	}
-}	
+}
 
 extern BOOL_T inDescribeCmd;
 
@@ -420,7 +419,7 @@ static STATUS_T CmdSwitchMotorEdit( wAction_t action, coOrd pos )
 {
 	track_p trk,btrk;
 	char msg[STR_SIZE];
-	
+
 	switch (action) {
 	case C_START:
 		InfoMessage( _("Select a turnout") );
@@ -452,7 +451,7 @@ static STATUS_T CmdSwitchMotorDelete( wAction_t action, coOrd pos )
 {
 	track_p trk,btrk;
 	switchmotorData_p xx;
-	
+
 	switch (action) {
 	case C_START:
 		InfoMessage( _("Select a turnout") );
@@ -469,7 +468,7 @@ static STATUS_T CmdSwitchMotorDelete( wAction_t action, coOrd pos )
 		/* Confirm Delete SwitchMotor */
 		xx = GetswitchmotorData(btrk);
 		if ( NoticeMessage( _("Really delete switch motor %s?"), _("Yes"), _("No"), xx->name) ) {
-			UndoStart( _("Delete Switch Motor"), "delete" );			
+			UndoStart( _("Delete Switch Motor"), "delete" );
 			DeleteTrack (btrk, FALSE);
 			UndoEnd();
 			return C_TERMINATE;
@@ -502,7 +501,7 @@ static STATUS_T CmdSwitchMotor (wAction_t action, coOrd pos )
 	default: return C_TERMINATE;
 	}
 }
-	
+
 //#include "bitmaps/switchmotor.xpm"
 
 #include "bitmaps/switchmnew.xpm"

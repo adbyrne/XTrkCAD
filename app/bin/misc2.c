@@ -126,7 +126,7 @@ EXPORT void Rprintf(
 
 static changeNotificationCallBack_t changeNotificationCallBacks[20];
 static int changeNotificationCallBackCnt = 0;
-		
+
 EXPORT void RegisterChangeNotification(
 		changeNotificationCallBack_t action )
 {
@@ -219,12 +219,12 @@ EXPORT DIST_T GetScaleDescRatio( SCALEDESCINX_T sdi )
 }
 
 /**
- * Get the index into the linear list from a scale description and a gauge. All information about a 
+ * Get the index into the linear list from a scale description and a gauge. All information about a
  * scale/ gauge combination is stored in a linear list. The index in that list for a given scale and the
  * gauge is returned by this function. Note that there is no error checking on parameters!
  *
  * \param IN scaleInx index into list of scale descriptions
- * \param IN gaugeInx index into list of gauges available for this scale 
+ * \param IN gaugeInx index into list of gauges available for this scale
  * \return  index into master list of scale/gauge combinations
  */
 
@@ -317,14 +317,14 @@ EXPORT SCALEINX_T LookupScale( const char * name )
 		if (strcmp( scaleInfo(si).scale, name ) == 0)
 			return si;
 	}
-	if ( isdigit(name[0]) ) {
+	if ( isdigit((unsigned char)name[0]) ) {
 		gauge = atof( name );
 		for ( si=0; si<scaleInfo_da.cnt; si++ ) {
 			if (scaleInfo(si).gauge == gauge)
 				return si;
 		}
 	}
-	NoticeMessage( MSG_BAD_SCALE_NAME, "Ok", NULL, name, sProdNameLower ); 
+	NoticeMessage( MSG_BAD_SCALE_NAME, "Ok", NULL, name, sProdNameLower );
 	si = scaleInfo_da.cnt;
 	DYNARR_APPEND( scaleInfo_t, scaleInfo_da, 10 );
 	scaleInfo(si) = scaleInfo(0);
@@ -357,7 +357,7 @@ EXPORT BOOL_T CompatibleScale(
 	return FALSE;
 }
 
-/** Split the scale and the gauge description for a given combination. Eg HOn3 will be 
+/** Split the scale and the gauge description for a given combination. Eg HOn3 will be
  * split to HO and n3.
  * \param scaleInx IN  scale/gauge combination
  * \param scaleDescInx OUT  scale part
@@ -372,7 +372,7 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 	char *scaleName = GetScaleName( scaleInx );
 	DIST_T scaleRatio = GetScaleRatio( scaleInx );
 	dynArr_t gauges_da;
-	
+
 	for( i = 0; i < scaleDesc_da.cnt; i++ ) {
 		char *t = strchr( scaleDesc(i).scaleDesc, ' ' );
 		/* are the first characters (which describe the scale) identical? */
@@ -388,13 +388,13 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
 					if( scaleInfo(ptr->scale).gauge == GetScaleTrackGauge( scaleInx )) {
 						*gaugeInx = j;
 						break;
-					}	
+					}
 				}
 				break;
-			}	
+			}
 		}
-	}	
-	
+	}
+
 	return TRUE;
 }
 
@@ -403,10 +403,10 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
  *
  * \param newScaleInx IN the index of the selected scale/gauge combination
  */
- 
+
 static void SetScale(
 		SCALEINX_T newScaleInx )
-{	
+{
 	if (newScaleInx < 0 && newScaleInx >= scaleInfo_da.cnt) {
 		NoticeMessage( MSG_BAD_SCALE_INDEX, _("Ok"), NULL, (int)newScaleInx );
 		return;
@@ -416,11 +416,11 @@ static void SetScale(
 	trackGauge = curScale->gauge;
 	curScaleRatio = curScale->ratio;
 	curScaleName = curScale->scale;
-	
+
 	curScaleDescInx = 0;
-	
+
 	GetScaleGauge( curScaleInx, &curScaleDescInx, &curGaugeInx );
-	
+
 	wPrefSetString( "misc", "scale", curScaleName );
 
 	// now load the minimum radius for the newly selected scale
@@ -441,12 +441,12 @@ EXPORT BOOL_T DoSetScale(
 	SCALEINX_T scale;
 	char * cp;
 	BOOL_T found = FALSE;
- 
+
 	if ( newScale != NULL ) {
 		cp = CAST_AWAY_CONST newScale+strlen(newScale)-1;
-		while ( *cp=='\n' || *cp==' ' || *cp=='\t' ) cp--; 
+		while ( *cp=='\n' || *cp==' ' || *cp=='\t' ) cp--;
 		cp[1] = '\0';
-		while (isspace(*newScale)) newScale++;
+		while (isspace((unsigned char)*newScale)) newScale++;
 		for (scale = 0; scale<scaleInfo_da.cnt; scale++) {
 			if (strcasecmp( scaleInfo(scale).scale, newScale ) == 0) {
 				curScaleInx = scale;
@@ -459,12 +459,12 @@ EXPORT BOOL_T DoSetScale(
 			DoChangeNotification( CHANGE_SCALE );
 		}
 	}
-	
+
 	return found;
 }
 
-/** 
- * Setup the data structures for scale and gauge. XTC reads 'scales' into an dynamic array, 
+/**
+ * Setup the data structures for scale and gauge. XTC reads 'scales' into an dynamic array,
  * but doesn't differentiate between scale and gauge.
  * This da is split into an dynamic array of scales. Each scale holds a dynamic array of gauges,
  * with at least one gauge per scale (ie standard gauge)
@@ -473,26 +473,26 @@ EXPORT BOOL_T DoSetScale(
  *
  * \return TRUE
  */
- 
+
 EXPORT BOOL_T DoSetScaleDesc( void )
 {
 	SCALEINX_T scaleInx;
 	SCALEINX_T work;
 	SCALEDESCINX_T descInx;
 	scaleDesc_p s = NULL;
-	gaugeInfo_p g; 
+	gaugeInfo_p g;
 	char *cp;
 	DIST_T ratio;
 	BOOL_T found;
 	char buf[ 80 ];
 	int len;
-	
+
 	for( scaleInx = 0; scaleInx < scaleInfo_da.cnt; scaleInx++ ) {
 		ratio = DYNARR_N( scaleInfo_t, scaleInfo_da, scaleInx ).ratio;
-		
+
 		/* do we already have a description for this scale? */
 		found = 0;
-		
+
 		if( scaleDesc_da.cnt > 0 ) {
 			for( descInx = 0; descInx < scaleDesc_da.cnt; descInx++ ) {
 				work = scaleDesc(descInx).scale;
@@ -502,32 +502,32 @@ EXPORT BOOL_T DoSetScaleDesc( void )
 				}
 			}
 		}
-		
-				
+
+
 		if( !found ) {
 			/* if no, add as new scale */
-	
+
 			DYNARR_APPEND( scaleDesc_t, scaleDesc_da, 1 );
-			
+
 			s = &(scaleDesc( scaleDesc_da.cnt-1 ));
-			
+
 			s->scale = scaleInx;
-			
+
 			sprintf( buf, "%s (1/%.1f)", scaleInfo(scaleInx).scale, scaleInfo(scaleInx).ratio );
 			s->scaleDesc = MyStrdup( buf );
-			
+
 			/* initialize the array with standard gauge */
-			
+
 			DYNARR_APPEND( gaugeInfo_t, s->gauges_da, 10 );
-			
+
 			g = &(DYNARR_N( gaugeInfo_t, s->gauges_da, (s->gauges_da).cnt - 1 ));
 			g->scale = scaleInx;
 			sprintf( buf, "Standard (%.1fmm)", scaleInfo(scaleInx).gauge*25.4 );
 			g->gauge = MyStrdup( buf );
-			
-		} else {	
+
+		} else {
 			/* if yes, is this a new gauge to the scale? */
-			DYNARR_APPEND( gaugeInfo_t, s->gauges_da, 10 );			
+			DYNARR_APPEND( gaugeInfo_t, s->gauges_da, 10 );
 			g = &(DYNARR_N( gaugeInfo_t, s->gauges_da, (s->gauges_da).cnt - 1 ));
 			g->scale = scaleInx;
 			cp = strchr( s->scaleDesc, ' ' );
@@ -539,7 +539,7 @@ EXPORT BOOL_T DoSetScaleDesc( void )
 			g->gauge = MyStrdup( buf );
 		}
 	}
-		
+
 	return( TRUE );
 }
 
@@ -659,15 +659,15 @@ EXPORT void LoadGaugeList( wList_p gaugeList, SCALEDESCINX_T scale )
 	scaleDesc_t s;
 	gaugeInfo_p g;
 	dynArr_t *gauges_da_p;
-	
+
 	s = scaleDesc(scale);
 	gauges_da_p = &(s.gauges_da);
 	g = gauges_da_p->ptr;
 	g = s.gauges_da.ptr;
 
-	wListClear( gaugeList );			/* remove old list in case */	
-	for (inx=0; inx<gauges_da_p->cnt; inx++) {		
-		(g[inx]).index = wListAddValue( gaugeList, (g[inx]).gauge, NULL, (void*)(intptr_t)(g[inx]).scale ); 
+	wListClear( gaugeList );			/* remove old list in case */
+	for (inx=0; inx<gauges_da_p->cnt; inx++) {
+		(g[inx]).index = wListAddValue( gaugeList, (g[inx]).gauge, NULL, (void*)(intptr_t)(g[inx]).scale );
 	}
 }
 
@@ -680,7 +680,7 @@ static void ScaleChange( long changes )
 
 /*****************************************************************************
  *
- * 
+ *
  *
  */
 

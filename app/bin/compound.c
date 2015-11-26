@@ -1,6 +1,4 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/compound.c,v 1.4 2008-01-20 23:29:15 mni77 Exp $
- *
+/** \file compound.c
  * Compound tracks: Turnouts and Structures
  *
  */
@@ -188,7 +186,7 @@ void ComputeCompoundBoundingBox(
 	coOrd hi, lo;
 
 	xx = GetTrkExtraData(trk);
-	
+
 	GetSegBounds( xx->orig, xx->angle, xx->segCnt, xx->segs, &lo, &hi );
 	hi.x += lo.x;
 	hi.y += lo.y;
@@ -283,7 +281,7 @@ void SetDescriptionOrig(
 		Translate( &p0, p0,
 				xx->segs[j].u.c.a0 + xx->segs[j].u.c.a1/2.0 + xx->angle,
 				fabs(xx->segs[j].u.c.radius) );
-		
+
 	} else {
 		GetBoundingBox( trk, (&p0), (&p1) );
 		p0.x = (p0.x+p1.x)/2.0;
@@ -396,7 +394,7 @@ STATUS_T CompoundDescriptionMove(
 	switch (action) {
 	case C_DOWN:
 		REORIGIN( p0, xx->descriptionOrig, xx->angle, xx->orig )
-		
+
 	case C_MOVE:
 	case C_UP:
 		if (action != C_DOWN)
@@ -432,7 +430,7 @@ EXPORT void GetSegInxEP(
 		int * segInx,
 		EPINX_T * segEP )
 {
-	int inx; 
+	int inx;
 	inx = segChar;
 	if (inx > 0 ) {
 		*segInx = (inx)-1;
@@ -672,7 +670,7 @@ void DescribeCompound(
 	int mL, nL, pL;
 	long mode;
 	long listLabelsOption = listLabels;
-	
+
 	if ( xx->flipped )
 		listLabelsOption |= LABEL_FLIPPED;
 	if ( xx->ungrouped )
@@ -685,7 +683,7 @@ void DescribeCompound(
 	strcpy( str, _(GetTrkTypeName( trk )) );
 	str++;
 	while (*str) {
-		*str = tolower(*str);
+		*str = tolower((unsigned char)*str);
 		str++;
 	}
 	sprintf( str, _("(%d): Layer=%d %s"),
@@ -836,7 +834,7 @@ BOOL_T WriteCompound(
 	switch ( xx->special ) {
 	case TOadjustable:
 		rc &= fprintf( f, "\tX %s %0.3f %0.3f\n", ADJUSTABLE,
-				xx->u.adjustable.minD, xx->u.adjustable.maxD )>0; 
+				xx->u.adjustable.minD, xx->u.adjustable.maxD )>0;
 		break;
 	case TOpier:
 		rc &= fprintf( f, "\tX %s %0.6f \"%s\"\n", PIER, xx->u.pier.height, xx->u.pier.name )>0;
@@ -1009,7 +1007,7 @@ void ReadCompound(
 	}
 	xx->segCnt = tempSegs_da.cnt;
 	memcpy( xx->segs, tempSegs_da.ptr, tempSegs_da.cnt * sizeof *xx->segs );
-	
+
 	ComputeCompoundBoundingBox( trk );
 	SetDescriptionOrig( trk );
 	xx->descriptionOff = descriptionOff;
@@ -1020,12 +1018,12 @@ void ReadCompound(
 			xx->special = TOadjustable;
 			GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
 						&xx->u.adjustable.minD, &xx->u.adjustable.maxD );
-				
+
 		} else if (strncmp( tempSpecial, PIER, strlen(PIER) ) == 0) {
 			xx->special = TOpier;
 			GetArgs( tempSpecial+strlen(PIER), "fq",
 						&xx->u.pier.height, &xx->u.pier.name );
-				
+
 		} else {
 			InputError("Unknown special case", TRUE);
 		}
@@ -1101,7 +1099,7 @@ void FlipCompound(
 	DIST_T d2, d1, d0;
 	ANGLE_T a2, a1;
 #define SMALLVALUE (0.001)
-	
+
 	FlipPoint( &xx->orig, orig, angle );
 	xx->angle = NormalizeAngle( 2*angle - xx->angle + 180.0 );
 	xx->segs = memdup( xx->segs, xx->segCnt * sizeof xx->segs[0] );
@@ -1252,14 +1250,14 @@ BOOL_T EnumerateCompound( track_p trk )
 		for ( type="TS"; *type; type++ ) {
 			for (inx = 0; inx < enumCompound_da.cnt; inx++ ) {
 				if (EnumCompound(inx).type[0] == *type) {
-					EnumerateList( EnumCompound(inx).count, 
+					EnumerateList( EnumCompound(inx).count,
 						EnumCompound(inx).price,
-						EnumCompound(inx).name ); 
+						EnumCompound(inx).name );
 				}
 			}
 		}
 		DYNARR_RESET( enumCompound_t, enumCompound_da );
 	}
-	return TRUE;   
+	return TRUE;
 }
 

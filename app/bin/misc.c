@@ -1,5 +1,5 @@
 /* \file misc.c
- * Main routine and initialization for the application 
+ * Main routine and initialization for the application
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -193,7 +193,7 @@ EXPORT void * MyMalloc ( long size )
 	p = malloc( (size_t)size + sizeof (size_t) + 2 * sizeof (unsigned long) );
 	if (p == NULL)
 		AbortProg( "No memory" );
-		
+
 LOG1( log_malloc, ( "Malloc(%ld) = %lx (%lx-%lx)\n", size,
 				(long)((char*)p+sizeof (size_t) + sizeof (unsigned long)),
 				(long)p,
@@ -312,11 +312,11 @@ EXPORT void AbortProg(
 EXPORT char * Strcpytrimed( char * dst, char * src, BOOL_T double_quotes )
 {
 	char * cp;
-	while (*src && isspace(*src) ) src++;
+	while (*src && isspace((unsigned char)*src) ) src++;
 	if (!*src)
 		return dst;
 	cp = src+strlen(src)-1;
-	while ( cp>src && isspace(*cp) ) cp--;
+	while ( cp>src && isspace((unsigned char)*cp) ) cp--;
 	while ( src<=cp ) {
 		if (*src == '"' && double_quotes)
 			*dst++ = '"';
@@ -450,7 +450,7 @@ EXPORT void Confirm( char * label2, doSaveCallBack_p after )
 {
 	int rc;
 	if (changed) {
-		 rc = wNotice3( 
+		 rc = wNotice3(
 						_("Save changes to the layout design before closing?\n\n"
 						"If you don't save now, your unsaved changes will be discarded."),
 						_("&Save"), _("&Cancel"), _("&Don't Save") );
@@ -473,7 +473,7 @@ static void ChkLoad( void )
 static void ChkRevert( void )
 {
 	int rc;
-	
+
 	if( changed) {
 		rc = wNoticeEx( NT_WARNING, _("Do you want to return to the last saved state?\n\n"
 									"Revert will cause all changes done since last save to be lost."),
@@ -481,7 +481,7 @@ static void ChkRevert( void )
 		if( rc ) {
 			/* load the file */
 			LoadTracks( curPathName, curFileName, NULL );
-		} 								
+		}
 	}
 }
 
@@ -499,7 +499,7 @@ static void ChkFileList( int index, const char * label, void * data )
 }
 
 /**
- * Save information about current files and some settings to preferences file. 
+ * Save information about current files and some settings to preferences file.
  */
 
 EXPORT void SaveState( void )
@@ -515,9 +515,9 @@ EXPORT void SaveState( void )
 	wPrefSetInteger( "draw", "mainheight", height );
 	RememberParamFiles();
 	ParamUpdatePrefs();
-	
+
 	wPrefSetString( "misc", "lastlayout", curPathName );
-	
+
 	if ( fileList_ml ) {
 		strcpy( file, "file" );
 		file[5] = 0;
@@ -544,12 +544,12 @@ static void DoQuitAfter( void )
 	SaveState();
 
 	CleanupFiles();
-		
+
 	quitting = TRUE;
 }
 /**
  * Process shutdown request. This function is called when the user requests
- * to close the application. Before shutting down confirmation is gotten to 
+ * to close the application. Before shutting down confirmation is gotten to
  * prevent data loss.
  */
 void DoQuit( void )
@@ -567,10 +567,10 @@ void DoQuit( void )
 static void DoClearAfter( void )
 {
 	ClearTracks();
-	
+
 	/* set all layers to their default properties and set current layer to 0 */
 	DefaultLayerProperties();
-	
+
 	checkPtMark = 0;
 	Reset();
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
@@ -744,7 +744,7 @@ static int commandCnt = 0;
 int * balloonHelpCnts;
 #endif
 
-EXPORT char * GetBalloonHelpStr( char * helpKey )
+EXPORT const char * GetBalloonHelpStr( char * helpKey )
 {
 	wBalloonHelp_t * bh;
 #ifdef CHECK_UNUSED_BALLOONHELP
@@ -820,7 +820,7 @@ LOG( log_command, 5, ( "COMMAND enable S%d M%d\n", selectedTrackCount, programMo
 			enable = TRUE;
 		wMenuPushEnable( (wMenuPush_p)menuPLs[inx].control, enable );
 	}
-		
+
 	for ( inx=0; inx<buttonCnt; inx++ ) {
 		if ( buttonList[inx].cmdInx < 0 && (buttonList[inx].options&IC_SELECTED) )
 			wControlActive( buttonList[inx].control, selectedTrackCount>0 );
@@ -944,7 +944,7 @@ EXPORT wBool_t DoCurCommand( wAction_t action, coOrd pos )
 {
 	wAction_t rc;
 	int mode;
-	
+
 	if ( action == wActionMove && (commandList[curCommand].options & IC_WANT_MOVE) == 0 )
 		return C_CONTINUE;
 
@@ -1424,7 +1424,7 @@ EXPORT wIndex_t AddCommandControl(
 		commandList[cmdInx].stickyMask = 1L<<(stickyCnt-1);
 	}
 	if ( buttonGroupPopupM ) {
-		commandList[cmdInx].menu[0] = 
+		commandList[cmdInx].menu[0] =
 		wMenuPushCreate( buttonGroupPopupM, helpKey, GetBalloonHelpStr(helpKey), 0, DoCommandB, (void*)cmdInx );
 		tm = commandsSubmenu;
 		p1m = popup1Submenu;
@@ -1434,14 +1434,14 @@ EXPORT wIndex_t AddCommandControl(
 		p1m = (options&IC_POPUP2)?popup1aM:popup1M;
 		p2m = (options&IC_POPUP2)?popup2aM:popup2M;
 	}
-	commandList[cmdInx].menu[1] = 
+	commandList[cmdInx].menu[1] =
 	wMenuPushCreate( tm, helpKey, nameStr, acclKey, DoCommandB, (void*)cmdInx );
 	if ( (options & (IC_POPUP|IC_POPUP2)) ) {
 		if ( !(options & IC_SELECTED) ) {
-			commandList[cmdInx].menu[2] = 
+			commandList[cmdInx].menu[2] =
 			wMenuPushCreate( p1m, helpKey, nameStr, 0, DoCommandB, (void*)cmdInx );
 		}
-		commandList[cmdInx].menu[3] = 
+		commandList[cmdInx].menu[3] =
 		wMenuPushCreate( p2m, helpKey, nameStr, 0, DoCommandB, (void*)cmdInx );
 	}
 
@@ -1508,24 +1508,24 @@ EXPORT wIndex_t AddMenuButton(
 		commandList[cmdInx].stickyMask = 1L<<(stickyCnt-1);
 	}
 	if ( buttonGroupPopupM ) {
-		commandList[cmdInx].menu[0] = 
+		commandList[cmdInx].menu[0] =
 		wMenuPushCreate( buttonGroupPopupM, helpKey, GetBalloonHelpStr(helpKey), 0, DoCommandB, (void*)(intptr_t)cmdInx );
 		tm = commandsSubmenu;
 		p1m = popup1Submenu;
 		p2m = popup2Submenu;
 	} else {
-		tm = menu; 
+		tm = menu;
 		p1m = (options&IC_POPUP2)?popup1aM:popup1M;
 		p2m = (options&IC_POPUP2)?popup2aM:popup2M;
 	}
-	commandList[cmdInx].menu[1] = 
+	commandList[cmdInx].menu[1] =
 	wMenuPushCreate( tm, helpKey, nameStr, acclKey, DoCommandB, (void*)(intptr_t)cmdInx );
 	if ( (options & (IC_POPUP|IC_POPUP2)) ) {
 		if ( !(options & IC_SELECTED) ) {
-			commandList[cmdInx].menu[2] = 
+			commandList[cmdInx].menu[2] =
 			wMenuPushCreate( p1m, helpKey, nameStr, 0, DoCommandB, (void*)(intptr_t)cmdInx );
 		}
-		commandList[cmdInx].menu[3] = 
+		commandList[cmdInx].menu[3] =
 		wMenuPushCreate( p2m, helpKey, nameStr, 0, DoCommandB, (void*)(intptr_t)cmdInx );
 	}
 
@@ -1692,10 +1692,10 @@ static void DoSticky( void )
 }
 /*--------------------------------------------------------------------*/
 
-/* 
+/*
  * These array control the choices available in the Toolbar setup.
- * For each choice, the text is given and the respective mask is 
- * specified in the following array. 
+ * For each choice, the text is given and the respective mask is
+ * specified in the following array.
  * Note: text and choices must be given in the same order.
  */
 static char *AllToolbarLabels[] = {
@@ -1718,14 +1718,14 @@ static char *AllToolbarLabels[] = {
 		N_("Hot Bar"),
 		NULL };
 static long AllToolbarMasks[] = {
-		1<<BG_FILE, 
+		1<<BG_FILE,
 		1<<BG_ZOOM,
 		1<<BG_UNDO,
 		1<<BG_EASE,
 		1<<BG_SNAP,
 		1<<BG_TRKCRT,
 #ifdef XTRKCAD_USE_LAYOUTCONTROL
-		1<<BG_CONTROL, 
+		1<<BG_CONTROL,
 #endif
 		1<<BG_TRKMOD,
 		1<<BG_SELECT,
@@ -1926,7 +1926,7 @@ static void MiscMenuItemCreate(
 	menuPLs[menuPG.paramCnt].nameStr = name;
 	menuPLs[menuPG.paramCnt].option = option;
 	menuPLs[menuPG.paramCnt].context = context;
-	
+
 	if ( name ) GetBalloonHelpStr( name );
 	menuPG.paramCnt++;
 }
@@ -2022,9 +2022,9 @@ static void CreateMenus( void )
 	windowM = wMenuBarAdd( mainW, "menuWindow", _("&Window") );
 	helpM = wMenuBarAdd( mainW, "menuHelp", _("&Help") );
 
-	/* 
+	/*
 	 * POPUP MENUS
-	 */ 
+	 */
 
 	popup1M = wMenuPopupCreate( mainW, _("Commands") );
 	popup2M = wMenuPopupCreate( mainW, _("Commands") );
@@ -2073,7 +2073,7 @@ static void CreateMenus( void )
 
 	wControlActive( (wControl_p)undoB, FALSE );
 	wControlActive( (wControl_p)redoB, FALSE );
- 
+
 
 	/*
 	 * FILE MENU
@@ -2128,7 +2128,7 @@ static void CreateMenus( void )
 	MiscMenuItemCreate( editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL, (void*)(wMenuCallBack_p)SelectTunnel, IC_SELECTED, (void *)0 );
 	MiscMenuItemCreate( editM, NULL, "cmdAbove", _("A&bove"), ACCL_ABOVE, (void*)(wMenuCallBack_p)SelectAbove, IC_SELECTED, (void *)0 );
 	MiscMenuItemCreate( editM, NULL, "cmdBelow", _("Belo&w"), ACCL_BELOW, (void*)(wMenuCallBack_p)SelectBelow, IC_SELECTED, (void *)0 );
-	
+
 	wMenuSeparatorCreate( editM );
 	MiscMenuItemCreate( editM, NULL, "cmdWidth0", _("Thin Tracks"), ACCL_THIN, (void*)(wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, (void *)0 );
 	MiscMenuItemCreate( editM, NULL, "cmdWidth2", _("Medium Tracks"), ACCL_MEDIUM, (void*)(wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, (void *)2 );
@@ -2146,7 +2146,7 @@ static void CreateMenus( void )
 
 	/* these menu choices and toolbar buttons are synonymous and should be treated as such */
 	wControlLinkedSet( (wControl_p)zoomInM, (wControl_p)zoomUpB );
-	wControlLinkedSet( (wControl_p)zoomOutM, (wControl_p)zoomDownB ); 
+	wControlLinkedSet( (wControl_p)zoomOutM, (wControl_p)zoomDownB );
 
 	wMenuPushCreate( viewM, "menuEdit-redraw", _("&Redraw"), ACCL_REDRAW, (wMenuCallBack_p)MainRedraw, NULL );
 	wMenuPushCreate( viewM, "menuEdit-redraw", _("Redraw All"), ACCL_REDRAWALL, (wMenuCallBack_p)DoRedraw, NULL );
@@ -2164,7 +2164,7 @@ static void CreateMenus( void )
 
    cmdGroup = BG_EASE;
 	InitCmdEasement();
-	
+
 	cmdGroup = BG_SNAP;
 	InitSnapGridButtons();
 
@@ -2172,7 +2172,7 @@ static void CreateMenus( void )
 	 * ADD MENU
 	 */
 
-	cmdGroup = BG_TRKCRT|BG_BIGGAP;	 
+	cmdGroup = BG_TRKCRT|BG_BIGGAP;
  	InitCmdStraight( addM );
 	InitCmdCurve( addM );
 	InitCmdParallel( addM );
@@ -2186,8 +2186,8 @@ static void CreateMenus( void )
 	cmdGroup = BG_CONTROL;
 	InitCmdBlock( addM );
 	InitCmdSwitchMotor( addM );
-#endif	
-	
+#endif
+
 	/*
 	 * CHANGE MENU
 	 */
@@ -2201,8 +2201,8 @@ static void CreateMenus( void )
 	InitCmdDelete();
 	InitCmdTunnel();
 	InitCmdAboveBelow();
-	
-	cmdGroup = BG_TRKMOD; 
+
+	cmdGroup = BG_TRKMOD;
 	if (extraButtons)
 		MiscMenuItemCreate( changeM, NULL, "loosen", _("&Loosen Tracks"), ACCL_LOOSEN, (void*)(wMenuCallBack_p)LoosenTracks, IC_SELECTED, (void *)0 );
 
@@ -2223,10 +2223,10 @@ static void CreateMenus( void )
 
 	wMenuSeparatorCreate( changeM );
 	MiscMenuItemCreate( changeM, NULL, "cmdRescale", _("Change Scale"), 0, (void*)(wMenuCallBack_p)DoRescale, IC_SELECTED, (void *)0 );
-	
-	/* 
+
+	/*
 	 * DRAW MENU
-	 */ 
+	 */
 	cmdGroup = BG_MISCCRT;
 	InitCmdDraw( drawM );
 	InitCmdText( drawM );
@@ -2235,7 +2235,7 @@ static void CreateMenus( void )
 	cmdGroup = BG_RULER;
 	InitCmdRuler( drawM );
 
-	 
+
 	/*
 	 * OPTION MENU
 	 */
@@ -2268,8 +2268,8 @@ static void CreateMenus( void )
 	/*
 	 * HELP MENU
 	 */
-	 
-	/* main help window */ 
+
+	/* main help window */
 	wMenuAddHelp( helpM );
 
 	/* help on recent messages */
@@ -2296,7 +2296,7 @@ static void CreateMenus( void )
 	wMenuSeparatorCreate( manageM );
 
 	InitNewTurn( wMenuMenuCreate( manageM, "cmdTurnoutNew", _("Tur&nout Designer...") ) );
-	
+
 	MiscMenuItemCreate( manageM, NULL, "cmdGroup", _("&Group"), ACCL_GROUP, (void*)(wMenuCallBack_p)DoGroup, IC_SELECTED, (void *)0 );
 	MiscMenuItemCreate( manageM, NULL, "cmdUngroup", _("&Ungroup"), ACCL_UNGROUP, (void*)(wMenuCallBack_p)DoUngroup, IC_SELECTED, (void *)0 );
 
@@ -2304,12 +2304,12 @@ static void CreateMenus( void )
 	MiscMenuItemCreate( manageM, NULL, "cmdRefreshCompound", _("Update Turnouts and Structures"), 0, (void*)(wMenuCallBack_p)DoRefreshCompound, 0, (void *)0 );
 
 	MiscMenuItemCreate( manageM, NULL, "cmdCarInventory", _("Car Inventory"), ACCL_CARINV, (void*)(wMenuCallBack_p)DoCarDlg, IC_MODETRAIN_TOO, (void *)0 );
-	
+
 	wMenuSeparatorCreate( manageM );
 
 	MiscMenuItemCreate( manageM, NULL, "cmdLayer", _("Layers ..."), ACCL_LAYERS, (void*)InitLayersDialog(), 0, (void *)0 );
 	wMenuSeparatorCreate( manageM );
-	 
+
 	MiscMenuItemCreate( manageM, NULL, "cmdEnumerate", _("Parts &List ..."), ACCL_PARTSLIST, (void*)(wMenuCallBack_p)EnumerateTracks, 0, (void *)0 );
 	MiscMenuItemCreate( manageM, NULL, "cmdPricelist", _("Price List..."), ACCL_PRICELIST, (void*)PriceListInit(), 0, (void *)0 );
 
@@ -2358,7 +2358,7 @@ static void LoadFileList( void )
 		if (!cp)
 			continue;
 		pathName = MyStrdup(cp);
-		fileName = strrchr( pathName, FILE_SEP_CHAR[0] ); 
+		fileName = strrchr( pathName, FILE_SEP_CHAR[0] );
 		if (fileName)
 		wMenuListAdd( fileList_ml, 0, fileName+1, pathName );
 	}
@@ -2376,25 +2376,25 @@ EXPORT void InitCmdExport( void )
 	AddToolbarButton( "cmdImport", wIconCreatePixMap(import_xpm), IC_ACCLKEY, (addButtonCallBack_t)DoImport, NULL );
 }
 
-/* Give user the option to continue work after crash. This function gives the user 
+/* Give user the option to continue work after crash. This function gives the user
  * the option to load the checkpoint file to continue working after a crash.
  *
  * \param none
  * \return none
  *
  */
- 
-static void OfferCheckpoint( void ) 
+
+static void OfferCheckpoint( void )
 {
 	int ret;
-	
+
 	/* sProdName */
 	ret = wNoticeEx( NT_INFORMATION,
-					 _("Program was not terminated properly. Do you want to resume working on the previous trackplan?"), 
+					 _("Program was not terminated properly. Do you want to resume working on the previous trackplan?"),
 					 _("Resume"), _("Ignore") );
 	if( ret ) {
-		/* load the checkpoint file */ 
-		LoadCheckpoint();	
+		/* load the checkpoint file */
+		LoadCheckpoint();
 	}
 
 }
@@ -2442,11 +2442,11 @@ EXPORT wWin_p wMain(
 		case 'c':					/* configuration name */
 			/* test for valid filename */
 			for( i = 0; i < strlen( optarg ); i++ ) {
-				if( !isalnum( optarg[ i ]) && optarg[ i ] != '.' ) {
+				if( !isalnum( (unsigned char)optarg[ i ]) && optarg[ i ] != '.' ) {
 					NoticeMessage( MSG_BAD_OPTION, _("Ok"), NULL, optarg );
 					exit( 1 );
 				}
-			}			
+			}
 			/* append delimiter and argument to configuration name */
 			if( strlen( optarg ) < STR_SIZE - strlen( ";" ) - strlen( buffer ) - 1 ){
 				strcat( buffer, ";" );
@@ -2627,13 +2627,13 @@ LOG1( log_init, ( "Reset\n" ) )
 
 	/* Set up the data for scale and gauge description */
 	DoSetScaleDesc();
-	 
+
 	pref = wPrefGetString( "misc", "scale" );
 	DoSetScale( pref );
 
-	/* see whether last layout should be reopened on startup */   
+	/* see whether last layout should be reopened on startup */
 	wPrefGetInteger( "DialogItem", "pref-onstartup", &onStartup, 0 );
-	
+
 	/*
 	 * THE END
 	 */
@@ -2647,18 +2647,18 @@ LOG1( log_init, ( "Initialization complete\n" ) )
 
 	wWinShow( mainW, TRUE );
 	mapVisible = TRUE;
-	wShow( mapW ); 
-	wDestroySplash();    
+	wShow( mapW );
+	wDestroySplash();
 
 	/* this has to be called before ShowTip() */
 	InitSmallDlg();
 
-	ShowTip(SHOWTIP_NEXTTIP); 
- 
+	ShowTip(SHOWTIP_NEXTTIP);
+
 	/* if work is to be resumed and no filename was given on startup, load last layout */
 	if( (onStartup == 0) && (!initialFile || !strlen(initialFile))) {
 		initialFile = (char*)wPrefGetString( "misc", "lastlayout" );
-	}	
+	}
 
 	if (initialFile && strlen(initialFile)) {
 		DoFileList( 0, NULL, initialFile );

@@ -180,7 +180,7 @@ static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 		getNumberError = N_("Unexpected End Of String");
 		return FALSE;
 	}
-	while ( isspace(*cp) ) cp++;
+	while ( isspace((unsigned char)*cp) ) cp++;
 	*numP = strtol( cp, &cq, 10 );
 	if ( cp==cq ) {
 		*cpp = cp;
@@ -194,7 +194,7 @@ static int GetDigitStr( char ** cpp, long * numP, int * lenP )
 		getNumberError = N_("Overflow");
 		return FALSE;
 	}
-	while ( isspace(*cq) ) cq++;
+	while ( isspace((unsigned char)*cq) ) cq++;
 	*cpp = cq;
 	return TRUE;
 }
@@ -206,7 +206,7 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 	char * cp = NULL;
 	struct lconv *lc;
 
-	while ( isspace(**cpp) ) (*cpp)++;
+	while ( isspace((unsigned char)**cpp) ) (*cpp)++;
 
 	/* Find out the decimal separator of the current locale */
 	lc = localeconv();
@@ -216,18 +216,18 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 		return FALSE;
 	if ( **cpp == lc->decimal_point[0] ) {
 		(*cpp)++;
-		if ( !isdigit(**cpp) ) {
+		if ( !isdigit((unsigned char)**cpp) ) {
 			*hasFract = FALSE;
 			*numP = (FLOAT_T)n0;
 			return TRUE;
 		}
 		if ( !GetDigitStr( cpp, &f1, &l1 ) ) return FALSE;
-		for ( f2=1; l1>0; l1-- ) f2 *= 10; 
+		for ( f2=1; l1>0; l1-- ) f2 *= 10;
 		*numP = ((FLOAT_T)n0)+((FLOAT_T)f1)/((FLOAT_T)f2);
 		*hasFract = TRUE;
 		return TRUE;  /* 999.999 */
 	}
-	if ( isdigit( **cpp ) ) {
+	if ( isdigit( (unsigned char)**cpp ) ) {
 		cp = *cpp;
 		if ( !GetDigitStr( cpp, &f1, NULL ) ) return FALSE;
 	} else {
@@ -266,7 +266,7 @@ static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
 	BOOL_T expectInch = FALSE;
 	long distanceFormat;
 
-	while ( isspace(**cpp) ) (*cpp)++;
+	while ( isspace((unsigned char)**cpp) ) (*cpp)++;
 	if ( (*cpp)[0] == '\0' ) {
 		*distP = 0.0;
 		return TRUE;
@@ -276,10 +276,10 @@ static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
 		(*cpp)++;
 	}
 	if ( !GetNumberStr( cpp, &n1, &hasFract ) ) return FALSE;
-	
+
 	distanceFormat = GetDistanceFormat();
-	
-	
+
+
 	if ( (*cpp)[0] == '\0' ) { /* EOL */
 		if ( units==UNITS_METRIC )
 		{
@@ -301,36 +301,36 @@ static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
 		n1 *= 12.0;
 		(*cpp) += 1;
 		expectInch = !hasFract;
-	} else if ( tolower((*cpp)[0]) == 'f' && tolower((*cpp)[1]) == 't' ) {
+	} else if ( tolower((unsigned char)(*cpp)[0]) == 'f' && tolower((unsigned char)(*cpp)[1]) == 't' ) {
 		n1 *= 12.0;
 		(*cpp) += 2;
 		expectInch = !hasFract;
-	} else if ( tolower((*cpp)[0]) == 'c' && tolower((*cpp)[1]) == 'm' ) {
+	} else if ( tolower((unsigned char)(*cpp)[0]) == 'c' && tolower((unsigned char)(*cpp)[1]) == 'm' ) {
 		n1 /= 2.54;
 		(*cpp) += 2;
-	} else if ( tolower((*cpp)[0]) == 'm' && tolower((*cpp)[1]) == 'm' ) {
+	} else if ( tolower((unsigned char)(*cpp)[0]) == 'm' && tolower((unsigned char)(*cpp)[1]) == 'm' ) {
 		n1 /= 25.4;
 		(*cpp) += 2;
-	} else if ( tolower((*cpp)[0]) == 'm' ) {
+	} else if ( tolower((unsigned char)(*cpp)[0]) == 'm' ) {
 		n1 *= 100.0/2.54;
 		(*cpp) += 1;
 	} else if ( (*cpp)[0] == '"' ) {
 		(*cpp) += 1;
-	} else if ( tolower((*cpp)[0]) == 'i' && tolower((*cpp)[1]) == 'n' ) {
+	} else if ( tolower((unsigned char)(*cpp)[0]) == 'i' && tolower((unsigned char)(*cpp)[1]) == 'n' ) {
 		(*cpp) += 2;
 	} else {
 		getNumberError = N_("Invalid Units Indicator");
 		return FALSE;
 	}
-	while ( isspace(**cpp) ) (*cpp)++;
-	if ( expectInch && isdigit( **cpp ) ) {
+	while ( isspace((unsigned char)**cpp) ) (*cpp)++;
+	if ( expectInch && isdigit( (unsigned char)**cpp ) ) {
 		if ( !GetNumberStr( cpp, &n2, &hasFract ) ) return FALSE;
 		n1 += n2;
 		if ( (*cpp)[0] == '"' )
 			(*cpp) += 1;
-		else if ( tolower((*cpp)[0]) == 'i' && tolower((*cpp)[1]) == 'n' )
+		else if ( tolower((unsigned char)(*cpp)[0]) == 'i' && tolower((unsigned char)(*cpp)[1]) == 'n' )
 			(*cpp) += 2;
-		while ( isspace(**cpp) ) (*cpp)++;
+		while ( isspace((unsigned char)**cpp) ) (*cpp)++;
 	}
 	if ( **cpp ) {
 		getNumberError = N_("Expected End Of String");
@@ -351,7 +351,7 @@ EXPORT FLOAT_T DecodeFloat(
 	const char *cp0, *cp1;
     char *cp2;
 	cp0 = cp1 = wStringGetValue( strCtrl );
-	while (isspace(*cp1)) cp1++;
+	while (isspace((unsigned char)*cp1)) cp1++;
 	if ( *cp1 ) {
 		valF = strtod( cp1, &cp2 );
 		if ( *cp2 != 0 ) {
@@ -378,7 +378,7 @@ EXPORT FLOAT_T DecodeDistance(
 
 	cp0 = cp1 = cpN = CAST_AWAY_CONST wStringGetValue( strCtrl );
 	cpN += strlen(cpN)-1;
-	while (cpN > cp1 && isspace(*cpN) ) cpN--;
+	while (cpN > cp1 && isspace((unsigned char)*cpN) ) cpN--;
 	c1 = *cpN;
 	switch ( c1 ) {
 	case '=':
@@ -505,7 +505,7 @@ EXPORT char * FormatDistanceEx(
 	if ( (distanceFormat&DISTFMT_FMT) == DISTFMT_FMT_NONE ) {
 		FormatFraction( &cp, FALSE, digits, (distanceFormat&DISTFMT_FRACT) == DISTFMT_FRACT_FRC, valF, "" );
 		return formatStrings[formatStringInx];
-	} else if ( units == UNITS_ENGLISH ) { 
+	} else if ( units == UNITS_ENGLISH ) {
 		feet = (long)(floor)(valF/12.0);
 		valF -= feet*12.0;
 		if ( feet != 0 ) {
@@ -623,7 +623,7 @@ EXPORT void ParamLoadControl(
 		case PD_FLOAT:
 			tmpR = *(FLOAT_T*)p->valueP;
 			if (p->option&PDO_DIM) {
-				if (p->option&PDO_SMALLDIM) 
+				if (p->option&PDO_SMALLDIM)
 					valS = FormatSmallDistance( tmpR );
 				else
 					valS = FormatDistance( tmpR );
@@ -830,7 +830,7 @@ EXPORT void ParamLoadData(
 			break;
 		case PD_COLORLIST:
 			*(wDrawColor*)p->valueP = wColorSelectButtonGetColor( (wButton_p)p->control );
-#ifdef LATER	
+#ifdef LATER
 			inx = wListGetIndex( (wList_p)p->control );
 			*(wDrawColor*)p->valueP = colorTab[inx].color;
 #endif
@@ -1377,7 +1377,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 	char * cp;
 	paramIntegerRange_t * irangeP;
 
-	while ( isspace(*val)) val++;
+	while ( isspace((unsigned char)*val)) val++;
 	valL = strtol( val, &cp, 10 );
 
 	wControlSetBalloon( p->control, 0, -5, NULL );
@@ -1750,7 +1750,7 @@ static void ParamPlayback( char * line )
 		if ( p->nameStr == NULL )
 			continue;
 		len2 = strlen( p->nameStr );
-		if ( strncmp(p->nameStr, line+len1+1, len2) != 0 || 
+		if ( strncmp(p->nameStr, line+len1+1, len2) != 0 ||
 			 (line[len1+1+len2] != ' ' && line[len1+1+len2] != '\0') )
 			continue;
 		len = len1 + 1 + len2 + 1;
@@ -1975,7 +1975,7 @@ static void ParamCheck( char * line )
 		if ( p->nameStr == NULL )
 			continue;
 		len2 = strlen( p->nameStr );
-		if ( strncmp(p->nameStr, line+len1+1, len2) != 0 || 
+		if ( strncmp(p->nameStr, line+len1+1, len2) != 0 ||
 			 (line[len1+1+len2] != ' ' && line[len1+1+len2] != '\0') )
 			continue;
 		if ( p->valueP == NULL )
@@ -2391,7 +2391,7 @@ static void LayoutControls(
 			continue;
 		}
 		/*
-		 * Set control orig 
+		 * Set control orig
 		 */
 		if ( (pd->option&PDO_DLGNEWCOLUMN) ) {
 			columnK.orig.x = columnK.term.x;
@@ -2449,7 +2449,7 @@ static void LayoutControls(
 		 * Set column term
 		 */
 		if ( (pd->option&PDO_DLGIGNOREX) == 0 ) {
-			if ( (pd->option&PDO_DLGUNDERCMDBUTT) == 0 ) { 
+			if ( (pd->option&PDO_DLGUNDERCMDBUTT) == 0 ) {
 				if ( columnK.term.x < controlK.term.x )
 					columnK.term.x = controlK.term.x;
 			} else {
@@ -2594,7 +2594,7 @@ EXPORT wWin_p ParamCreateDialog(
 		winOption |= F_RECALLSIZE;
 
 	sprintf( helpStr, "cmd%s", group->nameStr );
-	helpStr[3] = toupper(helpStr[3]);
+	helpStr[3] = toupper((unsigned char)helpStr[3]);
 
 	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
 
@@ -2607,7 +2607,7 @@ EXPORT wWin_p ParamCreateDialog(
 	}
 	if ( needHelpButton ) {
 		sprintf( helpStr, "cmd%s", group->nameStr );
-		helpStr[3] = toupper(helpStr[3]); 
+		helpStr[3] = toupper((unsigned char)helpStr[3]);
 		lastB = group->helpB = wButtonCreate( group->win, 0, 0, NULL, _("Help"), BB_HELP, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
 	}
 
@@ -2642,7 +2642,7 @@ EXPORT wWin_p ParamCreateDialog(
 }
 
 
-/** Resize dialog window for the contained fields. 
+/** Resize dialog window for the contained fields.
 * \param IN OUT Prameter Group
 *
 */

@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/macro.c,v 1.7 2009-06-15 19:29:57 m_fischer Exp $
+/** \file macro.c
+ * Macros
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -484,7 +484,7 @@ static void PlaybackCursor(
 	case C_REDRAW:
 		MacroDrawBitMap( playbackD, playbackBm, playbackX, playbackY, playbackColor );
 		break;
-				
+
 	default:
 		;
 	}
@@ -1027,7 +1027,7 @@ static void Playback( void )
 				continue;
 			snapshot_d.dpi=snapshot_d.scale=snapshot_d.orig.x=snapshot_d.orig.y=snapshot_d.size.x=snapshot_d.size.y=-1;
 			cp = paramLine+8;
-			while (*cp && isspace(*cp)) cp++;
+			while (*cp && isspace((unsigned char)*cp)) cp++;
 			if (snapshot_d.dpi = strtod( cp, &cq ), cp == cq)
 				snapshot_d.dpi = -1;
 			else if (snapshot_d.scale = strtod( cq, &cp ), cp == cq)
@@ -1352,7 +1352,7 @@ static void DemoInitValues( void )
 	for ( cpp = demoInitParams; *cpp; cpp++ )
 		paramPlaybackProc( *cpp );
 }
- 
+
 
 static void DoDemo( void * demoNumber )
 {
