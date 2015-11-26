@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.h,v 1.8 2009-09-05 16:40:53 m_fischer Exp $
+/* \file misc.h
+ * Application wide declarations and defines
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -229,7 +229,7 @@ void DefaultProc( wWin_p, winProcEvent, void * );
 void SelectFont();
 
 void CheckRoomSize( BOOL_T );
-const char * GetBalloonHelpStr( char* );
+char * GetBalloonHelpStr( char* );
 void EnableCommands( void );
 void Reset( void );
 void ResetIfNotSticky( void );

@@ -1,4 +1,5 @@
-/* simple-gettext.c  - a simplified version of gettext.
+/* \file simple-gettext.c  
+ * a simplified version of gettext.
  * Copyright (C) 1995, 1996, 1997, 1999,
  *               2005 Free Software Foundation, Inc.
  *
@@ -378,7 +379,7 @@ get_string( struct loaded_domain *domain, u32 idx )
  */
 
 char *
-gettext( char *msgid )
+gettext( const char *msgid )
 {
     struct loaded_domain *domain;
     size_t act = 0;
@@ -446,7 +447,7 @@ gettext( char *msgid )
     }
 
   not_found:
-    return msgid;
+    return (char *)msgid;
 }
 
 /**

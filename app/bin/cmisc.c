@@ -1,7 +1,5 @@
 /** \file cmisc.c
- * Handlimg of the 'Describe' dialog
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cmisc.c,v 1.7 2009-07-08 18:40:27 m_fischer Exp $
+ * Handling of the 'Describe' dialog
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -337,12 +335,12 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 			wControlActive( ddp->control1, ((ddp->mode|ro_mode)&DESC_RO)==0 );
 			break;
 		case DESC_LAYER:
-           wListClear(ddp->control0);  // Rebuild list on each invovation
+           wListClear((wList_p)ddp->control0);  // Rebuild list on each invovation
            for ( inx = 0; inx<NUM_LAYERS; inx++ ) {
 				if (!GetLayerFrozen(inx))				// Avoid Frozen layers.
 				{
 					sprintf( message, "%2d : %s", inx+1,  GetLayerName(inx) );
-					wListAddValue( ddp->control0, message, NULL, (void*)inx );
+					wListAddValue( (wList_p)ddp->control0, message, NULL, (void*)inx );
 				}
 			}
 			break;

@@ -1,7 +1,5 @@
 /** \file wlib.h
- * Commaon definitions and declarations for the wlib library
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/include/wlib.h,v 1.18 2010-04-28 04:04:39 dspagnol Exp $
+ * Common definitions and declarations for the wlib library
  */
 
 #ifndef WIN_H
@@ -14,7 +12,7 @@
 char *bindtextdomain( char *domainname, char *dirname );
 char *bind_textdomain_codeset(char *domainname, char *codeset );
 char *textdomain( char *domainname );
-char *gettext( char *msgid );
+char *gettext( const char *msgid );
 
 char *g_win32_getlocale (void);
 #endif

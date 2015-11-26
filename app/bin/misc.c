@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc.c,v 1.49 2010-04-28 04:04:39 dspagnol Exp $
+/* \file misc.c
+ * Main routine and initialization for the application 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -744,7 +744,7 @@ static int commandCnt = 0;
 int * balloonHelpCnts;
 #endif
 
-EXPORT const char * GetBalloonHelpStr( char * helpKey )
+EXPORT char * GetBalloonHelpStr( char * helpKey )
 {
 	wBalloonHelp_t * bh;
 #ifdef CHECK_UNUSED_BALLOONHELP
