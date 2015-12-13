@@ -1,0 +1,8 @@
+CONTENTS Peco Z Scale Streamlinie Code 60 Track
+
+TURNOUT Z  "Peco Z Scale Streamline Code 60	Straight Track 609mm	SL-200"	
+	P "Normal" 1
+	E 0.000000 0.000000 270.000000
+	E 23.976378 0.000000 135.000000
+	S 0 0 0.000000 0.000000 23.976378 0.000000
+	END
