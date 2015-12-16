@@ -714,9 +714,9 @@ void psPrintFillPolygon(
 
 	psSetColor(color);
 
-	cairo_move_to( cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ] );
+	cairo_move_to( cr, p[ 0 ][ 0 ], paperHeight * psPrint_d.dpi - p[ 0 ][ 1 ] );
 	for (inx=0; inx<cnt; inx++)
-		cairo_line_to( cr, p[ inx ][ 0 ], p[ inx ][ 1 ] );
+		cairo_line_to( cr, p[ inx ][ 0 ], paperHeight * psPrint_d.dpi - p[ inx ][ 1 ] );
 	cairo_fill( cr );
 }
 
@@ -763,10 +763,13 @@ void psPrintString(
 {
 	char * cp;
 	cairo_t *cr;
+	
 	PangoLayout *layout;
 	PangoFontDescription *desc;
-	double text_height, text_width, w, h;
-	int height, width;
+	PangoFontMetrics *metrics;
+	PangoContext *pcontext;
+	
+	double text_height;
 	GdkColor* const gcolor = gtkGetColor(color, TRUE);
 
 	if (color == wDrawColorWhite)
@@ -776,13 +779,11 @@ void psPrintString(
 
 	cairo_save( cr );
 
-	cairo_translate( cr, x, paperHeight * psPrint_d.dpi - y  );
-	cairo_rotate( cr, -a * M_PI / 180.0  );
-
 	layout = pango_cairo_create_layout( cr );
 	/** \todo use a getter function instead of double conversion */
 	desc = pango_font_description_from_string (gtkFontTranslate( fp ));
-	pango_font_description_set_size(desc, fs * PANGO_SCALE);
+	// still need to find out why font has to be scaled down by 0.75
+	pango_font_description_set_size(desc, fs * PANGO_SCALE * 0.75 ); 
 
 	/*
 	 *
@@ -792,13 +793,20 @@ void psPrintString(
 	pango_layout_set_text (layout, s, -1);
 	pango_layout_set_width (layout, -1);
 	pango_layout_set_alignment (layout, PANGO_ALIGN_LEFT);
-	pango_layout_get_size (layout, &width, &height);
-	text_height = (gdouble) height / PANGO_SCALE;
-	text_width = (gdouble) width / PANGO_SCALE;
-
+	
+	pcontext = pango_cairo_create_context( cr );
+	metrics = pango_context_get_metrics(pcontext, desc, pango_context_get_language(pcontext));
+	text_height = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
+	
 	cairo_set_source_rgb(cr, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
-
+	
+	cairo_translate( cr, x + text_height, paperHeight * psPrint_d.dpi - y  );
+	cairo_rotate( cr, -a * M_PI / 180.0  );
+	
 	pango_cairo_show_layout (cr, layout);
+
+	g_object_unref( pcontext );
+
 	cairo_restore( cr );
 }
 
