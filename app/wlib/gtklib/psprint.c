@@ -593,6 +593,16 @@ static void psSetColor(
 							 gcolor->blue / 65535.0);
 }
 
+/**
+ * Print a straight line
+ *
+ * \param x0, y0 IN  starting point in pixels
+ * \param x1, y1 IN  ending point in pixels
+ * \param width line width
+ * \param lineType
+ * \param color color
+ * \param opts ?
+ */
 
 void psPrintLine(
 		wPos_t x0, wPos_t y0,
@@ -606,12 +616,14 @@ void psPrintLine(
 		return;
 	if (opts&wDrawOptTemp)
 		return;
+
 	psSetColor(color);
 	setLineType( width, lineType, opts );
+
 	cairo_move_to( psPrint_d.printContext,
-					x0, paperHeight * psPrint_d.dpi - y0 );
+					x0, y0 );
 	cairo_line_to( psPrint_d.printContext,
-					x1, paperHeight * psPrint_d.dpi - y1 );
+					x1, y1 );
 	cairo_stroke( psPrint_d.printContext );
 }
 
@@ -671,6 +683,15 @@ void psPrintArc(
 	cairo_stroke( psPrint_d.printContext );
 }
 
+/**
+ * Print a filled rectangle
+ *
+ * \param x0, y0 IN top left corner
+ * \param x1, y1 IN bottom right corner
+ * \param color IN fill color
+ * \param opts IN options
+ * \return
+ */
 
 void psPrintFillRectangle(
 		wPos_t x0, wPos_t y0,
@@ -678,21 +699,26 @@ void psPrintFillRectangle(
 		wDrawColor color,
 		wDrawOpts opts )
 {
+	cairo_t *cr = psPrint_d.printContext;
+	double width = x0 - x1;
+	double height = y0 - y1;
+
 	if (color == wDrawColorWhite)
 		return;
 	if (opts&wDrawOptTemp)
 		return;
 	psSetColor(color);
-	psPrintf(psFile,
-				"%0.3f %0.3f moveto %0.3f %0.3f lineto closepath fill\n",
-				D2I(x0), D2I(y0), D2I(x1), D2I(y1) );
+
+	cairo_rectangle( cr, x0, y0, width, height );
+
+	cairo_fill( cr );
 }
 
 /**
  * Print a filled polygon
  *
  * \param p IN a list of x and y coordinates
- * \param cnt IN the number of ponts
+ * \param cnt IN the number of points
  * \param color IN fill color
  * \param opts IN options
  * \return
@@ -714,12 +740,21 @@ void psPrintFillPolygon(
 
 	psSetColor(color);
 
-	cairo_move_to( cr, p[ 0 ][ 0 ], paperHeight * psPrint_d.dpi - p[ 0 ][ 1 ] );
+	cairo_move_to( cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ] );
 	for (inx=0; inx<cnt; inx++)
-		cairo_line_to( cr, p[ inx ][ 0 ], paperHeight * psPrint_d.dpi - p[ inx ][ 1 ] );
+		cairo_line_to( cr, p[ inx ][ 0 ], p[ inx ][ 1 ] );
 	cairo_fill( cr );
 }
 
+/**
+ * Print a filled circle
+ *
+ * \param x0, y0  IN coordinates of center (in pixels )
+ * \param r IN radius
+ * \param color IN fill color
+ * \param opts IN options
+ * \return
+ */
 
 void psPrintFillCircle(
 		wPos_t x0, wPos_t y0,
@@ -732,17 +767,27 @@ void psPrintFillCircle(
 	if (opts&wDrawOptTemp)
 		return;
 	psSetColor(color);
-	psPrintf(psFile,
-		"newpath %0.3f %0.3f %0.3f 0.0 360.0 arc fill\n",
-		D2I(x0), D2I(y0), D2I(r) );
+
+	cairo_arc( psPrint_d.printContext,
+				x0, y0, r, 0.0, 2 * M_PI );
+
+	cairo_fill( psPrint_d.printContext );
 }
 
 
 /**
  * Print a string at the given position using specified font and text size.
+ * The orientatoion of the y-axis in XTrackCAD is wrong for cairo. So for
+ * all other print primitives a flip operation is done. As this would
+ * also affect the string orientation, printing a string has to be
+ * treated differently. The starting point is transformed, then the
+ * string is rotated and scaled as needed. Finally the string position
+ * translated to the starting point calculated previously. The same
+ * solution would have to be applied to a bitmap should printing
+ * bitmaps ever be implemented.
  *
- * \param x IN x position
- * \param y IN y position
+ * \param x IN x position in pixels
+ * \param y IN y position in pixels
  * \param a IN angle of baseline in degrees. Positive is clockwise, 0 is direction of positive x axis
  * \param s IN string to print
  * \param fp IN font
@@ -762,49 +807,62 @@ void psPrintString(
 		wDrawOpts opts )
 {
 	char * cp;
+	double x0 = (double)x, y0 = (double)y;
+	double text_height;
+
 	cairo_t *cr;
-	
+	cairo_matrix_t matrix;
+
 	PangoLayout *layout;
 	PangoFontDescription *desc;
 	PangoFontMetrics *metrics;
 	PangoContext *pcontext;
-	
-	double text_height;
-	GdkColor* const gcolor = gtkGetColor(color, TRUE);
 
 	if (color == wDrawColorWhite)
 		return;
 
 	cr = psPrint_d.printContext;
 
+	// get the current transformation matrix and transform the starting
+	// point of the string
+	cairo_get_matrix( cr, &matrix );
+	cairo_matrix_transform_point( &matrix, &x0, &y0 );
+
 	cairo_save( cr );
 
 	layout = pango_cairo_create_layout( cr );
+
+	// set the correct font and size
 	/** \todo use a getter function instead of double conversion */
 	desc = pango_font_description_from_string (gtkFontTranslate( fp ));
-	// still need to find out why font has to be scaled down by 0.75
-	pango_font_description_set_size(desc, fs * PANGO_SCALE * 0.75 ); 
 
-	/*
-	 *
-	 */
+	//don't know why the size has to be reduced to 75% :-(
+	pango_font_description_set_size(desc, fs * PANGO_SCALE *0.75 );
 
+	// render the string to a Pango layout
 	pango_layout_set_font_description (layout, desc);
 	pango_layout_set_text (layout, s, -1);
 	pango_layout_set_width (layout, -1);
 	pango_layout_set_alignment (layout, PANGO_ALIGN_LEFT);
-	
+
+	// get the height of the string
 	pcontext = pango_cairo_create_context( cr );
 	metrics = pango_context_get_metrics(pcontext, desc, pango_context_get_language(pcontext));
 	text_height = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
-	
-	cairo_set_source_rgb(cr, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
-	
-	cairo_translate( cr, x + text_height, paperHeight * psPrint_d.dpi - y  );
+
+	// transform the string to the correct position
+	cairo_identity_matrix( cr );
+	cairo_translate( cr, x0 + text_height, y0  );
 	cairo_rotate( cr, -a * M_PI / 180.0  );
-	
+
+	// set the color
+	psSetColor( color );
+
+	// and show the string
 	pango_cairo_show_layout (cr, layout);
 
+	// free unused objects
+	g_object_unref( layout );
 	g_object_unref( pcontext );
 
 	cairo_restore( cr );
@@ -1128,7 +1186,6 @@ wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 		psPrint_d.curPrintSurface = gtk_print_job_get_surface( curPrintJob,
 								   NULL );
 		psPrint_d.printContext = cairo_create( psPrint_d.curPrintSurface );
-//		g_object_unref( curPrintSurface );
 
 		//update the paper dimensions
 		WlibGetPaperSize();
@@ -1141,6 +1198,9 @@ wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 			psPrint_d.dpi = 72;
 		else
 			psPrint_d.dpi = (double)gtk_print_settings_get_resolution( settings );
+
+		cairo_scale( psPrint_d.printContext, 1.0, -1.0 );
+		cairo_translate( psPrint_d.printContext, lBorder * psPrint_d.dpi, -(paperHeight-bBorder) *psPrint_d.dpi );
 
 		SaveSettings( NULL );
 	}
