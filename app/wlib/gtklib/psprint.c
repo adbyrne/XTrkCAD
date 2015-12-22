@@ -71,7 +71,8 @@ extern wDrawColor wDrawColorBlack;
 #define DPI (1440.0)
 #define D2I( D ) (((double)(D))/DPI)
 
-#define CENTERMARK_LENGTH 60
+#define CENTERMARK_LENGTH (60)
+#define DASH_LENGTH (8.0)
 
 #define WFONT		"WFONT"
 #define WPRINTER	"WPRINTER"
@@ -558,20 +559,21 @@ static void setLineType(
 		wDrawOpts opts )
 {
 	cairo_t *cr = psPrint_d.printContext;
-	double dashLength = 2.0;
-
+	double dashLength = DASH_LENGTH;
+	
 	if (lineWidth < 0.0) {
 		lineWidth = P2I(-lineWidth)*2.0;
 	}
 
 	// make sure that there is a minimum line width used
 	if ( lineWidth == 0.0 )
-		lineWidth = 1.0;
-
-	/** \todo need to find out the correct units for line width */
+		lineWidth = 0.1;
+	
 	cairo_set_line_width( cr, lineWidth );
 
 	if (lineType == wDrawLineDash)
+		cairo_set_dash( cr, &dashLength, 1, 0.0 );
+	else	
 		cairo_set_dash( cr, NULL, 0, 0.0 );
 }
 
@@ -1198,7 +1200,12 @@ wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 			psPrint_d.dpi = 72;
 		else
 			psPrint_d.dpi = (double)gtk_print_settings_get_resolution( settings );
-
+		
+		// in XTrackCAD 0,0 is top left, in cairo bottom left. This is 
+		// corrected via the following transformations. 
+		// also the translate makes sure that the drawing is rendered
+		// within the paper margins
+		
 		cairo_scale( psPrint_d.printContext, 1.0, -1.0 );
 		cairo_translate( psPrint_d.printContext, lBorder * psPrint_d.dpi, -(paperHeight-bBorder) *psPrint_d.dpi );
 
