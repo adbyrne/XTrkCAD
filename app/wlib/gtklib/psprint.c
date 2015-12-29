@@ -68,9 +68,6 @@ extern wDrawColor wDrawColorBlack;
 #define PPI (72.0)
 #define P2I( P ) ((P)/PPI)
 
-#define DPI (1440.0)
-#define D2I( D ) (((double)(D))/DPI)
-
 #define CENTERMARK_LENGTH (60)
 #define DASH_LENGTH (8.0)
 
@@ -851,12 +848,13 @@ void psPrintString(
 	pcontext = pango_cairo_create_context( cr );
 	metrics = pango_context_get_metrics(pcontext, desc, pango_context_get_language(pcontext));
 	text_height = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
-
+	
 	// transform the string to the correct position
 	cairo_identity_matrix( cr );
-	cairo_translate( cr, x0 + text_height, y0  );
+	
+	cairo_translate( cr, x0 + text_height * sin ( -a * M_PI / 180.0) , y0 - text_height * cos ( a * M_PI / 180.0) );
 	cairo_rotate( cr, -a * M_PI / 180.0  );
-
+	
 	// set the color
 	psSetColor( color );
 
@@ -870,18 +868,22 @@ void psPrintString(
 	cairo_restore( cr );
 }
 
+/**
+ * Create clipping retangle.
+ *
+ * \param x, y IN starting position
+ * \param w, h IN width and height of rectangle
+ * \return    
+ */
+
 void wPrintClip( wPos_t x, wPos_t y, wPos_t w, wPos_t h )
 {
-	psPrintf( psFile, "\
-%0.3f %0.3f moveto \n\
-%0.3f %0.3f lineto \n\
-%0.3f %0.3f lineto \n\
-%0.3f %0.3f lineto \n\
-closepath clip newpath\n",
-		D2I(x), D2I(y),
-		D2I(x+w), D2I(y),
-		D2I(x+w), D2I(y+h),
-		D2I(x), D2I(y+h) );
+	cairo_move_to( psPrint_d.printContext, x, y );
+	cairo_rel_line_to( psPrint_d.printContext, w, 0 );
+	cairo_rel_line_to( psPrint_d.printContext, 0, h );
+	cairo_rel_line_to( psPrint_d.printContext, -w, 0 );
+	cairo_close_path( psPrint_d.printContext );
+	cairo_clip( psPrint_d.printContext );
 }
 
 /*****************************************************************************
@@ -1073,6 +1075,9 @@ static void printAbort( void * context )
 
 /**
  * Initialize new page.
+ * The cairo_save() / cairo_restore() cycle was added to solve problems
+ * with a multi page print operation. This might actually be a bug in 
+ * cairo but I didn't examine that any further.
  *
  * \return   print context for the print operation
  */
@@ -1080,11 +1085,16 @@ wDraw_p wPrintPageStart( void )
 {
 	pageCount++;
 
+	cairo_save( psPrint_d.printContext );
+	
 	return &psPrint_d;
 }
 
 /**
- * End of page
+ * End of page. This function returns the contents of printContinue. The
+ * caller continues printing as long as TRUE is returned. Setting 
+ * printContinue to FALSE in an asynchronous handler therefore cleanly 
+ * terminates a print job at the end of the page.
  *
  * \param p IN ignored
  * \return    always printContinue
@@ -1094,7 +1104,9 @@ wDraw_p wPrintPageStart( void )
 wBool_t wPrintPageEnd( wDraw_p p )
 {
 	cairo_show_page( psPrint_d.printContext );
-
+	
+	cairo_restore( psPrint_d.printContext );
+	
 	return printContinue;
 }
 
@@ -1216,6 +1228,8 @@ wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 	if (copiesP)
 		*copiesP = 1;
 
+	printContinue = TRUE;
+	
 	if( res != GTK_RESPONSE_OK )
 		return FALSE;
 	else
