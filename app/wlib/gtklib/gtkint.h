@@ -157,15 +157,10 @@ void gtkPrintColorMap( FILE *, int, int );
 int gtkMapPixel( long );
 
 /* psprint.c */
-typedef struct {
-		wIndex_t cmdOrFile;
-		FILE * f;
-		} wPrinterStream_t;
-typedef wPrinterStream_t * wPrinterStream_p;
 
-wPrinterStream_p wPrinterOpen( void );
-void wPrinterWrite( wPrinterStream_p p, char * buff, int siz );
-void wPrinterClose( wPrinterStream_p );
+void WlibApplySettings( GtkPrintOperation *op );
+void WlibSaveSettings( GtkPrintOperation *op );
+
 void psPrintLine( wPos_t, wPos_t, wPos_t, wPos_t,
 				wDrawWidth, wDrawLineType_e, wDrawColor, wDrawOpts );
 void psPrintArc( wPos_t, wPos_t, wPos_t, double, double, int,
@@ -204,8 +199,4 @@ struct wDraw_t {
 		cairo_t *printContext;
 		cairo_surface_t *curPrintSurface;
 		};
-
-
-void ApplySettings( GtkPrintOperation *op );
-void SaveSettings( GtkPrintOperation *op );
 #endif

@@ -19,7 +19,7 @@ SET(SOURCES
 	gtktext.c
 	gtkwindow.c
 	gtkxpm.c
-	psprint.c
+	print.c
 	wpref.c
 	)
 

@@ -420,7 +420,7 @@ EXPORT wBool_t wTextPrint(
 
 	/* Create a new print operation, applying saved print settings if they exist. */
 	operation = gtk_print_operation_new ();
-	ApplySettings( operation );
+	WlibApplySettings( operation );
   
 	data = malloc(sizeof( struct PrintData));
 	data->font_size = 10.0;
@@ -440,7 +440,7 @@ EXPORT wBool_t wTextPrint(
 	/* If the print operation was accepted, save the new print settings. */
 	if (res == GTK_PRINT_OPERATION_RESULT_APPLY)
 	{
-		SaveSettings( operation );
+		WlibSaveSettings( operation );
 	}
 	/* Otherwise, report that the print operation has failed. */
 	else if (error)
