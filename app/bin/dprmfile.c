@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dprmfile.c,v 1.3 2008-03-10 18:59:53 m_fischer Exp $
+/** \file dprmfile.c
+ * Param File Management
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -25,6 +25,8 @@
 #include "i18n.h"
 
 #include <stdint.h>
+
+#define PARAM_SUBDIR ("\\params")
 
 /****************************************************************************
  *
@@ -208,7 +210,7 @@ EXPORT void RememberParamFiles( void )
 
 static wWin_p paramFileW;
 
-static long paramFileSel = 1;
+static long paramFileSel = 0;
 static wIcon_p mtbox_bm;
 static wIcon_p chkbox_bm;
 
@@ -426,8 +428,11 @@ static void DoParamFiles( void * junk )
 		dir = wPrefGetString( "file", "paramdir" );
 		if (dir != NULL)
 			strcpy( curParamDir, dir );
-		else
+		else {
+			// in case there is no preference setting, use the installation's param directory as default
 			strcpy( curParamDir, libDir );
+			strcat( curParamDir, PARAM_SUBDIR );
+		}
 		mtbox_bm = wIconCreateBitMap( mtbox_width, mtbox_height, mtbox_bits, drawColorBlack );
 		chkbox_bm = wIconCreateBitMap( chkbox_width, chkbox_height, chkbox_bits, drawColorBlack );
 		paramFileW = ParamCreateDialog( &paramFilePG, MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, ParamFileCancel, TRUE, NULL, 0, ParamFileDlgUpdate );
