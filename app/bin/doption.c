@@ -502,6 +502,11 @@ static void PrefOk( void * junk )
 	if ( resetValues ) {
 		NoticeMessage2( 0, MSG_CONN_PARAMS_TOO_SMALL, _("Ok"), NULL ) ;
 	}
+
+	if( curScaleInx == -1 ) {
+		SetScale( 0 );
+	}
+
 	wHide( prefW );
 	DoChangeNotification(changes);
 }

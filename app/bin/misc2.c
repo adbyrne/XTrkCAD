@@ -404,8 +404,8 @@ GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *ga
  * \param newScaleInx IN the index of the selected scale/gauge combination
  */
 
-static void SetScale(
-		SCALEINX_T newScaleInx )
+void 
+SetScale( SCALEINX_T newScaleInx )
 {
 	if (newScaleInx < 0 && newScaleInx >= scaleInfo_da.cnt) {
 		NoticeMessage( MSG_BAD_SCALE_INDEX, _("Ok"), NULL, (int)newScaleInx );
