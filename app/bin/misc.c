@@ -60,6 +60,8 @@
 #include "i18n.h"
 #include <locale.h>
 
+#define DEFAULT_SCALE ("N")
+
 char *userLocale = NULL;
 
 extern wBalloonHelp_t balloonHelp[];
@@ -2628,7 +2630,11 @@ LOG1( log_init, ( "Reset\n" ) )
 	/* Set up the data for scale and gauge description */
 	DoSetScaleDesc();
 
+	// get the preferred scale from the configuration file	
 	pref = wPrefGetString( "misc", "scale" );
+	if( !pref )
+		// if preferred scale was not set (eg. during initial run), initialize to a default value
+		pref = DEFAULT_SCALE;
 	DoSetScale( pref );
 
 	/* see whether last layout should be reopened on startup */

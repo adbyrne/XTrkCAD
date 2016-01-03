@@ -79,7 +79,7 @@ BOOL_T GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEIN
 
 BOOL_T DoSetScale( const char * );
 
-void SetScale( SCALEINX_T );
+static void SetScale( SCALEINX_T );
 void SetScaleGauge( SCALEDESCINX_T, GAUGEINX_T );
 void ScaleLengthIncrement( SCALEINX_T, DIST_T );
 void LoadScaleList( wList_p );
