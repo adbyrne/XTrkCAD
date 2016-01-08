@@ -1171,7 +1171,6 @@ static void MapResize( void )
 	MapRedraw();
 }
 
-
 #ifdef LATER
 static void MapProc( wWin_p win, winProcEvent e, void * data )
 {
@@ -2367,7 +2366,7 @@ static void MapDlgUpdate(
 		void * valueP )
 {
 	if ( inx == -1 ) {
-		mapVisible = FALSE;
+		MapWindowShow( FALSE );
 	}
 }
 

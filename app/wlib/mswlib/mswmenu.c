@@ -1,3 +1,26 @@
+/** \file mswmenu.c
+ * Pulldown menu creation and handling
+ * \todo Code for accelerator keys was copied and pasted, replace with utility function
+ */
+
+/*  XTrkCad - Model Railroad CAD
+ *  Copyright (C) (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
 #define OEMRESOURCE
 
 #include <windows.h>
@@ -9,6 +32,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include "mswint.h"
+#include "i18n.h"
 
 /*
  *****************************************************************************
@@ -834,6 +858,11 @@ wMenuToggle_p wMenuToggleCreate(
 {
 	wMenuToggle_p mt;
 	int rc;
+	char label[80];
+	char *cp;
+	char ac;
+	UINT vk;
+	long modifier;
 
 	mt = (wMenuToggle_p)createMenuItem( m, M_TOGGLE, helpStr, labelStr, sizeof *mt );
 	/*setAcclKey( m->parent, m->menu, mt->menu_item, acclKey );*/
@@ -842,7 +871,47 @@ wMenuToggle_p wMenuToggleCreate(
 	mt->mparent = m;
 	mt->enabled = TRUE;
 	mt->parentMenu = m;
-	rc = AppendMenu( m->menu, MF_STRING, mt->index, labelStr );
+	strcpy( label, mt->labelStr );
+	modifier = 0;
+
+	if ( acclKey != 0 ) {
+		DYNARR_APPEND( acclTable_t, acclTable_da, 10 );
+		cp = label + strlen( label );
+		*cp++ = '\t';
+		if (acclKey & WCTL ) {
+			strcpy( cp, _("Ctrl+") );
+//			cp += 5;
+			modifier |= WKEY_CTRL;
+		}
+		if (acclKey & WALT ) {
+			strcpy( cp, _("Alt+") );
+//			cp += 4;
+			modifier |= WKEY_ALT;
+		}
+		if (acclKey & WSHIFT ) {
+			strcpy( cp, _("Shift+") );
+//			cp += 6;
+			modifier |= WKEY_SHIFT;
+		}
+		cp = label + strlen( label );
+		if( ((char)acclKey & 0xFF ) == ' ' ) {
+			strcat( label, _("Space") );
+		} else {
+			*cp++ = toupper( (char)(acclKey & 0xFF) );
+			*cp++ = '\0';
+		}
+		ac = (char)(acclKey & 0xFF);
+		if (isalpha(ac)) {
+			ac = tolower( ac );
+		}
+		vk = VkKeyScan( ac );
+		if ( vk & 0xFF00 )
+			modifier |= WKEY_SHIFT;
+		acclTable(acclTable_da.cnt-1).acclKey = (modifier<<8) | (vk&0x00FF);
+		acclTable(acclTable_da.cnt-1).mp = mt;
+	}
+
+	rc = AppendMenu( m->menu, MF_STRING, mt->index, label );
 	wMenuToggleSet( mt, set );
 	return mt;
 }

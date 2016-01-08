@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/acclkeys.h,v 1.6 2009-07-08 18:40:27 m_fischer Exp $
+/** \file acclkeys.h
+ * Definition of accelerator keys
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -127,6 +127,7 @@
 #define ACCL_ZOOMOUT	(WCTL+'-')
 #define ACCL_SNAPSHOW	(WCTL+']')
 #define ACCL_SNAPENABLE (WCTL+'[')
+#define ACCL_MAPSHOW	(WCTL+' ')
 
 /* optionsM */
 #define ACCL_LAYOUTW	(WALT+WCTL+'a')

@@ -587,6 +587,29 @@ static void DoClear( void )
 	Confirm(_("Clear"), DoClearAfter);
 }
 
+/**
+ * Toggle visibility state of map window.
+ */
+
+void MapWindowToggleShow( void )
+{
+	MapWindowShow( !mapVisible );
+}
+
+/**
+ * Set visibility state of map window.
+ */
+
+void MapWindowShow( int state )
+{
+	mapVisible = state;
+	wPrefSetInteger( "misc", "mapVisible", mapVisible );
+	wMenuToggleSet( mapShowMI, mapVisible );
+	if( mapVisible )
+		DoChangeNotification( CHANGE_MAP );
+
+	wWinShow( mapW, mapVisible );
+}
 
 static void DoShowWindow(
 		int index,
@@ -595,10 +618,8 @@ static void DoShowWindow(
 {
 	if (data == mapW) {
 		if (mapVisible == FALSE) {
-			mapVisible = TRUE;
-			DoChangeNotification( CHANGE_MAP );
+			MapWindowToggleShow( TRUE );
 		}
-		mapVisible = TRUE;
 	}
 	wWinShow( (wWin_p)data, TRUE );
 }
@@ -2159,6 +2180,13 @@ static void CreateMenus( void )
 	snapGridShowMI = wMenuToggleCreate( viewM, "cmdGridShow", _("Show SnapGrid"), ACCL_SNAPSHOW,
 		FALSE, (wMenuToggleCallBack_p)SnapGridShow, NULL );
 	gridCmdInx = InitGrid( viewM );
+
+	// visibility toggle for map window
+	// get the start value
+	wPrefGetInteger( "misc", "mapVisible", &mapVisible, 1 );
+	mapShowMI = wMenuToggleCreate( viewM, "cmdMapShow", _("Show Map"), ACCL_MAPSHOW,
+		mapVisible, (wMenuToggleCallBack_p)MapWindowToggleShow, NULL );
+
 	wMenuSeparatorCreate( viewM );
 
 	toolbarM = wMenuMenuCreate( viewM, "toolbarM", _("&Tool Bar") );
@@ -2652,8 +2680,7 @@ LOG1( log_init, ( "Initialization complete\n" ) )
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
 
 	wWinShow( mainW, TRUE );
-	mapVisible = TRUE;
-	wShow( mapW );
+	wWinShow( mapW, mapVisible );
 	wDestroySplash();
 
 	/* this has to be called before ShowTip() */

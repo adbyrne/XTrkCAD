@@ -330,8 +330,10 @@ BOOL_T GridIsVisible( void );
 void InitSnapGridButtons( void );
 void SnapGridEnable( void );
 void SnapGridShow( void );
+void MapWindowShow( int state );
 wMenuToggle_p snapGridEnableMI;
 wMenuToggle_p snapGridShowMI;
+wMenuToggle_p mapShowMI;
 
 void ScaleLengthEnd( void );
 void EnumerateList( long, FLOAT_T, char * );

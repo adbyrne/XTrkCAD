@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.h,v 1.4 2008-10-11 06:03:06 m_fischer Exp $
+/** \file draw.h
+ * 
  */
 
 /*  XTrkCad - Model Railroad CAD

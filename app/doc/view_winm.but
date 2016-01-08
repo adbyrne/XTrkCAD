@@ -29,6 +29,10 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 
 \u000
 
+\dd \f{ Show Map} - Toggles display of the \f{Map Window} on and off.
+
+\u000
+
 \dd \f{Tool-bar} - Command button groups displayed on the \f{Tool-bar} are selected using the Tool-bar Configuration Menu (\K{toolbarM}).
 
 \u000
