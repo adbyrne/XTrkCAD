@@ -618,7 +618,7 @@ static void DoShowWindow(
 {
 	if (data == mapW) {
 		if (mapVisible == FALSE) {
-			MapWindowToggleShow( TRUE );
+			MapWindowShow( TRUE );
 		}
 	}
 	wWinShow( (wWin_p)data, TRUE );
@@ -2183,7 +2183,7 @@ static void CreateMenus( void )
 
 	// visibility toggle for map window
 	// get the start value
-	wPrefGetInteger( "misc", "mapVisible", &mapVisible, 1 );
+	wPrefGetInteger( "misc", "mapVisible", (long *)&mapVisible, 1 );
 	mapShowMI = wMenuToggleCreate( viewM, "cmdMapShow", _("Show Map"), ACCL_MAPSHOW,
 		mapVisible, (wMenuToggleCallBack_p)MapWindowToggleShow, NULL );
 
