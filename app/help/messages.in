@@ -15,8 +15,7 @@ END
 
 # cselect.c
 MESSAGE MSG_SEL_TRK_FROZEN
-A frozen layer contains selected
-track. Command cannot be executed.
+A frozen layer contains selected track. Command cannot be executed.
 HELP
 This operation cannot be executed as segments of Selected track are present on a frozen layer. Track changes or deletions may be performed only on unfrozen layers. Deselect objects that appear on frozen layers or unfreeze the layers.
 
@@ -345,7 +344,7 @@ HELP
 The layout file that you're attempting to load was created using a newer version
 of \e{XTrackCAD}. In order to load this file it will be necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
 
-Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Website} and downloading the latest release.
 END
 
 #fileio.c
@@ -362,8 +361,7 @@ END
 
 # chndldto.c
 MESSAGE MSG_MOVE_POINTS_OTHER_SIDE
-Frog angle prevents placement of points.
-Move points to opposite side of frog.
+Frog angle prevents placement of points. Move points to opposite side of frog.
 HELP
 The frog angle prevents points from being placed on this side of the frog. Place points on opposite side of frog or retry this command and create the frog in the opposite direction.
 
@@ -686,8 +684,7 @@ END
 
 # cpull.c
 MESSAGE MSG_TOO_FAR_APART_DIVERGE
-Selected tracks deviate too much or
-are too far apart from each other.
+Selected tracks deviate too much or are too far apart from each other.
 HELP
 The \f{Connect} command is used to remove small gaps that may result when using sectional track. The chosen sectional track \e{endpoints} must be close together and nearly aligned. The selected tracks deviate too much or are too far apart from each other.
 
@@ -757,8 +754,7 @@ END
 
 # ctrain.c
 MESSAGE MSG_CANT_MOVE_UNDER_TRAIN
-The position of a turnout or turntable cannot
-be changed while occupied by a train.
+The position of a turnout or turntable cannot be changed while occupied by a train.
 HELP
 The position of a turnout or turntable cannot be changed while occupied by a train.
 
@@ -885,11 +881,9 @@ END
 
 # various
 MESSAGE MSG_RADIUS_LSS_EASE_MIN
-Track radius (%s) is smaller than
-easement minimum (%s).
+Track radius (%s) is smaller than easement minimum (%s).
 ALT
-Track radius (N.NNN) is smaller than
-easement minimum (N.NNN).
+Track radius (N.NNN) is smaller than easement minimum (N.NNN).
 HELP
 An attempt was made to create a curved track with a radius smaller than the minimum specified in the \f{Easement} dialog. Try moving the mouse to different position, creating a curve with a larger radius.
 
