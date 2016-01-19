@@ -420,6 +420,7 @@ static dstFmts_t englishDstFmts[] = {
 		{ N_("999ft 11.9in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|1 },
 		{ N_("999ft 11 7/8in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|3 },
 		{ N_("999ft 11 63/64in"),	DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|6 },
+		{ N_("999.999999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|6 },
 		{ NULL, 0 } };
 static dstFmts_t metricDstFmts[] = {
 		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
@@ -434,6 +435,7 @@ static dstFmts_t metricDstFmts[] = {
 		{ N_("999.999m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|3 },
 		{ N_("999.99m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|2 },
 		{ N_("999.9m"),				DISTFMT_FMT_M|DISTFMT_FRACT_NUM|1 },
+		{ NULL, 0 },
 		{ NULL, 0 },
 		{ NULL, 0 },
 		{ NULL, 0 },
