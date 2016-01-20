@@ -147,12 +147,12 @@
 #define ACCL_BRIDGE		(0)
 
 /* Blocks */
-#define ACCL_BLOCK1	(WALT+WSHIFT+'b')
-#define ACCL_BLOCK2	(WALT+WCTL+WSHIFT+'b')
+#define ACCL_BLOCK1	(0)
+#define ACCL_BLOCK2	(0)
 #define ACCL_BLOCK3	(0)
 /* Switch Motors */
-#define ACCL_SWITCHMOTOR1 (WSHIFT+'s')
-#define ACCL_SWITCHMOTOR2 (WALT+WSHIFT+'s')
+#define ACCL_SWITCHMOTOR1 (0)
+#define ACCL_SWITCHMOTOR2 (0)
 #define ACCL_SWITCHMOTOR3 (0)
 
 #endif
