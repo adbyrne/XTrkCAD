@@ -90,6 +90,14 @@ static double bBorder;			/**< bottom margin */
 
 static long printFormat = PRINT_LANDSCAPE;
 
+/*****************************************************************************
+ *
+ * FUNCTIONS
+ *
+ */
+
+static void WlibGetPaperSize( void );
+
 /**
  * Initialize printer und paper selection using the saved settings
  *
@@ -138,12 +146,7 @@ WlibApplySettings( GtkPrintOperation *op )
 		g_error_free (err);
 	} else {
 		// on success get the paper dimensions
-		bBorder = gtk_page_setup_get_bottom_margin( page_setup, GTK_UNIT_INCH );
-		tBorder = gtk_page_setup_get_top_margin( page_setup, GTK_UNIT_INCH );
-		lBorder = gtk_page_setup_get_left_margin( page_setup, GTK_UNIT_INCH );
-		rBorder = gtk_page_setup_get_right_margin( page_setup, GTK_UNIT_INCH );
-		paperHeight = gtk_page_setup_get_paper_height( page_setup, GTK_UNIT_INCH );
-		paperWidth = gtk_page_setup_get_paper_width( page_setup, GTK_UNIT_INCH );
+		WlibGetPaperSize();
 	}
 	g_free( filename );
 
@@ -226,6 +229,8 @@ void wPrintSetup( wPrintSetupCallBack_p callback )
 		g_object_unref (page_setup);
 
 	page_setup = new_page_setup;
+	
+	WlibGetPaperSize();
 	WlibSaveSettings( NULL );
 }
 
@@ -596,12 +601,22 @@ void wPrintClip( wPos_t x, wPos_t y, wPos_t w, wPos_t h )
 static void
 WlibGetPaperSize( void )
 {
+	double temp;
+	
 	bBorder = gtk_page_setup_get_bottom_margin( page_setup, GTK_UNIT_INCH );
 	tBorder = gtk_page_setup_get_top_margin( page_setup, GTK_UNIT_INCH );
 	lBorder = gtk_page_setup_get_left_margin( page_setup, GTK_UNIT_INCH );
 	rBorder = gtk_page_setup_get_right_margin( page_setup, GTK_UNIT_INCH );
 	paperHeight = gtk_page_setup_get_paper_height( page_setup, GTK_UNIT_INCH );
 	paperWidth = gtk_page_setup_get_paper_width( page_setup, GTK_UNIT_INCH );
+	
+	// XTrackCAD does page orientation itself. Basic assumption is that the
+	// paper is always oriented in portrait mode. Ignore settings by user
+	if( paperHeight < paperWidth ) {
+		temp = paperHeight;
+		paperHeight = paperWidth;
+		paperWidth = temp;
+	}	
 }
 
 /**
@@ -718,6 +733,7 @@ wBool_t wPrintDocStart( const char * title, int fTotalPageCount, int * copiesP )
 	GtkWidget *printDialog;
 	gint res;
 	cairo_surface_type_t surface_type;
+	cairo_matrix_t matrix;
 
 	printDialog = gtk_print_unix_dialog_new( title, GTK_WINDOW(gtkMainW->gtkwin));
 
