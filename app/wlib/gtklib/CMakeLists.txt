@@ -8,7 +8,7 @@ SET(SOURCES
 	gtkbutton.c
 	gtkcolor.c
 	gtkdraw-cairo.c
-	gtkfilsel.c
+	filesel.c
 	gtkfont.c
 	gtkhelp.c
 	gtklist.c
