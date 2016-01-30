@@ -68,7 +68,7 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 
 struct wWin_t {
 		WOBJ_COMMON
-		GtkWidget *gtkwin;             /**< GTK window */ 
+		GtkWidget *gtkwin;             /**< GTK window */
 		wPos_t lastX, lastY;
 		wControl_p first, last;
 		wWinCallBack_p winProc;        /**< window procedure */
@@ -157,15 +157,10 @@ void gtkPrintColorMap( FILE *, int, int );
 int gtkMapPixel( long );
 
 /* psprint.c */
-typedef struct {
-		wIndex_t cmdOrFile;
-		FILE * f;
-		} wPrinterStream_t;
-typedef wPrinterStream_t * wPrinterStream_p;
 
-wPrinterStream_p wPrinterOpen( void );
-void wPrinterWrite( wPrinterStream_p p, char * buff, int siz );
-void wPrinterClose( wPrinterStream_p );
+void WlibApplySettings( GtkPrintOperation *op );
+void WlibSaveSettings( GtkPrintOperation *op );
+
 void psPrintLine( wPos_t, wPos_t, wPos_t, wPos_t,
 				wDrawWidth, wDrawLineType_e, wDrawColor, wDrawOpts );
 void psPrintArc( wPos_t, wPos_t, wPos_t, double, double, int,
@@ -177,4 +172,31 @@ void psPrintFillRectangle( wPos_t, wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts
 void psPrintFillPolygon( wPos_t [][2], int, wDrawColor, wDrawOpts );
 void psPrintFillCircle( wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
 
+struct wDraw_t {
+		WOBJ_COMMON
+		void * context;
+		wDrawActionCallBack_p action;
+		wDrawRedrawCallBack_p redraw;
+
+		GdkPixmap * pixmap;
+		GdkPixmap * pixmapBackup;
+
+		double dpi;
+
+		GdkGC * gc;
+		wDrawWidth lineWidth;
+		wDrawOpts opts;
+		wPos_t maxW;
+		wPos_t maxH;
+		unsigned long lastColor;
+		wBool_t lastColorInverted;
+		const char * helpStr;
+
+		wPos_t lastX;
+		wPos_t lastY;
+
+		wBool_t delayUpdate;
+		cairo_t *printContext;
+		cairo_surface_t *curPrintSurface;
+		};
 #endif

@@ -1,5 +1,5 @@
 /** \file gtktext.c
- * Multi line text entry 
+ * Multi-line Text Boxes
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,7 +24,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <math.h>
+#include "i18n.h"
 #include "gtkint.h"
 
 /*
@@ -32,13 +33,18 @@
  */
 #define USE_TEXTVIEW
 
-/*
- *****************************************************************************
- *
- * Multi-line Text Boxes
- *
- *****************************************************************************
- */
+
+struct PrintData {
+	wText_p	tb;
+	gint lines_per_page;
+	gdouble font_size; 
+	gchar **lines;
+	gint total_lines;
+	gint total_pages;
+};
+
+#define HEADER_HEIGHT 20.0
+#define HEADER_GAP 8.5
 
 struct wText_t {
 		WOBJ_COMMON
@@ -69,16 +75,6 @@ EXPORT void wTextClear(
 	bt->changed = FALSE;
 }
 
-/**
- * Add text to a multiline text field. Font is selected as requested. 
- * Bold is supported if the flags BT_BOLD is set as flags for the entry 
- * field. For bold, pango text markup is used
- * 
- *
- * \param bt IN the text field
- * \param text IN text to add
- */
- 
 EXPORT void wTextAppend(
 		wText_p bt,
 		const char * text )
@@ -86,7 +82,6 @@ EXPORT void wTextAppend(
 #ifdef USE_TEXTVIEW
 	GtkTextBuffer * tb;
 	GtkTextIter ti1, ti2;
-//	PangoFontDescription    *pfd;
 #else
 	static GdkFont * fixedRegularFont = NULL;
 	static GdkFont * fixedBoldFont = NULL;
@@ -102,14 +97,6 @@ EXPORT void wTextAppend(
 	if (bt->text == 0) abort();
 #ifdef USE_TEXTVIEW
 	tb = gtk_text_view_get_buffer( GTK_TEXT_VIEW(bt->text) );
-	//if ((bt->option&BT_FIXEDFONT)) {
-		///* creating PangoFontDescription from string, specified in entry */
-		//pfd = pango_font_description_from_string("Monospace");
-		///* setting label's font */
-		//gtk_widget_modify_font(GTK_WIDGET(tb), pfd);
-		///* freeing PangoFontDescription, cause it has been copied by prev. call */
-		//pango_font_description_free(pfd);
-	//}	
 #else
 	if ((bt->option&BT_FIXEDFONT)) {
 		if (fixedRegularFont==NULL)
@@ -251,42 +238,224 @@ EXPORT wBool_t wTextSave(
 	fclose(f);
 	return TRUE;
 }
+/**
+ * Begin the printing by retrieving the contents of the text box and
+ * count the lines of text. 
+ * 
+ * \param operation IN the GTK print operation
+ * \param context IN print context
+ * \param pd IN data structure for user data
+ * 
+ */
+ 
+static void
+begin_print (GtkPrintOperation *operation, 
+             GtkPrintContext *context,
+             struct PrintData *pd)
+{
+	gchar *contents;
+	gdouble height;
+		
+	contents =  gtkGetText( pd->tb );
+	pd->lines = g_strsplit (contents, "\n", 0);
 
+	/* Count the total number of lines in the file. */
+	/* ignore the header lines */
+	pd->total_lines = 6;
+	while (pd->lines[pd->total_lines] != NULL)
+		pd->total_lines++;
+  
+	/* Based on the height of the page and font size, calculate how many lines can be 
+	* rendered on a single page. A padding of 3 is placed between lines as well.
+	* Space for page header, table header and footer lines is subtracted from the total size
+	*/
+	height = gtk_print_context_get_height (context) - (pd->font_size + 3) - 2 * ( HEADER_HEIGHT + HEADER_GAP );
+	pd->lines_per_page = floor (height / (pd->font_size + 3));
+	pd->total_pages = (pd->total_lines - 1) / pd->lines_per_page + 1;
+	gtk_print_operation_set_n_pages (operation, pd->total_pages);
+	
+	free( contents );
+}
+
+/**
+ * Draw the page, which includes a header with the file name and page number along
+ * with one page of text with a font of "Monospace 10". 
+ * 
+ * \param operation IN the GTK print operation
+ * \param context IN print context
+ * \param page_nr IN page to print
+ * \param pd IN data structure for user data
+ * 
+ * 
+ */
+ 
+static void
+draw_page (GtkPrintOperation *operation,
+           GtkPrintContext *context,
+           gint page_nr,
+           struct PrintData *pd )
+{
+	cairo_t *cr;
+	PangoLayout *layout;
+	gdouble width, text_height, height;
+	gint line, i, text_width, layout_height;
+	PangoFontDescription *desc;
+	gchar *page_str;
+
+	cr = gtk_print_context_get_cairo_context (context);
+	width = gtk_print_context_get_width (context);
+	
+	layout = gtk_print_context_create_pango_layout (context);
+	desc = pango_font_description_from_string ("Monospace");
+	pango_font_description_set_size (desc, pd->font_size * PANGO_SCALE);
+
+	/* 
+	 * render the header line with document type parts list on left and
+	 * first line of layout title on right 
+	 */ 
+	 
+	pango_layout_set_font_description (layout, desc);
+	pango_layout_set_text (layout, pd->lines[ 0 ], -1); 	// document type
+	pango_layout_set_width (layout, -1);
+	pango_layout_set_alignment (layout, PANGO_ALIGN_LEFT);
+	pango_layout_get_size (layout, NULL, &layout_height);
+	text_height = (gdouble) layout_height / PANGO_SCALE;
+
+	cairo_move_to (cr, 0, (HEADER_HEIGHT - text_height) / 2);
+	pango_cairo_show_layout (cr, layout);
+
+	pango_layout_set_text (layout, pd->lines[ 2 ], -1);		// layout title 
+	pango_layout_get_size (layout, &text_width, NULL);
+	pango_layout_set_alignment (layout, PANGO_ALIGN_RIGHT);
+
+	cairo_move_to (cr, width - (text_width / PANGO_SCALE), 
+                 (HEADER_HEIGHT - text_height) / 2);
+	pango_cairo_show_layout (cr, layout);
+
+	/* Render the column header */
+	cairo_move_to (cr, 0, HEADER_HEIGHT + HEADER_GAP + pd->font_size + 3 );
+	pango_layout_set_text (layout, pd->lines[ 6 ], -1);
+	pango_cairo_show_layout (cr, layout);
+	cairo_rel_move_to (cr, 0, pd->font_size + 3 );
+	pango_layout_set_text (layout, pd->lines[ 7 ], -1);
+	pango_cairo_show_layout (cr, layout);
+	
+	/* Render the page text with the specified font and size. */  
+	cairo_rel_move_to (cr, 0, pd->font_size + 3 );
+	line = page_nr * pd->lines_per_page + 8;
+	for (i = 0; i < pd->lines_per_page && line < pd->total_lines; i++) 
+	{
+		pango_layout_set_text (layout, pd->lines[line], -1);
+		pango_cairo_show_layout (cr, layout);
+		cairo_rel_move_to (cr, 0, pd->font_size + 3);
+		line++;
+	}
+
+	/* 
+	 * Render the footer line with date on the left and page number 
+	 * on the right
+	 */
+	pango_layout_set_text (layout, pd->lines[ 5 ], -1); 	// date
+	pango_layout_set_width (layout, -1);
+	pango_layout_set_alignment (layout, PANGO_ALIGN_LEFT);
+	pango_layout_get_size (layout, NULL, &layout_height);
+	text_height = (gdouble) layout_height / PANGO_SCALE;
+
+	height = gtk_print_context_get_height (context);
+	cairo_move_to (cr, 0, height - ((HEADER_HEIGHT - text_height) / 2));
+	pango_cairo_show_layout (cr, layout);
+
+	page_str = g_strdup_printf (_("%d of %d"), page_nr + 1, pd->total_pages); // page number
+	pango_layout_set_text( layout, page_str, -1 );
+	pango_layout_get_size (layout, &text_width, NULL);
+	pango_layout_set_alignment (layout, PANGO_ALIGN_RIGHT);
+
+	cairo_move_to (cr, width - (text_width / PANGO_SCALE), 
+                 height - ((HEADER_HEIGHT - text_height) / 2));
+	pango_cairo_show_layout (cr, layout);
+
+	g_free (page_str);
+	g_object_unref (layout);
+	pango_font_description_free (desc);
+}
+
+/**
+ * Clean up after the printing operation since it is done. 
+ *
+ * \param operation IN the GTK print operation
+ * \param context IN print context
+ * \param pd IN data structure for user data
+ * 
+ * 
+ */
+static void
+end_print (GtkPrintOperation *operation, 
+           GtkPrintContext *context,
+           struct PrintData *pd)
+{
+	g_strfreev (pd->lines);
+	free( pd );
+}
+
+/**
+ * Print the content of a multi line text box. This function is only used
+ * for printing the parts list. So it makes some assumptions on the structure
+ * and the content. Change if the multi line entry is changed.
+ * The deprecated gtk_text is not supported by this function. 
+ * 
+ * Thanks to Andrew Krause's book for a good starting point.
+ *
+ * \param bt IN the text field
+ * \return    TRUE on success, FALSE on error
+ */
 
 EXPORT wBool_t wTextPrint(
 		wText_p bt )
 {
-	wPrinterStream_p f;
-#ifndef USE_TEXTVIEW
-	int siz, pos, cnt;
-#endif
-	char * cp;
+	GtkPrintOperation *operation;
+	GtkWidget *dialog;
+	GError *error = NULL;
+	gint res;
+	struct PrintData *data;
 
-	f = wPrinterOpen();
-	if (f==NULL) {
-		return FALSE;
-	}
-#ifdef USE_TEXTVIEW
-	cp = gtkGetText( bt );
-	wPrinterWrite( f, cp, strlen(cp) );
-	free(cp);
+	/* Create a new print operation, applying saved print settings if they exist. */
+	operation = gtk_print_operation_new ();
+	WlibApplySettings( operation );
+  
+	data = malloc(sizeof( struct PrintData));
+	data->font_size = 10.0;
+	data->tb = bt;
 
-#else
-	siz = gtk_text_get_length( GTK_TEXT(bt->text) );
-	pos = 0;
-	cnt = BUFSIZ;
-	while (pos<siz) {
-		if (pos+cnt>siz)
-			 cnt = siz-pos;
-		cp = gtk_editable_get_chars( GTK_EDITABLE(bt->text), pos, pos+cnt );
-		if (cp == NULL)
-			break;
-		wPrinterWrite( f, cp, cnt );
-		free(cp);
-		pos += cnt;
+	g_signal_connect (G_OBJECT (operation), "begin_print", 
+		                G_CALLBACK (begin_print), (gpointer) data);
+	g_signal_connect (G_OBJECT (operation), "draw_page", 
+		                G_CALLBACK (draw_page), (gpointer) data);
+	g_signal_connect (G_OBJECT (operation), "end_print", 
+		                G_CALLBACK (end_print), (gpointer) data);
+
+	/* Run the default print operation that will print the selected file. */
+	res = gtk_print_operation_run (operation, GTK_PRINT_OPERATION_ACTION_PRINT_DIALOG, 
+									GTK_WINDOW(gtkMainW->gtkwin), &error);
+
+	/* If the print operation was accepted, save the new print settings. */
+	if (res == GTK_PRINT_OPERATION_RESULT_APPLY)
+	{
+		WlibSaveSettings( operation );
 	}
-#endif
-	wPrinterClose(f);
+	/* Otherwise, report that the print operation has failed. */
+	else if (error)
+	{
+		dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin), 
+                                     GTK_DIALOG_DESTROY_WITH_PARENT,
+                                     GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
+				                             error->message);
+    
+		g_error_free (error);
+		gtk_dialog_run (GTK_DIALOG (dialog));
+		gtk_widget_destroy (dialog);     
+	}
+	g_object_unref (operation);
+  
 	return TRUE;
 }
 
@@ -402,21 +571,7 @@ static void textChanged(
 	bt->changed = TRUE;
 }
 
-/**
- * Create a multi line text entry widget. The created widget is 
- * configured as requested by the BT_* flags. This includes Monospaced
- * font for BT_FIXEDFONT, readonly for BT_READONLY and a markup for 
- * bold when setup via BT_BOLD.
- *
- * \param parent IN parent window
- * \param x,y IN position 
- * \param helpstr IN label for linking into help system
- * \param labelStr IN label
- * \param option IN widget options 
- * \param width, height IN size of widget
- * \return  handle for new widget 
- */
- 
+
 EXPORT wText_p wTextCreate(
 		wWin_p	parent,
 		wPos_t	x,
@@ -430,7 +585,6 @@ EXPORT wText_p wTextCreate(
 	wText_p bt;
 #ifdef USE_TEXTVIEW
 	GtkTextBuffer * tb;
-	PangoFontDescription    *pfd;
 #else
 	GtkRequisition requisition;
 #endif
@@ -453,14 +607,6 @@ EXPORT wText_p wTextCreate(
 	gtk_text_buffer_create_tag( tb, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
 /*	gtk_text_buffer_create_tag( tb, "italic", "style", PANGO_STYLE_ITALIC, NULL); */
 /*	gtk_text_buffer_create_tag( tb, "bolditalic", "weight", PANGO_WEIGHT_BOLD, "style", PANGO_STYLE_ITALIC, NULL); */
-	if ((bt->option & BT_FIXEDFONT)) {
-		/* creating PangoFontDescription from string, specified in entry */
-		pfd = pango_font_description_from_string("Monospace");
-		/* setting label's font */
-		gtk_widget_modify_font(GTK_WIDGET(bt->text), pfd);
-		/* freeing PangoFontDescription, cause it has been copied by prev. call */
-		pango_font_description_free(pfd);
-	}	
 	bt->vscroll = gtk_vscrollbar_new( GTK_TEXT_VIEW(bt->text)->vadjustment );
 	if (bt->vscroll == 0) abort();
 #else

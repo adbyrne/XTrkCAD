@@ -269,67 +269,23 @@ The \f{Printer Setup} dialog allows you to configure the application's use of th
 
 The \f{Printer Setup} window contains:
 
-\dd \f{Printer} - a list to select a particular printer.  The entries on this list are defined by \c{printer} lines in the \c{~/.xtrkcad/xtrkcad.rc} file.  The first entry, 'File', causes printouts to be sent to a file.  You will be prompted for a file name when doing a print.
+\dd \f{Format for} - a list to select a particular printer.  The entries on this list are defined by \c{printer} lines in the \c{~/.xtrkcad/xtrkcad.rc} file.  The first entry, 'File', causes printouts to be sent to a file.  You will be prompted for a file name when doing a print.
 
 \u000
 
-\dd \f{Paper Size} - a list of various North American and European paper sizes.
+\dd \f{Paper Size} - a list of various supported paper sizes.
 
 \u000
 
-\dd \f{Margins} - non-printable margins for particular printers.  You can adjust these entries or select a printer type from the list.  To add margins for a new printer, enter the printer's name and then enter the margin for each edge.  You can use \f{Print Test Page} to determine the margins for your printer.
+\dd \f{Orientation} - a Radio button to select various Landscape or Portrait formats.
 
 \u000
 
-\dd The \f{Delete} button removes a printer from the margin list.
-
-\u000
-
-\dd \f{Format} - a Radio button to select either Landscape or Portrait format.
-
-\u000
-
-\dd \f{X Font} and \f{PS Font} - specifies the mapping between the displays X Font and the corresponding Postscript Font.  You can change the Postscript font for a specified X Font by typing the new font name in the \f{PS Font} field.  The \e{font alias} map will be printed on the \f{Print Test Page}.
-
-\u000
-
-\dd \f{Factor} - adjusts the scaling between X Font and Postscript Font sizes.  Due to differences between the two font systems, text size may be of slightly different between the display and printer. This option allows you to adjust the font size.  Normally only a small adjustment is required, (like 0.950).
-
-\u000
-
-\dd \f{OK} - updates the data and ends the dialog.
+\dd \f{Apply} - updates the data and ends the dialog.
 
 \u000
 
 \dd \f{Cancel} - ends the dialog without update.
-
-\u000
-
-\dd \f{Print Test Page} - prints a test page you can use to determine the printer margins.
-
-\u000
-
-The formats of the \e{printer} entries are:
-
-\dd PRINTER.Iprinter-num: Iprinter-name\e{=}Icommand
-
-\u000
-
-\dd where:
-
-\lcont{
-
-\dd \c{Iprinter-num} is the next value in a sequential list (starting at \f{1}, \f{0} is reserved for \f{FILE}). \f{printer.1} is predefined as \c{lp=lpr -P%s}.
-
-\dd \c{Iprinter-name} is the name of the printer as it appears in the \f{Printer} selection list.
-
-\dd \c{Icommand} is the command to invoke where \e{%s} will be replaced by the \c{Iprinter-name}.
-
-}
-
-To add a new printer, select the next value for Iprinter-num and add the printer line with the name and print command.
-
-Printing generates Postscript data which is sent to the specified printer (or File).  The names of fonts differs between the X Window System and Postscript and there is no formula to convert them.  The printing system uses a \e{font alias} map to convert from X font names to Postscript font names.  Font aliases for the common Postscript fonts are predefined but you must supply an alias for unknown fonts.  The 'Font Alias' window will be shown whenever you are printing an unknown font.  You will be asked to supply a Postscript font name for a X font.  You can change the \e{font alias} mapping by using the \f{X Font} and \f{PS Font} entries on the \f{Printer Setup} dialog.
 
 \rule
 

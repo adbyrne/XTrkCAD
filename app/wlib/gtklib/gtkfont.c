@@ -1,7 +1,5 @@
 /** \file gtkfont.c
  * Font selection and loading.
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkfont.c,v 1.12 2009-12-07 19:31:31 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -81,7 +79,7 @@ static wFont_p curFont = NULL;
 static void fontSelectionDialogCallback(GtkFontSelectionDialog *fontSelectionDialog, gint response, gpointer data)
 {
 	gchar *fontName;
-	
+
 	switch (response)
 	{
 		case GTK_RESPONSE_APPLY: /* once the apply button is hidden, this should not be used */
@@ -120,10 +118,10 @@ static wBool_t fontInit()
 		"helvetica bold 18",
 		"helvetica bold oblique 18",
 	};
-	
+
 	int s = 0;
 	int i, j, k;
-	
+
 	for (i = F_TIMES; i <= F_HELV; ++i) {
 		for (j = FW_MEDIUM; j <= FW_BOLD; ++j) {
 			for (k = FS_REGULAR; k <= FS_ITALIC; ++k) {
@@ -134,7 +132,7 @@ static wBool_t fontInit()
 			}
 		}
 	}
-	
+
 	if (curFont == NULL) {
 		curFont = (wFont_p) malloc(sizeof(struct wFont_t));
 		if (curFont == NULL)
@@ -143,7 +141,7 @@ static wBool_t fontInit()
 		curFont->fontDescription = pango_font_description_from_string(fontName ? fontName : "helvetica 18");
 		absoluteFontSize = (int) PANGO_PIXELS(pango_font_description_get_size(curFont->fontDescription));
 	}
-	
+
 	fontInitted = TRUE;
 	return TRUE;
 }
@@ -152,6 +150,21 @@ static wBool_t fontInit()
 static double fontFactor = 1.0;
 
 #define FONTSIZE_TO_PANGOSIZE(fs) ((gint) ((fs) * (fontFactor) + .5))
+
+/**
+ * Create a Pango layout with a specified font and font size
+ *
+ * \param widget IN
+ * \param cairo IN cairo context
+ * \param fp IN font
+ * \param fs IN size
+ * \param s IN ???
+ * \param width_p OUT width of layout
+ * \param height_p OUT height of layout
+ * \param ascent_p OUT ascent of layout
+ * \param descent_p OUT descent of layout
+ * \return    the created Pango layout
+ */
 
 PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
                                       void *cairo,
@@ -165,9 +178,9 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
 {
 	if (!fontInitted)
 		fontInit();
-	
+
 	PangoLayout *layout = NULL;
-	
+
 	gchar *utf8 = gtkConvertInput(s);
 
 /* RPH -- pango_cairo_create_layout() is missing in CentOS 4.8.
@@ -175,7 +188,7 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
           libpangocairo at all.
           pango_cairo_create_layout() was introduced with Pango 1.10. */
 
-#if PANGO_VERSION_MAJOR >= 1 && PANGO_VERSION_MINOR >= 10	
+#if PANGO_VERSION_MAJOR >= 1 && PANGO_VERSION_MINOR >= 10
 	if (cairo != NULL) {
 		layout = pango_cairo_create_layout((cairo_t *) cairo);
 		pango_layout_set_text(layout, utf8, -1);
@@ -183,17 +196,17 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
 	else
 #endif
 		layout = gtk_widget_create_pango_layout(widget, utf8);
-	
+
 	PangoFontDescription *fontDescription = (fp ? fp : curFont)->fontDescription;
-	
+
 	PangoContext *context;
 	PangoFontMetrics *metrics;
-	
+
 	/* set attributes */
 	pango_font_description_set_size(fontDescription,
 									FONTSIZE_TO_PANGOSIZE(fs) * PANGO_SCALE);
 	pango_layout_set_font_description(layout, fontDescription);
-	
+
 	/* get layout measures */
 	pango_layout_get_pixel_size(layout, width_p, height_p);
 	context = gtk_widget_get_pango_context(widget);
@@ -202,7 +215,7 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
 	*ascent_p  = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
 	*descent_p = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
 	pango_font_metrics_unref(metrics);
-	
+
 #if WLIB_FONT_DEBUG >= 3
 	fprintf(stderr, "font layout created:\n");
 	fprintf(stderr, "  widget:         %p\n", widget);
@@ -214,7 +227,7 @@ PangoLayout *gtkFontCreatePangoLayout(GtkWidget *widget,
 	fprintf(stderr, "  layout ascent:  %d (pixels)\n", *ascent_p);
 	fprintf(stderr, "  layout descent: %d (pixels)\n", *descent_p);
 #endif
-	
+
 	return layout;
 }
 
@@ -234,7 +247,7 @@ void wSelectFont(
 {
 	if (!fontInitted)
 		fontInit();
-	
+
 	if (fontSelectionDialog == NULL) {
 		fontSelectionDialog = gtk_font_selection_dialog_new(_("Font Select"));
 		gtk_window_set_position(GTK_WINDOW(fontSelectionDialog), GTK_WIN_POS_MOUSE);
@@ -244,17 +257,17 @@ void wSelectFont(
 		gtk_signal_connect(GTK_OBJECT(fontSelectionDialog), "destroy", GTK_SIGNAL_FUNC(gtk_widget_destroyed), &fontSelectionDialog);
 	}
 	gtk_window_set_title(GTK_WINDOW(fontSelectionDialog), title);
-	
+
 	if (curFont != NULL) {
-		/* the curFont description contains the latest font info 
+		/* the curFont description contains the latest font info
 		 * which is depended on the current scale
-		 * overwrite it with the absoluteFontSize */ 
+		 * overwrite it with the absoluteFontSize */
 		pango_font_description_set_size(curFont->fontDescription,FONTSIZE_TO_PANGOSIZE(absoluteFontSize) * PANGO_SCALE);
 		gchar *fontName = pango_font_description_to_string(curFont->fontDescription);
 		gtk_font_selection_dialog_set_font_name(GTK_FONT_SELECTION_DIALOG(fontSelectionDialog), fontName);
 		g_free(fontName);
 	}
-	
+
 	gtk_widget_show(fontSelectionDialog);
 }
 
@@ -262,7 +275,7 @@ static wFont_p gtkSelectedFont( void )
 {
 	if (!fontInitted)
 		fontInit();
-	
+
 	return curFont;
 }
 
@@ -270,12 +283,12 @@ wFontSize_t wSelectedFontSize( void )
 {
 	if (!fontInitted)
 		fontInit();
-	
+
 #if WLIB_FONT_DEBUG >= 3
 			fprintf(stderr, "the font size of current font description is: %d\n",pango_font_description_get_size(curFont->fontDescription)/PANGO_SCALE);
-			fprintf(stderr, "the font size of absoluteFontSize is: %d\n",absoluteFontSize); 
+			fprintf(stderr, "the font size of absoluteFontSize is: %d\n",absoluteFontSize);
 #endif
-	
+
 	//return (wFontSize_t) PANGO_PIXELS(pango_font_description_get_size(curFont->fontDescription));
 	return absoluteFontSize;
 }
@@ -283,26 +296,35 @@ wFontSize_t wSelectedFontSize( void )
 void wSetSelectedFontSize(int size){
 	absoluteFontSize = (wFontSize_t)size;
 }
-	
+
+/**
+ * get the Pango font description as a string from a font definition.
+ * If the font definition is NULL, a default font is return. This is
+ * the current font if one is set. If not the first font from the font
+ * list is returned.
+ *
+ * \param fp IN the font definition
+ * \return    the font description
+ */
 
 const char *gtkFontTranslate( wFont_p fp )
 {
 	static gchar *fontName = NULL;
-	
+
 	if (fontName != NULL)
 		g_free(fontName);
-	
+
 	if (!fontInitted)
 		fontInit();
-	
+
 	if (fp == NULL)
 		fp = gtkSelectedFont();
-	
+
 	if (fp == NULL)
 		fp = standardFonts[0][FW_MEDIUM][FS_REGULAR];
-	
+
 	fontName = pango_font_description_to_string(fp->fontDescription);
-	
+
 #if WLIB_FONT_DEBUG >= 2
 	fprintf(stderr, "font translation: ");
 	fprintf(stderr, "  \"%s\"\n", fontName);
@@ -315,6 +337,6 @@ wFont_p wStandardFont( int face, wBool_t bold, wBool_t italic )
 {
 	if (!fontInitted)
 		fontInit();
-	
+
 	return standardFonts[face-F_TIMES][bold][italic];
 }
