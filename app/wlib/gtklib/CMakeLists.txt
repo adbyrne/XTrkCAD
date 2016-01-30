@@ -7,6 +7,7 @@ SET(SOURCES
 	gtkbitmap.c
 	gtkbutton.c
 	gtkcolor.c
+	gtkdraw-cairo.c
 	gtkfilsel.c
 	gtkfont.c
 	gtkhelp.c
@@ -22,12 +23,6 @@ SET(SOURCES
 	print.c
 	wpref.c
 	)
-
-IF(XTRKCAD_USE_GTK_CAIRO)
-	SET(SOURCES ${SOURCES} gtkdraw-cairo.c)
-ELSE(XTRKCAD_USE_GTK_CAIRO)
-	SET(SOURCES ${SOURCES} gtkdraw.c)
-ENDIF(XTRKCAD_USE_GTK_CAIRO)
 
 SET_SOURCE_FILES_PROPERTIES(wpref.c PROPERTIES COMPILE_FLAGS -DEXPORT=)
 
