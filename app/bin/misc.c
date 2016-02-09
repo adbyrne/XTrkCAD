@@ -2663,7 +2663,8 @@ LOG1( log_init, ( "Reset\n" ) )
 	if( !pref )
 		// if preferred scale was not set (eg. during initial run), initialize to a default value
 		pref = DEFAULT_SCALE;
-	DoSetScale( pref );
+	strcpy( buffer, pref );
+	DoSetScale( buffer );
 
 	/* see whether last layout should be reopened on startup */
 	wPrefGetInteger( "DialogItem", "pref-onstartup", &onStartup, 0 );

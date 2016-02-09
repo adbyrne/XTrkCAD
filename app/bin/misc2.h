@@ -77,7 +77,7 @@ tieData_p GetScaleTieData( SCALEINX_T );
 SCALEINX_T LookupScale( const char * );
 BOOL_T GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *gaugeInx);
 
-BOOL_T DoSetScale( const char * );
+BOOL_T DoSetScale( char * );
 
 static void SetScale( SCALEINX_T );
 void SetScaleGauge( SCALEDESCINX_T, GAUGEINX_T );

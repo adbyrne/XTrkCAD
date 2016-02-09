@@ -436,14 +436,14 @@ SetScale( SCALEINX_T newScaleInx )
  */
 
 EXPORT BOOL_T DoSetScale(
-		const char * newScale )
+		char * newScale )
 {
 	SCALEINX_T scale;
 	char * cp;
 	BOOL_T found = FALSE;
 
 	if ( newScale != NULL ) {
-		cp = CAST_AWAY_CONST newScale+strlen(newScale)-1;
+		cp = newScale+strlen(newScale)-1;
 		while ( *cp=='\n' || *cp==' ' || *cp=='\t' ) cp--;
 		cp[1] = '\0';
 		while (isspace((unsigned char)*newScale)) newScale++;
