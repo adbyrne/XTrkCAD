@@ -1,4 +1,7 @@
-/*  XTrkCad - Model Railroad CAD
+/** \file i18n.c
+ *  Internationalization stuff
+ *
+ *  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2007 Mikko Nissinen
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -22,21 +25,29 @@
 #include <locale.h>
 #include <stdio.h>
 
-/*
- * Initialize gettext environment.
+/**
+ * Initialize gettext environment. By default, the language files are installed 
+ * in <install_dir>\share\locale\<language> 
+ * The install dir is derived from the library directory by removing the last 
+ * directory in the path (xtrkcad)
+ * Directory layout is:
+ * <install_dir>\bin\
+ *              \share\xtrkcad
+ *				      \locale
  */
 void InitGettext( void )
 {
 #ifdef XTRKCAD_USE_GETTEXT
 	char directory[2048];
+	
 	setlocale(LC_ALL, "");
-#ifdef XTRKCAD_CMAKE_BUILD
-	strcpy(directory, XTRKCAD_INSTALL_PREFIX);
-	strcat(directory, "/share");
-#else
+
+	// build the correct directory path
 	strcpy(directory, wGetAppLibDir());
-#endif
-	strcat(directory, "/locale");
+	strcat( directory, "/../locale" );
+	_fullpath( directory, directory, 2048 );
+
+	// initialize gettext
 	bindtextdomain(XTRKCAD_PACKAGE, directory);
 	bind_textdomain_codeset(XTRKCAD_PACKAGE, "UTF-8");
 	textdomain(XTRKCAD_PACKAGE);
