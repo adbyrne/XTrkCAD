@@ -123,7 +123,10 @@ WlibApplySettings( GtkPrintOperation *op )
 				                             err->message);
 			gtk_dialog_run (GTK_DIALOG (dialog));
 			gtk_widget_destroy (dialog);
-		}
+		} else {
+			// create  default print settings
+			settings = gtk_print_settings_new();
+		}	
 		g_error_free (err);
 	}
 	g_free( filename );
@@ -142,7 +145,9 @@ WlibApplySettings( GtkPrintOperation *op )
 				                             err->message);
 			gtk_dialog_run (GTK_DIALOG (dialog));
 			gtk_widget_destroy (dialog);
-		}
+		} else {
+			page_setup = gtk_page_setup_new();
+		}	
 		g_error_free (err);
 	} else {
 		// on success get the paper dimensions
