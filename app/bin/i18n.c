@@ -30,7 +30,7 @@
  * in <install_dir>\share\locale\<language> 
  * The install dir is derived from the library directory by removing the last 
  * directory in the path (xtrkcad)
- * Directory layout is:
+ * Directory layout on Windows is:
  * <install_dir>\bin\
  *              \share\xtrkcad
  *				      \locale
@@ -41,12 +41,21 @@ void InitGettext( void )
 	char directory[2048];
 	
 	setlocale(LC_ALL, "");
-
+	
+#ifdef WINDOWS
 	// build the correct directory path
 	strcpy(directory, wGetAppLibDir());
 	strcat( directory, "/../locale" );
 	_fullpath( directory, directory, 2048 );
-
+#else
+	#ifdef XTRKCAD_CMAKE_BUILD
+		strcpy(directory, XTRKCAD_INSTALL_PREFIX);
+		strcat(directory, "/share");
+	#else
+		strcpy(directory, wGetAppLibDir());
+	#endif
+		strcat(directory, "/locale");
+#endif	
 	// initialize gettext
 	bindtextdomain(XTRKCAD_PACKAGE, directory);
 	bind_textdomain_codeset(XTRKCAD_PACKAGE, "UTF-8");
