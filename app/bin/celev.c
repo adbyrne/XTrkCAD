@@ -225,7 +225,6 @@ static void DoElevDone( void * arg )
 	DoElevUpdate( NULL, 1, NULL );
 	HilightElevations( FALSE );
 	HilightSelectedEndPt( FALSE, elevTrk, elevEp );
-	wHide( elevW );
 	elevTrk = NULL;
 	Reset();
 }
