@@ -546,7 +546,7 @@ void wMenuListDelete(
 	GtkWidget * label;
 	char * labelStrConverted;
 
-	if (ml->count <= 0) abort();
+	if (ml->count < 0) abort();
 	origin = getMlistOrigin(ml->parentMenu, ml);
 	children = gtk_container_children( GTK_CONTAINER(ml->parentMenu->menu) );
 	if (children == NULL) abort();
