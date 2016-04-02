@@ -274,6 +274,7 @@ EXPORT BOOL_T GetArgs(
 	char * cp, * cq;
 	int argNo;
 	long * pl;
+	unsigned long *pul;
 	int * pi;
 	FLOAT_T *pf;
 	coOrd p, *pp;
@@ -347,6 +348,16 @@ EXPORT BOOL_T GetArgs(
 				*pf = strtod( cp, &cq );
 			else
 				*pf /= mainD.dpi;
+			cp = cq;
+			break;
+		case 'u':
+			pul = va_arg( ap, unsigned long * );
+			*pul = strtoul( cp, &cq, 10 );
+			if (cp == cq) {
+				RestoreLocale(oldLocale);
+				InputError( "Arg %d: expected integer", TRUE, argNo );
+				return FALSE;
+			}
 			cp = cq;
 			break;
 		case 'l':

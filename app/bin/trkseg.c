@@ -970,7 +970,7 @@ EXPORT BOOL_T ReadSegs( void )
 	BOOL_T rc=FALSE;
 	trkSeg_p s;
 	trkEndPt_p e;
-	long rgb;
+	unsigned long rgb;
 	int i;
 	DIST_T elev0, elev1;
 	BOOL_T hasElev;
@@ -1005,7 +1005,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
-			if ( !GetArgs( cp, hasElev?"lwpfpf":"lwpYpY",
+			if ( !GetArgs( cp, hasElev?"uwpfpf":"uwpYpY",
 				&rgb, &s->width, &s->u.l.pos[0], &elev0, &s->u.l.pos[1], &elev1 ) ) {
 				rc = FALSE;
 				break;
@@ -1018,7 +1018,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
-			if ( !GetArgs( cp, hasElev?"lwpfpfl":"lwpYpYZ",
+			if ( !GetArgs( cp, hasElev?"uwpfpfl":"uwpYpYZ",
 				&rgb, &s->width, &s->u.l.pos[0], &elev0, &s->u.l.pos[1], &elev1, &option ) ) {
 				rc = FALSE;
 				break;
@@ -1033,7 +1033,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_CRVLIN;
-			if ( !GetArgs( cp, hasElev?"lwfpfff":"lwfpYff",
+			if ( !GetArgs( cp, hasElev?"uwfpfff":"uwfpYff",
 				&rgb, &s->width,
 				 &s->u.c.radius,
 				 &s->u.c.center,
@@ -1048,7 +1048,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_STRTRK;
-			if ( !GetArgs( cp, hasElev?"lwpfpf":"lwpYpY",
+			if ( !GetArgs( cp, hasElev?"uwpfpf":"uwpYpY",
 				&rgb, &s->width,
 				&s->u.l.pos[0], &elev0,
 				&s->u.l.pos[1], &elev1 ) ) {
@@ -1061,7 +1061,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_CRVTRK;
-			if ( !GetArgs( cp, hasElev?"lwfpfff":"lwfpYff",
+			if ( !GetArgs( cp, hasElev?"uwfpfff":"uwfpYff",
 				 &rgb, &s->width,
 				 &s->u.c.radius,
 				 &s->u.c.center,
@@ -1076,7 +1076,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_JNTTRK;
-			if ( !GetArgs( cp, hasElev?"lwpffffffl":"lwpYfffffl",
+			if ( !GetArgs( cp, hasElev?"uwpffffffl":"uwpYfffffl",
 				 &rgb, &s->width,
 				 &s->u.j.pos,
 				 &elev0,
@@ -1098,7 +1098,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_FILCRCL;
-			if ( !GetArgs( cp, hasElev?"lwfpf":"lwfpY",
+			if ( !GetArgs( cp, hasElev?"uwfpf":"uwfpY",
 				 &rgb, &s->width,
 				 &s->u.c.radius,
 				 &s->u.c.center,
@@ -1115,7 +1115,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
-			if ( !GetArgs( cp, "lwd",
+			if ( !GetArgs( cp, "uwd",
 				 &rgb, &s->width,
 				 &s->u.p.cnt ) ) {
 				rc = FALSE;
@@ -1138,7 +1138,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
 			s->u.t.fontP = NULL;
-			if ( !GetArgs( cp, "lpf0fq", &rgb, &s->u.t.pos, &s->u.t.angle, &s->u.t.fontSize, &s->u.t.string ) ) {
+			if ( !GetArgs( cp, "upf0fq", &rgb, &s->u.t.pos, &s->u.t.angle, &s->u.t.fontSize, &s->u.t.string ) ) {
 				rc = FALSE;
 				/*??*/break;
 			}

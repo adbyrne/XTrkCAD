@@ -863,7 +863,7 @@ EXPORT BOOL_T ReadLayers( char * line )
 {
 	char * name;
 	int inx, visible, frozen, color, onMap;
-	long rgb;
+	unsigned long rgb;
 
 	/* older files didn't support layers */
 
@@ -887,7 +887,7 @@ EXPORT BOOL_T ReadLayers( char * line )
 
 	/* get the properties for a layer from the file and update the layer accordingly */
 
-	if (!GetArgs( line, "ddddl0000q", &inx, &visible, &frozen, &onMap, &rgb, &name ))
+	if (!GetArgs( line, "ddddu0000q", &inx, &visible, &frozen, &onMap, &rgb, &name ))
 		return FALSE;
 	if (paramVersion < 9) {
 		if ( rgb >= 0 && (int)rgb < sizeof oldColorMap/sizeof oldColorMap[0] )
