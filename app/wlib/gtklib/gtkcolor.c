@@ -37,7 +37,7 @@
 EXPORT wDrawColor wDrawColorWhite;
 EXPORT wDrawColor wDrawColorBlack;
 
-#define RGB(R,G,B) ( ((long)(255&0xFF))<<24 | (((long)((R)&0xFF))<<16) | (((long)((G)&0xFF))<<8) | ((long)((B)&0xFF)) )
+#define RGB(R,G,B) ( ((long)((R)&0xFF)<<16) | ((long)((G)&0xFF)<<8) | ((long)((B)&0xFF)) )
 
 #define MAX_COLOR_DISTANCE (3)
 
