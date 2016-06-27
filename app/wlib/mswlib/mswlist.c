@@ -285,6 +285,39 @@ void wListDelete(
 }
 
 
+/**
+ * Select all items in list.
+ *
+ * \param bl IN list handle
+ * \return
+ */
+
+void wListSelectAll( wList_p bl )
+{
+	wIndex_t inx;
+	listData *ldp;
+
+	// mark all items selected
+	SendMessage( bl->hWnd,
+				 LB_SETSEL,
+				 (WPARAM)TRUE,
+				 (DWORD)-1L );
+
+	// and synchronize the internal data structures 
+	wListGetCount(bl);
+	for ( inx=0; inx<bl->count; inx++ ) {
+		ldp = (listData*)SendMessage( bl->hWnd,
+									  (bl->type==B_LIST?LB_GETITEMDATA:CB_GETITEMDATA),
+									   inx, 0L );
+		ldp->selected = TRUE;
+		SendMessage( bl->hWnd,
+					(UINT)bl->type==B_LIST?LB_SETITEMDATA:CB_SETITEMDATA,
+					(WPARAM)inx,
+					(DWORD)ldp );
+	}
+}
+
+
 wIndex_t wListGetCount(
 		wList_p bl )
 {			  
@@ -331,6 +364,8 @@ wIndex_t wListGetSelectedCount(
 			selcnt++;
 	return selcnt;
 }
+
+
 
 
 wIndex_t wListAddValue(

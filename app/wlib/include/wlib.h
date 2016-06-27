@@ -329,6 +329,7 @@ void wListSetEditable(		wList_p, wBool_t );
 wIndex_t wListAddValue(		wList_p, const char *, wIcon_p, void * );
 void wListDelete(		wList_p, wIndex_t );
 wIndex_t wListGetValues(	wList_p, char *, int, void * *, void * * );
+void wListSelectAll( wList_p bl );
 wIndex_t wListGetCount(		wList_p );
 void * wListGetItemContext(	wList_p, wIndex_t );
 wBool_t wListGetItemSelected(	wList_p, wIndex_t );
