@@ -1,4 +1,4 @@
-/* \file misc.h
+/** \file misc.h
  * Application wide declarations and defines
  */
 

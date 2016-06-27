@@ -1,6 +1,5 @@
 /** \file chotbar.c
  * HOT BAR
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
