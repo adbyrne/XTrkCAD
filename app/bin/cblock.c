@@ -159,7 +159,7 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUn
 		}
 		if ( ! changed ) return;
 		if ( needUndoStart )
-			UndoStart( _("Change Block"), "Change Block" );
+			UndoStart( _("Change block"), "Change block" );
 		UndoModify( trk );
 		if (nChanged) {
 			MyFree(xx->name);
@@ -471,7 +471,7 @@ static void BlockOk ( void * junk )
 			wHide( blockW );
 			return;
 		}
-		UndoStart( _("Create Block"), "Create Block" );
+		UndoStart( _("Create block"), "Create block" );
 		/* Create a block object */
 		LOG( log_block, 1, ("*** BlockOk(): %d tracks in block\n",blockTrk_da.cnt))
 		trk = NewTrack(0, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(track_p)*(blockTrk_da.cnt-1))+1);
@@ -508,7 +508,7 @@ static void NewBlockDialog()
 				continue;
 			}
 			if ( FindBlock( trk ) != NULL ) {
-				ErrorMessage( _("Selected Track is already in a block, skipped!") );
+				ErrorMessage( _("Selected track is already in a block, skipped!") );
 				continue;
 			}
 			blockElementCount++;
