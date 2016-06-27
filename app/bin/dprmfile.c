@@ -216,18 +216,20 @@ static wIcon_p chkbox_bm;
 
 static void ParamFileAction( void * );
 static void ParamFileBrowse( void * );
+static void ParamFileSelectAll( void * );
 
 static paramListData_t paramFileListData = { 10, 370 };
 static char * paramFileLabels[] = { N_("Show File Names"), NULL };
 static paramData_t paramFilePLs[] = {
 #define I_PRMFILLIST	(0)
 #define paramFileL				((wList_p)paramFilePLs[I_PRMFILLIST].control)
-	{	PD_LIST, NULL, "inx", 0, &paramFileListData, NULL, BL_DUP|BL_SETSTAY },
+	{	PD_LIST, NULL, "inx", 0, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_PRMFILTOGGLE	(1)
 	{	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
-#define I_PRMFILACTION	(2)
+	{	PD_BUTTON, (void *)ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
+#define I_PRMFILACTION	(3)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
-	{	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_("Unload") },
+	{	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_("Unload"), 0L, FALSE },
 	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") } };
 
 static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };
@@ -324,37 +326,113 @@ static void ParamFileBrowse( void * junk )
 	return;
 }
 
+/**
+ * Update the action button. If at least one selected file is unloaded, the action button
+ * is set to 'Reload'. If all selected files are loaded, the button will be set to 'Unload'.
+ *
+ * \param varname1 IN this is a variable
+ * \return 
+ */
 
 static void UpdateParamFileButton(
 		wIndex_t fileInx )
 {
-	if (fileInx < 0 || fileInx >= paramFileInfo_da.cnt)
+	wIndex_t selcnt = wListGetSelectedCount( paramFileL );
+	wIndex_t inx, cnt;
+	
+	void * data;
+	
+	// set the default
+	wButtonSetLabel( paramFileActionB, _("Unload"));
+	paramFilePLs[ I_PRMFILACTION ].context = FALSE;
+	
+	//nothing selected -> leave
+	if( selcnt <= 0 )
 		return;
-	wButtonSetLabel( paramFileActionB,
-		paramFileInfo(fileInx).deleted?_("Reload"):_("Unload") );
+
+	// get the number of items in list
+	cnt = wListGetCount( paramFileL );
+
+	// walk through the whole list box
+	for ( inx=0; inx<cnt; inx++ ) 
+	{
+		if ( wListGetItemSelected( (wList_p)paramFileL, inx )) 
+		{
+			// if item is selected, get status
+			fileInx = (wIndex_t)wListGetItemContext( paramFileL, inx );
+	
+			if (fileInx < 0 || fileInx >= paramFileInfo_da.cnt)
+				return;
+			if( paramFileInfo(fileInx).deleted ) {
+				// if selected file was unloaded, set button to reload and finish loop
+				wButtonSetLabel( paramFileActionB, _("Reload"));
+				paramFilePLs[ I_PRMFILACTION ].context = TRUE;
+				break;
+			} 
+		}
+	}
 }
 
 
-static void ParamFileAction( void * junk )
+/**
+ * Unload selected files. 
+ *
+ * \param action IN FALSE = unload, TRUE = reload parameter files
+ * \return
+ */
+
+static void ParamFileAction( void * action )
 {
-	wIndex_t listInx;
+	wIndex_t selcnt = wListGetSelectedCount( paramFileL );
+	wIndex_t inx, cnt;
 	wIndex_t fileInx;
 	void * data;
-	listInx = wListGetValues( paramFileL, NULL, 0, NULL, &data );
-	if (listInx<0)
+	unsigned newDeletedState;
+
+	if( (unsigned)action )
+		newDeletedState = FALSE;
+	else
+		newDeletedState = TRUE;
+	
+	//nothing selected -> leave
+	if( selcnt <= 0 )
 		return;
-	fileInx = (wIndex_t)(long)data;
-	paramFileInfo(fileInx).deleted = ! paramFileInfo(fileInx).deleted;
-#ifndef LATER
-	strcpy( message, ((!paramFileSel) && paramFileInfo(fileInx).contents)?
-					 paramFileInfo(fileInx).contents:
-					 paramFileInfo(fileInx).name );
-	wListSetValues( paramFileL, listInx, message, (paramFileInfo(fileInx).deleted)?mtbox_bm:chkbox_bm, (void*)(intptr_t)fileInx );
-#endif
+
+	// get the number of items in list
+	cnt = wListGetCount( paramFileL );
+
+	// walk through the whole list box
+	for ( inx=0; inx<cnt; inx++ ) 
+	{
+		if ( wListGetItemSelected( (wList_p)paramFileL, inx ) ) 
+		{
+			fileInx = (wIndex_t)wListGetItemContext( paramFileL, inx );
+
+			// set the desired state
+			paramFileInfo(fileInx).deleted = newDeletedState;
+
+			strcpy( message, ((!paramFileSel) && paramFileInfo(fileInx).contents)?
+						 paramFileInfo(fileInx).contents:
+						 paramFileInfo(fileInx).name );
+			wListSetValues( paramFileL, inx, message, (paramFileInfo(fileInx).deleted)?mtbox_bm:chkbox_bm, (void*)(intptr_t)fileInx );
+		}
+	}
 	DoChangeNotification( CHANGE_PARAMS );
 	UpdateParamFileButton( fileInx );
 }
 
+/**
+ * Select all files in the list and set action button
+ *
+ * \param junk IN ignored
+ * \return 
+ */
+
+static void ParamFileSelectAll( void *junk )
+{
+	wListSelectAll( paramFileL );
+	UpdateParamFileButton( NULL );
+}
 
 static void ParamFileOk( void * junk )
 {

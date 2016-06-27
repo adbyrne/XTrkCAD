@@ -134,6 +134,8 @@ The dialog contains a list of parameter files.  Each file is preceded by a check
 
 Loaded definition files associated with current scale settings appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An unloaded file may be \e{reloaded} by selecting the  \f{Reload} button (The \f{Unload} button changes to \f{Reload} when a selected file is unloaded).
 
+It is possible to change the state of several files at once. The \f{Select All} button allows you to select all parameter files for the next operation.
+
 \e{Unloaded} files are removed from the list when \e{XTrackCAD} terminates.
 
 Files can be listed by either their file name or by their contents description. This is controlled by the \f{Show File Names} check box.
