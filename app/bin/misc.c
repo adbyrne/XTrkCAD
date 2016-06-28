@@ -713,8 +713,8 @@ EXPORT void SelectFont( void )
  *
  */
 
-#define COMMAND_MAX (100)
-#define BUTTON_MAX (100)
+#define COMMAND_MAX (160)
+#define BUTTON_MAX (160)
 #define NUM_CMDMENUS (4)
 
 #ifdef LATER

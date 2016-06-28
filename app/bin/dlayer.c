@@ -36,7 +36,7 @@
  *
  */
 
-#define NUM_BUTTONS		(20)
+#define NUM_BUTTONS		(99)
 #define LAYERPREF_FROZEN  (1)
 #define LAYERPREF_ONMAP	  (2)
 #define LAYERPREF_VISIBLE (4)
@@ -256,6 +256,7 @@ static void SetLayerColor( int inx, wDrawColor color )
 }
 
  
+
 #include "bitmaps/l1.xbm"
 #include "bitmaps/l2.xbm"
 #include "bitmaps/l3.xbm"
@@ -276,10 +277,101 @@ static void SetLayerColor( int inx, wDrawColor color )
 #include "bitmaps/l18.xbm"
 #include "bitmaps/l19.xbm"
 #include "bitmaps/l20.xbm"
+#include "bitmaps/l21.xbm"
+#include "bitmaps/l22.xbm"
+#include "bitmaps/l23.xbm"
+#include "bitmaps/l24.xbm"
+#include "bitmaps/l25.xbm"
+#include "bitmaps/l26.xbm"
+#include "bitmaps/l27.xbm"
+#include "bitmaps/l28.xbm"
+#include "bitmaps/l29.xbm"
+#include "bitmaps/l30.xbm"
+#include "bitmaps/l31.xbm"
+#include "bitmaps/l32.xbm"
+#include "bitmaps/l33.xbm"
+#include "bitmaps/l34.xbm"
+#include "bitmaps/l35.xbm"
+#include "bitmaps/l36.xbm"
+#include "bitmaps/l37.xbm"
+#include "bitmaps/l38.xbm"
+#include "bitmaps/l39.xbm"
+#include "bitmaps/l40.xbm"
+#include "bitmaps/l41.xbm"
+#include "bitmaps/l42.xbm"
+#include "bitmaps/l43.xbm"
+#include "bitmaps/l44.xbm"
+#include "bitmaps/l45.xbm"
+#include "bitmaps/l46.xbm"
+#include "bitmaps/l47.xbm"
+#include "bitmaps/l48.xbm"
+#include "bitmaps/l49.xbm"
+#include "bitmaps/l50.xbm"
+#include "bitmaps/l51.xbm"
+#include "bitmaps/l52.xbm"
+#include "bitmaps/l53.xbm"
+#include "bitmaps/l54.xbm"
+#include "bitmaps/l55.xbm"
+#include "bitmaps/l56.xbm"
+#include "bitmaps/l57.xbm"
+#include "bitmaps/l58.xbm"
+#include "bitmaps/l59.xbm"
+#include "bitmaps/l60.xbm"
+#include "bitmaps/l61.xbm"
+#include "bitmaps/l62.xbm"
+#include "bitmaps/l63.xbm"
+#include "bitmaps/l64.xbm"
+#include "bitmaps/l65.xbm"
+#include "bitmaps/l66.xbm"
+#include "bitmaps/l67.xbm"
+#include "bitmaps/l68.xbm"
+#include "bitmaps/l69.xbm"
+#include "bitmaps/l70.xbm"
+#include "bitmaps/l71.xbm"
+#include "bitmaps/l72.xbm"
+#include "bitmaps/l73.xbm"
+#include "bitmaps/l74.xbm"
+#include "bitmaps/l75.xbm"
+#include "bitmaps/l76.xbm"
+#include "bitmaps/l77.xbm"
+#include "bitmaps/l78.xbm"
+#include "bitmaps/l79.xbm"
+#include "bitmaps/l80.xbm"
+#include "bitmaps/l81.xbm"
+#include "bitmaps/l82.xbm"
+#include "bitmaps/l83.xbm"
+#include "bitmaps/l84.xbm"
+#include "bitmaps/l85.xbm"
+#include "bitmaps/l86.xbm"
+#include "bitmaps/l87.xbm"
+#include "bitmaps/l88.xbm"
+#include "bitmaps/l89.xbm"
+#include "bitmaps/l90.xbm"
+#include "bitmaps/l91.xbm"
+#include "bitmaps/l92.xbm"
+#include "bitmaps/l93.xbm"
+#include "bitmaps/l94.xbm"
+#include "bitmaps/l95.xbm"
+#include "bitmaps/l96.xbm"
+#include "bitmaps/l97.xbm"
+#include "bitmaps/l98.xbm"
+#include "bitmaps/l99.xbm"
 
-static char * show_layer_bits[NUM_BUTTONS] = { l1_bits, l2_bits, l3_bits, l4_bits, l5_bits, l6_bits, l7_bits, l8_bits, l9_bits, l10_bits,
- l11_bits, l12_bits, l13_bits, l14_bits, l15_bits, l16_bits, l17_bits, l18_bits, l19_bits, l20_bits };
- 
+
+static char * show_layer_bits[NUM_BUTTONS] = {
+ l1_bits, l2_bits, l3_bits, l4_bits, l5_bits, l6_bits, l7_bits, l8_bits, l9_bits, l10_bits,
+ l11_bits, l12_bits, l13_bits, l14_bits, l15_bits, l16_bits, l17_bits, l18_bits, l19_bits, l20_bits,
+ l21_bits, l22_bits, l23_bits, l24_bits, l25_bits, l26_bits, l27_bits, l28_bits, l29_bits, l30_bits,
+ l31_bits, l32_bits, l33_bits, l34_bits, l35_bits, l36_bits, l37_bits, l38_bits, l39_bits, l40_bits,
+ l41_bits, l42_bits, l43_bits, l44_bits, l45_bits, l46_bits, l47_bits, l48_bits, l49_bits, l50_bits, 
+ l51_bits, l52_bits, l53_bits, l54_bits, l55_bits, l56_bits, l57_bits, l58_bits, l59_bits, l60_bits,
+ l61_bits, l62_bits, l63_bits, l64_bits, l65_bits, l66_bits, l67_bits, l68_bits, l69_bits, l70_bits,
+ l71_bits, l72_bits, l73_bits, l74_bits, l75_bits, l76_bits, l77_bits, l78_bits, l79_bits, l80_bits,
+ l81_bits, l82_bits, l83_bits, l84_bits, l85_bits, l86_bits, l87_bits, l88_bits, l89_bits, l90_bits,
+ l91_bits, l92_bits, l93_bits, l94_bits, l95_bits, l96_bits, l97_bits, l98_bits, l99_bits, 
+};
+
+
 static EXPORT long layerRawColorTab[] = {
 		wRGB(  0,  0,255),      /* blue */
 		wRGB(  0,  0,128),      /* dk blue */
@@ -937,6 +1029,7 @@ EXPORT void InitLayers( void )
 		layerColorTab[i] = wDrawFindColor( layerRawColorTab[i] );
 
 	/* create the bitmaps for the layer buttons */
+	/* all bitmaps have to have the same dimensions */
 	for ( i = 0; i<NUM_BUTTONS; i++ ) {
 		show_layer_bmps[i] = wIconCreateBitMap( l1_width, l1_height, show_layer_bits[i], layerColorTab[i%(COUNT(layerColorTab))] );
 		layers[i].color = layerColorTab[i%(COUNT(layerColorTab))];
