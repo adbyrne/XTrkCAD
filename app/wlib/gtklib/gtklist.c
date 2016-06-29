@@ -1,7 +1,6 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtklist.c,v 1.4 2009-05-30 11:11:26 m_fischer Exp $
+/** \file gtklist.c
+ * Listboxes, dropdown boxes, combo boxes
  */
-
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
  *
@@ -42,7 +41,7 @@ static char ListItemDataKey[] = "ListItemDataKey";
  */
 
 typedef struct wListItem_t * wListItem_p;
-		
+
 struct wList_t {
 		WOBJ_COMMON
 		GtkWidget *list;
@@ -73,7 +72,7 @@ struct wListItem_t {
 
 static wListItem_p getListItem(
 		wList_p b,
-		wIndex_t inx, 
+		wIndex_t inx,
 		GList ** childR )
 {
 	GList * child;
@@ -86,7 +85,7 @@ static wListItem_p getListItem(
 		return NULL;
 	if ( b->type == B_LIST )
 		return (wListItem_p)gtk_clist_get_row_data( GTK_CLIST(b->list), inx );
-		
+
 	for ( child=GTK_LIST(b->list)->children; inx>0&&child; child=child->next,inx-- );
 	if (child==NULL) {
 		fprintf( stderr, "wListGetValues - End Of List\n" );
@@ -195,7 +194,7 @@ static void parseLabelStr(
 			textBuffer = (char**)realloc( textBuffer, count * sizeof *textBuffer );
 		textBufferCount = count;
 	}
-		
+
 	strcpy( labelBuffer, labelStr );
 	cp = labelBuffer;
 	for ( col=0; cp && col<count; col++ ) {
@@ -354,6 +353,29 @@ EXPORT wIndex_t wListGetSelectedCount(
 	return selcnt;
 }
 
+/**
+ * Select all items in list.
+ *
+ * \param bl IN list handle
+ * \return
+ */
+
+void wListSelectAll( wList_p bl )
+{
+	wIndex_t inx;
+	wListItem_p ldp;
+
+	// mark all items selected
+	gtk_clist_select_all(GTK_CLIST(bl->list));
+
+	// and synchronize the internal data structures
+	wListGetCount(bl);
+	for ( inx=0; inx<bl->count; inx++ ) {
+		ldp = getListItem( bl, inx, NULL );
+
+		ldp->selected = TRUE;
+	}
+}
 
 EXPORT wBool_t wListSetValues(
 		wList_p b,
@@ -494,21 +516,21 @@ If list is created with 'BL_
 	} else {
 		parseLabelStr( labelStr, b->colCnt, &texts );
 		gtk_clist_append( GTK_CLIST(b->list), texts );
-		
-		/* 
-		 * this has taken forever to find out: the adjustment has to be notified 
+
+		/*
+		 * this has taken forever to find out: the adjustment has to be notified
 		 * about the list change by the program. So we need to get the current alignment.
 		 * increment the upper value and then inform the scrolled window about the update.
 		 * The upper value is increased only if the current value is smaller than the size
-		 * of the list box. 
+		 * of the list box.
 		 */
-		
+
 		adj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(b->widget));
-		
+
 		if( adj->upper < adj->step_increment * (b->count+1)) {
 			adj->upper += adj->step_increment;
 			gtk_adjustment_changed( adj );
-		}	
+		}
 		if ( bm ) {
 			pixmap = gtkMakeIcon( b->widget, bm, &bitmap );
 			gtk_clist_set_pixtext( GTK_CLIST(b->list), b->count, 0, texts[0], 5, pixmap, bitmap );
@@ -609,7 +631,7 @@ static int selectCList(
 		bl->action( row, id_p->label, 1, bl->data, id_p->itemData );
 	return 1;
 }
-		
+
 
 static int unselectCList(
 		GtkWidget * clist,
@@ -753,7 +775,7 @@ static int DropListSelectionChanged(
 	return 1;
 #endif
 }
-		
+
 #endif
 
 
@@ -817,7 +839,7 @@ EXPORT wList_p wListCreate(
 		void 	*data )		/* Context */
 /*
 */
-{ 
+{
 	wList_p b;
 
 	b = (wList_p)gtkAlloc( parent, B_LIST, x, y, labelStr, sizeof *b, data );
@@ -873,17 +895,17 @@ EXPORT wList_p wListCreate(
 
 /** Create a drop down list. The drop down is created and intialized with the supplied values.
  *
- *		\param IN parent Parent window 
+ *		\param IN parent Parent window
  *		\param IN x, X-position
  *		\param IN y	 Y-position
- *		\param IN helpStr Help string 
+ *		\param IN helpStr Help string
  *		\param IN labelStr Label
- *		\param IN option Options 
+ *		\param IN option Options
  *		\param IN number Number of displayed entries
- *		\param IN width Width 
+ *		\param IN width Width
  *		\param IN valueP Selected index
  *		\param IN action Callback
- *		\param IN data Context 
+ *		\param IN data Context
  */
 
 EXPORT wList_p wDropListCreate(
@@ -1032,7 +1054,7 @@ EXPORT wList_p wListCreate(
 		void 	*data )		/* Context */
 /*
 */
-{ 
+{
 	wList_p bl;
 	long col;
 	static wPos_t zeroPos = 0;
@@ -1069,7 +1091,7 @@ EXPORT wList_p wListCreate(
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (bl->widget),
 				GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC );
 	/* gtk_container_add( GTK_CONTAINER(bl->widget), bl->list ); */
-	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(bl->widget), bl->list ); 
+	gtk_scrolled_window_add_with_viewport( GTK_SCROLLED_WINDOW(bl->widget), bl->list );
 	if (width == 0)
 		width = 100;
 	for ( col=0; col<colCnt; col++ ) {
