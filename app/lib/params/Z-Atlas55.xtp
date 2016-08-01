@@ -1,0 +1,8 @@
+CONTENTS Atlas Z Scale Super-Flex Code 55 Track
+
+TURNOUT Z  "Atlas Z Scale Super-Flex Code 55	Straight Track 24""/609.6mm	2810"	
+	P "Normal" 1
+	E 0.000000 0.000000 270.000000
+	E 24.000000 0.000000 90.000000
+	S 0 0 0.000000 0.000000 24.000000 0.000000
+	END
