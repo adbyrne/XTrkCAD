@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/doption.c,v 1.8 2009-10-15 04:21:15 dspagnol Exp $
+/** \file doption.c
+ * Option dialogs
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -405,6 +405,9 @@ typedef struct {
 		long fmt;
 	} dstFmts_t;
 static dstFmts_t englishDstFmts[] = {
+		{ N_("999.999999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|6 },
+		{ N_("999.99999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|5 },
+		{ N_("999.9999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|4 },
 		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
 		{ N_("999.99"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|2 },
 		{ N_("999.9"),				DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|1 },
@@ -420,7 +423,6 @@ static dstFmts_t englishDstFmts[] = {
 		{ N_("999ft 11.9in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_NUM|1 },
 		{ N_("999ft 11 7/8in"),		DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|3 },
 		{ N_("999ft 11 63/64in"),	DISTFMT_FMT_LONG|DISTFMT_FRACT_FRC|6 },
-		{ N_("999.999999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|6 },
 		{ NULL, 0 } };
 static dstFmts_t metricDstFmts[] = {
 		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
@@ -439,10 +441,14 @@ static dstFmts_t metricDstFmts[] = {
 		{ NULL, 0 },
 		{ NULL, 0 },
 		{ NULL, 0 },
+		{ NULL, 0 },
+		{ NULL, 0 },
 		{ NULL, 0 } };
 static dstFmts_t *dstFmts[] = { englishDstFmts, metricDstFmts };
 
-		
+/**
+ * Load the selection list for number formats with the appropriate list of variants.
+ */		
 		
 static void LoadDstFmtList( void )
 {
@@ -468,14 +474,6 @@ static void UpdatePrefD( void )
 	for ( inx = 0; inx<sizeof prefPLs/sizeof prefPLs[0]; inx++ ) {
 		if ( (prefPLs[inx].option&PDO_DIM) ) {
 			ParamLoadControl( &prefPG, inx );
-#ifdef LATER
-			val = wFloatGetValue( (wFloat_p)prefPLs[inx].control );
-			if ( newUnits == UNITS_METRIC )
-				val *= 2.54;
-			else
-				val /= 2.54;
-			wFloatSetValue( (wFloat_p)prefPLs[inx].control, val );
-#endif
 		}
 	}
 	LoadDstFmtList();

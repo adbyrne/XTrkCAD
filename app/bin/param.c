@@ -256,7 +256,7 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 	}
 	return TRUE;
 }
-extern wIndex_t distanceFormatInx;   // distanceFormatInx
+//extern wIndex_t distanceFormatInx;   // distanceFormatInx
 
 static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
 {
