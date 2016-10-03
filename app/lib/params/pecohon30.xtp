@@ -1,6 +1,6 @@
 CONTENTS OO9 PECO Turnouts
-TURNOUT OO9 "Peco	LH Small Radius 12""""	SL-E492"
-	U "Regular Turnout" "" "Peco" "LH Small Radius 12""""" "SL-E492" "RH Small Radius 12""""" "SL-E491" 4.796000 19.500000 0.656250 4.921000 0.000000 0.000000 0
+TURNOUT OO9 "Peco	LH Small Radius 12""	SL-E492"
+	U "Regular Turnout" "" "Peco" "LH Small Radius 12""" "SL-E492" "RH Small Radius 12""" "SL-E491" 4.796000 19.500000 0.656250 4.921000 0.000000 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -11,8 +11,8 @@ TURNOUT OO9 "Peco	LH Small Radius 12""""	SL-E492"
 	C 0 0.000000 -9.379199 1.331197 9.379199 160.499924 19.500152
 	S 0 0.000000 4.462046 0.537984 4.796000 0.656250
 	END
-TURNOUT OO9 "Peco	RH Small Radius 12""""	SL-E491"
-	U "Regular Turnout" "" "Peco" "LH Small Radius 12""""" "SL-E492" "RH Small Radius 12""""" "SL-E491" 4.796000 19.500000 0.656250 4.921000 0.000000 0.000000 0
+TURNOUT OO9 "Peco	RH Small Radius 12""	SL-E491"
+	U "Regular Turnout" "" "Peco" "LH Small Radius 12""" "SL-E492" "RH Small Radius 12""" "SL-E491" 4.796000 19.500000 0.656250 4.921000 0.000000 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -23,8 +23,8 @@ TURNOUT OO9 "Peco	RH Small Radius 12""""	SL-E491"
 	C 0 0.000000 9.379199 1.331147 -9.379199 0.000076 19.500152
 	S 0 0.000000 4.462046 -0.537984 4.796000 -0.656250
 	END
-TURNOUT OO9 "Peco	LH Mainline Radius 18""""	SL-E496"
-	U "Regular Turnout" "" "Peco" "LH Mainline Radius 18""""" "SL-E496" "RH Mainline Radius 18""""" "SL-E495" 5.531250 14.000000 0.656250 5.629000 0.000000 0.000000 0
+TURNOUT OO9 "Peco	LH Mainline Radius 18""	SL-E496"
+	U "Regular Turnout" "" "Peco" "LH Mainline Radius 18""" "SL-E496" "RH Mainline Radius 18""" "SL-E495" 5.531250 14.000000 0.656250 5.629000 0.000000 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -35,8 +35,8 @@ TURNOUT OO9 "Peco	LH Mainline Radius 18""""	SL-E496"
 	C 0 0.000000 -19.207026 0.540904 19.207026 165.999924 14.000152
 	S 0 0.000000 5.187525 0.570542 5.531250 0.656250
 	END
-TURNOUT OO9 "Peco	RH Mainline Radius 18""""	SL-E495"
-	U "Regular Turnout" "" "Peco" "LH Mainline Radius 18""""" "SL-E496" "RH Mainline Radius 18""""" "SL-E495" 5.531250 14.000000 0.656250 5.629000 0.000000 0.000000 0
+TURNOUT OO9 "Peco	RH Mainline Radius 18""	SL-E495"
+	U "Regular Turnout" "" "Peco" "LH Mainline Radius 18""" "SL-E496" "RH Mainline Radius 18""" "SL-E495" 5.531250 14.000000 0.656250 5.629000 0.000000 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -47,8 +47,8 @@ TURNOUT OO9 "Peco	RH Mainline Radius 18""""	SL-E495"
 	C 0 0.000000 19.207026 0.540802 -19.207026 0.000076 14.000152
 	S 0 0.000000 5.187525 -0.570542 5.531250 -0.656250
 	END
-TURNOUT OO9 "Peco	Y Turnout Radius 18""""	SL-E497"
-	U "Wye Turnout" "" "Peco" "Y Turnout Radius 18""""" "SL-E497" 4.291339 11.250000 0.328125 0.328125 11.250000 4.291339 0.000000 0.000000 0
+TURNOUT OO9 "Peco	Y Turnout Radius 18""	SL-E497"
+	U "Wye Turnout" "" "Peco" "Y Turnout Radius 18""" "SL-E497" 4.291339 11.250000 0.328125 0.328125 11.250000 4.291339 0.000000 0.000000 0
 	P "Left" 1 2 3
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
