@@ -1,7 +1,5 @@
 /** \file mswmisc.c
  * Basic windows functions and main entry point for application.
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswmisc.c,v 1.28 2010-04-28 04:04:38 dspagnol Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -2003,13 +2001,26 @@ static char selFileName[1024];
 static char selFileTitle[1024];
 static char sysDirName[1024];
 
+/**
+ * Run the file selector. After the selector is finished an array of filenames is
+ * created. Each filename will be fully qualified. The array and the number of 
+ * filenames are passed to a callback function. This is similar to the argc argv c
+ * convention in C. Once the callback returns, the allocated strings are free'd.
+ *
+ * \param fs IN the file selector dialog
+ * \param dirName IN the initial directory presented
+ * \return FALSE on error, TRUE if ok
+ */
+
 int wFilSelect(
 		struct wFilSel_t * fs,
 		const char * dirName )
 {
 	int rc;
 	OPENFILENAME ofn;
-	char * fileName;
+	char **fileName;
+	char *nextFileName;
+	int cntFiles;
 	const char * ext;
 	char defExt[4];
 	int i;
@@ -2024,7 +2035,7 @@ int wFilSelect(
 	ofn.hwndOwner = mswHWnd;
 	ofn.lpstrFilter = fs->extList;
 	ofn.nFilterIndex = 0;
-	selFileName[0] = '\0';
+	memset( selFileName, '\0', sizeof(selFileName));
 	ofn.lpstrFile = selFileName;
 	ofn.nMaxFile = sizeof selFileName;
 	selFileTitle[0] = '\0';
@@ -2041,7 +2052,13 @@ int wFilSelect(
 		defExt[0] = '\0';
 	}
 	ofn.lpstrDefExt = defExt;
-	ofn.Flags |= OFN_LONGFILENAMES;
+
+	if ( fs->option & FS_MULTIPLEFILES ) {
+		ofn.Flags = OFN_ALLOWMULTISELECT | OFN_LONGFILENAMES | OFN_EXPLORER;
+	} else {
+		ofn.Flags = OFN_LONGFILENAMES;
+	}
+
 	if (fs->mode == FS_LOAD) {
 		ofn.Flags |= OFN_FILEMUSTEXIST;
 		rc = GetOpenFileName( &ofn );
@@ -2054,12 +2071,37 @@ int wFilSelect(
 		return FALSE;
 	if (!rc)
 		return FALSE;
-	fileName = strrchr( selFileName, '\\' );
-	if (fileName == NULL) {
-		mswFail( "wFilSelect: cant extract fileName" );
-		return FALSE;
+
+	nextFileName = selFileName;
+	selFileName[ofn.nFileOffset - 1] = '\0';
+	cntFiles = 0;
+
+	while (*nextFileName) {
+		cntFiles++;
+		nextFileName = nextFileName + strlen( nextFileName ) + 1;
 	}
-	fs->action( selFileName, fileName+1, fs->data );
+
+	// strings were counted including the path on its own so reduce the count
+	cntFiles--;
+
+	// build up the array of filenames
+	fileName = malloc(sizeof(nextFileName) * cntFiles);
+	nextFileName = selFileName + ofn.nFileOffset;
+	for ( i=0; i < cntFiles; i++) {
+		fileName[ i ] = malloc(strlen(selFileName) + strlen(nextFileName) + 2 );
+		strcpy(fileName[ i ], selFileName);
+		strcat(fileName[ i ], FILE_SEP_CHAR);
+		strcat(fileName[ i ], nextFileName);
+		nextFileName = nextFileName + strlen( nextFileName ) + 1;
+	}
+
+	fs->action( cntFiles, fileName, fs->data );
+	
+	for (i=0; i < cntFiles; i++) {
+		free( fileName[ i ] );
+	}
+	free( fileName );
+
 	return TRUE;
 }
 

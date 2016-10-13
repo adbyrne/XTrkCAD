@@ -6,6 +6,9 @@
 #define WIN_H
 #ifdef WINDOWS
 #include <stdio.h>
+#define FILE_SEP_CHAR "\\"
+#else
+#define FILE_SEP_CHAR "/"
 #endif
 
 #ifdef USE_SIMPLE_GETTEXT
@@ -637,16 +640,18 @@ void wAttachAccelKey( wAccelKey_e, int, wAccelKeyCallBack_p, void * );
  * File Selection
  */
 
+#define FS_MULTIPLEFILES	1
+
 struct wFilSel_t;
 typedef enum {
 	FS_SAVE,
 	FS_LOAD,
 	FS_UPDATE }
 		wFilSelMode_e;
-typedef int (*wFilSelCallBack_p)( const char * pathName, const char * fileName, void * );
+typedef int (*wFilSelCallBack_p)( int files, char ** fileName, void * );
 struct wFilSel_t * wFilSelCreate(wWin_p, wFilSelMode_e, int, const char *, const char *,
 				wFilSelCallBack_p, void * );
-int wFilSelect(			struct wFilSel_t *, const char * );
+int wFilSelect( struct wFilSel_t *, const char * );
 
 
 /*------------------------------------------------------------------------------
