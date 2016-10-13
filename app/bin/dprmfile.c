@@ -257,6 +257,15 @@ static void ParamFileLoadList( void )
 /**
  * Load the selected parameter files. This is a callback executed when the file selection dialog
  * is closed. 
+ * Steps:
+ * - the parameters are read from file
+ * - check is performed to see whether the content is already present, if yes the previously
+ * loaded content is invalidated
+ * - loaded parameter file is added to list of parameter files
+ * - if a parameter file dialog exists the list is updated. It is either rewritten in
+ * in case of an invalidated file or the new file is appended
+ * - the settings are updated
+ * These steps are repeated for every file in list
  *
  * \param files IN the number of filenames in the fileName array
  * \param fileName IN an array of fully qualified filenames
@@ -274,67 +283,51 @@ EXPORT int LoadParamFile(
 	wIndex_t inx;
 	int i = 0;
 
-	wBool_t redrawList;
+	wBool_t redrawList = FALSE;
 
 	assert( fileName != NULL );
 	assert( files > 0);
 
-	//memcpy( curParamDir, pathName, fileName-pathName );
-	//curParamDir[fileName-pathName] = '\0';
-	//wPrefSetString( "file", "paramdir", curParamDir );
-	//wPrefSetString( "file", "paramdir", pathName );
+	for( i=0; i < files; i++ ) 
+	{
+		curContents = curSubContents = NULL;
+		curParamFileIndex = paramFileInfo_da.cnt;
+		if ( !ReadParams( 0, NULL, fileName[ i ] ) )
+			return FALSE;
 
-	//name = malloc( strlen(pathName) + strlen(fileName) + 2 );
-	//strcpy( name, pathName );
-	//strcat( name, "/" );
-	//strcat( name, fileName );
-
-	redrawList = FALSE;
-	curContents = curSubContents = NULL;
-	curParamFileIndex = paramFileInfo_da.cnt;
-	if ( !ReadParams( 0, NULL, fileName[ i ] /*pathName*/ ) )
-		return FALSE;
-
-	if (curContents == NULL) {
-		curContents = curSubContents = MyStrdup( fileName[ i ] );
-		for ( cp=curContents; *cp; cp++ ) {
-			if ( *cp == '=' || *cp == '\'' || *cp == '"'  || *cp == ':' || *cp == '.' )
-				*cp = ' ';
+		assert( curContents != NULL );
+		// in case the contents is already presented, make invalid 
+		for ( inx=0; inx<paramFileInfo_da.cnt; inx++ ) {
+			if ( paramFileInfo(inx).valid &&
+				strcmp( paramFileInfo(inx).contents, curContents ) == 0 ) {
+					paramFileInfo(inx).valid = FALSE;
+					redrawList = TRUE;
+					break;
+			}
 		}
-	}
 
-	for ( inx=0; inx<paramFileInfo_da.cnt; inx++ ) {
-		if ( paramFileInfo(inx).valid &&
-			 strcmp( paramFileInfo(inx).contents, curContents ) == 0 ) {
-			paramFileInfo(inx).valid = FALSE;
-			redrawList = TRUE;
-			break;
-		}
-	}
+		DYNARR_APPEND( paramFileInfo_t, paramFileInfo_da, 10 );
+		paramFileInfo(curParamFileIndex).name = MyStrdup( fileName[ i ] );
+		paramFileInfo(curParamFileIndex).valid = TRUE;
+		paramFileInfo(curParamFileIndex).deletedShadow =
+			paramFileInfo(curParamFileIndex).deleted = FALSE;
+		paramFileInfo(curParamFileIndex).contents = curContents;
 
-	DYNARR_APPEND( paramFileInfo_t, paramFileInfo_da, 10 );
-	paramFileInfo(curParamFileIndex).name = MyStrdup( fileName[ i ] /*pathName*/ );
-	paramFileInfo(curParamFileIndex).valid = TRUE;
-	paramFileInfo(curParamFileIndex).deleted = FALSE;
-	paramFileInfo(curParamFileIndex).deletedShadow =
-	paramFileInfo(curParamFileIndex).deleted = FALSE;
-	paramFileInfo(curParamFileIndex).contents = curContents;
-
-	if ( paramFilePG.win ) {
-		if ( redrawList ) {
-			ParamFileLoadList();
-		} else {
-			strcpy( message, ((!paramFileSel) && paramFileInfo(curParamFileIndex).contents)?
-						paramFileInfo(curParamFileIndex).contents:
-						paramFileInfo(curParamFileIndex).name );
-			wListAddValue( paramFileL, message, chkbox_bm, (void*)(intptr_t)curParamFileIndex );
-			wListSetIndex( paramFileL, wListGetCount(paramFileL)-1 );
-		}
-	}
-
-//	free(name);
-	wPrefSetString( "Parameter File Map", curContents,
+		if ( paramFilePG.win ) {
+			if ( redrawList ) {
+				ParamFileLoadList();
+			} else {
+				strcpy( message, ((!paramFileSel) && paramFileInfo(curParamFileIndex).contents)?
+					paramFileInfo(curParamFileIndex).contents:
 				paramFileInfo(curParamFileIndex).name );
+				wListAddValue( paramFileL, message, chkbox_bm, (void*)(intptr_t)curParamFileIndex );
+				wListSetIndex( paramFileL, wListGetCount(paramFileL)-1 );
+			}
+		}
+
+		wPrefSetString( "Parameter File Map", curContents,
+			paramFileInfo(curParamFileIndex).name );
+	}
 	curParamFileIndex = PARAM_CUSTOM;
 	DoChangeNotification( CHANGE_PARAMS );
 	return TRUE;
