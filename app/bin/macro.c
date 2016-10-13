@@ -154,15 +154,17 @@ EXPORT void RecordMouse( char * name, wAction_t action, POS_T px, POS_T py )
 }
 
 
-static int StartRecord( const char * pathName, const char * fileName, void * context )
+static int StartRecord( int cnt, char ** pathName, void * context )
 {
 	time_t clock;
-	if (pathName == NULL)
-		return TRUE;
-	SetCurDir( pathName, fileName );
-	recordF = fopen(pathName, "w");
+
+	assert( pathName != NULL );
+	assert( cnt == 1 );
+
+	SetCurrentPath( MACROPATHKEY, pathName[0] );
+	recordF = fopen(pathName[0], "w");
 	if (recordF==NULL) {
-		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Recording"), fileName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Recording"), pathName[0], strerror(errno) );
 		return FALSE;
 	}
 	time(&clock);
@@ -1141,19 +1143,19 @@ static void Playback( void )
 }
 
 
-static int StartPlayback( const char * pathName, const char * fileName, void * context )
+static int StartPlayback( int cnt, char **pathName, void * context )
 {
-	if (pathName == NULL)
-		return TRUE;
+	assert( pathName != NULL );
+	assert( cnt ==1 );
 
-	SetCurDir( pathName, fileName );
-	paramFile = fopen( pathName, "r" );
+	SetCurrentPath( MACROPATHKEY, pathName[0] );
+	paramFile = fopen( pathName[0], "r" );
 	if ( paramFile == NULL ) {
-		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Playback"), pathName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Playback"), pathName[0], strerror(errno) );
 		return FALSE;
 	}
 
-	strcpy( paramFileName, pathName );
+	strcpy( paramFileName, pathName[0] );
 
 	PlaybackSetup();
 	curDemo = -1;

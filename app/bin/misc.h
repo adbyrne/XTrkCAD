@@ -32,11 +32,8 @@ typedef void (*addButtonCallBack_t)(void*);
 #include "custom.h"
 
 #ifdef WINDOWS
-#define FILE_SEP_CHAR "\\"
 /* suppress warning from *.bmp about conversion of int to char */
 #pragma warning( disable : 4305)
-#else
-#define FILE_SEP_CHAR "/"
 #endif
 
 #define COUNT(A) (sizeof(A)/sizeof(A[0]))

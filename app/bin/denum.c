@@ -66,15 +66,15 @@ static int count_utf8_chars(char *s) {
 }
 
 static int DoEnumSave(
-		const char * pathName,
-		const char * fileName,
+		int files,
+		char **fileName,
 		void * data )
 {
-	if (pathName == NULL)
-		return TRUE;
-	memcpy( curDirName, pathName, fileName-pathName );
-	curDirName[fileName-pathName-1] = '\0';
-	return wTextSave( enumT, pathName );
+	assert( fileName != NULL );
+	assert( files == 1 );
+	
+	SetCurrentPath( PARTLISTPATHKEY, fileName[0] );
+	return wTextSave( enumT, fileName[ 0 ] );
 }
 
 

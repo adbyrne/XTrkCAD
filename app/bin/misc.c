@@ -482,7 +482,7 @@ static void ChkRevert( void )
 									_("&Revert"), _("&Cancel") );
 		if( rc ) {
 			/* load the file */
-			LoadTracks( curPathName, curFileName, NULL );
+			LoadTracks( 1, &curFileName, NULL );
 		}
 	}
 }

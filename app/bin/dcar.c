@@ -4205,8 +4205,8 @@ static void CarInvDlgDelete( void )
 
 
 static int CarInvSaveText(
-		const char * pathName,
-		const char * fileName,
+		int files, 
+		char ** fileName,
 		void * data )
 {
 	FILE * f;
@@ -4217,12 +4217,13 @@ static int CarInvSaveText(
 	char * cp0, * cp1;
 	int len;
 
-	if ( pathName == NULL )
-		return TRUE;
-	SetCurDir( pathName, fileName );
-	f = fopen( pathName, "w" );
+	assert( fileName != NULL );
+	assert( files == 1 );
+
+	SetCurrentPath( CARSPATHKEY, fileName[0] );
+	f = fopen( fileName[0], "w" );
 	if ( f == NULL ) {
-		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Car Inventory"), fileName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Car Inventory"), fileName[0], strerror(errno) );
 		return FALSE;
 	}
 
@@ -4437,8 +4438,8 @@ static int ParseCsvLine(
 
 
 static int CarInvImportCsv(
-		const char * pathName,
-		const char * fileName,
+		int files,
+		char **fileName,
 		void * data )
 {
 	FILE * f;
@@ -4458,12 +4459,13 @@ static int CarInvImportCsv(
 	int requiredCols;
 	char *oldLocale = NULL;
 
-	if ( pathName == NULL )
-		return TRUE;
-	SetCurDir( pathName, fileName );
-	f = fopen( pathName, "r" );
+	assert( fileName != NULL );
+	assert( files == 1 );
+
+	SetCurrentPath( CARSPATHKEY, fileName[0] );
+	f = fopen( fileName[0], "r" );
 	if ( f == NULL ) {
-		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Import Cars"), fileName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Import Cars"), fileName[0], strerror(errno) );
 		return FALSE;
 	}
 
@@ -4680,8 +4682,8 @@ static void CsvFormatFloat(
 
 
 static int CarInvExportCsv(
-		const char * pathName,
-		const char * fileName,
+		int files,
+		char ** fileName,
 		void * data )
 {
 	FILE * f;
@@ -4691,12 +4693,13 @@ static int CarInvExportCsv(
 	char * sp;
 	char *oldLocale = NULL;
 
-	if ( pathName == NULL )
-		return TRUE;
-	SetCurDir( pathName, fileName );
-	f = fopen( pathName, "w" );
+	assert( fileName != NULL );
+	assert( files == 1 );
+	SetCurrentPath( CARSPATHKEY, fileName[0] );
+
+	f = fopen( fileName[0], "w" );
 	if ( f == NULL ) {
-		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Export Cars"), fileName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Export Cars"), fileName[0], strerror(errno) );
 		return FALSE;
 	}
 

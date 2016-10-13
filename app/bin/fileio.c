@@ -1,7 +1,5 @@
 /** \file fileio.c
  * Loading and saving files. Handles trackplans as well as DXF export.
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.c,v 1.18 2009-05-08 15:28:54 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -48,6 +46,8 @@
 
 #include <stdint.h>
 
+#include <assert.h>
+
 #include "track.h"
 #include "version.h"
 #include "common.h"
@@ -75,13 +75,55 @@ EXPORT wBool_t executableOk = FALSE;
 
 static int log_paramFile;
 
-EXPORT void SetCurDir(
-		const char * pathName,
-		const char * fileName )
+/**
+ * Get the directory from the current file and store it as current directory 
+ * in a global variable and the preferences
+ *
+ * \param pathType IN possible enhancement for file type specific directorys
+ * \param fileName IN fully qualified filename
+ * \return 
+ *
+ * \todo split directory and keep directory part
+ */
+
+void SetCurrentPath(
+	const char * pathType,
+	const char * fileName )
 {
-	memcpy( curDirName, pathName, fileName-pathName );
-	curDirName[fileName-pathName-1] = '\0';
-	wPrefSetString( "file", "directory", curDirName );
+	char *path;
+	char *copy;
+
+	assert( fileName != NULL );
+	assert( pathType != NULL );
+
+	copy = strdup( fileName );
+	path = strrchr(copy, FILE_SEP_CHAR[ 0 ] );
+	if ( path ) 
+	{
+		*path = '\0';
+		strcpy( curDirName, copy );
+		wPrefSetString( "file", "directory", curDirName );
+	}    
+	free( copy );
+}
+
+/**
+ * Find the filename/extension piece in a fully qualified path
+ *
+ * \param path IN the full path
+ * \return pointer to the filename part
+ */
+
+char *FindName( char *path )
+{
+	char *name; 
+	name = strrchr( path, FILE_SEP_CHAR[0] );
+	if (name) {
+		name++;
+	} else {
+		name = path;
+	}
+	return(name );
 }
 
 #ifdef WINDOWS
@@ -850,7 +892,7 @@ static BOOL_T ReadTrackFile(
 
 	if( ret ) {
 		if (!noSetCurDir)
-			SetCurDir( pathName, fileName );
+			SetCurrentPath( LAYOUTPATHKEY, fileName );
 
 		if (full) {
 			strcpy( curPathName, pathName );
@@ -868,20 +910,24 @@ static BOOL_T ReadTrackFile(
 
 
 EXPORT int LoadTracks(
-		const char * pathName,
-		const char * fileName,
+		int cnt,
+		char **fileName,
 		void * data)
 {
 #ifdef TIME_READTRACKFILE
 	long time0, time1;
 #endif
-	if (pathName == NULL)
-		return TRUE;
+	char *nameOfFile;
+
+	assert( fileName != NULL );
+	assert( cnt == 1 ); 
+	//if (fileName == NULL || cnt == 0 )
+	//	return TRUE;
+
 	paramVersion = -1;
 	wSetCursor( wCursorWait );
 	Reset();
 	ClearTracks();
-/*	DefaultLayerProperties(); */
 	ResetLayers();
 	checkPtMark = changed = 0;
 	UndoSuspend();
@@ -889,8 +935,10 @@ EXPORT int LoadTracks(
 #ifdef TIME_READTRACKFILE
 	time0 = wGetTimer();
 #endif
-	if (ReadTrackFile( pathName, fileName, TRUE, FALSE, TRUE )) {
-		wMenuListAdd( fileList_ml, 0, fileName, MyStrdup(pathName) );
+	nameOfFile = FindName( fileName[ 0 ] );
+
+	if (ReadTrackFile( fileName[ 0 ], nameOfFile, TRUE, FALSE, TRUE )) {
+		wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]) );
 		ResolveIndex();
 #ifdef TIME_READTRACKFILE
 		time1 = wGetTimer();
@@ -903,7 +951,6 @@ EXPORT int LoadTracks(
 		LoadLayerLists();
 	}
 	UndoResume();
-	/*DoRedraw();*/
 	Reset();
 	wSetCursor( wCursorNormal );
 	return TRUE;
@@ -914,7 +961,7 @@ EXPORT int LoadTracks(
  * path.
  * \param index IN ignored
  * \param label IN ignored
- * \param data IN filename
+ * \param data IN path and filename 
  */
 
 EXPORT void DoFileList(
@@ -922,13 +969,9 @@ EXPORT void DoFileList(
 		char * label,
 		void * data )
 {
-	char * fileName, * pathName = (char*)data;
-	fileName = strrchr( pathName, FILE_SEP_CHAR[0] );
-	if (fileName == NULL)
-		fileName = pathName;
-	else
-		fileName++;
-	LoadTracks( pathName, fileName, NULL );
+	char *pathName = (char*)data;
+
+	LoadTracks( 1, &pathName, NULL );
 }
 
 
@@ -980,19 +1023,26 @@ static BOOL_T DoSaveTracks(
 static doSaveCallBack_p doAfterSave;
 
 static int SaveTracks(
-		const char * pathName,
-		const char * fileName,
+		int cnt,
+		char **fileName,
 		void * data )
 {
-	if (pathName == NULL)
-		return TRUE;
-	SetCurDir( pathName, fileName );
-	DoSaveTracks( pathName );
-	wMenuListAdd( fileList_ml, 0, fileName, MyStrdup(pathName) );
+	char *nameOfFile;
+
+	assert( fileName != NULL );
+	assert( cnt == 1 );
+
+	SetCurrentPath( LAYOUTPATHKEY, fileName[ 0 ] );
+	DoSaveTracks( fileName[ 0 ] );
+
+	nameOfFile = FindName( fileName[ 0 ] );
+	wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[ 0 ]) );
 	checkPtMark = changed = 0;
-	if (curPathName != pathName)
-	  strcpy( curPathName, pathName );
-	curFileName = &curPathName[fileName-pathName];
+
+	if (curPathName != fileName[ 0 ])
+	  strcpy( curPathName, fileName[ 0 ] );
+	curFileName = FindName( curPathName );
+	
 	if (doAfterSave)
 		doAfterSave();
 	doAfterSave = NULL;
@@ -1009,7 +1059,7 @@ EXPORT void DoSave( doSaveCallBack_p after )
 				sSourceFilePattern, SaveTracks, NULL );
 		wFilSelect( saveFile_fs, curDirName );
 	} else {
-		SaveTracks( curPathName, curFileName, NULL );
+		SaveTracks( 1, &curFileName, NULL );
 	}
 	SetWindowTitle();
 }
@@ -1018,7 +1068,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 {
 	doAfterSave = after;
 	if (saveFile_fs == NULL)
-		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
+		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
 			sSourceFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, curDirName );
 	SetWindowTitle();
@@ -1178,14 +1228,17 @@ static struct wFilSel_t * exportDXFFile_fs;
 
 
 static int ImportTracks(
-		const char * pathName,
-		const char * fileName,
+		int cnt,
+		char **fileName,
 		void * data )
 {
+	char *nameOfFile;
 	long paramVersionOld = paramVersion;
 
-	if (pathName == NULL)
-		return TRUE;
+	assert( fileName != NULL );
+	assert( cnt == 1 );
+
+	nameOfFile = FindName(fileName[ 0 ]);
 	paramVersion = -1;
 	wSetCursor( wCursorWait );
 	Reset();
@@ -1193,7 +1246,7 @@ static int ImportTracks(
 	ImportStart();
 	UndoStart( _("Import Tracks"), "importTracks" );
 	useCurrentLayer = TRUE;
-	ReadTrackFile( pathName, fileName, FALSE, FALSE, TRUE );
+	ReadTrackFile( fileName[ 0 ], nameOfFile, FALSE, FALSE, TRUE );
 	ImportEnd();
 	/*DoRedraw();*/
 	EnableCommands();
@@ -1219,27 +1272,28 @@ EXPORT void DoImport( void )
 /**
  * Export the selected track pieces
  *
- * \param pathname IN full path and filename for export file
- * \param filename IN pointer to filename part *within* pathname
+ * \param cnt IN Count of filenames, should always be 1
+ * \param fileName IN array of fileNames with cnt names
  * \param data IN unused
  * \return FALSE on error, TRUE on success
  */
 
 static int DoExportTracks(
-		const char * pathName,
-		const char * fileName,
+		int cnt,
+		char **fileName,
 		void * data )
 {
 	FILE * f;
 	time_t clock;
 	char *oldLocale = NULL;
 
-	if (pathName == NULL)
-		return TRUE;
-	SetCurDir( pathName, fileName );
-	f = fopen( pathName, "w" );
+	assert( fileName != NULL );
+	assert( cnt == 1 );
+
+	SetCurrentPath( IMPORTPATHKEY, fileName[ 0 ] );
+	f = fopen( fileName[ 0 ], "w" );
 	if (f==NULL) {
-		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Export"), fileName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Export"), fileName[0], strerror(errno) );
 		return FALSE;
 	}
 
@@ -1371,19 +1425,20 @@ static drawCmd_t dxfD = {
 		NULL, &dxfDrawFuncs, 0, 1.0, 0.0, {0.0,0.0}, {0.0,0.0}, Pix2CoOrd, CoOrd2Pix, 100.0 };
 
 static int DoExportDXFTracks(
-		const char * pathName,
-		const char * fileName,
+		int cnt,
+		char ** fileName,
 		void * data )
 {
 	time_t clock;
 	char *oldLocale;
 
-	if (pathName == NULL)
-		return TRUE;
-	SetCurDir( pathName, fileName );
-	dxfF = fopen( pathName, "w" );
+	assert( fileName != NULL );
+	assert( cnt != 1 );
+
+	SetCurrentPath( DXFPATHKEY, fileName[ 0 ] );
+	dxfF = fopen( fileName[0], "w" );
 	if (dxfF==NULL) {
-		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "DXF", fileName, strerror(errno) );
+		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, "DXF", fileName[0], strerror(errno) );
 		return FALSE;
 	}
 

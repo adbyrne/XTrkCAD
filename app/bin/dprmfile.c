@@ -254,29 +254,49 @@ static void ParamFileLoadList( void )
 	wControlShow( (wControl_p)paramFileL, TRUE );
 }
 
+/**
+ * Load the selected parameter files. This is a callback executed when the file selection dialog
+ * is closed. 
+ *
+ * \param files IN the number of filenames in the fileName array
+ * \param fileName IN an array of fully qualified filenames
+ * \param data IN ignored
+ * \return  TRUE on success, FALSE on error
+ */
 
 EXPORT int LoadParamFile(
-		const char * pathName,
-		const char * fileName,
+		int files,
+		char ** fileName,
 		void * data )
 {
 	char * cp;
+	char *name;
 	wIndex_t inx;
+	int i = 0;
+
 	wBool_t redrawList;
 
-	if (pathName == NULL)
-		return TRUE;
-	memcpy( curParamDir, pathName, fileName-pathName );
-	curParamDir[fileName-pathName] = '\0';
-	wPrefSetString( "file", "paramdir", curParamDir );
+	assert( fileName != NULL );
+	assert( files > 0);
+
+	//memcpy( curParamDir, pathName, fileName-pathName );
+	//curParamDir[fileName-pathName] = '\0';
+	//wPrefSetString( "file", "paramdir", curParamDir );
+	//wPrefSetString( "file", "paramdir", pathName );
+
+	//name = malloc( strlen(pathName) + strlen(fileName) + 2 );
+	//strcpy( name, pathName );
+	//strcat( name, "/" );
+	//strcat( name, fileName );
 
 	redrawList = FALSE;
 	curContents = curSubContents = NULL;
 	curParamFileIndex = paramFileInfo_da.cnt;
-	if ( !ReadParams( 0, NULL, pathName ) )
+	if ( !ReadParams( 0, NULL, fileName[ i ] /*pathName*/ ) )
 		return FALSE;
+
 	if (curContents == NULL) {
-		curContents = curSubContents = MyStrdup( fileName );
+		curContents = curSubContents = MyStrdup( fileName[ i ] );
 		for ( cp=curContents; *cp; cp++ ) {
 			if ( *cp == '=' || *cp == '\'' || *cp == '"'  || *cp == ':' || *cp == '.' )
 				*cp = ' ';
@@ -293,7 +313,7 @@ EXPORT int LoadParamFile(
 	}
 
 	DYNARR_APPEND( paramFileInfo_t, paramFileInfo_da, 10 );
-	paramFileInfo(curParamFileIndex).name = MyStrdup( pathName );
+	paramFileInfo(curParamFileIndex).name = MyStrdup( fileName[ i ] /*pathName*/ );
 	paramFileInfo(curParamFileIndex).valid = TRUE;
 	paramFileInfo(curParamFileIndex).deleted = FALSE;
 	paramFileInfo(curParamFileIndex).deletedShadow =
@@ -312,6 +332,7 @@ EXPORT int LoadParamFile(
 		}
 	}
 
+//	free(name);
 	wPrefSetString( "Parameter File Map", curContents,
 				paramFileInfo(curParamFileIndex).name );
 	curParamFileIndex = PARAM_CUSTOM;
@@ -366,7 +387,7 @@ static void UpdateParamFileButton(
 			if( paramFileInfo(fileInx).deleted ) {
 				// if selected file was unloaded, set button to reload and finish loop
 				wButtonSetLabel( paramFileActionB, _("Reload"));
-				paramFilePLs[ I_PRMFILACTION ].context = TRUE;
+				(int)paramFilePLs[ I_PRMFILACTION ].context = TRUE;
 				break;
 			} 
 		}
@@ -514,7 +535,7 @@ static void DoParamFiles( void * junk )
 		mtbox_bm = wIconCreateBitMap( mtbox_width, mtbox_height, mtbox_bits, drawColorBlack );
 		chkbox_bm = wIconCreateBitMap( chkbox_width, chkbox_height, chkbox_bits, drawColorBlack );
 		paramFileW = ParamCreateDialog( &paramFilePG, MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, ParamFileCancel, TRUE, NULL, 0, ParamFileDlgUpdate );
-		paramFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Load Parameters"), _("Parameter files|*.xtp"), LoadParamFile, NULL );
+		paramFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_MULTIPLEFILES, _("Load Parameters"), _("Parameter files|*.xtp"), LoadParamFile, NULL );
 		ParamFileLoadList();
 	}
 	ParamLoadControls( &paramFilePG );

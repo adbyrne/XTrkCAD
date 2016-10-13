@@ -45,8 +45,8 @@ static drawCmd_t bitmap_d = {
 
 
 static int SaveBitmapFile( 
-		const char * pathName,
-		const char * fileName,
+		int files,
+		char **fileName,
 		void * data )
 {
 	coOrd p[4];
@@ -55,10 +55,10 @@ static int SaveBitmapFile(
 	wFontSize_t fs;
 	coOrd textsize, textsize1;
 
-	if (pathName == NULL)
-		return TRUE;
-	memcpy( curDirName, pathName, fileName-pathName );
-	curDirName[fileName-pathName-1] = '\0';
+	assert( fileName != NULL );
+	assert( files == 1 );
+
+	SetCurrentPath( BITMAPPATHKEY, fileName[ 0 ] ); 
 
 	bitmap_d.d = wBitMapCreate( (wPos_t)bitmap_w, (wPos_t)bitmap_h, 8 );
 	if (bitmap_d.d == (wDraw_p)0) {
@@ -118,7 +118,7 @@ static int SaveBitmapFile(
 		bitmap_d.options &= ~DC_CENTERLINE;
 	DrawTracks( &bitmap_d, bitmap_d.scale, bitmap_d.orig, bitmap_d.size );
 	InfoMessage( _("Writing BitMap to file") );
-	if ( wBitMapWriteFile( bitmap_d.d, pathName ) == FALSE ) {
+	if ( wBitMapWriteFile( bitmap_d.d, fileName[0] ) == FALSE ) {
 		NoticeMessage( MSG_WBITMAP_FAILED, _("Ok"), NULL );
 		return FALSE;
 	}

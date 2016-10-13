@@ -57,7 +57,16 @@ int curDemo;
 
 wMenuList_p fileList_ml;
 
-void SetCurDir( const char *, const char * );
+#define LAYOUTPATHKEY "layout"
+#define BITMAPPATHKEY "bitmap"
+#define DXFPATHKEY "dxf"
+#define PARTLISTPATHKEY "parts"
+#define CARSPATHKEY "cars"
+#define PARAMETERPATHKEY "params"
+#define IMPORTPATHKEY "import"
+#define MACROPATHKEY "macro"
+
+void SetCurrentPath( const char *, const char * );
 
 void Stripcr( char * );
 char * GetNextLine( void );
@@ -80,9 +89,9 @@ char * PutTitle( char * cp );
 wBool_t IsParamValid( int );
 char * GetParamFileName( int );
 void RememberParamFiles( void );
-int LoadParamFile( const char *, const char *, void * );
+int LoadParamFile( int files, char **fileName, void *data );
 void ReadParamFiles( void );
-int LoadTracks( const char *, const char *, void * );
+int LoadTracks( int cnt, char **fileName, void *data );
 BOOL_T ReadParams( long, const char *, const char * );
 
 typedef void (*doSaveCallBack_p)( void );

@@ -165,8 +165,8 @@ static void CustMgmContentsOk( void * junk )
 
 
 static int CustomDoExport(
-		const char * pathName,
-		const char * fileName,
+		int files,
+		char ** fileName,
 		void * data )
 {
 	int rc;
@@ -175,15 +175,18 @@ static int CustomDoExport(
 	custMgmContext_p context = NULL;
 	char *oldLocale = NULL;
 
+	assert( fileName != NULL );
+	assert( files == 1 );
+
 	if ( selcnt <= 0 )
 		return FALSE;
 	
-	SetCurDir( pathName, fileName );
-	rc = access( pathName, F_OK );
+	SetCurrentPath( PARAMETERPATHKEY, fileName[ 0 ] );
+	rc = access( fileName[ 0 ], F_OK );
 	if ( rc != -1 ) {
-		rc = access( pathName, W_OK );
+		rc = access( fileName[ 0 ], W_OK );
 		if ( rc == -1 ) {
-			NoticeMessage( MSG_CUSTMGM_CANT_WRITE, _("Ok"), NULL, pathName );
+			NoticeMessage( MSG_CUSTMGM_CANT_WRITE, _("Ok"), NULL, fileName[ 0 ] );
 			return FALSE;
 		}
 		custMgmProceed = TRUE;
@@ -196,9 +199,9 @@ static int CustomDoExport(
 	}
 	if ( !custMgmProceed )
 		return FALSE;
-	customMgmF = fopen( pathName, "a" );
+	customMgmF = fopen( fileName[ 0 ], "a" );
 	if ( customMgmF == NULL ) {
-		NoticeMessage( MSG_CUSTMGM_CANT_WRITE, _("Ok"), NULL, pathName );
+		NoticeMessage( MSG_CUSTMGM_CANT_WRITE, _("Ok"), NULL, fileName[ 0 ] );
 		return FALSE;
 	}
 
@@ -214,7 +217,7 @@ static int CustomDoExport(
 		context = (custMgmContext_p)wListGetItemContext( customSelL, inx );
 		if ( context == NULL ) continue;
 		if (!context->proc( CUSTMGM_DO_COPYTO, context->data )) {
-			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), pathName );
+			NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName[ 0 ] );
 			fclose( customMgmF );
 			RestoreLocale(oldLocale);
 			return FALSE;
@@ -227,7 +230,7 @@ static int CustomDoExport(
 	}
 	fclose( customMgmF );
 	RestoreLocale(oldLocale);
-	LoadParamFile( pathName, fileName, NULL );
+	LoadParamFile( 1, fileName, NULL );
 	DoChangeNotification( CHANGE_PARAMS );
 	return TRUE;
 }
