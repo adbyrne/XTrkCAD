@@ -121,9 +121,12 @@ struct wFilSel_t * wFilSelCreate(
 int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 {
 	char name[1024];
-	char *fileName;
-	const char *base;
+	char *host;
+	char *file;
 	int i;
+	GSList *fileNameList;
+	GError *err = NULL;
+	char **fileNames;
 	
 	char * cp;
 	if (fs->window == NULL) {
@@ -137,6 +140,10 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		// get confirmation before overwritting an existing file									
 		gtk_file_chooser_set_do_overwrite_confirmation( GTK_FILE_CHOOSER(fs->window), TRUE );
 		
+		// allow selecting multiple files
+		if( fs->opt & FS_MULTIPLEFILES ) {
+			gtk_file_chooser_set_select_multiple ( GTK_FILE_CHOOSER(fs->window), TRUE);
+		}	
 		// add the file filters to the dialog box
 		if( fs->pattCount ) {
 			for( i = 0; i <= fs->pattCount; i++ ) {
@@ -156,17 +163,28 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		gtk_file_chooser_set_current_name( GTK_FILE_CHOOSER(fs->window), name ); 
 
 	if( gtk_dialog_run( GTK_DIALOG( fs->window )) == GTK_RESPONSE_ACCEPT ) {
-		fileName = gtk_file_chooser_get_filename( GTK_FILE_CHOOSER(fs->window) );
-			if (fs->data)
-		strcpy( fs->data, fileName );
-		if (fs->action) {
-			base = strrchr( fileName, '/' );
-			if (base==0) {
-				fprintf(stderr,"no / in %s\n", fileName );
-				return 1;
-			}
-			fs->action( fileName, base+1, fs->data );
+		
+		fileNameList = gtk_file_chooser_get_uris( GTK_FILE_CHOOSER(fs->window) );
+		fileNames = calloc( sizeof(char *), g_slist_length (fileNameList) ); 
+		
+		for (i=0; i < g_slist_length (fileNameList); i++ ) {
+			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ), &host, &err );
+			fileNames[ i ] = file;
+			g_free( g_slist_nth_data ( fileNameList, i));
 		}
+		
+		if (fs->data)
+			strcpy( fs->data, fileNames[ 0 ] );
+		
+		if (fs->action) {
+			fs->action( g_slist_length(fileNameList), fileNames, fs->data );
+		}
+		
+		for(i=0; i < g_slist_length(fileNameList); i++) {
+			g_free( fileNames[ i ]);
+		}
+		free( fileNames );
+		g_slist_free (fileNameList);	
 	}	
 	gtk_widget_hide( GTK_WIDGET( fs->window ));
 	

@@ -1433,7 +1433,7 @@ static int DoExportDXFTracks(
 	char *oldLocale;
 
 	assert( fileName != NULL );
-	assert( cnt != 1 );
+	assert( cnt == 1 );
 
 	SetCurrentPath( DXFPATHKEY, fileName[ 0 ] );
 	dxfF = fopen( fileName[0], "w" );

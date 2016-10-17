@@ -380,7 +380,7 @@ static void UpdateParamFileButton(
 			if( paramFileInfo(fileInx).deleted ) {
 				// if selected file was unloaded, set button to reload and finish loop
 				wButtonSetLabel( paramFileActionB, _("Reload"));
-				(int)paramFilePLs[ I_PRMFILACTION ].context = TRUE;
+				paramFilePLs[ I_PRMFILACTION ].context = (void *)TRUE;
 				break;
 			} 
 		}
