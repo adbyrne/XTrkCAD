@@ -236,7 +236,7 @@ static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
 	DoDescribe(_("Switch motor"), trk, switchmotorDesc, UpdateSwitchMotor );
 }
 
-static switchmotorDebug (track_p trk)
+static void switchmotorDebug (track_p trk)
 {
 	switchmotorData_p xx = GetswitchmotorData(trk);
 	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): trk = %08x\n",trk))

@@ -373,7 +373,7 @@ static void UpdateParamFileButton(
 		if ( wListGetItemSelected( (wList_p)paramFileL, inx )) 
 		{
 			// if item is selected, get status
-			fileInx = (wIndex_t)wListGetItemContext( paramFileL, inx );
+			fileInx = (intptr_t)wListGetItemContext( paramFileL, inx );
 	
 			if (fileInx < 0 || fileInx >= paramFileInfo_da.cnt)
 				return;
@@ -403,7 +403,7 @@ static void ParamFileAction( void * action )
 	void * data;
 	unsigned newDeletedState;
 
-	if( (unsigned)action )
+	if( action )
 		newDeletedState = FALSE;
 	else
 		newDeletedState = TRUE;
@@ -420,7 +420,7 @@ static void ParamFileAction( void * action )
 	{
 		if ( wListGetItemSelected( (wList_p)paramFileL, inx ) ) 
 		{
-			fileInx = (wIndex_t)wListGetItemContext( paramFileL, inx );
+			fileInx = (intptr_t)wListGetItemContext( paramFileL, inx );
 
 			// set the desired state
 			paramFileInfo(fileInx).deleted = newDeletedState;
@@ -445,7 +445,7 @@ static void ParamFileAction( void * action )
 static void ParamFileSelectAll( void *junk )
 {
 	wListSelectAll( paramFileL );
-	UpdateParamFileButton( NULL );
+	UpdateParamFileButton( 0 );
 }
 
 static void ParamFileOk( void * junk )

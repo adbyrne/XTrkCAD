@@ -340,7 +340,7 @@ void DoDescribe( char * title, track_p trk, descData_p data, descUpdate_t update
 				if (!GetLayerFrozen(inx))				// Avoid Frozen layers.
 				{
 					sprintf( message, "%2d : %s", inx+1,  GetLayerName(inx) );
-					wListAddValue( (wList_p)ddp->control0, message, NULL, (void*)inx );
+					wListAddValue( (wList_p)ddp->control0, message, NULL, (void*)(intptr_t)inx );
 				}
 			}
 			break;
