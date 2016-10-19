@@ -31,16 +31,19 @@
 #include "gtkint.h"
 #include "i18n.h"
 
+#define MAX_ALLOWEDFILTERS 10
+
 struct wFilSel_t {
 		GtkWidget * window;
 		wFilSelCallBack_p action;
 		void * data;
 		int pattCount;
-		GtkFileFilter *filter[ 10 ];
+		GtkFileFilter *filter[ MAX_ALLOWEDFILTERS ];
 		wFilSelMode_e mode;
 		int opt;
 		const char * title;
 		wWin_p parent;
+		char *defaultExtension;
 		};
 
 
@@ -90,11 +93,15 @@ struct wFilSel_t * wFilSelCreate(
 		count = 0;
 		// names and patterns are separated by |
 		cp = strtok( cp, "|" );		
-		while ( cp  && count < 9 ) {
+		while ( cp  && count < (MAX_ALLOWEDFILTERS - 1)) {
 			fs->filter[ count ] = gtk_file_filter_new ();
 			gtk_file_filter_set_name ( fs->filter[ count ], cp );
 			cp = strtok( NULL, "|" );
 			gtk_file_filter_add_pattern (fs->filter[ count ], cp );
+			// the first pattern is considered to match the default extension
+			if( count == 0 ) {
+				fs->defaultExtension = strdup( cp );
+			}	
 			cp = strtok( NULL, "|" );
 			count++;
 		}
@@ -123,9 +130,12 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 	char name[1024];
 	char *host;
 	char *file;
+	char *namePart;
 	int i;
 	GSList *fileNameList;
 	GError *err = NULL;
+	GtkFileFilter *activeFilter;
+	
 	char **fileNames;
 	
 	char * cp;
@@ -166,9 +176,19 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		
 		fileNameList = gtk_file_chooser_get_uris( GTK_FILE_CHOOSER(fs->window) );
 		fileNames = calloc( sizeof(char *), g_slist_length (fileNameList) ); 
-		
+			
 		for (i=0; i < g_slist_length (fileNameList); i++ ) {
 			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ), &host, &err );
+			
+			// check for presence of file extension
+			// jump behind tha last directory delimiter
+			namePart = strrchr( file, '/' ) + 1;
+			// is there a dot in the last part, yes->extension present
+			if( !strchr( namePart, '.' ) ){
+				// make room for the extension
+				file = g_realloc( file, strlen(file)+strlen(fs->defaultExtension));
+				strcat( file, fs->defaultExtension + 1 );
+			}	
 			fileNames[ i ] = file;
 			g_free( g_slist_nth_data ( fileNameList, i));
 		}
