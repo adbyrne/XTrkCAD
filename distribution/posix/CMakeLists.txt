@@ -8,11 +8,18 @@ SET(CPACK_RPM_PACKAGE_GROUP "Applications/Engineering")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}////xtrkcad-desc.txt")
 SET(CPACK_PACKAGE_FILE_NAME "xtrkcad-setup-${XTRKCAD_VERSION}-${CPACK_PACKAGE_RELEASE}.${CMAKE_SYSTEM_PROCESSOR}")
 SET(CPACK_INSTALL_PREFIX "/usr/local/" )
+SET(CPACK_PACKAGING_INSTALL_PREFIX ${CPACK_INSTALL_PREFIX})
 SET(CPACK_PACKAGE_VENDOR "XTrackCAD Fork Project")
 SET(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk2 webkitgtk")
 # exclude these directories from the  rpm
-SET(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION "/usr/share/locale"
+SET(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
+	"/usr/local"
+	"/usr/local/share"
+	"/usr/local/bin" 
+	"/usr/share/locale"
 	"/usr/share/locale/*"
+	"/usr/local/share/locale"
+	"/usr/local/share/locale/*"
 )
 
 SET(CPACK_RPM_CHANGELOG_FILE "${CMAKE_CURRENT_SOURCE_DIR}////changelog.txt")
