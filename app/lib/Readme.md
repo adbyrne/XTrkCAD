@@ -1,8 +1,8 @@
-= XTrackCAD 4.2.0 =
+# XTrackCAD 4.2.4 #
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
-== Contents ==
+## Contents ##
 
 * About XTrackCad
 * License Information
@@ -13,11 +13,12 @@ This file contains installation instructions and up-to-date information regardin
 * Building
 * Where to go for support  
 
-== About XTrackCad ==
+## About XTrackCad ##
 
 XTrackCad is a powerful CAD program for designing Model Railroad layouts.
 
 Some highlights:
+
 * Easy to use.
 * Supports any scale.
 * Supplied with parameter libraries for many popular brands of turnouts, plus the capability to define your own.
@@ -26,10 +27,9 @@ Some highlights:
   
 Availability:
 XTrkCad Fork is a project for further development of the original XTrkCad 
-software. See the project homepage at [[http://www.xtrackcad.org/]] for news and current releases.
+software. See the project homepage at <http://www.xtrackcad.org/> for news and current releases.
 
-
-== License Information ==
+## License Information ##
 
 **Copying:**
 
@@ -37,8 +37,52 @@ XTrackCad is copyrighted by Dave Bullis and Martin Fischer and licensed as
 free software under the terms of the GNU General Public License v2 which 
 you can find in the file COPYING.
 
-== New features in this release ==
+## New features ##
 
+### Version 4.2.4 ###
+* All: Parameter file for Minitrains HOe-009-HOn30 Track System
+* All: Improved and new parameter files Kato N and Super O
+* All: Corrected parameter file for Peco HOn30/OO9 track
+* All: New parameter file for Peco HOn3 turnouts
+* All: New and updated parameter files for Z-scale
+* All: added a few more length formats
+* All: added additional zoom and marco zoom steps 
+* All: Increase meximum number of layer buttons to 99
+* All: The parameter file dialog now allows loading and unloading several files together
+
+### Version 4.2.3 ###
+* All: updated German translations
+* All: TT Kuehn added items
+* Linux/OSX: New printing system
+* All: tomix-n.xtp Added or Updated multiple items
+* All: Add length format with six decimal places for English units (feature wish #33)
+* All: Feature Request #35: add hotkey for switching map window on and off
+* All: Make the installation's param directory the default on initial run
+* All: several new and updated parameter files
+* All: add Nm gauge and some Nm track parameters
+
+### Version 4.2.2 ###
+* All: Update German translations
+* All: extended parameter files fð² ‹ato HO and Walthers N structures
+* All: Added and extended parameter files
+* All: Add support for HOf scale/gauge and Busch track parameter files
+* Linux/OSX: Replace file selector dialog with newer file chooser dialog
+* All: Make editing of custom track work
+* All: Fix Atlas HO Code 100 parameter file
+* All: new Kato Unitrack N-Scale parameter file
+* All: add measurement units to train speed
+
+### Version 4.2.1 ###
+* Increase the number of layer buttons to 99
+* All: Update Eishindo T Gauge parameter file
+* All: Paste clipboard content at position of mouse pointer
+* All: Never mark curve centers of turnouts
+* All: Make drawing of center markings (crosshair) an user option
+* add ability to set text color when creating them
+* Windows: Draw and print crosshair to mark the center of an arc
+* Add the ability to change layers of a piece of track in the describe box.
+
+### Version 4.2.0 ###
 * New and updated parameter files and layout examples
 * Apply user preferences for dimensions to elevations
 * Add ability to update color of Text in properties
@@ -49,63 +93,87 @@ you can find in the file COPYING.
 * Merged webkit help system from Debian
 * Update help CSS to the Wiki's new default look
 
-= Installation =
-== Windows ==
+## Bugs fixed ##
 
-XTrackCad has only been tested on Windows 7. 
+### Version 4.2.4 ###
+* Linux/OSX: Correct search order for config files
+* All: Layout control functions are always included
+* Linux/OSX: add a default file extension when none is present on save
+* Linux/OSX: Update package build
+* All: Fix compiler warnings for pointer to in casts on 64 bit systems
+* All: Correct file comments
+* All: Consistent spelling
+* All: Fix definition for Atlas Code 83 3/4" straight track
 
-The MS-Windows version of XTrackCad is shipped as a self-extracting/
-self-installing program using the NSIS Installer from Nullsoft Inc.
+### Version 4.2.3b ###
+* Windows: Fix numeric overflow when reading layouts created on Linux
+* Linux/OSX: Fix crash when closing Train Control window
+* Linux/OSX: Fix crash when closing Change Elevation Window
+* All: new and improved parameter files for Tillig track
 
-Using Windows Explorer, locate the directory in which you downloaded or copied your new version of XTrackCAD.
+### Version 4.2.3a ###
+* Windows: Make UI translation work with directory structure of 64 bit Windows
+* Linux/OSX: Use defaults for printer and page settings on first run
 
-Start the installation program by double clicking on the 
-xtrkcad-setup-4.2.0.exe file icon.
+### Version 4.2.3 ###
+* All: Fix bug #143: Roco N Turnout 22247
+* All: fix invalid const variable usage
+* Linux/OSX: cairo is required and no longer optional
+* All: Fix bug #137 remove accelerator keys from block and switchmotor functions
+* All: Fixed wrapping of messages in status line
+* All: fix parameter files for On30
+* All: fix some compiler warnings
+* All: Fix bug #137 ie. crash on in intial run
+* All: fix possible signed / unsigned char problems
+* Windows: fix some compiler warnings
 
-Follow the steps in the installation program.
+### Version 4.2.2 ###
+* All: proper initialization of gauge on initial run
+* All: Added missing Language code header in Finnish and Brazilian Portuguese translations
+* Linux/MacOSX Fix for string conversion issues found using -Wformat-security default compiler flag on modern Linux distros
+* All: Bugfix: enable changing the layer of drawing elements from Describe dialog
+* All: Fix formatting of parts list, use monospace font on Linux and OSX
+* All: fix buffer overflow bug on overly long title lines (bug 120)
+* All: Fix memory violation bug on initial run of XTrackCAD
+* All: help and message fixes, load example directories on first start
+* All: Fix cmake backwards compatibility
+* All: Fix Backspace-Handling when field is emptied completly
+* All: Suppress warning from CMake versions  3.0
+* Linux: Additional files needed for Debian packages
 
-The installation lets you define the directory into which XTrackCAD is 
-installed. The directory is created automatically if it doesn't already exist.
+### Version 4.2.1 ###
+* All: Fix problem with blank line in American prototype file
+* All: fix one occurence if undo assert bug
+* All: Fix setting and getting minimum radius in Layout Options dialog
+* Windows: add round() missing in older Visual Studio versions
+* All: Fix locale problem with Export/Import
+* Linux/OSX: fix line width when printing
+* Linux/OSX: Add text rotation to gtk/cairo
+* Windows: Fix text rotation from Describe dialog
+* Fix initial HotBar Text Issue
+* Fix shift-modify abend
+* Fix redraw on Undo and Redo
+* All: fix bug 23 - make line width independent of zoom factor a creation time
+* Remove Ruler Text when selecting ruler button
+* Windows: Correct size calculation for radio buttons and checkboxes
+* Fix ghosts after delete
+* Fix modify
+* Fix ghost tracks and text on mac
+* Fix color stack protection bug
+* Windows Fix Bug 108: make sure that the line width is at least 1
+* ALL Fix bug 110: Proper error message on invalid scale in parameter file
+* Linux: Add valid ChangeLog to the RPM package
+* fix layerlist
+* Linux: Make RPM package generator work
+* Linux/OSX Draw and print crosshair to mark center of arc
+* ALL: Complete German translation for UI, messages and demos
+* Linux/OSX Fix bug 103:  Icons are unreadable
+* Linux/OSX Fix bug 101: Print command fails with path+name > 42 chars
+* fix kato-n parameter file
+* Change the default input to be the same as the default output.
+* Correction to parameter file, Marklin 5119 is a Right not a Left turnout
 
-A program folder named XTrackCAD 4.2.0 will be created during the installation 
-process. This folder contains the program, documentation, parameter and 
-example files. An existing installation of earlier versions of XTrackCad is 
-not overwritten. 
-
-A new program group named XTrackCad 4.2.0 will be created in the Start menu. 
-
-== Linux ==
-
-XTrackCAD for LINUX is shipped as a self-extracting archive (executable). 
-You will need libc6, X11R6, GTK+2.0, webkitgtk.
- 
-
-=== Installing from the self-extracting archive. ===
-
-After downloading open a command line then 
-
-./xtrkcad-setup-4.2.0.x86_64.sh --prefix=/usr/local --exclude-subdir
-
-This will install the executable in /usr/local/bin. A directory named 
-xtrkcad will be created in /usr/local/share and all files will be unpacked
-into it.
-
-If you install XTrackCAD into another directory, set the XTRKCADLIB 
-environment variable to point to that directory.
-
-= Release Info =
-
-== Upgrade Information == 
-
-In order to prevent problems when moving files between different platforms, the symbol '½' was
-removed from the scale definitions and parameter files for narrow gauge definitions. 
-As customary '.5' or the corresponding gauge in inches eg. 30 is used instead.  
-Layouts using the old definition can be still be loaded. Use the 'Layout Parameter' dialog to 
-set the updated definition. 
-
-== Bugs fixed ==
-
-The following bugs have been fixed with this release:
+### Version 4.2.0 ###
 * Fix I18N on Windows
 * Fix bug 48: created invalid XPMs when many colors were used
 * Windows: associate application icon to xtc files
@@ -158,8 +226,62 @@ The following bugs have been fixed with this release:
 * Enhanced bitmap display control
 * Improve internationalization support, use simple gettext on Win32
 
-= Building = 
-== Overview ==
+# Installation #
+## Windows ##
+
+XTrackCad has only been tested on Windows 7. 
+
+The MS-Windows version of XTrackCad is shipped as a self-extracting/
+self-installing program using the NSIS Installer from Nullsoft Inc.
+
+Using Windows Explorer, locate the directory in which you downloaded or copied your new version of XTrackCAD.
+
+Start the installation program by double clicking on the 
+**[xtrkcad-setup-4.2.4.exe][]** file icon.
+
+Follow the steps in the installation program.
+
+The installation lets you define the directory into which XTrackCAD is 
+installed. The directory is created automatically if it doesn't already exist.
+
+A program folder named XTrackCAD 4.2.4 will be created during the installation 
+process. This folder contains the program, documentation, parameter and 
+example files. An existing installation of earlier versions of XTrackCad is 
+not overwritten. 
+
+A new program group named XTrackCad 4.2.4 will be created in the Start menu. 
+
+## Linux ##
+
+XTrackCAD for LINUX is shipped as a RPM file and a self extracting archive.
+You will need libc6, X11R6, GTK+2.0, webkitgtk.
+
+### Installing from the RPM package. ### 
+
+Use your operating system's package manager to install XTrackCAD.
+
+### Installing from the self-extracting archive. ###
+
+After downloading open a command line then 
+
+    ./xtrkcad-setup-4.2.4.x86_64.sh --prefix=/ --exclude-subdir
+
+This will install the executable in /usr/local/bin. A directory named 
+xtrkcad will be created in /usr/local/share and all files will be unpacked
+into it.
+
+If you install XTrackCAD into another directory, set the XTRKCADLIB 
+environment variable to point to that directory.
+
+# Release Info #
+
+## Upgrade Information ##
+
+The available options for number formats have been extended. Check your setting 
+in Options>Preferences
+
+# Building #
+## Overview ##
 
 The following instructions detail building XTrackCAD using CMake. CMake is a
 cross-platform build system, available at http://www.cmake.org, that can be
@@ -167,19 +289,19 @@ used to generate builds for a variety of build tools ranging from "make" to
 Visual Studio and XCode. Using CMake you can build XTrackCAD on Windows,
 GNU/Linux, and Mac OSX using the build tool(s) of your choice.
 
-=== Building XTrackCAD on GNU/Linux ===
+### Building XTrackCAD on GNU/Linux ###
 
 * Obtain the current sources from Mercurial; I assume that they are stored locally at
   "~/src/xtrkcad".
-  Note that the correct URL for read-only access to Mercurial is\\
-  {{{http://xtrkcad-fork.hg.sourceforge.net:8000/hgroot/xtrkcad-fork/xtrkcad}}}
+  Note that the correct URL for read-only access to Mercurial is
+  <http://xtrkcad-fork.hg.sourceforge.net:8000/hgroot/xtrkcad-fork/xtrkcad>
 * Create a separate build directory; for these instructions I assume that
   your build directory is "~/build/xtrkcad".
 * Run CMake from the build directory, passing it the path to the source
   directory:
 
-  $ cd ~/build/xtrkcad
-  $ ccmake ~/src/xtrkcad
+    $ cd ~/build/xtrkcad
+    $ ccmake ~/src/xtrkcad
 
 * Press the "c" key to configure the build. After a few moments you will see
   four options to configure: CMAKE_BUILD_TYPE, CMAKE_INSTALL_PREFIX,
@@ -205,42 +327,42 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
   generate makefiles for your build.
 * Compile XTrkCad using your new build:
 
-  ##$ make##
+    $ make
 
 * Install the new binary:
 
-  ##$ make install##
+    $ make install
 
 * Run the installed binary:
 
-  ##$ ~/install/xtrkcad/bin/xtrkcad##
+    $ ~/install/xtrkcad/bin/xtrkcad
 
 * If XTRKCAD_USE_DOXYGEN was enabled:
 
-  ##$ make docs-doxygen##
+    $ make docs-doxygen
   
   to create the internals documentation. Read this documentation by pointing 
   your web browser at ~/build/xtrkcad/docs/doxygen/html/index.html.
 
-=== Building XTrackCAD on Mac OSX ===
+### Building XTrackCAD on Mac OSX ###
 
 * You will need to install the following dependencies - I recommend using
-  http://www.macports.org to obtain them:
-    o GTK2
-    o webkit
-    o gnome-icon-theme 
+  <http://www.macports.org> to obtain them:
+  - GTK2
+  - webkit
+  - gnome-icon-theme 
 * Once the prerequisites are installed the build instructions are the same
   as for the GNU/Linux build, above.
 * Remember that to run XTrackCAD on OSX, you need to have X11 running with
   your DISPLAY set.
 
-=== Building XTrackCAD on Windows ===
+### Building XTrackCAD on Windows ###
 
 * Obtain the current sources from Mercurial; I assume that they are stored locally at
   "c:/src/xtrkcad".
-  Note that the correct URL for read-only access to Mercurial is\\
-  {{{http://xtrkcad-fork.hg.sourceforge.net:8000/hgroot/xtrkcad-fork/xtrkcad}}}
-* Use the Windows Start menu to run CMake.
+  Note that the correct URL for read-only access to Mercurial is
+  <http://xtrkcad-fork.hg.sourceforge.net:8000/hgroot/xtrkcad-fork/xtrkcad>
+* Use the Windows Start menu to run CMake (cmake-gui).
 * Specify the source and build directories in the CMake window. You must
   provide a build directory outside the source tree - I use "c:/build/xtrkcad".
 * Press the "Configure" button to configure the build. You will be prompted
@@ -251,12 +373,12 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
   The default "c:/Program Files/XTrkCAD" is a good choice.
 * Use XTRKCAD_USE_GETTEXT to add new locales (language translations). Choose
   "OFF" to use XTrackCAD's default language (English). Refer to
-  http://www.xtrkcad.org/Wikka/Internationalization for additional information.
+  <http://www.xtrkcad.org/Wikka/Internationalization> for additional information.
 * Use XTRKCAD_USE_GTK to control the user-interface back-end. Choose "OFF"
   for Windows.
 * Use XTRKCAD_USE_GTK_CAIRO to enable optional high-quality antialiased
-  Cairo rendering for the GTK back-end. This option has no effect unless you are
-  using the GTK back-end.
+  Cairo rendering for the GTK back-end. This option has no effect unless on
+  Windows.
 * Use XTRKCAD_USE_DOXYGEN to enable the production of type, function, etc.,
   documentation from the the source code. Requires doxygen if enabled.
   Enable if and only if you intend to hack on the code. 
@@ -271,13 +393,13 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
 * Run XTrackCAD by double-clicking its icon located in the install directory -
   for example: c:/Program Files/XTrkCAD/bin/xtrkcad.exe.
 
-== Where to go for support == 
+## Where to go for support ##
 
 The following web addresses will be helpful for any questions or bug 
 reports
 
-[[http://groups.yahoo.com/projects/XTrkCad | The Yahoo!Group mailing list]]\\
-[[http://www.xtrackcad.org/ | The project website for the open source development]]\\
-[[http://www.sourceforge.net/groups/xtrkcad-fork/ | The official Sourceforge site]]\\
+- The Yahoo!Group mailing list <http://groups.yahoo.com/projects/XTrkCad>
+- The project website for the open source development <http://www.xtrackcad.org/>
+- The official Sourceforge site <http://www.sourceforge.net/groups/xtrkcad-fork/>
 
 Thanks for your interest in XTrackCAD.
