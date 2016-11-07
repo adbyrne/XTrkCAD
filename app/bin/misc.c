@@ -2212,11 +2212,9 @@ static void CreateMenus( void )
 	InitCmdHelix( addM );
 	InitCmdTurntable( addM );
 
-#ifdef XTRKCAD_USE_LAYOUTCONTROL
 	cmdGroup = BG_CONTROL;
 	InitCmdBlock( addM );
 	InitCmdSwitchMotor( addM );
-#endif
 
 	/*
 	 * CHANGE MENU
