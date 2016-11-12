@@ -257,7 +257,7 @@ static void buttDone(
 	free(b);
 }
 
-long FAR PASCAL _export pushButt(
+LRESULT CALLBACK pushButt(
 		HWND hWnd,
 		UINT message,
 		UINT wParam,
@@ -301,9 +301,10 @@ long FAR PASCAL _export pushButt(
 			InvalidateRect( b->hWnd, NULL, TRUE );
 		return 0L;
 		break;
-	case WM_ERASEBKGND:
-		if (kludge12)
-		return 1L;
+	case WM_LBUTTONUP:
+		/* don't know why but this solves a problem with color selection */
+		Sleep( 0 );
+		break;
 	}
 	return CallWindowProc( oldButtProc, hWnd, message, wParam, lParam );
 }
@@ -372,9 +373,8 @@ wButton_p wButtonCreate(
 	b->action = action;
 	mswCallBacks[B_BUTTON] = &buttonCallBacks;
 	mswChainFocus( (wControl_p)b );
-	newButtProc = MakeProcInstance( (XWNDPROC)pushButt, mswHInst );
-	oldButtProc = (XWNDPROC)GetWindowLong( b->hWnd, GWL_WNDPROC );
-	SetWindowLong( b->hWnd, GWL_WNDPROC, (LONG)newButtProc );
+
+	oldButtProc = (WNDPROC) SetWindowLongPtr(b->hWnd, GWL_WNDPROC, (LONG_PTR)&pushButt);
 	if (mswPalette) {
 		hDc = GetDC( b->hWnd );
 		SelectPalette( hDc, mswPalette, 0 );
