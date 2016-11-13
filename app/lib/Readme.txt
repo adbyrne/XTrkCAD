@@ -117,6 +117,13 @@ Version 4.2.0
 
 Bugs fixed
 
+Version 4.2.4a
+
+-   All: New parameter file for Micro Engineering HOn3 Turnouts
+-   Windows: Fix bug 157 Crash on color change when drawing lines
+-   All: Updated parameter file for Kato N scale
+-   All: Fix build problem with block and switchmotor feature
+
 Version 4.2.4
 
 -   Linux/OSX: Correct search order for config files

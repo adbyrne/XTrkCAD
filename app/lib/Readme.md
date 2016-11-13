@@ -1,4 +1,4 @@
-# XTrackCAD 4.2.4 #
+# XTrackCAD 4.2.4a #
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
@@ -94,6 +94,11 @@ you can find in the file COPYING.
 * Update help CSS to the Wiki's new default look
 
 ## Bugs fixed ##
+### Version 4.2.4a ###
+* All: New parameter file for Micro Engineering HOn3 Turnouts
+* Windows: Fix bug 157 Crash on color change when drawing lines
+* All: Updated parameter file for Kato N scale
+* All: Fix build problem with block and switchmotor feature
 
 ### Version 4.2.4 ###
 * Linux/OSX: Correct search order for config files
