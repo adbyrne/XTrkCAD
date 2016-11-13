@@ -1,6 +1,6 @@
 
 
-XTRACKCAD 4.2.4
+XTRACKCAD 4.2.4A
 
 
 This file contains installation instructions and up-to-date information
