@@ -1728,9 +1728,7 @@ static char *AllToolbarLabels[] = {
 		N_("Easement Button"),
 		N_("SnapGrid Buttons"),
 		N_("Create Track Buttons"),
-#ifdef XTRKCAD_USE_LAYOUTCONTROL
 		N_("Layout Control Elements"),
-#endif
 		N_("Modify Track Buttons"),
 		N_("Describe/Select"),
 		N_("Track Group Buttons"),
@@ -1747,9 +1745,7 @@ static long AllToolbarMasks[] = {
 		1<<BG_EASE,
 		1<<BG_SNAP,
 		1<<BG_TRKCRT,
-#ifdef XTRKCAD_USE_LAYOUTCONTROL
 		1<<BG_CONTROL,
-#endif
 		1<<BG_TRKMOD,
 		1<<BG_SELECT,
 		1<<BG_TRKGRP,

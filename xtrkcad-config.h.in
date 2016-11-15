@@ -22,7 +22,6 @@
 /* Generated file, do not edit! */
 
 #cmakedefine XTRKCAD_USE_GETTEXT
-#cmakedefine XTRKCAD_USE_LAYOUTCONTROL
 
 #define XTRKCAD_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
 #define XTRKCAD_PACKAGE "@XTRKCAD_PACKAGE@"
