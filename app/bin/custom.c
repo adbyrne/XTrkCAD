@@ -135,10 +135,10 @@ BOOL_T Initialize( void )
 	InitTrkDraw();
 	InitTrkNote();
 
-#ifdef XTRKCAD_USE_LAYOUTCONTROL
+/*#ifdef XTRKCAD_USE_LAYOUTCONTROL*/
 	InitTrkBlock();
 	InitTrkSwitchMotor();
-#endif
+/*#endif*/
 	InitCarDlg();
 
 	memset( message, 0, sizeof message );

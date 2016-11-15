@@ -1,7 +1,7 @@
 Summary: XTrkCad
 Name: xtrkcad
-Version: 4.2.3
-Release: 1%{?dist}
+Version: 4.2.4a
+Release: 3%{?dist}
 License: GPL
 Group: Applications/Engineering
 Vendor: XTrkCad Fork Project
