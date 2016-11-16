@@ -334,7 +334,7 @@ Installing from the self-extracting archive.
 
 After downloading open a command line then
 
-    ./xtrkcad-setup-4.2.4.x86_64.sh --prefix=/ --exclude-subdir
+    ./xtrkcad-setup-4.2.4.x86_64.sh --prefix=/usr/local --exclude-subdir
 
 This will install the executable in /usr/local/bin. A directory named
 xtrkcad will be created in /usr/local/share and all files will be

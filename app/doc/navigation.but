@@ -219,6 +219,8 @@ The size of the \e{Map Window} changes when you change the Room Size (see \K{cmd
 
 If you close the \e{Map Window}, you can reopen it by the \e{Window} menu.
 
+Visibility of the \e{Map Window} can be toggled by pressing \e{Ctrl+Space}
+
 \rule
 
 
@@ -687,6 +689,15 @@ Note Dialog
 
 }
 
+\u000
+
+\dd Map Window:
+
+\lcont{ 
+
+\b On / Off - \e{Ctrl+Space}
+
+}
 }
 
 \rule
