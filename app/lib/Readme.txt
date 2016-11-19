@@ -119,6 +119,12 @@ Bugs fixed
 
 Version 4.2.4a
 
+-   All: Update help
+-   Linux: Installation from self extracting archive accepts install
+    path
+-   Linux/OSX: Remove absolute path from source packages
+-   All: remove all dependencies on obsolete XTRKCAD_USE_LAYOUTCONTROL
+    conditional
 -   All: New parameter file for Micro Engineering HOn3 Turnouts
 -   Windows: Fix bug 157 Crash on color change when drawing lines
 -   All: Updated parameter file for Kato N scale
@@ -304,7 +310,7 @@ Using Windows Explorer, locate the directory in which you downloaded or
 copied your new version of XTrackCAD.
 
 Start the installation program by double clicking on the
-[XTRKCAD-SETUP-4.2.4.EXE][] file icon.
+[XTRKCAD-SETUP-4.2.4A.EXE][] file icon.
 
 Follow the steps in the installation program.
 
@@ -312,12 +318,12 @@ The installation lets you define the directory into which XTrackCAD is
 installed. The directory is created automatically if it doesn't already
 exist.
 
-A program folder named XTrackCAD 4.2.4 will be created during the
+A program folder named XTrackCAD 4.2.4a will be created during the
 installation process. This folder contains the program, documentation,
 parameter and example files. An existing installation of earlier
 versions of XTrackCad is not overwritten.
 
-A new program group named XTrackCad 4.2.4 will be created in the Start
+A new program group named XTrackCad 4.2.4a will be created in the Start
 menu.
 
 
@@ -334,7 +340,7 @@ Installing from the self-extracting archive.
 
 After downloading open a command line then
 
-    ./xtrkcad-setup-4.2.4.x86_64.sh --prefix=/usr/local --exclude-subdir
+    ./xtrkcad-setup-4.2.4a.x86_64.sh --prefix=/usr/local --exclude-subdir
 
 This will install the executable in /usr/local/bin. A directory named
 xtrkcad will be created in /usr/local/share and all files will be
