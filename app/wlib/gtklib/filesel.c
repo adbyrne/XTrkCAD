@@ -163,13 +163,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 
 	}
 	strcpy( name, dirName );
-    // Remove the adding of a trailing "/"
-    // cp = name+strlen(name);
-    // if (cp[-1] != '/') {
-    //    *cp++ = '/';
-    //    *cp = 0;
-    // }
-	if( fs->mode == FS_SAVE )
+    if( fs->mode == FS_SAVE )
 		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
     // Add a current folder and a shortcut to it for Load/import dialogs
     if( fs->mode == FS_LOAD ) {
