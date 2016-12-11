@@ -3,14 +3,14 @@ msgstr ""
 "Project-Id-Version: xtrkcad 4.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-02-06 12:30+0100\n"
-"PO-Revision-Date: 2016-02-06 12:35+0100\n"
+"PO-Revision-Date: 2016-08-25 10:38+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.1\n"
+"X-Generator: Poedit 1.8.4\n"
 
 #: ../bin/cblock.c:98 ../bin/cblock.c:133 ../bin/compound.c:520
 #: ../bin/cswitchmotor.c:78 ../bin/cswitchmotor.c:138 ../bin/dlayer.c:319
@@ -59,40 +59,40 @@ msgid "Block"
 msgstr "Block"
 
 #: ../bin/cblock.c:442 ../bin/cblock.c:461 ../bin/cblock.c:469
-#: ../bin/cblock.c:525 ../bin/cdraw.c:78 ../bin/cdraw.c:870
-#: ../bin/cgroup.c:962 ../bin/cgroup.c:1009 ../bin/cgroup.c:1024
-#: ../bin/cgroup.c:1063 ../bin/cgroup.c:1089 ../bin/cgroup.c:1148
-#: ../bin/cgroup.c:1592 ../bin/cnote.c:96 ../bin/cprint.c:520
-#: ../bin/cprint.c:945 ../bin/cpull.c:499 ../bin/cpull.c:514
-#: ../bin/cpull.c:516 ../bin/cpull.c:518 ../bin/cselect.c:670
-#: ../bin/cselect.c:767 ../bin/cselect.c:1243 ../bin/csnap.c:578
-#: ../bin/csnap.c:711 ../bin/cstruct.c:763 ../bin/cstruct.c:772
-#: ../bin/cstruct.c:874 ../bin/cswitchmotor.c:355 ../bin/cswitchmotor.c:381
-#: ../bin/ctext.c:163 ../bin/ctodesgn.c:150 ../bin/ctodesgn.c:1040
-#: ../bin/ctodesgn.c:1090 ../bin/ctodesgn.c:1203 ../bin/ctodesgn.c:1505
-#: ../bin/ctrain.c:2561 ../bin/cturnout.c:2381 ../bin/cturnout.c:2508
-#: ../bin/cundo.c:152 ../bin/cundo.c:156 ../bin/dbitmap.c:65
-#: ../bin/dbitmap.c:122 ../bin/dbitmap.c:200 ../bin/dbitmap.c:235
-#: ../bin/dcar.c:3528 ../bin/dcar.c:3712 ../bin/dcar.c:3716 ../bin/dcar.c:3720
-#: ../bin/dcar.c:3725 ../bin/dcar.c:4039 ../bin/dcar.c:4150 ../bin/dcar.c:4528
-#: ../bin/dcmpnd.c:387 ../bin/dcmpnd.c:398 ../bin/dcmpnd.c:530
-#: ../bin/dcustmgm.c:186 ../bin/dcustmgm.c:192 ../bin/dcustmgm.c:201
-#: ../bin/dcustmgm.c:217 ../bin/dease.c:220 ../bin/dlayer.c:200
-#: ../bin/dlayer.c:217 ../bin/dlayer.c:657 ../bin/dlayer.c:662
-#: ../bin/doption.c:155 ../bin/doption.c:274 ../bin/doption.c:354
-#: ../bin/doption.c:505 ../bin/doption.c:517 ../bin/doption.c:583
-#: ../bin/dprmfile.c:91 ../bin/dprmfile.c:105 ../bin/dprmfile.c:118
-#: ../bin/dprmfile.c:160 ../bin/dprmfile.c:438 ../bin/draw.c:2234
-#: ../bin/fileio.c:609 ../bin/fileio.c:678 ../bin/fileio.c:789
-#: ../bin/fileio.c:791 ../bin/fileio.c:796 ../bin/fileio.c:958
-#: ../bin/macro.c:934 ../bin/macro.c:938 ../bin/macro.c:1015
-#: ../bin/macro.c:1121 ../bin/macro.c:1349 ../bin/macro.c:1365
-#: ../bin/misc2.c:411 ../bin/param.c:1820 ../bin/param.c:1944
-#: ../bin/param.c:1947 ../bin/param.c:2069 ../bin/param.c:2075
-#: ../bin/smalldlg.c:91 ../bin/smalldlg.c:221 ../bin/tease.c:1039
-#: ../bin/track.c:1311 ../bin/misc.c:304 ../bin/misc.c:354 ../bin/misc.c:1712
-#: ../bin/misc.c:1846 ../bin/misc.c:1910 ../bin/misc.c:2476 ../bin/misc.c:2486
-#: ../bin/misc.c:2506 ../bin/misc.c:2509 ../wlib/gtklib/wpref.c:126
+#: ../bin/cblock.c:525 ../bin/cdraw.c:78 ../bin/cdraw.c:870 ../bin/cgroup.c:962
+#: ../bin/cgroup.c:1009 ../bin/cgroup.c:1024 ../bin/cgroup.c:1063
+#: ../bin/cgroup.c:1089 ../bin/cgroup.c:1148 ../bin/cgroup.c:1592
+#: ../bin/cnote.c:96 ../bin/cprint.c:520 ../bin/cprint.c:945 ../bin/cpull.c:499
+#: ../bin/cpull.c:514 ../bin/cpull.c:516 ../bin/cpull.c:518
+#: ../bin/cselect.c:670 ../bin/cselect.c:767 ../bin/cselect.c:1243
+#: ../bin/csnap.c:578 ../bin/csnap.c:711 ../bin/cstruct.c:763
+#: ../bin/cstruct.c:772 ../bin/cstruct.c:874 ../bin/cswitchmotor.c:355
+#: ../bin/cswitchmotor.c:381 ../bin/ctext.c:163 ../bin/ctodesgn.c:150
+#: ../bin/ctodesgn.c:1040 ../bin/ctodesgn.c:1090 ../bin/ctodesgn.c:1203
+#: ../bin/ctodesgn.c:1505 ../bin/ctrain.c:2561 ../bin/cturnout.c:2381
+#: ../bin/cturnout.c:2508 ../bin/cundo.c:152 ../bin/cundo.c:156
+#: ../bin/dbitmap.c:65 ../bin/dbitmap.c:122 ../bin/dbitmap.c:200
+#: ../bin/dbitmap.c:235 ../bin/dcar.c:3528 ../bin/dcar.c:3712
+#: ../bin/dcar.c:3716 ../bin/dcar.c:3720 ../bin/dcar.c:3725 ../bin/dcar.c:4039
+#: ../bin/dcar.c:4150 ../bin/dcar.c:4528 ../bin/dcmpnd.c:387
+#: ../bin/dcmpnd.c:398 ../bin/dcmpnd.c:530 ../bin/dcustmgm.c:186
+#: ../bin/dcustmgm.c:192 ../bin/dcustmgm.c:201 ../bin/dcustmgm.c:217
+#: ../bin/dease.c:220 ../bin/dlayer.c:200 ../bin/dlayer.c:217
+#: ../bin/dlayer.c:657 ../bin/dlayer.c:662 ../bin/doption.c:155
+#: ../bin/doption.c:274 ../bin/doption.c:354 ../bin/doption.c:505
+#: ../bin/doption.c:517 ../bin/doption.c:583 ../bin/dprmfile.c:91
+#: ../bin/dprmfile.c:105 ../bin/dprmfile.c:118 ../bin/dprmfile.c:160
+#: ../bin/dprmfile.c:438 ../bin/draw.c:2234 ../bin/fileio.c:609
+#: ../bin/fileio.c:678 ../bin/fileio.c:789 ../bin/fileio.c:791
+#: ../bin/fileio.c:796 ../bin/fileio.c:958 ../bin/macro.c:934
+#: ../bin/macro.c:938 ../bin/macro.c:1015 ../bin/macro.c:1121
+#: ../bin/macro.c:1349 ../bin/macro.c:1365 ../bin/misc2.c:411
+#: ../bin/param.c:1820 ../bin/param.c:1944 ../bin/param.c:1947
+#: ../bin/param.c:2069 ../bin/param.c:2075 ../bin/smalldlg.c:91
+#: ../bin/smalldlg.c:221 ../bin/tease.c:1039 ../bin/track.c:1311
+#: ../bin/misc.c:304 ../bin/misc.c:354 ../bin/misc.c:1712 ../bin/misc.c:1846
+#: ../bin/misc.c:1910 ../bin/misc.c:2476 ../bin/misc.c:2486 ../bin/misc.c:2506
+#: ../bin/misc.c:2509 ../wlib/gtklib/wpref.c:126
 #: ../../../build/xtc_4-2-3dev/app/bin/bllnhlp.c:523
 msgid "Ok"
 msgstr "Ok"
@@ -142,8 +142,7 @@ msgstr "Ja"
 #: ../bin/ctrain.c:2056 ../bin/dcar.c:3664 ../bin/dcar.c:3742
 #: ../bin/dcar.c:3826 ../bin/dcar.c:3845 ../bin/dcar.c:4175 ../bin/dcar.c:4590
 #: ../bin/dcustmgm.c:136 ../bin/track.c:1313 ../bin/track.c:1410
-#: ../bin/track.c:1424 ../bin/misc.c:1053 ../bin/misc.c:1058
-#: ../bin/misc.c:1123
+#: ../bin/track.c:1424 ../bin/misc.c:1053 ../bin/misc.c:1058 ../bin/misc.c:1123
 msgid "No"
 msgstr "Nein"
 
@@ -154,11 +153,11 @@ msgstr "Gleisabschnitt löschen"
 
 #: ../bin/cblock.c:641
 msgid "Blocks"
-msgstr "Blocks"
+msgstr "Gleisabschnitte"
 
 #: ../bin/cblock.c:643 ../../../build/xtc_4-2-3dev/app/bin/bllnhlp.c:19
 msgid "Edit Block"
-msgstr "Block bearbeiten"
+msgstr "Gleisabschnitt bearbeiten"
 
 #: ../bin/ccurve.c:102
 msgid "Drag from End-Point in direction of curve"
@@ -178,7 +177,7 @@ msgstr "Zum anderen Ende der Sehne ziehen"
 
 #: ../bin/ccurve.c:128 ../bin/chndldto.c:91
 msgid "Drag to set angle"
-msgstr "Ziehen um den Winkel zu ändern"
+msgstr "Durch Ziehen den Winkel festlegen"
 
 #: ../bin/ccurve.c:156
 #, c-format
@@ -264,7 +263,7 @@ msgstr "Gleiswendel"
 
 #: ../bin/ccurve.c:524
 msgid "Circle Radius"
-msgstr "Radius des Kreis"
+msgstr "Kreisradius"
 
 #: ../bin/ccurve.c:529
 msgid "Click on Circle Edge"
@@ -272,7 +271,7 @@ msgstr "Auf den Rand des Kreis klicken"
 
 #: ../bin/ccurve.c:533
 msgid "Click on Circle Center"
-msgstr "Auf Kreismittelpunkt klicken"
+msgstr "Auf den Mittelpunkt des Kreises klicken"
 
 #: ../bin/ccurve.c:564
 msgid "Drag to Center"
@@ -280,7 +279,7 @@ msgstr "Zum Mittelpunkt ziehen"
 
 #: ../bin/ccurve.c:568
 msgid "Drag to Edge"
-msgstr "Zur Kante ziehen"
+msgstr "Zum Rand ziehen"
 
 #: ../bin/ccurve.c:589 ../bin/ccurve.c:593
 #, c-format
@@ -305,7 +304,7 @@ msgstr "Radius durch Ziehen festlegen"
 
 #: ../bin/ccurve.c:686
 msgid "Place circle"
-msgstr "Setze Kreis"
+msgstr "Platziere Kreis"
 
 #: ../bin/ccurve.c:711
 msgid "Curve Track"
@@ -313,19 +312,19 @@ msgstr "Gleisbogen"
 
 #: ../bin/ccurve.c:711
 msgid "Curve Tracks"
-msgstr "Gleise biegen"
+msgstr "Gleisbögen"
 
 #: ../bin/ccurve.c:712
 msgid "Curve from End-Pt"
-msgstr "Bogen aus Endpunkte"
+msgstr "Bogen aus Endpunkten"
 
 #: ../bin/ccurve.c:713
 msgid "Curve from Tangent"
-msgstr "Bogen aus Tangente"
+msgstr "Bogen an Tangente"
 
 #: ../bin/ccurve.c:714
 msgid "Curve from Center"
-msgstr "Bogen aus Mittelpunkt"
+msgstr "Bogen um Mittelpunkt"
 
 #: ../bin/ccurve.c:715
 msgid "Curve from Chord"
@@ -345,11 +344,11 @@ msgstr "Kreis mit festem Radius"
 
 #: ../bin/ccurve.c:720
 msgid "Circle from Tangent"
-msgstr "Kreis aus Tangente"
+msgstr "Kreis an Tangente"
 
 #: ../bin/ccurve.c:721
 msgid "Circle from Center"
-msgstr "Kreis aus Mittelpunkt"
+msgstr "Kreis um Mittelpunkt"
 
 #: ../bin/cdraw.c:78
 msgid "Font Size must be > 0"
@@ -371,15 +370,15 @@ msgstr "Winkel"
 
 #: ../bin/cdraw.c:196 ../bin/tcurve.c:352
 msgid "CCW Angle"
-msgstr "Winkel (gegen Uhrzeiger)"
+msgstr "Winkel (gegen Uhrzeigersinn)"
 
 #: ../bin/cdraw.c:197 ../bin/tcurve.c:353
 msgid "CW Angle"
-msgstr "Winkel (im Uhrzeiger)"
+msgstr "Winkel (im Uhrzeigersinn)"
 
 #: ../bin/cdraw.c:198
 msgid "Point Count"
-msgstr "Anzahl Punkte"
+msgstr "Anzahl der Punkte"
 
 #: ../bin/cdraw.c:199 ../bin/cdraw.c:811 ../bin/ctodesgn.c:148
 msgid "Line Width"
@@ -418,8 +417,8 @@ msgstr "Schriftgröße"
 msgid "Text"
 msgstr "Text"
 
-#: ../bin/cdraw.c:208 ../bin/cmisc.c:114 ../bin/tcurve.c:355
-#: ../bin/tease.c:509 ../bin/tstraigh.c:84
+#: ../bin/cdraw.c:208 ../bin/cmisc.c:114 ../bin/tcurve.c:355 ../bin/tease.c:509
+#: ../bin/tstraigh.c:84
 msgid "Pivot"
 msgstr "Drehpunkt"
 
@@ -454,7 +453,7 @@ msgstr "Gerade Linie"
 
 #: ../bin/cdraw.c:421 ../bin/cdraw.c:1036
 msgid "Dimension Line"
-msgstr "Maßstablinie"
+msgstr "Maßlinie"
 
 #: ../bin/cdraw.c:436 ../bin/cdraw.c:832 ../bin/cdraw.c:1038
 msgid "Table Edge"
@@ -515,7 +514,7 @@ msgstr "Gerade"
 
 #: ../bin/cdraw.c:830
 msgid "Dimension"
-msgstr "Abmessungen"
+msgstr "Abmessung"
 
 #: ../bin/cdraw.c:833 ../bin/cdraw.c:834 ../bin/cdraw.c:835 ../bin/cdraw.c:836
 msgid "Curved"
@@ -536,7 +535,7 @@ msgstr "Gefülltes Rechteck"
 #: ../bin/cdraw.c:888
 #, c-format
 msgid "%s Line Width"
-msgstr "%s Strichstärke"
+msgstr "%s Strichdicke"
 
 #: ../bin/cdraw.c:901
 #, c-format
@@ -549,7 +548,7 @@ msgstr " Maßliniengröße"
 
 #: ../bin/cdraw.c:945
 msgid "Drag to create Table Edge"
-msgstr "Ziehen um die Tischkante zu erstellen"
+msgstr "Durch Ziehen die Tischkante erstellen"
 
 #: ../bin/cdraw.c:1035
 msgid "Line"
@@ -577,7 +576,7 @@ msgstr "Zeichne Tischkante"
 
 #: ../bin/cdraw.c:1040
 msgid "Curve End"
-msgstr "Kurve Enden "
+msgstr "Kurvenenden "
 
 #: ../bin/cdraw.c:1040
 msgid "Draw Curve from End"
@@ -593,7 +592,7 @@ msgstr "Zeichne Kurve an Tangente"
 
 #: ../bin/cdraw.c:1042
 msgid "Curve Center"
-msgstr "Kurve Mittelpunkt"
+msgstr "Kurve um Mittelpunkt"
 
 #: ../bin/cdraw.c:1042
 msgid "Draw Curve from Center"
@@ -601,15 +600,15 @@ msgstr "Zeichne Kurve um Mittelpunkt"
 
 #: ../bin/cdraw.c:1043
 msgid "Curve Chord"
-msgstr "Kurve Sehne "
+msgstr "Kurve durch Sehne "
 
 #: ../bin/cdraw.c:1043
 msgid "Draw Curve from Chord"
-msgstr "Bogen aus Sehne"
+msgstr "Zeichne Kurve durch Sehne"
 
 #: ../bin/cdraw.c:1046
 msgid "Circle Tangent"
-msgstr "Kreis Tangente"
+msgstr "Kreis an Tangente"
 
 #: ../bin/cdraw.c:1046
 msgid "Draw Circle from Tangent"
@@ -625,7 +624,7 @@ msgstr "Zeichne Kreis um Mittelpunkt"
 
 #: ../bin/cdraw.c:1049
 msgid "Circle Filled Tangent"
-msgstr "Gefüllter Kreis Tangente"
+msgstr "Gefüllter Kreis  an Tangente"
 
 #: ../bin/cdraw.c:1049
 msgid "Draw Filled Circle from Tangent"
@@ -777,9 +776,8 @@ msgstr "Durch neue Gruppe ersetzen?"
 
 #: ../bin/cgroup.c:604 ../bin/compound.c:519 ../bin/cstruct.c:64
 #: ../bin/ctodesgn.c:140 ../bin/ctodesgn.c:1764 ../bin/cturnout.c:69
-#: ../bin/dcar.c:1933 ../bin/dcar.c:4070 ../bin/dcar.c:4075
-#: ../bin/dcmpnd.c:444 ../bin/dcustmgm.c:45
-#: ../../../build/xtc_4-2-3dev/app/bin/bllnhlp.c:333
+#: ../bin/dcar.c:1933 ../bin/dcar.c:4070 ../bin/dcar.c:4075 ../bin/dcmpnd.c:444
+#: ../bin/dcustmgm.c:45 ../../../build/xtc_4-2-3dev/app/bin/bllnhlp.c:333
 #: ../../../build/xtc_4-2-3dev/app/bin/bllnhlp.c:502
 msgid "Manufacturer"
 msgstr "Hersteller"
@@ -1796,8 +1794,7 @@ msgstr "Weichendesigner"
 msgid "%s %s Designer"
 msgstr "%s %s Designer"
 
-#: ../bin/ctrain.c:168 ../bin/dcar.c:1986 ../bin/dcar.c:4070
-#: ../bin/dcar.c:4075
+#: ../bin/ctrain.c:168 ../bin/dcar.c:1986 ../bin/dcar.c:4070 ../bin/dcar.c:4075
 msgid "Index"
 msgstr "Verzeichnis"
 
@@ -2153,17 +2150,16 @@ msgstr ""
 "Falscher Trägertyp %s:\n"
 "%s"
 
-#: ../bin/dbench.c:142 ../bin/dcar.c:4225 ../bin/dcar.c:4409
-#: ../bin/dcar.c:4419 ../bin/dcar.c:4466 ../bin/dcar.c:4473 ../bin/dcar.c:4491
-#: ../bin/dcar.c:4504 ../bin/dcar.c:4509 ../bin/dcar.c:4538 ../bin/dcar.c:4699
-#: ../bin/fileio.c:242 ../bin/fileio.c:538 ../bin/fileio.c:656
-#: ../bin/fileio.c:749 ../bin/fileio.c:938 ../bin/fileio.c:1231
-#: ../bin/fileio.c:1375 ../bin/fileio.c:1461 ../bin/fileio.c:1507
-#: ../bin/macro.c:165 ../bin/macro.c:833 ../bin/macro.c:849
-#: ../bin/macro.c:1152 ../bin/param.c:2062 ../bin/track.c:931
-#: ../bin/track.c:1297 ../bin/track.c:1588 ../bin/track.c:1592
-#: ../bin/track.c:1612 ../bin/track.c:1674 ../wlib/gtklib/wpref.c:246
-#: ../wlib/gtklib/wpref.c:253
+#: ../bin/dbench.c:142 ../bin/dcar.c:4225 ../bin/dcar.c:4409 ../bin/dcar.c:4419
+#: ../bin/dcar.c:4466 ../bin/dcar.c:4473 ../bin/dcar.c:4491 ../bin/dcar.c:4504
+#: ../bin/dcar.c:4509 ../bin/dcar.c:4538 ../bin/dcar.c:4699 ../bin/fileio.c:242
+#: ../bin/fileio.c:538 ../bin/fileio.c:656 ../bin/fileio.c:749
+#: ../bin/fileio.c:938 ../bin/fileio.c:1231 ../bin/fileio.c:1375
+#: ../bin/fileio.c:1461 ../bin/fileio.c:1507 ../bin/macro.c:165
+#: ../bin/macro.c:833 ../bin/macro.c:849 ../bin/macro.c:1152
+#: ../bin/param.c:2062 ../bin/track.c:931 ../bin/track.c:1297
+#: ../bin/track.c:1588 ../bin/track.c:1592 ../bin/track.c:1612
+#: ../bin/track.c:1674 ../wlib/gtklib/wpref.c:246 ../wlib/gtklib/wpref.c:253
 msgid "Continue"
 msgstr "Weiter"
 
@@ -2454,8 +2450,7 @@ msgstr "Hinzufügen"
 msgid "Update %s Scale Car"
 msgstr "Aktualisiere Wagen in Maßstab %s"
 
-#: ../bin/dcar.c:2822 ../bin/dcar.c:2831 ../bin/dcar.c:2840
-#: ../bin/dcmpnd.c:166
+#: ../bin/dcar.c:2822 ../bin/dcar.c:2831 ../bin/dcar.c:2840 ../bin/dcmpnd.c:166
 msgid "Update"
 msgstr "Aktualisieren"
 
