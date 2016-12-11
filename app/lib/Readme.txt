@@ -129,6 +129,7 @@ Version 4.2.4a
 -   Windows: Fix bug 157 Crash on color change when drawing lines
 -   All: Updated parameter file for Kato N scale
 -   All: Fix build problem with block and switchmotor feature
+-   OSX: Provide new gtk-bundle installer  
 
 Version 4.2.4
 
@@ -326,6 +327,15 @@ versions of XTrackCad is not overwritten.
 A new program group named XTrackCad 4.2.4a will be created in the Start
 menu.
 
+Mac OSX
+
+XTrackCAD for MAC is shipped as a DMG file. You will need to install XQuartz.
+
+Open the DMG and drag the application to any convenient place, typically the 
+Applications folder.  The package run script will ensure that the environmental variables 
+are set correctly.  
+
+Click on this app to run the program.
 
 Linux
 
@@ -433,12 +443,10 @@ Building XTrackCAD on Mac OSX
 
 -   You will need to install the following dependencies - I recommend
     using http://www.macports.org to obtain them:
--   GTK2
--   webkit
--   gnome-icon-theme
+-   webkit2-gtk-develop
 -   Once the prerequisites are installed the build instructions are the
     same as for the GNU/Linux build, above.
--   Remember that to run XTrackCAD on OSX, you need to have X11 running
+-   Remember that to run XTrackCAD on OSX, you need to have X11/XQuartz running
     with your DISPLAY set.
 
 Building XTrackCAD on Windows
