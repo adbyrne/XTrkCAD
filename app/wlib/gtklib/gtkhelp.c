@@ -654,7 +654,7 @@ void load_into_view (char *file, int requested_view) {
 	               break;
 	}
 
-	char fileToLoad[100] = "file://";
+	char fileToLoad[250] = "file://";
 	strcat(fileToLoad,directory);
 	strcat(fileToLoad,file);
 
