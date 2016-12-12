@@ -4,6 +4,16 @@
 # Inkscape Modifications: Michael Wybrow <mjwybrow@users.sourceforge.net>
 # XTrackCAD Modifications: Timothy M. Shead <tshead@k-3d.com>
 
+if test "x$GTK_DEBUG_LAUNCHER" != x; then
+    set -x
+fi
+
+if test "x$GTK_DEBUG_GDB" != x; then
+    EXEC="gdb --args"
+else
+    EXEC=exec
+fi
+
 name=`basename "$0"`
 tmp="$0"
 tmp=`dirname "$tmp"`
@@ -43,7 +53,7 @@ export GTK_EXE_PREFIX="$bundle_res"
 export GTK_PATH="$bundle_res"
 
 export GTK2_RC_FILES="$bundle_etc/gtk-2.0/gtkrc"
-#XTRKCAD_PANGO_RC_FILE="$XTRKCAD_RESOURCES/etc/pango/pangorc"
+XTRKCAD_PANGO_RC_FILE="$XTRKCAD_RESOURCES/etc/pango/pangorc"
 
 I18NDIR="$bundle_data/locale"
 # Set the locale-related variables appropriately:
@@ -180,7 +190,7 @@ echo "XTrackCAD: XTRKCAD_BUNDLE: $XTRKCAD_BUNDLE"
 #export "FONTCONFIG_PATH=$XTRKCAD_RESOURCES/etc/fonts"
 #export "GDK_PIXBUF_MODULE_FILE=$XTRKCAD_GDK_PIXBUF_MODULE_FILE"
 #export "GTK_IM_MODULE_FILE=$XTRKCAD_GTK_IM_MODULE_FILE"
-#export "PANGO_RC_FILE=$XTRKCAD_PANGO_RC_FILE"
+export "PANGO_RC_FILE=$XTRKCAD_PANGO_RC_FILE"
 export "PATH=$XTRKCAD_RESOURCES/bin:$PATH"
 export "XTRKCADLIB=$XTRKCAD_RESOURCES/xtrkcad"
 

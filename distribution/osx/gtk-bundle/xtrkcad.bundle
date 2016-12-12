@@ -99,6 +99,9 @@
 <!-- Copy in the glib schemas - needed for Help function -->
   <data>
   	${prefix}/share/glib-2.0/schemas
+  </data>
+  <data>
+    ${prefix}/etc/xdg
   </data>	 
 
 
