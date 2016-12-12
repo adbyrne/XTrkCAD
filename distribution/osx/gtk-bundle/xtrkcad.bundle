@@ -93,8 +93,14 @@
   <!-- 
   <data>
     ${prefix}/share/gtk3-demo
-  </data> 
+  </data>
   -->
+
+<!-- Copy in the glib schemas - needed for Help function -->
+  <data>
+  	${prefix}/share/glib-2.0/schemas
+  </data>	 
+
 
   <!-- Copy in the themes data. You may want to trim this to save space
        in your bundle. -->
