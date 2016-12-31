@@ -106,6 +106,7 @@ SET(SOURCES
 	dprmfile.c
 	draw.c
 	drawgeom.c
+	dxfoutput.c
 	elev.c
 	fileio.c
 	i18n.c
