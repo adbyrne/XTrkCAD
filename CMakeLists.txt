@@ -1,7 +1,10 @@
 PROJECT(XTrkCAD)
+enable_testing()
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/app)
+# additional CMake modules can be found here
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/")
 
 # Setup high-level build options ...
 IF(UNIX AND NOT APPLE)
@@ -70,6 +73,11 @@ IF(XTRKCAD_USE_PACKAGEMAKER)
 		MESSAGE(SEND_ERROR "XTRKCAD_USE_PACKAGEMAKER requires CMAKE_INSTALL_PREFIX set to /usr.")
 	ENDIF(NOT CMAKE_INSTALL_PREFIX STREQUAL "/usr")
 ENDIF(XTRKCAD_USE_PACKAGEMAKER)
+
+# Find unit testing framework
+find_package(CMocka)
+include_directories(${CMOCKA_INCLUDE_DIR})
+set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
 
 # Test for headers and libraries for portability ...
 
