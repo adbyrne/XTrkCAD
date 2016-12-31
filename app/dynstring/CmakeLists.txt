@@ -1,0 +1,10 @@
+# compile the dynstring library
+
+set( SOURCES
+	 dynstring.c )
+
+add_library(dynstring
+			${SOURCES})
+			
+add_subdirectory( unittest )
+                 
