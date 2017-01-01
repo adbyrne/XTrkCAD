@@ -1,5 +1,6 @@
 # "bin/i18n.h" is widely used
 INCLUDE_DIRECTORIES(bin)
+include_directories(dynstring)
 
 # Setup the rest of the build ...
 add_subdirectory(dynstring)

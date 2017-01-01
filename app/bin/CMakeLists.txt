@@ -149,6 +149,7 @@ ADD_EXECUTABLE(xtrkcad WIN32
 	)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
+target_link_libraries(xtrkcad dynstring)
 
 ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}

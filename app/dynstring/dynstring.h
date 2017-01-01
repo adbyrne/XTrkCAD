@@ -13,32 +13,32 @@ struct DynString
 #define isnas(S) (!(S)->s)
 #define STR_FREEABLE (1ULL << 63)
 
-size_t DynstrSize(DynString * s);
+size_t DynStringSize(DynString * s);
 
-DynString * DynstrMalloc(size_t size);
+DynString * DynStringMalloc(DynString *s, size_t size);
 
- void DynstrRealloc(DynString * s);
+ void DynStringRealloc(DynString * s);
 
- void DynstrResize(DynString * s, size_t size);
+ void DynStringResize(DynString * s, size_t size);
 
- void DynstrFree(DynString * s);
+ void DynStringFree(DynString * s);
 
- DynString * DynstrDupStr(DynString * s);
+ DynString * DynStringDupStr(DynString *s2, DynString * s);
 
- void DynstrCpyStr(DynString * dest, DynString * src);
+ void DynStringCpyStr(DynString * dest, DynString * src);
 
- char * DynstrToCStr(DynString * s);
+ char * DynStringToCStr(DynString * s);
 
- void DynstrNCatCStr(DynString * s, size_t len, const char * str);
+ void DynStringNCatCStr(DynString * s, size_t len, const char * str);
 
- void DynstrCatCStr(DynString * s, const char * str);
+ void DynStringCatCStr(DynString * s, const char * str);
 
- void DynstrCatStr(DynString * s, const DynString * s2);
+ void DynStringCatStr(DynString * s, const DynString * s2);
 
- void DynstrCatCStrs(DynString * s, ...);
+ void DynStringCatCStrs(DynString * s, ...);
 
- void DynstrCatStrs(DynString * s1, ...);
+ void DynStringCatStrs(DynString * s1, ...);
 
- void DynstrPrintf(DynString * s, const char * fmt, ...);
+ void DynStringPrintf(DynString * s, const char * fmt, ...);
 
 #endif // !HAVE_DYNSTRING_H

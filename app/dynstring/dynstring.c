@@ -17,7 +17,7 @@
 * \return    the length of the string in bytes
 */
 
-size_t DynstrSize(DynString *s)
+size_t DynStringSize(DynString *s)
 {
     if (isnas(s)) {
         return 0;
@@ -27,29 +27,28 @@ size_t DynstrSize(DynString *s)
 }
 
 /* An initialized empty struct string */
-#define STRINIT() (DynstrMalloc(16))
+#define STRINIT() (DynStringMalloc(16))
 
 /**
 * Allocate memory for a string of the desired length. To optimize memory usage
 * a minimum length of 16 bytes is allocated. The allocated string has to be freed
-* using the DynstrFree() function.
+* using the DynStringFree() function.
 *
+* \param s IN pointer to DynString structure 
 * \param size IN number of bytes to allocate
 * \return pointer to the DynString
 */
 
-DynString *DynstrMalloc(size_t size)
+DynString *DynStringMalloc(DynString *s, size_t size)
 {
-    DynString *s2 = (DynString *)malloc(sizeof(DynString));
-
     if (size < 16) {
         size = 16;
     }
 
-    s2->s = malloc(size);
-    s2->size = 0;
-    s2->b_size = (size_t)(size | STR_FREEABLE);
-    return (s2);
+    s->s = malloc(size);
+    s->size = 0;
+    s->b_size = (size_t)(size | STR_FREEABLE);
+    return (s);
 }
 
 /**
@@ -59,7 +58,7 @@ DynString *DynstrMalloc(size_t size)
 * \param s IN the dynamic string
 */
 
-void DynstrRealloc(DynString *s)
+void DynStringRealloc(DynString *s)
 {
     char *buf;
 
@@ -96,7 +95,7 @@ void DynstrRealloc(DynString *s)
 * \param size IN the requested new size
 */
 
-void DynstrResize(DynString *s, size_t size)
+void DynStringResize(DynString *s, size_t size)
 {
     char *buf;
     size_t bsize;
@@ -108,7 +107,7 @@ void DynstrResize(DynString *s, size_t size)
 
     /* Not resizable */
     if (!(s->b_size & STR_FREEABLE)) {
-        DynString *s2;
+        DynString s2;
 
         /* Don't do anything if we want to shrink */
         if (size <= s->size) {
@@ -116,12 +115,12 @@ void DynstrResize(DynString *s, size_t size)
         }
 
         /* Need to alloc a new string */
-        s2 = DynstrMalloc(size);
+        DynStringMalloc(&s2, size);
         /* Copy into new string */
-        memcpy(s2->s, s->s, s->size);
+        memcpy(s2.s, s->s, s->size);
         /* Point to new string */
-        s->s = s2->s;
-        s->b_size = s2->b_size;
+        s->s = s2.s;
+        s->b_size = s2.b_size;
         return;
     }
 
@@ -174,7 +173,7 @@ void DynstrResize(DynString *s, size_t size)
 * \param s IN OUT the dynamic string
 */
 
-void DynstrFree(DynString *s)
+void DynStringFree(DynString *s)
 {
     DynString nas = NaS;
 
@@ -193,9 +192,8 @@ void DynstrFree(DynString *s)
 */
 
 /* Create a new string as a copy of an old one */
-DynString *DynstrDupStr(DynString *s)
+DynString *DynStringDupStr(DynString *s2, DynString *s)
 {
-    DynString *s2;
     DynString nas = NaS;
 
     /* Not a string? */
@@ -203,7 +201,7 @@ DynString *DynstrDupStr(DynString *s)
         return NULL;
     }
 
-    s2 = DynstrMalloc(s->size);
+    DynStringMalloc(s2, s->size);
     s2->size = s->size;
     memcpy(s2->s, s->s, s->size);
     return s2;
@@ -216,14 +214,14 @@ DynString *DynstrDupStr(DynString *s)
 * \param src IN the source dynamic string
 */
 
-void DynstrCpyStr(DynString *dest, DynString *src)
+void DynStringCpyStr(DynString *dest, DynString *src)
 {
     /* Are we no a string */
     if (isnas(src)) {
         return;
     }
 
-    DynstrResize(dest, src->size);
+    DynStringResize(dest, src->size);
 
     if (isnas(dest)) {
         return;
@@ -241,7 +239,7 @@ void DynstrCpyStr(DynString *dest, DynString *src)
 * \return the C string
 */
 
-char *DynstrToCStr(DynString *s)
+char *DynStringToCStr(DynString *s)
 {
     size_t bsize;
 
@@ -255,7 +253,7 @@ char *DynstrToCStr(DynString *s)
 
     if (s->size == bsize) {
         /* Increase buffer size */
-        DynstrResize(s, bsize + 1);
+        DynStringResize(s, bsize + 1);
 
         /* Are we no longer a string? */
         if (isnas(s)) {
@@ -278,7 +276,7 @@ char *DynstrToCStr(DynString *s)
 * \param str IN the source string
 */
 
-void DynstrNCatCStr(DynString *s, size_t len, const char *str)
+void DynStringNCatCStr(DynString *s, size_t len, const char *str)
 {
     size_t bsize;
 
@@ -296,7 +294,7 @@ void DynstrNCatCStr(DynString *s, size_t len, const char *str)
     bsize = s->b_size & ~STR_FREEABLE;
 
     if (s->size + len >= bsize) {
-        DynstrResize(s, s->size + len);
+        DynStringResize(s, s->size + len);
 
         /* Are we no longer a string? */
         if (isnas(s)) {
@@ -315,10 +313,10 @@ void DynstrNCatCStr(DynString *s, size_t len, const char *str)
 * \param str IN the source string
 */
 
-void DynstrCatCStr(DynString *s, const char *str)
+void DynStringCatCStr(DynString *s, const char *str)
 {
     if (str) {
-        DynstrNCatCStr(s, strlen(str), str);
+        DynStringNCatCStr(s, strlen(str), str);
     }
 }
 
@@ -329,9 +327,9 @@ void DynstrCatCStr(DynString *s, const char *str)
 * \param s2 IN the source dynamic string
 */
 
-void DynstrCatStr(DynString *s, const DynString *s2)
+void DynStringCatStr(DynString *s, const DynString *s2)
 {
-    DynstrNCatCStr(s, s2->size, s2->s);
+    DynStringNCatCStr(s, s2->size, s2->s);
 }
 
 /**
@@ -342,7 +340,7 @@ void DynstrCatStr(DynString *s, const DynString *s2)
 * \param ... IN variable number of C strings
 */
 
-void DynstrCatCStrs(DynString *s, ...)
+void DynStringCatCStrs(DynString *s, ...)
 {
     const char *str;
     va_list v;
@@ -355,7 +353,7 @@ void DynstrCatCStrs(DynString *s, ...)
     va_start(v, s);
 
     for (str = va_arg(v, const char *); str; str = va_arg(v, const char *)) {
-        DynstrNCatCStr(s, strlen(str), str);
+        DynStringNCatCStr(s, strlen(str), str);
     }
 
     va_end(v);
@@ -369,7 +367,7 @@ void DynstrCatCStrs(DynString *s, ...)
 * \param s2 IN the source dynamic strings
 */
 
-void DynstrCatStrs(DynString *s1, ...)
+void DynStringCatStrs(DynString *s1, ...)
 {
     const DynString *s2;
     va_list v;
@@ -382,7 +380,7 @@ void DynstrCatStrs(DynString *s1, ...)
     va_start(v, s1);
 
     for (s2 = va_arg(v, const DynString *); s2; s2 = va_arg(v, const DynString *)) {
-        DynstrNCatCStr(s1, s2->size, s2->s);
+        DynStringNCatCStr(s1, s2->size, s2->s);
     }
 
     va_end(v);
@@ -397,16 +395,16 @@ void DynstrCatStrs(DynString *s1, ...)
 * \param ... IN values
 */
 
-void DynstrPrintf(DynString *s, const char *fmt, ...)
+void DynStringPrintf(DynString *s, const char *fmt, ...)
 {
     va_list v;
     size_t len;
     DynString nas = NaS;
 
-    /* Are we not a string? */
-    if (isnas(s)) {
-        s = STRINIT();
-    }
+    ///* Are we not a string? */
+    //if (isnas(s)) {
+    //    *s = STRINIT();
+    //}
 
     /* Nothing to do? */
     if (!fmt) {
@@ -416,7 +414,7 @@ void DynstrPrintf(DynString *s, const char *fmt, ...)
     va_start(v, fmt);
     len = vsnprintf(NULL, 0, fmt, v) + 1;
     va_end(v);
-    DynstrResize(s, len);
+    DynStringResize(s, len);
 
     /* Are we no longer a string? */
     if (isnas(s)) {

@@ -5,6 +5,7 @@ set( SOURCES
 
 add_library(dynstring
 			${SOURCES})
-			
-add_subdirectory( unittest )
-                 
+
+if(XTRKCAD_TESTING)			
+	add_subdirectory( unittest )
+endif(XTRKCAD_TESTING)              
