@@ -673,7 +673,8 @@ WARN_LOGFILE           = ./doxygen.log
 
 INPUT                  = "@XTrkCAD_SOURCE_DIR@/app/bin" \
                          "@XTrkCAD_SOURCE_DIR@/app/wlib/@XTrkCAD_WLIB_DIR@" \
-                         "@XTrkCAD_SOURCE_DIR@/app/wlib/include/wlib.h"
+                         "@XTrkCAD_SOURCE_DIR@/app/wlib/include/wlib.h" \
+						 "@XTrkCAD_SOURCE_DIR@/app/dynstring"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
