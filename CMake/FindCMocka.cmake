@@ -45,7 +45,7 @@ if (CMOCKA_LIBRARY)
 endif (CMOCKA_LIBRARY)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(CMocka DEFAULT_MSG CMOCKA_LIBRARIES CMOCKA_INCLUDE_DIR)
+find_package_handle_standard_args(CMocka DEFAULT_MSG CMOCKA_LIBRARY CMOCKA_INCLUDE_DIR)
 
 # show the CMOCKA_INCLUDE_DIR and CMOCKA_LIBRARIES variables only in the advanced view
 mark_as_advanced(CMOCKA_INCLUDE_DIR CMOCKA_LIBRARY CMOCKA_LIBRARIES)
