@@ -507,7 +507,7 @@ static track_p * FindParent( track_p trk, int lineNum )
 {
 	track_p *ptrk;
 	ptrk = &to_first;
-	while ( 1 ) {
+        while ( 1 ) {
 		if ( *ptrk == trk )
 			return ptrk;
 		if (*ptrk == NULL)

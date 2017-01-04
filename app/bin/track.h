@@ -42,8 +42,6 @@
 #include "misc.h"
 
 
-
-
 extern TRKTYP_T T_NOTRACK;
 
 struct track_t ;
@@ -649,6 +647,12 @@ void HotBarCancel( void );
 void AddHotBarTurnouts( void );
 void AddHotBarStructures( void );
 void AddHotBarCarDesc( void );
+
+/* cblock.c */
+void CheckDeleteBlock( track_p t );
+/* cswitchmotor.c */
+void CheckDeleteSwitchmotor( track_p t );
+
 
 #endif
 

@@ -521,6 +521,19 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 	ButtonGroupEnd();
 	ParamRegister( &switchmotorPG );
 }
+EXPORT void CheckDeleteSwitchmotor(track_p t)
+{
+    track_p sm;
+    switchmotorData_p xx;
+    
+    sm = FindSwitchMotor( t );
+    if (sm == NULL) return;
+    xx = GetswitchmotorData (sm);
+    NoticeMessage(_("Deleting Switch Motor %s"),_("Ok"),NULL,xx->name);
+    DeleteTrack (sm, FALSE);
+}
+
+
 #endif
 
 

@@ -966,6 +966,8 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 			ClrTrkElev( trk2 );
 		}
 	}
+        CheckDeleteSwitchmotor( trk );
+        CheckDeleteBlock( trk );
 	UndoDelete( trk );
     MainRedraw();
 	trackCount--;

@@ -630,6 +630,19 @@ static STATUS_T CmdBlock (wAction_t action, coOrd pos )
 	}
 }
 
+EXPORT void CheckDeleteBlock (track_p t) 
+{
+    track_p blk;
+    blockData_p xx;
+    
+    blk = FindBlock(t);
+    if (blk == NULL) return;
+    xx = GetblockData(blk);
+    NoticeMessage(_("Deleting block %s"),_("Ok"),NULL,xx->name);
+    DeleteTrack(blk,FALSE);
+}
+
+
 #include "bitmaps/blocknew.xpm"
 #include "bitmaps/blockedit.xpm"
 #include "bitmaps/blockdel.xpm"

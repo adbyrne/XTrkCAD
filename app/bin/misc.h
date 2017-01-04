@@ -386,6 +386,5 @@ void AttachTrains( void );
 
 /* cblock.c */
 void InitCmdBlock( wMenu_p menu );
-
 /* cswitchmotor.c */
 void InitCmdSwitchMotor( wMenu_p menu );
