@@ -99,17 +99,23 @@ static paramData_t blockPLs[] = {
 /*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF, (void*)350, N_("Script") }
 };
 static paramGroup_t blockPG = { "block", 0, blockPLs,  sizeof blockPLs/sizeof blockPLs[0] };
+typedef struct btrackinfo_t {
+    track_p t;
+    TRKINX_T i;
+} btrackinfo_t, *btrackinfo_p;
+
 static dynArr_t blockTrk_da;
-#define blockTrk(N) DYNARR_N( track_p , blockTrk_da, N )
+#define blockTrk(N) DYNARR_N( btrackinfo_t , blockTrk_da, N )
 static wWin_p blockW;
 #endif
+
 
 
 typedef struct blockData_t {
 	char * name;
 	char * script;
 	wIndex_t numTracks;
-	track_p  trackList;
+	btrackinfo_t trackList;
 } blockData_t, *blockData_p;
 
 static blockData_p GetblockData ( track_p trk )
@@ -179,9 +185,9 @@ static DIST_T DistanceBlock (track_p t, coOrd * p )
 	DIST_T closest, current;
 	int iTrk = 1;
 
-	closest = GetTrkDistance ((&(xx->trackList))[0], *p);
+	closest = GetTrkDistance ((&(xx->trackList))[0].t, *p);
 	for (; iTrk < xx->numTracks; iTrk++) {
-		current = GetTrkDistance ((&(xx->trackList))[iTrk], *p);
+		current = GetTrkDistance ((&(xx->trackList))[iTrk].t, *p);
 		if (current < closest) closest = current;
 	}
 	return closest;
@@ -212,11 +218,11 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 	blockData.script[STR_LONG_SIZE-1] = '\0';
 	blockData.length = 0;
 	if (xx->numTracks > 0) {
-		blockData.endPt[0] = GetTrkEndPos((&(xx->trackList))[0],0);
+		blockData.endPt[0] = GetTrkEndPos((&(xx->trackList))[0].t,0);
 	}
 	for (tcount = 0; tcount < xx->numTracks; tcount++) {
-		blockData.length += GetTrkLength((&(xx->trackList))[tcount],0,1);
-		lastTrk = (&(xx->trackList))[tcount];
+		blockData.length += GetTrkLength((&(xx->trackList))[tcount].t,0,1);
+		lastTrk = (&(xx->trackList))[tcount].t;
 	}
 	if (lastTrk != NULL) blockData.endPt[1] = GetTrkEndPos(lastTrk,1);
 	blockDesc[E0].mode =
@@ -238,8 +244,8 @@ static blockDebug (track_p trk)
 	LOG( log_block, 1, ("*** blockDebug(): script = \"%s\"\n",xx->script))
 	LOG( log_block, 1, ("*** blockDebug(): numTracks = %d\n",xx->numTracks))
 	for (iTrack = 0; iTrack < xx->numTracks; iTrack++) {
-		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, ",iTrack,GetTrkIndex((&(xx->trackList))[iTrack])))
-		LOG( log_block, 1, ("%s\n",GetTrkTypeName((&(xx->trackList))[iTrack])))
+		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, ",iTrack,GetTrkIndex((&(xx->trackList))[iTrack].t)))
+		LOG( log_block, 1, ("%s\n",GetTrkTypeName((&(xx->trackList))[iTrack].t)))
 	}
 
 }
@@ -258,7 +264,7 @@ static BOOL_T blockCheckContigiousPath()
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 
 	for ( inx=0; inx<blockTrk_da.cnt; inx++ ) {
-		trk = blockTrk(inx);
+		trk = blockTrk(inx).t;
 		epCnt = GetTrkEndPtCnt(trk);
 		IsConnectedP = FALSE;
 		for ( ep=0; ep<epCnt; ep++ ) {
@@ -312,7 +318,7 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 		GetTrkIndex(t), xx->name, xx->script)>0;
 	for (iTrack = 0; iTrack < xx->numTracks && rc; iTrack++) {
 		rc &= fprintf(f, "\tTRK %d\n",
-				GetTrkIndex((&(xx->trackList))[iTrack]))>0;
+				GetTrkIndex((&(xx->trackList))[iTrack].t))>0;
 	}
 	rc &= fprintf( f, "\tEND\n" )>0;
 	return rc;
@@ -334,7 +340,7 @@ static void ReadBlock ( char * line )
 	if (!GetArgs(line+6,"dqq",&index,&name,&script)) {
 		return;
 	}
-	DYNARR_RESET( track_p , blockTrk_da );
+	DYNARR_RESET( btrackinfo_p , blockTrk_da );
 	while ( (cp = GetNextLine()) != NULL ) {
 		while (isspace((unsigned char)*cp)) cp++;
 		if ( strncmp( cp, "END", 3 ) == 0 ) {
@@ -346,11 +352,11 @@ static void ReadBlock ( char * line )
 		if ( strncmp( cp, "TRK", 3 ) == 0 ) {
 			if (!GetArgs(cp+4,"d",&trkindex)) return;
 			trk = FindTrack(trkindex);
-			DYNARR_APPEND( track_p *, blockTrk_da, 10 );
-			blockTrk(blockTrk_da.cnt-1) = trk;
+			DYNARR_APPEND( btrackinfo_p *, blockTrk_da, 10 );
+			blockTrk(blockTrk_da.cnt-1).i = trkindex;
 		}
 	}
-	blockCheckContigiousPath();
+	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
 	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(track_p)*(blockTrk_da.cnt-1))+1);
 	for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
 		endPtP = &tempEndPts(ep);
@@ -361,12 +367,28 @@ static void ReadBlock ( char * line )
 	xx->script = script;
 	xx->numTracks = blockTrk_da.cnt;
 	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
-		LOG( log_block, 1, ("*** ReadBlock(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack))))
-		(&(xx->trackList))[iTrack] = blockTrk(iTrack);
+		LOG( log_block, 1, ("*** ReadBlock(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack).t)))
+		memcpy((void*)&((&(xx->trackList))[iTrack]),(void*)&(blockTrk(iTrack)),sizeof(btrackinfo_t));
 	}
 	blockDebug(trk);
 }
 
+EXPORT void ResolveBlockTrack ( track_p trk )
+{
+    blockData_p xx;
+    track_p t_trk;
+    wIndex_t iTrack;
+    if (GetTrkType(trk) != T_BLOCK) return;
+    LOG( log_block, 1, ("*** ResolveBlockTrack(%d)\n",GetTrkIndex(trk)))
+    xx = GetblockData(trk);
+    for (iTrack = 0; iTrack < xx->numTracks; iTrack++) {
+        t_trk = FindTrack((&(xx->trackList))[iTrack].i);
+        if (t_trk == NULL) {
+            NoticeMessage( _("resolveBlockTrack: T%d[%d]: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), iTrack, (&(xx->trackList))[iTrack].i );
+        }
+        (&(xx->trackList))[iTrack].t = t_trk;
+    }
+}
 
 static void MoveBlock (track_p trk, coOrd orig ) {}
 static void RotateBlock (track_p trk, coOrd orig, ANGLE_T angle ) {}
@@ -412,7 +434,7 @@ static BOOL_T TrackInBlock (track_p trk, track_p blk) {
 	wIndex_t iTrack;
 	blockData_p xx = GetblockData(blk);
 	for (iTrack = 0; iTrack < xx->numTracks; iTrack++) {
-		if (trk == (&(xx->trackList))[iTrack]) return TRUE;
+		if (trk == (&(xx->trackList))[iTrack].t) return TRUE;
 	}
 	return FALSE;
 }
@@ -435,7 +457,7 @@ static void BlockOk ( void * junk )
 	trkEndPt_p endPtP;
 
 	LOG( log_block, 1, ("*** BlockOk()\n"))
-	DYNARR_RESET( track_p *, blockTrk_da );
+	DYNARR_RESET( btrackinfo_p *, blockTrk_da );
 
 	ParamUpdate( &blockPG );
 	if ( blockName[0]==0 ) {
@@ -450,9 +472,10 @@ static void BlockOk ( void * junk )
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
 			if ( IsTrack(trk) ) {
-				DYNARR_APPEND( track_p *, blockTrk_da, 10 );
+				DYNARR_APPEND( btrackinfo_p *, blockTrk_da, 10 );
 				LOG( log_block, 1, ("*** BlockOk(): adding track T%d\n",GetTrkIndex(trk)))
-				blockTrk(blockTrk_da.cnt-1) = trk;
+                                blockTrk(blockTrk_da.cnt-1).t = trk;
+                                blockTrk(blockTrk_da.cnt-1).i = GetTrkIndex(trk);
 			}
 		}
 	}
@@ -474,7 +497,7 @@ static void BlockOk ( void * junk )
 		UndoStart( _("Create block"), "Create block" );
 		/* Create a block object */
 		LOG( log_block, 1, ("*** BlockOk(): %d tracks in block\n",blockTrk_da.cnt))
-		trk = NewTrack(0, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(track_p)*(blockTrk_da.cnt-1))+1);
+		trk = NewTrack(0, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
 		for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
 			endPtP = &tempEndPts(ep);
 			SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
@@ -484,8 +507,8 @@ static void BlockOk ( void * junk )
 		xx->script = MyStrdup(blockScript);
 		xx->numTracks = blockTrk_da.cnt;
 		for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
-			LOG( log_block, 1, ("*** BlockOk(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack))))
-			(&(xx->trackList))[iTrack] = blockTrk(iTrack);
+			LOG( log_block, 1, ("*** BlockOk(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack).t)))
+			memcpy((void*)&(&(xx->trackList))[iTrack],(void*)&blockTrk(iTrack),sizeof(btrackinfo_t));
 		}
 		blockDebug(trk);
 		UndoEnd();

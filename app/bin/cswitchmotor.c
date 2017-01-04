@@ -58,6 +58,7 @@ EXPORT TRKTYP_T T_SWITCHMOTOR = -1;
 
 static int log_switchmotor = 0;
 
+
 #ifdef SWITCHMOTORCMD
 static drawCmd_t switchmotorD = {
 	NULL,
@@ -94,7 +95,8 @@ typedef struct switchmotorData_t {
 	char * normal;
 	char * reverse;
 	char * pointsense;
-	track_p turnout;
+        TRKINX_T turnindx;
+        track_p turnout;
 } switchmotorData_t, *switchmotorData_p;
 
 static switchmotorData_p GetswitchmotorData ( track_p trk )
@@ -245,8 +247,11 @@ static void switchmotorDebug (track_p trk)
 	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): normal = \"%s\"\n",xx->normal))
 	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): reverse = \"%s\"\n",xx->reverse))
 	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): pointsense = \"%s\"\n",xx->pointsense))
-	LOG( log_switchmotor, 1, ("*** switchmotorDebug(): turnout = T%d, %s\n",
-			GetTrkIndex(xx->turnout), GetTrkTypeName(xx->turnout)))
+        LOG( log_switchmotor, 1, ("*** switchmotorDebug(): turnindx = %d\n",xx->turnindx))
+        if (xx->turnout != NULL) {       
+             LOG( log_switchmotor, 1, ("*** switchmotorDebug(): turnout = T%d, %s\n",
+                                       GetTrkIndex(xx->turnout), GetTrkTypeName(xx->turnout)))
+        }
 }
 
 static void DeleteSwitchMotor ( track_p trk )
@@ -287,8 +292,22 @@ static void ReadSwitchMotor ( char * line )
 	xx->normal = normal;
 	xx->reverse = reverse;
 	xx->pointsense = pointsense;
-	xx->turnout = FindTrack(trkindex);
+        xx->turnindx = trkindex;
 	switchmotorDebug(trk);
+}
+
+EXPORT void ResolveSwitchmotorTurnout ( track_p trk )
+{
+    switchmotorData_p xx;
+    track_p t_trk;
+    if (GetTrkType(trk) != T_SWITCHMOTOR) return;
+    xx = GetswitchmotorData(trk);
+    LOG( log_switchmotor, 1, ("*** ResolveSwitchmotorTurnout(%d)\n",GetTrkIndex(trk)))
+    t_trk = FindTrack(xx->turnindx);
+    if (t_trk == NULL) {
+        NoticeMessage( _("ResolveSwitchmotor: Turnout T%d: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), xx->turnindx );
+    }
+    xx->turnout = t_trk;
 }
 
 static void MoveSwitchMotor (track_p trk, coOrd orig ) {}

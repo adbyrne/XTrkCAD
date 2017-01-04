@@ -923,7 +923,7 @@ EXPORT void ResolveIndex( void )
 {
 	track_p trk;
 	EPINX_T ep;
-	TRK_ITERATE(trk)
+	TRK_ITERATE(trk) {
 		for (ep=0; ep<trk->endCnt; ep++)
 			if (trk->endPt[ep].index >= 0) {
 				trk->endPt[ep].track = FindTrack( trk->endPt[ep].index );
@@ -931,6 +931,9 @@ EXPORT void ResolveIndex( void )
 					NoticeMessage( MSG_RESOLV_INDEX_BAD_TRK, _("Continue"), NULL, trk->index, ep, trk->endPt[ep].index );
 				}
 			}
+                ResolveBlockTrack (trk);
+                ResolveSwitchmotorTurnout (trk);
+        }
 	AuditTracks( "readTracks" );
 }
 
