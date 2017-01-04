@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 
-#define PARAM_SUBDIR ("\\params")
+#define PARAM_SUBDIR FILE_SEP_CHAR "params"
 
 /****************************************************************************
  *

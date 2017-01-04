@@ -1,0 +1,44 @@
+Readme for gtk-bundle directory.
+Created 12-1-2016 by Adam Richards
+
+Date: Dec-2016.
+
+The gtk-bundle technique replaces prior bundle techniques for OSX. 
+
+Prerequisites: 
+This directory produces files only for use with the gtk-mac-bundler tool (G-M-B). 
+That tool is available as a MacPort and should be installed with
+"sudo port install gtk-mac-bundler" 
+The bundler also requires a prior Macports install of GTK  
+"sudo port install webkit-gtk" 
+and that was the GTK level was used to build the xtrkcad binary.
+
+The ccmake process will place a copy of the binary in the /bin build subdirectory 
+for use by G-M-B. It also copies over the resource share libraries into a subdirectory. 
+ 
+Process:
+Once ccmake has been run "make" followed by "make install", the G-M-B tool is run 
+pointing at the xtrkcad.bundle file. 
+"cd /gtk-bundle"
+"gtk-mac-bundler xtrkcad-bundle"
+
+Output:
+G-M-B produces an .app bundle that is a self-contained executable 
+from the binary xtrkcad in gtk-bundle/bin. It recursively rewires all the link pointers to be 
+self-referential - that is, to point within the bundle.
+
+It uses the xtrkcad.plist to set properties of the app, including the 
+icon from the .icns file. It sets the pre-run script to be xtrkcad-launcher.sh
+
+Next Steps:
+Once this xtrkcad.app file has been created, it can be moved to wherever is desirable
+- such as the Application folder. The app does not have dependencies on GTK components
+from MACPorts like the binary does - it is standalone. 
+
+To produce an installable image from the .app, the disk utility can be used to create 
+a RW image .dmg that the .app can be copied into. 
+
+NOTE -
+It is expected that as long as the GTK level used in build can run on the OSX level used
+in build, the app bundle will work without necessarily having to be rebuilt for each OSX
+level. 

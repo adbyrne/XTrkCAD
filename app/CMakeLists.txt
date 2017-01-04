@@ -1,7 +1,7 @@
 # "bin/i18n.h" is widely used
 INCLUDE_DIRECTORIES(bin)
 
-# Setup the rest of the build ...
+# Setup the restt of the build ...
 ADD_SUBDIRECTORY(wlib)
 ADD_SUBDIRECTORY(tools)
 ADD_SUBDIRECTORY(help)

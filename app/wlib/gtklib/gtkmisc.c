@@ -1193,7 +1193,9 @@ int main( int argc, char *argv[] )
 
 	ld = wGetAppLibDir();
 	if (ld != NULL) {
-		sprintf( buff, "HELPPATH=/usr/lib/help:%s:", ld );
+		/* Move app lib to be first in order */
+		
+		sprintf( buff, "HELPPATH=%s:/usr/lib/help:", ld );
 		if ( (hp = getenv("HELPPATH")) != NULL )
 			strcat( buff, hp );
 		putenv( buff );

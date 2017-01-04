@@ -159,18 +159,17 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			for( i = 0; i <= fs->pattCount; i++ ) {
 				gtk_file_chooser_add_filter( GTK_FILE_CHOOSER( fs->window ), fs->filter[ i ] ); 
 			}
-		}												
-		/** \todo for loading a shortcut folder could be added linking to the example directory */
+		}
 
 	}
 	strcpy( name, dirName );
-	cp = name+strlen(name);
-	if (cp[-1] != '/') {
-		*cp++ = '/';
-		*cp = 0;
-	}
-	if( fs->mode == FS_SAVE )
-		gtk_file_chooser_set_current_name( GTK_FILE_CHOOSER(fs->window), name ); 
+    if( fs->mode == FS_SAVE )
+		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
+    // Add a current folder and a shortcut to it for Load/import dialogs
+    if( fs->mode == FS_LOAD ) {
+        gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
+        gtk_file_chooser_add_shortcut_folder( GTK_FILE_CHOOSER(fs->window), name, NULL );
+    }
 
 	if( gtk_dialog_run( GTK_DIALOG( fs->window )) == GTK_RESPONSE_ACCEPT ) {
 		
