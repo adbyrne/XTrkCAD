@@ -76,6 +76,10 @@ static void SingleString(void **state)
     DynStringCatCStr(&string, TEXT1);
     assert_int_equal(DynStringSize(&string), strlen(TEXT1));
     assert_string_equal(DynStringToCStr(&string), TEXT1);
+
+	DynStringClear(&string);
+	assert_int_equal(DynStringSize(&string), 0);
+
     DynStringFree(&string);
 }
 

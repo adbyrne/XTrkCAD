@@ -47,7 +47,7 @@ DynString *DynStringMalloc(DynString *s, size_t size)
 
     s->s = malloc(size);
     s->size = 0;
-    s->b_size = (size_t)(size | STR_FREEABLE);
+    s->b_size = (size_t)(size | STR_FREEABLE );
     return (s);
 }
 
@@ -76,6 +76,7 @@ void DynStringRealloc(DynString *s)
     if (!s->size) {
         free(s->s);
         s->s = malloc(16);
+		s->b_size = (size_t)(16 | STR_FREEABLE);
     } else {
         /* Try to compact */
         buf = realloc(s->s, s->size);
@@ -83,9 +84,34 @@ void DynStringRealloc(DynString *s)
         if (buf) {
             s->s = buf;
         }
+		s->b_size = (size_t)(s->size | STR_FREEABLE);
     }
 }
 
+/**
+* Clear the dynamic string. Current content is deleted. The buffer is shrinked to the 
+* minimum size. 
+*
+* \param s IN the dynamic string
+*/
+
+void DynStringClear(DynString *s)
+{
+	/* Not a string? */
+	if (isnas(s))
+	{
+		return;
+	}
+
+	/* Can't realloc? */
+	if (!(s->b_size & STR_FREEABLE))
+	{
+		return;
+	}
+	s->size = 0;
+
+	DynStringRealloc(s);
+}
 /**
 * Resize the string for a minimum number of bytes. In order to optimize memory usage the
 * actually allocated block of memory can be larger than the requested size.
