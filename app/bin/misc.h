@@ -318,6 +318,7 @@ addButtonCallBack_t OutputBitMapInit( void );
 addButtonCallBack_t CustomMgrInit( void );
 addButtonCallBack_t PriceListInit( void );
 addButtonCallBack_t ParamFilesInit( void );
+addButtonCallBack_t ControlMgrInit ( void );
 
 wIndex_t InitGrid( wMenu_p menu );
 
@@ -373,6 +374,16 @@ void CarCustMgmLoad();
 BOOL_T CompoundCustomSave(FILE*);
 BOOL_T CarCustomSave(FILE*);
 
+/* dcontmgm.c */
+#define CONTMGM_CAN_EDIT                (1)
+#define CONTMGM_DO_EDIT                 (2)
+#define CONTMGM_CAN_DELETE              (3)
+#define CONTMGM_DO_DELETE               (4)
+#define CONTMGM_GET_TITLE               (5)
+
+typedef int (*contMgmCallBack_p) (int, void *);
+void ContMgmLoad (wIcon_p,contMgmCallBack_p,void *);
+
 /* doption.c */
 long GetDistanceFormat( void );
 
@@ -382,9 +393,14 @@ void ClearCars( void );
 void CarDlgAddProto( void );
 void CarDlgAddDesc( void );
 void AttachTrains( void );
-#endif
+
 
 /* cblock.c */
 void InitCmdBlock( wMenu_p menu );
+void BlockDlgAdd( void );
+void BlockMgmLoad( void );
 /* cswitchmotor.c */
 void InitCmdSwitchMotor( wMenu_p menu );
+void SwitchmotorDlgAdd( void );
+void SwitchmotorMgmLoad( void );
+#endif

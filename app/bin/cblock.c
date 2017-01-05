@@ -47,6 +47,7 @@
 
 #include <ctype.h>
 #include "track.h"
+#include "trackx.h"
 #include "compound.h"
 #include "i18n.h"
 
@@ -557,7 +558,7 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 	LOG( log_block, 1, ("*** CmdBlockAction(%08x,{%f,%f})\n",action,pos.x,pos.y))
 	switch (action & 0xFF) {
 	case C_START:
-		fprintf(stderr,"*** CmdBlockCreate(): C_START\n");
+                LOG( log_block, 1,("*** CmdBlockCreate(): C_START\n"))
 		NewBlockDialog();
 		return C_TERMINATE;
 	default:
@@ -643,7 +644,7 @@ static STATUS_T CmdBlockDelete( wAction_t action, coOrd pos )
 
 static STATUS_T CmdBlock (wAction_t action, coOrd pos )
 {
-	fprintf(stderr,"*** CmdBlock(%08x,{%f,%f})\n",action,pos.x,pos.y);
+	LOG( log_block, 1, ("*** CmdBlock(%08x,{%f,%f})\n",action,pos.x,pos.y))
 
 	switch ((long)commandContext) {
 	case BLOCK_CREATE: return CmdBlockCreate(action,pos);
@@ -665,10 +666,69 @@ EXPORT void CheckDeleteBlock (track_p t)
     DeleteTrack(blk,FALSE);
 }
 
+static int BlockMgmProc ( int cmd, void * data )
+{
+    track_p trk = (track_p) data;
+    blockData_p xx = GetblockData(trk);
+    wIndex_t iTrack;
+    BOOL_T needComma = FALSE;
+    char temp[32];
+    char msg[STR_SIZE];
+    
+    switch ( cmd ) {
+    case CONTMGM_CAN_EDIT:
+        return TRUE;
+        break;
+    case CONTMGM_DO_EDIT:
+        inDescribeCmd = TRUE;
+        DescribeTrack (trk, msg, sizeof msg );
+        InfoMessage( msg );
+        return TRUE;
+        break;
+    case CONTMGM_CAN_DELETE:
+        return TRUE;
+        break;
+    case CONTMGM_DO_DELETE:
+        DeleteTrack (trk, FALSE);
+        return TRUE;
+        break;
+    case CONTMGM_GET_TITLE:
+        sprintf( message, "\t%s\t", xx->name);
+        for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
+            sprintf(temp,"%d",GetTrkIndex((&(xx->trackList))[iTrack].t));
+            if (needComma) strcat(message,", ");
+            strcat(message,temp);
+            needComma = TRUE;
+        }
+        break;
+    }
+    return FALSE;
+}
+
+EXPORT void BlockDlgAdd( void )
+{
+}
+
 
 #include "bitmaps/blocknew.xpm"
 #include "bitmaps/blockedit.xpm"
 #include "bitmaps/blockdel.xpm"
+#include "bitmaps/block.xpm"
+
+EXPORT void BlockMgmLoad( void )
+{
+    track_p trk;
+    static wIcon_p blockI = NULL;
+    
+    if ( blockI == NULL) 
+        blockI = wIconCreatePixMap( block_xpm );
+    
+    TRK_ITERATE(trk) {
+        if (GetTrkType(trk) != T_BLOCK) continue;
+        ContMgmLoad( blockI, BlockMgmProc, (void *)trk );
+    }
+    
+}
 
 EXPORT void InitCmdBlock( wMenu_p menu )
 {

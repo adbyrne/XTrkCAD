@@ -98,6 +98,7 @@ SET(SOURCES
 	dcar.c
 	dcmpnd.c
 	dcustmgm.c
+	dcontmgm.c
 	dease.c
 	denum.c
 	dlayer.c
