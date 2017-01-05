@@ -106,6 +106,7 @@ SET(SOURCES
 	dprmfile.c
 	draw.c
 	drawgeom.c
+	dxfformat.c
 	dxfoutput.c
 	elev.c
 	fileio.c
@@ -175,3 +176,7 @@ INSTALL(
 	TARGETS xtrkcad
 	RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
+	
+if(XTRKCAD_TESTING)			
+	add_subdirectory( unittest )
+endif(XTRKCAD_TESTING)  
