@@ -346,7 +346,7 @@ draw-benchorient	Orientation of Benchwork	cmdDraw
 draw-arrowsize	Size of Dimension Arrows	cmdDraw
 #
 easement-val	This controls the sharpness of the easement curve	cmdEasement
-easement-r	Minumum radius	cmdEasement
+easement-r	Minimum radius	cmdEasement
 easement-x	Maximum offset	cmdEasement
 easement-l	Easement length	cmdEasement
 easement-radio	These radio buttons are a short-cut for Values of 0.0, 0.5, 1.0 and 2.0.  None turns Easements off	cmdEasement
