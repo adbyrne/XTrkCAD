@@ -6809,7 +6809,7 @@ msgid "This controls the sharpness of the easement curve"
 msgstr "Steuert die Größe des Übergangsradius"
 
 #: ../../../build/xtc_4-2-3dev/app/bin/bllnhlp.c:306
-msgid "Minumum radius"
+msgid "Minimum radius"
 msgstr "Mindestgleisradius"
 
 #: ../../../build/xtc_4-2-3dev/app/bin/bllnhlp.c:307
