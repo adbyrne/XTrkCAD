@@ -7210,7 +7210,7 @@ msgid "This controls the sharpness of the easement curve"
 msgstr ""
 
 #: ../../../../xtrkcad-build/app/bin/bllnhlp.c:297
-msgid "Minumum radius"
+msgid "Minimum radius"
 msgstr ""
 
 #: ../../../../xtrkcad-build/app/bin/bllnhlp.c:298
