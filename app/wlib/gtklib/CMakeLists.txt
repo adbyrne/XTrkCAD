@@ -10,7 +10,6 @@ SET(SOURCES
 	gtkdraw-cairo.c
 	filesel.c
 	gtkfont.c
-	gtkhelp.c
 	gtklist.c
 	gtkmenu.c
 	gtkmisc.c
@@ -20,6 +19,8 @@ SET(SOURCES
 	gtktext.c
 	gtkwindow.c
 	gtkxpm.c
+	gtkhelp.c
+	ixhelp.c
 	print.c
 	wpref.c
 	)
