@@ -2321,8 +2321,7 @@ static void CreateMenus( void )
 
 	InitNewTurn( wMenuMenuCreate( manageM, "cmdTurnoutNew", _("Tur&nout Designer...") ) );
 
-        MiscMenuItemCreate( manageM, NULL, "smdContmgm", _("Layout &Control Elements"), ACCL_CONTMGM,(void*)ControlMgrInit(),0,(void*) 0);
-        MiscMenuItemCreate( manageM, NULL, "cmdGroup", _("&Group"), ACCL_GROUP, (void*)(wMenuCallBack_p)DoGroup, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( manageM, NULL, "cmdGroup", _("&Group"), ACCL_GROUP, (void*)(wMenuCallBack_p)DoGroup, IC_SELECTED, (void *)0 );
 	MiscMenuItemCreate( manageM, NULL, "cmdUngroup", _("&Ungroup"), ACCL_UNGROUP, (void*)(wMenuCallBack_p)DoUngroup, IC_SELECTED, (void *)0 );
 
 	MiscMenuItemCreate( manageM, NULL, "cmdCustmgm", _("Custom defined parts..."), ACCL_CUSTMGM, (void*)CustomMgrInit(), 0, (void *)0 );

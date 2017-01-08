@@ -49,7 +49,6 @@
 
 #include <ctype.h>
 #include "track.h"
-#include "trackx.h"
 #include "compound.h"
 #include "i18n.h"
 
@@ -522,61 +521,11 @@ static STATUS_T CmdSwitchMotor (wAction_t action, coOrd pos )
 	}
 }
 
-static int SwitchmotorMgmProc ( int cmd, void * data )
-{
-    track_p trk = (track_p) data;
-    switchmotorData_p xx = GetswitchmotorData(trk);
-    char msg[STR_SIZE];
-    
-    switch ( cmd ) {
-    case CONTMGM_CAN_EDIT:
-        return TRUE;
-        break;
-    case CONTMGM_DO_EDIT:
-        inDescribeCmd = TRUE;
-        DescribeTrack (trk, msg, sizeof msg );
-        InfoMessage( msg );
-        return TRUE;
-        break;
-    case CONTMGM_CAN_DELETE:
-        return TRUE;
-        break;
-    case CONTMGM_DO_DELETE:
-        DeleteTrack (trk, FALSE);
-        return TRUE;
-        break;
-    case CONTMGM_GET_TITLE:
-        sprintf( message, "\t%s\t%d", xx->name, GetTrkIndex(xx->turnout));
-        break;
-    }
-    return FALSE;
-}
-
-EXPORT void SwitchmotorDlgAdd( void )
-{
-}
-
-
 //#include "bitmaps/switchmotor.xpm"
 
 #include "bitmaps/switchmnew.xpm"
 #include "bitmaps/switchmedit.xpm"
 #include "bitmaps/switchmdel.xpm"
-#include "bitmaps/switchm.xpm"
-
-EXPORT void SwitchmotorMgmLoad( void )
-{
-    track_p trk;
-    static wIcon_p switchmI = NULL;
-    
-    if ( switchmI == NULL)
-        switchmI = wIconCreatePixMap( switchm_xpm );
-    
-    TRK_ITERATE(trk) {
-        if (GetTrkType(trk) != T_SWITCHMOTOR) continue;
-        ContMgmLoad( switchmI, SwitchmotorMgmProc, (void *)trk );
-    }
-}
 
 EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 {
