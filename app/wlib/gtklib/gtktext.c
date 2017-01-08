@@ -448,7 +448,7 @@ EXPORT wBool_t wTextPrint(
 		dialog = gtk_message_dialog_new (GTK_WINDOW (gtkMainW->gtkwin), 
                                      GTK_DIALOG_DESTROY_WITH_PARENT,
                                      GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-				                             error->message);
+				                             "%s", error->message);
     
 		g_error_free (error);
 		gtk_dialog_run (GTK_DIALOG (dialog));
