@@ -43,6 +43,8 @@ long debugWindow = 0;
 char wAppName[256];
 char wConfigName[ 256 ];
 
+char *wExecutableName;
+
 #define FOUR		(4)
 #ifndef GTK1
 #define MENUH		(24)
@@ -1191,6 +1193,8 @@ int main( int argc, char *argv[] )
 	if ((win=wMain( argc, argv )) == (wWin_p)0)
 		exit(1);
 
+	wExecutableName = argv[ 0 ];
+	
 	ld = wGetAppLibDir();
 	if (ld != NULL) {
 		/* Move app lib to be first in order */

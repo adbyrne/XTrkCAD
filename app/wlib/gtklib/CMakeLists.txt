@@ -20,10 +20,20 @@ SET(SOURCES
 	gtkwindow.c
 	gtkxpm.c
 	gtkhelp.c
-	ixhelp.c
 	print.c
 	wpref.c
 	)
+
+IF(APPLE)
+	SET(SOURCES 
+		${SOURCES}
+		osxhelp.c)
+ELSE(APPLE)
+# for testing only, has to be ixhelp.c for Unixes
+	SET(SOURCES 
+		${SOURCES}
+		osxhelp.c)
+ENDIF(APPLE)
 
 SET_SOURCE_FILES_PROPERTIES(wpref.c PROPERTIES COMPILE_FLAGS -DEXPORT=)
 

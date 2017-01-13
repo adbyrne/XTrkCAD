@@ -1,5 +1,5 @@
-/** \file ixhelp.c
- * HTML based help using webkitgtk
+/** \file osxhelp.c
+ * use OSX Help system 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -34,8 +34,8 @@
 
 #include <stdint.h>
 
-#include <gtk/gtk.h>
-#include <gdk/gdk.h>
+#include "gtkint.h"
+#include "i18n.h"
 
 #include <webkit/webkit.h>
 
@@ -130,6 +130,8 @@ lookup_widget(GtkWidget *widget, const gchar *widget_name)
   return found_widget;
 }
 
+
+
 
 /**
  * create a new horizontal pane and place it into container. 

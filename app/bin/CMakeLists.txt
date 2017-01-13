@@ -169,6 +169,15 @@ ELSE(NOT WIN32)
 	TARGET_LINK_LIBRARIES(mkturnout xtrkcad-wlib)
 ENDIF(NOT WIN32)	
 
+# for testing only, should be IF(APPLE) ...
+IF(UNIX)
+	ADD_EXECUTABLE( helphelper helphelper.c )
+	INSTALL(
+		TARGETS helphelper
+		RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+		)
+ENDIF(UNIX)
+	
 INSTALL(
 	TARGETS xtrkcad
 	RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
