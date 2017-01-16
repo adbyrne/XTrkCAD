@@ -13,6 +13,7 @@
 #include <dxfformat.h>
 
 char *sProdNameUpper = "XTRKCAD";
+long units;
 
 static void BasicFormatting(void **state)
 {
@@ -98,6 +99,37 @@ static void TextCommand(void **state)
 	DynStringFree(&string);
 }
 
+static void Units(void **state)
+{
+	DynString string;
+	(void)state;
+
+	DynStringMalloc(&string, 0);
+
+	/* test English units */
+	units = 0;
+	DxfUnits(&string);
+	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "9\n$MEASUREMENT\n  70\n0\n" DXF_INDENT "9\n$INSUNITS\n  70\n1\n");
+	DxfFormatPosition(&string, 20, 1.23456789);
+	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "20\n1.234568\n");
+	
+	DynStringClear(&string);
+	DxfDimensionSize(&string, DXF_DIMTEXTSIZE);
+	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "9\n$DIMTXT\n  40\n1.0\n");
+
+	/* test metric units */
+	units = 1;
+	DynStringClear(&string);
+	DxfUnits(&string);
+	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "9\n$MEASUREMENT\n  70\n1\n" DXF_INDENT "9\n$INSUNITS\n  70\n4\n");
+	DxfFormatPosition(&string, 20, 1.23456789);
+	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "20\n31.358024\n");
+
+	DynStringClear(&string);
+	DxfDimensionSize(&string, DXF_DIMTEXTSIZE);
+	assert_string_equal(DynStringToCStr(&string), DXF_INDENT "9\n$DIMTXT\n  40\n25.0\n");
+
+}
 int main(void)
 {
     const struct CMUnitTest tests[] = {
@@ -105,7 +137,8 @@ int main(void)
 		cmocka_unit_test(LineCommand),
 		cmocka_unit_test(CircleCommand),
 		cmocka_unit_test(ArcCommand),
-		cmocka_unit_test(TextCommand)
+		cmocka_unit_test(TextCommand),
+		cmocka_unit_test(Units)
     };
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

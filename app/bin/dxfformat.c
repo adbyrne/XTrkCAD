@@ -28,6 +28,12 @@
 #include "dxfformat.h"
 
 extern char *sProdNameUpper;
+extern long units;						   /**< meaning is 0 = English, 1 = metric */
+
+static char *dxfDimensionDefaults[][3] = { /**< default values for dimensions, English, metric and DXF variable name */
+	{ "1.0", "25.0", "$DIMTXT" },			
+	{ "0.8", "20.0", "$DIMASZ"}
+};
 
 /**
 * Build and format layer name. The name is created by appending the layer number
@@ -44,7 +50,10 @@ void DxfLayerName(DynString *result, char *name, int layer)
 }
 
 /**
-* Build and format a position.
+* Build and format a position. If it specifies a point the value
+* is assumed to be in inches and will be converted to millimeters
+* if the metric system is active.
+* If it is an angle (group codes 50 to 59) it is not converted. 
 *
 * \param result OUT buffer for result
 * \param type IN type of position following DXF specs
@@ -53,6 +62,12 @@ void DxfLayerName(DynString *result, char *name, int layer)
 
 void DxfFormatPosition(DynString *result, int type, double value)
 {
+	if (units == 1)
+	{
+		if( type < 50 || type > 58 )
+			value *= 25.4;
+	}
+		
     DynStringPrintf(result, DXF_INDENT "%d\n%0.6f\n", type, value);
 }
 
@@ -217,6 +232,61 @@ DxfTextCommand(DynString *result, int layer, double x,
 }
 
 /**
+ * Append the header lines needed to define the measurement system. This includes the
+ * definition of the measurement system (metric or English) vie the $MEASUREMENT variable
+ * and the units i.e. inches for English and mm for metric.
+ *
+ * \PARAM result OUT buffer for the completed command
+ */
+
+void
+DxfUnits(DynString *result)
+{
+    char *value;
+    DynStringCatCStr(result, DXF_INDENT "9\n$MEASUREMENT\n  70\n");
+
+    if (units == 1) {
+        value = "1\n";
+    } else {
+        value = "0\n";
+    }
+
+    DynStringCatCStr(result, value);
+    DynStringCatCStr(result, DXF_INDENT "9\n$INSUNITS\n  70\n");
+
+    if (units == 1) {
+        value = "4\n";
+    } else {
+        value = "1\n";
+    }
+
+    DynStringCatCStr(result, value);
+}
+
+/**
+* Define a size of dimensions. The default values are taken from  
+* static array dxfDimensionDefaults
+*
+* \PARAM result OUT the completed command is appended to this buffer
+* \PARAM dimension IN dimension variable to set
+*/
+
+void
+DxfDimensionSize(DynString *result, enum DXF_DIMENSIONS dimension )
+{
+	DynString formatted;
+	DynStringMalloc(&formatted, 0);
+
+    DynStringPrintf(&formatted, 
+					DXF_INDENT "9\n%s\n  40\n%s\n", 
+					dxfDimensionDefaults[dimension][2], 
+					dxfDimensionDefaults[dimension][units]);
+
+	DynStringCatStr(result, &formatted);
+	DynStringFree(&formatted);
+}
+
+/**
 * Create the complete prologue for a DXF file. Includes the header section,
 * a table for line styles and a table for layers.
 *
@@ -227,25 +297,27 @@ DxfTextCommand(DynString *result, int layer, double x,
 */
 
 void
-DxfPrologue(DynString *result, int layerCount, double x0, double y0, double x1, double y1)
+DxfPrologue(DynString *result, int layerCount, double x0, double y0, double x1,
+            double y1)
 {
-	int i;
-	DynString layer = NaS;
-	DynStringMalloc(&layer, 0);
-
-	DynStringCatCStr(result, "\
+    int i;
+    DynString layer = NaS;
+    DynStringMalloc(&layer, 0);
+    DynStringCatCStr(result, "\
   0\nSECTION\n\
   2\nHEADER\n\
-  9\n$ACADVER\n  1\nAC1009\n\
-  9\n$EXTMIN\n");
-
-	DxfAppendPosition(result, 10, x0);
-	DxfAppendPosition(result, 20, y0);
-	DynStringCatCStr(result, "  9\n$EXTMAX\n");
-	DxfAppendPosition(result, 10, x1);
-	DxfAppendPosition(result, 20, y1);
-
-	DynStringCatCStr(result, "\
+  9\n$ACADVER\n  1\nAC1015\n");
+	DxfUnits(result);
+	DxfDimensionSize(result, DXF_DIMTEXTSIZE);
+	DxfDimensionSize(result, DXF_DIMARROWSIZE);
+	
+    DynStringCatCStr(result, "  9\n$EXTMIN\n");
+    DxfAppendPosition(result, 10, x0);
+    DxfAppendPosition(result, 20, y0);
+    DynStringCatCStr(result, "  9\n$EXTMAX\n");
+    DxfAppendPosition(result, 10, x1);
+    DxfAppendPosition(result, 20, y1);
+    DynStringCatCStr(result, "\
   9\n$TEXTSTYLE\n  7\nSTANDARD\n\
   0\nENDSEC\n\
   0\nSECTION\n\
@@ -266,13 +338,14 @@ DxfPrologue(DynString *result, int layerCount, double x0, double y0, double x1, 
   2\nLAYER\n\
   70\n0\n");
 
-	for (i = 0; i < layerCount; i++)
-	{
-		DynStringPrintf(&layer, DXF_INDENT"0\nLAYER\n  2\n%s%d\n  6\nCONTINUOUS\n  62\n7\n  70\n0\n", sProdNameUpper, i + 1);
-		DynStringCatStr(result, &layer);
-	}
+    for (i = 0; i < layerCount; i++) {
+        DynStringPrintf(&layer,
+                        DXF_INDENT"0\nLAYER\n  2\n%s%d\n  6\nCONTINUOUS\n  62\n7\n  70\n0\n",
+                        sProdNameUpper, i + 1);
+        DynStringCatStr(result, &layer);
+    }
 
-	DynStringCatCStr(result, "\
+    DynStringCatCStr(result, "\
   0\nENDTAB\n\
   0\nENDSEC\n\
   0\nSECTION\n\
@@ -280,8 +353,8 @@ DxfPrologue(DynString *result, int layerCount, double x0, double y0, double x1, 
 }
 
 /**
-* Create the file footer for a DXF file. Closes the open section and places 
-* an end-of-file marker 
+* Create the file footer for a DXF file. Closes the open section and places
+* an end-of-file marker
 *
 * \param result OUT buffer for the completed command
 */
@@ -289,5 +362,5 @@ DxfPrologue(DynString *result, int layerCount, double x0, double y0, double x1, 
 void
 DxfEpilogue(DynString *result)
 {
-	DynStringCatCStr(result, DXF_INDENT "0\nENDSEC\n" DXF_INDENT "0\nEOF\n");
+    DynStringCatCStr(result, DXF_INDENT "0\nENDSEC\n" DXF_INDENT "0\nEOF\n");
 }
