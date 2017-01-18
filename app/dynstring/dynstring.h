@@ -12,16 +12,13 @@ struct DynString
 #define NaS {NULL, 0, 0}
 #define isnas(S) (!(S)->s)
 
-#ifdef _MSC_VER
-#ifdef _WIN32
-#define STR_FREEABLE (1ULL << 31)
-#else
-#define STR_FREEABLE (1ULL << 63)
-#endif // _WIN32
-#else
-#define STR_FREEABLE (1ULL << 63)
-#endif
+// define highest bit depending on 32 or 64 bit compile
 
+#if defined(__LP64__) || defined(_WIN64) || (defined(__x86_64__) &&  !defined(__ILP32__) ) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
+    #define STR_FREEABLE (1ULL << 63)
+#else
+    #define STR_FREEABLE (1ULL << 31)
+#endif
 
 size_t DynStringSize(DynString * s);
 

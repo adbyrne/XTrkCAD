@@ -76,12 +76,11 @@ ENDIF(XTRKCAD_USE_PACKAGEMAKER)
 
 # Find unit testing framework
 find_package(CMocka)
-include_directories(${CMOCKA_INCLUDE_DIR})
-set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
-
-if(CMOCKA_FOUND)
-	option( XTRKCAD_TESTING "Build unittests" ON)
-endif(CMOCKA_FOUND)
+if( CMOCKA_FOUND)
+  include_directories(${CMOCKA_INCLUDE_DIR})
+  set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
+  option( XTRKCAD_TESTING "Build unittests" ON)
+endif()
 
 # Test for headers and libraries for portability ...
 

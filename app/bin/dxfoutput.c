@@ -24,11 +24,13 @@
 #include <string.h>
 #include <time.h>
 #ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
-#if _MSC_VER >=1400
-#define strdup _strdup
-#endif
+  #include <io.h>
+  #include <windows.h>
+  #if _MSC_VER >=1400
+    #define strdup _strdup
+  #endif
+#else
+  #include <errno.h>
 #endif
 
 #include <xtrkcad-config.h>

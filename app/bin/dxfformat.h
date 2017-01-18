@@ -1,6 +1,12 @@
 #ifndef HAVE_DXFFORMAT_H
 #define HAVE_DXFFORMAT_H
 
+enum DXF_DIMENSIONS
+{
+	DXF_DIMTEXTSIZE,
+	DXF_DIMARROWSIZE
+};
+
 void DxfLayerName(DynString *result, char *name, int layer);
 void DxfFormatPosition(DynString *result, int type, double value);
 void DxfLineStyle(DynString *result, int isDashed);
@@ -16,10 +22,5 @@ void DxfPrologue(DynString *result, int layerCount, double x0, double y0, double
 void DxfEpilogue(DynString *result);
 #define DXF_INDENT "  "
 
-enum DXF_DIMENSIONS
-{
-	DXF_DIMTEXTSIZE,
-	DXF_DIMARROWSIZE
-};
 #endif // !HAVE_DXFFORMAT_H
 

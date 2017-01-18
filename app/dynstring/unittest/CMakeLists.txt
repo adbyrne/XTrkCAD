@@ -5,4 +5,4 @@ target_link_libraries(dynstringtest
 					  dynstring
                       ${LIBS})
 
-add_test(DynStringTestSuite DynStringTest)
+add_test(DynStringTest dynstringtest)

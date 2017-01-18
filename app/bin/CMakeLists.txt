@@ -177,6 +177,6 @@ INSTALL(
 	RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
 	
-if(XTRKCAD_TESTING)			
+if(XTRKCAD_TESTING AND CMOCKA_FOUND)			
 	add_subdirectory( unittest )
-endif(XTRKCAD_TESTING)  
+endif()  
