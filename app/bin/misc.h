@@ -397,10 +397,8 @@ void AttachTrains( void );
 
 /* cblock.c */
 void InitCmdBlock( wMenu_p menu );
-void BlockDlgAdd( void );
 void BlockMgmLoad( void );
 /* cswitchmotor.c */
 void InitCmdSwitchMotor( wMenu_p menu );
-void SwitchmotorDlgAdd( void );
 void SwitchmotorMgmLoad( void );
 #endif

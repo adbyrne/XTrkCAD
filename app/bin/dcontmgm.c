@@ -2,13 +2,9 @@
  *
  *  System        : 
  *  Module        : 
- *  Object Name   : $RCSfile$
- *  Revision      : $Revision$
- *  Date          : $Date$
- *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Thu Jan 5 10:52:12 2017
- *  Last Modified : <170105.1448>
+ *  Last Modified : <170123.1206>
  *
  *  Description
  * 
@@ -94,11 +90,6 @@ static paramData_t controlPLs[] = {
 	{	PD_BUTTON, (void*)ControlEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
 #define I_CONTROLDEL		(2)
     {	PD_BUTTON, (void*)ControlDelete, "delete", 0, NULL, N_("Delete") },
-#define I_CONTROLNEW		(3)
-    {   PD_MENU, NULL, "new", PDO_DLGWIDE, NULL, N_("New") },
-    {	PD_MENUITEM, (void*)BlockDlgAdd, "new-block-mi", 0, NULL, N_("Block") },
-    {	PD_MENUITEM, (void*)SwitchmotorDlgAdd, "new-sm-mi", 0, NULL, N_("Switch Motor") }
-    
   } ;
 static paramGroup_t controlPG = { "contmgm", 0, controlPLs, sizeof controlPLs/sizeof controlPLs[0] };
 

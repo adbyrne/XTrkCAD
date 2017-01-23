@@ -55,12 +55,9 @@
 
 EXPORT TRKTYP_T T_SWITCHMOTOR = -1;
 
-#define SWITCHMOTORCMD
-
 static int log_switchmotor = 0;
 
 
-#ifdef SWITCHMOTORCMD
 static drawCmd_t switchmotorD = {
 	NULL,
 	&screenDrawFuncs,
@@ -84,12 +81,32 @@ static paramData_t switchmotorPLs[] = {
 };
 
 static paramGroup_t switchmotorPG = { "switchmotor", 0, switchmotorPLs, sizeof switchmotorPLs/sizeof switchmotorPLs[0] };
+static wWin_p switchmotorW;
+
+static char switchmotorEditName[STR_SHORT_SIZE];
+static char switchmotorEditNormal[STR_LONG_SIZE];
+static char switchmotorEditReverse[STR_LONG_SIZE];
+static char switchmotorEditPointSense[STR_LONG_SIZE];
+static long int switchmotorEditTonum;
+static track_p switchmotorEditTrack;
+
+static paramIntegerRange_t r0_999999 = { 0, 999999 };
+
+static paramData_t switchmotorEditPLs[] = {
+/*0*/ { PD_STRING, switchmotorEditName, "name", PDO_NOPREF, (void*)200, N_("Name") },
+/*1*/ { PD_STRING, switchmotorEditNormal, "normal", PDO_NOPREF, (void*)350, N_("Normal") },
+/*2*/ { PD_STRING, switchmotorEditReverse, "reverse", PDO_NOPREF, (void*)350, N_("Reverse") },
+/*3*/ { PD_STRING, switchmotorEditPointSense, "pointSense", PDO_NOPREF, (void*)350, N_("Point Sense") },
+/*4*/ { PD_LONG,   &switchmotorEditTonum, "turnoutNumber", PDO_NOPREF, &r0_999999, N_("Turnout Number"), BO_READONLY }, 
+};
+
+static paramGroup_t switchmotorEditPG = { "switchmotorEdit", 0, switchmotorEditPLs, sizeof switchmotorEditPLs/sizeof switchmotorEditPLs[0] };
+static wWin_p switchmotorEditW;
+
 /*
 static dynArr_t switchmotorTrk_da;
 #define switchmotorTrk(N) DYNARR_N( track_p , switchmotorTrk_da, N )
 */
-static wWin_p switchmotorW;
-#endif
 
 typedef struct switchmotorData_t {
 	char * name;
@@ -349,7 +366,6 @@ static trackCmd_t switchmotorCmds = {
 	NULL  /* drawDesc */
 };
 
-#ifdef SWITCHMOTORCMD
 static track_p FindSwitchMotor (track_p trk)
 {
 	track_p a_trk;
@@ -372,7 +388,7 @@ static void SwitchMotorOk ( void * junk )
 	LOG( log_switchmotor, 1, ("*** SwitchMotorOk()\n"))
 	ParamUpdate (&switchmotorPG );
 	if ( switchmotorName[0]==0 ) {
-		NoticeMessage( 0, "Switch motor must have a name!", _("Ok"));
+		NoticeMessage( _("Switch motor must have a name!"), _("Ok"), NULL);
 		return;
 	}
 	wDrawDelayUpdate( mainD.d, TRUE );
@@ -522,6 +538,54 @@ static STATUS_T CmdSwitchMotor (wAction_t action, coOrd pos )
 	}
 }
 
+static void SwitchMotorEditOk ( void * junk )
+{
+    switchmotorData_p xx;
+    track_p trk;
+
+    LOG( log_switchmotor, 1, ("*** SwitchMotorEditOk()\n"))
+    ParamUpdate (&switchmotorEditPG );
+    if ( switchmotorEditName[0]==0 ) {
+        NoticeMessage( _("Switch motor must have a name!") , _("Ok"), NULL);
+        return;
+    }
+    wDrawDelayUpdate( mainD.d, TRUE );
+    UndoStart( _("Modify Switch Motor"), "Modify Switch Motor" );
+    trk = switchmotorEditTrack;
+    xx = GetswitchmotorData( trk );
+    xx->name = MyStrdup(switchmotorEditName);
+    xx->normal = MyStrdup(switchmotorEditNormal);
+    xx->reverse = MyStrdup(switchmotorEditReverse);
+    xx->pointsense = MyStrdup(switchmotorEditPointSense);
+    switchmotorDebug(trk);
+    UndoEnd();
+    wHide( switchmotorEditW );
+}
+
+
+static void EditSwitchMotor (track_p trk)
+{
+    switchmotorData_p xx = GetswitchmotorData(trk);
+    strncpy(switchmotorEditName,xx->name,STR_SHORT_SIZE);
+    strncpy(switchmotorEditNormal,xx->normal,STR_LONG_SIZE);
+    strncpy(switchmotorEditReverse,xx->reverse,STR_LONG_SIZE);
+    strncpy(switchmotorEditPointSense,xx->pointsense,STR_LONG_SIZE);
+    switchmotorEditTonum = GetTrkIndex(xx->turnout);
+    switchmotorEditTrack = trk;
+    if ( !switchmotorEditW ) {
+        ParamRegister( &switchmotorEditPG );
+        switchmotorEditW = ParamCreateDialog (&switchmotorEditPG, 
+                                              MakeWindowTitle(_("Edit switch motor")), 
+                                              _("Ok"), SwitchMotorEditOk, 
+                                              wHide, TRUE, NULL, F_BLOCK, 
+                                              NULL );
+    }
+    ParamLoadControls( &switchmotorEditPG );
+    sprintf( message, _("Edit switch motor %d"), GetTrkIndex(trk) );
+    wWinSetTitle( switchmotorEditW, message );
+    wShow (switchmotorEditW);
+}
+
 static int SwitchmotorMgmProc ( int cmd, void * data )
 {
     track_p trk = (track_p) data;
@@ -533,9 +597,10 @@ static int SwitchmotorMgmProc ( int cmd, void * data )
         return TRUE;
         break;
     case CONTMGM_DO_EDIT:
-        inDescribeCmd = TRUE;
-        DescribeTrack (trk, msg, sizeof msg );
-        InfoMessage( msg );
+        EditSwitchMotor (trk);
+        /*inDescribeCmd = TRUE;*/
+        /*DescribeTrack (trk, msg, sizeof msg );*/
+        /*InfoMessage( msg );*/
         return TRUE;
         break;
     case CONTMGM_CAN_DELETE:
@@ -551,11 +616,6 @@ static int SwitchmotorMgmProc ( int cmd, void * data )
     }
     return FALSE;
 }
-
-EXPORT void SwitchmotorDlgAdd( void )
-{
-}
-
 
 //#include "bitmaps/switchmotor.xpm"
 
@@ -603,8 +663,6 @@ EXPORT void CheckDeleteSwitchmotor(track_p t)
     DeleteTrack (sm, FALSE);
 }
 
-
-#endif
 
 
 EXPORT void InitTrkSwitchMotor( void )

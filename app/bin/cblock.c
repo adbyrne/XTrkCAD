@@ -53,11 +53,7 @@
 
 EXPORT TRKTYP_T T_BLOCK = -1;
 
-#define BLOCKCMD
-
 static int log_block = 0;
-
-#ifdef BLOCKCMD
 
 static void NoDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
 		       wDrawColor color ) {}
@@ -100,6 +96,21 @@ static paramData_t blockPLs[] = {
 /*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF, (void*)350, N_("Script") }
 };
 static paramGroup_t blockPG = { "block", 0, blockPLs,  sizeof blockPLs/sizeof blockPLs[0] };
+static wWin_p blockW;
+
+static char blockEditName[STR_SHORT_SIZE];
+static char blockEditScript[STR_LONG_SIZE];
+static char blockEditSegs[STR_LONG_SIZE];
+static track_p blockEditTrack;
+
+static paramData_t blockEditPLs[] = {
+/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF, (void*)200, N_("Name") },
+/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF, (void*)350, N_("Script") },
+/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, (void*)350, N_("Segments"), BO_READONLY }, 
+};
+static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
+static wWin_p blockEditW;
+
 typedef struct btrackinfo_t {
     track_p t;
     TRKINX_T i;
@@ -107,8 +118,6 @@ typedef struct btrackinfo_t {
 
 static dynArr_t blockTrk_da;
 #define blockTrk(N) DYNARR_N( btrackinfo_t , blockTrk_da, N )
-static wWin_p blockW;
-#endif
 
 
 
@@ -430,7 +439,6 @@ static trackCmd_t blockCmds = {
 
 
 
-#ifdef BLOCKCMD
 static BOOL_T TrackInBlock (track_p trk, track_p blk) {
 	wIndex_t iTrack;
 	blockData_p xx = GetblockData(blk);
@@ -462,7 +470,7 @@ static void BlockOk ( void * junk )
 
 	ParamUpdate( &blockPG );
 	if ( blockName[0]==0 ) {
-		NoticeMessage( 0, "Block must have a name!", _("Ok"));
+		NoticeMessage( _("Block must have a name!"), _("Ok"), NULL);
 		return;
 	}
 	wDrawDelayUpdate( mainD.d, TRUE );
@@ -666,6 +674,60 @@ EXPORT void CheckDeleteBlock (track_p t)
     DeleteTrack(blk,FALSE);
 }
 
+static void BlockEditOk ( void * junk )
+{
+    blockData_p xx;
+    track_p trk;
+
+    LOG( log_block, 1, ("*** BlockEditOk()\n"))
+    ParamUpdate (&blockEditPG );
+    if ( blockEditName[0]==0 ) {
+        NoticeMessage( _("Block must have a name!"), _("Ok"), NULL);
+        return;
+    }
+    wDrawDelayUpdate( mainD.d, TRUE );
+    UndoStart( _("Modify Block"), "Modify Block" );
+    trk = blockEditTrack;
+    xx = GetblockData( trk );
+    xx->name = MyStrdup(blockEditName);
+    xx->script = MyStrdup(blockEditScript);
+    blockDebug(trk);
+    UndoEnd();
+    wHide( blockEditW );
+}
+
+
+static void EditBlock (track_p trk)
+{
+    blockData_p xx = GetblockData(trk);
+    wIndex_t iTrack;
+    BOOL_T needComma = FALSE;
+    char temp[32];
+    
+    strncpy(blockEditName,xx->name,STR_SHORT_SIZE);
+    strncpy(blockEditScript,xx->script,STR_LONG_SIZE);
+    blockEditSegs[0] = '\0';
+    for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
+        sprintf(temp,"%d",GetTrkIndex((&(xx->trackList))[iTrack].t));
+        if (needComma) strcat(blockEditSegs,", ");
+        strcat(blockEditSegs,temp);
+        needComma = TRUE;
+    }
+    blockEditTrack = trk;
+    if ( !blockEditW ) {
+        ParamRegister( &blockEditPG );
+        blockEditW = ParamCreateDialog (&blockEditPG, 
+                                        MakeWindowTitle(_("Edit block")), 
+                                        _("Ok"), BlockEditOk, 
+                                        wHide, TRUE, NULL, F_BLOCK, 
+                                        NULL );
+    }
+    ParamLoadControls( &blockEditPG );
+    sprintf( message, _("Edit block %d"), GetTrkIndex(trk) );
+    wWinSetTitle( blockEditW, message );
+    wShow (blockEditW);
+}
+
 static int BlockMgmProc ( int cmd, void * data )
 {
     track_p trk = (track_p) data;
@@ -680,9 +742,10 @@ static int BlockMgmProc ( int cmd, void * data )
         return TRUE;
         break;
     case CONTMGM_DO_EDIT:
-        inDescribeCmd = TRUE;
-        DescribeTrack (trk, msg, sizeof msg );
-        InfoMessage( msg );
+        EditBlock (trk);
+        /*inDescribeCmd = TRUE;*/
+        /*DescribeTrack (trk, msg, sizeof msg );*/
+        /*InfoMessage( msg );*/
         return TRUE;
         break;
     case CONTMGM_CAN_DELETE:
@@ -703,10 +766,6 @@ static int BlockMgmProc ( int cmd, void * data )
         break;
     }
     return FALSE;
-}
-
-EXPORT void BlockDlgAdd( void )
-{
 }
 
 
@@ -741,7 +800,6 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 	ButtonGroupEnd();
 	ParamRegister( &blockPG );
 }
-#endif
 
 
 EXPORT void InitTrkBlock( void )
