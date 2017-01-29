@@ -1,6 +1,5 @@
-/** \file wpref.c Handle loading and saving preferences.
- * 
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/wpref.c,v 1.15 2010-04-28 04:04:38 dspagnol Exp $
+/** \file wpref.c
+ * Handle loading and saving preferences.
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,33 +23,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h>
 #include <ctype.h>
 #include <sys/stat.h>
 
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
+
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
 #include "wlib.h"
+#include "gtkint.h"
 #include "dynarr.h"
 #include "i18n.h"
 
-#ifndef TRUE
-#define TRUE	(1)
-#define FALSE	(0)
-#endif
-
-#ifdef XTRKCAD_CMAKE_BUILD
 #include "xtrkcad-config.h"
-#endif
 
-extern char wAppName[];
 extern char wConfigName[];
 static char appLibDir[BUFSIZ];
 static char appWorkDir[BUFSIZ];
 static char userHomeDir[BUFSIZ];
 
-EXPORT void wInitAppName(char *appName)
-{
-	strcpy(wAppName, appName);
-}
 
 /*
  *******************************************************************************
@@ -61,16 +57,17 @@ EXPORT void wInitAppName(char *appName)
  */
 
 
-EXPORT const char * wGetAppLibDir( void )
 /** Find the directory where configuration files, help, demos etc are installed. 
  *  The search order is:
  *  1. Directory specified by the XTRKCADLIB environment variable
  *  2. Directory specified by XTRKCAD_INSTALL_PREFIX/share/xtrkcad
- *  3. /usr/share/xtrkcad
- *  4. /usr/local/share/xtrkcad
+ *  3. /usr/lib/xtrkcad
+ *  4. /usr/local/lib/xtrkcad
  *  
  *  \return pointer to directory name
  */
+
+const char * wGetAppLibDir( void )
 {
 	char * cp, *ep;
 	char msg[BUFSIZ*2];
@@ -81,7 +78,7 @@ EXPORT const char * wGetAppLibDir( void )
 		return appLibDir;
 	}
 
-	for (cp=wAppName,ep=envvar; *cp; cp++,ep++)
+	for (cp=wlibGetAppName(),ep=envvar; *cp; cp++,ep++)
 		*ep = toupper(*cp);
 	strcpy( ep, "LIB" );
 	ep = getenv( envvar );
@@ -92,24 +89,22 @@ EXPORT const char * wGetAppLibDir( void )
 		}
 	}
 
-#ifdef XTRKCAD_CMAKE_BUILD
 	strcpy(appLibDir, XTRKCAD_INSTALL_PREFIX);
 	strcat(appLibDir, "/share/");
-	strcat(appLibDir, wAppName);
+	strcat(appLibDir, wlibGetAppName());
 
 	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
 		return appLibDir;
 	}
-#endif
 
-	strcpy( appLibDir, "/usr/share/" );
-	strcat( appLibDir, wAppName );
+	strcpy( appLibDir, "/usr/lib/" );
+	strcat( appLibDir, wlibGetAppName() );
 	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
 		return appLibDir;
 	}
 
-	strcpy( appLibDir, "/usr/local/share/" );
-	strcat( appLibDir, wAppName );
+	strcpy( appLibDir, "/usr/local/lib/" );
+	strcat( appLibDir, wlibGetAppName() );
 	if ((stat( appLibDir, &buf) == 0 ) && S_ISDIR( buf.st_mode)) {
 		return appLibDir;
 	}
@@ -118,11 +113,11 @@ EXPORT const char * wGetAppLibDir( void )
 		_("The required configuration files could not be located in the expected location.\n\n"
 		"Usually this is an installation problem. Make sure that these files are installed in either \n"
 		"  %s/share/xtrkcad or\n"
-		"  /usr/share/%s or\n"
-		"  /usr/local/share/%s\n"
+		"  /usr/lib/%s or\n"
+		"  /usr/local/lib/%s\n"
 		"If this is not possible, the environment variable %s must contain "
 		"the name of the correct directory."),
-		XTRKCAD_INSTALL_PREFIX, wAppName, wAppName, envvar );
+		XTRKCAD_INSTALL_PREFIX, wlibGetAppName(), wlibGetAppName(), envvar );
 	wNoticeEx( NT_ERROR, msg, _("Ok"), NULL );
 	appLibDir[0] = '\0';
 	wExit(0);
@@ -138,7 +133,7 @@ EXPORT const char * wGetAppLibDir( void )
  */
 
 
-EXPORT const char * wGetAppWorkDir(
+const char * wGetAppWorkDir(
 		void )
 {
 	char tmp[BUFSIZ+20];
@@ -186,7 +181,7 @@ EXPORT const char * wGetAppWorkDir(
  * \return    pointer to the user's home directory
  */
 
-EXPORT const char *wGetUserHomeDir( void )
+const char *wGetUserHomeDir( void )
 {
 	char *homeDir;
 	
@@ -222,6 +217,10 @@ typedef struct {
 dynArr_t prefs_da;
 #define prefs(N) DYNARR_N(prefs_t,prefs_da,N)
 wBool_t prefInitted = FALSE;
+
+/**
+ * Read the configuration file into memory
+ */
 
 static void readPrefs( void )
 {
@@ -276,7 +275,7 @@ static void readPrefs( void )
  * \param sval IN value to save
  */
 
-EXPORT void wPrefSetString(
+void wPrefSetString(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		const char * sval )		/* Value */
@@ -303,12 +302,16 @@ EXPORT void wPrefSetString(
 	p->val = strdup(sval);
 }
 
+/**
+ * Get a string from the user preferences.
+ *
+ * \param section IN section in preferences file
+ * \param name IN name of parameter
+ */
 
-EXPORT const char * wPrefGetString(	
+const char * wPrefGetString(	
 		const char * section,			/* Section */
 		const char * name )			/* Name */
-/*
-*/
 {
 	prefs_t * p;
 
@@ -352,7 +355,7 @@ EXPORT void wPrefSetInteger(
  * \return TRUE if value differs from default, FALSE if the same
  */
 
-EXPORT wBool_t wPrefGetInteger(
+wBool_t wPrefGetInteger(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		long * res,		/* Address of result */
@@ -404,7 +407,7 @@ EXPORT void wPrefSetFloat(
  */
 
 
-EXPORT wBool_t wPrefGetFloat(
+wBool_t wPrefGetFloat(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		double * res,		/* Address of result */
@@ -426,40 +429,14 @@ EXPORT wBool_t wPrefGetFloat(
 	return TRUE;
 }
 
-
-EXPORT const char * wPrefGetSectionItem(
-		const char * sectionName,
-		wIndex_t * index,
-		const char ** name )
-{
-	prefs_t * p;
-
-	if (!prefInitted)
-		readPrefs();
-	
-	if ( *index >= prefs_da.cnt )
-		return NULL;
-
-	for (p=&prefs((*index)++); p<&prefs(prefs_da.cnt); p++,(*index)++) {
-		if ( strcmp( p->section, sectionName ) == 0 ) {
-			if ( name )
-				*name = p->name;
-			return p->val;
-		}
-	}
-	return NULL;
-}
-
 /**
  * Save the configuration to a file. The config parameters are held and updated in an array.
  * To make the settings persistant, this function has to be called. 
  *
  */
 
-EXPORT void wPrefFlush(
+void wPrefFlush(
 		void )
-/*
-*/
 {
 	prefs_t * p;
 	char tmp[BUFSIZ];
@@ -481,11 +458,13 @@ EXPORT void wPrefFlush(
 	fclose( prefFile );
 }
 
+/**
+ * Clear the preferences from memory
+ * \return  
+ */
 
-EXPORT void wPrefReset(
+void wPrefReset(
 		void )
-/*
-*/
 {
 	prefs_t * p;
 

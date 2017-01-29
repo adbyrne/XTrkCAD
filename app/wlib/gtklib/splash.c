@@ -1,7 +1,5 @@
-/** \file gtksplash.c
+/** \file splash.c
  * Handling of the Splash Window functions
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtksplash.c,v 1.5 2009-05-31 14:48:58 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,22 +20,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <gdk/gdkkeysyms.h>
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
 #include <gtk/gtk.h>
 
 #include "gtkint.h"
 
 #define LOGOFILENAME "logo.bmp"
 
-static GtkWidget *window;	/** splash window handle */
-static GtkWidget *message;	/** window handle for progress message */
+static GtkWidget *window;	/**< splash window handle */
+static GtkWidget *message;	/**< window handle for progress message */
 
 /**
  * Create the splash window shown during startup. The function loads the logo 

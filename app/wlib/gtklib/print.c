@@ -36,6 +36,9 @@
 
 #include <stdint.h>
 
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
 #include "gtkint.h"
 #include <gtk/gtkprintunixdialog.h>
 #include <gtk/gtkprintjob.h>
@@ -291,7 +294,7 @@ static void psSetColor(
 		wDrawColor color )
 {
 	cairo_t *cr = psPrint_d.printContext;
-	GdkColor* const gcolor = gtkGetColor(color, TRUE);
+	GdkColor* const gcolor = wlibGetColor(color, TRUE);
 
 	cairo_set_source_rgb(cr, gcolor->red / 65535.0,
 							 gcolor->green / 65535.0,
@@ -539,7 +542,7 @@ void psPrintString(
 
 	// set the correct font and size
 	/** \todo use a getter function instead of double conversion */
-	desc = pango_font_description_from_string (gtkFontTranslate( fp ));
+	desc = pango_font_description_from_string (wlibFontTranslate( fp ));
 
 	//don't know why the size has to be reduced to 75% :-(
 	pango_font_description_set_size(desc, fs * PANGO_SCALE *0.75 );

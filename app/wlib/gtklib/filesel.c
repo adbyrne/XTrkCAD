@@ -28,6 +28,12 @@
 #include <unistd.h>
 #include <string.h>
 
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
+#include <gtk/gtk.h>
 #include "gtkint.h"
 #include "i18n.h"
 
@@ -135,10 +141,9 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 	GSList *fileNameList;
 	GError *err = NULL;
 	GtkFileFilter *activeFilter;
-	
-	char **fileNames;
-	
+	char **fileNames;	
 	char * cp;
+	
 	if (fs->window == NULL) {
 		fs->window = gtk_file_chooser_dialog_new( fs->title, 
 										   GTK_WINDOW( fs->parent->gtkwin ),
@@ -159,18 +164,20 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			for( i = 0; i <= fs->pattCount; i++ ) {
 				gtk_file_chooser_add_filter( GTK_FILE_CHOOSER( fs->window ), fs->filter[ i ] ); 
 			}
-		}
+		}												
+		/** \todo for loading a shortcut folder could be added linking to the example directory */
 
 	}
 	strcpy( name, dirName );
-    if( fs->mode == FS_SAVE )
-		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
+
+	if( fs->mode == FS_SAVE )
+		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name ); 
     // Add a current folder and a shortcut to it for Load/import dialogs
     if( fs->mode == FS_LOAD ) {
         gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
         gtk_file_chooser_add_shortcut_folder( GTK_FILE_CHOOSER(fs->window), name, NULL );
     }
-
+    
 	if( gtk_dialog_run( GTK_DIALOG( fs->window )) == GTK_RESPONSE_ACCEPT ) {
 		
 		fileNameList = gtk_file_chooser_get_uris( GTK_FILE_CHOOSER(fs->window) );
@@ -204,7 +211,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		}
 		free( fileNames );
 		g_slist_free (fileNameList);	
-	}	
+	}
 	gtk_widget_hide( GTK_WIDGET( fs->window ));
 	
 	return 1;

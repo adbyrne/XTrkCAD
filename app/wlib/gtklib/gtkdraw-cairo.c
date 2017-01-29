@@ -29,9 +29,13 @@
 #include <string.h>
 #include <math.h>
 
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
 #include "gtkint.h"
 #include "gdk/gdkkeysyms.h"
 
+#define gtkAddHelpString( a, b ) wlibAddHelpString( a, b )
 
 #define CENTERMARK_LENGTH (6)
 
@@ -116,7 +120,7 @@ static GdkGC * selectGC(
 	{
 		if(bd->lastColor != color || !bd->lastColorInverted)
 		{
-			gdk_gc_set_foreground( bd->gc, gtkGetColor(color,FALSE) );
+			gdk_gc_set_foreground( bd->gc, wlibGetColor(color,FALSE) );
 			bd->lastColor = color;
 			bd->lastColorInverted = TRUE;
 		}
@@ -127,7 +131,7 @@ static GdkGC * selectGC(
 	{
 		if(bd->lastColor != color || bd->lastColorInverted)
 		{
-			gdk_gc_set_foreground( bd->gc, gtkGetColor(color,TRUE) );
+			gdk_gc_set_foreground( bd->gc, wlibGetColor(color,TRUE) );
 			bd->lastColor = color;
 			bd->lastColorInverted = FALSE;
 		}
@@ -182,7 +186,7 @@ static cairo_t* gtkDrawCreateCairoContext(
 	}
 	else
 	{
-		GdkColor* const gcolor = gtkGetColor(color, TRUE);
+		GdkColor* const gcolor = wlibGetColor(color, TRUE);
 		cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
 
 		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
@@ -413,19 +417,19 @@ EXPORT void wDrawString(
 	cairo_translate( cairo, x, y );
 	cairo_rotate( cairo, angle );
 
-	layout = gtkFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
+	layout = wlibFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
 									  (int *) &w, (int *) &h,
 									  (int *) &ascent, (int *) &descent);
 
 	/* cairo does not support the old method of text removal by overwrite; force always write here and
            refresh on cancel event */
-	GdkColor* const gcolor = gtkGetColor(color, TRUE);
+	GdkColor* const gcolor = wlibGetColor(color, TRUE);
 	cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
 
 	cairo_move_to( cairo, 0, -ascent );
 
 	pango_cairo_show_layout(cairo, layout);
-	gtkFontDestroyPangoLayout(layout);
+	wlibFontDestroyPangoLayout(layout);
 	cairo_restore( cairo );
 	gtkDrawDestroyCairoContext(cairo);
 
@@ -459,8 +463,8 @@ EXPORT void wDrawGetTextSize(
 	*w = 0;
 	*h = 0;
 
-	gtkFontDestroyPangoLayout(
-		gtkFontCreatePangoLayout(bd->widget, NULL, fp, fs, s,
+	wlibFontDestroyPangoLayout(
+		wlibFontCreatePangoLayout(bd->widget, NULL, fp, fs, s,
 								 &textWidth, (int *) &textHeight,
 								 (int *) &ascent, (int *) &descent));
 
@@ -713,7 +717,7 @@ EXPORT void wDrawBitMap(
 				} else if ( (opts&wDrawOptNoClip) != 0 ) {
 					xx += bd->realX;
 					yy += bd->realY;
-					b = gtkGetControlFromPos( bd->parent, xx, yy );
+					b = wlibGetControlFromPos( bd->parent, xx, yy );
 					if ( b ) {
 						if ( b->type == B_DRAW )
 							gdk_window = ((wDraw_p)b)->pixmap;
@@ -844,7 +848,7 @@ EXPORT void wDrawGetSize(
 		wPos_t *h )
 {
 	if (bd->widget)
-		gtkControlGetSize( (wControl_p)bd );
+		wlibControlGetSize( (wControl_p)bd );
 	*w = bd->w-2;
 	*h = bd->h-2;
 }
@@ -956,7 +960,7 @@ static gint draw_leave_event(
 		GtkWidget *widget,
 		GdkEvent * event )
 {
-	gtkHelpHideBalloon();
+//	gtkHelpHideBalloon();
 	return FALSE;
 }
 
@@ -1072,7 +1076,7 @@ static gint draw_char_event(
 	}
 
 	if (extKey != wAccelKey_None) {
-		if ( gtkFindAccelKey( event ) == NULL ) {
+		if ( wlibFindAccelKey( event ) == NULL ) {
 			bd->action( bd, bd->context, wActionExtKey + ((int)extKey<<8), bd->lastX, bd->lastY );
 		}
 		return TRUE;
@@ -1111,12 +1115,12 @@ EXPORT wDraw_p wDrawCreate(
 {
 	wDraw_p bd;
 
-	bd = (wDraw_p)gtkAlloc( parent,  B_DRAW, x, y, NULL, sizeof *bd, NULL );
+	bd = (wDraw_p)wlibAlloc( parent,  B_DRAW, x, y, NULL, sizeof *bd, NULL );
 	bd->option = option;
 	bd->context = context;
 	bd->redraw = redraw;
 	bd->action = action;
-	gtkComputePos( (wControl_p)bd );
+	wlibComputePos( (wControl_p)bd );
 
 	bd->widget = gtk_drawing_area_new();
 	gtk_drawing_area_size( GTK_DRAWING_AREA(bd->widget), width, height );
@@ -1153,7 +1157,7 @@ EXPORT wDraw_p wDrawCreate(
 	bd->maxH = bd->h = height;
 
 	gtk_fixed_put( GTK_FIXED(parent->widget), bd->widget, bd->realX, bd->realY );
-	gtkControlGetSize( (wControl_p)bd );
+	wlibControlGetSize( (wControl_p)bd );
 	gtk_widget_realize( bd->widget );
 	bd->pixmap = gdk_pixmap_new( bd->widget->window, width, height, -1 );
 	bd->gc = gdk_gc_new( parent->gtkwin->window );
@@ -1169,7 +1173,7 @@ EXPORT wDraw_p wDrawCreate(
 		bd->labelW = gtkAddLabel( (wControl_p)bd, labelStr );
 #endif
 	gtk_widget_show( bd->widget );
-	gtkAddButton( (wControl_p)bd );
+	wlibAddButton( (wControl_p)bd );
 	gtkAddHelpString( bd->widget, helpStr );
 
 	return bd;
@@ -1185,7 +1189,7 @@ wDraw_p wBitMapCreate(          wPos_t w, wPos_t h, int arg )
 {
 	wDraw_p bd;
 
-	bd = (wDraw_p)gtkAlloc( gtkMainW,  B_DRAW, 0, 0, NULL, sizeof *bd, NULL );
+	bd = (wDraw_p)wlibAlloc( gtkMainW,  B_DRAW, 0, 0, NULL, sizeof *bd, NULL );
 
 	bd->lastColor = -1;
 	bd->dpi = 75;
