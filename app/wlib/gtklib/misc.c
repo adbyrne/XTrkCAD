@@ -40,7 +40,6 @@ wWin_p gtkMainW;
 
 long debugWindow = 0;
 
-char wAppName[256];
 char wConfigName[ 256 ];
 		
 const char * wNames[] = {
@@ -91,8 +90,7 @@ GdkPixmap* wlibMakeIcon(
 {
 	GdkPixmap * pixmap;
 	char ** pixmapData;
-	char * oldline1;
-	static char newline1[] = " \tc None s None";
+
 	char line0[40];
 	char line2[40];
 	int row,col,wb;

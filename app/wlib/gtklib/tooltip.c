@@ -202,6 +202,7 @@ void wlibAddHelpString(
 		const char * helpStr )
 {
 	char *string;
+	char *wAppName = wlibGetAppName();
 	wBalloonHelp_t * bhp;
 	
 	if (helpStr==NULL || *helpStr==0)

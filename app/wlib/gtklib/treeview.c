@@ -121,13 +121,14 @@ wlibTreeViewSetSelected(wList_p b, int index)
 {
     GtkTreeSelection *sel;
     GtkTreeIter iter;
-    int current = b->last;
-    int inx;
+
     wListItem_p id_p;
 
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(b->treeView));
 
     if (gtk_tree_selection_count_selected_rows(sel)) {
+		int inx;
+        
         gtk_tree_selection_unselect_all(sel);
 
         // and synchronize the internal data structures
@@ -242,7 +243,6 @@ int
 wlibTreeViewAddColumns(GtkWidget *tv, int count)
 {
     GtkCellRenderer *renderer;
-    GtkTreeViewColumn *column;
     int i;
 
     assert(tv != NULL);
@@ -272,12 +272,13 @@ int
 wlibAddColumnTitles(GtkWidget *tv, const char **titles)
 {
     int i = 0;
-    GtkTreeViewColumn *column;
 
     assert(tv != NULL);
 
     if (titles) {
         while (*titles) {
+		    GtkTreeViewColumn *column;
+		    
             column = gtk_tree_view_get_column(GTK_TREE_VIEW(tv), i + 1);
 
             if (column) {
@@ -307,14 +308,14 @@ int
 wlibTreeViewAddData(GtkWidget *tv, int cols, char *label, GdkPixbuf *pixbuf,
                     wListItem_p userData)
 {
-    int usedCols;
     GtkListStore *listStore = GTK_LIST_STORE(gtk_tree_view_get_model(GTK_TREE_VIEW(
                                   tv)));
-    GtkTreeViewColumn *column;
 
-    usedCols = wlibListStoreAddData(listStore, pixbuf, cols, userData);
+    wlibListStoreAddData(listStore, pixbuf, cols, userData);
 
     if (pixbuf) {
+	    GtkTreeViewColumn *column;
+	    
         // first column in list store has pixbuf
         column = gtk_tree_view_get_column(GTK_TREE_VIEW(tv), 0);
         gtk_tree_view_column_set_visible(column,
@@ -338,7 +339,7 @@ void
 wlibTreeViewAddRow(wList_p b, char *label, wIcon_p bm, wListItem_p id_p)
 {
     GtkAdjustment *adj;
-    GdkPixbuf *pixbuf;
+    GdkPixbuf *pixbuf = NULL;
 
     if (bm) {
         pixbuf = wlibMakePixbuf(bm);
@@ -456,7 +457,6 @@ wList_p wListCreate(
     GtkTreeSelection *sel;
     wList_p bl;
     static wPos_t zeroPos = 0;
-    int i;
 
     assert(width != 0);
 

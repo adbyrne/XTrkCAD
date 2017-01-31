@@ -162,7 +162,7 @@ const char * wGetAppWorkDir(
 			 */
 			struct stat stFileInfo;
 			char appEtcConfig[BUFSIZ];
-			sprintf( appEtcConfig, "/etc/%s.rc", wAppName );
+			sprintf( appEtcConfig, "/etc/%s.rc", wlibGetAppName());
 			
 			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
 				char copyConfigCmd[(BUFSIZ * 2) + 3];
@@ -224,7 +224,7 @@ wBool_t prefInitted = FALSE;
 
 static void readPrefs( void )
 {
-	char tmp[BUFSIZ], *sp, *np, *vp, *cp;
+	char tmp[BUFSIZ], *np, *vp, *cp;
 	const char * workDir;
 	FILE * prefFile;
 	prefs_t * p;
@@ -236,6 +236,8 @@ static void readPrefs( void )
 	if (prefFile == NULL)
 		return;
 	while ( ( fgets(tmp, sizeof tmp, prefFile) ) != NULL ) {
+		char *sp;
+		
 		sp = tmp;
 		while ( *sp==' ' || *sp=='\t' ) sp++;
 		if ( *sp == '\n' || *sp == '#' )

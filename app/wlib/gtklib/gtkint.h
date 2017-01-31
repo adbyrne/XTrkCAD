@@ -130,7 +130,6 @@ struct wIcon_t {
 		const void * bits;
 		};
 
-extern char wAppName[];
 extern char wConfigName[];
 extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
