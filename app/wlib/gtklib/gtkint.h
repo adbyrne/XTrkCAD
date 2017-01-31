@@ -283,7 +283,7 @@ void wlibTreeViewAddRow( wList_p b, char *label, wIcon_p bm, wListItem_p id_p );
 void wlibListStoreClear( GtkListStore *listStore );
 void *wTreeViewGetItemContext( wList_p b, int row );
 int wTreeViewGetCount( wList_p b );
-void wlibTreeViewToggleSelected( wList_p b, int index );
+void wlibTreeViewSetSelected( wList_p b, int index );
 
 /* liststore.c */
 wListItem_p wlibListItemGet(GtkListStore *ls,wIndex_t inx, GList ** childR );

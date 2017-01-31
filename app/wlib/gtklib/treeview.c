@@ -102,32 +102,37 @@ wIndex_t wListGetIndex(
 }
 
 /**
- * Set the selected state of an entry in the list
+ * Set an entry in the list to selected. 
  * 
  * \param b IN widget
- * \param index IN entry
+ * \param index IN entry if -1 the current selection is cleared
  * 
  */
  
 void
-wlibTreeViewToggleSelected( wList_p b, int index )
+wlibTreeViewSetSelected( wList_p b, int index )
 {
 	GtkTreeSelection *sel;
 	GtkTreeIter iter;	
 	int current = b->last;
+	int inx;
 	wListItem_p id_p;
 	
 	sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(b->treeView));
 
-	if (current != -1) {
-		if( gtk_tree_selection_get_selected( sel, NULL, NULL ) )
-			gtk_tree_selection_unselect_all( sel );
+	if( gtk_tree_selection_count_selected_rows(sel)) {
+		gtk_tree_selection_unselect_all( sel );
 		
-		id_p = wlibListItemGet( b->listStore, index, NULL );
-		//id_p = getListItem( b, cur, NULL );
-		if ( id_p )
+		// and synchronize the internal data structures
+		wTreeViewGetCount(b);
+		printf( "count: %d\n", b->count );
+		for ( inx=0; inx<b->count; inx++ ) {
+		printf( "count: %d\n", inx );
+			id_p = wlibListItemGet( b->listStore, inx, NULL );
 			id_p->selected = FALSE;
-	}
+		}
+	}	
+
 	if (index != -1) {
 		gtk_tree_model_iter_nth_child (GTK_TREE_MODEL(b->listStore),
                                       &iter,
@@ -136,7 +141,6 @@ wlibTreeViewToggleSelected( wList_p b, int index )
         gtk_tree_selection_select_iter (sel,
 										&iter);                           
 											
-		//id_p = getListItem( b, val, NULL );
 		id_p = wlibListItemGet( b->listStore, index, NULL );
 		if ( id_p )
 			id_p->selected = TRUE;
@@ -278,7 +282,7 @@ wlibAddColumnTitles( GtkWidget *tv, const char **titles )
  * 
  * \param tv IN treeview
  * \param cols IN number of cols to change
- * \param label IN tab separated string of valules
+ * \param label IN tab separated string of values
  * \param userData IN additional context information
  * \returns 
  */
@@ -296,7 +300,8 @@ wlibTreeViewAddData( GtkWidget *tv, int cols, char *label, GdkPixbuf *pixbuf, wL
 		column = gtk_tree_view_get_column ( GTK_TREE_VIEW(tv), 0);
 		gtk_tree_view_column_set_visible (column,
                                    TRUE);
-	}	
+	}
+		
 }	
 
 /**
@@ -329,6 +334,9 @@ wlibTreeViewAddRow( wList_p b, char *label, wIcon_p bm, wListItem_p id_p )
 								  gtk_adjustment_get_step_increment( adj ));
 		gtk_adjustment_changed( adj );
 	}
+	b->last = gtk_tree_model_iter_n_children (gtk_tree_view_get_model( GTK_TREE_VIEW(b->treeView)),
+                               NULL);
+
 }
 
 
@@ -339,50 +347,99 @@ wlibTreeViewAddRow( wList_p b, char *label, wIcon_p bm, wListItem_p id_p )
  * \param data IN the widget
  */
 
-static void
-tree_selection_changed_cb (GtkTreeSelection *selection, gpointer data)
-{
-    GtkTreeIter iter;
-    GtkTreeModel *model;
-    GList *selectedRows;
-    GtkTreePath *treePath;
-    char *text;
-	wList_p bl = (wList_p)data;
-	wListItem_p id_p = NULL;
-	GValue value = { 0 };	// never forget to initialize to zero
+//static void
+//tree_selection_changed_cb (GtkTreeSelection *selection, gpointer data)
+//{
+    //GtkTreeIter iter;
+    //GtkTreeModel *model;
+    //GList *selectedRows;
+    //GtkTreePath *treePath;
+    //char *text;
+	//wList_p bl = (wList_p)data;
+	//wListItem_p id_p = NULL;
+	//GValue value = { 0 };	// never forget to initialize to zero
 	
+	//int row;
+
+	//if (bl->recursion)
+		//return ;
+
+    //if (selectedRows = gtk_tree_selection_get_selected_rows (selection, &model ))
+    //{
+		//treePath = (GtkTreePath *)g_list_nth_data (selectedRows, 0 );
+		//text = gtk_tree_path_to_string( treePath );
+		//row = atoi( text );
+		//g_free( text );
+
+		//gtk_tree_model_get_iter( model, &iter, treePath );
+		//gtk_tree_model_get_value (model, &iter, LISTCOL_DATA, &value);
+		
+		//id_p = g_value_get_pointer( &value );
+		
+		//g_list_foreach (selectedRows, (GFunc) gtk_tree_path_free, NULL);
+		//g_list_free (selectedRows);		
+		
+		//if ( id_p == NULL ) return;
+		//bl->editted = FALSE;
+		//if ( (bl->option&BL_MANY)==0 && bl->last == row )
+			//return;
+		//bl->last = row;
+		//id_p->selected = TRUE;
+		//if (bl->valueP)
+			//*bl->valueP = row;
+		//if (bl->action)
+			//bl->action( row, id_p->label, 1, bl->data, id_p->itemData );	
+    //}
+	//return;
+//}
+
+/**
+ * Function for handling a selection change. The internal data structure
+ * for the changed row is updated. If a handler function for the list
+ * is given, the data for the row are retrieved and passed to that 
+ * function. This is used to update other fields in a dialog (see Price
+ * List for an example).
+ * 
+ * \param selection IN current selection
+ * \param model IN 
+ * \param path IN
+ * \param path_currently_selected IN
+ * \param data IN the list widget
+ */
+ 
+gboolean
+changeSelection( GtkTreeSelection *selection,
+                 GtkTreeModel *model,
+                 GtkTreePath *path,
+                 gboolean path_currently_selected,
+                 gpointer data)
+{
+	GtkTreeIter iter;
+	GValue value = { 0 };
+	wListItem_p id_p = NULL;
+	wList_p bl = (wList_p)data;
 	int row;
+	char *text;
 
-	if (bl->recursion)
-		return ;
-
-    if (selectedRows = gtk_tree_selection_get_selected_rows (selection, &model ))
-    {
-		treePath = (GtkTreePath *)g_list_nth_data (selectedRows, 0 );
-		text = gtk_tree_path_to_string( treePath );
-		row = atoi( text );
-		g_free( text );
-
-		gtk_tree_model_get_iter( model, &iter, treePath );
-		gtk_tree_model_get_value (model, &iter, LISTCOL_DATA, &value);
+	text = gtk_tree_path_to_string( path );
+	row = atoi( text );
+	g_free( text );
+	
+	gtk_tree_model_get_iter( model, &iter, path );
+	gtk_tree_model_get_value (model, &iter, LISTCOL_DATA, &value);
 		
-		id_p = g_value_get_pointer( &value );
-		
-		g_list_foreach (selectedRows, (GFunc) gtk_tree_path_free, NULL);
-		g_list_free (selectedRows);		
-		
-		if ( id_p == NULL ) return;
-		bl->editted = FALSE;
-		if ( (bl->option&BL_MANY)==0 && bl->last == row )
-			return;
+	id_p = g_value_get_pointer( &value );
+	id_p->selected = !path_currently_selected;
+	
+	if( id_p->selected ) {
 		bl->last = row;
-		id_p->selected = TRUE;
 		if (bl->valueP)
 			*bl->valueP = row;
 		if (bl->action)
 			bl->action( row, id_p->label, 1, bl->data, id_p->itemData );	
-    }
-	return;
+	}
+	
+	return TRUE;
 }
 
 /**
@@ -457,10 +514,14 @@ wList_p wListCreate(
     
     	
 	sel = gtk_tree_view_get_selection (GTK_TREE_VIEW(bl->treeView));                  
-	g_signal_connect (G_OBJECT (sel), "changed",
-                  G_CALLBACK (tree_selection_changed_cb),
-                  bl);
+	//g_signal_connect (G_OBJECT (sel), "changed",
+                  //G_CALLBACK (tree_selection_changed_cb),
+                  //bl);
 	
+	gtk_tree_selection_set_select_function (sel,
+											changeSelection,
+											bl,
+											NULL);
 	
 	wlibTreeViewAddColumns( bl->treeView, colCnt );
 

@@ -92,7 +92,7 @@ void wListSetIndex(
 	if ( b->type == B_DROPLIST ) {
 		wDropListSetIndex( b, element );
 	} else {
-		wlibTreeViewToggleSelected( b, element );
+		wlibTreeViewSetSelected( b, element );
 	}
 	b->last = element;
 	b->recursion--;
@@ -359,7 +359,7 @@ int wListGetColumnWidths(
  * \returns 
  */
 
-wIndex_t wListAddValue(
+	wIndex_t wListAddValue(
 	wList_p b,
 	const char * labelStr,	
 	wIcon_p bm,	
