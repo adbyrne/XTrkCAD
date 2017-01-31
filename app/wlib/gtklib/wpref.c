@@ -147,7 +147,7 @@ const char * wGetAppWorkDir(
 		wNoticeEx( NT_ERROR, _("HOME is not set"), _("Exit"), NULL);
 		wExit(0);
 	}
-	sprintf( appWorkDir, "%s/.%s", homeDir, wAppName );
+	sprintf( appWorkDir, "%s/.%s", homeDir, wlibGetAppName() );
 	if ( (dirp = opendir(appWorkDir)) != NULL ) {
 		closedir(dirp);
 	} else {
