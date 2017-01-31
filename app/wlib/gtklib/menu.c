@@ -240,8 +240,6 @@ static wMenuItem_p createMenuItem(
 
 static void setAcclKey( wWin_p w, GtkWidget * menu, GtkWidget * menu_item, int acclKey )
 {
-	char acclStr[40];
-	int len;
 	int mask;
 	static GtkAccelGroup * accel_alpha_group = NULL;
 	static GtkAccelGroup * accel_nonalpha_group = NULL;
@@ -264,6 +262,9 @@ static void setAcclKey( wWin_p w, GtkWidget * menu, GtkWidget * menu_item, int a
  
 	mask = 0;
 	if (acclKey) {
+		int len;
+		char acclStr[40];
+		
 #ifdef LATER
  		switch ( (acclKey&0xFF) ) {
 		case '+': acclKey = (acclKey&0xFF00) | WSHIFT | '='; break;
@@ -508,7 +509,6 @@ static void pushMenuList(
 {
 	// pointer to the list item
 	wMenuListItem_p ml = (wMenuListItem_p)value;
-	const char * itemLabel;
 
 	if (MRECURSION( ml ))
 		return;
@@ -520,6 +520,8 @@ static void pushMenuList(
 	}
 	// this is the applications callback routine
 	if (ml->mlist->action) {
+		const char * itemLabel;
+
 		itemLabel = gtk_menu_item_get_label( GTK_MENU_ITEM( widget ));
 		
 		ml->mlist->action( 0, itemLabel, ml->data );	
@@ -575,14 +577,13 @@ void wMenuListAdd(
 	const void * data )
 {
 	int i = 0;
-	GtkWidget * item;
 	GList * children;
-	wMenuListItem_p mi;
-	wMenuListItem_p mold;
-	
+
 	i = getMlistOrigin( ml, &children );
 	
 	if( i > -1 ) {
+		wMenuListItem_p mi;
+
 		// we're adding an item, so hide the default placeholder
 		gtk_widget_hide( MMENUITEM( ml ));
 		
@@ -593,6 +594,9 @@ void wMenuListAdd(
 		
 		// is there a maximum number of items set and reached with the new item?
 		if(( ml->max != -1 ) && ( ml->count > ml-> max )) {
+			wMenuListItem_p mold;
+			GtkWidget * item;
+	
 			// get the last item in the list
 			item = g_list_nth_data( children, i + ml->max );
 			// get the pointer to the data structure
@@ -638,17 +642,19 @@ void wMenuListDelete(
 {
 	int i;
 	int found = FALSE;
-	int origin;
-	GtkWidget * item;
-	const char * itemLabel;
+
+
 	GList * children;
-	char * labelStrConverted;
-	wMenuListItem_p mold;
+
 
 	// find the placeholder for the list in the menu
 	i = getMlistOrigin( ml, &children );
 	
 	if( i > -1 ) {
+		int origin;
+		GtkWidget * item;			
+		char * labelStrConverted;
+		
 		// starting from the placeholder, find the menu item with the correct text
 		found = FALSE;
 		labelStrConverted = wlibConvertInput( labelStr );
@@ -659,6 +665,8 @@ void wMenuListDelete(
 		// compare items
 		//    if identical, leave loop
 		while( i <= origin + ml->count && !found ) {
+			const char * itemLabel;
+			
 			item = g_list_nth_data( children, i );
 			itemLabel = gtk_menu_item_get_label( GTK_MENU_ITEM( item ));
 			if( !g_utf8_collate (itemLabel, labelStrConverted ))
@@ -667,6 +675,8 @@ void wMenuListDelete(
 				i++;
 		}
 		if( found ) {
+			wMenuListItem_p mold;
+
 			mold = g_object_get_data( G_OBJECT( item ), WLISTITEM );
 			// kill the menu entry
 			gtk_widget_destroy( item );
@@ -698,10 +708,9 @@ const char *
 wMenuListGet( wMenuList_p ml, int index, void ** data )
 {
 	int i;
-	GtkWidget * item;
+
 	GList * children;
 	const char * itemLabel = NULL;
-	wMenuListItem_p mold;
 	
 	// check whether index is in range, if not return immediately
 	if ( index >= ml->count || ml->count <= 0 ) {
@@ -714,10 +723,13 @@ wMenuListGet( wMenuList_p ml, int index, void ** data )
 	i = getMlistOrigin( ml, &children );
 	
 	if( i > -1 ) {
-			item = g_list_nth_data( children, i + index + 1 );
-			itemLabel = gtk_menu_item_get_label( GTK_MENU_ITEM( item ));
-			mold = g_object_get_data( G_OBJECT( GTK_MENU_ITEM( item ) ), WLISTITEM );
-			*data = mold->data;
+		GtkWidget * item;
+		wMenuListItem_p mold;
+
+		item = g_list_nth_data( children, i + index + 1 );
+		itemLabel = gtk_menu_item_get_label( GTK_MENU_ITEM( item ));
+		mold = g_object_get_data( G_OBJECT( GTK_MENU_ITEM( item ) ), WLISTITEM );
+		*data = mold->data;
 	}
 	
 	if( children )
@@ -735,11 +747,8 @@ wMenuListGet( wMenuList_p ml, int index, void ** data )
 void wMenuListClear(
 	wMenuList_p ml )
 {
-	int i;
 	int origin;
-	GtkWidget * item;
 	GList * children;
-	wMenuListItem_p mold;
 
 	if (ml->count == 0)
 		return;
@@ -747,8 +756,13 @@ void wMenuListClear(
 	origin = getMlistOrigin( ml, &children );
 		
 	if( origin > -1 ) {
+		int i;
+
 		i = origin;
 		while( i < origin + ml->count ) {
+			wMenuListItem_p mold;
+			GtkWidget * item;
+			
 			item = g_list_nth_data( children, i + 1 );
 			mold = g_object_get_data( G_OBJECT( item ), WLISTITEM );
 			// kill the menu entry

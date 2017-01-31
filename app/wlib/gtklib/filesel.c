@@ -77,9 +77,6 @@ struct wFilSel_t * wFilSelCreate(
 	void * data )
 {
 	struct wFilSel_t	*fs;
-	int count;
-	char * cp;
-	GtkFileFilter *filter;
 
 	fs = (struct wFilSel_t*)malloc(sizeof *fs);
 	if (!fs)
@@ -94,9 +91,10 @@ struct wFilSel_t * wFilSelCreate(
 	fs->data = data;
 
 	if (pattList) {
+		char * cp = strdup(pattList);
+		int count = 0;
+
 		//create filters for the passed filter list
-		cp = strdup(pattList);
-		count = 0;
 		// names and patterns are separated by |
 		cp = strtok( cp, "|" );		
 		while ( cp  && count < (MAX_ALLOWEDFILTERS - 1)) {
@@ -136,14 +134,9 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 	char name[1024];
 	char *host;
 	char *file;
-	char *namePart;
 	int i;
-	GSList *fileNameList;
 	GError *err = NULL;
-	GtkFileFilter *activeFilter;
-	char **fileNames;	
-	char * cp;
-	
+
 	if (fs->window == NULL) {
 		fs->window = gtk_file_chooser_dialog_new( fs->title, 
 										   GTK_WINDOW( fs->parent->gtkwin ),
@@ -179,11 +172,15 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
     }
     
 	if( gtk_dialog_run( GTK_DIALOG( fs->window )) == GTK_RESPONSE_ACCEPT ) {
+		char **fileNames;	
+		GSList *fileNameList;
 		
 		fileNameList = gtk_file_chooser_get_uris( GTK_FILE_CHOOSER(fs->window) );
 		fileNames = calloc( sizeof(char *), g_slist_length (fileNameList) ); 
 			
 		for (i=0; i < g_slist_length (fileNameList); i++ ) {
+			char *namePart;
+
 			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ), &host, &err );
 			
 			// check for presence of file extension

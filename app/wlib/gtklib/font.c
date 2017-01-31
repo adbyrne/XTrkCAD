@@ -85,9 +85,9 @@ static wFont_p curFont = NULL;
 static void fontSelectionDialogCallback(GtkFontSelectionDialog
                                         *fontSelectionDialog, gint response, gpointer data)
 {
-    gchar *fontName;
-
     if (response == GTK_RESPONSE_APPLY || response == GTK_RESPONSE_OK) {
+		gchar *fontName;
+
         fontName = gtk_font_selection_dialog_get_font_name(fontSelectionDialog);
         wPrefSetString("font", "name", fontName);
         pango_font_description_free(curFont->fontDescription);
@@ -267,8 +267,6 @@ void wInitializeFonts()
 void wSelectFont(
     const char * title)
 {
-    gchar *fontName;
-
     if (!fontInitted) {
         fontInit();
     }
@@ -288,6 +286,8 @@ void wSelectFont(
     gtk_window_set_title(GTK_WINDOW(fontSelectionDialog), title);
 
     if (curFont != NULL) {
+		gchar *fontName;
+
         /* the curFont description contains the latest font info
          * which is depended on the current scale
          * overwrite it with the absoluteFontSize */

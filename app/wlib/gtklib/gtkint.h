@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkint.h,v 1.8 2009-12-12 17:16:08 m_fischer Exp $
+/** \file gtkint.h 
+ * Internal definitions for the gtk-library
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -27,7 +27,6 @@
 #include "gdk/gdk.h"
 #include "gtk/gtk.h"
 
-#define EXPORT
 
 #ifdef WINDOWS
 #define strcasecmp _stricmp
@@ -135,98 +134,93 @@ extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
 
 /* boxes.c */
-static void boxRepaint(wControl_p b);
+void wlibDrawBox(wWin_p win, wBoxType_e style, wPos_t x, wPos_t y, wPos_t w, wPos_t h);
 
 /* button.c */
-static void pushButt(GtkWidget *widget, gpointer value);
-static long choiceGetValue(wChoice_p bc);
-static int pushChoice(GtkWidget *widget, gpointer b);
-static void choiceRepaint(wControl_p b);
+void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr, GtkLabel **labelG, GtkWidget **imageG);
+void wlibButtonDoAction(wButton_p bb);
 
-/* list.c */
-void wListClear(wList_p b);
-void wListSetIndex(wList_p b, int element);
-int CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
-wIndex_t wListFindValue(wList_p b, const char *val);
-wIndex_t wListGetCount(wList_p b);
-void *wListGetItemContext(wList_p b, wIndex_t inx);
-wBool_t wListGetItemSelected(wList_p b, wIndex_t inx);
-wIndex_t wListGetSelectedCount(wList_p b);
-void wListSelectAll(wList_p bl);
-wBool_t wListSetValues(wList_p b, wIndex_t row, const char *labelStr, wIcon_p bm, void *itemData);
-void wListDelete(wList_p b, wIndex_t inx);
-int wListGetColumnWidths(wList_p bl, int colCnt, wPos_t *colWidths);
-wIndex_t wListAddValue(wList_p b, const char *labelStr, wIcon_p bm, void *itemData);
-void wListSetSize(wList_p bl, wPos_t w, wPos_t h);
-wList_p wComboListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, long number, wPos_t width, long *valueP, wListCallBack_p action, void *data);
+/* color.c */
+typedef struct {
+    unsigned char red;
+    unsigned char green;
+    unsigned char blue;
+    GdkColor normalColor;
+    GdkColor invertColor;
+    long rgb;
+    int colorChar;
+} colorMap_t;
 
-/* misc.c */
+GdkColor *wlibGetColor(wDrawColor color, wBool_t normal);
 
-int wlibAddLabel( wControl_p, const char * );
-void * wlibAlloc( wWin_p, wType_e, wPos_t, wPos_t, const char *, int, void * );
-void wlibComputePos( wControl_p );
-void wlibControlGetSize( wControl_p );
-void wlibAddButton( wControl_p );
-wControl_p wlibGetControlFromPos( wWin_p, wPos_t, wPos_t );
-char * wlibConvertInput( const char * );
-char * wlibConvertOutput( const char * );
-struct accelData_t;
-struct accelData_t * wlibFindAccelKey( GdkEventKey * event );
-wBool_t wlibHandleAccelKey( GdkEventKey * );
+/* control.c */
 
-wBool_t catch_shift_ctrl_alt_keys( GtkWidget *, GdkEventKey *, void * );
-//void gtkSetReadonly( wControl_p, wBool_t );
-void wlibSetTrigger( wControl_p, setTriggerCallback_p );
-GdkPixmap * wlibMakeIcon( GtkWidget *, wIcon_p, GdkBitmap ** );
+/* droplist.c */
+enum columns {
+	LISTCOL_DATA,			/**< user data not for display */
+	LISTCOL_BITMAP,         /**< bitmap column */
+	LISTCOL_TEXT, 			/**< starting point for text columns */
+};
+GtkWidget *wlibNewDropList(GtkListStore *ls, int editable);
 
-
-/* notice.c */
-static char * wlibChgMnemonic( char *label );
-
-/* window.c */
-void wlibDoModal( wWin_p, wBool_t );
-
-/* gtkhelp.c */
-void load_into_view( char *, int );
-//void gtkAddHelpString( GtkWidget *, const char * );
-//void gtkHelpHideBalloon( void );
-
-/* boxes.c */
-void wlibDrawBox( wWin_p, wBoxType_e, wPos_t, wPos_t, wPos_t, wPos_t );
-
-/* lines.c */
-void wlibLineShow( wLine_p b, wBool_t show );
+/* filesel.c */
 
 /* font.c */
-const char * wlibFontTranslate( wFont_p );
-PangoLayout *wlibFontCreatePangoLayout( GtkWidget *, void *cairo,
-									  wFont_p, wFontSize_t, const char *,
-									  int *, int *, int *, int * );
+PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp, wFontSize_t fs, const char *s, int *width_p, int *height_p, int *ascent_p, int *descent_p);
+void wlibFontDestroyPangoLayout(PangoLayout *layout);
+const char *wlibFontTranslate(wFont_p fp);
 
-/* gtkbutton.c */
-void wlibButtonDoAction( wButton_p );
-void wlibSetLabel( GtkWidget*, long, const char *, GtkLabel**, GtkWidget** );
+/* help.c */
 
-/* gtkcolor.c */
-void wlibGetColorMap( void );
-GdkColor * wlibGetColor( wDrawColor, wBool_t );
+/* lines.c */
+void wlibLineShow(wLine_p bl, wBool_t visible);
 
-/* psprint.c */
+/* list.c */
+int CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
 
-void WlibApplySettings( GtkPrintOperation *op );
-void WlibSaveSettings( GtkPrintOperation *op );
+/* liststore.c */
+wListItem_p wlibListItemGet(GtkListStore *ls, wIndex_t inx, GList **childR);
+void *wlibListStoreGetContext(GtkListStore *ls, int inx);
+void wlibListStoreClear(GtkListStore *listStore);
+GtkListStore *wlibNewListStore(int colCnt);
+void wlibListStoreSetPixbuf(GtkListStore *ls, GtkTreeIter *iter, GdkPixbuf *pixbuf);
+int wlibListStoreAddData(GtkListStore *ls, GdkPixbuf *pixbuf, int cols, wListItem_p id);
+int wlibListStoreUpdateValues(GtkListStore *ls, int row, int cols, char *labels, wIcon_p bm);
 
-void psPrintLine( wPos_t, wPos_t, wPos_t, wPos_t,
-				wDrawWidth, wDrawLineType_e, wDrawColor, wDrawOpts );
-void psPrintArc( wPos_t, wPos_t, wPos_t, double, double, int,
-				wDrawWidth, wDrawLineType_e, wDrawColor, wDrawOpts );
-void psPrintString( wPos_t x, wPos_t y, double a, char * s,
-				wFont_p fp,	double fs,	wDrawColor color,	wDrawOpts opts );
+/* main.c */
+char *wlibGetAppName(void);
 
-void psPrintFillRectangle( wPos_t, wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
-void psPrintFillPolygon( wPos_t [][2], int, wDrawColor, wDrawOpts );
-void psPrintFillCircle( wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
+/* menu.c */
+int getMlistOrigin(wMenuList_p ml, GList **pChildren);
 
+/* misc.c */
+typedef struct accelData_t {
+    wAccelKey_e key;
+    int modifier;
+    wAccelKeyCallBack_p action;
+    void * data;
+} accelData_t;
+
+GdkPixmap *wlibMakeIcon(GtkWidget *widget, wIcon_p ip, GdkBitmap **mask);
+int wlibAddLabel(wControl_p b, const char *labelStr);
+void *wlibAlloc(wWin_p parent, wType_e type, wPos_t origX, wPos_t origY, const char *labelStr, int size, void *data);
+void wlibComputePos(wControl_p b);
+void wlibControlGetSize(wControl_p b);
+void wlibAddButton(wControl_p b);
+wControl_p wlibGetControlFromPos(wWin_p win, wPos_t x, wPos_t y);
+char *wlibConvertInput(const char *inString);
+char *wlibConvertOutput(const char *inString);
+struct accelData_t *wlibFindAccelKey(GdkEventKey *event);
+wBool_t wlibHandleAccelKey(GdkEventKey *event);
+
+/* notice.c */
+
+/* pixbuf.c */
+GdkPixbuf *wlibMakePixbuf(wIcon_p ip);
+
+/* png.c */
+
+/* print.c */
 struct wDraw_t {
 		WOBJ_COMMON
 		void * context;
@@ -254,53 +248,43 @@ struct wDraw_t {
 		cairo_t *printContext;
 		cairo_surface_t *curPrintSurface;
 		};
-		
-/* main.c */
 
-char *wlibGetAppName( void );	
+void WlibApplySettings(GtkPrintOperation *op);
+void WlibSaveSettings(GtkPrintOperation *op);
+void psPrintLine(wPos_t x0, wPos_t y0, wPos_t x1, wPos_t y1, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
+void psPrintArc(wPos_t x0, wPos_t y0, wPos_t r, double angle0, double angle1, wBool_t drawCenter, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
+void psPrintFillRectangle(wPos_t x0, wPos_t y0, wPos_t x1, wPos_t y1, wDrawColor color, wDrawOpts opts);
+void psPrintFillPolygon(wPos_t p[][2], int cnt, wDrawColor color, wDrawOpts opts);
+void psPrintFillCircle(wPos_t x0, wPos_t y0, wPos_t r, wDrawColor color, wDrawOpts opts);
+void psPrintString(wPos_t x, wPos_t y, double a, char *s, wFont_p fp, double fs, wDrawColor color, wDrawOpts opts);
+static void WlibGetPaperSize(void);
 
-/* tooltip.c */	
+/* single.c */
 
+/* splash.c */
+
+/* text.c */
+
+/* timer.c */
+void wlibSetTrigger(wControl_p b, setTriggerCallback_p trigger);
+
+/* tooltip.c */
 #define HELPDATAKEY "HelpDataKey"
-void wlibAddHelpString( GtkWidget * widget,	const char * helpStr );
-
-enum columns {
-	LISTCOL_DATA,			/**< user data not for display */
-	LISTCOL_BITMAP,         /**< bitmap column */
-	LISTCOL_TEXT, 			/**< starting point for text columns */
-};
-
-/* droplist.c */
-int wlibDropListAddColumns( GtkWidget *dropList, int columns );
-wIndex_t wDropListGetCount( wList_p b );
-void *wDropListGetItemContext( wList_p b, wIndex_t inx );
-void wDropListSetIndex( wList_p b, int val );
-void wDropListClear( wList_p b );
-void wDropListAddValue(	wList_p b, char *text, void *data );
-wBool_t wDropListSetValues(	wList_p b, wIndex_t row, const char * labelStr,	wIcon_p bm, void *itemData );
+void wlibAddHelpString(GtkWidget *widget, const char *helpStr);
 
 /* treeview.c */
-void wTreeViewClear( wList_p b );
+void wlibTreeViewSetSelected(wList_p b, int index);
 GtkWidget *wlibNewTreeView(GtkListStore *ls, int showTitles, int multiSelection);
-int wlibTreeViewAddColumns( GtkWidget *tv, int count );
-int wlibAddColumnTitles( GtkWidget *tv, const char **titles );
-int wlibTreeViewAddData( GtkWidget *tv, int cols, char *label, GdkPixbuf *pixbuf, wListItem_p userData );
-void wlibTreeViewAddRow( wList_p b, char *label, wIcon_p bm, wListItem_p id_p );
-void wlibListStoreClear( GtkListStore *listStore );
-void *wTreeViewGetItemContext( wList_p b, int row );
-int wTreeViewGetCount( wList_p b );
-void wlibTreeViewSetSelected( wList_p b, int index );
+int wlibTreeViewAddColumns(GtkWidget *tv, int count);
+int wlibAddColumnTitles(GtkWidget *tv, const char **titles);
+int wlibTreeViewAddData(GtkWidget *tv, int cols, char *label, GdkPixbuf *pixbuf, wListItem_p userData);
+void wlibTreeViewAddRow(wList_p b, char *label, wIcon_p bm, wListItem_p id_p);
+gboolean changeSelection(GtkTreeSelection *selection, GtkTreeModel *model, GtkTreePath *path, gboolean path_currently_selected, gpointer data);
 
-/* liststore.c */
-wListItem_p wlibListItemGet(GtkListStore *ls,wIndex_t inx, GList ** childR );
-GtkListStore *wlibNewListStore( int colCnt );
-void *wlibListStoreGetContext( GtkListStore *ls, int inx );
-void wlibListStoreClear( GtkListStore *listStore );
-int wlibListStoreUpdateValues( GtkListStore *ls, int row, int cols, char *labels, wIcon_p bm );
-int wlibListStoreAddData( GtkListStore *ls, GdkPixbuf *pixbuf, int cols, wListItem_p id );
+/* window.c */
+void wlibDoModal(wWin_p win0, wBool_t modal);
+wBool_t catch_shift_ctrl_alt_keys(GtkWidget *widget, GdkEventKey *event, void *data);
 
-/* pixmap.c */
-GdkPixbuf* wlibMakePixbuf( wIcon_p ip );
+/* wpref.c */
 
-void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr, GtkLabel **labelG, GtkWidget **imageG);
 #endif

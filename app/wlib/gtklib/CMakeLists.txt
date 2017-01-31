@@ -7,7 +7,6 @@ SET(SOURCES
 	bitmap.c
 	boxes.c
 	button.c
-# cproto and cppcheck
 	color.c
 	control.c
 	droplist.c	
@@ -18,7 +17,7 @@ SET(SOURCES
 	list.c
 	liststore.c
 	main.c
-	menu.c
+	menu.c	
 	message.c
 	misc.c
 	notice.c
@@ -29,10 +28,12 @@ SET(SOURCES
 	splash.c
 	text.c
 	timer.c
-	tooltip.c
+	tooltip.c	
 	treeview.c
 	window.c
 	wpref.c
+# cproto and cppcheck
+
 # end of refactored sources	
 	gtkdraw-cairo.c
 	)

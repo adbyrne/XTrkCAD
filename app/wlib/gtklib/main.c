@@ -23,8 +23,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-//#include <sys/time.h>
-//#include <string.h>
 #include <locale.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
@@ -74,9 +72,7 @@ wlibGetAppName()
 int main( int argc, char *argv[] )
 {
 	wWin_p win;
-	wControl_p b;
-	const char *ld, *hp;
-	static char buff[BUFSIZ];
+	const char *ld;
 
 	if ( getenv( "GTKLIB_NOLOCALE" ) == 0 )
 		setlocale( LC_ALL, "en_US" );
@@ -92,6 +88,9 @@ int main( int argc, char *argv[] )
 #else
 	// set up help search path on unix boxes
 	if (ld != NULL) {
+		static char buff[BUFSIZ];
+		const char *hp;
+
 		sprintf( buff, "HELPPATH=/usr/lib/help:%s:", ld );
 		if ( (hp = getenv("HELPPATH")) != NULL )
 			strcat( buff, hp );

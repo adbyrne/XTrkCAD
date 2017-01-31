@@ -34,7 +34,7 @@
 #include <gdk/gdk.h>
 
 #include "gtkint.h"
-#include "i18n.h"
+//#include "i18n.h"
 
 static wBool_t gtkPaused = FALSE;
 static int alarmTimer = 0;
@@ -141,7 +141,7 @@ unsigned long wGetTimer(void)
 {
     struct timeval tv;
     struct timezone tz;
-    int rc;
-    rc = gettimeofday(&tv, &tz);
+    
+    gettimeofday(&tv, &tz);
     return (tv.tv_sec-startTime.tv_sec+1) * 1000 + tv.tv_usec /1000;
 }

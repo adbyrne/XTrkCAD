@@ -51,8 +51,6 @@ wListItem_p wlibListItemGet(
     wIndex_t inx,
     GList ** childR)
 {
-    GList * child;
-    GObject * listItem;
     wListItem_p id_p;
 
     assert(ls != NULL);
@@ -135,7 +133,6 @@ wIndex_t wListGetValues(
 
             if (id_p==NULL) {
                 fprintf(stderr, "wListGetValues - id_p == NULL\n");
-                inx = -1;
             } else {
                 entry_value = id_p->label;
                 item_data = id_p->itemData;
@@ -295,10 +292,6 @@ wlibListStoreUpdateValues(GtkListStore *ls, int row, int cols, char *labels,
                           wIcon_p bm)
 {
     GtkTreeIter iter;
-    GdkPixbuf *pixbuf;
-    char *convertedLabels;
-    char *text;
-    char *start;
     int count;
 
     gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
@@ -309,6 +302,8 @@ wlibListStoreUpdateValues(GtkListStore *ls, int row, int cols, char *labels,
     count = wlibListStoreUpdateIter(ls, &iter, labels);
 
     if (bm) {
+		GdkPixbuf *pixbuf;
+        
         pixbuf = wlibMakePixbuf(bm);
         wlibListStoreSetPixbuf(ls, &iter, pixbuf);
     }

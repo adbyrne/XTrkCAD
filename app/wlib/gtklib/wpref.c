@@ -336,7 +336,7 @@ const char * wPrefGetString(
  * \param lval IN value to save
  */
 
-EXPORT void wPrefSetInteger(
+ void wPrefSetInteger(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		long lval )		/* Value */
@@ -387,7 +387,7 @@ wBool_t wPrefGetInteger(
  * \param lval IN the value
  */
 
-EXPORT void wPrefSetFloat(
+ void wPrefSetFloat(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		double lval )		/* Value */

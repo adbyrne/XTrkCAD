@@ -86,10 +86,7 @@ void wlibSetLabel(
     GtkWidget * * imageG)
 {
     wIcon_p bm;
-    GdkPixbuf *pixbuf;
-    GdkPixmap * pixmap;
     GdkBitmap * mask;
-//    GtkWidget * hbox;
 
     if (widget == 0) {
         abort();
@@ -101,6 +98,8 @@ void wlibSetLabel(
 
             // for XPM files use the pixbuf functions
             if (bm->gtkIconType == gtkIcon_pixmap) {
+				GdkPixbuf *pixbuf;
+
                 pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)bm->bits);
 
                 if (*imageG==NULL) {
@@ -114,6 +113,8 @@ void wlibSetLabel(
                 g_object_unref(pixbuf);
             } else {
                 // otherwise use the conversion to XPM
+                GdkPixmap * pixmap;
+
                 /** \todo { Should use the way via a pixbuf as well } */
                 pixmap = wlibMakeIcon(widget, bm, &mask);
 
@@ -589,7 +590,6 @@ wChoice_p wToggleCreate(
 {
     wChoice_p b;
     const char ** label;
-    GtkWidget *butt;
 
     if ((option & BC_NOBORDER)==0) {
         if (x>=0) {
@@ -621,6 +621,8 @@ wChoice_p wToggleCreate(
     }
 
     for (label=labels; *label; label++) {
+		GtkWidget *butt;
+		
         butt = gtk_check_button_new_with_label(_(*label));
         gtk_box_pack_start(GTK_BOX(b->widget), butt, TRUE, TRUE, 0);
         gtk_widget_show(butt);

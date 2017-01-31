@@ -80,7 +80,7 @@ void wEnableBalloonHelp( int enable )
  * \param help IN tip
  */
 
-EXPORT void wControlSetHelp(
+ void wControlSetHelp(
 	 wControl_p b,		
 	 const char * help )		
 {

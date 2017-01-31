@@ -48,22 +48,19 @@ GdkPixbuf* wlibMakePixbuf(
     wIcon_p ip)
 {
     GdkPixbuf * pixbuf;
-    char ** pixmapData;
-    char * oldline1;
-    static char newline1[] = " \tc None s None";
     char line0[40];
     char line2[40];
-    int row,col,wb;
-    long rgb;
-    const char * bits;
-    GdkColor *transparent;
+
     assert(ip != NULL);
-    transparent = &gtk_widget_get_style(gtkMainW->gtkwin)->bg[gtk_widget_get_state(
-                      gtkMainW->gtkwin)];
 
     if (ip->gtkIconType == gtkIcon_pixmap) {
         pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)ip->bits);
     } else {
+	    const char * bits;
+	    long rgb;
+        int row,col,wb;
+	    char ** pixmapData;
+
         wb = (ip->w+7)/8;
         pixmapData = (char**)g_malloc((3+ip->h) * sizeof *pixmapData);
         pixmapData[0] = line0;

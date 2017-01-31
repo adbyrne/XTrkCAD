@@ -199,7 +199,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_destroy(cairo);
 }
 
-EXPORT void wDrawDelayUpdate(
+ void wDrawDelayUpdate(
 		wDraw_p bd,
 		wBool_t delay )
 {
@@ -216,7 +216,7 @@ EXPORT void wDrawDelayUpdate(
 }
 
 
-EXPORT void wDrawLine(
+ void wDrawLine(
 		wDraw_p bd,
 		wPos_t x0, wPos_t y0,
 		wPos_t x1, wPos_t y1,
@@ -279,7 +279,7 @@ EXPORT void wDrawLine(
  */
 
 
-EXPORT void wDrawArc(
+ void wDrawArc(
 		wDraw_p bd,
 		wPos_t x0, wPos_t y0,
 		wPos_t r,
@@ -348,7 +348,7 @@ EXPORT void wDrawArc(
 
 }
 
-EXPORT void wDrawPoint(
+ void wDrawPoint(
 		wDraw_p bd,
 		wPos_t x0, wPos_t y0,
 		wDrawColor color,
@@ -384,7 +384,7 @@ EXPORT void wDrawPoint(
  *
  ******************************************************************************/
 
-EXPORT void wDrawString(
+ void wDrawString(
 		wDraw_p bd,
 		wPos_t x, wPos_t y,
 		wAngle_t a,
@@ -446,7 +446,7 @@ EXPORT void wDrawString(
 	gtk_widget_draw(bd->widget, &update_rect);
 }
 
-EXPORT void wDrawGetTextSize(
+ void wDrawGetTextSize(
 		wPos_t *w,
 		wPos_t *h,
 		wPos_t *d,
@@ -483,7 +483,7 @@ EXPORT void wDrawGetTextSize(
  *
 *******************************************************************************/
 
-EXPORT void wDrawFilledRectangle(
+ void wDrawFilledRectangle(
 		wDraw_p bd,
 		wPos_t x,
 		wPos_t y,
@@ -522,7 +522,7 @@ EXPORT void wDrawFilledRectangle(
 	gtk_widget_draw( bd->widget, &update_rect );
 }
 
-EXPORT void wDrawFilledPolygon(
+ void wDrawFilledPolygon(
 		wDraw_p bd,
 		wPos_t p[][2],
 		int cnt,
@@ -588,7 +588,7 @@ EXPORT void wDrawFilledPolygon(
 	gtk_widget_draw( bd->widget, &update_rect );
 }
 
-EXPORT void wDrawFilledCircle(
+ void wDrawFilledCircle(
 		wDraw_p bd,
 		wPos_t x0,
 		wPos_t y0,
@@ -627,7 +627,7 @@ EXPORT void wDrawFilledCircle(
 }
 
 
-EXPORT void wDrawClear(
+ void wDrawClear(
 		wDraw_p bd )
 {
 	GdkGC * gc;
@@ -652,7 +652,7 @@ EXPORT void wDrawClear(
 	gtk_widget_draw( bd->widget, &update_rect );
 }
 
-EXPORT void * wDrawGetContext(
+ void * wDrawGetContext(
 		wDraw_p bd )
 {
 	return bd->context;
@@ -665,7 +665,7 @@ EXPORT void * wDrawGetContext(
 *******************************************************************************/
 
 
-EXPORT wDrawBitMap_p wDrawBitMapCreate(
+ wDrawBitMap_p wDrawBitMapCreate(
 		wDraw_p bd,
 		int w,
 		int h,
@@ -686,7 +686,7 @@ EXPORT wDrawBitMap_p wDrawBitMapCreate(
 }
 
 
-EXPORT void wDrawBitMap(
+ void wDrawBitMap(
 		wDraw_p bd,
 		wDrawBitMap_p bm,
 		wPos_t x, wPos_t y,
@@ -766,7 +766,7 @@ EXPORT void wDrawBitMap(
 
 
 
-EXPORT void wDrawSaveImage(
+ void wDrawSaveImage(
 		wDraw_p bd )
 {
 	if ( bd->pixmapBackup ) {
@@ -785,7 +785,7 @@ EXPORT void wDrawSaveImage(
 }
 
 
-EXPORT void wDrawRestoreImage(
+ void wDrawRestoreImage(
 		wDraw_p bd )
 {
 	GdkRectangle update_rect;
@@ -810,7 +810,7 @@ EXPORT void wDrawRestoreImage(
 }
 
 
-EXPORT void wDrawSetSize(
+ void wDrawSetSize(
 		wDraw_p bd,
 		wPos_t w,
 		wPos_t h )
@@ -842,7 +842,7 @@ EXPORT void wDrawSetSize(
 }
 
 
-EXPORT void wDrawGetSize(
+ void wDrawGetSize(
 		wDraw_p bd,
 		wPos_t *w,
 		wPos_t *h )
@@ -860,7 +860,7 @@ EXPORT void wDrawGetSize(
  * \return    the resolution in dpi
  */
 
-EXPORT double wDrawGetDPI(
+ double wDrawGetDPI(
 		wDraw_p d )
 {
 	//if (d == &psPrint_d)
@@ -870,7 +870,7 @@ EXPORT double wDrawGetDPI(
 }
 
 
-EXPORT double wDrawGetMaxRadius(
+ double wDrawGetMaxRadius(
 		wDraw_p d )
 {
 	if (d == &psPrint_d)
@@ -880,7 +880,7 @@ EXPORT double wDrawGetMaxRadius(
 }
 
 
-EXPORT void wDrawClip(
+ void wDrawClip(
 		wDraw_p d,
 		wPos_t x,
 		wPos_t y,
@@ -1101,7 +1101,7 @@ int XW = 0;
 int XH = 0;
 int xw, xh, cw, ch;
 
-EXPORT wDraw_p wDrawCreate(
+ wDraw_p wDrawCreate(
 		wWin_p	parent,
 		wPos_t	x,
 		wPos_t	y,

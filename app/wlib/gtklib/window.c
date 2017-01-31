@@ -99,11 +99,12 @@ static void getWinSize(wWin_p win, const char * nameStr)
 
 static void saveSize(wWin_p win)
 {
-    char pos_s[20];
 
     if ((win->option&F_RESIZE) &&
             (win->option&F_RECALLPOS) &&
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
+	    char pos_s[20];
+
         sprintf(pos_s, "%d %d", win->w,
                 win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0)));
         wPrefSetString(SECTIONWINDOWSIZE, win->nameStr, pos_s);
@@ -119,15 +120,16 @@ static void saveSize(wWin_p win)
 
 static void getPos(wWin_p win)
 {
-    int x, y;
-    const char *cp;
     char *cp1, *cp2;
     wPos_t gtkDisplayWidth = gdk_screen_width();
     wPos_t gtkDisplayHeight = gdk_screen_height();
 
-    if ((win->option&F_RECALLPOS) &&
-            (!win->shown)) {
+    if ((win->option&F_RECALLPOS) && (!win->shown)) {
+		const char *cp;
+
         if ((cp = wPrefGetString(SECTIONWINDOWPOS, win->nameStr))) {
+			int x, y;
+
             x = strtod(cp, &cp1);
 
             if (cp == cp1) {
@@ -172,9 +174,10 @@ static void getPos(wWin_p win)
 static void savePos(wWin_p win)
 {
     int x, y;
-    char pos_s[20];
 
     if ((win->option&F_RECALLPOS)) {
+		char pos_s[20];
+
         gdk_window_get_position(gtk_widget_get_window(GTK_WIDGET(win->gtkwin)), &x, &y);
         x -= 5;
         y -= 25;
@@ -544,17 +547,17 @@ static int window_configure_event(
     GdkEventConfigure * event,
     wWin_p win)
 {
-    wPos_t h;
+//    wPos_t h;
 
     if (win==NULL) {
         return FALSE;
     }
 
-    h = event->height - BORDERSIZE;
+    //h = event->height - BORDERSIZE;
 
-    if (win->option&F_MENUBAR) {
-        h -= MENUH;
-    }
+    //if (win->option&F_MENUBAR) {
+        //h -= MENUH;
+    //}
 
     if (win->option&F_RESIZE) {
         if (event->width < 10 || event->height < 10) {

@@ -72,7 +72,7 @@ struct wText_t {
  * \return
  */
 
-EXPORT void wTextClear(wText_p bt)
+void wTextClear(wText_p bt)
 {
     GtkTextBuffer *tb;
     tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
@@ -93,8 +93,8 @@ EXPORT void wTextClear(wText_p bt)
  * \return
  */
 
-EXPORT void wTextAppend(wText_p bt,
-                        const char *text)
+void wTextAppend(wText_p bt,
+                 const char *text)
 {
     GtkTextBuffer *tb;
     GtkTextIter ti1;
@@ -149,7 +149,7 @@ static char *wlibGetText(wText_p bt)
  * \return    TRUE is success, FALSE if not
  */
 
-EXPORT wBool_t wTextSave(wText_p bt, const char *fileName)
+wBool_t wTextSave(wText_p bt, const char *fileName)
 {
     FILE *f;
     char *cp;
@@ -326,7 +326,7 @@ end_print(GtkPrintOperation *operation,
  * \return    TRUE on success, FALSE on error
  */
 
-EXPORT wBool_t wTextPrint(
+wBool_t wTextPrint(
     wText_p bt)
 {
     GtkPrintOperation *operation;
@@ -378,7 +378,7 @@ EXPORT wBool_t wTextPrint(
  * \return    length of string
  */
 
-EXPORT int wTextGetSize(wText_p bt)
+int wTextGetSize(wText_p bt)
 {
     char *cp = wlibGetText(bt);
     int len = strlen(cp);
@@ -395,7 +395,7 @@ EXPORT int wTextGetSize(wText_p bt)
  * \return
  */
 
-EXPORT void wTextGetText(wText_p bt, char *text, int len)
+void wTextGetText(wText_p bt, char *text, int len)
 {
     char *cp;
     cp = wlibGetText(bt);
@@ -416,7 +416,7 @@ EXPORT void wTextGetText(wText_p bt, char *text, int len)
  * \return
  */
 
-EXPORT void wTextSetReadonly(wText_p bt, wBool_t ro)
+void wTextSetReadonly(wText_p bt, wBool_t ro)
 {
     gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), !ro);
 
@@ -434,7 +434,7 @@ EXPORT void wTextSetReadonly(wText_p bt, wBool_t ro)
  * \return    TRUE of changed, FALSE otherwise
  */
 
-EXPORT wBool_t wTextGetModified(wText_p bt)
+wBool_t wTextGetModified(wText_p bt)
 {
     return bt->changed;
 }
@@ -448,7 +448,7 @@ EXPORT wBool_t wTextGetModified(wText_p bt)
  * \return
  */
 
-EXPORT void wTextSetSize(wText_p bt, wPos_t w, wPos_t h)
+void wTextSetSize(wText_p bt, wPos_t w, wPos_t h)
 {
     gtk_widget_set_size_request(bt->widget, w, h);
     bt->w = w;
@@ -467,8 +467,8 @@ EXPORT void wTextSetSize(wText_p bt, wPos_t w, wPos_t h)
  * \return
  */
 
-EXPORT void wTextComputeSize(wText_p bt, int rows, int cols, wPos_t *width,
-                             wPos_t *height)
+void wTextComputeSize(wText_p bt, int rows, int cols, wPos_t *width,
+                      wPos_t *height)
 {
     *width = rows * 7;
     *height = cols * 14;
@@ -482,7 +482,7 @@ EXPORT void wTextComputeSize(wText_p bt, int rows, int cols, wPos_t *width,
  * \return
  */
 
-EXPORT void wTextSetPosition(wText_p bt, int pos)
+void wTextSetPosition(wText_p bt, int pos)
 {
     /* TODO */
 }
@@ -490,7 +490,7 @@ EXPORT void wTextSetPosition(wText_p bt, int pos)
 /**
  * signal handler for changed signal
  *
- * \param widget IN 
+ * \param widget IN
  * \param bt IN text entry field
  * \return
  */
@@ -512,15 +512,15 @@ static void textChanged(GtkWidget *widget, wText_p bt)
  * \param Y IN y position
  * \param helpStr IN balloon help string
  * \param labelStr IN Button label ???
- * \param option IN 
- * \param width IN 
+ * \param option IN
+ * \param width IN
  * \param valueP IN Current color ???
  * \param action IN Button callback procedure
  * \param data IN ???
  * \return 	bb handle for created text widget
  */
 
-EXPORT wText_p
+wText_p
 wTextCreate(wWin_p	parent,
             wPos_t	x,
             wPos_t	y,

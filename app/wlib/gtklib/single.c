@@ -118,14 +118,15 @@ static gboolean killTimer(
 	GdkEvent *event,
     wString_p b) 
 {
-	const char *s;
-	
+
 	// remove all timers related to this widget	
 	while( g_source_remove_by_user_data( b ))
 		;
 	b->timer = 0;
 	
 	if (b->action) {
+		const char *s;
+		
 		s = gtk_entry_get_text(GTK_ENTRY(b->widget));
 		b->action(s, b->data);
 	}
@@ -140,7 +141,6 @@ static gboolean killTimer(
 static gboolean
 timeoutString( wString_p bs ) 
 {
-	const char *s;
 
 	if ( !bs )
 		return( FALSE );
@@ -148,6 +148,8 @@ timeoutString( wString_p bs )
 		abort();
 	
 	if (bs->action) {
+		const char *s;
+		
 		s = gtk_entry_get_text(GTK_ENTRY(bs->widget));
 		if ( s )
 			bs->action(s, bs->data);

@@ -37,7 +37,7 @@
 #include "gtkint.h"
 #include "i18n.h"
 
-void load_into_view(char *file,
+static void load_into_view(char *file,
                     int requested_view);	// Prototype to please clang.
 
 /* globals and defines related to the HTML help window */
@@ -150,23 +150,23 @@ DestroyHelpWindow(GtkWidget *win, GdkEvent *event, void *ptr)
     return TRUE;
 }
 
-void back_button_clicked(GtkWidget *widget, gpointer data)
+static void back_button_clicked(GtkWidget *widget, gpointer data)
 {
     webkit_web_view_go_back(WEBKIT_WEB_VIEW(data));
 }
 
-void forward_button_clicked(GtkWidget *widget, gpointer data)
+static void forward_button_clicked(GtkWidget *widget, gpointer data)
 {
     webkit_web_view_go_forward(WEBKIT_WEB_VIEW(data));
 }
 
-void home_button_clicked(GtkWidget *widget, gpointer data)
+static void home_button_clicked(GtkWidget *widget, gpointer data)
 {
     load_into_view("index.html", MAIN_VIEW);
 }
 
 /* Toggles the contents pane */
-void contents_button_clicked(GtkWidget *widget, gpointer data)
+static void contents_button_clicked(GtkWidget *widget, gpointer data)
 {
     if (gtk_paned_get_position(GTK_PANED(data)) < 50) {
         gtk_paned_set_position(GTK_PANED(data), 370);
@@ -175,7 +175,8 @@ void contents_button_clicked(GtkWidget *widget, gpointer data)
     }
 }
 
-gboolean contents_click_handler(
+static gboolean 
+contents_click_handler(
     WebKitWebView *web_view,
     WebKitWebFrame *frame,
     WebKitNetworkRequest *request,
@@ -191,7 +192,8 @@ gboolean contents_click_handler(
 /**
  * Initialize the buttons for the help window
  */
-void initialize_buttons(GtkWidget *main_vbox, GtkWidget *content_hpane)
+static void 
+initialize_buttons(GtkWidget *main_vbox, GtkWidget *content_hpane)
 {
     GtkWidget *buttons_hbuttonbox;
     GtkWidget *back_button;
@@ -234,7 +236,7 @@ void initialize_buttons(GtkWidget *main_vbox, GtkWidget *content_hpane)
  * \return handle of the created window.
  */
 
-GtkWidget*
+static GtkWidget*
 CreateHelpWindow(void)
 {
     GtkWidget *main_vbox;
@@ -246,7 +248,7 @@ CreateHelpWindow(void)
     int x, y;
     int w = 0, h = 0;
     const char *pref;
-    char title[100];
+
     wHelpWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     width = gdk_screen_get_width(gtk_window_get_screen((GtkWindow *)wHelpWindow));
     height = gdk_screen_get_height(gtk_window_get_screen((GtkWindow *)wHelpWindow));
@@ -316,6 +318,7 @@ CreateHelpWindow(void)
     return wHelpWindow;
 }
 
+static
 void load_into_view(char *file, int requested_view)
 {
     GtkWidget *view;
@@ -347,7 +350,7 @@ void load_into_view(char *file, int requested_view)
  * \param topic IN topic string
  */
 
-EXPORT void wHelp(const char * topic)
+void wHelp(const char * topic)
 {
     char *htmlFile;
 

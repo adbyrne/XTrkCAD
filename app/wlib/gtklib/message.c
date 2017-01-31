@@ -109,7 +109,7 @@ wPos_t wMessageGetHeight(
  * \return handle for created window
  */
 
-EXPORT wMessage_p wMessageCreateEx(
+ wMessage_p wMessageCreateEx(
     wWin_p	parent,
     wPos_t	x,
     wPos_t	y,

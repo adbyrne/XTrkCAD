@@ -38,22 +38,13 @@
 #include "gtkint.h"
 #include "square10.bmp"
 
-EXPORT wDrawColor wDrawColorWhite;
-EXPORT wDrawColor wDrawColorBlack;
+wDrawColor wDrawColorWhite;
+wDrawColor wDrawColorBlack;
 
 #define RGB(R,G,B) ( ((long)((R)&0xFF)<<16) | ((long)((G)&0xFF)<<8) | ((long)((B)&0xFF)) )
 
 #define MAX_COLOR_DISTANCE (3)
 
-typedef struct {
-    unsigned char red;
-    unsigned char green;
-    unsigned char blue;
-    GdkColor normalColor;
-    GdkColor invertColor;
-    long rgb;
-    int colorChar;
-} colorMap_t;
 static GArray *colorMap_garray = NULL; // Change to use glib array
 
 static colorMap_t colorMap[] = {
@@ -128,7 +119,7 @@ static char lastColorChar = '!';
  * \return definition for gray color
  */
 
-EXPORT wDrawColor wDrawColorGray(
+wDrawColor wDrawColorGray(
     int percent)
 {
     int n;
@@ -170,7 +161,7 @@ void wlibGetColorMap(void)
  * \return
  */
 
-void init_colorMapValue(colorMap_t * t)
+static void init_colorMapValue(colorMap_t * t)
 {
     t->rgb = RGB(t->red, t->green, t->blue);
     t->normalColor.red = t->red*65535/255;
@@ -195,7 +186,7 @@ void init_colorMapValue(colorMap_t * t)
  * \return
  */
 
-void init_colorMap(void)
+static void init_colorMap(void)
 {
     int gint;
     colorMap_garray = g_array_sized_new(TRUE, TRUE, sizeof(colorMap_t),
@@ -222,10 +213,8 @@ wDrawColor wDrawFindColor(
 {
     wDrawColor cc;
     int r0, g0, b0;
-    int d0, d1;
-    long rgb1;
-    colorMap_t * cm_p;
-    int gint;
+    int d0;
+    int i;
     colorMap_t tempMapValue;
     wlibGetColorMap();
     cc = wDrawColorBlack;
@@ -240,18 +229,20 @@ wDrawColor wDrawFindColor(
     }
 
     // Iterate over entire garray
-    for (gint=0; gint<colorMap_garray->len; gint++) {
-        cm_p = &g_array_index(colorMap_garray, colorMap_t, gint);
-        rgb1 = cm_p->rgb;
+    for (i=0; i<colorMap_garray->len; i++) {
+        int d1;
+        colorMap_t * cm_p;
+
+        cm_p = &g_array_index(colorMap_garray, colorMap_t, i);
         d1 = abs(r0-cm_p->red) + abs(g0-cm_p->green) + abs(b0-cm_p->blue);
 
         if (d1 == 0) {
-            return gint;
+            return i;
         }
 
         if (d1 < d0) {
             d0 = d1;
-            cc = gint;
+            cc = i;
         }
     }
 
@@ -265,7 +256,7 @@ wDrawColor wDrawFindColor(
     tempMapValue.blue = b0;
     init_colorMapValue(&tempMapValue);
     g_array_append_val(colorMap_garray,tempMapValue);
-    return gint;
+    return i;
 }
 
 /**
@@ -388,12 +379,11 @@ static int colorSelectCancel(
  * \return TRUE valid color has been selected, FALSE otherwise
  */
 
-EXPORT wBool_t wColorSelect(
+wBool_t wColorSelect(
     const char * title,
     wDrawColor * color)
 {
     static GtkWidget * colorSelectD = NULL;
-    long rgb;
     GdkColor colors;
     colorMap_t * colorMap_e;
 
@@ -425,6 +415,8 @@ EXPORT wBool_t wColorSelect(
     wlibDoModal(NULL, TRUE);
 
     if (colorSelectValid) {
+        long rgb;
+
         gtk_color_selection_get_current_color(GTK_COLOR_SELECTION(
                 GTK_COLOR_SELECTION_DIALOG(colorSelectD)->colorsel), &colors);
         rgb = RGB((int)(colors.red/256), (int)(colors.green/256),

@@ -333,30 +333,35 @@ typedef void (*wListCallBack_p)( wIndex_t, const char *, wIndex_t, void *, void 
 #define BL_EDITABLE	(1L<<23)
 #define BL_ICON		(1L<<0)
 
+
+/* lists, droplists and combo boxes */
+
 wList_p wListCreate(		wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				long, wPos_t, int, wPos_t *, wBool_t *, const char **, long *, wListCallBack_p, void * );
-wList_p wComboListCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
-				long, wPos_t, long *, wListCallBack_p, void * );
 wList_p wDropListCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				long, wPos_t, long *, wListCallBack_p, void * );
-void wListClear(		wList_p );
-void wListSetIndex(		wList_p, wIndex_t );
+				
+wList_p wComboListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, long number, wPos_t width, long *valueP, wListCallBack_p action, void *data);	
+void wListClear(wList_p b);
+void wListSetIndex(wList_p b, int element);
+wIndex_t wListFindValue(wList_p b, const char *val);
+wIndex_t wListGetCount(wList_p b);
 wIndex_t wListGetIndex(		wList_p );
-wIndex_t wListFindValue(	wList_p, const char * );
+void *wListGetItemContext(wList_p b, wIndex_t inx);
+wBool_t wListGetItemSelected(wList_p b, wIndex_t inx);
+wIndex_t wListGetSelectedCount(wList_p b);
+void wListSelectAll(wList_p bl);
+wBool_t wListSetValues(wList_p b, wIndex_t row, const char *labelStr, wIcon_p bm, void *itemData);
+void wListDelete(wList_p b, wIndex_t inx);
+int wListGetColumnWidths(wList_p bl, int colCnt, wPos_t *colWidths);
+wIndex_t wListAddValue(wList_p b, const char *labelStr, wIcon_p bm, void *itemData);
+void wListSetSize(wList_p bl, wPos_t w, wPos_t h);
+wIndex_t wListGetValues(	wList_p, char *, int, void * *, void * * );
+
+/** \todo Check for the existance of following functions */
 void  wListSetValue(		wList_p, const char * );
-int wListGetColumnWidths(	wList_p, int, wPos_t * );
-wBool_t wListSetValues(		wList_p, wIndex_t, const char *, wIcon_p, void * );
 void wListSetActive(		wList_p, wIndex_t, wBool_t );
 void wListSetEditable(		wList_p, wBool_t );
-wIndex_t wListAddValue(		wList_p, const char *, wIcon_p, void * );
-void wListDelete(		wList_p, wIndex_t );
-wIndex_t wListGetValues(	wList_p, char *, int, void * *, void * * );
-void wListSelectAll( wList_p bl );
-wIndex_t wListGetCount(		wList_p );
-void * wListGetItemContext(	wList_p, wIndex_t );
-wBool_t wListGetItemSelected(	wList_p, wIndex_t );
-wIndex_t wListGetSelectedCount(	wList_p );
-void wListSetSize(		wList_p, wPos_t, wPos_t );
 
 
 /*------------------------------------------------------------------------------

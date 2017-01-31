@@ -32,6 +32,7 @@
 #include <glib-object.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include "wlib.h"
 #include "gtkint.h"
 #include "i18n.h"
 
@@ -469,7 +470,7 @@ void wListSetSize(wList_p bl, wPos_t w, wPos_t h)
  * \return    describe the return value
  */
 
-EXPORT wList_p wComboListCreate(
+ wList_p wComboListCreate(
     wWin_p	parent,		/* Parent window */
     wPos_t	x,		/* X-position */
     wPos_t	y,		/* Y-position */

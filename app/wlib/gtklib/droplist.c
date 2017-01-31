@@ -105,7 +105,6 @@ wDropListClear(wList_p b)
 void *wDropListGetItemContext(wList_p b, wIndex_t inx)
 {
     GtkTreeIter iter;
-    gchar *text;
     void *data = NULL;
 
     if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
@@ -130,7 +129,6 @@ void wDropListAddValue(
     void *data)
 {
     GtkTreeIter iter;
-    unsigned cnt;
 
     assert(b != NULL);
     assert(text != NULL);
@@ -234,7 +232,6 @@ static int DropListSelectChild(
     gpointer data)
 {
     wList_p bl = (wList_p)data;
-    GtkTreeModel *model;
     GtkTreeIter iter;
 
     wIndex_t inx = 0;
@@ -258,6 +255,8 @@ static int DropListSelectChild(
     /* Obtain currently selected item from combo box.
      * If nothing is selected, do nothing. */
     if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(comboBox), &iter)) {
+		GtkTreeModel *model;
+		
         /* Obtain data model from combo box. */
         model = gtk_combo_box_get_model(comboBox);
 
@@ -373,7 +372,7 @@ wlibNewDropList(GtkListStore *ls, int editable)
  *	\param IN data Context
  */
 
-EXPORT wList_p wDropListCreate(
+wList_p wDropListCreate(
     wWin_p	parent,
     wPos_t	x,
     wPos_t	y,

@@ -39,7 +39,7 @@
 #include <gdk/gdk.h>
 
 #include "gtkint.h"
-#include "i18n.h"
+//#include "i18n.h"
 
 #define ROW_HEIGHT (15)
 
