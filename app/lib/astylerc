@@ -1,0 +1,8 @@
+style=1tbs
+break-blocks
+unpad-paren
+pad-header
+max-code-length=80
+break-after-logical
+mode=c
+
