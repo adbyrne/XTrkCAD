@@ -159,8 +159,8 @@ struct accelData_t * wlibFindAccelKey( GdkEventKey * event );
 wBool_t wlibHandleAccelKey( GdkEventKey * );
 
 wBool_t catch_shift_ctrl_alt_keys( GtkWidget *, GdkEventKey *, void * );
-void gtkSetReadonly( wControl_p, wBool_t );
-void gtkSetTrigger( wControl_p, setTriggerCallback_p );
+//void gtkSetReadonly( wControl_p, wBool_t );
+void wlibSetTrigger( wControl_p, setTriggerCallback_p );
 GdkPixmap * wlibMakeIcon( GtkWidget *, wIcon_p, GdkBitmap ** );
 
 
@@ -172,24 +172,14 @@ void wlibDoModal( wWin_p, wBool_t );
 
 /* gtkhelp.c */
 void load_into_view( char *, int );
-void gtkAddHelpString( GtkWidget *, const char * );
-void gtkHelpHideBalloon( void );
+//void gtkAddHelpString( GtkWidget *, const char * );
+//void gtkHelpHideBalloon( void );
 
 /* boxes.c */
 void wlibDrawBox( wWin_p, wBoxType_e, wPos_t, wPos_t, wPos_t, wPos_t );
 
 /* lines.c */
 void wlibLineShow( wLine_p b, wBool_t show );
-
-/* gktlist.c */
-void gtkListShow( wList_p, wBool_t );
-void gtkListSetPos( wList_p );
-void gtkListActive( wList_p, wBool_t );
-void gtkDropListPos( wList_p );
-
-/* gtktext.c */
-void gtkTextFreeze( wText_p );
-void gtkTextThaw( wText_p );
 
 /* font.c */
 const char * wlibFontTranslate( wFont_p );

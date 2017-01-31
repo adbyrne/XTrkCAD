@@ -94,7 +94,7 @@ static void doTrigger(void)
     }
 }
 
-void gtkSetTrigger(
+void wlibSetTrigger(
     wControl_p b,
     setTriggerCallback_p trigger)
 {

@@ -10,10 +10,13 @@ SET(SOURCES
 # cproto and cppcheck
 	color.c
 	control.c
+	droplist.c	
 	filesel.c
 	font.c
 	help.c
 	lines.c
+	list.c
+	liststore.c
 	main.c
 	menu.c
 	message.c
@@ -27,13 +30,10 @@ SET(SOURCES
 	text.c
 	timer.c
 	tooltip.c
+	treeview.c
 	window.c
 	wpref.c
 # end of refactored sources	
-	treeview.c
-	liststore.c
-	droplist.c	
-	list.c
 	gtkdraw-cairo.c
 	)
 
