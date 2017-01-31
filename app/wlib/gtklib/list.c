@@ -85,11 +85,6 @@ void wListSetIndex(
     wList_p b,
     int element)
 {
-    int cur;
-    wListItem_p id_p;
-    GtkTreeSelection *sel;
-    GtkTreeIter iter;
-
     if (b->widget == 0) {
         abort();
     }
@@ -199,8 +194,6 @@ void * wListGetItemContext(
     wList_p b,
     wIndex_t inx)
 {
-    wListItem_p id_p;
-
     if (inx < 0) {
         return NULL;
     }
@@ -268,7 +261,6 @@ wIndex_t wListGetSelectedCount(
 void wListSelectAll(wList_p bl)
 {
     wIndex_t inx;
-    wListItem_p ldp;
     GtkTreeSelection *selection;
 
     assert(bl != NULL);
@@ -280,6 +272,8 @@ void wListSelectAll(wList_p bl)
     wListGetCount(bl);
 
     for (inx=0; inx<bl->count; inx++) {
+        wListItem_p ldp;
+
         ldp = wlibListStoreGetContext(bl->listStore, inx);
 
         if (ldp) {
@@ -307,8 +301,6 @@ wBool_t wListSetValues(
     void *itemData)
 
 {
-    wListItem_p id_p;
-
     assert(b->listStore != NULL);
 
     b->recursion++;
@@ -334,8 +326,6 @@ void wListDelete(
     wIndex_t inx)
 
 {
-    wListItem_p id_p;
-    GList * child;
     GtkTreeIter iter;
 
     assert(b->listStore != 0);
@@ -343,12 +333,13 @@ void wListDelete(
     b->recursion++;
 
     if (b->type == B_DROPLIST) {
+        wNotice("Deleting from dropboxes is not implemented!", "Continue", NULL);
 //		id_p = getListItem( b, inx, &child );
-        if (id_p != NULL) {
-            gtk_container_remove(GTK_CONTAINER(b->listStore), child->data);
-            b->count--;
-            g_free(id_p);
-        }
+        //if (id_p != NULL) {
+        //gtk_container_remove(GTK_CONTAINER(b->listStore), child->data);
+        //b->count--;
+        //g_free(id_p);
+        //}
     } else {
         gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore),
                                       &iter,
@@ -414,9 +405,6 @@ wIndex_t wListAddValue(
     void * itemData)
 {
     wListItem_p id_p;
-
-
-    int i;
 
     assert(b != NULL);
 

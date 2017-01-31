@@ -143,6 +143,23 @@ static long choiceGetValue(wChoice_p bc);
 static int pushChoice(GtkWidget *widget, gpointer b);
 static void choiceRepaint(wControl_p b);
 
+/* list.c */
+void wListClear(wList_p b);
+void wListSetIndex(wList_p b, int element);
+int CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer data);
+wIndex_t wListFindValue(wList_p b, const char *val);
+wIndex_t wListGetCount(wList_p b);
+void *wListGetItemContext(wList_p b, wIndex_t inx);
+wBool_t wListGetItemSelected(wList_p b, wIndex_t inx);
+wIndex_t wListGetSelectedCount(wList_p b);
+void wListSelectAll(wList_p bl);
+wBool_t wListSetValues(wList_p b, wIndex_t row, const char *labelStr, wIcon_p bm, void *itemData);
+void wListDelete(wList_p b, wIndex_t inx);
+int wListGetColumnWidths(wList_p bl, int colCnt, wPos_t *colWidths);
+wIndex_t wListAddValue(wList_p b, const char *labelStr, wIcon_p bm, void *itemData);
+void wListSetSize(wList_p bl, wPos_t w, wPos_t h);
+wList_p wComboListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, long number, wPos_t width, long *valueP, wListCallBack_p action, void *data);
+
 /* misc.c */
 
 int wlibAddLabel( wControl_p, const char * );
