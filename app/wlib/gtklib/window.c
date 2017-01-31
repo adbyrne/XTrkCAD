@@ -609,18 +609,18 @@ wBool_t catch_shift_ctrl_alt_keys(
     state = 0;
 
     switch (event->keyval) {
-    case GDK_Shift_L:
-    case GDK_Shift_R:
+    case GDK_KEY_Shift_L:
+    case GDK_KEY_Shift_R:
         state |= WKEY_SHIFT;
         break;
 
-    case GDK_Control_L:
-    case GDK_Control_R:
+    case GDK_KEY_Control_L:
+    case GDK_KEY_Control_R:
         state |= WKEY_CTRL;
         break;
 
-    case GDK_Alt_L:
-    case GDK_Alt_R:
+    case GDK_KEY_Alt_L:
+    case GDK_KEY_Alt_R:
         state |= WKEY_ALT;
         break;
     }
@@ -654,7 +654,7 @@ static gint window_char_event(
     }
 
     if (event->state == 0) {
-        if (event->keyval == GDK_Escape) {
+        if (event->keyval == GDK_KEY_Escape) {
             for (bb=win->first; bb; bb=bb->next) {
                 if (bb->type == B_BUTTON && (bb->option&BB_CANCEL)) {
                     wlibButtonDoAction((wButton_p)bb);

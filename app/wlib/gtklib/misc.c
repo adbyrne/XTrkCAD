@@ -514,29 +514,29 @@ static dynArr_t accelData_da;
 
 static guint accelKeyMap[] = {
     0,			/* wAccelKey_None, */
-    GDK_Delete,		/* wAccelKey_Del, */
-    GDK_Insert,		/* wAccelKey_Ins, */
-    GDK_Home,		/* wAccelKey_Home, */
-    GDK_End,		/* wAccelKey_End, */
-    GDK_Page_Up,	/* wAccelKey_Pgup, */
-    GDK_Page_Down,	/* wAccelKey_Pgdn, */
-    GDK_Up,		/* wAccelKey_Up, */
-    GDK_Down,		/* wAccelKey_Down, */
-    GDK_Right,		/* wAccelKey_Right, */
-    GDK_Left,		/* wAccelKey_Left, */
-    GDK_BackSpace,	/* wAccelKey_Back, */
-    GDK_F1,		/* wAccelKey_F1, */
-    GDK_F2,		/* wAccelKey_F2, */
-    GDK_F3,		/* wAccelKey_F3, */
-    GDK_F4,		/* wAccelKey_F4, */
-    GDK_F5,		/* wAccelKey_F5, */
-    GDK_F6,		/* wAccelKey_F6, */
-    GDK_F7,		/* wAccelKey_F7, */
-    GDK_F8,		/* wAccelKey_F8, */
-    GDK_F9,		/* wAccelKey_F9, */
-    GDK_F10,		/* wAccelKey_F10, */
-    GDK_F11,		/* wAccelKey_F11, */
-    GDK_F12		/* wAccelKey_F12, */
+    GDK_KEY_Delete,		/* wAccelKey_Del, */
+    GDK_KEY_Insert,		/* wAccelKey_Ins, */
+    GDK_KEY_Home,		/* wAccelKey_Home, */
+    GDK_KEY_End,		/* wAccelKey_End, */
+    GDK_KEY_Page_Up,	/* wAccelKey_Pgup, */
+    GDK_KEY_Page_Down,	/* wAccelKey_Pgdn, */
+    GDK_KEY_Up,		/* wAccelKey_Up, */
+    GDK_KEY_Down,		/* wAccelKey_Down, */
+    GDK_KEY_Right,		/* wAccelKey_Right, */
+    GDK_KEY_Left,		/* wAccelKey_Left, */
+    GDK_KEY_BackSpace,	/* wAccelKey_Back, */
+    GDK_KEY_F1,		/* wAccelKey_F1, */
+    GDK_KEY_F2,		/* wAccelKey_F2, */
+    GDK_KEY_F3,		/* wAccelKey_F3, */
+    GDK_KEY_F4,		/* wAccelKey_F4, */
+    GDK_KEY_F5,		/* wAccelKey_F5, */
+    GDK_KEY_F6,		/* wAccelKey_F6, */
+    GDK_KEY_F7,		/* wAccelKey_F7, */
+    GDK_KEY_F8,		/* wAccelKey_F8, */
+    GDK_KEY_F9,		/* wAccelKey_F9, */
+    GDK_KEY_F10,		/* wAccelKey_F10, */
+    GDK_KEY_F11,		/* wAccelKey_F11, */
+    GDK_KEY_F12		/* wAccelKey_F12, */
 };
 
 /**

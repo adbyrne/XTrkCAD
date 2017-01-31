@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.11 2009-10-03 17:34:37 dspagnol Exp $
+/** \file gtkdraw-cairo.c
+ * Basic drawing functions
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -1045,33 +1045,33 @@ static gint draw_char_event(
 	guint key = event->keyval;
 	wAccelKey_e extKey = wAccelKey_None;
 	switch (key) {
-	case GDK_Escape:	key = 0x1B; break;
-	case GDK_Return:	key = 0x0D; break;
-	case GDK_Linefeed:	key = 0x0A; break;
-	case GDK_Tab:	key = 0x09; break;
-	case GDK_BackSpace:	key = 0x08; break;
-	case GDK_Delete:    extKey = wAccelKey_Del; break;
-	case GDK_Insert:    extKey = wAccelKey_Ins; break;
-	case GDK_Home:      extKey = wAccelKey_Home; break;
-	case GDK_End:       extKey = wAccelKey_End; break;
-	case GDK_Page_Up:   extKey = wAccelKey_Pgup; break;
-	case GDK_Page_Down: extKey = wAccelKey_Pgdn; break;
-	case GDK_Up:        extKey = wAccelKey_Up; break;
-	case GDK_Down:      extKey = wAccelKey_Down; break;
-	case GDK_Right:     extKey = wAccelKey_Right; break;
-	case GDK_Left:      extKey = wAccelKey_Left; break;
-	case GDK_F1:        extKey = wAccelKey_F1; break;
-	case GDK_F2:        extKey = wAccelKey_F2; break;
-	case GDK_F3:        extKey = wAccelKey_F3; break;
-	case GDK_F4:        extKey = wAccelKey_F4; break;
-	case GDK_F5:        extKey = wAccelKey_F5; break;
-	case GDK_F6:        extKey = wAccelKey_F6; break;
-	case GDK_F7:        extKey = wAccelKey_F7; break;
-	case GDK_F8:        extKey = wAccelKey_F8; break;
-	case GDK_F9:        extKey = wAccelKey_F9; break;
-	case GDK_F10:       extKey = wAccelKey_F10; break;
-	case GDK_F11:       extKey = wAccelKey_F11; break;
-	case GDK_F12:       extKey = wAccelKey_F12; break;
+	case GDK_KEY_Escape:	key = 0x1B; break;
+	case GDK_KEY_Return:	key = 0x0D; break;
+	case GDK_KEY_Linefeed:	key = 0x0A; break;
+	case GDK_KEY_Tab:	key = 0x09; break;
+	case GDK_KEY_BackSpace:	key = 0x08; break;
+	case GDK_KEY_Delete:    extKey = wAccelKey_Del; break;
+	case GDK_KEY_Insert:    extKey = wAccelKey_Ins; break;
+	case GDK_KEY_Home:      extKey = wAccelKey_Home; break;
+	case GDK_KEY_End:       extKey = wAccelKey_End; break;
+	case GDK_KEY_Page_Up:   extKey = wAccelKey_Pgup; break;
+	case GDK_KEY_Page_Down: extKey = wAccelKey_Pgdn; break;
+	case GDK_KEY_Up:        extKey = wAccelKey_Up; break;
+	case GDK_KEY_Down:      extKey = wAccelKey_Down; break;
+	case GDK_KEY_Right:     extKey = wAccelKey_Right; break;
+	case GDK_KEY_Left:      extKey = wAccelKey_Left; break;
+	case GDK_KEY_F1:        extKey = wAccelKey_F1; break;
+	case GDK_KEY_F2:        extKey = wAccelKey_F2; break;
+	case GDK_KEY_F3:        extKey = wAccelKey_F3; break;
+	case GDK_KEY_F4:        extKey = wAccelKey_F4; break;
+	case GDK_KEY_F5:        extKey = wAccelKey_F5; break;
+	case GDK_KEY_F6:        extKey = wAccelKey_F6; break;
+	case GDK_KEY_F7:        extKey = wAccelKey_F7; break;
+	case GDK_KEY_F8:        extKey = wAccelKey_F8; break;
+	case GDK_KEY_F9:        extKey = wAccelKey_F9; break;
+	case GDK_KEY_F10:       extKey = wAccelKey_F10; break;
+	case GDK_KEY_F11:       extKey = wAccelKey_F11; break;
+	case GDK_KEY_F12:       extKey = wAccelKey_F12; break;
 	default: ;
 	}
 
