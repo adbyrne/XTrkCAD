@@ -8,6 +8,10 @@
 		<string>XTrackCAD</string>
 		<key>CFBundleGetInfoString</key>
 		<string>@XTRKCAD_VERSION@</string>
+		<key>CFBundleHelpBookFolder</key>
+		<string>XTrackCAD.help</string>
+		<key>CFBundleHelpBookName</key>
+		<string>org.xtrkcad.help</string>
 		<key>CFBundleIconFile</key>
 		<string>XTrackCAD</string>
 		<key>LSMinimumSystemVersion</key>

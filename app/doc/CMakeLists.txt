@@ -38,7 +38,11 @@ ADD_CUSTOM_TARGET(clean-html
 # If we're using the GTK back-end, just generate "vanilla" HTML help files for use with gtkhtml
 IF(XTRKCAD_USE_GTK)
 
-	SET(HALIBUT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/linconf.but ${HALIBUT_SOURCES})
+	IF (APPLE) 
+	   SET(HALIBUT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/osxconf.but ${HALIBUT_SOURCES})
+	ELSE(APPLE)
+	   SET(HALIBUT_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/linconf.but ${HALIBUT_SOURCES})
+	ENDIF(APPLE)
 
 	ADD_CUSTOM_COMMAND(
 		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/index.html

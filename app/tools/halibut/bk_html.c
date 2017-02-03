@@ -2140,7 +2140,7 @@ static void html_words(htmloutput *ho, word *words, int flags,
 	}
 	break;
 		case word_Graphic:
-			element_open( ho, "img");
+			element_empty( ho, "img");
 			c = utoa_dup(w->text, CS_ASCII);
 			element_attr(ho, "src", c);
 			return_to_neutral(ho);

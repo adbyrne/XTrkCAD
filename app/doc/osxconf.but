@@ -1,0 +1,14 @@
+\cfg{html-version}{xhtml1.0strict}
+\cfg{html-leaf-level}{infinite}
+\cfg{html-leaf-contains-contents}{false}
+\cfg{html-suppress-navlinks}{true}
+\cfg{html-suppress-address}{true}
+
+\cfg{html-contents-filename}{contents.html}
+\cfg{html-template-filename}{%k.html}
+\cfg{html-template-fragment}{%k}
+
+\cfg{html-contents-depth}{0}{2}
+
+\cfg{html-head-end}{<link rel="stylesheet" type="text/css" href="xtrkcad_lin.css" />}
+

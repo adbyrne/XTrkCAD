@@ -28,6 +28,7 @@ IF(APPLE)
 	SET(SOURCES 
 		${SOURCES}
 		osxhelp.c)
+	
 ELSE(APPLE)
 # for testing only, has to be ixhelp.c for Unixes
 	SET(SOURCES 
@@ -46,3 +47,4 @@ ADD_LIBRARY(xtrkcad-wlib ${HEADERS} ${SOURCES})
 TARGET_LINK_LIBRARIES(xtrkcad-wlib ${GTK_LIBRARIES})
 TARGET_LINK_LIBRARIES(xtrkcad-wlib ${GTK_UNIX_PRINT_LIBRARIES})
 TARGET_LINK_LIBRARIES(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
+

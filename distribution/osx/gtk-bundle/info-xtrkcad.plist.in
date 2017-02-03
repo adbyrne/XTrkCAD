@@ -12,6 +12,10 @@
     <string>xtrkcad-logo.icns</string>
     <key>CFBundleIdentifier</key>
     <string>org.xtrkcad</string>
+    <key>CFBundleHelpBookFolder</key>
+	<string>XTrackCAD.help</string>
+	<key>CFBundleHelpBookName</key>
+	<string>org.xtrkcad.help</string>
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundlePackageType</key>
