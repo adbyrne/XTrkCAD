@@ -1,6 +1,8 @@
 /** \file cswitchmotor.c
  * Switch Motors
- * Created by Robert Heller on Sat Mar 14 10:39:56 2009
+ */
+
+/* Created by Robert Heller on Sat Mar 14 10:39:56 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
  * Modification History: Revision 1.5  2009/11/23 19:46:16  rheller
