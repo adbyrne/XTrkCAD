@@ -219,6 +219,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd, BOOL_T 
 static DIST_T DistanceSwitchMotor (track_p t, coOrd * p )
 {
 	switchmotorData_p xx = GetswitchmotorData(t);
+        if (xx->turnout == NULL) return 0;
 	return GetTrkDistance(xx->turnout,*p);
 }
 
@@ -247,7 +248,8 @@ static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
 	switchmotorData.reverse[STR_LONG_SIZE-1] = '\0';
 	strncpy(switchmotorData.pointsense,xx->pointsense,STR_LONG_SIZE-1);
 	switchmotorData.pointsense[STR_LONG_SIZE-1] = '\0';
-	switchmotorData.turnout = GetTrkIndex(xx->turnout);
+        if (xx->turnout == NULL) switchmotorData.turnout = 0;
+        else switchmotorData.turnout = GetTrkIndex(xx->turnout);
 	switchmotorDesc[TO].mode = DESC_RO;
 	switchmotorDesc[NM].mode =
 	switchmotorDesc[NOR].mode =
@@ -285,7 +287,8 @@ static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
 {
 	BOOL_T rc = TRUE;
 	switchmotorData_p xx = GetswitchmotorData(t);
-
+    
+        if (xx->turnout == NULL) return FALSE;
 	rc &= fprintf(f, "SWITCHMOTOR %d %d \"%s\" \"%s\" \"%s\" \"%s\"\n",
 		GetTrkIndex(t), GetTrkIndex(xx->turnout), xx->name,
 		xx->normal, xx->reverse, xx->pointsense)>0;
@@ -570,7 +573,8 @@ static void EditSwitchMotor (track_p trk)
     strncpy(switchmotorEditNormal,xx->normal,STR_LONG_SIZE);
     strncpy(switchmotorEditReverse,xx->reverse,STR_LONG_SIZE);
     strncpy(switchmotorEditPointSense,xx->pointsense,STR_LONG_SIZE);
-    switchmotorEditTonum = GetTrkIndex(xx->turnout);
+    if (xx->turnout == NULL) switchmotorEditTonum = 0;
+    else switchmotorEditTonum = GetTrkIndex(xx->turnout);
     switchmotorEditTrack = trk;
     if ( !switchmotorEditW ) {
         ParamRegister( &switchmotorEditPG );
@@ -611,7 +615,11 @@ static int SwitchmotorMgmProc ( int cmd, void * data )
         return TRUE;
         break;
     case CONTMGM_GET_TITLE:
-        sprintf( message, "\t%s\t%d", xx->name, GetTrkIndex(xx->turnout));
+        if (xx->turnout == NULL) {
+            sprintf( message, "\t%s\t%d", xx->name, 0);
+        } else {
+            sprintf( message, "\t%s\t%d", xx->name, GetTrkIndex(xx->turnout));
+        }
         break;
     }
     return FALSE;
