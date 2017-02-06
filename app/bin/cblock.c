@@ -231,6 +231,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 		blockData.endPt[0] = GetTrkEndPos((&(xx->trackList))[0].t,0);
 	}
 	for (tcount = 0; tcount < xx->numTracks; tcount++) {
+                if ((&(xx->trackList))[tcount].t == NULL) continue;
 		blockData.length += GetTrkLength((&(xx->trackList))[tcount].t,0,1);
 		lastTrk = (&(xx->trackList))[tcount].t;
 	}
@@ -254,6 +255,7 @@ static blockDebug (track_p trk)
 	LOG( log_block, 1, ("*** blockDebug(): script = \"%s\"\n",xx->script))
 	LOG( log_block, 1, ("*** blockDebug(): numTracks = %d\n",xx->numTracks))
 	for (iTrack = 0; iTrack < xx->numTracks; iTrack++) {
+                if ((&(xx->trackList))[iTrack].t == NULL) continue;
 		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, ",iTrack,GetTrkIndex((&(xx->trackList))[iTrack].t)))
 		LOG( log_block, 1, ("%s\n",GetTrkTypeName((&(xx->trackList))[iTrack].t)))
 	}
@@ -327,6 +329,7 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	rc &= fprintf(f, "BLOCK %d \"%s\" \"%s\"\n",
 		GetTrkIndex(t), xx->name, xx->script)>0;
 	for (iTrack = 0; iTrack < xx->numTracks && rc; iTrack++) {
+                if ((&(xx->trackList))[iTrack].t == NULL) continue;
 		rc &= fprintf(f, "\tTRK %d\n",
 				GetTrkIndex((&(xx->trackList))[iTrack].t))>0;
 	}
@@ -708,6 +711,7 @@ static void EditBlock (track_p trk)
     strncpy(blockEditScript,xx->script,STR_LONG_SIZE);
     blockEditSegs[0] = '\0';
     for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
+        if ((&(xx->trackList))[iTrack].t == NULL) continue;
         sprintf(temp,"%d",GetTrkIndex((&(xx->trackList))[iTrack].t));
         if (needComma) strcat(blockEditSegs,", ");
         strcat(blockEditSegs,temp);
@@ -758,6 +762,7 @@ static int BlockMgmProc ( int cmd, void * data )
     case CONTMGM_GET_TITLE:
         sprintf( message, "\t%s\t", xx->name);
         for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
+            if ((&(xx->trackList))[iTrack].t == NULL) continue;
             sprintf(temp,"%d",GetTrkIndex((&(xx->trackList))[iTrack].t));
             if (needComma) strcat(message,", ");
             strcat(message,temp);
