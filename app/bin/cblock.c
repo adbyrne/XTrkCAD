@@ -1,6 +1,7 @@
 /** \file cblock.c
  * Implement blocks: a group of trackwork with a single occ. detector
- * Created by Robert Heller on Thu Mar 12 09:43:02 2009
+ */
+/* Created by Robert Heller on Thu Mar 12 09:43:02 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
  * Modification History: Revision 1.4  2009/09/16 18:32:24  m_fischer

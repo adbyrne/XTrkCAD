@@ -1,3 +1,7 @@
+/** \file dcontmgm.c
+ * Manage layout control elements
+ */
+
 /* -*- C -*- ****************************************************************
  *
  *  System        : 
