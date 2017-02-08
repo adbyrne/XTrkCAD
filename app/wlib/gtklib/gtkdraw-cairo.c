@@ -960,7 +960,7 @@ static gint draw_leave_event(
 		GtkWidget *widget,
 		GdkEvent * event )
 {
-//	gtkHelpHideBalloon();
+	wlibHelpHideBalloon();
 	return FALSE;
 }
 

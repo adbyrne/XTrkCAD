@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -41,7 +42,7 @@ wBool_t listMissingHelpStrings = FALSE;
 static wBalloonHelp_t * balloonHelpStrings;
 static int enableBalloonHelp = TRUE;
 
-static GtkWidget * balloonF;
+static GtkWidget * balloonF; 	/**< balloon help control for hotbar item */
 static GtkWidget * balloonPI;
 
 static const char * balloonMsg;
@@ -49,28 +50,34 @@ static wControl_p balloonB;
 static wPos_t balloonDx, balloonDy;
 static wBool_t balloonVisible = FALSE;
 
+
+void
+wlibHelpHideBalloon()
+{
+    wControlSetBalloon( balloonB, 0, 0, NULL );
+}
 /**
  * Initialize tooltip array
  *
  * \param bh IN pointer to list of tooltips
- * \return  
+ * \return
  */
- 
+
 void wSetBalloonHelp( wBalloonHelp_t * bh )
 {
-	balloonHelpStrings = bh;
+    balloonHelpStrings = bh;
 }
 
 /**
  * Switch tooltips on and off
  *
  * \param enable IN desired state (TRUE or FALSE )
- * \return  
+ * \return
  */
 
 void wEnableBalloonHelp( int enable )
 {
-	enableBalloonHelp = enable;
+    enableBalloonHelp = enable;
 }
 
 /**
@@ -80,11 +87,11 @@ void wEnableBalloonHelp( int enable )
  * \param help IN tip
  */
 
- void wControlSetHelp(
-	 wControl_p b,		
-	 const char * help )		
+void wControlSetHelp(
+    wControl_p b,
+    const char * help )
 {
-	wControlSetBalloonText( b, help );
+    wControlSetBalloonText( b, help );
 }
 
 /**
@@ -95,92 +102,93 @@ void wEnableBalloonHelp( int enable )
  */
 
 void wControlSetBalloonText(
-		wControl_p b,
-		const char * label )
+    wControl_p b,
+    const char * label )
 {
-	if ( b->widget == NULL) 
-		abort();
-	
-	gtk_widget_set_tooltip_text( b->widget, label );
+    assert(b->widget != NULL);
+
+
+    gtk_widget_set_tooltip_text( b->widget, label );
 }
 
 /**
- * Display some help text for a widget. This is a wayy to create
+ * Display some help text for a widget. This is a way to create
  * some custom tooltips for error messages and the hotbar part desc
  * \todo Replace with standard tooltip handling and custom window
  *
  * \param b IN widget
  * \param dx IN dx offset in x-direction
  * \param dy IN dy offset in y direction
- * \param msg IN text to display
+ * \param msg IN text to display, if NULL tootip is hidden
  * \return
  */
 
 void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 {
-	PangoLayout * layout;
+    PangoLayout * layout;
 
-	wPos_t x, y;
-	wPos_t w, h;
-	wPos_t xx, yy;
-	const char * msgConverted;	
-	if (balloonVisible && balloonB == b &&
-		balloonDx == dx && balloonDy == dy && balloonMsg == msg )
-		return;
+    wPos_t x, y;
+    wPos_t w, h;
+    wPos_t xx, yy;
+    const char * msgConverted;
+    GtkAllocation size;
 
-	if ( msg == NULL ) {
-		if ( balloonF != NULL ) {
-			gtk_widget_hide( balloonF );
-			balloonVisible = FALSE;
-		}
-		balloonMsg = "";
-		return;
-	}
-	msgConverted = wlibConvertInput(msg);
-	if ( balloonF == NULL ) {
-		balloonF = gtk_window_new( GTK_WINDOW_POPUP );
-		gtk_window_set_resizable( GTK_WINDOW (balloonF), FALSE );
+    /* return if there is nothing to do */
+    if (balloonVisible && balloonB == b &&
+            balloonDx == dx && balloonDy == dy && balloonMsg == msg )
+        return;
 
-		balloonPI = gtk_label_new(msgConverted);
-		gtk_container_add( GTK_CONTAINER(balloonF), balloonPI );
-		gtk_container_set_border_width( GTK_CONTAINER(balloonF), 1 );
-		gtk_widget_show( balloonPI );
-	} else {
-		gtk_label_set_text( GTK_LABEL(balloonPI), msgConverted );
-	}
-	balloonDx = dx;
-	balloonDy = dy;
-	balloonB = b;
-	balloonMsg = msg;
-	gtk_widget_hide( balloonF );
-    layout = gtk_widget_create_pango_layout( balloonPI, msgConverted );
-    pango_layout_get_pixel_size( layout, &w, &h );
-	g_object_unref(G_OBJECT(layout));
-	h = 16;
-	
-	gdk_window_get_origin( gtk_widget_get_window( GTK_WIDGET(b->parent->gtkwin)), &x, &y );
-	
-	x += b->realX + dx;
-	y += b->realY + b->h - dy;
-	xx = gdk_screen_width();
-	yy = gdk_screen_height();
-	if ( x < 0 ) {
-		x = 0;
-	} else if ( x+w > xx ) {
-		x = xx - w;
-	}
-	if ( y < 0 ) {
-		y = 0;
-	} else if ( y+h > yy ) {
-		y = yy - h ;
-	}
-	gtk_widget_set_size_request( balloonPI, w, h );
-	gtk_widget_set_size_request( balloonF, w+2, h+2 );
-	gtk_window_move( GTK_WINDOW( balloonF ), x, y );
-	gtk_widget_show( balloonF );	
-	
-	gdk_draw_rectangle( GTK_WINDOW( balloonF ), gtk_widget_get_style( balloonF )->fg_gc[GTK_STATE_NORMAL], FALSE, 0, 0, w+1, h+1 );
-	balloonVisible = TRUE;
+    /* hide the tooltip */
+    if ( msg == NULL ) {
+        if ( balloonF != NULL ) {
+            gtk_widget_hide( balloonF );
+            balloonVisible = FALSE;
+        }
+        balloonMsg = "";
+        return;
+    }
+    msgConverted = wlibConvertInput(msg);
+
+    if ( balloonF == NULL ) {
+        balloonF = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+        gtk_window_set_type_hint( GTK_WINDOW( balloonF), GDK_WINDOW_TYPE_HINT_TOOLTIP );
+        gtk_window_set_decorated (GTK_WINDOW (balloonF), FALSE );
+        gtk_window_set_resizable( GTK_WINDOW (balloonF), FALSE );
+        balloonPI = gtk_label_new(msgConverted);
+        gtk_container_add( GTK_CONTAINER(balloonF), balloonPI );
+        gtk_container_set_border_width( GTK_CONTAINER(balloonF), 5 );
+        gtk_widget_show( balloonPI );
+    }
+    gtk_label_set_text( GTK_LABEL(balloonPI), msgConverted );
+
+    balloonDx = dx;
+    balloonDy = dy;
+    balloonB = b;
+    balloonMsg = msg;
+    gtk_widget_get_allocation(balloonPI, &size );
+    w = size.width;
+    h = size.height;
+
+    gdk_window_get_origin( gtk_widget_get_window( GTK_WIDGET(b->parent->gtkwin)), &x, &y );
+
+    x += b->realX + dx;
+    y += b->realY + b->h - dy;
+    xx = gdk_screen_width();
+    yy = gdk_screen_height();
+    if ( x < 0 ) {
+        x = 0;
+    } else if ( x+w > xx ) {
+        x = xx - w;
+    }
+    if ( y < 0 ) {
+        y = 0;
+    } else if ( y+h > yy ) {
+        y = yy - h ;
+    }
+    gtk_window_move( GTK_WINDOW( balloonF ), x, y );
+    gtk_widget_show( balloonF );
+
+    balloonVisible = TRUE;
 }
 
 /**
@@ -193,40 +201,40 @@ void wBalloonHelpUpdate( void )
 /**
  * Add tooltip and reference into help system to a widget
  *
- * \param widget IN widget 
- * \param helpStr IN symbolic link into help system 
+ * \param widget IN widget
+ * \param helpStr IN symbolic link into help system
  */
 
 void wlibAddHelpString(
-		GtkWidget * widget,
-		const char * helpStr )
+    GtkWidget * widget,
+    const char * helpStr )
 {
-	char *string;
-	char *wAppName = wlibGetAppName();
-	wBalloonHelp_t * bhp;
-	
-	if (helpStr==NULL || *helpStr==0)
-		return;
-	if ( balloonHelpStrings == NULL )
-		return;
-	
-	// search for the helpStr, bhp points to the entry when found 
-	for ( bhp = balloonHelpStrings; bhp->name && strcmp(bhp->name,helpStr) != 0; bhp++ )
-		;
-	
-	if (listMissingHelpStrings && !bhp->name) {
-		printf( "Missing Help String: %s\n", helpStr );
-		return;
-	}
-	
-	string = malloc( strlen(wAppName) + 5 + strlen(helpStr) + 1 );
-	sprintf( string, "%sHelp/%s", wAppName, helpStr );
-	
-	gtk_widget_set_tooltip_text( widget, _(bhp->value) );
-	
-	g_object_set_data( G_OBJECT( widget ), HELPDATAKEY, string );
-	
-	if (listHelpStrings)
-		printf( "HELPSTR - %s\n", string );
+    char *string;
+    char *wAppName = wlibGetAppName();
+    wBalloonHelp_t * bhp;
+
+    if (helpStr==NULL || *helpStr==0)
+        return;
+    if ( balloonHelpStrings == NULL )
+        return;
+
+    // search for the helpStr, bhp points to the entry when found
+    for ( bhp = balloonHelpStrings; bhp->name && strcmp(bhp->name,helpStr) != 0; bhp++ )
+        ;
+
+    if (listMissingHelpStrings && !bhp->name) {
+        printf( "Missing Help String: %s\n", helpStr );
+        return;
+    }
+
+    string = malloc( strlen(wAppName) + 5 + strlen(helpStr) + 1 );
+    sprintf( string, "%sHelp/%s", wAppName, helpStr );
+
+    gtk_widget_set_tooltip_text( widget, _(bhp->value) );
+
+    g_object_set_data( G_OBJECT( widget ), HELPDATAKEY, string );
+
+    if (listHelpStrings)
+        printf( "HELPSTR - %s\n", string );
 
 }
