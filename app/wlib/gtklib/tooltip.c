@@ -51,11 +51,16 @@ static wPos_t balloonDx, balloonDy;
 static wBool_t balloonVisible = FALSE;
 
 
+/**
+ * Hide the currently displayed Balloon Help.
+ */
+ 
 void
 wlibHelpHideBalloon()
 {
     wControlSetBalloon( balloonB, 0, 0, NULL );
 }
+
 /**
  * Initialize tooltip array
  *
@@ -150,13 +155,21 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
     msgConverted = wlibConvertInput(msg);
 
     if ( balloonF == NULL ) {
+		GtkWidget *alignment;
+		
         balloonF = gtk_window_new( GTK_WINDOW_TOPLEVEL );
         gtk_window_set_type_hint( GTK_WINDOW( balloonF), GDK_WINDOW_TYPE_HINT_TOOLTIP );
         gtk_window_set_decorated (GTK_WINDOW (balloonF), FALSE );
         gtk_window_set_resizable( GTK_WINDOW (balloonF), FALSE );
+            
+		alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
+		gtk_alignment_set_padding( GTK_ALIGNMENT(alignment), 6, 6, 6, 6 );
+		
+		gtk_container_add (GTK_CONTAINER (balloonF), alignment);
+		gtk_widget_show (alignment);
+        
         balloonPI = gtk_label_new(msgConverted);
-        gtk_container_add( GTK_CONTAINER(balloonF), balloonPI );
-        gtk_container_set_border_width( GTK_CONTAINER(balloonF), 5 );
+        gtk_container_add( GTK_CONTAINER(alignment), balloonPI );
         gtk_widget_show( balloonPI );
     }
     gtk_label_set_text( GTK_LABEL(balloonPI), msgConverted );
