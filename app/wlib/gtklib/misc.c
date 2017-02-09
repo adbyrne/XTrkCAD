@@ -83,63 +83,56 @@ static wBool_t reverseIcon =
  *****************************************************************************
  */
 
-GdkPixmap* wlibMakeIcon(
-    GtkWidget * widget,
-    wIcon_p ip,
-    GdkBitmap ** mask)
+/**
+ * Create a pixbuf from a two colored bitmap in XBM format.
+ *
+ * \param ip the XBM data
+ * \returns the pixbuf
+ */
+
+GdkPixbuf* wlibPixbufFromXBM(
+    wIcon_p ip )
 {
-    GdkPixmap * pixmap;
+    GdkPixbuf * pixbuf;
 
     char line0[40];
     char line2[40];
-    GdkColor *transparent;
 
-    transparent = &gtk_widget_get_style(gtkMainW->gtkwin)->bg[gtk_widget_get_state(
-                      gtkMainW->gtkwin)];
+    char ** pixmapData;
+    int row,col,wb;
+    long rgb;
+    const char * bits;
 
-    if (ip->gtkIconType == gtkIcon_pixmap) {
-        pixmap = gdk_pixmap_create_from_xpm_d(gtk_widget_get_window(gtkMainW->gtkwin),
-                                              mask, transparent, (char**)ip->bits);
-    } else {
-        char ** pixmapData;
-		int row,col,wb;
-		long rgb;
-		const char * bits;
-  
-        wb = (ip->w+7)/8;
-        pixmapData = (char**)malloc((3+ip->h) * sizeof *pixmapData);
-        pixmapData[0] = line0;
-        rgb = wDrawGetRGB(ip->color);
-        sprintf(line0, " %d %d 2 1", ip->w, ip->h);
-        sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb>>16)&0xFF, (rgb>>8)&0xFF,
-                rgb&0xFF);
-        pixmapData[1] = ". c None s None";
-        pixmapData[2] = line2;
-        bits = ip->bits;
+    wb = (ip->w+7)/8;
+    pixmapData = (char**)malloc((3+ip->h) * sizeof *pixmapData);
+    pixmapData[0] = line0;
+    rgb = wDrawGetRGB(ip->color);
+    sprintf(line0, " %d %d 2 1", ip->w, ip->h);
+    sprintf(line2, "# c #%2.2lx%2.2lx%2.2lx", (rgb>>16)&0xFF, (rgb>>8)&0xFF,
+            rgb&0xFF);
+    pixmapData[1] = ". c None s None";
+    pixmapData[2] = line2;
+    bits = ip->bits;
 
-        for (row = 0; row<ip->h; row++) {
-            pixmapData[row+3] = (char*)malloc((ip->w+1) * sizeof **pixmapData);
+    for (row = 0; row<ip->h; row++) {
+        pixmapData[row+3] = (char*)malloc((ip->w+1) * sizeof **pixmapData);
 
-            for (col = 0; col<ip->w; col++) {
-                if (bits[ row*wb+(col>>3) ] & (1<<(col&07))) {
-                    pixmapData[row+3][col] = '#';
-                } else {
-                    pixmapData[row+3][col] = '.';
-                }
+        for (col = 0; col<ip->w; col++) {
+            if (bits[ row*wb+(col>>3) ] & (1<<(col&07))) {
+                pixmapData[row+3][col] = '#';
+            } else {
+                pixmapData[row+3][col] = '.';
             }
-
-            pixmapData[row+3][ip->w] = 0;
         }
-
-        pixmap = gdk_pixmap_create_from_xpm_d(gtk_widget_get_window(gtkMainW->gtkwin),
-                                              mask, transparent, pixmapData);
-
-        for (row = 0; row<ip->h; row++) {
-            free(pixmapData[row+3]);
-        }
+        pixmapData[row+3][ip->w] = 0;
     }
 
-    return pixmap;
+    pixbuf = gdk_pixbuf_new_from_xpm_data((const char **)pixmapData);
+
+    for (row = 0; row<ip->h; row++) {
+        free(pixmapData[row+3]);
+    }
+    return pixbuf;
 }
 
 /**

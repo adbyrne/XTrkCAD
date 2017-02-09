@@ -94,41 +94,24 @@ void wlibSetLabel(
 
     if (labelStr) {
         if (option&BO_ICON) {
+            GdkPixbuf *pixbuf;
+
             bm = (wIcon_p)labelStr;
 
-            // for XPM files use the pixbuf functions
             if (bm->gtkIconType == gtkIcon_pixmap) {
-				GdkPixbuf *pixbuf;
-
                 pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)bm->bits);
-
-                if (*imageG==NULL) {
-                    *imageG = gtk_image_new_from_pixbuf(pixbuf);
-                    gtk_container_add(GTK_CONTAINER(widget), *imageG);
-                    gtk_widget_show(*imageG);
-                } else {
-                    gtk_image_set_from_pixbuf(GTK_IMAGE(*imageG), pixbuf);
-                }
-
-                g_object_unref(pixbuf);
             } else {
-                // otherwise use the conversion to XPM
-                GdkPixmap * pixmap;
-
-                /** \todo { Should use the way via a pixbuf as well } */
-                pixmap = wlibMakeIcon(widget, bm, &mask);
-
-                if (*imageG==NULL) {
-                    *imageG = gtk_image_new_from_pixmap(pixmap, NULL);
-                    gtk_widget_show(*imageG);
-                    gtk_container_add(GTK_CONTAINER(widget), *imageG);
-                } else {
-                    gtk_image_set_from_pixmap(GTK_IMAGE(*imageG), pixmap, NULL);
-                }
-
-                g_object_unref(pixmap);
-                g_object_unref(mask);
+                pixbuf = wlibPixbufFromXBM( bm );
             }
+            if (*imageG==NULL) {
+                *imageG = gtk_image_new_from_pixbuf(pixbuf);
+                gtk_container_add(GTK_CONTAINER(widget), *imageG);
+                gtk_widget_show(*imageG);
+            } else {
+                gtk_image_set_from_pixbuf(GTK_IMAGE(*imageG), pixbuf);
+            }
+
+            g_object_unref(pixbuf);
         } else {
             if (*labelG==NULL) {
                 *labelG = (GtkLabel*)gtk_label_new(wlibConvertInput(labelStr));
@@ -621,8 +604,8 @@ wChoice_p wToggleCreate(
     }
 
     for (label=labels; *label; label++) {
-		GtkWidget *butt;
-		
+        GtkWidget *butt;
+
         butt = gtk_check_button_new_with_label(_(*label));
         gtk_box_pack_start(GTK_BOX(b->widget), butt, TRUE, TRUE, 0);
         gtk_widget_show(butt);

@@ -201,7 +201,8 @@ typedef struct accelData_t {
     void * data;
 } accelData_t;
 
-GdkPixmap *wlibMakeIcon(GtkWidget *widget, wIcon_p ip, GdkBitmap **mask);
+
+GdkPixbuf* wlibPixbufFromXBM(wIcon_p ip);
 int wlibAddLabel(wControl_p b, const char *labelStr);
 void *wlibAlloc(wWin_p parent, wType_e type, wPos_t origX, wPos_t origY, const char *labelStr, int size, void *data);
 void wlibComputePos(wControl_p b);
@@ -271,6 +272,7 @@ void wlibSetTrigger(wControl_p b, setTriggerCallback_p trigger);
 /* tooltip.c */
 #define HELPDATAKEY "HelpDataKey"
 void wlibAddHelpString(GtkWidget *widget, const char *helpStr);
+void wlibHelpHideBalloon();
 
 /* treeview.c */
 void wlibTreeViewSetSelected(wList_p b, int index);
