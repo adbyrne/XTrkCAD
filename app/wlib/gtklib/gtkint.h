@@ -163,6 +163,14 @@ enum columns {
 };
 GtkWidget *wlibNewDropList(GtkListStore *ls, int editable);
 
+wIndex_t wDropListGetCount(wList_p b);
+void wDropListClear(wList_p b);
+void *wDropListGetItemContext(wList_p b, wIndex_t inx);
+void wDropListAddValue(wList_p b, char *text, void *data);
+void wDropListSetIndex(wList_p b, int val);
+wBool_t wDropListSetValues(wList_p b, wIndex_t row, const char *labelStr, wIcon_p bm, void *itemData);
+wList_p wDropListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, long number, wPos_t width, long *valueP, wListCallBack_p action, void *data);
+
 /* filesel.c */
 
 /* font.c */
@@ -282,6 +290,10 @@ int wlibAddColumnTitles(GtkWidget *tv, const char **titles);
 int wlibTreeViewAddData(GtkWidget *tv, int cols, char *label, GdkPixbuf *pixbuf, wListItem_p userData);
 void wlibTreeViewAddRow(wList_p b, char *label, wIcon_p bm, wListItem_p id_p);
 gboolean changeSelection(GtkTreeSelection *selection, GtkTreeModel *model, GtkTreePath *path, gboolean path_currently_selected, gpointer data);
+
+int wTreeViewGetCount(wList_p b);
+void wTreeViewClear(wList_p b);
+void *wTreeViewGetItemContext(wList_p b, int row);
 
 /* window.c */
 void wlibDoModal(wWin_p win0, wBool_t modal);
