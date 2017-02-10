@@ -21,6 +21,11 @@
 
 #include <stdlib.h>
 
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 

@@ -26,12 +26,16 @@
 #endif
 #include <math.h>
 
+#define GTK_DISABLE_SINGLE_INCLUDES
+#define GDK_DISABLE_DEPRECATED
+#define GTK_DISABLE_DEPRECATED
+#define GSEAL_ENABLE
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
 #include "gtkint.h"
-#include <gtk/gtkprintunixdialog.h>
-#include <gtk/gtkprintjob.h>
+#include <gtk/gtkunixprint.h>
 
 #include "wlib.h"
 #include "i18n.h"
