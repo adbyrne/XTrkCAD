@@ -265,12 +265,6 @@ static void setAcclKey( wWin_p w, GtkWidget * menu, GtkWidget * menu_item, int a
 		int len;
 		char acclStr[40];
 		
-#ifdef LATER
- 		switch ( (acclKey&0xFF) ) {
-		case '+': acclKey = (acclKey&0xFF00) | WSHIFT | '='; break;
-		case '?': acclKey = (acclKey&0xFF00) | WSHIFT | '/'; break;
-		}
-#endif
 		len = 0;
 		if (acclKey&WALT) {
 			mask |= GDK_MOD1_MASK;
@@ -587,8 +581,9 @@ void wMenuListAdd(
 		// we're adding an item, so hide the default placeholder
 		gtk_widget_hide( MMENUITEM( ml ));
 		
+		// delete an earlier entry with the same label
 		wMenuListDelete( ml, labelStr );		
-		
+
 		// a new item
 		ml->count ++;
 		
@@ -642,10 +637,7 @@ void wMenuListDelete(
 {
 	int i;
 	int found = FALSE;
-
-
 	GList * children;
-
 
 	// find the placeholder for the list in the menu
 	i = getMlistOrigin( ml, &children );
@@ -684,10 +676,7 @@ void wMenuListDelete(
 			free( (void *)mold->labelStr );
 			free( (void *)mold );
 
-			ml->count--;
-			// if last item was removed, display placeholder label
-			if( !ml->count )
-				gtk_widget_show( MMENUITEM( ml ));			
+			ml->count--;	
 		}
 	}	
 	
