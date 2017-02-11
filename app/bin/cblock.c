@@ -316,7 +316,11 @@ static BOOL_T blockCheckContigiousPath()
 
 static void DeleteBlock ( track_p t )
 {
-	blockData_p xx = GetblockData(t);
+        LOG( log_block, 1, ("*** DeleteBlock(%p)\n",t))
+        blockData_p xx = GetblockData(t);
+        LOG( log_block, 1, ("*** DeleteBlock(): index is %d\n",GetTrkIndex(t)))
+        LOG( log_block, 1, ("*** DeleteBlock(): xx = %p, xx->name = %p, xx->script = %p\n",
+                xx,xx->name,xx->script))
 	MyFree(xx->name); xx->name = NULL;
 	MyFree(xx->script); xx->script = NULL;
 }
@@ -371,13 +375,15 @@ static void ReadBlock ( char * line )
 		}
 	}
 	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
-	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(track_p)*(blockTrk_da.cnt-1))+1);
+	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
 	for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
 		endPtP = &tempEndPts(ep);
 		SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
 	}
-	xx = GetblockData( trk );
-	xx->name = name;
+        xx = GetblockData( trk );
+        LOG( log_block, 1, ("*** ReadBlock(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
+        LOG( log_block, 1, ("*** ReadBlock(): name = %p, script = %p\n",name,script))
+        xx->name = name;
 	xx->script = script;
 	xx->numTracks = blockTrk_da.cnt;
 	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
@@ -389,6 +395,7 @@ static void ReadBlock ( char * line )
 
 EXPORT void ResolveBlockTrack ( track_p trk )
 {
+    LOG( log_block, 1, ("*** ResolveBlockTrack(%p)\n",trk))
     blockData_p xx;
     track_p t_trk;
     wIndex_t iTrack;
@@ -401,6 +408,7 @@ EXPORT void ResolveBlockTrack ( track_p trk )
             NoticeMessage( _("resolveBlockTrack: T%d[%d]: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), iTrack, (&(xx->trackList))[iTrack].i );
         }
         (&(xx->trackList))[iTrack].t = t_trk;
+        LOG( log_block, 1, ("*** ResolveBlockTrack(): %d (%d): %p\n",iTrack,(&(xx->trackList))[iTrack].i,t_trk))
     }
 }
 
@@ -515,7 +523,8 @@ static void BlockOk ( void * junk )
 			endPtP = &tempEndPts(ep);
 			SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
 		}
-		xx = GetblockData( trk );
+                LOG( log_block, 1, ("*** BlockOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
+                xx = GetblockData( trk );
 		xx->name = MyStrdup(blockName);
 		xx->script = MyStrdup(blockScript);
 		xx->numTracks = blockTrk_da.cnt;

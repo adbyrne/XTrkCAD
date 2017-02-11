@@ -278,7 +278,11 @@ static void switchmotorDebug (track_p trk)
 
 static void DeleteSwitchMotor ( track_p trk )
 {
-	switchmotorData_p xx = GetswitchmotorData(trk);
+        LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(%p)\n",trk))
+        LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(): index is %d\n",GetTrkIndex(trk)))
+        switchmotorData_p xx = GetswitchmotorData(trk);
+        LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(): xx = %p, xx->name = %p, xx->normal = %p, xx->reverse = %p, xx->pointsense = %p\n",
+                xx,xx->name,xx->normal,xx->reverse,xx->pointsense))
 	MyFree(xx->name); xx->name = NULL;
 	MyFree(xx->normal); xx->normal = NULL;
 	MyFree(xx->reverse); xx->reverse = NULL;
@@ -316,11 +320,15 @@ static void ReadSwitchMotor ( char * line )
 	xx->reverse = reverse;
 	xx->pointsense = pointsense;
         xx->turnindx = trkindex;
-	switchmotorDebug(trk);
+        LOG( log_switchmotor, 1,("*** ReadSwitchMotor(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
+        LOG( log_switchmotor, 1,("*** ReadSwitchMotor(): name = %p, normal = %p, reverse = %p, pointsense = %p\n",
+                name,normal,reverse,pointsense))
+        switchmotorDebug(trk);
 }
 
 EXPORT void ResolveSwitchmotorTurnout ( track_p trk )
 {
+    LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(%p)\n",trk))
     switchmotorData_p xx;
     track_p t_trk;
     if (GetTrkType(trk) != T_SWITCHMOTOR) return;
@@ -331,6 +339,7 @@ EXPORT void ResolveSwitchmotorTurnout ( track_p trk )
         NoticeMessage( _("ResolveSwitchmotor: Turnout T%d: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), xx->turnindx );
     }
     xx->turnout = t_trk;
+    LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(): t_trk = (%d) %p\n",xx->turnindx,t_trk))
 }
 
 static void MoveSwitchMotor (track_p trk, coOrd orig ) {}
@@ -406,6 +415,7 @@ static void SwitchMotorOk ( void * junk )
 	xx->reverse = MyStrdup(switchmotorReverse);
 	xx->pointsense = MyStrdup(switchmotorPointSense);
 	xx->turnout = switchmotorTurnout;
+        LOG( log_switchmotor, 1,("*** SwitchMotorOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
 	switchmotorDebug(trk);
 	UndoEnd();
 	wHide( switchmotorW );
