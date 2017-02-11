@@ -369,7 +369,7 @@ static void ReadBlock ( char * line )
 		}
 		if ( strncmp( cp, "TRK", 3 ) == 0 ) {
 			if (!GetArgs(cp+4,"d",&trkindex)) return;
-			trk = FindTrack(trkindex);
+			/*trk = FindTrack(trkindex);*/
 			DYNARR_APPEND( btrackinfo_p *, blockTrk_da, 10 );
 			blockTrk(blockTrk_da.cnt-1).i = trkindex;
 		}
