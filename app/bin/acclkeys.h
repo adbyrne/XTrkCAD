@@ -113,6 +113,7 @@
 #define ACCL_GROUP		(WCTL+WSHIFT+'g')
 #define ACCL_UNGROUP	(WCTL+WSHIFT+'u')
 #define ACCL_CUSTMGM	(WALT+WCTL+'u')
+#define ACCL_CONTMGM    (WALT+WCTL+'c')
 #define ACCL_CARINV		(WALT+WCTL+'v')
 #define ACCL_LAYERS		(WALT+WCTL+'y')
 #define ACCL_SETCURLAYER		(0)

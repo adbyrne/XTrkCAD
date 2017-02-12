@@ -1,6 +1,7 @@
 /** \file cblock.c
  * Implement blocks: a group of trackwork with a single occ. detector
- * Created by Robert Heller on Thu Mar 12 09:43:02 2009
+ */
+/* Created by Robert Heller on Thu Mar 12 09:43:02 2009
  * ------------------------------------------------------------------
  * Modification History: $Log: not supported by cvs2svn $
  * Modification History: Revision 1.4  2009/09/16 18:32:24  m_fischer
@@ -47,16 +48,13 @@
 
 #include <ctype.h>
 #include "track.h"
+#include "trackx.h"
 #include "compound.h"
 #include "i18n.h"
 
 EXPORT TRKTYP_T T_BLOCK = -1;
 
-#define BLOCKCMD
-
 static int log_block = 0;
-
-#ifdef BLOCKCMD
 
 static void NoDrawLine(drawCmd_p d, coOrd p0, coOrd p1, wDrawWidth width,
 		       wDrawColor color ) {}
@@ -99,6 +97,21 @@ static paramData_t blockPLs[] = {
 /*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF, (void*)350, N_("Script") }
 };
 static paramGroup_t blockPG = { "block", 0, blockPLs,  sizeof blockPLs/sizeof blockPLs[0] };
+static wWin_p blockW;
+
+static char blockEditName[STR_SHORT_SIZE];
+static char blockEditScript[STR_LONG_SIZE];
+static char blockEditSegs[STR_LONG_SIZE];
+static track_p blockEditTrack;
+
+static paramData_t blockEditPLs[] = {
+/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF, (void*)200, N_("Name") },
+/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF, (void*)350, N_("Script") },
+/*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, (void*)350, N_("Segments"), BO_READONLY }, 
+};
+static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
+static wWin_p blockEditW;
+
 typedef struct btrackinfo_t {
     track_p t;
     TRKINX_T i;
@@ -106,8 +119,6 @@ typedef struct btrackinfo_t {
 
 static dynArr_t blockTrk_da;
 #define blockTrk(N) DYNARR_N( btrackinfo_t , blockTrk_da, N )
-static wWin_p blockW;
-#endif
 
 
 
@@ -221,6 +232,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 		blockData.endPt[0] = GetTrkEndPos((&(xx->trackList))[0].t,0);
 	}
 	for (tcount = 0; tcount < xx->numTracks; tcount++) {
+                if ((&(xx->trackList))[tcount].t == NULL) continue;
 		blockData.length += GetTrkLength((&(xx->trackList))[tcount].t,0,1);
 		lastTrk = (&(xx->trackList))[tcount].t;
 	}
@@ -244,6 +256,7 @@ static blockDebug (track_p trk)
 	LOG( log_block, 1, ("*** blockDebug(): script = \"%s\"\n",xx->script))
 	LOG( log_block, 1, ("*** blockDebug(): numTracks = %d\n",xx->numTracks))
 	for (iTrack = 0; iTrack < xx->numTracks; iTrack++) {
+                if ((&(xx->trackList))[iTrack].t == NULL) continue;
 		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, ",iTrack,GetTrkIndex((&(xx->trackList))[iTrack].t)))
 		LOG( log_block, 1, ("%s\n",GetTrkTypeName((&(xx->trackList))[iTrack].t)))
 	}
@@ -303,7 +316,11 @@ static BOOL_T blockCheckContigiousPath()
 
 static void DeleteBlock ( track_p t )
 {
-	blockData_p xx = GetblockData(t);
+        LOG( log_block, 1, ("*** DeleteBlock(%p)\n",t))
+        blockData_p xx = GetblockData(t);
+        LOG( log_block, 1, ("*** DeleteBlock(): index is %d\n",GetTrkIndex(t)))
+        LOG( log_block, 1, ("*** DeleteBlock(): xx = %p, xx->name = %p, xx->script = %p\n",
+                xx,xx->name,xx->script))
 	MyFree(xx->name); xx->name = NULL;
 	MyFree(xx->script); xx->script = NULL;
 }
@@ -317,6 +334,7 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	rc &= fprintf(f, "BLOCK %d \"%s\" \"%s\"\n",
 		GetTrkIndex(t), xx->name, xx->script)>0;
 	for (iTrack = 0; iTrack < xx->numTracks && rc; iTrack++) {
+                if ((&(xx->trackList))[iTrack].t == NULL) continue;
 		rc &= fprintf(f, "\tTRK %d\n",
 				GetTrkIndex((&(xx->trackList))[iTrack].t))>0;
 	}
@@ -357,13 +375,15 @@ static void ReadBlock ( char * line )
 		}
 	}
 	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
-	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(track_p)*(blockTrk_da.cnt-1))+1);
+	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
 	for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
 		endPtP = &tempEndPts(ep);
 		SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
 	}
-	xx = GetblockData( trk );
-	xx->name = name;
+        xx = GetblockData( trk );
+        LOG( log_block, 1, ("*** ReadBlock(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
+        LOG( log_block, 1, ("*** ReadBlock(): name = %p, script = %p\n",name,script))
+        xx->name = name;
 	xx->script = script;
 	xx->numTracks = blockTrk_da.cnt;
 	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
@@ -375,6 +395,7 @@ static void ReadBlock ( char * line )
 
 EXPORT void ResolveBlockTrack ( track_p trk )
 {
+    LOG( log_block, 1, ("*** ResolveBlockTrack(%p)\n",trk))
     blockData_p xx;
     track_p t_trk;
     wIndex_t iTrack;
@@ -387,6 +408,7 @@ EXPORT void ResolveBlockTrack ( track_p trk )
             NoticeMessage( _("resolveBlockTrack: T%d[%d]: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), iTrack, (&(xx->trackList))[iTrack].i );
         }
         (&(xx->trackList))[iTrack].t = t_trk;
+        LOG( log_block, 1, ("*** ResolveBlockTrack(): %d (%d): %p\n",iTrack,(&(xx->trackList))[iTrack].i,t_trk))
     }
 }
 
@@ -429,7 +451,6 @@ static trackCmd_t blockCmds = {
 
 
 
-#ifdef BLOCKCMD
 static BOOL_T TrackInBlock (track_p trk, track_p blk) {
 	wIndex_t iTrack;
 	blockData_p xx = GetblockData(blk);
@@ -461,7 +482,7 @@ static void BlockOk ( void * junk )
 
 	ParamUpdate( &blockPG );
 	if ( blockName[0]==0 ) {
-		NoticeMessage( 0, "Block must have a name!", _("Ok"));
+		NoticeMessage( _("Block must have a name!"), _("Ok"), NULL);
 		return;
 	}
 	wDrawDelayUpdate( mainD.d, TRUE );
@@ -502,7 +523,8 @@ static void BlockOk ( void * junk )
 			endPtP = &tempEndPts(ep);
 			SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
 		}
-		xx = GetblockData( trk );
+                LOG( log_block, 1, ("*** BlockOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
+                xx = GetblockData( trk );
 		xx->name = MyStrdup(blockName);
 		xx->script = MyStrdup(blockScript);
 		xx->numTracks = blockTrk_da.cnt;
@@ -557,7 +579,7 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 	LOG( log_block, 1, ("*** CmdBlockAction(%08x,{%f,%f})\n",action,pos.x,pos.y))
 	switch (action & 0xFF) {
 	case C_START:
-		fprintf(stderr,"*** CmdBlockCreate(): C_START\n");
+                LOG( log_block, 1,("*** CmdBlockCreate(): C_START\n"))
 		NewBlockDialog();
 		return C_TERMINATE;
 	default:
@@ -643,7 +665,7 @@ static STATUS_T CmdBlockDelete( wAction_t action, coOrd pos )
 
 static STATUS_T CmdBlock (wAction_t action, coOrd pos )
 {
-	fprintf(stderr,"*** CmdBlock(%08x,{%f,%f})\n",action,pos.x,pos.y);
+	LOG( log_block, 1, ("*** CmdBlock(%08x,{%f,%f})\n",action,pos.x,pos.y))
 
 	switch ((long)commandContext) {
 	case BLOCK_CREATE: return CmdBlockCreate(action,pos);
@@ -665,10 +687,122 @@ EXPORT void CheckDeleteBlock (track_p t)
     DeleteTrack(blk,FALSE);
 }
 
+static void BlockEditOk ( void * junk )
+{
+    blockData_p xx;
+    track_p trk;
+
+    LOG( log_block, 1, ("*** BlockEditOk()\n"))
+    ParamUpdate (&blockEditPG );
+    if ( blockEditName[0]==0 ) {
+        NoticeMessage( _("Block must have a name!"), _("Ok"), NULL);
+        return;
+    }
+    wDrawDelayUpdate( mainD.d, TRUE );
+    UndoStart( _("Modify Block"), "Modify Block" );
+    trk = blockEditTrack;
+    xx = GetblockData( trk );
+    xx->name = MyStrdup(blockEditName);
+    xx->script = MyStrdup(blockEditScript);
+    blockDebug(trk);
+    UndoEnd();
+    wHide( blockEditW );
+}
+
+
+static void EditBlock (track_p trk)
+{
+    blockData_p xx = GetblockData(trk);
+    wIndex_t iTrack;
+    BOOL_T needComma = FALSE;
+    char temp[32];
+    
+    strncpy(blockEditName,xx->name,STR_SHORT_SIZE);
+    strncpy(blockEditScript,xx->script,STR_LONG_SIZE);
+    blockEditSegs[0] = '\0';
+    for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
+        if ((&(xx->trackList))[iTrack].t == NULL) continue;
+        sprintf(temp,"%d",GetTrkIndex((&(xx->trackList))[iTrack].t));
+        if (needComma) strcat(blockEditSegs,", ");
+        strcat(blockEditSegs,temp);
+        needComma = TRUE;
+    }
+    blockEditTrack = trk;
+    if ( !blockEditW ) {
+        ParamRegister( &blockEditPG );
+        blockEditW = ParamCreateDialog (&blockEditPG, 
+                                        MakeWindowTitle(_("Edit block")), 
+                                        _("Ok"), BlockEditOk, 
+                                        wHide, TRUE, NULL, F_BLOCK, 
+                                        NULL );
+    }
+    ParamLoadControls( &blockEditPG );
+    sprintf( message, _("Edit block %d"), GetTrkIndex(trk) );
+    wWinSetTitle( blockEditW, message );
+    wShow (blockEditW);
+}
+
+static int BlockMgmProc ( int cmd, void * data )
+{
+    track_p trk = (track_p) data;
+    blockData_p xx = GetblockData(trk);
+    wIndex_t iTrack;
+    BOOL_T needComma = FALSE;
+    char temp[32];
+    char msg[STR_SIZE];
+    
+    switch ( cmd ) {
+    case CONTMGM_CAN_EDIT:
+        return TRUE;
+        break;
+    case CONTMGM_DO_EDIT:
+        EditBlock (trk);
+        /*inDescribeCmd = TRUE;*/
+        /*DescribeTrack (trk, msg, sizeof msg );*/
+        /*InfoMessage( msg );*/
+        return TRUE;
+        break;
+    case CONTMGM_CAN_DELETE:
+        return TRUE;
+        break;
+    case CONTMGM_DO_DELETE:
+        DeleteTrack (trk, FALSE);
+        return TRUE;
+        break;
+    case CONTMGM_GET_TITLE:
+        sprintf( message, "\t%s\t", xx->name);
+        for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
+            if ((&(xx->trackList))[iTrack].t == NULL) continue;
+            sprintf(temp,"%d",GetTrkIndex((&(xx->trackList))[iTrack].t));
+            if (needComma) strcat(message,", ");
+            strcat(message,temp);
+            needComma = TRUE;
+        }
+        break;
+    }
+    return FALSE;
+}
+
 
 #include "bitmaps/blocknew.xpm"
 #include "bitmaps/blockedit.xpm"
 #include "bitmaps/blockdel.xpm"
+#include "bitmaps/block.xpm"
+
+EXPORT void BlockMgmLoad( void )
+{
+    track_p trk;
+    static wIcon_p blockI = NULL;
+    
+    if ( blockI == NULL) 
+        blockI = wIconCreatePixMap( block_xpm );
+    
+    TRK_ITERATE(trk) {
+        if (GetTrkType(trk) != T_BLOCK) continue;
+        ContMgmLoad( blockI, BlockMgmProc, (void *)trk );
+    }
+    
+}
 
 EXPORT void InitCmdBlock( wMenu_p menu )
 {
@@ -681,7 +815,6 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 	ButtonGroupEnd();
 	ParamRegister( &blockPG );
 }
-#endif
 
 
 EXPORT void InitTrkBlock( void )
