@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <dirent.h>
 #include <sys/stat.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
