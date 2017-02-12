@@ -123,10 +123,11 @@ static dynArr_t blockTrk_da;
 
 
 typedef struct blockData_t {
-	char * name;
-	char * script;
-	wIndex_t numTracks;
-	btrackinfo_t trackList;
+    char * name;
+    char * script;
+    BOOL_T IsHilite;
+    wIndex_t numTracks;
+    btrackinfo_t trackList;
 } blockData_t, *blockData_p;
 
 static blockData_p GetblockData ( track_p trk )
@@ -384,7 +385,8 @@ static void ReadBlock ( char * line )
         LOG( log_block, 1, ("*** ReadBlock(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
         LOG( log_block, 1, ("*** ReadBlock(): name = %p, script = %p\n",name,script))
         xx->name = name;
-	xx->script = script;
+        xx->script = script;
+        xx->IsHilite = FALSE;
 	xx->numTracks = blockTrk_da.cnt;
 	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
 		LOG( log_block, 1, ("*** ReadBlock(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack).t)))
@@ -527,6 +529,7 @@ static void BlockOk ( void * junk )
                 xx = GetblockData( trk );
 		xx->name = MyStrdup(blockName);
 		xx->script = MyStrdup(blockScript);
+                xx->IsHilite = FALSE;
 		xx->numTracks = blockTrk_da.cnt;
 		for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
 			LOG( log_block, 1, ("*** BlockOk(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack).t)))
@@ -742,6 +745,21 @@ static void EditBlock (track_p trk)
     wShow (blockEditW);
 }
 
+static coOrd blkhiliteOrig, blkhiliteSize;
+static POS_T blkhiliteBorder;
+static wDrawColor blkhiliteColor = 0;
+static void DrawBlockTrackHilite( void )
+{
+	wPos_t x, y, w, h;
+	if (blkhiliteColor==0)
+		blkhiliteColor = wDrawColorGray(87);
+	w = (wPos_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = (wPos_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	mainD.CoOrd2Pix(&mainD,blkhiliteOrig,&x,&y);
+	wDrawFilledRectangle( mainD.d, x, y, w, h, blkhiliteColor, wDrawOptTemp );
+}
+
+
 static int BlockMgmProc ( int cmd, void * data )
 {
     track_p trk = (track_p) data;
@@ -750,6 +768,8 @@ static int BlockMgmProc ( int cmd, void * data )
     BOOL_T needComma = FALSE;
     char temp[32];
     char msg[STR_SIZE];
+    coOrd tempOrig, tempSize;
+    BOOL_T first = TRUE;
     
     switch ( cmd ) {
     case CONTMGM_CAN_EDIT:
@@ -768,6 +788,68 @@ static int BlockMgmProc ( int cmd, void * data )
     case CONTMGM_DO_DELETE:
         DeleteTrack (trk, FALSE);
         return TRUE;
+        break;
+    case CONTMGM_DO_HILIGHT:
+        if (!xx->IsHilite) {
+            blkhiliteBorder = mainD.scale*0.1;
+            if ( blkhiliteBorder < trackGauge ) blkhiliteBorder = trackGauge;
+            first = TRUE;
+            for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
+                if ((&(xx->trackList))[iTrack].t == NULL) continue;
+                GetBoundingBox( (&(xx->trackList))[iTrack].t, &tempSize, &tempOrig );
+                if (first) {
+                    blkhiliteOrig = tempOrig;
+                    blkhiliteSize = tempSize;
+                    first = FALSE;
+                } else {
+                    if (tempSize.x > blkhiliteSize.x)
+                        blkhiliteSize.x = tempSize.x;
+                    if (tempSize.y > blkhiliteSize.y)
+                        blkhiliteSize.y = tempSize.y;
+                    if (tempOrig.x < blkhiliteOrig.x)
+                        blkhiliteOrig.x = tempOrig.x;
+                    if (tempOrig.y < blkhiliteOrig.y)
+                        blkhiliteOrig.y = tempOrig.y;
+                }
+            }
+            blkhiliteOrig.x -= blkhiliteBorder;
+            blkhiliteOrig.y -= blkhiliteBorder;
+            blkhiliteSize.x -= blkhiliteOrig.x-blkhiliteBorder;
+            blkhiliteSize.y -= blkhiliteOrig.y-blkhiliteBorder;
+            DrawBlockTrackHilite();
+            xx->IsHilite = TRUE;
+        }
+        break;
+    case CONTMGM_UN_HILIGHT:
+        if (xx->IsHilite) {
+            blkhiliteBorder = mainD.scale*0.1;
+            if ( blkhiliteBorder < trackGauge ) blkhiliteBorder = trackGauge;
+            first = TRUE;
+            for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
+                if ((&(xx->trackList))[iTrack].t == NULL) continue;
+                GetBoundingBox( (&(xx->trackList))[iTrack].t, &tempSize, &tempOrig );
+                if (first) {
+                    blkhiliteOrig = tempOrig;
+                    blkhiliteSize = tempSize;
+                    first = FALSE;
+                } else {
+                    if (tempSize.x > blkhiliteSize.x)
+                        blkhiliteSize.x = tempSize.x;
+                    if (tempSize.y > blkhiliteSize.y)
+                        blkhiliteSize.y = tempSize.y;
+                    if (tempOrig.x < blkhiliteOrig.x)
+                        blkhiliteOrig.x = tempOrig.x;
+                    if (tempOrig.y < blkhiliteOrig.y)
+                        blkhiliteOrig.y = tempOrig.y;
+                }
+            }
+            blkhiliteOrig.x -= blkhiliteBorder;
+            blkhiliteOrig.y -= blkhiliteBorder;
+            blkhiliteSize.x -= blkhiliteOrig.x-blkhiliteBorder;
+            blkhiliteSize.y -= blkhiliteOrig.y-blkhiliteBorder;
+            DrawBlockTrackHilite();
+            xx->IsHilite = FALSE;
+        }
         break;
     case CONTMGM_GET_TITLE:
         sprintf( message, "\t%s\t", xx->name);

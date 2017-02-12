@@ -380,6 +380,8 @@ BOOL_T CarCustomSave(FILE*);
 #define CONTMGM_CAN_DELETE              (3)
 #define CONTMGM_DO_DELETE               (4)
 #define CONTMGM_GET_TITLE               (5)
+#define CONTMGM_DO_HILIGHT              (6)
+#define CONTMGM_UN_HILIGHT              (7)
 
 typedef int (*contMgmCallBack_p) (int, void *);
 void ContMgmLoad (wIcon_p,contMgmCallBack_p,void *);

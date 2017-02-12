@@ -8,7 +8,7 @@
  *  Module        : 
  *  Created By    : Robert Heller
  *  Created       : Thu Jan 5 10:52:12 2017
- *  Last Modified : <170123.1206>
+ *  Last Modified : <170212.1418>
  *
  *  Description
  * 
@@ -104,6 +104,8 @@ typedef struct {
 		wIcon_p icon;
 		} contMgmContext_t, *contMgmContext_p;
 
+static BOOL_T AnyHILIGHT = FALSE;
+
 static void ControlDlgUpdate(
 		paramGroup_p pg,
 		int inx,
@@ -114,6 +116,20 @@ static void ControlDlgUpdate(
     wIndex_t linx, lcnt;
 
     if ( inx != I_CONTROLLIST ) return;
+    lcnt = wListGetCount( (wList_p)controlPLs[0].control );
+    AnyHILIGHT = FALSE;
+    for (linx=0;
+         linx < lcnt;
+         linx++ ) {
+        if (wListGetItemSelected( (wList_p)controlPLs[0].control, linx ) == TRUE) {
+            context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
+            context->proc( CONTMGM_DO_HILIGHT, context->data );
+            AnyHILIGHT = TRUE;
+        } else {
+            context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
+            context->proc( CONTMGM_UN_HILIGHT, context->data );
+        }
+    }
     ParamControlActive( &controlPG, I_CONTROLEDIT, selcnt>0 );
     ParamControlActive( &controlPG, I_CONTROLDEL, selcnt>0 );
 }
@@ -171,7 +187,19 @@ static void ControlDelete( void * action )
 
 static void ControlDone( void * action )
 {
-	wHide( controlPG.win );
+    contMgmContext_p context = NULL;
+    wIndex_t linx, lcnt;
+    
+    if (AnyHILIGHT) {
+        lcnt = wListGetCount( (wList_p)controlPLs[0].control );
+        for (linx=0;
+             linx < lcnt;
+             linx++ ) {
+            context = (contMgmContext_p)wListGetItemContext( controlSelL, linx );
+            context->proc( CONTMGM_UN_HILIGHT, context->data );
+        }
+    }
+    wHide( controlPG.win );
 }
 
 

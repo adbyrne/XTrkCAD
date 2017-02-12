@@ -111,12 +111,13 @@ static dynArr_t switchmotorTrk_da;
 */
 
 typedef struct switchmotorData_t {
-	char * name;
-	char * normal;
-	char * reverse;
-	char * pointsense;
-        TRKINX_T turnindx;
-        track_p turnout;
+    char * name;
+    char * normal;
+    char * reverse;
+    char * pointsense;
+    BOOL_T IsHilite;
+    TRKINX_T turnindx;
+    track_p turnout;
 } switchmotorData_t, *switchmotorData_p;
 
 static switchmotorData_p GetswitchmotorData ( track_p trk )
@@ -602,6 +603,20 @@ static void EditSwitchMotor (track_p trk)
     wShow (switchmotorEditW);
 }
 
+static coOrd swmhiliteOrig, swmhiliteSize;
+static POS_T swmhiliteBorder;
+static wDrawColor swmhiliteColor = 0;
+static void DrawSWMotorTrackHilite( void )
+{
+	wPos_t x, y, w, h;
+	if (swmhiliteColor==0)
+		swmhiliteColor = wDrawColorGray(87);
+	w = (wPos_t)((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = (wPos_t)((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	mainD.CoOrd2Pix(&mainD,swmhiliteOrig,&x,&y);
+	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp );
+}
+
 static int SwitchmotorMgmProc ( int cmd, void * data )
 {
     track_p trk = (track_p) data;
@@ -625,6 +640,32 @@ static int SwitchmotorMgmProc ( int cmd, void * data )
     case CONTMGM_DO_DELETE:
         DeleteTrack (trk, FALSE);
         return TRUE;
+        break;
+    case CONTMGM_DO_HILIGHT:
+        if (xx->turnout != NULL && !xx->IsHilite) {
+            swmhiliteBorder = mainD.scale*0.1;
+            if ( swmhiliteBorder < trackGauge ) swmhiliteBorder = trackGauge;
+            GetBoundingBox( xx->turnout, &swmhiliteSize, &swmhiliteOrig );
+            swmhiliteOrig.x -= swmhiliteBorder;
+            swmhiliteOrig.y -= swmhiliteBorder;
+            swmhiliteSize.x -= swmhiliteOrig.x-swmhiliteBorder;
+            swmhiliteSize.y -= swmhiliteOrig.y-swmhiliteBorder;
+            DrawSWMotorTrackHilite();
+            xx->IsHilite = TRUE;
+        }
+        break;
+    case CONTMGM_UN_HILIGHT:
+        if (xx->turnout != NULL && xx->IsHilite) {
+            swmhiliteBorder = mainD.scale*0.1;
+            if ( swmhiliteBorder < trackGauge ) swmhiliteBorder = trackGauge;
+            GetBoundingBox( xx->turnout, &swmhiliteSize, &swmhiliteOrig );
+            swmhiliteOrig.x -= swmhiliteBorder;
+            swmhiliteOrig.y -= swmhiliteBorder;
+            swmhiliteSize.x -= swmhiliteOrig.x-swmhiliteBorder;
+            swmhiliteSize.y -= swmhiliteOrig.y-swmhiliteBorder;
+            DrawSWMotorTrackHilite();
+            xx->IsHilite = FALSE;
+        }
         break;
     case CONTMGM_GET_TITLE:
         if (xx->turnout == NULL) {
