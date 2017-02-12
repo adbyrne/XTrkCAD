@@ -5702,7 +5702,7 @@ msgid "Mint"
 msgstr "Loistava"
 
 #: ../../../../build/xtrkcad/app/bin/bllnhlp.c:298
-msgid "Minumum radius"
+msgid "Minimum radius"
 msgstr "Pienin karresäde"
 
 #: ../../../../build/xtrkcad/app/i18n/custmsg.h:41

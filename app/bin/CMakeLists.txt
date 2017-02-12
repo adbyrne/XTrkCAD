@@ -107,6 +107,8 @@ SET(SOURCES
 	dprmfile.c
 	draw.c
 	drawgeom.c
+	dxfformat.c
+	dxfoutput.c
 	elev.c
 	fileio.c
 	i18n.c
@@ -149,6 +151,7 @@ ADD_EXECUTABLE(xtrkcad WIN32
 	)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
+target_link_libraries(xtrkcad dynstring)
 
 ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}
@@ -174,3 +177,7 @@ INSTALL(
 	TARGETS xtrkcad
 	RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
+	
+if(XTRKCAD_TESTING AND CMOCKA_FOUND)			
+	add_subdirectory( unittest )
+endif()  

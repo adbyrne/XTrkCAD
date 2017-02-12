@@ -1,7 +1,9 @@
 # "bin/i18n.h" is widely used
 INCLUDE_DIRECTORIES(bin)
+include_directories(dynstring)
 
-# Setup the restt of the build ...
+# Setup the rest of the build ...
+add_subdirectory(dynstring)
 ADD_SUBDIRECTORY(wlib)
 ADD_SUBDIRECTORY(tools)
 ADD_SUBDIRECTORY(help)

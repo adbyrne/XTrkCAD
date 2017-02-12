@@ -45,7 +45,7 @@
 #include "compound.h"
 #include "i18n.h"
 
-EXPORT long units = 0;
+EXPORT long units = 0; /**< measurement units: 0 = English, 1 = metric */
 EXPORT long checkPtInterval = 10;
 
 EXPORT DIST_T curScaleRatio;
