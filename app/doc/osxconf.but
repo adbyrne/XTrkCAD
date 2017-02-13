@@ -11,4 +11,5 @@
 \cfg{html-contents-depth}{0}{2}
 
 \cfg{html-head-end}{<link rel="stylesheet" type="text/css" href="xtrkcad_lin.css" />}
+\cfg{html-head-local}{<meta tag="AppleTitle" contents="org.xtrkcad.help" />}
 

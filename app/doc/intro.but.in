@@ -44,10 +44,7 @@ Copyright 2007, Bob Blackwell and Martin Fischer
 
 \IM{Created by Turnout Command}{Easements and Sectional Track} Sectional Track
 
-
 \# >>>>>>>>>> Manual Begin's Here <<<<<<<<<<
-
-\cfg{html-local-head}{<meta name="AppleTitle" content=“XTrackCAD Help" />}
 
 \title \e{XTrackCAD} User's Manual
 
@@ -59,8 +56,9 @@ Copyright 2007, Bob Blackwell and Martin Fischer
 
 \rule
 
-
 \C{index} Introduction To \e{XTrackCAD}
+
+\cfg{html-local-head}{<meta name="AppleTitle" content="org.xtrkcad.help" />}
 
 \e{XTrackCAD} is a CAD (computer-aided design) program for designing Model Railroad layouts. \e{XTrackCAD} supports any scale, has libraries of popular brands of turnouts and sectional track (plus you add your own easily), can automatically use spiral transition curves when joining track and has extensive on-line help and demonstrations. \e{XTrackCAD} lets you manipulate track much like you would with actual flex-track to modify, extend and join tracks and turnouts. Additional features include tunnels, 'post-it' notes, on-screen ruler, parts list, 99 drawing layers, undo/redo commands, bench-work, 'Print to Bitmap', elevations, train simulation and car inventory. 
 
