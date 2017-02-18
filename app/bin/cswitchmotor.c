@@ -146,9 +146,9 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
     int iPoint;
     ANGLE_T x_angle, y_angle;
     
-    x_angle = 90-angle;
+    x_angle = 90-(360-angle);
     if (x_angle < 0) x_angle += 360;
-    y_angle = -angle;
+    y_angle = -(360-angle);
     if (y_angle < 0) y_angle += 360;
     
     
