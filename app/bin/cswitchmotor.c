@@ -430,7 +430,8 @@ static void SwitchMotorOk ( void * junk )
         LOG( log_switchmotor, 1,("*** SwitchMotorOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
 	switchmotorDebug(trk);
 	UndoEnd();
-	wHide( switchmotorW );
+        wHide( switchmotorW );
+        DrawNewTrack(trk);
 }
 
 static void NewSwitchMotorDialog(track_p trk)
