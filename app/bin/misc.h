@@ -403,4 +403,7 @@ void BlockMgmLoad( void );
 /* cswitchmotor.c */
 void InitCmdSwitchMotor( wMenu_p menu );
 void SwitchmotorMgmLoad( void );
+/* csignal.c */
+void InitCmdSignal ( wMenu_p menu );
+void SignalMgmLoad ( void );
 #endif

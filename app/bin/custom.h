@@ -94,6 +94,7 @@ void InitTrkTurnout( void );
 void InitTrkTurntable( void );
 void InitTrkBlock( void );
 void InitTrkSwitchMotor( void );
+void InitTrkSignal ( void );
 
 void InitCmdCurve( wMenu_p menu );
 void InitCmdHelix( wMenu_p menu );

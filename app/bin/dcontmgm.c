@@ -8,7 +8,7 @@
  *  Module        : 
  *  Created By    : Robert Heller
  *  Created       : Thu Jan 5 10:52:12 2017
- *  Last Modified : <170212.1418>
+ *  Last Modified : <170220.1239>
  *
  *  Description
  * 
@@ -245,7 +245,8 @@ static void LoadControlMgmList( void )
 	wListClear( controlSelL );
 
 	BlockMgmLoad();
-	SwitchmotorMgmLoad();
+        SwitchmotorMgmLoad();
+        SignalMgmLoad();
 
 #ifdef LATER
 	curInx = 0;
