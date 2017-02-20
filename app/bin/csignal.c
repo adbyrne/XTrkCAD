@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Feb 19 13:11:45 2017
- *  Last Modified : <170220.1316>
+ *  Last Modified : <170220.1426>
  *
  *  Description	
  *
@@ -142,6 +142,70 @@ static void DrawSignal (track_p t, drawCmd_p d, wDrawColor color )
     DDrawSignal(d,xx->orig, xx->angle, xx->numHeads, GetScaleRatio(GetTrkScale(t)),color);
 }
 
+static void SignalBoundingBox (coOrd orig, ANGLE_T angle,wIndex_t numHeads, 
+                               DIST_T scaleRatio, coOrd *hi, coOrd *lo)
+{
+    coOrd p1, p2, headp1, headp2;
+    ANGLE_T x_angle, y_angle;
+    DIST_T hoffset,delta;
+    wIndex_t ihead;
+    
+    x_angle = 90-(360-angle);
+    if (x_angle < 0) x_angle += 360;
+    y_angle = -(360-angle);
+    if (y_angle < 0) y_angle += 360;
+    
+    Translate (&p1, orig, x_angle, (-BASEX) * signal_SF / scaleRatio);
+    Translate (&p1, p1,   y_angle, BASEY * signal_SF / scaleRatio);
+    Translate (&p2, orig, x_angle, BASEX * signal_SF / scaleRatio);
+    Translate (&p2, p2,   y_angle, BASEY * signal_SF / scaleRatio);
+    *hi = p1; *lo = p1;
+    if (p2.x > hi->x) hi->x = p2.x;
+    if (p2.x < lo->x) lo->x = p2.x;
+    if (p2.y > hi->y) hi->y = p2.y;
+    if (p2.y < lo->y) lo->y = p2.y;
+    p1 = orig;
+    Translate (&p2, orig, x_angle, MASTX * signal_SF / scaleRatio);
+    Translate (&p2, p2,   y_angle, MASTY * signal_SF / scaleRatio);
+    if (p1.x > hi->x) hi->x = p1.x;
+    if (p1.x < lo->x) lo->x = p1.x;
+    if (p1.y > hi->y) hi->y = p1.y;
+    if (p1.y < lo->y) lo->y = p1.y;
+    if (p2.x > hi->x) hi->x = p2.x;
+    if (p2.x < lo->x) lo->x = p2.x;
+    if (p2.y > hi->y) hi->y = p2.y;
+    if (p2.y < lo->y) lo->y = p2.y;
+    hoffset = MASTY;
+    for (ihead = 0; ihead < numHeads; ihead++) {
+        Translate (&p1, orig, x_angle, MASTX * signal_SF / scaleRatio);
+        Translate (&p1, p1,   y_angle, (hoffset+HEADR) * signal_SF / scaleRatio);
+        delta = HEADR * signal_SF / scaleRatio;
+        headp1.x = p1.x - delta;
+        headp1.y = p1.y - delta;
+        headp2.x = p1.x + delta;
+        headp2.y = p1.y + delta;
+        if (headp1.x > hi->x) hi->x = headp1.x;
+        if (headp1.x < lo->x) lo->x = headp1.x;
+        if (headp1.y > hi->y) hi->y = headp1.y;
+        if (headp1.y < lo->y) lo->y = headp1.y;
+        if (headp2.x > hi->x) hi->x = headp2.x;
+        if (headp2.x < lo->x) lo->x = headp2.x;
+        if (headp2.y > hi->y) hi->y = headp2.y;
+        if (headp2.y < lo->y) lo->y = headp2.y;
+        hoffset += HEADR*2;
+    }
+    
+}
+
+static void ComputeSignalBoundingBox (track_p t )
+{
+    coOrd lo, hi;
+    signalData_p xx = GetsignalData(t);
+    SignalBoundingBox(xx->orig, xx->angle, xx->numHeads, 
+                      GetScaleRatio(GetTrkScale(t)), &hi, &lo);
+    SetBoundingBox(t, hi, lo);
+}
+
 static DIST_T DistanceSignal (track_p t, coOrd * p )
 {
     signalData_p xx = GetsignalData(t);
@@ -231,6 +295,7 @@ static void ReadSignal ( char * line )
         (&(xx->aspectList))[ia].aspectName = signalAspect(ia).aspectName;
         (&(xx->aspectList))[ia].aspectScript = signalAspect(ia).aspectScript;
     }
+    ComputeSignalBoundingBox(trk);
 }
 
 static void MoveSignal (track_p trk, coOrd orig )
@@ -394,6 +459,7 @@ static void SignalEditOk ( void * junk )
     }
     UndoEnd();
     DoRedraw();
+    ComputeSignalBoundingBox(trk);
     wHide( signalEditW );
 }
 
@@ -611,6 +677,20 @@ static STATUS_T CmdSignal ( wAction_t action, coOrd pos )
     }
 }
 
+static coOrd sighiliteOrig, sighiliteSize;
+static POS_T sighiliteBorder;
+static wDrawColor sighiliteColor = 0;
+static void DrawSignalTrackHilite( void )
+{
+	wPos_t x, y, w, h;
+	if (sighiliteColor==0)
+		sighiliteColor = wDrawColorGray(87);
+	w = (wPos_t)((sighiliteSize.x/mainD.scale)*mainD.dpi+0.5);
+	h = (wPos_t)((sighiliteSize.y/mainD.scale)*mainD.dpi+0.5);
+	mainD.CoOrd2Pix(&mainD,sighiliteOrig,&x,&y);
+	wDrawFilledRectangle( mainD.d, x, y, w, h, sighiliteColor, wDrawOptTemp );
+}
+
 static int SignalMgmProc ( int cmd, void * data )
 {
     track_p trk = (track_p) data;
@@ -633,10 +713,30 @@ static int SignalMgmProc ( int cmd, void * data )
         return TRUE;
         break;
     case CONTMGM_DO_HILIGHT:
-        /* To be done */
+        if (!xx->IsHilite) {
+            sighiliteBorder = mainD.scale*0.1;
+            if ( sighiliteBorder < trackGauge ) sighiliteBorder = trackGauge;
+            GetBoundingBox( trk, &sighiliteSize, &sighiliteOrig );
+            sighiliteOrig.x -= sighiliteBorder;
+            sighiliteOrig.y -= sighiliteBorder;
+            sighiliteSize.x -= sighiliteOrig.x-sighiliteBorder;
+            sighiliteSize.y -= sighiliteOrig.y-sighiliteBorder;
+            DrawSignalTrackHilite();
+            xx->IsHilite = TRUE;
+        }
         break;
     case CONTMGM_UN_HILIGHT:
-        /* To be done */
+        if (xx->IsHilite) {
+            sighiliteBorder = mainD.scale*0.1;
+            if ( sighiliteBorder < trackGauge ) sighiliteBorder = trackGauge;
+            GetBoundingBox( trk, &sighiliteSize, &sighiliteOrig );
+            sighiliteOrig.x -= sighiliteBorder;
+            sighiliteOrig.y -= sighiliteBorder;
+            sighiliteSize.x -= sighiliteOrig.x-sighiliteBorder;
+            sighiliteSize.y -= sighiliteOrig.y-sighiliteBorder;
+            DrawSignalTrackHilite();
+            xx->IsHilite = FALSE;
+        }
         break;
     case CONTMGM_GET_TITLE:
         sprintf(message,"\t%s\t",xx->name);
