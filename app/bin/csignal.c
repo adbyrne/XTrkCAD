@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Feb 19 13:11:45 2017
- *  Last Modified : <170220.1426>
+ *  Last Modified : <170222.1324>
  *
  *  Description	
  *
@@ -214,6 +214,19 @@ static DIST_T DistanceSignal (track_p t, coOrd * p )
 
 static void DescribeSignal (track_p trk, char * str, CSIZE_T len ) 
 {
+    signalData_p xx = GetsignalData(trk);
+    
+    strcpy( str, _(GetTrkTypeName( trk )) );
+    str++;
+    while (*str) {
+        *str = tolower((unsigned char)*str);
+        str++;
+    }
+    sprintf( str, _("(%d [%s]): Layer=%d, %d heads at %0.3f,%0.3f A%0.3f"),
+             GetTrkIndex(trk), 
+             xx->name,GetTrkLayer(trk)+1, xx->numHeads,
+             xx->orig.x, xx->orig.y,xx->angle );
+    
 }
 
 static void DeleteSignal ( track_p trk )
@@ -300,13 +313,23 @@ static void ReadSignal ( char * line )
 
 static void MoveSignal (track_p trk, coOrd orig )
 {
+    signalData_p xx = GetsignalData ( trk );
+    xx->orig.x += orig.x;
+    xx->orig.y += orig.y;
+    ComputeSignalBoundingBox(trk);
 }
 
 static void RotateSignal (track_p trk, coOrd orig, ANGLE_T angle ) 
 {
+    signalData_p xx = GetsignalData ( trk );
+    Rotate(&(xx->orig), orig, angle);
+    xx->angle = NormalizeAngle(xx->angle + angle);
+    ComputeSignalBoundingBox(trk);
 }
 
-static void RescaleSignal (track_p trk, FLOAT_T ratio ) {}
+static void RescaleSignal (track_p trk, FLOAT_T ratio ) 
+{
+}
 
 static trackCmd_t signalCmds = {
     "SIGNAL",
