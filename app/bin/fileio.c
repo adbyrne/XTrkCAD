@@ -1039,7 +1039,7 @@ static int SaveTracks(
 	wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[ 0 ]) );
 	checkPtMark = changed = 0;
 
-	if (curPathName != fileName[ 0 ])
+	if (strcmp(curPathName, fileName[ 0 ]))
 	  strcpy( curPathName, fileName[ 0 ] );
 	curFileName = FindName( curPathName );
 	
@@ -1053,13 +1053,14 @@ static int SaveTracks(
 EXPORT void DoSave( doSaveCallBack_p after )
 {
 	doAfterSave = after;
-	if (curPathName[0] == 0) {
+	if (curPathName[0] == '\0') {
 		if (saveFile_fs == NULL)
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
 				sSourceFilePattern, SaveTracks, NULL );
 		wFilSelect( saveFile_fs, curDirName );
 	} else {
-		SaveTracks( 1, &curFileName, NULL );
+		char *temp = curPathName; 
+		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
 }
