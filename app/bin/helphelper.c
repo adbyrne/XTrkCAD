@@ -46,6 +46,7 @@ OSStatus MyGoToHelpPage (CFStringRef pagePath, CFStringRef anchorName)
     CFBundleRef myApplicationBundle = NULL;
     CFStringRef myBookName = NULL;
     OSStatus err = noErr;
+    printf("HelpHelper: Started to look for help\n");
  
     myApplicationBundle = CFBundleGetMainBundle();
     if (myApplicationBundle == NULL) {
@@ -53,15 +54,18 @@ OSStatus MyGoToHelpPage (CFStringRef pagePath, CFStringRef anchorName)
     	err = fnfErr; 
     	return err;
     }
+    printf("HelpHelper: Application Bundle Found\n");
  
     myBookName = CFBundleGetValueForInfoDictionaryKey(
                     myApplicationBundle,
                     CFSTR("CFBundleHelpBookName"));
     if (myBookName == NULL) {
-    	printf("HelpHelper: Error - No HelpBookName\n" );  
+    	myBookName = CFStringCreateWithCString(NULL, "XTrackCAD Help", kCFStringEncodingMacRoman);
+    	printf("HelpHelper: Defaulting to 'XTrackCAD Help'\n" );  
     	err = fnfErr; 
     	return err;
     }
+    printf("HelpHelper: BookName dictionary name %s found\n",CFStringGetCStringPtr(myBookName, kCFStringEncodingMacRoman));
  
     if (CFGetTypeID(myBookName) != CFStringGetTypeID()) {
     	printf("HelpHelper: Error - BookName is not a string\n" );
@@ -71,7 +75,7 @@ OSStatus MyGoToHelpPage (CFStringRef pagePath, CFStringRef anchorName)
     if (err == noErr) {
     	err = AHGotoPage (myBookName, pagePath, anchorName);
     	if (err != noErr) {
-    		printf("HelpHelper: Error in AHGoToPage\n" );
+    		printf("HelpHelper: Error in AHGoToPage('%s','%s')\n",CFStringGetCStringPtr(myBookName, kCFStringEncodingMacRoman), CFStringGetCStringPtr(pagePath, kCFStringEncodingMacRoman));
     	}
     }
     	
@@ -82,7 +86,7 @@ OSStatus MyGoToHelpPage (CFStringRef pagePath, CFStringRef anchorName)
 int displayHelp(char* name) {
 	CFStringRef str = CFStringCreateWithCString(NULL,name,kCFStringEncodingMacRoman);
 	OSStatus err = MyGoToHelpPage(str, NULL);
-	if (err != noErr) printf("HelpHelper: MyGoToHelpPage had error\n" ); 
+	if (err != noErr) printf("HelpHelper: MyGoToHelpPage had error %d\n", err); 
 	return err;
 
 };
@@ -97,6 +101,7 @@ main( int argc, char **argv )
 	int len;
 	int finished = 0;
 	int numBytes = 0;
+	int numBytes2 = 0;
 	
 	printf( "HelpHelper: starting!\n" );
 	
@@ -109,18 +114,18 @@ main( int argc, char **argv )
 			
 			if( numBytes > 0 )
 				printf( "HelpHelper: read %d bytes\n", numBytes );
-			if( numBytes == sizeof(int )) {
+			if( numBytes == sizeof(int)) {
 				printf( "HelpHelper: Expecting %d bytes\n", len );
-				read( handleOfPipe, buffer, len + 1 );
-				printf( "HelpHelper: Display help on: %s\n", buffer );
+				numBytes2 = read( handleOfPipe, buffer, len + 1 );
+				if (numBytes2 > 0) 
+					printf( "HelpHelper: Display help on: %s\n", buffer );
 				
 				if( !strcmp(buffer, EXITCOMMAND )) {
 					finished = 1;
 				} else {
 					if (displayHelp(buffer) != 0) 
-						printf( "HelpHelper: Error - %s\n", issue);
-				}
-					
+						printf( "HelpHelper: Error\n");
+				}				
 			}
 			if( numBytes <= 0 ) {
 				printf( "HelpHelper: exiting on pipe error\n" );

@@ -169,6 +169,7 @@ enum {
     word_HyperLink,		       /* (invisible) */
     word_HyperEnd,		       /* (also invisible; no text) */
 	 word_Graphic,					 /* \G */
+	 word_Anchor,				/* \IA */
     /*
      * Back ends may define their own word types beyond here, in
      * case they need to use them internally.

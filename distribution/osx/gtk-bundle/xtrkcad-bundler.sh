@@ -11,7 +11,7 @@ version="Version"
 while getopts "v:i:h" option; do
 	case "${option}" in
 			v) version="${OPTARG}";;
-			i) buildlib="${OPTARG}";;
+			i) installib="${OPTARG}";;
 			h) usage;;
 			*) usage;;
 	esac
@@ -19,25 +19,26 @@ done
 shift "$((OPTIND-1))"
 
 usage() {
-	echo "xtrkcad-bundler -i Cmake_Install_Lib [-v Version][-t Template]";
+	echo "xtrkcad-bundler -i Cmake_Install_Lib [-v Version]";
 	echo " -v Version - will be appended to 'xtrkcad' in the image name";
 	echo " -i Cmake_Install_Lib where the binary and share files were placed by Make";
 	exit 1;
 	
 	}
 
-if [ -z "${buildlib}" ]; then
+if [ -z "${installib}" ]; then
 	usage;
 	exit 1;
 fi
 
 #copy in all shares
 echo "copying shares from build to share directory"
-cp -R "${buildlib}/share/" "share/"
+cp -R "${installib}/share/" "share/"
 
 #copy in binary
-echo "copying binary from build to bin directory"
-cp "${buildlib}/bin/xtrkcad" "bin"
+echo "copying binaries from build to bin directory"
+cp "${installib}/bin/xtrkcad" "bin"
+cp "${installib}/bin/helphelper" "bin"
 
 echo "executing gtk-mac-bundler"
 gtk-mac-bundler xtrkcad.bundle
@@ -63,7 +64,7 @@ cp -R "bin/xtrkcad.app" "dmg/xtrkcad.app"
 echo "closing image"
 #dev_dmg='hdiutil info | grep "dmg" | grep "Apple_HFS"' && \ 
 hdiutil detach dmg -force
-master=xtrkcad-OSX-"${version}"
+master="xtrkcad-OSX-${version}"
 rm -rf "${master}".dmg
 echo "making image RO and compressed"
 hdiutil convert xtrkcad-template.dmg -format UDZO -imagekey zlib-level=9 -o "${master}"
@@ -74,10 +75,10 @@ rm -f "${master}".dmg.tar.gz
 
 tar -cvzf "${master}".dmg.tar.gz "${master}".dmg
 
-mv -f "${master}".dmg.tar.gz "${buildlib}"/bin
+mv -f "${master}".dmg.tar.gz "${installib}"/bin
 
 rm -rf dmg
 
-echo "Tarball output image file ${master}.tar.gz is in ${buildlib}/bin directory"
+echo "Tarball output image file ${master}.tar.gz is in ${installib}/bin directory"
 
 exit 0

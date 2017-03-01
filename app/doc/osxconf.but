@@ -7,9 +7,10 @@
 \cfg{html-contents-filename}{contents.html}
 \cfg{html-template-filename}{%k.html}
 \cfg{html-template-fragment}{%k}
+\cfg{html-applehelp-toc}{toc.html}
 
 \cfg{html-contents-depth}{0}{2}
 
-\cfg{html-head-end}{<link rel="stylesheet" type="text/css" href="xtrkcad_lin.css" />}
-\cfg{html-head-local}{<meta tag="AppleTitle" contents="org.xtrkcad.help" />}
-
+\cfg{html-head-end}{<link rel="stylesheet" type="text/css" href="xtrkcad_osx.css" /><script type="text/javascript" src="toc.js" ></script>}
+\cfg{html-body-start}{<div id="container"><div id="toc" data-include="toc.html"></div><div id="contents">}
+\cfg{html-body-end}{</div></div>} 

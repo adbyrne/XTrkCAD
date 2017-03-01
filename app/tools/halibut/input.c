@@ -213,6 +213,7 @@ enum {
 	 c_G,					 /* graphic */	
     c_H,			       /* heading */
     c_I,			       /* invisible index mark */
+    c_IA,					/* included anchor */
     c_IM,			       /* index merge/rewrite */
     c_K,			       /* capitalised cross-reference */
     c_S,			       /* aux field is 0, 1, 2, ... */
@@ -1299,6 +1300,8 @@ static void read_file(paragraph ***ret, input *in, indexdata *idx,
 			wd.type = word_HyperLink;
 			 else if (t.cmd == c_G)
 			wd.type = word_Graphic; 
+			 else if (t.cmd == c_IA)
+			wd.type = word_Anchor; 
 		    else
 			wd.type = word_Normal;
 		    dtor(t), t = get_token(in);

@@ -92,16 +92,24 @@ void wHelp( const char * topic )
 	// (re)start child
 	if( pidOfChild == 0 ) {
 		mkfifo( HELPCOMMANDPIPE, 0666 );
-		newPid = fork();
+		newPid = fork();  /* New process starts here */
 		if( newPid > 0 ) {
 			printf( "xtrkcad: Child process %d successfully created\n", newPid );
 			pidOfChild = newPid;
-		} else {
+		} else if (newPid == 0) {
 			child = ChildProgramFile( wExecutableName );
 			printf( "xtrkcad: Starting helper program %s\n", child );
-			execlp( child, child, NULL );
-			free( child );
+			if (execlp( child, child, NULL ) < 0) { /* never normally returns */
+				printf("xtrkcad: Helphelper program start failed\n");
+				exit(8);
+			}
+		} else { /* -1 signifies fork failure */
+		   printf( "xtrkcad: Child process failed to start\n");
+		   pidOfChild = 0;
+		   return;
 		}
+		
+			
 	}
 	
 	if( !handleOfPipe ) {
@@ -109,13 +117,31 @@ void wHelp( const char * topic )
 		if( handleOfPipe < 0 ) {
 			printf( "xtrkcad: Pipe could not be opened!\n" );
 			perror( NULL );
-		}	
+			kill(pidOfChild, SIGKILL);  /* tidy up on next call */			
+		}
+			
 	}
 	
-	len = strlen( topic );
+	const char html[] = ".html";
+	char *page;
+	
+	page = malloc(strlen(topic) + strlen(html) + 1);
+    if (!page) {
+        fprintf(stderr, "xtrkcad: malloc() failed: insufficient memory!\n");
+        return;
+    }
+	
+	strcpy(page, topic);
+    strcat(page, html);
+	len = strlen( page );
+	
 	written = write( handleOfPipe, &len, sizeof( int ));
-	written = write( handleOfPipe, topic, strlen(topic)+1 );
-
+	printf( "xtrkcad: Size of %d sent\n", len );
+	written = write( handleOfPipe, page, strlen(page)+1 );
+	printf( "xtrkcad: Request for page %s sent\n", page );
+	
+	free(page);
+	
 	//len = strlen(EXITCOMMAND);
 	//written = write( handleOfPipe, &len, sizeof(int));
 	//written = write( handleOfPipe, EXITCOMMAND, len + 1);	

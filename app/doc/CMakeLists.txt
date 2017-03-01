@@ -74,7 +74,7 @@ IF(XTRKCAD_USE_GTK)
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex
         DEPENDS help-html ${HALIBUT_SOURCES}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
-        COMMAND hiutil -Cf XTrackCAD.helpindex -gva -e "IndexPage.html" ${CMAKE_CURRENT_BINARY_DIR}/html
+        COMMAND hiutil -Cf XTrackCAD.helpindex -gva -e "IndexPage.html" -e "toc.html" ${CMAKE_CURRENT_BINARY_DIR}/html
         )
 
         ADD_CUSTOM_TARGET(help-index ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex)
@@ -89,6 +89,10 @@ IF(XTRKCAD_USE_GTK)
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/png.d
             DESTINATION ${CMAKE_INSTALL_PREFIX}/${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
         )
+	INSTALL(
+	    FILES xtrkcad_osx.css
+		DESTINATION ${CMAKE_INSTALL_PREFIX}/${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
+	)
     ENDIF(APPLE)
 
 # Otherwise, we're using the Win32 back-end, so generate a compiled HTML help file

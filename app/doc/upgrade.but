@@ -2,6 +2,7 @@
 \#
 \# The "\u000" command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
 \#
+\cfg{html-local-head}{<meta name="AppleTitle" content="Upgrades" />}
 
 \A{upgrades} Upgrade From Earlier \e{XTrackCAD} Version
 

@@ -6,8 +6,9 @@
 
 \C{commandMenus} Command Menus
 
-\rule
+\cfg{html-local-head}{<meta name="AppleTitle" content="Command Menus" />}
 
+\rule
 
 \H{addM}\i{Add Menu}
 

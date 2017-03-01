@@ -3,6 +3,7 @@
 \# The "\u000" command is used to format the output. These commands causes a blank line to appear between "bulleted" or "described" items.
 \#
 \# The "\u00B0" command gives proper format to the degree sign.
+\cfg{html-local-head}{<meta name="AppleTitle" content="Manage Menu" />}
 
 \H{manageM}\i{Manage Menu}
 
