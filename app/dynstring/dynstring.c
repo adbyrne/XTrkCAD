@@ -2,7 +2,9 @@
 * Library for dynamic string functions
 */
 
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif
 #include <stdarg.h>
 #include <memory.h>
 #include <string.h>
