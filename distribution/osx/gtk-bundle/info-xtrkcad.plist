@@ -21,11 +21,11 @@
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
-    <string>@XTRKCAD_VERSION@</string>
+    <string>4.2.4a</string>
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleVersion</key>
-    <string>@XTRKCAD_VERSION@</string>
+    <string>4.2.4a</string>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright 1997 - 2016 The The XtrkCAD Team, GNU General Public License.</string>
     <key>LSMinimumSystemVersion</key>

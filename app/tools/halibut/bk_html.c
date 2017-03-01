@@ -54,7 +54,8 @@ typedef struct {
     char *index_filename;
     char *template_filename;
     char *single_filename;
-    char *chm_filename, *hhp_filename, *hhc_filename, *hhk_filename;
+    char *chm_filename, *hhp_filename, *hhc_filename, *hhk_filename; 
+    char *appletoc_filename;
     char **template_fragments;
     int ntfragments;
     char *head_end, *body_start, *body_end, *addr_start, *addr_end;
@@ -100,7 +101,7 @@ struct htmlsect {
     htmlsect *next, *parent;
     htmlfile *file;
     paragraph *title, *text;
-    enum { NORMAL, TOP, INDEX } type;
+    enum { NORMAL, TOP, INDEX, APPLEINDEX } type;
     int contents_depth;
     char **fragments;
 };
@@ -235,7 +236,7 @@ static char *html_sanitise_filename(htmlfilelist *files, char *text);
 
 static void html_contents_entry(htmloutput *ho, int depth, htmlsect *s,
 				htmlfile *thisfile, keywordlist *keywords,
-				htmlconfig *cfg);
+				htmlconfig *cfg, int toc_yes);
 static void html_section_title(htmloutput *ho, htmlsect *s,
 			       htmlfile *thisfile, keywordlist *keywords,
 			       htmlconfig *cfg, int real);
@@ -268,6 +269,7 @@ static htmlconfig html_configure(paragraph *source) {
     ret.template_filename = dupstr("%n.html");
     ret.chm_filename = ret.hhp_filename = NULL;
     ret.hhc_filename = ret.hhk_filename = NULL;
+    ret.appletoc_filename = NULL;
     ret.ntfragments = 1;
     ret.template_fragments = snewn(ret.ntfragments, char *);
     ret.template_fragments[0] = dupstr("%b");
@@ -517,6 +519,9 @@ static htmlconfig html_configure(paragraph *source) {
 	    } else if (!ustricmp(k, L"html-mshtmlhelp-index")) {
 		sfree(ret.hhk_filename);
 		ret.hhk_filename = dupstr(adv(p->origkeyword));
+		} else if (!ustricmp(k, L"html-applehelp-toc")) {
+		sfree(ret.appletoc_filename);
+		ret.appletoc_filename = dupstr(adv(p->origkeyword));
 	    }
 	}
     }
@@ -539,6 +544,7 @@ static htmlconfig html_configure(paragraph *source) {
 	sfree(ret.hhc_filename); ret.hhc_filename = NULL;
 	sfree(ret.hhk_filename); ret.hhk_filename = NULL;
     }
+    
 
     /*
      * Now process fallbacks on quote characters.
@@ -839,7 +845,7 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
      * 	  output the section text
      * 	- for each section which is not in the file but which has a
      * 	  parent that is, we output a contents entry for the
-     * 	  section if appropriate
+     * 	  section if appropriate/
      *  - finally, we output the file trailer and close the file.
      */
     {
@@ -1007,12 +1013,14 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 	    for (s = sects.head; s; s = s->next) {
 		if (s->file == f && s->text) {
 		    for (p = s->text;
-			 p && (p == s->text || p->type == para_Title ||
-			       !is_heading_type(p->type));
+			 p && (p == s->text || p->type == para_Title 
+			      || !is_heading_type(p->type) 
+			       );
 			 p = p->next) {
 			if (p->type == para_Config) {
 			    if (!ustricmp(p->keyword, L"html-local-head")) {
 				html_raw(&ho, adv(p->origkeyword));
+				html_nl(&ho);
 			    }
 			}
 		    }
@@ -1023,13 +1031,15 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 	    html_nl(&ho);
 
 	    if (conf.body_tag)
-		html_raw(&ho, conf.body_tag);
+			html_raw(&ho, conf.body_tag);
 	    else
-		element_open(&ho, "body");
+			element_open(&ho, "body");
 	    html_nl(&ho);
 
-	    if (conf.body_start)
-		html_raw(&ho, conf.body_start);
+	    if (conf.body_start) {
+			html_raw(&ho, conf.body_start);
+			html_nl(&ho);
+		}
 
 	    /*
 	     * Write out a nav bar. Special case: we don't do this
@@ -1084,6 +1094,7 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 	    }
 	    prevf = f;
 
+ 	    
 	    /*
 	     * Write out a prefix TOC for the file (if a leaf file).
 	     * 
@@ -1149,9 +1160,9 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 
 			assert(hlevel >= 1);
 			html_contents_entry(&ho, hlevel, s,
-					    f, keywords, &conf);
+					    f, keywords, &conf, 0);
 		    }
-		    html_contents_entry(&ho, 0, NULL, f, keywords, &conf);
+		    html_contents_entry(&ho, 0, NULL, f, keywords, &conf, 0);
 		}
 	    }
 
@@ -1204,7 +1215,7 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 			 */
 			if (adepth <= a->contents_depth) {
 			    html_contents_entry(&ho, adepth, s,
-						f, keywords, &conf);
+						f, keywords, &conf, 0);
 			}
 		    }
 		}
@@ -1213,7 +1224,7 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 		    int hlevel;
 		    char htag[3];
 
-		    html_contents_entry(&ho, 0, NULL, f, keywords, &conf);
+		    html_contents_entry(&ho, 0, NULL, f, keywords, &conf, 0);
 
 		    /*
 		     * Display the section heading.
@@ -1440,7 +1451,7 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 			sfree(stackhead);
 		    }
 		    
-		    if (s->type == INDEX) {
+		    if (s->type == INDEX ) {
 			indexentry *entry;
 			int i;
 
@@ -1503,7 +1514,7 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 		}
 	    }
 
-	    html_contents_entry(&ho, 0, NULL, f, keywords, &conf);
+	    html_contents_entry(&ho, 0, NULL, f, keywords, &conf, 0);
 	    html_nl(&ho);
 
 	    {
@@ -1593,6 +1604,78 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 	}
     }
 
+	/* APPLE TOC only has list entries and all entries are remote */
+    /*
+	 * Write out the whole TOC in the TOC file.
+	 * 
+	 */
+	 
+    if (conf.appletoc_filename) {
+		htmlsect *s, *top;
+		htmlfile *f;
+		htmloutput ho; 
+		ho.charset = conf.output_charset;
+	    ho.restrict_charset = conf.restrict_charset;
+	    ho.cstate = charset_init_state;
+	    ho.ver = conf.htmlver;
+	    ho.state = HO_NEUTRAL;
+	    ho.contents_level = 0;
+	    ho.hackflags = 0;	       /* none of these thankyouverymuch */
+	    ho.hacklimit = -1;
+		
+		ho.fp = fopen(conf.appletoc_filename, "w");
+		if (!ho.fp)
+	    	error(err_cantopenw, conf.appletoc_filename);	
+	    
+		/* Find TOP section */
+		s = sects.head;
+		
+		html_contents_entry(&ho, 1, s, NULL, keywords, &conf, TRUE);
+	    
+		/* Loop through all sections */
+		for (s = sects.head; s; s = s->next) {
+			if (s->type == TOP) {
+		    /*
+		     * This is the head - ignore as we just wrote out its entry.
+		     */
+			} else {
+			    /*
+			     * Doesn't contain the TOP so it is 
+			     * a descendant we consider it for the
+			     * main TOC.
+			     */
+		    	htmlsect *a, *ac;
+		   		int depth, adepth;
+			    /*
+			     * Search up from this section until we find
+			     * the highest-level one 
+			     */
+		    	depth = adepth = 0;
+		    	a = NULL;
+		    	for (ac = s; ac; ac = ac->parent) {
+					if (ac->type == TOP) {
+					    a = ac;
+					    adepth = depth;
+					}
+					depth++;
+				}
+				if (a) {  
+				 		
+						html_contents_entry(&ho, adepth, s,
+							NULL, keywords, &conf, TRUE);				
+			    }
+			}
+		}
+ 	   /* 
+ 	 	* Close the entries 
+  	   	*/
+		html_contents_entry(&ho, 0, NULL, NULL, keywords, &conf, TRUE);
+		cleanup(&ho);
+		
+	}
+    
+    /* End of Apple TOC */	
+    
     /*
      * Before we start outputting the HTML Help files, check
      * whether there's even going to _be_ an index file: we omit it
@@ -1703,6 +1786,9 @@ void html_backend(paragraph *sourceform, keywordlist *keywords,
 
 	fclose(ho.fp);
     }
+    
+    	      
+    
     if (conf.hhc_filename) {
 	htmlfile *f;
 	htmlsect *s, *a;
@@ -2139,8 +2225,16 @@ static void html_words(htmloutput *ho, word *words, int flags,
 	    sfree(c);
 	}
 	break;
+		case word_Anchor:
+		if (flags & LINKS) {
+			element_empty( ho, "a");
+			c = utoa_dup(w->text, CS_ASCII);
+			element_attr(ho, "name", c);
+			sfree(c);
+		}
+		break;	
 		case word_Graphic:
-			element_open( ho, "img");
+			element_empty( ho, "img");
 			c = utoa_dup(w->text, CS_ASCII);
 			element_attr(ho, "src", c);
 			return_to_neutral(ho);
@@ -2160,6 +2254,7 @@ static void html_words(htmloutput *ho, word *words, int flags,
 	    assert(s);
 
 	    html_href(ho, file, s->file, s->fragments[0]);
+	
 	}
 	break;
       case word_HyperEnd:
@@ -2490,7 +2585,6 @@ static void html_href(htmloutput *ho, htmlfile *thisfile,
 {
     rdstringc rs = { 0, 0, NULL };
     char *url;
-
     if (targetfile != thisfile)
 	rdaddsc(&rs, targetfile->filename);
     if (targetfrag) {
@@ -2708,37 +2802,52 @@ static char *html_sanitise_filename(htmlfilelist *files, char *text)
 
 static void html_contents_entry(htmloutput *ho, int depth, htmlsect *s,
 				htmlfile *thisfile, keywordlist *keywords,
-				htmlconfig *cfg)
+				htmlconfig *cfg, int toc_yes)
 {
-    if (ho->contents_level >= depth && ho->contents_level > 0) {
-	element_close(ho, "li");
-	html_nl(ho);
-    }
+    
 
-    while (ho->contents_level > depth) {
-	element_close(ho, "ul");
-	ho->contents_level--;
-	if (ho->contents_level > 0) {
-	    element_close(ho, "li");
-	}
-	html_nl(ho);
+    while (ho->contents_level > depth) {	
+		element_close(ho, "ul");
+		ho->contents_level--;
+		html_nl(ho);
+		if (toc_yes && ho->contents_level == 1 && depth == 1) {
+	   		element_close(ho, "div");
+	   		html_nl(ho);
+		}
     }
+    
+
 
     while (ho->contents_level < depth) {
-	html_nl(ho);
-	element_open(ho, "ul");
-	html_nl(ho);
-	ho->contents_level++;
+        if (toc_yes && ho->contents_level == 1 && depth == 2) {
+    		element_open(ho,"div");
+    		element_attr(ho,"class","panel");
+    		html_nl(ho);
+    	}
+		element_open(ho, "ul");
+		if (toc_yes && ho->contents_level < 1)
+			element_attr(ho,"class","top-list");
+		html_nl(ho);
+		ho->contents_level++;
     }
 
     if (!s)
-	return;
+	return;  
 
     element_open(ho, "li");
+    if (toc_yes && ho->contents_level > 0 && depth == 1) {
+    	element_open(ho,"button");
+    	element_attr(ho,"class","accordion");
+    	element_close(ho,"button");
+    }
+    
     html_href(ho, thisfile, s->file, s->fragments[0]);
     html_section_title(ho, s, thisfile, keywords, cfg, FALSE);
     element_close(ho, "a");
-    /* <li> will be closed by a later invocation */
+    element_close(ho, "li");
+    html_nl(ho);
+    
+    
 }
 
 static void html_section_title(htmloutput *ho, htmlsect *s, htmlfile *thisfile,
@@ -2778,9 +2887,9 @@ static void html_section_title(htmloutput *ho, htmlsect *s, htmlfile *thisfile,
 	assert(s->type != NORMAL);
 	/*
 	 * If we're printing the full document title for _real_ and
-	 * there isn't one, we don't want to print `Preamble' at
+	 * there isn't one, won't want to print `Preamble' at
 	 * the top of what ought to just be some text. If we need
-	 * it in any other context such as TOCs, we need to print
+	 * it in any other context such ae ds TOCs, we need to print
 	 * `Preamble'.
 	 */
 	if (s->type == TOP && !real)

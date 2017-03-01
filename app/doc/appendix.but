@@ -2,7 +2,7 @@
 \#
 \# The "\u000" command is used to format the output. These commands causes a blank line to appear between "bulleted" or "described" items.
 \#
-
+\cfg{html-local-head}{<meta name="AppleTitle" content="Frequently Asked Questions" />}
 
 \A{faqs} Frequently Asked Questions
 

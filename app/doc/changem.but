@@ -4,6 +4,8 @@
 \#
 \# The "\u00B0" command gives proper format to the degree sign.
 
+\cfg{html-local-head}{<meta name="AppleTitle" content="Change Menu" />}
+
 \H{changeM}\i{Change Menu}
 
 \G{png.d/mchange.png} 

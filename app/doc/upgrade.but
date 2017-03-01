@@ -2,6 +2,7 @@
 \#
 \# The "\u000" command is used to format the output. The command causes a blank line to appear between "bulleted" or "described" items.
 \#
+\cfg{html-local-head}{<meta name="AppleTitle" content="Upgrades" />}
 
 \A{upgrades} Upgrade From Earlier \e{XTrackCAD} Version
 
@@ -70,7 +71,7 @@ The wheel on a wheel mouse can now be used to zoom in and out on a layout design
 
 \f{Internationalization}
 
-Internationalization or the ability to localize \e{XTrackCAD} for use with various languages was adopted during this version upgrade. \e{XTrackCAD} is now available with balloon help and daily tips written in US English, Finnish and German. The \e{XTrackCAD} development team welcomes anyone who wishes to volunteer with translation of various support files. Let them know by submitting an offer to assist to the \e{XTrackCAD} \f{Feature Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&atid=781981}{\e{XTrackCAD} Fork Project Site} or the \e{XTrackCAD} \f{Wikka Wish List} located at the \W{http://www.xtrkcad.org/Wikka/WishList}{\e{XTrackCAD} Wiki: WishList}.
+Internationalization or the ability to localize \e{XTrackCAD} for use with various languages was adopted during this version upgrade. \e{XTrackCAD} is now available with balloon help and daily tips written in US English, Finnish and German. The \e{XTrackCAD} development team welcomes anyone who wishes to volunteer with translation of various support files. Let them know by submitting an offer to assist to the \e{XTrackCAD} \f{Feature Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&amp;atid=781981}{\e{XTrackCAD} Fork Project Site} or the \e{XTrackCAD} \f{Wikka Wish List} located at the \W{http://www.xtrkcad.org/Wikka/WishList}{\e{XTrackCAD} Wiki: WishList}.
 
 \f{Minor Fixes and Enhancements}
 

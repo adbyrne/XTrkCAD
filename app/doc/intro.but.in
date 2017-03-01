@@ -44,7 +44,6 @@ Copyright 2007, Bob Blackwell and Martin Fischer
 
 \IM{Created by Turnout Command}{Easements and Sectional Track} Sectional Track
 
-
 \# >>>>>>>>>> Manual Begin's Here <<<<<<<<<<
 
 \title \e{XTrackCAD} User's Manual
@@ -57,8 +56,9 @@ Copyright 2007, Bob Blackwell and Martin Fischer
 
 \rule
 
-
 \C{index} Introduction To \e{XTrackCAD}
+
+\cfg{html-local-head}{<meta name="AppleTitle" content="org.xtrkcad.help" />}
 
 \e{XTrackCAD} is a CAD (computer-aided design) program for designing Model Railroad layouts. \e{XTrackCAD} supports any scale, has libraries of popular brands of turnouts and sectional track (plus you add your own easily), can automatically use spiral transition curves when joining track and has extensive on-line help and demonstrations. \e{XTrackCAD} lets you manipulate track much like you would with actual flex-track to modify, extend and join tracks and turnouts. Additional features include tunnels, 'post-it' notes, on-screen ruler, parts list, 99 drawing layers, undo/redo commands, bench-work, 'Print to Bitmap', elevations, train simulation and car inventory. 
 
@@ -780,7 +780,7 @@ This section of the manual describes how and where to report a bug or seek an en
 
 \S{bugs} Reporting \i{Bugs}
 
-If you encounter an unreported bug please submit detail regarding such to the \f{Bug Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&atid=781978}{\e{XTrackCAD} Fork Project Site}.
+If you encounter an unreported bug please submit detail regarding such to the \f{Bug Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&amp;atid=781978}{\e{XTrackCAD} Fork Project Site}.
 
 \f{Be sure to provide the three basic elements of a bug report:} What you were doing at the time the bug occurred,  what you expected to happen and what actually happened. This detail will help developers replicate the error, find and correct the offending code.
 
@@ -808,7 +808,7 @@ If you encounter an unreported bug please submit detail regarding such to the \f
 
 \f{Always search the bug database first.} Advice so good, we'll repeat it twice. Always search the bug database first. The odds are good that if you've found a problem, someone else found it too. If you spend a few minutes of your time making sure that you're not filing a duplicate bug, that's a few more minutes someone can spend helping to fix that bug rather than sorting out duplicate bug reports.
 
-\f{If you don't understand an error message, ask for help.} Don't report an error message you don't understand as a bug. There are a lot of places you can ask for help in understanding what is going on before you can claim that an error message you do not understand is a bug. (Once you've understood the error message and have a good suggestion for a way to make the error message clearer, you might consider reporting it as a  \W{http://sourceforge.net/tracker/?group_id=151737&atid=781981}{\e{XTrackCAD} Feature Request}).
+\f{If you don't understand an error message, ask for help.} Don't report an error message you don't understand as a bug. There are a lot of places you can ask for help in understanding what is going on before you can claim that an error message you do not understand is a bug. (Once you've understood the error message and have a good suggestion for a way to make the error message clearer, you might consider reporting it as a  \W{http://sourceforge.net/tracker/?group_id=151737&amp;atid=781981}{\e{XTrackCAD} Feature Request}).
 
 \f{Be brief, but don't leave any important details out.} This is a fine line to walk. But there are some general guidelines:
 
@@ -825,6 +825,6 @@ If you can recreate the problem the \f{Macro>Record} command can be used to reco
 
 \S{enhancements} \i{Enhancement Requests}
 
-Suggestions for improvements are encouraged and welcome. Submit your suggestion to the \e{XTrackCAD} \f{Feature Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&atid=781981}{\e{XTrackCAD} Fork Project Site} or the \e{XTrackCAD} \f{Wikka Wish List} located at the \W{http://www.xtrkcad.org/Wikka/WishList}{\e{XTrackCAD} Wiki: WishList}.
+Suggestions for improvements are encouraged and welcome. Submit your suggestion to the \e{XTrackCAD} \f{Feature Tracker} located at the \W{http://sourceforge.net/tracker/?group_id=151737&amp;.atid=781981}{\e{XTrackCAD} Fork Project Site} or the \e{XTrackCAD} \f{Wikka Wish List} located at the \W{http://www.xtrkcad.org/Wikka/WishList}{\e{XTrackCAD} Wiki: WishList}.
 
 \rule

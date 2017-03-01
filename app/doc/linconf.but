@@ -1,7 +1,7 @@
 \cfg{html-leaf-level}{infinite}
 \cfg{html-leaf-contains-contents}{false}
-\cfg{html-suppress-navlinks}{true}
-\cfg{html-suppress-address}{true}
+\cfg{html-suppress-navlinks}{false}
+\cfg{html-suppress-address}{false}
 
 \cfg{html-contents-filename}{contents.html}
 \cfg{html-template-filename}{%k.html}

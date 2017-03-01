@@ -10,7 +10,6 @@ SET(SOURCES
 	gtkdraw-cairo.c
 	filesel.c
 	gtkfont.c
-	gtkhelp.c
 	gtklist.c
 	gtkmenu.c
 	gtkmisc.c
@@ -20,9 +19,22 @@ SET(SOURCES
 	gtktext.c
 	gtkwindow.c
 	gtkxpm.c
+	gtkhelp.c
 	print.c
 	wpref.c
 	)
+
+IF(APPLE)
+	SET(SOURCES 
+		${SOURCES}
+		osxhelp.c)
+	
+ELSE(APPLE)
+# for testing only, has to be ixhelp.c for Unixes
+	SET(SOURCES 
+		${SOURCES}
+		osxhelp.c)
+ENDIF(APPLE)
 
 SET_SOURCE_FILES_PROPERTIES(wpref.c PROPERTIES COMPILE_FLAGS -DEXPORT=)
 
@@ -35,3 +47,4 @@ ADD_LIBRARY(xtrkcad-wlib ${HEADERS} ${SOURCES})
 TARGET_LINK_LIBRARIES(xtrkcad-wlib ${GTK_LIBRARIES})
 TARGET_LINK_LIBRARIES(xtrkcad-wlib ${GTK_UNIX_PRINT_LIBRARIES})
 TARGET_LINK_LIBRARIES(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
+

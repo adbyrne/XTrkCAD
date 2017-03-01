@@ -53,7 +53,7 @@
   <plist>${project}/info-xtrkcad.plist</plist>
 
   <main-binary dest="${bundle}">${project}/bin/xtrkcad</main-binary>
-
+  	
   <!-- Copy in the input methods. Dunno if they actually work with
        OSX. Note the ${gtkdir} macro, which expands to the correct
        library subdirectory for the specified gtk version. -->
@@ -120,6 +120,13 @@
   <data dest="${bundle}/Contents/Resources">
     ${project}/xtrkcad-logo.icns
   </data> 
-
+  
+  <binary dest="${bundle}/Contents/MacOS/helphelper">
+  	${project}/bin/helphelper
+  </binary>
+  
+  <data dest="${bundle}/Contents/Resources/XTrackCAD.help">
+  	${project}/share/xtrkcad/XTrackCAD.help
+  </data>
 
   </app-bundle>

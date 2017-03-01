@@ -1,0 +1,144 @@
+/************************************************************************************
+LINUX Help File colour and fonts are done here. Halibut controls margins, line spacing and indents.
+*************************************************************************************/
+
+BODY {
+	background: white;
+	font-family: "Trebuchet MS", "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Tahoma, sans-serif;
+}
+
+A:link {
+	text-decoration: none;
+	color: #7DA1BF;
+	font-weight: bold;
+}          /* unvisited link */
+
+A:visited {
+	text-decoration: none;
+	color: #1d4e89;
+	font-weight: bold;
+}        /* visited links */
+
+A:active { 
+	text-decoration: none;
+	font-weight: bold;	
+	color: red;
+	}        /* active links */
+
+a:hover {
+	text-decoration: underline;
+	color: #F69256;
+	}
+
+H1 {
+	text-align: left;
+	font-size: large;
+	font-style: italic;
+	font-weight: bold;
+	padding: 3px 6px;
+}
+
+H2 {
+	text-align: left;
+	font-size: medium;
+	font-style: italic;
+	font-weight: bold;
+	padding: 3px 6px;
+}
+
+H3 {
+	text-align: left;
+	font-size: small;
+	font-style: italic;
+	font-weight: bold;
+	padding: 3px 6px;
+}
+
+#container {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+#toc {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  font-size: 25% small;
+  overflow-y: scroll;
+  width: 20%;
+}
+
+#contents {
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  margin-left: 20%;
+  float: left;
+  font-size: 90%;
+  color: #333;
+  font-weight: normal;
+  overflow: auto;
+}
+
+UL.top_link {
+   list-style: none;
+   padding-left:0;
+}
+
+#toc UL {
+   list-style: none;
+   padding-left:1em;
+}
+
+#toc A:link {
+	font-size: 62%;
+	text-decoration: none;
+	color: #7DA1BF;
+}
+#toc A:active { 
+    font_size: 62%;
+	text-decoration: none;	
+	color: red;
+	}        /* active links */
+/* Style the buttons that are used to open and close the accordion panel */
+button.accordion {
+    background-color: #eee;
+    color: #444;
+    cursor: pointer;
+    padding: 0px;
+    width: 20px%;
+    text-align: left;
+    border: none;
+    outline: none;
+    transition: 0.4s;
+}
+
+button.accordion:before {
+    content: '\02795'; /* Unicode character for "plus" sign (+) */
+    font-size: 62%;
+    color: #777;
+    float: left;
+    margin-left: 5px;
+}
+
+button.accordion.active:before {
+    content: "\2796"; /* Unicode character for "minus" sign (-) */
+}
+
+
+/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
+button.accordion.active, button.accordion:hover {
+    background-color: #ddd;
+}
+
+div.panel {
+    padding: 0 18px;
+    background-color: white;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.2s ease-out;
+}
+
+
