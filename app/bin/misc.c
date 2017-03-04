@@ -2210,7 +2210,8 @@ static void CreateMenus( void )
 
 	cmdGroup = BG_CONTROL;
 	InitCmdBlock( addM );
-	InitCmdSwitchMotor( addM );
+        InitCmdSwitchMotor( addM );
+        InitCmdSignal( addM );
 
 	/*
 	 * CHANGE MENU

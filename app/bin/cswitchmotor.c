@@ -128,24 +128,70 @@ static switchmotorData_p GetswitchmotorData ( track_p trk )
 #include "bitmaps/switchmotormark.xbm"
 static wDrawBitMap_p switchmotormark_bm = NULL;
 
+static coOrd switchmotorPoly_Pix[] = {
+    {6,0}, {6,13}, {4,13}, {4,19}, {6,19}, {6,23}, {9,23}, {9,19}, {13,19},
+    {13,23}, {27,23}, {27,10}, {13,10}, {13,13}, {9,13}, {9,0}, {6,0} };
+#define switchmotorPoly_CNT (sizeof(switchmotorPoly_Pix)/sizeof(switchmotorPoly_Pix[0]))
+#define switchmotorPoly_SF (3.0)
+
+static void ComputeSwitchMotorBoundingBox (track_p t)
+{
+    coOrd hi, lo, p;
+    switchmotorData_p data_p = GetswitchmotorData(t);
+    struct extraData *xx = GetTrkExtraData(data_p->turnout);
+    coOrd orig = xx->orig;
+    ANGLE_T angle = xx->angle;
+    SCALEINX_T s = GetTrkScale(data_p->turnout);
+    DIST_T scaleRatio = GetScaleRatio(s);
+    int iPoint;
+    ANGLE_T x_angle, y_angle;
+    
+    x_angle = 90-(360-angle);
+    if (x_angle < 0) x_angle += 360;
+    y_angle = -(360-angle);
+    if (y_angle < 0) y_angle += 360;
+    
+    
+    for (iPoint = 0; iPoint < switchmotorPoly_CNT; iPoint++) {
+        Translate (&p, orig, x_angle, switchmotorPoly_Pix[iPoint].x * switchmotorPoly_SF / scaleRatio );
+        Translate (&p, p, y_angle, (10+switchmotorPoly_Pix[iPoint].y) * switchmotorPoly_SF / scaleRatio );
+        if (iPoint == 0) {
+            lo = p;
+            hi = p;
+        } else {
+            if (p.x < lo.x) lo.x = p.x;
+            if (p.y < lo.y) lo.y = p.y;
+            if (p.x > hi.x) hi.x = p.x;
+            if (p.y > hi.y) hi.y = p.y;
+        }
+    }
+    SetBoundingBox(t, hi, lo);
+}
+    
+    
 static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
 {
-	coOrd p;
-	switchmotorData_p data_p = GetswitchmotorData(t);
-	struct extraData *xx = GetTrkExtraData(data_p->turnout);
-	coOrd orig = xx->orig;
-	ANGLE_T angle = xx->angle;
-
-	if (switchmotormark_bm == NULL) {
-		switchmotormark_bm =
-			wDrawBitMapCreate( mainD.d,
-					   switchmotormark_width,
-					   switchmotormark_height, 16, 16,
-					   switchmotormark_bits);
-	}
-	Translate (&p, orig, -angle , 2 );
-	Translate (&p, p, 90-angle, 2);
-	DrawBitMap(d, p, switchmotormark_bm, color);
+    coOrd p[switchmotorPoly_CNT];
+    switchmotorData_p data_p = GetswitchmotorData(t);
+    struct extraData *xx = GetTrkExtraData(data_p->turnout);
+    coOrd orig = xx->orig;
+    ANGLE_T angle = xx->angle;
+    SCALEINX_T s = GetTrkScale(data_p->turnout);
+    DIST_T scaleRatio = GetScaleRatio(s);
+    int iPoint;
+    ANGLE_T x_angle, y_angle;
+    
+    x_angle = 90-(360-angle);
+    if (x_angle < 0) x_angle += 360;
+    y_angle = -(360-angle);
+    if (y_angle < 0) y_angle += 360;
+    
+    
+    for (iPoint = 0; iPoint < switchmotorPoly_CNT; iPoint++) {
+        Translate (&p[iPoint], orig, x_angle, switchmotorPoly_Pix[iPoint].x * switchmotorPoly_SF / scaleRatio );
+        Translate (&p[iPoint], p[iPoint], y_angle, (10+switchmotorPoly_Pix[iPoint].y) * switchmotorPoly_SF / scaleRatio );
+    }
+    DrawFillPoly(d, switchmotorPoly_CNT, p,  wDrawColorBlack);
 }
 
 static struct {
@@ -340,6 +386,7 @@ EXPORT void ResolveSwitchmotorTurnout ( track_p trk )
         NoticeMessage( _("ResolveSwitchmotor: Turnout T%d: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), xx->turnindx );
     }
     xx->turnout = t_trk;
+    ComputeSwitchMotorBoundingBox(trk);
     LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(): t_trk = (%d) %p\n",xx->turnindx,t_trk))
 }
 
@@ -419,7 +466,9 @@ static void SwitchMotorOk ( void * junk )
         LOG( log_switchmotor, 1,("*** SwitchMotorOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
 	switchmotorDebug(trk);
 	UndoEnd();
-	wHide( switchmotorW );
+        wHide( switchmotorW );
+        ComputeSwitchMotorBoundingBox(trk);
+        DrawNewTrack(trk);
 }
 
 static void NewSwitchMotorDialog(track_p trk)
