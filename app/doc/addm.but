@@ -274,6 +274,8 @@ The \f{Turntable Angle} control on the Preferences (\K{cmdPref}) dialog controls
 
 \S{cmdBlock} Block
 
+\G{png.d/bblock.png}
+
 A block is created by first selecting the track segments in the block and then 
 selecting \f{Create Block} from either the Add menu \K{cmdAdd} or from the block menu on the 
 hotbar.  A block gets a name and a script.  The name is only used for 
@@ -283,7 +285,7 @@ software to determine block occupancy.  This could be a code snippet to
 retrieve the state of the block occupancy or it could be the address of the 
 sensor, etc. 
 
-[Graphic of a typical Create Block dialog]
+\G{png.d/block.png}
 
 The create block dialog has spaces for two text strings. One is the name and
 the other is a block occupancy script. The name identifies the block and the
@@ -295,6 +297,8 @@ information, etc.
 
 \S{cmdSwitchmotor} Switchmotor
 
+\G{png.d/bswitchmotor.png}
+
 A switchmotor is created by selecting \f{Create SwitchMotor} from either the Add
 menu \K{cmdAdd} or from the switchmotor menu on the hotbar and then clicking on a turnout.
 A switchmotor gets a name and three scripts. The name is only used for
@@ -304,7 +308,7 @@ throwing the turnout to its "reverse" position, and a script to read a point
 position sensor. These scripts could be code snippets or they could be
 addresses of I/O devices, etc. 
 
-[Graphic of a typical Create SwitchMotor dialog]
+\G{png.d/switchmotor.png}
 
 The create switchmotor dialog has spaces for four text strings. One is the
 name and the other three are scripts for Normal, Reverse, and Point Sense. The
@@ -317,6 +321,8 @@ could be code snippets or I/O device address information, etc.
 
 \S{cmdSignal} Signal
 
+\G{png.d/bsignal.png}
+
 A signal is created by selecting \f{Create Signal} from either the Add menu \K{cmdAdd} or
 from the hotbar. Use the mouse to select a location (left button) and then
 draging (left button down) the signal to set its orientation. Once the left 
@@ -324,7 +330,7 @@ button is released, a Create/Edit Signal dialog box is displayed, and you can
 fill in the signal's properties: name, fine tune the location and orientation, 
 number of heads, and the aspects.
 
-[Graphic of a typical Create/edit Signal dialog]
+\G{png.d/signal.png}
 
 The create/edit signal dialog has spaces for the name of the signal, its 
 location and orientation, the number of heads (1, 2, or 3), and a list of 

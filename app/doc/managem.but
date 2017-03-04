@@ -317,7 +317,7 @@ layout file. All that XTrackCAD does is provide a unified place for this
 information to be stored and to provide a mapping (association) between this
 control information and the layout itself.
 
-[Graphic of a typical Manage Layout Control Elements dialog]
+\G{png.d/lcemanager.png}
 
 The main part of this dialog contains a list of the currently defined layout
 control elements (blocks, switchmotors, and signals), along with the tracks
