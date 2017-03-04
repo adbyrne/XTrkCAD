@@ -209,6 +209,44 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 \rule
 
 
+\H{controlElementScripts} Control Element Scripts and the Model RR System's Dispatcher
+
+Notes about control element scripts and the Model RR System's Dispatcher 
+program in OpenLCB mode:
+
+When using the Model RR System's Dispatcher program in OpenLCB mode to create 
+CTC panels, the panel elements can have their LCC event IDs automatically 
+populated from the information in the XTrackCAD file, if the proper syntax is 
+observed.
+
+A LCC event id is a 64-bit number, represented as eight pairs of hexadevimal
+digits (0-9, a-f/A-F) separated by periods (.). Each pair represents one 8-bit
+byte of the event id. This event id is either produced by a sensor or logic
+element or is consumed by a control/device or a logic element.
+
+For blocks the occupency script contains a pair of LCC event ids, separated by 
+a colon (:).  The first LCC event id is produced by the occupency detector 
+when the train enters the block and the second LCC event id is produced by the 
+occupency detector when the train leaves the block.
+
+For switchmotors the point sense script contains a pair of LCC event ids, 
+separated by a colon (:).  The first LCC event id is produced by the point 
+sensor when the points are aligned in the "normal" position (typically aligned 
+to the main) and the second LCC event id is produced by the point sensor when 
+the points are aligned in the "reverse" position (typically aligned to the 
+spur).  The normal and reverse script each contain a signal LCC event id.  
+These events are produced by the CTC Panel when the control point Code button 
+is pressed (clicked) and are consumed by the switch motor.
+
+For signals, the aspect name is a space separated list of the color(s) of the
+signal heads from top to bottom and the aspect script is a LCC event id that
+is consumed to produce that aspect. Presumably, the LCC event id is produced
+by a logic element (presumably a mast group in a Tower-LCC or similar device)
+or virtual track circuit in a Tower-LCC or similar device.
+
+\rule
+
+
 \A{} Messages and Explanations
 
 \H{messageType} \i{Message Types}
@@ -236,3 +274,4 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 \K{messageList} provides detail explanation of each information or error message.
 
 \rule
+
