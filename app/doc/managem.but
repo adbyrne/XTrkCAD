@@ -19,6 +19,10 @@ The \f{Manage Menu} shows commands affecting the \f{Main Canvas} (\K{mainW}).
 
 \u000
 
+\dd \f{Layout Control Elements} - display the \f{Layout Control Elements} (\K{cmdContmgm}) dialog to manipulate blocks, turnout motors and signals.
+
+\u000
+
 \dd \f{Group} - creates a \f{Structure} or \f{Turnout} definition from the selected (\K{cmdSelect}) objects. See the \f{Group} command (\K{cmdGroup}) for details.
 
 \u000
@@ -290,6 +294,38 @@ The \f{Move To} button moves the selected entries to a \f{Parameter File} (\K{cm
 The \f{New} buttons invokes the Car (\K{cmdCarpart}) dialog to create a new \f{Car Prototype} or \f{Car Part}.
 
 \rule
+
+\S{cmdContmgm} Layout Control Elements Dialog
+
+This dialog is used to manage \f{layout control elements} (Blocks, Switch 
+motors, and Signals).
+
+Control Elements are elements related to layout control: blocks (occupency
+detection), switchmotors (actuators to "throw" turnouts), and signals. 
+
+These elements don't relate to directly "physical" items on the layout, but instead
+refer to the elements used by the layout control software. These elements
+contain "scripts", which are really just textual items that provide
+information for the layout control software and provide a bridge between
+physical layout elements (like tracks or turnouts) and the layout control
+software. These textual items could be actual software code or could be LCC
+Events (for I/O device elements on a LCC network) or DCC addresses for
+stationary decoders, etc. 
+
+XTrackCAD does not impose any sort of syntax or format, that is left up to other software that might load and parse the XTrackCAD
+layout file. All that XTrackCAD does is provide a unified place for this
+information to be stored and to provide a mapping (association) between this
+control information and the layout itself.
+
+[Graphic of a typical Manage Layout Control Elements dialog]
+
+The main part of this dialog contains a list of the currently defined layout
+control elements (blocks, switchmotors, and signals), along with the tracks
+they relate to. These elements are added to the layout either from their
+Hotbar menus or from the Add menu.
+
+The \f{Edit} button allows for editing a control element. And the \f{Delete} button 
+deletes the selected element(s).
 
 \S{cmdGroup} Group Dialog
 

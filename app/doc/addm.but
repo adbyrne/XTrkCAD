@@ -50,8 +50,19 @@ The \f{Add Menu} has all the actions related to adding track pieces to the layou
 
 \dd \f{Turntable} - Place a turntable.
 
-\rule
+\u000
 
+\dd \f{Block} - Create, edit or delete a block.
+
+\u000
+
+\dd \f{Switchmotor} - Create, edit or delete a switchmotor.
+
+\u000
+
+\dd \f{Signal} - Create, edit or delete a signal.
+
+\rule
 
 \S{cmdCircle} Circle Track
 
@@ -260,3 +271,66 @@ The \f{Modify command} (\K{cmdModify}) can be used to create turntable stall tra
 The \f{Turntable Angle} control on the Preferences (\K{cmdPref}) dialog controls how closely you can place tracks connected to a turntable.  If you want to create stall tracks every 7.5\u00B0, set the \f{Turntable Angle} control to 7.5 and place the track as close to each other as allowed.  \e{XTrackCAD} makes sure they will be separated by the correct angle.
 
 \rule
+
+\S{cmdBlock} Block
+
+A block is created by first selecting the track segments in the block and then 
+selecting \f{Create Block} from either the Add menu \K{cmdAdd} or from the block menu on the 
+hotbar.  A block gets a name and a script.  The name is only used for 
+identification and the script is used by the layout control software.  The 
+script should provide whatever information is needed by the layout control 
+software to determine block occupancy.  This could be a code snippet to 
+retrieve the state of the block occupancy or it could be the address of the 
+sensor, etc. 
+
+[Graphic of a typical Create Block dialog]
+
+The create block dialog has spaces for two text strings. One is the name and
+the other is a block occupancy script. The name identifies the block and the
+script is information used by the layout control software to detect block
+occupancy. The script could be a code snippet or I/O device address
+information, etc. 
+
+\rule 
+
+\S{cmdSwitchmotor} Switchmotor
+
+A switchmotor is created by selecting \f{Create SwitchMotor} from either the Add
+menu \K{cmdAdd} or from the switchmotor menu on the hotbar and then clicking on a turnout.
+A switchmotor gets a name and three scripts. The name is only used for
+identification and the three scripts are used by the layout control software.
+The three scripts are for throwing the turnout to its "normal" position,
+throwing the turnout to its "reverse" position, and a script to read a point
+position sensor. These scripts could be code snippets or they could be
+addresses of I/O devices, etc. 
+
+[Graphic of a typical Create SwitchMotor dialog]
+
+The create switchmotor dialog has spaces for four text strings. One is the
+name and the other three are scripts for Normal, Reverse, and Point Sense. The
+name identifies the switchmotor and the scripts are information used by the
+layout control software to throw the turnout to the normal position, throw the
+turnout to the reverse position, and sense the point position. The scripts
+could be code snippets or I/O device address information, etc.
+
+\rule
+
+\S{cmdSignal} Signal
+
+A signal is created by selecting \f{Create Signal} from either the Add menu \K{cmdAdd} or
+from the hotbar. Use the mouse to select a location (left button) and then
+draging (left button down) the signal to set its orientation. Once the left 
+button is released, a Create/Edit Signal dialog box is displayed, and you can 
+fill in the signal's properties: name, fine tune the location and orientation, 
+number of heads, and the aspects.
+
+[Graphic of a typical Create/edit Signal dialog]
+
+The create/edit signal dialog has spaces for the name of the signal, its 
+location and orientation, the number of heads (1, 2, or 3), and a list of 
+aspects.  Each aspect has a name and a script.  The name could be a rule book 
+name (Clear, Aproach, Stop, etc.) or the actual color(s) displayed (green, 
+yellow, red, etc.).  The script is just some information for the layout 
+control software to actually effect the display of the aspect -- this could be 
+the LCC event id to trigger the aspect or it could be a code snippet that 
+causes the aspect to be displayed.
