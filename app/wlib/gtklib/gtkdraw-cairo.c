@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/gtklib/gtkdraw-cairo.c,v 1.11 2009-10-03 17:34:37 dspagnol Exp $
+/** \file gtkdraw-cairo.c
+ * Basic drawing functions
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -29,9 +29,13 @@
 #include <string.h>
 #include <math.h>
 
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+
 #include "gtkint.h"
 #include "gdk/gdkkeysyms.h"
 
+#define gtkAddHelpString( a, b ) wlibAddHelpString( a, b )
 
 #define CENTERMARK_LENGTH (6)
 
@@ -116,7 +120,7 @@ static GdkGC * selectGC(
 	{
 		if(bd->lastColor != color || !bd->lastColorInverted)
 		{
-			gdk_gc_set_foreground( bd->gc, gtkGetColor(color,FALSE) );
+			gdk_gc_set_foreground( bd->gc, wlibGetColor(color,FALSE) );
 			bd->lastColor = color;
 			bd->lastColorInverted = TRUE;
 		}
@@ -127,7 +131,7 @@ static GdkGC * selectGC(
 	{
 		if(bd->lastColor != color || bd->lastColorInverted)
 		{
-			gdk_gc_set_foreground( bd->gc, gtkGetColor(color,TRUE) );
+			gdk_gc_set_foreground( bd->gc, wlibGetColor(color,TRUE) );
 			bd->lastColor = color;
 			bd->lastColorInverted = FALSE;
 		}
@@ -182,7 +186,7 @@ static cairo_t* gtkDrawCreateCairoContext(
 	}
 	else
 	{
-		GdkColor* const gcolor = gtkGetColor(color, TRUE);
+		GdkColor* const gcolor = wlibGetColor(color, TRUE);
 		cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
 
 		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
@@ -195,7 +199,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_destroy(cairo);
 }
 
-EXPORT void wDrawDelayUpdate(
+ void wDrawDelayUpdate(
 		wDraw_p bd,
 		wBool_t delay )
 {
@@ -212,7 +216,7 @@ EXPORT void wDrawDelayUpdate(
 }
 
 
-EXPORT void wDrawLine(
+ void wDrawLine(
 		wDraw_p bd,
 		wPos_t x0, wPos_t y0,
 		wPos_t x1, wPos_t y1,
@@ -275,7 +279,7 @@ EXPORT void wDrawLine(
  */
 
 
-EXPORT void wDrawArc(
+ void wDrawArc(
 		wDraw_p bd,
 		wPos_t x0, wPos_t y0,
 		wPos_t r,
@@ -344,7 +348,7 @@ EXPORT void wDrawArc(
 
 }
 
-EXPORT void wDrawPoint(
+ void wDrawPoint(
 		wDraw_p bd,
 		wPos_t x0, wPos_t y0,
 		wDrawColor color,
@@ -380,7 +384,7 @@ EXPORT void wDrawPoint(
  *
  ******************************************************************************/
 
-EXPORT void wDrawString(
+ void wDrawString(
 		wDraw_p bd,
 		wPos_t x, wPos_t y,
 		wAngle_t a,
@@ -413,19 +417,19 @@ EXPORT void wDrawString(
 	cairo_translate( cairo, x, y );
 	cairo_rotate( cairo, angle );
 
-	layout = gtkFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
+	layout = wlibFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
 									  (int *) &w, (int *) &h,
 									  (int *) &ascent, (int *) &descent);
 
 	/* cairo does not support the old method of text removal by overwrite; force always write here and
            refresh on cancel event */
-	GdkColor* const gcolor = gtkGetColor(color, TRUE);
+	GdkColor* const gcolor = wlibGetColor(color, TRUE);
 	cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
 
 	cairo_move_to( cairo, 0, -ascent );
 
 	pango_cairo_show_layout(cairo, layout);
-	gtkFontDestroyPangoLayout(layout);
+	wlibFontDestroyPangoLayout(layout);
 	cairo_restore( cairo );
 	gtkDrawDestroyCairoContext(cairo);
 
@@ -442,7 +446,7 @@ EXPORT void wDrawString(
 	gtk_widget_draw(bd->widget, &update_rect);
 }
 
-EXPORT void wDrawGetTextSize(
+ void wDrawGetTextSize(
 		wPos_t *w,
 		wPos_t *h,
 		wPos_t *d,
@@ -459,8 +463,8 @@ EXPORT void wDrawGetTextSize(
 	*w = 0;
 	*h = 0;
 
-	gtkFontDestroyPangoLayout(
-		gtkFontCreatePangoLayout(bd->widget, NULL, fp, fs, s,
+	wlibFontDestroyPangoLayout(
+		wlibFontCreatePangoLayout(bd->widget, NULL, fp, fs, s,
 								 &textWidth, (int *) &textHeight,
 								 (int *) &ascent, (int *) &descent));
 
@@ -479,7 +483,7 @@ EXPORT void wDrawGetTextSize(
  *
 *******************************************************************************/
 
-EXPORT void wDrawFilledRectangle(
+ void wDrawFilledRectangle(
 		wDraw_p bd,
 		wPos_t x,
 		wPos_t y,
@@ -518,7 +522,7 @@ EXPORT void wDrawFilledRectangle(
 	gtk_widget_draw( bd->widget, &update_rect );
 }
 
-EXPORT void wDrawFilledPolygon(
+ void wDrawFilledPolygon(
 		wDraw_p bd,
 		wPos_t p[][2],
 		int cnt,
@@ -584,7 +588,7 @@ EXPORT void wDrawFilledPolygon(
 	gtk_widget_draw( bd->widget, &update_rect );
 }
 
-EXPORT void wDrawFilledCircle(
+ void wDrawFilledCircle(
 		wDraw_p bd,
 		wPos_t x0,
 		wPos_t y0,
@@ -623,7 +627,7 @@ EXPORT void wDrawFilledCircle(
 }
 
 
-EXPORT void wDrawClear(
+ void wDrawClear(
 		wDraw_p bd )
 {
 	GdkGC * gc;
@@ -648,7 +652,7 @@ EXPORT void wDrawClear(
 	gtk_widget_draw( bd->widget, &update_rect );
 }
 
-EXPORT void * wDrawGetContext(
+ void * wDrawGetContext(
 		wDraw_p bd )
 {
 	return bd->context;
@@ -661,7 +665,7 @@ EXPORT void * wDrawGetContext(
 *******************************************************************************/
 
 
-EXPORT wDrawBitMap_p wDrawBitMapCreate(
+ wDrawBitMap_p wDrawBitMapCreate(
 		wDraw_p bd,
 		int w,
 		int h,
@@ -682,7 +686,7 @@ EXPORT wDrawBitMap_p wDrawBitMapCreate(
 }
 
 
-EXPORT void wDrawBitMap(
+ void wDrawBitMap(
 		wDraw_p bd,
 		wDrawBitMap_p bm,
 		wPos_t x, wPos_t y,
@@ -713,7 +717,7 @@ EXPORT void wDrawBitMap(
 				} else if ( (opts&wDrawOptNoClip) != 0 ) {
 					xx += bd->realX;
 					yy += bd->realY;
-					b = gtkGetControlFromPos( bd->parent, xx, yy );
+					b = wlibGetControlFromPos( bd->parent, xx, yy );
 					if ( b ) {
 						if ( b->type == B_DRAW )
 							gdk_window = ((wDraw_p)b)->pixmap;
@@ -762,7 +766,7 @@ EXPORT void wDrawBitMap(
 
 
 
-EXPORT void wDrawSaveImage(
+ void wDrawSaveImage(
 		wDraw_p bd )
 {
 	if ( bd->pixmapBackup ) {
@@ -781,7 +785,7 @@ EXPORT void wDrawSaveImage(
 }
 
 
-EXPORT void wDrawRestoreImage(
+ void wDrawRestoreImage(
 		wDraw_p bd )
 {
 	GdkRectangle update_rect;
@@ -806,7 +810,7 @@ EXPORT void wDrawRestoreImage(
 }
 
 
-EXPORT void wDrawSetSize(
+ void wDrawSetSize(
 		wDraw_p bd,
 		wPos_t w,
 		wPos_t h )
@@ -838,13 +842,13 @@ EXPORT void wDrawSetSize(
 }
 
 
-EXPORT void wDrawGetSize(
+ void wDrawGetSize(
 		wDraw_p bd,
 		wPos_t *w,
 		wPos_t *h )
 {
 	if (bd->widget)
-		gtkControlGetSize( (wControl_p)bd );
+		wlibControlGetSize( (wControl_p)bd );
 	*w = bd->w-2;
 	*h = bd->h-2;
 }
@@ -856,7 +860,7 @@ EXPORT void wDrawGetSize(
  * \return    the resolution in dpi
  */
 
-EXPORT double wDrawGetDPI(
+ double wDrawGetDPI(
 		wDraw_p d )
 {
 	//if (d == &psPrint_d)
@@ -866,7 +870,7 @@ EXPORT double wDrawGetDPI(
 }
 
 
-EXPORT double wDrawGetMaxRadius(
+ double wDrawGetMaxRadius(
 		wDraw_p d )
 {
 	if (d == &psPrint_d)
@@ -876,7 +880,7 @@ EXPORT double wDrawGetMaxRadius(
 }
 
 
-EXPORT void wDrawClip(
+ void wDrawClip(
 		wDraw_p d,
 		wPos_t x,
 		wPos_t y,
@@ -956,7 +960,7 @@ static gint draw_leave_event(
 		GtkWidget *widget,
 		GdkEvent * event )
 {
-	gtkHelpHideBalloon();
+	wlibHelpHideBalloon();
 	return FALSE;
 }
 
@@ -1041,38 +1045,38 @@ static gint draw_char_event(
 	guint key = event->keyval;
 	wAccelKey_e extKey = wAccelKey_None;
 	switch (key) {
-	case GDK_Escape:	key = 0x1B; break;
-	case GDK_Return:	key = 0x0D; break;
-	case GDK_Linefeed:	key = 0x0A; break;
-	case GDK_Tab:	key = 0x09; break;
-	case GDK_BackSpace:	key = 0x08; break;
-	case GDK_Delete:    extKey = wAccelKey_Del; break;
-	case GDK_Insert:    extKey = wAccelKey_Ins; break;
-	case GDK_Home:      extKey = wAccelKey_Home; break;
-	case GDK_End:       extKey = wAccelKey_End; break;
-	case GDK_Page_Up:   extKey = wAccelKey_Pgup; break;
-	case GDK_Page_Down: extKey = wAccelKey_Pgdn; break;
-	case GDK_Up:        extKey = wAccelKey_Up; break;
-	case GDK_Down:      extKey = wAccelKey_Down; break;
-	case GDK_Right:     extKey = wAccelKey_Right; break;
-	case GDK_Left:      extKey = wAccelKey_Left; break;
-	case GDK_F1:        extKey = wAccelKey_F1; break;
-	case GDK_F2:        extKey = wAccelKey_F2; break;
-	case GDK_F3:        extKey = wAccelKey_F3; break;
-	case GDK_F4:        extKey = wAccelKey_F4; break;
-	case GDK_F5:        extKey = wAccelKey_F5; break;
-	case GDK_F6:        extKey = wAccelKey_F6; break;
-	case GDK_F7:        extKey = wAccelKey_F7; break;
-	case GDK_F8:        extKey = wAccelKey_F8; break;
-	case GDK_F9:        extKey = wAccelKey_F9; break;
-	case GDK_F10:       extKey = wAccelKey_F10; break;
-	case GDK_F11:       extKey = wAccelKey_F11; break;
-	case GDK_F12:       extKey = wAccelKey_F12; break;
+	case GDK_KEY_Escape:	key = 0x1B; break;
+	case GDK_KEY_Return:	key = 0x0D; break;
+	case GDK_KEY_Linefeed:	key = 0x0A; break;
+	case GDK_KEY_Tab:	key = 0x09; break;
+	case GDK_KEY_BackSpace:	key = 0x08; break;
+	case GDK_KEY_Delete:    extKey = wAccelKey_Del; break;
+	case GDK_KEY_Insert:    extKey = wAccelKey_Ins; break;
+	case GDK_KEY_Home:      extKey = wAccelKey_Home; break;
+	case GDK_KEY_End:       extKey = wAccelKey_End; break;
+	case GDK_KEY_Page_Up:   extKey = wAccelKey_Pgup; break;
+	case GDK_KEY_Page_Down: extKey = wAccelKey_Pgdn; break;
+	case GDK_KEY_Up:        extKey = wAccelKey_Up; break;
+	case GDK_KEY_Down:      extKey = wAccelKey_Down; break;
+	case GDK_KEY_Right:     extKey = wAccelKey_Right; break;
+	case GDK_KEY_Left:      extKey = wAccelKey_Left; break;
+	case GDK_KEY_F1:        extKey = wAccelKey_F1; break;
+	case GDK_KEY_F2:        extKey = wAccelKey_F2; break;
+	case GDK_KEY_F3:        extKey = wAccelKey_F3; break;
+	case GDK_KEY_F4:        extKey = wAccelKey_F4; break;
+	case GDK_KEY_F5:        extKey = wAccelKey_F5; break;
+	case GDK_KEY_F6:        extKey = wAccelKey_F6; break;
+	case GDK_KEY_F7:        extKey = wAccelKey_F7; break;
+	case GDK_KEY_F8:        extKey = wAccelKey_F8; break;
+	case GDK_KEY_F9:        extKey = wAccelKey_F9; break;
+	case GDK_KEY_F10:       extKey = wAccelKey_F10; break;
+	case GDK_KEY_F11:       extKey = wAccelKey_F11; break;
+	case GDK_KEY_F12:       extKey = wAccelKey_F12; break;
 	default: ;
 	}
 
 	if (extKey != wAccelKey_None) {
-		if ( gtkFindAccelKey( event ) == NULL ) {
+		if ( wlibFindAccelKey( event ) == NULL ) {
 			bd->action( bd, bd->context, wActionExtKey + ((int)extKey<<8), bd->lastX, bd->lastY );
 		}
 		return TRUE;
@@ -1097,7 +1101,7 @@ int XW = 0;
 int XH = 0;
 int xw, xh, cw, ch;
 
-EXPORT wDraw_p wDrawCreate(
+ wDraw_p wDrawCreate(
 		wWin_p	parent,
 		wPos_t	x,
 		wPos_t	y,
@@ -1111,12 +1115,12 @@ EXPORT wDraw_p wDrawCreate(
 {
 	wDraw_p bd;
 
-	bd = (wDraw_p)gtkAlloc( parent,  B_DRAW, x, y, NULL, sizeof *bd, NULL );
+	bd = (wDraw_p)wlibAlloc( parent,  B_DRAW, x, y, NULL, sizeof *bd, NULL );
 	bd->option = option;
 	bd->context = context;
 	bd->redraw = redraw;
 	bd->action = action;
-	gtkComputePos( (wControl_p)bd );
+	wlibComputePos( (wControl_p)bd );
 
 	bd->widget = gtk_drawing_area_new();
 	gtk_drawing_area_size( GTK_DRAWING_AREA(bd->widget), width, height );
@@ -1153,7 +1157,7 @@ EXPORT wDraw_p wDrawCreate(
 	bd->maxH = bd->h = height;
 
 	gtk_fixed_put( GTK_FIXED(parent->widget), bd->widget, bd->realX, bd->realY );
-	gtkControlGetSize( (wControl_p)bd );
+	wlibControlGetSize( (wControl_p)bd );
 	gtk_widget_realize( bd->widget );
 	bd->pixmap = gdk_pixmap_new( bd->widget->window, width, height, -1 );
 	bd->gc = gdk_gc_new( parent->gtkwin->window );
@@ -1169,7 +1173,7 @@ EXPORT wDraw_p wDrawCreate(
 		bd->labelW = gtkAddLabel( (wControl_p)bd, labelStr );
 #endif
 	gtk_widget_show( bd->widget );
-	gtkAddButton( (wControl_p)bd );
+	wlibAddButton( (wControl_p)bd );
 	gtkAddHelpString( bd->widget, helpStr );
 
 	return bd;
@@ -1185,7 +1189,7 @@ wDraw_p wBitMapCreate(          wPos_t w, wPos_t h, int arg )
 {
 	wDraw_p bd;
 
-	bd = (wDraw_p)gtkAlloc( gtkMainW,  B_DRAW, 0, 0, NULL, sizeof *bd, NULL );
+	bd = (wDraw_p)wlibAlloc( gtkMainW,  B_DRAW, 0, 0, NULL, sizeof *bd, NULL );
 
 	bd->lastColor = -1;
 	bd->dpi = 75;

@@ -247,7 +247,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 
 }
 
-static blockDebug (track_p trk)
+static int blockDebug (track_p trk)
 {
 	wIndex_t iTrack;
 	blockData_p xx = GetblockData(trk);

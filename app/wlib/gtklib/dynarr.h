@@ -17,6 +17,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+
+#ifndef DYNARR_H_SEEN
+#define DYNARR_H_SEEN
+
 typedef struct {
 		int cnt;
 		int max;
@@ -47,3 +51,4 @@ typedef struct {
 				abort(); \
 		} \
 		(DA).cnt = 0; }
+#endif /* DYNARR_H_SEEN */

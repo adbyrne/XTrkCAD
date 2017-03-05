@@ -4,24 +4,38 @@ FILE(GLOB HEADERS *.h)
 INCLUDE (FindGTKUnixPrint.cmake)
 
 SET(SOURCES
-	gtkbitmap.c
-	gtkbutton.c
-	gtkcolor.c
-	gtkdraw-cairo.c
+	bitmap.c
+	boxes.c
+	button.c
+	color.c
+	control.c
+	droplist.c	
 	filesel.c
-	gtkfont.c
-	gtklist.c
-	gtkmenu.c
-	gtkmisc.c
-	gtksimple.c
-	gtksingle.c
-	gtksplash.c
-	gtktext.c
-	gtkwindow.c
-	gtkxpm.c
-	gtkhelp.c
+	font.c
+	help.c
+	lines.c
+	list.c
+	liststore.c
+	main.c
+	menu.c	
+	message.c
+	notice.c
+	pixbuf.c
+	png.c
 	print.c
+	single.c
+	splash.c
+	text.c
+	timer.c
+	tooltip.c	
+	treeview.c
+	util.c
+	window.c
 	wpref.c
+# cproto and cppcheck
+
+# end of refactored sources	
+	gtkdraw-cairo.c
 	)
 
 IF(APPLE)
@@ -30,10 +44,9 @@ IF(APPLE)
 		osxhelp.c)
 	
 ELSE(APPLE)
-# for testing only, has to be ixhelp.c for Unixes
 	SET(SOURCES 
 		${SOURCES}
-		osxhelp.c)
+		ixhelp.c)
 ENDIF(APPLE)
 
 SET_SOURCE_FILES_PROPERTIES(wpref.c PROPERTIES COMPILE_FLAGS -DEXPORT=)

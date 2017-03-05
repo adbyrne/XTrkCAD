@@ -1,5 +1,5 @@
-/** \file osxhelp.c
- * use OSX Help system 
+/** \file ixhelp.c
+ * use the Webkit2-based help system
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -42,7 +42,8 @@
 #include "gtkint.h"
 #include "i18n.h"
 
-void load_into_view (char *file, int requested_view);	// Prototype to please clang.
+void load_into_view(char *file,
+                    int requested_view);	// Prototype to please clang.
 
 /* globals and defines related to the HTML help window */
 
@@ -52,7 +53,7 @@ void load_into_view (char *file, int requested_view);	// Prototype to please cla
 								"Usually this is an installation problem, Make sure that XTrackCAD and the included " \
 								"HTML files are installed properly and can be found via the XTRKCADLIB environment " \
 								"variable. Also make sure that the user has sufficient access rights to read these" \
- 								"files.</p></body></html>" 
+ 								"files.</p></body></html>"
 
 
 #define SLIDERPOSDEFAULT 180		/**< default value for slider position */
@@ -74,24 +75,6 @@ void load_into_view (char *file, int requested_view);	// Prototype to please cla
 
 enum pane_views { MAIN_VIEW, CONTENTS_VIEW };
 
-#define MAXHISTORYSIZE 20
-
-/** \struct htmlHistory 
- * for storing information about the browse history 
- */
-struct htmlHistory {					
-	int curShownPage;					/**< index of page that is shown currently */
-	int newestPage;					/**< index of newest page loaded */
-	int oldestPage;					/**< index of earliest page loaded */
-	int bInUse;							/**< does buffer have at least one entry */
-	char *url[ MAXHISTORYSIZE ]; 	/**< array of pages in history */
-};	
-
-static struct htmlHistory sHtmlHistory;
-
-#define INCBUFFERINDEX( x ) (((x) + 1 ) % MAXHISTORYSIZE )
-#define DECBUFFERINDEX( x ) ((x) == 0 ? MAXHISTORYSIZE - 1 : (x)-1)
-
 static char *directory;				/**< base directory for HTML files */
 
 static GtkWidget *wHelpWindow;	/**< handle for the help window */
@@ -108,34 +91,42 @@ static GtkWidget *contents_view; /** handle for the help contents pane */
 static GtkWidget*
 lookup_widget(GtkWidget *widget, const gchar *widget_name)
 {
-  GtkWidget *parent, *found_widget;
+    GtkWidget *parent, *found_widget;
 
-  for (;;)
-    {
-      if (GTK_IS_MENU (widget))
-        parent = gtk_menu_get_attach_widget (GTK_MENU (widget));
-      else
-        parent = widget->parent;
-      if (!parent)
-        parent = (GtkWidget*) g_object_get_data (G_OBJECT (widget), "GladeParentKey");
-      if (parent == NULL)
-        break;
-      widget = parent;
+    for (;;) {
+        if (GTK_IS_MENU(widget)) {
+            parent = gtk_menu_get_attach_widget(GTK_MENU(widget));
+        } else {
+            parent = widget->parent;
+        }
+
+        if (!parent) {
+            parent = (GtkWidget*) g_object_get_data(G_OBJECT(widget), "GladeParentKey");
+        }
+
+        if (parent == NULL) {
+            break;
+        }
+
+        widget = parent;
     }
 
-  found_widget = (GtkWidget*) g_object_get_data (G_OBJECT (widget),
-                                                 widget_name);
-  if (!found_widget)
-    g_warning ("Widget not found: %s", widget_name);
-  return found_widget;
+    found_widget = (GtkWidget*) g_object_get_data(G_OBJECT(widget),
+                   widget_name);
+
+    if (!found_widget) {
+        g_warning("Widget not found: %s", widget_name);
+    }
+
+    return found_widget;
 }
 
 
 
 
 /**
- * create a new horizontal pane and place it into container. 
- * The separator position is read from the resource configuration and set accordingly. 
+ * create a new horizontal pane and place it into container.
+ * The separator position is read from the resource configuration and set accordingly.
  * Also a callback is specified that will be executed when the slider has been moved.
  *
  * \PARAM container IN the container into which the pane will be stuffed.
@@ -145,24 +136,24 @@ lookup_widget(GtkWidget *widget, const gchar *widget_name)
  */
 
 GtkWidget *
-CreateHPaned( GtkBox *container, char *property )
+CreateHPaned(GtkBox *container, char *property)
 {
-	GtkWidget *hpaned;
-	long posSlider;
-		
-	/* the horizontal slider */
-	hpaned = gtk_hpaned_new ();
-	gtk_container_set_border_width (GTK_CONTAINER (hpaned), 6);	
-	
-   wPrefGetInteger( HTMLHELPSECTION, SLIDERPREFNAME, &posSlider, SLIDERPOSDEFAULT );
- 	gtk_paned_set_position (GTK_PANED (hpaned), (int)posSlider); 
-	
-   /* pack the horizontal slider into the main window */
-   gtk_box_pack_start( container, hpaned, TRUE, TRUE, 0 );
-	gtk_widget_show( hpaned );
-	
-	return( hpaned );
-}  
+    GtkWidget *hpaned;
+    long posSlider;
+
+    /* the horizontal slider */
+    hpaned = gtk_hpaned_new();
+    gtk_container_set_border_width(GTK_CONTAINER(hpaned), 6);
+
+    wPrefGetInteger(HTMLHELPSECTION, SLIDERPREFNAME, &posSlider, SLIDERPOSDEFAULT);
+    gtk_paned_set_position(GTK_PANED(hpaned), (int)posSlider);
+
+    /* pack the horizontal slider into the main window */
+    gtk_box_pack_start(container, hpaned, TRUE, TRUE, 0);
+    gtk_widget_show(hpaned);
+
+    return (hpaned);
+}
 
 /**
  * Handler for the delete-event issued on the help window.We are saving window
@@ -170,229 +161,251 @@ CreateHPaned( GtkBox *container, char *property )
  *
  * \PARAM win IN the window to be destroyed
  * \PARAM event IN unused
- * \PARAM ptr IN unused 
+ * \PARAM ptr IN unused
  *
  * \RETURN FALSE
  */
- 
+
 static gboolean
-DestroyHelpWindow( GtkWidget *win, GdkEvent *event, void *ptr )
+DestroyHelpWindow(GtkWidget *win, GdkEvent *event, void *ptr)
 {
-	int i;
-	GtkWidget *widget;
-	char tmp[ 20 ];
-	
-	gint x, y;
-	
-	/* get the slider position and save it */
-	widget = lookup_widget( win, PANED );
-	i = gtk_paned_get_position( GTK_PANED( widget ));
-	wPrefSetInteger( HTMLHELPSECTION, SLIDERPREFNAME, i );
-	
-	/* get the window position */
-	gtk_window_get_position( (GtkWindow *)win, &x, &y ); 
-	sprintf( tmp, "%d %d", x, y );
-	wPrefSetString( HTMLHELPSECTION, WINDOWPOSPREFNAME, tmp );
-	
-	/* get the window size */	
-	gtk_window_get_size( (GtkWindow *)win , &x, &y );
-	sprintf( tmp, "%d %d", x, y );
-	wPrefSetString( HTMLHELPSECTION, WINDOWSIZEPREFNAME, tmp );
-	
-	gtk_widget_hide( win );
-	return TRUE;
+    int i;
+    GtkWidget *widget;
+    char tmp[ 20 ];
+
+    gint x, y;
+
+    /* get the slider position and save it */
+    widget = lookup_widget(win, PANED);
+    i = gtk_paned_get_position(GTK_PANED(widget));
+    wPrefSetInteger(HTMLHELPSECTION, SLIDERPREFNAME, i);
+
+    /* get the window position */
+    gtk_window_get_position((GtkWindow *)win, &x, &y);
+    sprintf(tmp, "%d %d", x, y);
+    wPrefSetString(HTMLHELPSECTION, WINDOWPOSPREFNAME, tmp);
+
+    /* get the window size */
+    gtk_window_get_size((GtkWindow *)win , &x, &y);
+    sprintf(tmp, "%d %d", x, y);
+    wPrefSetString(HTMLHELPSECTION, WINDOWSIZEPREFNAME, tmp);
+
+    gtk_widget_hide(win);
+    return TRUE;
 }
 
-void back_button_clicked(GtkWidget *widget, gpointer data) {
-        webkit_web_view_go_back(WEBKIT_WEB_VIEW(data));
+void back_button_clicked(GtkWidget *widget, gpointer data)
+{
+    webkit_web_view_go_back(WEBKIT_WEB_VIEW(data));
 }
 
-void forward_button_clicked(GtkWidget *widget, gpointer data) {
-        webkit_web_view_go_forward(WEBKIT_WEB_VIEW(data));
+void forward_button_clicked(GtkWidget *widget, gpointer data)
+{
+    webkit_web_view_go_forward(WEBKIT_WEB_VIEW(data));
 }
 
-void home_button_clicked(GtkWidget *widget, gpointer data) {
-        load_into_view("index.html", MAIN_VIEW);
+void home_button_clicked(GtkWidget *widget, gpointer data)
+{
+    load_into_view("index.html", MAIN_VIEW);
 }
 
 /* Toggles the contents pane */
-void contents_button_clicked(GtkWidget *widget, gpointer data) {
-        if (gtk_paned_get_position(GTK_PANED(data)) < 50) {
-                gtk_paned_set_position(GTK_PANED(data), 370);
-        }
-        else {
-                gtk_paned_set_position(GTK_PANED(data), 0);
-        }
+void contents_button_clicked(GtkWidget *widget, gpointer data)
+{
+    if (gtk_paned_get_position(GTK_PANED(data)) < 50) {
+        gtk_paned_set_position(GTK_PANED(data), 370);
+    } else {
+        gtk_paned_set_position(GTK_PANED(data), 0);
+    }
 }
 
 gboolean contents_click_handler(
-                WebKitWebView *web_view, 
-                WebKitWebFrame *frame, 
-                WebKitNetworkRequest *request, 
-                WebKitWebNavigationAction *navigation_action, 
-                WebKitWebPolicyDecision *policy_decision, 
-                gpointer data) {
+    WebKitWebView *web_view,
+    WebKitWebFrame *frame,
+    WebKitNetworkRequest *request,
+    WebKitWebNavigationAction *navigation_action,
+    WebKitWebPolicyDecision *policy_decision,
+    gpointer data)
+{
 
-        webkit_web_view_load_uri(WEBKIT_WEB_VIEW(data), webkit_network_request_get_uri(request));
+    webkit_web_view_load_uri(WEBKIT_WEB_VIEW(data),
+                             webkit_network_request_get_uri(request));
 
-        return TRUE;
+    return TRUE;
 }
 
 /**
  * Initialize the buttons for the help window
  */
-void initialize_buttons (GtkWidget *main_vbox, GtkWidget *content_hpane) {
-        GtkWidget *buttons_hbuttonbox;
-        GtkWidget *back_button;
-        GtkWidget *forward_button;
-        GtkWidget *home_button;
-        GtkWidget *contents_button;
+void initialize_buttons(GtkWidget *main_vbox, GtkWidget *content_hpane)
+{
+    GtkWidget *buttons_hbuttonbox;
+    GtkWidget *back_button;
+    GtkWidget *forward_button;
+    GtkWidget *home_button;
+    GtkWidget *contents_button;
 
-        // define and attach signals to buttons
-        back_button = gtk_button_new_with_label(_("Back"));
-        g_signal_connect(back_button, "clicked", G_CALLBACK(back_button_clicked), G_OBJECT(main_view));
+    // define and attach signals to buttons
+    back_button = gtk_button_new_with_label(_("Back"));
+    g_signal_connect(back_button, "clicked", G_CALLBACK(back_button_clicked),
+                     G_OBJECT(main_view));
 
-        forward_button = gtk_button_new_with_label(_("Forward"));
-        g_signal_connect(forward_button, "clicked", G_CALLBACK(forward_button_clicked), G_OBJECT(main_view));
+    forward_button = gtk_button_new_with_label(_("Forward"));
+    g_signal_connect(forward_button, "clicked", G_CALLBACK(forward_button_clicked),
+                     G_OBJECT(main_view));
 
-        home_button = gtk_button_new_with_label(_("Home"));
-        g_signal_connect(home_button, "clicked", G_CALLBACK(home_button_clicked), G_OBJECT(main_view));
+    home_button = gtk_button_new_with_label(_("Home"));
+    g_signal_connect(home_button, "clicked", G_CALLBACK(home_button_clicked),
+                     G_OBJECT(main_view));
 
-        contents_button = gtk_button_new_with_label(_("Contents"));
-        g_signal_connect(contents_button, "clicked", G_CALLBACK(contents_button_clicked), G_OBJECT(content_hpane));
+    contents_button = gtk_button_new_with_label(_("Contents"));
+    g_signal_connect(contents_button, "clicked",
+                     G_CALLBACK(contents_button_clicked), G_OBJECT(content_hpane));
 
-        // button layout
-        buttons_hbuttonbox = gtk_hbutton_box_new();
-        gtk_container_add(GTK_CONTAINER(buttons_hbuttonbox), back_button);
-        gtk_container_add(GTK_CONTAINER(buttons_hbuttonbox), forward_button);
-        gtk_container_add(GTK_CONTAINER(buttons_hbuttonbox), home_button);
-        gtk_container_add(GTK_CONTAINER(buttons_hbuttonbox), contents_button);
-        gtk_box_pack_start(GTK_BOX(main_vbox), buttons_hbuttonbox, FALSE, TRUE, 0);
-        gtk_box_set_spacing(GTK_BOX(buttons_hbuttonbox), 6);
-        gtk_button_box_set_layout(GTK_BUTTON_BOX(buttons_hbuttonbox), GTK_BUTTONBOX_START);
+    // button layout
+    buttons_hbuttonbox = gtk_hbutton_box_new();
+    gtk_container_add(GTK_CONTAINER(buttons_hbuttonbox), back_button);
+    gtk_container_add(GTK_CONTAINER(buttons_hbuttonbox), forward_button);
+    gtk_container_add(GTK_CONTAINER(buttons_hbuttonbox), home_button);
+    gtk_container_add(GTK_CONTAINER(buttons_hbuttonbox), contents_button);
+    gtk_box_pack_start(GTK_BOX(main_vbox), buttons_hbuttonbox, FALSE, TRUE, 0);
+    gtk_box_set_spacing(GTK_BOX(buttons_hbuttonbox), 6);
+    gtk_button_box_set_layout(GTK_BUTTON_BOX(buttons_hbuttonbox),
+                              GTK_BUTTONBOX_START);
 
-	/* Store pointers to all widgets, for use by lookup_widget().  */
-	GLADE_HOOKUP_OBJECT (main_view, back_button, BACKBUTTON);
-	GLADE_HOOKUP_OBJECT (main_view, forward_button, FORWARDBUTTON);
-	GLADE_HOOKUP_OBJECT (main_view, home_button, HOMEBUTTON);
-	GLADE_HOOKUP_OBJECT (main_view, contents_button, CONTENTBUTTON);
+    /* Store pointers to all widgets, for use by lookup_widget().  */
+    GLADE_HOOKUP_OBJECT(main_view, back_button, BACKBUTTON);
+    GLADE_HOOKUP_OBJECT(main_view, forward_button, FORWARDBUTTON);
+    GLADE_HOOKUP_OBJECT(main_view, home_button, HOMEBUTTON);
+    GLADE_HOOKUP_OBJECT(main_view, contents_button, CONTENTBUTTON);
 }
 
 /**
  * Create the help windows including all contained widgets and the needed HTML documents.
- * 
+ *
  * \RETURN handle of the created window.
  */
- 
+
 GtkWidget*
-CreateHelpWindow (void)
+CreateHelpWindow(void)
 {
-        GtkWidget *main_vbox;
-        GtkWidget *main_view_scroller;
-        GtkWidget *contents_view_scroller;
-        GtkWidget *content_hpane;
-	
-	int width;
-  	int height;
-	int x, y;
-	int w = 0, h = 0;
-  	const char *pref;
-	char title[100]; 
+    GtkWidget *main_vbox;
+    GtkWidget *main_view_scroller;
+    GtkWidget *contents_view_scroller;
+    GtkWidget *content_hpane;
 
- 	wHelpWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+    int width;
+    int height;
+    int x, y;
+    int w = 0, h = 0;
+    const char *pref;
 
-	width = gdk_screen_get_width( gtk_window_get_screen( (GtkWindow *)wHelpWindow ));
-	height = gdk_screen_get_height( gtk_window_get_screen( (GtkWindow *)wHelpWindow ));
+    wHelpWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-	pref = wPrefGetString( HTMLHELPSECTION, WINDOWSIZEPREFNAME );
-	if( pref ) {
-		sscanf( pref, "%d %d", &w, &h );
-		if( w > width )
-			w = width;
-		if( h > height )
-			h = height;				
-	}
-	else {
-		w = ( width * 2 )/ 5;
-		h = height - 100;
-	}
+    width = gdk_screen_get_width(gtk_window_get_screen((GtkWindow *)wHelpWindow));
+    height = gdk_screen_get_height(gtk_window_get_screen((GtkWindow *)wHelpWindow));
 
-	pref = wPrefGetString( HTMLHELPSECTION, WINDOWPOSPREFNAME );
-	if( pref ) {
-		sscanf( pref, "%d %d", &x, &y );
-		if( y > height - h )
-			y = height - h;
-			
-		if( x > width - w )
-			x = width - w;		
-	}
-	else {
-		x = ( width * 3 ) / 5 - 10;
-		y = 70;
-	}
-	
-	gtk_window_resize( (GtkWindow *)wHelpWindow, w, h );
-	gtk_window_move( (GtkWindow *)wHelpWindow, x, y );
+    pref = wPrefGetString(HTMLHELPSECTION, WINDOWSIZEPREFNAME);
 
-	gtk_window_set_title (GTK_WINDOW (wHelpWindow), "XTrkCad Help");
+    if (pref) {
+        sscanf(pref, "%d %d", &w, &h);
 
-	g_signal_connect( G_OBJECT( wHelpWindow ), "delete-event", G_CALLBACK( DestroyHelpWindow ), NULL );
+        if (w > width) {
+            w = width;
+        }
 
-	main_view_scroller = gtk_scrolled_window_new(NULL, NULL);
-	contents_view_scroller = gtk_scrolled_window_new(NULL, NULL);
-	main_view = webkit_web_view_new();
-	contents_view = webkit_web_view_new();
-	// must be done here as it gets locked down later
-	load_into_view ("contents.html", CONTENTS_VIEW);
-	gtk_widget_set_size_request(GTK_WIDGET(wHelpWindow), x, y);
+        if (h > height) {
+            h = height;
+        }
+    } else {
+        w = (width * 2)/ 5;
+        h = height - 100;
+    }
 
-	main_vbox = gtk_vbox_new(FALSE, 5);
-	gtk_container_add(GTK_CONTAINER(wHelpWindow), main_vbox);
+    pref = wPrefGetString(HTMLHELPSECTION, WINDOWPOSPREFNAME);
 
-	gtk_container_add(GTK_CONTAINER(main_view_scroller), main_view);
+    if (pref) {
+        sscanf(pref, "%d %d", &x, &y);
 
-	gtk_container_add(GTK_CONTAINER(contents_view_scroller), contents_view);
+        if (y > height - h) {
+            y = height - h;
+        }
 
-	content_hpane = gtk_hpaned_new();
-	initialize_buttons(main_vbox, content_hpane);
-	gtk_container_add(GTK_CONTAINER(content_hpane), contents_view_scroller);
-	gtk_container_add(GTK_CONTAINER(content_hpane), main_view_scroller);
-	gtk_box_pack_start(GTK_BOX(main_vbox), content_hpane, TRUE, TRUE, 0);
+        if (x > width - w) {
+            x = width - w;
+        }
+    } else {
+        x = (width * 3) / 5 - 10;
+        y = 70;
+    }
 
-	gtk_paned_set_position(GTK_PANED(content_hpane), 370);
+    gtk_window_resize((GtkWindow *)wHelpWindow, w, h);
+    gtk_window_move((GtkWindow *)wHelpWindow, x, y);
 
-	g_signal_connect(contents_view, "navigation-policy-decision-requested", G_CALLBACK(contents_click_handler), G_OBJECT(main_view));
+    gtk_window_set_title(GTK_WINDOW(wHelpWindow), "XTrkCad Help");
 
-	/* Store pointers to all widgets, for use by lookup_widget().  */
-	GLADE_HOOKUP_OBJECT_NO_REF (wHelpWindow, wHelpWindow, "wHelpWindow");
-	GLADE_HOOKUP_OBJECT (wHelpWindow, content_hpane, PANED );
-	GLADE_HOOKUP_OBJECT (wHelpWindow, contents_view, TOCVIEW );
-	GLADE_HOOKUP_OBJECT (wHelpWindow, main_view, CONTENTSVIEW );
+    g_signal_connect(G_OBJECT(wHelpWindow), "delete-event",
+                     G_CALLBACK(DestroyHelpWindow), NULL);
 
-	return wHelpWindow;
+    main_view_scroller = gtk_scrolled_window_new(NULL, NULL);
+    contents_view_scroller = gtk_scrolled_window_new(NULL, NULL);
+    main_view = webkit_web_view_new();
+    contents_view = webkit_web_view_new();
+    // must be done here as it gets locked down later
+    load_into_view("contents.html", CONTENTS_VIEW);
+    gtk_widget_set_size_request(GTK_WIDGET(wHelpWindow), x, y);
+
+    main_vbox = gtk_vbox_new(FALSE, 5);
+    gtk_container_add(GTK_CONTAINER(wHelpWindow), main_vbox);
+
+    gtk_container_add(GTK_CONTAINER(main_view_scroller), main_view);
+
+    gtk_container_add(GTK_CONTAINER(contents_view_scroller), contents_view);
+
+    content_hpane = gtk_hpaned_new();
+    initialize_buttons(main_vbox, content_hpane);
+    gtk_container_add(GTK_CONTAINER(content_hpane), contents_view_scroller);
+    gtk_container_add(GTK_CONTAINER(content_hpane), main_view_scroller);
+    gtk_box_pack_start(GTK_BOX(main_vbox), content_hpane, TRUE, TRUE, 0);
+
+    gtk_paned_set_position(GTK_PANED(content_hpane), 370);
+
+    g_signal_connect(contents_view, "navigation-policy-decision-requested",
+                     G_CALLBACK(contents_click_handler), G_OBJECT(main_view));
+
+    /* Store pointers to all widgets, for use by lookup_widget().  */
+    GLADE_HOOKUP_OBJECT_NO_REF(wHelpWindow, wHelpWindow, "wHelpWindow");
+    GLADE_HOOKUP_OBJECT(wHelpWindow, content_hpane, PANED);
+    GLADE_HOOKUP_OBJECT(wHelpWindow, contents_view, TOCVIEW);
+    GLADE_HOOKUP_OBJECT(wHelpWindow, main_view, CONTENTSVIEW);
+
+    return wHelpWindow;
 }
 
-void load_into_view (char *file, int requested_view) {
-	GtkWidget *view;
- 
-	switch (requested_view) {
-	       case MAIN_VIEW:
-	               view = main_view;
-	               break;
-	       case CONTENTS_VIEW:
-	               view = contents_view;
-	               break;
-	       default:
-	               printf("*** error, could not find view");
-	               break;
-	}
+void load_into_view(char *file, int requested_view)
+{
+    GtkWidget *view;
 
-	char fileToLoad[250] = "file://";
-	strcat(fileToLoad,directory);
-	strcat(fileToLoad,file);
+    switch (requested_view) {
+    case MAIN_VIEW:
+        view = main_view;
+        break;
 
-	//debug printf("*** loading %s into pane %d.\n", fileToLoad, requested_view);
-	webkit_web_view_load_uri(WEBKIT_WEB_VIEW(view), fileToLoad);
+    case CONTENTS_VIEW:
+        view = contents_view;
+        break;
+
+    default:
+        printf("*** error, could not find view");
+        break;
+    }
+
+    char fileToLoad[250] = "file://";
+    strcat(fileToLoad,directory);
+    strcat(fileToLoad,file);
+
+    //debug printf("*** loading %s into pane %d.\n", fileToLoad, requested_view);
+    webkit_web_view_load_uri(WEBKIT_WEB_VIEW(view), fileToLoad);
 }
 
 /**
@@ -401,29 +414,28 @@ void load_into_view (char *file, int requested_view) {
  * \param topic IN topic string
  */
 
-EXPORT void wHelp( const char * topic )		
+void wHelp(const char * topic)
 {
-	char *htmlFile;
+    char *htmlFile;
 
-	if( !wHelpWindow )
-	{
-		directory = malloc( BUFSIZ );
-		assert( directory != NULL );
-			
-		sprintf( directory, "%s/html/", wGetAppLibDir());
-		
-		wHelpWindow = CreateHelpWindow();
-		/* load the default content */
-		load_into_view ("index.html", MAIN_VIEW);
-	}
+    if (!wHelpWindow) {
+        directory = malloc(BUFSIZ);
+        assert(directory != NULL);
 
-	/* need space for the 'html' extension plus dot plus \0 */
-	htmlFile = malloc( strlen( topic ) + 6 );
-	assert( htmlFile != NULL );
-	
-	sprintf( htmlFile, "%s.html", topic );
-	
-	load_into_view (htmlFile, MAIN_VIEW);
-	gtk_widget_show_all(wHelpWindow);
-	gtk_window_present(GTK_WINDOW(wHelpWindow));
+        sprintf(directory, "%s/html/", wGetAppLibDir());
+
+        wHelpWindow = CreateHelpWindow();
+        /* load the default content */
+        load_into_view("index.html", MAIN_VIEW);
+    }
+
+    /* need space for the 'html' extension plus dot plus \0 */
+    htmlFile = malloc(strlen(topic) + 6);
+    assert(htmlFile != NULL);
+
+    sprintf(htmlFile, "%s.html", topic);
+
+    load_into_view(htmlFile, MAIN_VIEW);
+    gtk_widget_show_all(wHelpWindow);
+    gtk_window_present(GTK_WINDOW(wHelpWindow));
 }

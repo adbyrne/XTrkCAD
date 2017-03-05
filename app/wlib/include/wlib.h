@@ -65,6 +65,70 @@ typedef struct {
 extern long debugWindow;
 extern long wDebugFont;
 
+/*------------------------------------------------------------------------------
+ *
+ * Bitmap Controls bitmap.c
+ */
+
+wControl_p wBitmapCreate(wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP);
+wIcon_p wIconCreateBitMap(wPos_t w, wPos_t h, const char *bits, wDrawColor color);
+wIcon_p wIconCreatePixMap(char *pm[]);
+void wIconSetColor(wIcon_p ip, wDrawColor color);
+
+/*------------------------------------------------------------------------------
+ *
+ * Frames around widgets boxes.c
+ *
+ */
+
+typedef enum {
+	wBoxThinB,
+	wBoxThinW,
+	wBoxAbove,
+	wBoxBelow,
+	wBoxThickB,
+	wBoxThickW,
+	wBoxRidge,
+	wBoxTrough }
+		wBoxType_e;
+
+void wBoxSetSize(wBox_p b, wPos_t w, wPos_t h);
+void wlibDrawBox(wWin_p win, wBoxType_e style, wPos_t x, wPos_t y, wPos_t w, wPos_t h);
+wBox_p wBoxCreate(wWin_p parent, wPos_t bx, wPos_t by, const char *labelStr, wBoxType_e boxTyp, wPos_t bw, wPos_t bh);
+
+/*------------------------------------------------------------------------------
+ *
+ * Buttons, toggles and radiobuttons button.c
+ *
+ */
+
+/* Creation CallBacks */
+typedef void (*wButtonCallBack_p)( void * );
+
+/* Creation Options */
+#define BB_DEFAULT	(1L<<5)
+#define BB_CANCEL	(1L<<6)
+#define BB_HELP (1L<<7)
+
+/* Creation CallBacks */
+typedef void (*wChoiceCallBack_p)( long, void * );
+
+/* Creation Options */
+#define BC_ICON 	(1L<<0)
+#define BC_HORZ 	(1L<<22)
+#define BC_NONE 	(1L<<19)
+#define BC_NOBORDER 	(1L<<15)
+
+void wButtonSetLabel(wButton_p bb, const char *labelStr);
+void wButtonSetBusy(wButton_p bb, int value);
+wButton_p wButtonCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, wPos_t width, wButtonCallBack_p action, void *data);
+void wRadioSetValue(wChoice_p bc, long value);
+long wRadioGetValue(wChoice_p bc);
+void wToggleSetValue(wChoice_p bc, long value);
+long wToggleGetValue(wChoice_p b);
+wChoice_p wRadioCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, const char **labels, long *valueP, wChoiceCallBack_p action, void *data);
+wChoice_p wToggleCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, const char **labels, long *valueP, wChoiceCallBack_p action, void *data);
+
 
 /*------------------------------------------------------------------------------
  *
@@ -217,50 +281,6 @@ void wControlLinkedActive( wControl_p b, int active );
 
 /*------------------------------------------------------------------------------
  *
- * Push buttons
- */
-
-/* Creation CallBacks */
-typedef void (*wButtonCallBack_p)( void * );
-
-/* Creation Options */
-#define BB_DEFAULT	(1L<<5)
-#define BB_CANCEL	(1L<<6)
-#define BB_HELP (1L<<7)
-
-wButton_p wButtonCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
-				wPos_t, wButtonCallBack_p, void * );
-void wButtonSetLabel(		wButton_p, const char * );
-void wButtonSetColor(		wButton_p, wDrawColor );
-void wButtonSetBusy(		wButton_p, wBool_t );
-
-
-/*------------------------------------------------------------------------------
- *
- * Radio and Toggle (Choice) Buttons
- */
-
-/* Creation CallBacks */
-typedef void (*wChoiceCallBack_p)( long, void * );
-
-/* Creation Options */
-#define BC_ICON 	(1L<<0)
-#define BC_HORZ 	(1L<<22)
-#define BC_NONE 	(1L<<19)
-#define BC_NOBORDER 	(1L<<15)
-
-wChoice_p wRadioCreate(		wWin_p, wPos_t, wPos_t, const char *, const char *, long,
-				const char **, long *, wChoiceCallBack_p, void * );
-wChoice_p wToggleCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
-				const char **, long *, wChoiceCallBack_p, void * );
-void wRadioSetValue(		wChoice_p, long );
-void wToggleSetValue(		wChoice_p, long );
-long wRadioGetValue(		wChoice_p );
-long wToggleGetValue(		wChoice_p );
-
-
-/*------------------------------------------------------------------------------
- *
  * String entry
  */
 
@@ -314,30 +334,35 @@ typedef void (*wListCallBack_p)( wIndex_t, const char *, wIndex_t, void *, void 
 #define BL_EDITABLE	(1L<<23)
 #define BL_ICON		(1L<<0)
 
+
+/* lists, droplists and combo boxes */
+
 wList_p wListCreate(		wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				long, wPos_t, int, wPos_t *, wBool_t *, const char **, long *, wListCallBack_p, void * );
-wList_p wComboListCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
-				long, wPos_t, long *, wListCallBack_p, void * );
 wList_p wDropListCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				long, wPos_t, long *, wListCallBack_p, void * );
-void wListClear(		wList_p );
-void wListSetIndex(		wList_p, wIndex_t );
+				
+wList_p wComboListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, long number, wPos_t width, long *valueP, wListCallBack_p action, void *data);	
+void wListClear(wList_p b);
+void wListSetIndex(wList_p b, int element);
+wIndex_t wListFindValue(wList_p b, const char *val);
+wIndex_t wListGetCount(wList_p b);
 wIndex_t wListGetIndex(		wList_p );
-wIndex_t wListFindValue(	wList_p, const char * );
+void *wListGetItemContext(wList_p b, wIndex_t inx);
+wBool_t wListGetItemSelected(wList_p b, wIndex_t inx);
+wIndex_t wListGetSelectedCount(wList_p b);
+void wListSelectAll(wList_p bl);
+wBool_t wListSetValues(wList_p b, wIndex_t row, const char *labelStr, wIcon_p bm, void *itemData);
+void wListDelete(wList_p b, wIndex_t inx);
+int wListGetColumnWidths(wList_p bl, int colCnt, wPos_t *colWidths);
+wIndex_t wListAddValue(wList_p b, const char *labelStr, wIcon_p bm, void *itemData);
+void wListSetSize(wList_p bl, wPos_t w, wPos_t h);
+wIndex_t wListGetValues(	wList_p, char *, int, void * *, void * * );
+
+/** \todo Check for the existance of following functions */
 void  wListSetValue(		wList_p, const char * );
-int wListGetColumnWidths(	wList_p, int, wPos_t * );
-wBool_t wListSetValues(		wList_p, wIndex_t, const char *, wIcon_p, void * );
 void wListSetActive(		wList_p, wIndex_t, wBool_t );
 void wListSetEditable(		wList_p, wBool_t );
-wIndex_t wListAddValue(		wList_p, const char *, wIcon_p, void * );
-void wListDelete(		wList_p, wIndex_t );
-wIndex_t wListGetValues(	wList_p, char *, int, void * *, void * * );
-void wListSelectAll( wList_p bl );
-wIndex_t wListGetCount(		wList_p );
-void * wListGetItemContext(	wList_p, wIndex_t );
-wBool_t wListGetItemSelected(	wList_p, wIndex_t );
-wIndex_t wListGetSelectedCount(	wList_p );
-void wListSetSize(		wList_p, wPos_t, wPos_t );
 
 
 /*------------------------------------------------------------------------------
@@ -357,26 +382,6 @@ wMessage_p wMessageCreateEx(	wWin_p, wPos_t, wPos_t, const char *,
 void wMessageSetValue(		wMessage_p, const char * );
 void wMessageSetWidth(		wMessage_p, wPos_t );
 wPos_t wMessageGetHeight( long );
-
-
-/*------------------------------------------------------------------------------
- *
- * Boxes
- */
-
-typedef enum {
-	wBoxThinB,
-	wBoxThinW,
-	wBoxAbove,
-	wBoxBelow,
-	wBoxThickB,
-	wBoxThickW,
-	wBoxRidge,
-	wBoxTrough }
-		wBoxType_e;
-wBox_p wBoxCreate(		wWin_p, wPos_t, wPos_t, const char *, wBoxType_e,
-				wPos_t, wPos_t );
-void wBoxSetSize(		wBox_p, wPos_t, wPos_t );
 
 
 /*------------------------------------------------------------------------------
@@ -651,7 +656,7 @@ typedef enum {
 typedef int (*wFilSelCallBack_p)( int files, char ** fileName, void * );
 struct wFilSel_t * wFilSelCreate(wWin_p, wFilSelMode_e, int, const char *, const char *,
 				wFilSelCallBack_p, void * );
-int wFilSelect( struct wFilSel_t *, const char * );
+int wFilSelect(			struct wFilSel_t *, const char * );
 
 
 /*------------------------------------------------------------------------------
@@ -683,12 +688,5 @@ void wPrefFlush(		void );
 void wPrefReset(		void );
 
 void CleanupCustom( void );
-
-/*------------------------------------------------------------------------------
- *
- * Bitmap Controls
- */
-
-wControl_p wBitmapCreate( wWin_p parent, wPos_t xx, wPos_t yy, long options, wIcon_p iconP );
 
 #endif
