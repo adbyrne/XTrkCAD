@@ -38,6 +38,7 @@
 
 
 static char *appName;		/**< application name */
+char *wExecutableName;
 
 
 /**
@@ -80,7 +81,7 @@ int main( int argc, char *argv[] )
 
 	if ((win=wMain( argc, argv )) == NULL)
 		exit(1);
-
+    wExecutableName = argv[ 0 ];
 	ld = wGetAppLibDir();
 	
 #ifdef WINDOWS
