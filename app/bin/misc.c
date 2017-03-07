@@ -713,8 +713,8 @@ EXPORT void SelectFont( void )
  *
  */
 
-#define COMMAND_MAX (160)
-#define BUTTON_MAX (160)
+#define COMMAND_MAX (170)
+#define BUTTON_MAX (170)
 #define NUM_CMDMENUS (4)
 
 #ifdef LATER
@@ -2212,7 +2212,9 @@ static void CreateMenus( void )
 	InitCmdBlock( addM );
         InitCmdSwitchMotor( addM );
         InitCmdSignal( addM );
-
+        InitCmdControl( addM );
+        InitCmdSensor( addM );
+        
 	/*
 	 * CHANGE MENU
 	 */

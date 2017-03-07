@@ -95,6 +95,8 @@ void InitTrkTurntable( void );
 void InitTrkBlock( void );
 void InitTrkSwitchMotor( void );
 void InitTrkSignal ( void );
+void InitTrkControl ( void );
+void InitTrkSensor ( void );
 
 void InitCmdCurve( wMenu_p menu );
 void InitCmdHelix( wMenu_p menu );
