@@ -261,7 +261,7 @@ static int blockDebug (track_p trk)
 		LOG( log_block, 1, ("*** blockDebug(): trackList[%d] = T%d, ",iTrack,GetTrkIndex((&(xx->trackList))[iTrack].t)))
 		LOG( log_block, 1, ("%s\n",GetTrkTypeName((&(xx->trackList))[iTrack].t)))
 	}
-
+	return(0);
 }
 
 static BOOL_T blockCheckContigiousPath()
@@ -525,8 +525,9 @@ static void BlockOk ( void * junk )
 			endPtP = &tempEndPts(ep);
 			SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
 		}
-                LOG( log_block, 1, ("*** BlockOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
+
                 xx = GetblockData( trk );
+				LOG(log_block, 1, ("*** BlockOk(): trk = %p (%d), xx = %p\n", trk, GetTrkIndex(trk), xx))
 		xx->name = MyStrdup(blockName);
 		xx->script = MyStrdup(blockScript);
                 xx->IsHilite = FALSE;

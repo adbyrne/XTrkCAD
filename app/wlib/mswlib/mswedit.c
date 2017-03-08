@@ -109,7 +109,7 @@ void wStringSetValue(
 		wString_p b,
 		const char * arg )
 {
-	WORD len = strlen( arg );
+	WORD len = (WORD)strlen( arg );
 	SendMessage( b->hWnd, WM_SETTEXT, 0, (DWORD)arg );
 #ifdef WIN32
 	SendMessage( b->hWnd, EM_SETSEL, len, len );

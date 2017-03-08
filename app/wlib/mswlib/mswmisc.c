@@ -217,7 +217,7 @@ static void doDumpControls(void)
 		b = controlMap(inx).b;
 		if ( b ) {
 			fprintf( dumpControlsF, "[%0.3d] [%x] %s %s %s\n", inx,
-				b->hWnd,
+				(unsigned int)b->hWnd,
 				(b->type>=0&&b->type<=B_BOX?controlNames[b->type]:"NOTYPE"),
 				(b->labelStr?b->labelStr:"<NULL>"),
 				(b->helpStr?b->helpStr:"<NULL>") );

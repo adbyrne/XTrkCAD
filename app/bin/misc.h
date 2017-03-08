@@ -406,4 +406,10 @@ void SwitchmotorMgmLoad( void );
 /* csignal.c */
 void InitCmdSignal ( wMenu_p menu );
 void SignalMgmLoad ( void );
+/* ccontrol.c */
+void ControlMgmLoad ( void );
+void InitCmdControl ( wMenu_p menu );
+/* csensor.c */
+void SensorMgmLoad ( void );
+void InitCmdSensor ( wMenu_p menu );
 #endif

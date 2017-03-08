@@ -65,6 +65,7 @@ SET(SOURCES
 	bllnhlp.c
 	cblock.c
 	ccurve.c
+	ccontrol.c
 	cdraw.c
 	celev.c
 	cgroup.c
@@ -81,6 +82,7 @@ SET(SOURCES
 	cpull.c
 	cruler.c
 	cselect.c
+	csensor.c
 	csnap.c
 	csplit.c
 	csignal.c
