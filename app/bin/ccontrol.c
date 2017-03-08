@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Mar 5 16:01:37 2017
- *  Last Modified : <170306.2049>
+ *  Last Modified : <170308.1350>
  *
  *  Description	
  *
@@ -57,6 +57,7 @@ EXPORT TRKTYP_T T_CONTROL = -1;
 static int log_control = 0;
 
 
+#if 0
 static drawCmd_t controlD = {
 	NULL,
 	&screenDrawFuncs,
@@ -69,6 +70,7 @@ static drawCmd_t controlD = {
 static char controlName[STR_SHORT_SIZE];
 static char controlOnScript[STR_LONG_SIZE];
 static char controlOffScript[STR_LONG_SIZE];
+#endif
 
 typedef struct controlData_t {
     coOrd orig;
@@ -182,9 +184,9 @@ static BOOL_T WriteControl ( track_p t, FILE * f )
 static void ReadControl ( char * line )
 {
     wIndex_t index;
-    TRKINX_T trkindex;
+    /*TRKINX_T trkindex;*/
     track_p trk;
-    char * cp = NULL;
+    /*char * cp = NULL;*/
     char *name;
     char *onscript, *offscript;
     coOrd orig;
@@ -311,10 +313,12 @@ static void ControlEditOk ( void * junk )
     wHide( controlEditW );
 }
 
+#if 0
 static void ControlEditCancel ( wWin_p junk )
 {
     wHide( controlEditW );
 }
+#endif
 
 static void EditControlDialog()
 {
@@ -405,7 +409,7 @@ static int ControlMgmProc ( int cmd, void * data )
 {
     track_p trk = (track_p) data;
     controlData_p xx = GetcontrolData(trk);
-    char msg[STR_SIZE];
+    /*char msg[STR_SIZE];*/
     
     switch ( cmd ) {
     case CONTMGM_CAN_EDIT:

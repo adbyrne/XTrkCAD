@@ -271,7 +271,7 @@ static BOOL_T blockCheckContigiousPath()
 	track_p trk, trk1;
 	DIST_T dist;
 	ANGLE_T angle;
-	int pathElemStart = 0;
+        /*int pathElemStart = 0;*/
 	coOrd endPtOrig = zero;
 	BOOL_T IsConnectedP;
 	trkEndPt_p endPtP;
@@ -768,7 +768,7 @@ static int BlockMgmProc ( int cmd, void * data )
     wIndex_t iTrack;
     BOOL_T needComma = FALSE;
     char temp[32];
-    char msg[STR_SIZE];
+    /*char msg[STR_SIZE];*/
     coOrd tempOrig, tempSize;
     BOOL_T first = TRUE;
     

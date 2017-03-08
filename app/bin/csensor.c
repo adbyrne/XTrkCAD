@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Mar 5 16:01:37 2017
- *  Last Modified : <170306.2048>
+ *  Last Modified : <170308.1352>
  *
  *  Description	
  *
@@ -57,6 +57,7 @@ EXPORT TRKTYP_T T_SENSOR = -1;
 static int log_sensor = 0;
 
 
+#if 0
 static drawCmd_t sensorD = {
 	NULL,
 	&screenDrawFuncs,
@@ -68,6 +69,7 @@ static drawCmd_t sensorD = {
 
 static char sensorName[STR_SHORT_SIZE];
 static char sensorScript[STR_LONG_SIZE];
+#endif
 
 typedef struct sensorData_t {
     coOrd orig;
@@ -174,9 +176,9 @@ static BOOL_T WriteSensor ( track_p t, FILE * f )
 static void ReadSensor ( char * line )
 {
     wIndex_t index;
-    TRKINX_T trkindex;
+    /*TRKINX_T trkindex;*/
     track_p trk;
-    char * cp = NULL;
+    /*char * cp = NULL;*/
     char *name;
     char *script;
     coOrd orig;
@@ -295,10 +297,12 @@ static void SensorEditOk ( void * junk )
     wHide( sensorEditW );
 }
 
+#if 0
 static void SensorEditCancel ( wWin_p junk )
 {
     wHide( sensorEditW );
 }
+#endif
 
 static void EditSensorDialog()
 {
@@ -387,7 +391,7 @@ static int SensorMgmProc ( int cmd, void * data )
 {
     track_p trk = (track_p) data;
     sensorData_p xx = GetsensorData(trk);
-    char msg[STR_SIZE];
+    /*char msg[STR_SIZE];*/
     
     switch ( cmd ) {
     case CONTMGM_CAN_EDIT:

@@ -125,8 +125,10 @@ static switchmotorData_p GetswitchmotorData ( track_p trk )
 	return (switchmotorData_p) GetTrkExtraData(trk);
 }
 
+#if 0
 #include "bitmaps/switchmotormark.xbm"
 static wDrawBitMap_p switchmotormark_bm = NULL;
+#endif
 
 static coOrd switchmotorPoly_Pix[] = {
     {6,0}, {6,13}, {4,13}, {4,19}, {6,19}, {6,23}, {9,23}, {9,19}, {13,19},
@@ -670,7 +672,7 @@ static int SwitchmotorMgmProc ( int cmd, void * data )
 {
     track_p trk = (track_p) data;
     switchmotorData_p xx = GetswitchmotorData(trk);
-    char msg[STR_SIZE];
+    /*char msg[STR_SIZE];*/
     
     switch ( cmd ) {
     case CONTMGM_CAN_EDIT:

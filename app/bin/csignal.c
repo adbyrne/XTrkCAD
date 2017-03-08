@@ -1,4 +1,4 @@
-/** \file csignal.ccsignal.c
+/** \file csignal.c
  * Signals
  */
 
@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Feb 19 13:11:45 2017
- *  Last Modified : <170222.1324>
+ *  Last Modified : <170308.1353>
  *
  *  Description	
  *
@@ -58,6 +58,7 @@ EXPORT TRKTYP_T T_SIGNAL = -1;
 static int log_signal = 0;
 
 
+#if 0
 static drawCmd_t signalD = {
 	NULL,
 	&screenDrawFuncs,
@@ -69,6 +70,7 @@ static drawCmd_t signalD = {
 
 static char signalName[STR_SHORT_SIZE];
 static int  signalHeadCount;
+#endif
 
 typedef struct signalAspect_t {
     char * aspectName;
@@ -260,7 +262,7 @@ static BOOL_T WriteSignal ( track_p t, FILE * f )
 
 static void ReadSignal ( char * line )
 {
-    TRKINX_T trkindex;
+    /*TRKINX_T trkindex;*/
     wIndex_t index;
     track_p trk;
     char * cp = NULL;
@@ -718,7 +720,7 @@ static int SignalMgmProc ( int cmd, void * data )
 {
     track_p trk = (track_p) data;
     signalData_p xx = GetsignalData(trk);
-    char msg[STR_SIZE];
+    /*char msg[STR_SIZE];*/
     
     switch ( cmd ) {
     case CONTMGM_CAN_EDIT:
