@@ -62,7 +62,13 @@ The \f{Add Menu} has all the actions related to adding track pieces to the layou
 
 \dd \f{Signal} - Create, edit or delete a signal.
 
-\rule
+\u000
+
+\dd \f{Control} - Create a signal.
+
+\u000
+
+\dd \f{Sensor} - Create a sensor.\rule
 
 \S{cmdCircle} Circle Track
 
@@ -340,3 +346,41 @@ yellow, red, etc.).  The script is just some information for the layout
 control software to actually effect the display of the aspect -- this could be 
 the LCC event id to trigger the aspect or it could be a code snippet that 
 causes the aspect to be displayed.
+
+\rule
+
+\S{cmdControl} Control
+
+\G{png.d/bControl.png}
+
+A control is created by selecting \f{Create Control} from either the Add menu \K{cmdAdd} or 
+from the hotbar. Use the mouse to select a location (left button) and then 
+dragging (left button down) the control to where you want it.  Once the left 
+button is released, a Create/Edit Control dialog box is displayed, and you can 
+fill in the control's properties: name, fine tune the location, and the on and 
+off scripts.
+
+\G{png.d/control.png}
+
+The create/edit control dialog has entry fields for the name of the control, its
+location, and a pair of scripts, one to turn the control on and one to turn
+the control off. The scripts are just some information for the layout control
+software to actually effect the state on the control (on or off).
+
+\rule
+
+\S{cmdSensor} Sensor
+
+\G{png.d/bSensor.png}
+
+A sensor is created by selecting \f{Create Sensor} from either the Add menu \K{cmdAdd} or
+from the hotbar. Use the mouse to select a location (left button) and then
+dragging (left button down) the sensor to where you want it. Once the left
+button is released, a Create/Edit Sensor dialog box is displayed, and you can
+fill in the sensor's properties: name, fine tune the location, and the script.
+
+\G{png.d/sensor.png}
+
+The create/edit sensor dialog has spaces for the name of the sensor, its 
+location, and a script. The script is just some information for the layout 
+control software to actually return the state of the sensor (on or off).
