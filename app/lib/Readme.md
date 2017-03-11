@@ -1,4 +1,4 @@
-# XTrackCAD 4.2.4a #
+# XTrackCAD 4.3.beta1 #
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
@@ -38,6 +38,23 @@ free software under the terms of the GNU General Public License v2 which
 you can find in the file COPYING.
 
 ## New features ##
+
+### Version 4.3.beta1 ###
+
+* Add control and sensor types
+* Development of signal feature was finished
+* Add extra AppleHelp files
+* All: Add documentation for layout control elements
+* Write proper Describe, Move, and Rotate functions for Signals.
+* Add high lighting for signals.
+* Add AppleHelp bundle generation including index
+* First pass at high lighting layout control elements.
+* Linux/OSX: Set directory for rc file
+* All: Rework DXF export, add support for metric measurements
+* All: Add dynstring to build and modify DynstrMalloc interface
+* All: Add dynstring library and unit tests
+* All: enable unit testing with CMocka
+* Add Layout Control Element management dialog
 
 ### Version 4.2.4 ###
 * All: Parameter file for Minitrains HOe-009-HOn30 Track System
@@ -94,6 +111,39 @@ you can find in the file COPYING.
 * Update help CSS to the Wiki's new default look
 
 ## Bugs fixed ##
+
+### Version 4.3.beta1 ###
+* All: Fix path handling error after Save/Save As
+* Fix Malloc error (wrong size in ReadBlock, causing Guard1 hose error)
+* Updated cblock.c and cswitchmotor.c to handle possible broken blocks and switchmotors and not crash (check for NULL pointers)
+* Bulletproof against undefined (NULL pointer) track segments in SwitchMotor code.
+* Bulletproof against undefined (NULL pointer) track segments in Block code.
+* Linux/OSX: Preparing for GTK3 migration, second set of changes
+* Clean up help files for Apple Help Indexer
+* Linux/OSX: Preparing for GTK3 migration, first set of changes
+* All: New and updated parameter files for Lego and Peco H0 Code 83
+* Linux/OSX: Add OSX specific files
+* Linux/OSX: Split help functions in generic and platform specific piece
+* Description: Correct some translation typos
+* Linux/OSX: Fix #163 GCC format-security errors
+* All: Update parameter file for Kuehn TT track
+* Add forward reference resolution for Blocks and Switchmotors
+* Cleanly delete blocks and switch motors when their tracks are deleted (avoid dangling pointers)
+* Updated Spec file
+* Expand help path name for longer bundle directories
+* Attempt to fix help files crash issue
+* Add GLIB Schemas to GTK-Bundle
+* All: Improved German translations
+* Update Readme for OSX package
+* Add support for gtk-mac-bundler
+* fix bugs in xtrkcad-bundler code
+* Fix parm dialog default for GTK builds
+* Add a post-build script for auto-creating OSX images
+* Remove failing copy command for gtk-bundle share
+* Linux/OSX: Fix uninitialized param file directory on first run
+* All: Add TTi scale / gauge
+* All: New paramter files for Frateschi HO and Auhagen TTi
+
 ### Version 4.2.4a ###
 * All: Update help
 * Linux: Installation from self extracting archive accepts install path
@@ -246,19 +296,19 @@ self-installing program using the NSIS Installer from Nullsoft Inc.
 Using Windows Explorer, locate the directory in which you downloaded or copied your new version of XTrackCAD.
 
 Start the installation program by double clicking on the 
-**[xtrkcad-setup-4.2.4a.exe][]** file icon.
+**[xtrkcad-setup-4.3.beta1.exe][]** file icon.
 
 Follow the steps in the installation program.
 
 The installation lets you define the directory into which XTrackCAD is 
 installed. The directory is created automatically if it doesn't already exist.
 
-A program folder named XTrackCAD 4.2.4a will be created during the installation 
+A program folder named XTrackCAD 4.3.beta1 will be created during the installation 
 process. This folder contains the program, documentation, parameter and 
 example files. An existing installation of earlier versions of XTrackCad is 
 not overwritten. 
 
-A new program group named XTrackCad 4.2.4a will be created in the Start menu. 
+A new program group named XTrackCad 4.3.beta1 will be created in the Start menu. 
 
 ## Linux ##
 
@@ -273,7 +323,7 @@ Use your operating system's package manager to install XTrackCAD.
 
 After downloading open a command line then 
 
-    ./xtrkcad-setup-4.2.4a.x86_64.sh --prefix=/usr/local --exclude-subdir
+    ./xtrkcad-setup-4.3.beta1.x86_64.sh --prefix=/usr/local --exclude-subdir
 
 This will install the executable in /usr/local/bin. A directory named 
 xtrkcad will be created in /usr/local/share and all files will be unpacked
