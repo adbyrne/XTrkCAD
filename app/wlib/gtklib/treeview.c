@@ -133,28 +133,33 @@ wlibTreeViewSetSelected(wList_p b, int index)
 
         // and synchronize the internal data structures
         wTreeViewGetCount(b);
-        printf("count: %d\n", b->count);
 
         for (inx=0; inx<b->count; inx++) {
-            printf("count: %d\n", inx);
             id_p = wlibListItemGet(b->listStore, inx, NULL);
             id_p->selected = FALSE;
         }
     }
 
     if (index != -1) {
-        gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore),
-                                      &iter,
-                                      NULL,
-                                      index);
-        gtk_tree_selection_select_iter(sel,
-                                       &iter);
+		gint childs;
+		
+		childs = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(b->listStore),
+											NULL );
 
-        id_p = wlibListItemGet(b->listStore, index, NULL);
+		if(index < childs) {
+			gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore),
+										&iter,
+										NULL,
+										index);
+			gtk_tree_selection_select_iter(sel,
+										&iter);
 
-        if (id_p) {
-            id_p->selected = TRUE;
-        }
+			id_p = wlibListItemGet(b->listStore, index, NULL);
+	
+			if (id_p) {
+				id_p->selected = TRUE;
+			}
+		}	
     }
 }
 
