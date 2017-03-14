@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Mar 5 16:01:37 2017
- *  Last Modified : <170314.0008>
+ *  Last Modified : <170314.1418>
  *
  *  Description	
  *
@@ -147,6 +147,93 @@ static DIST_T DistanceControl (track_p t, coOrd * p )
     return FindDistance(xx->orig, *p);
 }
 
+static struct {
+    char name[STR_SHORT_SIZE];
+    coOrd pos;
+    char onscript[STR_LONG_SIZE];
+    char offscript[STR_LONG_SIZE];
+} controlProperties;
+
+typedef enum { NM, PS, ON, OF } controlDesc_e;
+static descData_t controlDesc[] = {
+    /* NM */ { DESC_STRING, N_("Name"),      &controlProperties.name },
+    /* PS */ { DESC_POS,    N_("Position"),  &controlProperties.pos },
+    /* ON */ { DESC_STRING, N_("On Script"), &controlProperties.onscript },
+    /* OF */ { DESC_STRING, N_("Off Script"),&controlProperties.offscript },
+    { DESC_NULL } };
+
+static void UpdateControlProperties (  track_p trk, int inx, descData_p
+                                     descUpd, BOOL_T needUndoStart )
+{
+    controlData_p xx = GetcontrolData(trk);
+    const char *thename, *theonscript, *theoffscript;
+    char *newName, *newOnScript, *newOffScript;
+    BOOL_T changed, nChanged, pChanged, onChanged, offChanged;
+    
+    switch (inx) {
+    case NM:
+        break;
+    case PS:
+        break;
+    case ON:
+        break;
+    case OF:
+        break;
+    case -1:
+        changed = nChanged = pChanged = onChanged = offChanged = FALSE;
+        thename = wStringGetValue( (wString_p) controlDesc[NM].control0 );
+        if (strcmp(thename,xx->name) != 0) {
+            nChanged = changed = TRUE;
+            newName = MyStrdup(thename);
+        }
+        theonscript = wStringGetValue( (wString_p) controlDesc[ON].control0 );
+        if (strcmp(theonscript,xx->onscript) != 0) {
+            onChanged = changed = TRUE;
+            newOnScript = MyStrdup(theonscript);
+        }
+        theoffscript = wStringGetValue( (wString_p) controlDesc[OF].control0 );
+        if (strcmp(theoffscript,xx->offscript) != 0) {
+            offChanged = changed = TRUE;
+            newOffScript = MyStrdup(theoffscript);
+        }
+        if (controlProperties.pos.x != xx->orig.x ||
+            controlProperties.pos.y != xx->orig.y) {
+            pChanged = changed = TRUE;
+        }
+        if (!changed) break;
+        if (needUndoStart)
+            UndoStart( _("Change Control"), "Change Control" );
+        UndoModify( trk );
+        if (nChanged) {
+            MyFree(xx->name);
+            xx->name = newName;
+        }
+        if (pChanged) {
+            UndrawNewTrack( trk );
+        }
+        if (pChanged) {
+            xx->orig = controlProperties.pos;
+        }
+        if (onChanged) {
+            MyFree(xx->onscript);
+            xx->onscript = newOnScript;
+        }
+        if (offChanged) {
+            MyFree(xx->offscript);
+            xx->offscript = newOffScript;
+        }
+        if (pChanged) { 
+            ComputeControlBoundingBox( trk );
+            DrawNewTrack( trk );
+        }
+        break;
+    }
+}
+
+        
+
+
+
 static void DescribeControl (track_p trk, char * str, CSIZE_T len )
 {
     controlData_p xx = GetcontrolData(trk);
@@ -160,6 +247,18 @@ static void DescribeControl (track_p trk, char * str, CSIZE_T len )
     sprintf( str, _("(%d [%s]): Layer=%d, at %0.3f,%0.3f"),
              GetTrkIndex(trk),
              xx->name,GetTrkLayer(trk)+1, xx->orig.x, xx->orig.y);
+    strncpy(controlProperties.name,xx->name,STR_SHORT_SIZE-1);
+    controlProperties.name[STR_SHORT_SIZE-1] = '\0';
+    strncpy(controlProperties.onscript,xx->onscript,STR_LONG_SIZE-1);
+    controlProperties.onscript[STR_LONG_SIZE-1] = '\0';
+    strncpy(controlProperties.offscript,xx->offscript,STR_LONG_SIZE-1);
+    controlProperties.offscript[STR_LONG_SIZE-1] = '\0';
+    controlProperties.pos = xx->orig;
+    controlDesc[NM].mode = 
+          controlDesc[ON].mode = 
+          controlDesc[OF].mode = DESC_NOREDRAW;
+    DoDescribe( _("Control"), trk, controlDesc, UpdateControlProperties );
+    
 }
 
 static void DeleteControl ( track_p trk ) 

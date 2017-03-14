@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Mar 5 16:01:37 2017
- *  Last Modified : <170314.0009>
+ *  Last Modified : <170314.1407>
  *
  *  Description	
  *
@@ -140,6 +140,78 @@ static DIST_T DistanceSensor (track_p t, coOrd * p )
     return FindDistance(xx->orig, *p);
 }
 
+static struct {
+    char name[STR_SHORT_SIZE];
+    coOrd pos;
+    char script[STR_LONG_SIZE];
+} sensorProperties;
+
+typedef enum { NM, PS, SC } sensorDesc_e;
+static descData_t sensorDesc[] = {
+    /* NM */ { DESC_STRING, N_("Name"),     &sensorProperties.name },
+    /* PS */ { DESC_POS,    N_("Position"), &sensorProperties.pos },
+    /* SC */ { DESC_STRING, N_("Script"),   &sensorProperties.script },
+    { DESC_NULL } };
+
+static void UpdateSensorProperties (  track_p trk, int inx, descData_p
+                                     descUpd, BOOL_T needUndoStart )
+{
+    sensorData_p xx = GetsensorData(trk);
+    const char *thename, *thescript;
+    char *newName, *newScript;
+    BOOL_T changed, nChanged, pChanged, sChanged;
+    
+    switch (inx) {
+    case NM:
+        break;
+    case PS:
+        break;
+    case SC:
+        break;
+    case -1:
+        changed = nChanged = pChanged = sChanged = FALSE;
+        thename = wStringGetValue( (wString_p) sensorDesc[NM].control0 );
+        if (strcmp(thename,xx->name) != 0) {
+            nChanged = changed = TRUE;
+            newName = MyStrdup(thename);
+        }
+        thescript = wStringGetValue( (wString_p) sensorDesc[SC].control0 );
+        if (strcmp(thescript,xx->script) != 0) {
+            sChanged = changed = TRUE;
+            newScript = MyStrdup(thescript);
+        }
+        if (sensorProperties.pos.x != xx->orig.x ||
+            sensorProperties.pos.y != xx->orig.y) {
+            pChanged = changed = TRUE;
+        }
+        if (!changed) break;
+        if (needUndoStart)
+            UndoStart( _("Change Sensor"), "Change Sensor" );
+        UndoModify( trk );
+        if (nChanged) {
+            MyFree(xx->name);
+            xx->name = newName;
+        }
+        if (pChanged) {
+            UndrawNewTrack( trk );
+        }
+        if (pChanged) {
+            xx->orig = sensorProperties.pos;
+        }
+        if (sChanged) {
+            MyFree(xx->script);
+            xx->script = newScript;
+        }
+        if (pChanged) { 
+            ComputeSensorBoundingBox( trk );
+            DrawNewTrack( trk );
+        }
+        break;
+    }
+}
+
+        
+
 static void DescribeSensor (track_p trk, char * str, CSIZE_T len )
 {
     sensorData_p xx = GetsensorData(trk);
@@ -153,6 +225,14 @@ static void DescribeSensor (track_p trk, char * str, CSIZE_T len )
     sprintf( str, _("(%d [%s]): Layer=%d, at %0.3f,%0.3f"),
              GetTrkIndex(trk),
              xx->name,GetTrkLayer(trk)+1, xx->orig.x, xx->orig.y);
+    strncpy(sensorProperties.name,xx->name,STR_SHORT_SIZE-1);
+    sensorProperties.name[STR_SHORT_SIZE-1] = '\0';
+    strncpy(sensorProperties.script,xx->script,STR_LONG_SIZE-1);
+    sensorProperties.script[STR_LONG_SIZE-1] = '\0';
+    sensorProperties.pos = xx->orig;
+    sensorDesc[NM].mode = 
+          sensorDesc[SC].mode = DESC_NOREDRAW;
+    DoDescribe( _("Sensor"), trk, sensorDesc, UpdateSensorProperties );
 }
 
 static void DeleteSensor ( track_p trk ) 
