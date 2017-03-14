@@ -80,18 +80,29 @@ void *
 wlibListStoreGetContext(GtkListStore *ls, int inx)
 {
     GtkTreeIter iter;
-    gchar *string;
+    gchar *string = NULL;
+    gboolean result;
+    gint childs;
+    
+    childs = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(ls),
+											NULL );
 
-    gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
-                                  &iter,
-                                  NULL,
-                                  inx);
-    gtk_tree_model_get(GTK_TREE_MODEL(ls),
-                       &iter,
-                       LISTCOL_DATA,
-                       &string,
-                       -1);
-
+	if(inx < childs) {
+	    result = gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
+	                                  &iter,
+	                                  NULL,
+	                                  inx);
+		if( result ) {								
+			gtk_tree_model_get(GTK_TREE_MODEL(ls),
+							&iter,
+	                       LISTCOL_DATA,
+	                       &string,
+	                       -1);
+		} else {
+			printf( "Invalid index %d for list!\n", inx );
+	
+		}
+	}	
     return (string);
 }
 
