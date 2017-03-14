@@ -516,6 +516,7 @@ static STATUS_T CmdSwitchMotorCreate( wAction_t action, coOrd pos )
 	}
 }
 
+#if 0
 extern BOOL_T inDescribeCmd;
 
 static STATUS_T CmdSwitchMotorEdit( wAction_t action, coOrd pos )
@@ -604,6 +605,7 @@ static STATUS_T CmdSwitchMotor (wAction_t action, coOrd pos )
 	default: return C_TERMINATE;
 	}
 }
+#endif
 
 static void SwitchMotorEditOk ( void * junk )
 {
@@ -731,9 +733,9 @@ static int SwitchmotorMgmProc ( int cmd, void * data )
 
 //#include "bitmaps/switchmotor.xpm"
 
-#include "bitmaps/switchmnew.xpm"
-#include "bitmaps/switchmedit.xpm"
-#include "bitmaps/switchmdel.xpm"
+//#include "bitmaps/switchmnew.xpm"
+//#include "bitmaps/switchmedit.xpm"
+//#include "bitmaps/switchmdel.xpm"
 #include "bitmaps/switchm.xpm"
 
 EXPORT void SwitchmotorMgmLoad( void )
@@ -755,12 +757,11 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 	switchmotorName[0] = '\0';
 	switchmotorNormal[0] = '\0';
 	switchmotorReverse[0] = '\0';
-	switchmotorPointSense[0] = '\0';
-	ButtonGroupBegin( _("SwitchMotor"), "cmdSwitchMotorSetCmd", _("Switch Motors") );
-	AddMenuButton( menu, CmdSwitchMotor, "cmdSwitchMotorCreate", _("Create Switch Motor"), wIconCreatePixMap(switchmnew_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_SWITCHMOTOR1, (void*)SWITCHMOTOR_CREATE );
-	AddMenuButton( menu, CmdSwitchMotor, "cmdSwitchMotorEdit", _("Edit Switch Motor"), wIconCreatePixMap(switchmedit_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_SWITCHMOTOR2, (void*)SWITCHMOTOR_EDIT );
-	AddMenuButton( menu, CmdSwitchMotor, "cmdSwitchMotorDelete", _("Delete Switch Motor"), wIconCreatePixMap(switchmdel_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_SWITCHMOTOR3, (void*)SWITCHMOTOR_DELETE );
-	ButtonGroupEnd();
+        switchmotorPointSense[0] = '\0';
+        AddMenuButton( menu, CmdSwitchMotorCreate, "cmdSwitchMotorCreate", 
+                       _("Switch Motor"), wIconCreatePixMap( switchm_xpm ),
+                       LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_SWITCHMOTOR1, 
+                       NULL );
 	ParamRegister( &switchmotorPG );
 }
 EXPORT void CheckDeleteSwitchmotor(track_p t)

@@ -591,6 +591,7 @@ static STATUS_T CmdBlockCreate( wAction_t action, coOrd pos )
 	}
 }
 
+#if 0
 extern BOOL_T inDescribeCmd;
 
 static STATUS_T CmdBlockEdit( wAction_t action, coOrd pos )
@@ -662,7 +663,6 @@ static STATUS_T CmdBlockDelete( wAction_t action, coOrd pos )
 }
 
 
-
 #define BLOCK_CREATE 0
 #define BLOCK_EDIT   1
 #define BLOCK_DELETE 2
@@ -678,6 +678,7 @@ static STATUS_T CmdBlock (wAction_t action, coOrd pos )
 	default: return C_TERMINATE;
 	}
 }
+#endif
 
 EXPORT void CheckDeleteBlock (track_p t) 
 {
@@ -867,9 +868,9 @@ static int BlockMgmProc ( int cmd, void * data )
 }
 
 
-#include "bitmaps/blocknew.xpm"
-#include "bitmaps/blockedit.xpm"
-#include "bitmaps/blockdel.xpm"
+//#include "bitmaps/blocknew.xpm"
+//#include "bitmaps/blockedit.xpm"
+//#include "bitmaps/blockdel.xpm"
 #include "bitmaps/block.xpm"
 
 EXPORT void BlockMgmLoad( void )
@@ -891,11 +892,9 @@ EXPORT void InitCmdBlock( wMenu_p menu )
 {
 	blockName[0] = '\0';
 	blockScript[0] = '\0';
-	ButtonGroupBegin( _("Block"), "cmdBlockSetCmd", _("Blocks") );
-	AddMenuButton( menu, CmdBlock, "cmdBlockCreate", _("Create Block"), wIconCreatePixMap(blocknew_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_BLOCK1, (void*)BLOCK_CREATE );
-	AddMenuButton( menu, CmdBlock, "cmdBlockEdit", _("Edit Block"), wIconCreatePixMap(blockedit_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_BLOCK2, (void*)BLOCK_EDIT );
-	AddMenuButton( menu, CmdBlock, "cmdBlockDelete", _("Delete Block"), wIconCreatePixMap(blockdel_xpm), LEVEL0_50, IC_CANCEL|IC_POPUP, ACCL_BLOCK3, (void*)BLOCK_DELETE );
-	ButtonGroupEnd();
+        AddMenuButton( menu, CmdBlockCreate, "cmdBlockCreate", _("Block"), 
+                       wIconCreatePixMap( block_xpm ), LEVEL0_50, 
+                       IC_STICKY|IC_POPUP2, ACCL_BLOCK1, NULL );
 	ParamRegister( &blockPG );
 }
 
