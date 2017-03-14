@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Mar 5 16:01:37 2017
- *  Last Modified : <170308.1352>
+ *  Last Modified : <170314.0009>
  *
  *  Description	
  *
@@ -216,6 +216,14 @@ static void RescaleSensor (track_p trk, FLOAT_T ratio )
 {
 }
 
+static void FlipSensor (track_p trk, coOrd orig, ANGLE_T angle ) 
+{
+    sensorData_p xx = GetsensorData ( trk );
+    FlipPoint(&(xx->orig), orig, angle);
+    ComputeSensorBoundingBox(trk);
+}
+
+
 static trackCmd_t sensorCmds = {
     "SENSOR",
     DrawSensor,
@@ -241,7 +249,7 @@ static trackCmd_t sensorCmds = {
     NULL, /* moveEndPt */
     NULL, /* query */
     NULL, /* ungroup */
-    NULL, /* flip */
+    FlipSensor, /* flip */
     NULL, /* drawPositionIndicator */
     NULL, /* advancePositionIndicator */
     NULL, /* checkTraverse */

@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Feb 19 13:11:45 2017
- *  Last Modified : <170308.1353>
+ *  Last Modified : <170314.0005>
  *
  *  Description	
  *
@@ -333,6 +333,14 @@ static void RescaleSignal (track_p trk, FLOAT_T ratio )
 {
 }
 
+static void FlipSignal (track_p trk, coOrd orig, ANGLE_T angle )
+{
+    signalData_p xx = GetsignalData ( trk );
+    FlipPoint(&(xx->orig), orig, angle);
+    xx->angle = NormalizeAngle(2*angle - xx->angle);
+    ComputeSignalBoundingBox(trk);
+}
+
 static trackCmd_t signalCmds = {
     "SIGNAL",
     DrawSignal,
@@ -358,7 +366,7 @@ static trackCmd_t signalCmds = {
     NULL, /* moveEndPt */
     NULL, /* query */
     NULL, /* ungroup */
-    NULL, /* flip */
+    FlipSignal, /* flip */
     NULL, /* drawPositionIndicator */
     NULL, /* advancePositionIndicator */
     NULL, /* checkTraverse */

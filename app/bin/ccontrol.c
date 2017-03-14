@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Mar 5 16:01:37 2017
- *  Last Modified : <170308.1350>
+ *  Last Modified : <170314.0008>
  *
  *  Description	
  *
@@ -225,6 +225,13 @@ static void RescaleControl (track_p trk, FLOAT_T ratio )
 {
 }
 
+static void FlipControl (track_p trk, coOrd orig, ANGLE_T angle ) 
+{
+    controlData_p xx = GetcontrolData ( trk );
+    FlipPoint(&(xx->orig), orig, angle);
+    ComputeControlBoundingBox(trk);
+}
+
 static trackCmd_t controlCmds = {
     "CONTROL",
     DrawControl,
@@ -250,7 +257,7 @@ static trackCmd_t controlCmds = {
     NULL, /* moveEndPt */
     NULL, /* query */
     NULL, /* ungroup */
-    NULL, /* flip */
+    FlipControl, /* flip */
     NULL, /* drawPositionIndicator */
     NULL, /* advancePositionIndicator */
     NULL, /* checkTraverse */
