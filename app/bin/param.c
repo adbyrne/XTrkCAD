@@ -1380,7 +1380,7 @@ static void ParamIntegerPush( const char * val, void * dp )
 	while ( isspace((unsigned char)*val)) val++;
 	valL = strtol( val, &cp, 10 );
 
-	wControlSetBalloon( p->control, 0, -5, NULL );
+	//wControlSetBalloon( p->control, 0, -5, NULL );
 	if ( val == cp ) {
 		wControlSetBalloon( p->control, 0, -5, _("Invalid Number") );
 		return;
@@ -1432,7 +1432,7 @@ static void ParamFloatPush( const char * val, void * dp )
 		if (p->option & PDO_ANGLE)
 			valF = NormalizeAngle( (angleSystem==ANGLE_POLAR)?valF:-valF );
 	}
-	wControlSetBalloon( p->control, 0, -5, NULL );
+	// wControlSetBalloon( p->control, 0, -5, NULL );
 	if ( !valid ) {
 		wControlSetBalloon( p->control, 0, -5, decodeErrorStr );
 		return;

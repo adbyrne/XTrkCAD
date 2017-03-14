@@ -1,5 +1,4 @@
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Info-xtrkcad.plist.in ${CMAKE_CURRENT_BINARY_DIR}/info-xtrkcad.plist @ONLY)
-CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/Info-xtrkcad.plist.in ${CMAKE_CURRENT_SOURCE_DIR}/info-xtrkcad.plist @ONLY)
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-template.dmg.zip ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-template-dmg.zip COPYONLY)
 

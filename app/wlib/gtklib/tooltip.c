@@ -140,7 +140,7 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 
     /* return if there is nothing to do */
     if (balloonVisible && balloonB == b &&
-            balloonDx == dx && balloonDy == dy && balloonMsg == msg )
+            balloonDx == dx && balloonDy == dy && msg != NULL && balloonMsg != NULL && !strcmp(balloonMsg,msg) )
         return;
 
     /* hide the tooltip */
