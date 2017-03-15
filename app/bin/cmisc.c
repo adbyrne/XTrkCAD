@@ -153,6 +153,7 @@ static void DescribeUpdate(
 		UndoStart( _("Change Track"), "Change Track" );
 		descUndoStarted = TRUE;
 	}
+	if (!descTrk) return; // In case timer pops after OK
 	UndoModify( descTrk );
 	descUpdateFunc( descTrk, ddp-descData, descData, FALSE );
 	if ( descTrk ) {

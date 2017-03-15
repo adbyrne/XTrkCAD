@@ -45,7 +45,7 @@ static int enableBalloonHelp = TRUE;
 static GtkWidget * balloonF; 	/**< balloon help control for hotbar item */
 static GtkWidget * balloonPI;
 
-static const char * balloonMsg;
+static const char * balloonMsg = NULL;
 static wControl_p balloonB;
 static wPos_t balloonDx, balloonDy;
 static wBool_t balloonVisible = FALSE;
@@ -140,8 +140,9 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
 
     /* return if there is nothing to do */
     if (balloonVisible && balloonB == b &&
-            balloonDx == dx && balloonDy == dy && msg != NULL && balloonMsg != NULL && !strcmp(balloonMsg,msg) )
-        return;
+            balloonDx == dx && balloonDy == dy && msg != NULL && balloonMsg != NULL)
+           if (strcmp(msg,balloonMsg)==0)
+      		return;
 
     /* hide the tooltip */
     if ( msg == NULL ) {
