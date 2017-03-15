@@ -56,13 +56,10 @@ static gint doAlarm(
 {
     wAlarmCallBack_p func = (wAlarmCallBack_p)data;
 
-    if (alarmTimer) {
-        g_source_remove(alarmTimer);
-    }
-
     func();
+
     alarmTimer = 0;
-    return 0;
+    return FALSE;
 }
 
 /**
