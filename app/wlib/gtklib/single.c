@@ -22,7 +22,7 @@
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
-#define GTK_DISABLE_DEPRECATED
+// #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
 #include <stdio.h>
@@ -31,6 +31,7 @@
 #include <math.h>
 
 #include <gtk/gtk.h>
+#include <glib-object.h>
 
 #include "gtkint.h"
 
@@ -70,8 +71,11 @@ void wStringSetValue(
 	
 	// the contents should not be changed programatically while
 	// the user is editing it
-	if( !(gtk_widget_has_focus(b->widget)))
+	if( !(gtk_widget_has_focus(b->widget))) {
+	    gtk_signal_handler_block_by_data(GTK_OBJECT(b->widget), b);
 		gtk_entry_set_text(GTK_ENTRY(b->widget), arg);
+		gtk_signal_handler_unblock_by_data(GTK_OBJECT(b->widget), b);
+	}
 }
 
 /**
@@ -310,7 +314,7 @@ wString_p wStringCreate(
 	wlibAddHelpString(b->widget, helpStr);
 	
 	g_signal_connect(GTK_OBJECT(b->widget), "changed", G_CALLBACK(stringChanged), b);
-	g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
+	//g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
 
 	gtk_widget_add_events( b->widget, GDK_FOCUS_CHANGE_MASK );
 	g_signal_connect(GTK_OBJECT(b->widget), "focus-out-event", G_CALLBACK(killTimer), b);
