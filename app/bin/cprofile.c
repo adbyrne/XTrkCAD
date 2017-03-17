@@ -716,6 +716,7 @@ static void DoProfileDone( void * junk )
 	wHide( profileW );
 	ClrAllTrkBits( TB_PROFILEPATH );
 	MainRedraw();
+	MapRedraw();
 #endif
 	Reset();
 }
@@ -725,8 +726,10 @@ static void DoProfileClear( void * junk )
 {
 	profElem_da.cnt = 0;
 	station_da.cnt = 0;
-	if (ClrAllTrkBits( TB_PROFILEPATH ))
+	if (ClrAllTrkBits( TB_PROFILEPATH )) {
 		MainRedraw();
+		MapRedraw();
+	}
 	pathStartTrk = pathEndTrk = NULL;
 	RedrawProfileW();
 }
@@ -1277,8 +1280,10 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 		profElem_da.cnt = 0;
 		station_da.cnt = 0;
 		RedrawProfileW();
-		if ( ClrAllTrkBits( TB_PROFILEPATH ) )
+		if ( ClrAllTrkBits( TB_PROFILEPATH ) ) {
 			MainRedraw();
+			MapRedraw();
+		}
 		pathStartTrk = NULL;
 		SetAllTrackSelect( FALSE );
 		profileUndo = FALSE;
@@ -1333,8 +1338,10 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 	case C_CANCEL:
 		wHide(profileW);
 		HilightProfileElevations( FALSE );
-		if (ClrAllTrkBits(TB_PROFILEPATH))
+		if (ClrAllTrkBits(TB_PROFILEPATH)) {
 			MainRedraw();
+			MapRedraw();
+		}
 		return C_TERMINATE;
 	case C_REDRAW:
 		if ( wWinIsVisible(profileW) ) {

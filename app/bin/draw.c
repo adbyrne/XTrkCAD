@@ -1154,7 +1154,7 @@ EXPORT void GetRoomSize( coOrd * froomSize )
 }
 
 
-static void MapRedraw( void )
+EXPORT void MapRedraw( void )
 {
 	if (inPlaybackQuit)
 		return;
