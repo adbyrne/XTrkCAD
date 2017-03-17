@@ -232,7 +232,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		return;
 	segPtr = &xx->segs[drawSegInx];
     MainRedraw();
-	//UndrawNewTrack( trk );
+	UndrawNewTrack( trk );
 	switch ( inx ) {
 	case LW:
 		segPtr->width = drawData.lineWidth/mainD.dpi;
