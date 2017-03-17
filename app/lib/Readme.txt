@@ -1,6 +1,6 @@
 
 
-XTRACKCAD 4.3.BETA1
+XTRACKCAD 4.3.BETA2
 
 
 This file contains installation instructions and up-to-date information
@@ -49,7 +49,7 @@ which you can find in the file COPYING.
 
 New features
 
-Version 4.3.beta1
+Version 4.3.beta2
 
 -   Add control and sensor types
 -   Development of signal feature was finished
@@ -134,7 +134,7 @@ Version 4.2.0
 
 Bugs fixed
 
-Version 4.3.beta1
+Version 4.3.beta2
 
 -   All: Fix path handling error after Save/Save As
 -   Fix Malloc error (wrong size in ReadBlock, causing Guard1
@@ -366,7 +366,7 @@ Using Windows Explorer, locate the directory in which you downloaded or
 copied your new version of XTrackCAD.
 
 Start the installation program by double clicking on the
-[XTRKCAD-SETUP-4.3.BETA1.EXE][] file icon.
+[XTRKCAD-SETUP-4.3.BETA2.EXE][] file icon.
 
 Follow the steps in the installation program.
 
@@ -374,12 +374,12 @@ The installation lets you define the directory into which XTrackCAD is
 installed. The directory is created automatically if it doesn't already
 exist.
 
-A program folder named XTrackCAD 4.3.beta1 will be created during the
+A program folder named XTrackCAD 4.3.beta2 will be created during the
 installation process. This folder contains the program, documentation,
 parameter and example files. An existing installation of earlier
 versions of XTrackCad is not overwritten.
 
-A new program group named XTrackCad 4.3.beta1 will be created in the
+A new program group named XTrackCad 4.3.beta2 will be created in the
 Start menu.
 
 
@@ -396,7 +396,7 @@ Installing from the self-extracting archive.
 
 After downloading open a command line then
 
-    ./xtrkcad-setup-4.3.beta1.x86_64.sh --prefix=/usr/local --exclude-subdir
+    ./xtrkcad-setup-4.3.beta2.x86_64.sh --prefix=/usr/local --exclude-subdir
 
 This will install the executable in /usr/local/bin. A directory named
 xtrkcad will be created in /usr/local/share and all files will be

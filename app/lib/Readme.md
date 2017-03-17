@@ -1,4 +1,4 @@
-# XTrackCAD 4.3.beta1 #
+# XTrackCAD 4.3.beta2 #
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
@@ -39,7 +39,7 @@ you can find in the file COPYING.
 
 ## New features ##
 
-### Version 4.3.beta1 ###
+### Version 4.3.beta2 ###
 
 * Add control and sensor types
 * Development of signal feature was finished
@@ -112,7 +112,7 @@ you can find in the file COPYING.
 
 ## Bugs fixed ##
 
-### Version 4.3.beta1 ###
+### Version 4.3.beta2 ###
 * All: Fix path handling error after Save/Save As
 * Fix Malloc error (wrong size in ReadBlock, causing Guard1 hose error)
 * Updated cblock.c and cswitchmotor.c to handle possible broken blocks and switchmotors and not crash (check for NULL pointers)
@@ -296,19 +296,19 @@ self-installing program using the NSIS Installer from Nullsoft Inc.
 Using Windows Explorer, locate the directory in which you downloaded or copied your new version of XTrackCAD.
 
 Start the installation program by double clicking on the 
-**[xtrkcad-setup-4.3.beta1.exe][]** file icon.
+**[xtrkcad-setup-4.3.beta2.exe][]** file icon.
 
 Follow the steps in the installation program.
 
 The installation lets you define the directory into which XTrackCAD is 
 installed. The directory is created automatically if it doesn't already exist.
 
-A program folder named XTrackCAD 4.3.beta1 will be created during the installation 
+A program folder named XTrackCAD 4.3.beta2 will be created during the installation 
 process. This folder contains the program, documentation, parameter and 
 example files. An existing installation of earlier versions of XTrackCad is 
 not overwritten. 
 
-A new program group named XTrackCad 4.3.beta1 will be created in the Start menu. 
+A new program group named XTrackCad 4.3.beta2 will be created in the Start menu. 
 
 ## Linux ##
 
@@ -323,7 +323,7 @@ Use your operating system's package manager to install XTrackCAD.
 
 After downloading open a command line then 
 
-    ./xtrkcad-setup-4.3.beta1.x86_64.sh --prefix=/usr/local --exclude-subdir
+    ./xtrkcad-setup-4.3.beta2.x86_64.sh --prefix=/usr/local --exclude-subdir
 
 This will install the executable in /usr/local/bin. A directory named 
 xtrkcad will be created in /usr/local/share and all files will be unpacked
