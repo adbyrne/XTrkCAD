@@ -174,6 +174,7 @@ void GetRoomSize( coOrd * );
 void DoRedraw( void );
 void SetMainSize( void );
 void MainRedraw( void );
+void MapRedraw( void );
 void DrawMarkers( void );
 void DrawMapBoundingBox( BOOL_T );
 void DrawTicks( drawCmd_p, coOrd );
