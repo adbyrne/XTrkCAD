@@ -217,6 +217,8 @@ It is possible to create tracks that abut (the endpoints are very close and alig
 
 Straight track is a created by selecting the first endpoint then dragging the cursor to the point where you want the second endpoint to be.
 
+If the Shift key is pressed when the first endpoint is being selected and the cursor is over an unconnected endpoint, the new track will be aligned and connected to this point.
+
 If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid.
 
 \rule
