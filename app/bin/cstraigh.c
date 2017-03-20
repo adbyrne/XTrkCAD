@@ -35,9 +35,6 @@
  */
 static struct {
 		coOrd pos0, pos1;
-		track_p trk;
-		EPINX_T ep;
-		
 		} Dl;
 
 
@@ -45,30 +42,15 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 {
 	track_p t;
 	DIST_T dist;
-	coOrd p;
 
 	switch (action) {
 
 	case C_START:
-		InfoMessage( _("Place 1st end point of Straight track + Shift -> snap to unconnected endpoint") );
+		InfoMessage( _("Place 1st end point of Straight track") );
 		return C_CONTINUE;
 
 	case C_DOWN:
-		p = pos;
-		BOOL_T found = FALSE;
-		Dl.trk = NULL;
-		if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
-			if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) {
-			   EPINX_T ep = PickUnconnectedEndPoint(p, t);
-			   if (ep != -1) {
-			   		Dl.trk = t;
-			   		Dl.ep = ep;
-			   		pos = GetTrkEndPos(t, ep);
-			   		found = TRUE;
-			   }
-			}
-		} 	
-		if (!found) SnapPos( &pos );
+		SnapPos( &pos );
 		Dl.pos0 = pos;
 		InfoMessage( _("Drag to place 2nd end point") );
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
@@ -81,15 +63,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 
 	case C_MOVE:
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-		ANGLE_T angle, angle2;
-		if (Dl.trk) {
-			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
-			angle2 = NormalizeAngle(FindAngle(pos, Dl.pos0)-angle);
-			if (angle2 > 90.0 && angle2 < 270.0)
-				Translate( &pos, Dl.pos0, angle, FindDistance( Dl.pos0, pos ) );
-			else pos = Dl.pos0;	
-		} else 	SnapPos( &pos );
-		
+		SnapPos( &pos );
 		InfoMessage( _("Straight Track Length=%s Angle=%0.3f"),
 				FormatDistance(FindDistance( Dl.pos0, pos )),
 				PutAngle(FindAngle( Dl.pos0, pos )) );
@@ -101,22 +75,13 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	case C_UP:
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		tempSegs_da.cnt = 0;
-		if (Dl.trk) {
-			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
-			angle2 = NormalizeAngle(FindAngle(pos, Dl.pos0)-angle);
-			if (angle2 > 90.0 && angle2 < 270.0)
-				Translate( &pos, Dl.pos0, angle, FindDistance( Dl.pos0, pos ));
-			else pos = Dl.pos0;	
-		} else 	SnapPos( &pos );
+		SnapPos( &pos );
 		if ((dist=FindDistance( Dl.pos0, pos )) <= minLength) {
 		   ErrorMessage( MSG_TRK_TOO_SHORT, "Straight ", PutDim(fabs(minLength-dist)) );
 		   return C_TERMINATE;
 		}
 		UndoStart( _("Create Straight Track"), "newStraight" );
 		t = NewStraightTrack( Dl.pos0, pos );
-		if (Dl.trk) {
-			ConnectTracks(Dl.trk, Dl.ep, t, 0);
-		}
 		UndoEnd();
 		DrawNewTrack(t);
 		return C_TERMINATE;
