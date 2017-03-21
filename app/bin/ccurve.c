@@ -103,12 +103,15 @@ EXPORT STATUS_T CreateCurve(
 		switch ( curveMode ) {
 		case crvCmdFromEP1:
 			if (track) 
-				InfoMessage( _("Drag from End-Point in direction of curve - Shift locks to open end-point") );
+				InfoMessage( _("Drag from End-Point in direction of curve - Shift locks to track open end-point") );
 			else 	
 				InfoMessage( _("Drag from End-Point in direction of curve") );
 			break;
 		case crvCmdFromTangent:
-			InfoMessage( _("Drag from End-Point to Center") );
+			if (track)
+				InfoMessage( _("Drag from End-Point to Center - Shift locks to track open end-point") );
+			else
+				InfoMessage( _("Drag from End-Point to Center") );
 			break;
 		case crvCmdFromCenter:
 			InfoMessage( _("Drag from Center to End-Point") );
@@ -127,7 +130,7 @@ EXPORT STATUS_T CreateCurve(
 			p = pos;
 		    BOOL_T found = FALSE;
 		    Da.trk = NULL;	    
-			if ((mode == crvCmdFromEP1) && track && (MyGetKeyState() & WKEY_SHIFT) != 0) {
+			if ((mode == crvCmdFromEP1 || mode == crvCmdFromTangent) && track && (MyGetKeyState() & WKEY_SHIFT) != 0) {
 				if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) {
 			   		EPINX_T ep = PickUnconnectedEndPoint(p, t);
 			   		if (ep != -1) {
@@ -156,8 +159,10 @@ EXPORT STATUS_T CreateCurve(
 				tempSegs(1).u.c.radius = mainD.scale*0.05;
 				tempSegs(1).u.c.a0 = 0;
 				tempSegs(1).u.c.a1 = 360;
-				tempSegs(2).type = SEG_STRLIN;	
-				message( mode==crvCmdFromTangent?_("Drag from End-Point to Center"):_("Drag from Center to End-Point") );
+				tempSegs(2).type = SEG_STRLIN;
+				if (Da.trk && mode==crvCmdFromTangent) message(_("End Locked: Drag out to center"));
+				else	
+					message( mode==crvCmdFromTangent?_("Drag from End-Point to Center"):_("Drag from Center to End-Point") );
 				break;
 			case crvCmdFromChord:
 				tempSegs(0).type = (track?SEG_STRTRK:SEG_STRLIN);
@@ -173,9 +178,17 @@ EXPORT STATUS_T CreateCurve(
 		if (Da.trk) {
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, pos0)-angle1);
-			if (angle2 > 90.0 && angle2 < 270.0)
-				Translate( &pos, pos0, angle1, FindDistance( pos0, pos ) );
-			else pos = pos0;
+			if (mode ==crvCmdFromEP1) {
+				if (angle2 > 90.0 && angle2 < 270.0)
+					Translate( &pos, pos0, angle1, FindDistance( pos0, pos )*cos(R2D(angle1)) );
+				else pos = pos0;
+			} else {
+				DIST_T dp = FindDistance(pos0, pos)*sin(R2D(angle1));
+				if (angle2 > 180.0)
+					Translate( &pos, pos0, angle1+90.0, dp );
+				else
+					Translate( &pos, pos0, angle1-90.0, dp ); 
+			}
 		} else SnapPos(&pos);
 		tempSegs(0).u.l.pos[1] = pos;
 		d = FindDistance( pos0, pos );
@@ -187,7 +200,8 @@ EXPORT STATUS_T CreateCurve(
 			tempSegs_da.cnt = 1;
 			break;
 		case crvCmdFromTangent:
-			message( _("Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
+			if (Da.trk) message( _("Tangent Locked: Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
+			else message( _("Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
 			tempSegs(1).u.c.center = pos;
 			DrawArrowHeads( &tempSegs(2), pos0, FindAngle(pos0,pos)+90, TRUE, wDrawColorBlack );
 			tempSegs_da.cnt = 7;
@@ -216,17 +230,26 @@ EXPORT STATUS_T CreateCurve(
 		if (Da.trk) {
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, pos0)-angle1);
-			if (angle2 > 90.0 && angle2 < 270.0) {
-					Translate( &pos, pos0, angle1, FindDistance( pos0, pos ) );
+			if (mode == crvCmdFromEP1) {
+				if (angle2 > 90.0 && angle2 < 270.0) {
+					
+					Translate( &pos, pos0, angle1, FindDistance( pos0, pos )*cos(R2D(angle1)) );
 					Da.pos1 = pos;
+				} else {
+					ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(0.0) );
+					return C_TERMINATE;
+				}
 			} else {
-				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(0.0) );
-				return C_TERMINATE;
+				DIST_T dp = FindDistance(pos0, pos)*sin(R2D(angle1));
+				if (angle2 > 180.0)
+					Translate( &pos, pos0, angle1+90.0, dp );
+				else
+					Translate( &pos, pos0, angle1-90.0, dp );
+				Da.pos1 = pos;
 			}
 		}
 		switch (mode) {
-		case crvCmdFromEP1:
-				
+		case crvCmdFromEP1:			
 				DrawArrowHeads( &tempSegs(1), pos, FindAngle(pos,pos0)+90, TRUE, drawColorRed );
 				tempSegs_da.cnt = 6;
 				break;

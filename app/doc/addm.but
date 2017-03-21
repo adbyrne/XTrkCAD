@@ -107,11 +107,11 @@ You can join to and from circles, after which they become curved tracks.
 
 Creating a curve is a two step operation.  The four methods (with their Shortcut keys) used to create a Curved Track are:
 
-\dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release. If Shift is pressed, the new track's end point and angle will lock to a nearby unconnected track end-point. Click and Drag to position the second endpoint.
+\dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release. If Shift is pressed, the new track's end point and angle can lock on to an unconnected track end-point and the resulting track will be auto-joined to it. Click and Drag to position the second endpoint.
 
 \u000
 
-\dd \G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release.  Click and Drag to position the second endpoint.
+\dd \G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release.  If Shift is pressed, the tangent can lock on to an unconnected track end-point and the resulting track will be auto-joined to it. Click and Drag to position the second endpoint.
 
 \u000
 
@@ -129,9 +129,9 @@ A drop down menu, which allows selection of the Curved Track creation method, is
 
 In all cases, two Red arrow heads will be drawn after the first step to indicate where you can Drag to complete the second step.
 
-A straight track will be created if the second endpoint is lined up with the first endpoint.
+A straight track will always be created if the second endpoint is lined up with the first endpoint.
 
-If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid.
+If the Snap Grid (\K{cmdGrid}) is enabled then un-snapped endpoints will be constrained to the grid.
 
 Optionally, the curve center point and radius can be displayed for the Curve.  This is enabled by the Move Label (\K{cmdMoveLabel}) command.
 
