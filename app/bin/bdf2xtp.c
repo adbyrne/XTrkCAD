@@ -134,20 +134,16 @@ double findDistance( coOrd p0, coOrd p1 )
 int small(double v )
 /* is <v> close to 0.0 */
 {
-	return (fabs(v) < 0.0001);
+	return (fabs(v) < 0.000000000001);
 }
 
 double findAngle( coOrd p0, coOrd p1 )
 /* find angle between two points */
 {
 	double dx = p1.x-p0.x, dy = p1.y-p0.y;
-	if (small(dx)) {
-		if (dy >=0) return 0.0;
+	if (small(dx) && small(dy)) {
+		if (dy >=0.0) return 0.0;
 		else return 180.0;
-	}
-	if (small(dy)) {
-		if (dx >=0) return 90.0;
-		else return 270.0;
 	}
 	return R2D(atan2( dx,dy ));
 }

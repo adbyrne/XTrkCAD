@@ -107,7 +107,7 @@ You can join to and from circles, after which they become curved tracks.
 
 Creating a curve is a two step operation.  The four methods (with their Shortcut keys) used to create a Curved Track are:
 
-\dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release.  Click and Drag to position the second endpoint.
+\dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release. If Shift is pressed, the new track's end point and angle will lock to a nearby unconnected track end-point. Click and Drag to position the second endpoint.
 
 \u000
 

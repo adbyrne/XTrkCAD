@@ -31,6 +31,9 @@ Then drag on one of the Red arrows to create the final shape of the curve.\
 \
 You can click on the small button to the left of the Curve command button to change the method.
 
+When creating a straight or a curved track by dragging from the 1st End Point, you can snap the new track to an existing open end point by holding down Shift while you click.\
+The new track will be joined to the old when you create it.
+
 Track Circles provide a quick way to see what arrangement of tracks will fit in your layout spaces.  Create Circles with your typical radius and place them in corners and other locations where your main-line will make changes of direction.  This will give you an overall idea of how your layout will look.\
 \
 You can create Circles by:\
