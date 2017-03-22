@@ -180,10 +180,10 @@ EXPORT STATUS_T CreateCurve(
 			angle2 = NormalizeAngle(FindAngle(pos, pos0)-angle1);
 			if (mode ==crvCmdFromEP1) {
 				if (angle2 > 90.0 && angle2 < 270.0)
-					Translate( &pos, pos0, angle1, FindDistance( pos0, pos )*cos(R2D(angle1)) );
+					Translate( &pos, pos0, angle1, -FindDistance( pos0, pos )*cos(D2R(angle2)) );
 				else pos = pos0;
 			} else {
-				DIST_T dp = FindDistance(pos0, pos)*sin(R2D(angle1));
+				DIST_T dp = -FindDistance(pos0, pos)*sin(D2R(angle2));
 				if (angle2 > 180.0)
 					Translate( &pos, pos0, angle1+90.0, dp );
 				else
@@ -231,16 +231,15 @@ EXPORT STATUS_T CreateCurve(
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, pos0)-angle1);
 			if (mode == crvCmdFromEP1) {
-				if (angle2 > 90.0 && angle2 < 270.0) {
-					
-					Translate( &pos, pos0, angle1, FindDistance( pos0, pos )*cos(R2D(angle1)) );
+				if (angle2 > 90.0 && angle2 < 270.0) {			
+					Translate( &pos, pos0, angle1, -FindDistance( pos0, pos )*cos(D2R(angle2)) );
 					Da.pos1 = pos;
 				} else {
 					ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(0.0) );
 					return C_TERMINATE;
 				}
 			} else {
-				DIST_T dp = FindDistance(pos0, pos)*sin(R2D(angle1));
+				DIST_T dp = -FindDistance(pos0, pos)*sin(D2R(angle2));
 				if (angle2 > 180.0)
 					Translate( &pos, pos0, angle1+90.0, dp );
 				else
