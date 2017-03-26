@@ -44,15 +44,6 @@
  *****************************************************************************
  */
 
-struct wButton_t {
-    WOBJ_COMMON
-    GtkLabel * labelG;
-    GtkWidget * imageG;
-    wButtonCallBack_p action;
-    int busy;
-    int recursion;
-};
-
 /**
  * Set the state of the button
  *
@@ -211,15 +202,17 @@ wButton_p wButtonCreate(
     b->option = option;
     b->action = action;
     wlibComputePos((wControl_p)b);
+
     b->widget = gtk_toggle_button_new();
     g_signal_connect(GTK_OBJECT(b->widget), "clicked",
-                     G_CALLBACK(pushButt), b);
-
+                         G_CALLBACK(pushButt), b);
     if (width > 0) {
         gtk_widget_set_size_request(b->widget, width, -1);
     }
+    if( labelStr ){
+        wButtonSetLabel(b, labelStr);
+    }
 
-    wButtonSetLabel(b, labelStr);
     gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
 
     if (option & BB_DEFAULT) {
