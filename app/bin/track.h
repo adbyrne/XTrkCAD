@@ -199,6 +199,15 @@ typedef struct {
 				long option;
 			} l;
 			struct {
+				coOrd pos[4];
+				ANGLE_T angle0;
+				ANGLE_T angle3;
+				DIST_T max_radius;
+				DIST_T radius0;
+				DIST_T radius3;
+				DIST_T length;
+			} b;
+			struct {
 				coOrd center;
 				ANGLE_T a0, a1;
 				DIST_T radius;
