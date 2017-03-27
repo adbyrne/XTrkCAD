@@ -72,96 +72,6 @@ static int hotspotOffsetY = 19;
 static int log_paramLayout;
 
 
-#ifdef LATER
-/*****************************************************************************
- *
- *	Colors
- *
- */
-
-typedef struct {
-		long rgb;
-		char * name;
-		wDrawColor color;
-		} colorTab_t[];
-
-static colorTab_t colorTab = {
-				{ wRGB(	 0,	 0,	 0), N_("Black") },
-
-				{ wRGB(	 0,	 0,128), N_("Dark Blue") },
-				{ wRGB( 70,130,180), N_("Steel Blue") },
-				{ wRGB( 65,105,225), N_("Royal Blue") },
-				{ wRGB(	 0,	 0,255), N_("Blue") },
-				{ wRGB(	 0,191,255), N_("Deep Sky Blue") },
-				{ wRGB(125,206,250), N_("Light Sky Blue") },
-				{ wRGB(176,224,230), N_("Powder Blue") },
-
-				{ wRGB(	 0,128,128), N_("Dark Aqua") },
-				{ wRGB(127,255,212), N_("Aquamarine") },
-				{ wRGB(	 0,255,255), N_("Aqua") },
-
-				{ wRGB(	 0,128,	 0), N_("Dark Green") },
-				{ wRGB( 34,139, 34), N_("Forest Green") },
-				{ wRGB( 50,205, 50), N_("Lime Green") },
-				{ wRGB(	 0,255,	 0), N_("Green") },
-				{ wRGB(124,252,	 0), N_("Lawn Green") },
-				{ wRGB(152,251,152), N_("Pale Green") },
-
-				{ wRGB(128,128,	 0), N_("Dark Yellow") },
-				{ wRGB(255,127, 80), N_("Coral") },
-				{ wRGB(255,165,	 0), N_("Orange") },
-				{ wRGB(255,215,	 0), N_("Gold") },
-				{ wRGB(255,255,	 0), N_("Yellow") },
-
-				{ wRGB(139, 69, 19), N_("Saddle Brown") },
-				{ wRGB(165, 42, 42), N_("Brown") },
-				{ wRGB(210,105, 30), N_("Chocolate") },
-				{ wRGB(188,143,143), N_("Rosy Brown") },
-				{ wRGB(210,180,140), N_("Tan") },
-				{ wRGB(245,245,220), N_("Beige") },
-
-
-				{ wRGB(128,	 0,	 0), N_("Dark Red") },
-				{ wRGB(255, 99, 71), N_("Tomato") },
-				{ wRGB(255,	 0,	 0), N_("Red") },
-				{ wRGB(255,105,180), N_("Hot Pink") },
-				{ wRGB(255,192,203), N_("Pink") },
-
-				{ wRGB(128,	 0,128), N_("Dark Purple") },
-				{ wRGB(176, 48, 96), N_("Maroon") },
-				{ wRGB(160, 32,240), N_("Purple2") },
-				{ wRGB(255,	 0,255), N_("Purple") },
-				{ wRGB(238,130,238), N_("Violet") },
-
-				{ wRGB( 64, 64, 64), N_("Dark Gray") },
-				{ wRGB(128,128,128), N_("Gray") },
-				{ wRGB(192,192,192), N_("Light Gray") } };
-static wIcon_p colorTabBitMaps[ sizeof colorTab/sizeof colorTab[0] ];
-#include "bitmaps/square10.xbm"
-
-static BOOL_T colorTabInitted = FALSE;
-
-static void InitColorTab( void )
-{
-	wIndex_t inx;
-	for ( inx=0; inx<COUNT(colorTab); inx++ )
-		colorTab[inx].color = wDrawFindColor( colorTab[inx].rgb );
-	colorTabInitted = TRUE;
-}
-
-
-static wIndex_t ColorTabLookup( wDrawColor color )
-{
-	wIndex_t inx;
-	if (!colorTabInitted)
-		InitColorTab();
-	for (inx = 0; inx < sizeof colorTab/sizeof colorTab[0]; inx++ )
-		if (colorTab[inx].color == color)
-			return inx;
-	return 0;
-}
-#endif
-
 /*****************************************************************************
  *
  *
@@ -613,10 +523,6 @@ EXPORT void ParamLoadControl(
 			p->oldD.l = *(wIndex_t*)p->valueP;
 			break;
 		case PD_COLORLIST:
-#ifdef LATER
-			inx = ColorTabLookup( *(wDrawColor*)p->valueP );
-			wListSetIndex( (wList_p)p->control, inx );
-#endif
 			wColorSelectButtonSetColor( (wButton_p)p->control, *(wDrawColor*)p->valueP );
 			p->oldD.dc = *(wDrawColor*)p->valueP;
 			break;
@@ -736,10 +642,6 @@ EXPORT long ParamUpdate(
 			break;
 		case PD_COLORLIST:
 			dc = wColorSelectButtonGetColor( (wButton_p)p->control );
-#ifdef LATER
-			inx = wListGetIndex( (wList_p)p->control );
-			dc = colorTab[inx].color;
-#endif
 			if (dc != p->oldD.dc) {
 				p->oldD.dc = dc;
 				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
@@ -830,10 +732,6 @@ EXPORT void ParamLoadData(
 			break;
 		case PD_COLORLIST:
 			*(wDrawColor*)p->valueP = wColorSelectButtonGetColor( (wButton_p)p->control );
-#ifdef LATER
-			inx = wListGetIndex( (wList_p)p->control );
-			*(wDrawColor*)p->valueP = colorTab[inx].color;
-#endif
 			break;
 		case PD_FLOAT:
 			if (p->option & PDO_DIM) {
@@ -1500,22 +1398,7 @@ static void ParamListPush( wIndex_t inx, const char * val, wIndex_t op, void * d
 			p->group->changeProc( p->group, p-p->group->paramPtr, &valL );
 		}
 		break;
-#ifdef LATER
-	case PD_COLORLIST:
-		dc = colorTab[inx].color;
-		rgb = wDrawGetRGB( dc );
-		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %ld\n",
-					p->group->nameStr, p->nameStr, rgb );
-			fflush( recordF );
-		}
-		if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
-			*(wDrawColor*)(p->valueP) = dc;
-		if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc ) {
-			; /* COLOR NOP */
-		}
-		break;
-#endif
+
 	default:
 		;
 	}
@@ -1644,10 +1527,6 @@ EXPORT void ParamChange( paramData_p p )
 	case PD_COLORLIST:
 		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr)
 			fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, rgb );
-#ifdef LATER
-		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 )
-			wColorSelectButtonSetColor( (wButton_p)p->control, wDrawFindRGB(rgb) );
-#endif
 		break;
 	case PD_FLOAT:
 		tmpR = *(FLOAT_T*)p->valueP;
@@ -1842,13 +1721,6 @@ static void ParamPlayback( char * line )
 				dc = wDrawFindColor( rgb );
 				if ( p->control)
 					wColorSelectButtonSetColor( (wButton_p)p->control, dc );
-#ifdef LATER
-				valL = ColorTabLookup( dc );
-				if (p->control) {
-					wListSetIndex( (wList_p)p->control, (wIndex_t)valL );
-					wFlush();
-				}
-#endif
 				if (p->valueP)
 					*(wDrawColor*)p->valueP = dc;
 				if (pg->changeProc) {
@@ -2093,7 +1965,7 @@ static void ParamCreateControl(
 	paramTextData_t * textDataP;
 	paramListData_t * listDataP;
 	wIcon_p iconP;
-    wDrawColor color = wDrawColorBlack;
+ //   wDrawColor color = wDrawColorBlack;
 
 	wWin_p win;
 	wPos_t w;
@@ -2177,7 +2049,7 @@ static void ParamCreateControl(
 			listDataP->height = wControlGetHeight( pd->control );
 			break;
 		case PD_COLORLIST:
-			pd->control = (wControl_p)wColorSelectButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, &color, ParamColorSelectPush, pd );
+			pd->control = (wControl_p)wColorSelectButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, NULL, ParamColorSelectPush, pd );
 			break;
 		case PD_MESSAGE:
 			if ( pd->winData != 0 )
