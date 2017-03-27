@@ -451,8 +451,10 @@ wButton_p wColorSelectButtonCreate(
     gtk_widget_show(b->widget);
     wlibAddButton((wControl_p)b);
     wlibAddHelpString(b->widget, helpStr);
-
     wColorSelectButtonSetColor(b, (valueP?*valueP:0));
-
+    
+    if (labelStr) {
+        ((wControl_p)b)->labelW = wlibAddLabel((wControl_p)b, labelStr);
+    }
     return b;
 }
