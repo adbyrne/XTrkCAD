@@ -241,6 +241,7 @@ typedef struct {
 #define SEG_CRVTRK		('C')
 #define SEG_STRLIN		('L')
 #define SEG_CRVLIN		('A')
+#define SEG_BEZTRK      ('B')
 #define SEG_JNTTRK		('J')
 #define SEG_FILCRCL		('G')
 #define SEG_POLY		('Y')
@@ -255,8 +256,9 @@ typedef struct {
 #define SEG_BENCH		('B')
 #define SEG_DIMLIN		('M')
 #define SEG_TBLEDGE		('Q')
+#define SEG_BEZLIN      ('Z')
 
-#define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK )
+#define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BZRTRK)
 
 dynArr_t tempSegs_da;
 #define tempSegs(N) DYNARR_N( trkSeg_t, tempSegs_da, N )

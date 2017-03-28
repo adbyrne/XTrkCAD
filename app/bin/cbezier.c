@@ -23,6 +23,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "cbezier.h"
+#include "draw.h"
 #include "track.h"
 #include "ccurve.h"
 #include "cstraigh.h"
@@ -41,6 +43,7 @@ static struct {
 		curveData_t curveData;
 		track_p trk[2];
 		EPINX_T ep[2];
+		int selectPoint;
 		} Da;
 
 /*
@@ -154,20 +157,20 @@ EXPORT STATUS_T CreateBezCurve(
 			pos0 = pos;
 			Da.pos[0] = pos;
 			Da.pos[1] = pos;
-			tempSegs(0).b.pos[0] = pos;
-        	tempSegs[0).b.pos[1] = pos;
+			tempSegs(0).u.b.pos[0] = pos;
+        	tempSegs(0).u.b.pos[1] = pos;
 		} else pos3 = pos;
 		Da.pos[2] = pos;
 		Da.pos[3] = pos;
-		tempSegs[0].b.pos[2] = pos;
-        tempSegs[0].b.pos[3] = pos;
+		tempSegs(0).u.b.pos[2] = pos;
+        tempSegs(0).u.b.pos[3] = pos;
 		
 		tempSegs(0).type = (track?SEG_BEZTRK:SEG_BEZLIN);
 		tempSegs(0).color = color;
 		tempSegs(0).width = width;
 				
 		if (Da.trk) message(_("End Locked: Drag out control arm"));
-		else message( _("Drag out control arm") )
+		else message( _("Drag out control arm"));
         
 		return C_CONTINUE;
 
@@ -183,7 +186,7 @@ EXPORT STATUS_T CreateBezCurve(
 		if (controlArm == 0) {
 			d = FindDistance( pos0, pos );
 			a = FindAngle( pos0, pos );
-		else {
+		} else {
 			d = FindDistance( pos3, pos );
 			a = FindAngle( pos3, pos );
 		}
@@ -215,8 +218,8 @@ EXPORT STATUS_T CreateBezCurve(
 		tempSegs_da.cnt = 1;		
 		tempSegs_da.cnt += 
 			DrawControlArm( &tempSegs(1), Da.pos[controlArm*3], pos, FindAngle(pos,Da.pos[controlArm*3]), TRUE, TRUE, 
-				drawColorBlack, drawColorBlack, drawColorBlack )
-		}
+				drawColorBlack, drawColorBlack, drawColorBlack );
+
         if (controlArm == 0)
         	message( _("Select 2nd End - Shift will lock to unconnected track") );
 		return C_CONTINUE;
@@ -224,8 +227,8 @@ EXPORT STATUS_T CreateBezCurve(
 	default:
 		return C_CONTINUE;
 
-	}
 }
+
 
 
 static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
@@ -278,7 +281,7 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		    	if (!close(dd)) Da.selectPoint = 0;
 		    	else pos = Da.pos[Da.selectPoint]; 
 		    }
-		    switch (Da.selectpoint) {
+		    switch (Da.selectPoint) {
 		    	case 1: DrawControlArm(&tempSegs(1),Da.pos[0],Da.pos[1], TRUE, FALSE, 
 							drawColorRed, drawColorBlack, drawColorBlack, drawColorRed); 
 						break;
@@ -309,12 +312,12 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			rc = CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, Da.state/2 , InfoMessage );
 		} else if (Da.state == 3) {
 			if (track && Da.trk[Da.selectPoint/2]) {
-				angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk[Da.selectPoint], pos);
+				angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk[Da.selectPoint],Da.pos[0]);
 				angle2 = NormalizeAngle(FindAngle(pos, Da.pos[Da.selectPoint])-angle1);
 				if (angle2 > 90.0 && angle2 < 270.0)
 					Translate( &pos, Da.pos[Da.selectPoint/2], angle1, -FindDistance( Da.pos[Da.selectPoint/2], pos )*cos(D2R(angle2)) );
 				else pos = Da.pos[Da.selectPoint];
-				switch (Da.selectpoint) {
+				switch (Da.selectPoint) {
 		    	case 1: DrawControlArm(&tempSegs(1),Da.pos[0],Da.pos[1], TRUE, FALSE, 
 							drawColorRed, drawColorBlack, drawColorBlack, drawColorRed); 
 						break;
@@ -346,7 +349,7 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			if (Da.state == 0) Da.pos[1]= pos;
 			else Da.pos[2] = pos;
 			Da.state = Da.state + 1;
-			CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, Da.State/2, InfoMessage );
+			CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, Da.state/2, InfoMessage );
 			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 			mainD.funcs->options = 0;
 			segCnt = tempSegs_da.cnt;
@@ -354,7 +357,7 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			return C_CONTINUE;
         } else {
         	Snap(&pos);
-        	Da.pos[Da.selectedPoint] = pos;
+        	Da.pos[Da.selectPoint] = pos;
 			
 			
 			
@@ -378,7 +381,7 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				t = NewCurvedTrack( Da.curveData.curvePos, Da.curveData.curveRadius,
 						Da.curveData.a0, Da.curveData.a1, 0 );
 				if (Da.trk) {
-					EPINX_T ep = PickUnconnectedEndPoint(Da.pos0, t);
+					EPINX_T ep = PickUnconnectedEndPoint(Da.pos[0], t);
 					if (ep != -1) ConnectTracks(Da.trk, Da.ep, t, ep);
 				}
 				UndoEnd();
@@ -391,15 +394,14 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		
             
     case C_OK:
-        if (curveMode == crvCmdBezFromChord) {
-            if ((d=BezierLength(Da.pos[0],Da.pos[1],Da.pos[2],Da.pos[3],0.0))<=minLength) {
+         if ((d=BezierLength(Da.pos[0],Da.pos[1],Da.pos[2],Da.pos[3],0.0))<=minLength) {
                 ErrorMessage( MSG_TRK_TOO_SHORT, "Bezier ", PutDim(fabs(minLength-d)) );
                 return C_TERMINATE;
-            }
-            UndoStart( _("Create Bezier Track"), "newCurve - Bezier");
-            t = NewBezierTrack(Da.pos[0],Da.pos[1],Da.pos[2],Da.pos[3]);
-            UndoEnd();
-        }
+         }
+         UndoStart( _("Create Bezier Track"), "newCurve - Bezier");
+         t = NewBezierTrack(Da.pos[0],Da.pos[1],Da.pos[2],Da.pos[3]);
+         UndoEnd();
+
         Da.state = -1;
         return C_TERMINATE;
 
@@ -422,7 +424,6 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		Da.state = -1;
 		return C_CONTINUE;
 
-	}
 
 	return C_CONTINUE;
 
@@ -438,9 +439,9 @@ EXPORT long circleMode;
 
 EXPORT void InitCmdBezier( wMenu_p menu )
 {	
-	AddMenuButton( menu, CmdBezierTrack, "cmdBezierTrack", _("Bezier Track"), wIconCreatePixMap( beztrack_xpm ),
+	AddMenuButton( menu, CreateBezCurve, "cmdBezierTrack", _("Bezier Track"), wIconCreatePixMap( beztrack_xpm ),
         LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE5, (void*)4 );
-    AddMenuButton( menu, CmdBezierLine, "cmdBezierLine", _("Bezier Line"), wIconCreatePixMap( bezline_xpm ),
+    AddMenuButton( menu, CreateBezCurve, "cmdBezierLine", _("Bezier Line"), wIconCreatePixMap( bezline_xpm ),
         LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE5, (void*)4 );    
 	ParamRegister( &bezierPG );
 	RegisterChangeNotification( ChangeBezierW );
