@@ -403,7 +403,7 @@ wList_p wDropListCreate(
     b->colCnt = 0;
     b->colWidths = NULL;
     b->colRightJust = NULL;
-    b->editable = (option & BL_EDITABLE != 0);
+    b->editable = ((option & BL_EDITABLE) != 0);
 
     assert(width != 0);
 

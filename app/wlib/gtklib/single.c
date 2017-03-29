@@ -50,7 +50,8 @@ struct wString_t {
 	char *valueP;			/**< pointer to result buffer */
 	wIndex_t valueL;	 	/**< maximum length */
 	wStringCallBack_p action;  	/**< callback for changes */
-	wBool_t busy;		 	/**< busy flag to prevent re-entry problems? */			
+	wBool_t busy;		 	/**< busy flag to prevent re-entry problems? */	
+	wBool_t hasSignal;		/** needs signal to be suppressed */
 	guint	timer;			/**< timer source for inactivity timer */
 };
 
@@ -72,9 +73,11 @@ void wStringSetValue(
 	// the contents should not be changed programatically while
 	// the user is editing it
 	if( !(gtk_widget_has_focus(b->widget))) {
-	    gtk_signal_handler_block_by_data(GTK_OBJECT(b->widget), b);
+		if (b->hasSignal) 
+	    	gtk_signal_handler_block_by_data(GTK_OBJECT(b->widget), b);
 		gtk_entry_set_text(GTK_ENTRY(b->widget), arg);
-		gtk_signal_handler_unblock_by_data(GTK_OBJECT(b->widget), b);
+		if (b->hasSignal)
+			gtk_signal_handler_unblock_by_data(GTK_OBJECT(b->widget), b);
 	}
 }
 
@@ -272,6 +275,7 @@ wString_p wStringCreate(
 	b->option = option;
 	b->valueL = valueL;
 	b->timer = 0;
+	b->hasSignal = 0;
 	wlibComputePos((wControl_p)b);
 
 	// create the gtk entry field and set maximum length if desired	
@@ -316,6 +320,7 @@ wString_p wStringCreate(
 	
 	g_signal_connect(GTK_OBJECT(b->widget), "changed", G_CALLBACK(stringChanged), b);
 	//g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
+	b->hasSignal = 1;
 	
 	// set the default text	and select it to make replacing it easier
 	if (b->valueP) {
