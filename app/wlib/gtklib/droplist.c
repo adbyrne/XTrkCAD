@@ -109,7 +109,10 @@ void *wDropListGetItemContext(wList_p b, wIndex_t inx)
 
     if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
                                       inx)) {
-        gtk_tree_model_get(GTK_TREE_MODEL(b->listStore), LISTCOL_DATA, &data, -1);
+        gtk_tree_model_get(GTK_TREE_MODEL(b->listStore), 
+										  &iter,
+										  LISTCOL_DATA, &data, 
+										  -1);
     }
 
     return (data);
@@ -210,7 +213,9 @@ wBool_t wDropListSetValues(
 
     if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
                                       row)) {
-        gtk_tree_store_set(GTK_TREE_STORE(b->listStore), &iter, LISTCOL_TEXT, labelStr,
+        gtk_list_store_set(b->listStore, 
+							&iter, 
+							LISTCOL_TEXT, labelStr,
                            -1);
         return (TRUE);
     } else {
@@ -423,6 +428,9 @@ wList_p wDropListCreate(
     g_object_unref(G_OBJECT(b->listStore));
 
     wlibDropListAddColumns(b->widget, DROPLIST_TEXTCOLUMNS);
+    
+    gtk_combo_box_set_entry_text_column (GTK_COMBO_BOX(b->widget),
+										 LISTCOL_TEXT);
 
     g_signal_connect(GTK_OBJECT(b->widget), "changed",
                      G_CALLBACK(DropListSelectChild), b);
