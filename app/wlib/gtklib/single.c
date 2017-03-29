@@ -134,6 +134,7 @@ static gboolean killTimer(
 		s = gtk_entry_get_text(GTK_ENTRY(b->widget));
 		b->action(s, b->data);
 	}
+	gtk_editable_select_region( GTK_EDITABLE( widget ), 0, 0 );
 	return( FALSE );
 }	
 
@@ -315,6 +316,12 @@ wString_p wStringCreate(
 	
 	g_signal_connect(GTK_OBJECT(b->widget), "changed", G_CALLBACK(stringChanged), b);
 	//g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
+	
+	// set the default text	and select it to make replacing it easier
+	if (b->valueP) {
+		wStringSetValue(b, b->valueP);
+		// select the text only if text is editable
+	}
 
 	gtk_widget_add_events( b->widget, GDK_FOCUS_CHANGE_MASK );
 	g_signal_connect(GTK_OBJECT(b->widget), "focus-out-event", G_CALLBACK(killTimer), b);
