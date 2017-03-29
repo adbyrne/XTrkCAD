@@ -1,5 +1,4 @@
 /*
- /*
  * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cbezier.h,v 1.1 2005-12-07 15:47:36 rc-flyer Exp $
  */
 
@@ -36,3 +35,4 @@ track_p NewBezierTrack( coOrd, DIST_T, ANGLE_T, ANGLE_T, long );
 DIST_T BezierDescriptionDistance( coOrd, track_p );
 STATUS_T BezierDescriptionMove( track_p, wAction_t, coOrd );
 BOOL_T GetBeziereMiddle( track_p, coOrd * );
+int DrawControlArm(trkSeg_p, coOrd, coOrd, BOOL_T, BOOL_T, wDrawColor, wDrawColor, wDrawColor );

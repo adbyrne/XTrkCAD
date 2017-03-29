@@ -23,10 +23,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "cbezier.h"
-#include "draw.h"
+
 #include "track.h"
 #include "ccurve.h"
+#include "cbezier.h"
 #include "cstraigh.h"
 #include "cjoin.h"
 #include "i18n.h"
@@ -43,7 +43,6 @@ static struct {
 		curveData_t curveData;
 		track_p trk[2];
 		EPINX_T ep[2];
-		int selectPoint;
 		} Da;
 
 /*
@@ -169,7 +168,7 @@ EXPORT STATUS_T CreateBezCurve(
 		tempSegs(0).color = color;
 		tempSegs(0).width = width;
 				
-		if (Da.trk) message(_("End Locked: Drag out control arm"));
+		if (*Da.trk) message(_("End Locked: Drag out control arm"));
 		else message( _("Drag out control arm"));
         
 		return C_CONTINUE;
@@ -195,12 +194,11 @@ EXPORT STATUS_T CreateBezCurve(
 		tempSegs_da.cnt = 1;
 		tempSegs_da.cnt += 
 			DrawControlArm(&tempSegs(1),Da.pos[controlArm*3],pos, TRUE, FALSE, 
-				drawColorRed, drawColorBlack, drawColorBlack, drawColorRed);
+				drawColorBlack, drawColorBlack, drawColorRed);
 		if (controlArm > 0) 
 	 		tempSegs_da.cnt += 
-	 			DrawControlArm(&tempSegs(temp_Segs_da.cnt),Da.pos[0],Da.pos[1], FALSE, FALSE, 
-					drawColorBlack, drawColorBlack, drawColorBlack, drawColorRed);
-		}
+	 			DrawControlArm(&tempSegs(tempSegs_da.cnt),Da.pos[0],Da.pos[1], FALSE, FALSE, 
+	 			drawColorBlack, drawColorBlack, drawColorRed);
 		return C_CONTINUE;
 
 	case C_UP:
@@ -217,7 +215,7 @@ EXPORT STATUS_T CreateBezCurve(
 		}	
 		tempSegs_da.cnt = 1;		
 		tempSegs_da.cnt += 
-			DrawControlArm( &tempSegs(1), Da.pos[controlArm*3], pos, FindAngle(pos,Da.pos[controlArm*3]), TRUE, TRUE, 
+			DrawControlArm( &tempSegs(1), Da.pos[controlArm*3], pos, TRUE, TRUE, 
 				drawColorBlack, drawColorBlack, drawColorBlack );
 
         if (controlArm == 0)
@@ -227,6 +225,7 @@ EXPORT STATUS_T CreateBezCurve(
 	default:
 		return C_CONTINUE;
 
+   }
 }
 
 
@@ -251,8 +250,6 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 0, InfoMessage );
 		else
 			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 1, InfoMessage );
-			
-
 
 	case C_DOWN:
 		if ( Da.state == -1 ) {
@@ -269,7 +266,7 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			Da.selectPoint = 3;
 			tempSegs_da.cnt = segCnt;
 			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 1, InfoMessage );
-		} else 
+		} else {
 			double dd = 0;
 			Da.selectPoint = -1;
 		    for (int i=0;i<3;i++) {
@@ -297,8 +294,8 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		    	default:
 			}
 			
-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-		mainD.funcs->options = 0;
+			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+			mainD.funcs->options = 0;
 		    
 		} 	 
 		return C_CONTINUE;
@@ -423,9 +420,12 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		}
 		Da.state = -1;
 		return C_CONTINUE;
+		
+	default:
 
 
 	return C_CONTINUE;
+	}
 
 }
 
