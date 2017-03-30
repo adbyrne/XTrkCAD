@@ -83,26 +83,28 @@ wlibListStoreGetContext(GtkListStore *ls, int inx)
     gchar *string = NULL;
     gboolean result;
     gint childs;
-    
-    childs = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(ls),
-											NULL );
 
-	if(inx < childs) {
-	    result = gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
-	                                  &iter,
-	                                  NULL,
-	                                  inx);
-		if( result ) {								
-			gtk_tree_model_get(GTK_TREE_MODEL(ls),
-							&iter,
-	                       LISTCOL_DATA,
-	                       &string,
-	                       -1);
-		} else {
-			printf( "Invalid index %d for list!\n", inx );
-	
-		}
-	}	
+    childs = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(ls),
+                                            NULL);
+
+    if (inx < childs) {
+        result = gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
+                                               &iter,
+                                               NULL,
+                                               inx);
+
+        if (result) {
+            gtk_tree_model_get(GTK_TREE_MODEL(ls),
+                               &iter,
+                               LISTCOL_DATA,
+                               &string,
+                               -1);
+        } else {
+            printf("Invalid index %d for list!\n", inx);
+
+        }
+    }
+
     return (string);
 }
 
@@ -313,8 +315,8 @@ wlibListStoreUpdateValues(GtkListStore *ls, int row, int cols, char *labels,
     count = wlibListStoreUpdateIter(ls, &iter, labels);
 
     if (bm) {
-		GdkPixbuf *pixbuf;
-        
+        GdkPixbuf *pixbuf;
+
         pixbuf = wlibMakePixbuf(bm);
         wlibListStoreSetPixbuf(ls, &iter, pixbuf);
     }

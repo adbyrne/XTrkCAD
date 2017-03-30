@@ -39,7 +39,9 @@
 #define DROPLIST_TEXTCOLUMNS 1
 
 /**
- * Add the data columns to the droplist.
+ * Add the data columns to the droplist. If dropList has an entry field
+ * the first text column is not added here as this is done by GTK
+ * automatically.
  *
  * \param dropList IN
  * \param columns IN
@@ -50,12 +52,17 @@ int
 wlibDropListAddColumns(GtkWidget *dropList, int columns)
 {
     int i;
+    int start = 0;
     GtkCellRenderer *cell;
+
+    if (gtk_combo_box_get_has_entry(GTK_COMBO_BOX(dropList))) {
+        start = 1;
+    }
 
     /* Create cell renderer. */
     cell = gtk_cell_renderer_text_new();
 
-    for (i = 0; i < columns; i++) {
+    for (i = start; i < columns; i++) {
         /* Pack it into the droplist */
         gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(dropList), cell, TRUE);
 
@@ -109,10 +116,10 @@ void *wDropListGetItemContext(wList_p b, wIndex_t inx)
 
     if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
                                       inx)) {
-        gtk_tree_model_get(GTK_TREE_MODEL(b->listStore), 
-										  &iter,
-										  LISTCOL_DATA, &data, 
-										  -1);
+        gtk_tree_model_get(GTK_TREE_MODEL(b->listStore),
+                           &iter,
+                           LISTCOL_DATA, &data,
+                           -1);
     }
 
     return (data);
@@ -213,9 +220,9 @@ wBool_t wDropListSetValues(
 
     if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
                                       row)) {
-        gtk_list_store_set(b->listStore, 
-							&iter, 
-							LISTCOL_TEXT, labelStr,
+        gtk_list_store_set(b->listStore,
+                           &iter,
+                           LISTCOL_TEXT, labelStr,
                            -1);
         return (TRUE);
     } else {
@@ -251,8 +258,6 @@ static int DropListSelectChild(
         if (bl->editted == FALSE) {
             return 0;
         }
-
-        wlibSetTrigger(NULL, NULL);
     }
 
     bl->editted = FALSE;
@@ -260,8 +265,8 @@ static int DropListSelectChild(
     /* Obtain currently selected item from combo box.
      * If nothing is selected, do nothing. */
     if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(comboBox), &iter)) {
-		GtkTreeModel *model;
-		
+        GtkTreeModel *model;
+
         /* Obtain data model from combo box. */
         model = gtk_combo_box_get_model(comboBox);
 
@@ -296,48 +301,6 @@ static int DropListSelectChild(
 
     return 1;
 }
-
-//static void triggerDListEntry(
-//wControl_p b )
-//{
-//wList_p bl = (wList_p)b;
-//const char * entry_value;
-
-//if (bl == 0)
-//return;
-//if (bl->widget == 0) abort();
-//entry_value = gtk_entry_get_text( GTK_ENTRY(GTK_COMBO(bl->widget)->entry) );
-//if (entry_value == NULL) return;
-//if (debugWindow >= 2) printf("triggerListEntry: %s text = %s\n", bl->labelStr?bl->labelStr:"No label", entry_value );
-//if (bl->action) {
-//bl->recursion++;
-//bl->action( -1, entry_value, 0, bl->data, NULL );
-//bl->recursion--;
-//}
-//gtkSetTrigger( NULL, NULL );
-//return;
-//}
-
-//static void updateDListEntry(
-//GtkEntry * widget,
-//wList_p bl )
-//{
-//const char *entry_value;
-//if (bl == 0)
-//return;
-//if (bl->recursion)
-//return;
-//if (!bl->editable)
-//return;
-//entry_value = gtk_entry_get_text( GTK_ENTRY(GTK_COMBO(bl->widget)->entry) );
-//bl->editted = TRUE;
-//if (bl->valueP != NULL)
-// *bl->valueP = -1;
-//bl->last = -1;
-//if (bl->action)
-//gtkSetTrigger( (wControl_p)bl, triggerDListEntry );
-//return;
-//}
 
 /**
  * Create a droplist for a given liststore
@@ -428,11 +391,11 @@ wList_p wDropListCreate(
     g_object_unref(G_OBJECT(b->listStore));
 
     wlibDropListAddColumns(b->widget, DROPLIST_TEXTCOLUMNS);
-    
-    gtk_combo_box_set_entry_text_column (GTK_COMBO_BOX(b->widget),
-										 LISTCOL_TEXT);
-										 
-	// combo's style
+
+    gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
+                                        LISTCOL_TEXT);
+
+    // combo's style
     gtk_rc_parse_string("style \"my-style\" { GtkComboBox::appears-as-list = 1 } widget \"*.mycombo\" style \"my-style\"  ");
     gtk_widget_set_name(b->widget,"mycombo");
 
