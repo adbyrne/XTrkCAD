@@ -431,6 +431,10 @@ wList_p wDropListCreate(
     
     gtk_combo_box_set_entry_text_column (GTK_COMBO_BOX(b->widget),
 										 LISTCOL_TEXT);
+										 
+	// combo's style
+    gtk_rc_parse_string("style \"my-style\" { GtkComboBox::appears-as-list = 1 } widget \"*.mycombo\" style \"my-style\"  ");
+    gtk_widget_set_name(b->widget,"mycombo");
 
     g_signal_connect(GTK_OBJECT(b->widget), "changed",
                      G_CALLBACK(DropListSelectChild), b);
