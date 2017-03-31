@@ -112,17 +112,17 @@ wDropListClear(wList_p b)
 void *wDropListGetItemContext(wList_p b, wIndex_t inx)
 {
     GtkTreeIter iter;
-    void *data = NULL;
+    wListItem_p data = NULL;
 
     if (gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore), &iter, NULL,
                                       inx)) {
         gtk_tree_model_get(GTK_TREE_MODEL(b->listStore),
                            &iter,
-                           LISTCOL_DATA, &data,
+                           LISTCOL_DATA, (void *)&data,
                            -1);
     }
 
-    return (data);
+    return (data->itemData);
 }
 
 /**
@@ -248,17 +248,17 @@ static int DropListSelectChild(
 
     wIndex_t inx = 0;
     gchar *string;
-    void *addData;
+    wListItem_p addData;
 
     if (bl->recursion) {
         return 0;
     }
 
-    if (bl->type == B_DROPLIST && bl->editable) {
-        if (bl->editted == FALSE) {
-            return 0;
-        }
-    }
+    //if (bl->type == B_DROPLIST && bl->editable) {
+        //if (bl->editted == FALSE) {
+            //return 0;
+        //}
+    //}
 
     bl->editted = FALSE;
 
@@ -279,7 +279,7 @@ static int DropListSelectChild(
         /* Obtain string from model. */
         gtk_tree_model_get(model, &iter,
                            LISTCOL_TEXT, &string,
-                           LISTCOL_DATA, &addData,
+                           LISTCOL_DATA, (void *)&addData,
                            -1);
 
     }
@@ -295,7 +295,7 @@ static int DropListSelectChild(
 
         /* selection changed -> callback */
         if (string && bl->action) {
-            bl->action(inx, string, 1, bl->data, addData);
+            bl->action(inx, string, 1, bl->data, addData->itemData);
         }
     }
 
