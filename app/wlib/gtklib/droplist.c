@@ -136,7 +136,7 @@ void *wDropListGetItemContext(wList_p b, wIndex_t inx)
 void wDropListAddValue(
     wList_p b,
     char *text,
-    void *data)
+    wListItem_p data)
 {
     GtkTreeIter iter;
 
@@ -147,7 +147,7 @@ void wDropListAddValue(
 
     gtk_list_store_set(b->listStore, &iter,
                        LISTCOL_TEXT, text,
-                       LISTCOL_DATA, data,
+                       LISTCOL_DATA, (void *)data,
                        -1);
 }
 
