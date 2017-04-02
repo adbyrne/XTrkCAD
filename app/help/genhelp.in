@@ -6,10 +6,7 @@ cmdAbout	About box dialog
 cmdAbove	Move Selected object to top
 cmdAddElevations	Raise or Lower all Selected tracks
 cmdBelow	Move Selected object to bottom
-cmdBlockCreate	Create Block
-cmdBlockDelete	Delete Block
-cmdBlockEdit	Edit Block
-cmdBlockSetCmd	Block
+cmdBlockCreate	Create a section of track for automation. 
 cmdCarDesc	Create a new Car/Loco description
 cmdCarInventory	Manage your Car and Loco Inventory
 cmdCircleCenter	Create track circle from center	cmdCircle
@@ -21,6 +18,7 @@ cmdClearElevations	Removes elevation from Selected tracks
 cmdCmdopt	Command Options dialog
 cmdColor	Controls colors
 cmdConnect	Connect two tracks
+cmdControl	Create a control for layout automation
 cmdCopy	Copy selected objects to clipboard
 cmdCurveCenter	Create curved track from center	cmdCurve
 cmdCurveChord	Create curved track from chord	cmdCurve
@@ -126,13 +124,12 @@ cmdSelectCurrentLayer	Selects all objects in the current Layer	layer
 cmdSelectInvert	Invert current selection
 cmdSplitTrack	Split a track
 cmdSelectOrphaned	Select stranded (unconnected) track pieces
+cmdSensor	Create a sensor (ie. a occupancy detector or a toggle switch)
+cmdSignal	Create a signal for train control
 cmdSticky	Choose which commands are sticky
 cmdStraight	Create straight track
 cmdStructure	Place a structure on the layout
-cmdSwitchMotorCreate	Create Switch Motor
-cmdSwitchMotorDelete	Delete Switch Motor
-cmdSwitchMotorEdit	Edit Switch Motor
-cmdSwitchMotorSetCmd	Switch Motors
+cmdSwitchMotorCreate	Create a switchmotor for turnout control
 cmdText	Enter text on the layout
 cmdTextSize	Controls the size of the entered text	cmdText
 #cmdTighten	Remove slack from connected tracks
