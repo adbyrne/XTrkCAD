@@ -1,9 +1,9 @@
 /* XPM */ 
-static const unsigned char * dbezier_xpm[] = {
+static char * dbezier_xpm[] = {
 "16 16 3 1",
 " 	c None",
-"!	c black",
-"#	c #FF0000",
+"!	c #0000000000",
+"#	c #FF00000000",
 "      ###       ",
 "      # ########",
 "      ###   !!!!",

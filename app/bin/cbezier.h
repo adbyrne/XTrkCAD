@@ -31,7 +31,7 @@ typedef struct {
 typedef void (*bezMessageProc)( char *, ... );
 STATUS_T CreateBezier( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long, bezMessageProc );
 int IsBezier( track_p );
-track_p NewBezierTrack( coOrd, DIST_T, ANGLE_T, ANGLE_T, long );
+track_p NewBezierTrack( coOrd, coOrd, coOrd, coOrd);
 DIST_T BezierDescriptionDistance( coOrd, track_p );
 STATUS_T BezierDescriptionMove( track_p, wAction_t, coOrd );
 BOOL_T GetBeziereMiddle( track_p, coOrd * );

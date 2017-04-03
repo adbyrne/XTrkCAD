@@ -236,6 +236,7 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 	DIST_T d;
 	static int segCnt;
 	STATUS_T rc = C_CONTINUE;
+	long curveMode = 0;
 
 	switch (action) {
 
@@ -243,13 +244,13 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		curveMode = (long)commandContext;
 		Da.state = -1;
 		tempSegs_da.cnt = 0;
-		return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 0, InfoMessage );
+		return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 0, 0, InfoMessage );
 		
 	case C_TEXT:
 		if ( Da.state == 0 )
-			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 0, InfoMessage );
+			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 0, 0, InfoMessage );
 		else
-			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 1, InfoMessage );
+			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 1, 0, InfoMessage );
 
 	case C_DOWN:
 		if ( Da.state == -1 ) {
@@ -257,7 +258,7 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			Da.pos[0] = pos;
 			Da.state = 0;  //Draw 
 			Da.selectPoint = 1;
-			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 0, InfoMessage );
+			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 0, 0, InfoMessage );
 			//Da.pos0 = pos;
 		} else if (Da.state == 1) {
 			SnapPos( &pos );
@@ -265,7 +266,7 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			Da.state = 2;
 			Da.selectPoint = 3;
 			tempSegs_da.cnt = segCnt;
-			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 1, InfoMessage );
+			return CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, 1, 0, InfoMessage );
 		} else {
 			double dd = 0;
 			Da.selectPoint = -1;
@@ -280,18 +281,19 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		    }
 		    switch (Da.selectPoint) {
 		    	case 1: DrawControlArm(&tempSegs(1),Da.pos[0],Da.pos[1], TRUE, FALSE, 
-							drawColorRed, drawColorBlack, drawColorBlack, drawColorRed); 
+							drawColorRed, drawColorBlack, drawColorBlack); 
 						break;
 		    	case 2: DrawControlArm(&tempSegs(1),Da.pos[0],Da.pos[1], FALSE, TRUE, 
-							drawColorRed, drawColorBlack, drawColorBlack, drawColorRed); 
+							drawColorRed, drawColorBlack, drawColorBlack); 
 						break;
 		    	case 3: DrawControlArm(&tempSegs(1),Da.pos[2],Da.pos[3], TRUE, FALSE, 
-							drawColorRed, drawColorBlack, drawColorBlack, drawColorRed); 
+							drawColorRed, drawColorBlack, drawColorBlack); 
 						break;
 		    	case 4: DrawControlArm(&tempSegs(1),Da.pos[2], Da.pos[3], TRUE, FALSE, 
-							drawColorRed, drawColorBlack, drawColorBlack, drawColorRed); 
+							drawColorRed, drawColorBlack, drawColorBlack); 
 						break;
 		    	default:
+				break;
 			}
 			
 			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
@@ -306,28 +308,30 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
         if ( Da.state == 0 || Da.state == 2) {
 			SnapPos( &pos );
 			//Da.pos[1] = pos;
-			rc = CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, Da.state/2 , InfoMessage );
+			rc = CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, Da.state/2 , 0, InfoMessage );
 		} else if (Da.state == 3) {
-			if (track && Da.trk[Da.selectPoint/2]) {
-				angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk[Da.selectPoint],Da.pos[0]);
+			if (Da.trk[Da.selectPoint] && Da.trk[Da.selectPoint/2]) {
+				ANGLE_T angle1,angle2;
+				angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk[Da.selectPoint],Da.selectPoint/2));
 				angle2 = NormalizeAngle(FindAngle(pos, Da.pos[Da.selectPoint])-angle1);
 				if (angle2 > 90.0 && angle2 < 270.0)
 					Translate( &pos, Da.pos[Da.selectPoint/2], angle1, -FindDistance( Da.pos[Da.selectPoint/2], pos )*cos(D2R(angle2)) );
 				else pos = Da.pos[Da.selectPoint];
 				switch (Da.selectPoint) {
 		    	case 1: DrawControlArm(&tempSegs(1),Da.pos[0],Da.pos[1], TRUE, FALSE, 
-							drawColorRed, drawColorBlack, drawColorBlack, drawColorRed); 
+							drawColorRed, drawColorBlack, drawColorBlack); 
 						break;
 		    	case 2: DrawControlArm(&tempSegs(1),Da.pos[0],Da.pos[1], FALSE, TRUE, 
-							drawColorRed, drawColorBlack, drawColorBlack, drawColorRed); 
+							drawColorRed, drawColorBlack, drawColorBlack); 
 						break;
 		    	case 3: DrawControlArm(&tempSegs(1),Da.pos[2],Da.pos[3], TRUE, FALSE, 
-							drawColorRed, drawColorBlack, drawColorBlack, drawColorRed); 
+							drawColorRed, drawColorBlack, drawColorBlack); 
 						break;
 		    	case 4: DrawControlArm(&tempSegs(1),Da.pos[2], Da.pos[3], TRUE, FALSE, 
-							drawColorRed, drawColorBlack, drawColorBlack, drawColorRed); 
+							drawColorRed, drawColorBlack, drawColorBlack); 
 						break;
 		    	default:
+						break;
 		    	}
 			}		
 		} else {
@@ -346,19 +350,17 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			if (Da.state == 0) Da.pos[1]= pos;
 			else Da.pos[2] = pos;
 			Da.state = Da.state + 1;
-			CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, Da.state/2, InfoMessage );
+			CreateBezCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, Da.state/2, 0, InfoMessage );
 			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 			mainD.funcs->options = 0;
 			segCnt = tempSegs_da.cnt;
-            else InfoMessage( _("Select control point or end and drag to adjust, Space or Enter to finish") );
+            InfoMessage( _("Select control point or end and drag to adjust, Space or Enter to finish") );
 			return C_CONTINUE;
         } else {
-        	Snap(&pos);
-        	Da.pos[Da.selectPoint] = pos;
+        	SnapPos(&pos);
+        	Da.pos[Da.selectPoint] = pos;	
 			
-			
-			
-			ainD.funcs->options = 0;
+			mainD.funcs->options = 0;
 			tempSegs_da.cnt = 0;
 			Da.state = -1;
 			if (Da.curveData.type == curveTypeStraight) {
@@ -379,7 +381,7 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 						Da.curveData.a0, Da.curveData.a1, 0 );
 				if (Da.trk) {
 					EPINX_T ep = PickUnconnectedEndPoint(Da.pos[0], t);
-					if (ep != -1) ConnectTracks(Da.trk, Da.ep, t, ep);
+					if (ep != -1) ConnectTracks(Da.trk[Da.selectPoint], Da.ep[Da.selectPoint/2], t, ep);
 				}
 				UndoEnd();
 			} else {
@@ -416,7 +418,8 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 			mainD.funcs->options = 0;
 			tempSegs_da.cnt = 0;
-			Da.trk = NULL;
+			Da.trk[0] = NULL;
+			Da.trk[1] = NULL;
 		}
 		Da.state = -1;
 		return C_CONTINUE;
@@ -434,14 +437,14 @@ static STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 EXPORT long circleMode;
 
 
-#include "bitmaps/beztrack.xpm"
-#include "bitmaps/bezline.xpm"
+#include "bitmaps/bezier.xpm"
+#include "bitmaps/dbezier.xpm"
 
 EXPORT void InitCmdBezier( wMenu_p menu )
 {	
-	AddMenuButton( menu, CreateBezCurve, "cmdBezierTrack", _("Bezier Track"), wIconCreatePixMap( beztrack_xpm ),
+	AddMenuButton( menu, CmdBezCurve, "cmdBezierTrack", _("Bezier Track"), wIconCreatePixMap( bezier_xpm ),
         LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE5, (void*)4 );
-    AddMenuButton( menu, CreateBezCurve, "cmdBezierLine", _("Bezier Line"), wIconCreatePixMap( bezline_xpm ),
+    AddMenuButton( menu, CmdBezCurve, "cmdBezierLine", _("Bezier Line"), wIconCreatePixMap( dbezier_xpm ),
         LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE5, (void*)4 );    
 	ParamRegister( &bezierPG );
 	RegisterChangeNotification( ChangeBezierW );
