@@ -110,65 +110,6 @@ wlibListStoreGetContext(GtkListStore *ls, int inx)
 
 
 /**
- *
- * \param bl IN widget
- * \param labelStr IN ?
- * \param labelSize IN ?
- * \param listDataRet IN
- * \param itemDataRet IN
- * \returns
- */
-
-wIndex_t wListGetValues(
-    wList_p bl,
-    char * labelStr,
-    int labelSize,
-    void * * listDataRet,
-    void * * itemDataRet)
-{
-    wListItem_p id_p;
-    wIndex_t inx = bl->last;
-    const char * entry_value = "";
-    void * item_data = NULL;
-
-    assert(bl != NULL);
-    assert(bl->listStore != NULL);
-
-    if (bl->type == B_DROPLIST && bl->editted) {
-        entry_value = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(
-                                             bl->widget))));
-        inx = bl->last = -1;
-    } else {
-        inx = bl->last;
-
-        if (inx >= 0) {
-            id_p = wlibListStoreGetContext(bl->listStore, inx);
-
-            if (id_p==NULL) {
-                fprintf(stderr, "wListGetValues - id_p == NULL\n");
-            } else {
-                entry_value = id_p->label;
-                item_data = id_p->itemData;
-            }
-        }
-    }
-
-    if (labelStr) {
-        strncpy(labelStr, entry_value, labelSize);
-    }
-
-    if (listDataRet) {
-        *listDataRet = bl->data;
-    }
-
-    if (itemDataRet) {
-        *itemDataRet = item_data;
-    }
-
-    return bl->last;
-}
-
-/**
  * Clear the list store
  *
  * \param listStore IN
