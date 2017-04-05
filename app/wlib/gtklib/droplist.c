@@ -231,6 +231,32 @@ wBool_t wDropListSetValues(
 }
 
 /**
+ * Signal handler for the "activated"-signal in drop list's entry field. 
+ * Get the entered text and calls the 'action' for handling of entered 
+ * value.
+ * *
+ * \param entry IN entry field of the droplist
+ * \param data IN the drop list handle
+ * \return
+ */
+
+static void DropListEntryEntered(
+	GtkEntry * entry,
+	gpointer userData)
+{
+	const gchar *text;
+	gchar *copyOfText;
+	
+	text = gtk_entry_get_text (entry);
+	if(*text != '\0' ) {
+		copyOfText = g_strdup(text);
+		((wList_p)userData)->editted = TRUE;
+		((wList_p)userData)->action(-1, copyOfText, 1, ((wList_p)userData)->data, NULL);
+		g_free((gpointer)copyOfText);
+	}	
+}
+
+/**
  * Signal handler for the "changed"-signal in drop list. Gets the selected
  * text and determines the selected row in the tree model.
  *
@@ -401,6 +427,13 @@ wList_p wDropListCreate(
 
     g_signal_connect(GTK_OBJECT(b->widget), "changed",
                      G_CALLBACK(DropListSelectChild), b);
+                     
+    if (option & BL_EDITABLE) {
+		g_signal_connect( gtk_bin_get_child(GTK_BIN(b->widget)),
+						  "activate",
+						  G_CALLBACK(DropListEntryEntered),
+						  b ); 
+	}
 
     gtk_widget_set_size_request(b->widget, width, -1);
 
