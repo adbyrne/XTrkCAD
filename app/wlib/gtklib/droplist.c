@@ -231,7 +231,7 @@ wBool_t wDropListSetValues(
 }
 
 /**
- * Signal handler for the "activated"-signal in drop list's entry field.
+ * Signal handler for the "changed"-signal in drop list's entry field.
  * Get the entered text and calls the 'action' for handling of entered
  * value.
  * *
@@ -244,11 +244,11 @@ static void DropListEntryEntered(
     GtkEntry * entry,
     gpointer userData)
 {
-    const gchar *text;
+    const gchar * text;
 
     text = gtk_entry_get_text(entry);
 
-    if (*text != '\0') {
+    if (!text || *text != '\0') {
         gchar *copyOfText = g_strdup(text);;
         ((wList_p)userData)->editted = TRUE;
         ((wList_p)userData)->action(-1, copyOfText, 1, ((wList_p)userData)->data, NULL);
@@ -302,7 +302,7 @@ static int DropListSelectChild(
                            LISTCOL_DATA, (void *)&addData,
                            -1);
 
-    }
+    } else return 0;  
 
     /* selection changed, store new selections and call back */
     if (bl->last != inx) {
@@ -424,7 +424,7 @@ wList_p wDropListCreate(
 
     if (option & BL_EDITABLE) {
         g_signal_connect(gtk_bin_get_child(GTK_BIN(b->widget)),
-                         "activate",
+                         "changed",
                          G_CALLBACK(DropListEntryEntered),
                          b);
     }
