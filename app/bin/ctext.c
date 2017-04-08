@@ -1,7 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctext.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
- *
- * TEXT
+/** \file ctext.c
+ *  Text command
  *
  */
 
@@ -26,11 +24,11 @@
 #include "track.h"
 #include "i18n.h"
 
-
 track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize, wDrawColor color );
 
 void LoadFontSizeList( wList_p, long );
 void UpdateFontSizeList( long *, wList_p, wIndex_t );
+long GetFontSize(long);
 
 static wMenu_p textPopupM;
 
@@ -60,6 +58,11 @@ static paramData_t textPLs[] = {
         };
 static paramGroup_t textPG = { "text", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
 
+enum TEXT_POSITION
+{
+	POSITION_TEXT = 0,
+	SHOW_TEXT
+};
 
 static void TextDlgUpdate(
 		paramGroup_p pg,
@@ -70,20 +73,20 @@ static void TextDlgUpdate(
 
 	switch (inx) {
 	case 0:
-		if ( Dt.state == 1 ) {
+		if ( Dt.state == SHOW_TEXT) {
 			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 		}
 		UpdateFontSizeList( &Dt.size, (wList_p)textPLs[0].control, Dt.fontSizeInx );
 		/*wWinSetBusy( mainW, TRUE );*/
-		if ( Dt.state == 1 ) {
+		if ( Dt.state == SHOW_TEXT) {
 			DrawTextSize( &mainD, Dt.text, NULL, Dt.size, TRUE, &size );
 			Dt.textLen = size.x;
 		}
 		DrawTextSize( &mainD, "X", NULL, Dt.size, TRUE, &size );
 		Dt.cursHeight = size.y;
 		/*wWinSetBusy( mainW, FALSE );*/
-		if ( Dt.state == 1 ) {
+		if ( Dt.state == SHOW_TEXT) {
 			Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x+Dt.textLen;
 			Dt.cursPos1.y = Dt.pos.y+Dt.cursHeight;
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
@@ -105,24 +108,29 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 
 	switch (action & 0xFF) {
 	case C_START:
-		/* check if font size was updated by the preferences dialog */
-		Dt.size = (CSIZE_T)wSelectedFontSize();
-        Dt.state = 0;
+        Dt.state = POSITION_TEXT;
 		Dt.cursPos0 = Dt.cursPos1 = zero;
 		Dt.len = 0;
 		Dt.textLen = 0;
 		Dt.text[0] = '\0';
-		if ( !inPlayback )
-			wWinSetBusy( mainW, TRUE );
-		DrawTextSize( &mainD, "X", NULL, Dt.size, TRUE, &size );
-		Dt.cursHeight = size.y;
-		if ( !inPlayback )
-			wWinSetBusy( mainW, FALSE );
-		if ( textPD.control==NULL ) {
-			ParamCreateControls( &textPG, TextDlgUpdate );
+
+		if (textPD.control == NULL)
+		{
+			ParamCreateControls(&textPG, TextDlgUpdate);
+			LoadFontSizeList((wList_p)textPD.control, Dt.size);
+			ParamRegister(&textPG);
+			Dt.size = GetFontSize(Dt.fontSizeInx);
 		}
-		LoadFontSizeList( (wList_p)textPD.control, Dt.size );
+		ParamLoadControls(&textPG);
 		ParamGroupRecord( &textPG );
+
+		if (!inPlayback)
+			wWinSetBusy(mainW, TRUE);
+		DrawTextSize(&mainD, "X", NULL, Dt.size, TRUE, &size);
+		Dt.cursHeight = size.y;
+		if (!inPlayback)
+			wWinSetBusy(mainW, FALSE);
+
 		controls[0] = textPD.control;
 		controls[1] = colorPD.control;
         controls[2] = 0;
@@ -142,7 +150,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.cursPos1.y += Dt.cursHeight;
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
-        Dt.state = 1;
+        Dt.state = SHOW_TEXT;
         MainRedraw();
 		return C_CONTINUE;
 	case C_MOVE:
@@ -159,14 +167,13 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 	case C_UP:
 		return C_CONTINUE;
 	case C_TEXT:
-		if (Dt.state == 0) {
+		if (Dt.state == POSITION_TEXT) {
 			NoticeMessage( MSG_SEL_POS_FIRST, _("Ok"), NULL );
 			return C_CONTINUE;
 		}
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		c = (unsigned char)(action >> 8);
-/*lprintf("C=%x\n", c);*/
 		switch (c) {
 		case '\b':
 		case 0xFF:
@@ -182,7 +189,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color );
 			UndoEnd();
 			DrawNewTrack(t); 
-			Dt.state = 0;
+			Dt.state = POSITION_TEXT;
 			InfoSubstituteControls( NULL, NULL );
 			return C_TERMINATE;
 		default:
@@ -204,18 +211,18 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		}
 		return C_CONTINUE;
 	case C_CANCEL:
-		if (Dt.state != 0) {
+		if (Dt.state != POSITION_TEXT) {
 			//DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 			//DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-			Dt.state = 0;
+			Dt.state = POSITION_TEXT;
 		}
 		InfoSubstituteControls( NULL, NULL );
 		MainRedraw();
 		return C_TERMINATE;
 	case C_OK:
-		if (Dt.state != 0) {
+		if (Dt.state != POSITION_TEXT) {
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-			Dt.state = 0;
+			Dt.state = POSITION_TEXT;
 			if (Dt.len) {
 				UndoStart( _("Create Text"), "newText - OK" );
 				t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color );
@@ -228,7 +235,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_FINISH:
-		if (Dt.state != 0 && Dt.len > 0)
+		if (Dt.state != POSITION_TEXT && Dt.len > 0)
 			 CmdText( C_OK, pos );
 		else
 			CmdText( C_CANCEL, pos );
@@ -251,7 +258,6 @@ void InitCmdText( wMenu_p menu )
 	wMenuPushCreate( textPopupM, "", _("Fonts..."), 0, (wMenuCallBack_p)SelectFont, NULL );
 	Dt.size = (CSIZE_T)wSelectedFontSize();
     Dt.color = wDrawColorBlack;
-	ParamRegister( &textPG );
 }
 
 void InitTrkText( void )

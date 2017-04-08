@@ -60,6 +60,10 @@ EXPORT void LoadFontSizeList(
 	wFlush();
 }
 
+long GetFontSize(wIndex_t inx)
+{
+	return(fontSizeList[inx]);
+}
 
 EXPORT void UpdateFontSizeList(
 		long * fontSizeR,
