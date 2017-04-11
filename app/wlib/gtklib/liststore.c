@@ -83,88 +83,31 @@ wlibListStoreGetContext(GtkListStore *ls, int inx)
     gchar *string = NULL;
     gboolean result;
     gint childs;
-    
-    childs = gtk_tree_model_iter_n_children (GTK_TREE_MODEL(ls),
-											NULL );
 
-	if(inx < childs) {
-	    result = gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
-	                                  &iter,
-	                                  NULL,
-	                                  inx);
-		if( result ) {								
-			gtk_tree_model_get(GTK_TREE_MODEL(ls),
-							&iter,
-	                       LISTCOL_DATA,
-	                       &string,
-	                       -1);
-		} else {
-			printf( "Invalid index %d for list!\n", inx );
-	
-		}
-	}	
-    return (string);
-}
+    childs = gtk_tree_model_iter_n_children(GTK_TREE_MODEL(ls),
+                                            NULL);
 
+    if (inx < childs) {
+        result = gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(ls),
+                                               &iter,
+                                               NULL,
+                                               inx);
 
-/**
- *
- * \param bl IN widget
- * \param labelStr IN ?
- * \param labelSize IN ?
- * \param listDataRet IN
- * \param itemDataRet IN
- * \returns
- */
+        if (result) {
+            gtk_tree_model_get(GTK_TREE_MODEL(ls),
+                               &iter,
+                               LISTCOL_DATA,
+                               &string,
+                               -1);
+        } else {
+            printf("Invalid index %d for list!\n", inx);
 
-wIndex_t wListGetValues(
-    wList_p bl,
-    char * labelStr,
-    int labelSize,
-    void * * listDataRet,
-    void * * itemDataRet)
-{
-    wListItem_p id_p;
-    wIndex_t inx = bl->last;
-    const char * entry_value = "";
-    void * item_data = NULL;
-
-    assert(bl != NULL);
-    assert(bl->listStore != NULL);
-
-    if (bl->type == B_DROPLIST && bl->editted) {
-        entry_value = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(
-                                             bl->widget))));
-        inx = bl->last = -1;
-    } else {
-        inx = bl->last;
-
-        if (inx >= 0) {
-            id_p = wlibListStoreGetContext(bl->listStore, inx);
-
-            if (id_p==NULL) {
-                fprintf(stderr, "wListGetValues - id_p == NULL\n");
-            } else {
-                entry_value = id_p->label;
-                item_data = id_p->itemData;
-            }
         }
     }
 
-    if (labelStr) {
-        strncpy(labelStr, entry_value, labelSize);
-    }
-
-    if (listDataRet) {
-        *listDataRet = bl->data;
-    }
-
-    if (itemDataRet) {
-        *itemDataRet = item_data;
-    }
-
-    return bl->last;
+    return (string);
 }
+
 
 /**
  * Clear the list store
@@ -313,8 +256,8 @@ wlibListStoreUpdateValues(GtkListStore *ls, int row, int cols, char *labels,
     count = wlibListStoreUpdateIter(ls, &iter, labels);
 
     if (bm) {
-		GdkPixbuf *pixbuf;
-        
+        GdkPixbuf *pixbuf;
+
         pixbuf = wlibMakePixbuf(bm);
         wlibListStoreSetPixbuf(ls, &iter, pixbuf);
     }

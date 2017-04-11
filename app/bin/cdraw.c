@@ -60,6 +60,10 @@ EXPORT void LoadFontSizeList(
 	wFlush();
 }
 
+long GetFontSize(wIndex_t inx)
+{
+	return(fontSizeList[inx]);
+}
 
 EXPORT void UpdateFontSizeList(
 		long * fontSizeR,
@@ -393,6 +397,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[inx].control0 = NULL;
 	}
 	drawData.color = segPtr->color;
+	drawData.layer = GetTrkLayer(trk);
 	drawDesc[CO].mode = 0;
 	drawData.lineWidth = (long)floor(segPtr->width*mainD.dpi+0.5);
 	drawDesc[LW].mode = 0;
@@ -765,40 +770,6 @@ static void DrawRedraw( void )
 }
 
 
-#ifdef LATER
-static void DrawOk( void * context )
-{
-	track_p t;
-	struct extraData * xx;
-	trkSeg_p sp;
-	wIndex_t cnt;
-
-	for ( cnt=0,sp=&DrawLineSegs(0); sp < &DrawLineSegs(drawCmdContext.Segs_da.cnt); sp++ )
-		if (sp->type != ' ')
-			cnt++;
-	if (cnt == 0)
-		return;
-	UndoStart( _("Create Lines"), "newDraw" );
-	for ( sp=&DrawLineSegs(0); sp < &DrawLineSegs(drawCmdContext.Segs_da.cnt); sp++ ) {
-		if (sp->type != ' ') {
-			t = NewTrack( 0, T_DRAW, 0, sizeof *xx + sizeof *(trkSeg_p)0 );
-			xx = GetTrkExtraData( t );
-			xx->orig = zero;
-			xx->angle = 0.0;
-			xx->segCnt = 1;
-			memcpy( xx->segs, sp, sizeof *(trkSeg_p)0 );
-			ComputeDrawBoundingBox( t );
-			DrawNewTrack(t);
-		}
-	}
-	UndoEnd();
-	DYNARR_RESET( trkSeg_t, drawCmdContext.Segs_da );
-	Reset();
-}
-#endif
-
-
-
 static wIndex_t benchChoice;
 static wIndex_t benchOrient;
 static wIndex_t dimArrowSize;
@@ -917,10 +888,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			labels[2] = N_("Color");
 			if ( wListGetCount( (wList_p)drawBenchChoicePD.control ) == 0 )
 				BenchLoadLists( (wList_p)drawBenchChoicePD.control, (wList_p)drawBenchOrientPD.control );
-#ifdef LATER
-			if ( benchInx >= 0 && benchInx < wListGetCount( (wList_p)drawBenchChoicePD.control ) )
-				wListSetIndex( (wList_p)drawBenchChoicePD.control, benchInx );
-#endif
+
 			ParamLoadControls( &drawPG );
 			BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, benchChoice ), (wList_p)drawBenchOrientPD.control );
 			wListSetIndex( (wList_p)drawBenchOrientPD.control, benchOrient );
@@ -962,9 +930,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		if ( drawCmdContext.Op == OP_BENCH ) {
 			drawCmdContext.benchOption = GetBenchData( (long)wListGetItemContext((wList_p)drawBenchChoicePD.control, benchChoice ), benchOrient );
 			drawCmdContext.Color = benchColor;
-#ifdef LATER
-			benchInx = wListGetIndex( (wList_p)drawBenchChoicePD.control );
-#endif
+
 		} else if ( drawCmdContext.Op == OP_DIMLINE ) {
 			drawCmdContext.benchOption = dimArrowSize;
 		} else {
@@ -1076,29 +1042,6 @@ static drawStuff_t drawStuff[4] = {
 		{ "cmdDrawCircleSetCmd", N_("Circle Lines"), N_("Draw Circles"), 4, dcircleCmds },
 		{ "cmdDrawShapeSetCmd", N_("Shapes"), N_("Draw Shapes"), 4, dshapeCmds} };
 		
-
-#ifdef LATER
-static void SetDrawMode( char * modeName )
-{
-	wButton_p bb;
-	int inx1, inx2;
-	drawData_t * dp;
-
-	for ( inx1=0; inx1<4; inx1++ ) {
-		for ( inx2=0; inx2<drawStuff[inx1].cnt; inx2++ ) {
-			dp = &drawStuff[inx1].data[inx2];
-			if (strncmp( modeName, dp->modeS, strlen(dp->modeS) ) == 0 ) {
-				bb = GetCommandButton(drawStuff[inx1].cmdInx);
-				wButtonSetLabel( bb, (char*)(dp->icon) );
-				wControlSetHelp( (wControl_p)bb, dp->help );
-				drawStuff[inx1].curr = inx2;
-				DoCommandB( (void*)(drawStuff[inx1].cmdInx) );
-				return;
-			}
-		}
-	}
-}
-#endif
 
 
 static void ChangeDraw( long changes )

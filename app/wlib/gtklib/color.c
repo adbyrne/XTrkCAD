@@ -30,13 +30,10 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
-#undef GSEAL_ENABLE  // doesn't work for color selection dialog
-
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
 #include "gtkint.h"
-#include "square10.bmp"
 
 wDrawColor wDrawColorWhite;
 wDrawColor wDrawColorBlack;
@@ -316,118 +313,6 @@ GdkColor* wlibGetColor(
     }
 }
 
-/*
- *****************************************************************************
- *
- * Color Selection Dialog
- *
- *****************************************************************************
- */
-
-
-static int colorSelectValid;
-
-/**
- * Signal handler to accept the selection
- *
- * \param widget IN widget which emitted the signal
- * \param window IN the selection window
- * \return FALSE
- */
-
-static int colorSelectOk(
-    GtkWidget * widget,
-    GtkWidget * * window)
-{
-    wlibDoModal(NULL, FALSE);
-    gtk_widget_hide(GTK_WIDGET(*window));
-    colorSelectValid = TRUE;
-    return FALSE;
-}
-
-/**
- * Signal handler to cancel the selection
- *
- * \param widget IN widget which emitted the signal
- * \param window IN the selection window
- * \return FALSE
- */
-
-static int colorSelectCancel(
-    GtkWidget * widget,
-    GtkWidget * * window)
-{
-    wlibDoModal(NULL, FALSE);
-    gtk_widget_hide(GTK_WIDGET(*window));
-    colorSelectValid = FALSE;
-
-    if (widget == *window)
-        /* Called by destroy event, window is gone */
-    {
-        *window = NULL;
-    }
-
-    return FALSE;
-}
-
-
-/**
- * Run the color selection dialog
- *
- * \param title IN dialog box title
- * \param color IN OUT selected color
- * \return TRUE valid color has been selected, FALSE otherwise
- */
-
-wBool_t wColorSelect(
-    const char * title,
-    wDrawColor * color)
-{
-    static GtkWidget * colorSelectD = NULL;
-    GdkColor colors;
-    colorMap_t * colorMap_e;
-
-    if (colorSelectD == NULL) {
-        colorSelectD = gtk_color_selection_dialog_new(title);
-        g_signal_connect(GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(
-                                        colorSelectD)->ok_button), "clicked", G_CALLBACK(colorSelectOk),
-                         (gpointer)&colorSelectD);
-        g_signal_connect(GTK_OBJECT(GTK_COLOR_SELECTION_DIALOG(
-                                        colorSelectD)->cancel_button), "clicked", G_CALLBACK(colorSelectCancel),
-                         (gpointer)&colorSelectD);
-        g_signal_connect(GTK_OBJECT(colorSelectD), "destroy",
-                         G_CALLBACK(colorSelectCancel), (gpointer)&colorSelectD);
-    } else {
-        gtk_window_set_title(GTK_WINDOW(colorSelectD), title);
-    }
-
-    if (!colorMap_garray) {
-        init_colorMap();
-    }
-
-    colorMap_e = &g_array_index(colorMap_garray, colorMap_t, *color);
-    colors.red = colorMap_e->red*256;
-    colors.green = colorMap_e->green*256;
-    colors.blue = colorMap_e->blue*256;
-    gtk_color_selection_set_current_color(GTK_COLOR_SELECTION(
-            GTK_COLOR_SELECTION_DIALOG(colorSelectD)->colorsel), &colors);
-    gtk_widget_show(colorSelectD);
-    wlibDoModal(NULL, TRUE);
-
-    if (colorSelectValid) {
-        long rgb;
-
-        gtk_color_selection_get_current_color(GTK_COLOR_SELECTION(
-                GTK_COLOR_SELECTION_DIALOG(colorSelectD)->colorsel), &colors);
-        rgb = RGB((int)(colors.red/256), (int)(colors.green/256),
-                  (int)(colors.blue/256));
-        * color = wDrawFindColor(rgb);
-        return TRUE;
-    }
-
-    return FALSE;
-}
-
 
 /*
  *****************************************************************************
@@ -439,31 +324,39 @@ wBool_t wColorSelect(
 
 typedef struct {
     wDrawColor * valueP;
-    wColorSelectButtonCallBack_p action;
     const char * labelStr;
+    wColorSelectButtonCallBack_p action;
     void * data;
     wDrawColor color;
     wButton_p button;
 } colorData_t;
 
-static void doColorButton(
-    void * data)
+/**
+ * Handle the color-set signal.
+ *
+ * \param widget  color button
+ * \param user_data
+ */
+
+static void
+colorChange(GtkColorButton *widget, gpointer user_data)
 {
-    colorData_t * cd = (colorData_t *)data;
-    wDrawColor newColor;
-    newColor = cd->color;
+    colorData_t *cd = user_data;
+    GdkColor newcolor;
+    long rgb;
 
-    if (wColorSelect(cd->labelStr, &newColor)) {
-        cd->color = newColor;
-        wColorSelectButtonSetColor(cd->button, newColor);
+    gtk_color_button_get_color(widget, &newcolor);
 
-        if (cd->valueP) {
-            *(cd->valueP) = newColor;
-        }
+    rgb = RGB((int)(newcolor.red/256), (int)(newcolor.green/256),
+              (int)(newcolor.blue/256));
+    cd->color = wDrawFindColor(rgb);
 
-        if (cd->action) {
-            cd->action(cd->data, newColor);
-        }
+    if (cd->valueP) {
+        *(cd->valueP) = cd->color;
+    }
+
+    if (cd->action) {
+        cd->action(cd->data, cd->color);
     }
 }
 
@@ -479,9 +372,10 @@ void wColorSelectButtonSetColor(
     wButton_p bb,
     wDrawColor color)
 {
-    wIcon_p bm;
-    bm = wIconCreateBitMap(square10_width, square10_height, square10_bits, color);
-    wButtonSetLabel(bb, (const char*)bm);
+    GdkColor *colorOfButton = wlibGetColor(color, TRUE);
+
+    gtk_color_button_set_color(GTK_COLOR_BUTTON(bb->widget),
+                               colorOfButton);
     ((colorData_t*)((wControl_p)bb)->data)->color = color;
 }
 
@@ -502,7 +396,7 @@ wDrawColor wColorSelectButtonGetColor(
 /**
  * Create the button showing the current paint color and starting the color selection dialog.
  *
- \param IN parent parent window
+ * \param IN parent parent window
  * \param IN x x coordinate
  * \param IN Y y coordinate
  * \param IN helpStr balloon help string
@@ -527,24 +421,46 @@ wButton_p wColorSelectButtonCreate(
     wColorSelectButtonCallBack_p action,
     void 	* data)
 {
-    wButton_p bb;
-    wIcon_p bm;
+    wButton_p b;
     colorData_t * cd;
-    bm = wIconCreateBitMap(square10_width, square10_height, square10_bits,
-                           (valueP?*valueP:0));
     cd = malloc(sizeof(colorData_t));
     cd->valueP = valueP;
     cd->action = action;
     cd->data = data;
     cd->labelStr = labelStr;
     cd->color = (valueP?*valueP:0);
-    bb = wButtonCreate(parent, x, y, helpStr, (const char*)bm, option|BO_ICON,
-                       width, doColorButton, cd);
-    cd->button = bb;
 
-    if (labelStr) {
-        ((wControl_p)bb)->labelW = wlibAddLabel((wControl_p)bb, labelStr);
+    b = wlibAlloc(parent, B_BUTTON, x, y, labelStr, sizeof *b, cd);
+    b->option = option;
+    wlibComputePos((wControl_p)b);
+
+    b->widget = gtk_color_button_new();
+    GtkStyle *style;
+    style = gtk_widget_get_style(b->widget);
+    style->xthickness = 1;
+    style->ythickness = 1;
+    gtk_widget_set_style(b->widget, style);
+    gtk_widget_set_size_request(GTK_WIDGET(b->widget), 22, 22);
+    g_signal_connect(GTK_OBJECT(b->widget), "color-set",
+                     G_CALLBACK(colorChange), cd);
+
+    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+
+    if (option & BB_DEFAULT) {
+        gtk_widget_set_can_default(b->widget, GTK_CAN_DEFAULT);
+        gtk_widget_grab_default(b->widget);
+        gtk_window_set_default(GTK_WINDOW(parent->gtkwin), b->widget);
     }
 
-    return bb;
+    wlibControlGetSize((wControl_p)b);
+
+    gtk_widget_show(b->widget);
+    wlibAddButton((wControl_p)b);
+    wlibAddHelpString(b->widget, helpStr);
+    wColorSelectButtonSetColor(b, (valueP?*valueP:0));
+    
+    if (labelStr) {
+        ((wControl_p)b)->labelW = wlibAddLabel((wControl_p)b, labelStr);
+    }
+    return b;
 }

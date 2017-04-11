@@ -39,6 +39,7 @@
 struct listSearch {
     const char *search;
     char *result;
+    int row;
 };
 
 
@@ -129,18 +130,18 @@ CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
                        &id_p,
                        -1);
 
-    if (id_p && id_p->label && strcmp(id_p->label, search->search) == 0) {
+    if (id_p && id_p->label && !strcmp(id_p->label, search->search)) {
         search->result = (char *)id_p->label;
         return TRUE;
     } else {
         search->result = NULL;
+        search->row++;
         return FALSE;
     }
 }
 
 /**
- * Find the row which contains the specified text. It is unclear whether
- * this is ever called, so I put an assert that always fails
+ * Find the row which contains the specified text.
  *
  * \param b IN
  * \param val IN
@@ -156,14 +157,17 @@ wIndex_t wListFindValue(
     assert(b!=NULL);
     assert(b->listStore!=NULL);
 
-    assert(FALSE);
-
     thisSearch.search = val;
+    thisSearch.row = 0;
 
     gtk_tree_model_foreach(GTK_TREE_MODEL(b->listStore), CompareListData,
                            (void *)&thisSearch);
 
-    return -1;
+    if (!thisSearch.result) {
+        return -1;
+    } else {
+        return thisSearch.row;
+    }
 }
 
 /**
@@ -204,6 +208,65 @@ void * wListGetItemContext(
     } else {
         return wTreeViewGetItemContext(b, inx);
     }
+}
+
+/**
+ *
+ * \param bl IN widget
+ * \param labelStr IN ?
+ * \param labelSize IN ?
+ * \param listDataRet IN
+ * \param itemDataRet IN
+ * \returns
+ */
+
+wIndex_t wListGetValues(
+    wList_p bl,
+    char * labelStr,
+    int labelSize,
+    void * * listDataRet,
+    void * * itemDataRet)
+{
+    wListItem_p id_p;
+    wIndex_t inx = bl->last;
+    const char * entry_value = "";
+    void * item_data = NULL;
+
+    assert(bl != NULL);
+    assert(bl->listStore != NULL);
+
+    if (bl->type == B_DROPLIST && bl->editted) {
+        entry_value = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(
+                                             bl->widget))));
+        inx = bl->last = -1;
+    } else {
+        inx = bl->last;
+
+        if (inx >= 0) {
+            id_p = wlibListStoreGetContext(bl->listStore, inx);
+
+            if (id_p==NULL) {
+                fprintf(stderr, "wListGetValues - id_p == NULL\n");
+            } else {
+                entry_value = id_p->label;
+                item_data = id_p->itemData;
+            }
+        }
+    }
+
+    if (labelStr) {
+        strncpy(labelStr, entry_value, labelSize);
+    }
+
+    if (listDataRet) {
+        *listDataRet = bl->data;
+    }
+
+    if (itemDataRet) {
+        *itemDataRet = item_data;
+    }
+
+    return bl->last;
 }
 
 /**
@@ -335,12 +398,6 @@ void wListDelete(
 
     if (b->type == B_DROPLIST) {
         wNotice("Deleting from dropboxes is not implemented!", "Continue", NULL);
-//		id_p = getListItem( b, inx, &child );
-        //if (id_p != NULL) {
-        //gtk_container_remove(GTK_CONTAINER(b->listStore), child->data);
-        //b->count--;
-        //g_free(id_p);
-        //}
     } else {
         gtk_tree_model_iter_nth_child(GTK_TREE_MODEL(b->listStore),
                                       &iter,
@@ -470,7 +527,7 @@ void wListSetSize(wList_p bl, wPos_t w, wPos_t h)
  * \return    describe the return value
  */
 
- wList_p wComboListCreate(
+wList_p wComboListCreate(
     wWin_p	parent,		/* Parent window */
     wPos_t	x,		/* X-position */
     wPos_t	y,		/* Y-position */
@@ -483,7 +540,6 @@ void wListSetSize(wList_p bl, wPos_t w, wPos_t h)
     wListCallBack_p action,	/* Callback */
     void 	*data)		/* Context */
 {
-    //return wListCreate( parent, x, y, helpStr, labelStr, option, number, width, 0, NULL, NULL, NULL, valueP, action, data );
     wNotice("ComboLists are not implemented!", "Abort", NULL);
     abort();
 }

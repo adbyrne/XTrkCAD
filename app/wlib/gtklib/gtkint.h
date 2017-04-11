@@ -133,12 +133,23 @@ extern char wConfigName[];
 extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
 
+
+
 /* boxes.c */
 void wlibDrawBox(wWin_p win, wBoxType_e style, wPos_t x, wPos_t y, wPos_t w, wPos_t h);
 
 /* button.c */
 void wlibSetLabel(GtkWidget *widget, long option, const char *labelStr, GtkLabel **labelG, GtkWidget **imageG);
 void wlibButtonDoAction(wButton_p bb);
+
+struct wButton_t {
+    WOBJ_COMMON
+    GtkLabel * labelG;
+    GtkWidget * imageG;
+    wButtonCallBack_p action;
+    int busy;
+    int recursion;
+};
 
 /* color.c */
 typedef struct {
@@ -166,7 +177,7 @@ GtkWidget *wlibNewDropList(GtkListStore *ls, int editable);
 wIndex_t wDropListGetCount(wList_p b);
 void wDropListClear(wList_p b);
 void *wDropListGetItemContext(wList_p b, wIndex_t inx);
-void wDropListAddValue(wList_p b, char *text, void *data);
+void wDropListAddValue(wList_p b, char *text, wListItem_p data);
 void wDropListSetIndex(wList_p b, int val);
 wBool_t wDropListSetValues(wList_p b, wIndex_t row, const char *labelStr, wIcon_p bm, void *itemData);
 wList_p wDropListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, long number, wPos_t width, long *valueP, wListCallBack_p action, void *data);
