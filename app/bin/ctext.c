@@ -29,6 +29,7 @@ track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T te
 void LoadFontSizeList( wList_p, long );
 void UpdateFontSizeList( long *, wList_p, wIndex_t );
 long GetFontSize(long);
+long GetFontSizeIndex(long size);
 
 static wMenu_p textPopupM;
 
@@ -121,6 +122,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			ParamRegister(&textPG);
 			Dt.size = GetFontSize(Dt.fontSizeInx);
 		}
+		Dt.size = wSelectedFontSize();
+		Dt.fontSizeInx = GetFontSizeIndex(Dt.size);
 		ParamLoadControls(&textPG);
 		ParamGroupRecord( &textPG );
 

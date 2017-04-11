@@ -2,23 +2,23 @@
  * Drawing of geometric elements
  */
 
-/*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 2005 Dave Bullis
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- */
+ /*  XTrkCad - Model Railroad CAD
+  *  Copyright (C) 2005 Dave Bullis
+  *
+  *  This program is free software; you can redistribute it and/or modify
+  *  it under the terms of the GNU General Public License as published by
+  *  the Free Software Foundation; either version 2 of the License, or
+  *  (at your option) any later version.
+  *
+  *  This program is distributed in the hope that it will be useful,
+  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *  GNU General Public License for more details.
+  *
+  *  You should have received a copy of the GNU General Public License
+  *  along with this program; if not, write to the Free Software
+  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+  */
 
 #include "track.h"
 #include "ccurve.h"
@@ -35,34 +35,48 @@ static long fontSizeList[] = {
 		200, 250, 300, 350, 400, 450, 500 };
 
 EXPORT void LoadFontSizeList(
-		wList_p list,
-		long curFontSize )
+	wList_p list,
+	long curFontSize)
 {
-	wIndex_t curInx=0, inx1;
+	wIndex_t curInx = 0, inx1;
 	int inx;
-	wListClear( list );
-	for ( inx=0; inx<sizeof fontSizeList/sizeof fontSizeList[0]; inx++ ) {
-		if ( ( inx==0 || curFontSize > fontSizeList[inx-1] ) && 
-			 ( curFontSize < fontSizeList[inx] ) ) {
-			sprintf( message, "%ld", curFontSize );
-			curInx = wListAddValue( list, message, NULL, (void*)curFontSize );
+	wListClear(list);
+	for (inx = 0; inx < sizeof fontSizeList / sizeof fontSizeList[0]; inx++)
+	{
+		if ((inx == 0 || curFontSize > fontSizeList[inx - 1]) &&
+			(curFontSize < fontSizeList[inx]))
+		{
+			sprintf(message, "%ld", curFontSize);
+			curInx = wListAddValue(list, message, NULL, (void*)curFontSize);
 		}
-		sprintf( message, "%ld", fontSizeList[inx] );
-		inx1 = wListAddValue( list, message, NULL, (void*)fontSizeList[inx] );
-		if ( curFontSize == fontSizeList[inx] )
+		sprintf(message, "%ld", fontSizeList[inx]);
+		inx1 = wListAddValue(list, message, NULL, (void*)fontSizeList[inx]);
+		if (curFontSize == fontSizeList[inx])
 			curInx = inx1;
 	}
-	if ( curFontSize > fontSizeList[(sizeof fontSizeList/sizeof fontSizeList[0])-1] ) {
-		sprintf( message, "%ld", curFontSize );
-		curInx = wListAddValue( list, message, NULL, (void*)curFontSize );
+	if (curFontSize > fontSizeList[(sizeof fontSizeList / sizeof fontSizeList[0]) - 1])
+	{
+		sprintf(message, "%ld", curFontSize);
+		curInx = wListAddValue(list, message, NULL, (void*)curFontSize);
 	}
-	wListSetIndex( list, curInx );
+	wListSetIndex(list, curInx);
 	wFlush();
 }
 
 long GetFontSize(wIndex_t inx)
 {
 	return(fontSizeList[inx]);
+}
+
+long GetFontSizeIndex(long size)
+{
+	int i;
+	for (i = 0; i < sizeof fontSizeList / sizeof fontSizeList[0]; i++)
+	{
+		if (fontSizeList[i] == size)
+			return(i);
+	}
+	return(-1);
 }
 
 EXPORT void UpdateFontSizeList(
