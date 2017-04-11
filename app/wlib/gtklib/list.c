@@ -39,6 +39,7 @@
 struct listSearch {
     const char *search;
     char *result;
+    int row;
 };
 
 
@@ -129,18 +130,18 @@ CompareListData(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter,
                        &id_p,
                        -1);
 
-    if (id_p && id_p->label && strcmp(id_p->label, search->search) == 0) {
+    if (id_p && id_p->label && !strcmp(id_p->label, search->search)) {
         search->result = (char *)id_p->label;
         return TRUE;
     } else {
         search->result = NULL;
+        search->row++;
         return FALSE;
     }
 }
 
 /**
- * Find the row which contains the specified text. It is unclear whether
- * this is ever called, so I put an assert that always fails
+ * Find the row which contains the specified text.
  *
  * \param b IN
  * \param val IN
@@ -156,14 +157,17 @@ wIndex_t wListFindValue(
     assert(b!=NULL);
     assert(b->listStore!=NULL);
 
-    assert(FALSE);
-
     thisSearch.search = val;
+    thisSearch.row = 0;
 
     gtk_tree_model_foreach(GTK_TREE_MODEL(b->listStore), CompareListData,
                            (void *)&thisSearch);
 
-    return -1;
+    if (!thisSearch.result) {
+        return -1;
+    } else {
+        return thisSearch.row;
+    }
 }
 
 /**

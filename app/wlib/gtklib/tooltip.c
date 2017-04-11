@@ -244,7 +244,8 @@ void wlibAddHelpString(
     string = malloc( strlen(wAppName) + 5 + strlen(helpStr) + 1 );
     sprintf( string, "%sHelp/%s", wAppName, helpStr );
 
-    gtk_widget_set_tooltip_text( widget, _(bhp->value) );
+	if(bhp->value)
+		gtk_widget_set_tooltip_text( widget, wlibConvertInput(_(bhp->value)) );
 
     g_object_set_data( G_OBJECT( widget ), HELPDATAKEY, string );
 
