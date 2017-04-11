@@ -8,7 +8,7 @@
  *  Module        : 
  *  Created By    : Robert Heller
  *  Created       : Thu Jan 5 10:52:12 2017
- *  Last Modified : <170306.2051>
+ *  Last Modified : <170411.1447>
  *
  *  Description
  * 
@@ -152,10 +152,8 @@ static void ControlEdit( void * action )
 	if ( context == NULL )
 		return;
 	context->proc( CONTMGM_DO_EDIT, context->data );
-#ifdef OBSOLETE
 	context->proc( CONTMGM_GET_TITLE, context->data );
 	wListSetValues( controlSelL, inx, message, context->icon, context );
-#endif
 }
 
 
