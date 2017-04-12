@@ -122,7 +122,11 @@ void *wDropListGetItemContext(wList_p b, wIndex_t inx)
                            -1);
     }
 
-    return (data->itemData);
+    if (data) {
+        return (data->itemData);
+    } else {
+        return (NULL);
+    }
 }
 
 /**
@@ -323,6 +327,7 @@ static int DropListSelectChild(
         }
     }
 
+    g_free(string);
     return 1;
 }
 
