@@ -3,7 +3,7 @@
 INSTALL(
 
 	FILES ${CMAKE_CURRENT_SOURCE_DIR}/InfoPlist.strings
-	DESTINATION ${CMAKE_INSTALL_PREFIX}/${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
+	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
 	)
 
 
