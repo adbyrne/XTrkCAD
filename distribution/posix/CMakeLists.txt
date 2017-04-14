@@ -25,6 +25,8 @@ SET(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
 	"/usr/share/locale/*"
 	"/usr/local/share/locale"
 	"/usr/local/share/locale/*"
+	"/usr/share/applications"
+	"/usr/share/pixmaps"
 )
 
 SET(CPACK_RPM_CHANGELOG_FILE "${CMAKE_CURRENT_SOURCE_DIR}////changelog.txt")

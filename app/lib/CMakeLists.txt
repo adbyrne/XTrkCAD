@@ -15,3 +15,13 @@ INSTALL(FILES
 	xtrkcad.xtq
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 	)
+
+INSTALL(FILES
+	xtrkcad.desktop
+	DESTINATION "/usr/share/applications"
+	)
+
+INSTALL(FILES
+	xtrkcad.png
+	DESTINATION "/usr/share/pixmaps"
+	)
