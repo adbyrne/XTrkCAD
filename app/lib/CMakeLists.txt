@@ -16,12 +16,13 @@ INSTALL(FILES
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 	)
 
-INSTALL(FILES
-	xtrkcad.desktop
-	DESTINATION "/usr/share/applications"
-	)
-
-INSTALL(FILES
-	xtrkcad.png
-	DESTINATION "/usr/share/pixmaps"
-	)
+IF(UNIX AND NOT APPLE)
+	INSTALL(FILES
+		xtrkcad.desktop
+		DESTINATION "/usr/share/applications"
+		)
+	INSTALL(FILES
+		xtrkcad.png
+		DESTINATION "/usr/share/pixmaps"
+		)
+ENDIF(UNIX AND NOT APPLE)
