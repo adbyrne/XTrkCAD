@@ -1,0 +1,44 @@
+======Download ""XTrackCAD"" Version @XTRKCAD_VERSION@======
+=====Install (Binary) Packages=====
+|=|OS|=|Download Package||
+||Windows||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-setup-@XTRKCAD_VERSION@.exe/download Windows Installer (32 Bit) ]]||
+||Mac OSX||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-OSX-V@XTRKCAD_VERSION@.dmg/download OSX Installer (64 Bit) ]]||
+||(y:2)Linux||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-setup-@XTRKCAD_VERSION@-1.i686.rpm/download Fedora RPM (32 Bit) ]]||
+||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-setup-@XTRKCAD_VERSION@-1.i686.sh/download self-extracting install script (32 Bit) ]]||
+=====Third Party Packages=====
+Robert Heller created afew additional packets for Raspbian, Ubuntu 14.04+, and EL6.  Files are up at:
+
+[[http://files.deepsoft.com/Other/xtrkcad/]]
+or
+[[ftp://ftp.deepsoft.com/pub/deepwoods/Other/xtrkcad/]]
+
+====""MacOSX""====
+	- ""MacOSX"" There is a new package available as linked above with a simplified install.
+	- Please see instructions for extra install steps at [[MacOSX]]
+=====Source Code=====
+|=|Format|=|Download||
+||TGZ||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-source-@XTRKCAD_VERSION@.tar.gz/download GZipped Tar Archive]]||
+||BZ2||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-source-@XTRKCAD_VERSION@.tar.bz2/download BZipped2 Tar Archive]]||
+||ZIP||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-source-@XTRKCAD_VERSION@.zip/download ZIP Archive]]||
+||Mercurial Bundle||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad_@XTRKCAD_MAJOR_VERSION@_@XTRKCAD_MINOR_VERSION@_@XTRKCAD_RELEASE_VERSION@@XTRKCAD_VERSIONMODIFIER@.hg/download Mercurial bundle]]||
+
+The Mercurial bundle provides a downloadable starting point for developers who are on bandwidth constrained / flakey connections.
+To use the .hg bundle download xtrkcad_@XTRKCAD_MAJOR_VERSION@_@XTRKCAD_MINOR_VERSION@_@XTRKCAD_RELEASE_VERSION@@XTRKCAD_VERSIONMODIFIER@.hg and perform the following steps:
+%%
+mkdir xtrkcad
+cd xtrkcad
+hg init
+hg unbundle ../xtrkcad_@XTRKCAD_MAJOR_VERSION@_@XTRKCAD_MINOR_VERSION@_@XTRKCAD_RELEASE_VERSION@@XTRKCAD_VERSIONMODIFIER@
+edit .hg/hgrc adding these lines:
+
+[paths]
+default = http://hg.code.sf.net/p/xtrkcad-fork/xtrkcad
+%%
+Optionally do an hg pull then hg update to get the latest changes.
+
+""XTrackCAD"" has been compiled and tested on ""FreeBSD"" and ""OpenSolaris"". But there is no official support for these operating systems.
+
+====Older Versions====
+For your convenience, older versions of ""XTrackCAD"" can be downloaded from [[DownloadPage here]].
+----
+CategoryUser
