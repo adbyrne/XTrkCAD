@@ -12,7 +12,7 @@
  *  Author        : $Author$
  *  Created By    : Robert Heller
  *  Created       : Sun Feb 19 13:11:45 2017
- *  Last Modified : <170314.1311>
+ *  Last Modified : <170417.1113>
  *
  *  Description	
  *
@@ -515,6 +515,7 @@ static void SignalEditOk ( void * junk )
     track_p trk;
     signalData_p xx;
     wIndex_t ia;
+    CSIZE_T newsize;
     
     if (signalCreate_P) {
         UndoStart( _("Create Signal"), "Create Signal");
@@ -526,16 +527,15 @@ static void SignalEditOk ( void * junk )
         xx = GetsignalData(trk);
         if (xx->numAspects != signalAspect_da.cnt) {
             /* We need to reallocate the extra data. */
-            /* We will delete the Signal and re-create it. */
-            BOOL_T visible = GetTrkVisible(trk);
-            SCALEINX_T scale = GetTrkScale(trk);
-            LAYER_T layer = GetTrkLayer(trk);
-            wIndex_t tindx = GetTrkIndex(trk);
-            FreeTrack(trk);
-            trk = NewTrack(tindx, T_SIGNAL, 0, sizeof(signalData_t)+(sizeof(signalAspect_t)*(signalAspect_da.cnt-1))+1);
-            SetTrkVisible(trk,visible);
-            SetTrkScale(trk,scale);
-            SetTrkLayer(trk,layer);
+            for (ia = 0; ia < xx->numAspects; ia++) {
+                MyFree((&(xx->aspectList))[ia].aspectName);
+                MyFree((&(xx->aspectList))[ia].aspectScript);
+                (&(xx->aspectList))[ia].aspectName = NULL;
+                (&(xx->aspectList))[ia].aspectScript = NULL;
+            }
+            newsize = sizeof(signalData_t)+(sizeof(signalAspect_t)*(signalAspect_da.cnt-1))+1;
+            trk->extraData = MyRealloc(trk->extraData,newsize);
+            trk->extraSize = newsize;
             xx = GetsignalData(trk);
         }
     }
