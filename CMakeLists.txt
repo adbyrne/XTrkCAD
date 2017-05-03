@@ -1,10 +1,11 @@
 PROJECT(XTrkCAD)
 enable_testing()
+cmake_minimum_required(VERSION 3.0)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/app)
+#SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/app)
 # additional CMake modules can be found here
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 
 # Setup high-level build options ...
 IF(UNIX AND NOT APPLE)
@@ -76,7 +77,7 @@ ENDIF(XTRKCAD_USE_PACKAGEMAKER)
 
 # Find unit testing framework
 find_package(CMocka)
-if( CMOCKA_FOUND)
+if(CMOCKA_FOUND)
   include_directories(${CMOCKA_INCLUDE_DIR})
   set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
   option( XTRKCAD_TESTING "Build unittests" ON)
