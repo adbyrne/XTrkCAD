@@ -1,18 +1,15 @@
-ADD_EXECUTABLE(addcrlf addcrlf.c)
 
-ADD_EXECUTABLE(bin2c bin2c.c)
+set ( sources listxtp.c )
 
-SET ( SOURCES listxtp.c )
-
-IF (WIN32)
-	SET ( SOURCES
-		  ${SOURCES}	
+if (WIN32)
+	set ( sources
+		  ${sources}	
 		  dirent.c)
 		  
-	INCLUDE_DIRECTORIES( BEFORE ${CMAKE_CURRENT_SOURCE_DIR})	  
-ENDIF (WIN32)
+	include_directories( before ${CMAKE_CURRENT_SOURCE_DIR})	  
+endif ()
 				 
-ADD_EXECUTABLE( listxtp ${SOURCES})
+add_executable( listxtp ${sources})
 
-ADD_SUBDIRECTORY(halibut)
+add_subdirectory(halibut)
 
