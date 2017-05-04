@@ -220,6 +220,10 @@ Whether tracks are printed with one or two lines (representing the center line a
 
 \u000
 
+\dd \f{Print centerline above Scale 1:1} - dotted line down the center of the Track/Roadbed.  This line will always be printed at Scale 1:1, but selecting this option will print it at larger scales. This option is disabled if tracks would be drawn with only one line (instead of two).
+
+\u000
+
 \dd \f{Print Roadbed Outline} - lines representing the edge of the Roadbed.  The Roadbed will be printed if the \e{Width} is greater than the track gauge.  Note: this option is most useful at 1:1.  This option is disabled if tracks would be drawn with only one line (instead of two).
 
 \u000
