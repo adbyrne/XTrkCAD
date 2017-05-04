@@ -279,7 +279,9 @@ static void setLineType(
     wDrawOpts opts)
 {
     cairo_t *cr = psPrint_d.printContext;
-    double dashLength = DASH_LENGTH;
+
+    double dashes[] = { DASH_LENGTH, 3 };							//Reduce gap in between dashes
+    static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
 
     if (lineWidth < 0.0) {
         lineWidth = P2I(-lineWidth)*2.0;
@@ -293,7 +295,7 @@ static void setLineType(
     cairo_set_line_width(cr, lineWidth);
 
     if (lineType == wDrawLineDash) {
-        cairo_set_dash(cr, &dashLength, 1, 0.0);
+        cairo_set_dash(cr, dashes, len_dashes, 0.0);
     } else {
         cairo_set_dash(cr, NULL, 0, 0.0);
     }
