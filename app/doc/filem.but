@@ -220,7 +220,7 @@ Whether tracks are printed with one or two lines (representing the center line a
 
 \u000
 
-\dd \f{Print centerline above Scale 1:1} - dotted line down the center of the Track/Roadbed.  This line will always be printed at Scale 1:1, but selecting this option will print it at larger scales. This option is disabled if tracks would be drawn with only one line (instead of two).
+\dd \f{Print centerline below Scale 1:1} - dotted line down the center of the Track/Roadbed.  This line will always be printed at Scale 1:1, but selecting this option will print it at smaller scales. This option is disabled if tracks would be drawn with only one line (instead of two).
 
 \u000
 
