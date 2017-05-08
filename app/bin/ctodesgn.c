@@ -1414,7 +1414,7 @@ static void NewTurnPrint(
 			wDrawString( newTurnout_d.d, POSX(3.0),
 						POSY(6.25), 0.0, message, fp, 30,
 						wDrawColorBlack, 0 );
-			sprintf( message, "%s %d x %d (of %d x %d)", _("Page"), i+1, j+1, ii, jj );
+			sprintf( message, _("%s %d x %d (of %d x %d)"), _("Page"), i+1, j+1, ii, jj );
 			wDrawString( newTurnout_d.d, POSX(3.0),
 						POSY(5.75), 0.0, message, fp, 20,
 						wDrawColorBlack, 0 );
