@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: xtrkcad 4.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-05-08 20:57+0200\n"
-"PO-Revision-Date: 2017-05-08 21:06+0100\n"
+"PO-Revision-Date: 2017-05-09 19:49+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "Language: de\n"
@@ -55,9 +55,8 @@ msgid "End Pt 2: X"
 msgstr "Endpunkt 2: X"
 
 #: ../bin/cblock.c:180
-#, fuzzy
 msgid "Change block"
-msgstr "Gleisabschnitt ändern"
+msgstr "Block ändern"
 
 #: ../bin/cblock.c:225 ../bin/compound.c:689 ../bin/cswitchmotor.c:292
 #, c-format
@@ -69,9 +68,9 @@ msgid "Block"
 msgstr "Block"
 
 #: ../bin/cblock.c:410
-#, fuzzy, c-format
+#, c-format
 msgid "resolveBlockTrack: T%d[%d]: T%d doesn't exist"
-msgstr "resolveIndex: T%d[%d]: T%d existiert nicht."
+msgstr "resolveBlockTrack: T%d[%d]: T%d existiert nicht."
 
 #: ../bin/cblock.c:410 ../bin/cswitchmotor.c:388 ../bin/dbench.c:142
 #: ../bin/dcar.c:4226 ../bin/dcar.c:4410 ../bin/dcar.c:4420 ../bin/dcar.c:4468
@@ -138,16 +137,14 @@ msgid "Block is discontigious!"
 msgstr "Der Block ist nicht zusammenhängend!"
 
 #: ../bin/cblock.c:520
-#, fuzzy
 msgid "Create block"
-msgstr "Gleisabschnitt erstellen"
+msgstr "Block erstellen"
 
 #: ../bin/cblock.c:556
 msgid "Non track object skipped!"
 msgstr "Objekt ist kein Gleis, übersprungen!"
 
 #: ../bin/cblock.c:560
-#, fuzzy
 msgid "Selected track is already in a block, skipped!"
 msgstr "Übersprungen, da das ausgewählte Gleis bereits in einem Block ist. "
 
@@ -203,9 +200,8 @@ msgid "Modify Block"
 msgstr "Gleisabschnitt bearbeiten"
 
 #: ../bin/cblock.c:739
-#, fuzzy
 msgid "Edit block"
-msgstr "Gleisabschnitt bearbeiten"
+msgstr "Block bearbeiten"
 
 #: ../bin/cblock.c:745
 #, c-format
@@ -218,24 +214,21 @@ msgid "Position"
 msgstr "Position"
 
 #: ../bin/ccontrol.c:161 ../bin/ccontrol.c:382
-#, fuzzy
 msgid "On Script"
-msgstr "Befehlsskript"
+msgstr "Befehlsskript An"
 
 #: ../bin/ccontrol.c:162 ../bin/ccontrol.c:384
-#, fuzzy
 msgid "Off Script"
-msgstr "Befehlsskript"
+msgstr "Befehlsskript Aus"
 
 #: ../bin/ccontrol.c:205
-#, fuzzy
 msgid "Change Control"
-msgstr "Zugsteuerung"
+msgstr "Steuerung ändern"
 
 #: ../bin/ccontrol.c:247 ../bin/csensor.c:225
-#, fuzzy, c-format
+#, c-format
 msgid "(%d [%s]): Layer=%d, at %0.3f,%0.3f"
-msgstr "(%d): Ebene=%d %s"
+msgstr "(%d [%s]): Ebene=%d, bei %0.3f,%0.3f"
 
 #: ../bin/ccontrol.c:260 ../bin/ccontrol.c:589
 msgid "Control"
@@ -250,24 +243,20 @@ msgid "Origin Y"
 msgstr "Ausgangspunkt: Y"
 
 #: ../bin/ccontrol.c:396
-#, fuzzy
 msgid "Create Control"
-msgstr "Zugsteuerung"
+msgstr "Steuerung anlegen"
 
 #: ../bin/ccontrol.c:399
-#, fuzzy
 msgid "Modify Control"
-msgstr "Zugsteuerung"
+msgstr "Steuerung ändern"
 
 #: ../bin/ccontrol.c:436
-#, fuzzy
 msgid "Edit control"
-msgstr "Zugsteuerung"
+msgstr "Steuerung bearbeiten"
 
 #: ../bin/ccontrol.c:476
-#, fuzzy
 msgid "Place control"
-msgstr "Platziere Kreis"
+msgstr "Steuerung setzen"
 
 #: ../bin/ccurve.c:102
 msgid "Drag from End-Point in direction of curve"
@@ -1180,9 +1169,8 @@ msgid "Print Roadbed Outline"
 msgstr "Gleisbettung drucken"
 
 #: ../bin/cprint.c:105
-#, fuzzy
 msgid "Print Centerline below Scale 1:1"
-msgstr "Mittellinie ausgeben"
+msgstr "Mittellinie bei Maßstab<1:1 ausgeben"
 
 #: ../bin/cprint.c:113
 msgid "Print Scale"
@@ -1536,43 +1524,36 @@ msgid "Flip"
 msgstr "Spiegeln"
 
 #: ../bin/csensor.c:189
-#, fuzzy
 msgid "Change Sensor"
-msgstr "Maßstab ändern"
+msgstr "Sensor ändern"
 
 #: ../bin/csensor.c:235 ../bin/csensor.c:553
 msgid "Sensor"
 msgstr "Sensor"
 
 #: ../bin/csensor.c:366
-#, fuzzy
 msgid "Create Sensor"
-msgstr "Erstelle Unterbau"
+msgstr "Sensor erstellen"
 
 #: ../bin/csensor.c:369
-#, fuzzy
 msgid "Modify Sensor"
-msgstr "Gleis bearbeiten"
+msgstr "Sensor ändern"
 
 #: ../bin/csensor.c:402
-#, fuzzy
 msgid "Edit sensor"
-msgstr "Menü für Bearbeitungsfunktionen"
+msgstr "Sensor bearbeiten"
 
 #: ../bin/csensor.c:440
-#, fuzzy
 msgid "Place sensor"
-msgstr "Neue Weiche setzen"
+msgstr "Sensor setzen"
 
 #: ../bin/csignal.c:229
-#, fuzzy
 msgid "Number Of Heads"
-msgstr "Nummern"
+msgstr "Anzahl der Köpfe"
 
 #: ../bin/csignal.c:261
-#, fuzzy
 msgid "Change Signal"
-msgstr "Maßstab ändern"
+msgstr "Signal ändern"
 
 #: ../bin/csignal.c:295
 #, c-format
@@ -1584,47 +1565,41 @@ msgid "Signal"
 msgstr "Signal"
 
 #: ../bin/csignal.c:484
-#, fuzzy
 msgid "Number of Heads"
-msgstr "Nummern"
+msgstr "Anzahl der Köpfe"
 
 #: ../bin/csignal.c:489
-#, fuzzy
 msgid "Edit Aspect"
-msgstr "Menü für Bearbeitungsfunktionen"
+msgstr "Signalbild bearbeiten"
 
 #: ../bin/csignal.c:491
 msgid "Add Aspect"
 msgstr "Signalanzeige"
 
 #: ../bin/csignal.c:493
-#, fuzzy
 msgid "Delete Aspect"
-msgstr "Objekte löschen"
+msgstr "Signalbild löschen"
 
 #: ../bin/csignal.c:506
 msgid "Aspect Index"
 msgstr "Nummer der Signalanzeige"
 
 #: ../bin/csignal.c:521
-#, fuzzy
 msgid "Create Signal"
-msgstr "Erstelle Linien"
+msgstr "Signal erstellen"
 
 #: ../bin/csignal.c:525
-#, fuzzy
 msgid "Modify Signal"
-msgstr "Gleis bearbeiten"
+msgstr "Signal ändern"
 
 #: ../bin/csignal.c:632
-#, fuzzy
 msgid "Edit aspect"
-msgstr "Menü für Bearbeitungsfunktionen"
+msgstr "Signalbild bearbeiten"
 
 #: ../bin/csignal.c:679
-#, fuzzy, c-format
+#, c-format
 msgid "Are you sure you want to delete the %d aspect(s)"
-msgstr "Sind Sie sicher, dass Sie diese %d Wagen löschen wollen?"
+msgstr "Sind Sie sicher, dass Sie %d Signalbilder löschen wollen?"
 
 #: ../bin/csignal.c:700
 msgid "Edit signal"
@@ -1635,9 +1610,8 @@ msgid "Place base of signal"
 msgstr "Basis des Signals festlegen"
 
 #: ../bin/csignal.c:767
-#, fuzzy
 msgid "Drag to orient signal"
-msgstr "Durch Ziehen den Winkel festlegen"
+msgstr "Durch Ziehen das Signal ausrichten"
 
 #: ../bin/csnap.c:517
 msgid "Horz"
@@ -1800,9 +1774,9 @@ msgid "Switch motor"
 msgstr "Weichenantrieb"
 
 #: ../bin/cswitchmotor.c:388
-#, fuzzy, c-format
+#, c-format
 msgid "ResolveSwitchmotor: Turnout T%d: T%d doesn't exist"
-msgstr "resolveIndex: T%d[%d]: T%d existiert nicht."
+msgstr "ResolveSwitchmotor: Weiche T%d: T%d existiert nicht."
 
 #: ../bin/cswitchmotor.c:455 ../bin/cswitchmotor.c:618
 msgid "Switch motor must have a name!"
@@ -1843,7 +1817,6 @@ msgid "Modify Switch Motor"
 msgstr "Weichenantrieb ändern"
 
 #: ../bin/cswitchmotor.c:648
-#, fuzzy
 msgid "Edit switch motor"
 msgstr "Weichenantrieb bearbeiten"
 
@@ -3625,7 +3598,6 @@ msgid "Show File Names"
 msgstr "Dateinamen anzeigen"
 
 #: ../bin/dprmfile.c:229
-#, fuzzy
 msgid "Select all"
 msgstr "Alles auswählen"
 
