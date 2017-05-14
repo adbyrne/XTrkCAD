@@ -24,6 +24,7 @@
  */
 
 #include "track.h"
+#include "cbezier.h"
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
@@ -181,7 +182,6 @@ EXPORT STATUS_T CreateCurve(
 			break;
 		}
 		return C_CONTINUE;
-
 	case C_UP:
 		switch (mode) {
 		case crvCmdFromEP1:
@@ -699,6 +699,7 @@ static STATUS_T CmdCircle2( wAction_t action, coOrd pos )
 #include "bitmaps/curve2.xpm"
 #include "bitmaps/curve3.xpm"
 #include "bitmaps/curve4.xpm"
+#include "bitmaps/bezier.xpm"
 #include "bitmaps/circle1.xpm"
 #include "bitmaps/circle2.xpm"
 #include "bitmaps/circle3.xpm"
@@ -713,6 +714,7 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"), wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE2, (void*)1 );
 	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE3, (void*)2 );
 	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"), wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE4, (void*)3 );
+	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap(bezier_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_BEZIER, (void*)bezCmdCreateTrack );
 	ButtonGroupEnd();
 
 	ButtonGroupBegin( _("Circle Track"), "cmdCurveSetCmd", _("Circle Tracks") );

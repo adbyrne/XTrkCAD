@@ -580,6 +580,8 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 										  ((Dj.inp[0].params.ep==0)?-90.0:90.0) );
 			break;
 		case curveTypeNone:
+		case curveTypeBezier:
+		case curveTypeCornu:
 			break;
 		}
 
@@ -801,6 +803,8 @@ errorReturn:
 								  Dj.jRes.arcA0, Dj.jRes.arcA1, 0 );
 			break;
 		case curveTypeNone:
+		case curveTypeBezier:
+		case curveTypeCornu:
 			return C_CONTINUE;
 		}
 

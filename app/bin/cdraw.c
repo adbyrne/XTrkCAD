@@ -22,6 +22,7 @@
 
 #include "track.h"
 #include "ccurve.h"
+#include "cbezier.h"
 #include "drawgeom.h"
 #include "i18n.h"
 
@@ -522,7 +523,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 static void DrawDraw( track_p t, drawCmd_p d, wDrawColor color )
 {
 	struct extraData * xx = GetTrkExtraData(t);
-	if ( (d->options&DC_QUICK) == 0 )
+	if ( (d->funcs->options&DC_QUICK) == 0 )
 		DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
 }
 
@@ -764,49 +765,13 @@ static void DrawRedraw( void )
 	MapRedraw();
 }
 
-
-#ifdef LATER
-static void DrawOk( void * context )
-{
-	track_p t;
-	struct extraData * xx;
-	trkSeg_p sp;
-	wIndex_t cnt;
-
-	for ( cnt=0,sp=&DrawLineSegs(0); sp < &DrawLineSegs(drawCmdContext.Segs_da.cnt); sp++ )
-		if (sp->type != ' ')
-			cnt++;
-	if (cnt == 0)
-		return;
-	UndoStart( _("Create Lines"), "newDraw" );
-	for ( sp=&DrawLineSegs(0); sp < &DrawLineSegs(drawCmdContext.Segs_da.cnt); sp++ ) {
-		if (sp->type != ' ') {
-			t = NewTrack( 0, T_DRAW, 0, sizeof *xx + sizeof *(trkSeg_p)0 );
-			xx = GetTrkExtraData( t );
-			xx->orig = zero;
-			xx->angle = 0.0;
-			xx->segCnt = 1;
-			memcpy( xx->segs, sp, sizeof *(trkSeg_p)0 );
-			ComputeDrawBoundingBox( t );
-			DrawNewTrack(t);
-		}
-	}
-	UndoEnd();
-	DYNARR_RESET( trkSeg_t, drawCmdContext.Segs_da );
-	Reset();
-}
-#endif
-
-
-
 static wIndex_t benchChoice;
 static wIndex_t benchOrient;
 static wIndex_t dimArrowSize;
-static wDrawColor lineColor;
+wDrawColor lineColor = 1;
+long lineWidth = 0;
 static wDrawColor benchColor;
-#ifdef LATER
-static wIndex_t benchInx;
-#endif
+
 
 static paramIntegerRange_t i0_100 = { 0, 100, 25 };
 static paramData_t drawPLs[] = {
@@ -847,6 +812,7 @@ static char * objectName[] = {
 		N_("Filled Circle"),
 		N_("Filled Box"),
 		N_("Polygon"),
+		N_("Bezier Line"),
 		NULL};
 
 static STATUS_T CmdDraw( wAction_t action, coOrd pos )
@@ -856,6 +822,11 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	wControl_p controls[4];
 	char * labels[3];
 	static char labelName[40];
+	wAction_t act2 = action | (bezCmdCreateLine<<8);
+
+	if ((wIndex_t)(long)commandContext == OP_BEZLIN) {								//Pass all Bezier direct to cbezier
+			wAction_t act2 = (action&0xFF) | (bezCmdCreateLine<<8);
+	}
 
 	switch (action&0xFF) {
 
@@ -885,6 +856,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_CIRCLE3:
 		case OP_BOX:
 		case OP_POLY:
+		case OP_BEZLIN:
 			controls[0] = drawWidthPD.control;
 			controls[1] = drawColorPD.control;
 			controls[2] = NULL;
@@ -917,10 +889,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			labels[2] = N_("Color");
 			if ( wListGetCount( (wList_p)drawBenchChoicePD.control ) == 0 )
 				BenchLoadLists( (wList_p)drawBenchChoicePD.control, (wList_p)drawBenchOrientPD.control );
-#ifdef LATER
-			if ( benchInx >= 0 && benchInx < wListGetCount( (wList_p)drawBenchChoicePD.control ) )
-				wListSetIndex( (wList_p)drawBenchChoicePD.control, benchInx );
-#endif
+
 			ParamLoadControls( &drawPG );
 			BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, benchChoice ), (wList_p)drawBenchOrientPD.control );
 			wListSetIndex( (wList_p)drawBenchOrientPD.control, benchOrient );
@@ -953,18 +922,22 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			infoSubst = FALSE;
 		}
 		ParamGroupRecord( &drawPG );
+		lineWidth = drawCmdContext.Width;
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		DrawGeomMouse( C_START, pos, &drawCmdContext );
 
 		return C_CONTINUE;
 
 	case wActionLDown:
 		ParamLoadData( &drawPG );
+		if (drawCmdContext.Op == OP_BEZLIN) {
+			act2 = action | (bezCmdCreateLine<<8);
+			return CmdBezCurve(act2, pos);
+		}
 		if ( drawCmdContext.Op == OP_BENCH ) {
 			drawCmdContext.benchOption = GetBenchData( (long)wListGetItemContext((wList_p)drawBenchChoicePD.control, benchChoice ), benchOrient );
 			drawCmdContext.Color = benchColor;
-#ifdef LATER
-			benchInx = wListGetIndex( (wList_p)drawBenchChoicePD.control );
-#endif
+
 		} else if ( drawCmdContext.Op == OP_DIMLINE ) {
 			drawCmdContext.benchOption = dimArrowSize;
 		} else {
@@ -984,21 +957,26 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionText:
 	case C_CMDMENU:
 		SnapPos( &pos );
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	case C_CANCEL:
 		InfoSubstituteControls( NULL, NULL );
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	case C_OK:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext );
 		/*DrawOk( NULL );*/
 
 	case C_FINISH:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext );
 		/*DrawOk( NULL );*/
 
 	case C_REDRAW:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	default:
@@ -1024,6 +1002,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 #include "bitmaps/dfilbox.xpm"
 #include "bitmaps/dpoly.xpm"
 #include "bitmaps/dfilpoly.xpm"
+#include "bitmaps/dbezier.xpm"
 
 typedef struct {
 		char **xpm;
@@ -1043,7 +1022,8 @@ static drawData_t dcurveCmds[] = {
 		{ dcurve1_xpm, OP_CURVE1, N_("Curve End"), N_("Draw Curve from End"), "cmdDrawCurveEndPt", ACCL_DRAWCURVE1 },
 		{ dcurve2_xpm, OP_CURVE2, N_("Curve Tangent"), N_("Draw Curve from Tangent"), "cmdDrawCurveTangent", ACCL_DRAWCURVE2 },
 		{ dcurve3_xpm, OP_CURVE3, N_("Curve Center"), N_("Draw Curve from Center"), "cmdDrawCurveCenter", ACCL_DRAWCURVE3 },
-		{ dcurve4_xpm, OP_CURVE4, N_("Curve Chord"), N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4 } };
+		{ dcurve4_xpm, OP_CURVE4, N_("Curve Chord"), N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4 },
+		{ dbezier_xpm, OP_BEZLIN, N_("Bezier Curve"), N_("Draw Bezier"), "cmdDrawBezierCurve", ACCL_DRAWBEZLINE } };
 static drawData_t dcircleCmds[] = {
 		/*{ dcircle1_xpm, OP_CIRCLE1, "Circle Fixed Radius", "Draw Fixed Radius Circle", "cmdDrawCircleFixedRadius", ACCL_DRAWCIRCLE1 },*/
 		{ dcircle2_xpm, OP_CIRCLE3, N_("Circle Tangent"), N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE2 },
@@ -1072,34 +1052,10 @@ static drawStuff_t drawStuff[4];
 
 static drawStuff_t drawStuff[4] = {
 		{ "cmdDrawLineSetCmd", N_("Straight Objects"), N_("Draw Straight Objects"), 4, dlineCmds },
-		{ "cmdDrawCurveSetCmd", N_("Curved Lines"), N_("Draw Curved Lines"), 4, dcurveCmds },
+		{ "cmdDrawCurveSetCmd", N_("Curved Lines"), N_("Draw Curved Lines"), 5, dcurveCmds },
 		{ "cmdDrawCircleSetCmd", N_("Circle Lines"), N_("Draw Circles"), 4, dcircleCmds },
 		{ "cmdDrawShapeSetCmd", N_("Shapes"), N_("Draw Shapes"), 4, dshapeCmds} };
 		
-
-#ifdef LATER
-static void SetDrawMode( char * modeName )
-{
-	wButton_p bb;
-	int inx1, inx2;
-	drawData_t * dp;
-
-	for ( inx1=0; inx1<4; inx1++ ) {
-		for ( inx2=0; inx2<drawStuff[inx1].cnt; inx2++ ) {
-			dp = &drawStuff[inx1].data[inx2];
-			if (strncmp( modeName, dp->modeS, strlen(dp->modeS) ) == 0 ) {
-				bb = GetCommandButton(drawStuff[inx1].cmdInx);
-				wButtonSetLabel( bb, (char*)(dp->icon) );
-				wControlSetHelp( (wControl_p)bb, dp->help );
-				drawStuff[inx1].curr = inx2;
-				DoCommandB( (void*)(drawStuff[inx1].cmdInx) );
-				return;
-			}
-		}
-	}
-}
-#endif
-
 
 static void ChangeDraw( long changes )
 {
@@ -1151,9 +1107,7 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 
 	ParamRegister( &drawPG );
 	RegisterChangeNotification( ChangeDraw );
-#ifdef LATER
-		InitCommand( cmdDraw, N_("Draw"), draw_bits, LEVEL0_50, IC_POPUP|IC_CMDMENU, ACCL_DRAW );
-#endif
+
 }
 
 

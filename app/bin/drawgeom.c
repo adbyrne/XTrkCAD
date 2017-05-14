@@ -20,6 +20,7 @@
 #include <stdarg.h>
 #include "track.h"
 #include "ccurve.h"
+#include "cbezier.h"
 #include "compound.h"
 #include "drawgeom.h"
 #include "i18n.h"
@@ -191,6 +192,9 @@ STATUS_T DrawGeomMouse(
 				tempSegs_da.cnt = segCnt;
 			}
 			break;
+		case OP_BEZLIN:
+			CmdBezCurve(C_DOWN, pos );
+			break;
 		case OP_CIRCLE1:
 		case OP_CIRCLE2:
 		case OP_CIRCLE3:
@@ -257,6 +261,9 @@ STATUS_T DrawGeomMouse(
 			OnTrack( &pos, FALSE, FALSE );
 		pos1 = pos;
 		switch (context->Op) {
+		case OP_BEZLIN:
+			CmdBezCurve(C_MOVE, pos );
+			break;
 		case OP_TBLEDGE:
 			OnTableEdgeEndPt( NULL, &pos1 );
 		case OP_LINE:
@@ -356,6 +363,9 @@ STATUS_T DrawGeomMouse(
 		lastValid = FALSE;
 		createTrack = FALSE;
 		switch ( context->Op ) {
+		case OP_BEZLIN:
+			CmdBezCurve(C_MOVE, pos );
+			break;
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
@@ -445,6 +455,9 @@ STATUS_T DrawGeomMouse(
 		return C_TERMINATE;
 
 	case wActionText:
+		if (context->Op == OP_BEZLIN) {
+			return CmdBezCurve(C_TEXT,pos);
+		}
 		if ( ((action>>8)&0xFF) == 0x0D ||
 			 ((action>>8)&0xFF) == ' ' ) {
 			EndPoly(context, segCnt);
@@ -453,6 +466,9 @@ STATUS_T DrawGeomMouse(
 		return C_TERMINATE;
 
 	case C_CANCEL:
+		if (context->Op == OP_BEZLIN) {
+			return CmdBezCurve(C_CANCEL, pos);
+		}
 		oldOptions = context->D->funcs->options;
 		context->D->funcs->options |= wDrawOptTemp;
 		DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );

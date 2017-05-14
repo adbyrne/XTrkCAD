@@ -35,7 +35,8 @@
 #define OP_FILLCIRCLE3	(15)
 #define OP_FILLBOX		(16)
 #define OP_FILLPOLY		(17)
-#define OP_LAST			(OP_FILLPOLY)
+#define OP_BEZLIN       (18)
+#define OP_LAST			(OP_BEZLIN)
 
 typedef struct {
 				void (*message)( char *, ... );
@@ -53,6 +54,9 @@ typedef struct {
 		} drawContext_t;
 
 extern drawContext_t * drawContext;
+extern wDrawColor lineColor;
+extern long lineWidth;
+
 void DrawGeomOp( void * );
 STATUS_T DrawGeomMouse( wAction_t, coOrd, drawContext_t * );
 STATUS_T DrawGeomModify( coOrd, ANGLE_T, wIndex_t, trkSeg_p, wAction_t, coOrd, wBool_t );

@@ -82,6 +82,7 @@ void InitCustom( void );
 void CleanupCustom( void );
 
 void InitTrkCurve( void );
+void InitTrkBezier( void );
 void InitTrkDraw( void );
 void InitTrkEase( void );
 void InitTrkNote( void );

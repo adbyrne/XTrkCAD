@@ -81,12 +81,13 @@ extern int pathMax;
 
 extern BOOL_T onTrackInSplit;
 
-typedef enum { curveTypeNone, curveTypeCurve, curveTypeStraight } curveType_e;
+typedef enum { curveTypeNone, curveTypeCurve, curveTypeStraight, curveTypeBezier, curveTypeCornu } curveType_e;
 
 #define PARAMS_1ST_JOIN (0)
 #define PARAMS_2ND_JOIN (1)
 #define PARAMS_EXTEND	(2)
 #define PARAMS_PARALLEL (3)
+#define PARAMS_BEZIER   (4)
 
 typedef struct {
 		curveType_e type;
@@ -99,6 +100,7 @@ typedef struct {
 		DIST_T arcR;
 		ANGLE_T arcA0, arcA1;
 		long helixTurns;
+		coOrd bezierPoints[4];
 		} trackParams_t;
 
 #define Q_CANNOT_BE_ON_END				(1)
@@ -118,6 +120,7 @@ typedef struct {
 #define Q_NOT_PLACE_FROGPOINTS			(15)
 #define Q_HAS_DESC						(16)
 #define Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK (17)
+#define Q_CAN_MODIFY_CONTROL_POINTS     (18)
 
 typedef struct {
 		track_p trk;
@@ -206,6 +209,7 @@ typedef struct {
 				DIST_T radius0;
 				DIST_T radius3;
 				DIST_T length;
+				dynArr_t segs;
 			} b;
 			struct {
 				coOrd center;
@@ -239,9 +243,10 @@ typedef struct {
 
 #define SEG_STRTRK		('S')
 #define SEG_CRVTRK		('C')
+#define SEG_BEZTRK      ('W')
 #define SEG_STRLIN		('L')
 #define SEG_CRVLIN		('A')
-#define SEG_BEZTRK      ('B')
+#define SEG_BEZLIN      ('H')
 #define SEG_JNTTRK		('J')
 #define SEG_FILCRCL		('G')
 #define SEG_POLY		('Y')
@@ -256,9 +261,8 @@ typedef struct {
 #define SEG_BENCH		('B')
 #define SEG_DIMLIN		('M')
 #define SEG_TBLEDGE		('Q')
-#define SEG_BEZLIN      ('Z')
 
-#define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BZRTRK)
+#define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BEZTRK)
 
 dynArr_t tempSegs_da;
 #define tempSegs(N) DYNARR_N( trkSeg_t, tempSegs_da, N )
@@ -370,6 +374,7 @@ void SegProc( segProc_e, trkSeg_p, segProcData_p );
 void StraightSegProc( segProc_e, trkSeg_p, segProcData_p );
 void CurveSegProc( segProc_e, trkSeg_p, segProcData_p );
 void JointSegProc( segProc_e, trkSeg_p, segProcData_p );
+void BezierSegProc( segProc_e, trkSeg_p, segProcData_p );   //Used in Cornu join
 
 
 

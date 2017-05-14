@@ -25,6 +25,7 @@ cmdCopy	Copy selected objects to clipboard
 cmdCurveCenter	Create curved track from center	cmdCurve
 cmdCurveChord	Create curved track from chord	cmdCurve
 cmdCurveEndPt	Create curved track from end-point	cmdCurve
+cmdBezier	Create Bezier track	cmdCurve
 cmdCurveSetCmd	Set Curve Track creation mode	cmdCurve
 cmdCurveTangent	Create curved track from tangent	cmdCurve
 cmdCustmgm	Manipulate Custom designer entries
@@ -47,6 +48,7 @@ cmdDrawCurveEndPt	Create a curved line from End	cmdDraw
 cmdDrawCurveCenter	Create a curved line from center	cmdDraw
 cmdDrawCurveChord	Create a curved line from chord	cmdDraw
 cmdDrawCurveTangent	Create a curved line from tangent	cmdDraw
+cmdDrawBezierCurve	Create a Bezier line	cmdDraw
 cmdDrawDimLine	Create a dimension line	cmdDraw
 cmdDrawFilledBox	Create a filled box	cmdDraw
 cmdDrawFilledCurve	Create a filled circle	cmdDraw
@@ -429,7 +431,7 @@ parameter-name	Enter your name as specified in the XTrackCAD Registration Notice
 parameter-key	Enter the key value as specified in the XTrackCAD Registration Notice	register
 parameter-ok	Validates the name and key.  Terminates the registration command	register
 #
-pref-anglesystem	0° is up or to the right	cmdPref
+pref-anglesystem	0ï¿½ is up or to the right	cmdPref
 pref-units	Choose english (inches) or metric (centimeters)	cmdPref
 pref-dstfmt	How to display length measurements	cmdPref
 pref-minlength	Do not create tracks to be shorter than this value	cmdPref

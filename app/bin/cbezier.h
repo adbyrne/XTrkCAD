@@ -21,18 +21,26 @@
  */
 
 
-typedef struct {
-		coOrd pos[4];
-		DIST_T minCurveRadius;
-		ANGLE_T a0, a1;
-		} BezierData_t;
 
+dynArr_t tempEndPts_da;
+#define BezSegs(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
+
+#define bezCmdNone 			(0)
+#define bezCmdModifyTrack 	(1)
+#define bezCmdModifyLine 	(2)
+#define bezCmdCreateTrack   (3)
+#define bezCmdCreateLine	(4)
 
 typedef void (*bezMessageProc)( char *, ... );
+STATUS_T CmdBezCurve( wAction_t, coOrd);
+STATUS_T CmdBezModify(track_p, wAction_t, coOrd);
 STATUS_T CreateBezier( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long, bezMessageProc );
 int IsBezier( track_p );
-track_p NewBezierTrack( coOrd, coOrd, coOrd, coOrd);
 DIST_T BezierDescriptionDistance( coOrd, track_p );
 STATUS_T BezierDescriptionMove( track_p, wAction_t, coOrd );
-BOOL_T GetBeziereMiddle( track_p, coOrd * );
-int DrawControlArm(trkSeg_p, coOrd, coOrd, BOOL_T, BOOL_T, wDrawColor, wDrawColor, wDrawColor );
+BOOL_T GetBezierMiddle( track_p, coOrd * );
+BOOL_T ConvertToArcs (coOrd[4], dynArr_t *, BOOL_T, wDrawColor, DIST_T);
+track_p NewBezierTrack(coOrd[4], trkSeg_t *, int);
+double BezierLength(coOrd[4], dynArr_t);
+double BezierMinRadius(coOrd[4],dynArr_t);
+
