@@ -100,7 +100,6 @@ You can join to and from circles, after which they become curved tracks.
 
 \rule
 
-
 \S{cmdCurve} Curved Track
 
 \G{png.d/bcurve.png}
@@ -121,19 +120,28 @@ Creating a curve is a two step operation.  The four methods (with their Shortcut
 
 \dd \G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.  Click on the center of the track and Drag to form the Curve.
 
+\u000
+
+\dd \G{png.d/bezier.png} Place one endpoint and drag out the first control point and release, Place the second Endpoint and drag out the second control point and release. Once all 4 points are placed, you can pick one at a time and drag it to move it. Complete the Curve by pressing Enter, or Reject it Esc.
+If Shift is held down when an endpoint is being placed it will "Snap" to an open track endpoint underneath it and you can only drag out the control point at the right angle. After a track is competed, it will be connected to this track.
+
+\u000
+
 A drop down menu, which allows selection of the Curved Track creation method, is invoked from the down arrow button (\G{png.d/bmenu.png}) located on the right side the Curved track button. Dependent upon previous selection, the Curved Track button will look like \G{png.d/bcurve1.png}, \G{png.d/bcurve2.png}, \G{png.d/bcurve3.png} or \G{png.d/bcurve4.png}.
 
 \dd \G{png.d/bmcurved.png}
 
 \dd \e{Curved Track Button Menu}
 
-In all cases, two Red arrow heads will be drawn after the first step to indicate where you can Drag to complete the second step.
+In all but the bezier case, two Red arrow heads will be drawn after the first step to indicate where you can Drag to complete the second step.
 
 A straight track will be created if the second endpoint is lined up with the first endpoint.
 
 If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid.
 
 Optionally, the curve center point and radius can be displayed for the Curve.  This is enabled by the Move Label (\K{cmdMoveLabel}) command.
+
+For Beziers, the active control point will be drawn in red and the available endpoints are shown with circles.  
 
 \rule
 

@@ -36,7 +36,9 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Modify} - modify an existing track.
+\dd \f{Modify} - modify an existing track, or a Bezier lines or tracks.
+
+For a Bezier, select the control points to modify and drag them to move - if the track is joined at the end, only the control point can be selected and will only move to preserve the end angle. Accept the change by pressing Enter or Reject it with Esc.
 
 \u000
 
