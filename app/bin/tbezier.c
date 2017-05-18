@@ -54,10 +54,10 @@ static DIST_T GetLengthBezier( track_p );
 /*
  * Run after any changes to the Bezier points
  */
-EXPORT void FixUpBezier(coOrd pos[4], struct extraData* xx) {
+EXPORT void FixUpBezier(coOrd pos[4], struct extraData* xx, BOOL_T track) {
 	xx->bezierData.a0 = NormalizeAngle(FindAngle(pos[1], pos[0]));
 	xx->bezierData.a1 = NormalizeAngle(FindAngle(pos[2], pos[3]));
-	ConvertToArcs(pos, &xx->bezierData.arcSegs, TRUE, xx->bezierData.segsColor,
+	ConvertToArcs(pos, &xx->bezierData.arcSegs, track, xx->bezierData.segsColor,
 			xx->bezierData.segsWidth);
 	xx->bezierData.minCurveRadius = BezierMinRadius(pos,
 			xx->bezierData.arcSegs);
@@ -271,7 +271,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 		SetTrkLayer( trk, bezData.layerNumber);
 		break;
 	case WI:
-		xx->bezierData.segsWidth = bezData.width;
+		xx->bezierData.segsWidth = bezData.width/mainD.dpi;
 		break;
 	case CO:
 		xx->bezierData.segsColor = bezData.color;
@@ -291,7 +291,8 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 			}
 	}
 
-	FixUpBezier(xx->bezierData.pos, &xx);
+	FixUpBezier(xx->bezierData.pos, xx, IsTrack(trk));
+	ComputeBezierBoundingBox(trk, xx);
 	DrawNewTrack( trk );
 }
 
@@ -325,11 +326,11 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	bezData.radius = xx->bezierData.minCurveRadius;
     bezData.layerNumber = GetTrkLayer(trk);
     bezData.pos[0] = xx->bezierData.pos[0];
-    crvData.pos[1] = xx->bezierData.pos[1];
+    bezData.pos[1] = xx->bezierData.pos[1];
     bezData.pos[2] = xx->bezierData.pos[2];
     bezData.pos[3] = xx->bezierData.pos[3];
     bezData.angle[0] = xx->bezierData.a0;
-    crvData.angle[1] = xx->bezierData.a1;
+    bezData.angle[1] = xx->bezierData.a1;
     if (GetTrkType(trk) == T_BEZIER) {
 		ComputeElev( trk, 0, FALSE, &bezData.elev[0], NULL );
 		ComputeElev( trk, 1, FALSE, &bezData.elev[1], NULL );
@@ -356,6 +357,7 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	crvDesc[GR].mode = DESC_RO;
     crvDesc[RA].mode = DESC_RO;
 	crvDesc[LY].mode = DESC_NOREDRAW;
+	bezData.width = (long)floor(xx->bezierData.segsWidth*mainD.dpi+0.5);
 	crvDesc[WI].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
 	crvDesc[CO].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
 	
@@ -374,7 +376,7 @@ static DIST_T DistanceBezier( track_p t, coOrd * p )
 
 	ANGLE_T a0, a1;
 	DIST_T d = 100000.0,dd;
-	coOrd p2;
+	coOrd p2 = xx->bezierData.pos[0];    //Set initial point
 	segProcData_t segProcData;
 	for (int i = 0;i<xx->bezierData.arcSegs.cnt;i++) {
 		segProcData.distance.pos1 = * p;
@@ -385,7 +387,7 @@ static DIST_T DistanceBezier( track_p t, coOrd * p )
 		}
 	}
     //d = BezierDistance( p, xx->bezierData.pos[0], xx->bezierData.pos[1], xx->bezierData.pos[2], xx->bezierData.pos[1], 100, NULL );
-	p = &p2;
+	* p = p2;
 	return d;
 }
 
@@ -397,7 +399,7 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 
 
 	if (GetTrkType(t) == T_BZRLIN) {
-		DrawSegsO(&mainD,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, 0.0, color, 0);
+		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, 0.0, color, 0);
 		return;
 	}
 
@@ -418,8 +420,8 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 			 d!=&mapD &&
 			 (d->options&DC_TIES)!=0 &&
 			 d->scale<scale2rail/2 )
-		DrawSegsO(&mainD,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions|DTS_TIES);
-	DrawSegsO(&mainD,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
+		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions|DTS_TIES);
+	DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
 	if ( (d->funcs->options & wDrawOptTemp) == 0 &&
 		 (d->options&DC_QUICK) == 0 ) {
 		DrawEndPt( d, t, 0, color );
@@ -430,15 +432,16 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 static void DeleteBezier( track_p t )
 {
 	struct extraData *xx = GetTrkExtraData(t);
+
 	for (int i=0;i<xx->bezierData.arcSegs.cnt;i++) {
 		trkSeg_t s = DYNARR_N(trkSeg_t,xx->bezierData.arcSegs,i);
 		if (s.type == SEG_BEZTRK || s.type == SEG_BEZLIN) {
-			if (s.u.b.segs.ptr) free(s.u.b.segs.ptr);
-			s.u.b.segs.max = 0;
-			s.u.b.segs.cnt = 0;
+			if (s.bezSegs.ptr) free(s.bezSegs.ptr);
+			s.bezSegs.max = 0;
+			s.bezSegs.cnt = 0;
 		}
 	}
-	if (xx->bezierData.arcSegs.ptr && xx->bezierData.arcSegs.max != 0)
+	if (xx->bezierData.arcSegs.ptr && !xx->bezierData.arcSegs.max)
 		free(xx->bezierData.arcSegs.ptr);
 	xx->bezierData.arcSegs.max = 0;
 	xx->bezierData.arcSegs.cnt = 0;
@@ -500,51 +503,46 @@ static void ReadBezier( char * line )
     xx->bezierData.pos[1] = c1;
     xx->bezierData.pos[2] = c2;
     xx->bezierData.pos[3] = p1;
-    ComputeBezierBoundingBox( t, xx );
     xx->bezierData.descriptionOff = dp;
-    xx->bezierData.a0 = NormalizeAngle(FindAngle(c1,p0));
-    xx->bezierData.a1 = NormalizeAngle(FindAngle(c2,p1));
     xx->bezierData.segsWidth = width;
     xx->bezierData.segsColor = wDrawFindColor( rgb );
     ReadSegs();
+    FixUpBezier(xx->bezierData.pos,xx,GetTrkType(t) == T_BEZIER);
+    ComputeBezierBoundingBox(t,xx);
     if (GetTrkType(t) == T_BEZIER) {
 		SetEndPts(t,2);
 	}
-	xx->bezierData.arcSegs.max = 0;
-	ConvertToArcs(xx->bezierData.pos, &xx->bezierData.arcSegs, TRUE, xx->bezierData.segsColor, xx->bezierData.segsWidth);
-    xx->bezierData.minCurveRadius = BezierMinRadius(xx->bezierData.pos,xx->bezierData.arcSegs);
-    xx->bezierData.length = BezierLength(xx->bezierData.pos,xx->bezierData.arcSegs);
 }
 
 static void MoveBezier( track_p trk, coOrd orig )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
+	UndoModify(trk);
     for (int i=0;i<4;i++) {
         xx->bezierData.pos[i].x += orig.x;
         xx->bezierData.pos[i].y += orig.y;
     }
-    ConvertToArcs(xx->bezierData.pos, &xx->bezierData.arcSegs, TRUE, xx->bezierData.segsColor, xx->bezierData.segsWidth);
-	ComputeBezierBoundingBox( trk, xx );
-	SetTrkEndPoint( trk, 0, xx->bezierData.pos[0], NormalizeAngle(FindAngle(xx->bezierData.pos[0],xx->bezierData.pos[1])));
-	SetTrkEndPoint( trk, 1, xx->bezierData.pos[3], NormalizeAngle(FindAngle(xx->bezierData.pos[3],xx->bezierData.pos[2])));
+    FixUpBezier(xx->bezierData.pos,xx,IsTrack(trk));
+    ComputeBezierBoundingBox(trk,xx);
+
 }
 
 static void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
+	UndoModify(trk);
     for (int i=0;i<5;i++) {
         Rotate( &xx->bezierData.pos[i], orig, angle );
     }
-    ConvertToArcs(xx->bezierData.pos, &xx->bezierData.arcSegs, TRUE,xx->bezierData.segsColor, xx->bezierData.segsWidth);
-	ComputeBezierBoundingBox( trk, xx );
-	SetTrkEndPoint( trk, 0, xx->bezierData.pos[0], NormalizeAngle(FindAngle(xx->bezierData.pos[0],xx->bezierData.pos[1])));
-	SetTrkEndPoint( trk, 1, xx->bezierData.pos[3], NormalizeAngle(FindAngle(xx->bezierData.pos[3],xx->bezierData.pos[2])));
+    FixUpBezier(xx->bezierData.pos,xx,IsTrack(trk));
+    ComputeBezierBoundingBox(trk,xx);
 
 }
 
 static void RescaleBezier( track_p trk, FLOAT_T ratio )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
+	UndoModify(trk);
 	xx->bezierData.pos[0].x *= ratio;
 	xx->bezierData.pos[0].y *= ratio;
     xx->bezierData.pos[1].x *= ratio;
@@ -553,13 +551,29 @@ static void RescaleBezier( track_p trk, FLOAT_T ratio )
     xx->bezierData.pos[2].y *= ratio;
     xx->bezierData.pos[3].x *= ratio;
     xx->bezierData.pos[3].y *= ratio;
-	xx->bezierData.minCurveRadius = BezierMinRadius(xx->bezierData.pos, xx->bezierData.arcSegs);
-    xx->bezierData.length = BezierLength(xx->bezierData.pos, xx->bezierData.arcSegs);
-    ConvertToArcs(xx->bezierData.pos, &xx->bezierData.arcSegs, TRUE, xx->bezierData.segsColor, xx->bezierData.segsWidth);
-    ComputeBezierBoundingBox(trk, xx);
-    SetTrkEndPoint( trk, 0, xx->bezierData.pos[0], NormalizeAngle(FindAngle(xx->bezierData.pos[0],xx->bezierData.pos[1])));
-    SetTrkEndPoint( trk, 1, xx->bezierData.pos[3], NormalizeAngle(FindAngle(xx->bezierData.pos[3],xx->bezierData.pos[2])));
+    FixUpBezier(xx->bezierData.pos,xx,IsTrack(trk));
+    ComputeBezierBoundingBox(trk,xx);
+
 }
+
+static void AdjustBezierEndPt( track_p trk, EPINX_T inx, coOrd pos ) {
+    struct extraData *xx = GetTrkExtraData(trk);
+    UndoModify(trk);
+    if (inx ==0 ) {
+        xx->bezierData.pos[1].x += -xx->bezierData.pos[0].x+pos.x;
+        xx->bezierData.pos[1].y += -xx->bezierData.pos[0].y+pos.y;
+        xx->bezierData.pos[0] = pos;
+    }
+    else {
+        xx->bezierData.pos[2].x += -xx->bezierData.pos[3].x+pos.x;
+        xx->bezierData.pos[2].y += -xx->bezierData.pos[3].y+pos.y;
+        xx->bezierData.pos[3] = pos;
+    }
+    FixUpBezier(xx->bezierData.pos, xx, IsTrack(trk));
+    ComputeBezierBoundingBox(trk,xx);
+    SetTrkEndPoint( trk, inx, pos, inx==0?xx->bezierData.a0:xx->bezierData.a1);
+}
+
 
 /**
  * Split the Track at approximately the point pos.
@@ -567,33 +581,32 @@ static void RescaleBezier( track_p trk, FLOAT_T ratio )
 static BOOL_T SplitBezier( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, EPINX_T * ep0, EPINX_T * ep1 )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	track_p trk1;
+	track_p trk1,trk2;
     double t;
+    BOOL_T track;
+    track = IsTrack(trk);
     
     coOrd newl[4], newr[4];
-    
-    dynArr_t tempSegs;
 
-    
     double dd = DistanceBezier(trk, &pos);
     if (dd>minLength) return FALSE;
     
+    BezierMathDistance(&pos, xx->bezierData.pos, 100, &t);  //Find t value
+
     BezierSplit(xx->bezierData.pos, &newl[0], &newr[0], t);
 
-    ConvertToArcs(newr,&tempSegs,TRUE,xx->bezierData.segsColor, xx->bezierData.segsWidth);
-	trk1 = NewBezierTrack(newr,(trkSeg_t *)tempSegs.ptr,tempSegs.cnt);
-
-	tempSegs.cnt = tempSegs.max = 0;
-	free(tempSegs.ptr);
-    
+    if (track) {
+    	trk1 = NewBezierTrack(ep?newr:newl,NULL,0);
+    } else
+    	trk1 = NewBezierLine(ep?newr:newl,NULL,0, xx->bezierData.segsColor,xx->bezierData.segsWidth);
+	UndoModify(trk);
     for (int i=0;i<4;i++) {
-        xx->bezierData.pos[i] = newl[i];
+    	xx->bezierData.pos[i] = ep?newl[i]:newr[i];
     }
-    ConvertToArcs(xx->bezierData.pos, &xx->bezierData.arcSegs, TRUE, xx->bezierData.segsColor, xx->bezierData.segsWidth);
-    xx->bezierData.length = BezierLength(xx->bezierData.pos,xx->bezierData.arcSegs);
-    xx->bezierData.minCurveRadius = BezierMinRadius(xx->bezierData.pos,xx->bezierData.arcSegs);
-    ComputeBezierBoundingBox( trk, xx);
-	
+    FixUpBezier(xx->bezierData.pos,xx,track);
+    ComputeBezierBoundingBox(trk,xx);
+    SetTrkEndPoint( trk, ep, xx->bezierData.pos[ep?3:0], ep?xx->bezierData.a1:xx->bezierData.a0);
+
 	*leftover = trk1;
 	*ep0 = 1-ep;
 	*ep1 = ep;
@@ -675,6 +688,10 @@ static BOOL_T MergeBezier(
 	track_p trk2;
 	EPINX_T ep2=-1;
 	coOrd pos;
+	BOOL_T tracks = FALSE;
+
+	if (IsTrack(trk0) && IsTrack(trk1) ) tracks = TRUE;
+	if (GetTrkType(trk0) != GetTrkType(trk1)) return FALSE;
 
 	if (ep0 == ep1)
 		return FALSE;
@@ -682,59 +699,34 @@ static BOOL_T MergeBezier(
 	UndoStart( _("Merge Bezier"), "MergeBezier( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
 	UndoModify( trk0 );
 	UndrawNewTrack( trk0 );
-	trk2 = GetTrkEndTrk( trk1, 1-ep1 );
-	if (trk2) {
-		ep2 = GetEndPtConnectedToMe( trk2, trk1 );
-		DisconnectTracks( trk1, 1-ep1, trk2, ep2 );
+	if (tracks) {
+		trk2 = GetTrkEndTrk( trk1, 1-ep1 );
+		if (trk2) {
+			ep2 = GetEndPtConnectedToMe( trk2, trk1 );
+			DisconnectTracks( trk1, 1-ep1, trk2, ep2 );
+		}
 	}
 	if (ep0 == 0) {
-        xx0->bezierData.pos[3] = xx1->bezierData.pos[3];
-        xx0->bezierData.pos[2] = xx1->bezierData.pos[2];
+		xx0->bezierData.pos[3] = xx1->bezierData.pos[3];
+		xx0->bezierData.pos[2] = xx1->bezierData.pos[2];
 	} else {
-        xx0->bezierData.pos[0] = xx1->bezierData.pos[0];
-        xx0->bezierData.pos[1] = xx1->bezierData.pos[1];
+		xx0->bezierData.pos[0] = xx1->bezierData.pos[0];
+		xx0->bezierData.pos[1] = xx1->bezierData.pos[1];
 	}
+	FixUpBezier(xx0->bezierData.pos,xx0,tracks);
+	ComputeBezierBoundingBox(trk0,xx0);
 	DeleteTrack( trk1, FALSE );
-	if (trk2) {
+	if (trk2 && tracks) {
+		if (ep0 == 1)
+			SetTrkEndPoint( trk2, 1, xx0->bezierData.pos[0], xx0->bezierData.a0);
+		else
+			SetTrkEndPoint( trk2, 2, xx0->bezierData.pos[3], xx0->bezierData.a1);
 		ConnectTracks( trk0, ep0, trk2, ep2 );
 	}
 	DrawNewTrack( trk0 );
-	ConvertToArcs(xx0->bezierData.pos,&xx0->bezierData.arcSegs, TRUE, xx0->bezierData.segsColor, xx0->bezierData.segsWidth);
-    xx0->bezierData.length = BezierLength(xx0->bezierData.pos,xx0->bezierData.arcSegs);
-    xx0->bezierData.minCurveRadius = BezierMinRadius(xx0->bezierData.pos, xx0->bezierData.arcSegs);
-	ComputeBezierBoundingBox( trk0, GetTrkExtraData(trk0) );
+
+
 	return TRUE;
-}
-
-
-static STATUS_T ModifyBezier( track_p trk, wAction_t action, coOrd pos )
-{
-    static int state;
-
-	DIST_T r, d;
-    coOrd pos0, pos1;
-    int selectedPos;
-	track_p trk1;
-    EPINX_T ep;
-	struct extraData *xx = GetTrkExtraData(trk);
-    
-    if (GetTrkType(trk) != T_BEZIER) return C_ERROR;
-
-	switch ( action ) {
-
-    case C_DOWN:
-    	CmdBezModify(trk,C_START,pos);
-    	return CmdBezModify(trk,action,pos);
-        break;
-    case C_UP:
-    case C_OK:
-    case C_TEXT:
-	case C_MOVE:
-	case C_CANCEL:
-		return CmdBezModify(trk,action,pos);
-		break;
-	}
-	return C_ERROR;
 }
 
 
@@ -765,25 +757,6 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 
 }
 
-static void AdjustBezierEndPt( track_p t, EPINX_T inx, coOrd pos ) {
-    struct extraData *xx = GetTrkExtraData(t);
-    if (inx ==0 ) {
-        xx->bezierData.pos[1].x += -xx->bezierData.pos[0].x+pos.x;
-        xx->bezierData.pos[1].y += -xx->bezierData.pos[0].y+pos.y;
-        xx->bezierData.pos[0] = pos;
-    }
-    else {
-        xx->bezierData.pos[2].x += -xx->bezierData.pos[3].x+pos.x;
-        xx->bezierData.pos[2].y += -xx->bezierData.pos[3].y+pos.y;
-        xx->bezierData.pos[3] = pos;
-    }
-    ConvertToArcs(xx->bezierData.pos, &xx->bezierData.arcSegs, TRUE, xx->bezierData.segsColor, xx->bezierData.segsWidth);
-    xx->bezierData.length = BezierLength(xx->bezierData.pos, xx->bezierData.arcSegs);
-    xx->bezierData.minCurveRadius = BezierMinRadius(xx->bezierData.pos,xx->bezierData.arcSegs);
-
-    ANGLE_T angle = FindAngle(pos,inx==0?xx->bezierData.pos[1]:xx->bezierData.pos[2]);
-    SetTrkEndPoint( t, inx, pos, angle);
-}
 
 
 static BOOL_T QueryBezier( track_p trk, int query )
@@ -800,6 +773,8 @@ static BOOL_T QueryBezier( track_p trk, int query )
 		return TRUE;
 	case Q_ISTRACK:
 		return GetTrkType(trk) == T_BEZIER?TRUE:FALSE;
+	case Q_CAN_PARALLEL:
+		return (GetTrkType(trk) == T_BEZIER);
 	default:
 		return FALSE;
 	}
@@ -816,7 +791,9 @@ static void FlipBezier(
 	FlipPoint( &xx->bezierData.pos[1], orig, angle );
     FlipPoint( &xx->bezierData.pos[2], orig, angle );
     FlipPoint( &xx->bezierData.pos[3], orig, angle );
-	ComputeBezierBoundingBox( trk, xx );
+    FixUpBezier(xx->bezierData.pos,xx,IsTrack(trk));
+    ComputeBezierBoundingBox(trk,xx);
+
 }
 
 
@@ -835,15 +812,19 @@ static BOOL_T MakeParallelBezier(
 
 	//Produce bezier that is translated parallel to the existing Bezier
     // - not a precise result if the bezier end angles are not in the same general direction.
+    // The expectation is that the user will have to adjust it - unless and until we produce
+    // a new algo to adjust the control points to be parallel to the endpoints.
     
     a = FindAngle(xx->bezierData.pos[0],xx->bezierData.pos[3]);
-    p = BezierMathFindNearestPoint(&pos, xx->bezierData.pos, 100);
-    a2 = FindAngle(pos,p);
+    p = pos;
+    DistanceBezier(trk, &p);
+    a2 = NormalizeAngle(FindAngle(pos,p)-a);
     //find parallel move x and y for points
     for (int i =0; i<4;i++) {
     	np[i] = xx->bezierData.pos[i];
     }
-    if ( a2 < 180 ) {
+
+    if ( a2 > 180 ) {
         Translate(&np[0],np[0],a+90,sep);
         Translate(&np[1],np[1],a+90,sep);
         Translate(&np[2],np[2],a+90,sep);
@@ -857,20 +838,37 @@ static BOOL_T MakeParallelBezier(
 
 	if ( newTrkR ) {
 		*newTrkR = NewBezierTrack( np, NULL, 0);
-		xx1 = GetTrkExtraData(*newTrkR);
-		ComputeBezierBoundingBox( *newTrkR, xx1 );
 	} else {
+		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_BEZTRK;
 		for (int i=0;i<4;i++) tempSegs(0).u.b.pos[i] = np[i];
-		ConvertToArcs(tempSegs(0).u.b.pos,&tempSegs(0).u.b.segs, TRUE,tempSegs(0).color, tempSegs(0).width);
-		tempSegs(0).u.b.max_radius = BezierMinRadius(tempSegs(0).u.b.pos,tempSegs(0).u.b.segs);
-		tempSegs(0).u.b.length = BezierLength(tempSegs(0).u.b.pos,tempSegs(0).u.b.segs);
+		ConvertToArcs(tempSegs(0).u.b.pos,&tempSegs(0).bezSegs,TRUE,tempSegs(0).color, tempSegs(0).width);
+		tempSegs(0).u.b.max_radius = BezierMinRadius(tempSegs(0).u.b.pos,tempSegs(0).bezSegs);
+		tempSegs(0).u.b.length = BezierLength(tempSegs(0).u.b.pos,tempSegs(0).bezSegs);
 	}
 	if ( p0R ) p0R = &np[0];
 	if ( p1R ) p1R = &np[1];
+	return TRUE;
+}
+
+/*
+ * When an undo is run, the array of segs is missing - they are not saved to the Undo log. So Undo calls this routine to
+ * ensure
+ * - that the Segs are restored and
+ * - other fields reset.
+ */
+BOOL_T RebuildBezier (track_p trk)
+{
+	struct extraData *xx;
+	xx = GetTrkExtraData(trk);
+	xx->bezierData.arcSegs.max = 0;
+	xx->bezierData.arcSegs.cnt = 0;
+	xx->bezierData.arcSegs.ptr = NULL;
+	FixUpBezier(xx->bezierData.pos,xx,IsTrack(trk));
+	ComputeBezierBoundingBox(trk, xx);
 	return TRUE;
 }
 
@@ -893,7 +891,7 @@ static trackCmd_t bezlinCmds = {
 		NULL,	/* redraw */
 		NULL,   /* trim   */
 		MergeBezier,
-		ModifyBezier,
+		NULL,   /* modify */
 		GetLengthBezier,
 		GetParamsBezier,
 		NULL, /* Move EndPt */
@@ -903,7 +901,10 @@ static trackCmd_t bezlinCmds = {
 		NULL,
 		NULL,
 		NULL,
-		NULL };
+		NULL,
+		NULL,
+		RebuildBezier
+		};
 
 static trackCmd_t bezierCmds = {
 		"BEZIER",
@@ -924,7 +925,7 @@ static trackCmd_t bezierCmds = {
 		NULL,	/* redraw */
 		NULL,   /* trim   */
 		MergeBezier,
-		ModifyBezier,
+		NULL,   /* modify */
 		GetLengthBezier,
 		GetParamsBezier,
 		NULL, /* Move EndPt */
@@ -934,7 +935,10 @@ static trackCmd_t bezierCmds = {
 		NULL,
 		NULL,
 		NULL,
-		MakeParallelBezier };
+		MakeParallelBezier,
+		NULL,
+		RebuildBezier
+		};
 
 
 EXPORT void BezierSegProc(
@@ -967,9 +971,9 @@ EXPORT void BezierSegProc(
 
 		dd = FindDistance(data->distance.pos1,segPtr->u.b.pos[0]);   //Just find one distance
 		p0 = data->distance.pos1;
-		for(int i=0;i<segPtr->u.b.segs.cnt;i++) {
+		for(int i=0;i<segPtr->bezSegs.cnt;i++) {
 			segProcData.distance.pos1 = p0;
-			SegProc(SEGPROC_DISTANCE,&(DYNARR_N(trkSeg_t,segPtr->u.b.segs,i)),&segProcData);
+			SegProc(SEGPROC_DISTANCE,&(DYNARR_N(trkSeg_t,segPtr->bezSegs,i)),&segProcData);
 			d = segProcData.distance.dd;
 			if (d<dd) {
 				dd = d;
@@ -991,16 +995,16 @@ EXPORT void BezierSegProc(
 		segPtr->u.b.pos[2] = temp1;
 		segPtr->u.b.pos[3] = temp0;
 
-		ConvertToArcs(segPtr->u.b.pos,&segPtr->u.b.segs, TRUE,segPtr->color,segPtr->width);
+		ConvertToArcs(segPtr->u.b.pos,&segPtr->bezSegs, TRUE,segPtr->color,segPtr->width);
 		break;
 
 	case SEGPROC_NEWTRACK:
-		data->newTrack.trk = NewBezierTrack( segPtr->u.b.pos, (trkSeg_t *)segPtr->u.b.segs.ptr, segPtr->u.b.segs.cnt);
+		data->newTrack.trk = NewBezierTrack( segPtr->u.b.pos, (trkSeg_t *)segPtr->bezSegs.ptr, segPtr->bezSegs.cnt);
 		break;
 
 	case SEGPROC_LENGTH:
-		for(int i=0;i<segPtr->u.b.segs.cnt;i++) {
-			SegProc(cmd,&(DYNARR_N(trkSeg_t,segPtr->u.b.segs,i)),&segProcData);
+		for(int i=0;i<segPtr->bezSegs.cnt;i++) {
+			SegProc(cmd,&(DYNARR_N(trkSeg_t,segPtr->bezSegs,i)),&segProcData);
 			data->length.length += segProcData.length.length;
 		}
 		break;
@@ -1081,7 +1085,7 @@ track_p NewBezierTrack(coOrd pos[4], trkSeg_t * tempsegs, int count)
     xx->bezierData.pos[3] = pos[3];
     xx->bezierData.segsColor = wDrawColorBlack;
     xx->bezierData.segsWidth = 0;
-    FixUpBezier(pos, xx);
+    FixUpBezier(pos, xx, TRUE);
 LOG( log_bezier, 1, ( "NewBezierTrack( EP1 %0.3f, %0.3f, CP1 %0.3f, %0.3f, CP2 %0.3f, %0.3f, EP2 %0.3f, %0.3f )  = %d\n", pos[0].x, pos[0].y, pos[1].x, pos[1].y, pos[2].x, pos[2].y, pos[3].x, pos[3].y, GetTrkIndex(p) ) )
 	ComputeBezierBoundingBox( p, xx );
 	SetTrkEndPoint( p, 0, pos[0], xx->bezierData.a0);
@@ -1102,7 +1106,7 @@ EXPORT track_p NewBezierLine( coOrd pos[4], trkSeg_t * tempsegs, int count, wDra
     xx->bezierData.pos[3] = pos[3];
     xx->bezierData.segsColor = color;
     xx->bezierData.segsWidth = width;
-    FixUpBezier(pos, xx);
+    FixUpBezier(pos, xx, FALSE);
 LOG( log_bezier, 1, ( "NewBezierLine( EP1 %0.3f, %0.3f, CP1 %0.3f, %0.3f, CP2 %0.3f, %0.3f, EP2 %0.3f, %0.3f)  = %d\n", pos[0].x, pos[0].y, pos[1].x, pos[1].y, pos[2].x, pos[2].y, pos[3].x, pos[3].y, GetTrkIndex(p) ) )
 	ComputeBezierBoundingBox( p, xx );
 	return p;
@@ -1155,18 +1159,23 @@ extern DIST_T BezierMathDistance( coOrd * pos, coOrd p[4], int segments, double 
 {
     DIST_T dd = FindDistance(*pos,p[0]);
     double t = 0.0;
-    coOrd pt;
+    coOrd pt, save_pt;
     for (int i = 1;i<=segments;i++) {
         pt = BezierPointByParameter(p, (double)i/segments);
-        if (FindDistance(*pos,pt) < dd) { dd=FindDistance(*pos,pt); t= (double)i/segments; }
+        if (FindDistance(*pos,pt) < dd) {
+        	dd=FindDistance(*pos,pt);
+        	t = (double)i/segments;
+        	save_pt = pt;
+        }
     }
     if (t_value) *t_value = t;
+    pos = &save_pt;
     return dd;
 }
 
 extern coOrd BezierMathFindNearestPoint(coOrd *pos, coOrd p[4], int segments) {
     double t = 0.0;
-    double dd = BezierMathDistance (pos, p, segments, &t);
+    double dd = BezierMathDistance(pos, p, segments, &t);
     return BezierPointByParameter(p, t);
 }
 

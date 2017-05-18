@@ -162,6 +162,7 @@ typedef struct {
 		BOOL_T (*checkTraverse)( track_p, coOrd );
 		BOOL_T (*makeParallel)( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
 		void (*drawDesc)( track_p, drawCmd_p, wDrawColor );
+		BOOL_T (*rebuildSegs)(track_p);
 		} trackCmd_t;
 
 
@@ -195,6 +196,7 @@ typedef struct {
 		char type;
 		wDrawColor color;
 		DIST_T width;
+		dynArr_t bezSegs;      //placed here to avoid overwrites
 		union {
 			struct {
 				coOrd pos[2];
@@ -209,7 +211,6 @@ typedef struct {
 				DIST_T radius0;
 				DIST_T radius3;
 				DIST_T length;
-				dynArr_t segs;
 			} b;
 			struct {
 				coOrd center;
@@ -375,6 +376,7 @@ void StraightSegProc( segProc_e, trkSeg_p, segProcData_p );
 void CurveSegProc( segProc_e, trkSeg_p, segProcData_p );
 void JointSegProc( segProc_e, trkSeg_p, segProcData_p );
 void BezierSegProc( segProc_e, trkSeg_p, segProcData_p );   //Used in Cornu join
+void CleanSegs( dynArr_t *);
 
 
 
@@ -576,6 +578,7 @@ BOOL_T QueryTrack( track_p, int );
 void UngroupTrack( track_p );
 BOOL_T IsTrack( track_p );
 char * GetTrkTypeName( track_p );
+BOOL_T RebuildTrackSegs(track_p);
 
 DIST_T GetFlexLength( track_p, EPINX_T, coOrd * );
 void LabelLengths( drawCmd_p, track_p, wDrawColor );

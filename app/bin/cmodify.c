@@ -57,20 +57,14 @@ static BOOL_T modifyBezierMode;
  * Picking a Bezier will allow control point(s) modifications until terminated with "Enter"
  */
 static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
-	STATUS_T rc;
-	if (Dex.Trk == NULL) return C_ERROR;
+	STATUS_T rc = C_CONTINUE;
+	if (Dex.Trk == NULL) return C_ERROR;   //No track picked yet!
 	switch (action) {
+		case C_START:
 		case C_DOWN:
-			rc = CmdBezModify(Dex.Trk, C_START, pos);
-			if (rc == C_CONTINUE) {
-				rc = CmdBezModify(Dex.Trk, C_DOWN, pos);
-			} else if (rc == C_ERROR) {
-				Dex.Trk = NULL;
-				return C_CONTINUE;
-			}
-			break;
 		case C_MOVE:
 		case C_UP:
+		case C_OK:
 			rc = CmdBezModify(Dex.Trk, action, pos);
 			break;
 		case C_TEXT:
@@ -126,7 +120,8 @@ static STATUS_T CmdModify(
 		return C_CONTINUE;
 
 	case C_DOWN:
-		if (modifyBezierMode) return CmdBezModify(Dex.Trk,C_DOWN, pos);
+		if (modifyBezierMode)
+			return ModifyBezier(C_DOWN, pos);
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
@@ -146,10 +141,10 @@ static STATUS_T CmdModify(
 		}
 		if (QueryTrack( Dex.Trk, Q_CAN_MODIFY_CONTROL_POINTS )) { //Bezier
 			modifyBezierMode = TRUE;
-			if (ModifyBezier(C_DOWN, pos) != C_CONTINUE) {					//Function rejected Bezier
-				modifyBezierMode = FALSE;
+			if (ModifyBezier(C_START, pos) != C_CONTINUE) {			//Call Start with track
+				modifyBezierMode = FALSE;							//Function rejected Bezier
 			}
-			return C_CONTINUE;
+			return C_CONTINUE;										//That's it
 		}
 
 		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
@@ -192,7 +187,7 @@ static STATUS_T CmdModify(
 		if (Dex.Trk == NULL)
 			return C_CONTINUE;
 		if ( modifyBezierMode )
-			return CmdBezModify(Dex.Trk,C_MOVE, pos);
+			return ModifyBezier(C_MOVE, pos);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		tempSegs_da.cnt = 0;
 		SnapPos( &pos );
@@ -213,7 +208,7 @@ static STATUS_T CmdModify(
 		if ( modifyRulerMode )
 			return ModifyRuler( C_MOVE, pos );
 		if ( modifyBezierMode )
-			return ModifyBezier( C_UP, pos );
+			return ModifyBezier( C_UP, pos);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		tempSegs_da.cnt = 0;
 		SnapPos( &pos );
@@ -262,10 +257,7 @@ LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
 		Dex.first = TRUE;
         MainRedraw();
         MapRedraw();
-#ifdef LATER
-		return C_CONTINUE;
-#endif
-
+        /* no break */
 	case C_RMOVE:
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		tempSegs_da.cnt = 0;
@@ -432,7 +424,7 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		if (modifyBezierMode) return CmdBezModify(Dex.Trk,C_REDRAW, pos);
+		if (modifyBezierMode) return ModifyBezier(C_REDRAW, pos);
 		if ( (!changeTrackMode) && Dex.Trk && !QueryTrack( Dex.Trk,	 Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK ) )
 		   UndrawNewTrack( Dex.Trk );
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
@@ -447,7 +439,7 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 		return ModifyTrack( Dex.Trk, action, pos );
 
 	default:
-		if (modifyBezierMode) CmdBezModify(Dex.Trk, action, pos);
+		if (modifyBezierMode) ModifyBezier(action, pos);
 		return C_CONTINUE;
 	}
 }

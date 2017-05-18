@@ -20,18 +20,34 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <track.h>
 #include <time.h>
 #include <ctype.h>
 #include <stdarg.h>
-#include "track.h"
+#include <common.h>
+#include <cbezier.h>
+
 #include "cjoin.h"
+
 
 /*****************************************************************************
  *
  * TRACK SEGMENTS
  *
+ * Notes: Segments are used
+ * 1. as temporary elements during editing operations
+ * 2. as a means of grouping primitives for compounds
+ * 3. as the way of drawing and operating on Bezier curves
+ *
+ * They are stored as dynamic arrays which can be displayed and operated on as sets.
+ *
  */
 
+
+/*
+ * Build a Segment that has a radius and passes through two points. This uses the knowledge
+ * that the center of curve is always on an orthogonal line through the bisection of a chord.
+ */
 EXPORT void ComputeCurvedSeg(
 		trkSeg_p s,
 		DIST_T radius,
@@ -116,7 +132,7 @@ EXPORT coOrd GetSegEndPt(
 		break;
     case SEG_BEZTRK:
     case SEG_BEZLIN:
-        if (ep ==1) pos = segPtr -> u.b.pos[3];
+        if (ep ==1) pos = segPtr->u.b.pos[3];       //For Bezier, use the End Points of the overall curve
         else pos = segPtr->u.b.pos[0];
         break;
     default:
@@ -183,7 +199,7 @@ EXPORT void GetTextBounds(
 static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo, coOrd *hi )
 {
 	int inx;
-	coOrd p0, p1, pc;
+	coOrd p0, p1, p2, p3, pBez[4], pc;
 	ANGLE_T a0, a1;
 	coOrd width;
 	DIST_T radius;
@@ -200,8 +216,6 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 	case SEG_TBLEDGE:
 	case SEG_CRVLIN:
 	case SEG_JNTTRK:
-    case SEG_BEZLIN:
-    case SEG_BEZTRK:
 			REORIGIN( p0, GetSegEndPt( segPtr, 0, FALSE, NULL ), angle, xlat )
 			REORIGIN( p1, GetSegEndPt( segPtr, 1, FALSE, NULL ), angle, xlat )
 			if (p0.x < p1.x) {
@@ -281,6 +295,21 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 	case SEG_TEXT:
 		REORIGIN( p0, segPtr->u.t.pos, angle, xlat )
 		GetTextBounds( p0, angle+segPtr->u.t.angle, segPtr->u.t.string, segPtr->u.t.fontSize, lo, hi );
+		break;
+	case SEG_BEZLIN:
+	case SEG_BEZTRK:								//Bezier control arms form a "tent" around the curve
+		REORIGIN( pBez[0], segPtr->u.b.pos[0], angle, xlat )
+		REORIGIN( pBez[1], segPtr->u.b.pos[1], angle, xlat )
+		REORIGIN( pBez[2], segPtr->u.b.pos[2], angle, xlat )
+		REORIGIN( pBez[3], segPtr->u.b.pos[3], angle, xlat )
+		lo->x = hi->x = pBez[0].x;
+		lo->y = hi->y = pBez[0].y;
+		for (int i=1;i<4;i++) {
+			lo->x = lo->x>pBez[i].x?pBez[i].x:lo->x;
+			lo->y = lo->y>pBez[i].y?pBez[i].y:lo->y;
+			hi->x = hi->x<pBez[i].x?pBez[i].x:hi->x;
+			hi->y = hi->y>pBez[i].y?pBez[i].y:hi->y;
+		}
 		break;
 	default:
 		;
@@ -396,6 +425,7 @@ EXPORT void MoveSegs(
             s->u.b.pos[3].y +=orig.y;
             s->u.b.pos[4].x +=orig.x;
             s->u.b.pos[4].y +=orig.y;
+            ConvertToArcs(s->u.b.pos, &s->bezSegs, s->type==SEG_BEZTRK, s->color, s->width);
             break;
 		}
 	}
@@ -447,11 +477,11 @@ EXPORT void RotateSegs(
             Rotate( &s->u.b.pos[1], orig, angle );
             Rotate( &s->u.b.pos[2], orig, angle );
             Rotate( &s->u.b.pos[3], orig, angle );
+            ConvertToArcs(s->u.b.pos, &s->bezSegs, s->type==SEG_BEZTRK, s->color, s->width);
             break;
         }
 	}
 }
-
 
 EXPORT void FlipSegs(
 		wIndex_t segCnt,
@@ -505,6 +535,7 @@ EXPORT void FlipSegs(
             s->u.b.pos[1].y = -s->u.b.pos[1].y;
             s->u.b.pos[2].y = -s->u.b.pos[2].y;
             s->u.b.pos[3].y = -s->u.b.pos[3].y;
+            ConvertToArcs(s->u.b.pos, &s->bezSegs, s->type==SEG_BEZTRK, s->color, s->width);
             break;
 		}
 	}
@@ -571,6 +602,7 @@ EXPORT void RescaleSegs(
             s->u.l.pos[2].x *= scale_x;
             s->u.l.pos[3].x *= scale_x;
             s->u.l.pos[3].y *= scale_y;
+            ConvertToArcs(s->u.b.pos, &s->bezSegs, s->type==SEG_BEZTRK, s->color, s->width);
             break;
 
 		}
@@ -694,9 +726,9 @@ EXPORT DIST_T DistanceSegs(
         case SEG_BEZLIN:
         		dd = 100000.0;
         		pt = p0;
-        		for (int i = 0;i<segPtr->u.b.segs.cnt;i++) {
+        		for (int i = 0;i<segPtr->bezSegs.cnt;i++) {
         			segProcData2.distance.pos1 = pt;
-        			SegProc(SEGPROC_DISTANCE,&DYNARR_N(trkSeg_t,segPtr->u.b.segs,i),&segProcData2);
+        			SegProc(SEGPROC_DISTANCE,&DYNARR_N(trkSeg_t,segPtr->bezSegs,i),&segProcData2);
         			if (segProcData2.distance.dd<dd) {
         				dd = segProcData2.distance.dd;
         				p1 = segProcData2.distance.pos1;
@@ -1536,6 +1568,10 @@ EXPORT void DrawDimLine(
 		DrawLine( d, p, p1, 0, color );
 }
 
+/*
+ * Display the array of segments.
+ * Note that Bezier segments in particular contain sub-arrays of Curve and Straight segments.
+ */
 EXPORT void DrawSegsO(
 		drawCmd_p d,
 		track_p trk,
@@ -1553,7 +1589,7 @@ EXPORT void DrawSegsO(
 	wDrawColor color1, color2;
 	DIST_T factor = d->dpi/d->scale;
 	trkSeg_p tempPtr;
-	static dynArr_t tempPts_da;
+    dynArr_t tempPts_da;
 #define tempPts(N) DYNARR_N( coOrd, tempPts_da, N )
 	long option;
 	wFontSize_t fs;
@@ -1588,8 +1624,8 @@ EXPORT void DrawSegsO(
                 REORIGIN(p1, segPtr->u.b.pos[1], angle, orig);
                 REORIGIN(p2, segPtr->u.b.pos[2], angle, orig);
                 REORIGIN(p3, segPtr->u.b.pos[3], angle, orig);
-                tempPtr = segPtr->u.b.segs.ptr;
-                for(int j=0;j<segPtr->u.b.segs.cnt;tempPtr++) {
+                tempPtr = segPtr->bezSegs.ptr;
+                for(int j=0;j<segPtr->bezSegs.cnt;tempPtr++) {   //Loop through sub parts (only Trks supported)
                 	if (tempPtr->type == SEG_CRVTRK) {
                 		a0 = NormalizeAngle(tempPtr->u.c.a0 + angle);
                 		REORIGIN( c, tempPtr->u.c.center, angle, orig );
@@ -1705,37 +1741,41 @@ EXPORT void DrawSegsO(
             REORIGIN(p1, segPtr->u.b.pos[1], angle, orig);
             REORIGIN(p2, segPtr->u.b.pos[2], angle, orig);
             REORIGIN(p3, segPtr->u.b.pos[3], angle, orig);
-            tempPtr = segPtr->u.b.segs.ptr;
-            for(int j=0;j<segPtr->u.b.segs.cnt;tempPtr++) {
-            	if (tempPtr->type == SEG_CRVTRK || tempPtr->type == SEG_CRVLIN) {
-            		a0 = NormalizeAngle(tempPtr->u.c.a0 + angle);
-            		REORIGIN( c, tempPtr->u.c.center, angle, orig );
-            		if (tempPtr->type == SEG_CRVTRK) {
-            			if (color1 == wDrawColorBlack)	color1 = normalColor;
-            			if ( tempPtr->color == wDrawColorWhite )
-            				  break;
-            			p0.x = p0.y = p1.x = p1.y = 0;
-            			DrawCurvedTrack( d,
+
+            for(int j=0;j<segPtr->bezSegs.cnt;j++) {     //Loop through sub Segs
+            	tempPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,j);
+            	switch (tempPtr->type) {
+        			case SEG_CRVTRK:
+        			case SEG_CRVLIN:
+        				a0 = NormalizeAngle(tempPtr->u.c.a0 + angle);
+        				REORIGIN( c, tempPtr->u.c.center, angle, orig );
+        				if (tempPtr->type == SEG_CRVTRK) {
+        					if (color1 == wDrawColorBlack)	color1 = normalColor;
+        					if ( tempPtr->color == wDrawColorWhite )  break;
+        					p0.x = p0.y = p1.x = p1.y = 0;
+        					DrawCurvedTrack( d,
             		   					c,
             		   					fabs(tempPtr->u.c.radius),
             		   					a0, tempPtr->u.c.a1,
             		   					p0, p1,
             		   					NULL, trackGauge, color1, options );
-            		} else {
-            		   	DrawArc( d, c, fabs(tempPtr->u.c.radius), a0, tempPtr->u.c.a1,
-            		   		FALSE, (wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
-            		}
+        				} else if (tempPtr->type == SEG_CRVLIN) {
+        					DrawArc( d, c, fabs(tempPtr->u.c.radius), a0, tempPtr->u.c.a1,
+        							FALSE, (wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
+        				}
+        				break;
+        			case SEG_STRTRK:
+        				if (color1 == wDrawColorBlack)	color1 = normalColor;
+        				if ( tempPtr->color == wDrawColorWhite ) break;
+        					DrawStraightTrack( d,
+        										p0, p1,
+												FindAngle(p0, p1 ),
+												NULL, trackGauge, color1, options );
+            			break;
+        			case SEG_STRLIN:
+        				DrawLine( d, p0, p1, (wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
+        				break;
             	}
-            	if (tempPtr->type == SEG_STRTRK) {
-            		if (color1 == wDrawColorBlack)	color1 = normalColor;
-            		if ( tempPtr->color == wDrawColorWhite )
-            		   break;
-            		DrawStraightTrack( d,
-            		   					p0, p1,
-            		   					FindAngle(p0, p1 ),
-            		   					NULL, trackGauge, color1, options );
-            	} else if (tempPtr->type == SEG_STRLIN)
-            	    DrawLine( d, p0, p1, (wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
             }
             break;
 		case SEG_JNTTRK:
@@ -1791,6 +1831,9 @@ EXPORT void DrawSegsO(
 }
 
 
+/*
+ * Draw Segments without setting DTS_ options.
+ */
 
 EXPORT void DrawSegs(
 		drawCmd_p d,
@@ -1802,6 +1845,22 @@ EXPORT void DrawSegs(
 		wDrawColor color )
 {
 	DrawSegsO( d, NULL, orig, angle, segPtr, segCnt, trackGauge, color, 0 );
+}
+
+/*
+ * Free dynamic storage added to each of an array of Track Segments.
+ */
+EXPORT void CleanSegs(dynArr_t * seg_p) {
+	if (seg_p->cnt ==0) return;
+	for (int i=0;i<seg_p->cnt;i++) {
+		trkSeg_t t = DYNARR_N(trkSeg_t,* seg_p,i);
+		if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
+			if (t.bezSegs.ptr && t.bezSegs.max) free(t.bezSegs.ptr);
+		}
+	}
+	seg_p->max = 0;
+	seg_p->cnt = 0;
+
 }
 
 
