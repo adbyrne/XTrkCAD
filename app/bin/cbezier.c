@@ -80,6 +80,8 @@ static struct {
 		enum { NONE,POS_1,CONTROL_ARM_1,POS_2,PICK_POINT,POINT_PICKED } state;
 		coOrd pos[4];
         int selectPoint;
+        wDrawColor color;
+        DIST_T width;
 		track_p trk[2];
 		EPINX_T ep[2];
 		dynArr_t crvSegs_da;
@@ -282,7 +284,7 @@ EXPORT enum BezierType AnalyseCurve(coOrd inpos[4]) {
 	if (pos[1].x == 0.0 && pos[1].y == 0.0) return PLAIN;
 	double f21 = (pos[2].y)/(pos[1].y);
 	double f31 = (pos[3].y)/(pos[1].y);
-	if ((pos[2].x-pos[1].x*f21) <0.00001) return PLAIN;   //defend against divide by zero
+	if (fabs(pos[2].x-pos[1].x*f21) <0.00001) return PLAIN;   //defend against divide by zero
 	double fx = (pos[3].x-pos[1].x*f31)/(pos[2].x-pos[1].x*f21);
 	double fy = f31+(1-f21)*fx;
 
@@ -746,6 +748,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
 		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up
 		return AdjustBezCurve(C_DOWN, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);
 
+
 	case C_MOVE:
 		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up and down
 		return AdjustBezCurve(C_MOVE, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);
@@ -756,6 +759,10 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
 		}
 		return AdjustBezCurve(C_UP, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth,  InfoMessage);					//Run Adjust
 
+	case C_TEXT:
+				if ((action>>8) != ' ')
+					return C_CONTINUE;
+					/* no break */
 	case C_OK:
 		if (Da.state != PICK_POINT) {										//Too early - abandon
 			InfoMessage(_("No changes made"));
@@ -839,25 +846,28 @@ DIST_T BezierMinRadius(coOrd pos[4],dynArr_t segs) {
 STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 {
 	track_p t;
-	DIST_T d, width = 0.0;
+	DIST_T d;
 	static int segCnt;
 	STATUS_T rc = C_CONTINUE;
 	long curveMode = 0;
 	long cmd;
-	wDrawColor color = wDrawColorBlack;
 	if (action>>8) {
 		cmd = action>>8;
 	} else cmd = (long)commandContext;
+	Da.track = (cmd == bezCmdModifyTrack || cmd == bezCmdCreateTrack)?TRUE:FALSE;
+	if (!Da.track) {
+			Da.color = lineColor;
+			Da.width = (double)lineWidth;
+	} else {
+			Da.color = wDrawColorBlack;
+			Da.width = 0.0;
+	}
 
 
 	switch (action&0xFF) {
 
 	case C_START:
-		Da.track = (cmd == bezCmdModifyTrack || cmd == bezCmdCreateTrack)?TRUE:FALSE;
-		if (!Da.track) {
-			color = lineColor;
-			width = lineWidth;
-		}
+
 		Da.state = POS_1;
 		Da. selectPoint = -1;
 		for (int i=0;i<4;i++) {
@@ -871,12 +881,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		Da.cp2Segs_da_cnt = 0;
 		InfoMessage( _("Place 1st end point of Bezier track + Shift -> snap to unconnected endpoint") );
 		return C_CONTINUE;
-	case C_TEXT:
-		if ( Da.state == PICK_POINT) {
-			AdjustBezCurve( action&0xFF, pos, Da.track, color, width, InfoMessage );
-			return C_TERMINATE;
-		} else
-			return C_CONTINUE;
+
 
 	case C_DOWN:
 		if ( Da.state == POS_1 || Da.state == POS_2) {   //Set the first or third point
@@ -937,12 +942,12 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,NULL,0,NULL,0,drawColorBlack); //Wipe out initial Arm
 				Da.cp1Segs_da_cnt = createControlArm(Da.cp1Segs_da, Da.pos[0], Da.pos[1], Da.track,FALSE,Da.trk[0]!=NULL,-1,wDrawColorBlack);
 				Da.cp2Segs_da_cnt = createControlArm(Da.cp2Segs_da, Da.pos[3], Da.pos[2], Da.track,TRUE,Da.trk[1]!=NULL,1,wDrawColorBlack);
-				if (ConvertToArcs(Da.pos,&Da.crvSegs_da,Da.track,color,width)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
+				if (ConvertToArcs(Da.pos,&Da.crvSegs_da,Da.track,Da.color,Da.width)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
 				DrawTempBezier(Da.track);
 			}
 			return C_CONTINUE;
 		} else  {
-			return AdjustBezCurve( action&0xFF, pos, Da.track, color, width, InfoMessage );
+			return AdjustBezCurve( action&0xFF, pos, Da.track, Da.color, Da.width, InfoMessage );
 		}
 		return C_CONTINUE;
 			
@@ -963,7 +968,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			Da.cp1Segs_da_cnt = createControlArm(Da.cp1Segs_da, Da.pos[0], Da.pos[1], Da.track, TRUE, Da.trk[0]!=NULL, 1, wDrawColorBlack);
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,NULL,0,NULL,0,drawColorBlack);
 		} else {
-			return AdjustBezCurve( action&0xFF, pos, Da.track, color, width, InfoMessage );
+			return AdjustBezCurve( action&0xFF, pos, Da.track, Da.color, Da.width, InfoMessage );
 		}
 		return C_CONTINUE;
 
@@ -991,22 +996,25 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,NULL,0,NULL,0,drawColorBlack);
 			return C_CONTINUE;
 		} else {
-			return AdjustBezCurve( action&0xFF, pos, Da.track, color, width, InfoMessage );
+			return AdjustBezCurve( action&0xFF, pos, Da.track, Da.color, Da.width, InfoMessage );
 		}
-            
+	case C_TEXT:
+			if (Da.state != PICK_POINT || (action>>8) != ' ')  //Space is same as Enter.
+				return C_CONTINUE;
+			/* no break */
     case C_OK:
     	if (Da.state != PICK_POINT) return C_CONTINUE;
-        return AdjustBezCurve( action, pos, Da.track, color, width, InfoMessage);
+        return AdjustBezCurve( C_OK, pos, Da.track, Da.color, Da.width, InfoMessage);
 
 	case C_REDRAW:
 		if ( Da.state != NONE ) {
-			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, color);
+			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, Da.color);
 		}
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		if (Da.state != NONE) {
-			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, color);
+			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, Da.color);
 			Da.cp1Segs_da_cnt = 0;
 			Da.cp2Segs_da_cnt = 0;
 			Da.crvSegs_da_cnt = 0;

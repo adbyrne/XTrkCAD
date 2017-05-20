@@ -65,9 +65,9 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 		case C_MOVE:
 		case C_UP:
 		case C_OK:
+		case C_TEXT:
 			rc = CmdBezModify(Dex.Trk, action, pos);
 			break;
-		case C_TEXT:
 		case C_TERMINATE:
 			rc = CmdBezModify(Dex.Trk, action, pos);
 			Dex.Trk = NULL;

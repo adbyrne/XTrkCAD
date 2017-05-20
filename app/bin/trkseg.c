@@ -1589,8 +1589,7 @@ EXPORT void DrawSegsO(
 	wDrawColor color1, color2;
 	DIST_T factor = d->dpi/d->scale;
 	trkSeg_p tempPtr;
-    dynArr_t tempPts_da;
-#define tempPts(N) DYNARR_N( coOrd, tempPts_da, N )
+
 	long option;
 	wFontSize_t fs;
 
@@ -1791,11 +1790,11 @@ EXPORT void DrawSegsO(
 				 d->funcs != &tempSegDrawFuncs ) {
 				/* Note: if we call tempSegDrawFillPoly we get a nasty bug
 				/+ because we don't make a private copy of p.pts */
-				DYNARR_SET( coOrd, tempPts_da, segPtr->u.p.cnt );
-				for ( j=0; j<segPtr->u.p.cnt; j++ ) {
-					REORIGIN( tempPts(j), segPtr->u.p.pts[j], angle, orig )
+				coOrd tempPts[segPtr->u.p.cnt];
+				for (j=0;j<segPtr->u.p.cnt;j++) {
+					REORIGIN( tempPts[j], segPtr->u.p.pts[j], angle, orig );
 				}
-				DrawFillPoly( d, segPtr->u.p.cnt, &tempPts(0), color1 );
+				DrawFillPoly( d, segPtr->u.p.cnt, tempPts, color1 );
 				break;
 			} /* else fall thru */
 		case SEG_POLY:

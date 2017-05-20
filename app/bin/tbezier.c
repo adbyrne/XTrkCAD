@@ -796,6 +796,21 @@ static void FlipBezier(
 
 }
 
+static ANGLE_T GetAngleBezier(
+		track_p trk,
+		coOrd pos,
+		EPINX_T * ep0,
+		EPINX_T * ep1 )
+{
+	struct extraData * xx = GetTrkExtraData(trk);
+	ANGLE_T angle;
+	angle = GetAngleSegs( xx->bezierData.arcSegs.cnt, (trkSeg_p)xx->bezierData.arcSegs.ptr, pos, NULL );
+	if ( ep0 ) *ep0 = -1;
+	if ( ep1 ) *ep1 = -1;
+	return angle;
+}
+
+
 
 static BOOL_T MakeParallelBezier(
 		track_p trk,
@@ -884,7 +899,7 @@ static trackCmd_t bezlinCmds = {
 		RotateBezier,
 		RescaleBezier,
 		NULL,
-		NULL,
+		GetAngleBezier,
 		SplitBezier,
 		NULL,
 		NULL,
@@ -918,7 +933,7 @@ static trackCmd_t bezierCmds = {
 		RotateBezier,
 		RescaleBezier,
 		NULL,
-		NULL,
+		GetAngleBezier,
 		SplitBezier,
 		TraverseBezier,
 		EnumerateBezier,
@@ -951,7 +966,9 @@ EXPORT void BezierSegProc(
 	coOrd p0,p2 ;
 	wIndex_t s0, s1;
 	segProcData_t segProcData;
+	trkSeg_p subSegsPtr;
 	coOrd temp0,temp1,temp2,temp3;
+	int inx;
 
     switch (cmd) {
 
@@ -1010,30 +1027,14 @@ EXPORT void BezierSegProc(
 		break;
 
 	case SEGPROC_SPLIT:
-		d = segPtr->u.c.a1/360.0 * 2*M_PI * fabs(segPtr->u.c.radius);
-		a2 = FindAngle( segPtr->u.c.center, data->split.pos );
-		a2 = NormalizeAngle( a2 - segPtr->u.c.a0 );
-		if ( a2 > segPtr->u.c.a1 ) {
-			if ( a2-segPtr->u.c.a1 < (360-segPtr->u.c.a1)/2.0 )
-				a2 = segPtr->u.c.a1;
-			else
-				a2 = 0.0;
-		}
-		s0 = 0;
-		if ( segPtr->u.c.radius<0 )
-			s0 = 1-s0;
-		s1 = 1-s0;
-		data->split.length[s0] = a2/360.0 * 2*M_PI * fabs(segPtr->u.c.radius);
-		data->split.length[s1] = d-data->split.length[s0];
-		data->split.newSeg[0] = *segPtr;
-		data->split.newSeg[1] = *segPtr;
-		data->split.newSeg[s0].u.c.a1 = a2;
-		data->split.newSeg[s1].u.c.a0 = NormalizeAngle( data->split.newSeg[s1].u.c.a0 + a2 );
-		data->split.newSeg[s1].u.c.a1 -= a2;
+		//TODO Split
 		break;
 
 	case SEGPROC_GETANGLE:
-		data->getAngle.angle = segPtr->u.b.angle0;
+		inx = 0;
+		subSegsPtr = (trkSeg_p) segPtr->bezSegs.ptr;
+		coOrd pos = segProcData.getAngle.pos;
+		data->getAngle.angle = GetAngleSegs(segPtr->bezSegs.cnt,subSegsPtr, pos, &inx);             //Recurse for Bezier sub-segs (only straights and curves)
 		break;
     
 	}
