@@ -1,4 +1,3 @@
-bezctx *new_bezctx_quartz(void);
+bezctx * new_bezctx_xtrkcad(dynArr_t * segArray, BOOL_T track, wDrawColor color, DIST_T width, int ends[2]);
 
-CGMutablePathRef
-bezctx_to_quartz(bezctx *bc);
+void bezctx_to_xtrkcad(bezctx *bc);

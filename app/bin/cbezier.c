@@ -240,7 +240,7 @@ void addSeg(dynArr_t * const array_p, trkSeg_p seg) {
 		s->u.b.angle0 = seg->u.b.angle0;  //Copy all the rest
 		s->u.b.angle3 = seg->u.b.angle3;
 		s->u.b.length = seg->u.b.length;
-		s->u.b.max_radius = seg->u.b.max_radius;
+		s->u.b.minRadius = seg->u.b.minRadius;
 		for (int i=0;i<4;i++) s->u.b.pos[i] = seg->u.b.pos[i];
 		s->u.b.radius0 = seg->u.b.radius3;
 		s->bezSegs.cnt = s->bezSegs.max = 0;

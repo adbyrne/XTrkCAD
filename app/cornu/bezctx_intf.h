@@ -1,7 +1,9 @@
 typedef struct _bezctx bezctx;
 
-bezctx *
-new_bezctx(void);
+#include "common.h"
+#include "wlib.h"
+
+bezctx * new_bezctx_xtrkcad(dynArr_t *, BOOL_T, wDrawColor, DIST_T , int[2] );
 
 void
 bezctx_moveto(bezctx *bc, double x, double y, int is_open);

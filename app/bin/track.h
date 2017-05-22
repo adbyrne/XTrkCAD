@@ -207,7 +207,7 @@ typedef struct {
 				coOrd pos[4];
 				ANGLE_T angle0;
 				ANGLE_T angle3;
-				DIST_T max_radius;
+				DIST_T minRadius;
 				DIST_T radius0;
 				DIST_T radius3;
 				DIST_T length;
@@ -318,17 +318,17 @@ BOOL_T ReadSegs( void );
 BOOL_T WriteSegs( FILE * f, wIndex_t segCnt, trkSeg_p segs );
 typedef union {
 		struct {
-				coOrd pos;				/* IN */
-				ANGLE_T angle;
-				DIST_T dist;			/* OUT */
-				BOOL_T backwards;
-		} traverse1;
+				coOrd pos;				/* IN the point on track to get to */
+				ANGLE_T angle;			/* IN  is the angle that the object starts at */
+				DIST_T dist;			/* OUT is how far it is along the track */
+				BOOL_T backwards;		/* OUT */
+		} traverse1;		//Find dist between pos and end of track that starts with angle set backwards
 		struct {
-				EPINX_T segDir;			/* IN */
-				DIST_T dist;			/* IN/OUT */
-				coOrd pos;				/* OUT */
-				ANGLE_T angle;
-		} traverse2;
+				EPINX_T segDir;			/* IN Direction to go */
+				DIST_T dist;			/* IN/OUT In = distance to go, Out = distance left */
+				coOrd pos;				/* OUT = point reached if dist = 0 */
+				ANGLE_T angle;			/* OUT = angle at point */
+		} traverse2;		//Return distance left (or 0) and angle and pos when going dist from segDir end
 		struct {
 				int first, last;		/* IN */
 				ANGLE_T side;

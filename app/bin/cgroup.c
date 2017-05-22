@@ -28,6 +28,7 @@
 #include "compound.h"
 #include "shrtpath.h"
 #include "i18n.h"
+#include "tbezier.h"
 
 /*****************************************************************************
  *
@@ -45,6 +46,9 @@ static char groupDesc[STR_SIZE];
 static char groupPartno[STR_SIZE];
 static char groupTitle[STR_SIZE];
 static int groupCompoundCount = 0;
+
+extern TRKTYP_T T_BZRTRK;
+extern TRKTYP_T T_BZRLIN;
 
 typedef struct {
 		int segInx;
@@ -995,6 +999,10 @@ static void GroupOk( void * junk )
 							DrawSegs( &groupD, xx->orig, xx->angle, segPtr, 1, trackGauge, wDrawColorBlack );
 						}
 					}
+				} else if (GetTrkType(trk) == T_BEZIER || GetTrkType(trk) == T_BZRLIN) {
+					DYNARR_APPEND(trkSeg_t, trackSegs_da, 10);
+					segPtr = &trackSegs(trackSegs_da.cnt-1);
+					GetBezierSegmentFromTrack(trk,segPtr);
 				} else {
 					segCnt = tempSegs_da.cnt;
 					oldOptions = groupD.options;
@@ -1568,6 +1576,7 @@ EXPORT void DoGroup( void )
 	xx = NULL;
 	groupSegCnt = 0;
 	groupCompoundCount = 0;
+	trkSeg_p temp_p;
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
 			trkType = GetTrkType(trk);
@@ -1575,9 +1584,8 @@ EXPORT void DoGroup( void )
 				xx = GetTrkExtraData(trk);
 				groupSegCnt += xx->segCnt;
 				GroupCopyTitle( xtitle(xx) );
-			} else {
+			} else
 				groupSegCnt += 1;
-			}
 		}
 	}
 	if ( groupSegCnt <= 0 ) {

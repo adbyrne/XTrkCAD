@@ -91,6 +91,8 @@ struct extraData {
 
 extern TRKTYP_T T_TURNOUT;
 extern TRKTYP_T T_STRUCTURE;
+extern TRKTYP_T T_BEZIER;
+extern TRKTYP_T T_BZRLIN;
 extern DIST_T curBarScale;
 extern dynArr_t turnoutInfo_da;
 extern dynArr_t structureInfo_da;
