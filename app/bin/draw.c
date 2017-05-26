@@ -2181,7 +2181,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 #endif
 			case wAccelKey_Right:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
-				mainD.orig.x += mainD.size.x/2;
+				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+					mainD.orig.x += 1;
+				else
+					mainD.orig.x += mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2190,7 +2193,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 				break;
 			case wAccelKey_Left:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
-				mainD.orig.x -= mainD.size.x/2;
+				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+					mainD.orig.x -= 1;
+				else
+					mainD.orig.x -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2199,7 +2205,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 				break;
 			case wAccelKey_Up:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
-				mainD.orig.y += mainD.size.y/2;
+				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+					mainD.orig.y += 1;
+				else
+					mainD.orig.y -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2208,7 +2217,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 				break;
 			case wAccelKey_Down:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
-				mainD.orig.y -= mainD.size.y/2;
+				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+					mainD.orig.y -= 1;
+				else
+					mainD.orig.y -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
