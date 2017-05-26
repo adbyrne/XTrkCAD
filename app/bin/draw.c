@@ -1645,11 +1645,19 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 		orig->y = 0;
 	if (mainD.scale >= 1.0) {
 		if (units == UNITS_ENGLISH) {
-			orig->x = floor(orig->x);
-			orig->y = floor(orig->y);
+			orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
+			orig->y = floor(orig->y*4)/4;
 		} else {
-			orig->x = floor(orig->x*2.54)/2.54;
-			orig->y = floor(orig->y*2.54)/2.54;
+			orig->x = floor(orig->x*2.54*2)/(2.54*2);  //>1:1 = 0.5 cm
+			orig->y = floor(orig->y*2.54*2)/(2.54*2);
+		}
+	} else {
+		if (units == UNITS_ENGLISH) {
+			orig->x = floor(orig->x*64)/64;   //<1:1 = 1/64 inch
+			orig->y = floor(orig->y*64)/64;
+		} else {
+			orig->x = floor(orig->x*25.4*2)/(25.4*2);  //>1:1 = 0.5 mm
+			orig->y = floor(orig->y*25.4*2)/(25.4*2);
 		}
 	}
 	orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
@@ -2182,7 +2190,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 			case wAccelKey_Right:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.x += 1;
+					mainD.orig.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
 				else
 					mainD.orig.x += mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
@@ -2194,7 +2202,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 			case wAccelKey_Left:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.x -= 1;
+					mainD.orig.x -= 0.25*mainD.scale;
 				else
 					mainD.orig.x -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
@@ -2206,7 +2214,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 			case wAccelKey_Up:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.y += 1;
+					mainD.orig.y += 0.25*mainD.scale;
 				else
 					mainD.orig.y -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
@@ -2218,7 +2226,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 			case wAccelKey_Down:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.y -= 1;
+					mainD.orig.y -= 0.25*mainD.scale;
 				else
 					mainD.orig.y -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
