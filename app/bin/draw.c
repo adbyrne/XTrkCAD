@@ -1798,15 +1798,24 @@ EXPORT void DoZoomUp( void * mode )
 		 * To jump into macro mode, the CTRL-key has to be pressed and held.
 		 */
 		if( mainD.scale != 1.0 || (mainD.scale == 1.0 && (MyGetKeyState()&WKEY_CTRL))) {
-			if( i ) 
+			if( i ) {
+				if (mainD.scale <=1.0) 
+					InfoMessage(_("Macro Zoom Mode"));
+				else 
+					InfoMessage(_("Use Shift+PageDwn to jump to preset Zoom In"));
 				DoNewScale( zoomList[ i - 1 ].value );	
+				
+			} else InfoMessage("Min Macro Zoom");
+		} else {
+			InfoMessage(_("Scale 1:1 - Use CTRL+PageDwn to go to Macro Zoom Mode"));
 		}
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomin", &newScale, 4 );
+		InfoMessage(_("Preset Zoom In Value selected. SHIFT+CTRL+PageDwn to reset value"));
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomin", (long)mainD.scale );
-		InfoMessage( _("Zoom In Program Value %ld:1"), (long)mainD.scale );
+		InfoMessage( _("Zoom In Program Value %ld:1, Shift+PageDwn to use"), (long)mainD.scale );
 	}
 }
 
@@ -1824,15 +1833,20 @@ EXPORT void DoZoomDown( void  * mode)
 	
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
-		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 ))
-			DoNewScale( zoomList[ i + 1 ].value );			
+		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
+			InfoMessage(_("SHIFT+PageUp to jump to preset Zoom Out"));
+			DoNewScale( zoomList[ i + 1 ].value );
+		} else
+			InfoMessage(_("At Maximum Zoom Out"));
+					
 			
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomout", &newScale, 16 );
+		InfoMessage(_("Preset Zoom Out Value selected. SHIFT+CTRL+PageUp to reset value"));
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomout", (long)mainD.scale );
-		InfoMessage( _("Zoom Out Program Value %ld:1"), (long)mainD.scale );
+		InfoMessage( _("Zoom Out Program Value %ld:1 set, Shift+PageUpto use"), (long)mainD.scale );
 	}
 }
 
