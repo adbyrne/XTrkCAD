@@ -20,7 +20,7 @@ install(FILES
 set( infile "${CMAKE_CURRENT_SOURCE_DIR}/Readme.md" )
 set( outfile "${CMAKE_CURRENT_BINARY_DIR}/Readme.txt" )
 
-if(DEFINED PANDOC_EXECUTABLE)
+if(PANDOC_FOUND)
 	add_custom_command(OUTPUT "${outfile}"
 					   COMMAND ${PANDOC_EXECUTABLE} "--from=Markdown" "--to=plain" "-o" ${outfile} ${infile} 
 					   DEPENDS "${infile}" 
