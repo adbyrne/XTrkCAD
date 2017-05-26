@@ -788,22 +788,32 @@ EXPORT DIST_T DistanceSegs(
 	return d;
 }
 
-
+/*
+ * Get the angle at a point on the segments closest to pos1
+ * Optionally return the index of the segment and the distance to that point (counting from LHS)
+ *
+ */
 EXPORT ANGLE_T GetAngleSegs(
 		wIndex_t segCnt,
 		trkSeg_p segPtr,
-		coOrd pos,
-		wIndex_t * segInxR )
+		coOrd * pos1,						// Now IN/OUT OUT =
+		wIndex_t * segInxR,
+		DIST_T * dist,
+		BOOL_T * backwards_seg)				//Is this segment reversed?
 {
 	wIndex_t inx;
 	ANGLE_T angle = 0.0;
 	coOrd p0;
 	DIST_T d, dd;
 	segProcData_t segProcData;
+	coOrd pos2 = * pos1;
+	BOOL_T reversed_seg = FALSE;
+	BOOL_T backwards = FALSE;
 
-	DistanceSegs( zero, 0.0, segCnt, segPtr, &pos, &inx );
+	d = DistanceSegs( zero, 0.0, segCnt, segPtr, &pos2, &inx );
+	if (dist) * dist = d;
 	segPtr += inx;
-	segProcData.getAngle.pos = pos;
+	segProcData.getAngle.pos = pos2;
 	switch ( segPtr->type ) {
 	case SEG_STRTRK:
 	case SEG_STRLIN:
@@ -818,6 +828,8 @@ EXPORT ANGLE_T GetAngleSegs(
 	case SEG_FILCRCL:
 		CurveSegProc( SEGPROC_GETANGLE, segPtr, &segProcData );
 		angle = segProcData.getAngle.angle;
+		reversed_seg = segProcData.getAngle.negative_radius;
+		backwards = segProcData.getAngle.backwards;
 		break;
 	case SEG_JNTTRK:
 		JointSegProc( SEGPROC_GETANGLE, segPtr, &segProcData );
@@ -827,14 +839,16 @@ EXPORT ANGLE_T GetAngleSegs(
     case SEG_BEZLIN:
         BezierSegProc( SEGPROC_GETANGLE, segPtr, &segProcData );
         angle = segProcData.getAngle.angle;
+        reversed_seg = segProcData.getAngle.negative_radius;
+        backwards = segProcData.getAngle.backwards;
         break;
 	case SEG_POLY:
 	case SEG_FILPOLY:
-		p0 = pos;
+		p0 = pos2;
 		dd = LineDistance( &p0, segPtr->u.p.pts[segPtr->u.p.cnt-1], segPtr->u.p.pts[0] );
 		angle = FindAngle( segPtr->u.p.pts[segPtr->u.p.cnt-1], segPtr->u.p.pts[0] );
 		for ( inx=0; inx<segPtr->u.p.cnt-1; inx++ ) {
-			p0 = pos;
+			p0 = pos2;
 			d = LineDistance( &p0, segPtr->u.p.pts[inx], segPtr->u.p.pts[inx+1] );
 			if ( d < dd ) {
 				dd = d;
@@ -849,6 +863,8 @@ EXPORT ANGLE_T GetAngleSegs(
 		AbortProg( "GetAngleSegs(%d)", segPtr->type );
 	}
 	if ( segInxR ) *segInxR = inx;
+	if ( backwards_seg) *backwards_seg = reversed_seg?!backwards:backwards;
+	* pos1 = pos2;
 	return angle;
 }
 
@@ -1410,7 +1426,7 @@ EXPORT BOOL_T WriteSegs(
 			break;
         case SEG_BEZTRK:
         case SEG_BEZLIN:
-            rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f",
+            rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
                 segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
                 segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
                 segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
@@ -1418,7 +1434,7 @@ EXPORT BOOL_T WriteSegs(
                 segs[i].u.l.pos[3].x, segs[i].u.l.pos[3].y ) > 0;
             break;
 		case SEG_CRVLIN:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
+			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
 				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
 				segs[i].u.c.radius,
 				segs[i].u.c.center.x, segs[i].u.c.center.y,

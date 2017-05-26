@@ -123,11 +123,11 @@ typedef struct {
 #define Q_CAN_MODIFY_CONTROL_POINTS     (18)
 
 typedef struct {
-		track_p trk;
-		DIST_T length;
-		DIST_T dist;
-		coOrd pos;
-		ANGLE_T angle;
+		track_p trk;							// IN Current Track OUT Next Track
+		DIST_T length;							// IN How far to go
+		DIST_T dist;							// OUT how far left = 0 if found
+		coOrd pos;								// IN/OUT - where we are, where we will be						// IN/OUT - where we are now
+		ANGLE_T angle;							// IN/OUT - angle now
 		} traverseTrack_t, *traverseTrack_p;
 
 
@@ -196,7 +196,7 @@ typedef struct {
 		char type;
 		wDrawColor color;
 		DIST_T width;
-		dynArr_t bezSegs;      //placed here to avoid overwrites
+		dynArr_t bezSegs;       //placed here to avoid overwrites
 		union {
 			struct {
 				coOrd pos[2];
@@ -311,7 +311,7 @@ void DrawSegsO(
 		DIST_T trackGauge,
 		wDrawColor color,
 		long options );
-ANGLE_T GetAngleSegs( wIndex_t, trkSeg_p, coOrd, wIndex_t * );
+ANGLE_T GetAngleSegs( wIndex_t, trkSeg_p, coOrd *, wIndex_t *, DIST_T *, BOOL_T * );
 void RecolorSegs( wIndex_t, trkSeg_p, wDrawColor );
 
 BOOL_T ReadSegs( void );
@@ -322,6 +322,7 @@ typedef union {
 				ANGLE_T angle;			/* IN  is the angle that the object starts at */
 				DIST_T dist;			/* OUT is how far it is along the track */
 				BOOL_T backwards;		/* OUT */
+				BOOL_T reverse_seg;		/* OUT */
 		} traverse1;		//Find dist between pos and end of track that starts with angle set backwards
 		struct {
 				EPINX_T segDir;			/* IN Direction to go */
@@ -356,8 +357,10 @@ typedef union {
 				trkSeg_t newSeg[2];
 		} split;
 		struct {
-				coOrd pos;				/* IN */
+				coOrd pos;				/* IN OUT */
 				ANGLE_T angle;			/* OUT */
+				BOOL_T negative_radius; /* OUT */
+				BOOL_T backwards;		/* OUT */
 		} getAngle;
 		} segProcData_t, *segProcData_p;
 typedef enum {

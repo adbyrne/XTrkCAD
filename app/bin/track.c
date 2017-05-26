@@ -1842,6 +1842,7 @@ EXPORT BOOL_T TraverseTrack(
 			return FALSE;
 		trvTrk->length = -1;
 		trvTrk->dist = 0.0;
+
 	}
 	return TRUE;
 }

@@ -663,7 +663,7 @@ static ANGLE_T GetAngleTurnout(
 	pos.x -= xx->orig.x;
 	pos.y -= xx->orig.y;
 	Rotate( &pos, zero, -xx->angle );
-	angle = GetAngleSegs( segCnt, xx->segs, pos, &segInx );
+	angle = GetAngleSegs( segCnt, xx->segs, &pos, &segInx, NULL, NULL );
 	return NormalizeAngle( angle+xx->angle );
 }
 

@@ -1347,6 +1347,7 @@ EXPORT void CurveSegProc(
 			a2 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1-a2 );
 		}
 		data->traverse1.dist = a2/360.0*2*M_PI*fabs(segPtr->u.c.radius);
+		data->traverse1.reverse_seg = segPtr->u.c.a0>=90 && segPtr->u.c.a0<270;
 		break;
 
 	case SEGPROC_TRAVERSE2:
@@ -1356,19 +1357,21 @@ EXPORT void CurveSegProc(
 		d = segPtr->u.c.a1/360.0*circum;
 		if ( d > data->traverse2.dist ) {
 			a2 = (data->traverse2.dist)/circum*360.0;
-			if ( data->traverse2.segDir == (segPtr->u.c.radius<0) ) {
-				a2 = NormalizeAngle( segPtr->u.c.a0+a2 );
-				a1 = a2+90;
-			} else {
-				a2 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1-a2 );
-				a1 = a2-90;
-			}
-			PointOnCircle( &data->traverse2.pos, segPtr->u.c.center, fabs(segPtr->u.c.radius), a2 );
 			data->traverse2.dist = 0;
-			data->traverse2.angle = a1;
 		} else {
+			a2 = segPtr->u.c.a1;
 			data->traverse2.dist -= d;
 		}
+		if ( data->traverse2.segDir == (segPtr->u.c.radius<0) ) {
+			a2 = NormalizeAngle( segPtr->u.c.a0+a2 );
+			a1 = a2+90;
+		} else {
+			a2 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1-a2 );
+			a1 = a2-90;
+		}
+		PointOnCircle( &data->traverse2.pos, segPtr->u.c.center, fabs(segPtr->u.c.radius), a2 );
+		data->traverse2.angle = a1;
+
 		break;
 
 	case SEGPROC_DRAWROADBEDSIDE:
@@ -1431,6 +1434,8 @@ EXPORT void CurveSegProc(
 
 	case SEGPROC_GETANGLE:
 		data->getAngle.angle = NormalizeAngle( FindAngle( data->getAngle.pos, segPtr->u.c.center ) + 90 );
+		data->getAngle.negative_radius = segPtr->u.c.radius<0;
+		data->getAngle.backwards = segPtr->u.c.a0>=90 && segPtr->u.c.a0<270;
 		break;
 	}
 }

@@ -263,6 +263,7 @@ EXPORT BOOL_T TraverseTrack2(
 		 trvTrk.trk==NULL ||
 		 dist!=0.0 ) {
 		Translate( &trvTrk.pos, trvTrk.pos, trvTrk.angle, dist );
+
 	}
 	if ( dist0 < 0 )
 		FlipTraverseTrack( &trvTrk );
