@@ -253,7 +253,7 @@ void addSeg(dynArr_t * const array_p, trkSeg_p seg) {
 	}
 }
 
-enum BezierType {PLAIN, LOOP, CUSP, INFLECTION, DOUBLEINFLECTION, LINE } bType;
+enum BezierType {PLAIN, LOOP, CUSP, INFLECTION, DOUBLEINFLECTION, LINE, ENDS, COINCIDENT } bType;
 
 /*
  * Analyse Bezier.
@@ -263,41 +263,74 @@ enum BezierType {PLAIN, LOOP, CUSP, INFLECTION, DOUBLEINFLECTION, LINE } bType;
  * We will eliminate cusps and loops as not useful forms. Line, Plain, Inflection and DoubleInflection are ok.
  *
  */
-EXPORT enum BezierType AnalyseCurve(coOrd inpos[4]) {
+EXPORT enum BezierType AnalyseCurve(coOrd inpos[4], double *Rfx, double *Rfy, double *cusp) {
 
+	*Rfx = *Rfy = 0;
+	if (Da.track && inpos[0].x == inpos[3].x && inpos[0].y == inpos[3].y ) {
+		return ENDS;
+	}
 
 	DIST_T d01 = FindDistance(inpos[0],inpos[1]);
 	DIST_T d12 = FindDistance(inpos[1],inpos[2]);
 	DIST_T d02 = FindDistance(inpos[0],inpos[2]);
-	if (d01+d12 == d02) {
+	if (d01+d12 == d02) {								//eliminate 3 co-resident points
 		DIST_T d23 = FindDistance(inpos[2],inpos[3]);
 		DIST_T d03 = FindDistance(inpos[0],inpos[3]);
-		if (d02+d23 == d03) return LINE;
+		if (d02+d23 == d03) return COINCIDENT;
+	}
+	int common_points = 0;
+	for (int i=0;i<3;i++) {
+		if (inpos[i].x == inpos[i+1].x && inpos[i].y == inpos[i+1].y) common_points++;
+	}
+	for (int i=0;i<2;i++) {
+		if (inpos[i].x == inpos[i+2].x && inpos[i].y == inpos[i+2].y) common_points++;
+	}
+
+	if (common_points>2) {
+		return PLAIN;
 	}
 
 	coOrd pos[4];
+	coOrd offset2, offset = inpos[0];
 
-	for (int i=0;i<4;i++) {     //move to zero origin
-		pos[i].x = inpos[i].x-pos[0].x;
-		pos[i].y = inpos[i].y-pos[0].y;
+	for (int i=0;i<4;i++) {     				//move to zero origin
+		pos[i].x = inpos[i].x-offset.x;
+		pos[i].y = inpos[i].y-offset.y;
 	}
-	if (pos[1].x == 0.0 && pos[1].y == 0.0) return PLAIN;
+
+	offset2.x = -offset.x + pos[3].x;
+	offset2.y = -offset.y + pos[3].y;
+	if (pos[1].y == 0.0) {   					//flip order of points
+		for (int i=0;i<4;i++) {
+			coOrd temp_pos = pos[i];
+			pos[i].x = pos[3-i].x - offset2.x;
+			pos[i].y = pos[3-i].y - offset2.y;
+			pos[3-i] = temp_pos;
+		}
+		if (pos[1].y == 0.0) {					//Both ways round the second point has no y left after translation
+			return PLAIN;
+		}
+	}
 	double f21 = (pos[2].y)/(pos[1].y);
 	double f31 = (pos[3].y)/(pos[1].y);
-	if (fabs(pos[2].x-pos[1].x*f21) <0.00001) return PLAIN;   //defend against divide by zero
-	double fx = (pos[3].x-pos[1].x*f31)/(pos[2].x-pos[1].x*f21);
+	if (fabs(pos[2].x-(pos[1].x*f21)) <0.0001) return PLAIN;   //defend against divide by zero
+	double fx = (pos[3].x-(pos[1].x*f31))/(pos[2].x-(pos[1].x*f21));
 	double fy = f31+(1-f21)*fx;
+	*Rfx = fx;
+	*Rfy = fy;
+	*cusp = fabs(fy - (-(fx*fx)+2*fx+3)/4);
 
-	if (fy>1.0) return INFLECTION;
-	if (fx<=1.0 && fy == (fx*fx+2*fx+3)/4) return CUSP;
-	if (fx<=1.0 && fy > (fx*fx+2*fx+3)/4) {
-		if (fx<=0.0 && fy <= (3*fx-(fx*fx))/3) return LOOP;
-		if (fx>=0.0 && fy == (sqrt(3*(4*fx-fx*fx))-fx)/2) return LOOP;
+	if (fy > 1.0) return INFLECTION;
+	if (fx >= 1.0) return PLAIN;
+	if (fabs(fy - (-(fx*fx)+2*fx+3)/4) <0.100) return CUSP;
+	if (fy < (-(fx*fx)+2*fx+3)/4) {
+		if (fx <= 0.0 && fy >= (3*fx-(fx*fx))/3) return LOOP;
+		if (fx > 0.0 && fy >= (sqrt(3*(4*fx-fx*fx))-fx)/2) return LOOP;
 		return PLAIN;
 	}
-	if (fx>1.0) return PLAIN;
+
 	return DOUBLEINFLECTION;
-};
+}
 
 /*
  * ConvertToArcs
@@ -516,6 +549,7 @@ EXPORT STATUS_T AdjustBezCurve(
 	enum BezierType b;
 	DIST_T dd;
 	EPINX_T ep;
+	double fx, fy, cusp;
 	int controlArm = -1;
 
 
@@ -585,11 +619,23 @@ EXPORT STATUS_T AdjustBezCurve(
 		CreateBothControlArms(Da.selectPoint, track);
 		if (ConvertToArcs(Da.pos,&Da.crvSegs_da,track, color, width)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
 		Da.minRadius = BezierMinRadius(Da.pos,Da.crvSegs_da);
-		if ( b == CUSP || b == LOOP) {
-			wBeep();
-			InfoMessage(_("Bezier Curve Invalid - Change End Point"));
+		if (Da.track) {
+			b = AnalyseCurve(Da.pos,&fx,&fy,&cusp);
+			if (b==ENDS) {
+				wBeep();
+				InfoMessage(_("Bezier Curve Invalid has identical end points Change End Point"),b==CUSP?"Cusp":"Loop");
+			} else if ( b == CUSP || b == LOOP) {
+				wBeep();
+				InfoMessage(_("Bezier Curve Invalid has %s Change End Point"),b==CUSP?"Cusp":"Loop");
+			} else if ( b == COINCIDENT ) {
+				wBeep();
+				InfoMessage(_("Bezier Curve Invalid has three co-incident points"),b==CUSP?"Cusp":"Loop");
+			} else
+				InfoMessage( _("Bezier %s : Min Radius=%s Length=%s fx=%0.3f fy=%0.3f cusp=%0.3f"),track?"Track":"Line",
+													FormatDistance(Da.minRadius),
+													FormatDistance(BezierLength(Da.pos,Da.crvSegs_da)),fx,fy,cusp);
 		} else
-			InfoMessage( _("Bezier %s : Min Radius=%s Length=%s"),track?"Track":"Line",
+				InfoMessage( _("Bezier %s : Min Radius=%s Length=%s"),track?"Track":"Line",
 									FormatDistance(Da.minRadius),
 									FormatDistance(BezierLength(Da.pos,Da.crvSegs_da)));
 		DrawTempBezier(Da.track);
@@ -629,13 +675,21 @@ EXPORT STATUS_T AdjustBezCurve(
 		CreateBothControlArms(Da.selectPoint,track);
 		if (ConvertToArcs(Da.pos,&Da.crvSegs_da,track,color,width)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
 		Da.minRadius = BezierMinRadius(Da.pos,Da.crvSegs_da);
-		b = AnalyseCurve(Da.pos);
-		if ( b == CUSP || b == LOOP) {
-			wBeep();
-			InfoMessage(_("Bezier Curve Invalid - Pick and adjust End Point(s)"));
-			DrawTempBezier(Da.track);
-		}
-		InfoMessage(_("Pick any circle to adjust it - Enter to confirm, ESC to abort"));
+		if (Da.track) {
+			b = AnalyseCurve(Da.pos,&fx,&fy,&cusp);
+			if (b==ENDS) {
+				wBeep();
+				InfoMessage(_("Bezier Curve Invalid has identical end points Change End Point"),b==CUSP?"Cusp":"Loop");
+			} else if ( b == CUSP || b == LOOP) {
+				wBeep();
+				InfoMessage(_("Bezier Curve Invalid has %s Change End Point"),b==CUSP?"Cusp":"Loop");
+			} else if ( b == COINCIDENT ) {
+				wBeep();
+				InfoMessage(_("Bezier Curve Invalid has three co-incident points"),b==CUSP?"Cusp":"Loop");
+			} else
+				InfoMessage(_("Pick any circle to adjust it - Enter to confirm, ESC to abort"));
+		} else
+			InfoMessage(_("Pick any circle to adjust it - Enter to confirm, ESC to abort"));
 		DrawTempBezier(Da.track);
 		Da.state = PICK_POINT;
 
@@ -644,18 +698,27 @@ EXPORT STATUS_T AdjustBezCurve(
 	case C_OK:                            //C_OK is not called by Modify.
 		if ( Da.state == PICK_POINT ) {
 			char c = (unsigned char)(action >> 8);
-			b = AnalyseCurve(Da.pos);
-			if ( b == CUSP || b == LOOP ) {
+			if (Da.track && Da.pos[0].x == Da.pos[3].x && Da.pos[0].y == Da.pos[3].y ) {
 				wBeep();
-				InfoMessage(_("Invalid Bezier Curve has %s - Adjust"),b==CUSP?"Cusp":"Loop");
+				ErrorMessage(_("Invalid Bezier Track - end points are identical"));
 				return C_CONTINUE;
+			}
+			if (Da.track) {
+				b = AnalyseCurve(Da.pos,&fx,&fy,&cusp);
+				if ( b == CUSP || b == LOOP ) {
+					wBeep();
+					ErrorMessage(_("Invalid Bezier Curve has a %s - Adjust"),b==CUSP?"Cusp":"Loop");
+					return C_CONTINUE;
+				} else if (b==COINCIDENT) {
+					wBeep();
+					ErrorMessage(_("Invalid Bezier Curve has three coincident points - Adjust"));
+					return C_CONTINUE;
+				} else if(b==ENDS) {
+					ErrorMessage(_("Invalid Bezier Track - end points are identical"));
+					return C_CONTINUE;
+				}
 			}
 			Da.minRadius = BezierMinRadius(Da.pos,Da.crvSegs_da);
-			if (Da.track && Da.minRadius < minTrackRadius) {
-				wBeep();
-				InfoMessage(_("Invalid Bezier Curve too small minimum Radius %s - Adjust"),FormatDistance(Da.minRadius));
-				return C_CONTINUE;
-			}
 			DrawTempBezier(Da.track);
 			UndoStart( _("Create Bezier"), "newBezier - CR" );
 			if (Da.track) {

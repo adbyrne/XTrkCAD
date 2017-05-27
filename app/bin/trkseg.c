@@ -425,7 +425,7 @@ EXPORT void MoveSegs(
             s->u.b.pos[3].y +=orig.y;
             s->u.b.pos[4].x +=orig.x;
             s->u.b.pos[4].y +=orig.y;
-            ConvertToArcs(s->u.b.pos, &s->bezSegs, s->type==SEG_BEZTRK, s->color, s->width);
+            FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
             break;
 		}
 	}
@@ -477,7 +477,7 @@ EXPORT void RotateSegs(
             Rotate( &s->u.b.pos[1], orig, angle );
             Rotate( &s->u.b.pos[2], orig, angle );
             Rotate( &s->u.b.pos[3], orig, angle );
-            ConvertToArcs(s->u.b.pos, &s->bezSegs, s->type==SEG_BEZTRK, s->color, s->width);
+            FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
             break;
         }
 	}
@@ -535,7 +535,7 @@ EXPORT void FlipSegs(
             s->u.b.pos[1].y = -s->u.b.pos[1].y;
             s->u.b.pos[2].y = -s->u.b.pos[2].y;
             s->u.b.pos[3].y = -s->u.b.pos[3].y;
-            ConvertToArcs(s->u.b.pos, &s->bezSegs, s->type==SEG_BEZTRK, s->color, s->width);
+            FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
             break;
 		}
 	}
@@ -594,15 +594,16 @@ EXPORT void RescaleSegs(
 			break;
         case SEG_BEZTRK:
         case SEG_BEZLIN:
-            s->u.l.pos[0].y *= scale_y;
-            s->u.l.pos[0].x *= scale_x;
-            s->u.l.pos[1].x *= scale_x;
-            s->u.l.pos[1].y *= scale_y;
-            s->u.l.pos[2].y *= scale_y;
-            s->u.l.pos[2].x *= scale_x;
-            s->u.l.pos[3].x *= scale_x;
-            s->u.l.pos[3].y *= scale_y;
-            ConvertToArcs(s->u.b.pos, &s->bezSegs, s->type==SEG_BEZTRK, s->color, s->width);
+            s->u.b.pos[0].y *= scale_y;
+            s->u.b.pos[0].x *= scale_x;
+            s->u.b.pos[1].x *= scale_x;
+            s->u.b.pos[1].y *= scale_y;
+            s->u.b.pos[2].y *= scale_y;
+            s->u.b.pos[2].x *= scale_x;
+            s->u.b.pos[3].x *= scale_x;
+            s->u.b.pos[3].y *= scale_y;
+            FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
+
             break;
 
 		}
@@ -790,7 +791,7 @@ EXPORT DIST_T DistanceSegs(
 
 /*
  * Get the angle at a point on the segments closest to pos1
- * Optionally return the index of the segment and the distance to that point (counting from LHS)
+ * Optionally return the index of the segment and the distance to that point
  *
  */
 EXPORT ANGLE_T GetAngleSegs(
