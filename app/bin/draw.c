@@ -57,6 +57,8 @@ static int log_mouse = 0;
 
 static wFontSize_t drawMaxTextFontSize = 100;
 
+extern long zoomCorner; 
+
 /****************************************************************************
  *
  * EXPORTED VARIABLES
@@ -1747,10 +1749,6 @@ static void DoNewScale( DIST_T scale )
 		scale = MAX_MAIN_SCALE;
 
 	DrawHilight( &mapD, mainD.orig, mainD.size );
-#ifdef LATER
-	center.x = mainD.orig.x + mainD.size.x/2.0;
-	center.y = mainD.orig.y + mainD.size.y/2.0;
-#endif
 	tempD.scale = mainD.scale = scale;
 	mainD.dpi = wDrawGetDPI( mainD.d );
 	if ( mainD.dpi == 75 ) {
@@ -1762,9 +1760,14 @@ static void DoNewScale( DIST_T scale )
 
 	SetZoomRadio( scale ); 
 	InfoScale();
-	SetMainSize();
-	mainD.orig.x = mainCenter.x - mainD.size.x/2.0;
-	mainD.orig.y = mainCenter.y - mainD.size.y/2.0;
+	SetMainSize(); 
+	if (zoomCorner) {
+		mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
+		mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
+	} else {
+		mainD.orig.x = mainCenter.x - mainD.size.x/2.0;
+		mainD.orig.y = mainCenter.y - mainD.size.y/2.0;
+	}
 	ConstraintOrig( &mainD.orig, mainD.size );
 	MainRedraw();
 	tempD.orig = mainD.orig;

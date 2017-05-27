@@ -483,6 +483,8 @@ Label elements on layout
 Color tracks or other objects by layer
 :display-tworailscale
 Drawing scale when to draw tracks with 2 rails
+:display-zoom-corner
+Zoom to keep lower corner in view
 :display-tiedraw
 How to draw track ties
 :display-mingridspacing
