@@ -121,6 +121,7 @@ typedef struct {
 #define Q_HAS_DESC						(16)
 #define Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK (17)
 #define Q_CAN_MODIFY_CONTROL_POINTS     (18)
+#define Q_IS_CORNU						(19)
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track

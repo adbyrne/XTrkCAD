@@ -26,6 +26,7 @@
 #include "cjoin.h"
 #include "ccurve.h"
 #include "cbezier.h"
+#include "ccornu.h"
 #include "cstraigh.h"
 #include "i18n.h"
 
@@ -51,6 +52,7 @@ static struct {
 
 static int log_modify;
 static BOOL_T modifyBezierMode;
+static BOOL_T modifyCornuMode;
 
 /*
  * Call cbezier.c CmdBezModify to alter Bezier Track and Lines.
@@ -72,6 +74,31 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 			rc = CmdBezModify(Dex.Trk, action, pos);
 			Dex.Trk = NULL;
 			modifyBezierMode = FALSE;
+			break;
+	}
+	return rc;
+}
+
+/*
+ * Call ccornu.c CmdCornuModify to alter Cornu Track and Lines.
+ * Picking a Cornu will allow end point(s) modifications until terminated with "Enter"
+ */
+static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
+	STATUS_T rc = C_CONTINUE;
+	if (Dex.Trk == NULL) return C_ERROR;   //No track picked yet!
+	switch (action) {
+		case C_START:
+		case C_DOWN:
+		case C_MOVE:
+		case C_UP:
+		case C_OK:
+		case C_TEXT:
+			rc = CmdCornuModify(Dex.Trk, action, pos);
+			break;
+		case C_TERMINATE:
+			rc = CmdCornuModify(Dex.Trk, action, pos);
+			Dex.Trk = NULL;
+			modifyCornuMode = FALSE;
 			break;
 	}
 	return rc;
@@ -117,11 +144,14 @@ static STATUS_T CmdModify(
 		trackGauge = 0.0;
 		changeTrackMode = modifyRulerMode = FALSE;
 		modifyBezierMode = FALSE;
+		modifyCornuMode - FALSE;
 		return C_CONTINUE;
 
 	case C_DOWN:
 		if (modifyBezierMode)
 			return ModifyBezier(C_DOWN, pos);
+		if (modifyCornuMode)
+			return ModifyCornu(C_DOWN, pos);
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
@@ -146,6 +176,14 @@ static STATUS_T CmdModify(
 			}
 			return C_CONTINUE;										//That's it
 		}
+		if (QueryTrack( Dex.Trk, Q_IS_CORNU )) { //Bezier
+					modifyCornuMode = TRUE;
+					if (ModifyCornu(C_START, pos) != C_CONTINUE) {			//Call Start with track
+						modifyCornuMode = FALSE;							//Function rejected Bezier
+					}
+					return C_CONTINUE;										//That's it
+		}
+
 
 		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 		if ( (MyGetKeyState()&WKEY_SHIFT) &&
@@ -188,6 +226,8 @@ static STATUS_T CmdModify(
 			return C_CONTINUE;
 		if ( modifyBezierMode )
 			return ModifyBezier(C_MOVE, pos);
+		if ( modifyCornuMode )
+			return ModifyCornu(C_MOVE, pos);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		tempSegs_da.cnt = 0;
 		SnapPos( &pos );
@@ -209,6 +249,8 @@ static STATUS_T CmdModify(
 			return ModifyRuler( C_MOVE, pos );
 		if ( modifyBezierMode )
 			return ModifyBezier( C_UP, pos);
+		if (modifyCornuMode)
+			return ModifyCornu(C_UP, pos);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		tempSegs_da.cnt = 0;
 		SnapPos( &pos );
@@ -226,6 +268,7 @@ static STATUS_T CmdModify(
 		changeTrackMode = TRUE;
 		modifyRulerMode = FALSE;
 		modifyBezierMode = FALSE;
+		modifyCornuMode = FALSE;
 		Dex.Trk = OnTrack( &pos, TRUE, TRUE );
 		if (Dex.Trk) {
 			if (!CheckTrackLayer( Dex.Trk ) ) {
@@ -425,6 +468,7 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 
 	case C_REDRAW:
 		if (modifyBezierMode) return ModifyBezier(C_REDRAW, pos);
+		if (modifyCornuMode) return ModifyCornu(C_REDRAW, pos);
 		if ( (!changeTrackMode) && Dex.Trk && !QueryTrack( Dex.Trk,	 Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK ) )
 		   UndrawNewTrack( Dex.Trk );
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
@@ -435,11 +479,14 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 			return C_CONTINUE;
 		if (modifyBezierMode) {
 			return ModifyBezier(C_TEXT, pos);
+		if (modifyCornuMode)
+			return ModifyCornu(C_TEXT, pos);
 		}
 		return ModifyTrack( Dex.Trk, action, pos );
 
 	default:
-		if (modifyBezierMode) ModifyBezier(action, pos);
+		if (modifyBezierMode) return ModifyBezier(action, pos);
+		if (modifyCornuMode)  return ModifyCornu(action, pos);
 		return C_CONTINUE;
 	}
 }
