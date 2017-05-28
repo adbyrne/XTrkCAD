@@ -451,11 +451,15 @@ static STATUS_T CmdJoin(
 		Dj.state = 0;
 		Dj.joinMoveState = 0;
 		/*ParamGroupRecord( &easementPG );*/
+		if (easementVal < 0)
+			return CmdCornu(action, pos);
 		return C_CONTINUE;
 
 	case C_DOWN:
 		if ( (Dj.state == 0 && (MyGetKeyState() & WKEY_SHIFT) != 0) || Dj.joinMoveState != 0 )
 			return DoMoveToJoin( pos );
+		if (easementVal < 0.0)
+			return CornuCmd(action, pos);
 
 		DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 		tempSegs(0).color = drawColorBlack;
@@ -545,6 +549,8 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 		tempSegs_da.cnt = 0;
 
 	case C_MOVE:
+		if (easementVal < 0)
+			return CornuCmd(action, pos);
 
 LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 		if (Dj.state != 2)
@@ -777,8 +783,13 @@ errorReturn:
 		return C_CONTINUE;
 
 	case C_UP:
-		if (Dj.state == 0)
-			return C_CONTINUE;
+
+		if (Dj.state == 0) {
+			if (easementVal<0)
+						return CornuCmd(action, pos);
+			else
+				return C_CONTINUE;
+		}
 		if (Dj.state == 1) {
 			InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
@@ -826,60 +837,15 @@ errorReturn:
 		DrawNewTrack( trk );
 		return rc;
 
-#ifdef LATER
-	case C_LCLICK:
-		if ( (MyGetKeyState() & WKEY_SHIFT) == 0 ) {
-			rc = CmdJoin( C_DOWN, pos );
-			if (rc == C_TERMINATE)
-				return rc;
-			return CmdJoin( C_UP, pos );
-		}
-		if ( selectedTrackCount <= 0 ) {
-			ErrorMessage( MSG_NO_SELECTED_TRK );
-			return C_CONTINUE;
-		}
-		if ( (Dj.inp[Dj.joinMoveState].trk = OnTrack( &pos, TRUE, TRUE )) == NULL )
-			return C_CONTINUE;
-		if (!CheckTrackLayer( Dj.inp[Dj.joinMoveState].trk ) )
-			return C_CONTINUE;
-		Dj.inp[Dj.joinMoveState].params.ep = PickUnconnectedEndPoint( pos, Dj.inp[Dj.joinMoveState].trk ); /* CHECKME */
-		if ( Dj.inp[Dj.joinMoveState].params.ep == -1 ) {
-#ifdef LATER
-			ErrorMessage( MSG_NO_ENDPTS );
-#endif
-			return C_CONTINUE;
-		}
-#ifdef LATER
-		if ( GetTrkEndTrk( Dj.inp[Dj.joinMoveState].trk, Dj.inp[Dj.joinMoveState].params.ep ) ) {
-			ErrorMessage( MSG_SEL_EP_CONN );
-			return C_CONTINUE;
-		}
-#endif
-		if (Dj.joinMoveState == 0) {
-			Dj.joinMoveState++;
-			InfoMessage( GetTrkSelected(Dj.inp[0].trk)?
-				_("Click on an unselected End-Point"):
-				_("Click on a selected End-Point") );
-			return C_CONTINUE;
-		}
-		if ( GetTrkSelected(Dj.inp[0].trk) == GetTrkSelected(Dj.inp[1].trk) ) {
-			ErrorMessage( MSG_2ND_TRK_NOT_SEL_UNSEL, GetTrkSelected(Dj.inp[0].trk)
-					? _("unselected") : _("selected") );
-			return C_CONTINUE;
-		}
-		if (GetTrkSelected(Dj.inp[0].trk))
-			MoveToJoin( Dj.inp[0].trk, Dj.inp[0].params.ep, Dj.inp[1].trk, Dj.inp[1].params.ep );
-		else
-			MoveToJoin( Dj.inp[1].trk, Dj.inp[1].params.ep, Dj.inp[0].trk, Dj.inp[0].params.ep );
-		Dj.joinMoveState = 0;
-		return C_TERMINATE;
-		break;
-#endif
 	case C_CANCEL:
 	case C_REDRAW:
+
+
 		if ( Dj.joinMoveState == 1 || Dj.state == 1 ) {
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
-		}
+		} else if (easementVal<0 )
+				return CmdCornu(action,pos);
+
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		break;
 

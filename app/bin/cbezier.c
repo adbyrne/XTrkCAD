@@ -66,7 +66,7 @@ enum { NONE,
 	CONTROL_ARM_2,
 	PICK_POINT,
 	POINT_PICKED,
-	TRACK_SELECTED } Bez_States;
+	TRACK_SELECTED } Cornu_States;
 
 typedef struct {
 		curveData_t curveData;
