@@ -323,6 +323,7 @@ display-centerdraw	Show crosshair at center of curves	cmdDisplay
 display-tworailscale	Drawing scale when to draw tracks with 2 rails	cmdDisplay
 display-mapscale	Drawing scale of the map window	cmdDisplay
 display-livemap	Whether the main layout is updated while dragging on the Map	cmdDisplay
+display-zoom-corner  Whether zoom should center or keep the bottom corner in view	cmdDisplay 
 display-labelenable	Enable labels for Turnouts, Flextrack Lengths and Elevations	cmdDisplay
 display-labelscale	When to label Turnout, Flextrack Lengths and Elevations	cmdDisplay
 display-description-fontsize	Font size for labels on layout	cmdDisplay

@@ -72,6 +72,7 @@ extern DIST_T connectDistance;
 extern ANGLE_T connectAngle;
 extern long twoRailScale;
 extern long mapScale;
+extern long zoomCorner;
 extern char Title1[40];
 extern char Title2[40];
 extern long checkPtInterval;
