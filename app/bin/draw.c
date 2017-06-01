@@ -41,6 +41,7 @@
 #endif
 
 #include "track.h"
+#include "trackx.h"
 #include "utility.h"
 #include "misc.h"
 #include "draw.h"

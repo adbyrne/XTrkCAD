@@ -88,6 +88,7 @@ typedef enum { curveTypeNone, curveTypeCurve, curveTypeStraight, curveTypeBezier
 #define PARAMS_EXTEND	(2)
 #define PARAMS_PARALLEL (3)
 #define PARAMS_BEZIER   (4)
+#define PARAMS_CORNU    (5)
 
 typedef struct {
 		curveType_e type;
@@ -101,6 +102,10 @@ typedef struct {
 		ANGLE_T arcA0, arcA1;
 		long helixTurns;
 		coOrd bezierPoints[4];
+		coOrd cornuEnd[2];
+		ANGLE_T cornuAngle[2];
+		DIST_T cornuRadius[2];
+
 		} trackParams_t;
 
 #define Q_CANNOT_BE_ON_END				(1)
@@ -317,6 +322,7 @@ void RecolorSegs( wIndex_t, trkSeg_p, wDrawColor );
 
 BOOL_T ReadSegs( void );
 BOOL_T WriteSegs( FILE * f, wIndex_t segCnt, trkSeg_p segs );
+BOOL_T WriteSegsEnd(FILE * f, wIndex_t segCnt, trkSeg_p segs, BOOL_T writeEnd);
 typedef union {
 		struct {
 				coOrd pos;				/* IN the point on track to get to */
@@ -362,6 +368,8 @@ typedef union {
 				ANGLE_T angle;			/* OUT */
 				BOOL_T negative_radius; /* OUT */
 				BOOL_T backwards;		/* OUT */
+				DIST_T radius;			/* OUT */
+				coOrd center;			/* OUT */
 		} getAngle;
 		} segProcData_t, *segProcData_p;
 typedef enum {

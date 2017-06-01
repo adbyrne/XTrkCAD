@@ -1635,6 +1635,7 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 			}
 		}
 		data->getAngle.angle = a;
+		data->getAngle.radius = 0.0;
 		break;
 	}
 }

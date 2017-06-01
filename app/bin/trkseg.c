@@ -1088,6 +1088,7 @@ EXPORT BOOL_T ReadSegs( void )
 	BOOL_T hasElev;
 	char type;
 	long option;
+	BOOL_T subsegs = FALSE;
 
 	descriptionOff = zero;
 	tempSpecial[0] = '\0';
@@ -1100,7 +1101,18 @@ EXPORT BOOL_T ReadSegs( void )
 		hasElev = FALSE;
 		if ( strncmp( cp, "END", 3 ) == 0 ) {
 			rc = TRUE;
+			subsegs = FALSE;
 			break;
+		}
+		if ( strncmp( cp, "SUBSEGS", 7) != 0) {
+			subsegs = TRUE;
+			break;
+		}
+		if (subsegs) {								//Ignore from SUBSEGS to SUBEND
+			if (strncmp (cp, "SUBEND", 6) != 0) {
+				subsegs = FALSE;
+				break;
+			}
 		}
 		if ( *cp == '\n' || *cp == '#' ) {
 			continue;
@@ -1367,11 +1379,20 @@ EXPORT BOOL_T ReadSegs( void )
 	return rc;
 }
 
-
 EXPORT BOOL_T WriteSegs(
 		FILE * f,
 		wIndex_t segCnt,
 		trkSeg_p segs )
+{
+    return WriteSegsEnd(f,segCnt,segs,TRUE);
+}
+
+
+EXPORT BOOL_T WriteSegsEnd(
+		FILE * f,
+		wIndex_t segCnt,
+		trkSeg_p segs, BOOL_T writeEnd)
+
 {
 	int i, j;
 	BOOL_T rc = TRUE;
@@ -1433,6 +1454,9 @@ EXPORT BOOL_T WriteSegs(
                 segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
                 segs[i].u.l.pos[2].x, segs[i].u.l.pos[2].y,
                 segs[i].u.l.pos[3].x, segs[i].u.l.pos[3].y ) > 0;
+            rc &= fprintf(f,"SUBSEGS\n");
+            rc &= WriteSegsEnd(f,segs[i].bezSegs.cnt,segs[i].bezSegs.ptr,FALSE);
+            rc &= fprintf(f,"ENDSUBS\n");
             break;
 		case SEG_CRVLIN:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
@@ -1440,6 +1464,7 @@ EXPORT BOOL_T WriteSegs(
 				segs[i].u.c.radius,
 				segs[i].u.c.center.x, segs[i].u.c.center.y,
 				segs[i].u.c.a0, segs[i].u.c.a1 ) > 0;
+
 			break;
 		case SEG_FILCRCL:
 			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f 0\n",
@@ -1464,7 +1489,7 @@ EXPORT BOOL_T WriteSegs(
 			break;
 		}
 	}
-	rc &= fprintf( f, "\tEND\n" )>0;
+	if (writeEnd) rc &= fprintf( f, "\tEND\n" )>0;
 	return rc;
 }
 

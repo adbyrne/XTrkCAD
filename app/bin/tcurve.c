@@ -1435,6 +1435,8 @@ EXPORT void CurveSegProc(
 	case SEGPROC_GETANGLE:
 		data->getAngle.angle = NormalizeAngle( FindAngle( data->getAngle.pos, segPtr->u.c.center ) + 90 );
 		data->getAngle.negative_radius = segPtr->u.c.radius<0;
+		data->getAngle.radius = segPtr->u.c.radius;
+		data->getAngle.center = segPtr->u.c.center;
 		data->getAngle.backwards = segPtr->u.c.a0>=90 && segPtr->u.c.a0<270;
 		break;
 	}

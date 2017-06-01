@@ -775,6 +775,7 @@ EXPORT void StraightSegProc(
 
 	case SEGPROC_GETANGLE:
 		data->getAngle.angle = FindAngle( segPtr->u.l.pos[0], segPtr->u.l.pos[1] );
+		data->getAngle.radius = 0.0;
 		break;
 	}
 }

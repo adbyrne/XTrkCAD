@@ -459,7 +459,7 @@ static STATUS_T CmdJoin(
 		if ( (Dj.state == 0 && (MyGetKeyState() & WKEY_SHIFT) != 0) || Dj.joinMoveState != 0 )
 			return DoMoveToJoin( pos );
 		if (easementVal < 0.0)
-			return CornuCmd(action, pos);
+			return CmdCornu(action, pos);
 
 		DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 		tempSegs(0).color = drawColorBlack;

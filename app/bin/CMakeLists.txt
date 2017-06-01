@@ -65,6 +65,7 @@ SET(SOURCES
 	bllnhlp.c
 	cbezier.c
 	cblock.c
+	ccornu.c
 	ccurve.c
 	ccontrol.c
 	cdraw.c
@@ -123,6 +124,7 @@ SET(SOURCES
 	shrtpath.c
 	smalldlg.c
 	tbezier.c
+	tcornu.c
 	tcurve.c
 	tease.c
 	track.c
@@ -135,6 +137,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
 INCLUDE_DIRECTORIES(${help_BINARY_DIR})
 INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${cornu_BINARY_DIR})
+INCLUDE_DIRECTORIES(${cornu_SOURCE_DIR})
 
 # find libintl.h and use it
 find_path ( INTL_PATH libintl.h )
@@ -156,7 +160,8 @@ ADD_EXECUTABLE(xtrkcad WIN32
 	)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
-target_link_libraries(xtrkcad dynstring)
+TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-cornu)
+TARGET_LINK_LIBRARIES(xtrkcad dynstring)
 
 ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}

@@ -25,8 +25,8 @@
 
 #include "track.h"
 #include "draw.h"
-#include "cbezier.h"
 #include "tbezier.h"
+#include "cbezier.h"
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
@@ -35,6 +35,17 @@
 
 EXPORT TRKTYP_T T_BEZIER = -1;
 EXPORT TRKTYP_T T_BZRLIN = -1;
+
+typedef struct {
+		coOrd pos[4];
+		DIST_T minCurveRadius;
+		ANGLE_T a0, a1;
+		DIST_T length;
+		dynArr_t arcSegs;
+		coOrd descriptionOff;
+		DIST_T segsWidth;
+		wDrawColor segsColor;
+		} BezierData_t;
 
 
 struct extraData {
@@ -572,7 +583,7 @@ static void RescaleBezier( track_p trk, FLOAT_T ratio )
 
 }
 
-static void AdjustBezierEndPt( track_p trk, EPINX_T inx, coOrd pos ) {
+EXPORT void AdjustBezierEndPt( track_p trk, EPINX_T inx, coOrd pos ) {
     struct extraData *xx = GetTrkExtraData(trk);
     UndoModify(trk);
     if (inx ==0 ) {
@@ -811,11 +822,26 @@ static DIST_T GetLengthBezier( track_p trk )
 
 static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
+	int segInx;
+	BOOL_T back;
+	DIST_T d;
+
 	params->type = curveTypeBezier;
 	struct extraData *xx = GetTrkExtraData(trk);
 	for (int i=0;i<4;i++) params->bezierPoints[i] = xx->bezierData.pos[i];
 	GetBezierAngles(&params->arcA0,&params->arcA1, trk);
 	params->len = xx->bezierData.length;
+	ANGLE_T a2 = GetAngleSegs(		  						//Find correct Segment and nearest point in it
+					xx->bezierData.arcSegs.cnt,xx->bezierData.arcSegs.ptr,
+					&pos, &segInx, &d , &back );
+	if (d>0.5) {
+		InfoMessage(_("Point Not on Track"));
+		return FALSE;
+	}
+	trkSeg_p segPtr = (trkSeg_t *)xx->bezierData.arcSegs.ptr[segInx];
+	if (segPtr->type == SEG_STRAIGHT) {
+		params
+	}
 	params->ep = PickUnconnectedEndPoint( pos, trk);
 	if (params->ep == -1)
 		return FALSE;
@@ -1178,6 +1204,12 @@ EXPORT void BezierSegProc(
 										//Recurse for Bezier sub-segs (only straights and curves)
 		data->getAngle.negative_radius = back;
 		data->getAngle.backwards = segPtr->u.b.angle0>=90 && segPtr->u.b.angle0<270;
+		subSegsPtr +=inx;
+		if (subSegsPtr->type == SEG_CRVTRK || subSegsPtr->type == SEG_CRVLIN ) {
+			data->getAngle.radius = subSegsPtr->u.c.radius;
+			data->getAngle.center = subSegsPtr->u.c.center;
+		}
+		else data->getAngle.radius = 0.0;
 		break;
     
 	}

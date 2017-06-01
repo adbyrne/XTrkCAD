@@ -22,11 +22,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 
 
 #include "zmisc.h"
+#include "common.h"
 #include "bezctx.h"
 #include "bezctx_xtrkcad.h"
 #include "track.h"
 #include "tbezier.h"
-#include "common.h"
 #include "i18n.h"
 
 #define trkSeg(N) DYNARR_N(trkSeg_t,* bc->segsArray, N );
@@ -37,34 +37,40 @@ typedef struct {
     dynArr_t * segsArray;
     BOOL_T track;
     BOOL_T is_open;
+    BOOL_T has_NAN;
     coOrd last_pos;						// For moveTo
-    wDrawColor color;
-    DIST_T width;
-    int ends[2];
+    int ends[2];						//Start and End knot number
 
 } bezctx_xtrkcad;
 
 static void
 bezctx_xtrkcad_moveto(bezctx *z, double x, double y, int is_open) {
     bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
+    if (!(isfinite(x) && isfinite(y))) {
+    	bc->has_NAN = TRUE;
+    	return;
+    }
     bc->last_pos.x = x;
     bc->last_pos.y = y;
-    bc->is_open = is_open;
 }
 
 static void
 bezctx_xtrkcad_lineto(bezctx *z, double x, double y) {
 
 	bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
+	if (!(isfinite(x) && isfinite(y))) {
+	    bc->has_NAN = TRUE;
+	    return;
+	}
 	if (!bc->is_open) return;
     DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
     trkSeg_p seg = &trkSeg(bc->segsArray->cnt-1);
     seg->u.l.pos[0] = bc->last_pos;
     seg->u.l.pos[1].x = x;
     seg->u.l.pos[1].y = y;
-    seg->width = bc->width;
-    seg->color = bc->color;
-    seg->type = bc->track?SEG_STRTRK:SEG_STRLIN;
+    seg->width = 0.0;
+    seg->color = wDrawColorBlack;
+    seg->type = SEG_STRTRK;
     seg->u.l.angle = FindAngle(seg->u.l.pos[0],seg->u.l.pos[1]);
 
 }
@@ -73,6 +79,11 @@ static void
 bezctx_xtrkcad_quadto(bezctx *z, double x1, double y1, double x2, double y2)
 {
     bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
+    if (!(isfinite(x1) && isfinite(y1)
+    			&& isfinite(x2) && isfinite(y2))) {
+    	bc->has_NAN = TRUE;
+    	return;
+    }
     if (!bc->is_open) return;
     DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
     trkSeg_p seg = &trkSeg(bc->segsArray->cnt-1);
@@ -83,9 +94,9 @@ bezctx_xtrkcad_quadto(bezctx *z, double x1, double y1, double x2, double y2)
     seg->u.b.pos[2].x = x1;
     seg->u.b.pos[3].x = x2;
     seg->u.b.pos[3].y = y2;
-    seg->width = bc->width;
-    seg->color = bc->color;
-    seg->type = bc->track?SEG_BEZTRK:SEG_BEZLIN;
+    seg->width = 0.0;
+    seg->color = wDrawColorBlack;
+    seg->type = SEG_BEZTRK;
 
     FixUpBezierSeg(seg->u.b.pos,seg,bc->track);
 }
@@ -95,6 +106,12 @@ static void
 	       double x3, double y3)
 {
 	bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
+	if (!(isfinite(x1) && isfinite(y1)
+			&& isfinite(x2) && isfinite(y2)
+			&& isfinite(x3) && isfinite(y3))) {
+		bc->has_NAN = TRUE;
+		return;
+	}
 	if (!bc->is_open) return;
 	DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
 	trkSeg_p seg = &trkSeg(bc->segsArray->cnt-1);
@@ -105,9 +122,9 @@ static void
 	    seg->u.b.pos[2].x = x2;
 	    seg->u.b.pos[3].x = x3;
 	    seg->u.b.pos[3].y = y3;
-	    seg->width = bc->width;
-	    seg->color = bc->color;
-	    seg->type = bc->track?SEG_BEZTRK:SEG_BEZLIN;
+	    seg->width = 0.0;
+	    seg->color = wDrawColorBlack;
+	    seg->type = SEG_BEZTRK;
 
 	    FixUpBezierSeg(seg->u.b.pos,seg,bc->track);
 }
@@ -124,12 +141,10 @@ bezctx_xtrkcad_mark_knot(bezctx *z, int knot_idx) {
 
 
 bezctx *
-new_bezctx_xtrkcad(dynArr_t * segArray, BOOL_T track, wDrawColor color, DIST_T width, int ends[2]) {
+new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2]) {
     bezctx_xtrkcad *result = znew(bezctx_xtrkcad, 1);
 
     result->segsArray = segArray;
-    result->color = color;
-    result->width = width;
     result->ends[0] = ends[0];
     result->ends[1] = ends[1];
 
@@ -139,11 +154,16 @@ new_bezctx_xtrkcad(dynArr_t * segArray, BOOL_T track, wDrawColor color, DIST_T w
     result->base.curveto = bezctx_xtrkcad_curveto;
     result->base.mark_knot = bezctx_xtrkcad_mark_knot;
     result->is_open = FALSE;
+    result->has_NAN = FALSE;
 
     return &result->base;
 }
 
-
+BOOL_T bezxtc_xtrkcad_close(bezctx *z) {
+	bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
+	if (bc->has_NAN) return FALSE;
+	return TRUE;
+}
 
 
 void
