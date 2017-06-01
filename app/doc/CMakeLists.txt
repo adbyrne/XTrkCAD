@@ -79,19 +79,17 @@ IF(XTRKCAD_USE_GTK)
 
         ADD_CUSTOM_TARGET(help-index ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/html/XTrackCAD.helpindex)
 
-# FILE(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj)
-
         INSTALL(
             DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html/
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
+            DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
         )
         INSTALL(
             DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/png.d
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
+            DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
         )
-	INSTALL(
-	    FILES xtrkcad_osx.css
-		DESTINATION ${CMAKE_INSTALL_PREFIX}/${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj
+	    INSTALL(
+	        FILES xtrkcad_osx.css
+		    DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj 
 	)
     ENDIF(APPLE)
 
@@ -116,7 +114,7 @@ ELSE(XTRKCAD_USE_GTK)
 
 	INSTALL(
 		FILES ${CMAKE_CURRENT_BINARY_DIR}/html/xtrkcad.chm
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/${XTRKCAD_SHARE_INSTALL_DIR}
+        DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 		)
 
 ENDIF(XTRKCAD_USE_GTK)

@@ -174,8 +174,9 @@ static cairo_t* gtkDrawCreateCairoContext(
 		}
 		case wDrawLineDash:
 		{
-			double dashes[] = { 5, 5 };
-			cairo_set_dash(cairo, dashes, 2, 0);
+			double dashes[] = { 5, 3 };
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0);
 			break;
 		}
 	}

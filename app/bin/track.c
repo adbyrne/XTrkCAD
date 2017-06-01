@@ -66,6 +66,7 @@ EXPORT wIndex_t trackCount;
 EXPORT long drawEndPtV = 2;
 
 EXPORT long centerDrawMode = FALSE;			/**< flag to control drawing of circle centers */
+EXPORT long printCenterLines = FALSE; 		/**< flag to control drawing of centerline in Print */
 
 static BOOL_T exportingTracks = FALSE;
 
@@ -1729,11 +1730,6 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 		*leftover = trk2;
 		DrawNewTrack( trk );
 
-#ifdef LATER
-	} else if ( IsTurnout(trk) ) {
-			ErrorMessage( MSG_CANT_SPLIT_TRK, _("Turnout") );
-			return FALSE;
-#endif
 
 	} else if ( epCnt == 2 &&
 				(d = FindDistance( trk->endPt[1-ep].pos, pos )) <= minLength) {
@@ -1746,15 +1742,9 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 			DisconnectTracks( trk, 1-ep, trk2, ep2 );
 			LOG( log_track, 2, ( "    at endPt with T%d[%d]\n", trk2->index, ep2 ) )
 			DrawNewTrack( trk2 );
-#ifdef LATER
-			*trk = trk2;
-			*ep = ep1;
-			*leftover = trk;
-#endif
+
 		} else {
-#ifdef LATER
-			*trk = NULL;
-#endif
+
 			LOG( log_track, 2, ( "    at endPt (no connection)\n") )
 		}
 		DrawNewTrack( trk );
@@ -1964,22 +1954,6 @@ EXPORT BOOL_T GetTrackParams( int inx, track_p trk, coOrd pos, trackParams_t * p
 		return trackCmds(trk->type)->getTrackParams( inx, trk, pos, params );
 	} else {
 		ASSERT( FALSE ); /* CHECKME */
-#ifdef LATER
-		switch ( inx ) {
-		case PARAMS_1ST_JOIN:
-		case PARAMS_2ND_JOIN:
-			ErrorMessage( MSG_JOIN_TRK, (inx==PARAMS_1ST_JOIN?_("First"):_("Second")) );
-			break;
-		case PARAMS_EXTEND:
-			ErrorMessage( MSG_CANT_EXTEND );
-			break;
-		case PARAMS_PARALLEL:
-			ErrorMessage( MSG_INV_TRK_PARALLEL );
-			break;
-		default:
-			ErrorMessage( MSG_INVALID_TRK );
-		}
-#endif
 		return FALSE;
 	}
 }
@@ -2123,15 +2097,7 @@ EXPORT void DrawTie(
 	Translate( &p[2], pos, angle+180, length );
 	Translate( &p[3], p[2], angle-90, width );
 	Translate( &p[2], p[2], angle+90, width );
-#ifdef LATER
-	lo = hi = p[0];
-	for ( i=1; i<4; i++ ) {
-		if ( p[i].x < lo.x ) lo.x = p[i].x;
-		if ( p[i].y < lo.y ) lo.y = p[i].y;
-		if ( p[i].x > hi.x ) hi.x = p[i].x;
-		if ( p[i].y > hi.y ) hi.y = p[i].y;
-	}
-#endif
+
 	if ( d == &mainD ) {
 		lo.x -= RBORDER/mainD.dpi*mainD.scale;
 		lo.y -= TBORDER/mainD.dpi*mainD.scale;
@@ -2245,7 +2211,8 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 	} else if (d->options & DC_QUICK) {
 		DrawArc( d, p, r, a0, a1, ((d->scale<32) && centerDrawMode && !(options&DTS_NOCENTER)) ? 1 : 0, 0, color );
 	} else {
-		if ( (d->scale <= 1 && (d->options&DC_SIMPLE)==0) || (d->options&DC_CENTERLINE)!=0 ) {
+		if ( (d->scale <= 1 && (d->options&DC_SIMPLE)==0) || (d->options&DC_CENTERLINE)!=0
+				|| (d->scale <= scale2rail/2 && d->options&DC_PRINT && printCenterLines)) {  // if printing two rails respect print CenterLine option
 			long options = d->options;
 			d->options |= DC_DASH;
 			DrawArc( d, p, r, a0, a1, 0, 0, color );
@@ -2360,7 +2327,8 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 	} else if (d->options&DC_QUICK) {
 		DrawLine( d, p0, p1, 0, color );
 	} else {
-		if ( (d->scale <= 1 && (d->options&DC_SIMPLE)==0) || (d->options&DC_CENTERLINE)!=0 ) {
+		if ( (d->scale <= 1 && (d->options&DC_SIMPLE)==0) || (d->options&DC_CENTERLINE)!=0
+				|| (d->scale <= scale2rail/2 && d->options&DC_PRINT && printCenterLines)) {  // if printing two rails respect print CenterLine option
 			long options = d->options;
 			d->options |= DC_DASH;
 			DrawLine( d, p0, p1, 0, color );
@@ -2792,40 +2760,7 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 EXPORT void RedrawLayer( LAYER_T l, BOOL_T draw )
 {
 	MainRedraw();
-#ifdef LATER
-	track_cp trk;
-	track_cp trk1;
-	EPINX_T ep;
-	wIndex_t count;
-	coOrd hi, lo;
 
-	count = 0;
-	InfoCount( 0 );
-	TRK_ITERATE( trk ) {
-		if (GetTrkLayer(trk) != l)
-			continue;
-		GetBoundingBox( trk, &hi, &lo );
-		if ( !OFF_MAIND( lo, hi ) ) {
-			if ( GetLayerVisible( l ) ) {
-				DrawTrack( trk, &mainD, draw?wDrawColorBlack:wDrawColorWhite );
-			}
-			for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-				trk1 = GetTrkEndTrk( trk, ep );
-				if ( trk1 && GetTrkLayer(trk1) != l && GetLayerVisible(GetTrkLayer(trk1)) ) {
-					DrawEndPt( &mainD, trk1, GetEndPtConnectedToMe( trk1, trk ),
-							draw?wDrawColorBlack:wDrawColorWhite );
-				}
-			}
-			count++;
-			if (count%10 == 0)
-				InfoCount( count );
-		}
-		if (draw)
-			ClrTrkBits( trk, TB_SELECTED );
-	}
-	InfoCount( trackCount );
-	SelectRecount();
-#endif
 }
 
 

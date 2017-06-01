@@ -435,6 +435,12 @@ wButton_p wColorSelectButtonCreate(
     wlibComputePos((wControl_p)b);
 
     b->widget = gtk_color_button_new();
+    GtkStyle *style;
+    style = gtk_widget_get_style(b->widget);
+    style->xthickness = 1;
+    style->ythickness = 1;
+    gtk_widget_set_style(b->widget, style);
+    gtk_widget_set_size_request(GTK_WIDGET(b->widget), 22, 22);
     g_signal_connect(GTK_OBJECT(b->widget), "color-set",
                      G_CALLBACK(colorChange), cd);
 

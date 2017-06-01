@@ -1,10 +1,11 @@
 PROJECT(XTrkCAD)
 enable_testing()
+cmake_minimum_required(VERSION 3.0)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/app)
+
 # additional CMake modules can be found here
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/CMake")
 
 # Setup high-level build options ...
 IF(UNIX AND NOT APPLE)
@@ -18,10 +19,8 @@ IF(APPLE)
 ENDIF(APPLE)
 
 IF(WIN32)
-	CMAKE_MINIMUM_REQUIRED(VERSION 2.4.7 FATAL_ERROR)
-
 	SET(XTRKCAD_USE_GTK_DEFAULT OFF)
-	SET(XTRKCAD_USE_GETTEXT_DEFAULT OFF)
+	SET(XTRKCAD_USE_GETTEXT_DEFAULT ON)
 
 	SET(CMAKE_C_FLAGS_DEBUG "/D_DEBUG /MTd /Zi  /Ob0 /Od /RTC1" CACHE STRING "Flags used by the compiler during debug builds" FORCE)
 	SET(CMAKE_C_FLAGS_MINSIZEREL "/MT /O1 /Ob1 /D NDEBUG" CACHE STRING "Flags used by the compiler during release minumum size builds" FORCE)
@@ -76,11 +75,14 @@ ENDIF(XTRKCAD_USE_PACKAGEMAKER)
 
 # Find unit testing framework
 find_package(CMocka)
-if( CMOCKA_FOUND)
+if(CMOCKA_FOUND)
   include_directories(${CMOCKA_INCLUDE_DIR})
   set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
   option( XTRKCAD_TESTING "Build unittests" ON)
 endif()
+
+# Find document conversion tool
+find_package(Pandoc)
 
 # Test for headers and libraries for portability ...
 
@@ -90,8 +92,8 @@ CHECK_INCLUDE_FILES (malloc.h HAVE_MALLOC_H)
 # Setup some global options for installation ...
 SET(XTRKCAD_MAJOR_VERSION "4")
 SET(XTRKCAD_MINOR_VERSION "3")
-SET(XTRKCAD_RELEASE_VERSION "beta")
-SET(XTRKCAD_VERSION_MODIFIER "2")
+SET(XTRKCAD_RELEASE_VERSION "0")
+SET(XTRKCAD_VERSION_MODIFIER "")
 SET(XTRKCAD_VERSION "${XTRKCAD_MAJOR_VERSION}.${XTRKCAD_MINOR_VERSION}.${XTRKCAD_RELEASE_VERSION}${XTRKCAD_VERSION_MODIFIER}")
 
 IF(WIN32)

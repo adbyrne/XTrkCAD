@@ -279,8 +279,8 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
+				CreateCurve( C_MOVE, pos, FALSE, context->Color, width, drawGeomCurveMode, context->message );
 				pos0x = pos;
-				CreateCurve( C_MOVE, pos, TRUE, context->Color, width, drawGeomCurveMode, context->message );
 			} else {
 				PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
 				tempSegs(0).color = context->Color;
@@ -369,7 +369,7 @@ STATUS_T DrawGeomMouse(
 				context->State = 1;
 				context->ArcAngle = FindAngle( pos0, pos1 );
 				pos0x = pos1;
-				CreateCurve( C_UP, pos, TRUE, context->Color, width, drawGeomCurveMode, context->message );
+				CreateCurve( C_UP, pos, FALSE, context->Color, width, drawGeomCurveMode, context->message );
 				DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 				segCnt = tempSegs_da.cnt;
 				context->message( _("Drag on Red arrows to adjust curve") );

@@ -73,6 +73,7 @@ static long printRoadbed = 0;
 static DIST_T printRoadbedWidth = 0.0;
 static BOOL_T printRotate = FALSE;
 static BOOL_T rotateCW = FALSE;
+static long printCenterLine = 0;
 
 static double printScale = 16;
 static long iPrintScale = 16;
@@ -101,6 +102,7 @@ static char * printPhysSizeLabels[] = { N_("Ignore Page Margins"), NULL };
 static char * printGridLabels[] = { N_("Print Snap Grid"), NULL };
 static char * printRulerLabels[] = { N_("Print Rulers"), NULL };
 static char * printRoadbedLabels[] = { N_("Print Roadbed Outline"), NULL };
+static char * printCenterLineLabels[] = { N_("Print Centerline below Scale 1:1"), NULL };
 static paramIntegerRange_t rminScale_999 = { 1, 999, 0, PDO_NORANGECHECK_HIGH };
 static paramFloatRange_t r0_ = { 0, 0, 0, PDO_NORANGECHECK_HIGH };
 static paramFloatRange_t r1_ = { 1, 0, 0, PDO_NORANGECHECK_HIGH };
@@ -124,19 +126,22 @@ static paramData_t printPLs[] = {
 /*10*/ { PD_TOGGLE, &printGrid, "grid", PDO_DLGNOLABELALIGN, printGridLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_RULER			(11)
 /*11*/ { PD_TOGGLE, &printRuler, "ruler", PDO_DLGNOLABELALIGN, printRulerLabels, NULL, BC_HORZ|BC_NOBORDER },
-#define I_ROADBED		(12)
-/*12*/{ PD_TOGGLE, &printRoadbed, "roadbed", PDO_DLGNOLABELALIGN, printRoadbedLabels, NULL, BC_HORZ|BC_NOBORDER },
-#define I_ROADBEDWIDTH	(13)
-/*13*/{ PD_FLOAT, &printRoadbedWidth, "roadbedWidth", PDO_DIM|PDO_DLGBOXEND, &r0_, N_("Width") },
-/*14*/{ PD_FLOAT, &newPrintGrid.orig.x, "origx", PDO_DIM|PDO_DLGRESETMARGIN, &r_10_99999, N_("Origin: X"), 0, (void*)2 },
-/*15*/ { PD_FLOAT, &newPrintGrid.orig.y, "origy", PDO_DIM, &r_10_99999, N_("Y"), 0, (void*)2 },
-/*16*/ { PD_BUTTON, (void*)DoResetGrid, "reset", PDO_DLGHORZ, NULL, N_("Reset") },
-/*17*/ { PD_FLOAT, &newPrintGrid.angle, "origa", PDO_ANGLE|PDO_DLGBOXEND, &r0_360, N_("Angle"), 0, (void*)2 },
-/*18*/ { PD_BUTTON, (void*)DoPrintSetup, "setup", PDO_DLGCMDBUTTON, NULL, N_("Setup") },
-/*19*/ { PD_BUTTON, (void*)PrintClear, "clear", 0, NULL, N_("Clear") },
-#define I_PAGECNT		(20)
-/*20*/ { PD_MESSAGE, N_("0 pages"), NULL, 0, (void*)80 },
-/*21*/ { PD_MESSAGE, N_("selected"), NULL, 0, (void*)80 } };
+#define I_CENTERLINE    (12)
+/*12*/ { PD_TOGGLE, &printCenterLine, "centerLine", PDO_DLGNOLABELALIGN, printCenterLineLabels, NULL, BC_HORZ|BC_NOBORDER },
+#define I_ROADBED		(13)
+/*13*/{ PD_TOGGLE, &printRoadbed, "roadbed", PDO_DLGNOLABELALIGN, printRoadbedLabels, NULL, BC_HORZ|BC_NOBORDER },
+#define I_ROADBEDWIDTH	(14)
+/*14*/{ PD_FLOAT, &printRoadbedWidth, "roadbedWidth", PDO_DIM|PDO_DLGBOXEND, &r0_, N_("Width") },
+/*15*/{ PD_FLOAT, &newPrintGrid.orig.x, "origx", PDO_DIM|PDO_DLGRESETMARGIN, &r_10_99999, N_("Origin: X"), 0, (void*)2 },
+/*16*/ { PD_FLOAT, &newPrintGrid.orig.y, "origy", PDO_DIM, &r_10_99999, N_("Y"), 0, (void*)2 },
+/*17*/ { PD_BUTTON, (void*)DoResetGrid, "reset", PDO_DLGHORZ, NULL, N_("Reset") },
+/*18*/ { PD_FLOAT, &newPrintGrid.angle, "origa", PDO_ANGLE|PDO_DLGBOXEND, &r0_360, N_("Angle"), 0, (void*)2 },
+/*19*/ { PD_BUTTON, (void*)DoPrintSetup, "setup", PDO_DLGCMDBUTTON, NULL, N_("Setup") },
+/*20*/ { PD_BUTTON, (void*)PrintClear, "clear", 0, NULL, N_("Clear") },
+#define I_PAGECNT		(21)
+/*21*/ { PD_MESSAGE, N_("0 pages"), NULL, 0, (void*)80 },
+/*22*/ { PD_MESSAGE, N_("selected"), NULL, 0, (void*)80 }
+};
 
 static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP, printPLs, sizeof printPLs/sizeof printPLs[0] };
 
@@ -158,33 +163,6 @@ static void ChangeDim( void )
 
 	MapGrid( zero, mapD.size, 0.0, currPrintGrid.orig, currPrintGrid.angle, currPrintGrid.size.x, currPrintGrid.size.y,
 		&x0, &x1, &y0, &y1 );
-#ifdef LATER
-	d0 = sqrt( mapD.size.x * mapD.size.x + mapD.size.y * mapD.size.y );
-
-	Translate( &p1, currPrintGrid.orig, currPrintGrid.angle, d0 );
-	p0 = currPrintGrid.orig;
-	ClipLine( &p0, &p1, zero, 0.0, mapD.size );
-	d1 = FindDistance( currPrintGrid.orig, p1 );
-	y1 = (int)ceil(d1/currPrintGrid.size.y);
-
-	Translate( &p1, currPrintGrid.orig, currPrintGrid.angle+180, d0 );
-	p0 = currPrintGrid.orig;
-	ClipLine( &p0, &p1, zero, 0.0, mapD.size );
-	d1 = FindDistance( currPrintGrid.orig, p1 );
-	y0 = -(int)floor(d1/currPrintGrid.size.y);
-
-	Translate( &p1, currPrintGrid.orig, currPrintGrid.angle+90, d0 );
-	p0 = currPrintGrid.orig;
-	ClipLine( &p0, &p1, zero, 0.0, mapD.size );
-	d1 = FindDistance( currPrintGrid.orig, p1 );
-	x1 = (int)ceil(d1/currPrintGrid.size.x);
-
-	Translate( &p1, currPrintGrid.orig, currPrintGrid.angle+270, d0 );
-	p0 = currPrintGrid.orig;
-	ClipLine( &p0, &p1, zero, 0.0, mapD.size );
-	d1 = FindDistance( currPrintGrid.orig, p1 );
-	x0 = -(int)floor(d1/currPrintGrid.size.x);
-#endif
 
 	if ( x0==bm.x0 && x1==bm.x1 && y0==bm.y0 && y1==bm.y1 )
 		return;
@@ -480,28 +458,15 @@ static void PrintEnableControls( void )
 		ParamLoadControl( &printPG, I_ROADBED );
 		ParamControlActive( &printPG, I_ROADBED, TRUE );
 		ParamControlActive( &printPG, I_ROADBEDWIDTH, TRUE );
+		ParamControlActive( &printPG, I_CENTERLINE, TRUE);
 	} else {
 		printRoadbed = 0;
 		ParamLoadControl( &printPG, I_ROADBED );
 		ParamControlActive( &printPG, I_ROADBED, FALSE );
 		ParamControlActive( &printPG, I_ROADBEDWIDTH, FALSE );
+		ParamControlActive( &printPG, I_CENTERLINE, FALSE );
 	}
 }
-
-
-#ifdef LATER
-static void PrintSetOrient( void )
-/*
- * Called when print landscape/portrait toggled
- */
-{
-	DrawPrintGrid();
-	ParamLoadData( &printPG );
-	currPrintGrid = newPrintGrid;
-	ChangeDim();
-	DrawPrintGrid();
-}
-#endif
 
 
 static void PrintUpdate( int inx0 )
@@ -918,6 +883,7 @@ static BOOL_T PrintPage(
 				if (printGrid)
 					DrawSnapGrid( &print_d, mapD.size, FALSE );
 				roadbedWidth = printRoadbed?printRoadbedWidth:0.0;
+				printCenterLines = printCenterLine;
 				DrawTracks( &print_d, print_d.scale, minP, maxP );
 				if (printRegistrationMarks && printScale == 1)
 					DrawRegistrationMarks( &print_d );

@@ -59,6 +59,7 @@ extern LAYER_T curTrackLayer;
 extern coOrd descriptionOff;
 extern DIST_T roadbedWidth;
 extern DIST_T roadbedLineWidth;
+extern long printCenterLines;
 extern long drawElevations;
 extern wDrawColor elevColorIgnore;
 extern wDrawColor elevColorDefined;

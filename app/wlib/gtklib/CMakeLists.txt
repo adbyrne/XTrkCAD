@@ -1,9 +1,9 @@
 
-FILE(GLOB HEADERS *.h)
+file(GLOB headers *.h)
 
-INCLUDE (FindGTKUnixPrint.cmake)
+find_package (GTKUnixPrint)
 
-SET(SOURCES
+set(sources
 	bitmap.c
 	boxes.c
 	button.c
@@ -32,32 +32,27 @@ SET(SOURCES
 	util.c
 	window.c
 	wpref.c
-# cproto and cppcheck
-
 # end of refactored sources	
 	gtkdraw-cairo.c
 	)
 
-IF(APPLE)
-	SET(SOURCES 
-		${SOURCES}
-		osxhelp.c)
-	
-ELSE(APPLE)
-	SET(SOURCES 
-		${SOURCES}
+if(APPLE)
+	set(sources 
+	    ${sources}
+		osxhelp.c)	
+else()
+	set(sources 
+		${sources}
 		ixhelp.c)
-ENDIF(APPLE)
+endif()
 
-SET_SOURCE_FILES_PROPERTIES(wpref.c PROPERTIES COMPILE_FLAGS -DEXPORT=)
+include_directories(${XTrkCAD_BINARY_DIR})
+include_directories(${GTK_INCLUDE_DIRS})
+include_directories(${GTK_UNIX_PRINT_INCLUDE_DIRS})
+include_directories(${GTK_WEBKIT_INCLUDE_DIRS})
 
-INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
-INCLUDE_DIRECTORIES(${GTK_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${GTK_UNIX_PRINT_INCLUDE_DIRS})
-INCLUDE_DIRECTORIES(${GTK_WEBKIT_INCLUDE_DIRS})
-
-ADD_LIBRARY(xtrkcad-wlib ${HEADERS} ${SOURCES})
-TARGET_LINK_LIBRARIES(xtrkcad-wlib ${GTK_LIBRARIES})
-TARGET_LINK_LIBRARIES(xtrkcad-wlib ${GTK_UNIX_PRINT_LIBRARIES})
-TARGET_LINK_LIBRARIES(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
+add_library(xtrkcad-wlib ${headers} ${sources})
+target_link_libraries(xtrkcad-wlib ${GTK_LIBRARIES})
+target_link_libraries(xtrkcad-wlib ${GTK_UNIX_PRINT_LIBRARIES})
+target_link_libraries(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
 

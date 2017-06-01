@@ -17,6 +17,8 @@ Move Selected object to top
 Raise or Lower all Selected tracks
 :cmdBelow
 Move Selected object to bottom
+:cmdBlockCreate
+Create a section of track for automation. 
 :cmdCarDesc
 Create a new Car/Loco description
 :cmdCarInventory
@@ -39,6 +41,8 @@ Controls colors
 Connect two tracks
 :cmdCopy
 Copy selected objects to clipboard
+:cmdControl
+Create a control for layout automation
 :cmdCurveCenter
 Create curved track from center
 :cmdCurveChord
@@ -201,16 +205,22 @@ Selects all objects on the layout
 Selects all objects in the current Layer
 :cmdSelectInvert
 Invert current selection
+:cmdSensor
+Create a sensor (ie. a occupancy detector or a toggle switch)
 :cmdSplitTrack
 Split a track
 :cmdSelectOrphaned
 Select stranded (unconnected) track pieces
+:cmdSignal
+Create a signal for train control
 :cmdSticky
 Choose which commands are sticky
 :cmdStraight
 Create straight track
 :cmdStructure
 Place a structure on the layout
+:cmdSwitchMotorCreate
+Create a switchmotor for turnout control
 :cmdText
 Enter text on the layout
 :cmdTextSize
@@ -475,6 +485,8 @@ Label elements on layout
 Color tracks or other objects by layer
 :display-tworailscale
 Drawing scale when to draw tracks with 2 rails
+:display-zoom-corner
+Zoom to keep lower corner in view
 :display-tiedraw
 How to draw track ties
 :display-mingridspacing

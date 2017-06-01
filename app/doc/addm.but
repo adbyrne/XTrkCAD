@@ -52,19 +52,19 @@ The \f{Add Menu} has all the actions related to adding track pieces to the layou
 
 \u000
 
-\dd \f{Block} - Create, edit or delete a block.
+\dd \f{Block} - Create a block.
 
 \u000
 
-\dd \f{Switchmotor} - Create, edit or delete a switchmotor.
+\dd \f{Switchmotor} - Create a switchmotor.
 
 \u000
 
-\dd \f{Signal} - Create, edit or delete a signal.
+\dd \f{Signal} - Create a signal.
 
 \u000
 
-\dd \f{Control} - Create a signal.
+\dd \f{Control} - Create a control.
 
 \u000
 

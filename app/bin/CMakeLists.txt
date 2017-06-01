@@ -48,7 +48,18 @@ IF(XTRKCAD_USE_GETTEXT)
 	# Find the GnuWin32 installation directory, the gettext include should be located in subdir include
 	#
 	IF(WIN32)
-		ADD_DEFINITIONS(-DUSE_SIMPLE_GETTEXT )
+		if(MSVC)
+			# use supplied gettext library for Visual Studio
+			message( STATUS "Use simple_gettext module included with XTrackCAD" )
+			ADD_DEFINITIONS(-DUSE_SIMPLE_GETTEXT )
+		else()	
+			# for mingw & co. find libintl.h and use it
+			find_path ( INTL_PATH libintl.h )
+			if(INTL_PATH)
+				message( STATUS "Use installed gettext module" )			
+				INCLUDE_DIRECTORIES(${INTL_PATH})
+			endif(INTL_PATH)		
+		endif()		
 	ENDIF(WIN32)
 ELSE(XTRKCAD_USE_GETTEXT)
 	SET(GENHELP_OPTS "-bh")
@@ -139,12 +150,6 @@ INCLUDE_DIRECTORIES(${help_BINARY_DIR})
 INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${cornu_BINARY_DIR})
 INCLUDE_DIRECTORIES(${cornu_SOURCE_DIR})
-
-# find libintl.h and use it
-find_path ( INTL_PATH libintl.h )
-if(INTL_PATH)
-	INCLUDE_DIRECTORIES(${INTL_PATH})
-endif(INTL_PATH)
 
 LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
 LINK_DIRECTORIES(${GTK_WEBKIT_LIBRARY_DIRS})

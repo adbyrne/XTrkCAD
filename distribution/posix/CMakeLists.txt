@@ -1,7 +1,7 @@
 # Setup packaging ...
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "XTrackCAD is a CAD program for designing model railroad layouts.")
 SET(CPACK_GENERATOR "RPM" "STGZ")
-SET(CPACK_SOURCE_GENERATOR "TGZ" "TBZ2" )
+SET(CPACK_SOURCE_GENERATOR "TGZ" "TBZ2" "ZIP")
 SET(CPACK_PACKAGE_RELEASE 1)
 SET(CPACK_RPM_PACKAGE_LICENSE "GPL")
 SET(CPACK_RPM_PACKAGE_GROUP "Applications/Engineering")
@@ -25,6 +25,8 @@ SET(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION
 	"/usr/share/locale/*"
 	"/usr/local/share/locale"
 	"/usr/local/share/locale/*"
+	"/usr/share/applications"
+	"/usr/share/pixmaps"
 )
 
 SET(CPACK_RPM_CHANGELOG_FILE "${CMAKE_CURRENT_SOURCE_DIR}////changelog.txt")

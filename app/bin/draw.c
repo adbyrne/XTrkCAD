@@ -58,6 +58,8 @@ static int log_mouse = 0;
 
 static wFontSize_t drawMaxTextFontSize = 100;
 
+extern long zoomCorner; 
+
 /****************************************************************************
  *
  * EXPORTED VARIABLES
@@ -1646,11 +1648,19 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 		orig->y = 0;
 	if (mainD.scale >= 1.0) {
 		if (units == UNITS_ENGLISH) {
-			orig->x = floor(orig->x);
-			orig->y = floor(orig->y);
+			orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
+			orig->y = floor(orig->y*4)/4;
 		} else {
-			orig->x = floor(orig->x*2.54)/2.54;
-			orig->y = floor(orig->y*2.54)/2.54;
+			orig->x = floor(orig->x*2.54*2)/(2.54*2);  //>1:1 = 0.5 cm
+			orig->y = floor(orig->y*2.54*2)/(2.54*2);
+		}
+	} else {
+		if (units == UNITS_ENGLISH) {
+			orig->x = floor(orig->x*64)/64;   //<1:1 = 1/64 inch
+			orig->y = floor(orig->y*64)/64;
+		} else {
+			orig->x = floor(orig->x*25.4*2)/(25.4*2);  //>1:1 = 0.5 mm
+			orig->y = floor(orig->y*25.4*2)/(25.4*2);
 		}
 	}
 	orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
@@ -1740,10 +1750,6 @@ static void DoNewScale( DIST_T scale )
 		scale = MAX_MAIN_SCALE;
 
 	DrawHilight( &mapD, mainD.orig, mainD.size );
-#ifdef LATER
-	center.x = mainD.orig.x + mainD.size.x/2.0;
-	center.y = mainD.orig.y + mainD.size.y/2.0;
-#endif
 	tempD.scale = mainD.scale = scale;
 	mainD.dpi = wDrawGetDPI( mainD.d );
 	if ( mainD.dpi == 75 ) {
@@ -1755,9 +1761,14 @@ static void DoNewScale( DIST_T scale )
 
 	SetZoomRadio( scale ); 
 	InfoScale();
-	SetMainSize();
-	mainD.orig.x = mainCenter.x - mainD.size.x/2.0;
-	mainD.orig.y = mainCenter.y - mainD.size.y/2.0;
+	SetMainSize(); 
+	if (zoomCorner) {
+		mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
+		mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
+	} else {
+		mainD.orig.x = mainCenter.x - mainD.size.x/2.0;
+		mainD.orig.y = mainCenter.y - mainD.size.y/2.0;
+	}
 	ConstraintOrig( &mainD.orig, mainD.size );
 	MainRedraw();
 	tempD.orig = mainD.orig;
@@ -1791,15 +1802,24 @@ EXPORT void DoZoomUp( void * mode )
 		 * To jump into macro mode, the CTRL-key has to be pressed and held.
 		 */
 		if( mainD.scale != 1.0 || (mainD.scale == 1.0 && (MyGetKeyState()&WKEY_CTRL))) {
-			if( i ) 
+			if( i ) {
+				if (mainD.scale <=1.0) 
+					InfoMessage(_("Macro Zoom Mode"));
+				else 
+					InfoMessage(_("Use Shift+PageDwn to jump to preset Zoom In"));
 				DoNewScale( zoomList[ i - 1 ].value );	
+				
+			} else InfoMessage("Min Macro Zoom");
+		} else {
+			InfoMessage(_("Scale 1:1 - Use CTRL+PageDwn to go to Macro Zoom Mode"));
 		}
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomin", &newScale, 4 );
+		InfoMessage(_("Preset Zoom In Value selected. SHIFT+CTRL+PageDwn to reset value"));
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomin", (long)mainD.scale );
-		InfoMessage( _("Zoom In Program Value %ld:1"), (long)mainD.scale );
+		InfoMessage( _("Zoom In Program Value %ld:1, Shift+PageDwn to use"), (long)mainD.scale );
 	}
 }
 
@@ -1817,15 +1837,20 @@ EXPORT void DoZoomDown( void  * mode)
 	
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
-		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 ))
-			DoNewScale( zoomList[ i + 1 ].value );			
+		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
+			InfoMessage(_("SHIFT+PageUp to jump to preset Zoom Out"));
+			DoNewScale( zoomList[ i + 1 ].value );
+		} else
+			InfoMessage(_("At Maximum Zoom Out"));
+					
 			
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomout", &newScale, 16 );
+		InfoMessage(_("Preset Zoom Out Value selected. SHIFT+CTRL+PageUp to reset value"));
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomout", (long)mainD.scale );
-		InfoMessage( _("Zoom Out Program Value %ld:1"), (long)mainD.scale );
+		InfoMessage( _("Zoom Out Program Value %ld:1 set, Shift+PageUpto use"), (long)mainD.scale );
 	}
 }
 
@@ -2182,7 +2207,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 #endif
 			case wAccelKey_Right:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
-				mainD.orig.x += mainD.size.x/2;
+				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+					mainD.orig.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
+				else
+					mainD.orig.x += mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2191,7 +2219,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 				break;
 			case wAccelKey_Left:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
-				mainD.orig.x -= mainD.size.x/2;
+				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+					mainD.orig.x -= 0.25*mainD.scale;
+				else
+					mainD.orig.x -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2200,7 +2231,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 				break;
 			case wAccelKey_Up:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
-				mainD.orig.y += mainD.size.y/2;
+				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+					mainD.orig.y += 0.25*mainD.scale;
+				else
+					mainD.orig.y -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2209,7 +2243,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 				break;
 			case wAccelKey_Down:
 				DrawHilight( &mapD, mainD.orig, mainD.size );
-				mainD.orig.y -= mainD.size.y/2;
+				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+					mainD.orig.y -= 0.25*mainD.scale;
+				else
+					mainD.orig.y -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
