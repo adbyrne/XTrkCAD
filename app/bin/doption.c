@@ -386,7 +386,7 @@ static paramData_t prefPLs[] = {
 	{ PD_RADIO, &angleSystem, "anglesystem", PDO_NOPSHUPD, angleSystemLabels, N_("Angles"), BC_HORZ },
 	{ PD_RADIO, &units, "units", PDO_NOPSHUPD|PDO_NOUPDACT, unitsLabels, N_("Units"), BC_HORZ, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
 #define I_DSTFMT		(2)
-	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_NOPSHUPD|PDO_LISTINDEX, (void*)150, N_("Length Format"), 0, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
+	{ PD_DROPLIST, &distanceFormatInx, "dstfmt", PDO_DIM|PDO_NOPSHUPD|PDO_LISTINDEX, (void*)150, N_("Length Format"), 0, (void*)(CHANGE_MAIN|CHANGE_UNITS) },
 	{ PD_FLOAT, &minLength, "minlength", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Min Track Length") },
 	{ PD_FLOAT, &connectDistance, "connectdistance", PDO_DIM|PDO_SMALLDIM|PDO_NOPSHUPD, &r0o1_1, N_("Connection Distance"), },
 	{ PD_FLOAT, &connectAngle, "connectangle", PDO_NOPSHUPD, &r1_10, N_("Connection Angle") },
@@ -460,6 +460,10 @@ static void LoadDstFmtList( void )
 		wListAddValue( (wList_p)prefPLs[I_DSTFMT].control, _(dstFmts[units][inx].name), NULL, (void*)dstFmts[units][inx].fmt );
 }
 
+/**
+* Handle changing of measurement system. The list of number formats is loaded 
+* and the first entry is selected as default value. 
+*/
 
 static void UpdatePrefD( void )
 {
@@ -473,12 +477,13 @@ static void UpdatePrefD( void )
 		return;
 	oldUnits = units;
 	units = newUnits;
+	LoadDstFmtList();
+	distanceFormatInx = 0;
 	for ( inx = 0; inx<sizeof prefPLs/sizeof prefPLs[0]; inx++ ) {
 		if ( (prefPLs[inx].option&PDO_DIM) ) {
 			ParamLoadControl( &prefPG, inx );
 		}
 	}
-	LoadDstFmtList();
 	units = oldUnits;
 	displayUnits = newUnits;
 }
