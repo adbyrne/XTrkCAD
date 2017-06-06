@@ -914,6 +914,14 @@ int mswTranslateAccelerator(
 		return 1;
 	}
 	/*acclKey = translateExtKey( (WORD)acclKey );*/
+
+	/* Convert Numpad to standard keys */
+	if (acclKey == VK_ADD)
+		acclKey = VK_OEM_PLUS;
+
+	if (acclKey == VK_SUBTRACT)
+		acclKey = VK_OEM_MINUS;
+
 	state = 0;
 	if ( GetKeyState(VK_CONTROL) & 0x1000 )
 		state |= WKEY_CTRL;
