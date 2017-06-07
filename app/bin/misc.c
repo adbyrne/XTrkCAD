@@ -1974,7 +1974,9 @@ static char * accelKeyNames[] = {
       "F9",
       "F10",
       "F11",
-      "F12" };
+      "F12",
+      "NumpadAdd",
+      "NumpadSub"};
 
 static void SetAccelKey(
       char * prefName,
@@ -2361,13 +2363,15 @@ static void CreateMenus( void )
 #endif
 	SetAccelKey( "zoomUp", wAccelKey_Pgdn, 0, (wAccelKeyCallBack_p)DoZoomUp, (void*)1 );
 	SetAccelKey( "zoomDown", wAccelKey_Pgup, 0, (wAccelKeyCallBack_p)DoZoomDown, (void*)1 );
-	SetAccelKey( "redraw", wAccelKey_F5, 0, (wAccelKeyCallBack_p)MainRedraw, (void*)1 );
+    SetAccelKey( "redraw", wAccelKey_F5, 0, (wAccelKeyCallBack_p)MainRedraw, (void*)1 );
 	SetAccelKey( "delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p)SelectDelete, (void*)1 );
 	SetAccelKey( "copy", wAccelKey_Ins, WKEY_CTRL, (wAccelKeyCallBack_p)EditCopy, 0 );
 	SetAccelKey( "paste", wAccelKey_Ins, WKEY_SHIFT, (wAccelKeyCallBack_p)EditPaste, 0 );
 	SetAccelKey( "undo", wAccelKey_Back, WKEY_SHIFT, (wAccelKeyCallBack_p)UndoUndo, 0 );
 	SetAccelKey( "cut", wAccelKey_Del, WKEY_SHIFT, (wAccelKeyCallBack_p)EditCut, 0 );
 	SetAccelKey( "nextWindow", wAccelKey_F6, 0, (wAccelKeyCallBack_p)NextWindow, 0 );
+    SetAccelKey( "zoomUp", wAccelKey_Numpad_Add, WKEY_CTRL, (wAccelKeyCallBack_p)DoZoomUp, (void*)1 );
+	SetAccelKey( "zoomDown", wAccelKey_Numpad_Subtract, WKEY_CTRL, (wAccelKeyCallBack_p)DoZoomDown, (void*)1 );
 
 	InitBenchDialog();
 }
