@@ -439,8 +439,8 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	        prev_arc = prev_arc.end==0.0?arc:prev_arc;
 	        trkSeg_t curveSeg;  			//Now set up tempSeg to copy into array
 	        curveSeg.width = width;
-	        curveSeg.color = (col&1)?wDrawColorGreen:wDrawColorRed;
 	        if ( prev_arc.curveData.type == curveTypeCurve ) {
+	        		curveSeg.color = (prev_arc.curveData.curveRadius<=minTrackRadius)?wDrawColorRed:wDrawColorBlack;
 	        		curveSeg.type = track?SEG_CRVTRK:SEG_CRVLIN;
 	        		curveSeg.u.c.a0 = prev_arc.curveData.a0;
 	        		curveSeg.u.c.a1 = prev_arc.curveData.a1;
@@ -448,6 +448,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	        		curveSeg.u.c.radius = prev_arc.curveData.curveRadius;
 	        } else {											//Straight Line because all points co-linear
 	        	curveSeg.type = track?SEG_STRTRK:SEG_STRLIN;
+	        	curveSeg.color = wDrawColorBlack;
 	        	curveSeg.u.l.angle = prev_arc.curveData.a1;
 	        	curveSeg.u.l.pos[0] = prev_arc.pos0;
 	        	curveSeg.u.l.pos[1] = prev_arc.pos1;
@@ -660,7 +661,7 @@ EXPORT STATUS_T AdjustBezCurve(
 		if (track && (Da.selectPoint == 0 || Da.selectPoint == 3)) {  //EPs
 			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Snap Track
 				if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) { //Snap to endPoint
-					ep = PickUnconnectedEndPoint(p, t);
+					ep = PickUnconnectedEndPointSilent(p, t);
 					if (ep != -1) {
 						Da.trk[Da.selectPoint/3] = t;
 						Da.ep[Da.selectPoint/3] = ep;
@@ -970,7 +971,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			if (Da.track) {
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Snap Track
 					if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) {
-						ep = PickUnconnectedEndPoint(p, t);
+						ep = PickUnconnectedEndPointSilent(p, t);
 						if (ep != -1) {
 							Da.trk[end] = t;
 							Da.ep[end] = ep;

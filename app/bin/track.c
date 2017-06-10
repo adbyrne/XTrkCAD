@@ -653,6 +653,28 @@ EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 	return inx;
 }
 
+EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
+{
+	EPINX_T inx, i;
+	DIST_T d=0, dd;
+	coOrd pos;
+	inx = -1;
+
+	for ( i=0; i<trk->endCnt; i++ ) {
+		if (trk->endPt[i].track == NULL) {
+			pos = trk->endPt[i].pos;
+			dd=FindDistance(p, pos);
+			if (inx == -1 || dd <= d) {
+				d = dd;
+				inx = i;
+			}
+		}
+	}
+
+	return inx;
+}
+
+
 
 EXPORT EPINX_T GetEndPtConnectedToMe( track_p trk, track_p me )
 {

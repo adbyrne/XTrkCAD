@@ -13,9 +13,9 @@
  * In XTrackCAD often want to change radius smoothly between two tracks whose end position, angle and curvature are known.
  *
  * Finding the right part(s) of the Cornu to fit the gap (if one is available) is mathematically complex,
- * but fortunately Ralph Levien published a PhD thesis on this together with his mathematical libraries as
+ * but fortunately Raph Levien published a PhD thesis on this together with his mathematical libraries as
  * open source. He was doing work on font design where the Cornu shapes make beautiful smooth fonts. He
- * was faced with the reality, though that graphics packages do not include these shapes as native objects
+ * was faced with the reality, though, that graphics packages do not include these shapes as native objects
  * and so his solution was to produce a set of Bezier curves that approximate the solution.
  *
  * We already have a tool that can produce a set of arcs and straight line to approximate a Bezier - so that in the end
@@ -24,11 +24,8 @@
  *
  * The inputs for the Cornu are the end points, angles and radii. To match the Cornu algorithm's expectations we input
  * these as a set of knots (points on lines). One point is always the desired end point and the other two are picked
- * direct the code to derive the other two end conditions. To make it easy we pick the far end point of the joined
- * curve and a point midway between these two (on the curve). By specifying that the desired end point is a "one-way"
+ * direct the code to derive the other two end conditions. By specifying that the desired end point is a "one-way"
  * knot we ensure that the result has smooth ends of either zero or fixed radius.
- *
- * For producing parallel tracks we may introduce one additional knot at the middle of the gap at the right central position.
  *
  * When reading back the output, we simply ignore the results before the first end point knot and after the last.
  *
@@ -43,11 +40,11 @@
  * end conditions (more space between the ends, different angles or different radii).
  *
  * Note that every time we change the Cornu end points we have to recalculate the Bezier approximation,
- * which recalculates the arc approximations, but that means that the majority of the time we are using the approximation.
+ * which recalculates the arc approximations, but that still means that the majority of the time we are using the approximation.
  *
- * Cornus do not have cusps, but can result in smooth loops. It is not yet determined if we can automatically eliminate these.
+ * Cornus do not have cusps, but can result in smooth loops. If there is too much looping, the code will reject the easement.
  *
- * This program is built and founded upon Ralph Levien's seminal work and relies on an adaptation of his Cornu library.
+ * This program is built and founded upon Raph Levien's seminal work and relies on an adaptation of his Cornu library.
  * As with the Bezier work, it also relies on the pages about Bezier curves that PoMax put up at https://pomax.github.io/bezierinfo
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -829,7 +826,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			int end = Da.state==NONE?0:1;
 			EPINX_T ep;
 		    if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) {
-				ep = PickUnconnectedEndPoint(p, t);
+				ep = PickUnconnectedEndPointSilent(p, t);
 				if (ep==-1 || FindDistance(p,GetTrkEndPos(t,ep))>2) {
 					wBeep();
 					InfoMessage(_("No Unconnected end point there"));

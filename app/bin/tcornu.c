@@ -949,7 +949,7 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 		params->cornuRadius[i] = xx->cornuData.r[i];
 	}
 	params->len = xx->cornuData.length;
-	params->ep = PickUnconnectedEndPoint( pos, trk);
+	params->ep = PickUnconnectedEndPointSilent( pos, trk);
 	if (params->ep == -1)
 		return FALSE;
 	return TRUE;

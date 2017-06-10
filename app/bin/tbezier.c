@@ -834,7 +834,7 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 		if ( inx == PARAMS_PARALLEL ) {
 			params->ep = 0;
 		} else {
-			params->ep = PickUnconnectedEndPoint( pos, trk );
+			params->ep = PickUnconnectedEndPointSilent( pos, trk );
 			if (params->ep == -1)
 				return FALSE;
 		}
@@ -842,7 +842,7 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 		params->arcR = segPtr->u.c.radius;
 		params->arcP = segPtr->u.c.center;
 	}
-	params->ep = PickUnconnectedEndPoint( pos, trk);
+	params->ep = PickUnconnectedEndPointSilent( pos, trk);
 	if (params->ep == -1)
 		return FALSE;
 	return TRUE;

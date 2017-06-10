@@ -498,6 +498,7 @@ void SetTrkEndPtCnt( track_p, EPINX_T );
 BOOL_T WriteEndPt( FILE *, track_cp, EPINX_T );
 EPINX_T PickEndPoint( coOrd, track_cp );
 EPINX_T PickUnconnectedEndPoint( coOrd, track_cp );
+EPINX_T PickUnconnectedEndPointSilent( coOrd, track_cp );
 
 void AuditTracks( char *, ... );
 void CheckTrackLength( track_cp );
