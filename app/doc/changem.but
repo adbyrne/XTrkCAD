@@ -268,9 +268,9 @@ For detail about;
 
 \S2{joinTrackCurve} Using Curved Flex-Track
 
-This method of joining track may be used using Normal Easments (see \k{Easements}) where tracks are either joined with a 'simple curve'\k{joinNormalEasment}, e.g. one which uses a curve in a single direction as opposed to using reverse curves (\K{generalTerms}) or using complex curves if Easement is set to Cornu \k{joinCornu}.
+This method of joining track may be used using Normal Easments where tracks are either joined with a 'simple curve'\k{joinNormalEasment}, e.g. one which uses a curve in a single direction as opposed to using reverse curves (\K{generalTerms}) or using complex curves if Easement is set to Cornu \K{joinCornu}.
 
-\S3{joinNormalEasment}
+\S2{joinNormalEasment} Join with Normal Easement
 
 \u000
 
@@ -348,7 +348,7 @@ For detail about;
 
 \dd Moving one segment of track to join with another refer to \K{joinTrackMove}.
 
-\S3{joinCornu}
+\S2{joinCornu} Join with Cornu Easement
 
 \u000
 
@@ -364,8 +364,11 @@ For detail about;
 
 }
 
-\n \e{Left-Click} the open endpoint of one of the two tracks being joined. A red dot will appear as a reminder of which track has been selected.
-\n \e{Drag} the endpoint to where you want it and release the button. Note that you will be able to fine-tune the position later.
+\dd \e{Left-Click} the open endpoint of one of the two tracks being joined. A red dot will appear as a reminder of which track has been selected.
+
+\u000
+
+\dd \e{Drag} the endpoint to where you want it and release the button. Note that you will be able to fine-tune the position later.
 
 \lcont{
 
@@ -377,9 +380,11 @@ For detail about;
 
 }
 
-\n \e{Left-Click} the endpoint of the other track being joined. A red dot will appear as a reminder of which track has been selected.
+\dd \e{Left-Click} the endpoint of the other track being joined. A red dot will appear as a reminder of which track has been selected.
+
 \u000
-\n \e{Left-Drag} the endpoint to where you want it and release the button. The initial curve will be drawn - it will be red if the minimum radius is smaller than the minimum radius option.
+
+\dd \e{Left-Drag} the endpoint to where you want it and release the button. The initial curve will be drawn - it will be red if the minimum radius is smaller than the minimum radius option.
 
 \lcont{
 
@@ -391,9 +396,11 @@ For detail about;
 
 }
 
-\n You are now in "Select Points" mode. You can select an end point with \e{Left-Click} and move it along the track with \e{Left-Drag}.
+\dd You are now in "Select Points" mode. You can select an end point with \e{Left-Click} and move it along the track with \e{Left-Drag}.
+
 \u000
-\n Once you are happy, hit \e{Enter} or the e{SpaceBar} to finish editing the easement. Or hit \e{Esc} to cancel. 
+
+\dd Once you are happy, hit \e{Enter} or the \e{SpaceBar} to finish editing the easement. Or hit \e{Esc} to cancel. 
 
 \rule
 
