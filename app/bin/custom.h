@@ -85,6 +85,7 @@ void InitTrkCurve( void );
 void InitTrkBezier( void );
 void InitTrkDraw( void );
 void InitTrkEase( void );
+void InitTrkCornu( void );
 void InitTrkNote( void );
 void InitTrkStraight( void );
 void InitTrkStruct( void );

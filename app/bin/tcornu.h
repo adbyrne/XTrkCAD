@@ -20,6 +20,7 @@
  */
 typedef struct {
 		coOrd pos[2];
+		coOrd c[2];
 		ANGLE_T a[2];
 		DIST_T r[2];
 		DIST_T minCurveRadius;
@@ -31,16 +32,26 @@ typedef struct {
 
 typedef struct {
 		coOrd pos[2];
-		ANGLE_T angle[2];
-		DIST_T radius[2];
+		DIST_T radius[2];		//0.0 if straight
+		ANGLE_T angle[2];		//Set if straight
+		coOrd center[2];		//Set if radius >0
 		} cornuParm_t;
 
 
 double CornuMaxCurve(coOrd[2],ANGLE_T[2],DIST_T[2]);
 double BezierMathMinRadius(coOrd[4]);
 coOrd BezierMathFindNearestPoint(coOrd *, coOrd[4] , int );
-track_p NewCornuTrack(coOrd[2], ANGLE_T[2], DIST_T[2], trkSeg_t * , int );
+track_p NewCornuTrack(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], trkSeg_t * tempsegs, int count);
 DIST_T CornuDistance( coOrd *, coOrd[2], ANGLE_T[2], DIST_T[2], trkSeg_t * ,int , double * );
-void FixUpCornu(coOrd[4], struct extraData*, BOOL_T);
+BOOL_T FixUpCornu(coOrd pos[2], track_p [2], EPINX_T ep[2], struct extraData* xx);
+BOOL_T FixUpCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], struct extraData* xx);
 BOOL_T GetCornuSegmentsFromTrack(track_p, trkSeg_p);
+BOOL_T AdjustCornuEndPt(track_p trk, EPINX_T inx, coOrd pos);
+BOOL_T RotateCornuEndPt(track_p trk, EPINX_T inx, coOrd orig, ANGLE_T angle);
+BOOL_T RebuildCornu (track_p trk);
+
+BOOL_T CallCornu(coOrd[2],track_p[2],EPINX_T[2],dynArr_t *,cornuParm_t *);
+BOOL_T CallCornu0(coOrd[2], coOrd[2], ANGLE_T[2], DIST_T[2], dynArr_t *,BOOL_T);
+
+
 

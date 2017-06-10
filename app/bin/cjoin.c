@@ -29,6 +29,7 @@
 #include "ccurve.h"
 #include "cstraigh.h"
 #include "cjoin.h"
+#include "ccornu.h"
 #include "i18n.h"
 
 
@@ -550,7 +551,7 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 
 	case C_MOVE:
 		if (easementVal < 0)
-			return CornuCmd(action, pos);
+			return CmdCornu(action, pos);
 
 LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 		if (Dj.state != 2)
@@ -786,7 +787,7 @@ errorReturn:
 
 		if (Dj.state == 0) {
 			if (easementVal<0)
-						return CornuCmd(action, pos);
+						return CmdCornu(action, pos);
 			else
 				return C_CONTINUE;
 		}
@@ -849,8 +850,14 @@ errorReturn:
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		break;
 
+	case C_TEXT:
+	case C_OK:
+		if (easementVal<0 )
+				return CmdCornu(action,pos);
 
 	}
+
+
 	return C_CONTINUE;
 
 }

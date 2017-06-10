@@ -1164,6 +1164,11 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 	params->type = curveTypeCurve;
 	GetTrkCurveCenter( trk, &params->arcP, &params->arcR);
 	GetCurveAngles( &params->arcA0, &params->arcA1, trk );
+	ANGLE_T angle1 = FindAngle(params->arcP,pos);
+	if (angle1>90 && angle1<270)
+		params->angle = NormalizeAngle(FindAngle(params->arcP,pos)+90);
+	else
+		params->angle = NormalizeAngle(FindAngle(params->arcP,pos)-90);
 	if ( easeR > 0.0 && params->arcR < easeR ) {
 		ErrorMessage( MSG_RADIUS_LSS_EASE_MIN,
 						FormatDistance( params->arcR ), FormatDistance( easeR ) );
@@ -1229,6 +1234,9 @@ static BOOL_T QueryCurve( track_p trk, int query )
 		return xx->radius < minTrackRadius;
 	case Q_NOT_PLACE_FROGPOINTS:
 		return IsCurveCircle( trk );
+	case Q_CAN_EXTEND:
+		if (xx->helixTurns > 0) return FALSE;
+		return TRUE;
 	default:
 		return FALSE;
 	}

@@ -144,7 +144,7 @@ static STATUS_T CmdModify(
 		trackGauge = 0.0;
 		changeTrackMode = modifyRulerMode = FALSE;
 		modifyBezierMode = FALSE;
-		modifyCornuMode - FALSE;
+		modifyCornuMode = FALSE;
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -177,11 +177,11 @@ static STATUS_T CmdModify(
 			return C_CONTINUE;										//That's it
 		}
 		if (QueryTrack( Dex.Trk, Q_IS_CORNU )) { //Bezier
-					modifyCornuMode = TRUE;
-					if (ModifyCornu(C_START, pos) != C_CONTINUE) {			//Call Start with track
-						modifyCornuMode = FALSE;							//Function rejected Bezier
-					}
-					return C_CONTINUE;										//That's it
+			modifyCornuMode = TRUE;
+			if (ModifyCornu(C_START, pos) != C_CONTINUE) {			//Call Start with track
+			modifyCornuMode = FALSE;							//Function rejected Bezier
+			}
+			return C_CONTINUE;										//That's it
 		}
 
 

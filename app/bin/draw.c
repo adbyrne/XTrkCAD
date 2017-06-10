@@ -2234,7 +2234,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.y += 0.25*mainD.scale;
 				else
-					mainD.orig.y -= mainD.size.x/2;
+					mainD.orig.y += mainD.size.y/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2246,7 +2246,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.y -= 0.25*mainD.scale;
 				else
-					mainD.orig.y -= mainD.size.x/2;
+					mainD.orig.y -= mainD.size.y/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;

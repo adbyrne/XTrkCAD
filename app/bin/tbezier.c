@@ -36,17 +36,6 @@
 EXPORT TRKTYP_T T_BEZIER = -1;
 EXPORT TRKTYP_T T_BZRLIN = -1;
 
-typedef struct {
-		coOrd pos[4];
-		DIST_T minCurveRadius;
-		ANGLE_T a0, a1;
-		DIST_T length;
-		dynArr_t arcSegs;
-		coOrd descriptionOff;
-		DIST_T segsWidth;
-		wDrawColor segsColor;
-		} BezierData_t;
-
 
 struct extraData {
 		BezierData_t bezierData;
@@ -462,13 +451,13 @@ static void DeleteBezier( track_p t )
 	for (int i=0;i<xx->bezierData.arcSegs.cnt;i++) {
 		trkSeg_t s = DYNARR_N(trkSeg_t,xx->bezierData.arcSegs,i);
 		if (s.type == SEG_BEZTRK || s.type == SEG_BEZLIN) {
-			if (s.bezSegs.ptr) free(s.bezSegs.ptr);
+			if (s.bezSegs.ptr) MyFree(s.bezSegs.ptr);
 			s.bezSegs.max = 0;
 			s.bezSegs.cnt = 0;
 		}
 	}
 	if (xx->bezierData.arcSegs.ptr && !xx->bezierData.arcSegs.max)
-		free(xx->bezierData.arcSegs.ptr);
+		MyFree(xx->bezierData.arcSegs.ptr);
 	xx->bezierData.arcSegs.max = 0;
 	xx->bezierData.arcSegs.cnt = 0;
 }
@@ -831,16 +820,27 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 	for (int i=0;i<4;i++) params->bezierPoints[i] = xx->bezierData.pos[i];
 	GetBezierAngles(&params->arcA0,&params->arcA1, trk);
 	params->len = xx->bezierData.length;
-	ANGLE_T a2 = GetAngleSegs(		  						//Find correct Segment and nearest point in it
+	params->angle = GetAngleSegs(		  						//Find correct Segment and nearest point in it
 					xx->bezierData.arcSegs.cnt,xx->bezierData.arcSegs.ptr,
 					&pos, &segInx, &d , &back );
 	if (d>0.5) {
 		InfoMessage(_("Point Not on Track"));
 		return FALSE;
 	}
-	trkSeg_p segPtr = (trkSeg_t *)xx->bezierData.arcSegs.ptr[segInx];
-	if (segPtr->type == SEG_STRAIGHT) {
-		params
+	trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->bezierData.arcSegs,segInx);
+	if (segPtr->type == SEG_STRLIN) {
+		params->angle = FindAngle(segPtr->u.l.pos[0],segPtr->u.l.pos[1]);
+		params->arcR = 0.0;
+		if ( inx == PARAMS_PARALLEL ) {
+			params->ep = 0;
+		} else {
+			params->ep = PickUnconnectedEndPoint( pos, trk );
+			if (params->ep == -1)
+				return FALSE;
+		}
+	} else {
+		params->arcR = segPtr->u.c.radius;
+		params->arcP = segPtr->u.c.center;
 	}
 	params->ep = PickUnconnectedEndPoint( pos, trk);
 	if (params->ep == -1)
@@ -968,6 +968,8 @@ static BOOL_T MakeParallelBezier(
 		tempSegs(0).width = 0;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_BEZTRK;
+		tempSegs(0).bezSegs.max = 0;
+		tempSegs(0).bezSegs.ptr = NULL;
 		for (int i=0;i<4;i++) tempSegs(0).u.b.pos[i] = np[i];
 		FixUpBezierSeg(tempSegs(0).u.b.pos,&tempSegs(0),TRUE);
 	}

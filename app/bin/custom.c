@@ -129,6 +129,7 @@ BOOL_T Initialize( void )
 	InitTrkBezier();
 	InitTrkStraight();
 	InitTrkEase();
+	InitTrkCornu();
 	InitTrkTurnout();
 	InitTrkTurntable();
 	InitTrkStruct();

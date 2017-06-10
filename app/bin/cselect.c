@@ -26,6 +26,7 @@
 #include "track.h"
 /*#include "trackx.h"*/
 #include "ccurve.h"
+#include "tcornu.h"
 #define PRIVATE_EXTRADATA
 #include "compound.h"
 
@@ -1050,12 +1051,37 @@ static void MoveTracks(
 			RotateTrack( trk, orig, angle );
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
 			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
-				!GetTrkSelected(trk1)) {
+					!GetTrkSelected(trk1)) {
 				ep1 = GetEndPtConnectedToMe( trk1, trk );
 				DisconnectTracks( trk, ep, trk1, ep1 );
+				if (QueryTrack(trk1,Q_IS_CORNU)) {  		//Cornu at end stays connected
+					if (move) {
+						if (AdjustCornuEndPt(trk1,ep1,base))
+								ConnectTracks(trk,ep,trk1,ep1);
+					}
+					if (rotate) {
+						if (RotateCornuEndPt(trk1,ep,orig,angle))
+								ConnectTracks(trk,ep,trk1,ep1);
+					}
+				} else {
+					if (QueryTrack(trk,Q_IS_CORNU)) {
+						if (move) {
+							coOrd base2;
+							base2.x = -base.x;
+							base2.y = -base.y;
+							if (AdjustCornuEndPt(trk,ep,base2))
+								ConnectTracks(trk,ep,trk1,ep1);
+						}
+						if (rotate) {
+							if (RotateCornuEndPt(trk,ep,orig,-angle))
+								ConnectTracks(trk,ep,trk1,ep1);
+						}
+					}
+				}
 				DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
 			}
 		}
+
 		InfoCount( inx );
 #ifdef LATER
 		if (tlist_da.cnt <= incrementalDrawLimit)

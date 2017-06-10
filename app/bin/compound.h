@@ -93,6 +93,7 @@ extern TRKTYP_T T_TURNOUT;
 extern TRKTYP_T T_STRUCTURE;
 extern TRKTYP_T T_BEZIER;
 extern TRKTYP_T T_BZRLIN;
+extern TRKTYP_T T_CORNU;
 extern DIST_T curBarScale;
 extern dynArr_t turnoutInfo_da;
 extern dynArr_t structureInfo_da;

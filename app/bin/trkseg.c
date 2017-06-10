@@ -26,6 +26,7 @@
 #include <stdarg.h>
 #include <common.h>
 #include <cbezier.h>
+#include <tbezier.h>
 
 #include "cjoin.h"
 
@@ -308,8 +309,9 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 			lo->x = lo->x>pBez[i].x?pBez[i].x:lo->x;
 			lo->y = lo->y>pBez[i].y?pBez[i].y:lo->y;
 			hi->x = hi->x<pBez[i].x?pBez[i].x:hi->x;
-			hi->y = hi->y>pBez[i].y?pBez[i].y:hi->y;
+			hi->y = hi->y<pBez[i].y?pBez[i].y:hi->y;
 		}
+		width.x = width.y = segPtr->width/2.0;
 		break;
 	default:
 		;
@@ -1104,15 +1106,13 @@ EXPORT BOOL_T ReadSegs( void )
 			subsegs = FALSE;
 			break;
 		}
-		if ( strncmp( cp, "SUBSEGS", 7) != 0) {
+		if ( strncmp(cp, "SUBSEGS", 7) == 0) {
 			subsegs = TRUE;
-			break;
+			continue;
 		}
-		if (subsegs) {								//Ignore from SUBSEGS to SUBEND
-			if (strncmp (cp, "SUBEND", 6) != 0) {
-				subsegs = FALSE;
-				break;
-			}
+		if (strncmp (cp, "SUBSEND", 7) == 0) {
+			subsegs = FALSE;
+			continue;
 		}
 		if ( *cp == '\n' || *cp == '#' ) {
 			continue;
@@ -1172,6 +1172,9 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_STRTRK;
+			s->bezSegs.max = 0;
+			s->bezSegs.cnt = 0;
+			s->bezSegs.ptr = NULL;
 			if ( !GetArgs( cp, hasElev?"lwpfpf":"lwpYpY",
 				&rgb, &s->width,
 				&s->u.l.pos[0], &elev0,
@@ -1185,6 +1188,9 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = SEG_CRVTRK;
+			s->bezSegs.max = 0;
+			s->bezSegs.cnt = 0;
+			s->bezSegs.ptr = NULL;
 			if ( !GetArgs( cp, hasElev?"lwfpfff":"lwfpYff",
 				 &rgb, &s->width,
 				 &s->u.c.radius,
@@ -1222,13 +1228,15 @@ EXPORT BOOL_T ReadSegs( void )
             DYNARR_APPEND( trkSeg_t, tempSegs_da, 10);
             s = &tempSegs(tempSegs_da.cnt-1);
             s->type=SEG_BEZTRK;
-            if ( !GetArgs( cp, hasElev?"lwppppf":"lwpppp",
+            s->bezSegs.max=0;
+            s->bezSegs.ptr= NULL;
+            s->bezSegs.cnt=0;
+            if ( !GetArgs( cp, hasElev?"lwpppp":"lwpppp",
                 &rgb, &s->width,
                 &s->u.b.pos[0],
                 &s->u.b.pos[1],
                 &s->u.b.pos[2],
-                &s->u.b.pos[3],
-                &elev0)) {
+                &s->u.b.pos[3])) {
                 rc = FALSE;
                 break;
             }
@@ -1238,13 +1246,15 @@ EXPORT BOOL_T ReadSegs( void )
             DYNARR_APPEND( trkSeg_t, tempSegs_da, 10);
             s = &tempSegs(tempSegs_da.cnt-1);
             s->type=SEG_BEZLIN;
-            if ( !GetArgs( cp, hasElev?"lwppppf":"lwpppp",
+            s->bezSegs.max=0;
+            s->bezSegs.ptr= NULL;
+            s->bezSegs.cnt=0;
+            if ( !GetArgs( cp, hasElev?"lwpppp":"lwpppp",
                 &rgb, &s->width,
                 &s->u.b.pos[0],
                 &s->u.b.pos[1],
                 &s->u.b.pos[2],
-                &s->u.b.pos[3],
-                &elev0)) {
+                &s->u.b.pos[3])) {
                 rc = FALSE;
                 break;
             }
@@ -1454,9 +1464,9 @@ EXPORT BOOL_T WriteSegsEnd(
                 segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
                 segs[i].u.l.pos[2].x, segs[i].u.l.pos[2].y,
                 segs[i].u.l.pos[3].x, segs[i].u.l.pos[3].y ) > 0;
-            rc &= fprintf(f,"SUBSEGS\n");
+            rc &= fprintf(f,"\tSUBSEGS\n");
             rc &= WriteSegsEnd(f,segs[i].bezSegs.cnt,segs[i].bezSegs.ptr,FALSE);
-            rc &= fprintf(f,"ENDSUBS\n");
+            rc &= fprintf(f,"\tSUBSEND\n");
             break;
 		case SEG_CRVLIN:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
@@ -1666,7 +1676,7 @@ EXPORT void DrawSegsO(
                 REORIGIN(p2, segPtr->u.b.pos[2], angle, orig);
                 REORIGIN(p3, segPtr->u.b.pos[3], angle, orig);
                 tempPtr = segPtr->bezSegs.ptr;
-                for(int j=0;j<segPtr->bezSegs.cnt;tempPtr++) {   //Loop through sub parts (only Trks supported)
+                for(int j=0;j<segPtr->bezSegs.cnt;j++,tempPtr++) {   //Loop through sub parts (only Trks supported)
                 	if (tempPtr->type == SEG_CRVTRK) {
                 		a0 = NormalizeAngle(tempPtr->u.c.a0 + angle);
                 		REORIGIN( c, tempPtr->u.c.center, angle, orig );
@@ -1808,12 +1818,16 @@ EXPORT void DrawSegsO(
         			case SEG_STRTRK:
         				if (color1 == wDrawColorBlack)	color1 = normalColor;
         				if ( tempPtr->color == wDrawColorWhite ) break;
-        					DrawStraightTrack( d,
-        										p0, p1,
-												FindAngle(p0, p1 ),
-												NULL, trackGauge, color1, options );
+        				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
+        				REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
+        				DrawStraightTrack( d,
+        									p0, p1,
+											FindAngle(p0, p1 ),
+											NULL, trackGauge, color1, options );
             			break;
         			case SEG_STRLIN:
+        				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
+        				REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
         				DrawLine( d, p0, p1, (wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
         				break;
             	}
@@ -1896,7 +1910,7 @@ EXPORT void CleanSegs(dynArr_t * seg_p) {
 	for (int i=0;i<seg_p->cnt;i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t,* seg_p,i);
 		if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
-			if (t.bezSegs.ptr && t.bezSegs.max) free(t.bezSegs.ptr);
+			if (t.bezSegs.ptr && t.bezSegs.max) MyFree(t.bezSegs.ptr);
 		}
 	}
 	seg_p->max = 0;

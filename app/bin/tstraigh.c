@@ -610,6 +610,7 @@ static BOOL_T QueryStraight( track_p trk, int query )
 	case Q_CAN_MODIFYRADIUS:
 	case Q_CAN_GROUP:
 	case Q_ISTRACK:
+	case Q_CAN_EXTEND:
 		return TRUE;
 	default:
 		return FALSE;

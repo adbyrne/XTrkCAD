@@ -38,6 +38,7 @@ typedef struct {
     BOOL_T track;
     BOOL_T is_open;
     BOOL_T has_NAN;
+    BOOL_T draw_spots;
     coOrd last_pos;						// For moveTo
     int ends[2];						//Start and End knot number
 
@@ -46,12 +47,12 @@ typedef struct {
 static void
 bezctx_xtrkcad_moveto(bezctx *z, double x, double y, int is_open) {
     bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
-    if (!(isfinite(x) && isfinite(y))) {
-    	bc->has_NAN = TRUE;
-    	return;
-    }
     bc->last_pos.x = x;
     bc->last_pos.y = y;
+    if (!(isfinite(x) && isfinite(y))) {
+        	bc->has_NAN = TRUE;
+        	return;
+    }
 }
 
 static void
@@ -60,18 +61,29 @@ bezctx_xtrkcad_lineto(bezctx *z, double x, double y) {
 	bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
 	if (!(isfinite(x) && isfinite(y))) {
 	    bc->has_NAN = TRUE;
-	    return;
 	}
-	if (!bc->is_open) return;
+	if (!bc->is_open || bc->has_NAN) {
+		bc->last_pos.x = x;
+		bc->last_pos.y = y;
+		return;
+	}
     DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
     trkSeg_p seg = &trkSeg(bc->segsArray->cnt-1);
-    seg->u.l.pos[0] = bc->last_pos;
+    seg->u.l.pos[0].x = bc->last_pos.x;
+    seg->u.l.pos[0].y = bc->last_pos.y;
     seg->u.l.pos[1].x = x;
     seg->u.l.pos[1].y = y;
+    seg->u.l.option = 0;
     seg->width = 0.0;
     seg->color = wDrawColorBlack;
     seg->type = SEG_STRTRK;
+    seg->bezSegs.max =0;
+    seg->bezSegs.cnt = 0;
+    seg->bezSegs.ptr = NULL;
     seg->u.l.angle = FindAngle(seg->u.l.pos[0],seg->u.l.pos[1]);
+    bc->last_pos.x = x;
+    bc->last_pos.y = y;
+
 
 }
 
@@ -79,24 +91,32 @@ static void
 bezctx_xtrkcad_quadto(bezctx *z, double x1, double y1, double x2, double y2)
 {
     bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
-    if (!(isfinite(x1) && isfinite(y1)
-    			&& isfinite(x2) && isfinite(y2))) {
+    if ((!isfinite(x1) || !isfinite(y1)
+    			|| !isfinite(x2) || !isfinite(y2))) {
     	bc->has_NAN = TRUE;
+    }
+    if (!bc->is_open || bc->has_NAN) {
+    	 bc->last_pos.x = x2;
+    	 bc->last_pos.y = y2;
     	return;
     }
-    if (!bc->is_open) return;
     DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
     trkSeg_p seg = &trkSeg(bc->segsArray->cnt-1);
     seg->u.b.pos[0] = bc->last_pos;
     seg->u.b.pos[1].x = x1;
     seg->u.b.pos[1].y = y1;
     seg->u.b.pos[2].x = x1;
-    seg->u.b.pos[2].x = x1;
+    seg->u.b.pos[2].y = y1;
     seg->u.b.pos[3].x = x2;
     seg->u.b.pos[3].y = y2;
     seg->width = 0.0;
     seg->color = wDrawColorBlack;
     seg->type = SEG_BEZTRK;
+    seg->bezSegs.max =0;
+    seg->bezSegs.cnt = 0;
+    seg->bezSegs.ptr = NULL;
+    bc->last_pos.x = x2;
+    bc->last_pos.y = y2;
 
     FixUpBezierSeg(seg->u.b.pos,seg,bc->track);
 }
@@ -110,38 +130,59 @@ static void
 			&& isfinite(x2) && isfinite(y2)
 			&& isfinite(x3) && isfinite(y3))) {
 		bc->has_NAN = TRUE;
+	}
+	if (!bc->is_open || bc->has_NAN) {
+		bc->last_pos.x = x3;
+		bc->last_pos.y = y3;
 		return;
 	}
-	if (!bc->is_open) return;
 	DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
 	trkSeg_p seg = &trkSeg(bc->segsArray->cnt-1);
-	seg->u.b.pos[0] = bc->last_pos;
+		seg->u.b.pos[0].x = bc->last_pos.x;
+		seg->u.b.pos[0].y = bc->last_pos.y;
 	    seg->u.b.pos[1].x = x1;
 	    seg->u.b.pos[1].y = y1;
 	    seg->u.b.pos[2].x = x2;
-	    seg->u.b.pos[2].x = x2;
+	    seg->u.b.pos[2].y = y2;
 	    seg->u.b.pos[3].x = x3;
 	    seg->u.b.pos[3].y = y3;
 	    seg->width = 0.0;
 	    seg->color = wDrawColorBlack;
 	    seg->type = SEG_BEZTRK;
+	    seg->bezSegs.max = 0;
+	    seg->bezSegs.cnt = 0;
+	    seg->bezSegs.ptr = NULL;
+	    bc->last_pos.x = x3;
+	    bc->last_pos.y = y3;
 
 	    FixUpBezierSeg(seg->u.b.pos,seg,bc->track);
+
+	 if (bc->draw_spots) {
+		 DYNARR_APPEND(trkSeg_t,* bc->segsArray,10);
+		 seg = &trkSeg(bc->segsArray->cnt-1);
+	 	 seg->type=SEG_FILCRCL;
+	 	 seg->u.c.center.x = bc->last_pos.x;
+	 	 seg->u.c.center.y = bc->last_pos.y;
+	 	 seg->u.c.radius = 0.5;
+	 	 seg->width = 0.0;
+	 	 seg->color = wDrawColorBlack;
+	 }
+
 }
 
 void
 bezctx_xtrkcad_mark_knot(bezctx *z, int knot_idx) {
 
 	bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
-	if (knot_idx == bc->ends[0]) bc->is_open = TRUE;    //Only worry about segs inside our gap
-	if (knot_idx == bc->ends[1]) bc->is_open = FALSE;
+	if (knot_idx >= bc->ends[0]) bc->is_open = TRUE;    //Only worry about segs inside our gap
+	if (knot_idx >= bc->ends[1]) bc->is_open = FALSE;
 
 }
 
 
 
 bezctx *
-new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2]) {
+new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2], BOOL_T spots) {
     bezctx_xtrkcad *result = znew(bezctx_xtrkcad, 1);
 
     result->segsArray = segArray;
@@ -155,11 +196,13 @@ new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2]) {
     result->base.mark_knot = bezctx_xtrkcad_mark_knot;
     result->is_open = FALSE;
     result->has_NAN = FALSE;
+    result->draw_spots = spots;
+    result->track = TRUE;
 
     return &result->base;
 }
 
-BOOL_T bezxtc_xtrkcad_close(bezctx *z) {
+BOOL_T bezctx_xtrkcad_close(bezctx *z) {
 	bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
 	if (bc->has_NAN) return FALSE;
 	return TRUE;

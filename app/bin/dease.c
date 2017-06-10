@@ -62,7 +62,7 @@ static void EasementOk( void );
 static void EasementCancel( void );
 
 static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
-static paramFloatRange_t r0o5_2 = { 0.5, 2.0, 60 };
+static paramFloatRange_t r0o5_2 = { -1.0, 2.0, 60 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0, 60 };
 static paramFloatRange_t r0_10 = { 0.0, 10.0, 60 };
 static long easeM;
@@ -88,14 +88,15 @@ static void SetEasement(
 	long selVal = -1;
 	wIcon_p bm;
 
-	if (val <= -1) {
+	if (val < 0.0) {
 		easeX = easeR = easeL = 0.0;
 		selVal = 4;
 		val = -1;
 		bm = ecornu_bm;
-	} else if (val == 0.0) {
+	} else if (val < 0.5) {
 		easeX = easeR = easeL = 0.0;
 		selVal = 0;
+		val = 0;
 		bm = enone_bm;
 	} else if (val <= 1.0) {
 		z = 1.0/val - 1.0;

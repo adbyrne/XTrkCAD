@@ -52,6 +52,7 @@
 #include "cjoin.h"
 #include "i18n.h"
 #include "common.h"
+#include "wcolors.h"
 
 extern drawCmd_t tempD;
 
@@ -227,7 +228,7 @@ double BezErrorLine(coOrd pos[4], coOrd start_point, coOrd end_point, double sta
 /*
  * Add element to DYNARR pointed to by caller from segment handed in
  */
-void addSeg(dynArr_t * const array_p, trkSeg_p seg) {
+void addSegBezier(dynArr_t * const array_p, trkSeg_p seg) {
 	trkSeg_p s;
 
 
@@ -236,6 +237,9 @@ void addSeg(dynArr_t * const array_p, trkSeg_p seg) {
 	s->type = seg->type;
 	s->color = seg->color;
 	s->width = seg->width;
+	s->bezSegs.max = 0;
+	s->bezSegs.cnt = 0;
+	s->bezSegs.ptr = NULL;
 	if ((s->type == SEG_BEZLIN || s->type == SEG_BEZTRK) && seg->bezSegs.cnt) {
 		s->u.b.angle0 = seg->u.b.angle0;  //Copy all the rest
 		s->u.b.angle3 = seg->u.b.angle3;
@@ -246,7 +250,7 @@ void addSeg(dynArr_t * const array_p, trkSeg_p seg) {
 		s->bezSegs.cnt = s->bezSegs.max = 0;
 		s->bezSegs.ptr = NULL; //Make sure new space as addr copied in earlier from seg
 		for (int i = 0; i<seg->bezSegs.cnt; i++) {
-			addSeg(&s->bezSegs,((trkSeg_p)&seg->bezSegs.ptr[i])); //recurse for copying embedded Beziers as in Cornu joint
+			addSegBezier(&s->bezSegs,((trkSeg_p)&seg->bezSegs.ptr[i])); //recurse for copying embedded Beziers as in Cornu joint
 		}
 	} else {
 		s->u = seg->u;
@@ -273,10 +277,10 @@ EXPORT enum BezierType AnalyseCurve(coOrd inpos[4], double *Rfx, double *Rfy, do
 	DIST_T d01 = FindDistance(inpos[0],inpos[1]);
 	DIST_T d12 = FindDistance(inpos[1],inpos[2]);
 	DIST_T d02 = FindDistance(inpos[0],inpos[2]);
-	if (d01+d12 == d02) {								//eliminate 3 co-resident points
+	if (d01+d12 == d02) {								//straight
 		DIST_T d23 = FindDistance(inpos[2],inpos[3]);
 		DIST_T d03 = FindDistance(inpos[0],inpos[3]);
-		if (d02+d23 == d03) return COINCIDENT;
+		if (d02+d23 == d03) return LINE;
 	}
 	int common_points = 0;
 	for (int i=0;i<3;i++) {
@@ -287,7 +291,7 @@ EXPORT enum BezierType AnalyseCurve(coOrd inpos[4], double *Rfx, double *Rfy, do
 	}
 
 	if (common_points>2) {
-		return PLAIN;
+		return COINCIDENT;
 	}
 
 	coOrd pos[4];
@@ -349,6 +353,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	 bCurveData_t arc;
 	 segs->cnt = 0; //wipe out
 	 BOOL_T safety;
+	 int col = 0;
 
 	 double prev_e = 0.0;
 	      // we do a binary search to find the "good `t` closest to no-longer-good"
@@ -434,8 +439,8 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	        prev_arc = prev_arc.end==0.0?arc:prev_arc;
 	        trkSeg_t curveSeg;  			//Now set up tempSeg to copy into array
 	        curveSeg.width = width;
-	        curveSeg.color = color;
-	        if ( prev_arc.curveData.type == curveTypeCurve) {
+	        curveSeg.color = (col&1)?wDrawColorGreen:wDrawColorRed;
+	        if ( prev_arc.curveData.type == curveTypeCurve ) {
 	        		curveSeg.type = track?SEG_CRVTRK:SEG_CRVLIN;
 	        		curveSeg.u.c.a0 = prev_arc.curveData.a0;
 	        		curveSeg.u.c.a1 = prev_arc.curveData.a1;
@@ -443,13 +448,14 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	        		curveSeg.u.c.radius = prev_arc.curveData.curveRadius;
 	        } else {											//Straight Line because all points co-linear
 	        	curveSeg.type = track?SEG_STRTRK:SEG_STRLIN;
-	        	curveSeg.u.l.angle = prev_arc.curveData.a0;
+	        	curveSeg.u.l.angle = prev_arc.curveData.a1;
 	        	curveSeg.u.l.pos[0] = prev_arc.pos0;
 	        	curveSeg.u.l.pos[1] = prev_arc.pos1;
 	        	curveSeg.u.l.option = 0;
 	        }
-	        addSeg(segs, &curveSeg);		//Add to array of segs used
+	        addSegBezier(segs, &curveSeg);		//Add to array of segs used
 	        t_s = prev_e;
+	        col++;
 	      } while(prev_e < 1.0);
 
 	      return TRUE;
@@ -630,6 +636,8 @@ EXPORT STATUS_T AdjustBezCurve(
 			} else if ( b == COINCIDENT ) {
 				wBeep();
 				InfoMessage(_("Bezier Curve Invalid has three co-incident points"),b==CUSP?"Cusp":"Loop");
+			} else if ( b == LINE ) {
+				InfoMessage(_("Bezier is Straight Line"));
 			} else
 				InfoMessage( _("Bezier %s : Min Radius=%s Length=%s fx=%0.3f fy=%0.3f cusp=%0.3f"),track?"Track":"Line",
 													FormatDistance(Da.minRadius),
@@ -686,7 +694,9 @@ EXPORT STATUS_T AdjustBezCurve(
 			} else if ( b == COINCIDENT ) {
 				wBeep();
 				InfoMessage(_("Bezier Curve Invalid has three co-incident points"),b==CUSP?"Cusp":"Loop");
-			} else
+			} else if ( b == LINE) {
+				InfoMessage(_("Bezier Curve is Straight Line"));
+			}
 				InfoMessage(_("Pick any circle to adjust it - Enter to confirm, ESC to abort"));
 		} else
 			InfoMessage(_("Pick any circle to adjust it - Enter to confirm, ESC to abort"));
@@ -719,6 +729,11 @@ EXPORT STATUS_T AdjustBezCurve(
 				}
 			}
 			Da.minRadius = BezierMinRadius(Da.pos,Da.crvSegs_da);
+			if (Da.track && Da.minRadius<minTrackRadius) {
+				wBeep();
+				ErrorMessage(_("Bezier Track smaller minimum radius than allowed - please adjust"));
+				return C_CONTINUE;
+			}
 			DrawTempBezier(Da.track);
 			UndoStart( _("Create Bezier"), "newBezier - CR" );
 			if (Da.track) {

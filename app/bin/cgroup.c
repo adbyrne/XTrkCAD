@@ -49,6 +49,7 @@ static int groupCompoundCount = 0;
 
 extern TRKTYP_T T_BZRTRK;
 extern TRKTYP_T T_BZRLIN;
+extern TRKTYP_T T_CORNU;
 
 typedef struct {
 		int segInx;
@@ -999,7 +1000,7 @@ static void GroupOk( void * junk )
 							DrawSegs( &groupD, xx->orig, xx->angle, segPtr, 1, trackGauge, wDrawColorBlack );
 						}
 					}
-				} else if (GetTrkType(trk) == T_BEZIER || GetTrkType(trk) == T_BZRLIN) {
+				} else if (GetTrkType(trk) == T_BEZIER || GetTrkType(trk) == T_BZRLIN || GetTrkType(trk) == T_CORNU) {
 					DYNARR_APPEND(trkSeg_t, trackSegs_da, 10);
 					segPtr = &trackSegs(trackSegs_da.cnt-1);
 					GetBezierSegmentFromTrack(trk,segPtr);

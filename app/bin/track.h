@@ -126,8 +126,10 @@ typedef struct {
 #define Q_NOT_PLACE_FROGPOINTS			(15)
 #define Q_HAS_DESC						(16)
 #define Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK (17)
-#define Q_CAN_MODIFY_CONTROL_POINTS     (18)
-#define Q_IS_CORNU						(19)
+#define Q_CAN_MODIFY_CONTROL_POINTS     (18)	// Is T_BEZIER or T_BEZLIN
+#define Q_IS_CORNU						(19)	// Is T_CORNU
+#define Q_MODIFY_CANT_SPLIT             (20)	// Is not able to be Split
+#define Q_CAN_EXTEND					(21)    // Add extra curve or straight in CORNU MODIFY
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track

@@ -20,6 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+typedef struct {
+		coOrd pos[4];
+		DIST_T minCurveRadius;
+		ANGLE_T a0, a1;
+		DIST_T length;
+		dynArr_t arcSegs;
+		coOrd descriptionOff;
+		DIST_T segsWidth;
+		wDrawColor segsColor;
+		} BezierData_t;
+
 
 void BezierSplit(coOrd[4], coOrd[4], coOrd[4] , double );
 coOrd BezierPointByParameter(coOrd[4], double);
