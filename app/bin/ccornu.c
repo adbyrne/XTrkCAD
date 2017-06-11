@@ -698,6 +698,8 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		Da.state = NONE;
 		MainRedraw();
 		return C_TERMINATE;
+	case C_REDRAW:
+		return AdjustCornuCurve(C_REDRAW, pos, InfoMessage);
 	}
 
 	return C_CONTINUE;

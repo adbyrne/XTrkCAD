@@ -75,6 +75,9 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 			Dex.Trk = NULL;
 			modifyBezierMode = FALSE;
 			break;
+		case C_REDRAW:
+			rc = CmdBezModify(Dex.Trk, action, pos);
+			break;
 	}
 	return rc;
 }
@@ -99,6 +102,9 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 			rc = CmdCornuModify(Dex.Trk, action, pos);
 			Dex.Trk = NULL;
 			modifyCornuMode = FALSE;
+			break;
+		case C_REDRAW:
+			rc = CmdCornuModify(Dex.Trk, action, pos);
 			break;
 	}
 	return rc;

@@ -1805,13 +1805,11 @@ EXPORT void DoZoomUp( void * mode )
 			if( i ) {
 				if (mainD.scale <=1.0) 
 					InfoMessage(_("Macro Zoom Mode"));
-				else 
-					InfoMessage(_("Use Shift+PageDwn to jump to preset Zoom In"));
 				DoNewScale( zoomList[ i - 1 ].value );	
 				
 			} else InfoMessage("Min Macro Zoom");
 		} else {
-			InfoMessage(_("Scale 1:1 - Use CTRL+PageDwn to go to Macro Zoom Mode"));
+			InfoMessage(_("Scale 1:1 - Use CTRL+PageDwn to go into Macro Zoom Mode"));
 		}
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomin", &newScale, 4 );
@@ -1819,7 +1817,7 @@ EXPORT void DoZoomUp( void * mode )
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomin", (long)mainD.scale );
-		InfoMessage( _("Zoom In Program Value %ld:1, Shift+PageDwn to use"), (long)mainD.scale );
+		InfoMessage( _("Zoom In Program Value %ld:1 set, Shift+PageDwn to use"), (long)mainD.scale );
 	}
 }
 
@@ -1838,7 +1836,6 @@ EXPORT void DoZoomDown( void  * mode)
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
 		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
-			InfoMessage(_("SHIFT+PageUp to jump to preset Zoom Out"));
 			DoNewScale( zoomList[ i + 1 ].value );
 		} else
 			InfoMessage(_("At Maximum Zoom Out"));
@@ -2180,6 +2177,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 	inError = FALSE;
 	if ( deferSubstituteControls[0] )
 		InfoSubstituteControls( deferSubstituteControls, deferSubstituteLabels );
+	InfoMessage(_(" "));
 
 	switch ( action&0xFF ) {
 		case C_DOWN:
@@ -2209,8 +2207,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
-				else
+				else {
 					mainD.orig.x += mainD.size.x/2;
+					InfoMessage(_("SHIFT plus Right Arrow to micro-step Pan Right"));
+				}
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2221,8 +2221,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.x -= 0.25*mainD.scale;
-				else
+				else {
 					mainD.orig.x -= mainD.size.x/2;
+					InfoMessage(_("SHIFT plus Left Arrow to micro-step Pan Left"));
+				}
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2233,8 +2235,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.y += 0.25*mainD.scale;
-				else
+				else {
 					mainD.orig.y += mainD.size.y/2;
+					InfoMessage(_("SHIFT plus Up Arrow to micro-step Pan Up"));
+				}
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2245,8 +2249,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.y -= 0.25*mainD.scale;
-				else
+				else {
 					mainD.orig.y -= mainD.size.y/2;
+					InfoMessage(_("SHIFT plus Down Arrow to micro-step Pan Down"));
+				}
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;

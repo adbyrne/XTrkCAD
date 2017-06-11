@@ -871,6 +871,9 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
 		Da.state = NONE;
 		MainRedraw();
 		return C_TERMINATE;
+
+	case C_REDRAW:
+		return AdjustBezCurve(C_REDRAW, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);
 	}
 
 	return C_CONTINUE;

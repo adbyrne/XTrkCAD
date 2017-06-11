@@ -276,7 +276,7 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 		        cornuDesc[P0].mode |= DESC_CHANGE;
 		        /* no break */
 		    case P1:
-		    	if (GetTrkEndTrk(trk,0) && GetTrkEndTrk(trk,1)) break;
+		    	if (GetTrkEndTrk(trk,1)) break;
 		        updateEndPts = TRUE;
 		        xx->cornuData.pos[1]= cornData.pos[1];
 		        cornuDesc[P1].mode |= DESC_CHANGE;
@@ -286,8 +286,9 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 		    	updateEndPts = TRUE;
 		    	xx->cornuData.a[0] = cornData.angle[0];
 		    	cornuDesc[A0].mode |= DESC_CHANGE;
+		    	break;
 		    case A1:
-		    	if (GetTrkEndTrk(trk,0) && GetTrkEndTrk(trk,1)) break;
+		    	if (GetTrkEndTrk(trk,1)) break;
 		    	updateEndPts = TRUE;
 		    	xx->cornuData.a[1]= cornData.angle[1];
 		    	cornuDesc[A1].mode |= DESC_CHANGE;
@@ -339,15 +340,15 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 			tracks[1] = GetTrkEndTrk(trk,1);
 
 			if (updateEndPts) {
-								if ( GetTrkEndTrk(trk,0) == NULL ) {
-									SetTrkEndPoint( trk, 0, cornData.pos[0], xx->cornuData.a[0]);
-									cornuDesc[A0].mode |= DESC_CHANGE;
-								}
-								if ( GetTrkEndTrk(trk,1) == NULL ) {
-									SetTrkEndPoint( trk, 1, cornData.pos[1], xx->cornuData.a[1]);
-									cornuDesc[A1].mode |= DESC_CHANGE;
-								}
-						}
+				if ( GetTrkEndTrk(trk,0) == NULL ) {
+					SetTrkEndPoint( trk, 0, cornData.pos[0], xx->cornuData.a[0]);
+					cornuDesc[A0].mode |= DESC_CHANGE;
+				}
+				if ( GetTrkEndTrk(trk,1) == NULL ) {
+					SetTrkEndPoint( trk, 1, cornData.pos[1], xx->cornuData.a[1]);
+					cornuDesc[A1].mode |= DESC_CHANGE;
+				}
+			}
 
 			EPINX_T new_ep[2];
 			new_ep[0] = GetEndPtConnectedToMe( GetTrkEndTrk(trk,0), trk );
