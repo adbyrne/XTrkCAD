@@ -46,8 +46,7 @@ DIST_T CornuDistance( coOrd *, coOrd[2], ANGLE_T[2], DIST_T[2], trkSeg_t * ,int 
 BOOL_T FixUpCornu(coOrd pos[2], track_p [2], EPINX_T ep[2], struct extraData* xx);
 BOOL_T FixUpCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], struct extraData* xx);
 BOOL_T GetCornuSegmentsFromTrack(track_p, trkSeg_p);
-BOOL_T AdjustCornuEndPt(track_p trk, EPINX_T inx, coOrd pos);
-BOOL_T RotateCornuEndPt(track_p trk, EPINX_T inx, coOrd orig, ANGLE_T angle);
+BOOL_T SetCornuEndPt(track_p trk, EPINX_T inx, coOrd pos, coOrd center, ANGLE_T angle, DIST_T radius);
 BOOL_T RebuildCornu (track_p trk);
 
 BOOL_T CallCornu(coOrd[2],track_p[2],EPINX_T[2],dynArr_t *,cornuParm_t *);

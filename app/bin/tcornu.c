@@ -622,29 +622,13 @@ static void RescaleCornu( track_p trk, FLOAT_T ratio )
 
 }
 
-EXPORT BOOL_T AdjustCornuEndPt(track_p trk, EPINX_T inx, coOrd base) {
+EXPORT BOOL_T SetCornuEndPt(track_p trk, EPINX_T inx, coOrd pos, coOrd center, ANGLE_T angle, DIST_T radius) {
     struct extraData *xx = GetTrkExtraData(trk);
-    UndoModify(trk);
-    xx->cornuData.pos[inx].x += base.x;
-    xx->cornuData.pos[inx].y += base.y;
-    xx->cornuData.c[inx].x += base.x;
-    xx->cornuData.c[inx].y += base.y;
 
-    if (!RebuildCornu(trk)) return FALSE;
-    coOrd pos = GetTrkEndPos(trk,inx);
-    pos.x += base.x;
-    pos.y += base.y;
-    SetTrkEndPoint( trk, inx, pos, xx->cornuData.a[inx]);
-    return TRUE;
-}
-
-EXPORT BOOL_T RotateCornuEndPt(track_p trk, EPINX_T inx, coOrd orig, ANGLE_T angle) {
-    struct extraData *xx = GetTrkExtraData(trk);
-    UndoModify(trk);
-    Rotate(&(xx->cornuData.pos[inx]),orig,angle);
-    Rotate(&(xx->cornuData.c[inx]),orig,angle);
-    xx->cornuData.a[inx] = NormalizeAngle( xx->cornuData.a[inx] + angle );
-
+    xx->cornuData.pos[inx] = pos;
+    xx->cornuData.c[inx] = center;
+    xx->cornuData.a[inx] = angle;
+    xx->cornuData.r[inx] = radius;
     if (!RebuildCornu(trk)) return FALSE;
     SetTrkEndPoint( trk, inx, xx->cornuData.pos[inx], xx->cornuData.a[inx]);
     return TRUE;
