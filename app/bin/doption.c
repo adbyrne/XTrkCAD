@@ -213,6 +213,7 @@ static wWin_p displayW;
 static char * autoPanLabels[] = { N_("Auto Pan"), NULL };
 static char * drawTunnelLabels[] = { N_("Hide"), N_("Dash"), N_("Normal"), NULL };
 static char * drawEndPtLabels3[] = { N_("None"), N_("Turnouts"), N_("All"), NULL };
+static char * drawEndPtUnconnectedSize[] = { N_("Normal"), N_("Thick"), N_("Exception") };
 static char * tiedrawLabels[] = { N_("None"), N_("Outline"), N_("Solid"), NULL };
 static char * drawCenterCircle[] = { N_("Off"), N_("On"), NULL };
 static char * labelEnableLabels[] = { N_("Track Descriptions"), N_("Lengths"), N_("EndPt Elevations"), N_("Track Elevations"), N_("Cars"), NULL };
@@ -229,6 +230,7 @@ static paramData_t displayPLs[] = {
 	{ PD_TOGGLE, &colorLayers, "color-layers", PDO_NOPSHUPD|PDO_DRAW, colorLayersLabels, N_("Color Layers"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &drawTunnel, "tunnels", PDO_NOPSHUPD|PDO_DRAW, drawTunnelLabels, N_("Draw Tunnel"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &drawEndPtV, "endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtLabels3, N_("Draw EndPts"), BC_HORZ, (void*)(CHANGE_MAIN) },
+	{ PD_RADIO, &drawUnconnectedEndPt, "unconnected-endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtUnconnectedSize, N_("Draw Unconnected EndPts"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &tieDrawMode, "tiedraw", PDO_NOPSHUPD|PDO_DRAW, tiedrawLabels, N_("Draw Ties"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, (void*)(CHANGE_MAIN | CHANGE_MAP) },
 	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, (void*)(CHANGE_MAIN) },
@@ -243,7 +245,7 @@ static paramData_t displayPLs[] = {
 	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, listLabelsLabels, N_("Layout Labels"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD, listLabelsLabels, N_("List Labels"), BC_HORZ, (void*)(CHANGE_PARAMS) },
 /* ATTENTION: update the define below if you add entries above */
-#define I_HOTBARLABELS	(16) 
+#define I_HOTBARLABELS	(17)
 	{ PD_DROPLIST, &carHotbarModeInx, "carhotbarlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_LISTINDEX, (void*)250, N_("Car Labels"), 0, (void*)CHANGE_SCALE },
 	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000 , N_("Train Update Delay"), 0, 0 },
 	{ PD_TOGGLE, &hideTrainsInTunnels, "hideTrainsInTunnels", PDO_NOPSHUPD, hideTrainsInTunnelsLabels, "", BC_HORZ }
