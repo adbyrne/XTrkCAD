@@ -23,6 +23,7 @@
 #include <time.h>
 #include "track.h"
 #include "i18n.h"
+#include "paths.h"
 
 /****************************************************************************
  *
@@ -83,7 +84,7 @@ static void DoEnumOp(
 {
 	switch( (int)(long)data ) {
 	case ENUMOP_SAVE:
-		wFilSelect( enumFile_fs, curDirName );
+		wFilSelect( enumFile_fs, GetCurrentPath(PARTLISTPATHKEY) );
 		break;
 	case ENUMOP_PRINT:
 		wTextPrint( enumT );

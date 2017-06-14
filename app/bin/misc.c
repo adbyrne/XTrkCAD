@@ -58,6 +58,7 @@
 #include "compound.h"
 #include "smalldlg.h"
 #include "i18n.h"
+#include "layout.h"
 #include <locale.h>
 
 #define DEFAULT_SCALE ("N")
@@ -482,7 +483,8 @@ static void ChkRevert( void )
 									_("&Revert"), _("&Cancel") );
 		if( rc ) {
 			/* load the file */
-			LoadTracks( 1, &curFileName, NULL );
+			char *filename = GetLayoutFilename();
+			LoadTracks( 1, &filename, NULL );
 		}
 	}
 }
@@ -518,7 +520,7 @@ EXPORT void SaveState( void )
 	RememberParamFiles();
 	ParamUpdatePrefs();
 
-	wPrefSetString( "misc", "lastlayout", curPathName );
+	wPrefSetString( "misc", "lastlayout", GetLayoutFullPath());
 
 	if ( fileList_ml ) {
 		strcpy( file, "file" );
@@ -577,8 +579,7 @@ static void DoClearAfter( void )
 	Reset();
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
 	EnableCommands();
-	curPathName[0] = '\0';
-	curFileName = curPathName;
+	SetLayoutFullPath("");
 	SetWindowTitle();
 }
 

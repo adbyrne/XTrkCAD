@@ -22,6 +22,7 @@
 
 #include "track.h"
 #include "i18n.h"
+#include "paths.h"
 
 /*****************************************************************************
  *
@@ -214,7 +215,7 @@ static void OutputBitMapOk( void * junk )
 				_("Bitmap files|*.xpm"),
 #endif
 				SaveBitmapFile, NULL );
-	wFilSelect( bitmap_fs, curDirName );
+	wFilSelect( bitmap_fs, GetCurrentPath( BITMAPPATHKEY ));
 }
 
 

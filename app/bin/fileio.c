@@ -56,6 +56,8 @@
 #include "misc.h"
 #include "compound.h"
 #include "i18n.h"
+#include "paths.h"
+#include "layout.h"
 
 /*#define TIME_READTRACKFILE*/
 
@@ -65,66 +67,9 @@ EXPORT const char * libDir;
 static char * customPath = NULL;
 static char * customPathBak = NULL;
 
-EXPORT char curPathName[STR_LONG_SIZE];
-EXPORT char * curFileName;
-EXPORT char curDirName[STR_LONG_SIZE];
-
 EXPORT char * clipBoardN;
 
-EXPORT wBool_t executableOk = FALSE;
-
 static int log_paramFile;
-
-/**
- * Get the directory from the current file and store it as current directory 
- * in a global variable and the preferences
- *
- * \param pathType IN possible enhancement for file type specific directorys
- * \param fileName IN fully qualified filename
- * \return 
- *
- * \todo split directory and keep directory part
- */
-
-void SetCurrentPath(
-	const char * pathType,
-	const char * fileName )
-{
-	char *path;
-	char *copy;
-
-	assert( fileName != NULL );
-	assert( pathType != NULL );
-
-	copy = strdup( fileName );
-	path = strrchr(copy, FILE_SEP_CHAR[ 0 ] );
-	if ( path ) 
-	{
-		*path = '\0';
-		strcpy( curDirName, copy );
-		wPrefSetString( "file", "directory", curDirName );
-	}    
-	free( copy );
-}
-
-/**
- * Find the filename/extension piece in a fully qualified path
- *
- * \param path IN the full path
- * \return pointer to the filename part
- */
-
-char *FindName( char *path )
-{
-	char *name; 
-	name = strrchr( path, FILE_SEP_CHAR[0] );
-	if (name) {
-		name++;
-	} else {
-		name = path;
-	}
-	return(name );
-}
 
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
@@ -741,10 +686,14 @@ EXPORT char * PutTitle( char * cp )
 
 void SetWindowTitle( void )
 {
+	char *filename;
+
 	if ( changed > 2 || inPlayback )
 		return;
+
+	filename = GetLayoutFilename();
 	sprintf( message, "%s%s - %s(%s)",
-		(curFileName==NULL||curFileName[0]=='\0')?_("Unnamed Trackplan"):curFileName,
+		(filename && filename[0])?filename: _("Unnamed Trackplan"),
 		changed>0?"*":"", sProdName, sVersion );
 	wWinSetTitle( mainW, message );
 }
@@ -895,8 +844,10 @@ static BOOL_T ReadTrackFile(
 			SetCurrentPath( LAYOUTPATHKEY, fileName );
 
 		if (full) {
-			strcpy( curPathName, pathName );
-			curFileName = &curPathName[fileName-pathName];
+//			SetCurrentPath(LAYOUTPATHKEY, pathName);
+			SetLayoutFullPath(pathName);
+			//strcpy(curPathName, pathName);
+			//curFileName = &curPathName[fileName-pathName];
 			SetWindowTitle();
 		}
 	}
@@ -1039,9 +990,7 @@ static int SaveTracks(
 	wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[ 0 ]) );
 	checkPtMark = changed = 0;
 
-	if (strcmp(curPathName, fileName[ 0 ]))
-	  strcpy( curPathName, fileName[ 0 ] );
-	curFileName = FindName( curPathName );
+	SetLayoutFullPath(fileName[0]);
 	
 	if (doAfterSave)
 		doAfterSave();
@@ -1053,13 +1002,13 @@ static int SaveTracks(
 EXPORT void DoSave( doSaveCallBack_p after )
 {
 	doAfterSave = after;
-	if (curPathName[0] == '\0') {
+	if (*(GetLayoutFilename()) == '\0') {
 		if (saveFile_fs == NULL)
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
 				sSourceFilePattern, SaveTracks, NULL );
-		wFilSelect( saveFile_fs, curDirName );
+		wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	} else {
-		char *temp = curPathName; 
+		char *temp = GetLayoutFullPath(); 
 		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
@@ -1071,7 +1020,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 	if (saveFile_fs == NULL)
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
 			sSourceFilePattern, SaveTracks, NULL );
-	wFilSelect( saveFile_fs, curDirName );
+	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	SetWindowTitle();
 }
 
@@ -1079,7 +1028,7 @@ EXPORT void DoLoad( void )
 {
 	loadFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Open Tracks"),
 		sSourceFilePattern, LoadTracks, NULL );
-	wFilSelect( loadFile_fs, curDirName );
+	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 }
 
 
@@ -1209,8 +1158,7 @@ EXPORT int LoadCheckpoint( void )
 
 	wSetCursor( wCursorNormal );
 
-	strcpy( curPathName, "" );
-	curFileName = curPathName;
+	SetLayoutFullPath("");
 	SetWindowTitle();
 	changed = TRUE;
 	MyFree( search );
@@ -1265,7 +1213,7 @@ EXPORT void DoImport( void )
 		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Tracks"),
 			sImportFilePattern, ImportTracks, NULL );
 
-	wFilSelect( importFile_fs, curDirName );
+	wFilSelect( importFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 }
 
 
@@ -1326,7 +1274,7 @@ EXPORT void DoExport( void )
 		exportFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Export Tracks"),
 				sImportFilePattern, DoExportTracks, NULL );
 
-	wFilSelect( exportFile_fs, curDirName );
+	wFilSelect( exportFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 }
 
 
@@ -1419,13 +1367,6 @@ EXPORT void FileInit( void )
 	}
 	if ( (workingDir = wGetAppWorkDir()) == NULL )
 		AbortProg( "wGetAppWorkDir()" );
-
-	pref = wPrefGetString( "file", "directory" );
-	if (pref != NULL) {
-		strcpy( curDirName, pref );
-	} else {
-		sprintf( curDirName, "%s%sexamples", libDir, FILE_SEP_CHAR );
-	}
 }
 
 EXPORT BOOL_T ParamFileInit( void )
@@ -1441,7 +1382,7 @@ EXPORT BOOL_T ParamFileInit( void )
 		ReadCustom();
 	}
 
-	curPathName[0] = '\0';
+	SetLayoutFullPath("");
 
 	clipBoardN = (char*)MyMalloc( strlen(workingDir) + 1 + strlen(sClipboardF) + 1 );
 	sprintf( clipBoardN, "%s%s%s", workingDir, FILE_SEP_CHAR, sClipboardF );

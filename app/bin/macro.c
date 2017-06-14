@@ -55,6 +55,7 @@
 #include "misc.h"
 #include "compound.h"
 #include "i18n.h"
+#include "paths.h"
 
 EXPORT long adjTimer;
 static void DemoInitValues( void );
@@ -268,7 +269,7 @@ EXPORT void DoRecord( void * context )
 		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern, StartRecord, NULL );
 	}
 	wTextClear( recordT );
-	wFilSelect( recordFile_fs, curDirName );
+	wFilSelect( recordFile_fs, GetCurrentPath(MACROPATHKEY ));
 }
 
 /*****************************************************************************
@@ -1241,7 +1242,7 @@ EXPORT void DoPlayBack( void * context )
 	if (demoW == NULL)
 		CreateDemoW();
 	wButtonSetLabel( demoNext, _("Save") );
-	wFilSelect( playbackFile_fs, curDirName );
+	wFilSelect( playbackFile_fs, GetCurrentPath(MACROPATHKEY));
 }
 
 
