@@ -13,7 +13,6 @@ add_test(DXFOutputTest dxfformattest)
 
 add_executable( pathstest
 				pathstest.c
-				../paths.c
 				../layout.c
 				)
 

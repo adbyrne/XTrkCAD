@@ -13,11 +13,30 @@
 #include "../layout.h"
 #include <dynstring.h>
 
+
 #define TESTPATH "C:\\Test\\Path"
 #define TESTFILENAME "file.test"
 #define TESTFILE TESTPATH "\\" TESTFILENAME
 #define TESTPATH2 "D:\\Root"
 #define TESTFILE2 TESTPATH2 "\\file2."
+
+#define DEFAULTPATH "C:\\Default\\Path"
+
+void
+wPrefSetString(const char *section, const char *key, const char *value)
+{}
+
+const char *wPrefGetString(const char *section, const char *key)
+{
+	return(NULL);
+}
+
+const char *wGetUserHomeDir(void)
+{
+	return(DEFAULTPATH);
+}
+
+#include "../paths.c"
 
 static void SetGetPath(void **state)
 {
@@ -25,7 +44,7 @@ static void SetGetPath(void **state)
 	(void)state;
 
 	string = GetCurrentPath("Test");
-	assert_null(string);
+	assert_string_equal(string, DEFAULTPATH);
 
 	SetCurrentPath("Test", TESTFILE );
 	string = GetCurrentPath("Test");
