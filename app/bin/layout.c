@@ -73,7 +73,7 @@ GetLayoutFilename()
 	char *string = DynStringToCStr(&thisLayout.fullFileName);
 
 	if (string)
-		return(FindName(string));
+		return(FindFilename(string));
 	else
 		return(NULL);
 }

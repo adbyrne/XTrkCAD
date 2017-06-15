@@ -119,13 +119,12 @@ void SetCurrentPath(
 	assert( pathType != NULL );
 
 	copy = strdup( fileName );
-	path = strrchr(copy, FILE_SEP_CHAR[ 0 ] );
+	path = strrchr(copy, FILE_SEP_CHAR[0] );
 	if ( path ) 
 	{
 		*path = '\0';
 		AddPath(pathType, copy);
 		wPrefSetString(PATHS_SECTION, pathType, copy);
-//		strcpy( curDirName, copy );
 	}    
 	free( copy );
 }
@@ -161,9 +160,9 @@ char *GetCurrentPath(
 		path = wPrefGetString("file", "directory");
 	if (!path)
 		path = wGetUserHomeDir();
-	AddPath(pathType, path);
+	AddPath(pathType, (char *)path);
 
-	return(path);
+	return((char *)path);
 }
 
 /**
@@ -173,7 +172,7 @@ char *GetCurrentPath(
 * \return pointer to the filename part
 */
 
-char *FindName(char *path)
+char *FindFilename(char *path)
 {
 	char *name;
 	name = strrchr(path, FILE_SEP_CHAR[0]);

@@ -872,8 +872,6 @@ EXPORT int LoadTracks(
 
 	assert( fileName != NULL );
 	assert( cnt == 1 ); 
-	//if (fileName == NULL || cnt == 0 )
-	//	return TRUE;
 
 	paramVersion = -1;
 	wSetCursor( wCursorWait );
@@ -886,7 +884,7 @@ EXPORT int LoadTracks(
 #ifdef TIME_READTRACKFILE
 	time0 = wGetTimer();
 #endif
-	nameOfFile = FindName( fileName[ 0 ] );
+	nameOfFile = FindFilename( fileName[ 0 ] );
 
 	if (ReadTrackFile( fileName[ 0 ], nameOfFile, TRUE, FALSE, TRUE )) {
 		wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]) );
@@ -986,7 +984,7 @@ static int SaveTracks(
 	SetCurrentPath( LAYOUTPATHKEY, fileName[ 0 ] );
 	DoSaveTracks( fileName[ 0 ] );
 
-	nameOfFile = FindName( fileName[ 0 ] );
+	nameOfFile = FindFilename( fileName[ 0 ] );
 	wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[ 0 ]) );
 	checkPtMark = changed = 0;
 
@@ -1186,7 +1184,7 @@ static int ImportTracks(
 	assert( fileName != NULL );
 	assert( cnt == 1 );
 
-	nameOfFile = FindName(fileName[ 0 ]);
+	nameOfFile = FindFilename(fileName[ 0 ]);
 	paramVersion = -1;
 	wSetCursor( wCursorWait );
 	Reset();
