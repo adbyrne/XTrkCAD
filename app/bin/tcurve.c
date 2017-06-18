@@ -1346,7 +1346,7 @@ EXPORT void CurveSegProc(
 	case SEGPROC_TRAVERSE1:
 		a1 = FindAngle( segPtr->u.c.center, data->traverse1.pos );
 		a1 += (segPtr->u.c.radius>0?90.0:-90.0);
-		a2 = NormalizeAngle( data->traverse1.angle+a1 );
+		a2 = NormalizeAngle( a1 - data->traverse1.angle );
 		data->traverse1.backwards = (a2 < 270 && a2 > 90 );
 		a2 = FindAngle( segPtr->u.c.center, data->traverse1.pos );
 		if ( data->traverse1.backwards == (segPtr->u.c.radius<0) ) {
@@ -1440,12 +1440,16 @@ EXPORT void CurveSegProc(
 		data->split.newSeg[s1].u.c.a1 -= a2;
 		break;
 
+	/* Please note - GetAngle for a curve returns an angle that is backwards for a reversed curve (90<a0<270)
+	 *   The caller needs to look at getAngle.backwards and adjust when compared to the travel direction to decide which way to process.
+	 */
 	case SEGPROC_GETANGLE:
-		data->getAngle.angle = NormalizeAngle( FindAngle( data->getAngle.pos, segPtr->u.c.center ) + 90 );
+		data->getAngle.angle = NormalizeAngle( FindAngle( segPtr->u.c.center, data->getAngle.pos ) + 90 );
 		data->getAngle.negative_radius = segPtr->u.c.radius<0;
 		data->getAngle.radius = segPtr->u.c.radius;
 		data->getAngle.center = segPtr->u.c.center;
 		data->getAngle.backwards = segPtr->u.c.a0>=90 && segPtr->u.c.a0<270;
+		if (data->getAngle.backwards) data->getAngle.angle = NormalizeAngle(data->getAngle.angle+180);
 		break;
 	}
 }

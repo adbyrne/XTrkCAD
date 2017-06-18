@@ -115,7 +115,7 @@ EXPORT void LogSet( char * name, int level )
 EXPORT int LogFindIndex( char * name )
 {
 	int inx;
-	for ( inx=11; inx<logTable_da.cnt; inx++ )
+	for ( inx=0; inx<logTable_da.cnt; inx++ )
 		if ( strcasecmp( logTable(inx).name, name ) == 0 )
 			return inx;
 	return 0;

@@ -704,8 +704,8 @@ EXPORT void StraightSegProc(
 
 	case SEGPROC_TRAVERSE1:
 		a1 = FindAngle( segPtr->u.l.pos[0], segPtr->u.l.pos[1] );
-		a2 = NormalizeAngle( data->traverse1.angle+a1 );
-		data->traverse1.backwards = (a2 < 270 && a2 > 90 );
+		a2 = NormalizeAngle( a1-data->traverse1.angle );
+		data->traverse1.backwards = ( (a2 < 270) && (a2 > 90) );
 		data->traverse1.dist = FindDistance( segPtr->u.l.pos[data->traverse1.backwards?1:0], data->traverse1.pos );
 		data->traverse1.reverse_seg = FALSE;
 		break;
@@ -773,7 +773,9 @@ EXPORT void StraightSegProc(
 		data->split.newSeg[1] = *segPtr;
 		data->split.newSeg[0].u.l.pos[1] = data->split.newSeg[1].u.l.pos[0] = p0;
 		break;
-
+	/*
+	 * Note GetAngle always gives a positive angle because p0 is always left of p1
+	 */
 	case SEGPROC_GETANGLE:
 		data->getAngle.angle = FindAngle( segPtr->u.l.pos[0], segPtr->u.l.pos[1] );
 		data->getAngle.radius = 0.0;

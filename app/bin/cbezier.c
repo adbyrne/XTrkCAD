@@ -641,11 +641,11 @@ EXPORT STATUS_T AdjustBezCurve(
 				InfoMessage(_("Bezier is Straight Line"));
 			} else
 				InfoMessage( _("Bezier %s : Min Radius=%s Length=%s fx=%0.3f fy=%0.3f cusp=%0.3f"),track?"Track":"Line",
-													FormatDistance(Da.minRadius),
+													FormatDistance(Da.minRadius>=100000?0:Da.minRadius),
 													FormatDistance(BezierLength(Da.pos,Da.crvSegs_da)),fx,fy,cusp);
 		} else
 				InfoMessage( _("Bezier %s : Min Radius=%s Length=%s"),track?"Track":"Line",
-									FormatDistance(Da.minRadius),
+									FormatDistance(Da.minRadius>=100000?0:Da.minRadius),
 									FormatDistance(BezierLength(Da.pos,Da.crvSegs_da)));
 		DrawTempBezier(Da.track);
 		return C_CONTINUE;
@@ -890,7 +890,7 @@ DIST_T BezierLength(coOrd pos[4],dynArr_t segs) {
 	for (int i = 0;i<segs.cnt;i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
-			dd += t.u.c.radius*D2R(NormalizeAngle(t.u.c.a0-t.u.c.a1));
+			dd += fabs(t.u.c.radius*D2R(t.u.c.a1));
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			dd +=BezierLength(t.u.b.pos,t.bezSegs);
 		} else if (t.type == SEG_STRLIN || t.type == SEG_STRTRK ) {

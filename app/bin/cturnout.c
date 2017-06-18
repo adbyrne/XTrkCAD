@@ -663,7 +663,7 @@ static ANGLE_T GetAngleTurnout(
 	pos.x -= xx->orig.x;
 	pos.y -= xx->orig.y;
 	Rotate( &pos, zero, -xx->angle );
-	angle = GetAngleSegs( segCnt, xx->segs, &pos, &segInx, NULL, NULL );
+	angle = GetAngleSegs( segCnt, xx->segs, &pos, &segInx, NULL, NULL, NULL, NULL );
 	return NormalizeAngle( angle+xx->angle );
 }
 
@@ -1255,7 +1255,7 @@ LOG( log_traverseTurnout, 1, ( "  PC=%d ", pathCurr[0] ) )
 	segPtr = xx->segs+currInx;
 #endif
 	segProcData.traverse1.pos = pos2;
-	segProcData.traverse1.angle = xx->angle-trvTrk->angle;
+	segProcData.traverse1.angle = xx->angle+trvTrk->angle;
 	SegProc( SEGPROC_TRAVERSE1, segPtr, &segProcData );
 	dist += segProcData.traverse1.dist;
 	backwards = segProcData.traverse1.backwards;

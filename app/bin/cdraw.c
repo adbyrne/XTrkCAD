@@ -669,7 +669,7 @@ static ANGLE_T GetAngleDraw(
 	pos.x -= xx->orig.x;
 	pos.y -= xx->orig.y;
 	Rotate( &pos, zero, -xx->angle );
-	angle = GetAngleSegs( xx->segCnt, xx->segs, &pos, NULL, NULL, NULL);
+	angle = GetAngleSegs( xx->segCnt, xx->segs, &pos, NULL, NULL, NULL, NULL, NULL);
 	if ( ep0 ) *ep0 = -1;
 	if ( ep1 ) *ep1 = -1;
 	return NormalizeAngle( angle + xx->angle );

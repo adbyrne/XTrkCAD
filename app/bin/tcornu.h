@@ -26,6 +26,7 @@ typedef struct {
 		DIST_T minCurveRadius;
 		DIST_T maxRateofChange;
 		DIST_T length;
+		ANGLE_T windingAngle;
 		dynArr_t arcSegs;
 		coOrd descriptionOff;
 		} cornuData_t;

@@ -320,7 +320,7 @@ void DrawSegsO(
 		DIST_T trackGauge,
 		wDrawColor color,
 		long options );
-ANGLE_T GetAngleSegs( wIndex_t, trkSeg_p, coOrd *, wIndex_t *, DIST_T *, BOOL_T * );
+ANGLE_T GetAngleSegs( wIndex_t, trkSeg_p, coOrd *, wIndex_t *, DIST_T *, BOOL_T *, wIndex_t *, BOOL_T * );
 void RecolorSegs( wIndex_t, trkSeg_p, wDrawColor );
 
 BOOL_T ReadSegs( void );
@@ -328,11 +328,11 @@ BOOL_T WriteSegs( FILE * f, wIndex_t segCnt, trkSeg_p segs );
 BOOL_T WriteSegsEnd(FILE * f, wIndex_t segCnt, trkSeg_p segs, BOOL_T writeEnd);
 typedef union {
 		struct {
-				coOrd pos;				/* IN the point on track to get to */
-				ANGLE_T angle;			/* IN  is the angle that the object starts at */
+				coOrd pos;				/* IN the point to get to */
+				ANGLE_T angle;			/* IN  is the angle that the object starts at (-ve for forwards) */
 				DIST_T dist;			/* OUT is how far it is along the track */
-				BOOL_T backwards;		/* OUT */
-				BOOL_T reverse_seg;		/* OUT */
+				BOOL_T backwards;		/* OUT which way are we going? */
+				BOOL_T reverse_seg;		/* OUT the seg is backwards curve */
 		} traverse1;		//Find dist between pos and end of track that starts with angle set backwards
 		struct {
 				EPINX_T segDir;			/* IN Direction to go */
@@ -351,15 +351,15 @@ typedef union {
 				drawCmd_p d;
 		} drawRoadbedSide;
 		struct {
-				coOrd pos1;				/* IN/OUT */
-				DIST_T dd;				/* OUT */
+				coOrd pos1;				/* IN pos to find */
+				DIST_T dd;				/* OUT distance from nearest point in seg to input pos */
 		} distance;
 		struct {
 				track_p trk;			/* OUT */
 				EPINX_T ep[2];
 		} newTrack;
 		struct {
-				DIST_T length;
+				DIST_T length;			/* OUT */
 		} length;
 		struct {
 				coOrd pos;				/* IN */
@@ -367,13 +367,14 @@ typedef union {
 				trkSeg_t newSeg[2];
 		} split;
 		struct {
-				coOrd pos;				/* IN OUT */
-				ANGLE_T angle;			/* OUT */
-				BOOL_T negative_radius; /* OUT */
-				BOOL_T backwards;		/* OUT */
-				DIST_T radius;			/* OUT */
-				coOrd center;			/* OUT */
-		} getAngle;
+				coOrd pos;				/* IN Pos to find nearest to  - OUT found pos on curve*/
+				ANGLE_T angle;			/* OUT angle at pos - (-ve if backwards)*/
+				BOOL_T negative_radius; /* OUT Radius <0? */
+				BOOL_T backwards;		/* OUT Seg is backwards */
+				DIST_T radius;			/* OUT radius at pos */
+				coOrd center;			/* OUT center of curvature at pos (0 = straight)*/
+				int  bezSegInx;			/* OUT if a bezier proc, the index of the sub segment */
+		} getAngle;			// Get pos on seg nearest, angle at that (-ve for forwards)
 		} segProcData_t, *segProcData_p;
 typedef enum {
 		SEGPROC_TRAVERSE1,

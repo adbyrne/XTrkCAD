@@ -716,7 +716,7 @@ DIST_T CornuLength(coOrd pos[4],dynArr_t segs) {
 	for (int i = 0;i<segs.cnt;i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
-			dd += t.u.c.radius*D2R(NormalizeAngle(t.u.c.a0-t.u.c.a1));
+			dd += fabs(t.u.c.radius*D2R(t.u.c.a1));
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			dd +=CornuLength(t.u.b.pos,t.bezSegs);
 		} else if (t.type == SEG_STRLIN || t.type == SEG_STRTRK ) {

@@ -672,6 +672,13 @@ EXPORT void FreeFilledDraw(
 	}
 }
 
+/*
+ * DistanceSegs
+ *
+ * Find the closest point on the Segs to the point pos.
+ * Return the distance to the point, the point on the curve and the index of the segment that contains it.
+ *
+ */
 
 EXPORT DIST_T DistanceSegs(
 		coOrd orig,
@@ -802,7 +809,9 @@ EXPORT ANGLE_T GetAngleSegs(
 		coOrd * pos1,						// Now IN/OUT OUT =
 		wIndex_t * segInxR,
 		DIST_T * dist,
-		BOOL_T * backwards_seg)				//Is this segment reversed?
+		BOOL_T * seg_backwards,
+		wIndex_t * subSegInxR,
+		BOOL_T * negative_radius)
 {
 	wIndex_t inx;
 	ANGLE_T angle = 0.0;
@@ -810,10 +819,11 @@ EXPORT ANGLE_T GetAngleSegs(
 	DIST_T d, dd;
 	segProcData_t segProcData;
 	coOrd pos2 = * pos1;
-	BOOL_T reversed_seg = FALSE;
+	BOOL_T negative = FALSE;
 	BOOL_T backwards = FALSE;
+	if (subSegInxR) *subSegInxR = -1;
 
-	d = DistanceSegs( zero, 0.0, segCnt, segPtr, &pos2, &inx );
+	d = DistanceSegs( zero, 0.0, segCnt, segPtr, &pos2, &inx ); //
 	if (dist) * dist = d;
 	segPtr += inx;
 	segProcData.getAngle.pos = pos2;
@@ -831,7 +841,7 @@ EXPORT ANGLE_T GetAngleSegs(
 	case SEG_FILCRCL:
 		CurveSegProc( SEGPROC_GETANGLE, segPtr, &segProcData );
 		angle = segProcData.getAngle.angle;
-		reversed_seg = segProcData.getAngle.negative_radius;
+		negative = segProcData.getAngle.negative_radius;
 		backwards = segProcData.getAngle.backwards;
 		break;
 	case SEG_JNTTRK:
@@ -842,8 +852,9 @@ EXPORT ANGLE_T GetAngleSegs(
     case SEG_BEZLIN:
         BezierSegProc( SEGPROC_GETANGLE, segPtr, &segProcData );
         angle = segProcData.getAngle.angle;
-        reversed_seg = segProcData.getAngle.negative_radius;
+        negative = segProcData.getAngle.negative_radius;
         backwards = segProcData.getAngle.backwards;
+        if (subSegInxR) *subSegInxR = segProcData.getAngle.bezSegInx;
         break;
 	case SEG_POLY:
 	case SEG_FILPOLY:
@@ -866,7 +877,9 @@ EXPORT ANGLE_T GetAngleSegs(
 		AbortProg( "GetAngleSegs(%d)", segPtr->type );
 	}
 	if ( segInxR ) *segInxR = inx;
-	if ( backwards_seg) *backwards_seg = reversed_seg?!backwards:backwards;
+	if (seg_backwards) *seg_backwards = backwards;
+	if (negative_radius) *negative_radius = negative;
+
 	* pos1 = pos2;
 	return angle;
 }
