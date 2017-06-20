@@ -1872,6 +1872,9 @@ LOG( log_turnout, 3, ( "placeTurnout T%d (%0.3f %0.3f) A%0.3f\n",
 				}
 			}
 		}
+	} else {
+		trk = NULL;
+		*trkR = NULL;
 	}
 	*connCntR = connCnt;
 	*maxDR = maxD;

@@ -928,6 +928,21 @@ static BOOL_T MergeCornu(
 	return TRUE;
 }
 
+BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs) {
+	struct extraData * xx = GetTrkExtraData(trk);
+	for (int i=0;i<xx->cornuData.arcSegs.cnt-1;i++) {
+			DYNARR_APPEND(trkSeg_t, * segs, 10);
+			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
+			segPtr->type = SEG_BEZTRK;
+			segPtr->bezSegs.cnt = 0;
+			segPtr->bezSegs.max = 0;
+			segPtr->bezSegs.ptr = NULL;
+			trkSeg_p p = (trkSeg_t *) xx->cornuData.arcSegs.ptr+i;
+			for (int j=0;j<4;j++) segPtr->u.b.pos[j] = p->u.b.pos[j];
+			FixUpBezierSeg(segPtr->u.b.pos,segPtr,TRUE);
+	}
+	return TRUE;
+}
 
 static DIST_T GetLengthCornu( track_p trk )
 {
@@ -980,6 +995,7 @@ static BOOL_T QueryCornu( track_p trk, int query )
 		return TRUE;
 	case Q_CAN_PARALLEL:
 	case Q_MODIFY_CANT_SPLIT:
+	case Q_CANNOT_PLACE_TURNOUT:
 		return TRUE;
 	default:
 		return FALSE;

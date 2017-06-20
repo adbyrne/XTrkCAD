@@ -29,6 +29,8 @@
 #include "shrtpath.h"
 #include "i18n.h"
 #include "tbezier.h"
+#include "tcornu.h"
+#include "common.h"
 
 /*****************************************************************************
  *
@@ -1000,10 +1002,12 @@ static void GroupOk( void * junk )
 							DrawSegs( &groupD, xx->orig, xx->angle, segPtr, 1, trackGauge, wDrawColorBlack );
 						}
 					}
-				} else if (GetTrkType(trk) == T_BEZIER || GetTrkType(trk) == T_BZRLIN || GetTrkType(trk) == T_CORNU) {
+				} else if (GetTrkType(trk) == T_BEZIER || GetTrkType(trk) == T_BZRLIN ) {
 					DYNARR_APPEND(trkSeg_t, trackSegs_da, 10);
 					segPtr = &trackSegs(trackSegs_da.cnt-1);
 					GetBezierSegmentFromTrack(trk,segPtr);
+				} else if (GetTrkType(trk) == T_CORNU) {
+					GetBezierSegmentsFromCornu(trk,&trackSegs_da);
 				} else {
 					segCnt = tempSegs_da.cnt;
 					oldOptions = groupD.options;
