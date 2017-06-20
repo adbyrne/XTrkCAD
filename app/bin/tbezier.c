@@ -1105,13 +1105,13 @@ LOG( log_bezierSegments, 1, ( "Tr1 Enter P[%0.3f %0.3f] A%0.3f\n", p0.x, p0.y, d
 				segs_backwards = FALSE;
 	    }
 	    segProcData.traverse1.pos = data->traverse1.pos = p0;		  //actual point on curve
-	    segProcData.traverse1.angle = data->traverse1.angle;          //Angle of car (must reverse for Traverse1)
+	    segProcData.traverse1.angle = data->traverse1.angle;          //Angle of car
  LOG( log_bezierSegments, 1, ( "TR1-GSA I%d P[%0.3f %0.3f] SB%d\n", segInx, p0.x, p0.y, segs_backwards ))
 		inx = segInx;
 
 		subSegsPtr = (trkSeg_p)segPtr->bezSegs.ptr+inx;
 		SegProc( SEGPROC_TRAVERSE1, subSegsPtr, &segProcData );
-		data->traverse1.backwards = segs_backwards;
+		data->traverse1.backwards = data->traverse1.reverse_seg?!backwards:backwards; //Adjust as curve can be backwards
 		data->traverse1.reverse_seg = FALSE;						  //SEG_BEZ are always forward
 		data->traverse1.dist = segProcData.traverse1.dist;			  //Get last seg partial dist
 		data->traverse1.angle = segProcData.traverse1.angle;
@@ -1136,11 +1136,10 @@ LOG( log_bezierSegments, 1, ( "Tr2 Enter D%0.3f SD%d\n", data->traverse2.dist, d
 			while (inx<=0 && inx<segPtr->bezSegs.cnt) {     //Go from right end
 				subSegsPtr = (trkSeg_p)segPtr->bezSegs.ptr+inx;
 				SegProc(SEGPROC_TRAVERSE1, subSegsPtr, &segProcData);
-				backwards = segProcData.traverse1.backwards;   //Just use returned seg direction.
-				//d += segProcData.traverse1.dist;             Dont add
 				reverse_seg = segProcData.traverse1.reverse_seg;
+				backwards = segProcData.traverse1.backwards;
+				//d += segProcData.traverse1.dist;             Dont add
 LOG( log_bezierSegments, 1, ( "Tr2Tr1 SI%d B%d\n", inx, backwards ))
-
 				segProcData.traverse2.dist = data->traverse2.dist;    //distance left
 				segProcData.traverse2.segDir = backwards;
 				SegProc(SEGPROC_TRAVERSE2, subSegsPtr, &segProcData);

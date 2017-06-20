@@ -979,6 +979,7 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	case Q_ISTRACK:
 		return TRUE;
 	case Q_CAN_PARALLEL:
+	case Q_MODIFY_CANT_SPLIT:
 		return TRUE;
 	default:
 		return FALSE;
