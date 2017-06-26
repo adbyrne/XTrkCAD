@@ -142,7 +142,7 @@ RestoreLocale( char * locale )
  */
 
 EXPORT FILE * paramFile = NULL;
-EXPORT char paramFileName[STR_LONG_SIZE];
+char *paramFileName;
 EXPORT wIndex_t paramLineNum = 0;
 EXPORT char paramLine[STR_LONG_SIZE];
 EXPORT char * curContents;
@@ -513,11 +513,9 @@ EXPORT BOOL_T ReadParams(
 	char *oldLocale = NULL;
 
 	if (dirName) {
-		strcpy( paramFileName, dirName );
-		strcat( paramFileName, FILE_SEP_CHAR );
-		strcat( paramFileName, fileName );
+		MakeFullpath(&paramFileName, dirName, fileName, NULL);
 	} else {
-		strcpy( paramFileName, fileName );
+		MakeFullpath(&paramFileName, fileName, NULL);
 	}
 	paramLineNum = 0;
 	curBarScale = -1;
@@ -573,11 +571,9 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 			paramLineNum = oldLineNum;
 			paramCheckSum = oldCheckSum;
 			if (dirName) {
-				strcpy( paramFileName, dirName );
-				strcat( paramFileName, FILE_SEP_CHAR );
-				strcat( paramFileName, fileName );
+				MakeFullpath(&paramFileName, dirName, fileName, NULL);
 			} else {
-				strcpy( paramFileName, fileName );
+				MakeFullpath(&paramFileName, fileName);
 			}
 		} else if (strncmp( paramLine, "CONTENTS ", 9) == 0 ) {
 			curContents = MyStrdup( paramLine+9 );
@@ -610,7 +606,7 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 		}
 	}
 	if (paramFile)fclose( paramFile );
-
+	free(paramFileName);
 	RestoreLocale( oldLocale );
 
 	return TRUE;
@@ -620,9 +616,7 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 static void ReadCustom( void )
 {
 	FILE * f;
-	customPath =
-		(char*)MyMalloc( strlen(workingDir) + 1 + strlen(sCustomF) + 1 );
-	sprintf( customPath, "%s%s%s", workingDir, FILE_SEP_CHAR, sCustomF );
+	MakeFullpath(&customPath, workingDir, sCustomF, NULL);
 	customPathBak = MyStrdup( customPath );
 	customPathBak[ strlen(customPathBak)-1 ] = '1';
 	f = fopen( customPath, "r" );
@@ -1080,45 +1074,16 @@ EXPORT void CleanupFiles( void )
 
 EXPORT int ExistsCheckpoint( void )
 {
-	int len;
-	char *pattern = sCheckPointF;
-	char *search;
-
 	struct stat fileStat;
 
-	len = strlen( workingDir ) + 1 + strlen( sCheckPointF ) + 1;
-	checkPtFileName1 = (char*)MyMalloc(len);
-	sprintf( checkPtFileName1, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPointF );
-	checkPtFileName2 = (char*)MyMalloc(len);
-	sprintf( checkPtFileName2, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPoint1F );
+	MakeFullpath(&checkPtFileName1, workingDir, sCheckPointF, NULL);
+	MakeFullpath(&checkPtFileName2, workingDir, sCheckPoint1F, NULL);
 
-	len = strlen( workingDir ) + 1 + strlen( pattern ) + 1;
-	search = (char*)MyMalloc(len);
-	sprintf( search, "%s%s%s", workingDir, FILE_SEP_CHAR, pattern );
-
-	if( !stat( search, &fileStat ) ) {
-		MyFree( search );
-		return TRUE;
-	} else {
-		MyFree( search );
-		return FALSE;
-	}
-
-
-#ifdef LATER
-	DIR *dir;
-
-	dir = opendir( search );
-	MyFree( search );
-
-	if( dir )	{
-		closedir( dir );
+	if( !stat( checkPtFileName1, &fileStat ) ) {
 		return TRUE;
 	} else {
 		return FALSE;
 	}
-#endif
-
 }
 
 /**
@@ -1130,16 +1095,12 @@ EXPORT int ExistsCheckpoint( void )
 
 EXPORT int LoadCheckpoint( void )
 {
-	int len;
 	char *search;
 
 	paramVersion = -1;
 	wSetCursor( wCursorWait );
 
-	len = strlen( workingDir ) + 1 + strlen( sCheckPointF ) + 1;
-	search = (char*)MyMalloc(len);
-	sprintf( search, "%s%s%s", workingDir, FILE_SEP_CHAR, sCheckPointF );
-
+	MakeFullpath(&search, workingDir, sCheckPointF, NULL);
 	UndoSuspend();
 
 	if (ReadTrackFile( search, search + strlen(search) - strlen( sCheckPointF ), TRUE, TRUE, TRUE )) {
@@ -1159,7 +1120,7 @@ EXPORT int LoadCheckpoint( void )
 	SetLayoutFullPath("");
 	SetWindowTitle();
 	changed = TRUE;
-	MyFree( search );
+	free( search );
 	return TRUE;
 }
 
@@ -1358,8 +1319,6 @@ EXPORT BOOL_T EditPaste( void )
 
 EXPORT void FileInit( void )
 {
-	const char * pref;
-
 	if ( (libDir = wGetAppLibDir()) == NULL ) {
 		abort();
 	}
@@ -1381,9 +1340,7 @@ EXPORT BOOL_T ParamFileInit( void )
 	}
 
 	SetLayoutFullPath("");
-
-	clipBoardN = (char*)MyMalloc( strlen(workingDir) + 1 + strlen(sClipboardF) + 1 );
-	sprintf( clipBoardN, "%s%s%s", workingDir, FILE_SEP_CHAR, sClipboardF );
+	MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
 	return TRUE;
 
 }

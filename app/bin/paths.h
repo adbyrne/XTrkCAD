@@ -28,4 +28,5 @@
 void SetCurrentPath( const char * pathType,	const char * fileName );
 char *GetCurrentPath(const char *pathType);
 char *FindFilename(char *path);
-#endif 
+void MakeFullpath(char **str, ...);
+#endif

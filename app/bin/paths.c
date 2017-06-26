@@ -32,6 +32,7 @@
 #endif
 
 #include <wlib.h>
+#include <dynstring.h>
 #include "track.h"
 #include "common.h"
 #include "utility.h"
@@ -39,9 +40,6 @@
 #include "i18n.h"
 #include "uthash.h"
 #include "paths.h"
-#include <dynstring.h>
-
-//extern char curDirName[];
 
 struct pathTable {
 	char	  type[ PATH_TYPE_SIZE]; 	   	/**< type of path */
@@ -185,3 +183,35 @@ char *FindFilename(char *path)
 	return(name);
 }
 
+/**
+* Make a full path definition from directorys and filenames. The individual pieces are
+* concatinated. Where necessary a path delimiter is added. A pointer to the resulting 
+* string is returned. This memory should be free'd when no longer needed. 
+* Windows: to construct an absolute path, a leading backslash has to be included after
+* the drive delimiter ':' or at the beginning of the first directory name.
+* 
+* \param str OUT pointer to the complete path
+* \param ... IN one or more parts of the path
+*/
+
+void
+MakeFullpath(char **str, ...)
+{
+	va_list valist;
+	const char *part;
+	char *separator = FILE_SEP_CHAR;
+	char lastchar = '\0';
+	DynString path;
+
+	DynStringMalloc(&path, 0);
+	va_start(valist, str);
+
+	while ( part = va_arg(valist, const char *)) {
+		if(part[0] !=separator[0] && lastchar && lastchar != separator[0] && lastchar != ':')
+			DynStringNCatCStr(&path, 1, separator);
+		DynStringCatCStr(&path, part );
+		lastchar = part[strlen(part) - 1];	
+	}
+	*str = strdup(DynStringToCStr(&path));
+	DynStringFree(&path);
+}

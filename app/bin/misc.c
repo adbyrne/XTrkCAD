@@ -59,6 +59,7 @@
 #include "smalldlg.h"
 #include "i18n.h"
 #include "layout.h"
+#include "paths.h"
 #include <locale.h>
 
 #define DEFAULT_SCALE ("N")
@@ -2391,9 +2392,9 @@ static void LoadFileList( void )
 		if (!cp)
 			continue;
 		pathName = MyStrdup(cp);
-		fileName = strrchr( pathName, FILE_SEP_CHAR[0] );
+		fileName = FindFilename((char *)pathName);
 		if (fileName)
-		wMenuListAdd( fileList_ml, 0, fileName+1, pathName );
+			wMenuListAdd( fileList_ml, 0, fileName, pathName );
 	}
 }
 

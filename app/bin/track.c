@@ -31,6 +31,7 @@
 #include "compound.h"
 #include "i18n.h"
 #include "draw.h"
+#include "paths.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
@@ -1297,8 +1298,10 @@ static void AuditPrint( char * msg )
 {
 	time_t clock;
 	if (auditFile == NULL) {
-		sprintf( message, "%s%s%s", workingDir, FILE_SEP_CHAR, sAuditF );
-		auditFile = fopen( message, "a+" );
+		char *path;
+		MakeFullpath(&path, workingDir, sAuditF, NULL);
+		auditFile = fopen( path, "a+" );
+		free(path);
 		if (auditFile == NULL) {
 			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Audit"), message, strerror(errno) );
 			auditIgnore = TRUE;

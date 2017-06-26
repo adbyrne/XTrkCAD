@@ -24,7 +24,7 @@
 #define FILEIO_H
 
 FILE * paramFile;
-char paramFileName[STR_LONG_SIZE];
+extern char *paramFileName;
 wIndex_t paramLineNum;
 char paramLine[STR_LONG_SIZE];
 char * curContents;

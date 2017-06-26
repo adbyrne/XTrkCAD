@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/lprintf.c,v 1.2 2006-05-26 17:31:44 m_fischer Exp $
+/** \file lprintf.c
+ * Logging functions
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -31,6 +31,7 @@
 #include <sys/timeb.h>
 #endif
 #include "track.h"
+#include "paths.h"
 
 /****************************************************************************
  *
@@ -72,8 +73,7 @@ static void LogDoOpen( void )
 {
 	if ( logFileName == NULL ) {
 #ifdef WINDOWS
-		logFileName = (char*)MyMalloc( strlen(wGetAppWorkDir()) + 1 + strlen("xtclog.txt") + 1);
-		sprintf( logFileName, "%s%s%s", wGetAppWorkDir(), FILE_SEP_CHAR, "xtclog.txt" );
+		MakeFullpath(&logFileName, wGetAppWorkDir(), "xtclog.txt", NULL);
 #else
 		logFile = stdout;
 #endif
