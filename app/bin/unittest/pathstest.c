@@ -84,14 +84,20 @@ static void Makepath(void **state)
 	(void)state;
 	char *path;
 
+#ifdef WINDOWS
 		MakeFullpath(&path,
-			"C:",
+		"C:",
 		TESTRELATIVEPATH,
 		TESTFILENAME,
 		NULL);
-#ifdef WINDOWS
+
 		assert_string_equal(path, "C:" TESTRELATIVEPATH "\\" TESTFILENAME);
 #else
+		MakeFullpath(&path,
+		TESTRELATIVEPATH,
+		TESTFILENAME,
+		NULL);
+
 		assert_string_equal(path, TESTRELATIVEPATH "/" TESTFILENAME);
 #endif // WINDOWS
 

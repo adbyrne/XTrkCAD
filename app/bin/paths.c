@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <stdarg.h>
 
 #ifdef WINDOWS
 #include <windows.h>
