@@ -65,7 +65,7 @@ static int log_readTracks = 0;
 EXPORT wIndex_t trackCount;
 
 EXPORT long drawEndPtV = 2;
-EXPORT long drawUnconnectedEndPt = 0;		/* How do we draw Unconnected EndPts */
+EXPORT long drawUnconnectedEndPt = 0;		/**< How do we draw Unconnected EndPts */
 
 EXPORT long centerDrawMode = FALSE;			/**< flag to control drawing of circle centers */
 EXPORT long printCenterLines = FALSE; 		/**< flag to control drawing of centerline in Print */
@@ -2675,6 +2675,7 @@ EXPORT void DrawEndPt(
 	} else if ( (drawEndPtV == 1 && (QueryTrack(trk,Q_DRAWENDPTV_1) || QueryTrack(trk1,Q_DRAWENDPTV_1)) ) ||
 				(drawEndPtV == 2) ) {
 		Translate( &p0, p, a, trackGauge );
+		width = 0;
 		if ( d != &mapD && d != &tempD && (GetTrkEndOption(trk,ep)&EPOPT_GAPPED) != 0 )
 			width = (wDrawWidth)ceil(trackGauge*d->dpi/2.0/d->scale);
 		DrawLine( d, p0, p, width, color );
