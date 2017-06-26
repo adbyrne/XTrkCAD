@@ -213,7 +213,7 @@ static wWin_p displayW;
 static char * autoPanLabels[] = { N_("Auto Pan"), NULL };
 static char * drawTunnelLabels[] = { N_("Hide"), N_("Dash"), N_("Normal"), NULL };
 static char * drawEndPtLabels3[] = { N_("None"), N_("Turnouts"), N_("All"), NULL };
-static char * drawEndPtUnconnectedSize[] = { N_("Normal"), N_("Thick"), N_("Exception") };
+static char * drawEndPtUnconnectedSize[] = { N_("Normal"), N_("Thick"), N_("Exception"), NULL };
 static char * tiedrawLabels[] = { N_("None"), N_("Outline"), N_("Solid"), NULL };
 static char * drawCenterCircle[] = { N_("Off"), N_("On"), NULL };
 static char * labelEnableLabels[] = { N_("Track Descriptions"), N_("Lengths"), N_("EndPt Elevations"), N_("Track Elevations"), N_("Cars"), NULL };
