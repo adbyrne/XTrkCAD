@@ -419,14 +419,10 @@ EXPORT void MoveSegs(
 			break;
         case SEG_BEZTRK:
         case SEG_BEZLIN:
-            s->u.b.pos[0].x +=orig.x;
-            s->u.b.pos[0].y +=orig.y;
-            s->u.b.pos[1].x +=orig.x;
-            s->u.b.pos[1].y +=orig.y;
-            s->u.b.pos[3].x +=orig.x;
-            s->u.b.pos[3].y +=orig.y;
-            s->u.b.pos[4].x +=orig.x;
-            s->u.b.pos[4].y +=orig.y;
+        	for (inx=0;inx<4;inx++) {
+        		s->u.b.pos[inx].x +=orig.x;
+            	s->u.b.pos[inx].y +=orig.y;
+        	}
             FixUpBezierSeg(s->u.b.pos,s,s->type == SEG_BEZTRK);
             break;
 		}
@@ -639,6 +635,13 @@ EXPORT void CloneFilledDraw(
 			break;
 		case SEG_TEXT:
 			sp->u.t.string = MyStrdup( sp->u.t.string );
+			break;
+		case SEG_BEZTRK:
+		case SEG_BEZLIN:
+			sp->bezSegs.cnt = 0;
+			sp->bezSegs.max = 0;
+			sp->bezSegs.ptr = NULL;
+			FixUpBezierSeg(sp->u.b.pos,sp,sp->type == SEG_BEZTRK);
 			break;
 		default:
 			break;

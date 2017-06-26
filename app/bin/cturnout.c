@@ -154,7 +154,7 @@ EXPORT wIndex_t CheckPaths(
 		PATHPTR_T paths )
 {
 	int pc, ps;
-	PATHPTR_T pp;
+	PATHPTR_T pp = 0;
 	int inx, inx1;
 	static dynArr_t segMap_da;
 	int segInx[2], segEp[2];

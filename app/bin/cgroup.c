@@ -1007,7 +1007,7 @@ static void GroupOk( void * junk )
 					segPtr = &trackSegs(trackSegs_da.cnt-1);
 					GetBezierSegmentFromTrack(trk,segPtr);
 				} else if (GetTrkType(trk) == T_CORNU) {
-					GetBezierSegmentsFromCornu(trk,&trackSegs_da);
+					GetBezierSegmentsFromCornu(trk,&trackSegs_da);  //Only give back Bezier - cant be undone
 				} else {
 					segCnt = tempSegs_da.cnt;
 					oldOptions = groupD.options;
@@ -1404,7 +1404,7 @@ if ( log_group >= 1 && logTable(log_group).level > log_group ) {
 		for ( pinx=0; pinx<trackSegs_da.cnt; pinx++ ) {
 			if ( segFlip(pinx) < 0 ) {
 LOG( log_group, 1, ( "Flipping Segment %d\n", pinx+1 ) );
-				SegProc( SEGPROC_FLIP, &trackSegs(pinx), NULL );
+					SegProc( SEGPROC_FLIP, &trackSegs(pinx), NULL );
 			}
 		}
 
@@ -1426,7 +1426,7 @@ LOG( log_group, 1, ( "Flipping Segment %d\n", pinx+1 ) );
 					if ( path == NULL )
 						AbortProg( "Missing Path T%d:%d.%d", GetTrkIndex(groupP->trk), ppp->ep2, ppp->ep1 );
 					if ( flip ) path += strlen((char *)path)-1;
-					while ( *path ) {
+					while ( *path && (path >= ppp->path) ) {      //Add Guard for flip backwards
 						DYNARR_APPEND( char, pathPtr_da, 10 );
 						pathChar = *path;
 						flip1 = flip;
