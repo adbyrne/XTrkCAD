@@ -1206,6 +1206,8 @@ LOG( log_bezierSegments, 1, ( "Tr2Nxt SI%d A%0.3f P[%0.3f %0.3f] D%0.3f\n", inx,
 
 	case SEGPROC_NEWTRACK:
 		data->newTrack.trk = NewBezierTrack( segPtr->u.b.pos, (trkSeg_t *)segPtr->bezSegs.ptr, segPtr->bezSegs.cnt);
+		data->newTrack.ep[0] = 0;
+		data->newTrack.ep[1] = 1;
 		break;
 
 	case SEGPROC_LENGTH:
