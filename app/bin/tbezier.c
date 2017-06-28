@@ -78,6 +78,13 @@ EXPORT void FixUpBezierSeg(coOrd pos[4], trkSeg_p p, BOOL_T track) {
 	p->u.b.length = BezierLength(pos, p->bezSegs);
 }
 
+EXPORT void FixUpBezierSegs(trkSeg_p p,int segCnt) {
+	for (int i=0;i<segCnt;i++,p++) {
+		if (p->type == SEG_BEZTRK || p->type == SEG_BEZLIN) {
+			FixUpBezierSeg(p->u.b.pos,p,p->type == SEG_BEZTRK);
+		}
+	}
+}
 
 
 static void GetBezierAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )

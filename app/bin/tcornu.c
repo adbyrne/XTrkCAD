@@ -106,6 +106,21 @@ EXPORT BOOL_T FixUpCornu0(coOrd pos[2],coOrd center[2],ANGLE_T angle[2],DIST_T r
 	return TRUE;
 }
 
+EXPORT char * CreateSegPathList(track_p trk) {
+	char * cp = "\0";
+	if (GetTrkType(trk) != T_CORNU) return cp;
+	struct extraData *xx = GetTrkExtraData(trk);
+	if (xx->cornuData.cornuPath) free(xx->cornuData.cornuPath);
+	xx->cornuData.cornuPath = malloc(xx->cornuData.arcSegs.cnt+2);
+	int j= 0;
+	for (int i = 0;i<xx->cornuData.arcSegs.cnt;i++,j++) {
+		xx->cornuData.cornuPath[j] = i+1;
+	}
+	xx->cornuData.cornuPath[j] = cp[0];
+	xx->cornuData.cornuPath[j+1] = cp[0];
+	return xx->cornuData.cornuPath;
+}
+
 
 static void GetCornuAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
@@ -930,10 +945,12 @@ static BOOL_T MergeCornu(
 
 BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs) {
 	struct extraData * xx = GetTrkExtraData(trk);
-	for (int i=0;i<xx->cornuData.arcSegs.cnt-1;i++) {
+	for (int i=0;i<xx->cornuData.arcSegs.cnt;i++) {
 			DYNARR_APPEND(trkSeg_t, * segs, 10);
 			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
 			segPtr->type = SEG_BEZTRK;
+			segPtr->color = wDrawColorBlack;
+			segPtr->width = 0;
 			segPtr->bezSegs.cnt = 0;
 			segPtr->bezSegs.max = 0;
 			segPtr->bezSegs.ptr = NULL;

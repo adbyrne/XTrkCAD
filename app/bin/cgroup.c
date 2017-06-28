@@ -673,6 +673,11 @@ static char * FindPathBtwEP(
 		if ( ep1+ep2 != 1 )
 			AbortProg( "findPathBtwEP" );
 		*flip = ( ep1 == 1 );
+		if (GetTrkType(trk) == T_CORNU ) { 			// Cornu doesn't have a path but lots of segs!
+			cp = CreateSegPathList(trk);
+LOG( log_group, 2, ( " Group: Cornu path:%s \n", cp ) )
+			return cp;
+		}
 		return "\1\0\0";
 	}
 	cp = (char *)xx->paths;

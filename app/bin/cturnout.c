@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include "track.h"
 #include "ccurve.h"
+#include "tbezier.h"
 #include "cstraigh.h"
 #include "compound.h"
 #include "cjoin.h"
@@ -120,6 +121,8 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 	}
 	to->segCnt = segCnt;
 	to->segs = (trkSeg_p)memdup( segData, (sizeof *segData) * segCnt );
+	FixUpBezierSegs(to->segs,to->segCnt);
+
 	GetSegBounds( zero, 0.0, segCnt, to->segs, &to->orig, &to->size );
 	to->endCnt = endPtCnt;
 	to->endPt = (trkEndPt_t*)memdup( endPts, (sizeof *endPts) * to->endCnt );

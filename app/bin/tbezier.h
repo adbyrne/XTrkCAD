@@ -46,5 +46,6 @@ track_p NewBezierLine(coOrd[4], trkSeg_t * , int, wDrawColor, DIST_T);
 DIST_T BezierMathDistance( coOrd *, coOrd[4], int , double * );
 void FixUpBezier(coOrd[4], struct extraData*, BOOL_T);
 void FixUpBezierSeg(coOrd[4], trkSeg_p , BOOL_T);
+void FixUpBezierSegs(trkSeg_p p,int segCnt);
 BOOL_T GetBezierSegmentFromTrack(track_p, trkSeg_p);
 
