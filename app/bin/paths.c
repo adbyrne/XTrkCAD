@@ -43,9 +43,9 @@
 #include "paths.h"
 
 struct pathTable {
-	char	  type[ PATH_TYPE_SIZE]; 	   	/**< type of path */
-	DynString path;							/**< path */
-	UT_hash_handle hh; 						/**< makes this structure hashable */
+    char type[ PATH_TYPE_SIZE]; 			/**< type of path */
+    DynString path;							/**< path */
+    UT_hash_handle hh; 						/**< makes this structure hashable */
 };
 
 static struct pathTable *paths;
@@ -66,66 +66,64 @@ static struct pathTable *FindPath(const char *type);
 static struct pathTable *
 FindPath(const char *type)
 {
-	struct pathTable *entry;
-	HASH_FIND_STR(paths, type, entry);
-	return(entry);
+    struct pathTable *entry;
+    HASH_FIND_STR(paths, type, entry);
+    return (entry);
 }
 
 /**
  * Add a path to the table. If it already exists, the value ist updated.
  *
  * \param type IN type of path
- * \param path  IN path 
+ * \param path  IN path
  */
 static void
 AddPath(const char *type, char*path)
 {
-	struct pathTable *tableEntry;
+    struct pathTable *tableEntry;
+    tableEntry = FindPath(type);
 
-	tableEntry = FindPath(type);
-	if (tableEntry) {
-		DynStringClear(&(tableEntry->path));
-	}
-	else {
-		tableEntry = malloc(sizeof(struct pathTable));
-		DynStringMalloc(&tableEntry->path, 16);
-		strcpy(tableEntry->type, type);
-		HASH_ADD_STR(paths, type, tableEntry);
-	}
+    if (tableEntry) {
+        DynStringClear(&(tableEntry->path));
+    } else {
+        tableEntry = malloc(sizeof(struct pathTable));
+        DynStringMalloc(&tableEntry->path, 16);
+        strcpy(tableEntry->type, type);
+        HASH_ADD_STR(paths, type, tableEntry);
+    }
 
-	DynStringCatCStr(&(tableEntry->path), path);
+    DynStringCatCStr(&(tableEntry->path), path);
 }
 
 /**
- * Update the current directory for a specific filetype. Get the directory part from the current file. 
- * XTrackCAD keeps seprate directories for different filetypes.(for trackplans, bitmaps and DXF files). 
- * The paths are stored in a hash table using the file type as the hash.   
+ * Update the current directory for a specific filetype. Get the directory part from the current file.
+ * XTrackCAD keeps seprate directories for different filetypes.(for trackplans, bitmaps and DXF files).
+ * The paths are stored in a hash table using the file type as the hash.
  *
  * \param pathType IN file type
  * \param fileName IN fully qualified filename
- * \return 
+ * \return
  *
  */
 
 void SetCurrentPath(
-	const char * pathType,
-	const char * fileName )
+    const char * pathType,
+    const char * fileName)
 {
-	char *path;
-	char *copy;
+    char *path;
+    char *copy;
+    assert(fileName != NULL);
+    assert(pathType != NULL);
+    copy = strdup(fileName);
+    path = strrchr(copy, FILE_SEP_CHAR[0]);
 
-	assert( fileName != NULL );
-	assert( pathType != NULL );
+    if (path) {
+        *path = '\0';
+        AddPath(pathType, copy);
+        wPrefSetString(PATHS_SECTION, pathType, copy);
+    }
 
-	copy = strdup( fileName );
-	path = strrchr(copy, FILE_SEP_CHAR[0] );
-	if ( path ) 
-	{
-		*path = '\0';
-		AddPath(pathType, copy);
-		wPrefSetString(PATHS_SECTION, pathType, copy);
-	}    
-	free( copy );
+    free(copy);
 }
 
 /**
@@ -141,27 +139,29 @@ void SetCurrentPath(
  */
 
 char *GetCurrentPath(
-	const char *pathType)
+    const char *pathType)
 {
-	struct pathTable *currentPath;
-	const char *path;
+    struct pathTable *currentPath;
+    const char *path;
+    assert(pathType != NULL);
+    currentPath = FindPath(pathType);
 
-	assert(pathType != NULL);
+    if (currentPath) {
+        return (DynStringToCStr(&(currentPath->path)));
+    }
 
-	currentPath = FindPath(pathType);
+    path = wPrefGetString(PATHS_SECTION, pathType);
 
-	if (currentPath) {
-		return(DynStringToCStr(&(currentPath->path)));
-	}
-	
-	path = wPrefGetString(PATHS_SECTION, pathType);
-	if (!path)
-		path = wPrefGetString("file", "directory");
-	if (!path)
-		path = wGetUserHomeDir();
-	AddPath(pathType, (char *)path);
+    if (!path) {
+        path = wPrefGetString("file", "directory");
+    }
 
-	return((char *)path);
+    if (!path) {
+        path = wGetUserHomeDir();
+    }
+
+    AddPath(pathType, (char *)path);
+    return ((char *)path);
 }
 
 /**
@@ -173,24 +173,25 @@ char *GetCurrentPath(
 
 char *FindFilename(char *path)
 {
-	char *name;
-	name = strrchr(path, FILE_SEP_CHAR[0]);
-	if (name) {
-		name++;
-	}
-	else {
-		name = path;
-	}
-	return(name);
+    char *name;
+    name = strrchr(path, FILE_SEP_CHAR[0]);
+
+    if (name) {
+        name++;
+    } else {
+        name = path;
+    }
+
+    return (name);
 }
 
 /**
 * Make a full path definition from directorys and filenames. The individual pieces are
-* concatinated. Where necessary a path delimiter is added. A pointer to the resulting 
-* string is returned. This memory should be free'd when no longer needed. 
+* concatinated. Where necessary a path delimiter is added. A pointer to the resulting
+* string is returned. This memory should be free'd when no longer needed.
 * Windows: to construct an absolute path, a leading backslash has to be included after
 * the drive delimiter ':' or at the beginning of the first directory name.
-* 
+*
 * \param str OUT pointer to the complete path
 * \param ... IN one or more parts of the path
 */
@@ -198,21 +199,25 @@ char *FindFilename(char *path)
 void
 MakeFullpath(char **str, ...)
 {
-	va_list valist;
-	const char *part;
-	char *separator = FILE_SEP_CHAR;
-	char lastchar = '\0';
-	DynString path;
+    va_list valist;
+    const char *part;
+    char *separator = FILE_SEP_CHAR;
+    char lastchar = '\0';
+    DynString path;
+    DynStringMalloc(&path, 0);
+    va_start(valist, str);
 
-	DynStringMalloc(&path, 0);
-	va_start(valist, str);
+    while (part = va_arg(valist, const char *)) {
+        if (part[0] !=separator[0] && lastchar && lastchar != separator[0] &&
+                lastchar != ':') {
+            DynStringNCatCStr(&path, 1, separator);
+        }
 
-	while ( part = va_arg(valist, const char *)) {
-		if(part[0] !=separator[0] && lastchar && lastchar != separator[0] && lastchar != ':')
-			DynStringNCatCStr(&path, 1, separator);
-		DynStringCatCStr(&path, part );
-		lastchar = part[strlen(part) - 1];	
-	}
-	*str = strdup(DynStringToCStr(&path));
-	DynStringFree(&path);
+        DynStringCatCStr(&path, part);
+        lastchar = part[strlen(part) - 1];
+    }
+
+    *str = strdup(DynStringToCStr(&path));
+    DynStringFree(&path);
+	va_end(valist);
 }

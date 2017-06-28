@@ -867,6 +867,7 @@ EXPORT int LoadTracks(
 	assert( fileName != NULL );
 	assert( cnt == 1 ); 
 
+	SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
 	paramVersion = -1;
 	wSetCursor( wCursorWait );
 	Reset();
@@ -971,11 +972,12 @@ static int SaveTracks(
 		void * data )
 {
 	char *nameOfFile;
+	char *temp;
 
 	assert( fileName != NULL );
 	assert( cnt == 1 );
 
-	SetCurrentPath( LAYOUTPATHKEY, fileName[ 0 ] );
+	SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
 	DoSaveTracks( fileName[ 0 ] );
 
 	nameOfFile = FindFilename( fileName[ 0 ] );
@@ -983,7 +985,7 @@ static int SaveTracks(
 	checkPtMark = changed = 0;
 
 	SetLayoutFullPath(fileName[0]);
-	
+
 	if (doAfterSave)
 		doAfterSave();
 	doAfterSave = NULL;

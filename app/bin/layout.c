@@ -1,9 +1,9 @@
 /** \file layout.c
- * Layout data 
+ * Layout data
  */
 
 /*  XTrkCad - Model Railroad CAD
- *  Copyright (C) 2017 Martin Fischer 
+ *  Copyright (C) 2017 Martin Fischer
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -25,13 +25,13 @@
 #include "paths.h"
 
 struct sDataLayout {
-	DynString	fullFileName;
+    DynString	fullFileName;
 };
 
 static struct sDataLayout thisLayout;
 
 /**
-* Update the full file name.
+* Update the full file name. Do not do anything if the new filename is identical to the old one.
 *
 * \param filename IN the new filename
 */
@@ -39,14 +39,15 @@ static struct sDataLayout thisLayout;
 void
 SetLayoutFullPath(const char *fileName)
 {
-	if (isnas(&thisLayout.fullFileName)) {
-		DynStringMalloc(&thisLayout.fullFileName, strlen(fileName) + 1);
-	}
-	else {
-		DynStringClear(&thisLayout.fullFileName);
-	}
+    if (DynStringToCStr(&thisLayout.fullFileName) != fileName) {
+        if (isnas(&thisLayout.fullFileName)) {
+            DynStringMalloc(&thisLayout.fullFileName, strlen(fileName) + 1);
+        } else {
+            DynStringClear(&thisLayout.fullFileName);
+        }
 
-	DynStringCatCStr(&thisLayout.fullFileName, fileName);
+        DynStringCatCStr(&thisLayout.fullFileName, fileName);
+    }
 }
 
 /**
@@ -58,7 +59,7 @@ SetLayoutFullPath(const char *fileName)
 char *
 GetLayoutFullPath()
 {
-	return(DynStringToCStr(&thisLayout.fullFileName));
+    return (DynStringToCStr(&thisLayout.fullFileName));
 }
 
 /**
@@ -70,10 +71,11 @@ GetLayoutFullPath()
 char *
 GetLayoutFilename()
 {
-	char *string = DynStringToCStr(&thisLayout.fullFileName);
+    char *string = DynStringToCStr(&thisLayout.fullFileName);
 
-	if (string)
-		return(FindFilename(string));
-	else
-		return(NULL);
+    if (string) {
+        return (FindFilename(string));
+    } else {
+        return (NULL);
+    }
 }

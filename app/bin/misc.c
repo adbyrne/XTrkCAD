@@ -484,7 +484,7 @@ static void ChkRevert( void )
 									_("&Revert"), _("&Cancel") );
 		if( rc ) {
 			/* load the file */
-			char *filename = GetLayoutFilename();
+			char *filename = GetLayoutFullPath();
 			LoadTracks( 1, &filename, NULL );
 		}
 	}
