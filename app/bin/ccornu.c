@@ -101,7 +101,10 @@ static struct {
 		EPINX_T ep[2];
 		DIST_T radius[2];
 		ANGLE_T angle[2];
+		ANGLE_T arcA0[2];
+		ANGLE_T arcA1[2];
 		coOrd center[2];
+		curveType_e trackType[2];
 
 		BOOL_T extend[2];
 		trkSeg_t extendSeg[2];
@@ -376,9 +379,12 @@ void GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track_e
 	GetTrackParams(PARAMS_CORNU, t, pos, &trackParams);
 	Da.radius[end] = 0.0;
 	Da.center[end] = zero;
+	Da.trackType[end] = trackParams.type;
 	if (trackParams.type == curveTypeCurve
 			|| trackParams.type == curveTypeBezier
 			|| trackParams.type == curveTypeCornu) {
+		Da.arcA0[end] = trackParams.arcA0;
+		Da.arcA1[end] = trackParams.arcA1;
 		Da.radius[end] = trackParams.arcR;
 		Da.center[end] = trackParams.arcP;
 		ANGLE_T angle1 = FindAngle(trackParams.arcP,pos);
@@ -478,15 +484,57 @@ EXPORT STATUS_T AdjustCornuCurve(
 			InfoMessage(_("Track can't be split"));
 			return C_CONTINUE;
 		}
-		if (OnTrack(&pos, FALSE, TRUE) == Da.trk[Da.selectPoint]) {
-			GetConnectedTrackParms(Da.trk[Da.selectPoint],pos,Da.selectPoint,Da.ep[Da.selectPoint]);
+		int sel = Da.selectPoint;
+		coOrd pos2 = pos;
+		BOOL_T inside = FALSE;
+		if (OnTrack(&pos, FALSE, TRUE) == Da.trk[sel]) {
+			inside = TRUE;
 		} else {
-			wBeep();
-			InfoMessage(_("Not inside selected Track"));
-			return C_CONTINUE;
+			pos = pos2;
+		}
+		DIST_T ab = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]));
+		DIST_T ac = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos);
+		DIST_T cb = FindDistance(GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]), pos);
+		if (ac>(ab-minLength) && cb<ac) {
+				wBeep();
+				InfoMessage(_("Too close to other end of selected Track"));
+				return C_CONTINUE;
 		}
 		DrawTempCornu();   //wipe out
+		Da.extend[sel] = FALSE;
 		Da.pos[Da.selectPoint] = pos;
+		GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel]);
+		if (!inside && Da.trackType[sel] == curveTypeStraight) {    //Extend with a temp seg
+			Da.extendSeg[sel].type = SEG_STRTRK;
+			Da.extendSeg[sel].width = 0;
+			Da.extendSeg[sel].color = wDrawColorBlack;
+			Da.extendSeg[sel].u.l.pos[0] = GetTrkEndPos( Da.trk[sel], Da.ep[sel] );
+			Da.extend[sel] = TRUE;
+			d = FindDistance( Da.extendSeg[sel].u.l.pos[0], pos );
+			a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,GetTrkEndPos(Da.trk[sel],Da.ep[sel])));
+			Translate( &Da.extendSeg[sel].u.l.pos[1],
+						Da.extendSeg[sel].u.l.pos[0],
+						Da.angle[sel], -d * cos(D2R(a)));
+			Da.pos[sel] = pos = Da.extendSeg[sel].u.l.pos[1];
+		} else if (!inside && Da.trackType[sel] == curveTypeCurve) {       //Extend with temp seg
+			Da.extendSeg[sel].type = SEG_CRVTRK;
+			Da.extendSeg[sel].width = 0;
+			Da.extendSeg[sel].color = wDrawColorBlack;
+			Da.extendSeg[sel].u.c.center = Da.center[sel];
+			Da.extendSeg[sel].u.c.radius = Da.radius[sel];
+			a = FindAngle( Da.center[sel], pos );
+			PointOnCircle( &pos, Da.center[sel], Da.radius[sel], a );
+			if (Da.ep[sel]!=0) {
+				Da.extendSeg[sel].u.c.a0 = FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]));
+				Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a-Da.extendSeg[sel].u.c.a0);
+			} else {
+				Da.extendSeg[sel].u.c.a0 = a;
+				Da.extendSeg[sel].u.c.a1 =
+						NormalizeAngle(FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]))-a);
+			}
+			Da.extend[sel] = TRUE;
+			Da.pos[sel] = pos;
+		}
 		CreateBothEnds(Da.selectPoint);
 		if (CallCornu(Da.pos, Da.trk, Da.ep, &Da.crvSegs_da,&cp)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
 		else Da.crvSegs_da_cnt = 0.0;
@@ -543,9 +591,9 @@ EXPORT STATUS_T AdjustCornuCurve(
 						FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
 				return C_TERMINATE;
 			}
-			UndoModify(Da.trk[0]);
-			UndoModify(Da.trk[1]);
+
 			for (int i=0;i<2;i++) {
+				UndoModify(Da.trk[i]);
 				MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
 				ConnectAbuttingTracks(Da.trk[i],Da.ep[i],t,i);
 			}
