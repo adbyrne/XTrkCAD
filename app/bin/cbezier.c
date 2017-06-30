@@ -991,16 +991,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				}
 			} else {
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
-					if ((t = OnTrack2(&p,TRUE, FALSE, TRUE)) != NULL) {
-						if (!IsTrack(t)) {
-							Da.trk[end] = t;
-							ep = PickEndPoint(p,t);
-							Da.ep[end] = ep;
-							pos = GetTrkEndPos(t, ep);
-							found = TRUE;
-						}
-					}
-					if (!found) {
+					if ((t = OnTrack2(&p,TRUE, FALSE, TRUE)) != NULL);
+					else {
 						wBeep();
 						InfoMessage(_("Shift used, but no Line End there"));
 						return C_CONTINUE;
