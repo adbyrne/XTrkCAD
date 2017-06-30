@@ -73,6 +73,7 @@ char * sClipboardF = product ".clp";
 char * sParamQF = product "." KEYCODE "tq";
 char * sUndoF = product ".und";
 char * sAuditF = product ".aud";
+char * sTipF = product ".tip";
 
 char * sSourceFilePattern = NULL;
 char * sImportFilePattern = NULL;

@@ -55,6 +55,7 @@
 #include "misc.h"
 #include "compound.h"
 #include "i18n.h"
+#include "paths.h"
 
 EXPORT long adjTimer;
 static void DemoInitValues( void );
@@ -268,7 +269,7 @@ EXPORT void DoRecord( void * context )
 		recordFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, title, sRecordFilePattern, StartRecord, NULL );
 	}
 	wTextClear( recordT );
-	wFilSelect( recordFile_fs, curDirName );
+	wFilSelect( recordFile_fs, GetCurrentPath(MACROPATHKEY ));
 }
 
 /*****************************************************************************
@@ -716,11 +717,7 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 	wBitMapDelete( d->d );
 	documentSnapshotNum++;
 	if (documentCopy && documentFile) {
-		cp = strrchr( message, FILE_SEP_CHAR[0] );
-		if (cp == 0)
-			cp = message;
-		else
-			cp++;
+		cp = FindFilename(message);
 		cp[strlen(cp)-4] = 0;
 		fprintf( documentFile, "\n?G%s\n", cp );
 	}
@@ -1241,7 +1238,7 @@ EXPORT void DoPlayBack( void * context )
 	if (demoW == NULL)
 		CreateDemoW();
 	wButtonSetLabel( demoNext, _("Save") );
-	wFilSelect( playbackFile_fs, curDirName );
+	wFilSelect( playbackFile_fs, GetCurrentPath(MACROPATHKEY));
 }
 
 
@@ -1380,6 +1377,7 @@ static BOOL_T ReadDemo(
 		static wMenu_p m;
 		char * cp;
 		char *oldLocale = NULL;
+		char *path;
 
 		if ( m == NULL )
 			m = demoM;
@@ -1405,10 +1403,8 @@ static BOOL_T ReadDemo(
 			if (userLocale)
 				oldLocale = SaveLocale(userLocale);
 			demoList( demoList_da.cnt-1 ).title = MyStrdup( _(line+6) );
-			demoList( demoList_da.cnt-1 ).fileName =
-				(char*)MyMalloc( strlen(libDir) + 1 + 5 + 1 + strlen(cp) + 1 );
-			sprintf( demoList( demoList_da.cnt-1 ).fileName, "%s%s%s%s%s",
-				libDir, FILE_SEP_CHAR, "demos", FILE_SEP_CHAR, cp );
+			MakeFullpath(&path, libDir, "demos", cp, NULL);
+			demoList(demoList_da.cnt - 1).fileName = path;
 			wMenuPushCreate( m, NULL, _(line+6), 0, DoDemo, (void*)(intptr_t)(demoList_da.cnt-1) );
 			if (oldLocale)
 				RestoreLocale(oldLocale);

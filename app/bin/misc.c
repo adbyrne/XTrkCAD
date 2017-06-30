@@ -58,6 +58,8 @@
 #include "compound.h"
 #include "smalldlg.h"
 #include "i18n.h"
+#include "layout.h"
+#include "paths.h"
 #include <locale.h>
 
 #define DEFAULT_SCALE ("N")
@@ -482,7 +484,8 @@ static void ChkRevert( void )
 									_("&Revert"), _("&Cancel") );
 		if( rc ) {
 			/* load the file */
-			LoadTracks( 1, &curFileName, NULL );
+			char *filename = GetLayoutFullPath();
+			LoadTracks( 1, &filename, NULL );
 		}
 	}
 }
@@ -518,7 +521,7 @@ EXPORT void SaveState( void )
 	RememberParamFiles();
 	ParamUpdatePrefs();
 
-	wPrefSetString( "misc", "lastlayout", curPathName );
+	wPrefSetString( "misc", "lastlayout", GetLayoutFullPath());
 
 	if ( fileList_ml ) {
 		strcpy( file, "file" );
@@ -577,8 +580,7 @@ static void DoClearAfter( void )
 	Reset();
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
 	EnableCommands();
-	curPathName[0] = '\0';
-	curFileName = curPathName;
+	SetLayoutFullPath("");
 	SetWindowTitle();
 }
 
@@ -2390,9 +2392,9 @@ static void LoadFileList( void )
 		if (!cp)
 			continue;
 		pathName = MyStrdup(cp);
-		fileName = strrchr( pathName, FILE_SEP_CHAR[0] );
+		fileName = FindFilename((char *)pathName);
 		if (fileName)
-		wMenuListAdd( fileList_ml, 0, fileName+1, pathName );
+			wMenuListAdd( fileList_ml, 0, fileName, pathName );
 	}
 }
 

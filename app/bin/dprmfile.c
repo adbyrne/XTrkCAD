@@ -23,10 +23,10 @@
 #include <time.h>
 #include "track.h"
 #include "i18n.h"
-
+#include "paths.h"
 #include <stdint.h>
 
-#define PARAM_SUBDIR FILE_SEP_CHAR "params"
+#define PARAM_SUBDIR "params"
 
 /****************************************************************************
  *
@@ -83,8 +83,9 @@ static BOOL_T UpdateParamFiles( void )
 	long updateTime;
 	long lastTime;
 
-	sprintf( message, "%s%sxtrkcad.upd", libDir, FILE_SEP_CHAR );
-	updateF = fopen( message, "r" );
+	MakeFullpath(&fileNameP, libDir, "xtrkcad.upd", NULL);
+	updateF = fopen( fileNameP, "r" );
+	free(fileNameP);
 	if ( updateF == NULL )
 		return FALSE;
 	if ( fgets( message, sizeof message, updateF ) == NULL ) {
@@ -95,14 +96,15 @@ static BOOL_T UpdateParamFiles( void )
 	updateTime = atol( message );
 	if ( lastTime >= updateTime )
 		return FALSE;
-	sprintf( fileName, "%s%sparams%s", libDir, FILE_SEP_CHAR, FILE_SEP_CHAR );
-	fileNameP = fileName+strlen(fileName);
-	while ( ( fgets( fileNameP, (fileName+sizeof fileName)-fileNameP, updateF ) ) != NULL ) {
-		Stripcr( fileNameP );
-		InfoMessage( _("Updating %s"), fileNameP );
-		paramF = fopen( fileName, "r" );
+
+	while ( ( fgets( fileName, STR_LONG_SIZE, updateF ) ) != NULL ) {
+		Stripcr( fileName );
+		InfoMessage( _("Updating %s"), fileName );
+		MakeFullpath(&fileNameP, libDir, "params", fileName, NULL);
+		paramF = fopen( fileNameP, "r" );
 		if ( paramF == NULL ) {
-			NoticeMessage( MSG_PRMFIL_OPEN_NEW, _("Ok"), NULL, fileName );
+			NoticeMessage( MSG_PRMFIL_OPEN_NEW, _("Ok"), NULL, fileNameP );
+			free(fileNameP);
 			continue;
 		}
 		contents = NULL;
@@ -115,25 +117,29 @@ static BOOL_T UpdateParamFiles( void )
 		}
 		fclose( paramF );
 		if (contents == NULL) {
-			NoticeMessage( MSG_PRMFIL_NO_CONTENTS, _("Ok"), NULL, fileName );
+			NoticeMessage( MSG_PRMFIL_NO_CONTENTS, _("Ok"), NULL, fileNameP );
+			free(fileNameP);
 			continue;
 		}
 		cp = wPrefGetString( "Parameter File Map", contents );
-		wPrefSetString( "Parameter File Map", contents, fileName );
+		wPrefSetString( "Parameter File Map", contents, fileNameP );
 		if (cp!=NULL && *cp!='\0') {
 			/* been there, done that */
+			free(fileNameP);
 			continue;
 		}
 
 		DYNARR_APPEND( paramFileInfo_t, paramFileInfo_da, 10 );
 		curParamFileIndex = paramFileInfo_da.cnt-1;
-		paramFileInfo(curParamFileIndex).name = MyStrdup( fileName );
+		paramFileInfo(curParamFileIndex).name = MyStrdup( fileNameP );
 		curContents = curSubContents = NULL;
 		paramFileInfo(curParamFileIndex).deleted = FALSE;
 		paramFileInfo(curParamFileIndex).valid = TRUE;
 		paramFileInfo(curParamFileIndex).deletedShadow = 
-		paramFileInfo(curParamFileIndex).deleted = !ReadParams( 0, NULL, fileName );
+		paramFileInfo(curParamFileIndex).deleted = !ReadParams( 0, NULL, fileNameP );
 		paramFileInfo(curParamFileIndex).contents = curContents;
+
+		free(fileNameP);
 	}
 	wPrefSetInteger( "file", "updatetime", updateTime );
 	return TRUE;
@@ -278,8 +284,6 @@ EXPORT int LoadParamFile(
 		char ** fileName,
 		void * data )
 {
-	char * cp;
-	char *name;
 	wIndex_t inx;
 	int i = 0;
 
@@ -354,8 +358,6 @@ static void UpdateParamFileButton(
 	wIndex_t selcnt = wListGetSelectedCount( paramFileL );
 	wIndex_t inx, cnt;
 	
-	void * data;
-	
 	// set the default
 	wButtonSetLabel( paramFileActionB, _("Unload"));
 	paramFilePLs[ I_PRMFILACTION ].context = FALSE;
@@ -400,7 +402,6 @@ static void ParamFileAction( void * action )
 	wIndex_t selcnt = wListGetSelectedCount( paramFileL );
 	wIndex_t inx, cnt;
 	wIndex_t fileInx;
-	void * data;
 	unsigned newDeletedState;
 
 	if( action )
@@ -522,8 +523,10 @@ static void DoParamFiles( void * junk )
 			strcpy( curParamDir, dir );
 		else {
 			// in case there is no preference setting, use the installation's param directory as default
-			strcpy( curParamDir, libDir );
-			strcat( curParamDir, PARAM_SUBDIR );
+			char *str;
+			MakeFullpath(&str, libDir, PARAM_SUBDIR, NULL);
+			strcpy( curParamDir, str );
+			free(str);
 		}
 		mtbox_bm = wIconCreateBitMap( mtbox_width, mtbox_height, mtbox_bits, drawColorBlack );
 		chkbox_bm = wIconCreateBitMap( chkbox_width, chkbox_height, chkbox_bits, drawColorBlack );

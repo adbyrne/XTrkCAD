@@ -27,6 +27,7 @@
 #include "track.h"
 #include "trackx.h"
 #include "i18n.h"
+#include "paths.h"
 
 /*****************************************************************************
  *
@@ -148,10 +149,11 @@ static BOOL_T UndoFail( char * cause, long val, char * fileName, int lineNumber 
 	undoStack_p us;
 	FILE * outf;
 	time_t clock;
-	char temp[STR_SIZE];
+	char *temp; 
 	NoticeMessage( MSG_UNDO_ASSERT, _("Ok"), NULL, fileName, lineNumber, val, val, cause );
-	sprintf( temp, "%s%s%s", workingDir, FILE_SEP_CHAR, sUndoF );
+	MakeFullpath(&temp, workingDir, sUndoF, NULL);
 	outf = fopen( temp, "a+" );
+	free(temp);
 	if ( outf == NULL ) {
 		NoticeMessage(  MSG_OPEN_FAIL, _("Ok"), NULL, _("Undo Trace"), temp, strerror(errno) );
 		return FALSE;

@@ -126,10 +126,12 @@ SET(SOURCES
 	elev.c
 	fileio.c
 	i18n.c
+	layout.c
 	lprintf.c
 	macro.c
 	misc2.c
 	param.c
+	paths.c
 	shrtpath.c
 	smalldlg.c
 	tcurve.c

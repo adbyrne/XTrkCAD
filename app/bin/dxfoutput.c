@@ -38,6 +38,7 @@
 #include <assert.h>
 #include "track.h"
 #include "i18n.h"
+#include "paths.h"
 #include <dynstring.h>
 
 #include "dxfformat.h"
@@ -224,7 +225,7 @@ void DoExportDXF(void)
         exportDXFFile_fs = wFilSelCreate(mainW, FS_SAVE, 0, _("Export to DXF"),
                                          sDXFFilePattern, DoExportDXFTracks, NULL);
 
-    wFilSelect(exportDXFFile_fs, curDirName);
+    wFilSelect(exportDXFFile_fs, GetCurrentPath(DXFPATHKEY));
 }
 
 
