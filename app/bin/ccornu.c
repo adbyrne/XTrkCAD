@@ -1,7 +1,7 @@
-/*
- *  XTrkCad - Model Railroad CAD
- *
+/** \file ccornu.c
  * Cornu Command. Draw or modify a Cornu Easement Track.
+ */
+/*  XTrkCad - Model Railroad CAD
  *
  * Cornu curves are a family of mathematically defined curves that define spirals that Euler spirals and elastica come from.
  *
@@ -124,7 +124,7 @@ static struct {
 
 
 
-/*
+/**
  * Draw a EndPoint.
  * A Cornu end Point has a filled circle surrounded by another circle for endpoint
  */
@@ -135,9 +135,6 @@ int createEndPoint(
 					 BOOL_T point_selectable
                       )
 {
-
-
-	coOrd p0, p1;
     DIST_T d, w;
     d = tempD.scale*0.25;
     w = tempD.scale/tempD.dpi; /*double width*/
@@ -185,7 +182,7 @@ void addSegCornu(dynArr_t * const array_p, trkSeg_p seg) {
 		for (int i=0;i<4;i++) s->u.b.pos[i] = seg->u.b.pos[i];
 		s->u.b.radius0 = seg->u.b.radius3;
 		for (int i = 0; i<seg->bezSegs.cnt; i++) {
-			addSegCornu(&s->bezSegs,((trkSeg_p)&seg->bezSegs.ptr[i])); //recurse for copying embedded Beziers as in Cornu joint
+			addSegCornu(&s->bezSegs, (((trkSeg_p)seg->bezSegs.ptr) + i)); //recurse for copying embedded Beziers as in Cornu joint
 		}
 	} else {
 		s->u = seg->u;
@@ -208,13 +205,12 @@ BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius
 	array_p->cnt = 0;
 	//Create LH knots
 	//Find remote end point of track, create start knot
-	trackParams_t params;
 	int ends[2];
 	ends[0] = 2; ends[1] = 3;
 	spiro_cp knots[6];
 	coOrd posk[6];
 	BOOL_T back;
-	ANGLE_T angle1,angle2;
+	ANGLE_T angle1;
 
 	bezctx * bezc = new_bezctx_xtrkcad(array_p,ends,spots);
 
@@ -263,7 +259,7 @@ BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p
 
 	trackParams_t params;
 	BOOL_T ccw0, ccw1;
-	ANGLE_T angle0, angle0_d, angle1, angle1_d;
+	ANGLE_T angle0, angle1;
 
 	GetTrackParams(PARAMS_CORNU,trk[0],pos[0],&params);
 	coOrd pos0 = pos[0];
@@ -415,12 +411,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 {
 	track_p t;
 	DIST_T d;
-	ANGLE_T a, angle1, angle2;
+	ANGLE_T a;
 	static coOrd pos0, pos3, p;
-	int inx;
 	DIST_T dd;
 	EPINX_T ep;
-	double fx, fy, cusp;
 	int controlArm = -1;
 	cornuParm_t cp;
 
@@ -537,7 +531,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		}
 		CreateBothEnds(Da.selectPoint);
 		if (CallCornu(Da.pos, Da.trk, Da.ep, &Da.crvSegs_da,&cp)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-		else Da.crvSegs_da_cnt = 0.0;
+		else Da.crvSegs_da_cnt = 0;
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 		DIST_T rin = Da.radius[0];
 		InfoMessage( _("Cornu : Min Radius=%s Max Rate of Radius Change=%s Length=%s Winding Arc=%s"),
@@ -620,7 +614,7 @@ struct extraData {
 				cornuData_t cornuData;
 		};
 
-/*
+/**
  * CmdCornuModify
  *
  * Called from Modify Command - this function deals with the real (old) track and calls AdjustCornuCurve to tune up the new one
@@ -639,11 +633,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 	track_p t;
 	double width = 1.0;
 	long mode = 0;
-	char c;
 	long cmd;
-	EPINX_T ep[2];
-
-	trackParams_t params;
 
 	struct extraData *xx = GetTrkExtraData(trk);
 	cmd = (long)commandContext;
@@ -840,7 +830,6 @@ DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * las
 STATUS_T CmdCornu( wAction_t action, coOrd pos )
 {
 	track_p t;
-	DIST_T d;
 	static int segCnt;
 	STATUS_T rc = C_CONTINUE;
 	long curveMode = 0;
@@ -928,7 +917,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	case C_MOVE:
 		if (Da.state == POS_1) {
 			EPINX_T ep = 0;
-			ANGLE_T angle1,angle2;
 			BOOL_T found = FALSE;
 			int end = Da.state==POS_1?0:1;
 			if(QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT)) {

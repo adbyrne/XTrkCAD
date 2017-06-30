@@ -200,7 +200,7 @@ EXPORT void GetTextBounds(
 static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo, coOrd *hi )
 {
 	int inx;
-	coOrd p0, p1, p2, p3, pBez[4], pc;
+	coOrd p0, p1, pBez[4], pc;
 	ANGLE_T a0, a1;
 	coOrd width;
 	DIST_T radius;
@@ -1862,11 +1862,13 @@ EXPORT void DrawSegsO(
 				 d->funcs != &tempSegDrawFuncs ) {
 				/* Note: if we call tempSegDrawFillPoly we get a nasty bug
 				/+ because we don't make a private copy of p.pts */
-				coOrd tempPts[segPtr->u.p.cnt];
+				coOrd *tempPts = malloc(sizeof(coOrd)*segPtr->u.p.cnt);
+//				coOrd tempPts[segPtr->u.p.cnt];
 				for (j=0;j<segPtr->u.p.cnt;j++) {
 					REORIGIN( tempPts[j], segPtr->u.p.pts[j], angle, orig );
 				}
 				DrawFillPoly( d, segPtr->u.p.cnt, tempPts, color1 );
+				free(tempPts);
 				break;
 			} /* else fall thru */
 		case SEG_POLY:

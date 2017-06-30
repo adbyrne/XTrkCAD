@@ -1185,6 +1185,9 @@ LOG( log_bezierSegments, 1, ( "Tr2Nxt SI%d A%0.3f P[%0.3f %0.3f] D%0.3f\n", inx,
 
 		dd = FindDistance(data->distance.pos1,segPtr->u.b.pos[0]);   //Just find one distance
 		p0 = data->distance.pos1;
+
+		//initialize p2 
+		p2 = p0;
 		for(int i=0;i<segPtr->bezSegs.cnt;i++) {
 			segProcData.distance.pos1 = p0;
 			SegProc(SEGPROC_DISTANCE,&(DYNARR_N(trkSeg_t,segPtr->bezSegs,i)),&segProcData);

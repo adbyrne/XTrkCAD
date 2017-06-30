@@ -1,7 +1,7 @@
-/*
- *  XTrkCad - Model Railroad CAD
- *
+/** \file cbezier.c
  * Bezier Command. Draw or modify a Bezier (Track or Line).
+ */
+ /*  XTrkCad - Model Railroad CAD
  *
  * Cubic Bezier curves have a definitional representation as an a set of four points.
  * The first and fourth are the end points, while the middle two are control points.
@@ -78,7 +78,7 @@ typedef struct {
 		} bCurveData_t;
 
 static struct {
-		enum { NONE,POS_1,CONTROL_ARM_1,POS_2,PICK_POINT,POINT_PICKED } state;
+		enum Cornu_States state;
 		coOrd pos[4];
         int selectPoint;
         wDrawColor color;
@@ -99,7 +99,7 @@ static struct {
 
 
 
-/*
+/**
  * Draw a ControlArm.
  * A control arm has two filled or unfilled circles for endpoints and a straight line between them.
  * If the end or control point is not selectable we don't mark it with a circle.
@@ -117,8 +117,6 @@ int createControlArm(
 					 wDrawColor color   //drawColorBlack or drawColorWhite
                       )
 {
-
-	coOrd p0, p1;
     DIST_T d, w;
     d = tempD.scale*0.25;
     w = tempD.scale/tempD.dpi; /*double width*/
@@ -250,7 +248,7 @@ void addSegBezier(dynArr_t * const array_p, trkSeg_p seg) {
 		s->bezSegs.cnt = s->bezSegs.max = 0;
 		s->bezSegs.ptr = NULL; //Make sure new space as addr copied in earlier from seg
 		for (int i = 0; i<seg->bezSegs.cnt; i++) {
-			addSegBezier(&s->bezSegs,((trkSeg_p)&seg->bezSegs.ptr[i])); //recurse for copying embedded Beziers as in Cornu joint
+			addSegBezier(&s->bezSegs,(((trkSeg_p)seg->bezSegs.ptr)+i)); //recurse for copying embedded Beziers as in Cornu joint
 		}
 	} else {
 		s->u = seg->u;
@@ -550,9 +548,8 @@ EXPORT STATUS_T AdjustBezCurve(
 {
 	track_p t;
 	DIST_T d;
-	ANGLE_T a, angle1, angle2;
+	ANGLE_T angle1, angle2;
 	static coOrd pos0, pos3, p;
-	int inx;
 	enum BezierType b;
 	DIST_T dd;
 	EPINX_T ep;
@@ -788,12 +785,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
 	track_p t;
 	double width = 1.0;
 	long mode = 0;
-	char c;
 	long cmd;
-	EPINX_T ep[2];
-
-	trackParams_t params;
-	enum BezierType b;
 
 	struct extraData *xx = GetTrkExtraData(trk);
 	cmd = (long)commandContext;
@@ -928,7 +920,6 @@ DIST_T BezierMinRadius(coOrd pos[4],dynArr_t segs) {
 STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 {
 	track_p t;
-	DIST_T d;
 	static int segCnt;
 	STATUS_T rc = C_CONTINUE;
 	long curveMode = 0;

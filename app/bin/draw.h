@@ -117,6 +117,7 @@ extern wDrawColor drawColorGold;
 #define wDrawColorBlack drawColorBlack
 #define wDrawColorWhite drawColorWhite
 #define wDrawColorBlue  drawColorBlue
+#define wDrawColorRed	drawColorRed
 
 extern wDrawColor markerColor;
 extern wDrawColor borderColor;
