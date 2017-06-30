@@ -61,7 +61,7 @@ static BOOL_T modifyCornuMode;
 static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
 	if (Dex.Trk == NULL) return C_ERROR;   //No track picked yet!
-	switch (action) {
+	switch (action&0xFF) {
 		case C_START:
 		case C_DOWN:
 		case C_MOVE:
@@ -89,7 +89,7 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
 	if (Dex.Trk == NULL) return C_ERROR;   //No track picked yet!
-	switch (action) {
+	switch (action&0xFF) {
 		case C_START:
 		case C_DOWN:
 		case C_MOVE:
@@ -483,11 +483,10 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 	case C_TEXT:
 		if ( !Dex.Trk )
 			return C_CONTINUE;
-		if (modifyBezierMode) {
-			return ModifyBezier(C_TEXT, pos);
+		if (modifyBezierMode)
+			return ModifyBezier(action, pos);
 		if (modifyCornuMode)
-			return ModifyCornu(C_TEXT, pos);
-		}
+			return ModifyCornu(action, pos);
 		return ModifyTrack( Dex.Trk, action, pos );
 
 	default:

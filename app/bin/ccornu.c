@@ -595,7 +595,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			for (int i=0;i<2;i++) {
 				UndoModify(Da.trk[i]);
 				MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
-				ConnectAbuttingTracks(Da.trk[i],Da.ep[i],t,i);
+				ConnectTracks(Da.trk[i],Da.ep[i],t,i);
 			}
 			UndoEnd();
 			DrawNewTrack(t);
@@ -649,7 +649,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 	cmd = (long)commandContext;
 
 
-	switch (action) {
+	switch (action&0xFF) {
 	case C_START:
 		Da.state = NONE;
 		DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
@@ -701,9 +701,9 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		return AdjustCornuCurve(C_UP, pos, InfoMessage);					//Run Adjust
 
 	case C_TEXT:
-				if ((action>>8) != ' ')
-					return C_CONTINUE;
-					/* no break */
+		if ((action>>8) != 32)
+			return C_CONTINUE;
+		/* no break */
 	case C_OK:
 		if (Da.state != PICK_POINT) {										//Too early - abandon
 			InfoMessage(_("No changes made"));
@@ -721,7 +721,8 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 								Da.center[1].x,Da.center[1].y,
 								Da.angle[0],Da.angle[1],
 								FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
-			UndoEnd();
+			UndoUndo();
+			MainRedraw();
 			return C_TERMINATE;
 		}
 
@@ -733,11 +734,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		for (int i=0;i<2;i++) {										//Attach new track
 			if (Da.trk[i] != NULL && Da.ep[i] != -1) {								//Like the old track
 				MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
-				ConnectAbuttingTracks(t,i,Da.trk[i],Da.ep[i]);
+				ConnectTracks(t,i,Da.trk[i],Da.ep[i]);
 			}
 		}
 		UndoEnd();
-		InfoMessage(_("Modify Cornu Complete - select another"));
+		MainRedraw();
 		Da.state = NONE;
 		return C_TERMINATE;
 
@@ -746,6 +747,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		Da.state = NONE;
 		MainRedraw();
 		return C_TERMINATE;
+
 	case C_REDRAW:
 		return AdjustCornuCurve(C_REDRAW, pos, InfoMessage);
 	}
@@ -962,7 +964,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			return AdjustCornuCurve( action&0xFF, pos, InfoMessage );
 		}
 	case C_TEXT:
-			if (Da.state != PICK_POINT || (action>>8) != ' ')  //Space is same as Enter.
+			if (Da.state != PICK_POINT || (action>>8) != 32)  //Space is same as Enter.
 				return C_CONTINUE;
 			/* no break */
     case C_OK:

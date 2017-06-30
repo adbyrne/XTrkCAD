@@ -799,7 +799,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
 	cmd = (long)commandContext;
 
 
-	switch (action) {
+	switch (action&0xFF) {
 	case C_START:
 		Da.state = NONE;
 		DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
@@ -839,9 +839,9 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
 		return AdjustBezCurve(C_UP, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth,  InfoMessage);					//Run Adjust
 
 	case C_TEXT:
-				if ((action>>8) != ' ')
-					return C_CONTINUE;
-					/* no break */
+		if ((action>>8) != 32)
+			return C_CONTINUE;
+		/* no break */
 	case C_OK:
 		if (Da.state != PICK_POINT) {										//Too early - abandon
 			InfoMessage(_("No changes made"));
@@ -936,20 +936,21 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 	if (action>>8) {
 		cmd = action>>8;
 	} else cmd = (long)commandContext;
-	Da.track = (cmd == bezCmdModifyTrack || cmd == bezCmdCreateTrack)?TRUE:FALSE;
-	if (!Da.track) {
-			Da.color = lineColor;
-			Da.width = (double)lineWidth;
-	} else {
-			Da.color = wDrawColorBlack;
-			Da.width = 0.0;
-	}
+
 
 
 	switch (action&0xFF) {
 
 	case C_START:
 
+		Da.track = (cmd == bezCmdModifyTrack || cmd == bezCmdCreateTrack)?TRUE:FALSE;
+		if (!Da.track) {
+			Da.color = lineColor;
+			Da.width = (double)lineWidth;
+		} else {
+			Da.color = wDrawColorBlack;
+			Da.width = 0.0;
+		}
 		Da.state = POS_1;
 		Da. selectPoint = -1;
 		for (int i=0;i<4;i++) {

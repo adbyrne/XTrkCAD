@@ -445,7 +445,7 @@ static STATUS_T CmdJoin(
 	DIST_T eR[2];
 	BOOL_T ok;
 
-	switch (action) {
+	switch (action&0xFF) {
 
 	case C_START:
 		InfoMessage( _("Left click - join with track, Shift Left click - move to join") );
