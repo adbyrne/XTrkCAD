@@ -159,8 +159,8 @@ DIST_T CornuDescriptionDistance(
 	if ( GetTrkType( trk ) != T_CORNU || ( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 )
 		return 100000;
 	
-		p1.x = xx->cornuData.pos[0].x + (xx->cornuData.pos[3].x-xx->cornuData.pos[0].x)/2 + xx->cornuData.descriptionOff.x;
-		p1.y = xx->cornuData.pos[0].y + (xx->cornuData.pos[3].y-xx->cornuData.pos[0].y)/2 + xx->cornuData.descriptionOff.y;
+		p1.x = xx->cornuData.pos[0].x + (xx->cornuData.pos[1].x-xx->cornuData.pos[0].x)/2 + xx->cornuData.descriptionOff.x;
+		p1.y = xx->cornuData.pos[0].y + (xx->cornuData.pos[1].y-xx->cornuData.pos[0].y)/2 + xx->cornuData.descriptionOff.y;
 	
 	return FindDistance( p1, pos );
 }
@@ -179,8 +179,8 @@ static void DrawCornuDescription(
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 		return;
-    pos.x = xx->cornuData.pos[0].x + (xx->cornuData.pos[3].x - xx->cornuData.pos[0].x)/2;
-    pos.y = xx->cornuData.pos[0].y + (xx->cornuData.pos[3].y - xx->cornuData.pos[0].y)/2;
+    pos.x = xx->cornuData.pos[0].x + (xx->cornuData.pos[1].x - xx->cornuData.pos[0].x)/2;
+    pos.y = xx->cornuData.pos[0].y + (xx->cornuData.pos[1].y - xx->cornuData.pos[0].y)/2;
     pos.x += xx->cornuData.descriptionOff.x;
     pos.y += xx->cornuData.descriptionOff.y;
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
@@ -210,8 +210,8 @@ STATUS_T CornuDescriptionMove(
     
         if (action != C_DOWN)
             DrawLine( &mainD, xx->cornuData.pos[0], p0, 0, wDrawColorBlack );
-        xx->cornuData.descriptionOff.x = p0.x - xx->cornuData.pos[0].x + (xx->cornuData.pos[3].x-xx->cornuData.pos[0].x)/2;
-        xx->cornuData.descriptionOff.y = p0.y - xx->cornuData.pos[0].x + (xx->cornuData.pos[3].y-xx->cornuData.pos[0].y)/2;
+        xx->cornuData.descriptionOff.x = p0.x - xx->cornuData.pos[0].x + (xx->cornuData.pos[1].x-xx->cornuData.pos[0].x)/2;
+        xx->cornuData.descriptionOff.y = p0.y - xx->cornuData.pos[0].x + (xx->cornuData.pos[1].y-xx->cornuData.pos[0].y)/2;
         p0 = pos;
         if (action != C_UP)
             DrawLine( &mainD, xx->cornuData.pos[0], p0, 0, wDrawColorBlack );
@@ -669,6 +669,7 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     trkSeg_p segPtr = &DYNARR_N(trkSeg_t, xx->cornuData.arcSegs, inx);
     if (segPtr->type == SEG_STRTRK) {
     	radius = 0.0;
+    	center = zero;
     } else if (segPtr->type == SEG_CRVTRK) {
     	center = segPtr->u.c.center;
     	radius = segPtr->u.c.radius;
@@ -1120,8 +1121,8 @@ static BOOL_T MakeParallelCornu(
 		//Dont have a SEG_CORNU yet...
 		return FALSE;
 	}
-	if ( p0R ) p0R = &np[0];
-	if ( p1R ) p1R = &np[1];
+	if ( p0R ) *p0R = np[0];
+	if ( p1R ) *p1R = np[1];
 	return TRUE;
 }
 
@@ -1233,7 +1234,7 @@ track_p NewCornuTrack(coOrd pos[2], coOrd center[2],ANGLE_T angle[2], DIST_T rad
     	ErrorMessage("Create Cornu Failed");
     	return NULL;
 	}
-LOG( log_cornu, 1, ( "NewCornuTrack( EP1 %0.3f, %0.3f, CP1 %0.3f, %0.3f, CP2 %0.3f, %0.3f, EP2 %0.3f, %0.3f )  = %d\n", pos[0].x, pos[0].y, pos[1].x, pos[1].y, pos[2].x, pos[2].y, pos[3].x, pos[3].y, GetTrkIndex(p) ) )
+LOG( log_cornu, 1, ( "NewCornuTrack( EP1 %0.3f, %0.3f, EP2 %0.3f, %0.3f )  = %d\n", pos[0].x, pos[0].y, pos[1].x, pos[1].y, GetTrkIndex(p) ) )
 	ComputeCornuBoundingBox( p, xx );
 	SetTrkEndPoint( p, 0, pos[0], xx->cornuData.a[0]);
 	SetTrkEndPoint( p, 1, pos[1], xx->cornuData.a[1]);
