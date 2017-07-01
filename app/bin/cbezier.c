@@ -60,14 +60,14 @@ extern drawCmd_t tempD;
 /*
  * STATE INFO
  */
-enum { NONE,
+enum Bezier_States { NONE,
 	POS_1,
 	CONTROL_ARM_1,
 	POS_2,
 	CONTROL_ARM_2,
 	PICK_POINT,
 	POINT_PICKED,
-	TRACK_SELECTED } Cornu_States;
+	TRACK_SELECTED };
 
 typedef struct {
 		curveData_t curveData;
@@ -78,7 +78,7 @@ typedef struct {
 		} bCurveData_t;
 
 static struct {
-		enum Cornu_States state;
+		enum Bezier_States state;
 		coOrd pos[4];
         int selectPoint;
         wDrawColor color;
