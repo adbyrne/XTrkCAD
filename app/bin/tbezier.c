@@ -732,7 +732,7 @@ static BOOL_T MergeBezier(
 {
 	struct extraData *xx0 = GetTrkExtraData(trk0);
 	struct extraData *xx1 = GetTrkExtraData(trk1);
-	track_p trk2;
+	track_p trk2 = NULL;
 	EPINX_T ep2=-1;
 	BOOL_T tracks = FALSE;
 
@@ -762,7 +762,7 @@ static BOOL_T MergeBezier(
 	FixUpBezier(xx0->bezierData.pos,xx0,tracks);
 	ComputeBezierBoundingBox(trk0,xx0);
 	DeleteTrack( trk1, FALSE );
-	if (trk2 && tracks) {
+	if (tracks && trk2) {
 		if (ep0 == 1)
 			SetTrkEndPoint( trk2, 1, xx0->bezierData.pos[0], xx0->bezierData.a0);
 		else
@@ -964,8 +964,8 @@ static BOOL_T MakeParallelBezier(
 		for (int i=0;i<4;i++) tempSegs(0).u.b.pos[i] = np[i];
 		FixUpBezierSeg(tempSegs(0).u.b.pos,&tempSegs(0),TRUE);
 	}
-	if ( p0R ) p0R = &np[0];
-	if ( p1R ) p1R = &np[1];
+	if ( p0R ) *p0R = np[0];
+	if ( p1R ) *p1R = np[1];
 	return TRUE;
 }
 
@@ -1099,7 +1099,7 @@ LOG( log_bezierSegments, 1, ( "Tr1 Enter P[%0.3f %0.3f] A%0.3f\n", p0.x, p0.y, d
 
 		subSegsPtr = (trkSeg_p)segPtr->bezSegs.ptr+inx;
 		SegProc( SEGPROC_TRAVERSE1, subSegsPtr, &segProcData );
-		data->traverse1.backwards = data->traverse1.reverse_seg?!backwards:backwards; //Adjust as curve can be backwards
+		data->traverse1.backwards = data->traverse1.reverse_seg?!segs_backwards:segs_backwards; //Adjust as curve can be backwards
 		data->traverse1.reverse_seg = FALSE;						  //SEG_BEZ are always forward
 		data->traverse1.dist = segProcData.traverse1.dist;			  //Get last seg partial dist
 		data->traverse1.angle = segProcData.traverse1.angle;
@@ -1247,30 +1247,6 @@ LOG( log_bezierSegments, 1, ( "GA-O SI%d A%0.3f P[%0.3f %0.3f] B%d\n", inx, data
  */
 
 
-
-EXPORT void PlotBezier(
-		long mode,
-		coOrd pos0,
-		coOrd pos1,
-		coOrd pos2,
-		BezierData_t * BezierData,
-		BOOL_T constrain )
-{
-	DIST_T d0, d2, r;
-	ANGLE_T angle, a0, a1, a2;
-	coOrd posx;
-    //TODO
-    /*
-	switch ( mode ) {
-	case crvCmdFromEP1:
-            
-            
-			}
-     */
-}
-
-
-
 track_p NewBezierTrack(coOrd pos[4], trkSeg_t * tempsegs, int count)
 {
 	struct extraData *xx;
@@ -1414,7 +1390,7 @@ extern void BezierSplit(coOrd input[4], coOrd left[4], coOrd right[4] , double t
  * If close enough (length of control polygon exceeds chord by < error) add length of polygon.
  * Else split and recurse
  */
-void BezierAddLengthIfClose(coOrd start[4], double length, double error) {
+double BezierAddLengthIfClose(coOrd start[4], double error) {
     coOrd left[4], right[4];                  /* bez poly splits */
     double len = 0.0;                         /* arc length */
     double chord;                             /* chord length */
@@ -1427,12 +1403,10 @@ void BezierAddLengthIfClose(coOrd start[4], double length, double error) {
 
     if((len-chord) > error)  {					// If error too large -
         BezierSplit(start,left,right,0.5);               /* split in two */
-        BezierAddLengthIfClose(left, length, error);        /* recurse left side */
-        BezierAddLengthIfClose(right, length, error);       /* recurse right side */
-        return;
+        len = BezierAddLengthIfClose(left, error);        /* recurse left side */
+        len += BezierAddLengthIfClose(right, error);       /* recurse right side */
     }
-    length = length + len;						// Add length of this curve
-    return;
+    return len;									// Add length of this curve
 
 }
 
@@ -1442,10 +1416,8 @@ void BezierAddLengthIfClose(coOrd start[4], double length, double error) {
  */
 extern double BezierMathLength(coOrd p[4], double error)
 {
-    double length; /* length of curve */
     if (error == 0.0) error = 0.01;
-    BezierAddLengthIfClose(p, length, error);  /* kick off recursion */
-    return length;                                  /* that's it! */
+    return BezierAddLengthIfClose(p, error);  /* kick off recursion */
 
 }
 
