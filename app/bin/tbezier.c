@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tbezier.c,v 1.0 2015-07-01 tynewydd Exp $
- *
+/** \file tbezier.c
  * BEZIER TRACK
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -164,8 +161,6 @@ STATUS_T BezierDescriptionMove(
 	struct extraData *xx = GetTrkExtraData(trk);
 	static coOrd p0;
 	wDrawColor color;
-	ANGLE_T a, a0, a1;
-	DIST_T d;
 	if (GetTrkType(trk) != T_BEZIER) return C_TERMINATE;
 
 	switch (action) {
@@ -233,9 +228,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	BOOL_T updateEndPts;
-	ANGLE_T a0, a1;
 	EPINX_T ep;
-	FLOAT_T turns;
 	ANGLE_T angle1, angle2;
 
 	if ( inx == -1 )
@@ -321,11 +314,8 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	ANGLE_T a0, a1;
 	DIST_T d;
 	int fix0, fix1 = 0;
-	FLOAT_T turns;
-
 	
 	d = xx->bezierData.length;
     sprintf( str, _("Bezier %s(%d): Layer=%d MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,%0.3f] CP1=[%0.3f,%0.3f] CP2=[%0.3f, %0.3f]"),
@@ -394,11 +384,9 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 static DIST_T DistanceBezier( track_p t, coOrd * p )
 {
 	struct extraData *xx = GetTrkExtraData(t);
-	double s;
 	//return BezierMathDistance(p,xx->bezierData.pos,100, &s);
 
-	ANGLE_T a0, a1;
-	DIST_T d = 100000.0,dd;
+	DIST_T d = 100000.0;
 	coOrd p2 = xx->bezierData.pos[0];    //Set initial point
 	segProcData_t segProcData;
 	for (int i = 0;i<xx->bezierData.arcSegs.cnt;i++) {
@@ -500,9 +488,7 @@ static void ReadBezier( char * line )
 	track_p t;
 	wIndex_t index;
 	BOOL_T visible;
-	DIST_T r;
 	coOrd p0, c1, c2, p1, dp;
-	DIST_T elev;
 	char scale[10];
 	wIndex_t layer;
 	long options;
@@ -605,7 +591,7 @@ EXPORT void AdjustBezierEndPt( track_p trk, EPINX_T inx, coOrd pos ) {
 static BOOL_T SplitBezier( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, EPINX_T * ep0, EPINX_T * ep1 )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	track_p trk1,trk2;
+	track_p trk1;
     double t;
     BOOL_T track;
     track = IsTrack(trk);
@@ -670,7 +656,7 @@ static BOOL_T TraverseBezier( traverseTrack_p trvTrk, DIST_T * distR )
 	coOrd pos2 = trvTrk->pos;
 	ANGLE_T a1,a2;
 	int inx,segInx = 0;
-	EPINX_T ep, ep2;
+	EPINX_T ep;
 	BOOL_T back;
 	trkSeg_p segPtr = (trkSeg_p)xx->bezierData.arcSegs.ptr;
 
@@ -745,10 +731,8 @@ static BOOL_T MergeBezier(
 {
 	struct extraData *xx0 = GetTrkExtraData(trk0);
 	struct extraData *xx1 = GetTrkExtraData(trk1);
-	DIST_T d;
 	track_p trk2;
 	EPINX_T ep2=-1;
-	coOrd pos;
 	BOOL_T tracks = FALSE;
 
 	if (IsTrack(trk0) && IsTrack(trk1) ) tracks = TRUE;
@@ -794,7 +778,6 @@ static BOOL_T MergeBezier(
 static BOOL_T EnumerateBezier( track_p trk )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	ANGLE_T a0, a1;
 	DIST_T d;
 	if (trk != NULL) {
 		xx = GetTrkExtraData(trk);
@@ -938,7 +921,6 @@ static BOOL_T MakeParallelBezier(
 		coOrd * p1R )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
-	struct extraData * xx1;
     coOrd np[4], p;
     ANGLE_T a,a2;
 
@@ -1078,11 +1060,9 @@ EXPORT void BezierSegProc(
 		trkSeg_p segPtr,
 		segProcData_p data )
 {
-	ANGLE_T a0, a1, a2;
-	DIST_T d, dd, circum, d0;
+	ANGLE_T a1, a2;
+	DIST_T d, dd;
 	coOrd p0,p2 ;
-	wIndex_t s0, s1;
-	EPINX_T ep;
 	segProcData_t segProcData;
 	trkSeg_p subSegsPtr;
 	coOrd temp0,temp1,temp2,temp3;
