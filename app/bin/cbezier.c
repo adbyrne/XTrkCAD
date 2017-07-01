@@ -435,10 +435,13 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	          return FALSE;				//Failed to make into arcs
 	        }
 	        prev_arc = prev_arc.end==0.0?arc:prev_arc;
-	        trkSeg_t curveSeg;  			//Now set up tempSeg to copy into array
-	        curveSeg.width = width;
+	        trkSeg_t curveSeg;  			//Now set up tempSeg to copy into arra
+	        curveSeg.width = track?0:width;
 	        if ( prev_arc.curveData.type == curveTypeCurve ) {
-	        		curveSeg.color = (prev_arc.curveData.curveRadius<=minTrackRadius)?wDrawColorRed:wDrawColorBlack;
+	        		if (track)
+	        			curveSeg.color = (prev_arc.curveData.curveRadius<=minTrackRadius)?wDrawColorRed:wDrawColorBlack;
+	        		else
+	        			curveSeg.color = color;
 	        		curveSeg.type = track?SEG_CRVTRK:SEG_CRVLIN;
 	        		curveSeg.u.c.a0 = prev_arc.curveData.a0;
 	        		curveSeg.u.c.a1 = prev_arc.curveData.a1;
@@ -446,7 +449,10 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	        		curveSeg.u.c.radius = prev_arc.curveData.curveRadius;
 	        } else {											//Straight Line because all points co-linear
 	        	curveSeg.type = track?SEG_STRTRK:SEG_STRLIN;
-	        	curveSeg.color = wDrawColorBlack;
+	        	if (track)
+	        		curveSeg.color = wDrawColorBlack;
+	        	else
+	        		curveSeg.color = color;
 	        	curveSeg.u.l.angle = prev_arc.curveData.a1;
 	        	curveSeg.u.l.pos[0] = prev_arc.pos0;
 	        	curveSeg.u.l.pos[1] = prev_arc.pos1;
@@ -928,20 +934,15 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		cmd = action>>8;
 	} else cmd = (long)commandContext;
 
-
+	Da.color = lineColor;
+	Da.width = (double)lineWidth;
 
 	switch (action&0xFF) {
 
 	case C_START:
 
 		Da.track = (cmd == bezCmdModifyTrack || cmd == bezCmdCreateTrack)?TRUE:FALSE;
-		if (!Da.track) {
-			Da.color = lineColor;
-			Da.width = (double)lineWidth;
-		} else {
-			Da.color = wDrawColorBlack;
-			Da.width = 0.0;
-		}
+
 		Da.state = POS_1;
 		Da. selectPoint = -1;
 		for (int i=0;i<4;i++) {
@@ -1074,6 +1075,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 
 	case C_REDRAW:
 		if ( Da.state != NONE ) {
+
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, Da.color);
 		}
 		return C_CONTINUE;

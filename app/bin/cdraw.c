@@ -841,11 +841,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	wControl_p controls[4];
 	char * labels[3];
 	static char labelName[40];
-	wAction_t act2 = action | (bezCmdCreateLine<<8);
 
-	if ((wIndex_t)(long)commandContext == OP_BEZLIN) {								//Pass all Bezier direct to cbezier
-			wAction_t act2 = (action&0xFF) | (bezCmdCreateLine<<8);
-	}
+	wAction_t act2 = (action&0xFF) | (bezCmdCreateLine<<8);
 
 	switch (action&0xFF) {
 
@@ -885,6 +882,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			InfoSubstituteControls( controls, labels );
 			drawWidthPD.option &= ~PDO_NORECORD;
 			drawColorPD.option &= ~PDO_NORECORD;
+			lineWidth = drawCmdContext.Width/drawCmdContext.D->dpi;
 			break;
 		case OP_FILLCIRCLE2:
 		case OP_FILLCIRCLE3:
@@ -941,7 +939,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			infoSubst = FALSE;
 		}
 		ParamGroupRecord( &drawPG );
-		lineWidth = drawCmdContext.Width/mainD.dpi;
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		DrawGeomMouse( C_START, pos, &drawCmdContext );
 
@@ -951,7 +948,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		ParamLoadData( &drawPG );
 		if (drawCmdContext.Op == OP_BEZLIN) {
 			act2 = action | (bezCmdCreateLine<<8);
-			lineWidth = drawCmdContext.Width/mainD.dpi;
+			drawCmdContext.Width = floor(lineWidth*drawCmdContext.D->dpi);
+			drawCmdContext.Color = lineColor;
 			return CmdBezCurve(act2, pos);
 		}
 		if ( drawCmdContext.Op == OP_BENCH ) {
@@ -977,7 +975,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionText:
 	case C_CMDMENU:
 		SnapPos( &pos );
-		lineWidth = drawCmdContext.Width/mainD.dpi;
+		lineWidth = drawCmdContext.Width/drawCmdContext.D->dpi;
+		lineColor = drawCmdContext.Color;
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
@@ -987,7 +986,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	case C_OK:
-		lineWidth = drawCmdContext.Width/mainD.dpi;
+		lineWidth = drawCmdContext.Width/drawCmdContext.D->dpi;
+		lineColor = drawCmdContext.Color;
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext );
 		/*DrawOk( NULL );*/
@@ -998,6 +998,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		/*DrawOk( NULL );*/
 
 	case C_REDRAW:
+		lineWidth = drawCmdContext.Width/drawCmdContext.D->dpi;
+		lineColor = drawCmdContext.Color;
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 

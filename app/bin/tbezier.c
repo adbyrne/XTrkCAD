@@ -382,6 +382,7 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	crvDesc[LY].mode = DESC_NOREDRAW;
 	bezData.width = (long)floor(xx->bezierData.segsWidth*mainD.dpi+0.5);
 	crvDesc[WI].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
+	bezData.color = xx->bezierData.segsColor;
 	crvDesc[CO].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
 	
 	if (GetTrkType(trk) == T_BEZIER)
@@ -869,7 +870,7 @@ static BOOL_T QueryBezier( track_p trk, int query )
 	case Q_HAS_DESC:
 		return TRUE;
 	case Q_EXCEPTION:
-		return xx->bezierData.minCurveRadius < minTrackRadius;
+		return GetTrkType(trk) == T_BEZIER?xx->bezierData.minCurveRadius < minTrackRadius:FALSE;
 	case Q_CAN_MODIFY_CONTROL_POINTS:
 		return TRUE;
 	case Q_ISTRACK:
