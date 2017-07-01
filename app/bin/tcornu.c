@@ -1,6 +1,4 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tcornu.c,v 1.0 2015-07-01 tynewydd Exp $
- *
+/** \file tcornu.c
  * CORNU SPIRAL TRACK
  *
  * A cornu is a spiral arc defined by a polynomial that has the property
@@ -200,8 +198,7 @@ STATUS_T CornuDescriptionMove(
 	struct extraData *xx = GetTrkExtraData(trk);
 	static coOrd p0;
 	wDrawColor color;
-	ANGLE_T a, a0, a1;
-	DIST_T d;
+
 	if (GetTrkType(trk) != T_CORNU) return C_TERMINATE;
 
 	switch (action) {
@@ -274,121 +271,116 @@ static descData_t cornuDesc[] = {
 
 
 static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final )
-		{
-			struct extraData *xx = GetTrkExtraData(trk);
-			BOOL_T updateEndPts;
-			ANGLE_T a0, a1;
-			EPINX_T ep;
-			FLOAT_T turns;
-			ANGLE_T angle1, angle2;
-			cornuParm_t cp;
+{
+	struct extraData *xx = GetTrkExtraData(trk);
+	BOOL_T updateEndPts;
+	EPINX_T ep;
 
-			if ( inx == -1 )
-				return;
-			updateEndPts = FALSE;
-			switch ( inx ) {
-		    case P0:
-		        if (GetTrkEndTrk(trk,0)) break;
-		    	updateEndPts = TRUE;
-		        xx->cornuData.pos[0] = cornData.pos[0];
-		        cornuDesc[P0].mode |= DESC_CHANGE;
-		        /* no break */
-		    case P1:
-		    	if (GetTrkEndTrk(trk,1)) break;
-		        updateEndPts = TRUE;
-		        xx->cornuData.pos[1]= cornData.pos[1];
-		        cornuDesc[P1].mode |= DESC_CHANGE;
-		        break;
-		    case A0:
-		    	if (GetTrkEndTrk(trk,0)) break;
-		    	updateEndPts = TRUE;
-		    	xx->cornuData.a[0] = cornData.angle[0];
-		    	cornuDesc[A0].mode |= DESC_CHANGE;
-		    	break;
-		    case A1:
-		    	if (GetTrkEndTrk(trk,1)) break;
-		    	updateEndPts = TRUE;
-		    	xx->cornuData.a[1]= cornData.angle[1];
-		    	cornuDesc[A1].mode |= DESC_CHANGE;
-		    	break;
-		    case C0:
-		    	if (GetTrkEndTrk(trk,0)) break;
-		    	updateEndPts = TRUE;
-		    	xx->cornuData.c[0] = cornData.center[0];
-		    	cornuDesc[C0].mode |= DESC_CHANGE;
-		    	break;
-		    case C1:
-		    	if (GetTrkEndTrk(trk,1)) break;
-		    	updateEndPts = TRUE;
-		    	xx->cornuData.c[1] = cornData.center[1];
-		    	cornuDesc[C1].mode |= DESC_CHANGE;
-		    	break;
-		    case R0:
-		        if (GetTrkEndTrk(trk,0)) break;
-		        updateEndPts = TRUE;
-		        xx->cornuData.r[0] = cornData.radius[0];
-		        cornuDesc[R0].mode |= DESC_CHANGE;
-		        break;
-		    case R1:
-		        if (GetTrkEndTrk(trk,1)) break;
-		        updateEndPts = TRUE;
-		        xx->cornuData.r[1]= cornData.radius[1];
-		        cornuDesc[R1].mode |= DESC_CHANGE;
-		        break;
-		    case Z0:
-			case Z1:
-				ep = (inx==Z0?0:1);
-				UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep), cornData.elev[ep], NULL );
-				ComputeElev( trk, 1-ep, FALSE, &cornData.elev[1-ep], NULL );
-				if ( cornData.length > minLength )
-					cornData.grade = fabs( (cornData.elev[0]-cornData.elev[1])/cornData.length )*100.0;
-				else
-					cornData.grade = 0.0;
-				cornuDesc[GR].mode |= DESC_CHANGE;
-				cornuDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
-		        return;
-			case LY:
-				SetTrkLayer( trk, cornData.layerNumber);
-				break;
-			default:
-				AbortProg( "updateCornu: Bad inx %d", inx );
-			}
-			track_p tracks[2];
-			tracks[0] = GetTrkEndTrk(trk,0);
-			tracks[1] = GetTrkEndTrk(trk,1);
+	cornuParm_t cp;
 
-			if (updateEndPts) {
-				if ( GetTrkEndTrk(trk,0) == NULL ) {
-					SetTrkEndPoint( trk, 0, cornData.pos[0], xx->cornuData.a[0]);
-					cornuDesc[A0].mode |= DESC_CHANGE;
-				}
-				if ( GetTrkEndTrk(trk,1) == NULL ) {
-					SetTrkEndPoint( trk, 1, cornData.pos[1], xx->cornuData.a[1]);
-					cornuDesc[A1].mode |= DESC_CHANGE;
-				}
-			}
+	if ( inx == -1 )
+		return;
+	updateEndPts = FALSE;
+	switch ( inx ) {
+	case P0:
+		if (GetTrkEndTrk(trk,0)) break;
+		updateEndPts = TRUE;
+		xx->cornuData.pos[0] = cornData.pos[0];
+		cornuDesc[P0].mode |= DESC_CHANGE;
+		/* no break */
+	case P1:
+		if (GetTrkEndTrk(trk,1)) break;
+		updateEndPts = TRUE;
+		xx->cornuData.pos[1]= cornData.pos[1];
+		cornuDesc[P1].mode |= DESC_CHANGE;
+		break;
+	case A0:
+		if (GetTrkEndTrk(trk,0)) break;
+		updateEndPts = TRUE;
+		xx->cornuData.a[0] = cornData.angle[0];
+		cornuDesc[A0].mode |= DESC_CHANGE;
+		break;
+	case A1:
+		if (GetTrkEndTrk(trk,1)) break;
+		updateEndPts = TRUE;
+		xx->cornuData.a[1]= cornData.angle[1];
+		cornuDesc[A1].mode |= DESC_CHANGE;
+		break;
+	case C0:
+		if (GetTrkEndTrk(trk,0)) break;
+		updateEndPts = TRUE;
+		xx->cornuData.c[0] = cornData.center[0];
+		cornuDesc[C0].mode |= DESC_CHANGE;
+		break;
+	case C1:
+		if (GetTrkEndTrk(trk,1)) break;
+		updateEndPts = TRUE;
+		xx->cornuData.c[1] = cornData.center[1];
+		cornuDesc[C1].mode |= DESC_CHANGE;
+		break;
+	case R0:
+		if (GetTrkEndTrk(trk,0)) break;
+		updateEndPts = TRUE;
+		xx->cornuData.r[0] = cornData.radius[0];
+		cornuDesc[R0].mode |= DESC_CHANGE;
+		break;
+	case R1:
+		if (GetTrkEndTrk(trk,1)) break;
+		updateEndPts = TRUE;
+		xx->cornuData.r[1]= cornData.radius[1];
+		cornuDesc[R1].mode |= DESC_CHANGE;
+		break;
+	case Z0:
+	case Z1:
+		ep = (inx==Z0?0:1);
+		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep), cornData.elev[ep], NULL );
+		ComputeElev( trk, 1-ep, FALSE, &cornData.elev[1-ep], NULL );
+		if ( cornData.length > minLength )
+			cornData.grade = fabs( (cornData.elev[0]-cornData.elev[1])/cornData.length )*100.0;
+		else
+			cornData.grade = 0.0;
+		cornuDesc[GR].mode |= DESC_CHANGE;
+		cornuDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
+		return;
+	case LY:
+		SetTrkLayer( trk, cornData.layerNumber);
+		break;
+	default:
+		AbortProg( "updateCornu: Bad inx %d", inx );
+	}
+	track_p tracks[2];
+	tracks[0] = GetTrkEndTrk(trk,0);
+	tracks[1] = GetTrkEndTrk(trk,1);
 
-			EPINX_T new_ep[2];
-			new_ep[0] = GetEndPtConnectedToMe( GetTrkEndTrk(trk,0), trk );
-			new_ep[1] = GetEndPtConnectedToMe( GetTrkEndTrk(trk,1), trk );
-
-			CallCornu(xx->cornuData.pos, tracks, new_ep, &xx->cornuData.arcSegs, &cp);
-
-
-			//FixUpCornu(xx->bezierData.pos, xx, IsTrack(trk));
-			ComputeCornuBoundingBox(trk, xx);
-			DrawNewTrack( trk );
+	if (updateEndPts) {
+		if ( GetTrkEndTrk(trk,0) == NULL ) {
+			SetTrkEndPoint( trk, 0, cornData.pos[0], xx->cornuData.a[0]);
+			cornuDesc[A0].mode |= DESC_CHANGE;
 		}
+		if ( GetTrkEndTrk(trk,1) == NULL ) {
+			SetTrkEndPoint( trk, 1, cornData.pos[1], xx->cornuData.a[1]);
+			cornuDesc[A1].mode |= DESC_CHANGE;
+		}
+	}
+
+	EPINX_T new_ep[2];
+	new_ep[0] = GetEndPtConnectedToMe( GetTrkEndTrk(trk,0), trk );
+	new_ep[1] = GetEndPtConnectedToMe( GetTrkEndTrk(trk,1), trk );
+
+	CallCornu(xx->cornuData.pos, tracks, new_ep, &xx->cornuData.arcSegs, &cp);
+
+
+	//FixUpCornu(xx->bezierData.pos, xx, IsTrack(trk));
+	ComputeCornuBoundingBox(trk, xx);
+	DrawNewTrack( trk );
+}
 
 
 static void DescribeCornu( track_p trk, char * str, CSIZE_T len )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	ANGLE_T a0, a1;
 	DIST_T d;
 	int fix0, fix1 = 0;
-	FLOAT_T turns;
-
 
 	d = xx->cornuData.length;
     sprintf( str, _("Cornu Track(%d): Layer=%d MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,%0.3f]"),
@@ -456,11 +448,9 @@ static void DescribeCornu( track_p trk, char * str, CSIZE_T len )
 static DIST_T DistanceCornu( track_p t, coOrd * p )
 {
 	struct extraData *xx = GetTrkExtraData(t);
-	double s;
 	//return BezierMathDistance(p,xx->bezierData.pos,100, &s);
 
-	ANGLE_T a0, a1;
-	DIST_T d = 100000.0,dd;
+	DIST_T d = 100000.0;
 	coOrd p2 = xx->cornuData.pos[0];    //Set initial point
 	segProcData_t segProcData;
 	for (int i = 0;i<xx->cornuData.arcSegs.cnt;i++) {
@@ -571,14 +561,11 @@ static void ReadCornu( char * line )
 	BOOL_T visible;
 	DIST_T r0,r1;
 	ANGLE_T a0,a1;
-	coOrd p0, p1, dp, c0, c1;
-	DIST_T elev;
+	coOrd p0, p1, c0, c1;
 	char scale[10];
 	wIndex_t layer;
 	long options;
 	char * cp = NULL;
-	unsigned long rgb;
-	DIST_T width;
 
 	if (!GetArgs( line+6, "dLl00sdpffppffp",
 		&index, &layer, &options, scale, &visible, &p0, &a0, &r0, &c0, &p1, &a1, &r1, &c1 ) ) {
@@ -662,8 +649,7 @@ EXPORT BOOL_T SetCornuEndPt(track_p trk, EPINX_T inx, coOrd pos, coOrd center, A
 static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, EPINX_T * ep0, EPINX_T * ep1 )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	track_p trk1,trk2;
-    double t;
+	track_p trk1;
     DIST_T radius = 0.0;
     coOrd center;
     int inx;
@@ -762,10 +748,10 @@ static BOOL_T TraverseCornu( traverseTrack_p trvTrk, DIST_T * distR )
 	BOOL_T reverse_seg = FALSE;
 	BOOL_T cornu_backwards= FALSE;
 	DIST_T d = 10000;
-	coOrd pos0, pos1, pos2 = trvTrk->pos;
+	coOrd pos1, pos2 = trvTrk->pos;
 	ANGLE_T a1,a2;
 	int inx,inx2, segInx,subSegInx = 0;
-	EPINX_T ep, ep2;
+	EPINX_T ep;
 	BOOL_T back;
 LOG( log_traverseCornu, 1, ( "TraverseCornu [%0.3f %0.3f] A%0.3f D%0.3f \n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ))
 	trkSeg_p segPtr = (trkSeg_p)xx->cornuData.arcSegs.ptr;
@@ -851,8 +837,8 @@ LOG( log_traverseCornu, 1, ( "   --> [%0.3f %0.3f] A%0.3f D%0.3f\n", trvTrk->pos
 static BOOL_T EnumerateCornu( track_p trk )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	ANGLE_T a0, a1;
 	DIST_T d;
+
 	if (trk != NULL) {
 		xx = GetTrkExtraData(trk);
 		d = xx->cornuData.minCurveRadius;
@@ -869,10 +855,8 @@ static BOOL_T MergeCornu(
 {
 	struct extraData *xx0 = GetTrkExtraData(trk0);
 	struct extraData *xx1 = GetTrkExtraData(trk1);
-	DIST_T d;
 	track_p trk_after,trk_before;
 	EPINX_T ep_before,ep_after=-1;
-	coOrd pos;
 	BOOL_T tracks = FALSE;
 	coOrd p[2];
 	coOrd c[2];
@@ -1071,7 +1055,6 @@ static BOOL_T MakeParallelCornu(
 		coOrd * p1R )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
-	struct extraData * xx1;
     coOrd np[4], p, nc[2];
     ANGLE_T a,a2, na[2];
     DIST_T nr[2];
