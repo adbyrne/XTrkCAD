@@ -1070,8 +1070,10 @@ static void MoveTracks(
 					endAngle = NormalizeAngle(GetTrkEndAngle(trk,ep)+180);
 					if (SetCornuEndPt(trk1,ep1,GetTrkEndPos(trk,ep),endCenter,endAngle,endRadius))
 						ConnectTracks(trk,ep,trk1,ep1);
-					else
+					else {
 						DeleteTrack(trk1,TRUE);
+						ErrorMessage(_("Cornu too tight - it was deleted"));
+					}
 				} else {
 					if (QueryTrack(trk,Q_IS_CORNU)) {
 						GetTrackParams(PARAMS_CORNU,trk1,GetTrkEndPos(trk,ep),&trackParms);
@@ -1085,8 +1087,10 @@ static void MoveTracks(
 						endAngle = NormalizeAngle(GetTrkEndAngle(trk1,ep1)+180);
 						if (SetCornuEndPt(trk,ep,GetTrkEndPos(trk1,ep1),endCenter,endAngle,endRadius))
 							ConnectTracks(trk,ep,trk1,ep1);
-						else
+						else {
 							DeleteTrack(trk,TRUE);
+							ErrorMessage(_("Cornu too tight - it was deleted"));
+						}
 					}
 				}
 				DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );

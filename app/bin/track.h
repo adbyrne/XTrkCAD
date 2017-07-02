@@ -106,6 +106,7 @@ typedef struct {
 		coOrd cornuEnd[2];
 		ANGLE_T cornuAngle[2];
 		DIST_T cornuRadius[2];
+		coOrd cornuCenter[2];
 
 		} trackParams_t;
 

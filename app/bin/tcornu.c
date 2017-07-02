@@ -969,6 +969,7 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 		params->cornuEnd[i] = xx->cornuData.pos[i];
 		params->cornuAngle[i] = xx->cornuData.a[i];
 		params->cornuRadius[i] = xx->cornuData.r[i];
+		params->cornuCenter[i] = xx->cornuData.c[i];
 	}
 	params->len = xx->cornuData.length;
 	params->ep = PickUnconnectedEndPointSilent( pos, trk);
@@ -1139,7 +1140,7 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 	xx->cornuData.arcSegs.max = 0;
 	xx->cornuData.arcSegs.cnt = 0;
 	xx->cornuData.arcSegs.ptr = NULL;
-	FixUpCornu0(xx->cornuData.pos,xx->cornuData.c,xx->cornuData.a,xx->cornuData.r, xx);
+	if (!FixUpCornu0(xx->cornuData.pos,xx->cornuData.c,xx->cornuData.a,xx->cornuData.r, xx)) return FALSE;
 	ComputeCornuBoundingBox(trk, xx);
 	return TRUE;
 }

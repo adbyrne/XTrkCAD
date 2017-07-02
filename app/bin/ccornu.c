@@ -376,9 +376,7 @@ void GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track_e
 	Da.radius[end] = 0.0;
 	Da.center[end] = zero;
 	Da.trackType[end] = trackParams.type;
-	if (trackParams.type == curveTypeCurve
-			|| trackParams.type == curveTypeBezier
-			|| trackParams.type == curveTypeCornu) {
+	if (trackParams.type == curveTypeCurve) {
 		Da.arcA0[end] = trackParams.arcA0;
 		Da.arcA1[end] = trackParams.arcA1;
 		Da.radius[end] = trackParams.arcR;
@@ -386,7 +384,24 @@ void GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track_e
 		ANGLE_T angle1 = FindAngle(trackParams.arcP,pos);
 		Da.angle[end] = NormalizeAngle(angle1+(track_end?-90:90));
 						//Ignore params.angle which is always left to right
-	} else if (trackParams.type == curveTypeStraight) {
+	} else if (trackParams.type == curveTypeBezier) {
+		Da.angle[end] = trackParams.angle;
+		if (trackParams.arcR == 0) {
+			Da.radius[end] = 0;
+			Da.angle[end] = trackParams.angle;
+			Da.center[end] = zero;
+		} else {
+			Da.arcA0[end] = trackParams.arcA0;
+			Da.arcA1[end] = trackParams.arcA1;
+			Da.radius[end] = trackParams.arcR;
+			Da.center[end] = trackParams.arcP;
+		}
+	} else if (trackParams.type == curveTypeCornu) {
+			Da.radius[end] = trackParams.cornuRadius[end];
+			Da.angle[end] = trackParams.cornuAngle[end];
+			Da.center[end] = trackParams.cornuCenter[end];
+	}
+	else if (trackParams.type == curveTypeStraight) {
 		Da.angle[end] = NormalizeAngle(GetTrkEndAngle(t,track_end)+180);  //Ignore params.angle because it gives from nearest end
 	}
 
@@ -496,7 +511,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		}
 		DrawTempCornu();   //wipe out
 		Da.extend[sel] = FALSE;
-		Da.pos[Da.selectPoint] = pos;
+		if (inside) Da.pos[Da.selectPoint] = pos;
 		GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel]);
 		if (!inside && Da.trackType[sel] == curveTypeStraight) {    //Extend with a temp seg
 			Da.extendSeg[sel].type = SEG_STRTRK;
@@ -526,8 +541,19 @@ EXPORT STATUS_T AdjustCornuCurve(
 				Da.extendSeg[sel].u.c.a1 =
 						NormalizeAngle(FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]))-a);
 			}
-			Da.extend[sel] = TRUE;
-			Da.pos[sel] = pos;
+			if (Da.extendSeg[sel].u.c.a1 == 0.0 ||
+					(Da.extendSeg[sel].u.c.a0 >= Da.arcA0[sel] &&
+					Da.extendSeg[sel].u.c.a0 <= Da.arcA0[sel] + Da.arcA1[sel])) {
+				Da.extend[sel] = FALSE;
+			} else {
+				Da.extend[sel] = TRUE;
+				Da.pos[sel] = pos;
+			}
+		} else if (!inside) {
+			DrawTempCornu();   //put back
+			wBeep();
+			InfoMessage(_("Must be on the %s Track"),Da.trackType[sel]==curveTypeBezier?"Bezier":"Unknown Type");
+			return C_CONTINUE;
 		}
 		CreateBothEnds(Da.selectPoint);
 		if (CallCornu(Da.pos, Da.trk, Da.ep, &Da.crvSegs_da,&cp)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;

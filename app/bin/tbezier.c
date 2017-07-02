@@ -810,9 +810,9 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 	params->type = curveTypeBezier;
 	struct extraData *xx = GetTrkExtraData(trk);
 	for (int i=0;i<4;i++) params->bezierPoints[i] = xx->bezierData.pos[i];
-	GetBezierAngles(&params->arcA0,&params->arcA1, trk);
+	//GetBezierAngles(&params->arcA0,&params->arcA1, trk);
 	params->len = xx->bezierData.length;
-	params->angle = GetAngleSegs(		  						//Find correct Segment and nearest point in it
+	GetAngleSegs(		  						//Find correct Segment and nearest point in it
 					xx->bezierData.arcSegs.cnt,xx->bezierData.arcSegs.ptr,
 					&pos, &segInx, &d , &back, NULL, NULL );
 	if (d>0.5) {
@@ -833,6 +833,8 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 	} else {
 		params->arcR = segPtr->u.c.radius;
 		params->arcP = segPtr->u.c.center;
+		params->arcA0 = segPtr->u.c.a0;
+		params->arcA1 = segPtr->u.c.a1;
 	}
 	params->ep = PickUnconnectedEndPointSilent( pos, trk);
 	if (params->ep == -1)
