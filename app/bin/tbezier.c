@@ -989,6 +989,15 @@ BOOL_T RebuildBezier (track_p trk)
 	return TRUE;
 }
 
+BOOL_T MoveBezierEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
+	track_p trk2;
+	if (SplitTrack(*trk,pos,*ep,&trk2,FALSE)) {
+		DeleteTrack(trk2,TRUE);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 static trackCmd_t bezlinCmds = {
 		"BZRLIN",
 		DrawBezier,
@@ -1045,7 +1054,7 @@ static trackCmd_t bezierCmds = {
 		NULL,   /* modify */
 		GetLengthBezier,
 		GetParamsBezier,
-		NULL, /* Move EndPt */
+		MoveBezierEndPt, /* Move EndPt */
 		QueryBezier,
 		NULL,	/* ungroup */
 		FlipBezier,
