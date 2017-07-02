@@ -882,7 +882,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			InfoSubstituteControls( controls, labels );
 			drawWidthPD.option &= ~PDO_NORECORD;
 			drawColorPD.option &= ~PDO_NORECORD;
-			lineWidth = drawCmdContext.Width/drawCmdContext.D->dpi;
+			lineWidth = drawCmdContext.Width;
 			break;
 		case OP_FILLCIRCLE2:
 		case OP_FILLCIRCLE3:
@@ -948,8 +948,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		ParamLoadData( &drawPG );
 		if (drawCmdContext.Op == OP_BEZLIN) {
 			act2 = action | (bezCmdCreateLine<<8);
-			drawCmdContext.Width = floor(lineWidth*drawCmdContext.D->dpi);
-			drawCmdContext.Color = lineColor;
 			return CmdBezCurve(act2, pos);
 		}
 		if ( drawCmdContext.Op == OP_BENCH ) {
@@ -975,8 +973,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionText:
 	case C_CMDMENU:
 		SnapPos( &pos );
-		lineWidth = drawCmdContext.Width/drawCmdContext.D->dpi;
-		lineColor = drawCmdContext.Color;
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
@@ -986,8 +982,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	case C_OK:
-		lineWidth = drawCmdContext.Width/drawCmdContext.D->dpi;
-		lineColor = drawCmdContext.Color;
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext );
 		/*DrawOk( NULL );*/
@@ -998,8 +992,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		/*DrawOk( NULL );*/
 
 	case C_REDRAW:
-		lineWidth = drawCmdContext.Width/drawCmdContext.D->dpi;
-		lineColor = drawCmdContext.Color;
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
@@ -1102,6 +1094,15 @@ static void DrawDlgUpdate(
 		int inx,
 		void * valueP )
 {
+	if (drawCmdContext.Op == OP_BEZLIN) {
+		if ( (inx == 0  && pg->paramPtr[inx].valueP == &drawCmdContext.Width) ||
+			 (inx == 1 && pg->paramPtr[inx].valueP == &lineColor))
+		   {
+			lineWidth = drawCmdContext.Width;
+			UpdateParms(lineColor, lineWidth);
+		   }
+	}
+
 	if ( inx >= 0 && pg->paramPtr[inx].valueP == &benchChoice )
 		BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, (wIndex_t)*(long*)valueP ), (wList_p)drawBenchOrientPD.control );
 }

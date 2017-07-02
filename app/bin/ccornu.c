@@ -841,7 +841,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 
 	Da.color = lineColor;
-	Da.width = (double)lineWidth;
+	Da.width = (double)lineWidth/mainD.dpi;
 
 	switch (action&0xFF) {
 
