@@ -623,7 +623,7 @@ EXPORT STATUS_T AdjustBezCurve(
 				if (angle2 > 90.0 && angle2 < 270.0)
 					Translate( &pos, Da.pos[Da.selectPoint==1?0:3], angle1, -FindDistance( Da.pos[Da.selectPoint==1?0:3], pos )*cos(D2R(angle2)) );
 				else pos = Da.pos[Da.selectPoint==1?0:3];
-			} else SnapPos(&pos);
+			} // Dont Snap control points
 		} else SnapPos(&pos);
 		Da.pos[Da.selectPoint] = pos;
 		CreateBothControlArms(Da.selectPoint, track);
@@ -1030,7 +1030,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				if (angle2 > 90.0 && angle2 < 270.0)
 					Translate( &pos, Da.pos[0], angle1, -FindDistance( Da.pos[0], pos )*cos(D2R(angle2)));
 				else pos = Da.pos[0];
-			} else SnapPos( &pos );
+			} // Don't Snap control points
 			Da.pos[1] = pos;
 			Da.cp1Segs_da_cnt = createControlArm(Da.cp1Segs_da, Da.pos[0], Da.pos[1], Da.track, TRUE, Da.trk[0]!=NULL, 1, wDrawColorBlack);
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,NULL,0,NULL,0,drawColorBlack);
@@ -1050,7 +1050,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				if (angle2 > 90.0 && angle2 < 270.0)
 					Translate( &pos, Da.pos[0], angle1, -FindDistance( Da.pos[0], pos )*cos(D2R(angle2)));
 				else pos = Da.pos[0];
-			} else SnapPos( &pos );
+			} // Don't Snap control points
 			Da.pos[1] = pos;
 			if (FindDistance(Da.pos[0],Da.pos[1]) <=minLength) {
 				InfoMessage( _("Control Arm 1 is too short, try again") );
