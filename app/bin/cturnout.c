@@ -1358,14 +1358,14 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
 	params->type = curveTypeStraight;
-	params->ep = PickUnconnectedEndPointSilent( pos, trk );
-	if (params->ep == -1)
-		 return FALSE;
 	params->lineOrig = GetTrkEndPos(trk,params->ep);
 	params->lineEnd = params->lineOrig;
 	params->len = 0.0;
 	params->angle = GetTrkEndAngle(trk,params->ep);
 	params->arcR = 0.0;
+	params->ep = PickUnconnectedEndPointSilent( pos, trk );
+		if (params->ep == -1)
+			 return FALSE;
 	return TRUE;
 }
 
