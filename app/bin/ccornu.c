@@ -491,7 +491,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 		return C_CONTINUE;
 
 	case C_MOVE:
-		if (Da.state != POINT_PICKED) return C_CONTINUE;
+		if (Da.state != POINT_PICKED) {
+			InfoMessage(_("Pick any circle to adjust it by dragging - Enter to accept, Esc to cancel"));
+			return C_CONTINUE;
+		}
 		//If locked, reset pos to be on line from other track
 
 		int sel = Da.selectPoint;
@@ -946,6 +949,10 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 			
 	case C_MOVE:
+		if (Da.state == NONE) {
+			InfoMessage("Place 1st end point of Cornu track on unconnected end-point");
+			return C_CONTINUE;
+		}
 		if (Da.state == POS_1) {
 			EPINX_T ep = 0;
 			BOOL_T found = FALSE;

@@ -612,7 +612,10 @@ EXPORT STATUS_T AdjustBezCurve(
 		return C_CONTINUE;
 
 	case C_MOVE:
-		if (Da.state != POINT_PICKED) return C_CONTINUE;
+		if (Da.state != POINT_PICKED) {
+			InfoMessage(_("Pick any circle to adjust it - Enter to confirm, ESC to abort"));
+			return C_CONTINUE;
+		}
 		//If locked, reset pos to be on line from other track
 		DrawTempBezier(Da.track);   //wipe out
 		if (Da.selectPoint == 1 || Da.selectPoint == 2) {  //CPs
@@ -949,7 +952,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
 		Da.cp1Segs_da_cnt = 0;
 		Da.cp2Segs_da_cnt = 0;
-		InfoMessage( _("Place 1st end point of Bezier track + Shift -> snap to unconnected endpoint") );
+		InfoMessage( _("Place 1st end point of Bezier + Shift -> snap to %s end"), Da.track?"Unconnected Track":"Line" );
 		return C_CONTINUE;
 
 
@@ -1014,7 +1017,13 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 			
 	case C_MOVE:
-
+		if (Da.state == POS_1) {
+			InfoMessage( _("Place 1st end point of Bezier + Shift -> snap to %s end"), Da.track?"Unconnected Track":"Line" );
+			return C_CONTINUE;
+		}
+		if (Da.state == POS_2) {
+			InfoMessage( _("Select other end of Bezier, +Shift -> snap to %s end"), Da.track?"Unconnected Track":"Line" );
+		}
 		if (Da.state == CONTROL_ARM_1 ) {
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,NULL,0,NULL,0,drawColorBlack);
 			if (Da.trk[0]) {
@@ -1053,7 +1062,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			Da.state = POS_2;
-			InfoMessage( _("Select other end of Bezier, +Shift locks to %s end"), Da.track?"Unconnected Track":"Line" );
+			InfoMessage( _("Select other end of Bezier, +Shift -> snaps to %s end"), Da.track?"Unconnected Track":"Line" );
 			Da.cp1Segs_da_cnt = createControlArm(Da.cp1Segs_da, Da.pos[0], Da.pos[1], Da.track, FALSE, Da.trk[0]!=NULL, -1, wDrawColorBlack);
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,NULL,0,NULL,0,drawColorBlack);
 			return C_CONTINUE;
