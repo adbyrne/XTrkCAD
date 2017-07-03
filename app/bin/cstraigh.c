@@ -65,7 +65,12 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			   		Dl.ep = ep;
 			   		pos = GetTrkEndPos(t, ep);
 			   		found = TRUE;
+			   } else {
+				   return C_CONTINUE;
 			   }
+			} else {
+				ErrorMessage(_("Not on a Track"));
+				return C_CONTINUE;
 			}
 		} 	
 		if (!found) SnapPos( &pos );

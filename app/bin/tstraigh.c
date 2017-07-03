@@ -577,7 +577,7 @@ static BOOL_T GetParamsStraight( int inx, track_p trk, coOrd pos, trackParams_t 
 	if ( inx == PARAMS_PARALLEL ) {
 		params->ep = 0;
 	} else {
-		params->ep = PickUnconnectedEndPoint( pos, trk );
+		params->ep = PickUnconnectedEndPointSilent( pos, trk );
 		if (params->ep == -1)
 			return FALSE;
 	}

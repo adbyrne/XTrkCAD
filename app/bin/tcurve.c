@@ -1192,7 +1192,7 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 		if ( IsCurveCircle( trk ) )
 			params->ep = PickArcEndPt( params->arcP, /*Dj.inp[0].*/pos, pos );
 		else
-			params->ep = PickUnconnectedEndPoint( pos, trk );
+			params->ep = PickUnconnectedEndPointSilent( pos, trk );
 		if (params->ep == -1)
 			return FALSE;
 	}

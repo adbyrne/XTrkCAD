@@ -972,8 +972,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionRUp:
 	case wActionText:
 	case C_CMDMENU:
-		SnapPos( &pos );
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
+		SnapPos( &pos );
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	case C_CANCEL:
