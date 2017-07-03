@@ -78,6 +78,7 @@
 #include "common.h"
 
 extern drawCmd_t tempD;
+extern TRKTYP_T T_BEZIER;
 
 
 /*
@@ -268,10 +269,14 @@ BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p
 	if (params.type == curveTypeStraight ) {
 		cp->angle[0] = NormalizeAngle(angle0+180);
 		cp->radius[0] = 0.0;
-	} else {
+	} else if (params.type == curveTypeCurve ){
 		if(params.arcA0>90 && params.arcA0<270) ccw0 = TRUE;
 		else ccw0 = FALSE;
 		cp->angle[0] = NormalizeAngle(FindAngle(params.arcP,pos[0]) + (ep[0]?-90:90));
+		cp->radius[0] = params.arcR;
+		cp->center[0] = params.arcP;
+	} else {
+		cp->angle[0] = NormalizeAngle(angle0+180);
 		cp->radius[0] = params.arcR;
 		cp->center[0] = params.arcP;
 	}
@@ -282,10 +287,14 @@ BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p
 	if (params.type == curveTypeStraight ) {
 		cp->angle[1] = NormalizeAngle(angle1+180);
 		cp->radius[1] = 0.0;
-	} else {
+	} else if (params.type == curveTypeCurve) {
 		if(params.arcA0>90 && params.arcA0<270) ccw1 = TRUE;
 		else ccw1 = FALSE;
 		cp->angle[1] = NormalizeAngle(FindAngle(params.arcP,pos[1]) + (ep[1]?-90:90));
+		cp->radius[1] = params.arcR;
+		cp->center[1] = params.arcP;
+	} else {
+		cp->angle[1] = NormalizeAngle(angle1+180);
 		cp->radius[1] = params.arcR;
 		cp->center[1] = params.arcP;
 	}
@@ -615,6 +624,11 @@ EXPORT STATUS_T AdjustCornuCurve(
 			for (int i=0;i<2;i++) {
 				UndoModify(Da.trk[i]);
 				MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
+				if (GetTrkType(Da.trk[i])==T_BEZIER) {          //Bezier split position not precise, so readjust Cornu
+					GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i]);
+					ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
+					SetCornuEndPt(t,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
+				}
 				ConnectTracks(Da.trk[i],Da.ep[i],t,i);
 			}
 			UndoEnd();

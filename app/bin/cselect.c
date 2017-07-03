@@ -1074,6 +1074,9 @@ static void MoveTracks(
 						DeleteTrack(trk1,TRUE);
 						ErrorMessage(_("Cornu too tight - it was deleted"));
 					}
+					if (QueryTrack(trk1,Q_EXCEPTION)) {
+
+					}
 				} else {
 					if (QueryTrack(trk,Q_IS_CORNU)) {
 						GetTrackParams(PARAMS_CORNU,trk1,GetTrkEndPos(trk,ep),&trackParms);

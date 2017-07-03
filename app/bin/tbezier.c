@@ -602,7 +602,7 @@ static BOOL_T SplitBezier( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover
     double dd = DistanceBezier(trk, &pos);
     if (dd>minLength) return FALSE;
     
-    BezierMathDistance(&pos, xx->bezierData.pos, 100, &t);  //Find t value
+    BezierMathDistance(&pos, xx->bezierData.pos, 500, &t);  //Find t value
 
     BezierSplit(xx->bezierData.pos, &newl[0], &newr[0], t);
 
