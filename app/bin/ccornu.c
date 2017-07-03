@@ -477,10 +477,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 			wBeep();
 			InfoMessage( _("Not close enough to end point, reselect") );
 			return C_CONTINUE;
-		} else if (QueryTrack(Da.trk[Da.selectPoint],Q_MODIFY_CANT_SPLIT)) {
-			InfoMessage(_("Track %d - can't split locked to end point"),Da.selectPoint+1 );
-			Da.selectPoint = -1;
-			return C_CONTINUE;
 		} else {
 			pos = Da.pos[Da.selectPoint];
 			Da.state = POINT_PICKED;
@@ -505,7 +501,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			inside = TRUE;
 			if (QueryTrack(Da.trk[Da.selectPoint],Q_MODIFY_CANT_SPLIT)) {
 				InfoMessage(_("Track can't be split"));
-				return C_CONTINUE;
+				pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 			}
 		} else {
 			pos = pos2;
