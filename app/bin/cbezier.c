@@ -733,11 +733,6 @@ EXPORT STATUS_T AdjustBezCurve(
 				}
 			}
 			Da.minRadius = BezierMinRadius(Da.pos,Da.crvSegs_da);
-			if (Da.track && Da.minRadius<minTrackRadius) {
-				wBeep();
-				ErrorMessage(_("Bezier Track smaller minimum radius than allowed - please adjust"));
-				return C_CONTINUE;
-			}
 			DrawTempBezier(Da.track);
 			UndoStart( _("Create Bezier"), "newBezier - CR" );
 			if (Da.track) {

@@ -498,15 +498,15 @@ EXPORT STATUS_T AdjustCornuCurve(
 		if (Da.state != POINT_PICKED) return C_CONTINUE;
 		//If locked, reset pos to be on line from other track
 
-		if (QueryTrack(Da.trk[Da.selectPoint],Q_MODIFY_CANT_SPLIT)) {
-			InfoMessage(_("Track can't be split"));
-			return C_CONTINUE;
-		}
 		int sel = Da.selectPoint;
 		coOrd pos2 = pos;
 		BOOL_T inside = FALSE;
 		if (OnTrack(&pos, FALSE, TRUE) == Da.trk[sel]) {
 			inside = TRUE;
+			if (QueryTrack(Da.trk[Da.selectPoint],Q_MODIFY_CANT_SPLIT)) {
+				InfoMessage(_("Track can't be split"));
+				return C_CONTINUE;
+			}
 		} else {
 			pos = pos2;
 		}
@@ -596,17 +596,12 @@ EXPORT STATUS_T AdjustCornuCurve(
 		if ( Da.state == PICK_POINT ) {
 			char c = (unsigned char)(action >> 8);
 			Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
-			DrawTempCornu();
-			if (Da.minRadius<minTrackRadius) {
-				wBeep();
-				InfoMessage(_("Cornu Min Radius smaller than minimum allowed - adjust"));
-				return C_CONTINUE;
-			}
 			if (CornuTotalWindingArc(Da.pos,Da.crvSegs_da)>4*360) {
 				wBeep();
-				InfoMessage(_("Cornu has complex shape - adjust"));
+				InfoMessage(_("Cornu has too complex shape - adjust end pts"));
 				return C_CONTINUE;
 			}
+			DrawTempCornu();
 			UndoStart( _("Create Cornu"),"newCornu curve");
 			t = NewCornuTrack( Da.pos, Da.center, Da.angle, Da.radius,(trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt);
 			if (t==NULL) {
