@@ -561,6 +561,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			DrawTempCornu();   //put back
 			wBeep();
 			InfoMessage(_("Must be on the %s Track"),Da.trackType[sel]==curveTypeBezier?"Bezier":"Unknown Type");
+			pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 			return C_CONTINUE;
 		}
 		CreateBothEnds(Da.selectPoint);
@@ -697,8 +698,8 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 	    }
 
 	    //TODO stop if both ends are un-adjustable (Turnouts)
-	    if (QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT) &&
-	    		QueryTrack(Da.trk[1],Q_MODIFY_CANT_SPLIT)) {
+	    if (QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT) && !QueryTrack(Da.trk[0],Q_CAN_EXTEND) &&
+	    		QueryTrack(Da.trk[1],Q_MODIFY_CANT_SPLIT) && !QueryTrack(Da.trk[1],Q_CAN_EXTEND)) {
 	    	wBeep();
 	    	ErrorMessage("Neither End of this Cornu is Adjustable");
 	    	return C_TERMINATE;

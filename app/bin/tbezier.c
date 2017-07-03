@@ -992,7 +992,7 @@ BOOL_T RebuildBezier (track_p trk)
 BOOL_T MoveBezierEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 	track_p trk2;
 	if (SplitTrack(*trk,pos,*ep,&trk2,FALSE)) {
-		DeleteTrack(trk2,TRUE);
+		if (trk2) DeleteTrack(trk2,TRUE);
 		return TRUE;
 	}
 	return FALSE;

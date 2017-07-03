@@ -1357,15 +1357,29 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 
 static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
-	params->type = curveTypeStraight;
+
+
+	params->type = curveTypeStraight;	//TODO should check if last segment is actually straight
+	if (inx == PARAMS_CORNU  || inx == PARAMS_BEZIER) {
+		params->arcR = 0.0;
+		params->arcP = zero;
+		params->ep = PickEndPoint(pos,trk);   //Nearest
+		if (params->ep>=0)
+			params->angle = GetTrkEndAngle(trk,params->ep);
+		else {
+			params->angle = 0;
+			return FALSE;
+		}
+		return TRUE;
+	}
+	params->ep = PickUnconnectedEndPointSilent( pos, trk );
+	if (params->ep == -1)
+				 return FALSE;
 	params->lineOrig = GetTrkEndPos(trk,params->ep);
 	params->lineEnd = params->lineOrig;
 	params->len = 0.0;
 	params->angle = GetTrkEndAngle(trk,params->ep);
 	params->arcR = 0.0;
-	params->ep = PickUnconnectedEndPointSilent( pos, trk );
-		if (params->ep == -1)
-			 return FALSE;
 	return TRUE;
 }
 
@@ -1409,6 +1423,7 @@ static BOOL_T QueryTurnout( track_p trk, int query )
 	case Q_HAS_DESC:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
 	case Q_MODIFY_CANT_SPLIT:
+	case Q_CAN_EXTEND:
 		return TRUE;
 	case Q_CAN_PARALLEL:
 		if( GetTrkEndPtCnt( trk ) == 2 && fabs( GetTrkEndAngle( trk, 0 ) - GetTrkEndAngle( trk, 1 )) == 180.0 )

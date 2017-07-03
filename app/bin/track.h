@@ -88,25 +88,25 @@ typedef enum { curveTypeNone, curveTypeCurve, curveTypeStraight, curveTypeBezier
 #define PARAMS_2ND_JOIN (1)
 #define PARAMS_EXTEND	(2)
 #define PARAMS_PARALLEL (3)
-#define PARAMS_BEZIER   (4)
-#define PARAMS_CORNU    (5)
+#define PARAMS_BEZIER   (4)	   //Not used (yet)
+#define PARAMS_CORNU    (5)    //Called to get end characteristics - Only uses type today (Straight)
 
 typedef struct {
-		curveType_e type;
-		EPINX_T ep;
-		DIST_T len;
-		ANGLE_T angle;
-		coOrd lineOrig;
-		coOrd lineEnd;
-		coOrd arcP;
-		DIST_T arcR;
-		ANGLE_T arcA0, arcA1;
+		curveType_e type;			//Straight, Curve, Bezier, Cornu
+		EPINX_T ep;					//End point that is nearby pos
+		DIST_T len;					//Length of track
+		ANGLE_T angle;				//Angle at end of track
+		coOrd lineOrig;				//Start of straight
+		coOrd lineEnd;				//End of Straight (or zero for Turnout)
+		coOrd arcP;					//center or zero
+		DIST_T arcR;				//radius or zero
+		ANGLE_T arcA0, arcA1;		//Start angle and angular length (clockwise)
 		long helixTurns;
-		coOrd bezierPoints[4];
-		coOrd cornuEnd[2];
-		ANGLE_T cornuAngle[2];
-		DIST_T cornuRadius[2];
-		coOrd cornuCenter[2];
+		coOrd bezierPoints[4];		//Bezier Ends and CPs
+		coOrd cornuEnd[2];			//Cornu Ends
+		ANGLE_T cornuAngle[2];		//Angle at Cornu Ends
+		DIST_T cornuRadius[2];		//Radius at Cornu Ends
+		coOrd cornuCenter[2];		//Center at Cornu Ends
 
 		} trackParams_t;
 
