@@ -1058,7 +1058,7 @@ static BOOL_T MakeParallelCornu(
 {
 	struct extraData * xx = GetTrkExtraData(trk);
     coOrd np[4], p, nc[2];
-    ANGLE_T a,a2, na[2];
+    ANGLE_T atrk, diff_a, na[2];
     DIST_T nr[2];
 
 
@@ -1067,42 +1067,41 @@ static BOOL_T MakeParallelCornu(
     // The expectation is that the user will have to adjust it - unless and until we produce
     // a new algo to adjust the control points to be parallel to the endpoints.
     
-    a = xx->cornuData.a[0];
     p = pos;
-    DistanceCornu(trk, &p);
-    a2 = NormalizeAngle(FindAngle(pos,p)-a);
+    DistanceCornu(trk, &p);  //Find nearest point on curve
+    atrk = GetAngleSegs(xx->cornuData.arcSegs.cnt,(trkSeg_t *)(xx->cornuData.arcSegs.ptr),&p,NULL,NULL,NULL,NULL, NULL);
+    diff_a = NormalizeAngle(FindAngle(pos,p)-atrk);  //we know it will be +/-90...
     //find parallel move x and y for points
-    for (int i =0; i<2;i++) {
-    	np[i] = xx->cornuData.pos[i];
-    }
+    BOOL_T above = FALSE;
+    if ( diff_a < 180 ) above = TRUE; //Above track
+    Translate(&np[0],xx->cornuData.pos[0],xx->cornuData.a[0]+(above?90:-90),sep);
+    Translate(&np[1],xx->cornuData.pos[1],xx->cornuData.a[1]+(above?-90:90),sep);
+    na[0]=xx->cornuData.a[0];
+    na[1]=xx->cornuData.a[1];
+    if (xx->cornuData.r[0]) {
+       //Find angle between center and end angle of track
+       ANGLE_T ea0 =
+        	   NormalizeAngle(FindAngle(xx->cornuData.c[0],xx->cornuData.pos[0])-xx->cornuData.a[0]);
+       DIST_T sep0 = sep;
+        	if (ea0>180) sep0 = -sep;
+        	nr[0]=xx->cornuData.r[0]+(above?sep0:-sep0);           //Needs adjustment
+        	nc[0]=xx->cornuData.c[0];
+     } else {
+        	nr[0] = 0;
+        	nc[0] = zero;
+     }
 
-    if ( a2 > 180 ) {
-        Translate(&np[0],np[0],a+90,sep);
-        Translate(&np[1],np[1],a+90,sep);
-        na[0]=xx->cornuData.a[0];
-        na[1]=xx->cornuData.a[1];
-        if (xx->cornuData.r[0]) {
-        	nr[0]=xx->cornuData.r[0]+sep;
-        	nc[0]=xx->cornuData.c[0];
-        }
-        if (xx->cornuData.r[1]) {
-        	nr[1]=xx->cornuData.r[1]+sep;
+     if (xx->cornuData.r[1]) {
+        	ANGLE_T ea1 =
+        			NormalizeAngle(FindAngle(xx->cornuData.c[1],xx->cornuData.pos[1])-xx->cornuData.a[1]);
+        	DIST_T sep1 = sep;
+        	if (ea1<180) sep1 = -sep;
+        	nr[1]=xx->cornuData.r[1]+(above?sep1:-sep1);            //Needs adjustment
         	nc[1]=xx->cornuData.c[1];
-        }
-    } else {
-        Translate(&np[0],np[0],a-90,sep);
-        Translate(&np[1],np[1],a-90,sep);
-        na[0]=xx->cornuData.a[0];
-        na[1]=xx->cornuData.a[1];
-        if (xx->cornuData.r[0]) {
-            nr[0]=xx->cornuData.r[0]-sep;
-        	nc[0]=xx->cornuData.c[0];
-        }
-        if (xx->cornuData.r[1]) {
-            nr[1]=xx->cornuData.r[1]-sep;
-        	nc[1]=xx->cornuData.c[1];
-        }
-    }
+     } else {
+        	nr[1] = 0;
+        	nc[1] = zero;
+     }
 
 	if ( newTrkR ) {
 		*newTrkR = NewCornuTrack( np, nc, na, nr, NULL, 0);
@@ -1119,8 +1118,8 @@ static BOOL_T MakeParallelCornu(
 			}
 
 	} else {
-		//Dont have a SEG_CORNU yet...
-		return FALSE;
+		tempSegs_da.cnt = 0;
+		CallCornu0(np,nc,na,nr,&tempSegs_da,FALSE);
 	}
 	if ( p0R ) *p0R = np[0];
 	if ( p1R ) *p1R = np[1];

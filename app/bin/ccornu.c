@@ -697,11 +697,15 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 	    	Da.center[i] = xx->cornuData.c[i];
 	    }
 
-	    //TODO stop if both ends are un-adjustable (Turnouts)
-	    if (QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT) && !QueryTrack(Da.trk[0],Q_CAN_EXTEND) &&
-	    		QueryTrack(Da.trk[1],Q_MODIFY_CANT_SPLIT) && !QueryTrack(Da.trk[1],Q_CAN_EXTEND)) {
+	    if (!Da.trk[0] || !Da.trk[1]) {
 	    	wBeep();
-	    	ErrorMessage("Neither End of this Cornu is Adjustable");
+	    	ErrorMessage("One or Both Ends are missing so not able to modify - add ends");
+	    	return C_TERMINATE;
+	    }
+	    if ((!Da.trk[0] || (QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT) && !QueryTrack(Da.trk[0],Q_CAN_EXTEND))) &&
+	    	(!Da.trk[1] || (QueryTrack(Da.trk[1],Q_MODIFY_CANT_SPLIT) && !QueryTrack(Da.trk[1],Q_CAN_EXTEND)))) {
+	    	wBeep();
+	    	ErrorMessage("Both Ends of this Cornu are UnAdjustable");
 	    	return C_TERMINATE;
 	    }
 
@@ -753,11 +757,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 
 		DeleteTrack(trk, TRUE);
 
-		UndoModify(Da.trk[0]);
-		UndoModify(Da.trk[1]);
+		if (Da.trk[0]) UndoModify(Da.trk[0]);
+		if (Da.trk[1]) UndoModify(Da.trk[1]);
 
 		for (int i=0;i<2;i++) {										//Attach new track
-			if (Da.trk[i] != NULL && Da.ep[i] != -1) {								//Like the old track
+			if (Da.trk[i] && Da.ep[i] != -1) {								//Like the old track
 				MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
 				ConnectTracks(t,i,Da.trk[i],Da.ep[i]);
 			}
