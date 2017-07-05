@@ -370,8 +370,8 @@ msgid "&Manage"
 msgstr "Hallinta"
 
 #: ../bin/misc.c:2127
-msgid "&New"
-msgstr "&Uusi"
+msgid "&New ..."
+msgstr "&Uusi ..."
 
 #: ../bin/misc.c:2128
 msgid "&Open ..."

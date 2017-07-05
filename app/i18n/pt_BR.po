@@ -4530,8 +4530,8 @@ msgid "More"
 msgstr "Mais"
 
 #: ../bin/misc.c:2077
-msgid "&New"
-msgstr "&Novo"
+msgid "&New ..."
+msgstr "&Novo ..."
 
 #: ../bin/misc.c:2078
 msgid "&Open ..."

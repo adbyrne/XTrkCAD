@@ -571,11 +571,12 @@ void DoQuit( void )
 
 static void DoClearAfter( void )
 {
+	
 	ClearTracks();
 
 	/* set all layers to their default properties and set current layer to 0 */
 	DefaultLayerProperties();
-
+	DoLayout();
 	checkPtMark = 0;
 	Reset();
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
@@ -2029,7 +2030,6 @@ static void CreateMenus( void )
 {
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM, messageListM, manageM, addM, changeM, drawM;
 	wMenu_p zoomM, zoomSubM;
-//	wIcon_p bm_p;
 
 	wMenuPush_p zoomInM, zoomOutM;
 
@@ -2078,7 +2078,6 @@ static void CreateMenus( void )
 	AddToolbarButton( "menuFile-clear", wIconCreatePixMap(document_new), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoClear, NULL );
 	AddToolbarButton( "menuFile-load", wIconCreatePixMap(document_open), IC_MODETRAIN_TOO, (addButtonCallBack_t)ChkLoad, NULL );
 	AddToolbarButton( "menuFile-save", wIconCreatePixMap(document_save), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoSave, NULL );
-//	AddToolbarButton( "menuFile-print", wIconCreatePixMap(document_print_xpm), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoPrint, NULL );
 
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton( "cmdZoomIn", wIconCreatePixMap(zoomin_xpm), IC_MODETRAIN_TOO,
@@ -2101,7 +2100,7 @@ static void CreateMenus( void )
 	/*
 	 * FILE MENU
 	 */
-	MiscMenuItemCreate( fileM, NULL, "menuFile-clear", _("&New"), ACCL_NEW, (void*)(wMenuCallBack_p)DoClear, 0, (void *)0 );
+	MiscMenuItemCreate( fileM, NULL, "menuFile-clear", _("&New ..."), ACCL_NEW, (void*)(wMenuCallBack_p)DoClear, 0, (void *)0 );
 	wMenuPushCreate( fileM, "menuFile-load", _("&Open ..."), ACCL_OPEN, (wMenuCallBack_p)ChkLoad, NULL );
 	wMenuSeparatorCreate( fileM );
 

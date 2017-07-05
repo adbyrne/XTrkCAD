@@ -4105,8 +4105,8 @@ msgid "More"
 msgstr "Weiter"
 
 #: ../bin/misc.c:2100
-msgid "&New"
-msgstr "&Neu"
+msgid "&New ...
+msgstr "&Neu..."
 
 #: ../bin/misc.c:2101
 msgid "&Open ..."
