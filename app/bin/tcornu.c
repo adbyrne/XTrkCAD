@@ -64,11 +64,24 @@ static DIST_T GetLengthCornu( track_p );
 /*
  * Run after any changes to the Cornu points
  */
-
+void SetUpCornuParmFromTracks(track_p trk[2],cornuParm_t * cp, struct extraData* xx) {
+	if (!trk[0]) {
+		cp->center[0] = xx->cornuData.c[0];
+		cp->angle[0] = xx->cornuData.a[0];
+		cp->radius[0] = xx->cornuData.r[0];
+	}
+	if (!trk[1]) {
+		cp->center[1] = xx->cornuData.c[1];
+		cp->angle[1] = xx->cornuData.a[1];
+		cp->radius[1] = xx->cornuData.r[1];
+	}
+}
 
 EXPORT BOOL_T FixUpCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], struct extraData* xx) {
 
 	cornuParm_t cp;
+
+	SetUpCornuParmFromTracks(trk,&cp,xx);
 
 	if (!CallCornu(pos, trk, ep, &xx->cornuData.arcSegs, &cp)) return FALSE;
 
@@ -249,18 +262,18 @@ static struct {
 		wDrawColor color;
 		} cornData;
 
-typedef enum { P0, Z0, A0, R0, C0, Z1, P1, A1, R1, C1, RA, RR, WA, LN, GR, LY } cornuDesc_e;
+typedef enum { P0, Z0, A0, R0, C0, P1, Z1, A1, R1, C1, RA, RR, WA, LN, GR, LY } cornuDesc_e;
 static descData_t cornuDesc[] = {
 /*P0*/	{ DESC_POS, N_("End Pt 1: X"), &cornData.pos[0] },
-/*Z0*/	{ DESC_DIM, N_("Z1"), &cornData.elev[0] },
+/*Z0*/	{ DESC_DIM, N_("Elev 1"), &cornData.elev[0] },
 /*A0*/  { DESC_ANGLE, N_("End Angle 1"), &cornData.angle[0] },
 /*R0*/  { DESC_DIM, N_("Radius 1"), &cornData.radius[0] },
 /*C0*/	{ DESC_POS, N_("End Radius Center 1: X"), &cornData.center[0] },
 /*P1*/	{ DESC_POS, N_("End Pt 2: X"), &cornData.pos[1] },
-/*Z1*/	{ DESC_DIM, N_("Z2"), &cornData.elev[1] },
+/*Z1*/	{ DESC_DIM, N_("Elev 2"), &cornData.elev[1] },
 /*A1*/  { DESC_ANGLE, N_("End Angle 2"), &cornData.angle[1] },
-/*C1*/	{ DESC_POS, N_("End Radius Center 2: X"), &cornData.center[1] },
 /*R1*/  { DESC_DIM, N_("Radius 2"), &cornData.radius[1] },
+/*C1*/	{ DESC_POS, N_("End Radius Center 2: X"), &cornData.center[1] },
 /*RA*/	{ DESC_DIM, N_("Minimum Radius"), &cornData.minRadius },
 /*RR*/  { DESC_DIM, N_("Maximum Rate Of Change Of Curvature"), &cornData.maxRateOfChange },
 /*WA*/  { DESC_ANGLE, N_("Total Winding Angle"), &cornData.windingAngle },
@@ -277,6 +290,7 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 	EPINX_T ep;
 
 	cornuParm_t cp;
+
 
 	if ( inx == -1 )
 		return;
@@ -364,9 +378,10 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 	}
 
 	EPINX_T new_ep[2];
-	new_ep[0] = GetEndPtConnectedToMe( GetTrkEndTrk(trk,0), trk );
-	new_ep[1] = GetEndPtConnectedToMe( GetTrkEndTrk(trk,1), trk );
-
+	track_p ts[2];
+	ts[0] = GetTrkEndTrk(trk,0);
+	ts[1] = GetTrkEndTrk(trk,1);
+	SetUpCornuParmFromTracks(ts,&cp,xx);
 	CallCornu(xx->cornuData.pos, tracks, new_ep, &xx->cornuData.arcSegs, &cp);
 
 
@@ -419,20 +434,22 @@ static void DescribeCornu( track_p trk, char * str, CSIZE_T len )
 		else
 			cornData.grade = 0.0;
     }
+    BOOL_T trk0 = (GetTrkEndTrk(trk,0)!=NULL);
+    BOOL_T trk1 = (GetTrkEndTrk(trk,1)!=NULL);
 
-	cornuDesc[P0].mode = DESC_RO;
-	cornuDesc[P1].mode = DESC_RO;
+	cornuDesc[P0].mode = !trk0?0:DESC_RO;
+	cornuDesc[P1].mode = !trk1?0:DESC_RO;
 	cornuDesc[LN].mode = DESC_RO;
     cornuDesc[Z0].mode = EndPtIsDefinedElev(trk,0)?0:DESC_RO;
     cornuDesc[Z1].mode = EndPtIsDefinedElev(trk,1)?0:DESC_RO;
 
 
-	cornuDesc[A0].mode = DESC_RO;
-	cornuDesc[A1].mode = DESC_RO;
-	cornuDesc[C0].mode = DESC_RO;
-	cornuDesc[C1].mode = DESC_RO;
-	cornuDesc[R0].mode = DESC_RO;
-	cornuDesc[R1].mode = DESC_RO;
+	cornuDesc[A0].mode = !trk0?0:DESC_RO;
+	cornuDesc[A1].mode = !trk1?0:DESC_RO;
+	cornuDesc[C0].mode = !trk0?0:DESC_RO;
+	cornuDesc[C1].mode = !trk1?0:DESC_RO;
+	cornuDesc[R0].mode = !trk0?0:DESC_RO;
+	cornuDesc[R1].mode = !trk1?0:DESC_RO;
 	cornuDesc[GR].mode = DESC_RO;
     cornuDesc[RA].mode = DESC_RO;
     cornuDesc[RR].mode = DESC_RO;
@@ -998,7 +1015,7 @@ static BOOL_T QueryCornu( track_p trk, int query )
 		return TRUE;
 	case Q_CAN_PARALLEL:
 	case Q_MODIFY_CANT_SPLIT:
-	case Q_CANNOT_BE_ON_END:
+	// case Q_CANNOT_BE_ON_END: Remove Restriction - Can have Cornu with no ends
 	case Q_CANNOT_PLACE_TURNOUT:
 		return TRUE;
 	default:
@@ -1074,6 +1091,7 @@ static BOOL_T MakeParallelCornu(
     //find parallel move x and y for points
     BOOL_T above = FALSE;
     if ( diff_a < 180 ) above = TRUE; //Above track
+    if (xx->cornuData.a[0] <180) above = !above;
     Translate(&np[0],xx->cornuData.pos[0],xx->cornuData.a[0]+(above?90:-90),sep);
     Translate(&np[1],xx->cornuData.pos[1],xx->cornuData.a[1]+(above?-90:90),sep);
     na[0]=xx->cornuData.a[0];

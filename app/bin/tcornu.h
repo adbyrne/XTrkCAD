@@ -33,7 +33,7 @@ typedef struct {
 		} cornuData_t;
 
 typedef struct {
-		coOrd pos[2];
+		coOrd pos[2];			//All values for end if trk[end] = NULL
 		DIST_T radius[2];		//0.0 if straight
 		ANGLE_T angle[2];		//Set if straight
 		coOrd center[2];		//Set if radius >0

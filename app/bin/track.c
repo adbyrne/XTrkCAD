@@ -116,9 +116,9 @@ EXPORT void DescribeTrack( track_cp trk, char * str, CSIZE_T len )
 }
 
 
-EXPORT DIST_T GetTrkDistance( track_cp trk, coOrd pos )
+EXPORT DIST_T GetTrkDistance( track_cp trk, coOrd * pos )
 {
-	return trackCmds( GetTrkType(trk) )->distance( trk, &pos );
+	return trackCmds( GetTrkType(trk) )->distance( trk, pos );
 }
 
 /**

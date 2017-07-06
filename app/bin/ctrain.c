@@ -1922,7 +1922,8 @@ EXPORT void AttachTrains( void )
 		}
 		if ( trk!=NULL && !QueryTrack( trk, Q_ISTRACK ) )
 			trk = NULL;
-		if ( trk==NULL || GetTrkDistance(trk,pos)>trackGauge*2.0 )
+		coOrd pos_temp = pos;
+		if ( trk==NULL || GetTrkDistance(trk,&pos_temp)>trackGauge*2.0 )
 			trk = OnTrack2( &pos, FALSE, TRUE, FALSE );
 		if ( trk!=NULL ) {
 			/*if ( trk == xx->trvTrk.trk )

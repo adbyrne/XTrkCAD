@@ -271,7 +271,7 @@ static DIST_T DistanceSwitchMotor (track_p t, coOrd * p )
 {
 	switchmotorData_p xx = GetswitchmotorData(t);
         if (xx->turnout == NULL) return 0;
-	return GetTrkDistance(xx->turnout,*p);
+	return GetTrkDistance(xx->turnout,p);
 }
 
 static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
