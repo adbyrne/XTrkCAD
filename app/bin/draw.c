@@ -41,7 +41,6 @@
 #endif
 
 #include "track.h"
-#include "trackx.h"
 #include "utility.h"
 #include "misc.h"
 #include "draw.h"
@@ -913,25 +912,16 @@ static void SetInfoBar( void )
 		wMessageSetWidth( infoD.info_m, infoD.info_w-six );
 		if (curInfoControl[0]) {
 			x = wControlGetPosX( (wControl_p)infoD.info_m );
-			wPos_t w = 0;
 #ifndef WINDOWS
 			yb -= 2;
-
 #endif
 			for ( inx=0; curInfoControl[inx]; inx++ ) {
 				x += curInfoLabelWidth[inx];
-				w += curInfoLabelWidth[inx];
 				wControlSetPos( curInfoControl[inx], x, yb );
 				x += wControlGetWidth( curInfoControl[inx] )+3;
-				w += wControlGetWidth( curInfoControl[inx] )+3;
 				wControlShow( curInfoControl[inx], TRUE );
 			}
-			wControlSetPos( (wControl_p)infoD.info_b, x, yb );
-			wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, ym );
-			wMessageSetWidth( infoD.info_m, infoD.info_w-six - w);
-			wControlShow( (wControl_p)infoD.info_m, TRUE );
 		}
-
 }
 
 
@@ -954,12 +944,22 @@ EXPORT void InfoCount( wIndex_t count )
 
 EXPORT void InfoPos( coOrd pos )
 {
+#ifdef LATER
+	wPos_t ww, hh;
+	DIST_T w, h;
+#endif
 	wPos_t x, y;
 
 	sprintf( message, "%s%s", xLabel, FormatDistance(pos.x) );
 	wMessageSetValue( infoD.posX_m, message );
 	sprintf( message, "%s%s", yLabel, FormatDistance(pos.y) );
 	wMessageSetValue( infoD.posY_m, message );
+#ifdef LATER
+	wDrawGetSize( mainD.d, &ww, &hh );
+	w = (DIST_T)(ww/mainD.dpi);
+	h = (DIST_T)(hh/mainD.dpi);
+	/*wDrawClip( mainD.d, 0, 0, w, h );*/
+#endif
 	mainD.CoOrd2Pix(&mainD,oldMarker,&x,&y);
 	wDrawLine( mainD.d, 0, y, (wPos_t)(LBORDER), y,
 				0, wDrawLineSolid, markerColor, wDrawOptTemp );
@@ -971,6 +971,10 @@ EXPORT void InfoPos( coOrd pos )
 				0, wDrawLineSolid, markerColor, wDrawOptTemp );
 	wDrawLine( mainD.d, x, 0, x, (wPos_t)(BBORDER),
 				0, wDrawLineSolid, markerColor, wDrawOptTemp );
+#ifdef LATER
+	/*wDrawClip( mainD.d, LBORDER, BBORDER,
+			   w-(LBORDER+RBORDER), h-(BBORDER+TBORDER) );*/
+#endif
 	oldMarker = pos;
 }
 
@@ -981,7 +985,7 @@ EXPORT void InfoSubstituteControls(
 		wControl_p * controls,
 		char ** labels )
 {
-	wPos_t x, y, ym;
+	wPos_t x, y;
 	int inx;
 	for ( inx=0; inx<NUM_INFOCTL; inx++ ) {
 		if (curInfoControl[inx]) {
@@ -995,13 +999,6 @@ EXPORT void InfoSubstituteControls(
 		memcpy( deferSubstituteControls, controls, sizeof deferSubstituteControls );
 		memcpy( deferSubstituteLabels, labels, sizeof deferSubstituteLabels );
 	}
-	x = infoD.scale_w + 10 + infoD.pos_w*2 + 10;
-	y = wControlGetPosY( (wControl_p)infoD.info_m );
-	ym = y;
-
-	wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, y );
-	wMessageSetWidth( infoD.info_m, infoD.info_w-six);
-
 	if ( inError || controls == NULL || controls[0]==NULL ) {
 		wControlShow( (wControl_p)infoD.info_m, TRUE );
 		return;
@@ -1013,27 +1010,79 @@ EXPORT void InfoSubstituteControls(
 #endif
 	wMessageSetValue( infoD.info_m, "" );
 	wControlShow( (wControl_p)infoD.info_m, FALSE );
-	wPos_t w = 0;
 	for ( inx=0; controls[inx]; inx++ ) {
 		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
 		x += curInfoLabelWidth[inx];
-		w += curInfoLabelWidth[inx];
 		wControlSetPos( controls[inx], x, y );
 		x += wControlGetWidth( controls[inx] );
-		w += wControlGetWidth( controls[inx] );
 		wControlSetLabel( controls[inx], _(labels[inx]) );
 		wControlShow( controls[inx], TRUE );
 		curInfoControl[inx] = controls[inx];
 		x += 3;
-		w += 3;
 	}
-	wControlSetPos( (wControl_p)infoD.info_m, x, ym );
-	wMessageSetWidth( infoD.info_m, infoD.info_w-six - w);
-	wControlShow( (wControl_p)infoD.info_m, TRUE );
-
 	curInfoControl[inx] = NULL;
 	deferSubstituteControls[0] = NULL;
 }
+
+
+#ifdef LATER
+EXPORT void InfoSubstituteControl(
+		wControl_p control1,
+		char * label1,
+		wControl_p control2,
+		char * label2 )
+{
+	wControl_p controls[3];
+	wPos_t widths[2];
+
+	if (control1 == NULL) {
+		InfoSubstituteControls( NULL, NULL );
+	} else {
+		controls[0] = control1;
+		controls[1] = control2;
+		controls[2] = NULL;
+		widths[0] = wLabelWidth( label1 );
+		if (label2)
+			widths[1] = wLabelWidth( label2 );
+		else
+			widths[1] = 0;
+		InfoSubstituteControls( controls, widths );
+#ifdef LATER
+		if (curInfoControl[0]) {
+			wControlShow( curInfoControl[0], FALSE );
+			curInfoControl[0] = NULL;
+		}
+		if (curInfoControl[1]) {
+			wControlShow( curInfoControl[1], FALSE );
+			curInfoControl[1] = NULL;
+		}
+		wControlShow( (wControl_p)infoD.info_m, TRUE );
+	} else {
+		if (curInfoControl[0])
+			wControlShow( curInfoControl[0], FALSE );
+		if (curInfoControl[1])
+			wControlShow( curInfoControl[1], FALSE );
+		x = wControlGetPosX( (wControl_p)infoD.info_m );
+		y = wControlGetPosY( (wControl_p)infoD.info_m );
+		curInfoLabelWidth[0] = wLabelWidth( label1 );
+		x += curInfoLabelWidth[0];
+		wControlShow( (wControl_p)infoD.info_m, FALSE );
+		wControlSetPos( control1, x, y );
+		wControlShow( control1, TRUE );
+		curInfoControl[0] = control1;
+		curInfoControl[1] = NULL;
+		if (control2 != NULL) {
+			curInfoLabelWidth[1] = wLabelWidth( label2 );
+			x = wControlBeside( curInfoControl[0] ) + 10;
+			x += curInfoLabelWidth[1]+10;
+			wControlSetPos( control2, x, y );
+			wControlShow( control2, TRUE );
+			curInfoControl[1] = control2;
+		}
+#endif
+	}
+}
+#endif
 
 
 EXPORT void SetMessage( char * msg )
@@ -1755,19 +1804,21 @@ EXPORT void DoZoomUp( void * mode )
 			if( i ) {
 				if (mainD.scale <=1.0) 
 					InfoMessage(_("Macro Zoom Mode"));
+				else 
+					InfoMessage(_("Use Shift+PageDwn to jump to preset Zoom In"));
 				DoNewScale( zoomList[ i - 1 ].value );	
 				
 			} else InfoMessage("Min Macro Zoom");
 		} else {
-			InfoMessage(_("Scale 1:1 - Use CTRL+PageDwn to go into Macro Zoom Mode"));
+			InfoMessage(_("Scale 1:1 - Use Ctrl+PageDwn to go to Macro Zoom Mode"));
 		}
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomin", &newScale, 4 );
-		InfoMessage(_("Preset Zoom In Value selected. SHIFT+CTRL+PageDwn to reset value"));
+		InfoMessage(_("Preset Zoom In Value selected. Shift+Ctrl+PageDwn to reset value"));
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomin", (long)mainD.scale );
-		InfoMessage( _("Zoom In Program Value %ld:1 set, Shift+PageDwn to use"), (long)mainD.scale );
+		InfoMessage( _("Zoom In Program Value %ld:1, Shift+PageDwn to use"), (long)mainD.scale );
 	}
 }
 
@@ -1786,6 +1837,7 @@ EXPORT void DoZoomDown( void  * mode)
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
 		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
+			InfoMessage(_("Use Shift+PageUp to jump to preset Zoom Out"));
 			DoNewScale( zoomList[ i + 1 ].value );
 		} else
 			InfoMessage(_("At Maximum Zoom Out"));
@@ -1793,11 +1845,11 @@ EXPORT void DoZoomDown( void  * mode)
 			
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomout", &newScale, 16 );
-		InfoMessage(_("Preset Zoom Out Value selected. SHIFT+CTRL+PageUp to reset value"));
+		InfoMessage(_("Preset Zoom Out Value selected. Shift+Ctrl+PageUp to reset value"));
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomout", (long)mainD.scale );
-		InfoMessage( _("Zoom Out Program Value %ld:1 set, Shift+PageUpto use"), (long)mainD.scale );
+		InfoMessage( _("Zoom Out Program Value %ld:1 set, Shift+PageUp to use"), (long)mainD.scale );
 	}
 }
 
@@ -2127,7 +2179,6 @@ static void DoMouse( wAction_t action, coOrd pos )
 	inError = FALSE;
 	if ( deferSubstituteControls[0] )
 		InfoSubstituteControls( deferSubstituteControls, deferSubstituteLabels );
-	InfoMessage(_(" "));
 
 	switch ( action&0xFF ) {
 		case C_DOWN:
@@ -2157,10 +2208,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
-				else {
+				else
 					mainD.orig.x += mainD.size.x/2;
-					InfoMessage(_("SHIFT plus Right Arrow to micro-step Pan Right"));
-				}
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2171,10 +2220,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.x -= 0.25*mainD.scale;
-				else {
+				else
 					mainD.orig.x -= mainD.size.x/2;
-					InfoMessage(_("SHIFT plus Left Arrow to micro-step Pan Left"));
-				}
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2185,10 +2232,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.y += 0.25*mainD.scale;
-				else {
-					mainD.orig.y += mainD.size.y/2;
-					InfoMessage(_("SHIFT plus Up Arrow to micro-step Pan Up"));
-				}
+				else
+					mainD.orig.y -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2199,10 +2244,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 				DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.y -= 0.25*mainD.scale;
-				else {
-					mainD.orig.y -= mainD.size.y/2;
-					InfoMessage(_("SHIFT plus Down Arrow to micro-step Pan Down"));
-				}
+				else
+					mainD.orig.y -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;

@@ -51,6 +51,7 @@ extern track_p tempTrack;
 extern wIndex_t trackCount;
 extern long drawTunnel;
 extern long drawEndPtV;
+extern long drawUnconnectedEndPt;
 extern long centerDrawMode;
 extern wDrawColor selectedColor;
 extern wDrawColor normalColor;

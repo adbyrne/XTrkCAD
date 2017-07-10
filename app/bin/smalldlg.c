@@ -1,7 +1,5 @@
 /** \file smalldlg.c
  * Several simple and smaller dialogs. 
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.c,v 1.6 2009-09-21 18:24:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -54,7 +52,9 @@
 
 #include "smalldlg.h"
 #include "i18n.h"
+#include "paths.h"
 
+extern char *sTipF;
 wWin_p aboutW;
 static wWin_p tipW;					/**< window handle for tip dialog */
 
@@ -86,13 +86,14 @@ static void CreateTipW( void )
 {
 	FILE * tipF;
 	char buff[4096];
+	char *filename;
 	char * cp;
 
 	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle(_("Tip of the Day")), _("Ok"), (paramActionOkProc)wHide, NULL, FALSE, NULL, F_CENTER, NULL );
 
 	/* open the tip file */
-	sprintf( buff, "%s%s%s.tip", libDir, FILE_SEP_CHAR, sProdNameLower );
-	tipF = fopen( buff, "r" );
+	MakeFullpath(&filename, libDir, sTipF, NULL);
+	tipF = fopen( filename, "r" );
 	
 	/* if tip file could not be opened, the only tip is an error message for the situation */
 	if (tipF == NULL) {
@@ -146,6 +147,7 @@ static void CreateTipW( void )
 			tips(tips_da.cnt-1) = strdup( buff );
 		}
 	}
+	free(filename);
 }
 
 /**

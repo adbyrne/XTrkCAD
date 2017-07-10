@@ -32,6 +32,7 @@
 
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
+#include <gdk/gdkkeysyms.h>
 
 #include "gtkint.h"
 #include "i18n.h"
@@ -237,7 +238,14 @@ static wMenuItem_p createMenuItem(
 	return mi;
 }
 
-
+/**
+ * Add a accelerator key to a widget
+ * 
+ * @param w         IN unused(?)
+ * @param menu      IN unused(?)
+ * @param menu_item IN owning widget
+ * @param acclKey   IN the accelerator key
+ */
 static void setAcclKey( wWin_p w, GtkWidget * menu, GtkWidget * menu_item, int acclKey )
 {
 	int mask;
@@ -262,19 +270,12 @@ static void setAcclKey( wWin_p w, GtkWidget * menu, GtkWidget * menu_item, int a
  
 	mask = 0;
 	if (acclKey) {
-		int len;
-		char acclStr[40];
 		
-		len = 0;
 		if (acclKey&WALT) {
 			mask |= GDK_MOD1_MASK;
-			strcpy( acclStr+len, "Meta+" );
-			len += 5;
 		}
 		if (acclKey&WSHIFT) {
 			mask |= GDK_SHIFT_MASK;
-			strcpy( acclStr+len, "Shift+" );
-			len += 6;
 			switch ( (acclKey&0xFF) ) {
 			case '0': acclKey += ')'-'0'; break;
 			case '1': acclKey += '!'-'1'; break;
@@ -302,11 +303,7 @@ static void setAcclKey( wWin_p w, GtkWidget * menu, GtkWidget * menu_item, int a
 		}
 		if (acclKey&WCTL) {
 			mask |= GDK_CONTROL_MASK;
-			strcpy( acclStr+len, "Ctrl+" );
-			len += 5;
 		}
-		acclStr[len++] = (acclKey & 0xFF);
-		acclStr[len++] = '\0';
 		gtk_widget_add_accelerator( menu_item, "activate",
 			(isalpha(acclKey&0xFF)?accel_alpha_group:accel_nonalpha_group),
 			toupper(acclKey&0xFF), mask, GTK_ACCEL_VISIBLE|GTK_ACCEL_LOCKED );

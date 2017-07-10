@@ -594,7 +594,9 @@ typedef enum {
 	wAccelKey_F9,
 	wAccelKey_F10,
 	wAccelKey_F11,
-	wAccelKey_F12 }
+	wAccelKey_F12,
+    wAccelKey_Numpad_Add,
+    wAccelKey_Numpad_Subtract }
 	wAccelKey_e;
 
 /* Creation CallBacks */

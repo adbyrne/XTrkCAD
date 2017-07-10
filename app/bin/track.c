@@ -31,6 +31,7 @@
 #include "compound.h"
 #include "i18n.h"
 #include "draw.h"
+#include "paths.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
@@ -64,6 +65,7 @@ static int log_readTracks = 0;
 EXPORT wIndex_t trackCount;
 
 EXPORT long drawEndPtV = 2;
+EXPORT long drawUnconnectedEndPt = 0;		/**< How do we draw Unconnected EndPts */
 
 EXPORT long centerDrawMode = FALSE;			/**< flag to control drawing of circle centers */
 EXPORT long printCenterLines = FALSE; 		/**< flag to control drawing of centerline in Print */
@@ -1328,8 +1330,10 @@ static void AuditPrint( char * msg )
 {
 	time_t clock;
 	if (auditFile == NULL) {
-		sprintf( message, "%s%s%s", workingDir, FILE_SEP_CHAR, sAuditF );
-		auditFile = fopen( message, "a+" );
+		char *path;
+		MakeFullpath(&path, workingDir, sAuditF, NULL);
+		auditFile = fopen( path, "a+" );
+		free(path);
 		if (auditFile == NULL) {
 			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Audit"), message, strerror(errno) );
 			auditIgnore = TRUE;
@@ -2516,11 +2520,11 @@ static void DrawUnconnectedEndPt( drawCmd_p d, coOrd p, ANGLE_T a, DIST_T trackG
 		Translate( &p0, p, a, trackGauge );
 		Translate( &p1, p, a-180.0, trackGauge );
 		DrawLine( d, p0, p1, 0, color );
-		if (d->scale < 8) {
+		if (d->scale < 8 || drawUnconnectedEndPt > 0) {
 			Translate( &p, p, a+90.0, 0.2 );
 			Translate( &p0, p, a, trackGauge );
 			Translate( &p1, p, a-180.0, trackGauge );
-			DrawLine( d, p0, p1, 0, color );
+			DrawLine( d, p0, p1, (drawUnconnectedEndPt>0)?4:0, (drawUnconnectedEndPt>1)?exceptionColor:color );
 		}
 }
 
@@ -2630,9 +2634,6 @@ EXPORT void DrawEndPt(
 	if (labelScale >= d->scale)
 		DrawEndElev( d, trk, ep, color );
 
-	if ( d->scale >= ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale) )
-		return;
-
 	trk1 = GetTrkEndTrk(trk,ep);
 	pp = p = GetTrkEndPos( trk, ep );
 	a = GetTrkEndAngle( trk, ep ) + 90.0;
@@ -2642,6 +2643,9 @@ EXPORT void DrawEndPt(
 		DrawUnconnectedEndPt( d, p, a, trackGauge, color );
 		return;
 	}
+
+	if ( d->scale >= ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale) )
+			return;
 
 	sepBoundary = FALSE;
 	if ((d->options&DC_PRINT)==0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {

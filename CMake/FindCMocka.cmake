@@ -21,6 +21,10 @@
 #=============================================================================
 #
 
+
+set (CMOCKA_ROOT_DIR
+	 "C:/Users/Martin/Documents/CMocka")
+
 find_path(CMOCKA_INCLUDE_DIR
     NAMES
         cmocka.h

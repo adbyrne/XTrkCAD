@@ -315,7 +315,9 @@ static long acclKeyMap[] = {
 			VK_F9,				/* wAccelKey_F9, */
 			VK_F10,				/* wAccelKey_F10, */
 			VK_F11,				/* wAccelKey_F11, */
-			VK_F12				/* wAccelKey_F12, */
+			VK_F12,				/* wAccelKey_F12, */
+			VK_ADD,				/* wAccelKey_Numpad_Add, */
+			VK_SUBTRACT			/* wAccelKey_Numpad_Subtract, */
 		};
 
 
@@ -326,7 +328,7 @@ void wAttachAccelKey(
 		void * data )
 {
 	acclTable_t * ad;
-	if ( key < 1 || key > wAccelKey_F12 ) {
+	if ( key < 1 || key > wAccelKey_Numpad_Subtract ) {
 		mswFail( "wAttachAccelKey: key out of range" );
 		return;
 	}

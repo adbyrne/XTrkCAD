@@ -1,7 +1,5 @@
 /** \file cprint.c
  * Printing functions. 
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprint.c,v 1.6 2009-08-16 13:26:41 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -28,7 +26,7 @@
 #include <ctype.h>
 #include "track.h"
 #include "i18n.h"
-
+#include "layout.h"
 
 #define PRINT_GAUDY		(0)
 #define PRINT_PLAIN		(1)
@@ -376,7 +374,7 @@ static void PrintGaudyBox(
 		(long)printScale, 
 		FormatDistance( roomSize.x ),
 		FormatDistance( roomSize.y ),
-		curScaleName, curFileName );
+		curScaleName, GetLayoutFilename() );
 	p00.x = 0.05; p00.y = 0.25+0.05;
 	DrawString( &page_d, p00, 0.0, dat, fp, 16.0, wDrawColorBlack );
 }

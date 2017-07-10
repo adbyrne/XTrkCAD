@@ -24,7 +24,7 @@
 #define FILEIO_H
 
 FILE * paramFile;
-char paramFileName[STR_LONG_SIZE];
+extern char *paramFileName;
 wIndex_t paramLineNum;
 char paramLine[STR_LONG_SIZE];
 char * curContents;
@@ -36,10 +36,6 @@ typedef BOOL_T (*readParam_t) ( char * );
 
 extern const char * workingDir;
 extern const char * libDir;
-
-extern char curPathName[STR_LONG_SIZE];
-extern char * curFileName;
-extern char curDirName[STR_LONG_SIZE];
 
 #define PARAM_CUSTOM	(-2)
 #define PARAM_LAYOUT	(-3)
@@ -65,8 +61,7 @@ wMenuList_p fileList_ml;
 #define PARAMETERPATHKEY "params"
 #define IMPORTPATHKEY "import"
 #define MACROPATHKEY "macro"
-
-void SetCurrentPath( const char *, const char * );
+#define CUSTOMPATHKEY "custom"
 
 void Stripcr( char * );
 char * GetNextLine( void );

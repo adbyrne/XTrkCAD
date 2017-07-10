@@ -1,4 +1,4 @@
-CONTENTS Peco HO Scale Turnouts Setrack
+CONTENTS Peco HO Scale Code 100 Setrack
 
 SUBCONTENTS Peco HO Setrack - Track
 TURNOUT HO "Peco	Setrack Straight standard	ST-200"
@@ -101,7 +101,7 @@ TURNOUT HO "Peco	Setrack Special Curve	ST-238"
 	END
 
 SUBCONTENTS Peco HO Setrack - Turnouts
-TURNOUT HO "Peco	Setrack No.2 Radius. LH Turnout, lnsulfrog	ST-241"
+TURNOUT HO "Peco	Setrack No.2 Radius LH Turnout, Insulfrog	ST-241"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -112,7 +112,7 @@ TURNOUT HO "Peco	Setrack No.2 Radius. LH Turnout, lnsulfrog	ST-241"
 	C 0 0.000000 -13.978252 0.649656 13.978252 157.499924 22.500152
 	S 0 0.000000 5.998913 1.064043 6.599029 1.312629
 	END
-TURNOUT HO "Peco	Setrack No.2 Radius. RH Turnout, lnsulfrog	ST-240"
+TURNOUT HO "Peco	Setrack No.2 Radius RH Turnout, Insulfrog	ST-240"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -123,7 +123,7 @@ TURNOUT HO "Peco	Setrack No.2 Radius. RH Turnout, lnsulfrog	ST-240"
 	C 0 0.000000 13.978252 0.649582 -13.978252 0.000076 22.500152
 	S 0 0.000000 5.998913 -1.064043 6.599029 -1.312629
 	END
-TURNOUT HO "Peco	Setrack Curved Double Radius. L/H Turnout. lnsulfrog	ST-245"
+TURNOUT HO "Peco	Setrack Curved Double Radius LH Turnout, Insulfrog	ST-245"
 	P "Normal" 2 3 4
 	P "Reverse" 1
 	E 0.000000 0.000000 270.000000
@@ -134,7 +134,7 @@ TURNOUT HO "Peco	Setrack Curved Double Radius. L/H Turnout. lnsulfrog	ST-245"
 	C 0 0.000000 -15.424000 3.000000 15.424000 157.500000 22.500000
 	S 0 0.000000 8.902509 1.174082 9.237000 1.313000
 	END
-TURNOUT HO "Peco	Setrack Curved Double Radius. R/H Turnout. lnsulfrog	ST-244"
+TURNOUT HO "Peco	Setrack Curved Double Radius RH Turnout, Insulfrog	ST-244"
 	P "Normal" 2 3 4
 	P "Reverse" 1
 	E 0.000000 0.000000 270.000000
@@ -145,7 +145,7 @@ TURNOUT HO "Peco	Setrack Curved Double Radius. R/H Turnout. lnsulfrog	ST-244"
 	C 0 0.000000 15.424000 3.000000 -15.424000 0.000000 22.500000
 	S 0 0.000000 8.902509 -1.174082 9.237000 -1.313000
 	END
-TURNOUT HO "Peco	Setrack Medium Radius Y Turnout, lnsulfrog	ST-247"
+TURNOUT HO "Peco	Setrack Medium Radius Y Turnout, Insulfrog	ST-247"
 	P "Left" 1 2 3
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
@@ -159,7 +159,7 @@ TURNOUT HO "Peco	Setrack Medium Radius Y Turnout, lnsulfrog	ST-247"
 	END
 
 SUBCONTENTS Peco HO Setrack - Crossing
-TURNOUT HO "Peco	Setrack Crossing	ST-250"
+TURNOUT HO "Peco	Setrack Medium Diamond Crossing, Insulfrog	ST-250"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 6.692913 0.000000 90.000000

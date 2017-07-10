@@ -914,6 +914,7 @@ int mswTranslateAccelerator(
 		return 1;
 	}
 	/*acclKey = translateExtKey( (WORD)acclKey );*/
+
 	state = 0;
 	if ( GetKeyState(VK_CONTROL) & 0x1000 )
 		state |= WKEY_CTRL;

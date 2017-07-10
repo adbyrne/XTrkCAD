@@ -58,6 +58,8 @@
 #include "compound.h"
 #include "smalldlg.h"
 #include "i18n.h"
+#include "layout.h"
+#include "paths.h"
 #include <locale.h>
 
 #define DEFAULT_SCALE ("N")
@@ -482,7 +484,8 @@ static void ChkRevert( void )
 									_("&Revert"), _("&Cancel") );
 		if( rc ) {
 			/* load the file */
-			LoadTracks( 1, &curFileName, NULL );
+			char *filename = GetLayoutFullPath();
+			LoadTracks( 1, &filename, NULL );
 		}
 	}
 }
@@ -518,7 +521,7 @@ EXPORT void SaveState( void )
 	RememberParamFiles();
 	ParamUpdatePrefs();
 
-	wPrefSetString( "misc", "lastlayout", curPathName );
+	wPrefSetString( "misc", "lastlayout", GetLayoutFullPath());
 
 	if ( fileList_ml ) {
 		strcpy( file, "file" );
@@ -577,8 +580,7 @@ static void DoClearAfter( void )
 	Reset();
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
 	EnableCommands();
-	curPathName[0] = '\0';
-	curFileName = curPathName;
+	SetLayoutFullPath("");
 	SetWindowTitle();
 }
 
@@ -1974,7 +1976,9 @@ static char * accelKeyNames[] = {
       "F9",
       "F10",
       "F11",
-      "F12" };
+      "F12",
+      "NumpadAdd",
+      "NumpadSub"};
 
 static void SetAccelKey(
       char * prefName,
@@ -2361,13 +2365,15 @@ static void CreateMenus( void )
 #endif
 	SetAccelKey( "zoomUp", wAccelKey_Pgdn, 0, (wAccelKeyCallBack_p)DoZoomUp, (void*)1 );
 	SetAccelKey( "zoomDown", wAccelKey_Pgup, 0, (wAccelKeyCallBack_p)DoZoomDown, (void*)1 );
-	SetAccelKey( "redraw", wAccelKey_F5, 0, (wAccelKeyCallBack_p)MainRedraw, (void*)1 );
+    SetAccelKey( "redraw", wAccelKey_F5, 0, (wAccelKeyCallBack_p)MainRedraw, (void*)1 );
 	SetAccelKey( "delete", wAccelKey_Del, 0, (wAccelKeyCallBack_p)SelectDelete, (void*)1 );
 	SetAccelKey( "copy", wAccelKey_Ins, WKEY_CTRL, (wAccelKeyCallBack_p)EditCopy, 0 );
 	SetAccelKey( "paste", wAccelKey_Ins, WKEY_SHIFT, (wAccelKeyCallBack_p)EditPaste, 0 );
 	SetAccelKey( "undo", wAccelKey_Back, WKEY_SHIFT, (wAccelKeyCallBack_p)UndoUndo, 0 );
 	SetAccelKey( "cut", wAccelKey_Del, WKEY_SHIFT, (wAccelKeyCallBack_p)EditCut, 0 );
 	SetAccelKey( "nextWindow", wAccelKey_F6, 0, (wAccelKeyCallBack_p)NextWindow, 0 );
+    SetAccelKey( "zoomUp", wAccelKey_Numpad_Add, WKEY_CTRL, (wAccelKeyCallBack_p)DoZoomUp, (void*)1 );
+	SetAccelKey( "zoomDown", wAccelKey_Numpad_Subtract, WKEY_CTRL, (wAccelKeyCallBack_p)DoZoomDown, (void*)1 );
 
 	InitBenchDialog();
 }
@@ -2386,9 +2392,9 @@ static void LoadFileList( void )
 		if (!cp)
 			continue;
 		pathName = MyStrdup(cp);
-		fileName = strrchr( pathName, FILE_SEP_CHAR[0] );
+		fileName = FindFilename((char *)pathName);
 		if (fileName)
-		wMenuListAdd( fileList_ml, 0, fileName+1, pathName );
+			wMenuListAdd( fileList_ml, 0, fileName, pathName );
 	}
 }
 
