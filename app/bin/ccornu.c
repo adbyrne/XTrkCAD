@@ -574,7 +574,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 					Da.extend[sel] = TRUE;
 			}
 		} else {
-			if (inside) Da.pos[Da.selectPoint] = pos;
+			if (inside) Da.pos[sel] = pos;
 			GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel]);
 			if (!inside && Da.trackType[sel] == curveTypeStraight) {    //Extend with a temp seg
 				Da.extendSeg[sel].type = SEG_STRTRK;
@@ -596,20 +596,21 @@ EXPORT STATUS_T AdjustCornuCurve(
 				Da.extendSeg[sel].u.c.radius = Da.radius[sel];
 				a = FindAngle( Da.center[sel], pos );
 				PointOnCircle( &pos, Da.center[sel], Da.radius[sel], a );
-				if (Da.ep[sel]!=0) {
-					Da.extendSeg[sel].u.c.a0 =
-							FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]));
-					Da.extendSeg[sel].u.c.a1 =
-							NormalizeAngle(a-Da.extendSeg[sel].u.c.a0);
+				a2 = FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]));
+				if ((Da.angle[sel] < 180 && (a2>90 && a2 <270))  ||
+				    (Da.angle[sel] > 180 && (a2<90 || a2 >270))) {
+					Da.extendSeg[sel].u.c.a0 = a2;
+					Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a-a2);
 				} else {
 					Da.extendSeg[sel].u.c.a0 = a;
-					Da.extendSeg[sel].u.c.a1 =
-						NormalizeAngle(FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]))-a);
+					Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a2-a);
 				}
-				if (Da.extendSeg[sel].u.c.a1 == 0.0 || Da.extendSeg[sel].u.c.a1 >180 ||
-						(Da.extendSeg[sel].u.c.a0 >= Da.arcA0[sel] &&
-								Da.extendSeg[sel].u.c.a0 <= Da.arcA0[sel] + Da.arcA1[sel])) {
+				if (Da.extendSeg[sel].u.c.a1 == 0.0 || Da.extendSeg[sel].u.c.a1 >180
+					|| (Da.extendSeg[sel].u.c.a0 >= Da.arcA0[sel] &&
+						Da.extendSeg[sel].u.c.a0 + Da.extendSeg[sel].u.c.a1 <= Da.arcA0[sel] + Da.arcA1[sel])
+						) {
 					Da.extend[sel] = FALSE;
+					Da.pos[sel] = pos;
 				} else {
 					Da.extend[sel] = TRUE;
 					Da.pos[sel] = pos;
