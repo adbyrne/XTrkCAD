@@ -132,6 +132,7 @@ typedef struct {
 #define Q_IS_CORNU						(19)	// Is T_CORNU
 #define Q_MODIFY_CANT_SPLIT             (20)	// Is not able to be Split
 #define Q_CAN_EXTEND					(21)    // Add extra curve or straight in CORNU MODIFY
+#define Q_CAN_ADD_ENDPOINTS             (22)    // Is T_TURNTABLE
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track

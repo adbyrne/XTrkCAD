@@ -623,7 +623,9 @@ static BOOL_T MoveEndPtTurntable( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d
 		d -= d0;
 		Translate( &pos, pos, angle0+180, d0 );
 	}
-	if (d < r) {
+	if (small((r-d)/2)) {
+		Translate( &pos, posCen, angle0+180, r);   //Make radius equal if close
+	} else if (d < r) {
 		ErrorMessage( MSG_POINT_INSIDE_TURNTABLE );
 		return FALSE;
 	}
@@ -650,6 +652,7 @@ static BOOL_T QueryTurntable( track_p trk, int query )
 	case Q_ISTRACK:
 	case Q_NOT_PLACE_FROGPOINTS:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
+	case Q_CAN_ADD_ENDPOINTS:
 		return TRUE;
 	default:
 		return FALSE;

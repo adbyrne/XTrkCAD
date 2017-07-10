@@ -364,11 +364,11 @@ For detail about;
 
 }
 
-\dd \e{Left-Click} the open endpoint of one of the two tracks being joined. A red dot will appear as a reminder of which track has been selected.
+\dd \e{Left-Click} the open endpoint of one of the two tracks being joined. A red dot within a red circle will appear at the end of the join.
 
 \u000
 
-\dd \e{Drag} the endpoint to where you want it and release the button. Note that you will be able to fine-tune the position later.
+\dd \e{Drag} the endpoint to where you want it and release the button. The point will only move along the piece of track with the open endpoint (if this track type can be split) as far as the opposite end, or as an extension of that track with the same curvature (if this track can be extended). Note that you will be able to fine-tune the position later.
 
 \lcont{
 
@@ -380,11 +380,11 @@ For detail about;
 
 }
 
-\dd \e{Left-Click} the endpoint of the other track being joined. A red dot will appear as a reminder of which track has been selected.
+\dd \e{Left-Click} the endpoint of the other track being joined. Anothe red dot within a circle will appear at that end of the join.
 
 \u000
 
-\dd \e{Left-Drag} the endpoint to where you want it and release the button. The initial curve will be drawn - it will be red if the minimum radius is smaller than the minimum radius option.
+\dd \e{Left-Drag} the endpoint to where you want it and release the button. The second endpoint can only be moved along the second track as far as the other end (if it can be split) or as an extension beyond the end of this track (if it can be extended). The initial curve will be drawn - it will be red if the minimum radius is smaller than the minimum radius option.
 
 \lcont{
 
@@ -396,7 +396,7 @@ For detail about;
 
 }
 
-\dd You are now in "Select Points" mode. You can select an end point with \e{Left-Click} and move it along the track with \e{Left-Drag}.
+\dd You are now in "Select Points" mode. You can select an end point with \e{Left-Click} and move it with \e{Left-Drag}.
 
 \u000
 
@@ -453,7 +453,7 @@ Any tracks created during the \f{Join} command will have the following propertie
 
 Turnouts and Sectional (\K{cmdHotBar}) tracks can be joined to other tracks. \e{XTrackCAD} extends the selected endpoint with a straight track when making the connection.  
 
-A Turntable (\K{cmdTurntable}) can be joined however it must be used as the second endpoint.
+A Turntable (\K{cmdTurntable}) can be joined however it must be used as the second endpoint for normal easements but can be connected to either end with Cornu.
 
 For detail about;
 
