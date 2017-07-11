@@ -838,7 +838,7 @@ spiro_seg_to_bpath(const double ks[4],
 	th = atan2(xy[1], xy[0]);
 	scale = seg_ch / ch;
 	rot = seg_th - th;
-	if (depth > 5 || bend < 1.) {
+	if (depth > 10 || bend < 1.) {
 	    th_even = (1./384) * ks[3] + (1./8) * ks[1] + rot;
 	    th_odd = (1./48) * ks[2] + .5 * ks[0];
 	    ul = (scale * (1./3)) * cos(th_even - th_odd);

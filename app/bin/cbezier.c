@@ -384,7 +384,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 
 	          if (arc.curveData.type == curveTypeStraight) {
 	          	  double error = BezErrorLine(pos,start_point,end_point, t_s, t_e);
-	          	  curr_good = (error <= errorThreshold);
+	          	  curr_good = (error <= errorThreshold/2);
 	          	  arc.curveData.a0 = FindAngle(start_point,end_point);
 	          	  arc.curveData.a1 = FindAngle(end_point,start_point);
 
@@ -392,7 +392,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	        	  return FALSE;			//Something wrong
 	          } else {
 	        	  double error = BezError(pos, arc.curveData.curvePos, start_point, t_s, t_e);
-	          	  curr_good = (error <= errorThreshold);
+	          	  curr_good = (error <= errorThreshold/2);
 	          };
 
 	          done = prev_good && !curr_good; //Was better than this last time?
