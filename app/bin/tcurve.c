@@ -1165,10 +1165,9 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 	GetTrkCurveCenter( trk, &params->arcP, &params->arcR);
 	GetCurveAngles( &params->arcA0, &params->arcA1, trk );
 	ANGLE_T angle1 = FindAngle(params->arcP,pos);
-	if (angle1>90 && angle1<270)
-		params->angle = NormalizeAngle(FindAngle(params->arcP,pos)+90);
-	else
-		params->angle = NormalizeAngle(FindAngle(params->arcP,pos)-90);
+
+	params->track_angle = NormalizeAngle(FindAngle(params->arcP,pos)+90);
+
 	if ( easeR > 0.0 && params->arcR < easeR ) {
 		ErrorMessage( MSG_RADIUS_LSS_EASE_MIN,
 						FormatDistance( params->arcR ), FormatDistance( easeR ) );
@@ -1191,10 +1190,14 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 	} else {
 		if ( IsCurveCircle( trk ) )
 			params->ep = PickArcEndPt( params->arcP, /*Dj.inp[0].*/pos, pos );
-		else
+		else if (inx == PARAMS_CORNU ) {
+			params->ep = PickEndPoint(pos, trk);
+		} else {
 			params->ep = PickUnconnectedEndPointSilent( pos, trk );
+		}
 		if (params->ep == -1)
 			return FALSE;
+		params->angle = GetTrkEndAngle(trk,params->ep); ;
 	}
 	return TRUE;
 }

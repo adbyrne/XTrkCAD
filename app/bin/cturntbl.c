@@ -629,7 +629,22 @@ static BOOL_T MoveEndPtTurntable( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d
 		ErrorMessage( MSG_POINT_INSIDE_TURNTABLE );
 		return FALSE;
 	}
-	*ep = NewTurntableEndPt( *trk, angle0 );
+	//Look for empty slot
+	int epCnt;
+	BOOL_T found = FALSE;
+	for (*ep=0; *ep<GetTrkEndPtCnt(*trk); *ep=*ep+1) {
+		if ( (GetTrkEndTrk(*trk,*ep)) == NULL )
+			found = TRUE;
+			break;
+	}
+	if (!found)
+		*ep = NewTurntableEndPt(*trk,angle0);
+	else {
+		struct extraData *xx = GetTrkExtraData(*trk);
+		coOrd pos1;
+		PointOnCircle( &pos1, xx->pos, xx->radius, angle0 );
+		SetTrkEndPoint(*trk, *ep, pos1, angle0);   //Reuse
+	}
 	if ((d-r) > connectDistance) {
 		trk1 = NewStraightTrack( GetTrkEndPos(*trk,*ep), pos );
 		CopyAttributes( *trk, trk1 );

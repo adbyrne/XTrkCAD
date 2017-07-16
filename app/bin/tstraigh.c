@@ -576,14 +576,17 @@ static BOOL_T GetParamsStraight( int inx, track_p trk, coOrd pos, trackParams_t 
 	params->type = curveTypeStraight;
 	if ( inx == PARAMS_PARALLEL ) {
 		params->ep = 0;
+	} else if (inx == PARAMS_CORNU ){
+		params->ep = PickEndPoint( pos, trk);
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk );
-		if (params->ep == -1)
-			return FALSE;
 	}
+    if (params->ep == -1)
+			return FALSE;
 	params->lineOrig = GetTrkEndPos(trk,1-params->ep);
 	params->lineEnd = GetTrkEndPos(trk,params->ep);
 	params->len = FindDistance( params->lineOrig, params->lineEnd );
+	params->track_angle = FindAngle( params->lineOrig, params->lineEnd);
 	params->angle = GetTrkEndAngle(trk,params->ep);
 	params->arcR = 0.0;
 	return TRUE;

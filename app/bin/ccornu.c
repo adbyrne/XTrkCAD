@@ -79,6 +79,7 @@
 
 extern drawCmd_t tempD;
 extern TRKTYP_T T_BEZIER;
+extern TRKTYP_T T_CORNU;
 
 
 /*
@@ -255,55 +256,38 @@ BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius
 	return TRUE;
 }
 
-
+/*
+ * Set up the call to Cornu0. Take the conditions of the two ends from the connected tracks.
+ */
 BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p, cornuParm_t * cp) {
 
 	trackParams_t params;
-	BOOL_T ccw0, ccw1;
-	ANGLE_T angle0, angle1;
-
-	if (trk[0]) {
-		GetTrackParams(PARAMS_CORNU,trk[0],pos[0],&params);
-		coOrd pos0 = pos[0];
-		cp->pos[0] = pos0;
-		if (Da.ep[0]>=0) angle0 = GetTrkEndAngle(trk[0],ep[0]);
-		else angle0 = params.angle;         //Turntable
-		if (params.type == curveTypeStraight ) {
-			cp->angle[0] = NormalizeAngle(angle0+180);
-			cp->radius[0] = 0.0;
-		} else if (params.type == curveTypeCurve ){
-			if(params.arcA0>90 && params.arcA0<270) ccw0 = TRUE;
-			else ccw0 = FALSE;
-			cp->angle[0] = NormalizeAngle(FindAngle(params.arcP,pos[0]) + (ep[0]?-90:90));
-			cp->radius[0] = params.arcR;
-			cp->center[0] = params.arcP;
-		} else {
-			cp->angle[0] = NormalizeAngle(angle0+180);
-			cp->radius[0] = params.arcR;
-			cp->center[0] = params.arcP;
-		}
-	} 										//use cp values set by caller
-
-	if (trk[1]) {
-		GetTrackParams(PARAMS_CORNU,trk[1],pos[1],&params);
-		coOrd pos1 = pos[1];
-		cp->pos[1] = pos1;
-		if (Da.ep[1]>=0) angle1 = GetTrkEndAngle(trk[1],Da.ep[1]);
-		else angle1 = params.angle;			//Turntable
-		if (params.type == curveTypeStraight ) {
-			cp->angle[1] = NormalizeAngle(angle1+180);
-			cp->radius[1] = 0.0;
+	BOOL_T ccw;
+	ANGLE_T angle;
+	for (int i=0;i<2;i++) {
+		if (!GetTrackParams(PARAMS_CORNU,trk[i],pos[i],&params)) return FALSE;
+		cp->pos[i] = pos[i];
+		if (Da.ep[i]>=0) angle = GetTrkEndAngle(trk[i],ep[i]);
+		else angle = params.angle;         							//Turntable only
+		if (params.type == curveTypeStraight) {
+			cp->angle[i] = NormalizeAngle(angle+180);       //Because end always backwards
+			cp->radius[i] = 0.0;
+		} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier) && params.arcR == 0.0 ) {
+			cp->radius[i] = 0.0;
+			cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));  //Use point not end
 		} else if (params.type == curveTypeCurve) {
-			if(params.arcA0>90 && params.arcA0<270) ccw1 = TRUE;
-			else ccw1 = FALSE;
-			cp->angle[1] = NormalizeAngle(FindAngle(params.arcP,pos[1]) + (ep[1]?-90:90));
-			cp->radius[1] = params.arcR;
-			cp->center[1] = params.arcP;
+			cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));
+			cp->radius[i] = params.arcR;
+			cp->center[i] = params.arcP;
+		} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier) && params.arcR != 0.0 ){
+			cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));
+			cp->radius[i] = params.arcR;
+			cp->center[i] = params.arcP;
 		} else {
-			cp->angle[1] = NormalizeAngle(angle1+180);
-			cp->radius[1] = params.arcR;
-			cp->center[1] = params.arcP;
-		}									//use cp values set by caller
+			cp->angle[i] = NormalizeAngle(angle+180);             //Unknown - treat like straight
+			cp->radius[i] = params.arcR;
+			cp->center[i] = params.arcP;
+		}
 	}
 
 	return CallCornu0(pos,cp->center,cp->angle,cp->radius,array_p,TRUE);
@@ -397,14 +381,11 @@ BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track
 		Da.arcA1[end] = trackParams.arcA1;
 		Da.radius[end] = trackParams.arcR;
 		Da.center[end] = trackParams.arcP;
-		ANGLE_T angle1 = FindAngle(trackParams.arcP,pos);
-		Da.angle[end] = NormalizeAngle(angle1+(track_end?-90:90));
-						//Ignore params.angle which is always left to right
-	} else if (trackParams.type == curveTypeBezier) {
-		Da.angle[end] = trackParams.angle;
+		Da.angle[end] = NormalizeAngle(trackParams.track_angle + (track_end?180:0));
+	} else if (trackParams.type == curveTypeBezier || trackParams.type == curveTypeCornu) {
+		Da.angle[end] = NormalizeAngle(trackParams.track_angle+(track_end?180:0));
 		if (trackParams.arcR == 0) {
 			Da.radius[end] = 0;
-			Da.angle[end] = trackParams.angle;
 			Da.center[end] = zero;
 		} else {
 			Da.arcA0[end] = trackParams.arcA0;
@@ -412,12 +393,7 @@ BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track
 			Da.radius[end] = trackParams.arcR;
 			Da.center[end] = trackParams.arcP;
 		}
-	} else if (trackParams.type == curveTypeCornu) {
-			Da.radius[end] = trackParams.cornuRadius[end];
-			Da.angle[end] = trackParams.cornuAngle[end];
-			Da.center[end] = trackParams.cornuCenter[end];
-	}
-	else if (trackParams.type == curveTypeStraight) {
+	} else if (trackParams.type == curveTypeStraight) {
 		if (Da.ep[end]>=0)
 			Da.angle[end] = NormalizeAngle(GetTrkEndAngle(t,track_end)+180);  //Ignore params.angle because it gives from nearest end
 		else {
@@ -525,15 +501,16 @@ EXPORT STATUS_T AdjustCornuCurve(
 		if (Da.trk[sel]) {										//There is a track
 			if (OnTrack(&pos,FALSE,TRUE) == Da.trk[sel]) {		//And the pos is on it
 				inside = TRUE;
-				if (QueryTrack(Da.trk[Da.selectPoint],Q_MODIFY_CANT_SPLIT)) {  //Turnouts & Cornus
+				if (QueryTrack(Da.trk[Da.selectPoint],Q_MODIFY_CANT_SPLIT)) {  //Turnouts
 					InfoMessage(_("Track can't be split"));
-					if (Da.ep[sel]>=0)											//May be turntable
+					if (Da.ep[sel]>=0)											//Ignore if turntable
 						pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 				}
 			} else {
 				pos = pos2;				//Put Back to original position as outside track
 			}
-			if (Da.ep[sel]>=0 && !QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)) { //Not Turntable
+			if (Da.ep[sel]>=0 && (!QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)
+					|| !QueryTrack(Da.trk[sel],Q_MODIFY_CANT_SPLIT))) { //Not Turntable or Turnout
 				DIST_T ab = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]));
 				DIST_T ac = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos);
 				DIST_T cb = FindDistance(GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]), pos);
@@ -543,10 +520,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 				}
 			}
 		}
-		DrawTempCornu();   //wipe out
+		DrawTempCornu();   //wipe out old
 		Da.extend[sel] = FALSE;
 		if(!Da.trk[sel]) {							//Cornu with no ends
-			if (Da.radius[sel] == 0)  {
+			if (Da.radius[sel] == 0)  {				//Straight
 				Da.extendSeg[sel].type = SEG_STRTRK;
 				Da.extendSeg[sel].width = 0;
 				Da.extendSeg[sel].color = wDrawColorBlack;
@@ -560,7 +537,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 					pos = Da.extendSeg[sel].u.l.pos[1-sel];
 					Da.extend[sel] = TRUE;
 				}
-			} else {
+			} else {								//Curve
 				Da.extendSeg[sel].type = SEG_CRVTRK;
 				Da.extendSeg[sel].width = 0;
 				Da.extendSeg[sel].color = wDrawColorBlack;
@@ -585,71 +562,75 @@ EXPORT STATUS_T AdjustCornuCurve(
 		} else {									//Cornu with ends
 			if (inside) Da.pos[sel] = pos;
 			if (!GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel])) {
-				DrawTempCornu();											//Put Back Turntable
-				return C_CONTINUE;
+				DrawTempCornu();
+				return C_CONTINUE;											//Stop drawing
 			}
-			if (!inside && Da.trackType[sel] == curveTypeStraight) {    //Extend with a temp seg
-				Da.extendSeg[sel].type = SEG_STRTRK;
-				Da.extendSeg[sel].width = 0;
-				Da.extendSeg[sel].color = wDrawColorBlack;
-				if (Da.ep[sel]>=0) {
-					Da.extendSeg[sel].u.l.pos[0] = GetTrkEndPos( Da.trk[sel], Da.ep[sel] );
-					a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,GetTrkEndPos(Da.trk[sel],Da.ep[sel])));
-				} else {												//Turntable initially
-					Da.extendSeg[sel].u.l.pos[0] = Da.pos[sel];
-					a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,Da.pos[sel]));
-				}
-				// Remove any extend in opposite direction for Turntable
-				if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS) && Da.ep[sel]>=0 && (a>90 && a<270)) {
-					Da.extend[sel] = FALSE;    //Turntable with point and extension is other side of well
-				    Da.pos[sel] = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
-				} else {
-					Da.extend[sel] = TRUE;
-					d = FindDistance( Da.extendSeg[sel].u.l.pos[0], pos );
-					Translate( &Da.extendSeg[sel].u.l.pos[1],
-						Da.extendSeg[sel].u.l.pos[0],
-						Da.angle[sel], -d * cos(D2R(a)));
-					Da.pos[sel] = pos = Da.extendSeg[sel].u.l.pos[1];
-				}
-			} else if (!inside && Da.trackType[sel] == curveTypeCurve) {       //Extend with temp curve
-				Da.extendSeg[sel].type = SEG_CRVTRK;
-				Da.extendSeg[sel].width = 0;
-				Da.extendSeg[sel].color = wDrawColorBlack;
-				Da.extendSeg[sel].u.c.center = Da.center[sel];
-				Da.extendSeg[sel].u.c.radius = Da.radius[sel];
-				a = FindAngle( Da.center[sel], pos );
-				PointOnCircle( &pos, Da.center[sel], Da.radius[sel], a );
-				a2 = FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]));
-				if ((Da.angle[sel] < 180 && (a2>90 && a2 <270))  ||
-				    (Da.angle[sel] > 180 && (a2<90 || a2 >270))) {
-					Da.extendSeg[sel].u.c.a0 = a2;
-					Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a-a2);
-				} else {
-					Da.extendSeg[sel].u.c.a0 = a;
-					Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a2-a);
-				}
-				if (Da.extendSeg[sel].u.c.a1 == 0.0 || Da.extendSeg[sel].u.c.a1 >180
-					|| (Da.extendSeg[sel].u.c.a0 >= Da.arcA0[sel] &&
-						Da.extendSeg[sel].u.c.a0 + Da.extendSeg[sel].u.c.a1 <= Da.arcA0[sel] + Da.arcA1[sel])
+			if (!inside) {										 //Extend the track
+				if (Da.trackType[sel] == curveTypeStraight) {    //Extend with a straight
+					Da.extendSeg[sel].type = SEG_STRTRK;
+					Da.extendSeg[sel].width = 0;
+					Da.extendSeg[sel].color = wDrawColorBlack;
+					if (Da.ep[sel]>=0) {
+						Da.extendSeg[sel].u.l.pos[0] = GetTrkEndPos( Da.trk[sel], Da.ep[sel] );
+						a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,GetTrkEndPos(Da.trk[sel],Da.ep[sel])));
+					} else {												//Turntable when unconnected
+						Da.extendSeg[sel].u.l.pos[0] = Da.pos[sel];
+						a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,Da.pos[sel]));
+					}
+					// Remove any extend in opposite direction for Turntable/Turnouts
+					if (((QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)  && Da.ep[sel]>=0)
+							|| QueryTrack(Da.trk[sel],Q_MODIFY_CANT_SPLIT))
+							&& (a>90 && a<270)) {
+						Da.extend[sel] = FALSE;    //Turntable with point and extension is other side of well
+						Da.pos[sel] = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
+					} else {
+						Da.extend[sel] = TRUE;
+						d = FindDistance( Da.extendSeg[sel].u.l.pos[0], pos );
+						Translate( &Da.extendSeg[sel].u.l.pos[1],
+								Da.extendSeg[sel].u.l.pos[0],
+								Da.angle[sel], -d * cos(D2R(a)));
+						Da.pos[sel] = pos = Da.extendSeg[sel].u.l.pos[1];
+					}
+				} else if (Da.trackType[sel] == curveTypeCurve) {       //Extend with temp curve
+					Da.extendSeg[sel].type = SEG_CRVTRK;
+					Da.extendSeg[sel].width = 0;
+					Da.extendSeg[sel].color = wDrawColorBlack;
+					Da.extendSeg[sel].u.c.center = Da.center[sel];
+					Da.extendSeg[sel].u.c.radius = Da.radius[sel];
+					a = FindAngle( Da.center[sel], pos );
+					PointOnCircle( &pos, Da.center[sel], Da.radius[sel], a );
+					a2 = FindAngle(Da.center[sel],GetTrkEndPos(Da.trk[sel],Da.ep[sel]));
+					if ((Da.angle[sel] < 180 && (a2>90 && a2 <270))  ||
+							(Da.angle[sel] > 180 && (a2<90 || a2 >270))) {
+						Da.extendSeg[sel].u.c.a0 = a2;
+						Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a-a2);
+					} else {
+						Da.extendSeg[sel].u.c.a0 = a;
+						Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a2-a);
+					}
+					if (Da.extendSeg[sel].u.c.a1 == 0.0 || Da.extendSeg[sel].u.c.a1 >180
+							|| (Da.extendSeg[sel].u.c.a0 >= Da.arcA0[sel] && Da.extendSeg[sel].u.c.a0 < Da.arcA0[sel]+Da.arcA1[sel]
+								&& Da.extendSeg[sel].u.c.a0 + Da.extendSeg[sel].u.c.a1 <= Da.arcA0[sel] + Da.arcA1[sel])
 						) {
-					Da.extend[sel] = FALSE;
-					Da.pos[sel] = pos;
-				} else {
-					Da.extend[sel] = TRUE;
-					Da.pos[sel] = pos;
-				}
+						Da.extend[sel] = FALSE;
+						Da.pos[sel] = pos;
+					} else {
+						Da.extend[sel] = TRUE;
+						Da.pos[sel] = pos;
+					}
 
-			} else if (!inside) {
-				DrawTempCornu();   //put back
-				wBeep();
-				InfoMessage(_("Must be on the %s Track"),Da.trackType[sel]==curveTypeBezier?"Bezier":"Unknown Type");
-				pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
-				return C_CONTINUE;
+				} else {								//Bezier and Cornu that we are joining TO can't extend
+					DrawTempCornu();   //put back
+					wBeep();
+					InfoMessage(_("Must be on the %s Track"),Da.trackType[sel]==curveTypeBezier?"Bezier":Da.trackType[sel]==curveTypeCornu?"Cornu":"Unknown Type");
+					pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
+					return C_CONTINUE;
+				}
 			}
 		}
 
 		CreateBothEnds(Da.selectPoint);
-		SetUpCornuParms(&cp);
+		SetUpCornuParms(&cp);    //In case we want to use these because the ends are not on the track
 
 		if (CallCornu(Da.pos, Da.trk, Da.ep, &Da.crvSegs_da,&cp)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
 		else Da.crvSegs_da_cnt = 0;
@@ -708,7 +689,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			for (int i=0;i<2;i++) {
 				UndoModify(Da.trk[i]);
 				MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
-				if (GetTrkType(Da.trk[i])==T_BEZIER) {          //Bezier split position not precise, so readjust Cornu
+				if (GetTrkType(Da.trk[i])==T_BEZIER || GetTrkType(Da.trk[i])==T_CORNU) {     //Bezier split position not precise, so readjust Cornu
 					GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i]);
 					ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
 					SetCornuEndPt(t,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
@@ -872,7 +853,13 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		for (int i=0;i<2;i++) {										//Attach new track
 			if (Da.trk[i] && Da.ep[i] != -1) {						//Like the old track
 				MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
-				ConnectTracks(t,i,Da.trk[i],Da.ep[i]);
+				if (GetTrkType(Da.trk[i])==T_BEZIER) {     //Bezier split position not precise, so readjust Cornu
+					GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i]);
+					ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
+					SetCornuEndPt(t,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
+				}
+				if (Da.ep[i]>= 0)
+					ConnectTracks(t,i,Da.trk[i],Da.ep[i]);
 			}
 		}
 		UndoEnd();
@@ -1018,14 +1005,10 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			EPINX_T ep;
 		    if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) {
 				ep = PickUnconnectedEndPointSilent(p, t);
-				if ((ep==-1 && !QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) || (ep>=0 && FindDistance(p,GetTrkEndPos(t,ep))>2)) {
+				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  //Ignore Turntable Unconnected
+				if	((ep==-1 && !QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) || (ep>=0 && FindDistance(p,GetTrkEndPos(t,ep))>2)) {
 					wBeep();
 					InfoMessage(_("No Unconnected end point there"));
-					return C_CONTINUE;
-				}
-				if (QueryTrack(t, Q_IS_CORNU)) {
-					InfoMessage(_("Can't connect Cornu to another Cornu"));
-					wBeep();
 					return C_CONTINUE;
 				}
 				Da.trk[end] = t;

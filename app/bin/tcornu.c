@@ -673,7 +673,7 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     BOOL_T track;
     track = IsTrack(trk);
     
-    cornuParm_t newl, newr;
+    cornuParm_t new;
 
 
     //TODO find right Seg and point, Create new Cornu from there to end, Adjust old
@@ -684,6 +684,10 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     ANGLE_T angle = GetAngleSegs(xx->cornuData.arcSegs.cnt,(trkSeg_t *)(xx->cornuData.arcSegs.ptr),&pos,&inx,NULL,NULL,NULL, NULL);
 
     trkSeg_p segPtr = &DYNARR_N(trkSeg_t, xx->cornuData.arcSegs, inx);
+
+    GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,NULL,NULL,NULL);
+    segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
+
     if (segPtr->type == SEG_STRTRK) {
     	radius = 0.0;
     	center = zero;
@@ -692,44 +696,48 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     	radius = segPtr->u.c.radius;
     }
     if (ep) {
-    	newr.angle[0] = angle;
-    	newr.angle[1] = xx->cornuData.a[1];
-    	newr.center[0] = center;
-    	newr.center[1] = xx->cornuData.c[1];
-    	newr.radius[0] = radius;
-    	newr.radius[1] = xx->cornuData.r[1];
+    	new.pos[0] = pos;
+    	new.pos[1] = xx->cornuData.pos[1];
+    	new.angle[0] = NormalizeAngle(angle+180);
+    	new.angle[1] = xx->cornuData.a[1];
+    	new.center[0] = center;
+    	new.center[1] = xx->cornuData.c[1];
+    	new.radius[0] = radius;
+    	new.radius[1] = xx->cornuData.r[1];
     } else {
-    	newl.angle[1] = angle;
-    	newl.angle[0] = xx->cornuData.a[0];
-    	newl.center[1] = center;
-    	newl.center[0] = xx->cornuData.c[0];
-    	newl.radius[1] = radius;
-    	newl.radius[0] = xx->cornuData.r[0];
+    	new.pos[1] = pos;
+    	new.pos[0] = xx->cornuData.pos[0];
+    	new.angle[1] = NormalizeAngle(angle);
+    	new.angle[0] = xx->cornuData.a[0];
+    	new.center[1] = center;
+    	new.center[0] = xx->cornuData.c[0];
+    	new.radius[1] = radius;
+    	new.radius[0] = xx->cornuData.r[0];
     }
 
-    trk1 = NewCornuTrack(ep?newr.pos:newl.pos,ep?newr.center:newl.center,ep?newr.angle:newl.angle,ep?newr.radius:newl.radius,NULL,0);
+    trk1 = NewCornuTrack(new.pos,new.center,new.angle,new.radius,NULL,0);
     if (trk1==NULL) {
     	wBeep();
     	InfoMessage(_("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
-    			ep?newr.pos[0].x:newl.pos[0].x,ep?newr.pos[0].y:newl.pos[0].y,
-    			ep?newr.pos[1].x:newl.pos[1].x,ep?newr.pos[1].y:newl.pos[1].y,
-    			ep?newr.center[0].x:newl.center[0].x,ep?newr.center[0].y:newl.center[0].y,
-    			ep?newr.center[1].x:newl.center[1].x,ep?newr.center[1].y:newl.center[1].y,
-    			ep?newr.angle[0]:newl.angle[0],ep?newr.angle[1]:newl.angle[1],
-    			FormatDistance(ep?newr.radius[0]:newl.radius[0]),FormatDistance(ep?newr.radius[1]:newl.radius[1]));
+    			new.pos[0].x,new.pos[0].y,
+    			new.pos[1].x,new.pos[1].y,
+    			new.center[0].x,new.center[0].y,
+    			new.center[1].x,new.center[1].y,
+    			new.angle[0],new.angle[1],
+    			FormatDistance(new.radius[0]),FormatDistance(new.radius[1]));
     	UndoEnd();
     	return FALSE;
     }
 
     UndoModify(trk);
-	for (int i=0;i<2;i++) {
-		xx->cornuData.pos[i] = ep?newl.pos[i]:newr.pos[i];
-		xx->cornuData.a[i] = ep?newl.angle[i]:newr.angle[i];
-		xx->cornuData.r[i] = ep?newl.radius[i]:newr.radius[i];
-		xx->cornuData.c[i] = ep?newl.center[i]:newr.center[i];
-	}
+    xx->cornuData.pos[ep] = pos;
+    xx->cornuData.a[ep] = NormalizeAngle(new.angle[1-ep]+180);
+    xx->cornuData.r[ep] = new.radius[1-ep];
+    xx->cornuData.c[ep] = new.center[1-ep];
+
     RebuildCornu(trk);
-    SetTrkEndPoint( trk, ep, xx->cornuData.pos[ep], xx->cornuData.a[ep]);
+
+    SetTrkEndPoint(trk, ep, xx->cornuData.pos[ep], xx->cornuData.a[ep]);
 
 	*leftover = trk1;
 	*ep0 = 1-ep;
@@ -738,6 +746,16 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	return TRUE;
 }
 
+BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
+	track_p trk2;
+	if (SplitTrack(*trk,pos,*ep,&trk2,TRUE)) {
+		struct extraData *xx = GetTrkExtraData(*trk);
+		if (trk2) DeleteTrack(trk2,TRUE);
+		SetTrkEndPoint( *trk, *ep, *ep?xx->cornuData.pos[1]:xx->cornuData.pos[0], *ep?xx->cornuData.a[1]:xx->cornuData.a[0] );
+		return TRUE;
+	}
+	return FALSE;
+}
 static int log_traverseCornu = 0;
 /*
  * TraverseCornu is used to position a train/car.
@@ -980,8 +998,33 @@ static DIST_T GetLengthCornu( track_p trk )
 
 static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
-	params->type = curveTypeCornu;
+	int segInx, segInx2;
+	BOOL_T back, negative;
+	DIST_T d;
 	struct extraData *xx = GetTrkExtraData(trk);
+	params->type = curveTypeCornu;
+	params->track_angle = GetAngleSegs(		  						//Find correct Segment and nearest point in it
+							xx->cornuData.arcSegs.cnt,xx->cornuData.arcSegs.ptr,
+							&pos, &segInx, &d , &back, &segInx2, &negative );
+	trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->cornuData.arcSegs,segInx);
+	if (segPtr->type == SEG_STRTRK) {
+		params->arcR = 0.0;
+	} else  if (segPtr->type == SEG_CRVTRK) {
+		params->arcR = segPtr->u.c.radius;
+		params->arcP = segPtr->u.c.center;
+		params->arcA0 = segPtr->u.c.a0;
+		params->arcA1 = segPtr->u.c.a1;
+	} else if (segPtr->type == SEG_BEZTRK) {
+		trkSeg_p segPtr2 = &DYNARR_N(trkSeg_t,segPtr->bezSegs,segInx2);
+		if (segPtr2->type == SEG_STRTRK) {
+			params->arcR = 0.0;
+		} else if (segPtr2->type == SEG_CRVTRK) {
+			params->arcR = segPtr2->u.c.radius;
+			params->arcP = segPtr2->u.c.center;
+			params->arcA0 = segPtr2->u.c.a0;
+			params->arcA1 = segPtr2->u.c.a1;
+		}
+	}
 	for (int i=0;i<2;i++) {
 		params->cornuEnd[i] = xx->cornuData.pos[i];
 		params->cornuAngle[i] = xx->cornuData.a[i];
@@ -989,9 +1032,17 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 		params->cornuCenter[i] = xx->cornuData.c[i];
 	}
 	params->len = xx->cornuData.length;
-	params->ep = PickUnconnectedEndPointSilent( pos, trk);
-	if (params->ep == -1)
-		return FALSE;
+	if ( inx == PARAMS_PARALLEL ) {
+			params->ep = 0;
+	} else if (inx == PARAMS_CORNU) {
+		params->ep = PickEndPoint( pos, trk);
+	} else {
+		params->ep = PickUnconnectedEndPointSilent( pos, trk );
+	}
+	if (params->ep>=0) {
+		params->angle = GetTrkEndAngle(trk,params->ep);
+	}
+
 	return TRUE;
 
 }
@@ -1014,7 +1065,7 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	case Q_ISTRACK:
 		return TRUE;
 	case Q_CAN_PARALLEL:
-	case Q_MODIFY_CANT_SPLIT:
+	// case Q_MODIFY_CANT_SPLIT: Remove Split Restriction
 	// case Q_CANNOT_BE_ON_END: Remove Restriction - Can have Cornu with no ends
 	case Q_CANNOT_PLACE_TURNOUT:
 		return TRUE;
@@ -1185,7 +1236,7 @@ static trackCmd_t cornuCmds = {
 		NULL,   /* modify */
 		GetLengthCornu,
 		GetParamsCornu,
-		NULL, /* Move EndPt */
+		MoveCornuEndPt, /* Move EndPt */
 		QueryCornu,
 		NULL,	/* ungroup */
 		FlipCornu,

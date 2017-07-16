@@ -812,33 +812,28 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 	for (int i=0;i<4;i++) params->bezierPoints[i] = xx->bezierData.pos[i];
 	//GetBezierAngles(&params->arcA0,&params->arcA1, trk);
 	params->len = xx->bezierData.length;
-	GetAngleSegs(		  						//Find correct Segment and nearest point in it
+	params->track_angle = GetAngleSegs(		  						//Find correct Segment and nearest point in it
 					xx->bezierData.arcSegs.cnt,xx->bezierData.arcSegs.ptr,
 					&pos, &segInx, &d , &back, NULL, NULL );
-	if (d>0.5) {
-		InfoMessage(_("Point Not on Track"));
-		return FALSE;
-	}
+
 	trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->bezierData.arcSegs,segInx);
 	if (segPtr->type == SEG_STRLIN) {
-		params->angle = FindAngle(segPtr->u.l.pos[0],segPtr->u.l.pos[1]);
 		params->arcR = 0.0;
-		if ( inx == PARAMS_PARALLEL ) {
-			params->ep = 0;
-		} else {
-			params->ep = PickUnconnectedEndPointSilent( pos, trk );
-			if (params->ep == -1)
-				return FALSE;
-		}
 	} else {
 		params->arcR = segPtr->u.c.radius;
 		params->arcP = segPtr->u.c.center;
 		params->arcA0 = segPtr->u.c.a0;
 		params->arcA1 = segPtr->u.c.a1;
 	}
-	params->ep = PickUnconnectedEndPointSilent( pos, trk);
-	if (params->ep == -1)
-		return FALSE;
+	if ( inx == PARAMS_PARALLEL ) {
+		params->ep = 0;
+	} else if (inx == PARAMS_CORNU ){
+		params->ep = PickEndPoint( pos, trk);
+	} else {
+		params->ep = PickUnconnectedEndPointSilent( pos, trk);
+	}
+	if (params->ep>=0)
+		params->angle = GetTrkEndAngle(trk, params->ep);
 	return TRUE;
 
 }
@@ -991,8 +986,11 @@ BOOL_T RebuildBezier (track_p trk)
 
 BOOL_T MoveBezierEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 	track_p trk2;
-	if (SplitTrack(*trk,pos,*ep,&trk2,FALSE)) {
+	struct extraData *xx;
+	if (SplitTrack(*trk,pos,*ep,&trk2,TRUE)) {
 		if (trk2) DeleteTrack(trk2,TRUE);
+		xx = GetTrkExtraData(*trk);
+		SetTrkEndPoint( *trk, *ep, *ep?xx->bezierData.pos[3]:xx->bezierData.pos[0], *ep?xx->bezierData.a1:xx->bezierData.a0 );
 		return TRUE;
 	}
 	return FALSE;
@@ -1175,11 +1173,11 @@ LOG( log_bezierSegments, 1, ( "Tr2Nxt SI%d A%0.3f P[%0.3f %0.3f] D%0.3f\n", inx,
 
 	case SEGPROC_DISTANCE:
 
-		dd = FindDistance(data->distance.pos1,segPtr->u.b.pos[0]);   //Just find one distance
+		dd = 100000.00;   //Just find one distance
 		p0 = data->distance.pos1;
 
 		//initialize p2 
-		p2 = p0;
+		p2 = segPtr->u.b.pos[0];
 		for(int i=0;i<segPtr->bezSegs.cnt;i++) {
 			segProcData.distance.pos1 = p0;
 			SegProc(SEGPROC_DISTANCE,&(DYNARR_N(trkSeg_t,segPtr->bezSegs,i)),&segProcData);
