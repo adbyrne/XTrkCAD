@@ -265,28 +265,30 @@ BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p
 	BOOL_T ccw;
 	ANGLE_T angle;
 	for (int i=0;i<2;i++) {
-		if (!GetTrackParams(PARAMS_CORNU,trk[i],pos[i],&params)) return FALSE;
-		cp->pos[i] = pos[i];
-		if (Da.ep[i]>=0) angle = GetTrkEndAngle(trk[i],ep[i]);
-		else angle = params.angle;         							//Turntable only
-		if (params.type == curveTypeStraight) {
-			cp->angle[i] = NormalizeAngle(angle+180);       //Because end always backwards
-			cp->radius[i] = 0.0;
-		} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier) && params.arcR == 0.0 ) {
-			cp->radius[i] = 0.0;
-			cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));  //Use point not end
-		} else if (params.type == curveTypeCurve) {
-			cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));
-			cp->radius[i] = params.arcR;
-			cp->center[i] = params.arcP;
-		} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier) && params.arcR != 0.0 ){
-			cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));
-			cp->radius[i] = params.arcR;
-			cp->center[i] = params.arcP;
-		} else {
-			cp->angle[i] = NormalizeAngle(angle+180);             //Unknown - treat like straight
-			cp->radius[i] = params.arcR;
-			cp->center[i] = params.arcP;
+		if (trk[i]) {
+			if (!GetTrackParams(PARAMS_CORNU,trk[i],pos[i],&params)) return FALSE;
+			cp->pos[i] = pos[i];
+			if (Da.ep[i]>=0) angle = GetTrkEndAngle(trk[i],ep[i]);
+			else angle = params.angle;         							//Turntable only
+			if (params.type == curveTypeStraight) {
+				cp->angle[i] = NormalizeAngle(angle+180);       //Because end always backwards
+				cp->radius[i] = 0.0;
+			} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier) && params.arcR == 0.0 ) {
+				cp->radius[i] = 0.0;
+				cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));  //Use point not end
+			} else if (params.type == curveTypeCurve) {
+				cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));
+				cp->radius[i] = params.arcR;
+				cp->center[i] = params.arcP;
+			} else if ((params.type == curveTypeCornu || params.type == curveTypeBezier) && params.arcR != 0.0 ){
+				cp->angle[i] = NormalizeAngle(params.track_angle+(ep[i]?180:0));
+				cp->radius[i] = params.arcR;
+				cp->center[i] = params.arcP;
+			} else {
+				cp->angle[i] = NormalizeAngle(angle+180);             //Unknown - treat like straight
+				cp->radius[i] = params.arcR;
+				cp->center[i] = params.arcP;
+			}
 		}
 	}
 
