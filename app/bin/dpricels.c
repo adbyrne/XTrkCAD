@@ -23,6 +23,7 @@
 #include "track.h"
 #include "compound.h"
 #include "i18n.h"
+#include "layout.h"
 
 /*****************************************************************************
  *
@@ -115,8 +116,8 @@ static void PriceListChange( long changes )
 		priceListW == NULL || !wWinIsVisible( priceListW ) ) 
 		return;
 	wListClear( priceListSelL );
-	to1 = TurnoutAdd( listLabels|LABEL_COST, curScaleInx, priceListSelL, NULL, -1 );
-	to2 = StructAdd( listLabels|LABEL_COST, curScaleInx, priceListSelL, NULL );
+	to1 = TurnoutAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL, NULL, -1 );
+	to2 = StructAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL, NULL );
 	if (to1 == NULL)
 		to1 = to2;
 	priceListCurrent = NULL;

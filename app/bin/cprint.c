@@ -361,14 +361,14 @@ static void PrintGaudyBox(
 	DrawString( &page_d, p00, 0.0, dat, fp, 16.0, wDrawColorBlack );
 	p00.y = 0.5+0.05;
 
-	DrawTextSize( &mainD, Title1, fp, 16.0, FALSE, &textsize );
+	DrawTextSize( &mainD, GetLayoutTitle(), fp, 16.0, FALSE, &textsize );
 	p00.x = (pageW/2.0)-(textsize.x/2.0);
 	p00.y = 0.75+0.05;
-	DrawString( &page_d, p00, 0.0, Title1, fp, 16.0, wDrawColorBlack );
-	DrawTextSize( &mainD, Title2, fp, 16.0, FALSE, &textsize );
+	DrawString( &page_d, p00, 0.0, GetLayoutTitle(), fp, 16.0, wDrawColorBlack );
+	DrawTextSize( &mainD, GetLayoutSubtitle(), fp, 16.0, FALSE, &textsize );
 	p00.x = (pageW/2.0)-(textsize.x/2.0);
 	p00.y = 0.50+0.05;
-	DrawString( &page_d, p00, 0.0, Title2, fp, 16.0, wDrawColorBlack );
+	DrawString( &page_d, p00, 0.0, GetLayoutSubtitle(), fp, 16.0, wDrawColorBlack );
 
 	sprintf( dat, _("PrintScale 1:%ld   Room %s x %s   Model Scale %s   File %s"),
 		(long)printScale, 
@@ -914,7 +914,7 @@ static void DoPrintPrint( void * junk )
 
 	print_d.CoOrd2Pix = page_d.CoOrd2Pix = mainD.CoOrd2Pix;
 	wSetCursor( wCursorWait );
-	if (!wPrintDocStart( Title1, pageCount, &copies )) {
+	if (!wPrintDocStart(GetLayoutTitle(), pageCount, &copies )) {
 		wSetCursor( wCursorNormal );
 		return;
 	}

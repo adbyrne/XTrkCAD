@@ -51,6 +51,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "trackx.h"
 #include "compound.h"
 #include "i18n.h"
+#include "layout.h"
 
 EXPORT TRKTYP_T T_SENSOR = -1;
 
@@ -433,28 +434,23 @@ static void CreateNewSensor (coOrd orig)
 
 static STATUS_T CmdSensor ( wAction_t action, coOrd pos )
 {
-    
-    
     switch (action) {
     case C_START:
         InfoMessage(_("Place sensor"));
         return C_CONTINUE;
     case C_DOWN:
-        SnapPos(&pos);
-        DDrawSensor( &tempD, pos, GetScaleRatio(curScaleInx), wDrawColorBlack );
-        return C_CONTINUE;
-    case C_MOVE:
-        SnapPos(&pos);
-        DDrawSensor( &tempD, pos, GetScaleRatio(curScaleInx), wDrawColorBlack );
+	case C_MOVE:
+		SnapPos(&pos);
+        DDrawSensor( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         return C_CONTINUE;
     case C_UP:
         SnapPos(&pos);
-        DDrawSensor( &tempD, pos, GetScaleRatio(curScaleInx), wDrawColorBlack );
+        DDrawSensor( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         CreateNewSensor(pos);
         return C_TERMINATE;
     case C_REDRAW:
     case C_CANCEL:
-        DDrawSensor( &tempD, pos, GetScaleRatio(curScaleInx), wDrawColorBlack );
+        DDrawSensor( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         return C_CONTINUE;
     default:
         return C_CONTINUE;

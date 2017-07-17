@@ -22,6 +22,7 @@
 
 #include "track.h"
 #include "i18n.h"
+#include "layout.h"
 #include "paths.h"
 
 /*****************************************************************************
@@ -88,14 +89,14 @@ static int SaveBitmapFile(
 	if (outputBitMapTogglesV&1) {
 		fp = wStandardFont( F_TIMES, FALSE, FALSE );
 		fs = 18;
-		DrawTextSize( &mainD, Title1, fp, fs, FALSE, &textsize );
+		DrawTextSize( &mainD, GetLayoutTitle(), fp, fs, FALSE, &textsize );
 		p[0].x = (bitmap_d.size.x - (textsize.x*bitmap_d.scale))/2.0 + bitmap_d.orig.x;
 		p[0].y = mapD.size.y + (y1+0.30)*bitmap_d.scale;
-		DrawString( &bitmap_d, p[0], 0.0, Title1, fp, fs*bitmap_d.scale, wDrawColorBlack );
-		DrawTextSize( &mainD, Title2, fp, fs, FALSE, &textsize );
+		DrawString( &bitmap_d, p[0], 0.0, GetLayoutTitle(), fp, fs*bitmap_d.scale, wDrawColorBlack );
+		DrawTextSize( &mainD, GetLayoutSubtitle(), fp, fs, FALSE, &textsize );
 		p[0].x = (bitmap_d.size.x - (textsize.x*bitmap_d.scale))/2.0 + bitmap_d.orig.x;
 		p[0].y = mapD.size.y + (y1+0.05)*bitmap_d.scale;
-		DrawString( &bitmap_d, p[0], 0.0, Title2, fp, fs*bitmap_d.scale, wDrawColorBlack );
+		DrawString( &bitmap_d, p[0], 0.0, GetLayoutSubtitle(), fp, fs*bitmap_d.scale, wDrawColorBlack );
 		fp_bi = wStandardFont( F_TIMES, TRUE, TRUE );
 		DrawTextSize( &mainD, _("Drawn with "), fp, fs, FALSE, &textsize );
 		DrawTextSize( &mainD, sProdName, fp_bi, fs, FALSE, &textsize1 );

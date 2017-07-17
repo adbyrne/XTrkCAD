@@ -1,6 +1,4 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tease.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
- *
+/** \file tease.c
  * TRANSISTION-CURVES (JOINTS)
  *
  */
@@ -69,6 +67,7 @@ do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'
 #include "cstraigh.h"
 #include "cjoin.h"
 #include "i18n.h"
+#include "layout.h"
 
 static TRKTYP_T T_EASEMENT = -1;
 
@@ -404,7 +403,7 @@ static track_p NewJoint(
 	static coOrd qZero = { 0.0, 0.0 };
 	ANGLE_T az0, a01, b, b01, b1, d, d1;
 	trk = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
-	SetTrkScale( trk, curScaleInx );
+	SetTrkScale( trk, GetLayoutCurScale() );
 	xx = GetTrkExtraData( trk );
 	SetTrkEndPoint( trk, 0, pos0, NormalizeAngle(angle0+180.0) );
 	SetTrkEndPoint( trk, 1, pos1, NormalizeAngle(angle1+180.0) );

@@ -52,6 +52,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "trackx.h"
 #include "compound.h"
 #include "i18n.h"
+#include "layout.h"
 
 EXPORT TRKTYP_T T_SIGNAL = -1;
 
@@ -769,7 +770,7 @@ static STATUS_T CmdSignal ( wAction_t action, coOrd pos )
     case C_MOVE:
         SnapPos(&pos);
         orient = FindAngle(pos0,pos);
-        DDrawSignal( &tempD, pos0, orient, 1, GetScaleRatio(curScaleInx), wDrawColorBlack );
+        DDrawSignal( &tempD, pos0, orient, 1, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         return C_CONTINUE;
     case C_UP:
         SnapPos(&pos);
@@ -778,7 +779,7 @@ static STATUS_T CmdSignal ( wAction_t action, coOrd pos )
         return C_TERMINATE;
     case C_REDRAW:
     case C_CANCEL:
-        DDrawSignal( &tempD, pos0, orient, 1, GetScaleRatio(curScaleInx), wDrawColorBlack );
+        DDrawSignal( &tempD, pos0, orient, 1, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         return C_CONTINUE;
     default:
         return C_CONTINUE;

@@ -576,7 +576,7 @@ static void DoClearAfter( void )
 
 	/* set all layers to their default properties and set current layer to 0 */
 	DefaultLayerProperties();
-	DoLayout();
+	DoLayout(NULL);
 	checkPtMark = 0;
 	Reset();
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
@@ -2532,7 +2532,7 @@ LOG1( log_init, ( "initCustom\n" ) )
 	 * MAIN WINDOW
 	 */
 LOG1( log_init, ( "create main window\n" ) )
-	strcpy( Title1, sProdName );
+	SetLayoutTitle( sProdName );
 	sprintf( message, _("Unnamed Trackplan - %s(%s)"), sProdName, sVersion );
 	wSetBalloonHelp( balloonHelp );
 	mainW = wWinMainCreate( buffer, 600, 350, "xtrkcadW", message, "main",

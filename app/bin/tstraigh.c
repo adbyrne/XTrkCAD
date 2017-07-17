@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tstraigh.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+/** \file tstraigh.c
+ * Straight track
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,6 +23,7 @@
 #include "track.h"
 #include "cstraigh.h"
 #include "i18n.h"
+#include "layout.h"
 
 /*******************************************************************************
  *
@@ -788,7 +789,7 @@ track_p NewStraightTrack( coOrd p0, coOrd p1 )
 	track_p t;
 	ANGLE_T a;
 	t = NewTrack( 0, T_STRAIGHT, 2, 0 );
-	SetTrkScale( t, curScaleInx );
+	SetTrkScale( t, GetLayoutCurScale() );
 	a = FindAngle( p1, p0 );
 	SetTrkEndPoint( t, 0, p0, a );
 	SetTrkEndPoint( t, 1, p1, NormalizeAngle( a+180.0 ) );

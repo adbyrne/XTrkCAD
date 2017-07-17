@@ -44,6 +44,7 @@
 #include "cjoin.h"
 #include "compound.h"
 #include "i18n.h"
+#include "layout.h"
 
 EXPORT long units = 0; /**< measurement units: 0 = English, 1 = metric */
 EXPORT long checkPtInterval = 10;
@@ -51,8 +52,6 @@ EXPORT long checkPtInterval = 10;
 EXPORT DIST_T curScaleRatio;
 EXPORT char * curScaleName;
 EXPORT DIST_T trackGauge;
-EXPORT char Title1[TITLEMAXLEN] = "";
-EXPORT char Title2[TITLEMAXLEN] = "Title line 2";
 EXPORT long labelScale = 8;
 EXPORT long labelEnable = ((1<<0)|LABELENABLE_LENGTHS|LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
 EXPORT long labelWhen = 2;
@@ -72,7 +71,9 @@ EXPORT long layoutLabels = 1;
 EXPORT long descriptionFontSize = 72;
 EXPORT long enableListPrices = 1;
 EXPORT void ScaleLengthEnd(void);
-static char minTrackRadiusPrefS[STR_SHORT_SIZE] = "minTrackRadius";
+
+static BOOL_T SetScaleDescGauge(SCALEINX_T scaleInx);
+
 
 /****************************************************************************
  *
@@ -174,7 +175,7 @@ static tieData_t tieData_demo = {
 		16.0/160.0,
 		32.0/160.0 };
 
-EXPORT SCALEINX_T curScaleInx = -1;
+//EXPORT SCALEINX_T curScaleInx = -1;
 static scaleInfo_p curScale;
 EXPORT long includeSameGaugeTurnouts = FALSE;
 static SCALEINX_T demoScaleInx = -1;
@@ -189,8 +190,6 @@ typedef struct {
 
 EXPORT typedef gaugeInfo_t * gaugeInfo_p;
 
-EXPORT GAUGEINX_T curGaugeInx = 0;
-
 /** this struct holds a scale description */
 typedef struct {
 		char *scaleDesc;	/** ptr to textual description eg. 'HO' */
@@ -203,7 +202,6 @@ EXPORT typedef scaleDesc_t *scaleDesc_p;
 static dynArr_t scaleDesc_da;
 #define scaleDesc(N) DYNARR_N( scaleDesc_t, scaleDesc_da, N )
 
-EXPORT SCALEDESCINX_T curScaleDescInx;
 
 /**
  * Get the ratio from a scale description. Each member in the list of scale descriptions is
@@ -306,6 +304,48 @@ EXPORT char *GetGaugeDesc( SCALEDESCINX_T scaleInx, GAUGEINX_T gaugeInx )
    g = &(DYNARR_N(gaugeInfo_t, s.gauges_da, gaugeInx));
 
 	return g->gauge;
+}
+
+void
+SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge)
+{
+	dynArr_t gauges_da;
+
+	gauges_da = (scaleDesc(desc)).gauges_da;
+	SetLayoutCurScale(((gaugeInfo_p)gauges_da.ptr)[gauge].scale);
+}
+
+static BOOL_T
+SetScaleDescGauge(SCALEINX_T scaleInx)
+{
+	int i, j;
+	char *scaleName = GetScaleName(scaleInx);
+	DIST_T scaleRatio = GetScaleRatio(scaleInx);
+	dynArr_t gauges_da;
+
+	for (i = 0; i < scaleDesc_da.cnt; i++) {
+		char *t = strchr(scaleDesc(i).scaleDesc, ' ');
+		/* are the first characters (which describe the scale) identical? */
+		if (!strncmp(scaleDesc(i).scaleDesc, scaleName, t - scaleDesc(i).scaleDesc)) {
+			/* if yes, are we talking about the same ratio */
+			if (scaleInfo(scaleDesc(i).scale).ratio == scaleRatio) {
+				/* yes, we found the right scale descriptor, so now look for the gauge */
+				SetLayoutCurScaleDesc( i );
+				gauges_da = scaleDesc(i).gauges_da;
+				SetLayoutCurGauge(0);
+				for (j = 0; j < gauges_da.cnt; j++) {
+					gaugeInfo_p ptr = &(DYNARR_N(gaugeInfo_t, gauges_da, j));
+					if (scaleInfo(ptr->scale).gauge == GetScaleTrackGauge(scaleInx)) {
+						SetLayoutCurGauge( j );
+						break;
+					}
+				}
+				break;
+			}
+		}
+	}
+
+	return TRUE;
 }
 
 EXPORT SCALEINX_T LookupScale( const char * name )
@@ -412,21 +452,20 @@ SetScale( SCALEINX_T newScaleInx )
 		NoticeMessage( MSG_BAD_SCALE_INDEX, _("Ok"), NULL, (int)newScaleInx );
 		return;
 	}
-	curScaleInx = (SCALEINX_T)newScaleInx;
-	curScale = &scaleInfo(curScaleInx);
+	SetLayoutCurScale((SCALEINX_T)newScaleInx );
+	curScale = &scaleInfo(newScaleInx);
 	trackGauge = curScale->gauge;
 	curScaleRatio = curScale->ratio;
 	curScaleName = curScale->scale;
 
-	curScaleDescInx = 0;
+	SetLayoutCurScaleDesc( 0 );
 
-	GetScaleGauge( curScaleInx, &curScaleDescInx, &curGaugeInx );
+	SetScaleDescGauge((SCALEINX_T)newScaleInx);
 
 	wPrefSetString( "misc", "scale", curScaleName );
 
 	// now load the minimum radius for the newly selected scale
-	sprintf( minTrackRadiusPrefS, "minTrackRadius-%s", curScaleName );
-	wPrefGetFloat( "misc", minTrackRadiusPrefS, &minTrackRadius, curScale->R[0] );
+	LoadLayoutMinRadiusPref(curScaleName, curScale->R[0]);
 }
 
 /**
@@ -450,7 +489,7 @@ EXPORT BOOL_T DoSetScale(
 		while (isspace((unsigned char)*newScale)) newScale++;
 		for (scale = 0; scale<scaleInfo_da.cnt; scale++) {
 			if (strcasecmp( scaleInfo(scale).scale, newScale ) == 0) {
-				curScaleInx = scale;
+				SetLayoutCurScale(scale);
 				found = TRUE;
 				break;
 			}
@@ -542,15 +581,6 @@ EXPORT BOOL_T DoSetScaleDesc( void )
 	}
 
 	return( TRUE );
-}
-
-void
-SetScaleGauge( SCALEDESCINX_T scaleDesc, GAUGEINX_T gauge )
-{
-	dynArr_t gauges_da;
-
-	gauges_da = (scaleDesc(scaleDesc)).gauges_da;
-	curScaleInx = ((gaugeInfo_p)gauges_da.ptr)[ gauge ].scale;
 }
 
 static BOOL_T AddScale(
@@ -675,7 +705,7 @@ EXPORT void LoadGaugeList( wList_p gaugeList, SCALEDESCINX_T scale )
 static void ScaleChange( long changes )
 {
 	if (changes & CHANGE_SCALE) {
-		SetScale( curScaleInx );
+		SetScale( GetLayoutCurScale() );
 	}
 }
 

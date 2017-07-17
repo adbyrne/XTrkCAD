@@ -30,7 +30,7 @@ size_t DynStringSize(DynString *s)
 }
 
 /* An initialized empty struct string */
-#define STRINIT() (DynStringMalloc(16))
+#define STRINIT(s) (DynStringMalloc(s, 16))
 
 /**
 * Allocate memory for a string of the desired length. To optimize memory usage
@@ -430,10 +430,10 @@ void DynStringPrintf(DynString *s, const char *fmt, ...)
     size_t len;
     DynString nas = NaS;
 
-    ///* Are we not a string? */
-    //if (isnas(s)) {
-    //    *s = STRINIT();
-    //}
+    /* Are we not a string? */
+    if (isnas(s)) {
+        STRINIT(s);
+    }
 
     /* Nothing to do? */
     if (!fmt) {
