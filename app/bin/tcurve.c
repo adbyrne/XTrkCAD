@@ -28,6 +28,7 @@
 #include "cstraigh.h"
 #include "cjoin.h"
 #include "i18n.h"
+#include "layout.h"
 
 static TRKTYP_T T_CURVE = -1;
 
@@ -1226,7 +1227,7 @@ static BOOL_T QueryCurve( track_p trk, int query )
 	case Q_HAS_DESC:
 		return TRUE;
 	case Q_EXCEPTION:
-		return xx->radius < minTrackRadius;
+		return xx->radius < GetLayoutMinTrackRadius();
 	case Q_NOT_PLACE_FROGPOINTS:
 		return IsCurveCircle( trk );
 	default:

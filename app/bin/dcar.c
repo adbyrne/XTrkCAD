@@ -33,6 +33,7 @@
 #include "i18n.h"
 #include "fileio.h"
 #include "paths.h"
+#include "layout.h"
 
 static int log_carList;
 static int log_carInvList;
@@ -1615,7 +1616,7 @@ EXPORT int CarAvailableCount( void )
 	carItem_t * item;
 	for ( inx=0; inx < carItemHotbar_da.cnt; inx ++ ) {
 		item = carItemHotbar(inx);
-		if ( item->scaleInx != curScaleInx )
+		if ( item->scaleInx != GetLayoutCurScale())
 			continue;
 		cnt++;
 	}
@@ -1637,7 +1638,7 @@ EXPORT void AddHotBarCarDesc( void )
 		item1 = carItemHotbar(inx);
 		if ( item1->car && !IsTrackDeleted(item1->car) )
 			continue;
-		if ( item1->scaleInx != curScaleInx )
+		if ( item1->scaleInx != GetLayoutCurScale())
 			continue;
 		if ( (carHotbarModes[carHotbarModeInx]&0xF000)!=0 || ( item0 == NULL || Cmp_carHotbar( &item0, &item1 ) != 0 ) ) {
 #ifdef DESCFIX
@@ -3877,7 +3878,7 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 		if ( carDlgUpdateItemPtr==NULL ) {
 			if ( partP ) {
 				TabStringExtract( title, 7, tabs );
-				if ( CarDlgLoadLists( TRUE, tabs, curScaleInx ) )
+				if ( CarDlgLoadLists( TRUE, tabs, GetLayoutCurScale()) )
 					currState = S_ItemSel;
 				else
 					currState = S_ItemEnter;
@@ -4004,7 +4005,7 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 	CarDlgLoadRoadnameList();
 	carProtoSegCnt = 0;
 	carProtoSegPtr = NULL;
-	carDlgScaleInx = curScaleInx;
+	carDlgScaleInx = GetLayoutCurScale();
 	carDlgFlipToggle = FALSE;
 	carDlgChanged = 0;
 

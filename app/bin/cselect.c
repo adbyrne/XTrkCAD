@@ -35,7 +35,7 @@
 #include "bitmaps/bma90.xbm"
 #include "bitmaps/bma135.xbm"
 #include "i18n.h"
-
+#include "layout.h"
 
 #define SETMOVEMODE "MOVEMODE"
 
@@ -766,9 +766,9 @@ EXPORT void DoRescale( void )
 	if ( rescalePG.win == NULL ) {
 		ParamCreateDialog( &rescalePG, MakeWindowTitle(_("Rescale")), _("Ok"), RescaleDlgOk, wHide, TRUE, NULL, F_BLOCK, RescaleDlgUpdate );
 		LoadScaleList( (wList_p)rescalePLs[I_RESCALE_TO_SCALE].control );
-		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, curScaleDescInx ); /* set correct gauge list here */
-		rescaleFromScaleInx = curScaleInx;
-		rescaleToScaleInx = curScaleInx;
+		LoadGaugeList( (wList_p)rescalePLs[I_RESCALE_TO_GAUGE].control, GetLayoutCurScaleDesc() ); /* set correct gauge list here */
+		rescaleFromScaleInx = GetLayoutCurScale();
+		rescaleToScaleInx = rescaleFromScaleInx;
 		rescalePercent = 100.0;
 	}
 

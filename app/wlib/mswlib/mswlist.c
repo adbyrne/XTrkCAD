@@ -214,8 +214,10 @@ wIndex_t wListGetValues(
 	}
 	cnt = (int)SendMessage( bl->hWnd, msg, inx, (DWORD)(LPSTR)mswTmpBuff );
 	mswTmpBuff[cnt] = '\0';
-	if (s)
-		strncpy( s, mswTmpBuff, siz );
+	if (s) {
+		strncpy(s, mswTmpBuff, siz);
+		s[siz] = '\0';
+	}
 	if (bl->last >= 0) {
 		ldp = (listData*)SendMessage( bl->hWnd,
 				(bl->type==B_LIST?LB_GETITEMDATA:CB_GETITEMDATA),

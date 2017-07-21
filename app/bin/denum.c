@@ -22,6 +22,7 @@
 
 #include <time.h>
 #include "track.h"
+#include "layout.h"
 #include "i18n.h"
 #include "paths.h"
 
@@ -152,13 +153,13 @@ void EnumerateStart(void)
 
 	message[0] = '\0';
 	cp = message;
-	if ( Title1[0] ) {
-		strcpy( cp, Title1 );
+	if ( *GetLayoutTitle() ) {
+		strcpy( cp, GetLayoutTitle() );
 		cp += strlen(cp);
 		*cp++ = '\n';
 	}
-	if ( Title2[0] ) {
-		strcpy( cp, Title2 );
+	if ( *GetLayoutSubtitle() ) {
+		strcpy( cp, GetLayoutSubtitle());
 		cp += strlen(cp);
 		*cp++ = '\n';
 	}

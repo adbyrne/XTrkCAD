@@ -796,13 +796,9 @@ static BOOL_T ReadTrackFile(
 			if( !(ret = InputError( "unknown command", TRUE )))
 				break;
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
-			strncpy( Title1, &paramLine[7], TITLEMAXLEN );
-			Title1[ TITLEMAXLEN - 1 ] = '\0';
-			/*wStringSetValue( title1PD.control, Title1 );*/
+			SetLayoutTitle(paramLine + 7);
 		} else if (strncmp( paramLine, "TITLE2 ", 7 ) == 0) {
-			strncpy( Title2, &paramLine[7], TITLEMAXLEN );
-			Title2[ TITLEMAXLEN - 1 ] = '\0';
-			/*wStringSetValue( title2PD.control, Title2 );*/
+			SetLayoutSubtitle(paramLine + 7);
 		} else if (strncmp( paramLine, "ROOMSIZE", 8 ) == 0) {
 			if ( ParseRoomSize( paramLine+8, &roomSize ) ) {
 				SetRoomSize( roomSize );
@@ -941,10 +937,10 @@ static BOOL_T DoSaveTracks(
 	time(&clock);
 	rc &= fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) )>0;
 	rc &= fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION )>0;
-	Stripcr( Title1 );
-	Stripcr( Title2 );
-	rc &= fprintf(f, "TITLE1 %s\n", Title1 )>0;
-	rc &= fprintf(f, "TITLE2 %s\n", Title2 )>0;
+	Stripcr( GetLayoutTitle() );
+	Stripcr( GetLayoutSubtitle() );
+	rc &= fprintf(f, "TITLE1 %s\n", GetLayoutTitle())>0;
+	rc &= fprintf(f, "TITLE2 %s\n", GetLayoutSubtitle())>0;
 	rc &= fprintf(f, "MAPSCALE %ld\n", (long)mapD.scale )>0;
 	rc &= fprintf(f, "ROOMSIZE %0.6f x %0.6f\n", mapD.size.x, mapD.size.y )>0;
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;

@@ -64,8 +64,6 @@ extern long printCenterLines;
 extern long drawElevations;
 extern wDrawColor elevColorIgnore;
 extern wDrawColor elevColorDefined;
-extern DIST_T minTrackRadius;
-extern DIST_T maxTrackGrade;
 extern wDrawColor exceptionColor;
 #define TIEDRAWMODE_NONE		(0)
 #define TIEDRAWMODE_OUTLINE		(1)

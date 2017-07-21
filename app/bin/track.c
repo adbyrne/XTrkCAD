@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.7 2009-07-05 15:11:02 m_fischer Exp $
+/** \file track.c
+ * Track 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -32,6 +32,7 @@
 #include "i18n.h"
 #include "draw.h"
 #include "paths.h"
+#include "layout.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
@@ -88,8 +89,8 @@ EXPORT coOrd descriptionOff;
 EXPORT DIST_T roadbedWidth = 0.0;
 EXPORT DIST_T roadbedLineWidth = 3.0/75.0;
 
-EXPORT DIST_T minTrackRadius;
-EXPORT DIST_T maxTrackGrade = 5.0;
+//EXPORT DIST_T minTrackRadius;
+//EXPORT DIST_T maxTrackGrade = 5.0;
 
 static int suspendElevUpdates = FALSE;
 
@@ -858,7 +859,7 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 	trk->index = index;
 	trk->type = type;
 	trk->layer = curLayer;
-	trk->scale = (char)curScaleInx;
+	trk->scale = (char)GetLayoutCurScale();
 	trk->bits = TB_VISIBLE;
 	trk->elevMode = ELEV_ALONE;
 	trk->elev = 0;
@@ -2365,7 +2366,7 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 		}
 	}
 	if ( (d->options&(DC_GROUP)) == 0 ) {
-		if ( grade > maxTrackGrade )
+		if ( grade > GetLayoutMaxTrackGrade())
 			return exceptionColor;
 		if ( QueryTrack( trk, Q_EXCEPTION ) )
 			return exceptionColor;

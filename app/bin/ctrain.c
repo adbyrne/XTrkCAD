@@ -32,6 +32,7 @@
 #include "ctrain.h"
 #include "compound.h"
 #include "i18n.h"
+#include "layout.h"
 
 EXPORT long programMode;
 EXPORT long maxCouplingSpeed = 100;
@@ -1659,7 +1660,7 @@ static BOOL_T MoveTrain(
 
 	if ( setTimeD )
 		timeD = setTimeD;
-	ips = ((xx->speed*5280.0*12.0)/(60.0*60.0*GetScaleRatio(curScaleInx)));
+	ips = ((xx->speed*5280.0*12.0)/(60.0*60.0*GetScaleRatio(GetLayoutCurScale())));
 	dist0 = ips * timeD/1000.0;
 	length = GetTrainLength( train, xx->direction );
 	dist1 = length + dist0;
