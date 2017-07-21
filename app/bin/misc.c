@@ -1733,7 +1733,7 @@ static char *AllToolbarLabels[] = {
 		N_("Create Track Buttons"),
 		N_("Layout Control Elements"),
 		N_("Modify Track Buttons"),
-		N_("Describe/Select"),
+		N_("Properties/Select"),
 		N_("Track Group Buttons"),
 		N_("Train Group Buttons"),
 		N_("Create Misc Buttons"),

@@ -3313,7 +3313,7 @@ msgid "End-Points"
 msgstr "Endpunkte"
 
 #: ../bin/doption.c:315 ../../../../build/work/app/i18n/custmsg.h:12
-msgid "Describe"
+msgid "Properties"
 msgstr "Eigenschaften"
 
 #: ../bin/doption.c:320
@@ -3937,7 +3937,7 @@ msgid "Modify Track Buttons"
 msgstr "Verändere Gleise"
 
 #: ../bin/misc.c:1733
-msgid "Describe/Select"
+msgid "Properties/Select"
 msgstr "Eigenschaften/Auswählen"
 
 #: ../bin/misc.c:1734

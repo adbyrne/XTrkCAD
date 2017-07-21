@@ -62,7 +62,7 @@ Delete objects
 :cmdDemo
 Playback demos
 :cmdDescribe
-Describe objects
+Properties
 :cmdDeselectAll
 Deselect all selected objects
 :cmdDisplay

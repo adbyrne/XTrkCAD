@@ -197,7 +197,7 @@ static char * moveQlabels[] = {
 		N_("End-Points"),
 		NULL };
 		
-static char * preSelectLabels[] = { N_("Describe"), N_("Select"), NULL };
+static char * preSelectLabels[] = { N_("Properties"), N_("Select"), NULL };
 
 #ifdef HIDESELECTIONWINDOW
 static char * hideSelectionWindowLabels[] = { N_("Hide"), NULL };

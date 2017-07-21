@@ -3675,7 +3675,7 @@ msgstr "Extremidades"
 
 #: ../bin/doption.c:291
 #: ../../../../xtrkcad-build/app/i18n/custmsg.h:12
-msgid "Describe"
+msgid "Properties"
 msgstr "Descrever"
 
 #: ../bin/doption.c:296
@@ -4357,7 +4357,7 @@ msgid "Modify Track Buttons"
 msgstr "Modificar botões de trilhos"
 
 #: ../bin/misc.c:1708
-msgid "Describe/Select"
+msgid "Properties/Select"
 msgstr "Descrever / Selecionar"
 
 #: ../bin/misc.c:1709

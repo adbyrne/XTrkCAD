@@ -2321,7 +2321,7 @@ msgid "Descr"
 msgstr "Kuvaus"
 
 #: ../bin/doption.c:195 ../../../../build/xtrkcad/app/i18n/custmsg.h:12
-msgid "Describe"
+msgid "Properties"
 msgstr "Määrittele"
 
 #: ../../../../build/xtrkcad/app/i18n/custmsg.h:11
@@ -2333,7 +2333,7 @@ msgid "Describe objects"
 msgstr "Määrittele objekteja"
 
 #: ../bin/misc.c:1695 ../bin/misc.c:1724
-msgid "Describe/Select"
+msgid "Properties/Select"
 msgstr "Määrittele/valitse"
 
 #: ../bin/cgroup.c:605 ../bin/ctodesgn.c:1761 ../bin/ctodesgn.c:1762
