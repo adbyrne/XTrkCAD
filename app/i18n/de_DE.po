@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: xtrkcad 4.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-05-08 20:57+0200\n"
-"PO-Revision-Date: 2017-05-09 19:49+0100\n"
+"PO-Revision-Date: 2017-07-21 17:46+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "Language: de\n"
@@ -3145,8 +3145,8 @@ msgid "Min Track Radius"
 msgstr "Mindestgleisradius"
 
 #: ../bin/doption.c:106
-msgid " Max Track Grade"
-msgstr "Maximale Gleissteigung"
+msgid " Max Track Grade (%)"
+msgstr "Maximale Gleissteigung (%)"
 
 #: ../bin/doption.c:155
 msgid "Layout Options"
@@ -4105,7 +4105,7 @@ msgid "More"
 msgstr "Weiter"
 
 #: ../bin/misc.c:2100
-msgid "&New ...
+msgid "&New .."
 msgstr "&Neu..."
 
 #: ../bin/misc.c:2101

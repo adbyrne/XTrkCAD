@@ -3505,8 +3505,8 @@ msgid "Min Track Radius"
 msgstr "Raio mínimo"
 
 #: ../bin/doption.c:109
-msgid " Max Track Grade"
-msgstr "Inclinação máxima"
+msgid " Max Track Grade (%)"
+msgstr "Inclinação máxima (%)"
 
 #: ../bin/doption.c:150
 msgid "Layout Options"

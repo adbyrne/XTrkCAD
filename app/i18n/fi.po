@@ -5622,8 +5622,8 @@ msgid "Max Coupling Speed"
 msgstr "Suurin kytkentänopeus"
 
 #: ../bin/doption.c:372
-msgid "Maximum Track Grade"
-msgstr "Suurin nousukulma"
+msgid "Max Track Grade (%)"
+msgstr "Suurin nousukulma (%)"
 
 #: ../../../../build/xtrkcad/app/bin/bllnhlp.c:371
 msgid "Maximum distance between connected end points"
