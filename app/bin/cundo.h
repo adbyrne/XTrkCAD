@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cundo.h,v 1.1 2005-12-07 15:46:54 rc-flyer Exp $
+/** \file cundo.h
+ * Function prototypes for undo  functionality
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,6 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef HAVE_CUNDO_H
+#define HAVE_CUNDO_H
+
+#include "common.h"
+
 int UndoUndo( void );
 int UndoRedo( void );
 void UndoResume( void );
@@ -30,3 +35,5 @@ BOOL_T UndoDelete( track_p );
 BOOL_T UndoNew( track_p );
 void UndoEnd( void );
 void UndoClear( void );
+
+#endif // !HAVE_CUNDO_H

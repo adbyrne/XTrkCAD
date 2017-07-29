@@ -1,5 +1,5 @@
 /** \file draw.h
- * 
+ * Definitions and prototypes for drawing operations
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,8 +23,8 @@
 #ifndef DRAW_H
 #define DRAW_H
 
-#define MSG_BASE (1000)
-#include "messages.h"
+#include "common.h"
+#include "wlib.h"
 
 #define DC_TICKS		(1<<1)
 #define DC_PRINT		(1<<2)

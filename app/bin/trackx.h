@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/trackx.h,v 1.1 2005-12-07 15:47:39 rc-flyer Exp $
+/** \file trackx.h
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,6 +23,9 @@
 
 #ifndef TRACKX_H
 #define TRACKX_H
+
+#include "common.h"
+#include "track.h"
 
 struct extraData;
 

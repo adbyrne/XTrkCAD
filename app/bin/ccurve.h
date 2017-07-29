@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ccurve.h,v 1.1 2005-12-07 15:47:36 rc-flyer Exp $
+/** \file ccurve.h
+ * Definitions for curve commands
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,6 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef HAVE_CCURVE_H
+#define HAVE_CCURVE_H
+
+#include "draw.h"
+#include "track.h"
 
 typedef struct {
 		curveType_e type;
@@ -45,4 +50,6 @@ void PlotCurve( long, coOrd, coOrd, coOrd, curveData_t *, BOOL_T );
 track_p NewCurvedTrack( coOrd, DIST_T, ANGLE_T, ANGLE_T, long );
 DIST_T CurveDescriptionDistance( coOrd, track_p );
 STATUS_T CurveDescriptionMove( track_p, wAction_t, coOrd );
-BOOL_T GetCurveMiddle( track_p, coOrd * );
+BOOL_T GetCurveMiddle( track_p , coOrd * );
+
+#endif // !HAVE_CCURVE_H

@@ -2,8 +2,8 @@
  * Common definitions and declarations for the wlib library
  */
 
-#ifndef WIN_H
-#define WIN_H
+#ifndef HAVE_WLIB_H
+#define HAVE_WLIB_H
 #ifdef WINDOWS
 #include <stdio.h>
 #define FILE_SEP_CHAR "\\"

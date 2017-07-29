@@ -25,11 +25,14 @@
 
 #define EXPORT
 
+#include <stdio.h>
+
 #include "acclkeys.h"
+#include "common.h"
+#include "draw.h"
+#include "wlib.h"
 
 typedef void (*addButtonCallBack_t)(void*);
-
-#include "custom.h"
 
 #ifdef WINDOWS
 /* suppress warning from *.bmp about conversion of int to char */
@@ -277,10 +280,6 @@ void InitDebug( char *, long * );
 typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
 void DoChangeNotification( long );
-
-#include "param.h"
-#include "misc2.h"
-#include "fileio.h"
 
 /* foreign externs */
 extern drawCmd_t mapD;
