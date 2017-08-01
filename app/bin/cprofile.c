@@ -20,12 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
-#include "layout.h"
-#include "cselect.h"
 #include <math.h>
-#include "shrtpath.h"
+
+#include "custom.h"
+#include "cselect.h"
+#include "cundo.h"
 #include "i18n.h"
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "shrtpath.h"
+#include "track.h"
 
 
 /*

@@ -1,6 +1,5 @@
 /** \file tease.c
  * TRANSISTION-CURVES (JOINTS)
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -61,13 +60,20 @@ For a better representation of this, build 'testjoin' and
 do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'
 */
 
+#include <math.h>
 
-#include "track.h"
 #include "ccurve.h"
+#include "cselect.h"
 #include "cstraigh.h"
 #include "cjoin.h"
+#include "cundo.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 static TRKTYP_T T_EASEMENT = -1;
 

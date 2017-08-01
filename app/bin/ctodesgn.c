@@ -26,13 +26,19 @@
 #endif
 
 #include <stdint.h>
-
 #include <ctype.h>
-#include "track.h"
+#include <math.h>
+
 #include "ccurve.h"
-#include "cstraigh.h"
 #include "compound.h"
+#include "cstraigh.h"
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 #define TURNOUTDESIGNER			"CTURNOUT DESIGNER"
 

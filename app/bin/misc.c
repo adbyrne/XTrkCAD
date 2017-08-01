@@ -45,22 +45,27 @@
 #else
 #include <sys/stat.h>
 #endif
+#include <locale.h>
 #include <stdarg.h>
-
 #include <stdint.h>
 
-#include "track.h"
-#include "common.h"
-#include "utility.h"
-#include "draw.h"
-#include "misc.h"
 #include "cjoin.h"
+#include "common.h"
 #include "compound.h"
-#include "smalldlg.h"
+#include "cselect.h"
+#include "cundo.h"
+#include "custom.h"
+#include "draw.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
+#include "messages.h"
+#include "misc.h"
+#include "param.h"
 #include "paths.h"
-#include <locale.h>
+#include "smalldlg.h"
+#include "track.h"
+#include "utility.h"
 
 #define DEFAULT_SCALE ("N")
 

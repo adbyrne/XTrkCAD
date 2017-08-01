@@ -36,15 +36,20 @@
 
 #include <stdint.h>
 
-#include "track.h"
-#include "common.h"
-#include "utility.h"
-#include "draw.h"
-#include "misc.h"
 #include "cjoin.h"
+#include "common.h"
 #include "compound.h"
+#include "custom.h"
+#include "draw.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
+#include "messages.h"
+#include "misc.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
+
 
 EXPORT long units = 0; /**< measurement units: 0 = English, 1 = metric */
 EXPORT long checkPtInterval = 10;

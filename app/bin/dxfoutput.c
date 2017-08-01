@@ -26,9 +26,6 @@
 #ifdef WINDOWS
   #include <io.h>
   #include <windows.h>
-  #if _MSC_VER >=1400
-    #define strdup _strdup
-  #endif
 #else
   #include <errno.h>
 #endif
@@ -36,12 +33,18 @@
 #include <xtrkcad-config.h>
 #include <locale.h>
 #include <assert.h>
-#include "track.h"
-#include "i18n.h"
-#include "paths.h"
+
 #include <dynstring.h>
 
+#include "cselect.h"
+#include "custom.h"
 #include "dxfformat.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
+#include "paths.h"
+#include "track.h"
+#include "utility.h"
 
 static struct wFilSel_t * exportDXFFile_fs;
 

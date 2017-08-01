@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csplit.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
+/** \file csplit.c
+ * SPLIT
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,15 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include "cundo.h"
 #include "i18n.h"
-
-/*****************************************************************************
- *
- * SPLIT
- *
- */
-
+#include "messages.h"
+#include "track.h"
+#include "utility.h"
 
 static wMenu_p splitPopupM[2];
 static wMenuToggle_p splitPopupMI[2][4];

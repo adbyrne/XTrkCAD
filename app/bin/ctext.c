@@ -1,6 +1,5 @@
 /** \file ctext.c
  *  Text command
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -21,8 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include "cundo.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "wlib.h"
 
 track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize, wDrawColor color );
 
@@ -122,7 +126,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			ParamRegister(&textPG);
 			Dt.size = GetFontSize(Dt.fontSizeInx);
 		}
-		Dt.size = wSelectedFontSize();
+		Dt.size = (long)wSelectedFontSize();
 		Dt.fontSizeInx = GetFontSizeIndex(Dt.size);
 		ParamLoadControls(&textPG);
 		ParamGroupRecord( &textPG );

@@ -22,11 +22,14 @@
 
 #include <string.h>
 #include <dynstring.h>
+
+#include "custom.h"
+#include "i18n.h"
+#include "layout.h"
+#include "misc2.h"
+#include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "layout.h"
-#include "i18n.h"
-#include "misc2.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 

@@ -1,6 +1,5 @@
 /** \file cturnout.c
  * T_TURNOUT
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,16 +21,22 @@
  */
 
 #include <ctype.h>
-#include "track.h"
+#include <math.h>
+#include <stdint.h>
+
 #include "ccurve.h"
-#include "cstraigh.h"
-#include "compound.h"
 #include "cjoin.h"
+#include "compound.h"
+#include "cstraigh.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
-
-
-#include <stdint.h>
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
 

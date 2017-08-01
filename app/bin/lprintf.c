@@ -30,8 +30,13 @@
 #include <time.h>
 #include <sys/timeb.h>
 #endif
-#include "track.h"
+
+#include "custom.h"
+#include "fileio.h"
+#include "messages.h"
 #include "paths.h"
+#include "track.h"
+
 
 /****************************************************************************
  *

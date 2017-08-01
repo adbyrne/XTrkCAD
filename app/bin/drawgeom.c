@@ -17,14 +17,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <math.h>
 #include <stdarg.h>
-#include "track.h"
+
 #include "ccurve.h"
 #include "compound.h"
+#include "cundo.h"
 #include "drawgeom.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
-/*EXPORT drawContext_t * drawContext;*/
 static long drawGeomCurveMode;
 
 #define contextSegs(N) DYNARR_N( trkSeg_t, context->Segs_da, N )
