@@ -3673,11 +3673,6 @@ msgstr "Fabricante / protótipo / número do item / item"
 msgid "End-Points"
 msgstr "Extremidades"
 
-#: ../bin/doption.c:291
-#: ../../../../xtrkcad-build/app/i18n/custmsg.h:12
-msgid "Properties"
-msgstr "Descrever"
-
 #: ../bin/doption.c:296
 msgid "Normal: Command List, Shift: Command Options"
 msgstr "Normal: lista de comandos, Shift: opções dos comandos"

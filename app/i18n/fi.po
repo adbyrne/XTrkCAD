@@ -2320,10 +2320,6 @@ msgstr "Kuvaus"
 msgid "Descr"
 msgstr "Kuvaus"
 
-#: ../bin/doption.c:195 ../../../../build/xtrkcad/app/i18n/custmsg.h:12
-msgid "Properties"
-msgstr "Määrittele"
-
 #: ../../../../build/xtrkcad/app/i18n/custmsg.h:11
 msgid "Describe and Select"
 msgstr "Määrittele ja valitse -toiminnot"
