@@ -28,6 +28,8 @@
 #define F_OK	(0)
 #define W_OK	(2)
 #define access	_access
+#else
+#include <unistd.h>
 #endif
 
 #include "custom.h"

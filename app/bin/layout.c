@@ -30,6 +30,7 @@
 #include "param.h"
 #include "paths.h"
 #include "track.h"
+#include "wlib.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 
@@ -287,7 +288,7 @@ static void LayoutOk(void * junk)
 * \param junk IN unused
 */
 
-static void LayoutCancel(void *junk)
+static void LayoutCancel(struct wWin_t *junk)
 {
     thisLayout.props = *(thisLayout.copyOfLayoutProps);
     ParamLoadControls(&layoutPG);
