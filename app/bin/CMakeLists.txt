@@ -73,6 +73,8 @@ ADD_CUSTOM_COMMAND(
 
 SET(SOURCES
 	${LIN_SOURCES}
+	inctest.c
+	appdefaults.c
 	bllnhlp.c
 	cblock.c
 	ccurve.c
@@ -156,7 +158,7 @@ ADD_LIBRARY(xtrkcad-lib ${SOURCES})
 ADD_DEPENDENCIES(xtrkcad-lib Help)
 
 ADD_EXECUTABLE(xtrkcad WIN32
-	misc.c 
+	misc.c
 	xtrkcad.rc
 	)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
