@@ -22,6 +22,7 @@
 
 #include <ctype.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "compound.h"
 #include "fileio.h"

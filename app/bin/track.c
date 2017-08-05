@@ -25,6 +25,7 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <math.h>
+#include <string.h>
 
 #include "ccurve.h"
 #include "cjoin.h"
