@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
 
 #ifdef WINDOWS
 #include <io.h>

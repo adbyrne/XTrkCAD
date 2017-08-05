@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <ctype.h>
 #include <math.h>
+#include <string.h>
 
 #include "ccurve.h"
 #include "compound.h"

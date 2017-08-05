@@ -27,6 +27,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "cselect.h"
 #include "ctrain.h"

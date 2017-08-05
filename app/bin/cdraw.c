@@ -22,6 +22,7 @@
 
 #include <math.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "ccurve.h"
 #include "drawgeom.h"
