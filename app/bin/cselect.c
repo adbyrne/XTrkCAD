@@ -21,6 +21,7 @@
  */
 
 #include <math.h>
+#include <string.h>
 
 #include "ccurve.h"
 #define PRIVATE_EXTRADATA

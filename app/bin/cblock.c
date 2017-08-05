@@ -48,6 +48,7 @@
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "compound.h"
 #include "cundo.h"

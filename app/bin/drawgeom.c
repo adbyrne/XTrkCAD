@@ -19,6 +19,7 @@
 
 #include <math.h>
 #include <stdarg.h>
+#include <string.h>
 
 #include "ccurve.h"
 #include "compound.h"

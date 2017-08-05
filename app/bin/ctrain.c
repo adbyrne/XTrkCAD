@@ -25,6 +25,8 @@
 #endif
 #include <ctype.h>
 #include <math.h>
+#include <string.h>
+
 #define PRIVATE_EXTRADATA
 
 #include "compound.h"

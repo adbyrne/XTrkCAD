@@ -21,6 +21,7 @@
  */
 
 #include <ctype.h>
+#include <string.h>
 
 #include "compound.h"
 #include "cundo.h"

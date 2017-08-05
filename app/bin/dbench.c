@@ -22,6 +22,7 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "i18n.h"
 #include "param.h"
