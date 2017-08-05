@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dbitmap.c,v 1.3 2008-02-14 19:49:19 m_fischer Exp $
+/** \file dbitmap.c
+ *  Print to Bitmap
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,16 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include <assert.h>
+
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
+#include "messages.h"
+#include "param.h"
 #include "paths.h"
+#include "track.h"
 
-/*****************************************************************************
- *
- *  Print to Bitmap
- *
- */
 
 static long outputBitMapTogglesV = 3;
 static double outputBitMapDensity = 10;

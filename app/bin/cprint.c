@@ -24,9 +24,16 @@
 #include <time.h>
 #include <string.h>
 #include <ctype.h>
-#include "track.h"
+#include <math.h>
+
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 #define PRINT_GAUDY		(0)
 #define PRINT_PLAIN		(1)

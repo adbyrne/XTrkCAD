@@ -22,11 +22,15 @@
 
 #include <string.h>
 #include <dynstring.h>
+
+#include "custom.h"
+#include "i18n.h"
+#include "layout.h"
+#include "misc2.h"
+#include "param.h"
 #include "paths.h"
 #include "track.h"
-#include "layout.h"
-#include "i18n.h"
-#include "misc2.h"
+#include "wlib.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 
@@ -284,7 +288,7 @@ static void LayoutOk(void * junk)
 * \param junk IN unused
 */
 
-static void LayoutCancel(void *junk)
+static void LayoutCancel(struct wWin_t *junk)
 {
     thisLayout.props = *(thisLayout.copyOfLayoutProps);
     ParamLoadControls(&layoutPG);

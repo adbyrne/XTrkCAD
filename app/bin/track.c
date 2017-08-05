@@ -20,19 +20,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <assert.h>
 #include <time.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <math.h>
-#include "track.h"
+
 #include "ccurve.h"
-#include "cstraigh.h"
 #include "cjoin.h"
 #include "compound.h"
-#include "i18n.h"
+#include "cselect.h"
+#include "cstraigh.h"
+#include "cundo.h"
+#include "custom.h"
 #include "draw.h"
-#include "paths.h"
+#include "fileio.h"
+#include "i18n.h"
 #include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "paths.h"
+#include "track.h"
+#include "utility.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK

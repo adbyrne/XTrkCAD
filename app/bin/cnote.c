@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cnote.c,v 1.6 2008-03-10 18:59:53 m_fischer Exp $
+/** \file cnote.c
+ * NOTE
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,14 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
-
-/*****************************************************************************
- *
- * NOTE
- *
- */
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 static TRKTYP_T T_NOTE = -1;
 

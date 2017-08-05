@@ -24,10 +24,17 @@
 #include <time.h>
 #include <stdarg.h>
 #include <errno.h>
+
+#include "cselect.h"
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
+#include "paths.h"
 #include "track.h"
 #include "trackx.h"
-#include "i18n.h"
-#include "paths.h"
+#include "cundo.h"
+
 
 /*****************************************************************************
  *

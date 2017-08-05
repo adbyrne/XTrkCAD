@@ -1,6 +1,6 @@
-#ifndef CSELECT_H
-#define CSELECT_H
-
+/** \file cselect.h
+ * Definitions and function prototypes for operations on selected elements
+ */
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
  *
@@ -18,6 +18,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#ifndef CSELECT_H
+#define CSELECT_H
+
+#include "common.h"
+#include "track.h"
 
 wIndex_t selectCmdInx;
 wIndex_t moveCmdInx;

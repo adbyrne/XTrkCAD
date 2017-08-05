@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.h,v 1.7 2010-01-01 13:24:59 m_fischer Exp $
+/** \file custom.h
+ * 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,9 @@
 
 #ifndef CUSTOM_H
 #define CUSTOM_H
+
+#include "wlib.h"
+#include "misc.h"
 
 #define ICON_WIDTH		(64)
 #define ICON_HEIGHT		(64)

@@ -47,10 +47,18 @@
  */
 
 #include <ctype.h>
+#include <stdlib.h>
+
+#include "compound.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
+#include "param.h"
 #include "track.h"
 #include "trackx.h"
-#include "compound.h"
-#include "i18n.h"
+#include "utility.h"
 
 EXPORT TRKTYP_T T_BLOCK = -1;
 

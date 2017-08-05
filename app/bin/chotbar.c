@@ -21,10 +21,12 @@
  */
 
 #include <ctype.h>
-#include "track.h"
-#include "compound.h"
-
 #include <stdint.h>
+
+#include "compound.h"
+#include "fileio.h"
+#include "messages.h"
+#include "track.h"
 
 EXPORT DIST_T curBarScale = -1;
 EXPORT long hotBarLabels = 0;

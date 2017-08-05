@@ -35,9 +35,9 @@
 #ifdef WINDOWS
 #include <io.h>
 #include <windows.h>
-	#if _MSC_VER >=1400
-		#define strdup _strdup
-	#endif
+	//#if _MSC_VER >=1400
+	//	#define strdup _strdup
+	//#endif
 #else
 #endif
 #include <sys/stat.h>
@@ -48,16 +48,23 @@
 
 #include <assert.h>
 
-#include "track.h"
-#include "version.h"
 #include "common.h"
-#include "utility.h"
-#include "draw.h"
-#include "misc.h"
 #include "compound.h"
+#include "cselect.h"
+#include "cundo.h"
+#include "custom.h"
+#include "draw.h"
+#include "fileio.h"
 #include "i18n.h"
-#include "paths.h"
 #include "layout.h"
+#include "messages.h"
+#include "misc.h"
+#include "param.h"
+#include "paths.h"
+#include "track.h"
+#include "utility.h"
+#include "version.h"
+
 
 /*#define TIME_READTRACKFILE*/
 
@@ -968,7 +975,6 @@ static int SaveTracks(
 		void * data )
 {
 	char *nameOfFile;
-	char *temp;
 
 	assert( fileName != NULL );
 	assert( cnt == 1 );

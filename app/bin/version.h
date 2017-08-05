@@ -1,4 +1,5 @@
-/* $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/version.h,v 1.9 2008-01-29 04:10:23 tshead Exp $
+/** \file version.h
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -19,6 +20,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef HAVE_VERSION_H
+#define HAVE_VERSION_H
 #ifdef XTRKCAD_CMAKE_BUILD
 
 	#include "xtrkcad-config.h"
@@ -36,4 +39,4 @@
 	#define MINPARAMVERSION (1)
 
 #endif
-
+#endif //HAVE_VERSION_H

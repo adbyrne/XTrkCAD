@@ -27,9 +27,6 @@
 
 #ifdef WINDOWS
 #include <windows.h>
-#if _MSC_VER >=1400
-#define strdup _strdup
-#endif
 #endif
 
 #include <wlib.h>

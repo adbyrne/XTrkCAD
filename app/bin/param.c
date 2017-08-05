@@ -45,12 +45,17 @@
 #include <stdarg.h>
 #include <locale.h>
 #include <wlib.h>
-#include "track.h"
+
 #include "common.h"
-#include "utility.h"
-#include "misc.h"
 #include "compound.h"
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "messages.h"
+#include "misc.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 
 /* Bogus reg vars */

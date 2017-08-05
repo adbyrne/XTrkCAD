@@ -1,4 +1,6 @@
-/* $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/shrtpath.h,v 1.1 2005-12-07 15:46:54 rc-flyer Exp $ */
+/** \file shrtpath.h
+ *
+ */
 
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
@@ -17,6 +19,11 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#ifndef HAVE_SHRTPATH_H
+#define HAVE_SHRTPATH_H
+
+#include "common.h"
+#include "track.h"
 
 typedef enum {
 		SPTC_MATCH,				/* trk:ep is end of path? */
@@ -31,3 +38,4 @@ typedef int (*shortestPathFunc_p)( SPTF_CMD cmd, track_p, EPINX_T, EPINX_T, DIST
 int FindShortestPath( track_p, EPINX_T, BOOL_T, shortestPathFunc_p, void * );
 
 extern int log_shortPath;
+#endif //HAVE_SHRTPATH_H

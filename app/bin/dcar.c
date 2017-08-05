@@ -1,6 +1,5 @@
 /** \file dcar.c
  * TRAIN
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,16 +23,22 @@
 #ifndef WINDOWS
 #include <errno.h>
 #endif
+#include <assert.h>
 #include <ctype.h>
-
+#include <math.h>
 #include <stdint.h>
 
-#include "track.h"
+#include "cselect.h"
 #include "ctrain.h"
-#include "i18n.h"
+#include "custom.h"
 #include "fileio.h"
-#include "paths.h"
+#include "i18n.h"
 #include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "paths.h"
+#include "track.h"
+#include "utility.h"
 
 static int log_carList;
 static int log_carInvList;

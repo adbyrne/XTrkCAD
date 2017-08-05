@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tcurve.c,v 1.3 2009-06-15 19:29:57 m_fischer Exp $
- *
+/** \file tcurve.c
  * CURVE
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,12 +20,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include <assert.h>
+#include <math.h>
+
 #include "ccurve.h"
-#include "cstraigh.h"
 #include "cjoin.h"
+#include "cstraigh.h"
+#include "cundo.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 static TRKTYP_T T_CURVE = -1;
 

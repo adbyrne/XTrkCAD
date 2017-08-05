@@ -1,7 +1,5 @@
 /** \file smalldlg.h
  * Definitions and declarations for the small dialog box functions. 
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/smalldlg.h,v 1.2 2009-09-21 18:24:33 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,6 +22,8 @@
 
 #ifndef SMALLDLG_H
 #define SMALLDLG_H
+
+#include "wlib.h"
 
 #define SHOWTIP_NEXTTIP (0L)
 #define SHOWTIP_PREVTIP (1L)

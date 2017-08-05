@@ -1,6 +1,5 @@
 /** \file ctrain.c
  * Functions related to running trains
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -25,14 +24,21 @@
 #include <errno.h>
 #endif
 #include <ctype.h>
-
+#include <math.h>
 #define PRIVATE_EXTRADATA
-#include "track.h"
-#include "trackx.h"
-#include "ctrain.h"
+
 #include "compound.h"
+#include "ctrain.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "trackx.h"
+#include "utility.h"
 
 EXPORT long programMode;
 EXPORT long maxCouplingSpeed = 100;

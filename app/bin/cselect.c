@@ -1,8 +1,5 @@
 /** \file cselect.c
  * Handle selecting / unselecting track and basic operations on the selection
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cselect.c,v 1.11 2008-09-05 08:08:15 m_fischer Exp $
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,19 +20,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
-/*#include "trackx.h"*/
+#include <math.h>
+
 #include "ccurve.h"
 #define PRIVATE_EXTRADATA
 #include "compound.h"
+#include "cselect.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 #include "bitmaps/bmendpt.xbm"
 #include "bitmaps/bma0.xbm"
 #include "bitmaps/bma45.xbm"
 #include "bitmaps/bma90.xbm"
 #include "bitmaps/bma135.xbm"
-#include "i18n.h"
-#include "layout.h"
 
 #define SETMOVEMODE "MOVEMODE"
 
@@ -389,7 +394,7 @@ EXPORT void SelectTunnel( void )
 }
 
 
-EXPORT void SelectRecount( void )
+void SelectRecount( void )
 {
 	track_p trk;
 	selectedTrackCount = 0;

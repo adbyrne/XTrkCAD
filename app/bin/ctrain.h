@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/ctrain.h,v 1.1 2005-12-07 15:46:59 rc-flyer Exp $
+/** \file ctrain.h
+ * Definitions and prototypes for train operations
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,6 +20,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef HAVE_CTRAIN_H
+#define HAVE_CTRAIN_H
+
+#include "common.h"
+#include "track.h"
 
 struct carItem_t;
 typedef struct carItem_t carItem_t;
@@ -53,3 +58,4 @@ int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );
 
+#endif // !HAVE_CTRAIN_H

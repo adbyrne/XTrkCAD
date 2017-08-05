@@ -22,15 +22,18 @@
  */
 
 #include <ctype.h>
-#include "track.h"
-#include "compound.h"
-#include "shrtpath.h"
-#include "cjoin.h"
-#include "i18n.h"
+#include <math.h>
+#include <string.h>
 
-#if _MSC_VER >=1400
-#define strdup _strdup
-#endif
+#include "cjoin.h"
+#include "common.h"
+#include "compound.h"
+#include "cundo.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "shrtpath.h"
+#include "track.h"
+#include "utility.h"
 
 /*****************************************************************************
  *

@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/csnap.c,v 1.7 2008-06-03 15:43:58 m_fischer Exp $
+/** \file csnap.c
+ * Draw Snap Grid
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,13 +20,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
-#include "i18n.h"
+#include <math.h>
 
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 /*****************************************************************************
  *
- * Draw Snap Grid
+ 
  *
  */
 

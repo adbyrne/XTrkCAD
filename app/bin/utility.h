@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/utility.h,v 1.1 2005-12-07 15:47:39 rc-flyer Exp $
+/** \file utility.h
+ * Prototypes for misc utility functions
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,8 @@
 
 #ifndef UTILITY_H
 #define UTILITY_H
+
+#include "common.h"
 
 #ifndef TRUE
 #define TRUE 1

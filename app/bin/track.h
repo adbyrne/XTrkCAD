@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.h,v 1.3 2009-05-25 18:11:03 m_fischer Exp $
+/** \file track.h
+ * 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,24 +23,9 @@
 #ifndef TRACK_H
 #define TRACK_H
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#endif
-#include <math.h>
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <string.h>
-
-#include "wlib.h"
 #include "common.h"
-#include "utility.h"
 #include "draw.h"
-#include "misc.h"
-
+#include "misc2.h"
 
 extern TRKTYP_T T_NOTRACK;
 
@@ -576,8 +561,6 @@ void AdvancePositionIndicator( track_p, coOrd, coOrd *, ANGLE_T * );
 
 BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
 
-#include "cundo.h"
-#include "cselect.h"
 
 /* cmisc.c */
 wIndex_t describeCmdInx;

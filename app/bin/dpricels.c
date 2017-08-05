@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dpricels.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+/** \file dpricels.c
+ * Price List Dialog
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,16 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
 #include "compound.h"
+#include "custom.h"
 #include "i18n.h"
 #include "layout.h"
-
-/*****************************************************************************
- *
- * Price List Dialog
- *
- */
+#include "messages.h"
+#include "param.h"
+#include "track.h"
 
 static wWin_p priceListW;
 

@@ -20,16 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include <stdint.h>
+
 #include "common.h"
+#include "cundo.h"
 #include "i18n.h"
-
-/*****************************************************************************
- *
- * DESCRIPTION WINDOW
- *
- */
-
+#include "messages.h"
+#include "param.h"
+#include "track.h"
 
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;

@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.h,v 1.7 2008-01-04 02:12:33 tshead Exp $
+/** \file misc2.h
+ * 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,9 +23,8 @@
 #ifndef MISC2_H
 #define MISC2_H
 
-#ifdef WINDOWS
-#include <time.h>
-#endif
+#include "common.h"
+#include "misc.h"
 
 #define LABEL_MANUF		(1<<0)
 #define LABEL_PARTNO	(1<<1)

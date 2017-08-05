@@ -1,7 +1,5 @@
 /** \file draw.c
  * Basic drawing functions.
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/draw.c,v 1.17 2009-12-12 17:20:59 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -40,12 +38,16 @@
 #include <sys/timeb.h>
 #endif
 
+#include "cselect.h"
+#include "custom.h"
+#include "draw.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
+#include "misc.h"
+#include "param.h"
 #include "track.h"
 #include "utility.h"
-#include "misc.h"
-#include "draw.h"
-#include "i18n.h"
-#include "fileio.h"
 
 static void DrawRoomWalls( wBool_t );
 EXPORT void DrawMarkers( void );

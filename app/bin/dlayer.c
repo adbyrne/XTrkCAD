@@ -1,7 +1,5 @@
 /** \file dlayer.c
  * Functions and dialogs for handling layers.
- *
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dlayer.c,v 1.9 2009-06-15 19:29:57 m_fischer Exp $
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,12 +21,14 @@
  */
 
 #include <assert.h>
-
-#include "track.h"
-#include "i18n.h"
-
 #include <stdint.h>
 
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
 
 /*****************************************************************************
  *

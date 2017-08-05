@@ -1,6 +1,5 @@
 /** \file cstruct.c
  * T_STRUCTURE
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,12 +21,19 @@
  */
 
 #include <ctype.h>
-#include "track.h"
+#include <math.h>
+#include <stdint.h>
+
 #include "compound.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
-
-#include <stdint.h>
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 EXPORT TRKTYP_T T_STRUCTURE = -1;
 

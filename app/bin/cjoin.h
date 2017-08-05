@@ -1,7 +1,6 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cjoin.h,v 1.1 2005-12-07 15:47:39 rc-flyer Exp $
+/** \file cjoin.h
+ * Prototypes and definitions related to the "join" command
  */
-
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
  *
@@ -19,6 +18,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#ifndef HAVE_CJOIN_H
+#define HAVE_CJOIN_H
+
+#include "common.h"
+#include "wlib.h"
+#include "track.h"
 
 #define E_NOTREQ		(0)
 #define E_REQ			(1)
@@ -42,3 +48,6 @@ void UndoJoint( track_p, EPINX_T, track_p, EPINX_T );
 void DrawJointTrack( drawCmd_p, coOrd, ANGLE_T, DIST_T, DIST_T, DIST_T, DIST_T, BOOL_T, BOOL_T, BOOL_T, track_p, EPINX_T, EPINX_T, DIST_T, wDrawColor, long );
 DIST_T JointDistance( coOrd *, coOrd, ANGLE_T, DIST_T, DIST_T, DIST_T, DIST_T, BOOL_T, BOOL_T );
 coOrd GetJointSegEndPos( coOrd, ANGLE_T, DIST_T, DIST_T, DIST_T, DIST_T, BOOL_T, BOOL_T, BOOL_T, EPINX_T, ANGLE_T * );
+
+#endif // !HAVE_CJOIN_H
+

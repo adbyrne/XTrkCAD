@@ -206,6 +206,7 @@ int main( int argc, char * argv[] )
 	}		
 
 	fputs( "/*\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n */\n", hdrF );
+	fputs("#ifndef HAVE_MESSAGES_H\n#define HAVE_MESSAGES_H\n", hdrF);
 	
 	/* open the help file to generate */
 	outF = fopen( argv[ inFileIdx + 1 ], "w" );
@@ -330,6 +331,7 @@ int main( int argc, char * argv[] )
 	}
 	dumpHelp( outF );
 
+	fputs("#endif // HAVE_MESSAGES_H\n", hdrF);
 	fclose( hdrF );
 	fclose( inF );
 	fclose( outF );
