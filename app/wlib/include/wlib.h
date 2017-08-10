@@ -680,11 +680,18 @@ wDrawColor wColorSelectButtonGetColor( wButton_p );
  */
 
 void wPrefSetString(		const char *, const char *, const char * );
-const char * wPrefGetString(		const char *, const char * );
+const char * wPrefGetString(		const char *section, const char *name );
+char * wPrefGetStringExt(const char *section, const char *name, char **result, char *defaultValue);
+
 void wPrefSetInteger(		const char *, const char *, long );
-wBool_t wPrefGetInteger(	const char *, const char *, long *, long );
+#define wPrefGetInteger(s, n, r, d) wPrefGetIntegerExt(s, n, r, d)
+wBool_t wPrefGetIntegerBasic(const char *section, const char *name, long *result, long defaultValue);
+wBool_t wPrefGetIntegerExt(const char *section, const char *name, long *result, long defaultValue);
+
 void wPrefSetFloat(		const char *, const char *, double );
-wBool_t wPrefGetFloat(		const char *, const char *, double *, double );
+wBool_t wPrefGetFloat(const char *section, const char *name, double *result, double defaultValue);
+wBool_t wPrefGetFloatExt(const char *section, const char *name, double *result, double defaultValue);
+
 const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index, const char ** name );
 void wPrefFlush(		void );
 void wPrefReset(		void );

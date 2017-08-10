@@ -51,7 +51,7 @@
 #include "utility.h"
 
 
-EXPORT long units = 0; /**< measurement units: 0 = English, 1 = metric */
+EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
 EXPORT long checkPtInterval = 10;
 
 EXPORT DIST_T curScaleRatio;
@@ -70,7 +70,7 @@ EXPORT ANGLE_T connectAngle = 1.0;
 EXPORT long twoRailScale = 16;
 EXPORT long mapScale = 64;
 EXPORT long liveMap = 0;
-EXPORT long preSelect = 0;
+EXPORT long preSelect = 0;			/**< default command 0 = Describe 1 = Select */
 EXPORT long listLabels = 7;
 EXPORT long layoutLabels = 1;
 EXPORT long descriptionFontSize = 72;

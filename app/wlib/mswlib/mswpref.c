@@ -181,7 +181,7 @@ void wPrefSetInteger( const char * section, const char * name, long lval )
 }
 
 
-wBool_t wPrefGetInteger(
+wBool_t wPrefGetIntegerBasic(
 		const char * section,
 		const char * name,
 		long *res,
