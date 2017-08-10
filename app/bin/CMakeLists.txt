@@ -73,7 +73,6 @@ ADD_CUSTOM_COMMAND(
 
 SET(SOURCES
 	${LIN_SOURCES}
-	inctest.c
 	appdefaults.c
 	bllnhlp.c
 	cblock.c
