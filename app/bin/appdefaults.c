@@ -44,6 +44,8 @@ enum defaultTypes {
 
 static int GetLocalMeasureSystem(struct appDefault *ptrDefault);
 static int GetLocalDistanceFormat(struct appDefault *ptrDefault);
+static char *GetLocalPopularScale(struct appDefault *ptrDefault);
+static double GetLocalRoomSize(struct appDefault *ptrDefault);
 
 struct appDefault {
 	char *defaultKey;						/**< the key used to access the value */
@@ -55,8 +57,8 @@ struct appDefault {
 		double  floatValue;
 		char    *stringValue;
 		int		(*intFunc)(struct appDefault *);
-		double  (*floatFunc)(void);			/**< if pointer, the function returns the default */
-		char   *(*stringFunc)(void);
+		double  (*floatFunc)(struct appDefault *);			/**< if pointer, the function returns the default */
+		char   *(*stringFunc)(struct appDefault *);
 	} defaultValue;
 };
 
@@ -64,6 +66,9 @@ struct appDefault xtcDefaults[] = {
 	{ "DialogItem.cmdopt-preselect", 0, INTEGERCONSTANT,{ .intValue = 1 } },			/**< default command is select */
 	{ "DialogItem.pref-dstfmt", 0, INTEGERFUNC,{ .intFunc = GetLocalDistanceFormat } },	/**< number format for distances */
 	{ "DialogItem.pref-units", 0, INTEGERFUNC,{ .intFunc = GetLocalMeasureSystem } },	/**< default unit depends on region */
+	{ "draw.roomsizeX", 0, FLOATFUNC, {.floatFunc = GetLocalRoomSize }},				/**< layout width */
+	{ "draw.roomsizeY", 0, FLOATFUNC,{ .floatFunc = GetLocalRoomSize } },				/**< layout depth */
+	{ "misc.scale", 0, STRINGFUNC, { .stringFunc = GetLocalPopularScale}},				/**< the (probably) most popular scale for a region */
 };
 
 #define DEFAULTCOUNT (sizeof(xtcDefaults)/sizeof(xtcDefaults[0]))
@@ -154,6 +159,39 @@ InitializeRegionCode(void)
 }
 
 /**
+ * For the US the classical 4x8 sheet is used as default size. in the metric world 1,25x2,0m is used.
+ */
+
+static double
+GetLocalRoomSize(struct appDefault *ptrDefault)
+{
+	if (!regionCode[0]) {
+		InitializeRegionCode();
+	}
+
+	if (!strcmp(ptrDefault->defaultKey, "draw.roomsizeX")) {
+		return(strcmp(regionCode, "US") ? 125.0/2.54 : 48);
+	}
+	if (!strcmp(ptrDefault->defaultKey, "draw.roomsizeY")) {
+		return(strcmp(regionCode, "US") ? 200.0 / 2.54 : 96);
+	}
+	return(0.0);		// should never get here
+}
+
+/**
+ * The most popular scale is supposed to be HO except for UK where OO is assumed.
+ */
+
+static char *
+GetLocalPopularScale(struct appDefault *ptrDefault)
+{
+	if (!regionCode[0]) {
+		InitializeRegionCode();
+	}
+	return(strcmp(regionCode, "UK") ? "HO" : "OO");
+}
+
+/**
  *	The measurement system is english for the US and metric elsewhere
  */
 static int 
@@ -205,18 +243,19 @@ wPrefGetFloatExt(const char *section, const char *name, double *result, double d
 			defaultValue = thisDefault->defaultValue.floatValue;
 		}
 		else {
-			defaultValue = (thisDefault->defaultValue.floatFunc)();
+			defaultValue = (thisDefault->defaultValue.floatFunc)(thisDefault);
 		}
 	}
-	return (wPrefGetFloat(section, name, result, defaultValue));
+	return (wPrefGetFloatBasic(section, name, result, defaultValue));
 }
 
 
 char *
-wPrefGetStringExt(const char *section, const char *name, char **result, char *defaultValue)
+wPrefGetStringExt(const char *section, const char *name)
 {
 	struct appDefault *thisDefault;
-	char *defaultString;
+	char *prefString;
+	char *defaultValue;
 
 	thisDefault = FindDefault(xtcDefaults, section, name);
 	if (thisDefault) {
@@ -224,10 +263,12 @@ wPrefGetStringExt(const char *section, const char *name, char **result, char *de
 			defaultValue = thisDefault->defaultValue.stringValue;
 		}
 		else {
-			defaultValue = (thisDefault->defaultValue.stringFunc)();
+			defaultValue = (thisDefault->defaultValue.stringFunc)(thisDefault);
 		}
+		prefString = wPrefGetStringBasic(section, name);
+		return (prefString ? prefString : defaultValue);
 	}
-
-	defaultString = wPrefGetString(section, name);
-	return (defaultString?defaultString:defaultValue);
+	else {
+		return (wPrefGetStringBasic(section, name));
+	}
 }
