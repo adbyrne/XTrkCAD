@@ -30,6 +30,9 @@
 #include <Windows.h>
 
 #include "common.h"
+#include "custom.h"
+#include "fileio.h"
+#include "paths.h"
 #include "wlib.h"
 
 enum defaultTypes {
@@ -42,10 +45,11 @@ enum defaultTypes {
 };
 
 
-static int GetLocalMeasureSystem(struct appDefault *ptrDefault);
-static int GetLocalDistanceFormat(struct appDefault *ptrDefault);
-static char *GetLocalPopularScale(struct appDefault *ptrDefault);
-static double GetLocalRoomSize(struct appDefault *ptrDefault);
+static int GetLocalMeasureSystem(struct appDefault *ptrDefault, void *additionalData);
+static int GetLocalDistanceFormat(struct appDefault *ptrDefault, void *additionalData);
+static char *GetLocalPopularScale(struct appDefault *ptrDefault, void *additionalData);
+static double GetLocalRoomSize(struct appDefault *ptrDefault, void *additionalData);
+static char *GetParamFullPath(struct appDefault *ptrDefault, void *additionalData);
 
 struct appDefault {
 	char *defaultKey;						/**< the key used to access the value */
@@ -56,16 +60,37 @@ struct appDefault {
 		int		intValue;
 		double  floatValue;
 		char    *stringValue;
-		int		(*intFunc)(struct appDefault *);
-		double  (*floatFunc)(struct appDefault *);			/**< if pointer, the function returns the default */
-		char   *(*stringFunc)(struct appDefault *);
+		int		(*intFunc)(struct appDefault *, void *);
+		double  (*floatFunc)(struct appDefault *, void *);			/**< if pointer, the function returns the default */
+		char   *(*stringFunc)(struct appDefault *, void *);
 	} defaultValue;
+	void *additionalData;
 };
+
+/**
+ * List of application default settings. As this is searched by binary search, the list has to be kept sorted
+ * alphabetically for the key, the first element
+ * Also the search is case sensitive on this field.
+ */
 
 struct appDefault xtcDefaults[] = {
 	{ "DialogItem.cmdopt-preselect", 0, INTEGERCONSTANT,{ .intValue = 1 } },			/**< default command is select */
 	{ "DialogItem.pref-dstfmt", 0, INTEGERFUNC,{ .intFunc = GetLocalDistanceFormat } },	/**< number format for distances */
 	{ "DialogItem.pref-units", 0, INTEGERFUNC,{ .intFunc = GetLocalMeasureSystem } },	/**< default unit depends on region */
+	{ "Parameter File Map.NMRA RP12-25 Feb 2015 O scale Turnouts", 0, STRINGFUNC,{ .stringFunc = GetParamFullPath }, "nmra-o.xtp" },
+	{ "Parameter File Map.NMRA RP12-27 Feb 2015 S Scale Turnouts", 0, STRINGFUNC,{ .stringFunc = GetParamFullPath }, "nmra-s.xtp"  },
+	{ "Parameter File Map.NMRA RP12-31 Feb 2015 HO Scale Turnouts", 0, STRINGFUNC,{ .stringFunc = GetParamFullPath }, "nmra-ho.xtp" },
+	{ "Parameter File Map.NMRA RP12-33 Feb 2015 TT Scale Turnouts", 0, STRINGFUNC,{ .stringFunc = GetParamFullPath }, "nmra-tt.xtp" },
+	{ "Parameter File Map.NMRA RP12-35 Feb 2015 N Scale Turnouts", 0, STRINGFUNC,{ .stringFunc = GetParamFullPath }, "nmra-n.xtp" },
+	{ "Parameter File Map.NMRA RP12-37 Feb 2015 Z scale Turnouts", 0, STRINGFUNC,{ .stringFunc = GetParamFullPath }, "nmra-z.xtp" },
+	{ "Parameter File Map.Trees", 0, STRINGFUNC,{ .stringFunc = GetParamFullPath } , "trees.xtp" },
+	{ "Parameter File Names.File1", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-37 Feb 2015 Z scale Turnouts" } },
+	{ "Parameter File Names.File2", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-35 Feb 2015 N Scale Turnouts" } },
+	{ "Parameter File Names.File3", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-33 Feb 2015 TT Scale Turnouts" } },
+	{ "Parameter File Names.File4", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-31 Feb 2015 HO Scale Turnouts" } },
+	{ "Parameter File Names.File5", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-27 Feb 2015 S Scale Turnouts" } },
+	{ "Parameter File Names.File6", 0, STRINGCONSTANT,{ .stringValue = "NMRA RP12-25 Feb 2015 O scale Turnouts" } },
+	{ "Parameter File Names.File7", 0, STRINGCONSTANT,{ .stringValue = "Trees" } },
 	{ "draw.roomsizeX", 0, FLOATFUNC, {.floatFunc = GetLocalRoomSize }},				/**< layout width */
 	{ "draw.roomsizeY", 0, FLOATFUNC,{ .floatFunc = GetLocalRoomSize } },				/**< layout depth */
 	{ "misc.scale", 0, STRINGFUNC, { .stringFunc = GetLocalPopularScale}},				/**< the (probably) most popular scale for a region */
@@ -163,7 +188,7 @@ InitializeRegionCode(void)
  */
 
 static double
-GetLocalRoomSize(struct appDefault *ptrDefault)
+GetLocalRoomSize(struct appDefault *ptrDefault, void *data)
 {
 	if (!regionCode[0]) {
 		InitializeRegionCode();
@@ -183,7 +208,7 @@ GetLocalRoomSize(struct appDefault *ptrDefault)
  */
 
 static char *
-GetLocalPopularScale(struct appDefault *ptrDefault)
+GetLocalPopularScale(struct appDefault *ptrDefault, void *data)
 {
 	if (!regionCode[0]) {
 		InitializeRegionCode();
@@ -195,7 +220,7 @@ GetLocalPopularScale(struct appDefault *ptrDefault)
  *	The measurement system is english for the US and metric elsewhere
  */
 static int 
-GetLocalMeasureSystem(struct appDefault *ptrDefault)
+GetLocalMeasureSystem(struct appDefault *ptrDefault, void *data)
 {
 	if (!regionCode[0]) {
 		InitializeRegionCode();
@@ -207,12 +232,20 @@ GetLocalMeasureSystem(struct appDefault *ptrDefault)
 *	The distance format is 999.9 cm for metric and ?? for english
 */
 static int
-GetLocalDistanceFormat(struct appDefault *ptrDefault)
+GetLocalDistanceFormat(struct appDefault *ptrDefault, void *data)
 {
 	if (!regionCode[0]) {
 		InitializeRegionCode();
 	}
-	return(strcmp(regionCode, "US") ? 8 : 0);
+	return(strcmp(regionCode, "US") ? 8 : 5);
+}
+
+static char *
+GetParamFullPath(struct appDefault *ptrDefault, void *additionalData)
+{
+	char *str;
+	MakeFullpath(&str, libDir, PARAM_SUBDIR, (char*)additionalData, NULL );
+	return str;
 }
 
 wBool_t
@@ -225,7 +258,7 @@ wPrefGetIntegerExt(const char *section, const char *name, long *result, long def
 		if (thisDefault->valueType == INTEGERCONSTANT) {
 			defaultValue = thisDefault->defaultValue.intValue;
 		} else {
-			defaultValue = (thisDefault->defaultValue.intFunc)(thisDefault);
+			defaultValue = (thisDefault->defaultValue.intFunc)(thisDefault, thisDefault->additionalData);
 		}
 	}
 	return (wPrefGetIntegerBasic(section, name, result, defaultValue));
@@ -243,7 +276,7 @@ wPrefGetFloatExt(const char *section, const char *name, double *result, double d
 			defaultValue = thisDefault->defaultValue.floatValue;
 		}
 		else {
-			defaultValue = (thisDefault->defaultValue.floatFunc)(thisDefault);
+			defaultValue = (thisDefault->defaultValue.floatFunc)(thisDefault, thisDefault->additionalData);
 		}
 	}
 	return (wPrefGetFloatBasic(section, name, result, defaultValue));
@@ -263,7 +296,7 @@ wPrefGetStringExt(const char *section, const char *name)
 			defaultValue = thisDefault->defaultValue.stringValue;
 		}
 		else {
-			defaultValue = (thisDefault->defaultValue.stringFunc)(thisDefault);
+			defaultValue = (thisDefault->defaultValue.stringFunc)(thisDefault, thisDefault->additionalData);
 		}
 		prefString = wPrefGetStringBasic(section, name);
 		return (prefString ? prefString : defaultValue);

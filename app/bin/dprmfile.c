@@ -33,8 +33,6 @@
 #include "paths.h"
 #include "track.h"
 
-#define PARAM_SUBDIR "params"
-
 typedef struct {
 		char * name;
 		char * contents;
@@ -201,6 +199,7 @@ EXPORT void RememberParamFiles( void )
 					*cp = ' ';
 			}
 			wPrefSetString( "Parameter File Names", message, contents );
+			wPrefSetString("Parameter File Map", contents, paramFileInfo(fileInx).name);
 		}
 	}
 	sprintf( message, "File%d", fileNo++ );
