@@ -20,6 +20,19 @@ struct appDefault tests[] = {
 	{"zkey"}
 };
 
+
+const char *libDir ="Parameter/directory/";
+
+/**
+ * A dummy for the real MakePath function 
+ */
+
+void
+MakeFullpath( char **result, ...)
+{
+    *result = libDir;
+}
+
 #define TESTARRAYSIZE (sizeof(tests) / sizeof(tests[0]) )
 
 struct appDefault test1[] = {
@@ -37,13 +50,13 @@ wPrefGetIntegerBasic(const char *section, const char *name, long *result, long d
 }
 
 int
-wPrefGetFloat(const char *section, const char *name, double *result, double defaultValue)
+wPrefGetFloatBasic(const char *section, const char *name, double *result, double defaultValue)
 {
 	*result = defaultValue;
 	return(TRUE);
 }
 
-const char * wPrefGetString(const char *section, const char *name)
+const char * wPrefGetStringBasic(const char *section, const char *name)
 {
 	return(NULL);
 }
@@ -76,7 +89,7 @@ static void BinarySearch(void **state)
 static void GetDefaults(void **state)
 {
 	double value = 0.0;
-	int intValue = 0;
+	long intValue = 0;
 	(void)state;
 
 	wPrefGetIntegerExt("DialogItem", "cmdopt-preselect", &intValue, 2);
@@ -84,8 +97,6 @@ static void GetDefaults(void **state)
 
 	wPrefGetIntegerExt("DialogItem", "cmdopt-preselect", &intValue, 2);
 	assert_int_equal(intValue, 2);
-
-	wPrefGetIntegerExt("DialogItem", "pref-units", &intValue, 2);
 
 }
 
