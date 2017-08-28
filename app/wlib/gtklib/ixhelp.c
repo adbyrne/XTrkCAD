@@ -20,27 +20,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
-#include <sys/time.h>
-#include <signal.h>
-#include <unistd.h>
-#include <string.h>
-#include <ctype.h>
 #include <assert.h>
-#include <errno.h>
-#include <fcntl.h>
-
-#include <stdint.h>
 
 #include "gtkint.h"
 #include "i18n.h"
 
 #include <webkit/webkit.h>
-
-#include "gtkint.h"
-#include "i18n.h"
 
 void load_into_view(char *file,
                     int requested_view);	// Prototype to please clang.
