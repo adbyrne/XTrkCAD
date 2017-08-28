@@ -13,7 +13,6 @@ add_test(DXFOutputTest dxfformattest)
 
 add_executable( pathstest
 				pathstest.c
-				../layout.c
 				)
 
 target_link_libraries(pathstest
@@ -21,3 +20,12 @@ target_link_libraries(pathstest
 					 ${LIBS})
 
 add_test(PathsTest pathstest)
+
+add_executable( defaultstest
+				defaultstest.c
+				)
+
+target_link_libraries(defaultstest
+                      ${LIBS})
+
+add_test(DefaultsTest defaultstest)

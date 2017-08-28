@@ -11,7 +11,6 @@
 
 #include <dynstring.h>
 #include "../paths.h"
-#include "../layout.h"
 
 #ifdef WINDOWS
 #define TESTPATH "C:\\Test\\Path"
@@ -37,7 +36,7 @@ void
 wPrefSetString(const char *section, const char *key, const char *value)
 {}
 
-const char *wPrefGetString(const char *section, const char *key)
+char *wPrefGetStringExt(const char *section, const char *key)
 {
 	return(NULL);
 }
@@ -64,19 +63,6 @@ static void SetGetPath(void **state)
 	SetCurrentPath("Test", TESTFILE2);
 	string = GetCurrentPath("Test");
 	assert_string_equal(string, TESTPATH2);	
-}
-
-static void SetGetLayout(void **state)
-{
-	char *string;
-	(void)state;
-
-	SetLayoutFullPath(TESTFILE);
-	string = GetLayoutFullPath();
-	assert_string_equal(string, TESTFILE);
-
-	string = GetLayoutFilename();
-	assert_string_equal(string, TESTFILENAME);
 }
 
 static void Makepath(void **state)
@@ -129,7 +115,6 @@ int main(void)
 {
     const struct CMUnitTest tests[] = {
 		cmocka_unit_test(SetGetPath),
-		cmocka_unit_test(SetGetLayout),
 		cmocka_unit_test(Makepath),
     };
     return cmocka_run_group_tests(tests, NULL, NULL);

@@ -26,6 +26,7 @@
 #include "common.h"
 #include "misc.h"
 
+
 void SetLayoutFullPath(const char *fileName);
 void LoadLayoutMinRadiusPref(char *scaleName, double defaultValue);
 void SetLayoutTitle(char *title);
