@@ -37,6 +37,60 @@
 								"HTML files are installed properly and can be found via the XTRKCADLIB environment " \
 								"variable.\n Also make sure that the user has sufficient access rights to read these" \
  								"files."
+/**
+ * Create a fully qualified url froma topic
+ *
+ * \param helpUrl OUT pointer to url, free by caller
+ * \param topic IN the help topic
+ */
+
+static void
+TopicToUrl(char **helpUrl, const char *topic)
+{
+    DynString url;
+    DynStringMalloc(&url, 16);
+
+    // build up the url line
+    DynStringCatCStrs(&url,
+                      "file://",
+                      wGetAppLibDir(),
+                      "/html/",
+                      topic,
+                      ".html",
+                      NULL);
+
+    *helpUrl = strdup(DynStringToCStr(&url));
+    DynStringFree(&url);
+}
+/**
+ * Extend the PATH variable inthe environment to include XTrackCAD's
+ * script directory.
+ *
+ * \return pointer to old path
+ */
+
+static char *
+ExtendPath(void)
+{
+    char *path = getenv("PATH");
+    DynString newPath;
+    DynStringMalloc(&newPath, 16);
+
+    // append XTrackCAD's directory to the path as a fallback
+    DynStringCatCStrs(&newPath,
+                      path,
+                      ":",
+                      wGetAppLibDir(),
+                      NULL);
+
+    setenv("PATH",
+           DynStringToCStr(&newPath),
+           TRUE);
+
+    DynStringFree(&newPath);
+
+    return (path);
+}
 
 /**
  * Invoke the system's default browser to display help for <topic>. First the
@@ -49,45 +103,35 @@
 void wHelp(const char * topic)
 {
     int rc;
-    DynString command;
+    char *url;
+    DynString commandLine;
+    char *currentPath;
 
-    DynStringMalloc(&command, 16);
+    assert(topic != NULL);
+    assert(strlen(topic));
 
-    // build up the command line
-    DynStringCatCStrs(&command,
+    currentPath = ExtendPath();
+    TopicToUrl(&url, topic);
+
+    DynStringMalloc(&commandLine, 16);
+    DynStringCatCStrs(&commandLine,
                       DEFAULTBROWSERCOMMAND,
-                      " file://",
-                      wGetAppLibDir(),
-                      "/html/",
-                      topic,
-                      ".html",
+                      " ",
+                      url,
                       NULL);
 
-    // assume that the command can be found via the PATH
-    rc = system(DynStringToCStr(&command));
+    // the command should be found via the PATH
+    rc = system(DynStringToCStr(&commandLine));
 
     if (rc) {
-        if (WEXITSTATUS(rc) == 127) {
-            // the command could not be found, so load it from the application
-            // install directory
-            DynStringClear(&command);
-            DynStringCatCStrs(&command,
-                              wGetAppLibDir(),
-                              "/",
-                              DEFAULTBROWSERCOMMAND,
-                              " file://",
-                              wGetAppLibDir(),
-                              "/html/",
-                              topic,
-                              ".html",
-                              NULL);
-            rc = system(DynStringToCStr(&command));
-        }
-
-        if (rc) {
-            wNotice(HELPERRORTEXT, _("Cancel"), NULL);
-        }
+        wNotice(HELPERRORTEXT, _("Cancel"), NULL);
     }
 
-    DynStringFree(&command);
+    // restore the PATH
+    setenv("PATH",
+           currentPath,
+           TRUE);
+
+    free(url);
+    DynStringFree(&commandLine);
 }

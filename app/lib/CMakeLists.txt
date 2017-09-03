@@ -34,6 +34,10 @@ else()
 endif()
 	
 if(UNIX AND NOT APPLE)
+    install(FILES
+        xdg-open
+        DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
+        )
 	install(FILES
 		xtrkcad.desktop
 		DESTINATION "/usr/share/applications"
