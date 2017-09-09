@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "custom.h"
+#include "dynstring.h"
 #include "fileio.h"
 #include "i18n.h"
 #include "messages.h"
@@ -256,7 +257,25 @@ static void SetLayerColor( int inx, wDrawColor color )
 	}
 }
 
- 
+char *
+FormatLayerName(int layerNumber)
+{
+	DynString string;// = NaS;
+	char *result;
+
+	DynStringMalloc(&string, 0);
+	DynStringPrintf(&string,
+		"%2d %c %s",
+		layerNumber + 1,
+		(layers[layerNumber].objCount > 0 ? '+' : '-'),
+		layers[layerNumber].name);
+
+	result = strdup(DynStringToCStr(&string));
+	DynStringFree(&string);
+
+	return result;
+}
+
 
 #include "bitmaps/l1.xbm"
 #include "bitmaps/l2.xbm"
@@ -457,7 +476,8 @@ LayerSystemDefaults( void )
 EXPORT void LoadLayerLists( void )
 {
 	int inx;
-	 
+	char *layerLabel;
+
 	/* clear both lists */
 	wListClear(setLayerL);
 	if ( layerL ) 
@@ -465,14 +485,13 @@ EXPORT void LoadLayerLists( void )
 
 	/* add all layers to both lists */
 	for ( inx=0; inx<NUM_LAYERS; inx++ ) {
-
+		layerLabel = FormatLayerName(inx);
 		if ( layerL ) {
-			sprintf( message, "%2d %c %s", inx+1, layers[inx].objCount>0?'+':'-', layers[inx].name );
-			wListAddValue( layerL, message, NULL, NULL );
+			wListAddValue( layerL, layerLabel, NULL, NULL );
 		}
 		
-		sprintf( message, "%2d : %s", inx+1,  layers[inx].name );
-		wListAddValue( setLayerL, message, NULL, NULL );
+		wListAddValue( setLayerL, layerLabel, NULL, NULL );
+		free(layerLabel);
 	}
 
 	/* set current layer to selected */
@@ -583,7 +602,7 @@ LayerPrefSave( void )
 	int inx;
 	int flags;
 	char buffer[ 80 ];
-	char layersSaved[ 3 * NUM_LAYERS ];			/* 0..99 plus separator */
+	char layersSaved[ 3 * NUM_LAYERS + 1 ];			/* 0..99 plus separator */
 	
 	/* FIXME: values for layers that are configured to default now should be overwritten in the settings */	
 	
@@ -616,8 +635,8 @@ LayerPrefSave( void )
 				/* extend the list of layers that are set up via the preferences */
 				if( layersSaved[ 0 ] )
 					strcat( layersSaved, "," );
-					
-				sprintf( layersSaved, "%s%d", layersSaved, inx );
+				_itoa(inx, buffer, 10);
+				strcat(layersSaved, buffer);
 		}
 	}
 	
@@ -743,6 +762,8 @@ DefaultLayerProperties(void)
 static void LayerUpdate( void )
 {
 	BOOL_T redraw;
+	char *layerFormattedName;
+
 	ParamLoadData( &layerPG );
 	if (layerCurrent < 0 || layerCurrent >= NUM_LAYERS)
 		return;
@@ -769,12 +790,15 @@ static void LayerUpdate( void )
 
 	if ( layerL ) {
 		strncpy( layers[(int)layerCurrent].name, layerName, sizeof layers[(int)layerCurrent].name );
-		sprintf( message, "%2d %c %s", (int)layerCurrent+1, layers[(int)layerCurrent].objCount>0?'+':'-', layers[(int)layerCurrent].name );
-		wListSetValues( layerL, layerCurrent, message, NULL, NULL );
+		layerFormattedName = FormatLayerName(layerCurrent);
+		wListSetValues( layerL, layerCurrent, layerFormattedName, NULL, NULL );
+		free(layerFormattedName);
 	}
 
-	sprintf( message, "%2d : %s", (int)layerCurrent+1, layers[(int)layerCurrent].name );
-	wListSetValues( setLayerL, layerCurrent, message, NULL, NULL );
+	layerFormattedName = FormatLayerName(layerCurrent);
+	wListSetValues( setLayerL, layerCurrent, layerFormattedName, NULL, NULL );
+	free(layerFormattedName);
+
 	if (layerCurrent < NUM_BUTTONS) {
 		if (strlen(layers[(int)layerCurrent].name)>0)
 			wControlSetBalloonText( (wControl_p)layer_btns[(int)layerCurrent], layers[(int)layerCurrent].name );
@@ -1042,6 +1066,8 @@ EXPORT void InitLayers( void )
 	AddToolbarControl( (wControl_p)setLayerL, IC_MODETRAIN_TOO );
 
 	for ( i = 0; i<NUM_LAYERS; i++ ) {
+		char *layerName;
+
 		if (i<NUM_BUTTONS) {
 			/* create the layer button */
 		   sprintf( message, "cmdLayerShow%d", i );
@@ -1058,8 +1084,10 @@ EXPORT void InitLayers( void )
 			/* set state of button */
 			wButtonSetBusy( layer_btns[i], 1 );
 		}
-		sprintf( message, "%2d : %s", i+1, (i==0?_("Main"):"") );
-		wListAddValue( setLayerL, message, NULL, (void*)(intptr_t)i );
+
+		layerName = FormatLayerName(i);
+		wListAddValue( setLayerL, layerName, NULL, (void*)i );
+		free(layerName);
 	}
 	AddPlaybackProc( "SETCURRLAYER", PlaybackCurrLayer, NULL );
 	AddPlaybackProc( "LAYERS", (playbackProc_p)ReadLayers, NULL );
