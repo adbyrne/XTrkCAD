@@ -164,7 +164,7 @@ TURNOUT S "S Helper Showcase Line	C131 5"" Third Rail	671"
 	L 0 0.053333 0.000000 1.281250 5.000000 1.281250
 	END
 
-	
+
 SUBCONTENTS S Helper Showcase Line Code 131 - Turnout
 TURNOUT S "S Helper Showcase Line	#3 Left Turnout	299"
 	P "Normal" 1 2

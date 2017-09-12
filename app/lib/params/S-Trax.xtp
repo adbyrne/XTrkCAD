@@ -164,7 +164,7 @@ TURNOUT S "Showcase Line	C131 5"" Third Rail	671"
 	L 0 0.053333 0.000000 1.281250 5.000000 1.281250
 	END
 
-	
+
 SUBCONTENTS Showcase Line Code 131 - Turnout
 TURNOUT S "Showcase Line	#3 Left Turnout	299"
 	P "Normal" 1 2
@@ -198,4 +198,3 @@ TURNOUT S "Showcase Line	#3 Right Turnout	298"
 	L3 0 0.000000 8.602487 -3.172591 0 9.359354 -3.609583 0
 	L3 0 0.000000 10.356817 -1.226543 0 10.640643 -1.390415 0
 	END
-	
