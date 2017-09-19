@@ -504,13 +504,22 @@ EXPORT void SetTrkEndPtCnt( track_p trk, EPINX_T cnt )
 		memset( &trk->endPt[oldCnt], 0, (cnt-oldCnt) * sizeof *trk->endPt );
 }
 
-
-EXPORT void SetTrkLayer( track_p trk, int layer )
+/**
+ * Set the layer for a track. 
+ *
+ * \param trk IN the layer to change the layer for
+ * \param layer IN  the new layer for the track
+ */
+void SetTrkLayer( track_p trk, int layer )
 {
+	DecrementLayerObjects(trk->layer);
+
 	if (useCurrentLayer)
 		trk->layer = (LAYER_T)curLayer;
 	else
 		trk->layer = (LAYER_T)layer;
+
+	IncrementLayerObjects(trk->layer);
 }
 
 
@@ -888,6 +897,7 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 	trk->extraSize = extraSize;
 	UndoNew( trk );
 	trackCount++;
+	IncrementLayerObjects(curLayer);
 	InfoCount( trackCount );
 	return trk;
 }
@@ -987,6 +997,7 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
         CheckDeleteBlock( trk );
 	UndoDelete( trk );
     MainRedraw();
+	DecrementLayerObjects(trk->layer);
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
 	InfoCount( trackCount );
@@ -2131,7 +2142,7 @@ EXPORT void DrawCurvedTies(
 		ANGLE_T a1,
 		wDrawColor color )
 {
-	tieData_p td = GetScaleTieData(GetTrkScale(trk));
+	tieData_p td; 
 	DIST_T len;
 	ANGLE_T ang, dang;
 	coOrd pos;
@@ -2141,6 +2152,9 @@ EXPORT void DrawCurvedTies(
 		return;
 	if ( trk == NULL )
 		return;
+
+	td = GetScaleTieData(GetTrkScale(trk));
+
 	if ( (!GetTrkVisible(trk)) && drawTunnel!=DRAW_TUNNEL_SOLID )
 		return;
 	if (color == wDrawColorBlack)
@@ -2245,7 +2259,7 @@ EXPORT void DrawStraightTies(
 		coOrd p1,
 		wDrawColor color )
 {
-	tieData_p td = GetScaleTieData(GetTrkScale(trk));
+	tieData_p td;
 	DIST_T tieOff0=0.0, tieOff1=0.0;
 	DIST_T len, dlen;
 	coOrd pos;
@@ -2256,6 +2270,8 @@ EXPORT void DrawStraightTies(
 		return;
 	if ( trk == NULL )
 		return;
+
+	td = GetScaleTieData(GetTrkScale(trk));
 	if ( (!GetTrkVisible(trk)) && drawTunnel!=DRAW_TUNNEL_SOLID )
 		return;
 	if ( color == wDrawColorBlack )
@@ -2588,7 +2604,7 @@ EXPORT void DrawEndPt(
 		EPINX_T ep,
 		wDrawColor color )
 {
-	coOrd p, pp;
+	coOrd p;
 	ANGLE_T a;
 	track_p trk1;
 	coOrd p0, p1, p2;
@@ -2614,7 +2630,7 @@ EXPORT void DrawEndPt(
 		DrawEndElev( d, trk, ep, color );
 
 	trk1 = GetTrkEndTrk(trk,ep);
-	pp = p = GetTrkEndPos( trk, ep );
+	p = GetTrkEndPos( trk, ep );
 	a = GetTrkEndAngle( trk, ep ) + 90.0;
 
 	trackGauge = GetTrkGauge(trk);
@@ -2717,14 +2733,13 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 {
 	track_cp trk;
 	TRKINX_T inx;
-	wIndex_t count;
+	wIndex_t count = 0;
 	coOrd lo, hi;
 	BOOL_T doSelectRecount = FALSE;
 	
 	inDrawTracks = TRUE;
-	count = 0;
 	InfoCount( 0 );
-	count = 0;
+
 	d->options |= DC_TIES;
 	TRK_ITERATE( trk ) {
 		if ( (d->options&DC_PRINT) != 0 &&

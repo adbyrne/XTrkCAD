@@ -896,6 +896,7 @@ EXPORT int LoadTracks(
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
 		LoadLayerLists();
+		LayerSetCounts();
 	}
 	UndoResume();
 	Reset();
