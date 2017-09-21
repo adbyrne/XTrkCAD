@@ -410,6 +410,14 @@ wPrefGetStringExt(const char *section, const char *name)
     }
 }
 
+/**
+ * Initialize the application default system. The flag firstrun is used to find
+ * out whether the application was run before. This is accomplished by trying
+ * to read it from the configuration file. As it is only written after this 
+ * test, it can never be found on the first run of the application ie. when the
+ * configuration file does not exist yet.
+ */
+
 void 
 InitAppDefaults(void)
 {
