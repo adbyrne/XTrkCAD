@@ -2546,6 +2546,8 @@ LOG1( log_init, ( "create main window\n" ) )
 	if ( mainW == NULL )
 		return NULL;
 
+	InitAppDefaults();
+
 	drawColorBlack  = wDrawFindColor( wRGB(  0,  0,  0) );
 	drawColorWhite  = wDrawFindColor( wRGB(255,255,255) );
 	drawColorRed    = wDrawFindColor( wRGB(255,  0,  0) );

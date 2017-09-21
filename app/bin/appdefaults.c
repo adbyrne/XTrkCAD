@@ -75,6 +75,8 @@ static char *GetParamFullPath(struct appDefault *ptrDefault,
 static char *GetParamPrototype(struct appDefault *ptrDefault,
 								void *additionalData);
 
+static long bFirstRun;	/**< TRUE if appl is run the first time */
+
 /**
  * List of application default settings. As this is searched by binary search, the list has to be kept sorted
  * alphabetically for the key, the first element
@@ -305,6 +307,7 @@ GetParamFullPath(struct appDefault *ptrDefault, void *additionalData)
     MakeFullpath(&str, libDir, PARAM_SUBDIR, (char*)additionalData, (void *)0);
     return str;
 }
+
 /**
  * Get an integer value from the configuration file. The is a wrapper for the real
  * file access and adds a region specific default value.
@@ -320,7 +323,9 @@ wPrefGetIntegerExt(const char *section, const char *name, long *result,
                    long defaultValue)
 {
     struct appDefault *thisDefault;
-
+	if (!bFirstRun) {
+		return (wPrefGetIntegerBasic(section, name, result, defaultValue));
+	}
     thisDefault = FindDefault(xtcDefaults, section, name);
 
     if (thisDefault) {
@@ -352,6 +357,9 @@ wPrefGetFloatExt(const char *section, const char *name, double *result,
 {
     struct appDefault *thisDefault;
 
+	if (!bFirstRun) {
+		return (wPrefGetFloatBasic(section, name, result, defaultValue));
+	}
     thisDefault = FindDefault(xtcDefaults, section, name);
 
     if (thisDefault) {
@@ -379,6 +387,9 @@ wPrefGetStringExt(const char *section, const char *name)
 {
     struct appDefault *thisDefault;
 
+	if (!bFirstRun) {
+		return ((char *)wPrefGetStringBasic(section, name));
+	}
     thisDefault = FindDefault(xtcDefaults, section, name);
 
     if (thisDefault) {
@@ -397,4 +408,12 @@ wPrefGetStringExt(const char *section, const char *name)
     } else {
         return ((char *)wPrefGetStringBasic(section, name));
     }
+}
+
+void 
+InitAppDefaults(void)
+{
+	wPrefGetIntegerBasic( "misc", "firstrun", &bFirstRun, TRUE);
+
+	wPrefSetInteger("misc", "firstrun", FALSE);
 }

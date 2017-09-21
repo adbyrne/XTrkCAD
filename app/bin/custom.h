@@ -90,7 +90,6 @@ void InitTrkEase( void );
 void InitTrkNote( void );
 void InitTrkStraight( void );
 void InitTrkStruct( void );
-void InitTrkTableEdge( void );
 void InitTrkText( void );
 void InitTrkTrack( void );
 void InitTrkTurnout( void );
@@ -108,7 +107,6 @@ void InitCmdElevation( wMenu_p menu );
 void InitCmdJoin( wMenu_p menu );
 void InitCmdProfile( wMenu_p menu );
 void InitCmdPull( wMenu_p menu );
-void InitCmdTighten( void );
 void InitCmdModify( wMenu_p menu );
 void InitCmdMove( wMenu_p menu );
 void InitCmdMoveDescription( wMenu_p menu );
@@ -122,7 +120,6 @@ void InitCmdRuler( wMenu_p menu );
 
 void InitCmdParallel( wMenu_p menu );
 wIndex_t InitCmdPrint( wMenu_p menu );
-void InitCmdTableEdge( void );
 void InitCmdText( wMenu_p menu );
 void InitCmdTrain( wMenu_p menu );
 void InitCmdTurnout( wMenu_p menu );
@@ -138,7 +135,6 @@ void InitCmdEasement( void );
 
 char * MakeWindowTitle( char * );
 addButtonCallBack_t EasementInit( void );
-addButtonCallBack_t StructDesignerInit( void );
 
 void InitLayers( void );
 void InitHotBar( void );
@@ -147,7 +143,7 @@ BOOL_T Initialize( void );
 void DoEasementRedir( void );
 void DoStructDesignerRedir( void );
 void InitNewTurnRedir( wMenu_p );
-void RedrawAbout( wDraw_p, void *, wPos_t, wPos_t );
-void DoKeycheck( char * );
+
+void InitAppDefaults(void);
 
 #endif
