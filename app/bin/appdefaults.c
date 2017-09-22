@@ -114,9 +114,9 @@ struct appDefault xtcDefaults[] = {
 static long bFirstRun;						/**< TRUE if appl is run the first time */
 static char regionCode[3];					/**< will be initialized to the locale's region code */
 
-static wBool_t(*GetIntegerPref)(const char *, const char *, long *, long) = wPrefGetIntegerExt;
-static wBool_t(*GetFloatPref)(const char *, const char *, double *, double) = wPrefGetFloatExt;
-static char *(*GetStringPref)(const char *, const char *) = wPrefGetStringExt;
+static wBool_t(*GetIntegerPref)(const char *, const char *, long *, long) = wPrefGetIntegerExt;	/**< pointer to active integer pref getter */
+static wBool_t(*GetFloatPref)(const char *, const char *, double *, double) = wPrefGetFloatExt; /**< pointer to active float pref getter */
+static char *(*GetStringPref)(const char *, const char *) = wPrefGetStringExt;					/**< pointer to active string pref getter */
 
 /**
  * A recursive binary search function. It returns location of x in
