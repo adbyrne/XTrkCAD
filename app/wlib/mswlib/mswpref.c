@@ -149,7 +149,7 @@ void wPrefSetString( const char * section, const char * name, const char * sval 
 }
 
 
-const char * wPrefGetStringBasic( const char * section, const char * name )
+char * wPrefGetStringBasic( const char * section, const char * name )
 {
 	prefs_t * p;
 	int rc;

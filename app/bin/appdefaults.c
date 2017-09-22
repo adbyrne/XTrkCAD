@@ -75,8 +75,6 @@ static char *GetParamFullPath(struct appDefault *ptrDefault,
 static char *GetParamPrototype(struct appDefault *ptrDefault,
 								void *additionalData);
 
-static long bFirstRun;	/**< TRUE if appl is run the first time */
-
 /**
  * List of application default settings. As this is searched by binary search, the list has to be kept sorted
  * alphabetically for the key, the first element
@@ -112,8 +110,13 @@ struct appDefault xtcDefaults[] = {
 
 #define DEFAULTCOUNT (sizeof(xtcDefaults)/sizeof(xtcDefaults[0]))
 
-static char
-regionCode[3];					/**< will be initialized to the locale's region code */
+
+static long bFirstRun;						/**< TRUE if appl is run the first time */
+static char regionCode[3];					/**< will be initialized to the locale's region code */
+
+static wBool_t(*GetIntegerPref)(const char *, const char *, long *, long) = wPrefGetIntegerExt;
+static wBool_t(*GetFloatPref)(const char *, const char *, double *, double) = wPrefGetFloatExt;
+static char *(*GetStringPref)(const char *, const char *) = wPrefGetStringExt;
 
 /**
  * A recursive binary search function. It returns location of x in
@@ -227,10 +230,6 @@ InitializeRegionCode(void)
 static double
 GetLocalRoomSize(struct appDefault *ptrDefault, void *data)
 {
-    if (!regionCode[0]) {
-        InitializeRegionCode();
-    }
-
     if (!strcmp(ptrDefault->defaultKey, "draw.roomsizeY")) {
         return (strcmp(regionCode, "US") ? 125.0/2.54 : 48);
     }
@@ -249,10 +248,6 @@ GetLocalRoomSize(struct appDefault *ptrDefault, void *data)
 static char *
 GetLocalPopularScale(struct appDefault *ptrDefault, void *data)
 {
-    if (!regionCode[0]) {
-        InitializeRegionCode();
-    }
-
     return (strcmp(regionCode, "GB") ? "HO" : "OO");
 }
 
@@ -262,10 +257,6 @@ GetLocalPopularScale(struct appDefault *ptrDefault, void *data)
 static int
 GetLocalMeasureSystem(struct appDefault *ptrDefault, void *data)
 {
-    if (!regionCode[0]) {
-        InitializeRegionCode();
-    }
-
     return (strcmp(regionCode, "US") ? 1 : 0);
 }
 
@@ -275,10 +266,6 @@ GetLocalMeasureSystem(struct appDefault *ptrDefault, void *data)
 static int
 GetLocalDistanceFormat(struct appDefault *ptrDefault, void *data)
 {
-    if (!regionCode[0]) {
-        InitializeRegionCode();
-    }
-
     return (strcmp(regionCode, "US") ? 8 : 5);
 }
 
@@ -290,10 +277,6 @@ GetLocalDistanceFormat(struct appDefault *ptrDefault, void *data)
 static char*
 GetParamPrototype(struct appDefault *ptrDefault, void *additionalData)
 {
-	if (!regionCode[0]) {
-		InitializeRegionCode();
-	}
-
 	return (strcmp(regionCode, "GB") ? "North American Prototypes" : "British stock");
 }
 
@@ -306,6 +289,30 @@ GetParamFullPath(struct appDefault *ptrDefault, void *additionalData)
     char *str;
     MakeFullpath(&str, libDir, PARAM_SUBDIR, (char*)additionalData, (void *)0);
     return str;
+}
+
+
+/**
+ * The following are three jump points for the correct implementation. Changing the funtion pointer
+ * allows to switch from the extended default version to the basic implementation.
+ */
+
+wBool_t 
+wPrefGetInteger(const char *section, const char *name, long *result, long defaultValue)
+{
+	return GetIntegerPref(section, name, result, defaultValue);
+}
+
+wBool_t
+wPrefGetFloat(const char *section, const char *name, double *result, double defaultValue)
+{
+	return GetFloatPref(section, name, result, defaultValue);
+}
+
+char * 
+wPrefGetString(const char *section, const char *name)
+{
+	return GetStringPref(section, name);
 }
 
 /**
@@ -323,9 +330,7 @@ wPrefGetIntegerExt(const char *section, const char *name, long *result,
                    long defaultValue)
 {
     struct appDefault *thisDefault;
-	if (!bFirstRun) {
-		return (wPrefGetIntegerBasic(section, name, result, defaultValue));
-	}
+
     thisDefault = FindDefault(xtcDefaults, section, name);
 
     if (thisDefault) {
@@ -357,9 +362,6 @@ wPrefGetFloatExt(const char *section, const char *name, double *result,
 {
     struct appDefault *thisDefault;
 
-	if (!bFirstRun) {
-		return (wPrefGetFloatBasic(section, name, result, defaultValue));
-	}
     thisDefault = FindDefault(xtcDefaults, section, name);
 
     if (thisDefault) {
@@ -387,9 +389,6 @@ wPrefGetStringExt(const char *section, const char *name)
 {
     struct appDefault *thisDefault;
 
-	if (!bFirstRun) {
-		return ((char *)wPrefGetStringBasic(section, name));
-	}
     thisDefault = FindDefault(xtcDefaults, section, name);
 
     if (thisDefault) {
@@ -422,6 +421,12 @@ void
 InitAppDefaults(void)
 {
 	wPrefGetIntegerBasic( "misc", "firstrun", &bFirstRun, TRUE);
-
-	wPrefSetInteger("misc", "firstrun", FALSE);
+	if (bFirstRun) {
+		wPrefSetInteger("misc", "firstrun", FALSE);
+		InitializeRegionCode();
+	} else {
+		GetIntegerPref = wPrefGetIntegerBasic;
+		GetFloatPref = wPrefGetFloatBasic;
+		GetStringPref = wPrefGetStringBasic;
+	}
 }
