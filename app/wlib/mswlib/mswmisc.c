@@ -1998,7 +1998,8 @@ struct wFilSel_t {
 		void * data;
 		};
 		
-static char selFileName[1024];
+#define SELECTEDFILENAMESIZE	(8*1024)	/**<estimated size in case all param files are selected */
+
 static char selFileTitle[1024];
 static char sysDirName[1024];
 
@@ -2021,6 +2022,7 @@ int wFilSelect(
 	OPENFILENAME ofn;
 	char **fileName;
 	char *nextFileName;
+	char *selFileName;
 	int cntFiles;
 	const char * ext;
 	char defExt[4];
@@ -2036,9 +2038,12 @@ int wFilSelect(
 	ofn.hwndOwner = mswHWnd;
 	ofn.lpstrFilter = fs->extList;
 	ofn.nFilterIndex = 0;
-	memset( selFileName, '\0', sizeof(selFileName));
+
+	selFileName = malloc(SELECTEDFILENAMESIZE);
+    memset( selFileName, '\0', SELECTEDFILENAMESIZE);
 	ofn.lpstrFile = selFileName;
-	ofn.nMaxFile = sizeof selFileName;
+	ofn.nMaxFile = SELECTEDFILENAMESIZE;
+
 	selFileTitle[0] = '\0';
 	ofn.lpstrFileTitle = selFileTitle;
 	ofn.nMaxFileTitle = sizeof selFileTitle;
@@ -2102,6 +2107,7 @@ int wFilSelect(
 		free( fileName[ i ] );
 	}
 	free( fileName );
+	free(selFileName);
 
 	return TRUE;
 }
