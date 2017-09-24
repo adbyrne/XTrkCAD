@@ -142,11 +142,12 @@ static DIST_T DistanceNote( track_p t, coOrd * p )
 
 static struct {
 		coOrd pos;
+		LAYER_T layer;
 		} noteData;
 typedef enum { OR, LY, TX } noteDesc_e;
 static descData_t noteDesc[] = {
 /*OR*/	{ DESC_POS, N_("Position"), &noteData.pos },
-/*LY*/	{ DESC_LAYER, N_("Layer"), NULL },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &noteData.layer },
 /*TX*/	{ DESC_TEXT, NULL, NULL },
 		{ DESC_NULL } };
 
@@ -161,6 +162,9 @@ static void UpdateNote( track_p trk, int inx, descData_p descUpd, BOOL_T needUnd
 		xx->pos = noteData.pos;
 		SetBoundingBox( trk, xx->pos, xx->pos );
 		DrawNewTrack( trk );
+		break;
+	case LY:
+		SetTrkLayer(trk, noteData.layer);
 		break;
 	case -1:
 		if ( wTextGetModified((wText_p)noteDesc[TX].control0) ) {
@@ -199,7 +203,7 @@ static void DescribeNote( track_p trk, char * str, CSIZE_T len )
 	noteDesc[TX].valueP = xx->text;
 	noteDesc[OR].mode = 0;
 	noteDesc[TX].mode = 0;
-	noteDesc[LY].mode = DESC_RO;
+	noteDesc[LY].mode = DESC_NOREDRAW;
 	DoDescribe( _("Note"), trk, noteDesc, UpdateNote );
 }
 
