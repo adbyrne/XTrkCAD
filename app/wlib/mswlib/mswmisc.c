@@ -1998,7 +1998,7 @@ struct wFilSel_t {
 		void * data;
 		};
 		
-#define SELECTEDFILENAMESIZE	(8*1024)	/**<estimated size in case all param files are selected */
+#define SELECTEDFILENAME_BUFFERSIZE	(8*1024)	/**<estimated size in case all param files are selected */
 
 static char selFileTitle[1024];
 static char sysDirName[1024];
@@ -2039,10 +2039,10 @@ int wFilSelect(
 	ofn.lpstrFilter = fs->extList;
 	ofn.nFilterIndex = 0;
 
-	selFileName = malloc(SELECTEDFILENAMESIZE);
-    memset( selFileName, '\0', SELECTEDFILENAMESIZE);
+	selFileName = malloc(SELECTEDFILENAME_BUFFERSIZE);
+    memset( selFileName, '\0', SELECTEDFILENAME_BUFFERSIZE);
 	ofn.lpstrFile = selFileName;
-	ofn.nMaxFile = SELECTEDFILENAMESIZE;
+	ofn.nMaxFile = SELECTEDFILENAME_BUFFERSIZE;
 
 	selFileTitle[0] = '\0';
 	ofn.lpstrFileTitle = selFileTitle;
