@@ -2000,9 +2000,6 @@ struct wFilSel_t {
 		
 #define SELECTEDFILENAME_BUFFERSIZE	(8*1024)	/**<estimated size in case all param files are selected */
 
-static char selFileTitle[1024];
-static char sysDirName[1024];
-
 /**
  * Run the file selector. After the selector is finished an array of filenames is
  * created. Each filename will be fully qualified. The array and the number of 
@@ -2031,7 +2028,7 @@ int wFilSelect(
 	if (dirName == NULL ||
 		dirName[0] == '\0' ||
 		strcmp(dirName, ".") == 0 ) {
-		GetSystemDirectory( CAST_AWAY_CONST (dirName = sysDirName), sizeof sysDirName );
+			dirName = wGetUserHomeDir();
 	}
 	memset( &ofn, 0, sizeof ofn );
 	ofn.lStructSize = sizeof ofn;
@@ -2044,9 +2041,8 @@ int wFilSelect(
 	ofn.lpstrFile = selFileName;
 	ofn.nMaxFile = SELECTEDFILENAME_BUFFERSIZE;
 
-	selFileTitle[0] = '\0';
-	ofn.lpstrFileTitle = selFileTitle;
-	ofn.nMaxFileTitle = sizeof selFileTitle;
+	ofn.lpstrFileTitle = NULL;
+	ofn.nMaxFileTitle = 0;
 	ofn.lpstrInitialDir = dirName;
 	ofn.lpstrTitle = fs->title;
 	ext = fs->extList + strlen(fs->extList)+1;
