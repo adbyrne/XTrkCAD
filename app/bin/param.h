@@ -226,7 +226,7 @@ long GetChanges(paramGroup_p pg);
 		(PD).valueP = FUNC; \
 		if ( HS ) GetBalloonHelpStr(HS);
 
-#define PD_F_ALT_CANCELLABEL	(1L<<30)
+#define PD_F_ALT_CANCELLABEL	(1L<<30)		/**<use Close or Cancel for the discard button */
 wWin_p ParamCreateDialog( paramGroup_p, char *, char *, paramActionOkProc, paramActionCancelProc, BOOL_T, paramLayoutProc, long, paramChangeProc );
 void ParamCreateControls( paramGroup_p, paramChangeProc );
 void ParamLayoutDialog( paramGroup_p );
