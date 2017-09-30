@@ -494,7 +494,6 @@ LayerSystemDefaults(void)
 EXPORT void LoadLayerLists(void)
 {
     int inx;
-    char *layerLabel;
     /* clear both lists */
     wListClear(setLayerL);
 
@@ -504,6 +503,7 @@ EXPORT void LoadLayerLists(void)
 
     /* add all layers to both lists */
     for (inx=0; inx<NUM_LAYERS; inx++) {
+        char *layerLabel;
         layerLabel = FormatLayerName(inx);
 
         if (layerL) {
@@ -675,23 +675,23 @@ LayerPrefSave(void)
 static void
 LayerPrefLoad(void)
 {
-    int inx;
-    char layersSaved[ 3 * NUM_LAYERS ];
-    char layerOption[ 20 ];
-    const char *layerValue;
     const char *prefString;
     long rgb;
-    int color;
     long flags;
     /* reset layer preferences to system default */
     LayerSystemDefaults();
     prefString = wPrefGetString(LAYERPREF_SECTION, "layers");
 
     if (prefString && prefString[ 0 ]) {
+        char layersSaved[3 * NUM_LAYERS];
         strncpy(layersSaved, prefString, sizeof(layersSaved));
         prefString = strtok(layersSaved, ",");
 
         while (prefString) {
+            int inx;
+            char layerOption[20];
+            const char *layerValue;
+            int color;
             inx = atoi(prefString);
             sprintf(layerOption, LAYERPREF_NAME ".%d", inx);
             layerValue = wPrefGetString(LAYERPREF_SECTION, layerOption);
@@ -746,7 +746,7 @@ static int LayerCount( int layer )
 
 /**
  * Increment the count of objects on a given layer.
- * 
+ *
  * \param index IN the layer to change
  */
 
@@ -1098,7 +1098,7 @@ EXPORT BOOL_T ReadLayers(char * line)
     }
 
     if (paramVersion < 9) {
-        if (rgb >= 0 && (int)rgb < sizeof oldColorMap/sizeof oldColorMap[0]) {
+        if ((int)rgb < sizeof oldColorMap/sizeof oldColorMap[0]) {
             rgb = wRGB(oldColorMap[(int)rgb][0], oldColorMap[(int)rgb][1],
                        oldColorMap[(int)rgb][2]);
         } else {
