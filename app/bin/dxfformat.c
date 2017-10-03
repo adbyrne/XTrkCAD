@@ -308,7 +308,7 @@ DxfPrologue(DynString *result, int layerCount, double x0, double y0, double x1,
     DynStringCatCStr(result, "\
   0\nSECTION\n\
   2\nHEADER\n\
-  9\n$ACADVER\n  1\nAC1015\n");
+  9\n$ACADVER\n  1\nAC1009\n");
 	DxfUnits(result);
 	DxfDimensionSize(result, DXF_DIMTEXTSIZE);
 	DxfDimensionSize(result, DXF_DIMARROWSIZE);
