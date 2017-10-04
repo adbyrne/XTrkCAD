@@ -659,7 +659,7 @@ LayerPrefSave(void)
                 strcat(layersSaved, ",");
             }
 
-            _itoa(inx, buffer, 10);
+			sprintf(buffer, "%ld", inx);
             strcat(layersSaved, buffer);
         }
     }
