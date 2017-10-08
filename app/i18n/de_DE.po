@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: xtrkcad 4.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-05-08 20:57+0200\n"
-"PO-Revision-Date: 2017-07-21 17:46+0100\n"
+"PO-Revision-Date: 2017-10-08 14:13+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "Language: de\n"
@@ -2098,7 +2098,7 @@ msgstr "Ende des Gleis"
 
 #: ../bin/ctrain.c:744
 msgid "Open Turnout"
-msgstr "Weiche öffnen"
+msgstr "Weiche ist gesperrt"
 
 #: ../bin/ctrain.c:747
 msgid "Manual Stop"
