@@ -93,7 +93,7 @@ BOOL_T GetLayerOnMap( LAYER_T );
 char * GetLayerName( LAYER_T );
 BOOL_T ReadLayers( char * );
 BOOL_T WriteLayers( FILE * );
-char * FormatLayerName(int layerNumber);
+char * FormatLayerName(unsigned int layerNumber);
 /* dlayers.c */
 void UpdateLayerLists( void );
 void DefaultLayerProperties(void);

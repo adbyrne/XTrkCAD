@@ -143,79 +143,84 @@ static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer);
 static void LayerPrefSave(void);
 static void LayerPrefLoad(void);
 
-EXPORT BOOL_T GetLayerVisible(unsigned int layer)
+int IsLayerValid(unsigned int layer)
 {
-    if (layer < 0 || layer >= NUM_LAYERS) {
+	return(layer <= NUM_LAYERS);
+}
+
+BOOL_T GetLayerVisible(unsigned int layer)
+{
+    if (!IsLayerValid(layer)) {
         return TRUE;
     } else {
-        return layers[(int)layer].visible;
+        return layers[layer].visible;
     }
 }
 
 
-EXPORT BOOL_T GetLayerFrozen(unsigned int layer)
+BOOL_T GetLayerFrozen(unsigned int layer)
 {
-    if (layer < 0 || layer >= NUM_LAYERS) {
+	if (!IsLayerValid(layer)) {
         return TRUE;
     } else {
-        return layers[(int)layer].frozen;
+        return layers[layer].frozen;
     }
 }
 
 
-EXPORT BOOL_T GetLayerOnMap(unsigned int layer)
+BOOL_T GetLayerOnMap(unsigned int layer)
 {
-    if (layer < 0 || layer >= NUM_LAYERS) {
+	if (!IsLayerValid(layer)) {
         return TRUE;
     } else {
-        return layers[(int)layer].onMap;
+        return layers[layer].onMap;
     }
 }
 
 
-EXPORT char * GetLayerName(unsigned int layer)
+char * GetLayerName(unsigned int layer)
 {
-    if (layer < 0 || layer >= NUM_LAYERS) {
+	if (!IsLayerValid(layer)) {
         return NULL;
     } else {
-        return layers[(int)layer].name;
+        return layers[layer].name;
     }
 }
 
 
-EXPORT void NewLayer(void)
+void NewLayer(void)
 {
 }
 
 
-EXPORT wDrawColor GetLayerColor(unsigned int layer)
+wDrawColor GetLayerColor(unsigned int layer)
 {
-    return layers[(int)layer].color;
+    return layers[layer].color;
 }
 
 
 static void FlipLayer(void * arg)
 {
-    unsigned int l = (unsigned int)(long)arg;
+    unsigned int l = (unsigned int)arg;
     wBool_t visible;
 
-    if (l < 0 || l >= NUM_LAYERS) {
+    if (!IsLayerValid(l)) {
         return;
     }
 
-    if (l == curLayer && layers[(int)l].visible) {
-        wButtonSetBusy(layer_btns[(int)l], layers[(int)l].visible);
+    if (l == curLayer && layers[l].visible) {
+        wButtonSetBusy(layer_btns[l], layers[l].visible);
         NoticeMessage(MSG_LAYER_HIDE, _("Ok"), NULL);
         return;
     }
 
     RedrawLayer(l, FALSE);
-    visible = !layers[(int)l].visible;
-    layers[(int)l].visible = visible;
+    visible = !layers[l].visible;
+    layers[l].visible = visible;
 
     if (l<NUM_BUTTONS) {
-        wButtonSetBusy(layer_btns[(int)l], visible != 0);
-        wButtonSetLabel(layer_btns[(int)l], (char *)show_layer_bmps[(int)l]);
+        wButtonSetBusy(layer_btns[l], visible != 0);
+        wButtonSetLabel(layer_btns[l], (char *)show_layer_bmps[l]);
     }
 
     RedrawLayer(l, TRUE);
@@ -224,9 +229,9 @@ static void FlipLayer(void * arg)
 static void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
                          void * listContext, void * arg)
 {
-    unsigned int newLayer = (unsigned int)(long)inx;
+    unsigned int newLayer = (unsigned int)inx;
 
-    if (layers[(int)newLayer].frozen) {
+    if (layers[newLayer].frozen) {
         NoticeMessage(MSG_LAYER_SEL_FROZEN, _("Ok"), NULL);
         wListSetIndex(setLayerL, curLayer);
         return;
@@ -234,12 +239,12 @@ static void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 
     curLayer = newLayer;
 
-    if (curLayer < 0 || curLayer >= NUM_LAYERS) {
+    if (!IsValidLayer(curLayer)) {
         curLayer = 0;
     }
 
-    if (!layers[(int)curLayer].visible) {
-        FlipLayer((void*)(intptr_t)inx);
+    if (!layers[curLayer].visible) {
+        FlipLayer((void *)inx);
     }
 
     if (recordF) {
@@ -262,7 +267,7 @@ static void PlaybackCurrLayer(char * line)
  * \param color IN new color
  */
 
-static void SetLayerColor(int inx, wDrawColor color)
+static void SetLayerColor(unsigned int inx, wDrawColor color)
 {
     if (color != layers[inx].color) {
         if (inx < NUM_BUTTONS) {
@@ -276,7 +281,7 @@ static void SetLayerColor(int inx, wDrawColor color)
 }
 
 char *
-FormatLayerName(int layerNumber)
+FormatLayerName(unsigned int layerNumber)
 {
     DynString string;// = NaS;
     char *result;
@@ -618,7 +623,7 @@ InitializeLayers(void LayerInitFunc(void), int newCurrLayer)
 static void
 LayerPrefSave(void)
 {
-    int inx;
+    unsigned int inx;
     int flags;
     char buffer[ 80 ];
     char layersSaved[ 3 * NUM_LAYERS + 1 ];			/* 0..99 plus separator */
@@ -631,9 +636,9 @@ LayerPrefSave(void)
         if ((layers[inx].name[0] && inx != 0) ||
                 layers[inx].frozen || (!layers[inx].onMap) || (!layers[inx].visible) ||
                 layers[inx].color != layerColorTab[inx%COUNT(layerColorTab)]) {
-            sprintf(buffer, LAYERPREF_NAME ".%0d", inx);
+            sprintf(buffer, LAYERPREF_NAME ".%0u", inx);
             wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].name);
-            sprintf(buffer, LAYERPREF_COLOR ".%0d", inx);
+            sprintf(buffer, LAYERPREF_COLOR ".%0u", inx);
             wPrefSetInteger(LAYERPREF_SECTION, buffer, wDrawGetRGB(layers[inx].color));
             flags = 0;
 
@@ -649,7 +654,7 @@ LayerPrefSave(void)
                 flags |= LAYERPREF_VISIBLE;
             }
 
-            sprintf(buffer, LAYERPREF_FLAGS ".%0d", inx);
+            sprintf(buffer, LAYERPREF_FLAGS ".%0u", inx);
             wPrefSetInteger(LAYERPREF_SECTION, buffer, flags);
 
             /* extend the list of layers that are set up via the preferences */
@@ -657,7 +662,7 @@ LayerPrefSave(void)
                 strcat(layersSaved, ",");
             }
 
-			sprintf(buffer, "%ld", inx);
+			sprintf(buffer, "%u", inx);
             strcat(layersSaved, buffer);
         }
     }
@@ -818,7 +823,7 @@ static void LayerUpdate(void)
     char *layerFormattedName;
     ParamLoadData(&layerPG);
 
-    if (layerCurrent < 0 || layerCurrent >= NUM_LAYERS) {
+    if (!IsLayerValid(layerCurrent)) {
         return;
     }
 
@@ -1077,7 +1082,7 @@ EXPORT BOOL_T ReadLayers(char * line)
     if (strncmp(line, "CURRENT", 7) == 0) {
         curLayer = atoi(line+7);
 
-        if (curLayer < 0) {
+        if (!IsValidLayer(curLayer)) {
             curLayer = 0;
         }
 
@@ -1142,7 +1147,7 @@ EXPORT BOOL_T ReadLayers(char * line)
  */
 
 bool
-IsLayerConfigured(int layerNumber)
+IsLayerConfigured(unsigned int layerNumber)
 {
     return (!layers[layerNumber].visible ||
             layers[layerNumber].frozen ||
@@ -1162,11 +1167,11 @@ IsLayerConfigured(int layerNumber)
 
 BOOL_T WriteLayers(FILE * f)
 {
-    int inx;
+    unsigned int inx;
 
     for (inx = 0; inx < NUM_LAYERS; inx++) {
         if (IsLayerConfigured(inx)) {
-            fprintf(f, "LAYERS %d %d %d %d %ld %d %d %d %d \"%s\"\n",
+            fprintf(f, "LAYERS %u %d %d %d %ld %d %d %d %d \"%s\"\n",
                     inx,
                     layers[inx].visible,
                     layers[inx].frozen,
@@ -1177,14 +1182,14 @@ BOOL_T WriteLayers(FILE * f)
         }
     }
 
-    fprintf(f, "LAYERS CURRENT %d\n", curLayer);
+    fprintf(f, "LAYERS CURRENT %u\n", curLayer);
     return TRUE;
 }
 
 
 EXPORT void InitLayers(void)
 {
-    int i;
+    unsigned int i;
     wPrefGetInteger(PREFSECT, "layer-button-count", &layerCount, layerCount);
 
     for (i = 0; i<COUNT(layerRawColorTab); i++) {
@@ -1210,7 +1215,7 @@ EXPORT void InitLayers(void)
 
         if (i<NUM_BUTTONS) {
             /* create the layer button */
-            sprintf(message, "cmdLayerShow%d", i);
+            sprintf(message, "cmdLayerShow%u", i);
             layer_btns[i] = wButtonCreate(mainW, 0, 0, message,
                                           (char*)(show_layer_bmps[i]),
                                           BO_ICON, 0, (wButtonCallBack_p)FlipLayer, (void*)(intptr_t)i);
