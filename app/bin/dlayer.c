@@ -64,10 +64,10 @@ static wList_p setLayerL;
 
 /** Describe the properties of a layer */
 typedef struct {
-    char name[STR_SHORT_SIZE];		/**< Layer name */
+    char name[STR_SHORT_SIZE];			/**< Layer name */
     wDrawColor color;					/**< layer color, is an index into a color table */
     BOOL_T frozen;						/**< Frozen flag */
-    BOOL_T visible;					/**< visible flag */
+    BOOL_T visible;						/**< visible flag */
     BOOL_T onMap;						/**< is layer shown map */
     long objCount;						/**< number of objects on layer */
 } layer_t;
@@ -144,7 +144,7 @@ static void LayerPrefLoad(void);
 
 int IsLayerValid(unsigned int layer)
 {
-	return(layer <= NUM_LAYERS);
+    return (layer <= NUM_LAYERS);
 }
 
 BOOL_T GetLayerVisible(unsigned int layer)
@@ -159,7 +159,7 @@ BOOL_T GetLayerVisible(unsigned int layer)
 
 BOOL_T GetLayerFrozen(unsigned int layer)
 {
-	if (!IsLayerValid(layer)) {
+    if (!IsLayerValid(layer)) {
         return TRUE;
     } else {
         return layers[layer].frozen;
@@ -169,7 +169,7 @@ BOOL_T GetLayerFrozen(unsigned int layer)
 
 BOOL_T GetLayerOnMap(unsigned int layer)
 {
-	if (!IsLayerValid(layer)) {
+    if (!IsLayerValid(layer)) {
         return TRUE;
     } else {
         return layers[layer].onMap;
@@ -179,7 +179,7 @@ BOOL_T GetLayerOnMap(unsigned int layer)
 
 char * GetLayerName(unsigned int layer)
 {
-	if (!IsLayerValid(layer)) {
+    if (!IsLayerValid(layer)) {
         return NULL;
     } else {
         return layers[layer].name;
@@ -487,7 +487,7 @@ LayerSystemDefaults(void)
  * Load the layer listboxes in Manage Layers and the Toolbar with up-to-date information.
  */
 
- void LoadLayerLists(void)
+void LoadLayerLists(void)
 {
     int inx;
     /* clear both lists */
@@ -655,7 +655,7 @@ LayerPrefSave(void)
                 strcat(layersSaved, ",");
             }
 
-			sprintf(buffer, "%u", inx);
+            sprintf(buffer, "%u", inx);
             strcat(layersSaved, buffer);
         }
     }
@@ -724,8 +724,7 @@ LayerPrefLoad(void)
 
 void IncrementLayerObjects(unsigned int layer)
 {
-	assert(layer <= NUM_LAYERS);
-
+    assert(layer <= NUM_LAYERS);
     layers[layer].objCount++;
 }
 
@@ -737,9 +736,8 @@ void IncrementLayerObjects(unsigned int layer)
 
 void DecrementLayerObjects(unsigned int layer)
 {
-	assert(layer <= NUM_LAYERS);
-	
-	layers[layer].objCount--;
+    assert(layer <= NUM_LAYERS);
+    layers[layer].objCount--;
 }
 
 /**
@@ -769,7 +767,7 @@ void LayerSetCounts(void)
  * from the preferences file.
  */
 
- void
+void
 DefaultLayerProperties(void)
 {
     InitializeLayers(LayerPrefLoad, 0);
@@ -887,7 +885,7 @@ static void LayerSelect(
     ParamLoadControls(&layerPG);
 }
 
- void ResetLayers(void)
+void ResetLayers(void)
 {
     int inx;
 
@@ -925,7 +923,7 @@ static void LayerSelect(
 }
 
 
- void SaveLayers(void)
+void SaveLayers(void)
 {
     layers_save = malloc(NUM_LAYERS * sizeof(unsigned int));
     assert(layers_save != NULL);
@@ -933,7 +931,7 @@ static void LayerSelect(
     ResetLayers();
 }
 
- void RestoreLayers(void)
+void RestoreLayers(void)
 {
     int inx;
     char * label;
@@ -1034,7 +1032,7 @@ static void DoLayer(void * junk)
 }
 
 
- BOOL_T ReadLayers(char * line)
+BOOL_T ReadLayers(char * line)
 {
     char * name;
     int inx, visible, frozen, color, onMap;
@@ -1156,7 +1154,7 @@ BOOL_T WriteLayers(FILE * f)
 }
 
 
- void InitLayers(void)
+void InitLayers(void)
 {
     unsigned int i;
     wPrefGetInteger(PREFSECT, "layer-button-count", &layerCount, layerCount);
@@ -1206,7 +1204,7 @@ BOOL_T WriteLayers(FILE * f)
 }
 
 
- addButtonCallBack_t InitLayersDialog(void)
+addButtonCallBack_t InitLayersDialog(void)
 {
     ParamRegister(&layerPG);
     return &DoLayer;
