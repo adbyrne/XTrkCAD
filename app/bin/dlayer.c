@@ -48,8 +48,8 @@
 #define LAYERPREF_COLOR "color"
 #define LAYERPREF_FLAGS "flags"
 
-EXPORT unsigned int curLayer;
-EXPORT long layerCount = 10;
+unsigned int curLayer;
+long layerCount = 10;
 static long newLayerCount = 10;
 static unsigned int layerCurrent = NUM_LAYERS;
 
@@ -137,7 +137,6 @@ static int oldColorMap[][3] = {
 
 static void DoLayerOp(void * data);
 static void UpdateLayerDlg(void);
-/* static void LoadLayerLists(); */
 
 static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer);
 static void LayerPrefSave(void);
@@ -187,12 +186,6 @@ char * GetLayerName(unsigned int layer)
     }
 }
 
-
-void NewLayer(void)
-{
-}
-
-
 wDrawColor GetLayerColor(unsigned int layer)
 {
     return layers[layer].color;
@@ -239,7 +232,7 @@ static void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
 
     curLayer = newLayer;
 
-    if (!IsValidLayer(curLayer)) {
+    if (!IsLayerValid(curLayer)) {
         curLayer = 0;
     }
 
@@ -412,7 +405,7 @@ static char * show_layer_bits[NUM_BUTTONS] = {
 };
 
 
-static EXPORT long layerRawColorTab[] = {
+static  long layerRawColorTab[] = {
     wRGB(0,  0,255),        /* blue */
     wRGB(0,  0,128),        /* dk blue */
     wRGB(0,128,  0),        /* dk green */
@@ -424,7 +417,7 @@ static EXPORT long layerRawColorTab[] = {
     wRGB(128,128,  0),      /* green-brown */
     wRGB(255,  0,255)
 };     /* lt-purple */
-static EXPORT wDrawColor layerColorTab[COUNT(layerRawColorTab)];
+static  wDrawColor layerColorTab[COUNT(layerRawColorTab)];
 
 
 static wWin_p layerW;
@@ -494,7 +487,7 @@ LayerSystemDefaults(void)
  * Load the layer listboxes in Manage Layers and the Toolbar with up-to-date information.
  */
 
-EXPORT void LoadLayerLists(void)
+ void LoadLayerLists(void)
 {
     int inx;
     /* clear both lists */
@@ -724,30 +717,6 @@ LayerPrefLoad(void)
 }
 
 /**
- * Count the number of elements on a layer.
- * NOTE: This function has been implemented but not actually been tested. As it might prove useful in the
- * future I left it in place. So you have been warned!
- * \param IN layer to count
- * \return number of elements
- */
-/*
-static int LayerCount( int layer )
-{
-	track_p trk;
-	int inx;
-	int count = 0;
-
-	for( trk = NULL; TrackIterate(&trk); ) {
-		inx = GetTrkLayer( trk );
-		if( inx == layer )
-			count++;
-	}
-
-	return count;
-}
-*/
-
-/**
  * Increment the count of objects on a given layer.
  *
  * \param index IN the layer to change
@@ -800,7 +769,7 @@ void LayerSetCounts(void)
  * from the preferences file.
  */
 
-EXPORT void
+ void
 DefaultLayerProperties(void)
 {
     InitializeLayers(LayerPrefLoad, 0);
@@ -918,7 +887,7 @@ static void LayerSelect(
     ParamLoadControls(&layerPG);
 }
 
-EXPORT void ResetLayers(void)
+ void ResetLayers(void)
 {
     int inx;
 
@@ -956,7 +925,7 @@ EXPORT void ResetLayers(void)
 }
 
 
-EXPORT void SaveLayers(void)
+ void SaveLayers(void)
 {
     layers_save = malloc(NUM_LAYERS * sizeof(unsigned int));
     assert(layers_save != NULL);
@@ -964,7 +933,7 @@ EXPORT void SaveLayers(void)
     ResetLayers();
 }
 
-EXPORT void RestoreLayers(void)
+ void RestoreLayers(void)
 {
     int inx;
     char * label;
@@ -1065,7 +1034,7 @@ static void DoLayer(void * junk)
 }
 
 
-EXPORT BOOL_T ReadLayers(char * line)
+ BOOL_T ReadLayers(char * line)
 {
     char * name;
     int inx, visible, frozen, color, onMap;
@@ -1082,7 +1051,7 @@ EXPORT BOOL_T ReadLayers(char * line)
     if (strncmp(line, "CURRENT", 7) == 0) {
         curLayer = atoi(line+7);
 
-        if (!IsValidLayer(curLayer)) {
+        if (!IsLayerValid(curLayer)) {
             curLayer = 0;
         }
 
@@ -1187,7 +1156,7 @@ BOOL_T WriteLayers(FILE * f)
 }
 
 
-EXPORT void InitLayers(void)
+ void InitLayers(void)
 {
     unsigned int i;
     wPrefGetInteger(PREFSECT, "layer-button-count", &layerCount, layerCount);
@@ -1237,7 +1206,7 @@ EXPORT void InitLayers(void)
 }
 
 
-EXPORT addButtonCallBack_t InitLayersDialog(void)
+ addButtonCallBack_t InitLayersDialog(void)
 {
     ParamRegister(&layerPG);
     return &DoLayer;
