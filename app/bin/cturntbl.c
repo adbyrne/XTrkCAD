@@ -238,7 +238,7 @@ static struct {
 		coOrd orig;
 		DIST_T diameter;
 		long epCnt;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		} trntblData;
 typedef enum { OR, RA, EC, LY } trntblDesc_e;
 static descData_t trntblDesc[] = {

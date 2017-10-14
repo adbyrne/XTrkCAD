@@ -83,8 +83,8 @@ void LoadScaleList( wList_p );
 void LoadGaugeList( wList_p, SCALEDESCINX_T );
 BOOL_T CompatibleScale( BOOL_T, SCALEINX_T, SCALEINX_T );
 BOOL_T DoSetScaleDesc( void );
-typedef int LAYER_T;
-LAYER_T curLayer;
+
+unsigned int curLayer;
 long layerCount;
 wDrawColor GetLayerColor( LAYER_T );
 BOOL_T GetLayerVisible( LAYER_T );

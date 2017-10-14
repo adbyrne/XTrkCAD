@@ -48,22 +48,20 @@
 #define LAYERPREF_COLOR "color"
 #define LAYERPREF_FLAGS "flags"
 
-EXPORT LAYER_T curLayer;
+EXPORT unsigned int curLayer;
 EXPORT long layerCount = 10;
 static long newLayerCount = 10;
-static LAYER_T layerCurrent = NUM_LAYERS;
+static unsigned int layerCurrent = NUM_LAYERS;
 
 
 static BOOL_T layoutLayerChanged = FALSE;
 
 static wIcon_p show_layer_bmps[NUM_BUTTONS];
-/*static wIcon_p hide_layer_bmps[NUM_BUTTONS]; */
 static wButton_p layer_btns[NUM_BUTTONS];	/**< layer buttons on toolbar */
 
 /** Layer selector on toolbar */
 static wList_p setLayerL;
 
-/*static wMessage_p layerNumM;*/
 /** Describe the properties of a layer */
 typedef struct {
     char name[STR_SHORT_SIZE];		/**< Layer name */
@@ -145,7 +143,7 @@ static void InitializeLayers(void LayerInitFunc(void), int newCurrLayer);
 static void LayerPrefSave(void);
 static void LayerPrefLoad(void);
 
-EXPORT BOOL_T GetLayerVisible(LAYER_T layer)
+EXPORT BOOL_T GetLayerVisible(unsigned int layer)
 {
     if (layer < 0 || layer >= NUM_LAYERS) {
         return TRUE;
@@ -155,7 +153,7 @@ EXPORT BOOL_T GetLayerVisible(LAYER_T layer)
 }
 
 
-EXPORT BOOL_T GetLayerFrozen(LAYER_T layer)
+EXPORT BOOL_T GetLayerFrozen(unsigned int layer)
 {
     if (layer < 0 || layer >= NUM_LAYERS) {
         return TRUE;
@@ -165,7 +163,7 @@ EXPORT BOOL_T GetLayerFrozen(LAYER_T layer)
 }
 
 
-EXPORT BOOL_T GetLayerOnMap(LAYER_T layer)
+EXPORT BOOL_T GetLayerOnMap(unsigned int layer)
 {
     if (layer < 0 || layer >= NUM_LAYERS) {
         return TRUE;
@@ -175,7 +173,7 @@ EXPORT BOOL_T GetLayerOnMap(LAYER_T layer)
 }
 
 
-EXPORT char * GetLayerName(LAYER_T layer)
+EXPORT char * GetLayerName(unsigned int layer)
 {
     if (layer < 0 || layer >= NUM_LAYERS) {
         return NULL;
@@ -190,7 +188,7 @@ EXPORT void NewLayer(void)
 }
 
 
-EXPORT wDrawColor GetLayerColor(LAYER_T layer)
+EXPORT wDrawColor GetLayerColor(unsigned int layer)
 {
     return layers[(int)layer].color;
 }
@@ -198,7 +196,7 @@ EXPORT wDrawColor GetLayerColor(LAYER_T layer)
 
 static void FlipLayer(void * arg)
 {
-    LAYER_T l = (LAYER_T)(long)arg;
+    unsigned int l = (unsigned int)(long)arg;
     wBool_t visible;
 
     if (l < 0 || l >= NUM_LAYERS) {
@@ -226,7 +224,7 @@ static void FlipLayer(void * arg)
 static void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
                          void * listContext, void * arg)
 {
-    LAYER_T newLayer = (LAYER_T)(long)inx;
+    unsigned int newLayer = (unsigned int)(long)inx;
 
     if (layers[(int)newLayer].frozen) {
         NoticeMessage(MSG_LAYER_SEL_FROZEN, _("Ok"), NULL);
@@ -750,9 +748,11 @@ static int LayerCount( int layer )
  * \param index IN the layer to change
  */
 
-void IncrementLayerObjects(int index)
+void IncrementLayerObjects(unsigned int layer)
 {
-    layers[index].objCount++;
+	assert(layer <= NUM_LAYERS);
+
+    layers[layer].objCount++;
 }
 
 /**
@@ -761,9 +761,11 @@ void IncrementLayerObjects(int index)
 * \param index IN the layer to change
 */
 
-void DecrementLayerObjects(int index)
+void DecrementLayerObjects(unsigned int layer)
 {
-    layers[index].objCount--;
+	assert(layer <= NUM_LAYERS);
+	
+	layers[layer].objCount--;
 }
 
 /**
@@ -867,7 +869,7 @@ static void LayerUpdate(void)
               (BOOL_T)layerVisible != layers[(int)layerCurrent].visible);
 
     if ((!layerRedrawMap) && redraw) {
-        RedrawLayer((LAYER_T)layerCurrent, FALSE);
+        RedrawLayer((unsigned int)layerCurrent, FALSE);
     }
 
     SetLayerColor(layerCurrent, layerColor);
@@ -884,7 +886,7 @@ static void LayerUpdate(void)
     if (layerRedrawMap) {
         DoRedraw();
     } else if (redraw) {
-        RedrawLayer((LAYER_T)layerCurrent, TRUE);
+        RedrawLayer((unsigned int)layerCurrent, TRUE);
     }
 
     layerRedrawMap = FALSE;
@@ -900,7 +902,7 @@ static void LayerSelect(
         return;
     }
 
-    layerCurrent = (LAYER_T)inx;
+    layerCurrent = (unsigned int)inx;
     strcpy(layerName, layers[inx].name);
     layerVisible = layers[inx].visible;
     layerFrozen = layers[inx].frozen;
@@ -951,7 +953,7 @@ EXPORT void ResetLayers(void)
 
 EXPORT void SaveLayers(void)
 {
-    layers_save = malloc(NUM_LAYERS * sizeof(layer_t));
+    layers_save = malloc(NUM_LAYERS * sizeof(unsigned int));
     assert(layers_save != NULL);
     memcpy(layers_save, layers, NUM_LAYERS * sizeof layers[0]);
     ResetLayers();

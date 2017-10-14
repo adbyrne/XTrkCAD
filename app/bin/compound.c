@@ -508,7 +508,7 @@ static struct {
 		long segCnt;
 		FLOAT_T grade;
 		DIST_T length;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		} compoundData;
 typedef enum { E0, Z0, E1, Z1, GR, OR, AN, MN, NM, PN, EC, SC, LY } compoundDesc_e;
 static descData_t compoundDesc[] = {

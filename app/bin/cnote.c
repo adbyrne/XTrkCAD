@@ -155,7 +155,7 @@ static DIST_T DistanceNote(track_p t, coOrd * p)
 
 static struct {
     coOrd pos;
-    LAYER_T layer;
+    unsigned int layer;
 } noteData;
 typedef enum { OR, LY, TX } noteDesc_e;
 static descData_t noteDesc[] = {

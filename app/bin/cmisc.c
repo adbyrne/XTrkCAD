@@ -43,7 +43,7 @@ static BOOL_T descNeedDrawHilite;
 static wPos_t describeW_posy;
 static wPos_t describeCmdButtonEnd;
 
-static LAYER_T editableLayerList[NUM_LAYERS];		/**< list of non-frozen layers */
+static unsigned int editableLayerList[NUM_LAYERS];		/**< list of non-frozen layers */
 static int *layerValue;								/**< pointer to current layer value */
 
 static paramFloatRange_t rdata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
@@ -146,7 +146,7 @@ CreateEditableLayersList()
  */
 
 static int
-SearchEditableLayerList(LAYER_T layer)
+SearchEditableLayerList(unsigned int layer)
 {
     int i;
 

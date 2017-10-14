@@ -63,7 +63,7 @@ struct extraData {
     trainStatus_e   status;
     DIST_T          distance;
     coOrd           couplerPos[2];
-    LAYER_T         trkLayer;
+    unsigned int         trkLayer;
 };
 #define NOTALAYER						(127)
 

@@ -341,7 +341,7 @@ static struct {
 		ANGLE_T angle;
 		FLOAT_T grade;
 		descPivot_t pivot;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		} crvData;
 typedef enum { E0, Z0, E1, Z1, CE, RA, TU, SE, LN, AL, A1, A2, GR, PV, LY } crvDesc_e;
 static descData_t crvDesc[] = {

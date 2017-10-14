@@ -383,8 +383,8 @@ void ContMgmLoad (wIcon_p,contMgmCallBack_p,void *);
 
 /* dlayer.c */
 void LayerSetCounts();
-void DecrementLayerObjects(int index);
-void IncrementLayerObjects(int index);
+void DecrementLayerObjects(unsigned int index);
+void IncrementLayerObjects(unsigned int index);
 
 /* doption.c */
 long GetDistanceFormat( void );

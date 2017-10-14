@@ -92,7 +92,7 @@ static dynArr_t trackCmds_da;
 
 EXPORT BOOL_T useCurrentLayer = FALSE;
 
-EXPORT LAYER_T curTrackLayer;
+EXPORT unsigned int curTrackLayer;
 
 EXPORT coOrd descriptionOff;
 
@@ -330,7 +330,7 @@ EXPORT void SetTrkScale( track_p trk, SCALEINX_T si )
 	trk->scale = (char)si;
 }
 
-EXPORT LAYER_T GetTrkLayer( track_p trk )
+EXPORT unsigned int GetTrkLayer( track_p trk )
 {
 	return trk->layer;
 }
@@ -515,9 +515,9 @@ void SetTrkLayer( track_p trk, int layer )
 	DecrementLayerObjects(trk->layer);
 
 	if (useCurrentLayer)
-		trk->layer = (LAYER_T)curLayer;
+		trk->layer = (unsigned int)curLayer;
 	else
-		trk->layer = (LAYER_T)layer;
+		trk->layer = (unsigned int)layer;
 
 	IncrementLayerObjects(trk->layer);
 }
@@ -995,11 +995,11 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	}
         CheckDeleteSwitchmotor( trk );
         CheckDeleteBlock( trk );
-	UndoDelete( trk );
-    MainRedraw();
 	DecrementLayerObjects(trk->layer);
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
+	UndoDelete(trk);					/**< Attention: trk is invalidated during that call */
+	MainRedraw();
 	InfoCount( trackCount );
 	return TRUE;
 }
@@ -2405,7 +2405,7 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 	}
 	if ( (d->options&(DC_GROUP)) == 0 ) {
 		if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) )
-			return GetLayerColor((LAYER_T)curTrackLayer);
+			return GetLayerColor((unsigned int)curTrackLayer);
 	}
 	return wDrawColorBlack;
 }
@@ -2433,7 +2433,7 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 		return;
 	if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) &&
 		d != &mapD && color == wDrawColorBlack )
-		color = GetLayerColor((LAYER_T)curTrackLayer);
+		color = GetLayerColor((unsigned int)curTrackLayer);
 	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	if ( (!inDrawTracks) &&
 		 tieDrawMode!=TIEDRAWMODE_NONE &&
@@ -2777,7 +2777,7 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 }
 
 
-EXPORT void RedrawLayer( LAYER_T l, BOOL_T draw )
+EXPORT void RedrawLayer( unsigned int l, BOOL_T draw )
 {
 	MainRedraw();
 

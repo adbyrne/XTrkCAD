@@ -496,7 +496,7 @@ static struct {
 		DIST_T l1;
 		FLOAT_T grade;
 		descPivot_t pivot;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		} jointData;
 typedef enum { E0, Z0, E1, Z1, OR, AL, RR, LL, L0, L1, GR, PV, LY } jointDesc_e;
 static descData_t jointDesc[] = {

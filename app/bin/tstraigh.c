@@ -78,7 +78,7 @@ static struct {
 		ANGLE_T angle;
 		FLOAT_T grade;
 		descPivot_t pivot;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		} strData;
 typedef enum { E0, Z0, E1, Z1, LN, AN, GR, PV, LY } strDesc_e;
 static descData_t strDesc[] = {

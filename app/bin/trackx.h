@@ -33,7 +33,7 @@ typedef struct track_t {
 		struct track_t *next;
 		TRKINX_T index;
 		TRKTYP_T type;
-		LAYER_T layer;
+		unsigned int layer;
 		signed char scale;
 		BOOL_T modified:1;
 		BOOL_T deleted:1;
