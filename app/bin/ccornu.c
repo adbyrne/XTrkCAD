@@ -817,7 +817,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 					Da.trk[i] = NewStraightTrack(Da.extendSeg[i].u.l.pos[0],Da.extendSeg[i].u.l.pos[1]);
 					if (Da.trk[i]) Da.ep[i] = 1-i;
 				} else {
-					Da.trk[i] = NewCurvedTrack(Da.extendSeg[i].u.c.center,Da.extendSeg[i].u.c.radius,
+					Da.trk[i] = NewCurvedTrack(Da.extendSeg[i].u.c.center,fabs(Da.extendSeg[i].u.c.radius),
 							Da.extendSeg[i].u.c.a0,Da.extendSeg[i].u.c.a1,FALSE);
 					if (Da.angle[i]>180)
 						Da.ep[i] = (Da.extendSeg[i].u.c.a0>90 && Da.extendSeg[i].u.c.a0<270)?0:1;
@@ -909,7 +909,7 @@ DIST_T CornuMinRadius(coOrd pos[4],dynArr_t segs) {
 	for (int i = 0;i<segs.cnt;i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
-			rr = t.u.c.radius;
+			rr = fabs(t.u.c.radius);
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			rr = CornuMinRadius(t.u.b.pos, t.bezSegs);
 		} else rr = 100000.00;
@@ -942,8 +942,8 @@ DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * las
 		if (t.type == SEG_FILCRCL) continue;
 		SegProc(SEGPROC_LENGTH,&t,&segProcData);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
-			rc = fabs((1/t.u.c.radius)- lc)/segProcData.length.length;
-			lc = 1/t.u.c.radius;
+			rc = fabs(fabs(1/t.u.c.radius)- lc)/segProcData.length.length;
+			lc = fabs(1/t.u.c.radius);
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			rc = CornuMaxRateofChangeofCurvature(t.u.b.pos, t.bezSegs,&lc);  //recurse
 		} else {

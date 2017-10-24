@@ -287,7 +287,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 				if ( segPtr->type != SEG_CRVLIN ) {
 					drawData.length = FindDistance( drawData.endPt[0], drawData.endPt[1] );
 				} else {
-					drawData.length = segPtr->u.c.radius*2*M_PI*segPtr->u.c.a1/360.0;
+					drawData.length = fabs(segPtr->u.c.radius)*2*M_PI*segPtr->u.c.a1/360.0;
 				}
 				drawDesc[LN].mode |= DESC_CHANGE;
 				break;
@@ -463,7 +463,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		break;
 	case SEG_CRVLIN:
 		REORIGIN( drawData.center, segPtr->u.c.center, xx->angle, xx->orig );
-		drawData.radius = segPtr->u.c.radius;
+		drawData.radius = fabs(segPtr->u.c.radius);
 		drawDesc[CE].mode =
 		drawDesc[RA].mode = 0;
 		if ( segPtr->u.c.a1 >= 360.0 ) {
@@ -480,7 +480,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		break;
 	case SEG_FILCRCL:
 		REORIGIN( drawData.center, segPtr->u.c.center, xx->angle, xx->orig );
-		drawData.radius = segPtr->u.c.radius;
+		drawData.radius = fabs(segPtr->u.c.radius);
 		drawDesc[CE].mode =
 		drawDesc[RA].mode = 0;
 		drawDesc[LW].mode = DESC_IGNORE;

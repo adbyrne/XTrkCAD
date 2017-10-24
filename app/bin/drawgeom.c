@@ -526,7 +526,7 @@ STATUS_T DrawGeomModify(
 			REORIGIN( pc, segPtr[segInx].u.c.center, angle, orig )
 			tempSegs(0).type = segPtr[segInx].type;
 			tempSegs(0).u.c.center = pc;
-			tempSegs(0).u.c.radius = segPtr[segInx].u.c.radius;
+			tempSegs(0).u.c.radius = fabs(segPtr[segInx].u.c.radius);
 			if (segPtr[segInx].u.c.a1 >= 360.0) {
 				tempSegs(0).u.c.a0 = 0.0;
 				tempSegs(0).u.c.a1 = 360.0;
@@ -534,8 +534,8 @@ STATUS_T DrawGeomModify(
 				tempSegs(0).u.c.a0 = NormalizeAngle( segPtr[segInx].u.c.a0+angle );
 				tempSegs(0).u.c.a1 = segPtr[segInx].u.c.a1;
 				segA1 = NormalizeAngle( segPtr[segInx].u.c.a0 + segPtr[segInx].u.c.a1 + angle );
-				PointOnCircle( &p0, pc, segPtr[segInx].u.c.radius, segPtr[segInx].u.c.a0+angle );
-				PointOnCircle( &p1, pc, segPtr[segInx].u.c.radius, segPtr[segInx].u.c.a0+segPtr[segInx].u.c.a1+angle );
+				PointOnCircle( &p0, pc, fabs(segPtr[segInx].u.c.radius), segPtr[segInx].u.c.a0+angle );
+				PointOnCircle( &p1, pc, fabs(segPtr[segInx].u.c.radius), segPtr[segInx].u.c.a0+segPtr[segInx].u.c.a1+angle );
 			}
 			
 			break;
@@ -667,7 +667,7 @@ STATUS_T DrawGeomModify(
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
 			if ( tempSegs(0).u.c.a1 >= 360.0 ) {
-				segPtr[segInx].u.c.radius = tempSegs(0).u.c.radius;
+				segPtr[segInx].u.c.radius = fabs(tempSegs(0).u.c.radius);
 			} else {
 				a = FindAngle( tempSegs(0).u.c.center, pos );
 				a = NormalizeAngle( a-angle );

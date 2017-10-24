@@ -337,13 +337,17 @@ typedef union {
 				DIST_T dist;			/* OUT is how far it is along the track */
 				BOOL_T backwards;		/* OUT which way are we going? */
 				BOOL_T reverse_seg;		/* OUT the seg is backwards curve */
-		} traverse1;		//Find dist between pos and end of track that starts with angle set backwards
+				int BezSegInx;			/* OUT for Bezier Seg */
+				BOOL_T segs_backwards;  /* OUT for Bezier Seg */
+		} traverse1;				// Find dist between pos and end of track that starts with angle set backwards
 		struct {
-				EPINX_T segDir;			/* IN Direction to go */
+				BOOL_T segDir;			/* IN Direction to go */
+				int BezSegInx;			/* IN for Bezier Seg */
+				BOOL_T segs_backwards;  /* IN for Bezier Seg */
 				DIST_T dist;			/* IN/OUT In = distance to go, Out = distance left */
 				coOrd pos;				/* OUT = point reached if dist = 0 */
 				ANGLE_T angle;			/* OUT = angle at point */
-		} traverse2;		//Return distance left (or 0) and angle and pos when going dist from segDir end
+		} traverse2;			//Return distance left (or 0) and angle and pos when going dist from segDir end
 		struct {
 				int first, last;		/* IN */
 				ANGLE_T side;

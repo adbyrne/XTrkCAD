@@ -708,7 +708,7 @@ EXPORT void StraightSegProc(
 	case SEGPROC_TRAVERSE1:
 		a1 = FindAngle( segPtr->u.l.pos[0], segPtr->u.l.pos[1] );
 		a2 = NormalizeAngle( a1-data->traverse1.angle );
-		data->traverse1.backwards = ( (a2 < 270) && (a2 > 90) );
+		data->traverse1.backwards = ((a2 < 270) && (a2 > 90));
 		data->traverse1.dist = FindDistance( segPtr->u.l.pos[data->traverse1.backwards?1:0], data->traverse1.pos );
 		data->traverse1.reverse_seg = FALSE;
 		break;

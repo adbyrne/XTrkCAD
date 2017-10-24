@@ -297,7 +297,7 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 					ep2b = 0;
 					break;
 				case SEG_CRVTRK:
-					trk2b = NewCurvedTrack( segP->u.c.center, segP->u.c.radius, segP->u.c.a0, segP->u.c.a1, 0 );
+					trk2b = NewCurvedTrack( segP->u.c.center, fabs(segP->u.c.radius), segP->u.c.a0, segP->u.c.a1, 0 );
 					ep2b = (right?0:1);
 				}
 				if (trk2 == NULL) {

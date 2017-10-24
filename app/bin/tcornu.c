@@ -675,17 +675,15 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     
     cornuParm_t new;
 
-
-    //TODO find right Seg and point, Create new Cornu from there to end, Adjust old
-
     double dd = DistanceCornu(trk, &pos);
     if (dd>minLength) return FALSE;
+    BOOL_T back, neg;
     
-    ANGLE_T angle = GetAngleSegs(xx->cornuData.arcSegs.cnt,(trkSeg_t *)(xx->cornuData.arcSegs.ptr),&pos,&inx,NULL,NULL,NULL, NULL);
+    ANGLE_T angle = GetAngleSegs(xx->cornuData.arcSegs.cnt,(trkSeg_t *)(xx->cornuData.arcSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
 
     trkSeg_p segPtr = &DYNARR_N(trkSeg_t, xx->cornuData.arcSegs, inx);
 
-    GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,NULL,NULL,NULL);
+    GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
     segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
 
     if (segPtr->type == SEG_STRTRK) {
@@ -693,12 +691,12 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     	center = zero;
     } else if (segPtr->type == SEG_CRVTRK) {
     	center = segPtr->u.c.center;
-    	radius = segPtr->u.c.radius;
+    	radius = fabs(segPtr->u.c.radius);
     }
     if (ep) {
     	new.pos[0] = pos;
     	new.pos[1] = xx->cornuData.pos[1];
-    	new.angle[0] = NormalizeAngle(angle+180);
+    	new.angle[0] = NormalizeAngle(angle+(neg==back?180:0));
     	new.angle[1] = xx->cornuData.a[1];
     	new.center[0] = center;
     	new.center[1] = xx->cornuData.c[1];
@@ -707,7 +705,7 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     } else {
     	new.pos[1] = pos;
     	new.pos[0] = xx->cornuData.pos[0];
-    	new.angle[1] = NormalizeAngle(angle);
+    	new.angle[1] = NormalizeAngle(angle+(neg==back?0:180));
     	new.angle[0] = xx->cornuData.a[0];
     	new.center[1] = center;
     	new.center[0] = xx->cornuData.c[0];
@@ -767,7 +765,9 @@ static int log_traverseCornu = 0;
  * 	If true we supply the remaining distance to go (always positive).
  *  We detect the movement direction by comparing the current angle to the angle of the track at the point.
  *
- *  Each segment may be processed forwards or in reverse (this really only applies to curved segments).
+ *  The entire Cornu may be reversed or forwards depending on the way it was drawn.
+ *
+ *  Each Bezier segment within that Cornu structure therefore may be processed forwards or in reverse.
  *  So for each segment we call traverse1 to get the direction and extra distance to go to get to the current point
  *  and then use that for traverse2 to actually move to the new point
  *
@@ -783,10 +783,11 @@ static BOOL_T TraverseCornu( traverseTrack_p trvTrk, DIST_T * distR )
 	BOOL_T backwards=FALSE;
 	BOOL_T reverse_seg = FALSE;
 	BOOL_T cornu_backwards= FALSE;
+	BOOL_T neg = FALSE;
 	DIST_T d = 10000;
 	coOrd pos1, pos2 = trvTrk->pos;
 	ANGLE_T a1,a2;
-	int inx,inx2, segInx,subSegInx = 0;
+	int inx,inx2, segInx, BezSegInx = 0;
 	EPINX_T ep;
 	BOOL_T back;
 LOG( log_traverseCornu, 1, ( "TraverseCornu [%0.3f %0.3f] A%0.3f D%0.3f \n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ))
@@ -795,13 +796,13 @@ LOG( log_traverseCornu, 1, ( "TraverseCornu [%0.3f %0.3f] A%0.3f D%0.3f \n", trv
 
 	a2 = GetAngleSegs(		  						//Find correct Segment and nearest point in it
 				xx->cornuData.arcSegs.cnt,segPtr,
-				&pos2, &segInx, &d , &back , &subSegInx, NULL);   	//d = how far pos2 from old pos2 = trvTrk->pos
+				&pos2, &segInx, &d , &back , NULL, &neg);   	//d = how far pos2 from old pos2 = trvTrk->pos
 
 	if ( d > 10 ) {
 			ErrorMessage( "traverseCornu: Position is not near track: %0.3f", d );
 			return FALSE;   						//This means the input pos is not on or close to the track.
 	}
-
+	if (back) a2 = NormalizeAngle(a2+180);		    //If reverse segs - reverse angle
 	a1 = NormalizeAngle(a2-trvTrk->angle);			//Establish if we are going fwds or backwards globally
 	if (a1<270 && a1>90) {							//Must add 180 if the seg is reversed or inverted (but not both)
 		cornu_backwards = TRUE;
@@ -810,55 +811,51 @@ LOG( log_traverseCornu, 1, ( "TraverseCornu [%0.3f %0.3f] A%0.3f D%0.3f \n", trv
 		cornu_backwards = FALSE;
 		ep = 1;
 	}
-	segProcData.traverse1.pos = pos2;					//actual point on curve
-	segProcData.traverse1.angle = trvTrk->angle;       //direction car is going for Traverse 1 has to be reversed...
-LOG( log_traverseCornu, 1, ( "  GetSubA A%0.3f I%d SI%d B%d CB%d\n", a2, segInx, subSegInx, back, cornu_backwards ))
-	inx = segInx;
-	inx2 = subSegInx;
-	while (inx >=0 && inx<xx->cornuData.arcSegs.cnt) {
-		segPtr = (trkSeg_p)xx->cornuData.arcSegs.ptr+inx;  	         //move in to the identified segment
-		while(inx2 >=0 && inx2<segPtr->bezSegs.cnt) {
-			subSegPtr = (trkSeg_p)segPtr->bezSegs.ptr+inx2;		     //Right Sub
-			SegProc( SEGPROC_TRAVERSE1, subSegPtr, &segProcData );   	//Backwards or forwards for THIS sub-segment - note that this can differ from segs_backward!!
-			backwards = segProcData.traverse1.backwards;			//do we process this sub-segment backwards (is it a curve?
-			reverse_seg = segProcData.traverse1.reverse_seg;		//is it a backwards segment (we don't actually care as Traverse1 takes care of it)
-LOG( log_traverseCornu, 1, ( "  Tr1 A%0.3f B%d D%0.3f\n", a2, backwards, segProcData.traverse1.dist ))
-			dist += segProcData.traverse1.dist;						//Add distance from end of segment
-
-			segProcData.traverse2.dist = dist;
-			segProcData.traverse2.segDir = backwards;
-
-			SegProc( SEGPROC_TRAVERSE2, subSegPtr, &segProcData );		//Angle at pos2
-			if ( segProcData.traverse2.dist <= 0 ) {				//-ve or zero distance left over so stop there
-				*distR = 0;
-				trvTrk->pos = segProcData.traverse2.pos;
-				trvTrk->angle = segProcData.traverse2.angle;
-LOG( log_traverseCornu, 1, ( "  Stop [%0.3f %0.3f] A%0.3f\n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle))
-				return TRUE;
-			}														//NOTE Traverse1 and Traverse2 are overlays so get all out of 1 before storing
-			dist = segProcData.traverse2.dist;						//How far left?
-			coOrd pos = segProcData.traverse2.pos;					//Will be at seg end
-			ANGLE_T angle = segProcData.traverse2.angle;			//Angle of end
-			segProcData.traverse1.angle = angle;	//Reverse to suit Traverse1
-			segProcData.traverse1.pos = pos;
-
-LOG( log_traverseCornu, 1, ( "  NextSeg D%0.3f SI%d A%0.3f [%0.3f %0.3f]\n", dist, inx2, angle, pos.x, pos.y ) )
-			inx2 = cornu_backwards?inx2-1:inx2+1;
-		}
-
-		//if (!cornu_backwards) segProcData.traverse1.angle = NormalizeAngle(segProcData.traverse1.angle+180);
-		inx = cornu_backwards?inx-1:inx+1;
-		if (inx>=0 && inx<xx->cornuData.arcSegs.cnt) {
-			segPtr = (trkSeg_p)xx->cornuData.arcSegs.ptr+inx;
-			inx2 = cornu_backwards?segPtr->bezSegs.cnt-1:0;
-		}															//Here's where the global segment direction comes in
-LOG( log_traverseCornu, 1, ( "  NextBez SI%d I%d\n", inx2, inx ) )
+	if (neg) { 
+		cornu_backwards = !cornu_backwards;			//Reversed direction
+		ep = 1-ep;
 	}
-	*distR = dist;								//Tell caller what is left
-												//Must be at one end or another
-	trvTrk->pos = GetTrkEndPos(trk,ep);
+	segProcData.traverse1.pos = pos2;					//actual point on curve
+	segProcData.traverse1.angle = trvTrk->angle;       //direction car is going for Traverse 1
+LOG( log_traverseCornu, 1, ( "  GetSubA A%0.3f I%d N%d B%d CB%d\n", a2, segInx, neg, back, cornu_backwards ))
+	inx = segInx;
+	while (inx >=0 && inx<xx->cornuData.arcSegs.cnt) {
+		segPtr = (trkSeg_p)xx->cornuData.arcSegs.ptr+inx;  	    //move in to the identified Bezier segment
+		SegProc( SEGPROC_TRAVERSE1, segPtr, &segProcData );
+		backwards = segProcData.traverse1.backwards;			//do we process this segment backwards?
+		reverse_seg = segProcData.traverse1.reverse_seg;		//Info only
+		BezSegInx = segProcData.traverse1.BezSegInx;			//Which subSeg was it?
+
+		dist += segProcData.traverse1.dist;						//Add in the part of the Bezier to get to pos
+
+		segProcData.traverse2.dist = dist;						//Set up Traverse2
+		segProcData.traverse2.segDir = backwards;
+		segProcData.traverse2.BezSegInx = BezSegInx;
+		segProcData.traverse2.segs_backwards = cornu_backwards;
+LOG( log_traverseCornu, 2, ( " TraverseCornuT1 SI%d D%0.3f B%d RS%d \n", BezSegInx, dist, backwards, reverse_seg ) )
+		SegProc( SEGPROC_TRAVERSE2, segPtr, &segProcData );		//Angle at pos2
+		if ( segProcData.traverse2.dist <= 0 ) {				//-ve or zero distance left over so stop there
+			*distR = 0;
+			trvTrk->pos = segProcData.traverse2.pos;			//Use finishing pos
+			trvTrk->angle = segProcData.traverse2.angle;		//Use finishing angle
+LOG( log_traverseCornu, 1, ( "  -> [%0.3f %0.3f] A%0.3f D%0.3f\n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ) )
+			return TRUE;
+		}
+		dist = segProcData.traverse2.dist;						//How far left?
+		coOrd pos = segProcData.traverse2.pos;					//Will always be at a Bezseg end
+		ANGLE_T angle = segProcData.traverse2.angle;			//Angle of end therefore
+
+		segProcData.traverse1.angle = angle; 					//Set up Traverse1
+		segProcData.traverse1.pos = pos;
+		inx = cornu_backwards?inx-1:inx+1;						//Here's where the global segment direction comes in
+LOG( log_traverseCornu, 2, ( " TraverseCornuL D%0.3f A%0.3f I%d \n", dist, angle, inx ) )
+	}	
+																//Ran out of Bez-Segs so punt to next Track
+	*distR = dist;												//Tell caller what dist is left
+
+	trvTrk->pos = GetTrkEndPos(trk,ep);							//Which end were we heading for?
 	trvTrk->angle = NormalizeAngle(GetTrkEndAngle(trk, ep)+cornu_backwards?180:0);
-	trvTrk->trk = GetTrkEndTrk(trk,ep);						//go to next track
+	trvTrk->trk = GetTrkEndTrk(trk,ep);							//go onto next track (or NULL)
 
 	if (trvTrk->trk==NULL) {
 		trvTrk->pos = pos1;
@@ -1010,7 +1007,7 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 	if (segPtr->type == SEG_STRTRK) {
 		params->arcR = 0.0;
 	} else  if (segPtr->type == SEG_CRVTRK) {
-		params->arcR = segPtr->u.c.radius;
+		params->arcR = fabs(segPtr->u.c.radius);
 		params->arcP = segPtr->u.c.center;
 		params->arcA0 = segPtr->u.c.a0;
 		params->arcA1 = segPtr->u.c.a1;
@@ -1019,7 +1016,7 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 		if (segPtr2->type == SEG_STRTRK) {
 			params->arcR = 0.0;
 		} else if (segPtr2->type == SEG_CRVTRK) {
-			params->arcR = segPtr2->u.c.radius;
+			params->arcR = fabs(segPtr2->u.c.radius);
 			params->arcP = segPtr2->u.c.center;
 			params->arcA0 = segPtr2->u.c.a0;
 			params->arcA1 = segPtr2->u.c.a1;

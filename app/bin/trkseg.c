@@ -288,10 +288,10 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 		break;
 	case SEG_FILCRCL:
 		REORIGIN( p0, segPtr->u.c.center, angle, xlat )
-		lo->x = p0.x - segPtr->u.c.radius;
-		hi->x = p0.x + segPtr->u.c.radius;
-		lo->y = p0.y - segPtr->u.c.radius;
-		hi->y = p0.y + segPtr->u.c.radius;
+		lo->x = p0.x - fabs(segPtr->u.c.radius);
+		hi->x = p0.x + fabs(segPtr->u.c.radius);
+		lo->y = p0.y - fabs(segPtr->u.c.radius);
+		hi->y = p0.y + fabs(segPtr->u.c.radius);
 		break;
 	case SEG_TEXT:
 		REORIGIN( p0, segPtr->u.t.pos, angle, xlat )
@@ -1427,8 +1427,8 @@ EXPORT BOOL_T WriteSegsEnd(
 	for ( i=0; i<segCnt; i++ ) {
 		switch ( segs[i].type ) {
 		case SEG_STRTRK:
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
+			rc &= fprintf( f, "\t%c 0 %0.6f %0.6f %0.6f %0.6f %0.6f\n",
+				segs[i].type, segs[i].width,
 				segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 				segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y ) > 0;
 			break;

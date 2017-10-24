@@ -658,7 +658,7 @@ EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
 {
 	EPINX_T inx, i;
-	DIST_T d=0, dd;
+	DIST_T d=10000.0, dd;
 	coOrd pos;
 	inx = -1;
 

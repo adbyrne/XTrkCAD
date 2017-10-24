@@ -410,8 +410,8 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	          			  if (t_e > 1.0) {
 	          				  if (arc.curveData.type != curveTypeStraight) {
 	          					  coOrd d;
-	          					  d.x = arc.curveData.curvePos.x + arc.curveData.curveRadius * cos(D2R(arc.curveData.a1));
-	          					  d.y = arc.curveData.curvePos.y + arc.curveData.curveRadius * sin(D2R(arc.curveData.a1));
+	          					  d.x = arc.curveData.curvePos.x + fabs(arc.curveData.curveRadius) * cos(D2R(arc.curveData.a1));
+	          					  d.y = arc.curveData.curvePos.y + fabs(arc.curveData.curveRadius) * sin(D2R(arc.curveData.a1));
 
 	          					  arc.curveData.a1 += FindAngle(d, getPoint(pos,1.0));
 	          					  t_e = 1.0;
@@ -435,18 +435,21 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	          return FALSE;				//Failed to make into arcs
 	        }
 	        prev_arc = prev_arc.end==0.0?arc:prev_arc;
-	        trkSeg_t curveSeg;  			//Now set up tempSeg to copy into arra
+	        trkSeg_t curveSeg;  			//Now set up tempSeg to copy into array
 	        curveSeg.width = track?0:width;
 	        if ( prev_arc.curveData.type == curveTypeCurve ) {
 	        		if (track)
-	        			curveSeg.color = (prev_arc.curveData.curveRadius<=minTrackRadius)?wDrawColorRed:wDrawColorBlack;
+	        			curveSeg.color = (fabs(prev_arc.curveData.curveRadius)<=minTrackRadius)?wDrawColorRed:wDrawColorBlack;
 	        		else
 	        			curveSeg.color = color;
 	        		curveSeg.type = track?SEG_CRVTRK:SEG_CRVLIN;
 	        		curveSeg.u.c.a0 = prev_arc.curveData.a0;
 	        		curveSeg.u.c.a1 = prev_arc.curveData.a1;
 	        		curveSeg.u.c.center = prev_arc.curveData.curvePos;
-	        		curveSeg.u.c.radius = prev_arc.curveData.curveRadius;
+	        		if (prev_arc.curveData.negative)
+	        			curveSeg.u.c.radius = -prev_arc.curveData.curveRadius;
+	        		else
+	        			curveSeg.u.c.radius = prev_arc.curveData.curveRadius;
 	        } else {											//Straight Line because all points co-linear
 	        	curveSeg.type = track?SEG_STRTRK:SEG_STRLIN;
 	        	if (track)
@@ -902,7 +905,7 @@ DIST_T BezierMinRadius(coOrd pos[4],dynArr_t segs) {
 	for (int i = 0;i<segs.cnt;i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
-			rr = t.u.c.radius;
+			rr = fabs(t.u.c.radius);
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			rr = BezierMinRadius(t.u.b.pos, t.bezSegs);
 		} else rr = 100000.00;

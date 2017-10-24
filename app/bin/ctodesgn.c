@@ -2176,14 +2176,14 @@ EXPORT BOOL_T WriteSegs(
 		case SEG_CRVLIN:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 				segs[i].type, (segs[i].type==SEG_CRVTRK?0:roadbedColorRGB), segs[i].width,
-				segs[i].u.c.radius,
+				fabs(segs[i].u.c.radius),
 				segs[i].u.c.center.x, segs[i].u.c.center.y,
 				segs[i].u.c.a0, segs[i].u.c.a1 )>0;
 			break;
 		case SEG_FILCRCL:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f\n",
 				segs[i].type, roadbedColorRGB, segs[i].width,
-				segs[i].u.c.radius,
+				fabs(segs[i].u.c.radius),
 				segs[i].u.c.center.x, segs[i].u.c.center.y )>0;
 			break;
 		case SEG_POLY:
