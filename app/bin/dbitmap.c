@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dbitmap.c,v 1.3 2008-02-14 19:49:19 m_fischer Exp $
+/** \file dbitmap.c
+ *  Print to Bitmap
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,15 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
-#include "i18n.h"
-#include "paths.h"
+#include <assert.h>
 
-/*****************************************************************************
- *
- *  Print to Bitmap
- *
- */
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "paths.h"
+#include "track.h"
+
 
 static long outputBitMapTogglesV = 3;
 static double outputBitMapDensity = 10;
@@ -88,14 +90,14 @@ static int SaveBitmapFile(
 	if (outputBitMapTogglesV&1) {
 		fp = wStandardFont( F_TIMES, FALSE, FALSE );
 		fs = 18;
-		DrawTextSize( &mainD, Title1, fp, fs, FALSE, &textsize );
+		DrawTextSize( &mainD, GetLayoutTitle(), fp, fs, FALSE, &textsize );
 		p[0].x = (bitmap_d.size.x - (textsize.x*bitmap_d.scale))/2.0 + bitmap_d.orig.x;
 		p[0].y = mapD.size.y + (y1+0.30)*bitmap_d.scale;
-		DrawString( &bitmap_d, p[0], 0.0, Title1, fp, fs*bitmap_d.scale, wDrawColorBlack );
-		DrawTextSize( &mainD, Title2, fp, fs, FALSE, &textsize );
+		DrawString( &bitmap_d, p[0], 0.0, GetLayoutTitle(), fp, fs*bitmap_d.scale, wDrawColorBlack );
+		DrawTextSize( &mainD, GetLayoutSubtitle(), fp, fs, FALSE, &textsize );
 		p[0].x = (bitmap_d.size.x - (textsize.x*bitmap_d.scale))/2.0 + bitmap_d.orig.x;
 		p[0].y = mapD.size.y + (y1+0.05)*bitmap_d.scale;
-		DrawString( &bitmap_d, p[0], 0.0, Title2, fp, fs*bitmap_d.scale, wDrawColorBlack );
+		DrawString( &bitmap_d, p[0], 0.0, GetLayoutSubtitle(), fp, fs*bitmap_d.scale, wDrawColorBlack );
 		fp_bi = wStandardFont( F_TIMES, TRUE, TRUE );
 		DrawTextSize( &mainD, _("Drawn with "), fp, fs, FALSE, &textsize );
 		DrawTextSize( &mainD, sProdName, fp_bi, fs, FALSE, &textsize1 );

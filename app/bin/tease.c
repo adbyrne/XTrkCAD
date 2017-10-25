@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tease.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
- *
+/** \file tease.c
  * TRANSISTION-CURVES (JOINTS)
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -63,12 +60,20 @@ For a better representation of this, build 'testjoin' and
 do 'testjoin psplot 10 10 40 1 | lpr -Ppostscript'
 */
 
+#include <math.h>
 
-#include "track.h"
 #include "ccurve.h"
+#include "cselect.h"
 #include "cstraigh.h"
 #include "cjoin.h"
+#include "cundo.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 static TRKTYP_T T_EASEMENT = -1;
 
@@ -404,7 +409,7 @@ static track_p NewJoint(
 	static coOrd qZero = { 0.0, 0.0 };
 	ANGLE_T az0, a01, b, b01, b1, d, d1;
 	trk = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
-	SetTrkScale( trk, curScaleInx );
+	SetTrkScale( trk, GetLayoutCurScale() );
 	xx = GetTrkExtraData( trk );
 	SetTrkEndPoint( trk, 0, pos0, NormalizeAngle(angle0+180.0) );
 	SetTrkEndPoint( trk, 1, pos1, NormalizeAngle(angle1+180.0) );
@@ -491,7 +496,7 @@ static struct {
 		DIST_T l1;
 		FLOAT_T grade;
 		descPivot_t pivot;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		} jointData;
 typedef enum { E0, Z0, E1, Z1, OR, AL, RR, LL, L0, L1, GR, PV, LY } jointDesc_e;
 static descData_t jointDesc[] = {

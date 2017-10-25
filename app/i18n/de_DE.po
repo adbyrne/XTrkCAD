@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: xtrkcad 4.1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-05-08 20:57+0200\n"
-"PO-Revision-Date: 2017-05-09 19:49+0100\n"
+"PO-Revision-Date: 2017-10-15 16:31+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "Language: de\n"
@@ -1142,7 +1142,7 @@ msgstr "Normal"
 #: ../bin/cprint.c:98 ../bin/cswitchmotor.c:81 ../bin/cswitchmotor.c:100
 #: ../bin/cswitchmotor.c:211 ../bin/ctrain.c:777 ../bin/ctrain.c:1034
 msgid "Reverse"
-msgstr "Umkehren"
+msgstr "Rückwärts"
 
 #: ../bin/cprint.c:99
 msgid "Engineering Data"
@@ -1296,7 +1296,7 @@ msgstr "Eine festgelegte Höhe auswählen, um das Höhenprofil zu beginnen"
 
 #: ../bin/cprofile.c:743
 msgid "Select a Defined Elevation to extend Profile"
-msgstr "eine festgelegte Höhe auswählen, um das Höhenprofil zu erweitern"
+msgstr "Eine festgelegte Höhe auswählen, um das Höhenprofil zu erweitern"
 
 #: ../bin/cprofile.c:1290
 msgid "Select a Defined Elevation to start profile"
@@ -1705,7 +1705,7 @@ msgstr "Verstecken"
 
 #: ../bin/cstruct.c:321 ../bin/cstruct.c:348
 msgid "Pier Number"
-msgstr "Bestellnummer"
+msgstr "Gleisanschluß"
 
 #: ../bin/cstruct.c:433
 #, c-format
@@ -1859,7 +1859,7 @@ msgstr "Abstand"
 
 #: ../bin/ctodesgn.c:142 ../bin/ctodesgn.c:1759 ../bin/ctodesgn.c:1760
 msgid "Left Description"
-msgstr "Beschreibung links"
+msgstr "Beschreibung, links"
 
 #: ../bin/ctodesgn.c:143 ../bin/ctodesgn.c:146
 msgid " #"
@@ -1867,11 +1867,11 @@ msgstr " Nr."
 
 #: ../bin/ctodesgn.c:145 ../bin/ctodesgn.c:1758
 msgid "Right Description"
-msgstr "Beschreibung rechts"
+msgstr "Beschreibung, rechts"
 
 #: ../bin/ctodesgn.c:147
 msgid "Roadbed Width"
-msgstr "Breite des Gleisbett"
+msgstr "Breite des Gleisbetts"
 
 #: ../bin/ctodesgn.c:151 ../bin/denum.c:51
 msgid "Print Setup"
@@ -2098,7 +2098,7 @@ msgstr "Ende des Gleis"
 
 #: ../bin/ctrain.c:744
 msgid "Open Turnout"
-msgstr "Weiche öffnen"
+msgstr "Weiche ist gesperrt"
 
 #: ../bin/ctrain.c:747
 msgid "Manual Stop"
@@ -3145,8 +3145,8 @@ msgid "Min Track Radius"
 msgstr "Mindestgleisradius"
 
 #: ../bin/doption.c:106
-msgid " Max Track Grade"
-msgstr "Maximale Gleissteigung"
+msgid " Max Track Grade (%)"
+msgstr "Maximale Gleissteigung (%)"
 
 #: ../bin/doption.c:155
 msgid "Layout Options"
@@ -3311,10 +3311,6 @@ msgstr "Hersteller/Vorbild/Bestellnr./lfd. Nr."
 #: ../bin/doption.c:312
 msgid "End-Points"
 msgstr "Endpunkte"
-
-#: ../bin/doption.c:315 ../../../../build/work/app/i18n/custmsg.h:12
-msgid "Describe"
-msgstr "Eigenschaften"
 
 #: ../bin/doption.c:320
 msgid "Normal: Command List, Shift: Command Options"
@@ -3937,7 +3933,7 @@ msgid "Modify Track Buttons"
 msgstr "Verändere Gleise"
 
 #: ../bin/misc.c:1733
-msgid "Describe/Select"
+msgid "Properties/Select"
 msgstr "Eigenschaften/Auswählen"
 
 #: ../bin/misc.c:1734
@@ -4105,8 +4101,8 @@ msgid "More"
 msgstr "Weiter"
 
 #: ../bin/misc.c:2100
-msgid "&New"
-msgstr "&Neu"
+msgid "&New .."
+msgstr "&Neu..."
 
 #: ../bin/misc.c:2101
 msgid "&Open ..."
@@ -6336,7 +6332,8 @@ msgstr ""
 
 #: ../../../../build/work/app/i18n/custmsg.h:291
 msgid "Notice the title has changed to Flipped Left.\n"
-msgstr "Beachten Sie, dass der Titel auf Gespiegelt Links geändert wurde.\n"
+msgstr ""
+"Beachten Sie, dass der Titel auf \"Links gespiegelt\" geändert wurde.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:292
 msgid "Now Group the turnout.\n"
@@ -6373,6 +6370,9 @@ msgid ""
 "We will be creating a helix with a Elevation Difference of 12\", Grade of "
 "1.5% and limit the Vertical Separation to at least 2\".\n"
 msgstr ""
+"Wir werden eine Gleiswendel  mit einem Höhenunterschied von 12\", einer "
+"Steigung von 1,5% erzeugen und den vertikale Abstand  auf mindestens 2\" "
+"begrenzen.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:298
 msgid "First set the Elevation Difference to 12\"\n"
@@ -8004,7 +8004,7 @@ msgstr "Durch Drücken von <Schliessen> wird der Befehl <Weiche> beendet.\n"
 #: ../../../../build/work/app/i18n/custmsg.h:543
 msgid "Sometimes it's useful to modify turnouts triming one of the ends.\n"
 msgstr ""
-"Manchmal ist es sinnvoll, eine Weich durch Krzen der Enden anzupassen.\n"
+"Manchmal ist es sinnvoll, eine Weich durch Kürzen der Enden anzupassen.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:544
 msgid "We use the <Split> command for this.\n"
@@ -8018,7 +8018,8 @@ msgstr ""
 
 #: ../../../../build/work/app/i18n/custmsg.h:546
 msgid "Hold down the Shift key and try again.\n"
-msgstr "Drücken Sie die Umschalten-Taste und versuchen es nochmals.\n"
+msgstr ""
+"Drücken und halten Sie die Umschalten-Taste und versuchen es nochmals.\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:547
 msgid ""

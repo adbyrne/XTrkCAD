@@ -47,10 +47,18 @@
 static const char rcsid[] = "@(#) : $Id$";
 
 #include <ctype.h>
+#include <string.h>
+
+#include "compound.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "layout.h"
+#include "param.h"
 #include "track.h"
 #include "trackx.h"
-#include "compound.h"
-#include "i18n.h"
+#include "utility.h"
 
 EXPORT TRKTYP_T T_CONTROL = -1;
 
@@ -476,21 +484,18 @@ static STATUS_T CmdControl ( wAction_t action, coOrd pos )
         InfoMessage(_("Place control"));
         return C_CONTINUE;
     case C_DOWN:
-        SnapPos(&pos);
-        DDrawControl( &tempD, pos, GetScaleRatio(curScaleInx), wDrawColorBlack );
-        return C_CONTINUE;
-    case C_MOVE:
-        SnapPos(&pos);
-        DDrawControl( &tempD, pos, GetScaleRatio(curScaleInx), wDrawColorBlack );
+	case C_MOVE:
+		SnapPos(&pos);
+        DDrawControl( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         return C_CONTINUE;
     case C_UP:
         SnapPos(&pos);
-        DDrawControl( &tempD, pos, GetScaleRatio(curScaleInx), wDrawColorBlack );
+        DDrawControl( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         CreateNewControl(pos);
         return C_TERMINATE;
     case C_REDRAW:
     case C_CANCEL:
-        DDrawControl( &tempD, pos, GetScaleRatio(curScaleInx), wDrawColorBlack );
+        DDrawControl( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         return C_CONTINUE;
     default:
         return C_CONTINUE;

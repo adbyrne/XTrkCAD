@@ -22,16 +22,20 @@
  */
 
 #include <ctype.h>
-#include "track.h"
-#include "compound.h"
-#include "shrtpath.h"
+#include <math.h>
+#include <string.h>
+
+
 #include "tbezier.h"
 #include "cjoin.h"
+#include "common.h"
+#include "compound.h"
+#include "cundo.h"
+#include "fileio.h"
 #include "i18n.h"
-
-#if _MSC_VER >=1400
-#define strdup _strdup
-#endif
+#include "shrtpath.h"
+#include "track.h"
+#include "utility.h"
 
 /*****************************************************************************
  *
@@ -506,7 +510,7 @@ static struct {
 		long segCnt;
 		FLOAT_T grade;
 		DIST_T length;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		} compoundData;
 typedef enum { E0, Z0, E1, Z1, GR, OR, AN, MN, NM, PN, EC, SC, LY } compoundDesc_e;
 static descData_t compoundDesc[] = {

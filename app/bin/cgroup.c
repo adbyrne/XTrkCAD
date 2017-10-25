@@ -1,6 +1,4 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cgroup.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
- *
+/** \file cgroup.c
  * Compound tracks: Group
  *
  */
@@ -24,13 +22,23 @@
  */
 
 #include <ctype.h>
-#include "track.h"
+#include <math.h>
+#include <string.h>
+
 #include "compound.h"
-#include "shrtpath.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "tbezier.h"
 #include "tcornu.h"
 #include "common.h"
+#include "messages.h"
+#include "param.h"
+#include "shrtpath.h"
+#include "track.h"
+#include "utility.h"
+
 
 /*****************************************************************************
  *

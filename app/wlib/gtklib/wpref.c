@@ -312,7 +312,7 @@ void wPrefSetString(
  * \param name IN name of parameter
  */
 
-const char * wPrefGetString(	
+char * wPrefGetStringBasic(
 		const char * section,			/* Section */
 		const char * name )			/* Name */
 {
@@ -358,7 +358,7 @@ const char * wPrefGetString(
  * \return TRUE if value differs from default, FALSE if the same
  */
 
-wBool_t wPrefGetInteger(
+wBool_t wPrefGetIntegerBasic(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		long * res,		/* Address of result */
@@ -410,7 +410,7 @@ wBool_t wPrefGetInteger(
  */
 
 
-wBool_t wPrefGetFloat(
+wBool_t wPrefGetFloatBasic(
 		const char * section,		/* Section */
 		const char * name,		/* Name */
 		double * res,		/* Address of result */

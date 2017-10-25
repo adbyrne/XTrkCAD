@@ -1,5 +1,4 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/fileio.h,v 1.4 2008-01-15 11:46:03 mni77 Exp $
+/** \file fileio.h
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +21,11 @@
 
 #ifndef FILEIO_H
 #define FILEIO_H
+
+#include <stdio.h>
+
+#include "common.h"
+#include "misc.h"
 
 FILE * paramFile;
 extern char *paramFileName;
@@ -52,6 +56,8 @@ wWin_p demoW;
 int curDemo;
 
 wMenuList_p fileList_ml;
+
+#define PARAM_SUBDIR "params"
 
 #define LAYOUTPATHKEY "layout"
 #define BITMAPPATHKEY "bitmap"

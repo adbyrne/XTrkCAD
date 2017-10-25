@@ -53,6 +53,12 @@
 #include "i18n.h"
 #include "common.h"
 #include "wcolors.h"
+#include "math.h"
+#include "utility.h"
+#include "param.h"
+#include "fileio.h"
+#include "layout.h"
+#include "cundo.h"
 
 extern drawCmd_t tempD;
 
@@ -439,7 +445,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	        curveSeg.width = track?0:width;
 	        if ( prev_arc.curveData.type == curveTypeCurve ) {
 	        		if (track)
-	        			curveSeg.color = (fabs(prev_arc.curveData.curveRadius)<=minTrackRadius)?wDrawColorRed:wDrawColorBlack;
+	        			curveSeg.color = (fabs(prev_arc.curveData.curveRadius)<=GetLayoutMinTrackRadius())?wDrawColorRed:wDrawColorBlack;
 	        		else
 	        			curveSeg.color = color;
 	        		curveSeg.type = track?SEG_CRVTRK:SEG_CRVLIN;
@@ -502,7 +508,7 @@ EXPORT void DrawBezCurve(trkSeg_p control_arm1,
  * If Track, make it red if the radius is below minimum
  */
 void DrawTempBezier(BOOL_T track) {
-  if (track) DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt, (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,Da.minRadius<minTrackRadius?drawColorRed:drawColorBlack);
+  if (track) DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt, (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,Da.minRadius<GetLayoutMinTrackRadius()?drawColorRed:drawColorBlack);
   else
 	DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt, (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,drawColorBlack); //Add Second Arm
 }

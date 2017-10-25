@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cparalle.c,v 1.5 2009-05-25 18:11:03 m_fischer Exp $
- *
+/** \file cparalle.c
  * PARALLEL
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,10 +20,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include <math.h>
+
 #include "ccurve.h"
 #include "cstraigh.h"
+#include "cundo.h"
 #include "i18n.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 static struct {
 		track_p Trk;

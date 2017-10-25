@@ -23,8 +23,34 @@
 #ifndef HAVE_LAYOUT_H
 #define HAVE_LAYOUT_H
 
-void SetLayoutFullPath(const char *fileName);
-char *GetLayoutFullPath();
-char *GetLayoutFilename();
+#include "common.h"
+#include "misc.h"
 
+
+void SetLayoutFullPath(const char *fileName);
+void LoadLayoutMinRadiusPref(char *scaleName, double defaultValue);
+void SetLayoutTitle(char *title);
+void SetLayoutSubtitle(char *title);
+void SetLayoutMinTrackRadius(DIST_T radius);
+void SetLayoutMaxTrackGrade(ANGLE_T angle);
+void SetLayoutRoomSize(coOrd size);
+void SetLayoutCurScale(SCALEINX_T scale);
+void SetLayoutCurScaleDesc(SCALEDESCINX_T desc);
+void SetLayoutCurGauge(GAUGEINX_T gauge);
+void SetLayoutScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge);
+
+char *GetLayoutFullPath(void);
+char *GetLayoutFilename(void);
+char *GetLayoutTitle(void);
+char *GetLayoutSubtitle(void);
+DIST_T GetLayoutMinTrackRadius(void);
+SCALEINX_T GetLayoutCurScale(void );
+SCALEDESCINX_T GetLayoutCurScaleDesc(void);
+//GAUGEINX_T GetLayoutCurGauge(void);
+
+
+ANGLE_T GetLayoutMaxTrackGrade(void);
+SCALEDESCINX_T GetLayoutCurScaleDesc(void);
+
+void DoLayout(void * junk);
 #endif

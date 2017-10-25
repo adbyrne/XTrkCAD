@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dpricels.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+/** \file dpricels.c
+ * Price List Dialog
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -19,16 +19,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <string.h>
 
-#include "track.h"
 #include "compound.h"
+#include "custom.h"
 #include "i18n.h"
-
-/*****************************************************************************
- *
- * Price List Dialog
- *
- */
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
 
 static wWin_p priceListW;
 
@@ -115,8 +114,8 @@ static void PriceListChange( long changes )
 		priceListW == NULL || !wWinIsVisible( priceListW ) ) 
 		return;
 	wListClear( priceListSelL );
-	to1 = TurnoutAdd( listLabels|LABEL_COST, curScaleInx, priceListSelL, NULL, -1 );
-	to2 = StructAdd( listLabels|LABEL_COST, curScaleInx, priceListSelL, NULL );
+	to1 = TurnoutAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL, NULL, -1 );
+	to2 = StructAdd( listLabels|LABEL_COST, GetLayoutCurScale(), priceListSelL, NULL );
 	if (to1 == NULL)
 		to1 = to2;
 	priceListCurrent = NULL;

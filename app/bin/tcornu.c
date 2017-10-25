@@ -44,6 +44,13 @@
 #include "utility.h"
 #include "common.h"
 #include "i18n.h"
+#include "param.h"
+#include "math.h"
+#include "string.h"
+#include "cundo.h"
+#include "layout.h"
+#include "fileio.h"
+#include "assert.h"
 
 EXPORT TRKTYP_T T_CORNU = -1;
 
@@ -197,8 +204,8 @@ static void DrawCornuDescription(
     pos.x += xx->cornuData.descriptionOff.x;
     pos.y += xx->cornuData.descriptionOff.y;
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
-    sprintf( message, _("Cornu Curve: length=%s min radius=%s"),
-				FormatDistance(xx->cornuData.length), FormatDistance(xx->cornuData.minCurveRadius));
+    sprintf( message, _("Cornu Curve: length=%0.3f min radius=%0.3f"),
+						xx->cornuData.length, xx->cornuData.minCurveRadius);
     DrawBoxedString( BOX_BOX, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
 }
 
@@ -256,7 +263,7 @@ static struct {
 		DIST_T minRadius;
 		DIST_T maxRateOfChange;
 		ANGLE_T windingAngle;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		dynArr_t segs;
 		long width;
 		wDrawColor color;
@@ -1056,7 +1063,7 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	case Q_HAS_DESC:
 		return TRUE;
 	case Q_EXCEPTION:
-		return xx->cornuData.minCurveRadius < minTrackRadius;
+		return xx->cornuData.minCurveRadius < GetLayoutMinTrackRadius();
 	case Q_IS_CORNU:
 		return TRUE;
 	case Q_ISTRACK:
@@ -1285,7 +1292,6 @@ track_p NewCornuTrack(coOrd pos[2], coOrd center[2],ANGLE_T angle[2], DIST_T rad
 	struct extraData *xx;
 	track_p p;
 	p = NewTrack( 0, T_CORNU, 2, sizeof *xx );
-	SetTrkScale( p, curScaleInx );
 	xx = GetTrkExtraData(p);
     xx->cornuData.pos[0] = pos[0];
     xx->cornuData.pos[1] = pos[1];

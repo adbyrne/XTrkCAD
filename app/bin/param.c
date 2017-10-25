@@ -45,12 +45,17 @@
 #include <stdarg.h>
 #include <locale.h>
 #include <wlib.h>
-#include "track.h"
+
 #include "common.h"
-#include "utility.h"
-#include "misc.h"
 #include "compound.h"
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "messages.h"
+#include "misc.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 
 /* Bogus reg vars */
@@ -1006,7 +1011,7 @@ EXPORT void ParamRegister( paramGroup_p pg )
 		case PD_COMBOLIST:
 			if ( (p->option&PDO_LISTINDEX) ) {
 				if (!wPrefGetInteger( PREFSECT, prefName1, &valL, *(wIndex_t*)p->valueP ))
-					wPrefGetInteger( prefSect2, prefName2, &valL, *(wIndex_t*)p->valueP );
+					wPrefGetInteger( prefSect2, prefName2, &valL, valL );
 				if ( p->control )
 					wListSetIndex( (wList_p)p->control, (wIndex_t)valL );
 				*(wIndex_t*)p->valueP = (wIndex_t)valL;

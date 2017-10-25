@@ -36,23 +36,20 @@
 #ifdef WINDOWS
 #include <io.h>
 #include <windows.h>
-#if _MSC_VER >1300
-	#define strdup _strdup
-#endif
 #else
 #include <sys/stat.h>
 #endif
 
-#include "wlib.h"
 #include "common.h"
-#include "draw.h"
-#include "misc.h"
 #include "custom.h"
-#include "param.h"
-
-#include "smalldlg.h"
+#include "draw.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "misc.h"
 #include "paths.h"
+#include "param.h"
+#include "smalldlg.h"
+#include "wlib.h"
 
 extern char *sTipF;
 wWin_p aboutW;

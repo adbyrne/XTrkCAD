@@ -20,17 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <assert.h>
+#include <string.h>
 #include <time.h>
-#include "track.h"
+
+#include "custom.h"
+#include "fileio.h"
+#include "layout.h"
 #include "i18n.h"
+#include "param.h"
 #include "paths.h"
-
-/****************************************************************************
- *
- * ENUMERATE
- *
- */
-
+#include "track.h"
 
 static wWin_p enumW;
 
@@ -152,13 +152,13 @@ void EnumerateStart(void)
 
 	message[0] = '\0';
 	cp = message;
-	if ( Title1[0] ) {
-		strcpy( cp, Title1 );
+	if ( *GetLayoutTitle() ) {
+		strcpy( cp, GetLayoutTitle() );
 		cp += strlen(cp);
 		*cp++ = '\n';
 	}
-	if ( Title2[0] ) {
-		strcpy( cp, Title2 );
+	if ( *GetLayoutSubtitle() ) {
+		strcpy( cp, GetLayoutSubtitle());
 		cp += strlen(cp);
 		*cp++ = '\n';
 	}

@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dcustmgm.c,v 1.4 2009-07-30 16:58:42 m_fischer Exp $
+/** \file dcustmgm.c
+ * Custom List Management
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,23 +20,27 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include <assert.h>
 #include <errno.h>
-#include "i18n.h"
-#include "paths.h"
+#include <string.h>
 
 #ifdef WINDOWS
 #include <io.h>
 #define F_OK	(0)
 #define W_OK	(2)
 #define access	_access
+#else
+#include <unistd.h>
 #endif
 
-/*****************************************************************************
- *
- * Custom List Management
- *
- */
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
+#include "param.h"
+#include "paths.h"
+#include "track.h"
+#include "wlib.h"
 
 static void CustomEdit( void * action );
 static void CustomDelete( void * action );

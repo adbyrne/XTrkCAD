@@ -20,19 +20,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <time.h>
-#include "track.h"
-#include "i18n.h"
-#include "paths.h"
+#include <assert.h>
 #include <stdint.h>
+#include <string.h>
+#include <time.h>
 
-#define PARAM_SUBDIR "params"
-
-/****************************************************************************
- *
- * Param File Management
- *
- */
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
+#include "param.h"
+#include "paths.h"
+#include "track.h"
 
 typedef struct {
 		char * name;
@@ -200,6 +199,7 @@ EXPORT void RememberParamFiles( void )
 					*cp = ' ';
 			}
 			wPrefSetString( "Parameter File Names", message, contents );
+			wPrefSetString("Parameter File Map", contents, paramFileInfo(fileInx).name);
 		}
 	}
 	sprintf( message, "File%d", fileNo++ );

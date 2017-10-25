@@ -19,11 +19,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "i18n.h"
-#include "wlib.h"
-
 #include <locale.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+#include "i18n.h"
+#include "wlib.h"
 
 /**
  * Initialize gettext environment. By default, the language files are installed 

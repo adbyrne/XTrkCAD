@@ -60,11 +60,8 @@
 
 static const char rcsid[] = "@(#) : $Id$";
 
-
-
-#include "track.h"
 #include <errno.h>
-#include "i18n.h"
+#include <math.h>
 
 #ifdef WINDOWS
 #include <io.h>
@@ -72,6 +69,14 @@ static const char rcsid[] = "@(#) : $Id$";
 #define W_OK	(2)
 #define access	_access
 #endif
+
+#include "cundo.h"
+#include "custom.h"
+#include "i18n.h"
+#include "param.h"
+#include "track.h"
+#include "wlib.h"
+
 
 /*****************************************************************************
  *

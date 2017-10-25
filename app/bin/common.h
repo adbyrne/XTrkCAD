@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/common.h,v 1.2 2008-02-23 07:27:15 m_fischer Exp $
+/** \file common.h
+ * Defnitions of basic types 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,8 @@
 
 #ifndef COMMON_H
 #define COMMON_H
+
+#include <stdlib.h>
 
 #ifndef TRUE
 #define TRUE	(1)

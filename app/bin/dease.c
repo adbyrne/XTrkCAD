@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/dease.c,v 1.3 2008-03-06 19:35:08 m_fischer Exp $
- *
+/** \file dease.c
  * Easement Button Hdlrs
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,12 +20,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <math.h>
 
-#include "track.h"
 #include "ccurve.h"
-#include "cstraigh.h"
 #include "cjoin.h"
+#include "cstraigh.h"
+#include "custom.h"
 #include "i18n.h"
+#include "param.h"
+#include "track.h"
 
 static wButton_p easementB;
 

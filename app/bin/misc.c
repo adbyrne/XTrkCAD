@@ -45,22 +45,27 @@
 #else
 #include <sys/stat.h>
 #endif
+#include <locale.h>
 #include <stdarg.h>
-
 #include <stdint.h>
 
-#include "track.h"
-#include "common.h"
-#include "utility.h"
-#include "draw.h"
-#include "misc.h"
 #include "cjoin.h"
+#include "common.h"
 #include "compound.h"
-#include "smalldlg.h"
+#include "cselect.h"
+#include "cundo.h"
+#include "custom.h"
+#include "draw.h"
+#include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
+#include "messages.h"
+#include "misc.h"
+#include "param.h"
 #include "paths.h"
-#include <locale.h>
+#include "smalldlg.h"
+#include "track.h"
+#include "utility.h"
 
 #define DEFAULT_SCALE ("N")
 
@@ -571,11 +576,12 @@ void DoQuit( void )
 
 static void DoClearAfter( void )
 {
+	
 	ClearTracks();
 
 	/* set all layers to their default properties and set current layer to 0 */
 	DefaultLayerProperties();
-
+	DoLayout(NULL);
 	checkPtMark = 0;
 	Reset();
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
@@ -1732,7 +1738,7 @@ static char *AllToolbarLabels[] = {
 		N_("Create Track Buttons"),
 		N_("Layout Control Elements"),
 		N_("Modify Track Buttons"),
-		N_("Describe/Select"),
+		N_("Properties/Select"),
 		N_("Track Group Buttons"),
 		N_("Train Group Buttons"),
 		N_("Create Misc Buttons"),
@@ -2029,7 +2035,6 @@ static void CreateMenus( void )
 {
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM, messageListM, manageM, addM, changeM, drawM;
 	wMenu_p zoomM, zoomSubM;
-//	wIcon_p bm_p;
 
 	wMenuPush_p zoomInM, zoomOutM;
 
@@ -2078,7 +2083,6 @@ static void CreateMenus( void )
 	AddToolbarButton( "menuFile-clear", wIconCreatePixMap(document_new), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoClear, NULL );
 	AddToolbarButton( "menuFile-load", wIconCreatePixMap(document_open), IC_MODETRAIN_TOO, (addButtonCallBack_t)ChkLoad, NULL );
 	AddToolbarButton( "menuFile-save", wIconCreatePixMap(document_save), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoSave, NULL );
-//	AddToolbarButton( "menuFile-print", wIconCreatePixMap(document_print_xpm), IC_MODETRAIN_TOO, (addButtonCallBack_t)DoPrint, NULL );
 
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton( "cmdZoomIn", wIconCreatePixMap(zoomin_xpm), IC_MODETRAIN_TOO,
@@ -2101,7 +2105,7 @@ static void CreateMenus( void )
 	/*
 	 * FILE MENU
 	 */
-	MiscMenuItemCreate( fileM, NULL, "menuFile-clear", _("&New"), ACCL_NEW, (void*)(wMenuCallBack_p)DoClear, 0, (void *)0 );
+	MiscMenuItemCreate( fileM, NULL, "menuFile-clear", _("&New ..."), ACCL_NEW, (void*)(wMenuCallBack_p)DoClear, 0, (void *)0 );
 	wMenuPushCreate( fileM, "menuFile-load", _("&Open ..."), ACCL_OPEN, (wMenuCallBack_p)ChkLoad, NULL );
 	wMenuSeparatorCreate( fileM );
 
@@ -2533,7 +2537,7 @@ LOG1( log_init, ( "initCustom\n" ) )
 	 * MAIN WINDOW
 	 */
 LOG1( log_init, ( "create main window\n" ) )
-	strcpy( Title1, sProdName );
+	SetLayoutTitle( sProdName );
 	sprintf( message, _("Unnamed Trackplan - %s(%s)"), sProdName, sVersion );
 	wSetBalloonHelp( balloonHelp );
 	mainW = wWinMainCreate( buffer, 600, 350, "xtrkcadW", message, "main",
@@ -2541,6 +2545,8 @@ LOG1( log_init, ( "create main window\n" ) )
 				MainProc, NULL );
 	if ( mainW == NULL )
 		return NULL;
+
+	InitAppDefaults();
 
 	drawColorBlack  = wDrawFindColor( wRGB(  0,  0,  0) );
 	drawColorWhite  = wDrawFindColor( wRGB(255,255,255) );

@@ -2,8 +2,8 @@
  * Common definitions and declarations for the wlib library
  */
 
-#ifndef WIN_H
-#define WIN_H
+#ifndef HAVE_WLIB_H
+#define HAVE_WLIB_H
 #ifdef WINDOWS
 #include <stdio.h>
 #define FILE_SEP_CHAR "\\"
@@ -679,12 +679,21 @@ wDrawColor wColorSelectButtonGetColor( wButton_p );
  * Preferences
  */
 
-void wPrefSetString(		const char *, const char *, const char * );
-const char * wPrefGetString(		const char *, const char * );
-void wPrefSetInteger(		const char *, const char *, long );
-wBool_t wPrefGetInteger(	const char *, const char *, long *, long );
+void wPrefSetString(const char *, const char *, const char * );
+char * wPrefGetString(const char *section, const char *name);
+char * wPrefGetStringBasic( const char *section, const char *name );
+char * wPrefGetStringExt(const char *section, const char *name);
+
+void wPrefSetInteger(const char *, const char *, long );
+wBool_t wPrefGetInteger(const char *section, const char *name, long *result, long defaultValue);
+wBool_t wPrefGetIntegerBasic(const char *section, const char *name, long *result, long defaultValue);
+wBool_t wPrefGetIntegerExt(const char *section, const char *name, long *result, long defaultValue);
+
 void wPrefSetFloat(		const char *, const char *, double );
-wBool_t wPrefGetFloat(		const char *, const char *, double *, double );
+wBool_t wPrefGetFloat(const char *section, const char *name, double *result, double defaultValue);
+wBool_t wPrefGetFloatBasic(const char *section, const char *name, double *result, double defaultValue);
+wBool_t wPrefGetFloatExt(const char *section, const char *name, double *result, double defaultValue);
+
 const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index, const char ** name );
 void wPrefFlush(		void );
 void wPrefReset(		void );

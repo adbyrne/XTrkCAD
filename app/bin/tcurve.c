@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tcurve.c,v 1.3 2009-06-15 19:29:57 m_fischer Exp $
- *
+/** \file tcurve.c
  * CURVE
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,11 +20,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include <assert.h>
+#include <math.h>
+
 #include "ccurve.h"
-#include "cstraigh.h"
 #include "cjoin.h"
+#include "cstraigh.h"
+#include "cundo.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 static TRKTYP_T T_CURVE = -1;
 
@@ -335,7 +341,7 @@ static struct {
 		ANGLE_T angle;
 		FLOAT_T grade;
 		descPivot_t pivot;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		} crvData;
 typedef enum { E0, Z0, E1, Z1, CE, RA, TU, SE, LN, AL, A1, A2, GR, PV, LY } crvDesc_e;
 static descData_t crvDesc[] = {
@@ -1234,7 +1240,7 @@ static BOOL_T QueryCurve( track_p trk, int query )
 	case Q_HAS_DESC:
 		return TRUE;
 	case Q_EXCEPTION:
-		return xx->radius < minTrackRadius;
+		return xx->radius < GetLayoutMinTrackRadius();
 	case Q_NOT_PLACE_FROGPOINTS:
 		return IsCurveCircle( trk );
 	case Q_CAN_EXTEND:

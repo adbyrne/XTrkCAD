@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 #include "track.h"
 #include "tbezier.h"
 #include "i18n.h"
+#include "math.h"
+#include "utility.h"
 
 #define trkSeg(N) DYNARR_N(trkSeg_t,* bc->segsArray, N );
 

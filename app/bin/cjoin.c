@@ -31,6 +31,13 @@
 #include "cjoin.h"
 #include "ccornu.h"
 #include "i18n.h"
+#include "utility.h"
+#include "math.h"
+#include "messages.h"
+#include "param.h"
+#include "cundo.h"
+#include "cselect.h"
+#include "fileio.h"
 
 
 static int log_join = 0;

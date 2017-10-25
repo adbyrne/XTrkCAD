@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #ifndef WINDOWS
@@ -47,15 +48,20 @@
 
 #include <stdint.h>
 
-#include "track.h"
-#include "version.h"
 #include "common.h"
-#include "utility.h"
-#include "draw.h"
-#include "misc.h"
 #include "compound.h"
+#include "cundo.h"
+#include "custom.h"
+#include "draw.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "messages.h"
+#include "misc.h"
+#include "param.h" 
 #include "paths.h"
+#include "track.h"
+#include "utility.h"
+#include "version.h"
 
 EXPORT long adjTimer;
 static void DemoInitValues( void );

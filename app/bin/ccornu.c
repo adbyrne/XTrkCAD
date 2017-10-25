@@ -76,6 +76,12 @@
 #include "cjoin.h"
 #include "i18n.h"
 #include "common.h"
+#include "utility.h"
+#include "math.h"
+#include "param.h"
+#include "layout.h"
+#include "cundo.h"
+#include "messages.h"
 
 extern drawCmd_t tempD;
 extern TRKTYP_T T_BEZIER;
@@ -352,7 +358,7 @@ void DrawTempCornu() {
 				  &Da.trk2Seg,
 				  Da.extend[0]?&Da.extendSeg[0]:NULL,
 				  Da.extend[1]?&Da.extendSeg[1]:NULL,
-				  Da.minRadius<minTrackRadius?drawColorRed:drawColorBlack);
+				  Da.minRadius<GetLayoutMinTrackRadius()?drawColorRed:drawColorBlack);
 
 }
 
@@ -1037,7 +1043,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				InfoMessage( _("Move 1st end point of Cornu track along track 1") );
 			} else {
 				if ( Da.trk[0] == t) {
-				   ErrorMessage( MSG_JOIN_SAME );
+				   ErrorMessage( MSG_JOIN_CORNU_SAME );
 				   Da.trk[1] = NULL;
 				   return C_CONTINUE;
 				}

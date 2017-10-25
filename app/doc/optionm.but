@@ -307,7 +307,7 @@ The font selection dialog allows selection of the font used by the text (\K{cmdT
 
 \S{cmdLayout} Layout Dialog
 
-The \f{Layout Options} dialog, displayed by the Options (\K{optionM}) menu, contains items controlling the current layout.
+The \f{Layout Options} dialog, displayed by the Options (\K{optionM}) or the File (\K{fileM} menu, contains items controlling the current layout.
 
 \dd \G{png.d/layout.png}
 

@@ -30,7 +30,7 @@ cmdCustmgm	Manipulate Custom designer entries
 cmdCut	Moves selected objects to clipboard
 cmdDelete	Delete objects
 cmdDemo	Playback demos
-cmdDescribe	Describe objects
+cmdDescribe	Change Object Properties
 cmdDeselectAll	Deselect all selected objects	cmdSelect
 cmdDisplay	Change Display parameters
 cmdDrawBench	Create benchwork	cmdDraw

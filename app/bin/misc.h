@@ -25,11 +25,14 @@
 
 #define EXPORT
 
+#include <stdio.h>
+
 #include "acclkeys.h"
+#include "common.h"
+#include "draw.h"
+#include "wlib.h"
 
 typedef void (*addButtonCallBack_t)(void*);
-
-#include "custom.h"
 
 #ifdef WINDOWS
 /* suppress warning from *.bmp about conversion of int to char */
@@ -73,8 +76,6 @@ extern ANGLE_T connectAngle;
 extern long twoRailScale;
 extern long mapScale;
 extern long zoomCorner;
-extern char Title1[40];
-extern char Title2[40];
 extern long checkPtInterval;
 extern long liveMap;
 extern long preSelect;
@@ -85,9 +86,6 @@ extern long descriptionFontSize;
 extern long units;
 extern long onStartup;
 extern long angleSystem;
-extern SCALEINX_T curScaleInx;
-extern GAUGEINX_T curGaugeInx;
-extern SCALEDESCINX_T curScaleDescInx;
 extern DIST_T trackGauge;
 extern DIST_T curScaleRatio;
 extern char * curScaleName;
@@ -283,10 +281,6 @@ typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
 void DoChangeNotification( long );
 
-#include "param.h"
-#include "misc2.h"
-#include "fileio.h"
-
 /* foreign externs */
 extern drawCmd_t mapD;
 extern STATUS_T CmdEnumerate( wAction_t, coOrd );
@@ -386,6 +380,11 @@ BOOL_T CarCustomSave(FILE*);
 
 typedef int (*contMgmCallBack_p) (int, void *);
 void ContMgmLoad (wIcon_p,contMgmCallBack_p,void *);
+
+/* dlayer.c */
+void LayerSetCounts();
+void DecrementLayerObjects(unsigned int index);
+void IncrementLayerObjects(unsigned int index);
 
 /* doption.c */
 long GetDistanceFormat( void );

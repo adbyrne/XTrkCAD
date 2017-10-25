@@ -29,6 +29,13 @@
 #include "cjoin.h"
 #include "utility.h"
 #include "i18n.h"
+#include "param.h"
+#include "math.h"
+#include "string.h"
+#include "cundo.h"
+#include "layout.h"
+#include "fileio.h"
+#include "assert.h"
 
 EXPORT TRKTYP_T T_BEZIER = -1;
 EXPORT TRKTYP_T T_BZRLIN = -1;
@@ -200,7 +207,7 @@ static struct {
 		FLOAT_T length;
 		DIST_T radius;
 		FLOAT_T grade;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		ANGLE_T angle[2];
 		dynArr_t segs;
 		long width;
@@ -855,7 +862,7 @@ static BOOL_T QueryBezier( track_p trk, int query )
 	case Q_HAS_DESC:
 		return TRUE;
 	case Q_EXCEPTION:
-		return GetTrkType(trk) == T_BEZIER?xx->bezierData.minCurveRadius < minTrackRadius:FALSE;
+		return GetTrkType(trk) == T_BEZIER?xx->bezierData.minCurveRadius < GetLayoutMinTrackRadius():FALSE;
 	case Q_CAN_MODIFY_CONTROL_POINTS:
 		return TRUE;
 	case Q_ISTRACK:
@@ -1277,7 +1284,6 @@ track_p NewBezierTrack(coOrd pos[4], trkSeg_t * tempsegs, int count)
 	struct extraData *xx;
 	track_p p;
 	p = NewTrack( 0, T_BEZIER, 2, sizeof *xx );
-	SetTrkScale( p, curScaleInx );
 	xx = GetTrkExtraData(p);
     xx->bezierData.pos[0] = pos[0];
     xx->bezierData.pos[1] = pos[1];

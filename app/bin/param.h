@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/param.h,v 1.6 2009-09-21 18:24:33 m_fischer Exp $
+/** \file param.h
+ * Definitions for parameter dialog handling
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,6 +22,10 @@
 
 #ifndef PARAM_H
 #define PARAM_H
+
+#include "common.h"
+#include "wlib.h"
+#include "draw.h"
 
 typedef struct turnoutInfo_t * turnoutInfo_p;
 
@@ -213,6 +217,9 @@ extern int paramLevel;
 extern int paramLen;
 extern unsigned long paramKey;
 extern BOOL_T paramTogglePlaybackHilite;
+
+long GetChanges(paramGroup_p pg);
+
 
 #define ParamMenuPushCreate( PD, M, HS, NS, AK, FUNC ) \
 		wMenuPushCreate( M, HS, NS, AK, paramMenuPush, &PD ); \

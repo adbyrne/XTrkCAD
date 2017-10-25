@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstraigh.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
+/** \file cstraigh.c
+ * STRAIGHT
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -19,16 +19,16 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <math.h>
 
-#include "track.h"
 #include "cstraigh.h"
+#include "cundo.h"
+#include "fileio.h"
 #include "i18n.h"
-
-/*******************************************************************************
- *
- * STRAIGHT
- *
- */
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 /*
  * STATE INFO

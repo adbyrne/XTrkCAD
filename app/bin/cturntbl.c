@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturntbl.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
- *
+/** \file cturntbl.c
  * TURNTABLE
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,9 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include <math.h>
+#include <string.h>
+
 #include "cstraigh.h"
+#include "cundo.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 static TRKTYP_T T_TURNTABLE = -1;
 
@@ -233,7 +238,7 @@ static struct {
 		coOrd orig;
 		DIST_T diameter;
 		long epCnt;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		} trntblData;
 typedef enum { OR, RA, EC, LY } trntblDesc_e;
 static descData_t trntblDesc[] = {

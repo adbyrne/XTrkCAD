@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/trackx.h,v 1.1 2005-12-07 15:47:39 rc-flyer Exp $
+/** \file trackx.h
+ *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,13 +24,16 @@
 #ifndef TRACKX_H
 #define TRACKX_H
 
+#include "common.h"
+#include "track.h"
+
 struct extraData;
 
 typedef struct track_t {
 		struct track_t *next;
 		TRKINX_T index;
 		TRKTYP_T type;
-		LAYER_T layer;
+		unsigned int layer;
 		signed char scale;
 		BOOL_T modified:1;
 		BOOL_T deleted:1;

@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/misc2.h,v 1.7 2008-01-04 02:12:33 tshead Exp $
+/** \file misc2.h
+ * 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,9 +23,9 @@
 #ifndef MISC2_H
 #define MISC2_H
 
-#ifdef WINDOWS
-#include <time.h>
-#endif
+#include "common.h"
+#include "misc.h"
+#include "time.h"
 
 #define LABEL_MANUF		(1<<0)
 #define LABEL_PARTNO	(1<<1)
@@ -76,27 +76,25 @@ void GetScaleEasementValues( DIST_T *, DIST_T * );
 tieData_p GetScaleTieData( SCALEINX_T );
 SCALEINX_T LookupScale( const char * );
 BOOL_T GetScaleGauge( SCALEINX_T scaleInx, SCALEDESCINX_T *scaleDescInx, GAUGEINX_T *gaugeInx);
-
+void SetScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge);
 BOOL_T DoSetScale( char * );
 
-static void SetScale( SCALEINX_T );
-void SetScaleGauge( SCALEDESCINX_T, GAUGEINX_T );
 void ScaleLengthIncrement( SCALEINX_T, DIST_T );
 void LoadScaleList( wList_p );
 void LoadGaugeList( wList_p, SCALEDESCINX_T );
 BOOL_T CompatibleScale( BOOL_T, SCALEINX_T, SCALEINX_T );
 BOOL_T DoSetScaleDesc( void );
-typedef int LAYER_T;
-LAYER_T curLayer;
+
+unsigned int curLayer;
 long layerCount;
-wDrawColor GetLayerColor( LAYER_T );
-BOOL_T GetLayerVisible( LAYER_T );
-BOOL_T GetLayerFrozen( LAYER_T );
-BOOL_T GetLayerOnMap( LAYER_T );
-char * GetLayerName( LAYER_T );
+wDrawColor GetLayerColor( unsigned int );
+BOOL_T GetLayerVisible( unsigned int );
+BOOL_T GetLayerFrozen( unsigned int );
+BOOL_T GetLayerOnMap( unsigned int );
+char * GetLayerName( unsigned int );
 BOOL_T ReadLayers( char * );
 BOOL_T WriteLayers( FILE * );
-
+char * FormatLayerName(unsigned int layerNumber);
 /* dlayers.c */
 void UpdateLayerLists( void );
 void DefaultLayerProperties(void);

@@ -1,6 +1,6 @@
 #define RENAME_H
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/custom.c,v 1.14 2010-01-01 13:24:59 m_fischer Exp $
+/** \file custom.c
+ * 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -40,13 +40,14 @@
 #include <stdarg.h>
 #include <errno.h>
 
+#include "cjoin.h"
+#include "common.h"
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "misc.h"
 #include "track.h"
 #include "version.h"
-#include "common.h"
-#include "misc.h"
-#include "fileio.h"
-#include "cjoin.h"
-#include "i18n.h"
 
 #define Product "XTrackCAD"
 #define product "xtrkcad"

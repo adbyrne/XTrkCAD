@@ -326,6 +326,7 @@ wlibTreeViewAddData(GtkWidget *tv, int cols, char *label, GdkPixbuf *pixbuf,
         gtk_tree_view_column_set_visible(column,
                                          TRUE);
     }
+    return 0;
 
 }
 

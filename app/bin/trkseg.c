@@ -23,12 +23,20 @@
 #include <track.h>
 #include <time.h>
 #include <ctype.h>
+#include <math.h>
 #include <stdarg.h>
+#include "track.h"
 #include <common.h>
 #include <cbezier.h>
+#include <string.h>
+
 #include <tbezier.h>
 
 #include "cjoin.h"
+#include "fileio.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 
 /*****************************************************************************

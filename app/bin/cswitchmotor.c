@@ -50,10 +50,17 @@
  */
 
 #include <ctype.h>
+#include <string.h>
+
+#include "compound.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "param.h"
 #include "track.h"
 #include "trackx.h"
-#include "compound.h"
-#include "i18n.h"
+#include "utility.h"
 
 EXPORT TRKTYP_T T_SWITCHMOTOR = -1;
 

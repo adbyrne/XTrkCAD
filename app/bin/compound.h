@@ -1,4 +1,6 @@
-/* $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/compound.h,v 1.1 2005-12-07 15:47:08 rc-flyer Exp $ */
+/** \file compound.h
+ * Definitions and function prototypes for complex elements (eg. turnouts)
+ */
 
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
@@ -20,6 +22,9 @@
 
 #ifndef COMPOUND_H
 #define COMPOUND_H
+
+#include "common.h"
+#include "track.h"
 
 typedef enum { TOnormal, TOadjustable, TOpierInfo, TOpier, TOcarDesc, TOlast } TOspecial_e;
 

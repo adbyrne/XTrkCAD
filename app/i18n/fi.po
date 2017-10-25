@@ -370,8 +370,8 @@ msgid "&Manage"
 msgstr "Hallinta"
 
 #: ../bin/misc.c:2127
-msgid "&New"
-msgstr "&Uusi"
+msgid "&New ..."
+msgstr "&Uusi ..."
 
 #: ../bin/misc.c:2128
 msgid "&Open ..."
@@ -2320,10 +2320,6 @@ msgstr "Kuvaus"
 msgid "Descr"
 msgstr "Kuvaus"
 
-#: ../bin/doption.c:195 ../../../../build/xtrkcad/app/i18n/custmsg.h:12
-msgid "Describe"
-msgstr "Määrittele"
-
 #: ../../../../build/xtrkcad/app/i18n/custmsg.h:11
 msgid "Describe and Select"
 msgstr "Määrittele ja valitse -toiminnot"
@@ -2333,7 +2329,7 @@ msgid "Describe objects"
 msgstr "Määrittele objekteja"
 
 #: ../bin/misc.c:1695 ../bin/misc.c:1724
-msgid "Describe/Select"
+msgid "Properties/Select"
 msgstr "Määrittele/valitse"
 
 #: ../bin/cgroup.c:605 ../bin/ctodesgn.c:1761 ../bin/ctodesgn.c:1762
@@ -5622,8 +5618,8 @@ msgid "Max Coupling Speed"
 msgstr "Suurin kytkentänopeus"
 
 #: ../bin/doption.c:372
-msgid "Maximum Track Grade"
-msgstr "Suurin nousukulma"
+msgid "Max Track Grade (%)"
+msgstr "Suurin nousukulma (%)"
 
 #: ../../../../build/xtrkcad/app/bin/bllnhlp.c:371
 msgid "Maximum distance between connected end points"

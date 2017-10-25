@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cprofile.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
+/* \file cprofile.c
+ * Track profile
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,11 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
-#include "cselect.h"
 #include <math.h>
-#include "shrtpath.h"
+
+#include "custom.h"
+#include "cselect.h"
+#include "cundo.h"
 #include "i18n.h"
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "shrtpath.h"
+#include "track.h"
 
 
 /*
@@ -484,7 +490,7 @@ static void DoProfilePrint( void * junk )
 	screenRatio = screenSize.y/screenSize.x;
 	printProfileD.size.x = w;
 	printProfileD.size.y = h;
-	sprintf( message, _("%s Profile: %s"), sProdName, Title1 );
+	sprintf( message, _("%s Profile: %s"), sProdName, GetLayoutTitle() );
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	DrawTextSize( &mainD, message, fp, 24, FALSE, &textsize );
 	titleH = textsize.y + 6.0/mainD.dpi;

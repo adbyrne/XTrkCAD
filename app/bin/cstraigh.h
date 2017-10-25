@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstraigh.h,v 1.1 2005-12-07 15:46:54 rc-flyer Exp $
+/** \file cstraigh.h
+ * Prototypes for straight track functions
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,6 +20,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#ifndef HAVE_CSTRAIGH_H
+#define HAVE_CSTRAIGH_H
+
+#include "common.h"
+#include "track.h"
+
 void AdjustStraightEndPt( track_p t, EPINX_T ep, coOrd pos );
 track_p NewStraightTrack( coOrd p0, coOrd p1 );
 BOOL_T ExtendStraightToJoin( track_p, EPINX_T, track_p, EPINX_T );
+
+#endif // !HAVE_CSTRAIGH_H

@@ -20,13 +20,19 @@
   *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
   */
 
-#include "track.h"
+#include <math.h>
+#include <stdint.h>
+#include <string.h>
+
 #include "ccurve.h"
 #include "cbezier.h"
 #include "drawgeom.h"
+#include "fileio.h"
 #include "i18n.h"
-
-#include <stdint.h>
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 extern void wSetSelectedFontSize(int size);
 
@@ -202,7 +208,7 @@ static struct {
 		descPivot_t pivot;
 		wIndex_t fontSizeInx;
 		char text[STR_SIZE];
-		LAYER_T layer;
+		unsigned int layer;
 		} drawData;
 typedef enum { E0, E1, CE, RA, LN, AL, A1, A2, VC, LW, CO, BE, OR, DS, TP, TA, TS, TX, PV, LY } drawDesc_e;
 static descData_t drawDesc[] = {

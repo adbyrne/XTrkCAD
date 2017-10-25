@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cturnout.c,v 1.8 2009-08-16 13:07:14 m_fischer Exp $
- *
+/** \file cturnout.c
  * T_TURNOUT
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,15 +21,24 @@
  */
 
 #include <ctype.h>
-#include "track.h"
+#include <math.h>
+#include <stdint.h>
+#include <string.h>
+
 #include "ccurve.h"
 #include "tbezier.h"
-#include "cstraigh.h"
-#include "compound.h"
 #include "cjoin.h"
+#include "compound.h"
+#include "cstraigh.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
 #include "i18n.h"
-
-#include <stdint.h>
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
 
@@ -1683,7 +1689,7 @@ static void TurnoutChange( long changes )
 	maxTurnoutDim.x = maxTurnoutDim.y = 0.0;
 	if (turnoutInfo_da.cnt <= 0)
 		return;
-	curTurnout = TurnoutAdd( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, curScaleInx, turnoutListL, &maxTurnoutDim, -1 );
+	curTurnout = TurnoutAdd( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, GetLayoutCurScale(), turnoutListL, &maxTurnoutDim, -1 );
 	wListSetIndex( turnoutListL, 0 );
 	wControlShow( (wControl_p)turnoutListL, TRUE );
 	if (curTurnout == NULL) {
@@ -2101,7 +2107,7 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 	xx->customInfo = curTurnout->customInfo;
 	if (connection((int)curTurnoutEp).trk) {
 		CopyAttributes( connection((int)curTurnoutEp).trk, newTrk );
-		SetTrkScale( newTrk, curScaleInx );
+		SetTrkScale( newTrk, GetLayoutCurScale());
 	}
 	xx->special = curTurnout->special;
 	xx->u = curTurnout->u;
@@ -2504,7 +2510,7 @@ EXPORT void AddHotBarTurnouts( void )
 		to = turnoutInfo(inx);
 		if ( !( IsParamValid(to->paramFileIndex) &&
 				to->segCnt > 0 &&
-				CompatibleScale( TRUE, to->scaleInx, curScaleInx ) ) )
+				CompatibleScale( TRUE, to->scaleInx, GetLayoutCurScale()) ) )
 				continue;
 		AddHotBarElement( to->contentsLabel, to->size, to->orig, TRUE, to->barScale, to, CmdTurnoutHotBarProc );
 	}

@@ -1,6 +1,5 @@
 /* \file dcmpnd.c
  * Compound tracks: Turnouts and Structures
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -22,11 +21,18 @@
  */
 
 #include <ctype.h>
-#include "track.h"
-#include "compound.h"
-#include "shrtpath.h"
-#include "i18n.h"
+#include <string.h>
 
+#include "compound.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "messages.h"
+#include "param.h"
+#include "shrtpath.h"
+#include "track.h"
+#include "utility.h"
 
 /*****************************************************************************
  *

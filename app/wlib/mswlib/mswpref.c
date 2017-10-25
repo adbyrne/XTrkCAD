@@ -149,7 +149,7 @@ void wPrefSetString( const char * section, const char * name, const char * sval 
 }
 
 
-const char * wPrefGetString( const char * section, const char * name )
+char * wPrefGetStringBasic( const char * section, const char * name )
 {
 	prefs_t * p;
 	int rc;
@@ -181,7 +181,7 @@ void wPrefSetInteger( const char * section, const char * name, long lval )
 }
 
 
-wBool_t wPrefGetInteger(
+wBool_t wPrefGetIntegerBasic(
 		const char * section,
 		const char * name,
 		long *res,
@@ -190,7 +190,7 @@ wBool_t wPrefGetInteger(
 	const char * cp;
         char * cp1;
 
-	cp = wPrefGetString( section, name );
+	cp = wPrefGetStringBasic( section, name );
 	if (cp == NULL) {
 		*res = def;
 		return FALSE;
@@ -218,7 +218,7 @@ void wPrefSetFloat(
 }
 
 
-wBool_t wPrefGetFloat(
+wBool_t wPrefGetFloatBasic(
 		const char * section,			/* Section */
 		const char * name,			/* Name */
 		double * res,			/* Address of result */
@@ -229,7 +229,7 @@ wBool_t wPrefGetFloat(
 	const char * cp;
         char * cp1;
 
-	cp = wPrefGetString( section, name );
+	cp = wPrefGetStringBasic( section, name );
 	if (cp == NULL) {
 		*res = def;
 		return FALSE;

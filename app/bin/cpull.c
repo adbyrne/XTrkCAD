@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cpull.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
- *
+/** \file cpull.c
  * Pull and Tighten commands
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,14 +21,15 @@
  */
 
 #include <math.h>
-#include "track.h"
+
 #include "cselect.h"
 #include "compound.h"
+#include "cundo.h"
+#include "fileio.h"
 #include "i18n.h"
-
-/*
- * pull track endpoint together
- */
+#include "messages.h"
+#include "track.h"
+#include "utility.h"
 
 int debugPull = 0;
 

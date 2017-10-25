@@ -1,4 +1,6 @@
-
+/** \file drawgeom.h
+ *
+ */
 /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
  *
@@ -16,6 +18,15 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#ifndef HAVE_DRAWGEOM_H
+#define HAVE_DRAWGEOM_H
+
+#include "ccurve.h"
+#include "common.h"
+#include "draw.h"
+#include "track.h"
+#include "wlib.h"
 
 #define OP_LINE			(0)
 #define OP_DIMLINE		(1)
@@ -60,3 +71,4 @@ extern long lineWidth;
 void DrawGeomOp( void * );
 STATUS_T DrawGeomMouse( wAction_t, coOrd, drawContext_t * );
 STATUS_T DrawGeomModify( coOrd, ANGLE_T, wIndex_t, trkSeg_p, wAction_t, coOrd, wBool_t );
+#endif //HAVE_DRAWGEOM_H

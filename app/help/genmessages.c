@@ -75,7 +75,7 @@ TranslateString( char *srcString, struct transTbl *trTbl )
 
    /* calculate the expected result length */
    for( cp = srcString; *cp; cp++ )
-   	if( idx = strchr( trTbl->inChar, *cp ))         /* does character need translation ? */
+   	if( idx == strchr( trTbl->inChar, *cp ))         /* does character need translation ? */
       	bufLen += strlen( (trTbl->outChar)[idx - trTbl->inChar ] ) - 1; /* yes, extend buffer accordingly */
 
    /* allocate memory for result */
@@ -85,7 +85,7 @@ TranslateString( char *srcString, struct transTbl *trTbl )
 		/* copy and translate characters as needed */
       cp2 = destString;
       for( cp = srcString; *cp; cp++ ) {
-      	if( idx = strchr( trTbl->inChar, *cp )) {       /* does character need translation ? */
+      	if( idx == strchr( trTbl->inChar, *cp )) {       /* does character need translation ? */
          	strcpy( cp2, (trTbl->outChar)[idx - trTbl->inChar ] );   /* yes, copy the escaped character sequence */
             cp2 += strlen((trTbl->outChar)[idx - trTbl->inChar ] );
          } else {
@@ -206,6 +206,7 @@ int main( int argc, char * argv[] )
 	}		
 
 	fputs( "/*\n * DO NOT EDIT! This file has been automatically created by genmessages.\n * Changes to this file will be overwritten.\n */\n", hdrF );
+	fputs("#ifndef HAVE_MESSAGES_H\n#define HAVE_MESSAGES_H\n", hdrF);
 	
 	/* open the help file to generate */
 	outF = fopen( argv[ inFileIdx + 1 ], "w" );
@@ -330,6 +331,7 @@ int main( int argc, char * argv[] )
 	}
 	dumpHelp( outF );
 
+	fputs("#endif // HAVE_MESSAGES_H\n", hdrF);
 	fclose( hdrF );
 	fclose( inF );
 	fclose( outF );

@@ -1,8 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cstruct.c,v 1.4 2008-03-06 19:35:06 m_fischer Exp $
- *
+/** \file cstruct.c
  * T_STRUCTURE
- *
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -24,11 +21,20 @@
  */
 
 #include <ctype.h>
-#include "track.h"
-#include "compound.h"
-#include "i18n.h"
-
+#include <math.h>
 #include <stdint.h>
+#include <string.h>
+
+#include "compound.h"
+#include "cundo.h"
+#include "custom.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 EXPORT TRKTYP_T T_STRUCTURE = -1;
 
@@ -403,7 +409,7 @@ static void structureChange( long changes )
 	maxStructureDim.x = maxStructureDim.y = 0.0;
 	if (structureInfo_da.cnt <= 0)
 		return;
-	curStructure = StructAdd( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, curScaleInx, structureListL, &maxStructureDim );
+	curStructure = StructAdd( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, GetLayoutCurScale(), structureListL, &maxStructureDim );
 	wControlShow( (wControl_p)structureListL, TRUE );
 	if (curStructure == NULL) {
 		wDrawClear( structureD.d );
@@ -854,7 +860,7 @@ EXPORT void AddHotBarStructures( void )
 		to = structureInfo(inx);
 		if ( !( IsParamValid(to->paramFileIndex) &&
 			    to->segCnt > 0 &&
-			    CompatibleScale( FALSE, to->scaleInx, curScaleInx ) ) )
+			    CompatibleScale( FALSE, to->scaleInx, GetLayoutCurScale()) ) )
 			 /*( (strcmp( to->scale, "*" ) == 0 && strcasecmp( curScaleName, "DEMO" ) != 0 ) ||
 			   strncasecmp( to->scale, curScaleName, strlen(to->scale) ) == 0 ) ) )*/
 				continue;

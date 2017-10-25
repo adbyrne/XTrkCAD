@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.h,v 1.3 2009-05-25 18:11:03 m_fischer Exp $
+/** \file track.h
+ * 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -23,24 +23,9 @@
 #ifndef TRACK_H
 #define TRACK_H
 
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#ifndef WINDOWS
-#include <unistd.h>
-#endif
-#include <math.h>
-#ifdef HAVE_MALLOC_H
-#include <malloc.h>
-#endif
-#include <string.h>
-
-#include "wlib.h"
 #include "common.h"
-#include "utility.h"
 #include "draw.h"
-#include "misc.h"
-
+#include "misc2.h"
 
 extern TRKTYP_T T_NOTRACK;
 
@@ -56,7 +41,7 @@ extern long centerDrawMode;
 extern wDrawColor selectedColor;
 extern wDrawColor normalColor;
 extern BOOL_T useCurrentLayer;
-extern LAYER_T curTrackLayer;
+extern unsigned int curTrackLayer;
 extern coOrd descriptionOff;
 extern DIST_T roadbedWidth;
 extern DIST_T roadbedLineWidth;
@@ -64,8 +49,6 @@ extern long printCenterLines;
 extern long drawElevations;
 extern wDrawColor elevColorIgnore;
 extern wDrawColor elevColorDefined;
-extern DIST_T minTrackRadius;
-extern DIST_T maxTrackGrade;
 extern wDrawColor exceptionColor;
 #define TIEDRAWMODE_NONE		(0)
 #define TIEDRAWMODE_OUTLINE		(1)
@@ -458,7 +441,7 @@ void SetTrkScale( track_p, SCALEINX_T );
 BOOL_T GetTrkSelected( track_p );
 BOOL_T GetTrkVisible( track_p );
 void SetTrkVisible( track_p, BOOL_T );
-LAYER_T GetTrkLayer( track_p );
+unsigned int GetTrkLayer( track_p );
 void SetBoundingBox( track_p, coOrd, coOrd );
 void GetBoundingBox( track_p, coOrd*, coOrd* );
 EPINX_T GetTrkEndPtCnt( track_p );
@@ -556,7 +539,7 @@ void DrawEndElev( drawCmd_p, track_p, EPINX_T, wDrawColor );
 wDrawColor GetTrkColor( track_p, drawCmd_p );
 void DrawTrack( track_cp, drawCmd_p, wDrawColor );
 void DrawTracks( drawCmd_p, DIST_T, coOrd, coOrd );
-void RedrawLayer( LAYER_T, BOOL_T );
+void RedrawLayer( unsigned int, BOOL_T );
 void DrawNewTrack( track_cp );
 void DrawOneTrack( track_cp, drawCmd_p );
 void UndrawNewTrack( track_cp );
@@ -620,8 +603,6 @@ void AdvancePositionIndicator( track_p, coOrd, coOrd *, ANGLE_T * );
 
 BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
 
-#include "cundo.h"
-#include "cselect.h"
 
 /* cmisc.c */
 wIndex_t describeCmdInx;

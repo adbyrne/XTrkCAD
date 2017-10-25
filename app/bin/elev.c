@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/elev.c,v 1.1 2005-12-07 15:47:20 rc-flyer Exp $
+/** \file elev.c
+ * 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -19,11 +19,16 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+#include <math.h>
 
-#include "track.h"
-#include "shrtpath.h"
 #include "ccurve.h"
-
+#include "cundo.h"
+#include "messages.h"
+#include "param.h"
+#include "shrtpath.h"
+#include "track.h"
+#include "utility.h"
+#include "string.h"
 
 EXPORT long oldElevationEvaluation = 0;
 static int log_fillElev = 0;

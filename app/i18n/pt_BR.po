@@ -3505,8 +3505,8 @@ msgid "Min Track Radius"
 msgstr "Raio mínimo"
 
 #: ../bin/doption.c:109
-msgid " Max Track Grade"
-msgstr "Inclinação máxima"
+msgid " Max Track Grade (%)"
+msgstr "Inclinação máxima (%)"
 
 #: ../bin/doption.c:150
 msgid "Layout Options"
@@ -3672,11 +3672,6 @@ msgstr "Fabricante / protótipo / número do item / item"
 #: ../bin/doption.c:288
 msgid "End-Points"
 msgstr "Extremidades"
-
-#: ../bin/doption.c:291
-#: ../../../../xtrkcad-build/app/i18n/custmsg.h:12
-msgid "Describe"
-msgstr "Descrever"
 
 #: ../bin/doption.c:296
 msgid "Normal: Command List, Shift: Command Options"
@@ -4357,7 +4352,7 @@ msgid "Modify Track Buttons"
 msgstr "Modificar botões de trilhos"
 
 #: ../bin/misc.c:1708
-msgid "Describe/Select"
+msgid "Properties/Select"
 msgstr "Descrever / Selecionar"
 
 #: ../bin/misc.c:1709
@@ -4530,8 +4525,8 @@ msgid "More"
 msgstr "Mais"
 
 #: ../bin/misc.c:2077
-msgid "&New"
-msgstr "&Novo"
+msgid "&New ..."
+msgstr "&Novo ..."
 
 #: ../bin/misc.c:2078
 msgid "&Open ..."

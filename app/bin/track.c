@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/track.c,v 1.7 2009-07-05 15:11:02 m_fischer Exp $
+/** \file track.c
+ * Track 
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,18 +20,29 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <assert.h>
 #include <time.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <math.h>
-#include "track.h"
+#include <string.h>
+
 #include "ccurve.h"
-#include "cstraigh.h"
 #include "cjoin.h"
 #include "compound.h"
-#include "i18n.h"
+#include "cselect.h"
+#include "cstraigh.h"
+#include "cundo.h"
+#include "custom.h"
 #include "draw.h"
+#include "fileio.h"
+#include "i18n.h"
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
 #include "paths.h"
+#include "track.h"
+#include "utility.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
@@ -81,15 +92,15 @@ static dynArr_t trackCmds_da;
 
 EXPORT BOOL_T useCurrentLayer = FALSE;
 
-EXPORT LAYER_T curTrackLayer;
+EXPORT unsigned int curTrackLayer;
 
 EXPORT coOrd descriptionOff;
 
 EXPORT DIST_T roadbedWidth = 0.0;
 EXPORT DIST_T roadbedLineWidth = 3.0/75.0;
 
-EXPORT DIST_T minTrackRadius;
-EXPORT DIST_T maxTrackGrade = 5.0;
+//EXPORT DIST_T minTrackRadius;
+//EXPORT DIST_T maxTrackGrade = 5.0;
 
 static int suspendElevUpdates = FALSE;
 
@@ -319,7 +330,7 @@ EXPORT void SetTrkScale( track_p trk, SCALEINX_T si )
 	trk->scale = (char)si;
 }
 
-EXPORT LAYER_T GetTrkLayer( track_p trk )
+EXPORT unsigned int GetTrkLayer( track_p trk )
 {
 	return trk->layer;
 }
@@ -493,13 +504,22 @@ EXPORT void SetTrkEndPtCnt( track_p trk, EPINX_T cnt )
 		memset( &trk->endPt[oldCnt], 0, (cnt-oldCnt) * sizeof *trk->endPt );
 }
 
-
-EXPORT void SetTrkLayer( track_p trk, int layer )
+/**
+ * Set the layer for a track. 
+ *
+ * \param trk IN the layer to change the layer for
+ * \param layer IN  the new layer for the track
+ */
+void SetTrkLayer( track_p trk, int layer )
 {
+	DecrementLayerObjects(trk->layer);
+
 	if (useCurrentLayer)
-		trk->layer = (LAYER_T)curLayer;
+		trk->layer = (unsigned int)curLayer;
 	else
-		trk->layer = (LAYER_T)layer;
+		trk->layer = (unsigned int)layer;
+
+	IncrementLayerObjects(trk->layer);
 }
 
 
@@ -889,7 +909,7 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 	trk->index = index;
 	trk->type = type;
 	trk->layer = curLayer;
-	trk->scale = (char)curScaleInx;
+	trk->scale = (char)GetLayoutCurScale();
 	trk->bits = TB_VISIBLE;
 	trk->elevMode = ELEV_ALONE;
 	trk->elev = 0;
@@ -908,6 +928,7 @@ LOG( log_track, 1, ( "NewTrack( T%d, t%d, E%d, X%ld)\n", index, type, endCnt, ex
 	trk->extraSize = extraSize;
 	UndoNew( trk );
 	trackCount++;
+	IncrementLayerObjects(curLayer);
 	InfoCount( trackCount );
 	return trk;
 }
@@ -1005,10 +1026,11 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	}
         CheckDeleteSwitchmotor( trk );
         CheckDeleteBlock( trk );
-	UndoDelete( trk );
-    MainRedraw();
+	DecrementLayerObjects(trk->layer);
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
+	UndoDelete(trk);					/**< Attention: trk is invalidated during that call */
+	MainRedraw();
 	InfoCount( trackCount );
 	return TRUE;
 }
@@ -2152,7 +2174,7 @@ EXPORT void DrawCurvedTies(
 		ANGLE_T a1,
 		wDrawColor color )
 {
-	tieData_p td = GetScaleTieData(GetTrkScale(trk));
+	tieData_p td; 
 	DIST_T len;
 	ANGLE_T ang, dang;
 	coOrd pos;
@@ -2162,6 +2184,9 @@ EXPORT void DrawCurvedTies(
 		return;
 	if ( trk == NULL )
 		return;
+
+	td = GetScaleTieData(GetTrkScale(trk));
+
 	if ( (!GetTrkVisible(trk)) && drawTunnel!=DRAW_TUNNEL_SOLID )
 		return;
 	if (color == wDrawColorBlack)
@@ -2266,7 +2291,7 @@ EXPORT void DrawStraightTies(
 		coOrd p1,
 		wDrawColor color )
 {
-	tieData_p td = GetScaleTieData(GetTrkScale(trk));
+	tieData_p td;
 	DIST_T tieOff0=0.0, tieOff1=0.0;
 	DIST_T len, dlen;
 	coOrd pos;
@@ -2277,6 +2302,8 @@ EXPORT void DrawStraightTies(
 		return;
 	if ( trk == NULL )
 		return;
+
+	td = GetScaleTieData(GetTrkScale(trk));
 	if ( (!GetTrkVisible(trk)) && drawTunnel!=DRAW_TUNNEL_SOLID )
 		return;
 	if ( color == wDrawColorBlack )
@@ -2397,7 +2424,7 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 		}
 	}
 	if ( (d->options&(DC_GROUP)) == 0 ) {
-		if ( grade > maxTrackGrade )
+		if ( grade > GetLayoutMaxTrackGrade())
 			return exceptionColor;
 		if ( QueryTrack( trk, Q_EXCEPTION ) )
 			return exceptionColor;
@@ -2410,7 +2437,7 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 	}
 	if ( (d->options&(DC_GROUP)) == 0 ) {
 		if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) )
-			return GetLayerColor((LAYER_T)curTrackLayer);
+			return GetLayerColor((unsigned int)curTrackLayer);
 	}
 	return wDrawColorBlack;
 }
@@ -2438,7 +2465,7 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 		return;
 	if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) &&
 		d != &mapD && color == wDrawColorBlack )
-		color = GetLayerColor((LAYER_T)curTrackLayer);
+		color = GetLayerColor((unsigned int)curTrackLayer);
 	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	if ( (!inDrawTracks) &&
 		 tieDrawMode!=TIEDRAWMODE_NONE &&
@@ -2609,7 +2636,7 @@ EXPORT void DrawEndPt(
 		EPINX_T ep,
 		wDrawColor color )
 {
-	coOrd p, pp;
+	coOrd p;
 	ANGLE_T a;
 	track_p trk1;
 	coOrd p0, p1, p2;
@@ -2635,7 +2662,7 @@ EXPORT void DrawEndPt(
 		DrawEndElev( d, trk, ep, color );
 
 	trk1 = GetTrkEndTrk(trk,ep);
-	pp = p = GetTrkEndPos( trk, ep );
+	p = GetTrkEndPos( trk, ep );
 	a = GetTrkEndAngle( trk, ep ) + 90.0;
 
 	trackGauge = GetTrkGauge(trk);
@@ -2738,14 +2765,13 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 {
 	track_cp trk;
 	TRKINX_T inx;
-	wIndex_t count;
+	wIndex_t count = 0;
 	coOrd lo, hi;
 	BOOL_T doSelectRecount = FALSE;
 	
 	inDrawTracks = TRUE;
-	count = 0;
 	InfoCount( 0 );
-	count = 0;
+
 	d->options |= DC_TIES;
 	TRK_ITERATE( trk ) {
 		if ( (d->options&DC_PRINT) != 0 &&
@@ -2783,7 +2809,7 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 }
 
 
-EXPORT void RedrawLayer( LAYER_T l, BOOL_T draw )
+EXPORT void RedrawLayer( unsigned int l, BOOL_T draw )
 {
 	MainRedraw();
 

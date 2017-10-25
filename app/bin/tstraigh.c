@@ -1,5 +1,5 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/tstraigh.c,v 1.2 2008-01-20 23:29:15 mni77 Exp $
+/** \file tstraigh.c
+ * Straight track
  */
 
 /*  XTrkCad - Model Railroad CAD
@@ -20,9 +20,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include <math.h>
+
 #include "cstraigh.h"
+#include "cundo.h"
+#include "fileio.h"
 #include "i18n.h"
+#include "layout.h"
+#include "messages.h"
+#include "param.h"
+#include "track.h"
+#include "utility.h"
 
 /*******************************************************************************
  *
@@ -70,7 +78,7 @@ static struct {
 		ANGLE_T angle;
 		FLOAT_T grade;
 		descPivot_t pivot;
-		LAYER_T layerNumber;
+		unsigned int layerNumber;
 		} strData;
 typedef enum { E0, Z0, E1, Z1, LN, AN, GR, PV, LY } strDesc_e;
 static descData_t strDesc[] = {
@@ -799,7 +807,7 @@ track_p NewStraightTrack( coOrd p0, coOrd p1 )
 	track_p t;
 	ANGLE_T a;
 	t = NewTrack( 0, T_STRAIGHT, 2, 0 );
-	SetTrkScale( t, curScaleInx );
+	SetTrkScale( t, GetLayoutCurScale() );
 	a = FindAngle( p1, p0 );
 	SetTrkEndPoint( t, 0, p0, a );
 	SetTrkEndPoint( t, 1, p1, NormalizeAngle( a+180.0 ) );

@@ -20,8 +20,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "track.h"
+#include <string.h>
+
 #include "shrtpath.h"
+#include "track.h"
 
 EXPORT int log_shortPath;
 static int log_shortPathInitted;
