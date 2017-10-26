@@ -31,7 +31,10 @@ END
 
 # ctext.c
 MESSAGE MSG_LARGE_FONT
-A large font has been selected. Large fonts may a take a while to load. Do you wish to continue?
+A large font has been selected.
+Large fonts may a take a while to load.
+
+Do you wish to continue?
 HELP
 A large font has been selected. Large fonts (or changing fonts sizes) may take a noticeable amount of time to load.
 
@@ -40,7 +43,9 @@ END
 
 # ctodesgn.c
 MESSAGE MSG_TODSGN_DESC_NONBLANK
-All description fields present in the Turnout Designer must contain appropriate information. Correct inappropriate values and try again.
+All description fields present in the Turnout
+Designer must contain appropriate information.
+Correct inappropriate values and try again.
 HELP
 Turnout descriptions should be as accurate as possible. All description fields listed in the \f{Turnout Designer} must contain appropriate information.
 
@@ -49,7 +54,8 @@ END
 
 # cgroup.c:groupOk
 MESSAGE MSG_GROUP_NONBLANK
-All fields listed in the Group dialog must contain data. Please enter missing values and try again.
+All fields listed in the Group dialog must contain data.
+Please enter missing values and try again.
 HELP
 The \f{Group} dialog shows the Manufacturer, Description and part number (Title) of the new definition. Initial values are based on selected turnouts and structures or on the last \f{Ungroup}ed object. The dialog also contains a toggle button (\f{Replace with new group}?), which is used if you want to replace the selected objects with the new definition. All fields listed in this dialog window must contain data.
 
@@ -58,7 +64,8 @@ END
 
 # ctodesgn.c
 MESSAGE MSG_TODSGN_VALUES_GTR_0
-All values specified in the Turnout Designer must be greater than 0. Correct inappropriate values and try again.
+All values specified in the Turnout Designer must be
+greater than 0. Correct inappropriate values and try again.
 HELP
 Turnout dimensions should be as accurate as possible. All values specified in the \f{Turnout Designer} must be greater than 0.
 
@@ -73,7 +80,8 @@ END
 
 # dcustmgm.c
 MESSAGE MSG_CUSTMGM_DELETE_CONFIRM
-Are you sure you want to delete the %d definition(s)?
+Are you sure you want to delete the
+%d definition(s)?
 ALT
 Are you sure you want to delete the
 NNN definition(s)?
@@ -181,6 +189,15 @@ You cannot select a \f{Turntable} as the second track in \f{Join} command. If yo
 Refer to \k{cmdJoin} for detail.
 END
 
+ ccornu.c
+MESSAGE MSG_JOIN_CORNU_SAME
+Cannot Join; Selected endpoints are on same track.
+HELP
+You are trying to \f{Join} a section of track with itself. Different tracks must selected when using the \f{Join} command.
+
+Refer to \k{cmdJoin} for detail.
+END
+
 # cjoin.c
 MESSAGE MSG_JOIN_SAME
 Cannot Join; Selected endpoints are on same track.
@@ -275,7 +292,8 @@ END
 
 # ctodesgn.c
 MESSAGE MSG_TODSGN_CROSSOVER_TOO_SHORT
-Crossover length is too short. Correct inappropriate value(s) and try again.
+Crossover length is too short. Correct
+inappropriate value(s) and try again.
 HELP
 The length of crossover segments must be greater than the track gauge.
 END
@@ -289,7 +307,10 @@ END
 
 # ctodesgn.c
 MESSAGE MSG_TODSGN_REPLACE
-Definition name is already in use. Saving this definition replaces the existing definition. Do you want to continue?
+Definition name is already in use. Saving this
+definition replaces the existing definition.
+
+Do you want to continue?
 HELP
 The definition you're attempting to create uses the same name as an existing
 definition. Saving  the definition with the same name will cause \e{XTrackCAD} to replace the existing definition, making the existing definition inaccessible. If the previous definition must be preserved, then choose a different name for the new definition. If necessary, the \f{Custom Management} dialog can be used to change definition names.
@@ -325,7 +346,9 @@ END
 
 # fileio.c
 MESSAGE MSG_UPGRADE_VERSION1
-File version %ld is greater than supported version %d. You need to upgrade %s to at least version %s.
+File version %ld is greater than supported
+version %d. You need to upgrade %s
+to at least version %s.
 HELP
 The layout file that you're attempting to load was created using a newer version
 of \e{XTrackCAD}. In order to load this file it will be necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
@@ -335,7 +358,9 @@ END
 
 #fileio.c
 MESSAGE MSG_UPGRADE_VERSION2
-File version %ld is greater than supported version %d. You need to upgrade your version of %s
+File version %ld is greater than supported
+version %d. You need to upgrade your
+version of %s
 HELP
 The layout file that you're attempting to load was created using a newer version of \e{XTrackCAD}. In order to load this file it will be
 necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
@@ -418,7 +443,9 @@ Please report this error to the \e{XTrackCAD} project development team at Source
 END
 
 MESSAGE MSG_NO_CARS
-No Cars are defined for the current scale. Do you want to use the Car Inventory dialog?
+No Cars are defined for the current scale.
+
+Do you want to use the Car Inventory dialog?
 HELP
 No Cars are defined for the current scale. Use the  dialog to select cars of the current scale and add them to the \f{Car Inventory}.
 
@@ -427,7 +454,10 @@ END
 
 # dcar.c
 MESSAGE MSG_NO_CARPROTO
-No Car Prototypes are defined. Load a Prototype definition file using the Parameter Files dialog or create a Prototype definition using the Car Prototype dialog.
+No Car Prototypes are defined.
+Load a Prototype definition file using the
+Parameter Files dialog or create a Prototype
+definition using the Car Prototype dialog.
 HELP
 No \f{Car Prototypes} are defined. Load a car prototype definition file (such as protoam.xtp) using the \f{Parameter Files} dialog or create a prototype definition using the \f{Car Prototype} dialog.
 
@@ -495,7 +525,8 @@ END
 
 # dcar.c
 MESSAGE MSG_CARDESC_VALUE_ZERO
-Numeric values on the Car Description dialog must be greater than 0.
+Numeric values on the Car Description
+dialog must be greater than 0.
 HELP
 Numeric values on the \f{Car Description} dialog (Car Length, Car Width, Truck Centers, Coupled Length and Coupler Length) must be greater than zero.
 
@@ -521,7 +552,9 @@ END
 
 # dcar.c
 MESSAGE MSG_CARPART_DUPNAME
-Part Number for this Manufacturer already exists. Do you want to update it?
+Part Number for this Manufacturer already exists.
+
+Do you want to update it?
 HELP
 The \e{Part} definition you're attempting to create uses the same Manufacturer and Part Number as an existing definition. Saving the
 definition with the same Manufacturer and Part Number will cause \e{XTrakCAD} to update the existing definition. If the previous definition must be preserved, then choose a different Part Number for the new definition.
@@ -542,7 +575,9 @@ END
 
 # macro.c
 MESSAGE MSG_PLAYBACK_VERSION_UPGRADE
-Playback file version %ld is greater than supported version %d. You need to upgrade your version of %s.
+Playback file version %ld is
+greater than supported version %d
+You need to upgrade your version of %s
 HELP
 The layout file that you're attempting to load was created using a newer version of \e{XTrackCAD}. In order to load this file it will be
 necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
@@ -579,7 +614,9 @@ END
 
 # dcar.c
 MESSAGE MSG_CARPROTO_DUPNAME
-Prototype name already exists. Do you want to update it?
+Prototype name already exists.
+
+Do you want to update it?
 HELP
 The \e{Prototype} definition you're attempting to create uses the same name as an existing definition. Saving the definition with the
 same name will cause \e{XTrackCAD} to update the existing definition. If the previous definition must be preserved, then choose a different Part Number for the new definition.
@@ -596,7 +633,9 @@ END
 
 #cselect.c
 MESSAGE MSG_RESCALE_TOO_BIG
-Rescaled tracks do not fit within layouts room parameters (Height and width). The layouts room parameters should be set to at least %s by %s.
+Rescaled tracks do not fit within layouts room parameters
+(Height and width). The layouts room parameters should be
+set to at least %s by %s.
 HELP
 While using the \f{Change Scale} command to enlarge the layout, \e{XTrackCAD} determined that rescaled tracks do not fit within the layout rooms parameters. Using the \f{Layout} dialog, the rooms parameters (Height and width) should be set so as to accommodate the rescaled track.
 
@@ -642,7 +681,8 @@ END
 
 # dcar.c
 MESSAGE MSG_CARPROTO_BADSEGS
-Selected shapes must define a rectangular area with length greater than height.
+Selected shapes must define a rectangular
+area with length greater than height.
 ALT
 Selected shapes must define a rectangular area ...
 HELP
@@ -684,7 +724,12 @@ The \f{Split} position must be between an endpoint and the position where the tu
 END
 
 MESSAGE MSG_CARIMP_MISSING_DIMS
-The following car has no dimensions and a Car Part description can not be found %s. Do you wish to continue importing other Cars?
+The following car has no dimensions and a
+Car Part description can not be found.
+
+%s
+
+Do you wish to continue importing other Cars?
 HELP
 The car import file does not specify car dimensions and the specified \e{Partno} can not be found. Edit the import file and either add
 car dimensions or add/update the \e{Partno}. This will allow \e{XTrackCAD} to locate information for the car being imported.
@@ -693,7 +738,11 @@ Refer to \k{cmdCarinv} for detail.
 END
 
 MESSAGE MSG_CARIMP_MISSING_PARTNO
-The following car has no Part Number %s. Do you wish to continue importing other Cars?
+The following car has no Part Number
+
+%s
+
+Do you wish to continue importing other Cars?
 HELP
 The car import file must contain headers for at least the \e{Scale}, \e{Prototype}, \e{Manufacturer} and \e{Partno} columns. In addition, car information relative to these columns must be included in each line of the file otherwise this error will occur.
 
@@ -701,7 +750,9 @@ Refer to \k{cmdCarinv} for detail.
 END
 
 MESSAGE MSG_CARIMP_IGNORED_COLUMN
-The following column in the Car Import file will be ignored: %s
+The following column in the Car Import file will be ignored:
+
+%s
 HELP
 An invalid column in the Car Import file will be ignored. Valid column names are:
 
@@ -721,7 +772,10 @@ END
 
 # cstruct.c
 MESSAGE MSG_STRUCT_NO_STRUCTS
-There are no structures to choose from in the structure selection list. Please check your SCALE, select the <File|Parameter Files> menu to load a Parameter File or create a new Structure with the Group command.
+There are no structures to choose from in the structure
+selection list.  Please check your SCALE, select the
+<File|Parameter Files> menu to load a Parameter File or
+create a new Structure with the Group command.
 HELP
 This error occurs when;
 
@@ -736,7 +790,11 @@ END
 
 # cturnout.c
 MESSAGE MSG_TURNOUT_NO_TURNOUT
-There are no turnouts to choose from in the turnout selection list. Please check your SCALE, select the <Manage|Turnout Designer> menu to enter a new turnout or select the <File|Parameter Files> menu to load a Parameter File.
+There are no turnouts to choose from in the turnout
+selection list.  Please check your SCALE, select the
+<Manage|Turnout Designer> menu to enter a new turnout
+or select the <File|Parameter Files> menu to load a
+Parameter File
 HELP
 This error occurs when;
 
@@ -852,7 +910,9 @@ END
 
 #ctodesgn.c
 MESSAGE MSG_SEGMENTS_DIFFER
-Turnout definition contains non-track segments. Do you want to include them in this update?
+Turnout definition contains non-track segments.
+
+Do you want to include them in this update?
 HELP
 Turnout definitions can include lines and other shapes that represent switch machines, switch stands, roadbed or other objects. Such items can be include when editing Turnout definitions. These same items can also be removed if there's a need to start over again.
 
@@ -868,14 +928,21 @@ END
 
 # cundo.c
 MESSAGE MSG_UNDO_ASSERT
-Undo assertion failure %s:%d Val = %ld(%lx) %s. Please report this error to the XTrackCAD project development team at SourceForge.
+Undo assertion failure %s:%d
+Val = %ld(%lx)
+%s
+Please report this error to the XTrackCAD project development team at SourceForge.
 HELP
 Please report this error to the \e{XTrackCAD} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
 # fileio.c
 MESSAGE MSG_PROG_CORRUPTED
-Critical file damaged! %s is corrupt. Please reinstall software. 
+Critical file damaged!
+
+%s is corrupt.
+
+Please reinstall software. 
 HELP
 A critical file is corrupt. Unfortunately it will be necessary to reinstall the software or contact the XTrackCAD project development team at SourceForge in order to overcome this error.
 
@@ -893,19 +960,15 @@ END
 
 # dbitmap.c
 MESSAGE MSG_BITMAP_SIZE_WARNING
-You have specified a large Bitmap. Are you sure you want to continue?
+You have specified a large Bitmap.
+
+Are you sure you want to continue?
 HELP
 Bitmaps can use a large amount of system resources. They may also take a long time to generate and create a large file.
 
 Refer to \k{cmdOutputbitmap} for detail.
 END
 
-#ccornu.c
-MESSAGE MSG_JOIN_CORNU_SAME
-Trying to join two ends of a cornu to the same track. 
-HELP
-A Cornu join can't join to two open ends of the same track.
-END
 
 
 ############################################################
@@ -920,7 +983,8 @@ END
 
 # various
 MESSAGE MSG_OPEN_FAIL
-Cannot open %s file: %s:%s
+Cannot open %s file:
+%s:%s
 #NOHELP
 END
 
@@ -932,19 +996,26 @@ END
 
 # various
 MESSAGE MSG_CARIMP_EOL
-End-Of-Line is unexpected in a quoted field. %s. Do you want to continue reading the file?
+End-Of-Line is unexpected in a quoted field.
+%s
+
+Do you want to continue reading the file?
 #NOHELP
 END
 
 # various
 MESSAGE MSG_CARIMP_MISSING_COMMA
-A comma was expected after this quoted field. %s. Do you want to continue reading the file?
+A comma was expected after this quoted field.
+%s
+
+Do you want to continue reading the file?
 #NOHELP
 END
 
 # various
 MESSAGE MSG_WRITE_FAILURE
-Error %s occurred while writing %s. Please check disk space and system status.
+Error \\"%s\\" occurred while writing %s.
+Please check disk space and system status.
 #NOHELP
 END
 
@@ -956,9 +1027,13 @@ END
 
 # cgroup.c:doGroup
 MESSAGE MSG_CANT_GROUP_BUMPER2
-At least one path for the Turnout T%d does not terminate on an endpoint. Such a track cannot be grouped. The track has been unselected.
+At least one path for the Turnout T%d does not
+terminate on an endpoint. Such a track cannot be grouped.  
+The track has been unselected.
 #NOHELP
 END
+
+
 
 # cprofile
 MESSAGE MSG_INV_PET_ON_PATH
@@ -994,19 +1069,30 @@ END
 
 # cpull.c
 MESSAGE MSG_PULL_ERROR_1
-The tracks cannot be connected together. Try changing some tracks for a closer fit or increase the Connection Angle value on the Preferences dialog.
+The tracks cannot be connected together.
+
+Try changing some tracks for a closer fit
+or increase the Connection Angle value on
+the Preferences dialog.
 #NOHELP
 END
 
 # cpull.c
 MESSAGE MSG_PULL_ERROR_2
-The tracks cannot be connected together. Try changing some tracks for a closer fit or increase the Connection Distance and Angle values on the Preferences dialog.
+The tracks cannot be connected together.
+
+Try changing some tracks for a closer fit
+or increase the Connection Distance and
+Angle values on the Preferences dialog
 #NOHELP
 END
 
 # cpull.c
 MESSAGE MSG_PULL_ERROR_3
-The tracks cannot be connected together. Try changing some tracks for a closer fit or increase the Connection Distance.
+The tracks cannot be connected together.
+
+Try changing some tracks for a closer fit
+or increase the Connection Distance
 #NOHELP
 END
 
@@ -1014,12 +1100,14 @@ END
 
 #cselect.c: cmdRotate
 MESSAGE MSG_1ST_TRACK_MUST_BE_SELECTED
-The first track for the Align Rotate command must be Selected.
+The first track for the Align
+Rotate command must be Selected.
 END
 
 #cselect.c: cmdRotate
 MESSAGE MSG_2ND_TRACK_MUST_BE_UNSELECTED
-The second track for the Align Rotate command must be Unselected.
+The second track for the Align
+Rotate command must be Unselected.
 END
 
 # cselect.c
@@ -1040,7 +1128,11 @@ END
 
 # ctodesgn.c
 MESSAGE MSG_TODSGN_NO_CONVERGE
-According to values that have been entered the diverging track does not connect with the tangent track. Please check the values entered and try again. Check the angle is entered as a frog number or in degrees as specified by Angle Mode radio buttons.
+According to values that have been entered the diverging
+track does not connect with the tangent track. Please
+check the values entered and try again. Check the angle
+is entered as a frog number or in degrees as specified
+by Angle Mode radio buttons.
 #NOHELP
 END
 
@@ -1056,29 +1148,36 @@ END
 
 # dcar.c
 MESSAGE MSG_CARDESC_BAD_COUPLER_LENGTH_VALUE
-The Coupled Length must be greater than the Car Length, and the Coupler Length must be greater than 0.
+The Coupled Length must be greater than the Car Length,
+and the Coupler Length must be greater than 0.
 END
 
 # dcar.c
 MESSAGE MSG_CARDESC_BAD_DIM_VALUE
-The Car Length value must be greaterthan the Car Width value.
+The Car Length value must be greater
+than the Car Width value.
 END
 
 # dcar.c
 MESSAGE MSG_CARITEM_BAD_INDEX
-The specified Index is already in use. The Index will be updated to the next available value.
+The specified Index is already in use.
+The Index will be updated to the next available value.
 END
 
 #dcar.c
 MESSAGE MSG_CARDESC_CHANGED
-You have changed values for this object. Are you sure you want to Close?
+You have changed values for this object.
+
+Are you sure you want to Close?
 END
 
 
 
 # fileio.c
 MESSAGE MSG_BAD_FILE_VERSION
-File version %ld is lower than the minimum supported version %d. You need to update your layout file using an older version of %s.
+File version %ld is lower than the minimum
+supported version %d. You need to update your
+layout file using an older version of %s
 #NOHELP
 END
 
@@ -1086,7 +1185,8 @@ END
 
 # macro.c
 MESSAGE MSG_CANT_READ_DEMO
-%s cannot read the demo file: %s.
+%s cannot read the demo file:
+%s
 #NOHELP
 END
 
@@ -1104,13 +1204,17 @@ END
 
 #macro.c
 MESSAGE MSG_PLAYBACK_UNK_CMD
-Unknown playback command (%d) %s
+Unknown playback command (%d)
+%s
 #NOHELP
 END
 
 # macro.c
 MESSAGE MSG_PLAYBACK_VERSION_DOWNGRADE
-Playback file version %ld is lower than the minimum supported version %d. You need to update your layout file using an older version of %s.
+Playback file version %ld is lower than the
+minimum supported version %d.
+You need to update your layout file using an
+older version of %s
 #NOHELP
 END
 
@@ -1122,7 +1226,8 @@ END
 
 # misc2.c
 MESSAGE MSG_BAD_SCALE_NAME
-Scale %s is not valid Please check your %s.xtq file.
+Scale %s is not valid
+Please check your %s.xtq file
 #NOHELP
 END
 

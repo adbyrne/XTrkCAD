@@ -8,6 +8,10 @@ SET(SOURCES
 	spiroentrypoints.c
 	spiro.c
 	)
+	
+SET(HEADERS 
+	spiro.h
+	)
 
 
 INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})

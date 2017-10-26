@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <signal.h>
+#include <string.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -82,7 +83,7 @@ int wNoticeEx(int type,
     unsigned flag;
     char *headline;
     GtkWidget *dialog;
-    GtkWindow *parent = GTK_WINDOW_TOPLEVEL;
+    GtkWindow *parent = NULL;
 
     switch (type) {
     case NT_INFORMATION:

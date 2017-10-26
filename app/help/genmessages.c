@@ -75,7 +75,8 @@ TranslateString( char *srcString, struct transTbl *trTbl )
 
    /* calculate the expected result length */
    for( cp = srcString; *cp; cp++ )
-   	if( idx == strchr( trTbl->inChar, *cp ))         /* does character need translation ? */
+	idx = strchr( trTbl->inChar, *cp );
+   	if( idx )         			/* does character need translation ? */
       	bufLen += strlen( (trTbl->outChar)[idx - trTbl->inChar ] ) - 1; /* yes, extend buffer accordingly */
 
    /* allocate memory for result */
@@ -85,7 +86,8 @@ TranslateString( char *srcString, struct transTbl *trTbl )
 		/* copy and translate characters as needed */
       cp2 = destString;
       for( cp = srcString; *cp; cp++ ) {
-      	if( idx == strchr( trTbl->inChar, *cp )) {       /* does character need translation ? */
+    	idx = strchr( trTbl->inChar, *cp );
+      	if( idx != NULL ) {       /* does character need translation ? */
          	strcpy( cp2, (trTbl->outChar)[idx - trTbl->inChar ] );   /* yes, copy the escaped character sequence */
             cp2 += strlen((trTbl->outChar)[idx - trTbl->inChar ] );
          } else {

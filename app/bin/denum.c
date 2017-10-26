@@ -31,6 +31,7 @@
 #include "param.h"
 #include "paths.h"
 #include "track.h"
+#include "utility.h"
 
 static wWin_p enumW;
 

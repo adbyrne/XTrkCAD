@@ -118,7 +118,7 @@ WlibApplySettings(GtkPrintOperation *op)
             dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
                                             GTK_DIALOG_DESTROY_WITH_PARENT,
                                             GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-                                            err->message);
+                                            "%s",err->message);
             gtk_dialog_run(GTK_DIALOG(dialog));
             gtk_widget_destroy(dialog);
         } else {
@@ -144,7 +144,7 @@ WlibApplySettings(GtkPrintOperation *op)
             dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
                                             GTK_DIALOG_DESTROY_WITH_PARENT,
                                             GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-                                            err->message);
+                                            "%s",err->message);
             gtk_dialog_run(GTK_DIALOG(dialog));
             gtk_widget_destroy(dialog);
         } else {
@@ -193,7 +193,7 @@ WlibSaveSettings(GtkPrintOperation *op)
         dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
                                         GTK_DIALOG_DESTROY_WITH_PARENT,
                                         GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-                                        err->message);
+                                        "%s",err->message);
 
         g_error_free(err);
         gtk_dialog_run(GTK_DIALOG(dialog));
@@ -216,7 +216,7 @@ WlibSaveSettings(GtkPrintOperation *op)
         dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
                                         GTK_DIALOG_DESTROY_WITH_PARENT,
                                         GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-                                        err->message);
+                                        "%s",err->message);
 
         g_error_free(err);
         gtk_dialog_run(GTK_DIALOG(dialog));
@@ -902,7 +902,7 @@ doPrintJobFinished(GtkPrintJob *job, void *data, GError *err)
         dialog = gtk_message_dialog_new(GTK_WINDOW(gtkMainW->gtkwin),
                                         GTK_DIALOG_DESTROY_WITH_PARENT,
                                         GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE,
-                                        err->message);
+                                        "%s",err->message);
     }
 }
 

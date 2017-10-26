@@ -29,6 +29,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
+#include <messages.h>
 
 #include "ccurve.h"
 #include "compound.h"
@@ -36,7 +37,7 @@
 #include "custom.h"
 #include "fileio.h"
 #include "i18n.h"
-#include "messages.h"
+
 #include "param.h"
 #include "track.h"
 #include "utility.h"
