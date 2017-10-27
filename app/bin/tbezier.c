@@ -604,14 +604,18 @@ static BOOL_T SplitBezier( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover
     BOOL_T track;
     track = IsTrack(trk);
     
-    coOrd newl[4], newr[4];
+    coOrd current[4], newl[4], newr[4];
 
     double dd = DistanceBezier(trk, &pos);
     if (dd>minLength) return FALSE;
     
     BezierMathDistance(&pos, xx->bezierData.pos, 500, &t);  //Find t value
 
-    BezierSplit(&pos, &newl[0], &newr[0], t);
+    for (int i=0;i<4;i++) {
+    	current[i] = xx->bezierData.pos[i];
+    }
+
+    BezierSplit(current, newl, newr, t);
 
     if (track) {
     	trk1 = NewBezierTrack(ep?newr:newl,NULL,0);
@@ -1387,32 +1391,56 @@ extern coOrd BezierMathFindNearestPoint(coOrd *pos, coOrd p[4], int segments) {
     return BezierPointByParameter(p, t);
 }
 
+void BezierSlice(coOrd input[], coOrd output[], double t) {
+	coOrd p1,p12,p2,p23,p3,p34,p4;
+	coOrd p123, p234, p1234;
+
+	    p1 = input[0];
+	    p2 = input[1];
+	    p3 = input[2];
+	    p4 = input[3];
+
+	    p12.x = (p2.x-p1.x)*t+p1.x;
+	    p12.y = (p2.y-p1.y)*t+p1.y;
+
+	    p23.x = (p3.x-p2.x)*t+p2.x;
+	    p23.y = (p3.y-p2.y)*t+p2.y;
+
+	    p34.x = (p4.x-p3.x)*t+p3.x;
+	    p34.y = (p4.y-p3.y)*t+p3.y;
+
+	    p123.x = (p23.x-p12.x)*t+p12.x;
+	    p123.y = (p23.y-p12.y)*t+p12.y;
+
+	    p234.x = (p34.x-p23.x)*t+p23.x;
+	    p234.y = (p34.y-p23.y)*t+p23.y;
+
+	    p1234.x = (p234.x-p123.x)*t+p123.x;
+	    p1234.y = (p234.y-p123.y)*t+p123.y;
+
+	    output[0]= p1;
+	    output[1] = p12;
+	    output[2] = p123;
+	    output[3] = p1234;
+
+};
+
 /**
  * Split bezier into two parts
  */
-extern void BezierSplit(coOrd input[4], coOrd left[4], coOrd right[4] , double t) {
+extern void BezierSplit(coOrd input[], coOrd left[], coOrd right[] , double t) {
 
-    int   i, j;                               /* Index variables  */
-    coOrd  Vtemp[4][4];                      /* Triangle Matrix */
-    /* Copy control points  */
-    for (j =0; j <= 3; j++)
-        Vtemp[0][j] = input[j];
+	BezierSlice(input,left,t);
 
-    /* Triangle computation */
-    for (i = 1; i <= 3; i++) {
-        for (j =0 ; j <= 3 - i; j++) {
-            Vtemp[i][j].x =
-            (1-t) * Vtemp[i-1][j].x + t * Vtemp[i-1][j+1].x;
-            Vtemp[i][j].y =
-            (1-t) * Vtemp[i-1][j].y + t * Vtemp[i-1][j+1].y;
+	coOrd back[4],backright[4];
 
-        }                                   /* end for i */
-    }                                       /* end for j */
-    for (j =0;j <=3;j++)
-        left[j]  = Vtemp[j][0];
-
-    for (j = 0;j <=3;j++)
-        right[j] = Vtemp[3-j][j];
+	for (int i = 0;i<4;i++) {
+		back[i] = input[3-i];
+	}
+	BezierSlice(back,backright,1-t);
+	for (int i = 0;i<4;i++) {
+		right[i] = backright[3-i];
+	}
 
 }
 
