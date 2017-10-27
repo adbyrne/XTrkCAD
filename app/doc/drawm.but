@@ -86,11 +86,11 @@ To complete the command, drag on the red arrows to adjust the curve.
 
 \u000
 
-\dd \G{png.d/dbezier.png} Drag out control point from one end of the curve and then drag out the second control point from the other end.
+\dd \G{png.d/dbezier.png} \e{Left-Drag} out control point from one end of the curve and then \e{Left-Drag} out the second control point from the other end.
 
 If Shift is held down while the end points are selected, the curve will lock to the ends of nearby line objects and so the control points can only move at the right angle.
 
-To adjust the curve, pick and drag an end or a control point. Hit Enter to accept, Esc to reject.
+To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a control point. Hit \e{Enter} to accept, \e{Esc} to reject.
 
 \rule
 

@@ -368,7 +368,7 @@ For detail about;
 
 \u000
 
-\dd \e{Drag} the endpoint to where you want it and release the button. The point will only move along the piece of track with the open endpoint (if this track type can be split) as far as the opposite end, or as an extension of that track with the same curvature (if this track can be extended). Note that you will be able to fine-tune the position later.
+\dd \e{Left-Drag} the endpoint to where you want it and release the button. The point will only move along the piece of track with the open endpoint (if this track type can be split) as far as the opposite end, or as an extension of that track with the same curvature (if this track can be extended). Note that you will be able to fine-tune the position later.
 
 \lcont{
 
@@ -380,7 +380,7 @@ For detail about;
 
 }
 
-\dd \e{Left-Click} the endpoint of the other track being joined. Anothe red dot within a circle will appear at that end of the join.
+\dd \e{Left-Click} the endpoint of the other track being joined. Another red dot within a circle will appear at that end of the join.
 
 \u000
 
@@ -396,7 +396,7 @@ For detail about;
 
 }
 
-\dd You are now in "Select Points" mode. You can select an end point with \e{Left-Click} and move it with \e{Left-Drag}.
+\dd You are now in "Select Points" mode. You can select one end point at a time with \e{Left-Click} and move it with \e{Left-Drag}.
 
 \u000
 
@@ -530,13 +530,15 @@ For detail about;
 
 \G{png.d/bmodify.png}
 
-The \f{Modify} command is used to change characteristics of or extend existing track by adding new track. This command works with any unconnected track endpoint.
+The \f{Modify} command is used to change characteristics of or extend existing track by adding new track. This command works with any unconnected track endpoint, or with a Cornu or Bezier even if connected
 
 The \f{Modify} command can be invoked using the \f{Change>Modify} menu item, the \f{Modify} button or the menu raised by a \e{Right-Click} over the \f{Main Canvas}.
 
 Either the left mouse button (for changing length or creating a tangent track) or the right mouse button (for extending with a new track) is used to modify the unconnected endpoint.
 
 The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.  A \e{Box} is treated as 4 Lines.
+
+The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be chnaged.
 
 \e{Curved Lines} are modified in same manner as curved track.
 
@@ -559,6 +561,14 @@ For detail about;
 \u000
 
 \dd Extending track length refer to \K{extendTrack}
+
+\u000
+
+\dd Modifying a Cornu refer to \K{chgCornu}
+
+\u000
+
+\dd Modifying a Bezier refer to \K{chgBezier}
 
 \rule
 
@@ -690,6 +700,45 @@ For detail about;
 
 \rule
 
+\S2{chgCornu} Modifying a Cornu
+
+Because a Cornu is defined by its end points position, angle and radius - it can only be modified by dragging an end point.
+
+\n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
+
+\lcont{\u000}
+
+\n Click on the track. The track ends will turn into roundels
+
+\lcont{\u000}
+
+\n \e{Left-Click} the endpoint and \e{Left-Drag} it to move the endpoint along the connected track.
+
+\lcont{\u000}
+
+\n Once you are happy, hit the \e{spacebar} or \e{Enter}, or to cancel hit \e{Escape}.
+
+\rule
+
+\S2{chgCornu} Modifying a Bezier
+
+Because a Bezier is defined by its control points position - it can only be modified by dragging an control point.
+
+\n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
+
+\lcont{\u000}
+
+\n Click on the track. The control points will appear
+
+\lcont{\u000}
+
+\n \e{Left-Click} the control point and \e{Left-Drag} it to move it.
+
+\lcont{\u000}
+
+\n Once you are happy, hit the \e{spacebar} or \e{Enter}, or to cancel hit \e{Escape}.
+
+\rule
 
 \S{cmdMove} Move
 
