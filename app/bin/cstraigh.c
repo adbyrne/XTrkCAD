@@ -37,7 +37,7 @@ static struct {
 		coOrd pos0, pos1;
 		track_p trk;
 		EPINX_T ep;
-		
+		BOOL_T down;
 		} Dl;
 
 
@@ -50,6 +50,11 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	switch (action) {
 
 	case C_START:
+		Dl.pos0=pos;
+		Dl.pos1=pos;
+		Dl.trk = NULL;
+		Dl.ep=-1;
+		Dl.down = FALSE;
 		InfoMessage( _("Place 1st end point of Straight track + Shift -> snap to unconnected endpoint") );
 		return C_CONTINUE;
 
@@ -66,13 +71,19 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			   		pos = GetTrkEndPos(t, ep);
 			   		found = TRUE;
 			   } else {
+				   InfoMessage(_("No Unconnected end-point on track - Try again or release shift and click"));
+				   Dl.pos0=pos;
+				   Dl.pos1=pos;
 				   return C_CONTINUE;
 			   }
 			} else {
-				ErrorMessage(_("Not on a Track"));
+				InfoMessage(_("Not on a Track - Try again or release shift and click"));
+				Dl.pos0=pos;
+				Dl.pos1=pos;
 				return C_CONTINUE;
 			}
-		} 	
+		} 
+		Dl.down = TRUE;	
 		if (!found) SnapPos( &pos );
 		Dl.pos0 = pos;
 		InfoMessage( _("Drag to place 2nd end point") );
@@ -85,6 +96,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_MOVE:
+		if (!Dl.down) return C_CONTINUE;
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		ANGLE_T angle, angle2;
 		if (Dl.trk) {
@@ -104,6 +116,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_UP:
+		if (!Dl.down) return C_CONTINUE;
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		tempSegs_da.cnt = 0;
 		if (Dl.trk) {
@@ -129,6 +142,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	case C_REDRAW:
 	case C_CANCEL:
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		Dl.down = FALSE;
 		return C_CONTINUE;
 
 	default:
