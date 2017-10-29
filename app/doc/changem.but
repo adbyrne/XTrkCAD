@@ -720,7 +720,7 @@ Because a Cornu is defined by its end points position, angle and radius - it can
 
 \rule
 
-\S2{chgCornu} Modifying a Bezier
+\S2{chgBezier} Modifying a Bezier
 
 Because a Bezier is defined by its control points position - it can only be modified by dragging an control point.
 
