@@ -675,7 +675,7 @@ EXPORT STATUS_T AdjustBezCurve(
 
 		if (track && (Da.selectPoint == 0 || Da.selectPoint == 3)) {  //EPs
 			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Snap Track
-				if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) { //Snap to endPoint
+				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) { //Snap to endPoint
 					ep = PickUnconnectedEndPointSilent(p, t);
 					if (ep != -1) {
 						Da.trk[Da.selectPoint/3] = t;
@@ -973,7 +973,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			EPINX_T ep;
 			if (Da.track) {
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Snap Track
-					if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) {
+					if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 						ep = PickUnconnectedEndPointSilent(p, t);
 						if (ep != -1) {
 							Da.trk[end] = t;

@@ -1011,7 +1011,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			BOOL_T found = FALSE;
 			int end = Da.state==NONE?0:1;
 			EPINX_T ep;
-		    if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) {
+		    if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 				ep = PickUnconnectedEndPointSilent(p, t);
 				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  //Ignore Turntable Unconnected
 				if	((ep==-1 && !QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) || (ep>=0 && FindDistance(p,GetTrkEndPos(t,ep))>2)) {

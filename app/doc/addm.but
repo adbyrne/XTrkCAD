@@ -106,24 +106,28 @@ You can join to and from circles, after which they become curved tracks.
 
 Creating a curve is a two step operation.  The four methods (with their Shortcut keys) used to create a Curved Track are:
 
-\dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release.  Click and Drag to position the second endpoint.
+\dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release.  Click and Drag the red arrows to position the second endpoint. 
+If Shift is held down when the first endpoint is being placed and the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you can drag out the second end aligned to that track. After a track is competed, the new track will be connected to this first track.
 
 \u000
 
 \dd \G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release.  Click and Drag to position the second endpoint.
+If Shift is held down when the first endpoint is being placed and the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you can drag out the center at right angles aligned to that end. After a track is competed, the new track will be connected to this first track.
 
 \u000
 
 \dd \G{png.d/bcurve3.png} (\c{Control-6}) Drag from the Center of the Curved track to one of the endpoints and release.  Click and Drag to position the second endpoint.
+Shift has no effect.
 
 \u000
 
 \dd \G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.  Click on the center of the track and Drag to form the Curve.
+Shift has no effect.
 
 \u000
 
-\dd \G{png.d/bezier.png} Place one endpoint and drag out the first control point and release, Place the second Endpoint and drag out the second control point and release. Once all 4 points are placed, you can pick one at a time and drag it to move it. Complete the Curve by pressing Enter, or Reject it Esc.
-If Shift is held down when an endpoint is being placed it will "Snap" to an open track endpoint underneath it and you can only drag out the control point at the right angle. After a track is competed, it will be connected to this track.
+\dd \G{png.d/bezier.png} Place one endpoint and drag out the first control point and release, Place the second Endpoint and drag out the second control point and release. Once all 4 points are placed, you can pick one at a time and drag it to move it. Complete the Curve by pressing Enter, or Reject it with Esc.
+If Shift is held down when either endpoint is being placed it will "Snap" to an open track endpoint of the track underneath the cursor and you can only drag out the control point aligned to the end of the track. After the new track is competed, it will be connected to this existing track.
 
 \u000
 
@@ -224,6 +228,7 @@ It is possible to create tracks that abut (the endpoints are very close and alig
 \G{png.d/bstraigh.png}
 
 Straight track is a created by selecting the first endpoint then dragging the cursor to the point where you want the second endpoint to be.
+If Shift is held down when the first endpoint is being placed and the cursor is on a track, the new straight end will "Snap" to the nearest open track endpoint and you can drag out the second end aligned to that track. After a track is competed, the new track will be connected to the existing track.
 
 If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid.
 

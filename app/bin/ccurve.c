@@ -143,7 +143,7 @@ EXPORT STATUS_T CreateCurve(
 		    BOOL_T found = FALSE;
 		    Da.trk = NULL;	    
 			if ((mode == crvCmdFromEP1 || mode == crvCmdFromTangent) && track && (MyGetKeyState() & WKEY_SHIFT) != 0) {
-				if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) {
+				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 			   		EPINX_T ep = PickUnconnectedEndPoint(p, t);
 			   		if (ep != -1) {
 			   			Da.trk = t;
@@ -172,7 +172,7 @@ EXPORT STATUS_T CreateCurve(
 				tempSegs(0).color = color;
 				tempSegs(0).width = width;
 				if (Da.trk) message(_("End Locked: Drag out curve start"));
-				else message( _("Drag along curve start") );
+				else message(_("Drag along curve start") );
 				break;
 			case crvCmdFromTangent:
 			case crvCmdFromCenter:

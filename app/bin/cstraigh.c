@@ -63,7 +63,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		BOOL_T found = FALSE;
 		Dl.trk = NULL;
 		if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
-			if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) {
+			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 			   EPINX_T ep = PickUnconnectedEndPoint(p, t);
 			   if (ep != -1) {
 			   		Dl.trk = t;
@@ -82,7 +82,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 				Dl.pos1=pos;
 				return C_CONTINUE;
 			}
-		} 
+		}
 		Dl.down = TRUE;	
 		if (!found) SnapPos( &pos );
 		Dl.pos0 = pos;
