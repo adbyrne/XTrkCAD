@@ -1073,19 +1073,20 @@ static void MoveTracks(
 						endRadius = trackParms.arcR;
 						endCenter = trackParms.arcP;
 					}
+					DrawTrack(trk1,&mainD,wDrawColorWhite);
+					DrawTrack(trk1,&mapD,wDrawColorWhite);
 					endAngle = NormalizeAngle(GetTrkEndAngle(trk,ep)+180);
-					if (SetCornuEndPt(trk1,ep1,GetTrkEndPos(trk,ep),endCenter,endAngle,endRadius))
+					if (SetCornuEndPt(trk1,ep1,GetTrkEndPos(trk,ep),endCenter,endAngle,endRadius)) {
 						ConnectTracks(trk,ep,trk1,ep1);
-					else {
+						DrawTrack(trk1,&mainD,wDrawColorBlack);
+						DrawTrack(trk1,&mapD,wDrawColorBlack);
+					} else {
 						DeleteTrack(trk1,TRUE);
 						ErrorMessage(_("Cornu too tight - it was deleted"));
 					}
-					if (QueryTrack(trk1,Q_EXCEPTION)) {
-
-					}
 				} else {
-					if (QueryTrack(trk,Q_IS_CORNU)) {
-						GetTrackParams(PARAMS_CORNU,trk1,GetTrkEndPos(trk,ep),&trackParms);
+					if (QueryTrack(trk,Q_IS_CORNU)) {		//I am a Cornu myself!
+						GetTrackParams(PARAMS_CORNU,trk1,GetTrkEndPos(trk1,ep1),&trackParms);
 						if (trackParms.type == curveTypeStraight) {
 							endRadius = 0;
 							endCenter = zero;
@@ -1093,12 +1094,17 @@ static void MoveTracks(
 							endRadius = trackParms.arcR;
 							endCenter = trackParms.arcP;
 						}
+						DrawTrack(trk,&mainD,wDrawColorWhite);
+						DrawTrack(trk1,&mapD,wDrawColorWhite);
 						endAngle = NormalizeAngle(GetTrkEndAngle(trk1,ep1)+180);
-						if (SetCornuEndPt(trk,ep,GetTrkEndPos(trk1,ep1),endCenter,endAngle,endRadius))
+						if (SetCornuEndPt(trk,ep,GetTrkEndPos(trk1,ep1),endCenter,endAngle,endRadius)) {
 							ConnectTracks(trk,ep,trk1,ep1);
-						else {
-							DeleteTrack(trk,TRUE);
-							ErrorMessage(_("Cornu too tight - it was deleted"));
+							DrawTrack(trk,&mainD,wDrawColorBlack);
+							DrawTrack(trk,&mapD,wDrawColorBlack);
+						} else {
+							ErrorMessage(_("Cornu selected too tight after move - it was left alone"));
+							DrawTrack(trk,&mainD,wDrawColorBlack);
+							DrawTrack(trk,&mapD,wDrawColorBlack);
 						}
 					}
 				}
