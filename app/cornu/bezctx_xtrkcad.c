@@ -211,9 +211,3 @@ BOOL_T bezctx_xtrkcad_close(bezctx *z) {
 }
 
 
-void
-bezctx_to_xtrkcad(bezctx *z)
-{
-    bezctx_xtrkcad *bc = (bezctx_xtrkcad *)z;
-
-}

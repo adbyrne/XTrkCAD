@@ -1,21 +1,24 @@
 /** \file tcornu.c
+ *
  * CORNU SPIRAL TRACK
  *
- * A cornu is a spiral arc defined by a polynomial that has the property
+ * A Cornu is a spiral arc defined by a polynomial that has the property
  * that curvature varies linearly with distance along the curve. It is a family
  * of curves that include Euler spirals.
  *
  * In order to be useful in XtrkCAD it is defined as a set of Bezier curves each of
  * which is defined as a set of circular arcs and lines.
  *
- * The derivation of the beziers is done by the cornu library which must be recalled
+ * The derivation of the Beziers is done by the Cornu library which must be recalled
  * whenever a change is made in the end conditions.
  *
  * A cornu has a minimum radius and a maximum rate of change of radius.
  *
- */
-
-/*  XTrkCad - Model Railroad CAD
+ * Acknowledgment is given to Dr. Raph Levien whose seminal PhD work on Cornu curves and
+ * generous open-sourcing of his libraries both inspired and powers this function.
+ *
+ *
+ *  XTrkCad - Model Railroad CAD
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -31,6 +34,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
 
 #include "track.h"
 #include "draw.h"
@@ -142,7 +146,6 @@ EXPORT char * CreateSegPathList(track_p trk) {
 
 static void GetCornuAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
-    struct extraData *xx = GetTrkExtraData(trk);
     assert( trk != NULL );
     
         *a0 = NormalizeAngle( GetTrkEndAngle(trk,0) );
@@ -402,10 +405,9 @@ static void DescribeCornu( track_p trk, char * str, CSIZE_T len )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	DIST_T d;
-	int fix0, fix1 = 0;
 
 	d = xx->cornuData.length;
-    sprintf( str, _("Cornu Track(%d): Layer=%d MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,%0.3f]"),
+    sprintf( str, _("Cornu Track(%d): Layer=%u MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,%0.3f]"),
     			GetTrkIndex(trk),
 				GetTrkLayer(trk)+1,
 				FormatDistance(xx->cornuData.minCurveRadius),
@@ -413,11 +415,6 @@ static void DescribeCornu( track_p trk, char * str, CSIZE_T len )
 				PutDim(xx->cornuData.pos[0].x),PutDim(xx->cornuData.pos[0].y),
                 PutDim(xx->cornuData.pos[1].x),PutDim(xx->cornuData.pos[1].y)
                 );
-
-	if (GetTrkType(trk) == T_CORNU) {
-		fix0 = GetTrkEndTrk(trk,0)!=NULL;
-		fix1 = GetTrkEndTrk(trk,1)!=NULL;
-	}
 
 	cornData.length = xx->cornuData.length;
 	cornData.minRadius = xx->cornuData.minCurveRadius;
@@ -495,7 +492,6 @@ static DIST_T DistanceCornu( track_p t, coOrd * p )
 static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 {
 	struct extraData *xx = GetTrkExtraData(t);
-		track_p tt = t;
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
 	if (GetTrkWidth(t) == 2)
@@ -787,19 +783,16 @@ static BOOL_T TraverseCornu( traverseTrack_p trvTrk, DIST_T * distR )
 	struct extraData *xx = GetTrkExtraData(trk);
 	DIST_T dist = *distR;
 	segProcData_t segProcData;
-	BOOL_T backwards=FALSE;
-	BOOL_T reverse_seg = FALSE;
 	BOOL_T cornu_backwards= FALSE;
 	BOOL_T neg = FALSE;
 	DIST_T d = 10000;
 	coOrd pos1, pos2 = trvTrk->pos;
 	ANGLE_T a1,a2;
-	int inx,inx2, segInx, BezSegInx = 0;
+	int inx, segInx = 0;
 	EPINX_T ep;
 	BOOL_T back;
 LOG( log_traverseCornu, 1, ( "TraverseCornu [%0.3f %0.3f] A%0.3f D%0.3f \n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ))
 	trkSeg_p segPtr = (trkSeg_p)xx->cornuData.arcSegs.ptr;
-	trkSeg_p subSegPtr;
 
 	a2 = GetAngleSegs(		  						//Find correct Segment and nearest point in it
 				xx->cornuData.arcSegs.cnt,segPtr,
@@ -829,9 +822,9 @@ LOG( log_traverseCornu, 1, ( "  GetSubA A%0.3f I%d N%d B%d CB%d\n", a2, segInx, 
 	while (inx >=0 && inx<xx->cornuData.arcSegs.cnt) {
 		segPtr = (trkSeg_p)xx->cornuData.arcSegs.ptr+inx;  	    //move in to the identified Bezier segment
 		SegProc( SEGPROC_TRAVERSE1, segPtr, &segProcData );
-		backwards = segProcData.traverse1.backwards;			//do we process this segment backwards?
-		reverse_seg = segProcData.traverse1.reverse_seg;		//Info only
-		BezSegInx = segProcData.traverse1.BezSegInx;			//Which subSeg was it?
+		BOOL_T backwards = segProcData.traverse1.backwards;			//do we process this segment backwards?
+		BOOL_T reverse_seg = segProcData.traverse1.reverse_seg;		//Info only
+		int BezSegInx = segProcData.traverse1.BezSegInx;			//Which subSeg was it?
 
 		dist += segProcData.traverse1.dist;						//Add in the part of the Bezier to get to pos
 
@@ -861,7 +854,7 @@ LOG( log_traverseCornu, 2, ( " TraverseCornuL D%0.3f A%0.3f I%d \n", dist, angle
 	*distR = dist;												//Tell caller what dist is left
 
 	trvTrk->pos = GetTrkEndPos(trk,ep);							//Which end were we heading for?
-	trvTrk->angle = NormalizeAngle(GetTrkEndAngle(trk, ep)+cornu_backwards?180:0);
+	trvTrk->angle = NormalizeAngle(GetTrkEndAngle(trk, ep)+(cornu_backwards?180:0));
 	trvTrk->trk = GetTrkEndTrk(trk,ep);							//go onto next track (or NULL)
 
 	if (trvTrk->trk==NULL) {
@@ -897,7 +890,6 @@ static BOOL_T MergeCornu(
 	struct extraData *xx1 = GetTrkExtraData(trk1);
 	track_p trk_after,trk_before;
 	EPINX_T ep_before,ep_after=-1;
-	BOOL_T tracks = FALSE;
 	coOrd p[2];
 	coOrd c[2];
 	ANGLE_T a[2];
@@ -1112,11 +1104,8 @@ static ANGLE_T GetAngleCornu(
 }
 
 BOOL_T GetCornuSegmentFromTrack(track_p trk, trkSeg_p seg_p) {
-	struct extraData * xx = GetTrkExtraData(trk);
 	//TODO If we support Group
-
 	return TRUE;
-
 }
 
 
@@ -1262,28 +1251,6 @@ static trackCmd_t cornuCmds = {
  *
  */
 
-
-
-EXPORT void PlotCornu(
-		long mode,
-		coOrd pos0,
-		coOrd pos1,
-		coOrd pos2,
-		cornuData_t * CornuData,
-		BOOL_T constrain )
-{
-	DIST_T d0, d2, r;
-	ANGLE_T angle, a0, a1, a2;
-	coOrd posx;
-    //TODO
-    /*
-	switch ( mode ) {
-	case crvCmdFromEP1:
-            
-            
-			}
-     */
-}
 
 
 

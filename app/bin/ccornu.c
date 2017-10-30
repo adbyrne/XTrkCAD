@@ -127,7 +127,6 @@ static struct {
 		trkSeg_t trk2Seg;
 		track_p selectTrack;
 		DIST_T minRadius;
-		DIST_T maxRadiusChange;
 		} Da;
 
 
@@ -268,7 +267,6 @@ BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius
 BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p, cornuParm_t * cp) {
 
 	trackParams_t params;
-	BOOL_T ccw;
 	ANGLE_T angle;
 	for (int i=0;i<2;i++) {
 		if (trk[i]) {
@@ -441,10 +439,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 	track_p t;
 	DIST_T d;
 	ANGLE_T a, a2;
-	static coOrd pos0, pos3, p;
 	DIST_T dd;
 	EPINX_T ep;
-	int controlArm = -1;
 	cornuParm_t cp;
 
 
@@ -655,7 +651,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 	case C_UP:
 		if (Da.state != POINT_PICKED) return C_CONTINUE;
 		ep = 0;
-		BOOL_T found = FALSE;
 		DrawTempCornu();  //wipe out
 		Da.selectPoint = -1;
 		CreateBothEnds(Da.selectPoint);
@@ -670,7 +665,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 
 	case C_OK:                            //C_OK is not called by Modify.
 		if ( Da.state == PICK_POINT ) {
-			char c = (unsigned char)(action >> 8);
 			Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 			if (CornuTotalWindingArc(Da.pos,Da.crvSegs_da)>4*360) {
 				wBeep();
@@ -743,15 +737,8 @@ struct extraData {
  *
  */
 STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
-	BOOL_T track = TRUE;
 	track_p t;
-	double width = 1.0;
-	long mode = 0;
-	long cmd;
-
 	struct extraData *xx = GetTrkExtraData(trk);
-	cmd = (long)commandContext;
-
 
 	switch (action&0xFF) {
 	case C_START:
@@ -939,7 +926,7 @@ DIST_T CornuTotalWindingArc(coOrd pos[4],dynArr_t segs) {
 }
 
 DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * last_c) {
-	DIST_T r_max = 0.0, rc, lc, last_l = 0;
+	DIST_T r_max = 0.0, rc, lc = 0;
 	lc = * last_c;
 	segProcData_t segProcData;
 	if (segs.cnt == 0 ) return r_max;
@@ -973,15 +960,7 @@ DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * las
 STATUS_T CmdCornu( wAction_t action, coOrd pos )
 {
 	track_p t;
-	static int segCnt;
-	STATUS_T rc = C_CONTINUE;
-	long curveMode = 0;
-	long cmd;
 	cornuParm_t cp;
-	if (action>>8) {
-		cmd = action>>8;
-	} else cmd = (long)commandContext;
-
 
 	Da.color = lineColor;
 	Da.width = (double)lineWidth/mainD.dpi;
@@ -991,7 +970,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	case C_START:
 		Da.state = NONE;
 		Da. selectPoint = -1;
-		for (int i=0;i<4;i++) {
+		for (int i=0;i<2;i++) {
 			Da.pos[i] = zero;
 		}
 		Da.trk[0] = Da.trk[1] = NULL;
@@ -1008,7 +987,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	case C_DOWN:
 		if ( Da.state == NONE || Da.state == LOC_2) {   //Set the first or second point
 			coOrd p = pos;
-			BOOL_T found = FALSE;
 			int end = Da.state==NONE?0:1;
 			EPINX_T ep;
 		    if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
@@ -1024,7 +1002,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				if (ep ==-1) pos = p;
 				else pos = GetTrkEndPos(t,ep);
 				Da.pos[end] = pos;
-				found = TRUE;
 				InfoMessage( _("Place 2nd end point of Cornu track on unconnected end-point") );
 			} else {
 				wBeep();

@@ -1,8 +1,5 @@
 /** \file tbezier.c
- * BEZIER TRACK
- */
-
-/*  XTrkCad - Model Railroad CAD
+ /*  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -18,7 +15,24 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *****************************************************************************
+ * BEZIER TRACK (and LINE)
+ *
+ * tbezier.c has all the Track functions (for both T_BEZIER and T_BEZLIN) but all the heavy-math-lifting is delegated to cbezier.c
+ *
+ * Both Bezier Tracks and Lines are defined with two end points and two control points. Each end and control point pair is joined by a control arm.
+ * The angle between the control and end point (arm angle) determines the angle at the end point.
+ * The way the curve moves in between the ends is driven by the relative lengths of the two control arms.
+ * In general, lengthening one arm while keeping the other arm length fixed results in a curve that changes more slowly from the lengthened end and more swiftly from the other.
+ * Very un-prototypical track curves are easy to draw with Bezier, so beware!
+ *
+ * Another large user of tbezier.c is the Cornu function by way of its support for Bezier segments, which are used to approximate Cornu curves.
+ *
+ * In XTrkcad, Bezier curves are rendered into a set of Curved and Straight segments for display. This set is also saved, although the code recalculates a fresh set upon reload.
+ *
  */
+
 
 #include "track.h"
 #include "draw.h"
@@ -93,7 +107,6 @@ EXPORT void FixUpBezierSegs(trkSeg_p p,int segCnt) {
 
 static void GetBezierAngles( ANGLE_T *a0, ANGLE_T *a1, track_p trk )
 {
-    struct extraData *xx = GetTrkExtraData(trk);
     assert( trk != NULL );
     
         *a0 = NormalizeAngle( GetTrkEndAngle(trk,0) );
@@ -325,7 +338,7 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	int fix0, fix1 = 0;
 	
 	d = xx->bezierData.length;
-    sprintf( str, _("Bezier %s(%d): Layer=%d MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,%0.3f] CP1=[%0.3f,%0.3f] CP2=[%0.3f, %0.3f]"),
+    sprintf( str, _("Bezier %s(%d): Layer=%u MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,%0.3f] CP1=[%0.3f,%0.3f] CP2=[%0.3f, %0.3f]"),
 				GetTrkType(trk)==T_BEZIER?"Track":"Line",
     			GetTrkIndex(trk),
 				GetTrkLayer(trk)+1,
@@ -392,7 +405,6 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 static DIST_T DistanceBezier( track_p t, coOrd * p )
 {
 	struct extraData *xx = GetTrkExtraData(t);
-	//return BezierMathDistance(p,xx->bezierData.pos,100, &s);
 
 	DIST_T d = 100000.0;
 	coOrd p2 = xx->bezierData.pos[0];    //Set initial point
@@ -405,15 +417,13 @@ static DIST_T DistanceBezier( track_p t, coOrd * p )
 			p2 = segProcData.distance.pos1;
 		}
 	}
-    //d = BezierDistance( p, xx->bezierData.pos[0], xx->bezierData.pos[1], xx->bezierData.pos[2], xx->bezierData.pos[1], 100, NULL );
-	* p = p2;
+    * p = p2;
 	return d;
 }
 
 static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 {
 	struct extraData *xx = GetTrkExtraData(t);
-		track_p tt = t;
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
 
@@ -473,7 +483,7 @@ static BOOL_T WriteBezier( track_p t, FILE * f )
 	BOOL_T rc = TRUE;
 	BOOL_T track =(GetTrkType(t)==T_BEZIER);
 	options = GetTrkWidth(t) & 0x0F;
-	rc &= fprintf(f, "%s %d %d %ld %ld %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f \n",
+	rc &= fprintf(f, "%s %d %u %ld %ld %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f \n",
 		track?"BEZIER":"BZRLIN",GetTrkIndex(t), GetTrkLayer(t), (long)options, wDrawGetRGB(xx->bezierData.segsColor), xx->bezierData.segsWidth,
                   GetTrkScaleName(t), GetTrkVisible(t),
 				  xx->bezierData.pos[0].x, xx->bezierData.pos[0].y,
@@ -486,7 +496,6 @@ static BOOL_T WriteBezier( track_p t, FILE * f )
 			rc &= WriteEndPt( f, t, 1 );
 		}
 	rc &= WriteSegs( f, xx->bezierData.arcSegs.cnt, xx->bezierData.arcSegs.ptr );
-	//rc &= fprintf(f, "\tEND\n" )>0;
 	return rc;
 }
 
@@ -661,8 +670,6 @@ static BOOL_T TraverseBezier( traverseTrack_p trvTrk, DIST_T * distR )
 	struct extraData *xx = GetTrkExtraData(trk);
 	DIST_T dist = *distR;
 	segProcData_t segProcData;
-	BOOL_T backwards=FALSE;
-	BOOL_T reverse_seg = FALSE;
 	BOOL_T segs_backwards= FALSE;
 	DIST_T d = 10000;
 	coOrd pos2 = trvTrk->pos;
@@ -701,8 +708,8 @@ LOG( log_traverseBezier, 1, ( " TraverseBezier [%0.3f %0.3f] D%0.3f A%0.3f SB%d 
 	while (inx >=0 && inx<xx->bezierData.arcSegs.cnt) {
 		segPtr = (trkSeg_p)xx->bezierData.arcSegs.ptr+inx;  	//move in to the identified segment
 		SegProc( SEGPROC_TRAVERSE1, segPtr, &segProcData );   	//Backwards or forwards for THIS segment - note that this can differ from segs_backward!!
-		backwards = segProcData.traverse1.backwards;			//do we process this segment backwards (it is ?
-		reverse_seg = segProcData.traverse1.reverse_seg;		//is it a backwards segment (we don't actually care as Traverse1 takes care of it)
+		BOOL_T backwards = segProcData.traverse1.backwards;			//do we process this segment backwards (it is ?
+		BOOL_T reverse_seg = segProcData.traverse1.reverse_seg;		//is it a backwards segment (we don't actually care as Traverse1 takes care of it)
 
 		dist += segProcData.traverse1.dist;
 		segProcData.traverse2.dist = dist;
@@ -727,7 +734,7 @@ LOG( log_traverseBezier, 2, ( " TraverseBezierL D%0.3f A%0.3f\n", dist, angle ) 
 	*distR = dist;								//Tell caller what is left
 												//Must be at one end or another
 	trvTrk->pos = GetTrkEndPos(trk,ep);
-	trvTrk->angle = NormalizeAngle(GetTrkEndAngle(trk, ep)+segs_backwards?180:0);
+	trvTrk->angle = NormalizeAngle(GetTrkEndAngle(trk, ep)+(segs_backwards?180:0));
 	trvTrk->trk = GetTrkEndTrk(trk,ep);						//go to next track
 	if (trvTrk->trk==NULL) {
 		trvTrk->pos = pos2;
@@ -826,7 +833,6 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 	params->type = curveTypeBezier;
 	struct extraData *xx = GetTrkExtraData(trk);
 	for (int i=0;i<4;i++) params->bezierPoints[i] = xx->bezierData.pos[i];
-	//GetBezierAngles(&params->arcA0,&params->arcA1, trk);
 	params->len = xx->bezierData.length;
 	params->track_angle = GetAngleSegs(		  						//Find correct Segment and nearest point in it
 					xx->bezierData.arcSegs.cnt,xx->bezierData.arcSegs.ptr,
@@ -1093,8 +1099,7 @@ EXPORT void BezierSegProc(
 	trkSeg_p subSegsPtr;
 	coOrd temp0,temp1,temp2,temp3;
 	int inx,segInx;
-	BOOL_T back, segs_backwards, backwards, reverse_seg, neg;
-	DIST_T dist;
+	BOOL_T back, segs_backwards, neg;
 #define bezSegs(N) DYNARR_N( trkSeg_t, segPtr->bezSegs, N )
 
     switch (cmd) {
@@ -1145,11 +1150,12 @@ LOG( log_bezierSegments, 1, ( "BezTr2 Enter D%0.3f SD%d SI%d SB%d\n", data->trav
 		if (data->traverse2.dist <= segPtr->u.b.length) {
 
 			segProcData.traverse2.pos = data->traverse2.pos;
-			segProcData.traverse2.dist = dist = data->traverse2.dist;
+			DIST_T dist = data->traverse2.dist
+			segProcData.traverse2.dist = data->traverse2.dist;
 			segProcData.traverse2.angle = data->traverse2.angle;
 			segProcData.traverse2.segDir = data->traverse2.segDir;
 			segs_backwards = data->traverse2.segs_backwards;
-			backwards = data->traverse2.segDir;
+			BOOL_T backwards = data->traverse2.segDir;
 			inx = data->traverse2.BezSegInx;							//Special from Traverse1
 			while (inx>=0 && inx<segPtr->bezSegs.cnt) {
 				subSegsPtr = (trkSeg_p)segPtr->bezSegs.ptr+inx;
@@ -1171,7 +1177,7 @@ LOG( log_bezierSegments, 1, ( "BezTr2-Tr2 D%0.3f P[%0.3f %0.3f] A%0.3f\n", dist,
 				if (inx<0 || inx>=segPtr->bezSegs.cnt) break;
 				subSegsPtr = (trkSeg_p)segPtr->bezSegs.ptr+inx;
 				SegProc(SEGPROC_TRAVERSE1, subSegsPtr, &segProcData);
-				reverse_seg = segProcData.traverse1.reverse_seg;        //For Info only
+				BOOL_T reverse_seg = segProcData.traverse1.reverse_seg;        //For Info only
 				segs_backwards = segProcData.traverse1.backwards;
 				dist += segProcData.traverse1.dist;             		//Add extra if needed - this is if we have to go from the other end of this seg
 
@@ -1387,7 +1393,7 @@ extern DIST_T BezierMathDistance( coOrd * pos, coOrd p[4], int segments, double 
 
 extern coOrd BezierMathFindNearestPoint(coOrd *pos, coOrd p[4], int segments) {
     double t = 0.0;
-    double dd = BezierMathDistance(pos, p, segments, &t);
+    BezierMathDistance(pos, p, segments, &t);
     return BezierPointByParameter(p, t);
 }
 
