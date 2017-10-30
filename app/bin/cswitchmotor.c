@@ -776,11 +776,11 @@ EXPORT void CheckDeleteSwitchmotor(track_p t)
     track_p sm;
     switchmotorData_p xx;
     
-    sm = FindSwitchMotor( t );
-    if (sm == NULL) return;
-    xx = GetswitchmotorData (sm);
-    NoticeMessage(_("Deleting Switch Motor %s"),_("Ok"),NULL,xx->name);
-    DeleteTrack (sm, FALSE);
+    while ((sm = FindSwitchMotor( t ))) {	                 //Cope with multiple motors for one Turnout!
+    	xx = GetswitchmotorData (sm);
+    	InfoMessage(_("Deleting Switch Motor %s"),xx->name);
+    	DeleteTrack (sm, FALSE);
+    };
 }
 
 
