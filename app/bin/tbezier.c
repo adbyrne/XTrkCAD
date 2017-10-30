@@ -1,5 +1,5 @@
 /** \file tbezier.c
- /*  XTrkCad - Model Railroad CAD
+ *  XTrkCad - Model Railroad CAD
  *  Copyright (C) 2005 Dave Bullis
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1150,7 +1150,7 @@ LOG( log_bezierSegments, 1, ( "BezTr2 Enter D%0.3f SD%d SI%d SB%d\n", data->trav
 		if (data->traverse2.dist <= segPtr->u.b.length) {
 
 			segProcData.traverse2.pos = data->traverse2.pos;
-			DIST_T dist = data->traverse2.dist
+			DIST_T dist = data->traverse2.dist;
 			segProcData.traverse2.dist = data->traverse2.dist;
 			segProcData.traverse2.angle = data->traverse2.angle;
 			segProcData.traverse2.segDir = data->traverse2.segDir;
