@@ -42,29 +42,6 @@ SET(LIN_SOURCES
 
 GET_TARGET_PROPERTY(genhelp_EXE genhelp LOCATION)
 
-IF(XTRKCAD_USE_GETTEXT)
-	SET(GENHELP_OPTS "-bhi")
-	#
-	# Find the GnuWin32 installation directory, the gettext include should be located in subdir include
-	#
-	IF(WIN32)
-		if(MSVC)
-			# use supplied gettext library for Visual Studio
-			message( STATUS "Use simple_gettext module included with XTrackCAD" )
-			ADD_DEFINITIONS(-DUSE_SIMPLE_GETTEXT )
-		else()	
-			# for mingw & co. find libintl.h and use it
-			find_path ( INTL_PATH libintl.h )
-			if(INTL_PATH)
-				message( STATUS "Use installed gettext module" )			
-				INCLUDE_DIRECTORIES(${INTL_PATH})
-			endif(INTL_PATH)		
-		endif()		
-	ENDIF(WIN32)
-ELSE(XTRKCAD_USE_GETTEXT)
-	SET(GENHELP_OPTS "-bh")
-ENDIF(XTRKCAD_USE_GETTEXT)
-
 ADD_CUSTOM_COMMAND(
        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
        DEPENDS genhelp ${help_SOURCE_DIR}/genhelp.in
