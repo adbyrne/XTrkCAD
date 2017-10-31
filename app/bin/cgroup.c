@@ -1594,7 +1594,7 @@ EXPORT void DoGroup( void )
 	xx = NULL;
 	groupSegCnt = 0;
 	groupCompoundCount = 0;
-	trkSeg_p temp_p;
+
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
 			trkType = GetTrkType(trk);

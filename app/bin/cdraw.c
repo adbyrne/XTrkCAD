@@ -777,7 +777,6 @@ EXPORT BOOL_T OnTableEdgeEndPt( track_p trk, coOrd * pos )
 EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
 {
 	struct extraData *xx;
-	coOrd pos1 = *pos;
 
 	if (GetTrkType(trk) == T_DRAW) {
 		ignoredTableEdge = NULL;

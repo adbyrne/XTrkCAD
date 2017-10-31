@@ -198,6 +198,7 @@ static cairo_t* gtkDrawCreateCairoContext(
 
 static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_destroy(cairo);
+	return NULL;
 }
 
  void wDrawDelayUpdate(
