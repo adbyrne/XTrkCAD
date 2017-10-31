@@ -1493,7 +1493,7 @@ EXPORT BOOL_T WriteSegsEnd(
             rc &= fprintf(f,"\tSUBSEND\n");
             break;
 		case SEG_CRVLIN:
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
+			rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f\n",
 				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
 				segs[i].u.c.radius,
 				segs[i].u.c.center.x, segs[i].u.c.center.y,
