@@ -774,7 +774,51 @@ EXPORT BOOL_T OnTableEdgeEndPt( track_p trk, coOrd * pos )
 	return FALSE;
 }
 
+EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
+{
+	struct extraData *xx;
+	coOrd pos1 = *pos;
 
+	if (GetTrkType(trk) == T_DRAW) {
+		ignoredTableEdge = NULL;
+		xx = GetTrkExtraData(trk);
+		if (xx->segCnt < 1)
+			return FALSE;
+		DIST_T dd0,dd1;
+		coOrd p0,p1;
+		switch (xx->segs[0].type) {
+			case SEG_CRVLIN:
+				PointOnCircle( &p0, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius), xx->segs[0].u.c.a0 );
+				dd0 = FindDistance( *pos, p0);
+				PointOnCircle( &p1, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius), xx->segs[0].u.c.a0 + xx->segs[0].u.c.a1);
+				dd1 = FindDistance( *pos, p1);
+			break;
+			case SEG_STRLIN:
+				dd0 = FindDistance( *pos, xx->segs[0].u.l.pos[0]);
+				p0 = xx->segs[0].u.l.pos[0];
+				dd1 = FindDistance( *pos, xx->segs[0].u.l.pos[1]);
+				p1 = xx->segs[0].u.l.pos[1];
+			break;
+			case SEG_BEZLIN:
+				dd0 = FindDistance( *pos, xx->segs[0].u.b.pos[0]);
+				p0 = xx->segs[0].u.b.pos[0];
+				dd1 = FindDistance( *pos, xx->segs[0].u.b.pos[3]);
+				p1 = xx->segs[0].u.b.pos[3];
+			break;
+			default:
+				return FALSE;
+		}
+		if (dd0>dd1) {
+			* pos = p1;
+			return TRUE;
+
+		} else {
+			* pos = p0;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
 
 
 static void DrawRedraw(void);

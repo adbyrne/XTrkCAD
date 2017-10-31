@@ -988,10 +988,14 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 						return C_CONTINUE;
 					}
 				}
-			} else {
+			} else {													//Snap Bez Line to Lines
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
-					if ((t = OnTrack2(&p,TRUE, FALSE, TRUE)) != NULL);
-					else {
+					if ((t = OnTrack(&p,FALSE, FALSE)) != NULL) {
+						if (GetClosestEndPt(t,&p)) {
+							pos = p;
+							found = TRUE;
+						}
+					} else {
 						wBeep();
 						InfoMessage(_("Shift used, but no Line End there"));
 						return C_CONTINUE;
