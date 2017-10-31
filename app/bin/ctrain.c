@@ -2272,7 +2272,6 @@ void AttachTrains(void)
         if (trk!=NULL && !QueryTrack(trk, Q_ISTRACK)) {
             trk = NULL;
             }
-	coOrd pos_temp = pos;
         if (trk==NULL || GetTrkDistance(trk,&pos)>trackGauge*2.0) {
             trk = OnTrack2(&pos, FALSE, TRUE, FALSE);
         }

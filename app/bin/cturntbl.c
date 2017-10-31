@@ -635,7 +635,6 @@ static BOOL_T MoveEndPtTurntable( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d
 		return FALSE;
 	}
 	//Look for empty slot
-	int epCnt;
 	BOOL_T found = FALSE;
 	for (*ep=0; *ep<GetTrkEndPtCnt(*trk); *ep=*ep+1) {
 		if ( (GetTrkEndTrk(*trk,*ep)) == NULL )

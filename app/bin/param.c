@@ -563,6 +563,7 @@ EXPORT void ParamLoadControl(
 		case PD_DRAW:
 		case PD_MENU:
 		case PD_MENUITEM:
+		case PD_BITMAP:
 			break;
 		}
 }
@@ -695,6 +696,7 @@ EXPORT long ParamUpdate(
 		case PD_TEXT:
 		case PD_MENU:
 		case PD_MENUITEM:
+		case PD_BITMAP:
 			break;
 		}
 	}
@@ -759,6 +761,7 @@ EXPORT void ParamLoadData(
 		case PD_TEXT:
 		case PD_MENU:
 		case PD_MENUITEM:
+		case PD_BITMAP:
 			break;
 		}
 	}
@@ -867,6 +870,7 @@ static long ParamIntRestore(
 		case PD_TEXT:
 		case PD_MENU:
 		case PD_MENUITEM:
+		case PD_BITMAP:
 			break;
 		}
 	}
@@ -916,6 +920,7 @@ static void ParamIntSave(
 			case PD_TEXT:
 			case PD_MENU:
 			case PD_MENUITEM:
+			case PD_BITMAP:
 				break;
 			}
 		}
@@ -1190,6 +1195,7 @@ EXPORT void ParamGroupRecord(
 		case PD_TEXT:
 		case PD_MENU:
 		case PD_MENUITEM:
+		case PD_BITMAP:
 			break;
 		}
 	}
@@ -1781,6 +1787,7 @@ static void ParamPlayback( char * line )
 			case PD_MESSAGE:
 			case PD_TEXT:
 			case PD_MENU:
+			case PD_BITMAP:
 				break;
 			case PD_MENUITEM:
 				if (p->valueP) {
@@ -1931,6 +1938,7 @@ static void ParamCheck( char * line )
 			case PD_TEXT:
 			case PD_MENU:
 			case PD_MENUITEM:
+			case PD_BITMAP:
 				break;
 		}
 		if ( hasError ) {

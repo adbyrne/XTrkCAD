@@ -116,7 +116,7 @@ main( int argc, char **argv )
 	/*
 	 * get all files from the directory
 	 */
-	while( ent = readdir( d ))
+	while((ent = readdir(d)))
 	{
 		/*
 		 * create full file name and get the state for that file

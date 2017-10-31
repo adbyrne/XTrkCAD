@@ -411,7 +411,7 @@ void processFile(
 				while ( *tab[inx] == ' ' ) tab[inx]++;
 				cq = tab[inx]+strlen(tab[inx]);
 				while ( cq[-1] == ' ' ) cq--;
-				cq = '\0';
+				*cq = '\0';
 			}
 			for ( ; inx<sizeof tab/sizeof tab[0]; inx++ ) {
 				tab[inx] = blanks;
