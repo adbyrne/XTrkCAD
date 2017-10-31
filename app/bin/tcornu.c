@@ -786,7 +786,7 @@ static BOOL_T TraverseCornu( traverseTrack_p trvTrk, DIST_T * distR )
 	BOOL_T cornu_backwards= FALSE;
 	BOOL_T neg = FALSE;
 	DIST_T d = 10000;
-	coOrd pos1, pos2 = trvTrk->pos;
+	coOrd pos1 = trvTrk->pos, pos2 = trvTrk->pos;
 	ANGLE_T a1,a2;
 	int inx, segInx = 0;
 	EPINX_T ep;
