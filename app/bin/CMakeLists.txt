@@ -42,29 +42,6 @@ SET(LIN_SOURCES
 
 GET_TARGET_PROPERTY(genhelp_EXE genhelp LOCATION)
 
-IF(XTRKCAD_USE_GETTEXT)
-	SET(GENHELP_OPTS "-bhi")
-	#
-	# Find the GnuWin32 installation directory, the gettext include should be located in subdir include
-	#
-	IF(WIN32)
-		if(MSVC)
-			# use supplied gettext library for Visual Studio
-			message( STATUS "Use simple_gettext module included with XTrackCAD" )
-			ADD_DEFINITIONS(-DUSE_SIMPLE_GETTEXT )
-		else()	
-			# for mingw & co. find libintl.h and use it
-			find_path ( INTL_PATH libintl.h )
-			if(INTL_PATH)
-				message( STATUS "Use installed gettext module" )			
-				INCLUDE_DIRECTORIES(${INTL_PATH})
-			endif(INTL_PATH)		
-		endif()		
-	ENDIF(WIN32)
-ELSE(XTRKCAD_USE_GETTEXT)
-	SET(GENHELP_OPTS "-bh")
-ENDIF(XTRKCAD_USE_GETTEXT)
-
 ADD_CUSTOM_COMMAND(
        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
        DEPENDS genhelp ${help_SOURCE_DIR}/genhelp.in
@@ -75,7 +52,9 @@ SET(SOURCES
 	${LIN_SOURCES}
 	appdefaults.c
 	bllnhlp.c
+	cbezier.c
 	cblock.c
+	ccornu.c
 	ccurve.c
 	ccontrol.c
 	cdraw.c
@@ -135,6 +114,8 @@ SET(SOURCES
 	paths.c
 	shrtpath.c
 	smalldlg.c
+	tbezier.c
+	tcornu.c
 	tcurve.c
 	tease.c
 	track.c
@@ -147,6 +128,8 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
 INCLUDE_DIRECTORIES(${help_BINARY_DIR})
 INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${cornu_BINARY_DIR})
+INCLUDE_DIRECTORIES(${cornu_SOURCE_DIR})
 
 LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
 LINK_DIRECTORIES(${GTK_WEBKIT_LIBRARY_DIRS})
@@ -162,7 +145,8 @@ ADD_EXECUTABLE(xtrkcad WIN32
 	)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
-target_link_libraries(xtrkcad dynstring)
+TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-cornu)
+TARGET_LINK_LIBRARIES(xtrkcad dynstring)
 
 ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}

@@ -21,7 +21,6 @@
 */
 
 #include <locale.h>
-#include <malloc.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,6 +28,7 @@
 
 #ifdef WINDOWS
 #include <Windows.h>
+#include <malloc.h>
 #endif
 
 #include "common.h"

@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "ccurve.h"
+ 
 #include "cjoin.h"
 #include "cstraigh.h"
 #include "cundo.h"
@@ -36,6 +37,8 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "wlib.h"
+#include "cbezier.h"
 
 /*
  * STATE INFO
@@ -48,6 +51,7 @@ static struct {
 		curveData_t curveData;
 		track_p trk;
 		EPINX_T ep;
+		BOOL_T down;
 		} Da;
 
 static long curveMode;
@@ -107,24 +111,25 @@ EXPORT STATUS_T CreateCurve(
 	switch ( action ) {
 	case C_START:
 		DYNARR_SET( trkSeg_t, tempSegs_da, 8 );
+		Da.down = FALSE;  						//Not got a valid start yet
 		switch ( curveMode ) {
 		case crvCmdFromEP1:
 			if (track) 
-				InfoMessage( _("Drag from End-Point in direction of curve - Shift locks to track open end-point") );
+				message(_("Drag from End-Point in direction of curve - Shift locks to track open end-point") );
 			else 	
-				InfoMessage( _("Drag from End-Point in direction of curve") );
+				message (_("Drag from End-Point in direction of curve") );
 			break;
 		case crvCmdFromTangent:
 			if (track)
-				InfoMessage( _("Drag from End-Point to Center - Shift locks to track open end-point") );
+				message(_("Drag from End-Point to Center - Shift locks to track open end-point") );
 			else
-				InfoMessage( _("Drag from End-Point to Center") );
+				message(_("Drag from End-Point to Center") );
 			break;
 		case crvCmdFromCenter:
-			InfoMessage( _("Drag from Center to End-Point") );
+			message(_("Drag from Center to End-Point") );
 			break;
 		case crvCmdFromChord:
-			InfoMessage( _("Drag from one to other end of chord") );
+			message(_("Drag from one to other end of chord") );
 			break;
 		}
 		return C_CONTINUE;
@@ -138,16 +143,26 @@ EXPORT STATUS_T CreateCurve(
 		    BOOL_T found = FALSE;
 		    Da.trk = NULL;	    
 			if ((mode == crvCmdFromEP1 || mode == crvCmdFromTangent) && track && (MyGetKeyState() & WKEY_SHIFT) != 0) {
-				if ((t = OnTrack(&p, TRUE, TRUE)) != NULL) {
+				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 			   		EPINX_T ep = PickUnconnectedEndPoint(p, t);
 			   		if (ep != -1) {
 			   			Da.trk = t;
 			   			Da.ep = ep;
 			   			pos = GetTrkEndPos(t, ep);
 			   			found = TRUE;
+			   		} else {
+			   			Da.pos0=pos;
+						message(_("No unconnected end-point on Track - Try again or release Shift and click"));
+						return C_CONTINUE;
 			   		}
+				}  else {
+					Da.pos0=pos;
+					message(_("Not on a Track - Try again or release Shift and click"));
+					return C_CONTINUE;
 				}
-			} 	
+				Da.down = TRUE;
+			}
+			Da.down = TRUE;
 			if (!found) SnapPos( &pos );
 			pos0 = pos;
 			Da.pos0 = pos;
@@ -157,7 +172,7 @@ EXPORT STATUS_T CreateCurve(
 				tempSegs(0).color = color;
 				tempSegs(0).width = width;
 				if (Da.trk) message(_("End Locked: Drag out curve start"));
-				else message( _("Drag along curve start") );
+				else message(_("Drag along curve start") );
 				break;
 			case crvCmdFromTangent:
 			case crvCmdFromCenter:
@@ -182,6 +197,7 @@ EXPORT STATUS_T CreateCurve(
 		return C_CONTINUE;
 
 	case C_MOVE:
+		if (!Da.down) return C_CONTINUE;
 		if (Da.trk) {
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, pos0)-angle1);
@@ -232,8 +248,8 @@ EXPORT STATUS_T CreateCurve(
 			break;
 		}
 		return C_CONTINUE;
-
 	case C_UP:
+		if (!Da.down) return C_CONTINUE;
 		if (Da.trk) {
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, pos0)-angle1);
@@ -292,7 +308,9 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	case C_START:
 		curveMode = (long)commandContext;
 		Da.state = -1;
+		Da.pos0 = pos;
 		tempSegs_da.cnt = 0;
+		STATUS_T rcode;
 		return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, InfoMessage );
 		
 	case C_TEXT:
@@ -306,7 +324,9 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			//SnapPos( &pos );
 			Da.pos0 = pos;
 			Da.state = 0;
-			return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, InfoMessage );
+			rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, InfoMessage );
+			if (!Da.down) Da.state = -1;
+			return rcode;
 			//Da.pos0 = pos;
 		} else {
 			tempSegs_da.cnt = segCnt;
@@ -314,6 +334,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		}
 
 	case C_MOVE:
+		if (Da.state<0) return C_CONTINUE;
 		mainD.funcs->options = wDrawOptTemp;
 		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		if ( Da.state == 0 ) {
@@ -362,6 +383,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 
 
 	case C_UP:
+		if (Da.state<0) return C_CONTINUE;
 		mainD.funcs->options = wDrawOptTemp;
 		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		if (Da.state == 0) {
@@ -780,6 +802,7 @@ static STATUS_T CmdCircle2( wAction_t action, coOrd pos )
 #include "bitmaps/curve2.xpm"
 #include "bitmaps/curve3.xpm"
 #include "bitmaps/curve4.xpm"
+#include "bitmaps/bezier.xpm"
 #include "bitmaps/circle1.xpm"
 #include "bitmaps/circle2.xpm"
 #include "bitmaps/circle3.xpm"
@@ -794,6 +817,7 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"), wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE2, (void*)1 );
 	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE3, (void*)2 );
 	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"), wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE4, (void*)3 );
+	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap(bezier_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_BEZIER, (void*)bezCmdCreateTrack );
 	ButtonGroupEnd();
 
 	ButtonGroupBegin( _("Circle Track"), "cmdCurveSetCmd", _("Circle Tracks") );

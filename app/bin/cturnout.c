@@ -26,6 +26,7 @@
 #include <string.h>
 
 #include "ccurve.h"
+#include "tbezier.h"
 #include "cjoin.h"
 #include "compound.h"
 #include "cstraigh.h"
@@ -126,6 +127,8 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 	}
 	to->segCnt = segCnt;
 	to->segs = (trkSeg_p)memdup( segData, (sizeof *segData) * segCnt );
+	FixUpBezierSegs(to->segs,to->segCnt);
+
 	GetSegBounds( zero, 0.0, segCnt, to->segs, &to->orig, &to->size );
 	to->endCnt = endPtCnt;
 	to->endPt = (trkEndPt_t*)memdup( endPts, (sizeof *endPts) * to->endCnt );
@@ -160,7 +163,7 @@ EXPORT wIndex_t CheckPaths(
 		PATHPTR_T paths )
 {
 	int pc, ps;
-	PATHPTR_T pp;
+	PATHPTR_T pp = 0;
 	int inx, inx1;
 	static dynArr_t segMap_da;
 	int segInx[2], segEp[2];
@@ -669,7 +672,7 @@ static ANGLE_T GetAngleTurnout(
 	pos.x -= xx->orig.x;
 	pos.y -= xx->orig.y;
 	Rotate( &pos, zero, -xx->angle );
-	angle = GetAngleSegs( segCnt, xx->segs, pos, &segInx );
+	angle = GetAngleSegs( segCnt, xx->segs, &pos, &segInx, NULL, NULL, NULL, NULL );
 	return NormalizeAngle( angle+xx->angle );
 }
 
@@ -1261,7 +1264,7 @@ LOG( log_traverseTurnout, 1, ( "  PC=%d ", pathCurr[0] ) )
 	segPtr = xx->segs+currInx;
 #endif
 	segProcData.traverse1.pos = pos2;
-	segProcData.traverse1.angle = xx->angle-trvTrk->angle;
+	segProcData.traverse1.angle = xx->angle+trvTrk->angle;
 	SegProc( SEGPROC_TRAVERSE1, segPtr, &segProcData );
 	dist += segProcData.traverse1.dist;
 	backwards = segProcData.traverse1.backwards;
@@ -1360,10 +1363,25 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 
 static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
-	params->type = curveTypeStraight;
-	params->ep = PickUnconnectedEndPoint( pos, trk );
+
+
+	params->type = curveTypeStraight;	//TODO should check if last segment is actually straight
+	if (inx == PARAMS_CORNU  || inx == PARAMS_BEZIER) {
+		params->arcR = 0.0;
+		params->arcP = zero;
+		params->ep = PickEndPoint(pos,trk);   //Nearest
+		if (params->ep>=0) {
+			params->angle = GetTrkEndAngle(trk,params->ep);
+		    params->track_angle = params->angle + params->ep?0:180;
+		} else {
+			params->angle = params-> track_angle = 0;
+			return FALSE;
+		}
+		return TRUE;
+	}
+	params->ep = PickUnconnectedEndPointSilent( pos, trk );
 	if (params->ep == -1)
-		 return FALSE;
+				 return FALSE;
 	params->lineOrig = GetTrkEndPos(trk,params->ep);
 	params->lineEnd = params->lineOrig;
 	params->len = 0.0;
@@ -1411,6 +1429,8 @@ static BOOL_T QueryTurnout( track_p trk, int query )
 	case Q_NOT_PLACE_FROGPOINTS:
 	case Q_HAS_DESC:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
+	case Q_MODIFY_CANT_SPLIT:
+	case Q_CAN_EXTEND:
 		return TRUE;
 	case Q_CAN_PARALLEL:
 		if( GetTrkEndPtCnt( trk ) == 2 && fabs( GetTrkEndAngle( trk, 0 ) - GetTrkEndAngle( trk, 1 )) == 180.0 )
@@ -1877,6 +1897,9 @@ LOG( log_turnout, 3, ( "placeTurnout T%d (%0.3f %0.3f) A%0.3f\n",
 				}
 			}
 		}
+	} else {
+		trk = NULL;
+		*trkR = NULL;
 	}
 	*connCntR = connCnt;
 	*maxDR = maxD;

@@ -25,6 +25,7 @@
 
 #include "common.h"
 #include "misc.h"
+#include "time.h"
 
 #define LABEL_MANUF		(1<<0)
 #define LABEL_PARTNO	(1<<1)
@@ -86,11 +87,11 @@ BOOL_T DoSetScaleDesc( void );
 
 unsigned int curLayer;
 long layerCount;
-wDrawColor GetLayerColor( LAYER_T );
-BOOL_T GetLayerVisible( LAYER_T );
-BOOL_T GetLayerFrozen( LAYER_T );
-BOOL_T GetLayerOnMap( LAYER_T );
-char * GetLayerName( LAYER_T );
+wDrawColor GetLayerColor( unsigned int );
+BOOL_T GetLayerVisible( unsigned int );
+BOOL_T GetLayerFrozen( unsigned int );
+BOOL_T GetLayerOnMap( unsigned int );
+char * GetLayerName( unsigned int );
 BOOL_T ReadLayers( char * );
 BOOL_T WriteLayers( FILE * );
 char * FormatLayerName(unsigned int layerNumber);

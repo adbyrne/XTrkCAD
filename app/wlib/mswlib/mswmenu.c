@@ -910,7 +910,7 @@ wMenuToggle_p wMenuToggleCreate(
 		if ( vk & 0xFF00 )
 			modifier |= WKEY_SHIFT;
 		acclTable(acclTable_da.cnt-1).acclKey = (modifier<<8) | (vk&0x00FF);
-		acclTable(acclTable_da.cnt-1).mp = mt;
+		acclTable(acclTable_da.cnt-1).mp = (wMenuPush_p)mt;
 	}
 
 	rc = AppendMenu( m->menu, MF_STRING, mt->index, label );

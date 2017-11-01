@@ -78,6 +78,7 @@ static void TextDlgUpdate(
 
 	switch (inx) {
 	case 0:
+	case 1:
 		if ( Dt.state == SHOW_TEXT) {
 			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );

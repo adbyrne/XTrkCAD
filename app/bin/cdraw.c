@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "ccurve.h"
+#include "cbezier.h"
 #include "drawgeom.h"
 #include "fileio.h"
 #include "i18n.h"
@@ -292,7 +293,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 				if ( segPtr->type != SEG_CRVLIN ) {
 					drawData.length = FindDistance( drawData.endPt[0], drawData.endPt[1] );
 				} else {
-					drawData.length = segPtr->u.c.radius*2*M_PI*segPtr->u.c.a1/360.0;
+					drawData.length = fabs(segPtr->u.c.radius)*2*M_PI*segPtr->u.c.a1/360.0;
 				}
 				drawDesc[LN].mode |= DESC_CHANGE;
 				break;
@@ -468,7 +469,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		break;
 	case SEG_CRVLIN:
 		REORIGIN( drawData.center, segPtr->u.c.center, xx->angle, xx->orig );
-		drawData.radius = segPtr->u.c.radius;
+		drawData.radius = fabs(segPtr->u.c.radius);
 		drawDesc[CE].mode =
 		drawDesc[RA].mode = 0;
 		if ( segPtr->u.c.a1 >= 360.0 ) {
@@ -485,7 +486,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		break;
 	case SEG_FILCRCL:
 		REORIGIN( drawData.center, segPtr->u.c.center, xx->angle, xx->orig );
-		drawData.radius = segPtr->u.c.radius;
+		drawData.radius = fabs(segPtr->u.c.radius);
 		drawDesc[CE].mode =
 		drawDesc[RA].mode = 0;
 		drawDesc[LW].mode = DESC_IGNORE;
@@ -547,7 +548,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 static void DrawDraw( track_p t, drawCmd_p d, wDrawColor color )
 {
 	struct extraData * xx = GetTrkExtraData(t);
-	if ( (d->options&DC_QUICK) == 0 )
+	if ( (d->funcs->options&DC_QUICK) == 0 )
 		DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
 }
 
@@ -674,7 +675,7 @@ static ANGLE_T GetAngleDraw(
 	pos.x -= xx->orig.x;
 	pos.y -= xx->orig.y;
 	Rotate( &pos, zero, -xx->angle );
-	angle = GetAngleSegs( xx->segCnt, xx->segs, pos, NULL );
+	angle = GetAngleSegs( xx->segCnt, xx->segs, &pos, NULL, NULL, NULL, NULL, NULL);
 	if ( ep0 ) *ep0 = -1;
 	if ( ep1 ) *ep1 = -1;
 	return NormalizeAngle( angle + xx->angle );
@@ -773,7 +774,50 @@ EXPORT BOOL_T OnTableEdgeEndPt( track_p trk, coOrd * pos )
 	return FALSE;
 }
 
+EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
+{
+	struct extraData *xx;
 
+	if (GetTrkType(trk) == T_DRAW) {
+		ignoredTableEdge = NULL;
+		xx = GetTrkExtraData(trk);
+		if (xx->segCnt < 1)
+			return FALSE;
+		DIST_T dd0,dd1;
+		coOrd p0,p1;
+		switch (xx->segs[0].type) {
+			case SEG_CRVLIN:
+				PointOnCircle( &p0, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius), xx->segs[0].u.c.a0 );
+				dd0 = FindDistance( *pos, p0);
+				PointOnCircle( &p1, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius), xx->segs[0].u.c.a0 + xx->segs[0].u.c.a1);
+				dd1 = FindDistance( *pos, p1);
+			break;
+			case SEG_STRLIN:
+				dd0 = FindDistance( *pos, xx->segs[0].u.l.pos[0]);
+				p0 = xx->segs[0].u.l.pos[0];
+				dd1 = FindDistance( *pos, xx->segs[0].u.l.pos[1]);
+				p1 = xx->segs[0].u.l.pos[1];
+			break;
+			case SEG_BEZLIN:
+				dd0 = FindDistance( *pos, xx->segs[0].u.b.pos[0]);
+				p0 = xx->segs[0].u.b.pos[0];
+				dd1 = FindDistance( *pos, xx->segs[0].u.b.pos[3]);
+				p1 = xx->segs[0].u.b.pos[3];
+			break;
+			default:
+				return FALSE;
+		}
+		if (dd0>dd1) {
+			* pos = p1;
+			return TRUE;
+
+		} else {
+			* pos = p0;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
 
 
 static void DrawRedraw(void);
@@ -789,15 +833,13 @@ static void DrawRedraw( void )
 	MapRedraw();
 }
 
-
 static wIndex_t benchChoice;
 static wIndex_t benchOrient;
 static wIndex_t dimArrowSize;
-static wDrawColor lineColor;
+wDrawColor lineColor = 1;
+long lineWidth = 0;
 static wDrawColor benchColor;
-#ifdef LATER
-static wIndex_t benchInx;
-#endif
+
 
 static paramIntegerRange_t i0_100 = { 0, 100, 25 };
 static paramData_t drawPLs[] = {
@@ -838,6 +880,7 @@ static char * objectName[] = {
 		N_("Filled Circle"),
 		N_("Filled Box"),
 		N_("Polygon"),
+		N_("Bezier Line"),
 		NULL};
 
 static STATUS_T CmdDraw( wAction_t action, coOrd pos )
@@ -847,6 +890,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	wControl_p controls[4];
 	char * labels[3];
 	static char labelName[40];
+
+	wAction_t act2 = (action&0xFF) | (bezCmdCreateLine<<8);
 
 	switch (action&0xFF) {
 
@@ -876,6 +921,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_CIRCLE3:
 		case OP_BOX:
 		case OP_POLY:
+		case OP_BEZLIN:
 			controls[0] = drawWidthPD.control;
 			controls[1] = drawColorPD.control;
 			controls[2] = NULL;
@@ -885,6 +931,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			InfoSubstituteControls( controls, labels );
 			drawWidthPD.option &= ~PDO_NORECORD;
 			drawColorPD.option &= ~PDO_NORECORD;
+			lineWidth = drawCmdContext.Width;
 			break;
 		case OP_FILLCIRCLE2:
 		case OP_FILLCIRCLE3:
@@ -941,12 +988,17 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			infoSubst = FALSE;
 		}
 		ParamGroupRecord( &drawPG );
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		DrawGeomMouse( C_START, pos, &drawCmdContext );
 
 		return C_CONTINUE;
 
 	case wActionLDown:
 		ParamLoadData( &drawPG );
+		if (drawCmdContext.Op == OP_BEZLIN) {
+			act2 = action | (bezCmdCreateLine<<8);
+			return CmdBezCurve(act2, pos);
+		}
 		if ( drawCmdContext.Op == OP_BENCH ) {
 			drawCmdContext.benchOption = GetBenchData( (long)wListGetItemContext((wList_p)drawBenchChoicePD.control, benchChoice ), benchOrient );
 			drawCmdContext.Color = benchColor;
@@ -969,22 +1021,27 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionRUp:
 	case wActionText:
 	case C_CMDMENU:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		SnapPos( &pos );
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	case C_CANCEL:
 		InfoSubstituteControls( NULL, NULL );
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	case C_OK:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext );
 		/*DrawOk( NULL );*/
 
 	case C_FINISH:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext );
 		/*DrawOk( NULL );*/
 
 	case C_REDRAW:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	default:
@@ -1010,6 +1067,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 #include "bitmaps/dfilbox.xpm"
 #include "bitmaps/dpoly.xpm"
 #include "bitmaps/dfilpoly.xpm"
+#include "bitmaps/dbezier.xpm"
 
 typedef struct {
 		char **xpm;
@@ -1029,7 +1087,8 @@ static drawData_t dcurveCmds[] = {
 		{ dcurve1_xpm, OP_CURVE1, N_("Curve End"), N_("Draw Curve from End"), "cmdDrawCurveEndPt", ACCL_DRAWCURVE1 },
 		{ dcurve2_xpm, OP_CURVE2, N_("Curve Tangent"), N_("Draw Curve from Tangent"), "cmdDrawCurveTangent", ACCL_DRAWCURVE2 },
 		{ dcurve3_xpm, OP_CURVE3, N_("Curve Center"), N_("Draw Curve from Center"), "cmdDrawCurveCenter", ACCL_DRAWCURVE3 },
-		{ dcurve4_xpm, OP_CURVE4, N_("Curve Chord"), N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4 } };
+		{ dcurve4_xpm, OP_CURVE4, N_("Curve Chord"), N_("Draw Curve from Chord"), "cmdDrawCurveChord", ACCL_DRAWCURVE4 },
+		{ dbezier_xpm, OP_BEZLIN, N_("Bezier Curve"), N_("Draw Bezier"), "cmdDrawBezierCurve", ACCL_DRAWBEZLINE } };
 static drawData_t dcircleCmds[] = {
 		/*{ dcircle1_xpm, OP_CIRCLE1, "Circle Fixed Radius", "Draw Fixed Radius Circle", "cmdDrawCircleFixedRadius", ACCL_DRAWCIRCLE1 },*/
 		{ dcircle2_xpm, OP_CIRCLE3, N_("Circle Tangent"), N_("Draw Circle from Tangent"), "cmdDrawCircleTangent", ACCL_DRAWCIRCLE2 },
@@ -1058,11 +1117,10 @@ static drawStuff_t drawStuff[4];
 
 static drawStuff_t drawStuff[4] = {
 		{ "cmdDrawLineSetCmd", N_("Straight Objects"), N_("Draw Straight Objects"), 4, dlineCmds },
-		{ "cmdDrawCurveSetCmd", N_("Curved Lines"), N_("Draw Curved Lines"), 4, dcurveCmds },
+		{ "cmdDrawCurveSetCmd", N_("Curved Lines"), N_("Draw Curved Lines"), 5, dcurveCmds },
 		{ "cmdDrawCircleSetCmd", N_("Circle Lines"), N_("Draw Circles"), 4, dcircleCmds },
 		{ "cmdDrawShapeSetCmd", N_("Shapes"), N_("Draw Shapes"), 4, dshapeCmds} };
 		
-
 
 static void ChangeDraw( long changes )
 {
@@ -1085,6 +1143,15 @@ static void DrawDlgUpdate(
 		int inx,
 		void * valueP )
 {
+	if (drawCmdContext.Op == OP_BEZLIN) {
+		if ( (inx == 0  && pg->paramPtr[inx].valueP == &drawCmdContext.Width) ||
+			 (inx == 1 && pg->paramPtr[inx].valueP == &lineColor))
+		   {
+			lineWidth = drawCmdContext.Width;
+			UpdateParms(lineColor, lineWidth);
+		   }
+	}
+
 	if ( inx >= 0 && pg->paramPtr[inx].valueP == &benchChoice )
 		BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, (wIndex_t)*(long*)valueP ), (wList_p)drawBenchOrientPD.control );
 }
@@ -1114,9 +1181,7 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 
 	ParamRegister( &drawPG );
 	RegisterChangeNotification( ChangeDraw );
-#ifdef LATER
-		InitCommand( cmdDraw, N_("Draw"), draw_bits, LEVEL0_50, IC_POPUP|IC_CMDMENU, ACCL_DRAW );
-#endif
+
 }
 
 

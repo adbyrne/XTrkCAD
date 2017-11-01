@@ -245,13 +245,15 @@ The \f{Easement} dialog is invoked from the Options (\K{optionM}) menu.
 
 \u000
 
-\dd Radio button group with \f{None}, \f{Sharp}, \f{Normal} and \f{Broad}. Corresponding \f{Value}s for these buttons are 0, 0.5, 1.0 and 2.0. Select \f{None} to turn easements off.
+\dd Radio button group with \f{None}, \f{Sharp}, \f{Normal}, \f{Broad} and \f{Cornu}. Corresponding \f{Value}s for these buttons are 0, 0.5, 1.0, 2.0 and -1.0. Select \f{None} to turn easements off.
+
+The Cornu Easements work in a different way to the others. They use a continously variable sharpness which you can control by the placement of the end points.
 
 The values \f{R}, \f{X} and \f{L} are read-only.
 
 These values indicate the worst case of joining a straight track with a curve of radius \f{R}. The two tracks are separated by the offset \f{X} while the easement curve extends for \f{L/2} inches or centimeters to each side of the endpoints.
 
-The formula used to draw easements is:
+The formula used to draw non-Cornu easements is:
 
 \c          x = l * l * l / (6 * R * L)
 \e                               b   b

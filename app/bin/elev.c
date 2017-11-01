@@ -28,6 +28,7 @@
 #include "shrtpath.h"
 #include "track.h"
 #include "utility.h"
+#include "string.h"
 
 EXPORT long oldElevationEvaluation = 0;
 static int log_fillElev = 0;

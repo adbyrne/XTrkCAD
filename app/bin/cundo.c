@@ -371,6 +371,7 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 		tempTrk.extraData = trk->extraData;
 	if (!ReadStream( stream, tempTrk.extraData, tempTrk.extraSize ))
 		return FALSE;
+	RebuildTrackSegs(&tempTrk);  //If we had an array of Segs - recreate it
 	if (recordUndo) Rprintf( "Restore T%D(%d) @ %lx\n", trk->index, tempTrk.index, (long)trk );
 	tempTrk.index = trk->index;
 	tempTrk.next = trk->next;

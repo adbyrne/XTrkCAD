@@ -31,6 +31,7 @@
 
 #define TRUE 1
 #define FALSE 0
+#define MAX_FILES 500
 #ifdef _WIN32
 	#define WIKIFORMATOPTION "/w"
 	#pragma warning( disable : 4996 )
@@ -70,7 +71,7 @@ main( int argc, char **argv )
 	struct stat buf;
 	char filename[ 256 ];
 	char path[ 256 ];
-	char *results[100];
+	char *results[MAX_FILES];
 	int cnt = 0;
 	int i;
 	int bWiki = FALSE;
@@ -115,7 +116,7 @@ main( int argc, char **argv )
 	/*
 	 * get all files from the directory
 	 */
-	while( ent = readdir( d ))
+	while((ent = readdir(d)))
 	{
 		/*
 		 * create full file name and get the state for that file
@@ -152,7 +153,7 @@ main( int argc, char **argv )
 						results[ cnt ] = malloc( strlen( buffer ) + 1 );
 						strcpy( results[ cnt ], buffer );
 						cnt++;
-						if( cnt == 100 ) {
+						if( cnt == MAX_FILES ) {
 							fprintf( stderr, "Error: too many files\n" );
 							exit( 1 );
 						}

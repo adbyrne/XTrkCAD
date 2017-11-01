@@ -847,7 +847,7 @@ wWin_p wWinMainCreate(
 {
     char *pos;
 
-    if (pos = strchr(name, ';')) {
+    if (pos == strchr(name, ';')) {
         /* if found, split application name and configuration name */
         strcpy(wConfigName, pos + 1);
     } else {

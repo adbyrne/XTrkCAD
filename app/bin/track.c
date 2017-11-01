@@ -129,9 +129,9 @@ EXPORT void DescribeTrack( track_cp trk, char * str, CSIZE_T len )
 }
 
 
-EXPORT DIST_T GetTrkDistance( track_cp trk, coOrd pos )
+EXPORT DIST_T GetTrkDistance( track_cp trk, coOrd * pos )
 {
-	return trackCmds( GetTrkType(trk) )->distance( trk, &pos );
+	return trackCmds( GetTrkType(trk) )->distance( trk, pos );
 }
 
 /**
@@ -675,6 +675,28 @@ EXPORT EPINX_T PickUnconnectedEndPoint( coOrd p, track_cp trk )
 	return inx;
 }
 
+EXPORT EPINX_T PickUnconnectedEndPointSilent( coOrd p, track_cp trk )
+{
+	EPINX_T inx, i;
+	DIST_T d=10000.0, dd;
+	coOrd pos;
+	inx = -1;
+
+	for ( i=0; i<trk->endCnt; i++ ) {
+		if (trk->endPt[i].track == NULL) {
+			pos = trk->endPt[i].pos;
+			dd=FindDistance(p, pos);
+			if (inx == -1 || dd <= d) {
+				d = dd;
+				inx = i;
+			}
+		}
+	}
+
+	return inx;
+}
+
+
 
 EXPORT EPINX_T GetEndPtConnectedToMe( track_p trk, track_p me )
 {
@@ -827,6 +849,15 @@ EXPORT BOOL_T MakeParallelTrack(
 		return trackCmds(trk->type)->makeParallel( trk, pos, dist, newTrkR, p0R, p1R );
 	return FALSE;
 }
+
+EXPORT BOOL_T RebuildTrackSegs(
+		track_p trk)
+{
+	if (trackCmds(trk->type)->rebuildSegs)
+		return trackCmds(trk->type)->rebuildSegs(trk);
+	return FALSE;
+}
+
 
 
 /*****************************************************************************
@@ -1849,6 +1880,7 @@ EXPORT BOOL_T TraverseTrack(
 			return FALSE;
 		trvTrk->length = -1;
 		trvTrk->dist = 0.0;
+
 	}
 	return TRUE;
 }

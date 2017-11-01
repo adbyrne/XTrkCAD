@@ -128,8 +128,10 @@ void DoStructDesignerRedir( void )
 BOOL_T Initialize( void )
 {
 	InitTrkCurve();
+	InitTrkBezier();
 	InitTrkStraight();
 	InitTrkEase();
+	InitTrkCornu();
 	InitTrkTurnout();
 	InitTrkTurntable();
 	InitTrkStruct();

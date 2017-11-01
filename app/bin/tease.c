@@ -1294,7 +1294,7 @@ static BOOL_T MergeJoint(
 static BOOL_T GetParamsJoint( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
 	params->type = curveTypeStraight;
-	params->ep = PickUnconnectedEndPoint( pos, trk );
+	params->ep = PickUnconnectedEndPointSilent( pos, trk );
 	if (params->ep == -1)
 		 return FALSE;
 	params->lineOrig = GetTrkEndPos(trk,params->ep);
@@ -1521,8 +1521,11 @@ EXPORT void JointSegProc(
 			else
 				data->traverse1.dist = JoinD( segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L ) + JoinD( l, segPtr->u.j.R, segPtr->u.j.L );
 		}
-		if ( segPtr->u.j.flip )
+		data->traverse1.reverse_seg = FALSE;
+		if ( segPtr->u.j.flip ) {
 			data->traverse1.backwards = !data->traverse1.backwards;
+			data->traverse1.reverse_seg = TRUE;
+		}
 LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f] A=%0.3f l0=%0.3f l1=%0.3f R=%0.3f L=%0.3f N:%d F:%d S:%d = a=%0.3f D=%0.3f B=%d\n",
 		data->traverse1.pos.x, data->traverse1.pos.y, data->traverse1.angle,
 		l,
@@ -1637,6 +1640,7 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 			}
 		}
 		data->getAngle.angle = a;
+		data->getAngle.radius = 0.0;
 		break;
 	}
 }

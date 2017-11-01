@@ -584,14 +584,17 @@ static BOOL_T GetParamsStraight( int inx, track_p trk, coOrd pos, trackParams_t 
 	params->type = curveTypeStraight;
 	if ( inx == PARAMS_PARALLEL ) {
 		params->ep = 0;
+	} else if (inx == PARAMS_CORNU ){
+		params->ep = PickEndPoint( pos, trk);
 	} else {
-		params->ep = PickUnconnectedEndPoint( pos, trk );
-		if (params->ep == -1)
-			return FALSE;
+		params->ep = PickUnconnectedEndPointSilent( pos, trk );
 	}
+    if (params->ep == -1)
+			return FALSE;
 	params->lineOrig = GetTrkEndPos(trk,1-params->ep);
 	params->lineEnd = GetTrkEndPos(trk,params->ep);
 	params->len = FindDistance( params->lineOrig, params->lineEnd );
+	params->track_angle = FindAngle( params->lineOrig, params->lineEnd);
 	params->angle = GetTrkEndAngle(trk,params->ep);
 	params->arcR = 0.0;
 	return TRUE;
@@ -618,6 +621,7 @@ static BOOL_T QueryStraight( track_p trk, int query )
 	case Q_CAN_MODIFYRADIUS:
 	case Q_CAN_GROUP:
 	case Q_ISTRACK:
+	case Q_CAN_EXTEND:
 		return TRUE;
 	default:
 		return FALSE;
@@ -711,9 +715,10 @@ EXPORT void StraightSegProc(
 
 	case SEGPROC_TRAVERSE1:
 		a1 = FindAngle( segPtr->u.l.pos[0], segPtr->u.l.pos[1] );
-		a2 = NormalizeAngle( data->traverse1.angle+a1 );
-		data->traverse1.backwards = (a2 < 270 && a2 > 90 );
+		a2 = NormalizeAngle( a1-data->traverse1.angle );
+		data->traverse1.backwards = ((a2 < 270) && (a2 > 90));
 		data->traverse1.dist = FindDistance( segPtr->u.l.pos[data->traverse1.backwards?1:0], data->traverse1.pos );
+		data->traverse1.reverse_seg = FALSE;
 		break;
 
 	case SEGPROC_TRAVERSE2:
@@ -724,7 +729,10 @@ EXPORT void StraightSegProc(
 			data->traverse2.dist = 0;
 			data->traverse2.angle = a1;
 		} else {
+			a1 = FindAngle( segPtr->u.l.pos[data->traverse2.segDir], segPtr->u.l.pos[1-data->traverse2.segDir] );
+			Translate( &data->traverse2.pos, segPtr->u.l.pos[data->traverse2.segDir], a1, d );
 			data->traverse2.dist -= d;
+			data->traverse2.angle = a1;
 		}
 		break;
 
@@ -776,9 +784,12 @@ EXPORT void StraightSegProc(
 		data->split.newSeg[1] = *segPtr;
 		data->split.newSeg[0].u.l.pos[1] = data->split.newSeg[1].u.l.pos[0] = p0;
 		break;
-
+	/*
+	 * Note GetAngle always gives a positive angle because p0 is always left of p1
+	 */
 	case SEGPROC_GETANGLE:
 		data->getAngle.angle = FindAngle( segPtr->u.l.pos[0], segPtr->u.l.pos[1] );
+		data->getAngle.radius = 0.0;
 		break;
 	}
 }

@@ -628,11 +628,27 @@ static BOOL_T MoveEndPtTurntable( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d
 		d -= d0;
 		Translate( &pos, pos, angle0+180, d0 );
 	}
-	if (d < r) {
+	if (small((r-d)/2)) {
+		Translate( &pos, posCen, angle0+180, r);   //Make radius equal if close
+	} else if (d < r) {
 		ErrorMessage( MSG_POINT_INSIDE_TURNTABLE );
 		return FALSE;
 	}
-	*ep = NewTurntableEndPt( *trk, angle0 );
+	//Look for empty slot
+	BOOL_T found = FALSE;
+	for (*ep=0; *ep<GetTrkEndPtCnt(*trk); *ep=*ep+1) {
+		if ( (GetTrkEndTrk(*trk,*ep)) == NULL )
+			found = TRUE;
+			break;
+	}
+	if (!found)
+		*ep = NewTurntableEndPt(*trk,angle0);
+	else {
+		struct extraData *xx = GetTrkExtraData(*trk);
+		coOrd pos1;
+		PointOnCircle( &pos1, xx->pos, xx->radius, angle0 );
+		SetTrkEndPoint(*trk, *ep, pos1, angle0);   //Reuse
+	}
 	if ((d-r) > connectDistance) {
 		trk1 = NewStraightTrack( GetTrkEndPos(*trk,*ep), pos );
 		CopyAttributes( *trk, trk1 );
@@ -655,6 +671,9 @@ static BOOL_T QueryTurntable( track_p trk, int query )
 	case Q_ISTRACK:
 	case Q_NOT_PLACE_FROGPOINTS:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
+	case Q_CAN_ADD_ENDPOINTS:
+	case Q_MODIFY_CANT_SPLIT:
+	case Q_CAN_EXTEND:
 		return TRUE;
 	default:
 		return FALSE;

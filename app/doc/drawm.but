@@ -70,19 +70,34 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \dd \G{png.d/dcurve1.png} Select the start of the curve and drag in the direction of the curve.
 
+If \e{Shift} is held down as the left mouse button is clicked for the first end point of the curve and the cursor is over a line object the position will snap to the nearest end of that line. 
+If \e{Shift} is held down when the button is released for the second end, it will snap to the nearest end of a line object if it is over one. 
+
 \u000
 
 \dd \G{png.d/dcurve2.png} Select one end of the curve and drag to the center.
+
+To complete the command, drag on the red arrows to adjust the curve.
 
 \u000
 
 \dd \G{png.d/dcurve3.png} Select the center of the curve and drag to one end.
 
+To complete the command, drag on the red arrows to adjust the curve.
+ 
 \u000
 
 \dd \G{png.d/dcurve4.png} Drag from one end of the curve to the other to form the chord of the curve.
 
 To complete the command, drag on the red arrows to adjust the curve.
+
+\u000
+
+\dd \G{png.d/dbezier.png} \e{Left-Drag} out control point from one end of the curve and then \e{Left-Drag} out the second control point from the other end.
+
+If \e{Shift} is held while the end points are selected, the curve will lock to the ends of nearby line objects.
+
+To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a control point. Hit \e{Enter} to accept, \e{Esc} to reject.
 
 \rule
 
@@ -134,9 +149,12 @@ Shapes are drawn by:
 
 \G{png.d/mdrawstraight.png}
 
-Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.  If \e{Draw Straight Objects} is Sticky (\K{cmdSticky}), \e{Shift+Left+Drag} will use the endpoint of the previous line as the starting point.
+Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.  If \e{Draw Straight Objects} is Sticky (\K{cmdSticky}), \e{Cntl+Left+Drag} will use the endpoint of the previous line as the starting point.
 
 \dd \G{png.d/dline.png} Creates a \f{Straight Line} of specified color and width.
+If \e{Shift} is held down for the first end point and the cursor is over a line object the new line start position will snap to the nearest end of the line. 
+If \e{Shift} is held down when the button is released at the end of the \e{Left+Drag} the line end position will snap to the nearest end of any line object it is over.  
+
 
 \u000
 

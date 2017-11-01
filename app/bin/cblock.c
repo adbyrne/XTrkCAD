@@ -205,12 +205,18 @@ static DIST_T DistanceBlock (track_p t, coOrd * p )
 	blockData_p xx = GetblockData(t);
 	DIST_T closest, current;
 	int iTrk = 1;
-
-	closest = GetTrkDistance ((&(xx->trackList))[0].t, *p);
+	coOrd pos = *p;
+	closest = GetTrkDistance ((&(xx->trackList))[0].t, &pos);
+	coOrd best_pos = pos;
 	for (; iTrk < xx->numTracks; iTrk++) {
-		current = GetTrkDistance ((&(xx->trackList))[iTrk].t, *p);
-		if (current < closest) closest = current;
+		pos = *p;
+		current = GetTrkDistance ((&(xx->trackList))[iTrk].t, &pos);
+		if (current < closest) {
+			closest = current;
+			best_pos = pos;
+		}
 	}
+	*p = best_pos;
 	return closest;
 }
 

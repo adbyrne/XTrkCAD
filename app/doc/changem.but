@@ -36,7 +36,9 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Modify} - modify an existing track.
+\dd \f{Modify} - modify an existing track, or a Bezier lines or tracks.
+
+For a Bezier, select the control points to modify and drag them to move - if a track is connected at the end, only the control point can be selected and will preserve the end angle. Accept the change by pressing Enter or Reject it with Esc.
 
 \u000
 
@@ -266,7 +268,9 @@ For detail about;
 
 \S2{joinTrackCurve} Using Curved Flex-Track
 
-This method of joining track may be used where tracks are joined with a 'simple curve', e.g. one which uses a curve in a single direction as opposed to using reverse curves (\K{generalTerms}).
+This method of joining track may be used using Normal Easments where tracks are either joined with a 'simple curve'\k{joinNormalEasment}, e.g. one which uses a curve in a single direction as opposed to using reverse curves (\K{generalTerms}) or using complex curves if Easement is set to Cornu \K{joinCornu}.
+
+\S2{joinNormalEasment} Join with Normal Easement
 
 \u000
 
@@ -344,6 +348,59 @@ For detail about;
 
 \dd Moving one segment of track to join with another refer to \K{joinTrackMove}.
 
+\S2{joinCornu} Join with Cornu Easement
+
+\u000
+
+\n Start the join process by clicking on the Join button (\G{png.d/bjoin.png}).
+
+\lcont{
+
+\u000
+
+\G{png.d/joincornu1.png}
+
+\u000
+
+}
+
+\dd \e{Left-Click} the open endpoint of one of the two tracks being joined. A red dot within a red circle will appear at the end of the join.
+
+\u000
+
+\dd \e{Left-Drag} the endpoint to where you want it and release the button. The point will only move along the piece of track with the open endpoint (if this track type can be split) as far as the opposite end, or as an extension of that track with the same curvature (if this track can be extended). Note that you will be able to fine-tune the position later.
+
+\lcont{
+
+\u000
+
+\G{png.d/joincornu2.png}
+
+\u000
+
+}
+
+\dd \e{Left-Click} the endpoint of the other track being joined. Another red dot within a circle will appear at that end of the join.
+
+\u000
+
+\dd \e{Left-Drag} the endpoint to where you want it and release the button. The second endpoint can only be moved along the second track as far as the other end (if it can be split) or as an extension beyond the end of this track (if it can be extended). The initial curve will be drawn - it will be red if the minimum radius is smaller than the minimum radius option.
+
+\lcont{
+
+\u000
+
+\G{png.d/joincornu3.png}
+
+\u000
+
+}
+
+\dd You are now in "Select Points" mode. You can select one end point at a time with \e{Left-Click} and move it with \e{Left-Drag}.
+
+\u000
+
+\dd Once you are happy, hit \e{Enter} or the \e{SpaceBar} to finish editing the easement. Or hit \e{Esc} to cancel. 
 
 \rule
 
@@ -396,7 +453,7 @@ Any tracks created during the \f{Join} command will have the following propertie
 
 Turnouts and Sectional (\K{cmdHotBar}) tracks can be joined to other tracks. \e{XTrackCAD} extends the selected endpoint with a straight track when making the connection.  
 
-A Turntable (\K{cmdTurntable}) can be joined however it must be used as the second endpoint.
+A Turntable (\K{cmdTurntable}) can be joined however it must be used as the second endpoint for normal easements but can be connected to either end with Cornu.
 
 For detail about;
 
@@ -473,13 +530,15 @@ For detail about;
 
 \G{png.d/bmodify.png}
 
-The \f{Modify} command is used to change characteristics of or extend existing track by adding new track. This command works with any unconnected track endpoint.
+The \f{Modify} command is used to change characteristics of or extend existing track by adding new track. This command works with any unconnected track endpoint, or with a Cornu or Bezier even if connected
 
 The \f{Modify} command can be invoked using the \f{Change>Modify} menu item, the \f{Modify} button or the menu raised by a \e{Right-Click} over the \f{Main Canvas}.
 
 Either the left mouse button (for changing length or creating a tangent track) or the right mouse button (for extending with a new track) is used to modify the unconnected endpoint.
 
 The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.  A \e{Box} is treated as 4 Lines.
+
+The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be chnaged.
 
 \e{Curved Lines} are modified in same manner as curved track.
 
@@ -502,6 +561,14 @@ For detail about;
 \u000
 
 \dd Extending track length refer to \K{extendTrack}
+
+\u000
+
+\dd Modifying a Cornu refer to \K{chgCornu}
+
+\u000
+
+\dd Modifying a Bezier refer to \K{chgBezier}
 
 \rule
 
@@ -633,6 +700,45 @@ For detail about;
 
 \rule
 
+\S2{chgCornu} Modifying a Cornu
+
+Because a Cornu is defined by its end points position, angle and radius - it can only be modified by dragging an end point.
+
+\n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
+
+\lcont{\u000}
+
+\n Click on the track. The track ends will turn into roundels
+
+\lcont{\u000}
+
+\n \e{Left-Click} the endpoint and \e{Left-Drag} it to move the endpoint along the connected track.
+
+\lcont{\u000}
+
+\n Once you are happy, hit the \e{spacebar} or \e{Enter}, or to cancel hit \e{Escape}.
+
+\rule
+
+\S2{chgBezier} Modifying a Bezier
+
+Because a Bezier is defined by its control points position - it can only be modified by dragging an control point.
+
+\n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
+
+\lcont{\u000}
+
+\n Click on the track. The control points will appear
+
+\lcont{\u000}
+
+\n \e{Left-Click} the control point and \e{Left-Drag} it to move it.
+
+\lcont{\u000}
+
+\n Once you are happy, hit the \e{spacebar} or \e{Enter}, or to cancel hit \e{Escape}.
+
+\rule
 
 \S{cmdMove} Move
 

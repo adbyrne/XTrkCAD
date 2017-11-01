@@ -30,6 +30,9 @@
 #include "custom.h"
 #include "fileio.h"
 #include "i18n.h"
+#include "tbezier.h"
+#include "tcornu.h"
+#include "common.h"
 #include "messages.h"
 #include "param.h"
 #include "shrtpath.h"
@@ -53,6 +56,10 @@ static char groupDesc[STR_SIZE];
 static char groupPartno[STR_SIZE];
 static char groupTitle[STR_SIZE];
 static int groupCompoundCount = 0;
+
+extern TRKTYP_T T_BZRTRK;
+extern TRKTYP_T T_BZRLIN;
+extern TRKTYP_T T_CORNU;
 
 typedef struct {
 		int segInx;
@@ -674,6 +681,11 @@ static char * FindPathBtwEP(
 		if ( ep1+ep2 != 1 )
 			AbortProg( "findPathBtwEP" );
 		*flip = ( ep1 == 1 );
+		if (GetTrkType(trk) == T_CORNU ) { 			// Cornu doesn't have a path but lots of segs!
+			cp = CreateSegPathList(trk);
+LOG( log_group, 2, ( " Group: Cornu path:%s \n", cp ) )
+			return cp;
+		}
 		return "\1\0\0";
 	}
 	cp = (char *)xx->paths;
@@ -1003,6 +1015,12 @@ static void GroupOk( void * junk )
 							DrawSegs( &groupD, xx->orig, xx->angle, segPtr, 1, trackGauge, wDrawColorBlack );
 						}
 					}
+				} else if (GetTrkType(trk) == T_BEZIER || GetTrkType(trk) == T_BZRLIN ) {
+					DYNARR_APPEND(trkSeg_t, trackSegs_da, 10);
+					segPtr = &trackSegs(trackSegs_da.cnt-1);
+					GetBezierSegmentFromTrack(trk,segPtr);
+				} else if (GetTrkType(trk) == T_CORNU) {
+					GetBezierSegmentsFromCornu(trk,&trackSegs_da);  //Only give back Bezier - cant be undone
 				} else {
 					segCnt = tempSegs_da.cnt;
 					oldOptions = groupD.options;
@@ -1399,7 +1417,7 @@ if ( log_group >= 1 && logTable(log_group).level > log_group ) {
 		for ( pinx=0; pinx<trackSegs_da.cnt; pinx++ ) {
 			if ( segFlip(pinx) < 0 ) {
 LOG( log_group, 1, ( "Flipping Segment %d\n", pinx+1 ) );
-				SegProc( SEGPROC_FLIP, &trackSegs(pinx), NULL );
+					SegProc( SEGPROC_FLIP, &trackSegs(pinx), NULL );
 			}
 		}
 
@@ -1421,7 +1439,7 @@ LOG( log_group, 1, ( "Flipping Segment %d\n", pinx+1 ) );
 					if ( path == NULL )
 						AbortProg( "Missing Path T%d:%d.%d", GetTrkIndex(groupP->trk), ppp->ep2, ppp->ep1 );
 					if ( flip ) path += strlen((char *)path)-1;
-					while ( *path ) {
+					while ( *path && (path >= ppp->path) ) {      //Add Guard for flip backwards
 						DYNARR_APPEND( char, pathPtr_da, 10 );
 						pathChar = *path;
 						flip1 = flip;
@@ -1576,6 +1594,7 @@ EXPORT void DoGroup( void )
 	xx = NULL;
 	groupSegCnt = 0;
 	groupCompoundCount = 0;
+
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
 			trkType = GetTrkType(trk);
@@ -1583,9 +1602,8 @@ EXPORT void DoGroup( void )
 				xx = GetTrkExtraData(trk);
 				groupSegCnt += xx->segCnt;
 				GroupCopyTitle( xtitle(xx) );
-			} else {
+			} else
 				groupSegCnt += 1;
-			}
 		}
 	}
 	if ( groupSegCnt <= 0 ) {

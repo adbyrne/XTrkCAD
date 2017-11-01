@@ -93,6 +93,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		}
 		if ( !QueryTrack( Dpa.Trk, Q_CAN_PARALLEL ) ) {
 			Dpa.Trk = NULL;
+			InfoMessage(_(" Track doesn't support parallel"));
 			return C_CONTINUE;
 		}
 		/* in case query has changed things (eg joint) */
@@ -104,6 +105,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		tempSegs_da.cnt = 0;
 
 	case C_MOVE:
+
 		if (Dpa.Trk == NULL) return C_CONTINUE;
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, NULL, &p0, &p1 ) ) {

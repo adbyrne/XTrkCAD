@@ -290,6 +290,7 @@ BOOL_T TraverseTrack2(
             trvTrk.trk==NULL ||
             dist!=0.0) {
         Translate(&trvTrk.pos, trvTrk.pos, trvTrk.angle, dist);
+
     }
 
     if (dist0 < 0) {
@@ -1256,7 +1257,6 @@ static struct {
 
 long trainPause = 200;
 static track_p followTrain = NULL;
-
 static void DrawAllCars(void)
 {
     track_p car;
@@ -2271,9 +2271,8 @@ void AttachTrains(void)
 
         if (trk!=NULL && !QueryTrack(trk, Q_ISTRACK)) {
             trk = NULL;
-        }
-
-        if (trk==NULL || GetTrkDistance(trk,pos)>trackGauge*2.0) {
+            }
+        if (trk==NULL || GetTrkDistance(trk,&pos)>trackGauge*2.0) {
             trk = OnTrack2(&pos, FALSE, TRUE, FALSE);
         }
 

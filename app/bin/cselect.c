@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "ccurve.h"
+#include "tcornu.h"
 #define PRIVATE_EXTRADATA
 #include "compound.h"
 #include "cselect.h"
@@ -1038,6 +1039,10 @@ static void MoveTracks(
 	track_p trk, trk1;
 	EPINX_T ep, ep1;
 	int inx;
+	trackParams_t trackParms;
+	ANGLE_T endAngle;
+	DIST_T endRadius;
+	coOrd endCenter;
 
 	wSetCursor( wCursorWait );
 	/*UndoStart( "Move/Rotate Tracks", "move/rotate" );*/
@@ -1056,12 +1061,57 @@ static void MoveTracks(
 			RotateTrack( trk, orig, angle );
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
 			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
-				!GetTrkSelected(trk1)) {
+					!GetTrkSelected(trk1)) {
 				ep1 = GetEndPtConnectedToMe( trk1, trk );
 				DisconnectTracks( trk, ep, trk1, ep1 );
+				if (QueryTrack(trk1,Q_IS_CORNU)) {  		//Cornu at end stays connected
+					GetTrackParams(PARAMS_CORNU,trk,GetTrkEndPos(trk,ep),&trackParms);
+					if (trackParms.type == curveTypeStraight) {
+						endRadius = 0;
+						endCenter = zero;
+					} else {
+						endRadius = trackParms.arcR;
+						endCenter = trackParms.arcP;
+					}
+					DrawTrack(trk1,&mainD,wDrawColorWhite);
+					DrawTrack(trk1,&mapD,wDrawColorWhite);
+					endAngle = NormalizeAngle(GetTrkEndAngle(trk,ep)+180);
+					if (SetCornuEndPt(trk1,ep1,GetTrkEndPos(trk,ep),endCenter,endAngle,endRadius)) {
+						ConnectTracks(trk,ep,trk1,ep1);
+						DrawTrack(trk1,&mainD,wDrawColorBlack);
+						DrawTrack(trk1,&mapD,wDrawColorBlack);
+					} else {
+						DeleteTrack(trk1,TRUE);
+						ErrorMessage(_("Cornu too tight - it was deleted"));
+					}
+				} else {
+					if (QueryTrack(trk,Q_IS_CORNU)) {		//I am a Cornu myself!
+						GetTrackParams(PARAMS_CORNU,trk1,GetTrkEndPos(trk1,ep1),&trackParms);
+						if (trackParms.type == curveTypeStraight) {
+							endRadius = 0;
+							endCenter = zero;
+						} else {
+							endRadius = trackParms.arcR;
+							endCenter = trackParms.arcP;
+						}
+						DrawTrack(trk,&mainD,wDrawColorWhite);
+						DrawTrack(trk1,&mapD,wDrawColorWhite);
+						endAngle = NormalizeAngle(GetTrkEndAngle(trk1,ep1)+180);
+						if (SetCornuEndPt(trk,ep,GetTrkEndPos(trk1,ep1),endCenter,endAngle,endRadius)) {
+							ConnectTracks(trk,ep,trk1,ep1);
+							DrawTrack(trk,&mainD,wDrawColorBlack);
+							DrawTrack(trk,&mapD,wDrawColorBlack);
+						} else {
+							ErrorMessage(_("Cornu selected too tight after move - it was left alone"));
+							DrawTrack(trk,&mainD,wDrawColorBlack);
+							DrawTrack(trk,&mapD,wDrawColorBlack);
+						}
+					}
+				}
 				DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
 			}
 		}
+
 		InfoCount( inx );
 #ifdef LATER
 		if (tlist_da.cnt <= incrementalDrawLimit)

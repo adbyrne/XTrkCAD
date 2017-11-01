@@ -1263,7 +1263,7 @@ static BOOL_T CarItemWrite(
 		item->data.purchPrice, item->data.currPrice, item->data.condition, item->data.purchDate, item->data.serviceDate )>0;
 	if ( ( options&CAR_ITEM_ONLAYOUT) ) {
 		CarGetPos( item->car, &pos, &angle );
-		rc &= fprintf( f, " %d %d %0.3f %0.3f %0.3f",
+		rc &= fprintf( f, " %d %u %0.3f %0.3f %0.3f",
 				GetTrkIndex(item->car), GetTrkLayer(item->car), pos.x, pos.y, angle )>0;
 	}
 	rc &= fprintf( f, "\n" )>0;
@@ -3819,7 +3819,7 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 		sprintf( message+strlen(message), "%s: %s %s %s %s %s %s",
 				(partP?_(" and Part"):""),
 				carDlgManufStr, carDlgPartnoStr, carDlgProtoStr, carDlgDescStr,
-				(carDlgRepmarkStr?carDlgRepmarkStr:carDlgRoadnameStr), carDlgNumberStr );
+				(carDlgRepmarkStr[ 0 ]?carDlgRepmarkStr:carDlgRoadnameStr), carDlgNumberStr );
 		carDlgQuantity = 1;
 		ParamLoadControl( &carDlgPG, I_CD_QTY );
 
@@ -3844,7 +3844,7 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 				RestoreLocale(oldLocale);
 		}
 		reloadRoadnameList = TRUE;
-		sprintf( message, _("%s Part: %s %s %s %s %s %s"), carDlgUpdatePartPtr==NULL?_("Added new"):_("Updated"), carDlgManufStr, carDlgPartnoStr, carDlgProtoStr, carDlgDescStr, carDlgRepmarkStr?carDlgRepmarkStr:carDlgRoadnameStr, carDlgNumberStr );
+		sprintf( message, _("%s Part: %s %s %s %s %s %s"), carDlgUpdatePartPtr==NULL?_("Added new"):_("Updated"), carDlgManufStr, carDlgPartnoStr, carDlgProtoStr, carDlgDescStr, carDlgRepmarkStr[ 0 ]?carDlgRepmarkStr:carDlgRoadnameStr, carDlgNumberStr );
 
 	} else if ( S_PROTO ) {
 		if ( carDlgUpdateProtoPtr==NULL ) {

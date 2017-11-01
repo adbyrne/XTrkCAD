@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "ccurve.h"
+#include "cbezier.h"
 #include "compound.h"
 #include "cundo.h"
 #include "drawgeom.h"
@@ -140,19 +141,38 @@ STATUS_T DrawGeomMouse(
 
 	case wActionLDown:
 		context->Started = TRUE;
+		if (context->State == 0) {		//First Down only
+			switch (context->Op) {  	//Snap pos to nearest line end point if this is end and just shift is depressed for lines and some curves
+				case OP_LINE:
+				case OP_CURVE1:
+					if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
+						coOrd p = pos;
+						track_p t;
+						if ((t=OnTrack(&p,FALSE,FALSE))) {
+							if (GetClosestEndPt(t,&p)) {
+								pos = p;
+							}
+						}
+					};
+					break;
+				default:
+					;
+			}
+		}
 		if ((context->Op == OP_CURVE1 || context->Op == OP_CURVE2 || context->Op == OP_CURVE3 || context->Op == OP_CURVE4) && context->State == 1) {
 			;
 		} else {
-			if ( (MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL )
+			if ( (MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL )   // Control snaps to nearest track (not necessarily the end)
 				OnTrack( &pos, FALSE, FALSE );
 			pos0 = pos;
 			pos1 = pos;
 		}
+
 		switch (context->Op) {
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
-			if ( lastValid && ( MyGetKeyState() & WKEY_SHIFT ) ) {
+			if ( lastValid && ( MyGetKeyState() & WKEY_CTRL ) ) {
 				pos = pos0 = lastPos;
 			}
 			DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
@@ -173,7 +193,7 @@ STATUS_T DrawGeomMouse(
 			context->message( _("Drag to place next end point") );
 			break;
 		case OP_TBLEDGE:
-			if ( lastValid && ( MyGetKeyState() & WKEY_SHIFT ) ) {
+			if ( lastValid && ( MyGetKeyState() & WKEY_CTRL ) ) {
 				pos = pos0 = lastPos;
 			}
 			OnTableEdgeEndPt( NULL, &pos );
@@ -362,6 +382,45 @@ STATUS_T DrawGeomMouse(
 			DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		lastValid = FALSE;
 		createTrack = FALSE;
+		if ((context->State == 0 && (context->Op == OP_LINE )) ||  //first point release for line,
+			(context->State == 1 && context->Op == OP_CURVE1)) {   //second point for curve from end
+			switch (context->Op) {  	//Snap pos to nearest line end point if this is on a line and just shift is depressed for lines and some curves
+				case OP_CURVE1:
+				case OP_LINE:
+					if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
+						coOrd p = pos1;
+						track_p t;
+						if ((t=OnTrack(&p,FALSE,FALSE))) {
+							if (GetClosestEndPt(t,&p)) {
+								pos1 = p;
+								if (context->Op == OP_LINE) {
+									tempSegs(0).u.l.pos[1] = p;
+								} else {
+									PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
+									if (context->ArcData.type == curveTypeStraight) {
+										tempSegs(0).type = SEG_STRLIN;
+										tempSegs(0).u.l.pos[0] = pos0;
+										tempSegs(0).u.l.pos[1] = context->ArcData.pos1;
+										tempSegs_da.cnt = 1;
+									} else if (context->ArcData.type == curveTypeNone) {
+										tempSegs_da.cnt = 0;
+									} else if (context->ArcData.type == curveTypeCurve) {
+										tempSegs(0).type = SEG_CRVLIN;
+										tempSegs(0).u.c.center = context->ArcData.curvePos;
+										tempSegs(0).u.c.radius = context->ArcData.curveRadius;
+										tempSegs(0).u.c.a0 = context->ArcData.a0;
+										tempSegs(0).u.c.a1 = context->ArcData.a1;
+										tempSegs_da.cnt = 1;
+									}
+								}
+							}
+						}
+					};
+					break;
+				default:
+				;
+			}
+		}
 		switch ( context->Op ) {
 		case OP_LINE:
 		case OP_DIMLINE:
@@ -452,6 +511,7 @@ STATUS_T DrawGeomMouse(
 		return C_TERMINATE;
 
 	case wActionText:
+
 		if ( ((action>>8)&0xFF) == 0x0D ||
 			 ((action>>8)&0xFF) == ' ' ) {
 			EndPoly(context, segCnt);
@@ -460,6 +520,7 @@ STATUS_T DrawGeomMouse(
 		return C_TERMINATE;
 
 	case C_CANCEL:
+
 		oldOptions = context->D->funcs->options;
 		context->D->funcs->options |= wDrawOptTemp;
 		DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
@@ -530,7 +591,7 @@ STATUS_T DrawGeomModify(
 			REORIGIN( pc, segPtr[segInx].u.c.center, angle, orig )
 			tempSegs(0).type = segPtr[segInx].type;
 			tempSegs(0).u.c.center = pc;
-			tempSegs(0).u.c.radius = segPtr[segInx].u.c.radius;
+			tempSegs(0).u.c.radius = fabs(segPtr[segInx].u.c.radius);
 			if (segPtr[segInx].u.c.a1 >= 360.0) {
 				tempSegs(0).u.c.a0 = 0.0;
 				tempSegs(0).u.c.a1 = 360.0;
@@ -538,8 +599,8 @@ STATUS_T DrawGeomModify(
 				tempSegs(0).u.c.a0 = NormalizeAngle( segPtr[segInx].u.c.a0+angle );
 				tempSegs(0).u.c.a1 = segPtr[segInx].u.c.a1;
 				segA1 = NormalizeAngle( segPtr[segInx].u.c.a0 + segPtr[segInx].u.c.a1 + angle );
-				PointOnCircle( &p0, pc, segPtr[segInx].u.c.radius, segPtr[segInx].u.c.a0+angle );
-				PointOnCircle( &p1, pc, segPtr[segInx].u.c.radius, segPtr[segInx].u.c.a0+segPtr[segInx].u.c.a1+angle );
+				PointOnCircle( &p0, pc, fabs(segPtr[segInx].u.c.radius), segPtr[segInx].u.c.a0+angle );
+				PointOnCircle( &p1, pc, fabs(segPtr[segInx].u.c.radius), segPtr[segInx].u.c.a0+segPtr[segInx].u.c.a1+angle );
 			}
 			
 			break;
@@ -671,7 +732,7 @@ STATUS_T DrawGeomModify(
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
 			if ( tempSegs(0).u.c.a1 >= 360.0 ) {
-				segPtr[segInx].u.c.radius = tempSegs(0).u.c.radius;
+				segPtr[segInx].u.c.radius = fabs(tempSegs(0).u.c.radius);
 			} else {
 				a = FindAngle( tempSegs(0).u.c.center, pos );
 				a = NormalizeAngle( a-angle );

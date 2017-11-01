@@ -25,6 +25,8 @@
 #include <math.h>
 #include <string.h>
 
+
+#include "tbezier.h"
 #include "cjoin.h"
 #include "common.h"
 #include "compound.h"
@@ -749,7 +751,7 @@ void DescribeCompound(
 	compoundDesc[NM].mode =
 	compoundDesc[PN].mode = 0 /*DESC_NOREDRAW*/;
 	compoundDesc[EC].mode =
-	compoundDesc[SC].mode =
+	compoundDesc[SC].mode = DESC_RO;
 	compoundDesc[LY].mode = DESC_NOREDRAW;
 	if ( compoundData.epCnt ) {
 		if ( compoundData.epCnt <=2 ) {
@@ -897,6 +899,8 @@ EXPORT track_p NewCompound(
 	xx->pathCurr = xx->paths;
 	xx->segCnt = segCnt;
 	xx->segs = memdup( segs, segCnt * sizeof *segs );
+	trkSeg_p p = xx->segs;
+	FixUpBezierSegs(xx->segs,xx->segCnt);
 	ComputeCompoundBoundingBox( trk );
 	SetDescriptionOrig( trk );
 	for ( ep=0; ep<epCnt; ep++ )

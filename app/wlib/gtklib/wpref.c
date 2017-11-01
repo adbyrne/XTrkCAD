@@ -312,7 +312,7 @@ void wPrefSetString(
  * \param name IN name of parameter
  */
 
-const char * wPrefGetStringBasic(	
+char * wPrefGetStringBasic(
 		const char * section,			/* Section */
 		const char * name )			/* Name */
 {

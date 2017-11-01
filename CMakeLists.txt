@@ -116,6 +116,29 @@ SET(XTRKCAD_SHARE_INSTALL_DIR "share/xtrkcad")
 ADD_DEFINITIONS(-DXTRKCAD_CMAKE_BUILD)
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/xtrkcad-config.h.in ${CMAKE_CURRENT_BINARY_DIR}/xtrkcad-config.h)
 
+IF(XTRKCAD_USE_GETTEXT)
+	SET(GENHELP_OPTS "-bhi")
+	#
+	# Find the GnuWin32 installation directory, the gettext include should be located in subdir include
+	#
+	IF(WIN32)
+		if(MSVC)
+			# use supplied gettext library for Visual Studio
+			message( STATUS "Use simple_gettext module included with XTrackCAD" )
+			ADD_DEFINITIONS(-DUSE_SIMPLE_GETTEXT )
+		else()	
+			# for mingw & co. find libintl.h and use it
+			find_path ( INTL_PATH libintl.h )
+			if(INTL_PATH)
+				message( STATUS "Use installed gettext module" )			
+				INCLUDE_DIRECTORIES(${INTL_PATH})
+			endif(INTL_PATH)		
+		endif()		
+	ENDIF(WIN32)
+ELSE(XTRKCAD_USE_GETTEXT)
+	SET(GENHELP_OPTS "-bh")
+ENDIF(XTRKCAD_USE_GETTEXT)
+
 # Setup the rest of the build ...
 ADD_SUBDIRECTORY(app)
 ADD_SUBDIRECTORY(distribution)

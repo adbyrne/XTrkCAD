@@ -66,24 +66,33 @@ extern int pathMax;
 
 extern BOOL_T onTrackInSplit;
 
-typedef enum { curveTypeNone, curveTypeCurve, curveTypeStraight } curveType_e;
+typedef enum { curveTypeNone, curveTypeCurve, curveTypeStraight, curveTypeBezier, curveTypeCornu } curveType_e;
 
 #define PARAMS_1ST_JOIN (0)
 #define PARAMS_2ND_JOIN (1)
 #define PARAMS_EXTEND	(2)
 #define PARAMS_PARALLEL (3)
+#define PARAMS_BEZIER   (4)	   //Not used (yet)
+#define PARAMS_CORNU    (5)    //Called to get end characteristics
 
 typedef struct {
-		curveType_e type;
-		EPINX_T ep;
-		DIST_T len;
-		ANGLE_T angle;
-		coOrd lineOrig;
-		coOrd lineEnd;
-		coOrd arcP;
-		DIST_T arcR;
-		ANGLE_T arcA0, arcA1;
+		curveType_e type;			//Straight, Curve, Bezier, Cornu
+		EPINX_T ep;					//End point that is nearby pos
+		DIST_T len;					//Length of track
+		ANGLE_T angle;				//Angle at end of track
+		coOrd lineOrig;				//Start of straight
+		coOrd lineEnd;				//End of Straight (or zero for Turnout)
+		coOrd arcP;					//center or zero
+		DIST_T arcR;				//radius or zero
+		ANGLE_T arcA0, arcA1;		//Start angle and angular length (clockwise)
 		long helixTurns;
+		ANGLE_T	track_angle;
+		coOrd bezierPoints[4];		//Bezier Ends and CPs
+		coOrd cornuEnd[2];			//Cornu Ends
+		ANGLE_T cornuAngle[2];		//Angle at Cornu Ends
+		DIST_T cornuRadius[2];		//Radius at Cornu Ends
+		coOrd cornuCenter[2];		//Center at Cornu Ends
+
 		} trackParams_t;
 
 #define Q_CANNOT_BE_ON_END				(1)
@@ -103,13 +112,18 @@ typedef struct {
 #define Q_NOT_PLACE_FROGPOINTS			(15)
 #define Q_HAS_DESC						(16)
 #define Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK (17)
+#define Q_CAN_MODIFY_CONTROL_POINTS     (18)	// Is T_BEZIER or T_BEZLIN
+#define Q_IS_CORNU						(19)	// Is T_CORNU
+#define Q_MODIFY_CANT_SPLIT             (20)	// Is not able to be Split
+#define Q_CAN_EXTEND					(21)    // Add extra curve or straight in CORNU MODIFY
+#define Q_CAN_ADD_ENDPOINTS             (22)    // Is T_TURNTABLE
 
 typedef struct {
-		track_p trk;
-		DIST_T length;
-		DIST_T dist;
-		coOrd pos;
-		ANGLE_T angle;
+		track_p trk;							// IN Current Track OUT Next Track
+		DIST_T length;							// IN How far to go
+		DIST_T dist;							// OUT how far left = 0 if found
+		coOrd pos;								// IN/OUT - where we are, where we will be						// IN/OUT - where we are now
+		ANGLE_T angle;							// IN/OUT - angle now
 		} traverseTrack_t, *traverseTrack_p;
 
 
@@ -144,6 +158,7 @@ typedef struct {
 		BOOL_T (*checkTraverse)( track_p, coOrd );
 		BOOL_T (*makeParallel)( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
 		void (*drawDesc)( track_p, drawCmd_p, wDrawColor );
+		BOOL_T (*rebuildSegs)(track_p);
 		} trackCmd_t;
 
 
@@ -177,12 +192,22 @@ typedef struct {
 		char type;
 		wDrawColor color;
 		DIST_T width;
+		dynArr_t bezSegs;       //placed here to avoid overwrites
 		union {
 			struct {
 				coOrd pos[2];
 				ANGLE_T angle;
 				long option;
 			} l;
+			struct {
+				coOrd pos[4];
+				ANGLE_T angle0;
+				ANGLE_T angle3;
+				DIST_T minRadius;
+				DIST_T radius0;
+				DIST_T radius3;
+				DIST_T length;
+			} b;
 			struct {
 				coOrd center;
 				ANGLE_T a0, a1;
@@ -215,8 +240,10 @@ typedef struct {
 
 #define SEG_STRTRK		('S')
 #define SEG_CRVTRK		('C')
+#define SEG_BEZTRK      ('W')
 #define SEG_STRLIN		('L')
 #define SEG_CRVLIN		('A')
+#define SEG_BEZLIN      ('H')
 #define SEG_JNTTRK		('J')
 #define SEG_FILCRCL		('G')
 #define SEG_POLY		('Y')
@@ -232,7 +259,7 @@ typedef struct {
 #define SEG_DIMLIN		('M')
 #define SEG_TBLEDGE		('Q')
 
-#define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK )
+#define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BEZTRK)
 
 dynArr_t tempSegs_da;
 #define tempSegs(N) DYNARR_N( trkSeg_t, tempSegs_da, N )
@@ -280,24 +307,30 @@ void DrawSegsO(
 		DIST_T trackGauge,
 		wDrawColor color,
 		long options );
-ANGLE_T GetAngleSegs( wIndex_t, trkSeg_p, coOrd, wIndex_t * );
+ANGLE_T GetAngleSegs( wIndex_t, trkSeg_p, coOrd *, wIndex_t *, DIST_T *, BOOL_T *, wIndex_t *, BOOL_T * );
 void RecolorSegs( wIndex_t, trkSeg_p, wDrawColor );
 
 BOOL_T ReadSegs( void );
 BOOL_T WriteSegs( FILE * f, wIndex_t segCnt, trkSeg_p segs );
+BOOL_T WriteSegsEnd(FILE * f, wIndex_t segCnt, trkSeg_p segs, BOOL_T writeEnd);
 typedef union {
 		struct {
-				coOrd pos;				/* IN */
-				ANGLE_T angle;
-				DIST_T dist;			/* OUT */
-				BOOL_T backwards;
-		} traverse1;
+				coOrd pos;				/* IN the point to get to */
+				ANGLE_T angle;			/* IN  is the angle that the object starts at (-ve for forwards) */
+				DIST_T dist;			/* OUT is how far it is along the track */
+				BOOL_T backwards;		/* OUT which way are we going? */
+				BOOL_T reverse_seg;		/* OUT the seg is backwards curve */
+				int BezSegInx;			/* OUT for Bezier Seg */
+				BOOL_T segs_backwards;  /* OUT for Bezier Seg */
+		} traverse1;				// Find dist between pos and end of track that starts with angle set backwards
 		struct {
-				EPINX_T segDir;			/* IN */
-				DIST_T dist;			/* IN/OUT */
-				coOrd pos;				/* OUT */
-				ANGLE_T angle;
-		} traverse2;
+				BOOL_T segDir;			/* IN Direction to go */
+				int BezSegInx;			/* IN for Bezier Seg */
+				BOOL_T segs_backwards;  /* IN for Bezier Seg */
+				DIST_T dist;			/* IN/OUT In = distance to go, Out = distance left */
+				coOrd pos;				/* OUT = point reached if dist = 0 */
+				ANGLE_T angle;			/* OUT = angle at point */
+		} traverse2;			//Return distance left (or 0) and angle and pos when going dist from segDir end
 		struct {
 				int first, last;		/* IN */
 				ANGLE_T side;
@@ -309,15 +342,15 @@ typedef union {
 				drawCmd_p d;
 		} drawRoadbedSide;
 		struct {
-				coOrd pos1;				/* IN/OUT */
-				DIST_T dd;				/* OUT */
+				coOrd pos1;				/* IN pos to find */
+				DIST_T dd;				/* OUT distance from nearest point in seg to input pos */
 		} distance;
 		struct {
 				track_p trk;			/* OUT */
 				EPINX_T ep[2];
 		} newTrack;
 		struct {
-				DIST_T length;
+				DIST_T length;			/* OUT */
 		} length;
 		struct {
 				coOrd pos;				/* IN */
@@ -325,9 +358,14 @@ typedef union {
 				trkSeg_t newSeg[2];
 		} split;
 		struct {
-				coOrd pos;				/* IN */
-				ANGLE_T angle;			/* OUT */
-		} getAngle;
+				coOrd pos;				/* IN Pos to find nearest to  - OUT found pos on curve*/
+				ANGLE_T angle;			/* OUT angle at pos - (-ve if backwards)*/
+				BOOL_T negative_radius; /* OUT Radius <0? */
+				BOOL_T backwards;		/* OUT Seg is backwards */
+				DIST_T radius;			/* OUT radius at pos */
+				coOrd center;			/* OUT center of curvature at pos (0 = straight)*/
+				int  bezSegInx;			/* OUT if a bezier proc, the index of the sub segment */
+		} getAngle;			// Get pos on seg nearest, angle at that (-ve for forwards)
 		} segProcData_t, *segProcData_p;
 typedef enum {
 		SEGPROC_TRAVERSE1,
@@ -344,6 +382,8 @@ void SegProc( segProc_e, trkSeg_p, segProcData_p );
 void StraightSegProc( segProc_e, trkSeg_p, segProcData_p );
 void CurveSegProc( segProc_e, trkSeg_p, segProcData_p );
 void JointSegProc( segProc_e, trkSeg_p, segProcData_p );
+void BezierSegProc( segProc_e, trkSeg_p, segProcData_p );   //Used in Cornu join
+void CleanSegs( dynArr_t *);
 
 
 
@@ -450,6 +490,7 @@ void SetTrkEndPtCnt( track_p, EPINX_T );
 BOOL_T WriteEndPt( FILE *, track_cp, EPINX_T );
 EPINX_T PickEndPoint( coOrd, track_cp );
 EPINX_T PickUnconnectedEndPoint( coOrd, track_cp );
+EPINX_T PickUnconnectedEndPointSilent( coOrd, track_cp );
 
 void AuditTracks( char *, ... );
 void CheckTrackLength( track_cp );
@@ -486,7 +527,7 @@ void DrawStraightTies( drawCmd_p, track_p, coOrd, coOrd, wDrawColor );
 void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_p, DIST_T, wDrawColor, long );
 
 ANGLE_T GetAngleAtPoint( track_p, coOrd, EPINX_T *, EPINX_T * );
-DIST_T GetTrkDistance( track_cp, coOrd );
+DIST_T GetTrkDistance( track_cp, coOrd *);
 track_p OnTrack( coOrd *, INT_T, BOOL_T );
 track_p OnTrack2( coOrd *, INT_T, BOOL_T, BOOL_T );
 
@@ -545,6 +586,7 @@ BOOL_T QueryTrack( track_p, int );
 void UngroupTrack( track_p );
 BOOL_T IsTrack( track_p );
 char * GetTrkTypeName( track_p );
+BOOL_T RebuildTrackSegs(track_p);
 
 DIST_T GetFlexLength( track_p, EPINX_T, coOrd * );
 void LabelLengths( drawCmd_p, track_p, wDrawColor );
@@ -615,6 +657,7 @@ void DrawTrackElev( track_p, drawCmd_p, BOOL_T );
 /* cdraw.c */
 track_p MakeDrawFromSeg( coOrd, ANGLE_T, trkSeg_p );
 BOOL_T OnTableEdgeEndPt( track_p, coOrd * );
+BOOL_T GetClosestEndPt( track_p, coOrd * );
 BOOL_T ReadTableEdge( char * );
 BOOL_T ReadText( char * );
 

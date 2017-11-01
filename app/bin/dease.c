@@ -46,6 +46,7 @@ static wIcon_p enormal_bm;
 static wIcon_p eltbroad_bm;
 static wIcon_p ebroad_bm;
 static wIcon_p egtbroad_bm;
+static wIcon_p ecornu_bm;
 
 /****************************************
  *
@@ -60,8 +61,8 @@ static void SetEasement( DIST_T, void * );
 static void EasementOk( void );
 static void EasementCancel( void );
 
-static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), NULL };
-static paramFloatRange_t r0o5_2 = { 0.5, 2.0, 60 };
+static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
+static paramFloatRange_t r0o5_2 = { -1.0, 2.0, 60 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0, 60 };
 static paramFloatRange_t r0_10 = { 0.0, 10.0, 60 };
 static long easeM;
@@ -87,9 +88,15 @@ static void SetEasement(
 	long selVal = -1;
 	wIcon_p bm;
 
-	if (val == 0.0) {
+	if (val < 0.0) {
+		easeX = easeR = easeL = 0.0;
+		selVal = 4;
+		val = -1;
+		bm = ecornu_bm;
+	} else if (val < 0.5) {
 		easeX = easeR = easeL = 0.0;
 		selVal = 0;
+		val = 0;
 		bm = enone_bm;
 	} else if (val <= 1.0) {
 		z = 1.0/val - 1.0;
@@ -177,6 +184,9 @@ static void EasementSel(
 	case 3:
 		val = 2.0;
 		break;
+	case 4:
+		val = -1.0;
+		break;
 	default:
 		AbortProg( "easementSel: bad value %ld", arg);
 		val = 0.0;
@@ -245,6 +255,7 @@ static void EasementChange( long changes )
 #include "bitmaps/eltbroad.xpm"
 #include "bitmaps/ebroad.xpm"
 #include "bitmaps/egtbroad.xpm"
+#include "bitmaps/ecornu.xpm"
 
 
 EXPORT addButtonCallBack_t EasementInit( void )
@@ -258,6 +269,7 @@ EXPORT addButtonCallBack_t EasementInit( void )
 	eltbroad_bm = wIconCreatePixMap( eltbroad_xpm );
 	ebroad_bm = wIconCreatePixMap( ebroad_xpm );
 	egtbroad_bm = wIconCreatePixMap( egtbroad_xpm );
+	ecornu_bm = wIconCreatePixMap( ecornu_xpm );
 	easementB = AddToolbarButton( "cmdEasement", enone_bm, 0, (addButtonCallBack_t)DoEasementRedir, NULL );
 
 	RegisterChangeNotification( EasementChange );

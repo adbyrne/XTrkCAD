@@ -73,7 +73,7 @@ Refer to \k{cmdTurnoutNew} for detail.
 END
 
 MESSAGE MSG_CURVE_OUT_OF_RANGE
-Angle must be between 0° and 360°.
+Angle must be between 0\u00B0 and 360\u00B0.
 HELP
 The angle specified for a curve must be between 0\u00B0 and 360\u00B0.
 END
@@ -185,6 +185,15 @@ MESSAGE MSG_JOIN_TURNTABLE
 Cannot join from a turntable, try to a turntable
 HELP
 You cannot select a \f{Turntable} as the second track in \f{Join} command. If you wish to \f{Join} to a \f{Turntable} then select the \f{Turntable} as the first track in the \f{Join} command.
+
+Refer to \k{cmdJoin} for detail.
+END
+
+ ccornu.c
+MESSAGE MSG_JOIN_CORNU_SAME
+Cannot Join; Selected endpoints are on same track.
+HELP
+You are trying to \f{Join} a section of track with itself. Different tracks must selected when using the \f{Join} command.
 
 Refer to \k{cmdJoin} for detail.
 END

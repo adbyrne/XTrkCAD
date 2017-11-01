@@ -54,6 +54,8 @@ Set Curve Track creation mode
 :cmdCurveTangent
 Create curved track from tangent
 :cmdCustmgm
+Create Bezier Track
+:cmdBezCurve
 Manipulate Custom designer entries
 :cmdCut
 Moves selected objects to clipboard
@@ -650,7 +652,7 @@ Choose english (inches) or metric (centimeters)
 :pref-dstfmt
 How to display length measurements
 :pref-anglesystem
-0° is up or to the right
+0ï¿½ is up or to the right
 :pref-minlength
 Do not create tracks to be shorter than this value
 :pref-connectdistance

@@ -66,6 +66,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 	switch (action) {
 	case C_START:
 		InfoMessage( _("Select track to split") );
+		/* no break */
 	case C_DOWN:
 	case C_MOVE:
 		return C_CONTINUE;
@@ -77,6 +78,11 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			if (!CheckTrackLayer( trk0 ) ) {
 				onTrackInSplit = FALSE;
 				return C_TERMINATE;
+			}
+			if (QueryTrack(trk0,Q_MODIFY_CANT_SPLIT)) {
+				onTrackInSplit = FALSE;
+				InfoMessage(_("Can't Split that Track"));
+				return C_CONTINUE;
 			}
 			ep0 = PickEndPoint( pos, trk0 );
 			onTrackInSplit = FALSE;

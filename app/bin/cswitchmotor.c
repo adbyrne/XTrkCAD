@@ -278,7 +278,7 @@ static DIST_T DistanceSwitchMotor (track_p t, coOrd * p )
 {
 	switchmotorData_p xx = GetswitchmotorData(t);
         if (xx->turnout == NULL) return 0;
-	return GetTrkDistance(xx->turnout,*p);
+	return GetTrkDistance(xx->turnout,p);
 }
 
 static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
@@ -776,11 +776,11 @@ EXPORT void CheckDeleteSwitchmotor(track_p t)
     track_p sm;
     switchmotorData_p xx;
     
-    sm = FindSwitchMotor( t );
-    if (sm == NULL) return;
-    xx = GetswitchmotorData (sm);
-    NoticeMessage(_("Deleting Switch Motor %s"),_("Ok"),NULL,xx->name);
-    DeleteTrack (sm, FALSE);
+    while ((sm = FindSwitchMotor( t ))) {	                 //Cope with multiple motors for one Turnout!
+    	xx = GetswitchmotorData (sm);
+    	InfoMessage(_("Deleting Switch Motor %s"),xx->name);
+    	DeleteTrack (sm, FALSE);
+    };
 }
 
 
