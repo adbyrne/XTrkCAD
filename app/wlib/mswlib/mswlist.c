@@ -216,7 +216,7 @@ wIndex_t wListGetValues(
 	mswTmpBuff[cnt] = '\0';
 	if (s) {
 		strncpy(s, mswTmpBuff, siz);
-		s[siz] = '\0';
+		s[siz-1] = '\0';
 	}
 	if (bl->last >= 0) {
 		ldp = (listData*)SendMessage( bl->hWnd,
