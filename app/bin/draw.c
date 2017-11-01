@@ -1319,16 +1319,10 @@ EXPORT void MainProc( wWin_p win, winProcEvent e, void * data )
 		DrawMapBoundingBox( TRUE );
 		break;
 	case wQuit_e:
-		if (changed &&
-			NoticeMessage( MSG_SAVE_CHANGES, _("Save"), _("Quit")))
-			DoSave(NULL);
-			
-		CleanupFiles();	
-		SaveState();
 		CleanupCustom();
 		break;
 	case wClose_e:
-		/* shutdown the application */
+		/* shutdown the application via "close window"  button  */
 		DoQuit();
 		break;
 	default:

@@ -545,17 +545,14 @@ EXPORT void SaveState( void )
 }
 
 /*
- * Clean up befor quitting
+ * Clean up before quitting
  */
-static int quitting;
 static void DoQuitAfter( void )
 {
 	changed = 0;
 	SaveState();
 
 	CleanupFiles();
-
-	quitting = TRUE;
 }
 /**
  * Process shutdown request. This function is called when the user requests
@@ -565,13 +562,11 @@ static void DoQuitAfter( void )
 void DoQuit( void )
 {
 	Confirm(_("Quit"), DoQuitAfter );
-	if ( quitting ) {
 #ifdef CHECK_UNUSED_BALLOONHELP
-		ShowUnusedBalloonHelp();
+	ShowUnusedBalloonHelp();
 #endif
-		LogClose();
-		wExit(0);
-	}
+	LogClose();
+	wExit(0);
 }
 
 static void DoClearAfter( void )
