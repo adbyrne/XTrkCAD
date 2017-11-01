@@ -190,7 +190,7 @@ char *FindFilename(char *path)
 * the drive delimiter ':' or at the beginning of the first directory name.
 *
 * \param str OUT pointer to the complete path
-* \param ... IN one or more parts of the path
+* \param ... IN one or more parts of the path, terminate with NULL
 */
 
 void

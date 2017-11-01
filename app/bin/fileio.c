@@ -614,6 +614,7 @@ LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
 	}
 	if (paramFile)fclose( paramFile );
 	free(paramFileName);
+	paramFileName = NULL;
 	RestoreLocale( oldLocale );
 
 	return TRUE;
@@ -755,7 +756,7 @@ static BOOL_T ReadTrackFile(
 	}
 
 	paramLineNum = 0;
-	strcpy( paramFileName, fileName );
+	paramFileName = strdup( fileName );
 
 	InfoMessage("0");
 	count = 0;
@@ -852,6 +853,9 @@ static BOOL_T ReadTrackFile(
 	RestoreLocale( oldLocale );
 
 	paramFile = NULL;
+
+	free(paramFileName);
+	paramFileName = NULL;
 	InfoMessage( "%d", count );
 	return ret;
 }
