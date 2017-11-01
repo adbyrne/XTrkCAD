@@ -635,7 +635,7 @@ LayerPrefSave( void )
 				/* extend the list of layers that are set up via the preferences */
 				if( layersSaved[ 0 ] )
 					strcat( layersSaved, "," );
-				_itoa(inx, buffer, 10);
+                sprintf(buffer, "%d", inx);
 				strcat(layersSaved, buffer);
 		}
 	}
