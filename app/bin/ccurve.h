@@ -41,6 +41,7 @@ typedef struct {
 #define crvCmdFromTangent		(1)
 #define crvCmdFromCenter		(2)
 #define crvCmdFromChord			(3)
+#define crvCmdFromCornu			(4)
 
 #define circleCmdFixedRadius	(0)
 #define circleCmdFromTangent	(1)
