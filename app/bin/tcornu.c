@@ -1065,6 +1065,8 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	// case Q_CANNOT_BE_ON_END: Remove Restriction - Can have Cornu with no ends
 	case Q_CANNOT_PLACE_TURNOUT:
 		return TRUE;
+	case Q_IGNORE_EASEMENT_ON_EXTEND:
+		return TRUE;
 	default:
 		return FALSE;
 	}

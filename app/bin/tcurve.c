@@ -1488,13 +1488,14 @@ EXPORT void PlotCurve(
 	coOrd posx;
 
 	switch ( mode ) {
+	case crvCmdFromCornu:
 	case crvCmdFromEP1:
 		angle = FindAngle( pos0, pos1 );
 		d0 = FindDistance( pos0, pos2 )/2.0;
 		a0 = FindAngle( pos0, pos2 );
 		a1 = NormalizeAngle( a0 - angle );
 LOG( log_curve, 3, ( "P1 = [%0.3f %0.3f] D=%0.3f A0=%0.3f A1=%0.3f\n", pos2.x, pos2.y, d0, a0, a1 ) )
-		if (fabs(d0*sin(D2R(a1))) < (4.0/75.0)*mainD.scale) {
+		if ((fabs(d0*sin(D2R(a1))) < (4.0/75.0)*mainD.scale) & (mode == crvCmdFromEP1)) {
 LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*mainD.scale ) )
 			curveData->pos1.x = pos0.x + d0*2.0*sin(D2R(angle));
 			curveData->pos1.y = pos0.y + d0*2.0*cos(D2R(angle));
@@ -1516,7 +1517,7 @@ LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*ma
 				else
 					curveData->curveRadius = d0/sin(D2R(-a1));
 			}
-			if (curveData->curveRadius > 1000) {
+			if (curveData->curveRadius > 1000 & mode == crvCmdFromEP1) {
 				LOG( log_curve, 3, ( "Straight %0.3f > 1000\n", curveData->curveRadius ) )
 				curveData->pos1.x = pos0.x + d0*2.0*sin(D2R(angle));
 				curveData->pos1.y = pos0.y + d0*2.0*cos(D2R(angle));

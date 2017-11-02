@@ -315,7 +315,21 @@ LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
 			return C_CONTINUE;
 		Dex.first = FALSE;
 		Dex.pos01 = Dex.pos00;
-		PlotCurve( crvCmdFromEP1, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, TRUE );
+		if (Dex.params.type == curveTypeCornu) {    			//Restrict Cornu drag out to match end
+			ANGLE_T angle2 = NormalizeAngle(FindAngle(pos, Dex.pos00)-Dex.angle);
+			if (angle2 > 90.0 && angle2 < 270.0) {
+				if (Dex.params.cornuRadius[Dex.params.ep] == 0) {
+					Translate( &pos, Dex.pos00, Dex.angle, FindDistance( Dex.pos00, pos ) );
+				} else {
+					ANGLE_T angle = FindAngle(Dex.params.cornuCenter[Dex.params.ep],pos)-
+							FindAngle(Dex.params.cornuCenter[Dex.params.ep],Dex.pos00);
+					pos=Dex.pos00;
+					Rotate(&pos,Dex.params.cornuCenter[Dex.params.ep],angle);
+				}
+			} else pos = Dex.pos00;					//Only out from end
+			PlotCurve( crvCmdFromCornu, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, FALSE );
+		} else
+			PlotCurve( crvCmdFromEP1, Dex.pos00, Dex.pos00x, pos, &Dex.curveData, TRUE );
 		curveType = Dex.curveData.type;
 		if ( curveType == curveTypeStraight ) {
 			Dex.r1 = 0.0;
