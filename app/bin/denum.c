@@ -39,6 +39,9 @@ static wWin_p enumW;
 #define ENUMOP_PRINT	(5)
 #define ENUMOP_CLOSE	(6)
 
+#undef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+
 static void DoEnumOp( void * );
 static long enableListPrices;
 
