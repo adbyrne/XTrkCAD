@@ -110,7 +110,8 @@ wlibListStoreGetContext(GtkListStore *ls, int inx)
 
 
 /**
- * Clear the list store
+ * Clear the list store. All data in the list store will be automatically
+ * free'd when the list store is cleared.
  *
  * \param listStore IN
  */
@@ -118,9 +119,18 @@ wlibListStoreGetContext(GtkListStore *ls, int inx)
 void
 wlibListStoreClear(GtkListStore *listStore)
 {
+    wListItem_p id_p;
+    int i = 0;
+
     assert(listStore != NULL);
 
-    /** \todo this looks like a memory leak. should probably free the id's */
+    id_p = wlibListStoreGetContext(listStore, i++);
+
+    while (id_p) {
+        g_free(id_p);
+        id_p = wlibListStoreGetContext(listStore, i++);
+    }
+
     gtk_list_store_clear(listStore);
 }
 
@@ -190,7 +200,9 @@ wlibListStoreUpdateIter(GtkListStore *ls, GtkTreeIter *iter, char *labels)
 }
 
 /**
- * Add a pixbuf to the list store
+ * Add a pixbuf to the list store. So pixbuf is unref'ed so it will be freed
+ * with the list store.
+ *
  * \param ls IN list store
  * \param iter IN position
  * \param pixbuf IN pixbuf to add
@@ -200,6 +212,7 @@ void
 wlibListStoreSetPixbuf(GtkListStore *ls, GtkTreeIter *iter, GdkPixbuf *pixbuf)
 {
     gtk_list_store_set(ls, iter, LISTCOL_BITMAP, pixbuf, -1);
+    g_object_unref(pixbuf);
 }
 /**
  * Add a row to the list store
