@@ -6,7 +6,8 @@ cmdAbout	About box dialog
 cmdAbove	Move Selected object to top
 cmdAddElevations	Raise or Lower all Selected tracks
 cmdBelow	Move Selected object to bottom
-cmdBlockCreate	Create a section of track for automation 
+cmdBlockCreate	Create a section of track for automation
+cmdBlockEdit	Edit a Block Definition 
 cmdCarDesc	Create a new Car/Loco description
 cmdCarInventory	Manage your Car and Loco Inventory
 cmdCircleCenter	Create track circle from center	cmdCircle
@@ -134,6 +135,7 @@ cmdSticky	Choose which commands are sticky
 cmdStraight	Create straight track
 cmdStructure	Place a structure on the layout
 cmdSwitchMotorCreate	Create a switchmotor for turnout control
+cmdSwitchMotorEdit	Edit a switchmotor definition
 cmdText	Enter text on the layout
 cmdTextSize	Controls the size of the entered text	cmdText
 #cmdTighten	Remove slack from connected tracks
@@ -210,7 +212,8 @@ map-hilight	This is the portion of the layout shown in the Main Window canvas
 addElev-value	Raise or Lower all Selected Track	cmdAddElevations
 #
 block-name	Name of block	cmdBlockCreate
-block_script	Script that the block will run	cmdBlockCreate 
+block-script	Script that the block will run	cmdBlockCreate
+block-segments	List of tracks in the Block	cmdBlockEdit 
 #
 carpart-ok	Add or Update car object	cmdCarInventory
 carpart-manuf	Manufacturer name	cmdCarInventory
@@ -289,6 +292,7 @@ demo-quit	Stops the demonstration and returns you to XTrackCAD	cmdDemo
 demo-speed	Select speed of Playback	cmdDemo
 demo-text	This is where comments about the demo are displayed	cmdDemo
 #
+#Note all below have tab char after name
 describe-F1	
 describe-F2	
 describe-F3	
@@ -317,6 +321,7 @@ describe-I5
 describe-S1	
 describe-S2	
 describe-S3	
+describe-S4	
 describe-Y1	
 describe-C1	
 describe-L1	
@@ -334,7 +339,6 @@ display-centerdraw	Show crosshair at center of curves	cmdDisplay
 display-tworailscale	Drawing scale when to draw tracks with 2 rails	cmdDisplay
 display-mapscale	Drawing scale of the map window	cmdDisplay
 display-livemap	Whether the main layout is updated while dragging on the Map	cmdDisplay
-display-zoom-corner  Whether zoom should center or keep the bottom corner in view	cmdDisplay 
 display-labelenable	Enable labels for Turnouts, Flextrack Lengths and Elevations	cmdDisplay
 display-labelscale	When to label Turnout, Flextrack Lengths and Elevations	cmdDisplay
 display-description-fontsize	Font size for labels on layout	cmdDisplay
@@ -345,7 +349,7 @@ display-carhotbarlabels	How to group cars on the Train Hot Bar	cmdDisplay
 display-trainpause	Delay (in mS) between updating train movements	cmdDisplay
 display-hideTrainsInTunnels	Don't show trains in tunnels when tunnels are hidden	cmdDisplay
 display-unconnected-endpt	Display unconnected endpoints of track with sepecial marks	cmdDisplay
-display-zoom-corner Display zoom is locked to the bottom left corner or the center point	cmdDisplay
+display-zoom-corner	Whether zoom is locked to the bottom left corner or the center point	cmdDisplay
 #display-ok	Update the display	cmdDisplay
 display-ok		cmdDisplay
 #

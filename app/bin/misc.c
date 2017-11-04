@@ -725,26 +725,6 @@ EXPORT void SelectFont( void )
 #define COMMAND_MAX (170)
 #define BUTTON_MAX (170)
 #define NUM_CMDMENUS (4)
-#define CHECK_BALLOONHELP (1)
-
-#ifdef LATER
-static struct {
-		addButtonCallBack_t actionProc;
-		procCommand_t cmdProc;
-		char * helpStr;
-		wControl_p control;
-		char * labelStr;
-		int reqLevel;
-		wBool_t enabled;
-		wPos_t x, y;
-		long options;
-		long stickyMask;
-		int group;
-		long acclKey;
-		wMenuPush_p menu[NUM_CMDMENUS];
-		void * context;
-		} commandList[COMMAND_MAX];
-#endif
 
 static struct {
 		wControl_p control;

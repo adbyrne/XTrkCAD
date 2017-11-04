@@ -488,7 +488,7 @@ Color tracks or other objects by layer
 :display-tworailscale
 Drawing scale when to draw tracks with 2 rails
 :display-zoom-corner
-Zoom to keep lower corner in view
+Zoom to keep lower corner in view or not
 :display-tiedraw
 How to draw track ties
 :display-mingridspacing
