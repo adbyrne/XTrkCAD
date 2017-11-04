@@ -6,7 +6,7 @@ cmdAbout	About box dialog
 cmdAbove	Move Selected object to top
 cmdAddElevations	Raise or Lower all Selected tracks
 cmdBelow	Move Selected object to bottom
-cmdBlockCreate	Create a section of track for automation. 
+cmdBlockCreate	Create a section of track for automation 
 cmdCarDesc	Create a new Car/Loco description
 cmdCarInventory	Manage your Car and Loco Inventory
 cmdCircleCenter	Create track circle from center	cmdCircle
@@ -19,6 +19,7 @@ cmdCmdopt	Command Options dialog
 cmdColor	Controls colors
 cmdConnect	Connect two tracks
 cmdControl	Create a control for layout automation
+cmdContmgm	Manage control elements
 cmdCopy	Copy selected objects to clipboard
 cmdCurveCenter	Create curved track from center	cmdCurve
 cmdCurveChord	Create curved track from chord	cmdCurve
@@ -99,6 +100,7 @@ cmdLayerSet	Selects the current drawing layer	cmdLayer
 #cmdLayerShow9	Shows or hides layers	cmdLayer
 cmdLayout	Layout parameters
 #cmdLoosen	Disconnect tracks at loose joints	nohelp
+cmdMapShow	Show/Hide Map Window
 cmdModify	Modify or extend a track
 cmdMove	Move selected objects
 cmdMoveLabel	Move a label
@@ -207,6 +209,9 @@ map-hilight	This is the portion of the layout shown in the Main Window canvas
 #
 addElev-value	Raise or Lower all Selected Track	cmdAddElevations
 #
+block-name	Name of block	cmdBlockCreate
+block_script	Script that the block will run	cmdBlockCreate 
+#
 carpart-ok	Add or Update car object	cmdCarInventory
 carpart-manuf	Manufacturer name	cmdCarInventory
 carpart-prototype	Car Prototype	cmdCarInventory
@@ -264,6 +269,10 @@ cmdopt-move-quick	How to draw track being moved/rotated	cmdCmdopt
 cmdopt-preselect	Default command is Describe or Select	cmdCmdopt
 cmdopt-rightclickmode	Action to invoke on Right-Click	cmdCmdopt
 cmdopt-ok		cmdCmdopt
+#
+contmgm-inx	The list of control elements	cmdContmgm
+contmgm-edit	Edit the element	cmdContmgm
+contmgm-delete	Delete the element	cmdContmgm
 #
 contents-label	Contents Label for new Parameter file	cmdCustmgm
 #
@@ -335,6 +344,8 @@ display-listlabels	Label elements for lists	cmdDisplay
 display-carhotbarlabels	How to group cars on the Train Hot Bar	cmdDisplay
 display-trainpause	Delay (in mS) between updating train movements	cmdDisplay
 display-hideTrainsInTunnels	Don't show trains in tunnels when tunnels are hidden	cmdDisplay
+display-unconnected-endpt	Display unconnected endpoints of track with sepecial marks	cmdDisplay
+display-zoom-corner Display zoom is locked to the bottom left corner or the center point	cmdDisplay
 #display-ok	Update the display	cmdDisplay
 display-ok		cmdDisplay
 #
@@ -453,6 +464,7 @@ pricelist-flexunit	Price of specified length of flex-track	cmdPricelist
 pricelist-flexcost	Price of specified length of flex-track	cmdPricelist
 pricelist-ok		cmdPricelist
 #
+print-centerLine	Controls the printing of a centerline of track cmdPrint
 print-scale	Controls the reduction (scale) of the printout	cmdPrint
 print-pagew	Scaled page width (Scale times physical page width)	cmdPrint
 print-max	Sets page size to the maximum (based on scale and physical page size)	cmdPrint
@@ -480,6 +492,7 @@ prmfile-mode	Show parameter files by names or descriptions	cmdPrmfile
 prmfile-action	Toggle the loaded status of the selected parameter file	cmdPrmfile
 prmfile-browse	Find a parameter file for loading	cmdPrmfile
 prmfile-ok	Update parameter file list	cmdPrmfile
+prmfile-selectall	Select all parameter files shown	cmdPrmfile 
 #
 profile-canvas	Profile of specified path	cmdProfile
 profile-clear	Clear the profile	cmdProfile
@@ -534,6 +547,11 @@ structure-stats	Drawing scale and size	cmdStructure
 structure-ok	Complete structure placement	cmdStructure
 #
 structure-pier-inx	Choose a Pier number	cmdStructure
+#
+switchmotor-name	Name of the Motor	cmdSwitchMotorCreate
+switchmotor-normal	Value when switch is normal	cmdSwitchMotorCreate
+switchmotor-reverse	Value when the switch is reversed	cmdSwitchMotorCreate
+switchmotor-pointSense	Value for a positive comfirmation of switch position	cmdSwitchMotorCreate 
 #
 text-fontsize	Controls the size of the entered text	cmdText
 #

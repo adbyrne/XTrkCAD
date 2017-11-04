@@ -139,6 +139,8 @@ Adjust snap grid
 Enable snap grid
 :cmdGridShow
 Show snap grid
+:cmdMapShow
+Show/Hide Map Window
 :cmdGroup
 Create a structure from a Group of objects
 :cmdHandLaidTurnout

@@ -725,6 +725,7 @@ EXPORT void SelectFont( void )
 #define COMMAND_MAX (170)
 #define BUTTON_MAX (170)
 #define NUM_CMDMENUS (4)
+#define CHECK_BALLOONHELP (1)
 
 #ifdef LATER
 static struct {
@@ -1998,6 +1999,7 @@ static void CreateMenus( void )
 	wMenuPushCreate( popup2M, "cmdZoomOut", _("Zoom Out"), 0, (wMenuCallBack_p)DoZoomDown, (void*)1 );
 	MiscMenuItemCreate( popup1M, popup2M, "cmdGridEnable", _("SnapGrid Enable"), 0, (void*)(wMenuCallBack_p)SnapGridEnable, 0, (void *)0 );
 	MiscMenuItemCreate( popup1M, popup2M, "cmdGridShow", _("SnapGrid Show"), 0, (void*)(wMenuCallBack_p)SnapGridShow, 0, (void *)0 );
+	MiscMenuItemCreate( popup1M, popup2M, "cmdMapShow", _("Show/Hide Map"), 0, (void*)(wMenuCallBack_p)MapWindowToggleShow, 0, (void *)0);
 	wMenuSeparatorCreate( popup1M );
 	wMenuSeparatorCreate( popup2M );
 	MiscMenuItemCreate( popup2M, NULL, "cmdCopy", _("Copy"), 0, (void*)(wMenuCallBack_p)EditCopy, 0, (void *)0 );
@@ -2122,7 +2124,7 @@ static void CreateMenus( void )
 	// visibility toggle for map window
 	// get the start value
 	wPrefGetInteger( "misc", "mapVisible", (long *)&mapVisible, 1 );
-	mapShowMI = wMenuToggleCreate( viewM, "cmdMapShow", _("Show Map"), ACCL_MAPSHOW,
+	mapShowMI = wMenuToggleCreate( viewM, "cmdMapShow", _("Show/Hide Map"), ACCL_MAPSHOW,
 		mapVisible, (wMenuToggleCallBack_p)MapWindowToggleShow, NULL );
 
 	wMenuSeparatorCreate( viewM );
@@ -2270,7 +2272,7 @@ static void CreateMenus( void )
 
 	InitNewTurn( wMenuMenuCreate( manageM, "cmdTurnoutNew", _("Tur&nout Designer...") ) );
 
-        MiscMenuItemCreate( manageM, NULL, "smdContmgm", _("Layout &Control Elements"), ACCL_CONTMGM,(void*)ControlMgrInit(),0,(void*) 0);
+        MiscMenuItemCreate( manageM, NULL, "cmdContmgm", _("Layout &Control Elements"), ACCL_CONTMGM,(void*)ControlMgrInit(),0,(void*) 0);
         MiscMenuItemCreate( manageM, NULL, "cmdGroup", _("&Group"), ACCL_GROUP, (void*)(wMenuCallBack_p)DoGroup, IC_SELECTED, (void *)0 );
 	MiscMenuItemCreate( manageM, NULL, "cmdUngroup", _("&Ungroup"), ACCL_UNGROUP, (void*)(wMenuCallBack_p)DoUngroup, IC_SELECTED, (void *)0 );
 
