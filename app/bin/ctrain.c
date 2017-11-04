@@ -1933,10 +1933,6 @@ static BOOL_T MoveTrain(
     dist1 = length + dist0;
     trvTrk = xx->trvTrk;
 
-    if (trvTrk.trk->index == 7) {
-        puts("Buffer");
-    }
-
     if (trvTrk.trk == NULL) {
         return FALSE;
     }
