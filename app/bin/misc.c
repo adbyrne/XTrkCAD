@@ -114,6 +114,7 @@ EXPORT wButton_p redoB;
 
 EXPORT wButton_p zoomUpB;
 EXPORT wButton_p zoomDownB;
+wButton_p mapShowB;
 
 EXPORT wIndex_t checkPtMark = 0;
 
@@ -594,24 +595,29 @@ static void DoClear( void )
  * Toggle visibility state of map window.
  */
 
-void MapWindowToggleShow( void )
+void MapWindowToggleShow(void)
 {
-	MapWindowShow( !mapVisible );
+    MapWindowShow(!mapVisible);
 }
 
 /**
  * Set visibility state of map window.
+ *
+ * \param state IN TRUE if visible, FALSE if hidden
  */
 
-void MapWindowShow( int state )
+void MapWindowShow(int state)
 {
-	mapVisible = state;
-	wPrefSetInteger( "misc", "mapVisible", mapVisible );
-	wMenuToggleSet( mapShowMI, mapVisible );
-	if( mapVisible )
-		DoChangeNotification( CHANGE_MAP );
+    mapVisible = state;
+    wPrefSetInteger("misc", "mapVisible", mapVisible);
+    wMenuToggleSet(mapShowMI, mapVisible);
 
-	wWinShow( mapW, mapVisible );
+    if (mapVisible) {
+        DoChangeNotification(CHANGE_MAP);
+    }
+
+    wWinShow(mapW, mapVisible);
+    wButtonSetBusy(mapShowB, (wBool_t)mapVisible);
 }
 
 static void DoShowWindow(
@@ -1408,74 +1414,6 @@ EXPORT void ButtonGroupEnd( void )
 }
 
 
-#ifdef LATER
-EXPORT wIndex_t AddCommandControl(
-		procCommand_t command,
-		char * helpKey,
-		char * nameStr,
-		wControl_p control,
-		int reqLevel,
-		long options,
-		long acclKey,
-		void * context )
-{
-	wIndex_t buttInx = -1;
-	wIndex_t cmdInx;
-	BOOL_T newButtonGroup = FALSE;
-	wMenu_p tm, p1m, p2m;
-	static wIcon_p openbuttIcon = NULL;
-	static wMenu_p commandsSubmenu;
-	static wMenu_p popup1Submenu;
-	static wMenu_p popup2Submenu;
-
-	AddToolbarControl( control, options );
-
-	buttonList[buttInx].cmdInx = commandCnt;
-	cmdInx = AddCommand( command, helpKey, nameStr, NULL, reqLevel, options, acclKey, context );
-	commandList[cmdInx].buttInx = buttInx;
-	if (nameStr[0] == '\0')
-		return cmdInx;
-	if (commandList[cmdInx].options&IC_STICKY) {
-		if ( buttonGroupPopupM==NULL || newButtonGroup ) {
-			if ( stickyCnt > 32 )
-				AbortProg( "stickyCnt>32" );
-			stickyCnt++;
-		}
-		if ( buttonGroupPopupM==NULL) {
-			stickyLabels[stickyCnt-1] = nameStr;
-		} else {
-			stickyLabels[stickyCnt-1] = buttonGroupStickyLabel;
-		}
-		stickyLabels[stickyCnt] = NULL;
-		commandList[cmdInx].stickyMask = 1L<<(stickyCnt-1);
-	}
-	if ( buttonGroupPopupM ) {
-		commandList[cmdInx].menu[0] =
-		wMenuPushCreate( buttonGroupPopupM, helpKey, GetBalloonHelpStr(helpKey), 0, DoCommandB, (void*)cmdInx );
-		tm = commandsSubmenu;
-		p1m = popup1Submenu;
-		p2m = popup2Submenu;
-	} else {
-		tm = commandsM;
-		p1m = (options&IC_POPUP2)?popup1aM:popup1M;
-		p2m = (options&IC_POPUP2)?popup2aM:popup2M;
-	}
-	commandList[cmdInx].menu[1] =
-	wMenuPushCreate( tm, helpKey, nameStr, acclKey, DoCommandB, (void*)cmdInx );
-	if ( (options & (IC_POPUP|IC_POPUP2)) ) {
-		if ( !(options & IC_SELECTED) ) {
-			commandList[cmdInx].menu[2] =
-			wMenuPushCreate( p1m, helpKey, nameStr, 0, DoCommandB, (void*)cmdInx );
-		}
-		commandList[cmdInx].menu[3] =
-		wMenuPushCreate( p2m, helpKey, nameStr, 0, DoCommandB, (void*)cmdInx );
-	}
-
-	return cmdInx;
-}
-#endif
-
-
 EXPORT wIndex_t AddMenuButton(
 		wMenu_p menu,
 		procCommand_t command,
@@ -2025,6 +1963,7 @@ static void SetAccelKey(
 #include "bitmaps/document-save.xpm"
 #include "bitmaps/document-open.xpm"
 #include "bitmaps/document-print.xpm"
+#include "bitmaps/map.xpm"
 
 static void CreateMenus( void )
 {
@@ -2196,6 +2135,10 @@ static void CreateMenus( void )
 
 	cmdGroup = BG_SNAP;
 	InitSnapGridButtons();
+	mapShowB = AddToolbarButton("cmdMapShow", wIconCreatePixMap(map_xpm), IC_MODETRAIN_TOO,
+		(addButtonCallBack_t)MapWindowToggleShow, NULL);
+	wControlLinkedSet((wControl_p)mapShowMI, (wControl_p)mapShowB);
+	wButtonSetBusy(mapShowB, (wBool_t)mapVisible);
 
 	/*
 	 * ADD MENU

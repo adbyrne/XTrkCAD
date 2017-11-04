@@ -758,46 +758,6 @@ static STATUS_T CmdHelix( wAction_t action, coOrd pos )
 	return CmdCircleCommon( action, pos, TRUE );
 }
 
-#ifdef LATER
-static struct {
-		coOrd pos;
-		DIST_T radius;
-		} Dc2;
-
-
-static STATUS_T CmdCircle2( wAction_t action, coOrd pos )
-{
-
-	switch (action) {
-
-	case C_START:
-		InfoMessage( _("Place circle center") );
-		return C_CONTINUE;
-
-	case C_DOWN:
-		Dc2.pos = pos;
-		InfoMessage( _("Drag to set radius") );
-		return C_CONTINUE;
-
-	case C_MOVE:
-		dc2.radius = ConstrainR( FindDistance( Dc2.pos, pos ) );
-		InfoMessage( "%s", FormatDistance(dc2.radius) );
-		return C_CONTINUE;
-
-	case C_UP:
-		curCommand = cmdCircle;
-		InfoMessage( _("Place circle") );
-		return C_CONTINUE;
-
-	default:
-		return C_CONTINUE;
-	}
-}
-#endif
-
-
-
-#include "bitmaps/helix.xpm"
 #include "bitmaps/curve1.xpm"
 #include "bitmaps/curve2.xpm"
 #include "bitmaps/curve3.xpm"
@@ -806,8 +766,6 @@ static STATUS_T CmdCircle2( wAction_t action, coOrd pos )
 #include "bitmaps/circle1.xpm"
 #include "bitmaps/circle2.xpm"
 #include "bitmaps/circle3.xpm"
-
-
 
 EXPORT void InitCmdCurve( wMenu_p menu )
 {
@@ -831,10 +789,18 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 
 }
 
-EXPORT void InitCmdHelix( wMenu_p menu )
-{
-	AddMenuButton( menu, CmdHelix, "cmdHelix", _("Helix"), wIconCreatePixMap(helix_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_HELIX, NULL );
-	ParamRegister( &helixPG );
-	RegisterChangeNotification( ChangeHelixW );
+/**
+* Append the helix command to the pulldown menu. The helix doesn't use an icon, so it is only
+* available through the pulldown
+*
+* \param varname1 IN pulldown menu
+* \return
+*/
 
+void InitCmdHelix(wMenu_p menu)
+{
+    AddMenuButton(menu, CmdHelix, "cmdHelix", _("Helix"), NULL, LEVEL0_50,
+                  IC_STICKY|IC_POPUP2, ACCL_HELIX, NULL);
+    ParamRegister(&helixPG);
+    RegisterChangeNotification(ChangeHelixW);
 }
