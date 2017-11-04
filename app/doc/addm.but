@@ -177,8 +177,6 @@ Note: the drawing is an approximation to show the location of the \e{Points} and
 
 \S{cmdHelix} Helix Track
 
-\G{png.d/bhelix.png}
-
 A helix track is used to change the elevation of track in a restricted space.  A helix is drawn as a circle of track, but in 3 dimensions it would resemble a cork screw or the pattern of threads on a bolt.
 
 \G{png.d/ahelix.png}
