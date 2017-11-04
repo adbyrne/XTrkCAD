@@ -351,7 +351,7 @@ EXPORT enum BezierType AnalyseCurve(coOrd inpos[4], double *Rfx, double *Rfy, do
  */
 EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawColor color, DIST_T width) {
 	 double t_s = 0.0, t_e = 1.0;
-	 double errorThreshold = connectDistance;
+	 double errorThreshold = connectDistance/2;
 	 bCurveData_t prev_arc;
 	 prev_arc.end = 0.0;
 	 bCurveData_t arc;
