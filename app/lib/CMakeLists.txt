@@ -41,7 +41,7 @@ else()
 endif()
 	
 if(UNIX AND NOT APPLE)
-    install(FILES
+    install(PROGRAMS
         xdg-open
         DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
         )

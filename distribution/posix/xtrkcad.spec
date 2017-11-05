@@ -37,6 +37,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-, root, root)
+%defattr(755, root, root) /usr/local/share/xtrkcad/xdg-open
 %{_bindir}/xtrkcad
 %{_datadir}
 
