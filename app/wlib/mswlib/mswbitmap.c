@@ -144,7 +144,7 @@ void mswDrawIcon(
 	COLORREF col;
 
     /* draw the bitmap by dynamically creating a Windows DIB in memory */
-
+	/* BITMAPINFO already has one RGBQUAD color struct, so only allocate the rest */
     bmiInfo = malloc( sizeof( BITMAPINFO ) + (bm->colorcnt - 1) * sizeof( RGBQUAD ));
     if( !bmiInfo ) {
         fprintf( stderr, "could not allocate memory for bmiInfo\n" );
@@ -201,17 +201,19 @@ void mswDrawIcon(
 		if( disabled ) {
 			/* create a gray scale palette */
 			for( i = 0; i < bm->colorcnt; i ++ ) {
-				byt = ( 30 * bm->colormap[ i ].rgbRed + 
-					    59 * bm->colormap[ i ].rgbGreen + 
-						11 * bm->colormap[ i ].rgbBlue )/100;
-        
-				/* if totally black, use a dark gray */
-				if( byt == 0 )
-					byt = 0x66;
-				
-				bmiInfo->bmiColors[ i ].rgbRed = byt;
-				bmiInfo->bmiColors[ i ].rgbGreen = byt;
-				bmiInfo->bmiColors[ i ].rgbBlue = byt;
+				if (i != bm->transparent) {
+					byt = (30 * bm->colormap[i].rgbRed +
+						59 * bm->colormap[i].rgbGreen +
+						11 * bm->colormap[i].rgbBlue) / 100;
+
+					/* if totally black, use a dark gray */
+					if (byt == 0)
+						byt = 0x66;
+
+					bmiInfo->bmiColors[i].rgbRed = byt;
+					bmiInfo->bmiColors[i].rgbGreen = byt;
+					bmiInfo->bmiColors[i].rgbBlue = byt;
+				}
 			}
 	    } else {
             /* copy the palette */

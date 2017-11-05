@@ -1,6 +1,5 @@
-/**
+/** \file mswsplash.c
  *	Splash window for Windows
- *  $header$
  */
 
  /*  XTrkCad - Model Railroad CAD
@@ -60,6 +59,7 @@ PaintBitmap( HWND hWnd, HBITMAP hBmp )
 {
 	HDC hdc, hdcMem;	
 	RECT rect;
+	HGDIOBJ oldObject;
 
 	UpdateWindow( hWnd );
 
@@ -69,10 +69,10 @@ PaintBitmap( HWND hWnd, HBITMAP hBmp )
 	
 	/* create a memory dc holding the bitmap */
 	hdcMem = CreateCompatibleDC( hdc );
-	SelectObject( hdcMem, hBmp );
+	oldObject = SelectObject( hdcMem, hBmp );
 
 	/* 
-	   show it in the uppler left corner 
+	   show it in the upper left corner 
 	   the window is created with the size of the bitmap, so there is no need 
 	   for any special transformation 
 	*/
@@ -81,6 +81,7 @@ PaintBitmap( HWND hWnd, HBITMAP hBmp )
 			hdcMem, 0, 0, SRCCOPY );
 
 	/* release the DCs that are not needed any more */
+	SelectObject(hdcMem, oldObject);
 	DeleteDC( hdcMem );
 	ReleaseDC( hWnd, hdc );
 
