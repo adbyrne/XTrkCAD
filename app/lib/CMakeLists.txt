@@ -19,14 +19,21 @@ install(FILES
 	
 set( infile "${CMAKE_CURRENT_SOURCE_DIR}/Readme.md" )
 set( outfile "${CMAKE_CURRENT_BINARY_DIR}/Readme.txt" )
+set( changelogin "${CMAKE_CURRENT_SOURCE_DIR}/CHANGELOG.md" )
+set( changelogout "${CMAKE_CURRENT_BINARY_DIR}/CHANGELOG.txt" )
 
 if(PANDOC_FOUND)
 	add_custom_command(OUTPUT "${outfile}"
 					   COMMAND ${PANDOC_EXECUTABLE} "--from=Markdown" "--to=plain" "-o" ${outfile} ${infile} 
 					   DEPENDS "${infile}" 
 					  )
-	add_custom_target(Readme ALL DEPENDS ${outfile})					  
-	install(FILES ${outfile}
+	add_custom_target(CHANGELOG ALL DEPENDS ${changelogout})					  
+	add_custom_command(OUTPUT "${changelogout}"
+					   COMMAND ${PANDOC_EXECUTABLE} "--from=Markdown" "--to=plain" "-o" ${changelogout} ${changelogin} 
+					   DEPENDS "${changelogin}" 
+					  )
+	add_custom_target(Readme ALL DEPENDS ${outfile})
+	install(FILES ${outfile} ${changelogout}
 			DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}
 			)
 else()			

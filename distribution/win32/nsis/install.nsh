@@ -2,8 +2,10 @@
 ; This file is included from the CMake generated NSIS file during install.
 ;
 
-CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrkCad Help.lnk" "$INSTDIR\share\xtrkcad\xtrkcad.chm" "" "" 0
-CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrkCad ReadMe.lnk" "notepad.exe" "$INSTDIR\share\xtrkcad\ReadMe.txt" 	
+CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD Help.lnk" "$INSTDIR\share\xtrkcad\xtrkcad.chm" "" "" 0
+CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD ReadMe.lnk" "notepad.exe" "$INSTDIR\share\xtrkcad\ReadMe.txt"
+CreateShortCut "$SMPROGRAMS\$STARTMENU_FOLDER\XTrackCAD CHANGELOG.lnk" "notepad.exe" "$INSTDIR\share\xtrkcad\CHANGELOG.txt"
+ 	
   
 ;	
 ;  create file association
