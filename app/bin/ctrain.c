@@ -1973,7 +1973,10 @@ static BOOL_T MoveTrain(
                 CrashTrain(car1, dir1, &trvTrk, (long)xx->speed, FALSE);
                 return TRUE;
             } else {
-                StopTrain(train, trvTrk.trk->endCnt > 1?ST_OpenTurnout:ST_EndOfTrack);
+            	if (trvTrk.trk && trvTrk.trk->endCnt > 1)    //Test for null track after Traverse
+            		StopTrain(train, ST_OpenTurnout );
+            	else
+            		StopTrain(train, ST_EndOfTrack);
                 return (FALSE);
             }
         }
