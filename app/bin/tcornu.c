@@ -562,7 +562,7 @@ static BOOL_T WriteCornu( track_p t, FILE * f )
 				  xx->cornuData.c[0].x,xx->cornuData.c[0].y,
 				  xx->cornuData.pos[1].x, xx->cornuData.pos[1].y,
 				  xx->cornuData.a[1],
-				  xx->cornuData.r[0],
+				  xx->cornuData.r[1],
 				  xx->cornuData.c[1].x,xx->cornuData.c[1].y )>0;
 	if (track) {
 			rc &= WriteEndPt( f, t, 0 );
