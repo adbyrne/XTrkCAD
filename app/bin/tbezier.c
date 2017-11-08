@@ -805,7 +805,7 @@ static BOOL_T EnumerateBezier( track_p trk )
 	if (trk != NULL) {
 		DIST_T d;
 		struct extraData *xx = GetTrkExtraData(trk);
-		d = xx->bezierData.minCurveRadius;
+		d = xx->bezierData.length;
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 	}
 	return TRUE;

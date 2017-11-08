@@ -873,7 +873,7 @@ static BOOL_T EnumerateCornu( track_p trk )
 	if (trk != NULL) {
 		struct extraData *xx = GetTrkExtraData(trk);
 		DIST_T d;
-		d = xx->cornuData.minCurveRadius;
+		d = xx->cornuData.length;
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 	}
 	return TRUE;
