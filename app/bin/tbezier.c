@@ -801,10 +801,10 @@ static BOOL_T MergeBezier(
 
 static BOOL_T EnumerateBezier( track_p trk )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
-	DIST_T d;
+
 	if (trk != NULL) {
-		xx = GetTrkExtraData(trk);
+		DIST_T d;
+		struct extraData *xx = GetTrkExtraData(trk);
 		d = xx->bezierData.minCurveRadius;
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 	}
@@ -1140,7 +1140,7 @@ LOG( log_bezierSegments, 1, ( "BezTr1 Enter P[%0.3f %0.3f] A%0.3f\n", p0.x, p0.y
 		data->traverse1.reverse_seg = segProcData.traverse1.reverse_seg; //which way is curve (info)
 		data->traverse1.backwards = segProcData.traverse1.backwards;     //Pass through Train direction
 		data->traverse1.dist = segProcData.traverse1.dist;			     //Get last seg partial dist
-		data->traverse1.segs_backwards = segProcData.traverse2.segs_backwards;	//Get last
+		data->traverse1.segs_backwards = segs_backwards;				 //Get last
 LOG( log_bezierSegments, 1, ( "BezTr1-Tr1 A%0.3f B%d R%d D%0.3f\n", a2, segProcData.traverse1.backwards, segProcData.traverse1.reverse_seg, segProcData.traverse1.dist ))
 		break;
 

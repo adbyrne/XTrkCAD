@@ -869,11 +869,10 @@ LOG( log_traverseCornu, 1, ( "   --> [%0.3f %0.3f] A%0.3f D%0.3f\n", trvTrk->pos
 
 static BOOL_T EnumerateCornu( track_p trk )
 {
-	struct extraData *xx = GetTrkExtraData(trk);
-	DIST_T d;
 
 	if (trk != NULL) {
-		xx = GetTrkExtraData(trk);
+		struct extraData *xx = GetTrkExtraData(trk);
+		DIST_T d;
 		d = xx->cornuData.minCurveRadius;
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 	}
