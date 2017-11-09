@@ -6,10 +6,26 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [4.4.0.beta1] - 2017-06-20
+## [4.4.0.beta2] - 2017-11-09
+
+###Fixed
+
++ Cornu problem with saving that led to bad curves on file open
++ Cornu and Bezier problem with List Parts - led to abend plus bad lengths
++ Failure in Train if a train hits an end-point
+
+###Added
+
++ Constrain add to unconnected Cornu end in Modify via right drag to be correct radius
+
+
+## [4.4.0.beta1] 
 
 ### Added
-+ New cornu feature for more flexible easements
++ New Cornu track feature for more flexible easements
++ New Bezier tracks and lines
++ Snapping of new straight, curved and Bezier tracks to unconnected end points
++ Snapping of new straight, curved and Bezier lines to line segment ends
 + Use region specific defaults on initial run of program
 + Keep separate current directories per file type
 + Add option to highlight unconnected end points
