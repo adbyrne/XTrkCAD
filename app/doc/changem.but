@@ -348,7 +348,7 @@ For detail about;
 
 \dd Moving one segment of track to join with another refer to \K{joinTrackMove}.
 
-\S2{joinCornu} Join with Cornu Easement
+\S2{joinCornu} \i{Creating a Cornu} Join with Cornu Easement
 
 \u000
 
@@ -368,7 +368,7 @@ For detail about;
 
 \u000
 
-\dd \e{Left-Drag} the endpoint to where you want it and release the button. The point will only move along the piece of track with the open endpoint (if this track type can be split) as far as the opposite end, or as an extension of that track with the same curvature (if this track can be extended). Note that you will be able to fine-tune the position later.
+\dd \e{Left-Drag} the endpoint to where you want it and release the button. The point will only move along the piece of track with the open endpoint (if this track type can be split) as far as the opposite end, or as an extension of that track at the selected end with the same curvature (if this track can be extended). Note that you will be able to fine-tune the end positions later.
 
 \lcont{
 
