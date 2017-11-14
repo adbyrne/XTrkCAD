@@ -49,6 +49,7 @@ struct extraData {
 #define xcircle extraData->circle
 
 static int log_curve = 0;
+static int log_curveSegs = 0;
 
 static DIST_T GetLengthCurve( track_p );
 
@@ -1360,29 +1361,46 @@ EXPORT void CurveSegProc(
 		data->traverse1.backwards = ((a2 < 270) && (a2 > 90 ));
 		//Find angular distance from end opposite to direction of travel
 		a2 = FindAngle( segPtr->u.c.center, data->traverse1.pos );
-		//if (segPtr->u.c.radius<0) data->traverse1.backwards = !data->traverse1.backwards;
-		if ( !data->traverse1.backwards ) {
-			a2 = NormalizeAngle( a2-segPtr->u.c.a0 );
+		//A segment may be fractionally too short - limit to angles within segment!
+		int res = AngleInRange(a2,segPtr->u.c.a0,segPtr->u.c.a1);
+		if (res == 1 ) {
+LOG( log_curveSegs, 1, ("CrvSegsAngle miss A%0.3f S%0.3f E%0.3f R%d B%d \n",a2,segPtr->u.c.a0,segPtr->u.c.a1,res,data->traverse1.backwards))
+			a2 = data->traverse1.backwards?segPtr->u.c.a1:0;
+		} else if (res == -1){
+			a2 = data->traverse1.backwards?0:segPtr->u.c.a1;
 		} else {
-			a2 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1-a2 );
+		//Fix issue of angles passing through zero -
+			if ( !data->traverse1.backwards ) {
+				a2 = NormalizeAngle(DifferenceBetweenAngles(segPtr->u.c.a0,a2));
+			} else {
+				a2 = NormalizeAngle(DifferenceBetweenAngles(a2,segPtr->u.c.a0+segPtr->u.c.a1));
+			}
 		}
-		data->traverse1.dist = fabs(a2/360.0*2*M_PI*fabs(segPtr->u.c.radius));  		//Distance from end in direction of travel
+
+		//Make sure backwards means going towards EP0
+		if (segPtr->u.c.radius<0) data->traverse1.backwards = !data->traverse1.backwards;
+		data->traverse1.dist = a2/360.0*2*M_PI*fabs(segPtr->u.c.radius);  		//Distance from end in direction of travel
 		data->traverse1.reverse_seg = ((segPtr->u.c.a0>=90) && (segPtr->u.c.a0<270));
+		data->traverse1.negative = (segPtr->u.c.radius < 0);
+		data->traverse1.segs_backwards = FALSE;
+		data->traverse1.BezSegInx = 0;
+LOG( log_curveSegs, 2, ("  CrvSegs D=%0.3f A%0.3f B%d \n",data->traverse1.dist,data->traverse1.backwards))
 		break;
 
 	case SEGPROC_TRAVERSE2:
 		circum = 2*M_PI*segPtr->u.c.radius;
 		if ( circum < 0 )
 				circum = - circum;
-		d = segPtr->u.c.a1/360.0*circum;
+		d = (segPtr->u.c.a1*circum)/360;
 		if ( d > data->traverse2.dist ) {
-			a2 = (data->traverse2.dist)/circum*360.0;
+			a2 = (data->traverse2.dist*360.0)/circum;
 			data->traverse2.dist = 0;
 		} else {
 			a2 = segPtr->u.c.a1;
 			data->traverse2.dist -= d;
 		}
-		if ( !data->traverse2.segDir /*== (segPtr->u.c.radius<0)*/ ) {
+		if (segPtr->u.c.radius<0) data->traverse2.segDir  = !data->traverse2.segDir;
+		if ( !data->traverse2.segDir ) {
 			a2 = NormalizeAngle( segPtr->u.c.a0+a2 );
 			a1 = NormalizeAngle(a2+90);
 		} else {
@@ -1452,9 +1470,7 @@ EXPORT void CurveSegProc(
 		data->split.newSeg[s1].u.c.a1 -= a2;
 		break;
 
-	/* Please note - GetAngle for a curve returns an angle that is backwards for a reversed curve (90<a0<270)
-	 *   The caller needs to look at getAngle.backwards and adjust when compared to the travel direction to decide which way to process.
-	 */
+
 	case SEGPROC_GETANGLE:
 		data->getAngle.angle = NormalizeAngle( FindAngle( segPtr->u.c.center, data->getAngle.pos ) + 90 );
 		data->getAngle.negative_radius = segPtr->u.c.radius<0;
@@ -1620,4 +1636,5 @@ EXPORT void InitTrkCurve( void )
 {
 	T_CURVE = InitObject( &curveCmds );
 	log_curve = LogFindIndex( "curve" );
+	log_curveSegs = LogFindIndex( "curveSegs");
 }

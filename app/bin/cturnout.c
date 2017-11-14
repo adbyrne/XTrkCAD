@@ -1211,7 +1211,6 @@ static BOOL_T TraverseTurnout(
 	coOrd pos0, pos1, pos2;
 	DIST_T d, dist;
 	PATHPTR_T path, pathCurr;
-	BOOL_T backwards=FALSE;
 	trkSeg_p segPtr;
 	EPINX_T ep, epCnt, ep2;
 	int segInx;
@@ -1231,10 +1230,6 @@ LOG( log_traverseTurnout, 1, ( "TraverseTurnout( T%d, [%0.3f %0.3f] [%0.3f %0.3f
 			continue;
 		GetSegInxEP( path[0], &segInx, &segEP );
 		segPtr = xx->segs+segInx;
-#ifdef LATER
-	for ( inx = 0; inx<xx->segCnt; inx++ ) {
-		segPtr = xx->segs+inx;
-#endif
 		segProcData.distance.pos1 = pos0;
 		SegProc( SEGPROC_DISTANCE, segPtr, &segProcData );
 		if ( segProcData.distance.dd < d ) {
@@ -1250,46 +1245,63 @@ LOG( log_traverseTurnout, 1, ( "TraverseTurnout( T%d, [%0.3f %0.3f] [%0.3f %0.3f
 LOG( log_traverseTurnout, 1, ( "  PC=%d ", pathCurr[0] ) )
 	GetSegInxEP( pathCurr[0], &segInx, &segEP );
 	segPtr = xx->segs+segInx;
-#ifdef LATER
-	for ( pathCurr = xx->pathCurr+strlen((char*)xx->pathCurr)+1; pathCurr[0] || pathCurr[1]; pathCurr++ ) {
-		if ( pathCurr[0] == 0 )
-			continue;
-		if ( Abs(pathCurr[0])-1 == currInx )
-			break;
-	}
-	if ( pathCurr[0] == 0 ) {
-		fprintf( stderr, "Open turnout [%d]\n", currInx );
-		return FALSE;
-	}
-	segPtr = xx->segs+currInx;
-#endif
 	segProcData.traverse1.pos = pos2;
 	segProcData.traverse1.angle = xx->angle+trvTrk->angle;
 	SegProc( SEGPROC_TRAVERSE1, segPtr, &segProcData );
 	dist += segProcData.traverse1.dist;
-	backwards = segProcData.traverse1.backwards;
-	if ( segEP ) backwards = !backwards;
-LOG( log_traverseTurnout, 2, ( " B%d D%0.3f\n", backwards, dist ) )
+	//Get ready for Traverse2 - copy all Traverse1 first
+	BOOL_T backwards = segProcData.traverse1.backwards;
+	BOOL_T segs_backwards = segProcData.traverse1.segs_backwards;
+	BOOL_T neg = segProcData.traverse1.negative;
+	int BezSegInx = segProcData.traverse1.BezSegInx;
 
+	// Backwards means universally we going towards EP=0 on this segment.
+	// But the overall direction we are going can have two types of reversal,
+	// a curve that is flipped is negative (the end points are reversed) which Traverse1 handles,
+	// and a path can also be reversed (negative path number) and will have segEP = 1
+	BOOL_T turnout_backwards = backwards;
+	if (segEP) turnout_backwards = !turnout_backwards; //direction modified if path reversed
+
+LOG( log_traverseTurnout, 2, ( " SI%d TB%d SP%d B%d SB%d N%d BSI%d D%0.3f\n", segInx, turnout_backwards, segEP, backwards, segs_backwards, neg, BezSegInx, dist ) )
 	while ( *pathCurr ) {
+		//Set up Traverse2
 		GetSegInxEP( pathCurr[0], &segInx, &segEP );
 		segPtr = xx->segs+segInx;
-		segProcData.traverse2.segDir = (backwards?1-segEP:segEP);
+		segProcData.traverse2.segDir = backwards;
 		segProcData.traverse2.dist = dist;
+		segProcData.traverse2.BezSegInx = BezSegInx;
+		segProcData.traverse2.segs_backwards = segs_backwards;
 		SegProc( SEGPROC_TRAVERSE2, segPtr, &segProcData );
 		if ( segProcData.traverse2.dist <= 0 ) {
 			*distR = 0;
 			REORIGIN( trvTrk->pos, segProcData.traverse2.pos, xx->angle, xx->orig );
 			trvTrk->angle = NormalizeAngle( xx->angle+segProcData.traverse2.angle );
+LOG( log_traverseTurnout, 2, ( "  -> [%0.3f %0.3f] A%0.3f D%0.3f\n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ))
 			return TRUE;
 		}
-		dist = segProcData.traverse2.dist;
-		pathCurr += (backwards?-1:1);
-LOG( log_traverseTurnout, 1, ( " D%0.3f\n", dist ) )
+		dist = segProcData.traverse2.dist;			//Remainder after segment
+		pathCurr += (turnout_backwards?-1:1);		//Use master direction for turnout
+		//Redrive Traverse 1 for each segment for Bezier - to pick up backwards elements
+		if (pathCurr[0] == '\0') continue;          //
+		//Set up Traverse1 - copy all of Traverse2 values first
+		GetSegInxEP( pathCurr[0], &segInx, &segEP );
+		segPtr = xx->segs+segInx;
+		ANGLE_T angle = segProcData.traverse2.angle;
+		coOrd pos = segProcData.traverse2.pos;
+LOG( log_traverseTurnout, 1, ( " Loop2-1 SI%d SP%d [%0.3f %0.3f] A%0.3f D%0.3f\n", segInx, segEP, pos.x, pos.y, angle, dist ) )
+		segProcData.traverse1.pos = pos;
+		segProcData.traverse1.angle = angle;
+		SegProc( SEGPROC_TRAVERSE1, segPtr, &segProcData );
+		// dist += segProcData.traverse1.dist;	               //Add distance from end to pos (could be zero or whole length if backwards)
+		backwards = segProcData.traverse1.backwards;
+		segs_backwards = segProcData.traverse1.segs_backwards;
+		neg = segProcData.traverse1.negative;
+		BezSegInx = segProcData.traverse1.BezSegInx;
+LOG( log_traverseTurnout, 1, ( " Loop1-2 B%d SB%d N%d BSI%d D%0.3f\n", backwards, segs_backwards, neg, BezSegInx, dist ) )
 	}
 
-	pathCurr += (backwards?1:-1);
-	pos1 = MapPathPos( xx, pathCurr[0], (backwards?0:1) );
+	pathCurr += (turnout_backwards?1:-1);
+	pos1 = MapPathPos( xx, pathCurr[0], (turnout_backwards?0:1) );
 	*distR = dist;
 	epCnt = GetTrkEndPtCnt(trk);
 	ep = 0;

@@ -708,7 +708,7 @@ LOG( log_traverseBezier, 1, ( " TraverseBezier [%0.3f %0.3f] D%0.3f A%0.3f SB%d 
 	while (inx >=0 && inx<xx->bezierData.arcSegs.cnt) {
 		segPtr = (trkSeg_p)xx->bezierData.arcSegs.ptr+inx;  	//move in to the identified segment
 		SegProc( SEGPROC_TRAVERSE1, segPtr, &segProcData );   	//Backwards or forwards for THIS segment - note that this can differ from segs_backward!!
-		BOOL_T backwards = segProcData.traverse1.backwards;			//do we process this segment backwards (it is ?
+		BOOL_T backwards = segProcData.traverse1.backwards;			//Are we going to EP0?
 		BOOL_T reverse_seg = segProcData.traverse1.reverse_seg;		//is it a backwards segment (we don't actually care as Traverse1 takes care of it)
 
 		dist += segProcData.traverse1.dist;
@@ -1111,7 +1111,7 @@ EXPORT void BezierSegProc(
 		}
 		d = data->traverse1.dist;
 		p0 = data->traverse1.pos;
-LOG( log_bezierSegments, 1, ( "BezTr1 Enter P[%0.3f %0.3f] A%0.3f\n", p0.x, p0.y, data->traverse1.angle ))
+LOG( log_bezierSegments, 1, ( "    BezTr1-Enter P[%0.3f %0.3f] A%0.3f\n", p0.x, p0.y, data->traverse1.angle ))
 		a2 = GetAngleSegs(segPtr->bezSegs.cnt,segPtr->bezSegs.ptr,&p0,&segInx,&d,&back, NULL, &neg); //Find right seg and pos
 		inx = segInx;
 		data->traverse1.BezSegInx = segInx;
@@ -1134,19 +1134,21 @@ LOG( log_bezierSegments, 1, ( "BezTr1 Enter P[%0.3f %0.3f] A%0.3f\n", p0.x, p0.y
 		}
 	    segProcData.traverse1.pos = data->traverse1.pos = p0;		  //actual point on curve
 	    segProcData.traverse1.angle = data->traverse1.angle;          //Angle of car
- LOG( log_bezierSegments, 1, ( "BezTR1-GSA I%d P[%0.3f %0.3f] N%d SB%d\n", segInx, p0.x, p0.y, neg, segs_backwards ))
+ LOG( log_bezierSegments, 1, ( "    BezTr1-GSA I%d P[%0.3f %0.3f] N%d SB%d\n", segInx, p0.x, p0.y, neg, segs_backwards ))
 		subSegsPtr = (trkSeg_p)segPtr->bezSegs.ptr+inx;
 		SegProc( SEGPROC_TRAVERSE1, subSegsPtr, &segProcData );
 		data->traverse1.reverse_seg = segProcData.traverse1.reverse_seg; //which way is curve (info)
 		data->traverse1.backwards = segProcData.traverse1.backwards;     //Pass through Train direction
 		data->traverse1.dist = segProcData.traverse1.dist;			     //Get last seg partial dist
 		data->traverse1.segs_backwards = segs_backwards;				 //Get last
-LOG( log_bezierSegments, 1, ( "BezTr1-Tr1 A%0.3f B%d R%d D%0.3f\n", a2, segProcData.traverse1.backwards, segProcData.traverse1.reverse_seg, segProcData.traverse1.dist ))
+		data->traverse1.negative = segProcData.traverse1.negative;		 //Is curve flipped (info)
+		data->traverse1.BezSegInx = inx;								 //Copy up Index
+LOG( log_bezierSegments, 1, ( "    BezTr1-Exit -> A%0.3f B%d R%d N%d D%0.3f\n", a2, segProcData.traverse1.backwards, segProcData.traverse1.reverse_seg, segProcData.traverse1.negative, segProcData.traverse1.dist ))
 		break;
 
 	case SEGPROC_TRAVERSE2:
 		if (segPtr->type != SEG_BEZTRK) return;							//Not SEG_BEZLIN
-LOG( log_bezierSegments, 1, ( "BezTr2 Enter D%0.3f SD%d SI%d SB%d\n", data->traverse2.dist, data->traverse2.segDir, data->traverse2.BezSegInx, data->traverse2.segs_backwards))
+LOG( log_bezierSegments, 1, ( "    BezTr2-Enter D%0.3f SD%d SI%d SB%d\n", data->traverse2.dist, data->traverse2.segDir, data->traverse2.BezSegInx, data->traverse2.segs_backwards))
 		if (data->traverse2.dist <= segPtr->u.b.length) {
 
 			segProcData.traverse2.pos = data->traverse2.pos;
@@ -1164,12 +1166,12 @@ LOG( log_bezierSegments, 1, ( "BezTr2 Enter D%0.3f SD%d SI%d SB%d\n", data->trav
 					data->traverse2.angle = segProcData.traverse2.angle;
 					data->traverse2.dist = 0;
 					data->traverse2.pos = segProcData.traverse2.pos;
-LOG( log_bezierSegments, 1, ( "BezTr2Exit A%0.3f P[%0.3f %0.3f] \n", data->traverse2.angle, data->traverse2.pos.x, data->traverse2.pos.y ))
+LOG( log_bezierSegments, 1, ( "    BezTr2-Exit1 -> A%0.3f P[%0.3f %0.3f] \n", data->traverse2.angle, data->traverse2.pos.x, data->traverse2.pos.y ))
 					return;
 				} else dist = segProcData.traverse2.dist;
 				p2 = segProcData.traverse2.pos;
 				a2 = segProcData.traverse2.angle;
-LOG( log_bezierSegments, 1, ( "BezTr2-Tr2 D%0.3f P[%0.3f %0.3f] A%0.3f\n", dist, p2.x, p2.y, a2 ))
+LOG( log_bezierSegments, 2, ( "    BezTr2-Tr2 D%0.3f P[%0.3f %0.3f] A%0.3f\n", dist, p2.x, p2.y, a2 ))
 
 				segProcData.traverse1.pos = p2;
 				segProcData.traverse1.angle = a2;
@@ -1178,14 +1180,13 @@ LOG( log_bezierSegments, 1, ( "BezTr2-Tr2 D%0.3f P[%0.3f %0.3f] A%0.3f\n", dist,
 				subSegsPtr = (trkSeg_p)segPtr->bezSegs.ptr+inx;
 				SegProc(SEGPROC_TRAVERSE1, subSegsPtr, &segProcData);
 				BOOL_T reverse_seg = segProcData.traverse1.reverse_seg;        //For Info only
-				segs_backwards = segProcData.traverse1.backwards;
+				backwards = segProcData.traverse1.backwards;
 				dist += segProcData.traverse1.dist;             		//Add extra if needed - this is if we have to go from the other end of this seg
-
 				segProcData.traverse2.dist = dist;    					//distance left
-				segProcData.traverse2.segDir = segs_backwards;			//which way
+				segProcData.traverse2.segDir = backwards;				//which way
 				segProcData.traverse2.pos = p2;
 				segProcData.traverse2.angle = a2;
-LOG( log_bezierSegments, 1, ( "BezTr2Loop A%0.3f P[%0.3f %0.3f] D%0.3f SI%d B%d RS%d\n", a2, p2.x, p2.y, dist, inx, backwards, reverse_seg ))
+LOG( log_bezierSegments, 2, ( "    BezTr2-Loop A%0.3f P[%0.3f %0.3f] D%0.3f SI%d B%d RS%d\n", a2, p2.x, p2.y, dist, inx, backwards, reverse_seg ))
 			}
 			data->traverse2.dist = dist;
 		} else data->traverse2.dist -= segPtr->u.b.length;  //we got here because the desired point is not inside the segment
@@ -1196,7 +1197,7 @@ LOG( log_bezierSegments, 1, ( "BezTr2Loop A%0.3f P[%0.3f %0.3f] D%0.3f SI%d B%d 
     		data->traverse2.pos = segPtr->u.b.pos[3];					// Forwards so point 3
     		data->traverse2.angle = segPtr->u.b.angle3;
     	}
-LOG( log_bezierSegments, 1, ( "BezTr2Nxt SI%d A%0.3f P[%0.3f %0.3f] D%0.3f\n", inx, data->traverse2.angle, data->traverse2.pos.x, data->traverse2.pos.y, data->traverse2.dist))
+LOG( log_bezierSegments, 1, ( "    BezTr-Exit2 --> SI%d A%0.3f P[%0.3f %0.3f] D%0.3f\n", inx, data->traverse2.angle, data->traverse2.pos.x, data->traverse2.pos.y, data->traverse2.dist))
 		break;
 
 	case SEGPROC_DRAWROADBEDSIDE:
@@ -1259,7 +1260,7 @@ LOG( log_bezierSegments, 1, ( "BezTr2Nxt SI%d A%0.3f P[%0.3f %0.3f] D%0.3f\n", i
 		back = FALSE;
 		subSegsPtr = (trkSeg_p) segPtr->bezSegs.ptr;
 		coOrd pos = data->getAngle.pos;
-LOG( log_bezierSegments, 1, ( "BezGA-I  P[%0.3f %0.3f] \n", pos.x, pos.y))
+LOG( log_bezierSegments, 1, ( "    BezGA-In  P[%0.3f %0.3f] \n", pos.x, pos.y))
 		data->getAngle.angle = GetAngleSegs(segPtr->bezSegs.cnt,subSegsPtr, &pos, &inx, NULL, &back, NULL, NULL);
 										//Recurse for Bezier sub-segs (only straights and curves)
 
@@ -1274,7 +1275,7 @@ LOG( log_bezierSegments, 1, ( "BezGA-I  P[%0.3f %0.3f] \n", pos.x, pos.y))
 			data->getAngle.center = subSegsPtr->u.c.center;
 		}
 		else data->getAngle.radius = 0.0;
-LOG( log_bezierSegments, 1, ( "BezGA-O SI%d A%0.3f P[%0.3f %0.3f] B%d\n", inx, data->getAngle.angle, pos.x, pos.y, back))
+LOG( log_bezierSegments, 1, ( "    BezGA-Out SI%d A%0.3f P[%0.3f %0.3f] B%d\n", inx, data->getAngle.angle, pos.x, pos.y, back))
 		break;
     
 	}
@@ -1336,7 +1337,7 @@ EXPORT void InitTrkBezier( void )
 	T_BZRLIN = InitObject( &bezlinCmds );
 	log_bezier = LogFindIndex( "Bezier" );
 	log_traverseBezier = LogFindIndex( "traverseBezier" );
-	log_bezierSegments = LogFindIndex( "BezierSegs");
+	log_bezierSegments = LogFindIndex( "traverseBezierSegs");
 }
 
 /********************************************************************************

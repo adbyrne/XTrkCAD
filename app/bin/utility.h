@@ -45,6 +45,8 @@ double min( double a, double b );
 #endif
 double FindDistance( coOrd p0, coOrd p1 );
 double NormalizeAngle( double a );
+double DifferenceBetweenAngles(double a, double b);
+int AngleInRange(double a, double start, double size);
 int IsAligned( double a1, double a2 );
 double D2R( double D );
 double R2D( double R );

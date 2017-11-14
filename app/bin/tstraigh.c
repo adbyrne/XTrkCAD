@@ -719,6 +719,9 @@ EXPORT void StraightSegProc(
 		data->traverse1.backwards = ((a2 < 270) && (a2 > 90));
 		data->traverse1.dist = FindDistance( segPtr->u.l.pos[data->traverse1.backwards?1:0], data->traverse1.pos );
 		data->traverse1.reverse_seg = FALSE;
+		data->traverse1.negative = FALSE;
+		data->traverse1.segs_backwards = FALSE;
+		data->traverse1.BezSegInx = 0;
 		break;
 
 	case SEGPROC_TRAVERSE2:

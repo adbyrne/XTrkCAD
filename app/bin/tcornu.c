@@ -129,7 +129,7 @@ EXPORT BOOL_T FixUpCornu0(coOrd pos[2],coOrd center[2],ANGLE_T angle[2],DIST_T r
 }
 
 EXPORT char * CreateSegPathList(track_p trk) {
-	char * cp = "\0";
+	char * cp = "\0\0";
 	if (GetTrkType(trk) != T_CORNU) return cp;
 	struct extraData *xx = GetTrkExtraData(trk);
 	if (xx->cornuData.cornuPath) free(xx->cornuData.cornuPath);
@@ -791,7 +791,7 @@ static BOOL_T TraverseCornu( traverseTrack_p trvTrk, DIST_T * distR )
 	int inx, segInx = 0;
 	EPINX_T ep;
 	BOOL_T back;
-LOG( log_traverseCornu, 1, ( "TraverseCornu [%0.3f %0.3f] A%0.3f D%0.3f \n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ))
+LOG( log_traverseCornu, 1, ( "TravCornu-In [%0.3f %0.3f] A%0.3f D%0.3f \n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ))
 	trkSeg_p segPtr = (trkSeg_p)xx->cornuData.arcSegs.ptr;
 
 	a2 = GetAngleSegs(		  						//Find correct Segment and nearest point in it
@@ -817,7 +817,7 @@ LOG( log_traverseCornu, 1, ( "TraverseCornu [%0.3f %0.3f] A%0.3f D%0.3f \n", trv
 	}
 	segProcData.traverse1.pos = pos2;					//actual point on curve
 	segProcData.traverse1.angle = trvTrk->angle;       //direction car is going for Traverse 1
-LOG( log_traverseCornu, 1, ( "  GetSubA A%0.3f I%d N%d B%d CB%d\n", a2, segInx, neg, back, cornu_backwards ))
+LOG( log_traverseCornu, 1, ( "  TravCornu-GetSubA A%0.3f I%d N%d B%d CB%d\n", a2, segInx, neg, back, cornu_backwards ))
 	inx = segInx;
 	while (inx >=0 && inx<xx->cornuData.arcSegs.cnt) {
 		segPtr = (trkSeg_p)xx->cornuData.arcSegs.ptr+inx;  	    //move in to the identified Bezier segment
@@ -825,20 +825,21 @@ LOG( log_traverseCornu, 1, ( "  GetSubA A%0.3f I%d N%d B%d CB%d\n", a2, segInx, 
 		BOOL_T backwards = segProcData.traverse1.backwards;			//do we process this segment backwards?
 		BOOL_T reverse_seg = segProcData.traverse1.reverse_seg;		//Info only
 		int BezSegInx = segProcData.traverse1.BezSegInx;			//Which subSeg was it?
+		BOOL_T segs_backwards = segProcData.traverse1.segs_backwards;
 
 		dist += segProcData.traverse1.dist;						//Add in the part of the Bezier to get to pos
 
 		segProcData.traverse2.dist = dist;						//Set up Traverse2
 		segProcData.traverse2.segDir = backwards;
 		segProcData.traverse2.BezSegInx = BezSegInx;
-		segProcData.traverse2.segs_backwards = cornu_backwards;
-LOG( log_traverseCornu, 2, ( " TraverseCornuT1 SI%d D%0.3f B%d RS%d \n", BezSegInx, dist, backwards, reverse_seg ) )
+		segProcData.traverse2.segs_backwards = segs_backwards;
+LOG( log_traverseCornu, 2, ( "  TravCornu-Tr1 SI%d D%0.3f B%d RS%d \n", BezSegInx, dist, backwards, reverse_seg ) )
 		SegProc( SEGPROC_TRAVERSE2, segPtr, &segProcData );		//Angle at pos2
 		if ( segProcData.traverse2.dist <= 0 ) {				//-ve or zero distance left over so stop there
 			*distR = 0;
 			trvTrk->pos = segProcData.traverse2.pos;			//Use finishing pos
 			trvTrk->angle = segProcData.traverse2.angle;		//Use finishing angle
-LOG( log_traverseCornu, 1, ( "  -> [%0.3f %0.3f] A%0.3f D%0.3f\n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ) )
+LOG( log_traverseCornu, 1, ( "TravCornu-Ex1 -> [%0.3f %0.3f] A%0.3f D%0.3f\n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ) )
 			return TRUE;
 		}
 		dist = segProcData.traverse2.dist;						//How far left?
@@ -848,7 +849,7 @@ LOG( log_traverseCornu, 1, ( "  -> [%0.3f %0.3f] A%0.3f D%0.3f\n", trvTrk->pos.x
 		segProcData.traverse1.angle = angle; 					//Set up Traverse1
 		segProcData.traverse1.pos = pos;
 		inx = cornu_backwards?inx-1:inx+1;						//Here's where the global segment direction comes in
-LOG( log_traverseCornu, 2, ( " TraverseCornuL D%0.3f A%0.3f I%d \n", dist, angle, inx ) )
+LOG( log_traverseCornu, 2, ( "  TravCornu-Loop D%0.3f A%0.3f I%d \n", dist, angle, inx ) )
 	}	
 																//Ran out of Bez-Segs so punt to next Track
 	*distR = dist;												//Tell caller what dist is left
@@ -861,7 +862,7 @@ LOG( log_traverseCornu, 2, ( " TraverseCornuL D%0.3f A%0.3f I%d \n", dist, angle
 		trvTrk->pos = pos1;
 	    return TRUE;
 	}
-LOG( log_traverseCornu, 1, ( "   --> [%0.3f %0.3f] A%0.3f D%0.3f\n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ) )
+LOG( log_traverseCornu, 1, ( "TravCornu-Ex2 --> [%0.3f %0.3f] A%0.3f D%0.3f\n", trvTrk->pos.x, trvTrk->pos.y, trvTrk->angle, *distR ) )
 	return TRUE;
 
 }

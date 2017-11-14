@@ -1533,6 +1533,9 @@ LOG( log_traverseJoint, 1, ( "TJ0: ?[%0.3f %0.3f] A=%0.3f l=%0.3f J[%0.3f %0.3f]
 		segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L,
 		segPtr->u.j.negate, segPtr->u.j.flip, segPtr->u.j.Scurve,
 		a, data->traverse1.dist, data->traverse1.backwards ) );
+		data->traverse1.negative = FALSE;
+		data->traverse1.BezSegInx = 0;
+		data->traverse1.segs_backwards = FALSE;
 		break;
 
 	case SEGPROC_TRAVERSE2:

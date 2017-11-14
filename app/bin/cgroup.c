@@ -682,11 +682,10 @@ static char * FindPathBtwEP(
 			AbortProg( "findPathBtwEP" );
 		*flip = ( ep1 == 1 );
 		if (GetTrkType(trk) == T_CORNU ) { 			// Cornu doesn't have a path but lots of segs!
-			cp = CreateSegPathList(trk);
+			cp = CreateSegPathList(trk);			// Make path
 LOG( log_group, 2, ( " Group: Cornu path:%s \n", cp ) )
-			return cp;
-		}
-		return "\1\0\0";
+		} else cp = "\1\0\0";						//One segment (but could be a Bezier)
+		return cp;
 	}
 	cp = (char *)xx->paths;
 	pos1 = GetTrkEndPos(trk,ep1);
@@ -698,7 +697,7 @@ LOG( log_group, 2, ( " Group: Cornu path:%s \n", cp ) )
 	pos2.x -= xx->orig.x;
 	pos2.y -= xx->orig.y;
 	while ( cp[0] ) {
-		cp += strlen(cp)+1;
+		cp += strlen(cp)+1;						//Ignore Path Name
 		while ( cp[0] ) {
 			cp0 = cp;
 			epN = -1;
@@ -711,8 +710,8 @@ LOG( log_group, 2, ( " Group: Cornu path:%s \n", cp ) )
 			if ( epN != -1 ) {
 				GetSegInxEP( cp[-1], &segInx, &segEP );
 				if ( CheckTurnoutEndPoint( &xx->segs[segInx], epN==0?pos1:pos2, 1-segEP ) ) {
-					*flip = epN==0;
-					return cp0;
+					*flip = epN==0;			 // If its reversed, set up to be flipped or noted
+					return cp0;				 //Found path between EPs
 				}
 			}
 			cp++;
@@ -1098,6 +1097,7 @@ static void GroupOk( void * junk )
 		}
 
 		/* Make sure no turnouts in groupTrk list have a path end which is not an EndPt */
+		//TODO Add Trap Points (which are Turnouts with a bumper track)
 		for ( inx=0; inx<groupTrk_da.cnt; inx++ ) {
 			trk = groupTrk(0).trk;
 			if ( GetTrkType( trk ) == T_TURNOUT ) {

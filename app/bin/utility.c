@@ -82,6 +82,22 @@ double NormalizeAngle( double a )
 	return a;
 }
 
+double DifferenceBetweenAngles(double a, double b) {
+	 double difference = b - a;
+	 while (difference < -180) difference += 360;
+	 while (difference > 180) difference -= 360;
+	 return difference;
+}
+
+int AngleInRange(double a, double start, double size) {
+	if (DifferenceBetweenAngles(start+size,a)<=0.0) {
+		if (DifferenceBetweenAngles(start,a)>=0.0)
+			return 0;
+		else return 1;
+	}
+	return -1;
+}
+
 
 
 int IsAligned( double a1, double a2 )
