@@ -61,6 +61,7 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		wPos_t realX, realY; \
 		wPos_t labelW; \
 		wPos_t w, h; \
+		int maximize_initially; \
 		long option; \
 		const char * labelStr; \
 		repaintProcCallback_p repaintProc; \
