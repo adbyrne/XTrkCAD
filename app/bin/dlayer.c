@@ -192,31 +192,30 @@ wDrawColor GetLayerColor(unsigned int layer)
 }
 
 
-static void FlipLayer(void * arg)
+static void FlipLayer(unsigned int layer)
 {
-    unsigned int l = (unsigned int)arg;
     wBool_t visible;
 
-    if (!IsLayerValid(l)) {
+    if (!IsLayerValid(layer)) {
         return;
     }
 
-    if (l == curLayer && layers[l].visible) {
-        wButtonSetBusy(layer_btns[l], layers[l].visible);
+    if (layer == curLayer && layers[layer].visible) {
+        wButtonSetBusy(layer_btns[layer], layers[layer].visible);
         NoticeMessage(MSG_LAYER_HIDE, _("Ok"), NULL);
         return;
     }
 
-    RedrawLayer(l, FALSE);
-    visible = !layers[l].visible;
-    layers[l].visible = visible;
+    RedrawLayer(layer, FALSE);
+    visible = !layers[layer].visible;
+    layers[layer].visible = visible;
 
-    if (l<NUM_BUTTONS) {
-        wButtonSetBusy(layer_btns[l], visible != 0);
-        wButtonSetLabel(layer_btns[l], (char *)show_layer_bmps[l]);
+    if (layer<NUM_BUTTONS) {
+        wButtonSetBusy(layer_btns[layer], visible != 0);
+        wButtonSetLabel(layer_btns[layer], (char *)show_layer_bmps[layer]);
     }
 
-    RedrawLayer(l, TRUE);
+    RedrawLayer(layer, TRUE);
 }
 
 static void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
@@ -237,7 +236,7 @@ static void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
     }
 
     if (!layers[curLayer].visible) {
-        FlipLayer((void *)inx);
+        FlipLayer(inx);
     }
 
     if (recordF) {
