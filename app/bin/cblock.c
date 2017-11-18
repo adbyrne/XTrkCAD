@@ -160,8 +160,8 @@ static descData_t blockDesc[] = {
 /*NM*/	{ DESC_STRING, N_("Name"), &blockData.name },
 /*SC*/  { DESC_STRING, N_("Script"), &blockData.script },
 /*LN*/  { DESC_DIM, N_("Length"), &blockData.length },
-/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &blockData.endPt[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &blockData.endPt[1] },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &blockData.endPt[0] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &blockData.endPt[1] },
 	{ DESC_NULL } };
 
 static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart )

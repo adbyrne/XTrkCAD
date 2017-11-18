@@ -82,9 +82,9 @@ static struct {
 		} strData;
 typedef enum { E0, Z0, E1, Z1, LN, AN, GR, PV, LY } strDesc_e;
 static descData_t strDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &strData.endPt[0] },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &strData.endPt[0] },
 /*Z0*/	{ DESC_DIM, N_("Z"), &strData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &strData.endPt[1] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &strData.endPt[1] },
 /*Z1*/	{ DESC_DIM, N_("Z"), &strData.elev[1] },
 /*LN*/	{ DESC_DIM, N_("Length"), &strData.length },
 /*AN*/	{ DESC_ANGLE, N_("Angle"), &strData.angle },
@@ -586,6 +586,8 @@ static BOOL_T GetParamsStraight( int inx, track_p trk, coOrd pos, trackParams_t 
 		params->ep = 0;
 	} else if (inx == PARAMS_CORNU ){
 		params->ep = PickEndPoint( pos, trk);
+		params->arcP = zero;
+		params->arcR = 0.0;
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk );
 	}

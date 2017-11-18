@@ -500,11 +500,11 @@ static struct {
 		} jointData;
 typedef enum { E0, Z0, E1, Z1, OR, AL, RR, LL, L0, L1, GR, PV, LY } jointDesc_e;
 static descData_t jointDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &jointData.endPt[0] },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &jointData.endPt[0] },
 /*Z0*/	{ DESC_DIM, N_("Z"), &jointData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &jointData.endPt[1] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &jointData.endPt[1] },
 /*Z1*/	{ DESC_DIM, N_("Z"), &jointData.elev[1] },
-/*OR*/	{ DESC_POS, N_("Origin: X"), &jointData.orig },
+/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &jointData.orig },
 /*AL*/	{ DESC_ANGLE, N_("Angle"), &jointData.angle },
 /*RR*/	{ DESC_DIM, N_("R"), &jointData.r },
 /*LL*/	{ DESC_DIM, N_("L"), &jointData.l },

@@ -499,8 +499,11 @@ DIST_T DistanceCompound(
 
 
 static struct {
-		coOrd endPt[2];
-		FLOAT_T elev[2];
+		coOrd endPt[4];
+		ANGLE_T endAngle[4];
+		DIST_T endRadius[4];
+		coOrd endCenter[4];
+		FLOAT_T elev[4];
 		coOrd orig;
 		ANGLE_T angle;
 		char manuf[STR_SIZE];
@@ -508,23 +511,40 @@ static struct {
 		char partno[STR_SIZE];
 		long epCnt;
 		long segCnt;
+		long pathCnt;
 		FLOAT_T grade;
 		DIST_T length;
 		unsigned int layerNumber;
 		} compoundData;
-typedef enum { E0, Z0, E1, Z1, GR, OR, AN, MN, NM, PN, EC, SC, LY } compoundDesc_e;
+typedef enum { E0, A0, C0, R0, Z0, E1, A1, C1, R1, Z1, E2, A2, C2, R2, Z2, E3, A3, C3, R3, Z3, GR, OR, AN, MN, NM, PN, EC, SC, LY } compoundDesc_e;
 static descData_t compoundDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &compoundData.endPt[0] },
-/*Z0*/	{ DESC_DIM, N_("Z"), &compoundData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &compoundData.endPt[1] },
-/*Z1*/	{ DESC_DIM, N_("Z"), &compoundData.elev[1] },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &compoundData.endPt[0] },
+/*A0*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[0] },
+/*C0*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[0] },
+/*R0*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[0] },
+/*Z0*/	{ DESC_DIM, N_("Z1"), &compoundData.elev[0] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &compoundData.endPt[1] },
+/*A1*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[1] },
+/*C1*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[1] },
+/*R1*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[1] },
+/*Z1*/	{ DESC_DIM, N_("Z2"), &compoundData.elev[1] },
+/*E2*/	{ DESC_POS, N_("End Pt 3: X,Y"), &compoundData.endPt[2] },
+/*A2*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[2] },
+/*C2*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[2] },
+/*R2*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[2] },
+/*Z2*/	{ DESC_DIM, N_("Z3"), &compoundData.elev[2] },
+/*E3*/	{ DESC_POS, N_("End Pt 4: X,Y"), &compoundData.endPt[3] },
+/*A3*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[3] },
+/*C3*/  { DESC_POS, N_("Center X,Y"), &compoundData.endCenter[3] },
+/*R3*/	{ DESC_DIM, N_("Radius"), &compoundData.endRadius[3] },
+/*Z3*/	{ DESC_DIM, N_("Z4"), &compoundData.elev[3] },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &compoundData.grade },
-/*OR*/	{ DESC_POS, N_("Origin: X"), &compoundData.orig },
+/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &compoundData.orig },
 /*AN*/	{ DESC_ANGLE, N_("Angle"), &compoundData.angle },
 /*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf },
 /*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name },
 /*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno },
-/*EC*/	{ DESC_LONG, N_("# End Pt"), &compoundData.epCnt },
+/*EC*/	{ DESC_LONG, N_("# End Pts"), &compoundData.epCnt },
 /*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &compoundData.layerNumber },
 		{ DESC_NULL } };
@@ -621,36 +641,55 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		MoveTrack( trk, pos );
 		ComputeCompoundBoundingBox( trk );
 		break;
+	case A0:
+	case A1:
+	case A2:
+	case A3:
+		if (inx==E3) ep=3;
+		else if (inx==E2) ep=2;
+		else if (inx==E1) ep=1;
+		else ep=0;
+		RotateTrack( trk, xx->orig, NormalizeAngle( compoundData.endAngle[ep]-xx->angle ) );
+		ComputeCompoundBoundingBox( trk );
+		compoundData.angle = xx->angle;
+		compoundDesc[AN].mode |= DESC_CHANGE;
+		break;
 	case AN:
 		RotateTrack( trk, xx->orig, NormalizeAngle( compoundData.angle-xx->angle ) );
 		ComputeCompoundBoundingBox( trk );
 		break;
 	case E0:
 	case E1:
-		ep = (inx==E0?0:1);
+	case E2:
+	case E3:
+		if (inx==E3) ep=3;
+		else if (inx==E2) ep=2;
+		else if (inx==E1) ep=1;
+		else ep=0;
 		pos = GetTrkEndPos(trk,ep);
 		pos.x = compoundData.endPt[ep].x - pos.x;
 		pos.y = compoundData.endPt[ep].y - pos.y;
 		MoveTrack( trk, pos );
 		ComputeCompoundBoundingBox( trk );
-		if ( compoundData.epCnt >= 2 ) {
-			compoundData.endPt[1-ep] = GetTrkEndPos(trk,1-ep);
-			compoundDesc[inx==E0?E1:E0].mode |= DESC_CHANGE;
-		}
 		break;
 	case Z0:
 	case Z1:
-		ep = (inx==Z0?0:1);
+	case Z2:
+	case Z3:
+		ep = (inx==Z0?0:(inx==Z1?1:(inx==Z2?2:3)));
 		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep), compoundData.elev[ep], NULL );
 		if ( GetTrkEndPtCnt(trk) == 1 )
 			 break;
-		ComputeElev( trk, 1-ep, FALSE, &compoundData.elev[1-ep], NULL );
+		for (int i=0;i<compoundData.epCnt;i++) {
+			if (i==ep) continue;
+			ComputeElev( trk, i, FALSE, &compoundData.elev[i], NULL );
+		}
 		if ( compoundData.length > minLength )
 			compoundData.grade = fabs( (compoundData.elev[0]-compoundData.elev[1])/compoundData.length )*100.0;
 		else
 			compoundData.grade = 0.0;
 		compoundDesc[GR].mode |= DESC_CHANGE;
-		compoundDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
+		compoundDesc[Z0+(E1-E0)*inx].mode |= DESC_CHANGE;
 		break;
 	case LY:
 		SetTrkLayer( trk, compoundData.layerNumber);
@@ -658,6 +697,35 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	default:
 		break;
 	}
+    switch ( inx ) {
+    case A0:
+    case A1:
+    case A2:
+    case A3:
+    case E0:
+    case E1:
+    case E2:
+    case E3:
+    case AN:
+    case OR:
+		for (int i=0;i<compoundData.epCnt;i++) {
+			compoundData.endPt[i] = GetTrkEndPos(trk,i);
+			compoundDesc[i*(E1-E0)+E0].mode |= DESC_CHANGE;
+			trackParams_t params;
+			compoundData.endAngle[i] = GetTrkEndAngle(trk,i);
+			compoundDesc[i*(E1-E0)+A0].mode |= DESC_CHANGE;
+			GetTrackParams(0,trk,compoundData.endPt[i],&params);
+			compoundData.endRadius[i] = params.arcR;
+			if (params.arcR != 0.0) {
+				  compoundData.endCenter[i] = params.arcP;
+				  compoundDesc[i*(E1-E0)+C0].mode |= DESC_CHANGE;
+			}
+		}
+    	break;
+    default:
+    	break;
+	};
+
 	DrawNewTrack( trk );
 
 }
@@ -696,9 +764,11 @@ void DescribeCompound(
 
 	epCnt = GetTrkEndPtCnt(trk);
 	fix = 0;
+	mode = 0;
 	for ( ep=0; ep<epCnt; ep++ ) {
 		if (GetTrkEndTrk(trk,ep)) {
 			fix = 1;
+			mode = DESC_RO;
 			break;
 		}
 	}
@@ -740,10 +810,15 @@ void DescribeCompound(
 	compoundData.segCnt = xx->segCnt;
 	compoundData.length = 0;
 	compoundData.layerNumber = GetTrkLayer( trk );
-	compoundDesc[E0].mode =
-	compoundDesc[Z0].mode =
-	compoundDesc[E1].mode =
-	compoundDesc[Z1].mode =
+
+	for ( int i=0 ; i<4 ; i++) {
+		compoundDesc[E0+(E1-E0)*i].mode = DESC_IGNORE;
+        compoundDesc[A0+(E1-E0)*i].mode = DESC_IGNORE;
+		compoundDesc[R0+(E1-E0)*i].mode = DESC_IGNORE;
+		compoundDesc[C0+(E1-E0)*i].mode = DESC_IGNORE;
+		compoundDesc[Z0+(E1-E0)*i].mode = DESC_IGNORE;
+	}
+
 	compoundDesc[GR].mode = DESC_IGNORE;
 	compoundDesc[OR].mode =
 	compoundDesc[AN].mode = fix?DESC_RO:0;
@@ -753,35 +828,32 @@ void DescribeCompound(
 	compoundDesc[EC].mode =
 	compoundDesc[SC].mode = DESC_RO;
 	compoundDesc[LY].mode = DESC_NOREDRAW;
-	if ( compoundData.epCnt ) {
-		if ( compoundData.epCnt <=2 ) {
-			if ( GetTrkEndTrk(trk,0) || (compoundData.epCnt==2 && GetTrkEndTrk(trk,1)) )
-				mode = DESC_RO;
-			else
-				mode = 0;
-			compoundDesc[OR].mode = DESC_IGNORE;
-			compoundDesc[AN].mode = DESC_IGNORE;
-			compoundDesc[EC].mode = DESC_IGNORE;
-			compoundData.endPt[0] = GetTrkEndPos(trk,0);
-			ComputeElev( trk, 0, FALSE, &compoundData.elev[0], NULL );
-			compoundDesc[E0].mode = (int)mode;
-			compoundDesc[Z0].mode = (EndPtIsDefinedElev(trk,0)?0:DESC_RO)|DESC_NOREDRAW;
-			if ( compoundData.epCnt == 2 ) {
-				compoundData.length = GetTrkLength( trk, 0, 1 );
-				compoundData.endPt[1] = GetTrkEndPos(trk,1);
-				ComputeElev( trk, 1, FALSE, &compoundData.elev[1], NULL );
-				compoundDesc[E1].mode = (int)mode;
-				compoundDesc[Z1].mode = (EndPtIsDefinedElev(trk,1)?0:DESC_RO)|DESC_NOREDRAW;
-				compoundDesc[GR].mode = DESC_RO;
-				if ( compoundData.length > minLength )
-					compoundData.grade = fabs( (compoundData.elev[0]-compoundData.elev[1])/compoundData.length )*100.0;
-				else
-					compoundData.grade = 0.0;
-			}
+	if (compoundData.epCnt >0) {
+		for (int i=0;i<compoundData.epCnt;i++) {
+			compoundDesc[A0+(E1-E0)*i].mode = (int)mode;
+			compoundDesc[R0+(E1-E0)*i].mode = DESC_RO;
+			compoundDesc[C0+(E1-E0)*i].mode = DESC_RO;
+			compoundDesc[E0+(E1-E0)*i].mode = (int)mode;
+			compoundData.endPt[i] = GetTrkEndPos(trk,i);
+			compoundData.endAngle[i] = GetTrkEndAngle(trk,i);
+			trackParams_t params;
+			GetTrackParams(0,trk,compoundData.endPt[i],&params);
+			compoundData.endRadius[i] = params.arcR;
+			if (params.arcR != 0.0) {
+				compoundData.endCenter[i] = params.arcP;
+			} else compoundDesc[C0+(E1-E0)*i].mode = DESC_IGNORE;
+			ComputeElev( trk, i, FALSE, &compoundData.elev[i], NULL );
+			compoundDesc[Z0+(E1-E0)*i].mode = (EndPtIsDefinedElev(trk,i)?0:DESC_RO)|DESC_NOREDRAW;
 		}
+		compoundDesc[GR].mode = DESC_RO;
+	}
+	if ( compoundData.length > minLength && compoundData.epCnt > 1)
+		compoundData.grade = fabs( (compoundData.elev[0]-compoundData.elev[1])/compoundData.length )*100.0;
+	else
+		compoundData.grade = 0.0;
+    if ( compoundData.epCnt >1 ) {
 		DoDescribe( compoundData.epCnt>2?_("Turnout"):_("Sectional Track"), trk, compoundDesc, UpdateCompound );
 	} else {
-		compoundDesc[EC].mode |= DESC_IGNORE;
 		DoDescribe( _("Structure"), trk, compoundDesc, UpdateCompound );
 	}
 }

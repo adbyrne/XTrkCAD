@@ -272,18 +272,18 @@ static struct {
 		wDrawColor color;
 		} cornData;
 
-typedef enum { P0, Z0, A0, R0, C0, P1, Z1, A1, R1, C1, RA, RR, WA, LN, GR, LY } cornuDesc_e;
+typedef enum { P0, A0, R0, C0, Z0, P1, A1, R1, C1, Z1, RA, RR, WA, LN, GR, LY } cornuDesc_e;
 static descData_t cornuDesc[] = {
-/*P0*/	{ DESC_POS, N_("End Pt 1: X"), &cornData.pos[0] },
-/*Z0*/	{ DESC_DIM, N_("Elev 1"), &cornData.elev[0] },
-/*A0*/  { DESC_ANGLE, N_("End Angle 1"), &cornData.angle[0] },
-/*R0*/  { DESC_DIM, N_("Radius 1"), &cornData.radius[0] },
-/*C0*/	{ DESC_POS, N_("End Radius Center 1: X"), &cornData.center[0] },
-/*P1*/	{ DESC_POS, N_("End Pt 2: X"), &cornData.pos[1] },
-/*Z1*/	{ DESC_DIM, N_("Elev 2"), &cornData.elev[1] },
-/*A1*/  { DESC_ANGLE, N_("End Angle 2"), &cornData.angle[1] },
-/*R1*/  { DESC_DIM, N_("Radius 2"), &cornData.radius[1] },
-/*C1*/	{ DESC_POS, N_("End Radius Center 2: X"), &cornData.center[1] },
+/*P0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &cornData.pos[0] },
+/*A0*/  { DESC_ANGLE, N_("End Angle"), &cornData.angle[0] },
+/*R0*/  { DESC_DIM, N_("Radius "), &cornData.radius[0] },
+/*C0*/	{ DESC_POS, N_("Center X,Y"), &cornData.center[0] },
+/*Z0*/	{ DESC_DIM, N_("Z1"), &cornData.elev[0] },
+/*P1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &cornData.pos[1] },
+/*A1*/  { DESC_ANGLE, N_("End Angle"), &cornData.angle[1] },
+/*R1*/  { DESC_DIM, N_("Radius"), &cornData.radius[1] },
+/*C1*/	{ DESC_POS, N_("Center X,Y"), &cornData.center[1] },
+/*Z1*/	{ DESC_DIM, N_("Z2"), &cornData.elev[1] },
 /*RA*/	{ DESC_DIM, N_("Minimum Radius"), &cornData.minRadius },
 /*RR*/  { DESC_DIM, N_("Maximum Rate Of Change Of Curvature"), &cornData.maxRateOfChange },
 /*WA*/  { DESC_ANGLE, N_("Total Winding Angle"), &cornData.windingAngle },

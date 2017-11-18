@@ -346,11 +346,11 @@ static struct {
 		} crvData;
 typedef enum { E0, Z0, E1, Z1, CE, RA, TU, SE, LN, AL, A1, A2, GR, PV, LY } crvDesc_e;
 static descData_t crvDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &crvData.endPt[0] },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &crvData.endPt[0] },
 /*Z0*/	{ DESC_DIM, N_("Z"), &crvData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &crvData.endPt[1] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &crvData.endPt[1] },
 /*Z1*/	{ DESC_DIM, N_("Z"), &crvData.elev[1] },
-/*CE*/	{ DESC_POS, N_("Center: X"), &crvData.center },
+/*CE*/	{ DESC_POS, N_("Center: X,Y"), &crvData.center },
 /*RA*/	{ DESC_DIM, N_("Radius"), &crvData.radius },
 /*TU*/	{ DESC_LONG, N_("Turns"), &crvData.turns },
 /*SE*/	{ DESC_DIM, N_("Separation"), &crvData.separation },

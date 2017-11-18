@@ -212,9 +212,9 @@ static struct {
 		} drawData;
 typedef enum { E0, E1, CE, RA, LN, AL, A1, A2, VC, LW, CO, BE, OR, DS, TP, TA, TS, TX, PV, LY } drawDesc_e;
 static descData_t drawDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X"), &drawData.endPt[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X"), &drawData.endPt[1] },
-/*CE*/	{ DESC_POS, N_("Center: X"), &drawData.center },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0] },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1] },
+/*CE*/	{ DESC_POS, N_("Center: X,Y"), &drawData.center },
 /*RA*/	{ DESC_DIM, N_("Radius"), &drawData.radius },
 /*LN*/	{ DESC_DIM, N_("Length"), &drawData.length },
 /*AL*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle },
@@ -226,7 +226,7 @@ static descData_t drawDesc[] = {
 /*BE*/	{ DESC_LIST, N_("Lumber"), &drawData.benchChoice },
 /*OR*/	{ DESC_LIST, N_("Orientation"), &drawData.benchOrient },
 /*DS*/	{ DESC_LIST, N_("Size"), &drawData.dimenSize },
-/*TP*/	{ DESC_POS, N_("Origin: X"), &drawData.endPt[0] },
+/*TP*/	{ DESC_POS, N_("Origin: X,Y"), &drawData.endPt[0] },
 /*TA*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle },
 /*TS*/	{ DESC_EDITABLELIST, N_("Font Size"), &drawData.fontSizeInx },
 /*TX*/	{ DESC_STRING, N_("Text"), &drawData.text },

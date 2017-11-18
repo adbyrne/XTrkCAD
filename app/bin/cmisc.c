@@ -72,7 +72,27 @@ static paramData_t describePLs[] = {
     { PD_FLOAT, NULL, "F18", 0, &rdata },
     { PD_FLOAT, NULL, "F19", 0, &rdata },
     { PD_FLOAT, NULL, "F20", 0, &rdata },
-#define I_FLOAT_N		I_FLOAT_0+20
+	{ PD_FLOAT, NULL, "F21", 0, &rdata },
+    { PD_FLOAT, NULL, "F22", 0, &rdata },
+	{ PD_FLOAT, NULL, "F23", 0, &rdata },
+	{ PD_FLOAT, NULL, "F24", 0, &rdata },
+	{ PD_FLOAT, NULL, "F25", 0, &rdata },
+	{ PD_FLOAT, NULL, "F26", 0, &rdata },
+	{ PD_FLOAT, NULL, "F27", 0, &rdata },
+	{ PD_FLOAT, NULL, "F28", 0, &rdata },
+	{ PD_FLOAT, NULL, "F29", 0, &rdata },
+	{ PD_FLOAT, NULL, "F30", 0, &rdata },
+	{ PD_FLOAT, NULL, "F31", 0, &rdata },
+	{ PD_FLOAT, NULL, "F32", 0, &rdata },
+    { PD_FLOAT, NULL, "F33", 0, &rdata },
+	{ PD_FLOAT, NULL, "F34", 0, &rdata },
+	{ PD_FLOAT, NULL, "F35", 0, &rdata },
+	{ PD_FLOAT, NULL, "F36", 0, &rdata },
+	{ PD_FLOAT, NULL, "F37", 0, &rdata },
+	{ PD_FLOAT, NULL, "F38", 0, &rdata },
+	{ PD_FLOAT, NULL, "F39", 0, &rdata },
+	{ PD_FLOAT, NULL, "F40", 0, &rdata },
+#define I_FLOAT_N		I_FLOAT_0+40
 
 #define I_LONG_0		I_FLOAT_N
     { PD_LONG, NULL, "I1", 0, &idata },
@@ -314,7 +334,8 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
                 describePLs[inx].option |= PDO_DLGUNDERCMDBUTT;
             }
 
-            describeW_posy += wControlGetHeight(describePLs[inx].control) + sep;
+            if (sep)
+            	describeW_posy += wControlGetHeight(describePLs[inx].control) + sep;
             describePLs[inx].context = ddp;
             describePLs[inx].valueP = valueP;
 
@@ -355,7 +376,7 @@ static void DescribeLayout(
 
     if (ddp->type == DESC_POS &&
             ddp->control0 != pd->control) {
-        *y += wControlGetHeight(pd->control) + 3;
+        *x += wControlGetWidth(pd->control) + 3;
     } else if (ddp->type == DESC_TEXT) {
         w = tdata.width;
         h = tdata.height;
@@ -436,8 +457,8 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
         case DESC_POS:
             ddp->control1 = AllocateButt(ddp,
                                          &((coOrd*)(ddp->valueP))->y,
-                                         "Y",
-                                         3);
+                                         NULL,
+                                         0);
             wControlActive(ddp->control1, ((ddp->mode|ro_mode)&DESC_RO)==0);
             break;
 

@@ -218,24 +218,30 @@ static struct {
 		coOrd pos[4];
 		FLOAT_T elev[2];
 		FLOAT_T length;
-		DIST_T radius;
+		DIST_T minRadius;
 		FLOAT_T grade;
 		unsigned int layerNumber;
 		ANGLE_T angle[2];
+		DIST_T radius[2];
+		coOrd center[2];
 		dynArr_t segs;
 		long width;
 		wDrawColor color;
 		} bezData;
-typedef enum { P0, Z0, A0, C1, C2, P1, Z1, A1, RA, LN, GR, LY, WI, CO } crvDesc_e;
-static descData_t crvDesc[] = {
-/*P0*/	{ DESC_POS, N_("End Pt 1: X"), &bezData.pos[0] },
+typedef enum { P0, A0, R0, C0, Z0, CP1, CP2, P1, A1, R1, C1, Z1, RA, LN, GR, LY, WI, CO } crvDesc_e;
+static descData_t bezDesc[] = {
+/*P0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &bezData.pos[0] },
+/*A0*/  { DESC_ANGLE, N_("End Angle"), &bezData.angle[0] },
+/*R0*/  { DESC_DIM, N_("Radius"), &bezData.radius[0] },
+/*C0*/	{ DESC_POS, N_("Center X,Y"), &bezData.center[0]},
 /*Z0*/	{ DESC_DIM, N_("Z1"), &bezData.elev[0] },
-/*A0*/  { DESC_ANGLE, N_("End Angle 1"), &bezData.angle[0] },
-/*C1*/	{ DESC_POS, N_("Ctl Pt 1: X"), &bezData.pos[1] },
-/*C2*/	{ DESC_POS, N_("Ctl Pt 2: X"), &bezData.pos[2] },
-/*P1*/	{ DESC_POS, N_("End Pt 2: X"), &bezData.pos[3] },
-/*Z3*/	{ DESC_DIM, N_("Z2"), &bezData.elev[1] },
-/*A1*/  { DESC_ANGLE, N_("End Angle 2"), &bezData.angle[1] },
+/*CP1*/	{ DESC_POS, N_("Ctl Pt 1: X,Y"), &bezData.pos[1] },
+/*CP2*/	{ DESC_POS, N_("Ctl Pt 2: X,Y"), &bezData.pos[2] },
+/*P1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &bezData.pos[3] },
+/*A1*/  { DESC_ANGLE, N_("End Angle"), &bezData.angle[1] },
+/*R1*/  { DESC_DIM, N_("Radius"), &bezData.radius[1] },
+/*C1*/	{ DESC_POS, N_("Center X,Y"), &bezData.center[1]},
+/*Z1*/	{ DESC_DIM, N_("Z2"), &bezData.elev[1] },
 /*RA*/	{ DESC_DIM, N_("MinRadius"), &bezData.radius },
 /*LN*/	{ DESC_DIM, N_("Length"), &bezData.length },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &bezData.grade },
@@ -259,18 +265,18 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
         if (GetTrkEndTrk(trk,0)) break;
     	updateEndPts = TRUE;
         xx->bezierData.pos[0] = bezData.pos[0];
-        crvDesc[P0].mode |= DESC_CHANGE;
+        bezDesc[P0].mode |= DESC_CHANGE;
         /* no break */
     case P1:
     	if (GetTrkEndTrk(trk,0) && GetTrkEndTrk(trk,1)) break;
         updateEndPts = TRUE;
         xx->bezierData.pos[3]= bezData.pos[3];
-        crvDesc[P1].mode |= DESC_CHANGE;
+        bezDesc[P1].mode |= DESC_CHANGE;
         break;
     case A0:
     case A1:
     	break;
-    case C1:
+    case CP1:
     	if (GetTrkEndTrk(trk,0)) {
     		angle1 = NormalizeAngle(GetTrkEndAngle(trk,0));
     	    angle2 = NormalizeAngle(FindAngle(bezData.pos[1], xx->bezierData.pos[0])-angle1);
@@ -278,9 +284,9 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
     		  Translate( &bezData.pos[1], xx->bezierData.pos[0], angle1, -FindDistance( xx->bezierData.pos[0], bezData.pos[1] )*cos(D2R(angle2)));
     	}
         xx->bezierData.pos[1] = bezData.pos[1];
-        crvDesc[C1].mode |= DESC_CHANGE;
+        bezDesc[CP1].mode |= DESC_CHANGE;
         break;
-    case C2:
+    case CP2:
     	if (GetTrkEndTrk(trk,1)) {
     	    angle1 = NormalizeAngle(GetTrkEndAngle(trk,1));
     	    angle2 = NormalizeAngle(FindAngle(bezData.pos[2], xx->bezierData.pos[3])-angle1);
@@ -288,7 +294,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
     	    Translate( &bezData.pos[2], xx->bezierData.pos[3], angle1, -FindDistance( xx->bezierData.pos[3], bezData.pos[0] )*cos(D2R(angle2)));
     	}
         xx->bezierData.pos[2] = bezData.pos[2];
-        crvDesc[C2].mode |= DESC_CHANGE;
+        bezDesc[CP2].mode |= DESC_CHANGE;
         break;
     case Z0:
 	case Z1:
@@ -299,8 +305,8 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 			bezData.grade = fabs( (bezData.elev[0]-bezData.elev[1])/bezData.length )*100.0;
 		else
 			bezData.grade = 0.0;
-		crvDesc[GR].mode |= DESC_CHANGE;
-		crvDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
+		bezDesc[GR].mode |= DESC_CHANGE;
+		bezDesc[inx==Z0?Z1:Z0].mode |= DESC_CHANGE;
         return;
 	case LY:
 		SetTrkLayer( trk, bezData.layerNumber);
@@ -318,11 +324,11 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 	if (updateEndPts) {
 			if ( GetTrkEndTrk(trk,0) == NULL ) {
 				SetTrkEndPoint( trk, 0, bezData.pos[0], NormalizeAngle( FindAngle(bezData.pos[0], bezData.pos[1]) ) );
-				crvDesc[A0].mode |= DESC_CHANGE;
+				bezDesc[A0].mode |= DESC_CHANGE;
 			}
 			if ( GetTrkEndTrk(trk,1) == NULL ) {
 				SetTrkEndPoint( trk, 1, bezData.pos[3], NormalizeAngle( FindAngle(bezData.pos[2], bezData.pos[3]) ) );
-				crvDesc[A1].mode |= DESC_CHANGE;
+				bezDesc[A1].mode |= DESC_CHANGE;
 			}
 	}
 
@@ -355,8 +361,8 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	}
 
 	bezData.length = GetLengthBezier(trk);
-	bezData.radius = xx->bezierData.minCurveRadius;
-	if (bezData.radius >= 100000.00) bezData.radius = 0;
+	bezData.minRadius = xx->bezierData.minCurveRadius;
+	if (bezData.minRadius >= 100000.00) bezData.minRadius = 0;
     bezData.layerNumber = GetTrkLayer(trk);
     bezData.pos[0] = xx->bezierData.pos[0];
     bezData.pos[1] = xx->bezierData.pos[1];
@@ -364,6 +370,12 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
     bezData.pos[3] = xx->bezierData.pos[3];
     bezData.angle[0] = xx->bezierData.a0;
     bezData.angle[1] = xx->bezierData.a1;
+    trackParams_t params;
+    for (int i=0;i<2;i++) {
+    	GetTrackParams(0,trk,xx->bezierData.pos[i],&params);
+    	bezData.radius[i] = params.arcR;
+    	bezData.center[i] = params.arcP;
+    }
     if (GetTrkType(trk) == T_BEZIER) {
 		ComputeElev( trk, 0, FALSE, &bezData.elev[0], NULL );
 		ComputeElev( trk, 1, FALSE, &bezData.elev[1], NULL );
@@ -374,31 +386,35 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 			bezData.grade = 0.0;
     }
 
-	crvDesc[P0].mode = fix0?DESC_RO:0;
-	crvDesc[P1].mode = fix1?DESC_RO:0;
-	crvDesc[LN].mode = DESC_RO;
-    crvDesc[C1].mode = 0;
-    crvDesc[C2].mode = 0;
+	bezDesc[P0].mode = fix0?DESC_RO:0;
+	bezDesc[P1].mode = fix1?DESC_RO:0;
+	bezDesc[LN].mode = DESC_RO;
+    bezDesc[CP1].mode = 0;
+    bezDesc[CP2].mode = 0;
     if (GetTrkType(trk) == T_BEZIER) {
-    	crvDesc[Z0].mode = EndPtIsDefinedElev(trk,0)?0:DESC_RO;
-		crvDesc[Z1].mode = EndPtIsDefinedElev(trk,1)?0:DESC_RO;
+    	bezDesc[Z0].mode = EndPtIsDefinedElev(trk,0)?0:DESC_RO;
+		bezDesc[Z1].mode = EndPtIsDefinedElev(trk,1)?0:DESC_RO;
     }
     else
-    	crvDesc[Z0].mode = crvDesc[Z1].mode = DESC_IGNORE;
-	crvDesc[A0].mode = DESC_RO;
-	crvDesc[A1].mode = DESC_RO;
-	crvDesc[GR].mode = DESC_RO;
-    crvDesc[RA].mode = DESC_RO;
-	crvDesc[LY].mode = DESC_NOREDRAW;
+    	bezDesc[Z0].mode = bezDesc[Z1].mode = DESC_IGNORE;
+	bezDesc[A0].mode = DESC_RO;
+	bezDesc[A1].mode = DESC_RO;
+	bezDesc[C0].mode = DESC_RO;
+	bezDesc[C1].mode = DESC_RO;
+	bezDesc[R0].mode = DESC_RO;
+	bezDesc[R1].mode = DESC_RO;
+	bezDesc[GR].mode = DESC_RO;
+    bezDesc[RA].mode = DESC_RO;
+	bezDesc[LY].mode = DESC_NOREDRAW;
 	bezData.width = (long)floor(xx->bezierData.segsWidth*mainD.dpi+0.5);
-	crvDesc[WI].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
+	bezDesc[WI].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
 	bezData.color = xx->bezierData.segsColor;
-	crvDesc[CO].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
+	bezDesc[CO].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
 	
 	if (GetTrkType(trk) == T_BEZIER)
-		DoDescribe( _("Bezier Track"), trk, crvDesc, UpdateBezier );
+		DoDescribe( _("Bezier Track"), trk, bezDesc, UpdateBezier );
 	else
-		DoDescribe( _("Bezier Line"), trk, crvDesc, UpdateBezier );
+		DoDescribe( _("Bezier Line"), trk, bezDesc, UpdateBezier );
 
 }
 
