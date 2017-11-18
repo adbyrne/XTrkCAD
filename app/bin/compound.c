@@ -714,7 +714,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 			trackParams_t params;
 			compoundData.endAngle[i] = GetTrkEndAngle(trk,i);
 			compoundDesc[i*(E1-E0)+A0].mode |= DESC_CHANGE;
-			GetTrackParams(0,trk,compoundData.endPt[i],&params);
+			GetTrackParams(PARAMS_CORNU,trk,compoundData.endPt[i],&params);
 			compoundData.endRadius[i] = params.arcR;
 			if (params.arcR != 0.0) {
 				  compoundData.endCenter[i] = params.arcP;
@@ -837,11 +837,14 @@ void DescribeCompound(
 			compoundData.endPt[i] = GetTrkEndPos(trk,i);
 			compoundData.endAngle[i] = GetTrkEndAngle(trk,i);
 			trackParams_t params;
-			GetTrackParams(0,trk,compoundData.endPt[i],&params);
+			GetTrackParams(PARAMS_CORNU,trk,compoundData.endPt[i],&params);
 			compoundData.endRadius[i] = params.arcR;
 			if (params.arcR != 0.0) {
 				compoundData.endCenter[i] = params.arcP;
-			} else compoundDesc[C0+(E1-E0)*i].mode = DESC_IGNORE;
+			} else {
+				compoundDesc[C0+(E1-E0)*i].mode = DESC_IGNORE;
+				compoundDesc[R0+(E1-E0)*i].mode = DESC_IGNORE;
+			}
 			ComputeElev( trk, i, FALSE, &compoundData.elev[i], NULL );
 			compoundDesc[Z0+(E1-E0)*i].mode = (EndPtIsDefinedElev(trk,i)?0:DESC_RO)|DESC_NOREDRAW;
 		}

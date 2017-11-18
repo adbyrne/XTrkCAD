@@ -285,6 +285,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
     	}
         xx->bezierData.pos[1] = bezData.pos[1];
         bezDesc[CP1].mode |= DESC_CHANGE;
+        updateEndPts = TRUE;
         break;
     case CP2:
     	if (GetTrkEndTrk(trk,1)) {
@@ -295,6 +296,7 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
     	}
         xx->bezierData.pos[2] = bezData.pos[2];
         bezDesc[CP2].mode |= DESC_CHANGE;
+        updateEndPts = TRUE;
         break;
     case Z0:
 	case Z1:
@@ -321,14 +323,28 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 		AbortProg( "updateBezier: Bad inx %d", inx );
 	}
 	ConvertToArcs(xx->bezierData.pos, &xx->bezierData.arcSegs, IsTrack(trk)?TRUE:FALSE, xx->bezierData.segsColor, xx->bezierData.segsWidth);
+	trackParams_t params;
+	    for (int i=0;i<2;i++) {
+	    	GetTrackParams(0,trk,xx->bezierData.pos[i],&params);
+	    	bezData.radius[i] = params.arcR;
+	    	bezData.center[i] = params.arcP;
+	    }
 	if (updateEndPts) {
 			if ( GetTrkEndTrk(trk,0) == NULL ) {
 				SetTrkEndPoint( trk, 0, bezData.pos[0], NormalizeAngle( FindAngle(bezData.pos[0], bezData.pos[1]) ) );
+				bezData.angle[0] = GetTrkEndAngle(trk,0);
 				bezDesc[A0].mode |= DESC_CHANGE;
+				GetTrackParams(PARAMS_CORNU,trk,xx->bezierData.pos[0],&params);
+			    bezData.radius[0] = params.arcR;
+				bezData.center[0] = params.arcP;
 			}
 			if ( GetTrkEndTrk(trk,1) == NULL ) {
 				SetTrkEndPoint( trk, 1, bezData.pos[3], NormalizeAngle( FindAngle(bezData.pos[2], bezData.pos[3]) ) );
+				bezData.angle[1] = GetTrkEndAngle(trk,1);
 				bezDesc[A1].mode |= DESC_CHANGE;
+				GetTrackParams(PARAMS_CORNU,trk,xx->bezierData.pos[1],&params);
+				bezData.radius[1] = params.arcR;
+				bezData.center[1] = params.arcP;
 			}
 	}
 
@@ -371,11 +387,13 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
     bezData.angle[0] = xx->bezierData.a0;
     bezData.angle[1] = xx->bezierData.a1;
     trackParams_t params;
-    for (int i=0;i<2;i++) {
-    	GetTrackParams(0,trk,xx->bezierData.pos[i],&params);
-    	bezData.radius[i] = params.arcR;
-    	bezData.center[i] = params.arcP;
-    }
+    GetTrackParams(PARAMS_CORNU,trk,xx->bezierData.pos[0],&params);
+    bezData.radius[0] = params.arcR;
+    bezData.center[0] = params.arcP;
+    GetTrackParams(PARAMS_CORNU,trk,xx->bezierData.pos[3],&params);
+    bezData.radius[1] = params.arcR;
+    bezData.center[1] = params.arcP;
+
     if (GetTrkType(trk) == T_BEZIER) {
 		ComputeElev( trk, 0, FALSE, &bezData.elev[0], NULL );
 		ComputeElev( trk, 1, FALSE, &bezData.elev[1], NULL );
