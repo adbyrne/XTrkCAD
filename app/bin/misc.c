@@ -2103,7 +2103,9 @@ static void CreateMenus( void )
 
 	// visibility toggle for map window
 	// get the start value
-	wPrefGetInteger( "misc", "mapVisible", (long *)&mapVisible, 1 );
+	long mapVisible_long;
+	wPrefGetInteger( "misc", "mapVisible", (long *)&mapVisible_long, 1 );
+	mapVisible = mapVisible_long?TRUE:FALSE;
 	mapShowMI = wMenuToggleCreate( viewM, "cmdMapShow", _("Show/Hide Map"), ACCL_MAPSHOW,
 		mapVisible, (wMenuToggleCallBack_p)MapWindowToggleShow, NULL );
 
