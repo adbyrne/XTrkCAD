@@ -542,12 +542,27 @@ static int fixed_expose_event(
     }
 }
 
+static int resizeTime(wWin_p win) {
+
+	if (win->resizeW == win->w && win->resizeH == win->h) {  // If hasn't changed since last
+		win->resizeTimer = 0;
+		return FALSE;						//Stop Timer and don't resize
+	}
+	if (win->busy==FALSE && win->winProc) {   //Always drive once
+	    win->winProc(win, wResize_e, win->data);
+	    win->resizeW = win->w;					//Remember this one
+	    win->resizeH = win->h;
+	}
+	return TRUE;							//Will redrive after another timer interval
+}
+
 static int window_configure_event(
     GtkWidget * widget,
     GdkEventConfigure * event,
     wWin_p win)
 {
 //    wPos_t h;
+
 
     if (win==NULL) {
         return FALSE;
@@ -563,6 +578,9 @@ static int window_configure_event(
         if (event->width < 10 || event->height < 10) {
             return TRUE;
         }
+        int w = win->w;
+        int h = win->h;
+
 
         if (win->w != event->width || win->h != event->height) {
             win->w = event->width;
@@ -579,9 +597,13 @@ static int window_configure_event(
             if (win->option&F_MENUBAR) {
                 gtk_widget_set_size_request(win->menubar, win->w, MENUH);
             }
-
-            if (win->busy==FALSE && win->winProc) {
-                win->winProc(win, wResize_e, win->data);
+            if (win->resizeTimer) {					// Already have a timer
+                 return FALSE;
+            } else {
+            	 win->resizeW = w;				//Remember where this started
+            	 win->resizeH = h;
+                 win->resizeTimer = g_timeout_add(200,(GSourceFunc)resizeTime,win);   // 200ms delay
+                 return FALSE;
             }
         }
     }
@@ -711,6 +733,7 @@ static wWin_p wWinCommonCreate(
     w = wlibAlloc(NULL, winType, x, y, labelStr, sizeof *w, data);
     w->busy = TRUE;
     w->option = option;
+    w->resizeTimer = 0;
     getWinSize(w, nameStr);
     h = BORDERSIZE;
 

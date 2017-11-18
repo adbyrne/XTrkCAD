@@ -81,6 +81,8 @@ struct wWin_t {
 		GdkGC * gc;                    /**< graphics context */
 		int gc_linewidth;              /**< ??? */
 		wBool_t busy;
+		int resizeTimer;		       /** resizing **/
+		int resizeW,resizeH;
 		int modalLevel;
 		};
 
