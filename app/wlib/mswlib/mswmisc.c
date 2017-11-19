@@ -558,17 +558,11 @@ static void getSavedSizeAndPos(
         int state;
 
         if ((option & F_RESIZE) &&
-                (cp = wPrefGetString("msw window size", nameStr)) &&
-                (state = (int)strtol(cp, &cq, 10), cp != cq) &&
+                (cp = wPrefGetStringBasic("msw window size", nameStr)) &&
+                (state = (int)strtol(cp, &cq, 10), cp != cq) &&  // state is not used 
                 (cp = cq, w = (wPos_t)strtod(cp, &cq), cp != cq) &&
                 (cp = cq, h = (int)strtod(cp, &cq), cp != cq)
            ) {
-            if (state == 1) {
-                *showCmd = SW_SHOWMINIMIZED;
-            } else if (state == 2) {
-                *showCmd = SW_SHOWMAXIMIZED;
-            }
-
             if (w < 10) {
                 w = 10;
             }
@@ -589,7 +583,7 @@ static void getSavedSizeAndPos(
             *rh = h;
         }
 
-        if ((cp = wPrefGetString("msw window pos", nameStr)) &&
+        if ((cp = wPrefGetStringBasic("msw window pos", nameStr)) &&
                 (x = (wPos_t)strtod(cp, &cq), cp != cq) &&
                 (cp = cq, y = (wPos_t)strtod(cp, &cq), cp != cq)
            ) {
@@ -615,6 +609,23 @@ static void getSavedSizeAndPos(
     }
 }
 
+/**
+ * Create a window. Retrieves the saved size and position and restores the created window accordingly.
+ *
+ * \param hWnd IN parent window
+ * \param typ  IN type of window (W_MAIN or W_POPUP)
+ * \param option IN options for window creation
+ * \param classname IN pre-registered window class
+ * \param style    IN 
+ * \param labelStr IN window title
+ * \param winProc IN callback procedure
+ * \param w IN default window width
+ * \param h IN default window height
+ * \param data IN ??
+ * \param nameStr IN name of window 
+ * \param pShowCmd IN/OUT window show option (maximize or show normal)
+ * \return    window data structure
+ */
 
 static wWin_p winCommonCreate(
     HWND hWnd,
@@ -628,7 +639,7 @@ static wWin_p winCommonCreate(
     wPos_t h,
     void * data,
     const char * nameStr,
-    int * showCmd)
+    int * pShowCmd)
 {
     wWin_p win;
     int index;
@@ -643,12 +654,13 @@ static wWin_p winCommonCreate(
     win->winProc = winProc;
     win->centerWin = TRUE;
     win->modalLevel = 0;
-#ifdef OWNERICON
-    win->wicon_bm = (HBITMAP)0;
-#endif
     win->busy = TRUE;
     ww = hh = xx = yy = CW_USEDEFAULT;
-    getSavedSizeAndPos(option, nameStr, &ww, &hh, &xx, &yy, showCmd);
+    getSavedSizeAndPos(option, nameStr, &ww, &hh, &xx, &yy, pShowCmd);
+
+    if (typ == W_MAIN) {
+        *pShowCmd = ((option & F_MAXIMIZE) ? SW_SHOWMAXIMIZED : SW_SHOWNORMAL);
+    }
 
     if (xx != CW_USEDEFAULT) {
         win->centerWin = FALSE;
@@ -694,6 +706,7 @@ static wWin_p winCommonCreate(
         SetWindowWord(win->hWnd, 0, (WORD)index);
     }
 
+    ShowWindow(win->hWnd, *pShowCmd);
     win->baseStyle = WS_GROUP;
     win->focusChainFirst = win->focusChainLast = win->focusChainNext = NULL;
 
@@ -704,24 +717,12 @@ static wWin_p winCommonCreate(
         winLast = win;
     }
 
-#ifdef HELPSTR
-
-    if (helpStrF) {
-        fprintf(helpStrF, "WINDOW - %s\n", labelStr);
-    }
-
-#endif
     win->nameStr = mswStrdup(nameStr);
 
     if (typ == W_MAIN) {
         mswInitColorPalette();
     }
 
-#ifdef LATER
-    hDc = GetDC(win->hWnd);
-    oldHPal = SelectPalette(hDc, mswPalette, 0);
-    ReleaseDC(win->hWnd, hDc);
-#endif
     return win;
 }
 
@@ -737,8 +738,8 @@ void wInitAppName(char *_appName)
  * of the application including creation of the main window.
  *
  * \param name IN internal name of the application. Used for filenames etc.
- * \param x    IN size
- * \param y    IN size
+ * \param x    IN default width
+ * \param y    IN default height
  * \param helpStr IN ??
  * \param labelStr IN window title
  * \param nameStr IN ??
@@ -769,6 +770,7 @@ wWin_p wWinMainCreate(
     TEXTMETRIC tm;
     char *pos;
     char * configName;
+	long maximize;
 
     /* check for configuration name */
     if (pos = strchr(name, ';')) {
@@ -806,6 +808,10 @@ wWin_p wWinMainCreate(
     helpFile = (char*)malloc(strlen(libDir) + 1 + strlen(appName) + 1 + 3 + 1);
     wsprintf(helpFile, "%s\\%s.chm", libDir, appName);
     wPrefGetInteger("msw tweak", "ThickFont", &mswThickFont, 0);
+
+	wPrefGetInteger("draw", "maximized", &maximize, 0L);
+	option |= (maximize ? F_MAXIMIZE : 0);
+
     showCmd = SW_SHOW;
     w = winCommonCreate(NULL, W_MAIN, option|F_RESIZE, "MswMainWindow",
                         WS_OVERLAPPEDWINDOW, labelStr, winProc, x, y, data,
@@ -1190,8 +1196,7 @@ static void savePos(wWin_p win)
                 }
 
                 wsprintf(posStr, "%d %d %d",
-                         (windowPlace.showCmd == SW_SHOWMINIMIZED ? 1 :
-                          (windowPlace.showCmd == SW_SHOWMAXIMIZED ? 2 : 0)),
+                         0,						// unused
                          w, h);
                 wPrefSetString("msw window size", win->nameStr, posStr);
             }
@@ -1304,6 +1309,17 @@ wBool_t wWinIsVisible(
     return IsWindowVisible(w->hWnd);
 }
 
+/**
+* Returns whether the window is maximized.
+*
+* \param win IN window
+* \return    TRUE if maximized, FALSE otherwise
+*/
+
+wBool_t wWinIsMaximized(wWin_p w)
+{
+    return (IsZoomed(w->hWnd));
+}
 
 void wWinSetTitle(
     wWin_p w,
@@ -2698,8 +2714,8 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         case SIZE_MAXIMIZED:
         case SIZE_MINIMIZED:
         case SIZE_RESTORED:
-            newW = LOWORD(lParam);		/* WIN32?? */
-            newH = HIWORD(lParam);		/* WIN32?? */
+            newW = LOWORD(lParam);		
+            newH = HIWORD(lParam);		
 
             if (newW <= 0 || newH <= 0) {
                 break;
@@ -2717,7 +2733,8 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             if (w->winProc) {
                 w->winProc(w, wResize_e, w->data);
-            }
+				w->winProc(w, wState_e, w->data);
+			}
 
             break;
 
@@ -3043,38 +3060,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case 51:
         count51++;
         /*return NULL;*/
-#ifdef LATER
 
-    case WM_SETFOCUS:
-        hDc = GetDC(hWnd);
-        rc = RealizePalette(hDc);
-        ReleaseDC(hWnd, hDc);
-        inx = GetWindowWord(hWnd, 0);
-
-        if (inx < CONTROL_BASE || inx > controlMap_da.cnt) {
-            break;
-        }
-
-        w = (wWin_p)controlMap(inx-CONTROL_BASE).b;
-
-        if (!w) {
-            break;
-        }
-
-        if (w->type != W_MAIN && w->type != W_POPUP) {
-            break;
-        }
-
-        for (b=w->first; b; b=b->next) {
-            if (b->hWnd && (b->type == B_BUTTON || b->type==B_DRAW)) {
-                hDc = GetDC(b->hWnd);
-                rc = RealizePalette(hDc);
-                ReleaseDC(b->hWnd, hDc);
-            }
-        }
-
-        break;
-#endif
 
     case WM_PALETTECHANGED:
         if (wParam == (WPARAM)hWnd) {
@@ -3255,10 +3241,11 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
     TEXTMETRIC tm;
     DWORD dw;
 
-    if (!hinstPrevious)
-        if (!InitApplication(hinstCurrent)) {
-            return FALSE;
-        }
+	if (!hinstPrevious) {
+		if (!InitApplication(hinstCurrent)) {
+			return FALSE;
+		}
+	}
 
     mswHInst = hinstCurrent;
     mTitleH = GetSystemMetrics(SM_CYCAPTION) - 1;

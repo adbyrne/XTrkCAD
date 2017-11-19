@@ -1826,6 +1826,7 @@ static void CreateDebugW( void )
 	debugPG.paramCnt = debugCnt;
 	ParamRegister( &debugPG );
 	debugW = ParamCreateDialog( &debugPG, MakeWindowTitle(_("Debug")), _("Ok"), DebugOk, NULL, FALSE, NULL, 0, NULL );
+	wHide(debugW);
 }
 
 
