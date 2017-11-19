@@ -62,6 +62,7 @@ static wDrawBitMap_p angle_bm[4];
  long quickMove = 0;
  BOOL_T importMove = 0;
  int incrementalDrawLimit = 20;
+ static int microCount = 0;
 
 static dynArr_t tlist_da;
 #define Tlist(N) DYNARR_N( track_p, tlist_da, N )
@@ -1252,12 +1253,18 @@ static STATUS_T CmdMove(
 						return C_CONTINUE;
 						break;
 				}
+
 			drawEnable = enableMoveDraw;
 			GetMovedTracks(quickMove!=MOVE_QUICK);
 			UndoStart( _("Move Tracks"), "move" );
 			SetMoveD( TRUE, base, 0.0 );
 			DrawSelectedTracksD( &mainD, wDrawColorWhite );
 			MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, base, zero, 0.0 );
+			++microCount;
+			if (microCount>5) {
+				microCount = 0;
+				MainRedraw();
+			}
 			return C_CONTINUE;
 			}
 			break;
