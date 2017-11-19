@@ -2375,6 +2375,8 @@ EXPORT wWin_p wMain(
 	char *oldLocale = NULL;
 	char buffer[ STR_SIZE ];
 	unsigned int i;
+    wPos_t displayWidth;
+    wPos_t displayHeight;
 
 	strcpy( buffer, sProdNameLower );
 
@@ -2460,7 +2462,9 @@ LOG1( log_init, ( "create main window\n" ) )
 	SetLayoutTitle( sProdName );
 	sprintf( message, _("Unnamed Trackplan - %s(%s)"), sProdName, sVersion );
 	wSetBalloonHelp( balloonHelp );
-	mainW = wWinMainCreate( buffer, 600, 350, "xtrkcadW", message, "main",
+    
+    wGetDisplaySize(&displayWidth, &displayHeight);
+	mainW = wWinMainCreate( buffer, displayWidth*0.66, displayHeight*0.66, "xtrkcadW", message, "main",
 				F_RESIZE|F_MENUBAR|F_NOTAB|F_RECALLPOS|F_HIDE,
 				MainProc, NULL );
 	if ( mainW == NULL )
