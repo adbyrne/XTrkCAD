@@ -1168,7 +1168,7 @@ static STATUS_T CmdMove(
 	static coOrd orig;
 	static int state;
 
-	switch( action ) {
+	switch( action&0xFF) {
 
 		case C_START:
 			if (selectedTrackCount == 0) {
@@ -1178,7 +1178,7 @@ static STATUS_T CmdMove(
 			if (SelectedTracksAreFrozen()) {
 				return C_TERMINATE;
 			}
-			InfoMessage( _("Drag to move selected tracks") );
+			InfoMessage( _("Drag to move selected tracks - ALT+Arrow micro-moves") );
 			state = 0;
 			break;
 		case C_DOWN:
@@ -1227,6 +1227,39 @@ static STATUS_T CmdMove(
 				break;
 			DrawSelectedTracksD( &mainD, wDrawColorWhite );
 			DrawMovedTracks();
+			break;
+
+		case wActionExtKey:
+			if (state) return C_CONTINUE;
+			if (SelectedTracksAreFrozen()) return C_TERMINATE;
+			if ((MyGetKeyState() & WKEY_ALT) != 0) {
+				base = zero;
+				DIST_T w = tempD.scale/tempD.dpi;
+				switch((wAccelKey_e) action>>8) {
+					case wAccelKey_Up:
+						base.y = w;
+						break;
+					case wAccelKey_Down:
+						base.y = -w;
+						break;
+					case wAccelKey_Left:
+						base.x = -w;
+						break;
+					case wAccelKey_Right:
+						base.x = w;
+						break;
+					default:
+						return C_CONTINUE;
+						break;
+				}
+			drawEnable = enableMoveDraw;
+			GetMovedTracks(quickMove!=MOVE_QUICK);
+			UndoStart( _("Move Tracks"), "move" );
+			SetMoveD( TRUE, base, 0.0 );
+			DrawSelectedTracksD( &mainD, wDrawColorWhite );
+			MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, base, zero, 0.0 );
+			return C_CONTINUE;
+			}
 			break;
 
 		default:
