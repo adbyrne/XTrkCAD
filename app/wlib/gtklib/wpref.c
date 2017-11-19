@@ -367,7 +367,7 @@ wBool_t wPrefGetIntegerBasic(
 	const char * cp;
     char *cp1;
 
-	cp = wPrefGetString( section, name );
+	cp = wPrefGetStringBasic( section, name );
 	if (cp == NULL) {
 		*res = def;
 		return FALSE;
@@ -419,7 +419,7 @@ wBool_t wPrefGetFloatBasic(
 	const char * cp;
     char *cp1;
 
-	cp = wPrefGetString( section, name );
+	cp = wPrefGetStringBasic( section, name );
 	if (cp == NULL) {
 		*res = def;
 		return FALSE;

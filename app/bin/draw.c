@@ -1293,8 +1293,15 @@ lprintf("mainRedraw\n");
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
+/**
+ * The wlib event handler for the main window.
+ * 
+ * \param win wlib window information
+ * \param e the wlib event
+ * \param data additional data (unused)
+ */
 
-EXPORT void MainProc( wWin_p win, winProcEvent e, void * data )
+void MainProc( wWin_p win, winProcEvent e, void * data )
 {
 	wPos_t width, height;
 	switch( e ) {
@@ -1317,6 +1324,9 @@ EXPORT void MainProc( wWin_p win, winProcEvent e, void * data )
 			wPrefSetInteger( "draw", "mainheight", height );
 		}
 		DrawMapBoundingBox( TRUE );
+		break;
+	case wState_e:
+		wPrefSetInteger( "draw", "maximized", wWinIsMaximized(win) );
 		break;
 	case wQuit_e:
 		CleanupCustom();
