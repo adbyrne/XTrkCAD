@@ -1318,6 +1318,9 @@ EXPORT void MainProc( wWin_p win, winProcEvent e, void * data )
 		}
 		DrawMapBoundingBox( TRUE );
 		break;
+	case wState_e:
+		wPrefSetInteger( "draw", "maximized", wWinIsMaximized(win) );
+		break;
 	case wQuit_e:
 		CleanupCustom();
 		break;

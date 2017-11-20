@@ -204,6 +204,7 @@ FILE * wFileOpen(		const char *, const char * );
 typedef enum {
 	wClose_e,
 	wResize_e,
+	wState_e,
 	wQuit_e,
 	wRedraw_e }
 		winProcEvent;
@@ -220,7 +221,8 @@ typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 #define F_RECALLSIZE	(1L<<10)
 #define F_TOP		(1L<<11)
 #define F_CENTER	(1L<<12)
-#define F_HIDE		(1L<<12)
+#define F_HIDE		(1L<<13)
+#define F_MAXIMIZE  (1L<<14)
 
 wWin_p wWinMainCreate(	        const char *, wPos_t, wPos_t, const char *, const char *, const char *,
 				long, wWinCallBack_p, void * );
@@ -232,6 +234,7 @@ void wWinSetBigIcon(		wWin_p, wIcon_p );
 void wWinSetSmallIcon(		wWin_p, wIcon_p );
 void wWinShow(			wWin_p, wBool_t );
 wBool_t wWinIsVisible(		wWin_p );
+wBool_t wWinIsMaximized( wWin_p win);
 void wWinGetSize (		wWin_p, wPos_t *, wPos_t * );
 void wWinSetSize(		wWin_p, wPos_t, wPos_t );
 void wWinSetTitle(		wWin_p, const char * );
