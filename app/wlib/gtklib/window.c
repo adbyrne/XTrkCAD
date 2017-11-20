@@ -48,6 +48,7 @@ extern wBool_t listHelpStrings;
 static wControl_p firstWin = NULL, lastWin;
 static int keyState;
 static wBool_t gtkBlockEnabled = TRUE;
+static wBool_t maximize_at_next_show = FALSE;
 
 /*
  *****************************************************************************
@@ -298,6 +299,10 @@ void wWinShow(
             wFlush();
         } else {
             wlibDoModal(win, TRUE);
+        }
+        if (maximize_at_next_show) {
+        	gtk_window_maximize(GTK_WINDOW(win->gtkwin));
+        	maximize_at_next_show = FALSE;
         }
     } else {
         wFlush();
@@ -738,23 +743,6 @@ static gint window_char_event(
  *******************************************************************************
  */
 
-/*
- *  Have to wait until after window is created to Resize
- */
-static int maximizeTime(wWin_p win) {
-	int w,h;
-	if (win->busy==FALSE && win->winProc) {   //Always drive once
-		win->w = gdk_window_get_width(GDK_WINDOW(gtk_widget_get_root_window(GTK_WIDGET(win->gtkwin))));
-		win->h = gdk_window_get_height(GDK_WINDOW(gtk_widget_get_root_window(GTK_WIDGET(win->gtkwin))));
-		win->origX = win->realX = w-BORDERSIZE;
-		win->origY = win->realY = h-BORDERSIZE;
-		if (win->option&F_MENUBAR) {
-	            gtk_widget_set_size_request(win->menubar, win->w, MENUH);
-		}
-	    win->winProc(win, wResize_e, win->data);
-	}
-	return FALSE;	//Only Once
-}
 
 /**
  * Create a window.
@@ -901,8 +889,7 @@ static wWin_p wWinCommonCreate(
     w->busy = FALSE;
 
     if (option&F_MAXIMIZE) {
-    	gtk_window_maximize(GTK_WINDOW(w->gtkwin));
-        g_timeout_add(500,(GSourceFunc)maximizeTime,w);
+    	maximize_at_next_show = TRUE;
     }
 
     return w;
