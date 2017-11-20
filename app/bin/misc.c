@@ -1826,6 +1826,7 @@ static void CreateDebugW( void )
 	debugPG.paramCnt = debugCnt;
 	ParamRegister( &debugPG );
 	debugW = ParamCreateDialog( &debugPG, MakeWindowTitle(_("Debug")), _("Ok"), DebugOk, NULL, FALSE, NULL, 0, NULL );
+	wHide(debugW);
 }
 
 
@@ -2103,7 +2104,9 @@ static void CreateMenus( void )
 
 	// visibility toggle for map window
 	// get the start value
-	wPrefGetInteger( "misc", "mapVisible", (long *)&mapVisible, 1 );
+	long mapVisible_long;
+	wPrefGetInteger( "misc", "mapVisible", (long *)&mapVisible_long, 1 );
+	mapVisible = mapVisible_long?TRUE:FALSE;
 	mapShowMI = wMenuToggleCreate( viewM, "cmdMapShow", _("Show/Hide Map"), ACCL_MAPSHOW,
 		mapVisible, (wMenuToggleCallBack_p)MapWindowToggleShow, NULL );
 
@@ -2375,6 +2378,8 @@ EXPORT wWin_p wMain(
 	char *oldLocale = NULL;
 	char buffer[ STR_SIZE ];
 	unsigned int i;
+    wPos_t displayWidth;
+    wPos_t displayHeight;
 
 	strcpy( buffer, sProdNameLower );
 
@@ -2460,7 +2465,9 @@ LOG1( log_init, ( "create main window\n" ) )
 	SetLayoutTitle( sProdName );
 	sprintf( message, _("Unnamed Trackplan - %s(%s)"), sProdName, sVersion );
 	wSetBalloonHelp( balloonHelp );
-	mainW = wWinMainCreate( buffer, 600, 350, "xtrkcadW", message, "main",
+    
+    wGetDisplaySize(&displayWidth, &displayHeight);
+	mainW = wWinMainCreate( buffer, displayWidth*0.66, displayHeight*0.66, "xtrkcadW", message, "main",
 				F_RESIZE|F_MENUBAR|F_NOTAB|F_RECALLPOS|F_HIDE,
 				MainProc, NULL );
 	if ( mainW == NULL )

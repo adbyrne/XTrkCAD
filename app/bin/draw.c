@@ -1293,8 +1293,15 @@ lprintf("mainRedraw\n");
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
+/**
+ * The wlib event handler for the main window.
+ * 
+ * \param win wlib window information
+ * \param e the wlib event
+ * \param data additional data (unused)
+ */
 
-EXPORT void MainProc( wWin_p win, winProcEvent e, void * data )
+void MainProc( wWin_p win, winProcEvent e, void * data )
 {
 	wPos_t width, height;
 	switch( e ) {
@@ -2191,6 +2198,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 			break;
 		case wActionExtKey:
 			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
+			if ((MyGetKeyState() & WKEY_ALT) != 0) break;
 			switch ((wAccelKey_e)(action>>8)) {
 			case wAccelKey_Del:
 				SelectDelete();

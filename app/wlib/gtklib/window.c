@@ -103,7 +103,7 @@ static void saveSize(wWin_p win)
     if ((win->option&F_RESIZE) &&
             (win->option&F_RECALLPOS) &&
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
-	    char pos_s[20];
+        char pos_s[20];
 
         sprintf(pos_s, "%d %d", win->w,
                 win->h-(BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0)));
@@ -125,10 +125,10 @@ static void getPos(wWin_p win)
     wPos_t gtkDisplayHeight = gdk_screen_height();
 
     if ((win->option&F_RECALLPOS) && (!win->shown)) {
-		const char *cp;
+        const char *cp;
 
         if ((cp = wPrefGetString(SECTIONWINDOWPOS, win->nameStr))) {
-			int x, y;
+            int x, y;
 
             x = strtod(cp, &cp1);
 
@@ -176,7 +176,7 @@ static void savePos(wWin_p win)
     int x, y;
 
     if ((win->option&F_RECALLPOS)) {
-		char pos_s[20];
+        char pos_s[20];
 
         gdk_window_get_position(gtk_widget_get_window(GTK_WIDGET(win->gtkwin)), &x, &y);
         x -= 5;
@@ -340,15 +340,15 @@ wBool_t wWinIsVisible(
 }
 
 /**
- * Returns whether the window is visible.
+ * Returns whether the window is maximized.
  *
  * \param win IN window
  * \return    TRUE if maximized, FALSE otherwise
  */
- 
-wBool_t wWinIsMaximized( wWin_p win)
+
+wBool_t wWinIsMaximized(wWin_p win)
 {
-	return win->maximize_initially;
+    return win->maximize_initially;
 }
 
 /**
@@ -616,26 +616,36 @@ static int window_configure_event(
 }
 
 /**
+ * Event handler for window state changes (maximize)
+ * Handles maximize event by storing the new state in the internal structure and
+ * calling the event handler
+ *
+ * \param widget gtk widget
+ * \param event event information
+ * \param win the wlib internal window data
+ * \return TRUE if win is valid,
  */
- 
+
 gboolean window_state_event(
     GtkWidget *widget,
     GdkEventWindowState *event,
-    wWin_p win )
+    wWin_p win)
 {
-	if( !win)
-		return( FALSE );
-	
-	win->maximize_initially = FALSE;
-	
-    if(event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED){
-		win->maximize_initially = TRUE;
-	}
-	if (win->busy==FALSE && win->winProc) {
-		win->winProc(win, wState_e, win->data);
-	}
+    if (!win) {
+        return (FALSE);
+    }
 
-	return TRUE;
+    win->maximize_initially = FALSE;
+
+    if (event->new_window_state & GDK_WINDOW_STATE_MAXIMIZED) {
+        win->maximize_initially = TRUE;
+    }
+
+    if (win->busy==FALSE && win->winProc) {
+        win->winProc(win, wState_e, win->data);
+    }
+
+    return TRUE;
 }
 /**
  * Get current state of shift, ctrl or alt keys.
@@ -728,19 +738,39 @@ static gint window_char_event(
  *******************************************************************************
  */
 
+/*
+ *  Have to wait until after window is created to Resize
+ */
+static int maximizeTime(wWin_p win) {
+	int w,h;
+	if (win->busy==FALSE && win->winProc) {   //Always drive once
+		win->w = gdk_window_get_width(GDK_WINDOW(gtk_widget_get_root_window(GTK_WIDGET(win->gtkwin))));
+		win->h = gdk_window_get_height(GDK_WINDOW(gtk_widget_get_root_window(GTK_WIDGET(win->gtkwin))));
+		win->origX = win->realX = w-BORDERSIZE;
+		win->origY = win->realY = h-BORDERSIZE;
+		if (win->option&F_MENUBAR) {
+	            gtk_widget_set_size_request(win->menubar, win->w, MENUH);
+		}
+	    win->winProc(win, wResize_e, win->data);
+	}
+	return FALSE;	//Only Once
+}
+
 /**
- * Create a window
+ * Create a window.
+ * Default width and height are replaced by values stored in the configuration
+ * file (.rc)
  *
  * \param parent IN parent window
  * \param winType IN type of window
- * \param x IN x position
- * \param y IN y position
+ * \param x IN default width
+ * \param y IN default height
  * \param labelStr IN window title
- * \param nameStr IN
- * \param option IN
+ * \param nameStr IN name of window
+ * \param option IN misc options for placement and sizing of window
  * \param winProc IN window procedure
  * \param data IN additional data to pass to the window procedure
- * \return    describe the return value
+ * \return  the newly created window
  */
 
 static wWin_p wWinCommonCreate(
@@ -759,8 +789,11 @@ static wWin_p wWinCommonCreate(
     w = wlibAlloc(NULL, winType, x, y, labelStr, sizeof *w, data);
     w->busy = TRUE;
     w->option = option;
-    w->resizeTimer = 0;
-    getWinSize(w, nameStr);
+	w->resizeTimer = 0;
+    if (winType != W_MAIN) {
+        getWinSize(w, nameStr);
+    }
+
     h = BORDERSIZE;
 
     if (w->option&F_MENUBAR) {
@@ -778,10 +811,6 @@ static wWin_p wWinCommonCreate(
         }
     }
 
-	if(option&F_MAXIMIZE) {
-		gtk_window_maximize (GTK_WINDOW(w->gtkwin));
-	}
-		
     if (option & F_HIDE) {
         gtk_widget_hide(w->gtkwin);
     }
@@ -811,7 +840,7 @@ static wWin_p wWinCommonCreate(
         w->w = 0;
         w->realY = h;
         w->h = 0;
-    } else {
+    } else if (w->origX != 0){
         w->w = w->realX = w->origX;
         w->h = w->realY = w->origY+h;
         gtk_widget_set_size_request(w->gtkwin, w->w, w->h);
@@ -830,8 +859,8 @@ static wWin_p wWinCommonCreate(
                      G_CALLBACK(fixed_expose_event), w);
     g_signal_connect(GTK_OBJECT(w->gtkwin), "configure_event",
                      G_CALLBACK(window_configure_event), w);
-    g_signal_connect(GTK_OBJECT(w->gtkwin), "window-state-event", 
-					 G_CALLBACK(window_state_event), w);
+    g_signal_connect(GTK_OBJECT(w->gtkwin), "window-state-event",
+                     G_CALLBACK(window_state_event), w);
     g_signal_connect(GTK_OBJECT(w->gtkwin), "key_press_event",
                      G_CALLBACK(window_char_event), w);
     g_signal_connect(GTK_OBJECT(w->gtkwin), "key_release_event",
@@ -868,7 +897,14 @@ static wWin_p wWinCommonCreate(
     lastWin = (wControl_p)w;
     gtk_widget_show(w->widget);
     gtk_widget_realize(w->gtkwin);
+
     w->busy = FALSE;
+
+    if (option&F_MAXIMIZE) {
+    	gtk_window_maximize(GTK_WINDOW(w->gtkwin));
+        g_timeout_add(500,(GSourceFunc)maximizeTime,w);
+    }
+
     return w;
 }
 
@@ -904,6 +940,7 @@ wWin_p wWinMainCreate(
     long isMaximized;
 
     pos = strchr(name, ';');
+
     if (pos) {
         /* if found, split application name and configuration name */
         strcpy(wConfigName, pos + 1);
@@ -912,12 +949,12 @@ wWin_p wWinMainCreate(
         strcpy(wConfigName, name);
     }
 
-    wPrefGetInteger("draw", "maximized", &isMaximized, 0 );
-	option = option | (isMaximized?F_MAXIMIZE:0);
-	
+    wPrefGetInteger("draw", "maximized", &isMaximized, 0);
+    option = option | (isMaximized?F_MAXIMIZE:0);
+
     gtkMainW = wWinCommonCreate(NULL, W_MAIN, x, y, labelStr, nameStr, option,
                                 winProc, data);
-    
+
     wDrawColorWhite = wDrawFindColor(0xFFFFFF);
     wDrawColorBlack = wDrawFindColor(0x000000);
     return gtkMainW;

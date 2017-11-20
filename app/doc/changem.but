@@ -755,7 +755,11 @@ A pop-up menu with commands controlling how objects are drawn during moves can b
 
 \G{png.d/mmovedraw.png}
 
-\e{Left+Drag} is used to move the selected object(s) around the layout.
+\e{Left+Drag} is used to move the selected object(s) around the layout using the mouse. 
+
+Alternatively, \e{ALT+Arrow} can be used to micro-move the selected object(s). The amount micro-moved is dependent on the zoom in use. To move by smaller increments, zoom in further. My moving to macro-zoom modes extremely fine adjustments can be made.
+
+Remember that unattached objects can be moved to exact positions using the \K{cmdDescribe} Command.    
 
 \f{Note:} The \f{Draw Moving Tracks} Radio box on the \f{Command Options} (\K{cmdCmdopt}) dialog can also be used to select how objects are drawn during drags to move or rotate objects. The options for this feature are:
 
