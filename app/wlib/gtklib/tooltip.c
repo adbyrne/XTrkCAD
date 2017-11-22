@@ -200,7 +200,7 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
         y = yy - h ;
     }
     gtk_window_move( GTK_WINDOW( balloonF ), x, y );
-    gtk_widget_show( balloonF );
+    gtk_widget_show_all( balloonF );
 
     balloonVisible = TRUE;
 }
