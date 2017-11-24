@@ -1187,7 +1187,7 @@ EXPORT void LayoutSetPos(
 		lastGroup = 0;
 		wWinGetSize( mainW, &width, &h );
 		gap = 5;
-		toolbarWidth = width+5;
+		toolbarWidth = width-20+5;
 		layerButtCnt = 0;
 		toolbarHeight = 0;
 	}
@@ -1214,7 +1214,7 @@ EXPORT void LayoutSetPos(
 				h = wControlGetHeight( buttonList[inx].control );
 				if ( inx<buttonCnt-1 && (buttonList[inx+1].options&IC_ABUT) )
 					w += wControlGetWidth( buttonList[inx+1].control );
-				if (toolbarWidth+w>width) {
+				if (toolbarWidth+w>width-20) {
 					toolbarWidth = 0;
 					toolbarHeight += h + 5;
 				}

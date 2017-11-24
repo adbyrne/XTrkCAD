@@ -852,7 +852,7 @@ EXPORT void InitInfoBar( void )
 		infoD.scale_w = wLabelWidth( "999:1" ) + wLabelWidth( zoomLabel ) + 6;
 		/* we do not use the count label for the moment */
 		infoD.count_w = 0;
-	infoD.info_w = width - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 45;
+	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 45;  // Allow Window to resize down
 	if (infoD.info_w <= 0) {
 		infoD.info_w = 10;
 	}
@@ -890,14 +890,14 @@ static void SetInfoBar( void )
 		wBoxSetSize( infoD.posY_b, infoD.pos_w, infoHeight-5 );
 		wMessageSetWidth( infoD.posY_m, infoD.pos_w-six );
 	}
-	infoD.info_w = width - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 40 + 4;
+	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 40 + 4;
 	if (infoD.info_w <= 0) {
 		infoD.info_w = 10;
 	}
 	yb = y+info_yb_offset;
 	ym = y+info_ym_offset;
 	boxH = infoHeight-5;
-		wWinClear( mainW, 0, y, width, infoHeight );
+		wWinClear( mainW, 0, y, width-20, infoHeight );
 		x = 0;
 		wControlSetPos( (wControl_p)infoD.scale_b, x, yb );
 		wControlSetPos( (wControl_p)infoD.scale_m, x+info_xm_offset, ym );
@@ -1313,7 +1313,7 @@ void MainProc( wWin_p win, winProcEvent e, void * data )
 		LayoutToolBar();
 		height -= (toolbarHeight+infoHeight);
 		if (height >= 0) {
-			wDrawSetSize( mainD.d, width, height );
+			wDrawSetSize( mainD.d, width-20, height );
 			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
 			SetMainSize();
 			ConstraintOrig( &mainD.orig, mainD.size );
