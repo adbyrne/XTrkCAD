@@ -127,7 +127,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 		if ( hotBarLabels ) {
 			orig.x = x - (tbm->labelW-tbm->objectW)/2*barScale;
 			orig.y = 2*barScale/hotBarD.dpi;
-			DrawString( &hotBarD, orig, 0.0, tbm->proc( HB_BARTITLE, tbm->context, NULL, NULL ), hotBarFp, hotBarFs*barScale, drawColorBlack );
+			DrawString( &hotBarD, orig, 0.0, tbm->proc( HB_BARTITLE, tbm->context, NULL, NULL ), hotBarFp, hotBarFs, drawColorBlack );
 		}
 	}
 	hotBarCurrEnd = inx;
