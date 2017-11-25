@@ -469,7 +469,8 @@ typedef void (*wDrawActionCallBack_p)(	wDraw_p, void*, wAction_t, wPos_t, wPos_t
 /* Creation Options */
 #define BD_TICKS	(1L<<25)
 #define BD_DIRECT	(1L<<26)
-#define BD_NOCAPTURE	(1L<<27)
+#define BD_NOCAPTURE (1L<<27)
+#define BD_NOFOCUS  (1L<<28)
 
 /* Create: */
 wDraw_p wDrawCreate(		wWin_p, wPos_t, wPos_t, const char *, long,

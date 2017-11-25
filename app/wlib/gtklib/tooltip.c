@@ -45,7 +45,7 @@ static int enableBalloonHelp = TRUE;
 static GtkWidget * balloonF; 	/**< balloon help control for hotbar item */
 static GtkWidget * balloonPI;
 
-static const char * balloonMsg = NULL;
+static char balloonMsg[100] = "";
 static wControl_p balloonB;
 static wPos_t balloonDx, balloonDy;
 static wBool_t balloonVisible = FALSE;
@@ -136,54 +136,56 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
     wPos_t w, h;
     wPos_t xx, yy;
     const char * msgConverted;
-    GtkAllocation size;
+    GtkRequisition size;
 
     /* return if there is nothing to do */
     if (balloonVisible && balloonB == b &&
-            balloonDx == dx && balloonDy == dy && msg != NULL && balloonMsg != NULL)
+            balloonDx == dx && balloonDy == dy && msg != NULL && !balloonMsg[0])
            if (strcmp(msg,balloonMsg)==0)
       		return;
 
     /* hide the tooltip */
     if ( msg == NULL ) {
-        if ( balloonF != NULL ) {
+        if ( balloonF != NULL && balloonVisible) {
             gtk_widget_hide( balloonF );
             balloonVisible = FALSE;
         }
-        balloonMsg = "";
+        balloonMsg[0] = '\0';
         return;
     }
     msgConverted = wlibConvertInput(msg);
 
     if ( balloonF == NULL ) {
-		GtkWidget *alignment;
+		//GtkWidget *alignment;
 		
-        balloonF = gtk_window_new( GTK_WINDOW_TOPLEVEL );
+        balloonF = gtk_window_new( GTK_WINDOW_POPUP );
         gtk_window_set_type_hint( GTK_WINDOW( balloonF), GDK_WINDOW_TYPE_HINT_TOOLTIP );
         gtk_window_set_decorated (GTK_WINDOW (balloonF), FALSE );
         gtk_window_set_resizable( GTK_WINDOW (balloonF), FALSE );
+        gtk_window_set_accept_focus(GTK_WINDOW( balloonF), FALSE);
             
-		alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
+		GtkWidget * alignment = gtk_alignment_new (0.5, 0.5, 1.0, 1.0);
 		gtk_alignment_set_padding( GTK_ALIGNMENT(alignment), 6, 6, 6, 6 );
-		
+
 		gtk_container_add (GTK_CONTAINER (balloonF), alignment);
+		
 		gtk_widget_show (alignment);
         
         balloonPI = gtk_label_new(msgConverted);
         gtk_container_add( GTK_CONTAINER(alignment), balloonPI );
-        gtk_widget_show( balloonPI );
+        gtk_widget_show_all( balloonPI );
     }
     gtk_label_set_text( GTK_LABEL(balloonPI), msgConverted );
 
     balloonDx = dx;
     balloonDy = dy;
     balloonB = b;
-    balloonMsg = msg;
-    gtk_widget_get_allocation(balloonPI, &size );
+    snprintf(balloonMsg, sizeof(balloonMsg), "%s", msg);
+    gtk_widget_get_requisition(balloonPI, &size );
     w = size.width;
     h = size.height;
 
-    gdk_window_get_origin( gtk_widget_get_window( GTK_WIDGET(b->parent->gtkwin)), &x, &y );
+    gtk_window_get_position( GTK_WINDOW(b->parent->gtkwin), &x, &y);
 
     x += b->realX + dx;
     y += b->realY + b->h - dy;
@@ -201,6 +203,7 @@ void wControlSetBalloon( wControl_p b, wPos_t dx, wPos_t dy, const char * msg )
     }
     gtk_window_move( GTK_WINDOW( balloonF ), x, y );
     gtk_widget_show_all( balloonF );
+    gtk_widget_show( balloonPI );
 
     balloonVisible = TRUE;
 }

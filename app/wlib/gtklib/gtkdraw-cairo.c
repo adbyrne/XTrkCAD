@@ -998,7 +998,8 @@ static gint draw_button_event(
 			printf( "%s[%dx%d]\n", actionNames[action], bd->lastX, bd->lastY );
 		bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
 	}
-	gtk_widget_grab_focus( bd->widget );
+	if (!(bd->option & BD_NOFOCUS))
+		gtk_widget_grab_focus( bd->widget );
 	return TRUE;
 }
 
@@ -1034,7 +1035,8 @@ static gint draw_motion_event(
 	if (drawVerbose >= 2)
 		printf( "%lx: %s[%dx%d] %s\n", (long)bd, actionNames[action], bd->lastX, bd->lastY, event->is_hint?"<Hint>":"<>" );
 	bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
-	gtk_widget_grab_focus( bd->widget );
+	if (!(bd->option & BD_NOFOCUS))
+		gtk_widget_grab_focus( bd->widget );
 	return TRUE;
 }
 
@@ -1143,7 +1145,9 @@ int xw, xh, cw, ch;
 						   (GtkSignalFunc) draw_char_event, bd);
 	gtk_signal_connect (GTK_OBJECT (bd->widget), "leave_notify_event",
 						   (GtkSignalFunc) draw_leave_event, bd);
-	GTK_WIDGET_SET_FLAGS(GTK_WIDGET(bd->widget), GTK_CAN_FOCUS);
+	gtk_widget_set_can_focus(bd->widget,!(option & BD_NOFOCUS));
+	//if (!(option & BD_NOFOCUS))
+	//	GTK_WIDGET_SET_FLAGS(GTK_WIDGET(bd->widget), GTK_CAN_FOCUS);
 	gtk_widget_set_events (bd->widget, GDK_EXPOSURE_MASK
 							  | GDK_LEAVE_NOTIFY_MASK
 							  | GDK_BUTTON_PRESS_MASK

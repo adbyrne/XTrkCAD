@@ -223,7 +223,8 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wPos_t w,
 	}
 	x = w/hotBarD.dpi + hotBarMap(hotBarCurrStart).x;
 	for ( inx=hotBarCurrStart; inx<hotBarCurrEnd; inx++ ) {
-		if ( x < hotBarMap(inx).x + hotBarMap(inx).w ) {
+		if ((x >= hotBarMap(inx).x) &&						//leave spaces between buttons
+			(x <= hotBarMap(inx).x + hotBarMap(inx).w )) {
 				break;
 		}
 	}
@@ -234,7 +235,7 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wPos_t w,
 	px += (wPos_t)(tbm->w*hotBarD.dpi/2);
 	titleP = tbm->proc( HB_LISTTITLE, tbm->context, NULL, NULL );
 	px -= wLabelWidth( titleP ) / 2;
-	wControlSetBalloon( (wControl_p)hotBarD.d, px, -5, titleP );
+	wControlSetBalloon( (wControl_p)hotBarD.d, px, -20, titleP );
 	switch (action & 0xff) {
 	case wActionLDown:
 		pos.x = mainD.size.x+mainD.orig.x;
@@ -453,7 +454,7 @@ EXPORT void LayoutHotBar( void )
 		hotBarLeftB = wButtonCreate( mainW, 0, 0, "hotBarLeft", (char*)bm_p, BO_ICON, 0, DoHotBarLeft, NULL );
 		bm_p = wIconCreateBitMap( 16, 16, turnbarr_bits, wDrawColorBlack );
 		hotBarRightB = wButtonCreate( mainW, 0, 0, "hotBarRight", (char*)bm_p, BO_ICON, 0, DoHotBarRight, NULL );
-		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, BD_NOCAPTURE, 100, hotBarHeight, NULL, RedrawHotBar, SelectHotBar );
+		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, BD_NOCAPTURE|BD_NOFOCUS, 100, hotBarHeight, NULL, RedrawHotBar, SelectHotBar );
 		hotBarD.dpi = wDrawGetDPI( hotBarD.d );
 		hotBarD.scale = 1.0;
 		initialize = TRUE;

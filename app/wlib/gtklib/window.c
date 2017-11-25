@@ -322,9 +322,9 @@ void wWinShow(
             gtk_widget_size_request(win->gtkwin, &requisition);
 
             if (requisition.width != win->w || requisition.height != win->h) {
-                gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
-            	//gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
-                //gtk_widget_set_size_request(win->widget, win->w-20, win->h);
+                //gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
+            	gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
+                gtk_widget_set_size_request(win->widget, win->w-20, win->h);
 
                 if (win->option&F_MENUBAR) {
                     gtk_widget_set_size_request(win->menubar, win->w-20, MENUH);
