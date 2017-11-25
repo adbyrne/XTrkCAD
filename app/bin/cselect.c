@@ -1179,7 +1179,7 @@ static STATUS_T CmdMove(
 			if (SelectedTracksAreFrozen()) {
 				return C_TERMINATE;
 			}
-			InfoMessage( _("Drag to move selected tracks - SHIFT+ALT+Arrow micro-steps the move") );
+			InfoMessage( _("Drag to move selected tracks - Shift+Ctrl+Arrow micro-steps the move") );
 			state = 0;
 			break;
 		case C_DOWN:
@@ -1233,7 +1233,7 @@ static STATUS_T CmdMove(
 		case wActionExtKey:
 			if (state) return C_CONTINUE;
 			if (SelectedTracksAreFrozen()) return C_TERMINATE;
-			if ((MyGetKeyState() & WKEY_ALT) != 0) {
+			if ((MyGetKeyState() & (WKEY_SHIFT | WKEY_CTRL )) != 0) {
 				base = zero;
 				DIST_T w = tempD.scale/tempD.dpi;
 				switch((wAccelKey_e) action>>8) {

@@ -2198,7 +2198,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 			break;
 		case wActionExtKey:
 			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
-			if ((MyGetKeyState() & WKEY_ALT) != 0) break;
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) != 0) break;
 			switch ((wAccelKey_e)(action>>8)) {
 			case wAccelKey_Del:
 				SelectDelete();
