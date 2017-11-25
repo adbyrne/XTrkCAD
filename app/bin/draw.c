@@ -2198,7 +2198,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 			break;
 		case wActionExtKey:
 			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) != 0) break;
+			if ((MyGetKeyState() &
+					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) break;  //Allow SHIFT+CTRL for Move
 			switch ((wAccelKey_e)(action>>8)) {
 			case wAccelKey_Del:
 				SelectDelete();

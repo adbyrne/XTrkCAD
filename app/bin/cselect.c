@@ -1233,7 +1233,8 @@ static STATUS_T CmdMove(
 		case wActionExtKey:
 			if (state) return C_CONTINUE;
 			if (SelectedTracksAreFrozen()) return C_TERMINATE;
-			if ((MyGetKeyState() & (WKEY_SHIFT | WKEY_CTRL )) != 0) {
+			if ((MyGetKeyState() &
+					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) {
 				base = zero;
 				DIST_T w = tempD.scale/tempD.dpi;
 				switch((wAccelKey_e) action>>8) {
