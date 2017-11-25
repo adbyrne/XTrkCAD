@@ -1179,7 +1179,7 @@ static STATUS_T CmdMove(
 			if (SelectedTracksAreFrozen()) {
 				return C_TERMINATE;
 			}
-			InfoMessage( _("Drag to move selected tracks - ALT+Arrow micro-moves") );
+			InfoMessage( _("Drag to move selected tracks - SHIFT+ALT+Arrow micro-steps the move") );
 			state = 0;
 			break;
 		case C_DOWN:
