@@ -1008,7 +1008,7 @@ EXPORT void InfoSubstituteControls(
 	x = wControlGetPosX( (wControl_p)infoD.info_m );
 	y = wControlGetPosY( (wControl_p)infoD.info_m );
 #ifndef WINDOWS
-	y -= 3;
+	y -= 5;
 #endif
 	wMessageSetValue( infoD.info_m, "" );
 	wControlShow( (wControl_p)infoD.info_m, FALSE );

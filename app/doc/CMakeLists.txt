@@ -89,7 +89,7 @@ IF(XTRKCAD_USE_GTK)
         )
 	    INSTALL(
 	        FILES xtrkcad_osx.css
-		    DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj 
+		    DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/XTrackCAD.help/Contents/Resources/en.lproj/sty
 	)
     ENDIF(APPLE)
 

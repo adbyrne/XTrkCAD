@@ -1,7 +1,7 @@
 \cfg{html-version}{xhtml1.0strict}
 \cfg{html-leaf-level}{infinite}
 \cfg{html-leaf-contains-contents}{false}
-\cfg{html-suppress-navlinks}{true}
+\cfg{html-suppress-navlinks}{false}
 \cfg{html-suppress-address}{true}
 
 \cfg{html-contents-filename}{contents.html}
@@ -11,6 +11,6 @@
 
 \cfg{html-contents-depth}{0}{2}
 
-\cfg{html-head-end}{<link rel="stylesheet" type="text/css" href="xtrkcad_osx.css" /><script type="text/javascript" src="toc.js" ></script>}
+\cfg{html-head-end}{<link rel="stylesheet" type="text/css" href="sty/xtrkcad_osx.css" /><script type="text/javascript" src="scrpt/toc.js" ></script>}
 \cfg{html-body-start}{<div id="container"><div id="toc" data-include="toc.html"></div><div id="contents">}
 \cfg{html-body-end}{</div></div>} 
