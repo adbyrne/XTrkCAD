@@ -6,18 +6,32 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [5.0.0.beta3]
+
+### Added
++ Add Micro-Move using Shift-Ctrl-Arrows in Move Command
+
+### Changed
++ Improve Cornu documentation
+
+###Fixed
++ Allow GTK window width to shrink, resize on restart to fit inside and show on available monitor(s)
++ Fix toolbar ballons blank after resize
++ Fix Display Elevations bug
++ Fix Bezier displayed radius and center for second end
++ Upgrade Describe for Compounds and reduce real estate for larger items by rendering POS X, Y on one line
++ Fix for up arrow panning down instead of up when un-shifted
++ Fixes for Traverse inside a Compound/Turnout.
+
 ## [4.4.0.beta2] - 2017-11-09
 
 ###Fixed
-
 + Cornu problem with saving that led to bad curves on file open
 + Cornu and Bezier problem with List Parts - led to abend plus bad lengths
 + Failure in Train if a train hits an end-point
 
 ###Added
-
 + Constrain add to unconnected Cornu end in Modify via right drag to be correct radius
-
 
 ## [4.4.0.beta1] 
 
