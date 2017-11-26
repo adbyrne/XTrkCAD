@@ -628,6 +628,7 @@ static void DoShowWindow(
 	if (data == mapW) {
 		if (mapVisible == FALSE) {
 			MapWindowShow( TRUE );
+			return;
 		}
 	}
 	wWinShow( (wWin_p)data, TRUE );
