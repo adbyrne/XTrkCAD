@@ -861,16 +861,16 @@ EXPORT void InitInfoBar( void )
 	boxH = infoHeight-5;
 		x = 0;
 		infoD.scale_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.scale_w, boxH );
-		infoD.scale_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarScale", infoD.scale_w-six, zoomLabel ); 
+		infoD.scale_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarScale", infoD.scale_w-six, zoomLabel );
 		x += infoD.scale_w + 10;
 		infoD.posX_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-		infoD.posX_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosX", infoD.pos_w-six, xLabel ); 
+		infoD.posX_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosX", infoD.pos_w-six, xLabel );
 		x += infoD.pos_w + 5;
 		infoD.posY_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-		infoD.posY_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosY", infoD.pos_w-six, yLabel ); 
+		infoD.posY_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosY", infoD.pos_w-six, yLabel );
 		x += infoD.pos_w + 10;
 		infoD.info_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.info_w, boxH );
-		infoD.info_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarStatus", infoD.info_w-six, "" ); 
+		infoD.info_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarStatus", infoD.info_w-six, "" );
 }
 
 
@@ -1009,7 +1009,7 @@ EXPORT void InfoSubstituteControls(
 	y = wControlGetPosY( (wControl_p)infoD.info_m );
 	int y_max = wControlGetHeight( (wControl_p)infoD.info_m );
 #ifndef WINDOWS
-	y -= 0;
+	y -= 3;
 #endif
 	wMessageSetValue( infoD.info_m, "" );
 	wControlShow( (wControl_p)infoD.info_m, FALSE );
