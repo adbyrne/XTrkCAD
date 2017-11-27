@@ -186,8 +186,14 @@ void wControlSetPos(
     }
 
     if (b->label) {
+    	GtkRequisition requisition, reqwidget;
+    	gtk_widget_size_request(b->label, &requisition);
+    	if (b->widget)
+    	   	gtk_widget_size_request(b->widget, &reqwidget);
+    	else
+    	  	reqwidget.height = requisition.height;
         gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
-                       b->realY+LABEL_OFFSET);
+                       b->realY+(reqwidget.height/2 - requisition.height/2));
     }
 }
 
@@ -202,14 +208,18 @@ void wControlSetLabel(
     wControl_p b,
     const char * labelStr)
 {
-    GtkRequisition requisition;
+    GtkRequisition requisition,reqwidget;
 
     if (b->label) {
         gtk_label_set_text(GTK_LABEL(b->label), wlibConvertInput(labelStr));
         gtk_widget_size_request(b->label, &requisition);
+        if (b->widget)
+        	gtk_widget_size_request(b->widget, &reqwidget);
+        else
+        	reqwidget.height = requisition.height;
         b->labelW = requisition.width+8;
         gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
-                       b->realY+LABEL_OFFSET);
+                       b->realY+(reqwidget.height/2 - requisition.height/2));
     } else {
         b->labelW = wlibAddLabel(b, labelStr);
     }

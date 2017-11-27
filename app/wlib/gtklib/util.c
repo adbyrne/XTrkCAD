@@ -147,7 +147,7 @@ GdkPixbuf* wlibPixbufFromXBM(
 
 int wlibAddLabel(wControl_p b, const char * labelStr)
 {
-    GtkRequisition requisition;
+    GtkRequisition requisition, reqwidget;
 
     if (labelStr == NULL) {
         return 0;
@@ -155,10 +155,13 @@ int wlibAddLabel(wControl_p b, const char * labelStr)
 
     b->label = gtk_label_new(wlibConvertInput(labelStr));
     gtk_widget_size_request(b->label, &requisition);
+    if (b->widget)
+       	gtk_widget_size_request(b->widget, &reqwidget);
+    else
+       	reqwidget.height = requisition.height;
     gtk_container_add(GTK_CONTAINER(b->parent->widget), b->label);
     gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label,
-                   b->realX - requisition.width - 8, b->realY + LABEL_OFFSET);
-
+                   b->realX - requisition.width - 8, b->realY + (reqwidget.height/2 - requisition.height/2));
     gtk_widget_show(b->label);
     return requisition.width + 8;
 }
