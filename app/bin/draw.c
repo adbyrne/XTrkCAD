@@ -857,7 +857,7 @@ EXPORT void InitInfoBar( void )
 		infoD.info_w = 10;
 	}
 	yb = y+info_yb_offset;
-	ym = y+info_ym_offset;
+	ym = y+info_ym_offset+(infoHeight-6)/2-3;
 	boxH = infoHeight-5;
 		x = 0;
 		infoD.scale_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.scale_w, boxH );
@@ -895,7 +895,7 @@ static void SetInfoBar( void )
 		infoD.info_w = 10;
 	}
 	yb = y+info_yb_offset;
-	ym = y+info_ym_offset;
+	ym = y+info_ym_offset+(infoHeight-6)/2-3;
 	boxH = infoHeight-5;
 		wWinClear( mainW, 0, y, width-20, infoHeight );
 		x = 0;
@@ -1007,15 +1007,19 @@ EXPORT void InfoSubstituteControls(
 	}
 	x = wControlGetPosX( (wControl_p)infoD.info_m );
 	y = wControlGetPosY( (wControl_p)infoD.info_m );
+	int y_max = wControlGetHeight( (wControl_p)infoD.info_m );
 #ifndef WINDOWS
-	y -= 5;
+	y -= 0;
 #endif
 	wMessageSetValue( infoD.info_m, "" );
 	wControlShow( (wControl_p)infoD.info_m, FALSE );
 	for ( inx=0; controls[inx]; inx++ ) {
 		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
 		x += curInfoLabelWidth[inx];
-		wControlSetPos( controls[inx], x, y );
+		int y_this = y;
+		if (y_max < wControlGetHeight( controls[inx] ))
+			y_this = y - (wControlGetHeight( controls[inx] ) - y_max)/2;
+		wControlSetPos( controls[inx], x, y_this );
 		x += wControlGetWidth( controls[inx] );
 		wControlSetLabel( controls[inx], _(labels[inx]) );
 		wControlShow( controls[inx], TRUE );

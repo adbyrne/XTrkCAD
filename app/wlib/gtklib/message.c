@@ -93,7 +93,7 @@ void wMessageSetWidth(
 wPos_t wMessageGetHeight(
     long flags)
 {
-    return 14;
+    return 20;
 }
 
 /**
