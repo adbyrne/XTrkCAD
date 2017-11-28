@@ -147,6 +147,8 @@ Optionally, the curve center point and radius can be displayed for the Curve.  T
 
 For Beziers, the active control point will be drawn in red and the available endpoints are shown with circles.  
 
+\f{Note:} You can also create Straight and Curved tracks using \k{cmdModify} by dragging out extra track from an open end-point.
+
 \rule
 
 

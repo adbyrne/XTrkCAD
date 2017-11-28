@@ -249,13 +249,13 @@ The \f{Easement} dialog is invoked from the Options (\K{optionM}) menu.
 
 For traditional fixed sharpness easements see \k{EasementsTraditional}, for Cornu Easements see \k{EasementsCornu}.
 
-\S2{EasementsCornu} \i{CornuEasements}
+\S2{EasementsCornu} \i{Cornu Easements}
 
 The Cornu Easements work in a different way to the other easements. They use all the space available to minimize sharpness, so you can control the sharpness for each curve you draw by the distance apart, radius and angle of the two end points.
 
 The Cornu is a mathematical curve that has the property that the curvature (inverse of the radius) varies linearly along its length. Using an open-source Cornu library written by Dr Raph Levin, we can calculate an Cornu easment to suit the end conditions of radius, curve center, angle and position. A Cornu easement can be constructed between two tracks by using the values of these parameters.
 
-To draw an cornu easement see \k{joinCornu}.
+To draw an cornu easement see \k{joinCornu}, to Modify it afterwards see \k{chgCornu}.
 
 \S2{EasementsTraditional} \i{Easements with Fixed Sharpness}
 

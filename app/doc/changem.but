@@ -36,9 +36,7 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Modify} - modify an existing track, or a Bezier lines or tracks.
-
-For a Bezier, select the control points to modify and drag them to move - if a track is connected at the end, only the control point can be selected and will preserve the end angle. Accept the change by pressing Enter or Reject it with Esc.
+\dd \f{Modify} - modify an existing track, or lines.
 
 \u000
 
@@ -162,7 +160,7 @@ An endpoint can have one of several elevation types:
 
 \b \f{Station} - assigns a name to the endpoint.
 
-\f{Note:} Only one of these attributes can be assigned to an endpoint.  For example, an endpoint can not be defined as a Grade and a Station at the same time.
+\f{Note:} Only one of these attributes can be assigned to an endpoint. For example, an endpoint can not be defined as a Grade and a Station at the same time.
 
 When an endpoint is selected on the layout by \e{Left-Click}, it is highlighted by a large red dot and its elevation type and values are displayed in the dialog.
 
@@ -348,9 +346,11 @@ For detail about;
 
 \dd Moving one segment of track to join with another refer to \K{joinTrackMove}.
 
-\S2{joinCornu} \i{Creating a Cornu} Join with Cornu Easement
+\S2{joinCornu} \i{Creating a Cornu} \i{Cornu Easements} Join with Cornu Easement
 
 \u000
+
+\n First, ensure that the Easement type option is set to Cornu - see \k{cmdEasement}
 
 \n Start the join process by clicking on the Join button (\G{png.d/bjoin.png}).
 
@@ -401,6 +401,8 @@ For detail about;
 \u000
 
 \dd Once you are happy, hit \e{Enter} or the \e{SpaceBar} to finish editing the easement. Or hit \e{Esc} to cancel. 
+
+\dd If you want to modify the Cornu later (even if it is joined at both ends) see \k{chgCornu}
 
 \rule
 
@@ -530,7 +532,7 @@ For detail about;
 
 \G{png.d/bmodify.png}
 
-The \f{Modify} command is used to change characteristics of or extend existing track by adding new track. This command works with any unconnected track endpoint, or with a Cornu or Bezier even if connected
+The \f{Modify} command is used to change characteristics of or extend existing track by adding new track. This command works with any unconnected track endpoint, or with a \e{Cornu} or \e{Bezier} track even if connected
 
 The \f{Modify} command can be invoked using the \f{Change>Modify} menu item, the \f{Modify} button or the menu raised by a \e{Right-Click} over the \f{Main Canvas}.
 
@@ -538,7 +540,7 @@ Either the left mouse button (for changing length or creating a tangent track) o
 
 The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.  A \e{Box} is treated as 4 Lines.
 
-The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be chnaged.
+The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be changed.
 
 \e{Curved Lines} are modified in same manner as curved track.
 
@@ -700,29 +702,35 @@ For detail about;
 
 \rule
 
-\S2{chgCornu} Modifying a Cornu
+\S2{chgCornu} \i{Cornu Easements} Modifying a Cornu
 
-Because a Cornu is defined by its end points position, angle and radius - it can only be modified by dragging an end point.
+Because a Cornu is defined by its end points position, angle and radius - it can only be directly modified by dragging an end point along a track. 
 
 \n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
 
 \lcont{\u000}
 
-\n Click on the track. The track ends will turn into roundels
+\n Click on the Cornu track. The track ends will turn into roundels
 
 \lcont{\u000}
 
-\n \e{Left-Click} the endpoint and \e{Left-Drag} it to move the endpoint along the connected track.
+\n \e{Left-Click} the endpoint and \e{Left-Drag} it to move the endpoint along the connected track, or beyond it if you want that track extended ( but this only works in the direction of the Cornu).
+
+\lcont{\u000}
+
+\n Repeat with the other end-pint if desired
 
 \lcont{\u000}
 
 \n Once you are happy, hit the \e{spacebar} or \e{Enter}, or to cancel hit \e{Escape}.
 
+\f{Note:} A Cornu can also be modified by moving or rotating a connected track.  
+
 \rule
 
 \S2{chgBezier} Modifying a Bezier
 
-Because a Bezier is defined by its control points position - it can only be modified by dragging an control point.
+Because a Bezier is defined by its control points position - its shape can only be modified by dragging an control point.
 
 \n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
 
@@ -732,11 +740,17 @@ Because a Bezier is defined by its control points position - it can only be modi
 
 \lcont{\u000}
 
-\n \e{Left-Click} the control point and \e{Left-Drag} it to move it.
+\n \e{Left-Click} a control point and \e{Left-Drag} it to move it.
+
+\lcont{\u000}
+
+\n Repeat for another end point if desired
 
 \lcont{\u000}
 
 \n Once you are happy, hit the \e{spacebar} or \e{Enter}, or to cancel hit \e{Escape}.
+
+\f{Note: } A Bezier's end point will only be modifyable if it is not connected. Both internal control points can be modified even if the track is connected.
 
 \rule
 
@@ -759,7 +773,11 @@ A pop-up menu with commands controlling how objects are drawn during moves can b
 
 Alternatively, \e{Shift+Ctrl+Arrow} can be used to micro-move the selected object(s). The amount micro-moved is dependent on the zoom in use. To move by smaller increments, zoom in further. My moving to macro-zoom modes extremely fine adjustments can be made.
 
-Remember that unattached objects can be moved to exact positions using the \K{cmdDescribe} Command.    
+Remember that unattached objects can also be moved to exact positions using the \K{cmdDescribe} Command.    
+
+\f{Note:} If the moved track is connected but the track it is connect to is not moved, it will be disconnected, unless that track or the last selected track is a Cornu, in which case the Cornu concenred will be modified (if possible) to remain connected. 
+
+\f{Note:} Cornu tracks connected to a turntable will be modified if it is moved or rotated. They remain connected at the point on the radius where they started, so it may be desireable to delete and redraw them if the rotation is large.
 
 \f{Note:} The \f{Draw Moving Tracks} Radio box on the \f{Command Options} (\K{cmdCmdopt}) dialog can also be used to select how objects are drawn during drags to move or rotate objects. The options for this feature are:
 
