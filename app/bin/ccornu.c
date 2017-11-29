@@ -820,6 +820,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 				if (!Da.trk[i]) {
 					wBeep();
 					InfoMessage(_("Cornu Extension Create Failed for end %d"),i);
+					Da.state = NONE;
 					return C_TERMINATE;
 				}
 
@@ -836,10 +837,11 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 								Da.angle[0],Da.angle[1],
 								FormatDistance(Da.radius[0]),FormatDistance(Da.radius[1]));
 			UndoUndo();
+			Da.state = NONE;
 			MainRedraw();
 			return C_TERMINATE;
 		}
-
+		Da.state = NONE;       //Must do before Delete
 		DeleteTrack(trk, TRUE);
 
 		if (Da.trk[0]) UndoModify(Da.trk[0]);
@@ -859,7 +861,6 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		}
 		UndoEnd();
 		MainRedraw();
-		Da.state = NONE;
 		return C_TERMINATE;
 
 	case C_CANCEL:
@@ -869,6 +870,8 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		if (Da.state != NONE)
+			DrawTrack(Da.selectTrack,&mainD,wDrawColorWhite);
 		return AdjustCornuCurve(C_REDRAW, pos, InfoMessage);
 	}
 

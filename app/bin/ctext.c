@@ -180,7 +180,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		}
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
+		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorWhite );
 		c = (unsigned char)(action >> 8);
 		switch (c) {
 		case '\b':

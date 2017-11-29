@@ -406,6 +406,7 @@ BOOL_T WriteMainNote(FILE* f)
 static STATUS_T CmdNote(wAction_t action, coOrd pos)
 {
     static coOrd oldPos;
+    static int state_on = FALSE;
     track_p trk;
     struct extraData * xx;
     const char* tmpPtrText;
@@ -416,21 +417,23 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case C_DOWN:
-        DrawBitMap(&tempD, pos, note_bm, normalColor);
+    	state_on = TRUE;
+        //DrawBitMap(&tempD, pos, note_bm, normalColor);
         oldPos = pos;
+        MainRedraw();
         return C_CONTINUE;
 
     case C_MOVE:
-        DrawBitMap(&tempD, oldPos, note_bm, normalColor);
-        DrawBitMap(&tempD, pos, note_bm, normalColor);
+        //DrawBitMap(&tempD, oldPos, note_bm, normalColor);
+        //DrawBitMap(&tempD, pos, note_bm, normalColor);
         oldPos = pos;
+        MainRedraw();
         return C_CONTINUE;
-        break;
 
     case C_UP:
         UndoStart(_("New Note"), "New Note");
         trk = NewNote(-1, pos, 2);
-        DrawNewTrack(trk);
+        //DrawNewTrack(trk);
         xx = GetTrkExtraData(trk);
         tmpPtrText = _("Replace this text with your note");
         xx->text = (char*)MyMalloc(strlen(tmpPtrText) + 1);
@@ -438,14 +441,18 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
         inDescribeCmd = TRUE;
         DescribeNote(trk, message, sizeof message);
         inDescribeCmd = FALSE;
+        state_on = FALSE;
+        MainRedraw();
         return C_CONTINUE;
 
     case C_REDRAW:
-        DrawBitMap(&tempD, oldPos, note_bm, normalColor);
+    	if (state_on) DrawBitMap(&tempD, oldPos, note_bm, drawColorBlack);
         return C_CONTINUE;
 
     case C_CANCEL:
         DescribeCancel();
+        state_on =FALSE;
+        MainRedraw();
         return C_CONTINUE;
     }
 

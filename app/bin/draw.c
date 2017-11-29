@@ -946,37 +946,27 @@ EXPORT void InfoCount( wIndex_t count )
 
 EXPORT void InfoPos( coOrd pos )
 {
-#ifdef LATER
-	wPos_t ww, hh;
-	DIST_T w, h;
-#endif
+
 	wPos_t x, y;
 
 	sprintf( message, "%s%s", xLabel, FormatDistance(pos.x) );
 	wMessageSetValue( infoD.posX_m, message );
 	sprintf( message, "%s%s", yLabel, FormatDistance(pos.y) );
 	wMessageSetValue( infoD.posY_m, message );
-#ifdef LATER
-	wDrawGetSize( mainD.d, &ww, &hh );
-	w = (DIST_T)(ww/mainD.dpi);
-	h = (DIST_T)(hh/mainD.dpi);
-	/*wDrawClip( mainD.d, 0, 0, w, h );*/
-#endif
-	mainD.CoOrd2Pix(&mainD,oldMarker,&x,&y);
-	wDrawLine( mainD.d, 0, y, (wPos_t)(LBORDER), y,
-				0, wDrawLineSolid, markerColor, wDrawOptTemp );
-	wDrawLine( mainD.d, x, 0, x, (wPos_t)(BBORDER),
-				0, wDrawLineSolid, markerColor, wDrawOptTemp );
+	//mainD.CoOrd2Pix(&mainD,oldMarker,&x,&y);
+	//wDrawLine( mainD.d, 0, y, (wPos_t)(LBORDER), y,
+	//			0, wDrawLineSolid, wDrawColorWhite, wDrawOptTemp|wDrawOptDelete );
+	//wDrawLine( mainD.d, x, 0, x, (wPos_t)(BBORDER),
+	//			0, wDrawLineSolid, wDrawColorWhite, wDrawOptTemp|wDrawOptDelete );
 
-	mainD.CoOrd2Pix(&mainD,pos,&x,&y);
-	wDrawLine( mainD.d, 0, y, (wPos_t)(LBORDER), y,
-				0, wDrawLineSolid, markerColor, wDrawOptTemp );
-	wDrawLine( mainD.d, x, 0, x, (wPos_t)(BBORDER),
-				0, wDrawLineSolid, markerColor, wDrawOptTemp );
-#ifdef LATER
-	/*wDrawClip( mainD.d, LBORDER, BBORDER,
-			   w-(LBORDER+RBORDER), h-(BBORDER+TBORDER) );*/
-#endif
+
+
+	//mainD.CoOrd2Pix(&mainD,pos,&x,&y);
+	MainRedraw();
+	//wDrawLine( mainD.d, 0, y, (wPos_t)(LBORDER), y,
+	//			0, wDrawLineSolid, markerColor, wDrawOptTemp );
+	//wDrawLine( mainD.d, x, 0, x, (wPos_t)(BBORDER),
+	//			0, wDrawLineSolid, markerColor, wDrawOptTemp );
 	oldMarker = pos;
 }
 

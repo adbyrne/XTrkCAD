@@ -403,9 +403,9 @@ STATUS_T CompoundDescriptionMove(
 	case C_MOVE:
 	case C_UP:
 		if (action != C_DOWN)
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+			DrawLine( &tempD, p0, p1, 0, wDrawColorWhite );
 		color = GetTrkColor( trk, &mainD );
-		DrawCompoundDescription( trk, &tempD, color );
+		DrawCompoundDescription( trk, &tempD, wDrawColorWhite );
 		xx->descriptionOff.x = (pos.x-p0.x);
 		xx->descriptionOff.y = (pos.y-p0.y);
 		p1 = xx->descriptionOrig;
@@ -619,7 +619,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		GetBoundingBox( trk, &hi, &lo );
 		if ( labelScale >= mainD.scale &&
 			 !OFF_MAIND( lo, hi ) ) {
-			DrawCompoundDescription( trk, &tempD, GetTrkColor(trk,&tempD) );
+			DrawCompoundDescription( trk, &tempD, wDrawColorWhite );
 		}
 		/*sprintf( message, "%s\t%s\t%s", manufS, nameS, partnoS );*/
 		xx->title = newTitle;

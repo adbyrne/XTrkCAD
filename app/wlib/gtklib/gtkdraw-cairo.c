@@ -184,28 +184,11 @@ static cairo_t* gtkDrawCreateCairoContext(
 
 	gcolor = wlibGetColor(wDrawColorBlack, TRUE);
 
-	if(opts & wDrawOptTemp)
-	{
-		cairo_set_operator(cairo, CAIRO_OPERATOR_DIFFERENCE);
 
-		//if(bd->lastColor != color || !bd->lastColorInverted)
-		//	{
-		//		gcolor = wlibGetColor(color, TRUE);
-		//		bd->lastColor = color;
-		//		bd->lastColorInverted = TRUE;
-		//	}
-		gcolor = wlibGetColor(color, FALSE);
-		gcolor->red = 65535-gcolor->red;
-		gcolor->green = 65535-gcolor->green;
-		gcolor->blue = 65535-gcolor->blue;
-	}
-	else
-	{
-		cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
-		gcolor = wlibGetColor(color, TRUE);
-		bd->lastColor = color;
-		bd->lastColorInverted = FALSE;
-	}
+	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
+	gcolor = wlibGetColor(color, TRUE);
+
+	bd->lastColor = color;
 
 	cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
 
