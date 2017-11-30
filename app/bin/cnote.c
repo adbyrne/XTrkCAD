@@ -172,14 +172,14 @@ static void UpdateNote(track_p trk, int inx, descData_p descUpd,
 
     switch (inx) {
     case OR:
-        UndrawNewTrack(trk);
         xx->pos = noteData.pos;
         SetBoundingBox(trk, xx->pos, xx->pos);
-        DrawNewTrack(trk);
+        MainRedraw();
         break;
 
     case LY:
         SetTrkLayer(trk, noteData.layer);
+        MainRedraw();
         break;
 
     case -1:
@@ -202,7 +202,7 @@ static void UpdateNote(track_p trk, int inx, descData_p descUpd,
 
             xx->text[len] = '\0';
         }
-
+        MainRedraw();
         break;
 
     default:
@@ -409,6 +409,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     track_p trk;
     struct extraData * xx;
     const char* tmpPtrText;
+    static int state_on = FALSE;
 
     switch (action) {
     case C_START:
@@ -416,19 +417,21 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case C_DOWN:
-        DrawBitMap(&tempD, pos, note_bm, normalColor);
+    	state_on = TRUE;
         oldPos = pos;
+        MainRedraw();
         return C_CONTINUE;
 
     case C_MOVE:
-        DrawBitMap(&tempD, oldPos, note_bm, normalColor);
-        DrawBitMap(&tempD, pos, note_bm, normalColor);
         oldPos = pos;
+        MainRedraw();
         return C_CONTINUE;
         break;
 
     case C_UP:
         UndoStart(_("New Note"), "New Note");
+        state_on = FALSE;
+        MainRedraw();
         trk = NewNote(-1, pos, 2);
         DrawNewTrack(trk);
         xx = GetTrkExtraData(trk);
@@ -441,7 +444,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case C_REDRAW:
-        DrawBitMap(&tempD, oldPos, note_bm, normalColor);
+        if (state_on) DrawBitMap(&tempD, oldPos, note_bm, normalColor);
         return C_CONTINUE;
 
     case C_CANCEL:

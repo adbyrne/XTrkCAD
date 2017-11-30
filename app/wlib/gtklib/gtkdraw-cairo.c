@@ -184,13 +184,14 @@ static cairo_t* gtkDrawCreateCairoContext(
 	if(opts & wDrawOptTemp)
 	{
 		cairo_set_source_rgba(cairo, 0, 0, 0, 0);
+		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 	}
 	else
 	{
 		GdkColor* const gcolor = wlibGetColor(color, TRUE);
 		cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
 
-		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+		cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 	}
 
 	return cairo;
@@ -695,7 +696,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		wDrawColor color,
 		wDrawOpts opts )
 {
-	GdkGC * gc;
+	//GdkGC * gc;
 	GdkRectangle update_rect;
 	int i, j, wb;
 	wPos_t xx, yy;
@@ -705,7 +706,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	x = INMAPX( bd, x-bm->x );
 	y = INMAPY( bd, y-bm->y )-bm->h;
 	wb = (bm->w+7)/8;
-	gc = selectGC( bd, 0, wDrawLineSolid, color, opts );
+	//gc = selectGC( bd, 0, wDrawLineSolid, color, opts );
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid, color, opts);
 
 	for ( i=0; i<bm->w; i++ )
 		for ( j=0; j<bm->h; j++ )
@@ -734,7 +736,9 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 					continue;
 				}
 /*printf( "gdk_draw_point( %ld, gc, %d, %d )\n", (long)gdk_window, xx, yy );*/
-				gdk_draw_point( gdk_window, gc, xx, yy );
+				//gdk_draw_point( gdk_window, gc, xx, yy );
+				cairo_rectangle(cairo, xx-0.5, yy-0.5, 1, 1);
+				cairo_fill(cairo);
 				if ( b && b->type == B_DRAW ) {
 					update_rect.x = xx-1;
 					update_rect.y = yy-1;
@@ -743,6 +747,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 					gtk_widget_draw( b->widget, &update_rect );
 				}
 			}
+	gtkDrawDestroyCairoContext(cairo);
 #ifdef LATER
 	gdk_draw_pixmap(bd->pixmap, gc,
 		bm->pixmap,
