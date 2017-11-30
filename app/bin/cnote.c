@@ -172,14 +172,16 @@ static void UpdateNote(track_p trk, int inx, descData_p descUpd,
 
     switch (inx) {
     case OR:
-        UndrawNewTrack(trk);
+        //UndrawNewTrack(trk);
         xx->pos = noteData.pos;
         SetBoundingBox(trk, xx->pos, xx->pos);
-        DrawNewTrack(trk);
+        //DrawNewTrack(trk);
+        MainRedraw();
         break;
 
     case LY:
         SetTrkLayer(trk, noteData.layer);
+        MainRedraw();
         break;
 
     case -1:
@@ -202,7 +204,7 @@ static void UpdateNote(track_p trk, int inx, descData_p descUpd,
 
             xx->text[len] = '\0';
         }
-
+        MainRedraw();
         break;
 
     default:
@@ -420,7 +422,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     	state_on = TRUE;
         //DrawBitMap(&tempD, pos, note_bm, normalColor);
         oldPos = pos;
-        MainRedraw();
+        DrawBitMap(&tempD, oldPos, note_bm, normalColor);
         return C_CONTINUE;
 
     case C_MOVE:
@@ -428,12 +430,15 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
         //DrawBitMap(&tempD, pos, note_bm, normalColor);
         oldPos = pos;
         MainRedraw();
+        DrawBitMap(&tempD, oldPos, note_bm, normalColor);
         return C_CONTINUE;
 
     case C_UP:
         UndoStart(_("New Note"), "New Note");
+        state_on = FALSE;
+        MainRedraw();
         trk = NewNote(-1, pos, 2);
-        //DrawNewTrack(trk);
+        DrawNewTrack(trk);
         xx = GetTrkExtraData(trk);
         tmpPtrText = _("Replace this text with your note");
         xx->text = (char*)MyMalloc(strlen(tmpPtrText) + 1);
@@ -441,17 +446,15 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
         inDescribeCmd = TRUE;
         DescribeNote(trk, message, sizeof message);
         inDescribeCmd = FALSE;
-        state_on = FALSE;
-        MainRedraw();
         return C_CONTINUE;
 
     case C_REDRAW:
-    	if (state_on) DrawBitMap(&tempD, oldPos, note_bm, drawColorBlack);
+    	if (state_on) DrawBitMap(&tempD, oldPos, note_bm, normalColor);
         return C_CONTINUE;
 
     case C_CANCEL:
         DescribeCancel();
-        state_on =FALSE;
+        state_on = FALSE;
         MainRedraw();
         return C_CONTINUE;
     }
