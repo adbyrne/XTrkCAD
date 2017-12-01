@@ -470,19 +470,33 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opt);
 
-	GdkColor * gcolor = wlibGetColor(color, TRUE);
-	cairo_set_source_rgba(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0, 1.0);
-	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
+
 	cairo_move_to(cairo, x, y);
 	cairo_rel_line_to(cairo, w, 0);
 	cairo_rel_line_to(cairo, 0, h);
 	cairo_rel_line_to(cairo, -w, 0);
 	cairo_rel_line_to(cairo, 0, -h);
-	cairo_stroke(cairo);
-	gcolor = wlibGetColor(color, FALSE);
-	cairo_set_source_rgba(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0, 0.8);
+	cairo_set_source_rgb(cairo, 0,0,0);
 	cairo_set_operator(cairo, CAIRO_OPERATOR_DIFFERENCE);
 	cairo_fill(cairo);
+	GdkColor * gcolor = wlibGetColor(color, TRUE);
+	cairo_set_source_rgba(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0, 1.0);
+	cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+	cairo_move_to(cairo, x, y);
+    cairo_rel_line_to(cairo, w, 0);
+    cairo_rel_line_to(cairo, 0, h);
+    cairo_rel_line_to(cairo, -w, 0);
+    cairo_rel_line_to(cairo, 0, -h);
+	cairo_stroke(cairo);
+	cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+	cairo_set_source_rgba(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0, 0.3);
+	cairo_move_to(cairo, x, y);
+	cairo_rel_line_to(cairo, w, 0);
+	cairo_rel_line_to(cairo, 0, h);
+	cairo_rel_line_to(cairo, -w, 0);
+	cairo_rel_line_to(cairo, 0, -h);
+	cairo_fill(cairo);
+
 	gtkDrawDestroyCairoContext(cairo);
 	gtk_widget_queue_draw(GTK_WIDGET(bd->widget));
 
