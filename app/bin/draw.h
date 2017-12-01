@@ -112,6 +112,7 @@ extern wDrawColor drawColorRed;
 extern wDrawColor drawColorBlue;
 extern wDrawColor drawColorGreen;
 extern wDrawColor drawColorAqua;
+extern wDrawColor drawColorPowderedBlue;
 extern wDrawColor drawColorPurple;
 extern wDrawColor drawColorGold;
 #define wDrawColorBlack drawColorBlack

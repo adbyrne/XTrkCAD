@@ -2442,7 +2442,10 @@ static void ParamDlgProc(
 			DefaultProc( win, wClose_e, data );
 		break;
 	case wResize_e:
-		LayoutControls( pg, ParamPositionControl, NULL, NULL );
+		if ((pg->winOption & F_RESIZE) != 0 )
+			pg->changeProc(pg, wResize_e, data);
+		else
+			LayoutControls( pg, ParamPositionControl, NULL, NULL );
 		break;
 	default:
 		break;
@@ -2472,6 +2475,7 @@ EXPORT wWin_p ParamCreateDialog(
 	group->cancelProc = cancelProc;
 	group->layoutProc = layoutProc;
 	group->changeProc = changeProc;
+	group->winOption = winOption;
 	if ( (winOption&F_CENTER) == 0 )
 		winOption |= F_RECALLPOS;
 	if ( (winOption&F_RESIZE) != 0 )

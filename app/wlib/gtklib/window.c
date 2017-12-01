@@ -286,8 +286,17 @@ void wWinSetSize(
     win->busy = TRUE;
     win->w = width;
     win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0);
-    //gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
-    gtk_widget_set_size_request(win->widget, win->w, win->h);
+    if (win->option&F_RESIZE) {
+    	gtk_window_set_default_size(GTK_WINDOW(win->gtkwin), 100, 100);
+    	gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
+    	gtk_widget_set_size_request(win->widget, win->w-10, win->h-10);
+    }
+    else {
+    	gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
+    	gtk_widget_set_size_request(win->widget, win->w, win->h);
+    }
+
+
     win->busy = FALSE;
 }
 
@@ -323,7 +332,6 @@ void wWinShow(
 
             if (requisition.width != win->w || requisition.height != win->h) {
                 //gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
-            	gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
                 gtk_widget_set_size_request(win->widget, win->w-20, win->h);
 
                 if (win->option&F_MENUBAR) {
@@ -662,7 +670,7 @@ static int window_configure_event(
             } else {
             	 win->resizeW = w;				//Remember where this started
             	 win->resizeH = h;
-                 win->resizeTimer = g_timeout_add(200,(GSourceFunc)resizeTime,win);   // 200ms delay
+                 win->resizeTimer = g_timeout_add(100,(GSourceFunc)resizeTime,win);   // 100ms delay
                  return FALSE;
             }
         }
@@ -881,10 +889,13 @@ static wWin_p wWinCommonCreate(
         w->w = 0;
         w->realY = h;
         w->h = 0;
+        gtk_window_set_default_size(GTK_WINDOW(w->gtkwin), 100, 100);
     } else if (w->origX != 0){
         w->w = w->realX = w->origX;
         w->h = w->realY = w->origY+h;
         gtk_window_set_default_size(GTK_WINDOW(w->gtkwin), w->w, w->h);
+        w->default_size_x = w->w;
+        w->default_size_y = w->h;
         //gtk_widget_set_size_request(w->widget, w->w-20, w->h);
 
         if (w->option&F_MENUBAR) {

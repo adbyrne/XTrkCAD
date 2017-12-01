@@ -703,6 +703,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			DrawNewTrack(t);
 			Da.state = NONE;
 			MainRedraw();
+			MapRedraw();
 			return C_TERMINATE;
 		}
 		return C_CONTINUE;
@@ -861,12 +862,14 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		}
 		UndoEnd();
 		MainRedraw();
+		MapRedraw();
 		return C_TERMINATE;
 
 	case C_CANCEL:
 		InfoMessage(_("Modify Cornu Cancelled"));
 		Da.state = NONE;
 		MainRedraw();
+		MapRedraw();
 		return C_TERMINATE;
 
 	case C_REDRAW:

@@ -729,6 +729,7 @@ EXPORT STATUS_T AdjustBezCurve(
 			InfoMessage(_("Pick any circle to adjust it - Enter to confirm, ESC to abort"));
 		//DrawTempBezier(Da.track);
 		MainRedraw();
+		MapRedraw();
 		Da.state = PICK_POINT;
 
 		return C_CONTINUE;
@@ -769,6 +770,7 @@ EXPORT STATUS_T AdjustBezCurve(
 			DrawNewTrack(t);
 			Da.state = NONE;
 			MainRedraw();
+			MapRedraw();
 			return C_TERMINATE;
 
 		}
@@ -880,13 +882,16 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
 			}
 		}
 		UndoEnd();
-		InfoMessage(_("Modify Bezier Complete - select another"));
+		MainRedraw();
+		MapRedraw();
+		InfoMessage(_("Modify Bezier Complete"));
 		return C_TERMINATE;
 
 	case C_CANCEL:
 		InfoMessage(_("Modify Bezier Cancelled"));
 		Da.state = NONE;
 		MainRedraw();
+		MapRedraw();
 		return C_TERMINATE;
 
 	case C_REDRAW:
@@ -1126,6 +1131,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		}
 		Da.state = NONE;
 		MainRedraw();
+		MapRedraw();
 		return C_CONTINUE;
 		
 	default:

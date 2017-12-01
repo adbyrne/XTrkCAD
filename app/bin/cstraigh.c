@@ -137,8 +137,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			ConnectTracks(Dl.trk, Dl.ep, t, 0);
 		}
 		UndoEnd();
-		//DrawNewTrack(t);
-		MainRedraw();
+		DrawNewTrack(t);
 		return C_TERMINATE;
 
 	case C_REDRAW:

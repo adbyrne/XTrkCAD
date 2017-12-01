@@ -429,6 +429,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				return C_ERROR;
 			}
 			DrawNewTrack( t );
+
 			return C_TERMINATE;
 		}
 
