@@ -241,9 +241,11 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wPos_t w,
 		pos.x = mainD.size.x+mainD.orig.x;
 		pos.y = mainD.size.y+mainD.orig.y;
 		if ( hotBarCurrSelect >= 0 ) {
-			HotBarHighlight( hotBarCurrSelect );
+			//HotBarHighlight( hotBarCurrSelect );
 			hotBarCurrSelect = -1;
+			RedrawHotBar(hotBarD.d, NULL, 0, 0 );
 		}
+
 		tbm->proc( HB_SELECT, tbm->context, NULL, NULL );
 		hotBarCurrSelect = inx;
 		HotBarHighlight( hotBarCurrSelect );
@@ -294,8 +296,9 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wPos_t w,
 EXPORT void HotBarCancel( void )
 {
 	if ( hotBarCurrSelect >= 0 )
-		HotBarHighlight( hotBarCurrSelect );
+		//HotBarHighlight( hotBarCurrSelect );
 	hotBarCurrSelect = -1;
+	RedrawHotBar(hotBarD.d, NULL, 0, 0 );
 }
 
 
@@ -308,7 +311,8 @@ static BOOL_T HotBarSelectPlayback( char * line )
 		tbm = &hotBarMap(inx);
 		if ( strcmp( tbm->proc( HB_FULLTITLE, tbm->context, NULL, NULL ), line) == 0) {
 			if ( hotBarCurrSelect >= 0 ) {
-				HotBarHighlight( hotBarCurrSelect );
+				//HotBarHighlight( hotBarCurrSelect );
+				RedrawHotBar(hotBarD.d, NULL, 0, 0 );
 			}
 			hotBarCurrSelect = inx;
 			if ( hotBarCurrSelect < hotBarCurrStart || hotBarCurrSelect > hotBarCurrEnd ) {
