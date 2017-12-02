@@ -287,8 +287,7 @@ void wWinSetSize(
     win->w = width;
     win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0);
     if (win->option&F_RESIZE) {
-    	gtk_window_set_default_size(GTK_WINDOW(win->gtkwin), 100, 100);
-    	gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
+       	gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
     	gtk_widget_set_size_request(win->widget, win->w-10, win->h-10);
     }
     else {
@@ -793,6 +792,25 @@ static gint window_char_event(
     }
 }
 
+void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio ) {
+	GdkGeometry hints;
+    hints.min_width = min_width;
+	hints.max_width = max_width;
+	hints.min_height = min_height;
+	hints.max_height = max_height;
+	hints.min_aspect = hints.max_aspect = aspect_ratio;
+	hints.base_width = base_width;
+	hints.base_height = base_height;
+
+	gtk_window_set_geometry_hints(
+			GTK_WINDOW(win->gtkwin),
+			win->gtkwin,
+			&hints,
+			(GdkWindowHints)(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE |
+					GDK_HINT_ASPECT | GDK_HINT_BASE_SIZE ));
+
+}
+
 
 /*
  *******************************************************************************
@@ -884,16 +902,18 @@ static wWin_p wWinCommonCreate(
 
     gtk_container_add(GTK_CONTAINER(w->gtkwin), w->widget);
 
+
+
+
     if (w->option&F_AUTOSIZE) {
         w->realX = 0;
         w->w = 0;
         w->realY = h;
         w->h = 0;
-        gtk_window_set_default_size(GTK_WINDOW(w->gtkwin), 100, 100);
     } else if (w->origX != 0){
         w->w = w->realX = w->origX;
         w->h = w->realY = w->origY+h;
-        gtk_window_set_default_size(GTK_WINDOW(w->gtkwin), w->w, w->h);
+
         w->default_size_x = w->w;
         w->default_size_y = w->h;
         //gtk_widget_set_size_request(w->widget, w->w-20, w->h);
@@ -902,6 +922,13 @@ static wWin_p wWinCommonCreate(
             gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
         }
     }
+    int scr_w, scr_h;
+    	wGetDisplaySize(&scr_w, &scr_h);
+        if (winType != W_MAIN) {
+        	wSetGeometry(w, 50, scr_w/2, 50, scr_h/2, w->w, w->h, -1);
+        } else {
+        	wSetGeometry(w, scr_w/2, scr_w-10, scr_h/2, scr_h-10, w->w, w->h, -1);
+     }
 
     w->first = w->last = NULL;
     w->winProc = winProc;

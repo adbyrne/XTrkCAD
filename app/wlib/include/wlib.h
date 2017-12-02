@@ -223,6 +223,7 @@ typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 #define F_CENTER	(1L<<12)
 #define F_HIDE		(1L<<13)
 #define F_MAXIMIZE  (1L<<14)
+#define F_RESTRICT  (1L<<15)
 
 wWin_p wWinMainCreate(	        const char *, wPos_t, wPos_t, const char *, const char *, const char *,
 				long, wWinCallBack_p, void * );
@@ -245,6 +246,7 @@ void wMessage(			wWin_p, const char *, wBool_t );
 void wWinTop(			wWin_p );
 void wWinDoCancel(		wWin_p );
 void wWinBlockEnable(		wBool_t );
+void wSetGeometry(wWin_p, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio);
 
 int wCreateSplash( char *appName, char *appVer );
 int wSetSplashInfo( char *msg );
