@@ -1,7 +1,5 @@
-
+# Setup GTK UI library...
 file(GLOB headers *.h)
-
-find_package (GTKUnixPrint)
 
 set(sources
 	bitmap.c
@@ -36,6 +34,8 @@ set(sources
 	gtkdraw-cairo.c
 	)
 
+
+# help system is OS and build specific, add appropriate source files
 if(APPLE)
     set(sources 
         ${sources}
@@ -53,13 +53,20 @@ else()
 endif()
 
 include_directories(${XTrkCAD_BINARY_DIR})
-include_directories(${GTK_INCLUDE_DIRS})
-include_directories(${GTK_UNIX_PRINT_INCLUDE_DIRS})
 
 add_library(xtrkcad-wlib ${headers} ${sources})
+
+# GTK 
+include_directories(${GTK_INCLUDE_DIRS})
 target_link_libraries(xtrkcad-wlib ${GTK_LIBRARIES})
+
+# configure for GTK's native Unix print
+find_package (GTKUnixPrint)
+include_directories(${GTK_UNIX_PRINT_INCLUDE_DIRS})
 target_link_libraries(xtrkcad-wlib ${GTK_UNIX_PRINT_LIBRARIES})
 
-include_directories(${GTK_WEBKIT_INCLUDE_DIRS})
-target_link_libraries(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
-
+# add dependency to webkit if configured
+if(NOT XTRKCAD_USE_BROWSER)
+    include_directories(${GTK_WEBKIT_INCLUDE_DIRS})
+    target_link_libraries(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
+endif()
