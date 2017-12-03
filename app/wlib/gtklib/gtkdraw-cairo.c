@@ -455,7 +455,6 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		wDrawColor color,
 		wDrawOpts opt )
 {
-	GdkGC * gc;
 	GdkRectangle update_rect;
 
 	if ( bd == &psPrint_d ) {
@@ -463,13 +462,10 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		return;
 	}
 
-	//gc = selectGC( bd, 0, wDrawLineSolid, color, opt );
 	x = INMAPX(bd,x);
 	y = INMAPY(bd,y)-h;
-	//gdk_draw_rectangle( bd->pixmap, gc, TRUE, x, y, w, h );
 
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opt);
-
 
 	cairo_move_to(cairo, x, y);
 	cairo_rel_line_to(cairo, w, 0);
@@ -509,11 +505,9 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		wDrawColor color,
 		wDrawOpts opt )
 {
-	//GdkGC * gc;
 	static int maxCnt = 0;
 	static GdkPoint *points;
 	int i;
-	//GdkRectangle update_rect;
 
 	if ( bd == &psPrint_d ) {
 		psPrintFillPolygon( p, cnt, color, opt );
@@ -555,9 +549,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		wDrawColor color,
 		wDrawOpts opt )
 {
-	//GdkGC * gc;
 	int x, y, w, h;
-	//GdkRectangle update_rect;
 
 	if ( bd == &psPrint_d ) {
 		psPrintFillCircle( x0, y0, r, color, opt );
@@ -702,19 +694,19 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
  void wDrawSaveImage(
 		wDraw_p bd )
 {
+	cairo_t * cr;
 	if ( bd->pixmapBackup ) {
 		gdk_pixmap_unref( bd->pixmapBackup );
 	}
 	bd->pixmapBackup = gdk_pixmap_new( bd->widget->window, bd->w, bd->h, -1 );
 
-	selectGC( bd, 0, wDrawLineSolid, bd->lastColor, 0 );
-	gdk_gc_set_function(bd->gc, GDK_COPY);
+	cr = gdk_cairo_create(bd->pixmapBackup);
+	gdk_cairo_set_source_pixmap(cr, bd->pixmap, 0, 0);
+    cairo_paint(cr);
+	cairo_destroy(cr);
 
-	gdk_draw_pixmap( bd->pixmapBackup, bd->gc,
-				bd->pixmap,
-				0, 0,
-				0, 0,
-				bd->w, bd->h );
+	cr = NULL;
+
 }
 
 
@@ -724,14 +716,13 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	GdkRectangle update_rect;
 	if ( bd->pixmapBackup ) {
 
-		selectGC( bd, 0, wDrawLineSolid, bd->lastColor, 0 );
-		gdk_gc_set_function(bd->gc, GDK_COPY);
+		cairo_t * cr;
+		cr = gdk_cairo_create(bd->pixmap);
+		gdk_cairo_set_source_pixmap(cr, bd->pixmapBackup, 0, 0);
+		cairo_paint(cr);
+		cairo_destroy(cr);
 
-		gdk_draw_pixmap( bd->pixmap, bd->gc,
-				bd->pixmapBackup,
-				0, 0,
-				0, 0,
-				bd->w, bd->h );
+		cr = NULL;
 
 		if ( bd->delayUpdate || bd->widget == NULL ) return;
 		update_rect.x = 0;
