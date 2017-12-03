@@ -433,7 +433,11 @@ EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s )
 	w = (wPos_t)((s.x/d->scale)*d->dpi+0.5);
 	h = (wPos_t)((s.y/d->scale)*d->dpi+0.5);
 	d->CoOrd2Pix(d,p,&x,&y);
-	wDrawFilledRectangle( d->d, x, y, w, h, drawColorPowderedBlue, wDrawOptTemp );
+	if (d == &mapD)
+		wDrawFilledRectangle( d->d, x, y, w, h, drawColorPowderedBlue, wDrawOptTemp );
+	else
+		wDrawFilledRectangle( d->d, x, y, w, h, selectedColor, wDrawOptTemp );
+
 }
 
 EXPORT void DrawHilightPolygon( drawCmd_p d, coOrd *p, int cnt )
