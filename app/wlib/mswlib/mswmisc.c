@@ -87,7 +87,12 @@ static wControl_p getControlFromCursor(HWND, wWin_p *);
  */
 
 struct wWin_t {
-    WOBJ_COMMON
+	WOBJ_COMMON
+	int validGeometry;
+	int min_width;
+	int max_width;
+	int min_height;
+	int max_height;
     wPos_t lastX, lastY;
     wPos_t padX, padY;
     wControl_p first, last;
@@ -607,6 +612,35 @@ static void getSavedSizeAndPos(
             *ry = y;
         }
     }
+}
+
+/**
+ * Set min and max dimensions for a window. 
+ *
+ * \param min_width IN minimum width of window
+ * \param max_width IN maximum width of window
+ * \param min_height IN minimum height of window
+ * \param max_height IN maximum height of window
+ * \param base_width IN unused on Windows
+ * \param base_height IN unused on Windows
+ * \param aspect_ration IN unused on Windows
+ */
+void wSetGeometry(wWin_p win,
+	int min_width,
+	int max_width,
+	int min_height,
+	int max_height,
+	int base_width,
+	int base_height,
+	double aspect_ratio)
+{
+	win->validGeometry = TRUE;	//remember that geometry was set
+	win->min_width = min_width;
+	win->max_width = max_width;
+	win->min_height = min_height;
+	win->max_height = max_height;
+
+	return;
 }
 
 /**
@@ -2599,6 +2633,23 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     wAccelKey_e extChar;
 
     switch (message) {
+	case WM_GETMINMAXINFO:
+		LPMINMAXINFO pMMI = (LPMINMAXINFO)lParam;
+		inx = GetWindowWord(hWnd, 0);
+
+		if (inx >= CONTROL_BASE && inx <= controlMap_da.cnt) {
+			w = (wWin_p)controlMap(inx - CONTROL_BASE).b;
+			if (w != NULL) {
+				if (w->validGeometry) {
+					pMMI->ptMaxTrackSize.x = w->max_width;
+					pMMI->ptMaxTrackSize.y = w->max_height;
+					pMMI->ptMinTrackSize.x = w->min_width;
+					pMMI->ptMinTrackSize.y = w->min_height;
+				}
+			}
+		}
+		return(0);
+
     case WM_MOUSEWHEEL:
         inx = GetWindowWord(hWnd, 0);
         b = getControlFromCursor(hWnd, NULL);
