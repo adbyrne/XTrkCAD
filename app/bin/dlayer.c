@@ -924,8 +924,12 @@ void ResetLayers(void)
 
 void SaveLayers(void)
 {
-    layers_save = malloc(NUM_LAYERS * sizeof(unsigned int));
-    assert(layers_save != NULL);
+    layers_save = malloc(NUM_LAYERS * sizeof(layers[0]));
+
+    if (layers_save == NULL) {
+        abort();
+    }
+
     memcpy(layers_save, layers, NUM_LAYERS * sizeof layers[0]);
     ResetLayers();
 }

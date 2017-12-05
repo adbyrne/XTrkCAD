@@ -805,6 +805,7 @@ static void Playback( void )
 	static wBool_t demoWinOnTop = FALSE;
 	coOrd roomSize;
 	char * cp, * cq;
+	char *demoFileName = NULL;
 
 	useCurrentLayer = FALSE;
 	inPlayback = TRUE;
@@ -832,13 +833,13 @@ static void Playback( void )
 			Reset();
 			if (curDemo < 0 || curDemo >= demoList_da.cnt)
 				break;
-			strcpy( paramFileName, demoList(curDemo).fileName );
-			paramFile = fopen( paramFileName, "r" );
+			demoFileName = strdup(demoList(curDemo).fileName );
+			paramFile = fopen( demoFileName, "r" );
 			if ( paramFile == NULL ) {
-				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), paramFileName, strerror(errno) );
+				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName, strerror(errno) );
 				return;
 			}
-
+			
 			playbackColor=wDrawColorBlack;
 			paramLineNum = 0;
 			wWinSetTitle( demoW, demoList( curDemo ).title );
@@ -851,11 +852,13 @@ static void Playback( void )
 			DoChangeNotification( CHANGE_ALL );
 			CompoundClearDemoDefns();
 			if ( fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
-				NoticeMessage( MSG_CANT_READ_DEMO, _("Continue"), NULL, sProdName, paramFileName );
+				NoticeMessage( MSG_CANT_READ_DEMO, _("Continue"), NULL, sProdName, demoFileName );
 				fclose( paramFile );
 				paramFile = NULL;
 				return;
 			}
+			free(demoFileName);
+			demoFileName = NULL;
 		}
 		if (paramLineNum == 0) {
 			documentSnapshotNum = 1;
@@ -953,38 +956,15 @@ static void Playback( void )
 			tempD.orig = mainD.orig;
 			tempD.size = mainD.size;
 			tempD.scale = mainD.scale;
-#ifdef LATER
-			ResolveIndex();
-			RecomputeElevations();
-#endif
+
 			DoRedraw();
 			if (playbackD != NULL && playbackBm != NULL)
 				MacroDrawBitMap( playbackD, playbackBm, playbackX, playbackY, wDrawColorBlack );
-#ifdef LATER
-		} else if (strncmp( paramLine, "POSITION ", 9 ) == 0) {
-			if ( !GetArgs( paramLine+9, "ff", &x, &y ) )
-				continue;
-			MovePlaybackCursor( &mainD, x, y );
-#endif
+
 		} else if (strncmp( paramLine, "PAUSE ", 6 ) == 0) {
 			paramTogglePlaybackHilite = TRUE;
 			didPause = TRUE;
-#ifdef DOPAUSE
-			if (lastCmd == mouseCmd) {
-				thisCmd = pauseCmd;
-			} else {
-				if ( !GetArgs( paramLine+6, "l", &timeout ) )
-					continue;
-#ifdef LATER
-				wFlush();
-				wAlarm( timeout*playbackDelay/100, playback );
-				return;
-#else
-				if (playbackTimer == 0)
-					wPause( timeout*playbackDelay/100 );
-#endif
-			}
-#endif
+
 			if ( !GetArgs( paramLine+6, "l", &timeout ) )
 				continue;
 			if (timeout > 10000)
@@ -999,18 +979,13 @@ static void Playback( void )
 		} else if (strncmp( paramLine, "BIGPAUSE ", 6 ) == 0) {
 			paramTogglePlaybackHilite = TRUE;
 			didPause = FALSE;
-#ifdef LATER
-			wFlush();
-			wAlarm( bigPause*playbackDelay/100, playback );
-			return;
-#else
+
 			if (playbackTimer == 0) {
 				timeout = bigPause*playbackDelay/100;
 				if (timeout <= dragTimeout)
 					timeout = dragTimeout+1;
 				wPause( timeout );
 			}
-#endif
 		} else if (strncmp( paramLine, "KEYSTATE ", 9 ) == 0 ) {
 			playbackKeyState = atoi( paramLine+9 );
 		} else if (strncmp( paramLine, "TIMESTART", 9 ) == 0 ) {
@@ -1062,49 +1037,9 @@ static void Playback( void )
 			DemoInitValues();
 		} else {
 			if (strncmp( paramLine, "MOUSE ", 6 ) == 0) {
-#ifdef LATER
-				if ( GetArgs( paramLine+6, "dff", &rc, &pos.x, &pos.y) ) {
-					pos.x = pos.x / mainD.scale - mainD.orig.x;
-					pos.y = pos.y / mainD.scale - mainD.orig.y;
-#ifdef DOPAUSE
-					if (lastCmd == pauseCmd) {
-#endif
-						d = sqrt( (pos.x-mainPos.x)*(pos.x-mainPos.x) +
-								  (pos.y-mainPos.y)*(pos.y-mainPos.y) );
-						d *= mainD.dpi;
-						timeout = (long)(MSEC_PER_PIXEL * d);
-						if (timeout > 2)
-							if (playbackTimer == 0)
-								wPause( timeout );
-#ifdef DOPAUSE
-					}
-#endif
-					mainPos = pos;
-				}
-#endif
 				thisCmd = mouseCmd;
 			}
 			if (strncmp( paramLine, "MAP ", 6 ) == 0) {
-#ifdef LATER
-				if ( GetArgs( paramLine+6, "dff", &rc, &pos.x, &pos.y ) ) {
-					pos.x = pos.x / mapD.scale - mapD.orig.x;
-					pos.y = pos.y / mapD.scale - mapD.orig.y;
-#ifdef DOPAUSE
-					if (lastCmd == pauseCmd) {
-#endif
-						d = sqrt( (pos.x-mapPos.y)*(pos.x-mapPos.x) +
-								  (pos.y-mapPos.y)*(pos.y-mapPos.y) );
-						d *= mapD.dpi;
-						timeout = (long)(MSEC_PER_PIXEL * d);
-						if (timeout > 2)
-							if (playbackTimer == 0)
-								wPause( timeout );
-#ifdef DOPAUSE
-					}
-#endif
-					mapPos = pos;
-				}
-#endif
 				thisCmd = mouseCmd;
 			}
 			for ( inx=0; inx<playbackProc_da.cnt; inx++ ) {
