@@ -284,8 +284,8 @@ static void DescOk(void * junk)
         DrawDescHilite();
     }
 
-    SetTrkLayer(descTrk, editableLayerList[*layerValue]);
     *layerValue = GetTrkLayer(descTrk);
+    SetTrkLayer(descTrk, editableLayerList[*layerValue]);
     descUpdateFunc(descTrk, -1, descData, !descUndoStarted);
     descTrk = NULL;
 
