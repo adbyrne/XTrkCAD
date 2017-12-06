@@ -267,7 +267,7 @@ void wWinGetSize(
     }
 
     *width = w;
-    *height = h - BORDERSIZE - ((win->option&F_MENUBAR)?MENUH:0);
+    *height = h - BORDERSIZE - ((win->option&F_MENUBAR)?win->menu_height:0);
 }
 
 /**
@@ -285,7 +285,7 @@ void wWinSetSize(
 {
     win->busy = TRUE;
     win->w = width;
-    win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0);
+    win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?win->menu_height:0);
     //gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
     gtk_widget_set_size_request(win->widget, win->w, win->h);
     win->busy = FALSE;
@@ -328,6 +328,9 @@ void wWinShow(
 
                 if (win->option&F_MENUBAR) {
                     gtk_widget_set_size_request(win->menubar, win->w-20, MENUH);
+                    GtkAllocation allocation;
+                    gtk_widget_get_allocation(win->menubar, &allocation);
+                    win->menu_height = allocation.height;
                 }
             }
         }
@@ -655,7 +658,10 @@ static int window_configure_event(
             }
 
             if (win->option&F_MENUBAR) {
-                gtk_widget_set_size_request(win->menubar, win->w-20, MENUH);
+            	GtkAllocation allocation;
+            	gtk_widget_get_allocation(win->menubar, &allocation);
+            	win->menu_height= allocation.height;
+                gtk_widget_set_size_request(win->menubar, win->w-20, win->menu_height);
             }
             if (win->resizeTimer) {					// Already have a timer
                  return FALSE;
@@ -871,7 +877,10 @@ static wWin_p wWinCommonCreate(
         w->menubar = gtk_menu_bar_new();
         gtk_container_add(GTK_CONTAINER(w->widget), w->menubar);
         gtk_widget_show(w->menubar);
-        gtk_widget_set_size_request(w->menubar, -1, MENUH);
+        GtkAllocation allocation;
+        gtk_widget_get_allocation(w->menubar, &allocation);
+        w->menu_height = allocation.height;
+        gtk_widget_set_size_request(w->menubar, -1, w->menu_height);
     }
 
     gtk_container_add(GTK_CONTAINER(w->gtkwin), w->widget);
@@ -938,6 +947,9 @@ static wWin_p wWinCommonCreate(
     lastWin = (wControl_p)w;
     gtk_widget_show(w->widget);
     gtk_widget_realize(w->gtkwin);
+    GtkAllocation allocation;
+    gtk_widget_get_allocation(w->gtkwin, &allocation);
+    w->menu_height = allocation.height;
 
     w->busy = FALSE;
 

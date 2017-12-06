@@ -162,7 +162,7 @@ wPos_t wControlGetPosX(
 wPos_t wControlGetPosY(
     wControl_p b)		/* Control */
 {
-    return b->realY - BORDERSIZE - ((b->parent->option&F_MENUBAR)?MENUH:0);
+    return b->realY - BORDERSIZE - ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);
 }
 
 /**
@@ -179,7 +179,7 @@ void wControlSetPos(
     wPos_t y)
 {
     b->realX = x;
-    b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?MENUH:0);
+    b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?b->parent->menu_height:0);
 
     if (b->widget) {
         gtk_fixed_move(GTK_FIXED(b->parent->widget), b->widget, b->realX, b->realY);

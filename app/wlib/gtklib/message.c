@@ -92,7 +92,12 @@ void wMessageSetWidth(
 wPos_t wMessageGetHeight(
     long flags)
 {
-	GtkWidget * temp = gtk_combo_box_text_new();   //to get max size of an object in infoBar
+	GtkWidget * temp;
+	if (!(flags&COMBOBOX))
+		temp = gtk_label_new("Test");	 //To get size of text itself
+	else
+		temp = gtk_combo_box_text_new(); //to get max size of an object in infoBar
+
 	if (wMessageSetFont(flags))	{
 		GtkStyle *style;
 		PangoFontDescription *fontDesc;
@@ -113,7 +118,8 @@ wPos_t wMessageGetHeight(
 	   /* set the new font size */
 	   gtk_widget_modify_font(temp, fontDesc);
 	}
-	gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
+	if (flags&1L)
+		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
 	GtkRequisition temp_requisition;
 	gtk_widget_size_request(temp,&temp_requisition);
 	gtk_widget_destroy(temp);

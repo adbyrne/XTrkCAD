@@ -375,6 +375,7 @@ void wListSetEditable(		wList_p, wBool_t );
 
 #define BM_LARGE (1L<<24)
 #define BM_SMALL (1L<<25)
+#define COMBOBOX (1L)
 
 #define wMessageSetFont( x ) ( x & (BM_LARGE | BM_SMALL ))
 

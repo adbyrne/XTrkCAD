@@ -79,6 +79,7 @@ struct wWin_t {
 		wBool_t shown;                 /**< visibility state */
 		const char * nameStr;          /**< window name (not title) */
 		GtkWidget * menubar;           /**< menubar handle (if exists) */
+		int menu_height;
 		GdkGC * gc;                    /**< graphics context */
 		int gc_linewidth;              /**< ??? */
 		wBool_t busy;

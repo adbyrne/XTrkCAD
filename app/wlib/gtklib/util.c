@@ -237,7 +237,7 @@ void wlibComputePos(
     }
 
     if (b->origY >= 0) {
-        b->realY = b->origY + BORDERSIZE + ((w->option & F_MENUBAR) ? MENUH : 0);
+        b->realY = b->origY + BORDERSIZE + ((w->option & F_MENUBAR) ? w->menu_height : 0);
     }
     else {
         b->realY = w->lastY + (-b->origY) - 1;
