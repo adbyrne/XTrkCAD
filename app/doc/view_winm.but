@@ -30,7 +30,7 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 
 \u000
 
-\dd \G{png.d/bmap.png} \f{ Show Map} - Toggles display of the \f{Map Window} on and off.
+\dd \G{png.d/bmap.png} \f{ Show/Hide Map} - Toggles display of the \f{Map Window} on and off.
 
 \u000
 

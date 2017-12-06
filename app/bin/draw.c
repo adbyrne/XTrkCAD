@@ -931,7 +931,6 @@ static void SetInfoBar( void )
 				wControlShow( curInfoControl[inx], TRUE );
 			}
 			wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, ym );
-			wMessageSetWidth( infoD.info_m, infoD.info_w-six-c );
 		}
 }
 
@@ -1324,7 +1323,7 @@ void MainProc( wWin_p win, winProcEvent e, void * data )
 		DrawMapBoundingBox( FALSE );
 		wWinGetSize( mainW, &width, &height );
 		LayoutToolBar();
-		height -= (toolbarHeight+max(infoHeight,textHeight));
+		height -= (toolbarHeight+max(infoHeight,textHeight)+10);
 		if (height >= 0) {
 			wDrawSetSize( mainD.d, width-20, height );
 			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
