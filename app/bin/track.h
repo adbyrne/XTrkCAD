@@ -576,6 +576,7 @@ void ConnectTracks( track_p, EPINX_T, track_p, EPINX_T );
 BOOL_T ReconnectTrack( track_p, EPINX_T, track_p, EPINX_T );
 void DisconnectTracks( track_p, EPINX_T, track_p, EPINX_T );
 BOOL_T ConnectAbuttingTracks( track_p, EPINX_T, track_p, EPINX_T );
+BOOL_T ConnectTurntableTracks(track_p, EPINX_T,	track_p, EPINX_T  );
 BOOL_T SplitTrack( track_p, coOrd, EPINX_T, track_p *leftover, BOOL_T );
 BOOL_T TraverseTrack( traverseTrack_p, DIST_T * );
 BOOL_T RemoveTrack( track_p*, EPINX_T*, DIST_T* );
