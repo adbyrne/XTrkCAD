@@ -1502,6 +1502,7 @@ static void QuickMove( void* pos) {
 	UndoStart( _("Move Tracks"), "Move Tracks" );
 	MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, move_pos, zero, 0.0 );
 	wDrawDelayUpdate( mainD.d, FALSE );
+	MainRedraw();
 }
 
 static void QuickRotate( void* pangle )
@@ -1515,6 +1516,7 @@ static void QuickRotate( void* pangle )
 	UndoStart( _("Rotate Tracks"), "Rotate Tracks" );
 	MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, cmdMenuPos, angle );
 	wDrawDelayUpdate( mainD.d, FALSE );
+	MainRedraw();
 }
 
 

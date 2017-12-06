@@ -67,7 +67,9 @@ Cars are placed on the layout by using the \f{Train Simulation} (\K{cmdTrain}) c
 
 The \f{Find} button will center the \f{Main Window} (\K{mainW}) on the selected car.  This button is only enabled for cars which are on the Layout (indicated by \f{Layout} in the Location column).  If the car on a track that is hidden and \f{Trains on Hidden Track} (\K{cmdDisplay}) is set to \f{Hide}, then the car (and any attached cars) will be made visible.
 
-The \f{Edit} button invokes the \f{Car} dialog (\K{cmdCarpart}) to modify the selected car.  This button is disabled if more than one (or no) car is selected or if the selected car is on the Layout.  This dialog is also used to \f{Add} a new Car. Refer to \K{faqsPrototype} if an error occurs when attempting to add inventory to this list.
+The \f{Edit} button invokes the \f{Car} dialog (\K{cmdCarpart}) to modify the selected car.  This button is disabled if more than one (or no) car is selected or if the selected car is on the Layout.  
+
+The \f{Add} button is to add a new Car. Refer to \K{faqsPrototype} if an error occurs when attempting to add inventory to this list.
 
 The \f{Delete} button removes the selected cars from your inventory.  This button is disabled if any of the selected cars are on the layout.
 
