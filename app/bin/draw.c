@@ -98,6 +98,7 @@ EXPORT DIST_T pixelBins = 80;
  */
 
 static wPos_t infoHeight;
+static wPos_t textHeight;
 EXPORT wWin_p mapW;
 EXPORT BOOL_T mapVisible;
 
@@ -845,21 +846,26 @@ EXPORT void InitInfoBar( void )
 {
 	wPos_t width, height, y, yb, ym, x, boxH;
 	wWinGetSize( mainW, &width, &height );
-	infoHeight = 3 + wMessageGetHeight( 0L ) + 3;
-	y = height - infoHeight;
+	infoHeight = 3 + wMessageGetHeight( COMBOBOX ) + 3;
+	textHeight = wMessageGetHeight(0L);
+	y = height - max(infoHeight,textHeight)-10;
+
+#ifdef WINDOWS
 	y -= 19; /* Kludge for MSW */
-		infoD.pos_w = GetInfoPosWidth() + 2;
-		infoD.scale_w = wLabelWidth( "999:1" ) + wLabelWidth( zoomLabel ) + 6;
-		/* we do not use the count label for the moment */
-		infoD.count_w = 0;
-	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 45;  // Allow Window to resize down
+#endif
+
+	infoD.pos_w = GetInfoPosWidth() + 2;
+	infoD.scale_w = wLabelWidth( "999:1" ) + wLabelWidth( zoomLabel ) + 6;
+	/* we do not use the count label for the moment */
+	infoD.count_w = 0;
+	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 45;      // Allow Window to resize down
 	if (infoD.info_w <= 0) {
 		infoD.info_w = 10;
 	}
 	yb = y+info_yb_offset;
-	ym = y+info_ym_offset+(infoHeight-6)/2-3;
-	boxH = infoHeight-5;
-		x = 0;
+	ym = y+(infoHeight-textHeight)/2;
+	boxH = infoHeight;
+		x = 2;
 		infoD.scale_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.scale_w, boxH );
 		infoD.scale_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarScale", infoD.scale_w-six, zoomLabel );
 		x += infoD.scale_w + 10;
@@ -881,7 +887,7 @@ static void SetInfoBar( void )
 	static long oldDistanceFormat = -1;
 	long newDistanceFormat;
 	wWinGetSize( mainW, &width, &height );
-	y = height - infoHeight;
+	y = height - max(infoHeight,textHeight)-10;
 	newDistanceFormat = GetDistanceFormat();
 	if ( newDistanceFormat != oldDistanceFormat ) {
 		infoD.pos_w = GetInfoPosWidth() + 2;
@@ -895,8 +901,8 @@ static void SetInfoBar( void )
 		infoD.info_w = 10;
 	}
 	yb = y+info_yb_offset;
-	ym = y+info_ym_offset+(infoHeight-6)/2-3;
-	boxH = infoHeight-5;
+	ym = y+(infoHeight-textHeight)/2;
+	boxH = infoHeight;
 		wWinClear( mainW, 0, y, width-20, infoHeight );
 		x = 0;
 		wControlSetPos( (wControl_p)infoD.scale_b, x, yb );
@@ -917,12 +923,16 @@ static void SetInfoBar( void )
 #ifndef WINDOWS
 			yb -= 2;
 #endif
+			int c = x;
 			for ( inx=0; curInfoControl[inx]; inx++ ) {
 				x += curInfoLabelWidth[inx];
 				wControlSetPos( curInfoControl[inx], x, yb );
 				x += wControlGetWidth( curInfoControl[inx] )+3;
 				wControlShow( curInfoControl[inx], TRUE );
 			}
+			wBoxSetSize( infoD.info_b, infoD.info_w-c, boxH );
+			wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, ym );
+			wMessageSetWidth( infoD.info_m, infoD.info_w-six-c );
 		}
 }
 
@@ -1315,7 +1325,7 @@ void MainProc( wWin_p win, winProcEvent e, void * data )
 		DrawMapBoundingBox( FALSE );
 		wWinGetSize( mainW, &width, &height );
 		LayoutToolBar();
-		height -= (toolbarHeight+infoHeight);
+		height -= (toolbarHeight+max(infoHeight,textHeight));
 		if (height >= 0) {
 			wDrawSetSize( mainD.d, width-20, height );
 			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
@@ -2448,7 +2458,7 @@ EXPORT void DrawInit( int initialZoom )
 
 	wWinGetSize( mainW, &w, &h );
 	/*LayoutToolBar();*/
-	h -= toolbarHeight+infoHeight;
+	h = h - (toolbarHeight+max(textHeight,infoHeight)+10);
 	if ( w <= 0 ) w = 1;
 	if ( h <= 0 ) h = 1;
 	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "", BD_TICKS,

@@ -1355,7 +1355,7 @@ static STATUS_T CmdRotate(
 						angle = NormalizeAngle(angle1-baseAngle);
 						if ( angle > 90 && angle < 270 )
 							angle = NormalizeAngle( angle + 180.0 );
-						if ( NormalizeAngle( FindAngle( pos, pos1 ) - angle1 ) < 180.0 )
+						if ( NormalizeAngle( FindAngle( base, pos1 ) - angle1 ) < 180.0 )
 							angle = NormalizeAngle( angle + 180.0 );
 /*printf( "angle 1 = %0.3f\n", angle );*/
 						if ( angle1 > 180.0 ) angle1 -= 180.0;
