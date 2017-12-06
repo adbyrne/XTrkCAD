@@ -119,7 +119,7 @@ Using the \f{Select} command, select the track that is to have its elevation set
 
 \G{png.d/bconnect.png}
 
-This command is used exclusively with \e{Sectional Track}.
+This command is most often used with \e{Sectional Track}.  But it can be useful to reattach ordinary track which has become disconected or split.
 
 Occasionally pieces of sectional track do not line up exactly, especially when creating figure-8's or passing sidings.  When laying out the actual track you can compensate for this by adjusting the individual tracks to provide a bit of slack.  This command simulates that process.
 
@@ -927,7 +927,7 @@ Rotate An Object Using the Mouse
 
 \lcont{\u000}
 
-\n Visualize an axis point on the object that's to be rotated then place the mouse pointer over that point.
+\n Visualize an axis point on the object that's to be rotated then place the mouse pointer over that point. If the track is a turntable, the point will be snapped to the turntable center if the mouse is within a quarter of the radius length of it.
 
 \lcont{\u000}
 
