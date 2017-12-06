@@ -610,7 +610,7 @@ static STATUS_T CmdPull(
 			if (trk1 == NULL) {
 				if ((trk1 = OnTrack( &pos, TRUE, FALSE )) != NULL) {
 					if ((ep1 = PickUnconnectedEndPoint( pos, trk1 )) < 0) {
-						if (QueryTrack(trk2, Q_CAN_ADD_ENDPOINTS)) {
+						if (QueryTrack(trk1, Q_CAN_ADD_ENDPOINTS)) {
 							turntable = TRUE;
 							ep1 = -1;
 						} else trk1 = NULL;

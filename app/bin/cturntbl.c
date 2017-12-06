@@ -596,10 +596,10 @@ EXPORT BOOL_T ConnectTurntableTracks(
 		EPINX_T ep2 ) {
 	coOrd center, pos;
 	DIST_T radius;
-	ANGLE_T angle = ConstrainTurntableAngle( trk1, GetTrkEndPos(trk2,ep2) );
+	TurntableGetCenter( trk1, &center, &radius );
 	pos = GetTrkEndPos(trk2,ep2);
-	if (GetTrkEndAngle(trk2,ep2) - angle < connectAngle) {
-		TurntableGetCenter( trk1, &center, &radius );
+	ANGLE_T angle = FindAngle(center, GetTrkEndPos(trk2,ep2));
+	if (NormalizeAngle(GetTrkEndAngle(trk2,ep2) + 180 - angle) < connectAngle) {
 		if (FindDistance(center,pos)-radius < connectDistance) {
 			EPINX_T ep = NewTurntableEndPt(trk1,angle);
 			ConnectTracks( trk1, ep, trk2, ep2 );
