@@ -1492,6 +1492,18 @@ static STATUS_T CmdRotate(
 	return C_CONTINUE;
 }
 
+static void QuickMove( void* pos) {
+	coOrd move_pos = *(coOrd*)pos;
+	if ( SelectedTracksAreFrozen() )
+		return;
+	wDrawDelayUpdate( mainD.d, TRUE );
+	GetMovedTracks(FALSE);
+	DrawSelectedTracksD( &mainD, wDrawColorWhite );
+	UndoStart( _("Move Tracks"), "Move Tracks" );
+	MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, move_pos, zero, 0.0 );
+	wDrawDelayUpdate( mainD.d, FALSE );
+}
+
 static void QuickRotate( void* pangle )
 {
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
@@ -1991,6 +2003,8 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 	quickMove2M[0] = wMenuToggleCreate( selectPopup2M, "", _("Normal"), 0, quickMove==0, ChangeQuickMove, (void *) 0 );
 	quickMove2M[1] = wMenuToggleCreate( selectPopup2M, "", _("Simple"), 0, quickMove==1, ChangeQuickMove, (void *) 1 );
 	quickMove2M[2] = wMenuToggleCreate( selectPopup2M, "", _("End Points"), 0, quickMove==2, ChangeQuickMove, (void *) 2 );
+	wMenuSeparatorCreate( selectPopup2M );
+	AddMoveMenu( selectPopup2M, QuickMove);
 	wMenuSeparatorCreate( selectPopup2M );
 	AddRotateMenu( selectPopup2M, QuickRotate );
 	rotateAlignMI = wMenuPushCreate( selectPopup2M, "", _("Align"), 0, (wMenuCallBack_p)RotateAlign, NULL );

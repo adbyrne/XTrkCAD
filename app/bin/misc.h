@@ -198,8 +198,11 @@ extern wMenu_p popup1M, popup2M;
 #define wControlBeside( B )		(wControlGetPosX((wControl_p)(B))+wControlGetWidth((wControl_p)(B)))
 
 typedef void (*rotateDialogCallBack_t) ( void * );
+typedef void (*moveDialogCallBack_t) (void *);
 extern void AddRotateMenu( wMenu_p, rotateDialogCallBack_t );
+extern void AddMoveMenu( wMenu_p, moveDialogCallBack_t );
 extern void StartRotateDialog( rotateDialogCallBack_t );
+extern void StartMoveDialog(moveDialogCallBack_t );
 /*
  * Safe Memory etc
  */

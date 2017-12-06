@@ -20,7 +20,7 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Connect Sectional Tracks} - creates a connection between sectional track pieces by slightly moving the select piece(s) and the pieces they connect to.
+\dd \f{Connect Two Tracks} - creates a connection between track pieces with an option to slightly move the select piece(s) and the pieces they connect to. (\K{cmdConnect}).
 
 \u000
 
@@ -28,23 +28,23 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Flip} - turn selected object(s) over or around.
+\dd \f{Flip} - turn selected object(s) over or around. (\K{cmdFlip}).
 
 \u000
 
-\dd \f{Join} - connect two separate pieces of track. This command can be used to move one of the pieces of track to the endpoint of the other or to create a connection by laying a stretch of flex-track.
+\dd \f{Join} - connect two separate pieces of track. This command can be used to move one of the pieces of track to the endpoint of the other or to create a connection by laying a stretch of flex-track. (\K{cmdJoin}).
 
 \u000
 
-\dd \f{Modify} - modify an existing track, or lines.
+\dd \f{Modify} - modify an existing track, or lines. (\K{cmdModify}).
 
 \u000
 
-\dd \f{Move} - move selected object(s). 
+\dd \f{Move} - move selected object(s). (\K{cmdMove}).
 
 \u000
 
-\dd \f{Move Description} - move the endpoint description of a track piece to another location.
+\dd \f{Move Description} - move the endpoint description of a track piece to another location. (\K{cmdMoveLabel}).
 
 \u000
 
@@ -52,15 +52,15 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Properties} - sets \e{XTrackCAD} into \e{Describe} mode. Whenever an object is clicked on while in this mode, the \f{Properties} dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation.
+\dd \f{Properties} - sets \e{XTrackCAD} into \e{Describe} mode. Whenever an object is clicked on while in this mode, the \f{Properties} dialog is opened. This dialog allows direct manipulation of settings such as the objects length, position or orientation. (\K{cmdDescribe}).
 
 \u000
 
-\dd \f{Raise/Lower Elevations} - raise or lower elevation of selected tracks.
+\dd \f{Raise/Lower Elevations} - raise or lower elevation of selected tracks. (\K{cmdRaiseElev}).
 
 \u000
 
-\dd \f{Rotate} - rotate selected object(s).
+\dd \f{Rotate} - rotate selected object(s). (\K{cmdRotate}).
 
 \u000
 
@@ -68,11 +68,11 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Select} - sets \e{XTrackCAD} into \e{Select} mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use \f{Deselect All} from the \f{Edit} (\K{editM}) menu or \f{Deselect All} from the \f{Pop-up} menu (\K{mouseBcmd}).
+\dd \f{Select} - sets \e{XTrackCAD} into \e{Select} mode.  Whenever an object is clicked on while in this mode, this selection state of this object is reversed.  If an object was unselected it becomes selected, and vice versa. To unselect all objects press the ESC key, use \f{Deselect All} from the \f{Edit} (\K{editM}) menu or \f{Deselect All} from the \f{Pop-up} menu (\K{mouseBcmd}). (\K{cmdSelect}).
 
 \u000
 
-\dd \f{Split Track} - the \f{Split Track} command can be used in one of two ways;
+\dd \f{Split Track} - the \f{Split Track} (\K{cmdSplitTrack}) command can be used in one of two ways;
 
 \lcont{
 
@@ -765,21 +765,21 @@ The \f{Move} command can be invoked using the \f{Change>Move} menu item or the \
 
 Successful use of this command requires selection of the object(s) to be moved before attempting to move it. An object is selected by using the \e{Left-Click} command. A group of connected objects can be selected using the \e{Shift+Left-Click} command.
 
+A move can be achieved using one of the following methods;
+
+\u000
+
+\dd \e{Left+Drag} using the mouse. See \K{moveByMouse} for detail.
+
+\u000
+
+\dd Selecting fixed or specified amounts of translation in the X and Y directions using a \e{Right-Click} menu. See \K{moveByMenu} for detail.
+
+\u000
+
+\rule
+
 A pop-up menu with commands controlling how objects are drawn during moves can be activated by entering a \e{Shift+Right-Click} command while hovering over the \f{Main Canvas}
-
-\G{png.d/mmovedraw.png}
-
-\e{Left+Drag} is used to move the selected object(s) around the layout using the mouse. 
-
-Alternatively, \e{Shift+Ctrl+Arrow} can be used to micro-move the selected object(s). The amount micro-moved is dependent on the zoom in use. To move by smaller increments, zoom in further. My moving to macro-zoom modes extremely fine adjustments can be made.
-
-Remember that unattached objects can also be moved to exact positions using the \K{cmdDescribe} Command.    
-
-\f{Note:} If the moved track is connected but the track it is connect to is not moved, it will be disconnected, unless that track or the last selected track is a Cornu, in which case the Cornu concenred will be modified (if possible) to remain connected. 
-
-\f{Note:} Cornu tracks connected to a turntable will be modified if it is moved or rotated. They remain connected at the point on the radius where they started, so it may be desireable to delete and redraw them if the rotation is large.
-
-\f{Note:} The \f{Draw Moving Tracks} Radio box on the \f{Command Options} (\K{cmdCmdopt}) dialog can also be used to select how objects are drawn during drags to move or rotate objects. The options for this feature are:
 
 \b \f{Normal} - objects are drawn normally. This can be time-consuming when using a slow machine and moving a large number of objects.
 
@@ -790,6 +790,54 @@ Remember that unattached objects can also be moved to exact positions using the 
 \u000
 
 \b \f{Endpoints} - only the endpoints are drawn (as stars).
+
+\G{png.d/mmovedraw.png}
+
+\rule
+
+\f{Note:} If the moved track is connected but the track it is connect to is not moved, it will be disconnected, unless that track or the last selected track is a Cornu, in which case the Cornu concenred will be modified (if possible) to remain connected. 
+
+\f{Note:} Cornu tracks connected to a turntable will be modified if it is moved or rotated. They remain connected at the point on the radius where they started, so it may be desireable to delete and redraw them if the rotation is large.
+
+\f{Note:} The \f{Draw Moving Tracks} Radio box on the \f{Command Options} (\K{cmdCmdopt}) dialog can also be used to select how objects are drawn during drags to move or rotate objects. The options for this feature are:
+
+\rule
+
+\S2{moveByMouse} Using Mouse
+
+Once object(s) are selected, \e{Left+Drag} is used to move them around the layout using the mouse. 
+
+Alternatively, \e{Shift+Ctrl+Arrow} can be used to micro-move the selected object(s). The amount micro-moved is dependent on the zoom in use. To move by smaller increments, zoom in further. My moving to macro-zoom modes extremely fine adjustments can be made.
+
+Remember that unattached objects can also be moved to exact positions using the \K{cmdDescribe} Command or by the \K{moveByMenu}. 
+
+\S2{moveByMenu} Using Values of X and Y Translation
+
+Move An Object Using Fixed or Specified amounts of X and Y Translation.
+
+A pop-up menu with additional menu items allows you to \f{Move} the selected object(s) through through any amount you specify. 
+
+\G{png.d/mmovevariable.png}
+
+The \f{Move} command is executed as follows;
+
+\n \f{Select} the object(s) to be moved.
+
+\lcont{\u000}
+
+\n \e{Shift+Right-Click} to raise the Move/Rotate menu. 
+
+\lcont{\u000
+
+Any amount of precise transalation may be entered by \e{Left-Click}ing the \f{Enter Move...} menu item then entering a desired amount of translation in X and Y in the dialog window that appears.
+
+\u000
+
+\G{png.d/dmovetranslate.png}
+
+\u000
+
+}   
 
 \rule
 
@@ -956,7 +1004,11 @@ Rotation can also be achieved through use of one of these alternate methods;
 
 Rotate An Object Using Fixed or Specified Degree's of Rotation
 
-A pop-up menu with additional menu items allows you to \f{Rotate} the selected object(s) through various predefined angles or through any angle you specify. The \f{Rotate} command is executed as follows;
+A pop-up menu with additional menu items allows you to \f{Rotate} the selected object(s) through various predefined angles or through any angle you specify. 
+
+\G{png.d/mrotatemove.png}
+
+The \f{Rotate} command is executed as follows;
 
 \n \f{Select} the object(s) to be rotated.
 
@@ -966,23 +1018,33 @@ A pop-up menu with additional menu items allows you to \f{Rotate} the selected o
 
 \lcont{\u000}
 
-\n With the mouse pointer hovering over the object to be rotated, \e{Shift+Right-Click} to raise the Rotate menu then select the desired degree and direction of rotation from the list of predefined angles (180\u00B0, 90\u00B0 CW, 45\u00B0 CW, 30\u00B0 CW, 15\u00B0 CW, 15\u00B0 CCW, 30\u00B0 CCW, 45\u00B0 CCW, 90\u00B0 CCW). 
+\n With the mouse pointer hovering over the point about which the object(s) are to be rotated, \e{Shift+Right-Click} to raise the Rotate menu then select the desired degree and direction of rotation from the list of predefined angles (180\u00B0, 90\u00B0 CW, 45\u00B0 CW, 30\u00B0 CW, 15\u00B0 CW, 15\u00B0 CCW, 30\u00B0 CCW, 45\u00B0 CCW, 90\u00B0 CCW). 
 
-\lcont{
-
-\u000
+\lcont{\u000}
 
 \G{png.d/mrotatefixed.png}
 
-\u000
+\u000 
 
-Alternately, any angle may be entered by \e{Left-Click}ing the \f{Enter Angle...} menu item then entering a desired angle in the Rotate dialog window that appears.
+\rule
+
+Alternately, any angle may be entered by \e{Left-Click}ing the \f{Enter Angle...} menu item 
+
+\n \f{Select} the object(s) to be rotated.
+
+\lcont{\u000}
+
+\n With the mouse pointer hovering over the point about which the object(s) are to be rotated, \e{Shift+Right-Click} to raise the Rotate menu and then select the \e{Enter Angle...} option.
+
+\lcont{\u000}
+
+\G{png.d/mrotatevariable.png}
+
+And then entering a desired angle in the Rotate dialog window that appears.
 
 \G{png.d/drotateangle.png}
 
 \u000
-
-}
 
 Rotation can also be achieved through use of one of these alternate methods;
 
@@ -1011,7 +1073,7 @@ A pop-up menu with additional menu items allows you to \f{Align} the selected ob
 
 \lcont{\u000}
 
-\n With the mouse pointer hovering over the object to be rotated, \e{Shift+Right-Click} to raise the Rotate menu then select \f{Align}.
+\n With the mouse pointer hovering over the point about which the object(s) are to be rotated, \e{Shift+Right-Click} to raise the Rotate menu then select \f{Align}.
 
 \lcont{
 

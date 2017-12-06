@@ -1749,14 +1749,25 @@ static void ShowAddElevations( void )
 /*--------------------------------------------------------------------*/
 
 static wWin_p rotateW;
+static wWin_p moveW;
 static long rotateValue;
+static coOrd moveValue;
 static rotateDialogCallBack_t rotateDialogCallBack;
+static moveDialogCallBack_t moveDialogCallBack;
 
 static void RotateEnterOk( void * );
+
 static paramIntegerRange_t rn360_360 = { -360, 360, 80 };
 static paramData_t rotatePLs[] = {
 	{   PD_LONG, &rotateValue, "rotate", PDO_ANGLE, &rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs/sizeof rotatePLs[0] };
+
+static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
+static void MoveEnterOk( void * );
+static paramData_t movePLs[] = {
+	{ PD_FLOAT, &moveValue.x, "moveX", PDO_DIM, &r_1000_1000, N_("Move X:") },
+	{ PD_FLOAT, &moveValue.y, "moveY", PDO_DIM, &r_1000_1000, N_("Move Y:") } };
+static paramGroup_t movePG = { "move", 0, movePLs, sizeof movePLs/sizeof movePLs[0] };
 
 
 EXPORT void StartRotateDialog( rotateDialogCallBack_t func )
@@ -1768,6 +1779,22 @@ EXPORT void StartRotateDialog( rotateDialogCallBack_t func )
 	wShow( rotateW );
 }
 
+EXPORT void StartMoveDialog( moveDialogCallBack_t func )
+{
+	if ( moveW == NULL )
+		moveW = ParamCreateDialog( &movePG, MakeWindowTitle(_("Move")), _("Ok"), MoveEnterOk, wHide, FALSE, NULL, 0, NULL );
+	ParamLoadControls( &movePG );
+	moveDialogCallBack = func;
+	moveValue = zero;
+	wShow( moveW );
+}
+
+static void MoveEnterOk( void * junk )
+{
+	ParamLoadData( &movePG );
+	moveDialogCallBack( (void*) &moveValue );
+	wHide( moveW );
+}
 
 static void RotateEnterOk( void * junk )
 {
@@ -1785,6 +1812,17 @@ static void RotateDialogInit( void )
 	ParamRegister( &rotatePG );
 }
 
+static void MoveDialogInit (void)
+{
+	ParamRegister( &movePG );
+}
+
+
+EXPORT void AddMoveMenu(
+		wMenu_p m,
+		moveDialogCallBack_t func ) {
+	wMenuPushCreate( m, "", _("Enter Move ..."), 0, (wMenuCallBack_p)StartMoveDialog, (void*)func );
+}
 
 EXPORT void AddRotateMenu(
 		wMenu_p m,
@@ -2533,6 +2571,7 @@ LOG1( log_init, ( "misc2Init\n" ) )
 	Misc2Init();
 
 	RotateDialogInit();
+	MoveDialogInit();
 
 	wSetSplashInfo( _("Initializing commands") );
 LOG1( log_init, ( "paramInit\n" ) )
