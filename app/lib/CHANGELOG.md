@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+###Fixed
++ Linux/OSX: Fix Note invisibility
++ Linux: FIX RPM dependencies for browser builds
+
 ## [5.0.0.beta3]
 
 ### Added
