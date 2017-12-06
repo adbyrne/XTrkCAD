@@ -311,6 +311,7 @@ STATUS_T CurveDescriptionMove(
 		}
 		DrawCurveDescription( trk, &tempD, color );
         MainRedraw();
+        MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:

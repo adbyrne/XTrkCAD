@@ -556,6 +556,7 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 					FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
         MainRedraw();
+        MapRedraw();
 		return C_CONTINUE;
 
 	case C_UP:
@@ -564,6 +565,7 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		tempSegs_da.cnt = 0;
         DrawNewTrack( trk );
         MainRedraw();
+        MapRedraw();
 		return C_TERMINATE;
 
 	default:

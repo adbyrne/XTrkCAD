@@ -151,6 +151,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 	SelectedTrackCountChange();
 	if (doRedraw) {
 		MainRedraw();
+		MapRedraw();
 	} else {
 		wDrawDelayUpdate( mainD.d, FALSE );
 	}
@@ -182,6 +183,7 @@ EXPORT void InvertTrackSelect( void *ptr )
 	
 	SelectedTrackCountChange();
 	MainRedraw();
+	MapRedraw();
 }
 
 /* Select orphaned (ie single) track pieces.
@@ -215,6 +217,7 @@ EXPORT void OrphanedTrackSelect( void *ptr )
 	}
 	SelectedTrackCountChange();
 	MainRedraw();
+	MapRedraw();
 }
 
 
@@ -526,6 +529,7 @@ EXPORT void DoRefreshCompound( void )
 		RefreshCompound( NULL, FALSE );
 		UndoEnd();
 		MainRedraw();
+		MapRedraw();
 	} else {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 	}
@@ -1195,6 +1199,7 @@ static STATUS_T CmdMove(
 			drawCount = 0;
 			state = 1;
             MainRedraw();
+            MapRedraw();
 			return C_CONTINUE;
 		case C_MOVE:
 			drawEnable = enableMoveDraw;
@@ -1211,6 +1216,7 @@ static STATUS_T CmdMove(
 #endif
 			drawEnable = TRUE;
             MainRedraw();
+            MapRedraw();
 			return C_CONTINUE;
 		case C_UP:
 			state = 0;
@@ -1265,6 +1271,7 @@ static STATUS_T CmdMove(
 			if (microCount>5) {
 				microCount = 0;
 				MainRedraw();
+				MapRedraw();
 			}
 			return C_CONTINUE;
 			}
@@ -1379,6 +1386,7 @@ static STATUS_T CmdRotate(
 				}
 			}
             MainRedraw();
+            MapRedraw();
 			return C_CONTINUE;
 		case C_MOVE:
 			if ( rotateAlignState == 1 )
@@ -1407,6 +1415,7 @@ static STATUS_T CmdRotate(
 /*printf( "angle 2 = %0.3f\n", angle );*/
 				DrawMovedTracks();
                 MainRedraw();
+                MapRedraw();
 				return C_CONTINUE;
 			}
 			if ( FindDistance( orig, pos ) > (6.0/75.0)*mainD.scale ) {
@@ -1440,6 +1449,7 @@ static STATUS_T CmdRotate(
 				drawEnable = TRUE;
 			}
             MainRedraw();
+            MapRedraw();
 			return C_CONTINUE;
 		case C_UP:
 			state = 0;
@@ -1460,6 +1470,7 @@ static STATUS_T CmdRotate(
 				MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, orig, angle );
 			}
             MainRedraw();
+            MapRedraw();
 			return C_TERMINATE;
 
 		case C_CMDMENU:
@@ -1716,6 +1727,7 @@ static STATUS_T CmdFlip(
 			pos0 = pos1 = pos;
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
             MainRedraw();
+            MapRedraw();
 			return C_CONTINUE;
 		case C_MOVE:
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
@@ -1723,6 +1735,7 @@ static STATUS_T CmdFlip(
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
 			InfoMessage( _("Angle %0.2f"), FindAngle( pos0, pos1 ) );
             MainRedraw();
+            MapRedraw();
 			return C_CONTINUE;
 		case C_UP:
 			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
@@ -1730,6 +1743,7 @@ static STATUS_T CmdFlip(
 			FlipTracks( pos0, FindAngle( pos0, pos1 ) );
 			state = 0;
             MainRedraw();
+            MapRedraw();
 			return C_TERMINATE;
 
 #ifdef LATER

@@ -416,6 +416,7 @@ STATUS_T CompoundDescriptionMove(
 		if (action != C_UP)
 			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
         MainRedraw();
+        MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 	}
 	return C_CONTINUE;

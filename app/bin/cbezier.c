@@ -757,6 +757,7 @@ EXPORT STATUS_T AdjustBezCurve(
 			DrawNewTrack(t);
 			Da.state = NONE;
 			MainRedraw();
+			MapRedraw();
 			return C_TERMINATE;
 
 		}
@@ -875,6 +876,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
 		InfoMessage(_("Modify Bezier Cancelled"));
 		Da.state = NONE;
 		MainRedraw();
+		MapRedraw();
 		return C_TERMINATE;
 
 	case C_REDRAW:

@@ -1058,12 +1058,13 @@ static void MoveMainWindow(
 
     dist *= factor;
     Translate(&pos, pos, angle, dist);
-    DrawMapBoundingBox(FALSE);
+    //DrawMapBoundingBox(FALSE);
     mainCenter = pos;
     mainD.orig.x = pos.x-mainD.size.x/2;;
     mainD.orig.y = pos.y-mainD.size.y/2;;
     MainRedraw();
-    DrawMapBoundingBox(TRUE);
+    MapRedraw();
+    //DrawMapBoundingBox(TRUE);
 }
 
 
@@ -2647,6 +2648,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             programMode = MODE_TRAIN;
             trk0 = NULL;
             MainRedraw(); //Make sure track is redrawn after switch thrown
+            MapRedraw();
         } else {
             trk0 = FindCar(&pos);
 
@@ -2733,6 +2735,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         }
 
         MainRedraw();
+        MapRedraw();
         curTrainDlg->train = NULL;
         return C_CONTINUE;
 
@@ -2815,6 +2818,7 @@ static void CmdTrainExit(void * junk)
     Reset();
     InfoSubstituteControls(NULL, NULL);
     MainRedraw();
+    MapRedraw();
 }
 
 
@@ -2989,6 +2993,7 @@ static void TrainFunc(
     }
 
     MainRedraw();  //Redraw if Train altered
+    MapRedraw();
 
     if (trainsState == TRAINS_PAUSE) {
         RestartTrains();

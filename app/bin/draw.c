@@ -1332,6 +1332,7 @@ void MainProc( wWin_p win, winProcEvent e, void * data )
 			tempD.orig = mainD.orig;
 			SetInfoBar();
 			MainRedraw();
+			MapRedraw();
 			wPrefSetInteger( "draw", "mainwidth", width );
 			wPrefSetInteger( "draw", "mainheight", height );
 		}
@@ -1788,6 +1789,7 @@ static void DoNewScale( DIST_T scale )
 	}
 	ConstraintOrig( &mainD.orig, mainD.size );
 	MainRedraw();
+	MapRedraw();
 	tempD.orig = mainD.orig;
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
 	/*SetFont(0);*/
@@ -2044,43 +2046,48 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 				return;
 			case wAccelKey_F5:
 				MainRedraw();
+				MapRedraw();
 				return;
 #endif
 			case wAccelKey_Right:
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				mainD.orig.x += mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				MapRedraw();
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				break;
 			case wAccelKey_Left:
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				mainD.orig.x -= mainD.size.x/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				MapRedraw();
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				break;
 			case wAccelKey_Up:
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				mainD.orig.y += mainD.size.y/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				MapRedraw();
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				break;
 			case wAccelKey_Down:
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				mainD.orig.y -= mainD.size.y/2;
 				ConstraintOrig( &mainD.orig, mainD.size );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				MapRedraw();
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				break;
 			default:
 				return;
@@ -2225,7 +2232,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 				break;
 #endif
 			case wAccelKey_Right:
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
 				else
@@ -2234,10 +2241,11 @@ static void DoMouse( wAction_t action, coOrd pos )
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				MapRedraw();
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				break;
 			case wAccelKey_Left:
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.x -= 0.25*mainD.scale;
 				else
@@ -2246,10 +2254,11 @@ static void DoMouse( wAction_t action, coOrd pos )
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				MapRedraw();
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				break;
 			case wAccelKey_Up:
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.y += 0.25*mainD.scale;
 				else
@@ -2258,10 +2267,11 @@ static void DoMouse( wAction_t action, coOrd pos )
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				MapRedraw();
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				break;
 			case wAccelKey_Down:
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
 					mainD.orig.y -= 0.25*mainD.scale;
 				else
@@ -2270,7 +2280,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
-				DrawHilight( &mapD, mainD.orig, mainD.size );
+				MapRedraw();
+				//DrawHilight( &mapD, mainD.orig, mainD.size );
 				break;
 			default:
 				return;
@@ -2378,11 +2389,12 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 					}
 					ConstraintOrig( &orig, mainD.size );
 					if ( orig.x != mainD.orig.x || orig.y != mainD.orig.y ) {
-						DrawMapBoundingBox( FALSE );
+						//DrawMapBoundingBox( FALSE );
 						mainD.orig = orig;
 						MainRedraw();
+						MapRedraw();
 						/*DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );*/
-						DrawMapBoundingBox( TRUE );
+						//DrawMapBoundingBox( TRUE );
 						wFlush();
 					}
 				}
@@ -2441,8 +2453,10 @@ static void MapDlgUpdate(
 
 static void DrawChange( long changes )
 {
-	if (changes & CHANGE_MAIN)
+	if (changes & CHANGE_MAIN) {
 		MainRedraw();
+		MapRedraw();
+	}
 	if (changes &CHANGE_UNITS)
 		SetInfoBar();
 	if (changes & CHANGE_MAP)

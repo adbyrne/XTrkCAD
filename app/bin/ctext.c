@@ -99,6 +99,7 @@ static void TextDlgUpdate(
 			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		}
         MainRedraw();
+        MapRedraw();
 		break;
 	}
 }
@@ -160,6 +161,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
         Dt.state = SHOW_TEXT;
         MainRedraw();
+        MapRedraw();
 		return C_CONTINUE;
 	case C_MOVE:
         //DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
@@ -171,6 +173,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
 		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
         MainRedraw();
+        MapRedraw();
         return C_CONTINUE;
 	case C_UP:
 		return C_CONTINUE;
@@ -226,6 +229,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		}
 		InfoSubstituteControls( NULL, NULL );
 		MainRedraw();
+		MapRedraw();
 		return C_TERMINATE;
 	case C_OK:
 		if (Dt.state != POSITION_TEXT) {
@@ -240,6 +244,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		}
 		InfoSubstituteControls( NULL, NULL );
         MainRedraw();
+        MapRedraw();
 		return C_TERMINATE;
 
 	case C_FINISH:

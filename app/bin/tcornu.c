@@ -240,6 +240,7 @@ STATUS_T CornuDescriptionMove(
             DrawLine( &mainD, xx->cornuData.pos[0], p0, 0, wDrawColorBlack );
         DrawCornuDescription( trk, &mainD, color );
         MainRedraw();
+        MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:

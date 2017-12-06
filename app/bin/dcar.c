@@ -4143,12 +4143,13 @@ static void CarInvDlgFind( void * junk )
 	if ( item == NULL || item->car == NULL || IsTrackDeleted(item->car) ) return;
 	CarGetPos( item->car, &pos, &angle );
 	CarSetVisible( item->car );
-	DrawMapBoundingBox( FALSE );
+	//DrawMapBoundingBox( FALSE );
 	mainCenter = pos;
 	mainD.orig.x = pos.x-mainD.size.x/2;;
 	mainD.orig.y = pos.y-mainD.size.y/2;;
 	MainRedraw();
-	DrawMapBoundingBox( TRUE );
+	MapRedraw();
+	//DrawMapBoundingBox( TRUE );
 }
 
 

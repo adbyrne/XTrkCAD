@@ -1031,6 +1031,7 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	AuditTracks( "deleteTrack T%d", trk->index);
 	UndoDelete(trk);					/**< Attention: trk is invalidated during that call */
 	MainRedraw();
+	MapRedraw();
 	InfoCount( trackCount );
 	return TRUE;
 }
@@ -1582,6 +1583,7 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		if (action != C_UP)
 			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
         MainRedraw();
+        MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
@@ -2812,6 +2814,7 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 EXPORT void RedrawLayer( unsigned int l, BOOL_T draw )
 {
 	MainRedraw();
+	MapRedraw();
 
 }
 

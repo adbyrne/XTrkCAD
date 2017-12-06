@@ -199,6 +199,7 @@ STATUS_T BezierDescriptionMove(
             DrawLine( &mainD, xx->bezierData.pos[0], p0, 0, wDrawColorBlack );
         DrawBezierDescription( trk, &mainD, color );
         MainRedraw();
+        MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
