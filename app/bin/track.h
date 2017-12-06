@@ -92,6 +92,8 @@ typedef struct {
 		ANGLE_T cornuAngle[2];		//Angle at Cornu Ends
 		DIST_T cornuRadius[2];		//Radius at Cornu Ends
 		coOrd cornuCenter[2];		//Center at Cornu Ends
+		coOrd ttcenter;				//Turntable
+		DIST_T ttradius; 			//Turntable
 
 		} trackParams_t;
 

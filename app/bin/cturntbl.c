@@ -589,6 +589,26 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 	return C_ERROR;
 }
 
+EXPORT BOOL_T ConnectTurntableTracks(
+		track_p trk1,
+		EPINX_T ep1,
+		track_p trk2,
+		EPINX_T ep2 ) {
+	coOrd center, pos;
+	DIST_T radius;
+	ANGLE_T angle = ConstrainTurntableAngle( trk1, GetTrkEndPos(trk2,ep2) );
+	pos = GetTrkEndPos(trk2,ep2);
+	if (GetTrkEndAngle(trk2,ep2) - angle < connectAngle) {
+		TurntableGetCenter( trk1, &center, &radius );
+		if (FindDistance(center,pos)-radius < connectDistance) {
+			EPINX_T ep = NewTurntableEndPt(trk1,angle);
+			ConnectTracks( trk1, ep, trk2, ep2 );
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 
 static BOOL_T GetParamsTurntable( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
@@ -609,6 +629,8 @@ static BOOL_T GetParamsTurntable( int inx, track_p trk, coOrd pos, trackParams_t
 	params->lineEnd = params->lineOrig;
 	params->len = 0.0;
 	params->arcR = 0.0;
+	params->ttcenter = center;	//Turntable
+	params->ttradius = radius;	//Turntable
 	return TRUE;
 }
 

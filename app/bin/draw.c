@@ -930,7 +930,6 @@ static void SetInfoBar( void )
 				x += wControlGetWidth( curInfoControl[inx] )+3;
 				wControlShow( curInfoControl[inx], TRUE );
 			}
-			wBoxSetSize( infoD.info_b, infoD.info_w-c, boxH );
 			wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, ym );
 			wMessageSetWidth( infoD.info_m, infoD.info_w-six-c );
 		}

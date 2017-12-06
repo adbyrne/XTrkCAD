@@ -1311,7 +1311,7 @@ static STATUS_T CmdRotate(
 			if (SelectedTracksAreFrozen()) {
 				return C_TERMINATE;
 			}
-			InfoMessage( _("Drag to rotate selected tracks") );
+			InfoMessage( _("Drag to rotate selected tracks, SHIFT+RightClick for QuickRotate Menu") );
 			wMenuPushEnable( rotateAlignMI, TRUE );
 			rotateAlignState = 0;
 			break;
@@ -1325,6 +1325,18 @@ static STATUS_T CmdRotate(
 				drawnAngle = FALSE;
 				angle = 0;
 				base = orig = pos;
+				trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
+				if ((trk) &&
+					QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
+					trackParams_t trackParams;
+					if (GetTrackParams(PARAMS_CORNU, trk, pos, &trackParams)) {
+						DIST_T dist = FindDistance(base, trackParams.ttcenter);
+						if (dist < trackParams.ttradius/4) {
+								base = orig = trackParams.ttcenter;
+								InfoMessage( _("Center of Rotation snapped to Turntable center") );
+						}
+					}
+				}
 				GetMovedTracks(FALSE);
 				/*DrawLine( &mainD, base, orig, 0, wDrawColorBlack );
 				DrawMovedTracks(FALSE, orig, angle);*/
@@ -1451,6 +1463,18 @@ static STATUS_T CmdRotate(
 			return C_TERMINATE;
 
 		case C_CMDMENU:
+			base = pos;
+			trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
+			if ((trk) &&
+				QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
+				trackParams_t trackParams;
+				if (GetTrackParams(PARAMS_CORNU, trk, pos, &trackParams)) {
+					DIST_T dist = FindDistance(base, trackParams.ttcenter);
+					if (dist < trackParams.ttradius/4) {
+							cmdMenuPos = trackParams.ttcenter;
+					}
+				}
+			}
 			wMenuPopupShow( selectPopup2M );
 			return C_CONTINUE;
 

@@ -458,6 +458,10 @@ static void PullTracks(
 	if (ConnectAdjustableTracks( trk1, ep1, trk2, ep2 ))
 		return;
 
+	if (QueryTrack(trk1,Q_CAN_ADD_ENDPOINTS))
+		if (ConnectTurntableTracks(trk1, ep1, trk2, ep2 ))
+		return;
+
 	p1 = GetTrkEndPos( trk1, ep1 );
 	p2 = GetTrkEndPos( trk2, ep2 );
 	a1 = GetTrkEndAngle( trk1, ep1 );
@@ -591,12 +595,14 @@ static STATUS_T CmdPull(
 	static EPINX_T ep1;
 	track_p trk2;
 	EPINX_T ep2;
+	static BOOL_T turntable;
 
 	switch (action) {
 
 	case C_START:
 		InfoMessage( _("Select first End-Point to connect") );
 		trk1 = NULL;
+		turntable = FALSE;
 		return C_CONTINUE;
 
 	case C_LCLICK:
@@ -604,10 +610,14 @@ static STATUS_T CmdPull(
 			if (trk1 == NULL) {
 				if ((trk1 = OnTrack( &pos, TRUE, FALSE )) != NULL) {
 					if ((ep1 = PickUnconnectedEndPoint( pos, trk1 )) < 0) {
-						 trk1 = NULL;
+						if (QueryTrack(trk2, Q_CAN_ADD_ENDPOINTS)) {
+							turntable = TRUE;
+							ep1 = -1;
+						} else trk1 = NULL;
 					} else {
 						InfoMessage( _("Select second End-Point to connect") );
 					}
+
 				}
 			} else {
 				if ((trk2 = OnTrack( &pos, TRUE, FALSE )) != NULL) {
@@ -615,6 +625,15 @@ static STATUS_T CmdPull(
 						PullTracks( trk1, ep1, trk2, ep2 );
 						trk1 = NULL;
 						inError = TRUE;
+						return C_TERMINATE;
+					}
+					if (!turntable && QueryTrack(trk2, Q_CAN_ADD_ENDPOINTS)) {
+						ep2 = -1;
+						turntable = TRUE;
+						PullTracks( trk2, ep2, trk1, ep1);
+						trk1 = NULL;
+						inError = TRUE;
+						turntable = FALSE;
 						return C_TERMINATE;
 					}
 				}
