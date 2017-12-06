@@ -1972,6 +1972,18 @@ static STATUS_T CmdSelect(
 		if (selectedTrackCount <= 0) {
 			wMenuPopupShow( selectPopup1M );
 		} else {
+			coOrd base = pos;
+		    track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
+			if ((trk) &&
+				QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
+				trackParams_t trackParams;
+				if (GetTrackParams(PARAMS_CORNU, trk, pos, &trackParams)) {
+					DIST_T dist = FindDistance(base, trackParams.ttcenter);
+					if (dist < trackParams.ttradius/4) {
+							cmdMenuPos = trackParams.ttcenter;
+					}
+				}
+			}
 			wMenuPopupShow( selectPopup2M );
 		}
 		return C_CONTINUE;
