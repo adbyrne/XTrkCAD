@@ -862,7 +862,7 @@ static DIST_T GetLengthBezier( track_p trk )
 static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
 	int segInx;
-	BOOL_T back;
+	BOOL_T back,negative;
 	DIST_T d;
 
 	params->type = curveTypeBezier;
@@ -871,8 +871,8 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 	params->len = xx->bezierData.length;
 	params->track_angle = GetAngleSegs(		  						//Find correct Segment and nearest point in it
 					xx->bezierData.arcSegs.cnt,xx->bezierData.arcSegs.ptr,
-					&pos, &segInx, &d , &back, NULL, NULL );
-
+					&pos, &segInx, &d , &back, NULL, &negative );
+    if (negative) params->track_angle = NormalizeAngle(params->track_angle+180);  //Bezier is in reverse
 	trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->bezierData.arcSegs,segInx);
 	if (segPtr->type == SEG_STRLIN) {
 		params->arcR = 0.0;

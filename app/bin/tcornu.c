@@ -1004,6 +1004,7 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 							xx->cornuData.arcSegs.cnt,xx->cornuData.arcSegs.ptr,
 							&pos, &segInx, &d , &back, &segInx2, &negative );
 	trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->cornuData.arcSegs,segInx);
+	if (negative) params->track_angle = NormalizeAngle(params->track_angle+180);  //Cornu is in reverse
 	if (segPtr->type == SEG_STRTRK) {
 		params->arcR = 0.0;
 	} else  if (segPtr->type == SEG_CRVTRK) {
