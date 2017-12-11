@@ -1335,8 +1335,7 @@ void MainProc( wWin_p win, winProcEvent e, void * data )
 			MapRedraw();
 			wPrefSetInteger( "draw", "mainwidth", width );
 			wPrefSetInteger( "draw", "mainheight", height );
-		}
-		DrawMapBoundingBox( TRUE );
+		} else	DrawMapBoundingBox( TRUE );
 		break;
 	case wState_e:
 		wPrefSetInteger( "draw", "maximized", wWinIsMaximized(win) );
@@ -1795,7 +1794,7 @@ LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
 	/*SetFont(0);*/
 	sprintf( tmp, "%0.3f", mainD.scale );
 	wPrefSetString( "draw", "zoom", tmp );
-	DrawHilight( &mapD, mainD.orig, mainD.size );
+	//DrawHilight( &mapD, mainD.orig, mainD.size );
 	if (recordF) {
 		fprintf( recordF, "ORIG %0.3f %0.3f %0.3f\n",
 						mainD.scale, mainD.orig.x, mainD.orig.y );
