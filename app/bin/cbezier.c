@@ -673,27 +673,29 @@ EXPORT STATUS_T AdjustBezCurve(
 
 		DrawTempBezier(Da.track);  //wipe out
 
+		p = pos;
+
 		if (track && (Da.selectPoint == 0 || Da.selectPoint == 3)) {  //EPs
 			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Snap Track
-				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) { //Snap to endPoint
+				if ((t = OnTrackIgnore(&p, FALSE, TRUE, Da.selectTrack)) != NULL) { //Snap to endPoint
 					ep = PickUnconnectedEndPointSilent(p, t);
 					if (ep != -1) {
 						Da.trk[Da.selectPoint/3] = t;
 						Da.ep[Da.selectPoint/3] = ep;
+						pos0 = Da.pos[(Da.selectPoint == 0)?1:2];
 						pos = GetTrkEndPos(t, ep);
 						found = TRUE;
 					}
 				} else {
 					wBeep();
 					InfoMessage(_("No unconnected End Point to lock to"));
-					DrawTempBezier(Da.track);
 				}
 			}
 		}
 		if (found) {
-			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk[controlArm], Da.ep[controlArm]));
+			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk[Da.selectPoint/3], Da.ep[Da.selectPoint/3]));
 			angle2 = NormalizeAngle(FindAngle(pos, pos0)-angle1);
-			Translate(&Da.pos[Da.selectPoint==0?0:3], Da.pos[Da.selectPoint==0?0:3], angle1, -FindDistance(Da.pos[Da.selectPoint==0?0:3],pos)*cos(D2R(angle2)));
+			Translate(&Da.pos[Da.selectPoint==0?1:2], Da.pos[Da.selectPoint==0?0:3], angle1, FindDistance(Da.pos[Da.selectPoint==0?1:2],pos)*cos(D2R(angle2)));
 		}
 		Da.selectPoint = -1;
 		CreateBothControlArms(Da.selectPoint,track);

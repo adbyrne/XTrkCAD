@@ -2273,7 +2273,7 @@ void AttachTrains(void)
             trk = NULL;
             }
         if (trk==NULL || GetTrkDistance(trk,&pos)>trackGauge*2.0) {
-            trk = OnTrack2(&pos, FALSE, TRUE, FALSE);
+            trk = OnTrack2(&pos, FALSE, TRUE, FALSE, NULL);
         }
 
         if (trk!=NULL) {

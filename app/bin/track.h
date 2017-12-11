@@ -532,7 +532,8 @@ void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_p, DIST_T, wDraw
 ANGLE_T GetAngleAtPoint( track_p, coOrd, EPINX_T *, EPINX_T * );
 DIST_T GetTrkDistance( track_cp, coOrd *);
 track_p OnTrack( coOrd *, INT_T, BOOL_T );
-track_p OnTrack2( coOrd *, INT_T, BOOL_T, BOOL_T );
+track_p OnTrackIgnore(coOrd *, INT_T, BOOL_T , track_p );
+track_p OnTrack2( coOrd *, INT_T, BOOL_T, BOOL_T, track_p );
 
 void ComputeRectBoundingBox( track_p, coOrd, coOrd );
 void ComputeBoundingBox( track_p );

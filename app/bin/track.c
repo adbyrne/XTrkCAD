@@ -147,7 +147,7 @@ EXPORT DIST_T GetTrkDistance( track_cp trk, coOrd * pos )
  * \return   NULL if there is no track, pointer to track otherwise 
  */
 
-EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignoreHidden )
+EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignoreHidden, track_p t )
 {
 	track_p trk;
 	DIST_T distance, closestDistance = 1000000;
@@ -162,6 +162,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 	TRK_ITERATE( trk ) {
 		if ( track && !IsTrack(trk) )
 			continue;
+		if (trk == t) continue;
 		if (trk->hi.x < q0.x ||
 			trk->lo.x > q1.x ||
 			trk->hi.y < q0.y ||
@@ -200,7 +201,11 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 
 EXPORT track_p OnTrack( coOrd * fp, BOOL_T complain, BOOL_T track )
 {
-	return OnTrack2( fp, complain, track, TRUE );
+	return OnTrack2( fp, complain, track, TRUE, NULL );
+}
+
+EXPORT track_p OnTrackIgnore (coOrd * fp, BOOL_T complain, BOOL_T track, track_p t ) {
+	return OnTrack2(fp, complain, track, TRUE, t);
 }
 
 
