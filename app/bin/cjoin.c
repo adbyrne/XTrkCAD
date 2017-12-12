@@ -671,6 +671,11 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 				d = Dj.inp[0].params.arcR * a1 * 2.0*M_PI/360.0;
 			}
 			break;
+		case curveTypeCornu:
+		case curveTypeBezier:
+		case curveTypeNone:
+			InfoMessage( _("First Track Type not supported for non-Cornu Join") );
+			goto errorReturn;
 		default:
 			AbortProg( "cmdJoin - unknown type[0]" );
 		}
@@ -698,6 +703,11 @@ LOG( log_join, 3, (" -E   POS0=[%0.3f %0.3f] POS1=[%0.3f %0.3f]\n",
 				d = Dj.inp[1].params.arcR * a1 * 2.0*M_PI/360.0;
 			}
 			break;
+		case curveTypeCornu:
+		case curveTypeBezier:
+		case curveTypeNone:
+			InfoMessage( _("Second Track Type not supported for non-Cornu Join") );
+			goto errorReturn;
 		default:
 			AbortProg( "cmdJoin - unknown type[1]" );
 		}
