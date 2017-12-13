@@ -87,6 +87,7 @@ typedef struct {
 		ANGLE_T arcA0, arcA1;		//Start angle and angular length (clockwise)
 		long helixTurns;
 		ANGLE_T	track_angle;
+		BOOL_T circleOrHelix;		//Track is circle or Helix
 		coOrd bezierPoints[4];		//Bezier Ends and CPs
 		coOrd cornuEnd[2];			//Cornu Ends
 		ANGLE_T cornuAngle[2];		//Angle at Cornu Ends
@@ -119,6 +120,7 @@ typedef struct {
 #define Q_MODIFY_CANT_SPLIT             (20)	// Is not able to be Split
 #define Q_CAN_EXTEND					(21)    // Add extra curve or straight in CORNU MODIFY
 #define Q_CAN_ADD_ENDPOINTS             (22)    // Is T_TURNTABLE
+#define Q_HAS_VARIABLE_ENDPOINTS        (23)    // Is Helix or Circle
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track

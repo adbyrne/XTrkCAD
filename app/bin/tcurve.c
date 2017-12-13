@@ -1196,9 +1196,13 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 			params->arcA1 = 360.0;
 		}
 	} else {
-		if ( IsCurveCircle( trk ) )
+		params->circleOrHelix = FALSE;
+		if ( IsCurveCircle( trk ) ) {
 			params->ep = PickArcEndPt( params->arcP, /*Dj.inp[0].*/pos, pos );
-		else if (inx == PARAMS_CORNU ) {
+			params->angle = params->track_angle;
+			params->circleOrHelix = TRUE;
+			return TRUE;
+		} else if (inx == PARAMS_CORNU ) {
 			params->ep = PickEndPoint(pos, trk);
 		} else {
 			params->ep = PickUnconnectedEndPointSilent( pos, trk );
@@ -1248,6 +1252,9 @@ static BOOL_T QueryCurve( track_p trk, int query )
 	case Q_CAN_EXTEND:
 		if (xx->helixTurns > 0) return FALSE;
 		return TRUE;
+	case Q_HAS_VARIABLE_ENDPOINTS:
+		if ((xx->helixTurns >0) || xx->circle) return TRUE;
+		return FALSE;
 	default:
 		return FALSE;
 	}
