@@ -64,7 +64,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		Dl.trk = NULL;
 		if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
 			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
-			   EPINX_T ep = PickUnconnectedEndPoint(p, t);
+			   EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 			   if (ep != -1) {
 			   		Dl.trk = t;
 			   		Dl.ep = ep;

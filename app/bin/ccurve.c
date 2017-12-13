@@ -144,7 +144,7 @@ EXPORT STATUS_T CreateCurve(
 		    Da.trk = NULL;	    
 			if ((mode == crvCmdFromEP1 || mode == crvCmdFromTangent) && track && (MyGetKeyState() & WKEY_SHIFT) != 0) {
 				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
-			   		EPINX_T ep = PickUnconnectedEndPoint(p, t);
+			   		EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 			   		if (ep != -1) {
 			   			Da.trk = t;
 			   			Da.ep = ep;
