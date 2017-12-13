@@ -432,6 +432,24 @@ void CorrectHelixAngles() {
 	}
 }
 
+BOOL_T CheckHelix(track_p trk) {
+	if ( QueryTrack(Da.trk[0],Q_HAS_VARIABLE_ENDPOINTS)) {
+		track_p t = GetTrkEndTrk(Da.trk[0],Da.ep[0]);
+		if ( t != NULL && t != trk)  {
+			ErrorMessage( MSG_TRK_ALREADY_CONN, _("First") );
+			return FALSE;
+		}
+	}
+	if ( QueryTrack(Da.trk[1],Q_HAS_VARIABLE_ENDPOINTS)) {
+		track_p t = GetTrkEndTrk(Da.trk[1],Da.ep[1]);
+		if ( t != NULL && t != trk)  {
+			ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
 void SetUpCornuParms(cornuParm_t * cp) {
 		cp->center[0] = Da.center[0];
 		cp->angle[0] = Da.angle[0];
@@ -590,6 +608,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			if (inside) Da.pos[sel] = pos;
 			if (!GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel])) {
 				DrawTempCornu();
+				wBeep();
 				return C_CONTINUE;											//Stop drawing
 			}
 			CorrectHelixAngles();
@@ -693,6 +712,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 			if (CornuTotalWindingArc(Da.pos,Da.crvSegs_da)>4*360) {
 				wBeep();
 				InfoMessage(_("Cornu has too complex shape - adjust end pts"));
+				return C_CONTINUE;
+			}
+			if (!CheckHelix(NULL)) {
+				wBeep();
 				return C_CONTINUE;
 			}
 			DrawTempCornu();
@@ -828,6 +851,10 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 			Da.state = NONE;
 			return C_CANCEL;
 		}
+		if (!CheckHelix(trk)) {
+			wBeep();
+			return C_CONTINUE;
+		}
 		UndoStart( _("Modify Cornu"), "newCornu - CR" );
 		for (int i=0;i<2;i++) {
 			if (!Da.trk[i] && Da.extend[i]) {
@@ -850,6 +877,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 
 			}
 		}
+
 		t = NewCornuTrack( Da.pos, Da.center, Da.angle, Da.radius, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt);
 		if (t==NULL) {
 			wBeep();
@@ -1064,14 +1092,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 					return C_CONTINUE;
 				}
 				CorrectHelixAngles();
-				if ( QueryTrack(Da.trk[0],Q_HAS_VARIABLE_ENDPOINTS) && (GetTrkEndTrk(Da.trk[0],Da.ep[0]) != NULL)) {
-					ErrorMessage( MSG_TRK_ALREADY_CONN, _("First") );
-					return C_CONTINUE;
-				}
-				if ( QueryTrack(Da.trk[1],Q_HAS_VARIABLE_ENDPOINTS) && (GetTrkEndTrk(Da.trk[1],Da.ep[1]) != NULL)) {
-					ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
-					return C_CONTINUE;
-				}
 				Da.selectPoint = 1;
 				Da.state = POINT_PICKED;
 				DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,drawColorBlack); //Wipe out initial Arm
@@ -1114,7 +1134,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.selectPoint = 1;
 				return C_CONTINUE;
 			}
-			CorrectHelixAngles();
 			Da.pos[ep] = pos;
 			Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],TRUE,!QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT));
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,drawColorBlack);
