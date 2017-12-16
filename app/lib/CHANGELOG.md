@@ -6,9 +6,30 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-###Fixed
+### Added
+
+### Fixed
+
+## [5.0.0.beta4]
+
+### Added
++ Lock center of rotation to center of turntable if within 1/4 of turntable radius when clicked
++ Allow Connect Two Tracks to connect correctly aligned stall tracks to a turntable like normal tracks
++ Add Precise Move Right-Click submenu
++ Additional German translations
+
+### Fixed
 + Linux/OSX: Fix Note invisibility
 + Linux: FIX RPM dependencies for browser builds
++ Linux/OSX: Fixed invisibility of Note icon on trackplan
++ Fixed crash in demo mode
++ Update copyright notice in About dialog
++ Cope with larger system fonts set by user
++ Linux/OSX: Make sure the draw area and the message are correctly placed after redraw
++ Fix Abend in Train with Car Label Display enabled
++ Allow Cornu Join to work on Circles and Helixes
++ Fix Layers Abend
++ Update map window after Quick Move and Quick Rotate
 
 ## [5.0.0.beta3]
 
