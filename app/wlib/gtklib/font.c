@@ -86,7 +86,7 @@ static void fontSelectionDialogCallback(GtkFontSelectionDialog
                                         *fontSelectionDialog, gint response, gpointer data)
 {
     if (response == GTK_RESPONSE_APPLY || response == GTK_RESPONSE_OK) {
-		gchar *fontName;
+        gchar *fontName;
 
         fontName = gtk_font_selection_dialog_get_font_name(fontSelectionDialog);
         wPrefSetString("font", "name", fontName);
@@ -215,12 +215,13 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
     pango_layout_set_font_description(layout, fontDescription);
     /* get layout measures */
     pango_layout_get_pixel_size(layout, width_p, height_p);
-    context = gtk_widget_get_pango_context(widget);
+    context = gtk_widget_create_pango_context(widget);
     metrics = pango_context_get_metrics(context, fontDescription,
                                         pango_context_get_language(context));
     *ascent_p  = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
     *descent_p = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
     pango_font_metrics_unref(metrics);
+    g_object_unref(context);
 #if WLIB_FONT_DEBUG >= 3
     fprintf(stderr, "font layout created:\n");
     fprintf(stderr, "  widget:         %p\n", widget);
@@ -286,7 +287,7 @@ void wSelectFont(
     gtk_window_set_title(GTK_WINDOW(fontSelectionDialog), title);
 
     if (curFont != NULL) {
-		gchar *fontName;
+        gchar *fontName;
 
         /* the curFont description contains the latest font info
          * which is depended on the current scale

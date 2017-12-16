@@ -63,7 +63,7 @@ void wMessageSetValue(
         abort();
     }
 
-    gtk_label_set_text(GTK_LABEL(b->labelWidget), wlibConvertInput(arg));
+    gtk_entry_set_text(GTK_ENTRY(b->labelWidget), wlibConvertInput(arg));
 }
 
 /**
@@ -92,37 +92,42 @@ void wMessageSetWidth(
 wPos_t wMessageGetHeight(
     long flags)
 {
-	GtkWidget * temp;
-	if (!(flags&COMBOBOX))
-		temp = gtk_label_new("Test");	 //To get size of text itself
-	else
-		temp = gtk_combo_box_text_new(); //to get max size of an object in infoBar
+    GtkWidget * temp;
 
-	if (wMessageSetFont(flags))	{
-		GtkStyle *style;
-		PangoFontDescription *fontDesc;
-		int fontSize;
-	    /* get the current font descriptor */
-	   style = gtk_widget_get_style(temp);
-	   fontDesc = style->font_desc;
-	   /* get the current font size */
-	   fontSize = PANGO_PIXELS(pango_font_description_get_size(fontDesc));
+    if (!(flags&COMBOBOX)) {
+        temp = gtk_entry_new();    //To get size of text itself
+    } else {
+        temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
+    }
 
-	   /* calculate the new font size */
-	   if (flags & BM_LARGE) {
-	       pango_font_description_set_size(fontDesc, fontSize * 1.4 * PANGO_SCALE);
-	   } else {
-	       pango_font_description_set_size(fontDesc, fontSize * 0.7 * PANGO_SCALE);
-	   }
+    if (wMessageSetFont(flags))	{
+        GtkStyle *style;
+        PangoFontDescription *fontDesc;
+        int fontSize;
+        /* get the current font descriptor */
+        style = gtk_widget_get_style(temp);
+        fontDesc = style->font_desc;
+        /* get the current font size */
+        fontSize = PANGO_PIXELS(pango_font_description_get_size(fontDesc));
 
-	   /* set the new font size */
-	   gtk_widget_modify_font(temp, fontDesc);
-	}
-	if (flags&1L)
-		gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
-	GtkRequisition temp_requisition;
-	gtk_widget_size_request(temp,&temp_requisition);
-	gtk_widget_destroy(temp);
+        /* calculate the new font size */
+        if (flags & BM_LARGE) {
+            pango_font_description_set_size(fontDesc, fontSize * 1.4 * PANGO_SCALE);
+        } else {
+            pango_font_description_set_size(fontDesc, fontSize * 0.7 * PANGO_SCALE);
+        }
+
+        /* set the new font size */
+        gtk_widget_modify_font(temp, fontDesc);
+    }
+
+    if (flags&1L) {
+        gtk_combo_box_text_append_text(GTK_COMBO_BOX_TEXT(temp),"Test");
+    }
+
+    GtkRequisition temp_requisition;
+    gtk_widget_size_request(temp,&temp_requisition);
+    gtk_widget_destroy(temp);
     return temp_requisition.height;
 }
 
@@ -139,7 +144,7 @@ wPos_t wMessageGetHeight(
  * \return handle for created window
  */
 
- wMessage_p wMessageCreateEx(
+wMessage_p wMessageCreateEx(
     wWin_p	parent,
     wPos_t	x,
     wPos_t	y,
@@ -157,7 +162,10 @@ wPos_t wMessageGetHeight(
     wlibComputePos((wControl_p)b);
     b->message = message;
     b->labelWidth = width;
-    b->labelWidget = gtk_label_new(message?wlibConvertInput(message):"");
+    b->labelWidget = gtk_entry_new();
+    gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
+    gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
+                       message?wlibConvertInput(message):"");
 
     /* do we need to set a special font? */
     if (wMessageSetFont(flags))	{
