@@ -44,7 +44,7 @@ static wPos_t describeW_posy;
 static wPos_t describeCmdButtonEnd;
 
 static unsigned int editableLayerList[NUM_LAYERS];		/**< list of non-frozen layers */
-static int *layerValue;								/**< pointer to current layer value */
+static int * layerValue;								/**pointer to current Layer (int *) */
 
 static paramFloatRange_t rdata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
 static paramIntegerRange_t idata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
@@ -283,9 +283,10 @@ static void DescOk(void * junk)
     if (descTrk) {
         DrawDescHilite();
     }
-
-    *layerValue = GetTrkLayer(descTrk);
-    SetTrkLayer(descTrk, editableLayerList[*layerValue]);
+    if (layerValue && *layerValue>=0) {
+    	SetTrkLayer(descTrk, editableLayerList[*layerValue]);  //int found that is really in the parm controls.
+    }
+    layerValue = NULL; 									   // wipe out reference
     descUpdateFunc(descTrk, -1, descData, !descUndoStarted);
     descTrk = NULL;
 
