@@ -903,17 +903,26 @@ static BOOL_T QueryBezier( track_p trk, int query )
 	switch ( query ) {
 	case Q_CAN_GROUP:
 		return FALSE;
+		break;
 	case Q_FLIP_ENDPTS:
 	case Q_HAS_DESC:
 		return TRUE;
+		break;
 	case Q_EXCEPTION:
 		return GetTrkType(trk) == T_BEZIER?xx->bezierData.minCurveRadius < GetLayoutMinTrackRadius():FALSE;
+		break;
 	case Q_CAN_MODIFY_CONTROL_POINTS:
 		return TRUE;
+		break;
+	case Q_CANNOT_PLACE_TURNOUT:
+		return TRUE;
+		break;
 	case Q_ISTRACK:
 		return GetTrkType(trk) == T_BEZIER?TRUE:FALSE;
+		break;
 	case Q_CAN_PARALLEL:
 		return (GetTrkType(trk) == T_BEZIER);
+		break;
 	default:
 		return FALSE;
 	}
@@ -943,8 +952,9 @@ static ANGLE_T GetAngleBezier(
 {
 	struct extraData * xx = GetTrkExtraData(trk);
 	ANGLE_T angle;
+	BOOL_T back, neg;
 	int indx;
-	angle = GetAngleSegs( xx->bezierData.arcSegs.cnt, (trkSeg_p)xx->bezierData.arcSegs.ptr, &pos, &indx, NULL, NULL, NULL, NULL );
+	angle = GetAngleSegs( xx->bezierData.arcSegs.cnt, (trkSeg_p)xx->bezierData.arcSegs.ptr, &pos, &indx, NULL, &back, NULL, &neg );
 	if ( ep0 ) *ep0 = -1;
 	if ( ep1 ) *ep1 = -1;
 	return angle;
