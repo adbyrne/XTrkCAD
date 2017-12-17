@@ -1053,22 +1053,31 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	switch ( query ) {
 	case Q_CAN_GROUP:
 		return FALSE;
+		break;
 	case Q_FLIP_ENDPTS:
 	case Q_HAS_DESC:
 		return TRUE;
+		break;
 	case Q_EXCEPTION:
 		return xx->cornuData.minCurveRadius < GetLayoutMinTrackRadius();
+		break;
 	case Q_IS_CORNU:
 		return TRUE;
+		break;
 	case Q_ISTRACK:
 		return TRUE;
+		break;
 	case Q_CAN_PARALLEL:
+		return TRUE;
+		break;
 	// case Q_MODIFY_CANT_SPLIT: Remove Split Restriction
 	// case Q_CANNOT_BE_ON_END: Remove Restriction - Can have Cornu with no ends
 	case Q_CANNOT_PLACE_TURNOUT:
 		return TRUE;
+		break;
 	case Q_IGNORE_EASEMENT_ON_EXTEND:
 		return TRUE;
+		break;
 	default:
 		return FALSE;
 	}
@@ -1100,8 +1109,9 @@ static ANGLE_T GetAngleCornu(
 {
 	struct extraData * xx = GetTrkExtraData(trk);
 	ANGLE_T angle;
+	BOOL_T back, neg;
 	int indx;
-	angle = GetAngleSegs( xx->cornuData.arcSegs.cnt, (trkSeg_p)xx->cornuData.arcSegs.ptr, &pos, &indx, NULL, NULL, NULL, NULL );
+	angle = GetAngleSegs( xx->cornuData.arcSegs.cnt, (trkSeg_p)xx->cornuData.arcSegs.ptr, &pos, &indx, NULL, &back, NULL, &neg );
 	if ( ep0 ) *ep0 = -1;
 	if ( ep1 ) *ep1 = -1;
 	return angle;

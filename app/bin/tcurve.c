@@ -1245,16 +1245,24 @@ static BOOL_T QueryCurve( track_p trk, int query )
 	case Q_ISTRACK:
 	case Q_HAS_DESC:
 		return TRUE;
+		break;
 	case Q_EXCEPTION:
 		return xx->radius < GetLayoutMinTrackRadius();
+		break;
 	case Q_NOT_PLACE_FROGPOINTS:
 		return IsCurveCircle( trk );
+		break;
 	case Q_CAN_EXTEND:
 		if (xx->helixTurns > 0) return FALSE;
 		return TRUE;
+		break;
+	case Q_CANNOT_PLACE_TURNOUT:
+		return (xx->helixTurns > 0);
+		break;
 	case Q_HAS_VARIABLE_ENDPOINTS:
 		if ((xx->helixTurns >0) || xx->circle) return TRUE;
 		return FALSE;
+		break;
 	default:
 		return FALSE;
 	}
