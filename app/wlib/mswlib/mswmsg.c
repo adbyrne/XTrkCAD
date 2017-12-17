@@ -121,6 +121,10 @@ void wMessageSetWidth(
 #endif
 }
 
+wPos_t wMessageGetWidth(const char *string)
+{
+	return(wLabelWidth(string));
+}
 
 wPos_t wMessageGetHeight( long flags )
 {
