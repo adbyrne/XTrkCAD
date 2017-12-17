@@ -21,6 +21,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -62,7 +63,8 @@ void wMessageSetValue(
     if (b->widget == 0) {
         abort();
     }
-
+    gtk_entry_set_max_length( GTK_ENTRY(b->labelWidget), strlen(arg));
+    gtk_entry_set_width_chars( GTK_ENTRY(b->labelWidget), strlen(arg));
     gtk_entry_set_text(GTK_ENTRY(b->labelWidget), wlibConvertInput(arg));
 }
 
@@ -96,6 +98,7 @@ wPos_t wMessageGetHeight(
 
     if (!(flags&COMBOBOX)) {
         temp = gtk_entry_new();    //To get size of text itself
+        gtk_entry_set_has_frame( GTK_ENTRY(temp), FALSE);
     } else {
         temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
     }
@@ -164,9 +167,9 @@ wMessage_p wMessageCreateEx(
     b->labelWidth = width;
     b->labelWidget = gtk_entry_new();
     gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
+    gtk_entry_set_has_frame( GTK_ENTRY(b->labelWidget), FALSE);
     gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
                        message?wlibConvertInput(message):"");
-
     /* do we need to set a special font? */
     if (wMessageSetFont(flags))	{
         /* get the current font descriptor */
@@ -187,10 +190,7 @@ wMessage_p wMessageCreateEx(
     }
 
     b->widget = gtk_fixed_new();
-    gtk_widget_size_request(GTK_WIDGET(b->labelWidget), &requisition);
     gtk_container_add(GTK_CONTAINER(b->widget), b->labelWidget);
-    gtk_widget_set_size_request(b->widget, width?width:requisition.width,
-                                requisition.height);
     wlibControlGetSize((wControl_p)b);
     gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
     gtk_widget_show(b->widget);
@@ -204,3 +204,20 @@ wMessage_p wMessageCreateEx(
 
     return b;
 }
+
+wPos_t
+wMessageGetWidth( const char *testString ) {
+    GtkWidget *entry;
+    GtkRequisition requisition;
+    
+    entry = gtk_entry_new();
+    gtk_entry_set_has_frame( GTK_ENTRY(entry), FALSE);
+    gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
+    gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
+    
+    gtk_widget_size_request(entry, &requisition);
+    gtk_widget_destroy(entry);
+    
+    return( requisition.width+8 );
+}
+    

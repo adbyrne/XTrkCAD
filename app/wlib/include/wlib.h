@@ -385,6 +385,7 @@ wMessage_p wMessageCreateEx(	wWin_p, wPos_t, wPos_t, const char *,
 
 void wMessageSetValue(		wMessage_p, const char * );
 void wMessageSetWidth(		wMessage_p, wPos_t );
+wPos_t wMessageGetWidth( const char *testString );
 wPos_t wMessageGetHeight( long );
 
 

@@ -832,9 +832,9 @@ static wPos_t GetInfoPosWidth( void )
 				dist = 9.0*12.0+11.0+3.0/4.0-1.0/64.0;
 		}
 		
-		labelWidth = (wLabelWidth( xLabel ) > wLabelWidth( yLabel ) ? wLabelWidth( xLabel ):wLabelWidth( yLabel ));
+		labelWidth = (wMessageGetWidth( xLabel ) > wMessageGetWidth( yLabel ) ? wMessageGetWidth( xLabel ):wMessageGetWidth( yLabel ));
 			
-		return wLabelWidth( FormatDistance(dist) ) + labelWidth;
+		return wMessageGetWidth( FormatDistance(dist) ) + labelWidth;
 }
 
 /**
@@ -855,7 +855,7 @@ EXPORT void InitInfoBar( void )
 #endif
 
 	infoD.pos_w = GetInfoPosWidth() + 2;
-	infoD.scale_w = wLabelWidth( "999:1" ) + wLabelWidth( zoomLabel ) + 6;
+	infoD.scale_w = wMessageGetWidth( "999:1" ) + wMessageGetWidth( zoomLabel ) + 6;
 	/* we do not use the count label for the moment */
 	infoD.count_w = 0;
 	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 45;      // Allow Window to resize down
