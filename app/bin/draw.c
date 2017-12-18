@@ -797,6 +797,8 @@ static wPos_t info_yb_offset = 2;
 static wPos_t info_ym_offset = 3;
 static wPos_t six = 2;
 static wPos_t info_xm_offset = 2;
+static wPos_t messageOrControlX = 0;
+static wPos_t messageOrControlY = 0;
 #define NUM_INFOCTL				(4)
 static wControl_p curInfoControl[NUM_INFOCTL];
 static wPos_t curInfoLabelWidth[NUM_INFOCTL];
@@ -875,9 +877,12 @@ EXPORT void InitInfoBar( void )
 		infoD.posY_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
 		infoD.posY_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosY", infoD.pos_w-six, yLabel );
 		x += infoD.pos_w + 10;
+		messageOrControlX = x+info_xm_offset;									//Remember Position
+		messageOrControlY = ym;
 		infoD.info_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.info_w, boxH );
 		infoD.info_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarStatus", infoD.info_w-six, "" );
 }
+
 
 
 static void SetInfoBar( void )
@@ -918,19 +923,17 @@ static void SetInfoBar( void )
 		wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, ym );
 		wBoxSetSize( infoD.info_b, infoD.info_w, boxH );
 		wMessageSetWidth( infoD.info_m, infoD.info_w-six );
+		messageOrControlX = x+info_xm_offset;
+		messageOrControlY = ym;
 		if (curInfoControl[0]) {
-			x = wControlGetPosX( (wControl_p)infoD.info_m );
-#ifndef WINDOWS
-			yb -= 2;
-#endif
-			int c = x;
 			for ( inx=0; curInfoControl[inx]; inx++ ) {
 				x += curInfoLabelWidth[inx];
-				wControlSetPos( curInfoControl[inx], x, yb );
+				int y_this = ym + (textHeight/2) - (wControlGetHeight( curInfoControl[inx] )/2);
+				wControlSetPos( curInfoControl[inx], x, y_this );
 				x += wControlGetWidth( curInfoControl[inx] )+3;
 				wControlShow( curInfoControl[inx], TRUE );
 			}
-			wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, ym );
+			wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, ym );  //Move to end
 		}
 }
 
@@ -986,23 +989,19 @@ EXPORT void InfoSubstituteControls(
 		memcpy( deferSubstituteLabels, labels, sizeof deferSubstituteLabels );
 	}
 	if ( inError || controls == NULL || controls[0]==NULL ) {
+		wControlSetPos( (wControl_p)infoD.info_m, messageOrControlX, messageOrControlY);
 		wControlShow( (wControl_p)infoD.info_m, TRUE );
 		return;
 	}
-	x = wControlGetPosX( (wControl_p)infoD.info_m );
-	y = wControlGetPosY( (wControl_p)infoD.info_m );
-	int y_max = wControlGetHeight( (wControl_p)infoD.info_m );
-#ifndef WINDOWS
-	y -= 3;
-#endif
+	//x = wControlGetPosX( (wControl_p)infoD.info_m );
+	x = messageOrControlX;
+	y = messageOrControlY;
 	wMessageSetValue( infoD.info_m, "" );
 	wControlShow( (wControl_p)infoD.info_m, FALSE );
 	for ( inx=0; controls[inx]; inx++ ) {
 		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
 		x += curInfoLabelWidth[inx];
-		int y_this = y;
-		if (y_max < wControlGetHeight( controls[inx] ))
-			y_this = y - (wControlGetHeight( controls[inx] ) - y_max)/2;
+		int	y_this = y + (textHeight/2) - (wControlGetHeight( controls[inx] )/2);
 		wControlSetPos( controls[inx], x, y_this );
 		x += wControlGetWidth( controls[inx] );
 		wControlSetLabel( controls[inx], _(labels[inx]) );
@@ -1010,6 +1009,7 @@ EXPORT void InfoSubstituteControls(
 		curInfoControl[inx] = controls[inx];
 		x += 3;
 	}
+	wControlSetPos( (wControl_p)infoD.info_m, x, y );
 	curInfoControl[inx] = NULL;
 	deferSubstituteControls[0] = NULL;
 }
