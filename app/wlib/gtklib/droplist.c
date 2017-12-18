@@ -416,7 +416,7 @@ wList_p wDropListCreate(
     if (b->widget == 0) {
         abort();
     }
-
+    g_object_ref_sink(b->listStore);
     g_object_unref(G_OBJECT(b->listStore));
 
     wlibDropListAddColumns(b->widget, DROPLIST_TEXTCOLUMNS);

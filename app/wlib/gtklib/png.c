@@ -59,6 +59,7 @@ wBool_t wBitMapWriteFile(wDraw_p d, const char * fileName)
         return FALSE;
     }
 
+    g_object_ref_sink(pixbuf);
     g_object_unref(pixbuf);
     return TRUE;
 }

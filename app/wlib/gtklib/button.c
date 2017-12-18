@@ -101,8 +101,8 @@ void wlibSetLabel(
             } else {
                 gtk_image_set_from_pixbuf(GTK_IMAGE(*imageG), pixbuf);
             }
-
-            g_object_unref(pixbuf);
+            g_object_ref_sink(pixbuf);
+            g_object_unref((gpointer)pixbuf);
         } else {
             if (*labelG==NULL) {
                 *labelG = (GtkLabel*)gtk_label_new(wlibConvertInput(labelStr));

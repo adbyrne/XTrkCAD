@@ -221,6 +221,7 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
     *ascent_p  = PANGO_PIXELS(pango_font_metrics_get_ascent(metrics));
     *descent_p = PANGO_PIXELS(pango_font_metrics_get_descent(metrics));
     pango_font_metrics_unref(metrics);
+    g_object_ref_sink(context);
     g_object_unref(context);
 #if WLIB_FONT_DEBUG >= 3
     fprintf(stderr, "font layout created:\n");
@@ -243,7 +244,8 @@ PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget,
 
 void wlibFontDestroyPangoLayout(PangoLayout *layout)
 {
-    g_object_unref(G_OBJECT(layout));
+    g_object_ref_sink(layout);
+	g_object_unref(layout);
 }
 
 /**

@@ -212,6 +212,7 @@ void
 wlibListStoreSetPixbuf(GtkListStore *ls, GtkTreeIter *iter, GdkPixbuf *pixbuf)
 {
     gtk_list_store_set(ls, iter, LISTCOL_BITMAP, pixbuf, -1);
+    g_object_ref_sink(pixbuf);
     g_object_unref(pixbuf);
 }
 /**

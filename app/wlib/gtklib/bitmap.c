@@ -67,6 +67,7 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
 	
 	/* create the bitmap from supplied xpm data */
 	pixbuf = gdk_pixbuf_new_from_xpm_data( (const char **)iconP->bits );
+	g_object_ref_sink(pixbuf);
 	image = gtk_image_new_from_pixbuf( pixbuf );
 	gtk_widget_show( image );
 	g_object_unref( (gpointer)pixbuf );

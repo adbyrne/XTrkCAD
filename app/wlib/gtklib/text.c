@@ -365,7 +365,7 @@ wBool_t wTextPrint(
         gtk_dialog_run(GTK_DIALOG(dialog));
         gtk_widget_destroy(dialog);
     }
-
+    g_object_ref_sink(operation);
     g_object_unref(operation);
     return TRUE;
 }

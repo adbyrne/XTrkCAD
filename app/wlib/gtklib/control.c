@@ -109,7 +109,9 @@ wPos_t wLabelWidth(
     GtkRequisition requisition;
     widget = gtk_label_new(wlibConvertInput(label));
     gtk_widget_size_request(widget, &requisition);
+    g_object_ref_sink (widget);
     gtk_widget_destroy(widget);
+    g_object_unref(widget);
     return requisition.width+8;
 }
 

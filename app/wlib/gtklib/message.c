@@ -130,7 +130,9 @@ wPos_t wMessageGetHeight(
 
     GtkRequisition temp_requisition;
     gtk_widget_size_request(temp,&temp_requisition);
+    g_object_ref_sink(temp);
     gtk_widget_destroy(temp);
+    g_object_unref(temp);
     return temp_requisition.height;
 }
 
