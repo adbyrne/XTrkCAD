@@ -63,8 +63,12 @@ void wMessageSetValue(
     if (b->widget == 0) {
         abort();
     }
-    gtk_entry_set_max_length( GTK_ENTRY(b->labelWidget), strlen(arg));
-    gtk_entry_set_width_chars( GTK_ENTRY(b->labelWidget), strlen(arg));
+
+    if (gtk_entry_get_max_length(GTK_ENTRY(b->labelWidget))<strlen(arg)) {
+        gtk_entry_set_max_length(GTK_ENTRY(b->labelWidget), strlen(arg));
+        gtk_entry_set_width_chars(GTK_ENTRY(b->labelWidget), strlen(arg));
+    }
+
     gtk_entry_set_text(GTK_ENTRY(b->labelWidget), wlibConvertInput(arg));
 }
 
@@ -98,7 +102,7 @@ wPos_t wMessageGetHeight(
 
     if (!(flags&COMBOBOX)) {
         temp = gtk_entry_new();    //To get size of text itself
-        gtk_entry_set_has_frame( GTK_ENTRY(temp), FALSE);
+        gtk_entry_set_has_frame(GTK_ENTRY(temp), FALSE);
     } else {
         temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
     }
@@ -169,9 +173,11 @@ wMessage_p wMessageCreateEx(
     b->labelWidth = width;
     b->labelWidget = gtk_entry_new();
     gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
-    gtk_entry_set_has_frame( GTK_ENTRY(b->labelWidget), FALSE);
+    gtk_entry_set_has_frame(GTK_ENTRY(b->labelWidget), FALSE);
+    gtk_widget_set_can_focus(b->labelWidget, FALSE);
     gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
                        message?wlibConvertInput(message):"");
+
     /* do we need to set a special font? */
     if (wMessageSetFont(flags))	{
         /* get the current font descriptor */
@@ -207,19 +213,31 @@ wMessage_p wMessageCreateEx(
     return b;
 }
 
+/**
+ * Get the anticipated length of a message field
+ *
+ * \param testString IN string that should fit into the message box
+ * \return expected width of message box
+ */
+
 wPos_t
-wMessageGetWidth( const char *testString ) {
+wMessageGetWidth(const char *testString)
+{
     GtkWidget *entry;
     GtkRequisition requisition;
-    
+
     entry = gtk_entry_new();
-    gtk_entry_set_has_frame( GTK_ENTRY(entry), FALSE);
+    g_object_ref_sink(entry);
+
+    gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
     gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
     gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
-    
+
     gtk_widget_size_request(entry, &requisition);
+
     gtk_widget_destroy(entry);
-    
-    return( requisition.width+8 );
+    g_object_unref(entry);
+
+    return (requisition.width+8);
 }
-    
+
