@@ -101,6 +101,13 @@ typedef struct {
 				abort(); \
 		} \
 		(DA).cnt = N; }
+#define DYNARR_FREE(T,DA) \
+		{ if ((DA).ptr) { \
+			MyFree( (DA).ptr); \
+			(DA).ptr = NULL; \
+		} \
+		(DA).max = 0; \
+		(DA).cnt = 0; }
 
 #ifdef WINDOWS
 #ifdef FAR

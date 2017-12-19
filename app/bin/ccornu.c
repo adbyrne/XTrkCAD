@@ -849,6 +849,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		if (Da.state != PICK_POINT) {										//Too early - abandon
 			InfoMessage(_("No changes made"));
 			Da.state = NONE;
+			DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 			return C_CANCEL;
 		}
 		if (!CheckHelix(trk)) {
@@ -891,6 +892,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 			UndoUndo();
 			MainRedraw();
 			MapRedraw();
+			DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 			return C_TERMINATE;
 		}
 
@@ -915,11 +917,13 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		MainRedraw();
 		MapRedraw();
 		Da.state = NONE;
+		DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 		return C_TERMINATE;
 
 	case C_CANCEL:
 		InfoMessage(_("Modify Cornu Cancelled"));
 		Da.state = NONE;
+		DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 		MainRedraw();
 		MapRedraw();
 		return C_TERMINATE;
@@ -1181,6 +1185,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.ep[i] = -1;
 				Da.pos[i] = zero;
 			}
+			DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 		}
 		Da.state = NONE;
 		return C_CONTINUE;
