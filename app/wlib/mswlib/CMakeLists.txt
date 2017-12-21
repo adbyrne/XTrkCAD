@@ -19,6 +19,7 @@ SET(SOURCES
 	mswpref.c
 	mswprint.c
 	mswsplash.c
+	mswstatus.c 
 	mswtext.c
 	gwin32.c
 	simple-gettext.c

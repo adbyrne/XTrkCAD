@@ -24,16 +24,11 @@
  *
  */
 
-
 #include <stdlib.h>
 #include <string.h>
+#include <windows.h>
 
-struct wStatus_t {
-    WOBJ_COMMON
-    GtkWidget * labelWidget;
-    const char * message;
-    wPos_t labelWidth;
-};
+#include "mswint.h"
 
 /**
  * Set the message text
@@ -47,7 +42,7 @@ void wStatusSetValue(
     wStatus_p b,
     const char * arg)
 {
-	wMessageSetValue((wMessage_p)b, arg);
+    wMessageSetValue((wMessage_p)b, arg);
 }
 /**
  * Create a window for a simple text.
@@ -70,7 +65,7 @@ wStatus_p wStatusCreate(
     wPos_t	width,
     const char	*message)
 {
-	return (wStatus_p)wMessageCreateEx(parent, x, y, labelStr, width, message, 0);
+    return (wStatus_p)wMessageCreateEx(parent, x, y, labelStr, width, message, 0);
 }
 
 /**
@@ -83,7 +78,7 @@ wStatus_p wStatusCreate(
 wPos_t
 wStatusGetWidth(const char *testString)
 {
-	return(wMessageGetWidth(testString));
+    return (wMessageGetWidth(testString));
 }
 
 /**
@@ -96,7 +91,7 @@ wStatusGetWidth(const char *testString)
 wPos_t wStatusGetHeight(
     long flags)
 {
-	return(wMessageGetHeight(flags));
+    return (wMessageGetHeight(flags));
 }
 
 /**
@@ -111,5 +106,5 @@ void wStatusSetWidth(
     wStatus_p b,
     wPos_t width)
 {
-	wMessageSetWidth((wMessage_p)b, width);
+    wMessageSetWidth((wMessage_p)b, width);
 }
