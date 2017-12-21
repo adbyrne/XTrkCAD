@@ -54,6 +54,7 @@ typedef struct wIcon_t      * wIcon_p;
 typedef struct wDrawBitMap_t * wDrawBitMap_p;
 typedef struct wFont_t      * wFont_p;
 typedef struct wBitmap_t	* wBitmap_p;
+typedef struct wStatus_t    * wStatus_p;
 typedef int wDrawWidth;
 typedef int wDrawColor;
 
@@ -706,4 +707,22 @@ void wPrefReset(		void );
 
 void CleanupCustom( void );
 
+/*------------------------------------------------------------------------------
+ *
+ * Statusbar
+ */
+
+wStatus_p wStatusCreate(
+    wWin_p	parent,
+    wPos_t	x,
+    wPos_t	y,
+    const char 	* labelStr,
+    wPos_t	width,
+    const char	*message );
+
+wPos_t wStatusGetWidth(const char *testString);
+wPos_t wStatusGetHeight(long flags);
+
+void wStatusSetValue(wStatus_p b, const char * arg);
+void wStatusSetWidth(wStatus_p b, wPos_t width);
 #endif

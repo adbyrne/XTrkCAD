@@ -47,7 +47,7 @@ typedef enum {
 		B_RADIO, B_TOGGLE,
 		B_DRAW, B_MENU, B_MULTITEXT, B_MESSAGE, B_LINES,
 		B_MENUITEM, B_BOX,
-		B_BITMAP } wType_e;
+		B_BITMAP, B_STATUS } wType_e;
 
 typedef void (*repaintProcCallback_p)( wControl_p );
 typedef void (*doneProcCallback_p)( wControl_p b );

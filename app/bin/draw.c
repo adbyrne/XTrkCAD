@@ -22,6 +22,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
 #ifdef HAVE_MALLOC_C
 #include <malloc.h>
 #endif
@@ -116,11 +118,11 @@ EXPORT wDrawColor exceptionColor;
 static wFont_p rulerFp;
 
 static struct {
-		wMessage_p scale_m;
-		wMessage_p count_m;
-		wMessage_p posX_m;
-		wMessage_p posY_m;
-		wMessage_p info_m;
+		wStatus_p scale_m;
+		wStatus_p count_m;
+		wStatus_p posX_m;
+		wStatus_p posY_m;
+		wStatus_p info_m;
 		wPos_t scale_w;
 		wPos_t count_w;
 		wPos_t pos_w;
@@ -834,9 +836,9 @@ static wPos_t GetInfoPosWidth( void )
 				dist = 9.0*12.0+11.0+3.0/4.0-1.0/64.0;
 		}
 		
-		labelWidth = (wMessageGetWidth( xLabel ) > wMessageGetWidth( yLabel ) ? wMessageGetWidth( xLabel ):wMessageGetWidth( yLabel ));
+		labelWidth = (wStatusGetWidth( xLabel ) > wStatusGetWidth( yLabel ) ? wStatusGetWidth( xLabel ):wStatusGetWidth( yLabel ));
 			
-		return wMessageGetWidth( FormatDistance(dist) ) + labelWidth;
+		return wStatusGetWidth( FormatDistance(dist) ) + labelWidth;
 }
 
 /**
@@ -848,8 +850,8 @@ EXPORT void InitInfoBar( void )
 {
 	wPos_t width, height, y, yb, ym, x, boxH;
 	wWinGetSize( mainW, &width, &height );
-	infoHeight = 3 + wMessageGetHeight( COMBOBOX ) + 3;
-	textHeight = wMessageGetHeight(0L);
+	infoHeight = 3 + wStatusGetHeight( COMBOBOX ) + 3;
+	textHeight = wStatusGetHeight(0L);
 	y = height - max(infoHeight,textHeight)-10;
 
 #ifdef WINDOWS
@@ -857,7 +859,7 @@ EXPORT void InitInfoBar( void )
 #endif
 
 	infoD.pos_w = GetInfoPosWidth() + 2;
-	infoD.scale_w = wMessageGetWidth( "999:1" ) + wMessageGetWidth( zoomLabel ) + 6;
+	infoD.scale_w = wStatusGetWidth( "999:1" ) + wStatusGetWidth( zoomLabel ) + 6;
 	/* we do not use the count label for the moment */
 	infoD.count_w = 0;
 	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 45;      // Allow Window to resize down
@@ -869,18 +871,18 @@ EXPORT void InitInfoBar( void )
 	boxH = infoHeight;
 		x = 2;
 		infoD.scale_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.scale_w, boxH );
-		infoD.scale_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarScale", infoD.scale_w-six, zoomLabel );
+		infoD.scale_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarScale", infoD.scale_w-six, zoomLabel);
 		x += infoD.scale_w + 10;
 		infoD.posX_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-		infoD.posX_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosX", infoD.pos_w-six, xLabel );
+		infoD.posX_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarPosX", infoD.pos_w-six, xLabel );
 		x += infoD.pos_w + 5;
 		infoD.posY_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-		infoD.posY_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarPosY", infoD.pos_w-six, yLabel );
+		infoD.posY_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarPosY", infoD.pos_w-six, yLabel );
 		x += infoD.pos_w + 10;
 		messageOrControlX = x+info_xm_offset;									//Remember Position
 		messageOrControlY = ym;
 		infoD.info_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.info_w, boxH );
-		infoD.info_m = wMessageCreate( mainW, x+info_xm_offset, ym, "infoBarStatus", infoD.info_w-six, "" );
+		infoD.info_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarStatus", infoD.info_w-six, "" );
 }
 
 
@@ -897,9 +899,9 @@ static void SetInfoBar( void )
 	if ( newDistanceFormat != oldDistanceFormat ) {
 		infoD.pos_w = GetInfoPosWidth() + 2;
 		wBoxSetSize( infoD.posX_b, infoD.pos_w, infoHeight-5 );
-		wMessageSetWidth( infoD.posX_m, infoD.pos_w-six );
+		wStatusSetWidth( infoD.posX_m, infoD.pos_w-six );
 		wBoxSetSize( infoD.posY_b, infoD.pos_w, infoHeight-5 );
-		wMessageSetWidth( infoD.posY_m, infoD.pos_w-six );
+		wStatusSetWidth( infoD.posY_m, infoD.pos_w-six );
 	}
 	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 40 + 4;
 	if (infoD.info_w <= 0) {
@@ -922,7 +924,7 @@ static void SetInfoBar( void )
 		wControlSetPos( (wControl_p)infoD.info_b, x, yb );
 		wControlSetPos( (wControl_p)infoD.info_m, x+info_xm_offset, ym );
 		wBoxSetSize( infoD.info_b, infoD.info_w, boxH );
-		wMessageSetWidth( infoD.info_m, infoD.info_w-six );
+		wStatusSetWidth( infoD.info_m, infoD.info_w-six );
 		messageOrControlX = x+info_xm_offset;
 		messageOrControlY = ym;
 		if (curInfoControl[0]) {
@@ -944,7 +946,7 @@ static void InfoScale( void )
 		sprintf( message, "%s%0.0f:1", zoomLabel, mainD.scale );
 	else
 		sprintf( message, "%s1:%0.0f", zoomLabel, floor(1/mainD.scale+0.5) );
-	wMessageSetValue( infoD.scale_m, message );
+	wStatusSetValue( infoD.scale_m, message );
 }
 
 EXPORT void InfoCount( wIndex_t count )
@@ -960,9 +962,9 @@ EXPORT void InfoPos( coOrd pos )
 	wPos_t x, y;
 
 	sprintf( message, "%s%s", xLabel, FormatDistance(pos.x) );
-	wMessageSetValue( infoD.posX_m, message );
+	wStatusSetValue( infoD.posX_m, message );
 	sprintf( message, "%s%s", yLabel, FormatDistance(pos.y) );
-	wMessageSetValue( infoD.posY_m, message );
+	wStatusSetValue( infoD.posY_m, message );
 
 	oldMarker = pos;
 }
@@ -996,7 +998,7 @@ EXPORT void InfoSubstituteControls(
 	//x = wControlGetPosX( (wControl_p)infoD.info_m );
 	x = messageOrControlX;
 	y = messageOrControlY;
-	wMessageSetValue( infoD.info_m, "" );
+	wStatusSetValue( infoD.info_m, "" );
 	wControlShow( (wControl_p)infoD.info_m, FALSE );
 	for ( inx=0; controls[inx]; inx++ ) {
 		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
@@ -1016,7 +1018,7 @@ EXPORT void InfoSubstituteControls(
 
 EXPORT void SetMessage( char * msg )
 {
-	wMessageSetValue( infoD.info_m, msg );
+	wStatusSetValue( infoD.info_m, msg );
 }
 
 

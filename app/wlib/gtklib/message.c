@@ -64,12 +64,7 @@ void wMessageSetValue(
         abort();
     }
 
-    if (gtk_entry_get_max_length(GTK_ENTRY(b->labelWidget))<strlen(arg)) {
-        gtk_entry_set_max_length(GTK_ENTRY(b->labelWidget), strlen(arg));
-        gtk_entry_set_width_chars(GTK_ENTRY(b->labelWidget), strlen(arg));
-    }
-
-    gtk_entry_set_text(GTK_ENTRY(b->labelWidget), wlibConvertInput(arg));
+    gtk_label_set_text(GTK_LABEL(b->labelWidget), wlibConvertInput(arg));
 }
 
 /**
@@ -101,8 +96,7 @@ wPos_t wMessageGetHeight(
     GtkWidget * temp;
 
     if (!(flags&COMBOBOX)) {
-        temp = gtk_entry_new();    //To get size of text itself
-        gtk_entry_set_has_frame(GTK_ENTRY(temp), FALSE);
+		temp = gtk_label_new("Test");	 //To get size of text itself
     } else {
         temp = gtk_combo_box_text_new();    //to get max size of an object in infoBar
     }
@@ -171,12 +165,7 @@ wMessage_p wMessageCreateEx(
     wlibComputePos((wControl_p)b);
     b->message = message;
     b->labelWidth = width;
-    b->labelWidget = gtk_entry_new();
-    gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
-    gtk_entry_set_has_frame(GTK_ENTRY(b->labelWidget), FALSE);
-    gtk_widget_set_can_focus(b->labelWidget, FALSE);
-    gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
-                       message?wlibConvertInput(message):"");
+    b->labelWidget = gtk_label_new(message?wlibConvertInput(message):"");
 
     /* do we need to set a special font? */
     if (wMessageSetFont(flags))	{
@@ -196,9 +185,12 @@ wMessage_p wMessageCreateEx(
         /* set the new font size */
         gtk_widget_modify_font((GtkWidget *)b->labelWidget, fontDesc);
     }
-
+    
     b->widget = gtk_fixed_new();
+    gtk_widget_size_request(GTK_WIDGET(b->labelWidget), &requisition);
     gtk_container_add(GTK_CONTAINER(b->widget), b->labelWidget);
+    gtk_widget_set_size_request(b->widget, width?width:requisition.width,
+                                requisition.height);
     wlibControlGetSize((wControl_p)b);
     gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
     gtk_widget_show(b->widget);
@@ -226,18 +218,19 @@ wMessageGetWidth(const char *testString)
     GtkWidget *entry;
     GtkRequisition requisition;
 
-    entry = gtk_entry_new();
-    g_object_ref_sink(entry);
-
-    gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
-    gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
-    gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
-
-    gtk_widget_size_request(entry, &requisition);
-
-    gtk_widget_destroy(entry);
-    g_object_unref(entry);
-
-    return (requisition.width+8);
+    return( wLabelWidth(testString));
+//    entry = gtk_entry_new();
+//    g_object_ref_sink(entry);
+//
+//    gtk_entry_set_has_frame(GTK_ENTRY(entry), FALSE);
+//    gtk_entry_set_width_chars(GTK_ENTRY(entry), strlen(testString));
+//    gtk_entry_set_max_length(GTK_ENTRY(entry), strlen(testString));
+//
+//    gtk_widget_size_request(entry, &requisition);
+//
+//    gtk_widget_destroy(entry);
+//    g_object_unref(entry);
+//
+//    return (requisition.width+8);
 }
 

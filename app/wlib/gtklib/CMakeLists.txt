@@ -23,6 +23,7 @@ set(sources
 	print.c
 	single.c
 	splash.c
+    statusbar.c
 	text.c
 	timer.c
 	tooltip.c	
