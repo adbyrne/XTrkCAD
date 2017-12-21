@@ -76,7 +76,7 @@ static void HotBarHighlight( int inx )
 {
 	wPos_t x0;
 	if ( inx >= hotBarCurrStart && inx < hotBarCurrEnd ) {
-		x0 = (wPos_t)((hotBarMap(inx).x-hotBarMap((int)hotBarCurrStart).x)*hotBarD.dpi+2);
+		x0 = (wPos_t)((hotBarMap(inx).x-hotBarMap((int)hotBarCurrStart).x)*hotBarD.dpi);
 		wDrawFilledRectangle( hotBarD.d, x0, 0, (wPos_t)(hotBarMap(inx).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTemp );
 	}
 }
@@ -108,7 +108,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 	for ( inx=hotBarCurrStart; inx < hotBarMap_da.cnt; inx++ ) {
 		tbm = &hotBarMap(inx);
 		barScale = tbm->barScale;
-		x = tbm->x - hotBarMap(hotBarCurrStart).x + 2.0*(inx-hotBarCurrStart)/hotBarD.dpi;
+		x = tbm->x - hotBarMap(hotBarCurrStart).x;
 		if ( x + tbm->w > barWidth ) {
 			break;
 		}
@@ -127,7 +127,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 		tbm->proc( HB_DRAW, tbm->context, &hotBarD, &orig );
 		if ( hotBarLabels ) {
 			hotBarD.scale = 1.0;
-			orig.x = tbm->x - hotBarMap(hotBarCurrStart).x + 2.0*(inx-hotBarCurrStart)/hotBarD.dpi;
+			orig.x = tbm->x - hotBarMap(hotBarCurrStart).x;
 			orig.y = 2.0/hotBarD.dpi;	            //Draw Label under icon
 			DrawString( &hotBarD, orig, 0.0, tbm->proc( HB_BARTITLE, tbm->context, NULL, NULL ), hotBarFp, hotBarFs, drawColorBlack );
 		}
@@ -386,7 +386,7 @@ EXPORT void AddHotBarElement(
 				tbm->w = tbm->labelW;
 			}
 		}
-		hotBarWidth += tbm->w;
+		hotBarWidth += tbm->w + 2/hotBarD.dpi;
 }
 
 
