@@ -850,7 +850,11 @@ static paramData_t drawPLs[] = {
 #define drawBenchColorPD		(drawPLs[2])
 	{ PD_COLORLIST, &benchColor, "benchcolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchChoicePD		(drawPLs[3])
+#ifdef WINDOWS
 	{ PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)120, N_("Lumber Type") },
+#else    
+    { PD_DROPLIST, &benchChoice, "benchlist", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)145, N_("Lumber Type") },
+#endif    
 #define drawBenchOrientPD		(drawPLs[4])
 #ifdef WINDOWS
 	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)45, "", 0 },
