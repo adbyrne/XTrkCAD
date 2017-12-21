@@ -104,29 +104,31 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 	}
 	if ( hotBarLabels && !hotBarFp )
 		hotBarFp = wStandardFont( F_HELV, FALSE, FALSE );
+	wPos_t textSize = wMessageGetHeight(0L);
 	for ( inx=hotBarCurrStart; inx < hotBarMap_da.cnt; inx++ ) {
 		tbm = &hotBarMap(inx);
 		barScale = tbm->barScale;
-		x = tbm->x - hotBarMap(hotBarCurrStart).x + 2.0/hotBarD.dpi;
+		x = tbm->x - hotBarMap(hotBarCurrStart).x + 2.0*(inx-hotBarCurrStart)/hotBarD.dpi;
 		if ( x + tbm->w > barWidth ) {
 			break;
 		}
 		orig.y = hh/2.0*barScale - tbm->size.y/2.0 - tbm->orig.y;
 		if ( hotBarLabels ) {
-			orig.y += 8/hotBarD.dpi*barScale;
+			orig.y += textSize/hotBarD.dpi*barScale;
 			if ( tbm->labelW > tbm->objectW ) {
 				x += (tbm->labelW-tbm->objectW)/2;
 			}
 		}
 		x *= barScale;
-		orig.x = x - tbm->orig.x;
+		orig.x = x;
 		hotBarD.scale = barScale;
 		hotBarD.size.x = barWidth*barScale;
 		hotBarD.size.y = barHeight*barScale;
 		tbm->proc( HB_DRAW, tbm->context, &hotBarD, &orig );
 		if ( hotBarLabels ) {
-			orig.x = x - (tbm->labelW-tbm->objectW)/2*barScale;
-			orig.y = 2*barScale/hotBarD.dpi;
+			hotBarD.scale = 1.0;
+			orig.x = tbm->x - hotBarMap(hotBarCurrStart).x + 2.0*(inx-hotBarCurrStart)/hotBarD.dpi;
+			orig.y = 2.0/hotBarD.dpi;	            //Draw Label under icon
 			DrawString( &hotBarD, orig, 0.0, tbm->proc( HB_BARTITLE, tbm->context, NULL, NULL ), hotBarFp, hotBarFs, drawColorBlack );
 		}
 	}
@@ -444,8 +446,9 @@ EXPORT void LayoutHotBar( void )
 
 	wWinGetSize( mainW, &winWidth, &winHeight );
 	hotBarHeight = hotBarDrawHeight;
-	if ( hotBarLabels)
-		hotBarHeight += 8;
+	if ( hotBarLabels) {
+	   hotBarHeight += wMessageGetHeight(0L);
+	}
 	if (hotBarLeftB == NULL) {
 		wIcon_p bm_p;
 		if (winWidth < 50)
@@ -465,7 +468,7 @@ EXPORT void LayoutHotBar( void )
 	wControlSetPos( (wControl_p)hotBarD.d, buttonWidth, toolbarHeight );
 	wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hotBarHeight+2 );
 	hotBarD.size.x = ((double)(winWidth-20-buttonWidth*2))/hotBarD.dpi*hotBarD.scale;
-	hotBarD.size.y = (double)hotBarHeight/hotBarD.dpi*hotBarD.scale;
+	hotBarD.size.y = (double)hotBarDrawHeight/hotBarD.dpi*hotBarD.scale;  //Exclude Label from calc
 	wControlShow( (wControl_p)hotBarLeftB, TRUE );
 	wControlShow( (wControl_p)hotBarRightB, TRUE );
 	wControlShow( (wControl_p)hotBarD.d, TRUE );
