@@ -1,3 +1,4 @@
+CONTENTS Lionel O-27 Track - Curve Track
 # Design by Dwyane Ward Created 03JAN08
 # Design modified by Paul Pullen September 2010
 # Curve Track Radius Changed, Switch (27) Curve
@@ -48,9 +49,7 @@ TURNOUT O  "Lionel O-27 Track	Remote-Control Track 8.75	6-12746"
 	L 11579568 0.053333 0.000000 0.000000 8.750000 0.000000
 	G 0 0.000000 0.500000 4.375000 0.000000 0
 	END
-
-
-CONTENTS Lionel O-27 Track - Curve Track
+SUBCONTENTS Lionel O-27 Track - Curved Track
 TURNOUT O "Lionel O-27	Original O-27 Curve	"
 #	U "Curved Section" "" "Lionel O-27" "Original O-27 Curve" "" 12.500000 45.000000 0.000000 0.000000 0
 	P "Normal" 1
@@ -173,4 +172,3 @@ TURNOUT O  "Lionel O-27 Track	42 Right Switch 30°	6-65168"
 	L 11579568 0.053333 0.000000 0.000000 13.625000 -0.000000
 	A 11579568 0.053333 21.000000 0.000000 -21.000000 0.000000 30.000000
 	END
-

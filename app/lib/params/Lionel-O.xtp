@@ -182,7 +182,6 @@ TURNOUT O  "Lionel O Track	72 Right Switch 22.5°	6-65165"
 	L 11579568 0.053333 0.000000 0.000000 14.250000 0.000000
 	END
 
-
 SUBCONTENTS Lionel O Track - Misc. Track
 TURNOUT O  "Lionel O Track	Insulated Track 10.0	6-12840"
 	P "Normal" 1
@@ -199,7 +198,6 @@ TURNOUT O  "Lionel O Track	Remote-COntrol Track 10.0	6-65530"
 	L 11579568 0.053333 0.000000 0.000000 10.000000 0.000000
 	G 0 0.000000 0.500000 5.000000 0.000000 0
 	END
-
 
 SUBCONTENTS Lionel O Track - Crossings
 TURNOUT O  "Lionel O Track	90 Cross	6-65540"
