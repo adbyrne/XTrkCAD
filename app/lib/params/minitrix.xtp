@@ -3,7 +3,7 @@ CONTENTS Minitrix N-Scale
 #
 # Design Armin Poschmann 08.01.1999 nach Vorgaben aus dem Minitrix Katalog
 # zur Benutzung mit xtrkcad
-# Genauigkeit der Berechnungen : Eingabe der Werte in cm mit 10 gültigen
+# Genauigkeit der Berechnungen : Eingabe der Werte in cm mit 10 gÃ¼ltigen
 # Ziffern
 #
 ############################################################################
@@ -66,7 +66,7 @@ TURNOUT N "Minitrix	Gerade-312,6mm	14902"
 	S 0 0.000000 0.000000 0.000000 12.307087 0.000000
 	END
 ############################################################################
-SUBCONTENTS Bögen
+SUBCONTENTS BÃ¶gen
 #################
 TURNOUT N "Minitrix	Bogen-R1-6	14916"
 	U "Curved Section" "" "Minitrix" "Bogen-R1-6" "14916" 7.661417 6.000000

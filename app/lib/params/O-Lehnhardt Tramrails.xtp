@@ -59,7 +59,7 @@ TURNOUT O "Lehnhardt O Scale TramTrack	30mm (1.181"") Straight	3000-50-107"
 	END
 
 SUBCONTENTS Lehnhardt O Scale TramTrack - Misc Track
-TURNOUT O "Lehnhardt O Scale TramTrack	120mm 90° Crosss	3000-50-109"
+TURNOUT O "Lehnhardt O Scale TramTrack	120mm 90Â° Crosss	3000-50-109"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.724409 0.000000 90.000000
@@ -78,7 +78,7 @@ TURNOUT O "Lehnhardt O Scale TramTrack	120mm 90° Crosss	3000-50-109"
 	END
 
 SUBCONTENTS Lehnhardt O Scale TramTrack - Curve Track
-TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 22°30' Curve	3000-51-102"
+TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 22Â°30' Curve	3000-51-102"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.670542 0.929028 67.500000
@@ -86,7 +86,7 @@ TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 22°30' Curve	3000-51-102"
 	A 11579568 0.053333 13.582677 0.000000 12.204724 157.500000 22.500000
 	A 11579568 0.053333 10.826772 0.000000 12.204724 157.500000 22.500000
 	END
-TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 45° Curve	3000-51-103"
+TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 45Â° Curve	3000-51-103"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 8.630038 3.574675 45.000000
@@ -94,7 +94,7 @@ TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 45° Curve	3000-51-103"
 	A 11579568 0.053333 13.582677 0.000000 12.204724 135.000000 45.000000
 	A 11579568 0.053333 10.826772 0.000000 12.204724 135.000000 45.000000
 	END
-TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 45° Interruption	3000-51-104"
+TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 45Â° Interruption	3000-51-104"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 8.630038 3.574675 45.000000
@@ -104,7 +104,7 @@ TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 45° Interruption	3000-51-104"
 	END
 
 SUBCONTENTS Lehnhardt O Scale TramTrack - Turnouts
-TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45° Left Manual Turnout	3000-50-113"
+TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45Â° Left Manual Turnout	3000-50-113"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -117,7 +117,7 @@ TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45° Left Manual Turnout	3000
 	A 11579568 0.053333 10.826772 0.000000 12.204724 135.000000 45.000000
 	A 11579568 0.053333 13.582677 0.000000 12.204724 135.000000 8.000000
 	END
-TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45° Right Manual Turnout	3000-50-112"
+TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45Â° Right Manual Turnout	3000-50-112"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -130,7 +130,7 @@ TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45° Right Manual Turnout	300
 	A 11579568 0.053333 10.826772 0.000000 -12.204724 0.000000 45.000000
 	A 11579568 0.053333 13.582677 0.000000 -12.204724 37.000000 8.000000
 	END
-TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45° Left Electric Turnout	3000-50-113E"
+TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45Â° Left Electric Turnout	3000-50-113E"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -143,7 +143,7 @@ TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45° Left Electric Turnout	30
 	A 11579568 0.053333 10.826772 0.000000 12.204724 135.000000 45.000000
 	A 11579568 0.053333 13.582677 0.000000 12.204724 135.000000 8.000000
 	END
-TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45° Right Electric Turnout	3000-50-112E"
+TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45Â° Right Electric Turnout	3000-50-112E"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -156,7 +156,7 @@ TURNOUT O "Lehnhardt O Scale TramTrack	240mm/R310mm 45° Right Electric Turnout	3
 	A 11579568 0.053333 10.826772 0.000000 -12.204724 0.000000 45.000000
 	A 11579568 0.053333 13.582677 0.000000 -12.204724 37.000000 8.000000
 	END
-TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 22°30' Wye Manual Turnout	3000-50-110"
+TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 22Â°30' Wye Manual Turnout	3000-50-110"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -167,7 +167,7 @@ TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 22°30' Wye Manual Turnout	3000-50-
 	A 11579568 0.053333 10.826772 0.000000 12.204724 157.500000 22.500000
 	A 11579568 0.053333 10.826772 0.000000 -12.204724 0.000000 22.500000
 	END
-TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 22°30' Wye Electric Turnout	3000-50-110E"
+TURNOUT O "Lehnhardt O Scale TramTrack	R310mm 22Â°30' Wye Electric Turnout	3000-50-110E"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000

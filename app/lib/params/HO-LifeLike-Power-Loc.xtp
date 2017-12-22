@@ -20,7 +20,7 @@ TURNOUT HO  "LifeLike HO Power-Loc Track	Straight 9in	21302/21332"
 	END
 
 SUBCONTENTS Bachmann True-Tack - Curve Track
-TURNOUT HO  "LifeLike HO Power-Loc Track	Curved 18in 30°	21303/21333"	
+TURNOUT HO  "LifeLike HO Power-Loc Track	Curved 18in 30Â°	21303/21333"	
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 9.000000 -2.411543 120.000000
@@ -28,7 +28,7 @@ TURNOUT HO  "LifeLike HO Power-Loc Track	Curved 18in 30°	21303/21333"
 	A 11579568 0.053333 18.984375 0.000000 -18.000000 0.000000 30.000000
 	A 11579568 0.053333 17.015625 0.000000 -18.000000 0.000000 30.000000
 	END
-TURNOUT HO  "LifeLike HO Power-Loc Track	Curved 22in 22.5°	21318/21348"	
+TURNOUT HO  "LifeLike HO Power-Loc Track	Curved 22in 22.5Â°	21318/21348"	
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 8.419036 -1.674650 112.500000
@@ -71,7 +71,7 @@ TURNOUT HO  "LifeLike HO Power-Loc Track	Right Turnout	21305/21335"
 
 
 SUBCONTENTS Bachmann True-Tack - Misc Track
-TURNOUT HO  "LifeLike HO Power-Loc Track	Crossing 90°	21715"
+TURNOUT HO  "LifeLike HO Power-Loc Track	Crossing 90Â°	21715"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 4.000000 0.000000 90.000000
@@ -88,7 +88,7 @@ TURNOUT HO  "LifeLike HO Power-Loc Track	Crossing 90°	21715"
 	L 11579568 0.053333 1.015625 -0.984375 1.015625 -2.000000
 	L 11579568 0.053333 2.984375 -0.984375 2.984375 -2.000000
 	END
-TURNOUT HO  "LifeLike HO Power-Loc Track	Terminal/Rerailer Curved 18in 30°	21304/21334"	
+TURNOUT HO  "LifeLike HO Power-Loc Track	Terminal/Rerailer Curved 18in 30Â°	21304/21334"	
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 9.000000 -2.411543 120.000000

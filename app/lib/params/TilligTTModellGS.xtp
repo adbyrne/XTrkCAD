@@ -53,8 +53,8 @@ TURNOUT TT "Tillig	Gerades Gleis - G6 - 21,3 mm	83120"
 	L3 13279072 0.000000 -0.000002 -0.590551 0 0.838581 -0.590550 0
 	L3 13279072 0.000000 0.000000 0.590551 0 0.838583 0.590552 0
 	END
-TURNOUT TT "Tillig	Übergangsgleis, Standard-/Modellgleis 57,0 mm	83132"
-	U "Straight Section" "" "Tillig" "Übergangsgleis, Standard-/Modellgleis 57,0 mm" "83132" 2.244094 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Ãœbergangsgleis, Standard-/Modellgleis 57,0 mm	83132"
+	U "Straight Section" "" "Tillig" "Ãœbergangsgleis, Standard-/Modellgleis 57,0 mm" "83132" 2.244094 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.244094 0.000000 90.000000
@@ -62,8 +62,8 @@ TURNOUT TT "Tillig	Übergangsgleis, Standard-/Modellgleis 57,0 mm	83132"
 	L3 13279072 0.000000 -0.000002 -0.590551 0 2.244093 -0.590548 0
 	L3 13279072 0.000000 0.000000 0.590551 0 2.244094 0.590554 0
 	END
-TURNOUT TT "Tillig	Modulausgleichsstück, 83,0 mm bis 88,0 mm	83139"
-	U "Straight Section" "" "Tillig" "Modulausgleichsstück, 83,0 mm bis 88,0 mm" "83139" 3.366142 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	ModulausgleichsstÃ¼ck, 83,0 mm bis 88,0 mm	83139"
+	U "Straight Section" "" "Tillig" "ModulausgleichsstÃ¼ck, 83,0 mm bis 88,0 mm" "83139" 3.366142 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.366142 0.000000 90.000000
@@ -71,8 +71,8 @@ TURNOUT TT "Tillig	Modulausgleichsstück, 83,0 mm bis 88,0 mm	83139"
 	L3 13279072 0.000000 -0.000002 -0.590551 0 3.366140 -0.590547 0
 	L3 13279072 0.000000 0.000000 0.590551 0 3.366142 0.590556 0
 	END
-TURNOUT TT "Tillig	Prellbock mit Gleisstück, 41,5 mm	83100"
-	U "Straight Section" "" "Tillig" "Prellbock mit Gleisstück, 41,5 mm" "83100" 1.633858 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Prellbock mit GleisstÃ¼ck, 41,5 mm	83100"
+	U "Straight Section" "" "Tillig" "Prellbock mit GleisstÃ¼ck, 41,5 mm" "83100" 1.633858 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.633858 0.000000 90.000000
@@ -95,8 +95,8 @@ TURNOUT TT "Tillig	Prellbock mit Gleisstück, 41,5 mm	83100"
 		0.708661 -0.413386 0
 		0.669291 -0.413386 0
 	END
-TURNOUT TT "Tillig	Gebogenes Gleis - R01 - R 267 mm/30,0°	83116"
-	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R01 - R 267 mm/30,0°" "83116" 10.511811 30.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Gebogenes Gleis - R01 - R 267 mm/30,0Â°	83116"
+	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R01 - R 267 mm/30,0Â°" "83116" 10.511811 30.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 5.255901 1.408313 60.000000
@@ -104,8 +104,8 @@ TURNOUT TT "Tillig	Gebogenes Gleis - R01 - R 267 mm/30,0°	83116"
 	A3 13279072 0.000000 11.102362 0.000014 10.511811 0 150.000076 30.000000
 	A3 13279072 0.000000 9.921260 0.000014 10.511811 0 150.000076 30.000000
 	END
-TURNOUT TT "Tillig	Gebogenes Gleis - R04 - R 267 mm/7,5°	83115"
-	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R04 - R 267 mm/7,5°" "83115" 10.511811 7.500000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Gebogenes Gleis - R04 - R 267 mm/7,5Â°	83115"
+	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R04 - R 267 mm/7,5Â°" "83115" 10.511811 7.500000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.372066 0.089930 82.500000
@@ -113,8 +113,8 @@ TURNOUT TT "Tillig	Gebogenes Gleis - R04 - R 267 mm/7,5°	83115"
 	A3 13279072 0.000000 11.102362 0.000014 10.511811 0 172.500076 7.500000
 	A3 13279072 0.000000 9.921260 0.000014 10.511811 0 172.500076 7.500000
 	END
-TURNOUT TT "Tillig	Gebogenes Gleis - R11 - R 310 mm/30,0°	83109"
-	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R11 - R 310 mm/30,0°" "83109" 12.204724 30.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Gebogenes Gleis - R11 - R 310 mm/30,0Â°	83109"
+	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R11 - R 310 mm/30,0Â°" "83109" 12.204724 30.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.102358 1.635120 60.000000
@@ -122,8 +122,8 @@ TURNOUT TT "Tillig	Gebogenes Gleis - R11 - R 310 mm/30,0°	83109"
 	A3 13279072 0.000000 12.795276 0.000016 12.204724 0 150.000076 30.000000
 	A3 13279072 0.000000 11.614173 0.000016 12.204724 0 150.000076 30.000000
 	END
-TURNOUT TT "Tillig	Gebogenes Gleis - R12 - R 310 mm/15,0°	83110"
-	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R12 - R 310 mm/15,0°" "83110" 12.204724 15.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Gebogenes Gleis - R12 - R 310 mm/15,0Â°	83110"
+	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R12 - R 310 mm/15,0Â°" "83110" 12.204724 15.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.158813 0.415865 75.000000
@@ -131,8 +131,8 @@ TURNOUT TT "Tillig	Gebogenes Gleis - R12 - R 310 mm/15,0°	83110"
 	A3 13279072 0.000000 12.795276 0.000016 12.204724 0 165.000076 15.000000
 	A3 13279072 0.000000 11.614173 0.000016 12.204724 0 165.000076 15.000000
 	END
-TURNOUT TT "Tillig	Gebogenes Gleis - R14 - R 310 mm/7,5°	83113"
-	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R14 - R 310 mm/7,5°" "83113" 12.204724 7.500000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Gebogenes Gleis - R14 - R 310 mm/7,5Â°	83113"
+	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R14 - R 310 mm/7,5Â°" "83113" 12.204724 7.500000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.593035 0.104413 82.500000
@@ -140,8 +140,8 @@ TURNOUT TT "Tillig	Gebogenes Gleis - R14 - R 310 mm/7,5°	83113"
 	A3 13279072 0.000000 12.795276 0.000016 12.204724 0 172.500076 7.500000
 	A3 13279072 0.000000 11.614173 0.000016 12.204724 0 172.500076 7.500000
 	END
-TURNOUT TT "Tillig	Gebogenes Gleis - R21 - R 353 mm/30,0°	83106"
-	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R21 - R 353 mm/30,0°" "83106" 13.897638 30.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Gebogenes Gleis - R21 - R 353 mm/30,0Â°	83106"
+	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R21 - R 353 mm/30,0Â°" "83106" 13.897638 30.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.948814 1.861927 60.000000
@@ -149,8 +149,8 @@ TURNOUT TT "Tillig	Gebogenes Gleis - R21 - R 353 mm/30,0°	83106"
 	A3 13279072 0.000000 14.488189 0.000018 13.897638 0 150.000076 30.000000
 	A3 13279072 0.000000 13.307087 0.000018 13.897638 0 150.000076 30.000000
 	END
-TURNOUT TT "Tillig	Gebogenes Gleis - R22 - R 353 mm/15,0°	83107"
-	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R22 - R 353 mm/15,0°" "83107" 13.897638 15.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Gebogenes Gleis - R22 - R 353 mm/15,0Â°	83107"
+	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R22 - R 353 mm/15,0Â°" "83107" 13.897638 15.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.596970 0.473550 75.000000
@@ -158,8 +158,8 @@ TURNOUT TT "Tillig	Gebogenes Gleis - R22 - R 353 mm/15,0°	83107"
 	A3 13279072 0.000000 14.488189 0.000018 13.897638 0 165.000076 15.000000
 	A3 13279072 0.000000 13.307087 0.000018 13.897638 0 165.000076 15.000000
 	END
-TURNOUT TT "Tillig	Gebogenes Gleis - R24 - R 353 mm/7,5°	83114"
-	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R24 - R 353 mm/7,5°" "83114" 13.897638 7.500000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Gebogenes Gleis - R24 - R 353 mm/7,5Â°	83114"
+	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R24 - R 353 mm/7,5Â°" "83114" 13.897638 7.500000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.814004 0.118896 82.500000
@@ -176,8 +176,8 @@ TURNOUT TT "Tillig	Gebogenes Gleis - R31 - R 396 mm/30,0	83111"
 	A3 13279072 0.000000 16.181102 0.000021 15.590551 0 150.000076 30.000000
 	A3 13279072 0.000000 15.000000 0.000021 15.590551 0 150.000076 30.000000
 	END
-TURNOUT TT "Tillig	Gebogenes Gleis - R32 - R 396 mm/15,0°	83112"
-	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R32 - R 396 mm/15,0°" "83112" 15.590551 15.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Gebogenes Gleis - R32 - R 396 mm/15,0Â°	83112"
+	U "Curved Section" "" "Tillig" "Gebogenes Gleis - R32 - R 396 mm/15,0Â°" "83112" 15.590551 15.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.035128 0.531234 75.000000
@@ -212,8 +212,8 @@ TURNOUT TT "Tillig	Betonschwellenflexgleis, 520 mm	83134"
 	L3 13279072 0.000000 -0.000002 -0.590551 0 20.472439 -0.590524 0
 	L3 13279072 0.000000 0.000000 0.590551 0 20.472441 0.590578 0
 	END
-TURNOUT TT "Tillig	Einfache Weiche - EW 1, links - Weiche 15°	83322"
-	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 1, links - Weiche 15°" "83322" "Einfache Weiche - EW 1, rechts - Weiche 15°" "83321" 4.985039 15.000000 0.846457 5.098425 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Einfache Weiche - EW 1, links - Weiche 15Â°	83322"
+	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 1, links - Weiche 15Â°" "83322" "Einfache Weiche - EW 1, rechts - Weiche 15Â°" "83321" 4.985039 15.000000 0.846457 5.098425 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -228,8 +228,8 @@ TURNOUT TT "Tillig	Einfache Weiche - EW 1, links - Weiche 15°	83322"
 	A3 13279072 0.000000 9.694435 0.472014 10.284986 0 164.999924 15.000152
 	L3 13279072 0.000000 2.981128 0.920887 0 4.832192 1.416885 0
 	END
-TURNOUT TT "Tillig	Einfache Weiche - EW 1, rechts - Weiche 15°	83321"
-	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 1, links - Weiche 15°" "83322" "Einfache Weiche - EW 1, rechts - Weiche 15°" "83321" 4.985039 15.000000 0.846457 5.098425 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Einfache Weiche - EW 1, rechts - Weiche 15Â°	83321"
+	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 1, links - Weiche 15Â°" "83322" "Einfache Weiche - EW 1, rechts - Weiche 15Â°" "83321" 4.985039 15.000000 0.846457 5.098425 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -244,8 +244,8 @@ TURNOUT TT "Tillig	Einfache Weiche - EW 1, rechts - Weiche 15°	83321"
 	A3 13279072 0.000000 9.694435 0.471959 -10.284986 0 0.000076 15.000152
 	L3 13279072 0.000000 2.981125 -0.920886 0 4.832189 -1.416884 0
 	END
-TURNOUT TT "Tillig	Einfache Weiche - EW 2, links - Weiche 15°	83332"
-	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 2, links - Weiche 15°" "83332" "Einfache Weiche - EW 2, rechts - Weiche 15°" "83331" 6.429528 15.000000 0.846457 6.535433 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Einfache Weiche - EW 2, links - Weiche 15Â°	83332"
+	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 2, links - Weiche 15Â°" "83332" "Einfache Weiche - EW 2, rechts - Weiche 15Â°" "83331" 6.429528 15.000000 0.846457 6.535433 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -260,8 +260,8 @@ TURNOUT TT "Tillig	Einfache Weiche - EW 2, links - Weiche 15°	83332"
 	A3 13279072 0.000000 20.665632 0.472139 21.256184 0 164.999924 15.000152
 	L3 13279072 0.000000 5.820811 1.294726 0 6.276672 1.416883 0
 	END
-TURNOUT TT "Tillig	Einfache Weiche - EW 2, rechts - Weiche 15°	83331"
-	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 2, links - Weiche 15°" "83332" "Einfache Weiche - EW 2, rechts - Weiche 15°" "83331" 6.429528 15.000000 0.846457 6.535433 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Einfache Weiche - EW 2, rechts - Weiche 15Â°	83331"
+	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 2, links - Weiche 15Â°" "83332" "Einfache Weiche - EW 2, rechts - Weiche 15Â°" "83331" 6.429528 15.000000 0.846457 6.535433 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -276,8 +276,8 @@ TURNOUT TT "Tillig	Einfache Weiche - EW 2, rechts - Weiche 15°	83331"
 	A3 13279072 0.000000 20.665632 0.472026 -21.256184 0 0.000076 15.000152
 	L3 13279072 0.000000 5.820808 -1.294726 0 6.276669 -1.416882 0
 	END
-TURNOUT TT "Tillig	Einfache Weiche - EW 3, links - Weiche 12°	83342"
-	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 3, links - Weiche 12°" "83342" "Einfache Weiche - EW 3, rechts - Weiche 12°" "83341" 8.053937 12.000000 0.846457 8.149606 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Einfache Weiche - EW 3, links - Weiche 12Â°	83342"
+	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 3, links - Weiche 12Â°" "83342" "Einfache Weiche - EW 3, rechts - Weiche 12Â°" "83341" 8.053937 12.000000 0.846457 8.149606 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -292,8 +292,8 @@ TURNOUT TT "Tillig	Einfache Weiche - EW 3, links - Weiche 12°	83342"
 	A3 13279072 0.000000 33.653425 0.472581 34.243976 0 167.999924 12.000152
 	L3 13279072 0.000000 7.469547 1.325974 0 7.931142 1.424100 0
 	END
-TURNOUT TT "Tillig	Einfache Weiche - EW 3, rechts - Weiche 12°	83341"
-	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 3, links - Weiche 12°" "83342" "Einfache Weiche - EW 3, rechts - Weiche 12°" "83341" 8.053937 12.000000 0.846457 8.149606 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Einfache Weiche - EW 3, rechts - Weiche 12Â°	83341"
+	U "Regular Turnout" "" "Tillig" "Einfache Weiche - EW 3, links - Weiche 12Â°" "83342" "Einfache Weiche - EW 3, rechts - Weiche 12Â°" "83341" 8.053937 12.000000 0.846457 8.149606 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -346,8 +346,8 @@ TURNOUT TT "Tillig	Innenbogenweiche - IBW, rechts	83361"
 	A3 13279072 0.000000 21.846735 0.472026 -21.256184 0 0.000691 14.999537
 	L3 13279072 0.000000 6.126523 -0.153875 0 6.582384 -0.276031 0
 	END
-TURNOUT TT "Tillig	Außenbogenweiche - ABW - 15° (2 x 7,5°)	83380"
-	U "Wye Turnout" "" "Tillig" "Außenbogenweiche - ABW - 15° (2 x 7,5°)" "83380" 6.574803 7.500000 0.428740 0.428740 7.500000 6.574803 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	AuÃŸenbogenweiche - ABW - 15Â° (2 x 7,5Â°)	83380"
+	U "Wye Turnout" "" "Tillig" "AuÃŸenbogenweiche - ABW - 15Â° (2 x 7,5Â°)" "83380" 6.574803 7.500000 0.428740 0.428740 7.500000 6.574803 1.181102 0.000000 13279072
 	P "Left" 1 2 3
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
@@ -365,8 +365,8 @@ TURNOUT TT "Tillig	Außenbogenweiche - ABW - 15° (2 x 7,5°)	83380"
 	A3 13279072 0.000000 42.322108 0.505450 -42.912659 0 0.000076 7.500152
 	L3 13279072 0.000000 6.029859 -0.952635 0 6.497708 -1.014237 0
 	END
-TURNOUT TT "Tillig	Außenbogenweiche - ABW - 12° (2 x 6°)	83382"
-	U "Wye Turnout" "" "Tillig" "Außenbogenweiche - ABW - 12° (2 x 6°)" "83382" 8.188976 6.000000 0.428346 0.428346 6.000000 8.188976 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	AuÃŸenbogenweiche - ABW - 12Â° (2 x 6Â°)	83382"
+	U "Wye Turnout" "" "Tillig" "AuÃŸenbogenweiche - ABW - 12Â° (2 x 6Â°)" "83382" 8.188976 6.000000 0.428346 0.428346 6.000000 8.188976 1.181102 0.000000 13279072
 	P "Left" 1 2 3
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
@@ -407,8 +407,8 @@ TURNOUT TT "Tillig	Dreiwege-Weiche	83230"
 	L3 13279072 0.000000 5.806209 -1.292818 0 6.269189 -1.416882 0
 	L3 13279072 0.000000 5.588022 0.590558 0 6.535433 0.590559 0
 	END
-TURNOUT TT "Tillig	Kreuzung - K1 - 15°	83160"
-	U "Crossing" "" "Tillig" "Kreuzung - K1 - 15°" "83160" 6.535433 15.000000 6.535433 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Kreuzung - K1 - 15Â°	83160"
+	U "Crossing" "" "Tillig" "Kreuzung - K1 - 15Â°" "83160" 6.535433 15.000000 6.535433 1.181102 0.000000 13279072
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 6.535433 0.000000 90.000000
@@ -421,8 +421,8 @@ TURNOUT TT "Tillig	Kreuzung - K1 - 15°	83160"
 	L3 13279072 0.000000 3.114869 -0.570428 0 6.271242 -1.416170 0
 	L3 13279072 0.000000 0.264189 1.416171 0 3.420562 0.570428 0
 	END
-TURNOUT TT "Tillig	Kreuzung - K2 - 30°	83170"
-	U "Crossing" "" "Tillig" "Kreuzung - K2 - 30°" "83170" 3.385827 30.000000 3.385827 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Kreuzung - K2 - 30Â°	83170"
+	U "Crossing" "" "Tillig" "Kreuzung - K2 - 30Â°" "83170" 3.385827 30.000000 3.385827 1.181102 0.000000 13279072
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 3.385827 0.000000 90.000000
@@ -596,8 +596,8 @@ TURNOUT TT "Tillig	Gerades Schwellenband - G1 - 166mm	83001"
 	L3 13279072 0.000000 -0.000002 -0.590551 0 6.535431 -0.590542 0
 	L3 13279072 0.000000 0.000000 0.590551 0 6.535433 0.590560 0
 	END
-TURNOUT TT "Tillig	Bogen-Schwellenband - R01 - R267/30°	83016"
-	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R01 - R267/30°" "83016" 10.511811 30.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Bogen-Schwellenband - R01 - R267/30Â°	83016"
+	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R01 - R267/30Â°" "83016" 10.511811 30.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 5.255901 1.408313 60.000000
@@ -605,8 +605,8 @@ TURNOUT TT "Tillig	Bogen-Schwellenband - R01 - R267/30°	83016"
 	A3 13279072 0.000000 11.102362 0.000014 10.511811 0 150.000076 30.000000
 	A3 13279072 0.000000 9.921260 0.000014 10.511811 0 150.000076 30.000000
 	END
-TURNOUT TT "Tillig	Bogen-Schwellenband - R285/15°	83003"
-	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R285/15°" "83003" 11.220472 15.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Bogen-Schwellenband - R285/15Â°	83003"
+	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R285/15Â°" "83003" 11.220472 15.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.904070 0.382328 75.000000
@@ -614,8 +614,8 @@ TURNOUT TT "Tillig	Bogen-Schwellenband - R285/15°	83003"
 	A3 13279072 0.000000 11.811023 0.000015 11.220472 0 165.000076 15.000000
 	A3 13279072 0.000000 10.629921 0.000015 11.220472 0 165.000076 15.000000
 	END
-TURNOUT TT "Tillig	Bogen-Schwellenband - R11 - R310/30°	83008"
-	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R11 - R310/30°" "83008" 12.204724 30.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Bogen-Schwellenband - R11 - R310/30Â°	83008"
+	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R11 - R310/30Â°" "83008" 12.204724 30.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.102358 1.635120 60.000000
@@ -623,8 +623,8 @@ TURNOUT TT "Tillig	Bogen-Schwellenband - R11 - R310/30°	83008"
 	A3 13279072 0.000000 12.795275 0.000016 12.204724 0 150.000076 30.000000
 	A3 13279072 0.000000 11.614173 0.000016 12.204724 0 150.000076 30.000000
 	END
-TURNOUT TT "Tillig	Bogen-Schwellenband - R12 - R310/15°	83009"
-	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R12 - R310/15°" "83009" 12.204724 15.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Bogen-Schwellenband - R12 - R310/15Â°	83009"
+	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R12 - R310/15Â°" "83009" 12.204724 15.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.158813 0.415865 75.000000
@@ -632,8 +632,8 @@ TURNOUT TT "Tillig	Bogen-Schwellenband - R12 - R310/15°	83009"
 	A3 13279072 0.000000 12.795275 0.000016 12.204724 0 165.000076 15.000000
 	A3 13279072 0.000000 11.614173 0.000016 12.204724 0 165.000076 15.000000
 	END
-TURNOUT TT "Tillig	Bogen-Schwellenband - R21 - R353/30°	83006"
-	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R21 - R353/30°" "83006" 13.897638 30.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Bogen-Schwellenband - R21 - R353/30Â°	83006"
+	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R21 - R353/30Â°" "83006" 13.897638 30.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.948814 1.861927 60.000000
@@ -641,8 +641,8 @@ TURNOUT TT "Tillig	Bogen-Schwellenband - R21 - R353/30°	83006"
 	A3 13279072 0.000000 14.488189 0.000018 13.897638 0 150.000076 30.000000
 	A3 13279072 0.000000 13.307087 0.000018 13.897638 0 150.000076 30.000000
 	END
-TURNOUT TT "Tillig	Bogen-Schwellenband - R22 - R353/15°	83007"
-	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R22 - R353/15°" "83007" 13.897638 15.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Bogen-Schwellenband - R22 - R353/15Â°	83007"
+	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R22 - R353/15Â°" "83007" 13.897638 15.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.596970 0.473550 75.000000
@@ -650,8 +650,8 @@ TURNOUT TT "Tillig	Bogen-Schwellenband - R22 - R353/15°	83007"
 	A3 13279072 0.000000 14.488189 0.000018 13.897638 0 165.000076 15.000000
 	A3 13279072 0.000000 13.307087 0.000018 13.897638 0 165.000076 15.000000
 	END
-TURNOUT TT "Tillig	Bogen-Schwellenband - R31 - R396/30°	83011"
-	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R31 - R396/30°" "83011" 15.590551 30.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Bogen-Schwellenband - R31 - R396/30Â°	83011"
+	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R31 - R396/30Â°" "83011" 15.590551 30.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.795270 2.088734 60.000000
@@ -659,8 +659,8 @@ TURNOUT TT "Tillig	Bogen-Schwellenband - R31 - R396/30°	83011"
 	A3 13279072 0.000000 16.181102 0.000021 15.590551 0 150.000076 30.000000
 	A3 13279072 0.000000 15.000000 0.000021 15.590551 0 150.000076 30.000000
 	END
-TURNOUT TT "Tillig	Bogen-Schwellenband - R32 - R396/15°	83012"
-	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R32 - R396/15°" "83012" 15.590551 15.000000 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Bogen-Schwellenband - R32 - R396/15Â°	83012"
+	U "Curved Section" "" "Tillig" "Bogen-Schwellenband - R32 - R396/15Â°" "83012" 15.590551 15.000000 1.181102 0.000000 13279072
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.035128 0.531234 75.000000
@@ -695,8 +695,8 @@ TURNOUT TT "Tillig	Flex-Schwellenband - 80mm - Stahlschwellen	83036"
 	L3 13279072 0.000000 -0.000002 -0.590551 0 3.149605 -0.590547 0
 	L3 13279072 0.000000 0.000000 0.590551 0 3.149606 0.590555 0
 	END
-TURNOUT TT "Tillig	Flexsteg-Weiche links - 15° - Bausatz	83420"
-	U "Regular Turnout" "" "Tillig" "Flexsteg-Weiche links - 15° - Bausatz" "83420" "Flexsteg-Weiche rechts - 15° - Bausatz" "83420" 6.429528 15.000000 0.846457 6.535433 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Flexsteg-Weiche links - 15Â° - Bausatz	83420"
+	U "Regular Turnout" "" "Tillig" "Flexsteg-Weiche links - 15Â° - Bausatz" "83420" "Flexsteg-Weiche rechts - 15Â° - Bausatz" "83420" 6.429528 15.000000 0.846457 6.535433 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -711,8 +711,8 @@ TURNOUT TT "Tillig	Flexsteg-Weiche links - 15° - Bausatz	83420"
 	A3 13279072 0.000000 20.665633 0.472139 21.256184 0 164.999924 15.000152
 	L3 13279072 0.000000 5.820811 1.294726 0 6.276672 1.416883 0
 	END
-TURNOUT TT "Tillig	Flexsteg-Weiche rechts - 15° - Bausatz	83420"
-	U "Regular Turnout" "" "Tillig" "Flexsteg-Weiche links - 15° - Bausatz" "83420" "Flexsteg-Weiche rechts - 15° - Bausatz" "83420" 6.429528 15.000000 0.846457 6.535433 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Flexsteg-Weiche rechts - 15Â° - Bausatz	83420"
+	U "Regular Turnout" "" "Tillig" "Flexsteg-Weiche links - 15Â° - Bausatz" "83420" "Flexsteg-Weiche rechts - 15Â° - Bausatz" "83420" 6.429528 15.000000 0.846457 6.535433 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -727,8 +727,8 @@ TURNOUT TT "Tillig	Flexsteg-Weiche rechts - 15° - Bausatz	83420"
 	A3 13279072 0.000000 20.665633 0.472026 -21.256184 0 0.000076 15.000152
 	L3 13279072 0.000000 5.820808 -1.294725 0 6.276669 -1.416882 0
 	END
-TURNOUT TT "Tillig	Flexsteg-Weiche links - 12° - Bausatz	83421"
-	U "Regular Turnout" "" "Tillig" "Flexsteg-Weiche links - 12° - Bausatz" "83421" "Flexsteg-Weiche rechts - 12° - Bausatz" "83421" 8.054331 12.000000 0.846457 8.149606 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Flexsteg-Weiche links - 12Â° - Bausatz	83421"
+	U "Regular Turnout" "" "Tillig" "Flexsteg-Weiche links - 12Â° - Bausatz" "83421" "Flexsteg-Weiche rechts - 12Â° - Bausatz" "83421" 8.054331 12.000000 0.846457 8.149606 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -743,8 +743,8 @@ TURNOUT TT "Tillig	Flexsteg-Weiche links - 12° - Bausatz	83421"
 	A3 13279072 0.000000 33.653425 0.472975 34.243976 0 167.999924 12.000152
 	L3 13279072 0.000000 7.469940 1.325974 0 7.931536 1.424100 0
 	END
-TURNOUT TT "Tillig	Flexsteg-Weiche rechts - 12° - Bausatz	83421"
-	U "Regular Turnout" "" "Tillig" "Flexsteg-Weiche links - 12° - Bausatz" "83421" "Flexsteg-Weiche rechts - 12° - Bausatz" "83421" 8.054331 12.000000 0.846457 8.149606 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	Flexsteg-Weiche rechts - 12Â° - Bausatz	83421"
+	U "Regular Turnout" "" "Tillig" "Flexsteg-Weiche links - 12Â° - Bausatz" "83421" "Flexsteg-Weiche rechts - 12Â° - Bausatz" "83421" 8.054331 12.000000 0.846457 8.149606 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -797,8 +797,8 @@ TURNOUT TT "Tillig	Innenbogenweiche - Bausatz, rechts	83411"
 	A3 13279072 0.000000 21.846744 0.472025 -21.256193 0 0.000699 14.999529
 	L3 13279072 0.000000 6.126523 -0.153875 0 6.582385 -0.276031 0
 	END
-TURNOUT TT "Tillig	EW1 - Bausatz, links - 15°	83430"
-	U "Regular Turnout" "" "Tillig" "EW1 - Bausatz, links - 15°" "83430" "EW1 - Bausatz, rechts - 15°" "83431" 4.985039 15.000000 0.846457 5.098425 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	EW1 - Bausatz, links - 15Â°	83430"
+	U "Regular Turnout" "" "Tillig" "EW1 - Bausatz, links - 15Â°" "83430" "EW1 - Bausatz, rechts - 15Â°" "83431" 4.985039 15.000000 0.846457 5.098425 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -813,8 +813,8 @@ TURNOUT TT "Tillig	EW1 - Bausatz, links - 15°	83430"
 	A3 13279072 0.000000 9.694435 0.472014 10.284986 0 164.999924 15.000152
 	L3 13279072 0.000000 2.981128 0.920887 0 4.832192 1.416885 0
 	END
-TURNOUT TT "Tillig	EW1 - Bausatz, rechts - 15°	83431"
-	U "Regular Turnout" "" "Tillig" "EW1 - Bausatz, links - 15°" "83430" "EW1 - Bausatz, rechts - 15°" "83431" 4.985039 15.000000 0.846457 5.098425 1.181102 0.000000 13279072
+TURNOUT TT "Tillig	EW1 - Bausatz, rechts - 15Â°	83431"
+	U "Regular Turnout" "" "Tillig" "EW1 - Bausatz, links - 15Â°" "83430" "EW1 - Bausatz, rechts - 15Â°" "83431" 4.985039 15.000000 0.846457 5.098425 1.181102 0.000000 13279072
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000

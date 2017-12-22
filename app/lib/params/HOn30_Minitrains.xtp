@@ -34,15 +34,15 @@ TURNOUT HOn30 "Minitrains	Insulated Track	9304"
 	E 3.031496 0.000000 90.000000
 	S 0 0.000000 0.000000 0.000000 3.031496 0.000000
 	END
-TURNOUT HOn30 "Minitrains	Curved Track 60°	9321"
-	U "Curved Section" "" "Minitrains" "Curved Track 60°" "9321" 5.511811 60.000000 0.000000 0.000000 0
+TURNOUT HOn30 "Minitrains	Curved Track 60Â°	9321"
+	U "Curved Section" "" "Minitrains" "Curved Track 60Â°" "9321" 5.511811 60.000000 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.773366 2.755901 30.000000
 	C 0 0.000000 -5.511811 0.000007 5.511811 120.000076 60.000000
 	END
-TURNOUT HOn30 "Minitrains	Curved Track 30°	9302"
-	U "Curved Section" "" "Minitrains" "Curved Track 30°" "9302" 5.511811 30.000000 0.000000 0.000000 0
+TURNOUT HOn30 "Minitrains	Curved Track 30Â°	9302"
+	U "Curved Section" "" "Minitrains" "Curved Track 30Â°" "9302" 5.511811 30.000000 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.755903 0.738441 60.000000

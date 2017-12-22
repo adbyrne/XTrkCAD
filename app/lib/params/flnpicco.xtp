@@ -46,8 +46,8 @@ TURNOUT N "Fleischmann N Scale	Straight 27.75mm	9104"
 	L 0 0.000000 0.000000 0.314960 1.092520 0.314961
 	END
 SUBCONTENTS Curved Track
-TURNOUT N "Fleischmann N Scale	Curved 192mm 45°	9120"
-	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 192mm 45°" "9120" 7.559055 45.000000 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Curved 192mm 45Â°	9120"
+	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 192mm 45Â°" "9120" 7.559055 45.000000 0.629921 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 5.345059 2.213996 45.000000
@@ -55,8 +55,8 @@ TURNOUT N "Fleischmann N Scale	Curved 192mm 45°	9120"
 	A 0 0.000000 7.874016 0.000000 7.559055 135.000000 45.000000
 	A 0 0.000000 7.244095 0.000000 7.559055 135.000000 45.000000
 	END
-TURNOUT N "Fleischmann N Scale	Curved 192mm 15°	9122"
-	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 192mm 15°" "9122" 7.559055 15.000000 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Curved 192mm 15Â°	9122"
+	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 192mm 15Â°" "9122" 7.559055 15.000000 0.629921 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.956427 0.257569 75.000000
@@ -64,8 +64,8 @@ TURNOUT N "Fleischmann N Scale	Curved 192mm 15°	9122"
 	A 0 0.000000 7.874016 0.000000 7.559055 165.000000 15.000000
 	A 0 0.000000 7.244095 0.000000 7.559055 165.000000 15.000000
 	END
-TURNOUT N "Fleischmann N Scale	Curved 192mm 7.5°	9123"
-	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 192mm 7.5°" "9123" 7.559055 7.500000 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Curved 192mm 7.5Â°	9123"
+	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 192mm 7.5Â°" "9123" 7.559055 7.500000 0.629921 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 0.986655 0.064669 82.500000
@@ -73,8 +73,8 @@ TURNOUT N "Fleischmann N Scale	Curved 192mm 7.5°	9123"
 	A 0 0.000000 7.874016 0.000000 7.559055 172.500000 7.500000
 	A 0 0.000000 7.244095 0.000000 7.559055 172.500000 7.500000
 	END
-TURNOUT N "Fleischmann N Scale	Curved 225.6mm 45°	9125"
-	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 225.6mm 45°" "9125" 8.881890 45.000000 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Curved 225.6mm 45Â°	9125"
+	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 225.6mm 45Â°" "9125" 8.881890 45.000000 0.629921 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.280444 2.601445 45.000000
@@ -82,8 +82,8 @@ TURNOUT N "Fleischmann N Scale	Curved 225.6mm 45°	9125"
 	A 0 0.000000 9.196850 0.000000 8.881890 135.000000 45.000000
 	A 0 0.000000 8.566929 0.000000 8.881890 135.000000 45.000000
 	END
-TURNOUT N "Fleischmann N Scale	Curved 225.6mm 15°	9127"
-	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 225.6mm 15°" "9127" 8.881890 15.000000 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Curved 225.6mm 15Â°	9127"
+	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 225.6mm 15Â°" "9127" 8.881890 15.000000 0.629921 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.298802 0.302643 75.000000
@@ -91,8 +91,8 @@ TURNOUT N "Fleischmann N Scale	Curved 225.6mm 15°	9127"
 	A 0 0.000000 9.196850 0.000000 8.881890 165.000000 15.000000
 	A 0 0.000000 8.566929 0.000000 8.881890 165.000000 15.000000
 	END
-TURNOUT N "Fleischmann N Scale	Curved 225.6mm 7.5°	9128"
-	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 225.6mm 7.5°" "9128" 8.881890 7.500000 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Curved 225.6mm 7.5Â°	9128"
+	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 225.6mm 7.5Â°" "9128" 8.881890 7.500000 0.629921 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 1.159319 0.075986 82.500000
@@ -100,8 +100,8 @@ TURNOUT N "Fleischmann N Scale	Curved 225.6mm 7.5°	9128"
 	A 0 0.000000 9.196850 0.000000 8.881890 172.500000 7.500000
 	A 0 0.000000 8.566929 0.000000 8.881890 172.500000 7.500000
 	END
-TURNOUT N "Fleischmann N Scale	Curved 396.4mm 30°	9130"
-	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 396.4mm 30°" "9130" 15.606299 30.000000 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Curved 396.4mm 30Â°	9130"
+	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 396.4mm 30Â°" "9130" 15.606299 30.000000 0.629921 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.803150 2.090848 60.000000
@@ -109,8 +109,8 @@ TURNOUT N "Fleischmann N Scale	Curved 396.4mm 30°	9130"
 	A 0 0.000000 15.921260 0.000000 15.606299 150.000000 30.000000
 	A 0 0.000000 15.291339 0.000000 15.606299 150.000000 30.000000
 	END
-TURNOUT N "Fleischmann N Scale	Curved 396.4mm 15°	9131"
-	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 396.4mm 15°" "9131" 15.606299 15.000000 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Curved 396.4mm 15Â°	9131"
+	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 396.4mm 15Â°" "9131" 15.606299 15.000000 0.629921 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.039207 0.531772 75.000000
@@ -118,8 +118,8 @@ TURNOUT N "Fleischmann N Scale	Curved 396.4mm 15°	9131"
 	A 0 0.000000 15.921260 0.000000 15.606299 165.000000 15.000000
 	A 0 0.000000 15.291339 0.000000 15.606299 165.000000 15.000000
 	END
-TURNOUT N "Fleischmann N Scale	Curved 430mm 30°	9135"
-	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 430mm 30°" "9135" 16.929134 30.000000 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Curved 430mm 30Â°	9135"
+	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 430mm 30Â°" "9135" 16.929134 30.000000 0.629921 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 8.464567 2.268074 60.000000
@@ -127,8 +127,8 @@ TURNOUT N "Fleischmann N Scale	Curved 430mm 30°	9135"
 	A 0 0.000000 17.244094 0.000000 16.929134 150.000000 30.000000
 	A 0 0.000000 16.614173 0.000000 16.929134 150.000000 30.000000
 	END
-TURNOUT N "Fleischmann N Scale	Curved 430mm 15°	9136"
-	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 430mm 15°" "9136" 16.929134 15.000000 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Curved 430mm 15Â°	9136"
+	U "Curved Section" "Sillub Technology" "Fleischmann N Scale" "Curved 430mm 15Â°" "9136" 16.929134 15.000000 0.629921 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.381582 0.576846 75.000000
@@ -137,8 +137,8 @@ TURNOUT N "Fleischmann N Scale	Curved 430mm 15°	9136"
 	A 0 0.000000 16.614173 0.000000 16.929134 165.000000 15.000000
 	END
 SUBCONTENTS Crossings	
-TURNOUT N "Fleischmann N Scale	Crossing 115mm 30°	9161"
-	U "Crossing" "Sillub Technology" "Fleischmann N Scale" "Crossing 115mm 30°" "9161" 4.527559 30.000000 4.527559 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Crossing 115mm 30Â°	9161"
+	U "Crossing" "Sillub Technology" "Fleischmann N Scale" "Crossing 115mm 30Â°" "9161" 4.527559 30.000000 4.527559 0.629921 0.000000 0
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 4.527559 0.000000 90.000000
@@ -155,8 +155,8 @@ TURNOUT N "Fleischmann N Scale	Crossing 115mm 30°	9161"
 	L 0 0.000000 0.460769 1.404654 2.298729 0.343507
 	L 0 0.000000 3.401505 -0.293181 4.381750 -0.859126
 	END
-TURNOUT N "Fleischmann N Scale	Crossing Right 111mm 15°	9162"
-	U "Crossing" "Sillub Technology" "Fleischmann N Scale" "Crossing Right 111mm 15°" "9162" 4.527559 15.000000 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Crossing Right 111mm 15Â°	9162"
+	U "Crossing" "Sillub Technology" "Fleischmann N Scale" "Crossing Right 111mm 15Â°" "9162" 4.527559 15.000000 4.370079 0.629921 0.000000 0
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 4.527559 0.000000 90.000000
@@ -169,8 +169,8 @@ TURNOUT N "Fleischmann N Scale	Crossing Right 111mm 15°	9162"
 	L 0 0.000000 2.182262 -0.304228 4.292848 -0.869758
 	L 0 0.000000 0.234711 0.869758 2.345297 0.304228
 	END
-TURNOUT N "Fleischmann N Scale	Crossing Left 111mm 15°	9163"
-	U "Crossing" "Sillub Technology" "Fleischmann N Scale" "Crossing Left 111mm 15°" "9163" 4.370079 15.000000 4.527559 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Crossing Left 111mm 15Â°	9163"
+	U "Crossing" "Sillub Technology" "Fleischmann N Scale" "Crossing Left 111mm 15Â°" "9163" 4.370079 15.000000 4.527559 0.629921 0.000000 0
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 4.370079 0.000000 90.000000
@@ -183,8 +183,8 @@ TURNOUT N "Fleischmann N Scale	Crossing Left 111mm 15°	9163"
 	L 0 0.000000 2.103522 -0.304228 4.290165 -0.890138
 	L 0 0.000000 0.079914 0.890138 2.266557 0.304228
 	END
-TURNOUT N "Fleischmann N Scale	Double Slip Left 111mm 15°	9184"
-	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip Left 111mm 15°" "9184" 4.527559 15.000000 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Double Slip Left 111mm 15Â°	9184"
+	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip Left 111mm 15Â°" "9184" 4.527559 15.000000 4.370079 0.629921 0.000000 0
 	P "Normal" 1 2 3 0 4 5 6
 	P "Reverse" 1 7 6 0 4 8 3
 	E 0.000000 0.000000 270.000000
@@ -206,8 +206,8 @@ TURNOUT N "Fleischmann N Scale	Double Slip Left 111mm 15°	9184"
 	A 0 0.000000 10.917940 0.784940 -11.232900 0.000000 15.000000
 	A 0 0.000000 10.917940 3.742619 11.232900 180.000000 15.000000
 	END
-TURNOUT N "Fleischmann N Scale	Double Slip Right 111mm 15°	9185"
-	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip Right 111mm 15°" "9185" 4.370079 15.000000 4.527559 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Double Slip Right 111mm 15Â°	9185"
+	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip Right 111mm 15Â°" "9185" 4.370079 15.000000 4.527559 0.629921 0.000000 0
 	P "Normal" 1 2 3 0 4 5 6
 	P "Reverse" 1 7 6 0 4 8 3
 	E 0.000000 0.000000 270.000000
@@ -229,8 +229,8 @@ TURNOUT N "Fleischmann N Scale	Double Slip Right 111mm 15°	9185"
 	A 0 0.000000 11.516031 0.627460 -11.830991 0.000000 15.000000
 	A 0 0.000000 11.516031 3.742619 11.830991 180.000000 15.000000
 	END
-TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Left 111mm 15°	9186"
-	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip w/Motor Left 111mm 15°" "9186" 4.527559 15.000000 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Left 111mm 15Â°	9186"
+	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip w/Motor Left 111mm 15Â°" "9186" 4.527559 15.000000 4.370079 0.629921 0.000000 0
 	P "Normal" 1 2 3 0 4 5 6
 	P "Reverse" 1 7 6 0 4 8 3
 	E 0.000000 0.000000 270.000000
@@ -252,8 +252,8 @@ TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Left 111mm 15°	9186"
 	A 0 0.000000 10.917940 0.784940 -11.232900 0.000000 15.000000
 	A 0 0.000000 10.917940 3.742619 11.232900 180.000000 15.000000
 	END
-TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Right 111mm 15°	9187"
-	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip w/Motor Right 111mm 15°" "9187" 4.370079 15.000000 4.527559 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Right 111mm 15Â°	9187"
+	U "Double Slipswitch" "Sillub Technology" "Fleischmann N Scale" "Double Slip w/Motor Right 111mm 15Â°" "9187" 4.370079 15.000000 4.527559 0.629921 0.000000 0
 	P "Normal" 1 2 3 0 4 5 6
 	P "Reverse" 1 7 6 0 4 8 3
 	E 0.000000 0.000000 270.000000
@@ -275,8 +275,8 @@ TURNOUT N "Fleischmann N Scale	Double Slip w/Motor Right 111mm 15°	9187"
 	A 0 0.000000 11.516031 0.627460 -11.830991 0.000000 15.000000
 	A 0 0.000000 11.516031 3.742619 11.830991 180.000000 15.000000
 	END
-TURNOUT N "Fleischmann N Scale	Turnout Left 111mm 15°	9170"
-	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout Left 111mm 15°" "9170" "Turnout Right 111mm 15°" "9171" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Turnout Left 111mm 15Â°	9170"
+	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout Left 111mm 15Â°" "9170" "Turnout Right 111mm 15Â°" "9171" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -294,8 +294,8 @@ TURNOUT N "Fleischmann N Scale	Turnout Left 111mm 15°	9170"
 	L3 0 0.000000 3.316016 0.699917 0 4.289845 0.960854 0
 	END
 SUBCONTENTS Turnouts	
-TURNOUT N "Fleischmann N Scale	Turnout Right 111mm 15°	9171"
-	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout Left 111mm 15°" "9170" "Turnout Right 111mm 15°" "9171" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Turnout Right 111mm 15Â°	9171"
+	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout Left 111mm 15Â°" "9170" "Turnout Right 111mm 15Â°" "9171" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -312,8 +312,8 @@ TURNOUT N "Fleischmann N Scale	Turnout Right 111mm 15°	9171"
 	L3 0 0.000000 3.316016 -0.699917 0 4.289845 -0.960854 0
 	L3 0 0.000000 4.267720 -0.313054 0 4.450313 -0.361980 0
 	END
-TURNOUT N "Fleischmann N Scale	Turnout w/Motor Left 111mm 15°	9172"
-	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Motor Left 111mm 15°" "9172" "Turnout w/Motor Right 111mm 15°" "9173" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Turnout w/Motor Left 111mm 15Â°	9172"
+	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Motor Left 111mm 15Â°" "9172" "Turnout w/Motor Right 111mm 15Â°" "9173" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -330,8 +330,8 @@ TURNOUT N "Fleischmann N Scale	Turnout w/Motor Left 111mm 15°	9172"
 	L3 0 0.000000 4.267720 0.313054 0 4.450313 0.361980 0
 	L3 0 0.000000 3.316016 0.699917 0 4.289845 0.960854 0
 	END
-TURNOUT N "Fleischmann N Scale	Turnout w/Motor Right 111mm 15°	9173"
-	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Motor Left 111mm 15°" "9172" "Turnout w/Motor Right 111mm 15°" "9173" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Turnout w/Motor Right 111mm 15Â°	9173"
+	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Motor Left 111mm 15Â°" "9172" "Turnout w/Motor Right 111mm 15Â°" "9173" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -348,8 +348,8 @@ TURNOUT N "Fleischmann N Scale	Turnout w/Motor Right 111mm 15°	9173"
 	L3 0 0.000000 3.316016 -0.699917 0 4.289845 -0.960854 0
 	L3 0 0.000000 4.267720 -0.313054 0 4.450313 -0.361980 0
 	END
-TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog Left 111mm 15°	9178"
-	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Cond Frog Left 111mm 15°" "9178" "Turnout w/Cond Frog Right 111mm 15°" "9179" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog Left 111mm 15Â°	9178"
+	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Cond Frog Left 111mm 15Â°" "9178" "Turnout w/Cond Frog Right 111mm 15Â°" "9179" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -366,8 +366,8 @@ TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog Left 111mm 15°	9178"
 	L3 0 0.000000 4.267720 0.313054 0 4.450313 0.361980 0
 	L3 0 0.000000 3.316016 0.699917 0 4.289845 0.960854 0
 	END
-TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog Right 111mm 15°	9179"
-	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Cond Frog Left 111mm 15°" "9178" "Turnout w/Cond Frog Right 111mm 15°" "9179" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog Right 111mm 15Â°	9179"
+	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Cond Frog Left 111mm 15Â°" "9178" "Turnout w/Cond Frog Right 111mm 15Â°" "9179" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -384,8 +384,8 @@ TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog Right 111mm 15°	9179"
 	L3 0 0.000000 3.316016 -0.699917 0 4.289845 -0.960854 0
 	L3 0 0.000000 4.267720 -0.313054 0 4.450313 -0.361980 0
 	END
-TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog w/Motor Left 111mm 15°	9180"
-	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Cond Frog w/Motor Left 111mm 15°" "9180" "Turnout w/Cond Frog w/Motor Right 111mm 15°" "9181" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog w/Motor Left 111mm 15Â°	9180"
+	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Cond Frog w/Motor Left 111mm 15Â°" "9180" "Turnout w/Cond Frog w/Motor Right 111mm 15Â°" "9181" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -402,8 +402,8 @@ TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog w/Motor Left 111mm 15°	9180"
 	L3 0 0.000000 4.267720 0.313054 0 4.450313 0.361980 0
 	L3 0 0.000000 3.316016 0.699917 0 4.289845 0.960854 0
 	END
-TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog w/Motor Right 111mm 15°	9181"
-	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Cond Frog w/Motor Left 111mm 15°" "9180" "Turnout w/Cond Frog w/Motor Right 111mm 15°" "9181" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog w/Motor Right 111mm 15Â°	9181"
+	U "Regular Turnout" "Martin Fischer" "Fleischmann N Scale" "Turnout w/Cond Frog w/Motor Left 111mm 15Â°" "9180" "Turnout w/Cond Frog w/Motor Right 111mm 15Â°" "9181" 4.381582 15.000000 0.576846 4.370079 0.629921 0.000000 0
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -420,8 +420,8 @@ TURNOUT N "Fleischmann N Scale	Turnout w/Cond Frog w/Motor Right 111mm 15°	9181"
 	L3 0 0.000000 3.316016 -0.699917 0 4.289845 -0.960854 0
 	L3 0 0.000000 4.267720 -0.313054 0 4.450313 -0.361980 0
 	END
-TURNOUT N "Fleischmann N Scale	Turnout 3-Way 111mm 15°	9157"
-	U "3-way Turnout" "Sillub Technology" "Fleischmann N Scale" "Turnout 3-Way 111mm 15°" "9157" 4.370079 15.000000 0.576772 4.370079 0.576772 15.000000 4.370079 0.629921 0.000000 0
+TURNOUT N "Fleischmann N Scale	Turnout 3-Way 111mm 15Â°	9157"
+	U "3-way Turnout" "Sillub Technology" "Fleischmann N Scale" "Turnout 3-Way 111mm 15Â°" "9157" 4.370079 15.000000 0.576772 4.370079 0.576772 15.000000 4.370079 0.629921 0.000000 0
 	P "Left" 1 2 3
 	P "Normal" 1 6
 	P "Right" 1 4 5

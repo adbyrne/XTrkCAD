@@ -1,40 +1,40 @@
-CONTENTS Märklin Z-Scale Turnouts
-# From 'Märklin	Complete Program 1994/95 E'
+CONTENTS MÃ¤rklin Z-Scale Turnouts
+# From 'MÃ¤rklin	Complete Program 1994/95 E'
 ##########################################################################
 ##########################################################################
 
-SUBCONTENTS Märklin Z-Scale - Straight Track
-TURNOUT Z  "Märklin	Straight 110mm	8500"
+SUBCONTENTS MÃ¤rklin Z-Scale - Straight Track
+TURNOUT Z  "MÃ¤rklin	Straight 110mm	8500"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.330709 0.000000 90.000000
 	S 0 0 0.000000 0.000000 4.331000 0.000000
 	END
-TURNOUT Z  "Märklin	Straight 55mm	8503"
+TURNOUT Z  "MÃ¤rklin	Straight 55mm	8503"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.165354 0.000000 90.000000
 	S 0 0 0.000000 0.000000 2.165000 0.000000
 	END
-TURNOUT Z  "Märklin	Straight 25mm	8504"
+TURNOUT Z  "MÃ¤rklin	Straight 25mm	8504"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 0.984252 0.000000 90.000000
 	S 0 0 0.000000 0.000000 0.984000 0.000000
 	END
-TURNOUT Z  "Märklin	Straight 220mm	8505"
+TURNOUT Z  "MÃ¤rklin	Straight 220mm	8505"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 8.661417 0.000000 90.000000
 	S 0 0 0.000000 0.000000 8.661000 0.000000
 	END
-TURNOUT Z  "Märklin	Straight 108.6mm	8506"
+TURNOUT Z  "MÃ¤rklin	Straight 108.6mm	8506"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.275591 0.000000 90.000000
 	S 0 0 0.000000 0.000000 4.276000 0.000000
 	END
-TURNOUT Z  "Märklin	Straight 112.8mm	8507"
+TURNOUT Z  "MÃ¤rklin	Straight 112.8mm	8507"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.440945 0.000000 90.000000
@@ -43,26 +43,26 @@ TURNOUT Z  "Märklin	Straight 112.8mm	8507"
 ##########################################################################
 ##########################################################################
 
-SUBCONTENTS Märklin Z-Scale - Curved Track
-TURNOUT Z  "Märklin	Curved 145mm 45°	8510"
+SUBCONTENTS MÃ¤rklin Z-Scale - Curved Track
+TURNOUT Z  "MÃ¤rklin	Curved 145mm 45Â°	8510"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.036633 -1.672028 135.000000
 	C 0 0 5.709000 0.000000 -5.709000 0.000000 45.000000
 	END
-TURNOUT Z  "Märklin	Curved 195mm 45°	8520"	
+TURNOUT Z  "MÃ¤rklin	Curved 195mm 45Â°	8520"	
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 5.428576 -2.248590 135.000000
 	C 0 0 7.677000 0.000000 -7.677000 0.000000 45.000000
 	END
-TURNOUT Z  "Märklin	Curved 195mm 30°	8521"
+TURNOUT Z  "MÃ¤rklin	Curved 195mm 30Â°	8521"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.838583 -1.028545 120.000000
 	C 0 0 7.677000 0.000000 -7.677000 0.000000 30.000000
 	END
-TURNOUT Z "Märklin	Curved 195mm Circuit Track	8529"
+TURNOUT Z "MÃ¤rklin	Curved 195mm Circuit Track	8529"
 	P "Normal" 1
 	E 0.000000 1.028523 270.000000
 	E 3.838583 -0.000022 120.000000
@@ -91,19 +91,19 @@ TURNOUT Z "Märklin	Curved 195mm Circuit Track	8529"
 		2.500000 0.457657 0
 		1.515748 0.733247 0
 	END
-TURNOUT Z  "Märklin	Curved 220mm 45°	8530"
+TURNOUT Z  "MÃ¤rklin	Curved 220mm 45Â°	8530"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.124547 -2.536870 135.000000
 	C 0 0 8.661000 0.000000 -8.661000 0.000000 45.000000
 	END
-TURNOUT Z  "Märklin	Curved 220mm 30°	8531"
+TURNOUT Z  "MÃ¤rklin	Curved 220mm 30Â°	8531"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.330709 -1.160410 120.000000
 	C 0 0 8.661000 0.000000 -8.661000 0.000000 30.000000
 	END
-TURNOUT Z "Märklin	Curved 220mm Circuit Track	8539"
+TURNOUT Z "MÃ¤rklin	Curved 220mm Circuit Track	8539"
 	P "Normal" 1
 	E 0.000000 1.160354 270.000000
 	E 4.330709 -0.000056 120.000000
@@ -132,7 +132,7 @@ TURNOUT Z "Märklin	Curved 220mm Circuit Track	8539"
 		2.755906 0.550118 0
 		1.771654 0.825708 0
 	END
-TURNOUT Z  "Märklin	Curve 490mm 13°	8591"
+TURNOUT Z  "MÃ¤rklin	Curve 490mm 13Â°	8591"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.339607 -0.494436 103.000000
@@ -141,8 +141,8 @@ TURNOUT Z  "Märklin	Curve 490mm 13°	8591"
 ##########################################################################
 ##########################################################################
 
-SUBCONTENTS Märklin Z-Scale - Crossings
-TURNOUT Z  "Märklin	Crossing	8559"
+SUBCONTENTS MÃ¤rklin Z-Scale - Crossings
+TURNOUT Z  "MÃ¤rklin	Crossing	8559"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 4.440945 0.000000 90.000000
@@ -154,9 +154,9 @@ TURNOUT Z  "Märklin	Crossing	8559"
 ##########################################################################
 ##########################################################################
 
-SUBCONTENTS Märklin Z-Scale - Turnouts(Switches)
+SUBCONTENTS MÃ¤rklin Z-Scale - Turnouts(Switches)
 # Double Slipswitch Design by Dirk Husemann - 11.280000 13.000000 11.2800
-TURNOUT Z "Märklin	Double Slip	8560"
+TURNOUT Z "MÃ¤rklin	Double Slip	8560"
 	P "Normal" 1 2 3 0 4 5 6
 	P "Reverse" 1 7 6 0 4 8 3
 	E 0.000000 0.000000 270.000000
@@ -172,7 +172,7 @@ TURNOUT Z "Märklin	Double Slip	8560"
 	C 0 0 14.981027 0.513600 -14.981027 0.000000 13.000000
 	C 0 0 -14.981027 3.927345 14.981027 180.000000 13.000000
 	END
-TURNOUT Z  "Märklin	Left Remote Turnout	8562"
+TURNOUT Z  "MÃ¤rklin	Left Remote Turnout	8562"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -181,7 +181,7 @@ TURNOUT Z  "Märklin	Left Remote Turnout	8562"
 	S 0 0 0.000000 0.000000 4.331000 0.000000
 	C 0 0 -19.291000 0.000000 19.291000 167.000000 13.000000
 	END
-TURNOUT Z  "Märklin	Right Remote Turnout	8563"
+TURNOUT Z  "MÃ¤rklin	Right Remote Turnout	8563"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -190,7 +190,7 @@ TURNOUT Z  "Märklin	Right Remote Turnout	8563"
 	S 0 0 0.000000 0.000000 4.331000 0.000000
 	C 0 0 19.291000 0.000000 -19.291000 0.000000 13.000000
 	END
-TURNOUT Z  "Märklin	Left Manual Turnout	8565"
+TURNOUT Z  "MÃ¤rklin	Left Manual Turnout	8565"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -199,7 +199,7 @@ TURNOUT Z  "Märklin	Left Manual Turnout	8565"
 	S 0 0 0.000000 0.000000 4.331000 0.000000
 	C 0 0 -19.291000 0.000000 19.291000 167.000000 13.000000
 	END
-TURNOUT Z  "Märklin	Right Manual Turnout	8566"
+TURNOUT Z  "MÃ¤rklin	Right Manual Turnout	8566"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -211,7 +211,7 @@ TURNOUT Z  "Märklin	Right Manual Turnout	8566"
 #
 # I'm guessing about the Outside leg radius
 #
-TURNOUT Z  "Märklin	Curved Left Turnout	8568"
+TURNOUT Z  "MÃ¤rklin	Curved Left Turnout	8568"
 	P "Normal" 1 2
 	P "Reverse" 3
 	E 0.000000 0.000000 270.000000
@@ -221,7 +221,7 @@ TURNOUT Z  "Märklin	Curved Left Turnout	8568"
 	C 0 0 -7.677000 0.984000 7.677000 150.000000 30.000000
 	C 0 0 -7.677000 0.000000 7.677000 150.000000 30.000000
 	END
-TURNOUT Z  "Märklin	Curved Right Turnout	8569"
+TURNOUT Z  "MÃ¤rklin	Curved Right Turnout	8569"
 	P "Normal" 1 2
 	P "Reverse" 3
 	E 0.000000 0.000000 270.000000
@@ -234,8 +234,8 @@ TURNOUT Z  "Märklin	Curved Right Turnout	8569"
 ##########################################################################
 ##########################################################################
 
-SUBCONTENTS Märklin Z-Scale - Misc Track
-TURNOUT Z "Märklin	Uncoupler Track	8587"
+SUBCONTENTS MÃ¤rklin Z-Scale - Misc Track
+TURNOUT Z "MÃ¤rklin	Uncoupler Track	8587"
 	P "P0" 1
 	E 0.000000 0.492126 270.000000
 	E 2.165000 0.492126 90.000000
@@ -251,7 +251,7 @@ TURNOUT Z "Märklin	Uncoupler Track	8587"
 		1.082677 0.393701 0
 		0.295276 0.393701 0
 	END
-TURNOUT Z "Märklin	Straight Isolating Track	8588"
+TURNOUT Z "MÃ¤rklin	Straight Isolating Track	8588"
 	P "Normal" 1
 	E 0.000000 0.590551 270.000000
 	E 2.165354 0.590551 90.000000
@@ -275,7 +275,7 @@ TURNOUT Z "Märklin	Straight Isolating Track	8588"
 	L3 0 0.026667 1.062992 0.551181 0 1.062992 0.393701 0
 	L3 0 0.026667 1.102362 0.551181 0 1.102362 0.393701 0
 	END
-TURNOUT Z "Märklin	Straight Circuit Track	8589"
+TURNOUT Z "MÃ¤rklin	Straight Circuit Track	8589"
 	P "Normal" 1
 	E 0.000000 0.590551 270.000000
 	E 2.165354 0.590551 90.000000
@@ -302,7 +302,7 @@ TURNOUT Z "Märklin	Straight Circuit Track	8589"
 		1.968504 0.787402 0
 		0.196850 0.787402 0
 	END
-TURNOUT Z "Märklin	Straight Feeder Track	8590"
+TURNOUT Z "MÃ¤rklin	Straight Feeder Track	8590"
 	P "P0" 1
 	E 0.000000 0.590551 270.000000
 	E 4.330709 0.590551 90.000000
@@ -324,20 +324,20 @@ TURNOUT Z "Märklin	Straight Feeder Track	8590"
 		2.362382 0.098425 0
 		2.263956 0.098425 0
 	END
-TURNOUT Z  "Märklin	Curve 490mm 13°	8591"
+TURNOUT Z  "MÃ¤rklin	Curve 490mm 13Â°	8591"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.339607 -0.494436 103.000000
 	C 0 0 19.291000 0.000000 -19.291000 0.000000 13.000000
 	END
-TURNOUT Z  "Märklin	Adjustable 10-12cm	8592"
+TURNOUT Z  "MÃ¤rklin	Adjustable 10-12cm	8592"
 	P "Normal" 1
 	X adjustable 3.9370 4.7244
 	E 0.000000 0.000000 270.000000
 	E 4.7244 0.000000 90.000000
 	S 0 0 0.000000 0.000000 4.7244 0.000000
 	END
-STRUCTURE Z "Märklin	Track Bumper 16mm	8931"
+STRUCTURE Z "MÃ¤rklin	Track Bumper 16mm	8931"
 	X pier -1 ""
 	F3 12566463 0.000000 4
 		0.000000 0.197150 0
@@ -346,7 +346,7 @@ STRUCTURE Z "Märklin	Track Bumper 16mm	8931"
 		0.000000 -0.197150 0
 	G3 16711680 0.000000 0.098500 0.394000 0.00000 0
 	END
-STRUCTURE Z "Märklin	Track Bumper 15mm	8991"
+STRUCTURE Z "MÃ¤rklin	Track Bumper 15mm	8991"
 	X pier -1 ""
 	L3 0 0.026667 -0.395000 0.295000 0 -0.395000 -0.295000 0
 	L3 0 0.026667 -0.591000 0.197500 0 0.000000 0.197500 0
@@ -354,7 +354,7 @@ STRUCTURE Z "Märklin	Track Bumper 15mm	8991"
 	L3 0 0.013333 -0.395000 0.197500 0 0.000000 -0.197500 0
 	L3 0 0.013333 -0.395000 -0.197500 0 0.000000 0.197500 0
 	END
-TURNOUT Z "Märklin	Transfer Table	8994"
+TURNOUT Z "MÃ¤rklin	Transfer Table	8994"
 	P "P1" 1 2 3
 	P "P2" 4 5 6
 	P "P3" 7 8 9
@@ -398,7 +398,7 @@ TURNOUT Z "Märklin	Transfer Table	8994"
 	L3 0 0.026667 5.529333 0.407333 0 7.893333 0.407333 0
 	L3 0 0.026667 0.801333 0.407333 0 3.165333 0.407333 0
 	END
-TURNOUT Z "Märklin	Turntable	8599"
+TURNOUT Z "MÃ¤rklin	Turntable	8599"
 	P "1" 1 2 3
 	P "2" 4 5 6
 	P "3" 7 8 9

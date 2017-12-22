@@ -279,7 +279,7 @@ CARPART N "Atlas	Caboose, Ext Vision		30661	Illinois Central Gulf	ICG	199044" 0 
 CARPART N "Atlas	Caboose, Ext Vision		30662	Illinois Central Gulf	ICG	199045" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
 CARPART N "Atlas	Caboose, Ext Vision		30668	Illinois Central Gulf	ICG	199044" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
 CARPART N "Atlas	Caboose, Ext Vision		30669	Illinois Central Gulf	ICG	199045" 0 30100 2.931 0.750 0 0 2.198 3.331 8535808
-CARPART N "Atlas	Caboose, NE-6	NH Style	33400			 " 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
+CARPART N "Atlas	Caboose, NE-6	NH Style	33400			Â " 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NH Style	33411	Clinchfield	CRR	1071" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NH Style	33412	Clinchfield	CRR	1076" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NH Style	33421	New Haven	NH	C-667" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
@@ -306,7 +306,7 @@ CARPART N "Atlas	Caboose, NE-6	NH Style	33552	Monongahela		72" 0 30100 2.475 0.7
 CARPART N "Atlas	Caboose, NE-6	NH Style	33561	Morristown & Erie		4" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NH Style	33571	Susquehanna		112" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NH Style	33572	Susquehanna		115" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
-CARPART N "Atlas	Caboose, NE-6	NKP Style	33401			 " 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
+CARPART N "Atlas	Caboose, NE-6	NKP Style	33401			Â " 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NKP Style	33431	Nickel Plate Road		768" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NKP Style	33432	Nickel Plate Road		772" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
 CARPART N "Atlas	Caboose, NE-6	NKP Style	33441	Norfolk & Western	N&W	557728" 0 30100 2.475 0.750 0 0 1.856 2.875 8535808
@@ -654,7 +654,7 @@ CARPART N "Atlas	Box, 50'	Staggered Double-Door	36392	Western Pacific	WP	35030" 
 CARPART N "Atlas	Box, 50'	Staggered Double-Door	36393	Western Pacific	WP	35022" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	Staggered Double-Door Automated Railway	36401	Union Pacific	UP	554038" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	Staggered Double-Door Automated Railway	36402	Union Pacific	UP	554040" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
-CARPART N "Atlas	Box, 50'	ACF Precision Design	45000			 " 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
+CARPART N "Atlas	Box, 50'	ACF Precision Design	45000			Â " 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45001	Chicago & North Western	CNW	154102" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45002	Chicago & North Western	CNW	154836" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45011	Illinois Centra		11379" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
@@ -685,7 +685,7 @@ CARPART N "Atlas	Box, 50'	ACF Precision Design	45101	Penn Eastern		1031" 0 30100
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45102	Penn Eastern		1035" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45111	Mississippi Delta		194298" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design	45112	Mississippi Delta		194385" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
-CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45200			 " 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
+CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45200			Â " 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45201	Chicago & North Western	CNW	155138" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45202	Chicago & North Western	CNW	155153" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Box, 50'	ACF Precision Design Ribside	45211	Frisco	SLSF	42044" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
@@ -869,7 +869,7 @@ CARPART N "Atlas	Stock, 50'		35422	Norfolk & Western	N&W	316619" 0 30100 3.800 0
 CARPART N "Atlas	Stock, 50'		35423	Norfolk & Western	N&W	316615" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Stock, 50'		35492	Pennsylvania	PRR	130013" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
 CARPART N "Atlas	Stock, 50'		35493	Pennsylvania	PRR	130011" 0 30100 3.800 0.750 0 0 2.850 4.200 8535808
-CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41400			 " 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41400			Â " 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41401	Chicago Burlington & Quincy	CB&Q	75276" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41402	Chicago Burlington & Quincy	CB&Q	75280" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41403	Edelweiss		18301" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
@@ -968,7 +968,7 @@ CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41506	Pelican Brand		6300" 0 301
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41507	Pelican Brand		6301" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41508	Silver Edge		1001" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 40'	Wood Refridgerator	41509	Silver Edge		1002" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
-CARPART N "Atlas	Reefer, 50'	Mechanical	3650			 " 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
+CARPART N "Atlas	Reefer, 50'	Mechanical	3650			Â " 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 50'	Mechanical	36521	Bangor & Aroostook		" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 50'	Mechanical	36522	Bangor & Aroostook		99" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
 CARPART N "Atlas	Reefer, 50'	Mechanical	36523	Bangor & Aroostook		96" 0 30100 3.750 0.750 0 0 2.813 4.150 8535808
@@ -1087,7 +1087,7 @@ CARPART N "Atlas	Tank, 28'	Modern (Beer Can) Gatx	32531	Dow Chemical		8710" 0 30
 CARPART N "Atlas	Tank, 28'	Modern (Beer Can) Gatx	32532	Dow Chemical		8713" 0 30100 2.100 0.750 0 0 1.575 2.500 8535808
 CARPART N "Atlas	Tank, 28'	Modern (Beer Can) Monx	32541	Monsanto Chemical Co		11510" 0 30100 2.100 0.750 0 0 1.575 2.500 8535808
 CARPART N "Atlas	Tank, 28'	Modern (Beer Can) Monx	32542	Monsanto Chemical Co		11513" 0 30100 2.100 0.750 0 0 1.575 2.500 8535808
-CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	1700			 " 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
+CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	1700			Â " 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	1711-1	Acfx		72084" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	1711-2	Acfx		75969" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	1712-1	Anglo American Clays		78630" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
@@ -1151,7 +1151,7 @@ CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34941	Ontario Carbonat
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34942	Ontario Carbonate		71477" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34951	Shpx		203080" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
 CARPART N "Atlas	Tank, 40'	Tank Car, 14,000 Gallon Kaolin	34952	Shpx		203084" 0 30100 3.000 0.750 0 0 2.250 3.400 8535808
-CARPART N "Atlas	Tank, 55'	23,500 Gallon	30700			 " 0 30100 4.125 0.750 0 0 3.094 4.525 8535808
+CARPART N "Atlas	Tank, 55'	23,500 Gallon	30700			Â " 0 30100 4.125 0.750 0 0 3.094 4.525 8535808
 CARPART N "Atlas	Tank, 55'	23,500 Gallon	30701	Gaf Corporation		83122" 0 30100 4.125 0.750 0 0 3.094 4.525 8535808
 CARPART N "Atlas	Tank, 55'	23,500 Gallon	30701	Gaf Corporation		ACFX 83122" 0 30100 4.125 0.750 0 0 3.094 4.525 8535808
 CARPART N "Atlas	Tank, 55'	23,500 Gallon	30702	Gaf Corporation		83124" 0 30100 4.125 0.750 0 0 3.094 4.525 8535808

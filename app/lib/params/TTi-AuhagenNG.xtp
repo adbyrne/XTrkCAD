@@ -8,7 +8,7 @@ TURNOUT TTi  "Auhagen TTi Track	G44 Straight 1.65 41.7mm	43700-1"
 	END
 
 SUBCONTENTS Auhagen TTi Narrow Gauge Track - Curve Track
-TURNOUT TTi  "Auhagen TTi Track	Curve 1.65R 42mm 30°	43700-2"
+TURNOUT TTi  "Auhagen TTi Track	Curve 1.65R 42mm 30Â°	43700-2"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 0.820866 -0.219950 120.000000

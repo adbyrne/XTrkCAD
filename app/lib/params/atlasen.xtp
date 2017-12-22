@@ -78,7 +78,7 @@ CARPART N "Atlas	RS3		4222	Erie Lackawanna	EL	1039" 1 10101 3.900 0.750 0 0 2.92
 CARPART N "Atlas	RS3		4250	Reading	RDG	496" 1 10101 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	RS3		4251	Lehigh Valley	LV	214" 1 10101 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	RS3		4252	Central New Jersy	CNJ	1553" 1 10101 3.900 0.750 0 0 2.925 4.300 8535808
-CARPART N "Atlas	RS3		4253	Boston & Maine	B&M	  " 1 10101 3.900 0.750 0 0 2.925 4.300 8535808
+CARPART N "Atlas	RS3		4253	Boston & Maine	B&M	Â  " 1 10101 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	RS3		4254	Conrail	CR	9946" 1 10101 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	RS3		4255	Lehigh & Ne		654" 1 10101 3.900 0.750 0 0 2.925 4.300 8535808
 CARPART N "Atlas	RS3		4256	Western Maryland	WM	185" 1 10101 3.900 0.750 0 0 2.925 4.300 8535808
@@ -1095,8 +1095,8 @@ CARPART N "Atlas	H16-44		52016	Santa Fe	SF	2804" 1 10101 3.825 0.750 0 0 2.869 4
 CARPART N "Atlas	H16-44	W/ Early Loewy Body & Cab W/Sill Mounted Handrails	52018			" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
 CARPART N "Atlas	H16-44	Early Body & Cab w/Sill Mounted Handrails	52027	New Haven	NH	594" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
 CARPART N "Atlas	H16-44	Early Body & Cab w/Sill Mounted Handrails	52028	New Haven	NH	596" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
-CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Body Mounted Handrails  	52030	Pennsyvlania		8807" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
-CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Body Mounted Handrails  	52031	Pennsyvlania		8809" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
+CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Body Mounted HandrailsÂ Â 	52030	Pennsyvlania		8807" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
+CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Body Mounted HandrailsÂ Â 	52031	Pennsyvlania		8809" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
 CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Sill Mounted Handrails	52033	Southern	SOU	2147" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
 CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Sill Mounted Handrails	52034	Southern	SOU	2151" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
 CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Sill Mounted Handrails	52046	Long Island		1504" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
@@ -1106,33 +1106,33 @@ CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Sill Mounted Handrails	
 CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Sill Mounted Handrails	52052	New Haven	NH	598" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
 CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Sill Mounted Handrails	52054	Santa Fe	SF	3007" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
 CARPART N "Atlas	H16-44	Early Body & Square Window Cab w/Sill Mounted Handrails	52055	Santa Fe	SF	3011" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
-CARPART N "Atlas	H16-44	Late Body & Square Window Cab w/Sill Mounted Handrails 	52036	Lackawanna		930" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
-CARPART N "Atlas	H16-44	Late Body & Square Window Cab w/Sill Mounted Handrails 	52037	Lackawanna		934" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
-CARPART N "Atlas	H16-44	Late Body/Square Window Cab w/Body & Sill Mounted Handrails 	52057	Erie Lackawanna	EL	1932" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
-CARPART N "Atlas	H16-44	Late Body/Square Window Cab w/Body & Sill Mounted Handrails 	52058	Erie Lackawanna	EL	1935" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50000			" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50001	Santa Fe	SF	2223" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50003	Atlantic Coast Line	ACL	606" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50004	Atlantic Coast Line	ACL	607" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50006	Southern Pacific	SP	1329" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50007	Southern Pacific	SP	1379" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50009	Lehigh Valley	LV	135" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50010	Lehigh Valley	LV	137" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50012	Santa Fe	SF	2207" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50013	Southern Pacific	SP	1374" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50014	Southern Pacific	SP	1377" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50015	Lehigh Valley	LV	136" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50016	Lehigh Valley	LV	139" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50017	Pennsylvania	PRR	5917" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50018	Pennsylvania	PRR	5918" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50020	Reading	RDG	83" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50021	Reading	RDG	86" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50023	Rock Island	ROCK	760" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50024	Rock Island	ROCK	761" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50026	Western Maryland	WM	128" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	50027	Western Maryland	WM	132" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	51030	Union Pacific	UP	1200" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
-CARPART N "Atlas	VO-1000	With Step Guards 	51031	Union Pacific	UP	1203" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	H16-44	Late Body & Square Window Cab w/Sill Mounted HandrailsÂ 	52036	Lackawanna		930" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
+CARPART N "Atlas	H16-44	Late Body & Square Window Cab w/Sill Mounted HandrailsÂ 	52037	Lackawanna		934" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
+CARPART N "Atlas	H16-44	Late Body/Square Window Cab w/Body & Sill Mounted HandrailsÂ 	52057	Erie Lackawanna	EL	1932" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
+CARPART N "Atlas	H16-44	Late Body/Square Window Cab w/Body & Sill Mounted HandrailsÂ 	52058	Erie Lackawanna	EL	1935" 1 10101 3.825 0.750 0 0 2.869 4.225 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50000			" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50001	Santa Fe	SF	2223" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50003	Atlantic Coast Line	ACL	606" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50004	Atlantic Coast Line	ACL	607" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50006	Southern Pacific	SP	1329" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50007	Southern Pacific	SP	1379" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50009	Lehigh Valley	LV	135" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50010	Lehigh Valley	LV	137" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50012	Santa Fe	SF	2207" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50013	Southern Pacific	SP	1374" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50014	Southern Pacific	SP	1377" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50015	Lehigh Valley	LV	136" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50016	Lehigh Valley	LV	139" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50017	Pennsylvania	PRR	5917" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50018	Pennsylvania	PRR	5918" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50020	Reading	RDG	83" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50021	Reading	RDG	86" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50023	Rock Island	ROCK	760" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50024	Rock Island	ROCK	761" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50026	Western Maryland	WM	128" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	50027	Western Maryland	WM	132" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	51030	Union Pacific	UP	1200" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
+CARPART N "Atlas	VO-1000	With Step GuardsÂ 	51031	Union Pacific	UP	1203" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
 CARPART N "Atlas	VO-1000	Without Step Guards	51000			" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
 CARPART N "Atlas	VO-1000	Without Step Guards	51003	Milwaukee Rd		935" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808
 CARPART N "Atlas	VO-1000	Without Step Guards	51004	Milwaukee Rd		939" 1 10101 3.663 0.750 0 0 2.747 4.063 8535808

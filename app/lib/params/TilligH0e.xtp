@@ -8,8 +8,8 @@ TURNOUT HOn30 "Tillig	Flexgleis H0e - 680mm	85626"
 	L3 13276512 0.000000 -0.000002 -0.688976 0 26.771652 -0.688941 0
 	L3 13276512 0.000000 0.000000 0.688976 0 26.771654 0.689012 0
 	END
-TURNOUT HOn30 "Tillig	Einfache Weiche li. H0e - EW - 18°	85638"
-	U "Regular Turnout" "" "Tillig" "Einfache Weiche li. H0e - EW - 18°" "85638" "Einfache Weiche re. H0e - EW - 18°" "85637" 4.975984 18.000000 0.787402 5.039370 1.377953 0.000000 13276512
+TURNOUT HOn30 "Tillig	Einfache Weiche li. H0e - EW - 18Â°	85638"
+	U "Regular Turnout" "" "Tillig" "Einfache Weiche li. H0e - EW - 18Â°" "85638" "Einfache Weiche re. H0e - EW - 18Â°" "85637" 4.975984 18.000000 0.787402 5.039370 1.377953 0.000000 13276512
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -24,8 +24,8 @@ TURNOUT HOn30 "Tillig	Einfache Weiche li. H0e - EW - 18°	85638"
 	A3 13276512 0.000000 13.161936 0.358880 13.850912 0 161.999924 18.000152
 	L3 13276512 0.000000 4.426144 1.333174 0 4.763067 1.442654 0
 	END
-TURNOUT HOn30 "Tillig	Einfache Weiche re. H0e - EW - 18°	85637"
-	U "Regular Turnout" "" "Tillig" "Einfache Weiche li. H0e - EW - 18°" "85638" "Einfache Weiche re. H0e - EW - 18°" "85637" 4.975984 18.000000 0.787402 5.039370 1.377953 0.000000 13276512
+TURNOUT HOn30 "Tillig	Einfache Weiche re. H0e - EW - 18Â°	85637"
+	U "Regular Turnout" "" "Tillig" "Einfache Weiche li. H0e - EW - 18Â°" "85638" "Einfache Weiche re. H0e - EW - 18Â°" "85637" 4.975984 18.000000 0.787402 5.039370 1.377953 0.000000 13276512
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -40,8 +40,8 @@ TURNOUT HOn30 "Tillig	Einfache Weiche re. H0e - EW - 18°	85637"
 	A3 13276512 0.000000 13.161936 0.358807 -13.850912 0 0.000076 18.000152
 	L3 13276512 0.000000 4.426141 -1.333173 0 4.763064 -1.442653 0
 	END
-TURNOUT HOn30 "Tillig	Bausatz Flexweiche li. Spur H0e - W1 - 18°	85641"
-	U "Regular Turnout" "" "Tillig" "Bausatz Flexweiche li. Spur H0e - W1 - 18°" "85641" "Bausatz Flexweiche re. Spur H0e - W1 - 18°" "85641" 4.975984 18.000000 0.787402 5.039370 1.377953 0.000000 13276512
+TURNOUT HOn30 "Tillig	Bausatz Flexweiche li. Spur H0e - W1 - 18Â°	85641"
+	U "Regular Turnout" "" "Tillig" "Bausatz Flexweiche li. Spur H0e - W1 - 18Â°" "85641" "Bausatz Flexweiche re. Spur H0e - W1 - 18Â°" "85641" 4.975984 18.000000 0.787402 5.039370 1.377953 0.000000 13276512
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -56,8 +56,8 @@ TURNOUT HOn30 "Tillig	Bausatz Flexweiche li. Spur H0e - W1 - 18°	85641"
 	A3 13276512 0.000000 13.161936 0.358880 13.850912 0 161.999924 18.000152
 	L3 13276512 0.000000 4.426144 1.333174 0 4.763067 1.442654 0
 	END
-TURNOUT HOn30 "Tillig	Bausatz Flexweiche re. Spur H0e - W1 - 18°	85641"
-	U "Regular Turnout" "" "Tillig" "Bausatz Flexweiche li. Spur H0e - W1 - 18°" "85641" "Bausatz Flexweiche re. Spur H0e - W1 - 18°" "85641" 4.975984 18.000000 0.787402 5.039370 1.377953 0.000000 13276512
+TURNOUT HOn30 "Tillig	Bausatz Flexweiche re. Spur H0e - W1 - 18Â°	85641"
+	U "Regular Turnout" "" "Tillig" "Bausatz Flexweiche li. Spur H0e - W1 - 18Â°" "85641" "Bausatz Flexweiche re. Spur H0e - W1 - 18Â°" "85641" 4.975984 18.000000 0.787402 5.039370 1.377953 0.000000 13276512
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000

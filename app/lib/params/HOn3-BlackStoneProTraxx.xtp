@@ -11,7 +11,7 @@ TURNOUT HOn3  "ProTraxx HOn3 Snap-Track	Straight 6.535 228mm	B500100"
 END
 
 SUBCONTENTS Blackstone ProTraxx HOn3 Snap-Track - Curve Track
-TURNOUT HOn3  "ProTraxx HOn3 Snap-Track	Curve 18.90R 480mm 22.5°	B500200"
+TURNOUT HOn3  "ProTraxx HOn3 Snap-Track	Curve 18.90R 480mm 22.5Â°	B500200"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.231813 -1.438497 112.500000

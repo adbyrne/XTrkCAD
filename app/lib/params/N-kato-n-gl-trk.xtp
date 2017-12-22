@@ -1,12 +1,12 @@
 CONTENTS Kato Unitrack N-Scale
 #
 # Note These are somewhat twiddled so that turnouts and
-# the 15° crossing line up with the corresponding curve.
+# the 15Â° crossing line up with the corresponding curve.
 # Also, most straight tracks are a multiple of 
 # 20-010 (186mm) (20-000:4/3, 20-020:2/3, 20-040:1/3).
 #
 # The curves are 1mm smaller than the specification.  According to the specs
-# on the Kato 90° crossing, half of the crossing + S45.5 + S186 should equal
+# on the Kato 90Â° crossing, half of the crossing + S45.5 + S186 should equal
 # the radius of a R249, but is 16.5+45.4+186=248.
 #
 # Note: I added the Kato #20-091 Misc Track Assmt pieces
@@ -230,7 +230,7 @@ TURNOUT N  "Kato Unitrack	Deck Plate Grider Bridge 4 7/8 124mm	20-464"
 	END
 SUBCONTENTS Kato Unitrack N-Scale Curved Track
 # Curved Section Design by D.Ward - 8.5625 8.000
-TURNOUT N  "Kato Unitrack	Curve 8.56R 216mm 45°	20-170"
+TURNOUT N  "Kato Unitrack	Curve 8.56R 216mm 45Â°	20-170"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.013192 -2.490745 135.000000
@@ -239,7 +239,7 @@ TURNOUT N  "Kato Unitrack	Curve 8.56R 216mm 45°	20-170"
 	A 11579568 0.053333 8.949711 0.000000 -8.503937 0.000000 45.000000
 	END
 # Curved Section Design by D.Ward - 8.5625 8.000
-TURNOUT N  "Kato Unitrack	Curve 8.56R 216mm 15°	20-171"
+TURNOUT N  "Kato Unitrack	Curve 8.56R 216mm 15Â°	20-171"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.200981 -0.289765 105.000000
@@ -248,7 +248,7 @@ TURNOUT N  "Kato Unitrack	Curve 8.56R 216mm 15°	20-171"
 	A 11579568 0.053333 8.949711 0.000000 -8.503937 0.000000 15.000000
 	END
 # Curved Section Design by Dave Bullis - 9.750 8.000
-TURNOUT N  "Kato Unitrack	Curve 9.75R 249mm 45°	20-100"
+TURNOUT N  "Kato Unitrack	Curve 9.75R 249mm 45Â°	20-100"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.931874 -2.871276 135.000000
@@ -257,7 +257,7 @@ TURNOUT N  "Kato Unitrack	Curve 9.75R 249mm 45°	20-100"
 	A 11579568 0.053333 10.248924 0.000000 -9.803150 0.000000 45.000000
 	END
 # Curved Section Design by Dave Bullis - 9.750 8.000
-TURNOUT N  "Kato Unitrack	Curve 9.75R 249mm 15°	20-101"
+TURNOUT N  "Kato Unitrack	Curve 9.75R 249mm 15Â°	20-101"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.537242 -0.334034 105.000000
@@ -266,7 +266,7 @@ TURNOUT N  "Kato Unitrack	Curve 9.75R 249mm 15°	20-101"
 	A 11579568 0.053333 10.248924 0.000000 -9.803150 0.000000 15.000000
 	END
 # Curved Section Design by Dave Bullis - 11.000 8.000
-TURNOUT N  "Kato Unitrack	Curve 11R 282mm 45°	20-110"
+TURNOUT N  "Kato Unitrack	Curve 11R 282mm 45Â°	20-110"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.850556 -3.251807 135.000000
@@ -275,7 +275,7 @@ TURNOUT N  "Kato Unitrack	Curve 11R 282mm 45°	20-110"
 	A 11579568 0.053333 11.548136 0.000000 -11.102362 0.000000 45.000000
 	END
 # Curved Section Design by Dave Bullis - 11.000 24.000
-TURNOUT N  "Kato Unitrack	Curve 11R 282mm 15°	20-111"
+TURNOUT N  "Kato Unitrack	Curve 11R 282mm 15Â°	20-111"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.873503 -0.378304 105.000000
@@ -284,7 +284,7 @@ TURNOUT N  "Kato Unitrack	Curve 11R 282mm 15°	20-111"
 	A 11579568 0.053333 11.548136 0.000000 -11.102362 0.000000 15.000000
 	END
 # Curved Section Design by Dave Bullis - 12.375 8.000
-TURNOUT N  "Kato Unitrack	Curve 12.375R 315mm 45°	20-120"
+TURNOUT N  "Kato Unitrack	Curve 12.375R 315mm 45Â°	20-120"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 8.769238 -3.632337 135.000000
@@ -293,7 +293,7 @@ TURNOUT N  "Kato Unitrack	Curve 12.375R 315mm 45°	20-120"
 	A 11579568 0.053333 12.847349 0.000000 -12.401575 0.000000 45.000000
 	END
 # Curved Section Design by Dave Bullis - 12.375 8.000
-TURNOUT N  "Kato Unitrack	Curve 12.375R 315mm 15°	20-121"
+TURNOUT N  "Kato Unitrack	Curve 12.375R 315mm 15Â°	20-121"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 3.209764 -0.422573 105.000000
@@ -302,7 +302,7 @@ TURNOUT N  "Kato Unitrack	Curve 12.375R 315mm 15°	20-121"
 	A 11579568 0.053333 12.847349 0.000000 -12.401575 0.000000 15.000000
 	END
 # Curved Section Design by Dave Bullis - 13.750 12.000
-TURNOUT N  "Kato Unitrack	Curve 13.75R 348mm 30°	20-130"
+TURNOUT N  "Kato Unitrack	Curve 13.75R 348mm 30Â°	20-130"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.850394 -1.835557 120.000000
@@ -311,7 +311,7 @@ TURNOUT N  "Kato Unitrack	Curve 13.75R 348mm 30°	20-130"
 	A 11579568 0.053333 14.146561 0.000000 -13.700787 0.000000 30.000000
 	END
 # Curved Section Design by Dave Bullis - 13.750 8.000
-TURNOUT N  "Kato Unitrack	Curve 13.75R 348mm 45°	20-132"
+TURNOUT N  "Kato Unitrack	Curve 13.75R 348mm 45Â°	20-132"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 9.687920 -4.012868 135.000000
@@ -320,7 +320,7 @@ TURNOUT N  "Kato Unitrack	Curve 13.75R 348mm 45°	20-132"
 	A 11579568 0.053333 14.146561 0.000000 -13.700787 0.000000 45.000000
 	END
 # Curved Section Design by Dave Bullis - 15.000 12.000
-TURNOUT N  "Kato Unitrack	Curve 15R 381mm 30°	20-140"
+TURNOUT N  "Kato Unitrack	Curve 15R 381mm 30Â°	20-140"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.500000 -2.009619 120.000000
@@ -329,7 +329,7 @@ TURNOUT N  "Kato Unitrack	Curve 15R 381mm 30°	20-140"
 	A 11579568 0.053333 15.445774 0.000000 -15.000000 0.000000 30.000000
 	END
 # Curved Section Design by Dave Bullis - 19.000 24.000
-TURNOUT N  "Kato Unitrack	Curve 19R 481mm 15°	20-160"
+TURNOUT N  "Kato Unitrack	Curve 19R 481mm 15Â°	20-160"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.901258 -0.645263 105.000000
@@ -338,7 +338,7 @@ TURNOUT N  "Kato Unitrack	Curve 19R 481mm 15°	20-160"
 	A 11579568 0.053333 19.382782 -0.000000 -18.937008 0.000000 15.000000
 	END
 # Curved Section Design by Dave Bullis - 28.25333 24.000
-TURNOUT N  "Kato Unitrack	Curve 28.25R 718mm 15°	20-150"
+TURNOUT N  "Kato Unitrack	Curve 28.25R 718mm 15Â°	20-150"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.316223 -0.963199 105.000000
@@ -494,7 +494,7 @@ TURNOUT N  "Kato Unitrack	Double Crossover	20-210"
 	L 11579568 0.053333 0.000000 -1.772546 12.204724 -1.772546
 	END
 # Crossing Design by Dave Bullis - 3.656 15.000 3.793
-TURNOUT N  "Kato Unitrack	Crossing 15° X15R	20-301"
+TURNOUT N  "Kato Unitrack	Crossing 15Â° X15R	20-301"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 7.322834 0.000000 90.000000
@@ -508,7 +508,7 @@ TURNOUT N  "Kato Unitrack	Crossing 15° X15R	20-301"
 	L 11579568 0.053333 7.20 -1.43 3.62 -0.445774
 	END
 # Crossing Design by Dave Bullis - 3.793 15.000 3.656
-TURNOUT N  "Kato Unitrack	Crossing 15° X15L	20-300"
+TURNOUT N  "Kato Unitrack	Crossing 15Â° X15L	20-300"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 7.322834 0.000000 90.000000
@@ -522,7 +522,7 @@ TURNOUT N  "Kato Unitrack	Crossing 15° X15L	20-300"
 	L 11579568 0.053333 7.20 1.43 3.62 0.445774
 	END
 # Crossing Design by Dave Bullis - 2.438 90.000 2.438
-TURNOUT N  "Kato Unitrack	Crossing 90° w/S45.5	20-320"
+TURNOUT N  "Kato Unitrack	Crossing 90Â° w/S45.5	20-320"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 4.881889 0.000000 90.000000
@@ -540,7 +540,7 @@ TURNOUT N  "Kato Unitrack	Crossing 90° w/S45.5	20-320"
 	L 11579568 0.053333 2.914278 2.440944 2.914278 0.500000
 	END
 # Crossing Design by Dave Bullis - 2.438 90.000 2.438
-TURNOUT N  "Kato Unitrack	Crossing 90° w/o S45.5	20-320"
+TURNOUT N  "Kato Unitrack	Crossing 90Â° w/o S45.5	20-320"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 1.299212 0.000000 90.000000

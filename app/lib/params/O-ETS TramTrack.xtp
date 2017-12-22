@@ -42,7 +42,7 @@ TURNOUT O "Electric Train System O Scale TramTrack	120mm Connecting Track	14"
 	L 11579568 0.053333 0.000000 1.377953 4.724409 1.377953
 	L 11579568 0.053333 0.000000 -1.377953 4.724409 -1.377953
 	END
-TURNOUT O "Electric Train System O Scale TramTrack	120mm 90° Crosss	27"
+TURNOUT O "Electric Train System O Scale TramTrack	120mm 90Â° Crosss	27"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.724409 0.000000 90.000000
@@ -61,7 +61,7 @@ TURNOUT O "Electric Train System O Scale TramTrack	120mm 90° Crosss	27"
 	END
 
 SUBCONTENTS Electric Train System O Scale TramTrack - Curve Track
-TURNOUT O "Electric Train System O Scale TramTrack	R170mm 45° Curve	31"
+TURNOUT O "Electric Train System O Scale TramTrack	R170mm 45Â° Curve	31"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.732601 1.960306 45.000000
@@ -71,7 +71,7 @@ TURNOUT O "Electric Train System O Scale TramTrack	R170mm 45° Curve	31"
 	END
 
 SUBCONTENTS Electric Train System O Scale TramTrack - Turnouts
-TURNOUT O "Electric Train System O Scale TramTrack	190mm/R170mm 45° Left Turnout	24"
+TURNOUT O "Electric Train System O Scale TramTrack	190mm/R170mm 45Â° Left Turnout	24"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -83,7 +83,7 @@ TURNOUT O "Electric Train System O Scale TramTrack	190mm/R170mm 45° Left Turnout
 	L 11579568 0.053333 0.000000 -1.377953 7.480315 -1.377953
 	A 11579568 0.053333 5.314961 0.000000 6.692913 135.000000 45.000000
 	END
-TURNOUT O "Electric Train System O Scale TramTrack	190mm/R170mm 45° Right Turnout	23"
+TURNOUT O "Electric Train System O Scale TramTrack	190mm/R170mm 45Â° Right Turnout	23"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000

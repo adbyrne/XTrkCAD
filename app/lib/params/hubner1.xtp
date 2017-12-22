@@ -1,50 +1,50 @@
-CONTENTS Húbner 1-Scale Turnouts
-# From 'Märklin Complete Program 1994/95 E'
+CONTENTS HÃºbner 1-Scale Turnouts
+# From 'MÃ¤rklin Complete Program 1994/95 E'
 # Straight Section Design by Dave Bullis
-TURNOUT 1  "Húbner	Straight 15cm	T1002"
+TURNOUT 1  "HÃºbner	Straight 15cm	T1002"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 5.905512 0.000000 90.000000
 	S 0 0 0.000000 0.000000 5.906000 0.000000
 	END
-TURNOUT 1  "Húbner	Straight 15.22cm	T1003"
+TURNOUT 1  "HÃºbner	Straight 15.22cm	T1003"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 5.992126 0.000000 90.000000
 	S 0 0 0.000000 0.000000 5.992000 0.000000
 	END
-TURNOUT 1  "Húbner	Straight 20cm	T1004"
+TURNOUT 1  "HÃºbner	Straight 20cm	T1004"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 7.874016 0.000000 90.000000
 	S 0 0 0.000000 0.000000 7.874000 0.000000
 	END
-TURNOUT 1  "Húbner	Straight 30cm	T1005"
+TURNOUT 1  "HÃºbner	Straight 30cm	T1005"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 11.811024 0.000000 90.000000
 	S 0 0 0.000000 0.000000 11.811000 0.000000
 	END
-TURNOUT 1  "Húbner	Straight 60cm	T1006"
+TURNOUT 1  "HÃºbner	Straight 60cm	T1006"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 23.622047 0.000000 90.000000
 	S 0 0 0.000000 0.000000 23.622000 0.000000
 	END
-TURNOUT 1  "Húbner	Straight 5.9cm	T1026"
+TURNOUT 1  "HÃºbner	Straight 5.9cm	T1026"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.342520 0.000000 90.000000
 	S 0 0 0.000000 0.000000 2.343000 0.000000
 	END
 # Curved Section Design by Dave Bullis
-TURNOUT 1  "Húbner	Curved R232.1cm 30°	T1008"
+TURNOUT 1  "HÃºbner	Curved R232.1cm 30Â°	T1008"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 15.867615 -1.388236 100.000000
 	C 0 0 91.378000 0.000000 -91.378000 0.000000 10.000000
 	END
-TURNOUT 1  "Húbner	Right Turnout	T1000"
+TURNOUT 1  "HÃºbner	Right Turnout	T1000"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -55,7 +55,7 @@ TURNOUT 1  "Húbner	Right Turnout	T1000"
 	C 0 0 71.174000 1.766000 -71.174000 0.000000 10.000000
 	S 0 0 14.125000 -1.081000 23.622000 -2.756000
 	END
-TURNOUT 1  "Húbner	Left Turnout	T1001"
+TURNOUT 1  "HÃºbner	Left Turnout	T1001"
 	P "Normal" 1 2
 	P "Reverse" 1 3 4
 	E 0.000000 0.000000 270.000000
@@ -66,7 +66,7 @@ TURNOUT 1  "Húbner	Left Turnout	T1001"
 	C 0 0 -71.174000 1.766000 71.174000 170.000000 10.000000
 	S 0 0 14.125000 1.081000 23.622000 2.756000
 	END
-TURNOUT 1  "Húbner	Right 10° Crossing	T1042"
+TURNOUT 1  "HÃºbner	Right 10Â° Crossing	T1042"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 31.496063 0.000000 90.000000
@@ -75,7 +75,7 @@ TURNOUT 1  "Húbner	Right 10° Crossing	T1042"
 	S 0 0 0.000000 0.000000 31.496000 0.000000
 	S 0 0 0.000000 2.756000 31.496000 -2.756000
 	END
-TURNOUT 1  "Húbner	Left 10° Crossing	T1042"
+TURNOUT 1  "HÃºbner	Left 10Â° Crossing	T1042"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 31.496063 0.000000 90.000000
@@ -85,7 +85,7 @@ TURNOUT 1  "Húbner	Left 10° Crossing	T1042"
 	S 0 0 0.000000 -2.756000 31.496000 2.756000
 	END
 # Double Slipswitch Design by Dave Bullis - 31.496063 10.000000 31.981932
-TURNOUT 1  "Húbner	Right 10° Double Slip	T1024"
+TURNOUT 1  "HÃºbner	Right 10Â° Double Slip	T1024"
 	P "Normal" 1 2 3 0 4 5 6
 	P "Reverse" 1 7 6 0 4 8 3
 	E 0.000000 0.000000 270.000000
@@ -101,7 +101,7 @@ TURNOUT 1  "Húbner	Right 10° Double Slip	T1024"
 	C 0 0 142.416000 3.288000 -142.416000 0.000000 10.000000
 	C 0 0 -142.416000 28.208000 142.416000 180.000000 10.000000
 	END
-TURNOUT 1  "Húbner	Right 10° Double Slip	T1024"
+TURNOUT 1  "HÃºbner	Right 10Â° Double Slip	T1024"
 	P "Normal" 1 2 3 0 4 5 6
 	P "Reverse" 1 7 6 0 4 8 3
 	E 0.000000 0.000000 270.000000
@@ -120,8 +120,8 @@ TURNOUT 1  "Húbner	Right 10° Double Slip	T1024"
 
 # Curved turnouts designed by Martin Heine	
 
-TURNOUT 1 "Hübner	Right Curved Turnout R1020mm 22.5/45°	H1074"
-	U "Curved Turnout" "" "Hübner" "Left Curved Turnout R1020mm 22.5/45°" "H1075" "Right Curved Turnout R1020mm 22.5/45°" "H1074" 28.395669 45.000000 11.761811 22.500000 3.056693 21.509449 0.000000 0.000000 0
+TURNOUT 1 "HÃ¼bner	Right Curved Turnout R1020mm 22.5/45Â°	H1074"
+	U "Curved Turnout" "" "HÃ¼bner" "Left Curved Turnout R1020mm 22.5/45Â°" "H1075" "Right Curved Turnout R1020mm 22.5/45Â°" "H1074" 28.395669 45.000000 11.761811 22.500000 3.056693 21.509449 0.000000 0.000000 0
 	P "Normal" 1 6 4 5
 	P "Reverse" 1 2 3
 	E 0.000000 0.000000 270.000000
@@ -134,8 +134,8 @@ TURNOUT 1 "Hübner	Right Curved Turnout R1020mm 22.5/45°	H1074"
 	S 0 0.000000 19.874263 -2.379347 21.509449 -3.056693
 	S 0 0.000000 1.770225 0.000000 7.912550 0.000000
 	END
-TURNOUT 1 "Hübner	Left Curved Turnout R1020mm 22.5/45°	H1075"
-	U "Curved Turnout" "" "Hübner" "Left Curved Turnout R1020mm 22.5/45°" "H1075" "Right Curved Turnout R1020mm 22.5/45°" "H1074" 28.395669 45.000000 11.761811 22.500000 3.056693 21.509449 0.000000 0.000000 0
+TURNOUT 1 "HÃ¼bner	Left Curved Turnout R1020mm 22.5/45Â°	H1075"
+	U "Curved Turnout" "" "HÃ¼bner" "Left Curved Turnout R1020mm 22.5/45Â°" "H1075" "Right Curved Turnout R1020mm 22.5/45Â°" "H1074" 28.395669 45.000000 11.761811 22.500000 3.056693 21.509449 0.000000 0.000000 0
 	P "Normal" 1 6 4 5
 	P "Reverse" 1 2 3
 	E 0.000000 0.000000 270.000000
@@ -148,8 +148,8 @@ TURNOUT 1 "Hübner	Left Curved Turnout R1020mm 22.5/45°	H1075"
 	S 0 0.000000 19.874263 2.379347 21.509449 3.056693
 	S 0 0.000000 1.770225 0.000000 7.912550 0.000000
 	END
-TURNOUT 1 "Hübner	Straight 15.6mm adjustment to H1074/H1075	H1076"
-	U "Straight Section" "" "Hübner" "Straight 15.6mm adjustment to H1074/H1075" "H1076" 6.141732 0.000000 0.000000 0
+TURNOUT 1 "HÃ¼bner	Straight 15.6mm adjustment to H1074/H1075	H1076"
+	U "Straight Section" "" "HÃ¼bner" "Straight 15.6mm adjustment to H1074/H1075" "H1076" 6.141732 0.000000 0.000000 0
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.141732 0.000000 90.000000

@@ -117,25 +117,25 @@ TURNOUT O "Electric Train System O Scale	Level Crossing	836"
 		END
 
 SUBCONTENTS Electric Train System O Scale - Curve Track
-TURNOUT O "Electric Train System O Scale	R672mm 22°30' Curve	631"
+TURNOUT O "Electric Train System O Scale	R672mm 22Â°30' Curve	631"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 9.446548 1.879034 67.500000
 	C 0 0.000000 -24.685039 0.000033 24.685039 157.500076 22.500000
 	END
-TURNOUT O "Electric Train System O Scale	R672mm 11°25' Curve	632"
+TURNOUT O "Electric Train System O Scale	R672mm 11Â°25' Curve	632"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.815808 0.474315 78.750000
 	C 0 0.000000 -24.685039 0.000000 24.685039 168.750000 11.250000
 	END
-TURNOUT O "Electric Train System O Scale	R672mm 5°42' Curve	633"
+TURNOUT O "Electric Train System O Scale	R672mm 5Â°42' Curve	633"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 2.419555 0.118865 84.375000
 	C 0 0.000000 -24.685039 0.000000 24.685039 174.375000 5.625000
 	END
-TURNOUT O "Electric Train System O Scale	R747mm 22°30' Curve	634"
+TURNOUT O "Electric Train System O Scale	R747mm 22Â°30' Curve	634"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 11.254500 2.238657 67.500000
@@ -143,7 +143,7 @@ TURNOUT O "Electric Train System O Scale	R747mm 22°30' Curve	634"
 	END
 
 SUBCONTENTS Electric Train System O Scale - Turnouts
-TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Left Remote Turnout	651"
+TURNOUT O "Electric Train System O Scale	240mm/R672mm 22Â°30' Left Remote Turnout	651"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -152,7 +152,7 @@ TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Left Remote Turnout
 	S 0 0 0.000000 0.000000 9.448819 0.000000
 	C 0 0.000000 24.685039 0.000000 24.685039 157.500000 22.500000
 	END
-TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Right Remote Turnout	652"
+TURNOUT O "Electric Train System O Scale	240mm/R672mm 22Â°30' Right Remote Turnout	652"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -161,7 +161,7 @@ TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Right Remote Turnou
 	S 0 0 0.000000 0.000000 9.448819 0.000000
 	C 0 0.000000 24.685039 0.000000 -24.685039 0.000000 22.500000
 	END
-TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Left Manual Turnout	653"
+TURNOUT O "Electric Train System O Scale	240mm/R672mm 22Â°30' Left Manual Turnout	653"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -170,7 +170,7 @@ TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Left Manual Turnout
 	S 0 0 0.000000 0.000000 9.448819 0.000000
 	C 0 0.000000 24.685039 0.000000 24.685039 157.500000 22.500000
 	END
-TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Right Manual Turnout	654"
+TURNOUT O "Electric Train System O Scale	240mm/R672mm 22Â°30' Right Manual Turnout	654"
 	P "Normal" 1
 	P "Reverse" 2
 	E 0.000000 0.000000 270.000000
@@ -179,7 +179,7 @@ TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Right Manual Turnou
 	S 0 0 0.000000 0.000000 9.448819 0.000000
 	C 0 0.000000 24.685039 0.000000 -24.685039 0.000000 22.500000
 	END
-TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Three-Way Manual Turnout	655"
+TURNOUT O "Electric Train System O Scale	240mm/R672mm 22Â°30' Three-Way Manual Turnout	655"
 	P "Normal" 1
 	P "Reverse" 2
 	P "Reverse" 3
@@ -191,7 +191,7 @@ TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Three-Way Manual Tu
 	C 0 0.000000 24.685039 0.000000 24.685039 157.500000 22.500000
 	C 0 0.000000 24.685039 0.000000 -24.685039 0.000000 22.500000
 	END
-TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Three-Way Remote Turnout	656"
+TURNOUT O "Electric Train System O Scale	240mm/R672mm 22Â°30' Three-Way Remote Turnout	656"
 	P "Normal" 1
 	P "Reverse" 2
 	P "Reverse" 3
@@ -205,7 +205,7 @@ TURNOUT O "Electric Train System O Scale	240mm/R672mm 22°30' Three-Way Remote Tu
 	END
 
 SUBCONTENTS Electric Train System O Scale - Turntable
-TURNOUT O "Electric Train System O Scale	240mm 22°30' Turntable	863"
+TURNOUT O "Electric Train System O Scale	240mm 22Â°30' Turntable	863"
 	P "1" 1 2
 	P "2" 3 4 5
 	P "3" 6 7 8

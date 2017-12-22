@@ -206,7 +206,7 @@ TURNOUT N  "Kato Unitrack	Conc Tie Single Trk Straight 9.75 248mm	20-875"
 
 
 SUBCONTENTS Kato Unitrack N-Scale Dbl Trk Plate  Curved Track
-TURNOUT N  "Kato Unitrack	Dbl Trk Plate Curve 12.375/11R 315/282mm 45°	20-112"
+TURNOUT N  "Kato Unitrack	Dbl Trk Plate Curve 12.375/11R 315/282mm 45Â°	20-112"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 0.000000 -1.299212 270.000000
@@ -219,7 +219,7 @@ TURNOUT N  "Kato Unitrack	Dbl Trk Plate Curve 12.375/11R 315/282mm 45°	20-112"
 	END
 
 SUBCONTENTS Kato Unitrack N-Scale Dbl Trk SupElev Curved Track
-TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Curve 16.3/15R 414/381mm 45°	20-181"
+TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Curve 16.3/15R 414/381mm 45Â°	20-181"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 11.525283 -4.773929 135.000000
@@ -230,7 +230,7 @@ TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Curve 16.3/15R 414/381mm 45°	
 	A 11579568 0.053333 16.744986 0.000000 -16.299212 0.000000 45.000000
 	A 11579568 0.053333 14.554226 0.000000 -16.299212 0.000000 45.000000
 	END
-TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (R) Appr 16.3/15R 414/381mm 22.5°	20-182 Right"
+TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (R) Appr 16.3/15R 414/381mm 22.5Â°	20-182 Right"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 6.237438 -1.240704 112.500000
@@ -241,7 +241,7 @@ TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (R) Appr 16.3/
 	A 11579568 0.053333 16.744986 0.000000 -16.299212 0.000000 22.500000
 	A 11579568 0.053333 14.554226 0.000000 -16.299212 0.000000 22.500000
 	END
-TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (L) Appr 16.3/15R 414/381mm 22.5°	20-182 Left"
+TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (L) Appr 16.3/15R 414/381mm 22.5Â°	20-182 Left"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 6.237438 -1.240704 112.500000
@@ -252,7 +252,7 @@ TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (L) Appr 16.3/
 	A 11579568 0.053333 16.744986 0.000000 -16.299212 0.000000 22.500000
 	A 11579568 0.053333 14.554226 0.000000 -16.299212 0.000000 22.500000
 	END
-TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Curve 12.375/11R 315/282mm 45°	20-183"
+TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Curve 12.375/11R 315/282mm 45Â°	20-183"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 0.000000 -1.299212 270.000000
@@ -263,7 +263,7 @@ TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Curve 12.375/11R 315/282mm 45
 	A 11579568 0.053333 12.847349 0.000000 -12.401575 0.000000 45.000000
 	A 11579568 0.053333 10.656588 0.000000 -12.401575 0.000000 45.000000
 	END
-TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve 12.375/11R 315/282mm 22.5°	20-184 Right"
+TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve 12.375/11R 315/282mm 22.5Â°	20-184 Right"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 0.000000 -1.299212 270.000000
@@ -274,7 +274,7 @@ TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve 12.375/11R 315
 	A 11579568 0.053333 12.847349 0.000000 -12.401575 0.000000 22.500000
 	A 11579568 0.053333 10.656588 0.000000 -12.401575 0.000000 22.500000
 	END
-TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve 12.375/11R 315/282mm 22.5°	20-184 Left"
+TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve 12.375/11R 315/282mm 22.5Â°	20-184 Left"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 0.000000 -1.299212 270.000000
@@ -285,7 +285,7 @@ TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve 12.375/11R 315
 	A 11579568 0.053333 12.847349 0.000000 -12.401575 0.000000 22.500000
 	A 11579568 0.053333 10.656588 0.000000 -12.401575 0.000000 22.500000
 	END
-TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Curve 18.875/17.625R 480/447mm 45°	20-185"
+TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Curve 18.875/17.625R 480/447mm 45Â°	20-185"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 13.362648 -5.534990 135.000000
@@ -296,7 +296,7 @@ TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Curve 18.875/17.625R 480/447m
 	A 11579568 0.053333 19.343412 0.000000 -18.897638 0.000000 45.000000
 	A 11579568 0.053333 17.152651 0.000000 -18.897638 0.000000 45.000000
 	END
-TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (R) Appr 18.875/17.625R 480/447mm 22.5°	20-186 Right"
+TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (R) Appr 18.875/17.625R 480/447mm 22.5Â°	20-186 Right"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 7.231813 -1.438497 112.500000
@@ -307,7 +307,7 @@ TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (R) Appr 18.87
 	A 11579568 0.053333 19.343412 0.000000 -18.897638 0.000000 22.500000
 	A 11579568 0.053333 17.152651 0.000000 -18.897638 0.000000 22.500000
 	END
-TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (L) Appr 18.875/17.625R 480/447mm 22.5°	20-186 Left"
+TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (L) Appr 18.875/17.625R 480/447mm 22.5Â°	20-186 Left"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 7.231813 -1.438497 112.500000
@@ -320,7 +320,7 @@ TURNOUT N  "Kato Unitrack	Conc Tie Dbl Trk SupElev Easement Curve (L) Appr 18.87
 	END
 
 SUBCONTENTS Kato Unitrack N-Scale Dbl Trk Curved Viaduct Track
-TURNOUT N  "Kato Unitrack	Dbl Trk Curve Viadut 16.3/15R 414/381mm 45°	20-541"
+TURNOUT N  "Kato Unitrack	Dbl Trk Curve Viadut 16.3/15R 414/381mm 45Â°	20-541"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 11.525283 -4.773929 135.000000
@@ -333,7 +333,7 @@ TURNOUT N  "Kato Unitrack	Dbl Trk Curve Viadut 16.3/15R 414/381mm 45°	20-541"
 	END
 
 SUBCONTENTS Kato Unitrack N-Scale Dbl Viaduct Trk SupElev Curved Track
-TURNOUT N  "Kato Unitrack	Dbl Viaduct Trk Sup Elev Curve 16.3/15R 414/381mm 45°	20-544"
+TURNOUT N  "Kato Unitrack	Dbl Viaduct Trk Sup Elev Curve 16.3/15R 414/381mm 45Â°	20-544"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 11.525283 -4.773929 135.000000
@@ -344,7 +344,7 @@ TURNOUT N  "Kato Unitrack	Dbl Viaduct Trk Sup Elev Curve 16.3/15R 414/381mm 45°	
 	A 11579568 0.053333 16.744986 0.000000 -16.299212 0.000000 45.000000
 	A 11579568 0.053333 14.554226 0.000000 -16.299212 0.000000 45.000000
 	END
-TURNOUT N  "Kato Unitrack	Dbl Viaduct Trk SupElev Easement Curve (R) Appr 16.3/15R 414/381mm 22.5°	20-545 Right"
+TURNOUT N  "Kato Unitrack	Dbl Viaduct Trk SupElev Easement Curve (R) Appr 16.3/15R 414/381mm 22.5Â°	20-545 Right"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 6.237438 -1.240704 112.500000
@@ -355,7 +355,7 @@ TURNOUT N  "Kato Unitrack	Dbl Viaduct Trk SupElev Easement Curve (R) Appr 16.3/1
 	A 11579568 0.053333 16.744986 0.000000 -16.299212 0.000000 22.500000
 	A 11579568 0.053333 14.554226 0.000000 -16.299212 0.000000 22.500000
 	END
-TURNOUT N  "Kato Unitrack	Dbl Viaduct Trk SupElev Easement Curve (L) Appr 16.3/15R 414/381mm 22.5°	20-545 Left"
+TURNOUT N  "Kato Unitrack	Dbl Viaduct Trk SupElev Easement Curve (L) Appr 16.3/15R 414/381mm 22.5Â°	20-545 Left"
 	P "Normal" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 6.237438 -1.240704 112.500000

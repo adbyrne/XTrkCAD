@@ -33,13 +33,13 @@ TURNOUT Z "Tokyo Marui Pro Z	Straight Feeder Track	PZR-06"
 	END
 
 SUBCONTENTS Tokyo Marui Pro Z Track - Curve Track
-TURNOUT Z  "Tokyo Marui Pro Z	Curved 145mm 45°	PZR-04"	
+TURNOUT Z  "Tokyo Marui Pro Z	Curved 145mm 45Â°	PZR-04"	
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.036633 -1.672028 135.000000
 	C 0 0 5.708661 0.000000 -5.708661 0.000000 45.000000
 	END
-TURNOUT Z  "Tokyo Marui Pro Z	Curved 170mm 45°	PZR-05"	
+TURNOUT Z  "Tokyo Marui Pro Z	Curved 170mm 45Â°	PZR-05"	
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 4.732604 -1.960309 135.000000
