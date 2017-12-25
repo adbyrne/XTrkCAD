@@ -2016,14 +2016,6 @@ static void AddTurnout( void )
 		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
 	UndoStart( _("Place New Turnout"), "addTurnout" );
 	titleLen = strlen( curTurnout->title );
-#ifdef LATER
-	newTrk = NewTrack( 0, T_TURNOUT, curTurnout->endCnt, sizeof (*xx) + 1 );
-	xx = GetTrkExtraData(newTrk);
-	xx->orig = Dto.pos;
-	xx->angle = Dto.angle;
-	xx->customInfo = curTurnout->customInfo;
-	xx->segs = MyMalloc( (curTurnout->segCnt)*sizeof curTurnout->segs[0] );
-#endif
 
 	DYNARR_SET( trkEndPt_t, tempEndPts_da, curTurnout->endCnt );
 	DYNARR_SET( junk_t, connection_da, curTurnout->endCnt );
@@ -2123,19 +2115,9 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 	}
 	xx->special = curTurnout->special;
 	xx->u = curTurnout->u;
-#ifdef LATER
-	xx->segCnt = curTurnout->segCnt;
-	memcpy( xx->segs, curTurnout->segs, xx->segCnt * sizeof *(trkSeg_p)0 );
-	xx->title = curTurnout->title;
-	xx->paths = xx->pathCurr = curTurnout->paths;
-	xx->pathLen = curTurnout->pathLen;
-#endif
 
 	/* Make the connections */
-#ifdef LATER
-	for (i=0; i<curTurnout->endCnt; i++)
-		SetTrkEndPoint( newTrk, i, tempEndPts(i).pos, tempEndPts(i).angle );
-#endif
+
 	visible = FALSE;
 	noConnections = TRUE;
 	AuditTracks( "addTurnout T%d before connection", GetTrkIndex(newTrk) );
@@ -2143,6 +2125,9 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 		if ( connection(i).trk != NULL ) {
 			p0 = GetTrkEndPos( newTrk, i );
 			p1 = GetTrkEndPos( connection(i).trk, connection(i).ep );
+			ANGLE_T a0 = GetTrkEndAngle( newTrk, i);
+			ANGLE_T a1 = GetTrkEndAngle( connection(i).trk, connection(i).ep );
+			ANGLE_T a = NormalizeAngle(a1-a0+180);
 			d = FindDistance( p0, p1 );
 			if ( d < connectDistance ) {
 				noConnections = FALSE;

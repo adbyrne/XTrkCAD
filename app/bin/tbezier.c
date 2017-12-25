@@ -895,6 +895,11 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 
 }
 
+static BOOL_T TrimBezier( track_p trk, EPINX_T ep, DIST_T dist ) {
+	DeleteTrack(trk, TRUE);
+	return TRUE;
+}
+
 
 
 static BOOL_T QueryBezier( track_p trk, int query )
@@ -915,7 +920,7 @@ static BOOL_T QueryBezier( track_p trk, int query )
 		return TRUE;
 		break;
 	case Q_CANNOT_PLACE_TURNOUT:
-		return TRUE;
+		return FALSE;
 		break;
 	case Q_ISTRACK:
 		return GetTrkType(trk) == T_BEZIER?TRUE:FALSE;
@@ -955,8 +960,9 @@ static ANGLE_T GetAngleBezier(
 	BOOL_T back, neg;
 	int indx;
 	angle = GetAngleSegs( xx->bezierData.arcSegs.cnt, (trkSeg_p)xx->bezierData.arcSegs.ptr, &pos, &indx, NULL, &back, NULL, &neg );
-	if ( ep0 ) *ep0 = -1;
-	if ( ep1 ) *ep1 = -1;
+	if (!back) angle = NormalizeAngle(angle+180);  //Make CCW
+	if ( ep0 ) *ep0 = neg?1:0;
+	if ( ep1 ) *ep1 = neg?0:1;
 	return angle;
 }
 
@@ -1114,7 +1120,7 @@ static trackCmd_t bezierCmds = {
 		TraverseBezier,
 		EnumerateBezier,
 		NULL,	/* redraw */
-		NULL,   /* trim   */
+		TrimBezier,   /* trim   */
 		MergeBezier,
 		NULL,   /* modify */
 		GetLengthBezier,
@@ -1397,43 +1403,43 @@ EXPORT void InitTrkBezier( void )
  */
 extern coOrd BezierPointByParameter(coOrd p[4], double t)
 {
-    //checkParameterT(t);
 
-    double cx = 3 * (p[1].x - p[0].x);
-    double bx = 3 * (p[2].x- p[1].x) - cx;
-    double ax = p[3].x - p[0].x - cx - bx;
+    double a,b,c,d;
+    double mt = 1-t;
+    double mt2 = mt*mt;
+    double t2 = t*t;
 
-    double cy = 3 * (p[1].y - p[0].y);
-    double by = 3 * (p[2].y - p[1].y) - cy;
-    double ay = p[3].y - p[0].y - cy - by;
+    a = mt2*mt;
+    b = mt2*t*3;
+    c = mt*t2*3;
+    d = t*t2;
 
-    double tSquared = t * t;
-    double tCubed = tSquared * t;
-    double resultX = (ax * tCubed) + (bx * tSquared) + (cx * t) + p[0].x;
-    double resultY = (ay * tCubed) + (by * tSquared) + (cy * t) + p[1].y;
-    coOrd c;
-    c.x = resultX;
-    c.y = resultY;
-    return c;
+    coOrd o;
+    o.x = a*p[0].x+b*p[1].x+c*p[2].x+d*p[3].x;
+    o.y = a*p[0].y+b*p[1].y+c*p[2].y+d*p[3].y;
+
+    return o;
+
 }
 /**
  * Find distance from point to Bezier. Return also the "t" value of that closest point.
  */
 extern DIST_T BezierMathDistance( coOrd * pos, coOrd p[4], int segments, double * t_value)
 {
-    DIST_T dd = FindDistance(*pos,p[0]);
+    DIST_T dd = 10000.0;
     double t = 0.0;
-    coOrd pt, save_pt = p[0];
-    for (int i = 1;i<=segments;i++) {
+    coOrd pt;
+    coOrd save_pt = p[0];
+    for (int i=0; i<=segments; i++) {
         pt = BezierPointByParameter(p, (double)i/segments);
         if (FindDistance(*pos,pt) < dd) {
-        	dd=FindDistance(*pos,pt);
+        	dd = FindDistance(*pos,pt);
         	t = (double)i/segments;
         	save_pt = pt;
         }
     }
     if (t_value) *t_value = t;
-    pos = &save_pt;
+    * pos = save_pt;
     return dd;
 }
 
