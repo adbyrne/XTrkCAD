@@ -1054,6 +1054,7 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	case Q_CAN_GROUP:
 		return FALSE;
 		break;
+	case Q_CANNOT_BE_ON_END:
 	case Q_FLIP_ENDPTS:
 	case Q_HAS_DESC:
 		return TRUE;
