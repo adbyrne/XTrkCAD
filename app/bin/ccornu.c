@@ -128,6 +128,8 @@ static struct {
 		track_p selectTrack;
 		DIST_T minRadius;
 		BOOL_T circleorHelix[2];
+
+		bezctx * bezc;
 		} Da;
 
 
@@ -221,7 +223,9 @@ BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius
 	BOOL_T back;
 	ANGLE_T angle1;
 
-	bezctx * bezc = new_bezctx_xtrkcad(array_p,ends,spots);
+	if (Da.bezc) free(Da.bezc);
+
+	Da.bezc = new_bezctx_xtrkcad(array_p,ends,spots);
 
 	coOrd pos0 = pos[0];
 
@@ -256,12 +260,10 @@ BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius
 		Rotate(&posk[5],center[1],(back)?10:-10);
 	}
 	SetKnots(knots,posk);
-	TaggedSpiroCPsToBezier(knots,bezc);
-	if (!bezctx_xtrkcad_close(bezc)) {
-		free(bezc);
+	TaggedSpiroCPsToBezier(knots,Da.bezc);
+	if (!bezctx_xtrkcad_close(Da.bezc)) {
 		return FALSE;
 	}
-	free(bezc);
 	return TRUE;
 }
 
@@ -851,7 +853,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		if (Da.state != PICK_POINT) {										//Too early - abandon
 			InfoMessage(_("No changes made"));
 			Da.state = NONE;
-			DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
+			//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 			return C_CANCEL;
 		}
 		if (!CheckHelix(trk)) {
@@ -894,7 +896,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 			UndoUndo();
 			MainRedraw();
 			MapRedraw();
-			DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
+			//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 			return C_TERMINATE;
 		}
 
@@ -919,13 +921,13 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 		MainRedraw();
 		MapRedraw();
 		Da.state = NONE;
-		DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
+		//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 		return C_TERMINATE;
 
 	case C_CANCEL:
 		InfoMessage(_("Modify Cornu Cancelled"));
 		Da.state = NONE;
-		DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
+		//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 		MainRedraw();
 		MapRedraw();
 		return C_TERMINATE;
@@ -1187,7 +1189,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.ep[i] = -1;
 				Da.pos[i] = zero;
 			}
-			DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
+			//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 		}
 		Da.state = NONE;
 		return C_CONTINUE;

@@ -79,6 +79,7 @@ bezctx_xtrkcad_lineto(bezctx *z, double x, double y) {
     seg->width = 0.0;
     seg->color = wDrawColorBlack;
     seg->type = SEG_STRTRK;
+    if (seg->bezSegs.ptr) MyFree(seg->bezSegs.ptr);
     seg->bezSegs.max =0;
     seg->bezSegs.cnt = 0;
     seg->bezSegs.ptr = NULL;
@@ -114,6 +115,7 @@ bezctx_xtrkcad_quadto(bezctx *z, double x1, double y1, double x2, double y2)
     seg->width = 0.0;
     seg->color = wDrawColorBlack;
     seg->type = SEG_BEZTRK;
+    if (seg->bezSegs.ptr) MyFree(seg->bezSegs.ptr);
     seg->bezSegs.max =0;
     seg->bezSegs.cnt = 0;
     seg->bezSegs.ptr = NULL;
@@ -151,6 +153,7 @@ static void
 	    seg->width = 0.0;
 	    seg->color = wDrawColorBlack;
 	    seg->type = SEG_BEZTRK;
+	    if (seg->bezSegs.ptr) MyFree(seg->bezSegs.ptr);
 	    seg->bezSegs.max = 0;
 	    seg->bezSegs.cnt = 0;
 	    seg->bezSegs.ptr = NULL;
@@ -185,6 +188,7 @@ bezctx_xtrkcad_mark_knot(bezctx *z, int knot_idx) {
 
 bezctx *
 new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2], BOOL_T spots) {
+
     bezctx_xtrkcad *result = znew(bezctx_xtrkcad, 1);
 
     result->segsArray = segArray;

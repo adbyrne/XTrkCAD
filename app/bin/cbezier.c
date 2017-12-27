@@ -236,7 +236,7 @@ void addSegBezier(dynArr_t * const array_p, trkSeg_p seg) {
 	trkSeg_p s;
 
 
-	DYNARR_APPEND(trkSeg_t, * array_p, 10);          //Adds 1 to cnt
+	DYNARR_APPEND(trkSeg_t, * array_p, 1);          //Adds 1 to cnt
 	s = &DYNARR_N(trkSeg_t,* array_p,array_p->cnt-1);
 	s->type = seg->type;
 	s->color = seg->color;
@@ -759,6 +759,10 @@ EXPORT STATUS_T AdjustBezCurve(
 			}
 			else t = NewBezierLine(Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt,color,width);
 			UndoEnd();
+			if (Da.crvSegs_da.ptr) MyFree(Da.crvSegs_da.ptr);
+			Da.crvSegs_da.ptr = NULL;
+			Da.crvSegs_da.cnt = 0;
+			Da.crvSegs_da.max = 0;
 			DrawNewTrack(t);
 			Da.state = NONE;
 			MainRedraw();
@@ -1114,6 +1118,10 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				Da.trk[i] = NULL;
 				Da.ep[i] = -1;
 			}
+			if (Da.crvSegs_da.ptr) MyFree(Da.crvSegs_da.ptr);
+			Da.crvSegs_da.ptr = NULL;
+			Da.crvSegs_da.cnt = 0;
+			Da.crvSegs_da.max = 0;
 		}
 		Da.state = NONE;
 		return C_CONTINUE;
