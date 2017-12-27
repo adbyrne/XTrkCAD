@@ -241,9 +241,10 @@ void addSegBezier(dynArr_t * const array_p, trkSeg_p seg) {
 	s->type = seg->type;
 	s->color = seg->color;
 	s->width = seg->width;
-	s->bezSegs.max = 0;
 	s->bezSegs.cnt = 0;
-	s->bezSegs.ptr = NULL;
+	if (s->bezSegs.ptr) MyFree(s->bezSegs.ptr);
+	s->bezSegs.ptr=NULL;
+	s->bezSegs.max = 0;
 	if ((s->type == SEG_BEZLIN || s->type == SEG_BEZTRK) && seg->bezSegs.cnt) {
 		s->u.b.angle0 = seg->u.b.angle0;  //Copy all the rest
 		s->u.b.angle3 = seg->u.b.angle3;
@@ -251,7 +252,9 @@ void addSegBezier(dynArr_t * const array_p, trkSeg_p seg) {
 		s->u.b.minRadius = seg->u.b.minRadius;
 		for (int i=0;i<4;i++) s->u.b.pos[i] = seg->u.b.pos[i];
 		s->u.b.radius0 = seg->u.b.radius3;
-		s->bezSegs.cnt = s->bezSegs.max = 0;
+		s->bezSegs.cnt = 0;
+		if (s->bezSegs.ptr) MyFree(s->bezSegs.ptr);
+		s->bezSegs.max = 0;
 		s->bezSegs.ptr = NULL; //Make sure new space as addr copied in earlier from seg
 		for (int i = 0; i<seg->bezSegs.cnt; i++) {
 			addSegBezier(&s->bezSegs,(((trkSeg_p)seg->bezSegs.ptr)+i)); //recurse for copying embedded Beziers as in Cornu joint

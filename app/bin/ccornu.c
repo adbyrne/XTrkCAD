@@ -178,8 +178,9 @@ void addSegCornu(dynArr_t * const array_p, trkSeg_p seg) {
 	s = &DYNARR_N(trkSeg_t,* array_p,array_p->cnt-1);
 	s->type = seg->type;
 	s->bezSegs.max = 0;
-	s->bezSegs.ptr = NULL;
 	s->bezSegs.cnt = 0;
+	if (s->bezSegs.ptr) MyFree(s->bezSegs.ptr);
+	s->bezSegs.ptr = NULL;
 	s->color = seg->color;
 	s->width = seg->width;
 	if ((s->type == SEG_BEZLIN || s->type == SEG_BEZTRK) && seg->bezSegs.cnt) {
@@ -495,7 +496,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 			Da.extend[0] = FALSE;
 			Da.extend[1] = FALSE;
 			CreateBothEnds(Da.selectPoint);
-			Da.crvSegs_da.max = 0;
 			Da.crvSegs_da.cnt = 0;
 			SetUpCornuParms(&cp);
 			if (CallCornu(Da.pos,Da.trk,Da.ep,&Da.crvSegs_da,&cp)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;

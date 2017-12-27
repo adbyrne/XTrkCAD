@@ -509,6 +509,7 @@ static void DeleteBezier( track_p t )
 		MyFree(xx->bezierData.arcSegs.ptr);
 	xx->bezierData.arcSegs.max = 0;
 	xx->bezierData.arcSegs.cnt = 0;
+	xx->bezierData.arcSegs.ptr = NULL;
 }
 
 static BOOL_T WriteBezier( track_p t, FILE * f )
@@ -973,11 +974,9 @@ BOOL_T GetBezierSegmentFromTrack(track_p trk, trkSeg_p seg_p) {
 	for (int i=0;i<4;i++) seg_p->u.b.pos[i] = xx->bezierData.pos[i];
 	seg_p->color = xx->bezierData.segsColor;
 	seg_p->bezSegs.cnt = 0;
+	if (seg_p->bezSegs.ptr) MyFree(seg_p->bezSegs.ptr);
 	seg_p->bezSegs.max = 0;
-	seg_p->bezSegs.ptr = NULL;
 	FixUpBezierSeg(seg_p->u.b.pos,seg_p,seg_p->type == SEG_BEZTRK);
-
-
 	return TRUE;
 
 }
@@ -1029,8 +1028,9 @@ static BOOL_T MakeParallelBezier(
 		tempSegs(0).width = 0;
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = SEG_BEZTRK;
+		if (tempSegs(0).bezSegs.ptr) MyFree(tempSegs(0).bezSegs.ptr);
 		tempSegs(0).bezSegs.max = 0;
-		tempSegs(0).bezSegs.ptr = NULL;
+		tempSegs(0).bezSegs.cnt = 0;
 		for (int i=0;i<4;i++) tempSegs(0).u.b.pos[i] = np[i];
 		FixUpBezierSeg(tempSegs(0).u.b.pos,&tempSegs(0),TRUE);
 	}
@@ -1049,9 +1049,7 @@ BOOL_T RebuildBezier (track_p trk)
 {
 	struct extraData *xx;
 	xx = GetTrkExtraData(trk);
-	xx->bezierData.arcSegs.max = 0;
 	xx->bezierData.arcSegs.cnt = 0;
-	xx->bezierData.arcSegs.ptr = NULL;
 	FixUpBezier(xx->bezierData.pos,xx,IsTrack(trk));
 	ComputeBezierBoundingBox(trk, xx);
 	return TRUE;

@@ -650,8 +650,9 @@ EXPORT void CloneFilledDraw(
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
 			sp->bezSegs.cnt = 0;
-			sp->bezSegs.max = 0;
+			if (sp->bezSegs.ptr) MyFree(sp->bezSegs.ptr);
 			sp->bezSegs.ptr = NULL;
+			sp->bezSegs.max = 0;
 			FixUpBezierSeg(sp->u.b.pos,sp,sp->type == SEG_BEZTRK);
 			break;
 		default:
@@ -1939,12 +1940,16 @@ EXPORT void CleanSegs(dynArr_t * seg_p) {
 	for (int i=0;i<seg_p->cnt;i++) {
 		trkSeg_t t = DYNARR_N(trkSeg_t,* seg_p,i);
 		if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
-			if (t.bezSegs.ptr && t.bezSegs.max) MyFree(t.bezSegs.ptr);
+			if (t.bezSegs.ptr) MyFree(t.bezSegs.ptr);
+			t.bezSegs.cnt = 0;
+			t.bezSegs.max = 0;
+			t.bezSegs.ptr = NULL;
 		}
 	}
-	seg_p->max = 0;
 	seg_p->cnt = 0;
-
+	if (seg_p->ptr) MyFree(seg_p->ptr);
+	seg_p->ptr = NULL;
+	seg_p->max = 0;
 }
 
 

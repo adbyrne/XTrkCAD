@@ -527,7 +527,7 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 
 void FreeSubSegs(trkSeg_t* s) {
 	if (s->type == SEG_BEZTRK || s->type == SEG_BEZLIN) {
-		if (s->bezSegs.ptr && s->bezSegs.max > 0) {
+		if (s->bezSegs.ptr) {
 			MyFree(s->bezSegs.ptr);
 		}
 		s->bezSegs.max = 0;
@@ -544,7 +544,7 @@ static void DeleteCornu( track_p t )
 		trkSeg_t s = DYNARR_N(trkSeg_t,xx->cornuData.arcSegs,i);
 		FreeSubSegs(&s);
 	}
-	if (xx->cornuData.arcSegs.ptr && !xx->cornuData.arcSegs.max)
+	if (xx->cornuData.arcSegs.ptr)
 		MyFree(xx->cornuData.arcSegs.ptr);
 	xx->cornuData.arcSegs.max = 0;
 	xx->cornuData.arcSegs.cnt = 0;
@@ -972,6 +972,7 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs) {
 			segPtr->type = SEG_BEZTRK;
 			segPtr->color = wDrawColorBlack;
 			segPtr->width = 0;
+			if (segPtr->bezSegs.ptr) MyFree(segPtr->bezSegs.ptr);
 			segPtr->bezSegs.cnt = 0;
 			segPtr->bezSegs.max = 0;
 			segPtr->bezSegs.ptr = NULL;
@@ -1219,6 +1220,7 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 	xx = GetTrkExtraData(trk);
 	xx->cornuData.arcSegs.max = 0;
 	xx->cornuData.arcSegs.cnt = 0;
+	if (xx->cornuData.arcSegs.ptr) MyFree(xx->cornuData.arcSegs.ptr);
 	xx->cornuData.arcSegs.ptr = NULL;
 	if (!FixUpCornu0(xx->cornuData.pos,xx->cornuData.c,xx->cornuData.a,xx->cornuData.r, xx)) return FALSE;
 	ComputeCornuBoundingBox(trk, xx);
