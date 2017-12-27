@@ -109,8 +109,12 @@ EXPORT BOOL_T FixUpCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], struct ext
 		xx->cornuData.c[1] = cp.center[1];
 	}
 
-	xx->cornuData.minCurveRadius = CornuMinRadius(pos,
-			xx->cornuData.arcSegs);
+	xx->cornuData.minCurveRadius = CornuMinRadius(pos,xx->cornuData.arcSegs);
+	xx->cornuData.windingAngle = CornuTotalWindingArc(pos,xx->cornuData.arcSegs);
+	DIST_T last_c;
+	if (xx->cornuData.r[0] == 0) last_c = 0;
+		else last_c = 1/xx->cornuData.r[0];
+	xx->cornuData.maxRateofChange = CornuMaxRateofChangeofCurvature(pos,xx->cornuData.arcSegs,&last_c);
 	xx->cornuData.length = CornuLength(pos, xx->cornuData.arcSegs);
 	return TRUE;
 }
@@ -938,7 +942,7 @@ static BOOL_T MergeCornu(
 		DisconnectTracks( trk1, 1-ep1, trk_after, ep_after );
 	}
 	trk_before = GetTrkEndTrk( trk0, 1-ep0 );
-	if (trk_after) {
+	if (trk_before) {
 		ep_before = GetEndPtConnectedToMe( trk_before, trk0 );
 		DisconnectTracks( trk0, 1-ep1, trk_before, ep_before );
 	}

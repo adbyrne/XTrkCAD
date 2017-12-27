@@ -428,7 +428,7 @@ static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist )
 					AdjustStraightEndPt( trk, ep, pos );
 					DrawNewTrack( trk );
 	} else
-		DeleteTrack( trk, FALSE );
+		DeleteTrack( trk, TRUE );
 	return TRUE;
 }
 
