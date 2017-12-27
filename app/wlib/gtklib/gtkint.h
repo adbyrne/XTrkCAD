@@ -117,7 +117,7 @@ struct wList_t {
 struct wListItem_t {
 		wBool_t active;
 		void * itemData;
-		const char * label;
+		char * label;
 		GtkLabel * labelG;
 		wBool_t selected;
 		wList_p listP;

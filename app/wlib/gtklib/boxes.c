@@ -129,6 +129,7 @@ void wlibDrawBox(
     cairo_stroke_preserve(cr);
 
     if (style < wBoxThickB) {
+    	cairo_destroy(cr);
         return;
     }
 

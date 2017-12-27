@@ -1102,6 +1102,7 @@ BOOL_T ReadLayers(char * line)
 
         wButtonSetBusy(layer_btns[(int)inx], visible);
     }
+    MyFree(name);
 
     return TRUE;
 }

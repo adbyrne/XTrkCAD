@@ -866,6 +866,9 @@ void DescribeCompound(
 void DeleteCompound(
 		track_p t )
 {
+	struct extraData *xx = GetTrkExtraData(t);
+	FreeFilledDraw( xx->segCnt, xx->segs );
+	MyFree( xx->segs );
 }
 
 

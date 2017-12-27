@@ -634,6 +634,8 @@ static carProto_p CarProtoNew(
 	proto->type = type;
 	proto->dim = *dim;
 	proto->segCnt = segCnt;
+	//if (proto->segPtr)				Can't do this because segPtr could be static
+	//	free(proto->segPtr);
 	proto->segPtr = (trkSeg_p)memdup( segPtr, (sizeof *(trkSeg_p)0) * proto->segCnt );
 	CloneFilledDraw( proto->segCnt, proto->segPtr, FALSE );
 	GetSegBounds( zero, 0.0, proto->segCnt, proto->segPtr, &proto->orig, &proto->size );
@@ -668,6 +670,8 @@ static BOOL_T CarProtoRead(
 	if ( !ReadSegs() )
 		return FALSE;
 	CarProtoNew( NULL, curParamFileIndex, desc, options, type, &dim, tempSegs_da.cnt, &tempSegs(0) );
+	FreeFilledDraw(tempSegs_da.cnt,&tempSegs(0));
+	MyFree(desc);
 	return TRUE;
 }
 

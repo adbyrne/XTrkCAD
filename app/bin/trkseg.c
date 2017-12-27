@@ -529,6 +529,7 @@ EXPORT void FlipSegs(
 			for (inx=0; inx<s->u.p.cnt; inx++) {
 				s->u.p.pts[inx].y = -s->u.p.pts[inx].y;
 			}
+			MyFree(pts);
 			break;
 		case SEG_JNTTRK:
 			s->u.j.pos.y = - s->u.j.pos.y;
@@ -639,6 +640,8 @@ EXPORT void CloneFilledDraw(
 			} else {
 				memcpy( newPts, sp->u.p.pts, sp->u.p.cnt * sizeof *(coOrd*)0 );
 			}
+			//if (sp->u.p.pts)    Can't do this a pts could be pointing at static
+			//	free(sp->u.p.pts);
 			sp->u.p.pts = newPts;
 			break;
 		case SEG_TEXT:

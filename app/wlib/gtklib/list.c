@@ -486,6 +486,8 @@ wIndex_t wListAddValue(
         wlibTreeViewAddRow(b, (char *)labelStr, bm, id_p);
     }
 
+    free(id_p->label);
+
     b->count++;
     b->recursion--;
 

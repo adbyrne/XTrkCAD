@@ -257,8 +257,10 @@ BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius
 	SetKnots(knots,posk);
 	TaggedSpiroCPsToBezier(knots,bezc);
 	if (!bezctx_xtrkcad_close(bezc)) {
+		free(bezc);
 		return FALSE;
 	}
+	free(bezc);
 	return TRUE;
 }
 
@@ -995,12 +997,12 @@ DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * las
 		if (t.type == SEG_FILCRCL) continue;
 		SegProc(SEGPROC_LENGTH,&t,&segProcData);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
-			rc = fabs(fabs(1/t.u.c.radius)- lc)/segProcData.length.length;
-			lc = fabs(1/t.u.c.radius);
+			rc = fabs(1/t.u.c.radius - lc)/segProcData.length.length/2;
+			lc = 1/t.u.c.radius;
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			rc = CornuMaxRateofChangeofCurvature(t.u.b.pos, t.bezSegs,&lc);  //recurse
 		} else {
-			rc = fabs(0-lc)/segProcData.length.length;
+			rc = fabs(0-lc)/segProcData.length.length/2;
 			lc = 0;
 		}
 		if (rc>r_max) r_max = rc;

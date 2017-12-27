@@ -134,6 +134,7 @@ GdkPixbuf* wlibPixbufFromXBM(
     for (row = 0; row < ip->h; row++) {
         free(pixmapData[row + 3]);
     }
+    free(pixmapData);
     return pixbuf;
 }
 
