@@ -374,6 +374,7 @@ STATUS_T DrawGeomMouse(
 		else
 			DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		context->D->funcs->options = oldOptions;
+		if (context->Op == OP_DIMLINE) MainRedraw();   //Wipe Out Text
 		return C_CONTINUE;
 
 	case wActionLUp:

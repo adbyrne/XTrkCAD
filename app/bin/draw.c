@@ -960,13 +960,13 @@ EXPORT void InfoCount( wIndex_t count )
 EXPORT void InfoPos( coOrd pos )
 {
 	wPos_t x, y;
-
+	DrawMarkers();
 	sprintf( message, "%s%s", xLabel, FormatDistance(pos.x) );
 	wStatusSetValue( infoD.posX_m, message );
 	sprintf( message, "%s%s", yLabel, FormatDistance(pos.y) );
 	wStatusSetValue( infoD.posY_m, message );
-
 	oldMarker = pos;
+	DrawMarkers();
 }
 
 static wControl_p deferSubstituteControls[NUM_INFOCTL+1];
