@@ -191,6 +191,8 @@ typedef struct {
 dynArr_t tempEndPts_da;
 #define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
 
+typedef enum { FREEFORM, RECTANGLE
+} PolyType_e;
 
 typedef struct {
 		char type;
@@ -238,6 +240,7 @@ typedef struct {
 				coOrd * pts;
 				coOrd orig;
 				ANGLE_T angle;
+				PolyType_e polyType;
 			} p;
 		} u;
 		} trkSeg_t, * trkSeg_p;
@@ -632,7 +635,7 @@ typedef struct {
 		wControl_p control0;
 		wControl_p control1;
 		wPos_t posy;
-		} descData_t, * descData_p; 
+		} descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, track_p, descData_p, descUpdate_t );
 void DescribeCancel( void );

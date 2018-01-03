@@ -57,7 +57,7 @@ static struct {
 static long curveMode;
 
 
-static void DrawArrowHeads(
+EXPORT void DrawArrowHeads(
 		trkSeg_p sp,
 		coOrd pos,
 		ANGLE_T angle,

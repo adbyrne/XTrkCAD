@@ -1116,6 +1116,7 @@ EXPORT BOOL_T ReadSegs( void )
 	int i;
 	DIST_T elev0, elev1;
 	BOOL_T hasElev;
+	BOOL_T isPolyV2;
 	char type;
 	long option;
 	BOOL_T subsegs = FALSE;
@@ -1150,6 +1151,12 @@ EXPORT BOOL_T ReadSegs( void )
 		if ( *cp == '3' ) {
 			cp++;
 			hasElev = TRUE;
+		}
+		isPolyV2 = FALSE;
+		if (*cp == '4') {
+			cp++;
+			hasElev = TRUE;
+			isPolyV2 = TRUE;
 		}
 		switch (type) {
 		case SEG_STRLIN:
@@ -1309,11 +1316,20 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
-			if ( !GetArgs( cp, "lwd",
-				 &rgb, &s->width,
-				 &s->u.p.cnt ) ) {
-				rc = FALSE;
-				/*??*/break;
+			if (isPolyV2) {
+				if ( !GetArgs( cp, "lwdd",
+					 &rgb, &s->width,
+					 &s->u.p.cnt, &s->u.p.polyType) ) {
+					rc = FALSE;
+					/*??*/break;
+				}
+			} else {
+				if ( !GetArgs( cp, "lwd",
+						&rgb, &s->width,
+						&s->u.p.cnt) ) {
+					rc = FALSE;
+					/*??*/break;
+				}
 			}
 			s->color = wDrawFindColor( rgb );
 			s->u.p.pts = (coOrd*)MyMalloc( s->u.p.cnt * sizeof *(coOrd*)NULL );
@@ -1512,9 +1528,9 @@ EXPORT BOOL_T WriteSegsEnd(
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
-			rc &= fprintf( f, "\t%c3 %ld %0.6f %d\n",
+			rc &= fprintf( f, "\t%c4 %ld %0.6f %d %d \n",
 				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
-				segs[i].u.p.cnt ) > 0;
+				segs[i].u.p.cnt, segs[i].u.p.polyType ) > 0;
 			for ( j=0; j<segs[i].u.p.cnt; j++ )
 				rc &= fprintf( f, "\t\t%0.6f %0.6f 0\n",
 						segs[i].u.p.pts[j].x, segs[i].u.p.pts[j].y ) > 0;

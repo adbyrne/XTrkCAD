@@ -209,8 +209,9 @@ static struct {
 		wIndex_t fontSizeInx;
 		char text[STR_SIZE];
 		unsigned int layer;
+		char polyType[STR_SIZE];
 		} drawData;
-typedef enum { E0, E1, CE, RA, LN, AL, A1, A2, VC, LW, CO, BE, OR, DS, TP, TA, TS, TX, PV, LY } drawDesc_e;
+typedef enum { E0, E1, CE, RA, LN, AL, A1, A2, VC, LW, CO, BE, OR, DS, TP, TA, TS, TX, PV, LY, PT } drawDesc_e;
 static descData_t drawDesc[] = {
 /*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0] },
 /*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1] },
@@ -232,6 +233,7 @@ static descData_t drawDesc[] = {
 /*TX*/	{ DESC_STRING, N_("Text"), &drawData.text },
 /*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &drawData.layer },
+/*PT*/  { DESC_STRING, N_("Type"), &drawData.polyType },
 		{ DESC_NULL } };
 int drawSegInx;
 
@@ -407,6 +409,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	trkSeg_p segPtr;
 	int inx;
 	char * title = NULL;
+	char * polyType = NULL;
 
 
 	DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, &pos, &drawSegInx );
@@ -495,12 +498,30 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	case SEG_POLY:
 		drawData.pointCount = segPtr->u.p.cnt;
 		drawDesc[VC].mode = DESC_RO;
-		title = _("Poly Line");
+		drawDesc[PT].mode = DESC_RO;
+		switch (segPtr->u.p.polyType) {
+			case RECTANGLE:
+				polyType = _("Rectangle");
+				break;
+			default:
+				polyType = _("Freeform");
+		}
+		strncpy( drawData.polyType, polyType, sizeof drawData.polyType );
+		title = _("Polygonal Line");
 		break;
 	case SEG_FILPOLY:
 		drawData.pointCount = segPtr->u.p.cnt;
 		drawDesc[VC].mode = DESC_RO;
 		drawDesc[LW].mode = DESC_IGNORE;
+		drawDesc[PT].mode = DESC_RO;
+		switch (segPtr->u.p.polyType) {
+			case RECTANGLE:
+				polyType =_("Rectangle");
+				break;
+			default:
+				polyType = _("Freeform");
+		}
+		strncpy( drawData.polyType, polyType, sizeof drawData.polyType );
 		title = _("Polygon");
 		break;
 	case SEG_TEXT:

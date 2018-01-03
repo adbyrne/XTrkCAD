@@ -55,5 +55,6 @@ track_p NewCurvedTrack( coOrd, DIST_T, ANGLE_T, ANGLE_T, long );
 DIST_T CurveDescriptionDistance( coOrd, track_p );
 STATUS_T CurveDescriptionMove( track_p, wAction_t, coOrd );
 BOOL_T GetCurveMiddle( track_p , coOrd * );
+void DrawArrowHeads(trkSeg_p sp, coOrd pos,	ANGLE_T angle, BOOL_T bidirectional, wDrawColor color );
 
 #endif // !HAVE_CCURVE_H

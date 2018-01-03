@@ -76,6 +76,7 @@ static void EndPoly( drawContext_t * context, int cnt )
 	segPtr->u.p.pts = pts;
 	segPtr->u.p.angle = 0.0;
 	segPtr->u.p.orig = zero;
+	segPtr->u.p.polyType = FREEFORM;
 	UndoStart( _("Create Lines"), "newDraw" );
 	trk = MakeDrawFromSeg( zero, 0.0, segPtr );
 	DrawNewTrack( trk );
@@ -483,17 +484,16 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_BOX:
 		case OP_FILLBOX:
-			if ( context->Op == OP_FILLBOX ) {
-				pts = (coOrd*)MyMalloc( 4 * sizeof *(coOrd*)NULL );
-				for ( inx=0; inx<4; inx++ )
-					pts[inx] = tempSegs(inx).u.l.pos[0];
-				tempSegs(0).type = SEG_FILPOLY;
-				tempSegs(0).u.p.cnt = 4;
-				tempSegs(0).u.p.pts = pts;
-				tempSegs(0).u.p.angle = 0.0;
-				tempSegs(0).u.p.orig = zero;
-				tempSegs_da.cnt = 1;
-			}
+			pts = (coOrd*)MyMalloc( 4 * sizeof *(coOrd*)NULL );
+			for ( inx=0; inx<4; inx++ )
+				pts[inx] = tempSegs(inx).u.l.pos[0];
+			tempSegs(0).type = (context->Op == OP_FILLBOX)?SEG_FILPOLY:SEG_POLY;
+			tempSegs(0).u.p.cnt = 4;
+			tempSegs(0).u.p.pts = pts;
+			tempSegs(0).u.p.angle = 0.0;
+			tempSegs(0).u.p.orig = zero;
+			tempSegs(0).u.p.polyType = RECTANGLE;
+			tempSegs_da.cnt = 1;
 			/*drawContext = context;
 			DrawGeomOp( (void*)context->Op );*/
 			break;
@@ -554,19 +554,22 @@ STATUS_T DrawGeomModify(
 		wBool_t selected)
 {
 	ANGLE_T a;
-	coOrd p0, p1, pc;
+	coOrd p0, p1, p2, pc;
+	static coOrd start_pos;
 	static wIndex_t segInx;
 	static EPINX_T segEp;
 	static ANGLE_T segA1;
-	static int polyInx;
-	int inx;
-	DIST_T d, dd;
+	static int polyInx, inx_other, inx_line, inx_origin;
+	static BOOL_T corner_mode;
+	int inx, inx1, inx2;
+	DIST_T d, d1, d2, dd;
 	coOrd * newPts;
 	int mergePoints;
-
+	tempSegs_da.cnt = 1;
 	switch ( action ) {
 	case C_DOWN:
 		segInx = -1;
+		corner_mode = FALSE;
 		DistanceSegs( orig, angle, segCnt, segPtr, &pos, &segInx );
 		if (segInx == -1)
 			return C_ERROR;
@@ -610,6 +613,7 @@ STATUS_T DrawGeomModify(
 			tempSegs(0).u.p.cnt = segPtr[segInx].u.p.cnt;
 			tempSegs(0).u.p.angle = 0.0;
 			tempSegs(0).u.p.orig = zero;
+			tempSegs(0).u.p.polyType = segPtr[segInx].u.p.polyType;
 			DYNARR_SET( coOrd, points_da, segPtr[segInx].u.p.cnt+1 );
 			tempSegs(0).u.p.pts = &points(0);
 			d = 10000;
@@ -625,21 +629,53 @@ STATUS_T DrawGeomModify(
 					polyInx = inx;
 				}
 			}
-			inx = (polyInx==0?segPtr[segInx].u.p.cnt-1:polyInx-1);
-			d = FindDistance( points(inx), pos );
-			dd = FindDistance( points(inx), points(polyInx) );
-			if ( d < 0.25*dd ) {
-				polyInx = inx;
-			} else if ( d > 0.75*dd ) {
-				;
-			} else {
-				tempSegs(0).u.p.cnt++;
-				for (inx=points_da.cnt-1; inx>polyInx; inx-- ) {
-					points(inx) = points(inx-1);
+			if (segPtr[segInx].u.p.polyType == RECTANGLE) {
+				d1 = FindDistance( points(polyInx), pos );
+				d2 = FindDistance( points(polyInx==0?segPtr[segInx].u.p.cnt-1:polyInx-1), pos );
+				if (d2<d1) {
+					inx_line = polyInx;
+					polyInx = polyInx==0?segPtr[segInx].u.p.cnt-1:polyInx-1;
+				} else {
+					inx_line = polyInx==0?segPtr[segInx].u.p.cnt-1:polyInx-1;
 				}
+				//polyInx is closest point
+				inx1 = (polyInx==0?3:polyInx-1);  //Prev point
+				inx2 = (polyInx==3?0:polyInx+1);  //Next Point
+				inx_origin = (inx2==3?0:inx2+1);  //Opposite point
+				if ( IsClose(d2) || IsClose(d1) ) {
+					corner_mode = TRUE;
+					pos = points(polyInx);
+					start_pos = pos;
+					DrawArrowHeads( &tempSegs(1), pos, FindAngle(points(polyInx),points(inx_origin)), TRUE, wDrawColorRed );
+				    tempSegs_da.cnt = 6;
+					InfoMessage( _("Drag to Move Corner Point"));
+				} else {
+					corner_mode = FALSE;
+					start_pos = pos;
+					pos.x = (points(polyInx).x + points(inx_line).x)/2;
+					pos.y = (points(polyInx).y + points(inx_line).y)/2;
+					DrawArrowHeads( &tempSegs(1), pos, FindAngle(points(polyInx),pos)+90, TRUE, wDrawColorRed );
+				    tempSegs_da.cnt = 6;
+				    InfoMessage( _("Drag to Move Edge "));
+				}
+				return C_CONTINUE;
+			} else {
+				inx = (polyInx==0?segPtr[segInx].u.p.cnt-1:polyInx-1);
+				d = FindDistance( points(inx), pos );
+				dd = FindDistance( points(inx), points(polyInx) );
+				if ( d < 0.25*dd ) {
+					polyInx = inx;
+				} else if ( d > 0.75*dd ) {
+					;
+				} else {
+					tempSegs(0).u.p.cnt++;
+					for (inx=points_da.cnt-1; inx>polyInx; inx-- ) {
+						points(inx) = points(inx-1);
+					}
 /*fprintf( stderr, "Inserting vertix before %d\n", polyInx );*/
+				}
+				points(polyInx) = pos;
 			}
-			points(polyInx) = pos;
 			p1=p0;
 			break;
 		default:
@@ -654,7 +690,6 @@ STATUS_T DrawGeomModify(
 			segEp = 1;
 			switch ( segPtr[segInx].type ) {
 			case SEG_TBLEDGE:
-
 			case SEG_STRLIN:
 			case SEG_DIMLIN:
 			case SEG_BENCH:
@@ -664,7 +699,6 @@ STATUS_T DrawGeomModify(
 				;
 			}
 		}
-		tempSegs_da.cnt = 1;
 		return C_CONTINUE;
 	case C_MOVE:
 		if (segInx == -1)
@@ -676,6 +710,11 @@ STATUS_T DrawGeomModify(
 		} else if ( (MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL ) {
 			OnTrack( &pos, FALSE, FALSE );
 		}
+		int prior_pnt, next_pnt, orig_pnt;
+		DIST_T dist_moved;
+		coOrd moved;
+		ANGLE_T prior_angle, next_angle, line_angle, move_angle;
+		tempSegs_da.cnt = 1;
 		switch (tempSegs(0).type) {
 		case SEG_TBLEDGE:
 
@@ -685,12 +724,6 @@ STATUS_T DrawGeomModify(
 			tempSegs(0).u.l.pos[segEp] = pos;
 			InfoMessage( _("Length = %0.3f Angle = %0.3f"), FindDistance( tempSegs(0).u.l.pos[segEp], tempSegs(0).u.l.pos[1-segEp] ), FindAngle( tempSegs(0).u.l.pos[1-segEp], tempSegs(0).u.l.pos[segEp] ) );
 			break;
-			pos.x -= orig.x;
-			pos.y -= orig.y;
-			pos.x -= orig.x;
-			pos.y -= orig.y;
-			Rotate( &pos, zero, -angle );
-			Rotate( &pos, zero, -angle );
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
 			if (tempSegs(0).u.c.a1 >= 360.0) {
@@ -707,12 +740,50 @@ STATUS_T DrawGeomModify(
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
-			points(polyInx) = pos;
+			switch (tempSegs(0).u.p.polyType) {
+				case RECTANGLE:
+					if (!corner_mode) {
+						/* Constrain movement to be perpendicular */
+						d = FindDistance(start_pos, pos);
+						line_angle = NormalizeAngle(FindAngle(points(inx_line),points(polyInx))-90);
+						a = FindAngle(pos,start_pos);
+						Translate( &pos, start_pos, line_angle, - d*cos(D2R(line_angle-a)));
+					}
+					d = FindDistance(start_pos,pos);
+					a = FindAngle(start_pos, pos);
+					start_pos = pos;
+					prior_pnt = (polyInx == 0)?3:polyInx-1;
+					next_pnt = (polyInx == 3)?0:polyInx+1;
+					orig_pnt = (prior_pnt == 0)?3:prior_pnt-1;
+					Translate( &points(polyInx), points(polyInx), a, d);
+					d = FindDistance(points(orig_pnt),points(polyInx));
+					a = FindAngle(points(orig_pnt),points(polyInx));
+					prior_angle = FindAngle(points(orig_pnt),points(prior_pnt));
+					Translate( &points(prior_pnt), points(orig_pnt), prior_angle, d*cos(D2R(prior_angle-a)));
+					next_angle = FindAngle(points(orig_pnt),points(next_pnt));
+					Translate( &points(next_pnt), points(orig_pnt), next_angle, d*cos(D2R(next_angle-a)));
+					if (!corner_mode) {
+						pos.x = (points(polyInx).x + points(inx_line).x)/2;
+						pos.y = (points(polyInx).y + points(inx_line).y)/2;
+						DrawArrowHeads( &tempSegs(1), pos, FindAngle(points(polyInx),points(inx_line))+90, TRUE, wDrawColorRed );
+						tempSegs_da.cnt = 6;
+						InfoMessage( _("Drag to Move Edge"));
+					} else {
+						pos = points(polyInx);
+						DrawArrowHeads( &tempSegs(1), pos, FindAngle(points(polyInx),points(inx_origin)), TRUE, wDrawColorRed );
+						tempSegs_da.cnt = 6;
+						InfoMessage( _("Drag to Move Corner Point"));
+					}
+				break;
+				default:
+					points(polyInx) = pos;
+			}
+
 			break;
 		default:
 			;
 		}
-		tempSegs_da.cnt = 1;
+
 		return C_CONTINUE;
 	case C_UP:
 		if (segInx == -1)
@@ -744,39 +815,54 @@ STATUS_T DrawGeomModify(
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
-			mergePoints = FALSE;
-			if ( IsClose( FindDistance( pos, points( polyInx==0?tempSegs(0).u.p.cnt-1:polyInx-1 ) ) ) ||
-				 IsClose( FindDistance( pos, points( (polyInx==tempSegs(0).u.p.cnt-1)?0:polyInx+1 ) ) ) ) {
-				mergePoints = TRUE;
-				if (segPtr[segInx].u.p.cnt <= 3) {
-					ErrorMessage( MSG_POLY_SHAPES_3_SIDES );
+			switch(tempSegs(0).u.p.polyType) {
+			case RECTANGLE:
+				for (int i=0;i<4;i++) {
+					pos = points(i);
+					pos.x -= orig.x;
+					pos.y -= orig.y;
+					Rotate( &pos, zero, -angle );
+					segPtr[segInx].u.p.pts[i] = pos;
+				}
+				break;
+			default:
+				mergePoints = FALSE;
+				if ( IsClose( FindDistance( pos, points( polyInx==0?tempSegs(0).u.p.cnt-1:polyInx-1 ) ) ) ||
+					IsClose( FindDistance( pos, points( (polyInx==tempSegs(0).u.p.cnt-1)?0:polyInx+1 ) ) ) ) {
+					mergePoints = TRUE;
+					if (segPtr[segInx].u.p.cnt <= 3) {
+						ErrorMessage( MSG_POLY_SHAPES_3_SIDES );
+						break;
+					}
+				}
+
+				coOrd * oldPts = segPtr[segInx].u.p.pts;
+				newPts = (coOrd*)MyMalloc( tempSegs(0).u.p.cnt * sizeof *(coOrd*)0 );
+				memcpy( newPts, segPtr[segInx].u.p.pts, (segPtr[segInx].u.p.cnt) * sizeof *(coOrd*)0 );
+				segPtr[segInx].u.p.pts = newPts;
+				MyFree(oldPts);
+
+
+				if ( tempSegs(0).u.p.cnt > segPtr[segInx].u.p.cnt ) {
+					ASSERT( tempSegs(0).u.p.cnt == segPtr[segInx].u.p.cnt+1 );
+					for (inx=tempSegs(0).u.p.cnt-1; inx>polyInx; inx--)
+						segPtr[segInx].u.p.pts[inx] = segPtr[segInx].u.p.pts[inx-1];
+					segPtr[segInx].u.p.cnt++;
+				}
+		
+				pos = points(polyInx);
+				if ( mergePoints ) {
+					for (inx=polyInx+1; inx<points_da.cnt; inx++)
+					segPtr[segInx].u.p.pts[inx-1] = segPtr[segInx].u.p.pts[inx];
+					segPtr[segInx].u.p.cnt--;
+/*fprintf( stderr, "Merging with vertix %d\n", polyInx );*/
 					break;
 				}
+				pos.x -= orig.x;
+				pos.y -= orig.y;
+				Rotate( &pos, zero, -angle );
+				segPtr[segInx].u.p.pts[polyInx] = pos;
 			}
-
-			newPts = (coOrd*)MyMalloc( tempSegs(0).u.p.cnt * sizeof *(coOrd*)0 );
-			memcpy( newPts, segPtr[segInx].u.p.pts, (segPtr[segInx].u.p.cnt) * sizeof *(coOrd*)0 );
-			segPtr[segInx].u.p.pts = newPts;
-
-			if ( tempSegs(0).u.p.cnt > segPtr[segInx].u.p.cnt ) {
-				ASSERT( tempSegs(0).u.p.cnt == segPtr[segInx].u.p.cnt+1 );
-				for (inx=tempSegs(0).u.p.cnt-1; inx>polyInx; inx--)
-					segPtr[segInx].u.p.pts[inx] = segPtr[segInx].u.p.pts[inx-1];
-				segPtr[segInx].u.p.cnt++;
-			}
-		
-			pos = points(polyInx);
-			if ( mergePoints ) {
-				for (inx=polyInx+1; inx<points_da.cnt; inx++)
-					segPtr[segInx].u.p.pts[inx-1] = segPtr[segInx].u.p.pts[inx];
-				segPtr[segInx].u.p.cnt--;
-/*fprintf( stderr, "Merging with vertix %d\n", polyInx );*/
-				break;
-			}
-			pos.x -= orig.x;
-			pos.y -= orig.y;
-			Rotate( &pos, zero, -angle );
-			segPtr[segInx].u.p.pts[polyInx] = pos;
 			break;
 		default:
 			;
