@@ -221,6 +221,9 @@ int NoticeMessage( char *, char*, char *, ... );
 int NoticeMessage2( int, char *, char*, char *, ... );
 void DoQuit( void );
 
+char * ConvertFromEscapedText(const char * text);
+char * ConvertToEscapedText(const char * text);
+
 void wShow( wWin_p );
 void wHide( wWin_p );
 void CloseDemoWindows( void );

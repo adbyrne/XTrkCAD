@@ -168,7 +168,7 @@ void DrawHilightPolygon( drawCmd_p, coOrd *, int );
 #define BOX_ARROW		(4)
 #define BOX_BACKGROUND	(5)
 void DrawBoxedString( int, drawCmd_p, coOrd, char *, wFont_p, wFontSize_t, wDrawColor, ANGLE_T );
-void DrawTextSize2( drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *, POS_T * );
+void DrawTextSize2( drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *, POS_T *);
 void DrawTextSize( drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd * );
 BOOL_T SetRoomSize( coOrd );
 void GetRoomSize( coOrd * );

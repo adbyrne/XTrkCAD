@@ -473,7 +473,7 @@ EXPORT void DrawMultiString(
 	coOrd size, textsize;
 	POS_T descent;
 
-	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent );
+	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent);
 	lineH = textsize.y+descent;
 	size.x = 0.0;
 	size.y = 0.0;
@@ -482,19 +482,19 @@ EXPORT void DrawMultiString(
 		while (*text != '\0' && *text != '\n')
 			*cp++ = *text++;
 		*cp = '\0';
-		DrawTextSize2( &mainD, message, fp, fs, TRUE, &textsize, &descent );
+		DrawTextSize2( &mainD, message, fp, fs, TRUE, &textsize, &descent);
 		lineW = textsize.x;
 		if (lineW>size.x)
 			size.x = lineW;
 		DrawString( d, pos, 0.0, message, fp, fs, color );
 		pos.y -= lineH;
 		size.y += lineH;
-		if (*text)
+		if (*text == '\0')
 			break;
 		text++;
 	}
 	*lo = pos;
-	hi->x = pos.x;
+	hi->x = pos.x+size.x;
 	hi->y = pos.y+size.y;
 }
 
@@ -2135,6 +2135,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
 			if ((MyGetKeyState() &
 					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) break;  //Allow SHIFT+CTRL for Move
+			if (((action>>8)&0xFF) == wAccelKey_LineFeed) {
+				action = C_TEXT+((int)(0x0A<<8));
+				break;
+			}
 			switch ((wAccelKey_e)(action>>8)) {
 			case wAccelKey_Del:
 				SelectDelete();
@@ -2206,9 +2210,9 @@ static void DoMouse( wAction_t action, coOrd pos )
 			InfoPos( pos );
 			return;
 		case C_TEXT:
-			if ((action>>8) == 0x0D)
+			if ((action>>8) == 0x0D) {
 				action = C_OK;
-			else if ((action>>8) == 0x1B) {
+			} else if ((action>>8) == 0x1B) {
 				ConfirmReset( TRUE );
 				return;
 			}

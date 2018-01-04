@@ -33,6 +33,7 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "misc.h"
 
 extern void wSetSelectedFontSize(int size);
 
@@ -207,7 +208,7 @@ static struct {
 		wIndex_t dimenSize;
 		descPivot_t pivot;
 		wIndex_t fontSizeInx;
-		char text[STR_SIZE];
+		char text[STR_LONG_SIZE];
 		unsigned int layer;
 		char polyType[STR_SIZE];
 		} drawData;
@@ -385,11 +386,13 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		break;
 	case TX:
 		text = wStringGetValue( (wString_p)drawDesc[TX].control0 );
-		if ( text && text[0] && strcmp( segPtr->u.t.string, text ) != 0 ) {
+		char * unescaped = ConvertFromEscapedText(text);
+		if ( unescaped && unescaped[0] && strcmp( segPtr->u.t.string, unescaped ) != 0 ) {
 			MyFree( segPtr->u.t.string );
-			segPtr->u.t.string = MyStrdup( text );
+			segPtr->u.t.string = MyStrdup( unescaped );
 			/*(char*)drawDesc[TX].valueP = segPtr->u.t.string;*/
 		}
+		MyFree(unescaped);
 		break;
 	case LY:
 		SetTrkLayer( trk, drawData.layer);
@@ -528,7 +531,9 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		REORIGIN( drawData.endPt[0], segPtr->u.t.pos, xx->angle, xx->orig );
 		//drawData.angle = NormalizeAngle( segPtr->u.t.angle );
 		drawData.angle = NormalizeAngle( xx->angle );
-		strncpy( drawData.text, segPtr->u.t.string, sizeof drawData.text );
+		char * escaped = ConvertToEscapedText(segPtr->u.t.string);
+		strncpy( drawData.text, escaped, sizeof drawData.text );
+		MyFree(escaped);
 		/*drawData.fontSize = segPtr->u.t.fontSize;*/
 		/*(char*)drawDesc[TX].valueP = segPtr->u.t.string;*/
 		drawDesc[TP].mode =
@@ -1264,7 +1269,6 @@ EXPORT track_p NewText(
 	return trk;
 }
 
-
 EXPORT BOOL_T ReadText( char * line )
 {
 	coOrd pos;
@@ -1285,6 +1289,10 @@ EXPORT BOOL_T ReadText( char * line )
         if (!GetArgs(line, "dLl00pfql", &index, &layer, &color, &pos, &angle, &text, &textSize ))
             return FALSE;
     }
+
+    char * old = text;
+    text = ConvertFromEscapedText(text);
+    MyFree(old);
 
 	trk = NewText( index, pos, angle, text, textSize, color );
 	SetTrkLayer( trk, layer );
