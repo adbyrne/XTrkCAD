@@ -670,8 +670,6 @@ BOOL_T OnTableEdgeEndPt( track_p, coOrd * );
 BOOL_T GetClosestEndPt( track_p, coOrd * );
 BOOL_T ReadTableEdge( char * );
 BOOL_T ReadText( char * );
-char * ConvertToEscaped(char * text);
-char * ConvertFromEscapes(char * text);
 
 /* chotbar.c */
 extern DIST_T curBarScale;
