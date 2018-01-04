@@ -136,7 +136,7 @@ Subsequent clicks on the \f{Ruler} button will hide or display the ruler.
 
 Shapes are drawn by:
 
-\dd \G{png.d/dbox.png} \G{png.d/dfilbox.png} \f{Boxes} and \f{Filled Boxes} are created by selecting one corner and dragging the opposite corner.  A \f{Box} is composed of four lines which may be individually deleted.
+\dd \G{png.d/dbox.png} \G{png.d/dfilbox.png} \f{Boxes} and \f{Filled Boxes} are created by selecting one corner and dragging the opposite corner. 
 
 \u000
 

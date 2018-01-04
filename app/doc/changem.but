@@ -538,13 +538,13 @@ The \f{Modify} command can be invoked using the \f{Change>Modify} menu item, the
 
 Either the left mouse button (for changing length or creating a tangent track) or the right mouse button (for extending with a new track) is used to modify the unconnected endpoint.
 
-The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.  A \e{Box} is treated as 4 Lines.
+The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.  A \e{Box} or a \e{FilledBox} can be modified by selecting a corner and dragging in two dimensions, or a side and dragging it orthogonally. These modifications preserve a 4-sided rectangle.
 
 The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be changed.
 
 \e{Curved Lines} are modified in same manner as curved track.
 
-Selecting a corner of a \e{Poly Line}, \e{Filled Box} or \e{Polygon} moves that corner to a new position, and if moved close to a neighboring corner will merge the two corners and delete the edge between them. Selecting an edge will create a corner that can be dragged to a new position.
+Selecting a corner of a \e{Poly Line} or \e{Polygon} moves that corner to a new position, and if moved close to a neighboring corner will merge the two corners and delete the edge between them. Selecting an edge will create a corner that can be dragged to a new position.
 
 Any tracks created during the \f{Modify} command will have the following properties inherited from the first track: selected state, hidden state, scale, track gauge and Layer. 
 
