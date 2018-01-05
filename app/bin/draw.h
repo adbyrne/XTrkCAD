@@ -170,6 +170,7 @@ void DrawHilightPolygon( drawCmd_p, coOrd *, int );
 void DrawBoxedString( int, drawCmd_p, coOrd, char *, wFont_p, wFontSize_t, wDrawColor, ANGLE_T );
 void DrawTextSize2( drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *, POS_T *);
 void DrawTextSize( drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd * );
+void DrawMultiString(drawCmd_p d, coOrd pos, char * text, wFont_p fp, wFontSize_t fs, wDrawColor color, ANGLE_T a, coOrd * lo, coOrd * hi);
 BOOL_T SetRoomSize( coOrd );
 void GetRoomSize( coOrd * );
 void DoRedraw( void );

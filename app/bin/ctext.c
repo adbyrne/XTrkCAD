@@ -27,6 +27,7 @@
 #include "param.h"
 #include "track.h"
 #include "wlib.h"
+#include "draw.h"
 #include "misc.h"
 
 track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize, wDrawColor color );
@@ -81,7 +82,7 @@ static void TextDlgUpdate(
 	case 0:
 	case 1:
 		if ( Dt.state == SHOW_TEXT) {
-			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
+			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 		}
 		UpdateFontSizeList( &Dt.size, (wList_p)textPLs[0].control, Dt.fontSizeInx );
@@ -97,12 +98,11 @@ static void TextDlgUpdate(
 			Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x+Dt.textLen;
 			Dt.cursPos1.y = Dt.pos.y+Dt.cursHeight;
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
-			//DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, NULL, NULL );
+			DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
 		}
         MainRedraw();
         MapRedraw();
-		break;
+        break;
 	}
 }
 
@@ -152,30 +152,24 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		break;
 	case C_DOWN:
 		if (Dt.state != 0) {
-            //DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-			//DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		}
 		Dt.pos = pos;
 		Dt.cursPos0.y = Dt.cursPos1.y = pos.y;
 		Dt.cursPos0.x = Dt.cursPos1.x = pos.x + Dt.textLen;
 		Dt.cursPos1.y += Dt.cursHeight;
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
-		//DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, NULL, NULL );
+		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
         Dt.state = SHOW_TEXT;
         MainRedraw();
         MapRedraw();
 		return C_CONTINUE;
 	case C_MOVE:
-        //DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		//DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
 		Dt.pos = pos;
 		Dt.cursPos0.y = Dt.cursPos1.y = pos.y;
 		Dt.cursPos0.x = Dt.cursPos1.x = pos.x + Dt.textLen;
 		Dt.cursPos1.y += Dt.cursHeight;
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
-		//DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, NULL, NULL );
+		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
         MainRedraw();
         MapRedraw();
         return C_CONTINUE;
@@ -187,8 +181,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		}
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
-		//DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, NULL, NULL );
+		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
 		c = (unsigned char)(action >> 8);
 		switch (c) {
 		case '\b':
@@ -224,21 +217,16 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.textLen = size.x;
 		Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x + Dt.textLen;
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
-		//DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, NULL, NULL );
+		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
 		return C_CONTINUE;
 	case C_REDRAW:
 		if (Dt.state == 1) {
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-			DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
-			//DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, NULL, NULL );
-
+			DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
 		}
 		return C_CONTINUE;
 	case C_CANCEL:
 		if (Dt.state != POSITION_TEXT) {
-			//DrawString( &tempD, Dt.pos, 0.0, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color );
-			//DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 			Dt.state = POSITION_TEXT;
 		}
 		InfoSubstituteControls( NULL, NULL );

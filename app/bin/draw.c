@@ -473,11 +473,16 @@ EXPORT void DrawMultiString(
 	coOrd size, textsize;
 	POS_T descent;
 
+	if (!text || !*text) {
+		return;  //No string or blank
+	}
+
 	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent);
-	lineH = textsize.y+descent;
+	int ascent = textsize.y-descent;
+	lineH = ascent+descent*1.5;
 	size.x = 0.0;
 	size.y = 0.0;
-	while (1) {
+	while (*text) {
 		cp = message;
 		while (*text != '\0' && *text != '\n')
 			*cp++ = *text++;
@@ -493,9 +498,14 @@ EXPORT void DrawMultiString(
 			break;
 		text++;
 	}
-	*lo = pos;
-	hi->x = pos.x+size.x;
-	hi->y = pos.y+size.y;
+	if (lo) {
+		lo->x = pos.x;
+		lo->y = pos.y-size.y;
+	}
+	if (hi) {
+		hi->x = pos.x+size.x;
+		hi->y = pos.y+ascent;
+	}
 }
 
 

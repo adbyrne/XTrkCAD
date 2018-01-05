@@ -231,7 +231,7 @@ static descData_t drawDesc[] = {
 /*TP*/	{ DESC_POS, N_("Origin: X,Y"), &drawData.endPt[0] },
 /*TA*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle },
 /*TS*/	{ DESC_EDITABLELIST, N_("Font Size"), &drawData.fontSizeInx },
-/*TX*/	{ DESC_STRING, N_("Text"), &drawData.text },
+/*TX*/	{ DESC_TEXT, N_("Text"), &drawData.text },
 /*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &drawData.layer },
 /*PT*/  { DESC_STRING, N_("Type"), &drawData.polyType },
@@ -256,9 +256,11 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 
 	if ( drawSegInx==-1 )
 		return;
-	if ( inx == -1 )
-		return;
 	segPtr = &xx->segs[drawSegInx];
+	if ( inx == -1 ) {
+		if (segPtr->type != SEG_TEXT) return;
+		else inx = TX;  //Always look at TextField for SEG_TEXT on "Done"
+	}
     MainRedraw();
     MapRedraw();
 	UndrawNewTrack( trk );
@@ -385,14 +387,14 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		segPtr->u.t.fontSize = fontSize;
 		break;
 	case TX:
-		text = wStringGetValue( (wString_p)drawDesc[TX].control0 );
-		char * unescaped = ConvertFromEscapedText(text);
-		if ( unescaped && unescaped[0] && strcmp( segPtr->u.t.string, unescaped ) != 0 ) {
+		if ( wTextGetModified((wText_p)drawDesc[TX].control0 )) {
+			int len = wTextGetSize((wText_p)drawDesc[TX].control0);
 			MyFree( segPtr->u.t.string );
-			segPtr->u.t.string = MyStrdup( unescaped );
-			/*(char*)drawDesc[TX].valueP = segPtr->u.t.string;*/
+			segPtr->u.t.string = (char *)MyMalloc(len+1);
+			wTextGetText((wText_p)drawDesc[TX].control0, segPtr->u.t.string, len+1);
+			segPtr->u.t.string[len] = '\0';				//Make sure of null term
 		}
-		MyFree(unescaped);
+
 		break;
 	case LY:
 		SetTrkLayer( trk, drawData.layer);
@@ -529,13 +531,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		break;
 	case SEG_TEXT:
 		REORIGIN( drawData.endPt[0], segPtr->u.t.pos, xx->angle, xx->orig );
-		//drawData.angle = NormalizeAngle( segPtr->u.t.angle );
 		drawData.angle = NormalizeAngle( xx->angle );
-		char * escaped = ConvertToEscapedText(segPtr->u.t.string);
-		strncpy( drawData.text, escaped, sizeof drawData.text );
-		MyFree(escaped);
-		/*drawData.fontSize = segPtr->u.t.fontSize;*/
-		/*(char*)drawDesc[TX].valueP = segPtr->u.t.string;*/
+		strncpy( drawData.text, segPtr->u.t.string, sizeof drawData.text );
 		drawDesc[TP].mode =
 		drawDesc[TS].mode =
 		drawDesc[TX].mode = 
