@@ -70,10 +70,6 @@ EXPORT char *PREFSECT = "DialogItem";
 static int paramCheckErrorCount = 0;
 static BOOL_T paramCheckShowErrors = FALSE;
 
-static int log_hotspot;
-static int hotspotOffsetX = 5;
-static int hotspotOffsetY = 19;
-
 static int log_paramLayout;
 
 
@@ -2324,10 +2320,6 @@ static void LayoutControls(
 			char * cp;
 			strcpy( message, pd->nameStr );
 			for ( cp=message; *cp; cp++ ) if ( *cp == '-' ) *cp = '_';
-			LOG( log_hotspot, 1, ( "popup %d %d %d %d _%s_%s\n",
-				controlK.orig.x+hotspotOffsetX, controlK.orig.y+hotspotOffsetY,
-				controlSize_x, controlSize_y,
-				group->nameStr, message ) )
 		}
 		/*
 		 * Set column term
@@ -2449,9 +2441,21 @@ static void ParamDlgProc(
 	}
 }
 
+/**
+ * Create a dialog box from data definition. 
+ *
+ * \param IN group	data definition for the dialog
+ * \param IN title  title of the new dialog
+ * \param IN okLabel text for the affirmative button
+ * \param IN okProc	subroutine to call when ok is pressed
+ * \param IN cancelProc if not NULL a subroutine for Cancel event. If NULL no cancel button is created
+ * \param IN needHelpButton if TRUE a help button is created
+ * \param IN layoutProc ???
+ * \param IN winOption ???
+ * \param IN changeProc ???
+ */
 
-
-EXPORT wWin_p ParamCreateDialog(
+wWin_p ParamCreateDialog(
 		paramGroup_p group,
 		char * title,
 		char * okLabel,
@@ -2464,7 +2468,6 @@ EXPORT wWin_p ParamCreateDialog(
 {
 	char helpStr[STR_SHORT_SIZE];
 	wPos_t w0, h0;
-	wButton_p lastB = NULL;
 	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
 
 	winOption &= ~PD_F_ALT_CANCELLABEL;
@@ -2477,34 +2480,22 @@ EXPORT wWin_p ParamCreateDialog(
 	if ( (winOption&F_RESIZE) != 0 )
 		winOption |= F_RECALLSIZE;
 
-	sprintf( helpStr, "cmd%s", group->nameStr );
-	helpStr[3] = toupper((unsigned char)helpStr[3]);
-
 	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
 
 	if ( okLabel && okProc ) {
 		sprintf( helpStr, "%s-ok", group->nameStr );
-		lastB = group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT, 0, (wButtonCallBack_p)ParamButtonOk, group );
+		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT, 0, (wButtonCallBack_p)ParamButtonOk, group );
 	}
 	if ( group->cancelProc ) {
-		lastB = group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL, 0, (wButtonCallBack_p)ParamButtonCancel, group );
+		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL, 0, (wButtonCallBack_p)ParamButtonCancel, group );
 	}
 	if ( needHelpButton ) {
 		sprintf( helpStr, "cmd%s", group->nameStr );
 		helpStr[3] = toupper((unsigned char)helpStr[3]);
-		lastB = group->helpB = wButtonCreate( group->win, 0, 0, NULL, _("Help"), BB_HELP, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
+		group->helpB = wButtonCreate( group->win, 0, 0, NULL, _("Help"), BB_HELP, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
 	}
 
-	LOG( log_hotspot, 1, ( "mkshg ${PNG2DIR}/%s.png ${SHGDIR}/%s.shg << EOF\n", group->nameStr, group->nameStr ) )
 	LayoutControls( group, ParamCreateControl, &group->origW, &group->origH );
-	if ( group->okB )
-		LOG( log_hotspot, 1, ( "popup %d %d %d %d _%s_%s\n",
-				wControlGetPosX((wControl_p)(group->okB))+hotspotOffsetX,
-				wControlGetPosY((wControl_p)(group->okB))+hotspotOffsetY,
-				wControlGetWidth((wControl_p)(group->okB)),
-				wControlGetHeight((wControl_p)(group->okB)),
-				group->nameStr, "ok" ) )
-	LOG( log_hotspot, 1, ( "EOF\n" ) )
 
 	group->origW += DlgSepRight;
 	group->origH += DlgSepBottom;
@@ -2514,11 +2505,9 @@ EXPORT wWin_p ParamCreateDialog(
 			 group->origH != h0 ) {
 			LayoutControls( group, ParamPositionControl, NULL, NULL );
 		}
-	} else if ( group->origW > w0 || group->origH > h0 ) {
-		if ( group->origW > w0 )
-			w0 = group->origW;
-		if ( group->origH > h0 )
-			h0 = group->origH;
+	} else {
+		w0 = max(group->origW, w0);
+		h0 = max(group->origH, h0);
 		wWinSetSize( group->win, w0, h0 );
 	}
 
@@ -2578,6 +2567,5 @@ EXPORT void ParamInit( void )
 {
 	AddPlaybackProc( "PARAMETER", ParamPlayback, NULL );
 	AddPlaybackProc( "PARAMCHECK", ParamCheck, NULL );
-	log_hotspot = LogFindIndex( "hotspot" );
 	log_paramLayout = LogFindIndex( "paramlayout" );
 }
