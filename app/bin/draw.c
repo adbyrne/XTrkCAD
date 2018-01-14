@@ -630,6 +630,50 @@ EXPORT void DrawTextSize(
 	DrawTextSize2( dp, text, fp, fs, relative, size, &descent );
 }
 
+EXPORT void DrawMultiLineTextSize(
+		drawCmd_p dp,
+		char * text,
+		wFont_p fp,
+		wFontSize_t fs,
+		BOOL_T relative,
+		coOrd * size,
+		coOrd * lastline )
+{
+	POS_T descent, lineW, lineH;
+	coOrd textsize, blocksize;
+	BOOL_T first = TRUE;
+
+	char *cp;
+	DrawTextSize2( &mainD, "Aqlip", fp, fs, TRUE, &textsize, &descent);
+	int ascent = textsize.y-descent;
+	lineH = ascent+descent*1.5;
+	blocksize.x = 0;
+	blocksize.y = 0;
+	while (*text != '\0') {
+		cp = message;
+		while (*text != '\0' && *text != '\n')
+			*cp++ = *text++;
+		*cp = '\0';
+		if (first) {
+			first = FALSE;
+		} else {
+			lastline->y -= lineH;
+		}
+		blocksize.y += lineH;
+		DrawTextSize2( &mainD, message, fp, fs, TRUE, &textsize, &descent);
+		lineW = textsize.x;
+		if (lineW>blocksize.x)
+			blocksize.x = lineW;
+		lastline->x = textsize.x;
+		if (*text == '\0')
+			break;
+		text++;
+	}
+	size->x = blocksize.x;
+	size->y = blocksize.y;
+
+}
+
 
 static void DDrawBitMap( drawCmd_p d, coOrd p, wDrawBitMap_p bm, wDrawColor color)
 {
