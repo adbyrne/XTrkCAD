@@ -230,8 +230,10 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		DrawTextSize(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size);  //In case fontsize change
 		Dt.cursHeight = size.y;
 		Dt.cursPos1.y +=Dt.cursHeight;
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
+		MainRedraw();
+		MapRedraw();
+		//DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+		//DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
 		return C_CONTINUE;
 	case C_REDRAW:
 		if (Dt.state == 1) {

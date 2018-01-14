@@ -641,7 +641,6 @@ EXPORT void DrawMultiLineTextSize(
 {
 	POS_T descent, lineW, lineH;
 	coOrd textsize, blocksize;
-	BOOL_T first = TRUE;
 
 	char *cp;
 	DrawTextSize2( &mainD, "Aqlip", fp, fs, TRUE, &textsize, &descent);
@@ -649,22 +648,23 @@ EXPORT void DrawMultiLineTextSize(
 	lineH = ascent+descent*1.5;
 	blocksize.x = 0;
 	blocksize.y = 0;
-	while (*text != '\0') {
+	lastline->x = 0;
+	lastline->y = 0;
+	while (text && *text != '\0' ) {
 		cp = message;
 		while (*text != '\0' && *text != '\n')
 			*cp++ = *text++;
 		*cp = '\0';
-		if (first) {
-			first = FALSE;
-		} else {
-			lastline->y -= lineH;
-		}
 		blocksize.y += lineH;
 		DrawTextSize2( &mainD, message, fp, fs, TRUE, &textsize, &descent);
 		lineW = textsize.x;
 		if (lineW>blocksize.x)
 			blocksize.x = lineW;
 		lastline->x = textsize.x;
+		if (*text =='\n') {
+			lastline->y -= lineH;
+			lastline->x = 0;
+		}
 		if (*text == '\0')
 			break;
 		text++;
