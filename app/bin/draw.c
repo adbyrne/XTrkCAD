@@ -478,7 +478,7 @@ EXPORT void DrawMultiString(
 	}
 
 	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent);
-	int ascent = textsize.y-descent;
+	POS_T ascent = textsize.y-descent;
 	lineH = ascent+descent*1.5;
 	size.x = 0.0;
 	size.y = 0.0;
@@ -644,7 +644,7 @@ EXPORT void DrawMultiLineTextSize(
 
 	char *cp;
 	DrawTextSize2( &mainD, "Aqlip", fp, fs, TRUE, &textsize, &descent);
-	int ascent = textsize.y-descent;
+	POS_T ascent = textsize.y-descent;
 	lineH = ascent+descent*1.5;
 	blocksize.x = 0;
 	blocksize.y = 0;

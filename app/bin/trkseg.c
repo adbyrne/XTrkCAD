@@ -172,13 +172,14 @@ EXPORT void GetTextBounds(
 		coOrd * hiR )
 {
 	coOrd size;
-	POS_T descent;
+	POS_T descent = 0.0;
 	coOrd lo, hi;
 	coOrd p[4];
+	coOrd lastL;
 	int i;
 
-	DrawTextSize2( &mainD, str, NULL, fs, FALSE, &size, &descent);
-
+	//DrawTextSize2( &mainD, str, NULL, fs, FALSE, &size, &descent);
+	DrawMultiLineTextSize(&mainD, str, NULL, fs, FALSE, &size, &lastL );
 	// set up the corners of the rectangle
 	p[0].x = p[3].x = 0.0;
 	p[1].x = p[2].x = size.x;
@@ -1892,7 +1893,7 @@ EXPORT void DrawSegsO(
 			break;
 		case SEG_TEXT:
 			REORIGIN( p0, segPtr->u.t.pos, angle, orig )
-			DrawString( d, p0, NormalizeAngle(angle+segPtr->u.t.angle), segPtr->u.t.string, segPtr->u.t.fontP, segPtr->u.t.fontSize, color1 );
+			DrawMultiString( d, p0, segPtr->u.t.string, segPtr->u.t.fontP, segPtr->u.t.fontSize, color1, NormalizeAngle(angle + segPtr->u.t.angle), NULL, NULL );
 			break;
 		case SEG_FILPOLY:
 			if ( (d->options&DC_GROUP) == 0 &&
