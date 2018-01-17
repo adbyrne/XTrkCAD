@@ -201,7 +201,7 @@ typedef struct {
 		dynArr_t bezSegs;       //placed here to avoid overwrites
 		union {
 			struct {
-				coOrd pos[2];
+				coOrd pos[4];
 				ANGLE_T angle;
 				long option;
 			} l;

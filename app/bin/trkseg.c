@@ -178,23 +178,36 @@ EXPORT void GetTextBounds(
 	coOrd lastL;
 	int i;
 
-	//DrawTextSize2( &mainD, str, NULL, fs, FALSE, &size, &descent);
-	DrawMultiLineTextSize(&mainD, str, NULL, fs, FALSE, &size, &lastL );
+	DrawMultiLineTextSize(&mainD, str, NULL, fs, FALSE, &size, &lastL);
 	// set up the corners of the rectangle
 	p[0].x = p[3].x = 0.0;
 	p[1].x = p[2].x = size.x;
-	p[0].y = p[1].y = size.y-descent;
-	p[2].y = p[3].y = -descent;         //"Descent" includes multiple lines
+	p[0].y = p[1].y = lastL.y-descent;
+	DrawTextSize2(&mainD, "A", NULL, fs, FALSE, &size, &descent);
+	p[2].y = p[3].y = size.y;
 
 	lo = hi = zero;
 
 	// rotate each point
-	for ( i=0; i<4; i++ ) {
-		Rotate( &p[i], zero, angle );
-		if ( p[i].x < lo.x ) lo.x = p[i].x;
-		if ( p[i].y < lo.y ) lo.y = p[i].y;
-		if ( p[i].x > hi.x ) hi.x = p[i].x;
-		if ( p[i].y > hi.y ) hi.y = p[i].y;
+	for (i=0; i<4; i++)
+	{
+	    Rotate(&p[i], zero, angle);
+
+	    if (p[i].x < lo.x) {
+	        lo.x = p[i].x;
+	    }
+
+	    if (p[i].y < lo.y) {
+	        lo.y = p[i].y;
+	    }
+
+	    if (p[i].x > hi.x) {
+	        hi.x = p[i].x;
+	    }
+
+	    if (p[i].y > hi.y) {
+	        hi.y = p[i].y;
+	    }
 	}
 
 	// now recaclulate the corners
@@ -1269,7 +1282,7 @@ EXPORT BOOL_T ReadSegs( void )
             s->bezSegs.max=0;
             s->bezSegs.ptr= NULL;
             s->bezSegs.cnt=0;
-            if ( !GetArgs( cp, hasElev?"lwpppp":"lwpppp",
+            if ( !GetArgs( cp, "lwpppp",
                 &rgb, &s->width,
                 &s->u.b.pos[0],
                 &s->u.b.pos[1],
@@ -1287,7 +1300,7 @@ EXPORT BOOL_T ReadSegs( void )
             s->bezSegs.max=0;
             s->bezSegs.ptr= NULL;
             s->bezSegs.cnt=0;
-            if ( !GetArgs( cp, hasElev?"lwpppp":"lwpppp",
+            if ( !GetArgs( cp, "lwpppp",
                 &rgb, &s->width,
                 &s->u.b.pos[0],
                 &s->u.b.pos[1],
