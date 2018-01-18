@@ -65,6 +65,7 @@ static wDrawBitMap_p angle_bm[4];
  static int microCount = 0;
 
 static dynArr_t tlist_da;
+
 #define Tlist(N) DYNARR_N( track_p, tlist_da, N )
 #define TlistAppend( T ) \
 		{ DYNARR_APPEND( track_p, tlist_da, 10 );\

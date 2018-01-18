@@ -469,6 +469,7 @@ EXPORT void DrawMultiString(
 		coOrd * hi)
 {
 	char * cp;
+	char * cp1;
 	POS_T lineH, lineW;
 	coOrd size, textsize, posl, orig;
 	POS_T descent;
@@ -484,24 +485,26 @@ EXPORT void DrawMultiString(
 	size.y = 0.0;
 	orig.x = pos.x;
 	orig.y = pos.y;
+	cp = message;				// Build up message to hold all of the strings separated by nulls
 	while (*text) {
-		cp = message;
+		cp1 = cp;
 		while (*text != '\0' && *text != '\n')
 			*cp++ = *text++;
 		*cp = '\0';
-		DrawTextSize2( &mainD, message, fp, fs, TRUE, &textsize, &descent);
+		DrawTextSize2( &mainD, cp1, fp, fs, TRUE, &textsize, &descent);
 		lineW = textsize.x;
 		if (lineW>size.x)
 			size.x = lineW;
 		posl.x = pos.x;
 		posl.y = pos.y;
 		Rotate( &posl, orig, a);
-		DrawString( d, posl, a, message, fp, fs, color );
+		DrawString( d, posl, a, cp1, fp, fs, color );
 		pos.y -= lineH;
 		size.y += lineH;
 		if (*text == '\0')
 			break;
 		text++;
+		cp++;
 	}
 	if (lo) {
 		lo->x = posl.x;
