@@ -470,7 +470,7 @@ EXPORT void DrawMultiString(
 {
 	char * cp;
 	POS_T lineH, lineW;
-	coOrd size, textsize;
+	coOrd size, textsize, posl, orig;
 	POS_T descent;
 
 	if (!text || !*text) {
@@ -482,6 +482,8 @@ EXPORT void DrawMultiString(
 	lineH = ascent+descent*1.5;
 	size.x = 0.0;
 	size.y = 0.0;
+	orig.x = pos.x;
+	orig.y = pos.y;
 	while (*text) {
 		cp = message;
 		while (*text != '\0' && *text != '\n')
@@ -491,7 +493,10 @@ EXPORT void DrawMultiString(
 		lineW = textsize.x;
 		if (lineW>size.x)
 			size.x = lineW;
-		DrawString( d, pos, 0.0, message, fp, fs, color );
+		posl.x = pos.x;
+		posl.y = pos.y;
+		Rotate( &posl, orig, a);
+		DrawString( d, posl, a, message, fp, fs, color );
 		pos.y -= lineH;
 		size.y += lineH;
 		if (*text == '\0')
@@ -499,12 +504,12 @@ EXPORT void DrawMultiString(
 		text++;
 	}
 	if (lo) {
-		lo->x = pos.x;
-		lo->y = pos.y-size.y;
+		lo->x = posl.x;
+		lo->y = posl.y-descent;
 	}
 	if (hi) {
-		hi->x = pos.x+size.x;
-		hi->y = pos.y+ascent;
+		hi->x = posl.x+size.x;
+		hi->y = posl.y+ascent;
 	}
 }
 

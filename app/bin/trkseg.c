@@ -171,6 +171,7 @@ EXPORT void GetTextBounds(
 		coOrd * loR,
 		coOrd * hiR )
 {
+
 	coOrd size;
 	POS_T descent = 0.0;
 	coOrd lo, hi;
