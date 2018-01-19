@@ -229,15 +229,18 @@ void wTextGetText(
 {
 	int lc, l, len;
 	s--;
-	lc = (int)SendMessage( b->hWnd, EM_GETLINECOUNT, 0, 0L );
-	for ( l=0; l<lc && s>=0; l++ ) {
-		*(WORD*)t = s;
-		len = (int)SendMessage( b->hWnd, EM_GETLINE, l, (DWORD)(LPSTR)t );
-		t += len;
-		*t++ = '\n';
-		s -= len+1;
+	lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, 0, 0L);
+
+	for (l=0; l<lc && s>=0; l++)
+	{
+	    *(WORD*)t = s;
+	    len = (int)SendMessage(b->hWnd, EM_GETLINE, l, (DWORD)(LPSTR)t);
+	    t += len;
+	    *t++ = '\n';
+	    s -= len+1;
 	}
-	*t++ = '\0';
+
+	*(t - 1) = '\0';		// overwrite the last \n added
 }
 
 

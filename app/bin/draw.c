@@ -473,10 +473,12 @@ EXPORT void DrawMultiString(
 	POS_T lineH, lineW;
 	coOrd size, textsize, posl, orig;
 	POS_T descent;
+	char *line;
 
 	if (!text || !*text) {
 		return;  //No string or blank
 	}
+	line = malloc(strlen(text) + 1);
 
 	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent);
 	POS_T ascent = textsize.y-descent;
@@ -485,7 +487,7 @@ EXPORT void DrawMultiString(
 	size.y = 0.0;
 	orig.x = pos.x;
 	orig.y = pos.y;
-	cp = message;				// Build up message to hold all of the strings separated by nulls
+	cp = line;				// Build up message to hold all of the strings separated by nulls
 	while (*text) {
 		cp1 = cp;
 		while (*text != '\0' && *text != '\n')
@@ -514,6 +516,8 @@ EXPORT void DrawMultiString(
 		hi->x = posl.x+size.x;
 		hi->y = posl.y+ascent;
 	}
+
+	free(line);
 }
 
 
@@ -651,6 +655,8 @@ EXPORT void DrawMultiLineTextSize(
 	coOrd textsize, blocksize;
 
 	char *cp;
+	char *line = malloc(strlen(text) + 1);
+
 	DrawTextSize2( &mainD, "Aqlip", fp, fs, TRUE, &textsize, &descent);
 	POS_T ascent = textsize.y-descent;
 	lineH = ascent+descent*1.5;
@@ -659,12 +665,12 @@ EXPORT void DrawMultiLineTextSize(
 	lastline->x = 0;
 	lastline->y = 0;
 	while (text && *text != '\0' ) {
-		cp = message;
+		cp = line;
 		while (*text != '\0' && *text != '\n')
 			*cp++ = *text++;
 		*cp = '\0';
 		blocksize.y += lineH;
-		DrawTextSize2( &mainD, message, fp, fs, TRUE, &textsize, &descent);
+		DrawTextSize2( &mainD, line, fp, fs, TRUE, &textsize, &descent);
 		lineW = textsize.x;
 		if (lineW>blocksize.x)
 			blocksize.x = lineW;
@@ -679,7 +685,7 @@ EXPORT void DrawMultiLineTextSize(
 	}
 	size->x = blocksize.x;
 	size->y = blocksize.y;
-
+	free(line);
 }
 
 

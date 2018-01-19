@@ -716,7 +716,7 @@ void wDrawGetTextSize(
 	y = HIWORD(extent);
 	*w = XPIXELSTOINCH( bd, x );
 	*h = YPIXELSTOINCH( bd, y );
-	*d = YPIXELSTOINCH(bd, textMetric.tmAscent );
+	*d = YPIXELSTOINCH(bd, textMetric.tmDescent );
 
 	SelectObject( bd->hDc, prevFont );
 	DeleteObject( newFont );
