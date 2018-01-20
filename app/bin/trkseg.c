@@ -183,8 +183,8 @@ EXPORT void GetTextBounds(
 	// set up the corners of the rectangle
 	p[0].x = p[3].x = 0.0;
 	p[1].x = p[2].x = size.x;
-	p[0].y = p[1].y = lastL.y-descent;
 	DrawTextSize2(&mainD, "A", NULL, fs, FALSE, &size, &descent);
+	p[0].y = p[1].y = lastL.y - descent;
 	p[2].y = p[3].y = size.y;
 
 	lo = hi = zero;
