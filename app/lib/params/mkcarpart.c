@@ -54,7 +54,7 @@ void readMap(
 	map_t * map )
 {
 	FILE * mapF;
-	char line[256], *cp1;
+	char line[256];
 	int len;
 	mapF = fopen( mapFile, "r" );
 	if ( mapF == NULL ) {
@@ -62,13 +62,15 @@ void readMap(
 		exit(1);
 	}
 	while ( fgets( line, sizeof line, mapF ) != NULL ) {
+		char *cp1;
+		
 		if ( map->cnt+1 > map->max ) {
 			map->max += 10;
 			map->map = (map_element_t*)realloc( map->map, map->max * sizeof *(map_element_t*)0 );
 		}
 		cp1 = strchr( line, '\t' );
 		if ( cp1 == NULL ) {
-			fprintf( stderr, "bad map line: %s\n", cp1 );
+			fprintf( stderr, "bad map line: %s\n", line );
 			continue;
 		}
 		while ( *cp1 == '\t' )
@@ -100,8 +102,6 @@ void readRoadnameMap(
 {
 	FILE * mapF;
 	char line[256];
-	int len;
-	int currLen = 0;
 	roadname_p r_p;
 	char * cp;
 	mapF = fopen( mapFile, "r" );
@@ -110,7 +110,7 @@ void readRoadnameMap(
 		exit(1);
 	}
 	while ( fgets( line, sizeof line, mapF ) != NULL ) {
-		len = strlen( line );
+		int len = strlen( line );
 		if ( line[len-1] == '\n' )
 			line[--len] = '\0';
 		if ( line[0] == '\0' || line[0] == '\n' || line[0] == '#' )
@@ -141,14 +141,6 @@ void readRoadnameMap(
 		alias_last = r_p;
 	}
 	fclose( mapF );
-#ifdef LATER
-	for ( r_p=roadnames; r_p; r_p=r_p->next ) {
-		roadname_p r_p1;
-		for ( r_p1=r_p; r_p1; r_p1=r_p1->alias )
-			printf( "%s ", r_p1->name );
-		printf("\n");
-	}
-#endif
 }
 
 
@@ -173,8 +165,7 @@ long lookupColor(
 		return 0x823F00;
 	if ( !isdigit( colorS[0] ) )
 		colorS = lookupMap( &colorMap, colorS );
-	if ( colorS == NULL )
-		return 0x823F00;
+
 	return strtol( colorS, &colorS, 10 );
 }
 
@@ -310,6 +301,7 @@ void processFile(
 	outF = fopen( outFile, "w" );
 	if ( outF == NULL ) {
 		perror( outFile );
+		fclose( inF );
 		return;
 	}
 	while ( fgets( line, sizeof line, inF )  != NULL ) {
@@ -403,7 +395,7 @@ void processFile(
 			cp = line+5;
 			memset( blanks, 0, sizeof blanks );
 			tab[0] = blanks;
-			for ( cp=line+5,inx=1; cp; inx++ ) {
+			for ( inx=1; cp; inx++ ) {
 				tab[inx] = cp;
 				cp = strchr( cp, '%' );
 				if ( cp )

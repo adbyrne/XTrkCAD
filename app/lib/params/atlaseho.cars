@@ -1005,7 +1005,7 @@ PART=8968%CSX%%2121
 PART=8970%Gulf, Mobile & Ohio%%709
 PART=8971%Gulf, Mobile & Ohio%%713
 PART=8973%New England Central%%9528
-PART=8974%New England Central %%9537
+PART=8974%New England Central%%9537
 PART=8976%Penn Central%%7754
 PART=8977%Penn Central%%7786
 PART=8979%Alaska RR%%2003
@@ -1197,7 +1197,7 @@ PART=9199%Green Mountain Railroad%%305
 DESC=Master DCC Equipped, High Nose
 #============================================
 PART=8940%Undecorated
-PART=8941%Guilford Rail %%370
+PART=8941%Guilford Rail%%370
 PART=8942%Guilford Rail%%378
 PART=8943%Guilford Rail
 PART=8944%Norfolk & Western%%1334
