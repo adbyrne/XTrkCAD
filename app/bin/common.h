@@ -110,19 +110,9 @@ typedef struct {
 		(DA).cnt = 0; }
 
 #ifdef WINDOWS
-#ifdef FAR
-#undef FAR
-#endif
-#ifndef WIN32
-#define FAR _far
-#else
-#define FAR
-#endif
 #define M_PI 3.14159
 #define strcasecmp _stricmp
 #define strncasecmp _strnicmp
-#else
-#define FAR
 #endif
 
 #if _MSC_VER >1300

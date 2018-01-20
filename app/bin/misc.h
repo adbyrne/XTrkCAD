@@ -180,7 +180,7 @@ extern wPos_t DlgSepFrmBottom;
 extern wWin_p mainW;
 extern wPos_t toolbarHeight;
 extern wIndex_t changed;
-extern char FAR message[STR_LONG_SIZE];
+extern char message[STR_LONG_SIZE];
 extern REGION_T curRegion;
 extern long paramVersion;
 extern coOrd zero;
