@@ -213,16 +213,13 @@ BOOL_T wTextPrint(
         TextOut(hDc, 0, currentLine*lineSpace, line, len);
 
         if (++currentLine > linesPerPage) {
-            EndPage(hDc);
-            currentLine = 1;
             IOStatus = EndPage(hDc);
-
             if (IOStatus < 0 || textPrintAbort) {
                 break;
             }
-
             StartPage(hDc);
-        }
+			currentLine = 1;
+		}
     }
 
     if (IOStatus >= 0 && !textPrintAbort) {
