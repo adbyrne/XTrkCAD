@@ -1246,7 +1246,7 @@ LOG( log_traverseTurnout, 1, ( "  PC=%d ", pathCurr[0] ) )
 	GetSegInxEP( pathCurr[0], &segInx, &segEP );
 	segPtr = xx->segs+segInx;
 	segProcData.traverse1.pos = pos2;
-	segProcData.traverse1.angle = xx->angle+trvTrk->angle;
+	segProcData.traverse1.angle = -xx->angle+trvTrk->angle;
 	SegProc( SEGPROC_TRAVERSE1, segPtr, &segProcData );
 	dist += segProcData.traverse1.dist;
 	//Get ready for Traverse2 - copy all Traverse1 first

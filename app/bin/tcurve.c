@@ -1381,9 +1381,9 @@ EXPORT void CurveSegProc(
 		int res = AngleInRange(a2,segPtr->u.c.a0,segPtr->u.c.a1);
 		if (res == 1 ) {
 LOG( log_curveSegs, 1, ("CrvSegsAngle miss A%0.3f S%0.3f E%0.3f R%d B%d \n",a2,segPtr->u.c.a0,segPtr->u.c.a1,res,data->traverse1.backwards))
-			a2 = data->traverse1.backwards?segPtr->u.c.a1:0;
+			a2 = 0;
 		} else if (res == -1){
-			a2 = data->traverse1.backwards?0:segPtr->u.c.a1;
+			a2 = segPtr->u.c.a1;
 		} else {
 		//Fix issue of angles passing through zero -
 			if ( !data->traverse1.backwards ) {
