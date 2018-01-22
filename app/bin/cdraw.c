@@ -33,6 +33,7 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "misc.h"
 
 extern void wSetSelectedFontSize(int size);
 
@@ -207,7 +208,7 @@ static struct {
 		wIndex_t dimenSize;
 		descPivot_t pivot;
 		wIndex_t fontSizeInx;
-		char text[STR_SIZE];
+		char text[STR_LONG_SIZE];
 		unsigned int layer;
 		char polyType[STR_SIZE];
 		} drawData;
@@ -230,7 +231,7 @@ static descData_t drawDesc[] = {
 /*TP*/	{ DESC_POS, N_("Origin: X,Y"), &drawData.endPt[0] },
 /*TA*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle },
 /*TS*/	{ DESC_EDITABLELIST, N_("Font Size"), &drawData.fontSizeInx },
-/*TX*/	{ DESC_STRING, N_("Text"), &drawData.text },
+/*TX*/	{ DESC_TEXT, N_("Text"), &drawData.text },
 /*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &drawData.layer },
 /*PT*/  { DESC_STRING, N_("Type"), &drawData.polyType },
@@ -255,9 +256,11 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 
 	if ( drawSegInx==-1 )
 		return;
-	if ( inx == -1 )
-		return;
 	segPtr = &xx->segs[drawSegInx];
+	if ( inx == -1 ) {
+		if (segPtr->type != SEG_TEXT) return;
+		else inx = TX;  //Always look at TextField for SEG_TEXT on "Done"
+	}
     MainRedraw();
     MapRedraw();
 	UndrawNewTrack( trk );
@@ -384,12 +387,14 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		segPtr->u.t.fontSize = fontSize;
 		break;
 	case TX:
-		text = wStringGetValue( (wString_p)drawDesc[TX].control0 );
-		if ( text && text[0] && strcmp( segPtr->u.t.string, text ) != 0 ) {
+		if ( wTextGetModified((wText_p)drawDesc[TX].control0 )) {
+			int len = wTextGetSize((wText_p)drawDesc[TX].control0);
 			MyFree( segPtr->u.t.string );
-			segPtr->u.t.string = MyStrdup( text );
-			/*(char*)drawDesc[TX].valueP = segPtr->u.t.string;*/
+			segPtr->u.t.string = (char *)MyMalloc(len+1);
+			wTextGetText((wText_p)drawDesc[TX].control0, segPtr->u.t.string, len+1);
+			segPtr->u.t.string[len] = '\0';				//Make sure of null term
 		}
+
 		break;
 	case LY:
 		SetTrkLayer( trk, drawData.layer);
@@ -526,11 +531,9 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		break;
 	case SEG_TEXT:
 		REORIGIN( drawData.endPt[0], segPtr->u.t.pos, xx->angle, xx->orig );
-		//drawData.angle = NormalizeAngle( segPtr->u.t.angle );
 		drawData.angle = NormalizeAngle( xx->angle );
 		strncpy( drawData.text, segPtr->u.t.string, sizeof drawData.text );
-		/*drawData.fontSize = segPtr->u.t.fontSize;*/
-		/*(char*)drawDesc[TX].valueP = segPtr->u.t.string;*/
+		drawData.text[sizeof drawData.text-1] ='\0';
 		drawDesc[TP].mode =
 		drawDesc[TS].mode =
 		drawDesc[TX].mode = 
@@ -1264,7 +1267,6 @@ EXPORT track_p NewText(
 	return trk;
 }
 
-
 EXPORT BOOL_T ReadText( char * line )
 {
 	coOrd pos;
@@ -1285,6 +1287,10 @@ EXPORT BOOL_T ReadText( char * line )
         if (!GetArgs(line, "dLl00pfql", &index, &layer, &color, &pos, &angle, &text, &textSize ))
             return FALSE;
     }
+
+    char * old = text;
+    text = ConvertFromEscapedText(text);
+    MyFree(old);
 
 	trk = NewText( index, pos, angle, text, textSize, color );
 	SetTrkLayer( trk, layer );

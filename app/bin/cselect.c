@@ -65,6 +65,7 @@ static wDrawBitMap_p angle_bm[4];
  static int microCount = 0;
 
 static dynArr_t tlist_da;
+
 #define Tlist(N) DYNARR_N( track_p, tlist_da, N )
 #define TlistAppend( T ) \
 		{ DYNARR_APPEND( track_p, tlist_da, 10 );\
@@ -1164,6 +1165,16 @@ void MoveToJoin(
 		DrawNewTrack( trk0 );
 		DrawNewTrack( trk1 );
 }
+
+void FreeTempStrings() {
+	for (int i = 0; i<tempSegs_da.cnt; i++) {
+		if (tempSegs(i).type == SEG_TEXT) {
+			if (tempSegs(i).u.t.string)
+				MyFree(tempSegs(i).u.t.string);
+			tempSegs(i).u.t.string = NULL;
+		}
+	}
+}
 
 static STATUS_T CmdMove(
 		wAction_t action,
@@ -1195,7 +1206,7 @@ static STATUS_T CmdMove(
 			orig = pos;
 			GetMovedTracks(quickMove != MOVE_QUICK);
 			SetMoveD( TRUE, base, 0.0 );
-			DrawMovedTracks();
+			//DrawMovedTracks();
 			drawCount = 0;
 			state = 1;
             MainRedraw();
@@ -1203,12 +1214,12 @@ static STATUS_T CmdMove(
 			return C_CONTINUE;
 		case C_MOVE:
 			drawEnable = enableMoveDraw;
-			DrawMovedTracks();
+			//DrawMovedTracks();
 			base.x = pos.x - orig.x;
 			base.y = pos.y - orig.y;
 			SnapPos( &base );
 			SetMoveD( TRUE, base, 0.0 );
-			DrawMovedTracks();
+			//DrawMovedTracks();
 #ifdef DRAWCOUNT
 			InfoMessage( "   [%s %s] #%ld", FormatDistance(base.x), FormatDistance(base.y), drawCount );
 #else
@@ -1220,7 +1231,8 @@ static STATUS_T CmdMove(
 			return C_CONTINUE;
 		case C_UP:
 			state = 0;
-			DrawMovedTracks();
+			//DrawMovedTracks();
+			FreeTempStrings();
 			MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, base, zero, 0.0 );
 			return C_TERMINATE;
 
@@ -1382,7 +1394,7 @@ static STATUS_T CmdRotate(
 					}
 					GetMovedTracks(TRUE);
 					SetMoveD( FALSE, orig, angle );
-					DrawMovedTracks();
+					//DrawMovedTracks();
 				}
 			}
             MainRedraw();
@@ -1402,7 +1414,7 @@ static STATUS_T CmdRotate(
 					ErrorMessage( MSG_2ND_TRACK_MUST_BE_UNSELECTED );
 					return C_CONTINUE;
 				}
-				DrawMovedTracks();
+				//DrawMovedTracks();
 				angle1 = NormalizeAngle( GetAngleAtPoint( trk, pos, NULL, NULL ) );
 				angle = NormalizeAngle(angle1-baseAngle);
 				if ( angle > 90 && angle < 270 )
@@ -1413,7 +1425,7 @@ static STATUS_T CmdRotate(
 				InfoMessage( _("Angle %0.3f"), angle1 );
 				SetMoveD( FALSE, orig, angle );
 /*printf( "angle 2 = %0.3f\n", angle );*/
-				DrawMovedTracks();
+				//DrawMovedTracks();
                 MainRedraw();
                 MapRedraw();
 				return C_CONTINUE;
@@ -1439,7 +1451,7 @@ static STATUS_T CmdRotate(
 				}
 				DrawLine( &tempD, base, orig, 0, wDrawColorBlack );
 				SetMoveD( FALSE, orig, angle );
-				DrawMovedTracks();
+				//DrawMovedTracks();
 #ifdef DRAWCOUNT
 				InfoMessage( _("   Angle %0.3f #%ld"), angle, drawCount );
 #else
@@ -1460,13 +1472,14 @@ static STATUS_T CmdRotate(
 				}
 				return C_CONTINUE;
 			} 
+			FreeTempStrings();
 			if ( rotateAlignState == 2 ) {
-				DrawMovedTracks();
+				//DrawMovedTracks();
 				MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, orig, angle );
 				rotateAlignState = 0;
 			} else if (drawnAngle) {
 				DrawLine( &tempD, base, orig, 0, wDrawColorBlack );
-				DrawMovedTracks();
+				//DrawMovedTracks();
 				MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, orig, angle );
 			}
             MainRedraw();

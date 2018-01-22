@@ -37,6 +37,7 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "misc.h"
 
 
 /*****************************************************************************
@@ -153,7 +154,7 @@ EXPORT coOrd GetSegEndPt(
 }
 
 /**
- * Caclulate the bounding box for a string.
+ * Calculate the bounding box for a string.
  *
  * \param coOrd IN position of text
  * \param angle IN text angle
@@ -161,9 +162,7 @@ EXPORT coOrd GetSegEndPt(
  * \param fs IN size of font
  * \param loR OUT bottom left corner
  * \param hiR OUT top right corner
- * \return    describe the return value
  */
-
 EXPORT void GetTextBounds(
 		coOrd pos,
 		ANGLE_T angle,
@@ -172,29 +171,44 @@ EXPORT void GetTextBounds(
 		coOrd * loR,
 		coOrd * hiR )
 {
+
 	coOrd size;
-	POS_T descent;
+	POS_T descent = 0.0;
 	coOrd lo, hi;
 	coOrd p[4];
+	coOrd lastL;
 	int i;
 
-	DrawTextSize2( &mainD, str, NULL, fs, FALSE, &size, &descent );
-
+	DrawMultiLineTextSize(&mainD, str, NULL, fs, FALSE, &size, &lastL);
 	// set up the corners of the rectangle
 	p[0].x = p[3].x = 0.0;
 	p[1].x = p[2].x = size.x;
-	p[0].y = p[1].y = -descent;
+	DrawTextSize2(&mainD, "A", NULL, fs, FALSE, &size, &descent);
+	p[0].y = p[1].y = lastL.y - descent;
 	p[2].y = p[3].y = size.y;
 
 	lo = hi = zero;
 
 	// rotate each point
-	for ( i=1; i<4; i++ ) {
-		Rotate( &p[i], zero, angle );
-		if ( p[i].x < lo.x ) lo.x = p[i].x;
-		if ( p[i].y < lo.y ) lo.y = p[i].y;
-		if ( p[i].x > hi.x ) hi.x = p[i].x;
-		if ( p[i].y > hi.y ) hi.y = p[i].y;
+	for (i=0; i<4; i++)
+	{
+	    Rotate(&p[i], zero, angle);
+
+	    if (p[i].x < lo.x) {
+	        lo.x = p[i].x;
+	    }
+
+	    if (p[i].y < lo.y) {
+	        lo.y = p[i].y;
+	    }
+
+	    if (p[i].x > hi.x) {
+	        hi.x = p[i].x;
+	    }
+
+	    if (p[i].y > hi.y) {
+	        hi.y = p[i].y;
+	    }
 	}
 
 	// now recaclulate the corners
@@ -645,7 +659,7 @@ EXPORT void CloneFilledDraw(
 			sp->u.p.pts = newPts;
 			break;
 		case SEG_TEXT:
-			sp->u.t.string = MyStrdup( sp->u.t.string );
+			sp->u.t.string = strdup( sp->u.t.string);
 			break;
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
@@ -677,8 +691,8 @@ EXPORT void FreeFilledDraw(
 			sp->u.p.pts = NULL;
 			break;
 		case SEG_TEXT:
-			if ( sp->u.t.string )
-				MyFree( sp->u.t.string );
+			if (sp->u.t.string)
+				MyFree(sp->u.t.string);
 			sp->u.t.string = NULL;
 			break;
 		default:
@@ -762,25 +776,27 @@ EXPORT DIST_T DistanceSegs(
             break;
 		case SEG_TEXT:
 			/*GetTextBounds( segPtr->u.t.pos, angle+segPtr->u.t.angle, segPtr->u.t.string, segPtr->u.t.fontSize, &lo, &hi );*/
-			GetTextBounds( zero, 0, segPtr->u.t.string, segPtr->u.t.fontSize, &lo, &hi );
-			Rotate( &p0, segPtr->u.t.pos, segPtr->u.t.angle );
+			GetTextBounds( zero, 0, segPtr->u.t.string, segPtr->u.t.fontSize, &lo, &hi ); //lo and hi are relative to seg origin
 			p0.x -= segPtr->u.t.pos.x;
 			p0.y -= segPtr->u.t.pos.y;
-			if ( p0.x < hi.x && p0.y < hi.y ) {
-				DIST_T dx, dy;
+			Rotate( &p0, zero, -segPtr->u.t.angle );
+			DIST_T dx, dy;
+			if (p0.x > lo.x && p0.x < hi.x && p0.y >lo.y && p0.y < hi.y) {  //Within rectangle - therefore small dist
 				hi.x /= 2.0;
 				hi.y /= 2.0;
-				p0.x -= hi.x;
-				p0.y -= hi.y;
-				dx = fabs(p0.x/hi.x);
-				dy = fabs(p0.y/hi.y);
-				if ( dx > dy )
-					dd = dx;
-				else
-					dd = dy;
-				dd *= 0.25*mainD.scale;
-				/*printf( "dx=%0.4f dy=%0.4f dd=%0.3f\n", dx, dy, dd );*/
+				dd = 0.1*FindDistance(hi, p0)/FindDistance(lo,hi);  // Proportion to mean that the closer we to the center or the smaller the target in overlapping cases, the more likely we pick it
+				break;
 			}
+			hi.x /= 2.0;   // rough center of rectangle
+			hi.y /= 2.0;
+			if (fabs((p0.x-hi.x)/hi.x)<fabs((p0.y-hi.y)/hi.y)) {  	// Proportionally closer to x
+				if (p0.x > hi.x) dd = (p0.x - hi.x);
+				else dd = fabs(p0.x-hi.x);
+			} else {												// Closer to y
+				if (p0.y > hi.y) dd = (p0.y - hi.y);
+				else dd = fabs(p0.y-hi.y);
+			}
+			/*printf( "dx=%0.4f dy=%0.4f dd=%0.3f\n", dx, dy, dd );*/
 /*
 			if ( p0.x >= lo.x && p0.x <= hi.x &&
 				 p0.y >= lo.y && p0.y <= hi.y ) {
@@ -1118,6 +1134,7 @@ EXPORT BOOL_T ReadSegs( void )
 	BOOL_T hasElev;
 	BOOL_T isPolyV2;
 	char type;
+	char * plain_text;
 	long option;
 	BOOL_T subsegs = FALSE;
 
@@ -1266,7 +1283,7 @@ EXPORT BOOL_T ReadSegs( void )
             s->bezSegs.max=0;
             s->bezSegs.ptr= NULL;
             s->bezSegs.cnt=0;
-            if ( !GetArgs( cp, hasElev?"lwpppp":"lwpppp",
+            if ( !GetArgs( cp, "lwpppp",
                 &rgb, &s->width,
                 &s->u.b.pos[0],
                 &s->u.b.pos[1],
@@ -1284,7 +1301,7 @@ EXPORT BOOL_T ReadSegs( void )
             s->bezSegs.max=0;
             s->bezSegs.ptr= NULL;
             s->bezSegs.cnt=0;
-            if ( !GetArgs( cp, hasElev?"lwpppp":"lwpppp",
+            if ( !GetArgs( cp, "lwpppp",
                 &rgb, &s->width,
                 &s->u.b.pos[0],
                 &s->u.b.pos[1],
@@ -1348,10 +1365,14 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
 			s->u.t.fontP = NULL;
-			if ( !GetArgs( cp, "lpf0fq", &rgb, &s->u.t.pos, &s->u.t.angle, &s->u.t.fontSize, &s->u.t.string ) ) {
+			char * expandedText;
+			if ( !GetArgs( cp, "lpf0fq", &rgb, &s->u.t.pos, &s->u.t.angle, &s->u.t.fontSize, &expandedText ) ) {
 				rc = FALSE;
 				/*??*/break;
 			}
+			plain_text = ConvertFromEscapedText(expandedText);
+			s->u.t.string = plain_text;
+			MyFree(expandedText);
 			s->color = wDrawFindColor( rgb );
 			break;
 		case SEG_UNCEP:
@@ -1451,6 +1472,7 @@ EXPORT BOOL_T WriteSegsEnd(
 	int i, j;
 	BOOL_T rc = TRUE;
 	long option;
+	char * escaped_text;
 
 	for ( i=0; i<segCnt; i++ ) {
 		switch ( segs[i].type ) {
@@ -1536,10 +1558,12 @@ EXPORT BOOL_T WriteSegsEnd(
 						segs[i].u.p.pts[j].x, segs[i].u.p.pts[j].y ) > 0;
 			break;
 		case SEG_TEXT: /* 0pf0fq */
+			escaped_text = ConvertToEscapedText(segs[i].u.t.string);
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f 0 %0.6f \"%s\"\n",
 				segs[i].type, wDrawGetRGB(segs[i].color),
 				segs[i].u.t.pos.x, segs[i].u.t.pos.y, segs[i].u.t.angle,
-				segs[i].u.t.fontSize, PutTitle(segs[i].u.t.string) ) > 0;
+				segs[i].u.t.fontSize, escaped_text ) > 0;
+			MyFree(escaped_text);
 			break;
 		}
 	}
@@ -1883,7 +1907,7 @@ EXPORT void DrawSegsO(
 			break;
 		case SEG_TEXT:
 			REORIGIN( p0, segPtr->u.t.pos, angle, orig )
-			DrawString( d, p0, NormalizeAngle(angle+segPtr->u.t.angle), segPtr->u.t.string, segPtr->u.t.fontP, segPtr->u.t.fontSize, color1 );
+			DrawMultiString( d, p0, segPtr->u.t.string, segPtr->u.t.fontP, segPtr->u.t.fontSize, color1, NormalizeAngle(angle + segPtr->u.t.angle), NULL, NULL );
 			break;
 		case SEG_FILPOLY:
 			if ( (d->options&DC_GROUP) == 0 &&

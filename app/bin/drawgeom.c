@@ -679,11 +679,12 @@ STATUS_T DrawGeomModify(
 			}
 			p1=p0;
 			break;
-		default:
-			ASSERT( FALSE ); /* CHECKME */
 		case SEG_TEXT:
 			segInx = -1;
 			return C_ERROR;
+		default:
+			ASSERT( FALSE ); /* CHECKME */
+
 		}
 		if ( FindDistance( p0, pos ) < FindDistance( p1, pos ) )
 			segEp = 0;

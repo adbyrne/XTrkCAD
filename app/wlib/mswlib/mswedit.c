@@ -135,7 +135,7 @@ void wStringSetWidth(
 const char * wStringGetValue(
 		wString_p b )
 {
-	static char buff[256];
+	static char buff[1024];
 	SendMessage( b->hWnd, WM_GETTEXT, sizeof buff, (DWORD)buff );
 	return buff;
 }

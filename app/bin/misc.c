@@ -294,6 +294,95 @@ EXPORT char * MyStrdup( const char * str )
 	return ret;
 }
 
+/*
+ * Convert Text into the equivalent form that can be written to a file or put in a text box by adding escape characters
+ *
+ * The following special characters are produced -
+ *  \n for LineFeed 	0x0A
+ *  \t for Tab 			0x09
+ *  "" for "  			This is so that a CSV conformant type program can interpret the file output
+ *
+ */
+EXPORT char * ConvertToEscapedText(const char * text) {
+	int text_i=0;
+	int add = 0;   //extra chars for escape
+	while(text[text_i]) {
+		switch (text[text_i]) {
+			case '\n': add++; break;
+			case '\t': add++; break;
+			case '\\': add++; break;
+			case '\"': add++; break;
+		}
+		text_i++;
+	}
+	char * cout = MyMalloc(strlen(text)+1+add);
+	int cout_i = 0;
+	text_i = 0;
+	while(text[text_i]) {
+		char c = text[text_i];
+		switch (c) {
+			case '\n': cout[cout_i] = '\\'; cout_i++; cout[cout_i] = 'n'; cout_i++; break;	// Line Feed
+			case '\t': cout[cout_i] = '\\'; cout_i++; cout[cout_i] = 't'; cout_i++; break;	// Tab
+			case '\\': cout[cout_i] = '\\'; cout_i++; cout[cout_i] = '\\'; cout_i++; break;	// BackSlash
+			case '\"': cout[cout_i] = '\"'; cout_i++; cout[cout_i] = '\"'; cout_i++; break; // Double Quotes
+			default: cout[cout_i] = c; cout_i++;
+		}
+		text_i++;
+	}
+	cout[cout_i] = '\0';
+	return cout;
+}
+
+/*
+ * Convert Text that has embedded escape characters into the equivalent form that can be shown on the screen
+ *
+ * The following special characters are supported -
+ *  \n = LineFeed 	0x0A
+ *  \t = Tab 		0x09
+ *  \\ = \ 			The way to still produce backslash
+ *  "" = "			Take out quotes included so that other (CSV-like) programs could read the files
+ *
+ */
+EXPORT char * ConvertFromEscapedText(const char * text) {
+    enum { CHARACTER, ESCAPE, QUOTE } state = CHARACTER;
+    char * cout = MyMalloc(strlen(text)+1);  //always equal to or shorter than
+    int text_i = 0;
+    int cout_i = 0;
+    int c;
+      while (text[text_i]) {
+    	c = text[text_i];
+        switch (state) {
+        case CHARACTER:
+          if (c == '\\') {
+            state = ESCAPE;
+          } else if (c == '\"') {
+        	state = QUOTE;
+          } else {
+            cout[cout_i] = c;
+            cout_i++;
+          }
+          break;
+
+        case ESCAPE:
+          switch (c) {
+          case '\\': cout[cout_i] = '\\'; cout_i++; break;  // "\\" = "\"
+          case 'n': cout[cout_i] = '\n';  cout_i++; break;	// LF
+          case 't': cout[cout_i] = '\t';  cout_i++; break;	// TAB
+          }
+          state = CHARACTER;
+          break;
+        case QUOTE:
+          switch(c) {
+          case '\"': cout[cout_i] = c; cout_i++; break;   //One quote = NULL, Two quotes = 1 quote
+          }
+          state = CHARACTER;
+        }
+        text_i++;
+      }
+      cout[cout_i] = '\0';
+      return cout;
+}
+
 
 EXPORT void AbortProg(
 		char * msg,

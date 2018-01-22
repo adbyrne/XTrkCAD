@@ -16,15 +16,15 @@ There are 4 command buttons on the tool-bar used to draw Straight Objects, Curve
 
 Functions for drawing basic shapes and objects like lines and curves can be accessed from this menu.
 
-\dd \f{Circle Lines} - draw empty or filled circles.
+\dd \f{Circle Lines} - draw empty or filled circles. (\K{cmdCircleL})
 
 \u000
 
-\dd \f{Curved Lines} - are created in the same manner as curved tracks.
+\dd \f{Curved Lines} - are created in the same manner as curved tracks. (\K{cmdCurvedL})
 
 \u000
 
-\dd \f{Note} - attach a note icon to a specific location on the layout.
+\dd \f{Note} - attach a note icon to a specific location on the layout. (\K{cmdNote})
 
 \u000
 
@@ -32,15 +32,15 @@ Functions for drawing basic shapes and objects like lines and curves can be acce
 
 \u000
 
-\dd \f{Shapes} - draw boxes and poly-lines.
+\dd \f{Shapes} - draw boxes and poly-lines. (\K{cmdShapes})
 
 \u000
 
-\dd \f{Straight Objects} - draw straight objects.
+\dd \f{Straight Objects} - draw straight objects. (\K{cmdStraightL})
 
 \u000
 
-\dd \f{Text} - allows entry of text directly onto the layout.
+\dd \f{Text} - allows entry of text directly onto the layout. (\K{cmdText})
 
 Some commands display controls on the Status Line (\K{mainW}) to change line width, color or other attributes of the object.
 
@@ -187,7 +187,7 @@ If \e{Shift} is held down when the button is released at the end of the \e{Left+
 
 \G{png.d/btext.png} 
 
-The \f{Text} command lets you enter text on the layout at the selected position.
+The \f{Text} command lets you enter text on the layout at the selected position. You can use the Tab key to format the text to fixed tab positions and CTRL+Enter to enter a newLine character.
 
 \G{png.d/statustext.png} 
 

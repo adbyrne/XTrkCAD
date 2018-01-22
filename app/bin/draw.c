@@ -469,33 +469,55 @@ EXPORT void DrawMultiString(
 		coOrd * hi)
 {
 	char * cp;
+	char * cp1;
 	POS_T lineH, lineW;
-	coOrd size, textsize;
+	coOrd size, textsize, posl, orig;
 	POS_T descent;
+	char *line;
 
-	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent );
-	lineH = textsize.y+descent;
+	if (!text || !*text) {
+		return;  //No string or blank
+	}
+	line = malloc(strlen(text) + 1);
+
+	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent);
+	POS_T ascent = textsize.y-descent;
+	lineH = ascent+descent*1.5;
 	size.x = 0.0;
 	size.y = 0.0;
-	while (1) {
-		cp = message;
+	orig.x = pos.x;
+	orig.y = pos.y;
+	cp = line;				// Build up message to hold all of the strings separated by nulls
+	while (*text) {
+		cp1 = cp;
 		while (*text != '\0' && *text != '\n')
 			*cp++ = *text++;
 		*cp = '\0';
-		DrawTextSize2( &mainD, message, fp, fs, TRUE, &textsize, &descent );
+		DrawTextSize2( &mainD, cp1, fp, fs, TRUE, &textsize, &descent);
 		lineW = textsize.x;
 		if (lineW>size.x)
 			size.x = lineW;
-		DrawString( d, pos, 0.0, message, fp, fs, color );
+		posl.x = pos.x;
+		posl.y = pos.y;
+		Rotate( &posl, orig, a);
+		DrawString( d, posl, a, cp1, fp, fs, color );
 		pos.y -= lineH;
 		size.y += lineH;
-		if (*text)
+		if (*text == '\0')
 			break;
 		text++;
+		cp++;
 	}
-	*lo = pos;
-	hi->x = pos.x;
-	hi->y = pos.y+size.y;
+	if (lo) {
+		lo->x = posl.x;
+		lo->y = posl.y-descent;
+	}
+	if (hi) {
+		hi->x = posl.x+size.x;
+		hi->y = posl.y+ascent;
+	}
+
+	free(line);
 }
 
 
@@ -620,6 +642,52 @@ EXPORT void DrawTextSize(
 	DrawTextSize2( dp, text, fp, fs, relative, size, &descent );
 }
 
+EXPORT void DrawMultiLineTextSize(
+		drawCmd_p dp,
+		char * text,
+		wFont_p fp,
+		wFontSize_t fs,
+		BOOL_T relative,
+		coOrd * size,
+		coOrd * lastline )
+{
+	POS_T descent, lineW, lineH;
+	coOrd textsize, blocksize;
+
+	char *cp;
+	char *line = malloc(strlen(text) + 1);
+
+	DrawTextSize2( &mainD, "Aqlip", fp, fs, TRUE, &textsize, &descent);
+	POS_T ascent = textsize.y-descent;
+	lineH = ascent+descent*1.5;
+	blocksize.x = 0;
+	blocksize.y = 0;
+	lastline->x = 0;
+	lastline->y = 0;
+	while (text && *text != '\0' ) {
+		cp = line;
+		while (*text != '\0' && *text != '\n')
+			*cp++ = *text++;
+		*cp = '\0';
+		blocksize.y += lineH;
+		DrawTextSize2( &mainD, line, fp, fs, TRUE, &textsize, &descent);
+		lineW = textsize.x;
+		if (lineW>blocksize.x)
+			blocksize.x = lineW;
+		lastline->x = textsize.x;
+		if (*text =='\n') {
+			lastline->y -= lineH;
+			lastline->x = 0;
+		}
+		if (*text == '\0')
+			break;
+		text++;
+	}
+	size->x = blocksize.x;
+	size->y = blocksize.y;
+	free(line);
+}
+
 
 static void DDrawBitMap( drawCmd_p d, coOrd p, wDrawBitMap_p bm, wDrawColor color)
 {
@@ -696,7 +764,7 @@ static void TempSegString(
 	tempSegs(tempSegs_da.cnt-1).u.t.angle = a;
 	tempSegs(tempSegs_da.cnt-1).u.t.fontP = fp;
 	tempSegs(tempSegs_da.cnt-1).u.t.fontSize = fontSize;
-	tempSegs(tempSegs_da.cnt-1).u.t.string = s;
+	tempSegs(tempSegs_da.cnt-1).u.t.string = MyStrdup(s);
 }
 
 
@@ -2135,6 +2203,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
 			if ((MyGetKeyState() &
 					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) break;  //Allow SHIFT+CTRL for Move
+			if (((action>>8)&0xFF) == wAccelKey_LineFeed) {
+				action = C_TEXT+((int)(0x0A<<8));
+				break;
+			}
 			switch ((wAccelKey_e)(action>>8)) {
 			case wAccelKey_Del:
 				SelectDelete();
@@ -2206,9 +2278,9 @@ static void DoMouse( wAction_t action, coOrd pos )
 			InfoPos( pos );
 			return;
 		case C_TEXT:
-			if ((action>>8) == 0x0D)
+			if ((action>>8) == 0x0D) {
 				action = C_OK;
-			else if ((action>>8) == 0x1B) {
+			} else if ((action>>8) == 0x1B) {
 				ConfirmReset( TRUE );
 				return;
 			}

@@ -445,7 +445,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	update_rect.x      = (gint) x - ascent - descent - 1;
 	update_rect.y      = (gint) y - (gint) ascent - 1;
 	update_rect.width  = (gint) (w * cos( angle ) + 2 + ascent + descent);
-	update_rect.height = (gint) (w * sin( angle ) + ascent + descent + 2 );
+	update_rect.height = (gint) (h * sin( angle ) + ascent + descent + 2 );
 	gtk_widget_draw(bd->widget, &update_rect);
 }
 
@@ -472,8 +472,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 								 (int *) &ascent, (int *) &descent));
 
 	*w = (wPos_t) textWidth;
-	*h = (wPos_t) ascent;
-	*d = (wPos_t) descent;
+	*h = (wPos_t) textHeight;
+	*d = (wPos_t) textHeight-ascent;
 
 	if (debugWindow >= 3)
 		fprintf(stderr, "text metrics: w=%d, h=%d, d=%d\n", *w, *h, *d);
@@ -1051,11 +1051,17 @@ static gint draw_char_event(
 		GdkEventKey *event,
 		wDraw_p bd )
 {
+	GdkModifierType modifiers;
 	guint key = event->keyval;
 	wAccelKey_e extKey = wAccelKey_None;
 	switch (key) {
 	case GDK_KEY_Escape:	key = 0x1B; break;
-	case GDK_KEY_Return:	key = 0x0D; break;
+	case GDK_KEY_Return:
+		modifiers = gtk_accelerator_get_default_mod_mask();
+		if (((event->state & modifiers)==GDK_CONTROL_MASK) || ((event->state & modifiers)==GDK_MOD1_MASK))
+			extKey = wAccelKey_LineFeed;  //If Return plus Control or Alt send in LineFeed
+		key = 0x0D;
+		break;
 	case GDK_KEY_Linefeed:	key = 0x0A; break;
 	case GDK_KEY_Tab:	key = 0x09; break;
 	case GDK_KEY_BackSpace:	key = 0x08; break;

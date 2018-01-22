@@ -698,6 +698,8 @@ void wDrawGetTextSize(
 	HFONT newFont, prevFont;
 	DWORD extent;
 	int oldLfHeight;
+	TEXTMETRIC textMetric;
+
 	if (fp == NULL)
 		fp = &logFont;
 	fp->lfEscapement = 0;
@@ -707,11 +709,15 @@ void wDrawGetTextSize(
 	newFont = CreateFontIndirect( fp );
 	prevFont = SelectObject( bd->hDc, newFont );
 	extent = GetTextExtent( bd->hDc, CAST_AWAY_CONST text, strlen(text) );
+
+	GetTextMetrics(bd->hDc, &textMetric);
+
 	x = LOWORD(extent);
 	y = HIWORD(extent);
 	*w = XPIXELSTOINCH( bd, x );
 	*h = YPIXELSTOINCH( bd, y );
-	*d = 0;
+	*d = YPIXELSTOINCH(bd, textMetric.tmDescent );
+
 	SelectObject( bd->hDc, prevFont );
 	DeleteObject( newFont );
 	fp->lfHeight = oldLfHeight;
