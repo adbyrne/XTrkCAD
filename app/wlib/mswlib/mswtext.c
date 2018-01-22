@@ -181,6 +181,7 @@ BOOL_T wTextPrint(
     TEXTMETRIC textMetric;
     DOCINFO docInfo;
     hDc = mswGetPrinterDC();
+	HFONT hFont, hOldFont;
 
     if (hDc == (HDC)0) {
         MessageBox(((wControl_p)(b->parent))->hWnd, "Print", "Cannot print",
@@ -192,6 +193,10 @@ BOOL_T wTextPrint(
     docInfo.lpszDocName = "XTrkcad Log";
     docInfo.lpszOutput = (LPSTR)NULL;
 
+	// Retrieve a handle to the monospaced stock font.  
+	hFont = (HFONT)GetStockObject(ANSI_FIXED_FONT);
+	hOldFont = (HFONT)SelectObject(hDc, hFont);
+
     if (StartDoc(hDc, &docInfo) < 0) {
         MessageBox(((wControl_p)(b->parent))->hWnd, "Unable to start print job", NULL,
                    MB_OK|MB_ICONHAND);
@@ -200,6 +205,7 @@ BOOL_T wTextPrint(
     }
 
     StartPage(hDc);
+
     GetTextMetrics(hDc, &textMetric);
     lineSpace = textMetric.tmHeight + textMetric.tmExternalLeading;
     linesPerPage = GetDeviceCaps(hDc, VERTRES) / lineSpace;
@@ -227,6 +233,7 @@ BOOL_T wTextPrint(
         EndDoc(hDc);
     }
 
+	SelectObject(hDc, hOldFont);
     DeleteDC(hDc);
     return TRUE;
 }

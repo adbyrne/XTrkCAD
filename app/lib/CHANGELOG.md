@@ -7,8 +7,27 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
++ Allow Turnout Placement on Bezier Tracks, also improve Bezier splitting logic
+to be more precise
++ Ensure Cornu is deleted if connected track is deleted (like Easement)
++ Make an unfilled Box into a Polygon with a RECTANGLE shape. Add special edit 
+capability for filled and unfilled Boxes in Modify that preserve their shape and
+allow for either editing at the corner or on a side. Add user prompts during 
+editing.
++ All: Add multi line text fields in drawing 
++ Windows: Select monospaced font for parts list
 
 ### Fixed
++ Linux/OSX: Fix memory leak when updating status bar
++ Stop turnout placement on helix, ensure no turnout placement on bezier or cornu
++ Set the width of the benchwork selector
++ Restore Labels in HotBar to full size and sort out layout even without labels
++ Fix Lionel files which were binary and had bad end lines
++ Fix assorted leaks and adjust the rate of change of curvature calc
++ Windows: Fix text handling for multi line edit fields, bug #198
++ Windows: Fix printing multi page parts lists
++ All: Fix car part files
++ Windows: Fix parts list 
 
 ## [5.0.0.beta4]
 

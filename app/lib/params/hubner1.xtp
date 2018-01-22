@@ -117,9 +117,7 @@ TURNOUT 1  "Húbner	Right 10° Double Slip	T1024"
 	C 0 0 -142.416000 3.288000 142.416000 170.000000 10.000000
 	C 0 0 142.416000 28.208000 -142.416000 350.000000 10.000000
 	END
-
 # Curved turnouts designed by Martin Heine	
-
 TURNOUT 1 "Hübner	Right Curved Turnout R1020mm 22.5/45°	H1074"
 	U "Curved Turnout" "" "Hübner" "Left Curved Turnout R1020mm 22.5/45°" "H1075" "Right Curved Turnout R1020mm 22.5/45°" "H1074" 28.395669 45.000000 11.761811 22.500000 3.056693 21.509449 0.000000 0.000000 0
 	P "Normal" 1 6 4 5
