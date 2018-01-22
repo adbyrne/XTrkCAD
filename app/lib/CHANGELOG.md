@@ -28,6 +28,7 @@ editing.
 + Windows: Fix printing multi page parts lists
 + All: Fix car part files
 + Windows: Fix parts list 
++ All: Fix Traverse of rotated turnouts and issues with inaccurate segments in turnouts
 
 ## [5.0.0.beta4]
 
