@@ -96,7 +96,7 @@ EXPORT wWin_p mainW;
 
 EXPORT wIndex_t changed = 0;
 
-EXPORT char FAR message[STR_LONG_SIZE];
+EXPORT char message[STR_LONG_SIZE];
 static char message2[STR_LONG_SIZE];
 
 EXPORT REGION_T curRegion = 0;
