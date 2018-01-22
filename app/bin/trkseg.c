@@ -659,7 +659,7 @@ EXPORT void CloneFilledDraw(
 			sp->u.p.pts = newPts;
 			break;
 		case SEG_TEXT:
-			sp->u.t.string = MyStrdup( sp->u.t.string );
+			sp->u.t.string = strdup( sp->u.t.string);
 			break;
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
@@ -691,8 +691,8 @@ EXPORT void FreeFilledDraw(
 			sp->u.p.pts = NULL;
 			break;
 		case SEG_TEXT:
-			if ( sp->u.t.string )
-				MyFree( sp->u.t.string );
+			if (sp->u.t.string)
+				MyFree(sp->u.t.string);
 			sp->u.t.string = NULL;
 			break;
 		default:

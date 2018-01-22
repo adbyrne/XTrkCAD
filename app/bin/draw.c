@@ -764,7 +764,7 @@ static void TempSegString(
 	tempSegs(tempSegs_da.cnt-1).u.t.angle = a;
 	tempSegs(tempSegs_da.cnt-1).u.t.fontP = fp;
 	tempSegs(tempSegs_da.cnt-1).u.t.fontSize = fontSize;
-	tempSegs(tempSegs_da.cnt-1).u.t.string = s;
+	tempSegs(tempSegs_da.cnt-1).u.t.string = MyStrdup(s);
 }
 
 

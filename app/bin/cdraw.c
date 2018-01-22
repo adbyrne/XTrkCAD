@@ -533,6 +533,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		REORIGIN( drawData.endPt[0], segPtr->u.t.pos, xx->angle, xx->orig );
 		drawData.angle = NormalizeAngle( xx->angle );
 		strncpy( drawData.text, segPtr->u.t.string, sizeof drawData.text );
+		drawData.text[sizeof drawData.text-1] ='\0';
 		drawDesc[TP].mode =
 		drawDesc[TS].mode =
 		drawDesc[TX].mode = 
