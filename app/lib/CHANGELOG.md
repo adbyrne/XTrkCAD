@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [5.0.0.beta5]
 
 ### Added
 + Allow Turnout Placement on Bezier Tracks, also improve Bezier splitting logic
@@ -29,6 +29,11 @@ editing.
 + All: Fix car part files
 + Windows: Fix parts list 
 + All: Fix Traverse of rotated turnouts and issues with inaccurate segments in turnouts
+
+### Added and Changed Parameter Files
++ Z-Atlas55.xtp Updated, added #6 Turnouts and 19d Crossing. Dimensions were scale from online images.
++ F-NMRA-RP12-21.xtp NMRA F Scale Std Gauge 13&#39; prototypical track centers
++ G-NMRA-RP12-23.xtp NMRA G Scale Std Gauge 13&#39; prototypical track centers
 
 ## [5.0.0.beta4]
 
