@@ -281,6 +281,14 @@ The parameters \e{Minimum Track Length}, \e{Connection Angle} and \e{Connection 
 Refer to \k{cmdPref} for detail.
 END
 
+MESSAGE MSG_CONN_PARAMS_TOO_BIG
+Connection parameters reset to maximum values.
+HELP
+The parameters \e{Minimum Track Length}, \e{Connection Angle} and \e{Connection Distance} have maximum values that cannot be set to bigger values. The maximum values are 1.0"/2.54cm, 10\u00B0 and 1.0"/2.54cm respectively.
+
+Refer to \k{cmdPref} for detail.
+END
+
 # fileio.c
 MESSAGE MSG_CANT_PASTE
 Copy/Paste buffer is empty. There is nothing to Paste.

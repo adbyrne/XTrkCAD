@@ -281,7 +281,7 @@ static paramData_t prefPLs[] = {
 	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
 	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
 	{ PD_TOGGLE, &enableBalloonHelp, "balloonhelp", PDO_NOPSHUPD, enableBalloonHelpLabels, "", BC_HORZ },
-	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD|PDO_DRAW, &r1_1000, N_("Drag Distance") },
+	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Distance") },
 	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Timeout") },
 	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD|PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
 	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point") },
@@ -379,24 +379,37 @@ static void UpdatePrefD( void )
 
 static void PrefOk( void * junk )
 {
-	wBool_t resetValues = FALSE;
+	wBool_t resetValuesLow = FALSE, resetValuesHigh = FALSE;
 	long changes;
 	changes = GetChanges( &prefPG );
 	if (connectAngle < 1.0) {
 		connectAngle = 1.0;
-		resetValues = TRUE;
+		resetValuesLow = TRUE;
+	} else if (connectAngle > 10.0) {
+		connectAngle = 10.0;
+		resetValuesHigh = TRUE;
 	}
 	if (connectDistance < 0.1) {
 		connectDistance = 0.1;
-		resetValues = TRUE;
+		resetValuesLow = TRUE;
+	} else if (connectDistance > 1.0) {
+		connectDistance = 1.0;
+		resetValuesHigh = TRUE;
 	}
 	if (minLength < 0.1) {
 		minLength = 0.1;
-		resetValues = TRUE;
+		resetValuesLow = TRUE;
+	} else if (minLength > 1.0) {
+		minLength = 1.0;
+		resetValuesHigh = TRUE;
 	}
-	if ( resetValues ) {
+	if ( resetValuesLow ) {
 		NoticeMessage2( 0, MSG_CONN_PARAMS_TOO_SMALL, _("Ok"), NULL ) ;
 	}
+	if ( resetValuesHigh ) {
+		NoticeMessage2( 0, MSG_CONN_PARAMS_TOO_BIG, _("Ok"), NULL ) ;
+	}
+
 
 	wHide( prefW );
 	DoChangeNotification(changes);
