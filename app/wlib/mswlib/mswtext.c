@@ -250,12 +250,12 @@ wBool_t wTextGetModified(
 int wTextGetSize(
     wText_p b)
 {
-    int lc, l, li, len=0;
+    int lc, l, len=0;
     lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, 0, 0L);
 
     for (l=0; l<lc ; l++) {
-        li = (int)SendMessage(b->hWnd, EM_LINEINDEX, l, 0L);
-        len += (int)SendMessage(b->hWnd, EM_LINELENGTH, l, 0L) + 1;
+        int charIndex = (int)SendMessage(b->hWnd, EM_LINEINDEX, l, NULL);
+        len += (int)SendMessage(b->hWnd, EM_LINELENGTH, charIndex, NULL) + 1;
     }
 
     if (len == 1) {
@@ -270,22 +270,19 @@ void wTextGetText(
     char * t,
     int s)
 {
+    int lc, l, len;
+    s--;
+    lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, 0, 0L);
 
-	int lc, l, len;
-	s--;
-	lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, 0, 0L);
+    for (l=0; l<lc && s>=0; l++) {
+        *(WORD*)t = s;
+        len = (int)SendMessage(b->hWnd, EM_GETLINE, l, (LPSTR)t);
+        t += len;
+        *t++ = '\n';
+        s -= len+1;
+    }
 
-	for (l=0; l<lc && s>=0; l++)
-	{
-	    *(WORD*)t = s;
-	    len = (int)SendMessage(b->hWnd, EM_GETLINE, l, (DWORD)(LPSTR)t);
-	    t += len;
-	    *t++ = '\n';
-	    s -= len+1;
-	}
-
-	*(t - 1) = '\0';		// overwrite the last \n added
-    
+    *(t - 1) = '\0';		// overwrite the last \n added
 }
 
 
