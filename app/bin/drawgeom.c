@@ -555,7 +555,7 @@ STATUS_T DrawGeomModify(
 		wBool_t selected)
 {
 	ANGLE_T a;
-	coOrd p0, p1, p2, pc;
+	coOrd p0, p1, pc;
 	static coOrd start_pos;
 	static wIndex_t segInx;
 	static EPINX_T segEp;
@@ -713,9 +713,7 @@ STATUS_T DrawGeomModify(
 			OnTrack( &pos, FALSE, FALSE );
 		}
 		int prior_pnt, next_pnt, orig_pnt;
-		DIST_T dist_moved;
-		coOrd moved;
-		ANGLE_T prior_angle, next_angle, line_angle, move_angle;
+		ANGLE_T prior_angle, next_angle, line_angle;
 		tempSegs_da.cnt = 1;
 		switch (tempSegs(0).type) {
 		case SEG_TBLEDGE:

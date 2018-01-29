@@ -780,7 +780,6 @@ EXPORT DIST_T DistanceSegs(
 			p0.x -= segPtr->u.t.pos.x;
 			p0.y -= segPtr->u.t.pos.y;
 			Rotate( &p0, zero, -segPtr->u.t.angle );
-			DIST_T dx, dy;
 			if (p0.x > lo.x && p0.x < hi.x && p0.y >lo.y && p0.y < hi.y) {  //Within rectangle - therefore small dist
 				hi.x /= 2.0;
 				hi.y /= 2.0;
