@@ -1025,7 +1025,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 {
 	track_p t;
 	cornuParm_t cp;
-	trackParams_t params;
 
 	Da.color = lineColor;
 	Da.width = (double)lineWidth/mainD.dpi;

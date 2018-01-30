@@ -2597,7 +2597,7 @@ LOG1( log_init, ( "create main window\n" ) )
 	wSetBalloonHelp( balloonHelp );
     
     wGetDisplaySize(&displayWidth, &displayHeight);
-	mainW = wWinMainCreate( buffer, displayWidth*0.66, displayHeight*0.66, "xtrkcadW", message, "main",
+	mainW = wWinMainCreate( buffer, (displayWidth*2)/3, (displayHeight*2)/3, "xtrkcadW", message, "main",
 				F_RESIZE|F_MENUBAR|F_NOTAB|F_RECALLPOS|F_HIDE,
 				MainProc, NULL );
 	if ( mainW == NULL )

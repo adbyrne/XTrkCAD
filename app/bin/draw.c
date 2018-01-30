@@ -1027,7 +1027,6 @@ EXPORT void InfoCount( wIndex_t count )
 
 EXPORT void InfoPos( coOrd pos )
 {
-	wPos_t x, y;
 	DrawMarkers();
 	sprintf( message, "%s%s", xLabel, FormatDistance(pos.x) );
 	wStatusSetValue( infoD.posX_m, message );

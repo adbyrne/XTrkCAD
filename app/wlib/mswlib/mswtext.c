@@ -254,8 +254,8 @@ int wTextGetSize(
     lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, 0, 0L);
 
     for (l=0; l<lc ; l++) {
-        int charIndex = (int)SendMessage(b->hWnd, EM_LINEINDEX, l, NULL);
-        len += (int)SendMessage(b->hWnd, EM_LINELENGTH, charIndex, NULL) + 1;
+        int charIndex = (int)SendMessage(b->hWnd, EM_LINEINDEX, l, 0L);
+        len += (int)SendMessage(b->hWnd, EM_LINELENGTH, charIndex, 0L) + 1;
     }
 
     if (len == 1) {
@@ -276,7 +276,7 @@ void wTextGetText(
 
     for (l=0; l<lc && s>=0; l++) {
         *(WORD*)t = s;
-        len = (int)SendMessage(b->hWnd, EM_GETLINE, l, (LPSTR)t);
+        len = (int)SendMessage(b->hWnd, EM_GETLINE, l, (LPARAM)t);
         t += len;
         *t++ = '\n';
         s -= len+1;
