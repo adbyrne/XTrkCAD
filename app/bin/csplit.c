@@ -79,7 +79,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 				onTrackInSplit = FALSE;
 				return C_TERMINATE;
 			}
-			if (QueryTrack(trk0,Q_MODIFY_CANT_SPLIT)) {
+			if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 				onTrackInSplit = FALSE;
 				InfoMessage(_("Can't Split that Track"));
 				return C_CONTINUE;
