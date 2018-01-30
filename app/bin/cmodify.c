@@ -177,13 +177,17 @@ static STATUS_T CmdModify(
 			modifyBezierMode = TRUE;
 			if (ModifyBezier(C_START, pos) != C_CONTINUE) {			//Call Start with track
 				modifyBezierMode = FALSE;							//Function rejected Bezier
+				Dex.Trk =NULL;
+				tempSegs_da.cnt = 0;
 			}
 			return C_CONTINUE;										//That's it
 		}
 		if (QueryTrack( Dex.Trk, Q_IS_CORNU )) { //Bezier
 			modifyCornuMode = TRUE;
 			if (ModifyCornu(C_START, pos) != C_CONTINUE) {			//Call Start with track
-			modifyCornuMode = FALSE;							//Function rejected Bezier
+				modifyCornuMode = FALSE;							//Function rejected Bezier
+				Dex.Trk =NULL;
+				tempSegs_da.cnt = 0;
 			}
 			return C_CONTINUE;										//That's it
 		}

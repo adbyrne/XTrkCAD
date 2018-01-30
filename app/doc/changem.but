@@ -115,17 +115,27 @@ Using the \f{Select} command, select the track that is to have its elevation set
 \rule
 
 
-\S{cmdConnect} Connect Sectional Tracks
+\S{cmdConnect} Connect Tracks
 
 \G{png.d/bconnect.png}
 
-This command is most often used with \e{Sectional Track}.  But it can be useful to reattach ordinary track which has become disconected or split.
+This command is frequently used with \e{Sectional Track}.  But it can be useful to reattach ordinary track which has become disconected or split.
 
-Occasionally pieces of sectional track do not line up exactly, especially when creating figure-8's or passing sidings.  When laying out the actual track you can compensate for this by adjusting the individual tracks to provide a bit of slack.  This command simulates that process.
+There are three modes, 
 
-Click on the endpoint of each track you're trying to connect.  Tracks will move slightly in an attempt to overcome the gap.  If the gap is too large, the connection will fail. If this occurs, try using other track pieces in your layout.
+\u000
 
-\e{XTrackCAD} adjusts the positions of tracks connected to the tracks up to a track with more than two connections.  See the Demo for details.
+\b a \f{Left} click on a track near a disconnected end-point followed by a second on a close-by disconnected end-point on another track will try to join two tracks
+
+\b a \f{Shift-Left} click on a connected track will "Tighten Tracks" moving other tracks connected to this track to reduce any small distance or angle differences  
+
+\b selecting a set of tracks followed by a \f{Right} click will prompt for confirmation that all selected tracks with unconnected endpoints should be joined to nearby selected track at an unconnected end point. This mode allows for an entire layout to be reconnected after a Select-All.  
+
+\f{Notes for two track mode:} Occasionally pieces of sectional track do not line up exactly, especially when creating figure-8's or passing sidings. When laying out the actual track you can compensate for this by adjusting the individual tracks to provide a bit of slack.  This command simulates that process.
+
+Click on the endpoint of each track you're trying to connect.  XtrkCAD will move the tracks slightly in an attempt to overcome the gap. If the gap is too large, the connection will fail. If this occurs, try using other track pieces in your layout.
+
+\e{XTrackCAD} adjusts the positions of tracks connected to the tracks up to a track with more than two connections. See the Demo for details.
 
 If one (or both) the selected tracks is an adjustable section (such as Kato's Adjustable Track #20-050) then the length of the track is changed to fill the gap.
 
@@ -1229,7 +1239,7 @@ For detail about;
 
 \u000
 
-\dd Dividing a section of track into two connected pieces see \K{splitDivide}.
+\dd Dividing a section of flex track into two connected pieces or trimming a turnout see \K{splitDivide}.
 
 \u000
 
@@ -1246,7 +1256,7 @@ Disconnecting a joint between two pieces of connected track;
 
 \lcont{\u000} 
 
-\n Place the mouse pointer over the joint between the two track endpoints then \e{Left-Click}.
+\n Place the mouse pointer right over the joint between the two track endpoints then \e{Left-Click}.
 
 \lcont{\u000}
 
@@ -1281,7 +1291,7 @@ For detail about;
 
 \S2{splitDivide} Divide Track
 
-Dividing a section of track into two connected pieces;
+Dividing a section of flex track into two connected pieces;
 
 \n Click the \f{Split} button (\G{png.d/bsplit.png}) to activate the \f{Split} command.
 
@@ -1354,7 +1364,7 @@ The \f{Split} command can be used to add block gaps (\K{generalTerms}) at the po
 
 \u000
 
-After executing the \f{Split} command use the \e{Shift+Right-Click} command to display one of two pop-up menus which can be used to add, change or remove \e{block gaps} for the selected endpoint.
+After starting the \f{Split} command use the \e{Shift+Right-Click} over a joint to display one of two pop-up menus which can be used to add, change or remove \e{block gaps} for the selected endpoint.
 
 \dd \G{png.d/msplitblock.png}
 
