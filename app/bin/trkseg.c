@@ -1133,6 +1133,8 @@ EXPORT BOOL_T ReadSegs( void )
 	DIST_T elev0, elev1;
 	BOOL_T hasElev;
 	BOOL_T isPolyV2;
+	BOOL_T improvedEnds;
+	FLOAT_T ignoreFloat;
 	char type;
 	char * plain_text;
 	long option;
@@ -1147,6 +1149,7 @@ EXPORT BOOL_T ReadSegs( void )
 	while ( (cp = GetNextLine()) != NULL ) {
 		while (isspace(*cp)) cp++;
 		hasElev = FALSE;
+		improvedEnds = FALSE;
 		if ( strncmp( cp, "END", 3 ) == 0 ) {
 			rc = TRUE;
 			subsegs = FALSE;
@@ -1174,6 +1177,7 @@ EXPORT BOOL_T ReadSegs( void )
 			cp++;
 			hasElev = TRUE;
 			isPolyV2 = TRUE;
+			improvedEnds = TRUE;
 		}
 		switch (type) {
 		case SEG_STRLIN:
@@ -1381,8 +1385,8 @@ EXPORT BOOL_T ReadSegs( void )
 			e = &tempEndPts(tempEndPts_da.cnt-1);
 			if (type == SEG_CONEP) {
 				if ( !GetArgs( cp, "dc", &e->index, &cp ) ) {
-					rc = FALSE;
-					/*??*/break;
+									rc = FALSE;
+									/*??*/break;
 				}
 			} else {
 				e->index = -1;
@@ -1396,6 +1400,23 @@ EXPORT BOOL_T ReadSegs( void )
 			e->elev.u.height = 0.0;
 			e->elev.doff = zero;
 			e->option = 0;
+			if (improvedEnds) {				//E4 and T4
+				GetArgs( cp, "lpc", &option, &e->elev.doff, &cp );
+				switch (option&ELEV_MASK) {
+					case ELEV_DEF:
+						break;
+					case ELEV_STATION:
+						GetArgs( cp, "qc", &e->elev.u.name, &cp);
+						break;
+					default:
+						GetArgs( cp, "Yc", &ignoreFloat, &cp);   //Ignore height
+						e->elev.u.height = 0.0;  				 //Ensure no defined height (yet)
+				}
+				GetArgs( cp, "fdddc", &e->elev.u.height, &e->option, &e->elev.option, &option, &cp );
+				if (option) e->elev.option |= ELEV_VISIBLE;
+				GetArgs(cp, "fc", &ignoreFloat, &cp);           //Calculated value
+				break;
+			}
 			if ( cp != NULL ) {
 				if (paramVersion < 7) {
 					GetArgs( cp, "dfp", &e->elev.option,  &e->elev.u.height, &e->elev.doff, &cp );

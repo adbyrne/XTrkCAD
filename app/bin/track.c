@@ -608,9 +608,9 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	assert ( endPt != NULL );
 	if (endPt->track == NULL ||
 		( exportingTracks && !GetTrkSelected(endPt->track) ) ) {
-		rc &= fprintf( f, "\tE " )>0;
+		rc &= fprintf( f, "\tE4 " )>0;
 	} else {
-		rc &= fprintf( f, "\tT %d ", endPt->track->index )>0;
+		rc &= fprintf( f, "\tT4 %d ", endPt->track->index )>0;
 	}
 	rc &= fprintf( f, "%0.6f %0.6f %0.6f", endPt->pos.x, endPt->pos.y, endPt->angle )>0; 
 	option = (endPt->option<<8) | (endPt->elev.option&0xFF);
@@ -619,16 +619,21 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 		if ( (endPt->elev.option&ELEV_MASK) != ELEV_NONE ) {
 			switch ( endPt->elev.option&ELEV_MASK ) {
 			case ELEV_DEF:
-				rc &= fprintf( f, " %0.6f", endPt->elev.u.height )>0;
+				rc &= fprintf( f, " %0.6f ", endPt->elev.u.height )>0;
 				break;
 			case ELEV_STATION:
-				rc &= fprintf( f, " \"%s\"", PutTitle( endPt->elev.u.name ) )>0;
+				rc &= fprintf( f, " \"%s\" ", PutTitle( endPt->elev.u.name ) )>0;
 				break;
 			default:
-				;
+				rc &= fprintf( f, " 0.0 ")>0;
 			}
 		}
+	} else {
+		rc &= fprintf( f, " 0 0.0 0.0 0.0 ")>0;
 	}
+	rc &= fprintf( f, "%0.6f %ld %ld %ld %0.6f ", ((endPt->elev.option&ELEV_MASK) == ELEV_DEF)?endPt->elev.u.height:0.0,
+			(long)(endPt->elev.option&ELEV_VISIBLE?1:0), endPt->option, (long)(endPt->elev.option&ELEV_MASK), endPt->elev.u.height )>0;
+	rc &= fprintf( f, "%0.6f ", trk->elev)>0;
 	rc &= fprintf( f, "\n" )>0;
 	return rc;
 }
