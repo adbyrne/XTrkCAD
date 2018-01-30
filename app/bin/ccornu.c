@@ -438,14 +438,14 @@ void CorrectHelixAngles() {
 }
 
 BOOL_T CheckHelix(track_p trk) {
-	if ( QueryTrack(Da.trk[0],Q_HAS_VARIABLE_ENDPOINTS)) {
+	if ( Da.trk[0] && QueryTrack(Da.trk[0],Q_HAS_VARIABLE_ENDPOINTS)) {
 		track_p t = GetTrkEndTrk(Da.trk[0],Da.ep[0]);
 		if ( t != NULL && t != trk)  {
 			ErrorMessage( MSG_TRK_ALREADY_CONN, _("First") );
 			return FALSE;
 		}
 	}
-	if ( QueryTrack(Da.trk[1],Q_HAS_VARIABLE_ENDPOINTS)) {
+	if ( Da.trk[1] && QueryTrack(Da.trk[1],Q_HAS_VARIABLE_ENDPOINTS)) {
 		track_p t = GetTrkEndTrk(Da.trk[1],Da.ep[1]);
 		if ( t != NULL && t != trk)  {
 			ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
