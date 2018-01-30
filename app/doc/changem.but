@@ -129,7 +129,7 @@ There are three modes,
 
 \b a \f{Shift-Left} click on a connected track will "Tighten Tracks" moving other tracks connected to this track to reduce any small distance or angle differences  
 
-\b selecting a set of tracks followed by a \{Right} click will prompt for confirmation that all selected tracks with unconnected endpoints should be joined to nearby selected track at an unconnected end point. This mode allows for an entire layout to be reconnected after a Select-All.  
+\b selecting a set of tracks followed by a \f{Right} click will prompt for confirmation that all selected tracks with unconnected endpoints should be joined to nearby selected track at an unconnected end point. This mode allows for an entire layout to be reconnected after a Select-All.  
 
 \f{Notes for two track mode:} Occasionally pieces of sectional track do not line up exactly, especially when creating figure-8's or passing sidings. When laying out the actual track you can compensate for this by adjusting the individual tracks to provide a bit of slack.  This command simulates that process.
 
