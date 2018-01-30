@@ -1229,7 +1229,7 @@ For detail about;
 
 \u000
 
-\dd Dividing a section of track into two connected pieces see \K{splitDivide}.
+\dd Dividing a section of flex track into two connected pieces or trimming a turnout see \K{splitDivide}.
 
 \u000
 
@@ -1246,7 +1246,7 @@ Disconnecting a joint between two pieces of connected track;
 
 \lcont{\u000} 
 
-\n Place the mouse pointer over the joint between the two track endpoints then \e{Left-Click}.
+\n Place the mouse pointer right over the joint between the two track endpoints then \e{Left-Click}.
 
 \lcont{\u000}
 
@@ -1281,7 +1281,7 @@ For detail about;
 
 \S2{splitDivide} Divide Track
 
-Dividing a section of track into two connected pieces;
+Dividing a section of flex track into two connected pieces;
 
 \n Click the \f{Split} button (\G{png.d/bsplit.png}) to activate the \f{Split} command.
 
@@ -1354,7 +1354,7 @@ The \f{Split} command can be used to add block gaps (\K{generalTerms}) at the po
 
 \u000
 
-After executing the \f{Split} command use the \e{Shift+Right-Click} command to display one of two pop-up menus which can be used to add, change or remove \e{block gaps} for the selected endpoint.
+After starting the \f{Split} command use the \e{Shift+Right-Click} over a joint to display one of two pop-up menus which can be used to add, change or remove \e{block gaps} for the selected endpoint.
 
 \dd \G{png.d/msplitblock.png}
 
