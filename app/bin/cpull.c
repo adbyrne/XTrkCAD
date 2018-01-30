@@ -597,10 +597,18 @@ static STATUS_T CmdPull(
 	EPINX_T ep2;
 	static BOOL_T turntable;
 
+	int countTracks = 0, possibleEndPoints = 0;
+	BOOL_T found = FALSE;
+	ANGLE_T a;
+	DIST_T d;
+
 	switch (action) {
 
 	case C_START:
-		InfoMessage( _("Select first End-Point to connect") );
+		if (selectedTrackCount==0)
+			InfoMessage( _("Select first End-Point to connect") );
+		else
+			InfoMessage( _("Select first End-Point to connect, or Right-Click for connecting selected Tracks") );
 		trk1 = NULL;
 		turntable = FALSE;
 		return C_CONTINUE;
@@ -652,6 +660,46 @@ static STATUS_T CmdPull(
 		}
 		return C_CONTINUE;
 
+	case C_RCLICK:
+		if (selectedTrackCount==0) {
+			ErrorMessage(_("Connect Multiple Tracks - Select multiple tracks to join first"));
+			return C_CONTINUE;
+		}
+		if (NoticeMessage(_("Try to Connect all Selected Tracks?"), _("Yes"), _("No"), countTracks, possibleEndPoints)<0) return C_CONTINUE;
+		trk1 = NULL;
+		trk2 = NULL;
+		UndoStart( _("ReConnect"),"Try to reconnect all selected tracks");
+		while ( TrackIterate( &trk1 ) ) {
+			found = FALSE;
+			if ( GetTrkSelected( trk1 ) ) {
+				for (ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++) {
+					if (!GetTrkEndTrk( trk1, ep1 )) {
+						trk2 = NULL;
+						while (!found && TrackIterate(&trk2) ) {
+							if (trk1 == trk2) continue;
+							for (ep2=0; ep2<GetTrkEndPtCnt(trk2); ep2++) {
+								if (GetTrkEndTrk( trk2, ep2 )) continue;
+								d = FindDistance(GetTrkEndPos(trk1,ep1),GetTrkEndPos(trk2,ep2));
+								a = NormalizeAngle( 180+GetTrkEndAngle( trk1, ep1 ) - GetTrkEndAngle( trk2, ep2 )+(connectAngle/2.0));
+								if ((d < connectDistance*2) && (a < connectAngle*2)) {
+									PullTracks(trk1,ep1,trk2,ep2);
+									if (GetTrkEndTrk( trk2, ep2 )) {
+										found = TRUE;
+										countTracks++;
+										break;
+									} else possibleEndPoints++;
+								}
+							}
+						}
+						if (found) break;
+					}
+				}
+			}
+		}
+		UndoEnd();
+		NoticeMessage(_("%d tracks connected, %d end Points not connected"), _("OK"), NULL, countTracks, possibleEndPoints);
+		return C_TERMINATE;
+
 	case C_REDRAW:
 		return C_CONTINUE;
 
@@ -675,5 +723,5 @@ static STATUS_T CmdPull(
 
 void InitCmdPull( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2, ACCL_CONNECT, NULL );
+	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2|IC_RCLICK, ACCL_CONNECT, NULL );
 }
