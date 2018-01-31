@@ -86,6 +86,8 @@ static double rBorder;			/**< right margin */
 static double lBorder;			/**< left margin */
 static double bBorder;			/**< bottom margin */
 
+static double scale_adjust = 1.0;
+
 static long printFormat = PRINT_LANDSCAPE;
 
 /*****************************************************************************
@@ -284,12 +286,12 @@ static void setLineType(
     static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
 
     if (lineWidth < 0.0) {
-        lineWidth = P2I(-lineWidth)*2.0;
+        lineWidth = P2I(-lineWidth)*2.0/scale_adjust;
     }
 
     // make sure that there is a minimum line width used
-    if (lineWidth == 0.0) {
-        lineWidth = 0.1;
+    if (lineWidth <= 0.09) {
+        lineWidth = 0.1/scale_adjust;
     }
 
     cairo_set_line_width(cr, lineWidth);
@@ -539,7 +541,7 @@ void psPrintFillCircle(
 
 /**
  * Print a string at the given position using specified font and text size.
- * The orientatoion of the y-axis in XTrackCAD is wrong for cairo. So for
+ * The orientation of the y-axis in XTrackCAD is wrong for cairo. So for
  * all other print primitives a flip operation is done. As this would
  * also affect the string orientation, printing a string has to be
  * treated differently. The starting point is transformed, then the
@@ -570,7 +572,8 @@ void psPrintString(
 {
     char * cp;
     double x0 = (double)x, y0 = (double)y;
-    double text_height;
+    int text_height, text_width;
+    double ascent;
 
     cairo_t *cr;
     cairo_matrix_t matrix;
@@ -588,10 +591,13 @@ void psPrintString(
 
     // get the current transformation matrix and transform the starting
     // point of the string
-    cairo_get_matrix(cr, &matrix);
-    cairo_matrix_transform_point(&matrix, &x0, &y0);
 
     cairo_save(cr);
+
+    cairo_get_matrix(cr, &matrix);
+
+    cairo_matrix_transform_point(&matrix, &x0, &y0);
+
 
     layout = pango_cairo_create_layout(cr);
 
@@ -599,26 +605,27 @@ void psPrintString(
     /** \todo use a getter function instead of double conversion */
     desc = pango_font_description_from_string(wlibFontTranslate(fp));
 
-    //don't know why the size has to be reduced to 75% :-(
-    pango_font_description_set_size(desc, fs * PANGO_SCALE *0.75);
+    pango_font_description_set_size(desc, fs * PANGO_SCALE );
 
     // render the string to a Pango layout
     pango_layout_set_font_description(layout, desc);
     pango_layout_set_text(layout, s, -1);
     pango_layout_set_width(layout, -1);
     pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
+    pango_layout_get_pixel_size(layout, &text_width, &text_height);
 
     // get the height of the string
     pcontext = pango_cairo_create_context(cr);
     metrics = pango_context_get_metrics(pcontext, desc,
                                         pango_context_get_language(pcontext));
-    text_height = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
 
-    // transform the string to the correct position
+    ascent = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE * scale_adjust ;
+
     cairo_identity_matrix(cr);
 
-    cairo_translate(cr, x0 + text_height * sin(-a * M_PI / 180.0) ,
-                    y0 - text_height * cos(a * M_PI / 180.0));
+    cairo_translate(cr, x0 + ((ascent + (bBorder*scale_adjust)) * sin(-a * M_PI / 180.0))+((lBorder*scale_adjust)* cos(a * M_PI / 180.0)),
+    					y0 - ((ascent + (bBorder*scale_adjust)) * cos( a * M_PI / 180.0))+((lBorder*scale_adjust)* sin(a * M_PI / 180.0)));
+
     cairo_rotate(cr, -a * M_PI / 180.0);
 
     // set the color
@@ -635,7 +642,7 @@ void psPrintString(
 }
 
 /**
- * Create clipping retangle.
+ * Create clipping rectangle.
  *
  * \param x, y IN starting position
  * \param w, h IN width and height of rectangle
@@ -802,6 +809,7 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
     cairo_surface_type_t surface_type;
     cairo_matrix_t matrix;
 
+
     printDialog = gtk_print_unix_dialog_new(title, GTK_WINDOW(gtkMainW->gtkwin));
 
     // load the settings
@@ -850,7 +858,10 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
         if (surface_type == CAIRO_SURFACE_TYPE_PDF ||
                 surface_type == CAIRO_SURFACE_TYPE_PS  ||
                 surface_type == CAIRO_SURFACE_TYPE_SVG) {
-            psPrint_d.dpi = 72;
+        	double p_def=600;
+        	cairo_surface_set_fallback_resolution (psPrint_d.curPrintSurface, p_def, p_def);
+        	psPrint_d.dpi = p_def;
+        	scale_adjust = 72/p_def;
         } else {
             psPrint_d.dpi = (double)gtk_print_settings_get_resolution(settings);
         }
@@ -858,11 +869,13 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
         // in XTrackCAD 0,0 is top left, in cairo bottom left. This is
         // corrected via the following transformations.
         // also the translate makes sure that the drawing is rendered
-        // within the paper margins
+        // within the paper margin
 
-        cairo_scale(psPrint_d.printContext, 1.0, -1.0);
-        cairo_translate(psPrint_d.printContext, lBorder * psPrint_d.dpi,
-                        -(paperHeight-bBorder) *psPrint_d.dpi);
+        cairo_translate(psPrint_d.printContext, lBorder*72,  (paperHeight-bBorder)*72 );
+
+        cairo_scale(psPrint_d.printContext, 1.0 * scale_adjust,  -1.0 * scale_adjust);
+
+        //cairo_translate(psPrint_d.printContext, 0, -paperHeight* psPrint_d.dpi);
 
         WlibSaveSettings(NULL);
     }

@@ -82,6 +82,7 @@
 #include "layout.h"
 #include "cundo.h"
 #include "messages.h"
+#include "cselect.h"
 
 extern drawCmd_t tempD;
 extern TRKTYP_T T_BEZIER;
@@ -372,8 +373,8 @@ void DrawTempCornu() {
 
 void CreateBothEnds(int selectPoint) {
 	BOOL_T selectable[2];
-	selectable[0] = !Da.trk[0] || !QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT);
-	selectable[1] = !Da.trk[1] || !QueryTrack(Da.trk[1],Q_MODIFY_CANT_SPLIT);
+	selectable[0] = Da.trk[0] && QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY);
+	selectable[1] = Da.trk[1] && QueryTrack(Da.trk[1],Q_CORNU_CAN_MODIFY);
 	if (selectPoint == -1) {
 		Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],FALSE,selectable[0]);
 		Da.ep2Segs_da_cnt = createEndPoint(Da.ep2Segs, Da.pos[1],FALSE,selectable[1]);
@@ -549,7 +550,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		if (Da.trk[sel]) {										//There is a track
 			if (OnTrack(&pos,FALSE,TRUE) == Da.trk[sel]) {		//And the pos is on it
 				inside = TRUE;
-				if (QueryTrack(Da.trk[Da.selectPoint],Q_MODIFY_CANT_SPLIT)) {  //Turnouts
+				if (!QueryTrack(Da.trk[Da.selectPoint],Q_CORNU_CAN_MODIFY)) {  //Turnouts
 					InfoMessage(_("Track can't be split"));
 					if (Da.ep[sel]>=0)											//Ignore if turntable
 						pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
@@ -557,9 +558,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 			} else {
 				pos = pos2;				//Put Back to original position as outside track
 			}
-			if (Da.ep[sel]>=0 && (!QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)
-					|| !QueryTrack(Da.trk[sel],Q_HAS_VARIABLE_ENDPOINTS)  //Not Helix or Circle
-					|| !QueryTrack(Da.trk[sel],Q_MODIFY_CANT_SPLIT))) { //Not Turntable or Turnout
+			// Stop the user extending right through the other track
+			if (Da.ep[sel]>=0 && QueryTrack(Da.trk[sel],Q_CORNU_CAN_MODIFY)) { //For non-turnouts
+				if ((!QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS))        // But Not Helix or Circle
+				&& (!QueryTrack(Da.trk[sel],Q_HAS_VARIABLE_ENDPOINTS))) { // Not a Turntable
 				DIST_T ab = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]));
 				DIST_T ac = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos);
 				DIST_T cb = FindDistance(GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]), pos);
@@ -567,6 +569,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 					InfoMessage(_("Too close to other end of selected Track"));
 					return C_CONTINUE;
 				}
+				if ((ac>=cb) && (ac>=ab)) { //Closer to far end and as long as the track
+					pos = GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]);  //Make other end of track
+				}
+			}
 			}
 		}
 		DrawTempCornu();   //wipe out old
@@ -629,8 +635,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 						a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,Da.pos[sel]));
 					}
 					// Remove any extend in opposite direction for Turntable/Turnouts
-					if (((QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)  && Da.ep[sel]>=0)
-							|| QueryTrack(Da.trk[sel],Q_MODIFY_CANT_SPLIT))
+					if ((QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)  && Da.ep[sel]>=0)
+							&& (!QueryTrack(Da.trk[sel],Q_CORNU_CAN_MODIFY))
 							&& (a>90 && a<270)) {
 						Da.extend[sel] = FALSE;    //Turntable with point and extension is other side of well
 						Da.pos[sel] = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
@@ -818,8 +824,8 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 	    }
 
 
-	    if ((Da.trk[0] && (QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT) && !QueryTrack(Da.trk[0],Q_CAN_EXTEND))) &&
-	    	(Da.trk[1] && (QueryTrack(Da.trk[1],Q_MODIFY_CANT_SPLIT) && !QueryTrack(Da.trk[1],Q_CAN_EXTEND)))) {
+	    if ((Da.trk[0] && (!QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY) && !QueryTrack(Da.trk[0],Q_CAN_EXTEND))) &&
+	    	(Da.trk[1] && (!QueryTrack(Da.trk[1],Q_CORNU_CAN_MODIFY) && !QueryTrack(Da.trk[1],Q_CAN_EXTEND)))) {
 	    	wBeep();
 	    	ErrorMessage("Both Ends of this Cornu are UnAdjustable");
 	    	return C_TERMINATE;
@@ -1025,7 +1031,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 {
 	track_p t;
 	cornuParm_t cp;
-	trackParams_t params;
 
 	Da.color = lineColor;
 	Da.width = (double)lineWidth/mainD.dpi;
@@ -1046,7 +1051,10 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		Da.ep2Segs_da_cnt = 0;
 		Da.extend[0] = FALSE;
 		Da.extend[1] = FALSE;
-		InfoMessage( _("Place 1st end point of Cornu track on track with an unconnected end-point") );
+		if (selectedTrackCount==0)
+			InfoMessage( _("Left click - join with Cornu track") );
+		else
+			InfoMessage( _("Left click - join with Cornu track, Shift Left click - move to join") );
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -1086,7 +1094,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				}
 				Da.state = POS_1;
 				Da.selectPoint = 0;
-				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[end], TRUE,!QueryTrack(t,Q_MODIFY_CANT_SPLIT));
+				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[end], TRUE, QueryTrack(t,Q_CORNU_CAN_MODIFY));
 				DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,drawColorBlack);
 				InfoMessage( _("Move 1st end point of Cornu track along track 1") );
 			} else {
@@ -1124,7 +1132,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			EPINX_T ep = 0;
 			BOOL_T found = FALSE;
 			int end = Da.state==POS_1?0:1;
-			if(QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT) && !QueryTrack(Da.trk[0],Q_CAN_ADD_ENDPOINTS)) {
+			if(!QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY) && !QueryTrack(Da.trk[0],Q_CAN_ADD_ENDPOINTS)) {
 				InfoMessage(_("Can't Split - Locked to End Point"));
 				return C_CONTINUE;
 			}
@@ -1143,7 +1151,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			Da.pos[ep] = pos;
-			Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],TRUE,!QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT));
+			Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],TRUE,QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY));
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,drawColorBlack);
 		} else {
 			return AdjustCornuCurve( action&0xFF, pos, InfoMessage );
@@ -1155,7 +1163,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,drawColorBlack);
 			Da.state = LOC_2;
 			InfoMessage( _("Put other end of Cornu on a track with an unconnected end point") );
-			Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,!QueryTrack(Da.trk[0],Q_MODIFY_CANT_SPLIT));
+			Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY));
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,drawColorBlack);
 			return C_CONTINUE;
 		} else {

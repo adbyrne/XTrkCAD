@@ -2222,6 +2222,8 @@ static void html_words(htmloutput *ho, word *words, int flags,
 	    element_open(ho, "a");
 	    c = utoa_dup(w->text, CS_ASCII);
 	    element_attr(ho, "href", c);
+		if(!strncmp(c, "http://", strlen("http://")) || !strncmp(c, "https://", strlen("https://")))
+			element_attr(ho, "target", "_blank");
 	    sfree(c);
 	}
 	break;

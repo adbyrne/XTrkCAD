@@ -1244,6 +1244,7 @@ static BOOL_T QueryCurve( track_p trk, int query )
 	case Q_FLIP_ENDPTS:
 	case Q_ISTRACK:
 	case Q_HAS_DESC:
+	case Q_CORNU_CAN_MODIFY:
 		return TRUE;
 		break;
 	case Q_EXCEPTION:
@@ -1252,10 +1253,10 @@ static BOOL_T QueryCurve( track_p trk, int query )
 	case Q_NOT_PLACE_FROGPOINTS:
 		return IsCurveCircle( trk );
 		break;
-	case Q_CAN_EXTEND:
-		if (xx->helixTurns > 0) return FALSE;
-		return TRUE;
-		break;
+	//case Q_CAN_EXTEND:
+	//	if (xx->helixTurns > 0) return FALSE;
+	//	return TRUE;
+	//	break;
 	case Q_CANNOT_PLACE_TURNOUT:
 		return (xx->helixTurns > 0);
 		break;
@@ -1549,7 +1550,7 @@ LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*ma
 				else
 					curveData->curveRadius = d0/sin(D2R(-a1));
 			}
-			if (curveData->curveRadius > 1000 & mode == crvCmdFromEP1) {
+			if (curveData->curveRadius > 1000 && mode == crvCmdFromEP1) {
 				LOG( log_curve, 3, ( "Straight %0.3f > 1000\n", curveData->curveRadius ) )
 				curveData->pos1.x = pos0.x + d0*2.0*sin(D2R(angle));
 				curveData->pos1.y = pos0.y + d0*2.0*cos(D2R(angle));
