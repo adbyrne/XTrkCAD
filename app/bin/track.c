@@ -616,23 +616,27 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	option = (endPt->option<<8) | (endPt->elev.option&0xFF);
 	if ( option != 0 ) {
 		rc &= fprintf( f, " %ld %0.6f %0.6f", option, endPt->elev.doff.x, endPt->elev.doff.y )>0;
-		if ( (endPt->elev.option&ELEV_MASK) != ELEV_NONE ) {
-			switch ( endPt->elev.option&ELEV_MASK ) {
-			case ELEV_DEF:
-				rc &= fprintf( f, " %0.6f ", endPt->elev.u.height )>0;
-				break;
-			case ELEV_STATION:
-				rc &= fprintf( f, " \"%s\" ", PutTitle( endPt->elev.u.name ) )>0;
-				break;
-			default:
-				rc &= fprintf( f, " 0.0 ")>0;
-			}
+		switch ( endPt->elev.option&ELEV_MASK ) {
+		case ELEV_DEF:
+			rc &= fprintf( f, " %0.6f ", endPt->elev.u.height )>0;
+			break;
+		case ELEV_STATION:
+			rc &= fprintf( f, " \"%s\" ", PutTitle( endPt->elev.u.name ) )>0;
+			break;
+		default:
+			rc &= fprintf( f, " 0.0 ")>0;
 		}
 	} else {
 		rc &= fprintf( f, " 0 0.0 0.0 0.0 ")>0;
 	}
-	rc &= fprintf( f, "%0.6f %ld %ld %ld %0.6f ", ((endPt->elev.option&ELEV_MASK) == ELEV_DEF)?endPt->elev.u.height:0.0,
-			(long)(endPt->elev.option&ELEV_VISIBLE?1:0), endPt->option, (long)(endPt->elev.option&ELEV_MASK), endPt->elev.u.height )>0;
+	if ((endPt->elev.option&ELEV_MASK) == ELEV_DEF)
+		rc &= fprintf( f, "%0.6f ",endPt->elev.u.height)>0;
+	else
+		rc &= fprintf( f, "0.0 ")>0;
+	long elevVisible = (endPt->elev.option&ELEV_VISIBLE)?1:0;
+	long elevType = endPt->elev.option&ELEV_MASK;
+	long gapType = endPt->option;
+	rc &= fprintf( f, "%ld %ld %ld ", elevVisible, elevType, gapType)>0;
 	rc &= fprintf( f, "%0.6f ", trk->elev)>0;
 	rc &= fprintf( f, "\n" )>0;
 	return rc;

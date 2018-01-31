@@ -1136,7 +1136,7 @@ EXPORT BOOL_T ReadSegs( void )
 	FLOAT_T ignoreFloat;
 	char type;
 	char * plain_text;
-	long option;
+	long option, option2;
 	BOOL_T subsegs = FALSE;
 
 	descriptionOff = zero;
@@ -1400,20 +1400,24 @@ EXPORT BOOL_T ReadSegs( void )
 			e->elev.doff = zero;
 			e->option = 0;
 			if (improvedEnds) {				//E4 and T4
-				GetArgs( cp, "lpc", &option, &e->elev.doff, &cp );
+				if (!GetArgs( cp, "lpc", &option, &e->elev.doff, &cp )) {
+					rc = FALSE;
+					/*??*/break;
+				}
 				switch (option&ELEV_MASK) {
-					case ELEV_DEF:
-						break;
 					case ELEV_STATION:
 						GetArgs( cp, "qc", &e->elev.u.name, &cp);
 						break;
 					default:
-						GetArgs( cp, "Yc", &ignoreFloat, &cp);   //Ignore height
-						e->elev.u.height = 0.0;  				 //Ensure no defined height (yet)
+						GetArgs( cp, "fc", &e->elev.u.height, &cp);   //First height
 				}
-				GetArgs( cp, "fdddc", &e->elev.u.height, &e->option, &e->elev.option, &option, &cp );
-				if (option) e->elev.option |= ELEV_VISIBLE;
-				GetArgs(cp, "fc", &ignoreFloat, &cp);           //Calculated value
+				DIST_T height2;
+				if (!GetArgs( cp, "flLlc", &height2, &option2, &e->elev.option, &e->option, &cp ) ) {
+					rc = FALSE;
+					break;
+				}
+				if (option2) e->elev.option |= ELEV_VISIBLE;
+				GetArgs(cp, "fc", &ignoreFloat, &cp);
 				break;
 			}
 			if ( cp != NULL ) {
