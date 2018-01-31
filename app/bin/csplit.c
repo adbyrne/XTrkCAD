@@ -79,29 +79,15 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 				onTrackInSplit = FALSE;
 				return C_TERMINATE;
 			}
+			if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
+				onTrackInSplit = FALSE;
+				InfoMessage(_("Can't Split that Track"));
+				return C_CONTINUE;
+			}
 			ep0 = PickEndPoint( pos, trk0 );
 			onTrackInSplit = FALSE;
 			if (ep0 < 0) {
 				return C_CONTINUE;
-			}
-			coOrd pos0 = GetTrkEndPos(trk0,ep0);
-			if (FindDistance( pos0, pos ) <= minLength) {   // will just disconnect - too close
-				if (GetTrkEndTrk(trk0,ep0)) {   			// is connected
-					UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-					if (SplitTrack( trk0, pos0, ep0, &trk1, FALSE )) {
-						InfoMessage(_("Track Disconnected"));
-						return C_TERMINATE;
-					}
-				} else {
-					ErrorMessage(_("Track Already Disconnected at End"));
-					return C_CONTINUE;
-				}
-				return C_CONTINUE;
-			}
-			if (QueryTrack(trk0,Q_MODIFY_CANT_SPLIT)) {
-							onTrackInSplit = FALSE;
-							InfoMessage(_("Can't Split that Track"));
-							return C_CONTINUE;
 			}
 			UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 			oldTrackCount = trackCount;

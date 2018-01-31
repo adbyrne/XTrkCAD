@@ -1244,6 +1244,7 @@ static BOOL_T QueryCurve( track_p trk, int query )
 	case Q_FLIP_ENDPTS:
 	case Q_ISTRACK:
 	case Q_HAS_DESC:
+	case Q_CORNU_CAN_MODIFY:
 		return TRUE;
 		break;
 	case Q_EXCEPTION:
@@ -1252,10 +1253,10 @@ static BOOL_T QueryCurve( track_p trk, int query )
 	case Q_NOT_PLACE_FROGPOINTS:
 		return IsCurveCircle( trk );
 		break;
-	case Q_CAN_EXTEND:
-		if (xx->helixTurns > 0) return FALSE;
-		return TRUE;
-		break;
+	//case Q_CAN_EXTEND:
+	//	if (xx->helixTurns > 0) return FALSE;
+	//	return TRUE;
+	//	break;
 	case Q_CANNOT_PLACE_TURNOUT:
 		return (xx->helixTurns > 0);
 		break;
