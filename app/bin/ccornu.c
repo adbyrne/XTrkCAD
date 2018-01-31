@@ -82,6 +82,7 @@
 #include "layout.h"
 #include "cundo.h"
 #include "messages.h"
+#include "cselect.h"
 
 extern drawCmd_t tempD;
 extern TRKTYP_T T_BEZIER;
@@ -1050,7 +1051,10 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		Da.ep2Segs_da_cnt = 0;
 		Da.extend[0] = FALSE;
 		Da.extend[1] = FALSE;
-		InfoMessage( _("Place 1st end point of Cornu track on track with an unconnected end-point") );
+		if (selectedTrackCount==0)
+			InfoMessage( _("Left click - join with Cornu track") );
+		else
+			InfoMessage( _("Left click - join with Cornu track, Shift Left click - move to join") );
 		return C_CONTINUE;
 
 	case C_DOWN:
