@@ -1245,6 +1245,7 @@ static BOOL_T QueryCurve( track_p trk, int query )
 	case Q_ISTRACK:
 	case Q_HAS_DESC:
 	case Q_CORNU_CAN_MODIFY:
+	case Q_MODIFY_CAN_SPLIT:
 		return TRUE;
 		break;
 	case Q_EXCEPTION:

@@ -929,6 +929,7 @@ static BOOL_T QueryBezier( track_p trk, int query )
 	case Q_CAN_PARALLEL:
 		return (GetTrkType(trk) == T_BEZIER);
 		break;
+	case Q_MODIFY_CAN_SPLIT:
 	case Q_CORNU_CAN_MODIFY:
 		return (GetTrkType(trk) == T_BEZIER);
 	default:
