@@ -169,88 +169,119 @@ static int GetNumberStr( char ** cpp, FLOAT_T * numP, BOOL_T * hasFract )
 }
 //extern wIndex_t distanceFormatInx;   // distanceFormatInx
 
-static BOOL_T GetDistance( char ** cpp, FLOAT_T * distP )
+static BOOL_T GetDistance(char ** cpp, FLOAT_T * distP)
 {
-	FLOAT_T n1, n2;
-	BOOL_T neg = FALSE;
-	BOOL_T hasFract;
-	BOOL_T expectInch = FALSE;
-	long distanceFormat;
+    FLOAT_T n1, n2;
+    BOOL_T neg = FALSE;
+    BOOL_T hasFract;
+    BOOL_T expectInch = FALSE;
+    long distanceFormat;
 
-	while ( isspace((unsigned char)**cpp) ) (*cpp)++;
-	if ( (*cpp)[0] == '\0' ) {
-		*distP = 0.0;
-		return TRUE;
-	}
-	if ( (*cpp)[0] == '-' ) {
-		neg = TRUE;
-		(*cpp)++;
-	}
-	if ( !GetNumberStr( cpp, &n1, &hasFract ) ) return FALSE;
+    while (isspace((unsigned char)**cpp)) {
+        (*cpp)++;
+    }
 
-	distanceFormat = GetDistanceFormat();
+    if ((*cpp)[0] == '\0') {
+        *distP = 0.0;
+        return TRUE;
+    }
 
+    if ((*cpp)[0] == '-') {
+        neg = TRUE;
+        (*cpp)++;
+    }
 
-	if ( (*cpp)[0] == '\0' ) { /* EOL */
-		if ( units==UNITS_METRIC )
-		{
-		   n1 = n1/2.54;
-		   if ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_MM)
-			   n1 /= 10;
-		   if ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_M)
-			   n1 *= 100;
-		} else {
-			if (((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_SHRT) || ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_LONG))
-				n1 *= 12;
-		}
-		if ( neg )
-			n1 = -n1;
-		*distP = n1;
-		return TRUE;
-	}
-	if ( (*cpp)[0] == '\'' ) {
-		n1 *= 12.0;
-		(*cpp) += 1;
-		expectInch = !hasFract;
-	} else if ( tolower((unsigned char)(*cpp)[0]) == 'f' && tolower((unsigned char)(*cpp)[1]) == 't' ) {
-		n1 *= 12.0;
-		(*cpp) += 2;
-		expectInch = !hasFract;
-	} else if ( tolower((unsigned char)(*cpp)[0]) == 'c' && tolower((unsigned char)(*cpp)[1]) == 'm' ) {
-		n1 /= 2.54;
-		(*cpp) += 2;
-	} else if ( tolower((unsigned char)(*cpp)[0]) == 'm' && tolower((unsigned char)(*cpp)[1]) == 'm' ) {
-		n1 /= 25.4;
-		(*cpp) += 2;
-	} else if ( tolower((unsigned char)(*cpp)[0]) == 'm' ) {
-		n1 *= 100.0/2.54;
-		(*cpp) += 1;
-	} else if ( (*cpp)[0] == '"' ) {
-		(*cpp) += 1;
-	} else if ( tolower((unsigned char)(*cpp)[0]) == 'i' && tolower((unsigned char)(*cpp)[1]) == 'n' ) {
-		(*cpp) += 2;
-	} else {
-		getNumberError = N_("Invalid Units Indicator");
-		return FALSE;
-	}
-	while ( isspace((unsigned char)**cpp) ) (*cpp)++;
-	if ( expectInch && isdigit( (unsigned char)**cpp ) ) {
-		if ( !GetNumberStr( cpp, &n2, &hasFract ) ) return FALSE;
-		n1 += n2;
-		if ( (*cpp)[0] == '"' )
-			(*cpp) += 1;
-		else if ( tolower((unsigned char)(*cpp)[0]) == 'i' && tolower((unsigned char)(*cpp)[1]) == 'n' )
-			(*cpp) += 2;
-		while ( isspace((unsigned char)**cpp) ) (*cpp)++;
-	}
-	if ( **cpp ) {
-		getNumberError = N_("Expected End Of String");
-		return FALSE;
-	}
-	if ( neg )
-		n1 = -n1;
-	*distP = n1;
-	return TRUE;
+    if (!GetNumberStr(cpp, &n1, &hasFract)) {
+        return FALSE;
+    }
+
+    distanceFormat = GetDistanceFormat();
+
+    if ((*cpp)[0] == '\0') {   /* EOL */
+        if (units==UNITS_METRIC) {
+            n1 = n1/2.54;
+
+            if ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_MM) {
+                n1 /= 10;
+            }
+
+            if ((distanceFormat & DISTFMT_FMT) == DISTFMT_FMT_M) {
+                n1 *= 100;
+            }
+        }
+
+        if (neg) {
+            n1 = -n1;
+        }
+
+        *distP = n1;
+        return TRUE;
+    }
+
+    if ((*cpp)[0] == '\'') {
+        n1 *= 12.0;
+        (*cpp) += 1;
+        expectInch = !hasFract;
+    } else if (tolower((unsigned char)(*cpp)[0]) == 'f' &&
+               tolower((unsigned char)(*cpp)[1]) == 't') {
+        n1 *= 12.0;
+        (*cpp) += 2;
+        expectInch = !hasFract;
+    } else if (tolower((unsigned char)(*cpp)[0]) == 'c' &&
+               tolower((unsigned char)(*cpp)[1]) == 'm') {
+        n1 /= 2.54;
+        (*cpp) += 2;
+    } else if (tolower((unsigned char)(*cpp)[0]) == 'm' &&
+               tolower((unsigned char)(*cpp)[1]) == 'm') {
+        n1 /= 25.4;
+        (*cpp) += 2;
+    } else if (tolower((unsigned char)(*cpp)[0]) == 'm') {
+        n1 *= 100.0/2.54;
+        (*cpp) += 1;
+    } else if ((*cpp)[0] == '"') {
+        (*cpp) += 1;
+    } else if (tolower((unsigned char)(*cpp)[0]) == 'i' &&
+               tolower((unsigned char)(*cpp)[1]) == 'n') {
+        (*cpp) += 2;
+    } else {
+        getNumberError = N_("Invalid Units Indicator");
+        return FALSE;
+    }
+
+    while (isspace((unsigned char)**cpp)) {
+        (*cpp)++;
+    }
+
+    if (expectInch && isdigit((unsigned char)**cpp)) {
+        if (!GetNumberStr(cpp, &n2, &hasFract)) {
+            return FALSE;
+        }
+
+        n1 += n2;
+
+        if ((*cpp)[0] == '"') {
+            (*cpp) += 1;
+        } else if (tolower((unsigned char)(*cpp)[0]) == 'i' &&
+                   tolower((unsigned char)(*cpp)[1]) == 'n') {
+            (*cpp) += 2;
+        }
+
+        while (isspace((unsigned char)**cpp)) {
+            (*cpp)++;
+        }
+    }
+
+    if (**cpp) {
+        getNumberError = N_("Expected End Of String");
+        return FALSE;
+    }
+
+    if (neg) {
+        n1 = -n1;
+    }
+
+    *distP = n1;
+    return TRUE;
 }
 
 
@@ -280,46 +311,57 @@ EXPORT FLOAT_T DecodeFloat(
 }
 
 
-EXPORT FLOAT_T DecodeDistance(
-		wString_p strCtrl,
-		BOOL_T * validP )
+FLOAT_T DecodeDistance(
+    wString_p strCtrl,
+    BOOL_T * validP)
 {
-	FLOAT_T valF;
-	char *cp0, *cp1, *cpN, c1;
+    FLOAT_T valF;
+    char *cp0, *cp1, *cpN, c1;
+    cp0 = cp1 = cpN = CAST_AWAY_CONST wStringGetValue(strCtrl);
+    cpN += strlen(cpN)-1;
 
-	cp0 = cp1 = cpN = CAST_AWAY_CONST wStringGetValue( strCtrl );
-	cpN += strlen(cpN)-1;
-	while (cpN > cp1 && isspace((unsigned char)*cpN) ) cpN--;
-	c1 = *cpN;
-	switch ( c1 ) {
-	case '=':
-	case 's':
-	case 'S':
-	case 'p':
-	case 'P':
-		*cpN = '\0';
-		break;
-	default:
-		cpN = NULL;
-	}
-	*validP = ( GetDistance( &cp1, &valF ) );
-	if ( cpN )
-		*cpN = c1;
-	if ( *validP ) {
-/*fprintf( stderr, "gd=%0.6f\n", valF );*/
-		if ( c1 == 's' || c1 == 'S' )
-			valF *= curScaleRatio;
-		else if ( c1 == 'p' || c1 == 'P' )
-			valF /= curScaleRatio;
-		if ( cpN )
-			wStringSetValue( strCtrl, FormatDistance( valF ) );
-	} else {
-/*fprintf( stderr, "Gd( @%s ) error=%s\n", cp1, getNumberError );*/
-		sprintf( decodeErrorStr, "%s @ %s", _(getNumberError), *cp1?cp1:_("End Of String") );
-		/*wStringSetHilight( strCtrl, cp1-cp0, -1 ); */
-		valF =	0.0;
-	}
-	return valF;
+    while (cpN > cp1 && isspace((unsigned char)*cpN)) {
+        cpN--;
+    }
+
+    c1 = *cpN;
+
+    switch (c1) {
+    case '=':
+    case 's':
+    case 'S':
+    case 'p':
+    case 'P':
+        *cpN = '\0';
+        break;
+
+    default:
+        cpN = NULL;
+    }
+
+    *validP = (GetDistance(&cp1, &valF));
+
+    if (cpN) {
+        *cpN = c1;
+    }
+
+    if (*validP) {
+        if (c1 == 's' || c1 == 'S') {
+            valF *= curScaleRatio;
+        } else if (c1 == 'p' || c1 == 'P') {
+            valF /= curScaleRatio;
+        }
+
+        if (cpN) {
+            wStringSetValue(strCtrl, FormatDistance(valF));
+        }
+    } else {
+        sprintf(decodeErrorStr, "%s @ %s", _(getNumberError),
+                *cp1?cp1:_("End Of String"));
+        valF =	0.0;
+    }
+
+    return valF;
 }
 
 
@@ -1524,7 +1566,7 @@ EXPORT void ParamChange( paramData_p p )
 	case PD_DROPLIST:
 	case PD_COMBOLIST:
 		if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
-			fprintf( recordF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr, *(wIndex_t*)p->valueP, ??? );
+			fprintf( recordF, "PARAMETER %s %s %d %s\n", p->group->nameStr, p->nameStr, *(wIndex_t*)p->valueP, "???" );
 		}
 #ifdef LATER
 		if ( p->control && (p->option&PDO_NOCONTUPD) == 0 )
