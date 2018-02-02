@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unpublished]
+
+### Added
++ Finish the new End Point records which have fixed positions and all fields are output
+
+### Fixed
++ Open external sites in separate window from help (bug #219)
++ Fix the initial position of rotated elements
++ Make sure all connection parms do not exceed bounds from options dialogs
++ Fix Abend on naked cornu modify
++ Fix invalid parm modification when selecting new number format
+
+### Added and changed parameter files
+
 ## [5.0.0.beta5]
 
 ### Added
