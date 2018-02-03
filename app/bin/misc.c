@@ -2282,6 +2282,7 @@ static void CreateMenus( void )
 	cmdGroup = BG_SELECT;
 	InitCmdDescribe( changeM );
 	InitCmdSelect( changeM );
+	InitCmdPan( changeM );
 	wMenuSeparatorCreate( changeM );
 
 	cmdGroup = BG_TRKGRP;

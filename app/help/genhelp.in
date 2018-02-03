@@ -108,6 +108,7 @@ cmdMoveLabel	Move a label
 cmdMoveToCurrentLayer	Move selected objects to current layer
 cmdNote	Place a note on the layout
 cmdOutputbitmap	Print a BitMap
+cmdPan	Pan or Zoom the Layout
 cmdParallel	Create a parallel track
 cmdParameter	Register	register
 cmdPaste	Copy objects from clipboard

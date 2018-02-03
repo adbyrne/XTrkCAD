@@ -2512,3 +2512,112 @@ EXPORT void DrawInit( int initialZoom )
 	wAttachAccelKey( wAccelKey_Pgdn, 0, (wAccelKeyCallBack_p)doZoomDown, NULL );
 #endif
 }
+
+#include "bitmaps/pan.xpm"
+
+static STATUS_T CmdPan(
+		wAction_t action,
+		coOrd pos )
+{
+	static enum { PAN, ZOOM, NONE } panmode;
+
+	static coOrd start_pos, last_orig, last_pos;
+	if ( action == C_DOWN ) {
+		panmode = PAN;
+	} else if ( action == C_RDOWN) {
+		panmode = ZOOM;
+	}
+
+	switch (action) {
+	case C_START:
+		start_pos = zero;
+		panmode = NONE;
+		InfoMessage(_("Left Click to Pan, Right Click to Zoom"));
+		break;
+	case C_DOWN:
+		panmode = PAN;
+		start_pos = pos;
+		last_pos = pos;
+		last_orig = mainD.orig;
+		InfoMessage(_("Pan Mode - drag point to new position"));
+		break;
+	case C_RDOWN:
+		panmode = ZOOM;
+		start_pos = pos;
+		last_pos = pos;
+		last_orig = mainD.orig;
+		InfoMessage(_("Zoom Mode - drag up to Zoom In, drag down for Zoom Out"));
+		break;
+	case C_MOVE:
+	case C_RMOVE:
+			if ((pos.x >= mainD.orig.x + mainD.size.x-20.0) || (pos.y >= mainD.orig.y + mainD.size.y-20.0)) return C_CONTINUE;
+			if ((pos.x < mainD.orig.x+20.0) || (pos.y < mainD.orig.y+20.0)) return C_CONTINUE;
+			if (panmode == PAN) {
+				double min_inc;
+				if (mainD.scale >= 1.0) {
+					if (units == UNITS_ENGLISH) {
+						min_inc = 1/4;   //>1:1 = 1/4 inch
+					} else {
+						min_inc = 1/(2.54*2);  //>1:1 = 0.5 cm
+					}
+				} else {
+					if (units == UNITS_ENGLISH) {
+						min_inc = 1/64;   //<1:1 = 1/64 inch
+					} else {
+						min_inc = 1/(25.4*2);  //>1:1 = 0.5 mm
+					}
+				}
+
+				if ((fabs(pos.x-start_pos.x) > min_inc) || (fabs(pos.y-start_pos.y)> min_inc)) {
+					mainD.orig.x -= (pos.x - start_pos.x);
+					mainD.orig.y -= (pos.y - start_pos.y);
+					ConstraintOrig( &mainD.orig, mainD.size );
+					mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
+					mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
+					last_pos = pos;
+					if ((last_orig.x == mainD.orig.x ) && (last_orig.y == mainD.orig.y)) {
+						InfoMessage(_("Can't move further that way"));
+					} else
+						InfoMessage(_(""));
+					last_orig = mainD.orig;
+				}
+			} else if (panmode == ZOOM) {
+				if ((last_pos.x == 0.0) && (last_pos.y == 0.0)) {
+					last_pos = pos;  								//reset start after zoom
+					return C_CONTINUE;
+				}
+				if (pos.y > (last_pos.y + (mainD.size.x/100.0))) {
+					last_pos = zero;
+					DoZoomUp((void *)1L);
+
+				}
+				else if (pos.y < (last_pos.y - (mainD.size.x/100.0))) {
+					last_pos = zero;
+					DoZoomDown((void *)1L);
+				}
+			}
+			MapRedraw();
+			MainRedraw();
+		break;
+	case C_REDRAW:
+		break;
+	case C_CANCEL:
+		return C_TERMINATE;
+	case C_TEXT:
+		panmode = NONE;
+		if ((action>>8) == 0x0D)
+			return C_TERMINATE;
+		else if ((action>>8) == 0x1B)
+			return C_TERMINATE;
+		break;
+	}
+
+	return C_CONTINUE;
+}
+
+
+EXPORT void InitCmdPan( wMenu_p menu )
+{
+	AddMenuButton( menu, CmdPan, "cmdPan", _("Pan/Zoom"), wIconCreatePixMap(pan_xpm),
+				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_RCLICK|IC_CMDMENU, ACCL_PAN, NULL );
+}

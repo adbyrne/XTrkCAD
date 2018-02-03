@@ -48,6 +48,10 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
+\dd \f{Pan/Zoom} - move or resize the viewport using the mouse.
+
+\u000   
+
 \dd \f{Profile} - display the elevation profile of a definable stretch of track (\K{cmdProfile}).
 
 \u000
@@ -868,6 +872,11 @@ This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select mode (\K
 
 \rule
 
+\S{cmdPan} Pan/Zoom 
+
+\G{png.d/pan.png}
+
+This command is used to move or resize the viewport using the mouse. \e{Left+Drag} Pans the point under the cursor around up and down, left and right. \e{Right+Drag} zooms up if the drag is up and zooms down if the drag is down. 
 
 \S{cmdProfile} Profile
 
