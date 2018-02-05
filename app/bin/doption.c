@@ -44,6 +44,9 @@ static paramFloatRange_t r1_1000 = { 1, 1000 };
 static paramFloatRange_t r0_180 = { 0, 180 };
 
 static void UpdatePrefD( void );
+static void UpdateMeasureFmt(void);
+
+static wIndex_t distanceFormatInx;
 
 EXPORT long enableBalloonHelp = 1;
 
@@ -74,8 +77,13 @@ static void OptionDlgUpdate(
 		quickMove = *(long*)valueP;
 		UpdateQuickMove(NULL);
 		quickMove = quickMoveOld;
-	} else if ( pg->paramPtr[inx].valueP == &units ) {
-		UpdatePrefD();
+	} else {
+		if (pg->paramPtr[inx].valueP == &units) {
+			UpdatePrefD();
+		}
+		if (pg->paramPtr[inx].valueP == &distanceFormatInx) {
+			UpdateMeasureFmt();
+		}
 	}
 }
 
@@ -264,7 +272,6 @@ EXPORT addButtonCallBack_t CmdoptInit( void )
 static wWin_p prefW;
 static long displayUnits;
 
-static wIndex_t distanceFormatInx;
 static char * unitsLabels[] = { N_("English"), N_("Metric"), NULL };
 static char * angleSystemLabels[] = { N_("Polar"), N_("Cartesian"), NULL };
 static char * enableBalloonHelpLabels[] = { N_("Balloon Help"), NULL };
@@ -361,21 +368,41 @@ static void UpdatePrefD( void )
 	if ( prefW==NULL || (!wWinIsVisible(prefW)) || prefPLs[1].control==NULL )
 		return;
 	newUnits = wRadioGetValue( (wChoice_p)prefPLs[1].control );
-	if ( newUnits == displayUnits )
-		return;
-	oldUnits = units;
-	units = newUnits;
-	LoadDstFmtList();
-	distanceFormatInx = 0;
-	for ( inx = 0; inx<sizeof prefPLs/sizeof prefPLs[0]; inx++ ) {
-		if ( (prefPLs[inx].option&PDO_DIM) ) {
-			ParamLoadControl( &prefPG, inx );
+	if (newUnits != displayUnits) {
+		oldUnits = units;
+		units = newUnits;
+		LoadDstFmtList();
+		distanceFormatInx = 0;
+
+		for (inx = 0; inx < sizeof prefPLs / sizeof prefPLs[0]; inx++) {
+			if ((prefPLs[inx].option&PDO_DIM)) {
+				ParamLoadControl(&prefPG, inx);
+			}
 		}
+
+		units = oldUnits;
+		displayUnits = newUnits;
 	}
-	units = oldUnits;
-	displayUnits = newUnits;
+	return;
 }
 
+/**
+ * Handle changes of the measurement format.
+ */
+
+static void UpdateMeasureFmt()
+{
+	int inx; 
+
+	distanceFormatInx = wListGetIndex((wList_p)prefPLs[I_DSTFMT].control);
+	units = wRadioGetValue((wChoice_p)prefPLs[1].control);
+
+	for (inx = 0; inx < sizeof prefPLs / sizeof prefPLs[0]; inx++) {
+		if ((prefPLs[inx].option&PDO_DIM)) {
+			ParamLoadControl(&prefPG, inx);
+		}
+	}
+}
 
 static void PrefOk( void * junk )
 {
