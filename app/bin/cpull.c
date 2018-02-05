@@ -597,7 +597,7 @@ static STATUS_T CmdPull(
 	EPINX_T ep2;
 	static BOOL_T turntable;
 
-	int countTracks = 0, possibleEndPoints = 0;
+	int countTracksR0 = 0, countTracksR1 = 0, possibleEndPoints = 0;
 	BOOL_T found = FALSE;
 	ANGLE_T a;
 	DIST_T d;
@@ -665,39 +665,46 @@ static STATUS_T CmdPull(
 			ErrorMessage(_("Connect Multiple Tracks - Select multiple tracks to join first"));
 			return C_CONTINUE;
 		}
-		if (NoticeMessage(_("Try to Connect all Selected Tracks?"), _("Yes"), _("No"), countTracks, possibleEndPoints)<0) return C_CONTINUE;
+		if (NoticeMessage(_("Try to Connect all Selected Tracks?"), _("Yes"), _("No"))<0) return C_CONTINUE;
 		trk1 = NULL;
 		trk2 = NULL;
 		UndoStart( _("ReConnect"),"Try to reconnect all selected tracks");
-		while ( TrackIterate( &trk1 ) ) {
-			found = FALSE;
-			if ( GetTrkSelected( trk1 ) ) {
-				for (ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++) {
-					if (!GetTrkEndTrk( trk1, ep1 )) {
-						trk2 = NULL;
-						while (!found && TrackIterate(&trk2) ) {
-							if (trk1 == trk2) continue;
-							for (ep2=0; ep2<GetTrkEndPtCnt(trk2); ep2++) {
-								if (GetTrkEndTrk( trk2, ep2 )) continue;
-								d = FindDistance(GetTrkEndPos(trk1,ep1),GetTrkEndPos(trk2,ep2));
-								a = NormalizeAngle( 180+GetTrkEndAngle( trk1, ep1 ) - GetTrkEndAngle( trk2, ep2 )+(connectAngle/2.0));
-								if ((d < connectDistance*2) && (a < connectAngle*2)) {
-									PullTracks(trk1,ep1,trk2,ep2);
-									if (GetTrkEndTrk( trk2, ep2 )) {
-										found = TRUE;
-										countTracks++;
-										break;
-									} else possibleEndPoints++;
+		for (int i=0;i<2;i++) {  // Try twice - in case later joins help earlier ones and to try close ones first
+			while ( TrackIterate( &trk1 ) ) {
+				found = FALSE;
+				if ( GetTrkSelected( trk1 ) ) {
+					for (ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++) {
+						if (!GetTrkEndTrk( trk1, ep1 )) {
+							trk2 = NULL;
+							while (!found && TrackIterate(&trk2) ) {
+								if (trk1 == trk2) continue;
+								for (ep2=0; ep2<GetTrkEndPtCnt(trk2); ep2++) {
+									if (GetTrkEndTrk( trk2, ep2 )) continue;
+									d = FindDistance(GetTrkEndPos(trk1,ep1),GetTrkEndPos(trk2,ep2));
+									a = NormalizeAngle( 180+GetTrkEndAngle( trk1, ep1 ) - GetTrkEndAngle( trk2, ep2 )+(connectAngle/2.0));
+									// Take two passes. In round one favor closer connections. In round two try anything.
+									if ( (i==0 && (d < connectDistance) && (a < connectAngle)) ||
+											(i>0 && (d<3.0 && a<7.5))) {    // Match PullTracks criteria in round 2
+										PullTracks(trk1,ep1,trk2,ep2);
+										if (GetTrkEndTrk( trk2, ep2 )) {
+											found = TRUE;
+											if (i==0)
+												countTracksR0++;
+											else
+												countTracksR1++;
+											break;               //Stop looking
+										} else if (i==1) possibleEndPoints++;
+									}
 								}
 							}
+							if (found) break;  //Next EndPoint
 						}
-						if (found) break;
 					}
 				}
 			}
 		}
 		UndoEnd();
-		NoticeMessage(_("%d tracks connected, %d end Points not connected"), _("OK"), NULL, countTracks, possibleEndPoints);
+		NoticeMessage(_("Round 1 %d and Round 2 %d tracks connected, %d close pairs of end Points were not connected"), _("OK"), NULL, countTracksR0, countTracksR1, possibleEndPoints);
 		return C_TERMINATE;
 
 	case C_REDRAW:
