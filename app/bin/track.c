@@ -608,27 +608,36 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	assert ( endPt != NULL );
 	if (endPt->track == NULL ||
 		( exportingTracks && !GetTrkSelected(endPt->track) ) ) {
-		rc &= fprintf( f, "\tE " )>0;
+		rc &= fprintf( f, "\tE4 " )>0;
 	} else {
-		rc &= fprintf( f, "\tT %d ", endPt->track->index )>0;
+		rc &= fprintf( f, "\tT4 %d ", endPt->track->index )>0;
 	}
 	rc &= fprintf( f, "%0.6f %0.6f %0.6f", endPt->pos.x, endPt->pos.y, endPt->angle )>0; 
 	option = (endPt->option<<8) | (endPt->elev.option&0xFF);
 	if ( option != 0 ) {
 		rc &= fprintf( f, " %ld %0.6f %0.6f", option, endPt->elev.doff.x, endPt->elev.doff.y )>0;
-		if ( (endPt->elev.option&ELEV_MASK) != ELEV_NONE ) {
-			switch ( endPt->elev.option&ELEV_MASK ) {
-			case ELEV_DEF:
-				rc &= fprintf( f, " %0.6f", endPt->elev.u.height )>0;
-				break;
-			case ELEV_STATION:
-				rc &= fprintf( f, " \"%s\"", PutTitle( endPt->elev.u.name ) )>0;
-				break;
-			default:
-				;
-			}
+		switch ( endPt->elev.option&ELEV_MASK ) {
+		case ELEV_DEF:
+			rc &= fprintf( f, " %0.6f ", endPt->elev.u.height )>0;
+			break;
+		case ELEV_STATION:
+			rc &= fprintf( f, " \"%s\" ", PutTitle( endPt->elev.u.name ) )>0;
+			break;
+		default:
+			rc &= fprintf( f, " 0.0 ")>0;
 		}
+	} else {
+		rc &= fprintf( f, " 0 0.0 0.0 0.0 ")>0;
 	}
+	if ((endPt->elev.option&ELEV_MASK) == ELEV_DEF)
+		rc &= fprintf( f, "%0.6f ",endPt->elev.u.height)>0;
+	else
+		rc &= fprintf( f, "0.0 ")>0;
+	long elevVisible = (endPt->elev.option&ELEV_VISIBLE)?1:0;
+	long elevType = endPt->elev.option&ELEV_MASK;
+	long gapType = endPt->option;
+	rc &= fprintf( f, "%ld %ld %ld ", elevVisible, elevType, gapType)>0;
+	rc &= fprintf( f, "%0.6f ", trk->elev)>0;
 	rc &= fprintf( f, "\n" )>0;
 	return rc;
 }
@@ -1762,9 +1771,11 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	*leftover = NULL;
 LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos.x, pos.y ) )
 
-	if ((splitCmd = trackCmds(trk->type)->split) == NULL) {
-		ErrorMessage( MSG_CANT_SPLIT_TRK, trackCmds(trk->type)->name );
-		return FALSE;
+	if (((splitCmd = trackCmds(trk->type)->split) == NULL)) {
+			if (!(FindDistance( trk->endPt[ep].pos, pos) <= minLength)) {
+				ErrorMessage( MSG_CANT_SPLIT_TRK, trackCmds(trk->type)->name );
+				return FALSE;
+		}
 	}
 	UndrawNewTrack( trk );
 	UndoModify( trk );

@@ -115,6 +115,7 @@ void InitCmdMoveDescription( wMenu_p menu );
 void InitCmdStraight( wMenu_p menu );
 void InitCmdDescribe( wMenu_p menu );
 void InitCmdSelect( wMenu_p menu );
+void InitCmdPan( wMenu_p menu);
 void InitCmdDelete( void );
 void InitCmdSplit( wMenu_p menu );
 void InitCmdTunnel( void );

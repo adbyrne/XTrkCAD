@@ -73,6 +73,7 @@ extern long zoomCorner;
 #define INIT_MAP_SCALE	(64.0)
 #define MAX_MAIN_SCALE	(256.0)
 #define MIN_MAIN_SCALE	(1.0)
+#define MIN_MAIN_MACRO  (0.10)
 
 // static char FAR message[STR_LONG_SIZE];
 
@@ -1027,7 +1028,6 @@ EXPORT void InfoCount( wIndex_t count )
 
 EXPORT void InfoPos( coOrd pos )
 {
-	wPos_t x, y;
 	DrawMarkers();
 	sprintf( message, "%s%s", xLabel, FormatDistance(pos.x) );
 	wStatusSetValue( infoD.posX_m, message );
@@ -1385,9 +1385,7 @@ static void DrawRoomWalls( wBool_t t )
 
 	if (mainD.d == NULL)
 		return;
-#ifdef LATER
-	wDrawGetDim( mainD.d, &w, &h );
-#endif
+
 	DrawTicks( &mainD, mapD.size );
 
 	p01.x = p10.y = 0.0;
@@ -1395,10 +1393,7 @@ static void DrawRoomWalls( wBool_t t )
 	p01.y = p11.y = mapD.size.y;
 	DrawLine( &mainD, p01, p11, 3, t?borderColor:wDrawColorWhite );
 	DrawLine( &mainD, p11, p10, 3, t?borderColor:wDrawColorWhite );
-#ifdef LATER
-	/*wDrawClip( mainD.d, LBORDER, BBORDER,
-			   w-(LBORDER+RBORDER), h-(BBORDER+TBORDER) );*/
-#endif
+
 }
 
 
@@ -1596,6 +1591,7 @@ EXPORT void DrawTicks( drawCmd_p d, coOrd size )
 	DIST_T offset;
 
 	offset = 0.0;
+
 	if ( d->orig.x<0.0 )
 		offset = d->orig.x;
 	p0.x = 0.0/*d->orig.x*/; p1.x = size.x;
@@ -1604,6 +1600,7 @@ EXPORT void DrawTicks( drawCmd_p d, coOrd size )
 	p0.y = p1.y = min(d->orig.y + d->size.y, size.y);
 	DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
 	offset = 0.0;
+
 	if ( d->orig.y<0.0 )
 		offset = d->orig.y;
 	p0.y = 0.0/*d->orig.y*/; p1.y = max(size.y,0.0);
@@ -1635,6 +1632,7 @@ static void ConstraintOrig( coOrd * orig, coOrd size )
 LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%0.3fx%0.3f",
 				orig->x, orig->y, mapD.size.x, mapD.size.y,
 				size.x, size.y ) )
+
 	if (orig->x+size.x > mapD.size.x ) {
 		orig->x = mapD.size.x-size.x;
 		orig->x += (units==UNITS_ENGLISH?1.0:(1.0/2.54));
@@ -1644,10 +1642,11 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 	if (orig->y+size.y > mapD.size.y ) {
 		orig->y = mapD.size.y-size.y;
 		orig->y += (units==UNITS_ENGLISH?1.0:1.0/2.54);
-				
+
 	}
 	if (orig->y < 0)
 		orig->y = 0;
+
 	if (mainD.scale >= 1.0) {
 		if (units == UNITS_ENGLISH) {
 			orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
@@ -1732,9 +1731,25 @@ static int ScaleInx(  DIST_T scale )
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
 		if( scale == zoomList[inx].value ) {
 			return inx;
-		}	
+		}
 	}
 	return -1;	
+}
+
+/*
+ * Find Nearest Scale
+ */
+
+static int NearestScaleInx ( DIST_T scale, BOOL_T larger ) {
+	int inx;
+
+		for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
+			if( scale == zoomList[inx].value ) {
+				return inx;
+			}
+			if (scale < zoomList[inx].value) return inx;
+		}
+		return inx-1;
 }
 
 /**
@@ -1773,13 +1788,12 @@ static void DoNewScale( DIST_T scale )
 	}
 	ConstraintOrig( &mainD.orig, mainD.size );
 	MainRedraw();
-	MapRedraw();
 	tempD.orig = mainD.orig;
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
 	/*SetFont(0);*/
 	sprintf( tmp, "%0.3f", mainD.scale );
 	wPrefSetString( "draw", "zoom", tmp );
-	//DrawHilight( &mapD, mainD.orig, mainD.size );
+	DrawHilight( &mapD, mainD.orig, mainD.size );
 	if (recordF) {
 		fprintf( recordF, "ORIG %0.3f %0.3f %0.3f\n",
 						mainD.scale, mainD.orig.x, mainD.orig.y );
@@ -1798,8 +1812,9 @@ EXPORT void DoZoomUp( void * mode )
 	long newScale;
 	int i;
 	
-	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
+	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0) {
 		i = ScaleInx( mainD.scale );
+		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
 		/* 
 		 * Zooming into macro mode happens when we are at scale 1:1. 
 		 * To jump into macro mode, the CTRL-key has to be pressed and held.
@@ -1808,7 +1823,7 @@ EXPORT void DoZoomUp( void * mode )
 			if( i ) {
 				if (mainD.scale <=1.0) 
 					InfoMessage(_("Macro Zoom Mode"));
-				else 
+				else
 					InfoMessage(_("Use Shift+PageDwn to jump to preset Zoom In"));
 				DoNewScale( zoomList[ i - 1 ].value );	
 				
@@ -1840,6 +1855,7 @@ EXPORT void DoZoomDown( void  * mode)
 	
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
+		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
 		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
 			InfoMessage(_("Use Shift+PageUp to jump to preset Zoom Out"));
 			DoNewScale( zoomList[ i + 1 ].value );
@@ -1940,12 +1956,6 @@ LOG( log_pan, 2, ( "NEW = [ %0.3f, %0.3f ] \n", pos.x, pos.y ) )
 		if (!liveMap)
 			MainRedraw();
 LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
-#ifdef LATER
-		if (recordF) {
-			fprintf( recordF, "ORIG %0.3f %0.3f %0.3f\n",
-						mainD.scale, mainD.orig.x, mainD.orig.y );
-		}
-#endif
 		mode = noPan;
 		break;
 
@@ -1957,11 +1967,6 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 		DrawHilight( &mapD, mainD.orig, mainD.size );
 		newOrig = pos;
 		oldOrig = newOrig;
-#ifdef LATER
-		xscale = INIT_MAP_SCALE;
-		size.x = mapD.size.x/xscale;
-		size.y = mapD.size.y/xscale;
-#endif
 		xscale = 1;
 		size.x = mainD.size.x/mainD.scale;
 		size.y = mainD.size.y/mainD.scale;
@@ -2456,6 +2461,7 @@ EXPORT void DrawInit( int initialZoom )
 {
 	wPos_t w, h;
 
+
 	wWinGetSize( mainW, &w, &h );
 	/*LayoutToolBar();*/
 	h = h - (toolbarHeight+max(textHeight,infoHeight)+10);
@@ -2512,4 +2518,168 @@ EXPORT void DrawInit( int initialZoom )
 	wAttachAccelKey( wAccelKey_Pgup, 0, (wAccelKeyCallBack_p)doZoomUp, NULL );
 	wAttachAccelKey( wAccelKey_Pgdn, 0, (wAccelKeyCallBack_p)doZoomDown, NULL );
 #endif
+}
+
+#include "bitmaps/pan.xpm"
+
+static STATUS_T CmdPan(
+		wAction_t action,
+		coOrd pos )
+{
+	static enum { PAN, ZOOM, NONE } panmode;
+
+	static coOrd base, size;
+
+	coOrd new_pos;
+
+	DIST_T scale_x,scale_y;
+
+	static coOrd start_pos;
+	if ( action == C_DOWN ) {
+		panmode = PAN;
+	} else if ( action == C_RDOWN) {
+		panmode = ZOOM;
+	}
+
+	switch (action&0xFF) {
+	case C_START:
+		start_pos = zero;
+		panmode = NONE;		InfoMessage(_("Left Click to Pan, Right Click to Zoom"));
+		 break;
+	case C_DOWN:
+		panmode = PAN;
+		start_pos = pos;
+		InfoMessage(_("Pan Mode - drag point to new position"));
+		break;
+	case C_RDOWN:
+		panmode = ZOOM;
+		start_pos = pos;
+		base = pos;
+		size = zero;
+		InfoMessage(_("Zoom Mode - Hilight Area to Zoom"));
+		break;
+	case C_MOVE:
+		if (panmode == PAN) {
+				double min_inc;
+				if (mainD.scale >= 1.0) {
+					if (units == UNITS_ENGLISH) {
+						min_inc = 1/4;   //>1:1 = 1/4 inch
+					} else {
+						min_inc = 1/(2.54*2);  //>1:1 = 0.5 cm
+					}
+				} else {
+					if (units == UNITS_ENGLISH) {
+						min_inc = 1/64;   //<1:1 = 1/64 inch
+					} else {
+						min_inc = 1/(25.4*2);  //>1:1 = 0.5 mm
+					}
+				}
+				if ((fabs(pos.x-start_pos.x) > min_inc) || (fabs(pos.y-start_pos.y) > min_inc)) {
+					DrawMapBoundingBox( TRUE );
+					mainD.orig.x -= (pos.x - start_pos.x);
+					mainD.orig.y -= (pos.y - start_pos.y);
+					ConstraintOrig( &mainD.orig, mainD.size );
+					tempD.orig = mainD.orig;
+					mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
+					mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
+					DrawMapBoundingBox( TRUE );
+				}
+			}
+			MainRedraw();
+		break;
+	case C_RMOVE:
+		if (panmode == ZOOM) {
+			base = start_pos;
+			size.x = pos.x - base.x;
+			if (size.x < 0) {
+				size.x = - size.x ;
+				base.x = pos.x;
+			}
+			size.y = pos.y - base.y;
+			if (size.y < 0) {
+				size.y = - size.y;
+				base.y = pos.y;
+			}
+		}
+		MainRedraw();
+		break;
+	case C_RUP:
+
+		scale_x = size.x/mainD.size.x*mainD.scale;
+		scale_y = size.y/mainD.size.y*mainD.scale;
+
+		if (scale_x<scale_y)
+				scale_x = scale_y;
+		if (scale_x>1) scale_x = ceil( scale_x );
+		else scale_x = 1/(ceil(1/scale_x));
+
+		if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
+		if (scale_x < MIN_MAIN_MACRO) scale_x = MIN_MAIN_MACRO;
+
+		mainCenter.x = base.x + size.x/2.0;  //Put center for scale in center of square
+		mainCenter.y = base.y + size.y/2.0;
+		mainD.orig.x = base.x;
+		mainD.orig.y = base.y;
+
+		panmode = NONE;
+		DoNewScale(scale_x);
+
+		break;
+	case C_UP:
+		panmode = NONE;
+		break;
+	case C_REDRAW:
+		if (panmode == ZOOM) {
+			if (base.x && base.y && size.x && size.y)
+				DrawHilight( &mainD, base, size );
+		}
+		break;
+	case C_CANCEL:
+		base = zero;
+		return C_TERMINATE;
+	case C_TEXT:
+		panmode = NONE;
+		if ((action>>8) == 0x65) {     //"e"
+			double fw, fh;
+			scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
+			scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
+			if (scale_x<scale_y)
+				scale_x = scale_y;
+			scale_x = ceil(scale_x);
+			if (scale_x < 1) scale_x = 1;
+			if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
+			mainD.orig = zero;
+			mainCenter.x = mainD.orig.x + mapD.size.x/2.0;
+			mainCenter.y = mainD.orig.y + mapD.size.y/2.0;
+			DoNewScale(scale_x);
+			ConstraintOrig( &mainD.orig, mainD.size );
+			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
+			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
+			MapRedraw();
+			MainRedraw();
+		}
+		if ((action>>8) == 0x30) {     //"0"
+			mainD.orig = zero;
+			ConstraintOrig( &mainD.orig, mainD.size );
+			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
+			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
+			MapRedraw();
+			MainRedraw();
+		}
+		if ((action>>8) == 0x0D) {
+			return C_TERMINATE;
+		}
+		else if ((action>>8) == 0x1B) {
+			return C_TERMINATE;
+		}
+		break;
+	}
+
+	return C_CONTINUE;
+}
+
+EXPORT void InitCmdPan( wMenu_p menu )
+{
+	panCmdInx = AddMenuButton( menu, CmdPan, "cmdPan", _("Pan/Zoom"), wIconCreatePixMap(pan_xpm),
+				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_RCLICK|IC_CMDMENU, ACCL_PAN, NULL );
 }

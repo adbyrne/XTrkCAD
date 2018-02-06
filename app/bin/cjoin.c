@@ -455,7 +455,10 @@ static STATUS_T CmdJoin(
 	switch (action&0xFF) {
 
 	case C_START:
-		InfoMessage( _("Left click - join with track, Shift Left click - move to join") );
+		if (selectedTrackCount==0)
+			InfoMessage( _("Left click - join with track") );
+		else
+			InfoMessage( _("Left click - join with track, Shift Left click - move to join") );
 		Dj.state = 0;
 		Dj.joinMoveState = 0;
 		/*ParamGroupRecord( &easementPG );*/

@@ -1342,7 +1342,7 @@ static STATUS_T CmdRotate(
 			UndoStart( _("Rotate Tracks"), "rotate" );
 			if ( rotateAlignState == 0 ) {
 				drawnAngle = FALSE;
-				angle = 0;
+				angle = 0.0;
 				base = orig = pos;
 				trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
 				if ((trk) &&
@@ -1357,6 +1357,7 @@ static STATUS_T CmdRotate(
 					}
 				}
 				GetMovedTracks(FALSE);
+				SetMoveD( FALSE, base, angle );
 				/*DrawLine( &mainD, base, orig, 0, wDrawColorBlack );
 				DrawMovedTracks(FALSE, orig, angle);*/
 			} else {

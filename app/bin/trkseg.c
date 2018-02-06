@@ -780,7 +780,6 @@ EXPORT DIST_T DistanceSegs(
 			p0.x -= segPtr->u.t.pos.x;
 			p0.y -= segPtr->u.t.pos.y;
 			Rotate( &p0, zero, -segPtr->u.t.angle );
-			DIST_T dx, dy;
 			if (p0.x > lo.x && p0.x < hi.x && p0.y >lo.y && p0.y < hi.y) {  //Within rectangle - therefore small dist
 				hi.x /= 2.0;
 				hi.y /= 2.0;
@@ -1133,9 +1132,11 @@ EXPORT BOOL_T ReadSegs( void )
 	DIST_T elev0, elev1;
 	BOOL_T hasElev;
 	BOOL_T isPolyV2;
+	BOOL_T improvedEnds;
+	FLOAT_T ignoreFloat;
 	char type;
 	char * plain_text;
-	long option;
+	long option, option2;
 	BOOL_T subsegs = FALSE;
 
 	descriptionOff = zero;
@@ -1147,6 +1148,7 @@ EXPORT BOOL_T ReadSegs( void )
 	while ( (cp = GetNextLine()) != NULL ) {
 		while (isspace(*cp)) cp++;
 		hasElev = FALSE;
+		improvedEnds = FALSE;
 		if ( strncmp( cp, "END", 3 ) == 0 ) {
 			rc = TRUE;
 			subsegs = FALSE;
@@ -1174,6 +1176,7 @@ EXPORT BOOL_T ReadSegs( void )
 			cp++;
 			hasElev = TRUE;
 			isPolyV2 = TRUE;
+			improvedEnds = TRUE;
 		}
 		switch (type) {
 		case SEG_STRLIN:
@@ -1381,8 +1384,8 @@ EXPORT BOOL_T ReadSegs( void )
 			e = &tempEndPts(tempEndPts_da.cnt-1);
 			if (type == SEG_CONEP) {
 				if ( !GetArgs( cp, "dc", &e->index, &cp ) ) {
-					rc = FALSE;
-					/*??*/break;
+									rc = FALSE;
+									/*??*/break;
 				}
 			} else {
 				e->index = -1;
@@ -1396,6 +1399,27 @@ EXPORT BOOL_T ReadSegs( void )
 			e->elev.u.height = 0.0;
 			e->elev.doff = zero;
 			e->option = 0;
+			if (improvedEnds) {				//E4 and T4
+				if (!GetArgs( cp, "lpc", &option, &e->elev.doff, &cp )) {
+					rc = FALSE;
+					/*??*/break;
+				}
+				switch (option&ELEV_MASK) {
+					case ELEV_STATION:
+						GetArgs( cp, "qc", &e->elev.u.name, &cp);
+						break;
+					default:
+						GetArgs( cp, "fc", &e->elev.u.height, &cp);   //First height
+				}
+				DIST_T height2;
+				if (!GetArgs( cp, "flLlc", &height2, &option2, &e->elev.option, &e->option, &cp ) ) {
+					rc = FALSE;
+					break;
+				}
+				if (option2) e->elev.option |= ELEV_VISIBLE;
+				GetArgs(cp, "fc", &ignoreFloat, &cp);
+				break;
+			}
 			if ( cp != NULL ) {
 				if (paramVersion < 7) {
 					GetArgs( cp, "dfp", &e->elev.option,  &e->elev.u.height, &e->elev.doff, &cp );

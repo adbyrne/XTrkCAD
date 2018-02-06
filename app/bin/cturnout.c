@@ -1441,9 +1441,15 @@ static BOOL_T QueryTurnout( track_p trk, int query )
 	case Q_NOT_PLACE_FROGPOINTS:
 	case Q_HAS_DESC:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
-	case Q_MODIFY_CANT_SPLIT:
 	case Q_CAN_EXTEND:
 		return TRUE;
+	case Q_MODIFY_CAN_SPLIT:
+		if (GetTrkEndPtCnt(trk) <= 2) {	// allow splitting of simple track und buffers
+			return TRUE ;
+		}
+		else {
+			return FALSE;
+		}
 	case Q_CAN_PARALLEL:
 		if( GetTrkEndPtCnt( trk ) == 2 && fabs( GetTrkEndAngle( trk, 0 ) - GetTrkEndAngle( trk, 1 )) == 180.0 )
 			return TRUE;
@@ -1451,6 +1457,8 @@ static BOOL_T QueryTurnout( track_p trk, int query )
 			return FALSE;
 	case Q_CAN_NEXT_POSITION:
 		return ( GetTrkEndPtCnt(trk) > 2 );
+	case Q_CORNU_CAN_MODIFY:
+		return FALSE;
 	default:
 		return FALSE;
 	}

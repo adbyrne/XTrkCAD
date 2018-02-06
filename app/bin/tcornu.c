@@ -1059,7 +1059,6 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	case Q_CAN_GROUP:
 		return FALSE;
 		break;
-	case Q_CANNOT_BE_ON_END:
 	case Q_FLIP_ENDPTS:
 	case Q_HAS_DESC:
 		return TRUE;
@@ -1084,6 +1083,9 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	case Q_IGNORE_EASEMENT_ON_EXTEND:
 		return TRUE;
 		break;
+	case Q_MODIFY_CAN_SPLIT:
+	case Q_CAN_EXTEND:
+		return TRUE;
 	default:
 		return FALSE;
 	}
@@ -1220,7 +1222,7 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 	xx = GetTrkExtraData(trk);
 	xx->cornuData.arcSegs.max = 0;
 	xx->cornuData.arcSegs.cnt = 0;
-	if (xx->cornuData.arcSegs.ptr) MyFree(xx->cornuData.arcSegs.ptr);
+	//if (xx->cornuData.arcSegs.ptr) MyFree(xx->cornuData.arcSegs.ptr);
 	xx->cornuData.arcSegs.ptr = NULL;
 	if (!FixUpCornu0(xx->cornuData.pos,xx->cornuData.c,xx->cornuData.a,xx->cornuData.r, xx)) return FALSE;
 	ComputeCornuBoundingBox(trk, xx);

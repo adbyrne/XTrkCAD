@@ -2115,6 +2115,8 @@ static void CreateMenus( void )
 	wMenuSeparatorCreate( popup2M );
 	MiscMenuItemCreate( popup2M, NULL, "cmdCopy", _("Copy"), 0, (void*)(wMenuCallBack_p)EditCopy, 0, (void *)0 );
 	MiscMenuItemCreate( popup1M, popup2M, "cmdPaste", _("Paste"), 0, (void*)(wMenuCallBack_p)EditPaste, 0, (void *)0 );
+	MiscMenuItemCreate( popup1M, popup2M, "cmdSelectAll", _("Select All"), 0, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)1 );
+	MiscMenuItemCreate( popup1M, popup2M, "cmdSelectCurrentLayer", _("Select Current Layer"), 0, (void*)(wMenuCallBack_p)SelectCurrentLayer, 0, (void *)0 );
 	MiscMenuItemCreate( popup2M, NULL, "cmdDeselectAll", _("Deselect All"), 0, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)0 );
 	wMenuPushCreate( popup2M, "cmdMove", _("Move"), 0, (wMenuCallBack_p)DoCommandBIndirect, &moveCmdInx );
 	wMenuPushCreate( popup2M, "cmdRotate", _("Rotate"), 0, (wMenuCallBack_p)DoCommandBIndirect, &rotateCmdInx );
@@ -2282,6 +2284,7 @@ static void CreateMenus( void )
 	cmdGroup = BG_SELECT;
 	InitCmdDescribe( changeM );
 	InitCmdSelect( changeM );
+	InitCmdPan( changeM );
 	wMenuSeparatorCreate( changeM );
 
 	cmdGroup = BG_TRKGRP;
@@ -2597,7 +2600,7 @@ LOG1( log_init, ( "create main window\n" ) )
 	wSetBalloonHelp( balloonHelp );
     
     wGetDisplaySize(&displayWidth, &displayHeight);
-	mainW = wWinMainCreate( buffer, displayWidth*0.66, displayHeight*0.66, "xtrkcadW", message, "main",
+	mainW = wWinMainCreate( buffer, (displayWidth*2)/3, (displayHeight*2)/3, "xtrkcadW", message, "main",
 				F_RESIZE|F_MENUBAR|F_NOTAB|F_RECALLPOS|F_HIDE,
 				MainProc, NULL );
 	if ( mainW == NULL )

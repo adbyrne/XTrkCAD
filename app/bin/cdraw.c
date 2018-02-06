@@ -251,7 +251,6 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	struct extraData *xx = GetTrkExtraData(trk);
 	trkSeg_p segPtr;
 	coOrd mid;
-	const char * text;
 	long fontSize;
 
 	if ( drawSegInx==-1 )
