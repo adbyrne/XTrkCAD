@@ -665,7 +665,7 @@ static STATUS_T CmdPull(
 			ErrorMessage(_("Connect Multiple Tracks - Select multiple tracks to join first"));
 			return C_CONTINUE;
 		}
-		if (NoticeMessage(_("Try to Connect all Selected Tracks?"), _("Yes"), _("No"))<0) return C_CONTINUE;
+		if (NoticeMessage(_("Try to Connect all Selected Tracks?"), _("Yes"), _("No"))<=0) return C_CONTINUE;
 		trk1 = NULL;
 		trk2 = NULL;
 		UndoStart( _("ReConnect"),"Try to reconnect all selected tracks");
