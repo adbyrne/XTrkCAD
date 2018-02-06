@@ -452,15 +452,20 @@ static void PullTracks(
 	int cnt1, cnt2;
 	int rc;
 
+	if (QueryTrack(trk1,Q_CAN_ADD_ENDPOINTS)) {
+		ConnectTurntableTracks(trk1, ep1, trk2, ep2 );
+		return;
+	}
+
+	if (ep1<0 || ep2<0) return;
+
 	if (ConnectAbuttingTracks( trk1, ep1, trk2, ep2 ))
 		return;
 
 	if (ConnectAdjustableTracks( trk1, ep1, trk2, ep2 ))
 		return;
 
-	if (QueryTrack(trk1,Q_CAN_ADD_ENDPOINTS))
-		if (ConnectTurntableTracks(trk1, ep1, trk2, ep2 ))
-		return;
+
 
 	p1 = GetTrkEndPos( trk1, ep1 );
 	p2 = GetTrkEndPos( trk2, ep2 );
