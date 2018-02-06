@@ -30,6 +30,7 @@
 /* commands */
 #define ACCL_DESCRIBE	(WCTL+'?')
 #define ACCL_SELECT		(WCTL+'e')
+#define ACCL_PAN        (WCTL+'/')
 #define ACCL_STRAIGHT	(WCTL+'g')
 #define ACCL_CURVE1		(WCTL+'4')
 #define ACCL_CURVE2		(WCTL+'5')
