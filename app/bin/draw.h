@@ -106,6 +106,7 @@ extern long drawCount;
 extern BOOL_T drawEnable;
 extern long currRedraw;
 
+
 extern wDrawColor drawColorBlack;
 extern wDrawColor drawColorWhite;
 extern wDrawColor drawColorRed;
@@ -194,6 +195,8 @@ void InitCmdZoom( wMenu_p, wMenu_p );
 void InfoPos( coOrd );
 void InfoCount( wIndex_t );
 void SetMessage( char * );
+
+wIndex_t panCmdInx;
 
 void InfoSubstituteControls( wControl_p *, char * * );
 
