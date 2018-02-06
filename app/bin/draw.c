@@ -1788,13 +1788,12 @@ static void DoNewScale( DIST_T scale )
 	}
 	ConstraintOrig( &mainD.orig, mainD.size );
 	MainRedraw();
-	MapRedraw();
 	tempD.orig = mainD.orig;
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
 	/*SetFont(0);*/
 	sprintf( tmp, "%0.3f", mainD.scale );
 	wPrefSetString( "draw", "zoom", tmp );
-	//DrawHilight( &mapD, mainD.orig, mainD.size );
+	DrawHilight( &mapD, mainD.orig, mainD.size );
 	if (recordF) {
 		fprintf( recordF, "ORIG %0.3f %0.3f %0.3f\n",
 						mainD.scale, mainD.orig.x, mainD.orig.y );
@@ -2535,7 +2534,7 @@ static STATUS_T CmdPan(
 
 	DIST_T scale_x,scale_y;
 
-	static coOrd start_pos, last_pos;
+	static coOrd start_pos;
 	if ( action == C_DOWN ) {
 		panmode = PAN;
 	} else if ( action == C_RDOWN) {
@@ -2550,13 +2549,11 @@ static STATUS_T CmdPan(
 	case C_DOWN:
 		panmode = PAN;
 		start_pos = pos;
-		last_pos = pos;
 		InfoMessage(_("Pan Mode - drag point to new position"));
 		break;
 	case C_RDOWN:
 		panmode = ZOOM;
 		start_pos = pos;
-		last_pos = pos;
 		base = pos;
 		size = zero;
 		InfoMessage(_("Zoom Mode - Hilight Area to Zoom"));
@@ -2577,20 +2574,18 @@ static STATUS_T CmdPan(
 						min_inc = 1/(25.4*2);  //>1:1 = 0.5 mm
 					}
 				}
-
-				if ((fabs(pos.x-start_pos.x) > min_inc) || (fabs(pos.y-start_pos.y)> min_inc)) {
+				if ((fabs(pos.x-start_pos.x) > min_inc) || (fabs(pos.y-start_pos.y) > min_inc)) {
+					DrawMapBoundingBox( TRUE );
 					mainD.orig.x -= (pos.x - start_pos.x);
 					mainD.orig.y -= (pos.y - start_pos.y);
 					ConstraintOrig( &mainD.orig, mainD.size );
 					tempD.orig = mainD.orig;
 					mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 					mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-					last_pos = pos;
+					DrawMapBoundingBox( TRUE );
 				}
 			}
-			MapRedraw();
 			MainRedraw();
-			wFlush();
 		break;
 	case C_RMOVE:
 		if (panmode == ZOOM) {
@@ -2605,11 +2600,8 @@ static STATUS_T CmdPan(
 				size.y = - size.y;
 				base.y = pos.y;
 			}
-			//DrawHilight( &mainD, base, size );
 		}
-		MapRedraw();
 		MainRedraw();
-		wFlush();
 		break;
 	case C_RUP:
 
@@ -2631,7 +2623,6 @@ static STATUS_T CmdPan(
 
 		panmode = NONE;
 		DoNewScale(scale_x);
-
 
 		break;
 	case C_UP:
@@ -2664,20 +2655,16 @@ static STATUS_T CmdPan(
 			ConstraintOrig( &mainD.orig, mainD.size );
 			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-			last_pos = zero;
 			MapRedraw();
 			MainRedraw();
-			wFlush();
 		}
 		if ((action>>8) == 0x30) {     //"0"
 			mainD.orig = zero;
 			ConstraintOrig( &mainD.orig, mainD.size );
 			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
-			last_pos = zero;
 			MapRedraw();
 			MainRedraw();
-			wFlush();
 		}
 		if ((action>>8) == 0x0D) {
 			return C_TERMINATE;
