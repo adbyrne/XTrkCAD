@@ -100,8 +100,8 @@ static drawCmd_t blockD = {
 static char blockName[STR_SHORT_SIZE];
 static char blockScript[STR_LONG_SIZE];
 static long blockElementCount;
-static track_t *first_block;
-static track_t *last_block;
+static track_p first_block;
+static track_p last_block;
 
 static paramData_t blockPLs[] = {
 /*0*/ { PD_STRING, blockName, "name", PDO_NOPREF, (void*)200, N_("Name") },
@@ -716,12 +716,26 @@ static STATUS_T CmdBlock (wAction_t action, coOrd pos )
 
 EXPORT void CheckDeleteBlock (track_p t) 
 {
-    track_p blk;
-    blockData_p xx;
+    track_p blk,trk1;
+    blockData_p xx,xx1;
     if (!IsTrack(t)) return;
     blk = FindBlock(t);
     if (blk == NULL) return;
     xx = GetblockData(blk);
+    if (first_block == blk) {
+        first_block = xx->next_block;
+    } else {
+		trk1 = first_block;
+		while(trk1) {
+			xx1 = GetblockData (trk1);
+			if (xx1->next_block == blk) {
+				xx1->next_block = xx->next_block;
+				break;
+			}
+		}
+	}
+	if (blk == last_block)
+		last_block = trk1;
     NoticeMessage(_("Deleting block %s"),_("Ok"),NULL,xx->name);
     DeleteTrack(blk,FALSE);
 }

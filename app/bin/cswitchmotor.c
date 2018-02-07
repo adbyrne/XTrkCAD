@@ -82,8 +82,8 @@ static char switchmotorReverse[STR_LONG_SIZE];
 static char switchmotorPointSense[STR_LONG_SIZE];
 static track_p switchmotorTurnout;
 
-static track_p *last_motor;
-static track_p *first_motor;
+static track_p last_motor;
+static track_p first_motor;
 
 static paramData_t switchmotorPLs[] = {
 /*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF, (void*)200, N_("Name") },
@@ -494,9 +494,9 @@ static void SwitchMotorOk ( void * junk )
         LOG( log_switchmotor, 1,("*** SwitchMotorOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
 	switchmotorDebug(trk);
 	UndoEnd();
-        wHide( switchmotorW );
-        ComputeSwitchMotorBoundingBox(trk);
-        DrawNewTrack(trk);
+	wHide( switchmotorW );
+	ComputeSwitchMotorBoundingBox(trk);
+	DrawNewTrack(trk);
 }
 
 static void NewSwitchMotorDialog(track_p trk)
@@ -805,7 +805,7 @@ EXPORT void CheckDeleteSwitchmotor(track_p t)
     	} else {
 			trk1 = first_motor;
 			while(trk1) {
-				xx1 = GetswitchmotorData (sm);
+				xx1 = GetswitchmotorData (trk1);
 				if (xx1->next_motor == sm) {
 					xx1->next_motor = xx->next_motor;
 					break;

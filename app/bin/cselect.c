@@ -345,6 +345,8 @@ EXPORT void SelectDelete( void )
 		selectedTrackCount = 0;
 		SelectedTrackCountChange();
 		UndoEnd();
+		MainRedraw();
+		MapRedraw();
 	} else {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 	}
