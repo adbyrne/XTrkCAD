@@ -128,7 +128,7 @@ typedef struct switchmotorData_t {
     BOOL_T IsHilite;
     TRKINX_T turnindx;
     track_p turnout;
-    struct track_t *next_motor;
+    track_p next_motor;
 } switchmotorData_t, *switchmotorData_p;
 
 static switchmotorData_p GetswitchmotorData ( track_p trk )
@@ -385,6 +385,7 @@ static void ReadSwitchMotor ( char * line )
     	xx1 = GetswitchmotorData(last_trk);
     	xx1->next_motor = trk;
     } else first_motor = trk;
+    xx->next_motor = NULL;
     last_motor = trk;
 
         LOG( log_switchmotor, 1,("*** ReadSwitchMotor(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
@@ -488,8 +489,9 @@ static void SwitchMotorOk ( void * junk )
 		xx1 = GetswitchmotorData( trk1 );
 		xx1->next_motor = trk;
 	} else first_motor = trk;
+	xx->next_motor = NULL;
 	last_motor = trk;
-        LOG( log_switchmotor, 1,("*** SwitchMotorOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
+    LOG( log_switchmotor, 1,("*** SwitchMotorOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
 	switchmotorDebug(trk);
 	UndoEnd();
 	wHide( switchmotorW );

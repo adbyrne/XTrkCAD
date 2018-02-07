@@ -137,9 +137,9 @@ typedef struct blockData_t {
     char * name;
     char * script;
     BOOL_T IsHilite;
+    track_p next_block;
     wIndex_t numTracks;
     btrackinfo_t trackList;
-    struct track_t *next_block;
 } blockData_t, *blockData_p;
 
 static blockData_p GetblockData ( track_p trk )
@@ -412,6 +412,7 @@ static void ReadBlock ( char * line )
 		xx1 = GetblockData(trk1);
 		xx1->next_block = trk;
 	}
+	xx->next_block = NULL;
 	last_block = trk;
 	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
 		LOG( log_block, 1, ("*** ReadBlock(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack).t)))
@@ -563,11 +564,14 @@ static void BlockOk ( void * junk )
         xx->IsHilite = FALSE;
 		xx->numTracks = blockTrk_da.cnt;
 		trk1 = last_block;
-		if (!trk1) first_block = trk;
+		if (!trk1) {
+			first_block = trk;
+		}
 		else {
-			xx1 =GetblockData(trk1);
+			xx1 = GetblockData(trk1);
 			xx1->next_block = trk;
 		}
+		xx->next_block = NULL;
 		last_block = trk;
 		for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
 			LOG( log_block, 1, ("*** BlockOk(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack).t)))
