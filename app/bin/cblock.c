@@ -489,12 +489,14 @@ static BOOL_T TrackInBlock (track_p trk, track_p blk) {
 
 static track_p FindBlock (track_p trk) {
 	track_p a_trk;
+	blockData_p xx;
 	if (!first_block) return NULL;
 	a_trk = first_block;
 	while (a_trk) {
 		if (GetTrkType(a_trk) == T_BLOCK &&
 		    TrackInBlock(trk,a_trk)) return a_trk;
-		a_trk = GetblockData(a_trk)->next_block;
+		xx = GetblockData(a_trk);
+		a_trk = xx->next_block;
 	}
 	return NULL;
 }
@@ -560,9 +562,10 @@ static void BlockOk ( void * junk )
 		xx->script = MyStrdup(blockScript);
         xx->IsHilite = FALSE;
 		xx->numTracks = blockTrk_da.cnt;
+		trk1 = last_block;
 		if (!trk1) first_block = trk;
 		else {
-			xx1 = GetblockData(trk1);
+			xx1 =GetblockData(trk1);
 			xx1->next_block = trk;
 		}
 		last_block = trk;

@@ -455,10 +455,8 @@ static track_p FindSwitchMotor (track_p trk)
 
 	a_trk = first_motor;
 	while (a_trk) {
-		if (GetTrkType(a_trk) == T_SWITCHMOTOR) {
-			xx =  GetswitchmotorData(a_trk);
-			if (xx->turnout == trk) return a_trk;
-		}
+		xx =  GetswitchmotorData(a_trk);
+		if (xx->turnout == trk) return a_trk;
 		a_trk = xx->next_motor;
 	}
 	return NULL;
