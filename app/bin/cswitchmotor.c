@@ -338,15 +338,32 @@ static void switchmotorDebug (track_p trk)
 
 static void DeleteSwitchMotor ( track_p trk )
 {
-        LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(%p)\n",trk))
-        LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(): index is %d\n",GetTrkIndex(trk)))
-        switchmotorData_p xx = GetswitchmotorData(trk);
-        LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(): xx = %p, xx->name = %p, xx->normal = %p, xx->reverse = %p, xx->pointsense = %p\n",
+
+	track_p trk1,trk2;
+	switchmotorData_p xx1;
+
+	LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(%p)\n",trk))
+	LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(): index is %d\n",GetTrkIndex(trk)))
+	switchmotorData_p xx = GetswitchmotorData(trk);
+	LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(): xx = %p, xx->name = %p, xx->normal = %p, xx->reverse = %p, xx->pointsense = %p\n",
                 xx,xx->name,xx->normal,xx->reverse,xx->pointsense))
 	MyFree(xx->name); xx->name = NULL;
 	MyFree(xx->normal); xx->normal = NULL;
 	MyFree(xx->reverse); xx->reverse = NULL;
 	MyFree(xx->pointsense); xx->pointsense = NULL;
+	if (first_motor == trk)
+	    first_motor = xx->next_motor;
+	trk1 = first_motor;
+	while(trk1) {
+		xx1 = GetswitchmotorData (trk1);
+		if (xx1->next_motor == trk) {
+			xx1->next_motor = xx->next_motor;
+			break;
+		}
+		trk1 = xx1->next_motor;
+	}
+	if (trk == last_motor)
+	    last_motor = trk1;
 }
 
 static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
@@ -457,7 +474,9 @@ static track_p FindSwitchMotor (track_p trk)
 	a_trk = first_motor;
 	while (a_trk) {
 		xx =  GetswitchmotorData(a_trk);
-		if (xx->turnout == trk) return a_trk;
+		if (!IsTrackDeleted(a_trk)) {
+			if (xx->turnout == trk) return a_trk;
+		}
 		a_trk = xx->next_motor;
 	}
 	return NULL;
@@ -799,21 +818,6 @@ EXPORT void CheckDeleteSwitchmotor(track_p t)
     while ((sm = FindSwitchMotor( t ))) {	                 //Cope with multiple motors for one Turnout!
     	xx = GetswitchmotorData (sm);
     	InfoMessage(_("Deleting Switch Motor %s"),xx->name);
-    	trk1 = NULL;
-    	if (first_motor == sm) {
-    		first_motor = xx->next_motor;
-    	} else {
-			trk1 = first_motor;
-			while(trk1) {
-				xx1 = GetswitchmotorData (trk1);
-				if (xx1->next_motor == sm) {
-					xx1->next_motor = xx->next_motor;
-					break;
-				}
-			}
-    	}
-    	if (sm == last_motor)
-    		last_motor = trk1;
     	DeleteTrack (sm, FALSE);
     };
 }

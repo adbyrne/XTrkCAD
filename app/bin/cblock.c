@@ -335,13 +335,31 @@ static BOOL_T blockCheckContigiousPath()
 
 static void DeleteBlock ( track_p t )
 {
-        LOG( log_block, 1, ("*** DeleteBlock(%p)\n",t))
-        blockData_p xx = GetblockData(t);
-        LOG( log_block, 1, ("*** DeleteBlock(): index is %d\n",GetTrkIndex(t)))
-        LOG( log_block, 1, ("*** DeleteBlock(): xx = %p, xx->name = %p, xx->script = %p\n",
+    track_p trk1;
+    blockData_p xx1;
+
+	LOG( log_block, 1, ("*** DeleteBlock(%p)\n",t))
+	blockData_p xx = GetblockData(t);
+	LOG( log_block, 1, ("*** DeleteBlock(): index is %d\n",GetTrkIndex(t)))
+	LOG( log_block, 1, ("*** DeleteBlock(): xx = %p, xx->name = %p, xx->script = %p\n",
                 xx,xx->name,xx->script))
 	MyFree(xx->name); xx->name = NULL;
 	MyFree(xx->script); xx->script = NULL;
+
+	if (first_block == t)
+	    first_block = xx->next_block;
+	trk1 = first_block;
+	while(trk1) {
+		xx1 = GetblockData (trk1);
+		if (xx1->next_block == t) {
+			xx1->next_block = xx->next_block;
+			break;
+		}
+		trk1 = xx1->next_block;
+	}
+	if (t == last_block)
+		last_block = trk1;
+
 }
 
 static BOOL_T WriteBlock ( track_p t, FILE * f )
@@ -494,8 +512,10 @@ static track_p FindBlock (track_p trk) {
 	if (!first_block) return NULL;
 	a_trk = first_block;
 	while (a_trk) {
-		if (GetTrkType(a_trk) == T_BLOCK &&
-		    TrackInBlock(trk,a_trk)) return a_trk;
+		if (!IsTrackDeleted(a_trk)) {
+			if (GetTrkType(a_trk) == T_BLOCK &&
+					TrackInBlock(trk,a_trk)) return a_trk;
+		}
 		xx = GetblockData(a_trk);
 		a_trk = xx->next_block;
 	}
@@ -728,21 +748,6 @@ EXPORT void CheckDeleteBlock (track_p t)
     if (!IsTrack(t)) return;
     blk = FindBlock(t);
     if (blk == NULL) return;
-    xx = GetblockData(blk);
-    if (first_block == blk) {
-        first_block = xx->next_block;
-    } else {
-		trk1 = first_block;
-		while(trk1) {
-			xx1 = GetblockData (trk1);
-			if (xx1->next_block == blk) {
-				xx1->next_block = xx->next_block;
-				break;
-			}
-		}
-	}
-	if (blk == last_block)
-		last_block = trk1;
     NoticeMessage(_("Deleting block %s"),_("Ok"),NULL,xx->name);
     DeleteTrack(blk,FALSE);
 }
