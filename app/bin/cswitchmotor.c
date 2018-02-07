@@ -82,6 +82,9 @@ static char switchmotorReverse[STR_LONG_SIZE];
 static char switchmotorPointSense[STR_LONG_SIZE];
 static track_p switchmotorTurnout;
 
+static track_p *last_motor;
+static track_p *first_motor;
+
 static paramData_t switchmotorPLs[] = {
 /*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF, (void*)200, N_("Name") },
 /*1*/ { PD_STRING, switchmotorNormal, "normal", PDO_NOPREF, (void*)350, N_("Normal") },
@@ -125,6 +128,7 @@ typedef struct switchmotorData_t {
     BOOL_T IsHilite;
     TRKINX_T turnindx;
     track_p turnout;
+    struct track_t *next_motor;
 } switchmotorData_t, *switchmotorData_p;
 
 static switchmotorData_p GetswitchmotorData ( track_p trk )
@@ -361,8 +365,8 @@ static void ReadSwitchMotor ( char * line )
 {
 	TRKINX_T trkindex;
 	wIndex_t index;
-	track_p trk;
-	switchmotorData_p xx;
+	track_p trk,last_trk;
+	switchmotorData_p xx,xx1;
 	char *name, *normal, *reverse, *pointsense;
 
 	LOG( log_switchmotor, 1, ("*** ReadSwitchMotor: line is '%s'\n",line))
@@ -375,7 +379,14 @@ static void ReadSwitchMotor ( char * line )
 	xx->normal = normal;
 	xx->reverse = reverse;
 	xx->pointsense = pointsense;
-        xx->turnindx = trkindex;
+    xx->turnindx = trkindex;
+    if (!last_motor) {
+    	last_trk = last_motor;
+    	xx1 = GetswitchmotorData(last_trk);
+    	xx1->next_motor = trk;
+    } else first_motor = trk;
+    last_motor = trk;
+
         LOG( log_switchmotor, 1,("*** ReadSwitchMotor(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
         LOG( log_switchmotor, 1,("*** ReadSwitchMotor(): name = %p, normal = %p, reverse = %p, pointsense = %p\n",
                 name,normal,reverse,pointsense))
@@ -442,19 +453,21 @@ static track_p FindSwitchMotor (track_p trk)
 	track_p a_trk;
 	switchmotorData_p xx;
 
-	for (a_trk = NULL; TrackIterate( &a_trk ) ;) {
+	a_trk = first_motor;
+	while (a_trk) {
 		if (GetTrkType(a_trk) == T_SWITCHMOTOR) {
 			xx =  GetswitchmotorData(a_trk);
 			if (xx->turnout == trk) return a_trk;
 		}
+		a_trk = xx->next_motor;
 	}
 	return NULL;
 }
 
 static void SwitchMotorOk ( void * junk )
 {
-	switchmotorData_p xx;
-	track_p trk;
+	switchmotorData_p xx,xx1;
+	track_p trk,trk1;
 
 	LOG( log_switchmotor, 1, ("*** SwitchMotorOk()\n"))
 	ParamUpdate (&switchmotorPG );
@@ -472,6 +485,12 @@ static void SwitchMotorOk ( void * junk )
 	xx->reverse = MyStrdup(switchmotorReverse);
 	xx->pointsense = MyStrdup(switchmotorPointSense);
 	xx->turnout = switchmotorTurnout;
+	trk1 = last_motor;
+	if (trk1) {
+		xx1 = GetswitchmotorData( trk1 );
+		xx1->next_motor = trk;
+	} else first_motor = trk;
+	last_motor = trk;
         LOG( log_switchmotor, 1,("*** SwitchMotorOk(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
 	switchmotorDebug(trk);
 	UndoEnd();
@@ -773,12 +792,28 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 }
 EXPORT void CheckDeleteSwitchmotor(track_p t)
 {
-    track_p sm;
-    switchmotorData_p xx;
+    track_p sm,trk1;
+    switchmotorData_p xx,xx1;
+    if (GetTrkType( t ) != T_TURNOUT) return;   // SMs only on turnouts
     
     while ((sm = FindSwitchMotor( t ))) {	                 //Cope with multiple motors for one Turnout!
     	xx = GetswitchmotorData (sm);
     	InfoMessage(_("Deleting Switch Motor %s"),xx->name);
+    	trk1 = NULL;
+    	if (first_motor == sm) {
+    		first_motor = xx->next_motor;
+    	} else {
+			trk1 = first_motor;
+			while(trk1) {
+				xx1 = GetswitchmotorData (sm);
+				if (xx1->next_motor == sm) {
+					xx1->next_motor = xx->next_motor;
+					break;
+				}
+			}
+    	}
+    	if (sm == last_motor)
+    		last_motor = trk1;
     	DeleteTrack (sm, FALSE);
     };
 }

@@ -100,6 +100,8 @@ static drawCmd_t blockD = {
 static char blockName[STR_SHORT_SIZE];
 static char blockScript[STR_LONG_SIZE];
 static long blockElementCount;
+static track_t *first_block;
+static track_t *last_block;
 
 static paramData_t blockPLs[] = {
 /*0*/ { PD_STRING, blockName, "name", PDO_NOPREF, (void*)200, N_("Name") },
@@ -137,6 +139,7 @@ typedef struct blockData_t {
     BOOL_T IsHilite;
     wIndex_t numTracks;
     btrackinfo_t trackList;
+    struct track_t *next_block;
 } blockData_t, *blockData_p;
 
 static blockData_p GetblockData ( track_p trk )
@@ -362,9 +365,9 @@ static void ReadBlock ( char * line )
 {
 	TRKINX_T trkindex;
 	wIndex_t index;
-	track_p trk;
+	track_p trk, trk1;
 	char * cp = NULL;
-	blockData_p xx;
+	blockData_p xx,xx1;
 	wIndex_t iTrack;
 	EPINX_T ep;
 	trkEndPt_p endPtP;
@@ -396,13 +399,20 @@ static void ReadBlock ( char * line )
 		endPtP = &tempEndPts(ep);
 		SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
 	}
-        xx = GetblockData( trk );
-        LOG( log_block, 1, ("*** ReadBlock(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
-        LOG( log_block, 1, ("*** ReadBlock(): name = %p, script = %p\n",name,script))
-        xx->name = name;
-        xx->script = script;
-        xx->IsHilite = FALSE;
+	xx = GetblockData( trk );
+	LOG( log_block, 1, ("*** ReadBlock(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
+	LOG( log_block, 1, ("*** ReadBlock(): name = %p, script = %p\n",name,script))
+	xx->name = name;
+	xx->script = script;
+	xx->IsHilite = FALSE;
 	xx->numTracks = blockTrk_da.cnt;
+	trk1 = last_block;
+	if (!trk1) first_block = trk;
+	else {
+		xx1 = GetblockData(trk1);
+		xx1->next_block = trk;
+	}
+	last_block = trk;
 	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
 		LOG( log_block, 1, ("*** ReadBlock(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack).t)))
 		memcpy((void*)&((&(xx->trackList))[iTrack]),(void*)&(blockTrk(iTrack)),sizeof(btrackinfo_t));
@@ -479,17 +489,20 @@ static BOOL_T TrackInBlock (track_p trk, track_p blk) {
 
 static track_p FindBlock (track_p trk) {
 	track_p a_trk;
-	for (a_trk = NULL; TrackIterate( &a_trk ) ;) {
+	if (!first_block) return NULL;
+	a_trk = first_block;
+	while (a_trk) {
 		if (GetTrkType(a_trk) == T_BLOCK &&
 		    TrackInBlock(trk,a_trk)) return a_trk;
+		a_trk = GetblockData(a_trk)->next_block;
 	}
 	return NULL;
 }
 
 static void BlockOk ( void * junk )
 {
-	blockData_p xx;
-	track_p trk;
+	blockData_p xx,xx1;
+	track_p trk,trk1;
 	wIndex_t iTrack;
 	EPINX_T ep;
 	trkEndPt_p endPtP;
@@ -541,12 +554,18 @@ static void BlockOk ( void * junk )
 			SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
 		}
 
-                xx = GetblockData( trk );
-				LOG(log_block, 1, ("*** BlockOk(): trk = %p (%d), xx = %p\n", trk, GetTrkIndex(trk), xx))
+		xx = GetblockData( trk );
+		LOG(log_block, 1, ("*** BlockOk(): trk = %p (%d), xx = %p\n", trk, GetTrkIndex(trk), xx))
 		xx->name = MyStrdup(blockName);
 		xx->script = MyStrdup(blockScript);
-                xx->IsHilite = FALSE;
+        xx->IsHilite = FALSE;
 		xx->numTracks = blockTrk_da.cnt;
+		if (!trk1) first_block = trk;
+		else {
+			xx1 = GetblockData(trk1);
+			xx1->next_block = trk;
+		}
+		last_block = trk;
 		for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
 			LOG( log_block, 1, ("*** BlockOk(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack).t)))
 			memcpy((void*)&(&(xx->trackList))[iTrack],(void*)&blockTrk(iTrack),sizeof(btrackinfo_t));
@@ -699,7 +718,7 @@ EXPORT void CheckDeleteBlock (track_p t)
 {
     track_p blk;
     blockData_p xx;
-    
+    if (!IsTrack(t)) return;
     blk = FindBlock(t);
     if (blk == NULL) return;
     xx = GetblockData(blk);
