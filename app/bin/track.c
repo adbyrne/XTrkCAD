@@ -1023,29 +1023,29 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 			}
 		}
 	}
-	UndrawNewTrack( trk );
+	//UndrawNewTrack( trk );
 	for (i=0;i<trk->endCnt;i++) {
 		if ((trk2=trk->endPt[i].track) != NULL) {
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
 			/*UndrawNewTrack( trk2 );*/
-			DrawEndPt( &mainD, trk2, ep2, wDrawColorWhite );
+			//DrawEndPt( &mainD, trk2, ep2, wDrawColorWhite );
 			DisconnectTracks( trk2, ep2, trk, i );
 			/*DrawNewTrack( trk2 );*/
 			if (!QueryTrack(trk2,Q_DONT_DRAW_ENDPOINT))
-				DrawEndPt( &mainD, trk2, ep2, wDrawColorBlack );
+				//DrawEndPt( &mainD, trk2, ep2, wDrawColorBlack );
 			if ( QueryTrack(trk,Q_CANNOT_BE_ON_END) )
 				UndoJoint( trk2, ep2, trk, i );
-			ClrTrkElev( trk2 );
+			//ClrTrkElev( trk2 );
 		}
 	}
-        CheckDeleteSwitchmotor( trk );
-        CheckDeleteBlock( trk );
+    CheckDeleteSwitchmotor( trk );
+    CheckDeleteBlock( trk );
 	DecrementLayerObjects(trk->layer);
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
 	UndoDelete(trk);					/**< Attention: trk is invalidated during that call */
-	MainRedraw();
-	MapRedraw();
+	//MainRedraw();
+	//MapRedraw();
 	InfoCount( trackCount );
 	return TRUE;
 }
