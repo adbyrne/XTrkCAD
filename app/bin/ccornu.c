@@ -149,23 +149,22 @@ int createEndPoint(
     DIST_T d, w;
     d = tempD.scale*0.25;
     w = tempD.scale/tempD.dpi; /*double width*/
+    if (point_selectable) {
+		sp[1].u.c.center = pos0;
+		sp[1].u.c.a0 = 0.0;
+		sp[1].u.c.a1 = 360.0;
+		sp[1].u.c.radius = d/2;
+		sp[1].type = SEG_CRVLIN;
+		sp[1].width = w;
+		sp[1].color = point_selected?drawColorRed:drawColorBlack;
+    }
     sp[0].u.c.center = pos0;
     sp[0].u.c.a0 = 0.0;
     sp[0].u.c.a1 = 360.0;
-    sp[0].u.c.radius = d/2;
-    sp[0].type = SEG_CRVLIN;
+    sp[0].u.c.radius = d/4;
+    sp[0].type = SEG_FILCRCL;
     sp[0].width = w;
-    sp[0].color = (point_selected>=0)?drawColorRed:drawColorBlack;
-    sp[1].u.c.center = pos0;
-    sp[1].u.c.a0 = 0.0;
-    sp[1].u.c.a1 = 360.0;
-    sp[1].u.c.radius = d/4;
-    if (point_selectable)
-    	sp[1].type = SEG_FILCRCL;
-    else
-    	sp[1].type = SEG_CRVLIN;
-    sp[1].width = w;
-    sp[1].color = (point_selected>=0)?drawColorRed:drawColorBlack;
+    sp[0].color = point_selectable?drawColorRed:drawColorBlack;
     return 2;
 }
 
@@ -373,8 +372,8 @@ void DrawTempCornu() {
 
 void CreateBothEnds(int selectPoint) {
 	BOOL_T selectable[2];
-	selectable[0] = Da.trk[0] && QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY);
-	selectable[1] = Da.trk[1] && QueryTrack(Da.trk[1],Q_CORNU_CAN_MODIFY);
+	selectable[0] = Da.trk[0] && !QueryTrack(Da.trk[0],Q_IS_CORNU);
+	selectable[1] = Da.trk[1] && !QueryTrack(Da.trk[1],Q_IS_CORNU);
 	if (selectPoint == -1) {
 		Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],FALSE,selectable[0]);
 		Da.ep2Segs_da_cnt = createEndPoint(Da.ep2Segs, Da.pos[1],FALSE,selectable[1]);
@@ -524,6 +523,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 			wBeep();
 			InfoMessage( _("Not close enough to end point, reselect") );
 			return C_CONTINUE;
+		} else if (QueryTrack(Da.trk[Da.selectPoint],Q_IS_CORNU)){
+			wBeep();
+			InfoMessage( _("Is Cornu End -> Not Selectable") );
+			return C_CONTINUE;
 		} else {
 			pos = Da.pos[Da.selectPoint];
 			Da.state = POINT_PICKED;
@@ -564,7 +567,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 				&& (!QueryTrack(Da.trk[sel],Q_HAS_VARIABLE_ENDPOINTS))) { // Not a Turntable
 				DIST_T ab = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]));
 				DIST_T ac = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos);
-				DIST_T cb = FindDistance(GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]), pos);
+				DIST_T cb = FindDistance(GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]),pos);
 				if (cb<minLength) {
 					InfoMessage(_("Too close to other end of selected Track"));
 					return C_CONTINUE;
@@ -1073,7 +1076,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  		//Ignore Turntable Unconnected
 				else if (ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
 				  	wBeep();
-				  	InfoMessage(_("No Unconnected end point on that track"));
+				  	InfoMessage(_("No Valid end point on that track"));
 				  	return C_CONTINUE;
 				}
 				Da.trk[end] = t;
@@ -1094,7 +1097,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				}
 				Da.state = POS_1;
 				Da.selectPoint = 0;
-				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[end], TRUE, QueryTrack(t,Q_CORNU_CAN_MODIFY));
+				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[end], FALSE, !QueryTrack(Da.trk[end],Q_IS_CORNU));
 				DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,drawColorBlack);
 				InfoMessage( _("Move 1st end point of Cornu track along track 1") );
 			} else {
