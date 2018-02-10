@@ -155,7 +155,7 @@ int createEndPoint(
     sp[0].u.c.a1 = 360.0;
     sp[0].width = w;
     sp[0].u.c.radius = d/4;
-    sp[0].color = (point_selected>=0)?drawColorRed:drawColorBlack;0
+    sp[0].color = (point_selected>=0)?drawColorRed:drawColorBlack;
     if (track_modifyable)
         sp[0].type = SEG_CRVLIN;
     else
@@ -529,6 +529,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 		if (Da.selectPoint == -1) {
 			wBeep();
 			InfoMessage( _("Not close enough to end point, reselect") );
+			return C_CONTINUE;
+		} else if (QueryTrack(Da.trk[Da.selectPoint],Q_IS_CORNU)){
+			wBeep();
+			InfoMessage( _("Is Cornu End -> Not Selectable") );
 			return C_CONTINUE;
 		} else {
 			pos = Da.pos[Da.selectPoint];
