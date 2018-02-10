@@ -168,7 +168,7 @@ static void
 	 	 seg->type=SEG_FILCRCL;
 	 	 seg->u.c.center.x = bc->last_pos.x;
 	 	 seg->u.c.center.y = bc->last_pos.y;
-	 	 seg->u.c.radius = 0.5;
+	 	 seg->u.c.radius = 0.25;
 	 	 seg->width = 0.0;
 	 	 seg->color = wDrawColorBlack;
 	 }
