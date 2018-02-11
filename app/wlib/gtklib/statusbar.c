@@ -99,6 +99,9 @@ wStatus_p wStatusCreate(
     gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
     gtk_entry_set_has_frame(GTK_ENTRY(b->labelWidget), FALSE);
     gtk_widget_set_can_focus(b->labelWidget, FALSE);
+    gtk_widget_set_sensitive(b->labelWidget, FALSE);
+    GdkColor black = {0, 0x0000, 0x0000, 0x0000};
+    gtk_widget_modify_text(b->labelWidget,GTK_STATE_INSENSITIVE,&black);
     gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
                        message?wlibConvertInput(message):"");
 
