@@ -1380,12 +1380,11 @@ void wWinClear(
 {
 }
 
-void wSetCursor(
+void wSetCursor( wWin_p win,
     wCursor_t cursor)
 {
     switch (cursor) {
     case wCursorNormal:
-    case wCursorQuestion:
     default:
         SetCursor(LoadCursor(NULL, IDC_ARROW));
         break;
@@ -1400,6 +1399,42 @@ void wSetCursor(
 
     case wCursorIBeam:
         SetCursor(LoadCursor(NULL, IDC_IBEAM));
+        break;
+
+    case wCursorQuestion:
+    	SetCursor(LoadCursor(NULL, IDC_HELP));
+    	break;
+
+    case wCursorHand:
+       	SetCursor(LoadCursor(NULL, IDC_HAND));
+       	break;
+
+    case wCursorNo:
+       	SetCursor(LoadCursor(NULL, IDC_NO));
+       	break;
+
+    case wCursorSizeAll:
+       	SetCursor(LoadCursor(NULL, IDC_SIZEALL));
+       	break;
+
+    case wCursorSizeNESW:
+       	SetCursor(LoadCursor(NULL, IDC_SIZENESW));
+       	break;
+
+    case wCursorSizeNWSE:
+       	SetCursor(LoadCursor(NULL, IDC_SIZENWSE));
+       	break;
+
+    case wCursorSizeNS:
+       	SetCursor(LoadCursor(NULL, IDC_SIZENS));
+       	break;
+
+    case wCursorSizeWE:
+       	SetCursor(LoadCursor(NULL, IDC_SIZEWE));
+       	break;
+
+    case wCursorAppStart:
+    	SetCursor(LoadCursor(NULL, IDC_APPSTARTING));
         break;
     }
 

@@ -170,11 +170,21 @@ unsigned long wGetTimer(	void );
 void wExit(			int );
 
 typedef enum {	wCursorNormal,
+		wCursorNone,
+		wCursorAppStart,
+		wCursorHand,
+		wCursorNo,
+		wCursorSizeAll,
+		wCursorSizeNESW,
+		wCursorSizeNS,
+		wCursorSizeNWSE,
+		wCursorSizeWE,
 		wCursorWait,
 		wCursorIBeam,
 		wCursorCross,
 		wCursorQuestion } wCursor_t;
-void wSetCursor( wCursor_t );
+void wSetCursor( wDraw_p, wCursor_t );
+#define defaultCursor wCursorCross
 
 const char * wMemStats( void );
 

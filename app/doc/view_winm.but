@@ -111,7 +111,7 @@ Command button groups displayed on the \f{Tool-bar} are selected using the Tool-
 
 \G{png.d/bgzoom.png}
 
-The \f{Zoom In} and \f{Zoom Out} actions can also be accessed using buttons on the Tool Bar.  The Mouse Wheel, PAGE DOWN and PAGE UP keys can also be used to zoom in and out.
+The \f{Zoom In} and \f{Zoom Out} actions can also be accessed using buttons on the Tool Bar or usig the \f{Pan/Zoom} Mode button.  The Mouse Wheel, PAGE DOWN and PAGE UP keys can also be used to zoom in and out.
 
 Holding down the Shift key while clicking the \f{Zoom In} or \f{Zoom Out} buttons sets the Drawing Scale to a \e{Programmed Zoom} value.
 

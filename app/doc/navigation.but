@@ -124,7 +124,9 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \b Mouse Wheel
 
-\b PAGE UP and PAGE DOWN keys.
+\b PAGE UP and PAGE DOWN keys
+
+\b \K{cmdPan} button on the \f{Tool-bar}
 
 \f{Note:} If The scale 1::1 is reached, "Macro Zoom" mode can be entered using CTRL+PageDown - with repeated presses a scale of 10::1 is possible. 
 

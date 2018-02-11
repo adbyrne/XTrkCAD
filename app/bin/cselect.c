@@ -345,8 +345,6 @@ EXPORT void SelectDelete( void )
 		selectedTrackCount = 0;
 		SelectedTrackCountChange();
 		UndoEnd();
-		MainRedraw();
-		MapRedraw();
 	} else {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 	}
@@ -916,7 +914,7 @@ static void AccumulateTracks( void )
 
 static void GetMovedTracks( BOOL_T undraw )
 {
-	wSetCursor( wCursorWait );
+	wSetCursor( mainD.d, wCursorWait );
 	DYNARR_RESET( track_p, tlist_da );
 	DoSelectedTracks( AddSelectedTrack );
 	tlist2 = (track_p*)MyRealloc( tlist2, (tlist_da.cnt+1) * sizeof *(track_p*)0 );
@@ -931,7 +929,7 @@ static void GetMovedTracks( BOOL_T undraw )
 	moveOrig = mainD.orig;
 	movedCnt = 0;
 	InfoCount(0);
-	wSetCursor( wCursorNormal );
+	wSetCursor( mainD.d, defaultCursor );
 	moveD_hi = moveD_lo = mainD.orig;
 	moveD_hi.x += mainD.size.x;
 	moveD_hi.y += mainD.size.y;
@@ -1052,7 +1050,7 @@ static void MoveTracks(
 	DIST_T endRadius;
 	coOrd endCenter;
 
-	wSetCursor( wCursorWait );
+	wSetCursor( mainD.d, wCursorWait );
 	/*UndoStart( "Move/Rotate Tracks", "move/rotate" );*/
 	if (tlist_da.cnt <= incrementalDrawLimit) {
 		DrawMapBoundingBox( FALSE );
@@ -1133,7 +1131,7 @@ static void MoveTracks(
 		DrawSelectedTracksD( &mapD, wDrawColorBlack );
 		DrawMapBoundingBox( TRUE );
 	}
-	wSetCursor( wCursorNormal );
+	wSetCursor( mainD.d, defaultCursor );
 	UndoEnd();
 	tempSegDrawFuncs.options = 0;
 	InfoCount( trackCount );
@@ -1672,7 +1670,7 @@ static void FlipTracks(
 	track_p trk, trk1;
 	EPINX_T ep, ep1;
 
-	wSetCursor( wCursorWait );
+	wSetCursor( mainD.d, wCursorWait );
 	/*UndoStart( "Move/Rotate Tracks", "move/rotate" );*/
 	if (selectedTrackCount <= incrementalDrawLimit) {
 		DrawMapBoundingBox( FALSE );
@@ -1708,7 +1706,7 @@ static void FlipTracks(
 		wDrawDelayUpdate( mapD.d, FALSE );
 		DrawMapBoundingBox( TRUE );
 	}
-	wSetCursor( wCursorNormal );
+	wSetCursor( mainD.d, defaultCursor );
 	UndoEnd();
 	InfoCount( trackCount );
     MainRedraw();
@@ -1928,6 +1926,7 @@ static STATUS_T CmdSelect(
 		importMove = FALSE;
 		SelectArea( action, pos );
 		wMenuPushEnable( rotateAlignMI, FALSE );
+		wSetCursor(mainD.d,defaultCursor);
 		break;
 
 	case C_DOWN:

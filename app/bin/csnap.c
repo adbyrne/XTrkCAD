@@ -212,7 +212,7 @@ EXPORT void DrawGrid(
 	if (!bigdot_bm)
 		bigdot_bm = wDrawBitMapCreate( mainD.d, bigdot_width, bigdot_height, 1, 1, bigdot_bits );
 		
-	wSetCursor( wCursorWait );
+	wSetCursor( mainD.d, wCursorWait );
 	dpi = D->dpi/D->scale;
 	Gdx = cos(D2R(Gangle));
 	Gdy = sin(D2R(Gangle));
@@ -332,7 +332,7 @@ EXPORT void DrawGrid(
     
 
 done:
-	wSetCursor( wCursorNormal );
+	wSetCursor( mainD.d, defaultCursor );
 }
 
 

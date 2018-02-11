@@ -533,6 +533,7 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
     switch (action) {
     case C_START:
         InfoMessage(_("Select track to describe"));
+        wSetCursor(mainD.d,wCursorQuestion);
         descUndoStarted = FALSE;
         return C_CONTINUE;
 
@@ -576,6 +577,7 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
     case C_CANCEL:
         DescribeCancel();
+        wSetCursor(mainD.d,defaultCursor);
         return C_CONTINUE;
     }
 

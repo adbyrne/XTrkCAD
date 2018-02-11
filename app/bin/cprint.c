@@ -798,7 +798,7 @@ static BOOL_T PrintPage(
 					page_d.size.x = print_d.size.x/printScale;
 					page_d.size.y = print_d.size.y/printScale;
 				}
-				wSetCursor( wCursorWait );
+				wSetCursor( mainD.d, wCursorWait );
 				print_d.scale = printScale;
 				if (print_d.d == NULL)
 					 AbortProg( "wPrintPageStart" );
@@ -920,9 +920,9 @@ static void DoPrintPrint( void * junk )
 	wPrefGetInteger( "print", "nodecoration", &noDecoration, 0 );
 
 	print_d.CoOrd2Pix = page_d.CoOrd2Pix = mainD.CoOrd2Pix;
-	wSetCursor( wCursorWait );
+	wSetCursor( mainD.d, wCursorWait );
 	if (!wPrintDocStart(GetLayoutTitle(), pageCount, &copies )) {
-		wSetCursor( wCursorNormal );
+		wSetCursor( mainD.d, defaultCursor );
 		return;
 	}
 	if (copies <= 0)
@@ -949,7 +949,7 @@ static void DoPrintPrint( void * junk )
 
 quitPrinting:
 	wPrintDocEnd();
-	wSetCursor( wCursorNormal );
+	wSetCursor( mainD.d, defaultCursor );
 	Reset();		/* undraws grid, resets pagecount, etc */
 }
 
