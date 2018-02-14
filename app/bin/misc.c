@@ -2474,13 +2474,13 @@ EXPORT void InitCmdExport( void )
  * the option to load the checkpoint file to continue working after a crash.
  *
  * \param none
- * \return none
+ * \return TRUE for resume, FALSE otherwise
  *
  */
 
-static void OfferCheckpoint( void )
+static int OfferCheckpoint( void )
 {
-	int ret;
+	int ret = FALSE;
 
 	/* sProdName */
 	ret = wNoticeEx( NT_INFORMATION,
@@ -2489,8 +2489,9 @@ static void OfferCheckpoint( void )
 	if( ret ) {
 		/* load the checkpoint file */
 		LoadCheckpoint();
+		ret = TRUE;
 	}
-
+	return ret;
 }
 
 
@@ -2499,6 +2500,7 @@ EXPORT wWin_p wMain(
 		char * argv[] )
 {
 	int c;
+	int resumeWork;
 	char * logFileName = NULL;
 	int log_init = 0;
 	int initialZoom = 0;
@@ -2760,19 +2762,21 @@ LOG1( log_init, ( "Initialization complete\n" ) )
 
 	ShowTip(SHOWTIP_NEXTTIP);
 
-	/* if work is to be resumed and no filename was given on startup, load last layout */
-	if( (onStartup == 0) && (!initialFile || !strlen(initialFile))) {
-		initialFile = (char*)wPrefGetString( "misc", "lastlayout" );
-	}
-
-	if (initialFile && strlen(initialFile)) {
-		DoFileList( 0, NULL, initialFile );
-	}
-
 	/* check for existing checkpoint file */
+	resumeWork = FALSE;
 	if (ExistsCheckpoint())
-		OfferCheckpoint();
+		resumeWork = OfferCheckpoint();
 
+	if (!resumeWork) {
+		/* if work is to be resumed and no filename was given on startup, load last layout */
+		if ((onStartup == 0) && (!initialFile || !strlen(initialFile))) {
+			initialFile = (char*)wPrefGetString("misc", "lastlayout");
+		}
+
+		if (initialFile && strlen(initialFile)) {
+			DoFileList(0, NULL, initialFile);
+		}
+	}
 	inMainW = FALSE;
 	return mainW;
 }
