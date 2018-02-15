@@ -523,15 +523,18 @@ EXPORT void DrawMultiString(
 		size.x += bw*d->scale/d->dpi;
 		size.y = fabs(orig.y-posl.y)+bh*d->scale/d->dpi;
 		size.y += descent+ascent;
-		coOrd p0,p1,p2,p3;
-		p0 = orig; p0.x -= (bw-br)*d->scale/d->dpi; p0.y += (bh-bb)*d->scale/d->dpi+ascent;
-		p1 = p0; p1.x += size.x;
-		p2 = p1; p2.y -= size.y;
-		p3 = p2; p3.x = p0.x;
-		DrawLine( d, p0, p1, 0, color );
-		DrawLine( d, p1, p2, 0, color );
-		DrawLine( d, p2, p3, 0, color );
-		DrawLine( d, p3, p0, 0, color );
+		coOrd p[4];
+		p[0] = orig; p[0].x -= (bw-br)*d->scale/d->dpi; p[0].y += (bh-bb)*d->scale/d->dpi+ascent;
+		p[1] = p[0]; p[1].x += size.x;
+		p[2] = p[1]; p[2].y -= size.y;
+		p[3] = p[2]; p[3].x = p[0].x;
+		for (int i=0;i<4;i++) {
+			Rotate( &p[i], orig, a);
+		}
+		DrawLine( d, p[0], p[1], 0, color );
+		DrawLine( d, p[1], p[2], 0, color );
+		DrawLine( d, p[2], p[3], 0, color );
+		DrawLine( d, p[3], p[0], 0, color );
 	}
 
 	free(line);
