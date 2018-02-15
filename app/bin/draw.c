@@ -467,7 +467,8 @@ EXPORT void DrawMultiString(
 		wDrawColor color,
 		ANGLE_T a,
 		coOrd * lo,
-		coOrd * hi)
+		coOrd * hi,
+		BOOL_T boxed)
 {
 	char * cp;
 	char * cp1;
@@ -515,7 +516,22 @@ EXPORT void DrawMultiString(
 	}
 	if (hi) {
 		hi->x = posl.x+size.x;
-		hi->y = posl.y+ascent;
+		hi->y = orig.y+ascent;
+	}
+	if (boxed && (d != &mapD)) {
+		int bw=5, bh=4, br=2, bb=2;
+		size.x += bw*d->scale/d->dpi;
+		size.y = fabs(orig.y-posl.y)+bh*d->scale/d->dpi;
+		size.y += descent+ascent;
+		coOrd p0,p1,p2,p3;
+		p0 = orig; p0.x -= (bw-br)*d->scale/d->dpi; p0.y += (bh-bb)*d->scale/d->dpi+ascent;
+		p1 = p0; p1.x += size.x;
+		p2 = p1; p2.y -= size.y;
+		p3 = p2; p3.x = p0.x;
+		DrawLine( d, p0, p1, 0, color );
+		DrawLine( d, p1, p2, 0, color );
+		DrawLine( d, p2, p3, 0, color );
+		DrawLine( d, p3, p0, 0, color );
 	}
 
 	free(line);

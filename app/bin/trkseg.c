@@ -1369,7 +1369,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s->type = type;
 			s->u.t.fontP = NULL;
 			char * expandedText;
-			if ( !GetArgs( cp, "lpf0fq", &rgb, &s->u.t.pos, &s->u.t.angle, &s->u.t.fontSize, &expandedText ) ) {
+			if ( !GetArgs( cp, "lpfdfq", &rgb, &s->u.t.pos, &s->u.t.angle, &s->u.t.boxed, &s->u.t.fontSize, &expandedText ) ) {
 				rc = FALSE;
 				/*??*/break;
 			}
@@ -1583,9 +1583,10 @@ EXPORT BOOL_T WriteSegsEnd(
 			break;
 		case SEG_TEXT: /* 0pf0fq */
 			escaped_text = ConvertToEscapedText(segs[i].u.t.string);
-			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f 0 %0.6f \"%s\"\n",
+			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %d %0.6f \"%s\"\n",
 				segs[i].type, wDrawGetRGB(segs[i].color),
 				segs[i].u.t.pos.x, segs[i].u.t.pos.y, segs[i].u.t.angle,
+				segs[i].u.t.boxed,
 				segs[i].u.t.fontSize, escaped_text ) > 0;
 			MyFree(escaped_text);
 			break;
@@ -1931,7 +1932,7 @@ EXPORT void DrawSegsO(
 			break;
 		case SEG_TEXT:
 			REORIGIN( p0, segPtr->u.t.pos, angle, orig )
-			DrawMultiString( d, p0, segPtr->u.t.string, segPtr->u.t.fontP, segPtr->u.t.fontSize, color1, NormalizeAngle(angle + segPtr->u.t.angle), NULL, NULL );
+			DrawMultiString( d, p0, segPtr->u.t.string, segPtr->u.t.fontP, segPtr->u.t.fontSize, color1, NormalizeAngle(angle + segPtr->u.t.angle), NULL, NULL, segPtr->u.t.boxed );
 			break;
 		case SEG_FILPOLY:
 			if ( (d->options&DC_GROUP) == 0 &&

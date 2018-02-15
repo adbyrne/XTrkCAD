@@ -50,6 +50,7 @@ static paramFloatRange_t rdata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGEC
 static paramIntegerRange_t idata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
 static paramTextData_t tdata = { 300, 150 };
 static char * pivotLabels[] = { N_("First"), N_("Middle"), N_("Second"), NULL };
+static char * boxLabels[] = { N_(""), NULL };
 static paramData_t describePLs[] = {
 #define I_FLOAT_0		(0)
     { PD_FLOAT, NULL, "F1", 0, &rdata },
@@ -114,7 +115,7 @@ static paramData_t describePLs[] = {
 #define I_LAYER_N		I_LAYER_0+1
 
 #define I_COLOR_0		I_LAYER_N
-    { PD_COLORLIST, NULL, "C1", 0, NULL, N_("Color") },
+    { PD_COLORLIST, NULL, "C1", PDO_NOPREF, NULL, N_("Color"), BC_HORZ|BC_NOBORDER },
 #define I_COLOR_N		I_COLOR_0+1
 
 #define I_LIST_0		I_COLOR_N
@@ -131,8 +132,12 @@ static paramData_t describePLs[] = {
 #define I_TEXT_N		I_TEXT_0+1
 
 #define I_PIVOT_0		I_TEXT_N
-    { PD_RADIO, NULL, "P1", 0, pivotLabels, N_("Pivot"), BC_HORZ|BC_NOBORDER, 0 }
+    { PD_RADIO, NULL, "P1", 0, pivotLabels, N_("Pivot"), BC_HORZ|BC_NOBORDER, 0 },
 #define I_PIVOT_N		I_PIVOT_0+1
+
+#define I_TOGGLE_0      I_PIVOT_N
+    { PD_TOGGLE, NULL, "boxed", PDO_NOPREF|PDO_DLGHORZ, boxLabels, N_("Boxed"), BC_HORZ|BC_NOBORDER },
+#define I_TOGGLE_N 		I_TOGGLE_0+1
 };
 
 static paramGroup_t describePG = { "describe", 0, describePLs, sizeof describePLs/sizeof describePLs[0] };
@@ -318,7 +323,8 @@ static struct {
     /*STRING*/		{ PD_STRING,0,		   I_STRING_0, I_STRING_N },
     /*TEXT*/		{ PD_TEXT,	PDO_DLGNOLABELALIGN, I_TEXT_0, I_TEXT_N },
     /*LIST*/		{ PD_DROPLIST, PDO_LISTINDEX,	   I_LIST_0, I_LIST_N },
-    /*EDITABLELIST*/{ PD_DROPLIST, 0,	   I_EDITLIST_0, I_EDITLIST_N }
+    /*EDITABLELIST*/{ PD_DROPLIST, 0,	   I_EDITLIST_0, I_EDITLIST_N },
+	/*BOXED*/      	{ PD_TOGGLE, 0,	       I_TOGGLE_0, I_TOGGLE_N },
 };
 
 static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
@@ -508,9 +514,11 @@ EXPORT void DescribeCancel(void)
 {
     if (describePG.win && wWinIsVisible(describePG.win)) {
         if (descTrk) {
-            descUpdateFunc(descTrk, -1, descData, TRUE);
-            descTrk = NULL;
-            DrawDescHilite();
+        	if (!IsTrackDeleted(descTrk))
+        		descUpdateFunc(descTrk, -1, descData, TRUE);
+        	descTrk = NULL;
+        	DrawDescHilite();
+
         }
 
         wHide(describePG.win);

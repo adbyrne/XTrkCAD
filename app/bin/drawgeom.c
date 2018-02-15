@@ -838,7 +838,8 @@ STATUS_T DrawGeomModify(
 
 				coOrd * oldPts = segPtr[segInx].u.p.pts;
 				newPts = (coOrd*)MyMalloc( tempSegs(0).u.p.cnt * sizeof *(coOrd*)0 );
-				memcpy( newPts, segPtr[segInx].u.p.pts, (segPtr[segInx].u.p.cnt) * sizeof *(coOrd*)0 );
+				int size = (segPtr[segInx].u.p.cnt > tempSegs(0).u.p.cnt)?tempSegs(0).u.p.cnt:segPtr[segInx].u.p.cnt;
+				memcpy( newPts, segPtr[segInx].u.p.pts, (size) * sizeof *(coOrd*)0 );
 				segPtr[segInx].u.p.pts = newPts;
 				MyFree(oldPts);
 

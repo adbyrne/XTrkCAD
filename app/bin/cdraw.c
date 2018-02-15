@@ -205,6 +205,7 @@ static struct {
 		ANGLE_T angle;
 		long pointCount;
 		long lineWidth;
+		BOOL_T boxed;
 		wDrawColor color;
 		wIndex_t benchChoice;
 		wIndex_t benchOrient;
@@ -215,7 +216,7 @@ static struct {
 		unsigned int layer;
 		char polyType[STR_SIZE];
 		} drawData;
-typedef enum { E0, E1, CE, RA, LN, HT, WT, OI, AL, A1, A2, VC, LW, CO, BE, OR, DS, TP, TA, TS, TX, PV, LY, PT } drawDesc_e;
+typedef enum { E0, E1, CE, RA, LN, HT, WT, OI, AL, A1, A2, VC, LW, CO, BX, BE, OR, DS, TP, TA, TS, TX, PV, LY, PT } drawDesc_e;
 static descData_t drawDesc[] = {
 /*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0] },
 /*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1] },
@@ -231,6 +232,7 @@ static descData_t drawDesc[] = {
 /*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
 /*LW*/	{ DESC_LONG, N_("Line Width"), &drawData.lineWidth },
 /*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color },
+/*BX*/  { DESC_BOXED, N_("Boxed"), &drawData.boxed },
 /*BE*/	{ DESC_LIST, N_("Lumber"), &drawData.benchChoice },
 /*OR*/	{ DESC_LIST, N_("Orientation"), &drawData.benchOrient },
 /*DS*/	{ DESC_LIST, N_("Size"), &drawData.dimenSize },
@@ -466,6 +468,9 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		UpdateFontSizeList( &fontSize, (wList_p)drawDesc[TS].control0, drawData.fontSizeInx );
 		segPtr->u.t.fontSize = fontSize;
 		break;
+	case BX:
+		segPtr->u.t.boxed = drawData.boxed;
+		break;
 	case TX:
 		if ( wTextGetModified((wText_p)drawDesc[TX].control0 )) {
 			int len = wTextGetSize((wText_p)drawDesc[TX].control0);
@@ -642,10 +647,12 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawData.angle = NormalizeAngle( xx->angle );
 		strncpy( drawData.text, segPtr->u.t.string, sizeof drawData.text );
 		drawData.text[sizeof drawData.text-1] ='\0';
+		drawData.boxed = segPtr->u.t.boxed;
 		drawDesc[TP].mode =
 		drawDesc[TS].mode =
 		drawDesc[TX].mode = 
 		drawDesc[TA].mode = 
+		drawDesc[BX].mode =
         drawDesc[CO].mode = 0;  /*Allow Text color setting*/
 		drawDesc[LW].mode = DESC_IGNORE;
 		title = _("Text");
@@ -1359,7 +1366,8 @@ EXPORT track_p NewText(
 		ANGLE_T angle,
 		char * text,
 		CSIZE_T textSize,
-        wDrawColor color )
+        wDrawColor color,
+		BOOL_T boxed)
 {
 	trkSeg_t tempSeg;
 	track_p trk;
@@ -1371,6 +1379,7 @@ EXPORT track_p NewText(
 	tempSeg.u.t.fontP = NULL;
 	tempSeg.u.t.fontSize = textSize;
 	tempSeg.u.t.string = MyStrdup( text );
+	tempSeg.u.t.boxed = boxed;
 	trk = MakeDrawFromSeg1( index, pos, angle, &tempSeg );
 	return trk;
 }
@@ -1384,6 +1393,7 @@ EXPORT BOOL_T ReadText( char * line )
 	wIndex_t layer;
 	track_p trk;
 	ANGLE_T angle;
+	BOOL_T boxed;
     wDrawColor color = wDrawColorBlack;
     if ( paramVersion<3 ) {
         if (!GetArgs( line, "XXpYql", &index, &layer, &pos, &angle, &text, &textSize ))
@@ -1400,7 +1410,7 @@ EXPORT BOOL_T ReadText( char * line )
     text = ConvertFromEscapedText(text);
     MyFree(old);
 
-	trk = NewText( index, pos, angle, text, textSize, color );
+	trk = NewText( index, pos, angle, text, textSize, color, FALSE );
 	SetTrkLayer( trk, layer );
 	MyFree(text);
 	return TRUE;

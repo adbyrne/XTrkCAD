@@ -234,6 +234,7 @@ typedef struct {
 				ANGLE_T angle;
 				wFont_p fontP;
 				FONTSIZE_T fontSize;
+				BOOL_T boxed;
 				char * string;
 			} t;
 			struct {
@@ -617,7 +618,7 @@ BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
 
 /* cmisc.c */
 wIndex_t describeCmdInx;
-typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST } descType;
+typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLOR, DESC_DIM, DESC_PIVOT, DESC_LAYER, DESC_STRING, DESC_TEXT, DESC_LIST, DESC_EDITABLELIST, DESC_BOXED } descType;
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)
 #define DESC_NOREDRAW	(1<<2)

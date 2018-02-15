@@ -30,7 +30,7 @@
 #include "draw.h"
 #include "misc.h"
 
-track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize, wDrawColor color );
+track_p NewText( wIndex_t index, coOrd p, ANGLE_T angle, char * text, CSIZE_T textSize, wDrawColor color, BOOL_T boxed );
 
 void LoadFontSizeList( wList_p, long );
 void UpdateFontSizeList( long *, wList_p, wIndex_t );
@@ -57,13 +57,17 @@ static struct {
 		wIndex_t fontSizeInx;
 		char text[STR_LONG_SIZE];
         wDrawColor color;
+        BOOL_T boxed;
 		} Dt;
 
+static char * boxLabels[] = { N_(""), NULL };
 static paramData_t textPLs[] = {
 #define textPD (textPLs[0])
-		{ PD_DROPLIST, &Dt.fontSizeInx, "fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE },
+		{ PD_DROPLIST, &Dt.fontSizeInx, "Fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE },
 #define colorPD (textPLs[1])
-        { PD_COLORLIST, &Dt.color, "color", PDO_NORECORD, NULL, N_("Color") }
+        { PD_COLORLIST, &Dt.color, "Color", PDO_NORECORD, NULL, N_("Color") },
+#define boxPD (textPLs[2])
+		{ PD_TOGGLE, &Dt.boxed, "Boxed", 0, boxLabels, NULL, 0 }
         };
 static paramGroup_t textPG = { "text", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
 
@@ -83,8 +87,9 @@ static void TextDlgUpdate(
 	switch (inx) {
 	case 0:
 	case 1:
+	case 2:
 		if ( Dt.state == SHOW_TEXT) {
-			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL );
+			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL, Dt.boxed );
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 		}
 		UpdateFontSizeList( &Dt.size, (wList_p)textPLs[0].control, Dt.fontSizeInx );
@@ -102,7 +107,7 @@ static void TextDlgUpdate(
 			Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x+Dt.lastLineLen;
 			Dt.cursPos1.y = Dt.pos.y+Dt.cursHeight+Dt.lastLineOffset;
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL );
+			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL, Dt.boxed );
 		}
         MainRedraw();
         MapRedraw();
@@ -115,8 +120,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 {
 	track_p t;
 	unsigned char c;
-	wControl_p controls[3];
-	char * labels[2];
+	wControl_p controls[4];
+	char * labels[3];
 	coOrd size, lastline;
 
 	switch (action & 0xFF) {
@@ -150,9 +155,11 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 
 		controls[0] = textPD.control;
 		controls[1] = colorPD.control;
-        controls[2] = 0;
+        controls[2] = boxPD.control;
+        controls[3] = 0;
 		labels[0] = N_("Font Size");
         labels[1] = N_("Color");
+        labels[2] = N_("Boxed");
 		InfoSubstituteControls( controls, labels );
 		return C_CONTINUE;
 		break;
@@ -166,7 +173,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.cursHeight = size.y;
 		Dt.cursPos1.y += Dt.cursHeight;
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
+		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
         Dt.state = SHOW_TEXT;
         MainRedraw();
         MapRedraw();
@@ -177,7 +184,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.cursPos0.x = Dt.cursPos1.x = pos.x + Dt.lastLineLen;
 		Dt.cursPos1.y += Dt.cursHeight;
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
+		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
         MainRedraw();
         MapRedraw();
         return C_CONTINUE;
@@ -189,7 +196,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		}
 		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
+		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
 		c = (unsigned char)(action >> 8);
 		switch (c) {
 		case '\b':
@@ -209,7 +216,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			break;
 		case '\015':
 			UndoStart( _("Create Text"), "newText - CR" );
-			t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color );
+			t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color, Dt.boxed );
 			UndoEnd();
 			DrawNewTrack(t);
 			Dt.state = POSITION_TEXT;
@@ -238,7 +245,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 	case C_REDRAW:
 		if (Dt.state == 1) {
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-			DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
+			DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
 		}
 		return C_CONTINUE;
 	case C_CANCEL:
@@ -255,7 +262,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			Dt.state = POSITION_TEXT;
 			if (Dt.len) {
 				UndoStart( _("Create Text"), "newText - OK" );
-				t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color );
+				t = NewText( 0, Dt.pos, Dt.angle, Dt.text, (CSIZE_T)Dt.size, Dt.color, Dt.boxed );
 				UndoEnd();
 				DrawNewTrack(t);
 			}
