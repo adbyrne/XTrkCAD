@@ -746,63 +746,100 @@ EXPORT long ParamUpdate(
 }
 
 
-EXPORT void ParamLoadData(
-		paramGroup_p pg )
+void ParamLoadData(
+    paramGroup_p pg)
 {
-	FLOAT_T floatV;
-	const char * stringV;
-	paramData_p p;
-	BOOL_T valid;
+    FLOAT_T floatV;
+    const char * stringV;
+    paramData_p p;
+    BOOL_T valid;
+    BOOL_T inRange;
 
-	for ( p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++ ) {
-		if ( (p->option&PDO_DLGIGNORE) != 0 )
-			continue;
-		if ( p->control == NULL || p->valueP == NULL)
-			continue;
-		switch ( p->type ) {
-		case PD_LONG:
-			stringV = wStringGetValue( (wString_p)p->control );
-			*(long*)p->valueP = atol( stringV );
-			break;
-		case PD_RADIO:
-			*(long*)p->valueP = wRadioGetValue( (wChoice_p)p->control );
-			break;
-		case PD_TOGGLE:
-			*(long*)p->valueP = wToggleGetValue( (wChoice_p)p->control );
-			break;
-		case PD_LIST:
-		case PD_DROPLIST:
-		case PD_COMBOLIST:
-			*(wIndex_t*)p->valueP = wListGetIndex( (wList_p)p->control );
-			break;
-		case PD_COLORLIST:
-			*(wDrawColor*)p->valueP = wColorSelectButtonGetColor( (wButton_p)p->control );
-			break;
-		case PD_FLOAT:
-			if (p->option & PDO_DIM) {
-				floatV = DecodeDistance( (wString_p)p->control, &valid );
-			} else {
-				floatV = DecodeFloat( (wString_p)p->control, &valid );
-				if (valid && (p->option & PDO_ANGLE) )
-					floatV = NormalizeAngle( (angleSystem==ANGLE_POLAR)?floatV:-floatV );
-			}
-			if ( valid )
-				*(FLOAT_T*)p->valueP = floatV;
-			break;
-		case PD_STRING:
-			stringV = wStringGetValue( (wString_p)p->control );
-			strcpy( (char*)p->valueP, stringV );
-			break;
-		case PD_MESSAGE:
-		case PD_BUTTON:
-		case PD_DRAW:
-		case PD_TEXT:
-		case PD_MENU:
-		case PD_MENUITEM:
-		case PD_BITMAP:
-			break;
-		}
-	}
+    for (p=pg->paramPtr; p<&pg->paramPtr[pg->paramCnt]; p++) {
+        if ((p->option&PDO_DLGIGNORE) != 0) {
+            continue;
+        }
+
+        if (p->control == NULL || p->valueP == NULL) {
+            continue;
+        }
+
+        switch (p->type) {
+            long longV;
+
+        case PD_LONG:
+            longV = atol(wStringGetValue((wString_p)p->control));
+
+            if (p->winData) {
+                inRange = (longV <= ((paramIntegerRange_t *)p->winData)->high) &&
+                          (longV >= ((paramIntegerRange_t *)p->winData)->low);
+            } else {
+                inRange = TRUE;
+            }
+
+            if (inRange) {
+                *(long*)p->valueP = longV;
+            }
+
+            break;
+
+        case PD_RADIO:
+            *(long*)p->valueP = wRadioGetValue((wChoice_p)p->control);
+            break;
+
+        case PD_TOGGLE:
+            *(long*)p->valueP = wToggleGetValue((wChoice_p)p->control);
+            break;
+
+        case PD_LIST:
+        case PD_DROPLIST:
+        case PD_COMBOLIST:
+            *(wIndex_t*)p->valueP = wListGetIndex((wList_p)p->control);
+            break;
+
+        case PD_COLORLIST:
+            *(wDrawColor*)p->valueP = wColorSelectButtonGetColor((wButton_p)p->control);
+            break;
+
+        case PD_FLOAT:
+            if (p->option & PDO_DIM) {
+                floatV = DecodeDistance((wString_p)p->control, &valid);
+            } else {
+                floatV = DecodeFloat((wString_p)p->control, &valid);
+
+                if (valid && (p->option & PDO_ANGLE)) {
+                    floatV = NormalizeAngle((angleSystem==ANGLE_POLAR)?floatV:-floatV);
+                }
+            }
+
+            if (p->winData) {
+                inRange = (floatV <= ((paramFloatRange_t *)p->winData)->high) &&
+                          (floatV >= ((paramFloatRange_t *)p->winData)->low);
+            } else {
+                inRange = TRUE;
+            }
+
+            if (valid && inRange) {
+                *(FLOAT_T*)p->valueP = floatV;
+            }
+
+            break;
+
+        case PD_STRING:
+            stringV = wStringGetValue((wString_p)p->control);
+            strcpy((char*)p->valueP, stringV);
+            break;
+
+        case PD_MESSAGE:
+        case PD_BUTTON:
+        case PD_DRAW:
+        case PD_TEXT:
+        case PD_MENU:
+        case PD_MENUITEM:
+        case PD_BITMAP:
+            break;
+        }
+    }
 }
 
 
