@@ -7,14 +7,33 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [Unpublished]
 
 ### Added
+
+### Fixed
+
+### Added and changed parameter files
+
+## [5.1.0beta]
+
+### Added
 + Finish the new End Point records which have fixed positions and all fields are output
++ Add Select Track and then Right-Click mode to Connect Tracks to reconnect large numbers 
+of tracks in one command (and provide an alternative to accurately selecting two close end-points).
++ Pan/Zoom button LeftDrag Pan, RightDrag Zoom
++ Pan/Zoom command adds 0 key to set origin and e key to zoom to extents
++ Improve zoom and pan performance if map is showing
++ Amend Mass Connect to use two passes - one close and one wide
++ Add Select All and Select All Current to popup menus
 
 ### Fixed
 + Open external sites in separate window from help (bug #219)
 + Fix the initial position of rotated elements
 + Make sure all connection parms do not exceed bounds from options dialogs
 + Fix Abend on naked cornu modify
-+ Fix invalid parm modification when selecting new number format
++ Fix invalid value modification when selecting new number format
++ Fix error threshold for bezier to avoid weird curves if connection distance high
++ Re-enable splitting fixed track for straight, curved and bumpers
++ Fix prompt for Join Start
++ Fix Abend when using connect for first track to turntable
 
 ### Added and changed parameter files
 

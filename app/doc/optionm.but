@@ -259,7 +259,7 @@ To draw an cornu easement see \k{joinCornu}, to Modify it afterwards see \k{chgC
 
 \S2{EasementsTraditional} \i{Easements with Fixed Sharpness}
 
-The values \f{R}, \f{X} and \f{L} are read-only.
+The values \f{R}, \f{X} and \f{L} are read-only. They are set using the radio buttons or the \f{Value} field which can be set to 0 (No Easment) or between 0.21 (sharpest Easement) 100 (broadest Easment). 
 
 These values indicate the worst case of joining a straight track with a curve of radius \f{R}. The two tracks are separated by the offset \f{X} while the easement curve extends for \f{L/2} inches or centimeters to each side of the endpoints.
 

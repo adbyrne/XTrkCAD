@@ -2531,7 +2531,7 @@ int main ( int argc, char * argv[] )
 			x1 = radius * sin(D2R(ang));
 			y1 = radius * cos(D2R(ang));
 			fprintf( stdout, "\tS 0 0 %0.6f %0.6f %0.6f %0.6f\n", x0, y0, x1, y1 );
-			fprintf( stdout, "\tS 16777215 0 %0.6f %0.6f %0.6f %0.6f\n", x1, y1, -x1, -y1 );
+			fprintf( stdout, "\tS 0 0 %0.6f %0.6f %0.6f %0.6f\n", x1, y1, -x1, -y1 );
 			fprintf( stdout, "\tS 0 0 %0.6f %0.6f %0.6f %0.6f\n", -x1, -y1, -x0, -y0 );
 		}
 		fprintf( stdout, "\tA 16711680 0 %0.6f 0.000000 0.000000 0.000000 360.000000\n", radius2 );

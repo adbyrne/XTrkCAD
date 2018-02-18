@@ -42,12 +42,13 @@ static DIST_T oldEasementVal;
 static wIcon_p enone_bm;
 static wIcon_p esharp_bm;
 static wIcon_p egtsharp_bm;
+static wIcon_p eltsharp_bm;
 static wIcon_p enormal_bm;
 static wIcon_p eltbroad_bm;
 static wIcon_p ebroad_bm;
 static wIcon_p egtbroad_bm;
 static wIcon_p ecornu_bm;
-
+
 /****************************************
  *
  * EASEMENTW
@@ -62,13 +63,13 @@ static void EasementOk( void );
 static void EasementCancel( void );
 
 static char *easementChoiceLabels[] = { N_("None"), N_("Sharp"), N_("Normal"), N_("Broad"), N_("Cornu"), NULL };
-static paramFloatRange_t r0o5_2 = { -1.0, 2.0, 60 };
+static paramFloatRange_t r0n1_100 = { -1.0, 100.0, 60 };
 static paramFloatRange_t r0_100 = { 0.0, 100.0, 60 };
 static paramFloatRange_t r0_10 = { 0.0, 10.0, 60 };
 static long easeM;
 static paramData_t easementPLs[] = {
 #define I_EASEVAL		(0)
-	{	PD_FLOAT, &easementVal, "val", PDO_NOPSHUPD, &r0o5_2, N_("Value") },
+	{	PD_FLOAT, &easementVal, "val", PDO_NOPSHUPD, &r0n1_100, N_("Value") },
 	{	PD_FLOAT, &easeR, "r", PDO_DIM|PDO_DLGRESETMARGIN, &r0_100, N_("R"), BO_READONLY },
 	{	PD_FLOAT, &easeX, "x", PDO_DIM|PDO_DLGHORZ, &r0_10, N_("X"), BO_READONLY },
 	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, N_("L"), BO_READONLY },
@@ -93,43 +94,52 @@ static void SetEasement(
 		selVal = 4;
 		val = -1;
 		bm = ecornu_bm;
-	} else if (val < 0.5) {
-		easeX = easeR = easeL = 0.0;
-		selVal = 0;
-		val = 0;
-		bm = enone_bm;
-	} else if (val <= 1.0) {
-		z = 1.0/val - 1.0;
-		easeR = Rvalues[1] - z * (Rvalues[1] - Rvalues[0]);
-		easeL = Lvalues[1] - z * (Lvalues[1] - Lvalues[0]);
-		if (easeR != 0.0)
-			easeX = easeL*easeL/(24*easeR);
-		else
-			easeX = 0.0;
-		if (val == 1.0) {
-			selVal = 2;
-			bm = enormal_bm;
-		} else if (val == 0.5) {
-			selVal = 1;
-			bm = esharp_bm;
-		} else {
-			bm = egtsharp_bm;
-		}
 	} else {
-		z = val - 1.0;
-		easeR = Rvalues[1] + z * (Rvalues[2] - Rvalues[1]);
-		easeL = Lvalues[1] + z * (Lvalues[2] - Lvalues[1]);
-		if (easeR != 0.0)
-			easeX = easeL*easeL/(24*easeR); 
-		else
-			easeX = 0.0;
-		if (val == 2.0) {
-			selVal = 3;
-			bm = ebroad_bm;
-		} else if (val < 2.0) {
-			bm = eltbroad_bm;
+		if (val == 0.0) {
+			easeX = easeR = easeL = 0.0;
+			selVal = 0;
+			val = 0;
+			bm = enone_bm;
+		} else if (val <= 1.0) {
+			if (val < 0.21) val = 0.21;   //Eliminate values that give negative radii
+			z = 1.0/val - 1.0;
+			easeR = Rvalues[1] - z * (Rvalues[1] - Rvalues[0]);
+			easeL = Lvalues[1] - z * (Lvalues[1] - Lvalues[0]);
+			if (easeR != 0.0)
+				easeX = easeL*easeL/(24*easeR);
+			else
+				easeX = 0.0;
+			if (val == 1.0) {
+				selVal = 2;
+				bm = enormal_bm;
+			} else if (val == 0.5) {
+				selVal = 1;
+				bm = esharp_bm;
+			} else if (val < 0.5) {
+				bm = eltsharp_bm;
+				selVal = 1;
+			} else {
+				selVal = 1;
+				bm = egtsharp_bm;
+			}
 		} else {
-			bm = egtbroad_bm;
+			z = val - 1.0;
+			easeR = Rvalues[1] + z * (Rvalues[2] - Rvalues[1]);
+			easeL = Lvalues[1] + z * (Lvalues[2] - Lvalues[1]);
+			if (easeR != 0.0)
+				easeX = easeL*easeL/(24*easeR);
+			else
+				easeX = 0.0;
+			if (val == 2.0) {
+				selVal = 3;
+				bm = ebroad_bm;
+			} else if (val < 2.0) {
+				selVal = 3;
+				bm = eltbroad_bm;
+			} else {
+				selVal = 3;
+				bm = egtbroad_bm;
+			}
 		}
 	}
 
@@ -251,6 +261,7 @@ static void EasementChange( long changes )
 #include "bitmaps/enone.xpm"
 #include "bitmaps/esharp.xpm"
 #include "bitmaps/egtsharp.xpm"
+#include "bitmaps/eltsharp.xpm"
 #include "bitmaps/enormal.xpm"
 #include "bitmaps/eltbroad.xpm"
 #include "bitmaps/ebroad.xpm"
@@ -263,6 +274,7 @@ EXPORT addButtonCallBack_t EasementInit( void )
 	ParamRegister( &easementPG );
 
 	enone_bm = wIconCreatePixMap( enone_xpm );
+	eltsharp_bm = wIconCreatePixMap( eltsharp_xpm );
 	esharp_bm = wIconCreatePixMap( esharp_xpm );
 	egtsharp_bm = wIconCreatePixMap( egtsharp_xpm );
 	enormal_bm = wIconCreatePixMap( enormal_xpm );
