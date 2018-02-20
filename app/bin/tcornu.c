@@ -758,6 +758,8 @@ BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 		struct extraData *xx = GetTrkExtraData(*trk);
 		if (trk2) DeleteTrack(trk2,TRUE);
 		SetTrkEndPoint( *trk, *ep, *ep?xx->cornuData.pos[1]:xx->cornuData.pos[0], *ep?xx->cornuData.a[1]:xx->cornuData.a[0] );
+		MainRedraw();
+		MapRedraw();
 		return TRUE;
 	}
 	return FALSE;
@@ -959,7 +961,8 @@ static BOOL_T MergeCornu(
 	}
 	DrawNewTrack( trk3 );
 	UndoEnd();
-
+	MainRedraw();
+	MapRedraw();
 
 	return TRUE;
 }

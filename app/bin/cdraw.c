@@ -787,6 +787,8 @@ static void UngroupDraw( track_p trk )
 			DrawNewTrack( trk );
 		}
 	}
+	MapRedraw();
+	MainRedraw();
 }
 
 

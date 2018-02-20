@@ -340,6 +340,8 @@ EXPORT void SelectDelete( void )
 		wDrawDelayUpdate( mainD.d, TRUE );
 		wDrawDelayUpdate( mapD.d, TRUE );
 		DoSelectedTracks( DeleteTrack );
+		MainRedraw();
+		MapRedraw();
 		wDrawDelayUpdate( mainD.d, FALSE );
 		wDrawDelayUpdate( mapD.d, FALSE );
 		selectedTrackCount = 0;
@@ -1089,6 +1091,8 @@ static void MoveTracks(
 					} else {
 						DeleteTrack(trk1,TRUE);
 						ErrorMessage(_("Cornu too tight - it was deleted"));
+						MapRedraw();
+						MainRedraw();
 					}
 				} else {
 					if (QueryTrack(trk,Q_IS_CORNU)) {		//I am a Cornu myself!

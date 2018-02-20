@@ -830,6 +830,9 @@ static BOOL_T MergeBezier(
 	}
 	DrawNewTrack( trk0 );
 
+	MainRedraw();
+	MapRedraw();
+
 
 	return TRUE;
 }
@@ -898,6 +901,8 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 
 static BOOL_T TrimBezier( track_p trk, EPINX_T ep, DIST_T dist ) {
 	DeleteTrack(trk, TRUE);
+	MainRedraw();
+	MapRedraw();
 	return TRUE;
 }
 
@@ -1065,6 +1070,8 @@ BOOL_T MoveBezierEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 		if (trk2) DeleteTrack(trk2,TRUE);
 		xx = GetTrkExtraData(*trk);
 		SetTrkEndPoint( *trk, *ep, *ep?xx->bezierData.pos[3]:xx->bezierData.pos[0], *ep?xx->bezierData.a1:xx->bezierData.a0 );
+		MainRedraw();
+		MapRedraw();
 		return TRUE;
 	}
 	return FALSE;

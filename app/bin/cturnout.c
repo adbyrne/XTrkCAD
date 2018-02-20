@@ -2109,6 +2109,8 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 			}
 		}
 	}
+	MapRedraw();
+	MainRedraw();
 
 	AuditTracks( "addTurnout after loop" );
 

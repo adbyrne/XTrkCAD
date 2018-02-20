@@ -427,8 +427,11 @@ static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist )
 					UndrawNewTrack( trk );
 					AdjustStraightEndPt( trk, ep, pos );
 					DrawNewTrack( trk );
-	} else
+	} else {
 		DeleteTrack( trk, TRUE );
+		MainRedraw();
+		MapRedraw();
+	}
 	return TRUE;
 }
 
@@ -494,6 +497,8 @@ BOOL_T ExtendStraightToJoin(
 		}
 		if (trk2) {
 			DeleteTrack( trk1, TRUE );
+			MainRedraw();
+			MapRedraw();
 		} else {
 			trk2 = trk1;
 			UndrawNewTrack( trk2 );
