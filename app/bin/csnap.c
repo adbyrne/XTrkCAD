@@ -30,6 +30,8 @@
 #include "track.h"
 #include "utility.h"
 
+#define bigdot_width 3
+
 /*****************************************************************************
  *
  
@@ -43,9 +45,6 @@ EXPORT long minGridSpacing = 3;
 #include "bitmaps/cross0.xbm"
 static wDrawBitMap_p cross0_bm;
 #endif
-
-#include "bitmaps/bigdot.xbm"
-static wDrawBitMap_p bigdot_bm;
 
 #define DEFAULTGRIDSPACING (1.0)
 
@@ -129,7 +128,7 @@ void static DrawGridPoint(
 	x0 = (wPos_t)(p0.x*dpi+0.5) + lborder;
 	y0 = (wPos_t)(p0.y*dpi+0.5) + bborder;
 	if ( bigdot )
-		wDrawBitMap( D->d, bigdot_bm, x0, y0, Color, (wDrawOpts)D->funcs->options );
+		wDrawFilledCircle(D->d, x0, y0, (wPos_t)(bigdot_width+0.5)/2, Color, (wDrawOpts)D->funcs->options );
 	else
 		wDrawPoint( D->d, x0, y0, Color, (wDrawOpts)D->funcs->options );
 }
@@ -209,9 +208,7 @@ EXPORT void DrawGrid(
 	if (!cross0_bm)
 		cross0_bm = wDrawBitMapCreate( mainD.d, cross0_width, cross0_height, 2, 2, cross0_bits );
 #endif
-	if (!bigdot_bm)
-		bigdot_bm = wDrawBitMapCreate( mainD.d, bigdot_width, bigdot_height, 1, 1, bigdot_bits );
-		
+
 	wSetCursor( mainD.d, wCursorWait );
 	dpi = D->dpi/D->scale;
 	Gdx = cos(D2R(Gangle));
