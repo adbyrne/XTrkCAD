@@ -83,8 +83,11 @@ static char *GetParamPrototype(struct appDefault *ptrDefault,
 
 struct appDefault xtcDefaults[] = {
     { "DialogItem.cmdopt-preselect", 0, INTEGERCONSTANT,{ .intValue = 1 } },			/**< default command is select */
-    { "DialogItem.pref-dstfmt", 0, INTEGERFUNCTION,{ .intFunction = GetLocalDistanceFormat } },	/**< number format for distances */
+	{ "DialogItem.grid-horzenable", 0, INTEGERCONSTANT, { .intValue = 0 }},
+	{ "DialogItem.grid-vertenable", 0, INTEGERCONSTANT,{ .intValue = 0 } },
+	{ "DialogItem.pref-dstfmt", 0, INTEGERFUNCTION,{ .intFunction = GetLocalDistanceFormat } },	/**< number format for distances */
     { "DialogItem.pref-units", 0, INTEGERFUNCTION,{ .intFunction = GetLocalMeasureSystem } },	/**< default unit depends on region */
+	{ "DialogItem.rgbcolor-exception", 0, INTEGERCONSTANT, { .intValue = 15923462 }},		/**< rich yellow as exception color */
 	{ "Parameter File Map.British stock", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "br.xtp" },
 	{ "Parameter File Map.European stock", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "eu.xtp" },
 	{ "Parameter File Map.NMRA RP12-25 Feb 2015 O scale Turnouts", 0, STRINGFUNCTION,{ .stringFunction = GetParamFullPath }, "nmra-o.xtp" },
