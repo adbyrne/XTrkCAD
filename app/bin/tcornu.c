@@ -562,7 +562,7 @@ static BOOL_T WriteCornu( track_p t, FILE * f )
 	BOOL_T rc = TRUE;
 	BOOL_T track =(GetTrkType(t)==T_CORNU);
 	options = GetTrkWidth(t) & 0x0F;
-	if ( ( GetTrkBits(t) & TB_HIDEDESC ) != 0 ) options |= 0x80;
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 ) options |= 0x80;
 	rc &= fprintf(f, "%s %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f \n",
 		"CORNU",GetTrkIndex(t), GetTrkLayer(t), (long)options,
                   GetTrkScaleName(t), GetTrkVisible(t),
