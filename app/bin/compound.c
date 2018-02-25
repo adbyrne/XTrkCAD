@@ -331,41 +331,6 @@ void DrawCompoundDescription(
 		Rotate( &p1, zero, xx->angle );
 		p1.x += xx->orig.x + xx->descriptionOff.x;
 		p1.y += xx->orig.y + xx->descriptionOff.y;
-#ifdef LATER
-		maxInx = -1;
-		for ( inx=0,a=0.0; a<360.0; inx++,a+=45 ) {
-			Translate( &p1, p0, a, trackGauge*3 );
-			dists[inx].p = p1;
-			if ((trk1 = dists[inx].trk = OnTrack( &p1, FALSE, TRUE )) == NULL ||
-				trk1 == trk ) {
-				p1 = dists[inx].p;
-				dists[inx].d = DistanceSegs( xx->orig, xx->angle, xx->segCnt, xx->segs, &p1, NULL );
-			} else if ( GetTrkType(trk1) == T_TURNOUT ) {
-				struct extraData *yy = GetTrkExtraData(trk1);
-				dists[inx].d = DistanceSegs( yy->orig, yy->angle, yy->segCnt, yy->segs, &p1, NULL );
-			} else {
-				dists[inx].d = FindDistance( p0, p1 );
-			}
-		}
-		maxD = 0; maxInx = -1;
-		for ( inx=0,a=0.0; a<360.0; inx++,a+=45 ) {
-			if (dists[inx].trk == NULL || dists[inx].trk == trk) {
-				if (dists[inx].d > maxD) {
-					maxD = dists[inx].d;
-					maxInx = inx;
-				}
-			}
-		}
-		if (maxInx == -1) {
-				if (dists[inx].d > maxD) {
-					maxD = dists[inx].d;
-					maxInx = inx;
-				}
-		}
-		if (maxInx != -1) {
-			p0 = dists[maxInx].p;
-		}
-#endif
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	DrawBoxedString( (xx->special==TOpier)?BOX_INVERT:BOX_NONE, d, p1, desc, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
 }
@@ -378,6 +343,8 @@ DIST_T CompoundDescriptionDistance(
 	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd p1;
 	if (GetTrkType(trk) != T_TURNOUT && GetTrkType(trk) != T_STRUCTURE)
+		return 100000;
+	if ( (GetTrkBits( trk ) & TB_HIDEDESC) != 0 )
 		return 100000;
 	p1 = xx->descriptionOrig;
 	Rotate( &p1, zero, xx->angle );
@@ -394,31 +361,37 @@ STATUS_T CompoundDescriptionMove(
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	static coOrd p0, p1;
+	static BOOL_T editMode;
 	wDrawColor color;
 
 	switch (action) {
 	case C_DOWN:
+		editMode = TRUE;
 		REORIGIN( p0, xx->descriptionOrig, xx->angle, xx->orig )
 
 	case C_MOVE:
 	case C_UP:
-		if (action != C_DOWN)
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
 		color = GetTrkColor( trk, &mainD );
-		DrawCompoundDescription( trk, &tempD, color );
 		xx->descriptionOff.x = (pos.x-p0.x);
 		xx->descriptionOff.y = (pos.y-p0.y);
 		p1 = xx->descriptionOrig;
 		Rotate( &p1, zero, xx->angle );
 		p1.x += xx->orig.x + xx->descriptionOff.x;
 		p1.y += xx->orig.y + xx->descriptionOff.y;
-		DrawCompoundDescription( trk, &tempD, color );
-		if (action != C_UP)
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
-        MainRedraw();
-        MapRedraw();
+		if (action == C_UP) {
+			editMode = FALSE;
+		}
+		MainRedraw();
+		MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
+		break;
+	case C_REDRAW:
+		if (editMode) {
+			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+		}
 	}
+
+
 	return C_CONTINUE;
 }
 

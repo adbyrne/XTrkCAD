@@ -52,3 +52,6 @@ void FixUpBezierSeg(coOrd[4], trkSeg_p , BOOL_T);
 void FixUpBezierSegs(trkSeg_p p,int segCnt);
 BOOL_T GetBezierSegmentFromTrack(track_p, trkSeg_p);
 
+DIST_T 	BezierDescriptionDistance(coOrd pos,track_p trk );
+STATUS_T BezierDescriptionMove(track_p trk,wAction_t action,coOrd pos );
+

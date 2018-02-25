@@ -1081,8 +1081,10 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 			&& (commandList[curCommand].stickyMask & stickySet)) {
 		tempSegs_da.cnt = 0;
 		UpdateAllElevations();
-		MainRedraw();
-		MapRedraw();
+		if (action != C_REDRAW) {
+			MainRedraw();
+			MapRedraw();
+		}
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
 		}

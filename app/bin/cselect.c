@@ -25,6 +25,7 @@
 
 #include "ccurve.h"
 #include "tcornu.h"
+#include "tbezier.h"
 #define PRIVATE_EXTRADATA
 #include "compound.h"
 #include "cselect.h"
@@ -1626,11 +1627,26 @@ STATUS_T CmdMoveDescription(
 				ep = -1;
 				mode = 2;
 			}
+			d = CornuDescriptionDistance( pos, trk1 );
+			if ( d < dd ) {
+				dd = d;
+				trk = trk1;
+				ep = -1;
+				mode = 3;
+			}
+			d = BezierDescriptionDistance( pos, trk1 );
+			if ( d < dd ) {
+				dd = d;
+				trk = trk1;
+				ep = -1;
+				mode = 4;
+			}
 		}
 		if (trk != NULL) {
 			UndoStart( _("Move Label"), "Modedesc( T%d )", GetTrkIndex(trk) );
 			UndoModify( trk );
 		}
+		/* no break */
 	case C_MOVE:
 	case C_UP:
 	case C_REDRAW:
@@ -1644,9 +1660,13 @@ STATUS_T CmdMoveDescription(
 				return CompoundDescriptionMove( trk, action, pos );
 			case 2:
 				return CurveDescriptionMove( trk, action, pos );
+			case 3:
+				return CornuDescriptionMove( trk, action, pos );
+			case 4:
+				return BezierDescriptionMove( trk, action, pos );
 			}
 		}
-
+		break;
 	case C_CMDMENU:
 		moveDescTrk = OnTrack( &pos, TRUE, FALSE );
 		if ( moveDescTrk == NULL ) break;

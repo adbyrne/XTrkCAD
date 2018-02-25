@@ -186,8 +186,8 @@ DIST_T CornuDescriptionDistance(
 	if ( GetTrkType( trk ) != T_CORNU || ( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 )
 		return 100000;
 	
-		p1.x = xx->cornuData.pos[0].x + (xx->cornuData.pos[1].x-xx->cornuData.pos[0].x)/2 + xx->cornuData.descriptionOff.x;
-		p1.y = xx->cornuData.pos[0].y + (xx->cornuData.pos[1].y-xx->cornuData.pos[0].y)/2 + xx->cornuData.descriptionOff.y;
+		p1.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x-xx->cornuData.pos[0].x)/2) + xx->cornuData.descriptionOff.x;
+		p1.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y-xx->cornuData.pos[0].y)/2) + xx->cornuData.descriptionOff.y;
 	
 	return FindDistance( p1, pos );
 }
@@ -205,9 +205,9 @@ static void DrawCornuDescription(
 	if (layoutLabels == 0)
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
-		return;
-    pos.x = xx->cornuData.pos[0].x + (xx->cornuData.pos[1].x - xx->cornuData.pos[0].x)/2;
-    pos.y = xx->cornuData.pos[0].y + (xx->cornuData.pos[1].y - xx->cornuData.pos[0].y)/2;
+			return;
+    pos.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x - xx->cornuData.pos[0].x)/2);
+    pos.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y - xx->cornuData.pos[0].y)/2);
     pos.x += xx->cornuData.descriptionOff.x;
     pos.y += xx->cornuData.descriptionOff.y;
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
@@ -223,31 +223,35 @@ STATUS_T CornuDescriptionMove(
 		coOrd pos )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	static coOrd p0;
+	static coOrd p0,p1;
+	static BOOL_T editState;
 	wDrawColor color;
 
 	if (GetTrkType(trk) != T_CORNU) return C_TERMINATE;
+
+	p0.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x - xx->cornuData.pos[0].x)/2);
+	p0.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y - xx->cornuData.pos[0].y)/2);
 
 	switch (action) {
 	case C_DOWN:
 	case C_MOVE:
 	case C_UP:
+		editState = TRUE;
+		p1 = pos;
 		color = GetTrkColor( trk, &mainD );
-		DrawCornuDescription( trk, &mainD, color );
-    
-        if (action != C_DOWN)
-            DrawLine( &mainD, xx->cornuData.pos[0], p0, 0, wDrawColorBlack );
-        xx->cornuData.descriptionOff.x = p0.x - xx->cornuData.pos[0].x + (xx->cornuData.pos[1].x-xx->cornuData.pos[0].x)/2;
-        xx->cornuData.descriptionOff.y = p0.y - xx->cornuData.pos[0].x + (xx->cornuData.pos[1].y-xx->cornuData.pos[0].y)/2;
-        p0 = pos;
-        if (action != C_UP)
-            DrawLine( &mainD, xx->cornuData.pos[0], p0, 0, wDrawColorBlack );
+        xx->cornuData.descriptionOff.x = pos.x - p0.x;
+        xx->cornuData.descriptionOff.y = pos.y - p0.y;
         DrawCornuDescription( trk, &mainD, color );
-        MainRedraw();
-        MapRedraw();
+        if (action == C_UP) {
+        	editState = FALSE;
+        }
+		MainRedraw();
+		MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
+		if (editState)
+			DrawLine( &mainD, p1, p0, 0, wDrawColorBlack );
 		break;
 		
 	}
@@ -558,6 +562,7 @@ static BOOL_T WriteCornu( track_p t, FILE * f )
 	BOOL_T rc = TRUE;
 	BOOL_T track =(GetTrkType(t)==T_CORNU);
 	options = GetTrkWidth(t) & 0x0F;
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) != 0 ) options |= 0x80;
 	rc &= fprintf(f, "%s %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f \n",
 		"CORNU",GetTrkIndex(t), GetTrkLayer(t), (long)options,
                   GetTrkScaleName(t), GetTrkVisible(t),
@@ -603,6 +608,7 @@ static void ReadCornu( char * line )
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&0x0F));
+	if ( ( options & 0x80 ) != 0 )  SetTrkBits(t,TB_HIDEDESC);
 	xx->cornuData.pos[0] = p0;
     xx->cornuData.pos[1] = p1;
     xx->cornuData.a[0] = a0;
@@ -1304,6 +1310,7 @@ LOG( log_cornu, 1, ( "NewCornuTrack( EP1 %0.3f, %0.3f, EP2 %0.3f, %0.3f )  = %d\
 	SetTrkEndPoint( p, 0, pos[0], xx->cornuData.a[0]);
 	SetTrkEndPoint( p, 1, pos[1], xx->cornuData.a[1]);
 	CheckTrackLength( p );
+	SetTrkBits( p, TB_HIDEDESC );
 	return p;
 }
 
