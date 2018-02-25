@@ -268,26 +268,28 @@ STATUS_T CurveDescriptionMove(
 		coOrd pos )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	static coOrd p0;
+	static coOrd p0,p1;
+	static BOOL_T editMode;
 	wDrawColor color;
 	ANGLE_T a, a0, a1;
 	DIST_T d;
+
+	p0 = xx->pos;
 
 	switch (action) {
 	case C_DOWN:
 	case C_MOVE:
 	case C_UP:
+		editMode = TRUE;
 		color = GetTrkColor( trk, &mainD );
-		DrawCurveDescription( trk, &tempD, color );
 		if ( xx->helixTurns > 0 ) {
-			if (action != C_DOWN)
-				DrawLine( &tempD, xx->pos, p0, 0, wDrawColorBlack );
 			xx->descriptionOff.x = (pos.x-xx->pos.x);
 			xx->descriptionOff.y = (pos.y-xx->pos.y);
-			p0 = pos;
+			p1 = pos;
 			if (action != C_UP)
-				DrawLine( &tempD, xx->pos, p0, 0, wDrawColorBlack );
+				DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
 		} else {
+			p1 = pos;
 			GetCurveAngles( &a0, &a1, trk );
 			if ( a1 < 1 ) a1 = 1.0;
 			a = FindAngle( xx->pos, pos );
@@ -308,15 +310,18 @@ STATUS_T CurveDescriptionMove(
 			if ( d < 0.1 )
 				d = 0.1;
 			xx->descriptionOff.y = d * 2.0 - 1.0;
+			GetCurveAngles( &a0, &a1, trk );
+			a = a0 + (0.5 * a1);
+			PointOnCircle( &p0, xx->pos, xx->radius/2, a );
 		}
-		DrawCurveDescription( trk, &tempD, color );
-        MainRedraw();
-        MapRedraw();
+		if (action == C_UP) editMode = FALSE;
+		MainRedraw();
+		MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
-		if ( xx->helixTurns > 0 ) {
-			DrawLine( &tempD, xx->pos, p0, 0, wDrawColorBlack );
+		if (editMode) {
+			DrawLine( &tempD, p1, p0, 0, wDrawColorBlack );
 		}
 		break;
 		

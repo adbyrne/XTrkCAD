@@ -142,8 +142,8 @@ DIST_T BezierDescriptionDistance(
 	if ( GetTrkType( trk ) != T_BEZIER || ( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 )
 		return 100000;
 	
-		p1.x = xx->bezierData.pos[0].x + (xx->bezierData.pos[3].x-xx->bezierData.pos[0].x)/2 + xx->bezierData.descriptionOff.x;
-		p1.y = xx->bezierData.pos[0].y + (xx->bezierData.pos[3].y-xx->bezierData.pos[0].y)/2 + xx->bezierData.descriptionOff.y;
+		p1.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x-xx->bezierData.pos[0].x)/2) + xx->bezierData.descriptionOff.x;
+		p1.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y-xx->bezierData.pos[0].y)/2) + xx->bezierData.descriptionOff.y;
 	
 	return FindDistance( p1, pos );
 }
@@ -162,8 +162,8 @@ static void DrawBezierDescription(
 		return;
 	if ((labelEnable&LABELENABLE_TRKDESC)==0)
 		return;
-    pos.x = xx->bezierData.pos[0].x + (xx->bezierData.pos[3].x - xx->bezierData.pos[0].x)/2;
-    pos.y = xx->bezierData.pos[0].y + (xx->bezierData.pos[3].y - xx->bezierData.pos[0].y)/2;
+    pos.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x - xx->bezierData.pos[0].x)/2);
+    pos.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y - xx->bezierData.pos[0].y)/2);
     pos.x += xx->bezierData.descriptionOff.x;
     pos.y += xx->bezierData.descriptionOff.y;
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
@@ -179,31 +179,33 @@ STATUS_T BezierDescriptionMove(
 		coOrd pos )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	static coOrd p0;
+	static coOrd p0,p1;
+	static BOOL_T editState;
 	wDrawColor color;
 	if (GetTrkType(trk) != T_BEZIER) return C_TERMINATE;
-
+	p0.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x - xx->bezierData.pos[0].x)/2);
+    p0.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y - xx->bezierData.pos[0].y)/2);
 	switch (action) {
 	case C_DOWN:
 	case C_MOVE:
 	case C_UP:
+		editState = TRUE;
+		p1 = pos;
 		color = GetTrkColor( trk, &mainD );
-		DrawBezierDescription( trk, &mainD, color );
-    
-        if (action != C_DOWN)
-            DrawLine( &mainD, xx->bezierData.pos[0], p0, 0, wDrawColorBlack );
-        xx->bezierData.descriptionOff.x = p0.x - xx->bezierData.pos[0].x + (xx->bezierData.pos[3].x-xx->bezierData.pos[0].x)/2;
-        xx->bezierData.descriptionOff.y = p0.y - xx->bezierData.pos[0].x + (xx->bezierData.pos[3].y-xx->bezierData.pos[0].y)/2;
-        p0 = pos;
-        if (action != C_UP)
-            DrawLine( &mainD, xx->bezierData.pos[0], p0, 0, wDrawColorBlack );
-        DrawBezierDescription( trk, &mainD, color );
-        MainRedraw();
-        MapRedraw();
+        DrawLine( &mainD, p0, pos, 0, wDrawColorBlack );
+        xx->bezierData.descriptionOff.x = pos.x - p0.x;
+        xx->bezierData.descriptionOff.y = pos.y - p0.y;
+        if (action == C_UP) {
+        	editState = FALSE;
+        }
+		MainRedraw();
+		MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
-
 	case C_REDRAW:
+		if (editState)
+			DrawLine( &mainD, p1, p0, 0, wDrawColorBlack );
 		break;
+
 		
 	}
 	return C_CONTINUE;
@@ -519,6 +521,7 @@ static BOOL_T WriteBezier( track_p t, FILE * f )
 	BOOL_T rc = TRUE;
 	BOOL_T track =(GetTrkType(t)==T_BEZIER);
 	options = GetTrkWidth(t) & 0x0F;
+	if ( ( GetTrkBits(t) & TB_HIDEDESC ) != 0 ) options |= 0x80;
 	rc &= fprintf(f, "%s %d %u %ld %ld %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f \n",
 		track?"BEZIER":"BZRLIN",GetTrkIndex(t), GetTrkLayer(t), (long)options, wDrawGetRGB(xx->bezierData.segsColor), xx->bezierData.segsWidth,
                   GetTrkScaleName(t), GetTrkVisible(t),
@@ -562,6 +565,7 @@ static void ReadBezier( char * line )
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&0x0F));
+	if ( ( options & 0x80 ) != 0 )  SetTrkBits(t,TB_HIDEDESC);
 	xx->bezierData.pos[0] = p0;
     xx->bezierData.pos[1] = c1;
     xx->bezierData.pos[2] = c2;
@@ -1360,6 +1364,7 @@ LOG( log_bezier, 1, ( "NewBezierTrack( EP1 %0.3f, %0.3f, CP1 %0.3f, %0.3f, CP2 %
 	SetTrkEndPoint( p, 0, pos[0], xx->bezierData.a0);
 	SetTrkEndPoint( p, 1, pos[3], xx->bezierData.a1);
 	CheckTrackLength( p );
+	SetTrkBits( p, TB_HIDEDESC );
 	return p;
 }
 

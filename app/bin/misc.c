@@ -1092,8 +1092,10 @@ LOG( log_command, 4, ( "    COMMAND returns %d\n", rc ) )
 		 (commandList[curCommand].stickyMask & stickySet) ) {
 		tempSegs_da.cnt = 0;
 		UpdateAllElevations();
-        MainRedraw();
-        MapRedraw();
+		if (action != C_REDRAW) {
+			MainRedraw();
+			MapRedraw();
+		}
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
 		}

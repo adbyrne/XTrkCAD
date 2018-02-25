@@ -35,6 +35,8 @@
 #include "utility.h"
 #include "misc.h"
 
+extern TRKTYP_T T_BZRLIN;
+
 extern void wSetSelectedFontSize(int size);
 
 static long fontSizeList[] = {
@@ -809,37 +811,46 @@ EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
 		DIST_T dd0,dd1;
 		coOrd p00,p0,p1;
 		p00 = *pos;
-		Rotate(&p00,xx->orig,-xx->angle);
-		p00.x -= xx->orig.x;
-		p00.y -= xx->orig.y;
-		switch (xx->segs[0].type) {
-			case SEG_CRVLIN:
-				PointOnCircle( &p0, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius), xx->segs[0].u.c.a0 );
-				dd0 = FindDistance( p00, p0);
-				PointOnCircle( &p1, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius), xx->segs[0].u.c.a0 + xx->segs[0].u.c.a1);
-				dd1 = FindDistance( p00, p1);
-			break;
-			case SEG_STRLIN:
-				dd0 = FindDistance( p00, xx->segs[0].u.l.pos[0]);
-				p0 = xx->segs[0].u.l.pos[0];
-				dd1 = FindDistance( p00, xx->segs[0].u.l.pos[1]);
-				p1 = xx->segs[0].u.l.pos[1];
-			break;
-			case SEG_BEZLIN:
-				dd0 = FindDistance( p00, xx->segs[0].u.b.pos[0]);
-				p0 = xx->segs[0].u.b.pos[0];
-				dd1 = FindDistance( p00, xx->segs[0].u.b.pos[3]);
-				p1 = xx->segs[0].u.b.pos[3];
-			break;
-			default:
-				return FALSE;
-		}
-		p0.x += xx->orig.x;
-		p0.y += xx->orig.y;
-		Rotate(&p0,xx->orig,xx->angle);
-		p1.x += xx->orig.x;
-		p1.y += xx->orig.y;
-		Rotate(&p1,xx->orig,xx->angle);
+		if (GetTrkType(trk) == T_DRAW) {
+			Rotate(&p00,xx->orig,-xx->angle);
+			p00.x -= xx->orig.x;
+			p00.y -= xx->orig.y;
+			switch (xx->segs[0].type) {
+				case SEG_CRVLIN:
+					PointOnCircle( &p0, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius), xx->segs[0].u.c.a0 );
+					dd0 = FindDistance( p00, p0);
+					PointOnCircle( &p1, xx->segs[0].u.c.center, fabs(xx->segs[0].u.c.radius), xx->segs[0].u.c.a0 + xx->segs[0].u.c.a1);
+					dd1 = FindDistance( p00, p1);
+				break;
+				case SEG_STRLIN:
+					dd0 = FindDistance( p00, xx->segs[0].u.l.pos[0]);
+					p0 = xx->segs[0].u.l.pos[0];
+					dd1 = FindDistance( p00, xx->segs[0].u.l.pos[1]);
+					p1 = xx->segs[0].u.l.pos[1];
+				break;
+				case SEG_BEZLIN:
+					dd0 = FindDistance( p00, xx->segs[0].u.b.pos[0]);
+					p0 = xx->segs[0].u.b.pos[0];
+					dd1 = FindDistance( p00, xx->segs[0].u.b.pos[3]);
+					p1 = xx->segs[0].u.b.pos[3];
+				break;
+				default:
+					return FALSE;
+			}
+			p0.x += xx->orig.x;
+			p0.y += xx->orig.y;
+			Rotate(&p0,xx->orig,xx->angle);
+			p1.x += xx->orig.x;
+			p1.y += xx->orig.y;
+			Rotate(&p1,xx->orig,xx->angle);
+		} else if (GetTrkType(trk) == T_BZRLIN) {
+			coOrd p0,p1;
+			xx = GetTrkExtraData(trk);
+			p0 = xx->segs[0].u.b.pos[0];
+			p1 = xx->segs[0].u.b.pos[3];
+			dd0 = FindDistance(p00,p0);
+			dd1 = FindDistance(p00,p1);
+		} else return FALSE;
 		if (dd0>dd1) {
 			* pos = p1;
 			return TRUE;
@@ -1059,7 +1070,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionText:
 	case C_CMDMENU:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
-		SnapPos( &pos );
+		if (!((MyGetKeyState() & WKEY_SHIFT) != 0)) {
+			SnapPos( &pos );
+		}
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	case C_CANCEL:
