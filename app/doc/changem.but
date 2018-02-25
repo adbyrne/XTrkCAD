@@ -868,7 +868,7 @@ Click the \f{Move Description} button to activate the \f{Move Description} comma
 
 This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select mode (\K{cmdSelect}).
 
-\e{Shift+Right-Click} (\K{cmdAcclKeys}) can be used to toggle display of individual Curved Track, Helix or Turnout Labels.
+\e{Shift+Right-Click} (\K{cmdAcclKeys}) can be used to toggle display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels.
 
 \rule
 

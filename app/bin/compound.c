@@ -361,35 +361,34 @@ STATUS_T CompoundDescriptionMove(
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	static coOrd p0, p1;
+	static BOOL_T editMode;
 	wDrawColor color;
 
 	switch (action) {
 	case C_DOWN:
+		editMode = TRUE;
 		REORIGIN( p0, xx->descriptionOrig, xx->angle, xx->orig )
 
 	case C_MOVE:
 	case C_UP:
-		if (action != C_DOWN)
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
 		color = GetTrkColor( trk, &mainD );
-		DrawCompoundDescription( trk, &tempD, color );
 		xx->descriptionOff.x = (pos.x-p0.x);
 		xx->descriptionOff.y = (pos.y-p0.y);
 		p1 = xx->descriptionOrig;
 		Rotate( &p1, zero, xx->angle );
 		p1.x += xx->orig.x + xx->descriptionOff.x;
 		p1.y += xx->orig.y + xx->descriptionOff.y;
-		DrawCompoundDescription( trk, &tempD, color );
-		if (action != C_UP)
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+		if (action == C_UP) {
+			editMode = FALSE;
+		}
+		MainRedraw();
+		MapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 		break;
 	case C_REDRAW:
-		p1 = xx->descriptionOrig;
-		Rotate( &p1, zero, xx->angle );
-		p1.x += xx->orig.x + xx->descriptionOff.x;
-		p1.y += xx->orig.y + xx->descriptionOff.y;
-		DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+		if (editMode) {
+			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+		}
 	}
 
 
