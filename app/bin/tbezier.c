@@ -565,7 +565,7 @@ static void ReadBezier( char * line )
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&0x0F));
-	if ( ( options & 0x80 ) != 0 )  SetTrkBits(t,TB_HIDEDESC);
+	if ( ( options & 0x80 ) == 0 )  SetTrkBits(t,TB_HIDEDESC);
 	xx->bezierData.pos[0] = p0;
     xx->bezierData.pos[1] = c1;
     xx->bezierData.pos[2] = c2;
