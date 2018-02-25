@@ -608,7 +608,7 @@ static void ReadCornu( char * line )
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&0x0F));
-	if ( ( options & 0x80 ) != 0 )  SetTrkBits(t,TB_HIDEDESC);
+	if ( ( options & 0x80 ) == 0 )  SetTrkBits(t,TB_HIDEDESC);
 	xx->cornuData.pos[0] = p0;
     xx->cornuData.pos[1] = p1;
     xx->cornuData.a[0] = a0;
