@@ -539,7 +539,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			wBeep();
 			InfoMessage( _("Not close enough to end point, reselect") );
 			return C_CONTINUE;
-		} else if (QueryTrack(Da.trk[Da.selectPoint],Q_IS_CORNU)){
+		} else if (Da.trk[Da.selectPoint] && QueryTrack(Da.trk[Da.selectPoint],Q_IS_CORNU)){
 			wBeep();
 			InfoMessage( _("Is Cornu End -> Not Selectable") );
 			return C_CONTINUE;
