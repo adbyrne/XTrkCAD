@@ -1254,7 +1254,7 @@ static BOOL_T QueryCurve( track_p trk, int query )
 		return TRUE;
 		break;
 	case Q_EXCEPTION:
-		return xx->radius < GetLayoutMinTrackRadius();
+		return xx->radius < GetLayoutMinTrackRadius() - EPSILON;
 		break;
 	case Q_NOT_PLACE_FROGPOINTS:
 		return IsCurveCircle( trk );
