@@ -957,6 +957,13 @@ A critical file is corrupt. Unfortunately it will be necessary to reinstall the 
 Please report this error to the \e{XTrackCAD} project development team at SourceForge. The process for reporting errors is outlined in \k{bugs}.
 END
 
+# param.c
+MESSAGE MSG_ENTERED_STRING_TRUNCATED
+The entered text is too long. Maximum length is %d. 
+HELP
+The text entered into a field is longer than the maximum allowed length and was truncated. Please check the shortened text and edit as necessary.
+END
+
 # track.c
 MESSAGE MSG_PT_IS_NOT_TRK
 [%s %s] is not a track.
