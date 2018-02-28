@@ -380,7 +380,7 @@ void DrawTempCornu() {
 				  &Da.trk2Seg,
 				  Da.extend[0]?&Da.extendSeg[0]:NULL,
 				  Da.extend[1]?&Da.extendSeg[1]:NULL,
-				  Da.minRadius<GetLayoutMinTrackRadius()?drawColorRed:drawColorBlack);
+				  Da.minRadius<(GetLayoutMinTrackRadius()-EPSILON)?drawColorRed:drawColorBlack);
 
 }
 

@@ -924,7 +924,7 @@ static BOOL_T QueryBezier( track_p trk, int query )
 		return TRUE;
 		break;
 	case Q_EXCEPTION:
-		return GetTrkType(trk) == T_BEZIER?xx->bezierData.minCurveRadius < GetLayoutMinTrackRadius():FALSE;
+		return GetTrkType(trk) == T_BEZIER?xx->bezierData.minCurveRadius < (GetLayoutMinTrackRadius()-EPSILON):FALSE;
 		break;
 	case Q_CAN_MODIFY_CONTROL_POINTS:
 		return TRUE;
