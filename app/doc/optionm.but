@@ -368,7 +368,7 @@ This dialog controls some parameters which likely will not be changed frequently
 
 \u000
 
-\dd \f{Check Point} - specifies the Check Point frequency; the number of modifications made to the layout since the last save. The layout is automatically saved to the Check Point file (\K{workDir}) when the Check Point frequency is reached. Setting this value to 0 disables use of the Checkpoint file.
+\dd \f{Check Point} \i{AutoSave} - specifies the Check Point frequency; the number of modifications made to the layout since the last save. The layout is automatically saved to the Check Point file (\K{workDir}) when the Check Point frequency is reached. Setting this value to 0 disables use of the Checkpoint file. Upon restart, if the program was not saved normally, the user will be prompted to see if they want to resume at the last checkpoint.
 
 \u000
 
