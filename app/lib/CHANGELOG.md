@@ -4,11 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unpublished]
+## [unpublished]
 
 ### Added
 
 ### Fixed
+
+### Added and changed parameter files
+
+## [5.1.0]
+
+### Added
+
+### Fixed
++ Fix Traditional Easements that are smaller than Sharp value between 0.21 and 0.5
++ Resuming after an abort takes precedence over loading last layout
++ Fix the vanish track segments problem.
++ Change all track segments currently set to white to black in parameter files and examples
++ Changed initial defaults to orange for exception color and snap grid turned off
++ Make snap feature work with rotated or moved lines
++ Fix track description editing for bezier, cornu and curve
++ Fix track description editing for compound (turnouts)
++ Flip sense of records for Bezier and Cornu so that the default (hidden) matches all the records written so far (0). Only those explicitly unhidden with have the bit flipped.
++ Fix Abend when naked cornu end is modified
++ Allow for small rounding errors when checking minimum radius
++ Round down exception radii in Cornu and Bezier
++ Limit maximum length for PD_STRING and enable limits for layout title
 
 ### Added and changed parameter files
 
