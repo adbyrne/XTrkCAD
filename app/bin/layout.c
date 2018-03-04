@@ -233,8 +233,8 @@ static wWin_p layoutW;
 static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, (void*)(CHANGE_MAIN | CHANGE_MAP) },
     { PD_FLOAT, &thisLayout.props.roomSize.y, "roomsizeY", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r1_9999999, N_("    Height"), 0, (void*)(CHANGE_MAIN | CHANGE_MAP) },
-    { PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD, NULL, N_("Layout Title"), 0, sizeof(thisLayout.props.title1) },
-    { PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD, NULL, N_("Subtitle"), 0, sizeof(thisLayout.props.title1) },
+    { PD_STRING, &thisLayout.props.title1, "title1", PDO_NOPSHUPD, NULL, N_("Layout Title"), 0, (void *)sizeof(thisLayout.props.title1) },
+    { PD_STRING, &thisLayout.props.title2, "title2", PDO_NOPSHUPD, NULL, N_("Subtitle"), 0, (void *)sizeof(thisLayout.props.title2) },
 #define SCALEINX (4)
     { PD_DROPLIST, &thisLayout.props.curScaleDescInx, "scale", PDO_NOPREF | PDO_NOPSHUPD | PDO_NORECORD | PDO_NOUPDACT, (void *)120, N_("Scale"), 0, (void*)(CHANGE_SCALE) },
 #define GAUGEINX (5)
