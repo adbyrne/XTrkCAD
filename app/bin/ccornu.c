@@ -411,7 +411,7 @@ BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track
 		} else {
 			Da.angle[end] = NormalizeAngle(trackParams.track_angle + (track_end?180:0));
 		}
-	} else if (trackParams.type == curveTypeBezier || trackParams.type == curveTypeCornu) {
+	} else if (trackParams.type == curveTypeBezier)  {
 		Da.angle[end] = NormalizeAngle(trackParams.track_angle+(track_end?180:0));
 		if (trackParams.arcR == 0) {
 			Da.radius[end] = 0;
@@ -422,6 +422,12 @@ BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track
 			Da.radius[end] = trackParams.arcR;
 			Da.center[end] = trackParams.arcP;
 		}
+	} else if (trackParams.type == curveTypeCornu) {
+		int ep = trackParams.ep;
+		Da.angle[end] = NormalizeAngle(trackParams.cornuAngle[ep]+(track_end?180:0));
+		Da.radius[end] = trackParams.cornuRadius[ep];
+		Da.pos[end] = trackParams.cornuEnd[ep];
+		Da.center[end] = trackParams.cornuCenter[ep];
 	} else if (trackParams.type == curveTypeStraight) {
 		if (Da.ep[end]>=0)
 			Da.angle[end] = NormalizeAngle(GetTrkEndAngle(t,track_end)+180);  //Ignore params.angle because it gives from nearest end
