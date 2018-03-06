@@ -1388,16 +1388,16 @@ EXPORT void CurveSegProc(
 		int res = AngleInRange(a2,segPtr->u.c.a0,segPtr->u.c.a1);
 		if (res == 1 ) {
 LOG( log_curveSegs, 1, ("CrvSegsAngle miss A%0.3f S%0.3f E%0.3f R%d B%d \n",a2,segPtr->u.c.a0,segPtr->u.c.a1,res,data->traverse1.backwards))
-			a2 = 0;
-		} else if (res == -1){
-			a2 = segPtr->u.c.a1;
-		} else {
+			a2 = segPtr->u.c.a0;
+		} else if (res == -1) {
+LOG( log_curveSegs, 1, ("CrvSegsAngle miss A%0.3f S%0.3f E%0.3f R%d B%d \n",a2,segPtr->u.c.a0,segPtr->u.c.a1,res,data->traverse1.backwards))
+			a2 = segPtr->u.c.a1+segPtr->u.c.a0;
+		}
 		//Fix issue of angles passing through zero -
-			if ( !data->traverse1.backwards ) {
-				a2 = NormalizeAngle(DifferenceBetweenAngles(segPtr->u.c.a0,a2));
-			} else {
-				a2 = NormalizeAngle(DifferenceBetweenAngles(a2,segPtr->u.c.a0+segPtr->u.c.a1));
-			}
+		if ( !data->traverse1.backwards ) {
+			a2 = NormalizeAngle(DifferenceBetweenAngles(segPtr->u.c.a0,a2));
+		} else {
+			a2 = NormalizeAngle(DifferenceBetweenAngles(a2,segPtr->u.c.a0+segPtr->u.c.a1));
 		}
 
 		//Make sure backwards means going towards EP0
