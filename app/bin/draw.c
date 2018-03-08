@@ -324,10 +324,18 @@ static void DDrawArc(
 		da = (maxArcSegStraightLen * 180) / (M_PI * rr);
 		cnt = (int)(angle1/da) + 1;
 		da = angle1 / cnt;
+		coOrd min,max;
+		min = d->orig;
+		max.x = min.x + d->size.x;
+		max.y = min.y + d->size.y;
 		PointOnCircle( &p0, p, r, angle0 );
 		for ( i=1; i<=cnt; i++ ) {
 			angle0 += da;
 			PointOnCircle( &p1, p, r, angle0 );
+			if ((p0.x >= min.x && p0.x <= max.x &&
+				 p0.y >= min.y && p0.y <= max.y) ||
+				(p1.x >= min.x && p1.x <= max.x &&
+				 p1.y >=min.y && p1.y <=max.y))
 			DrawLine( d, p0, p1, width, color );
 			p0 = p1;
 		}
