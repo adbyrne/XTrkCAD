@@ -645,8 +645,14 @@ HELP
 It's not possible to create a Circle or Helix with a radius of 10000\u00B0 or more. Specify a smaller value in the \f{Radius} field.
 END
 
+MESSAGE MSG_RADIUS_TOO_BIG 
+The Circle or Helix will not fit within the layouts room parameters (Height and Width).
+HELP
+The defined circle can not fit within the defined layout parameters. Either specify a smaller value in the \f{Radius} field, or increase the room parameters in the \f{Layout} dialog.
+END
+
 #cselect.c
-MESSAGE MSG_RESCALE_TOO_BIG
+MESSAGE MSG_RESCALE_TOO_BIG 
 Rescaled tracks do not fit within layouts room parameters
 (Height and width). The layouts room parameters should be
 set to at least %s by %s.

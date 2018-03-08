@@ -707,6 +707,14 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 
 	case C_UP:
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		if (helixRadius > mapD.size.x && helixRadius > mapD.size.y) {
+			ErrorMessage( MSG_RADIUS_TOO_BIG );
+			return C_ERROR;
+		}
+		if (circleRadius > mapD.size.x && circleRadius > mapD.size.y) {
+			ErrorMessage( MSG_RADIUS_TOO_BIG );
+			return C_ERROR;
+		}
 		if ( helix ) {
 			if (helixRadius > 10000) {
 				ErrorMessage( MSG_RADIUS_GTR_10000 );
