@@ -484,12 +484,12 @@ static void ComputeHelix( paramGroup_p, int, void * );
 static paramFloatRange_t r0_360 = { 0, 360 };
 static paramFloatRange_t r0_1000000 = { 0, 1000000 };
 static paramIntegerRange_t i1_1000000 = { 1, 1000000 };
-static paramFloatRange_t r1_1000000 = { 1, 1000000 };
+static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_100= { 0, 100 };
 
 static paramData_t helixPLs[] = {
 	{ PD_FLOAT, &helixElev, "elev", PDO_DIM, &r0_1000000, N_("Elevation Difference") },
-	{ PD_FLOAT, &helixRadius, "radius", PDO_DIM, &r1_1000000, N_("Radius") },
+	{ PD_FLOAT, &helixRadius, "radius", PDO_DIM, &r1_10000, N_("Radius") },
 	{ PD_LONG, &helixTurns, "turns", 0, &i1_1000000, N_("Turns") },
 	{ PD_FLOAT, &helixAngSep, "angSep", 0, &r0_360, N_("Angular Separation") },
 	{ PD_FLOAT, &helixGrade, "grade", 0, &r0_100, N_("Grade") },
@@ -499,7 +499,7 @@ static paramData_t helixPLs[] = {
 static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, sizeof helixPLs/sizeof helixPLs[0] };
 
 static paramData_t circleRadiusPLs[] = {
-	{ PD_FLOAT, &circleRadius, "radius", PDO_DIM, &r1_1000000 } };
+	{ PD_FLOAT, &circleRadius, "radius", PDO_DIM, &r1_10000 } };
 static paramGroup_t circleRadiusPG = { "circle", 0, circleRadiusPLs, sizeof circleRadiusPLs/sizeof circleRadiusPLs[0] };
 
 
@@ -708,11 +708,19 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 	case C_UP:
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		if ( helix ) {
+			if (helixRadius > 10000) {
+				ErrorMessage( MSG_RADIUS_GTR_10000 );
+				return C_ERROR;
+			}
 			UndoStart( _("Create Helix Track"), "newHelix" );
 			t = NewCurvedTrack( tempSegs(0).u.c.center, helixRadius, 0.0, 0.0, helixTurns );
 		} else {
 			if ( circleRadius <= 0 ) {
 				ErrorMessage( MSG_RADIUS_GTR_0 );
+				return C_ERROR;
+			}
+			if ((circleRadius > 100000) || (helixRadius > 10000)) {
+				ErrorMessage( MSG_RADIUS_GTR_10000 );
 				return C_ERROR;
 			}
 			UndoStart( _("Create Circle Track"), "newCircle" );

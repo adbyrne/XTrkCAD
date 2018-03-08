@@ -393,6 +393,10 @@ static void UpdateCurve( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 			ErrorMessage( MSG_RADIUS_GTR_0 );
 			crvData.radius = xx0.radius;
 			crvDesc[RA].mode |= DESC_CHANGE;
+		} else if (crvData.radius > 10000) {
+			ErrorMessage( MSG_RADIUS_GTR_10000 );
+			crvData.radius = xx0.radius;
+			crvDesc[RA].mode |= DESC_CHANGE;
 		} else {
 			if ( crvData.pivot == DESC_PIVOT_FIRST || GetTrkEndTrk(trk,0) ) {
 				Translate( &xx0.pos, xx0.pos, a0, xx0.radius-crvData.radius );
@@ -949,11 +953,8 @@ static BOOL_T TrimCurve( track_p trk, EPINX_T ep, DIST_T dist )
 		UndrawNewTrack( trk );
 		AdjustCurveEndPt( trk, ep, a+(ep==0?-90.0:90.0) );
 		DrawNewTrack( trk );
-	} else {
+	} else
 		DeleteTrack( trk, TRUE );
-		MainRedraw();
-		MapRedraw();
-	}
 	return TRUE;
 }
 
@@ -1010,8 +1011,6 @@ static BOOL_T MergeCurve(
 	}
 	DrawNewTrack( trk0 );
 	ComputeCurveBoundingBox( trk0, GetTrkExtraData(trk0) );
-	MainRedraw();
-	MapRedraw();
 	return TRUE;
 }
 
