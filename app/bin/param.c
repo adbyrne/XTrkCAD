@@ -585,10 +585,18 @@ EXPORT void ParamLoadControl(
 			p->oldD.f = tmpR;
 			break;
 		case PD_STRING:
-			wStringSetValue( (wString_p)p->control, (char*)p->valueP );
 			if (p->oldD.s)
 				MyFree( p->oldD.s );
-			p->oldD.s = MyStrdup( (char*)p->valueP );
+			if (p->context) {
+				p->oldD.s = MyMalloc((unsigned int)p->context);
+				strncpy(p->oldD.s, (char*)p->valueP, (unsigned int)p->context);
+				*(p->oldD.s + (unsigned int)p->context - 1) = '\0';
+				wStringSetValue((wString_p)p->control, (char*)p->oldD.s);
+			}
+			else {
+				p->oldD.s = MyStrdup((char *)p->valueP);
+				wStringSetValue((wString_p)p->control, (char*)p->valueP);
+			}
 			break;
 		case PD_MESSAGE:
 			wMessageSetValue( (wMessage_p)p->control, _((char*)p->valueP) );
@@ -721,8 +729,20 @@ EXPORT long ParamUpdate(
 				if (p->oldD.s)
 					MyFree( p->oldD.s );
 				p->oldD.s = MyStrdup( stringV );
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP)
-					strcpy( (char*)p->valueP, stringV );
+				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP) {
+					if (p->context) {
+						strncpy((char*)p->valueP, stringV, (unsigned int)p->context);
+						((char *)p->valueP)[(unsigned int)p->context - 1] = '\0';
+						if (strlen(stringV) > (unsigned int)p->context) {
+							NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, (unsigned int)p->context);
+						}
+
+					}
+					else {
+						strcpy((char*)p->valueP, stringV);
+					}
+				}
+
 				if ( (p->option&PDO_NOUPDACT)==0 && pg->changeProc)
 					 pg->changeProc( pg, inx, CAST_AWAY_CONST stringV );
 				change |= (1L<<inx);
