@@ -639,6 +639,12 @@ HELP
 It's not possible to create a Circle or Helix with a radius of 0\u00B0 or less. Specify a positive value in the \f{Radius} field that appears in the Status Bar.
 END
 
+MESSAGE MSG_RADIUS_GTR_10000 
+Radius must be less than 10000.
+HELP
+It's not possible to create a Circle or Helix with a radius of 10000\u00B0 or less. Specify a smaller value in the \f{Radius} field that appears in the Status Bar.
+END
+
 #cselect.c
 MESSAGE MSG_RESCALE_TOO_BIG
 Rescaled tracks do not fit within layouts room parameters
