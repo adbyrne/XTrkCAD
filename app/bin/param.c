@@ -734,7 +734,7 @@ EXPORT long ParamUpdate(
 					if (p->context) {
 						strncpy((char*)p->valueP, stringV, (intptr_t)p->context);
 						((char *)p->valueP)[(intptr_t)p->context - 1] = '\0';
-						if (strlen(stringV) > (intptr_t)p->context) {
+						if (strlen(stringV) > (uintptr_t)p->context) {
 							NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, (intptr_t)p->context);
 						}
 
