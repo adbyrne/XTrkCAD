@@ -876,7 +876,7 @@ This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select mode (\K
 
 \G{png.d/pan.png}
 
-This command is used to move or resize the viewport using the mouse. \e{Left+Drag} Pans the viewport up and down, left and right keping it within the boundaries of the layout. \e{Right+Drag} selects an area of the screen to zoom into. The \f{"0"}- key resets the display to the origin but leaves the zoom as is. The \f{"e"} - key resets the origin to zero and the zoom to show the whole layout. 
+This command is used to move or resize the viewport using the mouse or keyboard. \e{Left+Drag} Pans the viewport up and down, left and right keping it within the boundaries of the layout. \e{Right+Drag} selects an area of the screen to zoom into. The \f{"0"}- key resets the display to the origin but leaves the zoom as is. Keys between \f{1} and \f{9} set the zoom to that zoom level. The \f{"e"} - key resets the origin to zero and the zooms to show the whole layout. 
 
 \S{cmdProfile} Profile
 

@@ -2544,7 +2544,7 @@ static STATUS_T CmdPan(
 	switch (action&0xFF) {
 	case C_START:
 		start_pos = zero;
-		panmode = NONE;		InfoMessage(_("Left Click to Pan, Right Click to Zoom"));
+		panmode = NONE;		InfoMessage(_("Left Drag to Pan, Right Drag to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to set to Extent"));
 		 break;
 	case C_DOWN:
 		panmode = PAN;
@@ -2556,7 +2556,7 @@ static STATUS_T CmdPan(
 		start_pos = pos;
 		base = pos;
 		size = zero;
-		InfoMessage(_("Zoom Mode - Hilight Area to Zoom"));
+		InfoMessage(_("Zoom Mode - drag Area to Zoom"));
 		break;
 	case C_MOVE:
 		if (panmode == PAN) {
@@ -2623,7 +2623,7 @@ static STATUS_T CmdPan(
 
 		panmode = NONE;
 		DoNewScale(scale_x);
-
+		MapRedraw();
 		break;
 	case C_UP:
 		panmode = NONE;
@@ -2663,6 +2663,12 @@ static STATUS_T CmdPan(
 			ConstraintOrig( &mainD.orig, mainD.size );
 			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
+			MapRedraw();
+			MainRedraw();
+		}
+		if ((action>>8) >= 0x31 && (action>>8) <= 0x39) {         //"1" to "9"
+			scale_x = (action>>8)&0x0F;
+			DoNewScale(scale_x);
 			MapRedraw();
 			MainRedraw();
 		}
