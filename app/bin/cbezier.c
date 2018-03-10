@@ -708,15 +708,15 @@ EXPORT STATUS_T AdjustBezCurve(
 			b = AnalyseCurve(Da.pos,&fx,&fy,&cusp);
 			if (b==ENDS) {
 				wBeep();
-				InfoMessage(_("Bezier Curve Invalid has identical end points Change End Point"),b==CUSP?"Cusp":"Loop");
+				InfoMessage(_("Bezier curve invalid has identical end points Change End Point"),b==CUSP?"Cusp":"Loop");
 			} else if ( b == CUSP || b == LOOP) {
 				wBeep();
-				InfoMessage(_("Bezier Curve Invalid has %s Change End Point"),b==CUSP?"Cusp":"Loop");
+				InfoMessage(_("Bezier curve invalid has %s Change End Point"),b==CUSP?"Cusp":"Loop");
 			} else if ( b == COINCIDENT ) {
 				wBeep();
-				InfoMessage(_("Bezier Curve Invalid has three co-incident points"),b==CUSP?"Cusp":"Loop");
+				InfoMessage(_("Bezier curve invalid has three co-incident points"),b==CUSP?"Cusp":"Loop");
 			} else if ( b == LINE) {
-				InfoMessage(_("Bezier Curve is Straight Line"));
+				InfoMessage(_("Bezier curve is straight line"));
 			}
 				InfoMessage(_("Pick any circle to adjust it - Enter to confirm, ESC to abort"));
 		} else
@@ -1086,7 +1086,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			Da.state = POS_2;
-			InfoMessage( _("Select other end of Bezier, +Shift -> snaps to %s end"), Da.track?"Unconnected Track":"Line" );
+			InfoMessage( _("Select other end of Bezier, +Shift -> snap to %s end"), Da.track?"Unconnected Track":"Line" );
 			Da.cp1Segs_da_cnt = createControlArm(Da.cp1Segs_da, Da.pos[0], Da.pos[1], Da.track, FALSE, Da.trk[0]!=NULL, -1, wDrawColorBlack);
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,NULL,0,NULL,0,drawColorBlack);
 			return C_CONTINUE;

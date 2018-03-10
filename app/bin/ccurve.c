@@ -152,12 +152,12 @@ EXPORT STATUS_T CreateCurve(
 			   			found = TRUE;
 			   		} else {
 			   			Da.pos0=pos;
-						message(_("No unconnected end-point on Track - Try again or release Shift and click"));
+						message(_("No unconnected end-point on track - Try again or release Shift and click"));
 						return C_CONTINUE;
 			   		}
 				}  else {
 					Da.pos0=pos;
-					message(_("Not on a Track - Try again or release Shift and click"));
+					message(_("Not on a track - Try again or release Shift and click"));
 					return C_CONTINUE;
 				}
 				Da.down = TRUE;

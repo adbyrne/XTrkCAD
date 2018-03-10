@@ -610,9 +610,9 @@ static STATUS_T CmdPull(
 
 	case C_START:
 		if (selectedTrackCount==0)
-			InfoMessage( _("Select first End-Point to connect") );
+			InfoMessage( _("Select first end-point to connect") );
 		else
-			InfoMessage( _("Select first End-Point to connect, or Right-Click for connecting selected Tracks") );
+			InfoMessage( _("Select first end-point to connect, or Right-Click for connecting selected tracks") );
 		trk1 = NULL;
 		turntable = FALSE;
 		return C_CONTINUE;
@@ -627,7 +627,7 @@ static STATUS_T CmdPull(
 							ep1 = -1;
 						} else trk1 = NULL;
 					} else {
-						InfoMessage( _("Select second End-Point to connect") );
+						InfoMessage( _("Select second end-point to connect") );
 					}
 
 				}
@@ -708,7 +708,7 @@ static STATUS_T CmdPull(
 			}
 		}
 		UndoEnd();
-		NoticeMessage(_("Round 1 %d and Round 2 %d tracks connected, %d close pairs of end Points were not connected"), _("OK"), NULL, countTracksR0, countTracksR1, possibleEndPoints);
+		NoticeMessage(_("Round 1 %d and Round 2 %d tracks connected, %d close pairs of end Points were not connected"), _("Ok"), NULL, countTracksR0, countTracksR1, possibleEndPoints);
 		return C_TERMINATE;
 
 	case C_REDRAW:

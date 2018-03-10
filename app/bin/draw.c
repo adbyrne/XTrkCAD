@@ -2530,8 +2530,6 @@ static STATUS_T CmdPan(
 
 	static coOrd base, size;
 
-	coOrd new_pos;
-
 	DIST_T scale_x,scale_y;
 
 	static coOrd start_pos;
@@ -2640,7 +2638,6 @@ static STATUS_T CmdPan(
 	case C_TEXT:
 		panmode = NONE;
 		if ((action>>8) == 0x65) {     //"e"
-			double fw, fh;
 			scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
 			scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
 			if (scale_x<scale_y)

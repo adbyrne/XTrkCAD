@@ -55,7 +55,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		Dl.trk = NULL;
 		Dl.ep=-1;
 		Dl.down = FALSE;
-		InfoMessage( _("Place 1st end point of Straight track + Shift -> snap to unconnected endpoint") );
+		InfoMessage( _("Place 1st end point of straight track + Shift -> snap to unconnected endpoint") );
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -71,13 +71,13 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			   		pos = GetTrkEndPos(t, ep);
 			   		found = TRUE;
 			   } else {
-				   InfoMessage(_("No Unconnected end-point on track - Try again or release shift and click"));
+				   InfoMessage(_("No unconnected end-point on track - Try again or release Shift and click"));
 				   Dl.pos0=pos;
 				   Dl.pos1=pos;
 				   return C_CONTINUE;
 			   }
 			} else {
-				InfoMessage(_("Not on a Track - Try again or release shift and click"));
+				InfoMessage(_("Not on a track - Try again or release Shift and click"));
 				Dl.pos0=pos;
 				Dl.pos1=pos;
 				return C_CONTINUE;

@@ -1331,7 +1331,7 @@ static STATUS_T CmdRotate(
 			if (SelectedTracksAreFrozen()) {
 				return C_TERMINATE;
 			}
-			InfoMessage( _("Drag to rotate selected tracks, SHIFT+RightClick for QuickRotate Menu") );
+			InfoMessage( _("Drag to rotate selected tracks, Shift+RightClick for QuickRotate Menu") );
 			wMenuPushEnable( rotateAlignMI, TRUE );
 			rotateAlignState = 0;
 			break;
