@@ -21,6 +21,7 @@
  */
 
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #ifndef WINDOWS
 #include <unistd.h>
@@ -588,9 +589,9 @@ EXPORT void ParamLoadControl(
 			if (p->oldD.s)
 				MyFree( p->oldD.s );
 			if (p->context) {
-				p->oldD.s = MyMalloc((unsigned int)p->context);
-				strncpy(p->oldD.s, (char*)p->valueP, (unsigned int)p->context);
-				*(p->oldD.s + (unsigned int)p->context - 1) = '\0';
+				p->oldD.s = MyMalloc((intptr_t)p->context);
+				strncpy(p->oldD.s, (char*)p->valueP, (intptr_t)p->context);
+				*(p->oldD.s + (intptr_t)p->context - 1) = '\0';
 				wStringSetValue((wString_p)p->control, (char*)p->oldD.s);
 			}
 			else {
@@ -731,10 +732,10 @@ EXPORT long ParamUpdate(
 				p->oldD.s = MyStrdup( stringV );
 				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP) {
 					if (p->context) {
-						strncpy((char*)p->valueP, stringV, (unsigned int)p->context);
-						((char *)p->valueP)[(unsigned int)p->context - 1] = '\0';
-						if (strlen(stringV) > (unsigned int)p->context) {
-							NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, (unsigned int)p->context);
+						strncpy((char*)p->valueP, stringV, (intptr_t)p->context);
+						((char *)p->valueP)[(intptr_t)p->context - 1] = '\0';
+						if (strlen(stringV) > (intptr_t)p->context) {
+							NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, (intptr_t)p->context);
 						}
 
 					}

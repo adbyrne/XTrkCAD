@@ -469,7 +469,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
             for (inx = 0; inx<NUM_LAYERS; inx++) {
                 char *layerFormattedName;
                 layerFormattedName = FormatLayerName(editableLayerList[inx]);
-                wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)inx);
+                wListAddValue((wList_p)ddp->control0, layerFormattedName, NULL, (void*)(long)inx);
                 free(layerFormattedName);
             }
 
