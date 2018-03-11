@@ -30,6 +30,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Allow for small rounding errors when checking minimum radius
 + Round down exception radii in Cornu and Bezier
 + Limit maximum length for PD_STRING and enable limits for layout title
++ Add new check for radius > room dimensions when creating helix or circle
++ Fix map window update on zoom with options for gtk, map overlay update on pan/zoom and pan/zoom messages and doc.
++ Update German translations
 
 ### Added and changed parameter files
 
