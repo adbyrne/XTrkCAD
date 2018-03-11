@@ -3,10 +3,12 @@
 |=|OS|=|Download Package||
 ||Windows||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-setup-@XTRKCAD_VERSION@.exe/download Windows Installer (32 Bit) ]]||
 ||Mac OSX||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-OSX-V@XTRKCAD_VERSION@.dmg/download OSX Installer (64 Bit) ]]||
-||(y:2)Linux||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-setup-@XTRKCAD_VERSION@-1.i686.rpm/download Fedora RPM (32 Bit) ]]||
+||(y:4)Linux||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-setup-@XTRKCAD_VERSION@-1.i686.rpm/download Fedora RPM (32 Bit) ]]||
 ||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-setup-@XTRKCAD_VERSION@-1.i686.sh/download self-extracting install script (32 Bit) ]]||
+||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-setup-@XTRKCAD_VERSION@-1.x86_64.rpm/download Fedora RPM (64 Bit) ]]||
+||[[http://sourceforge.net/projects/xtrkcad-fork/files/XTrackCad/Version%20@XTRKCAD_MAJOR_VERSION@.@XTRKCAD_MINOR_VERSION@.@XTRKCAD_RELEASE_VERSION@/xtrkcad-setup-@XTRKCAD_VERSION@-1.x86_64.sh/download self-extracting install script (64 Bit) ]]||
 =====Third Party Packages=====
-Robert Heller created afew additional packets for Raspbian, Ubuntu 14.04+, and EL6.  Files are up at:
+Robert Heller created a few additional packets for Raspbian, Ubuntu 14.04+, and EL6.  Files are up at:
 
 [[http://files.deepsoft.com/Other/xtrkcad/]]
 or
