@@ -25,6 +25,7 @@
 #include <malloc.h>
 #endif
 #include <math.h>
+#include <string.h>
 
 #define GTK_DISABLE_SINGLE_INCLUDES
 #define GDK_DISABLE_DEPRECATED
@@ -855,15 +856,23 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
         /* for the file based surfaces the resolution is 72 dpi (see documentation) */
         surface_type = cairo_surface_get_type(psPrint_d.curPrintSurface);
 
-        if (surface_type == CAIRO_SURFACE_TYPE_PDF ||
-                surface_type == CAIRO_SURFACE_TYPE_PS  ||
-                surface_type == CAIRO_SURFACE_TYPE_SVG) {
-        	double p_def=600;
-        	cairo_surface_set_fallback_resolution (psPrint_d.curPrintSurface, p_def, p_def);
-        	psPrint_d.dpi = p_def;
-        	scale_adjust = 72/p_def;
+        const char * printer_name = gtk_print_settings_get_printer(settings);
+
+        if (strcmp(printer_name,"Print to File") == 0) {
+			if (surface_type == CAIRO_SURFACE_TYPE_PDF ||
+					surface_type == CAIRO_SURFACE_TYPE_PS  ||
+					surface_type == CAIRO_SURFACE_TYPE_SVG) {
+				double p_def = 600;
+				cairo_surface_set_fallback_resolution (psPrint_d.curPrintSurface, p_def, p_def);
+				psPrint_d.dpi = p_def;
+				scale_adjust = 72/p_def;
+			} else {
+				scale_adjust = 1.0;
+				psPrint_d.dpi = (double)gtk_print_settings_get_resolution(settings);
+			}
         } else {
             psPrint_d.dpi = (double)gtk_print_settings_get_resolution(settings);
+            scale_adjust = 72/psPrint_d.dpi;
         }
 
         // in XTrackCAD 0,0 is top left, in cairo bottom left. This is
