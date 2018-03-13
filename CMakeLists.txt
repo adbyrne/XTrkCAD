@@ -1,6 +1,6 @@
 PROJECT(XTrkCAD)
 enable_testing()
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 2.8)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 
