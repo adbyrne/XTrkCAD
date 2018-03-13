@@ -730,8 +730,8 @@ EXPORT long ParamUpdate(
 				if (p->oldD.s)
 					MyFree( p->oldD.s );
 				p->oldD.s = MyStrdup( stringV );
-				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP) {
-					if (p->context) {
+				if ( p->valueP ) {
+					if (p->option & PDO_STRINGLIMITLENGTH ) {
 						strncpy((char*)p->valueP, stringV, (uint32_t)p->context);
 						((char *)p->valueP)[(uint32_t)p->context - 1] = '\0';
 						if (strlen(stringV) > (uint32_t)p->context) {
