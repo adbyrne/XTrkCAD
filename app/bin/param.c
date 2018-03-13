@@ -589,9 +589,9 @@ EXPORT void ParamLoadControl(
 			if (p->oldD.s)
 				MyFree( p->oldD.s );
 			if (p->context) {
-				p->oldD.s = MyMalloc((intptr_t)p->context);
-				strncpy(p->oldD.s, (char*)p->valueP, (intptr_t)p->context);
-				*(p->oldD.s + (intptr_t)p->context - 1) = '\0';
+				p->oldD.s = MyMalloc((uint32_t)p->context);
+				strncpy(p->oldD.s, (char*)p->valueP, (uint32_t)p->context);
+				*(p->oldD.s + (uint32_t)p->context - 1) = '\0';
 				wStringSetValue((wString_p)p->control, (char*)p->oldD.s);
 			}
 			else {
@@ -732,10 +732,10 @@ EXPORT long ParamUpdate(
 				p->oldD.s = MyStrdup( stringV );
 				if ( /*(p->option&PDO_NOUPDUPD)==0 &&*/ p->valueP) {
 					if (p->context) {
-						strncpy((char*)p->valueP, stringV, (intptr_t)p->context);
-						((char *)p->valueP)[(intptr_t)p->context - 1] = '\0';
+						strncpy((char*)p->valueP, stringV, (uint32_t)p->context);
+						((char *)p->valueP)[(uint32_t)p->context - 1] = '\0';
 						if (strlen(stringV) > (uintptr_t)p->context) {
-							NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, (intptr_t)p->context);
+							NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, (uint32_t)p->context);
 						}
 
 					}
