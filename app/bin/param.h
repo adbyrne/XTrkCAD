@@ -59,6 +59,7 @@ typedef enum {
 #define PDO_DRAW				(1L<<8)
 #define PDO_FILE				(1L<<9)
 
+#define PDO_STRINGLIMITLENGTH	(1L<<11)	/**< context has maximum length for string */
 #define PDO_SMALLDIM			(1L<<12)
 
 #define PDO_DLGSTARTBTNS		(1L<<13)
@@ -67,6 +68,7 @@ typedef enum {
 #define PDO_DLGBOXEND			(1L<<16)	 /**< draw recessed frame around the controls */
 #define PDO_DLGRESETMARGIN		(1L<<17)	 /**< position control on the left ?*/
 #define PDO_DLGIGNORELABELWIDTH (1L<<18)
+
 #define PDO_DLGHORZ				(1L<<20)  /**< arrange on same line as previous element */
 #define PDO_DLGNEWCOLUMN		(1L<<21)
 #define PDO_DLGNOLABELALIGN		(1L<<22)

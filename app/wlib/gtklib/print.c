@@ -863,18 +863,19 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
          * Override up-scaling for some printer drivers/Linux systems that don't support the latest CUPS
          * - the user sets the environment variable XTRKCADPRINTSCALE1 to a value
          * and we just let the dpi default to 72ppi and set scaling to 1.0.
+         * Note - doing this will introduce differing artifacts.
          *
          */
         char * sEnvScale = PRODUCT "PRINTSCALE1";
 
-        if ((strcmp(printer_name,"Print to File") != 0) || getenv(sEnvScale) == 0) {
+        if ((strcmp(printer_name,"Print to File") == 0) || getenv(sEnvScale) == NULL) {
 			double p_def = 600;
 			cairo_surface_set_fallback_resolution(psPrint_d.curPrintSurface, p_def, p_def);
 			psPrint_d.dpi = p_def;
 			scale_adjust = 72/p_def;
 		} else {
 			scale_adjust = 1.0;
-			psPrint_d.dpi = (double)gtk_print_settings_get_resolution(settings);
+			psPrint_d.dpi = 72;
 		}
 
         // in XTrackCAD 0,0 is top left, in cairo bottom left. This is
