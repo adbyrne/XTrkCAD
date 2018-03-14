@@ -32,6 +32,8 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
+#define PRODUCT "XTRKCAD"
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
@@ -620,7 +622,7 @@ void psPrintString(
     metrics = pango_context_get_metrics(pcontext, desc,
                                         pango_context_get_language(pcontext));
 
-    ascent = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE * scale_adjust ;
+    ascent = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE *scale_adjust;
 
     cairo_identity_matrix(cr);
 
@@ -853,27 +855,27 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
         //update the paper dimensions
         WlibGetPaperSize();
 
-        /* for the file based surfaces the resolution is 72 dpi (see documentation) */
+        /* for all surfaces including files the resolution is always 72 ppi (as all GTK uses PDF) */
         surface_type = cairo_surface_get_type(psPrint_d.curPrintSurface);
 
         const char * printer_name = gtk_print_settings_get_printer(settings);
+        /*
+         * Override up-scaling for some printer drivers/Linux systems that don't support the latest CUPS
+         * - the user sets the environment variable XTRKCADPRINTSCALE1 to a value
+         * and we just let the dpi default to 72ppi and set scaling to 1.0.
+         *
+         */
+        char * sEnvScale = PRODUCT "PRINTSCALE1";
 
-        if (strcmp(printer_name,"Print to File") == 0) {
-			if (surface_type == CAIRO_SURFACE_TYPE_PDF ||
-					surface_type == CAIRO_SURFACE_TYPE_PS  ||
-					surface_type == CAIRO_SURFACE_TYPE_SVG) {
-				double p_def = 600;
-				cairo_surface_set_fallback_resolution (psPrint_d.curPrintSurface, p_def, p_def);
-				psPrint_d.dpi = p_def;
-				scale_adjust = 72/p_def;
-			} else {
-				scale_adjust = 1.0;
-				psPrint_d.dpi = (double)gtk_print_settings_get_resolution(settings);
-			}
-        } else {
-            psPrint_d.dpi = (double)gtk_print_settings_get_resolution(settings);
-            scale_adjust = 72/psPrint_d.dpi;
-        }
+        if ((strcmp(printer_name,"Print to File") != 0) || getenv(sEnvScale) == 0) {
+			double p_def = 600;
+			cairo_surface_set_fallback_resolution(psPrint_d.curPrintSurface, p_def, p_def);
+			psPrint_d.dpi = p_def;
+			scale_adjust = 72/p_def;
+		} else {
+			scale_adjust = 1.0;
+			psPrint_d.dpi = (double)gtk_print_settings_get_resolution(settings);
+		}
 
         // in XTrackCAD 0,0 is top left, in cairo bottom left. This is
         // corrected via the following transformations.
