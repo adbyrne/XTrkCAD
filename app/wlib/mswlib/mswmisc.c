@@ -2948,7 +2948,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_SETCURSOR:
         /*if (any buttons down)
         	break;*/
-        wSetCursor(curCursor);
+        wSetCursor(NULL, curCursor);
 
         if (!mswAllowBalloonHelp) {
             break;
