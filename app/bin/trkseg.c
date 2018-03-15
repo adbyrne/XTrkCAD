@@ -1237,7 +1237,6 @@ EXPORT BOOL_T ReadSegs( void )
 				rc = FALSE;
 				break;
 			}
-			rgb = 0;
 			s->color = wDrawFindColor( rgb );
 			break;
 		case SEG_CRVTRK:
@@ -1256,7 +1255,6 @@ EXPORT BOOL_T ReadSegs( void )
 				rc = FALSE;
 				break;
 			}
-			rgb = 0;
 			s->color = wDrawFindColor( rgb );
 			break;
 		case SEG_JNTTRK:
@@ -1279,7 +1277,6 @@ EXPORT BOOL_T ReadSegs( void )
 			s->u.j.negate = ( option&1 )!=0;
 			s->u.j.flip = ( option&2 )!=0;
 			s->u.j.Scurve = ( option&4 )!=0;
-			rgb = 0;
 			s->color = wDrawFindColor( rgb );
 			break;
         case SEG_BEZTRK:
@@ -1298,7 +1295,6 @@ EXPORT BOOL_T ReadSegs( void )
                 rc = FALSE;
                 break;
             }
-            rgb = 0;
             s->color = wDrawFindColor( rgb );
             break;
         case SEG_BEZLIN:
@@ -1532,16 +1528,16 @@ EXPORT BOOL_T WriteSegsEnd(
 				BenchOutputOption(segs[i].u.l.option) ) > 0;
 			break;
 		case SEG_CRVTRK:
-			rc &= fprintf( f, "\t%c 0 %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-				segs[i].type, segs[i].width,
+			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
+				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
 				segs[i].u.c.radius,
 				segs[i].u.c.center.x, segs[i].u.c.center.y,
 				segs[i].u.c.a0, segs[i].u.c.a1 ) > 0;
 			break;
 		case SEG_JNTTRK:
 			option = (segs[i].u.j.negate?1:0) + (segs[i].u.j.flip?2:0) + (segs[i].u.j.Scurve?4:0);
-			rc &= fprintf( f, "\t%c 0 %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %ld\n",
-				segs[i].type, segs[i].width,
+			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %ld\n",
+				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
 				segs[i].u.j.pos.x, segs[i].u.j.pos.y,
 				segs[i].u.j.angle,
 				segs[i].u.j.l0,
@@ -1552,8 +1548,8 @@ EXPORT BOOL_T WriteSegsEnd(
 			break;
         case SEG_BEZTRK:
         case SEG_BEZLIN:
-            rc &= fprintf( f, "\t%c3 0 %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-                segs[i].type, segs[i].width,
+            rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
+                segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
                 segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
                 segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,
                 segs[i].u.l.pos[2].x, segs[i].u.l.pos[2].y,
