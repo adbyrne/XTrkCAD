@@ -843,9 +843,9 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		bd->pixmap = gdk_pixmap_new( bd->widget->window, w, h, -1 );
 
 		wDrawClear( bd );
-		/*bd->redraw( bd, bd->context, w, h );*/
+		bd->redraw( bd, bd->context, w, h );
 	}
-	/*wRedraw( bd );*/
+	/*wRedraw( bd )*/;
 }
 
 

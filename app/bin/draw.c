@@ -2557,8 +2557,6 @@ static STATUS_T CmdPan(
 
 	static coOrd base, size;
 
-	coOrd new_pos;
-
 	DIST_T scale_x,scale_y;
 
 	static coOrd start_pos;
@@ -2571,8 +2569,8 @@ static STATUS_T CmdPan(
 	switch (action&0xFF) {
 	case C_START:
 		start_pos = zero;
-		panmode = NONE;		InfoMessage(_("Left Click to Pan, Right Click to Zoom, 0 for Origin, e for Extents"));
-		wSetCursor(mainD.d,wCursorSizeAll);
+        panmode = NONE;		InfoMessage(_("Left Drag to Pan, Right Drag to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to set to Extent"));
+        wSetCursor(mainD.d,wCursorSizeAll);
 		 break;
 	case C_DOWN:
 		panmode = PAN;
@@ -2584,7 +2582,7 @@ static STATUS_T CmdPan(
 		start_pos = pos;
 		base = pos;
 		size = zero;
-		InfoMessage(_("Zoom Mode - Hilight Area to Zoom"));
+		InfoMessage(_("Zoom Mode - drag Area to Zoom"));
 		break;
 	case C_MOVE:
 		if (panmode == PAN) {
@@ -2658,11 +2656,7 @@ static STATUS_T CmdPan(
 
 		panmode = NONE;
 		DoNewScale(scale_x);
-		if (mainD.scale == oldScale)
-			InfoMessage(_("Scale already at limit"));
-		else
-			InfoMessage(_("Left Click to Pan, Right Click to Zoom, 'o' for Origin, 'e' for Extents"));
-
+		MapRedraw();
 		break;
 	case C_UP:
 		panmode = NONE;
@@ -2680,7 +2674,6 @@ static STATUS_T CmdPan(
 	case C_TEXT:
 		panmode = NONE;
 		if ((action>>8) == 0x65) {     //"e"
-			double fw, fh;
 			scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
 			scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
 			if (scale_x<scale_y)
@@ -2703,6 +2696,12 @@ static STATUS_T CmdPan(
 			ConstraintOrig( &mainD.orig, mainD.size );
 			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
+			MapRedraw();
+			MainRedraw();
+		}
+		if ((action>>8) >= 0x31 && (action>>8) <= 0x39) {         //"1" to "9"
+			scale_x = (action>>8)&0x0F;
+			DoNewScale(scale_x);
 			MapRedraw();
 			MainRedraw();
 		}

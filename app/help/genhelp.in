@@ -349,7 +349,7 @@ display-listlabels	Label elements for lists	cmdDisplay
 display-carhotbarlabels	How to group cars on the Train Hot Bar	cmdDisplay
 display-trainpause	Delay (in mS) between updating train movements	cmdDisplay
 display-hideTrainsInTunnels	Don't show trains in tunnels when tunnels are hidden	cmdDisplay
-display-unconnected-endpt	Display unconnected endpoints of track with sepecial marks	cmdDisplay
+display-unconnected-endpt	Display unconnected endpoints of track with special marks	cmdDisplay
 display-zoom-corner	Whether zoom is locked to the bottom left corner or the center point	cmdDisplay
 #display-ok	Update the display	cmdDisplay
 display-ok		cmdDisplay

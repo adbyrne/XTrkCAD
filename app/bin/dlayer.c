@@ -1199,7 +1199,7 @@ void InitLayers(void)
         }
 
         layerName = FormatLayerName(i);
-        wListAddValue(setLayerL, layerName, NULL, (void*)i);
+        wListAddValue(setLayerL, layerName, NULL, (void*)(long)i);
         free(layerName);
     }
 

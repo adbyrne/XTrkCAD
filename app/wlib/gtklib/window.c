@@ -286,7 +286,7 @@ void wWinSetSize(
     win->busy = TRUE;
     win->w = width;
     win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?win->menu_height:0);
-    //gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
+    gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
     gtk_widget_set_size_request(win->widget, win->w, win->h);
     win->busy = FALSE;
 }
