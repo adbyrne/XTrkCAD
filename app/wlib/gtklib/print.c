@@ -90,6 +90,7 @@ static double lBorder;			/**< left margin */
 static double bBorder;			/**< bottom margin */
 
 static double scale_adjust = 1.0;
+static double scale_text = 1.0;
 
 static long printFormat = PRINT_LANDSCAPE;
 
@@ -608,7 +609,8 @@ void psPrintString(
     /** \todo use a getter function instead of double conversion */
     desc = pango_font_description_from_string(wlibFontTranslate(fp));
 
-    pango_font_description_set_size(desc, fs * PANGO_SCALE );
+
+    pango_font_description_set_size(desc, fs * PANGO_SCALE * scale_text);
 
     // render the string to a Pango layout
     pango_layout_set_font_description(layout, desc);
@@ -861,12 +863,13 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
         const char * printer_name = gtk_print_settings_get_printer(settings);
         /*
          * Override up-scaling for some printer drivers/Linux systems that don't support the latest CUPS
-         * - the user sets the environment variable XTRKCADPRINTSCALE1 to a value
-         * and we just let the dpi default to 72ppi and set scaling to 1.0.
+         * - the user sets the environment variable XTRKCADPRINTSCALE to a value
+         * and we just let the dpi default to 72ppi and set scaling to that value.
+         * And for PangoText we allow an override via variable XTRKCADPRINTTEXTSCALE
          * Note - doing this will introduce differing artifacts.
          *
          */
-        char * sEnvScale = PRODUCT "PRINTSCALE1";
+        char * sEnvScale = PRODUCT "PRINTSCALE";
 
         if ((strcmp(printer_name,"Print to File") == 0) || getenv(sEnvScale) == NULL) {
 			double p_def = 600;
@@ -874,7 +877,13 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
 			psPrint_d.dpi = p_def;
 			scale_adjust = 72/p_def;
 		} else {
-			scale_adjust = 1.0;
+			char * sEnvTextScale = PRODUCT "PRINTTEXTSCALE";
+			if (getenv(sEnvTextScale) && (atof(getenv(sEnvTextScale)) != 0.0)) {
+				scale_text = atof(getenv(sEnvTextScale));
+			} else scale_text = 1.0;
+			if (getenv(sEnvScale) && (atof(getenv(sEnvScale)) != 0.0)) {
+				scale_adjust = atof(getenv(sEnvScale));
+			} else scale_adjust = 1.0;
 			psPrint_d.dpi = 72;
 		}
 
