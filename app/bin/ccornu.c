@@ -283,7 +283,7 @@ BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p
 		if (trk[i]) {
 			if (!GetTrackParams(PARAMS_CORNU,trk[i],pos[i],&params)) return FALSE;
 			cp->pos[i] = pos[i];
-			if (Da.ep[i]>=0) angle = GetTrkEndAngle(trk[i],Da.ep[i]);
+			if (ep && ep[i]>=0) angle = GetTrkEndAngle(trk[i],ep[i]);
 			else angle = params.angle; //Turntable only
 			if (Da.circleorHelix[i]) { //Helix/Circle only
 				cp->radius[i] = params.arcR;
@@ -311,7 +311,7 @@ BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p
 		}
 	}
 
-	return CallCornu0(pos,cp->center,cp->angle,cp->radius,array_p,TRUE);
+	return CallCornu0(pos,cp->center,cp->angle,cp->radius,array_p,ep?TRUE:FALSE);
 }
 
 

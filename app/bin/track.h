@@ -621,6 +621,7 @@ typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLO
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)
 #define DESC_NOREDRAW	(1<<2)
+#define DESC_CHANGE2    (1<<4)
 #define DESC_CHANGE		(1<<8)
 typedef enum { DESC_PIVOT_FIRST, DESC_PIVOT_MID, DESC_PIVOT_SECOND, DESC_PIVOT_NONE } descPivot_t;
 #define DESC_PIVOT_1

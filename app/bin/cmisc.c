@@ -267,10 +267,18 @@ static void DescribeUpdate(
         }
 
         if ((ddp->mode&DESC_CHANGE) == 0) {
-            continue;
+        	if ((ddp->mode&DESC_CHANGE2) == 0)
+        		continue;
         }
 
         ddp->mode &= ~DESC_CHANGE;
+        if (ddp->type == DESC_POS) {			//POS Has two fields
+        	if (ddp->mode&DESC_CHANGE2) {
+        		ddp->mode &= ~DESC_CHANGE2;		//Second time
+        	} else {
+        		ddp->mode |= DESC_CHANGE2;		//First time
+        	}
+        }
         ParamLoadControl(&describePG, inx);
     }
 }
