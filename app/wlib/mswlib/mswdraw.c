@@ -724,94 +724,96 @@ void wDrawGetTextSize(
 }
 
 void wDrawString(
-		wDraw_p d,
-		wPos_t px,
-		wPos_t py,
-		double angle,
-		const char * text,
-		wFont_p fp,
-		double siz,
-		wDrawColor dc,
-		wDrawOpts dopts )
+    wDraw_p d,
+    wPos_t px,
+    wPos_t py,
+    double angle,
+    const char * text,
+    wFont_p fp,
+    double siz,
+    wDrawColor dc,
+    wDrawOpts dopts)
 {
-	int x, y;
-	HFONT newFont, prevFont;
-	HDC newDc;
-	HBITMAP oldBm, newBm;
-	DWORD extent;
-	int w, h;
-	RECT rect;
-	int oldLfHeight;
+    int x, y;
+    HFONT newFont, prevFont;
+    HDC newDc;
+    HBITMAP oldBm, newBm;
+    DWORD extent;
+    int w, h;
+    RECT rect;
+    int oldLfHeight;
 
-	if (fp == NULL)
-		fp = &logFont;
-	oldLfHeight = fp->lfHeight;
-	fp->lfEscapement = (int)(angle*10.0);
-	fp->lfHeight = computeFontSize( d, siz );
-	fp->lfWidth = 0;
-	newFont = CreateFontIndirect( fp );
-	x = XINCH2PIX(d,px) + (int)(mswsin(angle)*fp->lfHeight-0.5);
-	y = YINCH2PIX(d,py) + (int)(mswcos(angle)*fp->lfHeight-0.5);
-	if ( noNegDrawArgs > 0 && ( x < 0 || y < 0 ) )
-		return;
-	if (dopts & wDrawOptTemp) {
-		setDrawMode( d->hDc, d, 0, wDrawLineSolid, dc, dopts );
-		newDc = CreateCompatibleDC( d->hDc );
-		prevFont = SelectObject( newDc, newFont );
-		extent = GetTextExtent( newDc, CAST_AWAY_CONST text, strlen(text) );
-		w = LOWORD(extent);
-		h = HIWORD(extent);
-		if ( h > w ) w = h;
-		newBm = CreateCompatibleBitmap( d->hDc, w*2, w*2 );
-		oldBm = SelectObject( newDc, newBm ); 
-		rect.top = rect.left = 0;
-		rect.bottom = rect.right = w*2;
-		FillRect( newDc, &rect, GetStockObject(WHITE_BRUSH) );
-		TextOut( newDc, w, w, text, strlen(text) );
-		BitBlt( d->hDc, x-w, y-w, w*2, w*2, newDc, 0, 0, tmpOp );
-		SelectObject( newDc, oldBm );
-		DeleteObject( newBm );
-		SelectObject( newDc, prevFont );
-		DeleteDC( newDc );
-		if (d->hWnd) {
-		rect.top = y-(w+1);
-		rect.bottom = y+(w+1);
-		rect.left = x-(w+1);
-		rect.right = x+(w+1);
-		myInvalidateRect( d, &rect );
-		}
-#ifdef LATER
-		/* KLUDGE: Can't Invert text, so we just draw a bow - a pox on windows*/
-		MoveTo( d->hDc, x, y );
-		LineTo( d->hDc, x+w, y );
-		LineTo( d->hDc, x+w, y+h );
-		LineTo( d->hDc, x, y+h );
-		LineTo( d->hDc, x, y );
-#endif
-	} else {
-		prevFont = SelectObject( d->hDc, newFont );
-		SetBkMode( d->hDc, TRANSPARENT );
-		if (dc != wDrawColorBlack) {
-			COLORREF old;
-			old = SetTextColor( d->hDc, mswGetColor(d->hasPalette,dc)/*colorPalette.palPalEntry[dc]*/ );
-			TextOut( d->hDc, x, y, text, strlen(text) );
-			SetTextColor( d->hDc, old );
-		} else
-			TextOut( d->hDc, x, y, text, strlen(text) );
-		extent = GetTextExtent( d->hDc, CAST_AWAY_CONST text, strlen(text) );
-		SelectObject( d->hDc, prevFont );
-		w = LOWORD(extent);
-		h = HIWORD(extent);
-		if (d->hWnd) {
-		rect.top = y-(w+h+1);
-		rect.bottom = y+(w+h+1);
-		rect.left = x-(w+h+1);
-		rect.right = x+(w+h+1);
-		myInvalidateRect( d, &rect );
-		}
-	}
-	DeleteObject( newFont );
-	fp->lfHeight = oldLfHeight;
+    if (fp == NULL) {
+        fp = &logFont;
+    }
+
+    oldLfHeight = fp->lfHeight;
+    fp->lfEscapement = (int)(angle*10.0);
+    fp->lfHeight = computeFontSize(d, siz);
+    fp->lfWidth = 0;
+    newFont = CreateFontIndirect(fp);
+    x = XINCH2PIX(d,px) + (int)(mswsin(angle)*fp->lfHeight-0.5);
+    y = YINCH2PIX(d,py) + (int)(mswcos(angle)*fp->lfHeight-0.5);
+
+    if (noNegDrawArgs > 0 && (x < 0 || y < 0)) {
+        return;
+    }
+
+    if (dopts & wDrawOptTemp) {
+        setDrawMode(d->hDc, d, 0, wDrawLineSolid, dc, dopts);
+        newDc = CreateCompatibleDC(d->hDc);
+        prevFont = SelectObject(newDc, newFont);
+        extent = GetTextExtent(newDc, CAST_AWAY_CONST text, strlen(text));
+        w = LOWORD(extent);
+        h = HIWORD(extent);
+
+        if (h > w) {
+            w = h;
+        }
+
+        newBm = CreateCompatibleBitmap(d->hDc, w*2, w*2);
+        oldBm = SelectObject(newDc, newBm);
+        rect.top = rect.left = 0;
+        rect.bottom = rect.right = w*2;
+        FillRect(newDc, &rect, GetStockObject(WHITE_BRUSH));
+        TextOut(newDc, w, w, text, strlen(text));
+        BitBlt(d->hDc, x-w, y-w, w*2, w*2, newDc, 0, 0, tmpOp);
+        SelectObject(newDc, oldBm);
+        DeleteObject(newBm);
+        SelectObject(newDc, prevFont);
+        DeleteDC(newDc);
+
+        if (d->hWnd) {
+            rect.top = y-(w+1);
+            rect.bottom = y+(w+1);
+            rect.left = x-(w+1);
+            rect.right = x+(w+1);
+            myInvalidateRect(d, &rect);
+        }
+    } else {
+        COLORREF old;
+        prevFont = SelectObject(d->hDc, newFont);
+        SetBkMode(d->hDc, TRANSPARENT);
+        old = SetTextColor(d->hDc, mswGetColor(d->hasPalette,
+                                               dc));
+        TextOut(d->hDc, x, y, text, strlen(text));
+        SetTextColor(d->hDc, old);
+        extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, strlen(text));
+        SelectObject(d->hDc, prevFont);
+        w = LOWORD(extent);
+        h = HIWORD(extent);
+
+        if (d->hWnd) {
+            rect.top = y-(w+h+1);
+            rect.bottom = y+(w+h+1);
+            rect.left = x-(w+h+1);
+            rect.right = x+(w+h+1);
+            myInvalidateRect(d, &rect);
+        }
+    }
+
+    DeleteObject(newFont);
+    fp->lfHeight = oldLfHeight;
 }
 
 static const char * wCurFont( void )
@@ -943,10 +945,14 @@ void wDrawFilledPolygon(
 
 	if (d == NULL)
 		return;
-		if (cnt*2 > wFillPointsMax) {
-				wFillPoints = realloc( wFillPoints, cnt * 2 * sizeof *(POINT*)NULL );
-				wFillPointsMax = cnt*2;
+	if (cnt*2 > wFillPointsMax) {
+		wFillPoints = realloc( wFillPoints, cnt * 2 * sizeof *(POINT*)NULL );
+		if (wFillPoints == NULL) {
+			fputs("can't realloc wFillPoints\n", stderr);
+			abort();
 		}
+		wFillPointsMax = cnt*2;
+	}
 	setDrawBrush( d->hDc, d, color, opts );
 	p1.x = rect.left = rect.right = XINCH2PIX(d,p[cnt-1][0]-1);
 	p1.y = rect.top = rect.bottom = YINCH2PIX(d,p[cnt-1][1]+1);
