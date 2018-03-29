@@ -104,8 +104,8 @@ static track_p first_block;
 static track_p last_block;
 
 static paramData_t blockPLs[] = {
-/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF, (void*)200, N_("Name") },
-/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF, (void*)350, N_("Script") }
+/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, (void *)sizeof( blockName ) },
+/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, (void *)sizeof( blockScript) }
 };
 static paramGroup_t blockPG = { "block", 0, blockPLs,  sizeof blockPLs/sizeof blockPLs[0] };
 static wWin_p blockW;
@@ -116,8 +116,8 @@ static char blockEditSegs[STR_LONG_SIZE];
 static track_p blockEditTrack;
 
 static paramData_t blockEditPLs[] = {
-/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF, (void*)200, N_("Name") },
-/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF, (void*)350, N_("Script") },
+/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, (void *)sizeof(blockEditName) },
+/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, (void *)sizeof(blockEditScript) },
 /*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, (void*)350, N_("Segments"), BO_READONLY }, 
 };
 static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };

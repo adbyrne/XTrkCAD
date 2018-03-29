@@ -616,9 +616,9 @@ char * groupReplaceLabels[] = { N_("Replace with new group?"), NULL };
 static wWin_p groupW;
 static paramIntegerRange_t r0_999999 = { 0, 999999 };
 static paramData_t groupPLs[] = {
-/*0*/ { PD_STRING, groupManuf, "manuf", PDO_NOPREF, (void*)350, N_("Manufacturer") },
-/*1*/ { PD_STRING, groupDesc, "desc", PDO_NOPREF, (void*)230, N_("Description") },
-/*2*/ { PD_STRING, groupPartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH, (void*)100, N_("#") },
+/*0*/ { PD_STRING, groupManuf, "manuf", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Manufacturer"), 0, (void *)sizeof(groupManuf) },
+/*1*/ { PD_STRING, groupDesc, "desc", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)230, N_("Description"), 0, (void *)sizeof(groupDesc) },
+/*2*/ { PD_STRING, groupPartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH|PDO_STRINGLIMITLENGTH, (void*)100, N_("#"), 0, (void *)sizeof(groupPartno) },
 /*3*/ { PD_LONG, &groupSegCnt, "segcnt", PDO_NOPREF, &r0_999999, N_("# Segments"), BO_READONLY },
 /*4*/ { PD_TOGGLE, &groupReplace, "replace", 0, groupReplaceLabels, "", BC_HORZ|BC_NOBORDER } };
 static paramGroup_t groupPG = { "group", 0, groupPLs, sizeof groupPLs/sizeof groupPLs[0] };

@@ -272,10 +272,18 @@ static void DescribeUpdate(
         }
 
         if ((ddp->mode&DESC_CHANGE) == 0) {
-            continue;
+        	if ((ddp->mode&DESC_CHANGE2) == 0)
+        		continue;
         }
 
         ddp->mode &= ~DESC_CHANGE;
+        if (ddp->type == DESC_POS) {			//POS Has two fields
+        	if (ddp->mode&DESC_CHANGE2) {
+        		ddp->mode &= ~DESC_CHANGE2;		//Second time
+        	} else {
+        		ddp->mode |= DESC_CHANGE2;		//First time
+        	}
+        }
         ParamLoadControl(&describePG, inx);
     }
 }
@@ -349,6 +357,9 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
             if (label && ddp->type != DESC_TEXT) {
                 wControlSetLabel(describePLs[inx].control, label);
                 describePLs[inx].winLabel = label;
+            } else {
+            	wControlSetLabel(describePLs[inx].control, _(""));
+            	describePLs[inx].winLabel = _("");
             }
 
             return describePLs[inx].control;
