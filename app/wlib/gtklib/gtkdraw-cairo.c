@@ -188,8 +188,12 @@ static cairo_t* gtkDrawCreateCairoContext(
 	}
 	else
 	{
-		GdkColor* const gcolor = wlibGetColor(color, TRUE);
-		cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
+		long rgbcolor = wDrawGetRGB(color);
+		int r0, g0, b0;
+		r0 = (int)(rgbcolor>>16)&0xFF;
+		g0 = (int)(rgbcolor>>8)&0xFF;
+		b0 = (int)(rgbcolor)&0xFF;
+		cairo_set_source_rgb(cairo, r0/255.0, g0/255.0, b0/255.0);
 
 		cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 	}
