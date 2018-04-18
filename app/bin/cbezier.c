@@ -101,6 +101,7 @@ static struct {
 		track_p selectTrack;
 		BOOL_T track;
 		DIST_T minRadius;
+		DIST_T trackGauge;
 		} Da;
 
 
@@ -497,11 +498,11 @@ EXPORT void DrawBezCurve(trkSeg_p control_arm1,
 	tempD.orig = mainD.orig;
 	tempD.angle = mainD.angle;
 	if (crvSegs_cnt && curveSegs)
-		DrawSegs( &tempD, zero, 0.0, curveSegs, crvSegs_cnt, trackGauge, color );
+		DrawSegs( &tempD, zero, 0.0, curveSegs, crvSegs_cnt, Da.trackGauge, color );
 	if (cp1Segs_cnt && control_arm1)
-		DrawSegs( &tempD, zero, 0.0, control_arm1, cp1Segs_cnt, trackGauge, drawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, control_arm1, cp1Segs_cnt, Da.trackGauge, drawColorBlack );
 	if (cp2Segs_cnt && control_arm2)
-		DrawSegs( &tempD, zero, 0.0, control_arm2, cp2Segs_cnt, trackGauge, drawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, control_arm2, cp2Segs_cnt, Da.trackGauge, drawColorBlack );
 	tempD.funcs->options = oldDrawOptions;
 	tempD.options = oldOptions;
 
@@ -803,7 +804,7 @@ struct extraData {
  * Note: Available points are shown - if a Bezier track is attached to its neighbor, only the control point on that side is selectable.
  * Any free end-point can be locked to a unconnected end point using SHIFT during drag.
  */
-STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
+STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) {
 	BOOL_T track = TRUE;
 	track_p t;
 	double width = 1.0;
@@ -812,7 +813,7 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
 
 	struct extraData *xx = GetTrkExtraData(trk);
 	cmd = (long)commandContext;
-
+	Da.trackGauge = trackG;
 
 	switch (action&0xFF) {
 	case C_START:
@@ -866,6 +867,8 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos) {
 		UndoStart( _("Modify Bezier"), "newBezier - CR" );
 		if (Da.track) t = NewBezierTrack( Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt);
 		else t = NewBezierLine(Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt,xx->bezierData.segsColor,xx->bezierData.segsWidth);
+
+		if (Da.track) CopyAttributes( trk, t );
 
 		DeleteTrack(trk, TRUE);
 
@@ -954,6 +957,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 
 	Da.color = lineColor;
 	Da.width = (double)lineWidth/mainD.dpi;
+
+	Da.trackGauge = trackGauge;
 
 	switch (action&0xFF) {
 

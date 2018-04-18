@@ -20,4 +20,4 @@ DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4],dynArr_t segs,DIST_T * last_
 DIST_T CornuLength(coOrd pos[4],dynArr_t segs);
 DIST_T CornuTotalWindingArc(coOrd pos[4],dynArr_t segs);
 
-STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos);
+STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG);

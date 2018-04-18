@@ -89,6 +89,7 @@ extern TRKTYP_T T_BEZIER;
 extern TRKTYP_T T_CORNU;
 
 
+
 /*
  * STATE INFO
  */
@@ -129,6 +130,7 @@ static struct {
 		track_p selectTrack;
 		DIST_T minRadius;
 		BOOL_T circleorHelix[2];
+		DIST_T trackGauge;
 
 		bezctx * bezc;
 		} Da;
@@ -340,19 +342,19 @@ EXPORT void DrawCornuCurve(
 	tempD.orig = mainD.orig;
 	tempD.angle = mainD.angle;
 	if (first_trk)
-		DrawSegs( &tempD, zero, 0.0, first_trk, 1, trackGauge, drawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, first_trk, 1, Da.trackGauge, drawColorBlack );
 	if (crvSegs_cnt && curveSegs)
-		DrawSegs( &tempD, zero, 0.0, curveSegs, crvSegs_cnt, trackGauge, color );
+		DrawSegs( &tempD, zero, 0.0, curveSegs, crvSegs_cnt, Da.trackGauge, color );
 	if (second_trk)
-		DrawSegs( &tempD, zero, 0.0, second_trk, 1, trackGauge, drawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, second_trk, 1, Da.trackGauge, drawColorBlack );
 	if (ep1Segs_cnt && point1)
-		DrawSegs( &tempD, zero, 0.0, point1, ep1Segs_cnt, trackGauge, drawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, point1, ep1Segs_cnt, Da.trackGauge, drawColorBlack );
 	if (ep2Segs_cnt && point2)
-		DrawSegs( &tempD, zero, 0.0, point2, ep2Segs_cnt, trackGauge, drawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, point2, ep2Segs_cnt, Da.trackGauge, drawColorBlack );
 	if (extend1_trk)
-		DrawSegs( &tempD, zero, 0.0, extend1_trk, 1, trackGauge, drawColorBlack);
+		DrawSegs( &tempD, zero, 0.0, extend1_trk, 1, Da.trackGauge, drawColorBlack);
 	if (extend2_trk)
-		DrawSegs( &tempD, zero, 0.0, extend2_trk, 1, trackGauge, drawColorBlack);
+		DrawSegs( &tempD, zero, 0.0, extend2_trk, 1, Da.trackGauge, drawColorBlack);
 	tempD.funcs->options = oldDrawOptions;
 	tempD.options = oldOptions;
 
@@ -818,9 +820,11 @@ struct extraData {
  * - C_CANCEL (Esc) sets the state to NONE and reshows the original track unchanged.
  *
  */
-STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
+STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG ) {
 	track_p t;
 	struct extraData *xx = GetTrkExtraData(trk);
+
+	Da.trackGauge = trackG;
 
 	switch (action&0xFF) {
 	case C_START:
@@ -899,6 +903,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 				} else {
 					Da.trk[i] = NewCurvedTrack(Da.extendSeg[i].u.c.center,fabs(Da.extendSeg[i].u.c.radius),
 							Da.extendSeg[i].u.c.a0,Da.extendSeg[i].u.c.a1,FALSE);
+
 					if (Da.angle[i]>180)
 						Da.ep[i] = (Da.extendSeg[i].u.c.a0>90 && Da.extendSeg[i].u.c.a0<270)?0:1;
 					else
@@ -929,6 +934,8 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos) {
 			//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 			return C_TERMINATE;
 		}
+
+		CopyAttributes( trk, t );
 
 		DeleteTrack(trk, TRUE);
 
@@ -1020,7 +1027,7 @@ DIST_T CornuTotalWindingArc(coOrd pos[4],dynArr_t segs) {
 }
 
 DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * last_c) {
-	DIST_T r_max = 0.0, rc, lc = 0;
+	DIST_T r_max = 0.0, rc, lc = 0.0;
 	lc = * last_c;
 	segProcData_t segProcData;
 	if (segs.cnt == 0 ) return r_max;
@@ -1029,15 +1036,15 @@ DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * las
 		if (t.type == SEG_FILCRCL) continue;
 		SegProc(SEGPROC_LENGTH,&t,&segProcData);
 		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
-			rc = fabs(1/t.u.c.radius - lc)/segProcData.length.length/2;
-			lc = 1/t.u.c.radius;
+			rc = fabs(1/fabs(t.u.c.radius) - lc)/segProcData.length.length/2;
+			lc = 1/fabs(t.u.c.radius);
 		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
 			rc = CornuMaxRateofChangeofCurvature(t.u.b.pos, t.bezSegs,&lc);  //recurse
 		} else {
-			rc = fabs(0-lc)/segProcData.length.length/2;
-			lc = 0;
+			rc = fabs(0.0-lc)/segProcData.length.length/2;
+			lc = 0.0;
 		}
-		if (rc>r_max) r_max = rc;
+		if (rc > r_max) r_max = rc;
 	}
 	* last_c = lc;
 	return r_max;
@@ -1058,6 +1065,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	Da.color = lineColor;
 	Da.width = (double)lineWidth/mainD.dpi;
+
+	Da.trackGauge = trackGauge;
 
 	switch (action&0xFF) {
 
