@@ -294,7 +294,7 @@ static descData_t cornuDesc[] = {
 /*C1*/	{ DESC_POS, N_("Center X,Y"), &cornData.center[1] },
 /*Z1*/	{ DESC_DIM, N_("Z2"), &cornData.elev[1] },
 /*RA*/	{ DESC_DIM, N_("Minimum Radius"), &cornData.minRadius },
-/*RR*/  { DESC_DIM, N_("Maximum Rate Of Change Of Curvature"), &cornData.maxRateOfChange },
+/*RR*/  { DESC_FLOAT, N_("Max Rate Of Curve Change/Scale"), &cornData.maxRateOfChange },
 /*WA*/  { DESC_ANGLE, N_("Total Winding Angle"), &cornData.windingAngle },
 /*LN*/	{ DESC_DIM, N_("Length"), &cornData.length },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &cornData.grade },
@@ -442,7 +442,7 @@ static void DescribeCornu( track_p trk, char * str, CSIZE_T len )
 
 	cornData.length = xx->cornuData.length;
 	cornData.minRadius = xx->cornuData.minCurveRadius;
-	cornData.maxRateOfChange = xx->cornuData.maxRateofChange;
+	cornData.maxRateOfChange = xx->cornuData.maxRateofChange*GetScaleRatio(GetLayoutCurScale());
 	cornData.windingAngle = xx->cornuData.windingAngle;
     cornData.layerNumber = GetTrkLayer(trk);
     cornData.pos[0] = xx->cornuData.pos[0];

@@ -709,9 +709,9 @@ EXPORT STATUS_T AdjustCornuCurve(
 		else Da.crvSegs_da_cnt = 0;
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 		DIST_T rin = Da.radius[0];
-		InfoMessage( _("Cornu : Min Radius=%s Max Rate of Radius Change=%s Length=%s Winding Arc=%s"),
+		InfoMessage( _("Cornu : Min Radius=%s MaxRateofCurveChange/Scale=%s Length=%s Winding Arc=%s"),
 									FormatDistance(Da.minRadius),
-									FormatDistance(CornuMaxRateofChangeofCurvature(Da.pos,Da.crvSegs_da,&rin)),
+									FormatFloat(CornuMaxRateofChangeofCurvature(Da.pos,Da.crvSegs_da,&rin)*GetScaleRatio(GetLayoutCurScale())),
 									FormatDistance(CornuLength(Da.pos,Da.crvSegs_da)),
 									FormatDistance(CornuTotalWindingArc(Da.pos,Da.crvSegs_da)));
 		DrawTempCornu();
