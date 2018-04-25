@@ -747,10 +747,12 @@ EXPORT STATUS_T AdjustCornuCurve(
 				return C_CONTINUE;
 			}
 			for (int i=0;i<2;i++) {
-				if (FindDistance(Da.pos[i],GetTrkEndPos(Da.trk[i],1-Da.ep[i])) < minLength) {
-				wBeep();
-				InfoMessage(_("Cornu end %d too close to other end of connect track - reposition it"),i+1);
-				return C_CONTINUE;
+				if (!(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))) {        // Not Turntable
+					if (FindDistance(Da.pos[i],GetTrkEndPos(Da.trk[i],1-Da.ep[i])) < minLength) {
+					wBeep();
+					InfoMessage(_("Cornu end %d too close to other end of connect track - reposition it"),i+1);
+					return C_CONTINUE;
+					}
 				}
 			}
 
@@ -894,6 +896,15 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			wBeep();
 			return C_CONTINUE;
 		}
+		for (int i=0;i<2;i++) {
+			if (!(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))) {        // Not Turntable
+				if (FindDistance(Da.pos[i],GetTrkEndPos(Da.trk[i],1-Da.ep[i])) < minLength) {
+					wBeep();
+					InfoMessage(_("Cornu end %d too close to other end of connect track - reposition it"),i+1);
+					return C_CONTINUE;
+				}
+			}
+		}
 		UndoStart( _("Modify Cornu"), "newCornu - CR" );
 		for (int i=0;i<2;i++) {
 			if (!Da.trk[i] && Da.extend[i]) {
@@ -944,14 +955,20 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 
 		for (int i=0;i<2;i++) {										//Attach new track
 			if (Da.trk[i] && Da.ep[i] != -1) {						//Like the old track
-				MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
-				if (GetTrkType(Da.trk[i])==T_BEZIER) {     //Bezier split position not precise, so readjust Cornu
-					GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i]);
-					ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
-					SetCornuEndPt(t,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
+				if (MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0)) {
+					if (GetTrkType(Da.trk[i])==T_BEZIER) {     //Bezier split position not precise, so readjust Cornu
+						GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i]);
+						ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
+						SetCornuEndPt(t,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
+					}
+					if (Da.ep[i]>= 0)
+						ConnectTracks(t,i,Da.trk[i],Da.ep[i]);
+				} else {
+					UndoUndo();
+					wBeep();
+					InfoMessage(_("Connected Track End Adjust for end %d failed"),i);
+					return C_TERMINATE;
 				}
-				if (Da.ep[i]>= 0)
-					ConnectTracks(t,i,Da.trk[i],Da.ep[i]);
 			}
 		}
 		UndoEnd();
