@@ -168,6 +168,15 @@ static track_p MakeDrawFromSeg1(
 	xx->angle = angle;
 	xx->segCnt = 1;
 	memcpy( xx->segs, sp, sizeof *(trkSeg_p)0 );
+
+	if (xx->segs[0].type == SEG_POLY ||
+		xx->segs[0].type == SEG_FILPOLY) {
+		xx->segs[0].u.p.pts = (coOrd*)MyMalloc( (sp->u.p.cnt) * sizeof *(coOrd*)NULL );
+		memcpy(xx->segs[0].u.p.pts, sp->u.p.pts, sp->u.p.cnt * sizeof *(coOrd*)NULL);
+	}
+	if (xx->segs[0].type == SEG_TEXT) {
+		xx->segs[0].u.t.string = MyStrdup(sp->u.t.string);
+	}
 	ComputeDrawBoundingBox( trk );
 	return trk;
 }

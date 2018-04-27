@@ -59,6 +59,7 @@ static BOOL_T modifyCornuMode;
 static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
 	if (Dex.Trk == NULL) return C_ERROR;   //No track picked yet!
+	trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 	switch (action&0xFF) {
 		case C_START:
 		case C_DOWN:
@@ -66,15 +67,15 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 		case C_UP:
 		case C_OK:
 		case C_TEXT:
-			rc = CmdBezModify(Dex.Trk, action, pos);
+			rc = CmdBezModify(Dex.Trk, action, pos, trackGauge);
 			break;
 		case C_TERMINATE:
-			rc = CmdBezModify(Dex.Trk, action, pos);
+			rc = CmdBezModify(Dex.Trk, action, pos, trackGauge);
 			Dex.Trk = NULL;
 			modifyBezierMode = FALSE;
 			break;
 		case C_REDRAW:
-			rc = CmdBezModify(Dex.Trk, action, pos);
+			rc = CmdBezModify(Dex.Trk, action, pos, trackGauge);
 			break;
 	}
 	return rc;
@@ -87,6 +88,7 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
 	if (Dex.Trk == NULL) return C_ERROR;   //No track picked yet!
+	trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 	switch (action&0xFF) {
 		case C_START:
 		case C_DOWN:
@@ -94,15 +96,15 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 		case C_UP:
 		case C_OK:
 		case C_TEXT:
-			rc = CmdCornuModify(Dex.Trk, action, pos);
+			rc = CmdCornuModify(Dex.Trk, action, pos, trackGauge);
 			break;
 		case C_TERMINATE:
-			rc = CmdCornuModify(Dex.Trk, action, pos);
+			rc = CmdCornuModify(Dex.Trk, action, pos, trackGauge);
 			Dex.Trk = NULL;
 			modifyCornuMode = FALSE;
 			break;
 		case C_REDRAW:
-			rc = CmdCornuModify(Dex.Trk, action, pos);
+			rc = CmdCornuModify(Dex.Trk, action, pos, trackGauge);
 			break;
 	}
 	return rc;
@@ -173,6 +175,7 @@ static STATUS_T CmdModify(
 			Dex.Trk = NULL;
 			return C_CONTINUE;
 		}
+		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 		if (QueryTrack( Dex.Trk, Q_CAN_MODIFY_CONTROL_POINTS )) { //Bezier
 			modifyBezierMode = TRUE;
 			if (ModifyBezier(C_START, pos) != C_CONTINUE) {			//Call Start with track
@@ -192,8 +195,6 @@ static STATUS_T CmdModify(
 			return C_CONTINUE;										//That's it
 		}
 
-
-		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 		if ( (MyGetKeyState()&WKEY_SHIFT) &&
 			 QueryTrack( Dex.Trk, Q_CAN_MODIFYRADIUS )&&
 			 (inx=PickUnconnectedEndPoint(pos,Dex.Trk)) >= 0 ) {
