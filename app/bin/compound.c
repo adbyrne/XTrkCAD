@@ -522,7 +522,7 @@ static descData_t compoundDesc[] = {
 /*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &compoundData.layerNumber },
 		{ DESC_NULL } };
-
+#define MAX_DESCRIBE_ENDS 4
 
 
 static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart )
@@ -682,7 +682,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
     case E3:
     case AN:
     case OR:
-		for (int i=0;i<compoundData.epCnt;i++) {
+		for (int i=0;(i<compoundData.epCnt)&&(i<MAX_DESCRIBE_ENDS);i++) {
 			compoundData.endPt[i] = GetTrkEndPos(trk,i);
 			compoundDesc[i*(E1-E0)+E0].mode |= DESC_CHANGE;
 			trackParams_t params;
@@ -803,7 +803,7 @@ void DescribeCompound(
 	compoundDesc[SC].mode = DESC_RO;
 	compoundDesc[LY].mode = DESC_NOREDRAW;
 	if (compoundData.epCnt >0) {
-		for (int i=0;i<compoundData.epCnt;i++) {
+		for (int i=0;(i<compoundData.epCnt)&&(i<MAX_DESCRIBE_ENDS);i++) {
 			compoundDesc[A0+(E1-E0)*i].mode = (int)mode;
 			compoundDesc[R0+(E1-E0)*i].mode = DESC_RO;
 			compoundDesc[C0+(E1-E0)*i].mode = DESC_RO;
