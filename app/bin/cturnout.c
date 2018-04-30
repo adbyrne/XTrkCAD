@@ -127,8 +127,8 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 	}
 	to->segCnt = segCnt;
 	to->segs = (trkSeg_p)memdup( segData, (sizeof *segData) * segCnt );
+	CopyPoly(to->segs,segCnt);
 	FixUpBezierSegs(to->segs,to->segCnt);
-
 	GetSegBounds( zero, 0.0, segCnt, to->segs, &to->orig, &to->size );
 	to->endCnt = endPtCnt;
 	to->endPt = (trkEndPt_t*)memdup( endPts, (sizeof *endPts) * to->endCnt );

@@ -393,8 +393,7 @@ void CurveSegProc( segProc_e, trkSeg_p, segProcData_p );
 void JointSegProc( segProc_e, trkSeg_p, segProcData_p );
 void BezierSegProc( segProc_e, trkSeg_p, segProcData_p );   //Used in Cornu join
 void CleanSegs( dynArr_t *);
-
-
+void CopyPoly(trkSeg_p seg_p, wIndex_t segCnt);
 
 /* debug.c */
 void SetDebug( char * );

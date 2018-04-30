@@ -1336,6 +1336,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
+			s->u.p.polyType = FREEFORM;
 			if (isPolyV2) {
 				if ( !GetArgs( cp, "lwdd",
 					 &rgb, &s->width,
@@ -2009,11 +2010,28 @@ EXPORT void CleanSegs(dynArr_t * seg_p) {
 			t.bezSegs.max = 0;
 			t.bezSegs.ptr = NULL;
 		}
+		if (t.type == SEG_POLY || t.type == SEG_FILPOLY) {
+			if (t.u.p.pts) MyFree(t.u.p.pts);
+			t.u.p.cnt = 0;
+			t.u.p.pts = NULL;
+		}
 	}
 	seg_p->cnt = 0;
 	if (seg_p->ptr) MyFree(seg_p->ptr);
 	seg_p->ptr = NULL;
 	seg_p->max = 0;
 }
+
+EXPORT void CopyPoly(trkSeg_p p, wIndex_t segCnt) {
+	coOrd * newPts;
+	for (int i=0;i<segCnt;i++,p++) {
+		if (p->type == SEG_POLY || p->type == SEG_FILPOLY) {
+			newPts = memdup( p->u.p.pts, p->u.p.cnt*sizeof *(coOrd*)0 );
+			p->u.p.pts = newPts;
+		}
+	}
+}
+
+
 
 
