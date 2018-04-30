@@ -1131,7 +1131,7 @@ EXPORT BOOL_T ReadSegs( void )
 	int i;
 	DIST_T elev0, elev1;
 	BOOL_T hasElev;
-	BOOL_T isPolyV2;
+	BOOL_T isPolyV2, noVersion;
 	BOOL_T improvedEnds;
 	FLOAT_T ignoreFloat;
 	char type;
@@ -1167,6 +1167,9 @@ EXPORT BOOL_T ReadSegs( void )
 		}
 		type = *cp++;
 		hasElev = FALSE;
+		noVersion = TRUE;
+		if ( *cp != ' ')
+			noVersion = FALSE;
 		if ( *cp == '3' ) {
 			cp++;
 			hasElev = TRUE;
@@ -1356,9 +1359,14 @@ EXPORT BOOL_T ReadSegs( void )
 			s->u.p.pts = (coOrd*)MyMalloc( s->u.p.cnt * sizeof *(coOrd*)NULL );
 			for ( i=0; i<s->u.p.cnt; i++ ) {
 				cp = GetNextLine();
-				if (cp == NULL || !GetArgs( cp, hasElev?"pf":"pY", &s->u.p.pts[i], &elev0 ) ) {
+				if (cp == NULL || !GetArgs( cp, "p", &s->u.p.pts[i])) {
 					rc = FALSE;
-					/*??*/break;
+				}
+				if (!noVersion) {
+					if (cp == NULL || !GetArgs( cp, hasElev?"f":"Y", &elev0 ) ) {
+						rc = FALSE;
+						/*??*/break;
+					}
 				}
 			}
 			s->u.p.angle = 0.0;
