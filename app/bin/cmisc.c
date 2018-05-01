@@ -352,8 +352,8 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
                 wControlSetLabel(describePLs[inx].control, label);
                 describePLs[inx].winLabel = label;
             } else {
-            	wControlSetLabel(describePLs[inx].control, _(""));
-            	describePLs[inx].winLabel = _("");
+            	wControlSetLabel(describePLs[inx].control, "");
+            	describePLs[inx].winLabel = "";
             }
 
             return describePLs[inx].control;
