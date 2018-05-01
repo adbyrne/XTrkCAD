@@ -127,7 +127,7 @@ static paramData_t describePLs[] = {
 #define I_EDITLIST_N	I_EDITLIST_0+1
 
 #define I_TEXT_0		I_EDITLIST_N
-    { PD_TEXT, NULL, "T1", 0, &tdata },
+    { PD_TEXT, NULL, "T1", 0, &tdata, NULL, BT_HSCROLL },
 #define I_TEXT_N		I_TEXT_0+1
 
 #define I_PIVOT_0		I_TEXT_N
