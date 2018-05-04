@@ -128,7 +128,7 @@ static paramData_t describePLs[] = {
 #define I_EDITLIST_N	I_EDITLIST_0+1
 
 #define I_TEXT_0		I_EDITLIST_N
-    { PD_TEXT, NULL, "T1", 0, &tdata },
+    { PD_TEXT, NULL, "T1", 0, &tdata, NULL, BT_HSCROLL },
 #define I_TEXT_N		I_TEXT_0+1
 
 #define I_PIVOT_0		I_TEXT_N
@@ -358,8 +358,8 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
                 wControlSetLabel(describePLs[inx].control, label);
                 describePLs[inx].winLabel = label;
             } else {
-            	wControlSetLabel(describePLs[inx].control, _(""));
-            	describePLs[inx].winLabel = _("");
+            	wControlSetLabel(describePLs[inx].control, "");
+            	describePLs[inx].winLabel = "";
             }
 
             return describePLs[inx].control;

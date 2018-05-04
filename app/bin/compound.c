@@ -952,6 +952,7 @@ EXPORT track_p NewCompound(
 	xx->segCnt = segCnt;
 	xx->segs = memdup( segs, segCnt * sizeof *segs );
 	trkSeg_p p = xx->segs;
+	CopyPoly(xx->segs, xx->segCnt);
 	FixUpBezierSegs(xx->segs,xx->segCnt);
 	ComputeCompoundBoundingBox( trk );
 	SetDescriptionOrig( trk );
