@@ -172,6 +172,7 @@ static void UpdateNote(track_p trk, int inx, descData_p descUpd,
 
     switch (inx) {
     case OR:
+
         xx->pos = noteData.pos;
         SetBoundingBox(trk, xx->pos, xx->pos);
         MainRedraw();
@@ -406,11 +407,11 @@ BOOL_T WriteMainNote(FILE* f)
 static STATUS_T CmdNote(wAction_t action, coOrd pos)
 {
     static coOrd oldPos;
+    static int state_on = FALSE;
     track_p trk;
     struct extraData * xx;
     const char* tmpPtrText;
-    static int state_on = FALSE;
-
+    
     switch (action) {
     case C_START:
         InfoMessage(_("Place a note on the layout"));
@@ -426,7 +427,6 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
         oldPos = pos;
         MainRedraw();
         return C_CONTINUE;
-        break;
 
     case C_UP:
         UndoStart(_("New Note"), "New Note");
@@ -449,6 +449,8 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 
     case C_CANCEL:
         DescribeCancel();
+        state_on = FALSE;
+        MainRedraw();
         return C_CONTINUE;
     }
 

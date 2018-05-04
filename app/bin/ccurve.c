@@ -336,7 +336,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	case C_MOVE:
 		if (Da.state<0) return C_CONTINUE;
 		mainD.funcs->options = wDrawOptTemp;
-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		if ( Da.state == 0 ) {
 		    Da.pos1 = pos;
 			rc = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, InfoMessage );
@@ -385,7 +385,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	case C_UP:
 		if (Da.state<0) return C_CONTINUE;
 		mainD.funcs->options = wDrawOptTemp;
-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		if (Da.state == 0) {
 			SnapPos( &pos );
 			Da.pos1 = pos;
@@ -429,6 +429,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				return C_ERROR;
 			}
 			DrawNewTrack( t );
+
 			return C_TERMINATE;
 		}
 
@@ -679,7 +680,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		return C_CONTINUE;
 
 	case C_MOVE:
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		SnapPos( &pos );
 		tempSegs(0).u.c.center = pos;
 		if ( !helix ) {
@@ -706,6 +707,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		return C_CONTINUE;
 
 	case C_UP:
+            
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		if (helixRadius > mapD.size.x && helixRadius > mapD.size.y) {
 			ErrorMessage( MSG_RADIUS_TOO_BIG );
@@ -715,6 +717,7 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 			ErrorMessage( MSG_RADIUS_TOO_BIG );
 			return C_ERROR;
 		}
+
 		if ( helix ) {
 			if (helixRadius > 10000) {
 				ErrorMessage( MSG_RADIUS_GTR_10000 );

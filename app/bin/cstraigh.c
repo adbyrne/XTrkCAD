@@ -97,7 +97,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 
 	case C_MOVE:
 		if (!Dl.down) return C_CONTINUE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		ANGLE_T angle, angle2;
 		if (Dl.trk) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
@@ -112,12 +112,13 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 				PutAngle(FindAngle( Dl.pos0, pos )) );
 		tempSegs(0).u.l.pos[1] = pos;
 		tempSegs_da.cnt = 1;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		MainRedraw();
+		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
 		if (!Dl.down) return C_CONTINUE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		if (Dl.trk) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
@@ -140,9 +141,12 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		if (Dl.down)
+					DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		return C_CONTINUE;
 	case C_CANCEL:
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		Dl.down = FALSE;
+		MainRedraw();
 		return C_CONTINUE;
 
 	default:

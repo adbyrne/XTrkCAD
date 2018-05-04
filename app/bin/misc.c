@@ -1081,10 +1081,8 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 			&& (commandList[curCommand].stickyMask & stickySet)) {
 		tempSegs_da.cnt = 0;
 		UpdateAllElevations();
-		if (action != C_REDRAW) {
-			MainRedraw();
-			MapRedraw();
-		}
+        MainRedraw();
+        MapRedraw();
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
 		}
@@ -2622,15 +2620,15 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 		return NULL;
 
 	InitAppDefaults();
-
-	drawColorBlack = wDrawFindColor(wRGB(0, 0, 0));
-	drawColorWhite = wDrawFindColor(wRGB(255, 255, 255));
-	drawColorRed = wDrawFindColor(wRGB(255, 0, 0));
-	drawColorBlue = wDrawFindColor(wRGB(0, 0, 255));
-	drawColorGreen = wDrawFindColor(wRGB(0, 255, 0));
-	drawColorAqua = wDrawFindColor(wRGB(0, 255, 255));
-	drawColorPurple = wDrawFindColor(wRGB(255, 0, 255));
-	drawColorGold = wDrawFindColor(wRGB(255, 215, 0));
+	drawColorBlack  = wDrawFindColor( wRGB(  0,  0,  0) );
+	drawColorWhite  = wDrawFindColor( wRGB(255,255,255) );
+	drawColorRed    = wDrawFindColor( wRGB(255,  0,  0) );
+	drawColorBlue   = wDrawFindColor( wRGB(  0,  0,255) );
+	drawColorGreen  = wDrawFindColor( wRGB(  0,255,  0) );
+	drawColorAqua   = wDrawFindColor( wRGB(  0,255,255) );
+	drawColorPowderedBlue = wDrawFindColor( wRGB(129, 212, 250));
+	drawColorPurple = wDrawFindColor( wRGB(255,  0,255) );
+	drawColorGold   = wDrawFindColor( wRGB(255,215,  0) );
 	snapGridColor = drawColorGreen;
 	markerColor = drawColorRed;
 	borderColor = drawColorBlack;

@@ -107,7 +107,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 	case C_MOVE:
 
 		if (Dpa.Trk == NULL) return C_CONTINUE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, NULL, &p0, &p1 ) ) {
 			Dpa.Trk = NULL;
 			return C_CONTINUE;
@@ -117,7 +117,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 
 	case C_UP:
 		if (Dpa.Trk == NULL) return C_CONTINUE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack ); 
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		p = p0;
 		if ((t0=OnTrack( &p, FALSE, TRUE )) != NULL) {
 			ep0 = PickEndPoint( p, t0 );

@@ -195,8 +195,9 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			NoticeMessage( MSG_SEL_POS_FIRST, _("Ok"), NULL );
 			return C_CONTINUE;
 		}
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
+		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorWhite );
+            
+		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, wDrawColorWhite, 0.0, NULL, NULL, Dt.boxed );
 		c = (unsigned char)(action >> 8);
 		switch (c) {
 		case '\b':
