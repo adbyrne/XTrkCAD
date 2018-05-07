@@ -59,7 +59,6 @@ static BOOL_T modifyCornuMode;
 static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
 	if (Dex.Trk == NULL) return C_ERROR;   //No track picked yet!
-	trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 	switch (action&0xFF) {
 		case C_START:
 		case C_DOWN:
@@ -67,6 +66,7 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 		case C_UP:
 		case C_OK:
 		case C_TEXT:
+			trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 			rc = CmdBezModify(Dex.Trk, action, pos, trackGauge);
 			break;
 		case C_TERMINATE:
@@ -88,7 +88,6 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
 	if (Dex.Trk == NULL) return C_ERROR;   //No track picked yet!
-	trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 	switch (action&0xFF) {
 		case C_START:
 		case C_DOWN:
@@ -96,6 +95,7 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 		case C_UP:
 		case C_OK:
 		case C_TEXT:
+			trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 			rc = CmdCornuModify(Dex.Trk, action, pos, trackGauge);
 			break;
 		case C_TERMINATE:
