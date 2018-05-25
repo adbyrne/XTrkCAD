@@ -1250,6 +1250,7 @@ EXPORT void MainRedraw( void )
 #endif
 
 	coOrd orig, size;
+	coOrd back_orig;
 	DIST_T t1;
 	if (inPlaybackQuit)
 		return;
@@ -1291,6 +1292,16 @@ lprintf("mainRedraw\n");
 	ConstraintOrig( &mainD.orig, mainD.size );
 	tempD.orig = mainD.orig;
 	wDrawClear( mainD.d );
+
+	orig = mainD.orig;
+	size = mainD.size;
+	orig.x -= RBORDER/mainD.dpi*mainD.scale;
+	orig.y -= BBORDER/mainD.dpi*mainD.scale;
+	int back_x,back_y;
+	CoOrd2Pix(mainD.d,GetLayoutBackGroundPos(),&back_x,&back_y);
+	double back_width = GetLayoutBackGroundSize()*mainD.dpi/mainD.scale;
+	wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundAlpha());
+
 	currRedraw++;
 	DrawSnapGrid( &tempD, mapD.size, TRUE );
 	DrawRoomWalls( TRUE );

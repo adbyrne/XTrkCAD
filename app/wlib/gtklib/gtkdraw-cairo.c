@@ -1091,3 +1091,44 @@ wBool_t wBitMapDelete(          wDraw_p d )
 	return TRUE;
 }
 
+/*******************************************************************************
+ *
+ * Background
+ *
+ ******************************************************************************/
+int wDrawSetBackground(    wDraw_p bd, const char * path, char * error) {
+
+	GError *err = NULL;
+
+	if (path) {
+		bd->background = gdk_pixbuf_new_from_resource (path, &err);
+		if (!bd->background) {
+			error = dupstr(err->message);
+			return -1;
+		}
+	} else {
+		bd->background = NULL;
+		return 1;
+	}
+	return 0;
+
+}
+void wDrawShowBackground(   wDraw_p bd, wPos_t * pos_x, wPos_t pos_y, wPos_t * size, wAngle_t angle, int screen) {
+
+	if (bd->background) {
+		cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorWhite, 0);
+		int pixels = gdk_pixbuf_get_width(bd->background);
+		double scale = size/pixels;
+		cairo_set_scale(scale, scale);
+		cairo_set_rotate(angle);
+		gdk_cairo_set_source_pixbuf(cairo, bd->background, pos_x, pos_y);
+		cairo_pattern_t* alphamask = cairo_pattern_create_rgba(1.0,1.0,1.0,screen/100.0);
+		cairo_mask(cairo,alphamask);
+		gtkDrawDestroyCairoContext(cairo);
+	}
+
+}
+
+
+
+
