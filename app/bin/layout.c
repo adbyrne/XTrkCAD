@@ -185,17 +185,17 @@ void SetLayoutBackGroundSize(double size) {
 }
 
 void SetLayoutBackGroundPos(coOrd pos) {
-	thisLayout.props.backgroundPos;
+	thisLayout.props.backgroundPos = pos;
 
 }
 
 void SetLayoutBackGroundAngle(ANGLE_T angle) {
-	thisLayout.props.backgroundAngle;
+	thisLayout.props.backgroundAngle = angle;
 
 }
 
 void SetLayoutBackGroundAlpha(int alpha) {
-	thisLayout.props.backgroundAlpha;
+	thisLayout.props.backgroundAlpha = alpha;
 
 }
 
@@ -312,20 +312,22 @@ EXPORT int LoadImageFile(
 		char ** fileName,
 		void * data )
 {
-		char * error;
-		assert( fileName != NULL );
-		assert( files == 0);
-		SetLayoutBackGroundFullPath( fileName[ 0 ]);
-		if (wDrawSetBackground(  mainD.d, GetLayoutBackgroundFullPath(), &error)==-1) {
-			ErrorMessage(_("Unable to load Image File - %s"),error);
+		char * error = NULL;
+		if (files >0) {
+			SetLayoutBackGroundFullPath( fileName[ 0 ]);
+			if (wDrawSetBackground(  mainD.d, GetLayoutBackGroundFullPath(), error)==-1) {
+				NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
+				return FALSE;
+			}
+			return TRUE;
 		}
-		return TRUE;
+		return FALSE;
 }
 
 static void ImageFileBrowse( void * junk )
 {
 	const char * path;
-	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Load Background"), _("Background files|*.jpg"), LoadImageFile, NULL );
+	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Load Background"), _("Image Files|*.jpg;*.png;*.JPG;*.jpeg"), LoadImageFile, NULL );
 
 	if (!path) {
 	     path = wPrefGetString("file", "directory");
@@ -362,7 +364,7 @@ static paramData_t layoutPLs[] = {
 #define BACKGROUNDWIDTH (12)
 	{ PD_FLOAT, &thisLayout.props.backgroundWidth, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Width"), 0, (void*)(CHANGE_MAIN) },
 #define BACKGROUNDALPHA (13)
-	{ PD_LONG, &thisLayout.props.backgroundAlpha, "backgroundAlpha", PDO_NOPSHUPD | PDO_DRAW, i0_100, N_("Background Alpha"), 0, (void*)(CHANGE_MAIN) }
+	{ PD_LONG, &thisLayout.props.backgroundAlpha, "backgroundAlpha", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Alpha"), 0, (void*)(CHANGE_MAIN) }
 
 };
 
