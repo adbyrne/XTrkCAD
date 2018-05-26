@@ -1118,16 +1118,34 @@ void wDrawShowBackground( wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size, w
 
 	if (bd->background) {
 		cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorWhite, 0);
-		int pixels = gdk_pixbuf_get_width(bd->background);
-		double scale = (double)size/(double)pixels;
+		cairo_save(cairo);
+		int pixels_width = gdk_pixbuf_get_width(bd->background);
+		int pixels_height = gdk_pixbuf_get_height(bd->background);
+		double scale;
+		double posx,posy,width,sized;
+		posx = (double)pos_x;
+		posy = (double)pos_y;
+		if (size == 0) {
+			scale = 1.0;
+		} else {
+			sized = (double)size;
+			width = (double)pixels_width;
+			scale = sized/width;
+		}
+		posy = (double)bd->h-(pixels_height*scale)-posy;
+		//width = (double)(pixels_width*scale);
+		//height = (double)(pixels_height*scale);
+		cairo_translate(cairo,posx,posy);
 		cairo_scale(cairo, scale, scale);
-		cairo_rotate(cairo,angle);
-		double posx,posy;
-		posx = pos_x;
-		posy = pos_y;
-		gdk_cairo_set_source_pixbuf(cairo, bd->background, pos_x, pos_y);
-		cairo_pattern_t* alphamask = cairo_pattern_create_rgba(1.0,1.0,1.0,screen/100.0);
-		cairo_mask(cairo,alphamask);
+		cairo_translate(cairo, pixels_width/2.0, pixels_height/2.0);
+		cairo_rotate(cairo, M_PI*(angle/180.0));
+		// We need to clip around the image, or cairo will paint garbage data
+		cairo_rectangle(cairo, -pixels_width/2.0, -pixels_height/2.0, pixels_width, pixels_height);
+		cairo_clip(cairo);
+		gdk_cairo_set_source_pixbuf(cairo, bd->background, -pixels_width/2.0, -pixels_height/2.0);
+		cairo_pattern_t *mask = cairo_pattern_create_rgba (1.0,1.0,1.0,(100.0-screen)/100.0);
+		cairo_mask(cairo,mask);
+		cairo_restore(cairo);
 		gtkDrawDestroyCairoContext(cairo);
 	}
 

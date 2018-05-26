@@ -65,6 +65,8 @@ struct sDataLayout thisLayout = {
 static paramFloatRange_t r0_90 = { 0, 90 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r1_9999999 = { 1, 9999999 };
+static paramFloatRange_t r0_360 = { 0, 360 };
+static paramFloatRange_t r0_9999999 = { 1, 9999999 };
 static paramIntegerRange_t i0_100 = { 0, 100 };
 
 static void LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
@@ -314,7 +316,7 @@ EXPORT int LoadImageFile(
 {
 		char * error = NULL;
 		if (files >0) {
-			SetLayoutBackGroundFullPath( fileName[ 0 ]);
+			SetLayoutBackGroundFullPath( strdup(fileName[0]));
 			if (wDrawSetBackground(  mainD.d, GetLayoutBackGroundFullPath(), error)==-1) {
 				NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
 				return FALSE;
@@ -342,6 +344,8 @@ static void ImageFileBrowse( void * junk )
 
 static wWin_p layoutW;
 
+static char * backgroundFileName;
+
 static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, (void*)(CHANGE_MAIN | CHANGE_MAP) },
     { PD_FLOAT, &thisLayout.props.roomSize.y, "roomsizeY", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r1_9999999, N_("    Height"), 0, (void*)(CHANGE_MAIN | CHANGE_MAP) },
@@ -355,16 +359,18 @@ static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, (void*)(CHANGE_MAIN) },
 #define BACKGROUNDFILEENTRY (8)
-	{ PD_STRING, &thisLayout.props.backgroundFileName, "backgroundfile", PDO_NOPSHUPD,  NULL, N_("Background File Path"), 0, (void *)sizeof(thisLayout.props.backgroundFileName) },
+	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD,  NULL, N_("Background File Path"), 0, (void *)sizeof(backgroundFileName) },
 	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 #define BACKGROUNDPOSX (10)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background PosX"), 0, (void*)(CHANGE_MAIN) },
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background PosX"), 0, (void*)(CHANGE_MAIN) },
 #define BACKGROUNDPOSY (11)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background PosY"), 0, (void*)(CHANGE_MAIN) },
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background PosY"), 0, (void*)(CHANGE_MAIN) },
 #define BACKGROUNDWIDTH (12)
 	{ PD_FLOAT, &thisLayout.props.backgroundWidth, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Width"), 0, (void*)(CHANGE_MAIN) },
 #define BACKGROUNDALPHA (13)
-	{ PD_LONG, &thisLayout.props.backgroundAlpha, "backgroundAlpha", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Alpha"), 0, (void*)(CHANGE_MAIN) }
+	{ PD_LONG, &thisLayout.props.backgroundAlpha, "backgroundAlpha", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Alpha"), 0, (void*)(CHANGE_MAIN) },
+#define BACKGROUNDANGLE (14)
+	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW, &r0_360, N_("Background Angle"), 0, (void*)(CHANGE_MAIN) }
 
 };
 
@@ -401,6 +407,7 @@ static void LayoutOk(void * junk)
         sprintf(prefString, "minTrackRadius-%s", curScaleName);
         wPrefSetFloat("misc", prefString, thisLayout.props.minTrackRadius);
     }
+
 
     free(thisLayout.copyOfLayoutProps);
     wHide(layoutW);
@@ -448,6 +455,8 @@ void DoLayout(void * junk)
     if (!thisLayout.copyOfLayoutProps) {
         exit(1);
     }
+
+    backgroundFileName = GetLayoutBackGroundFullPath();
 
     *(thisLayout.copyOfLayoutProps) = thisLayout.props;
 
@@ -510,6 +519,9 @@ LayoutDlgUpdate(
     	MainRedraw();
     }
     if (inx == BACKGROUNDALPHA) {
+    	MainRedraw();
+    }
+    if (inx == BACKGROUNDANGLE) {
     	MainRedraw();
     }
 

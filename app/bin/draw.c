@@ -1296,7 +1296,7 @@ lprintf("mainRedraw\n");
 
 	orig = mainD.orig;
 	size = mainD.size;
-	orig.x -= RBORDER/mainD.dpi*mainD.scale;
+	orig.x -= LBORDER/mainD.dpi*mainD.scale;
 	orig.y -= BBORDER/mainD.dpi*mainD.scale;
 	wPos_t back_x,back_y;
 	coOrd back_pos = GetLayoutBackGroundPos();
