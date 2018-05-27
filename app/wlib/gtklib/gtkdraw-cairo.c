@@ -1132,12 +1132,14 @@ void wDrawShowBackground( wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size, w
 			width = (double)pixels_width;
 			scale = sized/width;
 		}
-		posy = (double)bd->h-(pixels_height*scale)-posy;
+		double rad = M_PI*(angle/180);
+		posy = (double)bd->h-((pixels_height*fabs(cos(rad))+pixels_width*fabs(sin(rad)))*scale)-posy;
 		//width = (double)(pixels_width*scale);
 		//height = (double)(pixels_height*scale);
 		cairo_translate(cairo,posx,posy);
 		cairo_scale(cairo, scale, scale);
-		cairo_translate(cairo, pixels_width/2.0, pixels_height/2.0);
+		cairo_translate(cairo, fabs(pixels_width/2.0*cos(rad))+fabs(pixels_height/2.0*sin(rad)),
+				fabs(pixels_width/2.0*sin(rad))+fabs(pixels_height/2.0*cos(rad)));
 		cairo_rotate(cairo, M_PI*(angle/180.0));
 		// We need to clip around the image, or cairo will paint garbage data
 		cairo_rectangle(cairo, -pixels_width/2.0, -pixels_height/2.0, pixels_width, pixels_height);
