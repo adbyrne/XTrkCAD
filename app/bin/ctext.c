@@ -146,12 +146,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		ParamLoadControls(&textPG);
 		ParamGroupRecord( &textPG );
 
-		if (!inPlayback)
-			wWinSetBusy(mainW, TRUE);
 		DrawTextSize(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size);
 		Dt.cursHeight = size.y;
-		if (!inPlayback)
-			wWinSetBusy(mainW, FALSE);
 
 		controls[0] = textPD.control;
 		controls[1] = colorPD.control;

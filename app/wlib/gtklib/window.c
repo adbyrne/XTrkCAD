@@ -312,7 +312,7 @@ void wWinShow(
     wWin_p win,		/* Window */
     wBool_t show)		/* Command */
 {
-    GtkRequisition requisition;
+    //GtkRequisition min_req, pref_req;
 
     if (debugWindow >= 2) {
         printf("Set Show %s\n", win->labelStr?win->labelStr:"No label");
@@ -322,25 +322,43 @@ void wWinShow(
         abort();
     }
 
+    int width, height;
+
     if (show) {
         keyState = 0;
         getPos(win);
 
         if (win->option & F_AUTOSIZE) {
-            gtk_widget_size_request(win->gtkwin, &requisition);
+        	GtkAllocation allocation;
+        	gtk_widget_get_allocation(win->widget, &allocation);
 
-            if (requisition.width != win->w || requisition.height != win->h) {
-                //gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
-                gtk_widget_set_size_request(win->widget, win->w-20, win->h);
+        	width = win->w;
+        	height = win->h;
+
+        	if (win->realX > width) width = win->realX;
+        	if (win->realY > height) height = win->realY;
+
+            if (allocation.width != width || allocation.height != height ) {
+            	GdkGeometry geometry;
+            	geometry.min_width = width;
+            	geometry.min_height = height;
+
+            	gtk_window_set_geometry_hints (GTK_WINDOW(win->gtkwin),
+            								   win->widget,
+            	                               &geometry,
+            	                               GDK_HINT_MIN_SIZE);
+            	gtk_window_set_resizable(GTK_WINDOW(win->gtkwin),TRUE);
 
                 if (win->option&F_MENUBAR) {
                     gtk_widget_set_size_request(win->menubar, win->w-20, MENUH);
-                    GtkAllocation allocation;
+
                     gtk_widget_get_allocation(win->menubar, &allocation);
                     win->menu_height = allocation.height;
                 }
             }
+            gtk_window_resize(GTK_WINDOW(win->gtkwin), width+10, height+10);
         }
+
 
         if (!win->shown) {
             gtk_widget_show(win->gtkwin);
@@ -934,7 +952,7 @@ static wWin_p wWinCommonCreate(
     int scr_w, scr_h;
     	wGetDisplaySize(&scr_w, &scr_h);
         if (winType != W_MAIN) {
-        	wSetGeometry(w, 50, scr_w/2, 50, scr_h/2, w->w, w->h, -1);
+        	wSetGeometry(w, 100, scr_w/2, 100, scr_h, w->w, w->h, -1);
         } else {
         	wSetGeometry(w, scr_w/2, scr_w-10, scr_h/2, scr_h-10, w->w, w->h, -1);
      }

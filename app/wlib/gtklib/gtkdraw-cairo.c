@@ -514,6 +514,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_rel_line_to(cairo, 0, bd->h);
 	cairo_rel_line_to(cairo, -bd->w, 0);
 	cairo_fill(cairo);
+	gtk_widget_queue_draw(bd->widget);
 	gtkDrawDestroyCairoContext(cairo);
 
 }
