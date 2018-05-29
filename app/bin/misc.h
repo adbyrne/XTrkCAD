@@ -278,6 +278,7 @@ void InitDebug( char *, long * );
 #define CHANGE_MAIN		(1<<2)
 #define CHANGE_MAP		(1<<4)
 #define CHANGE_GRID		(1<<5)
+#define CHANGE_FILE     (1<<6)
 #define CHANGE_UNITS	(1<<7)
 #define CHANGE_TOOLBAR	(1<<8)
 #define CHANGE_CMDOPT	(1<<9)
