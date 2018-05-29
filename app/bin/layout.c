@@ -306,6 +306,7 @@ int GetLayoutBackGroundAlpha()
 */
 static char backgroundFileName[STR_LONG_SIZE];
 #define TEXT_FIELD_LEN 50
+static wWin_p layoutW;
 
 void SetName() {
 	char * name = GetLayoutBackGroundFullPath();
@@ -328,25 +329,33 @@ static struct wFilSel_t * imageFile_fs;
 static char curImageDir[STR_LONG_SIZE];
 #define PARAM_SUBDIR "params"
 
+static paramData_p layout_p;
+static paramGroup_t * layout_pg_p;
+
 EXPORT int LoadImageFile(
 		int files,
 		char ** fileName,
 		void * data )
 {
-		char * error = NULL;
+		char * noname = "";
+		char * error;
 		if (files >0) {
 			SetLayoutBackGroundFullPath( strdup(fileName[0]));
 			if (wDrawSetBackground(  mainD.d, GetLayoutBackGroundFullPath(), error)==-1) {
 				NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
-				SetLayoutBackGroundFullPath(NULL);
+				SetLayoutBackGroundFullPath(noname);
+				SetName();
+				ParamLoadControl(layout_pg_p, 8);
 				return FALSE;
 			}
 			SetName();
+			ParamLoadControl(layout_pg_p, 8);
 			MainRedraw();
 			return TRUE;
 		}
-		SetLayoutBackGroundFullPath(NULL);
+		SetLayoutBackGroundFullPath(noname);
 		SetName();
+		ParamLoadControl(layout_pg_p, 8);
 		MainRedraw();
 		return FALSE;
 }
@@ -369,13 +378,14 @@ static void ImageFileBrowse( void * junk )
 
 static void ImageFileClear( void * junk)
 {
-	SetLayoutBackGroundFullPath(NULL);
+	char * noname = "";
+	SetLayoutBackGroundFullPath(noname);
 	wDrawSetBackground(  mainD.d, NULL, NULL);
 	SetName();
+	ParamLoadControl(layout_pg_p, 8);
+	//wStringSetValue((wString_p)layout_p[8].control,backgroundFileName);
 	MainRedraw();
 }
-
-static wWin_p layoutW;
 
 static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, (void*)(CHANGE_MAIN | CHANGE_MAP) },
@@ -498,6 +508,8 @@ EXPORT addButtonCallBack_t LayoutInit(void)
 {
     ParamRegister(&layoutPG);
     RegisterChangeNotification(LayoutChange);
+    layout_p = layoutPLs;
+    layout_pg_p = &layoutPG;
     return &DoLayout;
 }
 
