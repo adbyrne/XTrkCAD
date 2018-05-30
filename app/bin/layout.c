@@ -368,13 +368,14 @@ static void ImageFileBrowse( void * junk )
 	const char * path;
 	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), _("|"), LoadImageFile, NULL );
 
-	if (!path) {
-	     path = wPrefGetString("file", "directory");
-	}
+	// path is not initialized and not used, obsolete code?
+	//if (!path) {
+	//     path = wPrefGetString("file", "directory");
+	//}
 
-	if (!path) {
-	      path = wGetUserHomeDir();
-	}
+	//if (!path) {
+	//      path = wGetUserHomeDir();
+	//}
 	wFilSelect( imageFile_fs, curImageDir );
 	return;
 }

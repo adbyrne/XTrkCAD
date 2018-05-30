@@ -132,6 +132,7 @@ struct wDraw_t {
 		HBITMAP hBmBackup;
 		HDC hDcBackup;
 		HBITMAP hBmBackupOld;
+		void *background;
 		};
 
 extern HINSTANCE mswHInst;
