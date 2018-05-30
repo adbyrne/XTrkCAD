@@ -629,6 +629,22 @@ Specifies the Title of the layout.  This appears on Gaudy printouts
 Specifies the Modelling Scale
 :layout-gauge
 Specifies the rail gauge, ie. the distance between the rails
+:layout-backgroundfile
+Is the end of the full pathname of the image used as a background. Set with Browse or Clear buttons.
+:layout-browse
+Is the means to set the background image filename
+:layout-clear
+Is the means to clear the background image filename
+:layout-backgroundposX
+Specifies the x offset of the bottom left of the background image
+:layout-backgroundposY
+Specifies the y offset of the bottom left of the background image
+:layout-backgroundWidth
+Specifies how large the bottom edge of the background image should be in model units.
+:layout-backgroundAlpha
+Specifies the screening of the background image from 0 to 100%.
+:layout-backgroundAngle
+Specifies the rotation angle of the background image in degrees. 
 :newcar-road
 Roadname
 :newcar-number
