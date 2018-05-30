@@ -349,8 +349,23 @@ The \f{Layout Options} dialog, displayed by the Options (\K{optionM}) or the Fil
 
 \dd \f{Minimum Track Radius} - Specifies minimum track radius (in inches or centimeters). Curved tracks with a smaller radius are considered exceptional and drawn in the exception (\K{cmdRgbcolor}) color.
 
-\rule
+\u000
 
+\dd \f{Background File Name} - The end of the file pathname of the image used for a temporary background. It is set using the \f{Browse} and \f{Clear} buttons.
+
+\u000
+
+\dd \f{Background Pos X, Y} - The offset of the bottom left corner of the image from the origin (in inches or centimeters).
+
+\u000
+
+\dd \f{Background Screen} - The amount of screening (from 0 to 100%) to apply to the background image. Screening allows objects drawn over the image to be seen more clearly.
+
+\u000
+
+\dd \f{Background Angle} - The rotation angle to apply to the background image (in degrees).
+
+\rule
 
 \S{cmdPref} Preferences Dialog
 

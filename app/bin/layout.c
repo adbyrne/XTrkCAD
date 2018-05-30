@@ -67,7 +67,7 @@ static paramFloatRange_t r0_90 = { 0, 90 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r1_9999999 = { 1, 9999999 };
 static paramFloatRange_t r0_360 = { 0, 360 };
-static paramFloatRange_t r0_9999999 = { 1, 9999999 };
+static paramFloatRange_t rN_9999999 = { -99999, 99999 };
 static paramIntegerRange_t i0_100 = { 0, 100 };
 
 static void LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
@@ -366,7 +366,7 @@ EXPORT int LoadImageFile(
 static void ImageFileBrowse( void * junk )
 {
 	const char * path;
-	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Load Background"), _("Image Files|*.jpg;*.png;*.JPG;*.jpeg"), LoadImageFile, NULL );
+	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), _("|"), LoadImageFile, NULL );
 
 	if (!path) {
 	     path = wPrefGetString("file", "directory");
@@ -402,14 +402,14 @@ static paramData_t layoutPLs[] = {
 #define MINRADIUSENTRY (6)
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, (void*)(CHANGE_MAIN) },
-#define BACKGROUNDFILEENTRY (8)
+#define BACKGROUNDFILEENTRY (8)  //Note this value used in the file section routines above - if it chnages, they will need to change
 	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_FILE) },
 	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, (void*)ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
 #define BACKGROUNDPOSX (11)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background PosX,Y"), 0, (void*)(CHANGE_BACK) },
-	#define BACKGROUNDPOSY (12)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r0_9999999, NULL, 0, (void*)(CHANGE_BACK) },
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, (void*)(CHANGE_BACK) },
+#define BACKGROUNDPOSY (12)
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, (void*)(CHANGE_BACK) },
 #define BACKGROUNDWIDTH (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundWidth, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Width"), 0, (void*)(CHANGE_BACK) },
 #define BACKGROUNDALPHA (14)
