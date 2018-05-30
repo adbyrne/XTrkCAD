@@ -1133,6 +1133,7 @@ void wDrawShowBackground( wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size, w
 			width = (double)pixels_width;
 			scale = sized/width;
 		}
+		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 		double rad = M_PI*(angle/180);
 		posy = (double)bd->h-((pixels_height*fabs(cos(rad))+pixels_width*fabs(sin(rad)))*scale)-posy;
 		//width = (double)(pixels_width*scale);
