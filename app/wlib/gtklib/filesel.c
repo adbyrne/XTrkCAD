@@ -104,10 +104,20 @@ struct wFilSel_t * wFilSelCreate(
 			gtk_file_filter_add_pattern (fs->filter[ count ], cp );
 			// the first pattern is considered to match the default extension
 			if( count == 0 ) {
+
 				fs->defaultExtension = strdup( cp );
-			}	
+				int i = 0;
+				for (i=0; i<strlen(cp) && cp[i] != ' ' && cp[i] != ';';i++) ;
+				if (i<strlen(cp)) fs->defaultExtension[i] = '\0';
+			}
 			cp = strtok( NULL, "|" );
 			count++;
+		}
+		if (opt&FS_PICTURES) {
+			fs->filter[ count ] = gtk_file_filter_new ();
+			gtk_file_filter_set_name( fs->filter[ count ], _("Image files") );
+			gtk_file_filter_add_pixbuf_formats( fs->filter[ count ]);
+			fs->pattCount = count++;
 		}
 		// finally add the all files pattern
 		fs->filter[ count ] = gtk_file_filter_new ();

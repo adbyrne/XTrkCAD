@@ -670,6 +670,7 @@ void wAttachAccelKey( wAccelKey_e, int, wAccelKeyCallBack_p, void * );
  */
 
 #define FS_MULTIPLEFILES	1
+#define FS_PICTURES         2
 
 struct wFilSel_t;
 typedef enum {

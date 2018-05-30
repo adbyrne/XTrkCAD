@@ -363,7 +363,7 @@ EXPORT int LoadImageFile(
 static void ImageFileBrowse( void * junk )
 {
 	const char * path;
-	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Load Background"), _("Image Files|*.jpg;*.png;*.JPG;*.jpeg"), LoadImageFile, NULL );
+	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), _("|"), LoadImageFile, NULL );
 
 	if (!path) {
 	     path = wPrefGetString("file", "directory");
