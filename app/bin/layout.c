@@ -306,26 +306,60 @@ int GetLayoutBackGroundAlpha()
 *
 */
 static char backgroundFileName[STR_LONG_SIZE];
+
+#define TEXT_FIELD_LEN 40
+static wWin_p layoutW;
+
+void SetName() {
+	char * name = GetLayoutBackGroundFullPath();
+	if (name) {
+		if (name && (strlen(name)<=TEXT_FIELD_LEN)) {
+			for (int i=0; i<=strlen(name);i++) {
+				backgroundFileName[i] = name[i];
+			}
+			backgroundFileName[strlen(name)] = '\0';
+		} else {
+			for (int i=TEXT_FIELD_LEN;i>=0; i--) {
+				backgroundFileName[i] = name[strlen(name)-(TEXT_FIELD_LEN-i)-1];
+			}
+		}
+	} else backgroundFileName[0] = '\0';
+
+}
+
 static struct wFilSel_t * imageFile_fs;
 static char curImageDir[STR_LONG_SIZE];
 #define PARAM_SUBDIR "params"
+
+static paramData_p layout_p;
+static paramGroup_t * layout_pg_p;
 
 EXPORT int LoadImageFile(
 		int files,
 		char ** fileName,
 		void * data )
 {
-		char * error = NULL;
+		char * noname = "";
+		char * error;
 		if (files >0) {
 			strcpy(backgroundFileName,fileName[0]);
 			SetLayoutBackGroundFullPath( strdup(fileName[0]));
 			if (wDrawSetBackground(  mainD.d, GetLayoutBackGroundFullPath(), error)==-1) {
 				NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
-				backgroundFileName[0] = '\0';
+				SetLayoutBackGroundFullPath(noname);
+				SetName();
+				ParamLoadControl(layout_pg_p, 8);
 				return FALSE;
 			}
+			SetName();
+			ParamLoadControl(layout_pg_p, 8);
+			MainRedraw();
 			return TRUE;
 		}
+		SetLayoutBackGroundFullPath(noname);
+		SetName();
+		ParamLoadControl(layout_pg_p, 8);
+		MainRedraw();
 		return FALSE;
 }
 
@@ -345,28 +379,16 @@ static void ImageFileBrowse( void * junk )
 	return;
 }
 
-static void SetPathBox(void) {
-#define STRINGBOX_LEN 35
-
-    char * filename = GetLayoutBackGroundFullPath();
-    if (filename) {
-    	if (strlen(filename) < STRINGBOX_LEN) {
-    		strcpy(backgroundFileName,GetLayoutBackGroundFullPath());
-    	} else {
-    		for (int i = STRINGBOX_LEN; i>=0; i--) {
-    			backgroundFileName[i] = filename [strlen(filename)-(STRINGBOX_LEN-i)];
-    		}
-    	}
-    }
- }
-
-static void ImageFileClear( void * junk) {
-	backgroundFileName[0] = '\0';
-	SetLayoutBackGroundFullPath( backgroundFileName );
-	wDrawSetBackground( mainD.d, NULL, NULL);
+static void ImageFileClear( void * junk)
+{
+	char * noname = "";
+	SetLayoutBackGroundFullPath(noname);
+	wDrawSetBackground(  mainD.d, NULL, NULL);
+	SetName();
+	ParamLoadControl(layout_pg_p, 8);
+	//wStringSetValue((wString_p)layout_p[8].control,backgroundFileName);
+	MainRedraw();
 }
-
-static wWin_p layoutW;
 
 static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.roomSize.x, "roomsizeX", PDO_NOPREF | PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Room Width"), 0, (void*)(CHANGE_MAIN | CHANGE_MAP) },
@@ -381,12 +403,12 @@ static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, (void*)(CHANGE_MAIN) },
 #define BACKGROUNDFILEENTRY (8)
-	{ PD_STRING, backgroundFileName, "backgroundfile", 0,  NULL, N_("Background File Path"), 0, (void *)sizeof(backgroundFileName) },
+	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_FILE) },
 	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, (void*)ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
 #define BACKGROUNDPOSX (11)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r0_9999999, N_("Background PosX,Y"), 0, (void*)(CHANGE_BACK) },
-#define BACKGROUNDPOSY (12)
+	#define BACKGROUNDPOSY (12)
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &r0_9999999, NULL, 0, (void*)(CHANGE_BACK) },
 #define BACKGROUNDWIDTH (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundWidth, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Width"), 0, (void*)(CHANGE_BACK) },
@@ -453,7 +475,7 @@ static void LayoutCancel(struct wWin_t *junk)
 
 static void LayoutChange(long changes)
 {
-    if (changes & (CHANGE_SCALE | CHANGE_UNITS | CHANGE_BACK))
+    if (changes & (CHANGE_SCALE | CHANGE_UNITS | CHANGE_FILE))
         if (layoutW != NULL && wWinIsVisible(layoutW)) {
             ParamLoadControls(&layoutPG);
         }
@@ -478,9 +500,7 @@ void DoLayout(void * junk)
     if (!thisLayout.copyOfLayoutProps) {
         exit(1);
     }
-
-    SetPathBox();
-
+    SetName();
     *(thisLayout.copyOfLayoutProps) = thisLayout.props;
 
     ParamLoadControls(&layoutPG);
@@ -491,6 +511,8 @@ EXPORT addButtonCallBack_t LayoutInit(void)
 {
     ParamRegister(&layoutPG);
     RegisterChangeNotification(LayoutChange);
+    layout_p = layoutPLs;
+    layout_pg_p = &layoutPG;
     return &DoLayout;
 }
 
@@ -531,20 +553,32 @@ LayoutDlgUpdate(
         // put the scale's minimum value into the dialog
         wStringSetValue((wString_p)layoutPLs[MINRADIUSENTRY].control,
                         FormatDistance(thisLayout.props.minTrackRadius));
-    } else {
-		if (inx == BACKGROUNDPOSX) {
-			MainRedraw();
-		} else if (inx == BACKGROUNDPOSY) {
-			MainRedraw();
-		} else if (inx == BACKGROUNDWIDTH) {
-			MainRedraw();
-		} else if (inx == BACKGROUNDALPHA) {
-			MainRedraw();
-		} else if (inx == BACKGROUNDANGLE) {
-			MainRedraw();
-		} else if (inx == BACKGROUNDFILEENTRY) {
-			MainRedraw();
-		}
+    }
+    if (inx == BACKGROUNDPOSX) {
+    	coOrd pos;
+    	pos.x = *(double *)valueP;
+    	pos.y = GetLayoutBackGroundPos().y;
+    	SetLayoutBackGroundPos(pos);
+    	MainRedraw();
+    }
+    if (inx == BACKGROUNDPOSY) {
+    	coOrd pos;
+		pos.y = *(double *)valueP;
+		pos.x = GetLayoutBackGroundPos().x;
+		SetLayoutBackGroundPos(pos);
+    	MainRedraw();
+    }
+    if (inx == BACKGROUNDWIDTH) {
+    	SetLayoutBackGroundSize(*(double *)valueP);
+    	MainRedraw();
+    }
+    if (inx == BACKGROUNDALPHA) {
+    	SetLayoutBackGroundAlpha(*(int *)valueP);
+    	MainRedraw();
+    }
+    if (inx == BACKGROUNDANGLE) {
+    	SetLayoutBackGroundAngle(*(double *)valueP);
+    	MainRedraw();
     }
 
 }

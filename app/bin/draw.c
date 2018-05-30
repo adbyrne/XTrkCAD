@@ -1187,11 +1187,11 @@ lprintf("MapRedraw\n");
 
 	if (delayUpdate)
 	wDrawDelayUpdate( mapD.d, TRUE );
-	wSetCursor( mapD.d, wCursorWait );
+	//wSetCursor( mapD.d, wCursorWait );
 	wDrawClear( mapD.d );
 	DrawTracks( &mapD, mapD.scale, mapD.orig, mapD.size );
 	DrawMapBoundingBox( TRUE );
-	wSetCursor( mapD.d, defaultCursor );
+	//wSetCursor( mapD.d, defaultCursor );
 	wDrawDelayUpdate( mapD.d, FALSE );
 }
 
@@ -1259,7 +1259,7 @@ EXPORT void MainRedraw( void )
 lprintf("mainRedraw\n");
 #endif
 
-	wSetCursor( mainD.d, wCursorWait );
+	//wSetCursor( mainD.d, wCursorWait );
 	if (delayUpdate)
 	wDrawDelayUpdate( mainD.d, TRUE );
 #ifdef LATER
@@ -1319,7 +1319,7 @@ lprintf("mainRedraw\n");
 	RulerRedraw( FALSE );
 	DoCurCommand( C_REDRAW, zero );
 	DrawMarkers();
-	wSetCursor( mainD.d, defaultCursor );
+	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
