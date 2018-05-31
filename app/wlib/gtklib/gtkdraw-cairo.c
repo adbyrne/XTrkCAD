@@ -1101,6 +1101,10 @@ int wDrawSetBackground(    wDraw_p bd, char * path, char * error) {
 
 	GError *err = NULL;
 
+	if (bd->background) {
+		g_object_unref(bd->background);
+	}
+
 	if (path) {
 		bd->background = gdk_pixbuf_new_from_file (path, &err);
 		if (!bd->background) {
