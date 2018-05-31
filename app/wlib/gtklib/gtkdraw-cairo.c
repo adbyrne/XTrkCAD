@@ -1153,6 +1153,7 @@ void wDrawShowBackground( wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size, w
 		gdk_cairo_set_source_pixbuf(cairo, bd->background, -pixels_width/2.0, -pixels_height/2.0);
 		cairo_pattern_t *mask = cairo_pattern_create_rgba (1.0,1.0,1.0,(100.0-screen)/100.0);
 		cairo_mask(cairo,mask);
+		cairo_pattern_destroy(mask);
 		cairo_restore(cairo);
 		gtkDrawDestroyCairoContext(cairo);
 	}
