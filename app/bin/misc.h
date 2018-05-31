@@ -278,13 +278,12 @@ void InitDebug( char *, long * );
 #define CHANGE_MAIN		(1<<2)
 #define CHANGE_MAP		(1<<4)
 #define CHANGE_GRID		(1<<5)
-#define CHANGE_FILE     (1<<6)
+#define CHANGE_BACKGROUND (1<<6)
 #define CHANGE_UNITS	(1<<7)
 #define CHANGE_TOOLBAR	(1<<8)
 #define CHANGE_CMDOPT	(1<<9)
 #define CHANGE_LIMITS	(1<<10)
-#define CHANGE_BACK     (1<<11)
-#define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACK)
+#define CHANGE_ALL		(CHANGE_SCALE|CHANGE_PARAMS|CHANGE_MAIN|CHANGE_MAP|CHANGE_UNITS|CHANGE_TOOLBAR|CHANGE_CMDOPT|CHANGE_BACKGROUND)
 typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
 void DoChangeNotification( long );

@@ -365,17 +365,8 @@ EXPORT int LoadImageFile(
 
 static void ImageFileBrowse( void * junk )
 {
-	const char * path;
 	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), _("|"), LoadImageFile, NULL );
 
-	// path is not initialized and not used, obsolete code?
-	//if (!path) {
-	//     path = wPrefGetString("file", "directory");
-	//}
-
-	//if (!path) {
-	//      path = wGetUserHomeDir();
-	//}
 	wFilSelect( imageFile_fs, curImageDir );
 	return;
 }
@@ -404,19 +395,19 @@ static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.minTrackRadius, "mintrackradius", PDO_DIM | PDO_NOPSHUPD | PDO_NOPREF, &r1_10000, N_("Min Track Radius"), 0, (void*)(CHANGE_MAIN | CHANGE_LIMITS) },
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, (void*)(CHANGE_MAIN) },
 #define BACKGROUNDFILEENTRY (8)  //Note this value used in the file section routines above - if it chnages, they will need to change
-	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_FILE) },
+	{ PD_STRING, &backgroundFileName, "backgroundfile", PDO_NOPSHUPD,  NULL, N_("Background File Path"), 0, (void *)(CHANGE_BACKGROUND) },
 	{ PD_BUTTON, (void*)ImageFileBrowse, "browse", PDO_DLGHORZ, NULL, N_("Browse ...") },
 	{ PD_BUTTON, (void*)ImageFileClear, "clear", PDO_DLGHORZ, NULL, N_("Clear") },
 #define BACKGROUNDPOSX (11)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, (void*)(CHANGE_BACK) },
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.x, "backgroundposX", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &rN_9999999, N_("Background PosX,Y"), 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDPOSY (12)
-	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, (void*)(CHANGE_BACK) },
+	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDWIDTH (13)
-	{ PD_FLOAT, &thisLayout.props.backgroundWidth, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Width"), 0, (void*)(CHANGE_BACK) },
+	{ PD_FLOAT, &thisLayout.props.backgroundWidth, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Width"), 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDALPHA (14)
-	{ PD_LONG, &thisLayout.props.backgroundAlpha, "backgroundAlpha", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Alpha"), 0, (void*)(CHANGE_BACK) },
+	{ PD_LONG, &thisLayout.props.backgroundAlpha, "backgroundAlpha", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Alpha"), 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDANGLE (15)
-	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW, &r0_360, N_("Background Angle"), 0, (void*)(CHANGE_BACK) }
+	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW, &r0_360, N_("Background Angle"), 0, (void*)(CHANGE_BACKGROUND) }
 
 };
 
@@ -453,7 +444,7 @@ static void LayoutOk(void * junk)
         sprintf(prefString, "minTrackRadius-%s", curScaleName);
         wPrefSetFloat("misc", prefString, thisLayout.props.minTrackRadius);
     }
-
+    LayoutBackGroundSave();
 
     free(thisLayout.copyOfLayoutProps);
     wHide(layoutW);
@@ -476,7 +467,7 @@ static void LayoutCancel(struct wWin_t *junk)
 
 static void LayoutChange(long changes)
 {
-    if (changes & (CHANGE_SCALE | CHANGE_UNITS | CHANGE_FILE))
+    if (changes & (CHANGE_SCALE | CHANGE_UNITS | CHANGE_BACKGROUND))
         if (layoutW != NULL && wWinIsVisible(layoutW)) {
             ParamLoadControls(&layoutPG);
         }
@@ -581,5 +572,23 @@ LayoutDlgUpdate(
     	SetLayoutBackGroundAngle(*(double *)valueP);
     	MainRedraw();
     }
+
+}
+
+void
+LayoutBackGroundInit(void) {
+	SetLayoutBackGroundFullPath(NULL);
+	SetLayoutBackGroundPos(zero);
+	SetLayoutBackGroundSize(0.0);
+	SetLayoutBackGroundAlpha(0);
+	SetLayoutBackGroundAngle(0.0);
+}
+void
+LayoutBackGroundLoad(void) {
+
+}
+
+void
+LayoutBackGroundSave(void) {
 
 }
