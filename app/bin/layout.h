@@ -60,6 +60,7 @@ double GetLayoutBackGroundSize(void);
 coOrd GetLayoutBackGroundPos(void);
 ANGLE_T GetLayoutBackGroundAngle(void);
 int GetLayoutBackGroundAlpha(void);
+void LayoutBackGroundInit(void);
 
 void DoLayout(void * junk);
 #endif
