@@ -179,7 +179,8 @@ static int dumpControls;
 
 extern char *userLocale;
 
-
+char * filterImageFiles = "Image Files\0*.png;*.jpg;*.jpeg\0All Files\0*\0";
+
 /*
  *****************************************************************************
  *
@@ -2429,7 +2430,13 @@ int wFilSelect(
     memset(&ofn, 0, sizeof ofn);
     ofn.lStructSize = sizeof ofn;
     ofn.hwndOwner = mswHWnd;
-    ofn.lpstrFilter = fs->extList;
+	if (fs->option == FS_PICTURES) {
+		ofn.lpstrFilter = filterImageFiles;
+	}
+	else {
+		ofn.lpstrFilter = fs->extList;
+	}
+
     ofn.nFilterIndex = 0;
     selFileName = malloc(SELECTEDFILENAME_BUFFERSIZE);
     memset(selFileName, '\0', SELECTEDFILENAME_BUFFERSIZE);

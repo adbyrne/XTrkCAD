@@ -61,6 +61,8 @@ coOrd GetLayoutBackGroundPos(void);
 ANGLE_T GetLayoutBackGroundAngle(void);
 int GetLayoutBackGroundAlpha(void);
 void LayoutBackGroundInit(void);
+void LayoutBackGroundLoad(void);
+void LayoutBackGroundSave(void);
 
 void DoLayout(void * junk);
 #endif
