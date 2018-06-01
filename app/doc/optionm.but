@@ -351,19 +351,23 @@ The \f{Layout Options} dialog, displayed by the Options (\K{optionM}) or the Fil
 
 \u000
 
-\dd \f{Background File Name} - The end of the file pathname of the image used for a temporary background. It is set using the \f{Browse} and \f{Clear} buttons.
+\dd \f{Background File Name} - The last 40 characters of the full file pathname for the image used for a temporary background behind all the drawn objects. It is set using the \f{Browse} and reset with the \f{Clear} buttons. It is also cleared along with all the other background values after a \f{Open} or \f{New} command.
 
 \u000
 
-\dd \f{Background Pos X, Y} - The offset of the bottom left corner of the image from the origin (in inches or centimeters).
+\dd \f{Background Pos X, Y} - The offset of the bottom left corner of the background image from the origin (in inches or centimeters) after rotation.
 
 \u000
 
-\dd \f{Background Screen} - The amount of screening (from 0 to 100%) to apply to the background image. Screening allows objects drawn over the image to be seen more clearly.
+\dd \f{Background Size} - The model size (in inches or cm) to scale the base of the background image to (measured from bottom left to bottom right as displayed after any rotation has been applied). Note - A value of 0.0 means that no scaling is applied and the image is shown at its current size in pixels regardless of scale or zoom.
 
 \u000
 
-\dd \f{Background Angle} - The rotation angle to apply to the background image (in degrees).
+\dd \f{Background Screen} - The amount of screening (from 0 to 100%) to apply to the background image. Screening allows objects drawn over the image to be seen more clearly. 0 means no screening, while 100% means noting will be shown.
+
+\u000
+
+\dd \f{Background Angle} - The rotation angle to apply to the background image (in degrees) about its center before it is moved so that its bottom left corner is offset by the \f{Background Pos} setting.
 
 \rule
 
