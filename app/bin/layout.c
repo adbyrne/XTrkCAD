@@ -31,6 +31,7 @@
 #include "paths.h"
 #include "track.h"
 #include "wlib.h"
+#include "fileio.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 
@@ -334,8 +335,6 @@ void SetName() {
 }
 
 static struct wFilSel_t * imageFile_fs;
-static char curImageDir[STR_LONG_SIZE];
-#define PARAM_SUBDIR "params"
 
 static paramData_p layout_p;
 static paramGroup_t * layout_pg_p;
@@ -379,6 +378,7 @@ EXPORT int LoadImageFile(
 			file_changed = TRUE;
 			ParamLoadControl(layout_pg_p, 8);
 			MainRedraw();
+			SetCurrentPath( BACKGROUNDPATHKEY, fileName[ 0 ] );
 			return TRUE;
 		}
 
@@ -412,7 +412,7 @@ static void ImageFileBrowse( void * junk )
 {
 	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), _("|"), LoadImageFile, NULL );
 
-	wFilSelect( imageFile_fs, curImageDir );
+	wFilSelect( imageFile_fs, GetCurrentPath( BACKGROUNDPATHKEY ) );
 	return;
 }
 
