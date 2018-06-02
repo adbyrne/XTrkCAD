@@ -1097,7 +1097,7 @@ wBool_t wBitMapDelete(          wDraw_p d )
  * Background
  *
  ******************************************************************************/
-int wDrawSetBackground(    wDraw_p bd, char * path, char * error) {
+int wDrawSetBackground(    wDraw_p bd, char * path, char ** error) {
 
 	GError *err = NULL;
 
@@ -1108,7 +1108,7 @@ int wDrawSetBackground(    wDraw_p bd, char * path, char * error) {
 	if (path) {
 		bd->background = gdk_pixbuf_new_from_file (path, &err);
 		if (!bd->background) {
-			error = err->message;
+			*error = err->message;
 			return -1;
 		}
 	} else {
