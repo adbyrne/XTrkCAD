@@ -349,7 +349,7 @@ wBool_t
 LoadBackGroundImage(void)
 {
 	char * error;
-	if (wDrawSetBackground(  mainD.d, GetLayoutBackGroundFullPath(), error)==-1) {
+	if (wDrawSetBackground(  mainD.d, GetLayoutBackGroundFullPath(), &error)==-1) {
 		NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
 		return FALSE;
 	}
