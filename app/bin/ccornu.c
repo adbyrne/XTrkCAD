@@ -1114,6 +1114,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
 		Da.ep1Segs_da_cnt = 0;
 		Da.ep2Segs_da_cnt = 0;
+		Da.crvSegs_da_cnt = 0;
 		Da.extend[0] = FALSE;
 		Da.extend[1] = FALSE;
 		if (selectedTrackCount==0)
