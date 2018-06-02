@@ -1304,7 +1304,9 @@ lprintf("mainRedraw\n");
 	back_y = (wPos_t)((back_pos.y-orig.y)/mainD.scale*mainD.dpi);
 	wPos_t back_width = (wPos_t)(GetLayoutBackGroundSize()/mainD.scale*mainD.dpi);
 
-	wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundAlpha());
+	if (GetLayoutBackGroundScreen() < 100.0) {
+		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
+	}
 
 	currRedraw++;
 	DrawSnapGrid( &tempD, mapD.size, TRUE );

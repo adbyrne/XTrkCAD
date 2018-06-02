@@ -42,7 +42,7 @@ void SetLayoutBackGroundFullPath(const char *fileName);
 void SetLayoutBackGroundSize(double size);
 void SetLayoutBackGroundPos(coOrd pos);
 void SetLayoutBackGroundAngle(ANGLE_T angle);
-void SetLayoutBackGroundAlpha(int alpha);
+void SetLayoutBackGroundScreen(int screen);
 
 char *GetLayoutFullPath(void);
 char *GetLayoutFilename(void);
@@ -59,7 +59,7 @@ char *GetLayoutBackGroundFullPath(void);
 double GetLayoutBackGroundSize(void);
 coOrd GetLayoutBackGroundPos(void);
 ANGLE_T GetLayoutBackGroundAngle(void);
-int GetLayoutBackGroundAlpha(void);
+int GetLayoutBackGroundScreen(void);
 void LayoutBackGroundInit(void);
 void LayoutBackGroundLoad(void);
 void LayoutBackGroundSave(void);

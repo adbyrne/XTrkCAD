@@ -359,7 +359,7 @@ The \f{Layout Options} dialog, displayed by the Options (\K{optionM}) or the Fil
 
 \u000
 
-\dd \f{Background Screen} - The amount of screening (from 0 to 100%) to apply to the background image. Screening allows objects drawn over the image to be seen more clearly.
+\dd \f{Background Screen} - The amount of screening (from 0 to 100%) to apply to the background image. Screening allows objects drawn over the image to be seen more clearly. A value of 100 will make the background vanish.
 
 \u000
 

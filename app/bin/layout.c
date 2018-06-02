@@ -47,7 +47,7 @@ struct sLayoutProps {
     DynString       backgroundFileName;
     coOrd			backgroundPos;
     ANGLE_T			backgroundAngle;
-    int				backgroundAlpha;
+    int				backgroundScreen;
     double 			backgroundSize;
 };
 
@@ -201,8 +201,8 @@ void SetLayoutBackGroundAngle(ANGLE_T angle) {
 
 }
 
-void SetLayoutBackGroundAlpha(int alpha) {
-	thisLayout.props.backgroundAlpha = alpha;
+void SetLayoutBackGroundScreen(int screen) {
+	thisLayout.props.backgroundScreen = screen;
 
 }
 
@@ -300,9 +300,9 @@ GetLayoutBackGroundAngle()
 	return (thisLayout.props.backgroundAngle);
 }
 
-int GetLayoutBackGroundAlpha()
+int GetLayoutBackGroundScreen()
 {
-	return (thisLayout.props.backgroundAlpha);
+	return (thisLayout.props.backgroundScreen);
 }
 /****************************************************************************
 *
@@ -399,7 +399,7 @@ void LayoutBackGroundSave(void) {
    	wPrefSetFloat("layout", "BackgroundPosX", thisLayout.props.backgroundPos.x);
    	wPrefSetFloat("layout", "BackgroundPosY", thisLayout.props.backgroundPos.y);
    	wPrefSetFloat("layout", "BackgroundAngle", thisLayout.props.backgroundAngle);
-   	wPrefSetInteger("layout", "BackgroundAlpha", thisLayout.props.backgroundAlpha);
+   	wPrefSetInteger("layout", "BackgroundScreen", thisLayout.props.backgroundScreen);
    	wPrefSetFloat("layout", "BackgroundSize", thisLayout.props.backgroundSize);
 
    	wPrefFlush();
@@ -452,8 +452,8 @@ static paramData_t layoutPLs[] = {
 	{ PD_FLOAT, &thisLayout.props.backgroundPos.y, "backgroundposY", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW | PDO_DLGHORZ, &rN_9999999, NULL, 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDWIDTH (13)
 	{ PD_FLOAT, &thisLayout.props.backgroundSize, "backgroundWidth", PDO_DIM | PDO_NOPSHUPD | PDO_DRAW, &r1_9999999, N_("Background Size"), 0, (void*)(CHANGE_BACKGROUND) },
-#define BACKGROUNDALPHA (14)
-	{ PD_LONG, &thisLayout.props.backgroundAlpha, "backgroundAlpha", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, (void*)(CHANGE_BACKGROUND) },
+#define BACKGROUNDSCREEN (14)
+	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDANGLE (15)
 	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW, &r0_360, N_("Background Angle"), 0, (void*)(CHANGE_BACKGROUND) }
 
@@ -618,8 +618,8 @@ LayoutDlgUpdate(
     	SetLayoutBackGroundSize(*(double *)valueP);
     	MainRedraw();
     }
-    if (inx == BACKGROUNDALPHA) {
-    	SetLayoutBackGroundAlpha(*(int *)valueP);
+    if (inx == BACKGROUNDSCREEN) {
+    	SetLayoutBackGroundScreen(*(int *)valueP);
     	MainRedraw();
     }
     if (inx == BACKGROUNDANGLE) {
@@ -639,9 +639,9 @@ LayoutBackGroundLoad(void) {
 	wPrefGetFloat("layout", "BackgroundPosX", &thisLayout.props.backgroundPos.x, 0.0);
 	wPrefGetFloat("layout", "BackgroundPosY", &thisLayout.props.backgroundPos.y, 0.0);
 	wPrefGetFloat("layout", "BackgroundAngle", &thisLayout.props.backgroundAngle, 0.0);
-	long alpha_long;
-	wPrefGetInteger("layout", "BackgroundAlpha", &alpha_long, 0.0);
-	thisLayout.props.backgroundAlpha = alpha_long;
+	long screen_long;
+	wPrefGetInteger("layout", "BackgroundScreen", &screen_long, 0.0);
+	thisLayout.props.backgroundScreen = screen_long;
 	wPrefGetFloat("layout", "BackgroundSize", &thisLayout.props.backgroundSize, 0.0);
 }
 
@@ -656,7 +656,7 @@ LayoutBackGroundInit(void) {
 		SetLayoutBackGroundFullPath(noname);
 		SetLayoutBackGroundPos(zero);
 		SetLayoutBackGroundAngle(0.0);
-		SetLayoutBackGroundAlpha(0);
+		SetLayoutBackGroundScreen(0);
 		SetLayoutBackGroundSize(0.0);
 		LayoutBackGroundSave();
 	} else {      //First Time
