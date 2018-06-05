@@ -189,6 +189,7 @@ extern wButton_p undoB;
 extern wButton_p redoB;
 extern wButton_p zoomUpB;			/** ZoomUp button on toolbar */
 extern wButton_p zoomDownB;		/** ZoomDown button on toolbar */
+extern wButton_p backgroundB;		/** background visibility control */
 // extern wButton_p easementB;
 extern wIndex_t checkPtMark;
 extern wMenu_p demoM;

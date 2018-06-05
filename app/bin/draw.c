@@ -1304,7 +1304,7 @@ lprintf("mainRedraw\n");
 	back_y = (wPos_t)((back_pos.y-orig.y)/mainD.scale*mainD.dpi);
 	wPos_t back_width = (wPos_t)(GetLayoutBackGroundSize()/mainD.scale*mainD.dpi);
 
-	if (GetLayoutBackGroundScreen() < 100.0) {
+	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
 		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
 	}
 

@@ -115,6 +115,7 @@ EXPORT wButton_p redoB;
 EXPORT wButton_p zoomUpB;
 EXPORT wButton_p zoomDownB;
 wButton_p mapShowB;
+wButton_p backgroundB;
 
 EXPORT wIndex_t checkPtMark = 0;
 

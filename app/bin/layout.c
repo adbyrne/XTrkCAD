@@ -304,6 +304,7 @@ int GetLayoutBackGroundScreen()
 {
 	return (thisLayout.props.backgroundScreen);
 }
+
 /****************************************************************************
 *
 * Layout Dialog
@@ -340,7 +341,23 @@ static paramData_p layout_p;
 static paramGroup_t * layout_pg_p;
 static wBool_t file_changed;
 
+EXPORT BOOL_T haveBackground = FALSE;
+BOOL_T backgroundVisible = TRUE;
+
 char * noname = "";
+
+void
+BackgroundToggleShow()
+{
+	backgroundVisible = !backgroundVisible;
+	wButtonSetBusy(backgroundB, backgroundVisible);
+	MainRedraw();
+}
+
+int GetLayoutBackGroundVisible()
+{
+	return(backgroundVisible);
+}
 
 /*****************************************
 * Try to load the background image file
@@ -376,6 +393,9 @@ EXPORT int LoadImageFile(
 			}
 			SetName();
 			file_changed = TRUE;
+			backgroundVisible = TRUE;
+			wControlActive((wControl_p)backgroundB, TRUE);
+			wButtonSetBusy(backgroundB, backgroundVisible);
 			ParamLoadControl(layout_pg_p, 8);
 			MainRedraw();
 			SetCurrentPath( BACKGROUNDPATHKEY, fileName[ 0 ] );
@@ -425,6 +445,7 @@ static void ImageFileClear( void * junk)
 	SetLayoutBackGroundFullPath(noname);
 	wDrawSetBackground(  mainD.d, NULL, NULL);
 	SetName();
+	wControlActive((wControl_p)backgroundB, FALSE);
 	file_changed = TRUE;
 	ParamLoadControl(layout_pg_p, 8);
 	MainRedraw();
