@@ -1003,6 +1003,11 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 					if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 						ep = PickUnconnectedEndPointSilent(p, t);
 						if (ep != -1) {
+							if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
+								wBeep();
+								InfoMessage(_("Shift used but Track is different scale"));
+								return C_CONTINUE;
+							}
 							Da.trk[end] = t;
 							Da.ep[end] = ep;
 							pos = GetTrkEndPos(t, ep);

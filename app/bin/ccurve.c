@@ -146,6 +146,11 @@ EXPORT STATUS_T CreateCurve(
 				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 			   		EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 			   		if (ep != -1) {
+			   			if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
+			   				wBeep();
+			   				InfoMessage(_("Track is different scale"));
+			   				return C_CONTINUE;
+			   			}
 			   			Da.trk = t;
 			   			Da.ep = ep;
 			   			pos = GetTrkEndPos(t, ep);

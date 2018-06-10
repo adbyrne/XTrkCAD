@@ -66,6 +66,11 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 			   EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 			   if (ep != -1) {
+				   if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
+				   		wBeep();
+				   		InfoMessage(_("Track is different scale"));
+				   		return C_CONTINUE;
+				   	}
 			   		Dl.trk = t;
 			   		Dl.ep = ep;
 			   		pos = GetTrkEndPos(t, ep);
