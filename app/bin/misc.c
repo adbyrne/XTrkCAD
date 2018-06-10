@@ -2414,6 +2414,7 @@ static void CreateMenus(void) {
 			ACCL_PRICELIST, (void*) PriceListInit(), 0, (void *) 0);
 
 	cmdGroup = BG_LAYER | BG_BIGGAP;
+
 	InitLayers();
 
 	cmdGroup = BG_HOTBAR;
