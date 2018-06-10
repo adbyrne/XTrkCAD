@@ -671,6 +671,9 @@ static void RescaleCornu( track_p trk, FLOAT_T ratio )
 	for (int i=0;i<2;i++) {
 		xx->cornuData.pos[i].x *= ratio;
 		xx->cornuData.pos[i].y *= ratio;
+		xx->cornuData.c[i].x *= ratio;
+		xx->cornuData.c[i].y *= ratio;
+		xx->cornuData.r[i] *= ratio;
 	}
     RebuildCornu(trk);
 

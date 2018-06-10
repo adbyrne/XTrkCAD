@@ -39,6 +39,7 @@
 #include "utility.h"
 #include "wlib.h"
 #include "cbezier.h"
+#include "layout.h"
 
 /*
  * STATE INFO
