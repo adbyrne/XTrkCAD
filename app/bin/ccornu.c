@@ -910,7 +910,8 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			return C_CONTINUE;
 		}
 		for (int i=0;i<2;i++) {
-			if (!(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))) {        // Not Turntable
+			if (Da.trk[i] &&
+				!(QueryTrack(Da.trk[i],Q_CAN_ADD_ENDPOINTS))) {        // Not Turntable
 				if (FindDistance(Da.pos[i],GetTrkEndPos(Da.trk[i],1-Da.ep[i])) < minLength) {
 					wBeep();
 					InfoMessage(_("Cornu end %d too close to other end of connect track - reposition it"),i+1);
