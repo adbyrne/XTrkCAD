@@ -392,10 +392,14 @@ void DrawTempCornu() {
 
 void CreateBothEnds(int selectPoint) {
 	BOOL_T selectable[2],modifyable[2];
-	selectable[0] = Da.trk[0] && !QueryTrack(Da.trk[0],Q_IS_CORNU);
-	modifyable[0] = Da.trk[0] && QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY);
-	selectable[1] = Da.trk[1] && !QueryTrack(Da.trk[1],Q_IS_CORNU);
-	modifyable[1] = Da.trk[1] && QueryTrack(Da.trk[1],Q_CORNU_CAN_MODIFY);
+	selectable[0] = !Da.trk[0] || (
+			Da.trk[0] && !QueryTrack(Da.trk[0],Q_IS_CORNU) && !QueryTrack(Da.trk[0],Q_CAN_MODIFY_CONTROL_POINTS));
+	modifyable[0] = !Da.trk[0] || (
+			Da.trk[0] && QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY));
+	selectable[1] = !Da.trk[1] || (
+			Da.trk[1] && !QueryTrack(Da.trk[1],Q_IS_CORNU) && !QueryTrack(Da.trk[0],Q_CAN_MODIFY_CONTROL_POINTS));
+	modifyable[1] = !Da.trk[1] || (
+			Da.trk[1] && QueryTrack(Da.trk[1],Q_CORNU_CAN_MODIFY));
 	if (selectPoint == -1) {
 		Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],FALSE,selectable[0],modifyable[0]);
 		Da.ep2Segs_da_cnt = createEndPoint(Da.ep2Segs, Da.pos[1],FALSE,selectable[1],modifyable[1]);
@@ -492,6 +496,12 @@ void SetUpCornuParms(cornuParm_t * cp) {
 		cp->radius[1] = Da.radius[1];
 }
 
+
+struct extraData {
+				cornuData_t cornuData;
+		};
+
+
 /*
  * AdjustCornuCurve
  *
@@ -551,10 +561,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 			wBeep();
 			InfoMessage( _("Not close enough to end point, reselect") );
 			return C_CONTINUE;
-		} else if (Da.trk[Da.selectPoint] && QueryTrack(Da.trk[Da.selectPoint],Q_IS_CORNU)){
-			wBeep();
-			InfoMessage( _("Is Cornu End -> Not Selectable") );
-			return C_CONTINUE;
 		} else {
 			pos = Da.pos[Da.selectPoint];
 			Da.state = POINT_PICKED;
@@ -609,6 +615,11 @@ EXPORT STATUS_T AdjustCornuCurve(
 		DrawTempCornu();   //wipe out old
 		Da.extend[sel] = FALSE;
 		if(!Da.trk[sel]) {							//Cornu with no ends
+			struct extraData *xx = GetTrkExtraData(Da.selectTrack);
+			Da.pos[sel] = xx->cornuData.pos[sel];            //Re-Copy parms from old trk
+			Da.radius[sel] = xx->cornuData.r[sel];
+			Da.angle[sel] = xx->cornuData.a[sel];
+			Da.center[sel] = xx->cornuData.c[sel];
 			if (Da.radius[sel] == 0)  {				//Straight
 				Da.extendSeg[sel].type = SEG_STRTRK;
 				Da.extendSeg[sel].width = 0;
@@ -644,6 +655,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 					Da.extend[sel] = FALSE;
 				else
 					Da.extend[sel] = TRUE;
+			}
+			if (Da.extend[sel] == FALSE) {          // Not extending - so trim along our own Cornu
+				GetCornuParmsNear(Da.selectTrack, sel, &pos, &Da.center[sel], &Da.angle[sel],  &Da.radius[sel] );
+				Da.pos[sel] = pos;
 			}
 		} else {									//Cornu with ends
 			if (inside) Da.pos[sel] = pos;
@@ -707,11 +722,11 @@ EXPORT STATUS_T AdjustCornuCurve(
 						Da.pos[sel] = pos;
 					}
 
-				} else {								//Bezier and Cornu that we are joining TO can't extend
-					DrawTempCornu();   //put back
-					wBeep();
-					InfoMessage(_("Must be on the %s Track"),Da.trackType[sel]==curveTypeBezier?"Bezier":Da.trackType[sel]==curveTypeCornu?"Cornu":"Unknown Type");
-					pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
+				} else {	//Bezier and Cornu that we are joining TO can't extend
+                    DrawTempCornu();   //put back
+                    wBeep();
+					InfoMessage(_("Can't extend connected Bezier or Cornu"));
+                    pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 					return C_CONTINUE;
 				}
 			}
@@ -817,9 +832,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 
 }
 
-struct extraData {
-				cornuData_t cornuData;
-		};
 
 /**
  * CmdCornuModify
@@ -847,6 +859,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
 		Da.ep1Segs_da_cnt = 0;
 		Da.ep2Segs_da_cnt = 0;
+		Da.crvSegs_da_cnt = 0;
 		Da.extend[0] = FALSE;
 	    Da.extend[1] = FALSE;
 		Da.selectPoint = -1;
@@ -1254,13 +1267,15 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	case C_REDRAW:
 		if ( Da.state != NONE ) {
-			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, NULL, &Da.extendSeg[0],&Da.extendSeg[1],Da.color);
+			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, NULL,
+					Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,Da.color);
 		}
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		if (Da.state != NONE) {
-			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, NULL, &Da.extendSeg[0],&Da.extendSeg[1],Da.color);
+			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, NULL,
+					Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,Da.color);
 			Da.ep1Segs_da_cnt = 0;
 			Da.ep2Segs_da_cnt = 0;
 			Da.crvSegs_da_cnt = 0;
