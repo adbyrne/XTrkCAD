@@ -50,10 +50,11 @@ BOOL_T FixUpCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radiu
 BOOL_T GetCornuSegmentsFromTrack(track_p, trkSeg_p);
 BOOL_T SetCornuEndPt(track_p trk, EPINX_T inx, coOrd pos, coOrd center, ANGLE_T angle, DIST_T radius);
 BOOL_T RebuildCornu (track_p trk);
+DIST_T DistanceCornu( track_p t, coOrd * p );
 
 STATUS_T CornuDescriptionMove(track_p trk,wAction_t action,coOrd pos );
 DIST_T CornuDescriptionDistance(coOrd pos,track_p trk );
-
+void GetCornuParmsNear(track_p t, int sel, coOrd * pos, coOrd * center, ANGLE_T * angle,  DIST_T * radius );
 
 BOOL_T CallCornu(coOrd[2],track_p[2],EPINX_T[2],dynArr_t *,cornuParm_t *);
 BOOL_T CallCornu0(coOrd[2], coOrd[2], ANGLE_T[2], DIST_T[2], dynArr_t *,BOOL_T);

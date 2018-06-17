@@ -486,11 +486,10 @@ static void DescribeCornu( track_p trk, char * str, CSIZE_T len )
 
 	DoDescribe( _("Cornu Track"), trk, cornuDesc, UpdateCornu );
 
-
 }
 
 
-static DIST_T DistanceCornu( track_p t, coOrd * p )
+DIST_T DistanceCornu( track_p t, coOrd * p )
 {
 	struct extraData *xx = GetTrkExtraData(t);
 	//return BezierMathDistance(p,xx->bezierData.pos,100, &s);
@@ -686,6 +685,35 @@ EXPORT BOOL_T SetCornuEndPt(track_p trk, EPINX_T inx, coOrd pos, coOrd center, A
     if (!RebuildCornu(trk)) return FALSE;
     SetTrkEndPoint( trk, inx, xx->cornuData.pos[inx], xx->cornuData.a[inx]);
     return TRUE;
+}
+
+
+void GetCornuParmsNear(track_p t, int sel, coOrd * pos2, coOrd * center, ANGLE_T * angle2,  DIST_T * radius ) {
+	struct extraData *xx = GetTrkExtraData(t);
+	coOrd pos = *pos2;
+	double dd = DistanceCornu(t, &pos);   //Pos adjusted to be on curve
+	int inx;
+	wBool_t back,neg;
+	ANGLE_T angle = GetAngleSegs(xx->cornuData.arcSegs.cnt,(trkSeg_t *)(xx->cornuData.arcSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
+
+	trkSeg_p segPtr = &DYNARR_N(trkSeg_t, xx->cornuData.arcSegs, inx);
+
+	GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
+	segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
+
+	if (segPtr->type == SEG_STRTRK) {
+		*radius = 0.0;
+		*center = zero;
+	} else if (segPtr->type == SEG_CRVTRK) {
+		*center = segPtr->u.c.center;
+		*radius = fabs(segPtr->u.c.radius);
+	}
+	if (sel)
+		angle = NormalizeAngle(angle+(neg==back?0:180));
+	else
+		angle = NormalizeAngle(angle+(neg==back?180:0));
+	*angle2 = angle;
+	*pos2 = pos;
 }
 
 
