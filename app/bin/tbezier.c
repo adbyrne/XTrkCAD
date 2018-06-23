@@ -584,7 +584,6 @@ static void ReadBezier( char * line )
 static void MoveBezier( track_p trk, coOrd orig )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	UndoModify(trk);
     for (int i=0;i<4;i++) {
         xx->bezierData.pos[i].x += orig.x;
         xx->bezierData.pos[i].y += orig.y;
@@ -597,7 +596,6 @@ static void MoveBezier( track_p trk, coOrd orig )
 static void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	UndoModify(trk);
     for (int i=0;i<5;i++) {
         Rotate( &xx->bezierData.pos[i], orig, angle );
     }
@@ -609,7 +607,6 @@ static void RotateBezier( track_p trk, coOrd orig, ANGLE_T angle )
 static void RescaleBezier( track_p trk, FLOAT_T ratio )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	UndoModify(trk);
 	xx->bezierData.pos[0].x *= ratio;
 	xx->bezierData.pos[0].y *= ratio;
     xx->bezierData.pos[1].x *= ratio;

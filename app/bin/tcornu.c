@@ -641,7 +641,6 @@ static void ReadCornu( char * line )
 static void MoveCornu( track_p trk, coOrd orig )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	UndoModify(trk);
     for (int i=0;i<2;i++) {
         xx->cornuData.pos[i].x += orig.x;
         xx->cornuData.pos[i].y += orig.y;
@@ -654,7 +653,6 @@ static void MoveCornu( track_p trk, coOrd orig )
 static void RotateCornu( track_p trk, coOrd orig, ANGLE_T angle )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	UndoModify(trk);
     for (int i=0;i<2;i++) {
         Rotate( &xx->cornuData.pos[i], orig, angle );
         Rotate( &xx->cornuData.c[i], orig, angle);
@@ -666,7 +664,6 @@ static void RotateCornu( track_p trk, coOrd orig, ANGLE_T angle )
 static void RescaleCornu( track_p trk, FLOAT_T ratio )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	UndoModify(trk);
 	for (int i=0;i<2;i++) {
 		xx->cornuData.pos[i].x *= ratio;
 		xx->cornuData.pos[i].y *= ratio;
@@ -680,7 +677,6 @@ static void RescaleCornu( track_p trk, FLOAT_T ratio )
 
 EXPORT BOOL_T SetCornuEndPt(track_p trk, EPINX_T inx, coOrd pos, coOrd center, ANGLE_T angle, DIST_T radius) {
     struct extraData *xx = GetTrkExtraData(trk);
-
     xx->cornuData.pos[inx] = pos;
     xx->cornuData.c[inx] = center;
     xx->cornuData.a[inx] = angle;
