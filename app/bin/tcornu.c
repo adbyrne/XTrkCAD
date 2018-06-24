@@ -1150,6 +1150,20 @@ static void FlipCornu(
 	xx->cornuData.a[0] = NormalizeAngle( 2*angle - xx->cornuData.a[0] );
 	xx->cornuData.a[1] = NormalizeAngle( 2*angle - xx->cornuData.a[1] );
 
+	/* Reverse internals so that they match the new ends */
+	coOrd pos_save = xx->cornuData.pos[0];
+	xx->cornuData.pos[0] = xx->cornuData.pos[1];
+	xx->cornuData.pos[1] = pos_save;
+	ANGLE_T angle_save = xx->cornuData.a[0];
+	xx->cornuData.a[0] = xx->cornuData.a[1];
+	xx->cornuData.a[1] = angle_save;
+	coOrd c_save = xx->cornuData.c[0];
+	xx->cornuData.c[0] = xx->cornuData.c[1];
+	xx->cornuData.c[1] = c_save;
+	DIST_T rad_save = xx->cornuData.r[0];
+	xx->cornuData.r[0] = xx->cornuData.r[1];
+	xx->cornuData.r[1] = rad_save;
+
     RebuildCornu(trk);
 
 }
