@@ -564,7 +564,6 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	wPos_t xx, yy;
 	wControl_p b;
 	GdkDrawable * gdk_window, * cairo_window;
-	GdkRectangle update_rect;
 
 	x = INMAPX( bd, x-bm->x );
 	y = INMAPY( bd, y-bm->y )-bm->h;
@@ -608,14 +607,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 				cairo_rectangle(cairo, xx-0.5, yy-0.5, 1, 1);
 				cairo_fill(cairo);
-				if ( b && b->type == B_DRAW ) {
-				    update_rect.x = xx-1;
-			        update_rect.y = yy-1;
-			        update_rect.width = 3;
-				    update_rect.height = 3;
-				    gtk_widget_draw( b->widget, &update_rect );
-				}
 			}
+	gtk_widget_queue_draw( b->widget);
 
 	cairo_destroy(cairo);
 }
