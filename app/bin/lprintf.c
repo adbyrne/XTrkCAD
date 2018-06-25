@@ -62,7 +62,7 @@ static void LogInit( void )
 		return;
 	DYNARR_APPEND( logTable_t, logTable_da,10);
 	logTable(inx).name = "";
-	logTable(inx).level = 1;
+	logTable(inx).level = 0;
 }
 
 EXPORT void LogOpen( char * filename )
