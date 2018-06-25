@@ -1945,11 +1945,16 @@ static wWin_p debugW;
 static int debugCnt = 0;
 static paramIntegerRange_t r0_100 = { 0, 100, 80 };
 static void DebugOk( void * junk );
-static paramData_t debugPLs[20];
+static paramData_t debugPLs[30];
+static long debug_values[30];
+static int debug_index[30];
 static paramGroup_t debugPG = { "debug", 0, debugPLs, 0 };
 
 static void DebugOk( void * junk )
 {
+	for (int i = 0; i<debugCnt;i++) {
+		logTable(debug_index[i]).level = debug_values[i];
+	}
 	wHide( debugW );
 }
 
@@ -1961,10 +1966,29 @@ static void CreateDebugW( void )
 	wHide(debugW);
 }
 
+EXPORT void DebugInit(void) {
+
+	if (!debugW) {
+		debugCnt = 0;    //Reset to start building the dynamic dialog over again
+		int i = 0;
+		for ( int inx=0; inx<logTable_da.cnt; inx++ ) {
+			if (logTable(inx).name[0]) {
+				debug_values[i] = logTable(inx).level;
+				debug_index[i] = inx;
+				InitDebug(logTable(inx).name,&debug_values[i]);
+				i++;
+			}
+		}
+		//ParamCreateControls( &debugPG, NULL );
+		CreateDebugW();
+	}
+	ParamLoadControls( &debugPG );
+	wShow(debugW);
+}
 
 EXPORT void InitDebug(
 		char * label,
-		long * valueP )
+		long * valueP)
 {
 	if ( debugCnt >= sizeof debugPLs/sizeof debugPLs[0] )
 		AbortProg( "Too many debug flags" );
@@ -1975,6 +1999,7 @@ EXPORT void InitDebug(
 	debugPLs[debugCnt].winData = &r0_100;
 	debugPLs[debugCnt].winLabel = label;
 	debugCnt++;
+
 }
 
 
@@ -2340,7 +2365,7 @@ static void CreateMenus( void )
 	MiscMenuItemCreate( optionM, NULL, "cmdSticky", _("Stic&ky ..."), ACCL_STICKY, (void*)(wMenuCallBack_p)DoSticky, IC_MODETRAIN_TOO, (void *)0 );
 	if (extraButtons) {
 		menuPLs[menuPG.paramCnt].context = debugW;
-		MiscMenuItemCreate( optionM, NULL, "cmdDebug", _("&Debug ..."), 0, (void*)(wMenuCallBack_p)wShow, IC_MODETRAIN_TOO, (void *)0 );
+		MiscMenuItemCreate( optionM, NULL, "cmdDebug", _("&Debug ..."), 0, (void*)(wMenuCallBack_p)DebugInit, IC_MODETRAIN_TOO, (void *)0 );
 	}
 	MiscMenuItemCreate( optionM, NULL, "cmdPref", _("&Preferences ..."), ACCL_PREFERENCES, (void*)PrefInit(), IC_MODETRAIN_TOO, (void *)0 );
 	MiscMenuItemCreate( optionM, NULL, "cmdColor", _("&Colors ..."), ACCL_COLORW, (void*)ColorInit(), IC_MODETRAIN_TOO, (void *)0 );
@@ -2697,7 +2722,7 @@ LOG1( log_init, ( "initialize\n" ) )
 LOG1( log_init, ( "loadFileList\n" ) )
 	LoadFileList();
 	AddPlaybackProc( "MENU", MenuPlayback, NULL );
-	CreateDebugW();
+	//CreateDebugW();
 
 	/*
 	 * TIDY UP

@@ -60,11 +60,9 @@ static void LogInit( void )
 
 	if ( logTable_da.cnt != 0 )
 		return;
-	DYNARR_SET( logTable_t, logTable_da, 11 );
-	for ( inx=0; inx<=10; inx++ ) {
-		logTable(inx).name = "";
-		logTable(inx).level = inx;
-	}
+	DYNARR_APPEND( logTable_t, logTable_da,10);
+	logTable(inx).name = "";
+	logTable(inx).level = 1;
 }
 
 EXPORT void LogOpen( char * filename )
@@ -117,6 +115,7 @@ EXPORT void LogSet( char * name, int level )
 	logTable(logTable_da.cnt-1).name = MyStrdup( name );
 	logTable(logTable_da.cnt-1).level = level;
 }
+
 
 EXPORT int LogFindIndex( char * name )
 {
