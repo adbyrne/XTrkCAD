@@ -322,7 +322,7 @@ void SetName() {
 	char * name = GetLayoutBackGroundFullPath();
 	if (name) {
 		if (name && (strlen(name)<=TEXT_FIELD_LEN)) {
-			for (int i=0; i<=strlen(name);i++) {
+			for (unsigned int i=0; i<=strlen(name);i++) {
 				backgroundFileName[i] = name[i];
 			}
 			backgroundFileName[strlen(name)] = '\0';
@@ -375,34 +375,35 @@ LoadBackGroundImage(void)
 
 /*******************************************************
 * Callback from File Select for Background Image File
+* 
+* \param files number of files selected (only first file is used)
+* \param fileName array of pointers to filenames
+* \param data unused
+* \return FALSE
 */
 EXPORT int LoadImageFile(
 		int files,
 		char ** fileName,
 		void * data )
 {
-
 		if (files >0) {
 			SetLayoutBackGroundFullPath( strdup(fileName[0]));
 
 			if (!LoadBackGroundImage()) {
 				SetLayoutBackGroundFullPath(noname);
-				SetName();
-				ParamLoadControl(layout_pg_p, 8);
-				return FALSE;
+				backgroundVisible = FALSE;
 			}
-			SetName();
-			file_changed = TRUE;
-			backgroundVisible = TRUE;
-			wControlActive((wControl_p)backgroundB, TRUE);
-			wButtonSetBusy(backgroundB, backgroundVisible);
-			ParamLoadControl(layout_pg_p, 8);
-			MainRedraw();
-			SetCurrentPath( BACKGROUNDPATHKEY, fileName[ 0 ] );
-			return TRUE;
+			else {
+				backgroundVisible = TRUE;
+				SetCurrentPath(BACKGROUNDPATHKEY, fileName[0]);
+			}
+		} else {
+			SetLayoutBackGroundFullPath(noname);
+			backgroundVisible = FALSE;
 		}
+		wControlActive((wControl_p)backgroundB, backgroundVisible);
+		wButtonSetBusy(backgroundB, backgroundVisible);
 
-		SetLayoutBackGroundFullPath(noname);
 		SetName();
 		file_changed = TRUE;
 		ParamLoadControl(layout_pg_p, 8);
@@ -414,7 +415,7 @@ EXPORT int LoadImageFile(
  * Save the Background Parms - forcing a write
  */
 void LayoutBackGroundSave(void) {
-   	char prefString[STR_LONG_SIZE];
+   	
    	wPrefSetString("layout", "BackgroundPath", GetLayoutBackGroundFullPath());
    	wPrefSetFloat("layout", "BackgroundPosX", thisLayout.props.backgroundPos.x);
    	wPrefSetFloat("layout", "BackgroundPosY", thisLayout.props.backgroundPos.y);
@@ -654,14 +655,13 @@ LayoutDlgUpdate(
  ***************************************************************************************/
 void
 LayoutBackGroundLoad(void) {
-	char prefString[STR_LONG_SIZE];
 	SetLayoutBackGroundFullPath(wPrefGetString("layout", "BackgroundPath"));
-	coOrd pos;
+
 	wPrefGetFloat("layout", "BackgroundPosX", &thisLayout.props.backgroundPos.x, 0.0);
 	wPrefGetFloat("layout", "BackgroundPosY", &thisLayout.props.backgroundPos.y, 0.0);
 	wPrefGetFloat("layout", "BackgroundAngle", &thisLayout.props.backgroundAngle, 0.0);
 	long screen_long;
-	wPrefGetInteger("layout", "BackgroundScreen", &screen_long, 0.0);
+	wPrefGetInteger("layout", "BackgroundScreen", &screen_long, 0L);
 	thisLayout.props.backgroundScreen = screen_long;
 	wPrefGetFloat("layout", "BackgroundSize", &thisLayout.props.backgroundSize, 0.0);
 }
