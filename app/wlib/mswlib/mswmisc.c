@@ -179,7 +179,7 @@ static int dumpControls;
 
 extern char *userLocale;
 
-char * filterImageFiles = "Image Files\0*.png;*.jpg;*.jpeg\0All Files\0*\0";
+char * filterImageFiles = "Image Files\0*.gif;*.jpg;*.jpeg;*.png\0All Files\0*\0";
 
 /*
  *****************************************************************************
@@ -2431,7 +2431,7 @@ int wFilSelect(
     ofn.lStructSize = sizeof ofn;
     ofn.hwndOwner = mswHWnd;
 	if (fs->option == FS_PICTURES) {
-		ofn.lpstrFilter = filterImageFiles;
+		ofn.lpstrFilter = _(filterImageFiles);
 	}
 	else {
 		ofn.lpstrFilter = fs->extList;

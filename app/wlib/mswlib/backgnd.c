@@ -26,10 +26,55 @@
 #include "i18n.h"
 #include "mswint.h"
 
+static char *lastErrorMessage;		/**< store last message from FreeImage */
+#define ERRORPUNCTUATION " : "
+
+/**
+ * FreeImage error handler
+ * \param fif Format / Plugin responsible for the error
+ * \param message Error message
+ */
+
+static void 
+HandleFreeImageError(FREE_IMAGE_FORMAT fif, const char *message) 
+{
+	unsigned totalLength = strlen(message) + 1;
+
+	if (fif != FIF_UNKNOWN) {
+		totalLength += strlen(FreeImage_GetFormatFromFIF(fif)) + strlen(ERRORPUNCTUATION);
+	}
+
+	lastErrorMessage = malloc(totalLength);
+
+	if (fif != FIF_UNKNOWN) {
+		sprintf(lastErrorMessage,
+				"%s" ERRORPUNCTUATION "%s",
+				FreeImage_GetFormatFromFIF(fif),
+				message);
+	} else {
+		strcpy(lastErrorMessage, message);
+	}
+}
+
+/**
+* Load the background image
+* \param bd drawing context
+* \param path filename for image file, if NULL the existing background will be removed
+* \param error returned error message
+* \return -1 unsupported or invalid file, 0 success, 1 background removed
+*/
+
 int
 wDrawSetBackground(wDraw_p bd, char * path, char ** error)
 {
     FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
+
+	FreeImage_SetOutputMessage(HandleFreeImageError);
+
+	if (lastErrorMessage) {
+		free(lastErrorMessage);
+		lastErrorMessage = NULL;
+	}
 
     if (path) {
         // check the file signature and deduce its format
@@ -49,12 +94,13 @@ wDrawSetBackground(wDraw_p bd, char * path, char ** error)
 
             // unless a bad file format, we are done !
             if (!bd->background) {
-                *error = _("Could not load the requested image file!");
+                *error = lastErrorMessage;
                 return (-1);
             } else {
                 return (0);
             }
         } else {
+			*error = strdup(_("Image file is invalid or cannot be read."));
             return (-1);
         }
     } else {
@@ -67,6 +113,16 @@ wDrawSetBackground(wDraw_p bd, char * path, char ** error)
     }
 }
 
+/**
+* Draw background to screen. The background will be sized and rotated before being shown. The bitmap 
+* is scaled so that the width is equal to size. The height is changed proportionally. 
+*
+* \param bd drawing context
+* \param pos_x, pos_y bitmap position
+* \param size desired width after scaling
+* \param angle 
+* \param screen visibility of bitmap in percent
+*/
 
 void
 wDrawShowBackground(wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size,
