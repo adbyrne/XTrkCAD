@@ -38,6 +38,11 @@ void SetLayoutCurScale(SCALEINX_T scale);
 void SetLayoutCurScaleDesc(SCALEDESCINX_T desc);
 void SetLayoutCurGauge(GAUGEINX_T gauge);
 void SetLayoutScaleGauge(SCALEDESCINX_T desc, GAUGEINX_T gauge);
+void SetLayoutBackGroundFullPath(const char *fileName);
+void SetLayoutBackGroundSize(double size);
+void SetLayoutBackGroundPos(coOrd pos);
+void SetLayoutBackGroundAngle(ANGLE_T angle);
+void SetLayoutBackGroundScreen(int screen);
 
 char *GetLayoutFullPath(void);
 char *GetLayoutFilename(void);
@@ -48,9 +53,17 @@ SCALEINX_T GetLayoutCurScale(void );
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
 //GAUGEINX_T GetLayoutCurGauge(void);
 
-
 ANGLE_T GetLayoutMaxTrackGrade(void);
 SCALEDESCINX_T GetLayoutCurScaleDesc(void);
-
+char *GetLayoutBackGroundFullPath(void);
+double GetLayoutBackGroundSize(void);
+coOrd GetLayoutBackGroundPos(void);
+ANGLE_T GetLayoutBackGroundAngle(void);
+int GetLayoutBackGroundScreen(void);
+int GetLayoutBackGroundVisible(void);
+void LayoutBackGroundInit(void);
+void LayoutBackGroundLoad(void);
+void LayoutBackGroundSave(void);
+void BackgroundToggleShow(void);
 void DoLayout(void * junk);
 #endif

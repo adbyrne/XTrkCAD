@@ -110,7 +110,11 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \u000
 
-\dd The \f{Main Canvas} is where all tracks and objects are drawn.
+\dd The \f{Main Canvas} is where all tracks and objects (and optional background image) are drawn.
+
+\u000
+
+\dd The \f{Background Image} is drawn on the main canvas if specified in the \K{cmdLayout} menu.
 
 \u000
 

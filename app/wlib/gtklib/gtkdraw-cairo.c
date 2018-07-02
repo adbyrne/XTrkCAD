@@ -1085,3 +1085,74 @@ wBool_t wBitMapDelete(          wDraw_p d )
 	return TRUE;
 }
 
+/*******************************************************************************
+ *
+ * Background
+ *
+ ******************************************************************************/
+int wDrawSetBackground(    wDraw_p bd, char * path, char ** error) {
+
+	GError *err = NULL;
+
+	if (bd->background) {
+		g_object_unref(bd->background);
+	}
+
+	if (path) {
+		bd->background = gdk_pixbuf_new_from_file (path, &err);
+		if (!bd->background) {
+			*error = err->message;
+			return -1;
+		}
+	} else {
+		bd->background = NULL;
+		return 1;
+	}
+	return 0;
+
+}
+
+void wDrawShowBackground( wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size, wAngle_t angle, int screen) {
+
+	if (bd->background) {
+		cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorWhite, 0);
+		cairo_save(cairo);
+		int pixels_width = gdk_pixbuf_get_width(bd->background);
+		int pixels_height = gdk_pixbuf_get_height(bd->background);
+		double scale;
+		double posx,posy,width,sized;
+		posx = (double)pos_x;
+		posy = (double)pos_y;
+		if (size == 0) {
+			scale = 1.0;
+		} else {
+			sized = (double)size;
+			width = (double)pixels_width;
+			scale = sized/width;
+		}
+		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+		double rad = M_PI*(angle/180);
+		posy = (double)bd->h-((pixels_height*fabs(cos(rad))+pixels_width*fabs(sin(rad)))*scale)-posy;
+		//width = (double)(pixels_width*scale);
+		//height = (double)(pixels_height*scale);
+		cairo_translate(cairo,posx,posy);
+		cairo_scale(cairo, scale, scale);
+		cairo_translate(cairo, fabs(pixels_width/2.0*cos(rad))+fabs(pixels_height/2.0*sin(rad)),
+				fabs(pixels_width/2.0*sin(rad))+fabs(pixels_height/2.0*cos(rad)));
+		cairo_rotate(cairo, M_PI*(angle/180.0));
+		// We need to clip around the image, or cairo will paint garbage data
+		cairo_rectangle(cairo, -pixels_width/2.0, -pixels_height/2.0, pixels_width, pixels_height);
+		cairo_clip(cairo);
+		gdk_cairo_set_source_pixbuf(cairo, bd->background, -pixels_width/2.0, -pixels_height/2.0);
+		cairo_pattern_t *mask = cairo_pattern_create_rgba (1.0,1.0,1.0,(100.0-screen)/100.0);
+		cairo_mask(cairo,mask);
+		cairo_pattern_destroy(mask);
+		cairo_restore(cairo);
+		gtkDrawDestroyCairoContext(cairo);
+	}
+
+}
+
+
+
+

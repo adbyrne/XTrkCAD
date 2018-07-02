@@ -428,6 +428,14 @@ layout-scale	Specifies the Modelling Scale	cmdLayout
 layout-gauge	Specifies the rail gauge, ie. the distance between the rails	cmdLayout
 layout-mintrackradius	Specifies minimum track radius (in inches or centimeters). Tracks with a smaller radius are considered exceptional.	cmdLayout
 layout-maxtrackgrade	Specifies maximum track elevation expressed as a percent (%). Tracks with a larger elevation are considered exceptional.	cmdLayout
+layout-backgroundfile	Is the end of the full pathname of the image used as a background. Set with Browse or Clear buttons.	cmdLayout	
+layout-browse	Is the means to set the background image filename	cmdLayout
+layout-clear	Is the means to clear the background image filename	cmdLayout
+layout-backgroundposX	Specifies the x offset of the bottom left of the background image	cmdLayout
+layout-backgroundposY	Specifies the y offset of the bottom left of the background image	cmdLayout
+layout-backgroundWidth	Specifies how large the bottom edge of the background image should be in model units	cmdLayout
+layout-backgroundScreen	Specifies the screening of the background image from 0 (none) to 100% (vanishes)	cmdLayout
+layout-backgroundAngle	Specifies the rotation angle of the background image in degrees
 #
 newcar-road	Roadname	cmdTrain
 newcar-number	Car Number	cmdTrain

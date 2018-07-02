@@ -62,7 +62,7 @@ typedef struct drawCmd_t {
 		drawConvertPix2CoOrd Pix2CoOrd;
 		drawConvertCoOrd2Pix CoOrd2Pix;
 		FLOAT_T dpi;
-		} drawCmd_t;
+	} drawCmd_t;
 
 #define SCALEX(D,X)		((X)/(D).dpi)
 #define SCALEY(D,Y)		((Y)/(D).dpi)

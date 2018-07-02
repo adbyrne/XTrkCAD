@@ -541,6 +541,8 @@ wBool_t wBitMapWriteFile(	wDraw_p, const char * );
 void * wDrawGetContext(		wDraw_p );
 void wDrawSaveImage(		wDraw_p );
 void wDrawRestoreImage(		wDraw_p );
+int wDrawSetBackground(    wDraw_p, char * path, char ** error);
+void wDrawShowBackground(   wDraw_p, wPos_t pos_x, wPos_t pos_y, wPos_t width, wAngle_t angle, int screen);
 
 /*------------------------------------------------------------------------------
  *
@@ -668,6 +670,7 @@ void wAttachAccelKey( wAccelKey_e, int, wAccelKeyCallBack_p, void * );
  */
 
 #define FS_MULTIPLEFILES	1
+#define FS_PICTURES         2
 
 struct wFilSel_t;
 typedef enum {

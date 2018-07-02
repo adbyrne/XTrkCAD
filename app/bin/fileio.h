@@ -61,6 +61,7 @@ wMenuList_p fileList_ml;
 
 #define LAYOUTPATHKEY "layout"
 #define BITMAPPATHKEY "bitmap"
+#define BACKGROUNDPATHKEY "images"
 #define DXFPATHKEY "dxf"
 #define PARTLISTPATHKEY "parts"
 #define CARSPATHKEY "cars"

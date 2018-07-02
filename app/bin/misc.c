@@ -115,6 +115,7 @@ EXPORT wButton_p redoB;
 EXPORT wButton_p zoomUpB;
 EXPORT wButton_p zoomDownB;
 wButton_p mapShowB;
+wButton_p backgroundB;
 
 EXPORT wIndex_t checkPtMark = 0;
 
@@ -569,12 +570,16 @@ EXPORT void Confirm(char * label2, doSaveCallBack_p after) {
 										"If you don't save now, your unsaved changes will be discarded."),
 						_("&Save"), _("&Cancel"), _("&Don't Save"));
 		if (rc == 1) {
+			LayoutBackGroundInit();
+			LayoutBackGroundSave();
 			DoSave(after);
 			return;
 		} else if (rc == 0) {
 			return;
 		}
 	}
+	LayoutBackGroundInit();
+	LayoutBackGroundSave();
 	after();
 	return;
 }
@@ -675,6 +680,7 @@ static void DoClearAfter(void) {
 
 	/* set all layers to their default properties and set current layer to 0 */
 	DefaultLayerProperties();
+	LayoutBackGroundInit();
 	DoLayout(NULL);
 	checkPtMark = 0;
 	Reset();
@@ -682,6 +688,7 @@ static void DoClearAfter(void) {
 	EnableCommands();
 	SetLayoutFullPath("");
 	SetWindowTitle();
+	LayoutBackGroundInit();
 }
 
 static void DoClear(void) {
@@ -2443,6 +2450,7 @@ static void CreateMenus(void) {
 			ACCL_PRICELIST, (void*) PriceListInit(), 0, (void *) 0);
 
 	cmdGroup = BG_LAYER | BG_BIGGAP;
+
 	InitLayers();
 
 	cmdGroup = BG_HOTBAR;
@@ -2820,7 +2828,11 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 		if (initialFile && strlen(initialFile)) {
 			DoFileList(0, NULL, initialFile);
+			LayoutBackGroundLoad();  //Get Prior BackGround
 		}
+	} else {
+		LayoutBackGroundInit();
+		LayoutBackGroundSave();		//Remove Background
 	}
 	inMainW = FALSE;
 	return mainW;
