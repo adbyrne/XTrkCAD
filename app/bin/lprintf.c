@@ -56,7 +56,7 @@ static long logLineNumber;
 
 static void LogInit( void )
 {
-	int inx;
+	int inx=0;
 
 	if ( logTable_da.cnt != 0 )
 		return;
