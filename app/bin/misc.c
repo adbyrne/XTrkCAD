@@ -1886,6 +1886,7 @@ static void CreateDebugW(void) {
 EXPORT void DebugInit(void) {
 
 	if (!debugW) {
+		BOOL_T default_line = FALSE;
 		debugCnt = 0;    //Reset to start building the dynamic dialog over again
 		int i = 0;
 		for ( int inx=0; inx<logTable_da.cnt; inx++ ) {
@@ -1894,6 +1895,14 @@ EXPORT void DebugInit(void) {
 				debug_index[i] = inx;
 				InitDebug(logTable(inx).name,&debug_values[i]);
 				i++;
+			} else {
+				if (!default_line) {
+					debug_values[i] = logTable(inx).level;
+					debug_index[i] = inx;
+					InitDebug("Default Trace",&debug_values[i]);
+					i++;
+					default_line = TRUE;
+				}
 			}
 		}
 		//ParamCreateControls( &debugPG, NULL );
