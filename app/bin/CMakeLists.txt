@@ -157,7 +157,7 @@ SET_TARGET_PROPERTIES(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
 IF(NOT WIN32)
 	TARGET_LINK_LIBRARIES(mkturnout m)
 	TARGET_LINK_LIBRARIES(xtrkcad m)
-	
+
 	# Link libintl for systems where it is a separate library
 	find_library( INTL_LIBRARY intl )
 	if(INTL_LIBRARY)
@@ -165,25 +165,32 @@ IF(NOT WIN32)
 	endif(INTL_LIBRARY)
 ELSE(NOT WIN32)
 	TARGET_LINK_LIBRARIES(mkturnout xtrkcad-wlib)
-ENDIF(NOT WIN32)	
+
+	add_custom_command(
+		TARGET xtrkcad POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${FREEIMAGE_SHAREDLIB}
+		${CMAKE_CURRENT_BINARY_DIR}
+	)
+ENDIF(NOT WIN32)
 
 # for testing only, should be IF(APPLE) ...
 IF(APPLE)
-	ADD_EXECUTABLE( helphelper helphelper.c ) 
+	ADD_EXECUTABLE( helphelper helphelper.c )
 	FIND_LIBRARY(COREFOUNDATION_LIBRARY CoreFoundation)
-	FIND_LIBRARY(CARBON_LIBRARY Carbon)	
+	FIND_LIBRARY(CARBON_LIBRARY Carbon)
 	TARGET_lINK_LIBRARIES(helphelper ${COREFOUNDATION_LIBRARY} ${CARBON_LIBRARY})
 	INSTALL(
 		TARGETS helphelper
 		RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 		)
 ENDIF(APPLE)
-	
+
 INSTALL(
 	TARGETS xtrkcad
 	RUNTIME DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
-	
-if(XTRKCAD_TESTING AND CMOCKA_FOUND)			
+
+if(XTRKCAD_TESTING AND CMOCKA_FOUND)
 	add_subdirectory( unittest )
-endif()  
+endif()

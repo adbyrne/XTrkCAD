@@ -25,7 +25,7 @@ endif(UNIX)
 
 IF(WIN32)
 	# Set FreeImage path:
-	SET(FREEIMAGE_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/app/FreeImage")
+	SET(FREEIMAGE_ROOT_DIR "" CACHE PATH "Location of FreeImage files (.h, .lib and .dll)")
 
 	SET(XTRKCAD_USE_GTK_DEFAULT OFF)
 	SET(XTRKCAD_USE_GETTEXT_DEFAULT ON)
