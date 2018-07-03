@@ -159,7 +159,7 @@ EXPORT FILE * customMgmF;
 static char custMgmContentsStr[STR_SIZE];
 static BOOL_T custMgmProceed;
 static paramData_t custMgmContentsPLs[] = {
-	{ PD_STRING, custMgmContentsStr, "label", PDO_STRINGLIMITLENGTH, (void*)400, N_("Label"), 0, (void *)sizeof(custMgmContentsStr) } };
+	{ PD_STRING, custMgmContentsStr, "label", PDO_STRINGLIMITLENGTH, (void*)400, N_("Label"), 0, 0, sizeof(custMgmContentsStr)} };
 static paramGroup_t custMgmContentsPG = { "contents", 0, custMgmContentsPLs, sizeof custMgmContentsPLs/sizeof custMgmContentsPLs[0] };
 
 static void CustMgmContentsOk( void * junk )

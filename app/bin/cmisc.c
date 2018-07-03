@@ -347,6 +347,10 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
             	describeW_posy += wControlGetHeight(describePLs[inx].control) + sep;
             describePLs[inx].context = ddp;
             describePLs[inx].valueP = valueP;
+            if ((ddp->type == DESC_STRING) && ddp->max_string) {
+            	describePLs[inx].max_string = ddp->max_string;
+            	describePLs[inx].option |= PDO_STRINGLIMITLENGTH;
+            }
 
             if (label && ddp->type != DESC_TEXT) {
                 wControlSetLabel(describePLs[inx].control, label);

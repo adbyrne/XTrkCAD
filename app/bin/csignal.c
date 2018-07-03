@@ -60,6 +60,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "track.h"
 #include "trackx.h"
 #include "utility.h"
+#include "messages.h"
 
 EXPORT TRKTYP_T T_SIGNAL = -1;
 
@@ -231,7 +232,7 @@ static struct {
 
 typedef enum { NM, PS, OR, HD } signalDesc_e;
 static descData_t signalDesc[] = {
-    /* NM */ { DESC_STRING, N_("Name"),     &signalProperties.name },
+    /* NM */ { DESC_STRING, N_("Name"),     &signalProperties.name, sizeof(signalProperties.name) },
     /* PS */ { DESC_POS,    N_("Position"), &signalProperties.pos },
     /* OR */ { DESC_ANGLE,  N_("Angle"),    &signalProperties.orient },
     /* HD */ { DESC_LONG,   N_("Number Of Heads"), &signalProperties.heads },
@@ -255,8 +256,15 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
         thename = wStringGetValue( (wString_p) signalDesc[NM].control0 );
         if (strcmp(thename,xx->name) != 0) {
             nChanged = changed = TRUE;
-            newName = MyStrdup(thename);
+            int max_str = signalDesc[NM].max_string;
+			if (max_str && strlen(thename)>max_str) {
+				newName = MyMalloc(max_str);
+				newName[max_str-1] = '\0';
+				strncat(newName,thename, max_str-1);
+				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+			} else newName = MyStrdup(thename);
         }
+
         if (signalProperties.pos.x != xx->orig.x ||
             signalProperties.pos.y != xx->orig.y) {
             pChanged = changed = TRUE;
@@ -481,7 +489,7 @@ static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramFloatRange_t r0_360         = { 0.0, 360.0, 80 };
 static paramData_t signalEditPLs[] = {
 #define I_SIGNALNAME (0)
-    /*0*/ { PD_STRING, signalEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, (void *)sizeof(signalEditName) },
+    /*0*/ { PD_STRING, signalEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(signalEditName)},
 #define I_ORIGX (1)
     /*1*/ { PD_FLOAT, &signalEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Orgin X") }, 
 #define I_ORIGY (2)
@@ -507,9 +515,9 @@ static paramIntegerRange_t rm1_999999 = { -1, 999999 };
 
 static paramData_t aspectEditPLs[] = {
 #define I_ASPECTNAME (0)
-    /*0*/ { PD_STRING, signalAspectEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200,  N_("Name"), 0, (void *)sizeof(signalAspectEditName) },
+    /*0*/ { PD_STRING, signalAspectEditName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200,  N_("Name"), 0, 0, sizeof(signalAspectEditName)},
 #define I_ASPECTSCRIPT (1)
-    /*1*/ { PD_STRING, signalAspectEditScript, "script", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, (void *)sizeof(signalAspectEditScript) },
+    /*1*/ { PD_STRING, signalAspectEditScript, "script", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof(signalAspectEditScript)},
 #define I_ASPECTINDEX (2)
     /*2*/ { PD_LONG,   &signalAspectEditIndex, "index", PDO_NOPREF, &rm1_999999, N_("Aspect Index"), BO_READONLY },
 };
