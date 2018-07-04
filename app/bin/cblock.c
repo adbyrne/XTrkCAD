@@ -170,7 +170,7 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUn
 	const char * thename, *thescript;
 	char *newName, *newScript;
 	BOOL_T changed, nChanged, sChanged;
-	int max_str;
+	size_t max_str;
 
 	LOG( log_block, 1, ("*** UpdateBlock(): needUndoStart = %d\n",needUndoStart))
 	if ( inx == -1 ) {
@@ -182,8 +182,8 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUn
 			max_str = blockDesc[NM].max_string;
 			if (max_str && strlen(thename)>max_str-1) {
 				newName = MyMalloc(max_str);
-				newName[0] = '\0';
-				strncat(newName,thename,max_str-1);
+				strncpy(newName, thename, max_str - 1);
+				newName[max_str-1] = '\0';
 				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
 			} else 	newName = MyStrdup(thename);
 		}
@@ -194,8 +194,8 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUn
 			max_str = blockDesc[SC].max_string;
 			if (max_str && strlen(thescript)>max_str-1) {
 				newScript = MyMalloc(max_str);
-				newScript[0] = '\0';
-				strncat(newScript,thescript,max_str-1);
+				strncpy(newScript, thescript, max_str - 1);
+				newScript[max_str-1] = '\0';
 				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
 			} else newScript = MyStrdup(thescript);
 		}
@@ -751,10 +751,10 @@ static void EditBlock (track_p trk)
     wIndex_t iTrack;
     BOOL_T needComma = FALSE;
     char temp[32];
-    blockEditName[0] = '\0';
-    strncat(blockEditName,xx->name,STR_SHORT_SIZE-1);
-    blockEditScript[0] = '\0';
-    strncat(blockEditScript,xx->script,STR_LONG_SIZE-1);
+	strncpy(blockEditName, xx->name, STR_SHORT_SIZE - 1);
+	blockEditName[STR_SHORT_SIZE-1] = '\0';
+	strncpy(blockEditScript, xx->script, STR_LONG_SIZE - 1);
+	blockEditScript[STR_LONG_SIZE-1] = '\0';
     blockEditSegs[0] = '\0';
     for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
         if ((&(xx->trackList))[iTrack].t == NULL) continue;
