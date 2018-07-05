@@ -441,7 +441,7 @@ static paramData_t layerPLs[] = {
 #define I_LIST	(0)
     { PD_DROPLIST, NULL, "layer", PDO_LISTINDEX|PDO_DLGNOLABELALIGN, (void*)250 },
 #define I_NAME	(1)
-    { PD_STRING, layerName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Name"), 0, (void *)sizeof(layerName) },
+    { PD_STRING, layerName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Name"), 0, 0, sizeof(layerName) },
 #define I_COLOR	(2)
     { PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, N_("Color") },
 #define I_VIS	(3)
