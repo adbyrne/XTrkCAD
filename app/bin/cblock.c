@@ -104,8 +104,8 @@ static track_p first_block;
 static track_p last_block;
 
 static paramData_t blockPLs[] = {
-/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, (void *)sizeof( blockName ) },
-/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, (void *)sizeof( blockScript) }
+/*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof( blockName )},
+/*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof( blockScript)}
 };
 static paramGroup_t blockPG = { "block", 0, blockPLs,  sizeof blockPLs/sizeof blockPLs[0] };
 static wWin_p blockW;
@@ -116,8 +116,8 @@ static char blockEditSegs[STR_LONG_SIZE];
 static track_p blockEditTrack;
 
 static paramData_t blockEditPLs[] = {
-/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, (void *)sizeof(blockEditName) },
-/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, (void *)sizeof(blockEditScript) },
+/*0*/ { PD_STRING, blockEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(blockEditName)},
+/*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof(blockEditScript)},
 /*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, (void*)350, N_("Segments"), BO_READONLY }, 
 };
 static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
@@ -160,8 +160,8 @@ static struct {
 
 typedef enum { NM, SC, LN, E0, E1 } blockDesc_e;
 static descData_t blockDesc[] = {
-/*NM*/	{ DESC_STRING, N_("Name"), &blockData.name },
-/*SC*/  { DESC_STRING, N_("Script"), &blockData.script },
+/*NM*/	{ DESC_STRING, N_("Name"), &blockData.name, sizeof(blockData.name) },
+/*SC*/  { DESC_STRING, N_("Script"), &blockData.script, sizeof(blockData.script) },
 /*LN*/  { DESC_DIM, N_("Length"), &blockData.length },
 /*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &blockData.endPt[0] },
 /*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &blockData.endPt[1] },
@@ -173,30 +173,45 @@ static void UpdateBlock (track_p trk, int inx, descData_p descUpd, BOOL_T needUn
 	const char * thename, *thescript;
 	char *newName, *newScript;
 	BOOL_T changed, nChanged, sChanged;
+	size_t max_str;
 
 	LOG( log_block, 1, ("*** UpdateBlock(): needUndoStart = %d\n",needUndoStart))
 	if ( inx == -1 ) {
 		nChanged = sChanged = changed = FALSE;
 		thename = wStringGetValue( (wString_p)blockDesc[NM].control0 );
-		if ( strcmp( thename, xx->name ) != 0 ) {
+
+		if ( !xx->name || strcmp( thename, xx->name ) != 0 ) {
 			nChanged = changed = TRUE;
-			newName = MyStrdup(thename);
+			max_str = blockDesc[NM].max_string;
+			if (max_str && strlen(thename)>max_str-1) {
+				newName = MyMalloc(max_str);
+				strncpy(newName, thename, max_str - 1);
+				newName[max_str-1] = '\0';
+				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+			} else 	newName = MyStrdup(thename);
 		}
+
 		thescript = wStringGetValue( (wString_p)blockDesc[SC].control0 );
-		if ( strcmp( thescript, xx->script ) != 0 ) {
+		if ( !xx->script || strcmp( thescript, xx->script ) != 0 ) {
 			sChanged = changed = TRUE;
-			newScript = MyStrdup(thescript);
+			max_str = blockDesc[SC].max_string;
+			if (max_str && strlen(thescript)>max_str-1) {
+				newScript = MyMalloc(max_str);
+				strncpy(newScript, thescript, max_str - 1);
+				newScript[max_str-1] = '\0';
+				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+			} else newScript = MyStrdup(thescript);
 		}
 		if ( ! changed ) return;
 		if ( needUndoStart )
 			UndoStart( _("Change block"), "Change block" );
 		UndoModify( trk );
 		if (nChanged) {
-			MyFree(xx->name);
+			if (xx->name) MyFree(xx->name);
 			xx->name = newName;
 		}
 		if (sChanged) {
-			MyFree(xx->script);
+			if (xx->script) MyFree(xx->script);
 			xx->script = newScript;
 		}
 		return;
@@ -242,10 +257,10 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 	}
 	sprintf( str, _("(%d): Layer=%d %s"),
 		GetTrkIndex(trk), GetTrkLayer(trk)+1, message );
-	strncpy(blockData.name,xx->name,STR_SHORT_SIZE-1);
-	blockData.name[STR_SHORT_SIZE-1] = '\0';
-	strncpy(blockData.script,xx->script,STR_LONG_SIZE-1);
-	blockData.script[STR_LONG_SIZE-1] = '\0';
+	blockData.name[0] = '\0';
+	strncat(blockData.name,xx->name,STR_SHORT_SIZE-1);
+	blockData.script[0] = '\0';
+	strncat(blockData.script,xx->script,STR_LONG_SIZE-1);
 	blockData.length = 0;
 	if (xx->numTracks > 0) {
 		blockData.endPt[0] = GetTrkEndPos((&(xx->trackList))[0].t,0);
@@ -781,9 +796,10 @@ static void EditBlock (track_p trk)
     wIndex_t iTrack;
     BOOL_T needComma = FALSE;
     char temp[32];
-    
-    strncpy(blockEditName,xx->name,STR_SHORT_SIZE);
-    strncpy(blockEditScript,xx->script,STR_LONG_SIZE);
+	strncpy(blockEditName, xx->name, STR_SHORT_SIZE - 1);
+	blockEditName[STR_SHORT_SIZE-1] = '\0';
+	strncpy(blockEditScript, xx->script, STR_LONG_SIZE - 1);
+	blockEditScript[STR_LONG_SIZE-1] = '\0';
     blockEditSegs[0] = '\0';
     for (iTrack = 0; iTrack < xx->numTracks ; iTrack++) {
         if ((&(xx->trackList))[iTrack].t == NULL) continue;

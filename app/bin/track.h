@@ -633,6 +633,7 @@ typedef struct {
 		descType type;
 		char * label;
 		void * valueP;
+		int max_string;
 		int mode;
 		wControl_p control0;
 		wControl_p control1;

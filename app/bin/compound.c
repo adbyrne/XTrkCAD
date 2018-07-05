@@ -31,11 +31,13 @@
 #include "common.h"
 #include "compound.h"
 #include "cundo.h"
+#include "dynstring.h"
 #include "fileio.h"
 #include "i18n.h"
 #include "shrtpath.h"
 #include "track.h"
 #include "utility.h"
+#include "messages.h"
 
 /*****************************************************************************
  *
@@ -515,9 +517,9 @@ static descData_t compoundDesc[] = {
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &compoundData.grade },
 /*OR*/	{ DESC_POS, N_("Origin: X,Y"), &compoundData.orig },
 /*AN*/	{ DESC_ANGLE, N_("Angle"), &compoundData.angle },
-/*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf },
-/*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name },
-/*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno },
+/*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf, sizeof(compoundData.manuf)},
+/*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name, sizeof(compoundData.name) },
+/*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno, sizeof(compoundData.partno)},
 /*EC*/	{ DESC_LONG, N_("# End Pts"), &compoundData.epCnt },
 /*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &compoundData.layerNumber },
@@ -544,14 +546,27 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		if (nP == NULL) nP = "";
 		if (pP == NULL) pP = "";
 		manufS = wStringGetValue( (wString_p)compoundDesc[MN].control0 );
-		strcpy( message, manufS );
-		if ( strncmp( manufS, mP, mL ) != 0 || manufS[mL] != '\0' ) {
+		size_t max_manustr = 256, max_partstr = 256, max_namestr = 256;
+		if (compoundDesc[MN].max_string)
+			max_manustr = compoundDesc[MN].max_string-1;
+		if (strlen(manufS)>max_manustr) {
+			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_manustr-1);
+		}
+		message[0] = '\0';
+ 		strncat( message, manufS, max_manustr-1 );
+		if ( strncmp( manufS, mP, mL ) != 0 || mL != strlen(manufS) ) {
 			titleChanged = TRUE;
 		}
 		flipped = xx->flipped;
 		ungrouped = xx->ungrouped;
 		split = xx->split;
 		nameS = wStringGetValue( (wString_p)compoundDesc[NM].control0 );
+		max_namestr = 256;
+		if (compoundDesc[NM].max_string)
+			max_namestr = compoundDesc[NM].max_string;
+		if (strlen(nameS)>max_namestr) {
+			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_namestr-1);
+		}
 		if ( strncmp( nameS, "Flipped ", 8 ) == 0 ) {
 			nameS += 8;
 			flipped = TRUE;
@@ -570,23 +585,31 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		} else {
 			split = FALSE;
 		}
-		if ( strncmp( nameS, nP, nL ) != 0 || nameS[nL] != '\0' ||
+		if ( strncmp( nameS, nP, nL ) != 0 || nL != strlen(nameS) ||
 			 xx->flipped != flipped ||
 			 xx->ungrouped != ungrouped ||
 			 xx->split != split ) {
 			titleChanged = TRUE;
 		}
 		strcat( message, "\t" );
-		strcat( message, nameS );
+		strncat( message, nameS, max_namestr-1 );
 		partnoS = wStringGetValue( (wString_p)compoundDesc[PN].control0 );
-		strcat( message, "\t" );
-		strcat( message, partnoS );
+		max_partstr = 256;
+		if (compoundDesc[PN].max_string)
+			max_partstr = compoundDesc[PN].max_string;
+		if (strlen(partnoS)>max_partstr) {
+			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_partstr-1);
+		}
+		strcat( message, "\t");
+		strncat( message, partnoS, max_partstr-1 );
 		newTitle = MyStrdup( message );
-		if ( strncmp( partnoS, pP, pL ) != 0 || partnoS[pL] != '\0' ) {
+		if ( strncmp( partnoS, pP, pL ) != 0 || pL != strlen(partnoS) ) {
 			titleChanged = TRUE;
 		}
-		if ( ! titleChanged )
+		if ( ! titleChanged ) {
+			MyFree(newTitle);
 			return;
+		}
 		if ( needUndoStart )
 		   UndoStart( _("Change Track"), "Change Track" );
 		UndoModify( trk );
@@ -596,6 +619,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 			DrawCompoundDescription( trk, &tempD, wDrawColorWhite );
 		}
 		/*sprintf( message, "%s\t%s\t%s", manufS, nameS, partnoS );*/
+		if (xx->title) MyFree(xx->title);
 		xx->title = newTitle;
 		xx->flipped = flipped;
 		xx->ungrouped = ungrouped;
@@ -717,6 +741,8 @@ void DescribeCompound(
 	int mL, nL, pL;
 	long mode;
 	long listLabelsOption = listLabels;
+	DynString description;
+	char *trackType; 
 
 	if ( xx->flipped )
 		listLabelsOption |= LABEL_FLIPPED;
@@ -727,14 +753,28 @@ void DescribeCompound(
 	FormatCompoundTitle( listLabelsOption, xtitle(xx) );
 	if (message[0] == '\0')
 		FormatCompoundTitle( listLabelsOption|LABEL_DESCR, xtitle(xx) );
-	strcpy( str, _(GetTrkTypeName( trk )) );
-	str++;
-	while (*str) {
-		*str = tolower((unsigned char)*str);
-		str++;
+
+	if (GetTrkEndPtCnt(trk) <= 1) {
+		trackType = _("Structure");
+	} else {
+		trackType = GetTrkEndPtCnt(trk) > 2 ? _("Turnout") : _("Sectional Track");
 	}
-	sprintf( str, _("(%d): Layer=%d %s"),
-		GetTrkIndex(trk), GetTrkLayer(trk)+1, message );
+	DynStringMalloc(&description, len);
+	DynStringPrintf(&description,
+		_("%s (%d) Layer= %d %s"),
+		trackType,
+		GetTrkIndex(trk),
+		GetTrkLayer(trk) + 1,
+		message);
+	
+	if (DynStringSize(&description) > (unsigned)len) {
+		strncpy(str, DynStringToCStr(&description), len - 1);
+		strcpy(str + len - 4, "...");
+	} else {
+		strcpy(str, DynStringToCStr(&description));
+	}
+
+	DynStringFree(&description);
 
 	epCnt = GetTrkEndPtCnt(trk);
 	fix = 0;
@@ -828,11 +868,9 @@ void DescribeCompound(
 		compoundData.grade = fabs( (compoundData.elev[0]-compoundData.elev[1])/compoundData.length )*100.0;
 	else
 		compoundData.grade = 0.0;
-    if ( compoundData.epCnt >1 ) {
-		DoDescribe( compoundData.epCnt>2?_("Turnout"):_("Sectional Track"), trk, compoundDesc, UpdateCompound );
-	} else {
-		DoDescribe( _("Structure"), trk, compoundDesc, UpdateCompound );
-	}
+
+	DoDescribe(trackType, trk, compoundDesc, UpdateCompound);
+
 }
 
 

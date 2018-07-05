@@ -588,10 +588,10 @@ EXPORT void ParamLoadControl(
 		case PD_STRING:
 			if (p->oldD.s)
 				MyFree( p->oldD.s );
-			if (p->context) {
-				p->oldD.s = MyMalloc((uint32_t)p->context);
-				strncpy(p->oldD.s, (char*)p->valueP, (uint32_t)p->context);
-				*(p->oldD.s + (uint32_t)p->context - 1) = '\0';
+			if (p->max_string) {
+                p->oldD.s = MyMalloc(p->max_string);
+				strncpy(p->oldD.s, (char*)p->valueP, p->max_string-1);
+				*(p->oldD.s + (uint32_t)p->max_string - 1) = '\0';
 				wStringSetValue((wString_p)p->control, (char*)p->oldD.s);
 			}
 			else {
@@ -732,12 +732,11 @@ EXPORT long ParamUpdate(
 				p->oldD.s = MyStrdup( stringV );
 				if ( p->valueP ) {
 					if (p->option & PDO_STRINGLIMITLENGTH ) {
-						strncpy((char*)p->valueP, stringV, (uint32_t)p->context);
-						((char *)p->valueP)[(uint32_t)p->context - 1] = '\0';
-						if (strlen(stringV) > (uint32_t)p->context) {
-							NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, (uint32_t)p->context);
+						strncpy((char*)p->valueP, stringV, p->max_string-1);
+						((char *)p->valueP)[p->max_string - 1] = '\0';
+						if (strlen(stringV) > p->max_string-1) {
+							NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, p->max_string-1);
 						}
-
 					}
 					else {
 						strcpy((char*)p->valueP, stringV);
@@ -953,10 +952,16 @@ static long ParamIntRestore(
 			break;
 		case PD_STRING:
 			if ( oldP->s && strcmp((char*)p->valueP,oldP->s) != 0 ) {
-				/*if ((p->option&PDO_NORSTUPD)==0)*/
+				if (p->max_string && (p->option & PDO_STRINGLIMITLENGTH)) {
+					((char*)p->valueP)[0] = '\0';
+					strncat((char*)p->valueP,oldP->s,p->max_string-1);
+					if (p->control)
+						wStringSetValue( (wString_p)p->control, (char*)p->valueP );
+				} else {
 					strcpy( (char*)p->valueP, oldP->s );
-				if (p->control)
-					wStringSetValue( (wString_p)p->control, oldP->s );
+					if (p->control)
+						wStringSetValue( (wString_p)p->control, oldP->s );
+				}
 				change |= (1L<<inx);
 			}
 			break;
