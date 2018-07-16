@@ -29,7 +29,7 @@
 #include <ctype.h>
 #include <math.h>
 #include <string.h>
-#include <messages.h>
+#include "messages.h"
 
 #include "ccurve.h"
 #include "compound.h"
