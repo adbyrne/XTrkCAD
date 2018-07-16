@@ -761,6 +761,8 @@ EXPORT void MoveTrack( track_p trk, coOrd orig )
 EXPORT void RotateTrack( track_p trk, coOrd orig, ANGLE_T angle )
 {
 	EPINX_T ep;
+	if ( trackCmds( trk->type )->rotate == NULL )
+			return;
 	for (ep=0; ep<trk->endCnt; ep++) {
 		Rotate( &trk->endPt[ep].pos, orig, angle );
 		trk->endPt[ep].angle = NormalizeAngle( trk->endPt[ep].angle + angle );
@@ -772,7 +774,7 @@ EXPORT void RotateTrack( track_p trk, coOrd orig, ANGLE_T angle )
 EXPORT void RescaleTrack( track_p trk, FLOAT_T ratio, coOrd shift )
 {
 	EPINX_T ep;
-	if ( trackCmds( trk->type )->rotate == NULL )
+	if ( trackCmds( trk->type )->rescale == NULL )
 		return;
 	for (ep=0; ep<trk->endCnt; ep++) {
 		trk->endPt[ep].pos.x *= ratio;
