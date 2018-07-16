@@ -664,7 +664,7 @@ EXPORT void CloneFilledDraw(
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
 			sp->bezSegs.cnt = 0;
-			if (sp->bezSegs.ptr) MyFree(sp->bezSegs.ptr);
+			//if (sp->bezSegs.ptr) MyFree(sp->bezSegs.ptr);  Make sure no update to static
 			sp->bezSegs.ptr = NULL;
 			sp->bezSegs.max = 0;
 			FixUpBezierSeg(sp->u.b.pos,sp,sp->type == SEG_BEZTRK);
