@@ -901,6 +901,7 @@ static wPos_t messageOrControlY = 0;
 static wControl_p curInfoControl[NUM_INFOCTL];
 static wPos_t curInfoLabelWidth[NUM_INFOCTL];
 
+
 /**
  * Determine the width of a mouse pointer position string ( coordinate plus label ).
  *

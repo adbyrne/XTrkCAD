@@ -56,7 +56,7 @@ typedef struct wFont_t      * wFont_p;
 typedef struct wBitmap_t	* wBitmap_p;
 typedef struct wStatus_t    * wStatus_p;
 typedef int wDrawWidth;
-typedef int wDrawColor;
+typedef long wDrawColor;
 
 typedef struct {
 	const char * name;
@@ -183,6 +183,7 @@ typedef enum {	wCursorNormal,
 		wCursorIBeam,
 		wCursorCross,
 		wCursorQuestion } wCursor_t;
+
 void wSetCursor( wDraw_p, wCursor_t );
 #define defaultCursor wCursorCross
 
@@ -234,6 +235,7 @@ typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 #define F_CENTER	(1L<<12)
 #define F_HIDE		(1L<<13)
 #define F_MAXIMIZE  (1L<<14)
+#define F_RESTRICT  (1L<<15)
 
 wWin_p wWinMainCreate(	        const char *, wPos_t, wPos_t, const char *, const char *, const char *,
 				long, wWinCallBack_p, void * );
@@ -256,6 +258,7 @@ void wMessage(			wWin_p, const char *, wBool_t );
 void wWinTop(			wWin_p );
 void wWinDoCancel(		wWin_p );
 void wWinBlockEnable(		wBool_t );
+void wSetGeometry(wWin_p, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio);
 
 int wCreateSplash( char *appName, char *appVer );
 int wSetSplashInfo( char *msg );
@@ -730,6 +733,17 @@ wStatus_p wStatusCreate(
     const char 	* labelStr,
     wPos_t	width,
     const char	*message );
+
+wStatus_p wStatusGridCreate(
+    wWin_p	parent,
+    int	pos,
+    const char 	* labelStr,
+    const char	*message);
+
+void wStatusBarInit(wWin_p parent);
+void wStatusBarAddStatus(wStatus_p status, int pos, wBool_t expand);
+void wStatusBarAddControlNextTo(wControl_p status, wStatus_p next);
+void wStatusBarClearControls(wStatus_p start, wStatus_p end);
 
 wPos_t wStatusGetWidth(const char *testString);
 wPos_t wStatusGetHeight(long flags);
