@@ -62,6 +62,7 @@ include_directories(${GTK_INCLUDE_DIRS})
 target_link_libraries(xtrkcad-wlib ${GTK_LIBRARIES})
 
 # configure for GTK's native Unix print
+unset(GTK_UNIX_PRINT_FOUND CACHE)
 find_package (GTKUnixPrint)
 include_directories(${GTK_UNIX_PRINT_INCLUDE_DIRS})
 target_link_libraries(xtrkcad-wlib ${GTK_UNIX_PRINT_LIBRARIES})
