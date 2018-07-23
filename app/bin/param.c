@@ -2539,7 +2539,7 @@ static void ParamDlgProc(
 			DefaultProc( win, wClose_e, data );
 		break;
 	case wResize_e:
-		if ((pg->winOption & F_RESIZE) != 0 )
+		if (((pg->winOption & F_RESIZE) != 0) && pg->changeProc)
 			pg->changeProc(pg, wResize_e, data);
 		else
 			LayoutControls( pg, ParamPositionControl, NULL, NULL );
