@@ -217,7 +217,7 @@ void CreateAboutW( void *ptr )
 	if( !aboutW ) {
 		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap( xtc_xpm );
 		ParamRegister( &aboutPG );
-		aboutW = ParamCreateDialog( &aboutPG, MakeWindowTitle(_("About")), _("Ok"), (paramActionOkProc)wHide, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
+		aboutW = ParamCreateDialog( &aboutPG, MakeWindowTitle(_("About")), _("Ok"), (paramActionOkProc)wHide, NULL, FALSE, NULL, F_USETEMPLATE | F_TOP|F_CENTER, NULL );
 		ParamLoadMessage( &aboutPG, I_ABOUTVERSION, sAboutProd );
 		wTextAppend( COPYRIGHT_T, DESCRIPTION );
 		wTextAppend( COPYRIGHT_T, "\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017 by Bob Blackwell, Martin Fischer and  Adam Richards." );

@@ -180,22 +180,25 @@ void wControlSetPos(
     wPos_t x,
     wPos_t y)
 {
-    b->realX = x;
-    b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?MENUH:0);
+    if(!b->fromTemplate ) 
+    {
+        b->realX = x;
+        b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?MENUH:0);
 
-    if (b->widget) {
-        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->widget, b->realX, b->realY);
-    }
+        if (b->widget) {
+            gtk_fixed_move(GTK_FIXED(b->parent->widget), b->widget, b->realX, b->realY);
+        }
 
-    if (b->label) {
-    	GtkRequisition min_requisition, nat_requisition, min_reqwidget, nat_reqwidget;
-    	gtk_widget_get_preferred_size(b->label, &min_requisition, &nat_requisition);
-    	if (b->widget)
-    	   	gtk_widget_get_preferred_size(b->widget, &min_reqwidget, &nat_reqwidget);
-    	else
-    	  	nat_reqwidget.height = nat_requisition.height;
-        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
-                       b->realY+(nat_reqwidget.height/2 - nat_requisition.height/2));
+        if (b->label) {
+            GtkRequisition min_requisition, nat_requisition, min_reqwidget, nat_reqwidget;
+            gtk_widget_get_preferred_size(b->label, &min_requisition, &nat_requisition);
+            if (b->widget)
+                gtk_widget_get_preferred_size(b->widget, &min_reqwidget, &nat_reqwidget);
+            else
+                nat_reqwidget.height = nat_requisition.height;
+            gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
+                           b->realY+(nat_reqwidget.height/2 - nat_requisition.height/2));
+        }
     }
 }
 

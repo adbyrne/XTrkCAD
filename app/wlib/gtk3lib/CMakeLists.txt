@@ -4,6 +4,7 @@ file(GLOB headers *.h)
 set(sources
 	bitmap.c
 	boxes.c
+    builder.c
 	button.c
 	color.c
 	control.c

@@ -2569,6 +2569,7 @@ wWin_p ParamCreateDialog(
 	char helpStr[STR_SHORT_SIZE];
 	wPos_t w0, h0;
 	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
+    long useTemplate = 0L;
 
 	winOption &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
@@ -2579,20 +2580,23 @@ wWin_p ParamCreateDialog(
 		winOption |= F_RECALLPOS;
 	if ( (winOption&F_RESIZE) != 0 )
 		winOption |= F_RECALLSIZE;
+    
+    if( winOption & F_USETEMPLATE)
+        useTemplate = F_USETEMPLATE;
 
 	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
 
 	if ( okLabel && okProc ) {
 		sprintf( helpStr, "%s-ok", group->nameStr );
-		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT, 0, (wButtonCallBack_p)ParamButtonOk, group );
+		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT|useTemplate, winOption, (wButtonCallBack_p)ParamButtonOk, group );
 	}
 	if ( group->cancelProc ) {
-		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL, 0, (wButtonCallBack_p)ParamButtonCancel, group );
+		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL|useTemplate, winOption, (wButtonCallBack_p)ParamButtonCancel, group );
 	}
 	if ( needHelpButton ) {
 		sprintf( helpStr, "cmd%s", group->nameStr );
 		helpStr[3] = toupper((unsigned char)helpStr[3]);
-		group->helpB = wButtonCreate( group->win, 0, 0, NULL, _("Help"), BB_HELP, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
+		group->helpB = wButtonCreate( group->win, 0, 0, NULL, _("Help"), BB_HELP|useTemplate, winOption, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
 	}
 
 	LayoutControls( group, ParamCreateControl, &group->origW, &group->origH );

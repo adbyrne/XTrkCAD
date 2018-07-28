@@ -202,33 +202,54 @@ wButton_p wButtonCreate(
     b->action = action;
     wlibComputePos((wControl_p)b);
 
-    b->widget = gtk_toggle_button_new();
+    if(!(option & F_USETEMPLATE ))
+    {    
+        b->widget = gtk_toggle_button_new();
+
+        if (width > 0) {
+            gtk_widget_set_size_request(b->widget, width, -1);
+        }
+        if( labelStr ){
+            wButtonSetLabel(b, labelStr);
+        }
+
+        gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+
+        if (option & BB_DEFAULT) {
+            gtk_widget_set_can_default(b->widget, TRUE);
+            gtk_widget_grab_default(b->widget);
+            gtk_window_set_default(GTK_WINDOW(parent->gtkwin), b->widget);
+        }
+
+        wlibControlGetSize((wControl_p)b);
+
+        if (width == 0 && b->w < MIN_BUTTON_WIDTH && (b->option&BO_ICON)==0) {
+            b->w = MIN_BUTTON_WIDTH;
+            gtk_widget_set_size_request(b->widget, b->w, b->h);
+        }
+
+        gtk_widget_show(b->widget);
+    } else {
+        char *id;
+        switch( option & ~F_USETEMPLATE ) {
+        case BB_DEFAULT:
+            id="id-ok";
+            break;
+        case BB_CANCEL:
+            id = "id-cancel";
+            break;
+        case BB_HELP:
+            id="id-help";
+            break;
+        }
+        b->widget = wlibWidgetFromId(parent->builder,  id);
+        b->fromTemplate = TRUE;
+    }
+    wlibAddButton((wControl_p)b);
+    
     g_signal_connect(b->widget, "clicked",
                          G_CALLBACK(pushButt), b);
-    if (width > 0) {
-        gtk_widget_set_size_request(b->widget, width, -1);
-    }
-    if( labelStr ){
-        wButtonSetLabel(b, labelStr);
-    }
-
-    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-
-    if (option & BB_DEFAULT) {
-        gtk_widget_set_can_default(b->widget, TRUE);
-        gtk_widget_grab_default(b->widget);
-        gtk_window_set_default(GTK_WINDOW(parent->gtkwin), b->widget);
-    }
-
-    wlibControlGetSize((wControl_p)b);
-
-    if (width == 0 && b->w < MIN_BUTTON_WIDTH && (b->option&BO_ICON)==0) {
-        b->w = MIN_BUTTON_WIDTH;
-        gtk_widget_set_size_request(b->widget, b->w, b->h);
-    }
-
-    gtk_widget_show(b->widget);
-    wlibAddButton((wControl_p)b);
+    
     wlibAddHelpString(b->widget, helpStr);
     return b;
 }

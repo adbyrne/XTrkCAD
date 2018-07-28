@@ -223,6 +223,7 @@ typedef enum {
 typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 
 /* Creation Options */
+#define F_USETEMPLATE (1L<<31)
 #define F_AUTOSIZE	(1L<<1)
 #define F_HEADER 	(1L<<2)
 #define F_RESIZE 	(1L<<3)

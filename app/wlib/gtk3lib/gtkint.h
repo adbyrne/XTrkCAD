@@ -70,7 +70,8 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		GtkWidget * label; \
 		doneProcCallback_p doneProc; \
 		cairo_t * cr; \
-		void * data;
+		void * data; \
+        int fromTemplate;              /**< widget was build from ui template */
 
 struct wWin_t {
 		WOBJ_COMMON
@@ -87,6 +88,8 @@ struct wWin_t {
 		int resizeTimer;		       /** resizing **/
 		int resizeW,resizeH;
 		int modalLevel;
+        GtkBuilder *builder;            
+
 		};
 
 struct wControl_t {
@@ -319,7 +322,16 @@ void *wTreeViewGetItemContext(wList_p b, int row);
 /* window.c */
 void wlibDoModal(wWin_p win0, wBool_t modal);
 wBool_t catch_shift_ctrl_alt_keys(GtkWidget *widget, GdkEventKey *event, void *data);
+wWin_p wlibCreateFromTemplate( wWin_p parent, int winType, wPos_t x, wPos_t y,
+    const char * labelStr, const char * nameStr, long option,
+    wWinCallBack_p winProc, void * data);
 
 /* wpref.c */
+
+/* builder.c */
+wWin_p wlibDialogFromTemplate( int winType, const char *nameStr, long option, void *data );
+GString *wlibFileNameFromDialog( const char *dialog );
+GtkWidget *wlibWidgetFromId( GtkBuilder *builder, char *id );
+
 
 #endif
