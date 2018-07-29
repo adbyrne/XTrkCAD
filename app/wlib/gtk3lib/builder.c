@@ -57,7 +57,7 @@ wlibFileNameFromDialog( const char *dialog )
     getcwd(cwd, PATH_MAX );
     GString *filename = g_string_new( cwd);
 #endif  //NDEBUG    
-    g_string_append(filename, "/app/bin/ui/");
+    g_string_append(filename, "/ui/");
     g_string_append(filename, dialog );
     g_string_append(filename, ".glade");
 
@@ -92,8 +92,17 @@ wlibDialogFromTemplate( int winType, const char *nameStr, long option, void *dat
                   NULL );
         exit(1);
     }
-    w->gtkwin = gtk_builder_get_object(w->builder,
+    w->gtkwin = (GtkWidget *)gtk_builder_get_object(w->builder,
                                        nameStr);
+    if (!w->gtkwin) {
+    	GString *errorMessage = g_string_new("Could not find window object ");
+    	        g_string_append( errorMessage, nameStr);
+    	        wNoticeEx( NT_ERROR,
+    	                   errorMessage->str,
+    	                  "OK",
+    	                  NULL );
+    	        exit(1);
+    }
     w->widget = w->gtkwin;      /**<TODO: w->widget was used for the fixed grid, not needed anymore */
     g_string_free(filename, TRUE);
    

@@ -73,3 +73,5 @@ if(NOT XTRKCAD_USE_BROWSER)
     include_directories(${GTK_WEBKIT_INCLUDE_DIRS})
     target_link_libraries(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
 endif()
+
+install(DIRECTORY glade/ DESTINATION bin/ui)
