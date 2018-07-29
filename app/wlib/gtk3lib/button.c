@@ -242,7 +242,7 @@ wButton_p wButtonCreate(
             id="id-help";
             break;
         }
-        b->widget = wlibWidgetFromId(parent->builder,  id);
+        b->widget = wlibWidgetFromId(parent,  id);
         b->fromTemplate = TRUE;
     }
     wlibAddButton((wControl_p)b);
