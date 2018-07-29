@@ -60,7 +60,7 @@ static struct {
         BOOL_T boxed;
 		} Dt;
 
-static char * boxLabels[] = { N_(""), NULL };
+static char * boxLabels[] = { "", NULL };
 static paramData_t textPLs[] = {
 #define textPD (textPLs[0])
 		{ PD_DROPLIST, &Dt.fontSizeInx, "Fontsize", 0, NULL, N_("Font Size"), BL_EDITABLE },
