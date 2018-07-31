@@ -2339,8 +2339,10 @@ static void LayoutControlGrid(
 		control_row[currLabelPos] = curr_row;
 		control_col[currLabelPos] = curr_col;
 		/* If this has a label, add 1 col */
-		if (pd->winLabel && pd->winLabel[0] != 0) {
+		if (pd->winLabel && pd->winLabel[0] != '\0') {
 			curr_col++;
+		} else if (curr_col==1) {
+			curr_col++;     							/* Leave space for missing label if first field in row */
 		}
 		if (max_col<curr_col) max_col = curr_col;
 	}
