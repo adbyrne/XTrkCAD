@@ -2,7 +2,6 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkListStore" id="liststore1"/>
   <object class="GtkWindow" id="note">
     <property name="can_focus">False</property>
     <child>
@@ -13,15 +12,15 @@
         <property name="margin_right">18</property>
         <property name="margin_top">18</property>
         <property name="margin_bottom">18</property>
+        <property name="orientation">vertical</property>
         <property name="spacing">6</property>
         <child>
-          <object class="GtkGrid">
+          <object class="GtkScrolledWindow" id="text.scroll">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
-            <property name="row_spacing">6</property>
-            <property name="column_spacing">6</property>
+            <property name="shadow_type">in</property>
             <child>
               <object class="GtkTextView" id="text">
                 <property name="visible">True</property>
@@ -29,23 +28,19 @@
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
               </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-              </packing>
             </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
+            <property name="halign">end</property>
             <property name="spacing">6</property>
             <child>
               <object class="GtkButton" id="ok">
@@ -53,6 +48,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="halign">end</property>
                 <style>
                   <class name="suggested-action"/>
                 </style>
@@ -63,26 +59,11 @@
                 <property name="position">0</property>
               </packing>
             </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
-            </child>
           </object>
           <packing>
             <property name="expand">False</property>
             <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
       </object>

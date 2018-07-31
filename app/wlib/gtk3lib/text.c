@@ -538,19 +538,34 @@ wTextCreate(wWin_p	parent,
     bt->height = height;
     bt->option = option;
     wlibComputePos((wControl_p)bt);
-    // create a scroll window with scroll bars that are automatically created
-    bt->widget = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bt->widget),
+    if (option&F_USETEMPLATE) {
+        char name[256];
+        sprintf(name,"%s",helpStr);
+    	bt->widget = wlibWidgetFromId( parent, name );
+    	if (bt->widget) bt->fromTemplate = TRUE;
+    }
+    if (!bt->widget) {
+    	// create a scroll window with scroll bars that are automatically created
+    	bt->widget = gtk_scrolled_window_new(NULL, NULL);
+    	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bt->widget),
                                    GTK_POLICY_AUTOMATIC,
                                    GTK_POLICY_AUTOMATIC);
+    }
+    if (bt->fromTemplate) {
+    	char textname[256];
+    	sprintf(textname,"%s%s",helpStr,".text");
+    	bt->text = wlibWidgetFromId( parent, textname );
+    } else {
     // create a text view and place it inside the scroll widget
-    bt->text = gtk_text_view_new();
+    	bt->text = gtk_text_view_new();
+    }
 
     if (bt->text == 0) {
         abort();
     }
 
-    gtk_container_add(GTK_CONTAINER(bt->widget), bt->text);
+    if (!bt->fromTemplate)
+        gtk_container_add(GTK_CONTAINER(bt->widget), bt->text);
     // get the text buffer and add a bold tag to it
     tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
     gtk_text_buffer_create_tag(tb, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
@@ -581,10 +596,15 @@ wTextCreate(wWin_p	parent,
     wlibAddHelpString(bt->widget, helpStr);
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(bt->text), GTK_WRAP_WORD);
     g_signal_connect(G_OBJECT(tb), "changed", G_CALLBACK(textChanged), bt);
-    // place the widget in a fixed position of the parent
-    gtk_fixed_put(GTK_FIXED(parent->widget), bt->widget, bt->realX, bt->realY);
-    wlibControlGetSize((wControl_p)bt);
-    wlibAddButton((wControl_p)bt);
+    if (option&F_CONTROLGRID) {
+    	g_object_ref(bt->widget);
+        bt->useGrid = TRUE;
+    } else if (!bt->fromTemplate) {
+    	// place the widget in a fixed position of the parent
+    	gtk_fixed_put(GTK_FIXED(parent->widget), bt->widget, bt->realX, bt->realY);
+    	wlibControlGetSize((wControl_p)bt);
+    	wlibAddButton((wControl_p)bt);
+    }
     // done, return the finished widget
     return bt;
 }

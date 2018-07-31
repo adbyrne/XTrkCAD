@@ -310,7 +310,15 @@ wButton_p wColorSelectButtonCreate(
     b->option = option;
     wlibComputePos((wControl_p)b);
 
-    b->widget = gtk_color_button_new();
+    if (option&F_USETEMPLATE) {
+    	char name[256];
+    	sprintf(name,"%s",labelStr);
+    	b->widget = wlibWidgetFromId( parent, name );
+    	if (b->widget) b->fromTemplate = TRUE;
+    }
+    if (!b->widget) {
+    	b->widget = gtk_color_button_new();
+    }
     //GtkStyleContext *stylecontext;
    // stylecontext = gtk_widget_get_style_context(b->widget);
    // stylecontext->xthickness = 1;
@@ -320,7 +328,12 @@ wButton_p wColorSelectButtonCreate(
     g_signal_connect(b->widget, "color-set",
                      G_CALLBACK(colorChange), cd);
 
-    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+    if (option&F_CONTROLGRID) {
+    	g_object_ref(b->widget);
+    	b->useGrid = TRUE;
+    } else if (!b->fromTemplate){
+    	gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+    }
 
     if (option & BB_DEFAULT) {
         gtk_widget_set_can_default(b->widget, TRUE);

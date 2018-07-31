@@ -504,19 +504,35 @@ wList_p wListCreate(
 
     wlibComputePos((wControl_p)bl);
 
-    bl->widget = gtk_scrolled_window_new(NULL, NULL);
+    //Try to find element name in Template, if not found allocate a new one
+    if (option&F_USETEMPLATE & !(option&F_CONTROLGRID)) {
+    	char name[256];
+    	sprintf(name,"%s",helpStr);
+    	bl->widget = wlibWidgetFromId(parent, name );
+    	if (bl->widget)
+    		bl->fromTemplate = TRUE;
+    }
+    if (!bl->widget)
+    	bl->widget = gtk_scrolled_window_new(NULL, NULL);
+
     gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bl->widget),
                                    GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-    gtk_container_add(GTK_CONTAINER(bl->widget),
-                                          bl->treeView);
+	gtk_container_add(GTK_CONTAINER(bl->widget),
+									  bl->treeView);
 
-    gtk_widget_set_size_request(bl->widget, width, (number+1)*ROW_HEIGHT);
+	gtk_widget_set_size_request(bl->widget, width, (number+1)*ROW_HEIGHT);
 
 ///	g_signal_connect( GTK_OBJECT(bl->list), "resize_column", G_CALLBACK(changeListColumnWidth), bl );
 
     gtk_widget_show_all(bl->widget);
 
-    gtk_fixed_put(GTK_FIXED(parent->widget), bl->widget, bl->realX, bl->realY);
+    if (option&F_CONTROLGRID) {
+        g_object_ref(bl->widget);
+        bl->useGrid = TRUE;
+    } else if (!bl->fromTemplate) {
+    	//Only attach if not in template and not in grid
+    	gtk_fixed_put(GTK_FIXED(parent->widget), bl->widget, bl->realX, bl->realY);
+    }
     wlibControlGetSize((wControl_p)bl);
 
     if (labelStr) {

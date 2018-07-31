@@ -2194,7 +2194,7 @@ static void ParamCreateControl(
 			break;
 		case PD_BITMAP:
 			iconP = pd->winData;
-			pd->control = (wControl_p)wBitmapCreate( win, xx, yy, pd->winOption, iconP );
+			pd->control = (wControl_p)wBitmapCreate( win, xx, yy, helpStr, pd->winOption, iconP );
 			break;
 		default:
 			AbortProg( "paramCreatePG" );
@@ -2570,6 +2570,7 @@ wWin_p ParamCreateDialog(
 	wPos_t w0, h0;
 	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
     long useTemplate = 0L;
+    long controlGrid = 0L;
 
 	winOption &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
@@ -2583,6 +2584,8 @@ wWin_p ParamCreateDialog(
     
     if( winOption & F_USETEMPLATE)
         useTemplate = F_USETEMPLATE;
+    if( winOption & F_CONTROLGRID)
+    	controlGrid = F_CONTROLGRID;
 
 	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
 

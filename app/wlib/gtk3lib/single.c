@@ -279,16 +279,31 @@ wString_p wStringCreate(
 	b->hasSignal = 0;
 	wlibComputePos((wControl_p)b);
 
-	// create the gtk entry field and set maximum length if desired	
-	b->widget = (GtkWidget *)gtk_entry_new();
+	if (option&F_USETEMPLATE) {
+		char name[256];
+		sprintf(name,"%s",labelStr);
+		b->widget = wlibWidgetFromId( parent, name );
+		if (b->widget) b->fromTemplate = TRUE;
+	}
+	if (!b->fromTemplate) {
+		// create the gtk entry field and set maximum length if desired
+		b->widget = (GtkWidget *)gtk_entry_new();
+	}
 	if (b->widget == NULL) abort();
 
 	if( valueL )
 		gtk_entry_set_max_length( GTK_ENTRY( b->widget ), valueL );
-	
-	// it is assumed that the parent is a fixed layout widget and the entry can
-	// be placed at a specific position
-	gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+
+	if (option&F_CONTROLGRID) {
+		//If the grid is to be used, take a reference to the widget to ensure it lives
+		//outside a container. It can be placed into a container later.
+		g_object_ref(b->widget);
+        b->useGrid = TRUE;
+	} else if (!b->fromTemplate){
+		// otherwise, it is assumed that the parent is a fixed layout widget and the entry can
+		// be placed at a specific position
+		gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+	}
 	
 	// set minimum size for widget	
 	if (width)
@@ -310,8 +325,10 @@ wString_p wStringCreate(
 		// select the text only if text is editable
 	}
 	
-	// show
-	gtk_widget_show(b->widget);
+	if (!(option&F_CONTROLGRID)) {
+		// show
+		gtk_widget_show(b->widget);
+	}
 	
 	// add the new widget to the list of created widgets
 	wlibAddButton((wControl_p)b);

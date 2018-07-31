@@ -409,9 +409,17 @@ wList_p wDropListCreate(
         abort();
     }
 
+    if (option&F_USETEMPLATE) {
+    	char name[256];
+    	sprintf(name,"%s",labelStr);
+    	b->widget = wlibWidgetFromId( parent, name );
+    	b->fromTemplate = TRUE;
+    }
+    if (!b->widget) {
     // create the droplist
-    b->widget = wlibNewDropList(b->listStore,
+    	b->widget = wlibNewDropList(b->listStore,
                                 option & BL_EDITABLE);
+    }
 
     if (b->widget == 0) {
         abort();
@@ -450,7 +458,12 @@ wList_p wDropListCreate(
 
     gtk_widget_set_size_request(b->widget, width, -1);
 
-    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+    if (option&F_CONTROLGRID) {
+    	g_object_ref(b->widget);
+        b->useGrid = TRUE;
+	} else if (!b->fromTemplate) {
+		gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+	}
     wlibControlGetSize((wControl_p)b);
 
     if (labelStr) {

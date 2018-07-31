@@ -1020,7 +1020,15 @@ int xw, xh, cw, ch;
 	bd->action = action;
 	wlibComputePos( (wControl_p)bd );
 
-	bd->widget = gtk_drawing_area_new();
+	if (option&F_USETEMPLATE) {
+		char name[256];
+		sprintf(name,"%s",helpStr);
+		bd->widget = wlibWidgetFromId( parent, name );
+		if (bd->widget) bd->fromTemplate = TRUE;
+	}
+	if (!bd->widget)
+		bd->widget = gtk_drawing_area_new();
+
 	gtk_widget_set_size_request( GTK_WIDGET(bd->widget), width, height );
 	g_signal_connect ((bd->widget), "draw",
 						   G_CALLBACK(draw_event), bd);
@@ -1055,8 +1063,13 @@ int xw, xh, cw, ch;
 	bd->maxW = bd->w = width;
 	bd->maxH = bd->h = height;
 
-	gtk_fixed_put( GTK_FIXED(parent->widget), bd->widget, bd->realX, bd->realY );
-	wlibControlGetSize( (wControl_p)bd );
+	if (option&F_CONTROLGRID) {
+		g_object_ref(bd->widget);
+		bd->useGrid = TRUE;
+	} else if (!bd->fromTemplate) {
+		gtk_fixed_put( GTK_FIXED(parent->widget), bd->widget, bd->realX, bd->realY );
+		wlibControlGetSize( (wControl_p)bd );
+	}
 	gtk_widget_realize( bd->widget );
 	bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window(bd->widget), CAIRO_CONTENT_COLOR, width, height);
 	//bd->gc = gdk_gc_new( parent->gtkwin->window );

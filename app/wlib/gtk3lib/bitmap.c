@@ -46,7 +46,7 @@ struct wBitmap_t {
  */
 
 wControl_p
-wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
+wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, wIcon_p iconP )
 {
 	wBitmap_p bt;
 	GdkPixbuf *pixbuf;
@@ -72,13 +72,24 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP )
 	gtk_widget_show( image );
 	g_object_unref( (gpointer)pixbuf );
 	
-	bt->widget = gtk_fixed_new();
+	if (options&F_USETEMPLATE) {
+		bt->widget = wlibWidgetFromId( parent, helpStr );
+		if (bt->widget) bt->fromTemplate = TRUE;
+	}
+	if (!bt->widget) {
+		bt->widget = gtk_fixed_new();
+	}
 	gtk_widget_show( bt->widget );
 	gtk_container_add( GTK_CONTAINER(bt->widget), image );
 	
 	wlibComputePos( (wControl_p)bt );
 	wlibControlGetSize( (wControl_p)bt );
-	gtk_fixed_put( GTK_FIXED( parent->widget ), bt->widget, bt->realX, bt->realY );
+	if (options&F_CONTROLGRID) {
+		g_object_ref(bt->widget);
+        bt->useGrid = TRUE;
+	} else if (!bt->fromTemplate) {
+		gtk_fixed_put( GTK_FIXED( parent->widget ), bt->widget, bt->realX, bt->realY );
+	}
 	
 	return( (wControl_p)bt );
 }

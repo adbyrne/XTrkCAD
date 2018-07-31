@@ -19,6 +19,7 @@
           <object class="GtkMenuBar" id="menubar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="halign">start</property>
             <property name="hexpand">True</property>
           </object>
           <packing>
@@ -55,7 +56,6 @@
           <object class="GtkBox" id="statusbar">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="halign">start</property>
             <property name="hexpand">True</property>
             <property name="spacing">6</property>
             <child>
@@ -69,23 +69,11 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox" id="zoombox">
+                      <object class="GtkBox" id="infoBarScale.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkLabel" id="zoomlabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Zoom</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="zoom">
+                          <object class="GtkEntry" id="infoBarScale">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="editable">False</property>
@@ -123,23 +111,11 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox" id="xbox">
+                      <object class="GtkBox" id="infoBarPosX.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkLabel" id="xlabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">X:</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="x">
+                          <object class="GtkEntry" id="infoBarPosX">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="editable">False</property>
@@ -177,23 +153,11 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox" id="ybox">
+                      <object class="GtkBox" id="infoBarPosY.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkLabel" id="ylabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Y:</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="y">
+                          <object class="GtkEntry" id="infoBarPosY">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="editable">False</property>
@@ -221,7 +185,18 @@
               </packing>
             </child>
             <child>
-              <placeholder/>
+              <object class="GtkBox" id="infoBarControls.box">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
             </child>
             <child>
               <object class="GtkFrame" id="messageframe">
@@ -235,11 +210,24 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkEntry" id="message">
+                      <object class="GtkBox" id="infoBarStatus.box">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="editable">False</property>
-                        <property name="has_frame">False</property>
+                        <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
+                        <child>
+                          <object class="GtkEntry" id="infoBarStatus">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="hexpand">True</property>
+                            <property name="editable">False</property>
+                            <property name="has_frame">False</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -266,9 +254,12 @@
             <property name="can_focus">False</property>
             <property name="spacing">3</property>
             <child>
-              <object class="GtkDrawingArea" id="left arrow">
+              <object class="GtkBox" id="HotBarLeftArrow">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -277,9 +268,10 @@
               </packing>
             </child>
             <child>
-              <object class="GtkDrawingArea" id="rightarrow">
+              <object class="GtkDrawingArea" id="HotBarDraw">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -288,13 +280,16 @@
               </packing>
             </child>
             <child>
-              <object class="GtkDrawingArea" id="hotbarcontent">
+              <object class="GtkBox" id="HotBarRightArrow">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="hexpand">True</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
-                <property name="expand">True</property>
+                <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">2</property>
               </packing>

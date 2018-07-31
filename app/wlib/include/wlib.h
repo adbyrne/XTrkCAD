@@ -71,7 +71,7 @@ extern long wDebugFont;
  * Bitmap Controls bitmap.c
  */
 
-wControl_p wBitmapCreate(wWin_p parent, wPos_t x, wPos_t y, long options, wIcon_p iconP);
+wControl_p wBitmapCreate(wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, wIcon_p iconP);
 wIcon_p wIconCreateBitMap(wPos_t w, wPos_t h, const char *bits, wDrawColor color);
 wIcon_p wIconCreatePixMap(char *pm[]);
 void wIconSetColor(wIcon_p ip, wDrawColor color);
@@ -223,6 +223,7 @@ typedef enum {
 typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 
 /* Creation Options */
+#define F_CONTROLGRID (1L<<30)   /*Controls are in a dynamic grid in the template*/
 #define F_USETEMPLATE (1L<<31)
 #define F_AUTOSIZE	(1L<<1)
 #define F_HEADER 	(1L<<2)
@@ -286,6 +287,8 @@ wPos_t wControlGetHeight(	wControl_p );
 wPos_t wControlGetPosX(		wControl_p );
 wPos_t wControlGetPosY(		wControl_p );
 void wControlSetPos(		wControl_p, wPos_t, wPos_t );
+void wControlSetDescribeGrid(       wControl_p, wWin_p, int col, int row);
+void wControlResetDescribeGrid(     wWin_p);
 void wControlSetFocus(		wControl_p );
 void wControlActive(		wControl_p, wBool_t );
 void wControlSetBalloon(	wControl_p, wPos_t, wPos_t, const char * );
@@ -743,12 +746,14 @@ wStatus_p wStatusGridCreate(
 
 void wStatusBarInit(wWin_p parent);
 void wStatusBarAddStatus(wStatus_p status, int pos, wBool_t expand);
-void wStatusBarAddControlNextTo(wControl_p status, wStatus_p next);
-void wStatusBarClearControls(wStatus_p start, wStatus_p end);
 
 wPos_t wStatusGetWidth(const char *testString);
 wPos_t wStatusGetHeight(long flags);
 
 void wStatusSetValue(wStatus_p b, const char * arg);
 void wStatusSetWidth(wStatus_p b, wPos_t width);
+
+void wStatusClearControls(wWin_p win);
+void wStatusAttachControl(wWin_p win, wControl_p b);
+
 #endif

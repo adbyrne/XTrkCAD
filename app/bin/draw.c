@@ -1026,6 +1026,7 @@ static void SetInfoBar( void )
 		messageOrControlY = ym;
 		if (curInfoControl[0]) {
 			for ( inx=0; curInfoControl[inx]; inx++ ) {
+				wStatusAttachControl(mainW,curInfoControl[inx]);
 				x += curInfoLabelWidth[inx];
 				int y_this = ym + (textHeight/2) - (wControlGetHeight( curInfoControl[inx] )/2);
 				wControlSetPos( curInfoControl[inx], x, y_this );

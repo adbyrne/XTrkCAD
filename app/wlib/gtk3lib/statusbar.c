@@ -43,7 +43,10 @@ struct wStatus_t {
     GtkWidget * labelWidget;
     const char * message;
     wPos_t labelWidth;
+    wBool_t builder;
 };
+
+static GtkWidget *controlsbox;
 
 /**
  * Set the message text
@@ -91,24 +94,42 @@ wStatus_p wStatusCreate(
 {
     wStatus_p b;
     GtkRequisition requisition;
-    b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
-    wlibComputePos((wControl_p)b);
-    b->message = message;
-    b->labelWidth = width;
-    b->labelWidget = gtk_entry_new();
-    gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
-    gtk_entry_set_has_frame(GTK_ENTRY(b->labelWidget), FALSE);
-    gtk_widget_set_can_focus(b->labelWidget, FALSE);
-    gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
-                       message?wlibConvertInput(message):"");
 
-    b->widget = gtk_fixed_new();
-    gtk_container_add(GTK_CONTAINER(b->widget), b->labelWidget);
-    wlibControlGetSize((wControl_p)b);
-    gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-    gtk_widget_show(b->widget);
-    gtk_widget_show(b->labelWidget);
-    wlibAddButton((wControl_p)b);
+    b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
+    if (parent->builder) {
+    	char * boxname = malloc(strlen(labelStr)+3);
+    	char * id = malloc(strlen(labelStr));
+    	sprintf(id,"%s",labelStr);
+    	b->builder = TRUE;
+    	b->labelWidget = wlibWidgetFromId(b->parent, id );
+    	b->message = message;
+    	gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
+    							   message?wlibConvertInput(message):"");
+    	gtk_widget_show_all(b->labelWidget);
+    	sprintf(boxname,"%s%s",labelStr,"box");
+    	b->widget = wlibWidgetFromId(b->parent, boxname);
+    	free(boxname);
+    	free(id);
+    } else {
+		wlibComputePos((wControl_p)b);
+		b->message = message;
+		b->labelWidth = width;
+		b->labelWidget = gtk_entry_new();
+		gtk_editable_set_editable(GTK_EDITABLE(b->labelWidget), FALSE);
+		gtk_entry_set_has_frame(GTK_ENTRY(b->labelWidget), FALSE);
+		gtk_widget_set_can_focus(b->labelWidget, FALSE);
+		gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
+						   message?wlibConvertInput(message):"");
+
+		b->widget = gtk_fixed_new();
+		gtk_container_add(GTK_CONTAINER(b->widget), b->labelWidget);
+		wlibControlGetSize((wControl_p)b);
+		gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+		gtk_widget_show(b->widget);
+		gtk_widget_show(b->labelWidget);
+		wlibAddButton((wControl_p)b);
+
+    }
 
     return b;
 }
@@ -193,6 +214,36 @@ void wStatusSetWidth(
     wStatus_p b,
     wPos_t width)
 {
-    b->labelWidth = width;
-    gtk_widget_set_size_request(b->widget, width, -1);
+	if (!b->builder) {
+		b->labelWidth = width;
+    	gtk_widget_set_size_request(b->widget, width, -1);
+	}
+}
+
+void wStatusRemoveChild(GtkWidget * w, void * container) {
+	g_object_ref(w);
+	gtk_container_remove(GTK_CONTAINER(container),GTK_WIDGET(w));
+}
+
+
+void wStatusClearControls(wWin_p win) {
+	if (win->builder && !controlsbox) {
+		controlsbox = wlibWidgetFromId(win, "infoBarControls.box" );
+	}
+
+	gtk_container_foreach (GTK_CONTAINER(controlsbox),
+	                      wStatusRemoveChild,
+	                      controlsbox);
+}
+
+void wStatusAttachControl(wWin_p win, wControl_p b) {
+	if(!controlsbox) {
+		controlsbox = wlibWidgetFromId(win, "infoBarControls.box" );
+	}
+	gtk_box_pack_end (GTK_BOX(controlsbox),
+						  b->widget,
+						  FALSE,
+						  FALSE,
+						  0);
+	gtk_widget_show_all(b->widget);
 }

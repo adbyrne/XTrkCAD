@@ -428,7 +428,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
         /* SDB 5.13.2005 */
         ParamCreateDialog(&describePG, _("Description"), _("Done"), DescOk,
                           (paramActionCancelProc) DescribeCancel,
-                          TRUE, DescribeLayout, F_RECALLPOS,
+                          TRUE, DescribeLayout, F_RECALLPOS|F_USETEMPLATE|F_CONTROLGRID,
                           DescribeUpdate);
         describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
     }

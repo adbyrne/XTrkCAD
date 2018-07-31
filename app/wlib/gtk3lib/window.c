@@ -547,6 +547,9 @@ void wWinClear(
     wPos_t width,
     wPos_t height)
 {
+	if (win->builder) {
+		wStatusClearControls(win);
+	}
 }
 
 
