@@ -220,7 +220,7 @@ void wStatusSetWidth(
 	}
 }
 
-void wStatusRemoveChild(GtkWidget * w, void * container) {
+static void wStatusRemoveChild(GtkWidget * w, void * container) {
 	g_object_ref(w);
 	gtk_container_remove(GTK_CONTAINER(container),GTK_WIDGET(w));
 }

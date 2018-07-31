@@ -89,7 +89,8 @@ struct wWin_t {
 		int resizeTimer;		       /** resizing **/
 		int resizeW,resizeH;
 		int modalLevel;
-        GtkBuilder *builder;            
+        GtkBuilder *builder;
+        GtkWidget *grid;
 
 		};
 

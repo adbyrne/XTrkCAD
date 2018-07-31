@@ -2290,12 +2290,96 @@ static void ParamPositionControl(
 
 
 typedef void (*layoutControlsProc)(paramData_p, char *, wPos_t, wPos_t );
+
+/* Special Layout for Grid part of window only - used in Describe
+ *
+ * \param IN group	data definition for the dialog
+ * \param IN proc   callback to create the Dialog Controls
+ */
+
+static void LayoutControlGrid(
+		paramGroup_p group,
+		layoutControlsProc proc) {
+
+	int control_row[100] = { 0 };
+	int control_col[100] = { 0 };
+	paramData_p pd;
+	int currLabelPos = 0;
+
+	/*Set up Prefix of HelpStr to find content by concatenated field name*/
+	char helpStr[STR_SHORT_SIZE], * helpStrP;
+	strcpy( helpStr, group->nameStr );
+	helpStrP = helpStr+strlen(helpStr);
+	*helpStrP++ = '-';
+	*helpStrP = 0;
+
+	int curr_col = 1;
+	int curr_row = 1;
+	int max_col = 0;
+
+	/* Remove all the controls and boxes from the Grid */
+	wControlResetDescribeGrid(group->win);
+
+	/* Many pd->option values are not used in the Grid layout
+	 * These include the following -
+	 * PDO_DLGBOXEND,PDO_DLGRESETMARGIN,PDO_DLGNEWCOLUMN,PDO_DLGIGNORELABELWIDTH,
+	 * PDO_DLGNOLABELALIGN,PDO_DLGWIDE,PDO_DLGIGNOREX,PDO_DLGUNDERCMDBUTT,PDO_DLGNARROW
+	 * PDO_DLGSETY
+	 */
+
+	for ( pd=group->paramPtr; pd<&group->paramPtr[group->paramCnt]; pd++,currLabelPos++ ) {
+		if ( (pd->option&PDO_DLGIGNORE) != 0 )	continue; /*Ignore unused*/
+		if ( pd->option&PDO_DLGCMDBUTTON) 		continue; /*Ignore buttons - they will be found*/
+		if ( pd->option&PDO_DLGHORZ) {      	          /* Carry on across */
+			curr_col++;
+		} else {
+			curr_row++;
+			curr_col = 1;
+		}
+		control_row[currLabelPos] = curr_row;
+		control_col[currLabelPos] = curr_col;
+		/* If this has a label, add 1 col */
+		if (pd->winLabel && pd->winLabel[0] != 0) {
+			curr_col++;
+		}
+		if (max_col<curr_col) max_col = curr_col;
+	}
+	/* At this point, curr_row is the number of rows, max_col is the maximum col count  */
+	/* Please note though, that cols 2->n are held in a HBox in Grid col 2 */
+
+	int inx;
+	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
+		if ( (pd->option&PDO_DLGIGNORE) != 0 ) continue; /*Ignore unused */
+		if ( pd->option&PDO_DLGCMDBUTTON) 	   continue; /*Ignore buttons */
+		/* Note - Grid layout does not use group->layoutProc so we dont call it */
+		if ( pd->nameStr )
+			strcpy( helpStrP, pd->nameStr );
+
+		/* Callback the Create or Update routine */
+		proc( pd, helpStr, 0, 0 );  /* Note -> This is where the controls may be created */
+
+		/*Position the control correctly within the Grid */
+		wControlSetDescribeGrid( pd->control, group->win, control_row[inx], control_col[inx]);
+	}
+}
+
+
 static void LayoutControls(
 		paramGroup_p group,
 		layoutControlsProc proc,
 		wPos_t * retW,
 		wPos_t * retH )
 {
+	/* Bypass most of LayoutControls for a GRID layout */
+	if (group->winOption&F_CONTROLGRID) {
+		LayoutControlGrid(group,proc);
+		if ( retW )
+			*retW = -1;
+		if ( retH )
+			*retH = -1;
+		return;
+	}
+
 	struct {
 		struct { wPos_t x, y; } orig, term;
 	} controlK, columnK, windowK;
