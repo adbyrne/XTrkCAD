@@ -310,9 +310,9 @@ wButton_p wColorSelectButtonCreate(
     b->option = option;
     wlibComputePos((wControl_p)b);
 
-    if (option&F_USETEMPLATE) {
+    if (option&BO_USETEMPLATE) {
     	char name[256];
-    	sprintf(name,"%s",labelStr);
+    	sprintf(name,"%s",helpStr);
     	b->widget = wlibWidgetFromId( parent, name );
     	if (b->widget) b->fromTemplate = TRUE;
     }
@@ -328,7 +328,7 @@ wButton_p wColorSelectButtonCreate(
     g_signal_connect(b->widget, "color-set",
                      G_CALLBACK(colorChange), cd);
 
-    if (option&F_CONTROLGRID) {
+    if (option&BO_CONTROLGRID) {
     	g_object_ref(b->widget);
     	b->useGrid = TRUE;
     } else if (!b->fromTemplate){

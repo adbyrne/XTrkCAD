@@ -57,7 +57,7 @@ static paramData_t priceListPLs[] = {
 	{	PD_LIST, NULL, "inx", PDO_NOPREF|PDO_NOPSHUPD, &priceListListData },
 #define I_PRICELSFLEXLEN		(3)
 	{	PD_FLOAT, &priceListFlexLengthV, "flexlen", PDO_NOPREF|PDO_NOPSHUPD|PDO_DIM|PDO_DLGRESETMARGIN, &priceListFlexData, N_("Flex Track") },
-	{	PD_MESSAGE, N_("costs"), NULL, PDO_DLGHORZ },
+	{	PD_MESSAGE, N_("costs"), "costs", PDO_DLGHORZ },
 #define I_PRICELSFLEXCOST		(6)
 	{	PD_FLOAT, &priceListFlexCostV, "flexcost", PDO_NOPREF|PDO_NOPSHUPD|PDO_DLGHORZ, &priceListFlexData } };
 static paramGroup_t priceListPG = { "pricelist", 0, priceListPLs, sizeof priceListPLs/sizeof priceListPLs[0] };

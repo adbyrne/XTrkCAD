@@ -190,12 +190,14 @@ wPos_t wControlGetPosY(
  */
 
 void wControlSetDescribeGrid( wControl_p b, wWin_p win, int col, int row) {
-	if (!win->fromTemplate || !win->builder) return;
+	if (!win->builder) return;
 
 	if (!win->grid)	{
 		win->grid = wlibWidgetFromId(win, "describe.grid" );
 		if (!win->grid) return;
 	}
+
+	if (col<1) return;
 
 	if (col==1) {
 		if (b->label) {
@@ -213,15 +215,16 @@ void wControlSetDescribeGrid( wControl_p b, wWin_p win, int col, int row) {
 
 	if (col>1) {
 		if (b->label) {
-			gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->label),col-1,1,1,1);  /* Remember inner starts at col 2! */
+			gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->label),col-1,1,1,1);  /* Remember inner grid starts at outer col 2! */
 			gtk_widget_set_halign(GTK_WIDGET(b->label),GTK_ALIGN_END);
 		}
 		gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->widget),col-1+(b->label?1:0),1,1,1);
 		gtk_widget_set_halign(GTK_WIDGET(b->widget),GTK_ALIGN_START);
 	} else {
-		gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->widget),0,1,1,1);
+		gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->widget),1,1,1,1);
 		gtk_widget_set_halign(GTK_WIDGET(b->widget),GTK_ALIGN_START);
 	}
+	gtk_widget_queue_resize (GTK_WIDGET(win->grid));
 
 }
 
@@ -238,7 +241,7 @@ static void wStatusRemoveChild(GtkWidget * w, void * container) {
  */
 
 void wControlResetDescribeGrid( wWin_p win) {
-	if (!win->fromTemplate || !win->builder) return;
+	if (!win->builder) return;
 
 	if (!win->grid)	{
 		win->grid = wlibWidgetFromId(win, "describe.grid" );
@@ -262,7 +265,7 @@ void wControlSetPos(
     wPos_t x,
     wPos_t y)
 {
-    if(!b->fromTemplate ) 
+    if(!b->fromTemplate & !b->useGrid)
     {
         b->realX = x;
         b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?MENUH:0);
@@ -305,7 +308,8 @@ void wControlSetLabel(
         else
         	nat_reqwidget.height = nat_requisition.height;
         b->labelW = nat_requisition.width+8;
-        gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
+        if (!b->fromTemplate & !b->useGrid)
+        	gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
                        b->realY+(nat_reqwidget.height/2 - nat_requisition.height/2));
     } else {
         b->labelW = wlibAddLabel(b, labelStr);

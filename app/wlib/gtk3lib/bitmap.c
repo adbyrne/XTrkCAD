@@ -72,7 +72,7 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, 
 	gtk_widget_show( image );
 	g_object_unref( (gpointer)pixbuf );
 	
-	if (options&F_USETEMPLATE) {
+	if (options&BO_USETEMPLATE) {
 		bt->widget = wlibWidgetFromId( parent, helpStr );
 		if (bt->widget) bt->fromTemplate = TRUE;
 	}
@@ -84,7 +84,7 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, 
 	
 	wlibComputePos( (wControl_p)bt );
 	wlibControlGetSize( (wControl_p)bt );
-	if (options&F_CONTROLGRID) {
+	if (options&BO_CONTROLGRID) {
 		g_object_ref(bt->widget);
         bt->useGrid = TRUE;
 	} else if (!bt->fromTemplate) {

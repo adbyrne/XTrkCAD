@@ -144,8 +144,8 @@ static paramData_t printPLs[] = {
 /*19*/ { PD_BUTTON, (void*)DoPrintSetup, "setup", PDO_DLGCMDBUTTON, NULL, N_("Setup") },
 /*20*/ { PD_BUTTON, (void*)PrintClear, "clear", 0, NULL, N_("Clear") },
 #define I_PAGECNT		(21)
-/*21*/ { PD_MESSAGE, N_("0 pages"), NULL, 0, (void*)80 },
-/*22*/ { PD_MESSAGE, N_("selected"), NULL, 0, (void*)80 }
+/*21*/ { PD_MESSAGE, N_("0 pages"), "pages", 0, (void*)80 },
+/*22*/ { PD_MESSAGE, N_("selected"), "selected", 0, (void*)80 }
 };
 
 static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP, printPLs, sizeof printPLs/sizeof printPLs[0] };

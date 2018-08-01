@@ -151,9 +151,9 @@ static paramData_t outputBitMapPLs[] = {
 #define I_DENSITY		(1)
 	{   PD_FLOAT, &outputBitMapDensity, "density", PDO_DLGRESETMARGIN, &r0o1_100, N_("    dpi") },
 #define I_MSG1			(2)
-	{   PD_MESSAGE, N_("Bitmap : 99999 by 99999 pixels"), NULL, PDO_DLGRESETMARGIN|PDO_DLGUNDERCMDBUTT|PDO_DLGWIDE, (void*)180 },
+	{   PD_MESSAGE, N_("Bitmap : 99999 by 99999 pixels"), "pixelsize", PDO_DLGRESETMARGIN|PDO_DLGUNDERCMDBUTT|PDO_DLGWIDE, (void*)180 },
 #define I_MSG2			(3)
-	{   PD_MESSAGE, N_("Approximate file size: 999.9Mb"), NULL, PDO_DLGUNDERCMDBUTT, (void*)180 } };
+	{   PD_MESSAGE, N_("Approximate file size: 999.9Mb"), "filesize", PDO_DLGUNDERCMDBUTT, (void*)180 } };
 
 static paramGroup_t outputBitMapPG = { "outputbitmap", 0, outputBitMapPLs, sizeof outputBitMapPLs/sizeof outputBitMapPLs[0] };
 

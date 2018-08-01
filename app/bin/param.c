@@ -2166,7 +2166,7 @@ static void ParamCreateControl(
 				w = wLabelWidth( _(pd->valueP) );
 			else
 				w = 150;
-			pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, _(pd->winLabel), w, pd->valueP?_(pd->valueP):" ", pd->winOption );
+			pd->control = (wControl_p)wMessageCreateEx( win, xx, yy, helpStr, _(pd->winLabel), w, pd->valueP?_(pd->valueP):" ", pd->winOption );
 			break;
 		case PD_BUTTON:
 			pd->control = (wControl_p)wButtonCreate( win, xx, yy, helpStr, _(pd->winLabel), pd->winOption, 0, ParamButtonPush, pd );
@@ -2291,6 +2291,40 @@ static void ParamPositionControl(
 
 typedef void (*layoutControlsProc)(paramData_p, char *, wPos_t, wPos_t );
 
+/* Special Layout for Template part of window only - used in Describe
+ *
+ * \param IN group	data definition for the dialog
+ * \param IN proc   callback to create the Dialog Controls
+ */
+
+static void LayoutControlTemplate(
+		paramGroup_p group,
+		layoutControlsProc proc) {
+	int inx;
+	paramData_p pd;
+
+	/*Set up Prefix of HelpStr to find content by concatenated field name*/
+	char helpStr[STR_SHORT_SIZE], * helpStrP;
+	strcpy( helpStr, group->nameStr );
+	helpStrP = helpStr+strlen(helpStr);
+	*helpStrP++ = '-';
+	*helpStrP = 0;
+
+	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
+			pd->winOption |= BO_USETEMPLATE;				/* Yes Template */
+			pd->winOption &= ~BO_CONTROLGRID;				/* No Grid */
+			if ( (pd->option&PDO_DLGIGNORE) != 0 ) continue; /*Ignore unused */
+			if ( pd->option&PDO_DLGCMDBUTTON) 	   continue; /*Ignore buttons */
+			if ( pd->nameStr )
+				strcpy( helpStrP, pd->nameStr );
+			if (group->layoutProc)
+						group->layoutProc( pd, inx, 0, NULL, NULL );
+			/* Callback the Create or Update routine */
+			proc( pd, helpStr, 0, 0 );  /* Note -> This is where the controls may be found */
+	}
+
+}
+
 /* Special Layout for Grid part of window only - used in Describe
  *
  * \param IN group	data definition for the dialog
@@ -2314,7 +2348,7 @@ static void LayoutControlGrid(
 	*helpStrP = 0;
 
 	int curr_col = 1;
-	int curr_row = 1;
+	int curr_row = 0;
 	int max_col = 0;
 
 	/* Remove all the controls and boxes from the Grid */
@@ -2328,7 +2362,11 @@ static void LayoutControlGrid(
 	 */
 
 	for ( pd=group->paramPtr; pd<&group->paramPtr[group->paramCnt]; pd++,currLabelPos++ ) {
+		pd->winOption |= BO_CONTROLGRID;                  /* Make sure the controls use the Grid */
+		pd->winOption &= ~BO_USETEMPLATE;	              /* Not template */
 		if ( (pd->option&PDO_DLGIGNORE) != 0 )	continue; /*Ignore unused*/
+		if (!(pd->context))						continue;
+		if (!(pd->valueP))	   					continue; /*Ignore not allocated*/
 		if ( pd->option&PDO_DLGCMDBUTTON) 		continue; /*Ignore buttons - they will be found*/
 		if ( pd->option&PDO_DLGHORZ) {      	          /* Carry on across */
 			curr_col++;
@@ -2336,6 +2374,7 @@ static void LayoutControlGrid(
 			curr_row++;
 			curr_col = 1;
 		}
+
 		control_row[currLabelPos] = curr_row;
 		control_col[currLabelPos] = curr_col;
 		/* If this has a label, add 1 col */
@@ -2353,6 +2392,10 @@ static void LayoutControlGrid(
 	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
 		if ( (pd->option&PDO_DLGIGNORE) != 0 ) continue; /*Ignore unused */
 		if ( pd->option&PDO_DLGCMDBUTTON) 	   continue; /*Ignore buttons */
+		if (!(pd->context))						continue;
+		if (!(pd->valueP))	   					continue; /*Ignore not allocated*/
+		pd->winOption |= BO_CONTROLGRID;                 /* Make sure the controls use the Grid */
+		pd->winOption &= ~BO_USETEMPLATE;	             /* Not template */
 		/* Note - Grid layout does not use group->layoutProc so we dont call it */
 		if ( pd->nameStr )
 			strcpy( helpStrP, pd->nameStr );
@@ -2373,8 +2416,17 @@ static void LayoutControls(
 		wPos_t * retH )
 {
 	/* Bypass most of LayoutControls for a GRID layout */
-	if (group->winOption&F_CONTROLGRID) {
+	if (group->winOption&BO_CONTROLGRID) {
 		LayoutControlGrid(group,proc);
+		if ( retW )
+			*retW = -1;
+		if ( retH )
+			*retH = -1;
+		return;
+	}
+	/* Use definitions for Template Layout (not Grid) */
+	if (group->winOption&BO_USETEMPLATE) {
+		LayoutControlTemplate(group, proc);
 		if ( retW )
 			*retW = -1;
 		if ( retH )
@@ -2656,7 +2708,6 @@ wWin_p ParamCreateDialog(
 	wPos_t w0, h0;
 	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
     long useTemplate = 0L;
-    long controlGrid = 0L;
 
 	winOption &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
@@ -2670,10 +2721,20 @@ wWin_p ParamCreateDialog(
     
     if( winOption & F_USETEMPLATE)
         useTemplate = F_USETEMPLATE;
-    if( winOption & F_CONTROLGRID)
-    	controlGrid = F_CONTROLGRID;
 
-	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
+    long winOptions = winOption;
+
+    if (!(winOption & F_USETEMPLATE))
+    	winOptions |= F_AUTOSIZE;
+
+	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptions, ParamDlgProc, group );
+
+	if (winOption & F_CONTROLGRID) {
+		group->winOption |= BO_CONTROLGRID;
+	} else if (winOption & F_USETEMPLATE) {
+		group->winOption |= BO_USETEMPLATE;
+	}
+
 
 	if ( okLabel && okProc ) {
 		sprintf( helpStr, "%s-ok", group->nameStr );
@@ -2687,6 +2748,7 @@ wWin_p ParamCreateDialog(
 		helpStr[3] = toupper((unsigned char)helpStr[3]);
 		group->helpB = wButtonCreate( group->win, 0, 0, NULL, _("Help"), BB_HELP|useTemplate, winOption, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
 	}
+
 
 	LayoutControls( group, ParamCreateControl, &group->origW, &group->origH );
 

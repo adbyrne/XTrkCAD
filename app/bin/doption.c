@@ -169,7 +169,7 @@ static void DisplayChange( long changes )
 static void DoDisplay( void * junk )
 {
 	if (displayW == NULL) {
-		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")), _("Ok"), DisplayOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
+		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")), _("Ok"), DisplayOk, OptionDlgCancel, TRUE, NULL, F_USETEMPLATE, OptionDlgUpdate );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto"), NULL, (void*)0x0002 );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"), NULL, (void*)0x0012 );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf/Part Number"), NULL, (void*)0x0312 );

@@ -148,6 +148,7 @@ wPos_t wMessageGetHeight(
  * \param IN parent Handle of parent window
  * \param IN x position in x direction
  * \param IN y position in y direction
+ * \param IN helpStr - name of field
  * \param IN labelStr ???
  * \param IN width horizontal size of window
  * \param IN message message to display ( null terminated )
@@ -159,6 +160,7 @@ wMessage_p wMessageCreateEx(
     wWin_p	parent,
     wPos_t	x,
     wPos_t	y,
+	const char * helpStr,
     const char 	* labelStr,
     wPos_t	width,
     const char	*message,
@@ -173,7 +175,7 @@ wMessage_p wMessageCreateEx(
     wlibComputePos((wControl_p)b);
     b->message = message;
     b->labelWidth = width;
-    if (flags&F_USETEMPLATE) {
+    if (flags&BO_USETEMPLATE) {
     	char name[256];
     	sprintf(name,"%s",labelStr);
     	b->labelWidget = wlibWidgetFromId( parent, name );
@@ -217,7 +219,7 @@ wMessage_p wMessageCreateEx(
 	   }
     }
     
-    if (flags&F_CONTROLGRID) {
+    if (flags&BO_CONTROLGRID) {
     	g_object_ref(b->labelWidget);
     	b->useGrid = TRUE;
     } else if (!b->fromTemplate) {
@@ -234,7 +236,7 @@ wMessage_p wMessageCreateEx(
 		 wlibAddButton((wControl_p)b);
     } else {
     	char boxname[256];
-    	sprintf(boxname,"%s%s",labelStr,".box");
+    	sprintf(boxname,"%s%s",helpStr,".box");
     	b->widget = wlibWidgetFromId( parent, boxname );
     	if (b->widget)
     		gtk_widget_show_all(b->widget);

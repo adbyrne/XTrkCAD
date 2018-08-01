@@ -75,7 +75,7 @@ wlibDialogFromTemplate( int winType, const char *nameStr, long option, void *dat
     wWin_p w;
     int h;
     GString *filename;
-    w = wlibAlloc(NULL, winType, 0, 0, NULL, sizeof *w, data);
+    w = wlibAlloc(NULL, winType, 0, 0, nameStr, sizeof *w, data);
     w->busy = TRUE;
     w->option = option;
 	w->resizeTimer = 0;
@@ -103,7 +103,7 @@ wlibDialogFromTemplate( int winType, const char *nameStr, long option, void *dat
     	                  NULL );
     	        exit(1);
     }
-    w->widget = w->gtkwin;      /**<TODO: w->widget was used for the fixed grid, not needed anymore */
+    //w->widget = w->gtkwin;      /**<TODO: w->widget was used for the fixed grid, not needed anymore */
     g_string_free(filename, TRUE);
    
     return w;

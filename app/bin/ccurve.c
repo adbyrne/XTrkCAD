@@ -495,7 +495,7 @@ static paramData_t helixPLs[] = {
 	{ PD_FLOAT, &helixGrade, "grade", 0, &r0_100, N_("Grade") },
 	{ PD_FLOAT, &helixVertSep, "vertSep", PDO_DIM, &r0_1000000, N_("Vertical Separation") },
 #define I_HELIXMSG		(6)
-	{ PD_MESSAGE, N_("Total Length"), NULL, PDO_DLGRESETMARGIN, (void*)200 } };
+	{ PD_MESSAGE, N_("Total Length"), "length-mess", PDO_DLGRESETMARGIN, (void*)200 } };
 static paramGroup_t helixPG = { "helix", PGO_PREFMISCGROUP, helixPLs, sizeof helixPLs/sizeof helixPLs[0] };
 
 static paramData_t circleRadiusPLs[] = {

@@ -1020,7 +1020,7 @@ int xw, xh, cw, ch;
 	bd->action = action;
 	wlibComputePos( (wControl_p)bd );
 
-	if (option&F_USETEMPLATE) {
+	if (option&BO_USETEMPLATE) {
 		char name[256];
 		sprintf(name,"%s",helpStr);
 		bd->widget = wlibWidgetFromId( parent, name );
@@ -1063,7 +1063,7 @@ int xw, xh, cw, ch;
 	bd->maxW = bd->w = width;
 	bd->maxH = bd->h = height;
 
-	if (option&F_CONTROLGRID) {
+	if (option&BO_CONTROLGRID) {
 		g_object_ref(bd->widget);
 		bd->useGrid = TRUE;
 	} else if (!bd->fromTemplate) {

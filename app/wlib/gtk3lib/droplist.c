@@ -409,9 +409,9 @@ wList_p wDropListCreate(
         abort();
     }
 
-    if (option&F_USETEMPLATE) {
+    if (option&BO_USETEMPLATE) {
     	char name[256];
-    	sprintf(name,"%s",labelStr);
+    	sprintf(name,"%s",helpStr);
     	b->widget = wlibWidgetFromId( parent, name );
     	b->fromTemplate = TRUE;
     }
@@ -458,7 +458,7 @@ wList_p wDropListCreate(
 
     gtk_widget_set_size_request(b->widget, width, -1);
 
-    if (option&F_CONTROLGRID) {
+    if (option&BO_CONTROLGRID) {
     	g_object_ref(b->widget);
         b->useGrid = TRUE;
 	} else if (!b->fromTemplate) {

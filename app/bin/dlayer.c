@@ -452,7 +452,7 @@ static paramData_t layerPLs[] = {
     { PD_TOGGLE, &layerOnMap, "onmap", PDO_NOPREF|PDO_DLGHORZ, onMapLabels, N_("On Map"), BC_HORZ|BC_NOBORDER },
 #define I_COUNT (6)
     { PD_STRING, NULL, "object-count", PDO_NOPREF|PDO_DLGBOXEND, (void*)(80), N_("Count"), BO_READONLY },
-    { PD_MESSAGE, N_("Personal Preferences"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
+    { PD_MESSAGE, N_("Personal Preferences"), "prefs", PDO_DLGRESETMARGIN, (void *)180 },
     { PD_BUTTON, (void*)DoLayerOp, "reset", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, (void *)ENUMLAYER_RELOAD },
     { PD_BUTTON, (void*)DoLayerOp, "save", PDO_DLGHORZ, 0, N_("Save"), 0, (void *)ENUMLAYER_SAVE },
     { PD_BUTTON, (void*)DoLayerOp, "clear", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Defaults"), 0, (void *)ENUMLAYER_CLEAR },

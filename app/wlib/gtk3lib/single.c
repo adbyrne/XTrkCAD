@@ -279,9 +279,9 @@ wString_p wStringCreate(
 	b->hasSignal = 0;
 	wlibComputePos((wControl_p)b);
 
-	if (option&F_USETEMPLATE) {
+	if (option&BO_USETEMPLATE) {
 		char name[256];
-		sprintf(name,"%s",labelStr);
+		sprintf(name,"%s",helpStr);
 		b->widget = wlibWidgetFromId( parent, name );
 		if (b->widget) b->fromTemplate = TRUE;
 	}
@@ -294,7 +294,7 @@ wString_p wStringCreate(
 	if( valueL )
 		gtk_entry_set_max_length( GTK_ENTRY( b->widget ), valueL );
 
-	if (option&F_CONTROLGRID) {
+	if (option&BO_CONTROLGRID) {
 		//If the grid is to be used, take a reference to the widget to ensure it lives
 		//outside a container. It can be placed into a container later.
 		g_object_ref(b->widget);
@@ -325,7 +325,7 @@ wString_p wStringCreate(
 		// select the text only if text is editable
 	}
 	
-	if (!(option&F_CONTROLGRID)) {
+	if (!(option&BO_CONTROLGRID)) {
 		// show
 		gtk_widget_show(b->widget);
 	}

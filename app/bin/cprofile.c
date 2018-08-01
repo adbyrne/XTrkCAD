@@ -565,7 +565,7 @@ static paramDrawData_t profileDrawData = { 300, 150, (wDrawRedrawCallBack_p)Redr
 static paramData_t profilePLs[] = {
 	{	PD_DRAW, NULL, "canvas", PDO_DLGRESIZE, &profileDrawData },
 #define I_PROFILEMSG			(1)
-	{	PD_MESSAGE, NULL, NULL, PDO_DLGIGNOREX, (void*)300 },
+	{	PD_MESSAGE, NULL, "profile", PDO_DLGIGNOREX, (void*)300 },
 	{	PD_BUTTON, (void*)DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL, N_("Clear") },
 	{	PD_BUTTON, (void*)DoProfilePrint, "print", 0, NULL, N_("Print") } };
 static paramGroup_t profilePG = { "profile", 0, profilePLs, sizeof profilePLs/sizeof profilePLs[0] };

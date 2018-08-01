@@ -2015,7 +2015,7 @@ static paramData_t carDlgPLs[] = {
 
 #define D                       (C+9)
 #define I_CD_MSG                (D+0)
-	{ PD_MESSAGE, NULL, NULL, PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN|PDO_DLGBOXEND, (void*)450 },
+	{ PD_MESSAGE, NULL, "mess1", PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN|PDO_DLGBOXEND, (void*)450 },
 #define I_CD_NEW                (D+1)
 	{ PD_MENU, NULL, "new-menu", PDO_DLGCMDBUTTON, NULL, N_("New"), 0, (void*)0 },
 	{ PD_MENUITEM, (void*)CarDlgNewDesc, "new-part-mi", 0, NULL, N_("Car Part"), 0, (void*)0 },

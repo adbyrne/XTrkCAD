@@ -914,7 +914,7 @@ wMenu_p wMenuCreate(
 	m->traceData = NULL;
 	wlibComputePos( (wControl_p)m );
 
-	if (option&F_USETEMPLATE) {
+	if (option&BO_USETEMPLATE) {
         char name[256];
         sprintf(name,"%s",helpStr);
 		 m->widget = wlibWidgetFromId( parent, name );
@@ -930,7 +930,7 @@ wMenu_p wMenuCreate(
 
 	wMenuSetLabel( m, labelStr );
 	
-	if (option&F_CONTROLGRID) {
+	if (option&BO_CONTROLGRID) {
 		g_object_ref(m->widget);
         m->useGrid = TRUE;
 	} else if (!m->fromTemplate) {

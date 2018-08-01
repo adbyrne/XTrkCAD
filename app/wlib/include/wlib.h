@@ -223,7 +223,7 @@ typedef enum {
 typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 
 /* Creation Options */
-#define F_CONTROLGRID (1L<<30)   /*Controls are in a dynamic grid in the template*/
+#define F_CONTROLGRID (1L<<29)   /*Controls are in a dynamic grid in the template*/
 #define F_USETEMPLATE (1L<<31)
 #define F_AUTOSIZE	(1L<<1)
 #define F_HEADER 	(1L<<2)
@@ -277,6 +277,8 @@ void wDestroySplash( void );
 #define BO_READONLY	(1L<<2)
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
+#define BO_USETEMPLATE (1L<<3)
+#define BO_CONTROLGRID (1L<<4)
 
 wPos_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );
@@ -398,7 +400,7 @@ void wListSetEditable(		wList_p, wBool_t );
 #define wMessageSetFont( x ) ( x & (BM_LARGE | BM_SMALL ))
 
 #define wMessageCreate( w, p1, p2, l, p3, m ) wMessageCreateEx( w, p1, p2, l, p3, m, 0 )
-wMessage_p wMessageCreateEx(	wWin_p, wPos_t, wPos_t, const char *,
+wMessage_p wMessageCreateEx(	wWin_p, wPos_t, wPos_t, const char *, const char *,
 				wPos_t, const char *, long );
 
 void wMessageSetValue(		wMessage_p, const char * );
@@ -734,6 +736,7 @@ wStatus_p wStatusCreate(
     wWin_p	parent,
     wPos_t	x,
     wPos_t	y,
+	const char * helpStr,
     const char 	* labelStr,
     wPos_t	width,
     const char	*message );

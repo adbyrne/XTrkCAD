@@ -505,7 +505,7 @@ wList_p wListCreate(
     wlibComputePos((wControl_p)bl);
 
     //Try to find element name in Template, if not found allocate a new one
-    if (option&F_USETEMPLATE & !(option&F_CONTROLGRID)) {
+    if (option&BO_USETEMPLATE) {
     	char name[256];
     	sprintf(name,"%s",helpStr);
     	bl->widget = wlibWidgetFromId(parent, name );
@@ -526,7 +526,7 @@ wList_p wListCreate(
 
     gtk_widget_show_all(bl->widget);
 
-    if (option&F_CONTROLGRID) {
+    if (option&BO_CONTROLGRID) {
         g_object_ref(bl->widget);
         bl->useGrid = TRUE;
     } else if (!bl->fromTemplate) {

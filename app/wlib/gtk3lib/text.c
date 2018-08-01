@@ -538,7 +538,7 @@ wTextCreate(wWin_p	parent,
     bt->height = height;
     bt->option = option;
     wlibComputePos((wControl_p)bt);
-    if (option&F_USETEMPLATE) {
+    if (option&BO_USETEMPLATE) {
         char name[256];
         sprintf(name,"%s",helpStr);
     	bt->widget = wlibWidgetFromId( parent, name );
@@ -596,7 +596,7 @@ wTextCreate(wWin_p	parent,
     wlibAddHelpString(bt->widget, helpStr);
     gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(bt->text), GTK_WRAP_WORD);
     g_signal_connect(G_OBJECT(tb), "changed", G_CALLBACK(textChanged), bt);
-    if (option&F_CONTROLGRID) {
+    if (option&BO_CONTROLGRID) {
     	g_object_ref(bt->widget);
         bt->useGrid = TRUE;
     } else if (!bt->fromTemplate) {

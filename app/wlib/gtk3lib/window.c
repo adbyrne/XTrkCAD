@@ -297,11 +297,11 @@ void wWinSetSize(
     win->h = height + BORDERSIZE + ((win->option&F_MENUBAR)?MENUH:0);
     if (win->option&F_RESIZE) {
        	gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
-    	gtk_widget_set_size_request(win->widget, win->w-10, win->h-10);
+    	//gtk_widget_set_size_request(win->widget, win->w-10, win->h-10);
     }
     else {
     	gtk_widget_set_size_request(win->gtkwin, win->w, win->h);
-    	gtk_widget_set_size_request(win->widget, win->w, win->h);
+    	//gtk_widget_set_size_request(win->widget, win->w, win->h);
     }
 
 
@@ -327,9 +327,9 @@ void wWinShow(
         printf("Set Show %s\n", win->labelStr?win->labelStr:"No label");
     }
 
-    if (win->widget == 0) {
-        abort();
-    }
+    //if (win->widget == 0) {
+    //    abort();
+    //}
 
     if (show) {
         keyState = 0;
@@ -342,7 +342,7 @@ void wWinShow(
 
             if (pref_req.width != win->w || pref_req.height != win->h) {
                 //gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
-                gtk_widget_set_size_request(win->widget, win->w-20, win->h);
+                //gtk_widget_set_size_request(win->widget, win->w-20, win->h);
 
                 if (win->option&F_MENUBAR) {
                     gtk_widget_set_size_request(win->menubar, win->w-20, MENUH);
@@ -354,8 +354,8 @@ void wWinShow(
         }
 
         if (!win->shown) {
-            gtk_widget_show(win->gtkwin);
-            gtk_widget_show(win->widget);
+            gtk_widget_show_all(win->gtkwin);
+            //gtk_widget_show_all(win->widget);
         }
 
         gdk_window_raise(gtk_widget_get_window(win->gtkwin));
@@ -387,7 +387,7 @@ void wWinShow(
         }
 
         gtk_widget_hide(win->gtkwin);
-        gtk_widget_hide(win->widget);
+        //gtk_widget_hide(win->widget);
     }
 }
 
@@ -1187,11 +1187,11 @@ wWin_p wlibCreateFromTemplate(
 //    w->lastX = 0;
 //    w->lastY = h;
 //    w->shown = FALSE;
-//    w->nameStr = nameStr?strdup(nameStr):NULL;
+      w->nameStr = nameStr?strdup(nameStr):NULL;
 //
-    if (labelStr) {
-        gtk_window_set_title(GTK_WINDOW(w->gtkwin), labelStr);
-    }
+     if (labelStr) {
+         gtk_window_set_title(GTK_WINDOW(w->gtkwin), labelStr);
+     }
 //
 //    if (listHelpStrings) {
 //        printf("WINDOW - %s\n", nameStr?nameStr:"<NULL>");
@@ -1204,7 +1204,7 @@ wWin_p wlibCreateFromTemplate(
 //    }
 //
 //    lastWin = (wControl_p)w;
-      gtk_widget_show(w->widget);
+      gtk_widget_show_all(w->gtkwin);
 //    gtk_widget_realize(w->gtkwin);
 //    GtkAllocation allocation;
 //    gtk_widget_get_allocation(w->gtkwin, &allocation);

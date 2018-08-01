@@ -77,6 +77,7 @@ void wStatusSetValue(
  * \param IN parent Handle of parent window
  * \param IN x position in x direction
  * \param IN y position in y direction
+ * \param IN helpStr - name of field
  * \param IN labelStr ???
  * \param IN width horizontal size of window
  * \param IN message message to display ( null terminated )
@@ -88,6 +89,7 @@ wStatus_p wStatusCreate(
     wWin_p	parent,
     wPos_t	x,
     wPos_t	y,
+	const char * helpStr,
     const char 	* labelStr,
     wPos_t	width,
     const char	*message)
@@ -99,14 +101,14 @@ wStatus_p wStatusCreate(
     if (parent->builder) {
     	char * boxname = malloc(strlen(labelStr)+3);
     	char * id = malloc(strlen(labelStr));
-    	sprintf(id,"%s",labelStr);
+    	sprintf(id,"%s",helpStr);
     	b->builder = TRUE;
     	b->labelWidget = wlibWidgetFromId(b->parent, id );
     	b->message = message;
     	gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
     							   message?wlibConvertInput(message):"");
     	gtk_widget_show_all(b->labelWidget);
-    	sprintf(boxname,"%s%s",labelStr,"box");
+    	sprintf(boxname,"%s%s",helpStr,"box");
     	b->widget = wlibWidgetFromId(b->parent, boxname);
     	free(boxname);
     	free(id);

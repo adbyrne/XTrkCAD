@@ -80,11 +80,11 @@ static paramData_t structurePLs[] = {
 #define I_HIDE	(2)
 	{	PD_TOGGLE, &hideStructureWindow, "hide", PDO_DLGCMDBUTTON, /*CAST_AWAY_CONST*/(void*)hideLabels, NULL, BC_NOBORDER },
 #define I_MSGSCALE		(3)
-	{	PD_MESSAGE, NULL, NULL, 0, (void*)80 },
+	{	PD_MESSAGE, NULL, "mess1", 0, (void*)80 },
 #define I_MSGWIDTH		(4)
-	{	PD_MESSAGE, NULL, NULL, 0, (void*)80 },
+	{	PD_MESSAGE, NULL, "mess2", 0, (void*)80 },
 #define I_MSGHEIGHT		(5)
-	{	PD_MESSAGE, NULL, NULL, 0, (void*)80 } };
+	{	PD_MESSAGE, NULL, "mess3", 0, (void*)80 } };
 static paramGroup_t structurePG = { "structure", 0, structurePLs, sizeof structurePLs/sizeof structurePLs[0] };
 #endif
 

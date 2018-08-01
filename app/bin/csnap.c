@@ -517,7 +517,7 @@ static paramFloatRange_t r_1000_1000	= { -1000.0, 1000.0, 80 };
 static paramFloatRange_t r0_360			= { 0.0, 360.0, 80 };
 static char *gridLabels[]				= { "", NULL };
 static paramData_t gridPLs[] = {
-	{	PD_MESSAGE, N_("Horz"), NULL, 0, (void*)60 },
+	{	PD_MESSAGE, N_("Horz"), "horz", 0, (void*)60 },
 #define I_HORZSPACING	(1)
 	{	PD_FLOAT, &grid.Horz.Spacing, "horzspacing", PDO_DIM, &r0_999999, N_("Spacing") },
 #define I_HORZDIVISION	(2)
@@ -525,7 +525,7 @@ static paramData_t gridPLs[] = {
 #define I_HORZENABLE	(3)
 #define gridHorzEnableT ((wChoice_p)gridPLs[I_HORZENABLE].control)
 	{	PD_TOGGLE, &grid.Horz.Enable, "horzenable", 0, gridLabels, N_("Enable"), BC_HORZ|BC_NOBORDER },
-	{	PD_MESSAGE, N_("Vert"), NULL, PDO_DLGNEWCOLUMN|PDO_DLGWIDE, (void*)60},
+	{	PD_MESSAGE, N_("Vert"), "vert", PDO_DLGNEWCOLUMN|PDO_DLGWIDE, (void*)60},
 #define I_VERTSPACING	(5)
 	{	PD_FLOAT, &grid.Vert.Spacing, "vertspacing", PDO_DIM, &r0_999999, NULL },
 #define I_VERTDIVISION	(6)
