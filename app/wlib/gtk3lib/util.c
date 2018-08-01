@@ -508,6 +508,8 @@ char * wlibConvertInput(const char * inString)
     char * cq;
     int extCharCnt, inCharCnt;
 
+    if( !inString )
+        return(inString);
     /* Already UTF-8 encoded? */
     if (g_utf8_validate(inString, -1, NULL))
         /* Yes, do not double-convert */ {

@@ -163,7 +163,7 @@ static void pushButt(
         b->action(b->data);
     }
 
-    if (!b->busy) {
+    if (!b->busy && !b->fromTemplate) {
         b->recursion++;
         gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(b->widget), FALSE);
         b->recursion--;

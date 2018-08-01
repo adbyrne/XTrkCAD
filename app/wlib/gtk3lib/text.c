@@ -402,7 +402,7 @@ void wTextGetText(wText_p bt, char *text, int len)
     strncpy(text, cp, len);
 
     if (len > 0) {
-        text[len - 1] = '\0';
+        text[len] = '\0';
     }
 
     free(cp);
@@ -537,52 +537,61 @@ wTextCreate(wWin_p	parent,
     bt->width = width;
     bt->height = height;
     bt->option = option;
-    wlibComputePos((wControl_p)bt);
-    // create a scroll window with scroll bars that are automatically created
-    bt->widget = gtk_scrolled_window_new(NULL, NULL);
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bt->widget),
-                                   GTK_POLICY_AUTOMATIC,
-                                   GTK_POLICY_AUTOMATIC);
-    // create a text view and place it inside the scroll widget
-    bt->text = gtk_text_view_new();
+    
+    if( !(option&F_USETEMPLATE) ) {
+        wlibComputePos((wControl_p)bt);
+        // create a scroll window with scroll bars that are automatically created
+        bt->widget = gtk_scrolled_window_new(NULL, NULL);
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bt->widget),
+                                       GTK_POLICY_AUTOMATIC,
+                                       GTK_POLICY_AUTOMATIC);
+        // create a text view and place it inside the scroll widget
+        bt->text = gtk_text_view_new();
 
-    if (bt->text == 0) {
-        abort();
-    }
+        if (bt->text == 0) {
+            abort();
+        }
 
-    gtk_container_add(GTK_CONTAINER(bt->widget), bt->text);
+        gtk_container_add(GTK_CONTAINER(bt->widget), bt->text);
+        // this seems to assume some fixed size fonts, not really helpful
+        if (option&BT_CHARUNITS) {
+            width *= 7;
+            height *= 14;
+        }
+
+        // set the size???
+        gtk_widget_set_size_request(GTK_WIDGET(bt->widget),
+                                    width+15/*requisition.width*/, height);
+
+        gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(bt->text), GTK_WRAP_WORD);
+        // place the widget in a fixed position of the parent
+        gtk_fixed_put(GTK_FIXED(parent->widget), bt->widget, bt->realX, bt->realY);
+    } else {
+        bt->widget = wlibWidgetFromId(parent, "scrollwindow" );
+        bt->text = wlibWidgetFromId(parent, helpStr );
+        bt->fromTemplate = TRUE;
+    }    
+
     // get the text buffer and add a bold tag to it
     tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
     gtk_text_buffer_create_tag(tb, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
-
-    // this seems to assume some fixed size fonts, not really helpful
-    if (option&BT_CHARUNITS) {
-        width *= 7;
-        height *= 14;
-    }
-
-    // show the widgets
-    gtk_widget_show(bt->text);
-    gtk_widget_show(bt->widget);
-    // set the size???
-    gtk_widget_set_size_request(GTK_WIDGET(bt->widget),
-                                width+15/*requisition.width*/, height);
+    g_signal_connect(G_OBJECT(tb), "changed", G_CALLBACK(textChanged), bt);
 
     // configure read-only mode
     if (bt->option&BO_READONLY) {
         gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), FALSE);
         gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(bt->text), FALSE);
     }
-
     if (labelStr) {
         bt->labelW = wlibAddLabel((wControl_p)bt, labelStr);
     }
 
-    wlibAddHelpString(bt->widget, helpStr);
-    gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(bt->text), GTK_WRAP_WORD);
-    g_signal_connect(G_OBJECT(tb), "changed", G_CALLBACK(textChanged), bt);
-    // place the widget in a fixed position of the parent
-    gtk_fixed_put(GTK_FIXED(parent->widget), bt->widget, bt->realX, bt->realY);
+    wlibAddHelpString(bt->widget, helpStr); 
+   
+    // show the widgets
+    gtk_widget_show(bt->text);
+    gtk_widget_show(bt->widget);
+
     wlibControlGetSize((wControl_p)bt);
     wlibAddButton((wControl_p)bt);
     // done, return the finished widget

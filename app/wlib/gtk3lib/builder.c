@@ -70,15 +70,16 @@ wlibFileNameFromDialog( const char *dialog )
 
 
 wWin_p
-wlibDialogFromTemplate( int winType, const char *nameStr, long option, void *data )
+wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, long option, void *data )
 {
     wWin_p w;
     int h;
     GString *filename;
-    w = wlibAlloc(NULL, winType, 0, 0, NULL, sizeof *w, data);
+    w = wlibAlloc(NULL, winType, 0, 0, labelStr, sizeof *w, data);
     w->busy = TRUE;
     w->option = option;
 	w->resizeTimer = 0;
+    
 
     filename = wlibFileNameFromDialog( nameStr );
     

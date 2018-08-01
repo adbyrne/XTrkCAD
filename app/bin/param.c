@@ -1565,8 +1565,8 @@ static void ParamDrawAction( wDraw_p d, void * dp, wAction_t a, wPos_t w, wPos_t
 static void ParamButtonOk(
 		paramGroup_p group )
 {
-	if ( recordF && group->nameStr )
-		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" ); {
+	if ( recordF && group->nameStr ) {
+		fprintf( recordF, "PARAMETER %s %s\n", group->nameStr, "ok" ); 
 		fflush( recordF );
 	}
 	if ( group->okProc )
@@ -2406,6 +2406,11 @@ static void LayoutControls(
 			group->layoutProc( pd, inx, columnK.orig.x+labelW[inx], &controlK.orig.x, &controlK.orig.y );
 		if ( pd->nameStr )
 			strcpy( helpStrP, pd->nameStr );
+        
+        // if the dialog is created from a UI design, set the relevant option
+        if(group->options & PGO_DIALOGTEMPLATE ) {
+            pd->winOption |= F_USETEMPLATE;
+        }
 		proc( pd, helpStr, controlK.orig.x, controlK.orig.y );
 		/*
 		 * Set control term
@@ -2581,7 +2586,7 @@ wWin_p ParamCreateDialog(
 	if ( (winOption&F_RESIZE) != 0 )
 		winOption |= F_RECALLSIZE;
     
-    if( winOption & F_USETEMPLATE)
+    if( group->options & PGO_DIALOGTEMPLATE)
         useTemplate = F_USETEMPLATE;
 
 	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, F_AUTOSIZE|winOption, ParamDlgProc, group );
