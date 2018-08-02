@@ -34,7 +34,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="easement-value">
+              <object class="GtkEntry" id="easement-val">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>
@@ -65,7 +65,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="eaasement-r">
+                  <object class="GtkEntry" id="easement-r">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">10</property>

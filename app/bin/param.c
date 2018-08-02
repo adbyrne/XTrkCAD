@@ -2317,8 +2317,9 @@ static void LayoutControlTemplate(
 			if ( pd->option&PDO_DLGCMDBUTTON) 	   continue; /*Ignore buttons */
 			if ( pd->nameStr )
 				strcpy( helpStrP, pd->nameStr );
+			int x,y;
 			if (group->layoutProc)
-						group->layoutProc( pd, inx, 0, NULL, NULL );
+						group->layoutProc( pd, inx, 0, &x, &y );
 			/* Callback the Create or Update routine */
 			proc( pd, helpStr, 0, 0 );  /* Note -> This is where the controls may be found */
 	}

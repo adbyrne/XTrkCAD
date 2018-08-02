@@ -237,7 +237,7 @@ static void LayoutEasementW(
 static void DoEasement( void * junk )
 {
 	if (easementW == NULL) {
-		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")), _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel, TRUE, LayoutEasementW, 0, EasementDlgUpdate );
+		easementW = ParamCreateDialog( &easementPG, MakeWindowTitle(_("Easement")), _("Ok"), (paramActionOkProc)EasementOk, (paramActionCancelProc)EasementCancel, TRUE, LayoutEasementW, F_USETEMPLATE, EasementDlgUpdate );
 		SetEasement( easementVal, (void*)TRUE );
 	}
 	oldEasementVal = easementVal;

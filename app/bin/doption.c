@@ -249,7 +249,7 @@ static void CmdoptChange( long changes )
 static void DoCmdopt( void * junk )
 {
 	if (cmdoptW == NULL) {
-		cmdoptW = ParamCreateDialog( &cmdoptPG, MakeWindowTitle(_("Command Options")), _("Ok"), CmdoptOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
+		cmdoptW = ParamCreateDialog( &cmdoptPG, MakeWindowTitle(_("Command Options")), _("Ok"), CmdoptOk, OptionDlgCancel, TRUE, NULL, F_USETEMPLATE, OptionDlgUpdate );
 	}
 	ParamLoadControls( &cmdoptPG );
 	wShow( cmdoptW );
@@ -447,7 +447,7 @@ static void PrefOk( void * junk )
 static void DoPref( void * junk )
 {
 	if (prefW == NULL) {
-		prefW = ParamCreateDialog( &prefPG, MakeWindowTitle(_("Preferences")), _("Ok"), PrefOk, wHide, TRUE, NULL, 0, OptionDlgUpdate );
+		prefW = ParamCreateDialog( &prefPG, MakeWindowTitle(_("Preferences")), _("Ok"), PrefOk, wHide, TRUE, NULL, F_USETEMPLATE, OptionDlgUpdate );
 		LoadDstFmtList();
 	}
 	ParamLoadControls( &prefPG );
@@ -513,7 +513,7 @@ static void ColorOk( void * junk )
 static void DoColor( void * junk )
 {
 	if (colorW == NULL)
-		colorW = ParamCreateDialog( &colorPG, MakeWindowTitle(_("Color")), _("Ok"), ColorOk, wHide, TRUE, NULL, 0, NULL );
+		colorW = ParamCreateDialog( &colorPG, MakeWindowTitle(_("Color")), _("Ok"), ColorOk, wHide, TRUE, NULL, F_USETEMPLATE, NULL );
 	ParamLoadControls( &colorPG );
 	wShow( colorW );
 }

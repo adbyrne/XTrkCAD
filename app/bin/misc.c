@@ -1662,7 +1662,7 @@ void MenuPlayback(char * line) {
 static wWin_p stickyW;
 
 static void StickyOk(void *);
-static paramData_t stickyPLs[] = { { PD_TOGGLE, &stickySet, "set", 0,
+static paramData_t stickyPLs[] = { { PD_TOGGLE, &stickySet, "set", BC_REBUILDBUTTONS,
 		stickyLabels } };
 static paramGroup_t stickyPG = { "sticky", PGO_RECORD, stickyPLs,
 		sizeof stickyPLs / sizeof stickyPLs[0] };
@@ -1675,7 +1675,7 @@ static void DoSticky(void) {
 	if (!stickyW)
 		stickyW = ParamCreateDialog(&stickyPG,
 				MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, NULL,
-				TRUE, NULL, 0, NULL);
+				TRUE, NULL, F_USETEMPLATE, NULL);
 	ParamLoadControls(&stickyPG);
 	wShow(stickyW);
 }

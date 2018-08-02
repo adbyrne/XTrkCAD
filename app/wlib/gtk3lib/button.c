@@ -672,7 +672,7 @@ wChoice_p wToggleCreate(
         abort();
     }
 
-    if (b->fromTemplate) {
+    if (b->fromTemplate & !option&BC_REBUILDBUTTONS) {
 
     	 GList * child, * children;
 

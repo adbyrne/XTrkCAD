@@ -73,7 +73,7 @@
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkComboBoxText" id="layout-scale">
+                  <object class="GtkComboBox" id="layout-scale">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>
@@ -97,7 +97,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBoxText" id="layout-gauge">
+                  <object class="GtkComboBox" id="layout-gauge">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>

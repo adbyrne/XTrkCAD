@@ -414,6 +414,8 @@ wList_p wDropListCreate(
     	sprintf(name,"%s",helpStr);
     	b->widget = wlibWidgetFromId( parent, name );
     	b->fromTemplate = TRUE;
+    	gtk_combo_box_set_model (GTK_COMBO_BOX(b->widget),
+    	                         GTK_TREE_MODEL(b->listStore));
     }
     if (!b->widget) {
     // create the droplist

@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow" id="RGBColor">
+  <object class="GtkWindow" id="rgbcolor">
     <property name="name">RGBColor</property>
     <property name="can_focus">False</property>
     <child>
@@ -141,7 +141,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="RGBColor-snapgrid">
+              <object class="GtkColorButton" id="rgbcolor-snapgrid">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -152,7 +152,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="RGBColor-marker">
+              <object class="GtkColorButton" id="rgbcolor-marker">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -163,7 +163,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="RGBColor-border">
+              <object class="GtkColorButton" id="rgbcolor-border">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -174,7 +174,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="RGBColor-crossmajor">
+              <object class="GtkColorButton" id="rgbcolor-crossmajor">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -185,7 +185,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="RGBColor-crossminor">
+              <object class="GtkColorButton" id="rgbcolor-crossminor">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -196,7 +196,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="RGBColor-nornal">
+              <object class="GtkColorButton" id="rgbcolor-normal">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -207,7 +207,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="RGBColor-selected">
+              <object class="GtkColorButton" id="rgbcolor-selected">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -218,7 +218,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="RGBColor-profile">
+              <object class="GtkColorButton" id="rgbcolor-profile">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -229,7 +229,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="RGBColor-exception">
+              <object class="GtkColorButton" id="rgbcolor-exception">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -240,7 +240,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="RGBColor-tie">
+              <object class="GtkColorButton" id="rgbcolor-tie">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

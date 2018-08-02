@@ -304,7 +304,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox" id="pref-dstformat.box">
+                      <object class="GtkBox" id="pref-units.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
@@ -484,7 +484,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkComboBoxText" id="pref-dstfmt">
+              <object class="GtkComboBox" id="pref-dstfmt">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>

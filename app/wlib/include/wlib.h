@@ -119,6 +119,7 @@ typedef void (*wChoiceCallBack_p)( long, void * );
 #define BC_HORZ 	(1L<<22)
 #define BC_NONE 	(1L<<19)
 #define BC_NOBORDER 	(1L<<15)
+#define BC_REBUILDBUTTONS (1L<<16)
 
 void wButtonSetLabel(wButton_p bb, const char *labelStr);
 void wButtonSetBusy(wButton_p bb, int value);
