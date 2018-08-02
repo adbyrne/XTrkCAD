@@ -2,23 +2,23 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow">
+  <object class="GtkWindow" id="pref">
     <property name="can_focus">False</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">18</property>
-        <property name="margin_right">18</property>
-        <property name="margin_top">18</property>
-        <property name="margin_bottom">18</property>
+        <property name="margin_left">12</property>
+        <property name="margin_right">12</property>
+        <property name="margin_top">12</property>
+        <property name="margin_bottom">12</property>
         <property name="spacing">6</property>
         <child>
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="row_spacing">6</property>
-            <property name="column_spacing">6</property>
+            <property name="row_spacing">3</property>
+            <property name="column_spacing">3</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
@@ -187,7 +187,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="pref-onstartup.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
@@ -246,7 +246,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="pref-anglesystem.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
@@ -304,7 +304,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="pref-dstformat.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
@@ -362,12 +362,24 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkCheckButton" id="balloonhelp">
-                        <property name="label" translatable="yes">Balloon Help</property>
+                      <object class="GtkBox" id="pref-balloonhelp.box">
                         <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="draw_indicator">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkCheckButton" id="balloonhelp">
+                            <property name="label" translatable="yes">Balloon Help</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -382,7 +394,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="minlength">
+              <object class="GtkEntry" id="pref-minlength">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -392,7 +404,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="connectdistance">
+              <object class="GtkEntry" id="pref-connectdistance">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -402,7 +414,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="connectangle">
+              <object class="GtkEntry" id="pref-connectangle">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -412,7 +424,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="turntable-angle">
+              <object class="GtkEntry" id="pref-turntable-angle">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -422,7 +434,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="coupling-speed-max">
+              <object class="GtkEntry" id="pref-coupling-speed-max">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -432,7 +444,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="dragpixels">
+              <object class="GtkEntry" id="pref-dragpixels">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -442,7 +454,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="dragtimeout">
+              <object class="GtkEntry" id="pref-dragtimeout">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -452,7 +464,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="mingridspacing">
+              <object class="GtkEntry" id="pref-mingridspacing">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -462,7 +474,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="checkpoint">
+              <object class="GtkEntry" id="pref-checkpoint">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -472,7 +484,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkComboBoxText" id="dstfmt">
+              <object class="GtkComboBoxText" id="pref-dstfmt">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
               </object>
@@ -492,13 +504,14 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="buttons">
+            <property name="name">Button Col</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">6</property>
             <child>
-              <object class="GtkButton" id="OK Button">
+              <object class="GtkToggleButton" id="id-ok">
                 <property name="label" translatable="yes">OK</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -514,7 +527,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="Cancel Button">
+              <object class="GtkToggleButton" id="id-cancel">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -527,7 +540,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="Help Button">
+              <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>

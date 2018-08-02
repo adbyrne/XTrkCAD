@@ -2,30 +2,30 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow" id="Layout Options">
+  <object class="GtkWindow" id="layout">
     <property name="can_focus">False</property>
     <child>
       <object class="GtkBox" id="Window Columns">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">18</property>
-        <property name="margin_right">18</property>
-        <property name="margin_top">18</property>
-        <property name="margin_bottom">18</property>
-        <property name="spacing">12</property>
+        <property name="margin_left">12</property>
+        <property name="margin_right">12</property>
+        <property name="margin_top">12</property>
+        <property name="margin_bottom">12</property>
+        <property name="spacing">6</property>
         <child>
           <object class="GtkGrid" id="Contents Grid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="row_spacing">6</property>
-            <property name="column_spacing">6</property>
+            <property name="row_spacing">3</property>
+            <property name="column_spacing">3</property>
             <child>
               <object class="GtkBox">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkEntry" id="roomsizeX">
+                  <object class="GtkEntry" id="layout-roomsizeX">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">12</property>
@@ -50,7 +50,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="roomsizeY">
+                  <object class="GtkEntry" id="layout-roomsizeY">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">10</property>
@@ -73,7 +73,7 @@
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkComboBoxText" id="scale">
+                  <object class="GtkComboBoxText" id="layout-scale">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>
@@ -97,7 +97,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkComboBoxText" id="gauge">
+                  <object class="GtkComboBoxText" id="layout-gauge">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                   </object>
@@ -119,7 +119,7 @@
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkEntry" id="mintrackradius">
+                  <object class="GtkEntry" id="layout-mintrackradius">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">10</property>
@@ -143,7 +143,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="maxtrackgrade">
+                  <object class="GtkEntry" id="layout-maxtrackgrade">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="width_chars">10</property>
@@ -222,7 +222,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="title1">
+              <object class="GtkEntry" id="layout-title1">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -232,7 +232,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="title2">
+              <object class="GtkEntry" id="layout-title2">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -259,7 +259,7 @@
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkEntry" id="backgroundfile">
+                  <object class="GtkEntry" id="layout-backgroundfile">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="editable">False</property>
@@ -272,7 +272,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="browse">
+                  <object class="GtkButton" id="layout-browse">
                     <property name="label" translatable="yes">Browse ....</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -285,7 +285,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="clear">
+                  <object class="GtkButton" id="layout-clear">
                     <property name="label" translatable="yes">Clear</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -321,7 +321,7 @@
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkEntry" id="backgroundposX">
+                  <object class="GtkEntry" id="layout-backgroundposX">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                   </object>
@@ -332,7 +332,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkEntry" id="backgroundposY">
+                  <object class="GtkEntry" id="layout-backgroundposY">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                   </object>
@@ -349,7 +349,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="backgroundWidth">
+              <object class="GtkEntry" id="layout-backgroundWidth">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>
@@ -395,7 +395,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="backgroundScreen">
+              <object class="GtkEntry" id="layout-backgroundScreen">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>
@@ -406,7 +406,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="backgroundAngle">
+              <object class="GtkEntry" id="layout-backgroundAngle">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>
@@ -424,13 +424,14 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="buttons">
+            <property name="name">Button Col</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
-            <property name="spacing">12</property>
+            <property name="spacing">6</property>
             <child>
-              <object class="GtkButton" id="OK Button">
+              <object class="GtkToggleButton" id="id-ok">
                 <property name="label" translatable="yes">OK</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -446,7 +447,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="Cancel Button">
+              <object class="GtkToggleButton" id="id-cancel">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -459,7 +460,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="Help Button">
+              <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>

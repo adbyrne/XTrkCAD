@@ -289,7 +289,7 @@ wPos_t wControlGetHeight(	wControl_p );
 wPos_t wControlGetPosX(		wControl_p );
 wPos_t wControlGetPosY(		wControl_p );
 void wControlSetPos(		wControl_p, wPos_t, wPos_t );
-void wControlSetDescribeGrid(       wControl_p, wWin_p, int col, int row);
+void wControlSetDescribeGrid( wControl_p, wWin_p, int col, int row);
 void wControlResetDescribeGrid(     wWin_p);
 void wControlSetFocus(		wControl_p );
 void wControlActive(		wControl_p, wBool_t );

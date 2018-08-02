@@ -637,6 +637,10 @@ typedef struct {
 		wControl_p control0;
 		wControl_p control1;
 		wPos_t posy;
+		int grid_col0;
+		int grid_col1;
+		int grid_row0;
+		int grid_row1;
 		} descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, track_p, descData_p, descUpdate_t );

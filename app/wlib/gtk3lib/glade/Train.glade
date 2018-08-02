@@ -3,7 +3,7 @@
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkListStore" id="liststore1"/>
-  <object class="GtkWindow">
+  <object class="GtkWindow" id="train">
     <property name="can_focus">False</property>
     <child>
       <object class="GtkGrid">
@@ -18,7 +18,7 @@
         <property name="row_spacing">6</property>
         <property name="column_spacing">6</property>
         <child>
-          <object class="GtkTreeView" id="list">
+          <object class="GtkTreeView" id="train-list">
             <property name="height_request">134</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -36,74 +36,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="stop">
-            <property name="label" translatable="yes">Stop</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">7</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="direction">
-            <property name="label" translatable="yes">Forward</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">6</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="autoreverse">
-            <property name="label" translatable="yes">Auto Reverse</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="draw_indicator">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">5</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkCheckButton" id="follow">
-            <property name="label" translatable="yes">Follow</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">False</property>
-            <property name="draw_indicator">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">4</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="goto">
-            <property name="label" translatable="yes">Find</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">3</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="spacing">6</property>
             <child>
-              <object class="GtkEntry" id="distance">
+              <object class="GtkEntry" id="train-distance">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
@@ -114,7 +52,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="zeroDistance">
+              <object class="GtkEntry" id="train-zeroDistance">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="width_chars">3</property>
@@ -132,7 +70,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="speedread">
+          <object class="GtkEntry" id="train-speedread">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="halign">center</property>
@@ -154,7 +92,7 @@
             <property name="orientation">vertical</property>
             <property name="spacing">3</property>
             <child>
-              <object class="GtkEntry" id="mess1">
+              <object class="GtkEntry" id="train-mess1">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="editable">False</property>
@@ -168,7 +106,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="mess2">
+              <object class="GtkEntry" id="train-mess2">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="editable">False</property>
@@ -211,6 +149,92 @@
           <packing>
             <property name="left_attach">0</property>
             <property name="top_attach">8</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="train-follow.box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkCheckButton" id="follow">
+                <property name="label" translatable="yes">Follow</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="train-autoreverse.box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkCheckButton" id="autoreverse">
+                <property name="label" translatable="yes">Auto Reverse</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">False</property>
+                <property name="draw_indicator">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">5</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToggleButton" id="train-goto">
+            <property name="label" translatable="yes">Find</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToggleButton" id="train-direction">
+            <property name="label" translatable="yes">Forward</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">6</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkToggleButton" id="train-stop">
+            <property name="label" translatable="yes">Stop</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">7</property>
           </packing>
         </child>
       </object>

@@ -41,6 +41,7 @@ static wDrawColor descColor = 0;
 static BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
 static wPos_t describeW_posy;
+static int describe_row;
 static wPos_t describeCmdButtonEnd;
 
 static unsigned int editableLayerList[NUM_LAYERS];		/**< list of non-frozen layers */
@@ -341,8 +342,11 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
                 describePLs[inx].option |= PDO_DLGUNDERCMDBUTT;
             }
 
-            if (sep)
+
+            if (sep) {
             	describeW_posy += wControlGetHeight(describePLs[inx].control) + sep;
+            	describe_row++;
+            }
             describePLs[inx].context = ddp;
             describePLs[inx].valueP = valueP;
 
@@ -374,8 +378,19 @@ static void DescribeLayout(
         return;
     }
 
-    if (pd->context == NULL) {
+    if (pd->context == NULL)
         return;
+
+
+    if (pd->winOption&BO_CONTROLGRID) {
+    	ddp = (descData_p)pd->context;
+    	*x = (ddp->control0 == pd->control)?ddp->grid_row0:ddp->grid_row1;
+    	*y = (ddp->control0 == pd->control)?ddp->grid_col0:ddp->grid_col1;
+    	if (ddp->type == DESC_POS &&
+    	            ddp->control0 != pd->control) {
+    		*x = ddp->grid_row0;								/* Signal to keep on same row */
+    	}
+    	return;
     }
 
     ddp = (descData_p)pd->context;
@@ -423,6 +438,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
     descData = data;
     descUpdateFunc = update;
     describeW_posy = 0;
+    describe_row = 1;
 
     if (describePG.win == NULL) {
         /* SDB 5.13.2005 */
@@ -456,6 +472,8 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
         label = _(ddp->label);
         ddp->posy = describeW_posy;
+        ddp->grid_row0 = describe_row;
+        ddp->grid_col0 = 1;
         ddp->control0 = AllocateButt(ddp, ddp->valueP, label,
                                      (ddp->type == DESC_POS?3:3));
         wControlActive(ddp->control0, ((ddp->mode|ro_mode)&DESC_RO)==0);
@@ -467,10 +485,12 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
                                          NULL,
                                          0);
             wControlActive(ddp->control1, ((ddp->mode|ro_mode)&DESC_RO)==0);
+            ddp->grid_row1 = describe_row;
+            ddp->grid_col1 = 3;
             break;
 
         case DESC_LAYER:
-            wListClear((wList_p)ddp->control0);  // Rebuild list on each invovation
+            wListClear((wList_p)ddp->control0);  // Rebuild list on each invocation
 
             for (inx = 0; inx<NUM_LAYERS; inx++) {
                 char *layerFormattedName;

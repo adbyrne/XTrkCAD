@@ -2,22 +2,22 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow">
+  <object class="GtkWindow" id="cmdopt">
     <property name="can_focus">False</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">18</property>
-        <property name="margin_right">18</property>
-        <property name="margin_top">18</property>
-        <property name="margin_bottom">18</property>
+        <property name="margin_left">12</property>
+        <property name="margin_right">12</property>
+        <property name="margin_top">12</property>
+        <property name="margin_bottom">12</property>
         <property name="spacing">6</property>
         <child>
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="row_spacing">6</property>
+            <property name="row_spacing">3</property>
             <property name="column_spacing">6</property>
             <child>
               <object class="GtkLabel">
@@ -66,7 +66,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="cmdopt-move-quick.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
@@ -140,7 +140,7 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="cmdopt-preselect.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
@@ -198,10 +198,11 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="cmdopt-rightclickmode.box">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
+                        <property name="spacing">3</property>
                         <child>
                           <object class="GtkRadioButton" id="rightclickmode">
                             <property name="label" translatable="yes">Normal: Command List, Shift: Command Options</property>
@@ -233,6 +234,9 @@
                             <property name="position">1</property>
                           </packing>
                         </child>
+                        <child type="center">
+                          <placeholder/>
+                        </child>
                       </object>
                     </child>
                   </object>
@@ -254,13 +258,14 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="buttons">
+            <property name="name">Button Col</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">6</property>
             <child>
-              <object class="GtkButton" id="OK Button">
+              <object class="GtkToggleButton" id="id-ok">
                 <property name="label" translatable="yes">OK</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -276,7 +281,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="Cancel Button">
+              <object class="GtkToggleButton" id="id-cancel">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -289,7 +294,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="Help Button">
+              <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>

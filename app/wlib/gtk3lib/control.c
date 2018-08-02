@@ -199,12 +199,15 @@ void wControlSetDescribeGrid( wControl_p b, wWin_p win, int col, int row) {
 
 	if (col<1) return;
 
+	/* Put label of Col 1 object in main Grid col 1 */
 	if (col==1) {
 		if (b->label) {
 			gtk_grid_attach(GTK_GRID(win->grid),GTK_WIDGET(b->label),1,row,1,1);
 			gtk_widget_set_halign (GTK_WIDGET(b->label),GTK_ALIGN_END);
+			b->label_col = 1;
 		}
 	}
+	/* Make sure that there is a inner grid in main Grid col 2 */
 	GtkWidget *inner_grid = gtk_grid_get_child_at(GTK_GRID(win->grid),2,row);
 	if (!inner_grid) {
 		inner_grid = gtk_grid_new();
@@ -212,17 +215,23 @@ void wControlSetDescribeGrid( wControl_p b, wWin_p win, int col, int row) {
 		gtk_grid_attach(GTK_GRID(win->grid),GTK_WIDGET(inner_grid),2,row,1,1);
 	}
 
-
+	/* If we are for the inner grid, find out if there is a label, add it at col-1 and the content after it */
 	if (col>1) {
 		if (b->label) {
 			gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->label),col-1,1,1,1);  /* Remember inner grid starts at outer col 2! */
 			gtk_widget_set_halign(GTK_WIDGET(b->label),GTK_ALIGN_END);
+			b->label_col=col;
 		}
 		gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->widget),col-1+(b->label?1:0),1,1,1);
 		gtk_widget_set_halign(GTK_WIDGET(b->widget),GTK_ALIGN_START);
+		b->col=col+(b->label?1:0);
+		b->row=row;
 	} else {
+		/* Just the content in the inner grid (col 1 of it) */
 		gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->widget),1,1,1,1);
 		gtk_widget_set_halign(GTK_WIDGET(b->widget),GTK_ALIGN_START);
+		b->col=2;
+		b->row=row;
 	}
 	gtk_widget_queue_resize (GTK_WIDGET(win->grid));
 

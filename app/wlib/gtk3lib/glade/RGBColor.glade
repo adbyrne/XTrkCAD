@@ -2,16 +2,17 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkWindow">
+  <object class="GtkWindow" id="RGBColor">
+    <property name="name">RGBColor</property>
     <property name="can_focus">False</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">18</property>
-        <property name="margin_right">18</property>
-        <property name="margin_top">18</property>
-        <property name="margin_bottom">18</property>
+        <property name="margin_left">12</property>
+        <property name="margin_right">12</property>
+        <property name="margin_top">12</property>
+        <property name="margin_bottom">12</property>
         <property name="spacing">12</property>
         <child>
           <object class="GtkGrid">
@@ -140,7 +141,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="snapgrid">
+              <object class="GtkColorButton" id="RGBColor-snapgrid">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -151,7 +152,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="marker">
+              <object class="GtkColorButton" id="RGBColor-marker">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -162,7 +163,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="border">
+              <object class="GtkColorButton" id="RGBColor-border">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -173,7 +174,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="crossmajor">
+              <object class="GtkColorButton" id="RGBColor-crossmajor">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -184,7 +185,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="crossminor">
+              <object class="GtkColorButton" id="RGBColor-crossminor">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -195,7 +196,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="nornal">
+              <object class="GtkColorButton" id="RGBColor-nornal">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -206,7 +207,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="selected">
+              <object class="GtkColorButton" id="RGBColor-selected">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -217,7 +218,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="profile">
+              <object class="GtkColorButton" id="RGBColor-profile">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -228,7 +229,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="exception">
+              <object class="GtkColorButton" id="RGBColor-exception">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -239,7 +240,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkColorButton" id="tie">
+              <object class="GtkColorButton" id="RGBColor-tie">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
@@ -257,13 +258,14 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkBox" id="buttons">
+            <property name="name">Button Col</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">6</property>
             <child>
-              <object class="GtkButton" id="OK Button">
+              <object class="GtkToggleButton" id="id-ok">
                 <property name="label" translatable="yes">OK</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -279,7 +281,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="Cancel Button">
+              <object class="GtkToggleButton" id="id-cancel">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -292,7 +294,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="Help Button">
+              <object class="GtkToggleButton" id="id-help">
                 <property name="label" translatable="yes">Help</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
