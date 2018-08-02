@@ -558,15 +558,14 @@ wChoice_p wRadioCreate(
 		for (label=labels; *label; label++) {
 				butt = gtk_radio_button_new_with_label(
 					   butt0?gtk_radio_button_get_group(GTK_RADIO_BUTTON(butt0)):NULL, _(*label));
-			}
 			if (butt0==NULL) {
 				butt0 = butt;
 			}
 			gtk_box_pack_start(GTK_BOX(b->widget), butt, TRUE, TRUE, 0);
-			gtk_widget_show(butt);
 			g_signal_connect(butt, "toggled",
 							 G_CALLBACK(pushChoice), b);
 			wlibAddHelpString(butt, helpStr);
+		}
 	}
     if (option & BB_DEFAULT) {
         gtk_widget_set_can_default(b->widget, TRUE);
@@ -589,7 +588,7 @@ wChoice_p wRadioCreate(
     		g_object_ref(b->widget);
             b->useGrid = TRUE;
     } else if (!b->fromTemplate) {
-    	gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+    	 gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
     }
     wlibControlGetSize((wControl_p)b);
 
@@ -598,7 +597,7 @@ wChoice_p wRadioCreate(
     }
 
     if (!(b->useGrid)) {
-    	gtk_widget_show(b->widget);
+    	gtk_widget_show_all(b->widget);
     	wlibAddButton((wControl_p)b);
     }
 

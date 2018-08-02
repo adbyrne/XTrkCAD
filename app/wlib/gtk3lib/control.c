@@ -238,6 +238,7 @@ void wControlSetDescribeGrid( wControl_p b, wWin_p win, int col, int row) {
 }
 
 static void wStatusRemoveChild(GtkWidget * w, void * container) {
+	g_object_ref(w);
 	gtk_container_remove(GTK_CONTAINER(container),GTK_WIDGET(w));
 }
 

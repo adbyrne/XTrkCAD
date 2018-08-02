@@ -72,7 +72,10 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		cairo_t * cr; \
 		void * data; \
         int fromTemplate;               /**< widget was build from ui template */ \
-		int useGrid;					 /**< widget will be dynamically placed into a Grid */
+		int useGrid;					 /**< widget will be dynamically placed into a Grid */ \
+		int row;	\
+		int col;	\
+		int label_col;
 
 struct wWin_t {
 		WOBJ_COMMON
@@ -96,9 +99,6 @@ struct wWin_t {
 
 struct wControl_t {
 		WOBJ_COMMON
-		int col;          /* assigned Grid col */
-		int row;		  /* assigned Grid row */
-		int label_col;    /* assigned label Grid col */
 		};
 		
 typedef struct wListItem_t * wListItem_p;

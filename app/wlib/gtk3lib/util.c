@@ -168,7 +168,7 @@ int wlibAddLabel(wControl_p b, const char * labelStr)
        	nat_reqwidget.height = nat_req.height;
     if (b->useGrid) {
     	//If the grid is to be used, take a reference to the widget to ensure it lives
-    	//outside a container. It will be placed later.
+    	//outside a container. It will be placed into the Grid later.
     	g_object_ref(b->label);
     } else if (!b->fromTemplate) {
     	gtk_container_add(GTK_CONTAINER(b->parent->widget), b->label);
