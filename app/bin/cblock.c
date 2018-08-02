@@ -120,7 +120,7 @@ static paramData_t blockEditPLs[] = {
 /*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF, (void*)350, N_("Script") },
 /*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, (void*)350, N_("Segments"), BO_READONLY }, 
 };
-static paramGroup_t blockEditPG = { "block", 0, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
+static paramGroup_t blockEditPG = { "blockedit", 0, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
 static wWin_p blockEditW;
 
 typedef struct btrackinfo_t {

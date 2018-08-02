@@ -162,7 +162,7 @@ static paramData_t turnDesignPLs[] = {
 	};
 
 #ifndef MKTURNOUT
-static paramGroup_t turnDesignPG = { "turnoutNew", 0, turnDesignPLs, sizeof turnDesignPLs/sizeof turnDesignPLs[0] };
+static paramGroup_t turnDesignPG = { "turnoutnew", 0, turnDesignPLs, sizeof turnDesignPLs/sizeof turnDesignPLs[0] };
 
 static turnoutInfo_t * customTurnout1, * customTurnout2;
 static BOOL_T includeNontrackSegments;
