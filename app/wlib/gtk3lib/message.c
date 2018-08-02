@@ -177,7 +177,7 @@ wMessage_p wMessageCreateEx(
     b->labelWidth = width;
     if (flags&BO_USETEMPLATE) {
     	char name[256];
-    	sprintf(name,"%s",labelStr);
+    	sprintf(name,"%s",helpStr);
     	b->labelWidget = wlibWidgetFromId( parent, name );
     	b->fromTemplate = TRUE;
     }
