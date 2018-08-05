@@ -590,22 +590,32 @@ static STATUS_T ModifyTurntable( track_p trk, wAction_t action, coOrd pos )
 }
 
 EXPORT BOOL_T ConnectTurntableTracks(
-		track_p trk1,
-		EPINX_T ep1,
+		track_p trk1,   /*The turntable */
+		EPINX_T ep1,	/*Ignored */
 		track_p trk2,
 		EPINX_T ep2 ) {
 	coOrd center, pos;
 	DIST_T radius;
+	DIST_T dist;
+	if (!QueryTrack(trk1,Q_CAN_ADD_ENDPOINTS)) return FALSE;
 	TurntableGetCenter( trk1, &center, &radius );
 	pos = GetTrkEndPos(trk2,ep2);
 	ANGLE_T angle = FindAngle(center, GetTrkEndPos(trk2,ep2));
-	if (NormalizeAngle(GetTrkEndAngle(trk2,ep2) + 180 - angle) < connectAngle) {
-		if (FindDistance(center,pos)-radius < connectDistance) {
+	if (fabs(DifferenceBetweenAngles(GetTrkEndAngle(trk2,ep2),angle+180)) <= connectAngle) {
+		dist = FindDistance(center,pos)-radius;
+		if (dist < connectDistance) {
+			UndoStart( _("Connect Turntable Tracks"), "TurnTracks(T%d[%d] T%d[%d] D%0.3f A%0.3F )",
+					GetTrkIndex(trk1), ep1, GetTrkIndex(trk2), ep2, dist, angle );
+			UndoModify(trk1);
 			EPINX_T ep = NewTurntableEndPt(trk1,angle);
-			ConnectTracks( trk1, ep, trk2, ep2 );
+			if (ConnectTracks( trk1, ep, trk2, ep2 )) {
+				UndoUndo();
+				return FALSE;
+			}
 			return TRUE;
 		}
 	}
+	ErrorMessage( MSG_TOO_FAR_APART_DIVERGE );
 	return FALSE;
 }
 

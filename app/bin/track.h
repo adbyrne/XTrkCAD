@@ -579,7 +579,7 @@ void SaveCarState( void );
 void RestoreCarState( void );
 TRKTYP_T InitObject( trackCmd_t* );
 
-void ConnectTracks( track_p, EPINX_T, track_p, EPINX_T );
+int ConnectTracks( track_p, EPINX_T, track_p, EPINX_T );
 BOOL_T ReconnectTrack( track_p, EPINX_T, track_p, EPINX_T );
 void DisconnectTracks( track_p, EPINX_T, track_p, EPINX_T );
 BOOL_T ConnectAbuttingTracks( track_p, EPINX_T, track_p, EPINX_T );

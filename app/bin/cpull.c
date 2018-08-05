@@ -452,12 +452,15 @@ static void PullTracks(
 	int cnt1, cnt2;
 	int rc;
 
-	if (QueryTrack(trk1,Q_CAN_ADD_ENDPOINTS) || QueryTrack(trk2,Q_CAN_ADD_ENDPOINTS)) {
+	if (QueryTrack(trk1,Q_CAN_ADD_ENDPOINTS)) {
 		ConnectTurntableTracks(trk1, ep1, trk2, ep2 );
+		return;
+	} else if (QueryTrack(trk2,Q_CAN_ADD_ENDPOINTS)) {
+		ConnectTurntableTracks(trk2, ep2, trk1, ep1 );
 		return;
 	}
 
-	if (ep1<0 || ep1<0 ) return;
+	if (ep1<0 || ep2<0 ) return;
 
 	if (ConnectAbuttingTracks( trk1, ep1, trk2, ep2 ))
 		return;
@@ -610,9 +613,9 @@ static STATUS_T CmdPull(
 
 	case C_START:
 		if (selectedTrackCount==0)
-			InfoMessage( _("Select first end-point to connect") );
+			InfoMessage( _("Select first end-point to connect or turntable, +Shift to tighten") );
 		else
-			InfoMessage( _("Select first end-point to connect, or Right-Click for connecting selected tracks") );
+			InfoMessage( _("Select first end-point to connect, or Right-Click for connecting selected tracks (not turntable)") );
 		trk1 = NULL;
 		turntable = FALSE;
 		return C_CONTINUE;
@@ -627,19 +630,23 @@ static STATUS_T CmdPull(
 							ep1 = -1;
 						} else trk1 = NULL;
 					} else {
-						InfoMessage( _("Select second end-point to connect") );
+						InfoMessage( _("Select second end-point to connect or turntable") );
 					}
 
 				}
 			} else {
 				if ((trk2 = OnTrack( &pos, TRUE, FALSE )) != NULL) {
+					if (trk2 == trk1) {
+						InfoMessage( _("Same Track! - please select another") );
+						return C_CONTINUE;
+					}
 					if ((ep2 = PickUnconnectedEndPoint( pos, trk2 )) >= 0 ) {
 						PullTracks( trk1, ep1, trk2, ep2 );
 						trk1 = NULL;
 						inError = TRUE;
 						return C_TERMINATE;
 					}
-					if (!turntable && QueryTrack(trk2, Q_CAN_ADD_ENDPOINTS)) {
+					if (!turntable && QueryTrack(trk2, Q_CAN_ADD_ENDPOINTS)) {  /*Second end a turntable */
 						ep2 = -1;
 						turntable = TRUE;
 						PullTracks( trk2, ep2, trk1, ep1);

@@ -1659,7 +1659,7 @@ EXPORT void LoosenTracks( void )
 		InfoMessage(_("No tracks loosened"));
 }
 
-EXPORT void ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1 )
+EXPORT int ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1 )
 {
 	DIST_T d;
 	ANGLE_T a;
@@ -1667,18 +1667,20 @@ EXPORT void ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx
 
 	if ( !IsTrack(trk0) ) {
 		NoticeMessage( _("Connecting a non-track(%d) to (%d)"), _("Continue"), NULL, GetTrkIndex(trk0), GetTrkIndex(trk1) );
-		return;
+		return -1;
 	}
 	if ( !IsTrack(trk1) ) {
 		NoticeMessage( _("Connecting a non-track(%d) to (%d)"), _("Continue"), NULL, GetTrkIndex(trk1), GetTrkIndex(trk0) );
-		return;
+		return -1;
 	}
 	pos0 = trk0->endPt[inx0].pos;
 	pos1 = trk1->endPt[inx1].pos;
 LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f %0.3f]\n", trk0->index, inx0, pos0.x, pos0.y, trk1->index, inx1, pos1.x, pos1.y ) )
 	d = FindDistance( pos0, pos1 );
-	a = NormalizeAngle( trk0->endPt[inx0].angle -
-						trk1->endPt[inx1].angle + 180.0 );
+	/* Issue when angles are almost 360 degrees apart */
+    a = fabs(DifferenceBetweenAngles(trk0->endPt[inx0].angle,trk1->endPt[inx1].angle + 180.0));
+	/* a = NormalizeAngle( trk0->endPt[inx0].angle -
+						trk1->endPt[inx1].angle + 180.0 ); */
 	if (d > connectDistance || a > connectAngle || (log_endPt>0 && logTable(log_endPt).level>=1)) {
 #ifndef WINDOWS
 		LogPrintf( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n   %d ",
@@ -1690,8 +1692,10 @@ LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f
 		PrintEndPt( logFile, trk1, 1 );???*/
 		LogPrintf("\n");
 #endif
-		if (d > connectDistance || a > connectAngle)
+		if (d > connectDistance || a > connectAngle) {
 			NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
+			return -1; /* Stop connecting out of alignment tracks! */
+		}
 	}
 	UndoModify( trk0 );
 	UndoModify( trk1 );
@@ -1700,6 +1704,7 @@ LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f
 	trk0->endPt[inx0].track = trk1;
 	trk1->endPt[inx1].track = trk0;
 	AuditTracks( "connectTracks T%d[%d], T%d[%d]", trk0->index, inx0, trk1->index, inx1 );
+	return 0;
 }
 
 
