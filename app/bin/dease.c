@@ -75,7 +75,7 @@ static paramData_t easementPLs[] = {
 	{	PD_FLOAT, &easeL, "l", PDO_DIM|PDO_DLGHORZ, &r0_100, N_("L"), BO_READONLY },
 #define I_EASESEL		(4)
 	{	PD_RADIO, &easeM, "radio", PDO_DIM|PDO_NORECORD|PDO_NOPREF|PDO_DLGRESETMARGIN, easementChoiceLabels, NULL, BC_HORZ|BC_NONE } };
-static paramGroup_t easementPG = { "easement", PGO_RECORD, easementPLs, sizeof easementPLs/sizeof easementPLs[0] };
+static paramGroup_t easementPG = { "easement", PGO_DIALOGTEMPLATE | PGO_RECORD, easementPLs, sizeof easementPLs/sizeof easementPLs[0] };
 
 
 static void SetEasement(

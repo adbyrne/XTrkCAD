@@ -144,7 +144,7 @@ static paramData_t displayPLs[] = {
 	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000 , N_("Train Update Delay"), 0, 0 },
 	{ PD_TOGGLE, &hideTrainsInTunnels, "hideTrainsInTunnels", PDO_NOPSHUPD, hideTrainsInTunnelsLabels, "", BC_HORZ }
  };
-static paramGroup_t displayPG = { "display", PGO_RECORD|PGO_PREFMISC, displayPLs, sizeof displayPLs/sizeof displayPLs[0] };
+static paramGroup_t displayPG = { "display", PGO_DIALOGTEMPLATE |PGO_RECORD|PGO_PREFMISC, displayPLs, sizeof displayPLs/sizeof displayPLs[0] };
 
 
 static void DisplayOk( void * junk )
@@ -225,7 +225,7 @@ EXPORT paramData_t cmdoptPLs[] = {
 #endif
 	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, rightClickLabels, N_("Right Click"), 0 }
 	};
-static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD|PGO_PREFMISC, cmdoptPLs, sizeof cmdoptPLs/sizeof cmdoptPLs[0] };
+static paramGroup_t cmdoptPG = { "cmdopt", PGO_DIALOGTEMPLATE | PGO_RECORD|PGO_PREFMISC, cmdoptPLs, sizeof cmdoptPLs/sizeof cmdoptPLs[0] };
 
 EXPORT paramData_p moveQuickPD = &cmdoptPLs[0];
 
@@ -294,7 +294,7 @@ static paramData_t prefPLs[] = {
 	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point") },
 	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD, startOptions, N_("On Program Startup"), 0, NULL }
 	};
-static paramGroup_t prefPG = { "pref", PGO_RECORD|PGO_PREFMISC, prefPLs, sizeof prefPLs/sizeof prefPLs[0] };
+static paramGroup_t prefPG = { "pref", PGO_DIALOGTEMPLATE |PGO_RECORD|PGO_PREFMISC, prefPLs, sizeof prefPLs/sizeof prefPLs[0] };
 
 
 typedef struct {

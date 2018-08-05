@@ -1,4 +1,6 @@
 set(gladefiles 
+    "cmdopt.glade"
+    "display.glade"
     "easement.glade"
     "enum.glade"
     "layout.glade"

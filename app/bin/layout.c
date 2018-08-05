@@ -244,7 +244,7 @@ static paramData_t layoutPLs[] = {
     { PD_FLOAT, &thisLayout.props.maxTrackGrade, "maxtrackgrade", PDO_NOPSHUPD | PDO_DLGHORZ, &r0_90, N_(" Max Track Grade (%)"), 0, (void*)(CHANGE_MAIN) }
 };
 
-static paramGroup_t layoutPG = { "layout", PGO_RECORD | PGO_PREFMISC, layoutPLs, sizeof layoutPLs / sizeof layoutPLs[0] };
+static paramGroup_t layoutPG = { "layout", PGO_DIALOGTEMPLATE | PGO_RECORD | PGO_PREFMISC, layoutPLs, sizeof layoutPLs / sizeof layoutPLs[0] };
 
 /**
 * Apply the changes entered to settings
