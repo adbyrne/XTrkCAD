@@ -2735,26 +2735,26 @@ wWin_p ParamCreateDialog(
 		winOption |= F_RECALLPOS;
 	if ( (winOption&F_RESIZE) != 0 )
 		winOption |= F_RECALLSIZE;
-    
-    if( group->options & PGO_DIALOGTEMPLATE)
-        useTemplate = F_USETEMPLATE;
 
     long winOptions = winOption;
-
-    if (!(winOption & F_USETEMPLATE))
-    	winOptions |= F_AUTOSIZE;
-
+    
+    if( group->options & PGO_DIALOGTEMPLATE) {    
+        useTemplate = TRUE;
+        winOptions |= BO_USETEMPLATE;
+    } else {
+        winOptions |= F_AUTOSIZE;
+    }
+  	
 	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptions, ParamDlgProc, group );
 
 	if (winOption & F_CONTROLGRID) {
 		group->winOption |= BO_CONTROLGRID;
 		winOption |= BO_CONTROLGRID;
 		winOption |= BO_USETEMPLATE;     /* If we are using a grid there is a template */
-	} else if (winOption & F_USETEMPLATE) {
+	} else if (useTemplate) {
 		group->winOption |= BO_USETEMPLATE;
 		winOption |= BO_USETEMPLATE;
 	}
-
 
 	if ( okLabel && okProc ) {
 		sprintf( helpStr, "%s-ok", group->nameStr );

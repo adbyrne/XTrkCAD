@@ -1198,7 +1198,7 @@ wWin_p wWinPopupCreate(
         parent = gtkMainW;
     }
 
-    if( option & F_USETEMPLATE ) {
+    if( option & BO_USETEMPLATE ) {
         win = wlibCreateFromTemplate(parent, 
                                   W_POPUP, 
                                   x, y, 

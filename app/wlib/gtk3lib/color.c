@@ -315,32 +315,31 @@ wButton_p wColorSelectButtonCreate(
     	char name[256];
     	sprintf(name,"%s",helpStr);
     	b->widget = wlibWidgetFromId( parent, name );
-    	if (b->widget) b->fromTemplate = TRUE;
-    }
-    if (!b->widget) {
+    	if (b->widget) 
+            b->fromTemplate = TRUE;
+    } else {
     	b->widget = gtk_color_button_new();
+        gtk_widget_set_size_request(GTK_WIDGET(b->widget), 22, 22);
+        gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+        if (option & BB_DEFAULT) {
+            gtk_widget_set_can_default(b->widget, TRUE);
+            gtk_widget_grab_default(b->widget);
+            gtk_window_set_default(GTK_WINDOW(parent->gtkwin), b->widget);
+        }
     }
     //GtkStyleContext *stylecontext;
    // stylecontext = gtk_widget_get_style_context(b->widget);
    // stylecontext->xthickness = 1;
    // stylecontext->ythickness = 1;
    // gtk_widget_set_style_context(b->widget, stylecontext);
-    gtk_widget_set_size_request(GTK_WIDGET(b->widget), 22, 22);
+
     g_signal_connect(b->widget, "color-set",
                      G_CALLBACK(colorChange), cd);
 
     if (option&BO_CONTROLGRID) {
     	g_object_ref(b->widget);
     	b->useGrid = TRUE;
-    } else if (!b->fromTemplate){
-    	gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-    }
-
-    if (option & BB_DEFAULT) {
-        gtk_widget_set_can_default(b->widget, TRUE);
-        gtk_widget_grab_default(b->widget);
-        gtk_window_set_default(GTK_WINDOW(parent->gtkwin), b->widget);
-    }
+    } 
 
     wlibControlGetSize((wControl_p)b);
 

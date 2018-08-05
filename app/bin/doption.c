@@ -495,7 +495,7 @@ static paramData_t colorPLs[] = {
 	{ PD_COLORLIST, &profilePathColor, "profile", PDO_NOPSHUPD, NULL, N_("Profile Path"), 0, (void*)(CHANGE_MAIN) },
 	{ PD_COLORLIST, &exceptionColor, "exception", PDO_NOPSHUPD, NULL, N_("Exception Track"), 0, (void*)(CHANGE_MAIN) },
 	{ PD_COLORLIST, &tieColor, "tie", PDO_NOPSHUPD, NULL, N_("Track Ties"), 0, (void*)(CHANGE_MAIN) } };
-static paramGroup_t colorPG = { "rgbcolor", PGO_RECORD|PGO_PREFGROUP, colorPLs, sizeof colorPLs/sizeof colorPLs[0] };
+static paramGroup_t colorPG = { "rgbcolor", PGO_DIALOGTEMPLATE | PGO_RECORD | PGO_PREFGROUP, colorPLs, sizeof colorPLs/sizeof colorPLs[0] };
 
 
 
