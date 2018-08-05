@@ -109,6 +109,22 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, 
    
     return w;
 }    
+/**
+ */
+GtkWidget *
+wlibGetWidgetFromName( wWin_p parent, char *dialogname, char *suffix )
+{
+    GString *id = g_string_new(dialogname);
+    GtkWidget *widget;
+    
+    g_string_append_printf(id, ".%s", suffix );
+    
+   	widget = wlibWidgetFromId( parent, id->str );
+    
+    g_string_free(id, TRUE);
+    
+    return( widget );
+}
 
 GtkWidget *
 wlibWidgetFromId( wWin_p win, char *id )
@@ -121,6 +137,7 @@ wlibWidgetFromId( wWin_p win, char *id )
 			   errorMessage->str,
 			   "OK",
 			   NULL );
+        g_string_free(errorMessage, TRUE);
 		exit(1);
     }
     else g_object_ref(wi);

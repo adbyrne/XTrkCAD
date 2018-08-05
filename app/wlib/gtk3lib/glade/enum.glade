@@ -49,7 +49,7 @@
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkButton" id="enum-saveas">
+                  <object class="GtkButton" id="enum-save">
                     <property name="label" translatable="yes">Save _As ...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
@@ -91,12 +91,23 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkCheckButton" id="enum-list-prices.box">
-                    <property name="label" translatable="yes">Show Prices</property>
+                  <object class="GtkFrame" id="enum-list-prices.box">
                     <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="receives_default">False</property>
-                    <property name="draw_indicator">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkCheckButton">
+                        <property name="label" translatable="yes">Show Prices</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                    </child>
+                    <child type="label_item">
+                      <placeholder/>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -148,7 +159,7 @@
                 <property name="receives_default">True</property>
                 <property name="use_underline">True</property>
                 <style>
-                  <class name="suggested_action"/>
+                  <class name="suggested-action"/>
                 </style>
               </object>
               <packing>

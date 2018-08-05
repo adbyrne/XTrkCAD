@@ -1,7 +1,11 @@
 set(gladefiles 
+    "easement.glade"
     "enum.glade"
+    "layout.glade"
     "note.glade"
+    "pref.glade"
     "rgbcolor.glade"
+    "sticky.glade"
     )
 
 foreach( glade IN LISTS gladefiles )

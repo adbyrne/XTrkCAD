@@ -656,10 +656,9 @@ wChoice_p wToggleCreate(
     wlibComputePos((wControl_p)b);
 
     if (option&BO_USETEMPLATE ) {
-    	char boxname[256];
-    	sprintf(boxname,"%s%s",helpStr,".box");
-    	b->widget = wlibWidgetFromId( parent, boxname);
-    	if (b->widget) b->fromTemplate = TRUE;
+        b->widget = wlibGetWidgetFromName(parent, helpStr, "box");
+    	if (b->widget) 
+            b->fromTemplate = TRUE;
     } else {
 		if (option&BC_HORZ) {
 			b->widget = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -672,7 +671,7 @@ wChoice_p wToggleCreate(
         abort();
     }
 
-    if (b->fromTemplate & !option&BC_REBUILDBUTTONS) {
+    if (b->fromTemplate) {
 
     	 GList * child, * children;
 

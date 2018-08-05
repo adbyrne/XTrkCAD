@@ -336,6 +336,7 @@ wWin_p wlibCreateFromTemplate( wWin_p parent, int winType, wPos_t x, wPos_t y,
 /* builder.c */
 wWin_p wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, long option, void *data );
 GString *wlibFileNameFromDialog( const char *dialog );
+GtkWidget *wlibGetWidgetFromName( wWin_p parent, char *dialogname, char *suffix );
 GtkWidget *wlibWidgetFromId( wWin_p win, char *id );
 
 
