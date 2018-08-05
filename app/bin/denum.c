@@ -56,7 +56,7 @@ static paramData_t enumPLs[] = {
 	{   PD_BUTTON, (void*)wPrintSetup, "printsetup", 0, NULL, N_("Print Setup"), 0, NULL },
 #define I_ENUMLISTPRICE	(4)
 	{   PD_TOGGLE, &enableListPrices, "list-prices", PDO_DLGRESETMARGIN, priceLabels, NULL, BC_HORZ|BC_NOBORDER } };
-static paramGroup_t enumPG = { "enum", 0, enumPLs, sizeof enumPLs/sizeof enumPLs[0] };
+static paramGroup_t enumPG = { "enum", PGO_DIALOGTEMPLATE, enumPLs, sizeof enumPLs/sizeof enumPLs[0] };
 
 static struct wFilSel_t * enumFile_fs;
 

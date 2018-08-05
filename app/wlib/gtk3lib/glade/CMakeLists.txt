@@ -1,12 +1,8 @@
 set(gladefiles 
+    "enum.glade"
     "note.glade"
     "rgbcolor.glade"
     )
-message(STATUS ${CMAKE_CURRENT_SOURCE_DIR} )
-message(STATUS  ${CMAKE_BINARY_DIR}/ui)
-
-
-
 
 foreach( glade IN LISTS gladefiles )
     message( STATUS ${glade} )
