@@ -14,6 +14,8 @@
         <property name="margin_right">18</property>
         <property name="margin_top">18</property>
         <property name="margin_bottom">18</property>
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
         <property name="orientation">vertical</property>
         <property name="spacing">12</property>
         <child>
@@ -155,6 +157,8 @@
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
                 <property name="margin_bottom">6</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
                 <property name="label" translatable="yes">Track Color</property>
                 <property name="justify">right</property>
                 <style>
