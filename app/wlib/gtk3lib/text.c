@@ -545,6 +545,14 @@ wTextCreate(wWin_p	parent,
         gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bt->widget),
                                        GTK_POLICY_AUTOMATIC,
                                        GTK_POLICY_AUTOMATIC);
+
+        // configure read-only mode
+        if (bt->option&BO_READONLY) {
+            gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), FALSE);
+            gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(bt->text), FALSE);
+        }
+
+
         // create a text view and place it inside the scroll widget
         bt->text = gtk_text_view_new();
 
@@ -552,6 +560,11 @@ wTextCreate(wWin_p	parent,
             abort();
         }
 
+    	// set the size???
+        gtk_widget_set_size_request(GTK_WIDGET(bt->widget),
+								width+15/*requisition.width*/, height);
+
+        gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(bt->text), GTK_WRAP_WORD);
         gtk_container_add(GTK_CONTAINER(bt->widget), bt->text);
 
 
@@ -570,22 +583,12 @@ wTextCreate(wWin_p	parent,
 		height *= 14;
 	}
 
-	// set the size???
-	gtk_widget_set_size_request(GTK_WIDGET(bt->widget),
-								width+15/*requisition.width*/, height);
-
-	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(bt->text), GTK_WRAP_WORD);
 
     // get the text buffer and add a bold tag to it
     tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
     gtk_text_buffer_create_tag(tb, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
     g_signal_connect(G_OBJECT(tb), "changed", G_CALLBACK(textChanged), bt);
 
-    // configure read-only mode
-    if (bt->option&BO_READONLY) {
-        gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), FALSE);
-        gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(bt->text), FALSE);
-    }
     if (labelStr) {
         bt->labelW = wlibAddLabel((wControl_p)bt, labelStr);
     }
@@ -606,8 +609,7 @@ wTextCreate(wWin_p	parent,
     }
     
     wlibAddHelpString(bt->widget, helpStr);
-   
-
+ 
     // done, return the finished widget
     return bt;
 }
