@@ -112,7 +112,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, 
 /**
  */
 GtkWidget *
-wlibGetWidgetFromName( wWin_p parent, char *dialogname, char *suffix )
+wlibGetWidgetFromName( wWin_p parent, const char *dialogname, const char *suffix )
 {
     GString *id = g_string_new(dialogname);
     GtkWidget *widget;
@@ -127,7 +127,7 @@ wlibGetWidgetFromName( wWin_p parent, char *dialogname, char *suffix )
 }
 
 GtkWidget *
-wlibWidgetFromId( wWin_p win, char *id )
+wlibWidgetFromId( wWin_p win, const char *id )
 {
     GObject * wi = gtk_builder_get_object(win->builder, id);
     if (!wi) {
