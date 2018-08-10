@@ -482,48 +482,49 @@ wList_p wListCreate(
     bl->colCnt = colCnt;
     bl->colWidths = (wPos_t*)malloc(colCnt * sizeof *(wPos_t*)0);
     memcpy(bl->colWidths, colWidths, colCnt * sizeof *(wPos_t*)0);
+    
+    if( !(option & BO_USETEMPLATE )) {
+        /* create the data structure for data */
+        bl->listStore = wlibNewListStore(colCnt);
+        /* create the widget for the list store */
+        bl->treeView = wlibNewTreeView(bl->listStore,
+                                       colTitles != NULL,
+                                       option & BL_MANY);
 
-    /* create the data structure for data */
-    bl->listStore = wlibNewListStore(colCnt);
-    /* create the widget for the list store */
-    bl->treeView = wlibNewTreeView(bl->listStore,
-                                   colTitles != NULL,
-                                   option & BL_MANY);
+        wlibTreeViewAddColumns(bl->treeView, colCnt);
 
+        wlibComputePos((wControl_p)bl);
 
+        if (!bl->widget)
+        	bl->widget = gtk_scrolled_window_new(NULL, NULL);
+
+        gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bl->widget),
+                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+        gtk_container_add(GTK_CONTAINER(bl->widget),
+									  bl->treeView);
+
+        gtk_widget_set_size_request(bl->widget, width, (number+1)*ROW_HEIGHT);
+    } else {    
+        //Try to find element name in Template, if not found allocate a new one
+        bl->listStore = (GtkListStore *)wlibGetWidgetFromName( parent, helpStr, "liststore");
+        bl->widget = wlibGetWidgetFromName( parent, helpStr, "scrollwindow" );
+    	if (bl->widget)
+    		bl->fromTemplate = TRUE;
+        
+        bl->treeView = wlibGetWidgetFromName(parent, helpStr, "treeview");
+        
+    }
+
+  //  wlibAddColumnTitles(bl->treeView, colTitles);
+    
     sel = gtk_tree_view_get_selection(GTK_TREE_VIEW(bl->treeView));
 
     gtk_tree_selection_set_select_function(sel,
                                            changeSelection,
                                            bl,
                                            NULL);
-
-    wlibTreeViewAddColumns(bl->treeView, colCnt);
-
-    wlibAddColumnTitles(bl->treeView, colTitles);
-
-    wlibComputePos((wControl_p)bl);
-
-    //Try to find element name in Template, if not found allocate a new one
-    if (option&BO_USETEMPLATE) {
-    	char name[256];
-    	sprintf(name,"%s",helpStr);
-    	bl->widget = wlibWidgetFromId(parent, name );
-    	if (bl->widget)
-    		bl->fromTemplate = TRUE;
-    }
-    if (!bl->widget)
-    	bl->widget = gtk_scrolled_window_new(NULL, NULL);
-
-    gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(bl->widget),
-                                   GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
-	gtk_container_add(GTK_CONTAINER(bl->widget),
-									  bl->treeView);
-
-	gtk_widget_set_size_request(bl->widget, width, (number+1)*ROW_HEIGHT);
-
-///	g_signal_connect( GTK_OBJECT(bl->list), "resize_column", G_CALLBACK(changeListColumnWidth), bl );
-
+    
+    
     gtk_widget_show_all(bl->widget);
 
     if (option&BO_CONTROLGRID) {

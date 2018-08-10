@@ -6,6 +6,7 @@ set(gladefiles
     "layout.glade"
     "note.glade"
     "pref.glade"
+    "pricelist.glade"
     "rgbcolor.glade"
     "sticky.glade"
     )
