@@ -55,7 +55,7 @@ static paramData_t elevationPLs[] = {
 #define I_GRADE			(3)
 	{ PD_MESSAGE, NULL, "grade", 0, (void*)80 },
 #define I_STATION			(4)
-	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT, (void*)200 } };
+	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, (void*)200, NULL, 0, 0, sizeof(elevStationV)} };
 static paramGroup_t elevationPG = { "elev", 0, elevationPLs, sizeof elevationPLs/sizeof elevationPLs[0] };
 
 

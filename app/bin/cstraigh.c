@@ -29,6 +29,7 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "layout.h"
 
 /*
  * STATE INFO
@@ -66,6 +67,11 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 			   EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 			   if (ep != -1) {
+				   if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
+				   		wBeep();
+				   		InfoMessage(_("Track is different scale"));
+				   		return C_CONTINUE;
+				   	}
 			   		Dl.trk = t;
 			   		Dl.ep = ep;
 			   		pos = GetTrkEndPos(t, ep);
@@ -97,7 +103,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 
 	case C_MOVE:
 		if (!Dl.down) return C_CONTINUE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		ANGLE_T angle, angle2;
 		if (Dl.trk) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
@@ -112,12 +118,13 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 				PutAngle(FindAngle( Dl.pos0, pos )) );
 		tempSegs(0).u.l.pos[1] = pos;
 		tempSegs_da.cnt = 1;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		MainRedraw();
+		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
 		if (!Dl.down) return C_CONTINUE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		if (Dl.trk) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
@@ -140,9 +147,12 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		if (Dl.down)
+					DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		return C_CONTINUE;
 	case C_CANCEL:
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		Dl.down = FALSE;
+		MainRedraw();
 		return C_CONTINUE;
 
 	default:

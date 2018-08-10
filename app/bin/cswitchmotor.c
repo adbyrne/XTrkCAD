@@ -61,6 +61,7 @@
 #include "track.h"
 #include "trackx.h"
 #include "utility.h"
+#include "messages.h"
 
 EXPORT TRKTYP_T T_SWITCHMOTOR = -1;
 
@@ -86,10 +87,10 @@ static track_p last_motor;
 static track_p first_motor;
 
 static paramData_t switchmotorPLs[] = {
-/*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF, (void*)200, N_("Name") },
-/*1*/ { PD_STRING, switchmotorNormal, "normal", PDO_NOPREF, (void*)350, N_("Normal") },
-/*2*/ { PD_STRING, switchmotorReverse, "reverse", PDO_NOPREF, (void*)350, N_("Reverse") },
-/*3*/ { PD_STRING, switchmotorPointSense, "pointSense", PDO_NOPREF, (void*)350, N_("Point Sense") }
+/*0*/ { PD_STRING, switchmotorName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(switchmotorName)},
+/*1*/ { PD_STRING, switchmotorNormal, "normal", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Normal"), 0, 0, sizeof(switchmotorNormal)},
+/*2*/ { PD_STRING, switchmotorReverse, "reverse", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Reverse"), 0, 0, sizeof(switchmotorReverse)},
+/*3*/ { PD_STRING, switchmotorPointSense, "pointSense", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Point Sense"), 0, 0, sizeof(switchmotorPointSense)}
 };
 
 static paramGroup_t switchmotorPG = { "switchmotor", 0, switchmotorPLs, sizeof switchmotorPLs/sizeof switchmotorPLs[0] };
@@ -105,10 +106,10 @@ static track_p switchmotorEditTrack;
 static paramIntegerRange_t r0_999999 = { 0, 999999 };
 
 static paramData_t switchmotorEditPLs[] = {
-/*0*/ { PD_STRING, switchmotorEditName, "name", PDO_NOPREF, (void*)200, N_("Name") },
-/*1*/ { PD_STRING, switchmotorEditNormal, "normal", PDO_NOPREF, (void*)350, N_("Normal") },
-/*2*/ { PD_STRING, switchmotorEditReverse, "reverse", PDO_NOPREF, (void*)350, N_("Reverse") },
-/*3*/ { PD_STRING, switchmotorEditPointSense, "pointSense", PDO_NOPREF, (void*)350, N_("Point Sense") },
+    /*0*/ { PD_STRING, switchmotorEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(switchmotorEditName)},
+/*1*/ { PD_STRING, switchmotorEditNormal, "normal", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Normal"), 0, 0, sizeof(switchmotorEditNormal)},
+/*2*/ { PD_STRING, switchmotorEditReverse, "reverse", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Reverse"), 0, 0, sizeof(switchmotorEditReverse)},
+/*3*/ { PD_STRING, switchmotorEditPointSense, "pointSense", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Point Sense"), 0, 0, sizeof(switchmotorEditPointSense)},
 /*4*/ { PD_LONG,   &switchmotorEditTonum, "turnoutNumber", PDO_NOPREF, &r0_999999, N_("Turnout Number"), BO_READONLY }, 
 };
 
@@ -217,10 +218,10 @@ static struct {
 
 typedef enum { NM, NOR, REV, PS, TO } switchmotorDesc_e;
 static descData_t switchmotorDesc[] = {
-/*NM */  { DESC_STRING, N_("Name"), &switchmotorData.name },
-/*NOR*/  { DESC_STRING, N_("Normal"), &switchmotorData.normal },
-/*REV*/  { DESC_STRING, N_("Reverse"), &switchmotorData.reverse },
-/*PS */  { DESC_STRING, N_("Point Sense"), &switchmotorData.pointsense },
+/*NM */  { DESC_STRING, N_("Name"), &switchmotorData.name, sizeof(switchmotorData.name) },
+/*NOR*/  { DESC_STRING, N_("Normal"), &switchmotorData.normal, sizeof(switchmotorData.normal)  },
+/*REV*/  { DESC_STRING, N_("Reverse"), &switchmotorData.reverse, sizeof(switchmotorData.reverse)  },
+/*PS */  { DESC_STRING, N_("Point Sense"), &switchmotorData.pointsense, sizeof(switchmotorData.pointsense)  },
 /*TO */  { DESC_LONG, N_("Turnout"), &switchmotorData.turnout },
 	 { DESC_NULL } };
 
@@ -229,6 +230,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd, BOOL_T 
 	switchmotorData_p xx = GetswitchmotorData(trk);
 	const char * thename, *thenormal, *thereverse, *thepointsense;
 	char *newName, *newNormal, *newReverse, *newPointSense;
+	int max_str;
 	BOOL_T changed, nChanged, norChanged, revChanged, psChanged;
 
 	LOG( log_switchmotor, 1, ("*** UpdateSwitchMotor(): needUndoStart = %d\n",needUndoStart))
@@ -237,23 +239,51 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd, BOOL_T 
 		thename = wStringGetValue( (wString_p)switchmotorDesc[NM].control0 );
 		if ( strcmp( thename, xx->name ) != 0 ) {
 			nChanged = changed = TRUE;
-			newName = MyStrdup(thename);
+			max_str = switchmotorDesc[NM].max_string;
+			if (max_str && strlen(thename)>max_str-1) {
+				newName = MyMalloc(max_str);
+				newName[max_str-1] = '\0';
+				strncat(newName,thename,max_str-1);
+				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+			} else newName = MyStrdup(thename);
 		}
+
 		thenormal = wStringGetValue( (wString_p)switchmotorDesc[NOR].control0 );
 		if ( strcmp( thenormal, xx->normal ) != 0 ) {
 			norChanged = changed = TRUE;
-			newNormal = MyStrdup(thenormal);
+			max_str = switchmotorDesc[NOR].max_string;
+			if (max_str && strlen(thenormal)>max_str) {
+				newNormal = MyMalloc(max_str);
+				newNormal[max_str-1] = '\0';
+				strncat(newNormal,thenormal, max_str-1);
+				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+			} else newNormal = MyStrdup(thenormal);
 		}
+
 		thereverse = wStringGetValue( (wString_p)switchmotorDesc[REV].control0 );
 		if ( strcmp( thereverse, xx->reverse ) != 0 ) {
 			revChanged = changed = TRUE;
-			newReverse = MyStrdup(thereverse);
+			max_str = switchmotorDesc[REV].max_string;
+			if (max_str && strlen(thereverse)>max_str) {
+				newReverse = MyMalloc(max_str);
+				newReverse[max_str-1] = '\0';
+				strncat(newReverse,thereverse,max_str-1);
+				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+			} else newReverse = MyStrdup(thereverse);
 		}
+
 		thepointsense = wStringGetValue( (wString_p)switchmotorDesc[PS].control0 );
 		if ( strcmp( thepointsense, xx->pointsense ) != 0 ) {
 			psChanged = changed = TRUE;
-			newPointSense = MyStrdup(thepointsense);
+			max_str = switchmotorDesc[PS].max_string;
+			if (max_str && strlen(thepointsense)>max_str-1) {
+				newPointSense = MyMalloc(max_str);
+				newPointSense[max_str-1] = '\0';
+				strncat(newPointSense,thepointsense, max_str-1);
+				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+			} else newPointSense = MyStrdup(thepointsense);
 		}
+
 		if ( ! changed ) return;
 		if ( needUndoStart )
 			UndoStart( _("Change Switch Motor"), "Change Switch Motor" );

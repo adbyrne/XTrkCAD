@@ -62,7 +62,7 @@ typedef struct drawCmd_t {
 		drawConvertPix2CoOrd Pix2CoOrd;
 		drawConvertCoOrd2Pix CoOrd2Pix;
 		FLOAT_T dpi;
-		} drawCmd_t;
+	} drawCmd_t;
 
 #define SCALEX(D,X)		((X)/(D).dpi)
 #define SCALEY(D,Y)		((Y)/(D).dpi)
@@ -113,6 +113,7 @@ extern wDrawColor drawColorRed;
 extern wDrawColor drawColorBlue;
 extern wDrawColor drawColorGreen;
 extern wDrawColor drawColorAqua;
+extern wDrawColor drawColorPowderedBlue;
 extern wDrawColor drawColorPurple;
 extern wDrawColor drawColorGold;
 #define wDrawColorBlack drawColorBlack

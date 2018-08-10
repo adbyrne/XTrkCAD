@@ -29,6 +29,7 @@
 #include "dynstring.h"
 #include "fileio.h"
 #include "i18n.h"
+#include "layout.h"
 #include "messages.h"
 #include "param.h"
 #include "track.h"
@@ -441,7 +442,7 @@ static paramData_t layerPLs[] = {
 #define I_LIST	(0)
     { PD_DROPLIST, NULL, "layer", PDO_LISTINDEX|PDO_DLGNOLABELALIGN, (void*)250 },
 #define I_NAME	(1)
-    { PD_STRING, layerName, "name", PDO_NOPREF, (void*)(250-54), N_("Name") },
+    { PD_STRING, layerName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Name"), 0, 0, sizeof(layerName) },
 #define I_COLOR	(2)
     { PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, N_("Color") },
 #define I_VIS	(3)
@@ -1158,6 +1159,7 @@ BOOL_T WriteLayers(FILE * f)
     return TRUE;
 }
 
+#include "bitmaps/background.xpm"
 
 void InitLayers(void)
 {
@@ -1181,6 +1183,10 @@ void InitLayers(void)
                                 SetCurrLayer, NULL);
     wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
     AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);
+	
+	backgroundB = AddToolbarButton("cmdBackgroundShow", wIconCreatePixMap(background), 0,
+		(addButtonCallBack_t)BackgroundToggleShow, NULL);
+	wControlActive((wControl_p)backgroundB, FALSE);
 
     for (i = 0; i<NUM_LAYERS; i++) {
         char *layerName;

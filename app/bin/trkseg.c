@@ -664,7 +664,7 @@ EXPORT void CloneFilledDraw(
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
 			sp->bezSegs.cnt = 0;
-			if (sp->bezSegs.ptr) MyFree(sp->bezSegs.ptr);
+			//if (sp->bezSegs.ptr) MyFree(sp->bezSegs.ptr);  Make sure no update to static
 			sp->bezSegs.ptr = NULL;
 			sp->bezSegs.max = 0;
 			FixUpBezierSeg(sp->u.b.pos,sp,sp->type == SEG_BEZTRK);
@@ -1131,7 +1131,7 @@ EXPORT BOOL_T ReadSegs( void )
 	int i;
 	DIST_T elev0, elev1;
 	BOOL_T hasElev;
-	BOOL_T isPolyV2;
+	BOOL_T isPolyV2, noVersion;
 	BOOL_T improvedEnds;
 	FLOAT_T ignoreFloat;
 	char type;
@@ -1167,6 +1167,9 @@ EXPORT BOOL_T ReadSegs( void )
 		}
 		type = *cp++;
 		hasElev = FALSE;
+		noVersion = TRUE;
+		if ( *cp != ' ')
+			noVersion = FALSE;
 		if ( *cp == '3' ) {
 			cp++;
 			hasElev = TRUE;
@@ -1336,6 +1339,7 @@ EXPORT BOOL_T ReadSegs( void )
 			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
+			s->u.p.polyType = FREEFORM;
 			if (isPolyV2) {
 				if ( !GetArgs( cp, "lwdd",
 					 &rgb, &s->width,
@@ -1355,9 +1359,14 @@ EXPORT BOOL_T ReadSegs( void )
 			s->u.p.pts = (coOrd*)MyMalloc( s->u.p.cnt * sizeof *(coOrd*)NULL );
 			for ( i=0; i<s->u.p.cnt; i++ ) {
 				cp = GetNextLine();
-				if (cp == NULL || !GetArgs( cp, hasElev?"pf":"pY", &s->u.p.pts[i], &elev0 ) ) {
+				if (cp == NULL || !GetArgs( cp, "p", &s->u.p.pts[i])) {
 					rc = FALSE;
-					/*??*/break;
+				}
+				if (!noVersion) {
+					if (cp == NULL || !GetArgs( cp, hasElev?"f":"Y", &elev0 ) ) {
+						rc = FALSE;
+						/*??*/break;
+					}
 				}
 			}
 			s->u.p.angle = 0.0;
@@ -2010,11 +2019,28 @@ EXPORT void CleanSegs(dynArr_t * seg_p) {
 			t.bezSegs.max = 0;
 			t.bezSegs.ptr = NULL;
 		}
+		if (t.type == SEG_POLY || t.type == SEG_FILPOLY) {
+			if (t.u.p.pts) MyFree(t.u.p.pts);
+			t.u.p.cnt = 0;
+			t.u.p.pts = NULL;
+		}
 	}
 	seg_p->cnt = 0;
 	if (seg_p->ptr) MyFree(seg_p->ptr);
 	seg_p->ptr = NULL;
 	seg_p->max = 0;
 }
+
+EXPORT void CopyPoly(trkSeg_p p, wIndex_t segCnt) {
+	coOrd * newPts;
+	for (int i=0;i<segCnt;i++,p++) {
+		if (p->type == SEG_POLY || p->type == SEG_FILPOLY) {
+			newPts = memdup( p->u.p.pts, p->u.p.cnt*sizeof *(coOrd*)0 );
+			p->u.p.pts = newPts;
+		}
+	}
+}
+
+
 
 

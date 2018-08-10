@@ -138,8 +138,7 @@ typedef struct {
 		char * winLabel;
 		long winOption;
 		void * context;
-		int grid_col;
-		int grid_row;
+        int max_string;
 		wControl_p control;
 		paramGroup_p group;
 		paramOldData_t oldD, demoD;

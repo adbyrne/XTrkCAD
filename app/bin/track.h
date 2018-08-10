@@ -394,8 +394,7 @@ void CurveSegProc( segProc_e, trkSeg_p, segProcData_p );
 void JointSegProc( segProc_e, trkSeg_p, segProcData_p );
 void BezierSegProc( segProc_e, trkSeg_p, segProcData_p );   //Used in Cornu join
 void CleanSegs( dynArr_t *);
-
-
+void CopyPoly(trkSeg_p seg_p, wIndex_t segCnt);
 
 /* debug.c */
 void SetDebug( char * );
@@ -580,7 +579,7 @@ void SaveCarState( void );
 void RestoreCarState( void );
 TRKTYP_T InitObject( trackCmd_t* );
 
-void ConnectTracks( track_p, EPINX_T, track_p, EPINX_T );
+int ConnectTracks( track_p, EPINX_T, track_p, EPINX_T );
 BOOL_T ReconnectTrack( track_p, EPINX_T, track_p, EPINX_T );
 void DisconnectTracks( track_p, EPINX_T, track_p, EPINX_T );
 BOOL_T ConnectAbuttingTracks( track_p, EPINX_T, track_p, EPINX_T );
@@ -622,6 +621,7 @@ typedef enum { DESC_NULL, DESC_POS, DESC_FLOAT, DESC_ANGLE, DESC_LONG, DESC_COLO
 #define DESC_RO			(1<<0)
 #define DESC_IGNORE		(1<<1)
 #define DESC_NOREDRAW	(1<<2)
+#define DESC_CHANGE2    (1<<4)
 #define DESC_CHANGE		(1<<8)
 typedef enum { DESC_PIVOT_FIRST, DESC_PIVOT_MID, DESC_PIVOT_SECOND, DESC_PIVOT_NONE } descPivot_t;
 #define DESC_PIVOT_1
@@ -633,6 +633,7 @@ typedef struct {
 		descType type;
 		char * label;
 		void * valueP;
+		int max_string;
 		int mode;
 		wControl_p control0;
 		wControl_p control1;

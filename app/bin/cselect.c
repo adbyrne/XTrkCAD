@@ -580,9 +580,9 @@ static paramData_t rescalePLs[] = {
 #define I_RESCALE_MODE		(0)
 		{ PD_RADIO, &rescaleMode, "toggle", PDO_NOPREF, &rescaleToggleLabels, N_("Rescale by:"), BC_HORZ|BC_NOBORDER },
 #define I_RESCALE_FROM_SCALE		(1)
-		{ PD_STRING, rescaleFromScale, "fromS", PDO_NOPREF, (void *)100, N_("From:") },
+		{ PD_STRING, rescaleFromScale, "fromS", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)100, N_("From:"),0, 0, sizeof(rescaleFromScale)},
 #define I_RESCALE_FROM_GAUGE		(2)
-		{ PD_STRING, rescaleFromGauge, "fromG", PDO_NOPREF|PDO_DLGHORZ, (void *)100, " / " },		
+		{ PD_STRING, rescaleFromGauge, "fromG", PDO_NOPREF|PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, (void*)100, " / ", 0, 0, sizeof(rescaleFromGauge)},
 #define I_RESCALE_TO_SCALE		   (3)
 		{ PD_DROPLIST, &rescaleToScaleInx, "toS", PDO_NOPREF|PDO_LISTINDEX, (void *)100, N_("To: ") },
 #define I_RESCALE_TO_GAUGE		   (4)

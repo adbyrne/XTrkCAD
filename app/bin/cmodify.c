@@ -66,15 +66,16 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 		case C_UP:
 		case C_OK:
 		case C_TEXT:
-			rc = CmdBezModify(Dex.Trk, action, pos);
+			trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
+			rc = CmdBezModify(Dex.Trk, action, pos, trackGauge);
 			break;
 		case C_TERMINATE:
-			rc = CmdBezModify(Dex.Trk, action, pos);
+			rc = CmdBezModify(Dex.Trk, action, pos, trackGauge);
 			Dex.Trk = NULL;
 			modifyBezierMode = FALSE;
 			break;
 		case C_REDRAW:
-			rc = CmdBezModify(Dex.Trk, action, pos);
+			rc = CmdBezModify(Dex.Trk, action, pos, trackGauge);
 			break;
 	}
 	return rc;
@@ -94,15 +95,16 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 		case C_UP:
 		case C_OK:
 		case C_TEXT:
-			rc = CmdCornuModify(Dex.Trk, action, pos);
+			trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
+			rc = CmdCornuModify(Dex.Trk, action, pos, trackGauge);
 			break;
 		case C_TERMINATE:
-			rc = CmdCornuModify(Dex.Trk, action, pos);
+			rc = CmdCornuModify(Dex.Trk, action, pos, trackGauge);
 			Dex.Trk = NULL;
 			modifyCornuMode = FALSE;
 			break;
 		case C_REDRAW:
-			rc = CmdCornuModify(Dex.Trk, action, pos);
+			rc = CmdCornuModify(Dex.Trk, action, pos, trackGauge);
 			break;
 	}
 	return rc;
@@ -173,6 +175,7 @@ static STATUS_T CmdModify(
 			Dex.Trk = NULL;
 			return C_CONTINUE;
 		}
+		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 		if (QueryTrack( Dex.Trk, Q_CAN_MODIFY_CONTROL_POINTS )) { //Bezier
 			modifyBezierMode = TRUE;
 			if (ModifyBezier(C_START, pos) != C_CONTINUE) {			//Call Start with track
@@ -192,8 +195,6 @@ static STATUS_T CmdModify(
 			return C_CONTINUE;										//That's it
 		}
 
-
-		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 		if ( (MyGetKeyState()&WKEY_SHIFT) &&
 			 QueryTrack( Dex.Trk, Q_CAN_MODIFYRADIUS )&&
 			 (inx=PickUnconnectedEndPoint(pos,Dex.Trk)) >= 0 ) {
@@ -236,7 +237,7 @@ static STATUS_T CmdModify(
 			return ModifyBezier(C_MOVE, pos);
 		if ( modifyCornuMode )
 			return ModifyCornu(C_MOVE, pos);
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		SnapPos( &pos );
 		rc = ModifyTrack( Dex.Trk, C_MOVE, pos );
@@ -259,7 +260,7 @@ static STATUS_T CmdModify(
 			return ModifyBezier( C_UP, pos);
 		if (modifyCornuMode)
 			return ModifyCornu(C_UP, pos);
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		SnapPos( &pos );
 		UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
@@ -310,7 +311,7 @@ LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
         MapRedraw();
         /* no break */
 	case C_RMOVE:
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		Dex.valid = FALSE;
 		if (Dex.Trk == NULL) return C_CONTINUE;
@@ -442,7 +443,7 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 
 	case C_RUP:
 		changeTrackMode = FALSE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		if (Dex.Trk == NULL) return C_CONTINUE;
 		if (!Dex.valid)

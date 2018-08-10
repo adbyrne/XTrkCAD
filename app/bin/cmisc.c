@@ -129,7 +129,7 @@ static paramData_t describePLs[] = {
 #define I_EDITLIST_N	I_EDITLIST_0+1
 
 #define I_TEXT_0		I_EDITLIST_N
-    { PD_TEXT, NULL, "T1", 0, &tdata },
+    { PD_TEXT, NULL, "T1", 0, &tdata, NULL, BT_HSCROLL },
 #define I_TEXT_N		I_TEXT_0+1
 
 #define I_PIVOT_0		I_TEXT_N
@@ -273,10 +273,18 @@ static void DescribeUpdate(
         }
 
         if ((ddp->mode&DESC_CHANGE) == 0) {
-            continue;
+        	if ((ddp->mode&DESC_CHANGE2) == 0)
+        		continue;
         }
 
         ddp->mode &= ~DESC_CHANGE;
+        if (ddp->type == DESC_POS) {			//POS Has two fields
+        	if (ddp->mode&DESC_CHANGE2) {
+        		ddp->mode &= ~DESC_CHANGE2;		//Second time
+        	} else {
+        		ddp->mode |= DESC_CHANGE2;		//First time
+        	}
+        }
         ParamLoadControl(&describePG, inx);
     }
 }
@@ -349,10 +357,17 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
             }
             describePLs[inx].context = ddp;
             describePLs[inx].valueP = valueP;
+            if ((ddp->type == DESC_STRING) && ddp->max_string) {
+            	describePLs[inx].max_string = ddp->max_string;
+            	describePLs[inx].option |= PDO_STRINGLIMITLENGTH;
+            }
 
             if (label && ddp->type != DESC_TEXT) {
                 wControlSetLabel(describePLs[inx].control, label);
                 describePLs[inx].winLabel = label;
+            } else {
+            	wControlSetLabel(describePLs[inx].control, "");
+            	describePLs[inx].winLabel = "";
             }
 
             return describePLs[inx].control;

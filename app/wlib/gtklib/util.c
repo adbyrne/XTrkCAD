@@ -486,6 +486,7 @@ void wGetDisplaySize(wPos_t * w, wPos_t * h)
     *h = gdk_screen_height();
 }
 
+
 static dynArr_t conversionBuffer_da;
 
 /**

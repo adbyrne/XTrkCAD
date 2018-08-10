@@ -59,6 +59,7 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "track.h"
 #include "trackx.h"
 #include "utility.h"
+#include "messages.h"
 
 EXPORT TRKTYP_T T_CONTROL = -1;
 
@@ -164,10 +165,10 @@ static struct {
 
 typedef enum { NM, PS, ON, OF } controlDesc_e;
 static descData_t controlDesc[] = {
-    /* NM */ { DESC_STRING, N_("Name"),      &controlProperties.name },
+    /* NM */ { DESC_STRING, N_("Name"),      &controlProperties.name, sizeof(controlProperties.name) },
     /* PS */ { DESC_POS,    N_("Position"),  &controlProperties.pos },
-    /* ON */ { DESC_STRING, N_("On Script"), &controlProperties.onscript },
-    /* OF */ { DESC_STRING, N_("Off Script"),&controlProperties.offscript },
+    /* ON */ { DESC_STRING, N_("On Script"), &controlProperties.onscript, sizeof(controlProperties.onscript) },
+    /* OF */ { DESC_STRING, N_("Off Script"),&controlProperties.offscript, sizeof(controlProperties.offscript) },
     { DESC_NULL } };
 
 static void UpdateControlProperties (  track_p trk, int inx, descData_p
@@ -175,6 +176,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 {
     controlData_p xx = GetcontrolData(trk);
     const char *thename, *theonscript, *theoffscript;
+    int max_str;
     char *newName, *newOnScript, *newOffScript;
     BOOL_T changed, nChanged, pChanged, onChanged, offChanged;
     
@@ -192,18 +194,40 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
         thename = wStringGetValue( (wString_p) controlDesc[NM].control0 );
         if (strcmp(thename,xx->name) != 0) {
             nChanged = changed = TRUE;
-            newName = MyStrdup(thename);
+            max_str = controlDesc[NM].max_string;
+			if (max_str && strlen(thename)>max_str-1) {
+				newName = MyMalloc(max_str);
+				newName[0] = '\0';
+				strncat(newName,thename,max_str-1);
+				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+			} else newName = MyStrdup(thename);
         }
+
+
         theonscript = wStringGetValue( (wString_p) controlDesc[ON].control0 );
         if (strcmp(theonscript,xx->onscript) != 0) {
             onChanged = changed = TRUE;
-            newOnScript = MyStrdup(theonscript);
+        	max_str = controlDesc[ON].max_string;
+			if (max_str && strlen(theonscript)>max_str-1) {
+				newOnScript = MyMalloc(max_str);
+				newOnScript[0] = '\0';
+				strncat(newOnScript,theonscript,max_str-1);
+				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+			} else newOnScript = MyStrdup(theonscript);
         }
+
         theoffscript = wStringGetValue( (wString_p) controlDesc[OF].control0 );
         if (strcmp(theoffscript,xx->offscript) != 0) {
             offChanged = changed = TRUE;
-            newOffScript = MyStrdup(theoffscript);
+            max_str = controlDesc[OF].max_string;
+			if (max_str && strlen(theoffscript)>max_str-1) {
+				newOffScript = MyMalloc(max_str);
+				newOffScript[max_str-1] = '\0';
+				strncat(newOffScript,theoffscript,max_str-1);
+				NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str);
+			} else newOffScript = MyStrdup(theoffscript);
         }
+
         if (controlProperties.pos.x != xx->orig.x ||
             controlProperties.pos.y != xx->orig.y) {
             pChanged = changed = TRUE;
@@ -381,15 +405,15 @@ static char controlEditOffScript[STR_LONG_SIZE];
 static paramFloatRange_t r_1000_1000    = { -1000.0, 1000.0, 80 };
 static paramData_t controlEditPLs[] = {
 #define I_CONTROLNAME (0)
-    /*0*/ { PD_STRING, controlEditName, "name", PDO_NOPREF, (void*)200, N_("Name") },
+    /*0*/ { PD_STRING, controlEditName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof(controlEditName) },
 #define I_ORIGX (1)
-    /*1*/ { PD_FLOAT, &controlEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Orgin X") }, 
+    /*1*/ { PD_FLOAT, &controlEditOrig.x, "origx", PDO_DIM, &r_1000_1000, N_("Origin X") },
 #define I_ORIGY (2)
     /*2*/ { PD_FLOAT, &controlEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_CONTROLONSCRIPT (3)
-    /*3*/ { PD_STRING, controlEditOnScript, "script", PDO_NOPREF, (void*)350, N_("On Script") },
+    /*3*/ { PD_STRING, controlEditOnScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
 #define I_CONTROLOFFSCRIPT (4)
-    /*4*/ { PD_STRING, controlEditOffScript, "script", PDO_NOPREF, (void*)350, N_("Off Script") },
+    /*4*/ { PD_STRING, controlEditOffScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
 };
 
 static paramGroup_t controlEditPG = { "controlEdit", 0, controlEditPLs, sizeof controlEditPLs/sizeof controlEditPLs[0] };

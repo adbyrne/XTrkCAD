@@ -4,11 +4,43 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [unpublished]
+## [5.1.1]
 
 ### Added
 
 ### Fixed
++ Change gtk print.c to use native dpi for real printers and only up def to 600 dpi for file outputs.
++ Fix runaway storage and long wait for Car Inventory->Add
++ Fix map window not resized for map scale change in GTK
++ Last uintptr_t replaced with uint32_t in param.c
++ Control limiting of entered string length with a special flag in paramData_t
++ Downgrade CMake version requirement to 2.8 for CentOS 6 and Ubuntu 14.04.
++ Update print to reflect that GTK always uses PDF now.
++ Add fix for zoom grid performance from V5.2 to V5.1
++ Ensure that white (hidden) straight track segments get written out as white
++ Upgrade Map Icon
++ Add variable Print Override environment variables
+XTRKCADPRINTSCALE=scale_factor
+XTRKCADPRINTTEXTSCALE=text_factor
+scale_factor is a floating point number is frequently 1.0 (if needed)
+text_factor is a floating point number frequently 0.75 (if needed)
+These variables are ignored if the print is to a file.
+These seem most likely to result from Pango or other parts of the PDF chain to the printer being given bad DPI information which causes the scaling(s) to be inaccurate.
+If there is enough use, we can add to the print dialog itself.
++ Fix crash when changing the layer from the properties dialog of cornus
++ Fix Cornu Describe Abend when altering Layer.
++ Fix odd lost overlaid labels in Describe when lots of Positions are used
++ All: Check string length for all relevant PD_STRING entry fields
++ Windows: Always set color before drawing text
++ Make sure that Text Segs and Poly Segs copy string and Pts when UnGrouping. Stop weird results and Abends.
++ Make Cairo use pure RGB to retrieve the same color it stored for wDrawColor rather than ask for GDK�s version (which might not be exact).
++ Fix Cornu Rate of Change of Curvature.
++ Fix situation where a Bezier or Cornu is modified when the scale  or gauge has since been set to a different value than the track to be modified. Remember the old track values.
++ Fix Abend on cornu Join to turntable, also make sure cornu Modify leaves more than minlength on connected tracks
++ Fix Abend on Describe or Delete of Compound with more than 4 end points (like a turntable)
++ Try to stop issues with F3 objects in Compounds.
++ Correctly process F segment records (i.e., no version).
++ Remove automatic word wrap in describe Text object, linefeeds can be edited manually
 
 ### Added and changed parameter files
 
@@ -40,7 +72,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 ### Added
 + Finish the new End Point records which have fixed positions and all fields are output
-+ Add Select Track and then Right-Click mode to Connect Tracks to reconnect large numbers 
++ Add Select Track and then Right-Click mode to Connect Tracks to reconnect large numbers
 of tracks in one command (and provide an alternative to accurately selecting two close end-points).
 + Pan/Zoom button LeftDrag Pan, RightDrag Zoom
 + Pan/Zoom command adds 0 key to set origin and e key to zoom to extents
@@ -67,11 +99,11 @@ of tracks in one command (and provide an alternative to accurately selecting two
 + Allow Turnout Placement on Bezier Tracks, also improve Bezier splitting logic
 to be more precise
 + Ensure Cornu is deleted if connected track is deleted (like Easement)
-+ Make an unfilled Box into a Polygon with a RECTANGLE shape. Add special edit 
++ Make an unfilled Box into a Polygon with a RECTANGLE shape. Add special edit
 capability for filled and unfilled Boxes in Modify that preserve their shape and
-allow for either editing at the corner or on a side. Add user prompts during 
+allow for either editing at the corner or on a side. Add user prompts during
 editing.
-+ All: Add multi line text fields in drawing 
++ All: Add multi line text fields in drawing
 + Windows: Select monospaced font for parts list
 
 ### Fixed
@@ -84,7 +116,7 @@ editing.
 + Windows: Fix text handling for multi line edit fields, bug #198
 + Windows: Fix printing multi page parts lists
 + All: Fix car part files
-+ Windows: Fix parts list 
++ Windows: Fix parts list
 + All: Fix Traverse of rotated turnouts and issues with inaccurate segments in turnouts
 
 ### Added and Changed Parameter Files
@@ -140,7 +172,7 @@ editing.
 ###Added
 + Constrain add to unconnected Cornu end in Modify via right drag to be correct radius
 
-## [4.4.0.beta1] 
+## [4.4.0.beta1]
 
 ### Added
 + New Cornu track feature for more flexible easements
@@ -163,10 +195,10 @@ editing.
 
 ### Changed Parameter Files
 + Fixed three way turnout in Tillig TT Advanced track
-+ Clean up CTC-Panel, Peco N Code 80 Streamline, KB Scale and On30 parameters 
++ Clean up CTC-Panel, Peco N Code 80 Streamline, KB Scale and On30 parameters
 + Fix scale definitions and clean up S-Trax, Hubner, Atlas O Scale parameters
 + Added structures to Walthers Cornerstone in HO and N
-+ Extended T-Eishindo 
++ Extended T-Eishindo
 + Renamed rocon.xtp and updated N-fl for new ownership
 + Cleanup and reorganize Peco N track parameters
 + Cleanup and create separate files for Peco HO/OO track ranges
@@ -187,7 +219,7 @@ editing.
 + Fix broken DXF export by putting correct version into DXF export
 + Allow larger number of files to be selected at once for loading
 + Fix bug #196 wrong layer number in object properties
-+ Changing "Layout Options" can be cancelled 
++ Changing "Layout Options" can be cancelled
 + Consistently change "Describe" label to "Properties"
 + Make Text immediatetly update color as well as size
 + Fix filename handling bugs

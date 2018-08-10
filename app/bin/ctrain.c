@@ -183,8 +183,8 @@ static descData_t carDesc[] = {
     /*AN*/	{ DESC_ANGLE, N_("Angle"), &carData.angle },
     /*LN*/	{ DESC_DIM, N_("Length"), &carData.length },
     /*WD*/	{ DESC_DIM, N_("Width"), &carData.width },
-    /*DE*/	{ DESC_STRING, N_("Description"), &carData.desc },
-    /*NM*/	{ DESC_STRING, N_("Rep Marks"), &carData.number },
+    /*DE*/	{ DESC_STRING, N_("Description"), &carData.desc, sizeof(carData.desc)  },
+    /*NM*/	{ DESC_STRING, N_("Rep Marks"), &carData.number, sizeof(carData.number) },
     { DESC_NULL }
 };
 
@@ -199,10 +199,14 @@ static void UpdateCar(
         const char * cp;
         titleChanged = FALSE;
         cp = wStringGetValue((wString_p)carDesc[NM].control0);
-
+        int max_str = sizeof(carData.number);
+		if (max_str && strlen(cp)>max_str) {
+			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
+        }
         if (cp && strcmp(carData.number, cp) != 0) {
             titleChanged = TRUE;
-            strcpy(carData.number, cp);
+            carData.number[0] = '\0';
+            strncat(carData.number, cp, strlen(carData.number)-1);
         }
 
         if (!titleChanged) {

@@ -115,6 +115,7 @@ EXPORT wButton_p redoB;
 EXPORT wButton_p zoomUpB;
 EXPORT wButton_p zoomDownB;
 wButton_p mapShowB;
+wButton_p backgroundB;
 
 EXPORT wIndex_t checkPtMark = 0;
 
@@ -570,12 +571,16 @@ EXPORT void Confirm(char * label2, doSaveCallBack_p after) {
 										"If you don't save now, your unsaved changes will be discarded."),
 						_("&Save"), _("&Cancel"), _("&Don't Save"));
 		if (rc == 1) {
+			LayoutBackGroundInit();
+			LayoutBackGroundSave();
 			DoSave(after);
 			return;
 		} else if (rc == 0) {
 			return;
 		}
 	}
+	LayoutBackGroundInit();
+	LayoutBackGroundSave();
 	after();
 	return;
 }
@@ -676,6 +681,7 @@ static void DoClearAfter(void) {
 
 	/* set all layers to their default properties and set current layer to 0 */
 	DefaultLayerProperties();
+	LayoutBackGroundInit();
 	DoLayout(NULL);
 	checkPtMark = 0;
 	Reset();
@@ -683,6 +689,7 @@ static void DoClearAfter(void) {
 	EnableCommands();
 	SetLayoutFullPath("");
 	SetWindowTitle();
+	LayoutBackGroundInit();
 }
 
 static void DoClear(void) {
@@ -1082,10 +1089,8 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 			&& (commandList[curCommand].stickyMask & stickySet)) {
 		tempSegs_da.cnt = 0;
 		UpdateAllElevations();
-		if (action != C_REDRAW) {
-			MainRedraw();
-			MapRedraw();
-		}
+        MainRedraw();
+        MapRedraw();
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
 		}
@@ -1918,10 +1923,16 @@ static wWin_p debugW;
 static int debugCnt = 0;
 static paramIntegerRange_t r0_100 = { 0, 100, 80 };
 static void DebugOk(void * junk);
-static paramData_t debugPLs[20];
+static paramData_t debugPLs[30];
+static long debug_values[30];
+static int debug_index[30];
+
 static paramGroup_t debugPG = { "debug", 0, debugPLs, 0 };
 
 static void DebugOk(void * junk) {
+	for (int i = 0; i<debugCnt;i++) {
+			logTable(debug_index[i]).level = debug_values[i];
+	}
 	wHide(debugW);
 }
 
@@ -1932,6 +1943,36 @@ static void CreateDebugW(void) {
 			DebugOk, NULL, FALSE, NULL, 0, NULL);
 	wHide(debugW);
 }
+
+EXPORT void DebugInit(void) {
+
+	if (!debugW) {
+		BOOL_T default_line = FALSE;
+		debugCnt = 0;    //Reset to start building the dynamic dialog over again
+		int i = 0;
+		for ( int inx=0; inx<logTable_da.cnt; inx++ ) {
+			if (logTable(inx).name[0]) {
+				debug_values[i] = logTable(inx).level;
+				debug_index[i] = inx;
+				InitDebug(logTable(inx).name,&debug_values[i]);
+				i++;
+			} else {
+				if (!default_line) {
+					debug_values[i] = logTable(inx).level;
+					debug_index[i] = inx;
+					InitDebug("Default Trace",&debug_values[i]);
+					i++;
+					default_line = TRUE;
+				}
+			}
+		}
+		//ParamCreateControls( &debugPG, NULL );
+		CreateDebugW();
+	}
+	ParamLoadControls( &debugPG );
+	wShow(debugW);
+}
+
 
 EXPORT void InitDebug(char * label, long * valueP) {
 	if (debugCnt >= sizeof debugPLs / sizeof debugPLs[0])
@@ -2370,7 +2411,7 @@ static void CreateMenus(void) {
 	if (extraButtons) {
 		menuPLs[menuPG.paramCnt].context = debugW;
 		MiscMenuItemCreate(optionM, NULL, "cmdDebug", _("&Debug ..."), 0,
-				(void*) (wMenuCallBack_p) wShow, IC_MODETRAIN_TOO, (void *) 0);
+				(void*) (wMenuCallBack_p) DebugInit, IC_MODETRAIN_TOO, (void *) 0);
 	}
 	MiscMenuItemCreate(optionM, NULL, "cmdPref", _("&Preferences ..."),
 			ACCL_PREFERENCES, (void*) PrefInit(), IC_MODETRAIN_TOO, (void *) 0);
@@ -2463,6 +2504,7 @@ static void CreateMenus(void) {
 			ACCL_PRICELIST, (void*) PriceListInit(), 0, (void *) 0);
 
 	cmdGroup = BG_LAYER | BG_BIGGAP;
+
 	InitLayers();
 
 	cmdGroup = BG_HOTBAR;
@@ -2678,15 +2720,15 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	MainWindowTemplated = TRUE;
 
 	InitAppDefaults();
-
-	drawColorBlack = wDrawFindColor(wRGB(0, 0, 0));
-	drawColorWhite = wDrawFindColor(wRGB(255, 255, 255));
-	drawColorRed = wDrawFindColor(wRGB(255, 0, 0));
-	drawColorBlue = wDrawFindColor(wRGB(0, 0, 255));
-	drawColorGreen = wDrawFindColor(wRGB(0, 255, 0));
-	drawColorAqua = wDrawFindColor(wRGB(0, 255, 255));
-	drawColorPurple = wDrawFindColor(wRGB(255, 0, 255));
-	drawColorGold = wDrawFindColor(wRGB(255, 215, 0));
+	drawColorBlack  = wDrawFindColor( wRGB(  0,  0,  0) );
+	drawColorWhite  = wDrawFindColor( wRGB(255,255,255) );
+	drawColorRed    = wDrawFindColor( wRGB(255,  0,  0) );
+	drawColorBlue   = wDrawFindColor( wRGB(  0,  0,255) );
+	drawColorGreen  = wDrawFindColor( wRGB(  0,255,  0) );
+	drawColorAqua   = wDrawFindColor( wRGB(  0,255,255) );
+	drawColorPowderedBlue = wDrawFindColor( wRGB(129, 212, 250));
+	drawColorPurple = wDrawFindColor( wRGB(255,  0,255) );
+	drawColorGold   = wDrawFindColor( wRGB(255,215,  0) );
 	snapGridColor = drawColorGreen;
 	markerColor = drawColorRed;
 	borderColor = drawColorBlack;
@@ -2762,7 +2804,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	LOG1(log_init, ( "loadFileList\n" ))
 	LoadFileList();
 	AddPlaybackProc("MENU", MenuPlayback, NULL);
-	CreateDebugW();
+	//CreateDebugW();
 
 	/*
 	 * TIDY UP
@@ -2842,7 +2884,11 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 		if (initialFile && strlen(initialFile)) {
 			DoFileList(0, NULL, initialFile);
+			LayoutBackGroundLoad();  //Get Prior BackGround
 		}
+	} else {
+		LayoutBackGroundInit();
+		LayoutBackGroundSave();		//Remove Background
 	}
 	inMainW = FALSE;
 	return mainW;
