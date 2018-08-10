@@ -829,9 +829,9 @@ void DescribeCompound(
 	else
 		compoundData.grade = 0.0;
     if ( compoundData.epCnt >1 ) {
-		DoDescribe( compoundData.epCnt>2?_("Turnout"):_("Sectional Track"), trk, compoundDesc, UpdateCompound );
+		DoDescribe( compoundData.epCnt>2?_("Turnout"):_("Sectional Track"), "describe-turnout", trk, compoundDesc, UpdateCompound );
 	} else {
-		DoDescribe( _("Structure"), trk, compoundDesc, UpdateCompound );
+		DoDescribe( _("Structure"), "describe-structure", trk, compoundDesc, UpdateCompound );
 	}
 }
 

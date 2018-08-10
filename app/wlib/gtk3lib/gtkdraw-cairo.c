@@ -149,8 +149,8 @@ static cairo_t* gtkDrawCreateCairoContext(
 	cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
 	if(opts & wDrawOptTemp)
 	{
-		cairo_set_source_rgba(cairo, 0, 0, 0, 0);
-		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+		cairo_set_source_rgba(cairo, 255, 0, 0, 0.5);
+		//cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
 	}
 	else
 	{
@@ -195,6 +195,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 		gtk_widget_queue_draw_region(bd->widget, cairo_region);
 		//gtk_widget_draw( bd->widget, &update_rect );
 		cairo_region_destroy(cairo_region);
+		gtk_widget_queue_draw(bd->widget);
 	}
 	bd->delayUpdate = delay;
 }
@@ -225,6 +226,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 	cairo_stroke(cairo);
 
 	gtkDrawDestroyCairoContext(cairo, NULL);
+	gtk_widget_queue_draw(bd->widget);
 
 }
 
@@ -288,6 +290,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 	cairo_stroke(cairo);
 
 	gtkDrawDestroyCairoContext(cairo, NULL);
+	gtk_widget_queue_draw(bd->widget);
 
 }
 
@@ -308,6 +311,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), 0.75, 0, 2 * M_PI);
 	cairo_stroke(cairo);
 	gtkDrawDestroyCairoContext(cairo, NULL);
+	gtk_widget_queue_draw(bd->widget);
 
 }
 
@@ -369,6 +373,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 	wlibFontDestroyPangoLayout(layout);
 	cairo_restore( cairo );
 	gtkDrawDestroyCairoContext(cairo, NULL);
+	gtk_widget_queue_draw(bd->widget);
 
 }
 
@@ -504,6 +509,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 	}
 	cairo_fill(cairo);
 	gtkDrawDestroyCairoContext(cairo, NULL);
+	gtk_widget_queue_draw(bd->widget);
 
 }
 
@@ -531,6 +537,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), r, 0, 2 * M_PI);
 	cairo_fill(cairo);
 	gtkDrawDestroyCairoContext(cairo, NULL);
+	gtk_widget_queue_draw(bd->widget);
 
 }
 
@@ -645,6 +652,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 				}
 			}
 	gtkDrawDestroyCairoContext(cairo,surface);
+	gtk_widget_queue_draw(bd->widget);
 }
 
 
@@ -696,6 +704,12 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 		fprintf(stderr,"resizeDraw: no client data\n");
 		return;
 	}
+	if (bd->fromTemplate) {
+		GtkAllocation alloc;
+		gtk_widget_get_allocation(bd->widget, &alloc);
+		w = alloc.width;
+		h = alloc.height;
+	}
 
 	/* Negative values crashes the program */
 	if (w < 0 || h < 0)
@@ -715,6 +729,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 		/*bd->redraw( bd, bd->context, w, h );*/
 	}
 	/*wRedraw( bd );*/
+	gtk_widget_queue_draw(bd->widget);
 }
 
 
@@ -801,16 +816,26 @@ static gboolean draw_configure_event(
 		GdkEventConfigure *event,
 		wDraw_p bd)
 {
-	if (bd->surface)
-	    cairo_surface_destroy (bd->surface);
+	GtkAllocation alloc;
+	gtk_widget_get_allocation(widget, &alloc);
 
-	  bd->surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
-	                                               CAIRO_CONTENT_COLOR,
-	                                               gtk_widget_get_allocated_width (widget),
-	                                               gtk_widget_get_allocated_height (widget));
+	if ((bd->maxW != alloc.width) || bd->maxH != alloc.height) {
+		bd->maxW = bd->w = alloc.width;
+		bd->maxH = bd->h = alloc.height;
 
-	  /* Initialize the surface to white */
-	  clear_surface (bd->surface);
+		if (bd->surface)
+			cairo_surface_destroy (bd->surface);
+
+			bd->surface = gdk_window_create_similar_surface (gtk_widget_get_window (widget),
+												   CAIRO_CONTENT_COLOR,
+												   gtk_widget_get_allocated_width (widget),
+												   gtk_widget_get_allocated_height (widget));
+
+		  /* Initialize the surface to white */
+		  clear_surface (bd->surface);
+		  /* Kick off a full redraw to make sure we have something after resize */
+		  bd->redraw( bd, bd->context, bd->w, bd->h );
+		}
 
 	  /* We've handled the configure event, no need for further processing. */
 	  return TRUE;
@@ -1021,13 +1046,14 @@ int xw, xh, cw, ch;
 	wlibComputePos( (wControl_p)bd );
 
 	if (option&BO_USETEMPLATE) {
-		char name[256];
-		sprintf(name,"%s",helpStr);
-		bd->widget = wlibWidgetFromId( parent, name );
+		bd->widget = wlibWidgetFromIdWarn( parent, helpStr );
 		if (bd->widget) bd->fromTemplate = TRUE;
-	}
-	if (!bd->widget)
+		bd->template_id = strdup(helpStr);
+		/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
+		bd->reveal = (GtkRevealer *)wlibGetWidgetFromName( bd->parent, helpStr, "reveal", TRUE );
+	} else {
 		bd->widget = gtk_drawing_area_new();
+	}
 
 	gtk_widget_set_size_request( GTK_WIDGET(bd->widget), width, height );
 	g_signal_connect ((bd->widget), "draw",
@@ -1049,7 +1075,7 @@ int xw, xh, cw, ch;
 	gtk_widget_set_can_focus(bd->widget,!(option & BD_NOFOCUS));
 	//if (!(option & BD_NOFOCUS))
 	//	GTK_WIDGET_SET_FLAGS(GTK_WIDGET(bd->widget), GTK_CAN_FOCUS);
-	gtk_widget_set_events (bd->widget,
+	gtk_widget_add_events (bd->widget,
 							  GDK_LEAVE_NOTIFY_MASK
 							  | GDK_BUTTON_PRESS_MASK
 							  | GDK_BUTTON_RELEASE_MASK
@@ -1063,10 +1089,7 @@ int xw, xh, cw, ch;
 	bd->maxW = bd->w = width;
 	bd->maxH = bd->h = height;
 
-	if (option&BO_CONTROLGRID) {
-		g_object_ref(bd->widget);
-		bd->useGrid = TRUE;
-	} else if (!bd->fromTemplate) {
+	if (!bd->fromTemplate) {
 		gtk_fixed_put( GTK_FIXED(parent->widget), bd->widget, bd->realX, bd->realY );
 		wlibControlGetSize( (wControl_p)bd );
 	}
@@ -1074,16 +1097,12 @@ int xw, xh, cw, ch;
 	bd->surface = gdk_window_create_similar_surface(gtk_widget_get_window(bd->widget), CAIRO_CONTENT_COLOR, width, height);
 	//bd->gc = gdk_gc_new( parent->gtkwin->window );
 	//gdk_gc_copy( bd->gc, parent->gtkwin->style->base_gc[GTK_STATE_NORMAL] );
-{
+
 	GdkCursor * cursor;
 	cursor = gdk_cursor_new_for_display ( gdk_display_get_default(), GDK_TCROSS );
 	gdk_window_set_cursor ( gtk_widget_get_window(GTK_WIDGET(bd->widget)), cursor);
 	g_object_unref (cursor);
-}
-#ifdef LATER
-	if (labelStr)
-		bd->labelW = gtkAddLabel( (wControl_p)bd, labelStr );
-#endif
+
 	gtk_widget_show( bd->widget );
 	wlibAddButton( (wControl_p)bd );
 	gtkAddHelpString( bd->widget, helpStr );

@@ -198,7 +198,7 @@ void SetMessage( char * );
 
 wIndex_t panCmdInx;
 
-void InfoSubstituteControls( wControl_p *, char * * );
+void InfoSubstituteControls( wControl_p *, char * * , char *);
 
 void MapGrid( coOrd, coOrd, ANGLE_T, coOrd, ANGLE_T, POS_T, POS_T, int *, int *, int *, int * );
 void DrawGrid( drawCmd_p, coOrd *, POS_T, POS_T, long, long, coOrd, ANGLE_T, wDrawColor, BOOL_T );

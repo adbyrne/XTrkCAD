@@ -643,7 +643,7 @@ typedef struct {
 		int grid_row1;
 		} descData_t, * descData_p;
 typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
-void DoDescribe( char *, track_p, descData_p, descUpdate_t );
+void DoDescribe( char *, char *, track_p, descData_p, descUpdate_t );
 void DescribeCancel( void );
 BOOL_T UpdateDescStraight( int, int, int, int, int, descData_p, long );
 

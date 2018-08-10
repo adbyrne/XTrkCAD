@@ -506,11 +506,12 @@ wList_p wListCreate(
 
     //Try to find element name in Template, if not found allocate a new one
     if (option&BO_USETEMPLATE) {
-    	char name[256];
-    	sprintf(name,"%s",helpStr);
-    	bl->widget = wlibWidgetFromId(parent, name );
+    	bl->widget = wlibWidgetFromId(parent, helpStr );
     	if (bl->widget)
     		bl->fromTemplate = TRUE;
+    	bl->template_id = strdup(helpStr);
+    	/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
+    	bl->reveal = (GtkRevealer *)wlibGetWidgetFromName( parent, helpStr, "reveal", TRUE );
     }
     if (!bl->widget)
     	bl->widget = gtk_scrolled_window_new(NULL, NULL);
@@ -526,10 +527,7 @@ wList_p wListCreate(
 
     gtk_widget_show_all(bl->widget);
 
-    if (option&BO_CONTROLGRID) {
-        g_object_ref(bl->widget);
-        bl->useGrid = TRUE;
-    } else if (!bl->fromTemplate) {
+    if (!bl->fromTemplate) {
     	//Only attach if not in template and not in grid
     	gtk_fixed_put(GTK_FIXED(parent->widget), bl->widget, bl->realX, bl->realY);
     }

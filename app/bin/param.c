@@ -2086,9 +2086,10 @@ static void ParamCreateControl(
     char *cq;
 	static wMenu_p menu = NULL;
 
-	if ( ( win = pd->group->win ) == NULL )
+	if ( ( win = pd->group->win ) == NULL ) {
 		win = mainW;
-
+		pd->winOption |= BO_USETEMPLATE;        /* Force template to be used for main window controls */
+	}
 
 		switch (pd->type) {
 		case PD_FLOAT:
@@ -2311,8 +2312,8 @@ static void LayoutControlTemplate(
 	*helpStrP = 0;
 
 	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
+			pd->group->win = group->win;
 			pd->winOption |= BO_USETEMPLATE;				/* Yes Template */
-			pd->winOption &= ~BO_CONTROLGRID;				/* No Grid */
 			if ( (pd->option&PDO_DLGIGNORE) != 0 ) continue; /*Ignore unused */
 			if ( pd->option&PDO_DLGCMDBUTTON) 	   continue; /*Ignore buttons */
 			if ( pd->nameStr )
@@ -2326,100 +2327,6 @@ static void LayoutControlTemplate(
 
 }
 
-/* Special Layout for Grid part of window only - used in Describe
- *
- * \param IN group	data definition for the dialog
- * \param IN proc   callback to create the Dialog Controls
- */
-
-static void LayoutControlGrid(
-		paramGroup_p group,
-		layoutControlsProc proc) {
-
-	int control_row[100] = { 0 };
-	int control_col[100] = { 0 };
-	paramData_p pd;
-	int currLabelPos = 0;
-
-	/*Set up Prefix of HelpStr to find content by concatenated field name*/
-	char helpStr[STR_SHORT_SIZE], * helpStrP;
-	strcpy( helpStr, group->nameStr );
-	helpStrP = helpStr+strlen(helpStr);
-	*helpStrP++ = '-';
-	*helpStrP = 0;
-
-	int curr_col = 1;
-	int curr_row = 1;
-	int max_col = 0;
-
-	/* Remove all the controls and boxes from the Grid */
-	wControlResetDescribeGrid(group->win);
-
-	/* Many pd->option values are not used in the Grid layout
-	 * These include the following -
-	 * PDO_DLGBOXEND,PDO_DLGRESETMARGIN,PDO_DLGNEWCOLUMN,PDO_DLGIGNORELABELWIDTH,
-	 * PDO_DLGNOLABELALIGN,PDO_DLGWIDE,PDO_DLGIGNOREX,PDO_DLGUNDERCMDBUTT,PDO_DLGNARROW
-	 * PDO_DLGSETY
-	 */
-	int last_r,last_c;
-	for ( pd=group->paramPtr, currLabelPos=0; pd<&group->paramPtr[group->paramCnt]; pd++,currLabelPos++ ) {
-		pd->winOption |= BO_CONTROLGRID;                  /* Make sure the controls use the Grid */
-		pd->winOption &= ~BO_USETEMPLATE;	              /* Not template */
-		if ( (pd->option&PDO_DLGIGNORE) != 0 )	continue; /*Ignore unused*/
-		if (!(pd->context))						continue; /*Ignore not allocated*/
-		if (!(pd->valueP))	   					continue; /*Ignore not used*/
-		if ( pd->option&PDO_DLGCMDBUTTON ) 		continue; /*Ignore buttons - they will be found*/
-		last_r = curr_row;
-		last_c = curr_col;
-		if ( (pd->option&PDO_DLGHORZ) == 0 ) {      	          /* Carry on across */
-			curr_row++;
-			curr_col=1;
-		}
-		/* For describe we have to use the parm order that the caller defined and not the order of the PList */
-		/* This row order is imposed during button allocation and held in the ddp */
-		int r=curr_row,c=curr_col;
-		if (group->layoutProc)
-					group->layoutProc( pd, currLabelPos, 0, &r, &c );
-		if (r>0 ) {   /* If it returns then use returned rows and cols */
-			curr_row = r;
-			curr_col = c;
-		}
-		control_row[currLabelPos] = curr_row;
-		control_col[currLabelPos] = curr_col;
-		curr_col++;
-		/* If this has a label, add 1 col */
-		if (pd->winLabel && !(pd->winLabel[0] == '\0')) {
-			curr_col++;
-		} else if (curr_col==1) {
-			curr_col++;     							/* Leave space for missing label if first field in row */
-		}
-		if (max_col<curr_col) max_col = curr_col;
-	}
-	/* At this point, curr_row is the number of rows, max_col is the maximum col count  */
-	/* Please note though, that cols 2->n are held in a HBox in Grid col 2 */
-
-	int inx;
-	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
-		if ( (pd->option&PDO_DLGIGNORE) != 0 ) continue; /*Ignore unused */
-		if ( pd->option&PDO_DLGCMDBUTTON) 	   continue; /*Ignore buttons */
-		pd->winOption |= BO_CONTROLGRID;                 /* Make sure the controls use the Grid */
-		pd->winOption &= ~BO_USETEMPLATE;	             /* Not template */
-		/* Note - Grid layout does not use group->layoutProc so we dont call it */
-		if ( pd->nameStr )
-			strcpy( helpStrP, pd->nameStr );
-
-		/* Callback the Create or Update routine */
-		proc( pd, helpStr, 0, 0 );  /* Note -> This is where the controls may be created */
-		if (pd->control && pd->context && pd->valueP) {
-			/*Position an assigned control correctly within the Grid */
-			pd->grid_col = control_col[inx];
-			pd->grid_row = control_row[inx];
-
-			wControlSetDescribeGrid( pd->control, group->win, control_col[inx], control_row[inx]);
-		}
-	}
-}
-
 
 static void LayoutControls(
 		paramGroup_p group,
@@ -2427,15 +2334,6 @@ static void LayoutControls(
 		wPos_t * retW,
 		wPos_t * retH )
 {
-	/* Bypass most of LayoutControls for a GRID layout */
-	if (group->winOption&BO_CONTROLGRID) {
-		LayoutControlGrid(group,proc);
-		if ( retW )
-			*retW = -1;
-		if ( retH )
-			*retH = -1;
-		return;
-	}
 	/* Use definitions for Template Layout (not Grid) */
 	if (group->winOption&BO_USETEMPLATE) {
 		LayoutControlTemplate(group, proc);
@@ -2744,16 +2642,15 @@ wWin_p ParamCreateDialog(
     } else {
         winOptions |= F_AUTOSIZE;
     }
+    if (winOption&F_USETEMPLATE)
+    	winOptions |= BO_USETEMPLATE;
+
   	
 	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptions, ParamDlgProc, group );
 
-	if (winOption & F_CONTROLGRID) {
-		group->winOption |= BO_CONTROLGRID;
-		winOption |= BO_CONTROLGRID;
-		winOption |= BO_USETEMPLATE;     /* If we are using a grid there is a template */
-	} else if (useTemplate) {
+
+	if (winOption & F_USETEMPLATE) {
 		group->winOption |= BO_USETEMPLATE;
-		winOption |= BO_USETEMPLATE;
 	}
 
 	if ( okLabel && okProc ) {
@@ -2818,19 +2715,22 @@ EXPORT void ParamDialogOkActive(
 		wControlActive( (wControl_p)pg->okB, active );
 }
 
+/*
+ * ParamCreateControls is used to put controls onto the main screen (currently on the bottom rail
+ * The parms are named as the name of the parmlist followed by the name of the parm
+ */
 
 EXPORT void ParamCreateControls(
 		paramGroup_p pg,
 		paramChangeProc changeProc )
 {
 	paramData_p pd;
-	char helpStr[STR_SHORT_SIZE], * helpStrP;
-	strcpy( helpStr, pg->nameStr );
-	helpStrP = helpStr+strlen(helpStr);
-	*helpStrP++ = '-';
+	char prefix[STR_SHORT_SIZE], helpStr[STR_SHORT_SIZE];
+	sprintf(prefix,"main-%s",pg->nameStr);  /*the area like "parallel" */
 	for ( pd=pg->paramPtr; pd<&pg->paramPtr[pg->paramCnt]; pd++ ) {
 		pd->group = pg;
-		strcpy( helpStrP, pd->nameStr );
+		pd->winOption |= BO_USETEMPLATE;
+		sprintf( helpStr, "%s-%s",prefix,pd->nameStr ); /*the field name like "separation" */
 		ParamCreateControl( pd, helpStr, 0, 0 );
 		if ( pd->type != PD_MENUITEM && pd->control )
 			wControlShow( pd->control, FALSE );

@@ -264,7 +264,7 @@ static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 				  fix0?DESC_PIVOT_FIRST:
 				  fix1?DESC_PIVOT_SECOND:
 				  DESC_PIVOT_MID;
-	DoDescribe( _("Straight Track"), trk, strDesc, UpdateStraight );
+	DoDescribe( _("Straight Track"), "describe-straight", trk, strDesc, UpdateStraight );
 }
 
 static DIST_T DistanceStraight( track_p t, coOrd * p )

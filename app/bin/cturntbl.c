@@ -293,7 +293,7 @@ static void DescribeTurntable( track_p trk, char * str, CSIZE_T len )
 		trntblData.epCnt>0?DESC_RO:0;
 	trntblDesc[EC].mode = DESC_RO;
 	trntblDesc[LY].mode = DESC_NOREDRAW;
-	DoDescribe( _("Turntable"), trk, trntblDesc, UpdateTurntable );
+	DoDescribe( _("Turntable"), "describe-turntable", trk, trntblDesc, UpdateTurntable );
 }
 
 static void DeleteTurntable( track_p t )
@@ -817,7 +817,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		controls[0] = turntableDiameterPD.control;
 		controls[1] = NULL;
 		labels[0] = N_("Diameter");
-		InfoSubstituteControls( controls, labels );
+		InfoSubstituteControls( controls, labels, turntablePG.nameStr );
 		/*InfoMessage( "Place Turntable");*/
 		return C_CONTINUE;
 
@@ -830,7 +830,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		controls[0] = turntableDiameterPD.control;
 		controls[1] = NULL;
 		labels[0] = N_("Diameter");
-		InfoSubstituteControls( controls, labels );
+		InfoSubstituteControls( controls, labels, turntablePG.nameStr );
 		ParamLoadData( &turntablePG );
 		pos0 = pos;
 		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
@@ -850,7 +850,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		t = NewTurntable( pos, turntableDiameter/2.0 );
 		UndoEnd();
 		DrawNewTrack(t);
-		InfoSubstituteControls( NULL, NULL );
+		InfoSubstituteControls( NULL, NULL, NULL );
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		wPrefSetFloat( "misc", message, turntableDiameter );
 		return C_TERMINATE;
@@ -860,7 +860,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		InfoSubstituteControls( NULL, NULL );
+		InfoSubstituteControls( NULL, NULL, NULL );
 		return C_CONTINUE;
 
 	default:

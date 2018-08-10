@@ -72,7 +72,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		controls[0] = parSepPD.control;
 		controls[1] = NULL;
 		labels[0] = N_("Separation");
-		InfoSubstituteControls( controls, labels );
+		InfoSubstituteControls( controls, labels, parSepPG.nameStr );
 		/*InfoMessage( "Select track" );*/
 		return C_CONTINUE;
 
@@ -84,7 +84,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		controls[0] = parSepPD.control;
 		controls[1] = NULL;
 		labels[0] = N_("Separation");
-		InfoSubstituteControls( controls, labels );
+		InfoSubstituteControls( controls, labels, parSepPG.nameStr );
 		ParamLoadData( &parSepPG );
 		Dpa.orig = pos;
 		Dpa.Trk = OnTrack( &Dpa.orig, TRUE, TRUE );
@@ -165,7 +165,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		}
 		DrawNewTrack( t );
 		UndoEnd();
-		InfoSubstituteControls( NULL, NULL );
+		InfoSubstituteControls( NULL, NULL, NULL );
 		sprintf( message, "parallel-separation-%s", curScaleName );
 		wPrefSetFloat( "misc", message, parSeparation );
 		return C_TERMINATE;
@@ -174,7 +174,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		InfoSubstituteControls( NULL, NULL );
+		InfoSubstituteControls( NULL, NULL, NULL );
 		return C_TERMINATE;
 
 	}

@@ -149,6 +149,7 @@ static int verbose = 0;
 
 static wMenuList_p winList_mi;
 static BOOL_T inMainW = TRUE;
+static BOOL_T MainWindowTemplated = FALSE;
 
 static long stickySet;
 static long stickyCnt = 0;
@@ -526,7 +527,7 @@ EXPORT void ErrorMessage(char * format, ...) {
 	format = ParseMessage(format);
 	vsprintf(message2, format, ap);
 	va_end(ap);
-	InfoSubstituteControls( NULL, NULL);
+	InfoSubstituteControls( NULL, NULL, NULL);
 	SetMessage(message2);
 	wBeep();
 	inError = TRUE;
@@ -1264,7 +1265,7 @@ static void DoCommandBIndirect(void * cmdInxP) {
 	DoCommandB((void*) (intptr_t) cmdInx);
 }
 
-EXPORT void LayoutSetPos(wIndex_t inx) {
+EXPORT void LayoutSetPos(wIndex_t inx, wBool_t force) {
 	wPos_t w, h;
 	static wPos_t toolbarRowHeight = 0;
 	static wPos_t width;
@@ -1281,6 +1282,43 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 		layerButtCnt = 0;
 		toolbarHeight = 0;
 	}
+
+	if(MainWindowTemplated) {
+		BOOL_T seperator = FALSE;
+		if (buttonList[inx].control) {
+			currGroup = buttonList[inx].group & ~BG_BIGGAP;
+			if (currGroup != lastGroup && (buttonList[inx].group & BG_BIGGAP)) {
+				seperator = currGroup+1;
+			}
+			if (currGroup != lastGroup) {
+				lastGroup = currGroup;
+			}
+			if (force) {
+				if ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
+						|| layerButtCnt++ <= layerCount) {
+					wControlShow(buttonList[inx].control, FALSE);
+				}
+			} else {
+				if ((toolbarSet & (1 << currGroup))
+					&& (programMode != MODE_TRAIN
+						|| (buttonList[inx].options
+								& (IC_MODETRAIN_TOO | IC_MODETRAIN_ONLY)))
+					&& (programMode == MODE_TRAIN
+							|| (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
+					&& ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
+							|| layerButtCnt++ <= layerCount)) {
+						wControlSetPos(buttonList[inx].control, 0,0);
+						wControlShow(buttonList[inx].control, TRUE);
+					} else {
+						wControlShow(buttonList[inx].control, FALSE);
+					}
+			}
+
+		}
+		return;
+	}
+
+
 
 	if (buttonList[inx].control) {
 		if (toolbarRowHeight <= 0)
@@ -1326,9 +1364,14 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 EXPORT void LayoutToolBar(void) {
 	int inx;
 
+
 	for (inx = 0; inx < buttonCnt; inx++) {
-		LayoutSetPos(inx);
+		LayoutSetPos(inx, FALSE);
 	}
+	if (MainWindowTemplated) {
+		wButtonToolBarRedraw(mainW);
+	}
+
 	if (toolbarSet & (1 << BG_HOTBAR)) {
 		LayoutHotBar();
 	} else {
@@ -1390,7 +1433,7 @@ EXPORT void AddToolbarControl(wControl_p control, long options) {
 	buttonList[buttonCnt].y = 0;
 	buttonList[buttonCnt].control = control;
 	buttonList[buttonCnt].cmdInx = -1;
-	LayoutSetPos(buttonCnt);
+	LayoutSetPos(buttonCnt, TRUE);
 	buttonCnt++;
 }
 
@@ -1411,8 +1454,19 @@ EXPORT wButton_p AddToolbarButton(char * helpStr, wIcon_p icon, long options,
 			}
 		}
 	}
-	bb = wButtonCreate(mainW, 0, 0, helpStr, (char*) icon,
-	BO_ICON/*|((options&IC_CANCEL)?BB_CANCEL:0)*/, 0, action, context);
+	if (MainWindowTemplated) {
+		long opt = 0L;
+		if (options&IC_ABUT)
+			opt = BO_ABUT;
+		if (cmdGroup&BG_BIGGAP)
+			opt = BO_GAP;
+		bb = wButtonCreateForToolbar(mainW,0,0,helpStr, (char*) icon,
+				opt|BO_ICON|BO_USETEMPLATE, 0, action, context);
+	} else {
+		bb = wButtonCreate(mainW, 0, 0, helpStr, (char*) icon,
+		BO_ICON/*|((options&IC_CANCEL)?BB_CANCEL:0)*/, 0, action, context);
+
+	}
 	AddToolbarControl((wControl_p) bb, options);
 	return bb;
 }
@@ -2616,10 +2670,12 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	wGetDisplaySize(&displayWidth, &displayHeight);
 	mainW = wWinMainCreate(buffer, (displayWidth * 2) / 3,
 			(displayHeight * 2) / 3, "xtrkcadW", message, "main",
-			F_RESIZE | F_MENUBAR | F_NOTAB | F_RECALLPOS | F_HIDE, MainProc,
+			F_RESIZE | F_MENUBAR | F_NOTAB | F_RECALLPOS | F_HIDE |F_USETEMPLATE, MainProc,
 			NULL);
 	if (mainW == NULL)
 		return NULL;
+
+	MainWindowTemplated = TRUE;
 
 	InitAppDefaults();
 

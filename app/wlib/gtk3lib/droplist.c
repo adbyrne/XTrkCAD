@@ -35,6 +35,8 @@
 #include "gtkint.h"
 #include "i18n.h"
 
+#include "eggwrapbox.h"
+
 /* define the column count for the tree model */
 #define DROPLIST_TEXTCOLUMNS 1
 
@@ -353,6 +355,7 @@ wlibNewDropList(GtkListStore *ls, int editable)
     return (widget);
 }
 
+
 /**
  * Create a drop down list. The drop down is created and intialized with the supplied values.
  *
@@ -410,15 +413,15 @@ wList_p wDropListCreate(
     }
 
     if (option&BO_USETEMPLATE) {
-    	char name[256];
-    	sprintf(name,"%s",helpStr);
-    	b->widget = wlibWidgetFromId( parent, name );
+    	b->widget = wlibWidgetFromId( parent, helpStr );
     	b->fromTemplate = TRUE;
+    	b->template_id = strdup(helpStr);
     	gtk_combo_box_set_model (GTK_COMBO_BOX(b->widget),
     	                         GTK_TREE_MODEL(b->listStore));
-    }
-    if (!b->widget) {
-    // create the droplist
+    	/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
+    	b->reveal = (GtkRevealer *)wlibGetWidgetFromName( b->parent, helpStr, "reveal", TRUE );
+    } else {
+    	// create the droplist
     	b->widget = wlibNewDropList(b->listStore,
                                 option & BL_EDITABLE);
     }
@@ -460,13 +463,12 @@ wList_p wDropListCreate(
 
     gtk_widget_set_size_request(b->widget, width, -1);
 
-    if (option&BO_CONTROLGRID) {
-    	g_object_ref(b->widget);
-        b->useGrid = TRUE;
-	} else if (!b->fromTemplate) {
+    if (option & BO_TOOLBAR) {
+    	egg_wrap_box_insert_child(EGG_WRAP_BOX(parent->toolbar), b->widget, -1, 0 );
+    } else if (!b->fromTemplate) {
 		gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+		wlibControlGetSize((wControl_p)b);
 	}
-    wlibControlGetSize((wControl_p)b);
 
     if (labelStr) {
         b->labelW = wlibAddLabel((wControl_p)b, labelStr);
@@ -476,6 +478,12 @@ wList_p wDropListCreate(
     wlibAddButton((wControl_p)b);
     wlibAddHelpString(b->widget, helpStr);
 
+    if (option&BO_TOOLBAR) {
+    	b->inToolbar = TRUE;
+    }
+
+
     return b;
 }
+
 

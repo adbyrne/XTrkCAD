@@ -58,6 +58,26 @@ void wControlShow(
         abort();
     }
 
+    if (b->inToolbar) {
+    	gtk_widget_set_visible(b->widget,show);
+    	if (b->reveal) {
+    		gtk_widget_set_visible(GTK_WIDGET(b->reveal),show);
+    		gtk_revealer_set_reveal_child(GTK_REVEALER(b->reveal),show);
+    	}
+    	if (b->separator) {
+    		gtk_widget_set_visible(GTK_WIDGET(b->separator),show);
+    	}
+    	return;
+    }
+
+    if (b->reveal) {
+    	if (show == gtk_revealer_get_reveal_child(b->reveal)) {
+    	} else {
+    		gtk_revealer_set_reveal_child(b->reveal, show);
+    	}
+    }
+
+
     if (show) {
         gtk_widget_show(b->widget);
 
@@ -167,101 +187,6 @@ wPos_t wControlGetPosY(
     return b->realY - BORDERSIZE - ((b->parent->option&F_MENUBAR)?MENUH:0);
 }
 
-/*
- * Position the control in the dynamic Grid
- * \param b IN Cntrol
- * \param col IN Column - using a simple left to right ordering and including labels (if any)
- * \param row IN Row - using a simple top to bottom
- *
- * Note: This logic assumes a layout with an optional aligned label in Grid Col 1 and
- *       unaligned fields and optional labels inside a horizontal box in Grid Col 2
- *
- *   *************************************************************************
- *   |       | ************************************************************| |
- *   | Label | | Field 1 |  Label2  | Field 2 | etc                        | | <- Row 1
- *   |       | ************************************************************* |
- *   +-------+---------------------------------------------------------------+
- *   |       | *******************************                               |
- *   |       | | Field 1 | Label 2 | Field 2 | etc                           | <- Row 2, no labels on any fields but 2
- *   |       | *******************************                               |
- *   +-------+---------------------------------------------------------------+
- *   | Label |                                                               |
- *
- */
-
-void wControlSetDescribeGrid( wControl_p b, wWin_p win, int col, int row) {
-	if (!win->builder) return;
-
-	if (!win->grid)	{
-		win->grid = wlibWidgetFromId(win, "describe.grid" );
-		if (!win->grid) return;
-	}
-
-	if (col<1) return;
-
-	/* Put label of Col 1 object in main Grid col 1 */
-	if (col==1) {
-		if (b->label) {
-			gtk_grid_attach(GTK_GRID(win->grid),GTK_WIDGET(b->label),1,row,1,1);
-			gtk_widget_set_halign (GTK_WIDGET(b->label),GTK_ALIGN_END);
-			b->label_col = 1;
-		}
-	}
-	/* Make sure that there is a inner grid in main Grid col 2 */
-	GtkWidget *inner_grid = gtk_grid_get_child_at(GTK_GRID(win->grid),2,row);
-	if (!inner_grid) {
-		inner_grid = gtk_grid_new();
-		gtk_grid_set_column_spacing (GTK_GRID(inner_grid),6);
-		gtk_grid_attach(GTK_GRID(win->grid),GTK_WIDGET(inner_grid),2,row,1,1);
-	}
-
-	/* If we are for the inner grid, find out if there is a label, add it at col-1 and the content after it */
-	if (col>1) {
-		if (b->label) {
-			gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->label),col-1,1,1,1);  /* Remember inner grid starts at outer col 2! */
-			gtk_widget_set_halign(GTK_WIDGET(b->label),GTK_ALIGN_END);
-			b->label_col=col;
-		}
-		gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->widget),col-1+(b->label?1:0),1,1,1);
-		gtk_widget_set_halign(GTK_WIDGET(b->widget),GTK_ALIGN_START);
-		b->col=col+(b->label?1:0);
-		b->row=row;
-	} else {
-		/* Just the content in the inner grid (col 1 of it) */
-		gtk_grid_attach(GTK_GRID(inner_grid),GTK_WIDGET(b->widget),1,1,1,1);
-		gtk_widget_set_halign(GTK_WIDGET(b->widget),GTK_ALIGN_START);
-		b->col=2;
-		b->row=row;
-	}
-	gtk_widget_queue_resize (GTK_WIDGET(win->grid));
-
-}
-
-static void wStatusRemoveChild(GtkWidget * w, void * container) {
-	g_object_ref(w);
-	gtk_container_remove(GTK_CONTAINER(container),GTK_WIDGET(w));
-}
-
-
-/*
- * Reset The Grid, eliminating all children from it - this will free any resources that are not referenced
- *
- * \param IN win The window that holds the Describe Grid
- *
- */
-
-void wControlResetDescribeGrid( wWin_p win) {
-	if (!win->builder) return;
-
-	if (!win->grid)	{
-		win->grid = wlibWidgetFromId(win, "describe.grid" );
-		if (!win->grid) return;
-	}
-
-	gtk_container_foreach (GTK_CONTAINER(win->grid),
-		                    wStatusRemoveChild,
-		                    win->grid);
-}
 
 /**
  * Set the fixed position of a control within its parent window
@@ -275,7 +200,11 @@ void wControlSetPos(
     wPos_t x,
     wPos_t y)
 {
-    if(!b->fromTemplate & !b->useGrid)
+
+	if (b->inToolbar) {
+		return;
+	}
+    if(!b->fromTemplate)
     {
         b->realX = x;
         b->realY = y + BORDERSIZE + ((b->parent->option&F_MENUBAR)?MENUH:0);
@@ -318,7 +247,7 @@ void wControlSetLabel(
         else
         	nat_reqwidget.height = nat_requisition.height;
         b->labelW = nat_requisition.width+8;
-        if (!b->fromTemplate & !b->useGrid)
+        if (!b->fromTemplate)
         	gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
                        b->realY+(nat_reqwidget.height/2 - nat_requisition.height/2));
     } else {

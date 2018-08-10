@@ -240,7 +240,7 @@ static void DescribeSensor (track_p trk, char * str, CSIZE_T len )
     sensorProperties.pos = xx->orig;
     sensorDesc[NM].mode = 
           sensorDesc[SC].mode = DESC_NOREDRAW;
-    DoDescribe( _("Sensor"), trk, sensorDesc, UpdateSensorProperties );
+    DoDescribe( _("Sensor"), "describe-sensor", trk, sensorDesc, UpdateSensorProperties );
 }
 
 static void DeleteSensor ( track_p trk ) 

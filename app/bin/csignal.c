@@ -311,7 +311,7 @@ static void DescribeSignal (track_p trk, char * str, CSIZE_T len )
     signalProperties.heads = xx->numHeads;
     signalDesc[HD].mode = DESC_RO;
     signalDesc[NM].mode = DESC_NOREDRAW;
-    DoDescribe( _("Signal"), trk, signalDesc, UpdateSignalProperties );
+    DoDescribe( _("Signal"), "describe-signal", trk, signalDesc, UpdateSignalProperties );
 }
 
 static void DeleteSignal ( track_p trk )

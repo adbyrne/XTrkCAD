@@ -43,7 +43,6 @@ struct wStatus_t {
     GtkWidget * labelWidget;
     const char * message;
     wPos_t labelWidth;
-    wBool_t builder;
 };
 
 static GtkWidget *controlsbox;
@@ -99,19 +98,15 @@ wStatus_p wStatusCreate(
 
     b = (wStatus_p)wlibAlloc(parent, B_STATUS, x, y, NULL, sizeof *b, NULL);
     if (parent->builder) {
-    	char * boxname = malloc(strlen(labelStr)+3);
-    	char * id = malloc(strlen(labelStr));
-    	sprintf(id,"%s",helpStr);
-    	b->builder = TRUE;
-    	b->labelWidget = wlibWidgetFromId(b->parent, id );
+    	b->labelWidget = wlibWidgetFromIdWarn(b->parent, helpStr);
+    	b->fromTemplate = TRUE;
+    	b->template_id = strdup(helpStr);
     	b->message = message;
     	gtk_entry_set_text(GTK_ENTRY(b->labelWidget),
     							   message?wlibConvertInput(message):"");
     	gtk_widget_show_all(b->labelWidget);
-    	sprintf(boxname,"%s%s",helpStr,"box");
-    	b->widget = wlibWidgetFromId(b->parent, boxname);
-    	free(boxname);
-    	free(id);
+    	b->widget = wlibGetWidgetFromName(b->parent, helpStr, "box", FALSE);
+    	gtk_widget_show_all(b->widget);
     } else {
 		wlibComputePos((wControl_p)b);
 		b->message = message;
@@ -216,36 +211,57 @@ void wStatusSetWidth(
     wStatus_p b,
     wPos_t width)
 {
-	if (!b->builder) {
+	if (!b->fromTemplate) {
 		b->labelWidth = width;
     	gtk_widget_set_size_request(b->widget, width, -1);
 	}
 }
 
-static void wStatusRemoveChild(GtkWidget * w, void * container) {
-	g_object_ref(w);
-	gtk_container_remove(GTK_CONTAINER(container),GTK_WIDGET(w));
+static void wStatusHideChild(GtkWidget * w, void * container) {
+
+	gtk_revealer_set_reveal_child(GTK_REVEALER(w),FALSE);
+
 }
 
+/*
+ * Hide all the controls on window
+ */
 
 void wStatusClearControls(wWin_p win) {
 	if (win->builder && !controlsbox) {
-		controlsbox = wlibWidgetFromId(win, "infoBarControls.box" );
+		controlsbox = wlibGetWidgetFromName(win, "main-infoBarControls", "box", FALSE);
 	}
 
+	/*Note all the children of this box must be revealers each of which we hide */
+
 	gtk_container_foreach (GTK_CONTAINER(controlsbox),
-	                      wStatusRemoveChild,
+	                      wStatusHideChild,
 	                      controlsbox);
+}
+
+/*
+ * Reveal all controls for this command set in window
+ */
+void wStatusRevealControlSet(wWin_p win, char *id) {
+	char name[256];
+	sprintf(name,"main-%s",id);
+	GtkRevealer * reveal = (GtkRevealer *)wlibGetWidgetFromName(win, name, "reveal", TRUE );
+
+	if (reveal) {
+		if (!gtk_revealer_get_reveal_child(GTK_REVEALER(reveal)))
+				gtk_revealer_set_reveal_child(GTK_REVEALER(reveal),TRUE);
+	}
 }
 
 void wStatusAttachControl(wWin_p win, wControl_p b) {
 	if(!controlsbox) {
-		controlsbox = wlibWidgetFromId(win, "infoBarControls.box" );
+		controlsbox = wlibGetWidgetFromName(win, "main-infoBarControls", "box", FALSE );
 	}
-	gtk_box_pack_end (GTK_BOX(controlsbox),
-						  b->widget,
-						  FALSE,
-						  FALSE,
-						  0);
+
+	if (b->reveal) {
+		if (!gtk_revealer_get_reveal_child(GTK_REVEALER(b->reveal)))
+						gtk_revealer_set_reveal_child(GTK_REVEALER(b->reveal),FALSE);
+	}
+
 	gtk_widget_show_all(b->widget);
 }

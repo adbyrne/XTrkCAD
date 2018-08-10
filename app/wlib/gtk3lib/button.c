@@ -34,9 +34,12 @@
 #include "gtkint.h"
 #include "i18n.h"
 
+#include "eggwrapbox.h"
 
 #define MIN_BUTTON_WIDTH (80)
-#define MIN_BUTTON_HEIGHT (80)
+#define MIN_BUTTON_HEIGHT (30)
+#define MIN_TOOLBAR_WIDTH (10)
+#define MIN_TOOLBAR_HEIGHT (10)
 
 /*
  *****************************************************************************
@@ -98,8 +101,8 @@ void wlibSetLabel(
             }
             if (*imageG==NULL) {
                 *imageG = gtk_image_new_from_pixbuf(pixbuf);
-                gtk_container_add(GTK_CONTAINER(widget), *imageG);
-                gtk_widget_show(*imageG);
+				gtk_container_add(GTK_CONTAINER(widget), *imageG);
+				gtk_widget_show(*imageG);
             } else {
                 gtk_image_set_from_pixbuf(GTK_IMAGE(*imageG), pixbuf);
             }
@@ -107,8 +110,8 @@ void wlibSetLabel(
         } else {
             if (*labelG==NULL) {
                 *labelG = (GtkLabel*)gtk_label_new(wlibConvertInput(labelStr));
-                gtk_container_add(GTK_CONTAINER(widget), (GtkWidget*)*labelG);
-                gtk_widget_show((GtkWidget*)*labelG);
+				gtk_container_add(GTK_CONTAINER(widget), (GtkWidget*)*labelG);
+				gtk_widget_show((GtkWidget*)*labelG);
             } else {
                 gtk_label_set_text(*labelG, wlibConvertInput(labelStr));
             }
@@ -172,6 +175,128 @@ static void pushButt(
     }
 }
 
+static dynArr_t toolbar_da;
+
+typedef struct {
+	wButton_p button;
+} toolbar_t;
+
+void wButtonToolBarRedraw(wWin_p win) {
+	gtk_widget_queue_resize(win->toolbar);
+}
+
+static GtkWidget * last_inner_box;
+/*
+ * wButtonCreateForToolbar - Create button to got into a toolbar
+ *
+ */
+
+wButton_p wButtonCreateForToolbar(
+	wWin_p  w,
+    wPos_t	x,
+    wPos_t	y,
+    const char 	* helpStr,
+    const char	* labelStr,
+    long 	option,
+	wPos_t width,
+    wButtonCallBack_p action,
+    void 	* data) {
+
+
+	wButton_p b;
+	if (!w->toolbar) {
+		GtkWidget * toolbar_box = wlibGetWidgetFromName(w, "main-toolbar","box", FALSE);
+		DYNARR_RESET(toolbar_t,toolbar_da);
+		w->toolbar = egg_wrap_box_new (EGG_WRAP_ALLOCATE_FREE,
+									EGG_WRAP_BOX_SPREAD_START,
+									EGG_WRAP_BOX_SPREAD_START,
+									2, 2);
+		egg_wrap_box_set_minimum_line_children (EGG_WRAP_BOX (w->toolbar), 10);
+		egg_wrap_box_set_natural_line_children (EGG_WRAP_BOX (w->toolbar), 30);
+		gtk_widget_set_name(w->toolbar, "toolbar");
+		gtk_widget_set_hexpand(w->toolbar,TRUE);
+		gtk_box_pack_start(GTK_BOX(toolbar_box),w->toolbar,FALSE,FALSE,0);
+		gtk_widget_show_all(w->toolbar);
+		GdkScreen * screen = gdk_screen_get_default();
+		GtkCssProvider * provider = gtk_css_provider_new();
+		GtkStyleContext * context = gtk_widget_get_style_context(w->toolbar);
+		static const char style[] = ".image-button {min-width:5px } ";
+		gtk_css_provider_load_from_data(provider, style, strlen(style), NULL);
+		gtk_style_context_add_provider_for_screen(screen,
+										GTK_STYLE_PROVIDER(provider),
+										GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+	}
+
+	b = wlibAlloc(w, B_BUTTON, x, y, labelStr, sizeof *b, data);
+
+	DYNARR_APPEND(toolbar_t,toolbar_da,20);
+	(((toolbar_t *)toolbar_da.ptr)[toolbar_da.cnt-1]).button = b;
+
+	b->option = option;
+	b->action = action;
+	wlibComputePos((wControl_p)b);
+
+	b->widget = (GtkWidget *)gtk_toggle_button_new();
+
+	b->reveal = (GtkRevealer *)gtk_revealer_new();
+	gtk_container_add(GTK_CONTAINER(b->reveal),b->widget);  /*Add a revealer to allow show/noshow */
+
+	if ((option&BO_ABUT) && last_inner_box) { /* Add revealer into last Child Box if ABUT */
+		gtk_box_pack_start(GTK_BOX(last_inner_box),GTK_WIDGET(b->reveal),FALSE, FALSE, 0);
+	} else {
+		last_inner_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0); /*New Box*/
+		if (option&BO_GAP) {
+			b->separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+			gtk_box_pack_start(GTK_BOX(last_inner_box),b->separator,FALSE,FALSE,0);
+		}
+		gtk_box_pack_start(GTK_BOX(last_inner_box),GTK_WIDGET(b->reveal),FALSE, FALSE, 0);
+		egg_wrap_box_insert_child(EGG_WRAP_BOX(w->toolbar), last_inner_box, -1, 0 );
+	}
+	b->inToolbar = TRUE;
+
+	if (option&BO_ICON) {
+		GdkPixbuf *pixbuf;
+
+		wIcon_p bm;
+
+		bm = (wIcon_p)labelStr;
+
+		if (bm->gtkIconType == gtkIcon_pixmap) {
+			pixbuf = gdk_pixbuf_new_from_xpm_data((const char**)bm->bits);
+		} else {
+			pixbuf = wlibPixbufFromXBM( bm );
+		}
+	    b->imageG = gtk_image_new_from_pixbuf(pixbuf);
+		gtk_button_set_image(GTK_BUTTON(b->widget),b->imageG);
+	   	g_object_unref((gpointer)pixbuf);
+
+	} else {
+
+		gtk_button_set_label(GTK_BUTTON(b->widget),wlibConvertInput(labelStr));
+	}
+
+    if (option & BB_DEFAULT) {
+		gtk_widget_set_can_default(b->widget, TRUE);
+		gtk_widget_grab_default(b->widget);
+		gtk_window_set_default(GTK_WINDOW(w->gtkwin), b->widget);
+	}
+
+    wlibAddHelpString(b->widget, helpStr);
+    wlibAddButton((wControl_p)b);
+
+    g_signal_connect(b->widget, "clicked",
+                            G_CALLBACK(pushButt), b);
+
+    if (b->inToolbar) {
+
+    	//gtk_widget_set_size_request(b->widget, MIN_TOOLBAR_WIDTH, MIN_TOOLBAR_HEIGHT);
+    } else
+    	gtk_widget_set_size_request(b->widget, MIN_BUTTON_WIDTH, MIN_BUTTON_HEIGHT);
+
+	return b;
+
+
+}
 /**
  * Create a button
  *
@@ -206,7 +331,11 @@ wButton_p wButtonCreate(
 
     if(!(option & BO_USETEMPLATE ))
     {    
-        b->widget = gtk_toggle_button_new();
+    	if (option & BO_TOOLBAR) {
+    		b->widget = gtk_toggle_button_new();
+    		b->inToolbar = TRUE;
+    	} else
+    		b->widget = gtk_toggle_button_new();
 
         if (width > 0) {
             gtk_widget_set_size_request(b->widget, width, -1);
@@ -215,16 +344,14 @@ wButton_p wButtonCreate(
             wButtonSetLabel(b, labelStr);
         }
 
-        if (option&BO_CONTROLGRID) {
-        	g_object_ref(b->widget);
-        	b->useGrid = TRUE;
-        } else
+        if (!(option&BO_TOOLBAR)) {
         	gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
 
-        if (option & BB_DEFAULT) {
-            gtk_widget_set_can_default(b->widget, TRUE);
-            gtk_widget_grab_default(b->widget);
-            gtk_window_set_default(GTK_WINDOW(parent->gtkwin), b->widget);
+			if (option & BB_DEFAULT) {
+				gtk_widget_set_can_default(b->widget, TRUE);
+				gtk_widget_grab_default(b->widget);
+				gtk_window_set_default(GTK_WINDOW(parent->gtkwin), b->widget);
+			}
         }
 
         wlibControlGetSize((wControl_p)b);
@@ -234,8 +361,8 @@ wButton_p wButtonCreate(
             if (b->h<MIN_BUTTON_HEIGHT) b->h = MIN_BUTTON_HEIGHT;
             gtk_widget_set_size_request(b->widget, b->w, b->h);
         }
-
         gtk_widget_show(b->widget);
+
     } else {
     	wBool_t free_needed = FALSE;
         char *id;
@@ -257,9 +384,12 @@ wButton_p wButtonCreate(
         		id="unknown-button";
         }
         if (!(id==NULL || *id==0)) {
-        	b->widget = wlibWidgetFromId(parent, id);
+        	b->widget = wlibWidgetFromIdWarn(parent, id);
         	if (b->widget)
         		b->fromTemplate = TRUE;
+        	b->template_id =strdup(id);
+        	/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
+        	    b->reveal = (GtkRevealer *)wlibGetWidgetFromName( b->parent, id, "reveal", TRUE );
         }
         if (free_needed) free(id);
     }
@@ -526,10 +656,12 @@ wChoice_p wRadioCreate(
     wlibComputePos((wControl_p)b);
 
     if(option&BO_USETEMPLATE) {
-    	char boxname[256];
-    	sprintf(boxname,"%s%s",helpStr,".box");
-    	b->widget = wlibWidgetFromId( parent, boxname );
+    	/* This type of button uses a box to encapsulate the options
+    	 * the convention is that this will be the field name followed by ".box"
+    	 */
+    	b->widget = wlibGetWidgetFromName( parent, helpStr, "box", FALSE);
     	if (b->widget) b->fromTemplate = TRUE;
+    	b->template_id = strdup(helpStr);
     } else {
 		if (option&BC_HORZ) {
 			b->widget = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -582,12 +714,7 @@ wChoice_p wRadioCreate(
         b->h += 2;
     }
 
-    if (option&BO_CONTROLGRID) {
-    		//If the grid is to be used, take a reference to the widget to ensure it lives
-    		//outside a container. It will be placed later.
-    		g_object_ref(b->widget);
-            b->useGrid = TRUE;
-    } else if (!b->fromTemplate) {
+    if (!b->fromTemplate) {
     	 gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
     }
     wlibControlGetSize((wControl_p)b);
@@ -596,10 +723,8 @@ wChoice_p wRadioCreate(
         b->labelW = wlibAddLabel((wControl_p)b, labelStr);
     }
 
-    if (!(b->useGrid)) {
-    	gtk_widget_show_all(b->widget);
-    	wlibAddButton((wControl_p)b);
-    }
+    gtk_widget_show_all(b->widget);
+    wlibAddButton((wControl_p)b);
 
     return b;
 }
@@ -656,9 +781,10 @@ wChoice_p wToggleCreate(
     wlibComputePos((wControl_p)b);
 
     if (option&BO_USETEMPLATE ) {
-        b->widget = wlibGetWidgetFromName(parent, helpStr, "box");
+        b->widget = wlibGetWidgetFromName(parent, helpStr, "box", FALSE);
     	if (b->widget) 
             b->fromTemplate = TRUE;
+    	b->template_id = strdup(helpStr);
     } else {
 		if (option&BC_HORZ) {
 			b->widget = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
@@ -672,7 +798,6 @@ wChoice_p wToggleCreate(
     }
 
     if (b->fromTemplate) {
-
     	 GList * child, * children;
 
     	for (children=child=gtk_container_get_children(GTK_CONTAINER(b->widget));
@@ -710,23 +835,17 @@ wChoice_p wToggleCreate(
         b->h += 2;
     }
 
-    if (option&BO_CONTROLGRID) {
-    		//If the grid is to be used, take a reference to the widget to ensure it lives
-    		//outside a container. It will be placed later.
-    		g_object_ref(b->widget);
-    		b->useGrid = TRUE;
-    } else if (!b->fromTemplate){
+    if (!b->fromTemplate){
     	gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+    	wlibControlGetSize((wControl_p)b);
     }
-    wlibControlGetSize((wControl_p)b);
 
     if (labelStr) {
         b->labelW = wlibAddLabel((wControl_p)b, labelStr);
     }
 
-    if (!(b->useGrid)) {
-    	gtk_widget_show(b->widget);
-    	wlibAddButton((wControl_p)b);
-    }
+	gtk_widget_show(b->widget);
+	wlibAddButton((wControl_p)b);
+
     return b;
 }

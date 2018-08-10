@@ -123,6 +123,7 @@ typedef void (*wChoiceCallBack_p)( long, void * );
 
 void wButtonSetLabel(wButton_p bb, const char *labelStr);
 void wButtonSetBusy(wButton_p bb, int value);
+wButton_p wButtonCreateForToolbar(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, wPos_t width, wButtonCallBack_p action, void *data);
 wButton_p wButtonCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, wPos_t width, wButtonCallBack_p action, void *data);
 void wRadioSetValue(wChoice_p bc, long value);
 long wRadioGetValue(wChoice_p bc);
@@ -130,7 +131,7 @@ void wToggleSetValue(wChoice_p bc, long value);
 long wToggleGetValue(wChoice_p b);
 wChoice_p wRadioCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, const char **labels, long *valueP, wChoiceCallBack_p action, void *data);
 wChoice_p wToggleCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, const char **labels, long *valueP, wChoiceCallBack_p action, void *data);
-
+void wButtonToolBarRedraw(wWin_p parent);
 
 /*------------------------------------------------------------------------------
  *
@@ -224,7 +225,6 @@ typedef enum {
 typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 
 /* Creation Options */
-#define F_CONTROLGRID (1L<<29)   /*Controls are in a dynamic grid in the template*/
 #define F_USETEMPLATE (1L<<31)
 #define F_AUTOSIZE	(1L<<1)
 #define F_HEADER 	(1L<<2)
@@ -279,7 +279,10 @@ void wDestroySplash( void );
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
 #define BO_USETEMPLATE (1L<<3)
-#define BO_CONTROLGRID (1L<<4)
+#define BO_REVEAL   (1L<<4)
+#define BO_TOOLBAR  (1L<<5)
+#define BO_ABUT     (1L<<6)
+#define BO_GAP      (1L<<7)
 
 wPos_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );
@@ -365,7 +368,7 @@ wList_p wListCreate(		wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				long, wPos_t, int, wPos_t *, wBool_t *, const char **, long *, wListCallBack_p, void * );
 wList_p wDropListCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				long, wPos_t, long *, wListCallBack_p, void * );
-				
+
 wList_p wComboListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, const char *labelStr, long option, long number, wPos_t width, long *valueP, wListCallBack_p action, void *data);	
 void wListClear(wList_p b);
 void wListSetIndex(wList_p b, int element);
@@ -759,5 +762,6 @@ void wStatusSetWidth(wStatus_p b, wPos_t width);
 
 void wStatusClearControls(wWin_p win);
 void wStatusAttachControl(wWin_p win, wControl_p b);
+void wStatusRevealControlSet(wWin_p win, char *id);
 
 #endif

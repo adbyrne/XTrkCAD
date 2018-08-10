@@ -68,6 +68,18 @@ wlibFileNameFromDialog( const char *dialog )
     return( filename );
 }
 
+/*
+ * Load the GTK builder object for this window. The filename is assumed to be the same as the nameStr and the window object id.
+ *
+ * \param IN winType passed through to wlibAlloc
+ * \param IN labelStr the name that will be shown in the title of the window
+ * \param IN nameStr the name to look up
+ * \param IN option the creation options
+ * \param INOUT data passed through to wlibAlloc
+ * \return the window object pointer
+ *
+ * In the window object the builder field will be set with the loaded object and the gtkwin field populated
+ */
 
 wWin_p
 wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, long option, void *data )
@@ -83,6 +95,8 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, 
 
     filename = wlibFileNameFromDialog( nameStr );
     
+    w->template_id = strdup(nameStr);
+
     w->builder = gtk_builder_new_from_file(filename->str);
     if( !w->builder ) {
         GString *errorMessage = g_string_new("Could not load ");
@@ -110,9 +124,14 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, 
     return w;
 }    
 /**
+ * GetWidgetFromName
+ * \param IN win  			Window
+ * \param IN dialogname  	The first part of name
+ * \param IN suffix			The last part of the name
+ * \param IN ignore_failure	If object can't be found, shall we continue?
  */
 GtkWidget *
-wlibGetWidgetFromName( wWin_p parent, char *dialogname, char *suffix )
+wlibGetWidgetFromName( wWin_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failure )
 {
     GString *id = g_string_new(dialogname);
     GtkWidget *widget;
@@ -120,6 +139,21 @@ wlibGetWidgetFromName( wWin_p parent, char *dialogname, char *suffix )
     g_string_append_printf(id, ".%s", suffix );
     
    	widget = wlibWidgetFromId( parent, id->str );
+
+   	if(!widget) {
+		if (!ignore_failure) {
+			GString *errorMessage = g_string_new("Could not find widget ");
+			g_string_append( errorMessage, id->str);
+			wNoticeEx( NT_ERROR,
+				   errorMessage->str,
+				   "OK",
+				   NULL );
+			g_string_free(errorMessage, TRUE);
+			exit(1);
+		} else {
+			return NULL;
+		}
+	}
     
     g_string_free(id, TRUE);
     
@@ -127,20 +161,63 @@ wlibGetWidgetFromName( wWin_p parent, char *dialogname, char *suffix )
 }
 
 GtkWidget *
-wlibWidgetFromId( wWin_p win, char *id )
+wlibWidgetFromIdWarn( wWin_p win, const char *id)
 {
-    GObject * wi = gtk_builder_get_object(win->builder, id);
-    if (!wi) {
-		GString *errorMessage = g_string_new("Could not find widget ");
-		g_string_append( errorMessage, id);
+	GtkWidget * wi = wlibWidgetFromId(win,id);
+	if (wi) return wi;
+	GString *errorMessage = g_string_new("Could not load sub-widget ");
+	g_string_append_printf(errorMessage, "%s", id);
+	wNoticeEx( NT_ERROR,
+		   errorMessage->str,
+		   "OK",
+		   NULL );
+	g_string_free(errorMessage, TRUE);
+	return NULL;
+}
+
+/*
+ * Find the widget in the loaded template for this window.
+ * When finding labels, errors can be ignored as this implies a fixed label
+ * \param IN win Pointer to the window object
+ * \param IN id  The name to be found
+ * \param IN ignore Should we continue the program if the name can't be found?
+ * \return the widget or NULL
+ */
+
+GtkWidget *
+wlibWidgetFromId( wWin_p win, const char *id)
+{
+	GString *name = g_string_new(id);
+
+    GObject * wi = gtk_builder_get_object(win->builder, name->str);
+    g_string_free(name, TRUE);
+    return (GtkWidget *)wi;
+}
+
+GtkWidget *
+wlibAddHiddenContentFromTemplate( wWin_p win, const char *nameStr)
+{
+	GString *filename;
+	filename = wlibFileNameFromDialog( nameStr );
+	GError *error = NULL;
+    int success = gtk_builder_add_from_file(win->builder, filename->str, &error);
+    return NULL;
+    if (success == 0) {
+		GString *errorMessage = g_string_new("Could not load sub-widget ");
+		if (error)
+			g_string_append(errorMessage,error->message);
 		wNoticeEx( NT_ERROR,
 			   errorMessage->str,
 			   "OK",
 			   NULL );
         g_string_free(errorMessage, TRUE);
+        g_clear_error (&error);
 		exit(1);
     }
-    else g_object_ref(wi);
-    return (GtkWidget *)wi;
+    GString * name = g_string_new(nameStr);
+    GtkWidget * wi = (GtkWidget *)wlibGetWidgetFromName( win, name->str, "reveal", FALSE );
+    g_string_free(name, TRUE);
+    return wi;
 
-}    
+}
+

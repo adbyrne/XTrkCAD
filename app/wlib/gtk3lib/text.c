@@ -569,12 +569,12 @@ wTextCreate(wWin_p	parent,
 
 
     } else {
-    	char name[256];
-    	sprintf(name,"%s%s",helpStr,".scrollwindow");
-        bt->widget = wlibWidgetFromId(parent, name );
-        sprintf(name,"%s",helpStr);
-        bt->text = wlibWidgetFromId(parent, name );
+        bt->widget = wlibGetWidgetFromName(parent, helpStr, "scrollwindow", FALSE );
+        bt->text = wlibWidgetFromId(parent, helpStr );
         bt->fromTemplate = TRUE;
+        bt->template_id = strdup(helpStr);
+        /* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
+        bt->reveal = (GtkRevealer *)wlibGetWidgetFromName( parent, helpStr, "reveal", TRUE );
     }    
 
     // this seems to assume some fixed size fonts, not really helpful
@@ -593,20 +593,15 @@ wTextCreate(wWin_p	parent,
         bt->labelW = wlibAddLabel((wControl_p)bt, labelStr);
     }
 
-    if (option&BO_CONTROLGRID) {
-    	g_object_ref(bt->widget);
-        bt->useGrid = TRUE;
-    } else {
-        if (!bt->fromTemplate) {
-            /* place the widget in a fixed position of the parent */
-            gtk_fixed_put(GTK_FIXED(parent->widget), bt->widget, bt->realX, bt->realY);
-            wlibControlGetSize((wControl_p)bt);
-            wlibAddButton((wControl_p)bt);
-        }
-        // show the widgets
-        gtk_widget_show(bt->text);
-        gtk_widget_show(bt->widget);
-    }
+	if (!bt->fromTemplate) {
+		/* place the widget in a fixed position of the parent */
+		gtk_fixed_put(GTK_FIXED(parent->widget), bt->widget, bt->realX, bt->realY);
+		wlibControlGetSize((wControl_p)bt);
+		wlibAddButton((wControl_p)bt);
+	}
+	// show the widgets
+	gtk_widget_show(bt->text);
+	gtk_widget_show(bt->widget);
     
     wlibAddHelpString(bt->widget, helpStr);
  

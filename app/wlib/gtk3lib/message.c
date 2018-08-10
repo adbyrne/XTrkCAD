@@ -176,10 +176,11 @@ wMessage_p wMessageCreateEx(
     b->message = message;
     b->labelWidth = width;
     if (flags&BO_USETEMPLATE) {
-    	char name[256];
-    	sprintf(name,"%s",helpStr);
-    	b->labelWidget = wlibWidgetFromId( parent, name );
+    	b->labelWidget = wlibWidgetFromId( parent, helpStr);
     	b->fromTemplate = TRUE;
+    	b->template_id = strdup(helpStr);
+    	/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
+    	b->reveal = (GtkRevealer *)wlibGetWidgetFromName( b->parent, helpStr, "reveal", TRUE );
     }
     if (!b->labelWidget)
     	b->labelWidget = gtk_label_new(message?wlibConvertInput(message):"");
@@ -219,10 +220,7 @@ wMessage_p wMessageCreateEx(
 	   }
     }
     
-    if (flags&BO_CONTROLGRID) {
-    	g_object_ref(b->labelWidget);
-    	b->useGrid = TRUE;
-    } else if (!b->fromTemplate) {
+    if (!b->fromTemplate) {
     	b->widget = gtk_fixed_new();
 		GtkRequisition min_requisition,natural_requisition;
 		gtk_widget_get_preferred_size (b->labelWidget,&min_requisition,&natural_requisition);
@@ -235,11 +233,8 @@ wMessage_p wMessageCreateEx(
 		gtk_widget_show(b->labelWidget);
 		 wlibAddButton((wControl_p)b);
     } else {
-    	char boxname[256];
-    	sprintf(boxname,"%s%s",helpStr,".box");
-    	b->widget = wlibWidgetFromId( parent, boxname );
-    	if (b->widget)
-    		gtk_widget_show_all(b->widget);
+    	b->widget = wlibGetWidgetFromName( parent, helpStr, "box", FALSE );
+    	gtk_widget_show_all(b->labelWidget);
     }
 
     return b;

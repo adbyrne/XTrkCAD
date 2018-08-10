@@ -352,9 +352,9 @@ static void ShowPierL( void )
 		controls[0] = (wControl_p)pierL;
 		controls[1] = NULL;
 		labels[0] = N_("Pier Number");
-		InfoSubstituteControls( controls, labels );
+		InfoSubstituteControls( controls, labels, pierPG.nameStr );
 	} else {
-		InfoSubstituteControls( NULL, NULL );
+		InfoSubstituteControls( NULL, NULL, NULL );
 	}
 }
 
@@ -730,7 +730,7 @@ EXPORT STATUS_T CmdStructureAction(
 			DrawSegs( &tempD, Dst.pos, Dst.angle,
 				curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
 		Dst.state = 0;
-		InfoSubstituteControls( NULL, NULL );
+		InfoSubstituteControls( NULL, NULL, NULL );
 		HotBarCancel();
 		/*wHide( newTurn.reg.win );*/
 		return C_TERMINATE;
@@ -740,7 +740,7 @@ EXPORT STATUS_T CmdStructureAction(
 			return C_CONTINUE;
 	case C_OK:
 		NewStructure();
-		InfoSubstituteControls( NULL, NULL );
+		InfoSubstituteControls( NULL, NULL, NULL );
 		return C_TERMINATE;
 
 	case C_FINISH:

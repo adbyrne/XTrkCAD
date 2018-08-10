@@ -579,9 +579,10 @@ UpdateLayerDlg()
         ParamLoadControls(&layerPG);
     }
 
-    /* finally show the layer buttons with ballon text */
+    /* finally show the layer buttons with balloon text */
     for (inx = 0; inx < NUM_BUTTONS; inx++) {
         wButtonSetBusy(layer_btns[inx], layers[inx].visible != 0);
+        wControlShow((wControl_p)layer_btns[inx], TRUE);
         wControlSetBalloonText((wControl_p)layer_btns[inx],
                                (layers[inx].name[0] != '\0' ? layers[inx].name :_("Show/Hide Layer")));
     }
@@ -1176,7 +1177,7 @@ void InitLayers(void)
     }
 
     /* layer list for toolbar */
-    setLayerL = wDropListCreate(mainW, 0, 0, "cmdLayerSet", NULL, 0, 10, 200, NULL,
+    setLayerL = wDropListCreate(mainW, 0, 0, "cmdLayerSet", NULL, BO_TOOLBAR, 10, 200, NULL,
                                 SetCurrLayer, NULL);
     wControlSetBalloonText((wControl_p)setLayerL, GetBalloonHelpStr("cmdLayerSet"));
     AddToolbarControl((wControl_p)setLayerL, IC_MODETRAIN_TOO);
@@ -1187,15 +1188,16 @@ void InitLayers(void)
         if (i<NUM_BUTTONS) {
             /* create the layer button */
             sprintf(message, "cmdLayerShow%u", i);
-            layer_btns[i] = wButtonCreate(mainW, 0, 0, message,
+            layer_btns[i] = wButtonCreateForToolbar(mainW, 0, 0, message,
                                           (char*)(show_layer_bmps[i]),
-                                          BO_ICON, 0, (wButtonCallBack_p)FlipLayer, (void*)(intptr_t)i);
+                                          BO_ICON|BO_TOOLBAR, 0, (wButtonCallBack_p)FlipLayer, (void*)(intptr_t)i);
             /* add the help text */
             wControlSetBalloonText((wControl_p)layer_btns[i], _("Show/Hide Layer"));
             /* put on toolbar */
             AddToolbarControl((wControl_p)layer_btns[i], IC_MODETRAIN_TOO);
             /* set state of button */
             wButtonSetBusy(layer_btns[i], 1);
+            wControlShow((wControl_p)layer_btns[i],FALSE);
         }
 
         layerName = FormatLayerName(i);

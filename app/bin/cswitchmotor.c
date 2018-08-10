@@ -317,7 +317,7 @@ static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
 	switchmotorDesc[NOR].mode =
 	switchmotorDesc[REV].mode =
 	switchmotorDesc[PS].mode = DESC_NOREDRAW;
-	DoDescribe(_("Switch motor"), trk, switchmotorDesc, UpdateSwitchMotor );
+	DoDescribe(_("Switch motor"), "describe-motor", trk, switchmotorDesc, UpdateSwitchMotor );
 }
 
 static void switchmotorDebug (track_p trk)

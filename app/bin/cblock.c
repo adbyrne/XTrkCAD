@@ -261,7 +261,7 @@ static void DescribeBlock (track_p trk, char * str, CSIZE_T len )
 	blockDesc[LN].mode = DESC_RO;
 	blockDesc[NM].mode =
 	blockDesc[SC].mode = DESC_NOREDRAW;
-	DoDescribe(_("Block"), trk, blockDesc, UpdateBlock );
+	DoDescribe(_("Block"), "describe-block", trk, blockDesc, UpdateBlock );
 
 }
 

@@ -258,7 +258,7 @@ static void DescribeCar(
                     carDesc[WD].mode = DESC_RO;
     carDesc[DE].mode =
         carDesc[NM].mode = DESC_RO;
-    DoDescribe(_("Car"), trk, carDesc, UpdateCar);
+    DoDescribe(_("Car"), "describe-car", trk, carDesc, UpdateCar);
 }
 
 
@@ -2607,7 +2607,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         }
 
         DrawAllCars();
-        InfoSubstituteControls(NULL, NULL);
+        InfoSubstituteControls(NULL, NULL, NULL);
         currCar = trk0 = NULL;
         currCarItemPtr = NULL;
 
@@ -2751,7 +2751,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         currCar = NULL;
         currCarItemPtr = NULL;
         HotBarCancel();
-        InfoSubstituteControls(NULL, NULL);
+        InfoSubstituteControls(NULL, NULL, NULL);
         return C_TERMINATE;
     }
 
@@ -2816,7 +2816,7 @@ static BOOL_T TrainStopGoPlayback(char * line)
 static void CmdTrainExit(void * junk)
 {
     Reset();
-    InfoSubstituteControls(NULL, NULL);
+    InfoSubstituteControls(NULL, NULL, NULL);
     MainRedraw();
     MapRedraw();
 }
@@ -2910,7 +2910,7 @@ static void TrainFunc(
         /*DeleteTrack( trainFuncCar, FALSE );*/
         CarItemUpdate(xx->item);
         HotBarCancel();
-        InfoSubstituteControls(NULL, NULL);
+        InfoSubstituteControls(NULL, NULL, NULL);
         break;
 
     case DO_DELTRAIN:
@@ -2944,7 +2944,7 @@ static void TrainFunc(
         }
 
         HotBarCancel();
-        InfoSubstituteControls(NULL, NULL);
+        InfoSubstituteControls(NULL, NULL, NULL);
         break;
 
     case DO_MUMASTER:

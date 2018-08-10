@@ -312,21 +312,18 @@ wButton_p wColorSelectButtonCreate(
     wlibComputePos((wControl_p)b);
 
     if (option&BO_USETEMPLATE) {
-    	char name[256];
-    	sprintf(name,"%s",helpStr);
-    	b->widget = wlibWidgetFromId( parent, name );
+    	b->widget = wlibWidgetFromId( parent, helpStr );
     	if (b->widget) 
             b->fromTemplate = TRUE;
+    	b->template_id = strdup(helpStr);
+    	/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
+    	 b->reveal = (GtkRevealer *)wlibGetWidgetFromName( b->parent, helpStr, "reveal", TRUE );
     } else {
     	b->widget = gtk_color_button_new();
         gtk_widget_set_size_request(GTK_WIDGET(b->widget), 22, 22);
         gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
-        if (option & BB_DEFAULT) {
-            gtk_widget_set_can_default(b->widget, TRUE);
-            gtk_widget_grab_default(b->widget);
-            gtk_window_set_default(GTK_WINDOW(parent->gtkwin), b->widget);
-        }
     }
+    if (!b->widget) exit(4);
     //GtkStyleContext *stylecontext;
    // stylecontext = gtk_widget_get_style_context(b->widget);
    // stylecontext->xthickness = 1;
@@ -336,10 +333,16 @@ wButton_p wColorSelectButtonCreate(
     g_signal_connect(b->widget, "color-set",
                      G_CALLBACK(colorChange), cd);
 
-    if (option&BO_CONTROLGRID) {
-    	g_object_ref(b->widget);
-    	b->useGrid = TRUE;
-    } 
+
+    if (!b->fromTemplate){
+    	gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+    }
+
+    if (option & BB_DEFAULT) {
+        gtk_widget_set_can_default(b->widget, TRUE);
+        gtk_widget_grab_default(b->widget);
+        gtk_window_set_default(GTK_WINDOW(parent->gtkwin), b->widget);
+    }
 
     wlibControlGetSize((wControl_p)b);
 

@@ -72,7 +72,11 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		cairo_t * cr; \
 		void * data; \
         int fromTemplate;               /**< widget was build from ui template */ \
-		int useGrid;					 /**< widget will be dynamically placed into a Grid */ \
+        char * template_id; \
+		GtkRevealer * reveal;  \
+		int looked_for_reveal; \
+		int inToolbar; \
+		GtkWidget * separator; \
 		int row;	\
 		int col;	\
 		int label_col;
@@ -94,6 +98,7 @@ struct wWin_t {
 		int modalLevel;
         GtkBuilder *builder;
         GtkWidget *grid;
+        GtkWidget *toolbar;
 
 		};
 
@@ -336,8 +341,10 @@ wWin_p wlibCreateFromTemplate( wWin_p parent, int winType, wPos_t x, wPos_t y,
 /* builder.c */
 wWin_p wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, long option, void *data );
 GString *wlibFileNameFromDialog( const char *dialog );
-GtkWidget *wlibGetWidgetFromName( wWin_p parent, char *dialogname, char *suffix );
-GtkWidget *wlibWidgetFromId( wWin_p win, char *id );
+GtkWidget *wlibGetWidgetFromName( wWin_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failures );
+GtkWidget *wlibWidgetFromId( wWin_p win, const char *id );
+GtkWidget *wlibWidgetFromIdWarn( wWin_p win, const char *id );
+GtkWidget *wlibAddHiddenContentFromTemplate( wWin_p win, const char *nameStr);
 
 
 #endif

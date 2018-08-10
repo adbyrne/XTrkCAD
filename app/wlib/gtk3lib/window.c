@@ -684,20 +684,20 @@ static int window_configure_event(
                 win->h = MIN_WIN_HEIGHT;
             }
 
-            if (win->option&F_MENUBAR) {
-            	GtkAllocation allocation;
-            	gtk_widget_get_allocation(win->menubar, &allocation);
-            	win->menu_height= allocation.height;
-                gtk_widget_set_size_request(win->menubar, win->w-20, win->menu_height);
-            }
-            if (win->resizeTimer) {					// Already have a timer
-                 return FALSE;
-            } else {
-            	 win->resizeW = w;				//Remember where this started
-            	 win->resizeH = h;
-                 win->resizeTimer = g_timeout_add(100,(GSourceFunc)resizeTime,win);   // 100ms delay
-                 return FALSE;
-            }
+            //if (win->option&F_MENUBAR) {
+            //	GtkAllocation allocation;
+            //	gtk_widget_get_allocation(win->menubar, &allocation);
+            //	win->menu_height= allocation.height;
+            //    gtk_widget_set_size_request(win->menubar, win->w-20, win->menu_height);
+            //}
+            //if (win->resizeTimer) {					// Already have a timer
+            //     return FALSE;
+            //} else {
+            //	 win->resizeW = w;				//Remember where this started
+            //	 win->resizeH = h;
+            //     win->resizeTimer = g_timeout_add(100,(GSourceFunc)resizeTime,win);   // 100ms delay
+            //     return FALSE;
+            //}
         }
     }
 
@@ -1059,8 +1059,25 @@ wWin_p wWinMainCreate(
     wPrefGetInteger("draw", "maximized", &isMaximized, 0);
     option = option | (isMaximized?F_MAXIMIZE:0);
 
-    gtkMainW = wWinCommonCreate(NULL, W_MAIN, x, y, labelStr, nameStr, option,
+    if (option&F_USETEMPLATE) {
+    	gtkMainW = wlibCreateFromTemplate(
+					NULL,
+					W_MAIN,
+					x,
+					y,
+					labelStr,
+					nameStr,
+					option,
+					winProc,
+					data);
+    	if (option&F_MENUBAR) {
+    		gtkMainW->menubar = wlibWidgetFromIdWarn(gtkMainW, "main-menubar");
+    	}
+    } else {
+
+    	gtkMainW = wWinCommonCreate(NULL, W_MAIN, x, y, labelStr, nameStr, option,
                                 winProc, data);
+    }
 
     wDrawColorWhite = wDrawFindColor(0xFFFFFF);
     wDrawColorBlack = wDrawFindColor(0x000000);

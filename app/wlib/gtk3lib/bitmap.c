@@ -73,8 +73,11 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, 
 	g_object_unref( (gpointer)pixbuf );
 	
 	if (options&BO_USETEMPLATE) {
-		bt->widget = wlibWidgetFromId( parent, helpStr );
+		bt->widget = wlibWidgetFromId( parent, helpStr);
 		if (bt->widget) bt->fromTemplate = TRUE;
+		bt->template_id = strdup(helpStr);
+		/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
+		bt->reveal = (GtkRevealer *)wlibGetWidgetFromName(parent, helpStr, "reveal", TRUE );
 	}
 	if (!bt->widget) {
 		bt->widget = gtk_fixed_new();
@@ -82,12 +85,9 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, 
 	gtk_widget_show( bt->widget );
 	gtk_container_add( GTK_CONTAINER(bt->widget), image );
 	
-	wlibComputePos( (wControl_p)bt );
-	wlibControlGetSize( (wControl_p)bt );
-	if (options&BO_CONTROLGRID) {
-		g_object_ref(bt->widget);
-        bt->useGrid = TRUE;
-	} else if (!bt->fromTemplate) {
+	if (!bt->fromTemplate) {
+		wlibComputePos( (wControl_p)bt );
+		wlibControlGetSize( (wControl_p)bt );
 		gtk_fixed_put( GTK_FIXED( parent->widget ), bt->widget, bt->realX, bt->realY );
 	}
 	

@@ -449,15 +449,16 @@ EXPORT void LayoutHotBar( void )
 	if ( hotBarLabels) {
 	   hotBarHeight += wMessageGetHeight(0L);
 	}
+
 	if (hotBarLeftB == NULL) {
 		wIcon_p bm_p;
 		if (winWidth < 50)
 			return;
 		bm_p = wIconCreateBitMap( 16, 16, turnbarl_bits, wDrawColorBlack );
-		hotBarLeftB = wButtonCreate( mainW, 0, 0, "hotBarLeft", (char*)bm_p, BO_ICON, 0, DoHotBarLeft, NULL );
+		hotBarLeftB = wButtonCreate( mainW, 0, 0, "main-hotBarLeft", (char*)bm_p, BO_ICON|BO_USETEMPLATE, 0, DoHotBarLeft, NULL );
 		bm_p = wIconCreateBitMap( 16, 16, turnbarr_bits, wDrawColorBlack );
-		hotBarRightB = wButtonCreate( mainW, 0, 0, "hotBarRight", (char*)bm_p, BO_ICON, 0, DoHotBarRight, NULL );
-		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, BD_NOCAPTURE|BD_NOFOCUS, 100, hotBarHeight, NULL, RedrawHotBar, SelectHotBar );
+		hotBarRightB = wButtonCreate( mainW, 0, 0, "main-hotBarRight", (char*)bm_p, BO_ICON|BO_USETEMPLATE, 0, DoHotBarRight, NULL );
+		hotBarD.d = wDrawCreate( mainW, 0, 0, "main-hotBarDraw", BD_NOCAPTURE|BD_NOFOCUS|BO_USETEMPLATE, 100, hotBarHeight, NULL, RedrawHotBar, SelectHotBar );
 		hotBarD.dpi = wDrawGetDPI( hotBarD.d );
 		hotBarD.scale = 1.0;
 		initialize = TRUE;

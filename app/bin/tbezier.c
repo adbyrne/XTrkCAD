@@ -433,9 +433,9 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	bezDesc[CO].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
 	
 	if (GetTrkType(trk) == T_BEZIER)
-		DoDescribe( _("Bezier Track"), trk, bezDesc, UpdateBezier );
+		DoDescribe( _("Bezier Track"), "describe-beziertrack", trk, bezDesc, UpdateBezier );
 	else
-		DoDescribe( _("Bezier Line"), trk, bezDesc, UpdateBezier );
+		DoDescribe( _("Bezier Line"), "describe-bezierline", trk, bezDesc, UpdateBezier );
 
 }
 

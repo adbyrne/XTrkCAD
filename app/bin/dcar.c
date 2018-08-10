@@ -1547,7 +1547,7 @@ EXPORT void CarItemLoadList( void * junk )
 	wListSetIndex( (wList_p)newCarPLs[0].control, 0 );
 	strcpy( newCarLabel1, _("Select") );
 	ParamLoadControl( &newCarPG, 0 );
-	InfoSubstituteControls( newCarControls, newCarLabels );
+	InfoSubstituteControls( newCarControls, newCarLabels, newCarPG.nameStr );
 	wWinGetSize( mainW, &w, &h );
 	w -= wControlGetPosX( newCarControls[0] ) + 4;
 	if ( w > 20 )
@@ -1593,13 +1593,13 @@ static char * CarItemHotbarProc(
 			ParamLoadControls( &newCarPG );
 			ParamGroupRecord( &newCarPG );
 
-			InfoSubstituteControls( newCarControls, newCarLabels );
+			InfoSubstituteControls( newCarControls, newCarLabels, newCarPG.nameStr );
 			wWinGetSize( mainW, &w, &h );
 			w -= wControlGetPosX( newCarControls[0] ) + 4;
 			if ( w > 20 )
 				wListSetSize( (wList_p)newCarControls[0], w, wControlGetHeight( newCarControls[0] ) );
 		} else {
-			InfoSubstituteControls( NULL, NULL );
+			InfoSubstituteControls( NULL, NULL, NULL );
 			cp = CarItemDescribe( item, 0, NULL );
 			InfoMessage( cp );
 		}

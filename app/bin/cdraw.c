@@ -497,6 +497,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	trkSeg_p segPtr;
 	int inx;
 	char * title = NULL;
+	char * template_id = NULL;
 	char * polyType = NULL;
 
 
@@ -535,9 +536,11 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		switch (segPtr->type) {
 		case SEG_STRLIN:
 			title = _("Straight Line");
+			template_id = "describe-straight";
 			break;
 		case SEG_DIMLIN:
 			title = _("Dimension Line");
+			template_id = "describe-dimension";
 			drawDesc[CO].mode = DESC_IGNORE;
 			drawDesc[LW].mode = DESC_IGNORE;
 			drawData.dimenSize = (wIndex_t)segPtr->u.l.option;
@@ -545,6 +548,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			break;
 		case SEG_BENCH:
 			title = _("Lumber");
+			template_id = "describe-lumber";
 			drawDesc[LW].mode = DESC_IGNORE;
 			drawDesc[BE].mode =
 			drawDesc[OR].mode = 0;
@@ -553,6 +557,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			break;
 		case SEG_TBLEDGE:
 			title = _("Table Edge");
+			template_id = "describe-table";
 			drawDesc[CO].mode = DESC_IGNORE;
 			drawDesc[LW].mode = DESC_IGNORE;
 			break;
@@ -565,6 +570,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[RA].mode = 0;
 		if ( segPtr->u.c.a1 >= 360.0 ) {
 			title = _("Circle");
+			template_id = "describe-circle";
 		} else {
 			drawData.angle = segPtr->u.c.a1;
 			drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
@@ -573,6 +579,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			drawDesc[A1].mode =
 			drawDesc[A2].mode = 0;
 			title = _("Curved Line");
+			template_id = "describe-curvedline";
 		}
 		break;
 	case SEG_FILCRCL:
@@ -582,6 +589,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[RA].mode = 0;
 		drawDesc[LW].mode = DESC_IGNORE;
 		title = _("Filled Circle");
+		template_id = "describe-filledcircle";
 		break;
 	case SEG_POLY:
 		drawData.pointCount = segPtr->u.p.cnt;
@@ -594,6 +602,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		switch (segPtr->u.p.polyType) {
 			case RECTANGLE:
 				title = _("Rectangle");
+				template_id = "describe-rectangle";
 				drawDesc[VC].mode = DESC_IGNORE;
 				drawData.width = FindDistance(segPtr->u.p.pts[0], segPtr->u.p.pts[1]);
 				drawDesc[WT].mode = 0;
@@ -605,6 +614,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 				break;
 			default:
 				title = _("Polygonal Line");
+				template_id = "describe-polygonal";
 		}
 		break;
 	case SEG_FILPOLY:
@@ -619,6 +629,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		switch (segPtr->u.p.polyType) {
 			case RECTANGLE:
 				title =_("Filled Rectangle");
+				template_id = "describe-filledrectangle";
 				drawDesc[VC].mode = DESC_IGNORE;
 				drawData.width = FindDistance(segPtr->u.p.pts[0], segPtr->u.p.pts[1]);
 				drawDesc[WT].mode = 0;
@@ -630,6 +641,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 				break;
 			default:
 				title = _("Filled Polygon");
+				template_id = "describe-filledpolygon";
 		}
 		break;
 	case SEG_TEXT:
@@ -646,6 +658,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
         drawDesc[CO].mode = 0;  /*Allow Text color setting*/
 		drawDesc[LW].mode = DESC_IGNORE;
 		title = _("Text");
+		template_id = "describe-text";
 		break;
 	default:
 		AbortProg( "bad seg type" );
@@ -653,7 +666,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 
 	sprintf( str, _("%s: Layer=%d"), title, GetTrkLayer(trk)+1 );
 
-	DoDescribe( title, trk, drawDesc, UpdateDraw );
+	DoDescribe( title, template_id, trk, drawDesc, UpdateDraw );
 	if ( segPtr->type==SEG_BENCH && drawDesc[BE].control0!=NULL && drawDesc[OR].control0!=NULL) {
 		BenchLoadLists( (wList_p)drawDesc[BE].control0, (wList_p)drawDesc[OR].control0 );
 		wListSetIndex( (wList_p)drawDesc[BE].control0, drawData.benchChoice );
@@ -1082,7 +1095,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			sprintf( labelName, _("%s Line Width"), _(objectName[drawCmdContext.Op]) );
 			labels[0] = labelName;
 			labels[1] = N_("Color");
-			InfoSubstituteControls( controls, labels );
+			InfoSubstituteControls( controls, labels, drawPG.nameStr );
 			drawWidthPD.option &= ~PDO_NORECORD;
 			drawColorPD.option &= ~PDO_NORECORD;
 			lineWidth = drawCmdContext.Width;
@@ -1096,7 +1109,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			sprintf( labelName, _("%s Color"), _(objectName[drawCmdContext.Op]) );
 			labels[0] = labelName;
 			ParamLoadControls( &drawPG );
-			InfoSubstituteControls( controls, labels );
+			InfoSubstituteControls( controls, labels, drawPG.nameStr );
 			drawColorPD.option &= ~PDO_NORECORD;
 			break;
 		case OP_BENCH:
@@ -1113,7 +1126,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			ParamLoadControls( &drawPG );
 			BenchUpdateOrientationList( (long)wListGetItemContext( (wList_p)drawBenchChoicePD.control, benchChoice ), (wList_p)drawBenchOrientPD.control );
 			wListSetIndex( (wList_p)drawBenchOrientPD.control, benchOrient );
-			InfoSubstituteControls( controls, labels );
+			InfoSubstituteControls( controls, labels, drawPG.nameStr );
 			drawBenchColorPD.option &= ~PDO_NORECORD;
 			drawBenchChoicePD.option &= ~PDO_NORECORD;
 			drawBenchOrientPD.option &= ~PDO_NORECORD;
@@ -1129,16 +1142,16 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				wListAddValue( (wList_p)drawDimArrowSizePD.control, _("Large"), NULL, NULL );
 			}
 			ParamLoadControls( &drawPG );
-			InfoSubstituteControls( controls, labels );
+			InfoSubstituteControls( controls, labels, drawPG.nameStr );
 			drawDimArrowSizePD.option &= ~PDO_NORECORD;
 			break;
 		case OP_TBLEDGE:
-			InfoSubstituteControls( NULL, NULL );
+			InfoSubstituteControls( NULL, NULL, NULL);
 			InfoMessage( _("Drag to create Table Edge") );
 			drawColorPD.option &= ~PDO_NORECORD;
 			break;
 		default:
-			InfoSubstituteControls( NULL, NULL );
+			InfoSubstituteControls( NULL, NULL, NULL );
 			infoSubst = FALSE;
 		}
 		ParamGroupRecord( &drawPG );
@@ -1163,7 +1176,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			drawCmdContext.Color = lineColor;
 		}
 		if ( infoSubst ) {
-			InfoSubstituteControls( NULL, NULL );
+			InfoSubstituteControls( NULL, NULL, NULL );
 			infoSubst = FALSE;
 		}
 	case wActionLDrag:
@@ -1182,7 +1195,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 
 	case C_CANCEL:
-		InfoSubstituteControls( NULL, NULL );
+		InfoSubstituteControls( NULL, NULL, NULL );
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext );
 

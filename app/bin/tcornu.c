@@ -469,7 +469,7 @@ static void DescribeCornu( track_p trk, char * str, CSIZE_T len )
     cornuDesc[WA].mode = DESC_RO;
 	cornuDesc[LY].mode = DESC_NOREDRAW;
 
-	DoDescribe( _("Cornu Track"), trk, cornuDesc, UpdateCornu );
+	DoDescribe( _("Cornu Track"), "describe-cornu", trk, cornuDesc, UpdateCornu );
 
 
 }

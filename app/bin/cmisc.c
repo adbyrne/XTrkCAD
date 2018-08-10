@@ -371,41 +371,6 @@ static void DescribeLayout(
     wPos_t * x,
     wPos_t * y)
 {
-    descData_p ddp;
-    wPos_t w, h;
-
-    if (inx < 0) {
-        return;
-    }
-
-    if (pd->context == NULL)
-        return;
-
-
-    if (pd->winOption&BO_CONTROLGRID) {
-    	ddp = (descData_p)pd->context;
-    	*x = (ddp->control0 == pd->control)?ddp->grid_row0:ddp->grid_row1;
-    	*y = (ddp->control0 == pd->control)?ddp->grid_col0:ddp->grid_col1;
-    	if (ddp->type == DESC_POS &&
-    	            ddp->control0 != pd->control) {
-    		*x = ddp->grid_row0;								/* Signal to keep on same row */
-    	}
-    	return;
-    }
-
-    ddp = (descData_p)pd->context;
-    *y = ddp->posy;
-
-    if (ddp->type == DESC_POS &&
-            ddp->control0 != pd->control) {
-        *x += wControlGetWidth(pd->control) + 3;
-    } else if (ddp->type == DESC_TEXT) {
-        w = tdata.width;
-        h = tdata.height;
-        wTextSetSize((wText_p)pd->control, w, h);
-    }
-
-    wControlShow(pd->control, TRUE);
 }
 
 
@@ -422,7 +387,7 @@ static void DescribeLayout(
  */
 
 static wList_p setLayerL;
-void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
+void DoDescribe(char * title, char * template_id, track_p trk, descData_p data, descUpdate_t update)
 {
     int inx;
     descData_p ddp;
@@ -444,7 +409,7 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
         /* SDB 5.13.2005 */
         ParamCreateDialog(&describePG, _("Description"), _("Done"), DescOk,
                           (paramActionCancelProc) DescribeCancel,
-                          TRUE, DescribeLayout, F_RECALLPOS|F_USETEMPLATE|F_CONTROLGRID,
+                          TRUE, NULL, F_RECALLPOS|F_USETEMPLATE,
                           DescribeUpdate);
         describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
     }

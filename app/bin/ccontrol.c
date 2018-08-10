@@ -265,7 +265,7 @@ static void DescribeControl (track_p trk, char * str, CSIZE_T len )
     controlDesc[NM].mode = 
           controlDesc[ON].mode = 
           controlDesc[OF].mode = DESC_NOREDRAW;
-    DoDescribe( _("Control"), trk, controlDesc, UpdateControlProperties );
+    DoDescribe( _("Control"), "describe-control", trk, controlDesc, UpdateControlProperties );
     
 }
 

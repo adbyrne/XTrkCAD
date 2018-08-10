@@ -230,7 +230,7 @@ static void DescribeNote(track_p trk, char * str, CSIZE_T len)
     noteDesc[OR].mode = 0;
     noteDesc[TX].mode = 0;
     noteDesc[LY].mode = DESC_NOREDRAW;
-    DoDescribe(_("Note"), trk, noteDesc, UpdateNote);
+    DoDescribe(_("Note"), "describe-note", trk, noteDesc, UpdateNote);
 }
 
 static void DeleteNote(track_p t)

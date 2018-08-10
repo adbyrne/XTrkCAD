@@ -968,18 +968,18 @@ EXPORT void InitInfoBar( void )
 	boxH = infoHeight;
 		x = 2;
 		infoD.scale_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.scale_w, boxH );
-		infoD.scale_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarScale", "infoBarScale", infoD.scale_w-six, zoomLabel);
+		infoD.scale_m = wStatusCreate( mainW, x+info_xm_offset, ym, "main-infoBarScale", "infoBarScale", infoD.scale_w-six, zoomLabel);
 		x += infoD.scale_w + 10;
 		infoD.posX_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-		infoD.posX_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarPosX", "infoBarPosX", infoD.pos_w-six, xLabel );
+		infoD.posX_m = wStatusCreate( mainW, x+info_xm_offset, ym, "main-infoBarPosX", "infoBarPosX", infoD.pos_w-six, xLabel );
 		x += infoD.pos_w + 5;
 		infoD.posY_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
-		infoD.posY_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarPosY", "infoBarPosY", infoD.pos_w-six, yLabel );
+		infoD.posY_m = wStatusCreate( mainW, x+info_xm_offset, ym, "main-infoBarPosY", "infoBarPosY", infoD.pos_w-six, yLabel );
 		x += infoD.pos_w + 10;
 		messageOrControlX = x+info_xm_offset;									//Remember Position
 		messageOrControlY = ym;
 		infoD.info_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.info_w, boxH );
-		infoD.info_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarStatus", "infoBarStatus", infoD.info_w-six, "" );
+		infoD.info_m = wStatusCreate( mainW, x+info_xm_offset, ym, "main-infoBarStatus", "infoBarStatus", infoD.info_w-six, "" );
 }
 
 
@@ -1062,19 +1062,26 @@ EXPORT void InfoPos( coOrd pos )
 	wStatusSetValue( infoD.posX_m, message );
 	sprintf( message, "%s%s", yLabel, FormatDistance(pos.y) );
 	wStatusSetValue( infoD.posY_m, message );
+	MainRedraw();
 	oldMarker = pos;
 	DrawMarkers();
 }
 
 static wControl_p deferSubstituteControls[NUM_INFOCTL+1];
 static char * deferSubstituteLabels[NUM_INFOCTL];
+static char substitute_id[256];
 
 EXPORT void InfoSubstituteControls(
 		wControl_p * controls,
-		char ** labels )
+		char ** labels ,
+		char * id)
 {
 	wPos_t x, y;
 	int inx;
+
+	if (id)
+		wStatusRevealControlSet(mainW,id);  /* Unhide this set */
+
 	for ( inx=0; inx<NUM_INFOCTL; inx++ ) {
 		if (curInfoControl[inx]) {
 			wControlShow( curInfoControl[inx], FALSE );
@@ -1083,7 +1090,9 @@ EXPORT void InfoSubstituteControls(
 		curInfoLabelWidth[inx] = 0;
 		curInfoControl[inx] = NULL;
 	}
+
 	if ( inError && ( controls!=NULL && controls[0]!=NULL) ) {
+		sprintf(substitute_id, "%s",id);
 		memcpy( deferSubstituteControls, controls, sizeof deferSubstituteControls );
 		memcpy( deferSubstituteLabels, labels, sizeof deferSubstituteLabels );
 	}
@@ -2221,7 +2230,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 
 	inError = FALSE;
 	if ( deferSubstituteControls[0] )
-		InfoSubstituteControls( deferSubstituteControls, deferSubstituteLabels );
+		InfoSubstituteControls( deferSubstituteControls, deferSubstituteLabels, substitute_id );
 
 	switch ( action&0xFF ) {
 		case C_DOWN:
@@ -2496,7 +2505,7 @@ EXPORT void DrawInit( int initialZoom )
 	h = h - (toolbarHeight+max(textHeight,infoHeight)+10);
 	if ( w <= 0 ) w = 1;
 	if ( h <= 0 ) h = 1;
-	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "", BD_TICKS,
+	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "main-maindraw", BD_TICKS|BO_USETEMPLATE,
 												w, h, &mainD,
 				(wDrawRedrawCallBack_p)MainRedraw, DoMousew );
 

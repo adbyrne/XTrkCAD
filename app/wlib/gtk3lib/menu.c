@@ -919,8 +919,8 @@ wMenu_p wMenuCreate(
         sprintf(name,"%s",helpStr);
 		 m->widget = wlibWidgetFromId( parent, name );
 		 if (m->widget) m->fromTemplate = TRUE;
-	}
-	if (!m->widget) {
+		 m->template_id = strdup(helpStr);
+	} else {
 		m->widget = gtk_button_new();
 	}
 	g_signal_connect (m->widget, "clicked",
@@ -930,19 +930,16 @@ wMenu_p wMenuCreate(
 
 	wMenuSetLabel( m, labelStr );
 	
-	if (option&BO_CONTROLGRID) {
-		g_object_ref(m->widget);
-        m->useGrid = TRUE;
-	} else if (!m->fromTemplate) {
+	if (!m->fromTemplate) {
 		gtk_fixed_put( GTK_FIXED(parent->widget), m->widget, m->realX, m->realY );
 		wlibControlGetSize( (wControl_p)m );
 		if ( m->w < 80 && (m->option&BO_ICON)==0) {
 			m->w = 80;
 			gtk_widget_set_size_request( m->widget, m->w, m->h );
 		}
-		gtk_widget_show( m->widget );
-		wlibAddButton( (wControl_p)m );
 	}
+	gtk_widget_show( m->widget );
+	wlibAddButton( (wControl_p)m );
 	wlibAddHelpString( m->widget, helpStr );
 	return m;
 }

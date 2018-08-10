@@ -149,33 +149,31 @@ GdkPixbuf* wlibPixbufFromXBM(
 int wlibAddLabel(wControl_p b, const char * labelStr)
 {
     GtkRequisition min_req, nat_req, min_reqwidget, nat_reqwidget;
-
     if (labelStr == NULL) {
         return 0;
     }
 
-    if (b->fromTemplate && !b->useGrid) {
-    	return 0;
+    if (b->fromTemplate) {
+    	/*Find the label field in the template if there is one */
+    	b->label = wlibGetWidgetFromName( b->parent, b->template_id, "label", TRUE );
     }
 
     if (!b->label)
     	b->label = gtk_label_new(wlibConvertInput(labelStr));
 
-    gtk_widget_get_preferred_size(b->label, &min_req, &nat_req);
-    if (b->widget)
-       	gtk_widget_get_preferred_size(b->widget, &min_reqwidget, &nat_reqwidget);
-    else
-       	nat_reqwidget.height = nat_req.height;
-    if (b->useGrid) {
-    	//If the grid is to be used, take a reference to the widget to ensure it lives
-    	//outside a container. It will be placed into the Grid later.
-    	g_object_ref(b->label);
-    } else if (!b->fromTemplate) {
-    	gtk_container_add(GTK_CONTAINER(b->parent->widget), b->label);
-    	gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label,
-                   b->realX - nat_req.width - 8, b->realY + (nat_reqwidget.height/2 - nat_req.height/2));
-    	gtk_widget_show(b->label);
+    if (b->fromTemplate) {
+    	return 0;
     }
+	gtk_widget_get_preferred_size(b->label, &min_req, &nat_req);
+	if (b->widget)
+		gtk_widget_get_preferred_size(b->widget, &min_reqwidget, &nat_reqwidget);
+	else
+		nat_reqwidget.height = nat_req.height;
+
+	gtk_container_add(GTK_CONTAINER(b->parent->widget), b->label);
+	gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label,
+			   b->realX - nat_req.width - 8, b->realY + (nat_reqwidget.height/2 - nat_req.height/2));
+	gtk_widget_show(b->label);
     return nat_req.width + 8;
 }
 
@@ -291,6 +289,9 @@ void wlibAddButton(
     win->last = b;
     b->next = NULL;
     b->parent = win;
+
+    if (b->fromTemplate) return;  /*Don't bother fussing with sizes */
+
     win->lastX = b->realX + b->w;
     win->lastY = b->realY + b->h;
 
