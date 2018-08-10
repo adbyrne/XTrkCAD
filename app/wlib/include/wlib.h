@@ -483,9 +483,11 @@ typedef int wAction_t;
 #define wActionWheelDown (11)
 #define wActionLast		wActionWheelDown
 
-
-#define wRGB(R,G,B)\
-	(long)(((((long)(R)<<16))&0xFF0000L)|((((long)(G))<<8)&0x00FF00L)|(((long)(B))&0x0000FFL))
+/* Remember to set the A to full on in RGB */
+#define wRGB(R,G,B) \
+	(long)((0xFF000000L)|((((long)(R)<<16))&0xFF0000L)|((((long)(G))<<8)&0x00FF00L)|(((long)(B))&0x0000FFL))
+#define wRGBA(R,G,B,A) \
+	(long)(((((long)(A)<<24))&0xFF000000L)|((((long)(R)<<16))&0xFF0000L)|((((long)(G))<<8)&0x00FF00L)|(((long)(B))&0x0000FFL))
 
 
 /* Creation CallBacks */

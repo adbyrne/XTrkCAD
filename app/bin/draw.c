@@ -89,6 +89,7 @@ EXPORT wDrawColor drawColorRed;
 EXPORT wDrawColor drawColorBlue;
 EXPORT wDrawColor drawColorGreen;
 EXPORT wDrawColor drawColorAqua;
+EXPORT wDrawColor drawColorPowderedBlue;
 EXPORT wDrawColor drawColorPurple;
 EXPORT wDrawColor drawColorGold;
 
@@ -443,7 +444,7 @@ EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s )
 	w = (wPos_t)((s.x/d->scale)*d->dpi+0.5);
 	h = (wPos_t)((s.y/d->scale)*d->dpi+0.5);
 	d->CoOrd2Pix(d,p,&x,&y);
-	wDrawFilledRectangle( d->d, x, y, w, h, wDrawColorBlack, wDrawOptTemp );
+	wDrawFilledRectangle( d->d, x, y, w, h, drawColorBlue, wDrawOptTemp );
 }
 
 
@@ -1205,11 +1206,11 @@ lprintf("MapRedraw\n");
 
 	if (delayUpdate)
 	wDrawDelayUpdate( mapD.d, TRUE );
-	wSetCursor( mapD.d, wCursorWait );
+	//wSetCursor( mapD.d, wCursorWait );
 	wDrawClear( mapD.d );
 	DrawTracks( &mapD, mapD.scale, mapD.orig, mapD.size );
 	DrawMapBoundingBox( TRUE );
-	wSetCursor( mapD.d, defaultCursor );
+	//wSetCursor( mapD.d, defaultCursor );
 	wDrawDelayUpdate( mapD.d, FALSE );
 }
 
@@ -1276,7 +1277,7 @@ EXPORT void MainRedraw( void )
 lprintf("mainRedraw\n");
 #endif
 
-	wSetCursor( mainD.d, wCursorWait );
+	//wSetCursor( mainD.d, wCursorWait );
 	if (delayUpdate)
 	wDrawDelayUpdate( mainD.d, TRUE );
 #ifdef LATER
@@ -1323,7 +1324,7 @@ lprintf("mainRedraw\n");
 	RulerRedraw( FALSE );
 	DoCurCommand( C_REDRAW, zero );
 	DrawMarkers();
-	wSetCursor( mainD.d, defaultCursor );
+	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
 	wDrawDelayUpdate( mainD.d, FALSE );
 }

@@ -104,10 +104,20 @@ struct wFilSel_t * wFilSelCreate(
 			gtk_file_filter_add_pattern (fs->filter[ count ], cp );
 			// the first pattern is considered to match the default extension
 			if( count == 0 ) {
+
 				fs->defaultExtension = strdup( cp );
-			}	
+				int i = 0;
+				for (i=0; i<strlen(cp) && cp[i] != ' ' && cp[i] != ';';i++) ;
+				if (i<strlen(cp)) fs->defaultExtension[i] = '\0';
+			}
 			cp = strtok( NULL, "|" );
 			count++;
+		}
+		if (opt&FS_PICTURES) {
+			fs->filter[ count ] = gtk_file_filter_new ();
+			gtk_file_filter_set_name( fs->filter[ count ], _("Image files") );
+			gtk_file_filter_add_pixbuf_formats( fs->filter[ count ]);
+			fs->pattCount = count++;
 		}
 		// finally add the all files pattern
 		fs->filter[ count ] = gtk_file_filter_new ();
@@ -142,10 +152,10 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 										   GTK_WINDOW( fs->parent->gtkwin ),
 										   (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN : GTK_FILE_CHOOSER_ACTION_SAVE ),
 										   _("_Cancel"), GTK_RESPONSE_CANCEL,
-										   (fs->mode == FS_LOAD ? _("_Open") : _("_Save") ), GTK_RESPONSE_ACCEPT,
+										   (fs->mode == FS_LOAD ? _("_Open") : _("_Save")), GTK_RESPONSE_ACCEPT,
 										   NULL );
 		if (fs->window==0) abort();
-		// get confirmation before overwritting an existing file									
+		// get confirmation before overwriting an existing file
 		gtk_file_chooser_set_do_overwrite_confirmation( GTK_FILE_CHOOSER(fs->window), TRUE );
 		
 		// allow selecting multiple files

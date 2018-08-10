@@ -47,7 +47,6 @@ struct wDrawBitMap_t {
 		int x;
 		int y;
 		const char * bits;
-		GdkPixbuf * pixbuf;
 		};
 
 //struct wDraw_t {
@@ -456,7 +455,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
     cairo_rel_line_to(cairo, 0, -h);
 	cairo_stroke(cairo);
 	cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
-	cairo_set_source_rgba(cairo, gcolor.red, gcolor.green, gcolor.blue, 0.3);
+	cairo_set_source_rgba(cairo, gcolor.red, gcolor.green, gcolor.blue, 0.2);
 	cairo_move_to(cairo, x, y);
 	cairo_rel_line_to(cairo, w, 0);
 	cairo_rel_line_to(cairo, 0, h);
@@ -965,11 +964,17 @@ static gint draw_char_event(
 		GdkEventKey *event,
 		wDraw_p bd )
 {
+	GdkModifierType modifiers;
 	guint key = event->keyval;
 	wAccelKey_e extKey = wAccelKey_None;
 	switch (key) {
 	case GDK_KEY_Escape:	key = 0x1B; break;
-	case GDK_KEY_Return:	key = 0x0D; break;
+	case GDK_KEY_Return:
+		modifiers = gtk_accelerator_get_default_mod_mask();
+		if (((event->state & modifiers)==GDK_CONTROL_MASK) || ((event->state & modifiers)==GDK_MOD1_MASK))
+			extKey = wAccelKey_LineFeed;  //If Return plus Control or Alt send in LineFeed
+		key = 0x0D;
+		break;
 	case GDK_KEY_Linefeed:	key = 0x0A; break;
 	case GDK_KEY_Tab:	key = 0x09; break;
 	case GDK_KEY_BackSpace:	key = 0x08; break;
@@ -1152,4 +1157,75 @@ wBool_t wBitMapDelete(          wDraw_p d )
 	d->clip_set = FALSE;
 	return TRUE;
 }
+
+/*******************************************************************************
+ *
+ * Background
+ *
+ ******************************************************************************/
+int wDrawSetBackground(    wDraw_p bd, char * path, char ** error) {
+
+	GError *err = NULL;
+
+	if (bd->background) {
+		g_object_unref(bd->background);
+	}
+
+	if (path) {
+		bd->background = gdk_pixbuf_new_from_file (path, &err);
+		if (!bd->background) {
+			*error = err->message;
+			return -1;
+		}
+	} else {
+		bd->background = NULL;
+		return 1;
+	}
+	return 0;
+
+}
+
+void wDrawShowBackground( wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size, wAngle_t angle, int screen) {
+
+	if (bd->background) {
+		cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, NULL, 0, wDrawLineSolid, wDrawColorWhite, 0);
+		cairo_save(cairo);
+		int pixels_width = gdk_pixbuf_get_width(bd->background);
+		int pixels_height = gdk_pixbuf_get_height(bd->background);
+		double scale;
+		double posx,posy,width,sized;
+		posx = (double)pos_x;
+		posy = (double)pos_y;
+		if (size == 0) {
+			scale = 1.0;
+		} else {
+			sized = (double)size;
+			width = (double)pixels_width;
+			scale = sized/width;
+		}
+		cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+		double rad = M_PI*(angle/180);
+		posy = (double)bd->h-((pixels_height*fabs(cos(rad))+pixels_width*fabs(sin(rad)))*scale)-posy;
+		//width = (double)(pixels_width*scale);
+		//height = (double)(pixels_height*scale);
+		cairo_translate(cairo,posx,posy);
+		cairo_scale(cairo, scale, scale);
+		cairo_translate(cairo, fabs(pixels_width/2.0*cos(rad))+fabs(pixels_height/2.0*sin(rad)),
+				fabs(pixels_width/2.0*sin(rad))+fabs(pixels_height/2.0*cos(rad)));
+		cairo_rotate(cairo, M_PI*(angle/180.0));
+		// We need to clip around the image, or cairo will paint garbage data
+		cairo_rectangle(cairo, -pixels_width/2.0, -pixels_height/2.0, pixels_width, pixels_height);
+		cairo_clip(cairo);
+		gdk_cairo_set_source_pixbuf(cairo, bd->background, -pixels_width/2.0, -pixels_height/2.0);
+		cairo_pattern_t *mask = cairo_pattern_create_rgba (1.0,1.0,1.0,(100.0-screen)/100.0);
+		cairo_mask(cairo,mask);
+		cairo_pattern_destroy(mask);
+		cairo_restore(cairo);
+		gtkDrawDestroyCairoContext(cairo, NULL);
+	}
+
+}
+
+
+
 

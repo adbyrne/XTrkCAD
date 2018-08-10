@@ -290,6 +290,7 @@ struct wDraw_t {
 		wBool_t delayUpdate;
 		cairo_t *printContext;
 		cairo_surface_t *curPrintSurface;
+		GdkPixbuf * background;
 		};
 
 void WlibApplySettings(GtkPrintOperation *op);

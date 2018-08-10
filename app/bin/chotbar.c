@@ -240,8 +240,8 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wPos_t w,
 	wControlSetBalloon( (wControl_p)hotBarD.d, px, -20, titleP );
 	switch (action & 0xff) {
 	case wActionLDown:
-		pos.x = mainD.size.x+mainD.orig.x;
-		pos.y = mainD.size.y+mainD.orig.y;
+		pos.x = hotBarD.size.x+hotBarD.orig.x;
+		pos.y = hotBarD.size.y+hotBarD.orig.y;
 		if ( hotBarCurrSelect >= 0 ) {
 			//HotBarHighlight( hotBarCurrSelect );
 			hotBarCurrSelect = -1;
