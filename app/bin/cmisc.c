@@ -21,6 +21,7 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 
 #include "common.h"
 #include "cundo.h"
@@ -31,6 +32,13 @@
 
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
+
+static wWin_p describeWin;
+static paramGroup_t *describeCurrentPG;
+static wButton_p describeokB;
+static wButton_p describeCancelB;
+static wButton_p describeHelpB;
+
 
 static track_p descTrk;
 static descData_p descData;
@@ -261,12 +269,13 @@ static void DescribeUpdate(
         DrawDescHilite();
     }
 
-    for (inx = 0; inx < sizeof describePLs/sizeof describePLs[0]; inx++) {
-        if ((describePLs[inx].option & PDO_DLGIGNORE) != 0) {
+
+    for (inx = 0; inx < pg->paramCnt; inx++) {
+        if ((pg->paramPtr[inx].option & PDO_DLGIGNORE) != 0) {
             continue;
         }
 
-        ddp = (descData_p)describePLs[inx].context;
+        ddp = (descData_p)pg->paramPtr[inx].context;
 
         if ((ddp->mode&DESC_IGNORE) != 0) {
             continue;
@@ -285,14 +294,14 @@ static void DescribeUpdate(
         		ddp->mode |= DESC_CHANGE2;		//First time
         	}
         }
-        ParamLoadControl(&describePG, inx);
+        ParamLoadControl(pg, inx);
     }
 }
 
 
 static void DescOk(void * junk)
 {
-    wHide(describePG.win);
+    wHide(describeWin);
 
     if (descTrk) {
         DrawDescHilite();
@@ -325,7 +334,7 @@ static struct {
     /*FLOAT*/		{ PD_FLOAT, 0,		   I_FLOAT_0, I_FLOAT_N },
     /*ANGLE*/		{ PD_FLOAT, PDO_ANGLE, I_FLOAT_0, I_FLOAT_N },
     /*LONG*/		{ PD_LONG,	0,		   I_LONG_0, I_LONG_N },
-    /*COLOR*/		{ PD_LONG,	0,		   I_COLOR_0, I_COLOR_N },
+    /*COLOR*/		{ PD_COLORLIST,	0,	   I_COLOR_0, I_COLOR_N },
     /*DIM*/			{ PD_FLOAT, PDO_DIM,   I_FLOAT_0, I_FLOAT_N },
     /*PIVOT*/		{ PD_RADIO, 0,		   I_PIVOT_0, I_PIVOT_N },
     /*LAYER*/		{ PD_DROPLIST,PDO_LISTINDEX,	   I_LAYER_0, I_LAYER_N },
@@ -336,10 +345,49 @@ static struct {
 	/*BOXED*/      	{ PD_TOGGLE, 0,	       I_TOGGLE_0, I_TOGGLE_N },
 };
 
+static parameterType ConvertDescType(descType type) {
+	return descTypeMap[type].pd_type;
+}
+
+static int GetDescTypeOption(descType type) {
+	return descTypeMap[type].option;
+}
+
 static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
                                wPos_t sep)
 {
+
     int inx;
+    paramData_t * param;
+    /*Check to see if we already set up the linkage*/
+    if (ddp->param0) {		// Has a link in the first and possibly second part
+    	if (!ddp->control0) {
+			param = ((paramData_t *)ddp->param0);
+    	} else {
+    		param = ((paramData_t *)ddp->param1);
+    	}
+		param->valueP = valueP;
+		param->context = ddp;
+		param->option = descTypeMap[ddp->type].option;
+
+		if (ddp->type == DESC_POS) {
+			char helpStr[STR_SHORT_SIZE];
+			if (!ddp->control0)
+				sprintf(helpStr, "%sx",ddp->helpStr);
+			else
+				sprintf(helpStr, "%sy",ddp->helpStr);
+			param->assigned_helpStr = strdup(helpStr);
+		} else {
+			param->assigned_helpStr = strdup(ddp->helpStr);
+		}
+
+		if ((ddp->type == DESC_STRING) && ddp->max_string) {
+			param->max_string = ddp->max_string;
+			param->option |= PDO_STRINGLIMITLENGTH;
+		}
+
+		return param->control;
+    }
 
     for (inx = descTypeMap[ddp->type].first; inx<descTypeMap[ddp->type].last;
             inx++) {
@@ -351,16 +399,31 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
             }
 
 
-            if (sep) {
+            if (sep && describePLs[inx].control) {
             	describeW_posy += wControlGetHeight(describePLs[inx].control) + sep;
             	describe_row++;
             }
             describePLs[inx].context = ddp;
             describePLs[inx].valueP = valueP;
+
+            if (describePLs[inx].assigned_helpStr)
+            	free(describePLs[inx].assigned_helpStr);
+            if (ddp->type == DESC_POS) {
+            	char helpStr[STR_SHORT_SIZE];
+            	if (!ddp->control0)
+            		sprintf(helpStr, "%sx",ddp->helpStr);
+            	else
+            		sprintf(helpStr, "%sy",ddp->helpStr);
+            	describePLs[inx].assigned_helpStr = strdup(helpStr);
+            } else
+            	describePLs[inx].assigned_helpStr = strdup(ddp->helpStr);
+
             if ((ddp->type == DESC_STRING) && ddp->max_string) {
             	describePLs[inx].max_string = ddp->max_string;
             	describePLs[inx].option |= PDO_STRINGLIMITLENGTH;
             }
+
+            //Call
 
             if (label && ddp->type != DESC_TEXT) {
                 wControlSetLabel(describePLs[inx].control, label);
@@ -379,35 +442,106 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
 }
 
 
-static void DescribeLayout(
-    paramData_t * pd,
-    int inx,
-    wPos_t colX,
-    wPos_t * x,
-    wPos_t * y)
-{
-}
-
 
 /**
  * Creation and modification of the Describe dialog box is handled here. As the number
  * of values for a track element depends on the specific type, this dialog is dynamically
- * updated to hsow the changable parameters only
+ * updated to show the needed parameters only
+ *
+ * Each describe user creates both a description struct and a .glade file whose toplevel widget is a revealer.
+ * The names of the elements are "template_id-fieldname". The Top-level Revealer is "template_id.reveal".
+ * Any fields that are optional within a template have a revealer "template_id-fieldname.reveal"
+ *
+ * This toplevel revealer is added to the describe.contentsbox box and all the reveals children are hidden except the template_id in question.
+ * So eventually the window will contain a copy of all the different describe objects UIs. They were not included in one file because it would be too difficult to edit
  *
  * \param IN title Description of the selected part, shown in window title bar
+ * \param IN template-id the name of the describe template to add to the window
  * \param IN trk Track element to be described
- * \param IN data
- * \param IN update
+ * \param IN data the descData pointer
+ * \param IN updateproc to proc to be run when updates occur
  *
  */
 
 static wList_p setLayerL;
+static wBool_t DescribeWindowTemplated = FALSE;
+
+typedef struct {
+	char * template_name;
+	paramGroup_t * template_pg;
+} sub_window_t, * sub_window_p;
+
+static dynArr_t sub_windows;
+
+
+
+/*
+ * Setup a PGlist, filling out the paramData based on the DescData
+ */
+paramGroup_t * CreatePGList(char *tile, char *subtitle, descData_p data) {
+		paramGroup_t * pg;
+		pg = calloc(1,sizeof(paramGroup_t));
+		pg->nameStr = "describe";
+		pg->template_id = strdup(subtitle);
+		pg->okB = describeokB;
+		pg->cancelB = describeCancelB;
+		pg->helpB = describeHelpB;
+
+		int rows = 1;
+		descData_t * describe;
+		for (describe=data; (describe->type != DESC_NULL); describe++ ) {
+			if (describe->type == DESC_POS) {
+				rows = rows + 1;
+			}
+			rows++;
+		}
+		pg->paramCnt = 0;
+		pg->paramPtr = calloc(rows,sizeof(paramData_t));
+		int row = 0;
+		paramData_t * param = pg->paramPtr;
+		for (describe=data; (describe->type != DESC_NULL); describe++ ) {
+			char name[STR_SHORT_SIZE];
+			int inx = descTypeMap[describe->type].first;
+			/* Copy the parts from the default list for this type */
+			memcpy(&param[row],&describePLs[inx],sizeof(paramData_t));
+
+			param[row].group = pg;
+			param[row].type = ConvertDescType(describe->type);
+			param[row].option = GetDescTypeOption(describe->type);
+			param[row].option &= ~PDO_DLGIGNORE;
+			param[row].context = describe;
+			describe->param0 = &param[row];
+			if (describe->type == DESC_POS) {
+				sprintf(name,"%sx",describe->helpStr);
+				param[row].nameStr = strdup(name);
+				row++;
+				/* Copy the parts from the default list for this type */
+				memcpy(&param[row],&describePLs[inx],sizeof(paramData_t));
+				param[row].group = pg;
+				param[row].type = ConvertDescType(describe->type);
+				param[row].option = GetDescTypeOption(describe->type);
+				param[row].option &= ~PDO_DLGIGNORE;
+				param[row].context = describe;
+				sprintf(name,"%sy",describe->helpStr);
+				param[row].nameStr = strdup(name);
+				describe->param1 = &param[row];
+			} else {
+				sprintf(name,"%s",describe->helpStr);
+				param[row].nameStr = strdup(name);
+			}
+			row++;
+		}
+		pg->paramCnt = row;
+		return pg;
+}
+
 void DoDescribe(char * title, char * template_id, track_p trk, descData_p data, descUpdate_t update)
 {
     int inx;
     descData_p ddp;
     char * label;
     int ro_mode;
+    paramGroup_t * pg = NULL;
 
     if (!inDescribeCmd) {
         return;
@@ -420,19 +554,53 @@ void DoDescribe(char * title, char * template_id, track_p trk, descData_p data, 
     describeW_posy = 0;
     describe_row = 1;
 
-    if (describePG.win == NULL) {
-        /* SDB 5.13.2005 */
-        ParamCreateDialog(&describePG, _("Description"), _("Done"), DescOk,
-                          (paramActionCancelProc) DescribeCancel,
-                          TRUE, NULL, F_RECALLPOS|F_USETEMPLATE,
-                          DescribeUpdate);
-        describeCmdButtonEnd = wControlBelow((wControl_p)describePG.helpB);
+    wBool_t created = FALSE;
+
+    if (wUITemplates()) {
+		/* Deal with creating and re-using a parmlist per Describe Type */
+		for (int i=0;i<sub_windows.cnt && (!pg); i++) {
+			if ( strcmp( (((sub_window_t *)(sub_windows).ptr)[i]).template_name,template_id )==0 ) {
+				pg = (((sub_window_t *)(sub_windows).ptr)[i]).template_pg;
+			}
+		}
+		sub_window_p sub_window;
+		/* New template, so set up PG parmlist and add to directory */
+		if (!pg) {
+			pg = CreatePGList(title, template_id, data);
+			DYNARR_APPEND( sub_window_t, sub_windows, 5 );
+			sub_window = &DYNARR_N(sub_window_t, sub_windows, sub_windows.cnt-1);
+			sub_window->template_name = strdup(template_id);
+			sub_window->template_pg = pg;
+			created = TRUE;
+			pg->win = describeWin;  /* Set up to use same window */
+		}
     }
 
-    for (inx=0; inx<sizeof describePLs/sizeof describePLs[0]; inx++) {
-        describePLs[inx].option = PDO_DLGIGNORE;
-        wControlShow(describePLs[inx].control, FALSE);
+    if (pg->win == NULL || created) {   /* Same sub-template as last time? */
+    	 pg->template_id = template_id;     /*Remember the template_id for Create */
+    	 long opts = F_RECALLPOS|F_USETEMPLATE|F_DESCTEMPLATE;
+    	 if (pg->win) opts |= F_DESCADDTEMPLATE;
+        /* SDB 5.13.2005 */
+        ParamCreateDialog(pg, _("Description"), _("Done"), DescOk,
+                          (paramActionCancelProc) DescribeCancel,
+                          TRUE, NULL, opts,
+                          DescribeUpdate);
+        describeCmdButtonEnd = wControlBelow((wControl_p)pg->helpB);
+        describeWin = pg->win;
+    } else {
+    	pg->template_id = template_id;
+    	describeWin = pg->win;
     }
+
+    /* Hide all controls */
+    paramData_t * describeData = pg->paramPtr;
+    for (inx=0; inx<pg->paramCnt; inx++) {
+        describeData[inx].option = PDO_DLGIGNORE;
+        if (describeData[inx].control)
+        	wControlShow(describeData[inx].control, FALSE);
+    }
+
+    wlibHideAllRevealsExcept(pg->win,template_id);
 
     ro_mode = (GetLayerFrozen(GetTrkLayer(trk))?DESC_RO:0);
 
@@ -454,17 +622,22 @@ void DoDescribe(char * title, char * template_id, track_p trk, descData_p data, 
         ddp->posy = describeW_posy;
         ddp->grid_row0 = describe_row;
         ddp->grid_col0 = 1;
+        ddp->control0 = NULL;    /* Used to know if POS x or y */
         ddp->control0 = AllocateButt(ddp, ddp->valueP, label,
                                      (ddp->type == DESC_POS?3:3));
         wControlActive(ddp->control0, ((ddp->mode|ro_mode)&DESC_RO)==0);
+        wControlShow(ddp->control0,TRUE);
 
         switch (ddp->type) {
         case DESC_POS:
+
             ddp->control1 = AllocateButt(ddp,
                                          &((coOrd*)(ddp->valueP))->y,
                                          NULL,
                                          0);
             wControlActive(ddp->control1, ((ddp->mode|ro_mode)&DESC_RO)==0);
+            wControlShow(ddp->control1,TRUE);
+
             ddp->grid_row1 = describe_row;
             ddp->grid_col1 = 3;
             break;
@@ -488,18 +661,23 @@ void DoDescribe(char * title, char * template_id, track_p trk, descData_p data, 
         }
     }
 
-    ParamLayoutDialog(&describePG);
-    ParamLoadControls(&describePG);
+    ParamLayoutDialog(pg);
+    ParamLoadControls(pg);
     sprintf(message, "%s (T%d)", title, GetTrkIndex(trk));
-    wWinSetTitle(describePG.win, message);
-    wShow(describePG.win);
+    wWinSetTitle(pg->win, message);
+    wShow(pg->win);
+    wlibRedraw(pg->win);
+    describeCurrentPG = pg;
+    describeokB = pg->okB;
+    describeCancelB = pg->cancelB;
+    describeHelpB = pg->helpB;
 }
 
 
 static void DescChange(long changes)
 {
-    if ((changes&CHANGE_UNITS) && describePG.win && wWinIsVisible(describePG.win)) {
-        ParamLoadControls(&describePG);
+    if ((changes&CHANGE_UNITS) && describeWin && wWinIsVisible(describeWin)) {
+        ParamLoadControls(describeCurrentPG);
     }
 }
 
@@ -512,7 +690,7 @@ static void DescChange(long changes)
 
 EXPORT void DescribeCancel(void)
 {
-    if (describePG.win && wWinIsVisible(describePG.win)) {
+    if (describeWin && wWinIsVisible(describeWin)) {
         if (descTrk) {
         	if (!IsTrackDeleted(descTrk))
         		descUpdateFunc(descTrk, -1, descData, TRUE);
@@ -521,7 +699,7 @@ EXPORT void DescribeCancel(void)
 
         }
 
-        wHide(describePG.win);
+        wHide(describeWin);
 
         if (descUndoStarted) {
             UndoEnd();
@@ -547,7 +725,7 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
     case C_DOWN:
         if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
-            if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
+            if (describeWin && wWinIsVisible(describeWin) && descTrk) {
                 DrawDescHilite();
                 descUpdateFunc(descTrk, -1, descData, TRUE);
                 descTrk = NULL;
@@ -577,7 +755,7 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case C_REDRAW:
-        if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
+        if (describeWin && wWinIsVisible(describeWin) && descTrk) {
             DrawDescHilite();
         }
 

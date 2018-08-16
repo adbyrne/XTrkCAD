@@ -500,19 +500,19 @@ static struct {
 		} jointData;
 typedef enum { E0, Z0, E1, Z1, OR, AL, RR, LL, L0, L1, GR, PV, LY } jointDesc_e;
 static descData_t jointDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &jointData.endPt[0] },
-/*Z0*/	{ DESC_DIM, N_("Z"), &jointData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &jointData.endPt[1] },
-/*Z1*/	{ DESC_DIM, N_("Z"), &jointData.elev[1] },
-/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &jointData.orig },
-/*AL*/	{ DESC_ANGLE, N_("Angle"), &jointData.angle },
-/*RR*/	{ DESC_DIM, N_("R"), &jointData.r },
-/*LL*/	{ DESC_DIM, N_("L"), &jointData.l },
-/*L0*/	{ DESC_DIM, N_("l0"), &jointData.l0 },
-/*L1*/	{ DESC_DIM, N_("l1"), &jointData.l1 },
-/*GR*/	{ DESC_FLOAT, N_("Grade"), &jointData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &jointData.pivot },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &jointData.layerNumber },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &jointData.endPt[0], "endpt1" },
+/*Z0*/	{ DESC_DIM, N_("Z"), &jointData.elev[0], "elev1" },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &jointData.endPt[1], "endpt2" },
+/*Z1*/	{ DESC_DIM, N_("Z"), &jointData.elev[1], "elev2" },
+/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &jointData.orig, "origin" },
+/*AL*/	{ DESC_ANGLE, N_("Angle"), &jointData.angle, "angle"},
+/*RR*/	{ DESC_DIM, N_("R"), &jointData.r , "r" },
+/*LL*/	{ DESC_DIM, N_("L"), &jointData.l, "l" },
+/*L0*/	{ DESC_DIM, N_("l0"), &jointData.l0, "l0"},
+/*L1*/	{ DESC_DIM, N_("l1"), &jointData.l1, "l1" },
+/*GR*/	{ DESC_FLOAT, N_("Grade"), &jointData.grade, "grade" },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &jointData.pivot, "pivot" },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &jointData.layerNumber, "layer" },
 		{ DESC_NULL } };
 
 static void UpdateJoint( track_p trk, int inx, descData_p descUpd, BOOL_T final )

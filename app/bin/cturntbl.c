@@ -242,10 +242,10 @@ static struct {
 		} trntblData;
 typedef enum { OR, RA, EC, LY } trntblDesc_e;
 static descData_t trntblDesc[] = {
-/*OR*/	{ DESC_POS, N_("Origin: X"), &trntblData.orig },
-/*RA*/	{ DESC_DIM, N_("Diameter"), &trntblData.diameter },
-/*EC*/	{ DESC_LONG, N_("# EndPt"), &trntblData.epCnt },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &trntblData.layerNumber },
+/*OR*/	{ DESC_POS, N_("Origin: X,Y"), &trntblData.orig, "origin" },
+/*RA*/	{ DESC_DIM, N_("Diameter"), &trntblData.diameter, "diameter" },
+/*EC*/	{ DESC_LONG, N_("# EndPt"), &trntblData.epCnt, "endpts" },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &trntblData.layerNumber, "layer" },
 		{ DESC_NULL } };
 
 

@@ -140,6 +140,7 @@ typedef struct {
 		void * context;
         int max_string;
 		wControl_p control;
+		char * assigned_helpStr;
 		paramGroup_p group;
 		paramOldData_t oldD, demoD;
 		} paramData_t, *paramData_p;
@@ -183,6 +184,7 @@ typedef struct paramGroup_t {
 		wPos_t origW;
 		wPos_t origH;
 		wBox_p * boxs;
+		char * template_id;
 		} paramGroup_t;
 
 wIndex_t ColorTabLookup( wDrawColor );

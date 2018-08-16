@@ -312,7 +312,7 @@ wButton_p wColorSelectButtonCreate(
     wlibComputePos((wControl_p)b);
 
     if (option&BO_USETEMPLATE) {
-    	b->widget = wlibWidgetFromId( parent, helpStr );
+    	b->widget = wlibWidgetFromIdWarn( parent, helpStr );
     	if (b->widget) 
             b->fromTemplate = TRUE;
     	b->template_id = strdup(helpStr);

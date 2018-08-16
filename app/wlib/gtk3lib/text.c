@@ -546,18 +546,17 @@ wTextCreate(wWin_p	parent,
                                        GTK_POLICY_AUTOMATIC,
                                        GTK_POLICY_AUTOMATIC);
 
-        // configure read-only mode
-        if (bt->option&BO_READONLY) {
-            gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), FALSE);
-            gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(bt->text), FALSE);
-        }
-
-
         // create a text view and place it inside the scroll widget
         bt->text = gtk_text_view_new();
 
         if (bt->text == 0) {
             abort();
+        }
+
+        // configure read-only mode
+        if (bt->option&BO_READONLY) {
+            gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), FALSE);
+            gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(bt->text), FALSE);
         }
 
     	// set the size???
@@ -570,11 +569,18 @@ wTextCreate(wWin_p	parent,
 
     } else {
         bt->widget = wlibGetWidgetFromName(parent, helpStr, "scrollwindow", FALSE );
-        bt->text = wlibWidgetFromId(parent, helpStr );
+        bt->text = wlibWidgetFromIdWarn(parent, helpStr );
         bt->fromTemplate = TRUE;
         bt->template_id = strdup(helpStr);
         /* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
         bt->reveal = (GtkRevealer *)wlibGetWidgetFromName( parent, helpStr, "reveal", TRUE );
+        if (bt->option&BO_READONLY) {
+			gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), FALSE);
+			gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(bt->text), FALSE);
+        } else {
+        	gtk_text_view_set_editable(GTK_TEXT_VIEW(bt->text), TRUE);
+        	gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(bt->text), TRUE);
+        }
     }    
 
     // this seems to assume some fixed size fonts, not really helpful
@@ -600,8 +606,8 @@ wTextCreate(wWin_p	parent,
 		wlibAddButton((wControl_p)bt);
 	}
 	// show the widgets
-	gtk_widget_show(bt->text);
-	gtk_widget_show(bt->widget);
+	gtk_widget_show_all(bt->text);
+	gtk_widget_show_all(bt->widget);
     
     wlibAddHelpString(bt->widget, helpStr);
  

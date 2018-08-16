@@ -82,15 +82,15 @@ static struct {
 		} strData;
 typedef enum { E0, Z0, E1, Z1, LN, AN, GR, PV, LY } strDesc_e;
 static descData_t strDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &strData.endPt[0] },
-/*Z0*/	{ DESC_DIM, N_("Z"), &strData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &strData.endPt[1] },
-/*Z1*/	{ DESC_DIM, N_("Z"), &strData.elev[1] },
-/*LN*/	{ DESC_DIM, N_("Length"), &strData.length },
-/*AN*/	{ DESC_ANGLE, N_("Angle"), &strData.angle },
-/*GR*/	{ DESC_FLOAT, N_("Grade"), &strData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &strData.pivot },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &strData.layerNumber },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &strData.endPt[0], "endpt1" },
+/*Z0*/	{ DESC_DIM, N_("Z"), &strData.elev[0], "elev1" },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &strData.endPt[1], "endpt2" },
+/*Z1*/	{ DESC_DIM, N_("Z"), &strData.elev[1], "elev2" },
+/*LN*/	{ DESC_DIM, N_("Length"), &strData.length, "length" },
+/*AN*/	{ DESC_ANGLE, N_("Angle"), &strData.angle, "angle" },
+/*GR*/	{ DESC_FLOAT, N_("Grade"), &strData.grade, "grade" },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &strData.pivot, "pivot" },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &strData.layerNumber, "layer" },
 		{ DESC_NULL } };
 
 

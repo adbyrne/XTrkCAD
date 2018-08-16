@@ -345,7 +345,7 @@ GString *wlibFileNameFromDialog( const char *dialog );
 GtkWidget *wlibGetWidgetFromName( wWin_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failures );
 GtkWidget *wlibWidgetFromId( wWin_p win, const char *id );
 GtkWidget *wlibWidgetFromIdWarn( wWin_p win, const char *id );
-GtkWidget *wlibAddHiddenContentFromTemplate( wWin_p win, const char *nameStr);
+void wlibAddContentFromTemplate( wWin_p win, const char *nameStr);
 
 
 #endif

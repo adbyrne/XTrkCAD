@@ -2717,7 +2717,9 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	if (mainW == NULL)
 		return NULL;
 
-	MainWindowTemplated = TRUE;
+	/* Test to see if the back-end supports templates */
+	if (wUITemplates())
+		MainWindowTemplated = TRUE;
 
 	InitAppDefaults();
 	drawColorBlack  = wDrawFindColor( wRGB(  0,  0,  0) );

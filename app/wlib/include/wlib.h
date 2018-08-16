@@ -20,6 +20,7 @@ char *gettext( const char *msgid );
 char *g_win32_getlocale (void);
 #endif
 
+
 /*
  * Interface types
  */
@@ -65,6 +66,7 @@ typedef struct {
 
 extern long debugWindow;
 extern long wDebugFont;
+
 
 /*------------------------------------------------------------------------------
  *
@@ -137,6 +139,8 @@ void wButtonToolBarRedraw(wWin_p parent);
  *
  * System Interface
  */
+
+wBool_t wUITemplates();
 
 void wInitAppName(char *appName);
 
@@ -225,6 +229,8 @@ typedef enum {
 typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 
 /* Creation Options */
+#define F_DESCTEMPLATE (1L<<6)
+#define F_DESCADDTEMPLATE (1L<<7)
 #define F_USETEMPLATE (1L<<31)
 #define F_AUTOSIZE	(1L<<1)
 #define F_HEADER 	(1L<<2)
@@ -267,6 +273,8 @@ int wCreateSplash( char *appName, char *appVer );
 int wSetSplashInfo( char *msg );
 void wDestroySplash( void );
 
+void wlibHideAllRevealsExcept(wWin_p win,char * id);
+void wlibRedraw(wWin_p win);
 /*------------------------------------------------------------------------------
  *
  * Controls in general
@@ -279,6 +287,8 @@ void wDestroySplash( void );
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
 #define BO_USETEMPLATE (1L<<3)
+#define BO_DESCTEMPLATE (1L<<10)
+#define BO_DESCADDTEMPLATE (1L<<11)
 #define BO_REVEAL   (1L<<4)
 #define BO_TOOLBAR  (1L<<5)
 #define BO_ABUT     (1L<<6)

@@ -283,22 +283,22 @@ static struct {
 
 typedef enum { P0, A0, R0, C0, Z0, P1, A1, R1, C1, Z1, RA, RR, WA, LN, GR, LY } cornuDesc_e;
 static descData_t cornuDesc[] = {
-/*P0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &cornData.pos[0] },
-/*A0*/  { DESC_ANGLE, N_("End Angle"), &cornData.angle[0] },
-/*R0*/  { DESC_DIM, N_("Radius "), &cornData.radius[0] },
-/*C0*/	{ DESC_POS, N_("Center X,Y"), &cornData.center[0] },
-/*Z0*/	{ DESC_DIM, N_("Z1"), &cornData.elev[0] },
-/*P1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &cornData.pos[1] },
-/*A1*/  { DESC_ANGLE, N_("End Angle"), &cornData.angle[1] },
-/*R1*/  { DESC_DIM, N_("Radius"), &cornData.radius[1] },
-/*C1*/	{ DESC_POS, N_("Center X,Y"), &cornData.center[1] },
-/*Z1*/	{ DESC_DIM, N_("Z2"), &cornData.elev[1] },
-/*RA*/	{ DESC_DIM, N_("Minimum Radius"), &cornData.minRadius },
-/*RR*/  { DESC_FLOAT, N_("Max Rate Of Curve Change/Scale"), &cornData.maxRateOfChange },
-/*WA*/  { DESC_ANGLE, N_("Total Winding Angle"), &cornData.windingAngle },
-/*LN*/	{ DESC_DIM, N_("Length"), &cornData.length },
-/*GR*/	{ DESC_FLOAT, N_("Grade"), &cornData.grade },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &cornData.layerNumber },
+/*P0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &cornData.pos[0], "endpt1" },
+/*A0*/  { DESC_ANGLE, N_("End Angle"), &cornData.angle[0], "angle1" },
+/*R0*/  { DESC_DIM, N_("Radius "), &cornData.radius[0], "radius1" },
+/*C0*/	{ DESC_POS, N_("Center X,Y"), &cornData.center[0], "center1" },
+/*Z0*/	{ DESC_DIM, N_("Z1"), &cornData.elev[0], "elev1" },
+/*P1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &cornData.pos[1], "endpt2" },
+/*A1*/  { DESC_ANGLE, N_("End Angle"), &cornData.angle[1], "angle2" },
+/*R1*/  { DESC_DIM, N_("Radius"), &cornData.radius[1], "radius2" },
+/*C1*/	{ DESC_POS, N_("Center X,Y"), &cornData.center[1], "center2" },
+/*Z1*/	{ DESC_DIM, N_("Z2"), &cornData.elev[1], "elev2" },
+/*RA*/	{ DESC_DIM, N_("Minimum Radius"), &cornData.minRadius, "minradius" },
+/*RR*/  { DESC_FLOAT, N_("Max Rate Of Curve Change/Scale"), &cornData.maxRateOfChange, "maxrate" },
+/*WA*/  { DESC_ANGLE, N_("Total Winding Angle"), &cornData.windingAngle, "winding" },
+/*LN*/	{ DESC_DIM, N_("Length"), &cornData.length, "length" },
+/*GR*/	{ DESC_FLOAT, N_("Grade"), &cornData.grade, "grade" },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &cornData.layerNumber, "layer" },
 		{ DESC_NULL } };
 
 

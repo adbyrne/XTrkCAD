@@ -157,9 +157,9 @@ static struct {
 
 typedef enum { NM, PS, SC } sensorDesc_e;
 static descData_t sensorDesc[] = {
-    /* NM */ { DESC_STRING, N_("Name"),     &sensorProperties.name, sizeof(sensorProperties.name) },
-    /* PS */ { DESC_POS,    N_("Position"), &sensorProperties.pos },
-    /* SC */ { DESC_STRING, N_("Script"),   &sensorProperties.script, sizeof(sensorProperties.script) },
+    /* NM */ { DESC_STRING, N_("Name"),     &sensorProperties.name, "name", sizeof(sensorProperties.name) },
+    /* PS */ { DESC_POS,    N_("Position"), &sensorProperties.pos, "position" },
+    /* SC */ { DESC_STRING, N_("Script"),   &sensorProperties.script, "script", sizeof(sensorProperties.script) },
     { DESC_NULL } };
 
 static void UpdateSensorProperties (  track_p trk, int inx, descData_p

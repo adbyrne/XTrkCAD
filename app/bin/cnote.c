@@ -159,9 +159,9 @@ static struct {
 } noteData;
 typedef enum { OR, LY, TX } noteDesc_e;
 static descData_t noteDesc[] = {
-    /*OR*/	{ DESC_POS, N_("Position"), &noteData.pos },
-    /*LY*/	{ DESC_LAYER, N_("Layer"), &noteData.layer },
-    /*TX*/	{ DESC_TEXT, NULL, NULL },
+    /*OR*/	{ DESC_POS, N_("Position"), &noteData.pos , "position" },
+    /*LY*/	{ DESC_LAYER, N_("Layer"), &noteData.layer, "layer" },
+    /*TX*/	{ DESC_TEXT, NULL, NULL, "text"},
     { DESC_NULL }
 };
 

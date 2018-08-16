@@ -413,7 +413,7 @@ wList_p wDropListCreate(
     }
 
     if (option&BO_USETEMPLATE) {
-    	b->widget = wlibWidgetFromId( parent, helpStr );
+    	b->widget = wlibWidgetFromIdWarn( parent, helpStr );
     	b->fromTemplate = TRUE;
     	b->template_id = strdup(helpStr);
     	gtk_combo_box_set_model (GTK_COMBO_BOX(b->widget),

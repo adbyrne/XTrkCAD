@@ -229,30 +229,30 @@ static struct {
 		} drawData;
 typedef enum { E0, E1, CE, RA, LN, HT, WT, OI, AL, A1, A2, VC, LW, CO, BX, BE, OR, DS, TP, TA, TS, TX, PV, LY } drawDesc_e;
 static descData_t drawDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1] },
-/*CE*/	{ DESC_POS, N_("Center: X,Y"), &drawData.center },
-/*RA*/	{ DESC_DIM, N_("Radius"), &drawData.radius },
-/*LN*/	{ DESC_DIM, N_("Length"), &drawData.length },
-/*HT*/  { DESC_DIM, N_("Height"), &drawData.height },
-/*WT*/ 	{ DESC_DIM, N_("Width"), &drawData.width },
-/*OI*/  { DESC_POS, N_("Origin: X,Y"), &drawData.origin },
-/*AL*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle },
-/*A1*/	{ DESC_ANGLE, N_("CCW Angle"), &drawData.angle0 },
-/*A2*/	{ DESC_ANGLE, N_("CW Angle"), &drawData.angle1 },
-/*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
-/*LW*/	{ DESC_LONG, N_("Line Width"), &drawData.lineWidth },
-/*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color },
-/*BX*/  { DESC_BOXED, N_("Boxed"), &drawData.boxed },
-/*BE*/	{ DESC_LIST, N_("Lumber"), &drawData.benchChoice },
-/*OR*/	{ DESC_LIST, N_("Orientation"), &drawData.benchOrient },
-/*DS*/	{ DESC_LIST, N_("Size"), &drawData.dimenSize },
-/*TP*/	{ DESC_POS, N_("Origin: X,Y"), &drawData.endPt[0] },
-/*TA*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle },
-/*TS*/	{ DESC_EDITABLELIST, N_("Font Size"), &drawData.fontSizeInx },
-/*TX*/	{ DESC_TEXT, N_("Text"), &drawData.text },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &drawData.layer },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0], "endpt1" },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1], "endpt2" },
+/*CE*/	{ DESC_POS, N_("Center: X,Y"), &drawData.center, "center" },
+/*RA*/	{ DESC_DIM, N_("Radius"), &drawData.radius, "radius" },
+/*LN*/	{ DESC_DIM, N_("Length"), &drawData.length, "length" },
+/*HT*/  { DESC_DIM, N_("Height"), &drawData.height, "height" },
+/*WT*/ 	{ DESC_DIM, N_("Width"), &drawData.width, "width" },
+/*OI*/  { DESC_POS, N_("Origin: X,Y"), &drawData.origin, "origin1" },
+/*AL*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle, "angle1" },
+/*A1*/	{ DESC_ANGLE, N_("CCW Angle"), &drawData.angle0, "ccwangle" },
+/*A2*/	{ DESC_ANGLE, N_("CW Angle"), &drawData.angle1, "cwangle" },
+/*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount, "pointcount" },
+/*LW*/	{ DESC_LONG, N_("Line Width"), &drawData.lineWidth, "linewidth" },
+/*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color, "color" },
+/*BX*/  { DESC_BOXED, N_("Boxed"), &drawData.boxed, "boxed" },
+/*BE*/	{ DESC_LIST, N_("Lumber"), &drawData.benchChoice, "lumber" },
+/*OR*/	{ DESC_LIST, N_("Orientation"), &drawData.benchOrient, "orientation" },
+/*DS*/	{ DESC_LIST, N_("Size"), &drawData.dimenSize, "size" },
+/*TP*/	{ DESC_POS, N_("Origin: X,Y"), &drawData.endPt[0], "origin2" },
+/*TA*/	{ DESC_FLOAT, N_("Angle"), &drawData.angle, "angle2", 2},
+/*TS*/	{ DESC_EDITABLELIST, N_("Font Size"), &drawData.fontSizeInx, "fontsize" },
+/*TX*/	{ DESC_TEXT, N_("Text"), &drawData.text, "text" },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &drawData.pivot, "pivot" },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &drawData.layer, "layer" },
 		{ DESC_NULL } };
 static int drawSegInx;
 
@@ -506,7 +506,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	trkSeg_p segPtr;
 	int inx;
 	char * title = NULL;
-	char * template_id = NULL;
+	char * template_id = "describe-draw";
 	char * polyType = NULL;
 
 
@@ -545,11 +545,9 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		switch (segPtr->type) {
 		case SEG_STRLIN:
 			title = _("Straight Line");
-			template_id = "describe-straight";
 			break;
 		case SEG_DIMLIN:
 			title = _("Dimension Line");
-			template_id = "describe-dimension";
 			drawDesc[CO].mode = DESC_IGNORE;
 			drawDesc[LW].mode = DESC_IGNORE;
 			drawData.dimenSize = (wIndex_t)segPtr->u.l.option;
@@ -557,7 +555,6 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			break;
 		case SEG_BENCH:
 			title = _("Lumber");
-			template_id = "describe-lumber";
 			drawDesc[LW].mode = DESC_IGNORE;
 			drawDesc[BE].mode =
 			drawDesc[OR].mode = 0;
@@ -566,7 +563,6 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			break;
 		case SEG_TBLEDGE:
 			title = _("Table Edge");
-			template_id = "describe-table";
 			drawDesc[CO].mode = DESC_IGNORE;
 			drawDesc[LW].mode = DESC_IGNORE;
 			break;
@@ -579,7 +575,6 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[RA].mode = 0;
 		if ( segPtr->u.c.a1 >= 360.0 ) {
 			title = _("Circle");
-			template_id = "describe-circle";
 		} else {
 			drawData.angle = segPtr->u.c.a1;
 			drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
@@ -588,7 +583,6 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			drawDesc[A1].mode =
 			drawDesc[A2].mode = 0;
 			title = _("Curved Line");
-			template_id = "describe-curvedline";
 		}
 		break;
 	case SEG_FILCRCL:
@@ -598,7 +592,6 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[RA].mode = 0;
 		drawDesc[LW].mode = DESC_IGNORE;
 		title = _("Filled Circle");
-		template_id = "describe-filledcircle";
 		break;
 	case SEG_POLY:
 		drawData.pointCount = segPtr->u.p.cnt;
@@ -611,7 +604,6 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		switch (segPtr->u.p.polyType) {
 			case RECTANGLE:
 				title = _("Rectangle");
-				template_id = "describe-rectangle";
 				drawDesc[VC].mode = DESC_IGNORE;
 				drawData.width = FindDistance(segPtr->u.p.pts[0], segPtr->u.p.pts[1]);
 				drawDesc[WT].mode = 0;
@@ -623,7 +615,6 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 				break;
 			default:
 				title = _("Polygonal Line");
-				template_id = "describe-polygonal";
 		}
 		break;
 	case SEG_FILPOLY:
@@ -638,7 +629,6 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		switch (segPtr->u.p.polyType) {
 			case RECTANGLE:
 				title =_("Filled Rectangle");
-				template_id = "describe-filledrectangle";
 				drawDesc[VC].mode = DESC_IGNORE;
 				drawData.width = FindDistance(segPtr->u.p.pts[0], segPtr->u.p.pts[1]);
 				drawDesc[WT].mode = 0;
@@ -650,7 +640,6 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 				break;
 			default:
 				title = _("Filled Polygon");
-				template_id = "describe-filledpolygon";
 		}
 		break;
 	case SEG_TEXT:
@@ -667,7 +656,6 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
         drawDesc[CO].mode = 0;  /*Allow Text color setting*/
 		drawDesc[LW].mode = DESC_IGNORE;
 		title = _("Text");
-		template_id = "describe-text";
 		break;
 	default:
 		AbortProg( "bad seg type" );

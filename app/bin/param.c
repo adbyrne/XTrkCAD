@@ -613,6 +613,7 @@ EXPORT void ParamLoadControl(
 		case PD_BITMAP:
 			break;
 		}
+
 }
 
 
@@ -2297,37 +2298,46 @@ static void ParamPositionControl(
 
 typedef void (*layoutControlsProc)(paramData_p, char *, wPos_t, wPos_t );
 
-/* Special Layout for Template part of window only - used in Describe
+/* Special Layout for Templated window only - also used in Describe
  *
  * \param IN group	data definition for the dialog
  * \param IN proc   callback to create the Dialog Controls
+ *
+ *
+ *
  */
 
 static void LayoutControlTemplate(
 		paramGroup_p group,
 		layoutControlsProc proc) {
 	int inx;
-	paramData_p pd;
+	paramData_p pd = group->paramPtr;
 
 	/*Set up Prefix of HelpStr to find content by concatenated field name*/
-	char helpStr[STR_SHORT_SIZE], * helpStrP;
-	strcpy( helpStr, group->nameStr );
-	helpStrP = helpStr+strlen(helpStr);
-	*helpStrP++ = '-';
-	*helpStrP = 0;
+	char prefixStr[STR_SHORT_SIZE], helpStr[STR_SHORT_SIZE];
+	if (group->winOption&BO_DESCTEMPLATE) {
+			/* For Describe, use the current template e.g., describe-cornu- as prefix*/
+		sprintf(prefixStr,"%s",group->template_id);
+	} else {
+			/* Otherwise use the dialog name e.g., tip- */
+		sprintf(prefixStr,"%s",group->nameStr);
+	}
 
 	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
 			pd->group->win = group->win;
-			pd->winOption |= BO_USETEMPLATE;				/* Yes Template */
+			pd->winOption |= BO_USETEMPLATE;				/* Yes Always Template */
 			if ( (pd->option&PDO_DLGIGNORE) != 0 ) continue; /*Ignore unused */
 			if ( pd->option&PDO_DLGCMDBUTTON) 	   continue; /*Ignore buttons */
-			if ( pd->nameStr )
-				strcpy( helpStrP, pd->nameStr );
+
+			if ( pd->assigned_helpStr )
+				sprintf( helpStr, "%s-%s", prefixStr, pd->assigned_helpStr );  /* Add name of field */
+			else
+				sprintf( helpStr, "%s-%s", prefixStr, pd->nameStr);
 			int x,y;
 			if (group->layoutProc)
 						group->layoutProc( pd, inx, 0, &x, &y );
 			/* Callback the Create or Update routine */
-			proc( pd, helpStr, 0, 0 );  /* Note -> This is where the controls may be found */
+			proc( pd, helpStr, 0, 0 );  /* Note -> This is the first time where the controls may be built, or associated */
 	}
 
 }
@@ -2339,7 +2349,7 @@ static void LayoutControls(
 		wPos_t * retW,
 		wPos_t * retH )
 {
-	/* Use definitions for Template Layout (not Grid) */
+	/* Use definitions for Template Layout including Describe */
 	if (group->winOption&BO_USETEMPLATE) {
 		LayoutControlTemplate(group, proc);
 		if ( retW )
@@ -2624,26 +2634,26 @@ wWin_p ParamCreateDialog(
 		paramActionCancelProc cancelProc,
 		BOOL_T needHelpButton,
 		paramLayoutProc layoutProc,
-		long winOption,
+		long Option,
 		paramChangeProc changeProc )
 {
 	char helpStr[STR_SHORT_SIZE];
 	wPos_t w0, h0;
-	char * cancelLabel = (winOption&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
+	char * cancelLabel = (Option&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
     long useTemplate = 0L;
 
-	winOption &= ~PD_F_ALT_CANCELLABEL;
+	Option &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
 	group->cancelProc = cancelProc;
 	group->layoutProc = layoutProc;
 	group->changeProc = changeProc;
-	group->winOption = winOption;
-	if ( (winOption&F_CENTER) == 0 )
-		winOption |= F_RECALLPOS;
-	if ( (winOption&F_RESIZE) != 0 )
-		winOption |= F_RECALLSIZE;
+	group->winOption = Option;
+	if ( (Option&F_CENTER) == 0 )
+		Option |= F_RECALLPOS;
+	if ( (Option&F_RESIZE) != 0 )
+		Option |= F_RECALLSIZE;
 
-    long winOptions = winOption;
+    long winOptions = Option;
     
     if( group->options & PGO_DIALOGTEMPLATE) {    
         useTemplate = TRUE;
@@ -2651,38 +2661,49 @@ wWin_p ParamCreateDialog(
     } else {
         winOptions |= F_AUTOSIZE;
     }
-    if (winOption&F_USETEMPLATE)
+    if (Option&F_USETEMPLATE)
     	winOptions |= BO_USETEMPLATE;
 
-  	
-	group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptions, ParamDlgProc, group );
+    if (Option&F_DESCTEMPLATE) {
+    	winOptions |= BO_DESCTEMPLATE;
+    	sprintf(helpStr,"%s",group->template_id);
+    }
 
+    if (Option & F_USETEMPLATE) {
+    	group->winOption |= BO_USETEMPLATE;
+	}
+	if (Option & F_DESCTEMPLATE) {
+		group->winOption |= BO_DESCTEMPLATE;
+	}
+	/* If we are just adding content, don't worry about windows or buttons */
+	if (Option & F_DESCADDTEMPLATE) {
+		winOptions |= BO_DESCADDTEMPLATE;
+		wWinPopupCreate( group->win, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptions, ParamDlgProc, group );
+	} else {
+		group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptions, ParamDlgProc, group );
 
-	if (winOption & F_USETEMPLATE) {
-		group->winOption |= BO_USETEMPLATE;
-	}
+		if ( okLabel && okProc ) {
+			sprintf( helpStr, "%s-ok", group->nameStr );
+			group->okB = wButtonCreate( group->win, 0, 0, "id-ok", okLabel, BB_DEFAULT|winOptions, 0, (wButtonCallBack_p)ParamButtonOk, group );
+		}
+		if ( group->cancelProc ) {
+			sprintf( helpStr, "%s-cancel", group->nameStr );
+			group->cancelB = wButtonCreate( group->win, 0, 0, "id-cancel", cancelLabel, BB_CANCEL|winOptions, 0, (wButtonCallBack_p)ParamButtonCancel, group );
+		}
+		if ( needHelpButton ) {
+			sprintf( helpStr, "cmd%s", group->nameStr );
+			helpStr[3] = toupper((unsigned char)helpStr[3]);
+			group->helpB = wButtonCreate( group->win, 0, 0, "id-help", _("Help"), BB_HELP|winOptions, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
+		}
 
-	if ( okLabel && okProc ) {
-		sprintf( helpStr, "%s-ok", group->nameStr );
-		group->okB = wButtonCreate( group->win, 0, 0, helpStr, okLabel, BB_DEFAULT|winOption, 0, (wButtonCallBack_p)ParamButtonOk, group );
 	}
-	if ( group->cancelProc ) {
-		sprintf( helpStr, "%s-cancel", group->nameStr );
-		group->cancelB = wButtonCreate( group->win, 0, 0, NULL, cancelLabel, BB_CANCEL|winOption, 0, (wButtonCallBack_p)ParamButtonCancel, group );
-	}
-	if ( needHelpButton ) {
-		sprintf( helpStr, "cmd%s", group->nameStr );
-		helpStr[3] = toupper((unsigned char)helpStr[3]);
-		group->helpB = wButtonCreate( group->win, 0, 0, NULL, _("Help"), BB_HELP|winOption, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
-	}
-
 
 	LayoutControls( group, ParamCreateControl, &group->origW, &group->origH );
 
 	group->origW += DlgSepRight;
 	group->origH += DlgSepBottom;
 	wWinGetSize( group->win, &w0, &h0 );
-	if ( (winOption&F_RESIZE) ) {
+	if ( (Option&F_RESIZE) ) {
 		if ( group->origW != w0 ||
 			 group->origH != h0 ) {
 			LayoutControls( group, ParamPositionControl, NULL, NULL );
@@ -2706,12 +2727,14 @@ EXPORT void ParamLayoutDialog(
 {
 	wPos_t w, h;
 	LayoutControls( pg, ParamPositionControl, &w, &h );
-	w += DlgSepRight;
-	h += DlgSepBottom;
-	if ( w != pg->origW || h != pg->origH ) {
-		wWinSetSize( pg->win, w, h );
-		pg->origW = w;
-		pg->origH = h;
+	if (w>0 && h>0) {
+		w += DlgSepRight;
+		h += DlgSepBottom;
+		if ( w != pg->origW || h != pg->origH ) {
+			wWinSetSize( pg->win, w, h );
+			pg->origW = w;
+			pg->origH = h;
+		}
 	}
 }
 

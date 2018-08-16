@@ -347,6 +347,7 @@ void wWinShow(
                 //gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
                 //gtk_widget_set_size_request(win->widget, win->w-20, win->h);
 
+
                 if (win->option&F_MENUBAR) {
                     gtk_widget_set_size_request(win->menubar, win->w-20, MENUH);
                     GtkAllocation allocation;
@@ -359,6 +360,8 @@ void wWinShow(
         if (!win->shown) {
             gtk_widget_show_all(win->gtkwin);
             //gtk_widget_show_all(win->widget);
+        } else {
+        	gtk_widget_queue_draw(win->gtkwin);
         }
 
         gdk_window_raise(gtk_widget_get_window(win->gtkwin));
@@ -379,6 +382,7 @@ void wWinShow(
         	gtk_window_maximize(GTK_WINDOW(win->gtkwin));
         	maximize_at_next_show = FALSE;
         }
+
     } else {
         wFlush();
         saveSize(win);
@@ -1085,6 +1089,94 @@ wWin_p wWinMainCreate(
 }
 
 
+
+/*
+ *  Recursively walk the tree hiding everything - this is used to reset the Describe Super Window
+ *
+ */
+void wlibHideAllReveals(GtkWidget* parent) {
+
+		if (GTK_IS_REVEALER(parent)) {
+				gtk_revealer_set_reveal_child(GTK_REVEALER(parent),FALSE);
+		}
+
+		if (GTK_IS_BIN(parent)) {
+				GtkWidget *child = gtk_bin_get_child(GTK_BIN(parent));
+				wlibHideAllReveals(child);
+				return;
+		}
+
+		if (GTK_IS_CONTAINER(parent)) {
+				GList *children = gtk_container_get_children(GTK_CONTAINER(parent));
+				if (children && children->data) {
+					do {
+					  wlibHideAllReveals((GtkWidget *)(children->data));
+					} while ((children = g_list_next(children)) != NULL);
+				}
+				if (children) {
+				    g_list_free(children);
+				}
+		}
+
+}
+
+void wlibHideAllRevealsExcept(wWin_p parent, char * id) {
+
+	GtkWidget * box = wlibGetWidgetFromName( parent, parent->template_id, "contentbox", FALSE );
+
+	if (box)
+		wlibHideAllReveals(box);
+
+	GtkRevealer * reveal = (GtkRevealer *)wlibGetWidgetFromName( parent, id, "reveal", FALSE );
+
+	if (reveal)
+		gtk_revealer_set_reveal_child(GTK_REVEALER(reveal), TRUE);
+
+	gtk_widget_queue_draw(parent->gtkwin);
+
+}
+
+/*
+ * Add extra template into window and hook up to the window under the template-id.contentbox
+ */
+
+void wlibAddTemplate(wWin_p parent,const char * nameStr,long option) {
+	 GtkWidget * reveal;
+
+	/* See if we already have it */
+	if (!wlibGetWidgetFromName( parent, nameStr, "reveal", TRUE )) {
+
+		wlibAddContentFromTemplate(parent, nameStr);
+
+		reveal = wlibGetWidgetFromName( parent, nameStr, "reveal", FALSE );
+		GtkWidget * box = wlibGetWidgetFromName( parent, parent->template_id, "contentbox", FALSE );
+
+		gtk_box_pack_start(GTK_BOX(box),reveal, FALSE, FALSE, 3);
+	} else {
+		reveal = wlibGetWidgetFromName( parent, nameStr, "reveal", FALSE );
+	}
+
+	wlibHideAllReveals(parent->gtkwin);
+
+	/* But reveal this one! */
+
+	gtk_revealer_set_reveal_child(GTK_REVEALER(reveal), TRUE);
+
+	gtk_widget_queue_draw(parent->gtkwin);
+
+}
+
+void wlibRedraw(wWin_p parent) {
+
+	GtkWidget * box = wlibGetWidgetFromName( parent, parent->template_id, "contentbox", TRUE );
+	if (box)
+		gtk_widget_queue_draw(box);
+	gtk_widget_queue_draw(parent->gtkwin);
+
+}
+
+
+
 /**
  * Create a window.
  * Default width and height are replaced by values stored in the configuration
@@ -1215,21 +1307,33 @@ wWin_p wWinPopupCreate(
         parent = gtkMainW;
     }
 
-    if( option & BO_USETEMPLATE ) {
-        win = wlibCreateFromTemplate(parent, 
-                                  W_POPUP, 
-                                  x, y, 
-                                  labelStr, 
-                                  nameStr,
-                                  option,
-                                  winProc,
-                                  data );
+    if (!(option & BO_DESCADDTEMPLATE)) {  /*Only add*/
+
+		if( option & BO_USETEMPLATE ) {
+
+			win = wlibCreateFromTemplate(parent,
+									  W_POPUP,
+									  x, y,
+									  labelStr,
+									  nameStr,
+									  option,
+									  winProc,
+									  data );
+		} else {
+			win = wWinCommonCreate(parent, W_POPUP, x, y, labelStr, nameStr, option,
+							   winProc, data);
+		}
     } else {
-        win = wWinCommonCreate(parent, W_POPUP, x, y, labelStr, nameStr, option,
-                           winProc, data);
-    }    
+    	win = parent;
+    }
+
+    if (option & BO_DESCTEMPLATE) {
+    	wlibAddTemplate(win,helpStr,option);
+    }
+
     return win;
 }
+
 
 
 /**

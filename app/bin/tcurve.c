@@ -352,21 +352,21 @@ static struct {
 		} crvData;
 typedef enum { E0, Z0, E1, Z1, CE, RA, TU, SE, LN, AL, A1, A2, GR, PV, LY } crvDesc_e;
 static descData_t crvDesc[] = {
-/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &crvData.endPt[0] },
-/*Z0*/	{ DESC_DIM, N_("Z"), &crvData.elev[0] },
-/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &crvData.endPt[1] },
-/*Z1*/	{ DESC_DIM, N_("Z"), &crvData.elev[1] },
-/*CE*/	{ DESC_POS, N_("Center: X,Y"), &crvData.center },
-/*RA*/	{ DESC_DIM, N_("Radius"), &crvData.radius },
-/*TU*/	{ DESC_LONG, N_("Turns"), &crvData.turns },
-/*SE*/	{ DESC_DIM, N_("Separation"), &crvData.separation },
-/*LN*/	{ DESC_DIM, N_("Length"), &crvData.length },
-/*AL*/	{ DESC_FLOAT, N_("Angular Length"), &crvData.angle },
-/*A1*/	{ DESC_ANGLE, N_("CCW Angle"), &crvData.angle0 },
-/*A2*/	{ DESC_ANGLE, N_("CW Angle"), &crvData.angle1 },
-/*GR*/	{ DESC_FLOAT, N_("Grade"), &crvData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &crvData.pivot },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &crvData.layerNumber },
+/*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &crvData.endPt[0], "endpt1" },
+/*Z0*/	{ DESC_DIM, N_("Z"), &crvData.elev[0], "elev1" },
+/*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &crvData.endPt[1], "endpt2" },
+/*Z1*/	{ DESC_DIM, N_("Z"), &crvData.elev[1], "elev2" },
+/*CE*/	{ DESC_POS, N_("Center: X,Y"), &crvData.center, "center" },
+/*RA*/	{ DESC_DIM, N_("Radius"), &crvData.radius, "radius" },
+/*TU*/	{ DESC_LONG, N_("Turns"), &crvData.turns, "turns" },
+/*SE*/	{ DESC_DIM, N_("Separation"), &crvData.separation, "separation" },
+/*LN*/	{ DESC_DIM, N_("Length"), &crvData.length, "length" },
+/*AL*/	{ DESC_FLOAT, N_("Angular Length"), &crvData.angle, "angularlength" },
+/*A1*/	{ DESC_ANGLE, N_("CCW Angle"), &crvData.angle0, "ccwangle" },
+/*A2*/	{ DESC_ANGLE, N_("CW Angle"), &crvData.angle1, "cwangle"},
+/*GR*/	{ DESC_FLOAT, N_("Grade"), &crvData.grade, "grade" },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &crvData.pivot, "pivot" },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &crvData.layerNumber, "layer" },
 		{ DESC_NULL } };
 
 static void UpdateCurve( track_p trk, int inx, descData_p descUpd, BOOL_T final )
@@ -628,13 +628,13 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 	if ( xx->helixTurns ) {
 		if ( !xx->circle )
 			crvDesc[SE].mode = DESC_RO;
-		DoDescribe( _("Helix Track"), "describe-helix", trk, crvDesc, UpdateCurve );
+		DoDescribe( _("Helix Track"), "describe-curve", trk, crvDesc, UpdateCurve );
 	} else if ( xx->circle ) {
 		crvDesc[TU].mode |= DESC_IGNORE;
-		DoDescribe( _("Circle Track"), "describe-circletrack", trk, crvDesc, UpdateCurve );
+		DoDescribe( _("Circle Track"), "describe-curve", trk, crvDesc, UpdateCurve );
 	} else {
 		crvDesc[TU].mode |= DESC_IGNORE;
-		DoDescribe( _("Curved Track"), "describe-curvedtrack", trk, crvDesc, UpdateCurve );
+		DoDescribe( _("Curved Track"), "describe-curve", trk, crvDesc, UpdateCurve );
 	}
 }
 

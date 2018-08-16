@@ -233,24 +233,24 @@ static struct {
 		} bezData;
 typedef enum { P0, A0, R0, C0, Z0, CP1, CP2, P1, A1, R1, C1, Z1, RA, LN, GR, LY, WI, CO } crvDesc_e;
 static descData_t bezDesc[] = {
-/*P0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &bezData.pos[0] },
-/*A0*/  { DESC_ANGLE, N_("End Angle"), &bezData.angle[0] },
-/*R0*/  { DESC_DIM, N_("Radius"), &bezData.radius[0] },
-/*C0*/	{ DESC_POS, N_("Center X,Y"), &bezData.center[0]},
-/*Z0*/	{ DESC_DIM, N_("Z1"), &bezData.elev[0] },
-/*CP1*/	{ DESC_POS, N_("Ctl Pt 1: X,Y"), &bezData.pos[1] },
-/*CP2*/	{ DESC_POS, N_("Ctl Pt 2: X,Y"), &bezData.pos[2] },
-/*P1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &bezData.pos[3] },
-/*A1*/  { DESC_ANGLE, N_("End Angle"), &bezData.angle[1] },
-/*R1*/  { DESC_DIM, N_("Radius"), &bezData.radius[1] },
-/*C1*/	{ DESC_POS, N_("Center X,Y"), &bezData.center[1]},
-/*Z1*/	{ DESC_DIM, N_("Z2"), &bezData.elev[1] },
-/*RA*/	{ DESC_DIM, N_("MinRadius"), &bezData.radius },
-/*LN*/	{ DESC_DIM, N_("Length"), &bezData.length },
-/*GR*/	{ DESC_FLOAT, N_("Grade"), &bezData.grade },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &bezData.layerNumber },
-/*WI*/  { DESC_LONG, N_("Line Width"), &bezData.width},
-/*CO*/  { DESC_COLOR, N_("Line Color"), &bezData.color},
+/*P0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &bezData.pos[0], "endpt1" },
+/*A0*/  { DESC_ANGLE, N_("End Angle"), &bezData.angle[0], "angle1" },
+/*R0*/  { DESC_DIM, N_("Radius"), &bezData.radius[0], "radius1" },
+/*C0*/	{ DESC_POS, N_("Center X,Y"), &bezData.center[0], "center1" },
+/*Z0*/	{ DESC_DIM, N_("Z1"), &bezData.elev[0], "elev1" },
+/*CP1*/	{ DESC_POS, N_("Ctl Pt 1: X,Y"), &bezData.pos[1], "ctlpt1" },
+/*CP2*/	{ DESC_POS, N_("Ctl Pt 2: X,Y"), &bezData.pos[2], "ctlpt2" },
+/*P1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &bezData.pos[3], "endpt2" },
+/*A1*/  { DESC_ANGLE, N_("End Angle"), &bezData.angle[1], "angle2" },
+/*R1*/  { DESC_DIM, N_("Radius"), &bezData.radius[1], "radius2" },
+/*C1*/	{ DESC_POS, N_("Center X,Y"), &bezData.center[1], "center2" },
+/*Z1*/	{ DESC_DIM, N_("Z2"), &bezData.elev[1], "elev2" },
+/*RA*/	{ DESC_DIM, N_("MinRadius"), &bezData.radius, "minradius" },
+/*LN*/	{ DESC_DIM, N_("Length"), &bezData.length, "length" },
+/*GR*/	{ DESC_FLOAT, N_("Grade"), &bezData.grade, "grade" },
+/*LY*/	{ DESC_LAYER, N_("Layer"), &bezData.layerNumber, "layer" },
+/*WI*/  { DESC_LONG, N_("Line Width"), &bezData.width, "linewidth" },
+/*CO*/  { DESC_COLOR, N_("Line Color"), &bezData.color, "color" },
 		{ DESC_NULL } };
 
 static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final )
@@ -433,9 +433,9 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	bezDesc[CO].mode = GetTrkType(trk) == T_BEZIER?DESC_IGNORE:0;
 	
 	if (GetTrkType(trk) == T_BEZIER)
-		DoDescribe( _("Bezier Track"), "describe-beziertrack", trk, bezDesc, UpdateBezier );
+		DoDescribe( _("Bezier Track"), "describe-bezier", trk, bezDesc, UpdateBezier );
 	else
-		DoDescribe( _("Bezier Line"), "describe-bezierline", trk, bezDesc, UpdateBezier );
+		DoDescribe( _("Bezier Line"), "describe-bezier", trk, bezDesc, UpdateBezier );
 
 }
 

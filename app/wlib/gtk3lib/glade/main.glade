@@ -307,9 +307,16 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBox" id="main-text-Fontsize">
+                                  <object class="GtkComboBox" id="main-text-fontsize">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
+                                    <property name="has_entry">True</property>
+                                    <child internal-child="entry">
+                                      <object class="GtkEntry">
+                                        <property name="can_focus">False</property>
+                                        <property name="width_chars">5</property>
+                                      </object>
+                                    </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -370,17 +377,17 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkRevealer" id="main-text-Boxed.reveal">
+                          <object class="GtkRevealer" id="main-text-boxed.reveal">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="transition_type">none</property>
                             <property name="reveal_child">True</property>
                             <child>
-                              <object class="GtkBox" id="main-text-Boxed.box">
+                              <object class="GtkBox" id="main-text-boxed.box">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <child>
-                                  <object class="GtkCheckButton" id="main-text-Boxed">
+                                  <object class="GtkCheckButton" id="main-text-boxed">
                                     <property name="label" translatable="yes">Boxed</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>

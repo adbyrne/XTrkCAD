@@ -178,13 +178,13 @@ static struct {
 } carData;
 typedef enum { IT, PN, AN, LN, WD, DE, NM } carDesc_e;
 static descData_t carDesc[] = {
-    /*IT*/	{ DESC_LONG, N_("Index"), &carData.index },
-    /*PN*/	{ DESC_POS, N_("Position"), &carData.pos },
-    /*AN*/	{ DESC_ANGLE, N_("Angle"), &carData.angle },
-    /*LN*/	{ DESC_DIM, N_("Length"), &carData.length },
-    /*WD*/	{ DESC_DIM, N_("Width"), &carData.width },
-    /*DE*/	{ DESC_STRING, N_("Description"), &carData.desc, sizeof(carData.desc)  },
-    /*NM*/	{ DESC_STRING, N_("Rep Marks"), &carData.number, sizeof(carData.number) },
+    /*IT*/	{ DESC_LONG, N_("Index"), &carData.index, "index" },
+    /*PN*/	{ DESC_POS, N_("Position"), &carData.pos, "position"},
+    /*AN*/	{ DESC_ANGLE, N_("Angle"), &carData.angle, "angle" },
+    /*LN*/	{ DESC_DIM, N_("Length"), &carData.length, "length" },
+    /*WD*/	{ DESC_DIM, N_("Width"), &carData.width, "width" },
+    /*DE*/	{ DESC_STRING, N_("Description"), &carData.desc, "description", sizeof(carData.desc)  },
+    /*NM*/	{ DESC_STRING, N_("Rep Marks"), &carData.number, "repmarks", sizeof(carData.number) },
     { DESC_NULL }
 };
 

@@ -506,7 +506,7 @@ wList_p wListCreate(
 
     //Try to find element name in Template, if not found allocate a new one
     if (option&BO_USETEMPLATE) {
-    	bl->widget = wlibWidgetFromId(parent, helpStr );
+    	bl->widget = wlibWidgetFromIdWarn(parent, helpStr );
     	if (bl->widget)
     		bl->fromTemplate = TRUE;
     	bl->template_id = strdup(helpStr);

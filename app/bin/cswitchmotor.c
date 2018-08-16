@@ -218,11 +218,11 @@ static struct {
 
 typedef enum { NM, NOR, REV, PS, TO } switchmotorDesc_e;
 static descData_t switchmotorDesc[] = {
-/*NM */  { DESC_STRING, N_("Name"), &switchmotorData.name, sizeof(switchmotorData.name) },
-/*NOR*/  { DESC_STRING, N_("Normal"), &switchmotorData.normal, sizeof(switchmotorData.normal)  },
-/*REV*/  { DESC_STRING, N_("Reverse"), &switchmotorData.reverse, sizeof(switchmotorData.reverse)  },
-/*PS */  { DESC_STRING, N_("Point Sense"), &switchmotorData.pointsense, sizeof(switchmotorData.pointsense)  },
-/*TO */  { DESC_LONG, N_("Turnout"), &switchmotorData.turnout },
+/*NM */  { DESC_STRING, N_("Name"), &switchmotorData.name, "name", sizeof(switchmotorData.name) },
+/*NOR*/  { DESC_STRING, N_("Normal"), &switchmotorData.normal, "normal", sizeof(switchmotorData.normal)  },
+/*REV*/  { DESC_STRING, N_("Reverse"), &switchmotorData.reverse, "reverse", sizeof(switchmotorData.reverse)  },
+/*PS */  { DESC_STRING, N_("Point Sense"), &switchmotorData.pointsense, "sense", sizeof(switchmotorData.pointsense)  },
+/*TO */  { DESC_LONG, N_("Turnout"), &switchmotorData.turnout, "turnout" },
 	 { DESC_NULL } };
 
 static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart )

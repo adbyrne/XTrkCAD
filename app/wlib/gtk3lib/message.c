@@ -176,7 +176,7 @@ wMessage_p wMessageCreateEx(
     b->message = message;
     b->labelWidth = width;
     if (flags&BO_USETEMPLATE) {
-    	b->labelWidget = wlibWidgetFromId( parent, helpStr);
+    	b->labelWidget = wlibWidgetFromIdWarn( parent, helpStr);
     	b->fromTemplate = TRUE;
     	b->template_id = strdup(helpStr);
     	/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/

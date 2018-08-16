@@ -73,7 +73,7 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, 
 	g_object_unref( (gpointer)pixbuf );
 	
 	if (options&BO_USETEMPLATE) {
-		bt->widget = wlibWidgetFromId( parent, helpStr);
+		bt->widget = wlibWidgetFromIdWarn( parent, helpStr);
 		if (bt->widget) bt->fromTemplate = TRUE;
 		bt->template_id = strdup(helpStr);
 		/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/

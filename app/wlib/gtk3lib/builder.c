@@ -165,7 +165,7 @@ wlibWidgetFromIdWarn( wWin_p win, const char *id)
 {
 	GtkWidget * wi = wlibWidgetFromId(win,id);
 	if (wi) return wi;
-	GString *errorMessage = g_string_new("Could not load sub-widget ");
+	GString *errorMessage = g_string_new("Could not find widget with id: ");
 	g_string_append_printf(errorMessage, "%s", id);
 	wNoticeEx( NT_ERROR,
 		   errorMessage->str,
@@ -194,16 +194,15 @@ wlibWidgetFromId( wWin_p win, const char *id)
     return (GtkWidget *)wi;
 }
 
-GtkWidget *
-wlibAddHiddenContentFromTemplate( wWin_p win, const char *nameStr)
+void
+wlibAddContentFromTemplate( wWin_p win, const char *nameStr)
 {
 	GString *filename;
 	filename = wlibFileNameFromDialog( nameStr );
 	GError *error = NULL;
     int success = gtk_builder_add_from_file(win->builder, filename->str, &error);
-    return NULL;
     if (success == 0) {
-		GString *errorMessage = g_string_new("Could not load sub-widget ");
+		GString *errorMessage = g_string_new("Could not load sub-widget with name: ");
 		if (error)
 			g_string_append(errorMessage,error->message);
 		wNoticeEx( NT_ERROR,
@@ -214,10 +213,6 @@ wlibAddHiddenContentFromTemplate( wWin_p win, const char *nameStr)
         g_clear_error (&error);
 		exit(1);
     }
-    GString * name = g_string_new(nameStr);
-    GtkWidget * wi = (GtkWidget *)wlibGetWidgetFromName( win, name->str, "reveal", FALSE );
-    g_string_free(name, TRUE);
-    return wi;
 
 }
 

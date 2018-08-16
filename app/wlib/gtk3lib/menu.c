@@ -917,7 +917,7 @@ wMenu_p wMenuCreate(
 	if (option&BO_USETEMPLATE) {
         char name[256];
         sprintf(name,"%s",helpStr);
-		 m->widget = wlibWidgetFromId( parent, name );
+		 m->widget = wlibWidgetFromIdWarn( parent, name );
 		 if (m->widget) m->fromTemplate = TRUE;
 		 m->template_id = strdup(helpStr);
 	} else {

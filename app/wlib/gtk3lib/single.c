@@ -280,7 +280,7 @@ wString_p wStringCreate(
 	wlibComputePos((wControl_p)b);
 
 	if (option&BO_USETEMPLATE) {
-		b->widget = wlibWidgetFromId( parent, helpStr);
+		b->widget = wlibWidgetFromIdWarn( parent, helpStr);
 		b->fromTemplate = TRUE;
 		b->template_id = strdup(helpStr);
 		/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/

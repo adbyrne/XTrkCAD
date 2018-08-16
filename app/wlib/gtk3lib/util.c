@@ -66,6 +66,11 @@ const char * wNames[] = {
     "BOX"
 };
 
+/* Set up flag to show backend supports templates */
+wBool_t wUITemplates(void) {
+	return TRUE;
+}
+
 
 static wBool_t reverseIcon =
 #if defined(linux)

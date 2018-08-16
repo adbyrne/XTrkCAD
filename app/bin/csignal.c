@@ -232,10 +232,10 @@ static struct {
 
 typedef enum { NM, PS, OR, HD } signalDesc_e;
 static descData_t signalDesc[] = {
-    /* NM */ { DESC_STRING, N_("Name"),     &signalProperties.name, sizeof(signalProperties.name) },
-    /* PS */ { DESC_POS,    N_("Position"), &signalProperties.pos },
-    /* OR */ { DESC_ANGLE,  N_("Angle"),    &signalProperties.orient },
-    /* HD */ { DESC_LONG,   N_("Number Of Heads"), &signalProperties.heads },
+    /* NM */ { DESC_STRING, N_("Name"),     &signalProperties.name, "name", sizeof(signalProperties.name) },
+    /* PS */ { DESC_POS,    N_("Position"), &signalProperties.pos , "position"},
+    /* OR */ { DESC_ANGLE,  N_("Angle"),    &signalProperties.orient, "angle" },
+    /* HD */ { DESC_LONG,   N_("Number Of Heads"), &signalProperties.heads, "numberofheads" },
     { DESC_NULL } };
 
 static void UpdateSignalProperties ( track_p trk, int inx, descData_p
