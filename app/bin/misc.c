@@ -1805,7 +1805,7 @@ static void DoAddElev(void *);
 static paramFloatRange_t rn1000_1000 = { -1000.0, 1000.0 };
 static paramData_t addElevPLs[] = { { PD_FLOAT, &addElevValueV, "value",
 		PDO_DIM, &rn1000_1000, NULL, 0 } };
-static paramGroup_t addElevPG = { "addElev", 0, addElevPLs, sizeof addElevPLs
+static paramGroup_t addElevPG = { "addelev", 0, addElevPLs, sizeof addElevPLs
 		/ sizeof addElevPLs[0] };
 
 static void DoAddElev(void * junk) {
@@ -1822,7 +1822,7 @@ static void ShowAddElevations(void) {
 	if (addElevW == NULL)
 		addElevW = ParamCreateDialog(&addElevPG,
 				MakeWindowTitle(_("Change Elevations")), _("Change"), DoAddElev,
-				wHide, FALSE, NULL, 0, NULL);
+				wHide, FALSE, NULL, F_USETEMPLATE, NULL);
 	wShow(addElevW);
 }
 
