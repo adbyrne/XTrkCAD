@@ -6,6 +6,7 @@ set(gladefiles
     "enum.glade"
     "layout.glade"
     "note.glade"
+    "outputbitmap.glade"
     "pref.glade"
     "pricelist.glade"
     "prmfile.glade"
