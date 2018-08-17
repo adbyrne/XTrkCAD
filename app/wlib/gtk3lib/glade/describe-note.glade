@@ -2,155 +2,149 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkTextBuffer" id="describe-note-textbuffer">
+    <property name="text" translatable="yes">Replace this!</property>
+  </object>
   <object class="GtkRevealer" id="describe-note.reveal">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="transition_type">none</property>
     <property name="reveal_child">True</property>
     <child>
-      <object class="GtkListBox" id="describe-note-list">
+      <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="halign">start</property>
-        <property name="valign">start</property>
-        <property name="selection_mode">none</property>
+        <property name="orientation">vertical</property>
         <child>
-          <object class="GtkListBoxRow" id="describe-note-position.row">
+          <object class="GtkFrame">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
+            <property name="label_xalign">0</property>
+            <property name="shadow_type">in</property>
             <child>
-              <object class="GtkFrame">
+              <object class="GtkAlignment">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">in</property>
+                <property name="top_padding">3</property>
+                <property name="bottom_padding">3</property>
+                <property name="right_padding">3</property>
                 <child>
-                  <object class="GtkAlignment">
+                  <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="top_padding">3</property>
-                    <property name="bottom_padding">3</property>
-                    <property name="right_padding">3</property>
+                    <property name="row_spacing">3</property>
+                    <property name="column_spacing">3</property>
                     <child>
-                      <object class="GtkGrid">
+                      <object class="GtkLabel">
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
-                        <property name="row_spacing">3</property>
-                        <property name="column_spacing">3</property>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="valign">center</property>
-                            <property name="label" translatable="yes">Position X,Y:</property>
-                            <property name="justify">right</property>
-                            <property name="width_chars">15</property>
-                            <property name="xalign">1</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-note-positionx">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">1</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="describe-note-positiony">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="valign">center</property>
-                            <property name="width_chars">10</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">2</property>
-                            <property name="top_attach">0</property>
-                          </packing>
-                        </child>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <property name="label" translatable="yes">Position X,Y:</property>
+                        <property name="justify">right</property>
+                        <property name="width_chars">15</property>
+                        <property name="xalign">1</property>
                       </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="describe-note-positionx">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="valign">center</property>
+                        <property name="width_chars">10</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="describe-note-positiony">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="valign">center</property>
+                        <property name="width_chars">10</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">0</property>
+                      </packing>
                     </child>
                   </object>
                 </child>
-                <child type="label_item">
-                  <placeholder/>
-                </child>
               </object>
             </child>
+            <child type="label_item">
+              <placeholder/>
+            </child>
           </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
         </child>
         <child>
-          <object class="GtkListBoxRow" id="describe-note-layer.row">
+          <object class="GtkBox">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="can_focus">False</property>
             <child>
-              <object class="GtkBox">
+              <object class="GtkLabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <child>
-                  <object class="GtkLabel">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Layer:</property>
-                    <property name="width_chars">15</property>
-                    <property name="xalign">1</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkComboBox" id="describe-note-layer">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">1</property>
-                  </packing>
-                </child>
+                <property name="label" translatable="yes">Layer:</property>
+                <property name="width_chars">15</property>
+                <property name="xalign">1</property>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">False</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBox" id="describe-note-layer">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
         </child>
         <child>
-          <object class="GtkListBoxRow" id="describe-note-text.row">
+          <object class="GtkScrolledWindow" id="describe-note-text.scrollwindow">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="shadow_type">in</property>
+            <property name="propagate_natural_width">True</property>
+            <property name="propagate_natural_height">True</property>
             <child>
-              <object class="GtkScrolledWindow" id="describe-note-text.scrollwindow">
+              <object class="GtkTextView" id="describe-note-text">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="margin_left">6</property>
-                <property name="margin_right">6</property>
-                <property name="margin_top">6</property>
-                <property name="margin_bottom">6</property>
-                <property name="shadow_type">in</property>
-                <property name="propagate_natural_width">True</property>
-                <property name="propagate_natural_height">True</property>
-                <child>
-                  <object class="GtkTextView" id="describe-note-text">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="wrap_mode">word</property>
-                  </object>
-                </child>
+                <property name="buffer">describe-note-textbuffer</property>
               </object>
             </child>
           </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
         </child>
       </object>
     </child>

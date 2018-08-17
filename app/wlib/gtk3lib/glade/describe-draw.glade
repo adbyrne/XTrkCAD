@@ -2,6 +2,9 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkTextBuffer" id="describe-draw-textbuffer1">
+    <property name="text" translatable="yes">Fill in your own values here!</property>
+  </object>
   <object class="GtkRevealer" id="describe-draw.reveal">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -772,6 +775,7 @@
                   <object class="GtkTextView" id="describe-draw-text">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="buffer">describe-draw-textbuffer1</property>
                   </object>
                 </child>
               </object>
