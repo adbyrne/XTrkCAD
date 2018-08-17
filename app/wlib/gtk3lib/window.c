@@ -1170,8 +1170,9 @@ void wlibRedraw(wWin_p parent) {
 
 	GtkWidget * box = wlibGetWidgetFromName( parent, parent->template_id, "contentbox", TRUE );
 	if (box)
-		gtk_widget_queue_draw(box);
+		gtk_widget_show_all(box);
 	gtk_widget_queue_draw(parent->gtkwin);
+	gtk_widget_show_all(parent->gtkwin);
 
 }
 
