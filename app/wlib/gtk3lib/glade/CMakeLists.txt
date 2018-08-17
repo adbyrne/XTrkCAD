@@ -1,5 +1,6 @@
 set(gladefiles 
     "cmdopt.glade"
+    "custmgm.glade"
     "display.glade"
     "easement.glade"
     "enum.glade"
@@ -7,6 +8,7 @@ set(gladefiles
     "note.glade"
     "pref.glade"
     "pricelist.glade"
+    "prmfile.glade"
     "rgbcolor.glade"
     "sticky.glade"
     )

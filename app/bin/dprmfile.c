@@ -238,7 +238,7 @@ static paramData_t paramFilePLs[] = {
 	{	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_("Unload"), 0L, FALSE },
 	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") } };
 
-static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };
+static paramGroup_t paramFilePG = { "prmfile", PGO_DIALOGTEMPLATE, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };
 
 
 static void ParamFileLoadList( void )

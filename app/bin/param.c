@@ -2314,7 +2314,7 @@ static void LayoutControlTemplate(
 			pd->winOption |= BO_USETEMPLATE;				/* Yes Template */
 			pd->winOption &= ~BO_CONTROLGRID;				/* No Grid */
 			if ( (pd->option&PDO_DLGIGNORE) != 0 ) continue; /*Ignore unused */
-			if ( pd->option&PDO_DLGCMDBUTTON) 	   continue; /*Ignore buttons */
+//			if ( pd->option&PDO_DLGCMDBUTTON) 	   continue; /*Ignore buttons */
 			if ( pd->nameStr )
 				strcpy( helpStrP, pd->nameStr );
 			int x,y;
