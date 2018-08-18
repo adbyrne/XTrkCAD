@@ -9,6 +9,7 @@ set(gladefiles
     "outputbitmap.glade"
     "pref.glade"
     "pricelist.glade"
+    "print.glade"
     "prmfile.glade"
     "rgbcolor.glade"
     "sticky.glade"
