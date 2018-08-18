@@ -159,6 +159,7 @@ typedef void (*paramGroupProc_t) ( long, long );
 #define PGO_PREFDRAWGROUP		(1<<9)
 #define PGO_PREFMISC			(1<<10)
 #define PGO_DIALOGTEMPLATE      (1<<11)
+#define PGO_DYNAMICTEMPLATE     (1<<12)
 
 typedef void (*paramLayoutProc)( paramData_t *, int, wPos_t, wPos_t *, wPos_t * );
 typedef void (*paramActionOkProc)( void * );

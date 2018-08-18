@@ -73,7 +73,7 @@ static paramData_t tipPLs[] = {
 	{   PD_BUTTON, (void*)ShowTip, "next", PDO_DLGHORZ, NULL, N_("Next Tip"), 0L, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP) },
 	{   PD_TOGGLE, &showTipAtStart, "showatstart", PDO_DLGCMDBUTTON, tipLabels, NULL, BC_NOBORDER }};
 
-static paramGroup_t tipPG = { "tip", 0, tipPLs, sizeof tipPLs/sizeof tipPLs[0] };
+static paramGroup_t tipPG = { "tip", PGO_DIALOGTEMPLATE, tipPLs, sizeof tipPLs/sizeof tipPLs[0] };
 
 /**
  * Create and initialize the tip of the day window. The dialog box is created and the list of tips is loaded
@@ -87,7 +87,7 @@ static void CreateTipW( void )
 	char *filename;
 	char * cp;
 
-	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle(_("Tip of the Day")), _("Ok"), (paramActionOkProc)wHide, NULL, FALSE, NULL, F_CENTER|F_USETEMPLATE, NULL );
+	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle(_("Tip of the Day")), _("Ok"), (paramActionOkProc)wHide, NULL, FALSE, NULL, F_CENTER, NULL );
 
 	/* open the tip file */
 	MakeFullpath(&filename, libDir, sTipF, NULL);
@@ -205,7 +205,7 @@ static paramData_t aboutPLs[] = {
 #define COPYRIGHT_T			((wText_p)aboutPLs[I_COPYRIGHT].control)
 	{   PD_TEXT, NULL, NULL, PDO_DLGRESIZE, &aboutTextData, NULL, BT_CHARUNITS }
 };
-static paramGroup_t aboutPG = { "about", 0, aboutPLs, sizeof aboutPLs/sizeof aboutPLs[0] };
+static paramGroup_t aboutPG = { "about", PGO_DIALOGTEMPLATE , aboutPLs, sizeof aboutPLs/sizeof aboutPLs[0] };
 
 /** 
  *	Create and show the About window.
@@ -218,7 +218,7 @@ void CreateAboutW( void *ptr )
 	if( !aboutW ) {
 		aboutPLs[I_ABOUTDRAW].winData = wIconCreatePixMap( xtc_xpm );
 		ParamRegister( &aboutPG );
-		aboutW = ParamCreateDialog( &aboutPG, MakeWindowTitle(_("About")), _("Ok"), (paramActionOkProc)wHide, NULL, FALSE, NULL, F_USETEMPLATE | F_TOP|F_CENTER, NULL );
+		aboutW = ParamCreateDialog( &aboutPG, MakeWindowTitle(_("About")), _("Ok"), (paramActionOkProc)wHide, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
 		ParamLoadMessage( &aboutPG, I_ABOUTVERSION, sAboutProd );
 		wTextAppend( COPYRIGHT_T, DESCRIPTION );
 		wTextAppend( COPYRIGHT_T, "\n\nXTrackCAD is Copyright 2003 by Sillub Technology and 2017 by Bob Blackwell, Martin Fischer and  Adam Richards." );

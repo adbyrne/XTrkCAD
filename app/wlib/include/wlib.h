@@ -229,9 +229,9 @@ typedef enum {
 typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 
 /* Creation Options */
-#define F_DESCTEMPLATE (1L<<6)
-#define F_DESCADDTEMPLATE (1L<<7)
-#define F_USETEMPLATE (1L<<31)
+#define F_DESCTEMPLATE (1L<<16)
+#define F_DESCADDTEMPLATE (1L<<17)
+#define F_USETEMPLATE (1L<<18)
 #define F_AUTOSIZE	(1L<<1)
 #define F_HEADER 	(1L<<2)
 #define F_RESIZE 	(1L<<3)

@@ -555,7 +555,7 @@ void DoLayout(void * junk)
 
     if (layoutW == NULL) {
         layoutW = ParamCreateDialog(&layoutPG, MakeWindowTitle(_("Layout Options")),
-                                    _("Ok"), LayoutOk, LayoutCancel, TRUE, NULL, F_USETEMPLATE, LayoutDlgUpdate);
+                                    _("Ok"), LayoutOk, LayoutCancel, TRUE, NULL, 0, LayoutDlgUpdate);
         LoadScaleList((wList_p)layoutPLs[4].control);
     }
 

@@ -169,7 +169,7 @@ static void DisplayChange( long changes )
 static void DoDisplay( void * junk )
 {
 	if (displayW == NULL) {
-		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")), _("Ok"), DisplayOk, OptionDlgCancel, TRUE, NULL, F_USETEMPLATE, OptionDlgUpdate );
+		displayW = ParamCreateDialog( &displayPG, MakeWindowTitle(_("Display Options")), _("Ok"), DisplayOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto"), NULL, (void*)0x0002 );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf"), NULL, (void*)0x0012 );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Proto/Manuf/Part Number"), NULL, (void*)0x0312 );
@@ -249,7 +249,7 @@ static void CmdoptChange( long changes )
 static void DoCmdopt( void * junk )
 {
 	if (cmdoptW == NULL) {
-		cmdoptW = ParamCreateDialog( &cmdoptPG, MakeWindowTitle(_("Command Options")), _("Ok"), CmdoptOk, OptionDlgCancel, TRUE, NULL, F_USETEMPLATE, OptionDlgUpdate );
+		cmdoptW = ParamCreateDialog( &cmdoptPG, MakeWindowTitle(_("Command Options")), _("Ok"), CmdoptOk, OptionDlgCancel, TRUE, NULL, 0, OptionDlgUpdate );
 	}
 	ParamLoadControls( &cmdoptPG );
 	wShow( cmdoptW );
@@ -447,7 +447,7 @@ static void PrefOk( void * junk )
 static void DoPref( void * junk )
 {
 	if (prefW == NULL) {
-		prefW = ParamCreateDialog( &prefPG, MakeWindowTitle(_("Preferences")), _("Ok"), PrefOk, wHide, TRUE, NULL, F_USETEMPLATE, OptionDlgUpdate );
+		prefW = ParamCreateDialog( &prefPG, MakeWindowTitle(_("Preferences")), _("Ok"), PrefOk, wHide, TRUE, NULL, 0, OptionDlgUpdate );
 		LoadDstFmtList();
 	}
 	ParamLoadControls( &prefPG );
@@ -513,7 +513,7 @@ static void ColorOk( void * junk )
 static void DoColor( void * junk )
 {
 	if (colorW == NULL)
-		colorW = ParamCreateDialog( &colorPG, MakeWindowTitle(_("Color")), _("Ok"), ColorOk, wHide, TRUE, NULL, F_USETEMPLATE, NULL );
+		colorW = ParamCreateDialog( &colorPG, MakeWindowTitle(_("Color")), _("Ok"), ColorOk, wHide, TRUE, NULL, 0, NULL );
 	ParamLoadControls( &colorPG );
 	wShow( colorW );
 }

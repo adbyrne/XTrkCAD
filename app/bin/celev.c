@@ -56,7 +56,7 @@ static paramData_t elevationPLs[] = {
 	{ PD_MESSAGE, NULL, "grade", 0, (void*)80 },
 #define I_STATION			(4)
 	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, (void*)200, NULL, 0, 0, sizeof(elevStationV)} };
-static paramGroup_t elevationPG = { "elev", 0, elevationPLs, sizeof elevationPLs/sizeof elevationPLs[0] };
+static paramGroup_t elevationPG = { "elev", PGO_DIALOGTEMPLATE, elevationPLs, sizeof elevationPLs/sizeof elevationPLs[0] };
 
 
 static void LayoutElevW(
@@ -403,7 +403,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	switch (action) {
 	case C_START:
 		if ( elevW == NULL )
-			elevW = ParamCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")), _("Done"), DoElevDone, NULL, TRUE, LayoutElevW, F_USETEMPLATE, DoElevUpdate );
+			elevW = ParamCreateDialog( &elevationPG, MakeWindowTitle(_("Elevation")), _("Done"), DoElevDone, NULL, TRUE, LayoutElevW, 0, DoElevUpdate );
 		elevModeV = 0;
 		elevHeightV = 0.0;
 		elevStationV[0] = 0;

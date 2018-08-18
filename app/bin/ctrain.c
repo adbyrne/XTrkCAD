@@ -626,7 +626,7 @@ static paramData_t trainPLs[] = {
     { PD_MESSAGE, NULL, "mess3", PDO_DLGIGNOREX, (void *)120 }
 };
 
-static paramGroup_t trainPG = { "train", 0, trainPLs, sizeof trainPLs/sizeof trainPLs[0] };
+static paramGroup_t trainPG = { "train", PGO_DIALOGTEMPLATE, trainPLs, sizeof trainPLs/sizeof trainPLs[0] };
 
 
 typedef struct {

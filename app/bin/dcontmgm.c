@@ -100,7 +100,7 @@ static paramData_t controlPLs[] = {
 #define I_CONTROLDEL		(2)
     {	PD_BUTTON, (void*)ControlDelete, "delete", 0, NULL, N_("Delete") },
   } ;
-static paramGroup_t controlPG = { "contmgm", 0, controlPLs, sizeof controlPLs/sizeof controlPLs[0] };
+static paramGroup_t controlPG = { "contmgm", PGO_DIALOGTEMPLATE, controlPLs, sizeof controlPLs/sizeof controlPLs[0] };
 
 
 typedef struct {
@@ -297,7 +297,7 @@ static void ContMgmChange( long changes )
 static void DoControlMgr( void * junk )
 {
     if (controlPG.win == NULL) {
-        ParamCreateDialog( &controlPG, MakeWindowTitle(_("Manage Layout Control Elements")), _("Done"), ControlDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK|F_USETEMPLATE, ControlDlgUpdate );
+        ParamCreateDialog( &controlPG, MakeWindowTitle(_("Manage Layout Control Elements")), _("Done"), ControlDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, ControlDlgUpdate );
     } else {
         wListClear( controlSelL );
     }

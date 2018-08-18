@@ -2626,73 +2626,84 @@ static void ParamDlgProc(
  */
 
 wWin_p ParamCreateDialog(
-		paramGroup_p group,
+		paramGroup_p group,   /*Group options contain PGO_ flags */
 		char * title,
 		char * okLabel,
 		paramActionOkProc okProc,
 		paramActionCancelProc cancelProc,
 		BOOL_T needHelpButton,
 		paramLayoutProc layoutProc,
-		long Option,
+		long WinOptionsIn,		/* F_ flags pass through */
 		paramChangeProc changeProc )
 {
 	char helpStr[STR_SHORT_SIZE];
 	wPos_t w0, h0;
-	char * cancelLabel = (Option&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
+	char * cancelLabel = (WinOptionsIn&PD_F_ALT_CANCELLABEL?_("Close"):_("Cancel"));
     long useTemplate = 0L;
 
-	Option &= ~PD_F_ALT_CANCELLABEL;
+
+
+	WinOptionsIn &= ~PD_F_ALT_CANCELLABEL;
 	group->okProc = okProc;
 	group->cancelProc = cancelProc;
 	group->layoutProc = layoutProc;
 	group->changeProc = changeProc;
-	group->winOption = Option;
-	if ( (Option&F_CENTER) == 0 )
-		Option |= F_RECALLPOS;
-	if ( (Option&F_RESIZE) != 0 )
-		Option |= F_RECALLSIZE;
 
-    long winOptions = Option;
+	if ( (WinOptionsIn&F_CENTER) == 0 )
+		WinOptionsIn |= F_RECALLPOS;
+	if ( (WinOptionsIn&F_RESIZE) != 0 )
+		WinOptionsIn |= F_RECALLSIZE;
+
+	group->winOption = WinOptionsIn;  /* Save original set in group*/
+
+	/* Now set up output parms for the calls */
+    long winOptionsOut = WinOptionsIn;  /*Copy options for the PopUp call */
+    long butOptions = 0L;				/*Clear Options for the Button call */
     
     if( group->options & PGO_DIALOGTEMPLATE) {    
         useTemplate = TRUE;
-        winOptions |= BO_USETEMPLATE;
+        winOptionsOut |= F_USETEMPLATE;
     } else {
-        winOptions |= F_AUTOSIZE;
+        winOptionsOut |= F_AUTOSIZE;
     }
-    if (Option&F_USETEMPLATE)
-    	winOptions |= BO_USETEMPLATE;
+    if (group->options & PGO_DYNAMICTEMPLATE) {
+    	winOptionsOut |= F_DESCTEMPLATE;
+    }
 
-    if (Option&F_DESCTEMPLATE) {
-    	winOptions |= BO_DESCTEMPLATE;
+    if (winOptionsOut&F_DESCTEMPLATE) {
     	sprintf(helpStr,"%s",group->template_id);
     }
 
-    if (Option & F_USETEMPLATE) {
+
+    /* Copy output to buttons and the group winOptions */
+    if (winOptionsOut & F_USETEMPLATE) {
+    	butOptions |= BO_USETEMPLATE;
     	group->winOption |= BO_USETEMPLATE;
 	}
-	if (Option & F_DESCTEMPLATE) {
+	if (winOptionsOut & F_DESCTEMPLATE) {
+		butOptions |= BO_DESCTEMPLATE;
 		group->winOption |= BO_DESCTEMPLATE;
 	}
+
 	/* If we are just adding content, don't worry about windows or buttons */
-	if (Option & F_DESCADDTEMPLATE) {
-		winOptions |= BO_DESCADDTEMPLATE;
-		wWinPopupCreate( group->win, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptions, ParamDlgProc, group );
+	if (winOptionsOut & F_DESCADDTEMPLATE) {
+		winOptionsOut |= BO_DESCADDTEMPLATE;
+		wWinPopupCreate( group->win, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptionsOut, ParamDlgProc, group );
 	} else {
-		group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptions, ParamDlgProc, group );
+		group->win = wWinPopupCreate( mainW, DlgSepRight, DlgSepFrmBottom, helpStr, title, group->nameStr, winOptionsOut, ParamDlgProc, group );
 
 		if ( okLabel && okProc ) {
 			sprintf( helpStr, "%s-ok", group->nameStr );
-			group->okB = wButtonCreate( group->win, 0, 0, "id-ok", okLabel, BB_DEFAULT|winOptions, 0, (wButtonCallBack_p)ParamButtonOk, group );
+			group->okB = wButtonCreate( group->win, 0, 0, "id-ok", okLabel, BB_DEFAULT|butOptions, 0, (wButtonCallBack_p)ParamButtonOk, group );
 		}
 		if ( group->cancelProc ) {
 			sprintf( helpStr, "%s-cancel", group->nameStr );
-			group->cancelB = wButtonCreate( group->win, 0, 0, "id-cancel", cancelLabel, BB_CANCEL|winOptions, 0, (wButtonCallBack_p)ParamButtonCancel, group );
+			group->cancelB = wButtonCreate( group->win, 0, 0, "id-cancel", cancelLabel, BB_CANCEL|butOptions, 0, (wButtonCallBack_p)ParamButtonCancel, group );
 		}
 		if ( needHelpButton ) {
 			sprintf( helpStr, "cmd%s", group->nameStr );
 			helpStr[3] = toupper((unsigned char)helpStr[3]);
-			group->helpB = wButtonCreate( group->win, 0, 0, "id-help", _("Help"), BB_HELP|winOptions, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
+			group->helpB = wButtonCreate( group->win, 0, 0, "id-help", _("Help"), BB_HELP|butOptions, 0, (wButtonCallBack_p)wHelp, MyStrdup(helpStr) );
 		}
 
 	}
@@ -2702,7 +2713,7 @@ wWin_p ParamCreateDialog(
 	group->origW += DlgSepRight;
 	group->origH += DlgSepBottom;
 	wWinGetSize( group->win, &w0, &h0 );
-	if ( (Option&F_RESIZE) ) {
+	if ( (WinOptionsIn&F_RESIZE) ) {
 		if ( group->origW != w0 ||
 			 group->origH != h0 ) {
 			LayoutControls( group, ParamPositionControl, NULL, NULL );

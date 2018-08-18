@@ -463,9 +463,6 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
  *
  */
 
-static wList_p setLayerL;
-static wBool_t DescribeWindowTemplated = FALSE;
-
 typedef struct {
 	char * template_name;
 	paramGroup_t * template_pg;
@@ -483,6 +480,7 @@ paramGroup_t * CreatePGList(char *tile, char *subtitle, descData_p data) {
 		pg = calloc(1,sizeof(paramGroup_t));
 		pg->nameStr = "describe";
 		pg->template_id = strdup(subtitle);
+		pg->options = PGO_DIALOGTEMPLATE;
 		pg->okB = describeokB;
 		pg->cancelB = describeCancelB;
 		pg->helpB = describeHelpB;
@@ -579,7 +577,8 @@ void DoDescribe(char * title, char * template_id, track_p trk, descData_p data, 
     if (pg->win == NULL || created) {   /* Same sub-template as last time? */
     	 pg->template_id = template_id;     /*Remember the template_id for Create */
     	 long opts = F_RECALLPOS|F_USETEMPLATE|F_DESCTEMPLATE;
-    	 if (pg->win) opts |= F_DESCADDTEMPLATE;
+    	 if (pg->win)
+    		 opts |= F_DESCADDTEMPLATE;
         /* SDB 5.13.2005 */
         ParamCreateDialog(pg, _("Description"), _("Done"), DescOk,
                           (paramActionCancelProc) DescribeCancel,
