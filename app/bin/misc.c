@@ -797,7 +797,7 @@ static void NextWindow(void) {
 }
 
 EXPORT void SelectFont(void) {
-	wSelectFont(_("XTrackCAD Font"));
+	wSelectFont(_("XTrackCAD Font"), mainW);
 }
 
 /*****************************************************************************

@@ -797,7 +797,7 @@ wChoice_p wToggleCreate(
         abort();
     }
 
-    if (b->fromTemplate) {
+    if (b->fromTemplate && !(option&BC_REBUILDBUTTONS)) {
     	 GList * child, * children;
 
     	for (children=child=gtk_container_get_children(GTK_CONTAINER(b->widget));

@@ -270,14 +270,14 @@ void wInitializeFonts()
  */
 
 void wSelectFont(
-    const char * title)
+    const char * title, wWin_p win)
 {
     if (!fontInitted) {
         fontInit();
     }
 
     if (fontChooserDialog == NULL) {
-        fontChooserDialog = gtk_font_chooser_dialog_new(_("Font Select"),NULL);
+        fontChooserDialog = gtk_font_chooser_dialog_new(_("Font Select"),GTK_WINDOW(win->gtkwin));
         gtk_window_set_position(GTK_WINDOW(fontChooserDialog), GTK_WIN_POS_MOUSE);
         gtk_window_set_modal(GTK_WINDOW(fontChooserDialog), TRUE);
         gtk_font_chooser_set_preview_text(GTK_FONT_CHOOSER(

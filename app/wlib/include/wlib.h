@@ -572,7 +572,7 @@ void wDrawShowBackground(   wDraw_p, wPos_t pos_x, wPos_t pos_y, wPos_t width, w
  * Fonts
  */
 void wInitializeFonts();
-void wSelectFont(		const char * );
+void wSelectFont(		const char *, wWin_p win );
 wFontSize_t wSelectedFontSize(	void );
 void wSetSelectionFontSize(int);
 #define F_TIMES	(1)
