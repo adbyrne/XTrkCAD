@@ -2327,13 +2327,12 @@ static void LayoutControlTemplate(
 			pd->group->win = group->win;
 			pd->winOption |= BO_USETEMPLATE;				/* Yes Always Template */
 			if ( (pd->option&PDO_DLGIGNORE) != 0 ) continue; /*Ignore unused */
-			if ( pd->option&PDO_DLGCMDBUTTON) 	   continue; /*Ignore buttons */
 
 			if ( pd->assigned_helpStr )
 				sprintf( helpStr, "%s-%s", prefixStr, pd->assigned_helpStr );  /* Add name of field */
 			else
 				sprintf( helpStr, "%s-%s", prefixStr, pd->nameStr);
-			int x,y;
+            int x,y;
 			if (group->layoutProc)
 						group->layoutProc( pd, inx, 0, &x, &y );
 			/* Callback the Create or Update routine */

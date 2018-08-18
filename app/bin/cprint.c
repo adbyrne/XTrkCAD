@@ -148,7 +148,7 @@ static paramData_t printPLs[] = {
 /*22*/ { PD_MESSAGE, N_("selected"), "selected", 0, (void*)80 }
 };
 
-static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP, printPLs, sizeof printPLs/sizeof printPLs[0] };
+static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP | PGO_DIALOGTEMPLATE, printPLs, sizeof printPLs/sizeof printPLs[0] };
 
 
 /*****************************************************************************

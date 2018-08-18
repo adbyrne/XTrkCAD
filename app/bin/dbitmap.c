@@ -155,7 +155,7 @@ static paramData_t outputBitMapPLs[] = {
 #define I_MSG2			(3)
 	{   PD_MESSAGE, N_("Approximate file size: 999.9Mb"), "filesize", PDO_DLGUNDERCMDBUTT, (void*)180 } };
 
-static paramGroup_t outputBitMapPG = { "outputbitmap", 0, outputBitMapPLs, sizeof outputBitMapPLs/sizeof outputBitMapPLs[0] };
+static paramGroup_t outputBitMapPG = { "outputbitmap", PGO_DIALOGTEMPLATE, outputBitMapPLs, sizeof outputBitMapPLs/sizeof outputBitMapPLs[0] };
 
 
 static void OutputBitMapComputeSize( void )

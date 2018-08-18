@@ -1,11 +1,16 @@
 set(gladefiles 
     "cmdopt.glade"
+    "custmgm.glade"
     "display.glade"
     "easement.glade"
     "enum.glade"
     "layout.glade"
     "note.glade"
+    "outputbitmap.glade"
     "pref.glade"
+    "pricelist.glade"
+    "print.glade"
+    "prmfile.glade"
     "rgbcolor.glade"
     "sticky.glade"
     )

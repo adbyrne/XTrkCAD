@@ -132,6 +132,7 @@ wlibDialogFromTemplate( int winType, const char *labelStr, const char *nameStr, 
  */
 GtkWidget *
 wlibGetWidgetFromName( wWin_p parent, const char *dialogname, const char *suffix, wBool_t ignore_failure )
+
 {
     GString *id = g_string_new(dialogname);
     GtkWidget *widget;

@@ -127,7 +127,11 @@ void wlibSetLabel(
 
 void wButtonSetLabel(wButton_p bb, const char * labelStr)
 {
-    wlibSetLabel(bb->widget, bb->option, labelStr, &bb->labelG, &bb->imageG);
+    if(!bb->fromTemplate) {
+        wlibSetLabel(bb->widget, bb->option, labelStr, &bb->labelG, &bb->imageG);
+    } else {
+        gtk_button_set_label(GTK_BUTTON(bb->widget), labelStr );
+    }    
 }
 
 /**
