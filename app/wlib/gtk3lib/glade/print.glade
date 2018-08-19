@@ -608,24 +608,13 @@
           <object class="GtkBox" id="print-pages.box">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="margin_bottom">18</property>
             <child>
-              <object class="GtkFrame" id="print-selected.box">
+              <object class="GtkLabel" id="print-pages">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_right">6</property>
-                <property name="label_xalign">0</property>
-                <property name="shadow_type">none</property>
-                <child>
-                  <object class="GtkLabel" id="print-selected">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Selected</property>
-                  </object>
-                </child>
-                <child type="label_item">
-                  <placeholder/>
-                </child>
+                <property name="halign">start</property>
+                <property name="label" translatable="yes">0 pages</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -634,15 +623,26 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="print-pages">
+              <object class="GtkFrame" id="print-selected.box">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="margin_top">18</property>
-                <property name="margin_bottom">18</property>
+                <property name="can_focus">False</property>
+                <property name="margin_right">6</property>
                 <property name="hexpand">True</property>
-                <property name="editable">False</property>
-                <property name="has_frame">False</property>
-                <property name="text" translatable="yes">0 Pages</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">none</property>
+                <child>
+                  <object class="GtkLabel" id="print-selected">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="margin_left">6</property>
+                    <property name="hexpand">True</property>
+                    <property name="label" translatable="yes">will be printed.</property>
+                  </object>
+                </child>
+                <child type="label_item">
+                  <placeholder/>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
