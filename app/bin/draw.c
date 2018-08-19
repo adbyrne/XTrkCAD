@@ -50,6 +50,7 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "layout.h"
 
 static void DrawRoomWalls( wBool_t );
 EXPORT void DrawMarkers( void );
@@ -1311,6 +1312,16 @@ lprintf("mainRedraw\n");
 	ConstraintOrig( &mainD.orig, mainD.size );
 	tempD.orig = mainD.orig;
 	wDrawClear( mainD.d );
+	wPos_t back_x,back_y;
+	coOrd back_pos = GetLayoutBackGroundPos();
+	back_x = (wPos_t)((back_pos.x-orig.x)/mainD.scale*mainD.dpi);
+	back_y = (wPos_t)((back_pos.y-orig.y)/mainD.scale*mainD.dpi);
+	wPos_t back_width = (wPos_t)(GetLayoutBackGroundSize()/mainD.scale*mainD.dpi);
+
+	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
+		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
+	}
+
 	currRedraw++;
 	DrawSnapGrid( &tempD, mapD.size, TRUE );
 	DrawRoomWalls( TRUE );

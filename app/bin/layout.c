@@ -341,8 +341,7 @@ static paramData_p layout_p;
 static paramGroup_t * layout_pg_p;
 static wBool_t file_changed;
 
-EXPORT BOOL_T haveBackground = FALSE;
-BOOL_T backgroundVisible = TRUE;
+static BOOL_T backgroundVisible = TRUE;
 
 char * noname = "";
 
@@ -687,8 +686,11 @@ LayoutBackGroundInit(void) {
 	char * str = GetLayoutBackGroundFullPath();
 	if (str && str[0]) {
 		LoadBackGroundImage();
+		backgroundVisible = TRUE;
 	} else {
 		wDrawSetBackground(  mainD.d, NULL, NULL);
+		backgroundVisible = FALSE;
 	}
+	wControlActive((wControl_p)backgroundB, backgroundVisible);
 
 }
