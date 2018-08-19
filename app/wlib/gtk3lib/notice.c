@@ -234,7 +234,7 @@ int wNotice3(
         can = wlibChgMnemonic((char *) cancel);
         nw->butt[ 1 ] = gtk_button_new_with_mnemonic(can);
         gtk_widget_show(nw->butt[ 1 ]);
-        gtk_grid_attach_next_to (GTK_GRID (hbox1), nw->butt[0], nw->butt[1], GTK_POS_RIGHT, 1, 1);
+        gtk_grid_attach_next_to (GTK_GRID (hbox1), nw->butt[1], nw->butt[0], GTK_POS_RIGHT, 1, 1);
         //gtk_box_pack_end(GTK_BOX(hbox1), nw->butt[ 1 ], TRUE, TRUE, 0);
         gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 1 ]), 3);
         g_signal_connect(nw->butt[1], "clicked", G_CALLBACK(doNotice),
@@ -245,7 +245,7 @@ int wNotice3(
             alt = wlibChgMnemonic((char *) alternate);
             nw->butt[ 2 ] = gtk_button_new_with_mnemonic(alt);
             gtk_widget_show(nw->butt[ 2 ]);
-            gtk_grid_attach_next_to (GTK_GRID (hbox1), nw->butt[1], nw->butt[2], GTK_POS_RIGHT, 1, 1);
+            gtk_grid_attach_next_to (GTK_GRID (hbox1), nw->butt[2], nw->butt[1], GTK_POS_RIGHT, 1, 1);
             //gtk_box_pack_start(GTK_BOX(hbox1), nw->butt[ 2 ], TRUE, TRUE, 0);
             gtk_container_set_border_width(GTK_CONTAINER(nw->butt[ 2 ]), 3);
             g_signal_connect(nw->butt[2], "clicked", G_CALLBACK(doNotice),

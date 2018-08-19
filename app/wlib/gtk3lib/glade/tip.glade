@@ -134,7 +134,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="tip-showatstart">
+              <object class="GtkBox" id="tip-showatstart.box">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">center</property>
@@ -144,7 +144,7 @@
                   <placeholder/>
                 </child>
                 <child>
-                  <object class="GtkCheckButton">
+                  <object class="GtkCheckButton" id="tip-showatstart">
                     <property name="label" translatable="yes">Show at Start</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>

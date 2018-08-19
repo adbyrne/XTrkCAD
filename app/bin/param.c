@@ -2654,8 +2654,6 @@ wWin_p ParamCreateDialog(
 	if ( (WinOptionsIn&F_RESIZE) != 0 )
 		WinOptionsIn |= F_RECALLSIZE;
 
-	group->winOption = WinOptionsIn;  /* Save original set in group*/
-
 	/* Now set up output parms for the calls */
     long winOptionsOut = WinOptionsIn;  /*Copy options for the PopUp call */
     long butOptions = 0L;				/*Clear Options for the Button call */
@@ -2672,7 +2670,8 @@ wWin_p ParamCreateDialog(
 
     if (winOptionsOut&F_DESCTEMPLATE) {
     	sprintf(helpStr,"%s",group->template_id);
-    }
+    } else
+    	sprintf(helpStr,"%s",group->nameStr);
 
 
     /* Copy output to buttons and the group winOptions */

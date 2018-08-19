@@ -1299,8 +1299,7 @@ EXPORT void LayoutSetPos(wIndex_t inx, wBool_t force) {
 				lastGroup = currGroup;
 			}
 			if (force) {
-				if ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
-						|| layerButtCnt++ <= layerCount) {
+				if ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER) {
 					wControlShow(buttonList[inx].control, FALSE);
 				}
 			} else {
@@ -1721,8 +1720,8 @@ void MenuPlayback(char * line) {
 static wWin_p stickyW;
 
 static void StickyOk(void *);
-static paramData_t stickyPLs[] = { { PD_TOGGLE, &stickySet, "set", BC_REBUILDBUTTONS,
-		stickyLabels } };
+static paramData_t stickyPLs[] = { { PD_TOGGLE, &stickySet, "set", 0,
+		stickyLabels, NULL, BC_REBUILDBUTTONS} };
 static paramGroup_t stickyPG = { "sticky", PGO_DIALOGTEMPLATE | PGO_RECORD, stickyPLs,
 		sizeof stickyPLs / sizeof stickyPLs[0] };
 

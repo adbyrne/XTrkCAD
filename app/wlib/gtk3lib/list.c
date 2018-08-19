@@ -474,7 +474,7 @@ wIndex_t wListAddValue(
     id_p->active = TRUE;
 
     if (labelStr == NULL) {
-        labelStr = "";
+        labelStr = " ";
     }
 
     id_p->label = strdup(labelStr);

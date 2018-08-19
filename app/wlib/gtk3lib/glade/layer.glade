@@ -60,17 +60,6 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkComboBoxText" id="layer-layer">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                          </object>
-                          <packing>
-                            <property name="left_attach">0</property>
-                            <property name="top_attach">0</property>
-                            <property name="width">2</property>
-                          </packing>
-                        </child>
-                        <child>
                           <object class="GtkEntry" id="layer-name">
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
@@ -105,17 +94,29 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="layer-frozen.box">
+                          <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="spacing">6</property>
                             <child>
-                              <object class="GtkCheckButton" id="visble">
-                                <property name="label" translatable="yes">Visible</property>
+                              <object class="GtkBox" id="layer-visible.box">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="draw_indicator">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="layer-visible">
+                                    <property name="label" translatable="yes">Visible</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="draw_indicator">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -124,12 +125,24 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkCheckButton" id="frozen">
-                                <property name="label" translatable="yes">Frozen</property>
+                              <object class="GtkBox" id="layer-frozen.box">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="draw_indicator">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="layer-frozen">
+                                    <property name="label" translatable="yes">Frozen</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="draw_indicator">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -138,12 +151,24 @@
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkCheckButton" id="onmap">
-                                <property name="label" translatable="yes">On Map</property>
+                              <object class="GtkBox" id="layer-onmap.box">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="draw_indicator">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="layer-onmap">
+                                    <property name="label" translatable="yes">On Map</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="draw_indicator">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -167,6 +192,17 @@
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="top_attach">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBox" id="layer-layer">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
+                            <property name="width">2</property>
                           </packing>
                         </child>
                       </object>
@@ -243,10 +279,22 @@
                   </object>
                 </child>
                 <child type="label">
-                  <object class="GtkLabel">
+                  <object class="GtkBox" id="layer-prefs.box">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Personal Preferences</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkLabel" id="layer-prefs">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Personal Preferences</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
                   </object>
                 </child>
               </object>

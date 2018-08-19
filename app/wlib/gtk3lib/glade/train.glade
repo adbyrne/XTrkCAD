@@ -5,6 +5,7 @@
   <object class="GtkListStore" id="liststore1"/>
   <object class="GtkWindow" id="train">
     <property name="can_focus">False</property>
+    <property name="margin_left">5</property>
     <child>
       <object class="GtkGrid">
         <property name="visible">True</property>
@@ -17,24 +18,6 @@
         <property name="vexpand">True</property>
         <property name="row_spacing">6</property>
         <property name="column_spacing">6</property>
-        <child>
-          <object class="GtkTreeView" id="train-list">
-            <property name="height_request">134</property>
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="hexpand">True</property>
-            <property name="vexpand">True</property>
-            <property name="model">liststore1</property>
-            <child internal-child="selection">
-              <object class="GtkTreeSelection"/>
-            </child>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-            <property name="width">2</property>
-          </packing>
-        </child>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
@@ -52,10 +35,11 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="train-zeroDistance">
+              <object class="GtkToggleButton" id="train-zeroDistance">
+                <property name="label" translatable="yes">0</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="width_chars">3</property>
+                <property name="receives_default">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -70,34 +54,29 @@
           </packing>
         </child>
         <child>
-          <object class="GtkEntry" id="train-speedread">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="editable">False</property>
-            <property name="has_frame">False</property>
-            <property name="width_chars">7</property>
-            <property name="text" translatable="yes">0 mph</property>
-          </object>
-          <packing>
-            <property name="left_attach">1</property>
-            <property name="top_attach">8</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="orientation">vertical</property>
             <property name="spacing">3</property>
             <child>
-              <object class="GtkEntry" id="train-mess1">
+              <object class="GtkBox" id="train-mess1.box">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="editable">False</property>
-                <property name="has_frame">False</property>
-                <property name="text" translatable="yes">Manual Stop</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkLabel" id="train-mess1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">Train ID:</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -106,12 +85,24 @@
               </packing>
             </child>
             <child>
-              <object class="GtkEntry" id="train-mess2">
+              <object class="GtkBox" id="train-mess2.box">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="editable">False</property>
-                <property name="has_frame">False</property>
-                <property name="text" translatable="yes">X:71 Y:120</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkLabel" id="train-mess2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="has_focus">True</property>
+                    <property name="halign">start</property>
+                    <property name="label" translatable="yes">X: 2, Y: 3</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -127,7 +118,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkDrawingArea" id="speed">
+          <object class="GtkDrawingArea" id="train-speed">
             <property name="width_request">40</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -235,6 +226,48 @@
           <packing>
             <property name="left_attach">1</property>
             <property name="top_attach">7</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="train-list.scrollwindow">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="shadow_type">in</property>
+            <property name="propagate_natural_width">True</property>
+            <property name="propagate_natural_height">True</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+            <property name="width">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="train-mess3.box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkLabel" id="train-mess3">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Speed: 0.0</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">8</property>
           </packing>
         </child>
       </object>

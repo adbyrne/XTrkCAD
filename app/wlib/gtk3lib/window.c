@@ -1308,9 +1308,9 @@ wWin_p wWinPopupCreate(
         parent = gtkMainW;
     }
 
-    if (!(option & BO_DESCADDTEMPLATE)) {  /*Only add*/
+    if (!(option & F_DESCADDTEMPLATE)) {  /*Only add*/
 
-		if( option & BO_USETEMPLATE ) {
+		if( option & F_USETEMPLATE ) {
 
 			win = wlibCreateFromTemplate(parent,
 									  W_POPUP,
@@ -1328,7 +1328,7 @@ wWin_p wWinPopupCreate(
     	win = parent;
     }
 
-    if (option & BO_DESCTEMPLATE) {
+    if (option & F_DESCTEMPLATE) {
     	wlibAddTemplate(win,helpStr,option);
     }
 

@@ -543,7 +543,7 @@ static paramData_t gridPLs[] = {
 #define gridShowT		((wChoice_p)gridPLs[I_SHOW].control)
 	{	PD_TOGGLE, &grid.Show, "show", PDO_DLGIGNORELABELWIDTH, gridLabels, N_("Show"), BC_HORZ|BC_NOBORDER } };
 
-static paramGroup_t gridPG = { "grid", PGO_RECORD, gridPLs, sizeof gridPLs/sizeof gridPLs[0] };
+static paramGroup_t gridPG = { "grid", PGO_RECORD|PGO_DIALOGTEMPLATE, gridPLs, sizeof gridPLs/sizeof gridPLs[0] };
 
 
 static BOOL_T GridChanged( void )

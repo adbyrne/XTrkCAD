@@ -460,7 +460,7 @@ static paramData_t layerPLs[] = {
     { PD_LONG, &newLayerCount, "button-count", PDO_DLGBOXEND|PDO_DLGRESETMARGIN, &i0_20, N_("Number of Layer Buttons") },
 };
 
-static paramGroup_t layerPG = { "layer", 0, layerPLs, sizeof layerPLs/sizeof layerPLs[0] };
+static paramGroup_t layerPG = { "layer", PGO_DIALOGTEMPLATE, layerPLs, sizeof layerPLs/sizeof layerPLs[0] };
 
 #define layerL	((wList_p)layerPLs[I_LIST].control)
 
@@ -474,7 +474,7 @@ LayerSystemDefaults(void)
     int inx;
 
     for (inx=0; inx<NUM_LAYERS; inx++) {
-        strcpy(layers[inx].name, inx==0?_("Main"):"");
+        strcpy(layers[inx].name, inx==0?_("Main"):" ");
         layers[inx].visible = TRUE;
         layers[inx].frozen = FALSE;
         layers[inx].onMap = TRUE;
@@ -493,7 +493,7 @@ void LoadLayerLists(void)
     /* clear both lists */
     wListClear(setLayerL);
 
-    if (layerL) {
+    if (layerW) {
         wListClear(layerL);
     }
 
@@ -502,7 +502,7 @@ void LoadLayerLists(void)
         char *layerLabel;
         layerLabel = FormatLayerName(inx);
 
-        if (layerL) {
+        if (layerW) {
             wListAddValue(layerL, layerLabel, NULL, NULL);
         }
 
@@ -513,7 +513,7 @@ void LoadLayerLists(void)
     /* set current layer to selected */
     wListSetIndex(setLayerL, curLayer);
 
-    if (layerL) {
+    if (layerW) {
         wListSetIndex(layerL, curLayer);
     }
 }
@@ -523,7 +523,7 @@ void LoadLayerLists(void)
  *	dialog, this function is called. The parameter identifies the button pressed and
  * the operation is performed.
  *
- * \param[IN] data identifier for the button prerssed
+ * \param[IN] data identifier for the button pressed
  * \return
  */
 
@@ -575,24 +575,26 @@ UpdateLayerDlg()
     sprintf(message, "%ld", layers[curLayer].objCount);
     ParamLoadMessage(&layerPG, I_COUNT, message);
 
-    /* force update of the 'manage layers' dialogbox */
+    /* force update of the 'manage layers' dialog box */
     if (layerL) {
         ParamLoadControls(&layerPG);
     }
 
-    /* finally show the layer buttons with balloon text */
-    for (inx = 0; inx < NUM_BUTTONS; inx++) {
-        wButtonSetBusy(layer_btns[inx], layers[inx].visible != 0);
-        wControlShow((wControl_p)layer_btns[inx], TRUE);
-        wControlSetBalloonText((wControl_p)layer_btns[inx],
-                               (layers[inx].name[0] != '\0' ? layers[inx].name :_("Show/Hide Layer")));
+    /* finally show the layer buttons in the toolbar with balloon text */
+     for (inx = 0; inx < NUM_BUTTONS; inx++) {
+         if (inx<=layerCount) {
+        	wButtonSetBusy(layer_btns[inx], layers[inx].visible != 0);
+        	wControlShow((wControl_p)layer_btns[inx], TRUE);
+        	wControlSetBalloonText((wControl_p)layer_btns[inx],
+                 ((layers[inx].name[0] != '\0' || (strcmp(layers[inx].name," ")==0)) ? layers[inx].name :_("Show/Hide Layer")));
+        }
     }
 }
 
 /**
  * Initialize the layer lists.
  *
- * \param IN pointer to function that actually initialize tha data structures
+ * \param IN pointer to function that actually initialize the data structures
  * \param IN current layer (0...NUM_LAYERS), (-1) for no change
  */
 
@@ -696,7 +698,7 @@ LayerPrefLoad(void)
             if (layerValue) {
                 strcpy(layers[inx].name, layerValue);
             } else {
-                *(layers[inx].name) = '\0';
+                strcpy(layers[inx].name, " ");
             }
 
             /* get and set the color, using the system default color in case color is not available from prefs */
@@ -891,7 +893,7 @@ void ResetLayers(void)
     int inx;
 
     for (inx=0; inx<NUM_LAYERS; inx++) {
-        strcpy(layers[inx].name, inx==0?_("Main"):"");
+        strcpy(layers[inx].name, inx==0?_("Main"):" ");
         layers[inx].visible = TRUE;
         layers[inx].frozen = FALSE;
         layers[inx].onMap = TRUE;
@@ -950,7 +952,7 @@ void RestoreLayers(void)
         layers[inx].color = -1;
         SetLayerColor(inx, color);
 
-        if (layers[inx].name[0] == '\0') {
+        if (layers[inx].name[0] == '\0' || (strcmp(layers[inx].name," ")==0)) {
             if (inx == 0) {
                 label = _("Main");
             } else {

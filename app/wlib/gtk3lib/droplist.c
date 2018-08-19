@@ -61,10 +61,12 @@ wlibDropListAddColumns(GtkWidget *dropList, int columns)
         start = 1;
     }
 
-    /* Create cell renderer. */
-    cell = gtk_cell_renderer_text_new();
+
 
     for (i = start; i < columns; i++) {
+    	/* Create cell renderer - unique for each cell. */
+    	cell = gtk_cell_renderer_text_new();
+
         /* Pack it into the droplist */
         gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(dropList), cell, TRUE);
 
@@ -434,8 +436,9 @@ wList_p wDropListCreate(
 
     wlibDropListAddColumns(b->widget, DROPLIST_TEXTCOLUMNS);
 
-    gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
-                                        LISTCOL_TEXT);
+    if (option & BL_EDITABLE)
+    	gtk_combo_box_set_entry_text_column(GTK_COMBO_BOX(b->widget),
+                                        	LISTCOL_TEXT);
 
     // combo's style
     GtkCssProvider * provider = gtk_css_provider_get_default();
