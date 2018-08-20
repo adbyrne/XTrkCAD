@@ -5,6 +5,7 @@ Close	Closes the dialog
 cmdAbout	About box dialog
 cmdAbove	Move Selected object to top
 cmdAddElevations	Raise or Lower all Selected tracks
+cmdBackgroundShow	Show or Hide the background image (if the screen value is <100)
 cmdBelow	Move Selected object to bottom
 cmdBlockCreate	Create a section of track for automation
 cmdBlockEdit	Edit a Block Definition 
