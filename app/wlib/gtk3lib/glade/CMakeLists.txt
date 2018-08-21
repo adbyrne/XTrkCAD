@@ -4,6 +4,7 @@ set(gladefiles
     "display.glade"
     "easement.glade"
     "enum.glade"
+    "grid.glade"
     "layout.glade"
     "note.glade"
     "outputbitmap.glade"

@@ -86,6 +86,7 @@
                   <object class="GtkEntry" id="print-scale">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
+                    <property name="text" translatable="yes">1</property>
                     <property name="input_purpose">digits</property>
                   </object>
                   <packing>
