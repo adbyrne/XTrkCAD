@@ -721,6 +721,22 @@ EXPORT EPINX_T GetEndPtConnectedToMe( track_p trk, track_p me )
 	return -1;
 }
 
+EXPORT EPINX_T GetNearestEndPtConnectedToMe( track_p trk, track_p me, coOrd pos) {
+	EPINX_T ep, found = -1;
+	DIST_T d = 10000;
+	DIST_T dd;
+		for (ep=0; ep<trk->endCnt; ep++) {
+			if (trk->endPt[ep].track == me) {
+				dd = FindDistance(pos,trk->endPt[ep].pos);
+				if (dd<d) {
+					found = ep;
+					d = dd;
+				}
+			}
+		}
+		return found;
+}
+
 
 EXPORT void SetEndPts( track_p trk, EPINX_T cnt )
 {
@@ -1916,7 +1932,7 @@ EXPORT BOOL_T TraverseTrack(
 			return TRUE;
 		if ( !trvTrk->trk )
 			return FALSE;
-		ep = GetEndPtConnectedToMe( trvTrk->trk, oldTrk );
+		ep = GetNearestEndPtConnectedToMe( trvTrk->trk, oldTrk, trvTrk->pos );
 		if ( ep != -1 ) {
 			trvTrk->pos = GetTrkEndPos( trvTrk->trk, ep );
 			trvTrk->angle = NormalizeAngle( GetTrkEndAngle( trvTrk->trk, ep ) + 180.0 );

@@ -508,6 +508,7 @@ void CheckTrackLength( track_cp );
 track_p NewTrack( wIndex_t, TRKTYP_T, EPINX_T, CSIZE_T );
 void DescribeTrack( track_cp, char *, CSIZE_T );
 EPINX_T GetEndPtConnectedToMe( track_p, track_p );
+EPINX_T GetNearestEndPtConnectedToMe( track_p, track_p, coOrd);
 void SetEndPts( track_p, EPINX_T );
 BOOL_T DeleteTrack( track_p, BOOL_T );
 
