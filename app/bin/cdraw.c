@@ -171,8 +171,8 @@ static track_p MakeDrawFromSeg1(
 
 	if (xx->segs[0].type == SEG_POLY ||
 		xx->segs[0].type == SEG_FILPOLY) {
-		xx->segs[0].u.p.pts = (coOrd*)MyMalloc( (sp->u.p.cnt) * sizeof *(coOrd*)NULL );
-		memcpy(xx->segs[0].u.p.pts, sp->u.p.pts, sp->u.p.cnt * sizeof *(coOrd*)NULL);
+		xx->segs[0].u.p.pts = (coOrd*)MyMalloc( (sp->u.p.cnt) * sizeof (coOrd) );
+		memcpy(xx->segs[0].u.p.pts, sp->u.p.pts, sp->u.p.cnt * sizeof (coOrd) );
 	}
 	if (xx->segs[0].type == SEG_TEXT) {
 		xx->segs[0].u.t.string = MyStrdup(sp->u.t.string);
@@ -589,6 +589,12 @@ static void DrawDraw( track_p t, drawCmd_p d, wDrawColor color )
 
 static void DeleteDraw( track_p t )
 {
+	/* Get rid of points if specified */
+	struct extraData * xx = GetTrkExtraData(t);
+	if (xx->segs[0].type == SEG_POLY ||
+			xx->segs[0].type == SEG_FILPOLY) {
+		MyFree(xx->segs[0].u.p.pts);
+	}
 }
 
 
@@ -753,6 +759,36 @@ static void FlipDraw(
 	ComputeDrawBoundingBox( trk );
 }
 
+static BOOL_T StoreDraw(
+		track_p trk,
+		void **data,
+		long * len)
+{
+	struct extraData * xx = GetTrkExtraData(trk);
+	if (xx->segs[0].type == SEG_POLY ||
+		xx->segs[0].type == SEG_FILPOLY) {
+		*data = xx->segs[0].u.p.pts;
+		*len = xx->segs[0].u.p.cnt* sizeof (coOrd);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+static BOOL_T ReplayDraw(
+		track_p trk,
+		void * data,
+		long len)
+{
+	struct extraData * xx = GetTrkExtraData(trk);
+	if (xx->segs[0].type == SEG_POLY ||
+		xx->segs[0].type == SEG_FILPOLY) {
+		xx->segs[0].u.p.pts = MyMalloc(len);
+		memcpy(xx->segs[0].u.p.pts,data,len);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 
 static trackCmd_t drawCmds = {
 		"DRAW",
@@ -779,7 +815,16 @@ static trackCmd_t drawCmds = {
 		NULL, /* moveEndPt */
 		NULL, /* query */
 		UngroupDraw,
-		FlipDraw };
+		FlipDraw,
+		NULL,
+		NULL,
+		NULL,
+		NULL, /*Parallel*/
+		NULL,
+		NULL, /*MakeSegs*/
+		ReplayDraw,
+		StoreDraw
+		};
 
 EXPORT BOOL_T OnTableEdgeEndPt( track_p trk, coOrd * pos )
 {

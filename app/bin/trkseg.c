@@ -537,8 +537,8 @@ EXPORT void FlipSegs(
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
-			pts = (coOrd*)MyMalloc( s->u.p.cnt * sizeof *(coOrd*)NULL );
-			memcpy( pts, s->u.p.pts, s->u.p.cnt * sizeof *(coOrd*)NULL );
+			pts = (coOrd*)MyMalloc( s->u.p.cnt * sizeof (coOrd) );
+			memcpy( pts, s->u.p.pts, s->u.p.cnt * sizeof (coOrd) );
 			s->u.p.pts = pts;
 			for (inx=0; inx<s->u.p.cnt; inx++) {
 				s->u.p.pts[inx].y = -s->u.p.pts[inx].y;
@@ -645,14 +645,14 @@ EXPORT void CloneFilledDraw(
 		switch (sp->type) {
 		case SEG_POLY:
 		case SEG_FILPOLY:
-			newPts = (coOrd*)MyMalloc( sp->u.p.cnt * sizeof *(coOrd*)0 );
+			newPts = (coOrd*)MyMalloc( sp->u.p.cnt * sizeof (coOrd) );
 			if ( reorigin ) {
 				for ( inx = 0; inx<sp->u.p.cnt; inx++ )
 					REORIGIN( newPts[inx], sp->u.p.pts[inx], sp->u.p.angle, sp->u.p.orig );
 				sp->u.p.angle = 0;
 				sp->u.p.orig = zero;
 			} else {
-				memcpy( newPts, sp->u.p.pts, sp->u.p.cnt * sizeof *(coOrd*)0 );
+				memcpy( newPts, sp->u.p.pts, sp->u.p.cnt * sizeof (coOrd) );
 			}
 			//if (sp->u.p.pts)    Can't do this a pts could be pointing at static
 			//	free(sp->u.p.pts);
@@ -1356,7 +1356,7 @@ EXPORT BOOL_T ReadSegs( void )
 				}
 			}
 			s->color = wDrawFindColor( rgb );
-			s->u.p.pts = (coOrd*)MyMalloc( s->u.p.cnt * sizeof *(coOrd*)NULL );
+			s->u.p.pts = (coOrd*)MyMalloc( s->u.p.cnt * sizeof (coOrd) );
 			for ( i=0; i<s->u.p.cnt; i++ ) {
 				cp = GetNextLine();
 				if (cp == NULL || !GetArgs( cp, "p", &s->u.p.pts[i])) {
@@ -2034,7 +2034,7 @@ EXPORT void CopyPoly(trkSeg_p p, wIndex_t segCnt) {
 	coOrd * newPts;
 	for (int i=0;i<segCnt;i++,p++) {
 		if (p->type == SEG_POLY || p->type == SEG_FILPOLY) {
-			newPts = memdup( p->u.p.pts, p->u.p.cnt*sizeof *(coOrd*)0 );
+			newPts = memdup( p->u.p.pts, p->u.p.cnt*sizeof (coOrd) );
 			p->u.p.pts = newPts;
 		}
 	}

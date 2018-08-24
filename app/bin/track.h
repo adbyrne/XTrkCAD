@@ -164,6 +164,8 @@ typedef struct {
 		BOOL_T (*makeParallel)( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
 		void (*drawDesc)( track_p, drawCmd_p, wDrawColor );
 		BOOL_T (*rebuildSegs)(track_p);
+		BOOL_T (*replayData)(track_p, void *,long );
+		BOOL_T (*storeData)(track_p, void **,long *);
 		} trackCmd_t;
 
 
@@ -597,6 +599,8 @@ void UngroupTrack( track_p );
 BOOL_T IsTrack( track_p );
 char * GetTrkTypeName( track_p );
 BOOL_T RebuildTrackSegs(track_p);
+BOOL_T StoreTrackData(track_p, void **, long *);
+BOOL_T ReplayTrackData(track_p, void *, long);
 
 DIST_T GetFlexLength( track_p, EPINX_T, coOrd * );
 void LabelLengths( drawCmd_p, track_p, wDrawColor );

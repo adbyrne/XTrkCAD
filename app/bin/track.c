@@ -874,6 +874,26 @@ EXPORT BOOL_T RebuildTrackSegs(
 	return FALSE;
 }
 
+EXPORT BOOL_T ReplayTrackData(
+		track_p trk,
+		void * data,
+		long length)
+{
+	if (trackCmds(trk->type)->replayData)
+			return trackCmds(trk->type)->replayData(trk,data,length);
+		return FALSE;
+}
+
+EXPORT BOOL_T StoreTrackData(
+		track_p trk,
+		void ** data,
+		long * length)
+{
+	if (trackCmds(trk->type)->storeData)
+		return trackCmds(trk->type)->storeData(trk,data,length);
+			return FALSE;
+}
+
 
 
 /*****************************************************************************
