@@ -65,7 +65,7 @@ static void EndPoly( drawContext_t * context, int cnt )
 		ErrorMessage( MSG_POLY_SHAPES_3_SIDES );
 		return;
 	}
-	pts = (coOrd*)MyMalloc( (cnt+1) * sizeof *(coOrd*)NULL );
+	pts = (coOrd*)MyMalloc( (cnt+1) * sizeof (coOrd) );
 	for ( inx=0; inx<cnt; inx++ )
 		pts[inx] = tempSegs(inx).u.l.pos[0];
 	pts[cnt] = tempSegs(cnt-1).u.l.pos[1];
@@ -485,7 +485,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_BOX:
 		case OP_FILLBOX:
-			pts = (coOrd*)MyMalloc( 4 * sizeof *(coOrd*)NULL );
+			pts = (coOrd*)MyMalloc( 4 * sizeof (coOrd) );
 			for ( inx=0; inx<4; inx++ )
 				pts[inx] = tempSegs(inx).u.l.pos[0];
 			tempSegs(0).type = (context->Op == OP_FILLBOX)?SEG_FILPOLY:SEG_POLY;
@@ -564,7 +564,7 @@ STATUS_T DrawGeomModify(
 	static BOOL_T corner_mode;
 	int inx, inx1, inx2;
 	DIST_T d, d1, d2, dd;
-	coOrd * newPts;
+	coOrd * newPts = NULL;
 	int mergePoints;
 	tempSegs_da.cnt = 1;
 	switch ( action ) {
@@ -837,8 +837,9 @@ STATUS_T DrawGeomModify(
 				}
 
 				coOrd * oldPts = segPtr[segInx].u.p.pts;
-				newPts = (coOrd*)MyMalloc( tempSegs(0).u.p.cnt * sizeof *(coOrd*)0 );
-				memcpy( newPts, segPtr[segInx].u.p.pts, (segPtr[segInx].u.p.cnt) * sizeof *(coOrd*)0 );
+				newPts = (coOrd*)MyMalloc( tempSegs(0).u.p.cnt * sizeof (coOrd) );
+				int size = segPtr[segInx].u.p.cnt;
+				memcpy( newPts, segPtr[segInx].u.p.pts, (size) * sizeof (coOrd) );
 				segPtr[segInx].u.p.pts = newPts;
 				MyFree(oldPts);
 
@@ -852,7 +853,7 @@ STATUS_T DrawGeomModify(
 		
 				pos = points(polyInx);
 				if ( mergePoints ) {
-					for (inx=polyInx+1; inx<points_da.cnt; inx++)
+					for (inx=polyInx+1; inx<segPtr[segInx].u.p.cnt; inx++)
 					segPtr[segInx].u.p.pts[inx-1] = segPtr[segInx].u.p.pts[inx];
 					segPtr[segInx].u.p.cnt--;
 /*fprintf( stderr, "Merging with vertix %d\n", polyInx );*/
