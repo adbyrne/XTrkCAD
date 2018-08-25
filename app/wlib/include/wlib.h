@@ -287,6 +287,7 @@ void wlibRedraw(wWin_p win);
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
 #define BO_USETEMPLATE (1L<<3)
+#define BO_GRID       (1L<<13)
 #define BO_DESCTEMPLATE (1L<<10)
 #define BO_DESCADDTEMPLATE (1L<<11)
 #define BO_REVEAL   (1L<<4)

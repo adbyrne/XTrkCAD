@@ -59,6 +59,8 @@ typedef enum {
 #define PDO_DRAW				(1L<<8)
 #define PDO_FILE				(1L<<9)
 
+#define PDO_GRID                (1L<<10)	/** Used in templates to still set position */
+
 #define PDO_STRINGLIMITLENGTH	(1L<<11)	/**< context has maximum length for string */
 #define PDO_SMALLDIM			(1L<<12)
 

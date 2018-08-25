@@ -84,11 +84,17 @@ void wControlShow(
         if (b->label) {
             gtk_widget_show(b->label);
         }
+        if (b->box) {
+        	 gtk_widget_show(GTK_WIDGET(b->box));
+        }
     } else {
         gtk_widget_hide(b->widget);
 
         if (b->label) {
             gtk_widget_hide(b->label);
+        }
+        if (b->box) {
+        	gtk_widget_hide(GTK_WIDGET(b->box));
         }
     }
 }
@@ -223,6 +229,15 @@ void wControlSetPos(
             gtk_fixed_move(GTK_FIXED(b->parent->widget), b->label, b->realX-b->labelW,
                            b->realY+(nat_reqwidget.height/2 - nat_requisition.height/2));
         }
+    }
+
+    /* Special case for turnout designer window ->
+     * still use Fixed for input fields located over drawing
+     */
+    if (b->useGrid) {
+    	if (b->reveal && b->fixed) {
+    	      gtk_fixed_move(GTK_FIXED(b->fixed), GTK_WIDGET(b->reveal), x-45, y-5);
+    	}
     }
 }
 

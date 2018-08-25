@@ -2326,17 +2326,26 @@ static void LayoutControlTemplate(
 	for ( pd = group->paramPtr,inx=0; pd<&group->paramPtr[group->paramCnt]; pd++,inx++ ) {
 			pd->group->win = group->win;
 			pd->winOption |= BO_USETEMPLATE;				/* Yes Always Template */
-			if ( (pd->option&PDO_DLGIGNORE) != 0 ) continue; /*Ignore unused */
+			if ( (pd->option&PDO_DLGIGNORE) != 0 ) {
+				wControlShow(pd->control,FALSE);
+				continue; /*Ignore unused */
+			}
+
+			if ((pd->option&PDO_GRID) !=0 )
+				pd->winOption |= BO_GRID;                  /* Make sure that we place */
 
 			if ( pd->assigned_helpStr )
 				sprintf( helpStr, "%s-%s", prefixStr, pd->assigned_helpStr );  /* Add name of field */
 			else
 				sprintf( helpStr, "%s-%s", prefixStr, pd->nameStr);
-            int x,y;
+            int x=0,y=0;
 			if (group->layoutProc)
 						group->layoutProc( pd, inx, 0, &x, &y );
+			if ((pd->option&PDO_GRID) == 0) {
+				x = y = 0;
+			}
 			/* Callback the Create or Update routine */
-			proc( pd, helpStr, 0, 0 );  /* Note -> This is the first time where the controls may be built, or associated */
+			proc( pd, helpStr, x, y );  /* Note -> This is the first time where the controls may be built, or associated */
 	}
 
 }

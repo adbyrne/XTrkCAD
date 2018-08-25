@@ -134,16 +134,16 @@ static DIST_T radii[10] = { 0.0 };
 static paramData_t turnDesignPLs[] = {
 #define I_TOLENGTH			(0)
 #define I_TO_FIRST_FLOAT	(0)
-	{ PD_FLOAT, &newTurnLen1, "len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
-	{ PD_FLOAT, &newTurnLen2, "len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
-	{ PD_FLOAT, &newTurnLen0, "len0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnLen1, "len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH|PDO_GRID, &r0_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnLen2, "len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH|PDO_GRID, &r0_10000, N_("Length") },
+	{ PD_FLOAT, &newTurnLen0, "len0", PDO_DIM|PDO_DLGIGNORELABELWIDTH|PDO_GRID, &r0_10000, N_("Length") },
 #define I_TOOFFSET			(3)
-	{ PD_FLOAT, &newTurnOff1, "off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Offset") },
-	{ PD_FLOAT, &newTurnOff2, "off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnOff1, "off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH|PDO_GRID, &r0_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnOff2, "off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH|PDO_GRID, &r0_10000, N_("Offset") },
 #define I_TOANGLE			(5)
-	{ PD_FLOAT, &newTurnAngle1, "angle1", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
+	{ PD_FLOAT, &newTurnAngle1, "angle1", PDO_DLGIGNORELABELWIDTH|PDO_GRID, &r0_360, N_("Angle") },
 #define I_TO_LAST_FLOAT		(6)
-	{ PD_FLOAT, &newTurnAngle2, "angle2", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
+	{ PD_FLOAT, &newTurnAngle2, "angle2", PDO_DLGIGNORELABELWIDTH|PDO_GRID, &r0_360, N_("Angle") },
 #define I_TOMANUF			(7)
 	{ PD_STRING, &newTurnManufacturer, "manuf", PDO_STRINGLIMITLENGTH, NULL, N_("Manufacturer"), 0, 0, sizeof(newTurnManufacturer)},
 #define I_TOLDESC			(8)
@@ -1717,9 +1717,9 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 		turnDesignPLs[I_TORDESC+1].winData =
 			(void*)(intptr_t)partnoWidth;
 		partnoWidth += wLabelWidth( " # " );
-		newTurnW = ParamCreateDialog( &turnDesignPG, _("Turnout Designer"), _("Print"), NewTurnPrint, NewTurnCancel, TRUE, TurnDesignLayout, F_BLOCK, NULL );
+		newTurnW = ParamCreateDialog( &turnDesignPG, _("Turnout Designer"), _("Print"), NewTurnPrint, NewTurnCancel, TRUE, TurnDesignLayout, F_BLOCK|F_USETEMPLATE, NULL );
 		for ( inx=0; inx<(sizeof designDescs/sizeof designDescs[0]); inx++ ) {
-			designDescs[inx]->lineC = wLineCreate( turnDesignPG.win, NULL, designDescs[inx]->lineCnt, designDescs[inx]->lines );
+			designDescs[inx]->lineC = wLineCreate( turnDesignPG.win, turnDesignPG.nameStr, designDescs[inx]->lineCnt, designDescs[inx]->lines );
 			wControlShow( (wControl_p)designDescs[inx]->lineC, FALSE );
 		}
 	}

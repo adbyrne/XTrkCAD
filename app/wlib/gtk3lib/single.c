@@ -253,6 +253,7 @@ static void stringChanged(
  * \param 	data	IN	application data
  * \return  the created widget
  */
+static wBool_t css_loaded;
 
 wString_p wStringCreate(
     wWin_p	parent,
@@ -282,6 +283,12 @@ wString_p wStringCreate(
 	if (option&BO_USETEMPLATE) {
 		b->widget = wlibWidgetFromIdWarn( parent, helpStr);
 		b->fromTemplate = TRUE;
+		/*For Grid, find the box that contains both the Label and the field */
+		if (option&BO_GRID)  {
+			b->useGrid = TRUE;
+			b->box = (GtkBox *)wlibGetWidgetFromName(b->parent,helpStr,"box",FALSE);
+			b->fixed = b->parent->fixed;
+		}
 		b->template_id = strdup(helpStr);
 		/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
 		b->reveal = (GtkRevealer *)wlibGetWidgetFromName( b->parent, helpStr, "reveal", TRUE );
@@ -298,6 +305,23 @@ wString_p wStringCreate(
 		// It is assumed that the parent is a fixed layout widget and the entry can
 		// be placed at a specific position if not in a template
 		gtk_fixed_put(GTK_FIXED(parent->widget), b->widget, b->realX, b->realY);
+	}
+	if (b->useGrid) {
+
+	  if (b->reveal && b->fixed) {
+		gtk_fixed_move(GTK_FIXED(b->fixed), GTK_WIDGET(b->reveal), x-45, y-5);
+		if (!css_loaded) {
+			GdkScreen * screen = gdk_screen_get_default();
+			GtkCssProvider * provider = gtk_css_provider_new();
+			GtkStyleContext * context = gtk_widget_get_style_context(GTK_WIDGET(b->fixed));
+			static const char style[] = "#parm-entry {min-height:0px } ";
+			gtk_css_provider_load_from_data(provider, style, strlen(style), NULL);
+			gtk_style_context_add_provider_for_screen(screen,
+											GTK_STYLE_PROVIDER(provider),
+											GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+			css_loaded = TRUE;
+	  	}
+	  }
 	}
 	
 	// set minimum size for widget	
@@ -320,7 +344,8 @@ wString_p wStringCreate(
 		// select the text only if text is editable
 	}
 	
-	gtk_widget_show(b->widget);
+	if (!b->useGrid)
+		gtk_widget_show(b->widget);
 
 	
 	// add the new widget to the list of created widgets

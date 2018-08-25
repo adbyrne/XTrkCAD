@@ -33,157 +33,419 @@
                 <property name="orientation">vertical</property>
                 <property name="spacing">3</property>
                 <child>
-                  <object class="GtkOverlay">
+                  <object class="GtkFrame">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="margin_top">1</property>
-                    <property name="hexpand">True</property>
-                    <property name="vexpand">True</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkFixed" id="Fixed Overlay">
-                        <property name="name">Fixed Overlay Container</property>
-                        <property name="width_request">516</property>
-                        <property name="height_request">213</property>
+                      <object class="GtkAlignment">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkBox">
-                            <property name="name">Length Overlay</property>
-                            <property name="width_request">100</property>
-                            <property name="height_request">80</property>
+                          <object class="GtkOverlay">
+                            <property name="width_request">500</property>
+                            <property name="height_request">200</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">center</property>
-                            <property name="valign">center</property>
+                            <property name="margin_top">1</property>
+                            <property name="hexpand">True</property>
+                            <property name="vexpand">True</property>
                             <child>
-                              <object class="GtkLabel">
+                              <object class="GtkFixed" id="turnoutnew.fixed">
+                                <property name="name">Fixed Overlay Container</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="halign">end</property>
-                                <property name="valign">center</property>
-                                <property name="label" translatable="yes">Seperation :</property>
+                                <property name="hexpand">True</property>
+                                <property name="vexpand">False</property>
+                                <child>
+                                  <object class="GtkRevealer" id="turnoutnew-angle1.reveal">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="transition_type">none</property>
+                                    <property name="reveal_child">True</property>
+                                    <child>
+                                      <object class="GtkBox" id="turnoutnew-angle1.box">
+                                        <property name="name">Length Overlay</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="halign">end</property>
+                                            <property name="valign">center</property>
+                                            <property name="label" translatable="yes">Angle :</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkEntry" id="turnoutnew-angle1">
+                                            <property name="name">parm-entry</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="halign">center</property>
+                                            <property name="valign">center</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="max_width_chars">10</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="x">150</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRevealer" id="turnoutnew-len0.reveal">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="transition_type">none</property>
+                                    <property name="reveal_child">True</property>
+                                    <child>
+                                      <object class="GtkBox" id="turnoutnew-len0.box">
+                                        <property name="name">Length Overlay</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="halign">end</property>
+                                            <property name="valign">center</property>
+                                            <property name="label" translatable="yes">Length :</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkEntry" id="turnoutnew-len0">
+                                            <property name="name">parm-entry</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="halign">center</property>
+                                            <property name="valign">center</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="max_width_chars">10</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                </child>
+                                <child>
+                                  <object class="GtkRevealer" id="turnoutnew-len1.reveal">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="transition_type">none</property>
+                                    <property name="reveal_child">True</property>
+                                    <child>
+                                      <object class="GtkBox" id="turnoutnew-len1.box">
+                                        <property name="name">Length Overlay</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="halign">end</property>
+                                            <property name="valign">center</property>
+                                            <property name="label" translatable="yes">Length :</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkEntry" id="turnoutnew-len1">
+                                            <property name="name">parm-entry</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="halign">center</property>
+                                            <property name="valign">center</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="max_width_chars">10</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="y">40</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRevealer" id="turnoutnew-len2.reveal">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="transition_type">none</property>
+                                    <property name="reveal_child">True</property>
+                                    <child>
+                                      <object class="GtkBox" id="turnoutnew-len2.box">
+                                        <property name="name">Length Overlay</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="halign">end</property>
+                                            <property name="valign">center</property>
+                                            <property name="label" translatable="yes">Length :</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkEntry" id="turnoutnew-len2">
+                                            <property name="name">parm-entry</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="halign">center</property>
+                                            <property name="valign">center</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="max_width_chars">10</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="y">80</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRevealer" id="turnoutnew-angle2.reveal">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="transition_type">none</property>
+                                    <property name="reveal_child">True</property>
+                                    <child>
+                                      <object class="GtkBox" id="turnoutnew-angle2.box">
+                                        <property name="name">Length Overlay</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="halign">end</property>
+                                            <property name="valign">center</property>
+                                            <property name="label" translatable="yes">Angle :</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkEntry" id="turnoutnew-angle2">
+                                            <property name="name">parm-entry</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="halign">center</property>
+                                            <property name="valign">center</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="max_width_chars">10</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="x">150</property>
+                                    <property name="y">40</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRevealer" id="turnoutnew-off2.reveal">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="transition_type">none</property>
+                                    <property name="reveal_child">True</property>
+                                    <child>
+                                      <object class="GtkBox" id="turnoutnew-off2.box">
+                                        <property name="name">Length Overlay</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="halign">end</property>
+                                            <property name="valign">center</property>
+                                            <property name="label" translatable="yes">Offset :</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkEntry" id="turnoutnew-off2">
+                                            <property name="name">parm-entry</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="halign">center</property>
+                                            <property name="valign">center</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="max_width_chars">10</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="x">300</property>
+                                    <property name="y">40</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRevealer" id="turnoutnew-off1.reveal">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="transition_type">none</property>
+                                    <property name="reveal_child">True</property>
+                                    <child>
+                                      <object class="GtkBox" id="turnoutnew-off1.box">
+                                        <property name="name">Length Overlay</property>
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">center</property>
+                                        <property name="valign">center</property>
+                                        <child>
+                                          <object class="GtkLabel">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">False</property>
+                                            <property name="halign">end</property>
+                                            <property name="valign">center</property>
+                                            <property name="label" translatable="yes">Offset :</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkEntry" id="turnoutnew-off1">
+                                            <property name="name">parm-entry</property>
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="halign">start</property>
+                                            <property name="valign">start</property>
+                                            <property name="width_chars">5</property>
+                                            <property name="max_width_chars">10</property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">True</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                    </child>
+                                  </object>
+                                  <packing>
+                                    <property name="x">300</property>
+                                  </packing>
+                                </child>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
+                                <property name="index">1</property>
                               </packing>
                             </child>
-                            <child>
-                              <object class="GtkEntry" id="Seperation">
+                            <child type="overlay">
+                              <object class="GtkDrawingArea" id="turnoutnew.draw">
+                                <property name="name">Drawing</property>
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="halign">center</property>
-                                <property name="valign">center</property>
-                                <property name="width_chars">10</property>
-                                <property name="max_width_chars">10</property>
+                                <property name="can_focus">False</property>
+                                <property name="hexpand">True</property>
+                                <property name="vexpand">True</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="index">-1</property>
                               </packing>
                             </child>
                           </object>
-                          <packing>
-                            <property name="x">33</property>
-                            <property name="y">87</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox">
-                            <property name="name">Length Overlay</property>
-                            <property name="width_request">100</property>
-                            <property name="height_request">80</property>
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">center</property>
-                            <property name="valign">center</property>
-                            <child>
-                              <object class="GtkLabel">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">end</property>
-                                <property name="valign">center</property>
-                                <property name="label" translatable="yes">Length :</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="Length">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="halign">center</property>
-                                <property name="valign">center</property>
-                                <property name="width_chars">10</property>
-                                <property name="max_width_chars">10</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="x">261</property>
-                          </packing>
                         </child>
                       </object>
-                      <packing>
-                        <property name="index">1</property>
-                      </packing>
                     </child>
-                    <child type="overlay">
-                      <object class="GtkDrawingArea" id="DrawArea">
-                        <property name="name">Drawing</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                      </object>
-                      <packing>
-                        <property name="index">-1</property>
-                      </packing>
+                    <child type="label_item">
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
-                    <property name="expand">True</property>
+                    <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkGrid">
+                    <property name="width_request">100</property>
+                    <property name="height_request">80</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="row_spacing">3</property>
                     <property name="column_spacing">12</property>
-                    <child>
-                      <object class="GtkLabel">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">end</property>
-                        <property name="label" translatable="yes">Manufacturer :</property>
-                        <property name="justify">right</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="turnoutnew-manuf">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">0</property>
-                      </packing>
-                    </child>
                     <child>
                       <object class="GtkLabel" id="turnoutnew-desc1.label">
                         <property name="visible">True</property>
@@ -193,54 +455,6 @@
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="spacing">6</property>
-                        <child>
-                          <object class="GtkEntry" id="turnoutnew-desc1">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkLabel">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="halign">end</property>
-                            <property name="label" translatable="yes">#</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkEntry" id="turnoutnew-partno1">
-                            <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="max_length">4</property>
-                            <property name="max_width_chars">7</property>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">False</property>
-                            <property name="position">2</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="left_attach">1</property>
                         <property name="top_attach">1</property>
                       </packing>
                     </child>
@@ -387,13 +601,81 @@
                             <property name="position">2</property>
                           </packing>
                         </child>
-                        <child type="center">
-                          <placeholder/>
-                        </child>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">Manufacturer :</property>
+                        <property name="justify">right</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="turnoutnew-manuf">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="spacing">6</property>
+                        <child>
+                          <object class="GtkEntry" id="turnoutnew-desc1">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">end</property>
+                            <property name="label" translatable="yes">#</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="turnoutnew-partno1">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="max_length">4</property>
+                            <property name="max_width_chars">7</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
                       </packing>
                     </child>
                   </object>
@@ -436,7 +718,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="turnout-done">
+              <object class="GtkButton" id="turnoutnew-done">
                 <property name="label" translatable="yes">OK</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -465,6 +747,68 @@
               </packing>
             </child>
             <child>
+              <object class="GtkFrame">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="valign">start</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkAlignment">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">start</property>
+                    <child>
+                      <object class="GtkBox" id="turnoutnew-angleMode.box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="valign">start</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkRadioButton" id="frog">
+                            <property name="label" translatable="yes">Frog #</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="draw_indicator">True</property>
+                            <property name="group">degrees</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="degrees">
+                            <property name="label" translatable="yes">Degrees</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="active">True</property>
+                            <property name="draw_indicator">True</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="label_item">
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkButton" id="id-cancel">
                 <property name="label" translatable="yes">Cancel</property>
                 <property name="visible">True</property>
@@ -474,7 +818,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -487,7 +831,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">5</property>
               </packing>
             </child>
           </object>

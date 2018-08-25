@@ -72,6 +72,9 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		cairo_t * cr; \
 		void * data; \
         int fromTemplate;               /**< widget was build from ui template */ \
+        int useGrid;                    /**< widget still uses a fixed layout */ \
+        GtkBox * box;                   /**< box with label and widget */ \
+        GtkFixed * fixed;               /**< fixed container for grid  */ \
         char * template_id; \
 		GtkRevealer * reveal;  \
 		int looked_for_reveal; \

@@ -1211,6 +1211,9 @@ wWin_p wlibCreateFromTemplate(
 
     w=wlibDialogFromTemplate( winType, labelStr, nameStr, option, data );
     
+    /*Find out if there is a fixed element */
+    w->fixed = GTK_FIXED(wlibGetWidgetFromName(w,nameStr,"fixed",TRUE));
+
     if (gtkMainW) {
         gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
                                      GTK_WINDOW(gtkMainW->gtkwin));
