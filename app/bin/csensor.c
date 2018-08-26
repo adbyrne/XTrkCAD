@@ -378,7 +378,7 @@ static paramData_t sensorEditPLs[] = {
     /*3*/ { PD_STRING, sensorEditScript, "script", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof(sensorEditScript)},
 };
 
-static paramGroup_t sensorEditPG = { "sensorEdit", 0, sensorEditPLs, sizeof sensorEditPLs/sizeof sensorEditPLs[0] };
+static paramGroup_t sensorEditPG = { "sensorEdit", F_USETEMPLATE, sensorEditPLs, sizeof sensorEditPLs/sizeof sensorEditPLs[0] };
 static wWin_p sensorEditW;
 
 static void SensorEditOk ( void * junk )
@@ -426,7 +426,7 @@ static void EditSensorDialog()
                                           MakeWindowTitle(_("Edit sensor")),
                                           _("Ok"), SensorEditOk,
                                           wHide, TRUE, NULL,
-                                          F_BLOCK,
+                                          F_BLOCK|F_USETEMPLATE,
                                           NULL );
     }
     if (sensorEditTrack == NULL) {

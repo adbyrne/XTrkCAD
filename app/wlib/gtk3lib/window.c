@@ -1244,7 +1244,7 @@ wWin_p wlibCreateFromTemplate(
 
         w->default_size_x = w->w;
         w->default_size_y = w->h;
-        gtk_widget_set_size_request(w->widget, w->w-20, w->h);
+        gtk_widget_set_size_request(w->gtkwin, w->w-20, w->h);
 
         if (w->option&F_MENUBAR) {
             gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
