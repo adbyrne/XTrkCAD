@@ -297,7 +297,7 @@ static void ContMgmChange( long changes )
 static void DoControlMgr( void * junk )
 {
     if (controlPG.win == NULL) {
-        ParamCreateDialog( &controlPG, MakeWindowTitle(_("Manage Layout Control Elements")), _("Done"), ControlDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK|F_USETEMPLATE, ControlDlgUpdate );
+        ParamCreateDialog( &controlPG, MakeWindowTitle(_("Manage Layout Control Elements")), _("Done"), ControlDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, ControlDlgUpdate );
     } else {
         wListClear( controlSelL );
     }

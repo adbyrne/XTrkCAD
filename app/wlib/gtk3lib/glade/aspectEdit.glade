@@ -4,19 +4,18 @@
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkWindow" id="aspectEdit">
     <property name="can_focus">False</property>
+    <property name="border_width">18</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="margin_left">18</property>
-        <property name="margin_right">18</property>
-        <property name="margin_top">18</property>
-        <property name="margin_bottom">18</property>
+        <property name="orientation">vertical</property>
         <property name="spacing">6</property>
         <child>
           <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="margin_bottom">18</property>
             <property name="row_spacing">6</property>
             <property name="column_spacing">6</property>
             <child>
@@ -36,7 +35,8 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="halign">start</property>
-                <property name="width_chars">30</property>
+                <property name="max_length">80</property>
+                <property name="width_chars">20</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -49,6 +49,8 @@
                 <property name="can_focus">True</property>
                 <property name="valign">center</property>
                 <property name="hexpand">True</property>
+                <property name="max_length">1024</property>
+                <property name="width_chars">40</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -72,6 +74,8 @@
               <object class="GtkEntry" id="aspectEdit-index">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="max_length">1024</property>
+                <property name="width_chars">40</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -98,20 +102,18 @@
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkButtonBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
             <property name="spacing">6</property>
+            <property name="layout_style">end</property>
             <child>
-              <object class="GtkToggleButton" id="id-ok">
-                <property name="label" translatable="yes">OK</property>
+              <object class="GtkToggleButton" id="id-cancel">
+                <property name="label" translatable="yes">_Cancel</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <style>
-                  <class name="suggested-action"/>
-                </style>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -120,11 +122,17 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="id-cancel">
-                <property name="label" translatable="yes">Cancel</property>
+              <object class="GtkToggleButton" id="id-help">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">help-browser</property>
+                  </object>
+                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -133,11 +141,15 @@
               </packing>
             </child>
             <child>
-              <object class="GtkToggleButton" id="id-help">
-                <property name="label" translatable="yes">Help</property>
+              <object class="GtkToggleButton" id="id-ok">
+                <property name="label" translatable="yes">_Done</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="use_underline">True</property>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
               </object>
               <packing>
                 <property name="expand">False</property>

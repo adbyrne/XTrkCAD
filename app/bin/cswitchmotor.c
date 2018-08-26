@@ -93,7 +93,7 @@ static paramData_t switchmotorPLs[] = {
 /*3*/ { PD_STRING, switchmotorPointSense, "pointSense", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Point Sense"), 0, 0, sizeof(switchmotorPointSense)}
 };
 
-static paramGroup_t switchmotorPG = { "switchmotor", F_USETEMPLATE, switchmotorPLs, sizeof switchmotorPLs/sizeof switchmotorPLs[0] };
+static paramGroup_t switchmotorPG = { "switchmotor", PGO_DIALOGTEMPLATE, switchmotorPLs, sizeof switchmotorPLs/sizeof switchmotorPLs[0] };
 static wWin_p switchmotorW;
 
 static char switchmotorEditName[STR_SHORT_SIZE];
@@ -429,8 +429,8 @@ static void ReadSwitchMotor ( char * line )
     xx->turnindx = trkindex;
     if (!last_motor) {
     	last_trk = last_motor;
-    	xx1 = GetswitchmotorData(last_trk);
-    	xx1->next_motor = trk;
+//    	xx1 = GetswitchmotorData(last_trk);
+//    	xx1->next_motor = trk;
     } else first_motor = trk;
     xx->next_motor = NULL;
     last_motor = trk;
@@ -556,7 +556,7 @@ static void NewSwitchMotorDialog(track_p trk)
 	if ( log_switchmotor < 0 ) log_switchmotor = LogFindIndex( "switchmotor" );
 	if ( !switchmotorW ) {
 		ParamRegister( &switchmotorPG );
-		switchmotorW = ParamCreateDialog (&switchmotorPG, MakeWindowTitle(_("Create switch motor")), _("Ok"), SwitchMotorOk, wHide, TRUE, NULL, F_BLOCK|F_USETEMPLATE, NULL );
+		switchmotorW = ParamCreateDialog (&switchmotorPG, MakeWindowTitle(_("Create switch motor")), _("Ok"), SwitchMotorOk, wHide, TRUE, NULL, F_BLOCK, NULL );
 		switchmotorD.dpi = mainD.dpi;
 	}
 	ParamLoadControls( &switchmotorPG );

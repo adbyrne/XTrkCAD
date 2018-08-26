@@ -1,5 +1,8 @@
 set(gladefiles 
+    "aspectEdit.glade"
+    "blockedit.glade"
     "cmdopt.glade"
+    "contmgm.glade"
     "custmgm.glade"
     "display.glade"
     "easement.glade"
@@ -13,6 +16,7 @@ set(gladefiles
     "print.glade"
     "prmfile.glade"
     "rgbcolor.glade"
+    "signalEdit.glade"
     "sticky.glade"
     )
 

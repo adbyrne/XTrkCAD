@@ -107,7 +107,7 @@ static paramData_t blockPLs[] = {
 /*0*/ { PD_STRING, blockName, "name", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)200, N_("Name"), 0, 0, sizeof( blockName )},
 /*1*/ { PD_STRING, blockScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof( blockScript)}
 };
-static paramGroup_t blockPG = { "block", F_USETEMPLATE, blockPLs,  sizeof blockPLs/sizeof blockPLs[0] };
+static paramGroup_t blockPG = { "block", PGO_DIALOGTEMPLATE, blockPLs,  sizeof blockPLs/sizeof blockPLs[0] };
 static wWin_p blockW;
 
 static char blockEditName[STR_SHORT_SIZE];
@@ -120,7 +120,7 @@ static paramData_t blockEditPLs[] = {
 /*1*/ { PD_STRING, blockEditScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Script"), 0, 0, sizeof(blockEditScript)},
 /*2*/ { PD_STRING, blockEditSegs, "segments", PDO_NOPREF, (void*)350, N_("Segments"), BO_READONLY }, 
 };
-static paramGroup_t blockEditPG = { "blockedit", F_USETEMPLATE, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
+static paramGroup_t blockEditPG = { "blockedit", PGO_DIALOGTEMPLATE, blockEditPLs,  sizeof blockEditPLs/sizeof blockEditPLs[0] };
 static wWin_p blockEditW;
 
 typedef struct btrackinfo_t {
