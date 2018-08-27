@@ -427,10 +427,10 @@ static void ReadSwitchMotor ( char * line )
 	xx->reverse = reverse;
 	xx->pointsense = pointsense;
     xx->turnindx = trkindex;
-    if (!last_motor) {
+    if (last_motor) {
     	last_trk = last_motor;
-//    	xx1 = GetswitchmotorData(last_trk);
-//    	xx1->next_motor = trk;
+    	xx1 = GetswitchmotorData(last_trk);
+    	xx1->next_motor = trk;
     } else first_motor = trk;
     xx->next_motor = NULL;
     last_motor = trk;
