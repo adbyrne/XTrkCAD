@@ -411,9 +411,9 @@ static paramData_t controlEditPLs[] = {
 #define I_ORIGY (2)
     /*2*/ { PD_FLOAT, &controlEditOrig.y, "origy", PDO_DIM, &r_1000_1000, N_("Origin Y") },
 #define I_CONTROLONSCRIPT (3)
-    /*3*/ { PD_STRING, controlEditOnScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
+    /*3*/ { PD_STRING, controlEditOnScript, "onscript", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("On Script"), 0, 0, sizeof(controlEditOnScript)},
 #define I_CONTROLOFFSCRIPT (4)
-    /*4*/ { PD_STRING, controlEditOffScript, "script", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
+    /*4*/ { PD_STRING, controlEditOffScript, "offscript", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)350, N_("Off Script"), 0, 0, sizeof(controlEditOffScript)},
 };
 
 static paramGroup_t controlEditPG = { "controlEdit", PGO_DIALOGTEMPLATE, controlEditPLs, sizeof controlEditPLs/sizeof controlEditPLs[0] };
