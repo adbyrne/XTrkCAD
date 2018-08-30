@@ -7,6 +7,7 @@ set(gladefiles
     "custmgm.glade"
     "display.glade"
     "easement.glade"
+    "elev.glade"
     "enum.glade"
     "grid.glade"
     "helix.glade"
@@ -21,6 +22,7 @@ set(gladefiles
     "rgbcolor.glade"
     "signalEdit.glade"
     "sticky.glade"
+    "tip.glade"
     )
 
 foreach( glade IN LISTS gladefiles )
