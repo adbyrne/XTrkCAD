@@ -19,6 +19,7 @@ set(gladefiles
     "pricelist.glade"
     "print.glade"
     "prmfile.glade"
+    "rescale.glade"
     "rgbcolor.glade"
     "signalEdit.glade"
     "sticky.glade"

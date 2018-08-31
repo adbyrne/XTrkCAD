@@ -592,7 +592,7 @@ static paramData_t rescalePLs[] = {
 #define I_RESCALE_PERCENT	(6)
 		{ PD_FLOAT, &rescalePercent, "ratio", 0, &r0o001_10000, N_("Ratio") },
 		{ PD_MESSAGE, "%", "percent", PDO_DLGHORZ } };
-static paramGroup_t rescalePG = { "rescale", 0, rescalePLs, sizeof rescalePLs/sizeof rescalePLs[0] };
+static paramGroup_t rescalePG = { "rescale", PGO_DIALOGTEMPLATE, rescalePLs, sizeof rescalePLs/sizeof rescalePLs[0] };
 
 
 static long getboundsCount;
