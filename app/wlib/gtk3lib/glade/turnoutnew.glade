@@ -43,15 +43,24 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkOverlay">
+                          <object class="GtkOverlay" id="turnoutnew.overlay">
                             <property name="width_request">500</property>
                             <property name="height_request">200</property>
                             <property name="visible">True</property>
-                            <property name="can_focus">False</property>
+                            <property name="can_focus">True</property>
                             <property name="margin_top">1</property>
                             <property name="hexpand">True</property>
                             <property name="vexpand">True</property>
                             <child>
+                              <object class="GtkDrawingArea" id="turnoutnew.draw">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                              </object>
+                              <packing>
+                                <property name="index">-1</property>
+                              </packing>
+                            </child>
+                            <child type="overlay">
                               <object class="GtkFixed" id="turnoutnew.fixed">
                                 <property name="name">Fixed Overlay Container</property>
                                 <property name="visible">True</property>
@@ -408,21 +417,6 @@
                                   </packing>
                                 </child>
                               </object>
-                              <packing>
-                                <property name="index">1</property>
-                              </packing>
-                            </child>
-                            <child type="overlay">
-                              <object class="GtkDrawingArea" id="turnoutnew.draw">
-                                <property name="name">Drawing</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="hexpand">True</property>
-                                <property name="vexpand">True</property>
-                              </object>
-                              <packing>
-                                <property name="index">-1</property>
-                              </packing>
                             </child>
                           </object>
                         </child>
