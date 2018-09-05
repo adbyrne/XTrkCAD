@@ -865,6 +865,7 @@ static gint draw_scroll_event(
 		break;
 	}
 
+
 	if (action != 0) {
 		if (drawVerbose >= 2)
 			printf( "%s[%dx%d]\n", actionNames[action], bd->lastX, bd->lastY );
@@ -905,6 +906,10 @@ static gint draw_button_event(
 	case 1: /* left mouse button */
 		action = event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp;
 		/*bd->action( bd, bd->context, event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp, bd->lastX, bd->lastY );*/
+		GdkModifierType modifiers = gtk_accelerator_get_default_mod_mask ();
+		/* left plus control = right mouse */
+		if ((event->state & modifiers) == GDK_CONTROL_MASK)
+			action = event->type==GDK_BUTTON_PRESS?wActionRDown:wActionRUp;
 		break;
 	case 3: /* right mouse button */
 		action = event->type==GDK_BUTTON_PRESS?wActionRDown:wActionRUp;
@@ -929,6 +934,8 @@ static gint draw_motion_event(
 	int x, y;
 	GdkModifierType state;
 	wAction_t action;
+	GdkModifierType modifiers;
+	modifiers = gtk_accelerator_get_default_mod_mask();
 
 	if (bd->action == NULL)
 		return TRUE;
@@ -938,7 +945,7 @@ static gint draw_motion_event(
 	} else {
 		x = event->x;
 		y = event->y;
-		state = event->state;
+		state = event->state & modifiers;
 	}
 
 	if (state & GDK_BUTTON1_MASK) {
@@ -965,12 +972,12 @@ static gint draw_char_event(
 		wDraw_p bd )
 {
 	GdkModifierType modifiers;
+	modifiers = gtk_accelerator_get_default_mod_mask();
 	guint key = event->keyval;
 	wAccelKey_e extKey = wAccelKey_None;
 	switch (key) {
 	case GDK_KEY_Escape:	key = 0x1B; break;
 	case GDK_KEY_Return:
-		modifiers = gtk_accelerator_get_default_mod_mask();
 		if (((event->state & modifiers)==GDK_CONTROL_MASK) || ((event->state & modifiers)==GDK_MOD1_MASK))
 			extKey = wAccelKey_LineFeed;  //If Return plus Control or Alt send in LineFeed
 		key = 0x0D;
@@ -1003,12 +1010,14 @@ static gint draw_char_event(
 	default: ;
 	}
 
+	catch_shift_ctrl_alt_keys(widget, event, NULL);
+
 	if (extKey != wAccelKey_None) {
 		if ( wlibFindAccelKey( event ) == NULL ) {
 			bd->action( bd, bd->context, wActionExtKey + ((int)extKey<<8), bd->lastX, bd->lastY );
 		}
 		return FALSE;
-	} else if (key <= 0xFF && (event->state&(GDK_CONTROL_MASK|GDK_MOD1_MASK)) == 0 && bd->action) {
+	} else if (key <= 0xFF && ((event->state&modifiers)&(GDK_CONTROL_MASK|GDK_MOD1_MASK)) == 0 && bd->action) {
 		bd->action( bd, bd->context, wActionText+(key<<8), bd->lastX, bd->lastY );
 		return FALSE;
 	} else {
@@ -1084,7 +1093,7 @@ int xw, xh, cw, ch;
 							  GDK_LEAVE_NOTIFY_MASK
 							  | GDK_BUTTON_PRESS_MASK
 							  | GDK_BUTTON_RELEASE_MASK
-/*							  | GDK_SCROLL_MASK */
+							  | GDK_SCROLL_MASK
 							  | GDK_POINTER_MOTION_MASK
 							  | GDK_POINTER_MOTION_HINT_MASK
 							  | GDK_KEY_PRESS_MASK

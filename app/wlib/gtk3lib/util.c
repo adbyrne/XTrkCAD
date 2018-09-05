@@ -681,16 +681,24 @@ struct accelData_t * wlibFindAccelKey(
     accelData_t * ad;
     int modifier = 0;
 
-    if ((event->state & GDK_SHIFT_MASK)) {
+    GdkModifierType modifiers;
+
+    modifiers = gtk_accelerator_get_default_mod_mask ();
+
+    if (((event->state & modifiers) & GDK_SHIFT_MASK)) {
         modifier |= WKEY_SHIFT;
     }
 
-    if ((event->state & GDK_CONTROL_MASK)) {
+    if ((event->state & modifiers & GDK_CONTROL_MASK)) {
         modifier |= WKEY_CTRL;
     }
 
-    if ((event->state & GDK_MOD1_MASK)) {
+    if ((event->state & modifiers & GDK_MOD1_MASK)) {
         modifier |= WKEY_ALT;
+    }
+
+    if ((event->state & modifiers & GDK_MOD2_MASK)) {
+    	modifier |= WKEY_CMD;
     }
 
     for (ad = &accelData(0); ad<&accelData(accelData_da.cnt); ad++)

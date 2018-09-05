@@ -1861,33 +1861,25 @@ EXPORT void DoZoomUp( void * mode )
 {
 	long newScale;
 	int i;
-	
-	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0) {
-		i = ScaleInx( mainD.scale );
-		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
-		/* 
-		 * Zooming into macro mode happens when we are at scale 1:1. 
-		 * To jump into macro mode, the CTRL-key has to be pressed and held.
-		 */
-		if( mainD.scale != 1.0 || (mainD.scale == 1.0 && (MyGetKeyState()&WKEY_CTRL))) {
-			if( i ) {
-				if (mainD.scale <=1.0) 
-					InfoMessage(_("Macro Zoom Mode"));
-				else
-					InfoMessage(_("Use Shift+PageDwn to jump to preset Zoom In"));
-				DoNewScale( zoomList[ i - 1 ].value );	
-				
-			} else InfoMessage("Min Macro Zoom");
-		} else {
-			InfoMessage(_("Scale 1:1 - Use Ctrl+PageDwn to go to Macro Zoom Mode"));
-		}
-	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
-		wPrefGetInteger( "misc", "zoomin", &newScale, 4 );
-		InfoMessage(_("Preset Zoom In Value selected. Shift+Ctrl+PageDwn to reset value"));
-		DoNewScale( newScale );
+
+	i = ScaleInx( mainD.scale );
+	if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
+	/*
+	 * Zooming into macro mode happens when we are at scale 1:1.
+	 * To jump into macro mode, the CTRL-key has to be pressed and held.
+	 */
+	if( mainD.scale != 1.0 || (mainD.scale == 1.0 && (MyGetKeyState()&WKEY_CTRL))) {
+		if( i ) {
+			if (mainD.scale <=1.0)
+				InfoMessage(_("Macro Zoom Mode"));
+			DoNewScale( zoomList[ i - 1 ].value );
+
+		} else InfoMessage("Min Macro Zoom");
 	} else {
-		wPrefSetInteger( "misc", "zoomin", (long)mainD.scale );
-		InfoMessage( _("Zoom In Program Value %ld:1, Shift+PageDwn to use"), (long)mainD.scale );
+		if (mainD.scale == 1.0)
+			InfoMessage(_("Scale 1:1 - Use Ctrl+PageDwn to go to Macro Zoom Mode"));
+		else
+			InfoMessage(" ");
 	}
 }
 
@@ -1903,24 +1895,14 @@ EXPORT void DoZoomDown( void  * mode)
 	long newScale;
 	int i;
 	
-	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
-		i = ScaleInx( mainD.scale );
-		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
-		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
-			InfoMessage(_("Use Shift+PageUp to jump to preset Zoom Out"));
-			DoNewScale( zoomList[ i + 1 ].value );
-		} else
-			InfoMessage(_("At Maximum Zoom Out"));
+	i = ScaleInx( mainD.scale );
+	if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
+	if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
+		DoNewScale( zoomList[ i + 1 ].value );
+		InfoMessage(" ");
+	} else
+		InfoMessage(_("At Maximum Zoom Out"));
 					
-			
-	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
-		wPrefGetInteger( "misc", "zoomout", &newScale, 16 );
-		InfoMessage(_("Preset Zoom Out Value selected. Shift+Ctrl+PageUp to reset value"));
-		DoNewScale( newScale );
-	} else {
-		wPrefSetInteger( "misc", "zoomout", (long)mainD.scale );
-		InfoMessage( _("Zoom Out Program Value %ld:1 set, Shift+PageUp to use"), (long)mainD.scale );
-	}
 }
 
 /**
@@ -2256,8 +2238,9 @@ static void DoMouse( wAction_t action, coOrd pos )
 			break;
 		case wActionExtKey:
 			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
-			if ((MyGetKeyState() &
-					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) break;  //Allow SHIFT+CTRL for Move
+			if (((wAccelKey_e)(action>>8) != wAccelKey_Pgdn) &&
+					((MyGetKeyState() &  (WKEY_SHIFT | WKEY_CTRL))
+					    == (WKEY_SHIFT | WKEY_CTRL))) break;  //Allow SHIFT+CTRL for Move
 			if (((action>>8)&0xFF) == wAccelKey_LineFeed) {
 				action = C_TEXT+((int)(0x0A<<8));
 				break;
@@ -2347,10 +2330,10 @@ static void DoMouse( wAction_t action, coOrd pos )
 			/*DrawTempTrack();*/
 			break;
 		case C_WUP:
-			DoZoomUp((void *)1L);			
+			DoZoomUp(NULL);		 /* Allow use of Control with MouseWheel */
 			break;
 		case C_WDOWN:
-			DoZoomDown((void *)1L);
+			DoZoomDown(NULL);
 			break;
 		default:
 			NoticeMessage( MSG_DOMOUSE_BAD_OP, _("Ok"), NULL, action&0xFF );

@@ -758,29 +758,43 @@ wBool_t catch_shift_ctrl_alt_keys(
 {
     int state;
     state = 0;
+    GdkModifierType modifiers;
+    modifiers = gtk_accelerator_get_default_mod_mask();
+    /* Clear keystate */
+    keyState &= ~(WKEY_CTRL|WKEY_SHIFT|WKEY_ALT|WKEY_CMD);
 
-    switch (event->keyval) {
-    case GDK_KEY_Shift_L:
-    case GDK_KEY_Shift_R:
-        state |= WKEY_SHIFT;
-        break;
+    if ((event->state & modifiers)&GDK_CONTROL_MASK)
+    	state |= WKEY_CTRL;
+    if ((event->state & modifiers)&GDK_SHIFT_MASK)
+    	state |= WKEY_SHIFT;
+    if ((event->state & modifiers)&GDK_MOD1_MASK)
+    	state |= WKEY_ALT;
+    /* Add special key (Windows or Command) */
+    if ((event->state & modifiers)&GDK_MOD2_MASK)
+    	state |= WKEY_CMD;
 
-    case GDK_KEY_Control_L:
-    case GDK_KEY_Control_R:
-        state |= WKEY_CTRL;
-        break;
+    //switch (event->keyval) {
+    //case GDK_KEY_Shift_L:
+    //case GDK_KEY_Shift_R:
+    //    state |= WKEY_SHIFT;
+    //    break;
 
-    case GDK_KEY_Alt_L:
-    case GDK_KEY_Alt_R:
-        state |= WKEY_ALT;
-        break;
-    }
+    //case GDK_KEY_Control_L:
+    //case GDK_KEY_Control_R:
+    //    state |= WKEY_CTRL;
+    //    break;
+
+    //case GDK_KEY_Alt_L:
+    //case GDK_KEY_Alt_R:
+    //    state |= WKEY_ALT;
+    //    break;
+    //}
 
     if (state != 0) {
         if (event->type == GDK_KEY_PRESS) {
             keyState |= state;
         } else {
-            keyState &= ~state;
+        	keyState &= ~state;
         }
 
         return TRUE;

@@ -198,6 +198,7 @@ const char * wMemStats( void );
 #define WKEY_SHIFT	(1<<1)
 #define WKEY_CTRL	(1<<2)
 #define WKEY_ALT	(1<<3)
+#define WKEY_CMD    (1<<4)
 int wGetKeyState(		void );
 
 void wGetDisplaySize(		wPos_t*, wPos_t* );
