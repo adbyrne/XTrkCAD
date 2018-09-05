@@ -2510,6 +2510,7 @@ static void CreateMenus(void) {
 	cmdGroup = BG_HOTBAR;
 	InitHotBar();
 
+
 #ifdef LATER
 #ifdef WINDOWS
 	wAttachAccelKey( wAccelKey_Pgdn, 0, (wAccelKeyCallBack_p)DoZoomUp, (void*)1 );
@@ -2892,6 +2893,8 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 		LayoutBackGroundInit();
 		LayoutBackGroundSave();		//Remove Background
 	}
+
+	LayoutToolBar();
 	inMainW = FALSE;
 	return mainW;
 }
