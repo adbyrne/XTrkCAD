@@ -46,6 +46,11 @@ static void CustomEdit( void * action );
 static void CustomDelete( void * action );
 static void CustomExport( void * action );
 static void CustomDone( void * action );
+static void CustomNewCar( void * action );
+
+static const char * customTypes[] = { "Car Part", "Car Prototype", NULL };
+static wIndex_t selectedType;
+
 static wPos_t customListWidths[] = { 18, 100, 30, 80, 220 };
 static const char * customListTitles[] = { "", N_("Manufacturer"),
 	N_("Scale"), N_("Part No"), N_("Description") };
@@ -53,17 +58,17 @@ static paramListData_t customListData = { 10, 400, 5, customListWidths, customLi
 static paramData_t customPLs[] = {
 #define I_CUSTOMLIST	(0)
 #define customSelL		((wList_p)customPLs[I_CUSTOMLIST].control)
-	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE, &customListData, NULL, BL_MANY },
-#define I_CUSTOMEDIT	(1)
+	{	PD_LIST, NULL, "inx", PDO_DLGRESETMARGIN|PDO_DLGRESIZE|PDO_DLGBOXEND, &customListData, NULL, BL_MANY },   
+#define I_CUSTOMNEWTYPE (1)
+    {   PD_DROPLIST, &selectedType, "newtype", PDO_DLGRESETMARGIN | PDO_LISTINDEX, (void*)150, N_("Create a new ") },
+#define I_CUSTOMNEW     (2)    
+    {   PD_BUTTON, (void *)CustomNewCar, "newcar", PDO_DLGHORZ| PDO_DLGBOXEND, NULL, N_("Go") },     
+#define I_CUSTOMEDIT	(3)
 	{	PD_BUTTON, (void*)CustomEdit, "edit", PDO_DLGCMDBUTTON, NULL, N_("Edit") },
-#define I_CUSTOMDEL		(2)
+#define I_CUSTOMDEL		(4)
 	{	PD_BUTTON, (void*)CustomDelete, "delete", 0, NULL, N_("Delete") },
-#define I_CUSTOMCOPYTO	(3)
+#define I_CUSTOMCOPYTO	(5)
 	{	PD_BUTTON, (void*)CustomExport, "export", 0, NULL, N_("Move To") },
-#define I_CUSTOMNEW		(4)
-	{	PD_MENU, NULL, "new", PDO_DLGWIDE, NULL, N_("New") },
-	{	PD_MENUITEM, (void*)CarDlgAddDesc, "new-part-mi", 0, NULL, N_("Car Part") },
-	{	PD_MENUITEM, (void*)CarDlgAddProto, "new-proto-mi", 0, NULL, N_("Car Prototype") }
   } ;
 static paramGroup_t customPG = { "custmgm", 0, customPLs, sizeof customPLs/sizeof customPLs[0] };
 
@@ -84,6 +89,10 @@ static void CustomDlgUpdate(
 	wIndex_t selcnt = wListGetSelectedCount( (wList_p)customPLs[0].control );
 	wIndex_t linx, lcnt;
 
+    if ( inx == I_CUSTOMNEW ) {
+        lcnt = wListGetCount( (wList_p)pg->paramPtr[I_CUSTOMNEWTYPE].control );
+    }
+        
 	if ( inx != I_CUSTOMLIST ) return;
 	if ( selcnt == 1 ) {
 		lcnt = wListGetCount( (wList_p)pg->paramPtr[inx].control );
@@ -129,6 +138,20 @@ static void CustomEdit( void * action )
 #endif
 }
 
+static void CustomNewCar( void * action )
+{
+
+    switch(selectedType) {
+        case 1:                 // car prototype
+            CarDlgAddProto();
+            break;
+        case 0:                 // car part
+            CarDlgAddDesc();
+            break;
+        default:
+            break;
+    }        
+}
 
 static void CustomDelete( void * action )
 {
@@ -354,8 +377,16 @@ static void CustMgmChange( long changes )
 
 static void DoCustomMgr( void * junk )
 {
+    int i = 0;
+    
 	if (customPG.win == NULL) {
 		ParamCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
+        while(customTypes[ i ] != NULL) {
+            wListAddValue( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control), customTypes[ i++ ], NULL, NULL );
+        } 
+        selectedType = 0;
+        wListSetIndex( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control), selectedType);
+        
 	} else {
 		wListClear( customSelL );
 	}
@@ -369,7 +400,7 @@ static void DoCustomMgr( void * junk )
 
 EXPORT addButtonCallBack_t CustomMgrInit( void )
 {
-	ParamRegister( &customPG );
+	ParamRegister( &customPG );     
 	ParamRegister( &custMgmContentsPG );
 	RegisterChangeNotification( CustMgmChange );
 	return &DoCustomMgr;
