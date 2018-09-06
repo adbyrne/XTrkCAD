@@ -323,7 +323,7 @@ static int DropListSelectChild(
 
         /* selection changed -> callback */
         if (string && bl->action) {
-            bl->action(inx, string, 1, bl->data, addData->itemData);
+            bl->action(inx, string, 1, bl->data, (addData?addData->itemData:NULL));
         }
     }
 
