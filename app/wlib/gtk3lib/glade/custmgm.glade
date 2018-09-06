@@ -18,12 +18,9 @@
       <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkWindow">
+  <object class="GtkWindow" id="custmgm">
     <property name="can_focus">False</property>
-    <property name="margin_left">18</property>
-    <property name="margin_right">18</property>
-    <property name="margin_top">18</property>
-    <property name="margin_bottom">18</property>
+    <property name="border_width">18</property>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -40,7 +37,7 @@
             <property name="vexpand">True</property>
             <property name="spacing">12</property>
             <child>
-              <object class="GtkScrolledWindow">
+              <object class="GtkScrolledWindow" id="custmgm-inx.scrollwindow">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
@@ -131,11 +128,13 @@
                 <property name="orientation">vertical</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkButton" id="edit">
-                    <property name="label" translatable="yes">Edit</property>
+                  <object class="GtkButton" id="custmgm-edit">
+                    <property name="label" translatable="yes">_Edit</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="halign">start</property>
+                    <property name="use_underline">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -144,11 +143,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="export">
+                  <object class="GtkButton" id="custmgm-export">
                     <property name="label" translatable="yes">_Move to...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="halign">start</property>
                     <property name="use_underline">True</property>
                   </object>
                   <packing>
@@ -158,11 +158,12 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="delete">
+                  <object class="GtkButton" id="custmgm-delete">
                     <property name="label" translatable="yes">_Delete</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="halign">start</property>
                     <property name="use_underline">True</property>
                   </object>
                   <packing>
@@ -189,6 +190,7 @@
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="spacing">6</property>
             <child>
               <object class="GtkLabel">
                 <property name="visible">True</property>
@@ -196,6 +198,7 @@
                 <property name="margin_right">12</property>
                 <property name="label" translatable="yes">_Create new</property>
                 <property name="use_underline">True</property>
+                <property name="mnemonic_widget">custmgm-newtype</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -204,15 +207,9 @@
               </packing>
             </child>
             <child>
-              <object class="GtkComboBoxText">
+              <object class="GtkComboBox" id="custmgm-newtype">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="margin_right">12</property>
-                <property name="active">0</property>
-                <items>
-                  <item id="test" translatable="yes">Car Prototype</item>
-                  <item id="test2" translatable="yes">Car Template</item>
-                </items>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -221,17 +218,13 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton">
+              <object class="GtkButton" id="custmgm-newcar">
+                <property name="label" translatable="yes">_Go</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <child>
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="icon_name">list-add</property>
-                  </object>
-                </child>
+                <property name="halign">start</property>
+                <property name="use_underline">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -257,6 +250,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="halign">start</property>
                 <property name="use_underline">True</property>
                 <child>
                   <object class="GtkImage">
@@ -278,6 +272,7 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="halign">start</property>
                 <property name="use_underline">True</property>
                 <style>
                   <class name="suggested-action"/>
@@ -298,5 +293,15 @@
         </child>
       </object>
     </child>
+  </object>
+  <object class="GtkSizeGroup">
+    <widgets>
+      <widget name="custmgm-edit"/>
+      <widget name="custmgm-export"/>
+      <widget name="custmgm-delete"/>
+      <widget name="custmgm-newcar"/>
+      <widget name="id-help"/>
+      <widget name="id-ok"/>
+    </widgets>
   </object>
 </interface>

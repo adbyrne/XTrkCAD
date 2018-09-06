@@ -70,7 +70,7 @@ static paramData_t customPLs[] = {
 #define I_CUSTOMCOPYTO	(5)
 	{	PD_BUTTON, (void*)CustomExport, "export", 0, NULL, N_("Move To") },
   } ;
-static paramGroup_t customPG = { "custmgm", 0, customPLs, sizeof customPLs/sizeof customPLs[0] };
+static paramGroup_t customPG = { "custmgm", PGO_DIALOGTEMPLATE, customPLs, sizeof customPLs/sizeof customPLs[0] };
 
 
 typedef struct {
