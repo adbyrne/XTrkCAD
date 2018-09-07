@@ -1,4 +1,5 @@
 set(gladefiles 
+    "about.glade"
     "aspectEdit.glade"
     "blockedit.glade"
     "cmdopt.glade"
