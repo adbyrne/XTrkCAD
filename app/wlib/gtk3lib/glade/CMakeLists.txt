@@ -5,6 +5,7 @@ set(gladefiles
     "contmgm.glade"
     "controlEdit.glade"
     "custmgm.glade"
+    "demo.glade"
     "display.glade"
     "easement.glade"
     "elev.glade"
@@ -24,6 +25,7 @@ set(gladefiles
     "signalEdit.glade"
     "sticky.glade"
     "tip.glade"
+    "train.glade"
     )
 
 foreach( glade IN LISTS gladefiles )

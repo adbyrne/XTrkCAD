@@ -613,7 +613,7 @@ static paramData_t demoPLs[] = {
 #define I_DEMOTEXT		(4)
 #define demoT			((wText_p)demoPLs[I_DEMOTEXT].control)
 	{   PD_TEXT, NULL, "text", PDO_NORECORD|PDO_DLGRESIZE, &demoTextData, NULL, BT_CHARUNITS|BO_READONLY} };
-static paramGroup_t demoPG = { "demo", 0, demoPLs, sizeof demoPLs/sizeof demoPLs[0] };
+static paramGroup_t demoPG = { "demo", PGO_DIALOGTEMPLATE, demoPLs, sizeof demoPLs/sizeof demoPLs[0] };
 
 EXPORT int MyGetKeyState( void )
 {
