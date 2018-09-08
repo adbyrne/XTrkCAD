@@ -568,7 +568,7 @@ static paramData_t profilePLs[] = {
 	{	PD_MESSAGE, NULL, "profile", PDO_DLGIGNOREX, (void*)300 },
 	{	PD_BUTTON, (void*)DoProfileClear, "clear", PDO_DLGCMDBUTTON, NULL, N_("Clear") },
 	{	PD_BUTTON, (void*)DoProfilePrint, "print", 0, NULL, N_("Print") } };
-static paramGroup_t profilePG = { "profile", 0, profilePLs, sizeof profilePLs/sizeof profilePLs[0] };
+static paramGroup_t profilePG = { "profile", PGO_DIALOGTEMPLATE, profilePLs, sizeof profilePLs/sizeof profilePLs[0] };
 
 
 static void ProfileTempDraw( int inx, DIST_T elev )

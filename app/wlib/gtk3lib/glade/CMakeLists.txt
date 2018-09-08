@@ -21,12 +21,14 @@ set(gladefiles
     "pricelist.glade"
     "print.glade"
     "prmfile.glade"
+    "profile.glade"
     "rescale.glade"
     "rgbcolor.glade"
     "signalEdit.glade"
     "sticky.glade"
     "tip.glade"
     "train.glade"
+    "turnout.glade"
     )
 
 foreach( glade IN LISTS gladefiles )
