@@ -2,6 +2,7 @@ set(gladefiles
     "about.glade"
     "aspectEdit.glade"
     "blockedit.glade"
+    "checkpoint.glade"
     "cmdopt.glade"
     "contmgm.glade"
     "controlEdit.glade"
