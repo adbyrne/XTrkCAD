@@ -1162,8 +1162,8 @@ static void ChangeMapScale( void )
 	}
 	w = (wPos_t)fw;
 	h = (wPos_t)fh;
-	wWinSetSize( mapW, w+DlgSepLeft+DlgSepRight, h+DlgSepTop+DlgSepBottom );
 	wDrawSetSize( mapD.d, w, h );
+	wWinSetSize( mapW, w+DlgSepLeft+DlgSepRight, h+DlgSepTop+DlgSepBottom );
 }
 
 
@@ -1816,7 +1816,7 @@ static void DoNewScale( DIST_T scale )
 	if (scale > MAX_MAIN_SCALE)
 		scale = MAX_MAIN_SCALE;
 
-	DrawHilight( &mapD, mainD.orig, mainD.size );
+	//DrawHilight( &mapD, mainD.orig, mainD.size );
 	tempD.scale = mainD.scale = scale;
 	mainD.dpi = wDrawGetDPI( mainD.d );
 	if ( mainD.dpi == 75 ) {
@@ -1838,12 +1838,13 @@ static void DoNewScale( DIST_T scale )
 	}
 	ConstraintOrig( &mainD.orig, mainD.size );
 	MainRedraw();
+	MapRedraw();
 	tempD.orig = mainD.orig;
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
 	/*SetFont(0);*/
 	sprintf( tmp, "%0.3f", mainD.scale );
 	wPrefSetString( "draw", "zoom", tmp );
-	DrawHilight( &mapD, mainD.orig, mainD.size );
+	//DrawHilight( &mapD, mainD.orig, mainD.size );
 	if (recordF) {
 		fprintf( recordF, "ORIG %0.3f %0.3f %0.3f\n",
 						mainD.scale, mainD.orig.x, mainD.orig.y );
@@ -1948,7 +1949,8 @@ static void DoMapPan( wAction_t action, coOrd pos )
 {
 	static coOrd mapOrig;
 	static coOrd oldOrig, newOrig;
-	static coOrd size;
+	static coOrd oldSize, newSize;
+
 	static DIST_T xscale, yscale;
 	static enum { noPan, movePan, resizePan } mode = noPan;
 	wPos_t x, y;
@@ -1961,23 +1963,25 @@ static void DoMapPan( wAction_t action, coOrd pos )
 		else
 			break;
 		mapOrig = pos;
-		size = mainD.size;
+		oldSize = mainD.size;
 		newOrig = oldOrig = mainD.orig;
 LOG( log_pan, 1, ( "ORIG = [ %0.3f, %0.3f ]\n", mapOrig.x, mapOrig.y ) )
+		MapRedraw();
 		break;
 	case C_MOVE:
 		if ( mode != movePan )
 			break;
-		DrawHilight( &mapD, newOrig, size );
+		//DrawHilight( &mapD, newOrig, size );
 LOG( log_pan, 2, ( "NEW = [ %0.3f, %0.3f ] \n", pos.x, pos.y ) )
 		newOrig.x = oldOrig.x + pos.x-mapOrig.x;
 		newOrig.y = oldOrig.y + pos.y-mapOrig.y;
 		ConstraintOrig( &newOrig, mainD.size );
+		tempD.orig = mainD.orig = newOrig;
 		if (liveMap) {
-			tempD.orig = mainD.orig = newOrig;
 			MainRedraw();
 		}
-		DrawHilight( &mapD, newOrig, size );
+		MapRedraw();
+		//DrawHilight( &mapD, newOrig, size );
 		break;
 	case C_UP:
 		if ( mode != movePan )
@@ -1989,6 +1993,7 @@ LOG( log_pan, 2, ( "NEW = [ %0.3f, %0.3f ] \n", pos.x, pos.y ) )
 			MainRedraw();
 LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 		mode = noPan;
+		MapRedraw();
 		break;
 
 	case C_RDOWN:
@@ -1996,21 +2001,24 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			mode = resizePan;
 		else
 			break;
-		DrawHilight( &mapD, mainD.orig, mainD.size );
+		//DrawHilight( &mapD, mainD.orig, mainD.size );
 		newOrig = pos;
 		oldOrig = newOrig;
+		oldSize = mainD.size;
 		xscale = 1;
-		size.x = mainD.size.x/mainD.scale;
-		size.y = mainD.size.y/mainD.scale;
-		newOrig.x -= size.x/2.0;
-		newOrig.y -= size.y/2.0;
-		DrawHilight( &mapD, newOrig, size );
+		newSize.x = mainD.size.x/mainD.scale;
+		newSize.y = mainD.size.y/mainD.scale;
+		newOrig.x -= newSize.x/2.0;
+		newOrig.y -= newSize.y/2.0;
+		tempD.orig = mainD.orig = newOrig;
+		MapRedraw();
+		//DrawHilight( &mapD, newOrig, size );
 		break;
 
 	case C_RMOVE:
 		if ( mode != resizePan )
 			break;
-		DrawHilight( &mapD, newOrig, size );
+		//DrawHilight( &mapD, newOrig, size );
 		if (pos.x < 0)
 			pos.x = 0;
 		if (pos.x > mapD.size.x)
@@ -2019,16 +2027,16 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			pos.y = 0;
 		if (pos.y > mapD.size.y)
 			pos.y = mapD.size.y;
-		size.x = (pos.x - oldOrig.x)*2.0;
-		size.y = (pos.y - oldOrig.y)*2.0;
-		if (size.x < 0) {
-			size.x = - size.x;
+		newSize.x = (pos.x - oldOrig.x)*2.0;
+		newSize.y = (pos.y - oldOrig.y)*2.0;
+		if (newSize.x < 0) {
+			newSize.x = - newSize.x;
 		}
-		if (size.y < 0) {
-			size.y = - size.y;
+		if (newSize.y < 0) {
+			newSize.y = - newSize.y;
 		}
-		xscale = size.x / (mainD.size.x/mainD.scale);
-		yscale = size.y / (mainD.size.y/mainD.scale);
+		xscale = newSize.x / (oldSize.x/mainD.scale);
+		yscale = newSize.y / (oldSize.y/mainD.scale);
 		if (xscale < yscale)
 			xscale = yscale;
 		xscale = ceil( xscale );
@@ -2036,18 +2044,21 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			xscale = 1;
 		if (xscale > 64)
 			xscale = 64;
-		size.x = (mainD.size.x/mainD.scale) * xscale;
-		size.y = (mainD.size.y/mainD.scale) * xscale;
+		newSize.x = (oldSize.x/mainD.scale) * xscale;
+		newSize.y = (oldSize.y/mainD.scale) * xscale;
 		newOrig = oldOrig;
-		newOrig.x -= size.x/2.0;
-		newOrig.y -= size.y/2.0;
-		DrawHilight( &mapD, newOrig, size );
+		newOrig.x -= newSize.x/2.0;
+		newOrig.y -= newSize.y/2.0;
+		tempD.orig = mainD.orig = newOrig;
+		tempD.size = mainD.size = newSize;
+		MapRedraw();
+		//DrawHilight( &mapD, newOrig, size );
 		break;
 
 	case C_RUP:
 		if ( mode != resizePan )
 			break;
-		tempD.size = mainD.size = size;
+		tempD.size = mainD.size = newSize;
 		tempD.orig = mainD.orig = newOrig;
 		mainCenter.x = newOrig.x + mainD.size.x/2.0;
 		mainCenter.y = newOrig.y + mainD.size.y/2.0;
@@ -2055,9 +2066,9 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 		mode = noPan;
 		break;
 
-		case wActionExtKey:
-			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
-			switch ((wAccelKey_e)(action>>8)) {
+	case wActionExtKey:
+		mainD.CoOrd2Pix(&mainD,pos,&x,&y);
+		switch ((wAccelKey_e)(action>>8)) {
 #ifndef WINDOWS
 			case wAccelKey_Pgdn:
 				DoZoomUp(NULL);
@@ -2113,9 +2124,9 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			default:
 				return;
 			}
-			mainD.Pix2CoOrd( &mainD, x, y, &pos );
-			InfoPos( pos );
-			return;
+		mainD.Pix2CoOrd( &mainD, x, y, &pos );
+		InfoPos( pos );
+		return;
 	default:
 		return;
 	}
@@ -2463,17 +2474,54 @@ static wBool_t PlaybackMain( char * line )
 
 static paramDrawData_t mapDrawData = { 100, 100, (wDrawRedrawCallBack_p)MapRedraw, DoMapPan, &mapD };
 static paramData_t mapPLs[] = {
-	{	PD_DRAW, NULL, "canvas", 0, &mapDrawData } };
-static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC, mapPLs, sizeof mapPLs/sizeof mapPLs[0] };
+	{	PD_DRAW, NULL, "canvas", BD_RESIZEABLE, &mapDrawData } };
+static paramGroup_t mapPG = { "map", PGO_NODEFAULTPROC|PGO_DIALOGTEMPLATE, mapPLs, sizeof mapPLs/sizeof mapPLs[0] };
 
 static void MapDlgUpdate(
 		paramGroup_p pg,
 		int inx,
 		void * valueP )
 {
-	if ( inx == -1 ) {
-		MapWindowShow( FALSE );
+	switch(inx) {
+		case wResize_e:
+			if (mapD.d == NULL)
+				return;
+			wPos_t width, height;
+			DrawMapBoundingBox( FALSE );
+			if (pg->win == mapW) {
+				wWinGetSize(mapW, &width, &height);
+				wControlSetPos( (wControl_p)mapD.d, 0, 0 );
+				double scaleX = (mapD.size.x/((width-DlgSepLeft-DlgSepRight-10)/mapD.dpi));
+				double scaleY = (mapD.size.y/((height-DlgSepTop-DlgSepBottom-10)/mapD.dpi));
+				double scale;
+
+				if (scaleX<scaleY) scale = scaleX;
+				else scale = scaleY;
+
+				if (scale > 256.0) scale = 256.0;
+				if (scale < 0.01) scale = 0.01;
+
+				mapScale = (long)scale;
+
+				mapD.scale = mapScale;
+				ChangeMapScale();
+
+				if (mapVisible) {
+					//MapWindowShow(TRUE);
+					MapRedraw();
+					DrawMapBoundingBox( TRUE );
+				}
+				wPrefSetInteger( "draw", "mapscale", mapD.scale );
+			}
+			DrawMapBoundingBox( TRUE );
+			break;
+		case -1:
+			MapWindowShow( FALSE );
+			break;
+		default:
+			break;
 	}
+
 }
 
 
@@ -2532,7 +2580,7 @@ EXPORT void DrawInit( int initialZoom )
 	/*w = (wPos_t)((mapD.size.x/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	/*h = (wPos_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	ParamRegister( &mapPG );
-	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, NULL, FALSE, NULL, 0, MapDlgUpdate );
+	mapW = ParamCreateDialog( &mapPG, MakeWindowTitle(_("Map")), NULL, NULL, NULL, FALSE, NULL, F_CONSTRAINRESIZE, MapDlgUpdate );
 	ChangeMapScale();
 
 	log_pan = LogFindIndex( "pan" );
@@ -2623,6 +2671,7 @@ static STATUS_T CmdPan(
 				}
 			}
 			MainRedraw();
+			MapRedraw();
 		break;
 	case C_RMOVE:
 		if (panmode == ZOOM) {
@@ -2639,6 +2688,7 @@ static STATUS_T CmdPan(
 			}
 		}
 		MainRedraw();
+		MapRedraw();
 		break;
 	case C_RUP:
 

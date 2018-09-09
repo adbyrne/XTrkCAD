@@ -240,7 +240,9 @@ static void savePos(wWin_p win)
     if ((win->option&F_RECALLPOS)) {
         char pos_s[20];
 
-        gdk_window_get_position(gtk_widget_get_window(GTK_WIDGET(win->gtkwin)), &x, &y);
+        GdkWindow * window = gtk_widget_get_window(GTK_WIDGET(win->gtkwin));
+        if (!window) return;
+        gdk_window_get_position(window, &x, &y);
         x -= 5;
         y -= 25;
         sprintf(pos_s, "%d %d", x, y);
@@ -667,6 +669,22 @@ static int window_configure_event(
     if (win==NULL) {
         return FALSE;
     }
+    int width,height;
+    /* For Map, call back so zoom can be set */
+    if (win->option&F_CONSTRAINRESIZE) {
+    	/* Get the latest size */
+    	gtk_window_get_size(GTK_WINDOW(win->gtkwin),&width,&height);
+    	/* No change */
+    	if ((win->w == width) && (win->h == height)) return FALSE;
+    	win->w = width;
+    	win->h = height;
+    	win->realX = 0;
+    	win->realY = 0;
+    	if (win->busy==FALSE && win->winProc)
+    		    win->winProc(win, wResize_e, win->data);
+    	return FALSE;
+    }
+
 
     if (win->option&F_RESIZE) {
         if (event->width < 10 || event->height < 10) {
@@ -687,6 +705,8 @@ static int window_configure_event(
             if (win->h < MIN_WIN_HEIGHT) {
                 win->h = MIN_WIN_HEIGHT;
             }
+
+
 
             //if (win->option&F_MENUBAR) {
             //	GtkAllocation allocation;
@@ -976,12 +996,13 @@ static wWin_p wWinCommonCreate(
 
     w->first = w->last = NULL;
     w->winProc = winProc;
+    w->data = data;
     g_signal_connect(w->gtkwin, "delete_event",
                      G_CALLBACK(window_delete_event), w);
     g_signal_connect(w->widget, "draw",
                      G_CALLBACK(draw_event), w);
-    //g_signal_connect(w->gtkwin, "configure_event",
-    //               G_CALLBACK(window_configure_event), w);
+    g_signal_connect(w->gtkwin, "configure_event",
+                   G_CALLBACK(window_configure_event), w);
     g_signal_connect(w->gtkwin, "window-state-event",
                      G_CALLBACK(window_state_event), w);
     g_signal_connect(w->gtkwin, "key_press_event",
@@ -1252,7 +1273,7 @@ wWin_p wlibCreateFromTemplate(
         w->w = 0;
         w->realY = h;
         w->h = 0;
-    } else if (w->origX != 0){
+    } else if (w->origX != 0) {
         w->w = w->realX = w->origX;
         w->h = w->realY = w->origY+h;
 
@@ -1264,10 +1285,19 @@ wWin_p wlibCreateFromTemplate(
             gtk_widget_set_size_request(w->menubar, w->w-20, MENUH);
         }
     }
-      g_signal_connect(w->gtkwin, "configure_event",
-               G_CALLBACK(window_configure_event), w);
+    if (w->option&F_CONSTRAINRESIZE) {
+    	w->winProc = winProc;
+    	g_signal_connect(w->gtkwin, "configure_event",
+    	         	 	 	G_CALLBACK(window_configure_event), w);
+    	w->realX = 0;
+    	w->realY = 0;
+    }
 
-      w->nameStr = nameStr?strdup(nameStr):NULL;
+    g_signal_connect(w->gtkwin, "delete_event",
+                        G_CALLBACK(window_delete_event), w);
+
+
+    w->nameStr = nameStr?strdup(nameStr):NULL;
 
     if (labelStr) {
         gtk_window_set_title(GTK_WINDOW(w->gtkwin), labelStr);

@@ -246,6 +246,7 @@ typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
 #define F_HIDE		(1L<<13)
 #define F_MAXIMIZE  (1L<<14)
 #define F_RESTRICT  (1L<<15)
+#define F_CONSTRAINRESIZE (1L<<19)
 
 wWin_p wWinMainCreate(	        const char *, wPos_t, wPos_t, const char *, const char *, const char *,
 				long, wWinCallBack_p, void * );
@@ -511,6 +512,7 @@ typedef void (*wDrawActionCallBack_p)(	wDraw_p, void*, wAction_t, wPos_t, wPos_t
 #define BD_DIRECT	(1L<<26)
 #define BD_NOCAPTURE (1L<<27)
 #define BD_NOFOCUS  (1L<<28)
+#define BD_RESIZEABLE (1L<<29)
 
 /* Create: */
 wDraw_p wDrawCreate(		wWin_p, wPos_t, wPos_t, const char *, long,

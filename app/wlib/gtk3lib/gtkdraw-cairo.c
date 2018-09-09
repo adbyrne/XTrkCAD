@@ -703,7 +703,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo, cairo_surface_t *surf
 		fprintf(stderr,"resizeDraw: no client data\n");
 		return;
 	}
-	if (bd->fromTemplate) {
+	if (bd->fromTemplate && !(bd->option&BD_RESIZEABLE)) {
 		GtkAllocation alloc;
 		gtk_widget_get_allocation(bd->widget, &alloc);
 		w = alloc.width;
