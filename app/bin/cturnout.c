@@ -90,7 +90,7 @@ static paramData_t turnoutPLs[] = {
 #define I_HIDE		(3)
 #define turnoutHideT    ((wChoice_p)turnoutPLs[I_HIDE].control)
 	{   PD_TOGGLE, &hideTurnoutWindow, "hide", PDO_DLGCMDBUTTON, /*CAST_AWAY_CONST*/(void*)hideLabels, NULL, BC_NOBORDER } };
-static paramGroup_t turnoutPG = { "turnout", 0, turnoutPLs, sizeof turnoutPLs/sizeof turnoutPLs[0] };
+static paramGroup_t turnoutPG = { "turnout", PGO_DIALOGTEMPLATE, turnoutPLs, sizeof turnoutPLs/sizeof turnoutPLs[0] };
 #endif
 
 
@@ -1727,6 +1727,7 @@ static void TurnoutChange( long changes )
 
 static void RedrawTurnout()
 {
+	if (!turnoutD.d) return;
 	coOrd p, s;
 	RescaleTurnout();
 LOG( log_turnout, 2, ( "SelTurnout(%s)\n", (curTurnout?curTurnout->title:"<NULL>") ) )

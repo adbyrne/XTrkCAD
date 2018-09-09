@@ -85,7 +85,7 @@ static paramData_t structurePLs[] = {
 	{	PD_MESSAGE, NULL, "mess2", 0, (void*)80 },
 #define I_MSGHEIGHT		(5)
 	{	PD_MESSAGE, NULL, "mess3", 0, (void*)80 } };
-static paramGroup_t structurePG = { "structure", 0, structurePLs, sizeof structurePLs/sizeof structurePLs[0] };
+static paramGroup_t structurePG = { "structure", PGO_DIALOGTEMPLATE, structurePLs, sizeof structurePLs/sizeof structurePLs[0] };
 #endif
 
 
@@ -427,6 +427,7 @@ static void structureChange( long changes )
 
 static void RedrawStructure()
 {
+	if (!structureD.d) return;
 	RescaleStructure();
 LOG( log_structure, 2, ( "SelStructure(%s)\n", (curStructure?curStructure->title:"<NULL>") ) )
 	wDrawClear( structureD.d );

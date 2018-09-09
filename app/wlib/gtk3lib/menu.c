@@ -864,7 +864,7 @@ void wMenuToggleEnable(
  */
 
 void wMenuSetLabel( wMenu_p m, const char * labelStr) {
-	wlibSetLabel( m->widget, m->option, labelStr, &m->labelG, &m->imageG );
+	 wlibSetLabel( m->widget, m->option, labelStr, &m->labelG, &m->imageG );
 }
 
 /**
@@ -928,9 +928,9 @@ wMenu_p wMenuCreate(
 
 	m->menu = gtk_menu_new();
 
-	wMenuSetLabel( m, labelStr );
-	
+
 	if (!m->fromTemplate) {
+		wMenuSetLabel( m, labelStr );
 		gtk_fixed_put( GTK_FIXED(parent->widget), m->widget, m->realX, m->realY );
 		wlibControlGetSize( (wControl_p)m );
 		if ( m->w < 80 && (m->option&BO_ICON)==0) {
