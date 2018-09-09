@@ -24,6 +24,7 @@ set(gladefiles
     "print.glade"
     "prmfile.glade"
     "profile.glade"
+    "rename.glade"
     "rescale.glade"
     "rgbcolor.glade"
     "signalEdit.glade"
