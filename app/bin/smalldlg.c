@@ -203,7 +203,7 @@ static paramData_t aboutPLs[] = {
 	{   PD_MESSAGE, NULL, "mess1", PDO_DLGNEWCOLUMN, NULL, NULL, BM_LARGE },
 #define I_COPYRIGHT				 (2)
 #define COPYRIGHT_T			((wText_p)aboutPLs[I_COPYRIGHT].control)
-	{   PD_TEXT, NULL, NULL, PDO_DLGRESIZE, &aboutTextData, NULL, BT_CHARUNITS }
+	{   PD_TEXT, NULL, "text", PDO_DLGRESIZE, &aboutTextData, NULL, BT_CHARUNITS }
 };
 static paramGroup_t aboutPG = { "about", PGO_DIALOGTEMPLATE , aboutPLs, sizeof aboutPLs/sizeof aboutPLs[0] };
 

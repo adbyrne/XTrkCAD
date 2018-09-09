@@ -712,7 +712,7 @@ static struct wFilSel_t * saveFile_fs;
 static wWin_p checkPointingW;
 static paramData_t checkPointingPLs[] = {
    {    PD_MESSAGE, N_("Check Pointing"), "mess1" } };
-static paramGroup_t checkPointingPG = { "checkpoint", 0, checkPointingPLs, sizeof checkPointingPLs/sizeof checkPointingPLs[0] };
+static paramGroup_t checkPointingPG = { "checkpoint", PGO_DIALOGTEMPLATE, checkPointingPLs, sizeof checkPointingPLs/sizeof checkPointingPLs[0] };
 
 static char * checkPtFileName1;
 static char * checkPtFileName2;

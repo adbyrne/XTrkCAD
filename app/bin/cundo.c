@@ -330,16 +330,25 @@ LOG( log_undo, 3, ( "TruncateStream( , %ld )\n", off ) )
 	UASSERT( stream->stream_da.cnt >= 0, stream->stream_da.cnt );
 	return TRUE;
 }
+
 
 BOOL_T WriteObject( stream_p stream, char op, track_p trk )
 {
+	void * buff = NULL;
+	long len = 0;
 	if (!WriteStream( stream, &op, sizeof op ) ||
 		!WriteStream( stream, &trk, sizeof trk ) ||
 		!WriteStream( stream, trk, sizeof *trk ) ||
 		!WriteStream( stream, trk->endPt, trk->endCnt * sizeof trk->endPt[0] ) ||
-		!WriteStream( stream, trk->extraData, trk->extraSize ) ) {
+		!WriteStream( stream, trk->extraData, trk->extraSize ))
 		return FALSE;
-	}
+	/* Add a copy of the any type specific data before it is tampered with, for example */
+	StoreTrackData(trk,&buff,&len);
+	if (!WriteStream( stream, &len, sizeof len ))
+		return FALSE;
+	if (len)
+		if (!WriteStream( stream, buff, len ))
+			return FALSE;
 	return TRUE;
 }
 
@@ -371,7 +380,19 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 		tempTrk.extraData = trk->extraData;
 	if (!ReadStream( stream, tempTrk.extraData, tempTrk.extraSize ))
 		return FALSE;
-	RebuildTrackSegs(&tempTrk);  //If we had an array of Segs - recreate it
+	long Addsize;
+	void * tempBuff;
+	/* Fix up pts to be as big as it was before -> because it may have changed since */
+	if (!ReadStream (stream, &Addsize, sizeof Addsize))
+		return FALSE;
+	if (Addsize) {
+		tempBuff = MyMalloc(Addsize);
+		if (!ReadStream( stream, tempBuff, Addsize ))
+			return FALSE;
+		ReplayTrackData(&tempTrk, tempBuff, Addsize);
+		MyFree(tempBuff);
+	}
+	RebuildTrackSegs(&tempTrk);   //If we had an array of Segs - recreate it
 	if (recordUndo) Rprintf( "Restore T%D(%d) @ %lx\n", trk->index, tempTrk.index, (long)trk );
 	tempTrk.index = trk->index;
 	tempTrk.next = trk->next;
@@ -385,7 +406,7 @@ static BOOL_T ReadObject( stream_p stream, BOOL_T needRedo )
 }
 
 
-static void RedrawInStream( stream_p stream, long start, long end, BOOL_T draw )
+static BOOL_T RedrawInStream( stream_p stream, long start, long end, BOOL_T draw )
 {
 	char op;
 	track_p trk;
@@ -395,8 +416,12 @@ static void RedrawInStream( stream_p stream, long start, long end, BOOL_T draw )
 		if (!ReadStream( stream, &op, sizeof op ) ||
 			!ReadStream( stream, &trk, sizeof trk ) ||
 			!ReadStream( stream, &tempTrk, sizeof tempTrk ) )
-			return;
-		stream->curr += tempTrk.extraSize + tempTrk.endCnt*sizeof tempTrk.endPt[0];
+			return FALSE;
+		stream->curr += tempTrk.extraSize + tempTrk.endCnt*sizeof tempTrk.endPt[0];;
+		long Addsize;
+		if (!ReadStream( stream, &Addsize, sizeof Addsize ))
+				return FALSE;
+		stream->curr += Addsize;
 		if (!trk->deleted) {
 			if (draw)
 				DrawNewTrack( trk );
@@ -404,6 +429,7 @@ static void RedrawInStream( stream_p stream, long start, long end, BOOL_T draw )
 				UndrawNewTrack( trk );
 		}
 	}
+	return TRUE;
 }
 
 
@@ -421,15 +447,20 @@ LOG( log_undo, 3, ( "DeleteInSteam( , %ld, %ld )\n", start, end ) )
 			return FALSE;
 		UASSERT( op == ModifyOp || op == DeleteOp, (long)op );
 		if (!ReadStream( stream, &trk, sizeof trk ) ||
-			!ReadStream( stream, &tempTrk, sizeof tempTrk ) )
+			!ReadStream( stream, &tempTrk, sizeof tempTrk ))
 			return FALSE;
 		stream->curr += tempTrk.extraSize + tempTrk.endCnt*sizeof tempTrk.endPt[0];
+		long Addsize;
+		if (!ReadStream( stream, &Addsize, sizeof Addsize ))
+			return FALSE;
+		stream->curr += Addsize;
 		if (op == DeleteOp) {
 			if (recordUndo) Rprintf( "    Free T%D(%d) @ %lx\n", trk->index, tempTrk.index, (long)trk );
 			UASSERT( IsTrackDeleted(trk), (long)trk );
 			trk->index = -1;
 			delCount++;
 		}
+
 	}
 	if (delCount) {
 		for (ptrk=&to_first; *ptrk; ) {
@@ -475,6 +506,10 @@ static BOOL_T SetDeleteOpInStream( stream_p stream, long start, long end, track_
 		if (!ReadStream( stream, &tempTrk, sizeof tempTrk ))
 			return FALSE;
 		stream->curr += tempTrk.extraSize + tempTrk.endCnt*sizeof tempTrk.endPt[0];
+		long Addsize;
+		if (!ReadStream( stream, &Addsize, sizeof Addsize))
+				return FALSE;
+		stream->curr += Addsize;
 	}
 	UASSERT( "Cannot find undo record to convert to DeleteOp", 0 );
 	return FALSE;

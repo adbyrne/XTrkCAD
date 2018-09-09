@@ -164,6 +164,8 @@ typedef struct {
 		BOOL_T (*makeParallel)( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
 		void (*drawDesc)( track_p, drawCmd_p, wDrawColor );
 		BOOL_T (*rebuildSegs)(track_p);
+		BOOL_T (*replayData)(track_p, void *,long );
+		BOOL_T (*storeData)(track_p, void **,long *);
 		} trackCmd_t;
 
 
@@ -506,6 +508,7 @@ void CheckTrackLength( track_cp );
 track_p NewTrack( wIndex_t, TRKTYP_T, EPINX_T, CSIZE_T );
 void DescribeTrack( track_cp, char *, CSIZE_T );
 EPINX_T GetEndPtConnectedToMe( track_p, track_p );
+EPINX_T GetNearestEndPtConnectedToMe( track_p, track_p, coOrd);
 void SetEndPts( track_p, EPINX_T );
 BOOL_T DeleteTrack( track_p, BOOL_T );
 
@@ -598,6 +601,8 @@ void UngroupTrack( track_p );
 BOOL_T IsTrack( track_p );
 char * GetTrkTypeName( track_p );
 BOOL_T RebuildTrackSegs(track_p);
+BOOL_T StoreTrackData(track_p, void **, long *);
+BOOL_T ReplayTrackData(track_p, void *, long);
 
 DIST_T GetFlexLength( track_p, EPINX_T, coOrd * );
 void LabelLengths( drawCmd_p, track_p, wDrawColor );

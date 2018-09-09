@@ -57,39 +57,38 @@ wBitmapCreate( wWin_p parent, wPos_t x, wPos_t y, char * helpStr, long options, 
 	bt->h = iconP->h;
 	bt->option = options;
 	
-	/*
-	 * Depending on the platform, parent->widget->window might still be null 
-	 * at this point. The window allocation should be forced before creating
-	 * the pixmap.
-	 */
-	if ( gtk_widget_get_window( parent->widget ) == NULL )
-		gtk_widget_realize( parent->widget ); /* force allocation, if pending */
-	
 	/* create the bitmap from supplied xpm data */
 	pixbuf = gdk_pixbuf_new_from_xpm_data( (const char **)iconP->bits );
 	g_object_ref_sink(pixbuf);
-	image = gtk_image_new_from_pixbuf( pixbuf );
-	gtk_widget_show( image );
-	g_object_unref( (gpointer)pixbuf );
 	
 	if (options&BO_USETEMPLATE) {
 		bt->widget = wlibWidgetFromIdWarn( parent, helpStr);
+        gtk_image_set_from_pixbuf(GTK_IMAGE( bt->widget ), pixbuf);
 		if (bt->widget) bt->fromTemplate = TRUE;
 		bt->template_id = strdup(helpStr);
 		/* Find if this widget is inside a revealer widget which will be named with .reveal at the end*/
 		bt->reveal = (GtkRevealer *)wlibGetWidgetFromName(parent, helpStr, "reveal", TRUE );
-	}
-	if (!bt->widget) {
-		bt->widget = gtk_fixed_new();
-	}
-	gtk_widget_show( bt->widget );
-	gtk_container_add( GTK_CONTAINER(bt->widget), image );
+	} else {
+        /*
+         * Depending on the platform, parent->widget->window might still be null 
+         * at this point. The window allocation should be forced before creating
+         * the pixmap.
+         */
+    	image = gtk_image_new_from_pixbuf( pixbuf );
+//    	gtk_widget_show( image );
+        
+        if ( gtk_widget_get_window( parent->widget ) == NULL )
+            gtk_widget_realize( parent->widget ); /* force allocation, if pending */
 	
-	if (!bt->fromTemplate) {
+        bt->widget = gtk_fixed_new();
+       	gtk_container_add( GTK_CONTAINER(bt->widget), image );
 		wlibComputePos( (wControl_p)bt );
 		wlibControlGetSize( (wControl_p)bt );
 		gtk_fixed_put( GTK_FIXED( parent->widget ), bt->widget, bt->realX, bt->realY );
-	}
+    }
+   	gtk_widget_show( bt->widget );
+
+	g_object_unref( (gpointer)pixbuf );
 	
 	return( (wControl_p)bt );
 }
