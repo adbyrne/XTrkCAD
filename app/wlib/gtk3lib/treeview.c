@@ -404,7 +404,7 @@ changeSelection(GtkTreeSelection *selection,
     gtk_tree_model_get_value(model, &iter, LISTCOL_DATA, &value);
 
     id_p = g_value_get_pointer(&value);
-    id_p->selected = !path_currently_selected;
+    id_p->selected = path_currently_selected;
 
     if (id_p->selected) {
         bl->last = row;
