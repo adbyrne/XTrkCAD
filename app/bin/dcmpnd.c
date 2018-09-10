@@ -559,7 +559,7 @@ static int CompoundCustMgmProc(
 		return TRUE;
 	case CUSTMGM_GET_TITLE:
 		ParseCompoundTitle( to->title, &mP, &mL, &pP, &pL, &nP, &nL );
-		sprintf( message, "\t%.*s\t%s\t%.*s\t%.*s", mL, mP, GetScaleName(to->scaleInx), nL, nP, pL, pP );
+		sprintf( message, "%.*s\t%s\t%.*s\t%.*s", mL, mP, GetScaleName(to->scaleInx), nL, nP, pL, pP );
 		return TRUE;
 	}
 	return FALSE;

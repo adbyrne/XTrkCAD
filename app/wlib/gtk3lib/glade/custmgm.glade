@@ -2,7 +2,7 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkListStore" id="custmgm.liststore">
+  <object class="GtkListStore" id="custmgm-inx.liststore">
     <columns>
       <!-- column-name userdata -->
       <column type="gpointer"/>
@@ -45,10 +45,10 @@
                 <property name="shadow_type">in</property>
                 <property name="min_content_height">320</property>
                 <child>
-                  <object class="GtkTreeView" id="custmgm.treeview">
+                  <object class="GtkTreeView" id="custmgm-inx.treeview">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="model">custmgm.liststore</property>
+                    <property name="model">custmgm-inx.liststore</property>
                     <property name="enable_grid_lines">vertical</property>
                     <child internal-child="selection">
                       <object class="GtkTreeSelection"/>
