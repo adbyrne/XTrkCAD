@@ -427,7 +427,6 @@ static void structureChange( long changes )
 
 static void RedrawStructure()
 {
-	if (!structureD.d) return;
 	RescaleStructure();
 LOG( log_structure, 2, ( "SelStructure(%s)\n", (curStructure?curStructure->title:"<NULL>") ) )
 	wDrawClear( structureD.d );

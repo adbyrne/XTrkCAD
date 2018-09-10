@@ -1721,14 +1721,12 @@ static void TurnoutChange( long changes )
 	maxTurnoutDim.x += 2*trackGauge;
 	maxTurnoutDim.y += 2*trackGauge;
 	/*RescaleTurnout();*/
-	curTurnoutEp = 0;
 	RedrawTurnout();
 	return;
 }
 
 static void RedrawTurnout()
 {
-	if (!turnoutD.d) return;
 	coOrd p, s;
 	RescaleTurnout();
 LOG( log_turnout, 2, ( "SelTurnout(%s)\n", (curTurnout?curTurnout->title:"<NULL>") ) )
@@ -1741,9 +1739,9 @@ LOG( log_turnout, 2, ( "SelTurnout(%s)\n", (curTurnout?curTurnout->title:"<NULL>
 	turnoutD.orig.y = (curTurnout->size.y + curTurnout->orig.y) - turnoutD.size.y + trackGauge;
 	DrawSegs( &turnoutD, zero, 0.0, curTurnout->segs, curTurnout->segCnt,
 					 trackGauge, wDrawColorBlack );
-	//curTurnoutEp = 0;
-	p.x = curTurnout->endPt[curTurnoutEp].pos.x - trackGauge;
-	p.y = curTurnout->endPt[curTurnoutEp].pos.y - trackGauge;
+	curTurnoutEp = 0;
+	p.x = curTurnout->endPt[0].pos.x - trackGauge;
+	p.y = curTurnout->endPt[0].pos.y - trackGauge;
 	s.x = s.y = trackGauge*2.0 /*+ turnoutD.minSize*/;
 	DrawHilight( &turnoutD, p, s );
 }
@@ -1766,7 +1764,6 @@ static void TurnoutDlgUpdate(
 	to = (turnoutInfo_t*)wListGetItemContext( (wList_p)pg->paramPtr[inx].control, (wIndex_t)*(long*)valueP );
 	AddTurnout();
 	curTurnout = to;
-	curTurnoutEp = 0;
 	RedrawTurnout();
 /*	ParamDialogOkActive( &turnoutPG, FALSE ); */
 }
@@ -1809,10 +1806,9 @@ static void SelTurnoutEndPt(
 {
 	if (action != C_DOWN) return;
 
-	//HilightEndPt();
+	HilightEndPt();
 	curTurnoutEp = TOpickEndPoint( pos, curTurnout );
-	//HilightEndPt();
-	RedrawTurnout();
+	HilightEndPt();
 LOG( log_turnout, 3, (" selected (action=%d) %ld\n", action, curTurnoutEp ) )
 }
 #endif
@@ -2424,7 +2420,6 @@ static STATUS_T CmdTurnout(
 		if (turnoutIndex > 0 && turnoutPtr) {
 			curTurnout = turnoutPtr;
 			wListSetIndex( turnoutListL, turnoutIndex );
-			curTurnoutEp = 0;
 			RedrawTurnout();
 		}
 		InfoMessage( _("Pick turnout and active End Point, then place on the layout"));
@@ -2449,9 +2444,9 @@ static STATUS_T CmdTurnout(
 		return CmdTurnoutAction( action, pos );
 
 	case C_LCLICK:
-		//HilightEndPt();
+		HilightEndPt();
 		CmdTurnoutAction( action, pos );
-		//HilightEndPt();
+		HilightEndPt();
 		return C_CONTINUE;
 
 	case C_CANCEL:
