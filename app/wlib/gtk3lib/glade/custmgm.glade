@@ -129,11 +129,10 @@
                 <property name="spacing">6</property>
                 <child>
                   <object class="GtkButton" id="custmgm-edit">
-                    <property name="label" translatable="yes">_Edit</property>
+                    <property name="label" translatable="yes">_Edit...</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="halign">start</property>
                     <property name="use_underline">True</property>
                   </object>
                   <packing>
@@ -148,7 +147,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="halign">start</property>
                     <property name="use_underline">True</property>
                   </object>
                   <packing>
@@ -163,7 +161,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="halign">start</property>
                     <property name="use_underline">True</property>
                   </object>
                   <packing>
@@ -223,7 +220,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">start</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -272,7 +268,6 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="halign">start</property>
                 <property name="use_underline">True</property>
                 <style>
                   <class name="suggested-action"/>
@@ -293,15 +288,5 @@
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkSizeGroup">
-    <widgets>
-      <widget name="custmgm-edit"/>
-      <widget name="custmgm-export"/>
-      <widget name="custmgm-delete"/>
-      <widget name="custmgm-newcar"/>
-      <widget name="id-help"/>
-      <widget name="id-ok"/>
-    </widgets>
   </object>
 </interface>
