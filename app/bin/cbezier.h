@@ -51,3 +51,5 @@ double BezierLength(coOrd[4], dynArr_t);
 double BezierMinRadius(coOrd[4],dynArr_t);
 void UpdateParms(wDrawColor color,long width);
 
+void addSegBezier(dynArr_t * const array_p, trkSeg_p seg);
+

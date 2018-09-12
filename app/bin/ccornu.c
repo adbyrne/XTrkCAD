@@ -232,7 +232,7 @@ EXPORT void SetKnots(spiro_cp knots[6], coOrd posk[6]) {
 	knots[5].ty = SPIRO_END_OPEN_CONTOUR;
 }
 
-BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], dynArr_t * array_p, BOOL_T spots) {
+EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], dynArr_t * array_p, BOOL_T spots) {
 	array_p->cnt = 0;
 	//Create LH knots
 	//Find remote end point of track, create start knot

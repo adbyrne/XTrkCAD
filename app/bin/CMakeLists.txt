@@ -24,6 +24,7 @@ GENERATE_LIN(tosslip)
 GENERATE_LIN(tostrsct)
 GENERATE_LIN(towye)
 GENERATE_LIN(toxing)
+GENERATE_LIN(tocornu)
 
 SET(LIN_SOURCES
 	${CMAKE_CURRENT_BINARY_DIR}/to3way.lin
@@ -38,6 +39,7 @@ SET(LIN_SOURCES
 	${CMAKE_CURRENT_BINARY_DIR}/tostrsct.lin
 	${CMAKE_CURRENT_BINARY_DIR}/towye.lin
 	${CMAKE_CURRENT_BINARY_DIR}/toxing.lin
+	${CMAKE_CURRENT_BINARY_DIR}/tocornu.lin
 	)
 
 GET_TARGET_PROPERTY(genhelp_EXE genhelp LOCATION)
@@ -151,8 +153,11 @@ ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}
 	ctodesgn.c
 	utility.c
+
 	)
 SET_TARGET_PROPERTIES(mkturnout PROPERTIES COMPILE_FLAGS -DMKTURNOUT)
+
+TARGET_LINK_LIBRARIES(mkturnout xtrkcad-cornu)
 
 IF(NOT WIN32)
 	TARGET_LINK_LIBRARIES(mkturnout m)

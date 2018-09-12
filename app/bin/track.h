@@ -273,6 +273,7 @@ typedef struct {
 #define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BEZTRK)
 
 dynArr_t tempSegs_da;
+
 #define tempSegs(N) DYNARR_N( trkSeg_t, tempSegs_da, N )
 
 char tempSpecial[4096];
