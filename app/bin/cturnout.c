@@ -1375,10 +1375,58 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 
 static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
-
-
 	params->type = curveTypeStraight;	//TODO should check if last segment is actually straight
-	if (inx == PARAMS_CORNU  || inx == PARAMS_BEZIER) {
+	if (inx == PARAMS_CORNU) {
+		params->type = curveTypeStraight;
+		params->arcR = 0.0;
+		params->arcP = zero;
+		params->ep = PickEndPoint(pos,trk);   //Nearest
+		if (params->ep>=0) {
+			params->angle = GetTrkEndAngle(trk,params->ep);
+			params->track_angle = params->angle + params->ep?0:180;
+		} else {
+			params->angle = params-> track_angle = 0;
+			return FALSE;
+		}
+		/* Find the path we are closest to */
+		PATHPTR_T path, pathCurr = 0;
+		int segInx, subSegInx, segEP;
+		trkSeg_p segPtr;
+		segProcData_t segProcData;
+		coOrd pos2;
+		double d = 10000;
+		struct extraData * xx = GetTrkExtraData(trk);
+		/* Get parms from that seg */
+		wBool_t back,negative;
+		params->track_angle = GetAngleSegs(		  		//Find correct subSegment
+							xx->segCnt,xx->segs,
+							&pos, &segInx, &d , &back, &subSegInx, &negative );
+		segPtr = xx->segs+segInx;
+		switch (segPtr->type) {
+			case SEG_BEZTRK:
+				if ( negative != back ) params->track_angle = NormalizeAngle(params->track_angle+180);  //Bezier is in reverse
+				segPtr = xx->segs + segInx;
+				trkSeg_p subSegPtr = segPtr->bezSegs.ptr+subSegInx;
+				if (subSegPtr->type == SEG_CRVTRK) {
+					params->type = curveTypeCurve;
+					params->arcR = fabs(subSegPtr->u.c.radius);
+					params->arcP = subSegPtr->u.c.center;
+					params->arcA0 = subSegPtr->u.c.a0;
+					params->arcA1 = subSegPtr->u.c.a1;
+				}
+				return TRUE;
+				break;
+			case SEG_CRVTRK:
+				params->type = curveTypeCurve;
+				params->arcR = fabs(segPtr->u.c.radius);
+				params->arcP = segPtr->u.c.center;
+				params->arcA0 = segPtr->u.c.a0;
+				params->arcA1 = segPtr->u.c.a1;
+				break;
+		}
+	    return TRUE;
+	}
+	if(inx == PARAMS_BEZIER) {
 		params->arcR = 0.0;
 		params->arcP = zero;
 		params->ep = PickEndPoint(pos,trk);   //Nearest
