@@ -1375,8 +1375,8 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 
 static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
-	params->type = curveTypeStraight;	//TODO should check if last segment is actually straight
-	if (inx == PARAMS_CORNU) {
+	params->type = curveTypeStraight;
+	if ((inx == PARAMS_CORNU)  || (inx == PARAMS_EXTEND)) {
 		params->type = curveTypeStraight;
 		params->arcR = 0.0;
 		params->arcP = zero;
@@ -1398,6 +1398,10 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		struct extraData * xx = GetTrkExtraData(trk);
 		/* Get parms from that seg */
 		wBool_t back,negative;
+		Rotate(&pos,xx->orig,-xx->angle);
+		pos.x -= xx->orig.x;
+		pos.y -= xx->orig.y;
+
 		params->track_angle = GetAngleSegs(		  		//Find correct subSegment
 							xx->segCnt,xx->segs,
 							&pos, &segInx, &d , &back, &subSegInx, &negative );
@@ -1411,6 +1415,9 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 					params->type = curveTypeCurve;
 					params->arcR = fabs(subSegPtr->u.c.radius);
 					params->arcP = subSegPtr->u.c.center;
+					params->arcP.x += xx->orig.x;
+					params->arcP.y += xx->orig.y;
+					Rotate(&params->arcP,xx->orig,xx->angle);
 					params->arcA0 = subSegPtr->u.c.a0;
 					params->arcA1 = subSegPtr->u.c.a1;
 				}
@@ -1420,6 +1427,9 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 				params->type = curveTypeCurve;
 				params->arcR = fabs(segPtr->u.c.radius);
 				params->arcP = segPtr->u.c.center;
+				params->arcP.x += xx->orig.x;
+				params->arcP.y += xx->orig.y;
+				Rotate(&params->arcP,xx->orig,xx->angle);
 				params->arcA0 = segPtr->u.c.a0;
 				params->arcA1 = segPtr->u.c.a1;
 				break;
@@ -1489,7 +1499,6 @@ static BOOL_T QueryTurnout( track_p trk, int query )
 	case Q_NOT_PLACE_FROGPOINTS:
 	case Q_HAS_DESC:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
-	case Q_CAN_EXTEND:
 		return TRUE;
 	case Q_MODIFY_CAN_SPLIT:
 		if (GetTrkEndPtCnt(trk) <= 2) {	// allow splitting of simple track und buffers

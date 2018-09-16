@@ -1230,6 +1230,145 @@ static toDesignSchema_t * LoadSegs(
 			points[0].x = points[0].y = 0.0;
 			points[1].y = (newTurnOff1); points[1].x = (newTurnLen1); /*Inner*/
 			points[2].y = (newTurnOff2); points[2].x = (newTurnLen2); /*Outer*/
+			break;
+#endif
+		case NTO_WYE:
+		case NTO_3WAY:
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, (dp->type==NTO_3WAY)?4:3 );
+			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
+						(newTurnLen1), (newTurnOff1), angle1 ) )
+				return NULL;
+			if ( !ComputeCurve( &points[5], &points[6], &radii[1],
+						(newTurnLen2), (newTurnOff2), angle2 ) )
+				return NULL;
+			points[5].y = - points[5].y;
+			points[6].y = - points[6].y;
+			radii[0] = - radii[0];
+			points[0].x = points[0].y = 0.0;
+			points[1].y = (newTurnOff1);
+			points[1].x = (newTurnLen1);
+			points[2].y = -(newTurnOff2);
+			points[2].x = (newTurnLen2);
+			points[7].y = 0;
+			points[7].x = (newTurnLen0);
+			d = points[3].x - points[5].x;
+			if ( d < -0.10 ) {
+				pp = (dp->type==NTO_3WAY ? &Tri3Schema : &Wye3Schema );
+			} else if ( d > 0.10 ) {
+				pp = (dp->type==NTO_3WAY ? &Tri2Schema : &Wye2Schema );
+			} else {
+				pp = (dp->type==NTO_3WAY ? &Tri1Schema : &Wye1Schema );
+			}
+			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
+			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0-angle1;
+			tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 90.0+angle2;
+			if (dp->type == NTO_3WAY) {
+				tempEndPts(3).pos = points[7]; tempEndPts(3).angle = 90.0;
+			}
+			break;
+
+		case NTO_D_SLIP:
+		case NTO_S_SLIP:
+		case NTO_CROSSING:
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, 4 );
+			points[0].x = points[0].y = points[1].y = 0.0;
+			points[1].x = (newTurnLen1);
+			pos.y = 0; pos.x = (newTurnLen1)/2.0;
+			Translate( &points[3], pos, 90.0+angle1, (newTurnLen2)/2.0 );
+			points[2].y = - points[3].y;
+			points[2].x = (newTurnLen1)-points[3].x;
+			if (dp->type != NTO_CROSSING) {
+				Translate( &pos, points[3], 90.0+angle1, -newTurnTrackGauge );
+				if (!ComputeCurve( &points[4], &points[5], &radii[0],
+						pos.x, fabs(pos.y), angle1 )) /*???*/
+					return NULL;
+				radii[1] = - radii[0];
+				points[5].y = - points[5].y;
+				points[6].y = 0; points[6].x = (newTurnLen1)-points[4].x;
+				points[7].y = -points[5].y;
+				points[7].x = (newTurnLen1)-points[5].x;
+			}
+			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
+			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
+			tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 270.0+angle1;
+			tempEndPts(3).pos = points[3]; tempEndPts(3).angle = 90.0+angle1;
+			break;
+
+		case NTO_R_CROSSOVER:
+		case NTO_L_CROSSOVER:
+		case NTO_D_CROSSOVER:
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, 4 );
+			d = (newTurnLen1)/2.0 - newTurnTrackGauge;
+			if (d < 0.0) {
+				NoticeMessage( MSG_TODSGN_CROSSOVER_TOO_SHORT, _("Ok"), NULL );
+				return NULL;
+			}
+			angle1 = R2D( atan2( (newTurnOff1), d ) );
+			points[0].y = 0.0; points[0].x = 0.0;
+			points[1].y = 0.0; points[1].x = (newTurnLen1);
+			points[2].y = (newTurnOff1); points[2].x = 0.0;
+			points[3].y = (newTurnOff1); points[3].x = (newTurnLen1);
+			if (!ComputeCurve( &points[4], &points[5], &radii[1],
+				(newTurnLen1)/2.0, (newTurnOff1)/2.0, angle1 ) )
+				return NULL;
+			radii[0] = - radii[1];
+			points[6].y = 0.0; points[6].x = (newTurnLen1)-points[4].x;
+			points[7].y = points[5].y; points[7].x = (newTurnLen1)-points[5].x;
+			points[8].y = (newTurnOff1); points[8].x = points[4].x;
+			points[9].y = (newTurnOff1)-points[5].y; points[9].x = points[5].x;
+			points[10].y = (newTurnOff1); points[10].x = points[6].x;
+			points[11].y = points[9].y; points[11].x = points[7].x;
+			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
+			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
+			tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 270.0;
+			tempEndPts(3).pos = points[3]; tempEndPts(3).angle = 90.0;
+			break;
+
+		case NTO_STR_SECTION:
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, 2 );
+			points[0].y = points[0].x = 0;
+			points[1].y = 0/*(newTurnOff1)*/; points[1].x = (newTurnLen1);
+			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
+			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
+			break;
+
+		case NTO_CRV_SECTION:
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, 2 );
+			points[0].y = points[0].x = 0;
+			points[1].y = (newTurnLen1) * (1.0 - cos( D2R(angle1) ) );
+			points[1].x = (newTurnLen1) * sin( D2R(angle1) );
+			radii[0] = -(newTurnLen1);
+			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
+			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0-angle1;
+			break;
+
+		case NTO_BUMPER:
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, 1 );
+			points[0].y = points[0].x = 0;
+			points[1].y = 0/*(newTurnOff1)*/; points[1].x = (newTurnLen1);
+			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
+			break;
+
+		default:
+			;
+		}
+	} else {
+		switch (dp->type) {
+		case NTO_CURVED:
+			d = points[3].x - points[5].x;
+			if ( d < -0.10 )
+				pp = &Crv3Schema;
+			else if ( d > 0.10 )
+				pp = &Crv2Schema;
+			else
+				pp = &Crv1Schema;
+			break;
+		}
+	}
+
+#ifndef MKTURNOUT
+	if(dp->type == NTO_CORNU) {
+
 			cornuData.pos[0] = points[0]; /*Start*/
 			cornuData.pos[1] = points[2]; /*Outer*/
 			cornuData.pos[3] = points[2]; /*Outer for second time*/
@@ -1378,141 +1517,8 @@ static toDesignSchema_t * LoadSegs(
 
 			pp->paths = (signed char *)pathChar;
 			segCnt = tempSegs_da.cnt;
-#endif
-			break;
-		case NTO_WYE:
-		case NTO_3WAY:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, (dp->type==NTO_3WAY)?4:3 );
-			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
-						(newTurnLen1), (newTurnOff1), angle1 ) )
-				return NULL;
-			if ( !ComputeCurve( &points[5], &points[6], &radii[1],
-						(newTurnLen2), (newTurnOff2), angle2 ) )
-				return NULL;
-			points[5].y = - points[5].y;
-			points[6].y = - points[6].y;
-			radii[0] = - radii[0];
-			points[0].x = points[0].y = 0.0;
-			points[1].y = (newTurnOff1);
-			points[1].x = (newTurnLen1);
-			points[2].y = -(newTurnOff2);
-			points[2].x = (newTurnLen2);
-			points[7].y = 0;
-			points[7].x = (newTurnLen0);
-			d = points[3].x - points[5].x;
-			if ( d < -0.10 ) {
-				pp = (dp->type==NTO_3WAY ? &Tri3Schema : &Wye3Schema );
-			} else if ( d > 0.10 ) {
-				pp = (dp->type==NTO_3WAY ? &Tri2Schema : &Wye2Schema );
-			} else {
-				pp = (dp->type==NTO_3WAY ? &Tri1Schema : &Wye1Schema );
-			}
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0-angle1;
-			tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 90.0+angle2;
-			if (dp->type == NTO_3WAY) {
-				tempEndPts(3).pos = points[7]; tempEndPts(3).angle = 90.0;
-			}
-			break;
-
-		case NTO_D_SLIP:
-		case NTO_S_SLIP:
-		case NTO_CROSSING:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 4 );
-			points[0].x = points[0].y = points[1].y = 0.0;
-			points[1].x = (newTurnLen1);
-			pos.y = 0; pos.x = (newTurnLen1)/2.0;
-			Translate( &points[3], pos, 90.0+angle1, (newTurnLen2)/2.0 );
-			points[2].y = - points[3].y;
-			points[2].x = (newTurnLen1)-points[3].x;
-			if (dp->type != NTO_CROSSING) {
-				Translate( &pos, points[3], 90.0+angle1, -newTurnTrackGauge );
-				if (!ComputeCurve( &points[4], &points[5], &radii[0],
-						pos.x, fabs(pos.y), angle1 )) /*???*/
-					return NULL;
-				radii[1] = - radii[0];
-				points[5].y = - points[5].y;
-				points[6].y = 0; points[6].x = (newTurnLen1)-points[4].x;
-				points[7].y = -points[5].y;
-				points[7].x = (newTurnLen1)-points[5].x;
-			}
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
-			tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 270.0+angle1;
-			tempEndPts(3).pos = points[3]; tempEndPts(3).angle = 90.0+angle1;
-			break;
-
-		case NTO_R_CROSSOVER:
-		case NTO_L_CROSSOVER:
-		case NTO_D_CROSSOVER:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 4 );
-			d = (newTurnLen1)/2.0 - newTurnTrackGauge;
-			if (d < 0.0) {
-				NoticeMessage( MSG_TODSGN_CROSSOVER_TOO_SHORT, _("Ok"), NULL );
-				return NULL;
-			}
-			angle1 = R2D( atan2( (newTurnOff1), d ) );
-			points[0].y = 0.0; points[0].x = 0.0;
-			points[1].y = 0.0; points[1].x = (newTurnLen1);
-			points[2].y = (newTurnOff1); points[2].x = 0.0;
-			points[3].y = (newTurnOff1); points[3].x = (newTurnLen1);
-			if (!ComputeCurve( &points[4], &points[5], &radii[1],
-				(newTurnLen1)/2.0, (newTurnOff1)/2.0, angle1 ) )
-				return NULL;
-			radii[0] = - radii[1];
-			points[6].y = 0.0; points[6].x = (newTurnLen1)-points[4].x;
-			points[7].y = points[5].y; points[7].x = (newTurnLen1)-points[5].x;
-			points[8].y = (newTurnOff1); points[8].x = points[4].x;
-			points[9].y = (newTurnOff1)-points[5].y; points[9].x = points[5].x;
-			points[10].y = (newTurnOff1); points[10].x = points[6].x;
-			points[11].y = points[9].y; points[11].x = points[7].x;
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
-			tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 270.0;
-			tempEndPts(3).pos = points[3]; tempEndPts(3).angle = 90.0;
-			break;
-
-		case NTO_STR_SECTION:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 2 );
-			points[0].y = points[0].x = 0;
-			points[1].y = 0/*(newTurnOff1)*/; points[1].x = (newTurnLen1);
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
-			break;
-
-		case NTO_CRV_SECTION:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 2 );
-			points[0].y = points[0].x = 0;
-			points[1].y = (newTurnLen1) * (1.0 - cos( D2R(angle1) ) );
-			points[1].x = (newTurnLen1) * sin( D2R(angle1) );
-			radii[0] = -(newTurnLen1);
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0-angle1;
-			break;
-
-		case NTO_BUMPER:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 1 );
-			points[0].y = points[0].x = 0;
-			points[1].y = 0/*(newTurnOff1)*/; points[1].x = (newTurnLen1);
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			break;
-
-		default:
-			;
-		}
-	} else {
-		switch (dp->type) {
-		case NTO_CURVED:
-			d = points[3].x - points[5].x;
-			if ( d < -0.10 )
-				pp = &Crv3Schema;
-			else if ( d > 0.10 )
-				pp = &Crv2Schema;
-			else
-				pp = &Crv1Schema;
-			break;
-		}
 	}
+#endif
 
 	if (!( dp->type== NTO_CORNU)) {
 		segOrder = pp->segOrder;

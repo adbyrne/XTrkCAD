@@ -704,7 +704,6 @@ static BOOL_T QueryTurntable( track_p trk, int query )
 	case Q_NOT_PLACE_FROGPOINTS:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
 	case Q_CAN_ADD_ENDPOINTS:	
-	case Q_CAN_EXTEND:
 		return TRUE;
 	case Q_MODIFY_CAN_SPLIT:
 	case Q_CORNU_CAN_MODIFY:

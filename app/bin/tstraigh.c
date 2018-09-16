@@ -632,6 +632,7 @@ static BOOL_T QueryStraight( track_p trk, int query )
 	case Q_ISTRACK:
 	case Q_CORNU_CAN_MODIFY:
 	case Q_MODIFY_CAN_SPLIT:
+	case Q_CAN_EXTEND:
 		return TRUE;
 	default:
 		return FALSE;
