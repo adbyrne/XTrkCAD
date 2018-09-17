@@ -126,7 +126,14 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 		changes = CHANGE_PARAMS;
 	}
 	to->segCnt = segCnt;
-	to->segs = (trkSeg_p)memdup( segData, (sizeof *segData) * segCnt );
+	trkSeg_p seg_p;
+	to->segs = (trkSeg_p)memdup( segData, (sizeof (*segData) * segCnt ));
+	seg_p = to->segs;
+	for (int i=0;i<segCnt;i++) {
+		seg_p[i].bezSegs.ptr = NULL;
+		seg_p[i].bezSegs.cnt = 0;
+		seg_p[i].bezSegs.max = 0;
+	}
 	CopyPoly(to->segs,segCnt);
 	FixUpBezierSegs(to->segs,to->segCnt);
 	GetSegBounds( zero, 0.0, segCnt, to->segs, &to->orig, &to->size );

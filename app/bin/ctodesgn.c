@@ -135,6 +135,7 @@ static void ShowTurnoutDesigner( void * );
 
 static coOrd points[20];
 static DIST_T radii[10] = { 0.0 };
+static ANGLE_T angle[10] = { 0.0 };
 
 #define POSX(X) ((wPos_t)((X)*newTurnout_d.dpi))
 #define POSY(Y) ((wPos_t)((Y)*newTurnout_d.dpi))
@@ -1219,17 +1220,21 @@ static toDesignSchema_t * LoadSegs(
 			break;
 #ifndef MKTURNOUT
 		case NTO_CORNU:
-			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
 
 			radii[0] =  newTurnRad0; /*Toe*/
 			radii[1] =  newTurnRad1; /*Inner*/
 			radii[2] =  newTurnRad2; /*Outer*/
-			angle1 = newTurnAngle1; /*Inner*/
-			angle2 = newTurnAngle2; /*Outer*/
+			angle[1] = newTurnAngle1; /*Inner*/
+			angle[2] = newTurnAngle2; /*Outer*/
 			pp = &CornuSchema;
 			points[0].x = points[0].y = 0.0;
 			points[1].y = (newTurnOff1); points[1].x = (newTurnLen1); /*Inner*/
 			points[2].y = (newTurnOff2); points[2].x = (newTurnLen2); /*Outer*/
+
+			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
+			tempEndPts(2).pos = points[1]; tempEndPts(2).angle = 90.0-angle[1];
+			tempEndPts(1).pos = points[2]; tempEndPts(1).angle = 90.0-angle[2];
+
 			break;
 #endif
 		case NTO_WYE:
@@ -1368,6 +1373,7 @@ static toDesignSchema_t * LoadSegs(
 
 #ifndef MKTURNOUT
 	if(dp->type == NTO_CORNU) {
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
 
 			cornuData.pos[0] = points[0]; /*Start*/
 			cornuData.pos[1] = points[2]; /*Outer*/
@@ -1383,27 +1389,24 @@ static toDesignSchema_t * LoadSegs(
 			if (radii[1] == 0.0)  /* Inner */
 				cornuData.center[5] = zero;
 			else
-				Translate(&cornuData.center[5], cornuData.pos[5], -angle1, fabs(radii[1]));
+				Translate(&cornuData.center[5], cornuData.pos[5], -angle[1], fabs(radii[1]));
 
 			if (radii[2] == 0.0) /* Outer */
 				cornuData.center[1] = zero;
 			else
-				Translate(&cornuData.center[1], cornuData.pos[1], -angle2, fabs(radii[2]));
+				Translate(&cornuData.center[1], cornuData.pos[1], -angle[2], fabs(radii[2]));
 			cornuData.center[3] = cornuData.center[1];
 
 			cornuData.angle[0] = 270.0;
-			cornuData.angle[1] = 90.0-angle2;
-			cornuData.angle[3] = 90.0-angle2;
-			cornuData.angle[5] = 90.0-angle1; /*Inner*/
+			cornuData.angle[1] = 90.0-angle[2];
+			cornuData.angle[3] = 90.0-angle[2];
+			cornuData.angle[5] = 90.0-angle[1]; /*Inner*/
 
 			cornuData.radius[0] = fabs(radii[0]);
 			cornuData.radius[1] = fabs(radii[2]);
 			cornuData.radius[3] = fabs(radii[2]);
 			cornuData.radius[5] = fabs(radii[1]); /*Inner*/
 
-			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
-			tempEndPts(2).pos = points[1]; tempEndPts(2).angle = 90.0-angle1;
-			tempEndPts(1).pos = points[2]; tempEndPts(1).angle = 90.0-angle2;
 
 			DYNARR_RESET( trkSeg_t, tempSegs_da );
 			trkSeg_t * temp_p, * cornu_p;
@@ -1871,20 +1874,18 @@ static void NewTurnOk( void * context )
 		break;
 	case NTO_CURVED:
 	case NTO_CORNU:
-		points[1].y = - points[1].y;
+		points[0].y = - points[0].y;
 		points[2].y = - points[2].y;
-		points[4].y = - points[4].y;
-		points[6].y = - points[6].y;
-		radii[0] = - radii[0];
-		radii[1] = - radii[1];
-		radii[2] = - radii[2];
+		points[1].y = - points[1].y;
+		angle[1] = -angle[1];
+		angle[2] = -angle[2];
 		LoadSegs( curDesign, FALSE, &pathLen );
 		tempEndPts(1).pos.y = - tempEndPts(1).pos.y;
 		tempEndPts(1).angle = 180.0 - tempEndPts(1).angle;
 		tempEndPts(2).pos.y = - tempEndPts(2).pos.y;
 		tempEndPts(2).angle = 180.0 - tempEndPts(2).angle;
 		BuildTrimedTitle( tempCustom, "\t", newTurnManufacturer, newTurnRightDesc, newTurnRightPartno );
-		tempSegs_da.cnt = segCnt;
+		//tempSegs_da.cnt = segCnt;
 #ifndef MKTURNOUT
 		if (includeNontrackSegments && customTurnout2)
 			CopyNonTracks( customTurnout2 );

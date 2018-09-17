@@ -2035,7 +2035,7 @@ EXPORT void CleanSegs(dynArr_t * seg_p) {
 EXPORT void CopyPoly(trkSeg_p p, wIndex_t segCnt) {
 	coOrd * newPts;
 	for (int i=0;i<segCnt;i++,p++) {
-		if (p->type == SEG_POLY || p->type == SEG_FILPOLY) {
+		if ((p->type == SEG_POLY) || (p->type == SEG_FILPOLY)) {
 			newPts = memdup( p->u.p.pts, p->u.p.cnt*sizeof (coOrd) );
 			p->u.p.pts = newPts;
 		}
