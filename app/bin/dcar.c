@@ -4122,7 +4122,7 @@ static paramData_t carInvPLs[] = {
 	{ PD_BUTTON, (void*)CarInvDlgExportCsv, "export", 0, NULL, N_("Export") },
 #define I_CI_PRINT		(S+6)
 	{ PD_BUTTON, (void*)CarInvDlgSaveText, "savetext", 0, NULL, N_("List") } };
-static paramGroup_t carInvPG = { "carinv", 0, carInvPLs, sizeof carInvPLs/sizeof carInvPLs[0] };
+static paramGroup_t carInvPG = { "carinv", PGO_DIALOGTEMPLATE, carInvPLs, sizeof carInvPLs/sizeof carInvPLs[0] };
 
 static carItem_p CarInvDlgFindCurrentItem( void )
 {
