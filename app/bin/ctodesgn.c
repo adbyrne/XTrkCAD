@@ -71,6 +71,8 @@
 #define NTO_BUMPER		(13)
 #define NTO_TURNTABLE	(14)
 #define NTO_CORNU       (15)
+#define NTO_CORNUWYE    (16)
+#define NTO_CORNU3WAY   (17)
 
 #define FLOAT			(1)
 
@@ -82,7 +84,7 @@ typedef struct {
 		int index;
 		char * winLabel;
 		char * printLabel;
-		enum { Dim_e, Frog_e, Angle_e } mode;
+		enum { Dim_e, Frog_e, Angle_e, Rad_e } mode;
 		} toDesignFloat_t;
 
 typedef struct {
@@ -104,17 +106,30 @@ typedef struct {
 		} toDesignDesc_t;
 
 static wWin_p newTurnW;
+
+static FLOAT_T newTurnRad0;
+static FLOAT_T newTurnAngle0;
 static FLOAT_T newTurnLen0;
+static FLOAT_T newTurnOff0;
+
+static FLOAT_T newTurnRad1;
+static FLOAT_T newTurnAngle1;
 static FLOAT_T newTurnLen1;
 static FLOAT_T newTurnOff1;
-static FLOAT_T newTurnAngle1;
+
+static FLOAT_T newTurnRad2;
+static FLOAT_T newTurnAngle2;
 static FLOAT_T newTurnLen2;
 static FLOAT_T newTurnOff2;
-static FLOAT_T newTurnAngle2;
-static FLOAT_T newTurnRad0;
-static FLOAT_T newTurnRad1;
-static FLOAT_T newTurnRad2;
+
+static FLOAT_T newTurnRad3;
+static FLOAT_T newTurnAngle3;
+static FLOAT_T newTurnOff3;
+static FLOAT_T newTurnLen3;
+
 static FLOAT_T newTurnToeL;
+static FLOAT_T newTurnToeR;
+
 static long newTurnAngleMode = 1;
 static char newTurnRightDesc[STR_SIZE], newTurnLeftDesc[STR_SIZE];
 static char newTurnRightPartno[STR_SIZE], newTurnLeftPartno[STR_SIZE];
@@ -126,6 +141,7 @@ static wDrawColor roadbedColor;
 static DIST_T newTurnTrackGauge;
 static char * newTurnScaleName;
 static paramFloatRange_t r0_10000 = { 0, 10000, 80 };
+static paramFloatRange_t r_10000_10000 = {-10000, 10000, 80 };
 static paramFloatRange_t r0_360 = { 0, 360, 80 };
 static paramFloatRange_t r0_100 = { 0, 100, 80 };
 static paramIntegerRange_t i0_100 = { 0, 100, 40 };
@@ -143,28 +159,34 @@ static ANGLE_T angle[10] = { 0.0 };
 static paramData_t turnDesignPLs[] = {
 #define I_TOLENGTH			(0)
 #define I_TO_FIRST_FLOAT	(0)
+	{ PD_FLOAT, &newTurnLen0, "len0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
 	{ PD_FLOAT, &newTurnLen1, "len1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
 	{ PD_FLOAT, &newTurnLen2, "len2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
-	{ PD_FLOAT, &newTurnLen0, "len0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
 #define I_TOOFFSET			(3)
-	{ PD_FLOAT, &newTurnOff1, "off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Offset") },
-	{ PD_FLOAT, &newTurnOff2, "off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Offset") },
-#define I_TORAD             (5)
-	{ PD_FLOAT, &newTurnRad1, "rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Radius") },
-    { PD_FLOAT, &newTurnRad2, "rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Radius") },
-    { PD_FLOAT, &newTurnRad0, "rad0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Radius") },
-#define I_TOTOELENGTH       (8)
+	{ PD_FLOAT, &newTurnOff0, "off0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnOff1, "off1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnOff2, "off2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Offset") },
+	{ PD_FLOAT, &newTurnOff3, "off3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Offset") },
+#define I_TORAD             (7)
+	{ PD_FLOAT, &newTurnRad0, "rad0", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	{ PD_FLOAT, &newTurnRad1, "rad1", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+    { PD_FLOAT, &newTurnRad2, "rad2", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+	{ PD_FLOAT, &newTurnRad3, "rad3", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r_10000_10000, N_("Radius") },
+#define I_TOTOELENGTH       (11)
 	{ PD_FLOAT, &newTurnToeL, "toeL", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
-#define I_TOANGLE			(9)
+	{ PD_FLOAT, &newTurnToeR, "toeR", PDO_DIM|PDO_DLGIGNORELABELWIDTH, &r0_10000, N_("Length") },
+#define I_TOANGLE			(13)
+	{ PD_FLOAT, &newTurnAngle0, "angle0", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
 	{ PD_FLOAT, &newTurnAngle1, "angle1", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
-#define I_TO_LAST_FLOAT		(10)
 	{ PD_FLOAT, &newTurnAngle2, "angle2", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
-#define I_TOMANUF			(11)
+#define I_TO_LAST_FLOAT		(16)
+	{ PD_FLOAT, &newTurnAngle3, "angle3", PDO_DLGIGNORELABELWIDTH, &r0_360, N_("Angle") },
+#define I_TOMANUF			(17)
 	{ PD_STRING, &newTurnManufacturer, "manuf", PDO_STRINGLIMITLENGTH, NULL, N_("Manufacturer"), 0, 0, sizeof(newTurnManufacturer)},
-#define I_TOLDESC			(12)
+#define I_TOLDESC			(18)
 	{ PD_STRING, &newTurnLeftDesc, "desc1", PDO_STRINGLIMITLENGTH, NULL, N_("Left Description"), 0, 0, sizeof(newTurnLeftDesc)},
 	{ PD_STRING, &newTurnLeftPartno, "partno1", PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, NULL, N_(" #"), 0, 0, sizeof(newTurnLeftPartno)},
-#define I_TORDESC			(14)
+#define I_TORDESC			(20)
 	{ PD_STRING, &newTurnRightDesc, "desc2", PDO_STRINGLIMITLENGTH, NULL, N_("Right Description"),0, 0, sizeof(newTurnRightDesc)},
 	{ PD_STRING, &newTurnRightPartno, "partno2", PDO_DLGHORZ | PDO_STRINGLIMITLENGTH, NULL, N_(" #"),0, 0, sizeof(newTurnRightPartno)},
 	{ PD_FLOAT, &newTurnRoadbedWidth, "roadbedWidth", PDO_DIM, &r0_100, N_("Roadbed Width") },
@@ -172,7 +194,7 @@ static paramData_t turnDesignPLs[] = {
 	{ PD_COLORLIST, &roadbedColor, "color", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Color") },
 	{ PD_BUTTON, (void*)NewTurnOk, "done", PDO_DLGCMDBUTTON, NULL, N_("Ok") },
 	{ PD_BUTTON, (void*)wPrintSetup, "printsetup", 0, NULL, N_("Print Setup") },
-#define I_TOANGMODE			(21)
+#define I_TOANGMODE			(27)
 	{ PD_RADIO, &newTurnAngleMode, "angleMode", 0, newTurnAngleModeLabels }
 	};
 #ifndef MKTURNOUT
@@ -322,6 +344,35 @@ static toDesignDesc_t WyeDesc = {
 		sizeof WyeFloats/sizeof WyeFloats[0], WyeFloats,
 		NULL, 1 };
 
+static wLines_t CornuWyeLines[] = {
+#include "tocornuwye.lin"
+		};
+static toDesignFloat_t CornuWyeFloats[] = {
+{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Left Length"), Dim_e },
+{ { 400, 28 }, I_TOANGLE+0, N_("Angle"), N_("Left Angle"), Frog_e },
+{ { 400, 48 }, I_TOOFFSET+0, N_("Offset"), N_("Left Offset"), Dim_e },
+{ { 400, 68 }, I_TORAD+0, N_("Radius"), N_("Left Radius"), Dim_e },
+{ { 400, 108 }, I_TORAD+1, N_("Radius"), N_("Right Radius"), Dim_e },
+{ { 400, 128 }, I_TOOFFSET+1, N_("Offset"), N_("Right Offset"), Dim_e },
+{ { 400, 148 }, I_TOANGLE+1, N_("Angle"), N_("Right Angle"), Frog_e },
+{ { 175, 170 }, I_TOLENGTH+1, N_("Length"), N_("Right Length"), Dim_e },
+{ { 80, 48 }, I_TOTOELENGTH+0, N_("Length"), N_("Toe Length"), Dim_e },
+{ { 80, 28 }, I_TORAD+3, N_("Radius"), N_("Toe Radius"), Dim_e },
+		};
+static signed char CornuWyePaths[] = {
+		'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
+		'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 0, 0, 0 }; /* Not Used */
+static toDesignSchema_t CornuWyeSchema = {
+		CornuWyePaths,
+		"030" "341" "410" "362" "620" };  /* Not Used */
+static toDesignDesc_t CornuWyeDesc = {
+		NTO_CORNUWYE,
+		N_("Cornu Wye Turnout"),
+		1,
+		sizeof CornuWyeLines/sizeof CornuWyeLines[0], CornuWyeLines,
+		sizeof CornuWyeFloats/sizeof CornuWyeFloats[0], CornuWyeFloats,
+		NULL, 1 };
+
 static wLines_t ThreewayLines[] = {
 #include "to3way.lin"
 		};
@@ -361,6 +412,41 @@ static toDesignDesc_t ThreewayDesc = {
 		1,
 		sizeof ThreewayLines/sizeof ThreewayLines[0], ThreewayLines,
 		sizeof ThreewayFloats/sizeof ThreewayFloats[0], ThreewayFloats,
+		NULL, 1 };
+
+static wLines_t CornuThreewayLines[] = {
+#include "tocornu3way.lin"
+		};
+static toDesignFloat_t CornuThreewayFloats[] = {
+{ { 175, 10 }, I_TOLENGTH+0, N_("Length"), N_("Left Length"), Dim_e },
+{ { 380, 10 }, I_TOANGLE+0, N_("Angle"), N_("Left Angle"), Frog_e },
+{ { 380, 50 }, I_TOOFFSET+0, N_("Offset"), N_("Left Offset"), Dim_e },
+{ { 380, 30 }, I_TORAD+0, N_("Radius"), N_("Left Radius"), Dim_e },
+{ { 130, 90 }, I_TOLENGTH+3, N_("Length"), N_("Center Length"), Dim_e },
+{ { 400, 70 }, I_TOANGLE+3, N_("Angle"), N_("Center Angle"), Dim_e },
+{ { 400, 90}, I_TOOFFSET+3, N_("Offset"), N_("Center Offset"), Dim_e },
+{ { 400, 110 }, I_TORAD+3, N_("Radius"), N_("Center Radius"), Dim_e },
+{ { 420, 150 }, I_TORAD+1, N_("Radius"), N_("Right Radius"), Dim_e },
+{ { 420, 130 }, I_TOOFFSET+1, N_("Offset"), N_("Right Offset"), Dim_e },
+{ { 420, 170 }, I_TOANGLE+1, N_("Angle"), N_("Right Angle"), Frog_e },
+{ { 175, 170 }, I_TOLENGTH+1, N_("Length"), N_("Right Length"), Dim_e },
+{ { 45, 50 }, I_TOTOELENGTH+0, N_("Length"), N_("Toe Length Left"), Dim_e },
+{ { 55, 140 }, I_TOTOELENGTH+1, N_("Length"), N_("Toe Length Right"), Dim_e },
+{ { 40, 105 }, I_TORAD+2, N_("Radius"), N_("Toe Radius"), Dim_e },
+		};
+static signed char CornuTriPaths[] = {
+		'L', 'e', 'f', 't', 0, 1, 2, 3, 0, 0,
+		'N', 'o', 'r', 'm', 'a', 'l', 0, 1, 6, 0, 0,
+		'R', 'i', 'g', 'h', 't', 0, 1, 4, 5, 0, 0, 0 };
+static toDesignSchema_t CornuTriSchema = {
+		CornuTriPaths,
+		"030" "341" "410" "362" "620" "370" };
+static toDesignDesc_t CornuThreewayDesc = {
+		NTO_CORNU3WAY,
+		N_("Cornu 3-way Turnout"),
+		1,
+		sizeof CornuThreewayLines/sizeof CornuThreewayLines[0], CornuThreewayLines,
+		sizeof CornuThreewayFloats/sizeof CornuThreewayFloats[0], CornuThreewayFloats,
 		NULL, 1 };
 
 static wLines_t CrossingLines[] = {
@@ -640,7 +726,9 @@ static toDesignDesc_t * designDescs[] = {
 		&CrvDesc,
 		&CornuDesc,
 		&WyeDesc,
+		&CornuWyeDesc,
 		&ThreewayDesc,
+		&CornuThreewayDesc,
 		&CrossingDesc,
 		&SingleSlipDesc,
 		&DoubleSlipDesc,
@@ -1148,24 +1236,28 @@ static toDesignSchema_t * LoadSegs(
 	char *segOrder;
 	coOrd pos;
 	wIndex_t segCnt;
-	ANGLE_T angle1, angle2;
+	ANGLE_T angle0, angle1, angle2, angle3, angle4;
 	trkSeg_p segPtr;
 	struct {
-		coOrd pos[6];
-		coOrd center[6];
-		DIST_T radius[6];
-		DIST_T angle[6];
+		coOrd pos[10];
+		coOrd center[10];
+		DIST_T radius[10];
+		DIST_T angle[10];
 	} cornuData;
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 	angle1 = newTurnAngle1;
 	angle2 = newTurnAngle2;
+	angle3 = newTurnAngle3;
+
 	if ( newTurnAngleMode == 0 && dp->type != NTO_CRV_SECTION ) {
 		/* convert from Frog Num to degrees */
 		if ( angle1 > 0 )
 			angle1 = R2D(asin(1.0 / angle1));
 		if ( angle2 > 0 )
 			angle2 = R2D(asin(1.0 / angle2));
+		if ( angle3 > 0 )
+			angle3 = R2D(asin(1.0 / angle3));
 	}
 
 	pp = dp->paths;
@@ -1173,7 +1265,10 @@ static toDesignSchema_t * LoadSegs(
 		DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 		for ( i=0; i<dp->floatCnt; i++ )
 			if ( *(FLOAT_T*)(turnDesignPLs[dp->floats[i].index].valueP) == 0.0 )
-				if (dp->type != NTO_CORNU || !((dp->floats[i].index>=I_TORAD) && (dp->floats[i].index<=I_TORAD+2))) {
+				if (dp->type != NTO_CORNU &&
+					dp->type != NTO_CORNUWYE &&
+					dp->type != NTO_CORNU3WAY
+						) {
 					NoticeMessage( MSG_TODSGN_VALUES_GTR_0, _("Ok"), NULL );
 					return NULL;
 			}
@@ -1182,12 +1277,12 @@ static toDesignSchema_t * LoadSegs(
 		case NTO_REGULAR:
 			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
-				(newTurnLen1), (newTurnOff1), angle1 ) )
+				(newTurnLen1), fabs(newTurnOff1), angle1 ) )
 				return NULL;
 			radii[0] = - radii[0];
 			points[0].x = points[0].y = points[1].y = 0.0;
 			points[1].x = (newTurnLen0);
-			points[2].y = (newTurnOff1);
+			points[2].y = fabs(newTurnOff1);
 			points[2].x = (newTurnLen1);
 			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
 			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
@@ -1197,10 +1292,10 @@ static toDesignSchema_t * LoadSegs(
 		case NTO_CURVED:
 			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
-				(newTurnLen1), (newTurnOff1), angle1 ) )
+				(newTurnLen1), fabs(newTurnOff1), angle1 ) )
 				return NULL;
 			if ( !ComputeCurve( &points[5], &points[6], &radii[1],
-				(newTurnLen2), (newTurnOff2), angle2 ) )
+				(newTurnLen2), fabs(newTurnOff2), angle2 ) )
 				return NULL;
 			d = points[3].x - points[5].x;
 			if ( d < -0.10 )
@@ -1212,8 +1307,8 @@ static toDesignSchema_t * LoadSegs(
 			radii[0] = - radii[0];
 			radii[1] = - radii[1];
 			points[0].x = points[0].y = 0.0;
-			points[1].y = (newTurnOff1); points[1].x = (newTurnLen1);
-			points[2].y = (newTurnOff2); points[2].x = (newTurnLen2);
+			points[1].y = fabs(newTurnOff1); points[1].x = (newTurnLen1);
+			points[2].y = fabs(newTurnOff2); points[2].x = (newTurnLen2);
 			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
 			tempEndPts(2).pos = points[1]; tempEndPts(2).angle = 90.0-angle1;
 			tempEndPts(1).pos = points[2]; tempEndPts(1).angle = 90.0-angle2;
@@ -1221,9 +1316,9 @@ static toDesignSchema_t * LoadSegs(
 #ifndef MKTURNOUT
 		case NTO_CORNU:
 
-			radii[0] =  newTurnRad0; /*Toe*/
-			radii[1] =  newTurnRad1; /*Inner*/
-			radii[2] =  newTurnRad2; /*Outer*/
+			radii[0] =  fabs(newTurnRad0); /*Toe*/
+			radii[1] =  fabs(newTurnRad1); /*Inner*/
+			radii[2] =  fabs(newTurnRad2); /*Outer*/
 			angle[1] = newTurnAngle1; /*Inner*/
 			angle[2] = newTurnAngle2; /*Outer*/
 			pp = &CornuSchema;
@@ -1241,18 +1336,18 @@ static toDesignSchema_t * LoadSegs(
 		case NTO_3WAY:
 			DYNARR_SET( trkEndPt_t, tempEndPts_da, (dp->type==NTO_3WAY)?4:3 );
 			if ( !ComputeCurve( &points[3], &points[4], &radii[0],
-						(newTurnLen1), (newTurnOff1), angle1 ) )
+						(newTurnLen1), fabs(newTurnOff1), angle1 ) )
 				return NULL;
 			if ( !ComputeCurve( &points[5], &points[6], &radii[1],
-						(newTurnLen2), (newTurnOff2), angle2 ) )
+						(newTurnLen2), fabs(newTurnOff2), angle2 ) )
 				return NULL;
 			points[5].y = - points[5].y;
 			points[6].y = - points[6].y;
 			radii[0] = - radii[0];
 			points[0].x = points[0].y = 0.0;
-			points[1].y = (newTurnOff1);
+			points[1].y = fabs(newTurnOff1);
 			points[1].x = (newTurnLen1);
-			points[2].y = -(newTurnOff2);
+			points[2].y = -fabs(newTurnOff2);
 			points[2].x = (newTurnLen2);
 			points[7].y = 0;
 			points[7].x = (newTurnLen0);
@@ -1271,6 +1366,403 @@ static toDesignSchema_t * LoadSegs(
 				tempEndPts(3).pos = points[7]; tempEndPts(3).angle = 90.0;
 			}
 			break;
+#ifndef MKTURNOUT
+		case NTO_CORNUWYE:
+		case NTO_CORNU3WAY:
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, (dp->type==NTO_CORNU3WAY)?5:3 );
+
+			/*
+			 * Construct Wye and 3 Way Turnouts with Cornu curves
+			 * 1. Establish where the joint(s) (Toes) are by using the main curve
+			 * 2. Rebuild the segments into a single set using those points
+			 * 3. Build Path statements to suit the segments
+			 * ---------------------------------------------------------------------------------------------
+			 *                        7				CornuData. Cheat Sheet - segment array parts
+			 *           =============+				Note - 6-7 is at Toe2 and 8-9 at Toe1 if RH comes before LH
+			 *         //    Toe 2                       - Toe2 and Toe1 are the same (no 2-3) if co-incident
+			 * 0      6+    3  4                  5		 - Toe2, 2-3 and 4-5 all only exist for 3WAY not WYE
+			 * +=====+ +=====+ +==================+		 - If a WYE and zero radius at 0, curve starts at Toe 1
+			 *       1 2      8+
+			 *      Toe 1      \\         9
+			 *                  =========+
+			 *
+			 * ---------------------------------------------------------------------------------------------
+			 */
+
+			radii[0] = (newTurnRad2); /*Base*/
+			radii[1] = (newTurnRad0); /*Left*/
+			radii[2] = (newTurnRad1); /*Right*/
+			radii[3] = (newTurnRad3); /*Center*/
+			angle[0] = 270.0; 		  /*Base*/
+			angle[1] = newTurnAngle0; /*Left*/
+			angle[2] = newTurnAngle1; /*Right*/
+			angle[3] = newTurnAngle3; /*Center*/
+			points[0].x = points[0].y = 0.0; /*Base*/
+			points[1].y = (newTurnOff0);	/* Left */
+			points[1].x = (newTurnLen0);
+			points[2].y = -(newTurnOff1);   /* Right */
+			points[2].x = (newTurnLen1);
+			if (dp->type==NTO_CORNU3WAY) {
+				points[3].y = (newTurnOff3);    /* Center */
+				points[3].x = (newTurnLen3);
+			}
+
+			pp = (dp->type==NTO_CORNU3WAY ? &CornuTriSchema : &CornuWyeSchema );
+
+			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
+
+			if (newTurnRad0<0.0) {
+				tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0+angle[1];
+			} else {
+				tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0-angle[1];
+			}
+			if (newTurnRad1<0.0) {
+				tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 90.0-angle[2];
+			} else {
+				tempEndPts(2).pos = points[2]; tempEndPts(2).angle = 90.0+angle[2];
+			}
+			if (dp->type == NTO_CORNU3WAY) {
+				if (newTurnRad3<0.0) {
+					tempEndPts(3).pos = points[3]; tempEndPts(3).angle = 90.0+angle[3];
+				} else {
+					tempEndPts(3).pos = points[3]; tempEndPts(3).angle = 90.0-angle[3];
+				}
+			}
+
+			DYNARR_SET( trkEndPt_t, tempEndPts_da, 3 );
+
+			wBool_t LH_main = TRUE, LH_first = TRUE;
+
+			cornuData.pos[0] = points[0]; /*Start*/
+			if (dp->type == NTO_CORNU3WAY) {
+				if (newTurnToeR < newTurnToeL) LH_first = FALSE;
+				cornuData.pos[1] = points[3]; /*Center for First Time */
+				cornuData.pos[5] = points[3]; /*Center for last time*/
+			} else if (newTurnRad2>=0.0) {
+				cornuData.pos[1] = points[1];    /*Left is dominant curve */
+				newTurnToeR = newTurnToeL;
+			} else {
+				cornuData.pos[1] = points[2];    /*Right is dominant */
+				newTurnToeR = newTurnToeL;
+				LH_main = FALSE;
+			}
+
+			cornuData.pos[7] = points[1]; /*Left*/
+			cornuData.pos[9] = points[2]; /*Right*/
+
+			if (radii[0] == 0.0)  /* Base */
+				cornuData.center[0] = zero;
+			else {
+				cornuData.center[0].x = points[0].x;
+				cornuData.center[0].y = points[0].y + radii[0];
+			}
+			if (radii[1] == 0.0)  /* Left */
+				cornuData.center[7] = zero;
+			else if (radii[1] >0.0)
+				Translate(&cornuData.center[7], cornuData.pos[7], -angle[1], radii[1]);
+			else
+				Translate(&cornuData.center[7], cornuData.pos[7], 180.0+angle[1], radii[1]);
+
+			if (radii[2] == 0.0) /* Right */
+				cornuData.center[9] = zero;
+			else if (radii[2] >0.0)
+				Translate(&cornuData.center[9], cornuData.pos[9], 180.0+angle[2], radii[2]);
+			else
+				Translate(&cornuData.center[9], cornuData.pos[9], -angle[2], radii[2]);
+
+			if (dp->type == NTO_CORNU3WAY) {
+				if (radii[3] == 0.0) /* Center */
+					cornuData.center[5] = zero;
+				else if (radii[3] >0.0)
+					Translate(&cornuData.center[5], cornuData.pos[5], -angle[3], radii[3]);
+				else
+					Translate(&cornuData.center[5], cornuData.pos[5], 180.0+angle[3], radii[3]);
+			}
+
+			if (dp->type == NTO_CORNU3WAY) {
+				cornuData.center[1] = cornuData.center[5];
+				cornuData.center[3] = cornuData.center[5];
+			} else if (LH_main) {
+				cornuData.center[1] = cornuData.center[7];
+			} else
+				cornuData.center[1] = cornuData.center[9];
+
+			cornuData.angle[0] = 270.0;
+			if (dp->type == NTO_CORNU3WAY) {
+				cornuData.angle[1] = 90.0-angle[3];
+				cornuData.angle[3] = 90.0-angle[3];
+				cornuData.angle[5] = 90.0-angle[3]; /* Only used for 3way */
+			} else if (LH_main) {
+				cornuData.angle[1] = 90.0-angle[1];
+			} else {
+				cornuData.angle[1] = 90.0+angle[2];
+			}
+			cornuData.angle[7] = 90.0-angle[1]; /*Left*/
+			cornuData.angle[9] = 90.0+angle[2]; /*Right*/
+
+			cornuData.radius[0] = fabs(radii[0]);
+			if (dp->type == NTO_CORNU3WAY) {
+				cornuData.radius[1] = fabs(radii[3]);
+				cornuData.radius[3] = fabs(radii[3]);
+				cornuData.radius[5] = fabs(radii[3]);
+			} else if (LH_main) {
+				cornuData.radius[1] = fabs(radii[1]);
+			} else {
+				cornuData.radius[1] = fabs(radii[2]);
+			}
+			cornuData.radius[7] = fabs(radii[1]); /*Left*/
+			cornuData.radius[9] = fabs(radii[2]); /*Right*/
+
+			/* Ready to find Toe points */
+
+			DYNARR_RESET( trkSeg_t, tempSegs_da );
+			trkSeg_t * temp_p, * cornu_p;
+			temp_p = &tempSegs(0);
+
+
+			DIST_T radius;
+			coOrd center;
+			ANGLE_T angle;
+			int inx,subSeg;
+			wBool_t back, neg;
+
+			/* Override if a Y has zero radius at base to be a straight until the Toe
+			 * We set the start of the curve to be at the Toe position for now */
+			if (dp->type == NTO_CORNUWYE && (cornuData.radius[0] == 0.0)) {
+				pos.x = points[0].x+LH_first?newTurnToeL:newTurnToeR;
+				pos.y = 0.0;
+				angle = 90.0;
+				radius = 0.0;
+				center = zero;
+
+			} else {
+				/*Map out the main curve and find Toe 1 from it */
+
+				CallCornu0(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],&cornuData.radius[0],&tempSegs_da, FALSE);
+
+				/*Get ToeAngle/Radius/Center for first toe */
+				pos.x = points[0].x+LH_first?newTurnToeL:newTurnToeR;
+				pos.y = points[0].y; 				/* This will be close to but not on the curve */
+				angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,NULL,&back,&subSeg,&neg);
+				segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
+
+				if (segPtr->type == SEG_BEZTRK) {
+					segPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,subSeg);
+				}
+
+				if (segPtr->type == SEG_STRTRK) {
+					radius = 0.0;
+					center = zero;
+				} else if (segPtr->type == SEG_CRVTRK) {
+					center = segPtr->u.c.center;
+					radius = fabs(segPtr->u.c.radius);
+				}
+			}
+
+			/* Set up 2-3 even if we don't use it */
+			cornuData.pos[1] = cornuData.pos[2] = pos;
+			cornuData.center[1] = cornuData.center[2] = center;
+			cornuData.angle[1] = angle;
+			cornuData.angle[2]  = NormalizeAngle(180.0+angle);
+			cornuData.radius[1] = cornuData.radius[2] = radius;
+
+			if (dp->type == NTO_CORNU3WAY && (newTurnToeR!=newTurnToeL)) {
+				if (LH_first) {
+					cornuData.pos[6] = pos;
+					cornuData.pos[6] = center;
+					cornuData.angle[6] = NormalizeAngle(180.0+angle);
+					cornuData.radius[6] = radius;
+				} else {
+					cornuData.pos[8] = pos;
+					cornuData.pos[8] = center;
+					cornuData.angle[8] = NormalizeAngle(180.0+angle);
+					cornuData.radius[8] = radius;
+				}
+			} else {   /* Just one toe */
+				cornuData.pos[8] = cornuData.pos[6] = pos;
+				cornuData.center[8] = cornuData.center[6] = center;
+				cornuData.angle[8] = cornuData.angle[6] = NormalizeAngle(180.0+angle);
+				cornuData.radius[8] = cornuData.radius[6] = radius;
+				cornuData.center[8] = cornuData.center[6] = center;
+			}
+
+			if (dp->type == NTO_CORNU3WAY &&
+					(newTurnToeR!=newTurnToeL)) {
+				/* Second Toe */
+				pos.x = points[0].x+LH_first?newTurnToeR:newTurnToeL;
+				pos.y = points[0].y; 				/* This will be close to but not on the curve */
+				angle = GetAngleSegs(tempSegs_da.cnt,(trkSeg_t *)(tempSegs_da.ptr),&pos,&inx,NULL,&back,&subSeg,&neg);
+				segPtr = &DYNARR_N(trkSeg_t, tempSegs_da, inx);
+
+				if (segPtr->type == SEG_BEZTRK) {
+					segPtr = &DYNARR_N(trkSeg_t,segPtr->bezSegs,subSeg);
+				}
+
+				if (segPtr->type == SEG_STRTRK) {
+					radius = 0.0;
+					center = zero;
+				} else if (segPtr->type == SEG_CRVTRK) {
+					center = segPtr->u.c.center;
+					radius = fabs(segPtr->u.c.radius);
+				}
+				cornuData.pos[3] = cornuData.pos[4] = pos;
+				cornuData.center[3] = cornuData.center[4] = center;
+				cornuData.angle[3] = angle;
+				cornuData.angle[4] = NormalizeAngle(180.0+angle);
+				cornuData.radius[3] = cornuData.radius[4] = radius;
+
+				if (LH_first) {
+					cornuData.pos[8] = cornuData.pos[4] = pos;
+					cornuData.center[8] = cornuData.center[4] = center;
+					cornuData.angle[8] = cornuData.angle[4] = NormalizeAngle(180.0+angle);
+					cornuData.radius[8] = cornuData.radius[4] = radius;
+				} else {
+					cornuData.pos[6] = cornuData.pos[4] = pos;
+					cornuData.center[6] = cornuData.center[4] = center;
+					cornuData.angle[6] = cornuData.angle[4] = NormalizeAngle(180.0+angle);
+					cornuData.radius[6] = cornuData.radius[4] = radius;
+				}
+			}
+
+			static dynArr_t cornuSegs_da;
+
+			ClearSegs(&tempSegs_da);
+			ClearSegs(&cornuSegs_da);
+
+			int Toe1Seg = 0 , Toe2Seg = 0, CenterEndSeg = 0, LeftEndSeg = 0, RightEndSeg = 0;
+
+			/* Base to ToeL or Toe R in tempSegs array */
+			CallCornu0(&cornuData.pos[0],&cornuData.center[0],&cornuData.angle[0],&cornuData.radius[0],&tempSegs_da, FALSE);
+			Toe1Seg = tempSegs_da.cnt;
+
+			if (dp->type == NTO_CORNU3WAY && (newTurnToeR!=newTurnToeL)) {
+				/* Toe1 to Toe2 in tempSegs array */
+				CallCornu0(&cornuData.pos[2],&cornuData.center[2],&cornuData.angle[2],&cornuData.radius[2],&cornuSegs_da, FALSE);
+				if (dp->type == NTO_CORNU3WAY)
+					Toe2Seg = tempSegs_da.cnt+Toe1Seg;
+				else {
+					Toe2Seg = Toe1Seg;
+					LeftEndSeg = tempSegs_da.cnt+Toe1Seg;
+				}
+				/* Add to second cornu to tempSegs array */
+				AppendSegs(&tempSegs_da,&cornuSegs_da);
+				/* Get ready to reuse cornuSegs array*/
+				ClearSegs(&cornuSegs_da);
+			} else {
+				Toe2Seg = Toe1Seg;
+				CenterEndSeg = Toe1Seg;
+			}
+
+			if (dp->type == NTO_CORNU3WAY) {
+				/* ToeR to Center in cornuSegs array */
+				CallCornu0(&cornuData.pos[4],&cornuData.center[4],&cornuData.angle[4],&cornuData.radius[4],&cornuSegs_da, FALSE);
+				CenterEndSeg = cornuSegs_da.cnt+Toe2Seg;
+
+				/* Add to second cornu to tempSegs array */
+				AppendSegs(&tempSegs_da,&cornuSegs_da);
+				/* Get ready to reuse cornuSegs array*/
+				ClearSegs(&cornuSegs_da);
+			}
+
+			/* Toe to Left in cornuSegs array*/
+			CallCornu0(&cornuData.pos[6],&cornuData.center[6],&cornuData.angle[6],&cornuData.radius[6],&cornuSegs_da, FALSE);
+			LeftEndSeg = cornuSegs_da.cnt+CenterEndSeg;
+
+			/* Add to second cornu to tempSegs array */
+			AppendSegs(&tempSegs_da,&cornuSegs_da);
+			/* Get ready to reuse cornuSegs array*/
+			ClearSegs(&cornuSegs_da);
+
+			/* Toe to Right in cornuSegs array*/
+			CallCornu0(&cornuData.pos[8],&cornuData.center[8],&cornuData.angle[8],&cornuData.radius[8],&cornuSegs_da, FALSE);
+			RightEndSeg = cornuSegs_da.cnt+LeftEndSeg;
+
+			/*Add Third Part to tempSegs Array */
+			AppendSegs(&tempSegs_da,&cornuSegs_da);
+			/* Safety - clear out cornu Array */
+			ClearSegs(&cornuSegs_da);
+
+			if (tempSegs_da.cnt >128 ) {
+				NoticeMessage( MSG_TODSGN_CORNU_TOO_COMPLEX, _("Ok"), NULL );
+				return NULL;
+			}
+
+			/* Generate Paths */
+
+			static char pathChar[512];
+			unsigned char c;
+			if (dp->type == NTO_CORNU3WAY) {
+				strcpy(pathChar,"Normal");  /* Also resets array */
+				pathLen = strlen(pathChar)+1;
+				for (uint8_t i=0;i<CenterEndSeg;i++) {  /*CenterEnd is 0 if not 3-way */
+								pathChar[pathLen] = i+1;
+								pathLen++;
+				}
+				pathChar[pathLen] = 0;
+				pathLen++;
+				pathChar[pathLen] = 0;
+				pathLen++;
+				sprintf(&pathChar[pathLen],"%s","Left");
+				pathLen += strlen(&pathChar[pathLen])+1;
+			} else {
+				strcpy(pathChar,"Left");
+				pathLen += strlen(&pathChar[pathLen])+1;
+			}
+			for (uint8_t i=0;i<Toe1Seg;i++) {
+				pathChar[pathLen] = i+1;
+				pathLen++;
+			}
+			if ((dp->type == NTO_CORNU3WAY) && !LH_first && (newTurnToeR != newTurnToeL)) {
+				for (uint8_t i=Toe1Seg;i<Toe2Seg;i++) {
+					pathChar[pathLen] = i+1;
+					pathLen++;
+				}
+			}
+			if (dp->type == NTO_CORNU3WAY) {
+				for (uint8_t i=CenterEndSeg;i<LeftEndSeg;i++) {
+					pathChar[pathLen] = i+1;
+					pathLen++;
+				}
+			} else {
+				for (uint8_t i=Toe1Seg;i<LeftEndSeg;i++) {
+					pathChar[pathLen] = i+1;
+					pathLen++;
+				}
+			}
+			pathChar[pathLen] = 0;
+			pathLen++;
+			pathChar[pathLen] = 0;
+			pathLen++;
+
+			sprintf(&pathChar[pathLen],"%s","Right");
+			pathLen += strlen(&pathChar[pathLen])+1;
+
+			for (uint8_t i=0;i<Toe1Seg;i++) {
+				pathChar[pathLen] = i+1;
+				pathLen++;
+			}
+			if ((dp->type == NTO_CORNU3WAY) && LH_first && (newTurnToeR != newTurnToeL)) {
+				for (uint8_t i=Toe1Seg;i<Toe2Seg;i++) {
+					pathChar[pathLen] = i+1;
+					pathLen++;
+				}
+			}
+			for (uint8_t i=LeftEndSeg;i<RightEndSeg;i++) {
+				pathChar[pathLen] = i+1;
+				pathLen++;
+			}
+			pathChar[pathLen] = 0;
+			pathLen++;
+			pathChar[pathLen] = 0;
+			pathLen++;
+			pathChar[pathLen] = 0;
+			pathLen++;
+
+			pp->paths = (signed char *)pathChar;
+			segCnt = tempSegs_da.cnt;
+
+			break;
+#endif
 
 		case NTO_D_SLIP:
 		case NTO_S_SLIP:
@@ -1308,20 +1800,20 @@ static toDesignSchema_t * LoadSegs(
 				NoticeMessage( MSG_TODSGN_CROSSOVER_TOO_SHORT, _("Ok"), NULL );
 				return NULL;
 			}
-			angle1 = R2D( atan2( (newTurnOff1), d ) );
+			angle1 = R2D( atan2( fabs(newTurnOff1), d ) );
 			points[0].y = 0.0; points[0].x = 0.0;
 			points[1].y = 0.0; points[1].x = (newTurnLen1);
-			points[2].y = (newTurnOff1); points[2].x = 0.0;
-			points[3].y = (newTurnOff1); points[3].x = (newTurnLen1);
+			points[2].y = fabs(newTurnOff1); points[2].x = 0.0;
+			points[3].y = fabs(newTurnOff1); points[3].x = (newTurnLen1);
 			if (!ComputeCurve( &points[4], &points[5], &radii[1],
-				(newTurnLen1)/2.0, (newTurnOff1)/2.0, angle1 ) )
+				(newTurnLen1)/2.0, fabs(newTurnOff1)/2.0, angle1 ) )
 				return NULL;
 			radii[0] = - radii[1];
 			points[6].y = 0.0; points[6].x = (newTurnLen1)-points[4].x;
 			points[7].y = points[5].y; points[7].x = (newTurnLen1)-points[5].x;
-			points[8].y = (newTurnOff1); points[8].x = points[4].x;
-			points[9].y = (newTurnOff1)-points[5].y; points[9].x = points[5].x;
-			points[10].y = (newTurnOff1); points[10].x = points[6].x;
+			points[8].y = fabs(newTurnOff1); points[8].x = points[4].x;
+			points[9].y = fabs(newTurnOff1)-points[5].y; points[9].x = points[5].x;
+			points[10].y = fabs(newTurnOff1); points[10].x = points[6].x;
 			points[11].y = points[9].y; points[11].x = points[7].x;
 			tempEndPts(0).pos = points[0]; tempEndPts(0).angle = 270.0;
 			tempEndPts(1).pos = points[1]; tempEndPts(1).angle = 90.0;
@@ -1523,7 +2015,7 @@ static toDesignSchema_t * LoadSegs(
 	}
 #endif
 
-	if (!( dp->type== NTO_CORNU)) {
+	if (!( (dp->type== NTO_CORNU) || (dp->type == NTO_CORNUWYE) || (dp->type == NTO_CORNU3WAY))) {
 		segOrder = pp->segOrder;
 		segCnt = strlen( segOrder );
 		if (segCnt%3 != 0)
@@ -1807,15 +2299,17 @@ static void NewTurnOk( void * context )
 	for ( i=0; i<curDesign->floatCnt; i++ ) {
 		flt = *(FLOAT_T*)(turnDesignPLs[curDesign->floats[i].index].valueP);
 		switch( curDesign->floats[i].mode ) {
-		case Dim_e:
-			flt = ( flt );
-			break;
-		case Frog_e:
-			if (newTurnAngleMode == 0 && flt > 0.0)
-				flt = R2D(asin(1.0/flt));
-			break;
-		case Angle_e:
-			break;
+			case Dim_e:
+				flt = ( flt );
+				break;
+			case Frog_e:
+				if (newTurnAngleMode == 0 && flt > 0.0)
+					flt = R2D(asin(1.0/flt));
+				break;
+			case Angle_e:
+				break;
+			case Rad_e:
+				break;
 		}
 		sprintf( cp, " %0.6f", flt );
 		cp += strlen(cp);
@@ -2125,6 +2619,8 @@ EXPORT void EditCustomTurnout( turnoutInfo_t * to, turnoutInfo_t * to1 )
 			}
 			break;
 		case Angle_e:
+			break;
+		case Rad_e:
 			break;
 		}
 	}

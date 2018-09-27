@@ -25,6 +25,8 @@ GENERATE_LIN(tostrsct)
 GENERATE_LIN(towye)
 GENERATE_LIN(toxing)
 GENERATE_LIN(tocornu)
+GENERATE_LIN(tocornuwye)
+GENERATE_LIN(tocornu3way)
 
 SET(LIN_SOURCES
 	${CMAKE_CURRENT_BINARY_DIR}/to3way.lin
@@ -40,6 +42,8 @@ SET(LIN_SOURCES
 	${CMAKE_CURRENT_BINARY_DIR}/towye.lin
 	${CMAKE_CURRENT_BINARY_DIR}/toxing.lin
 	${CMAKE_CURRENT_BINARY_DIR}/tocornu.lin
+	${CMAKE_CURRENT_BINARY_DIR}/tocornuwye.lin
+	${CMAKE_CURRENT_BINARY_DIR}/tocornu3way.lin
 	)
 
 GET_TARGET_PROPERTY(genhelp_EXE genhelp LOCATION)
