@@ -2543,18 +2543,25 @@ static void SetupTurnoutDesignerW( toDesignDesc_t * newDesign )
 
 static void ShowTurnoutDesigner( void * context )
 {
+	wBool_t sameTurnout = FALSE;
 	if (recordF)
 		fprintf( recordF, TURNOUTDESIGNER " SHOW %s\n", ((toDesignDesc_t*)context)->label );
 	newTurnScaleName = curScaleName;
 	newTurnTrackGauge = trackGauge;
+	if (context && (curDesign == context))
+		sameTurnout = TRUE;
 	SetupTurnoutDesignerW( (toDesignDesc_t*)context );
-	newTurnRightDesc[0] = '\0';
-	newTurnRightPartno[0] = '\0';
-	newTurnLeftDesc[0] = '\0';
-	newTurnLeftPartno[0] = '\0';
-	newTurnLen0 =
-	newTurnOff1 = newTurnLen1 = newTurnAngle1 =
-	newTurnOff2 = newTurnLen2 = newTurnAngle2 = 0.0;
+	if (!sameTurnout) {  /* Clear Values unless same as last time */
+		newTurnRightDesc[0] = '\0';
+		newTurnRightPartno[0] = '\0';
+		newTurnLeftDesc[0] = '\0';
+		newTurnLeftPartno[0] = '\0';
+		newTurnOff0 = newTurnLen0 = newTurnAngle0 = newTurnRad0 =
+		newTurnOff1 = newTurnLen1 = newTurnAngle1 = newTurnRad1 =
+		newTurnOff2 = newTurnLen2 = newTurnAngle2 = newTurnRad2 =
+		newTurnOff3 = newTurnLen3 = newTurnAngle3 = newTurnRad3 =
+		newTurnToeL = newTurnToeR = 0.0;
+	}
 	ParamLoadControls( &turnDesignPG );
 	ParamGroupRecord( &turnDesignPG );
 	customTurnout1 = NULL;
