@@ -199,7 +199,7 @@ static void UpdateCar(
         const char * cp;
         titleChanged = FALSE;
         cp = wStringGetValue((wString_p)carDesc[NM].control0);
-        int max_str = sizeof(carData.number);
+        unsigned int max_str = sizeof(carData.number);
 		if (max_str && strlen(cp)>max_str) {
 			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
         }

@@ -226,7 +226,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd, BOOL_T 
 	switchmotorData_p xx = GetswitchmotorData(trk);
 	const char * thename, *thenormal, *thereverse, *thepointsense;
 	char *newName, *newNormal, *newReverse, *newPointSense;
-	int max_str;
+	unsigned int max_str;
 	BOOL_T changed, nChanged, norChanged, revChanged, psChanged;
 
 	LOG( log_switchmotor, 1, ("*** UpdateSwitchMotor(): needUndoStart = %d\n",needUndoStart))
