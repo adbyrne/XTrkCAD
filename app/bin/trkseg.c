@@ -543,7 +543,8 @@ EXPORT void FlipSegs(
 			for (inx=0; inx<s->u.p.cnt; inx++) {
 				s->u.p.pts[inx].y = -s->u.p.pts[inx].y;
 			}
-			MyFree(pts);
+			/* Don't Free - we only just got! ALso can't free other copy as that may be a template */
+			//MyFree(pts);
 			break;
 		case SEG_JNTTRK:
 			s->u.j.pos.y = - s->u.j.pos.y;
