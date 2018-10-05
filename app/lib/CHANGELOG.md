@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.1.2]
+
+### Added
+
+## Fixed
++ Fix problem at end of Modify for Bezier or Cornu - when the deleted old track is immediately Redrawn. The Gauge check is being run during redraw and it asserts to see if the track has been deleted
++ Make Up and Down Scroll only move 1/2 a screen height (rather than 1/2 a width)
++ Allow modify of naked Cornu along the Cornu itself as long as it isn't connected to another Cornu or Bezier. Fix a couple of odd display issues
++ Fix Abend on extend of naked cornu
++ Remove UndoModify from low-level functions - to ensure that they can't be called without a preceding UndoStart
++ Make sure Flip Cornu produces a correct relationship between ends and Bezier segments
++ Fix Traverse Cornu for case where there are multiple sub-segments within a Bezier segment - don't use whole Bezier length bypass - iterate over the relevant subsegs
++ Make Debug menu work. This menu in Options->Debug only appears if the env variable XTRKCADEXTRA is set ("Loosen" command also appears in Modify).  Formerly Debug would abend if invoked! The Debug window lists any LOGging entries (set with "-d loggingname=level" parms). For example "-d trainMove=5 -d traverseCornu=2" sets two Loglines one at level 5 and the other 2. The value of the level can be adjusted in the Debug window and then the button "OK" sets it. Given that a level value of 0 means no logging for that logging variable, this menu allows log/tracing to be adjusted on the fly after startup.
+Any log entries created before the first invocation of the window will be included, so a coder could add a LogSet("traverseBezier",0) line into the InitTrkBezier() code while testing or use a -d traverseBezier=0 and then use Debug to set level to 1 and start logging.
++ Stop connectTracks logging without being initialized and fix message if logging is initialized
++ Add default Trace level to Debug Window. This is the level of Log/Trace that all types of tracing will follow unless they have been specified explicitly in the startup parms or otherwise.
++ Uninitialized local variable caused memory violations when logging.
++ Merge with StringLimit
++ Description: correct include tag
++ Fix possible error when Cloning Structures or Turnouts especially used in Refresh - don't Free the Bezier segs storage - because it will be a copy of a pointer to storage allocated to the donor compound, not the cloned compound. This may set up a future problem with a pointer to freed storage.
++ Bad test for RescaleTrack and no test for RotateTrack.
++ Fix the Modify Polygon Undo problem. Reduce chance of bad data in points array.
++ DrawGeom part of fix the Modify Polygon Undo problem.
++ Allow Traverse to work properly on Double Track components
++ Attempt to fix issue with double track and elevation on Linux
++ Try to sort out collision/coupling on double tracks.
+For turnouts only, if the two cars are more than 2*trackgauges apart, don't couple/collide. This adds to the tests that wont couple if the cars aren't aligned by more than 45 degrees etc. Double tracks are a form of Turnout in XtrkCAD. As the tracks will be > 2 track-guages on center, this should work without needing to find out which path each car is on, etc.
++ Fix several signed / unsigned mismatch warnings
++ Improved German translations
++ Fix memory bug when flipping a Polygon.
++ Fix possible memory overrun when updating a car
+
+### Added and changed parameter files
++ Parameter files TT Kuehn Peco HO US, Newqida G, Atlas N and Fasttrack Nn3 new or update
++ New parameter file for Weinert Mein Gleis
++ Update parameter file for Z-Rokuhan
+
 ## [5.1.1]
 
 ### Added
