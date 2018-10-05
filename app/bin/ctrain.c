@@ -205,8 +205,7 @@ static void UpdateCar(
         }
         if (cp && strcmp(carData.number, cp) != 0) {
             titleChanged = TRUE;
-            carData.number[0] = '\0';
-            strncat(carData.number, cp, strlen(carData.number)-1);
+	    strcpy(carData.number, cp );
         }
 
         if (!titleChanged) {
