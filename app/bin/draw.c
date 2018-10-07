@@ -1123,7 +1123,7 @@ static void ChangeMapScale( void )
 	w = (wPos_t)fw;
 	h = (wPos_t)fh;
 	wWinSetSize( mapW, w+DlgSepLeft+DlgSepRight, h+DlgSepTop+DlgSepBottom );
-	wDrawSetSize( mapD.d, w, h );
+	wDrawSetSize( mapD.d, w, h, NULL );
 }
 
 
@@ -1305,19 +1305,21 @@ void MainProc( wWin_p win, winProcEvent e, void * data )
 	case wResize_e:
 		if (mainD.d == NULL)
 			return;
-		DrawMapBoundingBox( FALSE );
+		if (data) DrawMapBoundingBox( FALSE );
 		wWinGetSize( mainW, &width, &height );
-		LayoutToolBar();
+		LayoutToolBar(data);
 		height -= (toolbarHeight+max(infoHeight,textHeight)+10);
 		if (height >= 0) {
-			wDrawSetSize( mainD.d, width-20, height );
+			wDrawSetSize( mainD.d, width-20, height, data );
 			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
 			SetMainSize();
 			ConstraintOrig( &mainD.orig, mainD.size );
 			tempD.orig = mainD.orig;
 			SetInfoBar();
-			MainRedraw();
-			MapRedraw();
+			if (!data) {
+				MainRedraw();
+				MapRedraw();
+			} else DrawMapBoundingBox( TRUE );
 			wPrefSetInteger( "draw", "mainwidth", width );
 			wPrefSetInteger( "draw", "mainheight", height );
 		} else	DrawMapBoundingBox( TRUE );

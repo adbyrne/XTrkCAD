@@ -1324,7 +1324,7 @@ EXPORT void LayoutSetPos(
 }
 
 
-EXPORT void LayoutToolBar( void )
+EXPORT void LayoutToolBar( void * data )
 {
 	int inx;
 
@@ -1332,7 +1332,7 @@ EXPORT void LayoutToolBar( void )
 		LayoutSetPos( inx );
 	}
 	if (toolbarSet&(1<<BG_HOTBAR)) {
-		LayoutHotBar();
+		LayoutHotBar(data);
 	} else {
 		HideHotBar();
 	}
@@ -2743,7 +2743,7 @@ LOG1( log_init, ( "loadFileList\n" ) )
 	 * READ PARAMETERS
 	 */
 	if (toolbarSet&(1<<BG_HOTBAR)) {
-		LayoutHotBar();
+		LayoutHotBar( NULL );
 	} else {
 		HideHotBar();
 	}

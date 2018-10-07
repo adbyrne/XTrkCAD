@@ -2216,7 +2216,7 @@ static void ParamPositionControl(
 				ctlH = winH - (pd->group->origH-drawDataP->height);
 			else
 				ctlH = wControlGetHeight( pd->control );
-			wDrawSetSize( (wDraw_p)pd->control, ctlW, ctlH );
+			wDrawSetSize( (wDraw_p)pd->control, ctlW, ctlH, NULL );
 			if ( drawDataP->redraw )
 				drawDataP->redraw( (wDraw_p)pd->control, pd->context, ctlW, ctlH );
 			break;

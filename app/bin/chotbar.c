@@ -439,7 +439,7 @@ EXPORT void InitHotBar( void )
 	hotBarML = wMenuListCreate( hotbarPopupM, "", -1, HotbarJump );
 }
 
-EXPORT void LayoutHotBar( void )
+EXPORT void LayoutHotBar( void * redraw )
 {
 	wPos_t buttonWidth, winWidth, winHeight;
 	BOOL_T initialize = FALSE;
@@ -466,7 +466,7 @@ EXPORT void LayoutHotBar( void )
 	wControlSetPos( (wControl_p)hotBarLeftB, 0, toolbarHeight );
 	wControlSetPos( (wControl_p)hotBarRightB, winWidth-20-buttonWidth, toolbarHeight );
 	wControlSetPos( (wControl_p)hotBarD.d, buttonWidth, toolbarHeight );
-	wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hotBarHeight+2 );
+	wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hotBarHeight+2, redraw );
 	hotBarD.size.x = ((double)(winWidth-20-buttonWidth*2))/hotBarD.dpi*hotBarD.scale;
 	hotBarD.size.y = (double)hotBarDrawHeight/hotBarD.dpi*hotBarD.scale;  //Exclude Label from calc
 	wControlShow( (wControl_p)hotBarLeftB, TRUE );
@@ -474,7 +474,7 @@ EXPORT void LayoutHotBar( void )
 	wControlShow( (wControl_p)hotBarD.d, TRUE );
 	if (initialize)
 		ChangeHotBar( CHANGE_PARAMS );
-	else
+	else if (!redraw)
 		RedrawHotBar( NULL, NULL, 0, 0 );
 	toolbarHeight += hotBarHeight+3;
 }

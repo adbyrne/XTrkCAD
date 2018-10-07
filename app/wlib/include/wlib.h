@@ -513,7 +513,7 @@ long wDrawGetRGB(		wDrawColor );
 /* Geometry */
 double wDrawGetDPI(		wDraw_p );
 double wDrawGetMaxRadius(	wDraw_p );
-void wDrawSetSize(		wDraw_p, wPos_t, wPos_t );
+void wDrawSetSize(		wDraw_p, wPos_t, wPos_t, void * );
 void wDrawGetSize(		wDraw_p, wPos_t *, wPos_t * );
 
 /* Bitmaps */
