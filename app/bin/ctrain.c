@@ -249,12 +249,18 @@ static void DescribeCar(
     carData.length = size.x;
     carData.width = size.y;
     cp = CarItemDescribe(xx->item, 0, &carData.index);
-    strcpy(carData.number, CarItemNumber(xx->item));
-    strncpy(str, cp, len);
-    carData.pos = xx->trvTrk.pos;
-    carData.angle = xx->trvTrk.angle;
-    cp = CarItemDescribe(xx->item, -1, NULL);
-    strncpy(carData.desc, cp, sizeof carData.desc);
+
+	carData.number[0] = '\0';
+	strncat(carData.number, CarItemNumber(xx->item),
+		sizeof(carData.number) - 1);
+	str[0] = '\0';
+	strncat(str, cp, len - 1);
+	carData.pos = xx->trvTrk.pos;
+	carData.angle = xx->trvTrk.angle;
+	cp = CarItemDescribe(xx->item, -1, NULL);
+	carData.desc[0] = '\0';
+	strncat(carData.desc, cp, sizeof(carData.desc) - 1);
+
     carDesc[IT].mode =
         carDesc[PN].mode =
             carDesc[AN].mode =
