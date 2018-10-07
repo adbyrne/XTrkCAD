@@ -1102,7 +1102,7 @@ void wDrawClear( wDraw_p d )
 void wDrawSetSize(
 		wDraw_p d,
 		wPos_t width,
-		wPos_t height )
+		wPos_t height, void * )
 {
 	d->w = width;
 	d->h = height;

@@ -85,6 +85,8 @@ struct wWin_t {
 		wBool_t busy;
 		int resizeTimer;		       /** resizing **/
 		int resizeW,resizeH;
+		int timer_idle_count;
+		int timer_busy_count;
 		int modalLevel;
 		};
 
