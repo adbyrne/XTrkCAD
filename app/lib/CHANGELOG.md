@@ -31,6 +31,7 @@ Any log entries created before the first invocation of the window will be includ
 + Improved German translations
 + Include StringLimit code to stop overwrites
 + Fix possible memory overrun when updating a car
++ Improve performance of Window Resizing, especially to a smaller size in GTK
 
 ### Added and changed parameter files
 + Parameter files TT Kuehn Peco HO US, Newqida G, Atlas N and Fasttrack Nn3 new or update
