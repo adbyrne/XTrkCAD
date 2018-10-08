@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [5.1.2]
 
 ### Added
-+ Make Debug menu both work and do something useful 
++ Make Debug menu both work and do something useful
 This menu in Options->Debug only appears if the env variable XTRKCADEXTRA is set A "Loosen" command also appears in Modify when set.The Debug window lists any Logging entries (set with "-d loggingname=level" parms).For example, "-d trainMove=5 -d traverseCornu=2" sets two Loglines - one at level 5 and the other 2. The value of the level can be adjusted in the Debug window and then the button "OK" sets it.Given that a level value of 0 means no logging for that logging variable, this menu allows log/tracing to be adjusted on the fly after startup.
 Debug Window has a default trace level option. This is the level of Log/Trace that all types of tracing will follow unless they have been specified explicitly in the startup parms or otherwise.
 Any log entries created before the first invocation of the window will be included, so a tester could add a LogSet("traverseBezier",0) line into the InitTrkBezier() code while testing or use a -d traverseBezier=0 and then use Debug to set level to 1 and start logging.
@@ -15,10 +15,10 @@ Any log entries created before the first invocation of the window will be includ
 ## Fixed
 + Make Up and Down Scroll only move 1/2 a screen height (rather than 1/2 a width)
 + Fix Modify redraw for Bezier or Cornu
-+ Allow modify of naked Cornu along the Cornu itself if it isn't connected to another Cornu or Bezier 
++ Allow modify of naked Cornu along the Cornu itself if it isn't connected to another Cornu or Bezier
 + Fix Abend on extend of naked Cornu
 + Make sure Flip Cornu produces a correct relationship between ends and Bezier segments
-+ Fix Traverse Cornu for case where there are multiple sub-segments within a Bezier segment 
++ Fix Traverse Cornu for case where there are multiple sub-segments within a Bezier segment
 + Remove UndoModify from low-level functions - to ensure that they can't be called without a preceding UndoStart and cause error messages
 + Description: correct include tag for Linux
 + Fix possible error when Cloning Structures or Turnouts  
@@ -37,6 +37,7 @@ Any log entries created before the first invocation of the window will be includ
 + Parameter files TT Kuehn Peco HO US, Newqida G, Atlas N and Fasttrack Nn3 new or update
 + New parameter file for Weinert Mein Gleis
 + Update parameter file for Z-Rokuhan
++ HO Peco parameters with corrected turnout definitions and new Mehano parameters
 
 ## [5.1.1]
 
