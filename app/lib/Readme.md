@@ -62,6 +62,22 @@ not overwritten.
 
 A new program group named XTrackCad 5.1.2 will be created in the Start menu.
 
+## OSX ##
+
+XTrackCAD for Mac is shipped as a self-installing OSX package
+Start the install by double clicking on the 
+**[xtrkcad-osx-5.1.2.dmg][]** file icon.
+
+Drag the package and drop into the Applications folder. 
+
+You may receive a prompt telling you that the package is not signed. To install it anyway, go to the System Preferences page and select Security & Privacy. Hit the button marked "Install Anyway".
+
+If you have a previous version you will be asked if you want to replace it or install a second version. 
+
+You will need to have installed the correct level of XQuartz for your level of OSX to run XTrackCAD  on Mac - go to http://www.xquartz.org/ and download and then install the package. Remember to log out and in again (or reboot) if this your first xQuartz install.
+
+Once the XQuartz package has installed go to the XtrkCAD icon in Applications and double click on it. You may again be told the program is not signed. If so, again go to Systems Preferences->Security & Privacy and hit "Run Anyway".
+
 ## Linux ##
 
 XTrackCAD for LINUX is shipped as a RPM file and a self extracting archive.
