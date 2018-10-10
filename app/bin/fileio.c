@@ -1014,6 +1014,7 @@ EXPORT void DoSave( doSaveCallBack_p after )
 		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
+	SaveState();
 }
 
 EXPORT void DoSaveAs( doSaveCallBack_p after )
@@ -1024,6 +1025,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 			sSourceFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	SetWindowTitle();
+	SaveState();
 }
 
 EXPORT void DoLoad( void )
@@ -1031,6 +1033,7 @@ EXPORT void DoLoad( void )
 	loadFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Open Tracks"),
 		sSourceFilePattern, LoadTracks, NULL );
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+	SaveState();
 }
 
 
