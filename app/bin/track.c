@@ -1717,7 +1717,7 @@ LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f
 	d = FindDistance( pos0, pos1 );
 	a = NormalizeAngle( trk0->endPt[inx0].angle -
 						trk1->endPt[inx1].angle + 180.0 );
-	if (d > connectDistance || a > connectAngle || (log_endPt>0 && logTable(log_endPt).level>=1)) {
+	if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle) || (log_endPt>0 && logTable(log_endPt).level>=1)) {
 #ifndef WINDOWS
 		LogPrintf( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n   %d ",
 				trk0->index, inx0, trk1->index, inx1, d, a, trk0->index );
@@ -1728,7 +1728,7 @@ LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f
 		PrintEndPt( logFile, trk1, 1 );???*/
 		LogPrintf("\n");
 #endif
-		if (d > connectDistance || a > connectAngle)
+		if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle))
 			NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
 	}
 	UndoModify( trk0 );
