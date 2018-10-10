@@ -219,7 +219,7 @@ typedef enum {
 	wQuit_e,
 	wRedraw_e }
 		winProcEvent;
-typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void *, void *);
+typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void *, void * );
 
 /* Creation Options */
 #define F_AUTOSIZE	(1L<<1)
