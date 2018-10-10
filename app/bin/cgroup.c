@@ -472,7 +472,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		Rotate( &orig, zero, xx->angle );
 		orig.x = xx->orig.x - orig.x;
 		orig.y = xx->orig.y - orig.y;
-		trk1 = NewCompound( T_TURNOUT, 0, orig, xx->angle, xx->title, tempEndPts_da.cnt-epCnt1, &tempEndPts(epCnt1), pathPtr_da.cnt, &pathPtr(0), tempSegs_da.cnt, &tempSegs(0) );
+		trk1 = NewCompound( T_TURNOUT, 0, orig, xx->angle, xx->title, tempEndPts_da.cnt-epCnt1, &tempEndPts(epCnt1), NULL, pathPtr_da.cnt, &pathPtr(0), tempSegs_da.cnt, &tempSegs(0) );
 		xx1 = GetTrkExtraData(trk1);
 		xx1->ungrouped = TRUE;
 
@@ -1489,7 +1489,10 @@ groupSimpleTurnout:
 		 * Final: create new definition
 		 */
 		CheckPaths( trackSegs_da.cnt, &trackSegs(0), path );
-		to = CreateNewTurnout( curScaleName, groupTitle, trackSegs_da.cnt, &trackSegs(0), pathLen, path, tempEndPts_da.cnt, &tempEndPts(0), TRUE );
+		for (int ep =0; ep<tempEndPts_da.cnt;ep++) {
+			// Test to see if end is curved and if so set special and add radius to list
+		}
+		to = CreateNewTurnout( curScaleName, groupTitle, trackSegs_da.cnt, &trackSegs(0), pathLen, path, tempEndPts_da.cnt, &tempEndPts(0), NULL, TRUE );
 #ifdef LATER
 		if ( xx )
 			to->customInfo = xx->customInfo;
@@ -1528,7 +1531,7 @@ groupSimpleTurnout:
 					trackCount--;
 				}
 			}
-			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), pathLen, (char *)path, trackSegs_da.cnt, &trackSegs(0) );
+			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, pathLen, (char *)path, trackSegs_da.cnt, &trackSegs(0) );
 			SetTrkVisible( trk, TRUE );
 
 			SetTrkVisible( trk, TRUE );
@@ -1570,7 +1573,7 @@ groupSimpleTurnout:
 			}
 			orig.x = - orig.x;
 			orig.y = - orig.y;
-			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, 0, "", tempSegs_da.cnt, &tempSegs(0) );
+			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, NULL, 0, "", tempSegs_da.cnt, &tempSegs(0) );
 			SetTrkVisible( trk, TRUE );
 			DrawNewTrack( trk );
 			EnableCommands();

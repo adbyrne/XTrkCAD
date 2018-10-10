@@ -2348,8 +2348,17 @@ static void NewTurnOk( void * context )
 		CopyNonTracks( customTurnout1 );
 	if ( customTurnout1 )
 		customTurnout1->segCnt = 0;
+
+	DIST_T * radii_ends = NULL;
+
+	 if ((curDesign->type == NTO_CORNU) ||
+		 (curDesign->type == NTO_CORNUWYE) ||
+		 (curDesign->type == NTO_CORNU3WAY)) {
+		 radii_ends = &radii[0];
+	 }
+
 	to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE );
+						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), radii, FALSE );
 	to->customInfo = customInfoP;
 #endif
 	if (f) {
@@ -2379,7 +2388,7 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE );
+						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {
@@ -2416,7 +2425,7 @@ static void NewTurnOk( void * context )
 		if ( customTurnout2 )
 			customTurnout2->segCnt = 0;
 		to = CreateNewTurnout( newTurnScaleName, tempCustom, tempSegs_da.cnt, &tempSegs(0),
-						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), FALSE );
+						pathLen, pp->paths, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE );
 		to->customInfo = customInfoP;
 #endif
 		if (f) {

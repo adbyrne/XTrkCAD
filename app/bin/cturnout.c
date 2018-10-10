@@ -111,6 +111,7 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 		PATHPTR_T paths,
 		EPINX_T endPtCnt,
 		trkEndPt_t * endPts,
+		DIST_T * radii,
 		wBool_t updateList )
 {
 	turnoutInfo_t * to;
@@ -157,6 +158,13 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 
 	to->barScale = curBarScale>0?curBarScale:-1;
 	to->special = TOnormal;
+	if (radii) {
+		to->special = TOcurved;
+		DYNARR_APPEND(DIST_T,to->u.curved.radii,to->endCnt);
+		for (int i=0;i<to->endCnt;i++) {
+			DYNARR_N(DIST_T,to->u.curved.radii,i) = radii[i];
+		}
+	}
 	if (updateList && changes)
 		DoChangeNotification( changes );
 	return to;
@@ -256,7 +264,7 @@ static BOOL_T ReadTurnoutParam(
 	if (ReadSegs()) {
 		CheckPaths( tempSegs_da.cnt, &tempSegs(0), pathPtr );
 		to = CreateNewTurnout( scale, title, tempSegs_da.cnt, &tempSegs(0),
-						pathCnt, pathPtr, tempEndPts_da.cnt, &tempEndPts(0), FALSE );
+						pathCnt, pathPtr, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE );
 		if (to == NULL)
 			return FALSE;
 		if (tempSpecial[0] != '\0') {
@@ -264,7 +272,15 @@ static BOOL_T ReadTurnoutParam(
 				to->special = TOadjustable;
 				GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
 						&to->u.adjustable.minD, &to->u.adjustable.maxD );
-				
+			} else if (strncmp( tempSpecial, CURVED, strlen(CURVED) ) == 0) {
+				to->special = TOcurved;
+				char * cp = tempSpecial +strlen(CURVED);
+				DYNARR_APPEND(DIST_T,to->u.curved.radii,tempEndPts_da.cnt);
+				for (int i=0; i<tempEndPts_da.cnt;i++) {
+					if (cp && (cp != '\0'))
+						GetArgs(cp, "f", &DYNARR_N(DIST_T,to->u.curved.radii,i));
+						cp = strchr(cp,' ');
+				}
 			} else {
 				InputError(_("Unknown special case"), TRUE);
 			}
@@ -542,7 +558,7 @@ track_p NewHandLaidTurnout(
 	segs[1].color = wDrawColorBlack;
 	segs[1].u.l.pos[0] = zero;
 	segs[1].u.l.pos[1] = p2;
-	trk = NewCompound( T_TURNOUT, 0, p0, a0, message, 3, &tempEndPts(0), 22, "Normal\0\1\0\0Reverse\0\2\0\0\0", 2, segs );
+	trk = NewCompound( T_TURNOUT, 0, p0, a0, message, 3, &tempEndPts(0), NULL, 22, "Normal\0\1\0\0Reverse\0\2\0\0\0", 2, segs );
 	xx = GetTrkExtraData(trk);
 	xx->handlaid = TRUE;
 
@@ -1382,6 +1398,8 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 
 static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
+	struct extraData *xx;
+	xx = GetTrkExtraData(trk);
 	params->type = curveTypeStraight;
 	if ((inx == PARAMS_CORNU)  || (inx == PARAMS_EXTEND)) {
 		params->type = curveTypeStraight;
@@ -1394,6 +1412,16 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		} else {
 			params->angle = params-> track_angle = 0;
 			return FALSE;
+		}
+		/* Use end radii if we have them */
+		if (xx->special == TOcurved) {
+			params->type = curveTypeCurve;
+			params->arcR = fabs(DYNARR_N(DIST_T,xx->u.curved.radii,params->ep));
+			if (params->arcR != 0.0)
+				Translate(&params->arcP,pos,params->track_angle-90.0,params->arcR);
+			else
+				params->type = curveTypeStraight;
+			return TRUE;
 		}
 		/* Find the path we are closest to */
 		PATHPTR_T path, pathCurr = 0;
@@ -1650,7 +1678,12 @@ static BOOL_T MakeParallelTurnout(
 
 		yy = GetTrkExtraData(trk);
 
-		*newTrk = NewCompound( T_TURNOUT, 0, endPt[ 0 ].pos, endPt[ 0 ].angle + 90.0, yy->title, 2, endPt, yy->pathLen, (char *)yy->paths, yy->segCnt, yy->segs );
+		DIST_T * radii = NULL;
+		if (yy->special == TOcurved) {
+			radii = &DYNARR_N(DIST_T,xx->u.curved.radii,0);
+		}
+
+		*newTrk = NewCompound( T_TURNOUT, 0, endPt[ 0 ].pos, endPt[ 0 ].angle + 90.0, yy->title, 2, endPt, radii, yy->pathLen, (char *)yy->paths, yy->segCnt, yy->segs );
 		xx = GetTrkExtraData(*newTrk);
 		xx->customInfo = yy->customInfo;
 
@@ -1659,6 +1692,7 @@ static BOOL_T MakeParallelTurnout(
 			SetTrkScale( newTrk, curScaleInx );
 		} */
 		xx->special = yy->special;
+
 		xx->u = yy->u;
 
 		SetDescriptionOrig( *newTrk );
@@ -2180,7 +2214,8 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 
 	/*
 	 * copy data */
-	newTrk = NewCompound( T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), curTurnout->pathLen, (char *)curTurnout->paths, curTurnout->segCnt, curTurnout->segs );
+
+	newTrk = NewCompound( T_TURNOUT, 0, Dto.pos, Dto.angle, curTurnout->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, curTurnout->pathLen, (char *)curTurnout->paths, curTurnout->segCnt, curTurnout->segs );
 	xx = GetTrkExtraData(newTrk);
 	xx->customInfo = curTurnout->customInfo;
 	if (connection((int)curTurnoutEp).trk) {
@@ -2188,6 +2223,14 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 		SetTrkScale( newTrk, GetLayoutCurScale());
 	}
 	xx->special = curTurnout->special;
+	if (xx->special == TOcurved) {
+		DYNARR_RESET(DIST_T,xx->u.curved.radii);
+		xx->u.curved.radii.max =0;
+		DYNARR_APPEND(DIST_T,xx->u.curved.radii,curTurnout->endCnt);
+		for (int i=0;i<curTurnout->endCnt;i++) {
+			DYNARR_N(DIST_T,xx->u.curved.radii,i) = DYNARR_N(DIST_T,curTurnout->u.curved.radii,i);
+		}
+	}
 	xx->u = curTurnout->u;
 
 	/* Make the connections */
