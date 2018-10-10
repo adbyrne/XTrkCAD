@@ -546,7 +546,7 @@ static void DoLayerOp(void * data)
     UpdateLayerDlg();
 
     if (layoutLayerChanged) {
-        MainProc(mainW, wResize_e, NULL);
+        MainProc(mainW, wResize_e, NULL, NULL);
         layoutLayerChanged = FALSE;
         changed = TRUE;
         SetWindowTitle();
@@ -774,7 +774,7 @@ DefaultLayerProperties(void)
     UpdateLayerDlg();
 
     if (layoutLayerChanged) {
-        MainProc(mainW, wResize_e, NULL);
+        MainProc(mainW, wResize_e, NULL, NULL);
         layoutLayerChanged = FALSE;
     }
 }
@@ -993,7 +993,7 @@ static void LayerOk(void * junk)
     }
 
     if (layoutLayerChanged) {
-        MainProc(mainW, wResize_e, NULL);
+        MainProc(mainW, wResize_e, NULL, NULL);
     }
 
     wHide(layerW);

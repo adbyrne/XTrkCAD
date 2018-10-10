@@ -176,7 +176,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 {
     controlData_p xx = GetcontrolData(trk);
     const char *thename, *theonscript, *theoffscript;
-    int max_str;
+    unsigned int max_str;
     char *newName, *newOnScript, *newOffScript;
     BOOL_T changed, nChanged, pChanged, onChanged, offChanged;
     

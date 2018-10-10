@@ -199,14 +199,14 @@ static void UpdateCar(
         const char * cp;
         titleChanged = FALSE;
         cp = wStringGetValue((wString_p)carDesc[NM].control0);
-        int max_str = sizeof(carData.number);
+        unsigned int max_str = sizeof(carData.number);
 		if (max_str && strlen(cp)>max_str) {
 			NoticeMessage2(0, MSG_ENTERED_STRING_TRUNCATED, _("Ok"), NULL, max_str-1);
         }
         if (cp && strcmp(carData.number, cp) != 0) {
             titleChanged = TRUE;
-            carData.number[0] = '\0';
-            strncat(carData.number, cp, strlen(carData.number)-1);
+			carData.number[0] = '\0';
+			strncat(carData.number, cp, max_str - 1);
         }
 
         if (!titleChanged) {
@@ -249,12 +249,18 @@ static void DescribeCar(
     carData.length = size.x;
     carData.width = size.y;
     cp = CarItemDescribe(xx->item, 0, &carData.index);
-    strcpy(carData.number, CarItemNumber(xx->item));
-    strncpy(str, cp, len);
-    carData.pos = xx->trvTrk.pos;
-    carData.angle = xx->trvTrk.angle;
-    cp = CarItemDescribe(xx->item, -1, NULL);
-    strncpy(carData.desc, cp, sizeof carData.desc);
+
+	carData.number[0] = '\0';
+	strncat(carData.number, CarItemNumber(xx->item),
+		sizeof(carData.number) - 1);
+	str[0] = '\0';
+	strncat(str, cp, len - 1);
+	carData.pos = xx->trvTrk.pos;
+	carData.angle = xx->trvTrk.angle;
+	cp = CarItemDescribe(xx->item, -1, NULL);
+	carData.desc[0] = '\0';
+	strncat(carData.desc, cp, sizeof(carData.desc) - 1);
+
     carDesc[IT].mode =
         carDesc[PN].mode =
             carDesc[AN].mode =
@@ -1686,7 +1692,11 @@ static void CrashTrain(
     PlaceCar(car);
 }
 
-
+/*
+ * Check if this should couple or optionally if it should crash
+ * It will call couple or crash if needed.
+ * Returns TRUE if we should continue.
+ */
 static BOOL_T CheckCoupling(
     track_p car0,
     int dir00,
@@ -1738,17 +1748,19 @@ static BOOL_T CheckCoupling(
         return TRUE;
     }
 
-    /* are we close to aligned? */
+    /* are we close to aligned? Uses 45 degrees offset today */
+    /* It assumes that if the cars are aligned they could/should be coupled */
     if (angle > COUPLERCONNECTIONANGLE && angle < 360.0-COUPLERCONNECTIONANGLE) {
         return TRUE;
     }
 
-    /* find pos of found car's coupler, and dist btw couplers */
+    /* find pos of found end car's coupler, and dist btw couplers */
     distc = CarItemCoupledLength(xx1->item);
+    /* pos1 is the end of the xx1 car (end car) */
     Translate(&pos1, xx1->trvTrk.pos, xx1->trvTrk.angle+(dir1?180.0:0.0),
               distc/2.0);
     dist = FindDistance(trvTrk0.pos, pos1);
-
+    /* How far away are the two ends?*/
     if (dist < trackGauge/10) {
         return TRUE;
     }
@@ -1773,11 +1785,22 @@ static BOOL_T CheckCoupling(
         FlipTraverseTrack(&trvTrk1);
     }
 
+    /* Move second train back along track half a car length */
     TraverseTrack2(&trvTrk1, distc/2.0-dist);
 
+    /* If tracks are not the same - dont couple */
     if (trvTrk1.trk != trvTrk0.trk) {
         return TRUE;
     }
+
+    /* If this is further apart than 2 track gauges on a turnout, dont couple */
+	if (GetTrkType(trvTrk0.trk) == T_TURNOUT) {
+		if (dist > GetTrkGauge(trvTrk0.trk)*2) {
+			return TRUE;
+		}
+	}
+
+	/* Concluded we are hitting each other */
 
     if (doCheckCrash) {
         track_p loco1;

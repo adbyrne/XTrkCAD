@@ -238,7 +238,7 @@ void Reset( void );
 void ResetIfNotSticky( void );
 wBool_t DoCurCommand( wAction_t, coOrd );
 void ConfirmReset( BOOL_T );
-void LayoutToolBar( void );
+void LayoutToolBar( void * );
 #define IC_STICKY		(1<<0)
 #define IC_CANCEL		(1<<1)
 #define IC_MENU			(1<<2)

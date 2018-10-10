@@ -2253,7 +2253,7 @@ static void ParamPositionControl(
 				ctlH = winH - (pd->group->origH-drawDataP->height);
 			else
 				ctlH = wControlGetHeight( pd->control );
-			wDrawSetSize( (wDraw_p)pd->control, ctlW, ctlH );
+			wDrawSetSize( (wDraw_p)pd->control, ctlW, ctlH, NULL );
 			if ( drawDataP->redraw )
 				drawDataP->redraw( (wDraw_p)pd->control, pd->context, ctlW, ctlH );
 			break;
@@ -2528,6 +2528,7 @@ SkipControl:
 static void ParamDlgProc(
 		wWin_p win,
 		winProcEvent e,
+		void * refresh,
 		void * data )
 {
 	paramGroup_p pg = (paramGroup_p)data;
@@ -2540,11 +2541,10 @@ static void ParamDlgProc(
 		break;
 	case wResize_e:
 		if (((pg->winOption & F_RESIZE) != 0) && pg->changeProc)
-			pg->changeProc(pg, wResize_e, data);
+			pg->changeProc(pg, wResize_e, refresh);
 		else
 			LayoutControls( pg, ParamPositionControl, NULL, NULL );
 		break;
-	default:
 		break;
 	}
 }

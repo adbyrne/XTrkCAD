@@ -1,4 +1,4 @@
-# XTrackCAD 4.3.0 #
+# XTrackCAD 5.1.2 #
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
@@ -6,7 +6,7 @@ This file contains installation instructions and up-to-date information regardin
 
 * About XTrackCad
 * License Information
-* Installation 
+* Installation
 * Upgrading from earlier releases
 * Bugs fixed
 * Building
@@ -23,65 +23,81 @@ Some highlights:
 * Supplied with parameter libraries for many popular brands of turnouts, plus the capability to define your own.
 * Automatic easement (spiral transition) curve calculation.
 * Extensive help files and video-clip demonstration mode.
-  
+
 Availability:
-XTrkCad Fork is a project for further development of the original XTrkCad 
+XTrkCad Fork is a project for further development of the original XTrkCad
 software. See the project homepage at <http://www.xtrackcad.org/> for news and current releases.
 
 ## License Information ##
 
 **Copying:**
 
-XTrackCad is copyrighted by Dave Bullis and Martin Fischer and licensed as 
-free software under the terms of the GNU General Public License v2 which 
+XTrackCad is copyrighted by Dave Bullis and Martin Fischer and licensed as
+free software under the terms of the GNU General Public License v2 which
 you can find in the file COPYING.
 
 
 # Installation #
 ## Windows ##
 
-XTrackCad has only been tested on Windows 7 and Windows 10. 
+XTrackCad has only been tested on Windows 10.
 
 The MS-Windows version of XTrackCad is shipped as a self-extracting/
 self-installing program using the NSIS Installer from Nullsoft Inc.
 
 Using Windows Explorer, locate the directory in which you downloaded or copied your new version of XTrackCAD.
 
-Start the installation program by double clicking on the 
-**[xtrkcad-setup-4.4.0beta1.exe][]** file icon.
+Start the installation program by double clicking on the
+**[xtrkcad-setup-5.1.2.exe][]** file icon.
 
 Follow the steps in the installation program.
 
-The installation lets you define the directory into which XTrackCAD is 
+The installation lets you define the directory into which XTrackCAD is
 installed. The directory is created automatically if it doesn't already exist.
 
-A program folder named XTrackCAD 4.4.0beta1 will be created during the installation 
-process. This folder contains the program, documentation, parameter and 
-example files. An existing installation of earlier versions of XTrackCad is 
-not overwritten. 
+A program folder named XTrackCAD 4.4.0beta1 will be created during the installation
+process. This folder contains the program, documentation, parameter and
+example files. An existing installation of earlier versions of XTrackCad is
+not overwritten.
 
-A new program group named XTrackCad 4.4.0beta1 will be created in the Start menu. 
+A new program group named XTrackCad 5.1.2 will be created in the Start menu.
+
+## OSX ##
+
+XTrackCAD for Mac is shipped as a self-installing OSX package
+Start the install by double clicking on the 
+**[xtrkcad-osx-5.1.2.dmg][]** file icon.
+
+Drag the package and drop into the Applications folder. 
+
+You may receive a prompt telling you that the package is not signed. To install it anyway, go to the System Preferences page and select Security & Privacy. Hit the button marked "Install Anyway".
+
+If you have a previous version you will be asked if you want to replace it or install a second version. 
+
+You will need to have installed the correct level of XQuartz for your level of OSX to run XTrackCAD  on Mac - go to http://www.xquartz.org/ and download and then install the package. Remember to log out and in again (or reboot) if this your first xQuartz install.
+
+Once the XQuartz package has installed go to the XtrkCAD icon in Applications and double click on it. You may again be told the program is not signed. If so, again go to Systems Preferences->Security & Privacy and hit "Run Anyway".
 
 ## Linux ##
 
 XTrackCAD for LINUX is shipped as a RPM file and a self extracting archive.
-You will need libc6, X11R6, GTK+2.0, webkitgtk.
+You will need libc6, X11R6, GTK+2.0.
 
-### Installing from the RPM package. ### 
+### Installing from the RPM package. ###
 
 Use your operating system's package manager to install XTrackCAD.
 
 ### Installing from the self-extracting archive. ###
 
-After downloading open a command line then 
+After downloading open a command line then
 
-    ./xtrkcad-setup-4.4.0beta1.x86_64.sh --prefix=/usr/local --exclude-subdir
+    ./xtrkcad-setup-5.1.2.x86_64.sh --prefix=/usr/local --exclude-subdir
 
-This will install the executable in /usr/local/bin. A directory named 
+This will install the executable in /usr/local/bin. A directory named
 xtrkcad will be created in /usr/local/share and all files will be unpacked
 into it.
 
-If you install XTrackCAD into another directory, set the XTRKCADLIB 
+If you install XTrackCAD into another directory, set the XTRKCADLIB
 environment variable to point to that directory.
 
 # Release Info #
@@ -90,9 +106,9 @@ environment variable to point to that directory.
 
 **Note:** This version of XTrackCAD comes with the new cornu feature. In order to support
 this feature, the file format for layout files (.xtc) had to be extended.
-Files from earlier versions of XTrackCAD can be read without problems. 
-Layouts that were saved from this version of the program cannot be read by older 
-versions of XTrackCAD. 
+Files from earlier versions of XTrackCAD can be read without problems.
+Layouts that were saved from this version of the program cannot be read by older
+versions of XTrackCAD.
 
 # Building #
 ## Overview ##
@@ -129,12 +145,9 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
   http://www.xtrkcad.org/Wikka/Internationalization for additional information.
 * Use XTRKCAD_USE_GTK to control the user-interface back-end. Choose "OFF"
   for Windows, "ON" for all other platforms.
-* Use XTRKCAD_USE_GTK_CAIRO to enable optional high-quality antialiased
-  Cairo rendering for the GTK back-end. This option has no effect unless you are
-  using the GTK back-end.
 * Use XTRKCAD_USE_DOXYGEN to enable the production of type, function, etc.,
   documentation from the the source code. Requires doxygen if enabled.
-  Enable if and only if you intend to hack on the code. 
+  Enable if and only if you intend to hack on the code.
 * If you made any changes, press the "c" key again to update your new
   configuration.
 * Once everything is configured to your satisfaction, press the "g" key to
@@ -154,8 +167,8 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
 * If XTRKCAD_USE_DOXYGEN was enabled:
 
     $ make docs-doxygen
-  
-  to create the internals documentation. Read this documentation by pointing 
+
+  to create the internals documentation. Read this documentation by pointing
   your web browser at ~/build/xtrkcad/docs/doxygen/html/index.html.
 
 ### Building XTrackCAD on Mac OSX ###
@@ -163,8 +176,7 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
 * You will need to install the following dependencies - I recommend using
   <http://www.macports.org> to obtain them:
   - GTK2
-  - webkit
-  - gnome-icon-theme 
+  - gnome-icon-theme
 * Once the prerequisites are installed the build instructions are the same
   as for the GNU/Linux build, above.
 * Remember that to run XTrackCAD on OSX, you need to have X11 running with
@@ -181,8 +193,8 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
   provide a build directory outside the source tree - I use "c:/build/xtrkcad".
 * Press the "Configure" button to configure the build. You will be prompted
   for the type of build to generate. Choose your desired tool - I used "Visual
-  Studio 10". After a few moments you will see three options to
-  configure: CMAKE_INSTALL_PREFIX, XTRKCAD_USE_GTK, and XTRKCAD_USE_GTK_CAIRO.
+  Studio 15". After a few moments you will see two options to
+  configure: CMAKE_INSTALL_PREFIX and XTRKCAD_USE_GTK.
 * Use CMAKE_INSTALL_PREFIX to control where the software will be installed.
   The default "c:/Program Files/XTrkCAD" is a good choice.
 * Use XTRKCAD_USE_GETTEXT to add new locales (language translations). Choose
@@ -190,12 +202,9 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
   <http://www.xtrkcad.org/Wikka/Internationalization> for additional information.
 * Use XTRKCAD_USE_GTK to control the user-interface back-end. Choose "OFF"
   for Windows.
-* Use XTRKCAD_USE_GTK_CAIRO to enable optional high-quality antialiased
-  Cairo rendering for the GTK back-end. This option has no effect unless on
-  Windows.
 * Use XTRKCAD_USE_DOXYGEN to enable the production of type, function, etc.,
   documentation from the the source code. Requires doxygen if enabled.
-  Enable if and only if you intend to hack on the code. 
+  Enable if and only if you intend to hack on the code.
 * If you made any changes, press the "Configure" button again to update your
   new configuration.
 * Once everything is configured to your satisfaction, press the "OK" button
@@ -209,7 +218,7 @@ GNU/Linux, and Mac OSX using the build tool(s) of your choice.
 
 ## Where to go for support ##
 
-The following web addresses will be helpful for any questions or bug 
+The following web addresses will be helpful for any questions or bug
 reports
 
 - The Yahoo!Group mailing list <http://groups.yahoo.com/projects/XTrkCad>

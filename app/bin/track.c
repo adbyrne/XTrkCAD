@@ -106,7 +106,7 @@ static int suspendElevUpdates = FALSE;
 
 static track_p * importTrack;
 
-EXPORT BOOL_T onTrackInSplit;
+EXPORT BOOL_T onTrackInSplit = FALSE;
 
 static BOOL_T inDrawTracks;
 
@@ -650,8 +650,10 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 	coOrd pos;
 	if (trk->endCnt <= 0)
 		return -1;
-	if ( onTrackInSplit && trk->endCnt > 2 )
-		return TurnoutPickEndPt( p, trk );
+	if ( onTrackInSplit && trk->endCnt > 2 ) {
+		if (GetTrkType(trk) != T_TURNOUT)
+			return TurnoutPickEndPt( p, trk );
+	}
 	d = FindDistance( p, trk->endPt[0].pos );
 	inx = 0;
 	for ( i=1; i<trk->endCnt; i++ ) {

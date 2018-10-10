@@ -219,7 +219,7 @@ typedef enum {
 	wQuit_e,
 	wRedraw_e }
 		winProcEvent;
-typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void * );
+typedef void (*wWinCallBack_p)( wWin_p, winProcEvent, void *, void *);
 
 /* Creation Options */
 #define F_AUTOSIZE	(1L<<1)
@@ -525,7 +525,7 @@ long wDrawGetRGB(		wDrawColor );
 /* Geometry */
 double wDrawGetDPI(		wDraw_p );
 double wDrawGetMaxRadius(	wDraw_p );
-void wDrawSetSize(		wDraw_p, wPos_t, wPos_t );
+void wDrawSetSize(		wDraw_p, wPos_t, wPos_t, void * );
 void wDrawGetSize(		wDraw_p, wPos_t *, wPos_t * );
 
 /* Bitmaps */

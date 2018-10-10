@@ -668,7 +668,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
  void wDrawSetSize(
 		wDraw_p bd,
 		wPos_t w,
-		wPos_t h )
+		wPos_t h , void * redraw)
 {
 	wBool_t repaint;
 	if (bd == NULL) {
@@ -691,7 +691,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		bd->pixmap = gdk_pixmap_new( bd->widget->window, w, h, -1 );
 
 		wDrawClear( bd );
-		bd->redraw( bd, bd->context, w, h );
+		if (!redraw)
+			bd->redraw( bd, bd->context, w, h );
 	}
 	/*wRedraw( bd )*/;
 }

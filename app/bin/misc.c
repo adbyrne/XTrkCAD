@@ -1328,14 +1328,15 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 	}
 }
 
-EXPORT void LayoutToolBar(void) {
+EXPORT void LayoutToolBar( void * data )
+{
 	int inx;
 
 	for (inx = 0; inx < buttonCnt; inx++) {
 		LayoutSetPos(inx);
 	}
-	if (toolbarSet & (1 << BG_HOTBAR)) {
-		LayoutHotBar();
+	if (toolbarSet&(1<<BG_HOTBAR)) {
+		LayoutHotBar(data);
 	} else {
 		HideHotBar();
 	}
@@ -1344,7 +1345,7 @@ EXPORT void LayoutToolBar(void) {
 static void ToolbarChange(long changes) {
 	if ((changes & CHANGE_TOOLBAR)) {
 		/*if ( !(changes&CHANGE_MAIN) )*/
-		MainProc(mainW, wResize_e, NULL);
+		MainProc(mainW, wResize_e, NULL, NULL);
 		/*else
 		 LayoutToolBar();*/
 	}
@@ -1712,7 +1713,7 @@ static void ToolbarAction(wBool_t set, void * data) {
 	else
 		toolbarSet &= ~mask;
 	wPrefSetInteger("misc", "toolbarset", toolbarSet);
-	MainProc(mainW, wResize_e, NULL);
+	MainProc(mainW, wResize_e, NULL, NULL);
 	if (recordF)
 		fprintf(recordF, "PARAMETER %s %s %ld", "misc", "toolbarset",
 				toolbarSet);
@@ -2759,8 +2760,8 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	/*
 	 * READ PARAMETERS
 	 */
-	if (toolbarSet & (1 << BG_HOTBAR)) {
-		LayoutHotBar();
+	if (toolbarSet&(1<<BG_HOTBAR)) {
+		LayoutHotBar( NULL );
 	} else {
 		HideHotBar();
 	}
