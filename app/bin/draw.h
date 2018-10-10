@@ -183,7 +183,7 @@ void DrawMarkers( void );
 void DrawMapBoundingBox( BOOL_T );
 void DrawTicks( drawCmd_p, coOrd );
 void DrawRuler( drawCmd_p, coOrd, coOrd, DIST_T, int, int, wDrawColor );
-void MainProc( wWin_p, winProcEvent, void * );
+void MainProc( wWin_p, winProcEvent, void *, void * );
 void InitInfoBar( void );
 void DrawInit( int );
 void DoZoomUp( void * );

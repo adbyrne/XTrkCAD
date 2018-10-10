@@ -1783,7 +1783,7 @@ void wExit(int rc)
                 savePos(w);
 
                 if (w->winProc != NULL) {
-                    w->winProc(w, wQuit_e, w->data);
+                    w->winProc(w, wQuit_e, NULL, w->data);
                 }
             }
         }
@@ -2732,8 +2732,8 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             w->h = newH;
 
             if (w->winProc) {
-                w->winProc(w, wResize_e, w->data);
-				w->winProc(w, wState_e, w->data);
+                w->winProc(w, wResize_e, NULL, w->data);
+				w->winProc(w, wState_e, NULL, w->data);
 			}
 
             break;
@@ -2980,7 +2980,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         if (w->winProc) {
-            w->winProc(w, wClose_e, w->data);
+            w->winProc(w, wClose_e, NULL, w->data);
         }
 
         wWinShow(w, FALSE);
@@ -3003,7 +3003,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             /* It's the big one! */
             /* call main window procedure for processing of shutdown */
             if (w->winProc) {
-                (w->winProc(w, wClose_e, NULL));
+                (w->winProc(w, wClose_e, NULL, NULL));
             }
 
             return 0L;

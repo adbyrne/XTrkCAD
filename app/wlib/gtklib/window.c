@@ -591,7 +591,7 @@ static gint window_delete_event(
         }
 
     if (win->winProc) {
-        win->winProc(win, wClose_e, win->data);
+        win->winProc(win, wClose_e, NULL, win->data);
 
         if (win != gtkMainW) {
             wWinShow(win, FALSE);
@@ -617,7 +617,7 @@ static int resizeTime(wWin_p win) {
 
 	if (win->resizeW == win->w && win->resizeH == win->h) {  // If hasn't changed since last
 		if (win->timer_idle_count>3) {
-			win->winProc(win, wResize_e, NULL);  //Trigger Redraw on last occasion if one-third of a second has elapsed
+			win->winProc(win, wResize_e, NULL, win->data);  //Trigger Redraw on last occasion if one-third of a second has elapsed
 			win->timer_idle_count = 0;
 			win->resizeTimer = 0;
 			win->timer_busy_count = 0;
@@ -626,10 +626,10 @@ static int resizeTime(wWin_p win) {
 	}
 	if (win->busy==FALSE && win->winProc) {   //Always drive once
 		if (win->timer_busy_count>10) {
-			 win->winProc(win, wResize_e, NULL); //Redraw if ten times we saw a change (1 sec)
+			 win->winProc(win, wResize_e, NULL, win->data); //Redraw if ten times we saw a change (1 sec)
 			 win->timer_busy_count = 0;
 		} else {
-			win->winProc(win, wResize_e, (void*) 1); //No Redraw
+			win->winProc(win, wResize_e, (void*) 1, win->data); //No Redraw
 			win->timer_busy_count++;
 		}
 	    win->resizeW = win->w;					//Remember this one
@@ -717,7 +717,7 @@ gboolean window_state_event(
     }
 
     if (win->busy==FALSE && win->winProc) {
-        win->winProc(win, wState_e, win->data);
+        win->winProc(win, wState_e, NULL, win->data);
     }
 
     return TRUE;
@@ -1092,7 +1092,7 @@ void wExit(
     wPrefFlush();
 
     if (gtkMainW && gtkMainW->winProc != NULL) {
-        gtkMainW->winProc(gtkMainW, wQuit_e, gtkMainW->data);
+        gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->data);
     }
 
     exit(rc);

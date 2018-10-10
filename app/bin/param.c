@@ -2491,6 +2491,7 @@ SkipControl:
 static void ParamDlgProc(
 		wWin_p win,
 		winProcEvent e,
+		void * refresh,
 		void * data )
 {
 	paramGroup_p pg = (paramGroup_p)data;

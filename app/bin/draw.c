@@ -1298,25 +1298,25 @@ lprintf("mainRedraw\n");
  * \param data additional data (unused)
  */
 
-void MainProc( wWin_p win, winProcEvent e, void * data )
+void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 {
 	wPos_t width, height;
 	switch( e ) {
 	case wResize_e:
 		if (mainD.d == NULL)
 			return;
-		if (data) DrawMapBoundingBox( FALSE );
+		if (refresh) DrawMapBoundingBox( FALSE );
 		wWinGetSize( mainW, &width, &height );
-		LayoutToolBar(data);
+		LayoutToolBar(refresh);
 		height -= (toolbarHeight+max(infoHeight,textHeight)+10);
 		if (height >= 0) {
-			wDrawSetSize( mainD.d, width-20, height, data );
+			wDrawSetSize( mainD.d, width-20, height, refresh );
 			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
 			SetMainSize();
 			ConstraintOrig( &mainD.orig, mainD.size );
 			tempD.orig = mainD.orig;
 			SetInfoBar();
-			if (!data) {
+			if (!refresh) {
 				MainRedraw();
 				MapRedraw();
 			} else DrawMapBoundingBox( TRUE );
