@@ -1,5 +1,4 @@
 ADD_EXECUTABLE(cnvdsgn cnvdsgn.c utility.c)
-GET_TARGET_PROPERTY(cnvdsgn_EXE cnvdsgn LOCATION)
 IF(NOT WIN32)
 	TARGET_LINK_LIBRARIES(cnvdsgn m)
 ENDIF(NOT WIN32)
@@ -8,7 +7,7 @@ MACRO(GENERATE_LIN lin_name)
 	ADD_CUSTOM_COMMAND(
 		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
 		DEPENDS cnvdsgn ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src
-		COMMAND ${cnvdsgn_EXE} < ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src > ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
+		COMMAND cnvdsgn < ${CMAKE_CURRENT_SOURCE_DIR}/${lin_name}.src > ${CMAKE_CURRENT_BINARY_DIR}/${lin_name}.lin
 		)
 ENDMACRO(GENERATE_LIN)
 
@@ -40,12 +39,10 @@ SET(LIN_SOURCES
 	${CMAKE_CURRENT_BINARY_DIR}/toxing.lin
 	)
 
-GET_TARGET_PROPERTY(genhelp_EXE genhelp LOCATION)
-
 ADD_CUSTOM_COMMAND(
        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
        DEPENDS genhelp ${help_SOURCE_DIR}/genhelp.in
-       COMMAND ${genhelp_EXE} ${GENHELP_OPTS} ${help_SOURCE_DIR}/genhelp.in ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
+       COMMAND genhelp ${GENHELP_OPTS} ${help_SOURCE_DIR}/genhelp.in ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
        )
 
 SET(SOURCES

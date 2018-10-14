@@ -115,11 +115,10 @@ FILE(GLOB_RECURSE XTC_CUSTOM_MSG_FILES
 
 # Custom string extractor utility
 ADD_EXECUTABLE(stripmsg stripmsg.c)
-GET_TARGET_PROPERTY(stripmsg_EXE stripmsg LOCATION)
 
 # Extract translatable strings from custom message files to one temporary file
 ADD_CUSTOM_COMMAND(
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
-	COMMAND ${stripmsg_EXE} ${XTC_CUSTOM_MSG_FILES} > ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
+	COMMAND stripmsg ${XTC_CUSTOM_MSG_FILES} > ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
 	DEPENDS stripmsg
 	)

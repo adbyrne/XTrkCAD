@@ -3,7 +3,7 @@
 #
 # CMakeList for the params directory
 #
-# Several xtp files are created from text definitions, all xtp files and the 
+# Several xtp files are created from text definitions, all xtp files and the
 # created xtp files are installed.
 #
 
@@ -14,10 +14,9 @@ SET( outFiles )
 #  create param files from car definitions
 
 ADD_EXECUTABLE( mkcarpart mkcarpart.c )
-GET_TARGET_PROPERTY(mkcarpart_EXE mkcarpart LOCATION)
 
 FILE(GLOB inFiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/*.cars")
-	 
+
 FOREACH(infileName ${inFiles})
     # Generate output file name
     STRING(REGEX REPLACE ".cars\$" ".xtp" outfileName "${infileName}")
@@ -26,7 +25,7 @@ FOREACH(infileName ${inFiles})
     SET(infile "${CMAKE_CURRENT_SOURCE_DIR}/${infileName}")
     # Custom command to do the processing
     ADD_CUSTOM_COMMAND(OUTPUT "${outfile}"
-        COMMAND ${mkcarpart_EXE} "${infile}" "${outfile}"
+        COMMAND mkcarpart "${infile}" "${outfile}"
         DEPENDS "${infile}" mkcarpart
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}")
     # Finally remember the output file for dependencies
@@ -36,7 +35,6 @@ ENDFOREACH(infileName)
 # create param files from  structure definitions
 
 ADD_EXECUTABLE( mkstruct mkstruct.c )
-GET_TARGET_PROPERTY(mkstruct_EXE mkstruct LOCATION)
 
 FILE(GLOB inFiles RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/*.struct")
 
@@ -49,7 +47,7 @@ FOREACH(infileName ${inFiles})
     SET(infile "${CMAKE_CURRENT_SOURCE_DIR}/${infileName}")
     # Custom command to do the processing
     ADD_CUSTOM_COMMAND(OUTPUT "${outfile}"
-        COMMAND ${mkstruct_EXE} "${infile}" "${outfile}"
+        COMMAND mkstruct "${infile}" "${outfile}"
         DEPENDS "${infile}" mkstruct
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" )
     # Finally remember the output file for dependencies
@@ -63,4 +61,3 @@ INSTALL(
 	FILES ${XTP_FILES} t-trak-notes.txt ${outFiles}
 	DESTINATION ${XTRKCAD_SHARE_INSTALL_DIR}/params
 	)
-

@@ -25,8 +25,7 @@ endif(UNIX)
 
 IF(WIN32)
 	# Set FreeImage path:
-	SET(FREEIMAGE_ROOT_DIR "" CACHE PATH "Location of FreeImage files (.h, .lib and .dll)")
-
+	SET(FREEIMAGE_ROOT_DIR ${PROJECT_BINARY_DIR} CACHE PATH "Location of FreeImage files (.h, .lib and .dll)")
 	SET(XTRKCAD_USE_GTK_DEFAULT OFF)
 	SET(XTRKCAD_USE_GETTEXT_DEFAULT ON)
 
@@ -42,7 +41,7 @@ ENDIF(WIN32)
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 NEW)
     if( POLICY CMP0026 )
-	cmake_policy(SET CMP0026 OLD)
+	cmake_policy(SET CMP0026 NEW)
     endif( POLICY CMP0026 )
 endif(COMMAND cmake_policy)
 
@@ -53,6 +52,9 @@ OPTION(XTRKCAD_USE_GETTEXT "Use gettext for internationalization" ${XTRKCAD_USE_
 OPTION(XTRKCAD_USE_DOXYGEN "Generate internals documentation using doxygen" ${XTRKCAD_USE_DOXYGEN_DEFAULT})
 if(UNIX AND NOT APPLE)
     option(XTRKCAD_USE_BROWSER "Show help in default browser" ${XTRKCAD_USE_BROWSER_DEFAULT})
+endif()
+if(WIN32)
+	option(FREEIMAGE_ROOT_DIR "Base directory for the FreeImage library" ${FREEIMAGE_ROOT_DIR})
 endif()
 
 IF(UNIX)
