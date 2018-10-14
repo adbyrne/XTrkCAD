@@ -1728,7 +1728,7 @@ LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f
 		PrintEndPt( logFile, trk1, 1 );???*/
 		LogPrintf("\n");
 #endif
-		if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle))
+		if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle)) {
 			NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
 			return -1; /* Stop connecting out of alignment tracks! */
 		}
