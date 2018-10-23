@@ -1,7 +1,10 @@
+
 # "bin/i18n.h" is widely used
 INCLUDE_DIRECTORIES(bin)
 include_directories(dynstring)
 include_directories(cornu)
+include_directories(libzip)
+include_directories(json)
 
 # Setup the rest of the build ...
 add_subdirectory(dynstring)

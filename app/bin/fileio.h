@@ -69,6 +69,7 @@ wMenuList_p fileList_ml;
 #define IMPORTPATHKEY "import"
 #define MACROPATHKEY "macro"
 #define CUSTOMPATHKEY "custom"
+#define ARCHIVEPATHKEY "archive"
 
 void Stripcr( char * );
 char * GetNextLine( void );

@@ -46,7 +46,14 @@
 
 #include <stdint.h>
 
+// POSIX dependencies
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <assert.h>
+
+#include <zip.h>
 
 #include "common.h"
 #include "compound.h"
@@ -55,6 +62,7 @@
 #include "custom.h"
 #include "draw.h"
 #include "fileio.h"
+#include "fcntl.h"
 #include "i18n.h"
 #include "layout.h"
 #include "messages.h"
@@ -77,6 +85,9 @@ static char * customPathBak = NULL;
 EXPORT char * clipBoardN;
 
 static int log_paramFile;
+
+char zip_unpack_dir_name[] = "zip_in";
+char zip_pack_dir_name[] = "zip_out";
 
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
@@ -699,7 +710,281 @@ void SetWindowTitle( void )
 		changed>0?"*":"", sProdName, sVersion );
 	wWinSetTitle( mainW, message );
 }
-
+
+/*****************************************************************************
+ * Directory Management
+ */
+
+static BOOL_T safe_create_dir(const char *dir)
+{
+	if (mkdir(dir, 0755) < 0) {
+		if (errno != EEXIST) {
+			perror(dir);
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+static BOOL_T delete_directory(const char *dir_path)
+{
+	size_t path_len;
+	char *full_path;
+	DIR *dir;
+	struct stat stat_path, stat_entry;
+	struct dirent *entry;
+
+	// stat for the path
+	stat(dir_path, &stat_path);
+
+	// if path does not exists or is not dir - exit with status -1
+	if (S_ISDIR(stat_path.st_mode) == 0) {
+		fprintf(stderr, "%s: %s\n", "Is not directory", dir_path);
+		return FALSE;
+	}
+
+	// if not possible to read the directory for this user
+	if ((dir = opendir(dir_path)) == NULL) {
+		fprintf(stderr, "%s: %s\n", "Can`t open directory", dir_path);
+		return FALSE;
+	}
+
+	// the length of the path
+	path_len = strlen(dir_path);
+
+	// iteration through entries in the directory
+	while ((entry = readdir(dir)) != NULL) {
+
+		// skip entries "." and ".."
+		if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+			continue;
+
+		// determinate a full path of an entry
+		full_path = calloc(path_len + strlen(entry->d_name) + 1, sizeof(char));
+		strcpy(full_path, dir_path);
+		strcat(full_path, "/");
+		strcat(full_path, entry->d_name);
+
+		// stat for the entry
+		stat(full_path, &stat_entry);
+
+		// recursively remove a nested directory
+		if (S_ISDIR(stat_entry.st_mode) != 0) {
+			delete_directory(full_path);
+			continue;
+		}
+
+		// remove a file object
+		if (unlink(full_path) == 0)
+			printf("Removed a file: %s\n", full_path);
+		else {
+			printf("Can`t remove a file: %s\n", full_path);
+			closedir(dir);
+			free(full_path);
+			return FALSE;
+		}
+	}
+
+	// remove the devastated directory and close the object of it
+	if (rmdir(dir_path) == 0)
+		printf("Removed a directory: %s\n", dir_path);
+	else {
+		printf("Can`t remove a directory: %s\n", dir_path);
+		closedir(dir);
+		free(full_path);
+		return FALSE;
+	}
+
+	closedir(dir);
+	free(full_path);
+	return TRUE;
+}
+
+/*****************************************************************************
+ * Archive processing
+ */
+
+
+
+static BOOL_T add_directory_to_archive (
+				struct zip * za,
+				const char * prefix,
+				const char * dir_path) {
+
+	char *full_path;
+	char *arch_path;
+	DIR *dir;
+	struct stat stat_path, stat_entry;
+	struct dirent *entry;
+
+	zip_source_t * zt;
+
+	// stat for the path
+	stat(dir_path, &stat_path);
+
+	// if path does not exists or is not dir - exit with status -1
+	if (S_ISDIR(stat_path.st_mode) == 0) {
+		fprintf(stderr, "xtrkcad: Is not a directory %s\n",  dir_path);
+		return FALSE;
+	}
+
+	// if not possible to read the directory for this user
+	if ((dir = opendir(dir_path)) == NULL) {
+		fprintf(stderr, "xtrkcad: Can`t open directory %s\n", dir_path);
+		return FALSE;
+	}
+
+	// iteration through entries in the directory
+	while ((entry = readdir(dir)) != NULL) {
+		// skip entries "." and ".."
+		if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
+			continue;
+
+		// determinate a full path of an entry
+		MakeFullpath(&full_path, dir_path, entry->d_name, NULL);
+
+		// stat for the entry
+		stat(full_path, &stat_entry);
+
+		MakeFullpath(&arch_path, prefix, entry->d_name, NULL);
+
+		// recursively add a nested directory
+		if (S_ISDIR(stat_entry.st_mode) != 0) {
+			if (zip_dir_add(za,arch_path,0) !=0) {
+				fprintf(stderr, "xtrkcad: Can't write directory %s\n", arch_path);
+				free(arch_path);
+				free(full_path);
+				return FALSE;
+			}
+			if (add_directory_to_archive(za,arch_path,full_path) != 0) {
+				free(full_path);
+				free(arch_path);
+				return FALSE;
+			}
+			free(arch_path);
+			continue;
+		}
+		zt = zip_source_file(za, full_path, 0, -1);
+		if (zip_file_add(za,arch_path,zt,0)!=0) {
+			fprintf(stderr, "xtrkcad: Can't write file %s\n", arch_path);
+			free(full_path);
+			free(arch_path);
+			return FALSE;
+		}
+		free(arch_path);
+		free(full_path);
+	}
+
+	return TRUE;
+}
+
+static BOOL_T create_archive (
+				const char * dir_path,
+				const char * fileName) {
+
+	struct zip *za;
+	int err;
+	char buf[100];
+	char a[STR_LONG_SIZE];
+
+	if ((za = zip_open(fileName, ZIP_CREATE, &err)) == NULL) {
+			zip_error_to_str(buf, sizeof(buf), err, errno);
+			fprintf(stderr, "xtrkcad: can't create zip archive `%s': %s/n",
+				fileName, buf);
+			return FALSE;
+	}
+
+	add_directory_to_archive(za,dir_path,"");
+
+	if (zip_close(za) == -1) {
+			fprintf(stderr, "xtrkcad: can't close zip archive `%s'/n", fileName);
+			return FALSE;
+	}
+	return TRUE;
+
+}
+
+static BOOL_T unpack_archive_for(
+				const char * pathName,  /*Full name of archive*/
+				const char * fileName,  /*Just the name and extension */
+				const char * tempDir,   /*Directory to unpack into */
+				BOOL_T file_only) {
+	char *dirName;
+	char a[STR_LONG_SIZE];
+	struct zip *za;
+	struct zip_file *zf;
+	struct zip_stat sb;
+	char buf[100];
+	int err;
+	int i, len;
+	int fd;
+	long long sum;
+
+
+	if ((za = zip_open(pathName, 0, &err)) == NULL) {
+		zip_error_to_str(buf, sizeof(buf), err, errno);
+		fprintf(stderr, "xtrkcad: can't open xtrkcad zip archive `%s': %s/n",
+			pathName, buf);
+		return FALSE;
+	}
+
+	for (i = 0; i < zip_get_num_entries(za, 0); i++) {
+		if (zip_stat_index(za, i, 0, &sb) == 0) {
+			printf("==================/n");
+			len = strlen(sb.name);
+			printf("Name: [%s], ", sb.name);
+			printf("Size: [%llu], ", sb.size);
+			printf("mtime: [%u]/n", (unsigned int)sb.mtime);
+			if (sb.name[len - 1] == '/' && !file_only) {
+				MakeFullpath(&dirName, tempDir, &sb.name[0], NULL);
+				if (safe_create_dir(dirName)!=0) {
+					return FALSE;
+				}
+			} else {
+				zf = zip_fopen_index(za, i, 0);
+				if (!zf) {
+					fprintf(stderr, "xtrkcad zip archive index error/n");
+					return FALSE;
+				}
+
+				if (file_only) {
+					if (strncmp(sb.name, fileName, strlen(fileName))!=0) {
+						continue; /* Ignore any other files than the one we asked for */
+					}
+				}
+				MakeFullpath(&dirName, tempDir, &sb.name[0], NULL);
+				fd = open(dirName, O_RDWR | O_TRUNC | O_CREAT , 0644);
+				if (fd < 0) {
+					fprintf(stderr, "xtrkcad zip archive file open failed/n");
+					return FALSE;
+				}
+
+				sum = 0;
+				while (sum != sb.size) {
+					len = zip_fread(zf, buf, 100);
+					if (len < 0) {
+						fprintf(stderr, "xtrkcad zip archive read failed/n");
+						return FALSE;
+					}
+					write(fd, buf, len);
+					sum += len;
+				}
+				close(fd);
+				zip_fclose(zf);
+			}
+		} else {
+			printf("File[%s] Line[%d]/n", __FILE__, __LINE__);
+		}
+	}
+
+	if (zip_close(za) == -1) {
+		fprintf(stderr, "%s: can't close zip archive `%s'/n", "xtrkcad", pathName);
+		return FALSE;
+	}
+	return TRUE;
+}
+
+
 /*****************************************************************************
  *
  * LOAD / SAVE TRACKS
@@ -871,6 +1156,8 @@ EXPORT int LoadTracks(
 #endif
 	char *nameOfFile;
 
+	char *extOfFile;
+
 	assert( fileName != NULL );
 	assert( cnt == 1 ); 
 
@@ -889,7 +1176,56 @@ EXPORT int LoadTracks(
 #endif
 	nameOfFile = FindFilename( fileName[ 0 ] );
 
+ /*
+  * Support zipped filetype .zxtc
+  */
+	extOfFile = FindFileExtension( nameOfFile);
+
+	BOOL_T zipped = FALSE;
+
+	if (extOfFile && (strcmp(extOfFile,"zxtc"))) {
+
+		char * zip_input;
+
+		MakeFullpath(&zip_input, workingDir, zip_unpack_dir_name, NULL);
+
+		//If .zxtc unpack file into temporary input dir (cleared and re-created)
+
+		delete_directory(zip_input);
+		safe_create_dir(zip_input);
+
+		unpack_archive_for(fileName[0], nameOfFile, zip_input, FALSE);
+
+		//TODO Set up JSON manifest object for finding embedded objects
+
+		//Set filename to point to included .xtc file -> which must be the same name as the archive
+		MakeFullpath(&fileName[0], zip_input, nameOfFile, NULL);
+
+		extOfFile = FindFileExtension( nameOfFile);
+
+		for (int i=0;i<4;i++) {   //remove z
+			extOfFile[i] = extOfFile[i+1];
+		}
+
+		nameOfFile = FindFilename( fileName[ 0 ] );
+
+		zipped = TRUE;
+
+		free(zip_input);
+
+	}
+
 	if (ReadTrackFile( fileName[ 0 ], nameOfFile, TRUE, FALSE, TRUE )) {
+
+		if (zipped) {  //Put back zxtc extension
+			extOfFile = FindFileExtension( fileName[0]);
+			for (int i=0;i<4;i++) {
+				extOfFile[i+1] = extOfFile[i];
+			}
+			extOfFile[0] = 'z';
+			nameOfFile = FindFilename( fileName[ 0 ] );
+		}
+
 		wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]) );
 		ResolveIndex();
 #ifdef TIME_READTRACKFILE
@@ -986,7 +1322,40 @@ static int SaveTracks(
 	assert( cnt == 1 );
 
 	SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
-	DoSaveTracks( fileName[ 0 ] );
+
+	char * extOfFile = FindFileExtension( nameOfFile);
+
+	if (extOfFile && (strcmp(extOfFile,"zxtc"))) {
+
+		char * ArchiveName;
+
+		//Set filename to point to included .xtc file -> which must be the same name as the archive
+
+		char * zip_output;
+
+		MakeFullpath(&zip_output, workingDir, zip_pack_dir_name, NULL);
+
+		delete_directory(zip_output);
+		safe_create_dir(zip_output);
+
+		MakeFullpath(&ArchiveName, zip_output, nameOfFile, NULL);
+
+		extOfFile = FindFileExtension(ArchiveName);
+
+		for (int i =0; i<4; i++)
+			extOfFile[i] = extOfFile[i+1];
+
+		DoSaveTracks( ArchiveName );
+
+		//TODO if .zxtc Copy in dependencies (images, etc)
+		//TODO if .zxtc Build manifest
+		create_archive(	zip_output,	fileName[0]);
+		free(zip_output);
+		free(ArchiveName);
+
+	} else
+
+		DoSaveTracks( fileName[ 0 ] );
 
 	nameOfFile = FindFilename( fileName[ 0 ] );
 	wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[ 0 ]) );
@@ -1166,6 +1535,22 @@ static int ImportTracks(
 	ImportStart();
 	UndoStart( _("Import Tracks"), "importTracks" );
 	useCurrentLayer = TRUE;
+
+	/*
+ 	* Support zipped filetype .zxtc
+ 	*/
+	char * extOfFile = FindFileExtension( nameOfFile);
+
+	if (extOfFile && (strcmp(extOfFile,"zxtc"))) {
+		char * zip_input;
+
+		MakeFullpath(&zip_input, workingDir, zip_unpack_dir_name, NULL);
+
+		//If .zxtc unpack file into temporary input dir (reused)
+		unpack_archive_for(fileName[0], nameOfFile, zip_input, TRUE);
+
+		MakeFullpath(fileName, zip_input, nameOfFile, NULL);
+	}
 	ReadTrackFile( fileName[ 0 ], nameOfFile, FALSE, FALSE, TRUE );
 	ImportEnd();
 	/*DoRedraw();*/
