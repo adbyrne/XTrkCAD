@@ -50,7 +50,7 @@ static paramFloatRange_t rdata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGEC
 static paramIntegerRange_t idata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
 static paramTextData_t tdata = { 300, 150 };
 static char * pivotLabels[] = { N_("First"), N_("Middle"), N_("Second"), NULL };
-static char * boxLabels[] = { N_(""), NULL };
+static char * boxLabels[] = { "", NULL };
 static paramData_t describePLs[] = {
 #define I_FLOAT_0		(0)
     { PD_FLOAT, NULL, "F1", 0, &rdata },
