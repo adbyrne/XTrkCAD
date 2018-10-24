@@ -392,6 +392,9 @@ BOOL_T WriteMainNote(FILE* f)
     if (mainText && *mainText) {
         rc &= fprintf(f, "NOTE MAIN 0 0 0 0 %lu\n", strlen(mainText))>0;
         rc &= fprintf(f, "%s", mainText)>0;
+		if (*(mainText + strlen(mainText) - 1 ) != '\n') {
+			rc &= fprintf(f, "%s", "\n") > 0;
+		}
         rc &= fprintf(f, "    END\n")>0;
     }
 
