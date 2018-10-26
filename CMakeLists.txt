@@ -44,7 +44,7 @@ find_path(LIBZIP_INCLUDE_DIR_ZIPCONF
     HINTS ${PC_LIBZIP_INCLUDE_DIRS})
 
 find_library(LIBZIP_LIBRARY
-    NAMES libz)
+    NAMES zip)
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(

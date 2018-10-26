@@ -4,7 +4,6 @@ INCLUDE_DIRECTORIES(bin)
 include_directories(dynstring)
 include_directories(cornu)
 include_directories(libzip)
-include_directories(json)
 
 # Setup the rest of the build ...
 add_subdirectory(dynstring)
@@ -19,4 +18,3 @@ ADD_SUBDIRECTORY(cornu)
 IF(XTRKCAD_USE_GETTEXT)
 	ADD_SUBDIRECTORY(i18n)
 ENDIF(XTRKCAD_USE_GETTEXT)
-

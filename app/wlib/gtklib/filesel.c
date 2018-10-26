@@ -153,6 +153,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 										   (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN : GTK_FILE_CHOOSER_ACTION_SAVE ),
 										   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 										   (fs->mode == FS_LOAD ? GTK_STOCK_OPEN : GTK_STOCK_SAVE ), GTK_RESPONSE_ACCEPT,
+										   _("Archive"),GTK_RESPONSE_APPLY,
 										   NULL );
 		if (fs->window==0) abort();
 		// get confirmation before overwritting an existing file									
@@ -181,7 +182,9 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
         gtk_file_chooser_add_shortcut_folder( GTK_FILE_CHOOSER(fs->window), name, NULL );
     }
     
-	if( gtk_dialog_run( GTK_DIALOG( fs->window )) == GTK_RESPONSE_ACCEPT ) {
+    int resp = gtk_dialog_run( GTK_DIALOG( fs->window ));
+
+	if( resp == GTK_RESPONSE_ACCEPT || resp == GTK_RESPONSE_APPLY) {
 		char **fileNames;	
 		GSList *fileNameList;
 		
@@ -194,13 +197,18 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			file = g_filename_from_uri( g_slist_nth_data( fileNameList, i ), &host, &err );
 			
 			// check for presence of file extension
-			// jump behind tha last directory delimiter
+			// jump behind the last directory delimiter
 			namePart = strrchr( file, '/' ) + 1;
 			// is there a dot in the last part, yes->extension present
 			if( !strchr( namePart, '.' ) ){
-				// make room for the extension
-				file = g_realloc( file, strlen(file)+strlen(fs->defaultExtension));
-				strcat( file, fs->defaultExtension + 1 );
+				if (resp == GTK_RESPONSE_ACCEPT) {  //Normal
+					// make room for the extension
+					file = g_realloc( file, strlen(file)+strlen(fs->defaultExtension));
+					strcat( file, fs->defaultExtension + 1 );
+				} else {							//Archive
+					file = g_realloc( file, strlen(file)+4);
+					strcat( file, ".zxtc" );
+				}
 			}	
 			fileNames[ i ] = file;
 			g_free( g_slist_nth_data ( fileNameList, i));

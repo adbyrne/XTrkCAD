@@ -54,6 +54,7 @@
 #include <assert.h>
 
 #include <zip.h>
+#include <cJSON.h>
 
 #include "common.h"
 #include "compound.h"
@@ -729,7 +730,7 @@ static BOOL_T safe_create_dir(const char *dir)
 static BOOL_T delete_directory(const char *dir_path)
 {
 	size_t path_len;
-	char *full_path;
+	char *full_path = NULL;
 	DIR *dir;
 	struct stat stat_path, stat_entry;
 	struct dirent *entry;
@@ -739,13 +740,13 @@ static BOOL_T delete_directory(const char *dir_path)
 
 	// if path does not exists or is not dir - exit with status -1
 	if (S_ISDIR(stat_path.st_mode) == 0) {
-		fprintf(stderr, "%s: %s\n", "Is not directory", dir_path);
+		fprintf(stderr, "%s: %s \n", "Is not directory", dir_path);
 		return FALSE;
 	}
 
 	// if not possible to read the directory for this user
 	if ((dir = opendir(dir_path)) == NULL) {
-		fprintf(stderr, "%s: %s\n", "Can`t open directory", dir_path);
+		fprintf(stderr, "%s: %s \n", "Can`t open directory", dir_path);
 		return FALSE;
 	}
 
@@ -776,9 +777,9 @@ static BOOL_T delete_directory(const char *dir_path)
 
 		// remove a file object
 		if (unlink(full_path) == 0)
-			printf("Removed a file: %s\n", full_path);
+			printf("Removed a file: %s \n", full_path);
 		else {
-			printf("Can`t remove a file: %s\n", full_path);
+			printf("Can`t remove a file: %s \n", full_path);
 			closedir(dir);
 			free(full_path);
 			return FALSE;
@@ -787,24 +788,22 @@ static BOOL_T delete_directory(const char *dir_path)
 
 	// remove the devastated directory and close the object of it
 	if (rmdir(dir_path) == 0)
-		printf("Removed a directory: %s\n", dir_path);
+		printf("Removed a directory: %s \n", dir_path);
 	else {
-		printf("Can`t remove a directory: %s\n", dir_path);
+		printf("Can`t remove a directory: %s \n", dir_path);
 		closedir(dir);
-		free(full_path);
+		if (full_path) free(full_path);
 		return FALSE;
 	}
 
 	closedir(dir);
-	free(full_path);
+	if (full_path) free(full_path);
 	return TRUE;
 }
 
 /*****************************************************************************
  * Archive processing
  */
-
-
 
 static BOOL_T add_directory_to_archive (
 				struct zip * za,
@@ -824,13 +823,13 @@ static BOOL_T add_directory_to_archive (
 
 	// if path does not exists or is not dir - exit with status -1
 	if (S_ISDIR(stat_path.st_mode) == 0) {
-		fprintf(stderr, "xtrkcad: Is not a directory %s\n",  dir_path);
+		fprintf(stderr, "xtrkcad: Is not a directory %s \n",  dir_path);
 		return FALSE;
 	}
 
 	// if not possible to read the directory for this user
 	if ((dir = opendir(dir_path)) == NULL) {
-		fprintf(stderr, "xtrkcad: Can`t open directory %s\n", dir_path);
+		fprintf(stderr, "xtrkcad: Can`t open directory %s \n", dir_path);
 		return FALSE;
 	}
 
@@ -851,7 +850,7 @@ static BOOL_T add_directory_to_archive (
 		// recursively add a nested directory
 		if (S_ISDIR(stat_entry.st_mode) != 0) {
 			if (zip_dir_add(za,arch_path,0) !=0) {
-				fprintf(stderr, "xtrkcad: Can't write directory %s\n", arch_path);
+				fprintf(stderr, "xtrkcad: Can't write directory %s \n", arch_path);
 				free(arch_path);
 				free(full_path);
 				return FALSE;
@@ -866,7 +865,7 @@ static BOOL_T add_directory_to_archive (
 		}
 		zt = zip_source_file(za, full_path, 0, -1);
 		if (zip_file_add(za,arch_path,zt,0)!=0) {
-			fprintf(stderr, "xtrkcad: Can't write file %s\n", arch_path);
+			fprintf(stderr, "xtrkcad: Can't write file %s \n", arch_path);
 			free(full_path);
 			free(arch_path);
 			return FALSE;
@@ -889,7 +888,7 @@ static BOOL_T create_archive (
 
 	if ((za = zip_open(fileName, ZIP_CREATE, &err)) == NULL) {
 			zip_error_to_str(buf, sizeof(buf), err, errno);
-			fprintf(stderr, "xtrkcad: can't create zip archive `%s': %s/n",
+			fprintf(stderr, "xtrkcad: can't create zip archive %s %s \n",
 				fileName, buf);
 			return FALSE;
 	}
@@ -897,7 +896,7 @@ static BOOL_T create_archive (
 	add_directory_to_archive(za,dir_path,"");
 
 	if (zip_close(za) == -1) {
-			fprintf(stderr, "xtrkcad: can't close zip archive `%s'/n", fileName);
+			fprintf(stderr, "xtrkcad: can't close zip archive `%s \n", fileName);
 			return FALSE;
 	}
 	return TRUE;
@@ -923,7 +922,7 @@ static BOOL_T unpack_archive_for(
 
 	if ((za = zip_open(pathName, 0, &err)) == NULL) {
 		zip_error_to_str(buf, sizeof(buf), err, errno);
-		fprintf(stderr, "xtrkcad: can't open xtrkcad zip archive `%s': %s/n",
+		fprintf(stderr, "xtrkcad: can't open xtrkcad zip archive `%s': %s \n",
 			pathName, buf);
 		return FALSE;
 	}
@@ -943,7 +942,7 @@ static BOOL_T unpack_archive_for(
 			} else {
 				zf = zip_fopen_index(za, i, 0);
 				if (!zf) {
-					fprintf(stderr, "xtrkcad zip archive index error/n");
+					fprintf(stderr, "xtrkcad zip archive index error \n");
 					return FALSE;
 				}
 
@@ -955,7 +954,7 @@ static BOOL_T unpack_archive_for(
 				MakeFullpath(&dirName, tempDir, &sb.name[0], NULL);
 				fd = open(dirName, O_RDWR | O_TRUNC | O_CREAT , 0644);
 				if (fd < 0) {
-					fprintf(stderr, "xtrkcad zip archive file open failed/n");
+					fprintf(stderr, "xtrkcad zip archive file open failed \n");
 					return FALSE;
 				}
 
@@ -963,7 +962,7 @@ static BOOL_T unpack_archive_for(
 				while (sum != sb.size) {
 					len = zip_fread(zf, buf, 100);
 					if (len < 0) {
-						fprintf(stderr, "xtrkcad zip archive read failed/n");
+						fprintf(stderr, "xtrkcad zip archive read failed \n");
 						return FALSE;
 					}
 					write(fd, buf, len);
@@ -978,7 +977,7 @@ static BOOL_T unpack_archive_for(
 	}
 
 	if (zip_close(za) == -1) {
-		fprintf(stderr, "%s: can't close zip archive `%s'/n", "xtrkcad", pathName);
+		fprintf(stderr, "xtrkcad: can't close zip archive `%s \n", pathName);
 		return FALSE;
 	}
 	return TRUE;
@@ -1183,7 +1182,7 @@ EXPORT int LoadTracks(
 
 	BOOL_T zipped = FALSE;
 
-	if (extOfFile && (strcmp(extOfFile,"zxtc"))) {
+	if (extOfFile && (strcmp(extOfFile,"zxtc")==0)) {
 
 		char * zip_input;
 
@@ -1196,7 +1195,45 @@ EXPORT int LoadTracks(
 
 		unpack_archive_for(fileName[0], nameOfFile, zip_input, FALSE);
 
-		//TODO Set up JSON manifest object for finding embedded objects
+		char * manifest_file;
+
+		MakeFullpath(&manifest_file, zip_input, "manifest.json", NULL);
+
+		char * manifest = 0;
+		long length;
+		FILE * f = fopen (manifest_file, "rb");
+
+		if (f)
+		{
+		  fseek (f, 0, SEEK_END);
+		  length = ftell (f);
+		  fseek (f, 0, SEEK_SET);
+		  manifest = malloc (length);
+		  if (manifest)
+		  {
+		    fread (manifest, 1, length, f);
+		  }
+		  fclose (f);
+		}
+
+		if (manifest)
+		{
+			char *background_file;
+			cJSON *json_manifest = cJSON_Parse(manifest);
+			cJSON *dependencies = cJSON_GetObjectItemCaseSensitive(json_manifest, "dependencies");
+			cJSON *dependency;
+			cJSON_ArrayForEach(dependency, dependencies)  {
+				cJSON *name = cJSON_GetObjectItemCaseSensitive(dependency, "name");
+				if (strcmp(cJSON_GetStringValue(name),"background") != 0)
+					continue;
+				cJSON *filename = cJSON_GetObjectItemCaseSensitive(dependency, "filename");
+				cJSON *archpath = cJSON_GetObjectItemCaseSensitive(dependency, "arch_path");
+				MakeFullpath(&background_file, zip_input, "dependent", cJSON_GetStringValue(filename),NULL);
+				SetLayoutBackGroundFullPath(background_file);
+			}
+			cJSON_Delete(json_manifest);
+			free(background_file);
+		}
 
 		//Set filename to point to included .xtc file -> which must be the same name as the archive
 		MakeFullpath(&fileName[0], zip_input, nameOfFile, NULL);
@@ -1308,6 +1345,29 @@ static BOOL_T DoSaveTracks(
 	return rc;
 }
 
+static void CopyDependency(char * name, char * zip_output) {
+		char * backname = FindFilename(name);
+
+		FILE * source = fopen(name, "r");
+		if (source != NULL) {
+
+		   char * target_file;
+		   MakeFullpath(&target_file, zip_output, backname, NULL);
+		   FILE * target = fopen(target_file, "w");
+
+		   if (target != NULL) {
+
+			    int ch;
+
+			   while ((ch = fgetc(source)) != EOF)
+				  fputc(ch, target);
+		   }
+
+		   fclose(source);
+		   fclose(target);
+		}
+}
+
 
 static doSaveCallBack_p doAfterSave;
 
@@ -1316,14 +1376,16 @@ static int SaveTracks(
 		char **fileName,
 		void * data )
 {
-	char *nameOfFile;
 
 	assert( fileName != NULL );
 	assert( cnt == 1 );
 
+	char *nameOfFile = FindFilename(fileName[0]);
+
 	SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
 
-	char * extOfFile = FindFileExtension( nameOfFile);
+	char * extOfFile = FindFileExtension( fileName[0]);
+
 
 	if (extOfFile && (strcmp(extOfFile,"zxtc"))) {
 
@@ -1345,10 +1407,53 @@ static int SaveTracks(
 		for (int i =0; i<4; i++)
 			extOfFile[i] = extOfFile[i+1];
 
+		char * DependencyDir;
+
+		MakeFullpath(&DependencyDir, zip_output, "dependency", NULL);
+
+		char * background = GetLayoutBackGroundFullPath();
+
+		CopyDependency(background,DependencyDir);
+
+		cJSON *manifest = cJSON_CreateObject();
+		if (manifest != NULL) {
+			cJSON *a_object = cJSON_CreateObject();
+			cJSON_AddItemToObject(manifest, "layout", a_object);
+			cJSON_AddStringToObject(a_object, "name", nameOfFile);
+			cJSON *dependencies = cJSON_AddArrayToObject(manifest, "dependencies");
+			cJSON *b_object = cJSON_CreateObject();
+			cJSON_AddStringToObject(b_object, "name", "Background");
+			cJSON_AddStringToObject(b_object, "copy-path", background);
+			cJSON_AddStringToObject(b_object, "filename", FindFilename(background));
+			cJSON_AddStringToObject(b_object, "arch-path", DependencyDir);
+		    cJSON_AddItemToArray(dependencies,b_object);
+		}
+
+		free(background);
+		free(DependencyDir);
+
+		char * json_Manifest = cJSON_Print(manifest);
+		cJSON_Delete(manifest);
+
+		char * manifest_file;
+
+		MakeFullpath(&manifest_file, zip_output, "manifest.json", NULL);
+
+		FILE *fp = fopen(manifest_file, "ab+");
+		if (fp != NULL)
+		{
+		   fputs(json_Manifest, fp);
+		   fclose(fp);
+		}
+
+		free(manifest_file);
+		free(json_Manifest);
+
 		DoSaveTracks( ArchiveName );
 
-		//TODO if .zxtc Copy in dependencies (images, etc)
 		//TODO if .zxtc Build manifest
+
+
 		create_archive(	zip_output,	fileName[0]);
 		free(zip_output);
 		free(ArchiveName);
