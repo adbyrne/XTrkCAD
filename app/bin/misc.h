@@ -343,7 +343,10 @@ void EnumerateEnd(void);
 
 /* cnote.c */
 void DoNote( void );
+char * ReadMultilineText(size_t textLength);
 BOOL_T WriteMainNote( FILE * );
+
+void ReadMainNote(char * line);
 
 /* dbench.c */
 long GetBenchData( long, long );

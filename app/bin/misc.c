@@ -2333,7 +2333,7 @@ static void CreateMenus(void) {
 	cmdGroup = BG_MISCCRT;
 	InitCmdDraw(drawM);
 	InitCmdText(drawM);
-	InitCmdNote(drawM);
+	InitTrkNote(drawM);
 
 	cmdGroup = BG_RULER;
 	InitCmdRuler(drawM);

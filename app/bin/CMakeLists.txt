@@ -116,6 +116,7 @@ SET(SOURCES
 	tcurve.c
 	tease.c
 	track.c
+	trknote.c
 	trkseg.c
 	tstraigh.c
 	utility.c
