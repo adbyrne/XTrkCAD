@@ -66,4 +66,5 @@ void LayoutBackGroundLoad(void);
 void LayoutBackGroundSave(void);
 void BackgroundToggleShow(void);
 void DoLayout(void * junk);
+int LoadImageFile(int files,char ** fileName,void * data );
 #endif

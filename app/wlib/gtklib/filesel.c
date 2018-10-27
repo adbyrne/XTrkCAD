@@ -153,7 +153,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 										   (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN : GTK_FILE_CHOOSER_ACTION_SAVE ),
 										   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 										   (fs->mode == FS_LOAD ? GTK_STOCK_OPEN : GTK_STOCK_SAVE ), GTK_RESPONSE_ACCEPT,
-										   _("Archive"),GTK_RESPONSE_APPLY,
+										   (fs->mode == FS_LOAD ? NULL : _("Archive")),(fs->mode == FS_LOAD ? 0 : GTK_RESPONSE_APPLY),
 										   NULL );
 		if (fs->window==0) abort();
 		// get confirmation before overwritting an existing file									

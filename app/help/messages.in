@@ -1015,6 +1015,24 @@ Cannot open %s file:
 #NOHELP
 END
 
+# fileio.c
+MESSAGE MSG_ARCHIVE_FAIL
+Cannot save archive to %s from directory %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_MANIFEST_FAIL
+Cannot save manifest file to %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_UNPACK_FAIL
+Cannot unpack file %s for file %s in directory %s
+#NOHELP
+END
+
 # various
 MESSAGE MSG_BAD_OPTION
 Unrecognized Option: %s
