@@ -9,7 +9,7 @@
 
 \G{png.d/mfile.png}
 
-The \f{File Menu} shows file oriented commands for loading and saving layout files.
+The \f{File Menu} shows file oriented commands for loading and saving layout files. The main two types are normal layout files (.xtc) and Archives (.zxtc). An archive contains a zipped copy of the .xtc layout file, a manifest JSON file that lists the contents and any referenced content -> such as image files. Presently the only such content is the background image which is added to the archive if it is present.
 
 \dd \f{Exit} - Exits \e{XTrackCAD}. You will be asked to confirm your choice if there are unsaved changes.
 
@@ -27,7 +27,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{File List} - List of the five most recently used \e{XTrackCAD} files.
+\dd \f{File List} - List of the five most recently used \e{XTrackCAD} files or archives.
 
 \u000
 
@@ -43,7 +43,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \G{png.d/bopen.png} \f{Open} - Displays the \f{File Open} dialog which allows an existing \e{XTrackCAD} file to be selected and opened.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation.
+\dd \G{png.d/bopen.png} \f{Open} - Displays the \f{File Open} dialog which allows an existing \e{XTrackCAD} file or archive to be selected and opened.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation.
 
 \u000
 
@@ -63,11 +63,11 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \G{png.d/bsave.png} \f{Save} - Saves the layout under the current file name.  If a filename has not yet been assigned then the \f{File Save} dialog is shown so you enter a file name.
+\dd \G{png.d/bsave.png} \f{Save} - Saves the layout under the current file name.  If a filename has not yet been assigned then the \f{File Save} dialog is shown so you enter a file or archive name.
 
 \u000
 
-\dd \f{Save As} - This command lets you make a copy of the track plan you are currently working on. It differs from the regular Save command. Save stores your data back into the folder (directory) it originally came from. "Save As" lets you give your plan a different name and/or put it in a different folder on your hard disk or floppy disk.
+\dd \f{Save As} - This command lets you make a copy of the track plan you are currently working on as an file (.xtc) or an archive (.zxtc). It differs from the regular Save command. Save stores your data back into the folder (directory) it originally came from. "Save As" lets you give your plan a different name and/or put it in a different folder on your hard disk.  
 
 \rule
 
