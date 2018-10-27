@@ -1169,6 +1169,11 @@ char* CreateManifest(char* nameOfManifest, char* background,
 			cJSON_AddStringToObject(b_object, "copy-path", background);
 			cJSON_AddStringToObject(b_object, "filename", FindFilename(background));
 			cJSON_AddStringToObject(b_object, "arch-path", DependencyDir);
+			cJSON_AddNumberToObject(b_object, "size", GetLayoutBackGroundSize());
+			cJSON_AddNumberToObject(b_object, "pos-x", GetLayoutBackGroundPos().x);
+			cJSON_AddNumberToObject(b_object, "pos-y", GetLayoutBackGroundPos().y);
+			cJSON_AddNumberToObject(b_object, "screen", GetLayoutBackGroundScreen());
+			cJSON_AddNumberToObject(b_object, "angle", GetLayoutBackGroundAngle());
 			cJSON_AddItemToArray(dependencies, b_object);
 		}
 	}
@@ -1203,6 +1208,18 @@ EXPORT char* ParseManifest(char* manifest, char* zip_directory) {
 		fprintf(stderr, "Link to background image %s \n",
 						background_file[0]);
 		LoadImageFile(1,&background_file[0], NULL);
+		cJSON* size = cJSON_GetObjectItemCaseSensitive(dependency, "size");
+		SetLayoutBackGroundSize(size->valuedouble);
+		cJSON* posx = cJSON_GetObjectItemCaseSensitive(dependency, "pos-x");
+		cJSON* posy = cJSON_GetObjectItemCaseSensitive(dependency, "pos-y");
+		coOrd pos;
+		pos.x = posx->valuedouble;
+		pos.y = posy->valuedouble;
+		SetLayoutBackGroundPos(pos);
+		cJSON* screen = cJSON_GetObjectItemCaseSensitive(dependency, "screen");
+		SetLayoutBackGroundScreen(screen->valuedouble);
+		cJSON* angle = cJSON_GetObjectItemCaseSensitive(dependency, "angle");
+		SetLayoutBackGroundAngle(angle->valuedouble);
 	}
 	cJSON_Delete(json_manifest);
 	if (background_file[0]) free(background_file[0]);
