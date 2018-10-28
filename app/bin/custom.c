@@ -171,7 +171,7 @@ void InitCustom( void )
 	}
 	if (sSourceFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Files|*.xtc|%s Archives|*.zxtc"), Product, Product);
+		sprintf(buf, _("%s Files|*.xtc;*.zxtc"), Product);
 		sSourceFilePattern = strdup(buf);
 	}
 	if (sImportFilePattern == NULL)

@@ -1760,22 +1760,6 @@ static int ImportTracks(
 	ImportStart();
 	UndoStart( _("Import Tracks"), "importTracks" );
 	useCurrentLayer = TRUE;
-
-	/*
- 	* Support zipped filetype .zxtc
- 	*/
-	char * extOfFile = FindFileExtension( nameOfFile);
-
-	if (extOfFile && (strcmp(extOfFile,"zxtc")==0)) {
-		char * zip_input;
-
-		MakeFullpath(&zip_input, workingDir, zip_unpack_dir_name, NULL);
-
-		//If .zxtc unpack file into temporary input dir (reused)
-		unpack_archive_for(fileName[0], nameOfFile, zip_input, TRUE);
-
-		MakeFullpath(fileName, zip_input, nameOfFile, NULL);
-	}
 	ReadTrackFile( fileName[ 0 ], nameOfFile, FALSE, FALSE, TRUE );
 	ImportEnd();
 	/*DoRedraw();*/

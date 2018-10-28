@@ -101,10 +101,16 @@ struct wFilSel_t * wFilSelCreate(
 			fs->filter[ count ] = gtk_file_filter_new ();
 			gtk_file_filter_set_name ( fs->filter[ count ], cp );
 			cp = strtok( NULL, "|" );
-			gtk_file_filter_add_pattern (fs->filter[ count ], cp );
-			// the first pattern is considered to match the default extension
+			// find multiple patterns separated by ";"
+			char * cp1 = strdup(cp);
+			cp1 = strtok(cp1, ";" );
+			while (cp1) {
+				gtk_file_filter_add_pattern (fs->filter[ count ], cp1 );
+				cp1 = strtok(NULL, ";" );
+			}
+			if (cp1) free(cp1);
+				// the first pattern is considered to match the default extension
 			if( count == 0 ) {
-
 				fs->defaultExtension = strdup( cp );
 				int i = 0;
 				for (i=0; i<strlen(cp) && cp[i] != ' ' && cp[i] != ';';i++) ;
@@ -113,6 +119,7 @@ struct wFilSel_t * wFilSelCreate(
 			cp = strtok( NULL, "|" );
 			count++;
 		}
+		if (cp) free(cp);
 		if (opt&FS_PICTURES) {
 			fs->filter[ count ] = gtk_file_filter_new ();
 			gtk_file_filter_set_name( fs->filter[ count ], _("Image files") );
@@ -153,7 +160,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 										   (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN : GTK_FILE_CHOOSER_ACTION_SAVE ),
 										   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 										   (fs->mode == FS_LOAD ? GTK_STOCK_OPEN : GTK_STOCK_SAVE ), GTK_RESPONSE_ACCEPT,
-										   (fs->mode == FS_LOAD ? NULL : _("Archive")),(fs->mode == FS_LOAD ? 0 : GTK_RESPONSE_APPLY),
+										   (fs->mode == FS_LOAD ? NULL : _("Save Archive")),(fs->mode == FS_LOAD ? 0 : GTK_RESPONSE_APPLY),
 										   NULL );
 		if (fs->window==0) abort();
 		// get confirmation before overwritting an existing file									
