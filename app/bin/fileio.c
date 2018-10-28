@@ -1155,13 +1155,35 @@ static BOOL_T ReadTrackFile(
 	return ret;
 }
 
-char* CreateManifest(char* nameOfManifest, char* background,
+/***************************************************
+ * JSON routines
+ */
+
+/**********************************************************
+ * Build JSON Manifest -  manifest.json
+ * There are only two objects in the root -
+ * - The layout object defines the correct filename for the layout
+ * - The dependencies object is an arraylist of included elements
+ *
+ * Each element has a name, a filename and an arch-path (where in the archive it is located)
+ * It may have other values - a common one the copy-path is where it was copied from the originators machine (info only)
+ *
+ * There is one reserved name - "background" which is for the image file that is used as a layout background
+ *
+ *\param nameOfLayout - the layout this is a manifest for
+ *\param background - the full filepath to the background image (or NULL) -> TODO this will become an array with a count
+ *\param DependencyDir - the relative path in the archive to the directory in which the included object(s) will be stored
+ *
+ *\returns a String containing the JSON object
+ */
+
+char* CreateManifest(char* nameOfLayout, char* background,
 						char* DependencyDir) {
 	cJSON* manifest = cJSON_CreateObject();
 	if (manifest != NULL) {
 		cJSON* a_object = cJSON_CreateObject();
 		cJSON_AddItemToObject(manifest, "layout", a_object);
-		cJSON_AddStringToObject(a_object, "name", nameOfManifest);
+		cJSON_AddStringToObject(a_object, "name", nameOfLayout);
 		cJSON* dependencies = cJSON_AddArrayToObject(manifest, "dependencies");
 		cJSON* b_object = cJSON_CreateObject();
 		if (background && background[0]) {
@@ -1183,6 +1205,13 @@ char* CreateManifest(char* nameOfManifest, char* background,
 	return json_Manifest;
 }
 
+/**************************************************************************
+ * Pull in a Manifest File and extract values from it
+ * \param mamifest - the full path to the mainifest.json file
+ * \param zip_directory - the path to the directory to place extracted objects
+ *
+ * \returns - the layout filename
+ */
 
 EXPORT char* ParseManifest(char* manifest, char* zip_directory) {
 	char* background_file[1] = {NULL};
@@ -1191,8 +1220,7 @@ EXPORT char* ParseManifest(char* manifest, char* zip_directory) {
 	cJSON* layout = cJSON_GetObjectItemCaseSensitive(json_manifest, "layout");
 	cJSON* name = cJSON_GetObjectItemCaseSensitive(layout, "name");
 	layoutname = cJSON_GetStringValue(name);
-	fprintf(stderr, "Layout name %s \n",
-							layoutname);
+	fprintf(stderr, "Layout name %s \n",layoutname);
 
 	cJSON* dependencies = cJSON_GetObjectItemCaseSensitive(json_manifest,
 			"dependencies");
@@ -1205,8 +1233,7 @@ EXPORT char* ParseManifest(char* manifest, char* zip_directory) {
 		cJSON* filename = cJSON_GetObjectItemCaseSensitive(dependency, "filename");
 		cJSON* archpath = cJSON_GetObjectItemCaseSensitive(dependency, "arch-path");
 		MakeFullpath(&background_file[0], zip_directory, cJSON_GetStringValue(archpath), cJSON_GetStringValue(filename), NULL);
-		fprintf(stderr, "Link to background image %s \n",
-						background_file[0]);
+		fprintf(stderr, "Link to background image %s \n", background_file[0]);
 		LoadImageFile(1,&background_file[0], NULL);
 		cJSON* size = cJSON_GetObjectItemCaseSensitive(dependency, "size");
 		SetLayoutBackGroundSize(size->valuedouble);
@@ -1336,7 +1363,7 @@ int LoadTracks(
 
 	if (ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, FALSE, TRUE )) {
 
-		if (zipped) {  //Put back to .zxtc extension
+		if (zipped) {  //Put back to .zxtc extension - change back title and path
 			nameOfFile = FindFilename( fileName[0]);
 			extOfFile = FindFileExtension( fileName[0]);
 			SetCurrentPath( LAYOUTPATHKEY, fileName[0] );
@@ -1426,8 +1453,19 @@ static BOOL_T DoSaveTracks(
 	return rc;
 }
 
-static void CopyDependency(char * name, char * target_dir) {
+/************************************************
+ * Copy Dependency - copy file into another directory
+ *
+ * \param name
+ * \param traget_dir
+ *
+ * \returns TRUE/FALSE for success
+ *
+ */
+static BOOL_T CopyDependency(char * name, char * target_dir) {
 		char * backname = FindFilename(name);
+
+		BOOL_T copied = TRUE;
 
 		FILE * source = fopen(name, "r");
 		if (source != NULL) {
@@ -1441,18 +1479,20 @@ static void CopyDependency(char * name, char * target_dir) {
 
 			   while ((ch = fgetc(source)) != EOF)
 				  fputc(ch, target);
+
 			   fprintf(stderr, "xtrkcad: Included file %s into %s \n",
 			   		   				name, target_file);
 		   } else {
-			   fprintf(stderr, "xtrkcad: Can't create target file %s \n",
-			   		   				target_file);
+			   NoticeMessage( MSG_COPY_FAIL, _("Continue"), NULL, name, target_file);
+			   copied = FALSE;
 		   }
 		   fclose(source);
 		   fclose(target);
 		} else {
-			fprintf(stderr, "xtrkcad: Can't Open Included file %s \n",
-					   				name);
+			NoticeMessage( MSG_COPY_OPEN_FAIL, _("Continue"), NULL, name);
+			copied = FALSE;
 		}
+		return copied;
 }
 
 
@@ -1473,6 +1513,8 @@ static int SaveTracks(
 
 	SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
 
+	//Support Archive .zxtc files
+
 	char * extOfFile = FindFileExtension( fileName[0]);
 
 
@@ -1480,7 +1522,8 @@ static int SaveTracks(
 
 		char * ArchiveName;
 
-		//Set filename to point to included .xtc file -> which must be the same name as the archive
+		//Set filename to point to be the same as the included .xtc file.
+		//This is also in the manifest - in case a user renames the archive file.
 
 		char * zip_output;
 
@@ -1493,11 +1536,13 @@ static int SaveTracks(
 
 		extOfFile = FindFileExtension(ArchiveName);
 
+		// Get rid of the 'z'
 		for (int i=0; i<4; i++)
 			extOfFile[i] = extOfFile[i+1];
 
 		char * DependencyDir;
 
+		//The included files are placed (for now) into an includes directory - TODO an array of includes with directories by type
 		MakeFullpath(&DependencyDir, zip_output, "includes", NULL);
 
 		safe_create_dir(DependencyDir);
@@ -1507,7 +1552,7 @@ static int SaveTracks(
 		if (background && background[0])
 			CopyDependency(background,DependencyDir);
 
-
+		//The details are stored into the manifest - TODO use arrays for files, locations
 		char* json_Manifest = CreateManifest(nameOfFile, background, "includes");
 		char * manifest_file;
 

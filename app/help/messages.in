@@ -1033,6 +1033,18 @@ Cannot unpack file %s for file %s in directory %s
 #NOHELP
 END
 
+# fileio.c
+MESSAGE MSG_COPY_OPEN_FAIL
+Cannot open file %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_COPY_FAIL
+Cannot copy file %s into directory %s
+#NOHELP
+END
+
 # various
 MESSAGE MSG_BAD_OPTION
 Unrecognized Option: %s
