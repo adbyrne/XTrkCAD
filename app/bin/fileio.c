@@ -896,10 +896,22 @@ static BOOL_T create_archive (
 
 	unlink(fileName); 						//Delete Old
 
-	if ((za = zip_open(fileName, ZIP_CREATE, &err)) == NULL) {
+
+	char * archive = strdup(fileName);  	// Because of const char
+
+	char * archive_name = FindFilename(archive);
+
+	char * archive_path;
+
+	MakeFullpath(&archive_path,workingDir, archive_name, NULL);
+
+	//free(archive);
+
+	if ((za = zip_open(archive_path, ZIP_CREATE, &err)) == NULL) {
 			zip_error_to_str(buf, sizeof(buf), err, errno);
 			fprintf(stderr, "xtrkcad: can't create zip archive %s %s \n",
-				fileName, buf);
+				archive_path, buf);
+			free(archive_path);
 			return FALSE;
 	}
 
@@ -907,9 +919,19 @@ static BOOL_T create_archive (
 
 	if (zip_close(za) == -1) {
 		    zip_error_to_str(buf, sizeof(buf), err, errno);
-			fprintf(stderr, "xtrkcad: can't close zip archive %s - %s\n", fileName, buf);
+			fprintf(stderr, "xtrkcad: can't close zip archive %s - %s\n", archive_path, buf);
+			free(archive_path);
 			return FALSE;
 	}
+
+	unlink(fileName); 							//Delete Old
+	if (rename(archive_path,fileName) == -1) {	//Move zip into place
+		fprintf(stderr, "xtrkcad: can't move zip archive into place %s - %s \n",
+						fileName, strerror(errno));
+		free(archive_path);
+		return FALSE;
+	}
+	free(archive_path);
 	return TRUE;
 
 }
@@ -1227,26 +1249,25 @@ EXPORT char* ParseManifest(char* manifest, char* zip_directory) {
 	cJSON* dependency;
 	cJSON_ArrayForEach(dependency, dependencies) {
 		cJSON* name = cJSON_GetObjectItemCaseSensitive(dependency, "name");
-		if (strcmp(cJSON_GetStringValue(name), "background") != 0)
-			continue;
-
-		cJSON* filename = cJSON_GetObjectItemCaseSensitive(dependency, "filename");
-		cJSON* archpath = cJSON_GetObjectItemCaseSensitive(dependency, "arch-path");
-		MakeFullpath(&background_file[0], zip_directory, cJSON_GetStringValue(archpath), cJSON_GetStringValue(filename), NULL);
-		fprintf(stderr, "Link to background image %s \n", background_file[0]);
-		LoadImageFile(1,&background_file[0], NULL);
-		cJSON* size = cJSON_GetObjectItemCaseSensitive(dependency, "size");
-		SetLayoutBackGroundSize(size->valuedouble);
-		cJSON* posx = cJSON_GetObjectItemCaseSensitive(dependency, "pos-x");
-		cJSON* posy = cJSON_GetObjectItemCaseSensitive(dependency, "pos-y");
-		coOrd pos;
-		pos.x = posx->valuedouble;
-		pos.y = posy->valuedouble;
-		SetLayoutBackGroundPos(pos);
-		cJSON* screen = cJSON_GetObjectItemCaseSensitive(dependency, "screen");
-		SetLayoutBackGroundScreen(screen->valuedouble);
-		cJSON* angle = cJSON_GetObjectItemCaseSensitive(dependency, "angle");
-		SetLayoutBackGroundAngle(angle->valuedouble);
+		if (strcmp(cJSON_GetStringValue(name), "background") == 0) {
+			cJSON* filename = cJSON_GetObjectItemCaseSensitive(dependency, "filename");
+			cJSON* archpath = cJSON_GetObjectItemCaseSensitive(dependency, "arch-path");
+			MakeFullpath(&background_file[0], zip_directory, cJSON_GetStringValue(archpath), cJSON_GetStringValue(filename), NULL);
+			fprintf(stderr, "Link to background image %s \n", background_file[0]);
+			LoadImageFile(1,&background_file[0], NULL);
+			cJSON* size = cJSON_GetObjectItemCaseSensitive(dependency, "size");
+			SetLayoutBackGroundSize(size->valuedouble);
+			cJSON* posx = cJSON_GetObjectItemCaseSensitive(dependency, "pos-x");
+			cJSON* posy = cJSON_GetObjectItemCaseSensitive(dependency, "pos-y");
+			coOrd pos;
+			pos.x = posx->valuedouble;
+			pos.y = posy->valuedouble;
+			SetLayoutBackGroundPos(pos);
+			cJSON* screen = cJSON_GetObjectItemCaseSensitive(dependency, "screen");
+			SetLayoutBackGroundScreen(screen->valuedouble);
+			cJSON* angle = cJSON_GetObjectItemCaseSensitive(dependency, "angle");
+			SetLayoutBackGroundAngle(angle->valuedouble);
+		}
 	}
 	cJSON_Delete(json_manifest);
 	if (background_file[0]) free(background_file[0]);

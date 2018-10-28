@@ -57,8 +57,8 @@ struct sDataLayout {
     struct sLayoutProps *copyOfLayoutProps;
 };
 
-struct sDataLayout thisLayout = {
-    { "", "", -1, 0, 0, 0.0, 5.0, {0.0, 0.0} },
+static struct sDataLayout thisLayout = {
+    { "", "", -1, 0, 0, 0.0, 5.0, {0.0, 0.0}, NaS, {0.0, 0.0}, 0.0, 0, 0.0 },
     NaS,
     NULL,
 };
