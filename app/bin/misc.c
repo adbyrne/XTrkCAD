@@ -570,7 +570,7 @@ EXPORT void Confirm(char * label2, doSaveCallBack_p after) {
 										"If you don't save now, your unsaved changes will be discarded."),
 						_("&Save"), _("&Cancel"), _("&Don't Save"));
 		if (rc == 1) {
-			LayoutBackGroundInit();
+			LayoutBackGroundInit(FALSE);
 			LayoutBackGroundSave();
 			DoSave(after);
 			return;
@@ -578,7 +578,7 @@ EXPORT void Confirm(char * label2, doSaveCallBack_p after) {
 			return;
 		}
 	}
-	LayoutBackGroundInit();
+	LayoutBackGroundInit(TRUE);
 	LayoutBackGroundSave();
 	after();
 	return;
@@ -680,7 +680,7 @@ static void DoClearAfter(void) {
 
 	/* set all layers to their default properties and set current layer to 0 */
 	DefaultLayerProperties();
-	LayoutBackGroundInit();
+	LayoutBackGroundInit(TRUE);
 	DoLayout(NULL);
 	checkPtMark = 0;
 	Reset();
@@ -688,7 +688,7 @@ static void DoClearAfter(void) {
 	EnableCommands();
 	SetLayoutFullPath("");
 	SetWindowTitle();
-	LayoutBackGroundInit();
+	LayoutBackGroundInit(TRUE);
 }
 
 static void DoClear(void) {
@@ -2822,18 +2822,22 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 		resumeWork = OfferCheckpoint();
 
 	if (!resumeWork) {
-		/* if work is to be resumed and no filename was given on startup, load last layout */
+		/* if work is not to be resumed and no filename was given on startup, load last layout */
 		if ((onStartup == 0) && (!initialFile || !strlen(initialFile))) {
 			initialFile = (char*)wPrefGetString("misc", "lastlayout");
 		}
 
 		if (initialFile && strlen(initialFile)) {
-			DoFileList(0, NULL, initialFile);
-			LayoutBackGroundLoad();  //Get Prior BackGround
+			DoFileList(0, NULL, initialFile);   //Will load Background values, if archive
+			if (onStartup == 1)
+				LayoutBackGroundInit(TRUE);     //Wipe Out Prior Background
+			else
+				LayoutBackGroundInit(FALSE);    //Get Prior BackGround
 		}
 	} else {
-		LayoutBackGroundInit();
-		LayoutBackGroundSave();		//Remove Background
+		LayoutBackGroundInit(FALSE);  //Resuming get values before-hand.
+									  //Note that this may be those used with an archive (temp)
+		LayoutBackGroundSave();		  //Remove Background
 	}
 	inMainW = FALSE;
 	return mainW;

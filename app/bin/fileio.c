@@ -1221,7 +1221,6 @@ char* CreateManifest(char* nameOfLayout, char* background,
 			cJSON_AddItemToArray(dependencies, b_object);
 		}
 	}
-	free(background);
 	char* json_Manifest = cJSON_Print(manifest);
 	cJSON_Delete(manifest);
 	return json_Manifest;
@@ -1229,7 +1228,7 @@ char* CreateManifest(char* nameOfLayout, char* background,
 
 /**************************************************************************
  * Pull in a Manifest File and extract values from it
- * \param mamifest - the full path to the mainifest.json file
+ * \param manifest - the full path to the mainifest.json file
  * \param zip_directory - the path to the directory to place extracted objects
  *
  * \returns - the layout filename
@@ -1267,11 +1266,14 @@ EXPORT char* ParseManifest(char* manifest, char* zip_directory) {
 			SetLayoutBackGroundScreen(screen->valuedouble);
 			cJSON* angle = cJSON_GetObjectItemCaseSensitive(dependency, "angle");
 			SetLayoutBackGroundAngle(angle->valuedouble);
+			LayoutBackGroundSave();      //Force out Values	to override saved
 		}
 	}
-	cJSON_Delete(json_manifest);
+	char *str = NULL;
 	if (background_file[0]) free(background_file[0]);
-	return layoutname;
+	if (layoutname) str = strdup(layoutname);
+	cJSON_Delete(json_manifest);
+	return str;
 }
 
 int LoadTracks(
@@ -1296,7 +1298,7 @@ int LoadTracks(
 	ClearTracks();
 	ResetLayers();
 	checkPtMark = changed = 0;
-	LayoutBackGroundInit();
+	LayoutBackGroundInit(FALSE);   //Keep values of background -> will be overriden my archive
 	UndoSuspend();
 	useCurrentLayer = FALSE;
 #ifdef TIME_READTRACKFILE
@@ -1364,16 +1366,19 @@ int LoadTracks(
 
 			// If no manifest value use same name as the archive
 			if (arch_file && arch_file[0])
-				MakeFullpath(&full_path, zip_input, nameOfFile, NULL);
-			else {
 				MakeFullpath(&full_path, zip_input, arch_file, NULL);
+			else {
+				MakeFullpath(&full_path, zip_input, nameOfFile, NULL);
+			}
 
-			}
 			nameOfFile = FindFilename(full_path);
-			extOfFile = FindFileExtension(nameOfFile);
-			for (int i=0;i<4;i++) {   //remove z
-				extOfFile[i] = extOfFile[i+1];
-			}
+		    extOfFile = FindFileExtension(full_path);
+		    if (strcmp(extOfFile, "zxtc")==0) {
+				for (int i=0; i<4; i++) {
+					extOfFile[i] = extOfFile[i+1];
+				}
+		    }
+		    fprintf(stderr, "File Path: %s", full_path);
 		}
 
 		zipped = TRUE;
@@ -1555,11 +1560,14 @@ static int SaveTracks(
 
 		MakeFullpath(&ArchiveName, zip_output, nameOfFile, NULL);
 
+		nameOfFile = FindFilename(ArchiveName);
 		extOfFile = FindFileExtension(ArchiveName);
 
-		// Get rid of the 'z'
-		for (int i=0; i<4; i++)
-			extOfFile[i] = extOfFile[i+1];
+		if (extOfFile && strcmp(extOfFile,"zxtc")==0) {
+			// Get rid of the 'z'
+			for (int i=0; i<4; i++)
+				extOfFile[i] = extOfFile[i+1];
+		}
 
 		char * DependencyDir;
 
@@ -1576,6 +1584,8 @@ static int SaveTracks(
 		//The details are stored into the manifest - TODO use arrays for files, locations
 		char* json_Manifest = CreateManifest(nameOfFile, background, "includes");
 		char * manifest_file;
+
+		if (background) free(background);
 
 		MakeFullpath(&manifest_file, zip_output, "manifest.json", NULL);
 

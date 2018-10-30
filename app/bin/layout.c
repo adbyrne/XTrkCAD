@@ -81,14 +81,18 @@ static void LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
 void
 SetLayoutFullPath(const char *fileName)
 {
-    if (DynStringToCStr(&thisLayout.fullFileName) != fileName) {
-        if (isnas(&thisLayout.fullFileName)) {
-            DynStringMalloc(&thisLayout.fullFileName, strlen(fileName) + 1);
-        } else {
-            DynStringClear(&thisLayout.fullFileName);
-        }
-
-        DynStringCatCStr(&thisLayout.fullFileName, fileName);
+    if (fileName && fileName[0]) {
+    	if (DynStringSize(&thisLayout.fullFileName)) {
+    		if (strcmp(DynStringToCStr(&thisLayout.fullFileName),fileName)==0) {
+    			return;
+    		}
+    		DynStringClear(&thisLayout.fullFileName);
+    	}
+    	DynStringMalloc(&thisLayout.fullFileName, strlen(fileName) + 1);
+    	DynStringCatCStr(&thisLayout.fullFileName, fileName);
+     } else {
+    	 DynStringMalloc(&thisLayout.fullFileName, 2);
+    	 DynStringCatCStr(&thisLayout.fullFileName, "");
     }
 }
 
@@ -167,22 +171,17 @@ SetLayoutCurGauge(GAUGEINX_T gauge)
 }
 
 void SetLayoutBackGroundFullPath(const char *fileName) {
-	if (fileName) {
-		if (DynStringToCStr(&thisLayout.props.backgroundFileName) != fileName) {
-				if (isnas(&thisLayout.props.backgroundFileName)) {
-					DynStringMalloc(&thisLayout.props.backgroundFileName, strlen(fileName) + 1);
-				} else {
-					DynStringClear(&thisLayout.props.backgroundFileName);
-				}
-
-				DynStringCatCStr(&thisLayout.props.backgroundFileName, fileName);
+	if (fileName && fileName[0]) {
+		if (DynStringSize(&thisLayout.props.backgroundFileName)) {
+			if (strcmp(DynStringToCStr(&thisLayout.props.backgroundFileName),fileName)==0) {
+				return;
 			}
-	} else {
-		if (isnas(&thisLayout.props.backgroundFileName)) {
-			DynStringMalloc(&thisLayout.props.backgroundFileName, 1);
-		} else {
 			DynStringClear(&thisLayout.props.backgroundFileName);
 		}
+		DynStringMalloc(&thisLayout.props.backgroundFileName, strlen(fileName) + 1);
+		DynStringCatCStr(&thisLayout.props.backgroundFileName, fileName);
+	} else {
+		DynStringClear(&thisLayout.props.backgroundFileName);
 		DynStringCatCStr(&thisLayout.props.backgroundFileName, "");
 	}
 }
@@ -215,7 +214,9 @@ void SetLayoutBackGroundScreen(int screen) {
 char *
 GetLayoutFullPath()
 {
-    return (DynStringToCStr(&thisLayout.fullFileName));
+	char * s = DynStringToCStr(&thisLayout.fullFileName);
+    if (s) return strdup(s);
+    return NULL;
 }
 
 /**
@@ -230,7 +231,7 @@ GetLayoutFilename()
     char *string = DynStringToCStr(&thisLayout.fullFileName);
 
     if (string) {
-        return (FindFilename(string));
+        return FindFilename(strdup(string));
     } else {
         return (NULL);
     }
@@ -275,7 +276,9 @@ GetLayoutCurScale()
 char *
 GetLayoutBackGroundFullPath()
 {
-	return (DynStringToCStr(&thisLayout.props.backgroundFileName));
+	char * s = DynStringToCStr(&thisLayout.props.backgroundFileName);
+	if (s) return strdup(s);
+	return NULL;
 }
 
 double
@@ -320,7 +323,7 @@ static wWin_p layoutW;
 */
 void SetName() {
 	char * name = GetLayoutBackGroundFullPath();
-	if (name) {
+	if (name && name[0]) {									//Ignore ""
 		if (name && (strlen(name)<=TEXT_FIELD_LEN)) {
 			for (unsigned int i=0; i<=strlen(name);i++) {
 				backgroundFileName[i] = name[i];
@@ -328,10 +331,12 @@ void SetName() {
 			backgroundFileName[strlen(name)] = '\0';
 		} else {
 			for (int i=TEXT_FIELD_LEN;i>=0; i--) {
-				backgroundFileName[i] = name[strlen(name)-(TEXT_FIELD_LEN-i)-1];
+				backgroundFileName[i] = name[strlen(name)-(TEXT_FIELD_LEN-i)];
 			}
+			backgroundFileName[TEXT_FIELD_LEN] = '\0';     //Insurance
 		}
 	} else backgroundFileName[0] = '\0';
+	if (name) free(name);
 
 }
 
@@ -366,10 +371,13 @@ wBool_t
 LoadBackGroundImage(void)
 {
 	char * error;
-	if (wDrawSetBackground(  mainD.d, GetLayoutBackGroundFullPath(), &error)==-1) {
+	char * background = GetLayoutBackGroundFullPath();
+	if (wDrawSetBackground(  mainD.d, background, &error)==-1) {
 		NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
+		free(background);
 		return FALSE;
 	}
+	if (background) free(background);
 	return TRUE;
 }
 
@@ -415,8 +423,8 @@ EXPORT int LoadImageFile(
  * Save the Background Parms - forcing a write
  */
 void LayoutBackGroundSave(void) {
-   	
-   	wPrefSetString("layout", "BackgroundPath", GetLayoutBackGroundFullPath());
+   	char * background = GetLayoutBackGroundFullPath();
+   	wPrefSetString("layout", "BackgroundPath", background);
    	wPrefSetFloat("layout", "BackgroundPosX", thisLayout.props.backgroundPos.x);
    	wPrefSetFloat("layout", "BackgroundPosY", thisLayout.props.backgroundPos.y);
    	wPrefSetFloat("layout", "BackgroundAngle", thisLayout.props.backgroundAngle);
@@ -424,6 +432,7 @@ void LayoutBackGroundSave(void) {
    	wPrefSetFloat("layout", "BackgroundSize", thisLayout.props.backgroundSize);
 
    	wPrefFlush();
+   	if (background) free(background);
 }
 
 /************************************************************
@@ -672,15 +681,15 @@ static wBool_t inited;
  * Either Clear Background Parms or (if the first time called) Load from Saved Parms
  **************************************************************************************/
 void
-LayoutBackGroundInit(void) {
-	if (inited) {
+LayoutBackGroundInit(BOOL_T clear) {
+	if (clear) {
 		SetLayoutBackGroundFullPath(noname);
 		SetLayoutBackGroundPos(zero);
 		SetLayoutBackGroundAngle(0.0);
 		SetLayoutBackGroundScreen(0);
 		SetLayoutBackGroundSize(0.0);
 		LayoutBackGroundSave();
-	} else {      //First Time
+	} else {      //First Time and not "Clear"
 		inited = TRUE;
 		LayoutBackGroundLoad();
 	}
@@ -690,5 +699,6 @@ LayoutBackGroundInit(void) {
 	} else {
 		wDrawSetBackground(  mainD.d, NULL, NULL);
 	}
+	if (str) free(str);
 
 }
