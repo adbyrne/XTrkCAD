@@ -215,8 +215,7 @@ char *
 GetLayoutFullPath()
 {
 	char * s = DynStringToCStr(&thisLayout.fullFileName);
-    if (s) return strdup(s);
-    return NULL;
+    return s;
 }
 
 /**
@@ -231,7 +230,7 @@ GetLayoutFilename()
     char *string = DynStringToCStr(&thisLayout.fullFileName);
 
     if (string) {
-        return FindFilename(strdup(string));
+        return FindFilename(string);
     } else {
         return (NULL);
     }
@@ -277,8 +276,7 @@ char *
 GetLayoutBackGroundFullPath()
 {
 	char * s = DynStringToCStr(&thisLayout.props.backgroundFileName);
-	if (s) return strdup(s);
-	return NULL;
+	return s;
 }
 
 double
@@ -336,8 +334,6 @@ void SetName() {
 			backgroundFileName[TEXT_FIELD_LEN] = '\0';     //Insurance
 		}
 	} else backgroundFileName[0] = '\0';
-	if (name) free(name);
-
 }
 
 static struct wFilSel_t * imageFile_fs;
@@ -374,10 +370,8 @@ LoadBackGroundImage(void)
 	char * background = GetLayoutBackGroundFullPath();
 	if (wDrawSetBackground(  mainD.d, background, &error)==-1) {
 		NoticeMessage(_("Unable to load Image File - %s"),_("Ok"),NULL,error);
-		free(background);
 		return FALSE;
 	}
-	if (background) free(background);
 	return TRUE;
 }
 
@@ -432,7 +426,6 @@ void LayoutBackGroundSave(void) {
    	wPrefSetFloat("layout", "BackgroundSize", thisLayout.props.backgroundSize);
 
    	wPrefFlush();
-   	if (background) free(background);
 }
 
 /************************************************************
@@ -699,6 +692,5 @@ LayoutBackGroundInit(BOOL_T clear) {
 	} else {
 		wDrawSetBackground(  mainD.d, NULL, NULL);
 	}
-	if (str) free(str);
 
 }
