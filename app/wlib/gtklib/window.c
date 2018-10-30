@@ -965,7 +965,7 @@ static wWin_p wWinCommonCreate(
     int scr_w, scr_h;
     	wGetDisplaySize(&scr_w, &scr_h);
         if (winType != W_MAIN) {
-        	wSetGeometry(w, 100, scr_w/2, 100, scr_h, w->w, w->h, -1);
+        	wSetGeometry(w, 100, scr_w-10, 100, scr_h, w->w, w->h, -1);
         } else {
         	wSetGeometry(w, scr_w/2, scr_w-10, scr_h/2, scr_h-10, w->w, w->h, -1);
      }
