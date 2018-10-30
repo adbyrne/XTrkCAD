@@ -1016,8 +1016,98 @@ Cannot open %s file:
 END
 
 # fileio.c
+MESSAGE MSG_DIR_CREATE_FAIL
+Cannot create directory: %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_DIR_OPEN_FAIL
+Cannot open directory: %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_NOT_DIR_FAIL
+Path for deletion is not a directory: %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_OPEN_DIR_FAIL
+Open filed for directory: %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_DIR_ADD_FAIL
+Can't add directory record %s to zip - %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_FILE_ADD_FAIL
+Can't add file record %s to zip at %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_CREATE_FAIL
+Can't create zip %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_CLOSE_FAIL
+Close failure for zip %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_RENAME_FAIL
+Rename failure for zip from %s to %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_OPEN_FAIL
+Open failure for zip %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_INDEX_FAIL
+Index failure for zip %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_FILE_OPEN_FAIL
+Open read file failure %s %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_READ_FAIL
+Open file in zip failure %s %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_UNLINK_FAIL
+Unlink failed for: %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_RMDIR_FAIL
+Remove Directory failed for: %s 
+#NOHELP
+END
+
+# fileio.c
 MESSAGE MSG_ARCHIVE_FAIL
-Cannot save archive to %s from directory %s
+Cannot save archive to %s from directory: %s
 #NOHELP
 END
 
@@ -1028,8 +1118,14 @@ Cannot save manifest file to %s
 END
 
 # fileio.c
+MESSAGE MSG_MANIFEST_OPEN_FAIL
+Cannot open manifest file %s
+#NOHELP
+END
+
+# fileio.c
 MESSAGE MSG_UNPACK_FAIL
-Cannot unpack file %s for file %s in directory %s
+Cannot unpack file: %s for file: %s in directory: %s
 #NOHELP
 END
 

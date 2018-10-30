@@ -720,6 +720,8 @@ static BOOL_T safe_create_dir(const char *dir)
 {
 	if (mkdir(dir, 0755) < 0) {
 		if (errno != EEXIST) {
+			NoticeMessage( MSG_DIR_CREATE_FAIL,
+					_("Continue"), NULL, dir, strerror(errno) );
 			perror(dir);
 			return FALSE;
 		}
@@ -742,13 +744,15 @@ static BOOL_T delete_directory(const char *dir_path)
 
 	// if path is not dir - exit
 	if (S_ISDIR(stat_path.st_mode) == 0) {
-		fprintf(stderr, "%s: %s \n", "Is not directory", dir_path);
+		NoticeMessage( MSG_NOT_DIR_FAIL,
+							_("Continue"), NULL, dir_path);
 		return FALSE;
 	}
 
 	// if not possible to read the directory for this user
 	if ((dir = opendir(dir_path)) == NULL) {
-		fprintf(stderr, "%s: %s \n", "Can`t open directory", dir_path);
+		NoticeMessage( MSG_DIR_OPEN_FAIL,
+									_("Continue"), NULL, dir_path);
 		return FALSE;
 	}
 
@@ -781,7 +785,7 @@ static BOOL_T delete_directory(const char *dir_path)
 		if (unlink(full_path) == 0)
 			printf("Removed a file: %s \n", full_path);
 		else {
-			printf("Can`t remove a file: %s \n", full_path);
+			NoticeMessage( MSG_UNLINK_FAIL, _("Continue"), NULL, full_path);
 			closedir(dir);
 			free(full_path);
 			return FALSE;
@@ -792,7 +796,7 @@ static BOOL_T delete_directory(const char *dir_path)
 	if (rmdir(dir_path) == 0)
 		printf("Removed a directory: %s \n", dir_path);
 	else {
-		printf("Can`t remove a directory: %s \n", dir_path);
+		NoticeMessage( MSG_RMDIR_FAIL, _("Continue"), NULL, dir_path);
 		closedir(dir);
 		if (full_path) free(full_path);
 		return FALSE;
@@ -826,13 +830,15 @@ static BOOL_T add_directory_to_archive (
 
 	// if path does not exists or is not dir - exit with status -1
 	if (S_ISDIR(stat_path.st_mode) == 0) {
-		fprintf(stderr, "xtrkcad: Is not a directory %s \n",  dir_path);
+		NoticeMessage( MSG_NOT_DIR_FAIL,
+									_("Continue"), NULL, dir_path);
 		return FALSE;
 	}
 
 	// if not possible to read the directory for this user
 	if ((dir = opendir(dir_path)) == NULL) {
-		fprintf(stderr, "xtrkcad: Can`t open directory %s \n", dir_path);
+		NoticeMessage( MSG_OPEN_DIR_FAIL,
+									_("Continue"), NULL, dir_path);
 		return FALSE;
 	}
 
@@ -858,7 +864,8 @@ static BOOL_T add_directory_to_archive (
 			if (zip_dir_add(za,arch_path,0) < 0) {
 				zip_error_t  *ziperr = zip_get_error(za);
 				buf = zip_error_strerror(ziperr);
-				fprintf(stderr, "xtrkcad: Can't write directory %s - %s \n", arch_path, buf);
+				NoticeMessage( MSG_ZIP_DIR_ADD_FAIL,
+													_("Continue"), NULL, arch_path, buf);
 			}
 			if (add_directory_to_archive(za,full_path,arch_path) != TRUE) {
 				free(full_path);
@@ -872,7 +879,7 @@ static BOOL_T add_directory_to_archive (
 		if (zip_file_add(za,arch_path,zt,0)==-1) {
 			zip_error_t  *ziperr = zip_get_error(za);
 			buf = zip_error_strerror(ziperr);
-			fprintf(stderr, "xtrkcad: Can't write file %s into %s - %s \n", full_path, arch_path, buf);
+			NoticeMessage( MSG_ZIP_FILE_ADD_FAIL, _("Continue"), NULL, full_path, arch_path, buf);
 			free(full_path);
 			free(arch_path);
 			return FALSE;
@@ -909,6 +916,7 @@ static BOOL_T create_archive (
 
 	if ((za = zip_open(archive_path, ZIP_CREATE, &err)) == NULL) {
 			zip_error_to_str(buf, sizeof(buf), err, errno);
+			NoticeMessage( MSG_ZIP_CREATE_FAIL, _("Continue"), NULL, archive_path, buf);
 			fprintf(stderr, "xtrkcad: can't create zip archive %s %s \n",
 				archive_path, buf);
 			free(archive_path);
@@ -919,15 +927,14 @@ static BOOL_T create_archive (
 
 	if (zip_close(za) == -1) {
 		    zip_error_to_str(buf, sizeof(buf), err, errno);
-			fprintf(stderr, "xtrkcad: can't close zip archive %s - %s\n", archive_path, buf);
+		    NoticeMessage( MSG_ZIP_CLOSE_FAIL, _("Continue"), NULL, archive_path, buf);
 			free(archive_path);
 			return FALSE;
 	}
 
 	unlink(fileName); 							//Delete Old
 	if (rename(archive_path,fileName) == -1) {	//Move zip into place
-		fprintf(stderr, "xtrkcad: can't move zip archive into place %s - %s \n",
-						fileName, strerror(errno));
+		NoticeMessage( MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archive_path, fileName, strerror(errno));
 		free(archive_path);
 		return FALSE;
 	}
@@ -955,6 +962,7 @@ static BOOL_T unpack_archive_for(
 
 	if ((za = zip_open(pathName, 0, &err)) == NULL) {
 		zip_error_to_str(buf, sizeof(buf), err, errno);
+		NoticeMessage( MSG_ZIP_OPEN_FAIL, _("Continue"), NULL, pathName, buf);
 		fprintf(stderr, "xtrkcad: can't open xtrkcad zip archive `%s': %s \n",
 			pathName, buf);
 		return FALSE;
@@ -975,6 +983,7 @@ static BOOL_T unpack_archive_for(
 			} else {
 				zf = zip_fopen_index(za, i, 0);
 				if (!zf) {
+					NoticeMessage( MSG_ZIP_INDEX_FAIL, _("Continue"), NULL);
 					fprintf(stderr, "xtrkcad zip archive open index error \n");
 					return FALSE;
 				}
@@ -987,7 +996,7 @@ static BOOL_T unpack_archive_for(
 				MakeFullpath(&dirName, tempDir, &sb.name[0], NULL);
 				fd = open(dirName, O_RDWR | O_TRUNC | O_CREAT , 0644);
 				if (fd < 0) {
-					fprintf(stderr, "xtrkcad zip archive file open failed %s %s \n", dirName, &sb.name[0]);
+					NoticeMessage( MSG_ZIP_FILE_OPEN_FAIL, _("Continue"), NULL, dirName, strerror(errno));
 					return FALSE;
 				}
 
@@ -995,7 +1004,7 @@ static BOOL_T unpack_archive_for(
 				while (sum != sb.size) {
 					len = zip_fread(zf, buf, 100);
 					if (len < 0) {
-						fprintf(stderr, "xtrkcad zip archive read failed \n");
+						NoticeMessage( MSG_ZIP_READ_FAIL, _("Continue"), NULL, dirName, &sb.name[0]);
 						return FALSE;
 					}
 					write(fd, buf, len);
@@ -1010,7 +1019,7 @@ static BOOL_T unpack_archive_for(
 	}
 
 	if (zip_close(za) == -1) {
-		fprintf(stderr, "xtrkcad: zip archive can't close archive `%s \n", pathName);
+		NoticeMessage( MSG_ZIP_CLOSE_FAIL, _("Continue"), NULL, dirName, &sb.name[0]);
 		return FALSE;
 	}
 	return TRUE;
@@ -1351,7 +1360,7 @@ int LoadTracks(
 			  }
 			  fclose (f);
 			} else {
-				fprintf(stderr, "Can't open Manifest %s \n",manifest_file);
+				NoticeMessage( MSG_MANIFEST_OPEN_FAIL, _("Continue"), NULL, manifest_file);
 			}
 
 			char * arch_file = NULL;
