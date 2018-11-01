@@ -15,11 +15,11 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Export} - Exports the selected objects to a file in \e{XTrackCAD} (*.xti) format. The exported file can then be imported into another layout design. Refer to the Import command listed above. 
+\dd \f{Export} - Exports the selected objects to a file in \e{XTrackCAD} (*.xti) format. The exported file can then be imported into another layout design. Refer to the Import command listed above.
 
 \u000
 
-\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. 
+\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout.
 
 \u000
 
@@ -31,7 +31,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Import} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport}) file. This function can be used to transfer parts like a yard design from one layout design to another. 
+\dd \f{Import} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport}) file. This function can be used to transfer parts like a yard design from one layout design to another.
 
 \u000
 
@@ -59,7 +59,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Revert} - Undoes all changes and returns to the last saved layout plan. 
+\dd \f{Revert} - Undoes all changes and returns to the last saved layout plan.
 
 \u000
 
@@ -89,7 +89,7 @@ This menu item creates a bitmap file of the layout.
 
 The \f{Bitmap} dialog specifies the style and size of the bitmap.  The three check-boxes (\f{Print Titles}, \f{Print Borders} and \f{Print Centerline}) control whether the Layout Title (\K{cmdLayout}), the borders or the track centerlines are printed on the bitmap.  The size of the bitmap is smaller if these are disabled.
 
-Printing the track centerlines (also seen when zoomed in 1:1) is useful when you later print the bitmap 
+Printing the track centerlines (also seen when zoomed in 1:1) is useful when you later print the bitmap
 full size for laying out track.
 
 If the Snap Grid (\K{cmdGrid}) is visible then it will be printed on the bitmap.
@@ -247,7 +247,9 @@ The \f{Print} button prints the selected pages and closes the \f{Print} dialog. 
 
 The \f{Setup} button invokes the Printer Setup (\K{printSetup}) dialog.
 
-The \f{Clear} button unselects all selected pages.
+The \f{Select All} button selects all pages for printing.
+
+The \f{Clear} button unselects all selected pages, so no pages will be printed.
 
 \e{Suggested Uses:}
 
