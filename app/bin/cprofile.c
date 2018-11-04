@@ -347,9 +347,12 @@ static void RedrawProfileW( void )
 	wFont_p fp;
 	POS_T w;
 	coOrd textsize;
+	char *pTestString;
 
 	wDrawClear( screenProfileD.d );
 	wDrawGetSize( screenProfileD.d, &ww, &hh );
+	fp = wStandardFont(F_HELV, FALSE, FALSE);
+
 	screenProfileD.size.x = (ww)/screenProfileD.dpi;
 	screenProfileD.size.y = (hh)/screenProfileD.dpi;
 	screenProfileD.orig.x = -PBL(screenProfileFontSize);
@@ -359,6 +362,29 @@ static void RedrawProfileW( void )
 	size = screenProfileD.size;
 	size.x -= (PBL(screenProfileFontSize));
 	size.y -= (PBB(screenProfileFontSize));
+
+	/* make sure there is enough space to show the rightmost coordinate value*/
+	if (units == UNITS_ENGLISH) {
+		if (prof.totalD > 240.0) {
+			pTestString = "9999'";
+		} else {
+			pTestString = "999'11\"";
+		}
+	} else {
+		if (PutDim(prof.totalD) > 10000.0) {
+			pTestString = "999m";
+		} else {
+			if (PutDim(prof.totalD) > 100.0) {
+				pTestString = "99.9m";
+			}
+			else {
+				pTestString = "9.99m";
+			}
+		}
+	}
+	DrawTextSize(&mainD, pTestString, fp, screenProfileFontSize, FALSE, &textsize);
+	size.x -= textsize.x / 2;
+
 #ifdef WINDOWS
 	if (printVert) {
 		size.x -= PBR(screenProfileFontSize)/4.0;
@@ -411,7 +437,7 @@ static void RedrawProfileW( void )
 	/* Compute vert scale */
 	prof.scaleY = size.y/rngE;
 	sprintf( message, "%0.2f", maxE );
-	fp = wStandardFont( F_HELV, FALSE, FALSE );
+
 	DrawTextSize( &mainD, message, fp, screenProfileFontSize, FALSE, &textsize );
 	w = textsize.x;
 	w -= PBT;
