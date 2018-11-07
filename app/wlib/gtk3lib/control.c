@@ -63,10 +63,12 @@ void wControlShow(
     	if (b->reveal) {
     		gtk_widget_set_visible(GTK_WIDGET(b->reveal),show);
     		gtk_revealer_set_reveal_child(GTK_REVEALER(b->reveal),show);
+    		gtk_widget_set_visible(gtk_widget_get_parent(GTK_WIDGET(b->reveal)),show); // Box - assume all in box are hid/revealed
     	}
     	if (b->separator) {
     		gtk_widget_set_visible(GTK_WIDGET(b->separator),show);
     	}
+
     	return;
     }
 
