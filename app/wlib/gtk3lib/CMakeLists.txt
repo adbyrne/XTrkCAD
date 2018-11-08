@@ -81,4 +81,4 @@ endif()
 add_subdirectory(wrapbox)
 
 add_subdirectory(glade)
-install(DIRECTORY glade/ DESTINATION bin/ui)
+INSTALL(DIRECTORY glade/ DESTINATION ui/)

@@ -871,7 +871,7 @@ void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int 
 			win->gtkwin,
 			&hints,
 			(GdkWindowHints)(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE |
-					GDK_HINT_ASPECT | GDK_HINT_BASE_SIZE ));
+					GDK_HINT_ASPECT ));
 
 }
 
@@ -989,9 +989,9 @@ static wWin_p wWinCommonCreate(
     int scr_w, scr_h;
     	wGetDisplaySize(&scr_w, &scr_h);
         if (winType != W_MAIN) {
-        	wSetGeometry(w, 50, scr_w/2, 50, scr_h/2, w->w, w->h, -1);
+        	wSetGeometry(w, 50, scr_w-10, 50, scr_h-10, -1, -1, -1);
         } else {
-        	wSetGeometry(w, scr_w/2, scr_w-10, scr_h/2, scr_h-10, w->w, w->h, -1);
+        	wSetGeometry(w, scr_w/2, scr_w-10, scr_h/2, scr_h-10, -1, -1, -1);
      }
 
     w->first = w->last = NULL;

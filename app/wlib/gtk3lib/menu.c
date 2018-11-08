@@ -968,6 +968,7 @@ wMenu_p wMenuBarAdd(
 	
 	menuItem = gtk_menu_item_new_with_mnemonic( wlibConvertInput(m->labelStr) );
 	m->menu = gtk_menu_new();
+	gtk_widget_set_name(m->menu, "commands");
 	gtk_menu_item_set_submenu( GTK_MENU_ITEM(menuItem), m->menu );
 	gtk_menu_shell_append( GTK_MENU_SHELL(w->menubar), menuItem );
 	gtk_widget_show( menuItem );
