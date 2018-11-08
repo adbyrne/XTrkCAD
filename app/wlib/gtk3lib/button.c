@@ -215,8 +215,8 @@ wButton_p wButtonCreateForToolbar(
 									EGG_WRAP_BOX_SPREAD_START,
 									EGG_WRAP_BOX_SPREAD_START,
 									2, 2);
-		egg_wrap_box_set_minimum_line_children (EGG_WRAP_BOX (w->toolbar), 10);
-		egg_wrap_box_set_natural_line_children (EGG_WRAP_BOX (w->toolbar), 30);
+		egg_wrap_box_set_minimum_line_children (EGG_WRAP_BOX (w->toolbar), 15);
+		egg_wrap_box_set_natural_line_children (EGG_WRAP_BOX (w->toolbar), 60);
 		gtk_widget_set_name(w->toolbar, "toolbar");
 		gtk_widget_set_hexpand(w->toolbar,TRUE);
 		gtk_box_pack_start(GTK_BOX(toolbar_box),w->toolbar,FALSE,FALSE,0);

@@ -1314,9 +1314,9 @@ EXPORT void LayoutSetPos(wIndex_t inx, wBool_t force) {
 							|| layerButtCnt++ <= layerCount)) {
 						wControlSetPos(buttonList[inx].control, 0,0);
 						wControlShow(buttonList[inx].control, TRUE);
-					} else {
-						wControlShow(buttonList[inx].control, FALSE);
-					}
+				} else {
+					wControlShow(buttonList[inx].control, FALSE);
+				}
 			}
 
 		}
@@ -2893,7 +2893,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 		LayoutBackGroundInit();
 		LayoutBackGroundSave();		//Remove Background
 	}
-
+	programMode = MODE_DESIGN;
 	LayoutToolBar();
 	inMainW = FALSE;
 	return mainW;
