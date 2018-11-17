@@ -22,6 +22,7 @@
 
 #define _WIN32_WINNT 0x0500
 #include <windows.h>
+#include <shellapi.h>
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
@@ -1836,6 +1837,26 @@ void wMessage(
     ReleaseDC(w->hWnd, hDc);
 }
 
+/**
+ * Open a document using an external application
+ * 
+ * \param file
+ * \return TRUE on success, FALSE on error
+ * 
+ */
+unsigned wOpenFileExternal(char *file)
+{
+	HINSTANCE res;
+
+	res = ShellExecute(mswHWnd, "open", file, NULL, NULL, SW_SHOW);
+
+	if ((int)res <= 32) {
+		wNoticeEx(NT_ERROR, "Error when opening file!", "Cancel", NULL);
+		return(FALSE);
+	}
+
+	return(TRUE);
+}
 
 void wExit(int rc)
 {

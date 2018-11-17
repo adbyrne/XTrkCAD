@@ -154,6 +154,7 @@ void wHelp(			const char * );
 
 wBool_t wNoticeEx( int type, const char * msg, const char * yes, const char * no );
 
+unsigned wOpenFileExternal(char *filename);
 
 
 void wSetBalloonHelp ( wBalloonHelp_t * );
