@@ -137,13 +137,14 @@ BOOL_T Initialize( void )
 	InitTrkStruct();
 	InitTrkText();
 	InitTrkDraw();
-	InitTrkNote();
+	
 	InitTrkBlock();
         InitTrkSwitchMotor();
         InitTrkSignal();
         InitTrkControl();
         InitTrkSensor();
 	InitCarDlg();
+	InitCmdNote();
 
 	memset( message, 0, sizeof message );
 	
