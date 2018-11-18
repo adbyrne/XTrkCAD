@@ -18,7 +18,7 @@ Raise or Lower all Selected tracks
 :cmdBelow
 Move Selected object to bottom
 :cmdBlockCreate
-Create a section of track for automation. 
+Create a section of track for automation.
 :cmdCarDesc
 Create a new Car/Loco description
 :cmdCarInventory
@@ -165,8 +165,12 @@ Move selected objects
 Move a label
 :cmdMoveToCurrentLayer
 Move selected objects to current layer
-:cmdNote
+:cmdNoteCmd
 Place a note on the layout
+:cmdLinkNote
+Place a link on the layout
+:cmdTextNote
+Place a text note on the layout
 :cmdOutputbitmap
 Print a BitMap
 :cmdParallel
@@ -268,7 +272,7 @@ File Menu
 :menuFile-save
 Save layout
 :menuFile-saveAs
-Save layout under a new name 
+Save layout under a new name
 :menuFile-clear
 New layout
 :menuFile-enum
@@ -382,7 +386,7 @@ Length of car body
 :carpart-carWidth
 Width of car body
 :carpart-trkCenter
-Distance between Trucks 
+Distance between Trucks
 :carpart-cplrMount
 Coupler are mounted on body or truck
 :carpart-cpldLen
@@ -644,7 +648,7 @@ Specifies how large the bottom edge of the background image should be in model u
 :layout-backgroundAlpha
 Specifies the screening of the background image from 0 to 100%
 :layout-backgroundAngle
-Specifies the rotation angle of the background image in degrees 
+Specifies the rotation angle of the background image in degrees
 :newcar-road
 Roadname
 :newcar-number
@@ -1136,4 +1140,3 @@ Layer
 :cmdLayerShow19
 Layer
 :
-

@@ -104,6 +104,7 @@ SET(SOURCES
 	fileio.c
 	i18n.c
 	layout.c
+	linknoteui.c
 	lprintf.c
 	macro.c
 	misc2.c
@@ -115,6 +116,7 @@ SET(SOURCES
 	tcornu.c
 	tcurve.c
 	tease.c
+	textnoteui.c
 	track.c
 	trknote.c
 	trkseg.c

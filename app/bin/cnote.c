@@ -92,6 +92,7 @@ void DoNote(void)
  * \param textLength
  * \return pointer to string, has to be myfree'd by caller
  */
+ 
 char *
 ReadMultilineText(size_t textLength)
 {
