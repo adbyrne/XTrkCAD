@@ -38,7 +38,7 @@
 								"variable.\n Also make sure that the user has sufficient access rights to read these" \
  								"files."
 /**
- * Create a fully qualified url froma topic
+ * Create a fully qualified url from a topic
  *
  * \param helpUrl OUT pointer to url, free by caller
  * \param topic IN the help topic
@@ -63,36 +63,6 @@ TopicToUrl(char **helpUrl, const char *topic)
     DynStringFree(&url);
 }
 /**
- * Extend the PATH variable inthe environment to include XTrackCAD's
- * script directory.
- *
- * \return pointer to old path
- */
-
-static char *
-ExtendPath(void)
-{
-    char *path = getenv("PATH");
-    DynString newPath;
-    DynStringMalloc(&newPath, 16);
-
-    // append XTrackCAD's directory to the path as a fallback
-    DynStringCatCStrs(&newPath,
-                      path,
-                      ":",
-                      wGetAppLibDir(),
-                      NULL);
-
-    setenv("PATH",
-           DynStringToCStr(&newPath),
-           TRUE);
-
-    DynStringFree(&newPath);
-
-    return (path);
-}
-
-/**
  * Invoke the system's default browser to display help for <topic>. First the
  * system's standard xdg-open command is attempted. If that is not available, the
  * version included with the XTrackCAD installation is executed.
@@ -104,34 +74,18 @@ void wHelp(const char * topic)
 {
     int rc;
     char *url;
-    DynString commandLine;
     char *currentPath;
 
     assert(topic != NULL);
     assert(strlen(topic));
 
-    currentPath = ExtendPath();
     TopicToUrl(&url, topic);
 
-    DynStringMalloc(&commandLine, 16);
-    DynStringCatCStrs(&commandLine,
-                      DEFAULTBROWSERCOMMAND,
-                      " ",
-                      url,
-                      NULL);
+	rc = wOpenFileExternal(url);
 
-    // the command should be found via the PATH
-    rc = system(DynStringToCStr(&commandLine));
-
-    if (rc) {
+    if (!rc) {
         wNotice(HELPERRORTEXT, _("Cancel"), NULL);
     }
 
-    // restore the PATH
-    setenv("PATH",
-           currentPath,
-           TRUE);
-
     free(url);
-    DynStringFree(&commandLine);
 }

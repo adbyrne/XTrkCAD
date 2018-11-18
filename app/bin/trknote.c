@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdint.h>
 #include <string.h>
 
 #include "cundo.h"
@@ -165,7 +166,8 @@ void UpdateLink(track_p trk, int inx, descData_p descUpd,
 {
 	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 	struct noteLinkData *noteLinkData = GetNoteLinkData();
-
+	int len = strlen(noteLinkData->url);
+	
 	switch (inx) {
 	case OR_LINK:
 
@@ -180,7 +182,7 @@ void UpdateLink(track_p trk, int inx, descData_p descUpd,
 		break;
 
 	case OK_LINK:
-		int len = strlen(noteLinkData->url);
+		
 		xx->text = (char*)MyMalloc(strlen(noteLinkData->url) + 2);
 		strcpy(xx->text, noteLinkData->url);
 		if (xx->text[len - 1] != '\n') {

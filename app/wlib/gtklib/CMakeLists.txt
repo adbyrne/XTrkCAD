@@ -18,6 +18,7 @@ set(sources
 	menu.c	
 	message.c
 	notice.c
+	opendocument.c
 	pixbuf.c
 	png.c
 	print.c
