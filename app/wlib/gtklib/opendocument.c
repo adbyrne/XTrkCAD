@@ -28,13 +28,19 @@
 
 #include "dynstring.h"
 
-#if defined(linux)
+#if defined (_WIN32)
 
-#define DEFAULTOPENCOMMAND "xdg-open"
+#define DEFAULTOPENCOMMAND "start"
+
+#endif
+
+#if defined(__APPLE__) && defined(__MACH__)
+
+#define DEFAULTOPENCOMMAND "open"
 
 #else
 
-#define DEFAULTOPENCOMMAND "open"
+#define DEFAULTOPENCOMMAND "xdg-open"
 
 #endif
 
