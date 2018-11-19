@@ -95,7 +95,12 @@ unsigned wOpenFileExternal(char *file)
     {
     	char * full_command;
 
+#if defined(linux)
+    	char command[] = "xdg-open ";
+#else
     	char command[] = "open ";
+#endif
+
 
     	if (!file || !file[0]) return FALSE;
 
