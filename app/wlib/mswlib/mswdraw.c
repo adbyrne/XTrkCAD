@@ -1391,6 +1391,8 @@ long FAR PASCAL XEXPORT mswDrawPush(
 			action = wActionLUp;
 		else if (message == WM_RBUTTONUP)
 			action = wActionRUp;
+		else if (message == WM_LBUTTONDBLCLK)
+			action = wActionLDownDouble;
 		else {
 			if ( (wParam & MK_LBUTTON) != 0)
 				action = wActionLDrag;

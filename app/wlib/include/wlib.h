@@ -471,7 +471,8 @@ typedef int wAction_t;
 #define wActionExtKey		(9)
 #define wActionWheelUp (10)
 #define wActionWheelDown (11)
-#define wActionLast		wActionWheelDown
+#define wActionLDownDouble (12)
+#define wActionLast		wActionLDownDouble
 
 
 #define wRGB(R,G,B)\

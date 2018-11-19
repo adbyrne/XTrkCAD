@@ -2333,6 +2333,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 		case C_UP:
 		case C_RMOVE:
 		case C_RUP:
+		case C_LDOUBLE:
 			InfoPos( pos );
 			/*DrawTempTrack();*/
 			break;

@@ -145,7 +145,10 @@ void UpdateNote(track_p trk, int inx, descData_p descUpd,
 	struct noteTextData *noteData = GetNoteTextData();
 	size_t len;
 
-	switch (inx) {
+	int field = inx;
+	if (inx == -1) field = TX_TEXT;  //If OK, still get Text Field
+
+	switch (field) {
 	case OR_TEXT:
 
 		xx->pos = noteData->pos;
@@ -326,6 +329,12 @@ static void DescribeNote(track_p trk, char * str, CSIZE_T len)
 	}
 }
 
+static void ActivateNote(track_p trk) {
+	if (IsLinkNote(trk)) {
+		ActivateLinkNote(trk);
+	}
+}
+
 static trackCmd_t noteCmds = {
     "NOTE",
     DrawNote,
@@ -342,7 +351,25 @@ static trackCmd_t noteCmds = {
     NULL,		/* split */
     NULL,		/* traverse */
     NULL,		/* enumerate */
-    NULL		/* redraw */
+    NULL,		/* redraw */
+	NULL,       /*trim*/
+	NULL,       /*merge*/
+	NULL,       /*modify*/
+	NULL,       /*getLength*/
+	NULL,       /*getTrackParams*/
+	NULL,       /*moveEndPt*/
+	NULL,       /*query*/
+	NULL,       /*ungroup*/
+	NULL,       /*flip*/
+	NULL,       /*drawPositionIndicator*/
+	NULL,       /*advancePositionIndicator*/
+	NULL,       /*checkTraverse*/
+	NULL,	    /*makeParallel*/
+	NULL,       /*drawDesc*/
+	NULL,       /*rebuildSegs*/
+	NULL,       /*replayData*/
+	NULL,       /*storeData*/
+	ActivateNote
 };
 
 /*****************************************************************************

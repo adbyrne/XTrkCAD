@@ -1921,6 +1921,16 @@ static STATUS_T SelectTrack(
 	return C_CONTINUE;
 }
 
+static STATUS_T Activate( coOrd pos) {
+	track_p trk;
+	if ((trk = OnTrack( &pos, TRUE, FALSE )) == NULL) {
+				return C_CONTINUE;
+	}
+	ActivateTrack(trk);
+
+	return C_CONTINUE;
+}
+
 
 static STATUS_T CmdSelect(
 		wAction_t action,
@@ -2007,6 +2017,15 @@ static STATUS_T CmdSelect(
 		mode = AREA;
 		break;
 
+	case C_LDOUBLE:
+		switch (mode) {
+			case AREA:
+			case NONE:
+				return Activate(pos);
+			default:
+				break;
+		}
+		break;
 	case C_CMDMENU:
 		if (selectedTrackCount <= 0) {
 			wMenuPopupShow( selectPopup1M );

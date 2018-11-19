@@ -53,6 +53,7 @@ void NewLinkNoteUI(track_p trk);
 struct noteLinkData *GetNoteLinkData(void);
 bool IsLinkNote(track_p trk);
 void DescribeLinkNote(track_p trk, char * str, CSIZE_T len);
+void ActivateLinkNote(track_p trk);
 
 /* textnoteui.c */
 void NewTextNoteUI(track_p trk);
