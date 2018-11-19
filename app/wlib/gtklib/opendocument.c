@@ -28,7 +28,15 @@
 
 #include "dynstring.h"
 
+#if defined(linux)
+
 #define DEFAULTOPENCOMMAND "xdg-open"
+
+#else
+
+#define DEFAULTOPENCOMMAND "open"
+
+#endif
 
 /**
  * Extend the PATH variable in the environment to include XTrackCAD's
