@@ -80,7 +80,7 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 /**
  * Show the UI for entering new text notes
  * 
- * \param xx Note objext data
+ * \param xx Note object data
  */
 
 void NewTextNoteUI(track_p trk) {

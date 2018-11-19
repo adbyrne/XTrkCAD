@@ -32,6 +32,8 @@
 #include "track.h"
 #include "wlib.h"
 
+extern BOOL_T inDescribeCmd;
+
 #define MINURLLENGTH 5 /* 2 chars domain name, dot, 2 chars TLD */
 
 static char *validProtocols[] = { "http://", "https://" };
@@ -167,9 +169,15 @@ LinkEditOK(void *junk)
 	wHide(linkEditW);
 }
 
+
+
 void CreateEditLinkDialog(track_p trk, char *title, char *defaultURL)
 {
 	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+
+	if (!inDescribeCmd) {
+		return;
+	}
 
 	if (!linkEditW) {
 		ParamRegister(&linkEditPG);
@@ -201,6 +209,7 @@ void CreateEditLinkDialog(track_p trk, char *title, char *defaultURL)
 void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 {
 	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	strlcpy(str,xx->text,len);  /* Set info line */
 	CreateEditLinkDialog( trk, _("Describe link"), xx->text);
 }
 
