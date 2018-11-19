@@ -37,8 +37,7 @@ extern BOOL_T inDescribeCmd;
 
 static TRKTYP_T T_NOTE = -1;
 
-static wDrawBitMap_p note_bm;
-
+static wDrawBitMap_p note_bm, link_bm;
 
 typedef struct {
 	char **xpm;
@@ -89,6 +88,24 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 
     if (d->scale >= 16) {
         return;
+    }
+    if (IsLinkNote(t)) {
+    	if ((d->funcs->options & wDrawOptTemp) == 0) {
+    	     DrawBitMap(d, xx->pos, link_bm, color);
+    	} else {
+    		DIST_T dist;
+			dist = 0.1*d->scale;
+			p[0].x = p[1].x = xx->pos.x - dist;
+			p[2].x = p[3].x = xx->pos.x + dist;
+			p[1].y = p[2].y = xx->pos.y - dist;
+			p[3].y = p[0].y = xx->pos.y + dist;
+			DrawLine(d, p[0], p[1], 0, color);
+			DrawLine(d, p[1], p[2], 0, color);
+			DrawLine(d, p[2], p[3], 0, color);
+			DrawLine(d, p[3], p[0], 0, color);
+
+    	}
+    	return;
     }
 
     if ((d->funcs->options & wDrawOptTemp) == 0) {
@@ -381,9 +398,16 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		return C_CONTINUE;
 
     case C_REDRAW:
-        if (state_on) {
-            DrawBitMap(&tempD, oldPos, note_bm, normalColor);
-        }
+    	if (state_on) {
+			switch (curNoteType) {
+			case OP_NOTETEXT:
+				DrawBitMap(&tempD, oldPos, note_bm, normalColor);
+				break;
+			case OP_NOTELINK:
+				DrawBitMap(&tempD, oldPos, link_bm, normalColor);
+				break;
+			}
+    	}
         return C_CONTINUE;
 
     case C_CANCEL:
@@ -397,11 +421,13 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 }
 
 #include "bitmaps/note.xbm"
+#include "bitmaps/link.xbm"
 #include "bitmaps/cnote.xpm"
 
 void InitTrkNote(wMenu_p menu)
 {
     note_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, note_bits);
+    link_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, link_bits);
  
 	ButtonGroupBegin(_("Note"), "cmdNoteCmd", _("Select note command"));
 	for (int i = 0; i < NOTETYPESCOUNT; i++) {

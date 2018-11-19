@@ -84,6 +84,40 @@ static wBool_t reverseIcon =
  *****************************************************************************
  */
 
+ /**
+ * Open a document using an external application
+ *
+ * \param file
+ * \return TRUE on success, FALSE on error
+ *
+ */
+unsigned wOpenFileExternal(char *file)
+    {
+    	char * full_command;
+
+    	char command[] = "open ";
+
+    	if (!file || !file[0]) return FALSE;
+
+    	int len = strlen(file)+strlen(command)+1;
+
+    	full_command = malloc(len);
+
+    	strlcpy(full_command,command,len);
+    	strlcat(full_command,file,len);
+
+
+    	int res = system(full_command);
+
+    	if (res < 0) {
+    		wNoticeEx(NT_ERROR, "Error when opening URI!", "Cancel", NULL);
+    		free(full_command);
+    		return(FALSE);
+    	}
+    	free(full_command);
+    	return(TRUE);
+    }
+
 /**
  * Create a pixbuf from a two colored bitmap in XBM format.
  *
