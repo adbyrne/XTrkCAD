@@ -49,7 +49,7 @@ struct noteTextData *GetNoteTextData()
 		MyFree(noteData.text);
 		len = wTextGetSize((wText_p)noteDesc[TX_TEXT].control0);
 		noteData.text = (char*)MyMalloc(len + 2);
-		wTextGetText((wText_p)noteDesc[TX_TEXT].control0, noteData.text, len);
+		wTextGetText((wText_p)noteDesc[TX_TEXT].control0, noteData.text, len+1);
 	}
 	return(&noteData);
 }
