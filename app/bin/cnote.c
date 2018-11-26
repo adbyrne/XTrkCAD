@@ -56,12 +56,6 @@ static void NoteOk(void * junk)
         len = wTextGetSize(noteT);
         mainText = (char*)MyMalloc(len+2);
         wTextGetText(noteT, mainText, len);
-
-        if (mainText[len-1] != '\n') {
-            mainText[len++] = '\n';
-        }
-
-        mainText[len] = '\0';
     }
 
     wHide(noteW);
@@ -115,6 +109,8 @@ ReadMultilineText(size_t textLength)
 	}
 
 	string = MyStrdup(DynStringToCStr(&noteText));
+	string[strlen(string) - 1] = '\0';
+
 	DynStringFree(&noteText);
 	return(string);
 }
@@ -127,10 +123,7 @@ BOOL_T WriteMainNote(FILE* f)
     if (mainText && *mainText) {
         rc &= fprintf(f, "NOTE MAIN 0 0 0 0 %lu\n", strlen(mainText))>0;
         rc &= fprintf(f, "%s", mainText)>0;
-        if (*(mainText + strlen(mainText) - 1) != '\n') {
-            rc &= fprintf(f, "%s", "\n") > 0;
-        }
-        rc &= fprintf(f, "    END\n")>0;
+        rc &= fprintf(f, "\n    END\n")>0;
     }
 
     return rc;

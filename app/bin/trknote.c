@@ -168,9 +168,6 @@ void UpdateNote(track_p trk, int inx, descData_p descUpd,
 		len = strlen(noteData->text);
 		xx->text = (char*)MyMalloc(len + 2);
 		strcpy( xx->text, noteData->text );
-		if (xx->text[len - 1] != '\n') {
-			strcat(xx->text, "\n");
-		}
 		MainRedraw();
 		break;
 	default:
@@ -197,15 +194,13 @@ void UpdateLink(track_p trk, int inx, descData_p descUpd,
 		SetTrkLayer(trk, noteLinkData->layer);
 		MainRedraw();
 		break;
-
+	
 	case OK_LINK:
-		
-		xx->text = (char*)MyMalloc(strlen(noteLinkData->url) + 2);
-		strcpy(xx->text, noteLinkData->url);
-		if (xx->text[len - 1] != '\n') {
-			xx->text[len++] = '\n';
+		if (xx->text) {
+			MyFree(xx->text);
 		}
-		xx->text[len] = '\0';
+		xx->text = (char*)MyMalloc(strlen(noteLinkData->url) + strlen(noteLinkData->title) + 2);
+		sprintf(xx->text, "%s %s", noteLinkData->url, noteLinkData->title);
 		break;
 	default:
 		break;
@@ -224,21 +219,14 @@ static void DeleteNote(track_p t)
 static BOOL_T WriteNote(track_p t, FILE * f)
 {
     struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
-    int len;
-    BOOL_T addNL = FALSE;
+    int len = strlen(xx->text);
     BOOL_T rc = TRUE;
-    len = strlen(xx->text);
-
-    if (xx->text[len - 1] != '\n') {
-        len++;
-        addNL = TRUE;
-    }
 
     rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d\n", GetTrkIndex(t),
                   GetTrkLayer(t),
                   xx->pos.x, xx->pos.y, len) > 0;
-    rc &= fprintf(f, "%s%s", xx->text, addNL ? "\n" : "") > 0;
-    rc &= fprintf(f, "    END\n") > 0;
+    rc &= fprintf(f, "%s", xx->text ) > 0;
+    rc &= fprintf(f, "\n    END\n") > 0;
     return rc;
 }
 

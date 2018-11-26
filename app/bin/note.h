@@ -26,6 +26,7 @@
 #include "track.h"
 
 #define URLMAXIMUMLENGTH (2048)
+#define TITLEMAXIMUMLENGTH (81)
 
 struct extraDataNote {
 	coOrd pos;
@@ -41,12 +42,13 @@ struct noteTextData {
 struct noteLinkData {
 	coOrd pos;
 	unsigned int layer;
+	char title[TITLEMAXIMUMLENGTH];
 	char url[URLMAXIMUMLENGTH];
 	track_p trk;
 };
 
 enum { OR_TEXT, LY_TEXT, TX_TEXT };
-enum { OR_LINK, LY_LINK, TX_LINK, OK_LINK };
+enum { OR_LINK, LY_LINK, TITLE_LINK, TX_LINK, OK_LINK };
 
 /* linknoteui.c */
 void NewLinkNoteUI(track_p trk);
