@@ -34,6 +34,7 @@
 #include "utility.h"
 
 extern BOOL_T inDescribeCmd;
+extern descData_t noteDesc[];
 
 static TRKTYP_T T_NOTE = -1;
 
@@ -81,6 +82,14 @@ static track_p NewNote(wIndex_t index, coOrd p, long size)
     return t;
 }
 
+/**
+ * Draw the icon for a note into the drawing area
+ * 
+ * \param t IN note
+ * \param d IN drawing environment
+ * \param color IN color for ico
+ */
+ 
 static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 {
     struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
@@ -89,38 +98,28 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
     if (d->scale >= 16) {
         return;
     }
-    if (IsLinkNote(t)) {
-    	if ((d->funcs->options & wDrawOptTemp) == 0) {
-    	     DrawBitMap(d, xx->pos, link_bm, color);
-    	} else {
-    		DIST_T dist;
-			dist = 0.1*d->scale;
-			p[0].x = p[1].x = xx->pos.x - dist;
-			p[2].x = p[3].x = xx->pos.x + dist;
-			p[1].y = p[2].y = xx->pos.y - dist;
-			p[3].y = p[0].y = xx->pos.y + dist;
-			DrawLine(d, p[0], p[1], 0, color);
-			DrawLine(d, p[1], p[2], 0, color);
-			DrawLine(d, p[2], p[3], 0, color);
-			DrawLine(d, p[3], p[0], 0, color);
+	if ((d->funcs->options & wDrawOptTemp)) {
+		//while the icon is moved, draw a square
+		DIST_T dist;
+		dist = 0.1*d->scale;
+		p[0].x = p[1].x = xx->pos.x - dist;
+		p[2].x = p[3].x = xx->pos.x + dist;
+		p[1].y = p[2].y = xx->pos.y - dist;
+		p[3].y = p[0].y = xx->pos.y + dist;
+		DrawLine(d, p[0], p[1], 0, color);
+		DrawLine(d, p[1], p[2], 0, color);
+		DrawLine(d, p[2], p[3], 0, color);
+		DrawLine(d, p[3], p[0], 0, color);
+	} else {
+		// draw a bitmap for static object
+		wDrawBitMap_p bm;
 
-    	}
-    	return;
-    }
-
-    if ((d->funcs->options & wDrawOptTemp) == 0) {
-        DrawBitMap(d, xx->pos, note_bm, color);
-    } else {
-        DIST_T dist;
-        dist = 0.1*d->scale;
-        p[0].x = p[1].x = xx->pos.x - dist;
-        p[2].x = p[3].x = xx->pos.x + dist;
-        p[1].y = p[2].y = xx->pos.y - dist;
-        p[3].y = p[0].y = xx->pos.y + dist;
-        DrawLine(d, p[0], p[1], 0, color);
-        DrawLine(d, p[1], p[2], 0, color);
-        DrawLine(d, p[2], p[3], 0, color);
-        DrawLine(d, p[3], p[0], 0, color);
+		if (IsLinkNote(t)) {
+			bm = link_bm;
+		} else {
+			bm = note_bm;
+		}   	
+    	DrawBitMap(d, xx->pos, bm, color);
     }
 }
 
@@ -170,6 +169,27 @@ void UpdateNote(track_p trk, int inx, descData_p descUpd,
 		strcpy( xx->text, noteData->text );
 		MainRedraw();
 		break;
+	case -1:
+		if (wTextGetModified((wText_p)noteDesc[TX_TEXT].control0)) {
+			int len;
+
+			if (needUndoStart) {
+				UndoStart(_("Change Track"), "Change Track");
+			}
+
+			UndoModify(trk);
+			MyFree(xx->text);
+			len = wTextGetSize((wText_p)noteDesc[TX_TEXT].control0);
+			xx->text = (char*)MyMalloc(len + 2);
+			wTextGetText((wText_p)noteDesc[TX_TEXT].control0, xx->text, len);
+
+			if (xx->text[len - 1] != '\n') {
+				xx->text[len++] = '\n';
+			}
+
+			xx->text[len] = '\0';
+		}
+		MainRedraw();
 	default:
 		break;
 	}

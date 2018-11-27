@@ -31,7 +31,7 @@
 
 static struct noteTextData noteData;
 
-static descData_t noteDesc[] = {
+descData_t noteDesc[] = {
     /*OR_TEXT*/	{ DESC_POS, N_("Position"), &noteData.pos },
     /*LY_TEXT*/	{ DESC_LAYER, N_("Layer"), &noteData.layer },
     /*TX_TEXT*/	{ DESC_TEXT, NULL, NULL },
