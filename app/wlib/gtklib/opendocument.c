@@ -28,7 +28,21 @@
 
 #include "dynstring.h"
 
+#if defined (_WIN32)
+
+#define DEFAULTOPENCOMMAND "start"
+
+#endif
+
+#if defined(__APPLE__) && defined(__MACH__)
+
+#define DEFAULTOPENCOMMAND "open"
+
+#else
+
 #define DEFAULTOPENCOMMAND "xdg-open"
+
+#endif
 
 /**
  * Extend the PATH variable in the environment to include XTrackCAD's
