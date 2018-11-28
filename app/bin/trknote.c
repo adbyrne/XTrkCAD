@@ -58,7 +58,7 @@ enum noteCommands {
 } noteOperations;
 
 static trknoteData_t noteTypes[] = {
-	{ sticky_note_text_bits, OP_NOTETEXT, N_("Note"), N_("Text Note"), "cmdTextNote", 0L },
+	{ sticky_note_text_bits, OP_NOTETEXT, N_("Note"), N_("Text"), "cmdTextNote", 0L },
 	{ sticky_note_chain_bits, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
 };
 

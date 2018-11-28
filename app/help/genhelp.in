@@ -108,7 +108,7 @@ cmdMoveLabel	Move a label
 cmdMoveToCurrentLayer	Move selected objects to current layer
 cmdNote	Place a note on the layout
 cmdNoteCmd	Select a note type
-cmdLinkNote	Place a link on the layout
+cmdLinkNote	Place a weblink on the layout
 cmdTextNote	Place a text note on the layout
 cmdOutputbitmap	Print a BitMap
 cmdPan	Pan or Zoom the Layout
