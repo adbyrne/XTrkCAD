@@ -233,11 +233,24 @@ void CreateEditLinkDialog(track_p trk, char *title, char *defaultURL)
 }
 
 /**
+ * Activate note if double clicked
+ * \param trk the note
+ */
+
+void ActivateLinkNote(track_p trk)
+{
+    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+    SplitLinkNoteText(xx->text, noteLinkData.url, URLMAXIMUMLENGTH, NULL, 0);
+    NoteLinkOpen(NULL);
+}
+
+
+/**
  * Describe and enable editing of an existing link note
  *
  * \param trk the existing, valid note
- * \param str ??
- * \param len **
+ * \param str the field to put a text version of the note so it will appear on the status line
+ * \param len the lenght of the field
  */
 
 void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)

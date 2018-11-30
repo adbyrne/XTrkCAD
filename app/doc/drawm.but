@@ -123,6 +123,8 @@ used to display the website.
  When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Webink Note} will display the \e{Property Sheet} to let you read or modify the URL or the
  description.
 
+ Double clicking on a weblink icon opens the website in your default browser. 
+
 \rule
 
 

@@ -1383,6 +1383,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
+	case WM_LBUTTONDBLCLK:
 		if (message == WM_LBUTTONDOWN)
 			action = wActionLDown;
 		else if (message == WM_RBUTTONDOWN)
@@ -1391,6 +1392,8 @@ long FAR PASCAL XEXPORT mswDrawPush(
 			action = wActionLUp;
 		else if (message == WM_RBUTTONUP)
 			action = wActionRUp;
+		else if (message == WM_LBUTTONDBLCLK)
+			action = wActionLDownDouble;
 		else {
 			if ( (wParam & MK_LBUTTON) != 0)
 				action = wActionLDrag;

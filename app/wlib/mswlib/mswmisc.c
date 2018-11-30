@@ -3325,7 +3325,7 @@ static BOOL InitApplication(HINSTANCE hinstCurrent)
         return FALSE;
     }
 
-    wc.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC;
+    wc.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC | CS_DBLCLKS;
     wc.lpfnWndProc = mswDrawPush;
     wc.lpszClassName = mswDrawWindowClassName;
     wc.cbWndExtra = 4;

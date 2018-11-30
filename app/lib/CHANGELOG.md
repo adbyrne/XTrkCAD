@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
++ A new type of note can be used to store a weblink. Double-clicking on the
+weblink icon in a drawing opens the website in the default browser.
+
+### Fixed
+
+### Added and changed parameter files
+
 ## [5.1.2]
 
 ### Added
@@ -12,7 +22,7 @@ This menu in Options->Debug only appears if the env variable XTRKCADEXTRA is set
 Debug Window has a default trace level option. This is the level of Log/Trace that all types of tracing will follow unless they have been specified explicitly in the startup parms or otherwise.
 Any log entries created before the first invocation of the window will be included, so a tester could add a LogSet("traverseBezier",0) line into the InitTrkBezier() code while testing or use a -d traverseBezier=0 and then use Debug to set level to 1 and start logging.
 
-## Fixed
+### Fixed
 + Make Up and Down Scroll only move 1/2 a screen height (rather than 1/2 a width)
 + Fix Modify redraw for Bezier or Cornu
 + Allow modify of naked Cornu along the Cornu itself if it isn't connected to another Cornu or Bezier

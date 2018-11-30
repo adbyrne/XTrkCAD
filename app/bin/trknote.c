@@ -84,12 +84,12 @@ static track_p NewNote(wIndex_t index, coOrd p, long size)
 
 /**
  * Draw the icon for a note into the drawing area
- * 
+ *
  * \param t IN note
  * \param d IN drawing environment
  * \param color IN color for ico
  */
- 
+
 static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 {
     struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
@@ -118,7 +118,7 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 			bm = link_bm;
 		} else {
 			bm = note_bm;
-		}   	
+		}
     	DrawBitMap(d, xx->pos, bm, color);
     }
 }
@@ -201,7 +201,7 @@ void UpdateLink(track_p trk, int inx, descData_p descUpd,
 	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 	struct noteLinkData *noteLinkData = GetNoteLinkData();
 	int len = strlen(noteLinkData->url);
-	
+
 	switch (inx) {
 	case OR_LINK:
 
@@ -214,7 +214,7 @@ void UpdateLink(track_p trk, int inx, descData_p descUpd,
 		SetTrkLayer(trk, noteLinkData->layer);
 		MainRedraw();
 		break;
-	
+
 	case OK_LINK:
 		if (xx->text) {
 			MyFree(xx->text);
@@ -252,10 +252,10 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 
 /**
  * Read a track note aka postit
- * 
+ *
  * \param line
  */
-  
+
 static void
 ReadTrackNote(char *line)
 {
@@ -334,6 +334,12 @@ static void DescribeNote(track_p trk, char * str, CSIZE_T len)
 	}
 }
 
+static void ActivateNote(track_p trk) {
+	if (IsLinkNote(trk)) {
+		ActivateLinkNote(trk);
+	}
+}
+
 static trackCmd_t noteCmds = {
     "NOTE",
     DrawNote,
@@ -350,7 +356,25 @@ static trackCmd_t noteCmds = {
     NULL,		/* split */
     NULL,		/* traverse */
     NULL,		/* enumerate */
-    NULL		/* redraw */
+    NULL,		/* redraw */
+	NULL,       /*trim*/
+	NULL,       /*merge*/
+	NULL,       /*modify*/
+	NULL,       /*getLength*/
+	NULL,       /*getTrackParams*/
+	NULL,       /*moveEndPt*/
+	NULL,       /*query*/
+	NULL,       /*ungroup*/
+	NULL,       /*flip*/
+	NULL,       /*drawPositionIndicator*/
+	NULL,       /*advancePositionIndicator*/
+	NULL,       /*checkTraverse*/
+	NULL,	    /*makeParallel*/
+	NULL,       /*drawDesc*/
+	NULL,       /*rebuildSegs*/
+	NULL,       /*replayData*/
+	NULL,       /*storeData*/
+	ActivateNote
 };
 
 /*****************************************************************************
@@ -391,7 +415,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
         trk = NewNote(-1, pos, 2);
         DrawNewTrack(trk);
 		inDescribeCmd = TRUE;
-		switch (curNoteType) 
+		switch (curNoteType)
 		{
 		case OP_NOTETEXT:
 			NewTextNoteUI(trk);
@@ -402,7 +426,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		}
 
 		inDescribeCmd = FALSE;
-			
+
 		return C_CONTINUE;
 
     case C_REDRAW:
@@ -436,7 +460,7 @@ void InitTrkNote(wMenu_p menu)
 {
     note_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, note_bits);
     link_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, link_bits);
- 
+
 	ButtonGroupBegin(_("Note"), "cmdNoteCmd", _("Select note command"));
 	for (int i = 0; i < NOTETYPESCOUNT; i++) {
 		trknoteData_t *nt;
@@ -447,6 +471,6 @@ void InitTrkNote(wMenu_p menu)
 		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50, IC_STICKY | IC_POPUP2, nt->acclKey, (void *)(intptr_t)nt->OP);
 	}
 	ButtonGroupEnd();
-	
+
 	T_NOTE = InitObject(&noteCmds);
 }
