@@ -840,6 +840,7 @@ static gint draw_button_event(
 	switch ( event->button ) {
 	case 1: /* left mouse button */
 		action = event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp;
+		if (event->type==GDK_2BUTTON_PRESS) action = wActionLDownDouble;
 		/*bd->action( bd, bd->context, event->type==GDK_BUTTON_PRESS?wActionLDown:wActionLUp, bd->lastX, bd->lastY );*/
 		break;
 	case 3: /* right mouse button */

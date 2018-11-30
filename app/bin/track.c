@@ -117,10 +117,17 @@ static BOOL_T inDrawTracks;
  * 
  *
  */
+EXPORT void ActivateTrack( track_cp trk) {
+	int inx = GetTrkType(trk);
+	if (trackCmds( inx )->activate != NULL)
+		trackCmds( inx )->activate (trk);
+
+}
 
 
 EXPORT void DescribeTrack( track_cp trk, char * str, CSIZE_T len )
 {
+
 	trackCmds( GetTrkType(trk) )->describe ( trk, str, len );
 	/*epCnt = GetTrkEndPtCnt(trk);
 	if (debugTrack >= 2)

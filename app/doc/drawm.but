@@ -49,7 +49,7 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \S{cmdCircleL} Circles and Filled Circles
 
-\G{png.d/mdrawcircles.png} 
+\G{png.d/mdrawcircles.png}
 
 \f{Circles} and \f{Filled Circles} are created by selecting either the center position or a point on the edge of the circle and dragging to specify the radius.
 
@@ -70,8 +70,8 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \dd \G{png.d/dcurve1.png} Select the start of the curve and drag in the direction of the curve.
 
-If \e{Shift} is held down as the left mouse button is clicked for the first end point of the curve and the cursor is over a line object the position will snap to the nearest end of that line. 
-If \e{Shift} is held down when the button is released for the second end, it will snap to the nearest end of a line object if it is over one. 
+If \e{Shift} is held down as the left mouse button is clicked for the first end point of the curve and the cursor is over a line object the position will snap to the nearest end of that line.
+If \e{Shift} is held down when the button is released for the second end, it will snap to the nearest end of a line object if it is over one.
 
 \u000
 
@@ -84,7 +84,7 @@ To complete the command, drag on the red arrows to adjust the curve.
 \dd \G{png.d/dcurve3.png} Select the center of the curve and drag to one end.
 
 To complete the command, drag on the red arrows to adjust the curve.
- 
+
 \u000
 
 \dd \G{png.d/dcurve4.png} Drag from one end of the curve to the other to form the chord of the curve.
@@ -104,22 +104,33 @@ To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a control point.
 
 \S{cmdNote} Note
 
-\G{png.d/bnote.png}
+\G{png.d/mnote.png}
 
-The \f{Notepad} command allows you to attach notes (\G{png.d/iconnote.png}) to selected places on the layout.
+The \f{Note} command allows you to attach text notes (\G{png.d/iconnote.png}) or weblinks (\G{png.d/iconlink.png}) to selected places on the layout.
 
-Click and drag on the Main Canvas (\K{mainW}) to place the note.
+\dd \G{png.d/bnote.png} \G{png.d/iconnote.png} Click and drag on the Main Canvas (\K{mainW}) to place the note.
 
 When you release, the \e{Note Editor} dialog is displayed.  You can enter the note in the text area.
 
-When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Note} will display the \e{Property Sheet} to let you read or modify the note.  
+When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Note} will display the \e{Property Sheet} to let you read or modify the note.
+
+\dd \G{png.d/blink.png} \G{png.d/iconlink.png} Similar to text notes you can place a weblink on the layout.
+
+After releasing the mouse button, the \e{Link Editor} dialog is displayed. You can enter the URL
+of the website and a short description. When clicking on the Open button, your default browser is
+used to display the website.
+
+ When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Webink Note} will display the \e{Property Sheet} to let you read or modify the URL or the
+ description.
+
+ Double clicking on a weblink icon opens the website in your default browser. 
 
 \rule
 
 
 \S{cmdRuler} Ruler
 
-\G{png.d/bruler.png} 
+\G{png.d/bruler.png}
 
 The \f{Ruler} command displays a ruler on the layout.  Click where you want the ruler to begin and drag the cursor to measure distances from the origin.  The measured length is displayed in the \f{Status-bar} (\K{mainW}).
 
@@ -136,7 +147,7 @@ Subsequent clicks on the \f{Ruler} button will hide or display the ruler.
 
 Shapes are drawn by:
 
-\dd \G{png.d/dbox.png} \G{png.d/dfilbox.png} \f{Boxes} and \f{Filled Boxes} are created by selecting one corner and dragging the opposite corner. 
+\dd \G{png.d/dbox.png} \G{png.d/dfilbox.png} \f{Boxes} and \f{Filled Boxes} are created by selecting one corner and dragging the opposite corner.
 
 \u000
 
@@ -145,15 +156,15 @@ Shapes are drawn by:
 \rule
 
 
-\S{cmdStraightL} Straight Objects 
+\S{cmdStraightL} Straight Objects
 
 \G{png.d/mdrawstraight.png}
 
 Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.  If \e{Draw Straight Objects} is Sticky (\K{cmdSticky}), \e{Cntl+Left+Drag} will use the endpoint of the previous line as the starting point.
 
 \dd \G{png.d/dline.png} Creates a \f{Straight Line} of specified color and width.
-If \e{Shift} is held down for the first end point and the cursor is over a line object the new line start position will snap to the nearest end of the line. 
-If \e{Shift} is held down when the button is released at the end of the \e{Left+Drag} the line end position will snap to the nearest end of any line object it is over.  
+If \e{Shift} is held down for the first end point and the cursor is over a line object the new line start position will snap to the nearest end of the line.
+If \e{Shift} is held down when the button is released at the end of the \e{Left+Drag} the line end position will snap to the nearest end of any line object it is over.
 
 
 \u000
@@ -185,11 +196,11 @@ If \e{Shift} is held down when the button is released at the end of the \e{Left+
 
 \S{cmdText} Text
 
-\G{png.d/btext.png} 
+\G{png.d/btext.png}
 
 The \f{Text} command lets you enter text on the layout at the selected position. You can use the Tab key to format the text to fixed tab positions and CTRL+Enter to enter a newLine character.
 
-\G{png.d/statustext.png} 
+\G{png.d/statustext.png}
 
 The font size can be changed by the Font Size drop list on the \f{Status-bar} (\K{mainW}).  The font size is scaled along with everything else on the layout so text is always the same relative size as other layout objects.
 

@@ -1,3 +1,5 @@
+include( CheckSymbolExists )
+
 ADD_EXECUTABLE(cnvdsgn cnvdsgn.c utility.c)
 IF(NOT WIN32)
 	TARGET_LINK_LIBRARIES(cnvdsgn m)
@@ -104,6 +106,7 @@ SET(SOURCES
 	fileio.c
 	i18n.c
 	layout.c
+	linknoteui.c
 	lprintf.c
 	macro.c
 	misc2.c
@@ -115,12 +118,23 @@ SET(SOURCES
 	tcornu.c
 	tcurve.c
 	tease.c
+	textnoteui.c
 	track.c
 	trknote.c
 	trkseg.c
 	tstraigh.c
 	utility.c
 	)
+
+check_symbol_exists(strlcpy string.h HAVE_STRLCPY )
+
+if( NOT HAVE_STRLCPY )
+	set (SOURCES
+		 ${SOURCES}
+		 strlcpy.c)
+	message( STATUS "Add own version of strlcpy")	 
+endif( NOT HAVE_STRLCPY )
+
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})

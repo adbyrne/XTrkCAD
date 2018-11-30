@@ -589,6 +589,28 @@ UpdateLayerDlg()
 }
 
 /**
+ * Fill a layer dropbox with the current layer settings
+ * 
+ * \param listLayers the dropbox
+ * \return 
+ */
+  
+void
+FillLayerList( wList_p listLayers)
+{
+	wListClear(listLayers);  // Rebuild list on each invovation
+
+	for (int inx = 0; inx < NUM_LAYERS; inx++) {
+		char *layerFormattedName;
+		layerFormattedName = FormatLayerName(inx);
+		wListAddValue((wList_p)listLayers, layerFormattedName, NULL, (void*)(long)inx);
+		free(layerFormattedName);
+	}
+
+	/* set current layer to selected */
+	wListSetIndex(listLayers, curLayer);
+}
+/**
  * Initialize the layer lists.
  *
  * \param IN pointer to function that actually initialize tha data structures

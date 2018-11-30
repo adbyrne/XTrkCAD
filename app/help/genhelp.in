@@ -7,7 +7,7 @@ cmdAbove	Move Selected object to top
 cmdAddElevations	Raise or Lower all Selected tracks
 cmdBelow	Move Selected object to bottom
 cmdBlockCreate	Create a section of track for automation
-cmdBlockEdit	Edit a Block Definition 
+cmdBlockEdit	Edit a Block Definition
 cmdCarDesc	Create a new Car/Loco description
 cmdCarInventory	Manage your Car and Loco Inventory
 cmdCircleCenter	Create track circle from center	cmdCircle
@@ -107,6 +107,9 @@ cmdMove	Move selected objects
 cmdMoveLabel	Move a label
 cmdMoveToCurrentLayer	Move selected objects to current layer
 cmdNote	Place a note on the layout
+cmdNoteCmd	Select a note type
+cmdLinkNote	Place a weblink on the layout
+cmdTextNote	Place a text note on the layout
 cmdOutputbitmap	Print a BitMap
 cmdPan	Pan or Zoom the Layout
 cmdParallel	Create a parallel track
@@ -162,7 +165,7 @@ cmdZoomOut	Zoom out	editZoomOut
 #
 menuFile	File Menu
 menuFile-save	Save layout
-menuFile-saveAs	Save layout under a new name 
+menuFile-saveAs	Save layout under a new name
 menuFile-clear	New layout
 menuFile-enum	Generate parts list
 menuFile-load	Load a layout
@@ -214,7 +217,7 @@ addElev-value	Raise or Lower all Selected Track	cmdAddElevations
 #
 block-name	Name of block	cmdBlockCreate
 block-script	Script that the block will run	cmdBlockCreate
-block-segments	List of tracks in the Block	cmdBlockEdit 
+block-segments	List of tracks in the Block	cmdBlockEdit
 #
 carpart-ok	Add or Update car object	cmdCarInventory
 carpart-manuf	Manufacturer name	cmdCarInventory
@@ -294,42 +297,42 @@ demo-speed	Select speed of Playback	cmdDemo
 demo-text	This is where comments about the demo are displayed	cmdDemo
 #
 #Note all below have tab char after name
-describe-F1	
-describe-F2	
-describe-F3	
-describe-F4	
-describe-F5	
-describe-F6	
-describe-F7	
-describe-F8	
-describe-F9	
-describe-F10	
-describe-F11	
-describe-F12	
-describe-F13	
-describe-F14	
-describe-F15	
-describe-F16	
-describe-F17	
-describe-F18	
-describe-F19	
-describe-F20	
-describe-I1	
-describe-I2	
-describe-I3	
-describe-I4	
-describe-I5	
-describe-S1	
-describe-S2	
-describe-S3	
-describe-S4	
-describe-Y1	
-describe-C1	
-describe-L1	
-describe-L2	
-describe-LE1	
-describe-T1	
-describe-P1	
+describe-F1
+describe-F2
+describe-F3
+describe-F4
+describe-F5
+describe-F6
+describe-F7
+describe-F8
+describe-F9
+describe-F10
+describe-F11
+describe-F12
+describe-F13
+describe-F14
+describe-F15
+describe-F16
+describe-F17
+describe-F18
+describe-F19
+describe-F20
+describe-I1
+describe-I2
+describe-I3
+describe-I4
+describe-I5
+describe-S1
+describe-S2
+describe-S3
+describe-S4
+describe-Y1
+describe-C1
+describe-L1
+describe-L2
+describe-LE1
+describe-T1
+describe-P1
 #
 display-autoPan	Move the Main canvas if you drag near the edge	cmdDisplay
 display-color-layers	Color tracks or other objects by layer
@@ -428,7 +431,7 @@ layout-scale	Specifies the Modelling Scale	cmdLayout
 layout-gauge	Specifies the rail gauge, ie. the distance between the rails	cmdLayout
 layout-mintrackradius	Specifies minimum track radius (in inches or centimeters). Tracks with a smaller radius are considered exceptional.	cmdLayout
 layout-maxtrackgrade	Specifies maximum track elevation expressed as a percent (%). Tracks with a larger elevation are considered exceptional.	cmdLayout
-layout-backgroundfile	Is the end of the full pathname of the image used as a background. Set with Browse or Clear buttons.	cmdLayout	
+layout-backgroundfile	Is the end of the full pathname of the image used as a background. Set with Browse or Clear buttons.	cmdLayout
 layout-browse	Is the means to set the background image filename	cmdLayout
 layout-clear	Is the means to clear the background image filename	cmdLayout
 layout-backgroundposX	Specifies the x offset of the bottom left of the background image	cmdLayout
@@ -505,7 +508,7 @@ prmfile-mode	Show parameter files by names or descriptions	cmdPrmfile
 prmfile-action	Toggle the loaded status of the selected parameter file	cmdPrmfile
 prmfile-browse	Find a parameter file for loading	cmdPrmfile
 prmfile-ok	Update parameter file list	cmdPrmfile
-prmfile-selectall	Select all parameter files shown	cmdPrmfile 
+prmfile-selectall	Select all parameter files shown	cmdPrmfile
 #
 profile-canvas	Profile of specified path	cmdProfile
 profile-clear	Clear the profile	cmdProfile
@@ -564,7 +567,7 @@ structure-pier-inx	Choose a Pier number	cmdStructure
 switchmotor-name	Name of the Motor	cmdSwitchMotorCreate
 switchmotor-normal	Value when switch is normal	cmdSwitchMotorCreate
 switchmotor-reverse	Value when the switch is reversed	cmdSwitchMotorCreate
-switchmotor-pointSense	Value for a positive comfirmation of switch position	cmdSwitchMotorCreate 
+switchmotor-pointSense	Value for a positive comfirmation of switch position	cmdSwitchMotorCreate
 #
 text-fontsize	Controls the size of the entered text	cmdText
 #
@@ -655,7 +658,7 @@ about-about	No Help	nohelp
 about-ok		nohelp
 cmdDebug	No Help	nohelp
 loosen	No Help	nohelp
-misc-cur-turnout-ep	
+misc-cur-turnout-ep
 misc-toolbarset	No Help	nohelp
 misc-showlayout	No Help	nohelp
 misc-showdisplay	No Help	nohelp

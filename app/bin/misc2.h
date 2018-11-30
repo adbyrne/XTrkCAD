@@ -103,7 +103,7 @@ void SaveLayers( void );
 void RestoreLayers( void );
 void LoadLayerLists( void );
 addButtonCallBack_t InitLayersDialog( void );
-
+void FillLayerList(wList_p layerList);
 void Misc2Init( void );
 
 #endif

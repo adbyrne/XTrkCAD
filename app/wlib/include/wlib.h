@@ -154,6 +154,7 @@ void wHelp(			const char * );
 
 wBool_t wNoticeEx( int type, const char * msg, const char * yes, const char * no );
 
+unsigned wOpenFileExternal(char *filename);
 
 
 void wSetBalloonHelp ( wBalloonHelp_t * );
@@ -470,7 +471,8 @@ typedef int wAction_t;
 #define wActionExtKey		(9)
 #define wActionWheelUp (10)
 #define wActionWheelDown (11)
-#define wActionLast		wActionWheelDown
+#define wActionLDownDouble (12)
+#define wActionLast		wActionLDownDouble
 
 
 #define wRGB(R,G,B)\

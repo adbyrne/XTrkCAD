@@ -20,6 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <stdint.h>
 #include <string.h>
 
 #include "cundo.h"
@@ -27,19 +28,43 @@
 #include "fileio.h"
 #include "i18n.h"
 #include "misc.h"
+#include "note.h"
 #include "param.h"
 #include "track.h"
 #include "utility.h"
 
 extern BOOL_T inDescribeCmd;
+extern descData_t noteDesc[];
 
 static TRKTYP_T T_NOTE = -1;
 
-static wDrawBitMap_p note_bm;
-struct extraData {
-    coOrd pos;
-    char * text;
+static wDrawBitMap_p note_bm, link_bm;
+
+typedef struct {
+	char **xpm;
+	int OP;
+	char * shortName;
+	char * cmdName;
+	char * helpKey;
+	long acclKey;
+} trknoteData_t;
+
+#include "bitmaps/sticky-note-text.xpm"
+#include "bitmaps/sticky-note-chain.xpm"
+
+enum noteCommands {
+	OP_NOTETEXT,
+	OP_NOTELINK
+} noteOperations;
+
+static trknoteData_t noteTypes[] = {
+	{ sticky_note_text_bits, OP_NOTETEXT, N_("Note"), N_("Text"), "cmdTextNote", 0L },
+	{ sticky_note_chain_bits, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
 };
+
+static long curNoteType;
+
+#define NOTETYPESCOUNT (sizeof(noteTypes)/sizeof(trknoteData_t))
 
 /*****************************************************************************
  * NOTE OBJECT
@@ -48,43 +73,59 @@ struct extraData {
 static track_p NewNote(wIndex_t index, coOrd p, long size)
 {
     track_p t;
-    struct extraData * xx;
+    struct extraDataNote * xx;
     t = NewTrack(index, T_NOTE, 0, sizeof *xx);
-    xx = GetTrkExtraData(t);
+    xx = (struct extraDataNote *)GetTrkExtraData(t);
     xx->pos = p;
     xx->text = (char*)MyMalloc((int)size + 2);
     SetBoundingBox(t, p, p);
     return t;
 }
 
+/**
+ * Draw the icon for a note into the drawing area
+ *
+ * \param t IN note
+ * \param d IN drawing environment
+ * \param color IN color for ico
+ */
+
 static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 {
-    struct extraData *xx = GetTrkExtraData(t);
+    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
     coOrd p[4];
 
     if (d->scale >= 16) {
         return;
     }
+	if ((d->funcs->options & wDrawOptTemp)) {
+		//while the icon is moved, draw a square
+		DIST_T dist;
+		dist = 0.1*d->scale;
+		p[0].x = p[1].x = xx->pos.x - dist;
+		p[2].x = p[3].x = xx->pos.x + dist;
+		p[1].y = p[2].y = xx->pos.y - dist;
+		p[3].y = p[0].y = xx->pos.y + dist;
+		DrawLine(d, p[0], p[1], 0, color);
+		DrawLine(d, p[1], p[2], 0, color);
+		DrawLine(d, p[2], p[3], 0, color);
+		DrawLine(d, p[3], p[0], 0, color);
+	} else {
+		// draw a bitmap for static object
+		wDrawBitMap_p bm;
 
-    if ((d->funcs->options & wDrawOptTemp) == 0) {
-        DrawBitMap(d, xx->pos, note_bm, color);
-    } else {
-        DIST_T dist;
-        dist = 0.1*d->scale;
-        p[0].x = p[1].x = xx->pos.x - dist;
-        p[2].x = p[3].x = xx->pos.x + dist;
-        p[1].y = p[2].y = xx->pos.y - dist;
-        p[3].y = p[0].y = xx->pos.y + dist;
-        DrawLine(d, p[0], p[1], 0, color);
-        DrawLine(d, p[1], p[2], 0, color);
-        DrawLine(d, p[2], p[3], 0, color);
-        DrawLine(d, p[3], p[0], 0, color);
+		if (IsLinkNote(t)) {
+			bm = link_bm;
+		} else {
+			bm = note_bm;
+		}
+    	DrawBitMap(d, xx->pos, bm, color);
     }
 }
 
 static DIST_T DistanceNote(track_p t, coOrd * p)
 {
-    struct extraData *xx = GetTrkExtraData(t);
+    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
     DIST_T d;
     d = FindDistance(*p, xx->pos);
 
@@ -96,90 +137,99 @@ static DIST_T DistanceNote(track_p t, coOrd * p)
 }
 
 
-static struct {
-    coOrd pos;
-    unsigned int layer;
-} noteData;
-typedef enum { OR, LY, TX } noteDesc_e;
-static descData_t noteDesc[] = {
-    /*OR*/	{ DESC_POS, N_("Position"), &noteData.pos },
-    /*LY*/	{ DESC_LAYER, N_("Layer"), &noteData.layer },
-    /*TX*/	{ DESC_TEXT, NULL, NULL },
-    { DESC_NULL }
-};
-
-static void UpdateNote(track_p trk, int inx, descData_p descUpd,
-                       BOOL_T needUndoStart)
+void UpdateNote(track_p trk, int inx, descData_p descUpd,
+	BOOL_T needUndoStart)
 {
-    struct extraData *xx = GetTrkExtraData(trk);
+	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct noteTextData *noteData = GetNoteTextData();
+	size_t len;
 
-    switch (inx) {
-    case OR:
+	switch (inx) {
+	case OR_TEXT:
 
-        xx->pos = noteData.pos;
-        SetBoundingBox(trk, xx->pos, xx->pos);
-        MainRedraw();
-        break;
+		xx->pos = noteData->pos;
+		SetBoundingBox(trk, xx->pos, xx->pos);
+		MainRedraw();
+		break;
 
-    case LY:
-        SetTrkLayer(trk, noteData.layer);
-        MainRedraw();
-        break;
+	case LY_TEXT:
+		SetTrkLayer(trk, noteData->layer);
+		MainRedraw();
+		break;
 
-    case -1:
-        if (wTextGetModified((wText_p)noteDesc[TX].control0)) {
-            int len;
+	case TX_TEXT:
+		if (needUndoStart) {
+			UndoStart(_("Change Track"), "Change Track");
+		}
 
-            if (needUndoStart) {
-                UndoStart(_("Change Track"), "Change Track");
-            }
+		UndoModify(trk);
+		MyFree(xx->text);
+		len = strlen(noteData->text);
+		xx->text = (char*)MyMalloc(len + 2);
+		strcpy( xx->text, noteData->text );
+		MainRedraw();
+		break;
+	case -1:
+		if (wTextGetModified((wText_p)noteDesc[TX_TEXT].control0)) {
+			int len;
 
-            UndoModify(trk);
-            MyFree(xx->text);
-            len = wTextGetSize((wText_p)noteDesc[TX].control0);
-            xx->text = (char*)MyMalloc(len + 2);
-            wTextGetText((wText_p)noteDesc[TX].control0, xx->text, len);
+			if (needUndoStart) {
+				UndoStart(_("Change Track"), "Change Track");
+			}
 
-            if (xx->text[len - 1] != '\n') {
-                xx->text[len++] = '\n';
-            }
+			UndoModify(trk);
+			MyFree(xx->text);
+			len = wTextGetSize((wText_p)noteDesc[TX_TEXT].control0);
+			xx->text = (char*)MyMalloc(len + 2);
+			wTextGetText((wText_p)noteDesc[TX_TEXT].control0, xx->text, len);
 
-            xx->text[len] = '\0';
-        }
-        MainRedraw();
-        break;
+			if (xx->text[len - 1] != '\n') {
+				xx->text[len++] = '\n';
+			}
 
-    default:
-        break;
-    }
+			xx->text[len] = '\0';
+		}
+		MainRedraw();
+	default:
+		break;
+	}
 }
 
-
-static void DescribeNote(track_p trk, char * str, CSIZE_T len)
+void UpdateLink(track_p trk, int inx, descData_p descUpd,
+	BOOL_T needUndoStart)
 {
-    struct extraData * xx = GetTrkExtraData(trk);
-    strcpy(str, _("Note: "));
-    len -= strlen(_("Note: "));
-    str += strlen(_("Note: "));
-    strncpy(str, xx->text, len);
+	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct noteLinkData *noteLinkData = GetNoteLinkData();
+	int len = strlen(noteLinkData->url);
 
-    for (; *str; str++) {
-        if (*str == '\n') {
-            *str = ' ';
-        }
-    }
+	switch (inx) {
+	case OR_LINK:
 
-    noteData.pos = xx->pos;
-    noteDesc[TX].valueP = xx->text;
-    noteDesc[OR].mode = 0;
-    noteDesc[TX].mode = 0;
-    noteDesc[LY].mode = DESC_NOREDRAW;
-    DoDescribe(_("Note"), trk, noteDesc, UpdateNote);
+		xx->pos = noteLinkData->pos;
+		SetBoundingBox(trk, xx->pos, xx->pos);
+		MainRedraw();
+		break;
+
+	case LY_LINK:
+		SetTrkLayer(trk, noteLinkData->layer);
+		MainRedraw();
+		break;
+
+	case OK_LINK:
+		if (xx->text) {
+			MyFree(xx->text);
+		}
+		xx->text = (char*)MyMalloc(strlen(noteLinkData->url) + strlen(noteLinkData->title) + 2);
+		sprintf(xx->text, "%s %s", noteLinkData->url, noteLinkData->title);
+		break;
+	default:
+		break;
+	}
 }
 
 static void DeleteNote(track_p t)
 {
-    struct extraData *xx = GetTrkExtraData(t);
+    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
 
     if (xx->text) {
         MyFree(xx->text);
@@ -188,38 +238,31 @@ static void DeleteNote(track_p t)
 
 static BOOL_T WriteNote(track_p t, FILE * f)
 {
-    struct extraData *xx = GetTrkExtraData(t);
-    int len;
-    BOOL_T addNL = FALSE;
+    struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
+    int len = strlen(xx->text);
     BOOL_T rc = TRUE;
-    len = strlen(xx->text);
-
-    if (xx->text[len - 1] != '\n') {
-        len++;
-        addNL = TRUE;
-    }
 
     rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d\n", GetTrkIndex(t),
                   GetTrkLayer(t),
                   xx->pos.x, xx->pos.y, len) > 0;
-    rc &= fprintf(f, "%s%s", xx->text, addNL ? "\n" : "") > 0;
-    rc &= fprintf(f, "    END\n") > 0;
+    rc &= fprintf(f, "%s", xx->text ) > 0;
+    rc &= fprintf(f, "\n    END\n") > 0;
     return rc;
 }
 
 /**
  * Read a track note aka postit
- * 
+ *
  * \param line
  */
- * 
+
 static void
 ReadTrackNote(char *line)
 {
     track_p t;
     size_t size;
     char * cp;
-    struct extraData *xx;
+    struct extraDataNote *xx;
     wIndex_t index;
     wIndex_t layer;
     coOrd pos;
@@ -236,7 +279,7 @@ ReadTrackNote(char *line)
 
     cp = ReadMultilineText(size);
 
-    xx = GetTrkExtraData(t);
+    xx = (struct extraDataNote *)GetTrkExtraData(t);
     strcpy(xx->text, cp);
     MyFree(cp);
 }
@@ -259,7 +302,7 @@ ReadNote(char * line)
 
 static void MoveNote(track_p trk, coOrd orig)
 {
-    struct extraData * xx = GetTrkExtraData(trk);
+    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
     xx->pos.x += orig.x;
     xx->pos.y += orig.y;
     SetBoundingBox(trk, xx->pos, xx->pos);
@@ -268,18 +311,34 @@ static void MoveNote(track_p trk, coOrd orig)
 
 static void RotateNote(track_p trk, coOrd orig, ANGLE_T angle)
 {
-    struct extraData * xx = GetTrkExtraData(trk);
+    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
     Rotate(&xx->pos, orig, angle);
     SetBoundingBox(trk, xx->pos, xx->pos);
 }
 
 static void RescaleNote(track_p trk, FLOAT_T ratio)
 {
-    struct extraData * xx = GetTrkExtraData(trk);
+    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
     xx->pos.x *= ratio;
     xx->pos.y *= ratio;
 }
 
+
+static void DescribeNote(track_p trk, char * str, CSIZE_T len)
+{
+	if (IsLinkNote(trk)) {
+		DescribeLinkNote(trk, str, len);
+	}
+	else {
+		DescribeTextNote(trk, str, len);
+	}
+}
+
+static void ActivateNote(track_p trk) {
+	if (IsLinkNote(trk)) {
+		ActivateLinkNote(trk);
+	}
+}
 
 static trackCmd_t noteCmds = {
     "NOTE",
@@ -297,7 +356,25 @@ static trackCmd_t noteCmds = {
     NULL,		/* split */
     NULL,		/* traverse */
     NULL,		/* enumerate */
-    NULL		/* redraw */
+    NULL,		/* redraw */
+	NULL,       /*trim*/
+	NULL,       /*merge*/
+	NULL,       /*modify*/
+	NULL,       /*getLength*/
+	NULL,       /*getTrackParams*/
+	NULL,       /*moveEndPt*/
+	NULL,       /*query*/
+	NULL,       /*ungroup*/
+	NULL,       /*flip*/
+	NULL,       /*drawPositionIndicator*/
+	NULL,       /*advancePositionIndicator*/
+	NULL,       /*checkTraverse*/
+	NULL,	    /*makeParallel*/
+	NULL,       /*drawDesc*/
+	NULL,       /*rebuildSegs*/
+	NULL,       /*replayData*/
+	NULL,       /*storeData*/
+	ActivateNote
 };
 
 /*****************************************************************************
@@ -311,12 +388,13 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     static coOrd oldPos;
     static int state_on = FALSE;
     track_p trk;
-    struct extraData * xx;
+
     const char* tmpPtrText;
 
     switch (action) {
     case C_START:
         InfoMessage(_("Place a note on the layout"));
+		curNoteType = (long)commandContext;
         return C_CONTINUE;
 
     case C_DOWN:
@@ -336,19 +414,32 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
         MainRedraw();
         trk = NewNote(-1, pos, 2);
         DrawNewTrack(trk);
-        xx = GetTrkExtraData(trk);
-        tmpPtrText = _("Replace this text with your note");
-        xx->text = (char*)MyMalloc(strlen(tmpPtrText) + 1);
-        strcpy(xx->text, tmpPtrText);
-        inDescribeCmd = TRUE;
-        DescribeNote(trk, message, sizeof message);
-        inDescribeCmd = FALSE;
-        return C_CONTINUE;
+		inDescribeCmd = TRUE;
+		switch (curNoteType)
+		{
+		case OP_NOTETEXT:
+			NewTextNoteUI(trk);
+			break;
+		case OP_NOTELINK:
+			NewLinkNoteUI(trk);
+			break;
+		}
+
+		inDescribeCmd = FALSE;
+
+		return C_CONTINUE;
 
     case C_REDRAW:
-        if (state_on) {
-            DrawBitMap(&tempD, oldPos, note_bm, normalColor);
-        }
+    	if (state_on) {
+			switch (curNoteType) {
+			case OP_NOTETEXT:
+				DrawBitMap(&tempD, oldPos, note_bm, normalColor);
+				break;
+			case OP_NOTELINK:
+				DrawBitMap(&tempD, oldPos, link_bm, normalColor);
+				break;
+			}
+    	}
         return C_CONTINUE;
 
     case C_CANCEL:
@@ -362,12 +453,24 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 }
 
 #include "bitmaps/note.xbm"
+#include "bitmaps/link.xbm"
 #include "bitmaps/cnote.xpm"
 
 void InitTrkNote(wMenu_p menu)
 {
     note_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, note_bits);
-    AddMenuButton(menu, CmdNote, "cmdNote", _("Note"), wIconCreatePixMap(cnote_xpm),
-                  LEVEL0_50, IC_POPUP2, ACCL_NOTE, NULL);
-    T_NOTE = InitObject(&noteCmds);
+    link_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, link_bits);
+
+	ButtonGroupBegin(_("Note"), "cmdNoteCmd", _("Select note command"));
+	for (int i = 0; i < NOTETYPESCOUNT; i++) {
+		trknoteData_t *nt;
+		wIcon_p icon;
+
+		nt = noteTypes + i;
+		icon = wIconCreatePixMap(nt->xpm);
+		AddMenuButton(menu, CmdNote, nt->helpKey, _(nt->cmdName), icon, LEVEL0_50, IC_STICKY | IC_POPUP2, nt->acclKey, (void *)(intptr_t)nt->OP);
+	}
+	ButtonGroupEnd();
+
+	T_NOTE = InitObject(&noteCmds);
 }
