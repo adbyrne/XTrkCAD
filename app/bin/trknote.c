@@ -129,7 +129,7 @@ static DIST_T DistanceNote(track_p t, coOrd * p)
     DIST_T d;
     d = FindDistance(*p, xx->pos);
 
-    if (d < 1.0) {
+    if (d < 3.0*(mainD.scale/12.0)) {
         return d;
     }
 
