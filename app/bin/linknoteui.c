@@ -34,6 +34,8 @@
 
 extern BOOL_T inDescribeCmd;
 
+#define MYMIN(x, y) (((x) < (y)) ? (x) : (y))
+
 #define MINURLLENGTH 5 /* 2 chars domain name, dot, 2 chars TLD */
 
 static char *validProtocols[] = { "http://", "https://" };
@@ -88,7 +90,7 @@ SplitLinkNoteText(char *text, char *url, size_t urlMaxLength, char *title,
     char *delimiter = strchr(text, ' ');
 
     if (url) {
-        strlcpy(url, text, min(urlMaxLength, delimiter-text + 1));
+        strlcpy(url, text, MYMIN(urlMaxLength, delimiter-text + 1));
     }
 
     if (title) {
@@ -199,6 +201,7 @@ LinkEditOK(void *junk)
     CompleteURL(noteLinkData.url, URLMAXIMUMLENGTH);
     UpdateLink(noteLinkData.trk, OK_LINK, NULL, FALSE);
     wHide(linkEditW);
+	ResetIfNotSticky();
 }
 
 

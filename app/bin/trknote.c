@@ -114,7 +114,7 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 		// draw a bitmap for static object
 		wDrawBitMap_p bm;
 
-		if (IsLinkNote(t)) {
+		if (IsLinkNote(t)||(inDescribeCmd && curNoteType == OP_NOTELINK)) {
 			bm = link_bm;
 		} else {
 			bm = note_bm;
@@ -389,8 +389,6 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     static int state_on = FALSE;
     track_p trk;
 
-    const char* tmpPtrText;
-
     switch (action) {
     case C_START:
         InfoMessage(_("Place a note on the layout"));
@@ -413,8 +411,9 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
         state_on = FALSE;
         MainRedraw();
         trk = NewNote(-1, pos, 2);
-        DrawNewTrack(trk);
 		inDescribeCmd = TRUE;
+        DrawNewTrack(trk);
+
 		switch (curNoteType)
 		{
 		case OP_NOTETEXT:
@@ -461,7 +460,7 @@ void InitTrkNote(wMenu_p menu)
     note_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, note_bits);
     link_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, link_bits);
 
-	ButtonGroupBegin(_("Note"), "cmdNoteCmd", _("Select note command"));
+	ButtonGroupBegin(_("Note types"), "cmdNoteCmd", _("Add notes"));
 	for (int i = 0; i < NOTETYPESCOUNT; i++) {
 		trknoteData_t *nt;
 		wIcon_p icon;
