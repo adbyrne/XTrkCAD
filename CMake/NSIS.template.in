@@ -524,6 +524,13 @@ FunctionEnd
 !endif
 
 ;--------------------------------
+; Create desktop icon
+
+Function finishpageaction
+  CreateShortcut "$desktop\@CPACK_NSIS_DISPLAY_NAME@.lnk" "$instdir\@CPACK_NSIS_EXECUTABLE_NAME@"
+FunctionEnd
+
+;--------------------------------
 ; Installation types
 @CPACK_NSIS_INSTALLATION_TYPES@
 
@@ -556,9 +563,10 @@ FunctionEnd
   !insertmacro MUI_PAGE_STARTMENU Application $STARTMENU_FOLDER
 
   ; Finish page
-  !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\share\xtrkcad\CHANGELOG.txt"
-  !define MUI_FINISHPAGE_SHOWREADME_TEXT "Show new, improved and fixed features"
+  !define MUI_FINISHPAGE_SHOWREADME ""
   !define MUI_FINISHPAGE_SHOWREADME_NOTCHECKED
+  !define MUI_FINISHPAGE_SHOWREADME_TEXT "Create Desktop Shortcut"
+  !define MUI_FINISHPAGE_SHOWREADME_FUNCTION finishpageaction
 
   @CPACK_NSIS_PAGE_COMPONENTS@
 

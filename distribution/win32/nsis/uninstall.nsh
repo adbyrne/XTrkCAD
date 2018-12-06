@@ -25,3 +25,4 @@ SetShellVarContext all
 
 !insertmacro MUI_STARTMENU_GETFOLDER Application $MUI_TEMP
 RMDir /r "$SMPROGRAMS\$MUI_TEMP"
+Delete "$desktop\XTrackCAD.lnk"
