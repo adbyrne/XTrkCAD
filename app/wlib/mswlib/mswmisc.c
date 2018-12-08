@@ -33,6 +33,7 @@
 #include <htmlhelp.h>
 #include "mswint.h"
 #include "i18n.h"
+#include "FreeImage.h"
 
 #if _MSC_VER > 1300
 #define stricmp _stricmp
@@ -180,7 +181,20 @@ static int dumpControls;
 
 extern char *userLocale;
 
-char * filterImageFiles = "Image Files\0*.gif;*.jpg;*.jpeg;*.png\0All Files\0*\0";
+// list of supported fileformats for image files
+char * filterImageFiles[] = { N_("All image files"),
+							"*.gif;*.jpg;*.jpeg;*.png;*.tif;*.tiff",
+							N_("GIF files (*.gif)"),
+							"*.gif",
+							N_("JPEG files (*.jpeg,*.jpg)"),
+							"*.jpg;*.jpeg",
+							N_("PNG files (*.png)"),
+							"*.png",
+							N_("TIFF files (*.tiff, *.tif)"),
+							"*.tif;*.tiff",
+							N_("All files (*)"),
+							"*",
+							};
 
 /*
  *****************************************************************************
@@ -2417,6 +2431,24 @@ struct wFilSel_t {
 
 #define SELECTEDFILENAME_BUFFERSIZE	(8*1024)	/**<estimated size in case all param files are selected */
 
+char *
+GetImageFileFormats(void)
+{
+	char *filter = malloc(2048);
+	char *current = filter;
+	char *message;
+
+	for (int i = 0; i < sizeof(filterImageFiles) / sizeof(filterImageFiles[0]); i += 2) {
+		message = gettext(filterImageFiles[i]);
+		strcpy(current, message);
+		current += strlen(message) + 1;
+		strcpy(current, filterImageFiles[i + 1]);
+		current += strlen(current) + 1;
+	}
+	*current = '\0';
+	return(filter);
+}
+
 /**
  * Run the file selector. After the selector is finished an array of filenames is
  * created. Each filename will be fully qualified. The array and the number of
@@ -2447,12 +2479,11 @@ int wFilSelect(
             strcmp(dirName, ".") == 0) {
         dirName = wGetUserHomeDir();
     }
-
     memset(&ofn, 0, sizeof ofn);
     ofn.lStructSize = sizeof ofn;
     ofn.hwndOwner = mswHWnd;
 	if (fs->option == FS_PICTURES) {
-		ofn.lpstrFilter = _(filterImageFiles);
+		ofn.lpstrFilter = GetImageFileFormats();
 	}
 	else {
 		ofn.lpstrFilter = fs->extList;
