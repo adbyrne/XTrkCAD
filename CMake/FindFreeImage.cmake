@@ -7,23 +7,24 @@
 # FREEIMAGE_LIBRARY
 # FREEIMAGE_SHAREDLIB (Win32 only)
 #
+# There is no default installation for FreeImage on Windows so a
+# XTrackCAD specific directory tree is assumed
+#
 
 if (WIN32)
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
-		${FREEIMAGE_ROOT_DIR}/include
-		${FREEIMAGE_ROOT_DIR}
+		PATHS
+    $ENV{XTCEXTERNALROOT}/x86/FreeImage
 		DOC "The directory where FreeImage.h resides")
 	find_library( FREEIMAGE_LIBRARY
 		NAMES FreeImage freeimage
 		PATHS
-		${FREEIMAGE_ROOT_DIR}/lib
-		${FREEIMAGE_ROOT_DIR}
+    $ENV{XTCEXTERNALROOT}/x86/FreeImage
 		DOC "The FreeImage library")
 	find_file( FREEIMAGE_SHAREDLIB
 		NAMES freeimage.DLL
 		PATHS
-		${FREEIMAGE_ROOT_DIR}/dll
-		${FREEIMAGE_ROOT_DIR}
+    $ENV{XTCEXTERNALROOT}/x86/FreeImage
 	)
 else (WIN32)
 	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
