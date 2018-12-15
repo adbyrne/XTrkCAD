@@ -115,6 +115,23 @@ void DynStringClear(DynString *s)
 
 	DynStringRealloc(s);
 }
+
+/**
+* Clear the dynamic string contents without changing memory allocation.
+* 
+* \param s IN the dynamic string
+*/
+
+void DynStringReset(DynString *s)
+{
+	/* Not a string? */
+	if (isnas(s))
+	{
+		return;
+	}
+	s->size = 0;
+}
+
 /**
 * Resize the string for a minimum number of bytes. In order to optimize memory usage the
 * actually allocated block of memory can be larger than the requested size.
