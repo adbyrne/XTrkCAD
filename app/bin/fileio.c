@@ -33,12 +33,11 @@
 #include <time.h>
 #include <ctype.h>
 #ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
+	#include <io.h>
+	#include <windows.h>
 	//#if _MSC_VER >=1400
 	//	#define strdup _strdup
 	//#endif
-#else
 #endif
 #include <sys/stat.h>
 #include <stdarg.h>
@@ -46,26 +45,23 @@
 
 #include <stdint.h>
 
-// POSIX dependencies
-#include <dirent.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include <assert.h>
 
-#include <zip.h>
 #include <cJSON.h>
 
+#include "archive.h"
 #include "common.h"
 #include "compound.h"
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
+#include "directory.h"
 #include "draw.h"
 #include "fileio.h"
 #include "fcntl.h"
 #include "i18n.h"
 #include "layout.h"
+#include "manifest.h"
 #include "messages.h"
 #include "misc.h"
 #include "param.h"
@@ -77,6 +73,8 @@
 
 /*#define TIME_READTRACKFILE*/
 
+#define COPYBLOCKSIZE	1024
+
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
 
@@ -86,8 +84,6 @@ static char * customPathBak = NULL;
 EXPORT char * clipBoardN;
 
 static int log_paramFile;
-
-static int log_zip = 0;
 
 char zip_unpack_dir_name[] = "zip_in";
 char zip_pack_dir_name[] = "zip_out";
@@ -714,392 +710,6 @@ void SetWindowTitle( void )
 	wWinSetTitle( mainW, message );
 }
 
-/*****************************************************************************
- * Directory Management
- */
-
-/*****************************************************************************
- * Safe Create Dir
- * \param IN dir The directory path to create
- *
- * \return TRUE if ok
- *
- */
-
-static BOOL_T safe_create_dir(const char *dir)
-{
-	if (mkdir(dir, 0755) < 0) {
-		if (errno != EEXIST) {
-			NoticeMessage( MSG_DIR_CREATE_FAIL,
-					_("Continue"), NULL, dir, strerror(errno) );
-			perror(dir);
-			return FALSE;
-		}
-	}
-	return TRUE;
-}
-
-/************************************************
- * Delete_Directory empties and removes a directory recursively
- *
- * \param IN dir_path The Directory to empty and remove
- *
- * \return TRUE if ok
- *
- */
-static BOOL_T delete_directory(const char *dir_path)
-{
-	size_t path_len;
-	char *full_path = NULL;
-	DIR *dir;
-	struct stat stat_path, stat_entry;
-	struct dirent *entry;
-
-	// stat for the path
-	int resp = stat(dir_path, &stat_path);
-
-	if (resp == ENOENT) return TRUE; //Does not Exist
-
-	// if path is not dir - exit
-	if (S_ISDIR(stat_path.st_mode) == 0) {
-		NoticeMessage( MSG_NOT_DIR_FAIL,
-							_("Continue"), NULL, dir_path);
-		return FALSE;
-	}
-
-	// if not possible to read the directory for this user
-	if ((dir = opendir(dir_path)) == NULL) {
-		NoticeMessage( MSG_DIR_OPEN_FAIL,
-									_("Continue"), NULL, dir_path);
-		return FALSE;
-	}
-
-	// the length of the path
-	path_len = strlen(dir_path);
-
-	// iteration through entries in the directory
-	while ((entry = readdir(dir)) != NULL) {
-
-		// skip entries "." and ".."
-		if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
-			continue;
-
-		// determinate a full path of an entry
-		full_path = calloc(path_len + strlen(entry->d_name) + 1, sizeof(char));
-		strcpy(full_path, dir_path);
-		strcat(full_path, "/");
-		strcat(full_path, entry->d_name);
-
-		// stat for the entry
-		stat(full_path, &stat_entry);
-
-		// recursively remove a nested directory
-		if (S_ISDIR(stat_entry.st_mode) != 0) {
-			delete_directory(full_path);
-			continue;
-		}
-
-		// remove a file object
-		if (unlink(full_path) == 0) {
-#if DEBUG
-			printf("Removed a file: %s \n", full_path);
-#endif
-		} else {
-			NoticeMessage( MSG_UNLINK_FAIL, _("Continue"), NULL, full_path);
-			closedir(dir);
-			free(full_path);
-			return FALSE;
-		}
-	}
-
-	// remove the devastated directory and close the object of it
-	if (rmdir(dir_path) == 0) {
-#if DEBUG
-		printf("Removed a directory: %s \n", dir_path);
-#endif
-	} else {
-		NoticeMessage( MSG_RMDIR_FAIL, _("Continue"), NULL, dir_path);
-		closedir(dir);
-		if (full_path) free(full_path);
-		return FALSE;
-	}
-
-	closedir(dir);
-	if (full_path) free(full_path);
-	return TRUE;
-}
-
-/****************************************************************************
- *   ARCHIVE PROCESSING
- */
-
-/*****************************************************************************
- * Add directory to archive
- *
- * \param IN zip 		The open zip archive handle
- * \param IN dir_path 	The path to add
- * \param IN prefix 	The prefix in the archive
- *
- * \returns 	TRUE if OK
- */
-
-static BOOL_T add_directory_to_archive (
-				struct zip * za,
-				const char * dir_path,
-				const char * prefix) {
-
-	char *full_path;
-	char *arch_path;
-	DIR *dir;
-	const char * buf;
-	struct stat stat_path, stat_entry;
-	struct dirent *entry;
-
-	zip_source_t * zt;
-
-	// stat for the path
-	stat(dir_path, &stat_path);
-
-	// if path does not exists or is not dir - exit with status -1
-	if (S_ISDIR(stat_path.st_mode) == 0) {
-		NoticeMessage( MSG_NOT_DIR_FAIL,
-									_("Continue"), NULL, dir_path);
-		return FALSE;
-	}
-
-	// if not possible to read the directory for this user
-	if ((dir = opendir(dir_path)) == NULL) {
-		NoticeMessage( MSG_OPEN_DIR_FAIL,
-									_("Continue"), NULL, dir_path);
-		return FALSE;
-	}
-
-	// iteration through entries in the directory
-	while ((entry = readdir(dir)) != NULL) {
-		// skip entries "." and ".."
-		if (!strcmp(entry->d_name, ".") || !strcmp(entry->d_name, ".."))
-			continue;
-
-		// determinate a full path of an entry
-		MakeFullpath(&full_path, dir_path, entry->d_name, NULL);
-
-		// stat for the entry
-		stat(full_path, &stat_entry);
-
-		if (prefix[0])
-			MakeFullpath(&arch_path, prefix, entry->d_name, NULL);
-		else
-			MakeFullpath(&arch_path, entry->d_name, NULL);
-
-		// recursively add a nested directory
-		if (S_ISDIR(stat_entry.st_mode) != 0) {
-			if (zip_dir_add(za,arch_path,0) < 0) {
-				zip_error_t  *ziperr = zip_get_error(za);
-				buf = zip_error_strerror(ziperr);
-				NoticeMessage( MSG_ZIP_DIR_ADD_FAIL,
-													_("Continue"), NULL, arch_path, buf);
-#if DEBUG
-			printf("Added Directory %s \n",arch_path);
-#endif
-			}
-			if (add_directory_to_archive(za,full_path,arch_path) != TRUE) {
-				free(full_path);
-				free(arch_path);
-				return FALSE;
-			}
-			free(arch_path);
-			continue;
-		}
-		zt = zip_source_file(za, full_path, 0, -1);
-		if (zip_file_add(za,arch_path,zt,0)==-1) {
-			zip_error_t  *ziperr = zip_get_error(za);
-			buf = zip_error_strerror(ziperr);
-			NoticeMessage( MSG_ZIP_FILE_ADD_FAIL, _("Continue"), NULL, full_path, arch_path, buf);
-			free(full_path);
-			free(arch_path);
-			return FALSE;
-		}
-#if DEBUG
-		printf("Added File %s",full_path);
-#endif
-		free(arch_path);
-		free(full_path);
-	}
-
-	closedir(dir);
-	return TRUE;
-}
-
-/***********************************************************************
- * Create Archive
- *
- * \param IN dir_path The place to create the archive
- * \param IN fileName The name of the archive
- *
- * \return TRUE if ok
- */
-
-static BOOL_T create_archive (
-				const char * dir_path,
-				const char * fileName) {
-
-	struct zip *za;
-	int err;
-	char buf[100];
-	char a[STR_LONG_SIZE];
-
-	unlink(fileName); 						//Delete Old
-
-
-	char * archive = strdup(fileName);  	// Because of const char
-
-	char * archive_name = FindFilename(archive);
-
-	char * archive_path;
-
-	MakeFullpath(&archive_path,workingDir, archive_name, NULL);
-
-	free(archive);
-
-	if ((za = zip_open(archive_path, ZIP_CREATE, &err)) == NULL) {
-			zip_error_to_str(buf, sizeof(buf), err, errno);
-			NoticeMessage( MSG_ZIP_CREATE_FAIL, _("Continue"), NULL, archive_path, buf);
-			free(archive_path);
-			return FALSE;
-	}
-#if DEBUG
-	printf("====================== \n");
-	printf("Started Archive %s",archive_path);
-#endif
-
-	add_directory_to_archive(za,dir_path,"");
-
-	if (zip_close(za) == -1) {
-		    zip_error_to_str(buf, sizeof(buf), err, errno);
-		    NoticeMessage( MSG_ZIP_CLOSE_FAIL, _("Continue"), NULL, archive_path, buf);
-			free(archive_path);
-			return FALSE;
-	}
-
-	unlink(fileName); 							//Delete Old
-	if (rename(archive_path,fileName) == -1) {	//Move zip into place
-		NoticeMessage( MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archive_path, fileName, strerror(errno));
-		free(archive_path);
-		return FALSE;
-	}
-	free(archive_path);
-
-#if DEBUG
-	printf("Moved Archive to %s",fileName);
-	printf("====================== \n");
-#endif
-	return TRUE;
-
-}
-
-/**************************************************************************
- * Unpack_Archive_for
- *
- * \param IN pathName the name of the archive
- * \param IN fileName just the filename and extension of the layout
- * \param IN tempDir The directory to use to unpack into
- *
- * \returns TRUE if all worked
- */
-static BOOL_T unpack_archive_for(
-				const char * pathName,  /*Full name of archive*/
-				const char * fileName,  /*Layout name and extension */
-				const char * tempDir,   /*Directory to unpack into */
-				BOOL_T file_only) {
-	char *dirName;
-	char a[STR_LONG_SIZE];
-	struct zip *za;
-	struct zip_file *zf;
-	struct zip_stat sb;
-	char buf[100];
-	int err;
-	int i, len;
-	int fd;
-	long long sum;
-
-
-	if ((za = zip_open(pathName, 0, &err)) == NULL) {
-		zip_error_to_str(buf, sizeof(buf), err, errno);
-		NoticeMessage( MSG_ZIP_OPEN_FAIL, _("Continue"), NULL, pathName, buf);
-		fprintf(stderr, "xtrkcad: can't open xtrkcad zip archive `%s': %s \n",
-			pathName, buf);
-		return FALSE;
-	}
-
-	for (i = 0; i < zip_get_num_entries(za, 0); i++) {
-		if (zip_stat_index(za, i, 0, &sb) == 0) {
-			len = strlen(sb.name);
-
-#if DEBUG
-			printf("==================\n");
-			printf("Name: [%s], ", sb.name);
-			printf("Size: [%llu], ", sb.size);
-			printf("mtime: [%u]\n", (unsigned int)sb.mtime);
-			printf("mtime: [%u]\n", (unsigned int)sb.mtime);
-#endif
-
-LOG( log_zip, 1, ( "================= \n"))
-LOG( log_zip, 1, ( "Zip-Name [%s] \n", sb.name))
-LOG( log_zip, 1, ( "Zip-Size [%llu] \n", sb.size))
-LOG( log_zip, 1, ( "Zip-mtime [%u] \n", (unsigned int)sb.mtime))
-
-			if (sb.name[len - 1] == '/' && !file_only) {
-				MakeFullpath(&dirName, tempDir, &sb.name[0], NULL);
-				if (safe_create_dir(dirName)!=TRUE) {
-					return FALSE;
-				}
-			} else {
-				zf = zip_fopen_index(za, i, 0);
-				if (!zf) {
-					NoticeMessage( MSG_ZIP_INDEX_FAIL, _("Continue"), NULL);
-					fprintf(stderr, "xtrkcad zip archive open index error \n");
-					return FALSE;
-				}
-
-				if (file_only) {
-					if (strncmp(sb.name, fileName, strlen(fileName))!=0) {
-						continue; /* Ignore any other files than the one we asked for */
-					}
-				}
-				MakeFullpath(&dirName, tempDir, &sb.name[0], NULL);
-				fd = open(dirName, O_RDWR | O_TRUNC | O_CREAT , 0644);
-				if (fd < 0) {
-					NoticeMessage( MSG_ZIP_FILE_OPEN_FAIL, _("Continue"), NULL, dirName, strerror(errno));
-					return FALSE;
-				}
-
-				sum = 0;
-				while (sum != sb.size) {
-					len = zip_fread(zf, buf, 100);
-					if (len < 0) {
-						NoticeMessage( MSG_ZIP_READ_FAIL, _("Continue"), NULL, dirName, &sb.name[0]);
-						return FALSE;
-					}
-					write(fd, buf, len);
-					sum += len;
-				}
-				close(fd);
-				zip_fclose(zf);
-			}
-		} else {
-LOG( log_zip, 1, ( "Zip-Unknown File[%s] Line[%d] \n",  __FILE__, __LINE__))
-#if DEBUG
-			printf("File[%s] Line[%d]\n", __FILE__, __LINE__);
-#endif
-		}
-	}
-
-	if (zip_close(za) == -1) {
-		NoticeMessage( MSG_ZIP_CLOSE_FAIL, _("Continue"), NULL, dirName, &sb.name[0]);
-		return FALSE;
-	}
-	return TRUE;
-}
 
 
 /*****************************************************************************
@@ -1262,110 +872,6 @@ static BOOL_T ReadTrackFile(
 	return ret;
 }
 
-/***************************************************
- * JSON routines
- */
-
-/**********************************************************
- * Build JSON Manifest -  manifest.json
- * There are only two objects in the root -
- * - The layout object defines the correct filename for the layout
- * - The dependencies object is an arraylist of included elements
- *
- * Each element has a name, a filename and an arch-path (where in the archive it is located)
- * It may have other values - a common one the copy-path is where it was copied from the originators machine (info only)
- *
- * There is one reserved name - "background" which is for the image file that is used as a layout background
- *
- *\param IN nameOfLayout - the layout this is a manifest for
- *\param IN background - the full filepath to the background image (or NULL) -> TODO this will become an array with a count
- *\param IN DependencyDir - the relative path in the archive to the directory in which the included object(s) will be stored
- *
- *\returns a String containing the JSON object
- */
-
-char* CreateManifest(char* nameOfLayout, char* background,
-						char* DependencyDir) {
-	cJSON* manifest = cJSON_CreateObject();
-	if (manifest != NULL) {
-		cJSON* a_object = cJSON_CreateObject();
-		cJSON_AddItemToObject(manifest, "layout", a_object);
-		cJSON_AddStringToObject(a_object, "name", nameOfLayout);
-		cJSON* dependencies = cJSON_AddArrayToObject(manifest, "dependencies");
-		cJSON* b_object = cJSON_CreateObject();
-		if (background && background[0]) {
-			cJSON_AddStringToObject(b_object, "name", "background");
-			cJSON_AddStringToObject(b_object, "copy-path", background);
-			cJSON_AddStringToObject(b_object, "filename", FindFilename(background));
-			cJSON_AddStringToObject(b_object, "arch-path", DependencyDir);
-			cJSON_AddNumberToObject(b_object, "size", GetLayoutBackGroundSize());
-			cJSON_AddNumberToObject(b_object, "pos-x", GetLayoutBackGroundPos().x);
-			cJSON_AddNumberToObject(b_object, "pos-y", GetLayoutBackGroundPos().y);
-			cJSON_AddNumberToObject(b_object, "screen", GetLayoutBackGroundScreen());
-			cJSON_AddNumberToObject(b_object, "angle", GetLayoutBackGroundAngle());
-			cJSON_AddItemToArray(dependencies, b_object);
-		}
-	}
-	char* json_Manifest = cJSON_Print(manifest);
-	cJSON_Delete(manifest);
-	return json_Manifest;
-}
-
-/**************************************************************************
- * Pull in a Manifest File and extract values from it
- * \param IN manifest - the full path to the mainifest.json file
- * \param IN zip_directory - the path to the directory for extracted objects
- *
- * \returns - the layout filename
- */
-
-EXPORT char* ParseManifest(char* manifest, char* zip_directory) {
-	char* background_file[1] = {NULL};
-	char* layoutname = NULL;
-	cJSON* json_manifest = cJSON_Parse(manifest);
-	cJSON* layout = cJSON_GetObjectItemCaseSensitive(json_manifest, "layout");
-	cJSON* name = cJSON_GetObjectItemCaseSensitive(layout, "name");
-	layoutname = cJSON_GetStringValue(name);
-LOG( log_zip, 1, ( "Zip-Manifest %s \n", layoutname))
-#if DEBUG
-	fprintf(stderr, "Layout name %s \n",layoutname);
-#endif
-
-	cJSON* dependencies = cJSON_GetObjectItemCaseSensitive(json_manifest,
-			"dependencies");
-	cJSON* dependency;
-	cJSON_ArrayForEach(dependency, dependencies) {
-		cJSON* name = cJSON_GetObjectItemCaseSensitive(dependency, "name");
-		if (strcmp(cJSON_GetStringValue(name), "background") == 0) {
-			cJSON* filename = cJSON_GetObjectItemCaseSensitive(dependency, "filename");
-			cJSON* archpath = cJSON_GetObjectItemCaseSensitive(dependency, "arch-path");
-			MakeFullpath(&background_file[0], zip_directory, cJSON_GetStringValue(archpath), cJSON_GetStringValue(filename), NULL);
-#if DEBUG
-			printf("Link to background image %s \n", background_file[0]);
-#endif
-			LoadImageFile(1,&background_file[0], NULL);
-			cJSON* size = cJSON_GetObjectItemCaseSensitive(dependency, "size");
-			SetLayoutBackGroundSize(size->valuedouble);
-			cJSON* posx = cJSON_GetObjectItemCaseSensitive(dependency, "pos-x");
-			cJSON* posy = cJSON_GetObjectItemCaseSensitive(dependency, "pos-y");
-			coOrd pos;
-			pos.x = posx->valuedouble;
-			pos.y = posy->valuedouble;
-			SetLayoutBackGroundPos(pos);
-			cJSON* screen = cJSON_GetObjectItemCaseSensitive(dependency, "screen");
-			SetLayoutBackGroundScreen(screen->valuedouble);
-			cJSON* angle = cJSON_GetObjectItemCaseSensitive(dependency, "angle");
-			SetLayoutBackGroundAngle(angle->valuedouble);
-			LayoutBackGroundSave();      //Force out Values	to override saved
-		}
-	}
-	char *str = NULL;
-	if (background_file[0]) free(background_file[0]);
-	if (layoutname) str = strdup(layoutname);
-	cJSON_Delete(json_manifest);
-	return str;
-}
-
 int LoadTracks(
 		int cnt,
 		char **fileName,
@@ -1397,7 +903,7 @@ int LoadTracks(
 	nameOfFile = FindFilename( fileName[ 0 ] );
 
  /*
-  * Support zipped filetype .zxtc
+  * Support zipped filetype 
   */
 	extOfFile = FindFileExtension( nameOfFile);
 
@@ -1405,19 +911,18 @@ int LoadTracks(
 
 	char * full_path = fileName[0];
 
-	if (extOfFile && (strcmp(extOfFile,"zxtc")==0)) {
+	if (extOfFile && (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0)) {
 
 		char * zip_input;
 
 		MakeFullpath(&zip_input, workingDir, zip_unpack_dir_name, NULL);
 
-		//If .zxtc unpack file into temporary input dir (cleared and re-created)
+		//If zipped unpack file into temporary input dir (cleared and re-created)
 
-		delete_directory(zip_input);
-		safe_create_dir(zip_input);
+		DeleteDirectory(zip_input);
+		SafeCreateDir(zip_input);
 
-
-		if (unpack_archive_for(fileName[0], nameOfFile, zip_input, FALSE)!=TRUE) {
+		if (UnpackArchiveFor(fileName[0], nameOfFile, zip_input, FALSE)!=TRUE) {
 			NoticeMessage( MSG_UNPACK_FAIL, _("Continue"), NULL, fileName[0], nameOfFile, zip_input);
 		} else {
 
@@ -1427,51 +932,57 @@ int LoadTracks(
 
 			char * manifest = 0;
 			long length;
+
 			FILE * f = fopen (manifest_file, "rb");
 
 			if (f)
 			{
-			  fseek (f, 0, SEEK_END);
-			  length = ftell (f);
-			  fseek (f, 0, SEEK_SET);
-			  manifest = malloc (length);
-			  if (manifest)
-			  {
-				fread (manifest, 1, length, f);
-			  }
-			  fclose (f);
-			} else {
-				NoticeMessage( MSG_MANIFEST_OPEN_FAIL, _("Continue"), NULL, manifest_file);
+			    fseek(f, 0, SEEK_END);
+			    length = ftell(f);
+			    fseek(f, 0, SEEK_SET);
+			    manifest = malloc(length + 1);
+			    if (manifest) {
+			        fread(manifest, 1, length, f);
+			        manifest[length] = '\0';
+			    }
+			    fclose(f);
+			} else
+			{
+			    NoticeMessage(MSG_MANIFEST_OPEN_FAIL, _("Continue"), NULL, manifest_file);
 			}
+			free(manifest_file);
 
 			char * arch_file = NULL;
-
 
 			//Set filename to point to included .xtc file
 			//Use the name inside manifest (this helps if a user renames the zip)
 			if (manifest)
 			{
-				arch_file = ParseManifest(manifest, zip_input);
+			    arch_file = ParseManifest(manifest, zip_input);
+				free(manifest);
 			}
 
 			// If no manifest value use same name as the archive
 			if (arch_file && arch_file[0])
-				MakeFullpath(&full_path, zip_input, arch_file, NULL);
-			else {
-				MakeFullpath(&full_path, zip_input, nameOfFile, NULL);
+			{
+			    MakeFullpath(&full_path, zip_input, arch_file, NULL);
+			} else
+			{
+			    MakeFullpath(&full_path, zip_input, nameOfFile, NULL);
 			}
 
 			nameOfFile = FindFilename(full_path);
-		    extOfFile = FindFileExtension(full_path);
-		    if (strcmp(extOfFile, "zxtc")==0) {
-				for (int i=0; i<4; i++) {
-					extOfFile[i] = extOfFile[i+1];
-				}
-		    }
-LOG( log_zip, 1, ( "Zip-File %s \n", full_path))
-#if DEBUG
-		    printf("File Path: %s \n", full_path);
-#endif
+			extOfFile = FindFileExtension(full_path);
+			if (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0)
+			{
+			    for (int i=0; i<4; i++) {
+			        extOfFile[i] = extOfFile[i+1];
+			    }
+			}
+			LOG(log_zip, 1, ("Zip-File %s \n", full_path))
+			#if DEBUG
+			    printf("File Path: %s \n", full_path);
+			#endif
 		}
 
 		zipped = TRUE;
@@ -1482,7 +993,7 @@ LOG( log_zip, 1, ( "Zip-File %s \n", full_path))
 
 	if (ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, FALSE, TRUE )) {
 
-		if (zipped) {  //Put back to .zxtc extension - change back title and path
+		if (zipped) {  //Put back to zipped extension - change back title and path
 			nameOfFile = FindFilename( fileName[0]);
 			extOfFile = FindFileExtension( fileName[0]);
 			SetCurrentPath( LAYOUTPATHKEY, fileName[0] );
@@ -1583,40 +1094,43 @@ static BOOL_T DoSaveTracks(
  * \returns TRUE for success
  *
  */
-static BOOL_T CopyDependency(char * name, char * target_dir) {
-		char * backname = FindFilename(name);
+static BOOL_T CopyDependency(char * name, char * target_dir)
+{
+    char * backname = FindFilename(name);
+	BOOL_T copied = TRUE;
+	FILE * source = fopen(name, "rb");
 
-		BOOL_T copied = TRUE;
+    if (source != NULL) {
+        char * target_file;
+        MakeFullpath(&target_file, target_dir, backname, NULL);
+        FILE * target = fopen(target_file, "wb");
 
-		FILE * source = fopen(name, "r");
-		if (source != NULL) {
-
-		   char * target_file;
-		   MakeFullpath(&target_file, target_dir, backname, NULL);
-		   FILE * target = fopen(target_file, "w");
-		   if (target != NULL) {
-
-			    int ch;
-
-			   while ((ch = fgetc(source)) != EOF)
-				  fputc(ch, target);
-
-LOG( log_zip, 1, ( "Zip-Include %s into %s \n", name, target_file))
+        if (target != NULL) {
+            char *buffer = MyMalloc(COPYBLOCKSIZE);
+            while (!feof(source)) {
+                size_t bytes = fread(buffer, 1, sizeof(buffer), source);
+                if (bytes) {
+                    fwrite(buffer, 1, bytes, target);
+                }
+            }
+			MyFree(buffer);
+            LOG(log_zip, 1, ("Zip-Include %s into %s \n", name, target_file))
 #if DEBUG
-			   printf("xtrkcad: Included file %s into %s \n",
-			   		   				name, target_file);
+            printf("xtrkcad: Included file %s into %s \n",
+                   name, target_file);
 #endif
-		   } else {
-			   NoticeMessage( MSG_COPY_FAIL, _("Continue"), NULL, name, target_file);
-			   copied = FALSE;
-		   }
-		   fclose(source);
-		   fclose(target);
-		} else {
-			NoticeMessage( MSG_COPY_OPEN_FAIL, _("Continue"), NULL, name);
-			copied = FALSE;
-		}
-		return copied;
+            fclose(target);
+        } else {
+            NoticeMessage(MSG_COPY_FAIL, _("Continue"), NULL, name, target_file);
+            copied = FALSE;
+        }
+        free(target_file);
+        fclose(source);
+    } else {
+        NoticeMessage(MSG_COPY_OPEN_FAIL, _("Continue"), NULL, name);
+        copied = FALSE;
+    }
+    return copied;
 }
 
 
@@ -1637,12 +1151,12 @@ static int SaveTracks(
 
 	SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
 
-	//Support Archive .zxtc files
+	//Support Archive zipped files
 
 	char * extOfFile = FindFileExtension( fileName[0]);
 
 
-	if (extOfFile && (strcmp(extOfFile,"zxtc")==0)) {
+	if (extOfFile && (strcmp(extOfFile,ZIPFILETYPEEXTENSION)==0)) {
 
 		char * ArchiveName;
 
@@ -1653,15 +1167,15 @@ static int SaveTracks(
 
 		MakeFullpath(&zip_output, workingDir, zip_pack_dir_name, NULL);
 
-		delete_directory(zip_output);
-		safe_create_dir(zip_output);
+		DeleteDirectory(zip_output);
+		SafeCreateDir(zip_output);
 
 		MakeFullpath(&ArchiveName, zip_output, nameOfFile, NULL);
 
 		nameOfFile = FindFilename(ArchiveName);
 		extOfFile = FindFileExtension(ArchiveName);
 
-		if (extOfFile && strcmp(extOfFile,"zxtc")==0) {
+		if (extOfFile && strcmp(extOfFile, ZIPFILETYPEEXTENSION)==0) {
 			// Get rid of the 'z'
 			for (int i=0; i<4; i++)
 				extOfFile[i] = extOfFile[i+1];
@@ -1672,7 +1186,7 @@ static int SaveTracks(
 		//The included files are placed (for now) into an includes directory - TODO an array of includes with directories by type
 		MakeFullpath(&DependencyDir, zip_output, "includes", NULL);
 
-		safe_create_dir(DependencyDir);
+		SafeCreateDir(DependencyDir);
 
 		char * background = GetLayoutBackGroundFullPath();
 
@@ -1680,12 +1194,13 @@ static int SaveTracks(
 			CopyDependency(background,DependencyDir);
 
 		//The details are stored into the manifest - TODO use arrays for files, locations
+		char *oldLocale = SaveLocale("C");
 		char* json_Manifest = CreateManifest(nameOfFile, background, "includes");
 		char * manifest_file;
 
 		MakeFullpath(&manifest_file, zip_output, "manifest.json", NULL);
-
-		FILE *fp = fopen(manifest_file, "ab+");
+		
+		FILE *fp = fopen(manifest_file, "wb");
 		if (fp != NULL)
 		{
 		   fputs(json_Manifest, fp);
@@ -1693,13 +1208,14 @@ static int SaveTracks(
 		} else {
 			NoticeMessage( MSG_MANIFEST_FAIL, _("Continue"), NULL, manifest_file );
 		}
+		RestoreLocale(oldLocale);
 
 		free(manifest_file);
 		free(json_Manifest);
 
 		DoSaveTracks( ArchiveName );
 
-		if (create_archive(	zip_output,	fileName[0]) != TRUE) {
+		if (CreateArchive(	zip_output,	fileName[0]) != TRUE) {
 			NoticeMessage( MSG_ARCHIVE_FAIL, _("Continue"), NULL, fileName[0], zip_output );
 		}
 		free(zip_output);

@@ -57,6 +57,8 @@ int curDemo;
 
 wMenuList_p fileList_ml;
 
+#define ZIPFILETYPEEXTENSION "xtce"
+
 #define PARAM_SUBDIR "params"
 
 #define LAYOUTPATHKEY "layout"

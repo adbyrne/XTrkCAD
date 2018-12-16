@@ -48,6 +48,7 @@ ADD_CUSTOM_COMMAND(
 SET(SOURCES
 	${LIN_SOURCES}
 	appdefaults.c
+	archive.c
 	bllnhlp.c
 	cbezier.c
 	cblock.c
@@ -92,6 +93,7 @@ SET(SOURCES
 	dcontmgm.c
 	dease.c
 	denum.c
+	directory.c
 	dlayer.c
 	doption.c
 	dpricels.c
@@ -106,6 +108,7 @@ SET(SOURCES
 	layout.c
 	lprintf.c
 	macro.c
+	manifest.c
 	misc2.c
 	param.c
 	paths.c
@@ -120,6 +123,9 @@ SET(SOURCES
 	tstraigh.c
 	utility.c
 	cJSON.c
+	archive.h
+	directory.h
+	manifest.h
 	)
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
