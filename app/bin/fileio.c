@@ -1176,9 +1176,8 @@ static int SaveTracks(
 		extOfFile = FindFileExtension(ArchiveName);
 
 		if (extOfFile && strcmp(extOfFile, ZIPFILETYPEEXTENSION)==0) {
-			// Get rid of the 'z'
-			for (int i=0; i<4; i++)
-				extOfFile[i] = extOfFile[i+1];
+			// Get rid of the 'e'
+			extOfFile[3] = '\0';
 		}
 
 		char * DependencyDir;
