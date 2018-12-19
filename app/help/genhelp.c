@@ -71,7 +71,8 @@ int process(mode_e mode, char * json, FILE * outFile )
 			else
 				fprintf(outFile, "\t{ \"%s\", N_(\"%s\") },\n", line->valuestring, contents->valuestring);
 		} else {
-			fprintf(outFile, "\t{ \"%s\" },\n", line->valuestring);
+			fprintf(outFile, "\t{ \"%s\", \"No help\" },\n", line->valuestring);
+			fprintf(stderr, "INFO: %s has an empty help text\n", line->valuestring);
 		}
 	}
 
