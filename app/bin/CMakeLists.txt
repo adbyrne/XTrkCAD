@@ -43,8 +43,8 @@ SET(LIN_SOURCES
 
 ADD_CUSTOM_COMMAND(
        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
-       DEPENDS genhelp ${help_SOURCE_DIR}/genhelp.in
-       COMMAND genhelp ${GENHELP_OPTS} ${help_SOURCE_DIR}/genhelp.in ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
+       DEPENDS genhelp ${help_SOURCE_DIR}/genhelp.json
+       COMMAND genhelp ${GENHELP_OPTS} ${help_SOURCE_DIR}/genhelp.json ${CMAKE_CURRENT_BINARY_DIR}/bllnhlp.c
        )
 
 SET(SOURCES
