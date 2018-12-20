@@ -174,11 +174,36 @@ IF(NOT WIN32)
 ELSE(NOT WIN32)
 	TARGET_LINK_LIBRARIES(mkturnout xtrkcad-wlib)
 
+	# copy dlls into the build dir for easier debugging
 	add_custom_command(
 		TARGET xtrkcad POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy
 		${FREEIMAGE_SHAREDLIB}
 		${CMAKE_CURRENT_BINARY_DIR}
+	)
+
+	add_custom_command(
+		TARGET xtrkcad POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${LIBZIP_SHAREDLIB}
+		${CMAKE_CURRENT_BINARY_DIR}
+	)
+
+	add_custom_command(
+		TARGET xtrkcad POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${ZLIB_SHAREDLIB}
+		${CMAKE_CURRENT_BINARY_DIR}
+	)
+
+	# add dll to install package
+	install(FILES
+	${LIBZIP_SHAREDLIB}
+	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	)
+	install(FILES
+	${ZLIB_SHAREDLIB}
+	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
 ENDIF(NOT WIN32)
 

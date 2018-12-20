@@ -25,6 +25,7 @@ if(UNIX)
 endif(UNIX)
 
 find_package(Libzip)
+find_package(Zlib)
 
 IF(WIN32)
 	SET(XTRKCAD_USE_GTK_DEFAULT OFF)
