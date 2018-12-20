@@ -578,8 +578,7 @@ EXPORT void Confirm(char * label2, doSaveCallBack_p after) {
 			return;
 		}
 	}
-	LayoutBackGroundInit(TRUE);
-	LayoutBackGroundSave();
+
 	after();
 	return;
 }

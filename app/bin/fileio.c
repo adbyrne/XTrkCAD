@@ -894,7 +894,7 @@ int LoadTracks(
 	ClearTracks();
 	ResetLayers();
 	checkPtMark = changed = 0;
-	LayoutBackGroundInit(FALSE);   //Keep values of background -> will be overriden my archive
+	LayoutBackGroundInit(TRUE);   //Keep values of background -> will be overriden my archive
 	UndoSuspend();
 	useCurrentLayer = FALSE;
 #ifdef TIME_READTRACKFILE
