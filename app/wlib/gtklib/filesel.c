@@ -213,15 +213,24 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			namePart = strrchr( file, '/' ) + 1;
 			// is there a dot in the last part, yes->extension present
 			if( !strchr( namePart, '.' ) ){
-				// if not, add extension depending on pressed button
-				if (resp == GTK_RESPONSE_ACCEPT) {  //Normal
-					// make room for the extension
-					file = g_realloc( file, strlen(file)+strlen(fs->defaultExtension));
-					strcat( file, fs->defaultExtension + 1 );
-				} else {							//Archive
-					file = g_realloc( file, strlen(file)+4);
-					strcat( file, ".xtce" );
-				}
+				
+				// else try to find the current filter and parse its name
+				GtkFileFilter *currentFilter = gtk_file_chooser_get_filter (GTK_FILE_CHOOSER(fs->window) );
+				const char *nameOfFilter = gtk_file_filter_get_name( currentFilter );
+				char *pattern = strdup( nameOfFilter );
+				char *extension = fs->defaultExtension;
+				char *startDelimiter = strstr( pattern, "(*." );
+				
+				if(startDelimiter) {
+					char *endDelimiter = strpbrk(startDelimiter + 3, ",;) ");
+					if( endDelimiter ) {
+						*endDelimiter = '\0';
+						extension = startDelimiter + 2;
+					}
+				}	
+				file = g_realloc( file, strlen(file)+strlen(extension));
+				strcat( file, extension );										
+				free( pattern );
 			}	
 			fileNames[ i ] = file;
 			g_free( g_slist_nth_data ( fileNameList, i));
