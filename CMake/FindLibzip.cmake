@@ -31,15 +31,15 @@ else(WIN32)
   find_package(PkgConfig)
   pkg_check_modules(PC_LIBZIP QUIET libzip)
 
-find_path(LIBZIP_INCLUDE_DIR_ZIP
+  find_path(LIBZIP_INCLUDE_DIR_ZIP
     NAMES zip.h
     HINTS ${PC_LIBZIP_INCLUDE_DIRS})
 
-find_path(LIBZIP_INCLUDE_DIR_ZIPCONF
+  find_path(LIBZIP_INCLUDE_DIR_ZIPCONF
     NAMES zipconf.h
     HINTS ${PC_LIBZIP_INCLUDE_DIRS})
 
-find_library(LIBZIP_LIBRARY
+  find_library(LIBZIP_LIBRARY
     NAMES zip)
 endif(WIN32)
 

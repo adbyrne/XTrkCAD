@@ -27,17 +27,17 @@ else(WIN32)
   find_package(PkgConfig)
   pkg_check_modules(PC_ZLIB QUIET zlib)
 
-  find_path(ZLIB_INCLUDE_DIR_ZIP
+  find_path(ZLIB_INCLUDE_DIR
       NAMES zlib.h
       HINTS ${PC_ZLIB_INCLUDE_DIRS})
 
   find_library(ZLIB_LIBRARY
-  NAMES zlib)
+  	NAMES z)
 endif(WIN32)
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(
   ZLIB DEFAULT_MSG
-  ZLIB_LIBRARY ZLIB_INCLUDE_DIR ZLIB_SHAREDLIB)
+  ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
 
-mark_as_advanced(ZLIB_LIBRARY ZLIB_INCLUDE_DIR ZLIB_SHAREDLIB)
+mark_as_advanced(ZLIB_LIBRARY ZLIB_INCLUDE_DIR)
