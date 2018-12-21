@@ -17,7 +17,7 @@ set(CPACK_PROJECT_CONFIG_FILE ${CMAKE_CURRENT_SOURCE_DIR}/package.txt)
 set(CPACK_PACKAGE_VENDOR "XTrackCAD Fork Project")
 
 # common dependencies for all Linux builds
-set(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk2")
+set(CPACK_RPM_PACKAGE_REQUIRES "glibc gtk2 zip zlib")
 
 # Add dependency to webkitgtk if configured
 if(NOT XTRKCAD_USE_BROWSER)
