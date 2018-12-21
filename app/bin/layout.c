@@ -418,7 +418,9 @@ EXPORT int LoadImageFile(
  */
 void LayoutBackGroundSave(void) {
    	char * background = GetLayoutBackGroundFullPath();
-   	wPrefSetString("layout", "BackgroundPath", background);
+   	if(background) {
+		wPrefSetString("layout", "BackgroundPath", background);
+	}	
    	wPrefSetFloat("layout", "BackgroundPosX", thisLayout.props.backgroundPos.x);
    	wPrefSetFloat("layout", "BackgroundPosY", thisLayout.props.backgroundPos.y);
    	wPrefSetFloat("layout", "BackgroundAngle", thisLayout.props.backgroundAngle);

@@ -21,7 +21,7 @@
   
 #include <string.h>
 
-#include "cjson.h"
+#include "cJSON.h"
 #include "fileio.h"
 #include "layout.h"
 #include "misc2.h"
