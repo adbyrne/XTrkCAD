@@ -91,24 +91,33 @@ struct wFilSel_t * wFilSelCreate(
 	fs->data = data;
 
 	if (pattList) {
-		char * cp = strdup(pattList);
+		char * cps = strdup(pattList);
+		char *cp;
 		int count = 0;
+		char *patternState;
 
 		//create filters for the passed filter list
 		// names and patterns are separated by |
-		cp = strtok( cp, "|" );		
+		cp = cps;
+		cp = strtok_r( cp, "|", &patternState );		
 		while ( cp  && count < (MAX_ALLOWEDFILTERS - 1)) {
 			fs->filter[ count ] = gtk_file_filter_new ();
 			gtk_file_filter_set_name ( fs->filter[ count ], cp );
-			cp = strtok( NULL, "|" );
+			cp = strtok_r( NULL, "|", &patternState );
+			
 			// find multiple patterns separated by ";"
-			char * cp1 = strdup(cp);
-			cp1 = strtok(cp1, ";" );
+			char * cp1s = strdup(cp);
+			char *cp1;
+			char *filterState;
+			
+			cp1 = cp1s;
+			cp1 = strtok_r(cp1, ";", &filterState );
 			while (cp1) {
 				gtk_file_filter_add_pattern (fs->filter[ count ], cp1 );
-				cp1 = strtok(NULL, ";" );
+				cp1 = strtok_r(NULL, ";", &filterState );
 			}
-			if (cp1) free(cp1);
+			if (cp1s) 
+				free(cp1s);
 				// the first pattern is considered to match the default extension
 			if( count == 0 ) {
 				fs->defaultExtension = strdup( cp );
@@ -116,21 +125,18 @@ struct wFilSel_t * wFilSelCreate(
 				for (i=0; i<strlen(cp) && cp[i] != ' ' && cp[i] != ';';i++) ;
 				if (i<strlen(cp)) fs->defaultExtension[i] = '\0';
 			}
-			cp = strtok( NULL, "|" );
+			cp = strtok_r( NULL, "|", &patternState );
 			count++;
 		}
-		if (cp) free(cp);
+		if (cps) 
+			free(cps);
 		if (opt&FS_PICTURES) {
 			fs->filter[ count ] = gtk_file_filter_new ();
 			gtk_file_filter_set_name( fs->filter[ count ], _("Image files") );
 			gtk_file_filter_add_pixbuf_formats( fs->filter[ count ]);
 			fs->pattCount = count++;
 		}
-		// finally add the all files pattern
-		fs->filter[ count ] = gtk_file_filter_new ();
-		gtk_file_filter_set_name( fs->filter[ count ], _("All files") );
-		gtk_file_filter_add_pattern( fs->filter[ count ], "*" );
-		fs->pattCount = count++;
+
 	} else {
 		fs->filter[ 0 ] = NULL;
 		fs->pattCount = 0;
@@ -160,7 +166,6 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 										   (fs->mode == FS_LOAD ? GTK_FILE_CHOOSER_ACTION_OPEN : GTK_FILE_CHOOSER_ACTION_SAVE ),
 										   GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
 										   (fs->mode == FS_LOAD ? GTK_STOCK_OPEN : GTK_STOCK_SAVE ), GTK_RESPONSE_ACCEPT,
-										   (fs->mode == FS_LOAD ? NULL : _("Save Archive")),(fs->mode == FS_LOAD ? 0 : GTK_RESPONSE_APPLY),
 										   NULL );
 		if (fs->window==0) abort();
 		// get confirmation before overwritting an existing file									
@@ -208,13 +213,14 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			namePart = strrchr( file, '/' ) + 1;
 			// is there a dot in the last part, yes->extension present
 			if( !strchr( namePart, '.' ) ){
+				// if not, add extension depending on pressed button
 				if (resp == GTK_RESPONSE_ACCEPT) {  //Normal
 					// make room for the extension
 					file = g_realloc( file, strlen(file)+strlen(fs->defaultExtension));
 					strcat( file, fs->defaultExtension + 1 );
 				} else {							//Archive
 					file = g_realloc( file, strlen(file)+4);
-					strcat( file, ".zxtc" );
+					strcat( file, ".xtce" );
 				}
 			}	
 			fileNames[ i ] = file;
