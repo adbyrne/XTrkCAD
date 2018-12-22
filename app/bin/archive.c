@@ -31,7 +31,7 @@
 #include <zip.h>
 
 #ifdef WINDOWS
-    #include "dirent.h"
+    #include "../wlib/mswlib/dirent.h"
     #include <direct.h>
     #include <io.h>
     #define unlink(a) _unlink((a))

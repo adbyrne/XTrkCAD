@@ -24,7 +24,7 @@
 #include <string.h>
 
 #ifdef WINDOWS
-    #include "dirent.h"
+    #include "../wlib/mswlib/dirent.h"
     #include <direct.h>
     #define unlink(a) _unlink((a))
     #define rmdir(a) _rmdir((a))

@@ -409,7 +409,6 @@ EXPORT int LoadImageFile(
 		SetName();
 		file_changed = TRUE;
 		ParamLoadControl(layout_pg_p, 8);
-		MainRedraw();
 		return FALSE;
 }
 
