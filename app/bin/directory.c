@@ -90,7 +90,7 @@ BOOL_T DeleteDirectory(const char *dir_path)
     // stat for the path
     int resp = stat(dir_path, &stat_path);
 
-    if (resp == ENOENT) {
+    if (errno == ENOENT) {
         return TRUE;    //Does not Exist
     }
 

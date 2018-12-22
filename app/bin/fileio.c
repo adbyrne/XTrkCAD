@@ -908,7 +908,7 @@ int LoadTracks(
 	extOfFile = FindFileExtension( nameOfFile);
 
 	BOOL_T zipped = FALSE;
-
+	BOOL_T loadXTC = TRUE;
 	char * full_path = fileName[0];
 
 	if (extOfFile && (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0)) {
@@ -922,9 +922,7 @@ int LoadTracks(
 		DeleteDirectory(zip_input);
 		SafeCreateDir(zip_input);
 
-		if (UnpackArchiveFor(fileName[0], nameOfFile, zip_input, FALSE)!=TRUE) {
-			NoticeMessage( MSG_UNPACK_FAIL, _("Continue"), NULL, fileName[0], nameOfFile, zip_input);
-		} else {
+		if (UnpackArchiveFor(fileName[0], nameOfFile, zip_input, FALSE)) {
 
 			char * manifest_file;
 
@@ -983,15 +981,16 @@ int LoadTracks(
 			#if DEBUG
 			    printf("File Path: %s \n", full_path);
 			#endif
+		} else {
+			loadXTC = FALSE; // when unzipping fails, don't attempt loading the trackplan
 		}
-
 		zipped = TRUE;
 
 		free(zip_input);
 
 	}
 
-	if (ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, FALSE, TRUE )) {
+	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, FALSE, TRUE )) {
 
 		if (zipped) {  //Put back to zipped extension - change back title and path
 			nameOfFile = FindFilename( fileName[0]);
