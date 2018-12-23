@@ -432,7 +432,7 @@ void LayoutBackGroundSave(void) {
  */
 static void ImageFileBrowse( void * junk )
 {
-	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), _("|"), LoadImageFile, NULL );
+	imageFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_PICTURES, _("Load Background"), sImageFilePattern, LoadImageFile, NULL );
 
 	wFilSelect( imageFile_fs, GetCurrentPath( BACKGROUNDPATHKEY ) );
 	return;

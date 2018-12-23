@@ -78,6 +78,7 @@ char * sTipF = product ".tip";
 
 char * sSourceFilePattern = NULL;
 char * sSaveFilePattern = NULL;
+char * sImageFilePattern = NULL;
 char * sImportFilePattern = NULL;
 char * sDXFFilePattern = NULL;
 char * sRecordFilePattern = NULL;
@@ -189,6 +190,11 @@ void InitCustom( void )
 						Product,
 						Product );
 		sSaveFilePattern = strdup(buf);
+	}
+	if (sImageFilePattern == NULL)
+	{
+		sprintf(buf,_("All Files (*)|*"));
+		sImageFilePattern = strdup(buf);
 	}
 	if (sImportFilePattern == NULL)
 	{

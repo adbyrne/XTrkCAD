@@ -112,6 +112,12 @@ struct wFilSel_t * wFilSelCreate(
 		}
 		count = 0;
 		cp = cps;							//Restart
+		if (opt&FS_PICTURES) {				//Put first
+			fs->filter[ count ] = gtk_file_filter_new ();
+			gtk_file_filter_set_name( fs->filter[ count ], _("Image files") );
+			gtk_file_filter_add_pixbuf_formats( fs->filter[ count ]);
+			fs->pattCount = ++count;
+		}
 		cp = strtok_r( cp, ":", &patternState );          // Break up by colons
 		while ( cp  && count < (MAX_ALLOWEDFILTERS - 1)) {
 			cp2 = strtok_r( cp, "|", &patternState2 );
@@ -136,7 +142,7 @@ struct wFilSel_t * wFilSelCreate(
 						free(cp1s);
 				}
 				// the first pattern is considered to match the default extension
-				if( count == 0) {
+				if( count == 0 && !(opt&FS_PICTURES)) {
 					fs->defaultExtension = strdup( cp2 );
 					int i = 0;
 					for (i=0; i<strlen(cp2) && cp2[i] != ' ' && cp2[i] != ';';i++) ;
@@ -148,12 +154,7 @@ struct wFilSel_t * wFilSelCreate(
 		}
 		if (cps) 
 			free(cps);
-		if (opt&FS_PICTURES) {
-			fs->filter[ count ] = gtk_file_filter_new ();
-			gtk_file_filter_set_name( fs->filter[ count ], _("Image files") );
-			gtk_file_filter_add_pixbuf_formats( fs->filter[ count ]);
-			fs->pattCount = ++count;
-		}
+
 
 	} else {
 		fs->filter[ 0 ] = NULL;
