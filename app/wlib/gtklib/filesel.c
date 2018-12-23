@@ -34,6 +34,7 @@
 #define GSEAL_ENABLE
 
 #include <gtk/gtk.h>
+#include <glib-object.h>
 #include "gtkint.h"
 #include "i18n.h"
 
@@ -51,6 +52,63 @@ struct wFilSel_t {
 		wWin_p parent;
 		char *defaultExtension;
 		};
+
+static void FileFormatChanged( GtkWidget *comboBox, 
+						  struct wFilSel_t *fileSelector )
+{
+	// get active entry
+	int entry = (int)gtk_combo_box_get_active (GTK_COMBO_BOX(comboBox));
+	
+	if( entry>=0 ) {
+		gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(fileSelector->window ),						
+									(fileSelector->filter)[ entry ]);
+	}
+}
+
+/**
+ * Create a widget containing a combo box for selecting a file format. 
+ * From an array of filters, the names are retrieved and used to populate
+ * the combo box. 
+ * \param IN dialogBox
+ * \param patterns IN number of entries for combo
+ * \param filters IN
+ * \returns the newly created widget
+ */
+ 
+static GtkWidget *CreateFileformatSelector(struct wFilSel_t *dialogBox, 
+			int patterns, 
+			GtkFileFilter **filters)
+{
+	GtkWidget *hbox = gtk_hbox_new(FALSE, 12);
+	GtkWidget *text = gtk_label_new(_("Save format:"));
+	GtkWidget *combo = gtk_combo_box_text_new ();
+
+	g_signal_connect(G_OBJECT(combo), 
+				 "changed",
+				 (GCallback)FileFormatChanged,
+				 dialogBox );
+
+
+	gtk_box_pack_start (GTK_BOX(hbox),
+				text,
+				FALSE,
+				FALSE,
+				0);
+	gtk_box_pack_end (GTK_BOX(hbox),
+				combo,
+				TRUE,
+				TRUE,
+				0);
+	for(int i=0; i < patterns; i++ ) {
+		const char *nameOfFilter = gtk_file_filter_get_name( filters[ i ] );
+		gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT(combo), nameOfFilter );
+	}
+	gtk_combo_box_set_active (GTK_COMBO_BOX(combo), 1);
+	
+	gtk_widget_show_all(hbox);
+	
+	return(hbox);            
+}
 
 
 /**
@@ -190,6 +248,20 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		// get confirmation before overwritting an existing file									
 		gtk_file_chooser_set_do_overwrite_confirmation( GTK_FILE_CHOOSER(fs->window), TRUE );
 		
+		/** \todo for loading a shortcut folder could be added linking to the example directory */
+
+	}
+	strcpy( name, dirName );
+
+	if( fs->mode == FS_SAVE ) {
+		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name ); 
+		gtk_file_chooser_set_extra_widget( GTK_FILE_CHOOSER(fs->window), 
+				CreateFileformatSelector(fs, fs->pattCount, fs->filter ));
+	}	
+    // Add a current folder and a shortcut to it for Load/import dialogs
+    if( fs->mode == FS_LOAD ) {
+        gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
+        gtk_file_chooser_add_shortcut_folder( GTK_FILE_CHOOSER(fs->window), name, NULL );
 		// allow selecting multiple files
 		if( fs->opt & FS_MULTIPLEFILES ) {
 			gtk_file_chooser_set_select_multiple ( GTK_FILE_CHOOSER(fs->window), TRUE);
@@ -200,17 +272,6 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 				gtk_file_chooser_add_filter( GTK_FILE_CHOOSER( fs->window ), fs->filter[ i ] ); 
 			}
 		}												
-		/** \todo for loading a shortcut folder could be added linking to the example directory */
-
-	}
-	strcpy( name, dirName );
-
-	if( fs->mode == FS_SAVE )
-		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name ); 
-    // Add a current folder and a shortcut to it for Load/import dialogs
-    if( fs->mode == FS_LOAD ) {
-        gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
-        gtk_file_chooser_add_shortcut_folder( GTK_FILE_CHOOSER(fs->window), name, NULL );
     }
     
     int resp = gtk_dialog_run( GTK_DIALOG( fs->window ));
