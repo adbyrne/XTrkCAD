@@ -77,6 +77,7 @@ char * sAuditF = product ".aud";
 char * sTipF = product ".tip";
 
 char * sSourceFilePattern = NULL;
+char * sSaveFilePattern = NULL;
 char * sImportFilePattern = NULL;
 char * sDXFFilePattern = NULL;
 char * sRecordFilePattern = NULL;
@@ -179,6 +180,15 @@ void InitCustom( void )
 						Product, 
 						Product );
 		sSourceFilePattern = strdup(buf);
+	}
+	if (sSaveFilePattern == NULL)
+	{
+		sprintf(buf, _("%s Trackplan (*.xtc)|*.xtc|"
+					   "%s Extended Trackplan (*.xtce)|*.xtce|"
+					   "All Files (*)|*"),
+						Product,
+						Product );
+		sSaveFilePattern = strdup(buf);
 	}
 	if (sImportFilePattern == NULL)
 	{

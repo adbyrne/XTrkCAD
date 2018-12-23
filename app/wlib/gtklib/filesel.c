@@ -89,44 +89,62 @@ struct wFilSel_t * wFilSelCreate(
 	fs->title = strdup( title );
 	fs->action = action;
 	fs->data = data;
+	fs->pattCount = 0;
 
 	if (pattList) {
 		char * cps = strdup(pattList);
-		char *cp;
+		char *cp, *cp2;
 		int count = 0;
-		char *patternState;
+		char *patternState, *patternState2;
 
 		//create filters for the passed filter list
 		// names and patterns are separated by |
+		// filter elements are also separated by |
 		cp = cps;
-		cp = strtok_r( cp, "|", &patternState );		
+		while (cp && cp[0]) {
+			if (cp[0] == '|') {
+				count++;
+				if (count && count%2==0) {
+					cp[0] = ':';             //Replace every second "|" with ":"
+				}
+			}
+			cp++;
+		}
+		count = 0;
+		cp = cps;							//Restart
+		cp = strtok_r( cp, ":", &patternState );          // Break up by colons
 		while ( cp  && count < (MAX_ALLOWEDFILTERS - 1)) {
-			fs->filter[ count ] = gtk_file_filter_new ();
-			gtk_file_filter_set_name ( fs->filter[ count ], cp );
-			cp = strtok_r( NULL, "|", &patternState );
-			
-			// find multiple patterns separated by ";"
-			char * cp1s = strdup(cp);
-			char *cp1;
-			char *filterState;
-			
-			cp1 = cp1s;
-			cp1 = strtok_r(cp1, ";", &filterState );
-			while (cp1) {
-				gtk_file_filter_add_pattern (fs->filter[ count ], cp1 );
-				cp1 = strtok_r(NULL, ";", &filterState );
-			}
-			if (cp1s) 
-				free(cp1s);
+			cp2 = strtok_r( cp, "|", &patternState2 );
+			if (cp2) {
+				fs->filter[ count ] = gtk_file_filter_new ();
+				gtk_file_filter_set_name ( fs->filter[ count ], cp2 );
+
+				cp2 = strtok_r( NULL, "|", &patternState2 );
+				// find multiple patterns separated by ";"
+				if (cp2) {
+					char * cp1s = strdup(cp2);
+					char *cp1;
+					char *filterState;
+
+					cp1 = cp1s;
+					cp1 = strtok_r(cp1, ";", &filterState );
+					while (cp1) {
+						gtk_file_filter_add_pattern (fs->filter[ count ], cp1 );
+						cp1 = strtok_r(NULL, ";", &filterState );
+					}
+					if (cp1s)
+						free(cp1s);
+				}
 				// the first pattern is considered to match the default extension
-			if( count == 0 ) {
-				fs->defaultExtension = strdup( cp );
-				int i = 0;
-				for (i=0; i<strlen(cp) && cp[i] != ' ' && cp[i] != ';';i++) ;
-				if (i<strlen(cp)) fs->defaultExtension[i] = '\0';
+				if( count == 0) {
+					fs->defaultExtension = strdup( cp2 );
+					int i = 0;
+					for (i=0; i<strlen(cp2) && cp2[i] != ' ' && cp2[i] != ';';i++) ;
+					if (i<strlen(cp2)) fs->defaultExtension[i] = '\0';
+				}
+				fs->pattCount = ++count;
 			}
-			cp = strtok_r( NULL, "|", &patternState );
-			count++;
+			cp = strtok_r( NULL, ":", &patternState );
 		}
 		if (cps) 
 			free(cps);
@@ -134,7 +152,7 @@ struct wFilSel_t * wFilSelCreate(
 			fs->filter[ count ] = gtk_file_filter_new ();
 			gtk_file_filter_set_name( fs->filter[ count ], _("Image files") );
 			gtk_file_filter_add_pixbuf_formats( fs->filter[ count ]);
-			fs->pattCount = count++;
+			fs->pattCount = ++count;
 		}
 
 	} else {
@@ -177,7 +195,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		}	
 		// add the file filters to the dialog box
 		if( fs->pattCount ) {
-			for( i = 0; i <= fs->pattCount; i++ ) {
+			for( i = 0; i < fs->pattCount; i++ ) {
 				gtk_file_chooser_add_filter( GTK_FILE_CHOOSER( fs->window ), fs->filter[ i ] ); 
 			}
 		}												

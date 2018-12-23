@@ -1257,7 +1257,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 	doAfterSave = after;
 	if (saveFile_fs == NULL)
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
-			sSourceFilePattern, SaveTracks, NULL );
+			sSaveFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	SetWindowTitle();
 	SaveState();
