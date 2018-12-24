@@ -41,17 +41,26 @@
 #define MAX_ALLOWEDFILTERS 10
 
 struct wFilSel_t {
-		GtkWidget * window;
-		wFilSelCallBack_p action;
-		void * data;
-		int pattCount;
-		GtkFileFilter *filter[ MAX_ALLOWEDFILTERS ];
-		wFilSelMode_e mode;
-		int opt;
-		const char * title;
-		wWin_p parent;
-		char *defaultExtension;
+		GtkWidget * window; 							/**<  file selector handle*/
+		wFilSelCallBack_p action; 						/**<  */
+		void * data; 									/**<  */
+		int pattCount; 									/**<  number of file patterns*/
+		GtkFileFilter *filter[ MAX_ALLOWEDFILTERS ]; 	/**< array of file patterns */
+		wFilSelMode_e mode; 							/**< used for load or save */
+		int opt; 										/**< see FS_ options */
+		const char * title; 							/**< dialog box title */
+		wWin_p parent; 									/**< parent window */
+		char *defaultExtension; 						/**< to use if no extension specified */
 		};
+
+/**
+ * Signal handler for 'changed' signal of custom combo box. The filter
+ * is set accordinng to the file format active in the combo box
+ * 
+ * \param comboBox the combo box 
+ * \param fileSelector data of the file selector
+ * 
+ */
 
 static void FileFormatChanged( GtkWidget *comboBox, 
 						  struct wFilSel_t *fileSelector )
@@ -60,6 +69,7 @@ static void FileFormatChanged( GtkWidget *comboBox,
 	int entry = (int)gtk_combo_box_get_active (GTK_COMBO_BOX(comboBox));
 	
 	if( entry>=0 ) {
+		g_object_ref(G_OBJECT( (fileSelector->filter)[ entry ])); 
 		gtk_file_chooser_set_filter(GTK_FILE_CHOOSER(fileSelector->window ),						
 									(fileSelector->filter)[ entry ]);
 	}
@@ -103,13 +113,12 @@ static GtkWidget *CreateFileformatSelector(struct wFilSel_t *dialogBox,
 		const char *nameOfFilter = gtk_file_filter_get_name( filters[ i ] );
 		gtk_combo_box_text_append_text( GTK_COMBO_BOX_TEXT(combo), nameOfFilter );
 	}
-	gtk_combo_box_set_active (GTK_COMBO_BOX(combo), 1);
+	gtk_combo_box_set_active (GTK_COMBO_BOX(combo), 0);
 	
 	gtk_widget_show_all(hbox);
 	
 	return(hbox);            
 }
-
 
 /**
  * Create a new file selector. Only the internal data structures are
@@ -172,6 +181,7 @@ struct wFilSel_t * wFilSelCreate(
 		cp = cps;							//Restart
 		if (opt&FS_PICTURES) {				//Put first
 			fs->filter[ count ] = gtk_file_filter_new ();
+			g_object_ref_sink( G_OBJECT(fs->filter[ count ] ));
 			gtk_file_filter_set_name( fs->filter[ count ], _("Image files") );
 			gtk_file_filter_add_pixbuf_formats( fs->filter[ count ]);
 			fs->pattCount = ++count;
