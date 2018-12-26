@@ -86,7 +86,7 @@ char* CreateManifest(char* nameOfLayout, char* background,
 char* ParseManifest(char* manifest, char* zip_directory)
 {
 	char* background_file[1] = { NULL };
-	char* layoutname = NULL;
+	char* layoutname;
 
 	char *oldLocale = SaveLocale("C");
 	cJSON* json_manifest = cJSON_Parse(manifest);

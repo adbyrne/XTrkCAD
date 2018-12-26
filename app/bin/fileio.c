@@ -913,9 +913,7 @@ int LoadTracks(
 
 	if (extOfFile && (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0)) {
 
-		char * zip_input;
-
-		MakeFullpath(&zip_input, workingDir, zip_unpack_dir_name, NULL);
+		char * zip_input = GetZipDirectoryName(ARCHIVE_READ);
 
 		//If zipped unpack file into temporary input dir (cleared and re-created)
 
@@ -1162,9 +1160,7 @@ static int SaveTracks(
 		//Set filename to point to be the same as the included .xtc file.
 		//This is also in the manifest - in case a user renames the archive file.
 
-		char * zip_output;
-
-		MakeFullpath(&zip_output, workingDir, zip_pack_dir_name, NULL);
+		char * zip_output = GetZipDirectoryName(ARCHIVE_WRITE);
 
 		DeleteDirectory(zip_output);
 		SafeCreateDir(zip_output);
@@ -1296,9 +1292,9 @@ EXPORT void DoCheckPoint( void )
 }
 
 /**
- * Remove all temporary files before exiting.When the program terminates
- * normally through the exit choice, files that are created temporarily are removed:
- * xtrkcad.ckp
+ * Remove all temporary files before exiting. When the program terminates
+ * normally through the exit choice, files and directories that were created 
+ * temporarily are removed: xtrkcad.ckp
  *
  * \param none
  * \return none
@@ -1307,8 +1303,18 @@ EXPORT void DoCheckPoint( void )
 
 EXPORT void CleanupFiles( void )
 {
+	char *tempDir;
+
 	if( checkPtFileName1 )
 		remove( checkPtFileName1 );
+
+	for (int i = ARCHIVE_READ; i <= ARCHIVE_WRITE; ++i) {
+		tempDir = GetZipDirectoryName(i);
+		if (tempDir) {
+			DeleteDirectory(tempDir);
+			free(tempDir);
+		}
+	}
 }
 
 /**

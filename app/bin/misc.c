@@ -679,7 +679,6 @@ static void DoClearAfter(void) {
 
 	/* set all layers to their default properties and set current layer to 0 */
 	DefaultLayerProperties();
-	LayoutBackGroundInit(TRUE);
 	DoLayout(NULL);
 	checkPtMark = 0;
 	Reset();

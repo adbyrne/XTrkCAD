@@ -34,11 +34,13 @@
     #include "../wlib/mswlib/dirent.h"
     #include <direct.h>
     #include <io.h>
+    #include <process.h>
     #define unlink(a) _unlink((a))
     #define rmdir(a) _rmdir((a))
     #define open(name, flag, mode) _open((name), (flag), (mode))
     #define write(file, buffer, count) _write((file),(buffer), (count))
     #define close(file) _close((file))
+    #define getpid() _getpid()
 #else
     #include <dirent.h>
     #include <unistd.h>
@@ -47,6 +49,7 @@
 #include <wlib.h>
 #include "archive.h"
 #include "directory.h"
+#include "dynstring.h"
 #include "i18n.h"
 #include "messages.h"
 #include "misc.h"
@@ -54,6 +57,45 @@
 #include "paths.h"
 
 int log_zip = 0;
+
+/**
+ * Create the full path for temporary directories used in zip archive operations
+ *
+ * \param archive operation
+ * \return pointer to full path, must be free'd by caller
+ */
+
+char *
+GetZipDirectoryName(enum ArchiveOps op)
+{
+    char *opDesc;
+    char *directory;
+    DynString zipDirectory;
+
+	DynStringMalloc(&zipDirectory, 0);
+
+    switch (op) {
+    case ARCHIVE_READ:
+        opDesc = "in";
+        break;
+    case ARCHIVE_WRITE:
+        opDesc = "out";
+        break;
+    default:
+        opDesc = "err";
+        break;
+    }
+
+    DynStringPrintf(&zipDirectory,
+                    "%s" FILE_SEP_CHAR "zip_%s.%d",
+                    workingDir,
+                    opDesc,
+                    getpid());
+
+    directory = strdup(DynStringToCStr(&zipDirectory));
+    DynStringFree(&zipDirectory);
+    return (directory);
+}
 
 /*****************************************************************************
  * Add directory to archive
@@ -306,6 +348,7 @@ BOOL_T UnpackArchiveFor(
                     if (len < 0) {
                         NoticeMessage(MSG_ZIP_READ_FAIL, _("Continue"), NULL, dirName, &sb.name[0]);
                         free(dirName);
+						fclose(fd);
                         return FALSE;
                     }
                     fwrite(buf, 1, (unsigned int)len, fd);
