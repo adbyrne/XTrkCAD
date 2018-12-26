@@ -309,6 +309,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	int h;
 	gint ascent;
 	gint descent;
+	gint baseline;
 	double angle = -M_PI * a / 180.0;
 
 	if ( bd == &psPrint_d ) {
@@ -323,25 +324,42 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opts);
 
 	cairo_save( cairo );
-	cairo_translate( cairo, x, y );
-	cairo_rotate( cairo, angle );
+	cairo_identity_matrix(cairo);
 
 	layout = wlibFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
 									  (int *) &w, (int *) &h,
-									  (int *) &ascent, (int *) &descent);
+									  (int *) &ascent, (int *) &descent, (int *) &baseline);
 
 	/* cairo does not support the old method of text removal by overwrite; force always write here and
            refresh on cancel event */
 	GdkColor* const gcolor = wlibGetColor(color, TRUE);
 	cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
 
-	cairo_move_to( cairo, 0, -ascent );
+	cairo_translate( cairo, x, y );
+	cairo_rotate( cairo, angle );
+	cairo_translate( cairo, 0, -baseline);
+
+	cairo_move_to(cairo, 0, 0);
+
+	pango_cairo_update_layout(cairo, layout);
 
 	pango_cairo_show_layout(cairo, layout);
 	wlibFontDestroyPangoLayout(layout);
 	cairo_restore( cairo );
 	gtkDrawDestroyCairoContext(cairo);
 
+	if (bd->delayUpdate || bd->widget == NULL) return;
+
+	/* recalculate the area to be updated
+	 * for simplicity sake I added plain text height ascent and descent,
+	 * mathematically correct would be to use the trigonometrical functions as well
+	 */
+	update_rect.x      = (gint) x - 2;
+	update_rect.y      = (gint) y - (gint) (baseline + descent) - 2;
+	update_rect.width  = (gint) (w * cos( angle ) + h * sin(angle))+2;
+	update_rect.height = (gint) (h * sin( angle ) + w * cos(angle))+2;
+	gtk_widget_draw(bd->widget, &update_rect);
+    
 }
 
  void wDrawGetTextSize(
@@ -357,6 +375,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	int textHeight;
 	int ascent;
 	int descent;
+	int baseline;
 
 	*w = 0;
 	*h = 0;
@@ -364,7 +383,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	wlibFontDestroyPangoLayout(
 		wlibFontCreatePangoLayout(bd->widget, NULL, fp, fs, s,
 								 &textWidth, (int *) &textHeight,
-								 (int *) &ascent, (int *) &descent));
+								 (int *) &ascent, (int *) &descent, (int *) &baseline) );
 
 	*w = (wPos_t) textWidth;
 	*h = (wPos_t) textHeight;

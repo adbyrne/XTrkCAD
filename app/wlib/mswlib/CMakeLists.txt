@@ -3,7 +3,6 @@ find_package(FreeImage REQUIRED)
 FILE(GLOB HEADERS *.h)
 
 SET(SOURCES
-#	checksum.c
 	backgnd.c
 	getopt.c
 	mswbox.c

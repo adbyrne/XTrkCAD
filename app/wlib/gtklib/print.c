@@ -602,13 +602,13 @@ void psPrintString(
 
     cairo_matrix_transform_point(&matrix, &x0, &y0);
 
+    cairo_identity_matrix(cr);
 
     layout = pango_cairo_create_layout(cr);
 
     // set the correct font and size
     /** \todo use a getter function instead of double conversion */
     desc = pango_font_description_from_string(wlibFontTranslate(fp));
-
 
     pango_font_description_set_size(desc, fs * PANGO_SCALE * scale_text);
 
@@ -617,21 +617,28 @@ void psPrintString(
     pango_layout_set_text(layout, s, -1);
     pango_layout_set_width(layout, -1);
     pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
-    pango_layout_get_pixel_size(layout, &text_width, &text_height);
+    pango_layout_get_size(layout, &text_width, &text_height);
+
+    text_width = text_width / PANGO_SCALE;
+    text_height = text_height / PANGO_SCALE;
 
     // get the height of the string
     pcontext = pango_cairo_create_context(cr);
     metrics = pango_context_get_metrics(pcontext, desc,
                                         pango_context_get_language(pcontext));
 
-    ascent = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE *scale_adjust;
+    ascent = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
 
-    cairo_identity_matrix(cr);
+    int baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
 
-    cairo_translate(cr, x0 + ((ascent + (bBorder*scale_adjust)) * sin(-a * M_PI / 180.0))+((lBorder*scale_adjust)* cos(a * M_PI / 180.0)),
-    					y0 - ((ascent + (bBorder*scale_adjust)) * cos( a * M_PI / 180.0))+((lBorder*scale_adjust)* sin(a * M_PI / 180.0)));
-
+    cairo_translate(cr, x0,	y0 );
     cairo_rotate(cr, -a * M_PI / 180.0);
+    cairo_translate( cr, 0, -baseline );
+
+    cairo_move_to(cr,0,0);
+
+    pango_cairo_update_layout(cr, layout);
+
 
     // set the color
     psSetColor(color);
