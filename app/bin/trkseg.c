@@ -172,7 +172,7 @@ EXPORT void GetTextBounds(
 		coOrd * hiR )
 {
 
-	coOrd size;
+	coOrd size, size2;
 	POS_T descent = 0.0;
 	coOrd lo, hi;
 	coOrd p[4];
@@ -183,7 +183,7 @@ EXPORT void GetTextBounds(
 	// set up the corners of the rectangle
 	p[0].x = p[3].x = 0.0;
 	p[1].x = p[2].x = size.x;
-	DrawTextSize2(&mainD, "A", NULL, fs, FALSE, &size, &descent);
+	DrawTextSize2(&mainD, "A", NULL, fs, FALSE, &size2, &descent);
 	p[0].y = p[1].y = lastL.y - descent;
 	p[2].y = p[3].y = size.y;
 

@@ -191,7 +191,7 @@ wList_p wDropListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, 
 /* filesel.c */
 
 /* font.c */
-PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp, wFontSize_t fs, const char *s, int *width_p, int *height_p, int *ascent_p, int *descent_p);
+PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp, wFontSize_t fs, const char *s, int *width_p, int *height_p, int *ascent_p, int *descent_p, int *baseline_p);
 void wlibFontDestroyPangoLayout(PangoLayout *layout);
 const char *wlibFontTranslate(wFont_p fp);
 

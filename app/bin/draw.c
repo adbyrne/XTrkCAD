@@ -677,11 +677,14 @@ EXPORT void DrawMultiLineTextSize(
 			blocksize.x = lineW;
 		lastline->x = textsize.x;
 		if (*text =='\n') {
+			blocksize.y += lineH;
 			lastline->y -= lineH;
 			lastline->x = 0;
 		}
-		if (*text == '\0')
+		if (*text == '\0') {
+			blocksize.y += textsize.y;
 			break;
+		}
 		text++;
 	}
 	size->x = blocksize.x;
