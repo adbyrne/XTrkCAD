@@ -48,14 +48,14 @@ self-installing program using the NSIS Installer from Nullsoft Inc.
 Using Windows Explorer, locate the directory in which you downloaded or copied your new version of XTrackCAD.
 
 Start the installation program by double clicking on the
-**[xtrkcad-setup-5.1.2.exe][]** file icon.
+**[xtrkcad-setup-5.1.2a.exe][]** file icon.
 
 Follow the steps in the installation program.
 
 The installation lets you define the directory into which XTrackCAD is
 installed. The directory is created automatically if it doesn't already exist.
 
-A program folder named XTrackCAD 4.4.0beta1 will be created during the installation
+A program folder named XTrackCAD 5.1.2a will be created during the installation
 process. This folder contains the program, documentation, parameter and
 example files. An existing installation of earlier versions of XTrackCad is
 not overwritten.
@@ -66,7 +66,7 @@ A new program group named XTrackCad 5.1.2 will be created in the Start menu.
 
 XTrackCAD for Mac is shipped as a self-installing OSX package
 Start the install by double clicking on the 
-**[xtrkcad-osx-5.1.2.dmg][]** file icon.
+**[xtrkcad-osx-5.1.2a.dmg][]** file icon.
 
 Drag the package and drop into the Applications folder. 
 
@@ -89,9 +89,9 @@ Use your operating system's package manager to install XTrackCAD.
 
 ### Installing from the self-extracting archive. ###
 
-After downloading open a command line then
+After downloading open a command line then as root run
 
-    ./xtrkcad-setup-5.1.2.x86_64.sh --prefix=/usr/local --exclude-subdir
+    ./xtrkcad-setup-5.1.2a.x86_64.sh --prefix=/usr/local --exclude-subdir
 
 This will install the executable in /usr/local/bin. A directory named
 xtrkcad will be created in /usr/local/share and all files will be unpacked

@@ -370,7 +370,7 @@ static void PrintGaudyBox(
 	p01.y = 1.0;
 	p00.x = 0.05; p00.y = 0.5+0.05;
 	fp = wStandardFont( F_TIMES, TRUE, TRUE );
-	DrawString( &page_d, p00, 0.0, sProdName, fp, 30.0, wDrawColorBlack );
+	DrawString( &page_d, p00, 0.0, sProdName, fp, 22.0, wDrawColorBlack );
 
 	p00.y = 0.5; p01.y = 1.0;
 	p00.x = p01.x = (157.0/72.0)+0.1;
@@ -380,17 +380,17 @@ static void PrintGaudyBox(
 
 	fp = wStandardFont( F_TIMES, FALSE, FALSE );
 	p00.x = pageW-((157.0/72.0)+0.05); p00.y = 0.5+0.25+0.05;
-	DrawString( &page_d, p00, 0.0, dat, fp, 16.0, wDrawColorBlack );
+	DrawString( &page_d, p00, 0.0, dat, fp, 14.0, wDrawColorBlack );
 	p00.y = 0.5+0.05;
 
-	DrawTextSize( &mainD, GetLayoutTitle(), fp, 16.0, FALSE, &textsize );
+	DrawTextSize( &mainD, GetLayoutTitle(), fp, 14.0, FALSE, &textsize );
 	p00.x = (pageW/2.0)-(textsize.x/2.0);
 	p00.y = 0.75+0.05;
-	DrawString( &page_d, p00, 0.0, GetLayoutTitle(), fp, 16.0, wDrawColorBlack );
-	DrawTextSize( &mainD, GetLayoutSubtitle(), fp, 16.0, FALSE, &textsize );
+	DrawString( &page_d, p00, 0.0, GetLayoutTitle(), fp, 14.0, wDrawColorBlack );
+	DrawTextSize( &mainD, GetLayoutSubtitle(), fp, 14.0, FALSE, &textsize );
 	p00.x = (pageW/2.0)-(textsize.x/2.0);
 	p00.y = 0.50+0.05;
-	DrawString( &page_d, p00, 0.0, GetLayoutSubtitle(), fp, 16.0, wDrawColorBlack );
+	DrawString( &page_d, p00, 0.0, GetLayoutSubtitle(), fp, 12.0, wDrawColorBlack );
 
 	sprintf( dat, _("PrintScale 1:%ld   Room %s x %s   Model Scale %s   File %s"),
 		(long)printScale, 
@@ -398,7 +398,7 @@ static void PrintGaudyBox(
 		FormatDistance( roomSize.y ),
 		curScaleName, GetLayoutFilename() );
 	p00.x = 0.05; p00.y = 0.25+0.05;
-	DrawString( &page_d, p00, 0.0, dat, fp, 16.0, wDrawColorBlack );
+	DrawString( &page_d, p00, 0.0, dat, fp, 14.0, wDrawColorBlack );
 }
 
 
@@ -434,6 +434,14 @@ static void PrintPlainBox(
 	p00.x = pageW/2.0 - 20.0/72.0;
 	p00.y = pageH - 10.0/72.0;
 	DrawString( &page_d, p00, 0.0, tmp, fp, 4.0, wDrawColorBlack );
+	p00.y = 10.0/72.0;
+	DrawString( &page_d, p00, 0.0, tmp, fp, 4.0, wDrawColorBlack );
+	p00.y = pageH/2 + 10.0/72.0;
+	p00.x = pageW - 20.0/72.0;
+	DrawString( &page_d, p00, 0.0, tmp, fp, 4.0, wDrawColorBlack );
+	p00.x = 10.0/72.0;
+	DrawString( &page_d, p00, 0.0, tmp, fp, 4.0, wDrawColorBlack );
+
 
 	sprintf( tmp, "[%0.2f,%0.2f]", corners[0].x, corners[0].y );
 	p00.x = 4.0/72.0;
@@ -764,7 +772,7 @@ static BOOL_T PrintPage(
 		int x,
 		int y )
 {
-	coOrd orig, p[4], minP, maxP;
+	coOrd orig, p[4], psave[4], minP, maxP;
 	int i;
 	coOrd clipOrig, clipSize;
 	wFont_p fp;
@@ -803,6 +811,9 @@ static BOOL_T PrintPage(
 				if ( printGaudy ) {
 					Translate( &print_d.orig, orig, currPrintGrid.angle+180.0, printScale );
 					print_d.size.y += printScale;
+				}
+				for (int i=1;i<4;i++) {
+					psave[i] = p[i];
 				}
 				if (printRotate) {
 					rotateCW = (printFormat != PORTRAIT);
@@ -844,8 +855,7 @@ static BOOL_T PrintPage(
 					if (printRotate && rotateCW) {
 						print_d.size.x += printScale;
 					}
-				} else if (printRegistrationMarks)
-					PrintPlainBox( x, y, p );
+				}
 				if (printRotate) {
 					wPrintClip( (wPos_t)(clipOrig.y*print_d.dpi), (wPos_t)(clipOrig.x*print_d.dpi),
 							(wPos_t)(clipSize.y*print_d.dpi), (wPos_t)(clipSize.x*print_d.dpi) );
@@ -922,6 +932,8 @@ static BOOL_T PrintPage(
 				DrawTracks( &print_d, print_d.scale, minP, maxP );
 				if (printRegistrationMarks && printScale == 1)
 					DrawRegistrationMarks( &print_d );
+				if (printRegistrationMarks)
+					PrintPlainBox( x, y, psave );
 				if ( !wPrintPageEnd( print_d.d ) )
 					return FALSE;
 				/*BITMAP(bm,x,y) = 0;*/
