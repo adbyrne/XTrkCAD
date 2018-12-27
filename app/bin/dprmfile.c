@@ -44,12 +44,12 @@ typedef paramFileInfo_t * paramFileInfo_p;
 static dynArr_t paramFileInfo_da;
 #define paramFileInfo(N) DYNARR_N( paramFileInfo_t, paramFileInfo_da, N )
 
-EXPORT int curParamFileIndex = PARAM_DEMO;
-static char curParamDir[STR_LONG_SIZE];
+int curParamFileIndex = PARAM_DEMO;
+static char *curParamDir;
 static struct wFilSel_t * paramFile_fs;
 
 
-EXPORT wBool_t IsParamValid(
+wBool_t IsParamValid(
 		int fileInx )
 {
 	if (fileInx == PARAM_DEMO)
@@ -65,12 +65,22 @@ EXPORT wBool_t IsParamValid(
 }
 
 
-EXPORT char * GetParamFileName(
+char * GetParamFileName(
 		int fileInx )
 {
 	return paramFileInfo(fileInx).contents;
 }
 
+/**
+ * Update the configuration file in case the name of a parameter file has changed. 
+ * The function reads a list of new parameter filenames and gets the contents 
+ * description for each file. If that contents is in use, i.e. is a loaded parameter 
+ * file, the setting in the config file is updated to the new filename. 
+ * First line of update file has the date of the update file. 
+ * * Following lines have filenames, one per line. 
+ * 
+ * \return FALSE if update not possible or not necessary, TRUE if update successful
+ */
 
 static BOOL_T UpdateParamFiles( void )
 {
@@ -145,7 +155,7 @@ static BOOL_T UpdateParamFiles( void )
 }
 
 
-EXPORT void ReadParamFiles( void )
+void ReadParamFiles( void )
 {
 	int fileNo;
 	const char *fileName;
@@ -184,7 +194,7 @@ EXPORT void ReadParamFiles( void )
 }
 
 
-EXPORT void RememberParamFiles( void )
+void RememberParamFiles( void )
 {
 	int fileInx;
 	int fileNo;
@@ -213,12 +223,17 @@ EXPORT void RememberParamFiles( void )
  * Param File Dialog
  *
  */
+ 
+
+#include "bitmaps/greendot.xpm"
+#include "bitmaps/greydot.xpm"
+
+static wIcon_p greendot_icon;
+static wIcon_p greydot_icon;
 
 static wWin_p paramFileW;
 
 static long paramFileSel = 0;
-static wIcon_p mtbox_bm;
-static wIcon_p chkbox_bm;
 
 static void ParamFileAction( void * );
 static void ParamFileBrowse( void * );
@@ -253,7 +268,7 @@ static void ParamFileLoadList( void )
 			strcpy( message, ((!paramFileSel) && paramFileInfo(fileInx).contents)?
 						paramFileInfo(fileInx).contents:
 						paramFileInfo(fileInx).name );
-			wListAddValue( paramFileL, message, (paramFileInfo(fileInx).deleted)?mtbox_bm:chkbox_bm, (void*)(intptr_t)fileInx );
+			wListAddValue( paramFileL, message, (paramFileInfo(fileInx).deleted)?greydot_icon:greendot_icon, (void*)(intptr_t)fileInx );
 		}
 	}
 	wListSetIndex( paramFileL, listInx );
@@ -324,7 +339,7 @@ EXPORT int LoadParamFile(
 				strcpy( message, ((!paramFileSel) && paramFileInfo(curParamFileIndex).contents)?
 					paramFileInfo(curParamFileIndex).contents:
 				paramFileInfo(curParamFileIndex).name );
-				wListAddValue( paramFileL, message, chkbox_bm, (void*)(intptr_t)curParamFileIndex );
+				wListAddValue( paramFileL, message, greendot_icon, (void*)(intptr_t)curParamFileIndex );
 				wListSetIndex( paramFileL, wListGetCount(paramFileL)-1 );
 			}
 		}
@@ -429,7 +444,7 @@ static void ParamFileAction( void * action )
 			strcpy( message, ((!paramFileSel) && paramFileInfo(fileInx).contents)?
 						 paramFileInfo(fileInx).contents:
 						 paramFileInfo(fileInx).name );
-			wListSetValues( paramFileL, inx, message, (paramFileInfo(fileInx).deleted)?mtbox_bm:chkbox_bm, (void*)(intptr_t)fileInx );
+			wListSetValues( paramFileL, inx, message, (paramFileInfo(fileInx).deleted)?greydot_icon:greendot_icon, (void*)(intptr_t)fileInx );
 		}
 	}
 	DoChangeNotification( CHANGE_PARAMS );
@@ -508,28 +523,40 @@ static void ParamFileDlgUpdate(
 	}
 }
 
+/**
+ * Set the directory for parameter files, either the installation as default or the user setting.
+ * 
+ */
+static void SetParamDir()
+{
+	const char * dir;
+	dir = wPrefGetString("file", "paramdir");
+	if (dir != NULL) {
+		curParamDir = MyMalloc(strlen(dir) + 1);
+		strcpy(curParamDir, dir);
+	} else {
+		// in case there is no preference setting, use the installation's param directory as default
+		MakeFullpath(&curParamDir, libDir, PARAM_SUBDIR, NULL);
+	}
+}
 
-#include "bitmaps/mtbox.xbm"
-#include "bitmaps/chkbox.xbm"
+/**
+ * Create and open the parameter file dialog.
+ * 
+ * \param junk
+ */
+
 static void DoParamFiles( void * junk )
 {
 	wIndex_t listInx;
 	void * data;
 
 	if (paramFileW == NULL) {
-		const char * dir;
-		dir = wPrefGetString( "file", "paramdir" );
-		if (dir != NULL)
-			strcpy( curParamDir, dir );
-		else {
-			// in case there is no preference setting, use the installation's param directory as default
-			char *str;
-			MakeFullpath(&str, libDir, PARAM_SUBDIR, NULL);
-			strcpy( curParamDir, str );
-			free(str);
-		}
-		mtbox_bm = wIconCreateBitMap( mtbox_width, mtbox_height, mtbox_bits, drawColorBlack );
-		chkbox_bm = wIconCreateBitMap( chkbox_width, chkbox_height, chkbox_bits, drawColorBlack );
+		SetParamDir();
+
+		greendot_icon = wIconCreatePixMap(greendot);
+		greydot_icon = wIconCreatePixMap(greydot);
+
 		paramFileW = ParamCreateDialog( &paramFilePG, MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, ParamFileCancel, TRUE, NULL, 0, ParamFileDlgUpdate );
 		paramFile_fs = wFilSelCreate( mainW, FS_LOAD, FS_MULTIPLEFILES, _("Load Parameters"), _("Parameter files|*.xtp"), LoadParamFile, NULL );
 		ParamFileLoadList();
