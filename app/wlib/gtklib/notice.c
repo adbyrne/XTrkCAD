@@ -59,7 +59,8 @@ static void doNotice(
     long value)
 {
     noticeValue = value;
-    gtk_widget_destroy(noticeW.win);
+    if (noticeValue != 2)
+    	gtk_widget_destroy(noticeW.win);
     wlibDoModal(NULL, FALSE);
 }
 
@@ -242,6 +243,9 @@ int wNotice3(
             gtk_widget_set_can_default(nw->butt[ 2 ], TRUE);
         }
     }
+
+    g_signal_connect(GTK_WINDOW(nw->win),
+            "destroy", G_CALLBACK(doNotice), (void*)2);
 
     gtk_widget_grab_default(nw->butt[ 0 ]);
     gtk_widget_grab_focus(nw->butt[ 0 ]);

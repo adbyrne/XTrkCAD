@@ -1168,6 +1168,7 @@ static int ImportTracks(
 	useCurrentLayer = TRUE;
 	ReadTrackFile( fileName[ 0 ], nameOfFile, FALSE, FALSE, TRUE );
 	ImportEnd();
+	useCurrentLayer = FALSE;
 	/*DoRedraw();*/
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
@@ -1313,6 +1314,7 @@ EXPORT BOOL_T EditPaste( void )
 		rc = FALSE;
 	}
 	ImportEnd();
+	useCurrentLayer = FALSE;
 	/*DoRedraw();*/
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
