@@ -557,6 +557,25 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \rule
 
+\S{OSXInstall} \i{OSX Installation} \i{Mac Installation}
+
+\e{XTrackCAD} for LINUX is shipped as a package containing an application.
+
+\n Start the installation by opening the \f{XTCOSXPack} package and dragging the contained application into the \e{Applications} folder using the shortcut in the package. 
+The application includes the program, documentation, parameter and example files within it.  
+
+\lcont{\u000}
+
+\n To run on modern OSX levels, the \e{XQuartz} package must also have been installed - see \W{http://www.xquartz.org}{http://www.xquartz.org}.
+
+\lcont{\u000}
+
+\n \i{OSX Run Security} When the application is first run, it will need to be authorized by OSX. There will be a OSX prompt that asks if it should be opened. And then it fail to run. 
+After opening it for the first time, go to \e{System Preferences} and then \e{Security & Privacy} and you will see that the app is named as having been blocked. Hit the \e{Run Anyway} button and the program should start.
+This sequence will be necessary after each fresh install.
+
+\rule
+
 \S{LinuxInstall} \i{Linux Installation}
 
 \e{XTrackCAD} for LINUX is shipped as a self-extracting archive (executable). 
@@ -580,13 +599,20 @@ If you install \e{XTrackCAD} into another directory, set the \c{XTRKCADLIB} envi
 
 \H{startSoftware} \i{Start the Program}
 
-The \e{XTrackCAD} executable is named xtrkcad.exe on Windows and xtrkcad on Linux.
+The \e{XTrackCAD} executable is named xtrkcad.exe on Windows and xtrkcad on Linux and OSX.
+
+It is usually started by clicking on its icon, but there are command line options as well. 
 
 \f{Command Line}
 
 On Windows:
 
 \c xtrkcad [/c config] [/v] [/l logfile] [/d logcontrol] layoutfile
+
+On Mac OSX:
+
+\c cd /Applications
+\c ./open xtrkcad --args [-c config] [-v] [-l logfile] [-d logcontrol] layoutfile
 
 On Linux:
 
@@ -620,7 +646,7 @@ developers.
 \dt \c{d logcontrol}
 
 \dd specifies the amount of logging. The argument logcontrol has the format \c{logmodule[=level]}.
-logmodule defines the functionality that should be logged, the optional level specifies the loglevel.
+logmodule defines the functionality that should be logged, the optional level specifies the loglevel. Zero means no logging. 
 Defaults are no modules are logged and loglevel is 1 if omitted from logonctrol parameter.
 
 \u000
@@ -628,9 +654,6 @@ Defaults are no modules are logged and loglevel is 1 if omitted from logonctrol 
 \dt \c{l logfile}
 
 \dd set logfile, only needed in conjunction with the debug option.
-
-
-
 
 \H{introQT} Quick Tour
 
@@ -644,7 +667,7 @@ The Menu bar across the top of the \f{Main} window contains standard Windows men
 
 \u000
 
-\b The \f{File>Open} menu opens existing layout files.  When first installed, the default directory contains some example programs you can look at.
+\b The \f{File>Open} menu opens existing layout files and archives. When first installed, the default directory contains some example programs you can look at.
 
 \u000
 
@@ -684,6 +707,10 @@ This section lists some things that can improve the performance of \e{XTrackCAD}
 
 \b On the \f{Display} dialog (\K{cmdDisplay}) turn off drawing \f{Endpoints}, decrease the \f{Two Rail Scale}, increase \f{Min Grid Spacing}, set \f{Draw Ties} to \f{None} and turn off \f{Live Map}.
 
+\u000
+
+\b On the \f{View} dialog (\K{cmdView}) turn off \f{Show Snap Grid} or \f{Change Grid...} to have fewer grid points.
+
 \rule
 
 \H{directories} Files and Directories
@@ -702,11 +729,15 @@ Information within this section of the manual identifies installation directory 
 
 \b The \e{XTrackCAD Working} directory, which contains configuration and Check Point files.
 
-On MS Windows the \e{Install} directory is set when you install \e{XTrackCAD}. All data files (parameters, 
+On MS Windows, the \e{Install} directory is set when you install \e{XTrackCAD}. All data files (parameters, 
 demos, examples) can be found in the \c{share/xtrkcad} subdirectory underneath the \e{Install} directory. 
 The \e{Working} directory is in your personal profile.
 
-On Linux the \e{Install} directory is usually \c{/usr/local/lib/xtrkcad/}, but you can change this by defining the \c{XTRKCADLIB} environment variable before starting \e{XTrackCAD}. The working directory is \c{\{HOME\}/.xtrkcad/}.
+On Linux, the \e{Install} directory is usually \c{/usr/local/lib/xtrkcad/}, but you can change this by defining the \c{XTRKCADLIB} environment variable before starting \e{XTrackCAD}. The working directory is \c{\{HOME\}/.xtrkcad/}.
+
+On Mac OSX, the \e{Install} directory is the application package, usually located in the \c{/Applications} directory.
+All the included parameters, demos and examples can be found inside the package under the  \c{/Applications/xtrkcad/Contents/Resources/xtrkcad} directory.
+The \e{Working} directory is created as \c{.xtrkcad} - a hidden directory - under the active user's directory in \c{/Users} 
 
 Layout files (\c{*.xtc}) and export (\K{cmdExport}) files (\c{*.xti}) can be saved anywhere you wish, as specified in the \f{Save File} and \f{Open File} dialogs.
 
@@ -728,7 +759,7 @@ Example layouts can be found in the \c{example} directory under the \e{XTrackCAD
 
 \u000
 
-\b \c{xtrkcad.exe} (MS-Windows) or \c{xtrkcad} (Linux) is the \e{XTrackCAD} program.
+\b \c{xtrkcad.exe} (MS-Windows) or \c{xtrkcad} (Linux or Mac OSX) is the \e{XTrackCAD} program.
 
 \u000
 
@@ -762,15 +793,15 @@ The check-point frequency is set by the \e{Check Point} field found in the \f{Pr
 
 \u000
 
-\b The \c{xtrkcad.ini} (on MS-Windows) or the \c{xtrkcad.rc} (on Linux) file contains various parameter settings from each use of \e{XTrackCAD}.  Most changes you make (such as scale, room size, window position) are saved in this file for the next time you use \e{XTrackCAD}.
+\b The \c{xtrkcad.ini} (on MS-Windows) or the \c{xtrkcad.rc} (on Linux or Mac OSX) file contains various parameter settings from each use of \e{XTrackCAD}.  Most changes you make (such as scale, room size, window position) are saved in this file for the next time you use \e{XTrackCAD}.
 
 \rule
 
 \H{uninstall} \i{Removing \e{XTrackCAD}}
 
-Remove \e{XTrackCAD} by deleting the \e{XTrackCAD Install} directory, deleting any \c{xtrkcad.*} files from the \e{Working} directory, and deleting any \e{*.xtc} and \e{*.xti} files.
+Remove \e{XTrackCAD} by deleting the \e{XTrackCAD Install} directory, or application (on Mac OSX), deleting any \c{xtrkcad.*} files from the \e{Working} directory, and deleting any \e{*.xtc} and \e{*.xti} files.
 
-On MS-Windows, you can also use the \f{Uninstall} icon in the \e{XTrackCAD} program group.
+On MS-Windows only, you can also use the \f{Uninstall} icon in the \e{XTrackCAD} program group.
 
 \rule
 
@@ -814,7 +845,7 @@ If you encounter an unreported bug please submit detail regarding such to the \f
 
 \f{If you don't understand an error message, ask for help.} Don't report an error message you don't understand as a bug. There are a lot of places you can ask for help in understanding what is going on before you can claim that an error message you do not understand is a bug. (Once you've understood the error message and have a good suggestion for a way to make the error message clearer, you might consider reporting it as a  \W{https://sourceforge.net/p/xtrkcad-fork/feature-requests/}{\e{XTrackCAD} Feature Request}).
 
-\f{Be brief, but don't leave any important details out.} This is a fine line to walk. But there are some general guidelines:
+\f{Please be brief, but don't leave any important details out.} This is a fine line to walk. But there are some general guidelines:
 
 Remember the three basics: what you were doing, what you expected to happen, and what happened. 
 
