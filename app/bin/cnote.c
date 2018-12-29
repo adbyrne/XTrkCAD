@@ -83,6 +83,7 @@ static void NoteOk(void * junk)
         mainText = (char*)MyMalloc(len+2);
         wTextGetText(noteT, mainText, len);
 
+		len = strlen(mainText);
         if (mainText[len-1] != '\n') {
             mainText[len++] = '\n';
         }
@@ -315,6 +316,8 @@ static void ReadNote(char * line)
         if (size > 0 && size < len) {
             InputError("NOTE text overflow", TRUE);
             size = -1;
+			cp = mainText;	// no valid NOTE entered
+			break;
         }
 
         if (size > 0) {
@@ -332,7 +335,7 @@ static void ReadNote(char * line)
         lineCount++;
     }
 
-    if (cp[-1] != '\n') {
+    if (cp > mainText && cp[-1] != '\n') {
         *cp++ = '\n';
     }
 
