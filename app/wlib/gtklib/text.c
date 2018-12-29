@@ -375,7 +375,7 @@ wBool_t wTextPrint(
  * Get the length of text
  *
  * \param bt IN the text widget
- * \return    length of string
+ * \return    length of string including terminating \0
  */
 
 int wTextGetSize(wText_p bt)
@@ -383,7 +383,7 @@ int wTextGetSize(wText_p bt)
     char *cp = wlibGetText(bt);
     int len = strlen(cp);
     free(cp);
-    return len;
+    return len + 1;
 }
 
 /**
