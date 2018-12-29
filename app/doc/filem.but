@@ -9,7 +9,17 @@
 
 \G{png.d/mfile.png}
 
-The \f{File Menu} shows file oriented commands for loading and saving layout files. The main two types are normal layout files (.xtc) and Archives (.zxtc). An archive contains a zipped copy of the .xtc layout file, a manifest JSON file that lists the contents and any referenced content -> such as image files. Presently the only such content is the background image which is added to the archive if it is present.
+The \f{File Menu} shows file oriented commands for loading and saving layout files. 
+\i{File Types} The main two filetypes that XTrackCAD uses are normal Layout Files (*.xtc) and Archive Files (*.xtce). The internals of both formats are described in the XtrkCAD Wiki at \W{http://www.xtrkcad.org/Wikka/FileFormats}{Wiki FileFormats}.
+
+\i{Layout File} The layout file is named with a \e{*.xtc} extenstion and is a text-based description file of all the objects used in the layout plus some information about the options currently in use.
+\i{Archive} An archive is named with a \e{*.xtce} extension, is a zipped collection of -
+
+\b a \e{manifest} JSON file that lists the contents, 
+
+\b the .xtc layout file, and 
+
+\b any other content listed in the manifest -> such as referenced image files. Initially the only such content is the background image which is added to the archive if it is present.
 
 \dd \f{Exit} - Exits \e{XTrackCAD}. You will be asked to confirm your choice if there are unsaved changes.
 
@@ -63,11 +73,11 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \G{png.d/bsave.png} \f{Save} - Saves the layout under the current file name.  If a filename has not yet been assigned then the \f{File Save} dialog is shown so you enter a file or archive name.
+\dd \G{png.d/bsave.png} \f{Save} - Saves the layout under the current file name and with the same file type as was opened. If a filename has not yet been assigned then the \f{File Save} dialog is shown so you enter a file (.xtc) or archive name (.xtce).
 
 \u000
 
-\dd \f{Save As} - This command lets you make a copy of the track plan you are currently working on as an file (.xtc) or an archive (.zxtc). It differs from the regular Save command. Save stores your data back into the folder (directory) it originally came from. "Save As" lets you give your plan a different name and/or put it in a different folder on your hard disk.  
+\dd \f{Save As} - This command lets you make a copy of the track plan you are currently working on as an file (.xtc) or an archive (.xtce). It differs from the regular Save command. Save stores your data back into the folder (directory) it originally came from in the same filetype. "Save As" lets you give your plan a different name and/or put it in a different folder on your hard disk and chnage its filetype using the selection box at the bottom of the list of files or by hardcoding the extensions .xtc or .xtce (for an archive). 
 
 \rule
 
