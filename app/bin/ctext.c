@@ -67,7 +67,7 @@ static paramData_t textPLs[] = {
 #define colorPD (textPLs[1])
         { PD_COLORLIST, &Dt.color, "Color", PDO_NORECORD, NULL, N_("Color") },
 #define boxPD (textPLs[2])
-		{ PD_TOGGLE, &Dt.boxed, "Boxed", 0, boxLabels, NULL, 0 }
+		{ PD_TOGGLE, &Dt.boxed, "Boxed", 0, boxLabels, N_("Boxed"), 0 }
         };
 static paramGroup_t textPG = { "text", 0, textPLs, sizeof textPLs/sizeof textPLs[0] };
 
