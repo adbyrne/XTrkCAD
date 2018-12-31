@@ -845,7 +845,8 @@ static BOOL_T EnumerateBezier( track_p trk )
 	if (trk != NULL) {
 		DIST_T d;
 		struct extraData *xx = GetTrkExtraData(trk);
-		d = xx->bezierData.length;
+		d = max(BezierOffsetLength(xx->bezierData.arcSegs,-GetTrkGauge(trk)/2.0),
+				BezierOffsetLength(xx->bezierData.arcSegs,GetTrkGauge(trk)/2.0));
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 	}
 	return TRUE;
@@ -896,6 +897,7 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 	}
 	if (params->ep>=0)
 		params->angle = GetTrkEndAngle(trk, params->ep);
+
 	return TRUE;
 
 }

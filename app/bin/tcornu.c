@@ -928,7 +928,8 @@ static BOOL_T EnumerateCornu( track_p trk )
 	if (trk != NULL) {
 		struct extraData *xx = GetTrkExtraData(trk);
 		DIST_T d;
-		d = xx->cornuData.length;
+		d = max(CornuOffsetLength(xx->cornuData.arcSegs,-GetTrkGauge(trk)/2.0),
+				CornuOffsetLength(xx->cornuData.arcSegs,GetTrkGauge(trk)/2.0));
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 	}
 	return TRUE;

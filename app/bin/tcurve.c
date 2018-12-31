@@ -922,9 +922,9 @@ static BOOL_T EnumerateCurve( track_p trk )
 	if (trk != NULL) {
 		xx = GetTrkExtraData(trk);
 		GetCurveAngles( &a0, &a1, trk );
-		d = xx->radius * 2.0 * M_PI * a1 / 360.0;
+		d = (xx->radius + (GetTrkGauge(trk)/2.0))* 2.0 * M_PI * a1 / 360.0;
 		if (xx->helixTurns > 0)
-			d += (xx->helixTurns-(xx->circle?1:0)) * xx->radius * 2.0 * M_PI;
+			d += (xx->helixTurns-(xx->circle?1:0)) * (xx->radius+(GetTrkGauge(trk)/2.0)) * 2.0 * M_PI;
 		ScaleLengthIncrement( GetTrkScale(trk), d );
 	}
 	return TRUE;

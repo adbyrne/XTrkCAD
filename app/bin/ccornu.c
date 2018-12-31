@@ -1047,6 +1047,22 @@ DIST_T CornuLength(coOrd pos[4],dynArr_t segs) {
 	return dd;
 }
 
+DIST_T CornuOffsetLength(dynArr_t segs, double offset) {
+	DIST_T dd = 0.0;
+	if (segs.cnt == 0 ) return dd;
+	for (int i = 0;i<segs.cnt;i++) {
+		trkSeg_t t = DYNARR_N(trkSeg_t, segs, i);
+		if (t.type == SEG_CRVTRK || t.type == SEG_CRVLIN) {
+			dd += fabs((t.u.c.radius+(t.u.c.radius>0?offset:-offset))*D2R(t.u.c.a1));
+		} else if (t.type == SEG_BEZLIN || t.type == SEG_BEZTRK) {
+			dd +=CornuOffsetLength(t.bezSegs,offset);
+		} else if (t.type == SEG_STRLIN || t.type == SEG_STRTRK ) {
+			dd += FindDistance(t.u.l.pos[0],t.u.l.pos[1]);
+		}
+	}
+	return dd;
+}
+
 DIST_T CornuMinRadius(coOrd pos[4],dynArr_t segs) {
 	DIST_T r = 100000.0, rr;
 	if (segs.cnt == 0 ) return r;

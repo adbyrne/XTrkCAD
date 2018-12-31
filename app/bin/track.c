@@ -2137,6 +2137,9 @@ EXPORT char * GetTrkTypeName( track_p trk )
 	return trackCmds(trk->type)->name;
 }
 
+/*
+ * Note Misnomer - this function also gets the normal length - enumerate deals with flextrack length
+ */
 
 EXPORT DIST_T GetFlexLength( track_p trk0, EPINX_T ep, coOrd * pos )
 {

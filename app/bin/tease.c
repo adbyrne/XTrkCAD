@@ -483,6 +483,20 @@ static DIST_T GetLengthJoint( track_p trk )
 		return fabs( d0-d1 );
 }
 
+static DIST_T GetFlexLengthJoint( track_p trk )
+{
+	struct extraData *xx;
+	DIST_T d0, d1, d3;
+	xx = GetTrkExtraData(trk);
+	d0 = JoinD( xx->l0, xx->R+(GetTrkGauge(trk)/2.0), xx->L );
+	d1 = JoinD( xx->l1, xx->R+(GetTrkGauge(trk)/2.0), xx->L );
+	d3 = JoinD( xx->l1, xx->R-(GetTrkGauge(trk)/2.0), xx->L );
+	if (xx->Scurve) {
+		return d0+d3;
+	} else
+		return fabs( d0-d1 );
+}
+
 
 static struct {
 		coOrd endPt[2];
@@ -1225,7 +1239,7 @@ static BOOL_T TraverseJointTrack(
 static BOOL_T EnumerateJoint( track_p trk )
 {
 	if (trk != NULL) {
-		ScaleLengthIncrement( GetTrkScale(trk), GetLengthJoint(trk) );
+		ScaleLengthIncrement( GetTrkScale(trk), GetFlexLengthJoint(trk) );
 	}
 	return TRUE;
 }
@@ -1304,7 +1318,7 @@ static BOOL_T GetParamsJoint( int inx, track_p trk, coOrd pos, trackParams_t * p
 	params->lineOrig = GetTrkEndPos(trk,params->ep);
 	params->lineEnd = params->lineOrig;
 	params->angle = GetTrkEndAngle(trk,params->ep);
-	params->len = 0.0;
+	params->len = GetLengthJoint(trk);
 	params->arcR = 0.0;
 	return TRUE;
 }
