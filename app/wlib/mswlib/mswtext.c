@@ -247,42 +247,54 @@ wBool_t wTextGetModified(
     return (wBool_t)rc;
 }
 
+/**
+ * Get the size of the text in the text control including terminating '\0'. Note that
+ * the text actually might be shorter if the text includes CRs.
+ * 
+ * \param b IN text control
+ * \return required buffer size
+ */
 int wTextGetSize(
     wText_p b)
 {
-    int lc, l, len=0;
-    lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, 0, 0L);
+	int len;
 
-    for (l=0; l<lc ; l++) {
-        int charIndex = (int)SendMessage(b->hWnd, EM_LINEINDEX, l, 0L);
-        len += (int)SendMessage(b->hWnd, EM_LINELENGTH, charIndex, 0L) + 1;
-    }
+	len = GetWindowTextLength(b->hWnd);
 
-    if (len == 1) {
-        len = 0;
-    }
-
-    return len;
+    return len + 1;
 }
 
+/** 
+ * Get the text from a textentry. The buffer must be large enough for the text and
+ * the terminating \0.
+ * In case the string contains carriage returns these are removed. The returned string
+ * will be shortened accordingly. 
+ * To get the complete contents the buffer size must be equal or greater then the return
+ * value of wTextGetSize()
+ * 
+ * \param b IN text entry
+ * \param t IN/OUT buffer for text
+ * \param s IN size of buffer 
+ */
+ 
 void wTextGetText(
     wText_p b,
     char * t,
     int s)
 {
-    int lc, l, len;
-    s--;
-    lc = (int)SendMessage(b->hWnd, EM_GETLINECOUNT, 0, 0L);
+	char *buffer = malloc(s);
+	char *ptr = buffer;
+	GetWindowText(b->hWnd, buffer, s);
 
-    for (l=0; l<lc && s>=0; l++) {
-        *(WORD*)t = s;
-        len = (int)SendMessage(b->hWnd, EM_GETLINE, l, (LPARAM)t);
-        t += len;
-        *t++ = '\n';
-        s -= len+1;
-    }
-
-    *(t - 1) = '\0';		// overwrite the last \n added
+	// remove carriage returns
+	while (*ptr) {
+		if (*ptr != '\r') {
+			*t = *ptr;
+			t++;
+		}
+		ptr++;
+	}
+	free(buffer);
 }
 
 
