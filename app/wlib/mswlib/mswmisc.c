@@ -48,7 +48,7 @@ char * mswStrdup(const char *);
 #define BALLOONHELP_TIMER		(903)
 #define TRIGGER_TIMER	(904)
 #define CONTROLHILITEWIDTH (2)
-#define CONTROLHILITECOLOR (RGB(0x7f,0xff,0xd4))
+#define CONTROLHILITECOLOR (RGB(0x3a,0x5f,0xcd))
 
 #define WANT_LITTLE_LABEL_FONT
 
