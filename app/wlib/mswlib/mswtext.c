@@ -137,6 +137,9 @@ void wTextAppend(
     if (b->option&BO_READONLY) {
         SendMessage(b->hWnd, EM_SETREADONLY, 1, 0L);
     }
+
+	// scroll to bottom of text box
+	SendMessage(b->hWnd, EM_LINESCROLL, 0, 10000L);
 }
 
 

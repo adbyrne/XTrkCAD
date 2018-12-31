@@ -335,7 +335,18 @@ static struct {
 	/*BOXED*/      	{ PD_TOGGLE, 0,	       I_TOGGLE_0, I_TOGGLE_N },
 };
 
-static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
+/**
+ * An unused param element is selected from the list of pre-defined param elements and initialized
+ * for an element specific param. 
+ * 
+ * \param ddp Element specific param
+ * \param valueP the value pointer used by the element
+ * \param label the label assigned by the element
+ * \param sep ?
+ * \return the selected widget
+ */
+ 
+static wControl_p AssignParamToDescribeDialog(descData_p ddp, void * valueP, char * label,
                                wPos_t sep)
 {
     int inx;
@@ -370,7 +381,7 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
         }
     }
 
-    AbortProg("allocateButt: can't find %d", ddp->type);
+    AbortProg("AssignParamToDescribeDialog: can't find %d", ddp->type);
     return NULL;
 }
 
@@ -471,13 +482,13 @@ void DoDescribe(char * title, track_p trk, descData_p data, descUpdate_t update)
 
         label = _(ddp->label);
         ddp->posy = describeW_posy;
-        ddp->control0 = AllocateButt(ddp, ddp->valueP, label,
+        ddp->control0 = AssignParamToDescribeDialog(ddp, ddp->valueP, label,
                                      (ddp->type == DESC_POS?3:3));
         wControlActive(ddp->control0, ((ddp->mode|ro_mode)&DESC_RO)==0);
 
         switch (ddp->type) {
         case DESC_POS:
-            ddp->control1 = AllocateButt(ddp,
+            ddp->control1 = AssignParamToDescribeDialog(ddp,
                                          &((coOrd*)(ddp->valueP))->y,
                                          NULL,
                                          0);
