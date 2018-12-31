@@ -47,6 +47,8 @@ char * mswStrdup(const char *);
 #define ALARM_TIMER		(902)
 #define BALLOONHELP_TIMER		(903)
 #define TRIGGER_TIMER	(904)
+#define CONTROLHILITEWIDTH (2)
+#define CONTROLHILITECOLOR (RGB(0x7f,0xff,0xd4))
 
 #define WANT_LITTLE_LABEL_FONT
 
@@ -1693,8 +1695,6 @@ void wControlSetContext(
     b->data = context;
 }
 
-static int controlHiliteWidth = 5;
-static int controlHiliteWidth2 = 3;
 void wControlHilite(
     wControl_p b,
     wBool_t hilite)
@@ -1702,12 +1702,13 @@ void wControlHilite(
     HDC hDc;
     HPEN oldPen, newPen;
     int oldMode;
+	LOGBRUSH logBrush = { BS_SOLID, CONTROLHILITECOLOR, (ULONG_PTR)NULL };
 
     if (b == NULL) {
         return;
     }
 
-    if (!IsWindowVisible(b->parent->hWnd)) {
+    if (!IsWindowVisible(b->parent->hWnd)) {	
         return;
     }
 
@@ -1716,14 +1717,18 @@ void wControlHilite(
     }
 
     hDc = GetDC(b->parent->hWnd);
-    newPen = CreatePen(PS_SOLID, controlHiliteWidth, RGB(0,0,0));
+	newPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_ROUND | PS_JOIN_BEVEL,
+						  CONTROLHILITEWIDTH,
+						  &logBrush,
+						  0,
+						  NULL);
     oldPen = SelectObject(hDc, newPen);
     oldMode = SetROP2(hDc, R2_NOTXORPEN);
-    MoveTo(hDc, b->x-controlHiliteWidth2, b->y-controlHiliteWidth2);
-    LineTo(hDc, b->x+b->w+controlHiliteWidth2, b->y-controlHiliteWidth2);
-    LineTo(hDc, b->x+b->w+controlHiliteWidth2, b->y+b->h+controlHiliteWidth2);
-    LineTo(hDc, b->x-controlHiliteWidth2, b->y+b->h+controlHiliteWidth2);
-    LineTo(hDc, b->x-controlHiliteWidth2, b->y-controlHiliteWidth2);
+	Rectangle(hDc,
+		b->x - CONTROLHILITEWIDTH - 1,
+		b->y - CONTROLHILITEWIDTH - 1,
+		b->x + b->w + CONTROLHILITEWIDTH + 1,
+		b->y + b->h + CONTROLHILITEWIDTH + 1);
     SetROP2(hDc, oldMode);
     SelectObject(hDc, oldPen);
     DeleteObject(newPen);

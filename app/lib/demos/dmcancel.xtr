@@ -22,7 +22,7 @@ STRAIGHT 3 0 0 0 0 DEMO 2
 	T 2 19.405000 2.250007 270.000123
 	END
 NOTE 4 0 0 0 16.666667 4.250000 0 69
-This is a note about something important 
+This is a note about something important
 but I can't remember what.
     END
 DRAW 5 0 0 0 0 4.125000 5.750000 0 0.000000
@@ -84,7 +84,7 @@ You can change the contents of Text...
 END
 STEP
 #DESCRIBE Text	Goodbye
-PARAMETER describe S1 Goodbye
+PARAMETER describe T1 Goodbye
 BIGPAUSE
 MESSAGE
 and its size.
