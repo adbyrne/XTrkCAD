@@ -1375,9 +1375,60 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 
 static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
-
+	struct extraData *xx =	GetTrkExtraData(trk);
 
 	params->type = curveTypeStraight;	//TODO should check if last segment is actually straight
+	if (inx == PARAMS_TURNOUT) {
+		params->len = 0.0;
+		int epCnt = GetTrkEndPtCnt(trk);
+		if (epCnt < 3) {
+			double d = 10000.0;
+			params->centroid = zero;
+			//calculate path length from endPt (either to end or to other end)
+			segProcData_t segProcData;
+			trkSeg_p seg;
+			int segInx;
+			int segEP;
+			trkSeg_p segPtr;
+			PATHPTR_T path,pathCurr;
+			//Find starting seg on path (nearest to end Pt)
+			for ( path = xx->pathCurr+strlen((char*)xx->pathCurr)+1; path[0] || path[1]; path++ ) {
+				if ( path[0] == 0 )
+					continue;
+				GetSegInxEP( path[0], &segInx, &segEP );
+				segPtr = xx->segs+segInx;
+				segProcData.distance.pos1 = pos;
+				SegProc( SEGPROC_DISTANCE, segPtr, &segProcData );
+				if ( segProcData.distance.dd < d ) {
+					d = segProcData.distance.dd;
+					pathCurr = path;
+				}
+			}
+			GetSegInxEP( pathCurr[0], &segInx, &segEP );
+			seg = xx->segs+segInx;
+			d = 0.0;
+			//Loop through segs on path from endPt adding
+			while (pathCurr[0]) {
+				GetSegInxEP( pathCurr[0], &segInx, &segEP );
+				seg = xx->segs+segInx;
+				SegProc(SEGPROC_LENGTH, seg, &segProcData );
+				d += segProcData.length.length;
+				pathCurr += segEP?1:-1;
+			}
+			params->len = d;
+		} else {
+			double x, y;
+			for (int i=0;i<=epCnt; i++) {
+				coOrd cpos = GetTrkEndPos(trk,i);
+				x += cpos.x;
+				y += cpos.y;
+			}
+			params->centroid.x = x/epCnt;
+			params->centroid.y = y/epCnt;
+			params->len = FindDistance(params->centroid,pos)*2;  //Times two because it will be halved by track.c
+		}
+		return TRUE;
+	}
 	if (inx == PARAMS_CORNU  || inx == PARAMS_BEZIER) {
 		params->arcR = 0.0;
 		params->arcP = zero;

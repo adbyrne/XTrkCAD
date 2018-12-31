@@ -448,6 +448,7 @@ EXPORT void SetTrkEndElev( track_p trk, EPINX_T ep, int option, DIST_T height, c
 	track_p trk1;
 	EPINX_T ep1;
 	trk->endPt[ep].elev.option = option;
+	trk->endPt[ep].elev.cacheSet = FALSE;
 	if (EndPtIsDefinedElev(trk,ep)) {
 		trk->endPt[ep].elev.u.height = height;
 	} else if (EndPtIsStationElev(trk,ep)) {
@@ -492,6 +493,23 @@ EXPORT DIST_T GetTrkEndElevHeight( track_p trk, EPINX_T e )
 {
 	ASSERT( EndPtIsDefinedElev(trk,e) );
 	return trk->endPt[e].elev.u.height;
+}
+
+EXPORT BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T * height, DIST_T * length)
+{
+	if (trk->endPt[e].elev.cacheSet) {
+		*height = trk->endPt[e].elev.cachedElev;
+		*length = trk->endPt[e].elev.cachedLength;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+EXPORT void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T length)
+{
+	trk->endPt[e].elev.cachedElev = height;
+	trk->endPt[e].elev.cachedLength = length;
+	trk->endPt[e].elev.cacheSet = TRUE;
 }
 
 
@@ -556,6 +574,9 @@ EXPORT void SetTrkElev( track_p trk, int mode, DIST_T elev )
 	SetTrkBits( trk, TB_ELEVPATH );
 	trk->elev = elev;
 	trk->elevMode = mode;
+	for (int i=0;i<trk->endCnt;i++) {
+		trk->endPt[i].elev.cacheSet = FALSE;
+	}
 }
 
 
@@ -2163,9 +2184,33 @@ EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 	} else {
 		pos0 = GetTrkEndPos(trk,ep0);
 		if (ep1==-1) {
+			// Usual case for asking about distance to center of turnout for grades
+			if (trk->type==T_TURNOUT) {
+				trackParams_t trackParamsData;
+				trackParamsData.ep = ep0;
+				if (trackCmds(trk->type)->getTrackParams != NULL) {
+					//Find distance to centroid of end points * 2 or actual length if epCnt < 3
+					trackCmds(trk->type)->getTrackParams(PARAMS_TURNOUT,trk,pos0,&trackParamsData);
+					return trackParamsData.len/2.0;
+				}
+			}
 			pos1.x = (trk->hi.x+trk->lo.x)/2.0;
 			pos1.y = (trk->hi.y+trk->lo.y)/2.0;
 		} else {
+			if (trk->type==T_TURNOUT) {
+				pos1 = GetTrkEndPos(trk,ep1);
+				trackParams_t trackParamsData;
+				trackParamsData.ep = ep0;
+				if (trackCmds(trk->type)->getTrackParams != NULL) {
+					//Find distance via centroid of end points or actual length if epCnt < 3
+					trackCmds(trk->type)->getTrackParams(PARAMS_TURNOUT,trk,pos0,&trackParamsData);
+					d = trackParamsData.len/2.0;
+					trackParamsData.ep = ep1;
+					trackCmds(trk->type)->getTrackParams(PARAMS_TURNOUT,trk,pos1,&trackParamsData);
+					d += trackParamsData.len/2.0;
+					return d;
+				}
+			}
 			pos1 = GetTrkEndPos(trk,ep1);
 		}
 		pos1.x -= pos0.x;
@@ -2487,8 +2532,8 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
 		len = GetTrkLength( trk, 0, 1 );
 		if (len>0.1) {
-			ComputeElev( trk, 0, FALSE, &elev0, NULL );
-			ComputeElev( trk, 1, FALSE, &elev1, NULL );
+			ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
+			ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
 			grade = fabs( (elev1-elev0)/len )*100.0;
 		}
 	}
@@ -2653,7 +2698,7 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 	case ELEV_GRADE:
 		if ( color == wDrawColorWhite ) {
 			elev0 = grade = elev->u.height;
-		} else if ( !ComputeElev( trk, ep, FALSE, &elev0, &grade ) ) {
+		} else if ( !ComputeElev( trk, ep, FALSE, &elev0, &grade, FALSE ) ) {
 			elev0 = grade = 0;
 			gradeOk = FALSE;
 		}
@@ -2661,7 +2706,7 @@ EXPORT void DrawEndElev( drawCmd_p d, track_p trk, EPINX_T ep, wDrawColor color 
 			elevStr = FormatDistance(elev0);
 			elev->u.height = elev0;
 		} else if (gradeOk) {
-			sprintf( message, "%0.1f%%", fabs(grade*100.0) );
+			sprintf( message, "%0.1f%%", round(fabs(grade*100.0)*10)/10 );
 			elevStr = message;
 			a = GetTrkEndAngle( trk, ep );
 			style = BOX_ARROW;

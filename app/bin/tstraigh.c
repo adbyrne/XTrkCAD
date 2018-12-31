@@ -163,7 +163,7 @@ static void UpdateStraight( track_p trk, int inx, descData_p descUpd, BOOL_T fin
 	case Z1:
 		ep = (inx==Z0?0:1);
 		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep), strData.elev[ep], NULL );
-		ComputeElev( trk, 1-ep, FALSE, &strData.elev[1-ep], NULL );
+		ComputeElev( trk, 1-ep, FALSE, &strData.elev[1-ep], NULL, TRUE );
 		if ( strData.length > minLength )
 			strData.grade = fabs( (strData.elev[0]-strData.elev[1])/strData.length )*100.0;
 		else
@@ -242,8 +242,8 @@ static void DescribeStraight( track_p trk, char * str, CSIZE_T len )
 	fix1 = GetTrkEndTrk(trk,1)!=NULL;
 	strData.endPt[0] = GetTrkEndPos(trk,0);
 	strData.endPt[1] = GetTrkEndPos(trk,1);
-	ComputeElev( trk, 0, FALSE, &strData.elev[0], NULL );
-	ComputeElev( trk, 1, FALSE, &strData.elev[1], NULL );
+	ComputeElev( trk, 0, FALSE, &strData.elev[0], NULL, FALSE );
+	ComputeElev( trk, 1, FALSE, &strData.elev[1], NULL, FALSE );
 	strData.length = FindDistance( strData.endPt[0], strData.endPt[1] );
 	strData.layerNumber = GetTrkLayer(trk);
 	if ( strData.length > minLength )

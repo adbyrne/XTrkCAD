@@ -220,8 +220,8 @@ static void DrawCurveDescription(
 		dist = GetLengthCurve( trk );
 		elevValid = FALSE;
 		if ( (!xx->circle) &&
-			 ComputeElev( trk, 0, FALSE, &elev0, NULL ) &&
-			 ComputeElev( trk, 1, FALSE, &elev1, NULL ) ) {
+			 ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE ) &&
+			 ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE ) ) {
 			if( elev0 == elev1 )
 				elevValid = FALSE;
 			else {
@@ -478,7 +478,7 @@ static void UpdateCurve( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 	case Z1:
 		ep = (inx==Z0?0:1);
 		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep), crvData.elev[ep], NULL );
-		ComputeElev( trk, 1-ep, FALSE, &crvData.elev[1-ep], NULL );
+		ComputeElev( trk, 1-ep, FALSE, &crvData.elev[1-ep], NULL, TRUE );
 		if ( crvData.length > minLength )
 			crvData.grade = fabs( (crvData.elev[0]-crvData.elev[1])/crvData.length )*100.0;
 		else
@@ -575,13 +575,13 @@ static void DescribeCurve( track_p trk, char * str, CSIZE_T len )
 	crvData.angle = a1;
 	crvData.layerNumber = GetTrkLayer(trk);
 	if ( !xx->circle ) {
-		ComputeElev( trk, 0, FALSE, &crvData.elev[0], NULL );
-		ComputeElev( trk, 1, FALSE, &crvData.elev[1], NULL );
+		ComputeElev( trk, 0, FALSE, &crvData.elev[0], NULL, FALSE );
+		ComputeElev( trk, 1, FALSE, &crvData.elev[1], NULL, FALSE );
 	} else {
 		crvData.elev[0] = crvData.elev[1] = 0;
 	}
-	ComputeElev( trk, 0, FALSE, &crvData.elev[0], NULL );
-	ComputeElev( trk, 1, FALSE, &crvData.elev[1], NULL );
+	ComputeElev( trk, 0, FALSE, &crvData.elev[0], NULL, FALSE );
+	ComputeElev( trk, 1, FALSE, &crvData.elev[1], NULL, FALSE );
 	if ( crvData.length > minLength )
 		crvData.grade = fabs( (crvData.elev[0]-crvData.elev[1])/crvData.length )*100.0;
 	else
@@ -1168,7 +1168,7 @@ static DIST_T GetLengthCurve( track_p trk )
 		a1 = 360.0;
 	else
 		GetCurveAngles( &a0, &a1, trk );
-	dist = (rad+GetTrkGauge(trk)/2.0)*a1*2.0*M_PI/360.0;
+	dist = rad*a1*2.0*M_PI/360.0;
 	if (xx->helixTurns>0)
 		dist += (xx->helixTurns-(xx->circle?1:0)) * xx->radius * 2.0 * M_PI;
 	return dist;

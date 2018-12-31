@@ -354,29 +354,29 @@ if (oldElevationEvaluation) {
 	}
 } else {
 #endif
-	gradeOk = ComputeElev( trk, ep, FALSE, &elevX, &grade );
+	gradeOk = ComputeElev( trk, ep, FALSE, &elevX, &grade, TRUE );
 	computedOk = TRUE;
 #ifdef OLDELEV
 }
 #endif
 	if (oldElevationEvaluation || computedOk) {
-		sprintf( message, "%0.2f%s", PutDim( elevX ), (units==UNITS_METRIC?"cm":"\"") );
+		sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0, (units==UNITS_METRIC?"cm":"\"") );
 		ParamLoadMessage( &elevationPG, I_COMPUTED, message );
 		if (gradeOk) {
-			sprintf( message, "%0.1f%%", fabs(grade*100) );
+			sprintf( message, "%0.1f%%", fabs(round(grade*1000.0)/10.0) );
 		} else {
 			if ( EndPtIsDefinedElev(trk,ep) ) {
 				elev = GetElevation(trk);
 				dist = GetTrkLength(trk,ep,-1);
 				if (dist>0.1)
-					sprintf( message, "%0.1f%%", fabs((elev-elevX)/dist)*100.0 );
+					sprintf( message, "%0.1f%%", fabs(round((elev-elevX)/dist)*1000.0)/10.0 );
 				else
 					sprintf( message, _("Undefined") );
 				if ( (trk1=GetTrkEndTrk(trk,ep)) && (ep1=GetEndPtConnectedToMe(trk1,trk))>=0 ) {
 					elev = GetElevation(trk1);
 					dist = GetTrkLength(trk1,ep1,-1);
 					if (dist>0.1)
-						sprintf( message+strlen(message), " - %0.1f%%", fabs((elev-elevX)/dist)*100.0 );
+						sprintf( message+strlen(message), " - %0.1f%%", fabs(round((elev-elevX)/dist)*1000.0)/10.0 );
 					else
 						sprintf( message+strlen(message), " - %s", _("Undefined") );
 				}

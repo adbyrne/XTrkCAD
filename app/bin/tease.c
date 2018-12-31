@@ -523,7 +523,7 @@ static void UpdateJoint( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 	case Z1:
 		ep = (inx==Z0?0:1);
 		UpdateTrkEndElev( trk, ep, GetTrkEndElevUnmaskedMode(trk,ep), jointData.elev[ep], NULL );
-		ComputeElev( trk, 1-ep, FALSE, &jointData.elev[1-ep], NULL );
+		ComputeElev( trk, 1-ep, FALSE, &jointData.elev[1-ep], NULL, TRUE );
 		if ( jointData.length > minLength )
 			jointData.grade = fabs( (jointData.elev[0]-jointData.elev[1])/jointData.length )*100.0;
 		else
@@ -570,8 +570,8 @@ static void DescribeJoint(
 	jointData.l0 = xx->l0;
 	jointData.l1 = xx->l1;
 	jointData.layerNumber = GetTrkLayer(trk);
-	ComputeElev( trk, 0, FALSE, &jointData.elev[0], NULL );
-	ComputeElev( trk, 1, FALSE, &jointData.elev[1], NULL );
+	ComputeElev( trk, 0, FALSE, &jointData.elev[0], NULL, FALSE );
+	ComputeElev( trk, 1, FALSE, &jointData.elev[1], NULL, FALSE );
 	if ( jointData.length > minLength )
 		jointData.grade = fabs( (jointData.elev[0]-jointData.elev[1])/jointData.length )*100.0;
 	else
