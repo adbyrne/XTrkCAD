@@ -35,7 +35,7 @@
 
 #include "gtkint.h"
 
-#define  GTKCONTROLHILITEWIDTH (3)
+#define  GTKCONTROLHILITEWIDTH (2)
 
 /**
  * Cause the control <b> to be displayed or hidden.
@@ -280,8 +280,8 @@ void wControlHilite(
     }
 
     cr = gdk_cairo_create(gtk_widget_get_window(b->parent->gtkwin));
-    cairo_set_source_rgb(cr, 0.0, 0.0, 0.0);
-    cairo_set_operator(cr, CAIRO_OPERATOR_XOR);
+    cairo_set_source_rgb(cr, 0.23, 0.37, 0.80);
+    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
     cairo_set_line_width(cr, GTKCONTROLHILITEWIDTH);
     cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
     cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);

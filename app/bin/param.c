@@ -1864,13 +1864,19 @@ static void ParamPlayback( char * line )
 					pg->changeProc( pg, inx, &valF );
 				break;
 			case PD_STRING:
+			case PD_TEXT:
 				line += len;
 				while ( *line == ' ' ) line++;
 				Stripcr( line );
 				if (p->valueP)
 					strcpy( (char*)p->valueP, line );
 				if (p->control) {
-					wStringSetValue( (wString_p)p->control, line );
+					if (p->type == PD_STRING) {
+						wStringSetValue((wString_p)p->control, line);
+					} else {
+						wTextClear((wText_p)p->control);
+						wTextAppend((wText_p)p->control, line);
+					}
 					wFlush();
 				}
 				if (pg->changeProc)
@@ -1886,7 +1892,6 @@ static void ParamPlayback( char * line )
 				PlaybackMouse( ddp->action, ddp->d, a, pos, drawColorBlack );
 				break;
 			case PD_MESSAGE:
-			case PD_TEXT:
 			case PD_MENU:
 			case PD_BITMAP:
 				break;
