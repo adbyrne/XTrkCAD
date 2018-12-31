@@ -627,7 +627,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 				cairo_rectangle(cairo, xx-0.5, yy-0.5, 1, 1);
 				cairo_fill(cairo);
 			}
-	gtk_widget_queue_draw( b->widget);
+	gtk_widget_queue_draw(GTK_WIDGET(bd->widget));
 
 	cairo_destroy(cairo);
 }
