@@ -2526,15 +2526,19 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 
 EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 {
-	DIST_T len, elev0, elev1;
+	DIST_T len, len1, elev0, elev1;
 	ANGLE_T grade = 0.0;
 
 	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
-		len = GetTrkLength( trk, 0, 1 );
-		if (len>0.1) {
-			ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
-			ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
-			grade = fabs( (elev1-elev0)/len )*100.0;
+		if (GetTrkEndElevCachedHeight(trk,0,&elev0,&len) && GetTrkEndElevCachedHeight(trk,1,&elev1,&len1)) {
+			grade = fabs( (elev1-elev0)/(len+len1))*100.0;
+		} else {
+			len = GetTrkLength( trk, 0, 1 );
+			if (len>0.1) {
+				ComputeElev( trk, 0, FALSE, &elev0, NULL, FALSE );
+				ComputeElev( trk, 1, FALSE, &elev1, NULL, FALSE );
+				grade = fabs( (elev1-elev0)/len )*100.0;
+			}
 		}
 	}
 	if ( (d->options&(DC_GROUP)) == 0 ) {
