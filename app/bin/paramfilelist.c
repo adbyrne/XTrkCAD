@@ -27,9 +27,10 @@
 #include <stdlib.h>
 
 #include "common.h"
+#include "compound.h"
 #include "custom.h"
 #include "fileio.h"
-#include "i18n.h"
+#include "layout.h"
 #include "messages.h"
 #include "misc2.h"
 #include "paths.h"
@@ -60,6 +61,7 @@ int GetParamFileCount()
 {
     return (paramFileInfo_da.cnt);
 }
+
 
 /**
  * Update the configuration file in case the name of a parameter file has changed.
@@ -154,6 +156,7 @@ void LoadParamFileList(void)
     for (fileNo = 1; ; fileNo++) {
         const char *fileName;
         const char * contents;
+        enum paramFileState structState = PARAMFILE_UNLOADED;
 
         sprintf(message, "File%d", fileNo);
         contents = wPrefGetString("Parameter File Names", message);
@@ -166,16 +169,9 @@ void LoadParamFileList(void)
             NoticeMessage(MSG_PRMFIL_NO_MAP, _("Ok"), NULL, contents);
             continue;
         }
-        DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
-        curParamFileIndex = paramFileInfo_da.cnt - 1;
-        paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
-        curContents = NULL;
-        paramFileInfo(curParamFileIndex).deleted = FALSE;
-        paramFileInfo(curParamFileIndex).valid = TRUE;
-        paramFileInfo(curParamFileIndex).deletedShadow =
-            paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
 
-        paramFileInfo(curParamFileIndex).compatible = PERFECT_FIT;
+        ReadParamFile(fileName);
+
         if (curContents == NULL) {
             curContents = curSubContents = MyStrdup(contents);
         }
@@ -211,6 +207,14 @@ void SaveParamFileList(void)
     wPrefSetString("Parameter File Names", message, "");
 }
 
+void
+UpdateParamFileList(void)
+{
+    for (size_t i = 0; i < (unsigned)paramFileInfo_da.cnt; i++) {
+        SetParamFileState(i);
+    }
+}
+
 /**
  * Load the selected parameter files. This is a callback executed when the file selection dialog
  * is closed.
@@ -244,15 +248,15 @@ int LoadParamFile(
     assert(files > 0);
 
     for (i = 0; i < files; i++) {
-        curContents = curSubContents = NULL;
-        curParamFileIndex = paramFileInfo_da.cnt;
-        if (!ReadParams(0, NULL, fileName[i])) {
-            return FALSE;
-        }
+        enum paramFileState structState = PARAMFILE_UNLOADED;
+        int newIndex;
 
-        assert(curContents != NULL);
-        // in case the contents is already presented, make invalid
-        for (inx = 0; inx < paramFileInfo_da.cnt; inx++) {
+        curContents = curSubContents = NULL;
+
+        newIndex = ReadParamFile(fileName[i]);
+
+        // in case the contents is already present, make invalid
+        for (inx = 0; inx < newIndex; inx++) {
             if (paramFileInfo(inx).valid &&
                     strcmp(paramFileInfo(inx).contents, curContents) == 0) {
                 paramFileInfo(inx).valid = FALSE;
@@ -260,13 +264,6 @@ int LoadParamFile(
                 break;
             }
         }
-
-        DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
-        paramFileInfo(curParamFileIndex).name = MyStrdup(fileName[i]);
-        paramFileInfo(curParamFileIndex).valid = TRUE;
-        paramFileInfo(curParamFileIndex).deletedShadow =
-            paramFileInfo(curParamFileIndex).deleted = FALSE;
-        paramFileInfo(curParamFileIndex).contents = curContents;
 
         wPrefSetString("Parameter File Map", curContents,
                        paramFileInfo(curParamFileIndex).name);
@@ -282,23 +279,6 @@ int LoadParamFile(
  *
  */
 
-void InitializeParamDir(void)
-{
-    const char * dir;
-    char *curParamDir;
-
-    dir = wPrefGetString("file", "paramdir");
-    if (dir != NULL) {
-        curParamDir = MyMalloc(strlen(dir) + 1);
-        strcpy(curParamDir, dir);
-    } else {
-        // in case there is no preference setting, use the installation's param directory as default
-        MakeFullpath(&curParamDir, libDir, PARAM_SUBDIR, NULL);
-    }
-
-    SetCurrentPath("xtp", curParamDir);
-    free(curParamDir);
-}
 
 void
 ParamFileListConfirmChange(void)
@@ -321,6 +301,12 @@ ParamFileListCancelChange(void)
 static void ParamFilesChange(long changes)
 {
     if (changes & CHANGE_PARAMS) {
+        UpdateParamFileList();
+        ParamFileListLoad(paramFileInfo_da.cnt, &paramFileInfo_da);
+    }
+
+    if (changes & CHANGE_SCALE) {
+        UpdateParamFileList();
         ParamFileListLoad(paramFileInfo_da.cnt, &paramFileInfo_da);
     }
 }
@@ -395,7 +381,6 @@ BOOL_T ParamFileListInit(void)
     }
 
     curParamFileIndex = PARAM_CUSTOM;
-    InitializeParamDir();
 
     if (lParamKey == 0) {
         LoadParamFileList();

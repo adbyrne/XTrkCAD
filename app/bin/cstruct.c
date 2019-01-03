@@ -33,6 +33,7 @@
 #include "layout.h"
 #include "messages.h"
 #include "param.h"
+#include "paramfile.h"
 #include "track.h"
 #include "utility.h"
 
@@ -151,6 +152,28 @@ EXPORT turnoutInfo_t * CreateNewStructure(
 	return to;
 }
 
+enum paramFileState
+GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
+{
+	int i;
+	enum paramFileState ret = PARAMFILE_NOTUSABLE;
+	DIST_T ratio = GetScaleRatio(scaleIndex);
+
+	if (!IsParamValid(paramFileIndex)) {
+		return(PARAMFILE_UNLOADED);
+	}
+
+	for (i = 0; i < structureInfo_da.cnt; i++) {
+		turnoutInfo_t *to = structureInfo(i);
+		if (to->paramFileIndex == paramFileIndex) {
+			if (GetScaleRatio(to->scaleInx) == ratio || to->scaleInx == SCALE_ANY) {
+				ret = PARAMFILE_FIT;
+				break;
+			} 
+		}
+	}
+	return(ret);
+}
 
 static BOOL_T ReadStructureParam(
 		char * firstLine )

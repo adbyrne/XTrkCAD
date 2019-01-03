@@ -61,6 +61,11 @@ typedef int TRKINX_T;
 typedef long DEBUGF_T;
 typedef int REGION_T;
 
+enum paramFileState { PARAMFILE_UNLOADED = 0, PARAMFILE_NOTUSABLE, PARAMFILE_COMPATIBLE, PARAMFILE_FIT, PARAMFILE_MAXSTATE };
+
+#define SCALE_ANY	(-2)
+#define SCALE_DEMO	(-1)
+
 typedef struct {
 		int cnt;
 		int max;

@@ -37,6 +37,7 @@
 #include "layout.h"
 #include "messages.h"
 #include "param.h"
+#include "paramfile.h"
 #include "track.h"
 #include "utility.h"
 
@@ -155,6 +156,34 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 	return to;
 }
 
+
+enum paramFileState 
+GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
+{
+	int i;
+	enum paramFileState ret = PARAMFILE_NOTUSABLE;
+	DIST_T gauge = GetScaleTrackGauge(scaleIndex);
+
+	if (!IsParamValid(paramFileIndex)) {
+		return(PARAMFILE_UNLOADED);
+	}
+
+	for (i = 0; i < turnoutInfo_da.cnt; i++) {
+		turnoutInfo_t *to = turnoutInfo( i );
+		if (to->paramFileIndex == paramFileIndex ) {
+			if (to->scaleInx == scaleIndex ) {
+				ret = PARAMFILE_FIT;
+				break;
+			} else {
+				if (GetScaleTrackGauge(to->scaleInx) == gauge &&
+					ret < PARAMFILE_COMPATIBLE) {
+					ret = PARAMFILE_COMPATIBLE;
+				}
+			}
+		}
+	}
+	return(ret);
+}
 
 
 EXPORT wIndex_t CheckPaths(

@@ -26,10 +26,12 @@
 #include <string.h>
 
 #include "custom.h"
+#include "dynstring.h"
 #include "fileio.h"
 #include "i18n.h"
 #include "messages.h"
 #include "param.h"
+#include "paramfile.h"
 #include "paramfilelist.h"
 #include "paths.h"
 #include "track.h"
@@ -44,9 +46,10 @@ static struct wFilSel_t * paramFile_fs;
 
 #include "bitmaps/greendot.xpm"
 #include "bitmaps/greydot.xpm"
+#include "bitmaps/yellowdot.xpm"
+#include "bitmaps/reddot.xpm"
 
-static wIcon_p greendot_icon;
-static wIcon_p greydot_icon;
+static wIcon_p indicatorIcons[PARAMFILE_MAXSTATE];
 
 static wWin_p paramFileW;
 
@@ -78,26 +81,37 @@ static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFile
  */
 void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 {
-    int fileInx;
     wIndex_t listInx;
+    DynString description;
+    DynStringMalloc(&description, STR_SHORT_SIZE);
 
-    wControlShow((wControl_p)paramFileL, FALSE);
-    listInx = wListGetIndex(paramFileL);
-    wListClear(paramFileL);
+    if (paramFileW) {
+        int fileInx;
 
-    for (fileInx = 0; fileInx < paramFileCnt; fileInx++) {
-        paramFileInfo_t paramFileInfo = DYNARR_N(paramFileInfo_t, (*paramFiles),
-                                        fileInx);
-        if (paramFileInfo.valid) {
-            strcpy(message, ((!paramFileSel) && paramFileInfo.contents)?
-                   paramFileInfo.contents:
-                   paramFileInfo.name);
-            wListAddValue(paramFileL, message,
-                          (paramFileInfo.deleted)?greydot_icon:greendot_icon, (void*)(intptr_t)fileInx);
+        wControlShow((wControl_p)paramFileL, FALSE);
+        listInx = wListGetIndex(paramFileL);
+        wListClear(paramFileL);
+
+        for (fileInx = 0; fileInx < paramFileCnt; fileInx++) {
+            paramFileInfo_t paramFileInfo = DYNARR_N(paramFileInfo_t, (*paramFiles),
+                                            fileInx);
+            if (paramFileInfo.valid) {
+                DynStringClear(&description);
+                DynStringCatCStr(&description,
+                                 ((!paramFileSel) && paramFileInfo.contents) ?
+                                 paramFileInfo.contents :
+                                 paramFileInfo.name);
+
+                wListAddValue(paramFileL,
+                              DynStringToCStr(&description),
+                              indicatorIcons[paramFileInfo.trackState],
+                              (void*)(intptr_t)fileInx);
+            }
         }
+        wListSetIndex(paramFileL, listInx);
+        wControlShow((wControl_p)paramFileL, TRUE);
     }
-    wListSetIndex(paramFileL, listInx);
-    wControlShow((wControl_p)paramFileL, TRUE);
+    DynStringFree(&description);
 }
 
 
@@ -215,7 +229,7 @@ static void ParamFileOk(void * junk)
 
 static void ParamFileCancel(wWin_p junk)
 {
-    ParamFileListConfirmChange();
+    ParamFileListCancelChange();
     wHide(paramFileW);
     DoChangeNotification(CHANGE_PARAMS);
 }
@@ -248,8 +262,11 @@ void DoParamFiles(void * junk)
     void * data;
 
     if (paramFileW == NULL) {
-        greendot_icon = wIconCreatePixMap(greendot);
-        greydot_icon = wIconCreatePixMap(greydot);
+        indicatorIcons[ PARAMFILE_UNLOADED ] = wIconCreatePixMap(greydot);
+        indicatorIcons[ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(reddot);
+        indicatorIcons[ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(yellowdot);
+        indicatorIcons[ PARAMFILE_FIT] = wIconCreatePixMap(greendot);
+
         ParamRegister(&paramFilePG);
 
         paramFileW = ParamCreateDialog(&paramFilePG,

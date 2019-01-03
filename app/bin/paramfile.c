@@ -27,9 +27,11 @@
 #include <stdlib.h>
 
 #include "common.h"
+#include "compound.h"
 #include "custom.h"
 #include "fileio.h"
 #include "i18n.h"
+#include "layout.h"
 #include "messages.h"
 #include "misc2.h"
 #include "paths.h"
@@ -61,12 +63,6 @@ wBool_t IsParamValid(
     }
 }
 
-/**
- *
- *
- * \param fileInx
- * \return
- */
 
 char * GetParamFileName(
     int fileInx)
@@ -97,6 +93,57 @@ void ParamCheckSumLine(char * line)
         paramCheckSum += (((long)(*line++)) & 0xFF)*(mult++);
     }
 }
+
+/**
+ * Set the compatibility state of a parameter file
+ * 
+ * \param index parameter file number in list
+ * \return 
+ */
+
+void SetParamFileState(int index )
+{
+	enum paramFileState structState;
+
+	paramFileInfo(index).trackState = GetTrackCompatibility(index, GetLayoutCurScale());
+	structState = GetStructureCompatibility(index, GetLayoutCurScale());
+	if (structState > paramFileInfo(index).trackState) {
+		paramFileInfo(index).trackState = structState;
+	}
+}
+
+/**
+ * Read a single parameter file and update the parameter file list
+ * 
+ * \param fileName full path for parameter file
+ * \return 
+ */
+
+int
+ReadParamFile(const char *fileName)
+{
+	DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
+	curParamFileIndex = paramFileInfo_da.cnt - 1;
+	paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
+	paramFileInfo(curParamFileIndex).deleted = FALSE;
+	paramFileInfo(curParamFileIndex).valid = TRUE;
+	paramFileInfo(curParamFileIndex).deletedShadow =
+	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
+	paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
+
+	SetParamFileState(curParamFileIndex);
+
+	return(curParamFileIndex);
+}
+
+/**
+ * Paramter file reader and interpreter
+ * 
+ * \param key unused
+ * \param dirName prefix for parameter file path
+ * \param fileName name of parameter file
+ * \return 
+ */
 
 bool ReadParams(
     long key,

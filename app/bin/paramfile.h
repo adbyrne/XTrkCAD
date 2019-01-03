@@ -4,8 +4,6 @@
 
 	#include "common.h"
 
-	enum paramFileState { PARAMFILE_UNLOADED, PARAMFILE_COMPATIBLE, PARAMFILE_FIT, PARAMFILE_MAXSTATE };
-
 	extern DIST_T curBarScale;
 	extern dynArr_t paramProc_da;
 	extern dynArr_t paramFileInfo_da;
@@ -13,6 +11,8 @@
 	void ParamCheckSumLine(char * line);
 	wBool_t IsParamValid(int fileInx);
 	bool IsParamFileDeleted(int fileInx);
+	void SetParamFileState(int index);
+	int ReadParamFile(const char *fileName);
 	void SetParamFileDeleted(int fileInx, bool deleted);
 	char * GetParamFileName(int fileInx);
 	char * GetParamFileContents(int fileInx);
