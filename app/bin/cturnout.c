@@ -156,6 +156,19 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 	return to;
 }
 
+/** 
+ * Check to find out to what extent the contents of the parameter file can be used with 
+ * the current layout scale / gauge. 
+ * 
+ * If parameter scale == layout and parameter gauge == layout we have an exact fit.
+ * If parameter gauge == layout we have compatible track. 
+ * OO scale is special cased. If the layout is in OO scale track in HO is considered 
+ * an exact fit in spite of scale differences.
+ * 
+ * \param paramFileIndex
+ * \param scaleIndex
+ * \return 
+ */
 
 enum paramFileState 
 GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
@@ -168,7 +181,8 @@ GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 		return(PARAMFILE_UNLOADED);
 	}
 
-	for (i = 0; i < turnoutInfo_da.cnt; i++) {
+	// loop over all parameter entries or until a exact fit is found
+	for (i = 0; i < turnoutInfo_da.cnt && ret < PARAMFILE_FIT; i++) {
 		turnoutInfo_t *to = turnoutInfo( i );
 		if (to->paramFileIndex == paramFileIndex ) {
 			if (to->scaleInx == scaleIndex ) {
@@ -178,6 +192,20 @@ GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 				if (GetScaleTrackGauge(to->scaleInx) == gauge &&
 					ret < PARAMFILE_COMPATIBLE) {
 					ret = PARAMFILE_COMPATIBLE;
+					// handle special cases
+					// if layout is OO scale, HO scale track is considered exact
+					char *layoutScaleName = GetScaleName(scaleIndex);
+					char *paramScaleName = GetScaleName(to->scaleInx);
+					if (!strcmp(layoutScaleName, "OO") &&
+						!strcmp(paramScaleName, "HO")) {
+						ret = PARAMFILE_FIT;
+					}
+					//if layout is in Japanese or British N scale, N scale is exact
+					if ((!strcmp(layoutScaleName, "N(UK)") ||
+						!strcmp(layoutScaleName, "N(JP)")) &&
+						!strcmp(paramScaleName, "N")) {
+						ret = PARAMFILE_FIT;
+					}
 				}
 			}
 		}
