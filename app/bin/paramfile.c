@@ -28,6 +28,7 @@
 
 #include "common.h"
 #include "compound.h"
+#include "ctrain.h"
 #include "custom.h"
 #include "fileio.h"
 #include "i18n.h"
@@ -39,6 +40,17 @@
 #include "paramfilelist.h"
 
 static long paramCheckSum;
+
+typedef enum paramFileState(*GetCompatibilityFunction)(int index, SCALEINX_T scale);
+
+GetCompatibilityFunction GetCompatibility[] = {
+		GetTrackCompatibility,
+		GetStructureCompatibility,
+		GetCarProtoCompatibility,
+		GetCarPartCompatibility
+};
+
+#define COMPATIBILITYCHECKSCOUNT (sizeof(GetCompatibility)/sizeof(GetCompatibility[0]))
 
 /**
  * Check whether parameter file is still loaded
@@ -103,13 +115,18 @@ void ParamCheckSumLine(char * line)
 
 void SetParamFileState(int index )
 {
-	enum paramFileState structState;
+	enum paramFileState state = PARAMFILE_NOTUSABLE;
+	enum paramFileState newState;
+	SCALEINX_T scale = GetLayoutCurScale();
 
-	paramFileInfo(index).trackState = GetTrackCompatibility(index, GetLayoutCurScale());
-	structState = GetStructureCompatibility(index, GetLayoutCurScale());
-	if (structState > paramFileInfo(index).trackState) {
-		paramFileInfo(index).trackState = structState;
+	for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT && state != PARAMFILE_UNLOADED; i++) {
+		newState = (*GetCompatibility[i])(index, scale);
+		if (newState > state || newState == PARAMFILE_UNLOADED) {
+			state = newState;
+		}
 	}
+
+	paramFileInfo(index).trackState = state;
 }
 
 /**
