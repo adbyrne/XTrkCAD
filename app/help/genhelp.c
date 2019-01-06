@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "cjson.h"
+#include "cJSON.h"
 
 #define I18NHEADERFILE "i18n.h"
 

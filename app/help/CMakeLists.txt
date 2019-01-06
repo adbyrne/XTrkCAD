@@ -1,6 +1,6 @@
 PROJECT(help)
 
-ADD_EXECUTABLE(genhelp genhelp.c cjson.c cjson.h)
+ADD_EXECUTABLE(genhelp genhelp.c cJSON.c cJSON.h)
 
 ADD_EXECUTABLE(genmessages genmessages.c)
 

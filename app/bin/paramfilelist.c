@@ -2,7 +2,7 @@
  * Handling of the list of parameter files
  */
 
-/*  XTrackkCad - Model Railroad CAD
+/*  XTrackCad - Model Railroad CAD
  *  Copyright (C) 2019 Martin Fischer
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@
 
 
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +31,7 @@
 #include "compound.h"
 #include "custom.h"
 #include "fileio.h"
+#include "i18n.h"
 #include "layout.h"
 #include "messages.h"
 #include "misc2.h"
