@@ -1216,7 +1216,6 @@ GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 	int i;
 	enum paramFileState ret = PARAMFILE_NOTUSABLE;
 	DIST_T ratio = GetScaleRatio(scaleIndex);
-	//char *desc = GetScaleDesc(scaleIndex);
 
 	if (!IsParamValid(paramFileIndex)) {
 		return(PARAMFILE_UNLOADED);
@@ -1224,8 +1223,8 @@ GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
 
 	for (i = 0; i < carPartParent_da.cnt && ret != PARAMFILE_FIT; i++) {
 		carPartParent_t *carPartParent = carPartParent( i );
-		//char *desc2 = GetScaleDesc(carPartParent->scale);
-		if(carPartParent->scale == scaleIndex ){
+
+		if(GetScaleRatio(carPartParent->scale) == ratio ){
 			for(int j = 0; j < carPartParent->parts_da.cnt; j++ ){
 				carPart_t *carPart = carPart( carPartParent, j  );
 
