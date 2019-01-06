@@ -9,10 +9,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ### Added
 + A new type of note can be used to store a weblink. Double-clicking on the
 weblink icon in a drawing opens the website in the default browser.
++ Usabillity / compatibility of parameter files for current scale and gauge is
+shown in the parameter file dialog.
 
 ### Fixed
 
 ### Added and changed parameter files
++ Prototype definitions for North American narrow gauge
++ Blackstone and Rail Line car parts for HOn3
 
 ## [5.1.2]
 
