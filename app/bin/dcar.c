@@ -605,6 +605,26 @@ static carProto_p CarProtoLookup(
 	return proto;
 }
 
+enum paramFileState
+GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
+{
+	int i;
+	enum paramFileState ret = PARAMFILE_NOTUSABLE;
+	DIST_T ratio = GetScaleRatio(scaleIndex);
+
+	if (!IsParamValid(paramFileIndex)) {
+		return(PARAMFILE_UNLOADED);
+	}
+
+	for (i = 0; i < carProto_da.cnt; i++) {
+		carProto_t *carProto = carProto(i);
+		if (carProto->paramFileIndex == paramFileIndex) {
+			ret = PARAMFILE_FIT;
+			break;
+		}
+	}
+	return(ret);
+}
 
 static carProto_p CarProtoNew(
 		carProto_p proto,
@@ -1181,6 +1201,42 @@ static carItem_p CarItemNew(
 	return item;
 }
 
+/**
+ * Check the whether the parameter file has CARPARTS that are compatible
+ * with the current state. For CARPARTS only the exactly identical scale
+ * is accepted as compatible
+ * 
+ * \param paramFileIndex IN the parameter file
+ * \param scaleIndex IN the scale to check against
+ * \return the compatibility state of the the
+ */
+enum paramFileState	
+GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
+{
+	int i;
+	enum paramFileState ret = PARAMFILE_NOTUSABLE;
+	DIST_T ratio = GetScaleRatio(scaleIndex);
+
+	if (!IsParamValid(paramFileIndex)) {
+		return(PARAMFILE_UNLOADED);
+	}
+
+	for (i = 0; i < carPartParent_da.cnt && ret != PARAMFILE_FIT; i++) {
+		carPartParent_t *carPartParent = carPartParent( i );
+
+		if(GetScaleRatio(carPartParent->scale) == ratio ){
+			for(int j = 0; j < carPartParent->parts_da.cnt; j++ ){
+				carPart_t *carPart = carPart( carPartParent, j  );
+
+				if (carPart->paramFileIndex == paramFileIndex) {
+					ret = PARAMFILE_FIT;
+					break;
+				}
+			}
+		}
+	}
+	return(ret);
+}
 
 EXPORT BOOL_T CarItemRead(
 		char * line )

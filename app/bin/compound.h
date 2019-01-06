@@ -158,13 +158,14 @@ STATUS_T CmdTurnoutAction( wAction_t, coOrd );
 BOOL_T ConnectAdjustableTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T ep2 );
 track_p NewHandLaidTurnout( coOrd, ANGLE_T, coOrd, ANGLE_T, coOrd, ANGLE_T, ANGLE_T );
 void NextTurnoutPosition( track_p trk );
-
+enum paramFileState	GetTrackCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 /* ctodesgn.c */
 void EditCustomTurnout( turnoutInfo_t *, turnoutInfo_t * );
 long ComputeTurnoutRoadbedSide( trkSeg_p, int, int, ANGLE_T, DIST_T );
 
 /* cstruct.c */
 turnoutInfo_t * CreateNewStructure( char *, char *, wIndex_t, trkSeg_p, BOOL_T ); 
+enum paramFileState	GetStructureCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 turnoutInfo_t * StructAdd( long, SCALEINX_T, wList_p, coOrd * ); 
 STATUS_T CmdStructureAction( wAction_t, coOrd );
 BOOL_T StructLoadCarDescList( wList_p );

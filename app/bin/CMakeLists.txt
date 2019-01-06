@@ -111,6 +111,10 @@ SET(SOURCES
 	macro.c
 	misc2.c
 	param.c
+	paramfile.c
+	paramfile.h
+	paramfilelist.c
+	paramfilelist.h
 	paths.c
 	shrtpath.c
 	smalldlg.c

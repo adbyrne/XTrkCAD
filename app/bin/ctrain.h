@@ -24,6 +24,7 @@
 #define HAVE_CTRAIN_H
 
 #include "common.h"
+#include "paramfile.h"
 #include "track.h"
 
 struct carItem_t;
@@ -54,6 +55,8 @@ void CarItemSetLocoMaster( carItem_p, BOOL_T );
 void CarItemSetTrack( carItem_p, track_p );
 void CarItemPlace( carItem_p, traverseTrack_p, DIST_T * );
 void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t * );
+enum paramFileState	GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
+enum paramFileState	GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );

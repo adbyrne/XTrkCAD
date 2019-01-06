@@ -132,9 +132,21 @@ After importing the objects from the file, the imported objects are in selected 
 
 \G{png.d/dprmfile.png}
 
-The dialog contains a list of parameter files.  Each file is preceded by a checked box. If the box is checked, the parameter file is loaded. If the box is not checked the file is unloaded.
+The dialog contains a list of parameter files.  Each file is preceded by a color indicator. These indicators show whether a parameter file contains definitions that
+are usable in the current scale and gauge
 
-Loaded definition files associated with current scale settings appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An unloaded file may be \e{reloaded} by selecting the  \f{Reload} button (The \f{Unload} button changes to \f{Reload} when a selected file is unloaded).
+\G{png.d/greendot.png} Definitions loaded from this file are a perfect fit for the current layout options. For track this means that gauge and scale of the track elements
+are identical to the layout settings.
+
+\G{png.d/yellowdot.png} Definitions from this file can be used with this layout but do not fit perfectly. A typical example is On30 where HO scale track can be used because the
+gauge is the same. But differences in scale may make the track look out of scale.
+
+\G{png.d/reddot.png} This parameter file doesn't contain any usable definitions. You may want to change the layout options if you want to use elements from
+this file.
+
+\G{png.d/greydot.png} This file is unloaded.
+
+Loaded definition files that are marked with a yellow or a green indictor appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An unloaded file may be \e{reloaded} by selecting the  \f{Reload} button (The \f{Unload} button changes to \f{Reload} when a selected file is unloaded).
 
 It is possible to change the state of several files at once. The \f{Select All} button allows you to select all parameter files for the next operation.
 

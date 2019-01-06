@@ -156,10 +156,6 @@ EXPORT void DoChangeNotification( long changes )
  *
  */
 
-
-#define SCALE_ANY	(-2)
-#define SCALE_DEMO	(-1)
-
 typedef struct {
 		char * scale;
 		DIST_T ratio;

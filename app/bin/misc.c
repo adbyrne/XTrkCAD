@@ -62,6 +62,7 @@
 #include "messages.h"
 #include "misc.h"
 #include "param.h"
+#include "paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
 #include "track.h"
@@ -630,7 +631,7 @@ EXPORT void SaveState(void) {
 	wWinGetSize(mainW, &width, &height);
 	wPrefSetInteger("draw", "mainwidth", width);
 	wPrefSetInteger("draw", "mainheight", height);
-	RememberParamFiles();
+	SaveParamFileList();
 	ParamUpdatePrefs();
 
 	wPrefSetString("misc", "lastlayout", GetLayoutFullPath());
@@ -2771,7 +2772,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	MacroInit();
 	wSetSplashInfo(_("Reading parameter files"));
 	LOG1(log_init, ( "paramFileInit\n" ))
-	if (!ParamFileInit())
+	if (!ParamFileListInit())
 		return NULL;
 
 	curCommand = describeCmdInx;

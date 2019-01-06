@@ -60,6 +60,7 @@
 #include "messages.h"
 #include "misc.h"
 #include "param.h"
+#include "paramfile.h"
 #include "paths.h"
 #include "track.h"
 #include "utility.h"
@@ -71,12 +72,8 @@
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
 
-static char * customPath = NULL;
-static char * customPathBak = NULL;
 
 EXPORT char * clipBoardN;
-
-static int log_paramFile;
 
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
@@ -154,17 +151,10 @@ EXPORT wIndex_t paramLineNum = 0;
 EXPORT char paramLine[STR_LONG_SIZE];
 EXPORT char * curContents;
 EXPORT char * curSubContents;
-static long paramCheckSum;
 
 #define PARAM_DEMO (-1)
 
-typedef struct {
-		char * name;
-		readParam_t proc;
-		} paramProc_t;
-static dynArr_t paramProc_da;
-#define paramProc(N) DYNARR_N( paramProc_t, paramProc_da, N )
-
+dynArr_t paramProc_da;
 
 EXPORT void Stripcr( char * line )
 {
@@ -177,13 +167,6 @@ EXPORT void Stripcr( char * line )
 		*cp-- = '\0';
 	if (cp >= line && *cp == '\r')
 		*cp = '\0';
-}
-
-EXPORT void ParamCheckSumLine( char * line )
-{
-	long mult=1;
-	while ( *line )
-		paramCheckSum += (((long)(*line++))&0xFF)*(mult++);
 }
 
 EXPORT char * GetNextLine( void )
@@ -503,162 +486,6 @@ EXPORT void AddParam(
 	paramProc(paramProc_da.cnt-1).proc = proc;
 }
 
-
-EXPORT BOOL_T ReadParams(
-		long key,
-		const char * dirName,
-		const char * fileName )
-{
-	FILE * oldFile;
-	char *cp;
-	wIndex_t oldLineNum;
-	wIndex_t pc;
-	long oldCheckSum;
-	long checkSum=0;
-	BOOL_T checkSummed;
-	long paramVersion = -1;
-	char *oldLocale = NULL;
-
-	if (dirName) {
-		MakeFullpath(&paramFileName, dirName, fileName, NULL);
-	} else {
-		MakeFullpath(&paramFileName, fileName, NULL);
-	}
-	paramLineNum = 0;
-	curBarScale = -1;
-	curContents = strdup( fileName );
-	curSubContents = curContents;
-
-LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )
-
-	oldLocale = SaveLocale("C");
-
-	paramFile = fopen( paramFileName, "r" );
-	if (paramFile == NULL) {
-		/* Reset the locale settings */
-		RestoreLocale( oldLocale );
-
-		NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Parameter"), paramFileName, strerror(errno) );
-
-		return FALSE;
-	}
-	paramCheckSum = key;
-	paramLineNum = 0;
-	checkSummed = FALSE;
-	while ( paramFile && ( fgets(paramLine, 256, paramFile) ) != NULL ) {
-		paramLineNum++;
-		Stripcr( paramLine );
-		if (strncmp( paramLine, "CHECKSUM ", 9 ) == 0) {
-			checkSum = atol( paramLine+9 );
-			checkSummed = TRUE;
-			goto nextLine;
-		}
-		ParamCheckSumLine( paramLine );
-		if (paramLine[0] == '#') {
-			/* comment */
-		} else if (paramLine[0] == 0) {
-			/* empty paramLine */
-		} else if (strncmp( paramLine, "INCLUDE ", 8 ) == 0) {
-			cp = &paramLine[8];
-			while (*cp && isspace((unsigned char)*cp)) cp++;
-			if (!*cp) {
-				InputError( "INCLUDE - no file name", TRUE );
-
-				/* Close file and reset the locale settings */
-				if (paramFile) fclose(paramFile);
-				RestoreLocale( oldLocale );
-
-				return FALSE;
-			}
-			oldFile = paramFile;
-			oldLineNum = paramLineNum;
-			oldCheckSum = paramCheckSum;
-			ReadParams( key, dirName, cp );
-			paramFile = oldFile;
-			paramLineNum = oldLineNum;
-			paramCheckSum = oldCheckSum;
-			if (dirName) {
-				MakeFullpath(&paramFileName, dirName, fileName, NULL);
-			} else {
-				MakeFullpath(&paramFileName, fileName);
-			}
-		} else if (strncmp( paramLine, "CONTENTS ", 9) == 0 ) {
-			curContents = MyStrdup( paramLine+9 );
-			curSubContents = curContents;
-		} else if (strncmp( paramLine, "SUBCONTENTS ", 12) == 0 ) {
-			curSubContents = MyStrdup( paramLine+12 );
-		} else if (strncmp( paramLine, "PARAM ", 6) == 0 ) {
-			paramVersion = atol( paramLine+6 );
-		} else {
-			for (pc = 0; pc < paramProc_da.cnt; pc++ ) {
-				if (strncmp( paramLine, paramProc(pc).name,
-							 strlen(paramProc(pc).name)) == 0 ) {
-					paramProc(pc).proc( paramLine );
-					goto nextLine;
-				}
-			}
-			InputError( "Unknown param line", TRUE );
-		}
- nextLine:;
-	}
-	if ( key ) {
-		if ( !checkSummed || checkSum != paramCheckSum ) {
-			/* Close file and reset the locale settings */
-			if (paramFile) fclose(paramFile);
-			RestoreLocale( oldLocale );
-
-			NoticeMessage( MSG_PROG_CORRUPTED, _("Ok"), NULL, paramFileName );
-
-			return FALSE;
-		}
-	}
-	if (paramFile)fclose( paramFile );
-	free(paramFileName);
-	paramFileName = NULL;
-	RestoreLocale( oldLocale );
-
-	return TRUE;
-}
-
-
-static void ReadCustom( void )
-{
-	FILE * f;
-	MakeFullpath(&customPath, workingDir, sCustomF, NULL);
-	customPathBak = MyStrdup( customPath );
-	customPathBak[ strlen(customPathBak)-1 ] = '1';
-	f = fopen( customPath, "r" );
-	if ( f != NULL ) {
-		fclose( f );
-		curParamFileIndex = PARAM_CUSTOM;
-		ReadParams( 0, workingDir, sCustomF );
-	}
-}
-
-
-/*
- * Open the file and then set the locale to "C". Old locale will be copied to
- * oldLocale. After the required file I/O is done, the caller must call
- * CloseCustom() with the same locale value that was returned in oldLocale by
- * this function.
- */
-EXPORT FILE * OpenCustom( char *mode )
-{
-	FILE * ret = NULL;
-
-	if (inPlayback)
-		return NULL;
-	if ( *mode == 'w' )
-		rename( customPath, customPathBak );
-	if (customPath) {
-		ret = fopen( customPath, mode );
-		if (ret == NULL) {
-			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Custom"), customPath, strerror(errno) );
-		}
-	}
-
-	return ret;
-}
 
 
 EXPORT char * PutTitle( char * cp )
@@ -1339,23 +1166,9 @@ EXPORT void FileInit( void )
 	}
 	if ( (workingDir = wGetAppWorkDir()) == NULL )
 		AbortProg( "wGetAppWorkDir()" );
-}
-
-EXPORT BOOL_T ParamFileInit( void )
-{
-	curParamFileIndex = PARAM_DEMO;
-	log_paramFile = LogFindIndex( "paramFile" );
-	if ( ReadParams( lParamKey, libDir, sParamQF ) == FALSE )
-		return FALSE;
-
-	curParamFileIndex = PARAM_CUSTOM;
-	if (lParamKey == 0) {
-		ReadParamFiles();
-		ReadCustom();
-	}
 
 	SetLayoutFullPath("");
 	MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
-	return TRUE;
-
 }
+
+
