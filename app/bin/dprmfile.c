@@ -115,7 +115,7 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 
 static void ParamFileBrowse(void * junk)
 {
-    wFilSelect(paramFile_fs, GetParamFileListDir());
+    wFilSelect(paramFile_fs, GetParamFileDir());
     return;
 }
 

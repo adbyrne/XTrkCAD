@@ -49,16 +49,7 @@ static int log_paramFile;
 static char * customPath;
 static char * customPathBak;
 
-char *GetParamFileListDir(void)
-{
-    return (GetCurrentPath("xtp"));
-}
 
-void
-SetParamFileListDir(char *fullPath)
-{
-    SetCurrentPath("xtp", fullPath);
-}
 
 int GetParamFileCount()
 {
@@ -271,7 +262,7 @@ int LoadParamFile(
         wPrefSetString("Parameter File Map", curContents,
                        paramFileInfo(curParamFileIndex).name);
     }
-    SetParamFileListDir(fileName[i - 1]);
+    SetParamFileDir(fileName[i - 1]);
     curParamFileIndex = PARAM_CUSTOM;
     DoChangeNotification(CHANGE_PARAMS);
     return TRUE;

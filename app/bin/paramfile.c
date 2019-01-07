@@ -77,6 +77,16 @@ wBool_t IsParamValid(
     }
 }
 
+char *GetParamFileDir(void)
+{
+	return (GetCurrentPath(PARAMETERPATHKEY));
+}
+
+void
+SetParamFileDir(char *fullPath)
+{
+	SetCurrentPath(PARAMETERPATHKEY, fullPath);
+}
 
 char * GetParamFileName(
     int fileInx)

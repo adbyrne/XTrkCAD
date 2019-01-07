@@ -16,8 +16,8 @@
 
 	#define paramFileInfo(N) DYNARR_N( paramFileInfo_t, paramFileInfo_da, N )
 	
-	char *GetParamFileListDir(void);
-	void SetParamFileListDir(char *fullPath);
+	char *GetParamFileDir(void);
+	void SetParamFileDir(char *fullPath);
 	void LoadParamFileList(void);
 	void SaveParamFileList(void);
 	int GetParamFileCount();
