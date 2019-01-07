@@ -21,7 +21,8 @@
 	void LoadParamFileList(void);
 	void SaveParamFileList(void);
 	int GetParamFileCount();
-
+	void UpdateParamFileList(void);
+	void ParamFilesChange(long changes);
 	int LoadParamFile(int files, char ** fileName, void * data);
 	void InitializeParamDir(void);
 	void ParamFileListConfirmChange(void);

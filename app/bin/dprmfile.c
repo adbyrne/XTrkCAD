@@ -82,35 +82,33 @@ static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFile
 void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 {
     wIndex_t listInx;
+    int fileInx;
     DynString description;
     DynStringMalloc(&description, STR_SHORT_SIZE);
 
-    if (paramFileW) {
-        int fileInx;
 
-        wControlShow((wControl_p)paramFileL, FALSE);
-        listInx = wListGetIndex(paramFileL);
-        wListClear(paramFileL);
+	wControlShow((wControl_p)paramFileL, FALSE);
+	listInx = wListGetIndex(paramFileL);
+	wListClear(paramFileL);
 
-        for (fileInx = 0; fileInx < paramFileCnt; fileInx++) {
-            paramFileInfo_t paramFileInfo = DYNARR_N(paramFileInfo_t, (*paramFiles),
-                                            fileInx);
-            if (paramFileInfo.valid) {
-                DynStringClear(&description);
-                DynStringCatCStr(&description,
-                                 ((!paramFileSel) && paramFileInfo.contents) ?
-                                 paramFileInfo.contents :
-                                 paramFileInfo.name);
+	for (fileInx = 0; fileInx < paramFileCnt; fileInx++) {
+		paramFileInfo_t paramFileInfo = DYNARR_N(paramFileInfo_t, (*paramFiles),
+										fileInx);
+		if (paramFileInfo.valid) {
+			DynStringClear(&description);
+			DynStringCatCStr(&description,
+							 ((!paramFileSel) && paramFileInfo.contents) ?
+							 paramFileInfo.contents :
+							 paramFileInfo.name);
 
-                wListAddValue(paramFileL,
-                              DynStringToCStr(&description),
-                              indicatorIcons[paramFileInfo.trackState],
-                              (void*)(intptr_t)fileInx);
-            }
-        }
-        wListSetIndex(paramFileL, listInx);
-        wControlShow((wControl_p)paramFileL, TRUE);
-    }
+			wListAddValue(paramFileL,
+						  DynStringToCStr(&description),
+						  indicatorIcons[paramFileInfo.trackState],
+						  (void*)(intptr_t)fileInx);
+		}
+	}
+	wListSetIndex(paramFileL, listInx);
+	wControlShow((wControl_p)paramFileL, TRUE);
     DynStringFree(&description);
 }
 
@@ -247,6 +245,17 @@ static void ParamFileDlgUpdate(
     case I_PRMFILTOGGLE:
         DoChangeNotification(CHANGE_PARAMS);
         break;
+    }
+}
+
+
+void ParamFilesChange(long changes)
+{
+    if (changes & CHANGE_PARAMS || changes & CHANGE_SCALE ) {
+        UpdateParamFileList();
+        if( paramFileW ) {
+			ParamFileListLoad(paramFileInfo_da.cnt, &paramFileInfo_da);
+		}	
     }
 }
 

@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
 #include "compound.h"
@@ -300,18 +301,6 @@ ParamFileListCancelChange(void)
     }
 }
 
-static void ParamFilesChange(long changes)
-{
-    if (changes & CHANGE_PARAMS) {
-        UpdateParamFileList();
-        ParamFileListLoad(paramFileInfo_da.cnt, &paramFileInfo_da);
-    }
-
-    if (changes & CHANGE_SCALE) {
-        UpdateParamFileList();
-        ParamFileListLoad(paramFileInfo_da.cnt, &paramFileInfo_da);
-    }
-}
 
 static void ReadCustom(void)
 {
@@ -370,8 +359,7 @@ static void DoParamFileListDialog(void *junk)
 
 addButtonCallBack_t ParamFilesInit(void)
 {
-    RegisterChangeNotification(ParamFilesChange);
-
+	RegisterChangeNotification(ParamFilesChange);
     return &DoParamFileListDialog;
 }
 
