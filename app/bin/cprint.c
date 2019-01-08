@@ -812,7 +812,7 @@ static BOOL_T PrintPage(
 					Translate( &print_d.orig, orig, currPrintGrid.angle+180.0, printScale );
 					print_d.size.y += printScale;
 				}
-				for (int i=1;i<4;i++) {
+				for (int i=0;i<4;i++) {
 					psave[i] = p[i];
 				}
 				if (printRotate) {
