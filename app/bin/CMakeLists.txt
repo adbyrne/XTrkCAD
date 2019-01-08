@@ -50,6 +50,7 @@ ADD_CUSTOM_COMMAND(
 SET(SOURCES
 	${LIN_SOURCES}
 	appdefaults.c
+	archive.c
 	bllnhlp.c
 	cbezier.c
 	cblock.c
@@ -94,6 +95,7 @@ SET(SOURCES
 	dcontmgm.c
 	dease.c
 	denum.c
+	directory.c
 	dlayer.c
 	doption.c
 	dpricels.c
@@ -109,6 +111,7 @@ SET(SOURCES
 	linknoteui.c
 	lprintf.c
 	macro.c
+	manifest.c
 	misc2.c
 	param.c
 	paramfile.c
@@ -128,6 +131,10 @@ SET(SOURCES
 	trkseg.c
 	tstraigh.c
 	utility.c
+	cJSON.c
+	archive.h
+	directory.h
+	manifest.h
 	)
 
 check_symbol_exists(strlcpy string.h HAVE_STRLCPY )
@@ -145,9 +152,12 @@ INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
 INCLUDE_DIRECTORIES(${help_BINARY_DIR})
 INCLUDE_DIRECTORIES(${wlib_SOURCE_DIR}/include)
 include_directories(${FREEIMAGE_INCLUDE_PATH})
+INCLUDE_DIRECTORIES(${LIBZIP_INCLUDE_DIR_ZIP})
+INCLUDE_DIRECTORIES(${CJSON_INCLUDE})
 
 LINK_DIRECTORIES(${GTK_LIBRARY_DIRS})
 LINK_DIRECTORIES(${GTK_WEBKIT_LIBRARY_DIRS})
+LINK_DIRECTORIES(${LIBZIP_LIBZIP_LIBRARY})
 
 ADD_LIBRARY(xtrkcad-lib ${SOURCES})
 
@@ -162,6 +172,7 @@ TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-lib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-wlib)
 TARGET_LINK_LIBRARIES(xtrkcad xtrkcad-cornu)
 TARGET_LINK_LIBRARIES(xtrkcad dynstring)
+target_link_libraries(xtrkcad ${LIBZIP_LIBRARY} ${LIBZIP_LIBRARIES})
 
 ADD_EXECUTABLE(mkturnout
 	${LIN_SOURCES}
@@ -182,11 +193,36 @@ IF(NOT WIN32)
 ELSE(NOT WIN32)
 	TARGET_LINK_LIBRARIES(mkturnout xtrkcad-wlib)
 
+	# copy dlls into the build dir for easier debugging
 	add_custom_command(
 		TARGET xtrkcad POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy
 		${FREEIMAGE_SHAREDLIB}
 		${CMAKE_CURRENT_BINARY_DIR}
+	)
+
+	add_custom_command(
+		TARGET xtrkcad POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${LIBZIP_SHAREDLIB}
+		${CMAKE_CURRENT_BINARY_DIR}
+	)
+
+	add_custom_command(
+		TARGET xtrkcad POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy
+		${ZLIB_SHAREDLIB}
+		${CMAKE_CURRENT_BINARY_DIR}
+	)
+
+	# add dll to install package
+	install(FILES
+	${LIBZIP_SHAREDLIB}
+	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
+	)
+	install(FILES
+	${ZLIB_SHAREDLIB}
+	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
 ENDIF(NOT WIN32)
 

@@ -33,12 +33,11 @@
 #include <time.h>
 #include <ctype.h>
 #ifdef WINDOWS
-#include <io.h>
-#include <windows.h>
+	#include <io.h>
+	#include <windows.h>
 	//#if _MSC_VER >=1400
 	//	#define strdup _strdup
 	//#endif
-#else
 #endif
 #include <sys/stat.h>
 #include <stdarg.h>
@@ -48,15 +47,21 @@
 
 #include <assert.h>
 
+#include <cJSON.h>
+
+#include "archive.h"
 #include "common.h"
 #include "compound.h"
 #include "cselect.h"
 #include "cundo.h"
 #include "custom.h"
+#include "directory.h"
 #include "draw.h"
 #include "fileio.h"
+#include "fcntl.h"
 #include "i18n.h"
 #include "layout.h"
+#include "manifest.h"
 #include "messages.h"
 #include "misc.h"
 #include "param.h"
@@ -69,11 +74,14 @@
 
 /*#define TIME_READTRACKFILE*/
 
+#define COPYBLOCKSIZE	1024
+
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
 
 
 EXPORT char * clipBoardN;
+
 
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
@@ -526,7 +534,9 @@ void SetWindowTitle( void )
 		changed>0?"*":"", sProdName, sVersion );
 	wWinSetTitle( mainW, message );
 }
-
+
+
+
 /*****************************************************************************
  *
  * LOAD / SAVE TRACKS
@@ -687,8 +697,7 @@ static BOOL_T ReadTrackFile(
 	return ret;
 }
 
-
-EXPORT int LoadTracks(
+int LoadTracks(
 		int cnt,
 		char **fileName,
 		void * data)
@@ -696,7 +705,9 @@ EXPORT int LoadTracks(
 #ifdef TIME_READTRACKFILE
 	long time0, time1;
 #endif
-	char *nameOfFile;
+	char *nameOfFile = NULL;
+
+	char *extOfFile;
 
 	assert( fileName != NULL );
 	assert( cnt == 1 ); 
@@ -708,7 +719,7 @@ EXPORT int LoadTracks(
 	ClearTracks();
 	ResetLayers();
 	checkPtMark = changed = 0;
-	LayoutBackGroundInit();
+	LayoutBackGroundInit(TRUE);   //Keep values of background -> will be overriden my archive
 	UndoSuspend();
 	useCurrentLayer = FALSE;
 #ifdef TIME_READTRACKFILE
@@ -716,7 +727,104 @@ EXPORT int LoadTracks(
 #endif
 	nameOfFile = FindFilename( fileName[ 0 ] );
 
-	if (ReadTrackFile( fileName[ 0 ], nameOfFile, TRUE, FALSE, TRUE )) {
+ /*
+  * Support zipped filetype 
+  */
+	extOfFile = FindFileExtension( nameOfFile);
+
+	BOOL_T zipped = FALSE;
+	BOOL_T loadXTC = TRUE;
+	char * full_path = fileName[0];
+
+	if (extOfFile && (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0)) {
+
+		char * zip_input = GetZipDirectoryName(ARCHIVE_READ);
+
+		//If zipped unpack file into temporary input dir (cleared and re-created)
+
+		DeleteDirectory(zip_input);
+		SafeCreateDir(zip_input);
+
+		if (UnpackArchiveFor(fileName[0], nameOfFile, zip_input, FALSE)) {
+
+			char * manifest_file;
+
+			MakeFullpath(&manifest_file, zip_input, "manifest.json", NULL);
+
+			char * manifest = 0;
+			long length;
+
+			FILE * f = fopen (manifest_file, "rb");
+
+			if (f)
+			{
+			    fseek(f, 0, SEEK_END);
+			    length = ftell(f);
+			    fseek(f, 0, SEEK_SET);
+			    manifest = malloc(length + 1);
+			    if (manifest) {
+			        fread(manifest, 1, length, f);
+			        manifest[length] = '\0';
+			    }
+			    fclose(f);
+			} else
+			{
+			    NoticeMessage(MSG_MANIFEST_OPEN_FAIL, _("Continue"), NULL, manifest_file);
+			}
+			free(manifest_file);
+
+			char * arch_file = NULL;
+
+			//Set filename to point to included .xtc file
+			//Use the name inside manifest (this helps if a user renames the zip)
+			if (manifest)
+			{
+			    arch_file = ParseManifest(manifest, zip_input);
+				free(manifest);
+			}
+
+			// If no manifest value use same name as the archive
+			if (arch_file && arch_file[0])
+			{
+			    MakeFullpath(&full_path, zip_input, arch_file, NULL);
+			} else
+			{
+			    MakeFullpath(&full_path, zip_input, nameOfFile, NULL);
+			}
+
+			nameOfFile = FindFilename(full_path);
+			extOfFile = FindFileExtension(full_path);
+			if (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0)
+			{
+			    for (int i=0; i<4; i++) {
+			        extOfFile[i] = extOfFile[i+1];
+			    }
+			}
+			LOG(log_zip, 1, ("Zip-File %s \n", full_path))
+			#if DEBUG
+			    printf("File Path: %s \n", full_path);
+			#endif
+		} else {
+			loadXTC = FALSE; // when unzipping fails, don't attempt loading the trackplan
+		}
+		zipped = TRUE;
+
+		free(zip_input);
+
+	}
+
+	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, FALSE, TRUE )) {
+
+		if (zipped) {  //Put back to zipped extension - change back title and path
+			nameOfFile = FindFilename( fileName[0]);
+			extOfFile = FindFileExtension( fileName[0]);
+			SetCurrentPath( LAYOUTPATHKEY, fileName[0] );
+			SetLayoutFullPath(fileName[0]);
+			SetWindowTitle();
+			free(full_path);
+			full_path = fileName[0];
+		}
+
 		wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]) );
 		ResolveIndex();
 #ifdef TIME_READTRACKFILE
@@ -799,21 +907,142 @@ static BOOL_T DoSaveTracks(
 	return rc;
 }
 
+/************************************************
+ * Copy Dependency - copy file into another directory
+ *
+ * \param IN name
+ * \param IN target_dir
+ *
+ * \returns TRUE for success
+ *
+ */
+static BOOL_T CopyDependency(char * name, char * target_dir)
+{
+    char * backname = FindFilename(name);
+	BOOL_T copied = TRUE;
+	FILE * source = fopen(name, "rb");
+
+    if (source != NULL) {
+        char * target_file;
+        MakeFullpath(&target_file, target_dir, backname, NULL);
+        FILE * target = fopen(target_file, "wb");
+
+        if (target != NULL) {
+            char *buffer = MyMalloc(COPYBLOCKSIZE);
+            while (!feof(source)) {
+                size_t bytes = fread(buffer, 1, sizeof(buffer), source);
+                if (bytes) {
+                    fwrite(buffer, 1, bytes, target);
+                }
+            }
+			MyFree(buffer);
+            LOG(log_zip, 1, ("Zip-Include %s into %s \n", name, target_file))
+#if DEBUG
+            printf("xtrkcad: Included file %s into %s \n",
+                   name, target_file);
+#endif
+            fclose(target);
+        } else {
+            NoticeMessage(MSG_COPY_FAIL, _("Continue"), NULL, name, target_file);
+            copied = FALSE;
+        }
+        free(target_file);
+        fclose(source);
+    } else {
+        NoticeMessage(MSG_COPY_OPEN_FAIL, _("Continue"), NULL, name);
+        copied = FALSE;
+    }
+    return copied;
+}
+
 
 static doSaveCallBack_p doAfterSave;
+
+
 
 static int SaveTracks(
 		int cnt,
 		char **fileName,
 		void * data )
 {
-	char *nameOfFile;
 
 	assert( fileName != NULL );
 	assert( cnt == 1 );
 
+	char *nameOfFile = FindFilename(fileName[0]);
+
 	SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
-	DoSaveTracks( fileName[ 0 ] );
+
+	//Support Archive zipped files
+
+	char * extOfFile = FindFileExtension( fileName[0]);
+
+
+	if (extOfFile && (strcmp(extOfFile,ZIPFILETYPEEXTENSION)==0)) {
+
+		char * ArchiveName;
+
+		//Set filename to point to be the same as the included .xtc file.
+		//This is also in the manifest - in case a user renames the archive file.
+
+		char * zip_output = GetZipDirectoryName(ARCHIVE_WRITE);
+
+		DeleteDirectory(zip_output);
+		SafeCreateDir(zip_output);
+
+		MakeFullpath(&ArchiveName, zip_output, nameOfFile, NULL);
+
+		nameOfFile = FindFilename(ArchiveName);
+		extOfFile = FindFileExtension(ArchiveName);
+
+		if (extOfFile && strcmp(extOfFile, ZIPFILETYPEEXTENSION)==0) {
+			// Get rid of the 'e'
+			extOfFile[3] = '\0';
+		}
+
+		char * DependencyDir;
+
+		//The included files are placed (for now) into an includes directory - TODO an array of includes with directories by type
+		MakeFullpath(&DependencyDir, zip_output, "includes", NULL);
+
+		SafeCreateDir(DependencyDir);
+
+		char * background = GetLayoutBackGroundFullPath();
+
+		if (background && background[0])
+			CopyDependency(background,DependencyDir);
+
+		//The details are stored into the manifest - TODO use arrays for files, locations
+		char *oldLocale = SaveLocale("C");
+		char* json_Manifest = CreateManifest(nameOfFile, background, "includes");
+		char * manifest_file;
+
+		MakeFullpath(&manifest_file, zip_output, "manifest.json", NULL);
+		
+		FILE *fp = fopen(manifest_file, "wb");
+		if (fp != NULL)
+		{
+		   fputs(json_Manifest, fp);
+		   fclose(fp);
+		} else {
+			NoticeMessage( MSG_MANIFEST_FAIL, _("Continue"), NULL, manifest_file );
+		}
+		RestoreLocale(oldLocale);
+
+		free(manifest_file);
+		free(json_Manifest);
+
+		DoSaveTracks( ArchiveName );
+
+		if (CreateArchive(	zip_output,	fileName[0]) != TRUE) {
+			NoticeMessage( MSG_ARCHIVE_FAIL, _("Continue"), NULL, fileName[0], zip_output );
+		}
+		free(zip_output);
+		free(ArchiveName);
+
+	} else
+
+		DoSaveTracks( fileName[ 0 ] );
 
 	nameOfFile = FindFilename( fileName[ 0 ] );
 	wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[ 0 ]) );
@@ -849,7 +1078,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 	doAfterSave = after;
 	if (saveFile_fs == NULL)
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
-			sSourceFilePattern, SaveTracks, NULL );
+			sSaveFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	SetWindowTitle();
 	SaveState();
@@ -888,9 +1117,9 @@ EXPORT void DoCheckPoint( void )
 }
 
 /**
- * Remove all temporary files before exiting.When the program terminates
- * normally through the exit choice, files that are created temporarily are removed:
- * xtrkcad.ckp
+ * Remove all temporary files before exiting. When the program terminates
+ * normally through the exit choice, files and directories that were created 
+ * temporarily are removed: xtrkcad.ckp
  *
  * \param none
  * \return none
@@ -899,8 +1128,18 @@ EXPORT void DoCheckPoint( void )
 
 EXPORT void CleanupFiles( void )
 {
+	char *tempDir;
+
 	if( checkPtFileName1 )
 		remove( checkPtFileName1 );
+
+	for (int i = ARCHIVE_READ; i <= ARCHIVE_WRITE; ++i) {
+		tempDir = GetZipDirectoryName(i);
+		if (tempDir) {
+			DeleteDirectory(tempDir);
+			free(tempDir);
+		}
+	}
 }
 
 /**

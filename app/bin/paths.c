@@ -183,6 +183,24 @@ char *FindFilename(char *path)
 }
 
 /**
+ * Find file extension in a filename
+ *
+ * \param path IN full or partial path
+ * \return pointer to the file extension part
+ */
+
+char *FindFileExtension(char *path) {
+	char *ext;
+	ext = strrchr(path, '.');
+
+	if (ext) {
+		ext++;
+	}
+
+	return ext;
+}
+
+/**
 * Make a full path definition from directorys and filenames. The individual pieces are
 * concatinated. Where necessary a path delimiter is added. A pointer to the resulting
 * string is returned. This memory should be free'd when no longer needed.

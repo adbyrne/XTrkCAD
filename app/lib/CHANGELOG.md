@@ -11,6 +11,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 weblink icon in a drawing opens the website in the default browser.
 + Usabillity / compatibility of parameter files for current scale and gauge is
 shown in the parameter file dialog.
++ Additional enhanced file format .xtce allows storing background image and
+related information with the trackplan.
 
 ### Fixed
 

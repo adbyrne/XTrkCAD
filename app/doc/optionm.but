@@ -351,7 +351,12 @@ The \f{Layout Options} dialog, displayed by the Options (\K{optionM}) or the Fil
 
 \u000
 
-\dd \f{Background File Name} - The last 40 characters of the full file pathname for the image used for a temporary background behind all the drawn objects. It is set using the \f{Browse} and reset with the \f{Clear} buttons. It is also cleared along with all the other background values after a \f{Open} or \f{New} command.
+\dd \f{Background File Name} - The last 40 characters of the full file pathname for the image used for a temporary background behind all the drawn objects. It is set using the \f{Browse} and reset with the \f{Clear} buttons. 
+It is also cleared along with all the other background values after a \f{Open} or \f{New} command.
+The file is initally specified to be in the local file system. In order to send it along with the layout, use \f{Save As} command and specify the \i{Archive} Archive format (*.xtce). 
+This will create a single zipped package file containing the layout and the image file which can be sent and will open on a different system.
+If this has been done, after \f{Open} of the archive, the image file path will point into the extracted archive file directory. 
+It can be changed to a new local file and the next \f{Save} will rebuild the package using the new image file instead of the old one.
 
 \u000
 

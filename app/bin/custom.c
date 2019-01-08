@@ -76,6 +76,8 @@ char * sAuditF = product ".aud";
 char * sTipF = product ".tip";
 
 char * sSourceFilePattern = NULL;
+char * sSaveFilePattern = NULL;
+char * sImageFilePattern = NULL;
 char * sImportFilePattern = NULL;
 char * sDXFFilePattern = NULL;
 char * sRecordFilePattern = NULL;
@@ -156,7 +158,7 @@ BOOL_T Initialize( void )
 
 void InitCustom( void )
 {
-	char buf[STR_SHORT_SIZE];
+	char *buf = malloc(1024);
 
 	/* Initialize some localized strings */
 	if (sTurnoutDesignerW == NULL)
@@ -171,8 +173,28 @@ void InitCustom( void )
 	}
 	if (sSourceFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Files|*.xtc"), Product);
+		sprintf(buf, _("All %s Files (*.xtc,*.xtce)|*.xtc;*.xtce|"
+					   "%s Trackplan (*.xtc)|*.xtc|"
+					   "%s Extended Trackplan (*.xtce)|*.xtce|"
+					   "All Files (*)|*"), 
+						Product,
+						Product, 
+						Product );
 		sSourceFilePattern = strdup(buf);
+	}
+	if (sSaveFilePattern == NULL)
+	{
+		sprintf(buf, _("%s Trackplan (*.xtc)|*.xtc|"
+					   "%s Extended Trackplan (*.xtce)|*.xtce|"
+					   "All Files (*)|*"),
+						Product,
+						Product );
+		sSaveFilePattern = strdup(buf);
+	}
+	if (sImageFilePattern == NULL)
+	{
+		sprintf(buf,_("All Files (*)|*"));
+		sImageFilePattern = strdup(buf);
 	}
 	if (sImportFilePattern == NULL)
 	{
@@ -203,6 +225,8 @@ void InitCustom( void )
 		sprintf(buf, _("%s PartsList Files|*.txt"), Product);
 		sPartsListFilePattern = strdup(buf);
 	}
+
+	free(buf);
 }
 
 

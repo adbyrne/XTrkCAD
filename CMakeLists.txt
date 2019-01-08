@@ -1,6 +1,7 @@
 PROJECT(XTrkCAD)
 enable_testing()
 cmake_minimum_required(VERSION 2.8)
+set(CMAKE_MACOSX_RPATH 0)
 
 # where to look first for cmake modules, before ${CMAKE_ROOT}/Modules/ is checked
 
@@ -23,9 +24,10 @@ if(UNIX)
     endif(APPLE)
 endif(UNIX)
 
+find_package(Libzip)
+find_package(Zlib)
+
 IF(WIN32)
-	# Set FreeImage path:
-	SET(FREEIMAGE_ROOT_DIR ${PROJECT_BINARY_DIR} CACHE PATH "Location of FreeImage files (.h, .lib and .dll)")
 	SET(XTRKCAD_USE_GTK_DEFAULT OFF)
 	SET(XTRKCAD_USE_GETTEXT_DEFAULT ON)
 
@@ -52,9 +54,6 @@ OPTION(XTRKCAD_USE_GETTEXT "Use gettext for internationalization" ${XTRKCAD_USE_
 OPTION(XTRKCAD_USE_DOXYGEN "Generate internals documentation using doxygen" ${XTRKCAD_USE_DOXYGEN_DEFAULT})
 if(UNIX AND NOT APPLE)
     option(XTRKCAD_USE_BROWSER "Show help in default browser" ${XTRKCAD_USE_BROWSER_DEFAULT})
-endif()
-if(WIN32)
-	option(FREEIMAGE_ROOT_DIR "Base directory for the FreeImage library" ${FREEIMAGE_ROOT_DIR})
 endif()
 
 IF(UNIX)

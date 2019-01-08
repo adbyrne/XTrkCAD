@@ -67,6 +67,8 @@ extern char * sUndoF;
 extern char * sAuditF;
 
 extern char * sSourceFilePattern;
+extern char * sSaveFilePattern;
+extern char * sImageFilePattern;
 extern char * sImportFilePattern;
 extern char * sDXFFilePattern;
 extern char * sRecordFilePattern;
