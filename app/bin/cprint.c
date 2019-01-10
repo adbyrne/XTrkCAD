@@ -25,6 +25,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <stdbool.h>
 
 #include "custom.h"
 #include "dynstring.h"
@@ -100,6 +101,8 @@ static void DoPrintSetup( void );
 static void PrintClear( void );
 static void PrintMaxPageSize( void );
 static void SelectAllPages(void);
+static bool PrintPageNumber( wPos_t x, wPos_t y, DIST_T width, DIST_T height );
+static bool PrintNextPageNumber(int x, int y, DIST_T pageW, DIST_T pageH);
 
 static char * printFormatLabels[] = { N_("Portrait"), N_("Landscape"), NULL };
 static char * printOrderLabels[] = { N_("Normal"), N_("Reverse"), NULL };
@@ -429,20 +432,9 @@ static void PrintPlainBox(
 	DrawLine( &page_d, p11, p01, 0, wDrawColorBlack );
 	DrawLine( &page_d, p01, p00, 0, wDrawColorBlack );
 
-	fp = wStandardFont( F_HELV, FALSE, FALSE );
-	sprintf( tmp, "[%d,%d]", x, y );
-	p00.x = pageW/2.0 - 20.0/72.0;
-	p00.y = pageH - 10.0/72.0;
-	DrawString( &page_d, p00, 0.0, tmp, fp, 4.0, wDrawColorBlack );
-	p00.y = 10.0/72.0;
-	DrawString( &page_d, p00, 0.0, tmp, fp, 4.0, wDrawColorBlack );
-	p00.y = pageH/2 + 10.0/72.0;
-	p00.x = pageW - 20.0/72.0;
-	DrawString( &page_d, p00, 0.0, tmp, fp, 4.0, wDrawColorBlack );
-	p00.x = 10.0/72.0;
-	DrawString( &page_d, p00, 0.0, tmp, fp, 4.0, wDrawColorBlack );
+	PrintNextPageNumber(x, y, pageW, pageH );
 
-
+	fp = wStandardFont(F_HELV, FALSE, FALSE);
 	sprintf( tmp, "[%0.2f,%0.2f]", corners[0].x, corners[0].y );
 	p00.x = 4.0/72.0;
 	p00.y = 4.0/72.0;
@@ -767,6 +759,102 @@ static void DrawRegistrationMarks( drawCmd_p d )
 	}
 }
 
+/**
+ * Format the page coordinates. Also handle cases where the coordinates are
+ * out of range. 
+ * 
+ * \param x x position
+ * \param y y position
+ * \return TRUE
+ */
+ 
+static char *
+FormatPageNumber(int x, int y)
+{
+    DynString formatted;
+    char *result;
+
+    DynStringMalloc(&formatted, 16);
+    if (x > 0 &&  x <= bm.x1 && y > 0 && y <= bm.y1) {
+        DynStringPrintf(&formatted, "(%d/%d)", x, y);
+    } else {
+        DynStringCatCStr(&formatted, "(-/-)");
+    }
+
+    result = strdup(DynStringToCStr(&formatted));
+    DynStringFree(&formatted);
+
+    return (result);
+}
+
+/**
+ * Print the page number in the center of the page
+ *
+ * \param x	page index x-direction
+ * \param y page index y-direction
+ * \param width page width
+ * \param height page height
+ * \return TRUE
+ */
+
+static bool
+PrintPageNumber(wPos_t x, wPos_t y, DIST_T width, DIST_T height)
+{
+    coOrd printPosition;
+    coOrd textSize;
+
+    char *positionText;
+    wFont_p fp = wStandardFont(F_TIMES, TRUE, FALSE);
+    wFontSize_t fs = 64.0;
+
+    positionText = FormatPageNumber(x + 1, y + 1);
+
+    // even though we're printing into page_d, mainD must be used here
+    DrawTextSize(&mainD, positionText, fp, fs, TRUE, &textSize);
+
+    printPosition.x = (width - textSize.x) / 2;
+    printPosition.y = (height - textSize.y) / 2;
+
+    DrawString(&page_d, printPosition, 0.0, positionText, fp, fs,
+               wDrawColorGray(70));
+
+    free(positionText);
+
+    return (TRUE);
+}
+
+static bool
+PrintNextPageNumber(int x, int y, DIST_T pageW, DIST_T pageH)
+{
+    char *pageNumber;
+    wFont_p fp = wStandardFont(F_HELV, FALSE, FALSE);
+    wFontSize_t fs = 4.0;
+    coOrd p00;
+
+    pageNumber = FormatPageNumber(x+1, y+2);
+    p00.x = pageW / 2.0 - 20.0 / 72.0;
+    p00.y = pageH - 10.0 / 72.0;
+    DrawString(&page_d, p00, 0.0, pageNumber, fp, 4.0, wDrawColorBlack);
+    free(pageNumber);
+
+    pageNumber = FormatPageNumber(x+1, y);
+    p00.y = 10.0 / 72.0;
+    DrawString(&page_d, p00, 0.0, pageNumber, fp, 4.0, wDrawColorBlack);
+    free(pageNumber);
+
+    pageNumber = FormatPageNumber(x+2, y+1);
+    p00.y = pageH / 2 + 10.0 / 72.0;
+    p00.x = pageW - 20.0 / 72.0;
+    DrawString(&page_d, p00, 0.0, pageNumber, fp, 4.0, wDrawColorBlack);
+    free(pageNumber);
+
+    pageNumber = FormatPageNumber(x, y+1);
+    p00.x = 10.0 / 72.0;
+    DrawString(&page_d, p00, 0.0, pageNumber, fp, 4.0, wDrawColorBlack);
+    free(pageNumber);
+
+    return (TRUE);
+}
 
 static BOOL_T PrintPage(
 		int x,
@@ -925,6 +1013,7 @@ static BOOL_T PrintPage(
 						DrawRuler( &print_d, p[0], p[1], minP.x, FALSE, TRUE, wDrawColorBlack );
 					}
 				}
+
 				if (printGrid)
 					DrawSnapGrid( &print_d, mapD.size, FALSE );
 				roadbedWidth = printRoadbed?printRoadbedWidth:0.0;
@@ -934,6 +1023,9 @@ static BOOL_T PrintPage(
 					DrawRegistrationMarks( &print_d );
 				if (printRegistrationMarks)
 					PrintPlainBox( x, y, psave );
+
+				PrintPageNumber(x, y, page_d.size.x, page_d.size.y);
+
 				if ( !wPrintPageEnd( print_d.d ) )
 					return FALSE;
 				/*BITMAP(bm,x,y) = 0;*/
