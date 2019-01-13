@@ -644,8 +644,14 @@ void psPrintString(
     psSetColor(color);
 
     // and show the string
-    pango_cairo_show_layout(cr, layout);
-
+    if(!(opts & wDrawOutlineFont)) {
+		pango_cairo_show_layout(cr, layout);
+	} else {
+		PangoLayoutLine *line;
+		line = pango_layout_get_line_readonly (layout, 0);
+		pango_cairo_layout_line_path (cr, line);
+		cairo_stroke( cr );	
+	}
     // free unused objects
     g_object_unref(layout);
     g_object_unref(pcontext);
