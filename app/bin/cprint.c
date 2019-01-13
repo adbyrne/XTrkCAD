@@ -818,8 +818,10 @@ PrintPageNumber(wPos_t x, wPos_t y, DIST_T width, DIST_T height)
     printPosition.x = (width - textSize.x) / 2;
     printPosition.y = (height - textSize.y) / 2;
 
+	page_d.funcs->options |= wDrawOutlineFont;
     DrawString(&page_d, printPosition, 0.0, positionText, fp, fs,
                wDrawColorGray(70));
+	page_d.funcs->options &= ~wDrawOutlineFont;
 
     free(positionText);
 
