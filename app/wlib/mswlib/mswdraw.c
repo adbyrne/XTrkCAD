@@ -722,7 +722,19 @@ void wDrawGetTextSize(
 	DeleteObject( newFont );
 	fp->lfHeight = oldLfHeight;
 }
-
+/**
+ * Draw text
+ * 
+ * \param d	device context
+ * \param px position x
+ * \param py position y
+ * \param angle drawing angle
+ * \param text text to print
+ * \param fp font
+ * \param siz font size
+ * \param dc color
+ * \param dopts drawing options
+ */
 void wDrawString(
     wDraw_p d,
     wPos_t px,
@@ -791,56 +803,40 @@ void wDrawString(
             myInvalidateRect(d, &rect);
         }
     } else {
-		if (dopts & wDrawOutlineFont) {
-			const int RestorePoint = SaveDC(d->hDc);
+        prevFont = SelectObject(d->hDc, newFont);
+        SetBkMode(d->hDc, TRANSPARENT);
 
-			// Use new font
-			prevFont = SelectObject(d->hDc, newFont);
+        if (dopts & wDrawOutlineFont) {
+            HPEN oldPen;
+            BeginPath(d->hDc);
+            TextOut(d->hDc, x, y, text, strlen(text));
+            EndPath(d->hDc);
 
-			// Brush for pen
-			LOGBRUSH lBrushForPen = { 0 };
-			lBrushForPen.lbColor = mswGetColor(d->hasPalette, dc);
-			lBrushForPen.lbHatch = HS_CROSS;
-			lBrushForPen.lbStyle = BS_SOLID;
+            // Now draw outline text
+            oldPen = SelectObject(d->hDc,
+                                  CreatePen(PS_SOLID, 1,
+                                            mswGetColor(d->hasPalette, dc)));
+            StrokePath(d->hDc);
+            SelectObject(d->hDc, oldPen);
+        } else {
+            COLORREF old;
 
-			// New pen for drawing outline text
-			HPEN OutlinePen;
-			OutlinePen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID, 2, &lBrushForPen, 0, 0);
+            old = SetTextColor(d->hDc, mswGetColor(d->hasPalette,
+                                                   dc));
+            TextOut(d->hDc, x, y, text, strlen(text));
+            SetTextColor(d->hDc, old);
+        }
 
-			// Use this pen
-			SelectObject(d->hDc, &OutlinePen);
+        extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, strlen(text));
+        SelectObject(d->hDc, prevFont);
+        w = LOWORD(extent);
+        h = HIWORD(extent);
 
-			SetBkMode(d->hDc, TRANSPARENT);
-
-			BeginPath(d->hDc);
-			// This text is not drawn on screen, but instead each action is being
-			// recorded and stored internally as a path, since we called BeginPath
-			TextOut(d->hDc, x, y, text, strlen(text));
-			// Stop path
-			EndPath(d->hDc);
-
-			// Now draw outline text
-			StrokePath(d->hDc);
-
-			RestoreDC(d->hDc, RestorePoint);
-		} else {
-			COLORREF old;
-			prevFont = SelectObject(d->hDc, newFont);
-			SetBkMode(d->hDc, TRANSPARENT);
-			old = SetTextColor(d->hDc, mswGetColor(d->hasPalette,
-				dc));
-			TextOut(d->hDc, x, y, text, strlen(text));
-			SetTextColor(d->hDc, old);
-			extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, strlen(text));
-			SelectObject(d->hDc, prevFont);
-			w = LOWORD(extent);
-			h = HIWORD(extent);
-		}
         if (d->hWnd) {
-            rect.top = y-(w+h+1);
-            rect.bottom = y+(w+h+1);
-            rect.left = x-(w+h+1);
-            rect.right = x+(w+h+1);
+            rect.top = y - (w + h + 1);
+            rect.bottom = y + (w + h + 1);
+            rect.left = x - (w + h + 1);
+            rect.right = x + (w + h + 1);
             myInvalidateRect(d, &rect);
         }
     }

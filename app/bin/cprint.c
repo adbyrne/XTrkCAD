@@ -815,8 +815,13 @@ PrintPageNumber(wPos_t x, wPos_t y, DIST_T width, DIST_T height)
     // even though we're printing into page_d, mainD must be used here
     DrawTextSize(&mainD, positionText, fp, fs, TRUE, &textSize);
 
-    printPosition.x = (width - textSize.x) / 2;
-    printPosition.y = (height - textSize.y) / 2;
+	if (printFormat == PORTRAIT) {
+		printPosition.x = (width - textSize.x) / 2;
+		printPosition.y = (height - textSize.y) / 2;
+	} else {
+		printPosition.x = (height - textSize.x) / 2;
+		printPosition.y = (width - textSize.y) / 2;
+	}
 
 	page_d.funcs->options |= wDrawOutlineFont;
     DrawString(&page_d, printPosition, 0.0, positionText, fp, fs,
@@ -865,23 +870,40 @@ PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH)
     coOrd p00;
 
     // above
-    p00.x = pageW / 2.0 - 20.0 / 72.0;
-    p00.y = pageH - 10.0 / 72.0;
+	if (printFormat == PORTRAIT) {
+		p00.x = pageW / 2.0 - 20.0 / 72.0;
+		p00.y = pageH - 10.0 / 72.0;
+	} else {
+		p00.x = pageH / 2.0 - 20.0 / 72.0;
+		p00.y = pageW - 10.0 / 72.0;
+	}
     PrintNextPageNumberAt(x + 1, y + 2, p00);
 
     // below
-    p00.y = 10.0 / 72.0;
+	if (printFormat == PORTRAIT) {
+		p00.y = 10.0 / 72.0;
+	} else {
+		p00.y = 10.0 / 72.0;
+	}
     PrintNextPageNumberAt(x + 1, y, p00);
 
     // right
-    p00.y = pageH / 2 + 10.0 / 72.0;
-    p00.x = pageW - 20.0 / 72.0;
+	if (printFormat == PORTRAIT) {
+		p00.y = pageH / 2 + 10.0 / 72.0;
+		p00.x = pageW - 20.0 / 72.0;
+	} else {
+		p00.y = pageW / 2 + 10.0 / 72.0;
+		p00.x = pageH - 20.0 / 72.0;
+	}
     PrintNextPageNumberAt(x + 2, y + 1, p00);
 
-    // left
-    p00.x = 10.0 / 72.0;
-    PrintNextPageNumberAt(x, y + 1, p00);
-
+	// left
+	if (printFormat == PORTRAIT) {
+		p00.x = 10.0 / 72.0;
+	} else {
+		p00.x = 10.0 / 72.0;
+	}
+	PrintNextPageNumberAt(x, y + 1, p00);
     return (TRUE);
 }
 
