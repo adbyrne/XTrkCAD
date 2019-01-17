@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
++ Page positions can be shown on the center of each printed page.
 + A new type of note can be used to store a weblink. Double-clicking on the
 weblink icon in a drawing opens the website in the default browser.
 + Usabillity / compatibility of parameter files for current scale and gauge is

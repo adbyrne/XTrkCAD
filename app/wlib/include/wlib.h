@@ -453,6 +453,7 @@ void wTextSetPosition(		wText_p bt, int pos );
 typedef int wDrawOpts;
 #define wDrawOptTemp	(1<<0)
 #define wDrawOptNoClip	(1<<1)
+#define wDrawOutlineFont (1<<11)
 
 typedef enum {
 	wDrawLineSolid,
