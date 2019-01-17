@@ -1735,7 +1735,7 @@ static BOOL_T MakeParallelTurnout(
 }
 
 static trackCmd_t turnoutCmds = {
-		N_("TURNOUT "),
+		"TURNOUT ",
 		DrawTurnout,
 		DistanceCompound,
 		DescribeCompound,
@@ -2698,7 +2698,7 @@ EXPORT void InitTrkTurnout( void )
 	T_TURNOUT = InitObject( &turnoutCmds );
 
 	/*InitDebug( "Turnout", &debugTurnout );*/
-	AddParam( N_("TURNOUT "), ReadTurnoutParam );
+	AddParam( "TURNOUT ", ReadTurnoutParam );
 }
 
 #ifdef TEST
