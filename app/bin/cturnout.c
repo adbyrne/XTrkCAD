@@ -169,7 +169,7 @@ EXPORT wIndex_t CheckPaths(
 	int segInx[2], segEp[2];
 	int segTrkLast = -1;
 	trkSeg_t tempSeg;
-	
+
 #define segMap(N) DYNARR_N( trkSeg_p, segMap_da, N )
 
 	DYNARR_RESET( trkSeg_p, segMap_da );
@@ -257,7 +257,7 @@ static BOOL_T ReadTurnoutParam(
 				to->special = TOadjustable;
 				GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
 						&to->u.adjustable.minD, &to->u.adjustable.maxD );
-				
+
 			} else {
 				InputError(_("Unknown special case"), TRUE);
 			}
@@ -288,9 +288,9 @@ EXPORT turnoutInfo_t * TurnoutAdd( long mode, SCALEINX_T scale, wList_p list, co
 			if (message[0] != '\0') {
 				wListAddValue( list, message, NULL, to );
 				if (maxDim) {
-					if (to->size.x > maxDim->x) 
+					if (to->size.x > maxDim->x)
 						maxDim->x = to->size.x;
-					if (to->size.y > maxDim->y) 
+					if (to->size.y > maxDim->y)
 						maxDim->y = to->size.y;
 				}
 			}
@@ -803,7 +803,7 @@ EXPORT EPINX_T TurnoutPickEndPt(
 			if ( dir == 0 ) segEP = 1-segEP;
 			epPos = GetSegEndPt( &xx->segs[segInx], segEP, FALSE, NULL );
 			if ( ! SplitTurnoutCheckEP( segInx0, epPos, pps[dir], dir?1:-1, xx->paths, xx->segs ) )
-				unique_eps[dir] = FALSE; 
+				unique_eps[dir] = FALSE;
 		}
 	}
 
@@ -1154,7 +1154,7 @@ LOG( log_traverseTurnout, 1, ( "CheckTraverseTurnout( T%d, [%0.3f %0.3f])\n", Ge
 	pos.x -= xx->orig.x;
 	pos.y -= xx->orig.y;
 LOG( log_traverseTurnout, 1, ( "After rotation = [%0.3f %0.3f])\n", pos.x, pos.y ) )
-	
+
 #ifdef LATER
 	for ( inx=0; inx<xx->segCnt; inx++ ) {
 		switch ( xx->segs[inx].type ) {
@@ -1359,7 +1359,7 @@ static STATUS_T ModifyTurnout( track_p trk, wAction_t action, coOrd pos )
 			if (action == C_MOVE)
 				InfoMessage( _("Length=%s"), FormatDistance( d ) );
 			return C_CONTINUE;
-	
+
 		case C_UP:
 			d = FindDistance( tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1] );
 			ChangeAdjustableEndPt( trk, ep, d );
@@ -1533,7 +1533,7 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 
 /**
  * Create a parallel track for a turnout.
- * 
+ *
  *
  * \param trk IN existing track
  * \param pos IN ??
@@ -1563,7 +1563,7 @@ static BOOL_T MakeParallelTurnout(
 	if ( NormalizeAngle( FindAngle( GetTrkEndPos(trk,0), pos ) - GetTrkEndAngle(trk,1) ) < 180.0 )
 		angle += 90;
 	else
-		angle -= 90; 
+		angle -= 90;
 
 	/*
 	 * get all endpoints of current piece and translate them for the new piece
@@ -1574,7 +1574,7 @@ static BOOL_T MakeParallelTurnout(
 	}
 
 	/*
-	 * get information about the current piece and copy data 
+	 * get information about the current piece and copy data
 	 */
 
 	if( newTrk ) {
@@ -1582,7 +1582,7 @@ static BOOL_T MakeParallelTurnout(
 		endPt[ 0 ].pos = endPts[ 0 ];
 		endPt[ 0 ].angle = GetTrkEndAngle( trk, 0 );
 		endPt[ 1 ].pos = endPts[ 1 ];
-		endPt[ 1 ].angle = GetTrkEndAngle( trk, 1 ); 
+		endPt[ 1 ].angle = GetTrkEndAngle( trk, 1 );
 
 		yy = GetTrkExtraData(trk);
 
@@ -1608,7 +1608,7 @@ static BOOL_T MakeParallelTurnout(
 		SetTrkEndElev( *newTrk, 1, option, d, NULL );
 
 		MyFree( endPt );
-	} else { 
+	} else {
 		/* draw some temporary track while command is in process */
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
@@ -1626,7 +1626,7 @@ static BOOL_T MakeParallelTurnout(
 }
 
 static trackCmd_t turnoutCmds = {
-		N_("TURNOUT "),
+		"TURNOUT ",
 		DrawTurnout,
 		DistanceCompound,
 		DescribeCompound,
@@ -1938,7 +1938,7 @@ static void PlaceTurnout(
 
 	static dynArr_t vector_da;
 #define vector(N) DYNARR_N( vector_t, vector_da, N )
-	
+
 	pos1 = Dto.place = Dto.pos = pos;
 	if (curTurnoutEp >= (long)curTurnout->endCnt)
 		curTurnoutEp = 0;
@@ -2056,7 +2056,7 @@ LOG( log_turnout, 1, ( "ep[%d] on T%d @(%0.3f %0.3f)\n",
 				a = GetAngleAtPoint( trk, epPos, &ep0, &ep1 );
 			}
 			aa = NormalizeAngle( a - tempEndPts(i).angle + connectAngle/2.0 );
-			if ( IsClose(d) && 
+			if ( IsClose(d) &&
 				 ( (ep0!=ep1 && aa<connectAngle) ||
 				   ( aa>180.0 && aa<180.0+connectAngle ) ) &&
 				   ! ( GetTrkType(trk) == T_TURNOUT &&
@@ -2210,12 +2210,12 @@ static void TurnoutRotate( void * pangle )
 		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
 	Dto.state = 1;
 }
-	
+
 /**
  * Process the mouse events for laying track.
  *
  * \param action IN event type
- * \param pos    IN mouse position 
+ * \param pos    IN mouse position
  * \return    		next state
  */
 
@@ -2363,7 +2363,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		return C_TERMINATE;
 
 	case C_TEXT:
-		if ((action>>8) != ' ') 
+		if ((action>>8) != ' ')
 			return C_CONTINUE;
 	case C_OK:
 		AddTurnout();
@@ -2403,7 +2403,7 @@ static STATUS_T CmdTurnout(
 	case C_START:
 		if (turnoutW == NULL) {
 /*			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle("Turnout"), "Ok", , (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE|F_RECALLSIZE, TurnoutDlgUpdate ); */
-			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle(_("Turnout")), _("Close"), (paramActionOkProc)TurnoutOk, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate ); 
+			turnoutW = ParamCreateDialog( &turnoutPG, MakeWindowTitle(_("Turnout")), _("Close"), (paramActionOkProc)TurnoutOk, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, TurnoutDlgUpdate );
 			InitNewTurn( turnoutNewM );
 		}
 /*		ParamDialogOkActive( &turnoutPG, FALSE ); */
@@ -2470,10 +2470,10 @@ static STATUS_T CmdTurnout(
  * Event procedure for the hotbar.
  *
  * \param op   IN requested function
- * \param data IN	pointer to info on selected element	
+ * \param data IN	pointer to info on selected element
  * \param d    IN
  * \param origP IN
- * \return   
+ * \return
  */
 
 static char * CmdTurnoutHotBarProc(
@@ -2587,7 +2587,7 @@ EXPORT void InitTrkTurnout( void )
 	T_TURNOUT = InitObject( &turnoutCmds );
 
 	/*InitDebug( "Turnout", &debugTurnout );*/
-	AddParam( N_("TURNOUT "), ReadTurnoutParam );
+	AddParam( "TURNOUT ", ReadTurnoutParam );
 }
 
 #ifdef TEST
