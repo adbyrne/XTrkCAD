@@ -314,45 +314,63 @@ static void DDrawArc(
 		wDrawWidth width,
 		wDrawColor color )
 {
-	wPos_t x, y;
-	ANGLE_T da;
-	coOrd p0, p1;
-	DIST_T rr;
-	int i, cnt;
+    wPos_t x, y;
+    ANGLE_T da;
+    coOrd p0, p1;
+    DIST_T rr;
+    int i, cnt;
 
-	if (d == &mapD && !mapVisible)
-		return;
-	rr = (r / d->scale) * d->dpi + 0.5;
-	if (rr > wDrawGetMaxRadius(d->d)) {
-		da = (maxArcSegStraightLen * 180) / (M_PI * rr);
-		cnt = (int)(angle1/da) + 1;
-		da = angle1 / cnt;
-		coOrd min,max;
-		min = d->orig;
-		max.x = min.x + d->size.x;
-		max.y = min.y + d->size.y;
-		PointOnCircle( &p0, p, r, angle0 );
-		for ( i=1; i<=cnt; i++ ) {
-			angle0 += da;
-			PointOnCircle( &p1, p, r, angle0 );
-			if ((p0.x >= min.x && p0.x <= max.x &&
-				 p0.y >= min.y && p0.y <= max.y) ||
-				(p1.x >= min.x && p1.x <= max.x &&
-				 p1.y >=min.y && p1.y <=max.y))
-			DrawLine( d, p0, p1, width, color );
-			p0 = p1;
-		}
-		return;
-	}
-	if (d->angle!=0.0 && angle1 < 360.0)
-		angle0 = NormalizeAngle( angle0-d->angle );
-	d->CoOrd2Pix(d,p,&x,&y);
-	drawCount++;
-	if (drawEnable) {
-		wDrawArc( d->d, x, y, (wPos_t)(rr), angle0, angle1, drawCenter,
-				width, ((d->options&DC_DASH)==0)?wDrawLineSolid:wDrawLineDash,
-				color, (wDrawOpts)d->funcs->options );
-	}
+    if (d == &mapD && !mapVisible)
+    {
+        return;
+    }
+    rr = (r / d->scale) * d->dpi + 0.5;
+    if (rr > wDrawGetMaxRadius(d->d))
+    {
+        da = (maxArcSegStraightLen * 180) / (M_PI * rr);
+        cnt = (int)(angle1/da) + 1;
+        da = angle1 / cnt;
+        coOrd min,max;
+        min = d->orig;
+        max.x = min.x + d->size.x;
+        max.y = min.y + d->size.y;
+        PointOnCircle(&p0, p, r, angle0);
+        for (i=1; i<=cnt; i++) {
+            angle0 += da;
+            PointOnCircle(&p1, p, r, angle0);
+            if (d->angle == 0.0 &&
+                    ((p0.x >= min.x &&
+                      p0.x <= max.x &&
+                      p0.y >= min.y &&
+                      p0.y <= max.y) ||
+                     (p1.x >= min.x &&
+                      p1.x <= max.x &&
+                      p1.y >= min.y &&
+                      p1.y <= max.y))) {
+                DrawLine(d, p0, p1, width, color);
+            } else {
+                coOrd clip0 = p0, clip1 = p1;
+                if (ClipLine(&clip0, &clip1, d->orig, d->angle, d->size)) {
+                    DrawLine(d, clip0, clip1, width, color);
+                }
+            }
+
+            p0 = p1;
+        }
+        return;
+    }
+    if (d->angle!=0.0 && angle1 < 360.0)
+    {
+        angle0 = NormalizeAngle(angle0-d->angle);
+    }
+    d->CoOrd2Pix(d,p,&x,&y);
+    drawCount++;
+    if (drawEnable)
+    {
+        wDrawArc(d->d, x, y, (wPos_t)(rr), angle0, angle1, drawCenter,
+                 width, ((d->options&DC_DASH)==0)?wDrawLineSolid:wDrawLineDash,
+                 color, (wDrawOpts)d->funcs->options);
+    }
 }
 
 
@@ -1253,7 +1271,6 @@ EXPORT void MainRedraw( void )
 #endif
 
 	coOrd orig, size;
-	coOrd back_orig;
 	DIST_T t1;
 	if (inPlaybackQuit)
 		return;
@@ -2512,7 +2529,7 @@ static void MapDlgUpdate(
 					MapRedraw();
 					DrawMapBoundingBox( TRUE );
 				}
-				wPrefSetInteger( "draw", "mapscale", mapD.scale );
+				wPrefSetInteger( "draw", "mapscale", (long)mapD.scale );
 			}
 			DrawMapBoundingBox( TRUE );
 			break;
