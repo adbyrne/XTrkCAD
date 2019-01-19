@@ -1127,7 +1127,11 @@ EXPORT void InfoSubstituteControls(
 	for ( inx=0; controls[inx]; inx++ ) {
 		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
 		x += curInfoLabelWidth[inx];
+#ifdef WINDOWS
 		int	y_this = y + (infoHeight/2) - (textHeight / 2 );
+#else
+		int	y_this = y + (infoHeight / 2) - (wControlGetHeight(controls[inx]) / 2) - 2;
+#endif
 		wControlSetPos( controls[inx], x, y_this );
 		x += wControlGetWidth( controls[inx] );
 		wControlSetLabel( controls[inx], _(labels[inx]) );
