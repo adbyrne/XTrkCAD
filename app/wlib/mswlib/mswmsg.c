@@ -42,6 +42,7 @@ static void repaintMessage(
 	HFONT hFont;
 	LOGFONT msgFont;
 	double scale = 1.0;
+	TEXTMETRIC textMetrics;
 
 	hDc = GetDC( hWnd );
 
@@ -74,13 +75,15 @@ static void repaintMessage(
 			hFont = SelectObject( hDc, mswLabelFont );
 	}
 
+	GetTextMetrics(hDc, &textMetrics);
+
 	rect.bottom = (long)(bm->y+( bm->h ));
 	rect.right = (long)(bm->x+( scale * bm->w ));
-	rect.top = bm->y;
+	rect.top = bm->y+1;
 	rect.left = bm->x;
 
 	SetBkColor( hDc, GetSysColor( COLOR_BTNFACE ) );
-	ExtTextOut( hDc, bm->x, bm->y, ETO_CLIPPED|ETO_OPAQUE, &rect, bm->message, strlen( bm->message ), NULL );
+	ExtTextOut( hDc, bm->x, bm->y + ((bm->h + 2 - textMetrics.tmHeight) / 2), ETO_CLIPPED|ETO_OPAQUE, &rect, bm->message, strlen( bm->message ), NULL );
 
 	if( scale != 1.0 )
 		/* in case we did create a new font earlier, delete it now */
@@ -138,7 +141,7 @@ wPos_t wMessageGetHeight( long flags )
 	if( flags & BM_SMALL )
 		scale = SCALE_SMALL;
 
-	return((wPos_t)((mswEditHeight - 4) * scale ));
+	return((wPos_t)((mswEditHeight) * scale ));
 #endif
 }
 

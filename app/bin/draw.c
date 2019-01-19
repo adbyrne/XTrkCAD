@@ -973,7 +973,7 @@ EXPORT void InitInfoBar( void )
 {
 	wPos_t width, height, y, yb, ym, x, boxH;
 	wWinGetSize( mainW, &width, &height );
-	infoHeight = 3 + wStatusGetHeight( COMBOBOX ) + 3;
+	infoHeight = 2 + wStatusGetHeight( COMBOBOX ) + 2 ;
 	textHeight = wStatusGetHeight(0L);
 	y = height - max(infoHeight,textHeight)-10;
 
@@ -1021,9 +1021,9 @@ static void SetInfoBar( void )
 	newDistanceFormat = GetDistanceFormat();
 	if ( newDistanceFormat != oldDistanceFormat ) {
 		infoD.pos_w = GetInfoPosWidth() + 2;
-		wBoxSetSize( infoD.posX_b, infoD.pos_w, infoHeight-5 );
+		wBoxSetSize( infoD.posX_b, infoD.pos_w, infoHeight-3 );
 		wStatusSetWidth( infoD.posX_m, infoD.pos_w-six );
-		wBoxSetSize( infoD.posY_b, infoD.pos_w, infoHeight-5 );
+		wBoxSetSize( infoD.posY_b, infoD.pos_w, infoHeight-3 );
 		wStatusSetWidth( infoD.posY_m, infoD.pos_w-six );
 	}
 	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 40 + 4;
@@ -1127,7 +1127,7 @@ EXPORT void InfoSubstituteControls(
 	for ( inx=0; controls[inx]; inx++ ) {
 		curInfoLabelWidth[inx] = wLabelWidth(_(labels[inx]));
 		x += curInfoLabelWidth[inx];
-		int	y_this = y + (textHeight/2) - (wControlGetHeight( controls[inx] )/2);
+		int	y_this = y + (infoHeight/2) - (textHeight / 2 );
 		wControlSetPos( controls[inx], x, y_this );
 		x += wControlGetWidth( controls[inx] );
 		wControlSetLabel( controls[inx], _(labels[inx]) );

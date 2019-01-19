@@ -871,13 +871,10 @@ wWin_p wWinMainCreate(
     mswHWnd = w->hWnd;
 
     if (!mswThickFont) {
-        DWORD dw;
         SendMessage(w->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L);
         hDc = GetDC(w->hWnd);
         GetTextMetrics(hDc, &tm);
         mswEditHeight = tm.tmHeight+2;
-        dw = GetTextExtent(hDc, "AXqypj", 6);
-        mswEditHeight = HIWORD(dw)+2;
         ReleaseDC(w->hWnd, hDc);
     }
 
@@ -3388,8 +3385,6 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
     HDC hDc;
     char **argv;
     int argc;
-    TEXTMETRIC tm;
-    DWORD dw;
 
 	if (!hinstPrevious) {
 		if (!InitApplication(hinstCurrent)) {
@@ -3414,10 +3409,6 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
         mswScale = 1.0;
     }
 
-    GetTextMetrics(hDc, &tm);
-    mswEditHeight = tm.tmHeight + 8;
-    dw = GetTextExtent(hDc, "AXqypj", 6);
-    mswEditHeight = HIWORD(dw)+2;
     ReleaseDC(0, hDc);
     mswCreateCheckBitmaps();
     /*
