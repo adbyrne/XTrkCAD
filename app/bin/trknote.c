@@ -25,6 +25,7 @@
 
 #include "cundo.h"
 #include "custom.h"
+#include "file2uri.h"
 #include "fileio.h"
 #include "i18n.h"
 #include "misc.h"
@@ -38,7 +39,7 @@ extern descData_t noteDesc[];
 
 static TRKTYP_T T_NOTE = -1;
 
-static wDrawBitMap_p note_bm, link_bm;
+static wDrawBitMap_p note_bm, link_bm, document_bm;
 
 typedef struct {
 	char **xpm;
@@ -51,20 +52,24 @@ typedef struct {
 
 #include "bitmaps/sticky-note-text.xpm"
 #include "bitmaps/sticky-note-chain.xpm"
+#include "bitmaps/sticky-note-clip.xpm"
 
 enum noteCommands {
 	OP_NOTETEXT,
-	OP_NOTELINK
+	OP_NOTELINK,
+	OP_NOTEFILE
 } noteOperations;
 
 static trknoteData_t noteTypes[] = {
 	{ sticky_note_text_bits, OP_NOTETEXT, N_("Note"), N_("Text"), "cmdTextNote", 0L },
 	{ sticky_note_chain_bits, OP_NOTELINK, N_("Link"), N_("Weblink"), "cmdLinkNote", 0L },
+	{ sticky_note_clip_bits, OP_NOTEFILE, N_("Document"), N_("Document"), "cmdFileNote", 0L },
 };
 
 static long curNoteType;
 
 #define NOTETYPESCOUNT (sizeof(noteTypes)/sizeof(trknoteData_t))
+#define MYMIN(x, y) (((x) < (y)) ? (x) : (y))
 
 /*****************************************************************************
  * NOTE OBJECT
@@ -117,7 +122,11 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
 		if (IsLinkNote(t)||(inDescribeCmd && curNoteType == OP_NOTELINK)) {
 			bm = link_bm;
 		} else {
-			bm = note_bm;
+			if (IsFileNote(t) || (inDescribeCmd && curNoteType == OP_NOTEFILE)) {
+				bm = document_bm;
+			} else {
+				bm = note_bm;
+			}
 		}
     	DrawBitMap(d, xx->pos, bm, color);
     }
@@ -195,12 +204,50 @@ void UpdateNote(track_p trk, int inx, descData_p descUpd,
 	}
 }
 
+void UpdateFile(track_p trk, int inx, descData_p descUpd,
+	BOOL_T needUndoStart)
+{
+	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	struct noteFileData *noteFileData = GetNoteFileData();
+
+	switch (inx) {
+	case OR_FILE:
+		xx->pos = noteFileData->pos;
+		SetBoundingBox(trk, xx->pos, xx->pos);
+		MainRedraw();
+		break;
+
+	case LY_FILE:
+		SetTrkLayer(trk, noteFileData->layer);
+		MainRedraw();
+		break;
+
+	case OK_FILE:
+	{
+		char *result;
+		int maximumSize = strlen(noteFileData->path) * 3 + 8 + 1;
+		unsigned int resultSize;
+
+		if (xx->text) {
+			MyFree(xx->text);
+		}
+		result = malloc( maximumSize );
+		resultSize = File2URI(noteFileData->path, maximumSize, result);
+		xx->text = (char*)MyMalloc(resultSize + strlen(noteFileData->title) + 2);
+		sprintf(xx->text, "%s %s", result, noteFileData->title);
+		free(result);
+	}
+		break;
+	default:
+		break;
+	}
+}
+
 void UpdateLink(track_p trk, int inx, descData_p descUpd,
 	BOOL_T needUndoStart)
 {
 	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
 	struct noteLinkData *noteLinkData = GetNoteLinkData();
-	int len = strlen(noteLinkData->url);
 
 	switch (inx) {
 	case OR_LINK:
@@ -219,6 +266,7 @@ void UpdateLink(track_p trk, int inx, descData_p descUpd,
 		if (xx->text) {
 			MyFree(xx->text);
 		}
+		noteLinkData = GetNoteLinkData();
 		xx->text = (char*)MyMalloc(strlen(noteLinkData->url) + strlen(noteLinkData->title) + 2);
 		sprintf(xx->text, "%s %s", noteLinkData->url, noteLinkData->title);
 		break;
@@ -323,6 +371,31 @@ static void RescaleNote(track_p trk, FLOAT_T ratio)
     xx->pos.y *= ratio;
 }
 
+/**
+ * Splits the passed text into the URI and the title part and copies to
+ * destination buffer. If buffer is NULL, part is ignored
+ *
+ * \param text the link text
+ * \param uri buffer for uri part of input string
+ * \param uriMaxLength length of uri buffer
+ * \param title buffer for title part
+ * \param  titleMaxLength length of title buffer
+ * \return
+ */
+void
+SplitNoteUri(char *text, char *uri, size_t uriMaxLength, char *title,
+	size_t titleMaxLength)
+{
+	char *delimiter = strchr(text, ' ');
+
+	if (uri) {
+		strlcpy(uri, text, MYMIN(uriMaxLength, delimiter - text + 1));
+	}
+
+	if (title) {
+		strlcpy(title, delimiter + 1, titleMaxLength);
+	}
+}
 
 static void DescribeNote(track_p trk, char * str, CSIZE_T len)
 {
@@ -330,13 +403,20 @@ static void DescribeNote(track_p trk, char * str, CSIZE_T len)
 		DescribeLinkNote(trk, str, len);
 	}
 	else {
-		DescribeTextNote(trk, str, len);
+		if (IsFileNote(trk)) {
+			DescribeFileNote(trk, str, len);
+		} else {
+			DescribeTextNote(trk, str, len);
+		}
 	}
 }
 
 static void ActivateNote(track_p trk) {
-	if (IsLinkNote(trk)) {
+	if (IsLinkNote(trk) ) {
 		ActivateLinkNote(trk);
+	}
+	if (IsFileNote(trk)) {
+		ActivateFileNote(trk);
 	}
 }
 
@@ -422,6 +502,9 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 		case OP_NOTELINK:
 			NewLinkNoteUI(trk);
 			break;
+		case OP_NOTEFILE:
+			NewFileNoteUI(trk);
+			break;
 		}
 
 		inDescribeCmd = FALSE;
@@ -453,12 +536,14 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
 
 #include "bitmaps/note.xbm"
 #include "bitmaps/link.xbm"
+#include "bitmaps/clip.xbm"
 #include "bitmaps/cnote.xpm"
 
 void InitTrkNote(wMenu_p menu)
 {
     note_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, note_bits);
     link_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, link_bits);
+	document_bm = wDrawBitMapCreate(mainD.d, note_width, note_width, 8, 8, clip_bits);
 
 	ButtonGroupBegin(_("Note types"), "cmdNoteCmd", _("Add notes"));
 	for (int i = 0; i < NOTETYPESCOUNT; i++) {

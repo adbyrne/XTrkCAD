@@ -105,7 +105,10 @@ SET(SOURCES
 	dxfformat.c
 	dxfoutput.c
 	elev.c
+	file2uri.c
+	file2uri.h
 	fileio.c
+	filenoteui.c
 	i18n.c
 	layout.c
 	linknoteui.c

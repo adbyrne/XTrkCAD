@@ -34,8 +34,6 @@
 
 extern BOOL_T inDescribeCmd;
 
-#define MYMIN(x, y) (((x) < (y)) ? (x) : (y))
-
 #define MINURLLENGTH 5 /* 2 chars domain name, dot, 2 chars TLD */
 
 static char *validProtocols[] = { "http://", "https://" };
@@ -72,39 +70,13 @@ GetNoteLinkData(void)
     return (&noteLinkData);
 }
 
-/**
- * Splits the passed text into the URL and the title part and copies to
- * destination buffer. If buffer is NULL, part is ignored
- *
- * \param text the link text
- * \param url buffer for url part of input string
- * \param urlMaxLength length of url buffer
- * \param title buffer for title part
- * \param  titleMaxLength length of title buffer
- * \return
- */
-static void
-SplitLinkNoteText(char *text, char *url, size_t urlMaxLength, char *title,
-                  size_t titleMaxLength)
-{
-    char *delimiter = strchr(text, ' ');
-
-    if (url) {
-        strlcpy(url, text, MYMIN(urlMaxLength, delimiter-text + 1));
-    }
-
-    if (title) {
-        strlcpy(title, delimiter + 1, titleMaxLength);
-    }
-}
-
 bool
 IsLinkNote(track_p trk)
 {
     struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
     char url[URLMAXIMUMLENGTH];
 
-    SplitLinkNoteText(xx->text, url, URLMAXIMUMLENGTH, NULL, 0);
+    SplitNoteUri(xx->text, url, URLMAXIMUMLENGTH, NULL, 0);
 
     for (int i = 0; i < sizeof(validProtocols) / sizeof(char *); i++) {
         if (!strncmp(validProtocols[i], url, strlen(validProtocols[i]))) {
@@ -140,7 +112,7 @@ CompleteURL(char *text, size_t length)
 }
 
 /**
- * Simplistic checking of URL syntax validililty
+ * Simplistic checking of URL syntax validity
  *
  * \param testString
  * \return
@@ -148,7 +120,7 @@ CompleteURL(char *text, size_t length)
 static bool
 IsValidURL(char *testString)
 {
-    if (strlen(testString) < MINURLLENGTH) {	// hava minimum length
+    if (strlen(testString) < MINURLLENGTH) {	// have minimum length
         return (FALSE);
     }
     if (!strchr(testString,
@@ -227,7 +199,7 @@ void CreateEditLinkDialog(track_p trk, char *title, char *defaultURL)
 
     noteLinkData.pos = xx->pos;
     noteLinkData.trk = trk;
-    SplitLinkNoteText(defaultURL, noteLinkData.url, URLMAXIMUMLENGTH + 1,
+    SplitNoteUri(defaultURL, noteLinkData.url, URLMAXIMUMLENGTH + 1,
                       noteLinkData.title, TITLEMAXIMUMLENGTH + 1);
 
     ParamLoadControls(&linkEditPG);
@@ -243,7 +215,7 @@ void CreateEditLinkDialog(track_p trk, char *title, char *defaultURL)
 void ActivateLinkNote(track_p trk)
 {
     struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
-    SplitLinkNoteText(xx->text, noteLinkData.url, URLMAXIMUMLENGTH, NULL, 0);
+    SplitNoteUri(xx->text, noteLinkData.url, URLMAXIMUMLENGTH, NULL, 0);
     NoteLinkOpen(NULL);
 }
 
@@ -265,7 +237,7 @@ void DescribeLinkNote(track_p trk, char * str, CSIZE_T len)
 
     DynStringMalloc(&statusLine, 80);
 
-    SplitLinkNoteText(xx->text, url, URLMAXIMUMLENGTH,  title, TITLEMAXIMUMLENGTH);
+    SplitNoteUri(xx->text, url, URLMAXIMUMLENGTH,  title, TITLEMAXIMUMLENGTH);
     DynStringPrintf(&statusLine, "Link: %-.80s (%s)", title, url);
 
     strcpy(str, DynStringToCStr(&statusLine));
