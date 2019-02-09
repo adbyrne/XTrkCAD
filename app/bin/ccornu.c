@@ -384,7 +384,7 @@ void CreateBothEnds(int selectPoint) {
 	modifyable[0] = !Da.trk[0] || (
 			Da.trk[0] && QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY));
 	selectable[1] = !Da.trk[1] || (
-			Da.trk[1] && !QueryTrack(Da.trk[1],Q_IS_CORNU) && !QueryTrack(Da.trk[0],Q_CAN_MODIFY_CONTROL_POINTS));
+			Da.trk[1] && !QueryTrack(Da.trk[1],Q_IS_CORNU) && !QueryTrack(Da.trk[1],Q_CAN_MODIFY_CONTROL_POINTS));
 	modifyable[1] = !Da.trk[1] || (
 			Da.trk[1] && QueryTrack(Da.trk[1],Q_CORNU_CAN_MODIFY));
 	if (selectPoint == -1) {
