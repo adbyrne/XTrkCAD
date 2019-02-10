@@ -98,16 +98,17 @@ ReadMultilineText(size_t textLength)
 
 	line = GetNextLine();
 
-	while (strcmp(line, "    END") && (charsRead + strlen(line) <= textLength)) {
+	while (strcmp(line, "    END")) {
 		DynStringCatCStr(&noteText, line);
-		charsRead += strlen(line);
-		if (*(line + strlen(line)) != '\n') {
-			DynStringCatCStr(&noteText, "\n");
-			charsRead++;
-		}
+		DynStringCatCStr(&noteText, "\n");
 		line = GetNextLine();
 	}
-
+	charsRead = DynStringSize(&noteText);
+	if (charsRead != textLength) {
+		InputError("Expected note length: %d read: %d",
+			TRUE, textLength, charsRead);
+		exit(1);
+	}
 	string = MyStrdup(DynStringToCStr(&noteText));
 	string[strlen(string) - 1] = '\0';
 
