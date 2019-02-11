@@ -693,10 +693,10 @@ void AddHotBarCarDesc( void );
 
 /* cblock.c */
 void CheckDeleteBlock( track_p t );
-void ResolveBlockTrack ( track_p trk );
+BOOL_T ResolveBlockTrack ( track_p trk );
 /* cswitchmotor.c */
 void CheckDeleteSwitchmotor( track_p t );
-void ResolveSwitchmotorTurnout ( track_p trk );
+BOOL_T ResolveSwitchmotorTurnout ( track_p trk );
 
 #endif
 
