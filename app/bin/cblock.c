@@ -129,7 +129,7 @@ typedef struct btrackinfo_t {
 static dynArr_t blockTrk_da;
 #define blockTrk(N) DYNARR_N( btrackinfo_t , blockTrk_da, N )
 
-
+#define tracklist(N) ((&xx->trackList)[N])
 
 typedef struct blockData_t {
     char * name;
@@ -294,7 +294,8 @@ static int blockDebug (track_p trk)
 	return(0);
 }
 
-static BOOL_T blockCheckContigiousPath()
+/* Prereq blockTrack_da is set to have all the tracks to check all tracks must be selected */
+static BOOL_T blockCheckContigiousPath(BOOL_T selected)
 {
 	EPINX_T ep, epCnt, epN;
 	int inx;
@@ -305,22 +306,25 @@ static BOOL_T blockCheckContigiousPath()
 	coOrd endPtOrig = zero;
 	BOOL_T IsConnectedP;
 	trkEndPt_p endPtP;
+	int validEnds = 2;
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
-
 	for ( inx=0; inx<blockTrk_da.cnt; inx++ ) {
 		trk = blockTrk(inx).t;
+		if (!trk) continue;                 //Ignore missing tracks
 		epCnt = GetTrkEndPtCnt(trk);
-		IsConnectedP = FALSE;
+		if (epCnt>2) validEnds += epCnt-2;  //Add extra ends
 		for ( ep=0; ep<epCnt; ep++ ) {
 			trk1 = GetTrkEndTrk(trk,ep);
-			if ( trk1 == NULL || !GetTrkSelected(trk1) ) {
-				/* boundary EP */
+			IsConnectedP = FALSE;
+			if ( trk1 == NULL || (selected && !GetTrkSelected(trk1)) ) {
+				/* boundary EP - is it connected to part of the array? */
 				for ( epN=0; epN<tempEndPts_da.cnt; epN++ ) {
 					dist = FindDistance( GetTrkEndPos(trk,ep), tempEndPts(epN).pos );
 					angle = NormalizeAngle( GetTrkEndAngle(trk,ep) - tempEndPts(epN).angle + connectAngle/2.0 );
 					if ( dist < connectDistance && angle < connectAngle )
 						break;
 				}
+				/* Add to array if not found */
 				if ( epN>=tempEndPts_da.cnt ) {
 					DYNARR_APPEND( trkEndPt_t, tempEndPts_da, 10 );
 					endPtP = &tempEndPts(tempEndPts_da.cnt-1);
@@ -336,12 +340,20 @@ static BOOL_T blockCheckContigiousPath()
 					endPtOrig.x += endPtP->pos.x;
 					endPtOrig.y += endPtP->pos.y;
 				}
+				else {
+					endPtP->track = trk1;   //Found this one
+				}
 			} else {
-				IsConnectedP = TRUE;
+				if (trk1) IsConnectedP = TRUE;        //Not an end - at least one connection for
 			}
 		}
-		if (!IsConnectedP && blockTrk_da.cnt > 1) return FALSE;
 	}
+	int openEnds = 0;
+	for (epN=0; epN<tempEndPts_da.cnt; epN++) {
+		endPtP = &DYNARR_N(trkEndPt_t,tempEndPts_da,epN);
+		if (!endPtP->track) openEnds++;   //Not connected end
+	}
+	if (openEnds>validEnds) return FALSE;  //Too many - means isolated track groups
 	return TRUE;
 }
 
@@ -405,43 +417,58 @@ static void ReadBlock ( char * line )
 			blockTrk(blockTrk_da.cnt-1).i = trkindex;
 		}
 	}
-	/*blockCheckContigiousPath(); save for ResolveBlockTracks */
-	trk = NewTrack(index, T_BLOCK, tempEndPts_da.cnt, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
-	for ( ep=0; ep<tempEndPts_da.cnt; ep++) {
-		endPtP = &tempEndPts(ep);
-		SetTrkEndPoint( trk, ep, endPtP->pos, endPtP->angle );
-	}
-        xx = GetblockData( trk );
-        LOG( log_block, 1, ("*** ReadBlock(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
-        LOG( log_block, 1, ("*** ReadBlock(): name = %p, script = %p\n",name,script))
-        xx->name = name;
-        xx->script = script;
-        xx->IsHilite = FALSE;
+	trk = NewTrack(index, T_BLOCK, 0, sizeof(blockData_t)+(sizeof(btrackinfo_t)*(blockTrk_da.cnt-1))+1);
+	xx = GetblockData( trk );
+	LOG( log_block, 1, ("*** ReadBlock(): trk = %p (%d), xx = %p\n",trk,GetTrkIndex(trk),xx))
+	LOG( log_block, 1, ("*** ReadBlock(): name = %p, script = %p\n",name,script))
+	xx->name = name;
+	xx->script = script;
+	xx->IsHilite = FALSE;
 	xx->numTracks = blockTrk_da.cnt;
+	trk->endCnt = 0;
 	for (iTrack = 0; iTrack < blockTrk_da.cnt; iTrack++) {
 		LOG( log_block, 1, ("*** ReadBlock(): copying track T%d\n",GetTrkIndex(blockTrk(iTrack).t)))
-		memcpy((void*)&((&(xx->trackList))[iTrack]),(void*)&(blockTrk(iTrack)),sizeof(btrackinfo_t));
+		tracklist(iTrack).i = blockTrk(iTrack).i;
+		tracklist(iTrack).t = NULL;
 	}
 	blockDebug(trk);
 }
 
-EXPORT void ResolveBlockTrack ( track_p trk )
+EXPORT BOOL_T ResolveBlockTrack ( track_p trk )
 {
     LOG( log_block, 1, ("*** ResolveBlockTrack(%p)\n",trk))
     blockData_p xx;
     track_p t_trk;
     wIndex_t iTrack;
-    if (GetTrkType(trk) != T_BLOCK) return;
+    int rc =0;
+    if (GetTrkType(trk) != T_BLOCK) return TRUE;
+    DYNARR_RESET( btrackinfo_p , blockTrk_da );
     LOG( log_block, 1, ("*** ResolveBlockTrack(%d)\n",GetTrkIndex(trk)))
     xx = GetblockData(trk);
     for (iTrack = 0; iTrack < xx->numTracks; iTrack++) {
+    	DYNARR_APPEND(btrackinfo_p, blockTrk_da, 1);
+    	blockTrk(blockTrk_da.cnt-1).i = tracklist(iTrack).i;
         t_trk = FindTrack((&(xx->trackList))[iTrack].i);
+        blockTrk(blockTrk_da.cnt-1).t = t_trk;
         if (t_trk == NULL) {
-            NoticeMessage( _("resolveBlockTrack: T%d[%d]: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), iTrack, (&(xx->trackList))[iTrack].i );
+           if(NoticeMessage( _("resolveBlockTrack: T%d[%d]: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), iTrack, (&(xx->trackList))[iTrack].i )) {
+        	   exit(4);
+           } else {
+        	   rc=4;
+           }
         }
         (&(xx->trackList))[iTrack].t = t_trk;
         LOG( log_block, 1, ("*** ResolveBlockTrack(): %d (%d): %p\n",iTrack,(&(xx->trackList))[iTrack].i,t_trk))
     }
+    if (!blockCheckContigiousPath(FALSE)) {
+    	if (NoticeMessage( _("resolveBlockTrack: T%d: is not continuous"), _("Continue"), NULL, GetTrkIndex(trk))) {
+    		exit(4);
+    	} else {
+    		rc = 4;
+    	}
+    }
+
+    return (rc==0);
 }
 
 static void MoveBlock (track_p trk, coOrd orig ) {}
@@ -541,8 +568,8 @@ static void BlockOk ( void * junk )
 		}
 		/* Need to check that all block elements are connected to each
 		   other... */
-		if (!blockCheckContigiousPath()) {
-			NoticeMessage( _("Block is discontigious!"), _("Ok"), NULL );
+		if (!blockCheckContigiousPath(TRUE)) {
+			NoticeMessage( _("Block is discontinuous!"), _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );
 			wHide( blockW );
 			return;

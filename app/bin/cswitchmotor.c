@@ -412,21 +412,28 @@ static void ReadSwitchMotor ( char * line )
         switchmotorDebug(trk);
 }
 
-EXPORT void ResolveSwitchmotorTurnout ( track_p trk )
+EXPORT BOOL_T ResolveSwitchmotorTurnout ( track_p trk )
 {
-    LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(%p)\n",trk))
+    int rc =0;
+	LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(%p)\n",trk))
     switchmotorData_p xx;
     track_p t_trk;
-    if (GetTrkType(trk) != T_SWITCHMOTOR) return;
+    if (GetTrkType(trk) != T_SWITCHMOTOR) return TRUE;
     xx = GetswitchmotorData(trk);
     LOG( log_switchmotor, 1, ("*** ResolveSwitchmotorTurnout(%d)\n",GetTrkIndex(trk)))
     t_trk = FindTrack(xx->turnindx);
     if (t_trk == NULL) {
-        NoticeMessage( _("ResolveSwitchmotor: Turnout T%d: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), xx->turnindx );
+        if(NoticeMessage( _("ResolveSwitchmotor: Turnout T%d: T%d doesn't exist"), _("Continue"), NULL, GetTrkIndex(trk), xx->turnindx )) {
+        	exit(4);
+        } else {
+        	rc = 4;
+        }
+
     }
     xx->turnout = t_trk;
-    ComputeSwitchMotorBoundingBox(trk);
+    if (t_trk) ComputeSwitchMotorBoundingBox(trk);
     LOG( log_switchmotor, 1,("*** ResolveSwitchmotorTurnout(): t_trk = (%d) %p\n",xx->turnindx,t_trk))
+    return (rc == 0);
 }
 
 static void MoveSwitchMotor (track_p trk, coOrd orig ) {}
