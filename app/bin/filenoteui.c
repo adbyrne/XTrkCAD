@@ -105,7 +105,7 @@ IsValidFile(char *testString)
 	}
 #endif
 
-	return (TRUE);
+	return (FALSE);
 }
 
 bool
