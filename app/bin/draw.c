@@ -1841,10 +1841,7 @@ static void DoNewScale( DIST_T scale )
 	MapRedraw();
 	tempD.orig = mainD.orig;
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
-	/*SetFont(0);*/
-	sprintf( tmp, "%0.3f", mainD.scale );
-	wPrefSetString( "draw", "zoom", tmp );
-	//DrawHilight( &mapD, mainD.orig, mainD.size );
+	wPrefSetFloat( "draw", "zoom", mainD.scale );
 	if (recordF) {
 		fprintf( recordF, "ORIG %0.3f %0.3f %0.3f\n",
 						mainD.scale, mainD.orig.x, mainD.orig.y );
