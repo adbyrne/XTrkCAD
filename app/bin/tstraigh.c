@@ -362,11 +362,16 @@ static BOOL_T SplitStraight( track_p trk, coOrd pos, EPINX_T ep, track_p *leftov
 {
 	track_p trk1;
 
-	trk1 = NewStraightTrack( GetTrkEndPos(trk,ep), pos );
+	trk1 = NewStraightTrack( 1-ep?GetTrkEndPos(trk,ep):pos, 1-ep?pos:GetTrkEndPos(trk,ep) );
+	DIST_T height;
+	int opt;
+	GetTrkEndElev(trk,ep,&opt,&height);
+	UpdateTrkEndElev( trk1, ep, opt, height, (opt==ELEV_STATION)?GetTrkEndElevStation(trk,ep):NULL );
 	AdjustStraightEndPt( trk, ep, pos );
+	UpdateTrkEndElev( trk, ep, ELEV_NONE, 0, NULL);
 	*leftover = trk1;
-	*ep0 = 1;
-	*ep1 = 0;
+	*ep0 = 1-ep;
+	*ep1 = ep;
 	return TRUE;
 }
 

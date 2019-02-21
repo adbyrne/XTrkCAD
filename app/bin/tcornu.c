@@ -779,6 +779,10 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     	UndoEnd();
     	return FALSE;
     }
+    DIST_T height;
+	int opt;
+	GetTrkEndElev(trk,ep,&opt,&height);
+    UpdateTrkEndElev( trk1, ep, opt, height, (opt==ELEV_STATION)?GetTrkEndElevStation(trk,ep):NULL );
 
     UndoModify(trk);
     xx->cornuData.pos[ep] = pos;
@@ -789,6 +793,7 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     RebuildCornu(trk);
 
     SetTrkEndPoint(trk, ep, xx->cornuData.pos[ep], xx->cornuData.a[ep]);
+    UpdateTrkEndElev( trk, ep, ELEV_NONE, 0, NULL);
 
 	*leftover = trk1;
 	*ep0 = 1-ep;
