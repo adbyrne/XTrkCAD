@@ -515,6 +515,7 @@ static struct {
 		FLOAT_T elev[4];
 		coOrd orig;
 		ANGLE_T angle;
+		descPivot_t pivot;
 		char manuf[STR_SIZE];
 		char name[STR_SIZE];
 		char partno[STR_SIZE];
@@ -525,7 +526,7 @@ static struct {
 		DIST_T length;
 		unsigned int layerNumber;
 		} compoundData;
-typedef enum { E0, A0, C0, R0, Z0, E1, A1, C1, R1, Z1, E2, A2, C2, R2, Z2, E3, A3, C3, R3, Z3, GR, OR, AN, MN, NM, PN, EC, SC, LY } compoundDesc_e;
+typedef enum { E0, A0, C0, R0, Z0, E1, A1, C1, R1, Z1, E2, A2, C2, R2, Z2, E3, A3, C3, R3, Z3, GR, OR, AN, PV, MN, NM, PN, EC, SC, LY } compoundDesc_e;
 static descData_t compoundDesc[] = {
 /*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &compoundData.endPt[0] },
 /*A0*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[0] },
@@ -550,6 +551,7 @@ static descData_t compoundDesc[] = {
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &compoundData.grade },
 /*OR*/	{ DESC_POS, N_("Origin: X,Y"), &compoundData.orig },
 /*AN*/	{ DESC_ANGLE, N_("Angle"), &compoundData.angle },
+/*PV*/	{ DESC_PIVOT, N_("Pivot"), &compoundData.pivot },
 /*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf, sizeof(compoundData.manuf)},
 /*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name, sizeof(compoundData.name) },
 /*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno, sizeof(compoundData.partno)},
@@ -665,6 +667,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	}
 
 	UndrawNewTrack( trk );
+	coOrd orig;
 	switch ( inx ) {
 	case OR:
 		pos.x = compoundData.orig.x - xx->orig.x;
@@ -686,7 +689,23 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		compoundDesc[AN].mode |= DESC_CHANGE;
 		break;
 	case AN:
-		RotateTrack( trk, xx->orig, NormalizeAngle( compoundData.angle-xx->angle ) );
+		orig = xx->orig;
+		GetBoundingBox(trk,&hi,&lo);
+		switch (compoundData.pivot) {
+			case DESC_PIVOT_MID:
+				orig.x = (hi.x-lo.x)/2+lo.x;
+				orig.y = (hi.y-lo.y)/2+lo.y;
+				break;
+			case DESC_PIVOT_SECOND:
+				orig.x = (hi.x-lo.x)/2+lo.x;
+				orig.y = (hi.y-lo.y)/2+lo.y;
+				orig.x = (orig.x - xx->orig.x)*2+xx->orig.x;
+				orig.y = (orig.y - xx->orig.y)*2+xx->orig.y;
+				break;
+			default:
+				break;
+		}
+		RotateTrack( trk, orig, NormalizeAngle( compoundData.angle-xx->angle ) );
 		ComputeCompoundBoundingBox( trk );
 		break;
 	case E0:
@@ -875,6 +894,8 @@ void DescribeCompound(
 	compoundDesc[EC].mode =
 	compoundDesc[SC].mode = DESC_RO;
 	compoundDesc[LY].mode = DESC_NOREDRAW;
+	compoundDesc[PV].mode = 0;
+	compoundData.pivot = DESC_PIVOT_FIRST;
 	if (compoundData.epCnt >0) {
 		for (int i=0;(i<compoundData.epCnt)&&(i<MAX_DESCRIBE_ENDS);i++) {
 			compoundDesc[A0+(E1-E0)*i].mode = (int)mode;

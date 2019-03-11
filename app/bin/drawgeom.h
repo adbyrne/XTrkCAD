@@ -55,7 +55,10 @@ typedef struct {
 				drawCmd_t *D;
 				long Op;
 				wDrawColor Color;
-				long Width;
+				long line_Width;
+				double width;
+				ANGLE_T angle;
+				double length;
 				long benchOption;
 				int State;
 				curveData_t ArcData;
@@ -64,11 +67,13 @@ typedef struct {
 				BOOL_T Changed;
 		} drawContext_t;
 
+typedef enum {LENGTH_UPDATE, WIDTH_UPDATE} drawUpdateType_e;
+
 extern drawContext_t * drawContext;
 extern wDrawColor lineColor;
 extern long lineWidth;
 
 void DrawGeomOp( void * );
-STATUS_T DrawGeomMouse( wAction_t, coOrd, drawContext_t * );
-STATUS_T DrawGeomModify( coOrd, ANGLE_T, wIndex_t, trkSeg_p, wAction_t, coOrd, wBool_t );
+STATUS_T DrawGeomMouse( wAction_t, coOrd, drawContext_t *);
+STATUS_T DrawGeomModify( track_p, coOrd, ANGLE_T, wIndex_t, trkSeg_p, wAction_t, coOrd, wBool_t );
 #endif //HAVE_DRAWGEOM_H

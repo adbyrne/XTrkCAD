@@ -147,6 +147,7 @@ extern long programMode;
 #define C_RCLICK		(wActionLast+8)
 #define C_CMDMENU		(wActionLast+9)
 #define C_FINISH		(wActionLast+10)
+#define C_UPDATE        (wActionLast+11)
 
 #define C_CONTINUE		(100)
 #define C_TERMINATE		(101)
@@ -236,6 +237,7 @@ void CheckRoomSize( BOOL_T );
 const char * GetBalloonHelpStr( char* );
 void EnableCommands( void );
 void Reset( void );
+BOOL_T IsCurCommandSticky(void);
 void ResetIfNotSticky( void );
 wBool_t DoCurCommand( wAction_t, coOrd );
 void ConfirmReset( BOOL_T );

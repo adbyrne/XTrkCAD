@@ -35,11 +35,7 @@ struct wFloat_t {
 static XWNDPROC oldEditProc = NULL;
 static XWNDPROC newEditProc;
 static void triggerString( wControl_p b );
-#ifdef LATER
-static void triggerInteger( wControl_p b );
-static void triggerFloat( wControl_p b );
-#endif
-
+static void triggerStringReturn( wControl_p b);
 
 long FAR PASCAL _export pushEdit(
 		HWND hWnd,
@@ -48,19 +44,19 @@ long FAR PASCAL _export pushEdit(
 		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-#ifdef WIN32
-	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
 	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
 	wControl_p b = mswMapIndex( inx );
 
 	switch (message) {
 	case WM_CHAR:
 		if ( b != NULL) {
 			switch( wParam ) {
-			case 0x0D:
 			case 0x1B:
+				if (b->option && (BO_ENTER)) {
+					if (((wString_p)b)->action)
+						mswSetTriggerReturn( (wControl_p)b, triggerStringReturn );
+				}
+			case 0x0D:
 			case 0x09:
 				SetFocus( ((wControl_p)(b->parent))->hWnd ); 
 				SendMessage( ((wControl_p)(b->parent))->hWnd, WM_CHAR,
@@ -73,22 +69,12 @@ long FAR PASCAL _export pushEdit(
 		break;
 
 	case WM_KEYUP:
-		if ( b != NULL)
+		if (b != NULL)
 			switch (b->type) {
 			case B_STRING:
 				if (((wString_p)b)->action)
 					mswSetTrigger( (wControl_p)b, triggerString );
 				break;
-#ifdef LATER
-			case B_INTEGER:
-				if (((wInteger_p)b)->action)
-					mswSetTrigger( (wControl_p)b, triggerInteger );
-				break;
-			case B_FLOAT:
-				if (((wFloat_p)b)->action)
-					mswSetTrigger( (wControl_p)b, triggerFloat );
-				break;
-#endif
 			}
 		break;
 
@@ -96,6 +82,7 @@ long FAR PASCAL _export pushEdit(
 	return CallWindowProc( oldEditProc, hWnd, message, wParam, lParam );
 }
 
+
 /*
  *****************************************************************************
  *
@@ -140,6 +127,24 @@ const char * wStringGetValue(
 	return buff;
 }
 
+static void triggerStringReturn(
+		wControl_p b )
+{
+	wString_p bs = (wString_p)b;
+	int cnt;
+	if (b->option && (BO_ENTER))
+
+	if (bs->action) {
+		*(WPARAM*)&mswTmpBuff[0] = 78;
+		cnt = (int)SendMessage( bs->hWnd, (UINT)EM_GETLINE, 0, (DWORD)(LPSTR)mswTmpBuff );
+		mswTmpBuff[cnt] = '\n';
+		mswTmpBuff[cnt+1] = '\0';
+		if (bs->valueP)
+			strcpy( bs->valueP, mswTmpBuff );
+		bs->action( mswTmpBuff, bs->data, 0 );
+		mswSetTrigger( NULL, NULL );
+	}
+}
 
 static void triggerString(
 		wControl_p b )
@@ -153,7 +158,7 @@ static void triggerString(
 		mswTmpBuff[cnt] = '\0';
 		if (bs->valueP)
 			strcpy( bs->valueP, mswTmpBuff );
-		bs->action( mswTmpBuff, bs->data );
+		bs->action( mswTmpBuff, bs->data, 0 );
 		mswSetTrigger( NULL, NULL );
 	}
 }
@@ -184,7 +189,7 @@ LRESULT stringProc(
 			if (bs->valueP)
 				strncpy( bs->valueP, mswTmpBuff, bs->valueL );
 			if (bs->action) {
-				bs->action( mswTmpBuff, bs->data );
+				bs->action( mswTmpBuff, bs->data, 0 );
 				mswSetTrigger( NULL, NULL );
 			}
 			break;

@@ -671,8 +671,10 @@ static BOOL_T ReadTrackFile(
 		}
 	}
 
-	if (paramFile)
+	if (paramFile) {
 		fclose(paramFile);
+		paramFile = NULL;
+	}
 
 	if( ret ) {
 		if (!noSetCurDir)

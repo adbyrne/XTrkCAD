@@ -318,21 +318,22 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	case WT:
 		if ((segPtr->type == SEG_POLY) || (segPtr->type == SEG_FILPOLY)) {
 			if (segPtr->u.p.polyType == RECTANGLE) {
-				coOrd oldMiddle, oldEnd;
-				oldMiddle.x = (segPtr->u.p.pts[2].x - segPtr->u.p.pts[0].x)/2+segPtr->u.p.pts[0].x;
-				oldMiddle.y = (segPtr->u.p.pts[2].y - segPtr->u.p.pts[0].y)/2+segPtr->u.p.pts[0].y;
-				oldEnd = segPtr->u.p.pts[2];
+				coOrd oldEnd, oldStart;
+				oldStart = segPtr->u.p.pts[0];
+				coOrd oldCentroid = FindCentroid(segPtr->u.p.cnt, segPtr->u.p.pts );
+				oldEnd.x = (oldCentroid.x-oldStart.x)*2+oldStart.x;
+				oldEnd.y = (oldCentroid.y-oldStart.y)*2+oldStart.y;
 				for (int i=0;i<4;i++) {
 					drawData.endPt[i] = segPtr->u.p.pts[i];
 				}
 				if (inx == HT) {
-					ANGLE_T angle = NormalizeAngle((FindAngle(segPtr->u.p.pts[0],segPtr->u.p.pts[1]))+90);
+					ANGLE_T angle = NormalizeAngle(FindAngle(drawData.endPt[0],drawData.endPt[3]));
 					Translate( &drawData.endPt[3], drawData.endPt[0], angle, drawData.height);
 					UNREORIGIN( segPtr->u.p.pts[3], drawData.endPt[3], xx->angle, xx->orig );
 					Translate( &drawData.endPt[2], drawData.endPt[1], angle, drawData.height);
 					UNREORIGIN( segPtr->u.p.pts[2], drawData.endPt[2], xx->angle, xx->orig );
 				} else {
-					ANGLE_T angle = drawData.angle;
+					ANGLE_T angle = NormalizeAngle(FindAngle(drawData.endPt[0],drawData.endPt[1]));;
 					Translate( &drawData.endPt[1], drawData.endPt[0], angle, drawData.width);
 					UNREORIGIN( segPtr->u.p.pts[1], drawData.endPt[1], xx->angle, xx->orig );
 					Translate( &drawData.endPt[2], drawData.endPt[3], angle, drawData.width);
@@ -341,10 +342,25 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 				ANGLE_T angle;
 				DIST_T dist;
 				coOrd newOrig;
-				newOrig.x= (segPtr->u.p.pts[2].x - segPtr->u.p.pts[0].x)/2+segPtr->u.p.pts[0].x;
-				newOrig.y= (segPtr->u.p.pts[2].y - segPtr->u.p.pts[0].y)/2+segPtr->u.p.pts[0].y;
-				angle = FindAngle(newOrig,oldMiddle);
-				dist = FindDistance(oldMiddle,newOrig);
+				switch ( drawData.pivot ) {
+					case DESC_PIVOT_FIRST:
+						newOrig = segPtr->u.p.pts[0];
+						angle = FindAngle(newOrig,oldStart);
+						dist = FindDistance(oldStart,newOrig);
+						break;
+					case DESC_PIVOT_SECOND:
+						newOrig = segPtr->u.p.pts[2];
+						angle = FindAngle(newOrig,oldEnd);
+						dist = FindDistance(oldEnd,newOrig);
+						break;
+					case DESC_PIVOT_MID:
+						newOrig = FindCentroid(segPtr->u.p.cnt, segPtr->u.p.pts );
+						angle = FindAngle(newOrig,oldCentroid);
+						dist = FindDistance(oldCentroid,newOrig);
+						break;
+					default:
+					break;
+				}
 				for (int i=0;i<segPtr->u.p.cnt;i++) {
 					Translate(&drawData.endPt[i], drawData.endPt[i], angle, dist);
 					UNREORIGIN(segPtr->u.p.pts[i], drawData.endPt[i], xx->angle, xx->orig );
@@ -359,9 +375,19 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		if ((inx == AL) && (segPtr->type == SEG_POLY || segPtr->type == SEG_FILPOLY)) {
 			ANGLE_T angle = -(drawData.angle-drawData.oldAngle);
 			coOrd origin = drawData.origin;
-			if (segPtr->u.p.polyType == RECTANGLE) {
-				origin.x= (segPtr->u.p.pts[2].x - segPtr->u.p.pts[0].x)/2+segPtr->u.p.pts[0].x;
-				origin.y= (segPtr->u.p.pts[2].y - segPtr->u.p.pts[0].y)/2+segPtr->u.p.pts[0].y;
+			coOrd centroid = FindCentroid(segPtr->u.p.cnt, segPtr->u.p.pts );
+			switch ( drawData.pivot ) {
+				case DESC_PIVOT_FIRST:
+					break;
+				case DESC_PIVOT_SECOND:
+					origin.x = (centroid.x-segPtr->u.p.pts[0].x)*2+segPtr->u.p.pts[0].x;
+					origin.y = (centroid.y-segPtr->u.p.pts[0].y)*2+segPtr->u.p.pts[0].y;
+					break;
+				case DESC_PIVOT_MID:
+					origin = centroid;
+					break;
+				default:
+				break;
 			}
 			for (int i=0;i<segPtr->u.p.cnt;i++) {
 				coOrd pnt = segPtr->u.p.pts[i];
@@ -373,13 +399,30 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			drawData.oldAngle = drawData.angle;
 			break;
 		}
-
 		if ( segPtr->type == SEG_CRVLIN && inx == AL ) {
 			if ( drawData.angle <= 0.0 || drawData.angle >= 360.0 ) {
 				ErrorMessage( MSG_CURVE_OUT_OF_RANGE );
 				drawData.angle = segPtr->u.c.a1;
 				drawDesc[AL].mode |= DESC_CHANGE;
 				break;
+			} else {
+				if ( drawData.pivot == DESC_PIVOT_FIRST ) {
+					segPtr->u.c.a1 = drawData.angle;
+					drawData.angle1 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1 );
+					drawDesc[A2].mode |= DESC_CHANGE;
+				} else if ( drawData.pivot == DESC_PIVOT_SECOND ) {
+					segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1-drawData.angle );
+					segPtr->u.c.a1 = drawData.angle;
+					drawData.angle0 = NormalizeAngle( segPtr->u.c.a0 );
+					drawDesc[A1].mode |= DESC_CHANGE;
+				} else {
+					segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1/2.0-drawData.angle/2.0);
+					segPtr->u.c.a1 = drawData.angle;
+					drawData.angle0 = NormalizeAngle( segPtr->u.c.a0 );
+					drawData.angle1 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1 );
+					drawDesc[A1].mode |= DESC_CHANGE;
+					drawDesc[A2].mode |= DESC_CHANGE;
+				}
 			}
 		} else {
 			if ( drawData.length <= minLength ) {
@@ -437,7 +480,16 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		UNREORIGIN( segPtr->u.c.center, drawData.center, xx->angle, xx->orig );
 		break;
 	case RA:
+		if ( drawData.pivot == DESC_PIVOT_FIRST ) {
+			Translate( &segPtr->u.c.center, segPtr->u.c.center, segPtr->u.c.a0, segPtr->u.c.radius-drawData.radius );
+		} else if ( drawData.pivot == DESC_PIVOT_SECOND ) {
+			Translate( &segPtr->u.c.center, segPtr->u.c.center, segPtr->u.c.a0+segPtr->u.c.a1, segPtr->u.c.radius-drawData.radius );
+		} else {
+			Translate( &segPtr->u.c.center, segPtr->u.c.center, (segPtr->u.c.a0+segPtr->u.c.a1)/2.0, segPtr->u.c.radius-drawData.radius );
+		}
+		drawDesc[CE].mode |= DESC_CHANGE;
 		segPtr->u.c.radius = drawData.radius;
+		drawDesc[LN].mode |= DESC_CHANGE;
 		break;
 	case A1:
 		segPtr->u.c.a0 = NormalizeAngle( drawData.angle0-xx->angle );
@@ -581,6 +633,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			drawDesc[AL].mode =
 			drawDesc[A1].mode =
 			drawDesc[A2].mode = 0;
+			drawDesc[PV].mode = 0;
 			title = _("Curved Line");
 		}
 		break;
@@ -589,6 +642,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawData.radius = fabs(segPtr->u.c.radius);
 		drawDesc[CE].mode =
 		drawDesc[RA].mode = 0;
+		drawDesc[PV].mode = 0;
 		drawDesc[LW].mode = DESC_IGNORE;
 		title = _("Filled Circle");
 		break;
@@ -600,6 +654,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[AL].mode = 0;
 		drawData.origin = segPtr->u.p.pts[0];
 		drawDesc[OI].mode = 0;
+		drawDesc[PV].mode = 0;
+		drawData.pivot = DESC_PIVOT_FIRST;
 		switch (segPtr->u.p.polyType) {
 			case RECTANGLE:
 				title = _("Rectangle");
@@ -625,6 +681,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[AL].mode = 0;
 		drawData.origin = segPtr->u.p.pts[0];
 		drawDesc[OI].mode = 0;
+		drawDesc[PV].mode = 0;
 		switch (segPtr->u.p.polyType) {
 			case RECTANGLE:
 				title =_("Filled Rectangle");
@@ -775,16 +832,27 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 	struct extraData * xx = GetTrkExtraData(trk);
 	STATUS_T rc;
 
-	if (action == C_DOWN) {
-		//UndrawNewTrack( trk );
-	}
-	if ( action == C_MOVE )
+	switch(action&0xFF) {     //Remove Text value
+	case C_START:
+	case C_DOWN:
+	case C_REDRAW:
+		rc = DrawGeomModify( trk, xx->orig, xx->angle, xx->segCnt, xx->segs, action, pos, GetTrkSelected(trk) );
+		break;
+	case C_MOVE:
 		ignoredDraw = trk;
-	rc = DrawGeomModify( xx->orig, xx->angle, xx->segCnt, xx->segs, action, pos, GetTrkSelected(trk) );
-	ignoredDraw = NULL;
-	if (action == C_UP) {
+		rc = DrawGeomModify( trk, xx->orig, xx->angle, xx->segCnt, xx->segs, action, pos, GetTrkSelected(trk) );
+		ignoredDraw = NULL;
+		break;
+	case C_UP:
+	case C_TEXT:
+		ignoredDraw = trk;
+		rc = DrawGeomModify( trk, xx->orig, xx->angle, xx->segCnt, xx->segs, action, pos, GetTrkSelected(trk) );
+		ignoredDraw = NULL;
 		ComputeDrawBoundingBox( trk );
 		DrawNewTrack( trk );
+		break;
+	default:
+		break;
 	}
 	return rc;
 }
@@ -895,6 +963,24 @@ static BOOL_T ReplayDraw(
 	return FALSE;
 }
 
+static BOOL_T QueryDraw( track_p trk, int query )
+{
+	struct extraData * xx = GetTrkExtraData(trk);
+	switch(query) {
+	case Q_IS_POLY:
+		if ((xx->segs[0].type == SEG_POLY) || (xx->segs[0].type == SEG_FILPOLY) ) {
+			if (xx->segs[0].u.p.polyType != RECTANGLE) {
+				return TRUE;
+			}
+			return FALSE;
+		}
+		else
+			return FALSE;
+	default:
+		return FALSE;
+	}
+}
+
 
 static trackCmd_t drawCmds = {
 		"DRAW",
@@ -919,7 +1005,7 @@ static trackCmd_t drawCmds = {
 		NULL, /* getLength */
 		NULL, /* getTrackParams */
 		NULL, /* moveEndPt */
-		NULL, /* query */
+		QueryDraw, /* query */
 		UngroupDraw,
 		FlipDraw,
 		NULL,
@@ -1046,9 +1132,11 @@ static wDrawColor benchColor;
 
 
 static paramIntegerRange_t i0_100 = { 0, 100, 25 };
+static paramFloatRange_t r1_10000 = { 1, 10000 };
+static paramFloatRange_t r0_360 = { 0, 360, 80 };
 static paramData_t drawPLs[] = {
-#define drawWidthPD				(drawPLs[0])
-	{ PD_LONG, &drawCmdContext.Width, "linewidth", PDO_NORECORD, &i0_100, N_("Line Width") }, 
+#define drawLineWidthPD				(drawPLs[0])
+	{ PD_LONG, &drawCmdContext.line_Width, "linewidth", PDO_NORECORD, &i0_100, N_("Line Width") },
 #define drawColorPD				(drawPLs[1])
 	{ PD_COLORLIST, &lineColor, "linecolor", PDO_NORECORD, NULL, N_("Color") },
 #define drawBenchColorPD		(drawPLs[2])
@@ -1066,7 +1154,14 @@ static paramData_t drawPLs[] = {
 	{ PD_DROPLIST, &benchOrient, "benchorient", PDO_NOPREF|PDO_NORECORD|PDO_LISTINDEX, (void*)105, "", 0 },
 #endif
 #define drawDimArrowSizePD		(drawPLs[5])
-	{ PD_DROPLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, (void*)80, N_("Size") } };
+	{ PD_DROPLIST, &dimArrowSize, "arrowsize", PDO_NORECORD|PDO_LISTINDEX, (void*)80, N_("Size") },
+#define drawLengthPD			(drawPLs[6])
+	{ PD_FLOAT, &drawCmdContext.length, "Length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r1_10000, N_("Length") },
+#define drawWidthPD				(drawPLs[7])
+	{ PD_FLOAT, &drawCmdContext.width, "BoxWidth", PDO_DIM|PDO_NORECORD|BO_ENTER, &r1_10000, N_("Box Width") },
+#define drawAnglePD				(drawPLs[8])
+	{ PD_FLOAT, &drawCmdContext.angle, "Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Angle") }
+};
 static paramGroup_t drawPG = { "draw", 0, drawPLs, sizeof drawPLs/sizeof drawPLs[0] };
 
 static char * objectName[] = {
@@ -1095,8 +1190,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 
 {
 	static BOOL_T infoSubst = FALSE;
-	wControl_p controls[4];
-	char * labels[3];
+	wControl_p controls[5];				//Always needs a NULL last entry
+	char * labels[4];
 	static char labelName[40];
 
 	wAction_t act2 = (action&0xFF) | (bezCmdCreateLine<<8);
@@ -1106,7 +1201,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case C_START:
 		ParamLoadControls( &drawPG );
 		/*drawContext = &drawCmdContext;*/
-		drawWidthPD.option |= PDO_NORECORD;
+		drawLineWidthPD.option |= PDO_NORECORD;
 		drawColorPD.option |= PDO_NORECORD;
 		drawBenchColorPD.option |= PDO_NORECORD;
 		drawBenchChoicePD.option |= PDO_NORECORD;
@@ -1127,19 +1222,18 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_CURVE4:
 		case OP_CIRCLE2:
 		case OP_CIRCLE3:
+		case OP_BEZLIN:
 		case OP_BOX:
 		case OP_POLY:
-		case OP_BEZLIN:
-			controls[0] = drawWidthPD.control;
+			controls[0] = drawLineWidthPD.control;
 			controls[1] = drawColorPD.control;
 			controls[2] = NULL;
 			sprintf( labelName, _("%s Line Width"), _(objectName[drawCmdContext.Op]) );
 			labels[0] = labelName;
 			labels[1] = N_("Color");
 			InfoSubstituteControls( controls, labels );
-			drawWidthPD.option &= ~PDO_NORECORD;
+			drawLineWidthPD.option &= ~PDO_NORECORD;
 			drawColorPD.option &= ~PDO_NORECORD;
-			lineWidth = drawCmdContext.Width;
 			break;
 		case OP_FILLCIRCLE2:
 		case OP_FILLCIRCLE3:
@@ -1171,6 +1265,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			drawBenchColorPD.option &= ~PDO_NORECORD;
 			drawBenchChoicePD.option &= ~PDO_NORECORD;
 			drawBenchOrientPD.option &= ~PDO_NORECORD;
+			drawLengthPD.option &= ~PDO_NORECORD;
 			break;
 		case OP_DIMLINE:
 			controls[0] = drawDimArrowSizePD.control;
@@ -1187,9 +1282,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			drawDimArrowSizePD.option &= ~PDO_NORECORD;
 			break;
 		case OP_TBLEDGE:
-			InfoSubstituteControls( NULL, NULL );
 			InfoMessage( _("Drag to create Table Edge") );
-			drawColorPD.option &= ~PDO_NORECORD;
 			break;
 		default:
 			InfoSubstituteControls( NULL, NULL );
@@ -1197,8 +1290,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		}
 		ParamGroupRecord( &drawPG );
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
-		DrawGeomMouse( C_START, pos, &drawCmdContext );
-
+		DrawGeomMouse( C_START, pos, &drawCmdContext);
 		return C_CONTINUE;
 
 	case wActionLDown:
@@ -1223,36 +1315,79 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionLDrag:
 		ParamLoadData( &drawPG );
 	case wActionMove:
-	case wActionLUp:
 	case wActionRDown:
 	case wActionRDrag:
-	case wActionRUp:
 	case wActionText:
 	case C_CMDMENU:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		if (!((MyGetKeyState() & WKEY_SHIFT) != 0)) {
 			SnapPos( &pos );
 		}
-		return DrawGeomMouse( action, pos, &drawCmdContext );
+		return DrawGeomMouse( action, pos, &drawCmdContext);
+	case wActionLUp:
+	case wActionRUp:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
+		//if (!((MyGetKeyState() & WKEY_SHIFT) != 0)) {
+		//		SnapPos( &pos );   Remove Snap at end of action - it will have been imposed in Geom if needed
+		//}
+		int rc = DrawGeomMouse( action, pos, &drawCmdContext);
+		// Put up text entry boxes ready for updates if the result was continue
+		if (rc == C_CONTINUE) {
+			switch( drawCmdContext.Op ) {
+			case OP_LINE:
+			case OP_BENCH:
+			case OP_TBLEDGE:
+			case OP_POLY:
+			case OP_FILLPOLY:
+				controls[0] = drawLengthPD.control;
+				controls[1] = drawAnglePD.control;
+				controls[2] = NULL;
+				labels[0] = N_("Line Length");
+				labels[1] = N_("Line Angle");
+				ParamLoadControls( &drawPG );
+				InfoSubstituteControls( controls, labels );
+				drawLengthPD.option &= ~PDO_NORECORD;
+				drawAnglePD.option &= ~PDO_NORECORD;
+				infoSubst = TRUE;
+				break;
+			case OP_BOX:
+			case OP_FILLBOX:
+				controls[0] = drawLengthPD.control;
+				controls[1] = drawWidthPD.control;
+				controls[2] = NULL;
+				labels[0] = N_("Box Length");
+				labels[1] = N_("Box Width");
+				ParamLoadControls( &drawPG );
+				InfoSubstituteControls( controls, labels );
+				drawLengthPD.option &= ~PDO_NORECORD;
+				drawWidthPD.option &= ~PDO_NORECORD;
+				infoSubst = TRUE;
+				break;
+			default:
+				break;
+			}
+		}
+		return rc;
 
 	case C_CANCEL:
 		InfoSubstituteControls( NULL, NULL );
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
-		return DrawGeomMouse( action, pos, &drawCmdContext );
+		return DrawGeomMouse( action, pos, &drawCmdContext);
 
 	case C_OK:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
-		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext );
+		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
+
 		/*DrawOk( NULL );*/
 
 	case C_FINISH:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
-		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext );
+		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);
 		/*DrawOk( NULL );*/
 
 	case C_REDRAW:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
-		return DrawGeomMouse( action, pos, &drawCmdContext );
+		return DrawGeomMouse( action, pos, &drawCmdContext);
 
 	default:
 		return C_CONTINUE;
@@ -1353,13 +1488,40 @@ static void DrawDlgUpdate(
 		int inx,
 		void * valueP )
 {
-	if (drawCmdContext.Op == OP_BEZLIN) {
-		if ( (inx == 0  && pg->paramPtr[inx].valueP == &drawCmdContext.Width) ||
-			 (inx == 1 && pg->paramPtr[inx].valueP == &lineColor))
-		   {
-			lineWidth = drawCmdContext.Width;
-			UpdateParms(lineColor, lineWidth);
-		   }
+	if (inx==3) {
+		if (drawCmdContext.Op == OP_BEZLIN) {
+			if ( (inx == 0  && pg->paramPtr[inx].valueP == &drawCmdContext.line_Width) ||
+				 (inx == 1 && pg->paramPtr[inx].valueP == &lineColor))
+			   {
+				lineWidth = drawCmdContext.line_Width;
+				UpdateParms(lineColor, lineWidth);
+			   }
+		}
+	}
+	if (inx >=6 ) {
+		if (drawCmdContext.Op == OP_LINE ||
+			drawCmdContext.Op == OP_BENCH||
+			drawCmdContext.Op == OP_TBLEDGE) {
+			coOrd pos = zero;
+			DrawGeomMouse(C_UPDATE,pos,&drawCmdContext);
+		}
+
+		if (drawCmdContext.Op == OP_BOX ||
+			drawCmdContext.Op == OP_FILLBOX	){
+			coOrd pos = zero;
+			DrawGeomMouse(C_UPDATE,pos,&drawCmdContext);
+		}
+
+		if (drawCmdContext.Op == OP_POLY ||
+			drawCmdContext.Op == OP_FILLPOLY) {
+			coOrd pos = zero;
+			DrawGeomMouse(C_UPDATE,pos,&drawCmdContext);
+		}
+		//if (pg->paramPtr[inx].enter_pressed) {
+		//	coOrd pos = zero;
+		//	DrawGeomMouse((0x0D<<8)|(C_TEXT&0xFF),pos,&drawCmdContext);
+		//	CmdDraw(C_START,pos);
+		//}
 	}
 
 	if ( inx >= 0 && pg->paramPtr[inx].valueP == &benchChoice )

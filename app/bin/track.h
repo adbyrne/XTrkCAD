@@ -124,6 +124,8 @@ typedef struct {
 #define Q_CAN_ADD_ENDPOINTS             (22)    // Is T_TURNTABLE
 #define Q_HAS_VARIABLE_ENDPOINTS        (23)    // Is Helix or Circle
 #define Q_CORNU_CAN_MODIFY				(24)	// can be modified by CORNU MODIFY
+#define Q_ISTRAIN                       (25)
+#define Q_IS_POLY                       (26)
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track

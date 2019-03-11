@@ -275,6 +275,7 @@ void wDestroySplash( void );
 #define BO_READONLY	(1L<<2)
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
+#define BO_ENTER    (1L<<10)
 
 wPos_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );
@@ -303,7 +304,7 @@ void wControlLinkedActive( wControl_p b, int active );
 
 #define BS_TRIM			(1<<12)
 /* Creation CallBacks */
-typedef void (*wStringCallBack_p)( const char *, void * );
+typedef void (*wStringCallBack_p)( const char *, void *);
 wString_p wStringCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				wPos_t, char *, wIndex_t, wStringCallBack_p,
 				void * );
@@ -318,8 +319,8 @@ const char * wStringGetValue(		wString_p );
  */
 
 /* Creation CallBacks */
-typedef void (*wIntegerCallBack_p)( long, void * );
-typedef void (*wFloatCallBack_p)( double, void * );
+typedef void (*wIntegerCallBack_p)( long, void * , int);
+typedef void (*wFloatCallBack_p)( double, void * , int);
 wInteger_p wIntegerCreate(	wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				wPos_t, wInteger_t, wInteger_t, wInteger_t *,
 				wIntegerCallBack_p, void * );

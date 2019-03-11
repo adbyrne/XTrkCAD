@@ -1161,6 +1161,13 @@ EXPORT void ConfirmReset(BOOL_T retry) {
 	commandList[curCommand].cmdProc( C_START, zero);
 }
 
+EXPORT BOOL_T IsCurCommandSticky(void) {
+	if ((commandList[curCommand].options & IC_STICKY) != 0
+		&& (commandList[curCommand].stickyMask & stickySet) != 0)
+		return TRUE;
+	return FALSE;
+}
+
 EXPORT void ResetIfNotSticky(void) {
 	if ((commandList[curCommand].options & IC_STICKY) == 0
 			|| (commandList[curCommand].stickyMask & stickySet) == 0)

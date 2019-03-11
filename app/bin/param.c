@@ -1385,13 +1385,24 @@ static void ParamIntegerPush( const char * val, void * dp )
 	paramData_p p = (paramData_p)dp;
 	long valL;
 	char * cp;
+	const char * value;
 	paramIntegerRange_t * irangeP;
 
-	while ( isspace((unsigned char)*val)) val++;
-	valL = strtol( val, &cp, 10 );
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & BO_ENTER)) {
+		value = wStringGetValue((wString_p)p->control);
+		p->enter_pressed = TRUE;
+	} else {
+		p->enter_pressed = FALSE;
+		value = CAST_AWAY_CONST val;
+	}
+
+
+	while ( isspace((unsigned char)*value)) value++;
+	valL = strtol( value, &cp, 10 );
+
 
 	//wControlSetBalloon( p->control, 0, -5, NULL );
-	if ( val == cp ) {
+	if ( value == cp ) {
 		wControlSetBalloon( p->control, 0, -5, _("Invalid Number") );
 		return;
 	}
@@ -1433,7 +1444,15 @@ static void ParamFloatPush( const char * val, void * dp )
 	paramData_p p = (paramData_p)dp;
 	FLOAT_T valF;
 	BOOL_T valid;
+	const char * value;
 	paramFloatRange_t * frangeP;
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & PDO_ENTER)) {
+		value = wStringGetValue((wString_p)p->control);
+		p->enter_pressed = TRUE;
+	} else {
+		value = val;
+		p->enter_pressed = FALSE;
+	}
 
 	if (p->option & PDO_DIM) {
 		valF = DecodeDistance( (wString_p)p->control, &valid );
@@ -1471,7 +1490,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	}
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*((FLOAT_T*)(p->valueP)) = valF;
-	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( val ))
+	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( value ))
 		p->group->changeProc( p->group, p-p->group->paramPtr, &valF );
 }
 
@@ -1479,14 +1498,23 @@ static void ParamFloatPush( const char * val, void * dp )
 static void ParamStringPush( const char * val, void * dp )
 {
 	paramData_p p = (paramData_p)dp;
+	const char * value;
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val );
 		fflush( recordF );
 	}
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & PDO_ENTER)) {
+			value = wStringGetValue((wString_p)p->control);
+			p->enter_pressed = TRUE;
+	} else {
+		p->enter_pressed = FALSE;
+		value = CAST_AWAY_CONST val;
+	}
+
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
-		strcpy( (char*)p->valueP, val );
+		strcpy( (char*)p->valueP, value );
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
-		p->group->changeProc( p->group, p-p->group->paramPtr, CAST_AWAY_CONST val );
+		p->group->changeProc( p->group, p-p->group->paramPtr, CAST_AWAY_CONST value );
 }
 
 

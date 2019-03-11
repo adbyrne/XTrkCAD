@@ -50,8 +50,10 @@ struct wString_t {
 	char *valueP;			/**< pointer to result buffer */
 	wIndex_t valueL;	 	/**< maximum length */
 	wStringCallBack_p action;  	/**< callback for changes */
-	wBool_t busy;		 	/**< busy flag to prevent re-entry problems? */	
+	wBool_t notice_activate; /** if flag set to observe enter key **/
+	wBool_t enter_pressed;	/**< flag if enter was pressed */
 	wBool_t hasSignal;		/** needs signal to be suppressed */
+	int count;				/** number of 100ms since last entry **/
 	guint	timer;			/**< timer source for inactivity timer */
 };
 
@@ -142,33 +144,43 @@ static gboolean killTimer(
 }	
 
 /**
- *	Timer handler for string activity. This timer expires if the user
- * 	doesn't change an entry value within the preset time. 
+ *	Timer handler for string activity. This timer checks the input if the user
+ * 	doesn't change an entry value for the preset time (0.5s).
  */
 
 static gboolean
 timeoutString( wString_p bs ) 
 {
-
+	const char *new_value;
 	if ( !bs )
 		return( FALSE );
 	if (bs->widget == 0) 
 		abort();
 	
-	if (bs->action) {
-		const char *s;
-		
-		s = gtk_entry_get_text(GTK_ENTRY(bs->widget));
-		if ( s )
-			bs->action(s, bs->data);
-	}
+	bs->count--;
 
-	bs->timer = 0;
-	return( FALSE );
+	if (bs->count==0) {
+		// get the currently entered value
+	    new_value = wStringGetValue(bs);
+		if (bs->valueP != NULL)
+			strcpy(bs->valueP, new_value);
+
+		if (bs->action) {
+			bs->enter_pressed = FALSE;     //Normal input
+			if ( new_value )
+				bs->action(new_value,bs->data);
+		}
+	}
+	if (bs->count<=0) {
+		bs->timer = 0;
+		return( FALSE );   //Stop timer
+	} else {
+		return TRUE;       //Wait 100ms
+	}
 }
 
 /**
- * Signal handler for 'activate' signal: callback with the current value and then 
+ * Signal handler for 'activate' signal: enter pressed - callback with the current value and then
  * select the whole default value
  *
  * \param widget 	IN the edit field
@@ -181,6 +193,7 @@ static gboolean stringActivated(
     wString_p b) 
 {
 	const char *s;
+	const char * output = "\n";
 
 	if ( !b )
 		return( FALSE );
@@ -191,12 +204,13 @@ static gboolean stringActivated(
 		strcpy(b->valueP, s);
 
 	if (b->action) {
-		b->action(s, b->data);
+		b->enter_pressed = TRUE;
+		b->action( output, b->data);
 	}
 	
 	// select the complete default value to make editing it easier
 	gtk_editable_select_region( GTK_EDITABLE( widget ), 0, -1 );
-	return( FALSE );
+	return( TRUE );
 }
 
 /**
@@ -213,25 +227,27 @@ static void stringChanged(
 {
 	const char *new_value;
 
-	if ( !b || b->busy )
+	if ( !b  )
 		return;
 
+	b->count = 5;              /* set ~500 ms from now */
+
 	// get the entered value
-	new_value = wStringGetValue(b);
-	if (b->valueP != NULL)
-		strcpy(b->valueP, new_value);
-	
+	//new_value = wStringGetValue(b);
+	//if (b->valueP != NULL)
+	//	strcpy(b->valueP, new_value);
+	//
 	// 
 	if (b->action){
 		// if one exists, remove the inactivity timer
-		if( b->timer )
-			g_source_remove( b->timer );
+		if( !b->timer ) {
+			//g_source_remove( b->timer );
 		
 		// create a new timer
-		b->timer = g_timeout_add( TIMEOUT_INACTIVITY,
+			b->timer = g_timeout_add( TIMEOUT_INACTIVITY/5,
 								  (GSourceFunc)timeoutString, 
-								  b );
-		
+								  	  b );
+		}
 	}	
 	return;
 }
@@ -318,8 +334,9 @@ wString_p wStringCreate(
 	// link into help 
 	wlibAddHelpString(b->widget, helpStr);
 	
-	g_signal_connect(GTK_OBJECT(b->widget), "changed", G_CALLBACK(stringChanged), b);
-	//g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
+	//g_signal_connect(GTK_OBJECT(b->widget), "changed", G_CALLBACK(stringChanged), b);
+	//if (option&BO_ENTER)
+		g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
 	b->hasSignal = 1;
 	
 	// set the default text	and select it to make replacing it easier
