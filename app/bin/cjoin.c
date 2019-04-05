@@ -53,6 +53,7 @@ typedef struct {
 static struct {
 		STATE_T state;
 		int joinMoveState;
+		BOOL_T cornuMode;
 		struct {
 				TRKTYP_T realType;
 				track_p trk;
@@ -461,16 +462,21 @@ static STATUS_T CmdJoin(
 			InfoMessage( _("Left click - join with track, Shift Left click - move to join") );
 		Dj.state = 0;
 		Dj.joinMoveState = 0;
+		Dj.cornuMode = FALSE;
 		/*ParamGroupRecord( &easementPG );*/
 		if (easementVal < 0)
 			return CmdCornu(action, pos);
+
 		return C_CONTINUE;
 
 	case C_DOWN:
-		if ( (Dj.state == 0 && (MyGetKeyState() & WKEY_SHIFT) != 0) || Dj.joinMoveState != 0 )
+
+		if ( !Dj.cornuMode && ((Dj.state == 0 && (MyGetKeyState() & WKEY_SHIFT) != 0) || Dj.joinMoveState != 0) )
 			return DoMoveToJoin( pos );
-		if (easementVal < 0.0)
+		if (easementVal < 0.0) {
+			Dj.cornuMode = TRUE;
 			return CmdCornu(action, pos);
+		}
 
 		DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 		tempSegs(0).color = drawColorBlack;

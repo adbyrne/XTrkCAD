@@ -127,8 +127,10 @@ static STATUS_T ModifyDrawPoly(wAction_t action, coOrd pos) {
 			break;
 		case C_OK:
 		case C_TEXT:
+			//Delete - continues
 			if (action>>8 == 127 || action>>8 == 8) return ModifyTrack( Dex.Trk, action, pos );
-			if (action>>8 !=32) return C_CONTINUE;
+			//Enter/Space does not
+			if (action>>8 !=32 && action>>8 != 13) return C_CONTINUE;
 			UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 			UndoModify( Dex.Trk );
 			rc = ModifyTrack( Dex.Trk, action, pos );

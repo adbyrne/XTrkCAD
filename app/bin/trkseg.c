@@ -2005,7 +2005,8 @@ EXPORT void DrawSegs(
 		DIST_T trackGauge,
 		wDrawColor color )
 {
-	DrawSegsO( d, NULL, orig, angle, segPtr, segCnt, trackGauge, color, 0 );
+
+	DrawSegsO( d, NULL, orig, angle, segPtr, segCnt, trackGauge, color, DTS_LEFT|DTS_RIGHT );
 }
 
 /*

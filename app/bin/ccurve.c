@@ -39,6 +39,7 @@
 #include "utility.h"
 #include "wlib.h"
 #include "cbezier.h"
+#include "ccornu.h"
 #include "layout.h"
 
 /*
@@ -88,6 +89,11 @@ EXPORT void DrawArrowHeads(
 		Translate( &sp[3].u.l.pos[1], p1, angle-45, d/2.0 );
 		sp[4].u.l.pos[0] = p1;
 		Translate( &sp[4].u.l.pos[1], p1, angle+45, d/2.0 );
+	} else {
+		sp[3].u.l.pos[0] = p1;
+		sp[3].u.l.pos[1] = p1;
+		sp[4].u.l.pos[0] = p1;
+		sp[4].u.l.pos[1] = p1;
 	}
 }
 
@@ -788,6 +794,7 @@ static STATUS_T CmdHelix( wAction_t action, coOrd pos )
 #include "bitmaps/curve3.xpm"
 #include "bitmaps/curve4.xpm"
 #include "bitmaps/bezier.xpm"
+#include "bitmaps/cornu.xpm"
 #include "bitmaps/circle1.xpm"
 #include "bitmaps/circle2.xpm"
 #include "bitmaps/circle3.xpm"
@@ -801,6 +808,7 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE3, (void*)2 );
 	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"), wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE4, (void*)3 );
 	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap(bezier_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_BEZIER, (void*)bezCmdCreateTrack );
+	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"), wIconCreatePixMap(cornu_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CORNU, (void*)cornuCmdCreateTrack);
 	ButtonGroupEnd();
 
 	ButtonGroupBegin( _("Circle Track"), "cmdCurveSetCmd", _("Circle Tracks") );

@@ -40,6 +40,7 @@
 #define ACCL_CIRCLE2	(WCTL+'9')
 #define ACCL_CIRCLE3	(WCTL+'0')
 #define ACCL_BEZIER     (0)
+#define ACCL_CORNU      (0)
 #define ACCL_TURNOUT	(WCTL+'t')
 #define ACCL_TURNTABLE	(WCTL+WSHIFT+'n')
 #define ACCL_PARALLEL	(WCTL+WSHIFT+'p')

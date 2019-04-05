@@ -126,6 +126,7 @@ typedef struct {
 #define Q_CORNU_CAN_MODIFY				(24)	// can be modified by CORNU MODIFY
 #define Q_ISTRAIN                       (25)
 #define Q_IS_POLY                       (26)
+#define Q_IS_DRAW					    (27)
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track

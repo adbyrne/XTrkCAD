@@ -11,6 +11,10 @@
 
 typedef void (*cornuMessageProc)( char *, ... );
 
+#define cornuCmdNone   		  (0)
+#define cornuJoinTrack        (1)
+#define cornuCmdCreateTrack   (2)
+
 
 #endif /* APP_BIN_CCORNU_H_ */
 

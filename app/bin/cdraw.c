@@ -218,6 +218,7 @@ static struct {
 		long pointCount;
 		long lineWidth;
 		BOOL_T boxed;
+		BOOL_T filled;
 		wDrawColor color;
 		wIndex_t benchChoice;
 		wIndex_t benchOrient;
@@ -227,7 +228,7 @@ static struct {
 		char text[STR_LONG_SIZE];
 		unsigned int layer;
 		} drawData;
-typedef enum { E0, E1, CE, RA, LN, HT, WT, OI, AL, A1, A2, VC, LW, CO, BX, BE, OR, DS, TP, TA, TS, TX, PV, LY } drawDesc_e;
+typedef enum { E0, E1, CE, RA, LN, HT, WT, OI, AL, A1, A2, VC, LW, CO, FL, BX, BE, OR, DS, TP, TA, TS, TX, PV, LY } drawDesc_e;
 static descData_t drawDesc[] = {
 /*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0] },
 /*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1] },
@@ -243,6 +244,7 @@ static descData_t drawDesc[] = {
 /*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
 /*LW*/	{ DESC_LONG, N_("Line Width"), &drawData.lineWidth },
 /*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color },
+/*FL*/	{ DESC_BOXED, N_("Filled"), &drawData.filled },
 /*BX*/  { DESC_BOXED, N_("Boxed"), &drawData.boxed },
 /*BE*/	{ DESC_LIST, N_("Lumber"), &drawData.benchChoice },
 /*OR*/	{ DESC_LIST, N_("Orientation"), &drawData.benchOrient },
@@ -527,6 +529,19 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		UpdateFontSizeList( &fontSize, (wList_p)drawDesc[TS].control0, drawData.fontSizeInx );
 		segPtr->u.t.fontSize = fontSize;
 		break;
+	case FL:
+		if(drawData.filled) {
+			if (segPtr->type == SEG_POLY) segPtr->type = SEG_FILPOLY;
+			if (segPtr->type == SEG_CRVLIN) segPtr->type = SEG_FILCRCL;
+		} else {
+			if (segPtr->type == SEG_FILPOLY) segPtr->type = SEG_POLY;
+			if (segPtr->type == SEG_FILCRCL) {
+				segPtr->type = SEG_CRVLIN;
+				segPtr->u.c.a0 = 0.0;
+				segPtr->u.c.a1 = 360.0;
+			}
+		}
+		break;
 	case BX:
 		segPtr->u.t.boxed = drawData.boxed;
 		break;
@@ -626,6 +641,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[RA].mode = 0;
 		if ( segPtr->u.c.a1 >= 360.0 ) {
 			title = _("Circle");
+			drawDesc[FL].mode = 0;
+			drawData.filled = FALSE;
 		} else {
 			drawData.angle = segPtr->u.c.a1;
 			drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
@@ -640,6 +657,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	case SEG_FILCRCL:
 		REORIGIN( drawData.center, segPtr->u.c.center, xx->angle, xx->orig );
 		drawData.radius = fabs(segPtr->u.c.radius);
+		drawDesc[FL].mode = 0;
+		drawData.filled = TRUE;
 		drawDesc[CE].mode =
 		drawDesc[RA].mode = 0;
 		drawDesc[PV].mode = 0;
@@ -826,30 +845,115 @@ static void RescaleDraw( track_p trk, FLOAT_T ratio )
 	RescaleSegs( xx->segCnt, xx->segs, ratio, ratio, ratio );
 }
 
+static void DoConvertFill(void) {
+
+}
+
+static void DrawModRedraw( void )
+{
+	MainRedraw();
+	MapRedraw();
+}
+
+static drawModContext_t drawModCmdContext = {
+		InfoMessage,
+		DrawModRedraw,
+		&mainD};
+
+static void DrawModDlgUpdate(
+		paramGroup_p pg,
+		int inx,
+		void * valueP )
+{
+	 DrawGeomModify(C_UPDATE,zero,&drawModCmdContext);
+}
+
+
+static paramIntegerRange_t i0_100 = { 0, 100, 25 };
+static paramFloatRange_t r1_10000 = { 1, 10000 };
+static paramFloatRange_t r0_10000 = { 0, 10000 };
+static paramFloatRange_t r0_360 = { 0, 360, 80 };
+static paramData_t drawModPLs[] = {
+
+#define drawModLengthPD			(drawModPLs[0])
+	{ PD_FLOAT, &drawModCmdContext.length, "Length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
+#define drawModRelAnglePD			(drawModPLs[1])
+	{ PD_FLOAT, &drawModCmdContext.rel_angle, "Rel Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Relative Angle") },
+#define drawModConvertPD		(drawModPLs[2])
+	{ PD_BUTTON, (void*)DoConvertFill, "convert", PDO_NORECORD, NULL, N_("Convert Fill") },
+
+};
+static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, sizeof drawModPLs/sizeof drawModPLs[0] };
+
 
 static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
-	STATUS_T rc;
+	STATUS_T rc = C_CONTINUE;
+	static BOOL_T infoSubst = FALSE;
+	wControl_p controls[5];				//Always needs a NULL last entry
+	char * labels[4];
+
+	drawModCmdContext.trk = trk;
+	drawModCmdContext.orig = xx->orig;
+	drawModCmdContext.angle = xx->angle;
+	drawModCmdContext.segCnt = xx->segCnt;
+	drawModCmdContext.segPtr = xx->segs;
+	drawModCmdContext.selected = GetTrkSelected(trk);
+	drawModCmdContext.type = xx->segs[0].type;
 
 	switch(action&0xFF) {     //Remove Text value
 	case C_START:
 	case C_DOWN:
+		rc = DrawGeomModify( action, pos, &drawModCmdContext );
+		if ( infoSubst ) {
+			InfoSubstituteControls( NULL, NULL );
+			infoSubst = FALSE;
+		}
+		break;
 	case C_REDRAW:
-		rc = DrawGeomModify( trk, xx->orig, xx->angle, xx->segCnt, xx->segs, action, pos, GetTrkSelected(trk) );
+		rc = DrawGeomModify( action, pos, &drawModCmdContext );
 		break;
 	case C_MOVE:
 		ignoredDraw = trk;
-		rc = DrawGeomModify( trk, xx->orig, xx->angle, xx->segCnt, xx->segs, action, pos, GetTrkSelected(trk) );
+		rc = DrawGeomModify( action, pos, &drawModCmdContext );
 		ignoredDraw = NULL;
 		break;
 	case C_UP:
-	case C_TEXT:
 		ignoredDraw = trk;
-		rc = DrawGeomModify( trk, xx->orig, xx->angle, xx->segCnt, xx->segs, action, pos, GetTrkSelected(trk) );
+		rc = DrawGeomModify( action, pos, &drawModCmdContext );
 		ignoredDraw = NULL;
 		ComputeDrawBoundingBox( trk );
 		DrawNewTrack( trk );
+		if (drawModCmdContext.type == SEG_POLY || drawModCmdContext.type == SEG_FILPOLY ) {
+			if (xx->segs[0].u.p.polyType != RECTANGLE) {
+				if (drawModCmdContext.prev_inx >= 0) {
+					controls[0] = drawModLengthPD.control;
+					controls[1] = drawModRelAnglePD.control;
+					controls[2] = NULL;
+					labels[0] = N_("Seg Length");
+					labels[1] = N_("Rel Angle");
+					ParamLoadControls( &drawModPG );
+					InfoSubstituteControls( controls, labels );
+					drawModLengthPD.option &= ~PDO_NORECORD;
+					drawModRelAnglePD.option &= ~PDO_NORECORD;
+					infoSubst = TRUE;
+				}
+			}
+		}
+		break;
+	case C_TEXT:
+		ignoredDraw = trk;
+		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
+		xx->angle = drawModCmdContext.angle;
+		xx->orig = drawModCmdContext.orig;
+		ignoredDraw = NULL;
+		ComputeDrawBoundingBox( trk );
+		DrawNewTrack( trk );
+		if ( infoSubst ) {
+			InfoSubstituteControls( NULL, NULL );
+			infoSubst = FALSE;
+		}
 		break;
 	default:
 		break;
@@ -967,6 +1071,8 @@ static BOOL_T QueryDraw( track_p trk, int query )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
 	switch(query) {
+	case Q_IS_DRAW:
+		return TRUE;
 	case Q_IS_POLY:
 		if ((xx->segs[0].type == SEG_POLY) || (xx->segs[0].type == SEG_FILPOLY) ) {
 			if (xx->segs[0].u.p.polyType != RECTANGLE) {
@@ -1131,9 +1237,7 @@ long lineWidth = 0;
 static wDrawColor benchColor;
 
 
-static paramIntegerRange_t i0_100 = { 0, 100, 25 };
-static paramFloatRange_t r1_10000 = { 1, 10000 };
-static paramFloatRange_t r0_360 = { 0, 360, 80 };
+
 static paramData_t drawPLs[] = {
 #define drawLineWidthPD				(drawPLs[0])
 	{ PD_LONG, &drawCmdContext.line_Width, "linewidth", PDO_NORECORD, &i0_100, N_("Line Width") },
@@ -1539,6 +1643,8 @@ EXPORT void InitCmdDraw( wMenu_p menu )
 	lineColor = wDrawColorBlack;
 	benchColor = wDrawFindColor( wRGB(255,192,0) );
 	ParamCreateControls( &drawPG, DrawDlgUpdate );
+
+	ParamCreateControls( &drawModPG, DrawModDlgUpdate) ;
 
 	for ( inx1=0; inx1<4; inx1++ ) {
 		dsp = &drawStuff[inx1];

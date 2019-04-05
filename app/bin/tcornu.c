@@ -517,6 +517,11 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 	struct extraData *xx = GetTrkExtraData(t);
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
+	if ((d->options&DC_BLOCK_LEFT)!=0)
+		widthOptions = DTS_BLOCK_LEFT;
+	if ((d->options&DC_BLOCK_LEFT)!=0)
+		widthOptions = DTS_BLOCK_RIGHT;
+
 	if (GetTrkWidth(t) == 2)
 		widthOptions |= DTS_THICK2;
 	if (GetTrkWidth(t) == 3)

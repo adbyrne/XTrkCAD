@@ -37,6 +37,7 @@ typedef struct {
 		DIST_T radius[2];		//0.0 if straight
 		ANGLE_T angle[2];		//Set if straight
 		coOrd center[2];		//Set if radius >0
+		dynArr_t mids;			//If there are G2 points added
 		} cornuParm_t;
 
 

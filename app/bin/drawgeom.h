@@ -67,6 +67,26 @@ typedef struct {
 				BOOL_T Changed;
 		} drawContext_t;
 
+typedef struct {
+				void (*message)( char *, ... );
+				void (*Redraw)( void );
+				drawCmd_t *D;
+				double length;
+				ANGLE_T rel_angle;
+				double radius;
+				ANGLE_T abs_angle;
+				double height;
+				double width;
+				int prev_inx;
+				track_p trk;
+				char type;
+				coOrd orig;
+				ANGLE_T angle;
+				wIndex_t segCnt;
+				trkSeg_p segPtr;
+				wBool_t selected;
+		} drawModContext_t;
+
 typedef enum {LENGTH_UPDATE, WIDTH_UPDATE} drawUpdateType_e;
 
 extern drawContext_t * drawContext;
@@ -75,5 +95,5 @@ extern long lineWidth;
 
 void DrawGeomOp( void * );
 STATUS_T DrawGeomMouse( wAction_t, coOrd, drawContext_t *);
-STATUS_T DrawGeomModify( track_p, coOrd, ANGLE_T, wIndex_t, trkSeg_p, wAction_t, coOrd, wBool_t );
+STATUS_T DrawGeomModify( wAction_t, coOrd, drawModContext_t * );
 #endif //HAVE_DRAWGEOM_H
