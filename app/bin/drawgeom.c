@@ -60,22 +60,19 @@ static void EndPoly( drawContext_t * context, int cnt )
 	context->D->funcs->options |= wDrawOptTemp;
 	DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 	context->D->funcs->options = oldOptions;
-
-	if (IsClose(FindDistance(tempSegs(0).u.l.pos[0], tempSegs(cnt-1).u.l.pos[1] )))
-		cnt--;
 	if ( cnt < 2 ) {
 		tempSegs_da.cnt = 0;
 		ErrorMessage( MSG_POLY_SHAPES_3_SIDES );
 		return;
 	}
-	pts = (coOrd*)MyMalloc( (cnt+2) * sizeof (coOrd) );
+	pts = (coOrd*)MyMalloc( (cnt) * sizeof (coOrd) );
 	for ( inx=0; inx<cnt; inx++ )
 		pts[inx] = tempSegs(inx).u.l.pos[0];
-	pts[cnt] = tempSegs(cnt-1).u.l.pos[1];
+	//pts[cnt-1] = tempSegs(cnt-1).u.l.pos[1];
 	DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 	segPtr = &tempSegs(0);
 	segPtr->type = ( context->Op == OP_POLY ? SEG_POLY: SEG_FILPOLY );
-	segPtr->u.p.cnt = cnt+1;
+	segPtr->u.p.cnt = cnt;
 	segPtr->u.p.pts = pts;
 	segPtr->u.p.angle = 0.0;
 	segPtr->u.p.orig = zero;
@@ -139,6 +136,14 @@ STATUS_T DrawGeomMouse(
 	case C_UPDATE:
 		if (context->State == 0 || context->State == 1) return C_TERMINATE;
 		switch (context->Op) {
+		case OP_CIRCLE1:
+		case OP_CIRCLE2:
+		case OP_CIRCLE3:
+		case OP_FILLCIRCLE1:
+		case OP_FILLCIRCLE2:
+		case OP_FILLCIRCLE3:
+			tempSegs(0).u.c.radius = context->radius;
+		break;
 		case OP_LINE:
 		case OP_BENCH:
 		case OP_TBLEDGE:
@@ -146,7 +151,6 @@ STATUS_T DrawGeomMouse(
 			Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,context->length);
 			lastPos = pos1 = tempSegs(0).u.l.pos[1];
 			tempSegs_da.cnt = 1;
-			segCnt = 1;
 		break;
 		case OP_BOX:
 		case OP_FILLBOX:
@@ -157,11 +161,9 @@ STATUS_T DrawGeomMouse(
 			Translate(&pts[2],pts[1],a2,context->width);
 			Translate(&pts[3],pts[0],a2,context->width);
 			tempSegs_da.cnt = 1;
-			segCnt = 1;
 		break;
 		case OP_POLY:
 		case OP_FILLPOLY:
-			segCnt = tempSegs_da.cnt;
 			Translate(&tempSegs(segCnt-1).u.l.pos[1],tempSegs(segCnt-1).u.l.pos[0],context->angle,context->length);
 			pos1 = lastPos = tempSegs(segCnt-1).u.l.pos[1];
 		break;
@@ -214,19 +216,16 @@ STATUS_T DrawGeomMouse(
 
 	case wActionLDown:
 		if (context->State == 2) {
-			context->D->funcs->options = oldOptions;
+			tempSegs_da.cnt = segCnt;
 			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY)) {
 				EndPoly(context, segCnt);
 			} else {
-				tempSegs_da.cnt = segCnt;
-				context->D->funcs->options = oldOptions;
 				DrawGeomOk();
-
 			}
-			anchors_da.cnt = 0;
 			MainRedraw();
+			segCnt = 0;
+			anchors_da.cnt = 0;
 			context->State = 0;
-			//MainRedraw();
 		}
 		context->Started = TRUE;
 		line_angle = 90.0;
@@ -305,8 +304,6 @@ STATUS_T DrawGeomMouse(
 				case OP_CURVE4: drawGeomCurveMode = crvCmdFromChord; break;
 				}
 				CreateCurve( C_DOWN, pos, FALSE, context->Color, width, drawGeomCurveMode, context->message );
-			} else {
-				tempSegs_da.cnt = segCnt;
 			}
 			break;
 		case OP_CIRCLE1:
@@ -330,6 +327,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_FILLBOX:
 			width = 0;
+			/* no break */
 		case OP_BOX:
 			DYNARR_SET( trkSeg_t, tempSegs_da, 4 );
 			for ( inx=0; inx<4; inx++ ) {
@@ -338,7 +336,6 @@ STATUS_T DrawGeomMouse(
 				tempSegs(inx).width = width;
 				tempSegs(inx).u.l.pos[0] = tempSegs(inx).u.l.pos[1] = pos;
 			}
-			tempSegs_da.cnt = 0;
 			context->message( _("Drag set box size") );
 			break;
 		case OP_POLY:
@@ -357,16 +354,14 @@ STATUS_T DrawGeomMouse(
 			segPtr->u.l.pos[1] = pos;
 			context->State = 1;
 			oldOptions = context->D->funcs->options;
-			context->D->funcs->options |= wDrawOptTemp;
 			DrawSegs( context->D, zero, 0.0, &tempSegs(tempSegs_da.cnt-1), 1, trackGauge, wDrawColorBlack );
-			context->D->funcs->options = oldOptions;
+			segCnt = tempSegs_da.cnt;
 			break;
 		}
 		return C_CONTINUE;
 
 	case wActionLDrag:
 		oldOptions = context->D->funcs->options;
-		context->D->funcs->options |= wDrawOptTemp;
 		if (context->Op == OP_POLY || context->Op == OP_FILLPOLY)
 			DrawSegs( context->D, zero, 0.0, &tempSegs(tempSegs_da.cnt-1), 1, trackGauge, wDrawColorBlack );
 		else
@@ -380,8 +375,7 @@ STATUS_T DrawGeomMouse(
 		case OP_LINE:
 		case OP_DIMLINE:
 		case OP_BENCH:
-			if (lock) {
-			//if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
 				//Snap to Right-Angle from previous or from 0
 				DIST_T l = FindDistance(pos0, pos);
 				ANGLE_T angle2 = NormalizeAngle(FindAngle(pos0, pos)-line_angle);
@@ -403,12 +397,11 @@ STATUS_T DrawGeomMouse(
 						FormatDistance(FindDistance( pos0, pos1 )),
 						PutAngle(FindAngle( pos0, pos1 )) );
 			tempSegs_da.cnt = 1;
-			segCnt = 1;
 			break;
 		case OP_POLY:
 		case OP_FILLPOLY:
-			if (lock) {
-			//if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
+			tempSegs_da.cnt = segCnt;
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
 				coOrd last_point;
 				ANGLE_T last_angle, initial_angle;
 				if (tempSegs_da.cnt == 1) {
@@ -443,7 +436,8 @@ STATUS_T DrawGeomMouse(
 						if (IsClose(d)) {
 							pos = intersect;
 							d = tempD.scale*0.15;
-							anchors(0).type = SEG_FILCRCL;
+							DYNARR_SET(trkSeg_t,anchors_da,1);
+							anchors(0).type = SEG_CRVLIN;
 							anchors(0).color = wDrawColorBlue;
 							anchors(0).u.c.center = intersect;
 							anchors(0).u.c.radius = d/2;
@@ -459,6 +453,7 @@ STATUS_T DrawGeomMouse(
 			context->message( _("Length = %s, Angle = %0.2f"),
 						FormatDistance(FindDistance( tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos )),
 						PutAngle(FindAngle( tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos )) );
+			segCnt = tempSegs_da.cnt;
 			break;
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
@@ -473,13 +468,11 @@ STATUS_T DrawGeomMouse(
 					tempSegs(0).u.l.pos[0] = pos0;
 					tempSegs(0).u.l.pos[1] = context->ArcData.pos1;
 					tempSegs_da.cnt = 1;
-					segCnt = 1;
 					context->message( _("Straight Line: Length=%s Angle=%0.3f"),
 							FormatDistance(FindDistance( pos0, context->ArcData.pos1 )),
 							PutAngle(FindAngle( pos0, context->ArcData.pos1 )) );
 				} else if (context->ArcData.type == curveTypeNone) {
 					tempSegs_da.cnt = 0;
-					segCnt = 0;
 					context->message( _("Back") );
 				} else if (context->ArcData.type == curveTypeCurve) {
 					tempSegs(0).type = SEG_CRVLIN;
@@ -488,7 +481,6 @@ STATUS_T DrawGeomMouse(
 					tempSegs(0).u.c.a0 = context->ArcData.a0;
 					tempSegs(0).u.c.a1 = context->ArcData.a1;
 					tempSegs_da.cnt = 1;
-					segCnt = 1;
 					d = D2R(context->ArcData.a1);
 					if (d < 0.0)
 						d = 2*M_PI+d;
@@ -511,6 +503,7 @@ STATUS_T DrawGeomMouse(
 		case OP_CIRCLE2:
 		case OP_FILLCIRCLE2:
 			tempSegs(0).u.c.center = pos1;
+			/* no break */
 		case OP_CIRCLE3:
 		case OP_FILLCIRCLE3:
 			tempSegs(0).u.c.radius = FindDistance( pos0, pos1 );
@@ -528,6 +521,7 @@ STATUS_T DrawGeomMouse(
 						FormatDistance(fabs(pos1.x - pos0.x)), FormatDistance(fabs(pos1.y - pos0.y)) );
 			break;
 		}
+		context->D->funcs->options |= wDrawOptTemp;
 		if (context->Op == OP_POLY || context->Op == OP_FILLPOLY)
 			DrawSegs( context->D, zero, 0.0, &tempSegs(tempSegs_da.cnt-1), 1, trackGauge, wDrawColorBlack );
 		else
@@ -592,6 +586,7 @@ STATUS_T DrawGeomMouse(
 			context->length = FindDistance(pos1,pos0);
 			context->angle = FindAngle(pos0,pos1);
 			context->State = 2;
+			segCnt = tempSegs_da.cnt;
 			break;
 		case OP_CURVE1: case OP_CURVE2: case OP_CURVE3: case OP_CURVE4:
 			if (context->State == 0) {
@@ -600,9 +595,7 @@ STATUS_T DrawGeomMouse(
 				pos0x = pos1;
 				CreateCurve( C_UP, pos, FALSE, context->Color, width, drawGeomCurveMode, context->message );
 				DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-				segCnt = tempSegs_da.cnt;
 				context->message( _("Drag on Red arrows to adjust curve") );
-				context->D->funcs->options = oldOptions;
 				return C_CONTINUE;
 			} else {
 				tempSegs_da.cnt = 0;
@@ -627,10 +620,8 @@ STATUS_T DrawGeomMouse(
 				} else {
 					tempSegs_da.cnt = 0;
 				}
-				context->State = 0;
 				lastValid = TRUE;
 				lastPos = pos1;
-				segCnt = 1;
 				/*drawContext = context;
 				DrawGeomOp( (void*)context->Op );*/
 			}
@@ -644,8 +635,8 @@ STATUS_T DrawGeomMouse(
 			if ( context->Op>=OP_FILLCIRCLE1 && context->Op<=OP_FILLCIRCLE3 )
 				tempSegs(0).type = SEG_FILCRCL;
 			tempSegs_da.cnt = 1;
-			/*drawContext = context;
-			DrawGeomOp( (void*)context->Op );*/
+			context->State = 2;
+			context->radius = tempSegs(0).u.c.radius;
 			break;
 		case OP_BOX:
 		case OP_FILLBOX:
@@ -664,26 +655,36 @@ STATUS_T DrawGeomMouse(
 			context->length = FindDistance(pts[0],pts[1]);
 			context->width = FindDistance(pts[3],pts[0]);
 			context->State = 2;
+			segCnt = tempSegs_da.cnt;
 			break;
 		case OP_POLY:
 		case OP_FILLPOLY:
-			segCnt = tempSegs_da.cnt;
-			context->D->funcs->options = oldOptions;
+			tempSegs_da.cnt = segCnt;
+			anchors_da.cnt=0;
+			if ( segCnt>2 && IsClose(FindDistance(tempSegs(0).u.l.pos[0], tempSegs(tempSegs_da.cnt-1).u.l.pos[1] ))) {
+				EndPoly(context, tempSegs_da.cnt);
+				DYNARR_RESET(points_t, points_da);
+				DYNARR_RESET(trkSeg_t,tempSegs_da);
+				context->State = 0;
+				segCnt = 0;
+				return C_TERMINATE;
+			}
 			context->length = FindDistance(tempSegs(tempSegs_da.cnt-1).u.l.pos[0],tempSegs(tempSegs_da.cnt-1).u.l.pos[1]);
 			context->angle = FindAngle(tempSegs(tempSegs_da.cnt-1).u.l.pos[0],tempSegs(tempSegs_da.cnt-1).u.l.pos[1]);
 			context->State = 1;
+			segCnt = tempSegs_da.cnt;
 			return C_CONTINUE;
 		}
 		context->Started = FALSE;
 		context->Changed = TRUE;
 		/*CheckOk();*/
-		segCnt = tempSegs_da.cnt;
-		if (context->State == 2 && IsCurCommandSticky())
+		if (context->State == 2 && IsCurCommandSticky()) {
+			segCnt = tempSegs_da.cnt;
+			MainRedraw();
 			return C_CONTINUE;
-
+		}
 		context->D->funcs->options = oldOptions;
 		DrawGeomOk();
-		segCnt = 0;
 		context->State = 0;
 		return C_TERMINATE;
 
@@ -691,29 +692,25 @@ STATUS_T DrawGeomMouse(
 		if ( ((action>>8)&0xFF) == 0x0D ||
 			 ((action>>8)&0xFF) == ' ' ) {
 			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY)) {
-				segCnt = tempSegs_da.cnt;
-				EndPoly(context, segCnt);
-				segCnt = 0;
+				tempSegs_da.cnt = segCnt;
+				DYNARR_APPEND(trkSeg_t,tempSegs_da,1);
+				tempSegs(tempSegs_da.cnt-1).type = SEG_STRLIN;
+				tempSegs(tempSegs_da.cnt-1).u.l.pos[0] = tempSegs(tempSegs_da.cnt-2).u.l.pos[1];
+				tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = tempSegs(0).u.l.pos[0];
+				EndPoly(context, segCnt+1);
 				DYNARR_RESET(points_t, points_da);
 				DYNARR_RESET(trkSeg_t,tempSegs_da);
 			} else {
-				context->D->funcs->options = oldOptions;
 				if (context->State == 2)
 					tempSegs_da.cnt = segCnt;
 				DrawGeomOk();
 			}
-		}
-		if (((action>>8)&0xFF) == 9) {
-			lock = !lock;
-			context->message("Lock %s",lock?"On":"Off");
-			return C_CONTINUE;
 		}
 		context->State = 0;
 		segCnt = 0;
 		return C_TERMINATE;
 
 	case C_CANCEL:
-
 		oldOptions = context->D->funcs->options;
 		context->D->funcs->options |= wDrawOptTemp;
 		DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
@@ -727,15 +724,15 @@ STATUS_T DrawGeomMouse(
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		oldOptions = context->D->funcs->options;
+		context->D->funcs->options |= wDrawOptTemp;
 		if (context->State !=0) {
-			oldOptions = context->D->funcs->options;
-			context->D->funcs->options |= wDrawOptTemp;
 			DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-			context->D->funcs->options = oldOptions;
 		}
 		if (anchors_da.cnt > 0) {
 			DrawSegs(context->D, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		}
+		context->D->funcs->options = oldOptions;
 		return C_CONTINUE;
 		
 	default:
@@ -747,6 +744,7 @@ static int polyInx;
 typedef enum {POLY_NONE, POLY_SELECTED, POLYPOINT_SELECTED, ROTATE_SELECTED} PolyState_e;
 static PolyState_e polyState = POLY_NONE;
 static coOrd rotate_origin;
+static ANGLE_T rotate_angle;
 static dynArr_t origin_da;
 
 
@@ -985,6 +983,7 @@ STATUS_T DrawGeomPolyModify(
 			}
 			selected_count=0;
 			rotate_origin = context->orig;
+			rotate_angle = context->angle;
 			//Show points
 			tempSegs_da.cnt = 1;
 			tempSegs(0).width = context->segPtr->width;
@@ -997,7 +996,7 @@ STATUS_T DrawGeomPolyModify(
 			tempSegs(0).u.p.polyType = context->segPtr[segInx].u.p.polyType;
 			tempSegs(0).u.p.pts = &points(0);
 			CreatePolyAnchors( -1, zero);
-			MainRedraw();
+			//MainRedraw();
 			return C_CONTINUE;
 		case C_DOWN:
 			d = 10000.0;
@@ -1011,6 +1010,7 @@ STATUS_T DrawGeomPolyModify(
 					point_selected(i) = FALSE;
 				}
 				selected_count = 0;
+
 			}
 			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL ) {
 				polyState = ROTATE_SELECTED;
@@ -1033,7 +1033,17 @@ STATUS_T DrawGeomPolyModify(
 					polyInx = inx;
 				}
 			}
-			if (!IsClose(d)) return C_CONTINUE; //Not close to line
+			if (!IsClose(d)) {
+				//Not on object - deselect all
+				for (int i=0;i<points_da.cnt;i++) {
+					point_selected(i) = FALSE;
+				}
+				polyInx = -1;
+				selected_count = 0;
+				CreatePolyAnchors( -1, zero);
+				MainRedraw();
+				return C_CONTINUE; //Not close to line
+			}
 			polyState = POLYPOINT_SELECTED;
 			inx = polyInx==0?points_da.cnt-1:polyInx-1;
 			//Find if the point is to be added
@@ -1044,6 +1054,12 @@ STATUS_T DrawGeomPolyModify(
 			} else if ( d > 0.75*dd ) {
 				;
 			} else {
+				DYNARR_APPEND(wBool_t,select_da,1);
+				for (int i=0;i<select_da.cnt;i++) {
+					if (i == polyInx) point_selected(i) = TRUE;
+					else point_selected(i) = FALSE;
+				}
+				selected_count=1;
 				DYNARR_APPEND(coOrd,points_da,1);
 				tempSegs(0).u.p.pts = &points(0);
 				for (inx=points_da.cnt-1; inx>polyInx; inx-- ) {
@@ -1051,9 +1067,8 @@ STATUS_T DrawGeomPolyModify(
 				}
 				tempSegs(0).u.p.cnt = points_da.cnt;
 			}
-			if (point_selected(polyInx)) {
-				point_selected(polyInx) = FALSE;
-				--selected_count;
+			pos = DYNARR_N(coOrd,points_da,polyInx);  		//Move to point
+			if (point_selected(polyInx)) {					//Already selected
 			} else {
 				point_selected(polyInx) = TRUE;
 				++selected_count;
@@ -1084,8 +1099,10 @@ STATUS_T DrawGeomPolyModify(
 				}
 				context->length = FindDistance(points(last_inx),points(first_inx));
 				an1 = FindAngle(points(last_inx),points(first_inx));
-				an0 = FindAngle(points(last_inx==0?points_da.cnt-1:last_inx-1),points(last_inx));
-				context->rel_angle = 180-NormalizeAngle(an0-an1);
+				an0 = FindAngle(points(last_inx==0?(points_da.cnt-1):(last_inx-1)),points(last_inx));
+				context->rel_angle = NormalizeAngle(180-(an0-an1));
+			} else {
+
 			}
 			context->prev_inx = first_inx;
 			//Show three anchors only
@@ -1115,6 +1132,7 @@ STATUS_T DrawGeomPolyModify(
 					DrawLine( &tempD, base, rotate_origin, 0, wDrawColorBlack );
 					delta_angle = NormalizeAngle( angle-currentAngle);
 					currentAngle = angle;
+					rotate_angle = currentAngle;
 					for (int i=0; i<points_da.cnt;i++) {
 						Rotate( &points(i), rotate_origin, delta_angle );
 					}
@@ -1151,8 +1169,7 @@ STATUS_T DrawGeomPolyModify(
 					next_inx = first_inx+1;
 				}
 				//Lock to 90 degrees first/last point
-				if (lock) {
-				//if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
+				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
 					ANGLE_T last_angle,next_angle;
 					coOrd last_point,next_point;
 					if (first_inx == 0) {
@@ -1191,7 +1208,18 @@ STATUS_T DrawGeomPolyModify(
 					coOrd intersect;
 					if (FindIntersection(&intersect,last_point,last_angle+90.0,next_point,next_angle+90.0)) {
 						d = FindDistance(intersect,pos);
-						if (IsClose(d)) pos = intersect;
+						if (IsClose(d)) {
+							pos = intersect;
+							d = tempD.scale*0.15;
+							DYNARR_SET(trkSeg_t,anchors_da,1);
+							anchors(0).type = SEG_CRVLIN;
+							anchors(0).color = wDrawColorBlue;
+							anchors(0).u.c.center = intersect;
+							anchors(0).u.c.radius = d/2;
+							anchors(0).u.c.a0 = 0.0;
+							anchors(0).u.c.a1 = 360.0;
+							tempSegs(0).width = 0;
+						} else anchors_da.cnt = 0;
 					}
 					InfoMessage( _("Length = %s, Last_Angle = %0.2f"),
 							FormatDistance(FindDistance(pos,last_point)),
@@ -1199,8 +1227,8 @@ STATUS_T DrawGeomPolyModify(
 				}
 				context->length = FindDistance(points(last_inx),pos);
 				an1 = FindAngle(points(last_inx),pos);
-				an0 = FindAngle(points(last_inx==0?points_da.cnt-1:last_inx-1),points(last_inx));
-				context->rel_angle = DifferenceBetweenAngles(an0,an1)-180;
+				an0 = FindAngle(points(last_inx==0?(points_da.cnt-1):(last_inx-1)),points(last_inx));
+				context->rel_angle = NormalizeAngle(180-(an1-an0));
 			}
 			context->prev_inx = first_inx;
 			coOrd diff;
@@ -1221,6 +1249,7 @@ STATUS_T DrawGeomPolyModify(
 			if (segInx == -1 || polyState != POLYPOINT_SELECTED)
 				return C_CONTINUE;   //Didn't get a point selected/added
 			polyState = POLY_SELECTED;  //Return to base state
+			anchors_da.cnt = 0;
 			CreatePolyAnchors(polyInx, zero);  //Show last selection
 			prev_inx = polyInx;
 			context->prev_inx = prev_inx;
@@ -1230,29 +1259,33 @@ STATUS_T DrawGeomPolyModify(
 		case C_UPDATE:
 			if (prev_inx>=0) {
 				int before_prev_inx = prev_inx==0?points_da.cnt-1:prev_inx-1;
-				an0 = FindAngle(points(before_prev_inx==0?points_da.cnt-1:before_prev_inx-1),points(prev_inx==0?points_da.cnt-1:prev_inx-1));
-				an1 = context->rel_angle+an0+180;
-				Translate(&points(prev_inx),points(prev_inx==0?points_da.cnt-1:prev_inx-1),an1,context->length);
+				an0 = FindAngle(points(before_prev_inx==0?(points_da.cnt-1):(before_prev_inx-1)),points(prev_inx==0?(points_da.cnt-1):(prev_inx-1)));
+				an1 = NormalizeAngle((180-context->rel_angle)+an0);
+				Translate(&points(prev_inx),points(prev_inx==0?(points_da.cnt-1):(prev_inx-1)),an1,context->length);
 			}
 			CreatePolyAnchors(prev_inx, zero);
 			MainRedraw();
 			break;
 		case C_TEXT:
-			if (action>>9) {
-				lock = !lock;
-				InfoMessage("Lock %s",lock?"On":"Off");
-				return C_CONTINUE;
-			}
 			//Delete or backspace deletes last selected index
 			if (action>>8 == 127 || action>>8 == 8) {
 				if (polyState == POLY_SELECTED && prev_inx >=0) {
+					if (selected_count >1) {
+						ErrorMessage( MSG_POLY_MULTIPLE_SELECTED );
+						return C_CONTINUE;
+					}
 					if (context->segPtr[segInx].u.p.cnt <= 3) {
 						ErrorMessage( MSG_POLY_SHAPES_3_SIDES );
 						return C_CONTINUE;
 					}
-					for (inx=prev_inx+1; inx<points_da.cnt; inx++)
-						points(inx-1) = points(inx);
+					for (int i=0;i<points_da.cnt;i++) {
+						point_selected(i) = FALSE;
+						if (i>=prev_inx && i<points_da.cnt-1)
+							points(i) = points(i+1);
+					}
 					points_da.cnt--;
+					select_da.cnt--;
+					selected_count=0;
 					tempSegs(0).u.p.cnt = points_da.cnt;
 				}
 				prev_inx = -1;
@@ -1267,25 +1300,24 @@ STATUS_T DrawGeomPolyModify(
 			/* no break */
 		case C_FINISH:
 			//copy changes back into track
-			if (polyState != POLY_SELECTED) return C_TERMINATE;
+			if (polyState != POLY_SELECTED && polyState != ROTATE_SELECTED) return C_TERMINATE;
 			coOrd * oldPts = context->segPtr[segInx].u.p.pts;
 			void * newPts = (coOrd*)MyMalloc( points_da.cnt * sizeof (coOrd) );
 			context->segPtr[segInx].u.p.pts = newPts;
+			context->segPtr->u.p.cnt = points_da.cnt;
 			context->orig = rotate_origin;
-			context->angle = 0.0;
+			context->angle = rotate_angle;
 			for (int i=0; i<points_da.cnt; i++) {
 				pos = points(i);
 				pos.x -= context->orig.x;
 				pos.y -= context->orig.y;
 				Rotate( &pos, zero, -context->angle );
-				context->segPtr->u.p.pts[i] = pos;
+				context->segPtr[segInx].u.p.pts[i] = pos;
 			}
-			context->segPtr->u.p.cnt = points_da.cnt;
 			MyFree(oldPts);
 			polyState = POLY_NONE;
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			DYNARR_RESET(trkSeg_t,tempSegs_da);
-			MainRedraw();
 			return C_TERMINATE;
 		case C_REDRAW:
 			if (polyState == POLY_NONE) return C_CONTINUE;

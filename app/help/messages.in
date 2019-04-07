@@ -617,7 +617,14 @@ END
 MESSAGE MSG_POLY_SHAPES_3_SIDES
 Poly shapes must have at least 3 sides.
 HELP
-Polygons and Poly Lines must have at least 3 sides. By moving one of the corners close to another corner you're attempting to merge the corners and create a Poly shape with only 2 sides. Try moving the other corner to the new position first.
+Polygons and Poly Lines must have at least 3 sides. You're attempting to create a Poly shape with only 2 sides by deleting the third. 
+END
+
+# drawgeom.c
+MESSAGE MSG_POLY_MULTIPLE_SELECTED
+Can't delete multiple points at once
+HELP
+Polygons and Poly Lines points can only be deleted one at a time. 
 END
 
 # dcar.c

@@ -304,16 +304,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		break;
 	case OI:
 		if (segPtr->type == SEG_POLY || segPtr->type == SEG_FILPOLY) {
-			DIST_T dist = FindDistance(drawData.origin,segPtr->u.p.pts[0]);
-			if (dist>0.0) {
-				ANGLE_T angle = FindAngle(segPtr->u.p.pts[0],drawData.origin);
-				coOrd orig = segPtr->u.p.pts[0];
-				for (int i=0;i<segPtr->u.p.cnt;i++) {
-					coOrd pnt = segPtr->u.p.pts[i];
-					Translate(&pnt, pnt, angle, dist);
-					UNREORIGIN(segPtr->u.p.pts[i], pnt, xx->angle, xx->orig );
-				}
-			}
+			xx->orig = drawData.origin;
 		}
 		break;
 	case HT:
@@ -375,30 +366,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	case LN:
 	case AL:
 		if ((inx == AL) && (segPtr->type == SEG_POLY || segPtr->type == SEG_FILPOLY)) {
-			ANGLE_T angle = -(drawData.angle-drawData.oldAngle);
-			coOrd origin = drawData.origin;
-			coOrd centroid = FindCentroid(segPtr->u.p.cnt, segPtr->u.p.pts );
-			switch ( drawData.pivot ) {
-				case DESC_PIVOT_FIRST:
-					break;
-				case DESC_PIVOT_SECOND:
-					origin.x = (centroid.x-segPtr->u.p.pts[0].x)*2+segPtr->u.p.pts[0].x;
-					origin.y = (centroid.y-segPtr->u.p.pts[0].y)*2+segPtr->u.p.pts[0].y;
-					break;
-				case DESC_PIVOT_MID:
-					origin = centroid;
-					break;
-				default:
-				break;
-			}
-			for (int i=0;i<segPtr->u.p.cnt;i++) {
-				coOrd pnt = segPtr->u.p.pts[i];
-				Rotate(&pnt, origin, angle);
-				UNREORIGIN(segPtr->u.p.pts[i], pnt, xx->angle, xx->orig );
-			}
-			drawData.origin = segPtr->u.p.pts[0];
-			drawDesc[OI].mode |= DESC_CHANGE;
-			drawData.oldAngle = drawData.angle;
+			xx->angle = drawData.angle;
 			break;
 		}
 		if ( segPtr->type == SEG_CRVLIN && inx == AL ) {
@@ -668,13 +636,13 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	case SEG_POLY:
 		drawData.pointCount = segPtr->u.p.cnt;
 		drawDesc[VC].mode = DESC_RO;
+		drawData.filled = FALSE;
+		drawDesc[FL].mode = 0;
 		drawData.angle = 0.0;
-		drawData.oldAngle = 0.0;
-		drawDesc[AL].mode = 0;
-		drawData.origin = segPtr->u.p.pts[0];
+		drawData.oldAngle = xx->angle;
+		drawDesc[AL].mode = xx->angle;
+		drawData.origin = xx->orig;
 		drawDesc[OI].mode = 0;
-		drawDesc[PV].mode = 0;
-		drawData.pivot = DESC_PIVOT_FIRST;
 		switch (segPtr->u.p.polyType) {
 			case RECTANGLE:
 				title = _("Rectangle");
@@ -694,13 +662,14 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	case SEG_FILPOLY:
 		drawData.pointCount = segPtr->u.p.cnt;
 		drawDesc[VC].mode = DESC_RO;
+		drawData.filled = TRUE;
+		drawDesc[FL].mode = 0;
 		drawDesc[LW].mode = DESC_IGNORE;
-		drawData.angle = 0.0;
-		drawData.oldAngle = 0.0;
+		drawData.angle = xx->angle;
+		drawData.oldAngle = xx->angle;
 		drawDesc[AL].mode = 0;
-		drawData.origin = segPtr->u.p.pts[0];
+		drawData.origin = xx->orig;
 		drawDesc[OI].mode = 0;
-		drawDesc[PV].mode = 0;
 		switch (segPtr->u.p.polyType) {
 			case RECTANGLE:
 				title =_("Filled Rectangle");
@@ -924,7 +893,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		rc = DrawGeomModify( action, pos, &drawModCmdContext );
 		ignoredDraw = NULL;
 		ComputeDrawBoundingBox( trk );
-		DrawNewTrack( trk );
+		//DrawNewTrack( trk );
 		if (drawModCmdContext.type == SEG_POLY || drawModCmdContext.type == SEG_FILPOLY ) {
 			if (xx->segs[0].u.p.polyType != RECTANGLE) {
 				if (drawModCmdContext.prev_inx >= 0) {
@@ -949,7 +918,8 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		xx->orig = drawModCmdContext.orig;
 		ignoredDraw = NULL;
 		ComputeDrawBoundingBox( trk );
-		DrawNewTrack( trk );
+		//DrawNewTrack( trk );
+		MainRedraw();
 		if ( infoSubst ) {
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
@@ -1264,7 +1234,9 @@ static paramData_t drawPLs[] = {
 #define drawWidthPD				(drawPLs[7])
 	{ PD_FLOAT, &drawCmdContext.width, "BoxWidth", PDO_DIM|PDO_NORECORD|BO_ENTER, &r1_10000, N_("Box Width") },
 #define drawAnglePD				(drawPLs[8])
-	{ PD_FLOAT, &drawCmdContext.angle, "Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Angle") }
+	{ PD_FLOAT, &drawCmdContext.angle, "Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Angle") },
+#define drawRadiusPD            (drawPLs[9])
+	{ PD_FLOAT, &drawCmdContext.radius, "Radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r1_10000, N_("Radius") }
 };
 static paramGroup_t drawPG = { "draw", 0, drawPLs, sizeof drawPLs/sizeof drawPLs[0] };
 
@@ -1416,8 +1388,10 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
+		/* no break */
 	case wActionLDrag:
 		ParamLoadData( &drawPG );
+		/* no break */
 	case wActionMove:
 	case wActionRDown:
 	case wActionRDrag:
@@ -1438,6 +1412,21 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		// Put up text entry boxes ready for updates if the result was continue
 		if (rc == C_CONTINUE) {
 			switch( drawCmdContext.Op ) {
+			case OP_CIRCLE1:
+			case OP_CIRCLE2:
+			case OP_CIRCLE3:
+			case OP_FILLCIRCLE1:
+			case OP_FILLCIRCLE2:
+			case OP_FILLCIRCLE3:
+				controls[0] = drawRadiusPD.control;
+				controls[1] = NULL;
+				labels[0] = N_("Radius");
+				ParamLoadControls( &drawPG );
+				InfoSubstituteControls( controls, labels );
+				drawLengthPD.option &= ~PDO_NORECORD;
+				drawAnglePD.option &= ~PDO_NORECORD;
+				infoSubst = TRUE;
+				break;
 			case OP_LINE:
 			case OP_BENCH:
 			case OP_TBLEDGE:
@@ -1603,6 +1592,15 @@ static void DrawDlgUpdate(
 		}
 	}
 	if (inx >=6 ) {
+		if (drawCmdContext.Op == OP_CIRCLE1 ||
+			drawCmdContext.Op == OP_FILLCIRCLE1 ||
+			drawCmdContext.Op == OP_CIRCLE2 ||
+			drawCmdContext.Op == OP_FILLCIRCLE2 ||
+			drawCmdContext.Op == OP_CIRCLE3 ||
+			drawCmdContext.Op == OP_FILLCIRCLE3) {
+			coOrd pos = zero;
+			DrawGeomMouse(C_UPDATE,pos,&drawCmdContext);
+		}
 		if (drawCmdContext.Op == OP_LINE ||
 			drawCmdContext.Op == OP_BENCH||
 			drawCmdContext.Op == OP_TBLEDGE) {

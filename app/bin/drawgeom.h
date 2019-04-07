@@ -59,6 +59,7 @@ typedef struct {
 				double width;
 				ANGLE_T angle;
 				double length;
+				double radius;
 				long benchOption;
 				int State;
 				curveData_t ArcData;
