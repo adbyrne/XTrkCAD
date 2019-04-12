@@ -841,13 +841,13 @@ static void DrawModDlgUpdate(
 static paramIntegerRange_t i0_100 = { 0, 100, 25 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
-static paramFloatRange_t r0_360 = { 0, 360, 80 };
+static paramFloatRange_t r0_180 = { 0, 180, 80 };
 static paramData_t drawModPLs[] = {
 
 #define drawModLengthPD			(drawModPLs[0])
 	{ PD_FLOAT, &drawModCmdContext.length, "Length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
 #define drawModRelAnglePD			(drawModPLs[1])
-	{ PD_FLOAT, &drawModCmdContext.rel_angle, "Rel Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Relative Angle") },
+	{ PD_FLOAT, &drawModCmdContext.rel_angle, "Rel Angle", PDO_NORECORD|BO_ENTER, &r0_180, N_("Relative Angle") },
 #define drawModConvertPD		(drawModPLs[2])
 	{ PD_BUTTON, (void*)DoConvertFill, "convert", PDO_NORECORD, NULL, N_("Convert Fill") },
 
@@ -1427,6 +1427,30 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				drawAnglePD.option &= ~PDO_NORECORD;
 				infoSubst = TRUE;
 				break;
+			case OP_CURVE1:
+			case OP_CURVE2:
+			case OP_CURVE3:
+			case OP_CURVE4:
+				if (drawCmdContext.ArcData.type == curveTypeCurve) {
+					controls[0] = drawRadiusPD.control;
+					controls[1] = drawAnglePD.control;
+					controls[2] = NULL;
+					labels[0] = N_("Radius");
+					labels[1] = N_("Arc Angle");
+				} else {
+					controls[0] = drawLengthPD.control;
+					controls[1] = drawAnglePD.control;
+					controls[2] = NULL;
+					labels[0] = N_("Length");
+					labels[1] = N_("Angle");
+				}
+				ParamLoadControls( &drawPG );
+				InfoSubstituteControls( controls, labels );
+				drawLengthPD.option &= ~PDO_NORECORD;
+				drawRadiusPD.option &= ~PDO_NORECORD;
+				drawAnglePD.option &= ~PDO_NORECORD;
+				infoSubst = TRUE;
+				break;
 			case OP_LINE:
 			case OP_BENCH:
 			case OP_TBLEDGE:
@@ -1435,8 +1459,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				controls[0] = drawLengthPD.control;
 				controls[1] = drawAnglePD.control;
 				controls[2] = NULL;
-				labels[0] = N_("Line Length");
-				labels[1] = N_("Line Angle");
+				labels[0] = N_("Seg Length");
+				labels[1] = N_("Rel Angle");
 				ParamLoadControls( &drawPG );
 				InfoSubstituteControls( controls, labels );
 				drawLengthPD.option &= ~PDO_NORECORD;
@@ -1598,6 +1622,13 @@ static void DrawDlgUpdate(
 			drawCmdContext.Op == OP_FILLCIRCLE2 ||
 			drawCmdContext.Op == OP_CIRCLE3 ||
 			drawCmdContext.Op == OP_FILLCIRCLE3) {
+			coOrd pos = zero;
+			DrawGeomMouse(C_UPDATE,pos,&drawCmdContext);
+		}
+		if (drawCmdContext.Op == OP_CURVE1 ||
+			drawCmdContext.Op == OP_CURVE2 ||
+			drawCmdContext.Op == OP_CURVE3 ||
+			drawCmdContext.Op == OP_CURVE4 	) {
 			coOrd pos = zero;
 			DrawGeomMouse(C_UPDATE,pos,&drawCmdContext);
 		}
