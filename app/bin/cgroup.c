@@ -917,6 +917,38 @@ static BOOL_T CheckForBumper(
 	return TRUE;
 }
 
+typedef struct {
+	trkSeg_p seg;
+	int inx;
+	wBool_t track;
+} segInMap_t;
+static dynArr_t segInMap_da;
+#define segInMap(N) DYNARR_N( segInMap_t, segInMap_da, N);
+
+void AddToSegMap(int inx,wBool_t track) {
+	DYNARR_APPEND(segInMap_t,segInMap_da,10);
+	DYNARR_LAST(segInMap_t,segInMap_da).inx = inx;
+	DYNARR_LAST(segInMap_t,segInMap_da).track = track;
+}
+
+void AddSegsToSegMap(int start, int end, wBool_t track) {
+	for (int i = start; i<= end; i++) {
+		AddToSegMap(i,track);
+	}
+}
+
+static dynArr_t trackSegs_da;
+#define trackSegs(N) DYNARR_N( trkSeg_t, trackSegs_da, N )
+
+trkSeg_p GetSegFromSegMap(int index) {
+	if (DYNARR_N( segInMap_t, segInMap_da, index).track) {
+		return &DYNARR_N(trkSeg_t,trackSegs_da,DYNARR_N( segInMap_t, segInMap_da, index).inx);
+	} else
+		return &DYNARR_N(trkSeg_t,tempSegs_da,DYNARR_N( segInMap_t, segInMap_da, index).inx);
+}
+
+static dynArr_t outputSegs_da;
+#define outputSegs(N) DYNARR_N( trkSeg_t, outputSegs_da, N)
 
 static void GroupOk( void * junk )
 {
@@ -937,17 +969,7 @@ static void GroupOk( void * junk )
 	ANGLE_T angle, angleN;
 	pathElem_t pathElemTemp;
 	char * cp=NULL;
-#ifdef SEGMAP
-	pathElem_p ppp1, ppp2;
-	int segInx1, segInx2;
-	coOrd pos1, pos2;
-	static dynArr_t segMap_da;
-#define segMap(I,J)		DYNARR_N( char, segMap_da, (2*(I)+0)*trackSegs_da.cnt+(J) )
-#define segAcc(I,J)		DYNARR_N( char, segMap_da, (2*(I)+1)*trackSegs_da.cnt+(J) )
-#define segSum(I,J)		DYNARR_N( char, segMap_da, (2*(groupTrk_da.cnt)+0)*trackSegs_da.cnt+(J) )
-#endif
-	static dynArr_t trackSegs_da;
-#define trackSegs(N) DYNARR_N( trkSeg_t, trackSegs_da, N )
+
 	trkSeg_p segPtr;
 	int segCnt;
 	static dynArr_t conflictMap_da;
@@ -965,9 +987,6 @@ static void GroupOk( void * junk )
 	signed char pathChar;
 	char *oldLocale = NULL;
 
-#ifdef SEGMAP
-	DYNARR_RESET( char, segMap_da );
-#endif
 	DYNARR_RESET( trkSeg_t, trackSegs_da );
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 	DYNARR_RESET( groupTrk_t, groupTrk_da );
@@ -975,6 +994,8 @@ static void GroupOk( void * junk )
 	DYNARR_RESET( pathElem_t, pathElem_da );
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 	DYNARR_RESET( char, pathPtr_da );
+
+	DYNARR_RESET( segInMap_t, segInMap_da);
 
 	ParamUpdate( &groupPG );
 	if ( groupManuf[0]==0 || groupDesc[0]==0 || groupPartno[0]==0 ) {
@@ -994,6 +1015,7 @@ static void GroupOk( void * junk )
 	 * Collect tracks
 	 */
 	trk = NULL;
+	int InInx = -1;
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
 			if ( IsTrack(trk) ) {
@@ -1008,18 +1030,35 @@ static void GroupOk( void * junk )
 						if ( IsSegTrack(segPtr) ) {
 							DYNARR_APPEND( trkSeg_t, trackSegs_da, 10 );
 							trackSegs(trackSegs_da.cnt-1) = *segPtr;
+
+							AddToSegMap(trackSegs_da.cnt-1,TRUE);    /* Single Track Seg - Note no Cornu*/
+
 							RotateSegs( 1, &trackSegs(trackSegs_da.cnt-1), zero, xx->angle );
 							MoveSegs( 1, &trackSegs(trackSegs_da.cnt-1), xx->orig );
+
 						} else {
+							int start = tempSegs_da.cnt;
 							DrawSegs( &groupD, xx->orig, xx->angle, segPtr, 1, trackGauge, wDrawColorBlack );
+
+							AddSegsToSegMap(start,tempSegs_da.cnt-1,FALSE);  /* Multiple Non-Track Segs */
 						}
 					}
 				} else if (GetTrkType(trk) == T_BEZIER || GetTrkType(trk) == T_BZRLIN ) {
 					DYNARR_APPEND(trkSeg_t, trackSegs_da, 10);
 					segPtr = &trackSegs(trackSegs_da.cnt-1);
+
 					GetBezierSegmentFromTrack(trk,segPtr);
+
+					AddToSegMap(trackSegs_da.cnt-1,TRUE);   // Add Single Bezier Track
+
 				} else if (GetTrkType(trk) == T_CORNU) {
+
+					int start = trackSegs_da.cnt;
+
 					GetBezierSegmentsFromCornu(trk,&trackSegs_da);  //Only give back Bezier - cant be undone
+
+					AddSegsToSegMap(start,trackSegs_da.cnt-1,TRUE);  /* Add Multiple Track Segs */
+
 				} else {
 					segCnt = tempSegs_da.cnt;
 					oldOptions = groupD.options;
@@ -1029,17 +1068,25 @@ static void GroupOk( void * junk )
 					DYNARR_APPEND( trkSeg_t, trackSegs_da, 10 );
 					segPtr = &trackSegs(trackSegs_da.cnt-1);
 					*segPtr = tempSegs( segCnt );
+
+					AddToSegMap(trackSegs_da.cnt-1,TRUE);             // Add One Track
+
 					if ( tempSegs_da.cnt != segCnt+1 ||
 						 !IsSegTrack(segPtr) ) {
 						NoticeMessage2( 0, MSG_CANNOT_GROUP_TRACK, _("Ok"), NULL );
 						wHide( groupW );
 						return;
 					}
+
 					tempSegs_da.cnt = segCnt;
 				}
 				groupP->segEnd = trackSegs_da.cnt-1;
 			} else {
+				int start = tempSegs_da.cnt;
+
 				DrawTrack( trk, &groupD, wDrawColorBlack );
+
+				AddSegsToSegMap(start,tempSegs_da.cnt-1,FALSE);      /* Multiple Non-Track Segs */
 			}
 		}
 	}
@@ -1140,10 +1187,7 @@ static void GroupOk( void * junk )
 		qsort( tempEndPts_da.ptr, tempEndPts_da.cnt, sizeof *endPtP, CmpEndPtAngle );
 		if ( NormalizeAngle( tempEndPts(0).angle - tempEndPts(tempEndPts_da.cnt-1).angle ) >
 			 NormalizeAngle( tempEndPts(1).angle - tempEndPts(0).angle ) ) {
-#ifdef LATER
-		if ( endPtAngle-FindAngle(endPtOrig,tempEndPts(tempEndPts_da.cnt-1).pos) >
-			 FindAngle(endPtOrig,tempEndPts(1).pos)-endPtAngle ) {
-#endif
+
 			for ( ep=1; ep<(tempEndPts_da.cnt+1)/2; ep++ ) {
 				trkEndPt_t tempEndPt;
 				tempEndPt = tempEndPts(ep);
@@ -1239,59 +1283,6 @@ if ( log_group >= 1 && logTable(log_group).level > log_group ) {
 	}
 }
 
-#ifdef SEGMAP
-		DYNARR_SET( char, segMap_da, 2 * trackSegs_da.cnt * path_da.cnt + 2 );
-		memset( segMap_da.ptr, 0, segMap_da.max * sizeof segMap(0,0) );
-		for ( inx=0; inx<path_da.cnt; inx++ ) {
-			pp = &path(inx);
-			for ( inx2=pp->pathElem_da.cnt-1; inx2>=0; inx2-- ) {
-				ppp = &pathElem(pp->pathElemStart+inx2);
-				groupP = &groupTrk(ppp->groupInx);
-				if ( GetTrkEndPtCnt(groupP->trk) == 2 ) {
-					segMap(inx,groupP->segStart) = 1;
-					continue;
-				}
-				cp = ppp->path;
-				if ( cp == NULL )
-					continue;
-				segInx1 = cp[0]-1;
-				for ( ; *cp; cp++ )
-					segMap(inx,groupP->segInx+cp[0]-1) = 1;
-				segInx2 = cp[-1]-1;
-				pos1 = GetSegEndPt( &trackSegs(groupP->segInx+segInx1), ppp->flip?1:0, FALSE, NULL );
-				pos2 = GetSegEndPt( &trackSegs(groupP->segInx+segInx2), ppp->flip?0:1, FALSE, NULL );
-				for ( inx3=0; inx3<groupP->segCnt; inx3++ ) {
-					if ( inx3 == segInx1 || inx3 == segInx2 ) continue;
-					if ( segMap(inx,groupP->segInx+inx3) != 0 ) continue;
-					if ( CheckTurnoutEndPoint( &trackSegs(groupP->segInx+inx3), pos1, 0 ) )
-						segMap(inx,inx3) = 2;
-					else if ( CheckTurnoutEndPoint( &trackSegs(groupP->segInx+inx3), pos2, 0 ) )
-						segMap(inx,groupP->segInx+inx3) = 2;
-				}
-			}
-		}
-if ( log_group >= 1 && logTable(log_group).level > log_group ) {
-	LogPrintf( "Path to Segment Map\n   ");
-	for ( inx=0; inx<groupTrk_da.cnt; inx++ ) {
-		groupP = &groupTrk(inx);
-		LogPrintf( "%2d", GetTrkIndex(groupP->trk) );
-		for ( inx2=1; inx2<groupP->segCnt; inx2++ ) LogPrintf( "--" );
-	}
-	LogPrintf( "\n   " );
-	for ( inx=0; inx<groupTrk_da.cnt; inx++ ) {
-		groupP = &groupTrk(inx);
-		for ( inx2=0; inx2<groupP->segCnt; inx2++ )
-			LogPrintf( "%2d", inx2+1 );
-	}
-	LogPrintf( "\n" );
-	for ( inx=0; inx<path_da.cnt; inx++ ) {
-		LogPrintf( "%2d ", inx );
-		for ( inx2=0; inx2<trackSegs_da.cnt; inx2++ )
-			LogPrintf( "%2d", segMap(inx,inx2) );
-		LogPrintf("\n");
-	}
-}
-#endif
 
 		/*
 		 * Create Conflict Map
@@ -1362,30 +1353,6 @@ if ( log_group >= 1 && logTable(log_group).level > log_group ) {
 		LogPrintf( "\n" );
 	}
 }
-
-#ifdef SEGMAP
-	for ( inx=0; inx<path_da.cnt; inx++ ) {
-		for ( inx2=0; inx2<tempSegs_da.cnt; inx2++ ) {
-		groupInx = 0;
-		memset( &SegTotal(0), 0, tempSegs_da.cnt * sizeof SegAcc(0) );
-		while (1) {
-			memcpy( &SegAcc(0), &SegTotal(0), tempSegs_da.cnt * sizeof SegAcc(0) );
-			collision = FALSE;
-			for ( inx=0; inx<path_da.cnt; inx++ ) {
-				pp = path(0);
-				if ( pp->groupInx < 0 ) continue;
-				for ( inx2=0; inx2<tempSegs_da.cnt; inx2++ ) {
-					if ( !segMap(inx,inx2) ) continue;
-					if ( SegAcc(inx2) ) {
-						collision = TRUE;
-						break;
-					}
-					SegAcc(inx2) = TRUE;
-				}
-			}
-			if ( collision )
-		}
-#endif
 
 		/*
 		 * Count number of times each segment is used as flipped
@@ -1468,18 +1435,22 @@ LOG( log_group, 1, ( "Flipping Segment %d\n", pinx+1 ) );
 
 groupSimpleTurnout:
 		/*
-		 * Copy and Reorigin Segments
+		 * Copy and Reorigin Segments - Start by putting them out in the original order
 		 */
-		if ( tempSegs_da.cnt > 0 ) {
-			inx = trackSegs_da.cnt;
-			DYNARR_SET( trkSeg_t, trackSegs_da, trackSegs_da.cnt+tempSegs_da.cnt );
-			memcpy( &trackSegs(inx), tempSegs_da.ptr, tempSegs_da.cnt*sizeof trackSegs(0) );
-			CloneFilledDraw( tempSegs_da.cnt, &trackSegs(inx), TRUE );
+
+		DYNARR_RESET(trkSeg_t, outputSegs_da);
+		for (int i=0; i<segInMap_da.cnt;i++) {
+			DYNARR_APPEND(trkSeg_t,outputSegs_da,10);
+			trkSeg_p from_p = GetSegFromSegMap(i);
+			trkSeg_p to_p = &DYNARR_LAST(trkSeg_t, outputSegs_da);
+			memcpy((void *)to_p,(void *)from_p,sizeof( trkSeg_t));
+			CloneFilledDraw( 1, to_p, FALSE );
 		}
-		GetSegBounds( zero, 0, trackSegs_da.cnt, &trackSegs(0), &orig, &size );
+
+		GetSegBounds( zero, 0, outputSegs_da.cnt, &outputSegs(0), &orig, &size );
 		orig.x = - tempEndPts(0).pos.x;
 		orig.y = - tempEndPts(0).pos.y;
-		MoveSegs( trackSegs_da.cnt, &trackSegs(0), orig );
+		MoveSegs( outputSegs_da.cnt, &outputSegs(0), orig );
 		for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
 			tempEndPts(ep).pos.x += orig.x;
 			tempEndPts(ep).pos.y += orig.y;
@@ -1488,21 +1459,13 @@ groupSimpleTurnout:
 		/*
 		 * Final: create new definition
 		 */
-		CheckPaths( trackSegs_da.cnt, &trackSegs(0), path );
-		to = CreateNewTurnout( curScaleName, groupTitle, trackSegs_da.cnt, &trackSegs(0), pathLen, path, tempEndPts_da.cnt, &tempEndPts(0), TRUE );
-#ifdef LATER
-		if ( xx )
-			to->customInfo = xx->customInfo;
-#endif
+		CheckPaths( outputSegs_da.cnt, &outputSegs(0), path );
+		to = CreateNewTurnout( curScaleName, groupTitle, outputSegs_da.cnt, &outputSegs(0), pathLen, path, tempEndPts_da.cnt, &tempEndPts(0), TRUE );
 		f = OpenCustom("a");
 		if (f && to) {
 			oldLocale = SaveLocale("C");
 			rc &= fprintf( f, "TURNOUT %s \"%s\"\n", curScaleName, PutTitle(to->title) )>0;
-#ifdef LATER
-			if ( to->customInfo )
-				rc &= fprintf( f, "\tU %s\n", to->customInfo )>0;
-#endif
-			rc &= WriteCompoundPathsEndPtsSegs( f, path, trackSegs_da.cnt, &trackSegs(0), tempEndPts_da.cnt, &tempEndPts(0) );
+			rc &= WriteCompoundPathsEndPtsSegs( f, path, outputSegs_da.cnt, &outputSegs(0), tempEndPts_da.cnt, &tempEndPts(0) );
 		}
 		if ( groupReplace ) {
 			UndoStart( _("Group Tracks"), "group" );
@@ -1528,7 +1491,7 @@ groupSimpleTurnout:
 					trackCount--;
 				}
 			}
-			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), pathLen, (char *)path, trackSegs_da.cnt, &trackSegs(0) );
+			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), pathLen, (char *)path, outputSegs_da.cnt, &outputSegs(0) );
 			SetTrkVisible( trk, TRUE );
 
 			SetTrkVisible( trk, TRUE );
@@ -1552,10 +1515,6 @@ groupSimpleTurnout:
 		if (f && to) {
 			oldLocale = SaveLocale("C");
 			rc &= fprintf( f, "STRUCTURE %s \"%s\"\n", curScaleName, PutTitle(groupTitle) )>0;
-#ifdef LATER
-			if ( to->customInfo )
-				rc &= fprintf( f, "\tU %s\n", to->customInfo )>0;
-#endif
 			rc &= WriteSegs( f, tempSegs_da.cnt, &tempSegs(0) );
 		}
 		if ( groupReplace ) {

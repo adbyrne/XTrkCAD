@@ -151,6 +151,7 @@ BOOL_T RefreshCompound( track_p, BOOL_T );
 /* cturnout.c */
 EPINX_T TurnoutPickEndPt( coOrd p, track_p );
 void GetSegInxEP( signed char, int *, EPINX_T * );
+void SetSegInxEP( signed char *, int, EPINX_T) ;
 wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T );
 turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, wIndex_t, PATHPTR_T, EPINX_T, trkEndPt_t *, wBool_t );
 turnoutInfo_t * TurnoutAdd( long, SCALEINX_T, wList_p, coOrd *, EPINX_T );
