@@ -745,15 +745,31 @@ static ANGLE_T GetAngleTurnout(
 	struct extraData * xx = GetTrkExtraData(trk);
 	wIndex_t segCnt, segInx;
 	ANGLE_T angle;
+	trkSeg_p p;
 
 	if ( ep0 && ep1 )
 		*ep0 = *ep1 = PickEndPoint( pos, trk );
-	for ( segCnt=0; segCnt<xx->segCnt && IsSegTrack(&xx->segs[segCnt]); segCnt++ );
-	pos.x -= xx->orig.x;
-	pos.y -= xx->orig.y;
-	Rotate( &pos, zero, -xx->angle );
-	angle = GetAngleSegs( segCnt, xx->segs, &pos, &segInx, NULL, NULL, NULL, NULL );
-	return NormalizeAngle( angle+xx->angle );
+	coOrd pos0=pos;
+	double dd = 10000.0;
+	int found = -1;
+	//Cope with tracks not being first
+	for (segCnt =0; segCnt<xx->segCnt ; segCnt++ ) {
+		if (IsSegTrack(&xx->segs[segCnt])) {
+			double d = DistanceSegs( xx->orig, xx->angle, 1, &xx->segs[segCnt], &pos0, NULL );
+			if (d<dd) {
+				dd = d;
+				found = segCnt;
+			}
+		}
+		pos0 = pos;
+	}
+	if (found>=0) {
+		pos.x -= xx->orig.x;
+		pos.y -= xx->orig.y;
+		Rotate( &pos, zero, -xx->angle );
+		angle = GetAngleSegs( 1, &xx->segs[found], &pos, &segInx, NULL, NULL, NULL, NULL );
+		return NormalizeAngle( angle+xx->angle );
+	} else return 0.0;
 }
 
 
