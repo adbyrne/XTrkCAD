@@ -1794,7 +1794,7 @@ EXPORT void DrawSegsO(
                 }
                 break;
             }
-			continue;
+			// continue; Ensure tracks also drawn
 		}
 		switch (segPtr->type) {
 		case SEG_STRTRK:

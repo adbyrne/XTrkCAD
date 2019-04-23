@@ -464,7 +464,7 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
 
-	if (GetTrkType(t) == T_BZRLIN) {
+		if (GetTrkType(t) == T_BZRLIN) {
 		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, 0.0, color, 0);
 		return;
 	}
@@ -487,9 +487,10 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 			 (d->options&DC_TIES)!=0 &&
 			 d->scale<scale2rail/2 )
 		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions|DTS_TIES);
-	DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
+	else
+		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
 	if ( (d->funcs->options & wDrawOptTemp) == 0 &&
-		 (d->options&DC_QUICK) == 0 ) {
+		 (d->options&DC_QUICK) == 0 {
 		DrawEndPt( d, t, 0, color );
 		DrawEndPt( d, t, 1, color );
 	}

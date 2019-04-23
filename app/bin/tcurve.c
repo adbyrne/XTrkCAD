@@ -659,6 +659,7 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 	track_p tt = t;
 	long widthOptions = DTS_LEFT|DTS_RIGHT|DTS_TIES;
 
+
 	if (GetTrkWidth(t) == 2)
 		widthOptions |= DTS_THICK2;
 	if (GetTrkWidth(t) == 3)

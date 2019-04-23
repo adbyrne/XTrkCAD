@@ -137,10 +137,13 @@ static STATUS_T ModifyDrawPoly(wAction_t action, coOrd pos) {
 			if (rc != C_CONTINUE) modifyDrawPolyMode = FALSE;
 			UndoEnd();
 			break;
+		case C_FINISH:
+		case C_CONFIRM:
 		case C_TERMINATE:
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			Dex.Trk = NULL;
 			modifyDrawPolyMode = FALSE;
+			rc = C_TERMINATE;
 			break;
 		case C_REDRAW:
 			rc = ModifyTrack( Dex.Trk, action, pos );
@@ -206,14 +209,36 @@ static STATUS_T CmdModify(
 		tempSegs(1).width = 0;
 		tempSegs_da.cnt = 0;
 		SnapPos( &pos );
-		Dex.Trk = OnTrack( &pos, TRUE, FALSE );
+		//If on a different track
+		//track_p trk = OnTrack( &pos, TRUE, FALSE );
+		//if (!modifyRulerMode && trk && Dex.Trk && trk != Dex.Trk) {
+		//	action = C_FINISH;
+		//	if ( modifyBezierMode ) {
+		//		rc = ModifyBezier(C_FINISH, pos);
+		//	} else if ( modifyCornuMode ) {
+		//		rc = ModifyCornu(C_FINISH, pos);
+		//	} else if ( modifyDrawPolyMode) {
+		//		rc = ModifyDrawPoly(C_FINISH, pos);
+		//	} else rc = ModifyTrack( Dex.Trk, C_FINISH, pos );
+		//	Dex.Trk = trk;
+		//	tempSegs_da.cnt = 0;
+			/*ChangeParameter( &easementPD );*/
+		//	trackGauge = 0.0;
+		//	changeTrackMode = modifyRulerMode = FALSE;
+		//	modifyBezierMode = FALSE;
+		//	modifyCornuMode = FALSE;
+		//	modifyDrawPolyMode = FALSE;
+		//}
+		//Dex.Trk = OnTrack( &pos, TRUE, FALSE );
+		Dex.Trk = trk;
 		if (Dex.Trk == NULL) {
 			if ( ModifyRuler( C_DOWN, pos ) == C_CONTINUE )
 				modifyRulerMode = TRUE;
 			return C_CONTINUE;
 		}
-		if (!CheckTrackLayer( Dex.Trk ) ) {
+		if (!CheckTrackLayer( trk ) ) {
 			Dex.Trk = NULL;
+
 			return C_CONTINUE;
 		}
 		trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
@@ -226,7 +251,7 @@ static STATUS_T CmdModify(
 			}
 			return C_CONTINUE;										//That's it
 		}
-		if (QueryTrack( Dex.Trk, Q_IS_CORNU )) { //Bezier
+		if (QueryTrack( Dex.Trk, Q_IS_CORNU )) { 					//Cornu
 			modifyCornuMode = TRUE;
 			if (ModifyCornu(C_START, pos) != C_CONTINUE) {			//Call Start with track
 				modifyCornuMode = FALSE;							//Function rejected Bezier
@@ -236,7 +261,7 @@ static STATUS_T CmdModify(
 			return C_CONTINUE;										//That's it
 		}
 
-		if (QueryTrack( Dex.Trk, Q_IS_POLY )) {
+		if (QueryTrack( Dex.Trk, Q_IS_DRAW )) {
 			modifyDrawPolyMode = TRUE;
 			if (ModifyDrawPoly(C_START, pos) != C_CONTINUE) {
 				modifyDrawPolyMode = FALSE;
@@ -269,6 +294,7 @@ static STATUS_T CmdModify(
 			}
 			ErrorMessage( MSG_CANNOT_CHANGE );
 		}
+		ModifyTrack(Dex.Trk, C_START, pos);
 		rc = ModifyTrack( Dex.Trk, C_DOWN, pos );
 		if ( rc != C_CONTINUE ) {
 			Dex.Trk = NULL;
@@ -569,6 +595,8 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 		if (modifyBezierMode) return ModifyBezier(action, pos);
 		if (modifyCornuMode)  return ModifyCornu(action, pos);
 		if (modifyDrawPolyMode) return ModifyDrawPoly(action, pos);
+		if (Dex.Trk)
+			return ModifyTrack( Dex.Trk, action, pos );
 		return C_CONTINUE;
 	}
 }

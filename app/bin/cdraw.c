@@ -842,15 +842,27 @@ static paramIntegerRange_t i0_100 = { 0, 100, 25 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
 static paramFloatRange_t r0_180 = { 0, 180, 80 };
+static paramFloatRange_t r0_360 = { 0, 360, 80 };
 static paramData_t drawModPLs[] = {
 
 #define drawModLengthPD			(drawModPLs[0])
 	{ PD_FLOAT, &drawModCmdContext.length, "Length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
 #define drawModRelAnglePD			(drawModPLs[1])
 	{ PD_FLOAT, &drawModCmdContext.rel_angle, "Rel Angle", PDO_NORECORD|BO_ENTER, &r0_180, N_("Relative Angle") },
-#define drawModConvertPD		(drawModPLs[2])
-	{ PD_BUTTON, (void*)DoConvertFill, "convert", PDO_NORECORD, NULL, N_("Convert Fill") },
-
+#define drawModWidthPD		(drawModPLs[2])
+	{ PD_FLOAT, &drawModCmdContext.width, "Width", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Width") },
+#define drawModHeightPD		(drawModPLs[3])
+	{ PD_FLOAT, &drawModCmdContext.height, "Height", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Height") },
+#define drawModRadiusPD		(drawModPLs[4])
+	{ PD_FLOAT, &drawModCmdContext.radius, "Radius", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") },
+#define drawModArcAnglePD		(drawModPLs[5])
+	{ PD_FLOAT, &drawModCmdContext.arc_angle, "ArcAngle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Arc Angle") },
+#define drawModRotAnglePD		(drawModPLs[6])
+	{ PD_FLOAT, &drawModCmdContext.rot_angle, "Rot Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Rotate Angle") },
+#define drawModRotCenterXPD		(drawModPLs[7])
+	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "Rot Center X,Y", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X") },
+#define drawModRotCenterYPD		(drawModPLs[8])
+	{ PD_FLOAT, &drawModCmdContext.rot_center.y, " ", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center Y") },
 };
 static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, sizeof drawModPLs/sizeof drawModPLs[0] };
 
@@ -873,8 +885,15 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 
 	switch(action&0xFF) {     //Remove Text value
 	case C_START:
+		infoSubst = FALSE;
+		DrawGeomModify( C_START, pos, &drawModCmdContext );
+		if ( infoSubst ) {
+			InfoSubstituteControls( NULL, NULL );
+			infoSubst = FALSE;
+		}
+		/* no break */
 	case C_DOWN:
-		rc = DrawGeomModify( action, pos, &drawModCmdContext );
+		rc = DrawGeomModify( C_DOWN, pos, &drawModCmdContext );
 		if ( infoSubst ) {
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
@@ -894,23 +913,99 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		ignoredDraw = NULL;
 		ComputeDrawBoundingBox( trk );
 		//DrawNewTrack( trk );
-		if (drawModCmdContext.type == SEG_POLY || drawModCmdContext.type == SEG_FILPOLY ) {
-			if (xx->segs[0].u.p.polyType != RECTANGLE) {
-				if (drawModCmdContext.prev_inx >= 0) {
-					controls[0] = drawModLengthPD.control;
-					controls[1] = drawModRelAnglePD.control;
+		if (drawModCmdContext.state == ROTATE_POS_MOD) {
+			controls[0] = drawModRotCenterXPD.control;
+			controls[1] = drawModRotCenterYPD.control;
+			labels[0] = N_("Rot Center X,Y:");
+			labels[1] = "";
+			ParamLoadControls( &drawModPG );
+			InfoSubstituteControls( controls, labels );
+			drawModRotCenterXPD.option &= ~PDO_NORECORD;
+			drawModRotCenterYPD.option &= ~PDO_NORECORD;
+			infoSubst = TRUE;
+		} else if (drawModCmdContext.state == ROTATE_ANG_MOD) {
+			controls[0] = drawModRotAnglePD.control;
+			controls[1] = NULL;
+			labels[0] = N_("Rot Angle");
+			ParamLoadControls( &drawModPG );
+			InfoSubstituteControls( controls, labels );
+			drawModRotAnglePD.option &= ~PDO_NORECORD;
+			infoSubst = TRUE;
+		} else if (drawModCmdContext.state == SELECTED_PT_MOD) {
+			switch(drawModCmdContext.type) {
+			case SEG_POLY:
+			case SEG_FILPOLY:
+				if (xx->segs[0].u.p.polyType != RECTANGLE) {
+					if (drawModCmdContext.prev_inx >= 0) {
+						controls[0] = drawModLengthPD.control;
+						controls[1] = drawModRelAnglePD.control;
+						controls[2] = NULL;
+						labels[0] = N_("Seg Length");
+						labels[1] = N_("Rel Angle");
+						ParamLoadControls( &drawModPG );
+						InfoSubstituteControls( controls, labels );
+						drawModLengthPD.option &= ~PDO_NORECORD;
+						drawModRelAnglePD.option &= ~PDO_NORECORD;
+						infoSubst = TRUE;
+					}
+				} else  {
+					controls[0] = drawModWidthPD.control;
+					controls[1] = drawModHeightPD.control;
 					controls[2] = NULL;
-					labels[0] = N_("Seg Length");
-					labels[1] = N_("Rel Angle");
+					labels[0] = N_("Width");
+					labels[1] = N_("Height");
 					ParamLoadControls( &drawModPG );
 					InfoSubstituteControls( controls, labels );
-					drawModLengthPD.option &= ~PDO_NORECORD;
-					drawModRelAnglePD.option &= ~PDO_NORECORD;
+					drawModWidthPD.option &= ~PDO_NORECORD;
+					drawModHeightPD.option &= ~PDO_NORECORD;
 					infoSubst = TRUE;
 				}
+			break;
+			case SEG_STRLIN:
+			case SEG_BENCH:
+			case SEG_DIMLIN:
+			case SEG_TBLEDGE:
+				controls[0] = drawModLengthPD.control;
+				controls[1] = drawModRelAnglePD.control;
+				controls[2] = NULL;
+				labels[0] = N_("Length");
+				labels[1] = N_("Angle");
+				ParamLoadControls( &drawModPG );
+				InfoSubstituteControls( controls, labels );
+				drawModLengthPD.option &= ~PDO_NORECORD;
+				drawModRelAnglePD.option &= ~PDO_NORECORD;
+				infoSubst = TRUE;
+			break;
+			case SEG_CRVLIN:
+				if (!drawModCmdContext.circle) {
+					controls[0] = drawModLengthPD.control;
+					controls[1] = drawModRadiusPD.control;
+					controls[2] = NULL;
+					labels[0] = N_("Arc Angle");
+					labels[1] = N_("Radius");
+					ParamLoadControls( &drawModPG );
+					InfoSubstituteControls( controls, labels );
+					drawModArcAnglePD.option &= ~PDO_NORECORD;
+					drawModRadiusPD.option &= ~PDO_NORECORD;
+					infoSubst = TRUE;
+				break;
+				}
+			/* no break */
+			case SEG_FILCRCL:
+				controls[0] = drawModRadiusPD.control;
+				controls[1] = NULL;
+				labels[0] = N_("Radius");
+				ParamLoadControls( &drawModPG );
+				InfoSubstituteControls( controls, labels );
+				drawModRadiusPD.option &= ~PDO_NORECORD;
+				infoSubst = TRUE;
+			break;
+			default:
+			break;
 			}
 		}
 		break;
+
 	case C_TEXT:
 		ignoredDraw = trk;
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
@@ -925,7 +1020,17 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 			infoSubst = FALSE;
 		}
 		break;
+	case C_FINISH:
+	case C_CONFIRM:
+	case C_TERMINATE:
+		if ( infoSubst ) {
+			InfoSubstituteControls( NULL, NULL );
+			infoSubst = FALSE;
+		}
+		break;
+
 	default:
+
 		break;
 	}
 	return rc;
@@ -1045,10 +1150,7 @@ static BOOL_T QueryDraw( track_p trk, int query )
 		return TRUE;
 	case Q_IS_POLY:
 		if ((xx->segs[0].type == SEG_POLY) || (xx->segs[0].type == SEG_FILPOLY) ) {
-			if (xx->segs[0].u.p.polyType != RECTANGLE) {
-				return TRUE;
-			}
-			return FALSE;
+			return TRUE;
 		}
 		else
 			return FALSE;

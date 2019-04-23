@@ -182,7 +182,8 @@ static void DrawTurntable( track_p t, drawCmd_p d, wDrawColor color )
 	struct extraData *xx = GetTrkExtraData(t);
 	coOrd p0, p1;
 	EPINX_T ep;
-	long widthOptions = DTS_TIES;
+	long widthOptions = DTS_LEFT|DTS_RIGHT|DTS_TIES;
+
 
 	if ( !ValidateTurntablePosition(t) ) {
 		p0.y = p1.y = xx->pos.y;

@@ -517,10 +517,6 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 	struct extraData *xx = GetTrkExtraData(t);
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
-	if ((d->options&DC_BLOCK_LEFT)!=0)
-		widthOptions = DTS_BLOCK_LEFT;
-	if ((d->options&DC_BLOCK_LEFT)!=0)
-		widthOptions = DTS_BLOCK_RIGHT;
 
 	if (GetTrkWidth(t) == 2)
 		widthOptions |= DTS_THICK2;
@@ -540,7 +536,8 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 			 (d->options&DC_TIES)!=0 &&
 			 d->scale<scale2rail/2 )
 		DrawSegsO(d,t,zero,0.0,xx->cornuData.arcSegs.ptr,xx->cornuData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions|DTS_TIES);
-	DrawSegsO(d,t,zero,0.0,xx->cornuData.arcSegs.ptr,xx->cornuData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
+	else
+		DrawSegsO(d,t,zero,0.0,xx->cornuData.arcSegs.ptr,xx->cornuData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
 	if ( (d->funcs->options & wDrawOptTemp) == 0 &&
 		 (d->options&DC_QUICK) == 0 ) {
 		DrawEndPt( d, t, 0, color );

@@ -69,6 +69,8 @@ typedef struct {
 				BOOL_T Changed;
 		} drawContext_t;
 
+typedef enum {NONE_MOD, STARTED_MOD, SELECTED_PT_MOD, ROTATE_POS_MOD, ROTATE_ANG_MOD} ModState_e;
+
 typedef struct {
 				void (*message)( char *, ... );
 				void (*Redraw)( void );
@@ -76,6 +78,7 @@ typedef struct {
 				double length;
 				ANGLE_T rel_angle;
 				double radius;
+				ANGLE_T arc_angle;
 				ANGLE_T abs_angle;
 				double height;
 				double width;
@@ -87,6 +90,10 @@ typedef struct {
 				wIndex_t segCnt;
 				trkSeg_p segPtr;
 				wBool_t selected;
+				wBool_t circle;
+				ModState_e state;
+				coOrd rot_center;
+				ANGLE_T rot_angle;
 		} drawModContext_t;
 
 typedef enum {LENGTH_UPDATE, WIDTH_UPDATE} drawUpdateType_e;
