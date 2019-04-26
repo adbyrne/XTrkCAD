@@ -29,6 +29,7 @@
 #include "i18n.h"
 #include "param.h"
 #include "track.h"
+#include "utility.h"
 
 static wWin_p elevW;
 
@@ -393,6 +394,40 @@ if (oldElevationEvaluation) {
 	HilightSelectedEndPt(TRUE, elevTrk, elevEp);
 }
 
+static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
+	DIST_T len, len1, elev0, elev1, dist0, dist1;
+	if ( IsTrack( trk ) && GetTrkEndPtCnt(trk) == 2 ) {
+		dist0 = FindDistance(pos,GetTrkEndPos(trk,0));
+		dist1 = FindDistance(pos,GetTrkEndPos(trk,1));
+		if (EndPtIsDefinedElev(trk,0))
+			elev0 = GetTrkEndElevHeight(trk,0);
+		else {
+			if (!GetTrkEndElevCachedHeight(trk,0,&elev0,&len)) {
+				if (GetTrkLength( trk, 0, 1 )<0.1) return FALSE;
+				ComputeElev( trk, 0, FALSE, &elev0, NULL, TRUE );
+			}
+		}
+		if (EndPtIsDefinedElev(trk,1))
+			elev1 = GetTrkEndElevHeight(trk,1);
+		else {
+			if (!GetTrkEndElevCachedHeight(trk,1,&elev1,&len1)) {
+				if (GetTrkLength( trk, 0, 1 )<0.1) return FALSE;
+				ComputeElev( trk, 0, FALSE, &elev0, NULL, TRUE );
+			}
+		}
+		if (dist1+dist0 < 0.1) {
+			*height = elev0;
+			return TRUE;
+		}
+		*height = ((elev1-elev0)*(dist0/(dist0+dist1)))+elev0;
+		return TRUE;
+	} else if (GetTrkEndPtCnt(trk) == 1 && GetTrkEndElevCachedHeight(trk,0,&elev0,&len)) {
+		*height = elev0;
+		return TRUE;
+	}
+	return FALSE;
+}
+
 
 static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 {
@@ -419,6 +454,29 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		HilightElevations( TRUE );
 		elevTrk = NULL;
 		elevUndo = FALSE;
+		return C_CONTINUE;
+	case wActionMove:
+		if ((trk0 = OnTrack2(&pos,FALSE, TRUE, FALSE, NULL)) != NULL) {
+			EPINX_T ep0 = 0, ep1 = 1;
+			DIST_T elev0, elev1;
+			if (GetTrkEndPtCnt(trk0) == 2) {
+				if (!GetPointElev(trk0,pos,&elev0)) {
+					InfoMessage( _("Select End-Point") );
+					return C_CONTINUE;
+				}
+			} else {
+				InfoMessage( _("Select End-Point") );
+				return C_CONTINUE;
+			}
+			if ((trk1 = OnTrack2(&pos,FALSE, TRUE, FALSE, trk0)) != NULL) {
+				if (GetTrkEndPtCnt(trk1) == 2) {
+					if (GetPointElev(trk1,pos, &elev1))
+						InfoMessage (_("Track Elevation %0.3f, Clearance %0.3f"), elev0, elev0-elev1);
+					return C_CONTINUE;
+				}
+			}
+			InfoMessage (_("Track Elevation %0.3f"), elev0);
+		} else InfoMessage( _("Select End-Point") );
 		return C_CONTINUE;
 	case C_RDOWN:
 	case C_RMOVE:
@@ -469,6 +527,6 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 EXPORT void InitCmdElevation( wMenu_p menu )
 {
 	ParamRegister( &elevationPG );
-	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"), wIconCreatePixMap(elev_xpm), LEVEL0_50, IC_POPUP|IC_LCLICK, ACCL_ELEVATION, NULL );
+	AddMenuButton( menu, CmdElevation, "cmdElevation", _("Elevation"), wIconCreatePixMap(elev_xpm), LEVEL0_50, IC_POPUP|IC_LCLICK|IC_RCLICK|IC_WANT_MOVE, ACCL_ELEVATION, NULL );
 }
 

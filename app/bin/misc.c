@@ -1041,9 +1041,11 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 	wAction_t rc;
 	int mode;
 
-	if (action == wActionMove
-			&& (commandList[curCommand].options & IC_WANT_MOVE) == 0)
-		return C_CONTINUE;
+	if (action == wActionMove) {
+		if ((commandList[curCommand].options & IC_WANT_MOVE) == 0)
+			return C_CONTINUE;
+	}
+
 
 	if (!CheckClick(&action, &pos,
 			(int) (commandList[curCommand].options & IC_LCLICK), TRUE))

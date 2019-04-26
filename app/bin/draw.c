@@ -2168,7 +2168,7 @@ EXPORT BOOL_T IsClose(
  *
  */
 
-static int ignoreMoves = 1;
+static int ignoreMoves = 0;
 
 EXPORT void ResetMouseState( void )
 {

@@ -810,7 +810,9 @@ static BOOL_T SplitCurve( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 		a0 = a;
 	}
 	trk1 = NewCurvedTrack( xx->pos, xx->radius, a0, a1, 0 );
+	//Copy existing elevation ep details to new track
 	AdjustCurveEndPt( trk, ep, a+(ep==0?-90.0:90.0) );
+	//Wipe out elevation on old ep
 	*leftover = trk1;
 	*ep0 = 1-ep;
 	*ep1 = ep;

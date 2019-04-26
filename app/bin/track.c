@@ -1061,6 +1061,7 @@ EXPORT void ResolveIndex( void )
 	track_p trk;
 	EPINX_T ep;
 	TRK_ITERATE(trk) {
+		LOG (log_track, 1, ( "ResNextTrack( T%d, t%d, E%d, X%ld)\n", trk->index, trk->type, trk->endCnt, trk->extraSize ));
 		for (ep=0; ep<trk->endCnt; ep++)
 			if (trk->endPt[ep].index >= 0) {
 				trk->endPt[ep].track = FindTrack( trk->endPt[ep].index );

@@ -770,6 +770,7 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     }
 
     trk1 = NewCornuTrack(new.pos,new.center,new.angle,new.radius,NULL,0);
+    //Copy elevation details from old ep to new ep 0/1
     if (trk1==NULL) {
     	wBeep();
     	InfoMessage(_("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
@@ -788,6 +789,7 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     xx->cornuData.a[ep] = NormalizeAngle(new.angle[1-ep]+180);
     xx->cornuData.r[ep] = new.radius[1-ep];
     xx->cornuData.c[ep] = new.center[1-ep];
+    //Wipe out old elevation for ep1
 
     RebuildCornu(trk);
 
