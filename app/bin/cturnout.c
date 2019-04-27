@@ -671,15 +671,15 @@ static coOrd MapPathPos(
 		ep = 1-ep;
 	}
 
-	for ( inx=0,segPtr=xx->segs; inx<xx->segCnt; inx++,segPtr++ ) {
-		if ( !IsSegTrack(segPtr) ) continue;
-		if ( --segInx > 0 ) continue;
-		pos = GetSegEndPt( segPtr, ep, FALSE, NULL );
-		REORIGIN1( pos, xx->angle, xx->orig );
-		return pos;
+	segPtr=xx->segs+(segInx-1);
+	if (!IsSegTrack(segPtr)) {
+		fprintf( stderr, "mapPathPos: bad segInx: %d\n", segInx );
+		return zero;
 	}
-	fprintf( stderr, "mapPathPos: bad segInx: %d\n", segInx );
-	return zero;
+	pos = GetSegEndPt( segPtr, ep, FALSE, NULL );
+	REORIGIN1( pos, xx->angle, xx->orig );
+	return pos;
+
 }
 
 

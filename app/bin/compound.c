@@ -54,10 +54,10 @@ char ConvertPathSegToExternal(char signed pp, int segCnt,trkSeg_p segs) {
 	int old_inx;
 	EPINX_T old_EP;
 	GetSegInxEP(pp,&old_inx,&old_EP);
-	int j =-1;
-	for (int i=0;i<=old_inx;i++) {
-		if ( IsSegTrack(&segs[i]) ) {
-			j++;
+	int j = old_inx;
+	for (int i=0;i<old_inx;i++) {
+		if ( !IsSegTrack(&segs[i]) ) {
+			j--;
 		}
 	}
 	SetSegInxEP(&new_pp,j,old_EP);
@@ -79,7 +79,7 @@ BOOL_T WriteCompoundPathsEndPtsSegs(
 	BOOL_T rc = TRUE;
 	for ( pp=paths; *pp; pp+=2 ) {
 		rc &= fprintf( f, "\tP \"%s\"", pp )>0;
-		for ( pp+=strlen((char *)pp)+1; pp[0]!=0||pp[1]!=0; pp++ )
+		for ( pp+=strlen((char *)pp)+1; pp[0]!=0 || pp[1]!=0; pp++ )
 			rc &= fprintf( f, " %d", ConvertPathSegToExternal(pp[0],segCnt,segs) )>0;
 		rc &= fprintf( f, "\n" )>0;
 	}

@@ -1444,8 +1444,8 @@ groupSimpleTurnout:
 			trkSeg_p from_p = GetSegFromSegMap(i);
 			trkSeg_p to_p = &DYNARR_LAST(trkSeg_t, outputSegs_da);
 			memcpy((void *)to_p,(void *)from_p,sizeof( trkSeg_t));
-			CloneFilledDraw( 1, to_p, FALSE );
 		}
+		CloneFilledDraw( outputSegs_da.cnt, outputSegs_da.ptr, FALSE );
 
 		GetSegBounds( zero, 0, outputSegs_da.cnt, &outputSegs(0), &orig, &size );
 		orig.x = - tempEndPts(0).pos.x;
