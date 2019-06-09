@@ -2283,11 +2283,13 @@ static void CreateMenus(void) {
 	InitCmdTurntable(addM);
 
 	cmdGroup = BG_CONTROL;
+	ButtonGroupBegin( _("Control Element"), "cmdControlElements", _("Control Element") );
 	InitCmdBlock(addM);
 	InitCmdSwitchMotor(addM);
 	InitCmdSignal(addM);
 	InitCmdControl(addM);
 	InitCmdSensor(addM);
+	ButtonGroupEnd();
 
 	/*
 	 * CHANGE MENU
