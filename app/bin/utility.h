@@ -64,5 +64,6 @@ int PickLineEndPt( coOrd, double, coOrd );
 coOrd AddCoOrd( coOrd, coOrd, double );
 int ClipLine( coOrd *, coOrd *, coOrd, double, coOrd );
 coOrd FindCentroid(int vertexCount, coOrd vertices[] );
+double FindArcCenter(coOrd * c,coOrd p0,coOrd p1, double r );
 
 #endif

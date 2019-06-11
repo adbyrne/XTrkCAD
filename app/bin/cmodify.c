@@ -52,7 +52,7 @@ static struct {
 static int log_modify;
 static BOOL_T modifyBezierMode;
 static BOOL_T modifyCornuMode;
-static BOOL_T modifyDrawPolyMode;
+static BOOL_T modifyDrawMode;
 
 /*
  * Call cbezier.c CmdBezModify to alter Bezier Track and Lines.
@@ -113,9 +113,9 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 }
 
 /*
- * Picking a POLY will allow point modifications until terminated with "Enter"
+ * Picking a DRAW will allow point modifications until terminated with "Enter"
  */
-static STATUS_T ModifyDrawPoly(wAction_t action, coOrd pos) {
+static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
 	if (Dex.Trk == NULL) return C_ERROR;   //No item picked yet!
 	switch (action&0xFF) {
@@ -127,14 +127,15 @@ static STATUS_T ModifyDrawPoly(wAction_t action, coOrd pos) {
 			break;
 		case C_OK:
 		case C_TEXT:
-			//Delete - continues
-			if (action>>8 == 127 || action>>8 == 8) return ModifyTrack( Dex.Trk, action, pos );
+			//Delete or '0' - continues
+			if (action>>8 == 127 || action>>8 == 8 || (
+					action>>8 >= 48 && action>>8 <= 52)) return ModifyTrack( Dex.Trk, action, pos );
 			//Enter/Space does not
 			if (action>>8 !=32 && action>>8 != 13) return C_CONTINUE;
 			UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 			UndoModify( Dex.Trk );
 			rc = ModifyTrack( Dex.Trk, action, pos );
-			if (rc != C_CONTINUE) modifyDrawPolyMode = FALSE;
+			if (rc != C_CONTINUE) modifyDrawMode = FALSE;
 			UndoEnd();
 			break;
 		case C_FINISH:
@@ -142,11 +143,16 @@ static STATUS_T ModifyDrawPoly(wAction_t action, coOrd pos) {
 		case C_TERMINATE:
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			Dex.Trk = NULL;
-			modifyDrawPolyMode = FALSE;
+			modifyDrawMode = FALSE;
 			rc = C_TERMINATE;
 			break;
 		case C_REDRAW:
 			rc = ModifyTrack( Dex.Trk, action, pos );
+			break;
+		case C_CMDMENU:
+			rc = ModifyTrack( Dex.Trk, action, pos );
+			break;
+		default:
 			break;
 	}
 	return rc;
@@ -192,7 +198,7 @@ static STATUS_T CmdModify(
 		changeTrackMode = modifyRulerMode = FALSE;
 		modifyBezierMode = FALSE;
 		modifyCornuMode = FALSE;
-		modifyDrawPolyMode = FALSE;
+		modifyDrawMode = FALSE;
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -200,15 +206,15 @@ static STATUS_T CmdModify(
 			return ModifyBezier(C_DOWN, pos);
 		if (modifyCornuMode)
 			return ModifyCornu(C_DOWN, pos);
-		if (modifyDrawPolyMode)
-			return ModifyDrawPoly(C_DOWN, pos);
+		if (modifyDrawMode)
+			return ModifyDraw(C_DOWN, pos);
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
 		tempSegs(1).color = wDrawColorBlack;
 		tempSegs(1).width = 0;
 		tempSegs_da.cnt = 0;
-		SnapPos( &pos );
+		//SnapPos( &pos );
 		//If on a different track
 		//track_p trk = OnTrack( &pos, TRUE, FALSE );
 		//if (!modifyRulerMode && trk && Dex.Trk && trk != Dex.Trk) {
@@ -227,16 +233,16 @@ static STATUS_T CmdModify(
 		//	changeTrackMode = modifyRulerMode = FALSE;
 		//	modifyBezierMode = FALSE;
 		//	modifyCornuMode = FALSE;
-		//	modifyDrawPolyMode = FALSE;
+		//	modifyDrawMode = FALSE;
 		//}
-		//Dex.Trk = OnTrack( &pos, TRUE, FALSE );
-		Dex.Trk = trk;
+		Dex.Trk = OnTrack( &pos, TRUE, FALSE );
+		//Dex.Trk = trk;
 		if (Dex.Trk == NULL) {
 			if ( ModifyRuler( C_DOWN, pos ) == C_CONTINUE )
 				modifyRulerMode = TRUE;
 			return C_CONTINUE;
 		}
-		if (!CheckTrackLayer( trk ) ) {
+		if (!CheckTrackLayer( Dex.Trk ) ) {
 			Dex.Trk = NULL;
 
 			return C_CONTINUE;
@@ -262,9 +268,9 @@ static STATUS_T CmdModify(
 		}
 
 		if (QueryTrack( Dex.Trk, Q_IS_DRAW )) {
-			modifyDrawPolyMode = TRUE;
-			if (ModifyDrawPoly(C_START, pos) != C_CONTINUE) {
-				modifyDrawPolyMode = FALSE;
+			modifyDrawMode = TRUE;
+			if (ModifyDraw(C_START, pos) != C_CONTINUE) {
+				modifyDrawMode = FALSE;
 				Dex.Trk = NULL;
 				tempSegs_da.cnt = 0;
 			}
@@ -314,8 +320,8 @@ static STATUS_T CmdModify(
 			return ModifyBezier(C_MOVE, pos);
 		if ( modifyCornuMode )
 			return ModifyCornu(C_MOVE, pos);
-		if ( modifyDrawPolyMode)
-			return ModifyDrawPoly(C_MOVE, pos);
+		if ( modifyDrawMode)
+			return ModifyDraw(C_MOVE, pos);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		SnapPos( &pos );
@@ -339,8 +345,8 @@ static STATUS_T CmdModify(
 			return ModifyBezier( C_UP, pos);
 		if (modifyCornuMode)
 			return ModifyCornu(C_UP, pos);
-		if (modifyDrawPolyMode)
-			return ModifyDrawPoly(C_UP, pos);
+		if (modifyDrawMode)
+			return ModifyDraw(C_UP, pos);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		SnapPos( &pos );
@@ -359,7 +365,7 @@ static STATUS_T CmdModify(
 		modifyRulerMode = FALSE;
 		modifyBezierMode = FALSE;
 		modifyCornuMode = FALSE;
-		modifyDrawPolyMode = FALSE;
+		modifyDrawMode = FALSE;
 		Dex.Trk = OnTrack( &pos, TRUE, TRUE );
 		if (Dex.Trk) {
 			if (!CheckTrackLayer( Dex.Trk ) ) {
@@ -574,7 +580,7 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 	case C_REDRAW:
 		if (modifyBezierMode) return ModifyBezier(C_REDRAW, pos);
 		if (modifyCornuMode) return ModifyCornu(C_REDRAW, pos);
-		if (modifyDrawPolyMode) return ModifyDrawPoly(C_REDRAW, pos);
+		if (modifyDrawMode) return ModifyDraw(C_REDRAW, pos);
 		if ( (!changeTrackMode) && Dex.Trk && !QueryTrack( Dex.Trk,	 Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK ) )
 		   UndrawNewTrack( Dex.Trk );
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
@@ -587,14 +593,14 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 			return ModifyBezier(action, pos);
 		if (modifyCornuMode)
 			return ModifyCornu(action, pos);
-		if (modifyDrawPolyMode)
-			return ModifyDrawPoly(action, pos);
+		if (modifyDrawMode)
+			return ModifyDraw(action, pos);
 		return ModifyTrack( Dex.Trk, action, pos );
 
 	default:
 		if (modifyBezierMode) return ModifyBezier(action, pos);
 		if (modifyCornuMode)  return ModifyCornu(action, pos);
-		if (modifyDrawPolyMode) return ModifyDrawPoly(action, pos);
+		if (modifyDrawMode) return ModifyDraw(action, pos);
 		if (Dex.Trk)
 			return ModifyTrack( Dex.Trk, action, pos );
 		return C_CONTINUE;
@@ -612,6 +618,6 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 
 void InitCmdModify( wMenu_p menu )
 {
-	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"), wIconCreatePixMap(extend_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_MODIFY, NULL );
+	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"), wIconCreatePixMap(extend_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
 	log_modify = LogFindIndex( "modify" );
 }

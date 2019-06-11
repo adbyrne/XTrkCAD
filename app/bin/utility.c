@@ -631,6 +631,24 @@ coOrd FindCentroid(int vertexCount, coOrd vertices[] )
     return centroid;
 }
 
+double FindArcCenter(
+		coOrd * pos,
+		coOrd p0,
+		coOrd p1,
+		double radius )
+{
+	double d;
+	double a0, a1;
+	d = FindDistance( p0, p1 )/2.0;
+	a0 = FindAngle( p0, p1 );
+	a1 = NormalizeAngle(R2D(asin( d/radius )));
+	if (a1 > 180)
+		a1 -= 360;
+	a0 = NormalizeAngle( a0 + (90.0-a1) );
+	Translate( pos, p0, a0, radius );
+	return a1*2.0;
+}
+
 
 #ifdef LATER
 BOOL_T ClipArc( double a0, double a1, coOrd pos, double radius, coOrd orig, double angle, double size )

@@ -69,7 +69,8 @@ typedef struct {
 				BOOL_T Changed;
 		} drawContext_t;
 
-typedef enum {NONE_MOD, STARTED_MOD, SELECTED_PT_MOD, ROTATE_POS_MOD, ROTATE_ANG_MOD} ModState_e;
+typedef enum {MOD_NONE, MOD_STARTED, MOD_SELECTED_PT, MOD_AFTER_PT,
+		MOD_ORIGIN, MOD_AFTER_ORIG } ModState_e;
 
 typedef struct {
 				void (*message)( char *, ... );
@@ -79,6 +80,7 @@ typedef struct {
 				ANGLE_T rel_angle;
 				double radius;
 				ANGLE_T arc_angle;
+				int last_inx;
 				ANGLE_T abs_angle;
 				double height;
 				double width;
@@ -92,8 +94,19 @@ typedef struct {
 				wBool_t selected;
 				wBool_t circle;
 				ModState_e state;
+				coOrd rel_center;
 				coOrd rot_center;
+				coOrd translate_center;
+				coOrd moved;
+				coOrd arm;
+				coOrd new_arm;
 				ANGLE_T rot_angle;
+				coOrd p0;
+				coOrd p1;
+				coOrd pm;
+				coOrd pc;
+				DIST_T disp;
+				wBool_t rotate_state;
 		} drawModContext_t;
 
 typedef enum {LENGTH_UPDATE, WIDTH_UPDATE} drawUpdateType_e;
@@ -105,4 +118,5 @@ extern long lineWidth;
 void DrawGeomOp( void * );
 STATUS_T DrawGeomMouse( wAction_t, coOrd, drawContext_t *);
 STATUS_T DrawGeomModify( wAction_t, coOrd, drawModContext_t * );
+STATUS_T DrawGeomOriginMove(wAction_t, coOrd, drawModContext_t * );
 #endif //HAVE_DRAWGEOM_H

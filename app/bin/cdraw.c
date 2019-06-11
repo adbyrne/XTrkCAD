@@ -37,6 +37,12 @@
 
 extern TRKTYP_T T_BZRLIN;
 
+static wMenu_p drawModDelMI;
+static wMenuPush_p drawModDel;
+static wMenuPush_p drawModCenterMode;
+static wMenuPush_p drawModPointsMode;
+static wMenuPush_p drawModSet[3];
+
 extern void wSetSelectedFontSize(int size);
 
 static long fontSizeList[] = {
@@ -829,49 +835,53 @@ static drawModContext_t drawModCmdContext = {
 		DrawModRedraw,
 		&mainD};
 
-static void DrawModDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
-{
-	 DrawGeomModify(C_UPDATE,zero,&drawModCmdContext);
-}
 
+static BOOL_T infoSubst = FALSE;
 
 static paramIntegerRange_t i0_100 = { 0, 100, 25 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
-static paramFloatRange_t r0_180 = { 0, 180, 80 };
+static paramFloatRange_t r10000_10000 = {-10000, 10000};
 static paramFloatRange_t r0_360 = { 0, 360, 80 };
 static paramData_t drawModPLs[] = {
 
 #define drawModLengthPD			(drawModPLs[0])
 	{ PD_FLOAT, &drawModCmdContext.length, "Length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
 #define drawModRelAnglePD			(drawModPLs[1])
-	{ PD_FLOAT, &drawModCmdContext.rel_angle, "Rel Angle", PDO_NORECORD|BO_ENTER, &r0_180, N_("Relative Angle") },
+	{ PD_FLOAT, &drawModCmdContext.rel_angle, "Rel Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Relative Angle") },
 #define drawModWidthPD		(drawModPLs[2])
 	{ PD_FLOAT, &drawModCmdContext.width, "Width", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Width") },
 #define drawModHeightPD		(drawModPLs[3])
 	{ PD_FLOAT, &drawModCmdContext.height, "Height", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Height") },
 #define drawModRadiusPD		(drawModPLs[4])
-	{ PD_FLOAT, &drawModCmdContext.radius, "Radius", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") },
+#define drawModRadius           4
+	{ PD_FLOAT, &drawModCmdContext.radius, "Radius", PDO_NORECORD|BO_ENTER, &r10000_10000, N_("Radius") },
 #define drawModArcAnglePD		(drawModPLs[5])
 	{ PD_FLOAT, &drawModCmdContext.arc_angle, "ArcAngle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Arc Angle") },
 #define drawModRotAnglePD		(drawModPLs[6])
 	{ PD_FLOAT, &drawModCmdContext.rot_angle, "Rot Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Rotate Angle") },
 #define drawModRotCenterXPD		(drawModPLs[7])
+#define drawModRotCenterInx      7
 	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "Rot Center X,Y", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X") },
 #define drawModRotCenterYPD		(drawModPLs[8])
 	{ PD_FLOAT, &drawModCmdContext.rot_center.y, " ", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center Y") },
 };
 static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, sizeof drawModPLs/sizeof drawModPLs[0] };
 
-
+static void DrawModDlgUpdate(
+		paramGroup_p pg,
+		int inx,
+		void * valueP )
+{
+	 DrawGeomModify(C_UPDATE,zero,&drawModCmdContext);
+	 ParamLoadControl(&drawModPG,drawModRotCenterInx-1);	  //Make sure the angle is updated in case center moved
+	 ParamLoadControl(&drawModPG,drawModRadius);			 // Make sure Radius updated
+}
 static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
 	STATUS_T rc = C_CONTINUE;
-	static BOOL_T infoSubst = FALSE;
+
 	wControl_p controls[5];				//Always needs a NULL last entry
 	char * labels[4];
 
@@ -886,14 +896,21 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 	switch(action&0xFF) {     //Remove Text value
 	case C_START:
 		infoSubst = FALSE;
-		DrawGeomModify( C_START, pos, &drawModCmdContext );
+		rc = DrawGeomModify( C_START, pos, &drawModCmdContext );
 		if ( infoSubst ) {
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
-		/* no break */
+		break;
 	case C_DOWN:
 		rc = DrawGeomModify( C_DOWN, pos, &drawModCmdContext );
+		if ( infoSubst ) {
+			InfoSubstituteControls( NULL, NULL );
+			infoSubst = FALSE;
+		}
+		break;
+	case C_LDOUBLE:
+		rc = DrawGeomModify( C_LDOUBLE, pos, &drawModCmdContext );
 		if ( infoSubst ) {
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
@@ -913,25 +930,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		ignoredDraw = NULL;
 		ComputeDrawBoundingBox( trk );
 		//DrawNewTrack( trk );
-		if (drawModCmdContext.state == ROTATE_POS_MOD) {
-			controls[0] = drawModRotCenterXPD.control;
-			controls[1] = drawModRotCenterYPD.control;
-			labels[0] = N_("Rot Center X,Y:");
-			labels[1] = "";
-			ParamLoadControls( &drawModPG );
-			InfoSubstituteControls( controls, labels );
-			drawModRotCenterXPD.option &= ~PDO_NORECORD;
-			drawModRotCenterYPD.option &= ~PDO_NORECORD;
-			infoSubst = TRUE;
-		} else if (drawModCmdContext.state == ROTATE_ANG_MOD) {
-			controls[0] = drawModRotAnglePD.control;
-			controls[1] = NULL;
-			labels[0] = N_("Rot Angle");
-			ParamLoadControls( &drawModPG );
-			InfoSubstituteControls( controls, labels );
-			drawModRotAnglePD.option &= ~PDO_NORECORD;
-			infoSubst = TRUE;
-		} else if (drawModCmdContext.state == SELECTED_PT_MOD) {
+		if (drawModCmdContext.state == MOD_AFTER_PT) {
 			switch(drawModCmdContext.type) {
 			case SEG_POLY:
 			case SEG_FILPOLY:
@@ -940,8 +939,8 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 						controls[0] = drawModLengthPD.control;
 						controls[1] = drawModRelAnglePD.control;
 						controls[2] = NULL;
-						labels[0] = N_("Seg Length");
-						labels[1] = N_("Rel Angle");
+						labels[0] = N_("Seg Lth");
+						labels[1] = N_("Rel Ang");
 						ParamLoadControls( &drawModPG );
 						InfoSubstituteControls( controls, labels );
 						drawModLengthPD.option &= ~PDO_NORECORD;
@@ -978,10 +977,10 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 			break;
 			case SEG_CRVLIN:
 				if (!drawModCmdContext.circle) {
-					controls[0] = drawModLengthPD.control;
+					controls[0] = drawModArcAnglePD.control;
 					controls[1] = drawModRadiusPD.control;
 					controls[2] = NULL;
-					labels[0] = N_("Arc Angle");
+					labels[0] = N_("Arc Ang");
 					labels[1] = N_("Radius");
 					ParamLoadControls( &drawModPG );
 					InfoSubstituteControls( controls, labels );
@@ -1001,32 +1000,52 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 				infoSubst = TRUE;
 			break;
 			default:
+				InfoSubstituteControls( NULL, NULL );
+				infoSubst = FALSE;
 			break;
 			}
+		} else {
+			InfoSubstituteControls( NULL, NULL );
+			infoSubst = FALSE;
 		}
 		break;
-
+	case C_CMDMENU:
+		wMenuPopupShow( drawModDelMI );
+		wMenuPushEnable( drawModDel,(!drawModCmdContext.rotate_state)&&(drawModCmdContext.last_inx>=0));
+		wMenuPushEnable( drawModPointsMode,drawModCmdContext.rotate_state);
+		wMenuPushEnable( drawModCenterMode,!drawModCmdContext.rotate_state);
+		for (int i=0;i<3;i++) {
+			wMenuPushEnable( drawModSet[i],drawModCmdContext.rotate_state);
+		}
+		break;
 	case C_TEXT:
-		ignoredDraw = trk;
+		ignoredDraw = trk ;
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
-		xx->angle = drawModCmdContext.angle;
-		xx->orig = drawModCmdContext.orig;
-		ignoredDraw = NULL;
-		ComputeDrawBoundingBox( trk );
-		//DrawNewTrack( trk );
 		MainRedraw();
 		if ( infoSubst ) {
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
-		break;
+		if (rc == C_CONTINUE) break;
+		/* no break*/
 	case C_FINISH:
+		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
+		xx->angle = drawModCmdContext.angle;
+		xx->orig = drawModCmdContext.orig;
+		ignoredDraw = NULL;
+		ComputeDrawBoundingBox( trk );
+		MainRedraw();
+		break;
 	case C_CONFIRM:
 	case C_TERMINATE:
+		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
+		drawModCmdContext.state = MOD_NONE;
+		DYNARR_RESET(trkSeg_t,tempSegs_da);
 		if ( infoSubst ) {
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
+		MainRedraw();
 		break;
 
 	default:
@@ -1498,7 +1517,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionRDown:
 	case wActionRDrag:
 	case wActionText:
-	case C_CMDMENU:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		if (!((MyGetKeyState() & WKEY_SHIFT) != 0)) {
 			SnapPos( &pos );
@@ -1606,6 +1624,10 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 
 	case C_REDRAW:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
+		return DrawGeomMouse( action, pos, &drawCmdContext);
+
+	case C_CMDMENU:
+		if (drawCmdContext.Op == OP_BEZLIN) return C_CONTINUE;
 		return DrawGeomMouse( action, pos, &drawCmdContext);
 
 	default:
@@ -1882,10 +1904,44 @@ EXPORT BOOL_T ReadText( char * line )
 	return TRUE;
 }
 
+void MenuMode(int mode) {
+	if ( infoSubst ) {
+		InfoSubstituteControls( NULL, NULL );
+		infoSubst = FALSE;
+	}
+	if (mode == 1)
+		DrawGeomOriginMove(C_START,zero,&drawModCmdContext);
+	else
+		DrawGeomModify(C_START,zero,&drawModCmdContext);
+}
+
+void MenuEnter(int key) {
+	int action;
+	action = key<<8;
+	action &=0xFF&C_TEXT;
+	if (drawModCmdContext.rotate_state)
+		DrawGeomOriginMove(action,zero,&drawModCmdContext);
+	else
+		DrawGeomModify(action,zero,&drawModCmdContext);
+}
 
 EXPORT void InitTrkDraw( void )
 {
 	T_DRAW = InitObject( &drawCmds );
 	AddParam( "TABLEEDGE", ReadTableEdge );
 	AddParam( "TEXT", ReadText );
+
+
+
+	drawModDelMI = MenuRegister( "Modify Draw Edit Menu" );
+	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode"), 0, (wMenuCallBack_p)MenuMode, (void*) 0 );
+	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point"), 0, (wMenuCallBack_p)MenuEnter, (void*) 127 );
+	wMenuSeparatorCreate( drawModDelMI );
+	drawModCenterMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode"), 0, (wMenuCallBack_p)MenuMode, (void*) 1 );
+	drawModSet[0] = wMenuPushCreate( drawModDelMI, "", _("Reset Origin"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );
+	drawModSet[1] = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l' );
+	drawModSet[2] = wMenuPushCreate( drawModDelMI, "", _("Origin to Centroid"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c');
+
+
+
 }
