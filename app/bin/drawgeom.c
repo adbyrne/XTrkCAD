@@ -1004,6 +1004,7 @@ STATUS_T DrawGeomPolyModify(
 			tempSegs(0).u.p.polyType = context->segPtr[segInx].u.p.polyType;
 			tempSegs(0).u.p.pts = &points(0);
 			CreatePolyAnchors( -1);
+			CreateOriginAnchor(context->rot_center,FALSE);
 			//MainRedraw();
 			return C_CONTINUE;
 		case C_DOWN:
@@ -1237,6 +1238,7 @@ STATUS_T DrawGeomPolyModify(
 			polyState = POLY_SELECTED;  //Return to base state
 			anchors_da.cnt = 0;
 			CreatePolyAnchors(polyInx);  //Show last selection
+			CreateOriginAnchor(context->rot_center,FALSE);
 			prev_inx = polyInx;
 			for (int i=0;i<points_da.cnt;i++) {
 				if (point_selected(i)) {
@@ -1272,6 +1274,7 @@ STATUS_T DrawGeomPolyModify(
 				Translate(&points(prev_inx),points(last_index),an1,context->length);
 			}
 			CreatePolyAnchors(prev_inx);
+			CreateOriginAnchor(context->rot_center,FALSE);
 			MainRedraw();
 			break;
 		case C_TEXT:
@@ -1300,6 +1303,7 @@ STATUS_T DrawGeomPolyModify(
 				polyInx = -1;
 				polyState = POLY_SELECTED;
 				CreatePolyAnchors( -1);
+				CreateOriginAnchor(context->rot_center,FALSE);
 				InfoMessage(_("Point Deleted"));
 				MainRedraw();
 				return C_CONTINUE;
@@ -1385,7 +1389,7 @@ STATUS_T DrawGeomOriginMove(
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			CreateOriginAnchor(context->rot_center,FALSE);
 			MainRedraw();
-			InfoMessage("Rotate Mode: Select Orig, 0-4 or l, Enter or Esc");
+			InfoMessage("Origin Mode: Place Origin, 0-4 or l, Enter or Esc");
 			return C_CONTINUE;
 			break;
 		case C_DOWN:
@@ -1507,6 +1511,9 @@ STATUS_T DrawGeomModify(
 		}
 		context->state = MOD_STARTED;
 		context->rotate_state = FALSE;
+		context->last_inx=-1;
+		lineInx = -1;
+		curveInx = -1;
 		segInx = -1;
 		polyMode = FALSE;
 		DistanceSegs( context->orig, context->angle, context->segCnt, context->segPtr, &pos, &segInx );
@@ -1922,9 +1929,15 @@ STATUS_T DrawGeomModify(
 		MainRedraw();
 		return C_CONTINUE;
 	case C_UP:
+
 		if (context->rotate_state) return DrawGeomOriginMove(action, pos, context);
 
-		if (polyMode) return DrawGeomPolyModify(action,pos,context);
+		if (polyMode) {
+			int rc;
+			rc = DrawGeomPolyModify(action,pos,context);
+			context->state = MOD_AFTER_PT;
+			return rc;
+		}
 
 		if (segInx == -1)
 			return C_CONTINUE;
@@ -1937,7 +1950,8 @@ STATUS_T DrawGeomModify(
 			p1 = context->p1;
 			context->rel_angle = FindAngle(p0,p1);
 			context->length = FindDistance(p0,p1);
-			CreateLineAnchors(-1,p0,p1);
+			CreateLineAnchors(lineInx,p0,p1);
+			context->last_inx = lineInx;
 			break;
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
@@ -1950,25 +1964,27 @@ STATUS_T DrawGeomModify(
 				pm = context->pm;
 				context->radius = fabs(tempSegs(0).u.c.radius);
 				context->arc_angle = tempSegs(0).u.c.a1;
-				CreateCurveAnchors(-1,pm,pc,p0,p1);
+				CreateCurveAnchors(curveInx,pm,pc,p0,p1);
 				a = FindAngle(p1,p0);
 				Rotate(&pm,p1,-a);
 				context->disp = pm.x-p1.x;
 			}
+			context->last_inx = curveInx;
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
 			CreateBoxAnchors(-1,tempSegs(0).u.p.pts);
 			context->width = FindDistance(tempSegs(0).u.p.pts[0],tempSegs(0).u.p.pts[1]);
 			context->height = FindDistance(tempSegs(0).u.p.pts[1],tempSegs(0).u.p.pts[2]);
+			context->last_inx = polyInx;
 			break;
 		default:
 			;
 		}
 		context->state = MOD_AFTER_PT;
-		context->last_inx = curveInx;
 		curveInx = -1;
 		lineInx = -1;
+		polyInx = -1;
 		InfoMessage("Enter/Space to Accept, ESC to Reject");
 		CreateOriginAnchor(context->rot_center, FALSE);
 		MainRedraw();
@@ -1984,7 +2000,7 @@ STATUS_T DrawGeomModify(
 				case SEG_DIMLIN:
 				case SEG_BENCH:
 					Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->rel_angle,context->length);
-					CreateLineAnchors(-1,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1]);
+					CreateLineAnchors(context->last_inx,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1]);
 					context->p0 = tempSegs(0).u.l.pos[0];
 					context->p1 = tempSegs(0).u.l.pos[1];
 					break;
@@ -2054,7 +2070,7 @@ STATUS_T DrawGeomModify(
 					a = NormalizeAngle(FindAngle(points(0),points(1)));;
 					Translate( &points(1), points(0), a, context->width);
 					Translate( &points(2), points(3), a, context->width);
-					CreateBoxAnchors(-1,&points(0));
+					CreateBoxAnchors(context->last_inx,&points(0));
 					break;
 				default:
 					break;
@@ -2117,6 +2133,7 @@ STATUS_T DrawGeomModify(
 		}
 		context->state = MOD_NONE;
 		context->rotate_state = FALSE;
+		context->last_inx = -1;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		DYNARR_RESET(trkSeg_t,tempSegs_da);
 		return C_TERMINATE;
