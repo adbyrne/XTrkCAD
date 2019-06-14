@@ -104,7 +104,6 @@ enum Cornu_States { NONE,
 	POS_2,
 	PICK_POINT,
 	POINT_PICKED,
-	ADD_POINT,
 	TRACK_SELECTED };
 
 
@@ -648,20 +647,23 @@ track_p CreateCornuFromPoints(coOrd pos[2],BOOL_T track_end[2]) {
 		dynArr_t segs;
 		BOOL_T back, neg;
 		cornuParm_t new;
-		int inx;
+		int inx,subinx;
+		coOrd pos_temp[2];
 
-		for (int i =0;i<2;i++) {
+		for (int i=0;i<2;i++) {
+			pos_temp[i] = pos[i];
 			if (!track_end[i]) {
-				angle[i] = GetAngleSegs(Da.crvSegs_da.cnt,(trkSeg_t *)(Da.crvSegs_da.ptr),&pos[i],&inx,NULL,&back,NULL,&neg);
+				angle[i] = GetAngleSegs(Da.crvSegs_da.cnt,(trkSeg_t *)(Da.crvSegs_da.ptr),&pos_temp[i],&inx,NULL,&back,&subinx,&neg);
 
 				trkSeg_p segPtr = &DYNARR_N(trkSeg_t, Da.crvSegs_da, inx);
 
-				if (segPtr->type == SEG_BEZTRK) {
-					GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos[i],&inx,NULL,&back,NULL,&neg);
+				segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, subinx);
 
-					segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
+				if (i==0) {
+					if (neg==back) angle[i] = NormalizeAngle(angle[i]+180);
+				} else {
+					if (!(neg==back)) angle[i] = NormalizeAngle(angle[i]+180);
 				}
-				if (i==0) angle[i] = NormalizeAngle(angle[i]+(neg==back?180:0));
 
 				if (segPtr->type == SEG_STRTRK) {
 					radius[i] = 0.0;
@@ -738,7 +740,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 	Da.cmdType = (long)commandContext;
 
 
-	if (Da.state != PICK_POINT && Da.state != POINT_PICKED && Da.state != TRACK_SELECTED && Da.state != ADD_POINT) return C_CONTINUE;
+	if (Da.state != PICK_POINT && Da.state != POINT_PICKED && Da.state != TRACK_SELECTED) return C_CONTINUE;
 
 	switch ( action & 0xFF) {
 
@@ -819,7 +821,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 			InfoMessage( _("Not close enough to point, reselect") );
 			return C_CONTINUE;
 		} else {
-
 			if (Da.selectEndPoint >=0 ) {
 				pos = Da.pos[Da.selectEndPoint];
 				if (Da.trk[Da.selectEndPoint]) {
@@ -942,12 +943,14 @@ EXPORT STATUS_T AdjustCornuCurve(
 					}
 				} else {									//Just move end (no shift)
 					Da.pos[sel] = pos;
-					coOrd offset;
-					struct extraData *xx = GetTrkExtraData(Da.selectTrack);
-					offset.x = Da.pos[sel].x-xx->cornuData.pos[sel].x;
-					offset.y = Da.pos[sel].y-xx->cornuData.pos[sel].y;
-					Da.center[sel].x = xx->cornuData.c[sel].x+offset.x;
-					Da.center[sel].y = xx->cornuData.c[sel].y+offset.y;
+					if (Da.selectTrack) {					//Track already exists
+						coOrd offset;
+						struct extraData *xx = GetTrkExtraData(Da.selectTrack);
+						offset.x = Da.pos[sel].x-xx->cornuData.pos[sel].x;
+						offset.y = Da.pos[sel].y-xx->cornuData.pos[sel].y;
+						Da.center[sel].x = xx->cornuData.c[sel].x+offset.x;
+						Da.center[sel].y = xx->cornuData.c[sel].y+offset.y;
+					}										//No Track, no end so radius = 0;
 				}
 			} else {									//Cornu with ends
 				if (inside) Da.pos[sel] = pos;
@@ -1763,9 +1766,13 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,TRUE,TRUE);
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack);
 			return C_CONTINUE;
+		} else if (Da.cmdType == cornuCmdCreateTrack) {
+			Da.state = PICK_POINT;
 		} else {
 			return AdjustCornuCurve( action&0xFF, pos, InfoMessage );
 		}
+		return C_CONTINUE;
+		break;
 	case C_TEXT:
 			if (Da.state != PICK_POINT)	return C_CONTINUE;
 			if ((action>>8 == 127) || (action>>8 == 8))   //
@@ -1809,7 +1816,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	return C_CONTINUE;
 	}
-
+	return C_CONTINUE;
 }
 
 
