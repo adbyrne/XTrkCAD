@@ -1588,7 +1588,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	case C_START:
 		Da.state = NONE;
-		Da. selectEndPoint = -1;
+		Da.selectEndPoint = -1;
 		for (int i=0;i<2;i++) {
 			Da.pos[i] = zero;
 		}
@@ -1768,8 +1768,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,TRUE,TRUE);
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack);
 			return C_CONTINUE;
-		} else if (Da.cmdType == cornuCmdCreateTrack) {
-			Da.state = PICK_POINT;
 		} else {
 			return AdjustCornuCurve( action&0xFF, pos, InfoMessage );
 		}
