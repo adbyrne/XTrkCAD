@@ -2337,6 +2337,10 @@ static void CreateMenus(void) {
 	MiscMenuItemCreate(changeM, NULL, "cmdRescale", _("Change Scale"), 0,
 			(void*) (wMenuCallBack_p) DoRescale, IC_SELECTED, (void *) 0);
 
+	wMenuSeparatorCreate(changeM);
+
+	InitCmdCornu(changeM);
+
 	/*
 	 * DRAW MENU
 	 */

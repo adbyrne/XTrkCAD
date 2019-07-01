@@ -104,7 +104,7 @@ You can join to and from circles, after which they become curved tracks.
 
 \G{png.d/bcurve.png}
 
-Creating a curve is a two step operation.  The four methods (with their Shortcut keys) used to create a Curved Track are:
+Creating a curve is a two step operation.  The five methods (with their Shortcut keys) used to create a Curved Track are:
 
 \dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release.  Click and Drag the red arrows to position the second endpoint. 
 If Shift is held down when the first endpoint is being placed and the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you can drag out the second end aligned to that track. After a track is competed, the new track will be connected to this first track.
@@ -131,7 +131,13 @@ If Shift is held down when either endpoint is being placed it will "Snap" to an 
 
 \u000
 
-A drop down menu, which allows selection of the Curved Track creation method, is invoked from the down arrow button (\G{png.d/bmenu.png}) located on the right side the Curved track button. Dependent upon previous selection, the Curved Track button will look like \G{png.d/bcurve1.png}, \G{png.d/bcurve2.png}, \G{png.d/bcurve3.png} or \G{png.d/bcurve4.png}.
+\dd \G{png.d/bcornu.png} Place each endpoint, Place the second Endpoint. Add Pins by clicking on the Cornu and drag them to constrain the curve to smoothly pass through points between them. Complete the Curve by pressing Enter, or Reject it with Esc.
+If Shift is held down when either endpoint is being placed it will "Snap" to an open track endpoint of the track underneath the cursor and you can only move the point along that track, or in an extension of it. After the new track is completed, it will be connected to this existing track.
+If the end is not connected, the end radius is assumed to be zero and the angle will be picked to minimize overall curvature, this means that two such end points will define a straight track, but adding one intermediate pin will create a smooth arc through the three points.
+
+\u000
+
+A drop down menu, which allows selection of the Curved Track creation method, is invoked from the down arrow button (\G{png.d/bmenu.png}) located on the right side the Curved track button. Dependent upon previous selection, the Curved Track button will look like \G{png.d/bcurve1.png}, \G{png.d/bcurve2.png}, \G{png.d/bcurve3.png}, \G{png.d/bcurve4.png}, \G{png.d/bezier.png} or \G{png.d/bcornu.png}.
 
 \dd \G{png.d/bmcurved.png}
 

@@ -1038,6 +1038,26 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs) {
 	return TRUE;
 }
 
+BOOL_T GetSegmentsFromCornu(track_p trk, dynArr_t * segs) {
+	struct extraData * xx = GetTrkExtraData(trk);
+	for (int i=0;i<xx->cornuData.arcSegs.cnt;i++) {
+			DYNARR_APPEND(trkSeg_t, * segs, 10);
+			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
+			segPtr->type = SEG_BEZTRK;
+			segPtr->color = wDrawColorBlack;
+			segPtr->width = 0;
+			if (segPtr->bezSegs.ptr) MyFree(segPtr->bezSegs.ptr);
+			segPtr->bezSegs.cnt = 0;
+			segPtr->bezSegs.max = 0;
+			segPtr->bezSegs.ptr = NULL;
+			trkSeg_p p = (trkSeg_t *) xx->cornuData.arcSegs.ptr+i;
+			for (int j=0;j<4;j++) segPtr->u.b.pos[j] = p->u.b.pos[j];
+			FixUpBezierSeg(segPtr->u.b.pos,segPtr,TRUE);
+	}
+	return TRUE;
+}
+
+
 static DIST_T GetLengthCornu( track_p trk )
 {
 	struct extraData *xx = GetTrkExtraData(trk);

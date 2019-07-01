@@ -995,6 +995,56 @@ BOOL_T GetBezierSegmentFromTrack(track_p trk, trkSeg_p seg_p) {
 
 }
 
+BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2]) {
+	track_p trk_old = NULL;
+	newTracks[0] = NULL, newTracks[1] = NULL;
+	if (bezSeg->type != SEG_BEZTRK) return FALSE;
+	for (int i=0;i<bezSeg->bezSegs.cnt;i++) {
+		trkSeg_p seg = &DYNARR_N(trkSeg_t,bezSeg->bezSegs,i);
+		track_p new_trk;
+		if (seg->type == SEG_CRVTRK)
+			new_trk = NewCurvedTrack(seg->u.c.center,fabs(seg->u.c.radius),seg->u.c.a0,seg->u.c.a1,0);
+		else if (seg->type == SEG_STRTRK)
+			new_trk = NewStraightTrack(seg->u.l.pos[0],seg->u.l.pos[1]);
+		if (newTracks[0] == NULL) newTracks[0] = new_trk;
+		newTracks[1] = new_trk;
+		if (trk_old) {
+			EPINX_T ep1, ep2;
+			for (int i=0;i<2;i++) {
+				if (GetTrkEndTrk(trk_old,i)==NULL) {
+					coOrd pos = GetTrkEndPos(trk_old,i);
+					EPINX_T ep_n = PickUnconnectedEndPoint(pos,new_trk);
+					if (connectDistance >= FindDistance(GetTrkEndPos(trk_old,i),GetTrkEndPos(new_trk,ep_n))) {
+						ConnectTracks(trk_old,i,new_trk,ep_n);
+						break;
+					}
+				}
+			}
+		}
+		trk_old = new_trk;
+	}
+	return TRUE;
+}
+
+BOOL_T GetTracksFromBezierTrack(track_p trk, track_p newTracks[2]) {
+	trkSeg_t seg_temp;
+	struct extraData * xx = GetTrkExtraData(trk);
+	newTracks[0] = NULL, newTracks[1] = NULL;
+
+	if (!IsTrack(trk)) return FALSE;
+	seg_temp.type = SEG_BEZTRK;
+	for (int i=0;i<4;i++) seg_temp.u.b.pos[i] = xx->bezierData.pos[i];
+	seg_temp.color = xx->bezierData.segsColor;
+	seg_temp.bezSegs.cnt = 0;
+	//if (seg_temp->bezSegs.ptr) MyFree(seg_temp->bezSegs.ptr);
+	DYNARR_RESET(trkSeg_t,seg_temp.bezSegs);
+	FixUpBezierSeg(seg_temp.u.b.pos,&seg_temp,TRUE);
+	GetTracksFromBezierSegment(&seg_temp, newTracks);
+	MyFree(seg_temp.bezSegs.ptr);
+	return TRUE;
+
+}
+
 
 static BOOL_T MakeParallelBezier(
 		track_p trk,

@@ -24,6 +24,10 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
+\dd \f{Convert Tracks} - chnages fixed tracks (Straight, Curve, Joint, Bezier) into a Smooth Cornu or vice versa. (\K{cmdConvert}).
+
+\u000
+
 \dd \f{Elevation} - define an elevation at specified track location (\K{cmdElev}).
 
 \u000
@@ -147,6 +151,27 @@ You can undo the effect of the \f{Connect} command by splitting (\K{splitDisconn
 
 \rule
 
+\S{cmdConvert} Convert Tracks
+
+A drop down menu, which allows selection of the Convert Mode, is invoked from the down arrow button (\G{png.d/bmenu.png}) located on the right side the Convert Tracks button. Dependent upon previous selection, the Convert Track button will look like \G{png.d/convertto.png} or \G{png.d/convertfrom.png}.
+
+\S2{cmdConvertTo} Convert Fixed Track(s) to Cornu(s)
+
+\G{png.d/convertto.png}
+
+This command will take a pre-selected set of fixed track elements (Straights, Curves, Joint or Bezier) and convert them into a set of Cornu Tracks. If there are no selected Tracks, the user can click on a single track.
+
+The Cornu(s) will smoothly pass through all the end points of the selected tracks and smoothly join to the end-points (if any). This may change the internal shape of the resulting track(s) due to smoothing. A subsequent \k{cmdModify} can be used to fine tune the Cornu(s) by moving, adding and deleting "pins" in the combined shape.
+
+This command is intended to help conversion of track designs that were made before Cornu Track existed to Cornu.
+
+\G{png.d/bconvertfrom.png}
+
+This command will take a pre-selected set of Cornu and Bezier Tracks and convert them into a set of equivalent Straights or Curves,
+
+The resulting track(s) will mimic the shape of the Cornu/Bezier(s) exactly. This command is intended to allow easier layout of smoothed shapes. 
+
+\rule
 
 \S{cmdElev} Elevation
 
@@ -546,15 +571,15 @@ For detail about;
 
 \G{png.d/bmodify.png}
 
-The \f{Modify} command is used to change characteristics of or extend existing track by adding new track. This command works with any unconnected track endpoint, or with a \e{Cornu} or \e{Bezier} track even if connected
+The \f{Modify} command is used to change characteristics of or extend existing track by adding new track. This command works with any unconnected track endpoint, or with \e{Cornu(s)} or \e{Bezier} track even if connected.  Selecting one Cornu which is connected to other Cornu(s) results in a single curve with added control "Pins" at the connections.
 
 The \f{Modify} command can be invoked using the \f{Change>Modify} menu item, the \f{Modify} button or the menu raised by a \e{Right-Click} over the \f{Main Canvas}.
 
-Either the left mouse button (for changing length or creating a tangent track) or the right mouse button (for extending with a new track) is used to modify the unconnected endpoint.
+Either the left mouse button (for changing length or creating a tangent track) or the right mouse button (for extending with a new track) is used to modify an unconnected endpoint.
 
 The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.  A \e{Box} or a \e{FilledBox} can be modified by selecting a corner and dragging in two dimensions, or a side and dragging it orthogonally. These modifications preserve a 4-sided rectangle.
 
-The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be changed.
+The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be changed. Control "Pins" can be added, moved or selected and removed from \e{Cornus}.
 
 \e{Curved Lines} are modified in same manner as curved track.
 
@@ -718,25 +743,39 @@ For detail about;
 
 \S2{chgCornu} \i{Cornu Easements} Modifying a Cornu
 
-Because a Cornu is defined by its end points position, angle and radius - it can only be directly modified by dragging an end point along a track. 
+Because a Cornu is defined by its end points position, angle and radius - it can only be directly modified by dragging an end point along a track. It can also have added "Pins" which constrain the curve to smoothly pass through a point.
 
 \n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
 
 \lcont{\u000}
 
-\n Click on the Cornu track. The track ends will turn into roundels
+\n Click on the Cornu track. The track ends will turn into roundels. If any other Cornus are connected at either end, the entire connected set will be modifyable as one Cornu with intermediate "Pins" at the connections. 
 
 \lcont{\u000}
 
-\n \e{Left-Click} the endpoint and \e{Left-Drag} it to move the endpoint along the connected track, or beyond it if you want that track extended ( but this only works in the direction of the Cornu).
+\n \e{Left-Click} an endpoint and \e{Left-Drag} it to move the endpoint along the connected track, or beyond it if you want that track extended.
 
 \lcont{\u000}
 
-\n Repeat with the other end-pint if desired
+\n \e{Left-Click} an Pin and \e{Left-Drag} it to move the pin and make the curve to pass through it.
 
 \lcont{\u000}
 
-\n Once you are happy, hit the \e{spacebar} or \e{Enter}, or to cancel hit \e{Escape}.
+\n \e{Left-Click} the track where a Pin doesn't exist to add a Pin and \e{Left-Drag} it to alter the curve to pass through a defined point.
+
+\lcont{\u000}
+
+\n \e{Delete} to delete the last seelcted Pin, the curve will change to meet the end conditions and pass through any remaining Pins.
+
+\lcont{\u000}
+
+\n Repeat with the other end-point or Pins if desired
+
+\lcont{\u000}
+
+\n Once you are happy, hit the \e{spacebar} or \e{Enter}, or to cancel hit \e{Escape}.  
+
+\f{Note:} If the Modify command contained Pins, \e{spacebar} or \e{Enter} it will output a set of connected Cornu(s) joined at the Pin points.
 
 \f{Note:} A Cornu can also be modified by moving or rotating a connected track.  
 
