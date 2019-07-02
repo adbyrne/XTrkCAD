@@ -26,3 +26,5 @@ DIST_T CornuOffsetLength(dynArr_t segs, double offset);
 DIST_T CornuTotalWindingArc(coOrd pos[4],dynArr_t segs);
 
 STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG);
+
+void InitCmdCornu( wMenu_p menu );

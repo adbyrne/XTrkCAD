@@ -253,7 +253,6 @@ As an additional aid, the numbers of the next pages are printed on each edge.
 
 \dd \f{Ignore Page Margins} - use the physical page size.  This allows the printouts to abut without trimming.
 
-\u000
 \dt The orientation of the print grid is controlled by:
 
 \dd \f{X} - X co-ordinate.

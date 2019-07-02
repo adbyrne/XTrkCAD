@@ -490,7 +490,7 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 	else
 		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
 	if ( (d->funcs->options & wDrawOptTemp) == 0 &&
-		 (d->options&DC_QUICK) == 0 {
+		 (d->options&DC_QUICK) == 0) {
 		DrawEndPt( d, t, 0, color );
 		DrawEndPt( d, t, 1, color );
 	}

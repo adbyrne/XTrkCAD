@@ -2172,7 +2172,7 @@ static STATUS_T CmdConvertFrom(
 
 EXPORT void InitCmdCornu( wMenu_p menu )
 {	
-	ButtonGroupBegin( _("Convert"), "cmdConvertSet", _("Convert") );
+	ButtonGroupBegin( _("Convert"), "cmdConvertSetCmd", _("Convert") );
 	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"), wIconCreatePixMap(convertto_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2,ACCL_CONVERTTO, NULL );
 	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"), wIconCreatePixMap(convertfr_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2,ACCL_CONVERTFR, NULL );
 	ButtonGroupEnd();

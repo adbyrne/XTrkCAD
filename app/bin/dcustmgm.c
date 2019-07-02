@@ -41,6 +41,7 @@
 #include "paths.h"
 #include "track.h"
 #include "wlib.h"
+#include "paramfilelist.h"
 
 static void CustomEdit( void * action );
 static void CustomDelete( void * action );
