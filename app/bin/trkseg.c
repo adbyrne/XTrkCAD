@@ -1166,6 +1166,7 @@ EXPORT BOOL_T ReadSegs( void )
 		if ( *cp == '\n' || *cp == '#' ) {
 			continue;
 		}
+		if (subsegs) continue;
 		type = *cp++;
 		hasElev = FALSE;
 		noVersion = TRUE;

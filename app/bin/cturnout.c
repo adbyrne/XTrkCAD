@@ -227,23 +227,22 @@ EXPORT wIndex_t CheckPaths(
 	int segTrkLast = -1;
 	trkSeg_t tempSeg;
 	
-#define segMap(N) DYNARR_N( trkSeg_p, segMap_da, N )
+typedef struct {
+	trkSeg_p seg;
+	int indx;
+} segMap_t, * segMap_p;
 
-	DYNARR_RESET( trkSeg_p, segMap_da );
+#define segMap(N) DYNARR_N( segMap_t, segMap_da, N )
+	segMap_p sg;
+	DYNARR_RESET( segMap_t, segMap_da );
+	// Don't reshuffle segs, but build an offset map instead just of the tracks
+	// Use the map to set up the paths to point at the correct segs in the Turnout
 	for ( inx=0; inx<segCnt; inx++ ) {
 		if ( IsSegTrack(&segs[inx]) ) {
-			if ( segTrkLast != inx-1 ) {
-				tempSeg = segs[inx];
-				segTrkLast++;
-				for ( inx1=inx; inx1>segTrkLast; inx1-- ) {
-					 segs[inx1] = segs[inx1-1];
-				}
-				segs[segTrkLast] = tempSeg;
-			} else {
-				segTrkLast = inx;
-			}
-			DYNARR_APPEND( trkSeg_p, segMap_da, 10 );
-			segMap(segMap_da.cnt-1) = &segs[inx];
+			DYNARR_APPEND( segMap_t, segMap_da, 10 );
+			sg = &DYNARR_LAST(segMap_t,segMap_da);
+			sg->seg = &segs[inx];
+			sg->indx = inx;
 		}
 	}
 
@@ -260,8 +259,27 @@ EXPORT wIndex_t CheckPaths(
 				return -1;
 			}
 #endif
-
+			//Rewrite the Path to point to the nth Track seg using the Map
+			int old_inx;
+			EPINX_T old_EP;
+			if (pp[0]!=0 && ps==0) {  // First or only one
+				GetSegInxEP( pp[0], &old_inx, &old_EP );
+				if (old_inx<0 || old_inx>= segMap_da.cnt) {
+					InputError( _("Turnout path[%d] %d is not a valid track segment"),
+						FALSE, pc, ps );
+					return -1;
+				}
+				SetSegInxEP( &pp[0], DYNARR_N(segMap_t,segMap_da,old_inx).indx, old_EP);
+			}
 			if (pp[0]!=0 && pp[1]!=0 ) {
+				//Rewrite the Path to point to the nth Track seg using the Map
+				GetSegInxEP( pp[1], &old_inx, &old_EP );
+				if (old_inx<0 || old_inx>= segMap_da.cnt) {
+					InputError( _("Turnout path[%d] %d is not a valid track segment"),
+						FALSE, pc, ps );
+					return -1;
+				}
+				SetSegInxEP( &pp[1], DYNARR_N(segMap_t,segMap_da,old_inx).indx, old_EP);
 				/* check connectivity */
 				DIST_T d;
 				GetSegInxEP( pp[0], &segInx[0], &segEp[0] );
@@ -653,15 +671,15 @@ static coOrd MapPathPos(
 		ep = 1-ep;
 	}
 
-	for ( inx=0,segPtr=xx->segs; inx<xx->segCnt; inx++,segPtr++ ) {
-		if ( !IsSegTrack(segPtr) ) continue;
-		if ( --segInx > 0 ) continue;
-		pos = GetSegEndPt( segPtr, ep, FALSE, NULL );
-		REORIGIN1( pos, xx->angle, xx->orig );
-		return pos;
+	segPtr=xx->segs+(segInx-1);
+	if (!IsSegTrack(segPtr)) {
+		fprintf( stderr, "mapPathPos: bad segInx: %d\n", segInx );
+		return zero;
 	}
-	fprintf( stderr, "mapPathPos: bad segInx: %d\n", segInx );
-	return zero;
+	pos = GetSegEndPt( segPtr, ep, FALSE, NULL );
+	REORIGIN1( pos, xx->angle, xx->orig );
+	return pos;
+
 }
 
 
@@ -675,17 +693,22 @@ static void DrawTurnout(
 	long widthOptions = 0;
 	DIST_T scale2rail;
 
+	widthOptions = DTS_LEFT|DTS_RIGHT;
+    
 	if (GetTrkWidth(trk) == 2)
-		widthOptions = DTS_THICK2;
+		widthOptions |= DTS_THICK2;
 	if (GetTrkWidth(trk) == 3)
-		widthOptions = DTS_THICK3;
+		widthOptions |= DTS_THICK3;
 	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	if ( tieDrawMode!=TIEDRAWMODE_NONE &&
 		 d!=&mapD &&
 		 (d->options&DC_TIES)!=0 &&
 		 d->scale<scale2rail/2 )
-		DrawSegsO( d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions|DTS_TIES );
-	DrawSegsO( d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions | DTS_NOCENTER );  // no curve center for turnouts
+		DrawSegsO( d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions|DTS_TIES| DTS_NOCENTER );
+	else
+		DrawSegsO( d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions | DTS_NOCENTER );  // no curve center for turnouts
+
+
 	for (i=0; i<GetTrkEndPtCnt(trk); i++) {
 		DrawEndPt( d, trk, i, color );
 	}
@@ -722,15 +745,31 @@ static ANGLE_T GetAngleTurnout(
 	struct extraData * xx = GetTrkExtraData(trk);
 	wIndex_t segCnt, segInx;
 	ANGLE_T angle;
+	trkSeg_p p;
 
 	if ( ep0 && ep1 )
 		*ep0 = *ep1 = PickEndPoint( pos, trk );
-	for ( segCnt=0; segCnt<xx->segCnt && IsSegTrack(&xx->segs[segCnt]); segCnt++ );
-	pos.x -= xx->orig.x;
-	pos.y -= xx->orig.y;
-	Rotate( &pos, zero, -xx->angle );
-	angle = GetAngleSegs( segCnt, xx->segs, &pos, &segInx, NULL, NULL, NULL, NULL );
-	return NormalizeAngle( angle+xx->angle );
+	coOrd pos0=pos;
+	double dd = 10000.0;
+	int found = -1;
+	//Cope with tracks not being first
+	for (segCnt =0; segCnt<xx->segCnt ; segCnt++ ) {
+		if (IsSegTrack(&xx->segs[segCnt])) {
+			double d = DistanceSegs( xx->orig, xx->angle, 1, &xx->segs[segCnt], &pos0, NULL );
+			if (d<dd) {
+				dd = d;
+				found = segCnt;
+			}
+		}
+		pos0 = pos;
+	}
+	if (found>=0) {
+		pos.x -= xx->orig.x;
+		pos.y -= xx->orig.y;
+		Rotate( &pos, zero, -xx->angle );
+		angle = GetAngleSegs( 1, &xx->segs[found], &pos, &segInx, NULL, NULL, NULL, NULL );
+		return NormalizeAngle( angle+xx->angle );
+	} else return 0.0;
 }
 
 
