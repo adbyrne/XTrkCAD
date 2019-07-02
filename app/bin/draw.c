@@ -1493,8 +1493,8 @@ EXPORT void DrawRuler(
 	long mm, mm0, mm1, power;
 	wPos_t x0, y0, x1, y1;
 	long dxn, dyn;
-	static int lengths[8] = {
-		0, 2, 4, 2, 6, 2, 4, 2 };
+	static int lengths[16] = {
+		0, 2, 4, 2, 6, 2, 4, 2, 8, 2, 4, 2, 6, 2, 4, 2 };
 	int fraction, incr, firstFraction, lastFraction;
 	int majorLength;
 	coOrd p0, p1;
@@ -1514,7 +1514,7 @@ EXPORT void DrawRuler(
 		dyn = +3;
 	}
 	sin_aa = sin(D2R(aa));
-	dxn = (long)floor(10.0*sin_aa);
+	dxn = 10.0;
 	end = FindDistance( pos0, pos1 );
 	if (end < 0.1)
 		return;
@@ -1568,13 +1568,17 @@ EXPORT void DrawRuler(
 						if (mm%100 != 0) {
 							sprintf(message, "%ld", mm/10%10 );
 							fs = rulerFontSize*2/3;
-							p0.x = p1.x+4*dxn/10*d->scale/mainD.dpi;
-							p0.y = p1.y+dyn*d->scale/mainD.dpi;
+							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/72.0 );
+							Translate( &p0, p0, 225, fs*d->scale/72.0 );
+							//p0.x = p1.x+4*dxn/10*d->scale/mainD.dpi;
+							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						} else {
 							sprintf(message, "%0.1f", mm/1000.0 );
 							fs = rulerFontSize;
-							p0.x = p0.x+((-(LBORDER-2)/2)+((LBORDER-2)/2+2)*sin_aa)*d->scale/mainD.dpi;
-							p0.y = p1.y+dyn*d->scale/mainD.dpi;
+							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/72.0 );
+							Translate( &p0, p0, 225, 1.5*fs*d->scale/72.0 );
+							//p0.x = p0.x+((-(LBORDER-2)/2)+((LBORDER-2)/2+2)*sin_aa)*d->scale/mainD.dpi;
+							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						}
 						d->CoOrd2Pix( d, p0, &x0, &y0 );
 						wDrawString( d->d, x0, y0, d->angle, message, rulerFp,
@@ -1585,41 +1589,50 @@ EXPORT void DrawRuler(
 		}
 	} else {
 		if (d->scale <= 1)
-			incr = 1;
-		else if (d->scale <= 2)
-			incr = 2;
-		else if (d->scale <= 4)
-			incr = 4;
+			incr = 1;             //16ths
+		else if (d->scale <= 3)
+			incr = 2;			  //8ths
+		else if (d->scale <= 5)
+			incr = 4;			  //4ths
+		else if (d->scale <= 7)
+			incr = 8;			  //1/2ths
+		else if (d->scale <= 48)
+			incr = 32;
 		else
-			incr = 8;
+			incr = 16;			  //Inches
 		lastInch = (int)floor(end);
-		lastFraction = 7;
+		lastFraction = 16;
 		inch = (int)ceil(start);
-		firstFraction = (((int)((inch-start)*8/*+1*/)) / incr) * incr;
+		firstFraction = (((int)((inch-start)*16/*+1*/)) / incr) * incr;
 		if (firstFraction > 0) {
 			inch--;
-			firstFraction = 8 - firstFraction;
+			firstFraction = 16 - firstFraction;
 		}
 		for ( ; inch<=lastInch; inch++){
 			if (inch % 12 == 0) {
-				lengths[0] = 10;
+				lengths[0] = 12;
 				majorLength = 16;
 				digit = (int)(inch/12);
 				fs = rulerFontSize;
 				quote = '\'';
 			} else if (d->scale <= 8) {
-				lengths[0] = 8;
-				majorLength = 13;
+				lengths[0] = 12;
+				majorLength = 16;
 				digit = (int)(inch%12);
 				fs = rulerFontSize*(2.0/3.0);
 				quote = '"';
+			} else if (d->scale <= 16){
+				lengths[0] = 10;
+				majorLength = 12;
+				digit = (int)(inch%12);
+				fs = rulerFontSize*(1.0/2.0);
 			} else {
 				continue;
 			}
 			if (inch == lastInch)
-				lastFraction = (((int)((end - lastInch)*8)) / incr) * incr;
+				lastFraction = (((int)((end - lastInch)*16)) / incr) * incr;
 			for ( fraction = firstFraction; fraction<=lastFraction; fraction += incr ) {
-				Translate( &p0, orig, a, inch+fraction/8.0 );
+				Translate( &p0, orig, a, inch+fraction/16.0 );
 				Translate( &p1, p0, aa, lengths[fraction]*d->scale/72.0 );
 				d->CoOrd2Pix( d, p0, &x0, &y0 );
 				d->CoOrd2Pix( d, p1, &x1, &y1 );
@@ -1633,7 +1646,7 @@ EXPORT void DrawRuler(
 			if ( fraction == 0 && number == TRUE) {
 				if (inch % 12 == 0 || d->scale <= 2) {
 					Translate( &p0, p0, aa, majorLength*d->scale/72.0 );
-					Translate( &p0, p0, 225, 11*d->scale/72.0 );
+					Translate( &p0, p0, 225, fs*d->scale/72.0 );
 					sprintf(message, "%d%c", digit, quote );
 					d->CoOrd2Pix( d, p0, &x0, &y0 );
 					wDrawString( d->d, x0, y0, d->angle, message, rulerFp, fs, color, (wDrawOpts)d->funcs->options );
