@@ -20,6 +20,7 @@
 		{"line": "cmdColor", "contents": "Controls colors" },
 		{"line": "cmdConnect", "contents": "Connect two tracks" },
 		{"line": "cmdControl", "contents": "Create a control for layout automation" },
+		{"line": "cmdControlElements", "contents", "Set Control Element creation mode" },
 		{"line": "cmdContmgm", "contents": "Manage control elements" },
 		{"line": "cmdCopy", "contents": "Copy selected objects to clipboard" },
 		{"line": "cmdCornu", "contents": "Create Cornu track" },
