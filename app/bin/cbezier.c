@@ -831,14 +831,16 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) 
 		Da.selectPoint = -1;
 		Da.selectTrack = NULL;
 
-		if (IsTrack(trk)) Da.track = TRUE;
+		if (IsTrack(trk)) {
+			Da.track = TRUE;
+			Da.trk[0] = GetTrkEndTrk( trk, 0 );
+			if (Da.trk[0]) Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],trk);
+			Da.trk[1] = GetTrkEndTrk( trk, 1 );
+			if (Da.trk[1]) Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],trk);
+		}
 		else Da.track = FALSE;
 
 		Da.selectTrack = trk;
-	    Da.trk[0] = GetTrkEndTrk( trk, 0 );
-		if (Da.trk[0]) Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],trk);
-		Da.trk[1] = GetTrkEndTrk( trk, 1 );
-		if (Da.trk[1]) Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],trk);
 
 	    for (int i=0;i<4;i++) Da.pos[i] = xx->bezierData.pos[i];              //Copy parms from old trk
 		InfoMessage(_("%s picked - now select a Point"),track?"Track":"Line");
