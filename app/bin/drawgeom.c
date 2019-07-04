@@ -185,12 +185,12 @@ STATUS_T DrawGeomMouse(
 		case OP_POLY:
 		case OP_FILLPOLY:
 			tempSegs_da.cnt = segCnt;
-			if (context->index>1) {
-				ANGLE_T an = FindAngle(tempSegs(context->index-1).u.l.pos[0],tempSegs(context->index-1).u.l.pos[1]);
-				an = NormalizeAngle(an+context->angle);
-				Translate(&tempSegs(context->index).u.l.pos[1],tempSegs(context->index-1).u.l.pos[0],an,context->length);
+			if (segCnt>1) {
+				ANGLE_T an = FindAngle(tempSegs(segCnt-2).u.l.pos[0],tempSegs(segCnt-2).u.l.pos[1]);
+				an = an+context->angle;
+				Translate(&tempSegs(segCnt-1).u.l.pos[1],tempSegs(segCnt-1).u.l.pos[0],an,context->length);
 			} else {
-				Translate(&tempSegs(context->index).u.l.pos[1],tempSegs(context->index).u.l.pos[0],context->angle,context->length);
+				Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,context->length);
 			}
 			pos1 = lastPos = tempSegs(segCnt-1).u.l.pos[1];
 		break;
@@ -370,7 +370,15 @@ STATUS_T DrawGeomMouse(
 		case OP_POLY:
 		case OP_FILLPOLY:
 			tempSegs_da.cnt = segCnt;
+			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
+			segPtr = &tempSegs(tempSegs_da.cnt-1);
+			segPtr->type = SEG_STRLIN;
+			segPtr->color = context->Color;
+			segPtr->width = (context->Op==OP_POLY?width:0);
+			//End if over start
 			if ( segCnt>2 && IsClose(FindDistance(tempSegs(0).u.l.pos[0], pos ))) {
+				segPtr->u.l.pos[0] = tempSegs(segCnt-1).u.l.pos[1];
+				segPtr->u.l.pos[1] = tempSegs(0).u.l.pos[0];
 				EndPoly(context, tempSegs_da.cnt);
 				DYNARR_RESET(points_t, points_da);
 				DYNARR_RESET(trkSeg_t,tempSegs_da);
@@ -378,19 +386,10 @@ STATUS_T DrawGeomMouse(
 				segCnt = 0;
 				return C_TERMINATE;
 			}
-			DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
-			segPtr = &tempSegs(tempSegs_da.cnt-1);
-			segPtr->type = SEG_STRLIN;
-			segPtr->color = context->Color;
-			segPtr->width = (context->Op==OP_POLY?width:0);
 			if ( tempSegs_da.cnt == 1 ) {
 				segPtr->u.l.pos[0] = pos;
 			} else {
-				if (IsClose(FindDistance(segPtr[-1].u.l.pos[0],segPtr[-1].u.l.pos[1]))) {
-					segPtr[-1].u.l.pos[1] = pos;
-					segPtr->u.l.pos[0] = pos;
-				} else
-					segPtr->u.l.pos[0] = segPtr[-1].u.l.pos[1];
+				segPtr->u.l.pos[0] = segPtr[-1].u.l.pos[1];
 			}
 			segPtr->u.l.pos[1] = pos;
 			context->State = 1;
@@ -710,6 +709,7 @@ STATUS_T DrawGeomMouse(
 		case OP_FILLPOLY:
 			tempSegs_da.cnt = segCnt;
 			anchors_da.cnt=0;
+			//End if close to start
 			if ( segCnt>2 && IsClose(FindDistance(tempSegs(0).u.l.pos[0], pos))) {
 				EndPoly(context, tempSegs_da.cnt);
 				DYNARR_RESET(points_t, points_da);
@@ -718,17 +718,20 @@ STATUS_T DrawGeomMouse(
 				segCnt = 0;
 				return C_TERMINATE;
 			}
-			int text_inx;
-			if (tempSegs_da.cnt >1 && IsClose(FindDistance(tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos))) text_inx = tempSegs_da.cnt-2;
-			else text_inx = tempSegs_da.cnt-1;
+			//If too short, remove last segment
+			if (IsClose(FindDistance(tempSegs(segCnt-1).u.l.pos[0],pos))) {
+				--tempSegs_da.cnt;
+				wBeep();
+				return C_CONTINUE;
+			}
+			int text_inx = tempSegs_da.cnt-1;
 			tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pos;
 			context->length = FindDistance(tempSegs(text_inx).u.l.pos[0],tempSegs(text_inx).u.l.pos[1]);
 			if (text_inx>1) {
 				ANGLE_T an = FindAngle(tempSegs(text_inx-1).u.l.pos[0],tempSegs(text_inx-1).u.l.pos[1]);
-				context->angle =
-					NormalizeAngle(FindAngle(tempSegs(text_inx).u.l.pos[0],tempSegs(text_inx).u.l.pos[1])-an);
+				context->angle = NormalizeAngle(FindAngle(tempSegs(text_inx).u.l.pos[0],tempSegs(text_inx).u.l.pos[1])-an);
 			} else
-				context->angle = FindAngle(tempSegs(text_inx).u.l.pos[0],tempSegs(text_inx).u.l.pos[1]);
+				context->angle = FindAngle(tempSegs(1).u.l.pos[0],tempSegs(1).u.l.pos[1]);
 			context->State = 1;
 			context->index = text_inx;
 			segCnt = tempSegs_da.cnt;
