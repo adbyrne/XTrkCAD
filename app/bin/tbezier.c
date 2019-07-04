@@ -669,15 +669,18 @@ static BOOL_T SplitBezier( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover
     	//Move elev data from ep
     } else
     	trk1 = NewBezierLine(ep?newr:newl,NULL,0, xx->bezierData.segsColor,xx->bezierData.segsWidth);
-	UndoModify(trk);
+    DIST_T height;
+	int opt;
+	GetTrkEndElev(trk,ep,&opt,&height);
+	UpdateTrkEndElev( trk1, ep, opt, height, (opt==ELEV_STATION)?GetTrkEndElevStation(trk,ep):NULL );
+    UndoModify(trk);
     for (int i=0;i<4;i++) {
     	xx->bezierData.pos[i] = ep?newl[i]:newr[i];
     }
     FixUpBezier(xx->bezierData.pos,xx,track);
     ComputeBezierBoundingBox(trk,xx);
     SetTrkEndPoint( trk, ep, xx->bezierData.pos[ep?3:0], ep?xx->bezierData.a1:xx->bezierData.a0);
-    //Clear elev data from ep
-
+    UpdateTrkEndElev( trk, ep, ELEV_NONE, 0, NULL);
 	*leftover = trk1;
 	*ep0 = 1-ep;
 	*ep1 = ep;
