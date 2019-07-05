@@ -681,7 +681,9 @@ The \f{Cancel} button removes the \f{Turnout Designer} dialog.
 
 This command updates (or refreshes) selected turnouts, sectional tracks and structures on your layout with the current definitions from the loaded parameter files (\K{cmdPrmfile}).  Each selected object that is found in a parameter file is updated with the current definition.
 
-If an object can not be found or if the new definition does not fit (same number of endpoints and all the endpoints have the same position and angle) then a dialog is displayed which contains suitable definitions that you can choose from.  You can \f{Skip} the current object or \f{Cancel} to skip all the remaining objects.
+If an object can be found and if a new track definition fits in the same footprint, (i.e., has the same number of endpoints and all the endpoints have the same position and angle) then a dialog is displayed which contains suitable definitions that you can choose from.  You can \f{Skip} the current object or \f{Cancel} to skip all the remaining objects.
+
+Otherwise the update fails and must be done manually using \f{Delete} and \f{Add}.
 
 If an object has been updated then it is unselected, otherwise it will remain selected at the end of this command.
 

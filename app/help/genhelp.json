@@ -98,7 +98,7 @@
 		{"line": "cmdPref", "contents": "Perferences dialog" },
 		{"line": "cmdPricelist", "contents": "Display prices of turnouts, sectional tracks and structures" },
 		{"line": "cmdPrint", "contents": "Print the layout" },
-		{"line": "cmdPrmfile", "contents": "Loads and unloads parameter files" },
+		{"line": "cmdPrmfile", "contents": "Loads and Unloads parameter files into/from Toolbar" },
 		{"line": "cmdProfile", "contents": "Elevation Profile Command" },
 		{"line": "cmdProfileDraw", "contents": "Profile" },
 		{"line": "cmdRecord", "contents": "Command recorder" },
