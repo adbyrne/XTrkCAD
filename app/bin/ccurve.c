@@ -120,6 +120,7 @@ EXPORT STATUS_T CreateCurve(
 	switch ( action ) {
 	case C_START:
 		DYNARR_SET( trkSeg_t, tempSegs_da, 8 );
+		tempSegs_da.cnt = 0;
 		Da.down = FALSE;  						//Not got a valid start yet
 		switch ( curveMode ) {
 		case crvCmdFromEP1:
@@ -180,6 +181,7 @@ EXPORT STATUS_T CreateCurve(
 			if (!found) SnapPos( &pos );
 			pos0 = pos;
 			Da.pos0 = pos;
+			tempSegs_da.cnt = 1;
 			switch (mode) {
 			case crvCmdFromEP1:
 				tempSegs(0).type = (track?SEG_STRTRK:SEG_STRLIN);
@@ -191,11 +193,14 @@ EXPORT STATUS_T CreateCurve(
 			case crvCmdFromTangent:
 			case crvCmdFromCenter:
 				tempSegs(0).type = SEG_STRLIN;
+				tempSegs(0).color = color;
 				tempSegs(1).type = SEG_CRVLIN;
+				tempSegs(1).color = color;
 				tempSegs(1).u.c.radius = mainD.scale*0.05;
 				tempSegs(1).u.c.a0 = 0;
 				tempSegs(1).u.c.a1 = 360;
 				tempSegs(2).type = SEG_STRLIN;
+				tempSegs(2).color = color;
 				if (Da.trk && mode==crvCmdFromTangent) message(_("End Locked: Drag out to center"));
 				else	
 					message( mode==crvCmdFromTangent?_("Drag from End-Point to Center"):_("Drag from Center to End-Point") );
@@ -207,7 +212,7 @@ EXPORT STATUS_T CreateCurve(
 				message( _("Drag to other end of chord") );
 				break;
 			}
-			tempSegs(0).u.l.pos[0] = pos;
+			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = pos;
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -240,7 +245,8 @@ EXPORT STATUS_T CreateCurve(
 			if (Da.trk) message( _("Tangent Locked: Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
 			else message( _("Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
 			tempSegs(1).u.c.center = pos;
-			tempSegs_da.cnt += DrawArrowHeads( &tempSegs(2), pos0, FindAngle(pos0,pos)+90, TRUE, wDrawColorBlack );
+			DrawArrowHeads( &tempSegs(2), pos0, FindAngle(pos0,pos)+90, TRUE, wDrawColorBlack );
+			tempSegs_da.cnt = 7;
 			break;
 		case crvCmdFromCenter:
 			message( _("Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
