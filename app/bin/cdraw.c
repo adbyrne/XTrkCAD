@@ -877,6 +877,7 @@ static void DrawModDlgUpdate(
 	 ParamLoadControl(&drawModPG,drawModRotCenterInx-1);	  //Make sure the angle is updated in case center moved
 	 ParamLoadControl(&drawModPG,drawModRadius);			 // Make sure Radius updated
 }
+
 static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
@@ -893,8 +894,11 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 	drawModCmdContext.selected = GetTrkSelected(trk);
 	drawModCmdContext.type = xx->segs[0].type;
 
+
 	switch(action&0xFF) {     //Remove Text value
 	case C_START:
+		drawModCmdContext.rot_moved = FALSE;
+		drawModCmdContext.rotate_state = FALSE;
 		infoSubst = FALSE;
 		rc = DrawGeomModify( C_START, pos, &drawModCmdContext );
 		if ( infoSubst ) {
@@ -1011,12 +1015,13 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		break;
 	case C_CMDMENU:
 		wMenuPopupShow( drawModDelMI );
-		wMenuPushEnable( drawModDel,(!drawModCmdContext.rotate_state)&&(drawModCmdContext.last_inx>=0));
+		wMenuPushEnable( drawModDel,(!drawModCmdContext.rotate_state & (drawModCmdContext.prev_inx>=0)));
 		wMenuPushEnable( drawModPointsMode,drawModCmdContext.rotate_state);
 		wMenuPushEnable( drawModCenterMode,!drawModCmdContext.rotate_state);
-		for (int i=0;i<3;i++) {
+		for (int i=0;i<2;i++) {
 			wMenuPushEnable( drawModSet[i],drawModCmdContext.rotate_state);
 		}
+		wMenuPushEnable( drawModSet[2],drawModCmdContext.rotate_state & (drawModCmdContext.prev_inx>=0));
 		break;
 	case C_TEXT:
 		ignoredDraw = trk ;
@@ -1029,11 +1034,12 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		if (rc == C_CONTINUE) break;
 		/* no break*/
 	case C_FINISH:
-		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
+		rc = DrawGeomModify( C_FINISH, pos, &drawModCmdContext  );
 		xx->angle = drawModCmdContext.angle;
 		xx->orig = drawModCmdContext.orig;
 		ignoredDraw = NULL;
 		ComputeDrawBoundingBox( trk );
+		DYNARR_RESET(trkSeg_t,tempSegs_da);
 		MainRedraw();
 		break;
 	case C_CONFIRM:
@@ -1911,14 +1917,17 @@ void MenuMode(int mode) {
 	}
 	if (mode == 1)
 		DrawGeomOriginMove(C_START,zero,&drawModCmdContext);
-	else
+	else  {
 		DrawGeomModify(C_START,zero,&drawModCmdContext);
+		InfoMessage("Points Mode");
+	}
+	MainRedraw();
 }
 
 void MenuEnter(int key) {
 	int action;
-	action = key<<8;
-	action &=0xFF&C_TEXT;
+	action = C_TEXT;
+	action |= key<<8;
 	if (drawModCmdContext.rotate_state)
 		DrawGeomOriginMove(action,zero,&drawModCmdContext);
 	else
@@ -1934,13 +1943,13 @@ EXPORT void InitTrkDraw( void )
 
 
 	drawModDelMI = MenuRegister( "Modify Draw Edit Menu" );
-	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode"), 0, (wMenuCallBack_p)MenuMode, (void*) 0 );
-	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point"), 0, (wMenuCallBack_p)MenuEnter, (void*) 127 );
+	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode - 'p'"), 0, (wMenuCallBack_p)MenuMode, (void*) 0 );
+	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point - 'Del'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 127 );
 	wMenuSeparatorCreate( drawModDelMI );
-	drawModCenterMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode"), 0, (wMenuCallBack_p)MenuMode, (void*) 1 );
-	drawModSet[0] = wMenuPushCreate( drawModDelMI, "", _("Reset Origin"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );
-	drawModSet[1] = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l' );
-	drawModSet[2] = wMenuPushCreate( drawModDelMI, "", _("Origin to Centroid"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c');
+	drawModCenterMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, (wMenuCallBack_p)MenuMode, (void*) 1 );
+	drawModSet[0] = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );
+	drawModSet[1] = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l' );
+	drawModSet[2] = wMenuPushCreate( drawModDelMI, "", _("Origin to Centroid - 'c'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c');
 
 
 

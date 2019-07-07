@@ -105,6 +105,7 @@ void InitTrkControl ( void );
 void InitTrkSensor ( void );
 
 void InitCmdCurve( wMenu_p menu );
+void InitCmdCornu( wMenu_p menu);
 void InitCmdHelix( wMenu_p menu );
 void InitCmdDraw( wMenu_p menu );
 void InitCmdElevation( wMenu_p menu );

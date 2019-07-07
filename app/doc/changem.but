@@ -581,7 +581,7 @@ The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work
 
 The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be changed. Control "Pins" can be added, moved or selected and removed from \e{Cornus}.
 
-\e{Curved Lines} are modified in same manner as curved track.
+\e{Curved Lines} are modified by dragging the end points and dragging the amount of central deflection (radius).
 
 Selecting a corner of a \e{Poly Line} or \e{Polygon} moves that corner to a new position, and if moved close to a neighboring corner will merge the two corners and delete the edge between them. Selecting an edge will create a corner that can be dragged to a new position.
 
@@ -602,6 +602,10 @@ For detail about;
 \u000
 
 \dd Extending track length refer to \K{extendTrack}
+
+\u000
+
+\dd Modifying Draw elements refer to \K{chgDraw}
 
 \u000
 
@@ -741,9 +745,37 @@ For detail about;
 
 \rule
 
-\S2{chgCornu} \i{Cornu Easements} Modifying a Cornu
+\S2{chgDraw} Modifying Draw Elements
 
-Because a Cornu is defined by its end points position, angle and radius - it can only be directly modified by dragging an end point along a track. It can also have added "Pins" which constrain the curve to smoothly pass through a point.
+Draw elements have blue handles that show how they can be modified. They also have text entry boxes that allow precise entry of parameters. These values become active when a \e{Tab} is entered, or the cursor is moved out of the text box.  
+
+There is a context menu accessed via \e{Right-Click} for Draw Objects that can change the edit mode from the initial "Points Mode" to "Origin Mode" where \e{Click} sets the position of the drawn object's origin - which will cause subsequent rotations using \K{cmdModify} to be centered about that point. The context menu can be used to go back to Points Mode, or to set the origin to defined points. The shortcuts are "o" for Origin Mode, "p" for Points Mode. 
+
+In Origin Mode, the context menu allows the origin to be set to the layout origin (shortcut "0") or the position of the corner points (shortcut "1" through "4") or the centroid of the shape (shortcut "c"). For a polygon, if a node is selected, the origin can be moved to it (shortcut "l"). 
+
+\dd Lines have end points that can be dragged. \e{Shift-Drag} will snap the end to the end of a nearby Draw object, while \e{Ctrl+Drag} will snap to any point on a nearby Draw object.  They have text entry boxes for length and angle.
+
+\u000
+
+\dd Curves have end points that work like Lines but also have a middle anchor that can be used to alter the curve radius. They have text box entry for Arc Length (in degrees) and Radius. 
+
+\u000
+
+\dd Boxes have anchors for all corners and the middle of all sides. They have text entry boxes for width and height.
+
+\u000
+
+\dd Polygons have nodes that can be selected and dragged. Selected nodes are highlighted. \e{Shift+Click} will add to selected nodes and dragging will then move all of the selected points together. If \e{Shift} is held down while dragging, the relative angle for the first selected point to its predecessor point will be locked to a multiple of 90 degrees. Clicking between existing nodes will add a new node while \e{Delete} will delete all currently selected nodes. If a single node is selected, text entry boxes for length and relative angle (the deviation angle from the preceeding side) can be used to fine-tune it. 
+
+\u000
+
+\dd Bezier Lines - see \K{chgBezier}
+
+\rule
+
+\S2{chgCornu} \i{Cornu Easements} Modifying a Cornu Track
+
+Because a Cornu Track is defined by its end points position, angle and radius - it can only be directly modified by dragging an end point along a track. It can also have added "Pins" which constrain the curve to smoothly pass through a point.
 
 \n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
 

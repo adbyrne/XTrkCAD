@@ -96,6 +96,7 @@ typedef struct {
 				ModState_e state;
 				coOrd rel_center;
 				coOrd rot_center;
+				wBool_t rot_moved;
 				coOrd translate_center;
 				coOrd moved;
 				coOrd arm;
