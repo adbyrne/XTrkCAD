@@ -26,7 +26,7 @@
 #include "common.h"
 #include "track.h"
 
-typedef enum { TOnormal, TOadjustable, TOpierInfo, TOpier, TOcarDesc, TOlast } TOspecial_e;
+typedef enum { TOnormal, TOadjustable, TOpierInfo, TOpier, TOcarDesc, TOlast, TOcurved } TOspecial_e;
 
 typedef struct {
 		char * name;
@@ -44,6 +44,9 @@ typedef union {
 				FLOAT_T height;
 				char * name;
 			} pier;
+			struct {
+				dynArr_t radii;
+			} curved;
 		} turnoutInfo_u;
 		
 typedef struct turnoutInfo_t{
@@ -91,6 +94,7 @@ struct extraData {
 		PATHPTR_T pathCurr;
 		wIndex_t segCnt;
 		trkSeg_t * segs;
+		DIST_T * radii;
 		};
 #endif
 
@@ -111,6 +115,7 @@ extern turnoutInfo_t * curStructure;
 
 #define ADJUSTABLE "adjustable"
 #define PIER "pier"
+#define CURVED "curvedends"
 
 /* compound.c */
 #define FIND_TURNOUT	(1<<11)
@@ -129,7 +134,7 @@ void DrawCompoundDescription( track_p, drawCmd_p, wDrawColor );
 DIST_T DistanceCompound( track_p, coOrd * );
 void DescribeCompound( track_p, char *, CSIZE_T );
 void DeleteCompound( track_p );
-track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, char *, EPINX_T, trkEndPt_t *, int, char *, wIndex_t, trkSeg_p );
+track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, char *, EPINX_T, trkEndPt_t *, DIST_T *, int, char *, wIndex_t, trkSeg_p );
 BOOL_T WriteCompound( track_p, FILE * );
 void ReadCompound( char *, TRKTYP_T );
 void MoveCompound( track_p, coOrd );
@@ -153,7 +158,7 @@ EPINX_T TurnoutPickEndPt( coOrd p, track_p );
 void GetSegInxEP( signed char, int *, EPINX_T * );
 void SetSegInxEP( signed char *, int, EPINX_T) ;
 wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T );
-turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, wIndex_t, PATHPTR_T, EPINX_T, trkEndPt_t *, wBool_t );
+turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, wIndex_t, PATHPTR_T, EPINX_T, trkEndPt_t *, DIST_T *, wBool_t );
 turnoutInfo_t * TurnoutAdd( long, SCALEINX_T, wList_p, coOrd *, EPINX_T );
 STATUS_T CmdTurnoutAction( wAction_t, coOrd );
 BOOL_T ConnectAdjustableTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T ep2 );

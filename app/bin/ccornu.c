@@ -358,7 +358,7 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2], cornuParm_
 	return TRUE;
 }
 
-BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], dynArr_t * array_p, BOOL_T spots) {
+EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T radius[2], dynArr_t * array_p, BOOL_T spots) {
 	array_p->cnt = 0;
 	//Create LH knots
 	//Find remote end point of track, create start knot
@@ -463,6 +463,7 @@ BOOL_T CallCornu(coOrd pos[2], track_p trk[2], EPINX_T ep[2], dynArr_t * array_p
 
 	return CallCornu0(pos,cp->center,cp->angle,cp->radius,array_p,ep?TRUE:FALSE);
 }
+
 
 
 /*
@@ -886,74 +887,76 @@ EXPORT STATUS_T AdjustCornuCurve(
 			DrawTempCornu();
 			Da.extend[sel] = FALSE;
 			if(!Da.trk[sel]) {							//Cornu with no ends
-				if (inside) {
-					Da.pos[sel] = pos;
-					struct extraData *xx = GetTrkExtraData(Da.selectTrack);
-					Da.center[sel] = xx->cornuData.c[sel];			//Reset center
-					Da.extend[sel] = FALSE;
-				}
-				if (!inside && ((MyGetKeyState() & WKEY_SHIFT) != 0)) {  //Shift extends out old track
-					struct extraData *xx = GetTrkExtraData(Da.selectTrack);
-					//Da.pos[sel] = xx->cornuData.pos[sel];            //Re-Copy parms from old trk
-					Da.radius[sel] = xx->cornuData.r[sel];
-					Da.angle[sel] = xx->cornuData.a[sel];
-					Da.center[sel] = xx->cornuData.c[sel];
-					if (Da.radius[sel] == 0)  {				//Straight
-						Da.extendSeg[sel].type = SEG_STRTRK;
-						Da.extendSeg[sel].width = 0;
-						Da.extendSeg[sel].color = wDrawColorBlack;
-						Da.extendSeg[sel].u.l.pos[1-sel] = Da.pos[sel];
-						d = FindDistance( Da.extendSeg[sel].u.l.pos[1-sel], pos );
-						a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,Da.pos[sel]));
-						if (cos(D2R(a))<=0) {
-							Translate( &Da.extendSeg[sel].u.l.pos[sel],
-										Da.extendSeg[sel].u.l.pos[1-sel],
-										Da.angle[sel], - d * cos(D2R(a)));
-							pos = Da.extendSeg[sel].u.l.pos[sel];
-							Da.extend[sel] = TRUE;
-						}
-					} else {								//Curve
-						Da.extendSeg[sel].type = SEG_CRVTRK;
-						Da.extendSeg[sel].width = 0;
-						Da.extendSeg[sel].color = wDrawColorBlack;
-						Da.extendSeg[sel].u.c.center = Da.center[sel];
-						coOrd offset;
-						offset.x = Da.pos[sel].x-xx->cornuData.pos[sel].x;
-						offset.y = Da.pos[sel].y-xx->cornuData.pos[sel].y;
-						Da.extendSeg[sel].u.c.center.x =xx->cornuData.c[sel].x+offset.x;
-						Da.extendSeg[sel].u.c.center.y =xx->cornuData.c[sel].y+offset.y;
-						Da.extendSeg[sel].u.c.radius = Da.radius[sel];
-						a = FindAngle( Da.center[sel], Da.pos[sel] );
-						PointOnCircle( &pos, Da.extendSeg[sel].u.c.center, Da.radius[sel], a );
-						a2 = FindAngle(Da.extendSeg[sel].u.c.center,Da.pos[sel]);
-						if (((Da.angle[sel] < 180) && (a2>90 && a2<270)) ||
-							((Da.angle[sel] > 180) && (a2<90 || a2>270))) {
-							Da.extendSeg[sel].u.c.a0 = a;
-							Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a2-a);
-						} else {
-							Da.extendSeg[sel].u.c.a0 = a2;
-							Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a-a2);
-						}
-						if (Da.extendSeg[sel].u.c.a1 == 0 || Da.extendSeg[sel].u.c.a1 >180 )
-							Da.extend[sel] = FALSE;
-						else
-							Da.extend[sel] = TRUE;
-					}
-					if (Da.extend[sel] == FALSE) {          // Not extending - so trim along our own Cornu
-						GetCornuParmsNear(Da.selectTrack, sel, &pos, &Da.center[sel], &Da.angle[sel],  &Da.radius[sel] );
+				if (Da.selectTrack) {					//There is already a track
+					if (inside) {
 						Da.pos[sel] = pos;
-					}
-				} else {									//Just move end (no shift)
-					Da.pos[sel] = pos;
-					if (Da.selectTrack) {					//Track already exists
-						coOrd offset;
 						struct extraData *xx = GetTrkExtraData(Da.selectTrack);
-						offset.x = Da.pos[sel].x-xx->cornuData.pos[sel].x;
-						offset.y = Da.pos[sel].y-xx->cornuData.pos[sel].y;
-						Da.center[sel].x = xx->cornuData.c[sel].x+offset.x;
-						Da.center[sel].y = xx->cornuData.c[sel].y+offset.y;
-					}										//No Track, no end so radius = 0;
-				}
+						Da.center[sel] = xx->cornuData.c[sel];			//Reset center
+						Da.extend[sel] = FALSE;
+					}
+					if (!inside && ((MyGetKeyState() & WKEY_SHIFT) != 0)) {  //Shift extends out old track
+						struct extraData *xx = GetTrkExtraData(Da.selectTrack);
+						//Da.pos[sel] = xx->cornuData.pos[sel];            //Re-Copy parms from old trk
+						Da.radius[sel] = xx->cornuData.r[sel];
+						Da.angle[sel] = xx->cornuData.a[sel];
+						Da.center[sel] = xx->cornuData.c[sel];
+						if (Da.radius[sel] == 0)  {				//Straight
+							Da.extendSeg[sel].type = SEG_STRTRK;
+							Da.extendSeg[sel].width = 0;
+							Da.extendSeg[sel].color = wDrawColorBlack;
+							Da.extendSeg[sel].u.l.pos[1-sel] = Da.pos[sel];
+							d = FindDistance( Da.extendSeg[sel].u.l.pos[1-sel], pos );
+							a = NormalizeAngle(Da.angle[sel]-FindAngle(pos,Da.pos[sel]));
+							if (cos(D2R(a))<=0) {
+								Translate( &Da.extendSeg[sel].u.l.pos[sel],
+											Da.extendSeg[sel].u.l.pos[1-sel],
+											Da.angle[sel], - d * cos(D2R(a)));
+								pos = Da.extendSeg[sel].u.l.pos[sel];
+								Da.extend[sel] = TRUE;
+							}
+						} else {								//Curve
+							Da.extendSeg[sel].type = SEG_CRVTRK;
+							Da.extendSeg[sel].width = 0;
+							Da.extendSeg[sel].color = wDrawColorBlack;
+							Da.extendSeg[sel].u.c.center = Da.center[sel];
+							coOrd offset;
+							offset.x = Da.pos[sel].x-xx->cornuData.pos[sel].x;
+							offset.y = Da.pos[sel].y-xx->cornuData.pos[sel].y;
+							Da.extendSeg[sel].u.c.center.x =xx->cornuData.c[sel].x+offset.x;
+							Da.extendSeg[sel].u.c.center.y =xx->cornuData.c[sel].y+offset.y;
+							Da.extendSeg[sel].u.c.radius = Da.radius[sel];
+							a = FindAngle( Da.center[sel], Da.pos[sel] );
+							PointOnCircle( &pos, Da.extendSeg[sel].u.c.center, Da.radius[sel], a );
+							a2 = FindAngle(Da.extendSeg[sel].u.c.center,Da.pos[sel]);
+							if (((Da.angle[sel] < 180) && (a2>90 && a2<270)) ||
+								((Da.angle[sel] > 180) && (a2<90 || a2>270))) {
+								Da.extendSeg[sel].u.c.a0 = a;
+								Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a2-a);
+							} else {
+								Da.extendSeg[sel].u.c.a0 = a2;
+								Da.extendSeg[sel].u.c.a1 = NormalizeAngle(a-a2);
+							}
+							if (Da.extendSeg[sel].u.c.a1 == 0 || Da.extendSeg[sel].u.c.a1 >180 )
+								Da.extend[sel] = FALSE;
+							else
+								Da.extend[sel] = TRUE;
+						}
+						if (Da.extend[sel] == FALSE) {          // Not extending - so trim along our own Cornu
+							GetCornuParmsNear(Da.selectTrack, sel, &pos, &Da.center[sel], &Da.angle[sel],  &Da.radius[sel] );
+							Da.pos[sel] = pos;
+						}
+					} else {									//Just move end (no shift)
+						Da.pos[sel] = pos;
+						if (Da.selectTrack) {					//Track already exists
+							coOrd offset;
+							struct extraData *xx = GetTrkExtraData(Da.selectTrack);
+							offset.x = Da.pos[sel].x-xx->cornuData.pos[sel].x;
+							offset.y = Da.pos[sel].y-xx->cornuData.pos[sel].y;
+							Da.center[sel].x = xx->cornuData.c[sel].x+offset.x;
+							Da.center[sel].y = xx->cornuData.c[sel].y+offset.y;
+						}										//No Track, no end so radius = 0;
+					}
+				} else Da.pos[sel] = pos;
 			} else {									//Cornu with ends
 				if (inside) Da.pos[sel] = pos;
 				if (!GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel])) {

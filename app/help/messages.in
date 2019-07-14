@@ -78,6 +78,16 @@ HELP
 The angle specified for a curve must be between 0\u00B0 and 360\u00B0.
 END
 
+# ctodesgn.c
+MESSAGE MSG_TODSGN_CORNU_TOO_COMPLEX
+The curves created by the Turnout Designer for a cornu curve have more than 128 segments.
+Try adjusting the end angles and radii to be closer in values.
+HELP
+Too complex a curve set to be used. Respecify \f{Turnout Designer} values.
+
+Refer to \k{cmdTurnoutNew} for detail.
+END
+
 # dcustmgm.c
 MESSAGE MSG_CUSTMGM_DELETE_CONFIRM
 Are you sure you want to delete the

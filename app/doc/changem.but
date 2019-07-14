@@ -387,6 +387,16 @@ For detail about;
 
 \S2{joinCornu} \i{Creating a Cornu} \i{Cornu Easements} Join with Cornu Easement
 
+A Cornu is a form of Join that uses a mathematical approach to creating a curve between two sets of end conditions. 
+
+The conditions at each end are the radius, angle and position. 
+
+The curve is designed to change radius (curvature) linearly along its length, which mimics the characteristics of railway easements because it minimizes sudden changes in acceleration towards the center of curvature.
+
+Because Cornu are mathematically generated, they can be regenerated at will and so Cornu Joins are unique in XtrkCAD because they remain connected even if the tracks at the end are moved or even change shape.
+
+Cornu Joins will use whatever space is available - that is their "tightness" (rate of change of curvature) is variable and dynamic. 
+
 \u000
 
 \n First, ensure that the Easement type option is set to Cornu - see \k{cmdEasement}

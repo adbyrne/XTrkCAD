@@ -1261,6 +1261,7 @@ static BOOL_T QueryCurve( track_p trk, int query )
 	case Q_HAS_DESC:
 	case Q_CORNU_CAN_MODIFY:
 	case Q_MODIFY_CAN_SPLIT:
+	case Q_CAN_EXTEND:
 		return TRUE;
 		break;
 	case Q_EXCEPTION:
@@ -1530,7 +1531,7 @@ EXPORT void PlotCurve(
 		coOrd pos1,
 		coOrd pos2,
 		curveData_t * curveData,
-		BOOL_T constrain )
+		BOOL_T constrain )   //Make the Radius be in steps of radiusGranularity (1/8)
 {
 	DIST_T d0, d2, r;
 	ANGLE_T angle, a0, a1, a2;
@@ -1538,13 +1539,14 @@ EXPORT void PlotCurve(
 
 	switch ( mode ) {
 	case crvCmdFromCornu:
+		/* Already set curveRadius, pos1, and type */
 	case crvCmdFromEP1:
 		angle = FindAngle( pos0, pos1 );
 		d0 = FindDistance( pos0, pos2 )/2.0;
 		a0 = FindAngle( pos0, pos2 );
 		a1 = NormalizeAngle( a0 - angle );
 LOG( log_curve, 3, ( "P1 = [%0.3f %0.3f] D=%0.3f A0=%0.3f A1=%0.3f\n", pos2.x, pos2.y, d0, a0, a1 ) )
-		if ((fabs(d0*sin(D2R(a1))) < (4.0/75.0)*mainD.scale) & (mode == crvCmdFromEP1)) {
+		if ((fabs(d0*sin(D2R(a1))) < (4.0/75.0)*mainD.scale)) {
 LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*mainD.scale ) )
 			curveData->pos1.x = pos0.x + d0*2.0*sin(D2R(angle));
 			curveData->pos1.y = pos0.y + d0*2.0*cos(D2R(angle));
@@ -1566,7 +1568,7 @@ LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*ma
 				else
 					curveData->curveRadius = d0/sin(D2R(-a1));
 			}
-			if (curveData->curveRadius > 1000 && mode == crvCmdFromEP1) {
+			if (curveData->curveRadius > 1000) {
 				LOG( log_curve, 3, ( "Straight %0.3f > 1000\n", curveData->curveRadius ) )
 				curveData->pos1.x = pos0.x + d0*2.0*sin(D2R(angle));
 				curveData->pos1.y = pos0.y + d0*2.0*cos(D2R(angle));

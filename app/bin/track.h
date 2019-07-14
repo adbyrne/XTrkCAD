@@ -282,6 +282,7 @@ typedef struct {
 #define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BEZTRK)
 
 dynArr_t tempSegs_da;
+
 #define tempSegs(N) DYNARR_N( trkSeg_t, tempSegs_da, N )
 
 char tempSpecial[4096];
@@ -605,6 +606,7 @@ BOOL_T RemoveTrack( track_p*, EPINX_T*, DIST_T* );
 BOOL_T TrimTrack( track_p, EPINX_T, DIST_T );
 BOOL_T MergeTracks( track_p, EPINX_T, track_p, EPINX_T );
 STATUS_T ExtendStraightFromOrig( track_p, wAction_t, coOrd );
+STATUS_T ExtendTrackFromOrig( track_p, wAction_t, coOrd );
 STATUS_T ModifyTrack( track_p, wAction_t, coOrd );
 BOOL_T GetTrackParams( int, track_p, coOrd, trackParams_t* );
 BOOL_T MoveEndPt( track_p *, EPINX_T *, coOrd, DIST_T );

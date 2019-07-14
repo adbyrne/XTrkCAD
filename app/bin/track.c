@@ -2024,6 +2024,130 @@ EXPORT BOOL_T MergeTracks( track_p trk0, EPINX_T ep0, track_p trk1, EPINX_T ep1 
 		return FALSE;
 }
 
+EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
+{
+	static EPINX_T ep;
+	static coOrd end_pos;
+	static BOOL_T valid;
+	DIST_T d;
+	track_p trk1;
+	trackParams_t params;
+	static wBool_t curved;
+	static ANGLE_T end_angle;
+
+	switch ( action ) {
+	case C_DOWN:
+		ep = PickUnconnectedEndPoint( pos, trk );
+		if ( ep == -1 )
+			return C_ERROR;
+		pos = GetTrkEndPos(trk,ep);
+		if (!GetTrackParams(PARAMS_CORNU,trk,pos,&params)) return C_ERROR;
+		end_pos = pos;
+		if (params.type == curveTypeCurve) {
+			curved = TRUE;
+			tempSegs(0).type = SEG_CRVTRK;
+			tempSegs(0).width = 0;
+			tempSegs(0).u.c.radius = params.arcR;
+			tempSegs(0).u.c.center = params.arcP;
+			tempSegs(0).u.c.a0 = FindAngle(params.arcP,GetTrkEndPos(trk,ep));
+			tempSegs(0).u.c.a1 = 0;
+		} else {
+			curved = FALSE;
+			tempSegs(0).type = SEG_STRTRK;
+			tempSegs(0).width = 0;
+			tempSegs(0).u.l.pos[0] = tempSegs(0).u.l.pos[1] = GetTrkEndPos( trk, ep );
+		}
+		valid = FALSE;
+		InfoMessage( _("Drag to change track length") );
+		return C_CONTINUE;
+		/*no break*/
+	case C_MOVE:
+		if (curved) {
+			//Normalize pos
+			PointOnCircle( &pos, tempSegs(0).u.c.center, tempSegs(0).u.c.radius, FindAngle(tempSegs(0).u.c.center,pos) );
+			ANGLE_T a = FindAngle(tempSegs(0).u.c.center,pos)-FindAngle(tempSegs(0).u.c.center,end_pos);
+			d = fabs(a)*2*M_PI/360*tempSegs(0).u.c.radius;
+			if ( d <= minLength ) {
+				if (action == C_MOVE)
+					ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
+				valid = FALSE;
+				return C_CONTINUE;
+			}
+			//Restrict to outside track
+			ANGLE_T diff = NormalizeAngle(GetTrkEndAngle(trk, ep)-FindAngle(end_pos,pos));
+			if (diff>90.0 && diff<270.0) {
+				valid = FALSE;
+				tempSegs(0).u.c.a1 = 0;
+				tempSegs(0).u.c.a0 = end_angle;
+				InfoMessage( _("Inside Turnout Track"));
+				return C_CONTINUE;
+			}
+			end_angle = GetTrkEndAngle( trk, ep );
+			a = FindAngle(tempSegs(0).u.c.center, pos );
+			PointOnCircle( &pos, tempSegs(0).u.c.center, tempSegs(0).u.c.radius, a );
+			ANGLE_T a2 = FindAngle(tempSegs(0).u.c.center,end_pos);
+			if ((end_angle > 180 && (a2>90 && a2 <270))  ||
+					(end_angle < 180 && (a2<90 || a2 >270))) {
+				tempSegs(0).u.c.a0 = a2;
+				tempSegs(0).u.c.a1 = NormalizeAngle(a-a2);
+			} else {
+				tempSegs(0).u.c.a0 = a;
+				tempSegs(0).u.c.a1 = NormalizeAngle(a2-a);
+			}
+			tempSegs_da.cnt = 1;
+			valid = TRUE;
+			if (action == C_MOVE)
+				InfoMessage( _("Curve: Length=%s, Radius=%0.3f Arc=%0.3f"),
+						FormatDistance( d ), FormatDistance(tempSegs(0).u.c.radius), PutAngle( fabs(a) ) );
+			return C_CONTINUE;
+		} else {
+			d = FindDistance( end_pos, pos );
+			valid = TRUE;
+			if ( d <= minLength ) {
+				if (action == C_MOVE)
+					ErrorMessage( MSG_TRK_TOO_SHORT, _("Connecting "), PutDim(fabs(minLength-d)) );
+				valid = FALSE;
+				return C_CONTINUE;
+			}
+			ANGLE_T diff = NormalizeAngle(GetTrkEndAngle( trk, ep )-FindAngle(end_pos, pos));
+			if (diff>=90.0 && diff<=270.0) {
+				valid = FALSE;
+				tempSegs(0).u.c.a1 = 0;
+				tempSegs(0).u.c.a0 = end_angle;
+				InfoMessage( _("Inside Turnout Track"));
+				return C_CONTINUE;
+			}
+			Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk, ep ), d );
+			tempSegs_da.cnt = 1;
+			if (action == C_MOVE)
+				InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
+						FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
+		}
+		return C_CONTINUE;
+
+	case C_UP:
+		if (!valid)
+			return C_TERMINATE;
+		UndrawNewTrack( trk );
+		EPINX_T jp;
+		if (curved) {
+			trk1 = NewCurvedTrack(tempSegs(0).u.c.center, tempSegs(0).u.c.radius, tempSegs(0).u.c.a0, tempSegs(0).u.c.a1, 0);
+			jp = PickUnconnectedEndPoint(end_pos,trk1);
+		} else {
+			trk1 = NewStraightTrack( tempSegs(0).u.l.pos[0], tempSegs(0).u.l.pos[1] );
+			jp = 0;
+		}
+		CopyAttributes( trk, trk1 );
+		ConnectTracks( trk, ep, trk1, jp );
+		DrawNewTrack( trk );
+		DrawNewTrack( trk1 );
+		return C_TERMINATE;
+
+	default:
+		;
+	}
+	return C_ERROR;
+}
 
 EXPORT STATUS_T ExtendStraightFromOrig( track_p trk, wAction_t action, coOrd pos )
 {

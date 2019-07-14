@@ -1164,7 +1164,6 @@ static BOOL_T QueryCornu( track_p trk, int query )
 		return TRUE;
 		break;
 	case Q_MODIFY_CAN_SPLIT:
-	case Q_CAN_EXTEND:
 		return TRUE;
 	default:
 		return FALSE;

@@ -327,17 +327,16 @@ static STATUS_T CmdModify(
 			return ModifyDraw(C_MOVE, pos);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
+
 		SnapPos( &pos );
 		rc = ModifyTrack( Dex.Trk, C_MOVE, pos );
 		if ( rc != C_CONTINUE ) {
 			rc = C_CONTINUE;
 			Dex.Trk = NULL;
 		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
         MainRedraw();
         MapRedraw();
 		return rc;
-
 
 	case C_UP:
 		if (Dex.Trk == NULL)
@@ -352,12 +351,12 @@ static STATUS_T CmdModify(
 			return ModifyDraw(C_UP, pos);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
+
 		SnapPos( &pos );
 		UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 		UndoModify( Dex.Trk );
 		rc = ModifyTrack( Dex.Trk, C_UP, pos );
 		UndoEnd();
-        //changeTrackMode = FALSE;
         Dex.Trk = NULL;
         MainRedraw();
         MapRedraw();
@@ -437,11 +436,6 @@ LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
 					ErrorMessage( MSG_TRK_TOO_SHORT, "First ", PutDim(fabs(minLength-d)) );
 					return C_CONTINUE;
 				}
-				a0 = Dex.angle + (Dex.jointD.negate?-90.0:+90.0);
-				Translate( &Dex.pos01, Dex.pos00, a0, Dex.jointD.x );
-				Translate( &Dex.curveData.pos1, Dex.curveData.pos1,
-						a0, Dex.jointD.x );
-LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 			} else {
 				Dex.jointD.d1 = 0.0;
 			}
@@ -467,44 +461,46 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 			return C_CONTINUE;
 		} else if ( curveType == curveTypeCurve ) {
 			Dex.r1 = Dex.curveData.curveRadius;
-			if ( easeR > 0.0 && Dex.r1 < easeR ) {
-				ErrorMessage( MSG_RADIUS_LSS_EASE_MIN,
-					FormatDistance( Dex.r1 ), FormatDistance( easeR ) );
-				return C_CONTINUE;
-			}
-			if ( Dex.r1*2.0*M_PI*Dex.curveData.a1/360.0 > mapD.size.x+mapD.size.y ) {
-				ErrorMessage( MSG_CURVE_TOO_LARGE );
-				return C_CONTINUE;
-			}
-			if ( NormalizeAngle( FindAngle( Dex.pos00, pos ) - Dex.angle ) > 180.0 )
-				Dex.r1 = -Dex.r1;
 			if ( QueryTrack( Dex.Trk, Q_IGNORE_EASEMENT_ON_EXTEND ) ) {
-				/* Ignore easements when extending turnouts */
+							       /* Ignore easements when extending turnouts or turntables */
 				Dex.jointD.x =
 				Dex.jointD.r0 = Dex.jointD.r1 = 
 				Dex.jointD.l0 = Dex.jointD.l1 = 
 				Dex.jointD.d0 = Dex.jointD.d1 = 0.0;
 				Dex.jointD.flip = Dex.jointD.negate = Dex.jointD.Scurve = FALSE;
-			} else {
-				if (ComputeJoint( Dex.params.arcR, Dex.r1, &Dex.jointD ) == E_ERROR)
+				d = Dex.curveData.curveRadius * Dex.curveData.a1 * 2.0*M_PI/360.0;
+			} else {					/* Easment code */
+				if ( easeR > 0.0 && Dex.r1 < easeR ) {
+					ErrorMessage( MSG_RADIUS_LSS_EASE_MIN,
+						FormatDistance( Dex.r1 ), FormatDistance( easeR ) );
 					return C_CONTINUE;
+				}
+				if ( Dex.r1*2.0*M_PI*Dex.curveData.a1/360.0 > mapD.size.x+mapD.size.y ) {
+					ErrorMessage( MSG_CURVE_TOO_LARGE );
+					return C_CONTINUE;
+				}
+				if ( NormalizeAngle( FindAngle( Dex.pos00, pos ) - Dex.angle ) > 180.0 )
+					if (ComputeJoint( Dex.params.arcR, Dex.r1, &Dex.jointD ) == E_ERROR)
+						return C_CONTINUE;
 				d = Dex.params.len - Dex.jointD.d0;
 				if (d <= minLength) {
 					ErrorMessage( MSG_TRK_TOO_SHORT, "First ", PutDim(fabs(minLength-d)) );
 					return C_CONTINUE;
 				}
+
+				d = Dex.curveData.curveRadius * Dex.curveData.a1 * 2.0*M_PI/360.0;
+				d -= Dex.jointD.d1;
+
+				a0 = Dex.angle + (Dex.jointD.negate?-90.0:+90.0);
+				Translate( &Dex.pos01, Dex.pos00, a0, Dex.jointD.x );
+				Translate( &Dex.curveData.curvePos, Dex.curveData.curvePos,
+							a0, Dex.jointD.x );
+LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 			}
-			d = Dex.curveData.curveRadius * Dex.curveData.a1 * 2.0*M_PI/360.0;
-			d -= Dex.jointD.d1;
 			if (d <= minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Extending ", PutDim(fabs(minLength-d)) );
 				return C_CONTINUE;
 			}
-			a0 = Dex.angle + (Dex.jointD.negate?-90.0:+90.0);
-			Translate( &Dex.pos01, Dex.pos00, a0, Dex.jointD.x );
-			Translate( &Dex.curveData.curvePos, Dex.curveData.curvePos,
-						a0, Dex.jointD.x );
-LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 			tempSegs(0).type = SEG_CRVTRK;
 			tempSegs(0).width = 0;
 			tempSegs(0).u.c.center = Dex.curveData.curvePos;
@@ -512,9 +508,9 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 			tempSegs(0).u.c.a0 = Dex.curveData.a0;
 			tempSegs(0).u.c.a1 = Dex.curveData.a1;
 			tempSegs_da.cnt = 1;
-			d = D2R(Dex.curveData.a1);
-			if (d < 0.0)
-				d = 2*M_PI + d;
+			double da = D2R(Dex.curveData.a1);
+			if (da < 0.0)
+				da = 2*M_PI + da;
 			a = NormalizeAngle( Dex.angle - FindAngle( Dex.pos00, Dex.curveData.curvePos ) );
 			if ( a < 180.0 )
 				a = NormalizeAngle( Dex.curveData.a0-90 );
@@ -524,17 +520,15 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 			if (action != C_RDOWN)
 				InfoMessage( _("Curve Track: Radius=%s Length=%s Angle=%0.3f"),
 					FormatDistance( Dex.curveData.curveRadius ),
-					FormatDistance( Dex.curveData.curveRadius * d),
+					FormatDistance( Dex.curveData.curveRadius * da),
 					Dex.curveData.a1 );
 		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
         MainRedraw();
         MapRedraw();
 		return C_CONTINUE;
 
 	case C_RUP:
 		changeTrackMode = FALSE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		if (Dex.Trk == NULL) return C_CONTINUE;
 		if (!Dex.valid)
@@ -544,22 +538,26 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 		curveType = Dex.curveData.type;
    
 		if ( curveType == curveTypeStraight ) {
-			if ( Dex.params.type == curveTypeStraight && Dex.params.len > 0 ) {
-				//UndrawNewTrack( Dex.Trk );
-				UndoModify( Dex.Trk );
-				AdjustStraightEndPt( Dex.Trk, Dex.params.ep, Dex.curveData.pos1 );
-				UndoEnd();
-				DrawNewTrack(Dex.Trk );
-                MainRedraw();
-                MapRedraw();
-				return C_TERMINATE;
+			if (QueryTrack(Dex.Trk,Q_CAN_EXTEND))   //Check it isn't a turnout end....
+				if ( Dex.params.type == curveTypeStraight &&
+						FindDistance(Dex.pos01, Dex.curveData.pos1) > 0 ) {
+					UndoModify( Dex.Trk );
+					AdjustStraightEndPt( Dex.Trk, Dex.params.ep, Dex.curveData.pos1 );
+					UndoEnd();
+					DrawNewTrack(Dex.Trk );
+					MainRedraw();
+					MapRedraw();
+					return C_TERMINATE;
 			}
+			if (FindDistance(Dex.pos01, Dex.curveData.pos1) == 0) return C_ERROR;
+LOG( log_modify, 1, ("L = %0.3f, P0 = %0.3f, P1 = %0.3f\n",
+						Dex.params.len, Dex.pos01, Dex.curveData.pos1 ) )
 			trk = NewStraightTrack( Dex.pos01, Dex.curveData.pos1 );
 			inx = 0;
 
 		} else if ( curveType == curveTypeCurve ) {
-LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
-						Dex.curveData.a0, Dex.curveData.a1 ) )
+LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
+						Dex.curveData.curveRadius, Dex.curveData.a0, Dex.curveData.a1 ) )
 			trk = NewCurvedTrack( Dex.curveData.curvePos, Dex.curveData.curveRadius,
 						Dex.curveData.a0, Dex.curveData.a1, 0 );
 			inx = PickUnconnectedEndPoint( Dex.pos01, trk );
@@ -569,13 +567,13 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 		} else {
 			return C_ERROR;
 		}
-		//UndrawNewTrack( Dex.Trk );
 		CopyAttributes( Dex.Trk, trk );
-		JoinTracks( Dex.Trk, Dex.params.ep, Dex.pos00, trk, inx, Dex.pos01, &Dex.jointD );
+		if (Dex.jointD.d1 == 0)
+			ConnectTracks(Dex.Trk, Dex.params.ep, trk, inx);
+		else
+			JoinTracks( Dex.Trk, Dex.params.ep, Dex.pos00, trk, inx, Dex.pos01, &Dex.jointD );
 		UndoEnd();
-		DrawNewTrack( trk );
-		DrawNewTrack( Dex.Trk );
-		Dex.Trk = NULL;
+		tempSegs_da.cnt = 0;
         MainRedraw();
         MapRedraw();
 		return C_TERMINATE;
@@ -587,6 +585,7 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 		if ( (!changeTrackMode) && Dex.Trk && !QueryTrack( Dex.Trk,	 Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK ) )
 		   UndrawNewTrack( Dex.Trk );
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+
 		return C_CONTINUE;
 
 	case C_TEXT:
@@ -608,6 +607,7 @@ LOG( log_modify, 1, ("A0 = %0.3f, A1 = %0.3f\n",
 			return ModifyTrack( Dex.Trk, action, pos );
 		return C_CONTINUE;
 	}
+	return C_CONTINUE;
 }
 
 

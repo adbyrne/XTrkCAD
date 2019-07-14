@@ -673,6 +673,8 @@ The \f{Cancel} button removes the \f{Turnout Designer} dialog.
 
 \u000
 
+\b The new \i{Cornu Turnouts} allow you to build turnouts that have curved ends. The dialogs include radius information that can be set to zero for a straight end. The turnouts will be composed of simple curves and tracks and when extended the end radius will be used. 
+
 \b The Group (\K{cmdGroup}) command can be used to add cosmetic details to \f{Turnout} definitions.
 
 \rule
