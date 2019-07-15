@@ -558,9 +558,12 @@ void CreateBothEnds(int selectEndPoint, int selectMidPoint ) {
 	else Da.ends[1] = FALSE;
 }
 
-BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track_end) {
+BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track_end, wBool_t extend) {
 	trackParams_t trackParams;
-	if (!GetTrackParams(PARAMS_CORNU, t, pos, &trackParams)) return FALSE;
+	coOrd pos1;
+	if (extend) pos1 = GetTrkEndPos(t,track_end);
+	else pos1 = pos;
+	if (!GetTrackParams(PARAMS_CORNU, t, pos1, &trackParams)) return FALSE;
 	Da.radius[end] = 0.0;
 	Da.center[end] = zero;
 	Da.circleorHelix[end] = FALSE;
@@ -574,7 +577,8 @@ BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track
 			Da.circleorHelix[end] = TRUE;
 			Da.angle[end] = trackParams.track_angle;	  //For Now
 		} else {
-			Da.angle[end] = NormalizeAngle(trackParams.track_angle + (track_end?180:0));
+			Da.angle[end] = NormalizeAngle(GetTrkEndAngle(t,track_end)+180);
+			//Da.angle[end] = NormalizeAngle(trackParams.track_angle + (track_end?180:0));
 		}
 	} else if (trackParams.type == curveTypeBezier)  {
 		Da.angle[end] = NormalizeAngle(trackParams.track_angle+(track_end?180:0));
@@ -768,6 +772,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		if (Da.state != PICK_POINT) return C_CONTINUE;
 		dd = 10000.0;
 		Da.selectEndPoint = -1;
+		Da.selectMidPoint = -1;
 		for (int i=0;i<2;i++) {
 			d = FindDistance(Da.pos[i],pos);
 			if (d < dd) {
@@ -829,7 +834,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 				if (Da.trk[Da.selectEndPoint]) {
 					InfoMessage( _("Drag along end track"));
 				} else
-					InfoMessage( _("Drag to move, +Shift to drag out end track"));
+					InfoMessage( _("Drag to move, +Shift to drag out end track from Cornu"));
 			} else {
 			if (Da.selectMidPoint >=0 )
 				pos = DYNARR_N(coOrd,Da.mid_points,Da.selectMidPoint);
@@ -856,32 +861,46 @@ EXPORT STATUS_T AdjustCornuCurve(
 			int sel = Da.selectEndPoint?1:0;
 			coOrd pos2 = pos;
 			BOOL_T inside = FALSE;
-			if (Da.trk[sel]) {										//There is a track
+			if (Da.trk[sel]) {
 				if (OnTrack(&pos,FALSE,TRUE) == Da.trk[sel]) {		//And the pos is on it
 					inside = TRUE;
 					if (!QueryTrack(Da.trk[Da.selectEndPoint],Q_CORNU_CAN_MODIFY)) {  //Turnouts
 						InfoMessage(_("Track can't be split"));
+						inside = FALSE;
 						if (Da.ep[sel]>=0)											//Ignore if turntable
-							pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
+							Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
+						return C_CONTINUE;
 					}
 				} else {
 					pos = pos2;				//Put Back to original position as outside track
+				}
+				if (!inside) {
+					ANGLE_T diff = NormalizeAngle(GetTrkEndAngle(Da.trk[sel],Da.ep[sel])-FindAngle(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos));
+					if (diff>90.0 && diff<270.0) {
+						Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
+						return C_CONTINUE;
+					}
 				}
 				// Stop the user extending right through the other track
 				if (Da.ep[sel]>=0 && QueryTrack(Da.trk[sel],Q_CORNU_CAN_MODIFY)) { //For non-turnouts
 					if ((!QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS))        // But Not Helix or Circle
 					&& (!QueryTrack(Da.trk[sel],Q_HAS_VARIABLE_ENDPOINTS))) { // Not a Turntable
-					DIST_T ab = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]));
-					DIST_T ac = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos);
-					DIST_T cb = FindDistance(GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]),pos);
-					if (cb<minLength) {
-						InfoMessage(_("Too close to other end of selected Track"));
-						return C_CONTINUE;
+						DIST_T ab = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]));
+						DIST_T ac = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos);
+						DIST_T cb = FindDistance(GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]),pos);
+						if (cb<minLength) {
+							InfoMessage(_("Too close to other end of selected Track"));
+							return C_CONTINUE;
+						}
+						if ((ac>=cb) && (ac>=ab)) { //Closer to far end and as long as the track
+							pos = GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]);  //Make other end of track
+						}
 					}
-					if ((ac>=cb) && (ac>=ab)) { //Closer to far end and as long as the track
-						pos = GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]);  //Make other end of track
-					}
-				}
+				} else if (inside) {
+					InfoMessage(_("Can't move end inside a Turnout"));		//Turnouts are stuck to end-point
+					Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
+					CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint);
+					return C_CONTINUE;
 				}
 			}
 			DrawTempCornu();
@@ -958,8 +977,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 					}
 				} else Da.pos[sel] = pos;
 			} else {									//Cornu with ends
-				if (inside) Da.pos[sel] = pos;
-				if (!GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel])) {
+				if (!GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel],inside?FALSE:TRUE)) {
 					DrawTempCornu();
 					wBeep();
 					return C_CONTINUE;											//Stop drawing
@@ -1154,7 +1172,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 					UndoModify(Da.trk[i]);
 					MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
 					if ((GetTrkType(Da.trk[i])==T_BEZIER) || (GetTrkType(Da.trk[i])==T_CORNU)) {     //Bezier split position not precise, so readjust Cornu
-						GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i]);
+						GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i],FALSE);
 						ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
 						SetCornuEndPt(i==0?first_trk:trk1,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
 					}
@@ -1439,7 +1457,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			if (Da.trk[i] && Da.ep[i] != -1) {						//Like the old track
 				if (MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0)) {
 					if (GetTrkType(Da.trk[i])==T_BEZIER) {     //Bezier split position not precise, so readjust Cornu
-						GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i]);
+						GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i],FALSE);
 						ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
 						SetCornuEndPt(i==0?first_trk:trk1,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
 					}
@@ -1584,6 +1602,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	Da.width = (double)lineWidth/mainD.dpi;
 
 	Da.trackGauge = trackGauge;
+	Da.selectTrack = NULL;
 
 	Da.cmdType = (long)commandContext;
 
@@ -1592,6 +1611,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	case C_START:
 		Da.state = NONE;
 		Da.selectEndPoint = -1;
+		Da.selectMidPoint = -1;
 		for (int i=0;i<2;i++) {
 			Da.pos[i] = zero;
 		}
@@ -1621,8 +1641,11 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 		if ( Da.state == NONE || Da.state == LOC_2) {   //Set the first or second point
 			coOrd p = pos;
-			int end = Da.state==NONE?0:1;
-			EPINX_T ep;
+			t = NULL;
+			int end = 0;
+			if (Da.state != NONE) end=1;
+			EPINX_T ep = -1;
+			//Lock to endpoint if one is available and under pointer
 		    if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 		    	if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
 		    		if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
@@ -1630,97 +1653,108 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 						return C_CONTINUE;
 					}
 					ep = -1;                                            //Not a real ep yet
-		    	} else ep = PickUnconnectedEndPointSilent(p, t);
-				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  		//Ignore Turntable Unconnected
-				else if (ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
-				  	wBeep();
-				  	InfoMessage(_("No Valid end point on that track"));
-				  	return C_CONTINUE;
+		    	} else ep = PickUnconnectedEndPointSilent(p, t);		//EP
+				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  		//Don't attach to Turntable
+				if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
+					wBeep();
+					InfoMessage(_("No Valid end point on that track"));
+					return C_CONTINUE;
 				}
 				if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
 					wBeep();
 					InfoMessage(_("Track is different scale"));
 					return C_CONTINUE;
 				}
+			}
+			if (ep>=0) {
 				Da.trk[end] = t;
 				Da.ep[end] = ep;           // Note: -1 for Turntable or Circle
-				if (ep ==-1) pos = p;
-				else pos = GetTrkEndPos(t,ep);
+
+				pos = GetTrkEndPos(t,ep);
 				Da.pos[end] = pos;
 				InfoMessage( _("Place 2nd end point of Cornu track on track with an unconnected end-point") );
-			} else {      //end not on Track, OK for CreateCornu
+			} else {      //end not on Track, OK for CreateCornu -> empty end point
+				pos = p;	//Reset to initial
 				if (Da.cmdType == cornuCmdCreateTrack) {
 					Da.trk[end] = NULL;
 					Da.pos[end] = pos;
-					Da.radius[end] = -1.0;   //No End Rad
-					if (Da.state != LOC_2 ) {
+					Da.radius[end] = -1.0;   //No End Rad for open
+					if (Da.state == NONE ) {
 						Da.state = POS_1;
 						Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE,TRUE,TRUE);
 						DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack);
-						InfoMessage( _("Place 2nd point of Cornu track") );
+						InfoMessage( _("Unlocked - Move 1st end point of Cornu track") );
 						return C_CONTINUE;
 					}
-					Da.state = POINT_PICKED;
+					Da.state = POINT_PICKED;    //Now this is second end and it is open
+					Da.selectEndPoint = 1;
 					Da.mid_points.cnt=0;
 					CreateBothEnds(1,-1);
 					SetUpCornuParms(&cp);
 					if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE))
 							Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
 					DrawTempCornu();
+					InfoMessage( _("Unlocked - Move 2nd end point of Cornu track") );
 					return C_CONTINUE;
 				}
 				wBeep();
-				InfoMessage(_("No Unconnected Track End there"));
+				InfoMessage(_("No Unconnected Track End there"));  //Not creating a Cornu - Join can't be open
 				return C_CONTINUE;
 			}
 			if (Da.state == NONE) {
-				if (!GetConnectedTrackParms(t, pos, 0, Da.ep[0])) {
+				if (!GetConnectedTrackParms(t, pos, 0, Da.ep[0],FALSE)) {  //Must get parms
 					Da.trk[0] = NULL;
+					Da.ep[0] = -1;
+					wBeep();
+					InfoMessage(_("No Valid Track End there"));
 					return C_CONTINUE;
 				}
 				Da.state = POS_1;
-				Da.selectEndPoint = 0;
+				Da.selectEndPoint = 0;        //Select first end point
 				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0], FALSE, !QueryTrack(Da.trk[0],Q_IS_CORNU),QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY));
 				DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack);
-				InfoMessage( _("Move 1st end point of Cornu track along track 1") );
-			} else {
+				InfoMessage( _("Locked - Move 1st end point of Cornu track along track 1") );
+			} else {					//Second Point
 				if (Da.trk[0] == t) {
 				   ErrorMessage( MSG_JOIN_CORNU_SAME );
 				   Da.trk[1] = NULL;
+				   Da.ep[1] = -1;
 				   return C_CONTINUE;
 				}
-				if (!GetConnectedTrackParms(t, pos, 1, Da.ep[1])) {
+				if (!GetConnectedTrackParms(t, pos, 1, Da.ep[1],FALSE)) {
 					Da.trk[1] = NULL;								//Turntable Fail
+					wBeep();
+					InfoMessage(_("No Valid Track End there"));
 					return C_CONTINUE;
 				}
 				CorrectHelixAngles();
-				Da.selectEndPoint = 1;
+				Da.selectEndPoint = 1;			//Select second end point
 				Da.state = POINT_PICKED;
 				DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack); //Wipe out initial Arm
 				CreateBothEnds(1,-1);
 				if (CallCornu(Da.pos,Da.trk,Da.ep,&Da.crvSegs_da, &cp))
 						Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
 				DrawTempCornu();
-				InfoMessage( _("Move 2nd end point of Cornu track along track 2") );
+				InfoMessage( _("Locked - Move 2nd end point of Cornu track along track 2") );
 			}
 			return C_CONTINUE;
-		} else  {
+		} else  {					//This is after both ends exist
 			return AdjustCornuCurve( action&0xFF, pos, InfoMessage );
 		}
 		return C_CONTINUE;
 			
 	case C_MOVE:
-		if (Da.state == NONE) {
+		if (Da.state == NONE) {    //First point not created
 			if (Da.cmdType == cornuCmdCreateTrack) {
 				InfoMessage("Place 1st end point of Cornu track");
 			} else
 				InfoMessage("Place 1st end point of Cornu track on unconnected end-point");
 			return C_CONTINUE;
 		}
-		if (Da.state == POS_1) {
-			if (Da.cmdType == cornuCmdCreateTrack && !Da.trk[0]) {  //OK for CreateCornu
-				Da.state = POS_1;
-				Da.selectEndPoint = 1;
+		if (Da.state == POS_1) {	//First point has been created
+			if (Da.cmdType == cornuCmdCreateTrack && !Da.trk[0]) {  //OK for CreateCornu -> No track selected
+				Da.selectEndPoint = 0;
+				Da.pos[0] = pos;			//Move end as dictated
 				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],TRUE,TRUE,TRUE);
 				DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack);
 				return C_CONTINUE;
@@ -1729,27 +1763,27 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			BOOL_T found = FALSE;
 			int end = Da.state==POS_1?0:1;
 			if(!QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY) && !QueryTrack(Da.trk[0],Q_CAN_ADD_ENDPOINTS)) {
-				InfoMessage(_("Can't Split - Locked to End Point"));
+				InfoMessage(_("Can't Split - So Locked to End Point"));
 				return C_CONTINUE;
 			}
 			if (Da.trk[0] != OnTrack(&pos, FALSE, TRUE)) {
 				wBeep();
 				InfoMessage(_("Point not on track 1"));
 				Da.state = POS_1;
-				Da.selectEndPoint = 1;
+				Da.selectEndPoint = 0;
 				return C_CONTINUE;
 			}
 			t = Da.trk[0];
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack);
-			if (!GetConnectedTrackParms(t, pos, ep, Da.ep[ep])) {
+			if (!GetConnectedTrackParms(t, pos, ep, Da.ep[ep],FALSE)) {
 				Da.state = POS_1;
-				Da.selectEndPoint = 1;
+				Da.selectEndPoint = 0;
 				return C_CONTINUE;
 			}
 			Da.pos[ep] = pos;
 			Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],TRUE,!QueryTrack(Da.trk[0],Q_IS_CORNU),QueryTrack(Da.trk[0],Q_CORNU_CAN_MODIFY));
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack);
-		} else {
+		} else {	//Second Point Has Been Created
 			return AdjustCornuCurve( action&0xFF, pos, InfoMessage );
 		}
 		return C_CONTINUE;
@@ -1758,6 +1792,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		if (Da.state == POS_1 && (Da.cmdType == cornuCmdCreateTrack || Da.trk[0])) {
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack);
 			Da.state = LOC_2;
+			Da.selectEndPoint = -1;
 			if (Da.cmdType == cornuCmdCreateTrack) {
 				InfoMessage( _("Pick other end of Cornu") );
 				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],FALSE,TRUE,TRUE);
@@ -1957,7 +1992,7 @@ static STATUS_T CmdConvertTo(
 				Da.center[0] = zero;
 				Da.pos[0] = GetTrkEndPos(prior,ep0);
 				if (Da.trk[0] && Da.ep[0]>=0) {
-					GetConnectedTrackParms(Da.trk[0],GetTrkEndPos(Da.trk[0],Da.ep[0]),0,Da.ep[0]);
+					GetConnectedTrackParms(Da.trk[0],GetTrkEndPos(Da.trk[0],Da.ep[0]),0,Da.ep[0],FALSE);
 				}
 
 				//Move to RHS
@@ -1985,7 +2020,7 @@ static STATUS_T CmdConvertTo(
 				Da.center[1] = zero;
 				Da.pos[1] = GetTrkEndPos(next,ep1);
 				if (Da.trk[1] && Da.ep[1]>=0) {
-					GetConnectedTrackParms(Da.trk[1],GetTrkEndPos(Da.trk[1],Da.ep[1]),1,Da.ep[1]);
+					GetConnectedTrackParms(Da.trk[1],GetTrkEndPos(Da.trk[1],Da.ep[1]),1,Da.ep[1],FALSE);
 				}
 				SetUpCornuParms(&cp);
 				if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;

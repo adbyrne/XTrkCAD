@@ -1527,6 +1527,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		params->arcR = 0.0;
 		params->arcP = zero;
 		params->ep = PickEndPoint(pos,trk);   //Nearest
+		params->circleOrHelix = FALSE;
 		if (params->ep>=0) {
 			params->angle = GetTrkEndAngle(trk,params->ep);
 			params->track_angle = params->angle + params->ep?0:180;
