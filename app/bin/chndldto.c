@@ -19,6 +19,25 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ *  *******************************************************************************************************
+ *
+ *  Define a custom turnout by drawing. Standard turnouts are supported by the custom editor.
+ *
+ *  A turnout consists of a base track and at least one PathGroup of tracks.
+ *
+ *  Each PathGroup has either a toe or end point at each end and can optionally have one or more frog points.
+ *
+ *  A frog point is a way of specifying a middle point with an offset. A frog and a toe can each have straight lengths
+ *  either side and are defined by an angle where they meet another track (Toe Angle/Frog Angle).
+ *
+ *  These points are linked together by Cornu tracks in XtrkCAD which are rendered into straights and curves.
+ *
+ *  The turnout is defined by picking out a base track and its ends and then adding the group(s) to it.
+ *  Each Group becomes a path definition (taking the name of the group).
+ *
+ *  **************
+ *
  */
 
 #include <math.h>
@@ -35,21 +54,205 @@
 
 #define PTRACE(X)
 
+typedef enum CustomState {NONE, TRKSELECTED, END1DEF, END2DEF, GRPEDIT, PICKGRP} CustomState;
+
+typedef enum GroupState {PICKORADD, FROGDEF, MIDDEF, PICKED} GroupState;
+
+typedef enum PointType {TOE, FROGLEFT, FROGRIGHT, MIDDLE, END} PointType;
+
+typedef struct PathPoint {
+		PointType type;
+		coOrd   pos;
+		track_p endTrack;
+		ANGLE_T abs_angle;
+		ANGLE_T off_angle;	//compared to base track
+		DIST_T radius;		//End Radius
+		coOrd center;		//End Center
+		coOrd   offset;     //Frog from Frog pos to Cornu point
+		DIST_T frogNo;		//Frog Number => off_angle
+		DIST_T length;
+		} PathPoint_t, PathPoint_p;
+
+typedef struct {
+		PathPoint_t point[3];
+		wBool_t point_defined[3];
+		char * pathname;
+		dynArr_t linesegs;
+		} PathGroup_t, PathGroup_p;
+
+static dynArr_t cornuSegs_da;
+static dynArr_t anchorSegs_da;
+
+
+
 /*
  * STATE INFO
  */
-static struct {
-		STATE_T state;
-		coOrd normalP;
-		ANGLE_T normalA;
-		track_p normalT;
-		coOrd reverseP;
-		coOrd reverseP1;
-		ANGLE_T reverseA;
-		DIST_T frogNo;
-		ANGLE_T frogA;
-		curveData_t curveData;
+static static struct {
+		dynArr_t pathgroups;
+		CustomState state;
+		GroupState groupState;
+		int groupSelected;
+		int pointSelected;				//In Group
+		dynArr_t tracks;				//"Normal" path tracks
 		} Dhlt;
+
+void CreatePoint(coOrd pos,wBool_t select,wBool_t active) {
+	DYNARR_APPEND(trkSeg_t, anchorSegs_da,1);
+	trkSeg_p ts = &DYNARR_LAST(trkSeg_t, anchorSegs_da);
+	if (select) ts->type = SEG_FILCRCL;
+	else {
+		ts->type = SEG_CRVLIN;
+		ts->u.c.a1 = 360.0;
+	}
+	ts->color = active?drawColorRed:drawColorBlack;
+	ts->width = 0;
+	ts->u.c.center = pos;
+	DIST_T d = tempD.scale*0.25;
+	ts->u.c.radius = d/2;
+}
+void CreateFrogPoint(coOrd pos,wBool_t select,wBool_t active) {
+	CreatePoint(pos,select,active);
+	DYNARR_APPEND(trkSeg_t, anchorSegs_da,1);
+	trkSeg_p ts = &DYNARR_LAST(trkSeg_t, anchorSegs_da);
+	ts->type = SEG_TEXT;
+	ts->color = select?drawColorWhite:(active?drawColorRed:drawColorBlack);
+	ts->width = 0;
+	ts->u.t.boxed = FALSE;
+	ts->u.t.fontSize = 12;
+	ts->u.t.string = "F";
+	ts->u.t.pos.x = pos.x+d/2;
+	ts->u.t.pos.y = pos.y+d/2;
+}
+
+void CreateToePoint(coOrd pos,wBool_t select,wBool_t active) {
+	CreatePoint(pos,select,active);
+	DYNARR_APPEND(trkSeg_t, anchorSegs_da,1);
+	trkSeg_p ts = &DYNARR_LAST(trkSeg_t, anchorSegs_da);
+	ts->type = SEG_TEXT;
+	ts->color = select?drawColorWhite:(active?drawColorRed:drawColorBlack);
+	ts->width = 0;
+	ts->u.t.boxed = FALSE;
+	ts->u.t.fontSize = 12;
+	ts->u.t.string = "T";
+	ts->u.t.pos.x = pos.x+d/2;
+	ts->u.t.pos.y = pos.y+d/2;
+}
+
+void CreateAnchors(PathGroup_p pg, wBool_t active) {
+	DYNARR_RESET(trkSeg_t, anchorSegs_da);
+	for (int i=0;i<3;i++) {
+		if ((pg->point_defined[i]) && (i != 3))
+			if (pg->point[i].type == TOE)
+				CreateToePoint(pg->point[i].pos,(Dhlt.pointSelected==i+1)?TRUE:FALSE,active);
+			else
+				CreatePoint(pg->point[i].pos,(Dhlt.pointSelected==i+1)?TRUE:FALSE,active);
+		else if ((pg->point_defined[3]))
+			if (pg->point[3].type == FROGLEFT || pg->point[3].type == FROGRIGHT) {
+			coOrd frog_pos = pg->point[3].pos;
+			wBool_t dir = (pg->point[3].type == FROGLEFT);
+			ANGLE_T track_a = dir?(pg->point[3].abs_angle+pg->point[3].off_angle):(pg->point[3].abs_angle+pg->point[3].off_angle);
+			Translate(&frog_pos,frog_pos,track_a+dir?-90:90,trackGauge);
+			Translate(&frog_pos,frog_pos,pg->point[3].abs_angle+dir?-90:90,trackGauge);
+			CreateFrogPoint(frog_pos,(Dhlt.pointSelected==3)?TRUE:FALSE,active);
+			coOrd frog_before, frog_after;
+		}
+	}
+}
+
+
+static STATUS_T ModifyHandLaidGroup( wAction_t action, coOrd pos) {
+
+	PathGroup_p pg = &DYNARR_N(PathGroup_t,Dhlt.pathgroups,Dhlt.groupSelected);
+
+	switch(action) {
+
+	case C_START:
+		//Initialize
+		Dhlt.pointSelected = -1;
+		Dhlt.groupState = NONE;
+		CreateAnchors();
+		MainRedraw();
+		break;
+	case C_DOWN:
+		DIST_T dd = 10000.0;
+		int found = -1;
+		if (Dhlt.groupSelected ==-1) return C_CONTINUE;
+		//Pick Point
+		for (int i=0;i<3;i++) {
+			DIST_T d = FindDistance(pos,pg->point[i]);
+			if (d<dd) {
+				dd = d;
+				found = i;
+			}
+		}
+		if (IsClose(dd)) Dhlt.pointSelected = found;
+		else if (!pg->point_defined[3]) {
+			track_p t;
+			coOrd p = pos;
+			if ((t=OnTrack(&p, FALSE, TRUE))!=NULL ) {
+				for (int i = 0;i<Dhlt.tracks.cnt-1;i++) {
+					if (t==&DYNARR_N(track_p,Dhlt.tracks,i)) {
+						//Add Frog
+						ANGLE_T track_angle = GetAngleAtPos(t,pos);
+						PathPoint_t pt = pg->point[3];
+						if (FindAngle(pos,pg->point[1])>track_angle) pt.type = FROGLEFT;
+						else pt.type = FROGRIGHT;
+						pt.pos = pos;
+						pt.off_angle = offsetAngleparm;
+						pt.length = lengthparm;
+						pt.abs_angle = NormalizeAngle(pt.off_angle+track_angle);
+						pg->point_defined[2] = TRUE;
+						Dhlt.pointSelected = 3;
+						Dhlt.groupState = PICKED;
+						break;
+					}
+				}
+			}
+		}
+		CreateAnchors();
+		MainRedraw();
+		break;
+	case C_MOVE:
+		//Move Point
+		if (Dhlt.pointSelected>=0 && Dhlt.pointSelected<2) {
+			// Make point move along track
+			pg->point[Dhlt.pointSelected].pos = pos;
+		} else if (Dhlt.pointSelected==3) {
+			pg->frogpoint.pos = pos;
+		}
+		CreateAnchors();
+		MainRedraw();
+		break;
+	case C_UP:
+		//Stop Moving
+		Dhlt.groupState = PICKORADD;
+		break;
+	case C_UPDATE:
+		//Alter Point characteristics (Angle, Length)
+		if (Dhlt.pointSelected>=0 && Dhlt.pointSelected<2) {
+			pg->endpoint[Dhlt.pointSelected].pos = pos;
+		} else {
+					PathPoint_p pt = &DYNARR_N(PathPoint_t,pg->midpoints,Dhlt.pointSelected-2);
+					pt->pos = pos;
+				}
+		pt->off_angle = offsetAngleparm;
+	    pt->length = lengthparm;
+	case C_TEXT:
+		//SpaceBar accepts
+	case C_OK:
+	case C_CANCEL:
+		//ESC cancels
+	case C_REDRAW:
+		//Redraw Group highlighted
+	default: ;
+
+	}
+
+	return C_CONTINUE;
+
+}
+
 
 
 static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
@@ -67,10 +270,10 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 	switch (action) {
 
 	case C_START:
-		InfoMessage( _("Place frog and drag angle") );
+		InfoMessage( _("Pick Base Track") );
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
-		Dhlt.state = 0;
-		Dhlt.normalT = NULL;
+		Dhlt.state = NONE;
+		Dhlt.pathgroups.cnt = 0;
 		tempSegs_da.cnt = 0;
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = drawColorBlack;
@@ -80,9 +283,32 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_DOWN:
-		if (Dhlt.state == 0) {
-			if ((Dhlt.normalT = OnTrack( &pos, TRUE, TRUE )) == NULL)
+		if (Dhlt.state == NONE) {
+			if ((Dhlt.normalT = OnTrack( &pos, TRUE, TRUE )) == NULL) {
 				break;
+			}
+			Dhlt.state = TRKSELECTED;
+			DYNARR_APPEND(PathGroup_t,Dhlt.pathgroups,1);
+			InfoMessage( _("Select First End/Toe"));
+			break;
+		}
+		if (Dhlt.state == TRKSELECTED) {
+			if ((Dhlt.normalT = OnTrack( &pos, TRUE, TRUE )) == NULL) {
+				InfoMessage( _("No Track there to select"));
+				break;
+			}
+			if (TrackQueryParms(Dhlt.normalT,Q_CORNUTRACK) ||
+				TrackQueryParms(Dhlt.normalT,Q_ADD_ENDPOINTS)) {
+
+			}
+			PathGroup_p pg = DYNARR_N(PathGroup_t,Dhlt.pathgroups,Dhlt.pathgroups.cnt-1);
+			pg->endpoint[0] = pos;
+			Dhlt.state = END1DEF;
+			InfoMessage( _("Select Second End/Toe"));
+			break;
+		}
+
+
 			if ( QueryTrack( Dhlt.normalT, Q_NOT_PLACE_FROGPOINTS ) ) {
 				ErrorMessage( MSG_CANT_PLACE_FROGPOINTS, _("frog") );
 				Dhlt.normalT = NULL;
@@ -96,6 +322,7 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			pointC = pointP = pointP1 = reverseC = zero;
 			return C_CONTINUE;
 		}
+		break;
 
 	case C_MOVE:
 	case C_UP:
