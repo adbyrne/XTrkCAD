@@ -154,7 +154,7 @@ typedef struct {
 		BOOL_T (*traverse)( traverseTrack_p, DIST_T * );
 		BOOL_T (*enumerate)( track_p );
 		void (*redraw)( void );
-		BOOL_T (*trim)( track_p, EPINX_T, DIST_T );
+		BOOL_T (*trim)( track_p, EPINX_T, DIST_T, coOrd endpos, ANGLE_T angle, DIST_T endradius, coOrd endcenter );
 		BOOL_T (*merge)( track_p, EPINX_T, track_p, EPINX_T );
 		STATUS_T (*modify)( track_p, wAction_t, coOrd );
 		DIST_T (*getLength)( track_p );
@@ -603,7 +603,7 @@ BOOL_T ConnectTurntableTracks(track_p, EPINX_T,	track_p, EPINX_T  );
 BOOL_T SplitTrack( track_p, coOrd, EPINX_T, track_p *leftover, BOOL_T );
 BOOL_T TraverseTrack( traverseTrack_p, DIST_T * );
 BOOL_T RemoveTrack( track_p*, EPINX_T*, DIST_T* );
-BOOL_T TrimTrack( track_p, EPINX_T, DIST_T );
+BOOL_T TrimTrack( track_p, EPINX_T, DIST_T, coOrd pos, ANGLE_T angle, DIST_T radius, coOrd center);
 BOOL_T MergeTracks( track_p, EPINX_T, track_p, EPINX_T );
 STATUS_T ExtendStraightFromOrig( track_p, wAction_t, coOrd );
 STATUS_T ExtendTrackFromOrig( track_p, wAction_t, coOrd );

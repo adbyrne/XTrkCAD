@@ -1244,7 +1244,7 @@ static BOOL_T EnumerateJoint( track_p trk )
 	return TRUE;
 }
 
-static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T maxX )
+static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T maxX, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center )
 {
 	DeleteTrack( trk, FALSE );
 	MainRedraw();
