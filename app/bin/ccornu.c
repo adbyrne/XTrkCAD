@@ -658,7 +658,9 @@ track_p CreateCornuFromPoints(coOrd pos[2],BOOL_T track_end[2]) {
 
 		for (int i=0;i<2;i++) {
 			pos_temp[i] = pos[i];
-			if (!track_end[i]) {
+
+			if (!track_end[i] || (Da.radius[i]==-1.0)) {
+
 				angle[i] = GetAngleSegs(Da.crvSegs_da.cnt,(trkSeg_t *)(Da.crvSegs_da.ptr),&pos_temp[i],&inx,NULL,&back,&subinx,&neg);
 
 				trkSeg_p segPtr = &DYNARR_N(trkSeg_t, Da.crvSegs_da, inx);
@@ -914,11 +916,11 @@ EXPORT STATUS_T AdjustCornuCurve(
 						Da.extend[sel] = FALSE;
 					}
 					if (!inside && ((MyGetKeyState() & WKEY_SHIFT) != 0)) {  //Shift extends out old track
+						coOrd pos2 = Da.pos[sel];
+						SetUpCornuParms(&cp);
+						CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,FALSE);
+						GetCornuParmsTemp(&Da.crvSegs_da, sel, &pos2, &Da.center[sel], &Da.angle[sel],  &Da.radius[sel] );
 						struct extraData *xx = GetTrkExtraData(Da.selectTrack);
-						//Da.pos[sel] = xx->cornuData.pos[sel];            //Re-Copy parms from old trk
-						Da.radius[sel] = xx->cornuData.r[sel];
-						Da.angle[sel] = xx->cornuData.a[sel];
-						Da.center[sel] = xx->cornuData.c[sel];
 						if (Da.radius[sel] == 0)  {				//Straight
 							Da.extendSeg[sel].type = SEG_STRTRK;
 							Da.extendSeg[sel].width = 0;
@@ -938,13 +940,13 @@ EXPORT STATUS_T AdjustCornuCurve(
 							Da.extendSeg[sel].width = 0;
 							Da.extendSeg[sel].color = wDrawColorBlack;
 							Da.extendSeg[sel].u.c.center = Da.center[sel];
-							coOrd offset;
-							offset.x = Da.pos[sel].x-xx->cornuData.pos[sel].x;
-							offset.y = Da.pos[sel].y-xx->cornuData.pos[sel].y;
-							Da.extendSeg[sel].u.c.center.x =xx->cornuData.c[sel].x+offset.x;
-							Da.extendSeg[sel].u.c.center.y =xx->cornuData.c[sel].y+offset.y;
+							//coOrd offset;
+							//offset.x = Da.pos[sel].x-xx->cornuData.pos[sel].x;
+							//offset.y = Da.pos[sel].y-xx->cornuData.pos[sel].y;
+							//Da.extendSeg[sel].u.c.center.x =xx->cornuData.c[sel].x+offset.x;
+							//Da.extendSeg[sel].u.c.center.y =xx->cornuData.c[sel].y+offset.y;
 							Da.extendSeg[sel].u.c.radius = Da.radius[sel];
-							a = FindAngle( Da.center[sel], Da.pos[sel] );
+							a = FindAngle( Da.center[sel], pos );
 							PointOnCircle( &pos, Da.extendSeg[sel].u.c.center, Da.radius[sel], a );
 							a2 = FindAngle(Da.extendSeg[sel].u.c.center,Da.pos[sel]);
 							if (((Da.angle[sel] < 180) && (a2>90 && a2<270)) ||
@@ -960,10 +962,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 							else
 								Da.extend[sel] = TRUE;
 						}
-						if (Da.extend[sel] == FALSE) {          // Not extending - so trim along our own Cornu
-							GetCornuParmsNear(Da.selectTrack, sel, &pos, &Da.center[sel], &Da.angle[sel],  &Da.radius[sel] );
-							Da.pos[sel] = pos;
-						}
+						//if (Da.extend[sel] == FALSE) {          	// Not extending - so trim along our own Cornu
+						//	GetCornuParmsTemp(&Da.crvSegs_da, sel, &pos, &Da.center[sel], &Da.angle[sel],  &Da.radius[sel] );
+						//	Da.pos[sel] = pos;
+						//}
 					} else {									//Just move end (no shift)
 						Da.pos[sel] = pos;
 						if (Da.selectTrack) {					//Track already exists
@@ -975,8 +977,11 @@ EXPORT STATUS_T AdjustCornuCurve(
 							Da.center[sel].y = xx->cornuData.c[sel].y+offset.y;
 						}										//No Track, no end so radius = 0;
 					}
-				} else Da.pos[sel] = pos;
+				} else {
+					Da.pos[sel] = pos;
+				}
 			} else {									//Cornu with ends
+				if (inside) Da.pos[sel] = pos;
 				if (!GetConnectedTrackParms(Da.trk[sel],pos,sel,Da.ep[sel],inside?FALSE:TRUE)) {
 					DrawTempCornu();
 					wBeep();
@@ -1043,7 +1048,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 						pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 						return C_CONTINUE;
 					}
-				}
+				} else Da.pos[sel] = pos;
 			}
 		} else if (Da.selectMidPoint >=0){
 			DrawTempCornu();
@@ -1361,11 +1366,9 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 				} else {
 					Da.trk[i] = NewCurvedTrack(Da.extendSeg[i].u.c.center,fabs(Da.extendSeg[i].u.c.radius),
 							Da.extendSeg[i].u.c.a0,Da.extendSeg[i].u.c.a1,FALSE);
-
-					if (Da.angle[i]>180)
-						Da.ep[i] = (Da.extendSeg[i].u.c.a0>90 && Da.extendSeg[i].u.c.a0<270)?0:1;
-					else
-						Da.ep[i] = (Da.extendSeg[i].u.c.a0>90 && Da.extendSeg[i].u.c.a0<270)?1:0;
+					if (FindDistance(GetTrkEndPos(Da.trk[i],0),Da.pos[i])<=connectDistance) {
+						Da.ep[i] = 0;
+					} else Da.ep[i] = 1;
 				}
 				if (!Da.trk[i]) {
 					wBeep();

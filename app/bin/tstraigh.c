@@ -418,7 +418,7 @@ static BOOL_T EnumerateStraight( track_p trk )
 	return TRUE;
 }
 
-static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist )
+static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center )
 {
 	DIST_T d;
 	ANGLE_T a;

@@ -699,8 +699,43 @@ void GetCornuParmsNear(track_p t, int sel, coOrd * pos2, coOrd * center, ANGLE_T
 
 	trkSeg_p segPtr = &DYNARR_N(trkSeg_t, xx->cornuData.arcSegs, inx);
 
-	GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
-	segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
+	if (segPtr->type == SEG_BEZTRK) {
+		GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
+		segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
+	}
+
+	if (segPtr->type == SEG_STRTRK) {
+		*radius = 0.0;
+		*center = zero;
+	} else if (segPtr->type == SEG_CRVTRK) {
+		*center = segPtr->u.c.center;
+		*radius = fabs(segPtr->u.c.radius);
+	}
+	if (sel)
+		angle = NormalizeAngle(angle+(neg==back?0:180));
+	else
+		angle = NormalizeAngle(angle+(neg==back?180:0));
+	*angle2 = angle;
+	*pos2 = pos;
+}
+
+void GetCornuParmsTemp(dynArr_t * array_p, int sel, coOrd * pos2, coOrd * center, ANGLE_T * angle2,  DIST_T * radius ) {
+
+	coOrd pos = *pos2;
+	int inx;
+	wBool_t back,neg;
+
+	ANGLE_T angle = GetAngleSegs(array_p->cnt,(trkSeg_p)array_p->ptr,&pos,&inx,NULL,&back,NULL,&neg);
+
+	trkSeg_p segPtr = &DYNARR_N(trkSeg_t, *array_p, inx);
+
+	if (segPtr->type == SEG_BEZTRK) {
+
+		GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
+
+		segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
+
+	}
 
 	if (segPtr->type == SEG_STRTRK) {
 		*radius = 0.0;
@@ -1158,7 +1193,7 @@ static BOOL_T QueryCornu( track_p trk, int query )
 	// case Q_MODIFY_CANT_SPLIT: Remove Split Restriction
 	// case Q_CANNOT_BE_ON_END: Remove Restriction - Can have Cornu with no ends
 	case Q_CANNOT_PLACE_TURNOUT:
-		return TRUE;
+		return FALSE;
 		break;
 	case Q_IGNORE_EASEMENT_ON_EXTEND:
 		return TRUE;
@@ -1213,8 +1248,8 @@ static ANGLE_T GetAngleCornu(
 	BOOL_T back, neg;
 	int indx;
 	angle = GetAngleSegs( xx->cornuData.arcSegs.cnt, (trkSeg_p)xx->cornuData.arcSegs.ptr, &pos, &indx, NULL, &back, NULL, &neg );
-	if ( ep0 ) *ep0 = -1;
-	if ( ep1 ) *ep1 = -1;
+	if ( ep0 ) *ep0 = back?1:0;
+	if ( ep1 ) *ep1 = 1-*ep0;
 	return angle;
 }
 
@@ -1303,6 +1338,26 @@ static BOOL_T MakeParallelCornu(
 	return TRUE;
 }
 
+static BOOL_T TrimCornu( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center ) {
+	UndoModify(trk);
+	if (dist>0.0 && dist<minLength) {
+		DeleteTrack(trk, TRUE);
+		return FALSE;
+	} else {
+		struct extraData *xx;
+		xx = GetTrkExtraData(trk);
+		xx->cornuData.a[ep] = angle;
+		xx->cornuData.c[ep] = center;
+		xx->cornuData.r[ep] = radius;
+		xx->cornuData.pos[ep] = endpos;
+		RebuildCornu(trk);
+		SetTrkEndPoint(trk, ep, xx->cornuData.pos[ep], xx->cornuData.a[ep]);
+	}
+	MainRedraw();
+	MapRedraw();
+	return TRUE;
+}
+
 /*
  * When an undo is run, the array of segs is missing - they are not saved to the Undo log. So Undo calls this routine to
  * ensure
@@ -1322,6 +1377,8 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 	return TRUE;
 }
 
+EXPORT
+
 
 static trackCmd_t cornuCmds = {
 		"CORNU",
@@ -1340,7 +1397,7 @@ static trackCmd_t cornuCmds = {
 		TraverseCornu,
 		EnumerateCornu,
 		NULL,	/* redraw */
-		NULL,   /* trim   */
+		TrimCornu,   /* trim   */
 		MergeCornu,
 		NULL,   /* modify */
 		GetLengthCornu,

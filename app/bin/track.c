@@ -2002,14 +2002,14 @@ EXPORT BOOL_T RemoveTrack( track_p * trk, EPINX_T * ep, DIST_T *dist )
 	}
 	dist1 = *dist;
 	*dist = 0.0;
-	return TrimTrack( *trk, *ep, dist1 );
+	return TrimTrack( *trk, *ep, dist1, zero, 0.0, 0.0, zero );
 }
 
 
-EXPORT BOOL_T TrimTrack( track_p trk, EPINX_T ep, DIST_T dist )
+EXPORT BOOL_T TrimTrack( track_p trk, EPINX_T ep, DIST_T dist, coOrd pos, ANGLE_T angle, DIST_T radius, coOrd center )
 {
 	if (trackCmds(trk->type)->trim)
-		return trackCmds(trk->type)->trim( trk, ep, dist );
+		return trackCmds(trk->type)->trim( trk, ep, dist, pos, angle, radius, center );
 	else
 		return FALSE;
 }

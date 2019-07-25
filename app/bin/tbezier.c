@@ -908,7 +908,7 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 
 }
 
-static BOOL_T TrimBezier( track_p trk, EPINX_T ep, DIST_T dist ) {
+static BOOL_T TrimBezier( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center ) {
 	DeleteTrack(trk, TRUE);
 	MainRedraw();
 	MapRedraw();

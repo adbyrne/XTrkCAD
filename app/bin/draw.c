@@ -1442,18 +1442,21 @@ EXPORT void DoRedraw( void )
 
 static void DrawRoomWalls( wBool_t t )
 {
-	coOrd p01, p11, p10;
+	coOrd p00, p01, p11, p10;
 
 	if (mainD.d == NULL)
 		return;
 
 	DrawTicks( &mainD, mapD.size );
 
+	p00.x = 0.0; p00.y = 0.0;
 	p01.x = p10.y = 0.0;
 	p11.x = p10.x = mapD.size.x;
 	p01.y = p11.y = mapD.size.y;
 	DrawLine( &mainD, p01, p11, 3, t?borderColor:wDrawColorWhite );
 	DrawLine( &mainD, p11, p10, 3, t?borderColor:wDrawColorWhite );
+	DrawLine( &mainD, p00, p01, 3, t?borderColor:wDrawColorWhite );
+	DrawLine( &mainD, p00, p10, 3, t?borderColor:wDrawColorWhite );
 
 }
 
@@ -1666,21 +1669,31 @@ EXPORT void DrawTicks( drawCmd_p d, coOrd size )
 
 	offset = 0.0;
 
-	if ( d->orig.x<0.0 )
-		offset = d->orig.x;
-	p0.x = 0.0/*d->orig.x*/; p1.x = size.x;
-	p0.y = p1.y = /*max(d->orig.y,0.0)*/ d->orig.y;
+	if ( d->orig.x<0.0 ) {
+		 p0.y = 0.0; p1.y = mapD.size.y;
+		 p0.x = p1.x = 0.0;
+		 DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
+		 offset = d->orig.x;
+	}
+	p0.x = 0.0; p1.x = d->size.x-d->orig.x;
+	p0.y = p1.y = d->orig.y;
 	DrawRuler( d, p0, p1, offset, TRUE, FALSE, borderColor );
-	p0.y = p1.y = min(d->orig.y + d->size.y, size.y);
+	p0.y = p1.y = d->size.y+d->orig.y;
 	DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
+
 	offset = 0.0;
 
-	if ( d->orig.y<0.0 )
+	if ( d->orig.y<0.0 ) {
+		p0.x = 0.0; p1.x = mapD.size.x;
+		p0.y = p1.y = 0.0;
+		DrawRuler( d, p0, p1, offset, FALSE, FALSE, borderColor );
 		offset = d->orig.y;
-	p0.y = 0.0/*d->orig.y*/; p1.y = max(size.y,0.0);
+	}
+
+	p0.y = 0.0; p1.y = d->size.y-d->orig.y;
 	p0.x = p1.x = d->orig.x;
 	DrawRuler( d, p0, p1, offset, TRUE, TRUE, borderColor );
-	p0.x = p1.x = min(d->orig.x + d->size.x, size.x);
+	p0.x = p1.x = d->size.x+d->orig.x;
 	DrawRuler( d, p0, p1, offset, FALSE, FALSE, borderColor );
 }
 
@@ -1707,19 +1720,22 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 				orig->x, orig->y, mapD.size.x, mapD.size.y,
 				size.x, size.y ) )
 
-	if (orig->x+size.x > mapD.size.x ) {
-		orig->x = mapD.size.x-size.x;
+	coOrd bound;
+	bound.x = size.x/2;
+	bound.y = size.y/2;
+	if (orig->x+size.x > mapD.size.x+bound.x ) {
+		orig->x = mapD.size.x-size.x+bound.x;
 		orig->x += (units==UNITS_ENGLISH?1.0:(1.0/2.54));
 	}
-	if (orig->x < 0)
-		orig->x = 0;
-	if (orig->y+size.y > mapD.size.y ) {
-		orig->y = mapD.size.y-size.y;
+	if (orig->x < 0-bound.x)
+		orig->x = 0-bound.x;
+	if (orig->y+size.y > mapD.size.y+bound.y ) {
+		orig->y = mapD.size.y-size.y+bound.y;
 		orig->y += (units==UNITS_ENGLISH?1.0:1.0/2.54);
 
 	}
-	if (orig->y < 0)
-		orig->y = 0;
+	if (orig->y < 0-bound.y)
+		orig->y = 0-bound.y;
 
 	if (mainD.scale >= 1.0) {
 		if (units == UNITS_ENGLISH) {

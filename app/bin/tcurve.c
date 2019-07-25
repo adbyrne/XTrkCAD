@@ -936,7 +936,7 @@ static BOOL_T EnumerateCurve( track_p trk )
 	return TRUE;
 }
 
-static BOOL_T TrimCurve( track_p trk, EPINX_T ep, DIST_T dist )
+static BOOL_T TrimCurve( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANGLE_T angle, DIST_T endradius, coOrd endcenter )
 {
 	DIST_T d;
 	DIST_T radius;
