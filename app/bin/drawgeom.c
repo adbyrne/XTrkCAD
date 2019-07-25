@@ -218,7 +218,7 @@ STATUS_T DrawGeomMouse(
 					if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
 						coOrd p = pos;
 						track_p t;
-						if ((t=OnTrack(&p,FALSE,FALSE))) {
+						if ((t=OnTrack(&p,FALSE,FALSE))!=NULL) {
 							if (GetClosestEndPt(t,&p)) {
 								d = tempD.scale*0.15;
 								anchors(0).type = SEG_FILCRCL;
