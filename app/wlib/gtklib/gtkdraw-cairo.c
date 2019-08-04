@@ -452,19 +452,24 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 }
 
- void wDrawFilledPolygon(
+ void wDrawPolygon(
 		wDraw_p bd,
 		wPos_t p[][2],
+		int type[],
 		int cnt,
 		wDrawColor color,
-		wDrawOpts opt )
+		wDrawWidth dw,
+		wDrawLineType_e lt,
+		wDrawOpts opt,
+		int fill,
+		int open )
 {
 	static int maxCnt = 0;
 	static GdkPoint *points;
 	int i;
 
 	if ( bd == &psPrint_d ) {
-		psPrintFillPolygon( p, cnt, color, opt );
+		psPrintFillPolygon( p, type, cnt, color, opt, fill, open );
 		return;
 	}
 
@@ -482,15 +487,77 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
     	points[i].y = INMAPY(bd,p[i][1]);
 	}
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opt);
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, fill?0:dw, fill?lt:wDrawLineSolid, color, opt);
+
 	for(i = 0; i < cnt; ++i)
 	{
-		if(i)
+		int j = i-1;
+		int k = i+1;
+		if (j < 0) j = cnt-1;
+		if (k > cnt-1) k = 0;
+		GdkPoint mid0, mid1, mid3, mid4, save;
+		double len0, len1;
+		double d0x = (points[i].x-points[j].x);
+		double d0y = (points[i].y-points[j].y);
+		double d1x = (points[k].x-points[i].x);
+		double d1y = (points[k].y-points[i].y);
+		len0 = (d0x*d0x+d0y*d0y);
+		len1 = (d1x*d1x+d1y*d1y);
+		mid0.x = (d0x/2)+points[j].x;
+		mid0.y = (d0y/2)+points[j].y;
+		mid1.x = (d1x/2)+points[i].x;
+		mid1.y = (d1y/2)+points[i].y;
+		if ((type[i] == 2) && (len1>0) && (len0>0)) {
+			double ratio = sqrt(len0/len1);
+			if (len0 < len1) {
+				mid1.x = ((d1x*ratio)/2)+points[i].x;
+				mid1.y = ((d1y*ratio)/2)+points[i].y;
+			} else {
+				mid0.x = points[i].x-(d0x/(2*ratio));
+				mid0.y = points[i].y-(d0y/(2*ratio));
+			}
+		}
+		mid3.x = (points[i].x-mid0.x)/2+mid0.x;
+		mid3.y = (points[i].y-mid0.y)/2+mid0.y;
+		mid4.x = (mid1.x-points[i].x)/2+points[i].x;
+		mid4.y = (mid1.y-points[i].y)/2+points[i].y;
+		points[i].x = round(points[i].x)+0.5;
+		points[i].y = round(points[i].y)+0.5;
+		mid0.x = round(mid0.x)+0.5;
+		mid0.y = round(mid0.y)+0.5;
+		mid1.x = round(mid1.x)+0.5;
+		mid1.y = round(mid1.y)+0.5;
+		mid3.x = round(mid3.x)+0.5;
+		mid3.y = round(mid3.y)+0.5;
+		mid4.x = round(mid4.x)+0.5;
+		mid4.y = round(mid4.y)+0.5;
+		if(i==0) {
+			if (type[i] == 0 || open) {
+				cairo_move_to(cairo, points[i].x, points[i].y);
+				save = points[0];
+			} else {
+				cairo_move_to(cairo, mid0.x, mid0.y);
+				if (type[i] == 1)
+					cairo_curve_to(cairo, points[i].x, points[i].y, points[i].x, points[i].y, mid1.x, mid1.y);
+				else
+					cairo_curve_to(cairo, mid3.x, mid3.y, mid4.x, mid4.y, mid1.x, mid1.y);
+				save = mid0;
+			}
+		} else if (type[i] == 0 || (open && (i==cnt-1))) {
 			cairo_line_to(cairo, points[i].x, points[i].y);
-		else
-			cairo_move_to(cairo, points[i].x, points[i].y);
+		} else {
+			cairo_line_to(cairo, mid0.x, mid0.y);
+			if (type[i] == 1)
+				cairo_curve_to(cairo, points[i].x, points[i].y, points[i].x, points[i].y, mid1.x, mid1.y);
+			else
+				cairo_curve_to(cairo, mid3.x, mid3.y, mid4.x, mid4.y, mid1.x, mid1.y);
+		}
+		if ((i==cnt-1) && (!fill && !open)) {
+			cairo_line_to(cairo, save.x, save.y);
+		}
 	}
-	cairo_fill(cairo);
+	if (fill && !open) cairo_fill(cairo);
+	else cairo_stroke(cairo);
 	gtkDrawDestroyCairoContext(cairo);
 
 }
@@ -963,10 +1030,10 @@ static gint draw_char_event(
 		if ( wlibFindAccelKey( event ) == NULL ) {
 			bd->action( bd, bd->context, wActionExtKey + ((int)extKey<<8), bd->lastX, bd->lastY );
 		}
-		return FALSE;
+		return TRUE;
 	} else if (key <= 0xFF && (event->state&(GDK_CONTROL_MASK|GDK_MOD1_MASK)) == 0 && bd->action) {
 		bd->action( bd, bd->context, wActionText+(key<<8), bd->lastX, bd->lastY );
-		return FALSE;
+		return TRUE;
 	} else {
 		return FALSE;
 	}

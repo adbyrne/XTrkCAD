@@ -589,7 +589,7 @@ BOOL_T ClipLine( coOrd *fp0, coOrd *fp1, coOrd orig, double angle, coOrd size )
 	return 1;
 }
 
-coOrd FindCentroid(int vertexCount, coOrd vertices[] )
+coOrd FindCentroid(int vertexCount, pts_t vertices[] )
 {
     coOrd centroid = {0, 0};
     double signedArea = 0.0;
@@ -603,10 +603,10 @@ coOrd FindCentroid(int vertexCount, coOrd vertices[] )
     int i=0;
     for (i=0; i<vertexCount-1; ++i)
     {
-        x0 = vertices[i].x;
-        y0 = vertices[i].y;
-        x1 = vertices[i+1].x;
-        y1 = vertices[i+1].y;
+        x0 = vertices[i].pt.x;
+        y0 = vertices[i].pt.y;
+        x1 = vertices[i+1].pt.x;
+        y1 = vertices[i+1].pt.y;
         a = x0*y1 - x1*y0;
         signedArea += a;
         centroid.x += (x0 + x1)*a;
@@ -615,10 +615,10 @@ coOrd FindCentroid(int vertexCount, coOrd vertices[] )
 
     // Do last vertex separately to avoid performing an expensive
     // modulus operation in each iteration.
-    x0 = vertices[i].x;
-    y0 = vertices[i].y;
-    x1 = vertices[0].x;
-    y1 = vertices[0].y;
+    x0 = vertices[i].pt.x;
+    y0 = vertices[i].pt.y;
+    x1 = vertices[0].pt.x;
+    y1 = vertices[0].pt.y;
     a = x0*y1 - x1*y0;
     signedArea += a;
     centroid.x += (x0 + x1)*a;

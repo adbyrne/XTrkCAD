@@ -135,7 +135,9 @@ static void DxfFillPoly(
     drawCmd_p d,
     int cnt,
     coOrd * pts,
-    wDrawColor color)
+	int * types,
+    wDrawColor color,
+	int fill)
 {
     int inx;
 

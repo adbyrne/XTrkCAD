@@ -74,8 +74,8 @@ static void NoDrawString( drawCmd_p d, coOrd p, ANGLE_T a, char * s,
 			  wFont_p fp, FONTSIZE_T fontSize, wDrawColor color ) {}
 static void NoDrawBitMap( drawCmd_p d, coOrd p, wDrawBitMap_p bm,
 			  wDrawColor color) {}
-static void NoDrawFillPoly( drawCmd_p d, int cnt, coOrd * pts,
-			    wDrawColor color ) {}
+static void NoDrawFillPoly( drawCmd_p d, int cnt, coOrd * pts, int * types,
+			    wDrawColor color, wDrawWidth width, int fill, int open) {}
 static void NoDrawFillCircle( drawCmd_p d, coOrd p, DIST_T r,
 			      wDrawColor color ) {}
 

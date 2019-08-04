@@ -205,7 +205,7 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
         Translate (&p[iPoint], orig, x_angle, switchmotorPoly_Pix[iPoint].x * switchmotorPoly_SF / scaleRatio );
         Translate (&p[iPoint], p[iPoint], y_angle, (10+switchmotorPoly_Pix[iPoint].y) * switchmotorPoly_SF / scaleRatio );
     }
-    DrawFillPoly(d, switchmotorPoly_CNT, p,  wDrawColorBlack);
+    DrawPoly(d, switchmotorPoly_CNT, p, NULL, wDrawColorBlack, 0, 1, 0);
 }
 
 static struct {
