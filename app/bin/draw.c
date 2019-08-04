@@ -54,7 +54,7 @@
 
 static void DrawRoomWalls( wBool_t );
 EXPORT void DrawMarkers( void );
-static void ConstraintOrig( coOrd *, coOrd );
+static void ConstraintOrig( coOrd *, coOrd, int );
 
 static int log_pan = 0;
 static int log_zoom = 0;
@@ -829,15 +829,6 @@ static void TempSegFillPoly(
 		coOrd * pts,
 		wDrawColor color )
 {
-#ifdef LATER
-	pts is not guaranteed to valid
-	DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
-	tempSegs(tempSegs_da.cnt-1).type = SEG_FILPOLY;
-	tempSegs(tempSegs_da.cnt-1).color = color;
-	tempSegs(tempSegs_da.cnt-1).width = 0;
-	tempSegs(tempSegs_da.cnt-1).u.p.cnt = cnt;
-	tempSegs(tempSegs_da.cnt-1).u.p.pts = pts;
-#endif
 	return;
 }
 
@@ -1184,7 +1175,7 @@ EXPORT BOOL_T SetRoomSize( coOrd size )
 	if ( mapW == NULL)
 		return TRUE;
 	ChangeMapScale(TRUE);
-	ConstraintOrig( &mainD.orig, mainD.size );
+	ConstraintOrig( &mainD.orig, mainD.size, TRUE );
 	tempD.orig = mainD.orig;
 	/*MainRedraw();*/
 	wPrefSetFloat( "draw", "roomsizeX", mapD.size.x );
@@ -1313,7 +1304,7 @@ lprintf("mainRedraw\n");
 			pixelBins /= 2.0;
 		}
 	}
-	ConstraintOrig( &mainD.orig, mainD.size );
+	ConstraintOrig( &mainD.orig, mainD.size, FALSE );
 	tempD.orig = mainD.orig;
 	wDrawClear( mainD.d );
 
@@ -1372,7 +1363,7 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 			wDrawSetSize( mainD.d, width-20, height, refresh );
 			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
 			SetMainSize();
-			ConstraintOrig( &mainD.orig, mainD.size );
+			ConstraintOrig( &mainD.orig, mainD.size, TRUE );
 			tempD.orig = mainD.orig;
 			SetInfoBar();
 			if (!refresh) {
@@ -1563,7 +1554,7 @@ EXPORT void DrawRuler(
 					wDrawLine( d->d, x0, y0, x1, y1,
 							0, wDrawLineSolid, color, (wDrawOpts)d->funcs->options );
 
-					if (!number)
+					if (!number || (d->scale>40 && mm != 0.0))
 						continue;
 					if ( (power>=1000) ||
 						 (d->scale<=8 && power>=100) ||
@@ -1646,13 +1637,15 @@ EXPORT void DrawRuler(
 		/* KLUDGE: can't draw invertable strings on windows */
 			if ( (opts&DO_TEMP) == 0)
 #endif
-			if ( fraction == 0 && number == TRUE) {
-				if (inch % 12 == 0 || d->scale <= 2) {
-					Translate( &p0, p0, aa, majorLength*d->scale/72.0 );
-					Translate( &p0, p0, 225, fs*d->scale/72.0 );
-					sprintf(message, "%d%c", digit, quote );
-					d->CoOrd2Pix( d, p0, &x0, &y0 );
-					wDrawString( d->d, x0, y0, d->angle, message, rulerFp, fs, color, (wDrawOpts)d->funcs->options );
+			if (fraction == 0) {
+				if ( (number == TRUE && d->scale<40) || (digit==0)) {
+					if (inch % 12 == 0 || d->scale <= 2) {
+						Translate( &p0, p0, aa, majorLength*d->scale/72.0 );
+						Translate( &p0, p0, 225, fs*d->scale/72.0 );
+						sprintf(message, "%d%c", digit, quote );
+						d->CoOrd2Pix( d, p0, &x0, &y0 );
+						wDrawString( d->d, x0, y0, d->angle, message, rulerFp, fs, color, (wDrawOpts)d->funcs->options );
+					}
 				}
 			}
 			firstFraction = 0;
@@ -1673,9 +1666,14 @@ EXPORT void DrawTicks( drawCmd_p d, coOrd size )
 		 p0.y = 0.0; p1.y = mapD.size.y;
 		 p0.x = p1.x = 0.0;
 		 DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
-		 offset = d->orig.x;
 	}
-	p0.x = 0.0; p1.x = d->size.x-d->orig.x;
+	if (d->orig.x+d->size.x>mapD.size.x) {
+		 p0.y = 0.0; p1.y = mapD.size.y;
+		 p0.x = p1.x = mapD.size.x;
+		 DrawRuler( d, p0, p1, offset, FALSE, FALSE, borderColor );
+	}
+	p0.x = 0.0; p1.x = d->size.x;
+	offset = d->orig.x;
 	p0.y = p1.y = d->orig.y;
 	DrawRuler( d, p0, p1, offset, TRUE, FALSE, borderColor );
 	p0.y = p1.y = d->size.y+d->orig.y;
@@ -1687,10 +1685,14 @@ EXPORT void DrawTicks( drawCmd_p d, coOrd size )
 		p0.x = 0.0; p1.x = mapD.size.x;
 		p0.y = p1.y = 0.0;
 		DrawRuler( d, p0, p1, offset, FALSE, FALSE, borderColor );
-		offset = d->orig.y;
 	}
-
-	p0.y = 0.0; p1.y = d->size.y-d->orig.y;
+	if (d->orig.y+d->size.y>mapD.size.y) {
+		 p0.x = 0.0; p1.x = mapD.size.x;
+		 p0.y = p1.y = mapD.size.y;
+		 DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
+	}
+	p0.y = 0.0; p1.y = d->size.y;
+	offset = d->orig.y;
 	p0.x = p1.x = d->orig.x;
 	DrawRuler( d, p0, p1, offset, TRUE, TRUE, borderColor );
 	p0.x = p1.x = d->size.x+d->orig.x;
@@ -1714,7 +1716,7 @@ EXPORT void DrawMapBoundingBox( BOOL_T set )
 }
 
 
-static void ConstraintOrig( coOrd * orig, coOrd size )
+static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bounds  )
 {
 LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%0.3fx%0.3f",
 				orig->x, orig->y, mapD.size.x, mapD.size.y,
@@ -1723,19 +1725,20 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 	coOrd bound;
 	bound.x = size.x/2;
 	bound.y = size.y/2;
-	if (orig->x+size.x > mapD.size.x+bound.x ) {
-		orig->x = mapD.size.x-size.x+bound.x;
+	if ((orig->x+size.x) > (mapD.size.x+(bounds?0:bound.x))) {
+		orig->x = mapD.size.x-size.x+(bounds?0:bound.x);
 		orig->x += (units==UNITS_ENGLISH?1.0:(1.0/2.54));
 	}
-	if (orig->x < 0-bound.x)
-		orig->x = 0-bound.x;
-	if (orig->y+size.y > mapD.size.y+bound.y ) {
-		orig->y = mapD.size.y-size.y+bound.y;
+	if (orig->x < (0-(bounds?0:bound.x)))
+		orig->x = 0-(bounds?0:bound.x);
+
+	if ((orig->y+size.y) > (mapD.size.y+(bounds?0:bound.y)) ) {
+		orig->y = mapD.size.y-size.y+(bounds?0:bound.y);
 		orig->y += (units==UNITS_ENGLISH?1.0:1.0/2.54);
 
 	}
-	if (orig->y < 0-bound.y)
-		orig->y = 0-bound.y;
+	if (orig->y < (0-(bounds?0:bound.y)))
+		orig->y = 0-(bounds?0:bound.y);
 
 	if (mainD.scale >= 1.0) {
 		if (units == UNITS_ENGLISH) {
@@ -1875,7 +1878,7 @@ static void DoNewScale( DIST_T scale )
 		mainD.orig.x = mainCenter.x - mainD.size.x/2.0;
 		mainD.orig.y = mainCenter.y - mainD.size.y/2.0;
 	}
-	ConstraintOrig( &mainD.orig, mainD.size );
+	ConstraintOrig( &mainD.orig, mainD.size, TRUE );
 	MainRedraw();
 	tempD.orig = mainD.orig;
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
@@ -2028,7 +2031,7 @@ LOG( log_pan, 1, ( "ORIG = [ %0.3f, %0.3f ]\n", mapOrig.x, mapOrig.y ) )
 LOG( log_pan, 2, ( "NEW = [ %0.3f, %0.3f ] \n", pos.x, pos.y ) )
 		newOrig.x = oldOrig.x + pos.x-mapOrig.x;
 		newOrig.y = oldOrig.y + pos.y-mapOrig.y;
-		ConstraintOrig( &newOrig, mainD.size );
+		ConstraintOrig( &newOrig, mainD.size, FALSE );
 		tempD.orig = mainD.orig = newOrig;
 		if (liveMap) {
 			MainRedraw();
@@ -2134,7 +2137,7 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			case wAccelKey_Right:
 
 				mainD.orig.x += mainD.size.x/2;
-				ConstraintOrig( &mainD.orig, mainD.size );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2143,7 +2146,7 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			case wAccelKey_Left:
 
 				mainD.orig.x -= mainD.size.x/2;
-				ConstraintOrig( &mainD.orig, mainD.size );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2153,7 +2156,7 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			case wAccelKey_Up:
 
 				mainD.orig.y += mainD.size.y/2;
-				ConstraintOrig( &mainD.orig, mainD.size );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2164,7 +2167,7 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			case wAccelKey_Down:
 
 				mainD.orig.y -= mainD.size.y/2;
-				ConstraintOrig( &mainD.orig, mainD.size );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2323,7 +2326,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 					mainD.orig.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
 				else
 					mainD.orig.x += mainD.size.x/2;
-				ConstraintOrig( &mainD.orig, mainD.size );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2336,7 +2339,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 					mainD.orig.x -= 0.25*mainD.scale;
 				else
 					mainD.orig.x -= mainD.size.x/2;
-				ConstraintOrig( &mainD.orig, mainD.size );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2349,7 +2352,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 					mainD.orig.y += 0.25*mainD.scale;
 				else
 					mainD.orig.y += mainD.size.y/2;
-				ConstraintOrig( &mainD.orig, mainD.size );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL));
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2362,7 +2365,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 					mainD.orig.y -= 0.25*mainD.scale;
 				else
 					mainD.orig.y -= mainD.size.y/2;
-				ConstraintOrig( &mainD.orig, mainD.size );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2474,7 +2477,7 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 							}
 						}
 					}
-					ConstraintOrig( &orig, mainD.size );
+					ConstraintOrig( &orig, mainD.size, TRUE );
 					if ( orig.x != mainD.orig.x || orig.y != mainD.orig.y ) {
 						//DrawMapBoundingBox( FALSE );
 						mainD.orig = orig;
@@ -2709,7 +2712,7 @@ static STATUS_T CmdPan(
 					DrawMapBoundingBox( TRUE );
 					mainD.orig.x -= (pos.x - start_pos.x);
 					mainD.orig.y -= (pos.y - start_pos.y);
-					ConstraintOrig( &mainD.orig, mainD.size );
+					ConstraintOrig( &mainD.orig, mainD.size, TRUE );
 					tempD.orig = mainD.orig;
 					mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 					mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2789,7 +2792,7 @@ static STATUS_T CmdPan(
 			mainCenter.x = mainD.orig.x + mapD.size.x/2.0;
 			mainCenter.y = mainD.orig.y + mapD.size.y/2.0;
 			DoNewScale(scale_x);
-			ConstraintOrig( &mainD.orig, mainD.size );
+			ConstraintOrig( &mainD.orig, mainD.size, TRUE );
 			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 			MapRedraw();
@@ -2797,7 +2800,7 @@ static STATUS_T CmdPan(
 		}
 		if (((action>>8) == 0x30) || ((action>>8) == 0x6F)) {     //"0" or "o"
 			mainD.orig = zero;
-			ConstraintOrig( &mainD.orig, mainD.size );
+			ConstraintOrig( &mainD.orig, mainD.size, TRUE);
 			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 			MapRedraw();
