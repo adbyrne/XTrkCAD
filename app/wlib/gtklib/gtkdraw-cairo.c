@@ -963,10 +963,10 @@ static gint draw_char_event(
 		if ( wlibFindAccelKey( event ) == NULL ) {
 			bd->action( bd, bd->context, wActionExtKey + ((int)extKey<<8), bd->lastX, bd->lastY );
 		}
-		return FALSE;
+		return TRUE;
 	} else if (key <= 0xFF && (event->state&(GDK_CONTROL_MASK|GDK_MOD1_MASK)) == 0 && bd->action) {
 		bd->action( bd, bd->context, wActionText+(key<<8), bd->lastX, bd->lastY );
-		return FALSE;
+		return TRUE;
 	} else {
 		return FALSE;
 	}
