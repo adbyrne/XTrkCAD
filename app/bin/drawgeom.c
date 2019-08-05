@@ -250,7 +250,7 @@ STATUS_T DrawGeomMouse(
 	case wActionLDown:
 		if (context->State == 2) {
 			tempSegs_da.cnt = segCnt;
-			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op != OP_POLYLINE)) {
+			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE)) {
 				EndPoly(context, segCnt, context->Op==OP_POLYLINE);
 			} else {
 				DrawGeomOk();
@@ -421,7 +421,7 @@ STATUS_T DrawGeomMouse(
 	case wActionLDrag:
 
 		oldOptions = context->D->funcs->options;
-		if (context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op != OP_POLYLINE)
+		if (context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE)
 			DrawSegs( context->D, zero, 0.0, &tempSegs(tempSegs_da.cnt-1), 1, trackGauge, wDrawColorBlack );
 		else
 			DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
@@ -582,7 +582,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		}
 		context->D->funcs->options |= wDrawOptTemp;
-		if (context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op != OP_POLYLINE)
+		if (context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE)
 			DrawSegs( context->D, zero, 0.0, &tempSegs(tempSegs_da.cnt-1), 1, trackGauge, wDrawColorBlack );
 		else
 			DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
