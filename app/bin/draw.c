@@ -93,6 +93,16 @@ EXPORT wDrawColor drawColorAqua;
 EXPORT wDrawColor drawColorPowderedBlue;
 EXPORT wDrawColor drawColorPurple;
 EXPORT wDrawColor drawColorGold;
+EXPORT wDrawColor drawColorGrey10;
+EXPORT wDrawColor drawColorGrey20;
+EXPORT wDrawColor drawColorGrey30;
+EXPORT wDrawColor drawColorGrey40;
+EXPORT wDrawColor drawColorGrey50;
+EXPORT wDrawColor drawColorGrey60;
+EXPORT wDrawColor drawColorGrey70;
+EXPORT wDrawColor drawColorGrey80;
+EXPORT wDrawColor drawColorGrey90;
+
 
 
 EXPORT DIST_T pixelBins = 80;
@@ -1449,9 +1459,27 @@ EXPORT void DoRedraw( void )
 static void DrawRoomWalls( wBool_t t )
 {
 	coOrd p00, p01, p11, p10;
+	int p0,p1,p2,p3;
 
 	if (mainD.d == NULL)
 		return;
+
+	if (t) {
+		mainD.CoOrd2Pix(&mainD,mainD.orig,&p0,&p1);
+		coOrd end;
+		end.x = mainD.orig.x + mainD.size.x;
+		end.y = mainD.orig.y + mainD.size.y;
+		mainD.CoOrd2Pix(&mainD,end,&p2,&p3);
+		p2 -= p0;
+		p3 -= p1;
+		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorGrey80, wDrawOptTemp );
+
+		mainD.CoOrd2Pix(&mainD,zero,&p0,&p1);
+		mainD.CoOrd2Pix(&mainD,mapD.size,&p2,&p3);
+		p2 -= p0;
+		p3 -= p1;
+		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorWhite, wDrawOptOpaque);
+	}
 
 	DrawTicks( &mainD, mapD.size );
 
@@ -1459,11 +1487,11 @@ static void DrawRoomWalls( wBool_t t )
 	p01.x = p10.y = 0.0;
 	p11.x = p10.x = mapD.size.x;
 	p01.y = p11.y = mapD.size.y;
+
 	DrawLine( &mainD, p01, p11, 3, t?borderColor:wDrawColorWhite );
 	DrawLine( &mainD, p11, p10, 3, t?borderColor:wDrawColorWhite );
 	DrawLine( &mainD, p00, p01, 3, t?borderColor:wDrawColorWhite );
 	DrawLine( &mainD, p00, p10, 3, t?borderColor:wDrawColorWhite );
-
 }
 
 
@@ -1772,8 +1800,8 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 			orig->y = floor(orig->y*25.4*2)/(25.4*2);
 		}
 	}
-	orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
-	orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
+	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
+	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
 LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
 }
 
@@ -2152,7 +2180,7 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			case wAccelKey_Right:
 
 				mainD.orig.x += mainD.size.x/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2161,7 +2189,7 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			case wAccelKey_Left:
 
 				mainD.orig.x -= mainD.size.x/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2171,7 +2199,7 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			case wAccelKey_Up:
 
 				mainD.orig.y += mainD.size.y/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2182,7 +2210,7 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			case wAccelKey_Down:
 
 				mainD.orig.y -= mainD.size.y/2;
-				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) == ( WKEY_CTRL) );
+				ConstraintOrig( &mainD.orig, mainD.size, (MyGetKeyState() & WKEY_CTRL) );
 				mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 				mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 				MainRedraw();
@@ -2691,7 +2719,8 @@ static STATUS_T CmdPan(
 	switch (action&0xFF) {
 	case C_START:
 		start_pos = zero;
-        panmode = NONE;		InfoMessage(_("Left Drag to Pan, Right Drag to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to set to Extent"));
+        panmode = NONE;
+        InfoMessage(_("Left Drag to Pan, Right Drag to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to set to Extent"));
         wSetCursor(mainD.d,wCursorSizeAll);
 		 break;
 	case C_DOWN:
@@ -2727,7 +2756,7 @@ static STATUS_T CmdPan(
 					DrawMapBoundingBox( TRUE );
 					mainD.orig.x -= (pos.x - start_pos.x);
 					mainD.orig.y -= (pos.y - start_pos.y);
-					ConstraintOrig( &mainD.orig, mainD.size, TRUE );
+					ConstraintOrig( &mainD.orig, mainD.size, FALSE );
 					tempD.orig = mainD.orig;
 					mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 					mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
@@ -2777,6 +2806,7 @@ static STATUS_T CmdPan(
 		mainD.orig.y = base.y;
 
 		panmode = NONE;
+		InfoMessage(_("Left Drag to Pan, Right Drag to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to set to Extent"));
 		DoNewScale(scale_x);
 		MapRedraw();
 		break;

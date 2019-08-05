@@ -455,6 +455,8 @@ typedef int wDrawOpts;
 #define wDrawOptTemp	(1<<0)
 #define wDrawOptNoClip	(1<<1)
 #define wDrawOutlineFont (1<<11)
+#define wDrawOptOpaque   (1<<12)
+
 
 typedef enum {
 	wDrawLineSolid,

@@ -1532,13 +1532,14 @@ static char * objectName[] = {
 		N_("Circle"),
 		N_("Circle"),
 		N_("Box"),
-		N_("Polyline"),
+		N_("Polygon"),
 		N_("Filled Circle"),
 		N_("Filled Circle"),
 		N_("Filled Circle"),
 		N_("Filled Box"),
-		N_("Polygon"),
+		N_("Filled Polygon"),
 		N_("Bezier Line"),
+		N_("Polyline"),
 		NULL};
 
 static STATUS_T CmdDraw( wAction_t action, coOrd pos )
@@ -1580,6 +1581,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_BEZLIN:
 		case OP_BOX:
 		case OP_POLY:
+		case OP_POLYLINE:
 			controls[0] = drawLineWidthPD.control;
 			controls[1] = drawColorPD.control;
 			controls[2] = NULL;
@@ -1594,7 +1596,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_FILLCIRCLE3:
 		case OP_FILLBOX:
 		case OP_FILLPOLY:
-		case OP_POLYLINE:
 			controls[0] = drawColorPD.control;
 			controls[1] = NULL;
 			sprintf( labelName, _("%s Color"), _(objectName[drawCmdContext.Op]) );

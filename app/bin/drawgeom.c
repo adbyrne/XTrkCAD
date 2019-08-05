@@ -757,7 +757,7 @@ STATUS_T DrawGeomMouse(
 				return C_CONTINUE;
 			}
 			int text_inx = tempSegs_da.cnt-1;
-			tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pos;
+			//tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pos;
 			context->length = FindDistance(tempSegs(text_inx).u.l.pos[0],tempSegs(text_inx).u.l.pos[1]);
 			if (text_inx>1) {
 				ANGLE_T an = FindAngle(tempSegs(text_inx-1).u.l.pos[0],tempSegs(text_inx-1).u.l.pos[1]);
