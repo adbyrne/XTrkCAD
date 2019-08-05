@@ -185,7 +185,7 @@ EXPORT void GetTextBounds(
 	p[1].x = p[2].x = size.x;
 	DrawTextSize2(&mainD, "A", NULL, fs, FALSE, &size2, &descent);
 	p[0].y = p[1].y = lastL.y - descent;
-	p[2].y = p[3].y = size.y;
+	p[2].y = p[3].y = 0.0;
 
 	lo = hi = zero;
 
