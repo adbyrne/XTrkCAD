@@ -132,6 +132,7 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 					action>>8 == 'o' || action>>8 == 'p' ||
 					action>>8 == 'l' || action>>8 == 'c' ||
 					action>>8 == 'r' || action>>8 == 's' ||
+					action>>8 == 'e' || action>>8 == 'f' ||
 					(action>>8 >= 48 && action>>8 <= 52)) return ModifyTrack( Dex.Trk, action, pos );
 			//Enter/Space does not
 			if (action>>8 !=32 && action>>8 != 13) return C_CONTINUE;

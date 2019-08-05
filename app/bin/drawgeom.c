@@ -45,7 +45,7 @@ static dynArr_t select_da;
 #define point_selected(N) DYNARR_N( wBool_t, select_da, N)
 #define anchors(N) DYNARR_N( trkSeg_t, anchors_da, N)
 
-static void EndPoly( drawContext_t * context, int cnt )
+static void EndPoly( drawContext_t * context, int cnt, wBool_t open)
 {
 	trkSeg_p segPtr;
 	track_p trk;
@@ -73,12 +73,12 @@ static void EndPoly( drawContext_t * context, int cnt )
 	//pts[cnt-1] = tempSegs(cnt-1).u.l.pos[1];
 	DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 	segPtr = &tempSegs(0);
-	segPtr->type = ( context->Op == OP_POLY ? SEG_POLY: SEG_FILPOLY );
+	segPtr->type = ( (context->Op == OP_POLY || context->Op == OP_POLYLINE )? SEG_POLY:SEG_FILPOLY );
 	segPtr->u.p.cnt = cnt;
 	segPtr->u.p.pts = pts;
 	segPtr->u.p.angle = 0.0;
 	segPtr->u.p.orig = zero;
-	segPtr->u.p.polyType = FREEFORM;
+	segPtr->u.p.polyType = open?POLYLINE:FREEFORM;
 	UndoStart( _("Create Lines"), "newDraw" );
 	trk = MakeDrawFromSeg( zero, 0.0, segPtr );
 	DrawNewTrack( trk );
@@ -141,7 +141,7 @@ STATUS_T DrawGeomMouse(
 
 	case C_UPDATE:
 		if (context->State == 0 ) return C_TERMINATE;
-		if (context->Op != OP_POLY && context->Op != OP_FILLPOLY && context->State == 1) return C_TERMINATE;
+		if (context->Op != OP_POLY && context->Op != OP_FILLPOLY && context->Op != OP_POLYLINE && context->State == 1) return C_TERMINATE;
 		switch (context->Op) {
 		case OP_CIRCLE1:
 		case OP_CIRCLE2:
@@ -177,7 +177,7 @@ STATUS_T DrawGeomMouse(
 		case OP_BOX:
 		case OP_FILLBOX:
 			for (int i=0; i<4;i++) {
-				pts[i].pt = tempSegs(0).u.p.pts->pt;
+				pts[i].pt = tempSegs(0).u.p.pts[i].pt;
 				pts[i].pt_type = 0;
 			}
 			a1 = FindAngle(pts[0].pt,pts[1].pt);
@@ -189,6 +189,7 @@ STATUS_T DrawGeomMouse(
 		break;
 		case OP_POLY:
 		case OP_FILLPOLY:
+		case OP_POLYLINE:
 			tempSegs_da.cnt = segCnt;
 			if (segCnt>1) {
 				ANGLE_T an = FindAngle(tempSegs(segCnt-2).u.l.pos[0],tempSegs(segCnt-2).u.l.pos[1]);
@@ -249,8 +250,8 @@ STATUS_T DrawGeomMouse(
 	case wActionLDown:
 		if (context->State == 2) {
 			tempSegs_da.cnt = segCnt;
-			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY)) {
-				EndPoly(context, segCnt);
+			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op != OP_POLYLINE)) {
+				EndPoly(context, segCnt, context->Op==OP_POLYLINE);
 			} else {
 				DrawGeomOk();
 			}
@@ -374,6 +375,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_POLY:
 		case OP_FILLPOLY:
+		case OP_POLYLINE:
 			tempSegs_da.cnt = segCnt;
 			wBool_t first_spot = FALSE;
 			if (segCnt == 1 && tempSegs(0).type == SEG_CRVLIN) {
@@ -393,7 +395,7 @@ STATUS_T DrawGeomMouse(
 			if ( segCnt>2 && IsClose(FindDistance(tempSegs(0).u.l.pos[0], pos ))) {
 				segPtr->u.l.pos[0] = tempSegs(segCnt-1).u.l.pos[1];
 				segPtr->u.l.pos[1] = tempSegs(0).u.l.pos[0];
-				EndPoly(context, tempSegs_da.cnt);
+				EndPoly(context, tempSegs_da.cnt, context->Op==OP_POLYLINE);
 				DYNARR_RESET(pts_t, points_da);
 				DYNARR_RESET(trkSeg_t,tempSegs_da);
 				context->State = 0;
@@ -419,7 +421,7 @@ STATUS_T DrawGeomMouse(
 	case wActionLDrag:
 
 		oldOptions = context->D->funcs->options;
-		if (context->Op == OP_POLY || context->Op == OP_FILLPOLY)
+		if (context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op != OP_POLYLINE)
 			DrawSegs( context->D, zero, 0.0, &tempSegs(tempSegs_da.cnt-1), 1, trackGauge, wDrawColorBlack );
 		else
 			DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
@@ -457,6 +459,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_POLY:
 		case OP_FILLPOLY:
+		case OP_POLYLINE:
 			tempSegs_da.cnt = segCnt;
 			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
 				coOrd last_point;
@@ -579,7 +582,7 @@ STATUS_T DrawGeomMouse(
 			break;
 		}
 		context->D->funcs->options |= wDrawOptTemp;
-		if (context->Op == OP_POLY || context->Op == OP_FILLPOLY)
+		if (context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op != OP_POLYLINE)
 			DrawSegs( context->D, zero, 0.0, &tempSegs(tempSegs_da.cnt-1), 1, trackGauge, wDrawColorBlack );
 		else
 			DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
@@ -590,7 +593,7 @@ STATUS_T DrawGeomMouse(
 	case wActionLUp:
 		oldOptions = context->D->funcs->options;
 		context->D->funcs->options |= wDrawOptTemp;
-		if (context->Op != OP_POLY && context->Op != OP_FILLPOLY)
+		if (context->Op != OP_POLY && context->Op != OP_FILLPOLY && context->Op != OP_POLYLINE)
 			DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		lastValid = FALSE;
 		createTrack = FALSE;
@@ -725,11 +728,12 @@ STATUS_T DrawGeomMouse(
 			break;
 		case OP_POLY:
 		case OP_FILLPOLY:
+		case OP_POLYLINE:
 			tempSegs_da.cnt = segCnt;
 			anchors_da.cnt=0;
 			//End if close to start
 			if ( segCnt>2 && IsClose(FindDistance(tempSegs(0).u.l.pos[0], pos))) {
-				EndPoly(context, tempSegs_da.cnt);
+				EndPoly(context, tempSegs_da.cnt, context->Op==OP_POLYLINE);
 				DYNARR_RESET(pts_t, points_da);
 				DYNARR_RESET(trkSeg_t,tempSegs_da);
 				context->State = 0;
@@ -781,7 +785,7 @@ STATUS_T DrawGeomMouse(
 	case wActionText:
 		if ( ((action>>8)&0xFF) == 0x0D ||
 			 ((action>>8)&0xFF) == ' ' ) {
-			if ((context->Op == OP_POLY || context->Op == OP_FILLPOLY)) {
+			if ((context->Op == OP_POLY) || (context->Op == OP_FILLPOLY) || (context->Op == OP_POLYLINE)) {
 				tempSegs_da.cnt = segCnt;
 				//If last segment wasn't just a point, add another starting on its end
 				if (!IsClose(FindDistance(tempSegs(segCnt-1).u.l.pos[0],tempSegs(segCnt-1).u.l.pos[1]))) {
@@ -791,8 +795,8 @@ STATUS_T DrawGeomMouse(
 					segPtr->u.l.pos[0] = segPtr[-1].u.l.pos[1];
 					segPtr->u.l.pos[1] = tempSegs(0).u.l.pos[0];
 				}
-				EndPoly(context, tempSegs_da.cnt);
-				DYNARR_RESET(pts_t, points_da);
+                EndPoly(context, tempSegs_da.cnt, context->Op == OP_POLYLINE);
+                DYNARR_RESET(pts_t, points_da);
 				DYNARR_RESET(trkSeg_t,tempSegs_da);
 			} else {
 				if (context->State == 2)
@@ -1324,7 +1328,7 @@ STATUS_T DrawGeomPolyModify(
 				MainRedraw();
 				return C_CONTINUE;
 			}
-			if ((action>>8 == 'c') || (action>>8 == 's')|| (action>>8 == 'r')  ) {
+			if (prev_inx>=0 && ((action>>8 == 'c') || (action>>8 == 's')|| (action>>8 == 'r'))  ) {
 				switch(action>>8) {
 				case 'c':
 					points(context->prev_inx).pt_type = 1;
@@ -1338,6 +1342,36 @@ STATUS_T DrawGeomPolyModify(
 				default:
 					return C_CONTINUE;
 				}
+				MainRedraw();
+				return C_CONTINUE;
+			}
+			if (action>>8 == 'c' && prev_inx<0 && tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.polyType == POLYLINE ) {
+				tempSegs(0).u.p.polyType = FREEFORM;
+				context->subtype=FREEFORM;
+				context->open = FALSE;
+				MainRedraw();
+				return C_CONTINUE;
+			}
+			if (action>>8 == 'l' && prev_inx<0 && tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.polyType == FREEFORM) {
+				tempSegs(0).u.p.polyType = POLYLINE;
+				context->subtype=POLYLINE;
+				context->open = TRUE;
+				MainRedraw();
+				return C_CONTINUE;
+			}
+			if (action>>8 == 'f' && tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.polyType != POLYLINE ) {
+				tempSegs(0).type = SEG_FILPOLY;
+				context->type =  SEG_FILPOLY;
+				context->filled = TRUE;
+				MainRedraw();
+				return C_CONTINUE;
+			}
+			if (action>>8 == 'e' && tempSegs(0).type == SEG_FILPOLY ) {
+				tempSegs(0).type = SEG_POLY;
+				context->type =  SEG_POLY;
+				context->filled = FALSE;
+				MainRedraw();
+				return C_CONTINUE;
 			}
 			//Delete or backspace deletes last selected index
 			if (action>>8 == 127 || action>>8 == 8) {

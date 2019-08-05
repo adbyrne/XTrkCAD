@@ -47,7 +47,8 @@
 #define OP_FILLBOX		(16)
 #define OP_FILLPOLY		(17)
 #define OP_BEZLIN       (18)
-#define OP_LAST			(OP_BEZLIN)
+#define OP_POLYLINE     (19)
+#define OP_LAST			(OP_POLYLINE)
 
 typedef struct {
 				void (*message)( char *, ... );
@@ -108,6 +109,9 @@ typedef struct {
 				coOrd pc;
 				DIST_T disp;
 				wBool_t rotate_state;
+				wBool_t open;
+				wBool_t filled;
+				PolyType_e subtype;
 		} drawModContext_t;
 
 typedef enum {LENGTH_UPDATE, WIDTH_UPDATE} drawUpdateType_e;

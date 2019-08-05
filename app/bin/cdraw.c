@@ -45,6 +45,10 @@ static wMenuPush_p drawModRound;
 static wMenuPush_p drawModCenterMode;
 static wMenuPush_p drawModPointsMode;
 static wMenuPush_p drawModSet[3];
+static wMenuPush_p drawModClose;
+static wMenuPush_p drawModOpen;
+static wMenuPush_p drawModFill;
+static wMenuPush_p drawModEmpty;
 
 extern void wSetSelectedFontSize(int size);
 
@@ -179,7 +183,7 @@ static track_p MakeDrawFromSeg1(
 	memcpy( xx->segs, sp, sizeof *(trkSeg_p)0 );
 
 	if (xx->segs[0].type == SEG_POLY ||
-		xx->segs[0].type == SEG_FILPOLY) {
+		xx->segs[0].type == SEG_FILPOLY ) {
 		xx->segs[0].u.p.pts = (pts_t*)MyMalloc( (sp->u.p.cnt) * sizeof (pts_t) );
 		memcpy(xx->segs[0].u.p.pts, sp->u.p.pts, sp->u.p.cnt * sizeof (pts_t) );
 	}
@@ -1003,13 +1007,25 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 	drawModCmdContext.segCnt = xx->segCnt;
 	drawModCmdContext.segPtr = xx->segs;
 	drawModCmdContext.selected = GetTrkSelected(trk);
-	drawModCmdContext.type = xx->segs[0].type;
 
 
 	switch(action&0xFF) {     //Remove Text value
 	case C_START:
+		drawModCmdContext.type = xx->segs[0].type;
+		switch(drawModCmdContext.type) {
+			case SEG_POLY:
+			case SEG_FILPOLY:
+				drawModCmdContext.filled = (drawModCmdContext.type==SEG_FILPOLY)?TRUE:FALSE;
+				drawModCmdContext.subtype = xx->segs[0].u.p.polyType;
+				drawModCmdContext.open = (drawModCmdContext.subtype==POLYLINE)?TRUE:FALSE;
+				break;
+			default:
+				break;
+
+		}
 		drawModCmdContext.rot_moved = FALSE;
 		drawModCmdContext.rotate_state = FALSE;
+
 		infoSubst = FALSE;
 		rc = DrawGeomModify( C_START, pos, &drawModCmdContext );
 		if ( infoSubst ) {
@@ -1126,17 +1142,33 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		break;
 	case C_CMDMENU:
 		wMenuPopupShow( drawModDelMI );
-		wMenuPushEnable( drawModDel,(!drawModCmdContext.rotate_state & (drawModCmdContext.prev_inx>=0)));
 		wMenuPushEnable( drawModPointsMode,drawModCmdContext.rotate_state);
 		wMenuPushEnable( drawModCenterMode,!drawModCmdContext.rotate_state);
-		if (!drawModCmdContext.rotate_state & (drawModCmdContext.prev_inx>=0)) {
-			wMenuPushEnable( drawModRound,TRUE);
-			wMenuPushEnable( drawModStraight, TRUE);
-			wMenuPushEnable( drawModCurved, TRUE);
-		} else {
+		if ((drawModCmdContext.type != SEG_POLY) && (drawModCmdContext.type != SEG_FILPOLY)) {
 			wMenuPushEnable( drawModRound, FALSE);
 			wMenuPushEnable( drawModStraight, FALSE);
 			wMenuPushEnable( drawModCurved, FALSE);
+			wMenuPushEnable( drawModDel, FALSE);
+			wMenuPushEnable( drawModFill, FALSE);
+			wMenuPushEnable( drawModEmpty, FALSE);
+			wMenuPushEnable( drawModClose, FALSE);
+			wMenuPushEnable( drawModOpen, FALSE);
+		} else {
+			wMenuPushEnable( drawModDel,(!drawModCmdContext.rotate_state & (drawModCmdContext.prev_inx>=0)));
+			if (!drawModCmdContext.rotate_state && (drawModCmdContext.prev_inx>=0)) {
+				if (((drawModCmdContext.prev_inx>1) && (drawModCmdContext.prev_inx<drawModCmdContext.segCnt-1)) ||
+					!drawModCmdContext.open) {
+					wMenuPushEnable( drawModRound,TRUE);
+					wMenuPushEnable( drawModStraight, TRUE);
+					wMenuPushEnable( drawModCurved, TRUE);
+				}
+			}
+			if (drawModCmdContext.prev_inx==-1) {
+				wMenuPushEnable( drawModFill,!drawModCmdContext.rotate_state && !drawModCmdContext.open && !drawModCmdContext.filled);
+				wMenuPushEnable( drawModEmpty,!drawModCmdContext.rotate_state && !drawModCmdContext.open && drawModCmdContext.filled);
+				wMenuPushEnable( drawModClose,!drawModCmdContext.rotate_state && drawModCmdContext.open && !drawModCmdContext.filled);
+				wMenuPushEnable( drawModOpen,!drawModCmdContext.rotate_state && !drawModCmdContext.open && !drawModCmdContext.filled);
+			}
 		}
 		for (int i=0;i<2;i++) {
 			wMenuPushEnable( drawModSet[i],drawModCmdContext.rotate_state);
@@ -1562,6 +1594,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_FILLCIRCLE3:
 		case OP_FILLBOX:
 		case OP_FILLPOLY:
+		case OP_POLYLINE:
 			controls[0] = drawColorPD.control;
 			controls[1] = NULL;
 			sprintf( labelName, _("%s Color"), _(objectName[drawCmdContext.Op]) );
@@ -1702,6 +1735,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			case OP_TBLEDGE:
 			case OP_POLY:
 			case OP_FILLPOLY:
+			case OP_POLYLINE:
 				controls[0] = drawLengthPD.control;
 				controls[1] = drawAnglePD.control;
 				controls[2] = NULL;
@@ -1780,6 +1814,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 #include "bitmaps/dpoly.xpm"
 #include "bitmaps/dfilpoly.xpm"
 #include "bitmaps/dbezier.xpm"
+#include "bitmaps/dpolyline.xpm"
 
 typedef struct {
 		char **xpm;
@@ -1811,8 +1846,10 @@ static drawData_t dcircleCmds[] = {
 static drawData_t dshapeCmds[] = {
 		{ dbox_xpm, OP_BOX, N_("Box"), N_("Draw Box"), "cmdDrawBox", ACCL_DRAWBOX },
 		{ dfilbox_xpm, OP_FILLBOX, N_("Filled Box"), N_("Draw Filled Box"), "cmdDrawFilledBox", ACCL_DRAWFILLBOX },
-		{ dpoly_xpm, OP_POLY, N_("Poly Line"), N_("Draw Polyline"), "cmdDrawPolyline", ACCL_DRAWPOLYLINE },
-		{ dfilpoly_xpm, OP_FILLPOLY, N_("Polygon"), N_("Draw Polygon"), "cmdDrawPolygon", ACCL_DRAWPOLYGON } };
+		{ dpoly_xpm, OP_POLY, N_("Polygon"), N_("Draw Polygon"), "cmdDrawPolygon", ACCL_DRAWPOLY },
+		{ dfilpoly_xpm, OP_FILLPOLY, N_("Filled Polygon"), N_("Draw Filled Polygon"), "cmdDrawFilledPolygon", ACCL_DRAWFILLPOLYGON },
+		{ dpolyline_xpm, OP_POLYLINE, N_("PolyLine"), N_("Draw PolyLine"), "cmdDrawPolyline", ACCL_DRAWPOLYLINE },
+};
 
 typedef struct {
 		char * helpKey;
@@ -1831,7 +1868,7 @@ static drawStuff_t drawStuff[4] = {
 		{ "cmdDrawLineSetCmd", N_("Straight Objects"), N_("Draw Straight Objects"), 4, dlineCmds },
 		{ "cmdDrawCurveSetCmd", N_("Curved Lines"), N_("Draw Curved Lines"), 5, dcurveCmds },
 		{ "cmdDrawCircleSetCmd", N_("Circle Lines"), N_("Draw Circles"), 4, dcircleCmds },
-		{ "cmdDrawShapeSetCmd", N_("Shapes"), N_("Draw Shapes"), 4, dshapeCmds} };
+		{ "cmdDrawShapeSetCmd", N_("Shapes"), N_("Draw Shapes"), 5, dshapeCmds} };
 		
 
 static void ChangeDraw( long changes )
@@ -1896,7 +1933,8 @@ static void DrawDlgUpdate(
 		}
 
 		if (drawCmdContext.Op == OP_POLY ||
-			drawCmdContext.Op == OP_FILLPOLY) {
+			drawCmdContext.Op == OP_FILLPOLY ||
+			drawCmdContext.Op == OP_POLYLINE) {
 			coOrd pos = zero;
 			DrawGeomMouse(C_UPDATE,pos,&drawCmdContext);
 		}
@@ -2060,9 +2098,12 @@ EXPORT void InitTrkDraw( void )
 	AddParam( "TABLEEDGE", ReadTableEdge );
 	AddParam( "TEXT", ReadText );
 
-
-
 	drawModDelMI = MenuRegister( "Modify Draw Edit Menu" );
+	drawModClose = wMenuPushCreate( drawModDelMI, "", _("Close Polygon - 'c'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c');
+	drawModOpen = wMenuPushCreate( drawModDelMI, "", _("Make PolyLine - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l');
+	drawModFill = wMenuPushCreate( drawModDelMI, "", _("Fill Polygon - 'f'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'f');
+	drawModEmpty = wMenuPushCreate( drawModDelMI, "", _("Empty Polygon - 'e'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'e');
+	wMenuSeparatorCreate( drawModDelMI );
 	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode - 'p'"), 0, (wMenuCallBack_p)MenuMode, (void*) 0 );
 	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point - 'Del'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 127 );
 	drawModStraight = wMenuPushCreate( drawModDelMI, "", _("Straight Point - 's'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 's' );
@@ -2073,7 +2114,5 @@ EXPORT void InitTrkDraw( void )
 	drawModSet[0] = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );
 	drawModSet[1] = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l' );
 	drawModSet[2] = wMenuPushCreate( drawModDelMI, "", _("Origin to Centroid - 'c'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c');
-
-
 
 }

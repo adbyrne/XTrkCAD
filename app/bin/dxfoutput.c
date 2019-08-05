@@ -137,15 +137,17 @@ static void DxfFillPoly(
     coOrd * pts,
 	int * types,
     wDrawColor color,
-	int fill)
+	wDrawWidth width,
+	int fill,
+	int open )
 {
     int inx;
 
     for (inx=1; inx<cnt; inx++) {
-        DxfLine(d, pts[inx-1], pts[inx], 0, color);
+        DxfLine(d, pts[inx-1], pts[inx], width, color);
     }
-
-    DxfLine(d, pts[cnt-1], pts[0], 0, color);
+    if (!open)
+    	DxfLine(d, pts[cnt-1], pts[0], width, color);
 }
 
 static void DxfFillCircle(drawCmd_p d, coOrd center, DIST_T radius,

@@ -32,7 +32,7 @@ Functions for drawing basic shapes and objects like lines and curves can be acce
 
 \u000
 
-\dd \f{Shapes} - draw boxes and poly-lines. (\K{cmdShapes})
+\dd \f{Shapes} - draw boxes, polygons and poly-lines. (\K{cmdShapes})
 
 \u000
 
@@ -151,7 +151,12 @@ Shapes are drawn by:
 
 \u000
 
-\dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \f{Poly Lines} and \f{Polygons} are created by \e{Left+Drag}, and a corner is placed when you release the left mouse button.  The \f{Poly} shape is finished by pressing the \e{Space} key or by selecting another operation.
+\dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \G{png.d/dpolyline} \f{PolyLines} and \f{Polygons} are created by \e{Left+Drag}, and a new corner is placed when you press the left mouse button. You can drag it until you release the button. 
+The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \e{Space} key or by selecting another operation.
+If \e{Shift} is held down when a new corner is placed, it will snap the relative angle of the new side to a multiple of 90 degrees.
+All Polylines and Polygons must have more than 2 corners. 
+
+Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been finished to alter individual points to make them curved or rounded points.
 
 \rule
 
