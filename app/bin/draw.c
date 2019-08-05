@@ -1547,7 +1547,7 @@ EXPORT void DrawRuler(
 	if (units == UNITS_METRIC) {
 		mm0 = (int)ceil(start*25.4-0.5);
 		mm1 = (int)floor(end*25.4+0.5);
-		len = 2;
+		len = 5;
 		if (d->scale <= 1) {
 			power = 1;
 		} else if (d->scale <= 8) {

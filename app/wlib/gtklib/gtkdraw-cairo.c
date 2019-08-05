@@ -380,8 +380,13 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	*w = 0;
 	*h = 0;
 
+	/* draw text */
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorBlack, 0);
+
+	cairo_identity_matrix(cairo);
+
 	wlibFontDestroyPangoLayout(
-		wlibFontCreatePangoLayout(bd->widget, NULL, fp, fs, s,
+		wlibFontCreatePangoLayout(bd->widget, cairo, fp, fs, s,
 								 &textWidth, (int *) &textHeight,
 								 (int *) &ascent, (int *) &descent, (int *) &baseline) );
 
@@ -391,6 +396,8 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 	if (debugWindow >= 3)
 		fprintf(stderr, "text metrics: w=%d, h=%d, d=%d\n", *w, *h, *d);
+
+	gtkDrawDestroyCairoContext(cairo);
 }
 
 
