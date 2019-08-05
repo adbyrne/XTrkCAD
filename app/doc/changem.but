@@ -593,11 +593,11 @@ The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can 
 
 \e{Curved Lines} are modified by dragging the end points and dragging the amount of central deflection (radius).
 
-Selecting a corner of a \e{Poly Line} or \e{Polygon} moves that corner to a new position, and if moved close to a neighboring corner will merge the two corners and delete the edge between them. Selecting an edge will create a corner that can be dragged to a new position.
+Selecting a corner of a \e{PolyLine} or \e{Polygon} moves that corner to a new position, and if moved close to a neighboring corner will merge the two corners and delete the edge between them. Selecting an edge will create a new corner that can be dragged to a new position.
 
 Any tracks created during the \f{Modify} command will have the following properties inherited from the first track: selected state, hidden state, scale, track gauge and Layer. 
 
-For detail about;
+For more detail about;
 
 \dd Changing track length refer to \K{chgTrackLength}.
 
@@ -759,9 +759,20 @@ For detail about;
 
 Draw elements have blue handles that show how they can be modified. They also have text entry boxes that allow precise entry of parameters. These values become active when a \e{Tab} is entered, or the cursor is moved out of the text box.  
 
-There is a context menu accessed via \e{Right-Click} for Draw Objects that can change the edit mode from the initial "Points Mode" to "Origin Mode" where \e{Click} sets the position of the drawn object's origin - which will cause subsequent rotations using \K{cmdModify} to be centered about that point. The context menu can be used to go back to Points Mode, or to set the origin to defined points. The shortcuts are "o" for Origin Mode, "p" for Points Mode. 
+There is a context menu accessed via \e{Right-Click} for Draw Objects that can change the edit mode from the initial "Points Mode" to "Origin Mode" where \e{Click} sets the position of the drawn object's origin - which will cause subsequent rotations using \K{cmdModify} to be centered about that point. 
 
-In Origin Mode, the context menu allows the origin to be set to the layout origin (shortcut "0") or the position of the corner points (shortcut "1" through "4") or the centroid of the shape (shortcut "c"). For a polygon, if a node is selected, the origin can be moved to it (shortcut "l"). 
+The context menu can be used to go back to Points Mode, or to set the origin to defined points. 
+The shortcuts are "o" for Origin Mode, "p" for Points Mode. 
+
+In Origin Mode, 
+
+\dd the context menu allows the origin to be set by dragging or snapped to the layout origin (shortcut "0") or the position of the corner points (shortcut "1" through "4") or the centroid of the shape (shortcut "c"). For a polygon, if a node is selected, the origin can be moved to it (shortcut "l").
+
+\u000
+
+In Points Mode,
+
+\u000
 
 \dd Lines have end points that can be dragged. \e{Shift-Drag} will snap the end to the end of a nearby Draw object, while \e{Ctrl+Drag} will snap to any point on a nearby Draw object.  They have text entry boxes for length and angle.
 
@@ -776,6 +787,12 @@ In Origin Mode, the context menu allows the origin to be set to the layout origi
 \u000
 
 \dd Polygons have nodes that can be selected and dragged. Selected nodes are highlighted. \e{Shift+Click} will add to selected nodes and dragging will then move all of the selected points together. If \e{Shift} is held down while dragging, the relative angle for the first selected point to its predecessor point will be locked to a multiple of 90 degrees. Clicking between existing nodes will add a new node while \e{Delete} will delete all currently selected nodes. If a single node is selected, text entry boxes for length and relative angle (the deviation angle from the preceeding side) can be used to fine-tune it. 
+
+If no points are selected, the context menu can be used to close an polyline into a polygon (shortcut "c") or open (shortcut "o") a non-filled polygon between its last and first points. A non-filled polygon can also be filled (shortcut "f") or a filled one emptied (shortcut "e").
+A selected Polygon or Polyline point can be deleted (shortcut "Delete") as long as there are at least three points left. It can also be curved (shortcut "c"), rounded (shortcut "r") or made back into a sharp point (shortcut "s") as long as it isn't an end point on a Polyline.
+
+Curved "poly-points" create a short Bezier curve that goes from halfway along the intersection line to the next point and which has a control arm until the 3 quarter point of that line. A rounded point starts at the halfway point of the shorter of the two lines on both sides has control arms that extend to the point and then has the other point an equal distance away as the first (ensuring an arc). By manipulating the nearest point (for example by adding a point, the curve at the desired location can be controlled.
+For defined radii rounding a point will work best, but curvng it will be more naturalistic.
 
 \u000
 

@@ -512,8 +512,8 @@ void wDrawString(		wDraw_p, wPos_t, wPos_t, wAngle_t, const char *, wFont_p,
 		  		wFontSize_t, wDrawColor, wDrawOpts );
 void wDrawFilledRectangle(	wDraw_p, wPos_t, wPos_t, wPos_t, wPos_t,
 				wDrawColor, wDrawOpts );
-void wDrawFilledPolygon(	wDraw_p, wPos_t [][2], wIndex_t, wDrawColor,
-				wDrawOpts );
+void wDrawPolygon(	wDraw_p, wPos_t [][2], wIndex_t [], wIndex_t, wDrawColor, wDrawWidth, wDrawLineType_e,
+				wDrawOpts, int, int );
 void wDrawFilledCircle(		wDraw_p, wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
 
 void wDrawGetTextSize(		wPos_t *, wPos_t *, wPos_t *, wDraw_p, const char *, wFont_p,

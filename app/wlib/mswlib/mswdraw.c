@@ -935,20 +935,29 @@ void wDrawFilledRectangle(
 static FILE * logF;
 #endif
 static int wFillPointsMax = 0;
+static dynArr_t wFillPoints_da;
+static dynArr_t wFillType_da;
 static POINT * wFillPoints;
+static BYTE * wTypePoints;
 
 static void addPoint(
 		int * pk,
 		POINT * pp,
+		BYTE * type,
 		RECT * pr )
 {
 #ifdef DRAWFILLPOLYLOG
 fprintf( logF, "	q[%d] = {%d,%d}\n", *pk, pp->x, pp->y );
 #endif
-	if ( *pk > 0 &&
+
+	if ( *pk > 0 && wTypePoints[ (*pk)-1] == *type &&
 		 wFillPoints[(*pk)-1].x == pp->x && wFillPoints[(*pk)-1].y == pp->y )
 		return;
+
+	DYNARR_APPEND(POINT,wFillPoints_da,1);
+	DYNARR_APPEND(BYTE,wFillType_da,1);
 	wFillPoints[ (*pk)++ ] = *pp;
+	wTypePoints[ (*pk)] = *type;
 	if (pp->x<pr->left)
 		pr->left = pp->x;
 	if (pp->x>pr->right)
@@ -957,71 +966,128 @@ fprintf( logF, "	q[%d] = {%d,%d}\n", *pk, pp->x, pp->y );
 		pr->top = pp->y;
 	if (pp->y>pr->bottom)
 		pr->bottom = pp->y;
+
 }
 
-void wDrawFilledPolygon(
+
+void wDrawPolygon(
 		wDraw_p d,
 		wPos_t p[][2],
-		int cnt,
+		wIndex_t type[],
+		wIndex_t cnt,
 		wDrawColor color,
-		wDrawOpts opts )
+		wDrawWidth dw,
+		wDrawLineType_e lt,
+		wDrawOpts opts,
+		int fill,
+		int open)
 {				 
 	RECT rect;
-	int i, k;
-	POINT p0, p1, q0, q1;
+	int i, j, k;
+	POINT p0, p1, p3, p4, point, save;
+	coOrd mid0, mid1, mid3, mid4;
 	static POINT zero = { 0, 0 };
+
 	wBool_t p1Clipped;
 
 	if (d == NULL)
 		return;
-	if (cnt*2 > wFillPointsMax) {
-		wFillPoints = realloc( wFillPoints, cnt * 2 * sizeof *(POINT*)NULL );
-		if (wFillPoints == NULL) {
-			fputs("can't realloc wFillPoints\n", stderr);
-			abort();
-		}
-		wFillPointsMax = cnt*2;
+	DYNARR_RESET(POINT,wFillPoints_da);
+	DYNARR_SET(POINT,wFillPoints_da,cnt);
+	DYNARR_RESET(BYTE,wFillType_da);
+	DYNARR_SET(POINT,wFillType_da,cnt);
+
+	if (fill)
+		setDrawBrush( d->hDc, d, color, opts );
+	else {
+		setDrawMode( d->hDc, d, dw, lt, color, opts );
 	}
-	setDrawBrush( d->hDc, d, color, opts );
+
 	p1.x = rect.left = rect.right = XINCH2PIX(d,p[cnt-1][0]-1);
 	p1.y = rect.top = rect.bottom = YINCH2PIX(d,p[cnt-1][1]+1);
+
+
 #ifdef DRAWFILLPOLYLOG
 logF = fopen( "log.txt", "a" );
 fprintf( logF, "\np[%d] = {%d,%d}\n", cnt-1, p1.x, p1.y );
 #endif
-	p1Clipped = FALSE;
+	int closed = 0;
 	for ( i=k=0; i<cnt; i++ ) {
-		p0 = p1;
-		p1.x = XINCH2PIX(d,p[i][0]-1);
-		p1.y = YINCH2PIX(d,p[i][1]+1);
-#ifdef DRAWFILLPOLYLOG
-fprintf( logF, "p[%d] = {%d,%d}\n", i, p1.x, p1.y );
-#endif
-		q0 = p0;
-		q1 = p1;
-		if ( clip0( &q0, &q1, NULL ) ) {
-#ifdef DRAWFILLPOLYLOG
-fprintf( logF, "  clip( {%d,%d} {%d,%d} )  = {%d,%d} {%d,%d}\n", p0.x, p0.y, p1.x, p1.y, q0.x, q0.y, q1.x, q1.y );
-#endif
-			if ( q0.x != p0.x || q0.y != p0.y ) {
-				if ( k > 0 && ( q0.x > q0.y ) != ( wFillPoints[k-1].x > wFillPoints[k-1].y ) )
-					 addPoint( &k, &zero, &rect );
-				addPoint( &k, &q0, &rect );
+		j = i==0?cnt-1:i-1;
+		k = (i==cnt-1)?0:i+1;
+		int d1x = p[k][0]-p[i][0];
+		int d1y = p[k][1]-p[i][1];
+		int d0x = p[i][0]-p[j][0];
+		int d0y = p[i][1]-p[j][1];
+		double len1 = (d1x*d1x+d1y+d1y);
+		double len0 = (d0x*d0x+d0y+d0y);
+		mid0.x = (d0x/2)+p[j][0];
+		mid0.y = (d0y/2)+p[j][1];
+		mid1.x = (d1x/2)+p[i][0];
+		mid1.y = (d1y/2)+p[i][1];
+		if ((type[i] == 2) && (len1>0) && (len0>0)) {
+			double ratio = sqrt(len1/len0);
+			if (len0 < len1) {
+				mid1.x = ((d1x*ratio)/2)+p[i][0];
+				mid1.y = ((d1y*ratio)/2)+p[i][1];
+			} else {
+				mid0.x = p[i][0]-(d0x/(2*ratio));
+				mid0.y = p[i][1]-(d0y/(2*ratio));
 			}
-			addPoint( &k, &q1, &rect );
-			p1Clipped = ( q1.x != p1.x || q1.y != p1.y );
+		}
+		mid3.x = (p[i][0]-mid0.x)/2+mid0.x;
+		mid3.y = (p[i][1]-mid0.y)/2+mid0.y;
+		mid4.x = (mid1.x-p[i][0])/2+p[i][0];
+		mid4.y = (mid1.y-p[i][1])/2+p[i][1];
+		point.x = XINCH2PIX(d,p[1][0]);
+		point.y = YINCH2PIX(d,p[1][1]);
+		p0.x = XINCH2PIX(d,mid0.x);
+		p0.y = YINCH2PIX(d,mid0.y);
+		p1.x = XINCH2PIX(d,mid1.x);
+		p1.y = YINCH2PIX(d,mid1.y);
+		p3.x = XINCH2PIX(d,mid3.x);
+		p3.y = YINCH2PIX(d,mid3.y);
+		p4.x = XINCH2PIX(d,mid4.x);
+		p4.y = YINCH2PIX(d,mid4.y);
+		if(i==0) {
+			if (type[i] == 0 || open) {
+				MoveTo( d->hDc, point.x, point.y );
+				save = point;
+			} else {
+				addPoint( &k, &p0, PT_LINETO, &rect );
+				if (type[i] == 1) {
+					addPoint( &k, &point, PT_CURVETO, &rect );
+					addPoint( &k, &point, PT_CURVETO, &rect );
+					addPoint( &k, &p1, PT_CURVETO, &rect );
+				} else {
+					addPoint( &k, &p3, PT_CURVETO, &rect );
+					addPoint( &k, &p4, PT_CURVETO, &rect );
+					addPoint( &k, &p1, PT_CURVETO, &rect );
+				}
+				save = p0;
+			}
+		} else if (type[i] == 0 || (open && (i==cnt-1))) {
+			addPoint( &k, &point, PT_LINETO, &rect );
+		} else {
+			if (i==cnt-1 && !open) closed = TRUE;
+			addPoint( &k, &p0, PT_LINETO, &rect );
+			if (type[i] == 1) {
+				addPoint( &k, &point, PT_CURVETO, &rect );
+				addPoint( &k, &point, PT_CURVETO, &rect );
+				addPoint( &k, &p1, PT_CURVETO|(closed?PT_CLOSEFIGURE:0), &rect );
+			} else {
+				addPoint( &k, &p3, PT_CURVETO, &rect );
+				addPoint( &k, &p4, PT_CURVETO, &rect );
+				addPoint( &k, &p1, PT_CURVETO|(closed?PT_CLOSEFIGURE:0), &rect );
+			}
 		}
 	}
-	if ( p1Clipped &&
-		 ( wFillPoints[k-1].x > wFillPoints[k-1].y ) != ( wFillPoints[0].x > wFillPoints[0].y ) )
-		addPoint( &k, &zero, &rect );
-#ifdef DRAWFILLPOLYLOG
-fflush( logF );
-fclose( logF );
-#endif
-	if ( k <= 2 )
-		return;
-	Polygon( d->hDc, wFillPoints, k );
+	PolyDraw(d->hDc, wFillPoints_da.ptr, wFillType_da.ptr, cnt );
+	if (fill && !open) {
+		FillPath(d->hDc);
+	} else
+		StrokePath(d->hDc);
+
 	if (d->hWnd) {
 		rect.top--;
 		rect.left--;
@@ -1064,7 +1130,7 @@ void wDrawFilledCircle(
 			circlePts[inx][0] = x + (int)(r * mswcos( inx*dang ) + 0.5 );
 			circlePts[inx][1] = y + (int)(r * mswsin( inx*dang ) + 0.5 );
 		}
-		wDrawFilledPolygon( d, circlePts, cnt, color, opts );
+		wDrawFilledPolygon( d, circlePts, NULL, cnt, color, opts );
 	} else {
 		Ellipse( d->hDc, p0.x, p0.y, p1.x, p1.y );
 		if (d->hWnd) {

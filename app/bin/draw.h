@@ -45,7 +45,7 @@ typedef struct {
 		void (*drawArc)( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, BOOL_T, wDrawWidth, wDrawColor );
 		void (*drawString)( drawCmd_p, coOrd, ANGLE_T, char *, wFont_p, FONTSIZE_T, wDrawColor );
 		void (*drawBitMap)( drawCmd_p, coOrd, wDrawBitMap_p, wDrawColor );
-		void (*drawFillPoly) (drawCmd_p, int, coOrd *, wDrawColor );
+		void (*drawPoly) (drawCmd_p, int, coOrd *, int *, wDrawColor, wDrawWidth, int, int );
 		void (*drawFillCircle) (drawCmd_p, coOrd, DIST_T,  wDrawColor );
 		} drawFuncs_t;
 
@@ -141,7 +141,7 @@ drawFuncs_t printDrawFuncs;
 #define DrawArc( D, P, R, A0, A1, F, W, C ) (D)->funcs->drawArc( D, P, R, A0, A1, F, W, C )
 #define DrawString( D, P, A, S, FP, FS, C ) (D)->funcs->drawString( D, P, A, S, FP, FS, C )
 #define DrawBitMap( D, P, B, C ) (D)->funcs->drawBitMap( D, P, B, C )
-#define DrawFillPoly( D, N, P, C ) (D)->funcs->drawFillPoly( D, N, P, C );
+#define DrawPoly( D, N, P, T, C, W, F, O ) (D)->funcs->drawPoly( D, N, P, T, C, W, F, O );
 #define DrawFillCircle( D, P, R, C ) (D)->funcs->drawFillCircle( D, P, R, C );
 
 #define REORIGIN( Q, P, A, O ) { \

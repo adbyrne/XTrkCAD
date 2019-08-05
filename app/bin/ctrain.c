@@ -699,13 +699,13 @@ static void SpeedRedraw(
     pts[2][1] = pts[3][1] = y+SLIDER_THICKNESS/2;
     pts[0][0] = pts[3][0] = 0;
     pts[1][0] = pts[2][0] = SLIDER_WIDTH;
-    wDrawFilledPolygon(d, pts, 4, drawColor, 0);
+    wDrawPolygon(d, pts, NULL, 4, drawColor, 0, 0, 0, 1, 0);
     drawColor  = wDrawFindColor(wRGB(220, 220, 220));
     pts[0][1] = pts[1][1] = y+SLIDER_THICKNESS/2;
     pts[2][1] = pts[3][1] = y;
     pts[0][0] = pts[3][0] = 0;
     pts[1][0] = pts[2][0] = SLIDER_WIDTH;
-    wDrawFilledPolygon(d, pts, 4, drawColor, 0);
+    wDrawPolygon(d, pts, NULL, 4, drawColor, 0, 0, 0, 1, 0);
     wDrawLine(d, 0, y, SLIDER_WIDTH, y, 1, wDrawLineSolid, drawColorRed, 0);
     wDrawLine(d, 0, y+SLIDER_THICKNESS/2, SLIDER_WIDTH, y+SLIDER_THICKNESS/2, 1,
               wDrawLineSolid, drawColorBlack, 0);

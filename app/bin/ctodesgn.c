@@ -3077,7 +3077,7 @@ EXPORT BOOL_T WriteSegs(
 				segs[i].u.p.cnt )>0;
 			for ( j=0; j<segs[i].u.p.cnt; j++ )
 				rc &= fprintf( f, "\t\t%0.6f %0.6f\n",
-						segs[i].u.p.pts[j].x, segs[i].u.p.pts[j].y )>0;
+						segs[i].u.p.pts[j].pt.x, segs[i].u.p.pts[j].pt.y )>0;
 			break;
 		}
 	}

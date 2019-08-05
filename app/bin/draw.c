@@ -392,24 +392,35 @@ static void DDrawString(
 }
 
 
-static void DDrawFillPoly(
+static void DDrawPoly(
 		drawCmd_p d,
 		int cnt,
 		coOrd * pts,
-		wDrawColor color )
+		int * types,
+		wDrawColor color,
+		wDrawWidth width,
+		int fill,
+		int open )
 {
 	typedef wPos_t wPos2[2];
 	static dynArr_t wpts_da;
+	static  dynArr_t wpts_type_da;
 	int inx;
 	wPos_t x, y;
 	DYNARR_SET( wPos2, wpts_da, cnt * 2 );
+	DYNARR_SET( int, wpts_type_da, cnt);
 #define wpts(N) DYNARR_N( wPos2, wpts_da, N )
+#define wtype(N) DYNARR_N( int, wpts_type_da, N )
 	for ( inx=0; inx<cnt; inx++ ) {
 		d->CoOrd2Pix( d, pts[inx], &x, &y );
 		wpts(inx)[0] = x;
 		wpts(inx)[1] = y;
+		if (!types)
+			wtype(inx) = 0;
+		else
+			wtype(inx) = types[inx];
 	}
-	wDrawFilledPolygon( d->d, &wpts(0), cnt, color, (wDrawOpts)d->funcs->options );
+	wDrawPolygon( d->d, &wpts(0), &wtype(0), cnt, color, width, ((d->options&DC_DASH)==0)?wDrawLineSolid:wDrawLineDash, (wDrawOpts)d->funcs->options, fill, open );
 }
 
 
@@ -486,7 +497,7 @@ EXPORT void DrawHilightPolygon( drawCmd_p d, coOrd *p, int cnt )
 	for (i=0; i<cnt; i++) {
 		d->CoOrd2Pix(d,p[i],&q[i][0],&q[i][1]);
 	}
-	wDrawFilledPolygon( d->d, q, cnt, wDrawColorBlack, wDrawOptTemp );
+	wDrawPolygon( d->d, q, NULL, cnt, wDrawColorBlack, 0, 0, wDrawOptTemp, 1, 0 );
 }
 
 
@@ -640,12 +651,12 @@ EXPORT void DrawBoxedString(
 		DrawString( d, p0, 0.0, text, fp, fs, color );
 		break;
 	case BOX_INVERT:
-		DrawFillPoly( d, 4, p, color );
+		DrawPoly( d, 4, p, NULL, color, 0, 1, 0);
 		if ( color != wDrawColorWhite )
 			DrawString( d, p0, 0.0, text, fp, fs, wDrawColorWhite );
 		break;
 	case BOX_BACKGROUND:
-		DrawFillPoly( d, 4, p, wDrawColorWhite );
+		DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0, 1, 0 );
 		DrawString( d, p0, 0.0, text, fp, fs, color );
 		break;
 	}
@@ -823,11 +834,15 @@ static void TempSegString(
 }
 
 
-static void TempSegFillPoly(
+static void TempSegPoly(
 		drawCmd_p d,
 		int cnt,
 		coOrd * pts,
-		wDrawColor color )
+		int * types,
+		wDrawColor color,
+		wDrawWidth width,
+		int fill,
+		int open )
 {
 	return;
 }
@@ -862,7 +877,7 @@ EXPORT drawFuncs_t screenDrawFuncs = {
 		DDrawArc,
 		DDrawString,
 		DDrawBitMap,
-		DDrawFillPoly,
+		DDrawPoly,
 		DDrawFillCircle };
 
 EXPORT drawFuncs_t tempDrawFuncs = {
@@ -871,7 +886,7 @@ EXPORT drawFuncs_t tempDrawFuncs = {
 		DDrawArc,
 		DDrawString,
 		DDrawBitMap,
-		DDrawFillPoly,
+		DDrawPoly,
 		DDrawFillCircle };
 
 EXPORT drawFuncs_t printDrawFuncs = {
@@ -880,7 +895,7 @@ EXPORT drawFuncs_t printDrawFuncs = {
 		DDrawArc,
 		DDrawString,
 		NoDrawBitMap,
-		DDrawFillPoly,
+		DDrawPoly,
 		DDrawFillCircle };
 
 EXPORT drawFuncs_t tempSegDrawFuncs = {
@@ -889,7 +904,7 @@ EXPORT drawFuncs_t tempSegDrawFuncs = {
 		TempSegArc,
 		TempSegString,
 		NoDrawBitMap,
-		TempSegFillPoly,
+		TempSegPoly,
 		TempSegFillCircle };
 
 EXPORT drawCmd_t mainD = {

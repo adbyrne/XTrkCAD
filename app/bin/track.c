@@ -2371,7 +2371,9 @@ EXPORT void DrawTie(
 		wDrawColor color,
 		BOOL_T solid )
 {
-	coOrd p[4], lo, hi;
+	coOrd lo, hi;
+	coOrd p[4];
+	int t[4];
 
 	length /= 2;
 	width /= 2;
@@ -2381,12 +2383,17 @@ EXPORT void DrawTie(
 	hi.x += length;
 	hi.y += length;
 	angle += 90;
+
 	Translate( &p[0], pos, angle, length );
 	Translate( &p[1], p[0], angle+90, width );
 	Translate( &p[0], p[0], angle-90, width );
 	Translate( &p[2], pos, angle+180, length );
 	Translate( &p[3], p[2], angle-90, width );
 	Translate( &p[2], p[2], angle+90, width );
+
+	for (int i=0;i<4;i++) {
+		t[i] = 0;
+	}
 
 	if ( d == &mainD ) {
 		lo.x -= RBORDER/mainD.dpi*mainD.scale;
@@ -2397,12 +2404,9 @@ EXPORT void DrawTie(
 			return;
 	}
 	if ( solid ) {
-		DrawFillPoly( d, 4, p, color );
+		DrawPoly( d, 4, p, t, color, 0, 1, 0 );
 	} else {
-		DrawLine( d, p[0], p[1], 0, color );
-		DrawLine( d, p[1], p[2], 0, color );
-		DrawLine( d, p[2], p[3], 0, color );
-		DrawLine( d, p[3], p[0], 0, color );
+		DrawPoly( d, 4, p, t, color, 0, 0, 0);
 	}
 }
 

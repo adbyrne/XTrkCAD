@@ -136,8 +136,9 @@ static paramData_t describePLs[] = {
 #define I_PIVOT_N		I_PIVOT_0+1
 
 #define I_TOGGLE_0      I_PIVOT_N
-    { PD_TOGGLE, NULL, "boxed", PDO_NOPREF|PDO_DLGHORZ, boxLabels, N_("Boxed"), BC_HORZ|BC_NOBORDER },
-#define I_TOGGLE_N 		I_TOGGLE_0+1
+    { PD_TOGGLE, NULL, "boxed1", PDO_NOPREF|PDO_DLGHORZ, boxLabels, N_("Boxed"), BC_HORZ|BC_NOBORDER },
+	{ PD_TOGGLE, NULL, "boxed2", PDO_NOPREF|PDO_DLGHORZ, boxLabels, N_("Boxed"), BC_HORZ|BC_NOBORDER },
+#define I_TOGGLE_N 		I_TOGGLE_0+2
 };
 
 static paramGroup_t describePG = { "describe", 0, describePLs, sizeof describePLs/sizeof describePLs[0] };

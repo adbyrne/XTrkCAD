@@ -479,14 +479,18 @@ void psPrintFillRectangle(
  * \param cnt IN the number of points
  * \param color IN fill color
  * \param opts IN options
+ * \paran fill IN Fill or not
  * \return
  */
 
 void psPrintFillPolygon(
     wPos_t p[][2],
+	int type[],
     int cnt,
     wDrawColor color,
-    wDrawOpts opts)
+    wDrawOpts opts,
+	int fill,
+	int open )
 {
     int inx;
     cairo_t *cr = psPrint_d.printContext;
@@ -501,13 +505,41 @@ void psPrintFillPolygon(
 
     psSetColor(color);
 
-    cairo_move_to(cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ]);
+    wPos_t mid1[2], mid2[2], mid3[2], mid4[2];
 
     for (inx=0; inx<cnt; inx++) {
-        cairo_line_to(cr, p[ inx ][ 0 ], p[ inx ][ 1 ]);
+    	int j = cnt-1;
+		int k = 1;
+		mid1[0] = ((p[inx][0]-p[j][0])/2)+p[j][0];
+		mid1[1] = ((p[inx][1]-p[j][1])/2)+p[j][1];
+		mid2[0] = ((p[inx][0]-mid1[0])/2)+mid1[0];
+		mid2[1] = ((p[inx][1]-mid1[1])/2)+mid1[1];
+		mid4[0] = ((p[k][0]-p[inx][0])/2)+p[inx][0];
+		mid4[1] = ((p[k][1]-p[inx][1])/2)+p[inx][1];
+		mid3[0] = ((mid4[0]-p[inx][0])/2)+p[inx][0];
+		mid3[1] = ((mid4[1]-p[inx][1])/2)+p[inx][1];
+		if (inx==0) {
+			 if (type[0] == 0)
+				 cairo_move_to(cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ]);
+			else
+				 cairo_move_to(cr, mid1[0], mid1[1]);
+		}
+		if (type[inx] == 0 ) {
+			cairo_line_to(cr, p[ inx ][ 0 ], p[ inx ][ 1 ]);
+		}
+		else if (type[inx] == 1) {
+			cairo_line_to(cr, mid1[ 0 ], mid1[ 1 ]);
+			cairo_curve_to(cr, p[inx][0],p[inx][1],p[inx][0],p[inx][1],mid4[0],mid4[1]);
+		}
+
+		else if (type[inx] == 2) {
+			cairo_line_to(cr, mid1[ 0 ], mid1[ 1 ]);
+			cairo_curve_to(cr, mid2[0],mid2[1],mid3[0],mid3[1],mid4[0],mid4[1]);
+
+		}
     }
 
-    cairo_fill(cr);
+    if (fill) cairo_fill(cr);
 }
 
 /**

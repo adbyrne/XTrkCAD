@@ -203,8 +203,9 @@ typedef struct {
 dynArr_t tempEndPts_da;
 #define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
 
-typedef enum { FREEFORM, RECTANGLE
+typedef enum { FREEFORM, RECTANGLE, POLYLINE
 } PolyType_e;
+
 
 typedef struct {
 		char type;
@@ -250,7 +251,7 @@ typedef struct {
 			} t;
 			struct {
 				int cnt;
-				coOrd * pts;
+				pts_t * pts;
 				coOrd orig;
 				ANGLE_T angle;
 				PolyType_e polyType;
