@@ -35,6 +35,7 @@
 #include "track.h"
 #include "utility.h"
 #include "drawgeom.h"
+#include "common.h"
 
 static struct {
 		track_p Trk;
@@ -48,6 +49,8 @@ static struct {
 		BOOL_T first;
 		} Dex;
 
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
 static int log_modify;
 static BOOL_T modifyBezierMode;
@@ -195,6 +198,7 @@ static STATUS_T CmdModify(
 	switch (action&0xFF) {
 
 	case C_START:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		InfoMessage( _("Select track to modify") );
 		Dex.Trk = NULL;
 		tempSegs_da.cnt = 0;
@@ -207,6 +211,7 @@ static STATUS_T CmdModify(
 		return C_CONTINUE;
 
 	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (modifyBezierMode)
 			return ModifyBezier(C_DOWN, pos);
 		if (modifyCornuMode)
@@ -316,6 +321,27 @@ static STATUS_T CmdModify(
         MapRedraw();
 		return rc;
 
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if ( (MyGetKeyState()&WKEY_SHIFT) == WKEY_SHIFT) {
+			track_p t;
+			if ((t=OnTrack(&pos,FALSE,TRUE))!= NULL) {
+				if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
+						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+						if (ep != -1) {
+							pos = GetTrkEndPos(t, ep);
+							CreateEndAnchor(pos,TRUE);
+						}
+					}
+				}
+			}
+		}
+		if (anchors_da.cnt)
+				DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		if (anchors_da.cnt)
+				DrawSegs( &mainD, zero, 0.0, &anchors(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		return C_CONTINUE;
+
 	case C_MOVE:
 		if ( modifyRulerMode )
 			return ModifyRuler( C_MOVE, pos );
@@ -341,6 +367,7 @@ static STATUS_T CmdModify(
 		return rc;
 
 	case C_UP:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Dex.Trk == NULL)
 			return C_CONTINUE;
 		if ( modifyRulerMode )
@@ -365,6 +392,7 @@ static STATUS_T CmdModify(
 		return rc;
 
 	case C_RDOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		changeTrackMode = TRUE;
 		modifyRulerMode = FALSE;
 		modifyBezierMode = FALSE;
@@ -403,6 +431,7 @@ LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
         MapRedraw();
         /* no break */
 	case C_RMOVE:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		Dex.valid = FALSE;
@@ -587,6 +616,8 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 		if ( (!changeTrackMode) && Dex.Trk && !QueryTrack( Dex.Trk,	 Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK ) )
 		   UndrawNewTrack( Dex.Trk );
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		if (anchors_da.cnt)
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 
 		return C_CONTINUE;
 

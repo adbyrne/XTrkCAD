@@ -58,6 +58,9 @@ static struct {
 
 static long curveMode;
 
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
+
 
 EXPORT int DrawArrowHeads(
 		trkSeg_p sp,
@@ -314,6 +317,20 @@ EXPORT STATUS_T CreateCurve(
 	}
 }
 
+static void CreateEndAnchor(coOrd p, wBool_t lock) {
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+}
+
 
 static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 {
@@ -339,6 +356,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 
 	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( Da.state == -1 ) {
 			//SnapPos( &pos );
 			Da.pos0 = pos;
@@ -353,7 +371,28 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		}
 
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if ((Da.state<0 && curveMode != crvCmdFromCenter) ||
+			(Da.state == 1 && curveMode != crvCmdFromCenter)){
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT) {
+				if ((t=OnTrack(&pos,FALSE,TRUE))!= NULL) {
+					if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
+						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+						if (ep != -1) {
+							pos = GetTrkEndPos(t, ep);
+							CreateEndAnchor(pos,TRUE);
+						}
+					}
+				}
+			}
+			if (anchors_da.cnt)
+				DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		}
+		return C_CONTINUE;
+
 	case C_MOVE:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state<0) return C_CONTINUE;
 		mainD.funcs->options = wDrawOptTemp;
 		if ( Da.state == 0 ) {
@@ -399,8 +438,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		mainD.funcs->options = 0;
 		MainRedraw();
 		return rc;
-
-
 	case C_UP:
 		if (Da.state<0) return C_CONTINUE;
 		mainD.funcs->options = wDrawOptTemp;
@@ -457,6 +494,8 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 			mainD.funcs->options = 0;
 		}
+		if (anchors_da.cnt)
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_CANCEL:
@@ -807,12 +846,12 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 {
 
 	ButtonGroupBegin( _("Curve Track"), "cmdCircleSetCmd", _("Curve Tracks") );
-	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"), wIconCreatePixMap( curve1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE1, (void*)0 );
-	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"), wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE2, (void*)1 );
-	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE3, (void*)2 );
-	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"), wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CURVE4, (void*)3 );
-	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap(bezier_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_BEZIER, (void*)bezCmdCreateTrack );
-	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"), wIconCreatePixMap(cornu_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_CORNU, (void*)cornuCmdCreateTrack);
+	AddMenuButton( menu, CmdCurve, "cmdCurveEndPt", _("Curve from End-Pt"), wIconCreatePixMap( curve1_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE1, (void*)0 );
+	AddMenuButton( menu, CmdCurve, "cmdCurveTangent", _("Curve from Tangent"), wIconCreatePixMap( curve2_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE2, (void*)1 );
+	AddMenuButton( menu, CmdCurve, "cmdCurveCenter", _("Curve from Center"), wIconCreatePixMap( curve3_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE3, (void*)2 );
+	AddMenuButton( menu, CmdCurve, "cmdCurveChord", _("Curve from Chord"), wIconCreatePixMap( curve4_xpm ), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CURVE4, (void*)3 );
+	AddMenuButton( menu, CmdBezCurve, "cmdBezier", _("Bezier Curve"), wIconCreatePixMap(bezier_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_BEZIER, (void*)bezCmdCreateTrack );
+	AddMenuButton( menu, CmdCornu, "cmdCornu", _("Cornu Curve"), wIconCreatePixMap(cornu_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_CORNU, (void*)cornuCmdCreateTrack);
 	ButtonGroupEnd();
 
 	ButtonGroupBegin( _("Circle Track"), "cmdCurveSetCmd", _("Circle Tracks") );

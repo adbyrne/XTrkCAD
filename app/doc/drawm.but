@@ -151,10 +151,13 @@ Shapes are drawn by:
 
 \u000
 
-\dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \G{png.d/dpolyline} \f{PolyLines} and \f{Polygons} are created by \e{Left+Drag}, and a new corner is placed when you press the left mouse button. You can drag it until you release the button. 
-The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \e{Space} key or by selecting another operation.
-If \e{Shift} is held down when a new corner is placed, it will snap the relative angle of the new side to a multiple of 90 degrees.
-All Polylines and Polygons must have more than 2 corners. 
+\dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \G{png.d/dpolyline} \f{PolyLines} and \f{Polygons} are created by \e{Left+Drag}, and a new corner is placed when you press the left mouse button. You can drag it until you release the button.
+If \e{Shift} is pressed, an anchor point will be shown on nearby objects that the next point will be snapped to. 
+If \e{Ctrl} is held down when a new point is placed, it will snap the relative angle of the new side to a multiple of 90 degrees.
+If \e{Sticky} is set for draw objects, after the object is created, precise dimensions can be entered to alter the new object, before it is completed either with a \e{Space} or \e{Return} or by selecting a new operation.
+ 
+The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \e{Space} or \e{Return} key or by selecting another operation. Before they are finished, precise dimensions can be entered for the last side drawn.
+All Polylines and Polygons must have more than 2 corners to be created successfully. 
 
 Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been finished to alter individual points to make them curved or rounded points.
 
@@ -165,11 +168,12 @@ Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been
 
 \G{png.d/mdrawstraight.png}
 
-Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.  If \e{Draw Straight Objects} is Sticky (\K{cmdSticky}), \e{Cntl+Left+Drag} will use the endpoint of the previous line as the starting point.
+Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.  
 
 \dd \G{png.d/dline.png} Creates a \f{Straight Line} of specified color and width.
-If \e{Shift} is held down for the first end point and the cursor is over a line object the new line start position will snap to the nearest end of the line.
-If \e{Shift} is held down when the button is released at the end of the \e{Left+Drag} the line end position will snap to the nearest end of any line object it is over.
+If \e{Shift} is held down for the first end point and the cursor is near a line object the new line start position will snap to the nearest draw object, as shown by the anchor.
+If \e{Shift} is held down during \e{Left+Drag} the line end position will snap to the nearest point of any draw object as shown by the anchor.
+If \e{Ctrl} is held down during \e{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees. 
 
 
 \u000
@@ -198,7 +202,6 @@ If \e{Shift} is held down when the button is released at the end of the \e{Left+
 
 \rule
 
-
 \S{cmdText} Text
 
 \G{png.d/btext.png}
@@ -213,7 +216,7 @@ The font can be selected by the \f{Font Selection} (\K{fontSelW}) dialog invoked
 
 The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \e{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \e{Left-Click+Drag}ing the text to any desired postion on the layout.
 
-The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents of existing \f{Text} objects.
+The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents of existing \f{Text} objects and to draw boxes around them.
 
 Note: loading fonts (or changing sizes) can take a noticeable amount of time.
 

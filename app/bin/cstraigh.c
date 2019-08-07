@@ -41,6 +41,23 @@ static struct {
 		BOOL_T down;
 		} Dl;
 
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
+
+static void CreateEndAnchor(coOrd p, wBool_t lock) {
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+}
+
 
 static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 {
@@ -48,9 +65,10 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	DIST_T dist;
 	coOrd p;
 
-	switch (action) {
+	switch (action&0xFF) {
 
 	case C_START:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dl.pos0=pos;
 		Dl.pos1=pos;
 		Dl.trk = NULL;
@@ -60,6 +78,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		p = pos;
 		BOOL_T found = FALSE;
 		Dl.trk = NULL;
@@ -102,7 +121,24 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_MOVE:
-		if (!Dl.down) return C_CONTINUE;
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (!Dl.down) {
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT) {
+				p = pos;
+				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
+					if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
+					   EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+					   if (ep != -1) {
+							   CreateEndAnchor(GetTrkEndPos(t,ep),TRUE);
+					   }
+					}
+				}
+			}
+			if (anchors_da.cnt)
+				DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+			return C_CONTINUE;
+		}
 		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		ANGLE_T angle, angle2;
 		if (Dl.trk) {
@@ -123,6 +159,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_UP:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (!Dl.down) return C_CONTINUE;
 		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
@@ -147,8 +184,10 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		if (anchors_da.cnt)
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		if (Dl.down)
-					DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 	case C_CANCEL:
 		Dl.down = FALSE;
@@ -165,5 +204,5 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 
 void InitCmdStraight( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdStraight, "cmdStraight", _("Straight Track"), wIconCreatePixMap(straight_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_STRAIGHT, NULL );
+	AddMenuButton( menu, CmdStraight, "cmdStraight", _("Straight Track"), wIconCreatePixMap(straight_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_STRAIGHT, NULL );
 }

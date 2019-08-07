@@ -104,7 +104,8 @@ static struct {
 		DIST_T trackGauge;
 		} Da;
 
-
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
 /**
  * Draw a ControlArm.
@@ -964,6 +965,20 @@ DIST_T BezierMinRadius(coOrd pos[4],dynArr_t segs) {
 	return r;
 }
 
+static void CreateEndAnchor(coOrd p, wBool_t lock) {
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+}
+
 /*
  * Create a Bezier Curve (Track or Line)
  * Sequence is
@@ -1012,6 +1027,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 
 
 	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( Da.state == POS_1 || Da.state == POS_2) {   //Set the first or third point
 			coOrd p = pos;
 			BOOL_T found = FALSE;
@@ -1077,6 +1093,32 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		} else  {
 			return AdjustBezCurve( action&0xFF, pos, Da.track, Da.color, Da.width, InfoMessage );
 		}
+		return C_CONTINUE;
+
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if ( Da.state != POS_1 && Da.state != POS_2) return C_CONTINUE;
+		if (Da.track)  {
+			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
+				if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL) {
+					EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+					if (ep != -1) {
+						if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
+							pos = GetTrkEndPos(t, ep);
+							CreateEndAnchor(pos,TRUE);
+						}
+					}
+				}
+			}
+		} else {
+			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
+				if ((t = OnTrack(&pos,FALSE, FALSE)) != NULL) {
+					CreateEndAnchor(pos,TRUE);
+				}
+			}
+		}
+		if (anchors_da.cnt)
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 			
 	case C_MOVE:
@@ -1144,6 +1186,8 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		if ( Da.state != NONE ) {
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, Da.color);
 		}
+		if (anchors_da.cnt)
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_CANCEL:

@@ -1588,6 +1588,23 @@ DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * las
 	return r_max;
 }
 
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
+
+static void CreateEndAnchor(coOrd p, wBool_t lock) {
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+}
+
 /*
  * Create a Cornu Curve Track
  * Sequence is
@@ -1628,6 +1645,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		Da.midSegs.cnt = 0;
 		DYNARR_RESET(coOrd,Da.mid_points);
 		DYNARR_RESET(track_p,Da.tracks);
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		Da.extend[0] = FALSE;
 		Da.extend[1] = FALSE;
 		if (Da.cmdType == cornuCmdCreateTrack)
@@ -1641,7 +1659,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_DOWN:
-
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( Da.state == NONE || Da.state == LOC_2) {   //Set the first or second point
 			coOrd p = pos;
 			t = NULL;
@@ -1745,6 +1763,37 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			return AdjustCornuCurve( action&0xFF, pos, InfoMessage );
 		}
 		return C_CONTINUE;
+
+
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		EPINX_T ep = -1;
+		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT) {
+			//Lock to endpoint if one is available and under pointer
+			if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL) {
+				if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
+					if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
+						return C_CONTINUE;
+					}
+					ep = -1;                                            //Not a real ep yet
+				} else ep = PickUnconnectedEndPointSilent(pos, t);		//EP
+				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  		//Don't attach to Turntable
+				if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
+					return C_CONTINUE;
+				}
+				if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
+					return C_CONTINUE;
+				}
+			}
+		}
+		if (ep>=0) {
+			pos = GetTrkEndPos(t,ep);
+			CreateEndAnchor(pos,TRUE);
+		}
+		if (anchors_da.cnt)
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+
+		return C_CONTINUE;
 			
 	case C_MOVE:
 		if (Da.state == NONE) {    //First point not created
@@ -1830,6 +1879,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, NULL,
 					Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,(trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,Da.color);
 		}
+		if (anchors_da.cnt)
+					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_CANCEL:
