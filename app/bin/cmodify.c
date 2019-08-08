@@ -36,6 +36,7 @@
 #include "utility.h"
 #include "drawgeom.h"
 #include "common.h"
+#include "layout.h"
 
 static struct {
 		track_p Trk;
@@ -56,6 +57,21 @@ static int log_modify;
 static BOOL_T modifyBezierMode;
 static BOOL_T modifyCornuMode;
 static BOOL_T modifyDrawMode;
+
+
+static void CreateEndAnchor(coOrd p, wBool_t lock) {
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+}
 
 /*
  * Call cbezier.c CmdBezModify to alter Bezier Track and Lines.
@@ -327,11 +343,10 @@ static STATUS_T CmdModify(
 			track_p t;
 			if ((t=OnTrack(&pos,FALSE,TRUE))!= NULL) {
 				if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
-						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
-						if (ep != -1) {
-							pos = GetTrkEndPos(t, ep);
-							CreateEndAnchor(pos,TRUE);
-						}
+					EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+					if (ep != -1) {
+						pos = GetTrkEndPos(t, ep);
+						CreateEndAnchor(pos,TRUE);
 					}
 				}
 			}
