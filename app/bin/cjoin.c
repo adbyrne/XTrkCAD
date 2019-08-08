@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cjoin.c,v 1.4 2008-03-06 19:35:05 m_fischer Exp $
+ * $Header: /home/dave/Source/xtrkcad_5_1_2a/app/bin/RCS/cjoin.c,v 1.3 2019/07/24 15:11:51 dave Exp $
  *
  * JOINS
  *
@@ -302,11 +302,11 @@ static STATUS_T AdjustJoint(
 	switch ( Dj.inp[0].params.type ) {
 	case curveTypeCurve:
 		if (adjust) {
-			a0 = FindAngle( Dj.inp[0].params.arcP, Dj.jRes.pos[0] ) +
-					((Dj.jointD[0].Scurve==TRUE || Dj.jointD[0].flip==FALSE)?0:+180);
+			a0 = FindAngle( Dj.inp[0].params.arcP, Dj.jRes.pos[0] );
 			Translate( &pc, Dj.inp[0].params.arcP, a0, Dj.jointD[0].x );
-LOG( log_join, 2, (" Move P0 X%0.3f A%0.3f  P1 X%0.3f A%0.3f)\n",
-					Dj.jointD[0].x, a0, Dj.jointD[1].x, a1 ) )
+LOG( log_join, 2, (" Move P0 X%0.3f A%0.3f  P1 X%0.3f A%0.3f SC%d FL%d\n",
+					Dj.jointD[0].x, a0, Dj.jointD[1].x, a1,
+					Dj.jointD[0].Scurve, Dj.jointD[0].flip ) )
 		} else {
 			pc = Dj.inp[0].params.arcP;
 		}
