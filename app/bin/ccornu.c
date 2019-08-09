@@ -1687,14 +1687,14 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 					return C_CONTINUE;
 				}
 			}
-			if (ep>=0) {
+			if (ep>=0 && t) {				//Real end point, real track
 				Da.trk[end] = t;
 				Da.ep[end] = ep;           // Note: -1 for Turntable or Circle
 
 				pos = GetTrkEndPos(t,ep);
 				Da.pos[end] = pos;
 				InfoMessage( _("Place 2nd end point of Cornu track on track with an unconnected end-point") );
-			} else {      //end not on Track, OK for CreateCornu -> empty end point
+			} else if (t == NULL) {      //end not on Track, OK for CreateCornu -> empty end point
 				pos = p;	//Reset to initial
 				if (Da.cmdType == cornuCmdCreateTrack) {
 					Da.trk[end] = NULL;
@@ -1721,14 +1721,20 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				wBeep();
 				InfoMessage(_("No Unconnected Track End there"));  //Not creating a Cornu - Join can't be open
 				return C_CONTINUE;
-			}
+			}   //Either a real end or a track but no end
+
 			if (Da.state == NONE) {
+
 				if (!GetConnectedTrackParms(t, pos, 0, Da.ep[0],FALSE)) {  //Must get parms
 					Da.trk[0] = NULL;
 					Da.ep[0] = -1;
 					wBeep();
 					InfoMessage(_("No Valid Track End there"));
 					return C_CONTINUE;
+				}
+				if (ep<0) {
+						Da.trk[0] = t;
+						Da.pos[0] = pos;
 				}
 				Da.state = POS_1;
 				Da.selectEndPoint = 0;        //Select first end point
@@ -1747,6 +1753,10 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 					wBeep();
 					InfoMessage(_("No Valid Track End there"));
 					return C_CONTINUE;
+				}
+				if (ep<1) {
+					Da.trk[1] = t;
+					Da.pos[1] = pos;
 				}
 				CorrectHelixAngles();
 				Da.selectEndPoint = 1;			//Select second end point
