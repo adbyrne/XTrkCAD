@@ -417,7 +417,7 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 	ts[0] = GetTrkEndTrk(trk,0);
 	ts[1] = GetTrkEndTrk(trk,1);
 	SetUpCornuParmFromTracks(ts,&cp,xx);
-	CallCornu(xx->cornuData.pos, tracks, NULL, &xx->cornuData.arcSegs, &cp);
+	CallCornu0(xx->cornuData.pos, xx->cornuData.c, xx->cornuData.a, xx->cornuData.r, &xx->cornuData.arcSegs, FALSE);
 
 	//FixUpCornu(xx->bezierData.pos, xx, IsTrack(trk));
 	ComputeCornuBoundingBox(trk, xx);
