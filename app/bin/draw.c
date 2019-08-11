@@ -1343,13 +1343,13 @@ lprintf("mainRedraw\n");
 	back_y = (wPos_t)((back_pos.y-orig.y)/mainD.scale*mainD.dpi);
 	wPos_t back_width = (wPos_t)(GetLayoutBackGroundSize()/mainD.scale*mainD.dpi);
 
+	DrawRoomWalls( TRUE );
 	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
 		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
 	}
-
+	DrawRoomWalls( FALSE );
 	currRedraw++;
 	DrawSnapGrid( &tempD, mapD.size, TRUE );
-	DrawRoomWalls( TRUE );
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= RBORDER/mainD.dpi*mainD.scale;
@@ -1456,7 +1456,7 @@ EXPORT void DoRedraw( void )
  */
 
 
-static void DrawRoomWalls( wBool_t t )
+static void DrawRoomWalls( wBool_t drawBackground )
 {
 	coOrd p00, p01, p11, p10;
 	int p0,p1,p2,p3;
@@ -1464,7 +1464,7 @@ static void DrawRoomWalls( wBool_t t )
 	if (mainD.d == NULL)
 		return;
 
-	if (t) {
+	if (drawBackground) {
 		mainD.CoOrd2Pix(&mainD,mainD.orig,&p0,&p1);
 		coOrd end;
 		end.x = mainD.orig.x + mainD.size.x;
@@ -1479,19 +1479,21 @@ static void DrawRoomWalls( wBool_t t )
 		p2 -= p0;
 		p3 -= p1;
 		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorWhite, wDrawOptOpaque);
+
+	} else {
+
+		DrawTicks( &mainD, mapD.size );
+
+		p00.x = 0.0; p00.y = 0.0;
+		p01.x = p10.y = 0.0;
+		p11.x = p10.x = mapD.size.x;
+		p01.y = p11.y = mapD.size.y;
+
+		DrawLine( &mainD, p01, p11, 3, borderColor );
+		DrawLine( &mainD, p11, p10, 3, borderColor );
+		DrawLine( &mainD, p00, p01, 3, borderColor );
+		DrawLine( &mainD, p00, p10, 3, borderColor );
 	}
-
-	DrawTicks( &mainD, mapD.size );
-
-	p00.x = 0.0; p00.y = 0.0;
-	p01.x = p10.y = 0.0;
-	p11.x = p10.x = mapD.size.x;
-	p01.y = p11.y = mapD.size.y;
-
-	DrawLine( &mainD, p01, p11, 3, t?borderColor:wDrawColorWhite );
-	DrawLine( &mainD, p11, p10, 3, t?borderColor:wDrawColorWhite );
-	DrawLine( &mainD, p00, p01, 3, t?borderColor:wDrawColorWhite );
-	DrawLine( &mainD, p00, p10, 3, t?borderColor:wDrawColorWhite );
 }
 
 
