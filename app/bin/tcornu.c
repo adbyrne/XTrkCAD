@@ -365,18 +365,20 @@ static void UpdateCornu( track_p trk, int inx, descData_p descUpd, BOOL_T final 
 	case R0:
 		if (GetTrkEndTrk(trk,0)) break;
 		updateEndPts = TRUE;
-		xx->cornuData.r[0] = cornData.radius[0];
-		Translate(&xx->cornuData.c[0],xx->cornuData.pos[0],NormalizeAngle(xx->cornuData.a[0]+90),xx->cornuData.r[0]);
+		xx->cornuData.r[0] = fabs(cornData.radius[0]);
+		Translate(&xx->cornuData.c[0],xx->cornuData.pos[0],NormalizeAngle(xx->cornuData.a[0]+90),cornData.radius[0]);
 		cornData.center[0] = xx->cornuData.c[0];
+		cornData.radius[0] = fabs(cornData.radius[0]);
 		cornuDesc[R0].mode |= DESC_CHANGE;
 		cornuDesc[C0].mode |= DESC_CHANGE;
 		break;
 	case R1:
 		if (GetTrkEndTrk(trk,1)) break;
 		updateEndPts = TRUE;
-		xx->cornuData.r[1]= cornData.radius[1];
-		Translate(&xx->cornuData.c[1],xx->cornuData.pos[1],NormalizeAngle(xx->cornuData.a[1]-90),xx->cornuData.r[1]);
+		xx->cornuData.r[1]= fabs(cornData.radius[1]);
+		Translate(&xx->cornuData.c[1],xx->cornuData.pos[1],NormalizeAngle(xx->cornuData.a[1]-90),cornData.radius[1]);
 		cornData.center[1] = xx->cornuData.c[1];
+		cornData.radius[1] = fabs(cornData.radius[1]);
 		cornuDesc[R1].mode |= DESC_CHANGE;
 		cornuDesc[C1].mode |= DESC_CHANGE;
 		break;
