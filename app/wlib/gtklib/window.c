@@ -811,7 +811,7 @@ static gint window_char_event(
         return FALSE;
     }
 
-    if (event->state == 0) {
+    if ( ( event->state & GDK_MODIFIER_MASK ) == 0 ) {
         if (event->keyval == GDK_KEY_Escape) {
             for (bb=win->first; bb; bb=bb->next) {
                 if (bb->type == B_BUTTON && (bb->option&BB_CANCEL)) {
