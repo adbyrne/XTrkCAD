@@ -168,7 +168,8 @@ void ShowTip( long flags )
 		}
 		ParamLoadControls( &tipPG );
 		wTextClear( tipT );
-		wPrefGetInteger( "misc", "tip-number", &tipNum, 0 );
+		/*  initial value is -1 which gets incremented 0 below */
+		wPrefGetInteger( "misc", "tip-number", &tipNum, -1 );
 		
 		if( flags & SHOWTIP_PREVTIP ) {
 			if(tipNum == 0 )
