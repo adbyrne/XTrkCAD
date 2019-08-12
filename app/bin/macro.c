@@ -1093,13 +1093,15 @@ static int StartPlayback( int cnt, char **pathName, void * context )
 		return FALSE;
 	}
 
-	strcpy( paramFileName, pathName[0] );
+	paramFileName = strdup( pathName[0] );
 
 	PlaybackSetup();
 	curDemo = -1;
 	UndoSuspend();
 	wWinBlockEnable( FALSE );
 	Playback();
+	free( paramFileName );
+	paramFileName = NULL;
 
 	return TRUE;
 }
