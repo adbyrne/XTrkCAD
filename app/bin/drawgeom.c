@@ -1731,9 +1731,9 @@ STATUS_T DrawGeomModify(
 				} else {
 					tempSegs(0).type = SEG_POLY;
 					tempSegs(0).color = wDrawColorRed;
-					DYNARR_RESET( coOrd, points_da);
+					DYNARR_RESET( pts_t, points_da);
 					for (int inx=0;inx<context->segPtr->u.p.cnt;inx++) {
-						DYNARR_APPEND(coOrd, points_da,3);
+						DYNARR_APPEND(pts_t, points_da,3);
 						REORIGIN( points(inx).pt, context->segPtr[segInx].u.p.pts[inx].pt, context->angle, context->orig );
 					}
 					tempSegs(0).u.p.pts = &points(0);
@@ -1867,6 +1867,7 @@ STATUS_T DrawGeomModify(
 				corner_mode = TRUE;
 				start_pos = pos;
 				DYNARR_SET(trkSeg_t,anchors_da,5);
+				polyInx = inx_line;
 				DrawArrowHeads( &anchors(0), pos, FindAngle(points(polyInx).pt,points(inx_origin).pt), TRUE, wDrawColorRed );
 				InfoMessage( _("Drag to Move Corner Point"));
 			} else {
@@ -2061,7 +2062,7 @@ STATUS_T DrawGeomModify(
 			if (!corner_mode) {
 				/* Constrain movement to be perpendicular */
 				d = FindDistance(start_pos, pos);
-				line_angle = NormalizeAngle(FindAngle(points(inx_line).pt,points(polyInx).pt)-90);
+				line_angle = NormalizeAngle(FindAngle(points(inx_line).pt,points(inx_line==3?0:inx_line+1).pt));
 				a = FindAngle(pos,start_pos);
 				Translate( &pos, start_pos, line_angle, - d*cos(D2R(line_angle-a)));
 			}
