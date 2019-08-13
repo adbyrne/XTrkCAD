@@ -147,6 +147,8 @@ void DoGroup( void );
 void UpdateTitleMark( char *, SCALEINX_T );
 void DoUpdateTitles( void );
 BOOL_T RefreshCompound( track_p, BOOL_T );
+wIndex_t FindListItemByContext( wList_p, void *);
+
 
 /* cturnout.c */
 EPINX_T TurnoutPickEndPt( coOrd p, track_p );

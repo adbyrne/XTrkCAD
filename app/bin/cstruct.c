@@ -196,6 +196,7 @@ EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wList_p list, coO
 {
 	wIndex_t inx;
 	turnoutInfo_t * to, *to1=NULL;
+	structureInx = 0;
 	for ( inx = 0; inx < structureInfo_da.cnt; inx++ ) {
 		to = structureInfo(inx);
 		if ( IsParamValid(to->paramFileIndex) &&
@@ -204,6 +205,10 @@ EXPORT turnoutInfo_t * StructAdd( long mode, SCALEINX_T scale, wList_p list, coO
 			 to->segCnt != 0 ) {
 			if (to1 == NULL)
 				to1 = to;
+			if ( to == curStructure ) {
+				to1 = to;
+				structureInx = wListGetCount( list );
+			}
 			FormatCompoundTitle( mode, to->title );
 			if (message[0] != '\0') {
 				wListAddValue( list, message, NULL, to );
@@ -404,13 +409,14 @@ static void structureChange( long changes )
 		  (changes&CHANGE_PARAMS) == 0 ) )
 		return;
 	lastScaleName = curScaleName;
-	curStructure = NULL;
+	//curStructure = NULL;
 	wControlShow( (wControl_p)structureListL, FALSE );
 	wListClear( structureListL );
 	maxStructureDim.x = maxStructureDim.y = 0.0;
 	if (structureInfo_da.cnt <= 0)
 		return;
 	curStructure = StructAdd( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, GetLayoutCurScale(), structureListL, &maxStructureDim );
+	wListSetIndex( structureListL, structureInx );
 	wControlShow( (wControl_p)structureListL, TRUE );
 	if (curStructure == NULL) {
 		wDrawClear( structureD.d );
@@ -878,13 +884,16 @@ static STATUS_T CmdStructureHotBar(
 	switch (action & 0xFF) {
 
 	case C_START:
-		structureChange( CHANGE_PARAMS );
+		//structureChange( CHANGE_PARAMS );
 		if (curStructure == NULL) {
 			NoticeMessage( MSG_STRUCT_NO_STRUCTS, _("Ok"), NULL );
 			return C_TERMINATE;
 		}
 		FormatCompoundTitle( listLabels|LABEL_DESCR, curStructure->title );
 		InfoMessage( _("Place %s and draw into position"), message );
+		wIndex_t listIndex = FindListItemByContext( structureListL, curStructure );
+		if ( listIndex > 0 )
+			structureInx = listIndex;
 		ParamLoadControls( &structurePG );
 		ParamGroupRecord( &structurePG );
 		return CmdStructureAction( action, pos );
