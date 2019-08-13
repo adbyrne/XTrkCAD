@@ -535,7 +535,7 @@ void wDrawSetSize(		wDraw_p, wPos_t, wPos_t, void * );
 void wDrawGetSize(		wDraw_p, wPos_t *, wPos_t * );
 
 /* Bitmaps */
-wDrawBitMap_p wDrawBitMapCreate( wDraw_p, int, int, int, int, const char * );
+wDrawBitMap_p wDrawBitMapCreate( wDraw_p, int, int, int, int, const unsigned char * );
 void wDrawBitMap(		wDraw_p, wDrawBitMap_p, wPos_t, wPos_t,
 				wDrawColor, wDrawOpts );
 

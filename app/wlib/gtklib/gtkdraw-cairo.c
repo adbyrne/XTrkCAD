@@ -46,7 +46,7 @@ struct wDrawBitMap_t {
 		int h;
 		int x;
 		int y;
-		const char * bits;
+		const unsigned char * bits;
 		GdkPixmap * pixmap;
 		GdkBitmap * mask;
 		};
@@ -634,7 +634,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		int h,
 		int x,
 		int y,
-		const char * fbits )
+		const unsigned char * fbits )
 {
 	wDrawBitMap_p bm;
 

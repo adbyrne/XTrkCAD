@@ -1355,7 +1355,7 @@ wDrawBitMap_p wDrawBitMapCreate(
 		int h,
 		int x,
 		int y,
-		const char * bits )
+		const unsigned char * bits )
 {
 	wDrawBitMap_p bm;
 	int bmSize = ((w+7)/8) * h;
