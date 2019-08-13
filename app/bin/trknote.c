@@ -260,7 +260,7 @@ static void
 ReadTrackNote(char *line)
 {
     track_p t;
-    size_t size;
+    int size;
     char * cp;
     struct extraDataNote *xx;
     wIndex_t index;
@@ -277,7 +277,8 @@ ReadTrackNote(char *line)
     t = NewNote(index, pos, size + 2);
     SetTrkLayer(t, layer);
 
-    cp = ReadMultilineText(size);
+    size_t long_size = size;   //size is an integer, size_t is bigger.
+    cp = ReadMultilineText(long_size);
 
     xx = (struct extraDataNote *)GetTrkExtraData(t);
     strcpy(xx->text, cp);

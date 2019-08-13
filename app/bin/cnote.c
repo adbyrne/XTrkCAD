@@ -104,10 +104,10 @@ ReadMultilineText(size_t textLength)
 		line = GetNextLine();
 	}
 	charsRead = DynStringSize(&noteText);
-	if (charsRead != textLength) {
-		InputError("Expected note length: %d read: %d",
-			TRUE, textLength, charsRead);
-		exit(1);
+	if (charsRead > textLength+1) {				// Cope with trailing '/n' and only care if larger
+		if (!(InputError("Expected note length: %d read: %d",
+			TRUE, textLength, charsRead)))		//If TRUE, carry on
+			exit(1);
 	}
 	string = MyStrdup(DynStringToCStr(&noteText));
 	string[strlen(string) - 1] = '\0';
