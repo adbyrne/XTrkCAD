@@ -1154,7 +1154,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		wMenuPushEnable( drawModEmpty, FALSE);
 		wMenuPushEnable( drawModClose, FALSE);
 		wMenuPushEnable( drawModOpen, FALSE);
-		if (!drawModCmdContext.rotate_state) {
+		if (!drawModCmdContext.rotate_state && (drawModCmdContext.type == SEG_POLY || drawModCmdContext.type == SEG_FILPOLY)) {
 			wMenuPushEnable( drawModDel,drawModCmdContext.prev_inx>=0);
 			if ((!drawModCmdContext.open && drawModCmdContext.prev_inx>=0) ||
 					((drawModCmdContext.prev_inx>0) && (drawModCmdContext.prev_inx<drawModCmdContext.max_inx))) {

@@ -2215,8 +2215,8 @@ static STATUS_T CmdConvertTo(
 					DYNARR_APPEND(track_p,Da.tracks,1);
 					DYNARR_LAST(track_p,Da.tracks) = prior;
 					DYNARR_APPEND(coOrd,Da.mid_points,1);
-					for (int i=0;i<Da.mid_points.cnt-1;i++) {
-						DYNARR_N(coOrd,Da.mid_points,i+1) = DYNARR_N(coOrd,Da.mid_points,i);
+					for (int i=Da.mid_points.cnt-1;i>1;i--) {
+						DYNARR_N(coOrd,Da.mid_points,i) = DYNARR_N(coOrd,Da.mid_points,i-1);
 					}
 					DYNARR_N(coOrd,Da.mid_points,0) = GetTrkEndPos(prior,1-ep0);
 					Da.trk[0] = GetTrkEndTrk( prior, ep0 );
