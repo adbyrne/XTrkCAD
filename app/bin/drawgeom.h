@@ -86,6 +86,7 @@ typedef struct {
 				double height;
 				double width;
 				int prev_inx;
+				int max_inx;
 				track_p trk;
 				char type;
 				coOrd orig;

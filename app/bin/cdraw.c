@@ -39,12 +39,14 @@ extern TRKTYP_T T_BZRLIN;
 
 static wMenu_p drawModDelMI;
 static wMenuPush_p drawModDel;
-static wMenuPush_p drawModCurved;
-static wMenuPush_p drawModStraight;
+static wMenuPush_p drawModSmooth;
+static wMenuPush_p drawModVertex;
 static wMenuPush_p drawModRound;
-static wMenuPush_p drawModCenterMode;
+static wMenuPush_p drawModriginMode;
 static wMenuPush_p drawModPointsMode;
-static wMenuPush_p drawModSet[3];
+static wMenuPush_p drawModOrigin;
+static wMenuPush_p drawModLast;
+static wMenuPush_p drawModCenter;
 static wMenuPush_p drawModClose;
 static wMenuPush_p drawModOpen;
 static wMenuPush_p drawModFill;
@@ -1143,37 +1145,31 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 	case C_CMDMENU:
 		wMenuPopupShow( drawModDelMI );
 		wMenuPushEnable( drawModPointsMode,drawModCmdContext.rotate_state);
-		wMenuPushEnable( drawModCenterMode,!drawModCmdContext.rotate_state);
-		if ((drawModCmdContext.type != SEG_POLY) && (drawModCmdContext.type != SEG_FILPOLY)) {
-			wMenuPushEnable( drawModRound, FALSE);
-			wMenuPushEnable( drawModStraight, FALSE);
-			wMenuPushEnable( drawModCurved, FALSE);
-			wMenuPushEnable( drawModDel, FALSE);
-			wMenuPushEnable( drawModFill, FALSE);
-			wMenuPushEnable( drawModEmpty, FALSE);
-			wMenuPushEnable( drawModClose, FALSE);
-			wMenuPushEnable( drawModOpen, FALSE);
-		} else {
-			wMenuPushEnable( drawModDel,(!drawModCmdContext.rotate_state & (drawModCmdContext.prev_inx>=0)));
-			if (!drawModCmdContext.rotate_state && (drawModCmdContext.prev_inx>=0)) {
-				if (((drawModCmdContext.prev_inx>1) && (drawModCmdContext.prev_inx<drawModCmdContext.segCnt-1)) ||
-					!drawModCmdContext.open) {
-					wMenuPushEnable( drawModRound,TRUE);
-					wMenuPushEnable( drawModStraight, TRUE);
-					wMenuPushEnable( drawModCurved, TRUE);
-				}
+		wMenuPushEnable( drawModriginMode,!drawModCmdContext.rotate_state);
+		wMenuPushEnable( drawModRound, FALSE);
+		wMenuPushEnable( drawModVertex, FALSE);
+		wMenuPushEnable( drawModSmooth, FALSE);
+		wMenuPushEnable( drawModDel, FALSE);
+		wMenuPushEnable( drawModFill, FALSE);
+		wMenuPushEnable( drawModEmpty, FALSE);
+		wMenuPushEnable( drawModClose, FALSE);
+		wMenuPushEnable( drawModOpen, FALSE);
+		if (!drawModCmdContext.rotate_state) {
+			wMenuPushEnable( drawModDel,drawModCmdContext.prev_inx>=0);
+			if ((!drawModCmdContext.open && drawModCmdContext.prev_inx>=0) ||
+					((drawModCmdContext.prev_inx>0) && (drawModCmdContext.prev_inx<drawModCmdContext.max_inx))) {
+				wMenuPushEnable( drawModRound,TRUE);
+				wMenuPushEnable( drawModVertex, TRUE);
+				wMenuPushEnable( drawModSmooth, TRUE);
 			}
-			if (drawModCmdContext.prev_inx==-1) {
-				wMenuPushEnable( drawModFill,!drawModCmdContext.rotate_state && !drawModCmdContext.open && !drawModCmdContext.filled);
-				wMenuPushEnable( drawModEmpty,!drawModCmdContext.rotate_state && !drawModCmdContext.open && drawModCmdContext.filled);
-				wMenuPushEnable( drawModClose,!drawModCmdContext.rotate_state && drawModCmdContext.open && !drawModCmdContext.filled);
-				wMenuPushEnable( drawModOpen,!drawModCmdContext.rotate_state && !drawModCmdContext.open && !drawModCmdContext.filled);
-			}
+			wMenuPushEnable( drawModFill, (!drawModCmdContext.open) && (!drawModCmdContext.filled));
+			wMenuPushEnable( drawModEmpty, (!drawModCmdContext.open) && (drawModCmdContext.filled));
+			wMenuPushEnable( drawModClose, drawModCmdContext.open);
+			wMenuPushEnable( drawModOpen, !drawModCmdContext.open);
 		}
-		for (int i=0;i<2;i++) {
-			wMenuPushEnable( drawModSet[i],drawModCmdContext.rotate_state);
-		}
-		wMenuPushEnable( drawModSet[2],drawModCmdContext.rotate_state & (drawModCmdContext.prev_inx>=0));
+		wMenuPushEnable( drawModOrigin,drawModCmdContext.rotate_state);
+		wMenuPushEnable( drawModLast,drawModCmdContext.rotate_state && (drawModCmdContext.prev_inx>=0));
+		wMenuPushEnable( drawModCenter,drawModCmdContext.rotate_state);
 		break;
 	case C_TEXT:
 		ignoredDraw = trk ;
@@ -2107,13 +2103,13 @@ EXPORT void InitTrkDraw( void )
 	wMenuSeparatorCreate( drawModDelMI );
 	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode - 'p'"), 0, (wMenuCallBack_p)MenuMode, (void*) 0 );
 	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point - 'Del'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 127 );
-	drawModStraight = wMenuPushCreate( drawModDelMI, "", _("Straight Point - 's'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 's' );
+	drawModVertex = wMenuPushCreate( drawModDelMI, "", _("Vertex Point - 'v'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'v' );
 	drawModRound =  wMenuPushCreate( drawModDelMI, "", _("Round Corner - 'r'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'r' );
-	drawModCurved =  wMenuPushCreate( drawModDelMI, "", _("Curved Corner - 'c'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c' );
+	drawModSmooth =  wMenuPushCreate( drawModDelMI, "", _("Smooth Corner - 's'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 's' );
 	wMenuSeparatorCreate( drawModDelMI );
-	drawModCenterMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, (wMenuCallBack_p)MenuMode, (void*) 1 );
-	drawModSet[0] = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );
-	drawModSet[1] = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l' );
-	drawModSet[2] = wMenuPushCreate( drawModDelMI, "", _("Origin to Centroid - 'c'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c');
+	drawModriginMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, (wMenuCallBack_p)MenuMode, (void*) 1 );
+	drawModOrigin = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );
+	drawModLast = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l' );
+	drawModCenter = wMenuPushCreate( drawModDelMI, "", _("Origin to Centroid - 'c'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c');
 
 }

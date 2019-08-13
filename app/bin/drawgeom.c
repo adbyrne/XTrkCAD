@@ -1042,6 +1042,7 @@ STATUS_T DrawGeomPolyModify(
 	static double currentAngle;
 	static double baseAngle;
 	static BOOL_T lock;
+
 	switch ( action&0xFF ) {
 		case C_START:
 			lock = FALSE;
@@ -1063,6 +1064,7 @@ STATUS_T DrawGeomPolyModify(
 				points(inx).pt_type = context->segPtr[segInx].u.p.pts[inx].pt_type;
 				point_selected(inx) = FALSE;
 			}
+			context->max_inx = points_da.cnt-1;
 			selected_count=0;
 			rotate_origin = context->orig;
 			rotate_angle = context->angle;
@@ -1140,6 +1142,7 @@ STATUS_T DrawGeomPolyModify(
 				}
 				points(polyInx).pt_type = 0;
 				tempSegs(0).u.p.cnt = points_da.cnt;
+				context->max_inx = points_da.cnt-1;
 			}
 			pos = points(polyInx).pt;  		//Move to point
 			if (point_selected(polyInx)) {					//Already selected
@@ -1147,7 +1150,6 @@ STATUS_T DrawGeomPolyModify(
 				point_selected(polyInx) = TRUE;
 				++selected_count;
 			}
-			points(polyInx).pt = pos;
 			//Work out before and after point
 			int first_inx = -1;
 			if (selected_count >0 && selected_count < points_da.cnt-2) {
@@ -1366,12 +1368,13 @@ STATUS_T DrawGeomPolyModify(
 				MainRedraw();
 				return C_CONTINUE;
 			}
-			if (prev_inx>=0 && ((action>>8 == 'c') || (action>>8 == 's')|| (action>>8 == 'r'))  ) {
+			if (((prev_inx>=0 && tempSegs(0).u.p.polyType != POLYLINE) || (prev_inx>=1 && prev_inx<=points_da.cnt-2)) &&
+					((action>>8 == 's') || (action>>8 == 'v') || (action>>8 == 'r')))  {
 				switch(action>>8) {
-				case 'c':
+				case 's':
 					points(context->prev_inx).pt_type = 1;
 					break;
-				case 's':
+				case 'v':
 					points(context->prev_inx).pt_type = 0;
 					break;
 				case 'r':
@@ -1383,28 +1386,28 @@ STATUS_T DrawGeomPolyModify(
 				MainRedraw();
 				return C_CONTINUE;
 			}
-			if (action>>8 == 'c' && prev_inx<0 && tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.polyType == POLYLINE ) {
+			if ((action>>8 == 'c') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType == POLYLINE) ) {
 				tempSegs(0).u.p.polyType = FREEFORM;
 				context->subtype=FREEFORM;
 				context->open = FALSE;
 				MainRedraw();
 				return C_CONTINUE;
 			}
-			if (action>>8 == 'l' && prev_inx<0 && tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.polyType == FREEFORM) {
+			if ((action>>8 == 'l') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType == FREEFORM)) {
 				tempSegs(0).u.p.polyType = POLYLINE;
 				context->subtype=POLYLINE;
 				context->open = TRUE;
 				MainRedraw();
 				return C_CONTINUE;
 			}
-			if (action>>8 == 'f' && tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.polyType != POLYLINE ) {
+			if ((action>>8 == 'f') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType != POLYLINE )) {
 				tempSegs(0).type = SEG_FILPOLY;
 				context->type =  SEG_FILPOLY;
 				context->filled = TRUE;
 				MainRedraw();
 				return C_CONTINUE;
 			}
-			if (action>>8 == 'e' && tempSegs(0).type == SEG_FILPOLY ) {
+			if ((action>>8 == 'e') && (tempSegs(0).type == SEG_FILPOLY) ) {
 				tempSegs(0).type = SEG_POLY;
 				context->type =  SEG_POLY;
 				context->filled = FALSE;
@@ -1431,6 +1434,7 @@ STATUS_T DrawGeomPolyModify(
 					select_da.cnt--;
 					selected_count=0;
 					tempSegs(0).u.p.cnt = points_da.cnt;
+					context->max_inx = points_da.cnt-1;
 				}
 				prev_inx = -1;
 				context->prev_inx = -1;
