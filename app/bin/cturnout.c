@@ -366,6 +366,7 @@ EXPORT turnoutInfo_t * TurnoutAdd( long mode, SCALEINX_T scale, wList_p list, co
 {
 	wIndex_t inx;
 	turnoutInfo_t * to, * to1 = NULL;
+	turnoutInx = 0;
 	for ( inx = 0; inx < turnoutInfo_da.cnt; inx++ ) {
 		to = turnoutInfo(inx);
 		if ( IsParamValid(to->paramFileIndex) &&
@@ -375,6 +376,10 @@ EXPORT turnoutInfo_t * TurnoutAdd( long mode, SCALEINX_T scale, wList_p list, co
 			 ( epCnt <= 0 || epCnt == to->endCnt ) ) {
 			if (to1==NULL)
 				to1 = to;
+			if ( to == curTurnout ) {
+				to1 = to;
+				turnoutInx = wListGetCount( list );
+			}
 			FormatCompoundTitle( mode, to->title );
 			if (message[0] != '\0') {
 				wListAddValue( list, message, NULL, to );
@@ -1915,7 +1920,7 @@ static void TurnoutChange( long changes )
 		  (changes&CHANGE_PARAMS) == 0 ) )
 		return;
 	lastScaleName = curScaleName;
-	curTurnout = NULL;
+	//curTurnout = NULL;
 	curTurnoutEp = 0;
 	wControlShow( (wControl_p)turnoutListL, FALSE );
 	wListClear( turnoutListL );
@@ -1923,7 +1928,7 @@ static void TurnoutChange( long changes )
 	if (turnoutInfo_da.cnt <= 0)
 		return;
 	curTurnout = TurnoutAdd( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, GetLayoutCurScale(), turnoutListL, &maxTurnoutDim, -1 );
-	wListSetIndex( turnoutListL, 0 );
+	wListSetIndex( turnoutListL, turnoutInx );
 	wControlShow( (wControl_p)turnoutListL, TRUE );
 	if (curTurnout == NULL) {
 		wDrawClear( turnoutD.d );
@@ -2894,13 +2899,18 @@ static STATUS_T CmdTurnoutHotBar(
 	switch (action & 0xFF) {
 
 	case C_START:
-		TurnoutChange( CHANGE_PARAMS|CHANGE_SCALE );
+		//TurnoutChange( CHANGE_PARAMS|CHANGE_SCALE );
 		if (curTurnout == NULL) {
 			NoticeMessage2( 0, MSG_TURNOUT_NO_TURNOUT, _("Ok"), NULL );
 			return C_TERMINATE;
 		}
 		FormatCompoundTitle( listLabels|LABEL_DESCR, curTurnout->title );
 		InfoMessage( _("Place %s and draw into position"), message );
+        wIndex_t listIndex = FindListItemByContext( turnoutListL, curTurnout );
+        if ( listIndex > 0 )
+                turnoutInx = listIndex;
+        ParamLoadControls( &turnoutPG );
+        ParamGroupRecord( &turnoutPG );
 		return CmdTurnoutAction( action, pos );
 
 	case wActionMove:

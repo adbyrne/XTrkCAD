@@ -595,3 +595,30 @@ EXPORT void CompoundCustMgmLoad( void )
 		}
 	}
 }
+
+/*****************************************************************************
+ *
+ * Utitlies
+ *
+ */
+
+wIndex_t FindListItemByContext(
+	wList_p listP,
+	void * context )
+{
+	if ( listP == NULL )
+		return -1;
+	if ( context == NULL )
+		return -1;
+	for ( wIndex_t inx = 0; inx < wListGetCount( listP ); ++inx ) {
+		void * itemContext = wListGetItemContext( listP, inx );
+		if ( itemContext != NULL ) {
+			if ( itemContext == context ) {
+				return inx;
+			}
+		}
+	}
+	return -1;
+}
+
+
