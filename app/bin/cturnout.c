@@ -1555,13 +1555,14 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		struct extraData * xx = GetTrkExtraData(trk);
 		/* Get parms from that seg */
 		wBool_t back,negative;
-		Rotate(&pos,xx->orig,-xx->angle);
-		pos.x -= xx->orig.x;
-		pos.y -= xx->orig.y;
+		coOrd segPos;
+		Rotate(&segPos,xx->orig,-xx->angle);
+		segPos.x -= xx->orig.x;
+		segPos.y -= xx->orig.y;
 
 		params->track_angle = GetAngleSegs(		  		//Find correct subSegment
 							xx->segCnt,xx->segs,
-							&pos, &segInx, &d , &back, &subSegInx, &negative );
+							&segPos, &segInx, &d , &back, &subSegInx, &negative );
 		segPtr = xx->segs+segInx;
 		switch (segPtr->type) {
 			case SEG_BEZTRK:
@@ -1654,7 +1655,6 @@ static BOOL_T QueryTurnout( track_p trk, int query )
 	case Q_NOT_PLACE_FROGPOINTS:
 	case Q_HAS_DESC:
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
-	case Q_CAN_EXTEND:
 		return TRUE;
 	case Q_MODIFY_CAN_SPLIT:
 		if (GetTrkEndPtCnt(trk) <= 2) {	// allow splitting of simple track und buffers

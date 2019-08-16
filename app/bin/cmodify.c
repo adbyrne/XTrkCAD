@@ -304,11 +304,11 @@ static STATUS_T CmdModify(
 			return C_CONTINUE;
 		}
 
-		if ( (MyGetKeyState()&WKEY_SHIFT) &&
+		if ( (MyGetKeyState()&WKEY_SHIFT) &&   //That's odd - means actually alter - perhaps CTRL could be used instead
 			 QueryTrack( Dex.Trk, Q_CAN_MODIFYRADIUS )&&
 			 (inx=PickUnconnectedEndPoint(pos,Dex.Trk)) >= 0 ) {
 			trk = Dex.Trk;
-			while ( (trk1=GetTrkEndTrk(trk,1-inx)) &&
+			while ( (trk1=GetTrkEndTrk(trk,1-inx)) &&        //Means next track to mine even if can be end...
 					QueryTrack(trk1, Q_CANNOT_BE_ON_END) ) {
 				inx = GetEndPtConnectedToMe( trk1, trk );
 				trk = trk1;
@@ -317,7 +317,7 @@ static STATUS_T CmdModify(
 				UndoStart( _("Change Track"), "Change( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 				inx = GetEndPtConnectedToMe( trk1, trk );
                 Dex.Trk = NULL;
-                DeleteTrack(trk, TRUE);
+                DeleteTrack(trk, TRUE);					//Get rid of original track
 				if ( !GetTrkEndTrk( trk1, inx ) ) {
 					Dex.Trk = trk1;
 					Dex.pos00 = GetTrkEndPos( Dex.Trk, inx );
@@ -327,7 +327,7 @@ static STATUS_T CmdModify(
 			}
 			ErrorMessage( MSG_CANNOT_CHANGE );
 		}
-		ModifyTrack(Dex.Trk, C_START, pos);
+		ModifyTrack(Dex.Trk, C_START, pos);         //Basically trim via Modify...
 		rc = ModifyTrack( Dex.Trk, C_DOWN, pos );
 		if ( rc != C_CONTINUE ) {
 			Dex.Trk = NULL;
@@ -344,11 +344,14 @@ static STATUS_T CmdModify(
 			track_p t;
 			if ((t=OnTrack(&pos,FALSE,TRUE))!= NULL) {
 				if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
-					EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
-					if (ep != -1) {
-						pos = GetTrkEndPos(t, ep);
+					if (!QueryTrack(t,Q_CAN_EXTEND)) {
+						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+						if (ep != -1) {
+							pos = GetTrkEndPos(t, ep);
+							CreateEndAnchor(pos,TRUE);
+						}
+					} else
 						CreateEndAnchor(pos,TRUE);
-					}
 				}
 			}
 		}
@@ -407,7 +410,7 @@ static STATUS_T CmdModify(
         MapRedraw();
 		return rc;
 
-	case C_RDOWN:
+	case C_RDOWN:									//This is same as context menu....
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		changeTrackMode = TRUE;
 		modifyRulerMode = FALSE;
