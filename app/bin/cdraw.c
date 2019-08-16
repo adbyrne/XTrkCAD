@@ -959,13 +959,15 @@ static paramIntegerRange_t i0_100 = { 0, 100, 25 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r0_10000 = { 0, 10000 };
 static paramFloatRange_t r10000_10000 = {-10000, 10000};
+static paramFloatRange_t r360_360 = { -360, 360, 80 };
 static paramFloatRange_t r0_360 = { 0, 360, 80 };
 static paramData_t drawModPLs[] = {
 
 #define drawModLengthPD			(drawModPLs[0])
 	{ PD_FLOAT, &drawModCmdContext.length, "Length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
 #define drawModRelAnglePD			(drawModPLs[1])
-	{ PD_FLOAT, &drawModCmdContext.rel_angle, "Rel Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Relative Angle") },
+#define drawModRelAngle           1
+	{ PD_FLOAT, &drawModCmdContext.rel_angle, "Rel Angle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Relative Angle") },
 #define drawModWidthPD		(drawModPLs[2])
 	{ PD_FLOAT, &drawModCmdContext.width, "Width", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Width") },
 #define drawModHeightPD		(drawModPLs[3])
@@ -974,7 +976,7 @@ static paramData_t drawModPLs[] = {
 #define drawModRadius           4
 	{ PD_FLOAT, &drawModCmdContext.radius, "Radius", PDO_NORECORD|BO_ENTER, &r10000_10000, N_("Radius") },
 #define drawModArcAnglePD		(drawModPLs[5])
-	{ PD_FLOAT, &drawModCmdContext.arc_angle, "ArcAngle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Arc Angle") },
+	{ PD_FLOAT, &drawModCmdContext.arc_angle, "ArcAngle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Arc Angle") },
 #define drawModRotAnglePD		(drawModPLs[6])
 	{ PD_FLOAT, &drawModCmdContext.rot_angle, "Rot Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Rotate Angle") },
 #define drawModRotCenterXPD		(drawModPLs[7])
@@ -982,6 +984,7 @@ static paramData_t drawModPLs[] = {
 	{ PD_FLOAT, &drawModCmdContext.rot_center.x, "Rot Center X,Y", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center X") },
 #define drawModRotCenterYPD		(drawModPLs[8])
 	{ PD_FLOAT, &drawModCmdContext.rot_center.y, " ", PDO_NORECORD|BO_ENTER, &r0_10000, N_("Rot Center Y") },
+
 };
 static paramGroup_t drawModPG = { "drawMod", 0, drawModPLs, sizeof drawModPLs/sizeof drawModPLs[0] };
 
@@ -991,8 +994,9 @@ static void DrawModDlgUpdate(
 		void * valueP )
 {
 	 DrawGeomModify(C_UPDATE,zero,&drawModCmdContext);
-	 ParamLoadControl(&drawModPG,drawModRotCenterInx-1);	  //Make sure the angle is updated in case center moved
-	 ParamLoadControl(&drawModPG,drawModRadius);			 // Make sure Radius updated
+	 ParamLoadControl(&drawModPG,drawModRotCenterInx-1);	  	//Make sure the angle is updated in case center moved
+	 ParamLoadControl(&drawModPG,drawModRadius);			 	// Make sure Radius updated
+	 ParamLoadControl(&drawModPG,drawModRelAngle);				//Relative Angle as well
 }
 
 static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
@@ -1509,7 +1513,8 @@ static paramData_t drawPLs[] = {
 #define drawWidthPD				(drawPLs[7])
 	{ PD_FLOAT, &drawCmdContext.width, "BoxWidth", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Box Width") },
 #define drawAnglePD				(drawPLs[8])
-	{ PD_FLOAT, &drawCmdContext.angle, "Angle", PDO_NORECORD|BO_ENTER, &r0_360, N_("Angle") },
+#define drawAngleInx					8
+	{ PD_FLOAT, &drawCmdContext.angle, "Angle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Angle") },
 #define drawRadiusPD            (drawPLs[9])
 	{ PD_FLOAT, &drawCmdContext.radius, "Radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") }
 };
@@ -1737,7 +1742,12 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				controls[1] = drawAnglePD.control;
 				controls[2] = NULL;
 				labels[0] = N_("Seg Length");
-				labels[1] = N_("Rel Angle");
+				if (drawCmdContext.Op == OP_LINE || drawCmdContext.Op  == OP_BENCH || drawCmdContext.Op == OP_TBLEDGE)
+					labels[1] = N_("Angle");
+				else if (drawCmdContext.index > 0 )
+					labels[1] = N_("Rel Angle");
+				else
+					labels[1] = N_("Angle");
 				ParamLoadControls( &drawPG );
 				InfoSubstituteControls( controls, labels );
 				drawLengthPD.option &= ~PDO_NORECORD;
@@ -1935,6 +1945,7 @@ static void DrawDlgUpdate(
 			coOrd pos = zero;
 			DrawGeomMouse(C_UPDATE,pos,&drawCmdContext);
 		}
+		ParamLoadControl(&drawPG,drawAngleInx);				//Force Angle change out
 		//if (pg->paramPtr[inx].enter_pressed) {
 		//	coOrd pos = zero;
 		//	DrawGeomMouse((0x0D<<8)|(C_TEXT&0xFF),pos,&drawCmdContext);

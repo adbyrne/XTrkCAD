@@ -211,6 +211,7 @@ STATUS_T DrawGeomMouse(
 			Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,context->length);
 			lastPos = pos1 = tempSegs(0).u.l.pos[1];
 			tempSegs_da.cnt = 1;
+			context->angle = NormalizeAngle(context->angle);
 		break;
 		case OP_BOX:
 		case OP_FILLBOX:
@@ -237,6 +238,8 @@ STATUS_T DrawGeomMouse(
 				Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,context->length);
 			}
 			pos1 = lastPos = tempSegs(segCnt-1).u.l.pos[1];
+			context->angle = fabs(context->angle);
+			if (context->angle >180) context->angle = context->angle - 180.0;
 		break;
 		default:
 		break;
@@ -258,7 +261,7 @@ STATUS_T DrawGeomMouse(
 
 	case wActionMove:
 		DYNARR_RESET( trkSeg_t, anchors_da );
-		if (context->State == 0) {
+		if (context->State == 0 || context->State ==2 ) {
 			switch (context->Op) {  	//Snap pos to nearest line if this is end and just shift is depressed for lines and some curves
 				case OP_CURVE2:
 				case OP_CURVE4:
@@ -1082,6 +1085,7 @@ STATUS_T DrawGeomPolyModify(
 			tempSegs(0).u.p.polyType = context->segPtr[segInx].u.p.polyType;
 			tempSegs(0).u.p.pts = &points(0);
 			CreatePolyAnchors( -1);
+			InfoMessage(_("Select Points, or use Context Menu"));
 			//MainRedraw();
 			return C_CONTINUE;
 		case C_DOWN:
@@ -1090,13 +1094,21 @@ STATUS_T DrawGeomPolyModify(
 			coOrd p0;
 			double dd;
 			int inx;
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT ) {
-				//Wipe out selection(s)
-				for (int i=0;i<points_da.cnt;i++) {
-					point_selected(i) = FALSE;
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT) {
+				if (selected_count <2 ) {
+					//Wipe out selection(s) if we don't have multiple already (i,e. move with >1 selected)
+					for (int i=0;i<points_da.cnt;i++) {
+						point_selected(i) = FALSE;
+					}
+					selected_count = 0;
+				} else {
+					for (int i=0;i<points_da.cnt;i++) {
+						if (IsClose(FindDistance(pos,points(i).pt)) && point_selected(i)==TRUE) {
+							point_selected(i) = FALSE;
+							selected_count--;
+						}
+					}
 				}
-				selected_count = 0;
-
 			}
 			//Select Point (polyInx)
 			for ( int inx=0; inx<points_da.cnt; inx++ ) {
@@ -1107,17 +1119,15 @@ STATUS_T DrawGeomPolyModify(
 					polyInx = inx;
 				}
 			}
-			if (!IsClose(d)) {
-				//Not on object - deselect all
+			if (!IsClose(d)) {	//Not on/near object - de-select all points
 				for (int i=0;i<points_da.cnt;i++) {
 					point_selected(i) = FALSE;
 				}
 				polyInx = -1;
 				selected_count = 0;
-				//TODO move to another modifyable object if the click is on that
 				CreatePolyAnchors( -1);
 				MainRedraw();
-				return C_CONTINUE; //Not close to line
+				return C_CONTINUE; //Not close to any line
 			}
 			polyState = POLYPOINT_SELECTED;
 			inx = polyInx==0?points_da.cnt-1:polyInx-1;
@@ -1129,20 +1139,35 @@ STATUS_T DrawGeomPolyModify(
 			} else if ( d > 0.75*dd ) {
 				;
 			} else {
-				DYNARR_APPEND(wBool_t,select_da,1);
-				for (int i=0;i<select_da.cnt;i++) {
-					if (i == polyInx) point_selected(i) = TRUE;
-					else point_selected(i) = FALSE;
+				if (selected_count == 0) {					//Only add a new point if no points are already selected!
+					DYNARR_APPEND(wBool_t,select_da,1);
+					for (int i=0;i<select_da.cnt;i++) {
+						if (i == polyInx) point_selected(i) = TRUE;
+						else point_selected(i) = FALSE;
+					}
+					selected_count=1;
+					DYNARR_APPEND(pts_t,points_da,1);
+					tempSegs(0).u.p.pts = &points(0);
+					for (inx=points_da.cnt-1; inx>polyInx; inx-- ) {
+						points(inx) = points(inx-1);
+					}
+					points(polyInx).pt_type = 0;
+					tempSegs(0).u.p.cnt = points_da.cnt;
+					context->max_inx = points_da.cnt-1;
 				}
-				selected_count=1;
-				DYNARR_APPEND(pts_t,points_da,1);
-				tempSegs(0).u.p.pts = &points(0);
-				for (inx=points_da.cnt-1; inx>polyInx; inx-- ) {
-					points(inx) = points(inx-1);
+			}
+			//If already selected (multiple points), not using shift (to add) select, and on object move to first point
+			if (selected_count>0 && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT)) {
+				for (int i=0; i<points_da.cnt;i++) {
+					if (IsClose(FindDistance(pos,points(i).pt))) {
+
+						point_selected(i) = FALSE;
+
+					}
+					if (point_selected(i) == TRUE) {
+						polyInx = i;
+					}
 				}
-				points(polyInx).pt_type = 0;
-				tempSegs(0).u.p.cnt = points_da.cnt;
-				context->max_inx = points_da.cnt-1;
 			}
 			pos = points(polyInx).pt;  		//Move to point
 			if (point_selected(polyInx)) {					//Already selected
@@ -1211,6 +1236,8 @@ STATUS_T DrawGeomPolyModify(
 			}
 			last_inx = -1;
 			next_inx = -1;
+			coOrd intersect;
+			wBool_t show_intersect = FALSE;
 			if (first_inx >=0) {
 				if (first_inx == 0) {
 					last_inx = points_da.cnt-1;
@@ -1223,7 +1250,7 @@ STATUS_T DrawGeomPolyModify(
 					next_inx = first_inx+1;
 				}
 				//Lock to 90 degrees first/last point
-				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL ) {
+				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
 					ANGLE_T last_angle,next_angle;
 					coOrd last_point,next_point;
 					if (first_inx == 0) {
@@ -1269,21 +1296,14 @@ STATUS_T DrawGeomPolyModify(
 					diff.y = pos_lock.y - points(first_inx).pt.y;
 					pos.x 	= points(polyInx).pt.x+diff.x;
 					pos.y 	= points(polyInx).pt.y+diff.y;
-					coOrd intersect;
-					if (FindIntersection(&intersect,last_point,last_angle+90.0,next_point,next_angle+90.0)) {
-						d = FindDistance(intersect,pos_lock);
-						if (IsClose(d)) {
-							pos = intersect;
-							d = tempD.scale*0.15;
-							DYNARR_SET(trkSeg_t,anchors_da,1);
-							anchors(0).type = SEG_CRVLIN;
-							anchors(0).color = wDrawColorBlue;
-							anchors(0).u.c.center = intersect;
-							anchors(0).u.c.radius = d/2;
-							anchors(0).u.c.a0 = 0.0;
-							anchors(0).u.c.a1 = 360.0;
-							tempSegs(0).width = 0;
-						} else anchors_da.cnt = 0;
+					if (selected_count<2) {
+						if (FindIntersection(&intersect,last_point,last_angle+90.0,next_point,last_angle+180.0)) {
+							show_intersect = TRUE;
+						}
+					}
+					d = FindDistance(intersect,pos_lock);
+					if (IsClose(d)) {
+						pos = intersect;
 					}
 					InfoMessage( _("Length = %s, Last_Angle = %0.2f"),
 							FormatDistance(FindDistance(pos_lock,last_point)),
@@ -1309,6 +1329,8 @@ STATUS_T DrawGeomPolyModify(
 				context->rel_angle = NormalizeAngle(180-(an1-an0));
 			}
 			CreatePolyAnchors(first_inx);
+			if (show_intersect)
+				CreateSquareAnchor(intersect);
 			context->p0 = points(0).pt;
 			context->p1 = points(1).pt;
 			MainRedraw();
@@ -1356,6 +1378,8 @@ STATUS_T DrawGeomPolyModify(
 				}
 				Translate(&points(prev_inx).pt,points(last_index).pt,an1,context->length);
 			}
+			context->rel_angle = fabs(context->rel_angle);
+			if (context->rel_angle >180) context->rel_angle = context->rel_angle - 180.0;
 			CreatePolyAnchors(prev_inx);
 			context->p0 = points(0).pt;
 			context->p1 = points(1).pt;
@@ -2123,7 +2147,7 @@ STATUS_T DrawGeomModify(
 		case SEG_BENCH:
 			p0 = context->p0;
 			p1 = context->p1;
-			context->rel_angle = FindAngle(p0,p1);
+			context->angle = FindAngle(p0,p1);
 			context->length = FindDistance(p0,p1);
 			CreateLineAnchors(lineInx,p0,p1);
 			context->last_inx = lineInx;
@@ -2173,7 +2197,8 @@ STATUS_T DrawGeomModify(
 				case SEG_STRLIN:
 				case SEG_DIMLIN:
 				case SEG_BENCH:
-					Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->rel_angle,context->length);
+					context->angle = NormalizeAngle(context->angle);
+					Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,context->length);
 					CreateLineAnchors(context->last_inx,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1]);
 					context->p0 = tempSegs(0).u.l.pos[0];
 					context->p1 = tempSegs(0).u.l.pos[1];
