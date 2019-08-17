@@ -73,6 +73,11 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).width = 0;
 }
 
+static void CreateRadiusAnchor(coOrd p, ANGLE_T a, BOOL_T bi) {
+	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),p,a,bi,wDrawColorBlue);
+}
+
 /*
  * Call cbezier.c CmdBezModify to alter Bezier Track and Lines.
  * Picking a Bezier will allow control point(s) modifications until terminated with "Enter"
@@ -216,7 +221,7 @@ static STATUS_T CmdModify(
 
 	case C_START:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		InfoMessage( _("Select track to modify") );
+		InfoMessage( _("Select a track to modify, Left-Click change length, Right-Click to add flextrack") );
 		Dex.Trk = NULL;
 		tempSegs_da.cnt = 0;
 		/*ChangeParameter( &easementPD );*/
@@ -304,9 +309,9 @@ static STATUS_T CmdModify(
 			return C_CONTINUE;
 		}
 
-		if ( (MyGetKeyState()&WKEY_SHIFT) &&   //That's odd - means actually alter - perhaps CTRL could be used instead
+		if ( (MyGetKeyState()&WKEY_SHIFT) &&      //Free to change radius
 			 QueryTrack( Dex.Trk, Q_CAN_MODIFYRADIUS )&&
-			 (inx=PickUnconnectedEndPoint(pos,Dex.Trk)) >= 0 ) {
+			 ((inx=PickUnconnectedEndPoint(pos,Dex.Trk)) >= 0 )) {
 			trk = Dex.Trk;
 			while ( (trk1=GetTrkEndTrk(trk,1-inx)) &&        //Means next track to mine even if can be end...
 					QueryTrack(trk1, Q_CANNOT_BE_ON_END) ) {
@@ -327,6 +332,7 @@ static STATUS_T CmdModify(
 			}
 			ErrorMessage( MSG_CANNOT_CHANGE );
 		}
+		InfoMessage(_("Drag to set size, +Shift to change radius"));
 		ModifyTrack(Dex.Trk, C_START, pos);         //Basically trim via Modify...
 		rc = ModifyTrack( Dex.Trk, C_DOWN, pos );
 		if ( rc != C_CONTINUE ) {
@@ -340,20 +346,33 @@ static STATUS_T CmdModify(
 
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if ( (MyGetKeyState()&WKEY_SHIFT) == WKEY_SHIFT) {
-			track_p t;
-			if ((t=OnTrack(&pos,FALSE,TRUE))!= NULL) {
-				if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
-					if (!QueryTrack(t,Q_CAN_EXTEND)) {
-						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
-						if (ep != -1) {
-							pos = GetTrkEndPos(t, ep);
-							CreateEndAnchor(pos,TRUE);
-						}
-					} else
+		track_p t;
+		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayer( t )) {
+			if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
+				if (QueryTrack( t, Q_IS_CORNU ) || QueryTrack( t, Q_CAN_MODIFY_CONTROL_POINTS )) {
+					CreateRadiusAnchor(pos,NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0),TRUE);
+					CreateRadiusAnchor(pos,GetAngleAtPoint(t,pos,NULL,NULL),TRUE);
+				} else if (!QueryTrack(t,Q_CAN_EXTEND)) {
+					EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+					if (ep != -1) {
+						pos = GetTrkEndPos(t, ep);
 						CreateEndAnchor(pos,TRUE);
+						CreateRadiusAnchor(pos,NormalizeAngle(GetTrkEndAngle(t,ep)),FALSE);
+					}
+				} else {
+					CreateEndAnchor(pos,TRUE);
+					if ((MyGetKeyState()&WKEY_SHIFT) && 					//Shift Down
+							QueryTrack( t, Q_CAN_MODIFYRADIUS ) &&		// Straight or Curve
+							 ((inx=PickUnconnectedEndPoint(pos,t)) >= 0 )) { //Which has an open end
+						if (GetTrkEndTrk(t,1-inx))					// &Has to have a track on other end
+							CreateRadiusAnchor(pos,NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0),TRUE);
+					}
+					CreateRadiusAnchor(pos,GetAngleAtPoint(t,pos,NULL,NULL),TRUE);
 				}
 			}
+		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL) && CheckTrackLayer( t ) && QueryTrack( t, Q_IS_DRAW )) {
+			DrawTrack( t, &mainD, wDrawColorBlue );
+			CreateEndAnchor(pos,FALSE);
 		}
 		if (anchors_da.cnt)
 				DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
@@ -440,7 +459,7 @@ CHANGE_TRACK:
 				Translate( &Dex.pos00x, Dex.pos00, Dex.angle, 10.0 );
 LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
 							Dex.params.ep, Dex.pos00.x, Dex.pos00.y, Dex.angle ) )
-				InfoMessage( _("Drag to create new track segment") );
+				InfoMessage( _("Drag to add flex track") );
 			} else {
 				return C_ERROR;
 			}
@@ -460,7 +479,8 @@ LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
 			return C_CONTINUE;
 		Dex.first = FALSE;
 		Dex.pos01 = Dex.pos00;
-		if (Dex.params.type == curveTypeCornu) {    			//Restrict Cornu drag out to match end
+
+		if (Dex.params.type == curveTypeCornu) {    			//Always Restrict Cornu drag out to match end
 			ANGLE_T angle2 = NormalizeAngle(FindAngle(pos, Dex.pos00)-Dex.angle);
 			if (angle2 > 90.0 && angle2 < 270.0) {
 				if (Dex.params.cornuRadius[Dex.params.ep] == 0) {
@@ -519,28 +539,36 @@ LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
 				Dex.jointD.d0 = Dex.jointD.d1 = 0.0;
 				Dex.jointD.flip = Dex.jointD.negate = Dex.jointD.Scurve = FALSE;
 				d = Dex.curveData.curveRadius * Dex.curveData.a1 * 2.0*M_PI/360.0;
-			} else {					/* Easment code */
-				if ( easeR > 0.0 && Dex.r1 < easeR ) {
-					ErrorMessage( MSG_RADIUS_LSS_EASE_MIN,
-						FormatDistance( Dex.r1 ), FormatDistance( easeR ) );
-					return C_CONTINUE;
-				}
-				if ( Dex.r1*2.0*M_PI*Dex.curveData.a1/360.0 > mapD.size.x+mapD.size.y ) {
-					ErrorMessage( MSG_CURVE_TOO_LARGE );
-					return C_CONTINUE;
-				}
-				if ( NormalizeAngle( FindAngle( Dex.pos00, pos ) - Dex.angle ) > 180.0 )
-					if (ComputeJoint( Dex.params.arcR, Dex.r1, &Dex.jointD ) == E_ERROR)
+			} else {					/* Easement code */
+				if (easementVal<0.0) {  //Cornu Join - need to estimate a "good" easement length
+					d = Dex.curveData.curveRadius * Dex.curveData.a1 * 2.0*M_PI/360.0;
+					Dex.jointD.d0 = Dex.jointD.d1 =0.75*72*12/GetTrkScale(Dex.Trk); //Easement 1.5 cars long to start
+					if (Dex.jointD.d0>(GetTrkLength(Dex.Trk,0,1)/2))
+						Dex.jointD.d0 = GetTrkLength(Dex.Trk,0,1)/2;
+					if (Dex.jointD.d1>d/2)
+						Dex.jointD.d1 = d/2;
+					Dex.jointD.negate = DifferenceBetweenAngles(Dex.angle,FindAngle(Dex.pos00,pos))<0.0;
+					Dex.jointD.x = 2*trackGauge;  //Signal an easement present to JoinTracks
+				} else {
+					if ( easeR > 0.0 && Dex.r1 < easeR ) {
+						ErrorMessage( MSG_RADIUS_LSS_EASE_MIN,
+							FormatDistance( Dex.r1 ), FormatDistance( easeR ) );
 						return C_CONTINUE;
-				d = Dex.params.len - Dex.jointD.d0;
-				if (d <= minLength) {
-					ErrorMessage( MSG_TRK_TOO_SHORT, "First ", PutDim(fabs(minLength-d)) );
-					return C_CONTINUE;
+					}
+					if ( Dex.r1*2.0*M_PI*Dex.curveData.a1/360.0 > mapD.size.x+mapD.size.y ) {
+						ErrorMessage( MSG_CURVE_TOO_LARGE );
+						return C_CONTINUE;
+					}
+					if ( NormalizeAngle( FindAngle( Dex.pos00, pos ) - Dex.angle ) > 180.0 )
+						if (ComputeJoint( Dex.params.arcR, Dex.r1, &Dex.jointD ) == E_ERROR)
+							return C_CONTINUE;
+					d = Dex.params.len - Dex.jointD.d0;
+					if (d <= minLength) {
+						ErrorMessage( MSG_TRK_TOO_SHORT, "First ", PutDim(fabs(minLength-d)) );
+						return C_CONTINUE;
+					}
 				}
-
-				d = Dex.curveData.curveRadius * Dex.curveData.a1 * 2.0*M_PI/360.0;
 				d -= Dex.jointD.d1;
-
 				a0 = Dex.angle + (Dex.jointD.negate?-90.0:+90.0);
 				Translate( &Dex.pos01, Dex.pos00, a0, Dex.jointD.x );
 				Translate( &Dex.curveData.curvePos, Dex.curveData.curvePos,

@@ -585,6 +585,8 @@ The \f{Modify} command is used to change characteristics of or extend existing t
 
 The \f{Modify} command can be invoked using the \f{Change>Modify} menu item, the \f{Modify} button or the menu raised by a \e{Right-Click} over the \f{Main Canvas}.
 
+Before a track is selected for Modify, a dynamic blue anchor will show which track the command will take effect on if the cursor is close enough to a modifyable track or object. It will show arrows to indicate if the track can be extended or trimmed and if its radius can be modified (if Shift is depressed).  
+
 Either the left mouse button (for changing length or creating a tangent track) or the right mouse button (for extending with a new track) is used to modify an unconnected endpoint.
 
 The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.  A \e{Box} or a \e{FilledBox} can be modified by selecting a corner and dragging in two dimensions, or a side and dragging it orthogonally. These modifications preserve a 4-sided rectangle.

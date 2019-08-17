@@ -2055,6 +2055,7 @@ static STATUS_T CmdSelect(
 	static enum { AREA, MOVE, MOVEDESC, NONE } mode;
 	static BOOL_T doingMove = TRUE;
 	STATUS_T rc=C_CONTINUE;
+	track_p t;
 
 	if ( (action == C_DOWN || action == C_RDOWN) ) {
 		mode = AREA;
@@ -2077,6 +2078,11 @@ static STATUS_T CmdSelect(
 		SelectArea( action, pos );
 		wMenuPushEnable( rotateAlignMI, FALSE );
 		wSetCursor(mainD.d,defaultCursor);
+		break;
+
+	case wActionMove:
+		if ((t = OnTrack( &pos, FALSE, FALSE )) == NULL) return C_CONTINUE;
+		if (!GetTrkSelected(t)) DrawTrack(t,&mainD,wDrawColorBlue);
 		break;
 
 	case C_DOWN:
@@ -2118,8 +2124,7 @@ static STATUS_T CmdSelect(
 			mode = AREA;
 		return rc;
 
-	case wActionMove:
-		break;
+
 
 	case C_LCLICK:
 		switch (mode) {
@@ -2188,7 +2193,7 @@ static void SetMoveMode( char * line )
 EXPORT void InitCmdSelect( wMenu_p menu )
 {
 	selectCmdInx = AddMenuButton( menu, CmdSelect, "cmdSelect", _("Select"), wIconCreatePixMap(select_xpm),
-				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU, ACCL_SELECT, NULL );
+				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE, ACCL_SELECT, NULL );
 	endpt_bm = wDrawBitMapCreate( mainD.d, bmendpt_width, bmendpt_width, 7, 7, bmendpt_bits );
 	angle_bm[0] = wDrawBitMapCreate( mainD.d, bma90_width, bma90_width, 7, 7, bma90_bits );
 	angle_bm[1] = wDrawBitMapCreate( mainD.d, bma135_width, bma135_width, 7, 7, bma135_bits );
