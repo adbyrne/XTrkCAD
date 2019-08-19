@@ -401,7 +401,7 @@ Cornu Joins will use whatever space is available - that is their "tightness" (ra
 
 \n First, ensure that the Easement type option is set to Cornu - see \k{cmdEasement}
 
-\n Start the join process by clicking on the Join button (\G{png.d/bjoin.png}).
+\n Start the join process by clicking on the Join button (\G{png.d/bjoin.png}). A blue dot will indicate the end that will be chosen with \e{Left-Click}.
 
 \lcont{
 
@@ -1025,6 +1025,8 @@ The \f{Print} button prints the dialog.  The aspect ratio is preserved on the pr
 
 Clicking on the \f{Properties} (Describe Mode) button cancels all active commands, closes any open dialog windows and places focus on the main window.
 
+Until an object is selected, the object under the cursor that will be selected with \e{Left-Click} is highlighted in blue.
+
 A \e{Left-Click} on an object while in \f{Properties} mode causes a properties dialog window to appear. The properties dialog contains information pertaining to the selected objects position, size, color and layer as appropriate for each type of object. Certain values can be changed to modify the object. If a track is connected to other tracks, then some values, e.g., endpoint positions, can not be changed.
 
 \G{png.d/dproperties.png}
@@ -1233,6 +1235,10 @@ Clicking on the \f{Select} button cancels all active commands, closes any open d
 
 In combination with the mouse, the \f{Select} command can be used as follows;
 
+\dd Objects under the cursor that will be selected with a \e{Left-Click} are highlighted in Blue unless they are already selected.
+
+\u000
+
 \dd \e{Left-Click} - selects an object (or unselects a selected object). Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog).
 
 \u000
@@ -1340,6 +1346,8 @@ Notes:
 
 The \f{Split} command provides several functions. It can be used to disconnect the joint between two sections of connected track, to divide a section of track into two pieces at a selected point or to place block gaps at an existing joint.
 
+Until a split point is selected, the split point under the cursor will have a blue marker and if it is near a connected end a blue "X" will indicate that a split will occur.
+
 For detail about;
 
 \u000
@@ -1363,9 +1371,9 @@ Disconnecting a joint between two pieces of connected track;
 
 \n Click the \f{Split} button (\G{png.d/bsplit.png}) to activate the \f{Split} command.
 
-\lcont{\u000} 
+\n Place the mouse pointer right over the joint between the two track endpoints (so the "X" is shown) then \e{Left-Click}.
 
-\n Place the mouse pointer right over the joint between the two track endpoints then \e{Left-Click}.
+\n A blue marker will show where a split will occur, but if the cursor is a near connected joint, it will show a blue "X". 
 
 \lcont{\u000}
 
@@ -1404,9 +1412,7 @@ Dividing a section of flex track into two connected pieces;
 
 \n Click the \f{Split} button (\G{png.d/bsplit.png}) to activate the \f{Split} command.
 
-\lcont{\u000} 
-
-\n Place the mouse pointer over the point on the track where the it should be divided then \e{Left-Click}.
+\n Place the mouse pointer over the point on the track where the it should be divided then \e{Left-Click}. A blue anchor bar across the track under the cursor will indicate the current split point.
 
 \lcont{\u000}
 
@@ -1473,7 +1479,7 @@ The \f{Split} command can be used to add block gaps (\K{generalTerms}) at the po
 
 \u000
 
-After starting the \f{Split} command use the \e{Shift+Right-Click} over a joint to display one of two pop-up menus which can be used to add, change or remove \e{block gaps} for the selected endpoint.
+After starting the \f{Split} command use the \e{Shift+Right-Click} over a joint (with the blue "X" anchor showing) to display one of two pop-up menus which can be used to add, change or remove \e{block gaps} for the selected endpoint.
 
 \dd \G{png.d/msplitblock.png}
 

@@ -575,13 +575,7 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
     case wActionMove:
     	if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
-    		GetBoundingBox(trk, &descSize, &descOrig);
-			descOrig.x -= descBorder;
-			descOrig.y -= descBorder;
-			descSize.x -= descOrig.x-descBorder;
-			descSize.y -= descOrig.y-descBorder;
-			descNeedDrawHilite = TRUE;
-			DrawDescHilite(FALSE);
+    		DrawTrack(trk,&mainD,wDrawColorBlue);
     	}
     	return C_CONTINUE;
 
@@ -622,7 +616,7 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
             DrawDescHilite(TRUE);
         } else if (trk){
-        	DrawDescHilite(FALSE);
+        	DrawTrack(trk,&mainD,wDrawColorBlue);
         }
 
 
