@@ -60,6 +60,9 @@ static dynArr_t section_da;
 #define section(N) DYNARR_N( section_t, section_da, N )
 static double contribL, contribR;
 
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
+
 
 typedef enum { freeEnd, connectedEnd, loopEnd } ending_e;
 
@@ -592,14 +595,59 @@ printf("T%d [%0.3f %0.3f %0.3f]\n", GetTrkIndex(trk1), p1.x, p1.y, a1 );
 	InfoMessage( _("%d tracks moved"), cnt );
 }
 
+static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift) {
+	coOrd pos = GetTrkEndPos(t,ep);
+	DIST_T d = tempD.scale*0.15;
+	ANGLE_T a = GetTrkEndAngle(t,ep);
+	int i;
+	if (!shift) {
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		i = anchors_da.cnt-1;
+		anchors(i).type = SEG_STRLIN;
+		anchors(i).color = wDrawColorBlue;
+		anchors(i).u.l.pos[0] = pos;
+		Translate(&anchors(i).u.l.pos[1],pos,a+90,-GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,-d);
+		anchors(i).width = 0.5;
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		i = anchors_da.cnt-1;
+		anchors(i).type = SEG_STRLIN;
+		anchors(i).color = wDrawColorBlue;
+		anchors(i).u.l.pos[0] = pos;
+		Translate(&anchors(i).u.l.pos[1],pos,a+90,GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,-d);
+		anchors(i).width = 0.5;
+	} else {
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		i = anchors_da.cnt-1;
+		anchors(i).type = SEG_STRLIN;
+		anchors(i).color = wDrawColorBlue;
+		Translate(&anchors(i).u.l.pos[0],pos,a+90,GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a,d);
+		Translate(&anchors(i).u.l.pos[1],pos,a+90,-GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,-d);
+		anchors(i).width = 0.5;
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		i = anchors_da.cnt-1;
+		anchors(i).type = SEG_STRLIN;
+		anchors(i).color = wDrawColorBlue;
+		Translate(&anchors(i).u.l.pos[0],pos,a+90,GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a,-d);
+		Translate(&anchors(i).u.l.pos[1],pos,a+90,-GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a,d);
+		anchors(i).width = 0.5;
+	}
+}
+
 
 static STATUS_T CmdPull(
 		wAction_t action,
 		coOrd pos )
 {
 
-	static track_p trk1;
-	static EPINX_T ep1;
+	static track_p trk1, t1, t2;
+	static BOOL_T t_turn1, t_turn2;
+	static EPINX_T ep1, t_ep1, t_ep2;
 	track_p trk2;
 	EPINX_T ep2;
 	static BOOL_T turntable;
@@ -618,12 +666,57 @@ static STATUS_T CmdPull(
 			InfoMessage( _("Select first end-point to connect, or Right-Click for connecting selected tracks (not turntable)") );
 		trk1 = NULL;
 		turntable = FALSE;
+		t1 = t2 = NULL;
+		t_turn1 = t_turn2 = FALSE;
 		return C_CONTINUE;
 
-	case C_LCLICK:
-		if ( (MyGetKeyState() & WKEY_SHIFT) == 0 ) {
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if ((MyGetKeyState() & WKEY_SHIFT) == 0 ) {
 			if (trk1 == NULL) {
-				if ((trk1 = OnTrack( &pos, TRUE, FALSE )) != NULL) {
+				if ((t1= OnTrack( &pos, FALSE, TRUE )) != NULL) {
+					if ((t_ep1 = PickUnconnectedEndPointSilent( pos, t1 )) < 0) {
+						if (QueryTrack(t1, Q_CAN_ADD_ENDPOINTS)) {
+							DrawTrack(t1,&mainD,wDrawColorBlue);
+							t_turn1 = TRUE;
+						} else t1 = NULL;
+					}
+					if (t1 && t_ep1 >=0)
+						CreateConnectAnchor(t_ep1,t1,FALSE);
+				}
+			} else {
+				if (t1 != NULL) {
+					if (t_turn1) DrawTrack(t1,&mainD,wDrawColorBlue);
+					else CreateConnectAnchor(t_ep1,t1,FALSE);
+				}
+				if ((t2= OnTrackIgnore( &pos, FALSE, TRUE, t1 )) != NULL) {
+					if ((t_ep2 = PickUnconnectedEndPointSilent( pos, t2 )) < 0) {
+						if (QueryTrack(t2, Q_CAN_ADD_ENDPOINTS)) {
+							DrawTrack(t2,&mainD,wDrawColorBlue);
+							t_turn2 = TRUE;
+						} else t2 = NULL;
+					}
+					if (t2 && t_ep2 >=0)
+						CreateConnectAnchor(t_ep2,t2,FALSE);
+				}
+
+			}
+		} else {										//Shift, tighten
+			t1 = OnTrack( &pos, FALSE, TRUE );
+			if (t1 == NULL)
+				return C_CONTINUE;
+			t_ep1 = PickUnconnectedEndPointSilent( pos, t1 );
+			if ( t_ep1 < 0 )
+				return C_CONTINUE;
+			CreateConnectAnchor(t_ep1,t1,TRUE);
+		}
+		MainRedraw();
+		break;
+
+	case C_LCLICK:
+		if ( (MyGetKeyState() & WKEY_SHIFT) == 0 ) {   //No shift - try and join
+			if (trk1 == NULL) {
+				if ((trk1 = OnTrack( &pos, TRUE, TRUE )) != NULL) {
 					if ((ep1 = PickUnconnectedEndPoint( pos, trk1 )) < 0) {
 						if (QueryTrack(trk1, Q_CAN_ADD_ENDPOINTS)) {
 							turntable = TRUE;
@@ -635,7 +728,7 @@ static STATUS_T CmdPull(
 
 				}
 			} else {
-				if ((trk2 = OnTrack( &pos, TRUE, FALSE )) != NULL) {
+				if ((trk2 = OnTrackIgnore( &pos, TRUE, TRUE, trk1 )) != NULL) {
 					if (trk2 == trk1) {
 						InfoMessage( _("Same Track! - please select another") );
 						return C_CONTINUE;
@@ -658,7 +751,7 @@ static STATUS_T CmdPull(
 				}
 			}
 		} else {
-			trk1 = OnTrack( &pos, TRUE, FALSE );
+			trk1 = OnTrack( &pos, TRUE, TRUE );
 			if (trk1 == NULL)
 				return C_CONTINUE;
 			ep1 = PickUnconnectedEndPoint( pos, trk1 );
@@ -719,6 +812,12 @@ static STATUS_T CmdPull(
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		if (anchors_da.cnt)
+					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		if (t1 && t_turn1)
+					DrawTrack(t1,&mainD,wDrawColorBlue);
+		if (t2 && t_turn2)
+					DrawTrack(t2,&mainD,wDrawColorBlue);
 		return C_CONTINUE;
 
 	case C_CANCEL:
@@ -733,6 +832,7 @@ static STATUS_T CmdPull(
 	default:
 		return C_CONTINUE;
 	}
+	return C_CONTINUE;
 }
 
 
@@ -741,5 +841,5 @@ static STATUS_T CmdPull(
 
 void InitCmdPull( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2|IC_RCLICK, ACCL_CONNECT, NULL );
+	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2|IC_RCLICK|IC_WANT_MOVE, ACCL_CONNECT, NULL );
 }
