@@ -684,7 +684,7 @@ BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track
 		Da.pos[end] = trackParams.cornuEnd[ep];
 		Da.center[end] = trackParams.cornuCenter[ep];
 	} else if (trackParams.type == curveTypeStraight) {
-		if (Da.ep[end]>=0)
+		if (trackParams.ep>=0)
 			Da.angle[end] = NormalizeAngle(GetTrkEndAngle(t,track_end)+180);  //Ignore params.angle because it gives from nearest end
 		else {
 			Da.angle[end] = NormalizeAngle(trackParams.angle+180);            //Turntable
