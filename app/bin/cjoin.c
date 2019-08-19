@@ -468,6 +468,11 @@ static STATUS_T CmdJoin(
 			return CmdCornu(action, pos);
 
 		return C_CONTINUE;
+
+	case wActionMove:
+		if (easementVal < 0)
+			return CmdCornu(action, pos);
+		break;
 
 	case C_DOWN:
 
@@ -898,7 +903,7 @@ errorReturn:
 
 void InitCmdJoin( wMenu_p menu )
 {
-	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoin", _("Join"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_JOIN, NULL );
+	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoin", _("Join"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
 	log_join = LogFindIndex( "join" );
 }
 

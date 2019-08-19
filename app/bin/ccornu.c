@@ -1947,23 +1947,22 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (Da.state != NONE && Da.state != LOC_2) return C_CONTINUE;
 		EPINX_T ep = -1;
-		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT) {
-			//Lock to endpoint if one is available and under pointer
-			if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL) {
-				if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
-					if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
-						return C_CONTINUE;
-					}
-					ep = -1;                                            //Not a real ep yet
-				} else ep = PickUnconnectedEndPointSilent(pos, t);		//EP
-				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  		//Don't attach to Turntable
-				if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
+		//Lock to endpoint if one is available and under pointer
+		if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL) {
+			if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
+				if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
 					return C_CONTINUE;
 				}
-				if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
-					return C_CONTINUE;
-				}
+				ep = -1;                                            //Not a real ep yet
+			} else ep = PickUnconnectedEndPointSilent(pos, t);		//EP
+			if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  		//Don't attach to Turntable
+			if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
+				return C_CONTINUE;
+			}
+			if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
+				return C_CONTINUE;
 			}
 		}
 		if (ep>=0) {

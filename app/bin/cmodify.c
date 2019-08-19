@@ -346,6 +346,9 @@ static STATUS_T CmdModify(
 
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (modifyBezierMode) return C_CONTINUE;
+		if (modifyCornuMode) return C_CONTINUE;
+		if (modifyDrawMode) return C_CONTINUE;
 		track_p t;
 		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayer( t )) {
 			if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
@@ -363,14 +366,14 @@ static STATUS_T CmdModify(
 					CreateEndAnchor(pos,TRUE);
 					if ((MyGetKeyState()&WKEY_SHIFT) && 					//Shift Down
 							QueryTrack( t, Q_CAN_MODIFYRADIUS ) &&		// Straight or Curve
-							 ((inx=PickUnconnectedEndPoint(pos,t)) >= 0 )) { //Which has an open end
+							 ((inx=PickUnconnectedEndPointSilent(pos,t)) >= 0 )) { //Which has an open end
 						if (GetTrkEndTrk(t,1-inx))					// &Has to have a track on other end
 							CreateRadiusAnchor(pos,NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0),TRUE);
 					}
 					CreateRadiusAnchor(pos,GetAngleAtPoint(t,pos,NULL,NULL),TRUE);
 				}
 			}
-		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL) && CheckTrackLayer( t ) && QueryTrack( t, Q_IS_DRAW )) {
+		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL) && !GetLayerFrozen( GetTrkLayer( t )) && QueryTrack( t, Q_IS_DRAW )) {
 			DrawTrack( t, &mainD, wDrawColorBlue );
 			CreateEndAnchor(pos,FALSE);
 		}
