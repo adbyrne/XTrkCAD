@@ -1760,7 +1760,7 @@ DIST_T CornuMaxRateofChangeofCurvature(coOrd pos[4], dynArr_t segs, DIST_T * las
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
-static void CreateEndAnchor(coOrd p, wBool_t lock) {
+static void CreateCornuEndAnchor(coOrd p, wBool_t lock) {
 	DIST_T d = tempD.scale*0.15;
 
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -1769,6 +1769,15 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).color = wDrawColorBlue;
 	anchors(i).u.c.center = p;
 	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	i = anchors_da.cnt-1;
+	anchors(i).type = SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d;
 	anchors(i).u.c.a0 = 0.0;
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).width = 0;
@@ -1964,10 +1973,19 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
 				return C_CONTINUE;
 			}
+			if (Da.state != NONE && t==Da.trk[0]) return C_CONTINUE;
 		}
-		if (ep>=0) {
+		if (ep>=0 && t) {
 			pos = GetTrkEndPos(t,ep);
-			CreateEndAnchor(pos,TRUE);
+			CreateCornuEndAnchor(pos,TRUE);
+		} else if (t) {
+			trackParams_t tp;        //Turntable or extendable track
+			if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
+			if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {
+				ANGLE_T a = FindAngle(tp.ttcenter,pos);
+				Translate(&pos,tp.ttcenter,a,tp.ttradius);
+				CreateCornuEndAnchor(pos,TRUE);
+			} else CreateCornuEndAnchor(pos,TRUE);
 		}
 		if (anchors_da.cnt)
 			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );

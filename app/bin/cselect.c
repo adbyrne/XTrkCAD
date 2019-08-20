@@ -1183,6 +1183,8 @@ void FreeTempStrings() {
 		}
 	}
 }
+
+
 wBool_t FindEndIntersection(coOrd base, ANGLE_T angle, track_p * t1, EPINX_T * ep1, track_p * t2, EPINX_T * ep2) {
 	*ep1 = -1;
 	*ep2 = -1;
@@ -1191,7 +1193,10 @@ wBool_t FindEndIntersection(coOrd base, ANGLE_T angle, track_p * t1, EPINX_T * e
 	for ( int inx=0; inx<tlist_da.cnt; inx++ ) {   //All selected
 		track_p ts = Tlist(inx);
 		for (int i=0; i<GetTrkEndPtCnt(ts); i++) { //All EndPoints
-			if (GetTrkEndTrk(ts,i)) continue;		//Not connected
+			track_p ct;
+			if ((ct = GetTrkEndTrk(ts,i))!=NULL) {
+				if (GetTrkSelected(ct)) continue;   // Another selected track - ignore
+			}
 			coOrd pos1 = GetTrkEndPos(ts,i);
 			if (angle != 0.0)
 				Rotate(&pos1,base,angle);
@@ -1212,6 +1217,21 @@ wBool_t FindEndIntersection(coOrd base, ANGLE_T angle, track_p * t1, EPINX_T * e
 						*t1 = tt;
 						*t2 = ts;
 						return TRUE;
+					}
+				} else {
+					epp = PickEndPoint(pos2,tt);      //Any close end point (even joined)
+					if (epp>=0) {
+						ct = GetTrkEndTrk(tt,epp);
+						if (ct && !GetTrkSelected(ct)) {  //Point is junction to selected track - so will be broken
+							DIST_T d = FindDistance(pos1,GetTrkEndPos(tt,epp));
+							if (IsClose(d)) {
+								*ep1 = epp;
+								*ep2 = i;
+								*t1 = tt;
+								*t2 = ts;
+								return TRUE;
+							}
+						}
 					}
 				}
 			}

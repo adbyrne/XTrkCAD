@@ -891,6 +891,8 @@ A move can be achieved using one of the following methods;
 
 \u000
 
+During a Move of tracks, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. This indicates that the two points will auto-snap and the moved track will align to the unselected point if the Move is stopped. 
+
 \rule
 
 A pop-up menu with commands controlling how objects are drawn during moves can be activated by entering a \e{Shift+Right-Click} command while hovering over the \f{Main Canvas}
@@ -1080,6 +1082,8 @@ Rotation can be achieved using one of the following methods;
 \u000
 
 \dd Aligning the selected object with another object on the layout. See \K{rotateByAlign} for detail.
+
+During Rotation of a track, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. This indicates that the two points will auto-snap and the moved track will align to the unselected point if the Rotation is stopped. 
 
 \rule
 

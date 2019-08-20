@@ -73,6 +73,30 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).width = 0;
 }
 
+static void CreateCornuAnchor(coOrd p, wBool_t lock) {
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	i = anchors_da.cnt-1;
+	anchors(i).type = SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+}
+
+
 static void CreateRadiusAnchor(coOrd p, ANGLE_T a, BOOL_T bi) {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),p,a,bi,wDrawColorBlue);
@@ -309,6 +333,8 @@ static STATUS_T CmdModify(
 			return C_CONTINUE;
 		}
 
+		if ((MyGetKeyState()&WKEY_CTRL)) goto extendTrack;
+
 		if ( (MyGetKeyState()&WKEY_SHIFT) &&      //Free to change radius
 			 QueryTrack( Dex.Trk, Q_CAN_MODIFYRADIUS )&&
 			 ((inx=PickUnconnectedEndPoint(pos,Dex.Trk)) >= 0 )) {
@@ -352,25 +378,41 @@ static STATUS_T CmdModify(
 		track_p t;
 		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayer( t )) {
 			if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
-				if (QueryTrack( t, Q_IS_CORNU ) || QueryTrack( t, Q_CAN_MODIFY_CONTROL_POINTS )) {
+				EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+				if (QueryTrack( t, Q_IS_CORNU )) {
+					CreateCornuAnchor(pos,FALSE);
+				} else if ( QueryTrack( t, Q_CAN_MODIFY_CONTROL_POINTS )) {
 					CreateRadiusAnchor(pos,NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0),TRUE);
-					CreateRadiusAnchor(pos,GetAngleAtPoint(t,pos,NULL,NULL),TRUE);
-				} else if (!QueryTrack(t,Q_CAN_EXTEND)) {
-					EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+					CreateEndAnchor(pos,FALSE);
+				} else if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)){     //Turntable
+					trackParams_t tp;
+					if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
+					ANGLE_T a = FindAngle(tp.ttcenter,pos);
+					Translate(&pos,tp.ttcenter,a,tp.ttradius);
+					CreateRadiusAnchor(pos,a,FALSE);
+				} else if (QueryTrack(t,Q_CAN_EXTEND)) {
 					if (ep != -1) {
-						pos = GetTrkEndPos(t, ep);
-						CreateEndAnchor(pos,TRUE);
-						CreateRadiusAnchor(pos,NormalizeAngle(GetTrkEndAngle(t,ep)),FALSE);
+						if (MyGetKeyState()&WKEY_CTRL) {
+							pos = GetTrkEndPos(t,ep);
+							CreateEndAnchor(pos,TRUE);
+							CreateRadiusAnchor(pos,GetTrkEndAngle(t,ep),FALSE);
+							CreateRadiusAnchor(pos,GetTrkEndAngle(t,ep)+90,TRUE);
+						} else {
+							CreateEndAnchor(pos,TRUE);
+							if ((MyGetKeyState()&WKEY_SHIFT) && 					//Shift Down
+								QueryTrack( t, Q_CAN_MODIFYRADIUS ) &&				// Straight or Curve
+								((inx=PickUnconnectedEndPointSilent(pos,t)) >= 0 )) { //Which has an open end
+								if (GetTrkEndTrk(t,1-inx))					// Has to have a track on other end
+									CreateRadiusAnchor(pos,NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0),TRUE);
+							}
+							CreateRadiusAnchor(pos,GetAngleAtPoint(t,pos,NULL,NULL),TRUE);
+						}
 					}
-				} else {
+
+				} else if (ep>=0){
+					pos = GetTrkEndPos(t, ep);
 					CreateEndAnchor(pos,TRUE);
-					if ((MyGetKeyState()&WKEY_SHIFT) && 					//Shift Down
-							QueryTrack( t, Q_CAN_MODIFYRADIUS ) &&		// Straight or Curve
-							 ((inx=PickUnconnectedEndPointSilent(pos,t)) >= 0 )) { //Which has an open end
-						if (GetTrkEndTrk(t,1-inx))					// &Has to have a track on other end
-							CreateRadiusAnchor(pos,NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0),TRUE);
-					}
-					CreateRadiusAnchor(pos,GetAngleAtPoint(t,pos,NULL,NULL),TRUE);
+					CreateRadiusAnchor(pos,NormalizeAngle(GetTrkEndAngle(t,ep)),FALSE);
 				}
 			}
 		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL) && !GetLayerFrozen( GetTrkLayer( t )) && QueryTrack( t, Q_IS_DRAW )) {
@@ -394,6 +436,8 @@ static STATUS_T CmdModify(
 			return ModifyCornu(C_MOVE, pos);
 		if ( modifyDrawMode)
 			return ModifyDraw(C_MOVE, pos);
+		if ((MyGetKeyState()&WKEY_CTRL))
+			goto extendTrackMove;
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 
@@ -419,6 +463,8 @@ static STATUS_T CmdModify(
 			return ModifyCornu(C_UP, pos);
 		if (modifyDrawMode)
 			return ModifyDraw(C_UP, pos);
+		if ((MyGetKeyState()&WKEY_CTRL)) goto extendTrackUp;
+
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 
@@ -433,6 +479,7 @@ static STATUS_T CmdModify(
 		return rc;
 
 	case C_RDOWN:									//This is same as context menu....
+extendTrack:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		changeTrackMode = TRUE;
 		modifyRulerMode = FALSE;
@@ -472,6 +519,7 @@ LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
         MapRedraw();
         /* no break */
 	case C_RMOVE:
+extendTrackMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
@@ -609,6 +657,7 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 		return C_CONTINUE;
 
 	case C_RUP:
+extendTrackUp:
 		changeTrackMode = FALSE;
 		tempSegs_da.cnt = 0;
 		if (Dex.Trk == NULL) return C_CONTINUE;
