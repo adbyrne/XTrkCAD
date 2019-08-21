@@ -238,6 +238,7 @@ wIndex_t wListGetValues(
     if (bl->type == B_DROPLIST && bl->editted) {
         entry_value = gtk_entry_get_text(GTK_ENTRY(gtk_bin_get_child(GTK_BIN(
                                              bl->widget))));
+	item_data = NULL;
         inx = bl->last = -1;
     } else {
         inx = bl->last;
