@@ -555,7 +555,7 @@ wMenuList_p wMenuListCreate(
  * behind it. In case the maximum number of items is reached the last item is removed.
  *
  * \param ml 		IN handle for the menu list - the placeholder item
- * \param index 	IN currently ignored
+ * \param index 	IN position of new menu item
  * \param labelStr 	IN the menu label for the new item 
  * \param data 		IN application data for the new item
  * \return    
@@ -611,7 +611,11 @@ void wMenuListAdd(
 		g_object_set_data( G_OBJECT(MMENUITEM( mi )), WLISTITEM,  mi );
 		
 		// add the item to the menu
-		gtk_menu_shell_insert((GtkMenuShell *)(MPARENT( ml )->menu), MMENUITEM( mi ), i + 1 );
+		if ( index < 0 )
+			index = 0;
+		if ( index >= ml->count )
+			index = ml->count - 1;
+		gtk_menu_shell_insert((GtkMenuShell *)(MPARENT( ml )->menu), MMENUITEM( mi ), i + index + 1 );
 		g_signal_connect( GTK_OBJECT(MMENUITEM( mi )), "activate", G_CALLBACK(pushMenuList), mi );
 	
 		gtk_widget_show(MMENUITEM( mi ));
