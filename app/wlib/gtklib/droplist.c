@@ -235,43 +235,16 @@ wBool_t wDropListSetValues(
 }
 
 /**
- * Signal handler for the "changed"-signal in drop list's entry field.
- * Get the entered text and calls the 'action' for handling of entered
- * value.
- * *
- * \param entry IN entry field of the droplist
- * \param data IN the drop list handle
- * \return
- */
-
-static void DropListEntryEntered(
-    GtkEntry * entry,
-    gpointer userData)
-{
-    const gchar * text;
-
-    text = gtk_entry_get_text(entry);
-
-    if (text && *text != '\0') {
-        gchar *copyOfText = g_strdup(text);
-        ((wList_p)userData)->editted = TRUE;
-        ((wList_p)userData)->action(-1, copyOfText, 1, ((wList_p)userData)->data, NULL);
-        g_free((gpointer)copyOfText);
-    } else {
-        wBeep();
-    }
-}
-
-/**
- * Signal handler for the "changed"-signal in drop list. Gets the selected
- * text and determines the selected row in the tree model.
+ * Signal handler for the "changed"-signal in drop list.
+ * Gets the selected text and determines the selected row in the tree model.
+ * Or handles user entered text.
  *
  * \param comboBox IN the combo_box
  * \param data IN the drop list handle
  * \return
  */
 
-static int DropListSelectChild(
+static int DropListChanged(
     GtkComboBox * comboBox,
     gpointer data)
 {
@@ -279,17 +252,14 @@ static int DropListSelectChild(
     GtkTreeIter iter;
 
     wIndex_t inx = 0;
-    gchar *string;
-    wListItem_p addData;
+    gchar *string = NULL;
+    wListItem_p listItemP = NULL;
 
     if (bl->recursion) {
         return 0;
     }
 
-    bl->editted = FALSE;
-
-    /* Obtain currently selected item from combo box.
-     * If nothing is selected, do nothing. */
+    /* Obtain currently selected item from combo box. */
     if (gtk_combo_box_get_active_iter(GTK_COMBO_BOX(comboBox), &iter)) {
         GtkTreeModel *model;
 
@@ -301,19 +271,30 @@ static int DropListSelectChild(
                  &iter);
         inx = atoi(string);
         g_free(string);
+        string = NULL;
 
         /* Obtain string from model. */
         gtk_tree_model_get(model, &iter,
                            LISTCOL_TEXT, &string,
-                           LISTCOL_DATA, (void *)&addData,
+                           LISTCOL_DATA, (void *)&listItemP,
                            -1);
+        bl->editted = FALSE;
 
     } else {
-        return 0;
+	/* Nothing selected, user is entering text directly */
+        inx = -1;
+        GtkEntry * entry = GTK_ENTRY(gtk_bin_get_child(GTK_BIN(bl->widget)));
+	if ( entry == NULL )
+            return 0;
+        const char * string1 = gtk_entry_get_text(entry);
+	if ( string1 == NULL )
+            return 0;
+        string = g_strdup(string1);
+        bl->editted = TRUE;
     }
 
     /* selection changed, store new selections and call back */
-    if (bl->last != inx) {
+    if (bl->last != inx || bl->editted == TRUE) {
 
         bl->last = inx;
 
@@ -323,11 +304,12 @@ static int DropListSelectChild(
 
         /* selection changed -> callback */
         if (string && bl->action) {
-            bl->action(inx, string, 1, bl->data, addData->itemData);
+            bl->action(inx, string, 1, bl->data, listItemP?listItemP->itemData:NULL);
         }
     }
 
-    g_free(string);
+    if ( string )
+        g_free(string);
     return 1;
 }
 
@@ -429,14 +411,7 @@ wList_p wDropListCreate(
     gtk_widget_set_name(b->widget,"mycombo");
 
     g_signal_connect(GTK_OBJECT(b->widget), "changed",
-                     G_CALLBACK(DropListSelectChild), b);
-
-    if (option & BL_EDITABLE) {
-        g_signal_connect(gtk_bin_get_child(GTK_BIN(b->widget)),
-                         "changed",
-                         G_CALLBACK(DropListEntryEntered),
-                         b);
-    }
+                     G_CALLBACK(DropListChanged), b);
 
     gtk_widget_set_size_request(b->widget, width, -1);
 
