@@ -962,15 +962,19 @@ Any amount of precise transalation may be entered by \e{Left-Click}ing the \f{En
 
 \G{png.d/bmovedes.png}
 
-This command is used to move Elevation, Grade, Station (\K{cmdElev}), Curved Track (\K{cmdCurve}), Helix (\K{cmdHelix}) or Turnout (\K{cmdHotBar}) Labels.
+This command is used to move Elevation, Grade, Station (\K{cmdElev}), Curved Track (\K{cmdCurve}), Bezier, Cornu, Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
 
-The \f{Move Description} command can be invoked using the \f{Change>Move Description} menu item, the \f{Move Description} button or the menu raised by a \e{Right-Click} over the \f{Main Canvas}.
+The \f{Move Description} command can be invoked using the \f{Change>Move Description} menu item or the \f{Move Description} button.
 
-Click the \f{Move Description} button to activate the \f{Move Description} command. Use \e{Left+Drag} to move the label to a new position. Once moved, the label becomes fixed in a position relative to the object. Subsequent moves of that object will cause the label to move as well.
+Click the \f{Move Description} button to activate the \f{Move Description} command. As the cursor passes close to an object that can display a label it will be highlighted. A dark blue indicates a label that has "Show Description" set on, a light blue set off.  
+
+Use \e{Left+Drag} to move the label to a new position and unhide if hidden. Once moved, the label becomes fixed in a position relative to the object. Subsequent moves of that object will cause the label to move as well.
 
 This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select mode (\K{cmdSelect}).
 
-\e{Shift+Right-Click} (\K{cmdAcclKeys}) can be used to toggle display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels.
+\e{Shift+Right-Click}, the Context Menu command, can be used to toggle display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels.
+
+Note - existing elevation labels can be moved, but controlling thier visbility is done with the \K{cmdElev} command.
 
 \rule
 
@@ -978,7 +982,9 @@ This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select mode (\K
 
 \G{png.d/pan.png}
 
-This command is used to move or resize the viewport using the mouse or keyboard. \e{Left+Drag} Pans the viewport up and down, left and right keping it within the boundaries of the layout. \e{Right+Drag} selects an area of the screen to zoom into. The \f{"0"}- key resets the display to the origin but leaves the zoom as is. Keys between \f{1} and \f{9} set the zoom to that zoom level. The \f{"e"} - key resets the origin to zero and the zooms to show the whole layout.
+This command is used to move or resize the viewport using the mouse or keyboard. \e{Left+Drag} Pans the viewport up and down, left and right keping it within the boundaries of the layout. \e{Ctrl+Left-Drag} selects an area of the screen to zoom into. The \f{"0"} or \f{"o"} - key resets the display to the origin but leaves the zoom as is. Keys between \f{1} and \f{9} set the zoom to that zoom level. The \f{"e"} - key resets the origin to zero and the zooms to show the whole layout.
+
+There is a context menu that contains these text based items as well.
 
 \S{cmdProfile} Profile
 
@@ -1239,11 +1245,15 @@ Clicking on the \f{Select} button cancels all active commands, closes any open d
 
 In combination with the mouse, the \f{Select} command can be used as follows;
 
-\dd Objects under the cursor that will be selected with a \e{Left-Click} are highlighted in Blue unless they are already selected.
+\dd Objects under the cursor that will be selected with a \e{Left-Click} are highlighted in Blue unless they are already selected. 
 
 \u000
 
-\dd \e{Left-Click} - selects an object (or unselects a selected object). Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog).
+\dd \e{Left-Click} - selects just the object (or unselects a selected object). Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog). If an point without a track is selected, all currently selected tracks are unselected.
+
+\u000
+
+\dd \e{Ctrl+Left-Click} - Adds the track to the selected tracks, or removes it if it is already selected.
 
 \u000
 
@@ -1251,7 +1261,7 @@ In combination with the mouse, the \f{Select} command can be used as follows;
 
 \u000
 
-\dd \e{Left+Drag} - highlights an area, and all objects within the area are selected.
+\dd \e{Left+Drag} - highlights an area, and just the objects within the area are selected.
 
 \u000
 

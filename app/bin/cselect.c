@@ -242,7 +242,6 @@ static void SelectOneTrack(
 		DrawTrackAndEndPts( trk, wDrawColorBlack );
 }
 
-
 static void SelectConnectedTracks(
 		track_p trk )
 {
@@ -1411,6 +1410,7 @@ static STATUS_T CmdMove(
 
 
 wMenuPush_p rotateAlignMI;
+wMenuPush_p descriptionMI;
 int rotateAlignState = 0;
 
 static void RotateAlign( void )
@@ -1705,6 +1705,80 @@ static void ChangeDescFlag( wBool_t set, void * mode )
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
+track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T show_hidden, BOOL_T * hidden_o)  {
+	 	track_p trk = NULL;
+		DIST_T d, dd = 10000;
+		track_p trk1 = NULL;
+		EPINX_T ep1, ep;
+		BOOL_T hidden_t, hidden;
+		int mode;
+		if (hidden) *hidden_o = FALSE;
+		while ( TrackIterate( &trk1 ) ) {
+			if ( !GetLayerVisible(GetTrkLayer(trk1)) )
+				continue;
+			if ( (!GetTrkVisible(trk1)) && drawTunnel==0 )
+				continue;
+			if ( (labelEnable&LABELENABLE_ENDPT_ELEV)!=0) {
+				for ( ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++ ) {
+					d = EndPtDescriptionDistance( pos, trk1, ep1, FALSE, NULL );  //No hidden
+					if ( d < dd ) {
+						dd = d;
+						trk = trk1;
+						ep = ep1;
+						mode = 0;
+						hidden = FALSE;
+					}
+				}
+			}
+			if ( !QueryTrack( trk1, Q_HAS_DESC ) )
+				continue;
+			if ((labelEnable&LABELENABLE_TRKDESC)==0)
+				continue;
+			if ( ( GetTrkBits( trk1 ) & TB_HIDEDESC ) != 0 ) {
+				if ( !show_hidden ) continue;
+			}
+			d = CompoundDescriptionDistance( pos, trk1, show_hidden, &hidden_t );
+			if ( d < dd ) {
+				dd = d;
+				trk = trk1;
+				ep = -1;
+				mode = 1;
+				hidden = hidden_t;
+			}
+			d = CurveDescriptionDistance( pos, trk1, show_hidden, &hidden_t );
+			if ( d < dd ) {
+				dd = d;
+				trk = trk1;
+				ep = -1;
+				mode = 2;
+				hidden = hidden_t;
+			}
+			d = CornuDescriptionDistance( pos, trk1, show_hidden, &hidden_t );
+			if ( d < dd ) {
+				dd = d;
+				trk = trk1;
+				ep = -1;
+				mode = 3;
+				hidden = hidden_t;
+			}
+			d = BezierDescriptionDistance( pos, trk1, show_hidden, &hidden_t );
+			if ( d < dd ) {
+				dd = d;
+				trk = trk1;
+				ep = -1;
+				mode = 4;
+				hidden = hidden_t;
+			}
+		}
+		if (trk != NULL) {       //Only when close to a label not anywhere on layout!
+			if (ep_o) *ep_o = ep;
+			if (mode_o) *mode_o = mode;
+			if (hidden_o) *hidden_o = hidden;
+			return trk;
+		}
+		else return NULL;
+}
+
 STATUS_T CmdMoveDescription(
 		wAction_t action,
 		coOrd pos )
@@ -1714,78 +1788,56 @@ STATUS_T CmdMoveDescription(
 	track_p trk1;
 	EPINX_T ep1;
 	DIST_T d, dd;
+	static BOOL_T hidden;
 	static int mode;
 
 	switch (action) {
 	case C_START:
 		if ( labelWhen < 2 || mainD.scale > labelScale ||
-			 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_LENGTHS|LABELENABLE_ENDPT_ELEV))==0 ) {
+			 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_TERMINATE;
 		}
+		trk = NULL;
+		hidden = FALSE;
+		mode = -1;
 		InfoMessage( _("Select and drag a description") );
 		break;
-	case C_DOWN:
-		if ( labelWhen < 2 || mainD.scale > labelScale )
-			return C_TERMINATE;
-		trk = NULL;
-		dd = 10000;
-		trk1 = NULL;
-		while ( TrackIterate( &trk1 ) ) {
-			if ( !GetLayerVisible(GetTrkLayer(trk1)) )
-				continue;
-			if ( (!GetTrkVisible(trk1)) && drawTunnel==0 )
-				continue;
-			for ( ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++ ) {
-				d = EndPtDescriptionDistance( pos, trk1, ep1 );
-				if ( d < dd ) {
-					dd = d;
-					trk = trk1;
-					ep = ep1;
-					mode = 0;
-				}
-			}
-			if ( !QueryTrack( trk1, Q_HAS_DESC ) )
-				continue;
-			if ( ( GetTrkBits( trk1 ) & TB_HIDEDESC ) != 0 )
-				continue;
-			d = CompoundDescriptionDistance( pos, trk1 );
-			if ( d < dd ) {
-				dd = d;
-				trk = trk1;
-				ep = -1;
-				mode = 1;
-			}
-			d = CurveDescriptionDistance( pos, trk1 );
-			if ( d < dd ) {
-				dd = d;
-				trk = trk1;
-				ep = -1;
-				mode = 2;
-			}
-			d = CornuDescriptionDistance( pos, trk1 );
-			if ( d < dd ) {
-				dd = d;
-				trk = trk1;
-				ep = -1;
-				mode = 3;
-			}
-			d = BezierDescriptionDistance( pos, trk1 );
-			if ( d < dd ) {
-				dd = d;
-				trk = trk1;
-				ep = -1;
-				mode = 4;
+	case wActionMove:
+		if ( labelWhen < 2 || mainD.scale > labelScale ) return C_CONTINUE;
+		if ((trk=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden))!=NULL) {
+			if (mode==0) {
+				if (!hidden)
+					DrawEndPt2( &mainD, trk, ep, wDrawColorBlue );
+			} else {
+				if (hidden) {
+					DrawTrack(trk,&mainD,wDrawColorAqua);
+					InfoMessage(_("Hidden description"));
+				} else
+					DrawTrack(trk,&mainD,wDrawColorBlue);
 			}
 		}
-		if (trk != NULL) {
+		MainRedraw();
+		break;
+	case C_DOWN:
+		if (( labelWhen < 2 || mainD.scale > labelScale ) ||
+		 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
+			 	 ErrorMessage( MSG_DESC_NOT_VISIBLE );
+			return C_TERMINATE;
+		 }
+		trk = FindTrackDescription(pos,&ep,&mode,TRUE,&hidden);
+		if (trk != NULL ) {
+			if (hidden) {
+				if (mode == 0) return C_CONTINUE;
+				InfoMessage(_("Hidden Label - Drag to reveal"));
+			} else {
+				InfoMessage(_("Drag label"));
+			}
 			UndoStart( _("Move Label"), "Modedesc( T%d )", GetTrkIndex(trk) );
 			UndoModify( trk );
 		}
 		/* no break */
 	case C_MOVE:
-	case C_UP:
-	case C_REDRAW:
 		if ( labelWhen < 2 || mainD.scale > labelScale )
 			return C_TERMINATE;
 		if (trk != NULL) {
@@ -1802,9 +1854,31 @@ STATUS_T CmdMoveDescription(
 				return BezierDescriptionMove( trk, action, pos );
 			}
 		}
+		hidden = FALSE;
+		MainRedraw();
+		break;
+	case C_UP:
+		trk = NULL;
+		InfoMessage(_("To Hide, use Context Menu"));
+		MainRedraw();
+		break;
+	case C_REDRAW:
+		if (trk) {
+			if (mode==0) {
+				DrawEndPt2( &mainD, trk, ep, hidden?wDrawColorAqua:wDrawColorBlue );
+			} else {
+				if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 )
+					DrawTrack(trk,&mainD,wDrawColorAqua);
+				else
+					DrawTrack(trk,&mainD,wDrawColorBlue);
+			}
+		}
 		break;
 	case C_CMDMENU:
-		moveDescTrk = OnTrack( &pos, TRUE, FALSE );
+		if (trk == NULL)
+			moveDescTrk = OnTrack( &pos, TRUE, FALSE );
+		else
+			moveDescTrk = trk;
 		if ( moveDescTrk == NULL ) break;
 		if ( ! QueryTrack( moveDescTrk, Q_HAS_DESC ) ) break;
 		if ( moveDescM == NULL ) {
@@ -1813,6 +1887,7 @@ STATUS_T CmdMoveDescription(
 		}
 		wMenuToggleSet( moveDescMI, ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC ) == 0 );
 		wMenuPopupShow( moveDescM );
+		MainRedraw();
 		break;
 
 	default:
@@ -1985,6 +2060,7 @@ static STATUS_T SelectArea(
 			DrawHilight( &mainD, base, size );
 			cnt = 0;
 			trk = NULL;
+			SetAllTrackSelect( FALSE );							//Remove all tracks first
 			while ( TrackIterate( &trk ) ) {
 				GetBoundingBox( trk, &hi, &lo );
 				if (GetLayerVisible( GetTrkLayer( trk ) ) &&
@@ -2044,14 +2120,18 @@ static STATUS_T SelectTrack(
 	track_p trk;
 	char msg[STR_SIZE];
 
-	if ((trk = OnTrack( &pos, TRUE, FALSE )) == NULL) {
-			return C_CONTINUE;
+	if ((trk = OnTrack( &pos, FALSE, FALSE )) == NULL) {
+		SetAllTrackSelect( FALSE );							//Unselect all
+		return C_CONTINUE;
 	}
 	DescribeTrack( trk, msg, sizeof msg );
 	InfoMessage( msg );
-	if (MyGetKeyState() & WKEY_SHIFT) {
+	if (MyGetKeyState() & WKEY_SHIFT) {						//All track up to
 		SelectConnectedTracks( trk );
+	} else if (MyGetKeyState() & WKEY_CTRL) {
+		SelectOneTrack( trk, !GetTrkSelected(trk) );
 	} else {
+		SetAllTrackSelect( FALSE );							//Just this Track
 		SelectOneTrack( trk, !GetTrkSelected(trk) );
 	}
 	return C_CONTINUE;
@@ -2072,7 +2152,7 @@ static STATUS_T CmdSelect(
 		wAction_t action,
 		coOrd pos )
 {
-	static enum { AREA, MOVE, MOVEDESC, NONE } mode;
+	static enum { AREA, MOVE, NONE } mode;
 	static BOOL_T doingMove = TRUE;
 	STATUS_T rc=C_CONTINUE;
 	track_p t;
@@ -2081,14 +2161,15 @@ static STATUS_T CmdSelect(
 		mode = AREA;
 		if (MyGetKeyState() & WKEY_SHIFT) {
 			mode = MOVE;
-		} else if (MyGetKeyState() & WKEY_CTRL) {
-			mode = MOVEDESC;
-		}
+		} //else if (MyGetKeyState() & WKEY_CTRL) {
+		  //mode = MOVEDESC;
+		  //InfoMessage(_("Move Description Mode Selected"));
+		//}
 	}
 
 	switch (action) {
 	case C_START:
-		InfoMessage( _("Select tracks") );
+		InfoMessage( _("Select track") );
 #ifdef LATER
 		if ((!importMove) && selectedTrackCount > 0) {
 			SetAllTrackSelect( FALSE );
@@ -2131,17 +2212,16 @@ static STATUS_T CmdSelect(
 				}
 			}
 			break;
-		case MOVEDESC:
-			rc = CmdMoveDescription( action, pos );
-			break;
 		case AREA:
 			rc = SelectArea( action, pos );
 			break;
 		case NONE:
 			break;
 		}
-		if (action == C_UP || action == C_RUP)
+		if (action == C_UP || action == C_RUP) {
 			mode = AREA;
+			InfoMessage(_("Select Track, +Ctrl to Add, +Shift to add joined"));
+		}
 		return rc;
 
 
@@ -2149,8 +2229,6 @@ static STATUS_T CmdSelect(
 	case C_LCLICK:
 		switch (mode) {
 		case MOVE:
-		case MOVEDESC:
-			break;
 		case AREA:
 		case NONE:
 			return SelectTrack( pos );
@@ -2183,6 +2261,9 @@ static STATUS_T CmdSelect(
 					}
 				}
 			}
+			if ((trk)) {
+				wMenuPushEnable(descriptionMI, QueryTrack( moveDescTrk, Q_HAS_DESC ));
+			}
 			wMenuPopupShow( selectPopup2M );
 		}
 		return C_CONTINUE;
@@ -2209,6 +2290,10 @@ static void SetMoveMode( char * line )
 	enableMoveDraw = ((tmp&0x10) == 0);
 }
 
+static void moveDescription( void ) {
+
+}
+
 
 EXPORT void InitCmdSelect( wMenu_p menu )
 {
@@ -2229,13 +2314,12 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 	quickMove1M[1] = wMenuToggleCreate( selectPopup1M, "", _("Simple"), 0, quickMove==1, ChangeQuickMove, (void *) 1 );
 	quickMove1M[2] = wMenuToggleCreate( selectPopup1M, "", _("End Points"), 0, quickMove==2, ChangeQuickMove, (void *) 2 );
 	selectPopup2M = MenuRegister( "Move Draw Mode " );
-	quickMove2M[0] = wMenuToggleCreate( selectPopup2M, "", _("Normal"), 0, quickMove==0, ChangeQuickMove, (void *) 0 );
-	quickMove2M[1] = wMenuToggleCreate( selectPopup2M, "", _("Simple"), 0, quickMove==1, ChangeQuickMove, (void *) 1 );
-	quickMove2M[2] = wMenuToggleCreate( selectPopup2M, "", _("End Points"), 0, quickMove==2, ChangeQuickMove, (void *) 2 );
 	wMenuSeparatorCreate( selectPopup2M );
 	AddMoveMenu( selectPopup2M, QuickMove);
 	wMenuSeparatorCreate( selectPopup2M );
 	AddRotateMenu( selectPopup2M, QuickRotate );
+	wMenuSeparatorCreate( selectPopup2M );
+	descriptionMI = wMenuPushCreate(selectPopup2M, "cmdMoveLabel", _("Move Description"), 0, (wMenuCallBack_p)moveDescription, NULL);
 	rotateAlignMI = wMenuPushCreate( selectPopup2M, "", _("Align"), 0, (wMenuCallBack_p)RotateAlign, NULL );
 	ParamRegister( &rescalePG );
 }
@@ -2267,7 +2351,7 @@ EXPORT void InitCmdTunnel( void )
 EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"), wIconCreatePixMap(movedesc_xpm),
-				LEVEL0, IC_STICKY|IC_POPUP|IC_CMDMENU, ACCL_MOVEDESC, NULL );
+				LEVEL0, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, NULL );
 }
 
 

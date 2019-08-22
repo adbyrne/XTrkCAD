@@ -414,6 +414,16 @@ You are connecting two \e{endpoints} which differ in heights by N.NNN. The eleva
 END
 
 # cselect.c:cmdMoveDescription
+MESSAGE MSG_TRK_DESC_NOT_VISIBLE
+Label description is hidden
+HELP
+The \f{Move Description} command can only be used when labels are visible on the layout. Labels can be hidden using the Context Menu.
+
+Use the Context Menu to toggle a track's visbility on and off.
+
+END
+
+# cselect.c:cmdMoveDescription
 MESSAGE MSG_DESC_NOT_VISIBLE
 Label descriptions not visible
 HELP

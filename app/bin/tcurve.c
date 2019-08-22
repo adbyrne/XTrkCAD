@@ -172,25 +172,30 @@ BOOL_T GetCurveMiddle( track_p trk, coOrd * pos )
 
 DIST_T CurveDescriptionDistance(
 		coOrd pos,
-		track_p trk )
+		track_p trk,
+		BOOL_T show_hidden,
+		BOOL_T * hidden)
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd p1;
 	FLOAT_T ratio;
 	ANGLE_T a, a0, a1;
-
-	if ( GetTrkType( trk ) != T_CURVE || ( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 )
+	if (hidden) *hidden = FALSE;
+	if ( (GetTrkType( trk ) != T_CURVE )|| ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) && !show_hidden))
 		return 100000;
+	coOrd offset = xx->descriptionOff;
+	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) offset = zero;
 	if ( xx->helixTurns > 0 ) {
-		p1.x = xx->pos.x + xx->descriptionOff.x;
-		p1.y = xx->pos.y + xx->descriptionOff.y;
+		p1.x = xx->pos.x + offset.x;
+		p1.y = xx->pos.y + offset.y;
 	} else {
 		GetCurveAngles( &a0, &a1, trk );
-		ratio = ( xx->descriptionOff.x + 1.0 ) / 2.0;
+		ratio = ( offset.x + 1.0 ) / 2.0;
 		a = a0 + ratio * a1;
-		ratio = ( xx->descriptionOff.y + 1.0 ) / 2.0;
+		ratio = ( offset.y + 1.0 ) / 2.0;
 		Translate( &p1, xx->pos, a, xx->radius * ratio );
 	}
+	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	return FindDistance( p1, pos );
 }
 

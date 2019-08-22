@@ -1613,21 +1613,30 @@ EXPORT void ComputeBoundingBox( track_p trk )
 EXPORT DIST_T EndPtDescriptionDistance(
 		coOrd pos,
 		track_p trk,
-		EPINX_T ep )
+		EPINX_T ep,
+		BOOL_T show_hidden,
+		BOOL_T * hidden)
 {
 	elev_t *e;
 	coOrd pos1;
 	track_p trk1;
+	if (hidden) *hidden = FALSE;
 	e = &trk->endPt[ep].elev;
-	if ((e->option&ELEV_MASK)==ELEV_NONE ||
-		(e->option&ELEV_VISIBLE)==0 )
+	if ((e->option&ELEV_MASK)==ELEV_NONE)
+		return 100000;
+	if (((e->option&ELEV_VISIBLE)==0) && !show_hidden)
 		return 100000;
 	if ((trk1=GetTrkEndTrk(trk,ep)) && GetTrkIndex(trk1)<GetTrkIndex(trk))
 		return 100000;
+	if ((e->option&ELEV_VISIBLE)==0) {					//Hidden - disregard offset
+		if (hidden) *hidden = TRUE;
+		return FindDistance( GetTrkEndPos(trk,ep), pos );
+	}
 	/*REORIGIN( pos1, e->doff, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );*/
 	pos1 = GetTrkEndPos(trk,ep);
 	pos1.x += e->doff.x;
 	pos1.y += e->doff.y;
+	if (hidden) *hidden = !(e->option&ELEV_VISIBLE);
 	return FindDistance( pos1, pos );
 }
 
@@ -1647,8 +1656,10 @@ EXPORT STATUS_T EndPtDescriptionMove(
 	switch (action) {
 	case C_DOWN:
 		p0 = GetTrkEndPos(trk,ep);
+		p1 = pos;
+		e->option |= ELEV_VISIBLE; //Make sure we make visible
 		/*REORIGIN( p0, e->doff, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );*/
-		
+		/*no break*/
 	case C_MOVE:
 	case C_UP:
 		if (action != C_DOWN)

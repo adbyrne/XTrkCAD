@@ -178,17 +178,22 @@ static void ComputeCornuBoundingBox( track_p trk, struct extraData * xx )
 
 DIST_T CornuDescriptionDistance(
 		coOrd pos,
-		track_p trk )
+		track_p trk,
+		BOOL_T show_hidden,
+		BOOL_T * hidden)
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd p1;
-
-	if ( GetTrkType( trk ) != T_CORNU || ( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 )
+	if (hidden) *hidden = FALSE;
+	if ( GetTrkType( trk ) != T_CORNU || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) && !show_hidden) )
 		return 100000;
 	
-		p1.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x-xx->cornuData.pos[0].x)/2) + xx->cornuData.descriptionOff.x;
-		p1.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y-xx->cornuData.pos[0].y)/2) + xx->cornuData.descriptionOff.y;
-	
+	coOrd offset = xx->cornuData.descriptionOff;
+
+	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0) offset = zero;
+	p1.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x-xx->cornuData.pos[0].x)/2) + offset.x;
+	p1.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y-xx->cornuData.pos[0].y)/2) + offset.y;
+	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	return FindDistance( p1, pos );
 }
 

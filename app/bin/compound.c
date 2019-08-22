@@ -361,18 +361,23 @@ void DrawCompoundDescription(
 
 DIST_T CompoundDescriptionDistance(
 		coOrd pos,
-		track_p trk )
+		track_p trk,
+		BOOL_T show_hidden,
+		BOOL_T * hidden)
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd p1;
 	if (GetTrkType(trk) != T_TURNOUT && GetTrkType(trk) != T_STRUCTURE)
 		return 100000;
-	if ( (GetTrkBits( trk ) & TB_HIDEDESC) != 0 )
+	if ( ((GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) && !show_hidden)
 		return 100000;
 	p1 = xx->descriptionOrig;
+	coOrd offset = xx->descriptionOff;
+	if ( (GetTrkBits( trk ) & TB_HIDEDESC) != 0 ) offset = zero;
 	Rotate( &p1, zero, xx->angle );
-	p1.x += xx->orig.x + xx->descriptionOff.x;
-	p1.y += xx->orig.y + xx->descriptionOff.y;
+	p1.x += xx->orig.x + offset.x;
+	p1.y += xx->orig.y + offset.y;
+	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	return FindDistance( p1, pos );
 }
 

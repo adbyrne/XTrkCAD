@@ -134,17 +134,23 @@ static void ComputeBezierBoundingBox( track_p trk, struct extraData * xx )
 
 DIST_T BezierDescriptionDistance(
 		coOrd pos,
-		track_p trk )
+		track_p trk,
+		BOOL_T show_hidden,
+		BOOL_T * hidden)
 {
 	struct extraData *xx = GetTrkExtraData(trk);
 	coOrd p1;
-
-	if ( GetTrkType( trk ) != T_BEZIER || ( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 )
+	if (hidden) *hidden = FALSE;
+	if ( GetTrkType( trk ) != T_BEZIER || ((( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) && !show_hidden))
 		return 100000;
 	
-		p1.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x-xx->bezierData.pos[0].x)/2) + xx->bezierData.descriptionOff.x;
-		p1.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y-xx->bezierData.pos[0].y)/2) + xx->bezierData.descriptionOff.y;
-	
+	coOrd offset = xx->bezierData.descriptionOff;
+
+	if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 ) offset = zero;
+
+	p1.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x-xx->bezierData.pos[0].x)/2) + offset.x;
+	p1.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y-xx->bezierData.pos[0].y)/2) + offset.y;
+	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
 	return FindDistance( p1, pos );
 }
 

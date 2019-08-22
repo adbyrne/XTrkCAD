@@ -573,7 +573,7 @@ void UndrawNewTrack( track_cp );
 void DrawSelectedTracks( drawCmd_p );
 void HilightElevations( BOOL_T );
 void HilightSelectedEndPt( BOOL_T, track_p, EPINX_T );
-DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T );
+DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T, BOOL_T show_hidden, BOOL_T * hidden );
 STATUS_T EndPtDescriptionMove( track_p, EPINX_T, wAction_t, coOrd );
 
 track_p FindTrack( TRKINX_T );
@@ -666,7 +666,7 @@ BOOL_T UpdateDescStraight( int, int, int, int, int, descData_p, long );
 
 		
 /* compound.c */
-DIST_T CompoundDescriptionDistance( coOrd, track_p );
+DIST_T CompoundDescriptionDistance( coOrd, track_p, BOOL_T, BOOL_T * );
 STATUS_T CompoundDescriptionMove( track_p, wAction_t, coOrd );
 
 /* elev.c */
