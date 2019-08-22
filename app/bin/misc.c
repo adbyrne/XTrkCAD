@@ -2198,9 +2198,9 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate(editM);
 	MiscMenuItemCreate(editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL,
 			(void*) (wMenuCallBack_p) SelectTunnel, IC_SELECTED, (void *) 0);
-	MiscMenuItemCreate(editM, NULL, "cmdAbove", _("A&bove"), ACCL_ABOVE,
+	MiscMenuItemCreate(editM, NULL, "cmdAbove", _("Move to &Top"), ACCL_ABOVE,
 			(void*) (wMenuCallBack_p) SelectAbove, IC_SELECTED, (void *) 0);
-	MiscMenuItemCreate(editM, NULL, "cmdBelow", _("Belo&w"), ACCL_BELOW,
+	MiscMenuItemCreate(editM, NULL, "cmdBelow", _("Move to &Bottom"), ACCL_BELOW,
 			(void*) (wMenuCallBack_p) SelectBelow, IC_SELECTED, (void *) 0);
 
 	wMenuSeparatorCreate(editM);

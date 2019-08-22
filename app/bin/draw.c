@@ -2701,6 +2701,8 @@ EXPORT void DrawInit( int initialZoom )
 
 #include "bitmaps/pan.xpm"
 
+static wMenu_p panPopupM;
+
 static STATUS_T CmdPan(
 		wAction_t action,
 		coOrd pos )
@@ -2722,20 +2724,22 @@ static STATUS_T CmdPan(
 	case C_START:
 		start_pos = zero;
         panmode = NONE;
-        InfoMessage(_("Left Drag to Pan, Right Drag to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to set to Extent"));
+        InfoMessage(_("Left-Drag to Pan, CTRL+Left-Drag to Zoom, 0 to set Origin to zero, 1-9 to Zoom#, e to set to Extents"));
         wSetCursor(mainD.d,wCursorSizeAll);
 		 break;
 	case C_DOWN:
-		panmode = PAN;
-		start_pos = pos;
-		InfoMessage(_("Pan Mode - drag point to new position"));
-		break;
-	case C_RDOWN:
-		panmode = ZOOM;
-		start_pos = pos;
-		base = pos;
-		size = zero;
-		InfoMessage(_("Zoom Mode - drag Area to Zoom"));
+		if ((wGetKeyState()&WKEY_CTRL) == 0) {
+			panmode = PAN;
+			start_pos = pos;
+			InfoMessage(_("Pan Mode - drag point to new position"));
+			break;
+		} else {
+			panmode = ZOOM;
+			start_pos = pos;
+			base = pos;
+			size = zero;
+			InfoMessage(_("Zoom Mode - drag Area to Zoom"));
+		}
 		break;
 	case C_MOVE:
 		if (panmode == PAN) {
@@ -2769,10 +2773,7 @@ static STATUS_T CmdPan(
 					    InfoMessage(_("Left Click to Pan, Right Click to Zoom, 'o' for Origin, 'e' for Extents"));
 				}
 			}
-			MainRedraw();
-		break;
-	case C_RMOVE:
-		if (panmode == ZOOM) {
+		else if (panmode == ZOOM) {
 			base = start_pos;
 			size.x = pos.x - base.x;
 			if (size.x < 0) {
@@ -2787,33 +2788,34 @@ static STATUS_T CmdPan(
 		}
 		MainRedraw();
 		break;
-	case C_RUP:
-
-		scale_x = size.x/mainD.size.x*mainD.scale;
-		scale_y = size.y/mainD.size.y*mainD.scale;
-
-		DIST_T oldScale = mainD.scale;
-
-		if (scale_x<scale_y)
-				scale_x = scale_y;
-		if (scale_x>1) scale_x = ceil( scale_x );
-		else scale_x = 1/(ceil(1/scale_x));
-
-		if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
-		if (scale_x < MIN_MAIN_MACRO) scale_x = MIN_MAIN_MACRO;
-
-		mainCenter.x = base.x + size.x/2.0;  //Put center for scale in center of square
-		mainCenter.y = base.y + size.y/2.0;
-		mainD.orig.x = base.x;
-		mainD.orig.y = base.y;
-
-		panmode = NONE;
-		InfoMessage(_("Left Drag to Pan, Right Drag to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to set to Extent"));
-		DoNewScale(scale_x);
-		MapRedraw();
-		break;
 	case C_UP:
-		panmode = NONE;
+		if (panmode == ZOOM) {
+			scale_x = size.x/mainD.size.x*mainD.scale;
+			scale_y = size.y/mainD.size.y*mainD.scale;
+
+			DIST_T oldScale = mainD.scale;
+
+			if (scale_x<scale_y)
+					scale_x = scale_y;
+			if (scale_x>1) scale_x = ceil( scale_x );
+			else scale_x = 1/(ceil(1/scale_x));
+
+			if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
+			if (scale_x < MIN_MAIN_MACRO) scale_x = MIN_MAIN_MACRO;
+
+			mainCenter.x = base.x + size.x/2.0;  //Put center for scale in center of square
+			mainCenter.y = base.y + size.y/2.0;
+			mainD.orig.x = base.x;
+			mainD.orig.y = base.y;
+
+			panmode = NONE;
+			InfoMessage(_("Left Drag to Pan, +CTRL to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to set to Extent"));
+			DoNewScale(scale_x);
+			MapRedraw();
+			break;
+		} else if (panmode == PAN) {
+			panmode = NONE;
+		}
 		break;
 	case C_REDRAW:
 		if (panmode == ZOOM) {
@@ -2862,19 +2864,44 @@ static STATUS_T CmdPan(
 		if ((action>>8) == 0x0D) {
 			wSetCursor(mainD.d,defaultCursor);
 			return C_TERMINATE;
-		}
-		else if ((action>>8) == 0x1B) {
+		} else if ((action>>8) == 0x1B) {
 			wSetCursor(mainD.d,defaultCursor);
 			return C_TERMINATE;
 		}
+		break;
+	case C_CMDMENU:
+		wMenuPopupShow( panPopupM );
+		return C_CONTINUE;
 		break;
 	}
 
 	return C_CONTINUE;
 }
+static wMenuPush_p zoomExtents,panOrig;
+static wMenuPush_p zoomLvl1,zoomLvl2,zoomLvl3,zoomLvl4,zoomLvl5,zoomLvl6,zoomLvl7,zoomLvl8,zoomLvl9;
+
+void panMenuEnter(int key) {
+	int action;
+	action = C_TEXT;
+	action |= key<<8;
+	CmdPan(action,zero);
+}
 
 EXPORT void InitCmdPan( wMenu_p menu )
 {
 	panCmdInx = AddMenuButton( menu, CmdPan, "cmdPan", _("Pan/Zoom"), wIconCreatePixMap(pan_xpm),
-				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_RCLICK|IC_CMDMENU, ACCL_PAN, NULL );
+				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU, ACCL_PAN, NULL );
+	panPopupM = MenuRegister( "Text Font" );
+	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom To Extents - 'e'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'e');
+	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::1 - '1'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '1');
+	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::2 - '2'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '2');
+	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::3 - '3'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '3');
+	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::4 - '4'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '4');
+	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::5 - '5'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '5');
+	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::6 - '6'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '6');
+	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::7 - '7'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '7');
+	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::8 - '8'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '8');
+	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::9 - '9'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '9');
+	panOrig = wMenuPushCreate( panPopupM, "", _("Pan To Origin - 'o'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'o');
+
 }
