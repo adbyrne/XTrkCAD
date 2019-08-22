@@ -639,6 +639,59 @@ static void CreateConnectAnchor(EPINX_T ep, track_p t, BOOL_T shift) {
 	}
 }
 
+STATUS_T ConnectMultiple() {
+	int countTracksR0 =0,countTracksR1 =0, possibleEndPoints =0;
+	if (selectedTrackCount==0) {
+		ErrorMessage(_("Connect Multiple Tracks - Select multiple tracks to join first"));
+		return C_CONTINUE;
+	}
+	if (NoticeMessage(_("Try to Connect all Selected Tracks?"), _("Yes"), _("No"))<=0) return C_CONTINUE;
+	track_p trk1 = NULL;
+	track_p trk2 = NULL;
+	EPINX_T ep1,ep2;
+	ANGLE_T a;
+	DIST_T d;
+	UndoStart( _("ReConnect"),"Try to reconnect all selected tracks");
+	for (int i=0;i<2;i++) {  // Try twice - in case later joins help earlier ones and to try close ones first
+		while ( TrackIterate( &trk1 ) ) {
+			BOOL_T found = FALSE;
+			if ( GetTrkSelected( trk1 ) ) {
+				for (ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++) {
+					if (!GetTrkEndTrk( trk1, ep1 )) {
+						trk2 = NULL;
+						while (!found && TrackIterate(&trk2) ) {
+							if (trk1 == trk2) continue;
+							for (ep2=0; ep2<GetTrkEndPtCnt(trk2); ep2++) {
+								if (GetTrkEndTrk( trk2, ep2 )) continue;
+								d = FindDistance(GetTrkEndPos(trk1,ep1),GetTrkEndPos(trk2,ep2));
+								a = NormalizeAngle( 180+GetTrkEndAngle( trk1, ep1 ) - GetTrkEndAngle( trk2, ep2 )+(connectAngle/2.0));
+								// Take two passes. In round one favor closer connections. In round two try anything.
+								if ( (i==0 && (d < connectDistance) && (a < connectAngle)) ||
+										(i>0 && (d<3.0 && a<7.5))) {    // Match PullTracks criteria in round 2
+									PullTracks(trk1,ep1,trk2,ep2);
+									if (GetTrkEndTrk( trk2, ep2 )) {
+										found = TRUE;
+										if (i==0)
+											countTracksR0++;
+										else
+											countTracksR1++;
+										break;               //Stop looking
+									} else if (i==1) possibleEndPoints++;
+								}
+							}
+						}
+						if (found) break;  //Next EndPoint
+					}
+				}
+			}
+		}
+	}
+	UndoEnd();
+	NoticeMessage(_("Round 1 %d and Round 2 %d tracks connected, %d close pairs of end Points were not connected"), _("Ok"), NULL, countTracksR0, countTracksR1, possibleEndPoints);
+	return C_TERMINATE;
+}
+
+static wMenu_p pullPopupM;
 
 static STATUS_T CmdPull(
 		wAction_t action,
@@ -657,7 +710,7 @@ static STATUS_T CmdPull(
 	ANGLE_T a;
 	DIST_T d;
 
-	switch (action) {
+	switch (action&0xFF) {
 
 	case C_START:
 		if (selectedTrackCount==0)
@@ -764,53 +817,6 @@ static STATUS_T CmdPull(
 		}
 		return C_CONTINUE;
 
-	case C_RCLICK:
-		if (selectedTrackCount==0) {
-			ErrorMessage(_("Connect Multiple Tracks - Select multiple tracks to join first"));
-			return C_CONTINUE;
-		}
-		if (NoticeMessage(_("Try to Connect all Selected Tracks?"), _("Yes"), _("No"))<=0) return C_CONTINUE;
-		trk1 = NULL;
-		trk2 = NULL;
-		UndoStart( _("ReConnect"),"Try to reconnect all selected tracks");
-		for (int i=0;i<2;i++) {  // Try twice - in case later joins help earlier ones and to try close ones first
-			while ( TrackIterate( &trk1 ) ) {
-				found = FALSE;
-				if ( GetTrkSelected( trk1 ) ) {
-					for (ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++) {
-						if (!GetTrkEndTrk( trk1, ep1 )) {
-							trk2 = NULL;
-							while (!found && TrackIterate(&trk2) ) {
-								if (trk1 == trk2) continue;
-								for (ep2=0; ep2<GetTrkEndPtCnt(trk2); ep2++) {
-									if (GetTrkEndTrk( trk2, ep2 )) continue;
-									d = FindDistance(GetTrkEndPos(trk1,ep1),GetTrkEndPos(trk2,ep2));
-									a = NormalizeAngle( 180+GetTrkEndAngle( trk1, ep1 ) - GetTrkEndAngle( trk2, ep2 )+(connectAngle/2.0));
-									// Take two passes. In round one favor closer connections. In round two try anything.
-									if ( (i==0 && (d < connectDistance) && (a < connectAngle)) ||
-											(i>0 && (d<3.0 && a<7.5))) {    // Match PullTracks criteria in round 2
-										PullTracks(trk1,ep1,trk2,ep2);
-										if (GetTrkEndTrk( trk2, ep2 )) {
-											found = TRUE;
-											if (i==0)
-												countTracksR0++;
-											else
-												countTracksR1++;
-											break;               //Stop looking
-										} else if (i==1) possibleEndPoints++;
-									}
-								}
-							}
-							if (found) break;  //Next EndPoint
-						}
-					}
-				}
-			}
-		}
-		UndoEnd();
-		NoticeMessage(_("Round 1 %d and Round 2 %d tracks connected, %d close pairs of end Points were not connected"), _("Ok"), NULL, countTracksR0, countTracksR1, possibleEndPoints);
-		return C_TERMINATE;
-
 	case C_REDRAW:
 		if (anchors_da.cnt)
 					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
@@ -820,6 +826,12 @@ static STATUS_T CmdPull(
 					DrawTrack(t2,&mainD,wDrawColorBlue);
 		return C_CONTINUE;
 
+	case C_TEXT:
+		if (action>>8 == 'S')
+			return ConnectMultiple();
+
+		break;
+
 	case C_CANCEL:
 		return C_TERMINATE;
 
@@ -828,6 +840,12 @@ static STATUS_T CmdPull(
 
 	case C_CONFIRM:
 		return C_CONTINUE;
+
+	case C_CMDMENU:
+		wMenuPopupShow( pullPopupM );
+		return C_CONTINUE;
+		break;
+
 
 	default:
 		return C_CONTINUE;
@@ -839,7 +857,18 @@ static STATUS_T CmdPull(
 
 #include "bitmaps/pull.xpm"
 
+wMenuPush_p pullConnectMultiple;
+
+void pullMenuEnter(int key) {
+	int action;
+	action = C_TEXT;
+	action |= key<<8;
+	CmdPull(action,zero);
+}
+
 void InitCmdPull( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2|IC_RCLICK|IC_WANT_MOVE, ACCL_CONNECT, NULL );
+	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2|IC_CMDMENU|IC_WANT_MOVE, ACCL_CONNECT, NULL );
+	pullPopupM = MenuRegister( "Connect Options" );
+	pullConnectMultiple = wMenuPushCreate( pullPopupM, "", _("Connect All Selected - 'S'"), 0, (wMenuCallBack_p)pullMenuEnter, (void*) 'S');
 }

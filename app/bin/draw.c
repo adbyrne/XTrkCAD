@@ -2891,7 +2891,7 @@ EXPORT void InitCmdPan( wMenu_p menu )
 {
 	panCmdInx = AddMenuButton( menu, CmdPan, "cmdPan", _("Pan/Zoom"), wIconCreatePixMap(pan_xpm),
 				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU, ACCL_PAN, NULL );
-	panPopupM = MenuRegister( "Text Font" );
+	panPopupM = MenuRegister( "Pan Options" );
 	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom To Extents - 'e'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'e');
 	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::1 - '1'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '1');
 	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::2 - '2'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '2');
