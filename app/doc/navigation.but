@@ -1080,15 +1080,15 @@ The Shortcut key for each command is listed after the command name.
 
 \dd Unselect all objects within the highlighted area - \e{Right+Drag}
 
-\dd Rotate selected objects - \e{Shift+Right+Drag}
+\dd Rotate selected objects - \e{Ctrl+Left-Drag}
 
 \lcont{
 
-\b in increments of 15\u00B0 - \e{Ctrl+Shift+Right+Drag}
+\b in increments of 15\u00B0 - \e{Ctrl+Shift+Left+Drag}
 
 }
 
-\dd Select (or unselect) the object - \e{Left-Click}
+\dd Select (or unselect) the object - \e{Left-Click} - note clicking on an area without tracks deselects all tracks
 
 \dd Select all objects
 

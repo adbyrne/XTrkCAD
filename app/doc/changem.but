@@ -1069,9 +1069,9 @@ The entered value is added to all Defined Elevations on the Selected tracks.  A 
 
 This command is used to rotate selected (\K{cmdSelect}) objects.
 
-The \f{Rotate} command can be invoked using the \f{Change>Rotate} menu item, the \f{Rotate} button, the menu raised by a \e{Right-Click} over the \f{Main Canvas} or by the \e{Shift+Right+Drag} command when in \f{Select} mode.
+The \f{Rotate} command can be invoked using the \f{Change>Rotate} menu item, the \f{Rotate} button, the menu raised by a \e{Right-Click} over the \f{Main Canvas} or by the \e{Ctrl+Right-Drag} command when over a selected trak in \f{Select} mode.
 
-Successful use of this command requires selection of the object(s) to be rotated before attempting to rotate it. An object is selected by using the \e{Left-Click} command. A group of connected objects can be selected using the \e{Shift+Left-Click} command.
+Successful use of this command requires selection of the object(s) to be rotated before attempting to rotate it. An object is selected by using the \e{Left-Click} command. A group of connected objects can be selected using the \e{Shift+Left-Click} command, or indivdual tracks added with \e{Ctrl+Left-Click}.
 
 A pop-up menu with commands controlling how objects move during the \f{Rotate} function can be activated by entering a \e{Shift+Right-Click} command while hovering over the \f{Main Canvas}.
 
@@ -1112,7 +1112,7 @@ Rotate An Object Using the Mouse
 
 \lcont{\u000}
 
-\n Click and hold the left mouse button then drag (\e{Left+Drag}) the mouse away from the axis point to create a "handle". This handle will be used to rotate the object. While continuing to hold the left mouse button, drag (\e{Left+Drag}) the handle in the desired direction of rotation. \f{Note:} If the \e{Ctrl} key is pressed in conjunction with \e{Left+Drag}, the object will rotate in increments of 15\u00B0.
+\n Click and hold the left mouse button then drag (\e{Left+Drag}) the mouse away from the axis point to create a "handle". This handle will be used to rotate the object. While continuing to hold the left mouse button, drag (\e{Left+Drag}) the handle in the desired direction of rotation. \f{Note:} If the \e{Shift} key is pressed in conjunction with \e{Left+Drag}, the object will rotate in increments of 15\u00B0.
 
 \lcont{\u000}
 
@@ -1251,7 +1251,7 @@ In combination with the mouse, the \f{Select} command can be used as follows;
 
 \u000
 
-\dd \e{Left-Click} - selects just the object (or unselects a selected object). Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog). If an point without a track is selected, all currently selected tracks are unselected.
+\dd \e{Left-Click} - selects just the object. Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog). If an point without a track is selected, all currently selected tracks are unselected.
 
 \u000
 
@@ -1285,25 +1285,17 @@ In combination with the mouse, the \f{Select} command can be used as follows;
 
 \u000
 
-\dd \e{Right+Drag} - highlights an area, and all objects within the area are unselected.
-
-\u000
-
 \dd \e{Shift+Left-Click+Drag} - moves the selected objects (the Move (\K{cmdMove}) command).
 
 \u000
 
-\dd \e{Shift+Right-Click+Drag} - rotates the selected objects (the \f{Rotate} (\K{cmdRotate}) command).
+\dd \e{Ctrl+Left-Click+Drag} - rotates the selected objects (the \f{Rotate} (\K{cmdRotate}) command).
 
 \lcont{
 
-\b If the \e{Ctrl} key is pressed while dragging then rotation will occur in 15\u00B0 increments.
+\b If the \e{Shift} key is pressed while dragging then rotation will occur in 15\u00B0 increments.
 
 }
-
-\u000
-
-\dd \e{Ctrl+Left-Click+Drag} - moves turnout and elevations labels (Also see the \f{Move Description} (\K{cmdMoveLabel}) command).
 
 \u000
 
@@ -1351,7 +1343,7 @@ Notes:
 
 \u000
 
-\b Pressing the \e{Escape} key will deselect all selected tracks.
+\b Pressing the \e{Escape} key will deselect all selected tracks. Alternatively clicking on an empty area will also work.
 
 \rule
 

@@ -80,6 +80,67 @@ static wMenu_p selectPopup1M;
 static wMenu_p selectPopup2M;
 
 static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color );
+
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
+
+void CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len) {
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		int i = anchors_da.cnt-1;
+		anchors(i).type = SEG_STRLIN;
+		anchors(i).width = 0;
+		anchors(i).u.l.pos[0] = pos;
+		Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a+135),len);
+		anchors(i).color = wDrawColorBlue;
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		i = anchors_da.cnt-1;
+		anchors(i).type = SEG_STRLIN;
+		anchors(i).width = 0;
+		anchors(i).u.l.pos[0] = pos;
+		Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a-135),len);
+		anchors(i).color = wDrawColorBlue;
+}
+
+void CreateRotateAnchor(coOrd pos) {
+	DIST_T d = tempD.scale*0.15;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = SEG_CRVLIN;
+	anchors(i).width = 0.5;
+	anchors(i).u.c.center = pos;
+	anchors(i).u.c.a0 = 180.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).u.c.radius = d*2;
+	anchors(i).color = wDrawColorAqua;
+	coOrd head;					//Arrows
+	for (int j=0;j<3;j++) {
+		Translate(&head,pos,j*120,d*2);
+		CreateArrowAnchor(head,NormalizeAngle((j*120)+90),d);
+	}
+}
+
+void CreateMoveAnchor(coOrd pos) {
+	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
+	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,90,TRUE,wDrawColorBlue);
+}
+
+void CreateEndAnchor(coOrd p, wBool_t lock) {
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+}
+
+
 
 /*****************************************************************************
  *
@@ -1184,7 +1245,7 @@ void FreeTempStrings() {
 }
 
 
-wBool_t FindEndIntersection(coOrd base, ANGLE_T angle, track_p * t1, EPINX_T * ep1, track_p * t2, EPINX_T * ep2) {
+wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1, EPINX_T * ep1, track_p * t2, EPINX_T * ep2) {
 	*ep1 = -1;
 	*ep2 = -1;
 	*t1 = NULL;
@@ -1198,7 +1259,7 @@ wBool_t FindEndIntersection(coOrd base, ANGLE_T angle, track_p * t1, EPINX_T * e
 			}
 			coOrd pos1 = GetTrkEndPos(ts,i);
 			if (angle != 0.0)
-				Rotate(&pos1,base,angle);
+				Rotate(&pos1,orig,angle);
 			else {
 				pos1.x +=base.x;
 				pos1.y +=base.y;
@@ -1239,22 +1300,6 @@ wBool_t FindEndIntersection(coOrd base, ANGLE_T angle, track_p * t1, EPINX_T * e
 	return FALSE;
 }
 
-static dynArr_t anchors_da;
-#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
-
-void CreateEndAnchor(coOrd p, wBool_t lock) {
-	DIST_T d = tempD.scale*0.15;
-
-	DYNARR_APPEND(trkSeg_t,anchors_da,1);
-	int i = anchors_da.cnt-1;
-	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
-	anchors(i).color = wDrawColorBlue;
-	anchors(i).u.c.center = p;
-	anchors(i).u.c.radius = d/2;
-	anchors(i).u.c.a0 = 0.0;
-	anchors(i).u.c.a1 = 360.0;
-	anchors(i).width = 0;
-}
 
 
 
@@ -1287,6 +1332,13 @@ static STATUS_T CmdMove(
 			ep1 = -1;
 			ep2 = -1;
 			break;
+
+		case wActionMove:
+			DYNARR_RESET(trkSeg_t,anchors_da);
+			CreateMoveAnchor(pos);
+			if (anchors_da.cnt)
+						DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+			break;
 		case C_DOWN:
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			if (SelectedTracksAreFrozen()) {
@@ -1314,7 +1366,7 @@ static STATUS_T CmdMove(
 			SnapPos( &base );
 			SetMoveD( TRUE, base, 0.0 );
 
-			if (FindEndIntersection(base,0.0,&t1,&ep1,&t2,&ep2)) {
+			if (FindEndIntersection(base,zero,0.0,&t1,&ep1,&t2,&ep2)) {
 				coOrd pos2 = GetTrkEndPos(t2,ep2);
 				pos2.x +=base.x;
 				pos2.y +=base.y;
@@ -1411,12 +1463,15 @@ static STATUS_T CmdMove(
 
 wMenuPush_p rotateAlignMI;
 wMenuPush_p descriptionMI;
-int rotateAlignState = 0;
+static int rotateAlignState = 0;
 
-static void RotateAlign( void )
+static void RotateAlign( BOOL_T align )
 {
-	rotateAlignState = 1;
-	InfoMessage( _("Click on selected object to align") );
+	rotateAlignState = 0;
+	if (align) {
+		rotateAlignState = 1;
+		InfoMessage( _("Click on selected object to align") );
+	}
 }
 
 static STATUS_T CmdRotate(
@@ -1456,6 +1511,12 @@ static STATUS_T CmdRotate(
 			ep1 = -1;
 			ep2 = -1;
 			break;
+		case wActionMove:
+			DYNARR_RESET(trkSeg_t,anchors_da);
+			CreateRotateAnchor(pos);
+			if (anchors_da.cnt)
+					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+			break;
 		case C_DOWN:
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			state = 1;
@@ -1485,6 +1546,7 @@ static STATUS_T CmdRotate(
 				DrawMovedTracks(FALSE, orig, angle);*/
 			} else {
 				pos1 = pos;
+				drawnAngle = FALSE;
 				onTrackInSplit = TRUE;
 				trk = OnTrack( &pos, TRUE, FALSE );
 				onTrackInSplit = FALSE;
@@ -1572,17 +1634,18 @@ static STATUS_T CmdRotate(
 				}
 				base = pos;
 				angle = NormalizeAngle( angle-baseAngle );
-				if ( MyGetKeyState()&WKEY_CTRL ) {
+				if ( MyGetKeyState()&WKEY_SHIFT ) {
 					angle = NormalizeAngle(floor((angle+7.5)/15.0)*15.0);
 					Translate( &base, orig, angle, FindDistance(orig,pos) );
 				}
 				DrawLine( &tempD, base, orig, 0, wDrawColorBlack );
 				SetMoveD( FALSE, orig, angle );
-				if (FindEndIntersection(base,angle,&t1,&ep1,&t2,&ep2)) {
+				if (FindEndIntersection(zero,orig,angle,&t1,&ep1,&t2,&ep2)) {
 					coOrd pos2 = GetTrkEndPos(t2,ep2);
-					Rotate(&pos2,base,angle);
+					coOrd pos1 = GetTrkEndPos(t1,ep1);
+					Rotate(&pos2,orig,angle);
 					CreateEndAnchor(pos2,FALSE);
-					CreateEndAnchor(GetTrkEndPos(t1,ep1),TRUE);
+					CreateEndAnchor(pos1,TRUE);
 				}
 				//DrawMovedTracks();
 #ifdef DRAWCOUNT
@@ -1644,7 +1707,7 @@ static STATUS_T CmdRotate(
 
 		case C_REDRAW:
 			if (anchors_da.cnt)
-				DrawSegs( &mainD, moveOrig, moveAngle, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+				DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 			/* DO_REDRAW */
 			if ( state == 0 )
 				break;
@@ -2113,6 +2176,7 @@ static STATUS_T SelectArea(
 	return C_CONTINUE;
 }
 
+
 
 static STATUS_T SelectTrack( 
 		coOrd pos )
@@ -2134,6 +2198,7 @@ static STATUS_T SelectTrack(
 		SetAllTrackSelect( FALSE );							//Just this Track
 		SelectOneTrack( trk, !GetTrkSelected(trk) );
 	}
+
 	return C_CONTINUE;
 }
 
@@ -2147,70 +2212,124 @@ static STATUS_T Activate( coOrd pos) {
 	return C_CONTINUE;
 }
 
+track_p IsInsideABox(coOrd pos) {
+	track_p ts = NULL;
+	while ( TrackIterate( &ts ) ) {
+		if (!GetLayerVisible( GetTrkLayer( ts))) continue;
+		if (!GetTrkSelected(ts)) continue;
+		coOrd hi,lo;
+		GetBoundingBox(ts, &hi, &lo);
+		if ((pos.x>=lo.x && pos.x<=hi.x) && (pos.y>=lo.y && pos.y<=hi.y)) {
+			return ts;
+		}
+	}
+	return NULL;
+}
+
+void DrawHighlightBoxes() {
+	track_p ts = NULL;
+	while ( TrackIterate( &ts ) ) {
+		if ( !GetLayerVisible( GetTrkLayer( ts))) continue;
+		if (!GetTrkSelected(ts)) continue;
+		coOrd hi,lo;
+		GetBoundingBox(ts, &hi, &lo);
+		coOrd hilite,size;
+		hilite = lo;
+		size.x = hi.x-lo.x;
+		size.y = hi.y-lo.y;
+		DIST_T w,h;
+		w = (wPos_t)((size.x/mainD.scale)*mainD.dpi+0.5);
+		h = (wPos_t)((size.y/mainD.scale)*mainD.dpi+0.5);
+		wPos_t x, y;
+		mainD.CoOrd2Pix(&mainD,hilite,&x,&y);
+		wDrawFilledRectangle(mainD.d, x, y, w, h, wDrawColorGrey40, wDrawOptTemp);
+	}
+
+}
+
 
 static STATUS_T CmdSelect(
 		wAction_t action,
 		coOrd pos )
 {
 	static enum { AREA, MOVE, NONE } mode;
-	static BOOL_T doingMove = TRUE;
+	static BOOL_T doingMove = FALSE;
+	static BOOL_T doingRotate = FALSE;
 	STATUS_T rc=C_CONTINUE;
 	track_p t;
 
-	if ( (action == C_DOWN || action == C_RDOWN) ) {
+	if ( action == C_DOWN ) {
 		mode = AREA;
-		if (MyGetKeyState() & WKEY_SHIFT) {
+		if (MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) {
 			mode = MOVE;
-		} //else if (MyGetKeyState() & WKEY_CTRL) {
-		  //mode = MOVEDESC;
-		  //InfoMessage(_("Move Description Mode Selected"));
-		//}
+		}
 	}
 
 	switch (action) {
 	case C_START:
 		InfoMessage( _("Select track") );
-#ifdef LATER
-		if ((!importMove) && selectedTrackCount > 0) {
-			SetAllTrackSelect( FALSE );
-		}
-#endif
 		importMove = FALSE;
+		doingMove = FALSE;
+		doingRotate = FALSE;
 		SelectArea( action, pos );
 		wMenuPushEnable( rotateAlignMI, FALSE );
 		wSetCursor(mainD.d,defaultCursor);
 		break;
 
 	case wActionMove:
-		if ((t = OnTrack( &pos, FALSE, FALSE )) == NULL) return C_CONTINUE;
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		coOrd p = pos;
+		t = OnTrack( &p, FALSE, FALSE );
+		track_p ht;
+		if ((selectedTrackCount==0) && (t == NULL)) return C_CONTINUE;
+		if (selectedTrackCount>0) {
+			if ((ht = IsInsideABox(pos)) != NULL) {
+				if ((wGetKeyState()&WKEY_CTRL)) {
+					CreateRotateAnchor(pos);
+				} else if ((wGetKeyState()&WKEY_SHIFT)) {
+					CreateMoveAnchor(pos);
+				}
+			}
+			if (anchors_da.cnt)
+					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		} if (!t) return C_CONTINUE;
 		if (!GetTrkSelected(t)) DrawTrack(t,&mainD,wDrawColorBlue);
 		break;
 
 	case C_DOWN:
 	case C_UP:
 	case C_MOVE:
-	case C_RDOWN:
-	case C_RUP:
-	case C_RMOVE:
 	case C_REDRAW:
 		switch (mode) {
 		case MOVE:
 			if (SelectedTracksAreFrozen()) {
 				rc = C_TERMINATE;
 				mode = NONE;
-			} else if (action >= C_DOWN && action <= C_UP) {
+				doingMove = FALSE;
+				doingRotate = FALSE;
+			} else if ((action >= C_DOWN && action <= C_UP) && (doingRotate || (wGetKeyState()&WKEY_CTRL)))	{
+				RotateAlign( FALSE );
+				rc = CmdRotate( action, pos );
+				doingMove = FALSE;
+				doingRotate = TRUE;
+			} else if ((action >= C_DOWN && action <= C_UP) && (doingMove || (wGetKeyState()&WKEY_SHIFT))) {
 				rc = CmdMove( action, pos );
 				doingMove = TRUE;
-			} else if (action >= C_RDOWN && action <= C_RUP) {
-				rc = CmdRotate( action-C_RDOWN+C_DOWN, pos );
-				doingMove = FALSE;
+				doingRotate = FALSE;
 			} else if (action == C_REDRAW) {
 				if (doingMove) {
 					rc = CmdMove( C_REDRAW, pos );
-				} else {
+				} else if (doingRotate){
 					rc = CmdRotate( C_REDRAW, pos );
-				}
+				} else if (anchors_da.cnt)
+					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+
 			}
+			if (action == C_UP) {
+				doingMove = FALSE;
+				doingRotate = FALSE;
+			}
+
 			break;
 		case AREA:
 			rc = SelectArea( action, pos );
@@ -2218,7 +2337,9 @@ static STATUS_T CmdSelect(
 		case NONE:
 			break;
 		}
-		if (action == C_UP || action == C_RUP) {
+		DrawHighlightBoxes();
+
+		if (action == C_UP ) {
 			mode = AREA;
 			InfoMessage(_("Select Track, +Ctrl to Add, +Shift to add joined"));
 		}
@@ -2231,7 +2352,9 @@ static STATUS_T CmdSelect(
 		case MOVE:
 		case AREA:
 		case NONE:
-			return SelectTrack( pos );
+			rc = SelectTrack( pos );
+			MainRedraw();
+			return rc;
 		}
 		mode = AREA;
 		break;
@@ -2262,7 +2385,7 @@ static STATUS_T CmdSelect(
 				}
 			}
 			if ((trk)) {
-				wMenuPushEnable(descriptionMI, QueryTrack( moveDescTrk, Q_HAS_DESC ));
+				wMenuPushEnable(descriptionMI, QueryTrack( trk, Q_HAS_DESC ));
 			}
 			wMenuPopupShow( selectPopup2M );
 		}
@@ -2320,7 +2443,7 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 	AddRotateMenu( selectPopup2M, QuickRotate );
 	wMenuSeparatorCreate( selectPopup2M );
 	descriptionMI = wMenuPushCreate(selectPopup2M, "cmdMoveLabel", _("Move Description"), 0, (wMenuCallBack_p)moveDescription, NULL);
-	rotateAlignMI = wMenuPushCreate( selectPopup2M, "", _("Align"), 0, (wMenuCallBack_p)RotateAlign, NULL );
+	rotateAlignMI = wMenuPushCreate( selectPopup2M, "", _("Align"), 0, (wMenuCallBack_p)RotateAlign, (void* ) 1 );
 	ParamRegister( &rescalePG );
 }
 
@@ -2358,9 +2481,9 @@ EXPORT void InitCmdMoveDescription( wMenu_p menu )
 EXPORT void InitCmdMove( wMenu_p menu )
 {
 	moveCmdInx = AddMenuButton( menu, CmdMove, "cmdMove", _("Move"), wIconCreatePixMap(move_xpm),
-				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_MOVE, NULL );
+				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVE, NULL );
 	rotateCmdInx = AddMenuButton( menu, CmdRotate, "cmdRotate", _("Rotate"), wIconCreatePixMap(rotate_xpm),
-				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_ROTATE, NULL );
+				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU|IC_WANT_MOVE, ACCL_ROTATE, NULL );
 	/*flipCmdInx =*/ AddMenuButton( menu, CmdFlip, "cmdFlip", _("Flip"), wIconCreatePixMap(flip_xpm),
 				LEVEL0, IC_STICKY|IC_SELECTED|IC_CMDMENU, ACCL_FLIP, NULL );
 }

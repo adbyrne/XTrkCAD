@@ -421,7 +421,7 @@ static STATUS_T CmdModify(
 		}
 		if (anchors_da.cnt)
 				DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-		if (anchors_da.cnt)
+		if (tempSegs_da.cnt)
 				DrawSegs( &mainD, zero, 0.0, &anchors(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
