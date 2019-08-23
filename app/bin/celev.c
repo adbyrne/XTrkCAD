@@ -29,6 +29,7 @@
 #include "i18n.h"
 #include "param.h"
 #include "track.h"
+#include "ccurve.h"
 #include "utility.h"
 
 static wWin_p elevW;
@@ -59,6 +60,15 @@ static paramData_t elevationPLs[] = {
 	{ PD_STRING, elevStationV, "station", PDO_DLGUNDERCMDBUTT|PDO_STRINGLIMITLENGTH, (void*)200, NULL, 0, 0, sizeof(elevStationV)} };
 static paramGroup_t elevationPG = { "elev", 0, elevationPLs, sizeof elevationPLs/sizeof elevationPLs[0] };
 
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
+
+void static CreateMoveAnchor(coOrd pos) {
+	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
+	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,90,TRUE,wDrawColorBlue);
+}
 
 static void LayoutElevW(
 		paramData_t * pd,
@@ -456,6 +466,11 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		elevUndo = FALSE;
 		return C_CONTINUE;
 	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (wGetKeyState()&WKEY_CTRL) {
+			CreateMoveAnchor(pos);
+			return C_CONTINUE;
+		}
 		if ((trk0 = OnTrack2(&pos,FALSE, TRUE, FALSE, NULL)) != NULL) {
 			EPINX_T ep0 = 0, ep1 = 1;
 			DIST_T elev0, elev1;
@@ -477,11 +492,14 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			}
 			InfoMessage (_("Track Elevation %0.3f"), elev0);
 		} else InfoMessage( _("Select End-Point") );
+		if (anchors_da.cnt)
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
-	case C_RDOWN:
-	case C_RMOVE:
-	case C_RUP:
-		CmdMoveDescription( action-C_RDOWN+C_DOWN, pos );
+	case C_DOWN:
+	case C_MOVE:
+	case C_UP:
+		if (wGetKeyState()&WKEY_CTRL)
+			CmdMoveDescription( action, pos );
 		return C_CONTINUE;
 	case C_LCLICK:
 		if ((trk0 = OnTrack( &pos, TRUE, TRUE )) == NULL) {
@@ -501,6 +519,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			ElevSelect( trk0, ep0 );
 			return C_CONTINUE;
 		}
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		return C_CONTINUE;
 	case C_OK:
 		DoElevDone(NULL);
@@ -514,6 +533,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	case C_REDRAW:
 		DoElevHilight( NULL );
 		HilightSelectedEndPt( TRUE, elevTrk, elevEp );
+		if (anchors_da.cnt)
+					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 	}
 	return C_CONTINUE;
