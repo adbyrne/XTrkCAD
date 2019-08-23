@@ -1345,11 +1345,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 				if (Da.trk[i]) {
 					UndoModify(Da.trk[i]);
 					MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0);
-					if ((GetTrkType(Da.trk[i])==T_BEZIER) || (GetTrkType(Da.trk[i])==T_CORNU)) {     //Bezier split position not precise, so readjust Cornu
-						GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i],FALSE);
-						ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
-						SetCornuEndPt(i==0?first_trk:trk1,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
-					}
+				    //End position not precise, so readjust Cornu
+					GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i],FALSE);
+					ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
+					SetCornuEndPt(i==0?first_trk:trk1,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
 					if (Da.ep[i]>=0)
 						ConnectTracks(Da.trk[i],Da.ep[i],i==0?first_trk:trk1,i);
 				}
@@ -1628,11 +1627,10 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		for (int i=0;i<2;i++) {										//Attach new track
 			if (Da.trk[i] && Da.ep[i] != -1) {						//Like the old track
 				if (MoveEndPt(&Da.trk[i],&Da.ep[i],Da.pos[i],0)) {
-					if (GetTrkType(Da.trk[i])==T_BEZIER) {     //Bezier split position not precise, so readjust Cornu
-						GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i],FALSE);
-						ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
-						SetCornuEndPt(i==0?first_trk:trk1,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
-					}
+					//Bezier split position not precise, so readjust Cornu
+					GetConnectedTrackParms(Da.trk[i],GetTrkEndPos(Da.trk[i],Da.ep[i]),i,Da.ep[i],FALSE);
+					ANGLE_T endAngle = NormalizeAngle(GetTrkEndAngle(Da.trk[i],Da.ep[i])+180);
+					SetCornuEndPt(i==0?first_trk:trk1,i,GetTrkEndPos(Da.trk[i],Da.ep[i]),Da.center[i],endAngle,Da.radius[i]);
 					if (Da.ep[i]>= 0)
 						ConnectTracks(i==0?first_trk:trk1,i,Da.trk[i],Da.ep[i]);
 				} else {
