@@ -706,8 +706,8 @@ void SetWindowTitle( void )
  *
  */
 
-static struct wFilSel_t * loadFile_fs;
-static struct wFilSel_t * saveFile_fs;
+static struct wFilSel_t * loadFile_fs = NULL;
+static struct wFilSel_t * saveFile_fs = NULL;
 
 static wWin_p checkPointingW;
 static paramData_t checkPointingPLs[] = {
@@ -1027,8 +1027,9 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 
 EXPORT void DoLoad( void )
 {
-	loadFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Open Tracks"),
-		sSourceFilePattern, LoadTracks, NULL );
+	if (loadFile_fs == NULL)
+		loadFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Open Tracks"),
+			sSourceFilePattern, LoadTracks, NULL );
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 }
 
@@ -1335,6 +1336,8 @@ EXPORT void FileInit( void )
 	}
 	if ( (workingDir = wGetAppWorkDir()) == NULL )
 		AbortProg( "wGetAppWorkDir()" );
+	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
+	SetCurrentPath( LAYOUTPATHKEY, message );
 }
 
 EXPORT BOOL_T ParamFileInit( void )

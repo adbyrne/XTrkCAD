@@ -254,6 +254,7 @@ static void ParamFileLoadList( void )
 						paramFileInfo(fileInx).contents:
 						paramFileInfo(fileInx).name );
 			wListAddValue( paramFileL, message, (paramFileInfo(fileInx).deleted)?mtbox_bm:chkbox_bm, (void*)(intptr_t)fileInx );
+			SetCurrentPath( PARAMETERPATHKEY, paramFileInfo(fileInx).name);
 		}
 	}
 	wListSetIndex( paramFileL, listInx );
@@ -292,6 +293,7 @@ EXPORT int LoadParamFile(
 	assert( fileName != NULL );
 	assert( files > 0);
 
+	SetCurrentPath( PARAMETERPATHKEY, fileName[0] );
 	for( i=0; i < files; i++ ) 
 	{
 		curContents = curSubContents = NULL;
@@ -340,7 +342,7 @@ EXPORT int LoadParamFile(
 
 static void ParamFileBrowse( void * junk )
 {
-	wFilSelect( paramFile_fs, curParamDir );
+	wFilSelect( paramFile_fs, GetCurrentPath(PARAMETERPATHKEY) );
 	return;
 }
 
