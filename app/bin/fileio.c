@@ -1104,7 +1104,7 @@ EXPORT void DoCheckPoint( void )
 		checkPointingW = ParamCreateDialog( &checkPointingPG, MakeWindowTitle(_("Check Pointing")), NULL, NULL, NULL, FALSE, NULL, F_TOP|F_CENTER, NULL );
 	}
 	rename( checkPtFileName1, checkPtFileName2 );
-	wShow( checkPointingW );
+	//wShow( checkPointingW );
 	rc = DoSaveTracks( checkPtFileName1 );
 
 	/* could the check point file be written ok? */
@@ -1115,7 +1115,8 @@ EXPORT void DoCheckPoint( void )
 		/* no, rename the backup copy back to the checkpoint file name */
 		rename( checkPtFileName2, checkPtFileName1 );
 	}
-	wHide( checkPointingW );
+	//wHide( checkPointingW );
+	wShow( mainW );
 }
 
 /**

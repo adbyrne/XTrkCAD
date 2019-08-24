@@ -860,7 +860,7 @@ static gint draw_expose_event(
 		event->area.x, event->area.y,
 		event->area.x, event->area.y,
 		event->area.width, event->area.height);
-	return FALSE;
+	return TRUE;
 }
 
 
@@ -869,7 +869,7 @@ static gint draw_configure_event(
 		GdkEventConfigure *event,
 		wDraw_p bd)
 {
-	return FALSE;
+	return TRUE;
 }
 
 static const char * actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "RDown", "RDrag", "RUp", "Text", "ExtKey", "WUp", "WDown" };
@@ -903,7 +903,7 @@ static gint draw_scroll_event(
 		bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
 	}
 
-	return FALSE;
+	return TRUE;
 }
 
 
@@ -913,7 +913,7 @@ static gint draw_leave_event(
 		GdkEvent * event )
 {
 	wlibHelpHideBalloon();
-	return FALSE;
+	return TRUE;
 }
 
 
@@ -951,7 +951,7 @@ static gint draw_button_event(
 	}
 	if (!(bd->option & BD_NOFOCUS))
 		gtk_widget_grab_focus( bd->widget );
-	return FALSE;
+	return TRUE;
 }
 
 static gint draw_motion_event(
@@ -988,7 +988,7 @@ static gint draw_motion_event(
 	bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
 	if (!(bd->option & BD_NOFOCUS))
 		gtk_widget_grab_focus( bd->widget );
-	return FALSE;
+	return TRUE;
 }
 
 
@@ -1040,9 +1040,13 @@ static gint draw_char_event(
 		if ( wlibFindAccelKey( event ) == NULL ) {
 			bd->action( bd, bd->context, wActionExtKey + ((int)extKey<<8), bd->lastX, bd->lastY );
 		}
+		if (!(bd->option & BD_NOFOCUS))
+				gtk_widget_grab_focus( bd->widget );
 		return TRUE;
 	} else if (key <= 0xFF && (event->state&(GDK_CONTROL_MASK|GDK_MOD1_MASK)) == 0 && bd->action) {
 		bd->action( bd, bd->context, wActionText+(key<<8), bd->lastX, bd->lastY );
+		if (!(bd->option & BD_NOFOCUS))
+				gtk_widget_grab_focus( bd->widget );
 		return TRUE;
 	} else {
 		return FALSE;

@@ -534,9 +534,24 @@ STATUS_T DrawGeomMouse(
 				}
 				CreateEndAnchor(pos,TRUE);
 				//Show closing 90 degree intersect if close
-				if (tempSegs_da.cnt > 1) {
-					coOrd intersect;
-					if (FindIntersection(&intersect,tempSegs(0).u.l.pos[0],initial_angle+90.0,tempSegs(tempSegs_da.cnt-2).u.l.pos[1],last_angle+90.0)) {
+				//if (tempSegs_da.cnt > 1) {
+				//	coOrd intersect;
+				//	if (FindIntersection(&intersect,tempSegs(0).u.l.pos[0],initial_angle+90.0,tempSegs(tempSegs_da.cnt-2).u.l.pos[1],last_angle+90.0)) {
+				//		CreateSquareAnchor(intersect);
+				//		d = FindDistance(intersect,pos);
+				//		if (IsClose(d)) {
+				//			pos = intersect;
+				//		}
+				//	}
+				//}
+			}
+			//If there is any point on this line that will give a 90 degree return to the first point, show it
+			if (tempSegs_da.cnt > 1) {
+				coOrd intersect;
+				ANGLE_T an_this = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],pos);
+				if (FindIntersection(&intersect,tempSegs(0).u.l.pos[0],an_this+90.0,tempSegs(tempSegs_da.cnt-2).u.l.pos[1],an_this)) {
+					ANGLE_T an_inter = FindAngle(tempSegs(tempSegs_da.cnt-2).u.l.pos[1],intersect);
+					if (fabs(DifferenceBetweenAngles(an_inter,an_this))<90.0) {
 						CreateSquareAnchor(intersect);
 						d = FindDistance(intersect,pos);
 						if (IsClose(d)) {

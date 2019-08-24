@@ -125,9 +125,11 @@ extern wDrawColor drawColorGrey60;
 extern wDrawColor drawColorGrey70;
 extern wDrawColor drawColorGrey80;
 extern wDrawColor drawColorGrey90;
+
 #define wDrawColorBlack drawColorBlack
 #define wDrawColorWhite drawColorWhite
 #define wDrawColorBlue  drawColorBlue
+#define wDrawColorPowderedBlue drawColorPowderedBlue
 #define wDrawColorAqua  drawColorAqua
 #define wDrawColorRed	drawColorRed
 #define wDrawColorGrey10 drawColorGrey10

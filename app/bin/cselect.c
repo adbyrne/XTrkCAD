@@ -101,7 +101,7 @@ void CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len) {
 		anchors(i).color = wDrawColorBlue;
 }
 
-void CreateRotateAnchor(coOrd pos) {
+void static CreateRotateAnchor(coOrd pos) {
 	DIST_T d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
@@ -119,7 +119,7 @@ void CreateRotateAnchor(coOrd pos) {
 	}
 }
 
-void CreateMoveAnchor(coOrd pos) {
+void static CreateMoveAnchor(coOrd pos) {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
@@ -2219,7 +2219,8 @@ track_p IsInsideABox(coOrd pos) {
 		if (!GetTrkSelected(ts)) continue;
 		coOrd hi,lo;
 		GetBoundingBox(ts, &hi, &lo);
-		if ((pos.x>=lo.x && pos.x<=hi.x) && (pos.y>=lo.y && pos.y<=hi.y)) {
+		double boundary = mainD.scale*5/mainD.dpi;
+		if ((pos.x>=lo.x-boundary && pos.x<=hi.x+boundary) && (pos.y>=lo.y-boundary && pos.y<=hi.y+boundary)) {
 			return ts;
 		}
 	}
@@ -2238,11 +2239,11 @@ void DrawHighlightBoxes() {
 		size.x = hi.x-lo.x;
 		size.y = hi.y-lo.y;
 		DIST_T w,h;
-		w = (wPos_t)((size.x/mainD.scale)*mainD.dpi+0.5);
-		h = (wPos_t)((size.y/mainD.scale)*mainD.dpi+0.5);
+		w = (wPos_t)((size.x/mainD.scale)*mainD.dpi+0.5+10);
+		h = (wPos_t)((size.y/mainD.scale)*mainD.dpi+0.5+10);
 		wPos_t x, y;
 		mainD.CoOrd2Pix(&mainD,hilite,&x,&y);
-		wDrawFilledRectangle(mainD.d, x, y, w, h, wDrawColorGrey40, wDrawOptTemp);
+		wDrawFilledRectangle(mainD.d, x-5, y-5, w, h, wDrawColorPowderedBlue, wDrawOptTemp);
 	}
 
 }
@@ -2252,7 +2253,7 @@ static STATUS_T CmdSelect(
 		wAction_t action,
 		coOrd pos )
 {
-	static enum { AREA, MOVE, NONE } mode;
+	static enum { AREA, MOVE } mode;
 	static BOOL_T doingMove = FALSE;
 	static BOOL_T doingRotate = FALSE;
 	STATUS_T rc=C_CONTINUE;
@@ -2274,6 +2275,8 @@ static STATUS_T CmdSelect(
 		SelectArea( action, pos );
 		wMenuPushEnable( rotateAlignMI, FALSE );
 		wSetCursor(mainD.d,defaultCursor);
+		mode = AREA;
+		MainRedraw();
 		break;
 
 	case wActionMove:
@@ -2299,12 +2302,10 @@ static STATUS_T CmdSelect(
 	case C_DOWN:
 	case C_UP:
 	case C_MOVE:
-	case C_REDRAW:
 		switch (mode) {
 		case MOVE:
 			if (SelectedTracksAreFrozen()) {
 				rc = C_TERMINATE;
-				mode = NONE;
 				doingMove = FALSE;
 				doingRotate = FALSE;
 			} else if ((action >= C_DOWN && action <= C_UP) && (doingRotate || (wGetKeyState()&WKEY_CTRL)))	{
@@ -2316,42 +2317,37 @@ static STATUS_T CmdSelect(
 				rc = CmdMove( action, pos );
 				doingMove = TRUE;
 				doingRotate = FALSE;
-			} else if (action == C_REDRAW) {
-				if (doingMove) {
-					rc = CmdMove( C_REDRAW, pos );
-				} else if (doingRotate){
-					rc = CmdRotate( C_REDRAW, pos );
-				} else if (anchors_da.cnt)
-					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-
 			}
 			if (action == C_UP) {
 				doingMove = FALSE;
 				doingRotate = FALSE;
+				mode = AREA;
+				InfoMessage(_("Select Track, +Ctrl to Add, +Shift to add joined"));
 			}
-
 			break;
 		case AREA:
 			rc = SelectArea( action, pos );
 			break;
-		case NONE:
-			break;
-		}
-		DrawHighlightBoxes();
-
-		if (action == C_UP ) {
-			mode = AREA;
-			InfoMessage(_("Select Track, +Ctrl to Add, +Shift to add joined"));
 		}
 		return rc;
-
-
+		break;
+	case C_REDRAW:
+		if (doingMove) {
+			rc = CmdMove( C_REDRAW, pos );
+		} else if (doingRotate) {
+			rc = CmdRotate( C_REDRAW, pos );
+		} else if (anchors_da.cnt) {
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		}
+		if (mode==AREA)
+			rc = SelectArea( action, pos );
+		DrawHighlightBoxes();
+		return rc;
 
 	case C_LCLICK:
 		switch (mode) {
 		case MOVE:
 		case AREA:
-		case NONE:
 			rc = SelectTrack( pos );
 			MainRedraw();
 			return rc;
@@ -2362,7 +2358,6 @@ static STATUS_T CmdSelect(
 	case C_LDOUBLE:
 		switch (mode) {
 			case AREA:
-			case NONE:
 				return Activate(pos);
 			default:
 				break;
