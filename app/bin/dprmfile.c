@@ -105,16 +105,78 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 						  DynStringToCStr(&description),
 						  indicatorIcons[paramFileInfo.trackState],
 						  (void*)(intptr_t)fileInx);
+
+			SetCurrentPath( PARAMETERPATHKEY, paramFileInfo(fileInx).name);
 		}
 	}
 	wListSetIndex(paramFileL, listInx);
 	wControlShow((wControl_p)paramFileL, TRUE);
     DynStringFree(&description);
+    wIndex_t inx;
+    int i = 0;
+    
+    wBool_t redrawList = FALSE;
+    
+    assert( fileName != NULL );
+    assert( files > 0);
+    
+    SetCurrentPath( PARAMETERPATHKEY, fileName[0] );
+    for( i=0; i < files; i++ )
+    {
+        curContents = curSubContents = NULL;
+        curParamFileIndex = paramFileInfo_da.cnt;
+        if ( !ReadParams( 0, NULL, fileName[ i ] ) )
+            return FALSE;
+        
+        assert( curContents != NULL );
+        // in case the contents is already presented, make invalid
+        for ( inx=0; inx<paramFileInfo_da.cnt; inx++ ) {
+            if ( paramFileInfo(inx).valid &&
+                strcmp( paramFileInfo(inx).contents, curContents ) == 0 ) {
+                paramFileInfo(inx).valid = FALSE;
+                redrawList = TRUE;
+                break;
+            }
+        }
+        
+        DYNARR_APPEND( paramFileInfo_t, paramFileInfo_da, 10 );
+        paramFileInfo(curParamFileIndex).name = MyStrdup( fileName[ i ] );
+        paramFileInfo(curParamFileIndex).valid = TRUE;
+        paramFileInfo(curParamFileIndex).deletedShadow =
+        paramFileInfo(curParamFileIndex).deleted = FALSE;
+        paramFileInfo(curParamFileIndex).contents = curContents;
+        
+        if ( paramFilePG.win ) {
+            if ( redrawList ) {
+                ParamFileLoadList();
+            } else {
+                DynStringClear(&description);
+                DynStringCatCStr(&description,
+                                 ((!paramFileSel) && paramFileInfo.contents) ?
+                                 paramFileInfo.contents :
+                                 paramFileInfo.name);
+                
+                wListAddValue(paramFileL,
+                              DynStringToCStr(&description),
+                              indicatorIcons[paramFileInfo.trackState],
+                              (void*)(intptr_t)fileInx);
+
+                wListSetIndex( paramFileL, wListGetCount(paramFileL)-1 );
+            }
+        }
+        
+        wPrefSetString( "Parameter File Map", curContents,
+                       paramFileInfo(curParamFileIndex).name );
+    }
+    curParamFileIndex = PARAM_CUSTOM;
+    DoChangeNotification( CHANGE_PARAMS );
+    return TRUE;
 }
 
 
 static void ParamFileBrowse(void * junk)
 {
+
     wFilSelect(paramFile_fs, GetParamFileDir());
     return;
 }
