@@ -355,18 +355,34 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 
 }
 
-void wDrawPoint(
+ void wDrawPoint(
 		wDraw_p bd,
 		wPos_t x0, wPos_t y0,
 		wDrawColor color,
 		wDrawOpts opts )
 {
-	static wDrawBitMap_p pointBMp = NULL;
-	if ( pointBMp == NULL ) {
-		static char bits[1] = { 0x01 };
-		pointBMp = wDrawBitMapCreate( bd, 1, 1, 0, 0, bits );
+	GdkGC * gc;
+	GdkRectangle update_rect;
+
+	if ( bd == &psPrint_d ) {
+		/*psPrintArc( x0, y0, r, angle0, angle1, drawCenter, width, lineType, color, opts );*/
+		return;
 	}
-	wDrawBitMap( bd, pointBMp, x0, y0, color, opts );
+	gc = selectGC( bd, 0, wDrawLineSolid, color, opts );
+	gdk_draw_point( bd->pixmap, gc, INMAPX(bd, x0 ), INMAPY(bd, y0 ) );
+
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid, color, opts);
+	cairo_new_path(cairo);
+	cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), 0.75, 0, 2 * M_PI);
+	cairo_stroke(cairo);
+	gtkDrawDestroyCairoContext(cairo);
+
+	if ( bd->delayUpdate || bd->widget == NULL) return;
+	update_rect.x = INMAPX(bd, x0 )-1;
+	update_rect.y = INMAPY(bd, y0 )-1;
+	update_rect.width = 2;
+	update_rect.height = 2;
+	gtk_widget_draw( bd->widget, &update_rect );
 }
 
 /*******************************************************************************
@@ -691,42 +707,74 @@ void wDrawPoint(
 		wDrawColor color,
 		wDrawOpts opts )
 {
-	int i, j, wb;
-	x = x-bm->x;
-	y = y+bm->y;
-	wb = (bm->w+7)/8;
-
-	GdkGC * gc;
+	//GdkGC * gc;
 	GdkRectangle update_rect;
+	int i, j, wb;
+	wPos_t xx, yy;
+	wControl_p b;
+	GdkDrawable * gdk_window;
 
-	if ( bd == &psPrint_d ) {
-		/*psPrintArc( x0, y0, r, angle0, angle1, drawCenter, width, lineType, color, opts );*/
-		return;
-	}
-	gc = selectGC( bd, 0, wDrawLineSolid, color, opts );
-
+	x = INMAPX( bd, x-bm->x );
+	y = INMAPY( bd, y-bm->y )-bm->h;
+	wb = (bm->w+7)/8;
+	//gc = selectGC( bd, 0, wDrawLineSolid, color, opts );
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, 0, wDrawLineSolid, color, opts);
-	cairo_new_path(cairo);
 
 	for ( i=0; i<bm->w; i++ )
 		for ( j=0; j<bm->h; j++ )
 			if ( bm->bits[ j*wb+(i>>3) ] & (1<<(i&07)) ) {
-				int x0=x+i;
-				int y0=y-j;
-				gdk_draw_point( bd->pixmap, gc, INMAPX(bd, x0 ), INMAPY(bd, y0 ) );
-				cairo_arc(cairo, INMAPX(bd, x0), INMAPY(bd, y0), 0.75, 0, 2 * M_PI);
-				cairo_stroke(cairo);
+				xx = x+i;
+				yy = y+j;
+				if ( 0 <= xx && xx < bd->w &&
+					 0 <= yy && yy < bd->h ) {
+					gdk_window = bd->pixmap;
+					b = (wControl_p)bd;
+				} else if ( (opts&wDrawOptNoClip) != 0 ) {
+					xx += bd->realX;
+					yy += bd->realY;
+					b = wlibGetControlFromPos( bd->parent, xx, yy );
+					if ( b ) {
+						if ( b->type == B_DRAW )
+							gdk_window = ((wDraw_p)b)->pixmap;
+						else
+							gdk_window = b->widget->window;
+						xx -= b->realX;
+						yy -= b->realY;
+					} else {
+						gdk_window = bd->parent->widget->window;
+					}
+				} else {
+					continue;
+				}
+/*printf( "gdk_draw_point( %ld, gc, %d, %d )\n", (long)gdk_window, xx, yy );*/
+				//gdk_draw_point( gdk_window, gc, xx, yy );
+				cairo_rectangle(cairo, xx-0.5, yy-0.5, 1, 1);
+				cairo_fill(cairo);
+				if ( b && b->type == B_DRAW ) {
+					update_rect.x = xx-1;
+					update_rect.y = yy-1;
+					update_rect.width = 3;
+					update_rect.height = 3;
+					gtk_widget_draw( b->widget, &update_rect );
+				}
 			}
-
 	gtkDrawDestroyCairoContext(cairo);
-
+#ifdef LATER
+	gdk_draw_pixmap(bd->pixmap, gc,
+		bm->pixmap,
+		0, 0,
+		x, y,
+		bm->w, bm->h );
+#endif
 	if ( bd->delayUpdate || bd->widget == NULL) return;
-	update_rect.x = INMAPX(bd, x )-1;
-	update_rect.y = INMAPY(bd, y )-1;
+
+	update_rect.x = x;
+	update_rect.y = y;
 	update_rect.width = bm->w;
 	update_rect.height = bm->h;
 	gtk_widget_draw( bd->widget, &update_rect );
 }
+
 
 /*******************************************************************************
  *
