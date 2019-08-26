@@ -27,6 +27,7 @@
 
 #include "ccurve.h"
 #include "tbezier.h"
+#include "tcornu.h"
 #include "cjoin.h"
 #include "compound.h"
 #include "cstraigh.h"
@@ -1555,7 +1556,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		struct extraData * xx = GetTrkExtraData(trk);
 		/* Get parms from that seg */
 		wBool_t back,negative;
-		coOrd segPos;
+		coOrd segPos = pos;
 		Rotate(&segPos,xx->orig,-xx->angle);
 		segPos.x -= xx->orig.x;
 		segPos.y -= xx->orig.y;
@@ -1563,6 +1564,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		params->track_angle = GetAngleSegs(		  		//Find correct subSegment
 							xx->segCnt,xx->segs,
 							&segPos, &segInx, &d , &back, &subSegInx, &negative );
+		if (segInx ==- 1) return FALSE;
 		segPtr = xx->segs+segInx;
 		switch (segPtr->type) {
 			case SEG_BEZTRK:
@@ -2053,13 +2055,27 @@ static struct {
 		coOrd rot0, rot1;
 		} Dto;
 
+static dynArr_t vector_da;
+#define vector(N) DYNARR_N( vector_t, vector_da, N )
 
 typedef struct {
 		DIST_T off;
 		ANGLE_T angle;
 		EPINX_T ep;
+		track_p trk;
 		} vector_t;
 
+/*
+ * PlaceTurnoutTrial
+ *
+ * OUT Track 	- the Track that the Turnout is closest to
+ * IN/OUT Pos	- Position of the Turnout end
+ * OUT Angle1   - The angle on the Track at the position
+ * OUT Angle2   - The angle of the Turnout (can be reversed from Angle 2 if the point is to the left)
+ * OUT Count	- The number of connections
+ * OUT Max		- The maximum distance between the ends and the connection points
+ * OUT Vector   - An array of end points positions and offsets
+ */
 static void PlaceTurnoutTrial(
 		track_p *trkR,
 		coOrd *posR,
@@ -2090,11 +2106,12 @@ static void PlaceTurnoutTrial(
 		d = FindDistance( pos, epPos );
 		if (d <= minLength)
 			pos = epPos;
-		if ( GetTrkType(trk) == T_TURNOUT ) {
+		if ( GetTrkType(trk) == T_TURNOUT ) {				//Only on the end
 			ep0 = ep1 = PickEndPoint( pos, trk );
 			angle = GetTrkEndAngle( trk, ep0 );
 		} else {
 			angle = GetAngleAtPoint( trk, pos, &ep0, &ep1 );
+			if (ep0==1) angle = NormalizeAngle(angle+180);      //Reverse if curve backwards
 		}
 		angle = NormalizeAngle( angle + 180.0 );
 		if ( NormalizeAngle( FindAngle( pos, *posR ) - angle ) < 180.0 && ep0 != ep1 )
@@ -2105,11 +2122,13 @@ static void PlaceTurnoutTrial(
 		Rotate( &epPos, zero, angle );
 		pos.x -= epPos.x;
 		pos.y -= epPos.y;
-		*posR = pos;
+		*posR = pos;			//The place the Turnout end sits
 LOG( log_turnout, 3, ( "placeTurnout T%d (%0.3f %0.3f) A%0.3f\n",
 				GetTrkIndex(trk), pos.x, pos.y, angle ) )
 		/*InfoMessage( "Turnout(%d): Angle=%0.3f", GetTrkIndex(trk), angle );*/
-
+		track_p ctrk = NULL;
+		int ccnt = 0;
+		DIST_T clarge = 100000;
 		for (i=0;i<curTurnout->endCnt;i++) {
 			posI = curTurnout->endPt[i].pos;
 			epPos = AddCoOrd( pos, posI, angle );
@@ -2122,19 +2141,30 @@ LOG( log_turnout, 3, ( "placeTurnout T%d (%0.3f %0.3f) A%0.3f\n",
 				if ( GetTrkType(trk) == T_TURNOUT ) {
 					ep0 = ep1 = PickEndPoint( conPos, trk );
 					aa = GetTrkEndAngle( trk, ep0 );
-				} else if(QueryTrack(trk,Q_IS_CORNU) && v->off < trackGauge/2 ) {  //Match if close for Cornu
-					aa = epAngle;
-					v->off = 0;
 				} else {
 					aa = GetAngleAtPoint( trk, conPos, &ep0, &ep1 );
+					if (ep0) 					//Backwards - so reverse
+						aa = NormalizeAngle(aa+180);
 				}
 				v->ep = i;
-				aa = NormalizeAngle( aa - epAngle + connectAngle/2.0 );
-				if ( IsClose(v->off) &&
-					 ( aa<connectAngle || ( aa>180.0 && aa<180.0+connectAngle ) ) &&
-					 ! ( GetTrkType(trk) == T_TURNOUT &&
+				aa = fabs(DifferenceBetweenAngles( aa, epAngle ));
+				if (QueryTrack(trk,Q_IS_CORNU) ) {			//Make sure only two conns to each Cornu
+					int k=0;
+					v->trk = trk;
+					for (int j=0; j<i;j++) {
+						if (vector(j).trk == trk) k++;
+					}
+					if (k<2) {						//Already two conns to this track
+						connCnt++;
+						if (v->off > maxD)
+							maxD = v->off;
+						v++;
+
+					}
+				} else if (( IsClose(v->off) && (aa<connectAngle || aa>180-connectAngle) &&
+				  !( GetTrkType(trk) == T_TURNOUT &&
 						 (trk1=GetTrkEndTrk(trk,ep0)) &&
-						 GetTrkType(trk1) == T_TURNOUT ) ) {
+						 GetTrkType(trk1) == T_TURNOUT )) ) {
 					if (v->off > maxD)
 						maxD = v->off;
 					connCnt++;
@@ -2161,21 +2191,20 @@ static void PlaceTurnout(
 	DIST_T d, maxD1, maxD2, sina;
 	vector_t *V, * maxV;
 
-	static dynArr_t vector_da;
-#define vector(N) DYNARR_N( vector_t, vector_da, N )
 	
+
 	pos1 = Dto.place = Dto.pos = pos;
 	if (curTurnoutEp >= (long)curTurnout->endCnt)
 		curTurnoutEp = 0;
 	DYNARR_SET( vector_t, vector_da, curTurnout->endCnt );
 	PlaceTurnoutTrial( &trk1, &pos1, &a1, &a2, &connCnt1, &maxD1, &vector(0) );
 	if (connCnt1 > 0) {
-		Dto.pos = pos1;
-		Dto.trk = trk1;
-		Dto.angle = a1;
-		if ( (MyGetKeyState()&WKEY_SHIFT)==0 && connCnt1 > 1 && maxD1 >= 0.001 ) {
+		Dto.pos = pos1;		//First track pos
+		Dto.trk = trk1;		//Track
+		Dto.angle = a1;		//Angle of track to put down
+		if ( (MyGetKeyState()&WKEY_SHIFT)==0 && connCnt1 > 1 && maxD1 >= 0.001 ) {  //Adjust if Shift
 			maxV = &vector(0);
-			for ( i=1; i<connCnt1; i++ ) {
+			for ( i=1; i<connCnt1; i++ ) {		//Ignore first point
 				V = &vector(i);
 				if ( V->off > maxV->off ) {
 					maxV = V;
@@ -2268,27 +2297,26 @@ static void AddTurnout( void )
 		connection(i).trk = leftover(i).trk = NULL;
 		/* connect each endPt ... */
 		epPos = tempEndPts(i).pos;
-		if ((trk = OnTrack(&epPos, FALSE, TRUE)) != NULL &&
+		if ((trk = OnTrack(&epPos, FALSE, TRUE)) != NULL &&    //Adjust epPos onto existing track
 			(!GetLayerFrozen(GetTrkLayer(trk))) &&
 			(!QueryTrack(trk,Q_CANNOT_PLACE_TURNOUT)) ) {
 LOG( log_turnout, 1, ( "ep[%d] on T%d @(%0.3f %0.3f)\n",
 					i, GetTrkIndex(trk), epPos.x, epPos.y ) )
 			d = FindDistance( tempEndPts(i).pos, epPos );
+			BOOL_T back = FALSE;
 			if ( GetTrkType(trk) == T_TURNOUT ) {
 				ep0 = ep1 = PickEndPoint( epPos, trk );
 				a = GetTrkEndAngle( trk, ep0 );
 			} else {
 				a = GetAngleAtPoint( trk, epPos, &ep0, &ep1 );
 			}
-			aa = NormalizeAngle( a - tempEndPts(i).angle + connectAngle/2.0 );
-			if ( IsClose(d) && 
-				 ( (ep0!=ep1 && aa<connectAngle) ||
-				   ( aa>180.0 && aa<180.0+connectAngle ) ) &&
+			aa = fabs(DifferenceBetweenAngles( a , tempEndPts(i).angle));
+			if (( IsClose(d)  &&  ( ep0!=ep1 && (aa<=connectAngle || aa>=180-connectAngle)) &&
 				   ! ( GetTrkType(trk) == T_TURNOUT &&
 				       (trk1=GetTrkEndTrk(trk,ep0)) &&
-					   GetTrkType(trk1) == T_TURNOUT ) ) {
-				/* ... if they are close to a track and line up */
-				if (aa<connectAngle) {
+					   GetTrkType(trk1) == T_TURNOUT )) ) {
+				/* ... if they are close enough to a track and line up */
+				if ((aa<=connectAngle)) {
 				   epx = ep1;
 				   epy = ep0;
 				} else {
@@ -2304,13 +2332,16 @@ LOG( log_turnout, 1, ( "   Attach! epx=%d\n", epx ) )
 				}
 				/* split the track at the intersection point */
 		AuditTracks( "addTurnout [%d] before splitTrack", i );
-				if (SplitTrack( trk, epPos, epx, &leftover(i).trk, TRUE )) {
+				EPINX_T ept,epl;
+				if (SplitTrack( trk, epPos, epx, &leftover(i).trk, &ept, &epl, TRUE )) {
+LogPrintf( "turnoutSplit: T%d[%d] T%d EPT=%d EPL=%d \n",
+									GetTrkIndex(trk), epx, GetTrkIndex(leftover(i).trk), ept, epl );
 		AuditTracks( "addTurnout [%d], after splitTrack", i );
 					/* remember so we can fix up connection later */
 					connection(i).trk = trk;
 					connection(i).ep = epx;
 					if (leftover(i).trk != NULL) {
-						leftover(i).ep = PickEndPoint( epPos, leftover(i).trk );
+						leftover(i).ep = 1-epx;
 						/* did we already split this track? */
 						for (j=0;j<i;j++) {
 							if ( leftover(j).trk == leftover(i).trk ) {
@@ -2323,6 +2354,8 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 										GetTrkIndex(leftover(i).trk) ) )
 								leftover(j).trk = NULL;
 		AuditTracks( "addTurnout [%d] before delete", i );
+LogPrintf( "turnoutDelete: T%d\n",
+								GetTrkIndex(leftover(i).trk));
 								DeleteTrack( leftover(i).trk, FALSE );
 		AuditTracks( "addTurnout [%d] before delete", i );
 								leftover(i).trk = NULL;
@@ -2376,6 +2409,8 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 				trk1 = connection(i).trk;
 				ep0 = connection(i).ep;
 				DrawEndPt( &mainD, trk1, ep0, wDrawColorWhite );
+LogPrintf( "turnoutConnect: T%d[%d] T%d[%d]\n",
+					GetTrkIndex(newTrk), i, GetTrkIndex(trk1), ep0 );
 				ConnectTracks( newTrk, i, trk1, ep0 );
 				visible |= GetTrkVisible(trk1);
 				DrawEndPt( &mainD, trk1, ep0, wDrawColorBlack );
@@ -2385,6 +2420,7 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 	if (noConnections)
 		visible = TRUE;
 	SetTrkVisible( newTrk, visible);
+
 
 	AuditTracks( "addTurnout T%d before dealing with leftovers", GetTrkIndex(newTrk) );
 	/* deal with the leftovers */
@@ -2405,14 +2441,14 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 			DIST_T dd = 10000.0;
 			a = NormalizeAngle( GetTrkEndAngle(lt,le) + 180.0 );
 			for (ep=0; ep<curTurnout->endCnt; ep++) {
-
 				FindPos( &off, NULL, GetTrkEndPos(newTrk,ep), GetTrkEndPos(lt,le), a, 100000.0 );
 				pos = GetTrkEndPos(newTrk,ep);
 				DIST_T d = GetTrkDistance(lt, &pos);
-				if (d<dd && (d<trackGauge/2) && QueryTrack(lt,Q_IS_CORNU)) {
-					ANGLE_T a2 = NormalizeAngle(GetTrkEndAngle(newTrk,ep)-GetTrkEndAngle(lt,le)+180.0);
+				if (d<dd && ( d<trackGauge/2 || QueryTrack(lt,Q_IS_CORNU))) {
+					ANGLE_T a = GetTrkEndAngle( lt, le );
+					ANGLE_T a2 = fabs(DifferenceBetweenAngles(GetTrkEndAngle(newTrk,ep),a+180));
 					if ((GetTrkEndTrk(newTrk,ep)==NULL) && //Not if joined already
-						(a2<90 || a2>270.0)) { 	//And in the right direction
+						(a2<90)) { 	//And in the right direction
 						GetTrackParams( PARAMS_EXTEND, newTrk, GetTrkEndPos(newTrk,ep), &params);
 						nearest_pos = GetTrkEndPos(newTrk,ep);
 						nearest_angle = NormalizeAngle(params.angle+180.0);
@@ -2427,11 +2463,24 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 			}
 			maxX += trackGauge;
 			pos = Dto.pos;
-			if (QueryTrack(lt,Q_IS_CORNU) && (nearest_ep >=0)) maxX = -1.0;
+			if (QueryTrack(lt,Q_IS_CORNU)) {
+				if (nearest_ep >=0) {
+LogPrintf( "turnoutAdjust: T%d[%d] T%d[%d]\n",
+						GetTrkIndex(lt), le, GetTrkIndex(newTrk), nearest_ep );
+					SetCornuEndPt(lt, le, nearest_pos, nearest_center, nearest_angle, nearest_radius);
+					ConnectTracks(newTrk,nearest_ep,lt,le);
+				} else {
+LogPrintf( "turnoutAdjustDel: T%d\n",
+								GetTrkIndex(lt));
+					DeleteTrack(lt,TRUE);
+				}
+			} else {
 	AuditTracks( "addTurnout T%d[%d] before trimming L%d[%d]", GetTrkIndex(newTrk), i, GetTrkIndex(lt), le );
-			wBool_t rc = TrimTrack( lt, le, maxX, nearest_pos, nearest_angle, nearest_radius, nearest_center );
+LogPrintf( "turnoutTrim: T%d[%d]\n",
+								GetTrkIndex(lt),le);
+				wBool_t rc = TrimTrack( lt, le, maxX, nearest_pos, nearest_angle, nearest_radius, nearest_center );
 	AuditTracks( "addTurnout T%d[%d] after trimming L%d[%d]", GetTrkIndex(newTrk), i, GetTrkIndex(lt), le );
-			if (QueryTrack(lt,Q_IS_CORNU) && (nearest_ep >=0) && rc) ConnectTracks(newTrk,nearest_ep,lt,le);
+			}
 ;		}
 	}
 

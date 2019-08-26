@@ -701,13 +701,21 @@ void GetCornuParmsNear(track_p t, int sel, coOrd * pos2, coOrd * center, ANGLE_T
 	coOrd pos = *pos2;
 	double dd = DistanceCornu(t, &pos);   //Pos adjusted to be on curve
 	int inx;
+	*radius = 0.0;
+	*angle2 = 0.0;
+	*center = zero;
 	wBool_t back,neg;
 	ANGLE_T angle = GetAngleSegs(xx->cornuData.arcSegs.cnt,(trkSeg_t *)(xx->cornuData.arcSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
+
+	if (inx == -1) {
+		return;    //Error in GetAngle
+	}
 
 	trkSeg_p segPtr = &DYNARR_N(trkSeg_t, xx->cornuData.arcSegs, inx);
 
 	if (segPtr->type == SEG_BEZTRK) {
 		GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
+		if (inx ==-1) return;
 		segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
 	}
 
@@ -731,14 +739,21 @@ void GetCornuParmsTemp(dynArr_t * array_p, int sel, coOrd * pos2, coOrd * center
 	coOrd pos = *pos2;
 	int inx;
 	wBool_t back,neg;
+	*radius = 0.0;
+	*center = zero;
+	*angle2 = 0.0;
 
 	ANGLE_T angle = GetAngleSegs(array_p->cnt,(trkSeg_p)array_p->ptr,&pos,&inx,NULL,&back,NULL,&neg);
+
+	if (inx==-1) return;
 
 	trkSeg_p segPtr = &DYNARR_N(trkSeg_t, *array_p, inx);
 
 	if (segPtr->type == SEG_BEZTRK) {
 
 		GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
+
+		if (inx ==-1) return;
 
 		segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
 
@@ -781,9 +796,14 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     
     ANGLE_T angle = GetAngleSegs(xx->cornuData.arcSegs.cnt,(trkSeg_t *)(xx->cornuData.arcSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
 
+    if (inx == -1) return FALSE;
+
     trkSeg_p segPtr = &DYNARR_N(trkSeg_t, xx->cornuData.arcSegs, inx);
 
     GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_t *)(segPtr->bezSegs.ptr),&pos,&inx,NULL,&back,NULL,&neg);
+
+    if (inx == -1) return FALSE;
+
     segPtr = &DYNARR_N(trkSeg_t, segPtr->bezSegs, inx);
 
     if (segPtr->type == SEG_STRTRK) {
@@ -845,15 +865,15 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     UpdateTrkEndElev( trk, ep, ELEV_NONE, 0, NULL);
 
 	*leftover = trk1;
-	*ep0 = 1-ep;
-	*ep1 = ep;
+	*ep0 = ep;    		//Which end is for new on pos?
+	*ep1 = 1-ep;		//Which end is for old trk?
 
 	return TRUE;
 }
 
 BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 	track_p trk2;
-	if (SplitTrack(*trk,pos,*ep,&trk2,TRUE)) {
+	if (SplitTrack(*trk,pos,*ep,&trk2,NULL,NULL,TRUE)) {
 		struct extraData *xx = GetTrkExtraData(*trk);
 		if (trk2) DeleteTrack(trk2,TRUE);
 		SetTrkEndPoint( *trk, *ep, *ep?xx->cornuData.pos[1]:xx->cornuData.pos[0], *ep?xx->cornuData.a[1]:xx->cornuData.a[0] );
@@ -1130,6 +1150,7 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 	params->track_angle = GetAngleSegs(		  						//Find correct Segment and nearest point in it
 							xx->cornuData.arcSegs.cnt,xx->cornuData.arcSegs.ptr,
 							&pos, &segInx, &d , &back, &segInx2, &negative );
+	if (segInx ==-1) return FALSE;
 	trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->cornuData.arcSegs,segInx);
 	if (negative != back) params->track_angle = NormalizeAngle(params->track_angle+180);  //Cornu is in reverse
 	if (segPtr->type == SEG_STRTRK) {
@@ -1255,8 +1276,9 @@ static ANGLE_T GetAngleCornu(
 	BOOL_T back, neg;
 	int indx;
 	angle = GetAngleSegs( xx->cornuData.arcSegs.cnt, (trkSeg_p)xx->cornuData.arcSegs.ptr, &pos, &indx, NULL, &back, NULL, &neg );
-	if ( ep0 ) *ep0 = back?1:0;
-	if ( ep1 ) *ep1 = 1-*ep0;
+	if (!back) angle = NormalizeAngle(angle+180);
+	if ( ep0 ) *ep0 = neg?1:0;
+	if ( ep1 ) *ep1 = neg?0:1;
 	return angle;
 }
 

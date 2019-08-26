@@ -1921,13 +1921,13 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 			trkl = *leftover;
 			ep0 = epl;
 			if ( !disconnect )
-				ConnectTracks( trk, ep, trkl, ep0 );
-			ep0 = 1-ep0;
+				ConnectTracks( trk, ep, trkl, 1-ep );
+			ep0 = ep;
 			while ( 1 ) {
 				CopyAttributes( trk, trkl );
 				ClrTrkElev( trkl );
 				trk0 = GetTrkEndTrk(trkl,ep0);
-				if ( trk0 == NULL )
+				if ( trk0 == NULL || trk0->type == T_TURNOUT )
 					break;
 				ep0 = 1-GetEndPtConnectedToMe(trk0,trkl);
 				trkl = trk0;
@@ -1940,11 +1940,11 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 		DrawNewTrack( trk );
 		if (*leftover) {
 			trkl = *leftover;
-			ep0 = 1-epl;
+			ep0 = 1-ep;
 			while ( 1 ) {
 				DrawNewTrack( trkl );
 				trk0 = GetTrkEndTrk(trkl,ep0);
-				if ( trk0 == NULL || trk0 == trk2 )
+				if ( trk0 == NULL || trk0 == trk2 || trk0->type == T_TURNOUT)
 					break;
 				ep0 = 1-GetEndPtConnectedToMe(trk0,trkl);
 				trkl = trk0;
