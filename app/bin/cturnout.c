@@ -2311,7 +2311,7 @@ LOG( log_turnout, 1, ( "ep[%d] on T%d @(%0.3f %0.3f)\n",
 				a = GetAngleAtPoint( trk, epPos, &ep0, &ep1 );
 			}
 			aa = fabs(DifferenceBetweenAngles( a , tempEndPts(i).angle));
-			if (( IsClose(d)  &&  ( ep0!=ep1 && (aa<=connectAngle || aa>=180-connectAngle)) &&
+			if (( IsClose(d)  &&  ( (ep0!=ep1 && aa<=connectAngle) || (aa<=connectAngle || aa>=180-connectAngle)) &&
 				   ! ( GetTrkType(trk) == T_TURNOUT &&
 				       (trk1=GetTrkEndTrk(trk,ep0)) &&
 					   GetTrkType(trk1) == T_TURNOUT )) ) {
