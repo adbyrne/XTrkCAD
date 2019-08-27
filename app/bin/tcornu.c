@@ -873,7 +873,7 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 
 BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 	track_p trk2;
-	if (SplitTrack(*trk,pos,*ep,&trk2,NULL,NULL,TRUE)) {
+	if (SplitTrack(*trk,pos,*ep,&trk2,TRUE)) {
 		struct extraData *xx = GetTrkExtraData(*trk);
 		if (trk2) DeleteTrack(trk2,TRUE);
 		SetTrkEndPoint( *trk, *ep, *ep?xx->cornuData.pos[1]:xx->cornuData.pos[0], *ep?xx->cornuData.a[1]:xx->cornuData.a[0] );

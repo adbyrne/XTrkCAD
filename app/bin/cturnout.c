@@ -2333,7 +2333,7 @@ LOG( log_turnout, 1, ( "   Attach! epx=%d\n", epx ) )
 				/* split the track at the intersection point */
 		AuditTracks( "addTurnout [%d] before splitTrack", i );
 				EPINX_T ept,epl;
-				if (SplitTrack( trk, epPos, epx, &leftover(i).trk, &ept, &epl, TRUE )) {
+				if (SplitTrack( trk, epPos, epx, &leftover(i).trk, TRUE )) {
 LogPrintf( "turnoutSplit: T%d[%d] T%d EPT=%d EPL=%d \n",
 									GetTrkIndex(trk), epx, GetTrkIndex(leftover(i).trk), ept, epl );
 		AuditTracks( "addTurnout [%d], after splitTrack", i );

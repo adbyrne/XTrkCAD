@@ -957,7 +957,7 @@ static void AccumulateTracks( void )
 				GetBoundingBox( trk, &hi, &lo );
 				if (lo.x <= moveD_hi.x && hi.x >= moveD_lo.x &&
 					lo.y <= moveD_hi.y && hi.y >= moveD_lo.y ) {
-					if (quickMove != MOVE_QUICK) {
+					if (quickMove != MOVE_QUICK)
 #if defined(WINDOWS) && ! defined(WIN32)
 						if ( tempSegs_da.cnt+100 > 65500 / sizeof(*(trkSeg_p)NULL) ) {
 							ErrorMessage( MSG_TOO_MANY_SEL_TRKS );
@@ -965,16 +965,32 @@ static void AccumulateTracks( void )
 							quickMove = MOVE_QUICK;
 						} else
 #endif
+						if (!QueryTrack(trk,Q_IS_CORNU))
 							DrawTrack( trk, &moveD, wDrawColorBlack );
 					}
 					tlist2[inx] = NULL;
 					movedCnt++;
 				}
-			}
 		}
 		moveD.options &= ~DC_QUICK;
+
 	InfoCount( movedCnt );
 	/*wDrawDelayUpdate( moveD.d, FALSE );*/
+}
+
+static void AddEndCornus() {
+	for (int i=0;i<tlist_da.cnt;i++) {
+		track_p trk = DYNARR_N(track_p,tlist_da,i);
+		track_p tc;
+		for (int j=GetTrkEndPtCnt(trk)-1;j>=0;j--) {
+			tc = GetTrkEndTrk(trk,j);
+			if (tc && !GetTrkSelected(tc) && QueryTrack(tc,Q_IS_CORNU) && !QueryTrack(trk,Q_IS_CORNU)) {  //On end and cornu
+				SetTrkBits(tc,TB_SELECTED);
+				DYNARR_APPEND(track_p,tlist_da,1);	//Add to selected list
+				DYNARR_LAST(track_p,tlist_da) = tc;
+			}
+		}
+	}
 }
 
 
@@ -983,6 +999,7 @@ static void GetMovedTracks( BOOL_T undraw )
 	wSetCursor( mainD.d, wCursorWait );
 	DYNARR_RESET( track_p, tlist_da );
 	DoSelectedTracks( AddSelectedTrack );
+	AddEndCornus();							//Include Cornus that are attached at ends of selected
 	tlist2 = (track_p*)MyRealloc( tlist2, (tlist_da.cnt+1) * sizeof *(track_p*)0 );
 	if (tlist_da.ptr)
 		memcpy( tlist2, tlist_da.ptr, (tlist_da.cnt) * sizeof *(track_p*)0 );
@@ -1060,10 +1077,49 @@ static void DrawMovedTracks( void )
 	wDrawBitMap_p bm;
 	ANGLE_T a;
 	int ia;
+	dynArr_t cornu_segs;
 
 	if ( quickMove != MOVE_QUICK) {
 		DrawSegs( &tempD, moveOrig, moveAngle, &tempSegs(0), tempSegs_da.cnt,
 						0.0, wDrawColorBlack );
+
+		for ( inx=0; inx<tlist_da.cnt; inx++ ) {
+			trk = Tlist(inx);
+			if (QueryTrack(trk,Q_IS_CORNU)) {
+				DYNARR_RESET(trkSeg_t,cornu_segs);
+				coOrd pos[2];
+				DIST_T radius[2];
+				ANGLE_T angle[2];
+				coOrd center[2];
+				trackParams_t trackParams;
+				if (GetTrackParams(PARAMS_CORNU, trk, zero, &trackParams)) {
+					for (int i=0;i<2;i++) {
+						pos[i] = trackParams.cornuEnd[i];
+						center[i] = trackParams.cornuCenter[i];
+						angle[i] = trackParams.cornuAngle[i];
+						radius[i] = trackParams.cornuRadius[i];
+						if (GetTrkEndTrk(trk,i) && GetTrkSelected(GetTrkEndTrk(trk,i))) {
+							if (!move0B) {
+								Rotate( &pos[i], zero, moveAngle );
+								Rotate( &center[i],zero, moveAngle );
+								angle[i] = NormalizeAngle(angle[i]+moveAngle);
+							}
+							pos[i].x += moveOrig.x;
+							pos[i].y += moveOrig.y;
+							center[i].x +=moveOrig.x;
+							center[i].y +=moveOrig.y;
+						}
+					}
+					CallCornu0(&pos[0],&center[0],&angle[0],&radius[0],&cornu_segs, FALSE);
+					trkSeg_p cornu_p = &DYNARR_N(trkSeg_t,cornu_segs,0);
+
+					DrawSegs(&tempD, zero, 0.0, cornu_p,cornu_segs.cnt,
+							0.0, wDrawColorBlack );
+				}
+
+			}
+
+		}
 		return;
 	}
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
@@ -1255,7 +1311,7 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 		for (int i=0; i<GetTrkEndPtCnt(ts); i++) { //All EndPoints
 			track_p ct;
 			if ((ct = GetTrkEndTrk(ts,i))!=NULL) {
-				if (GetTrkSelected(ct)) continue;   // Another selected track - ignore
+				if (GetTrkSelected(ct) || QueryTrack(ts,Q_IS_CORNU)) continue;   // Another selected track or Cornu - ignore
 			}
 			coOrd pos1 = GetTrkEndPos(ts,i);
 			if (angle != 0.0)
@@ -1365,6 +1421,8 @@ static STATUS_T CmdMove(
 			base.y = pos.y - orig.y;
 			SnapPos( &base );
 			SetMoveD( TRUE, base, 0.0 );
+
+			//
 
 			if (FindEndIntersection(base,zero,0.0,&t1,&ep1,&t2,&ep2)) {
 				coOrd pos2 = GetTrkEndPos(t2,ep2);

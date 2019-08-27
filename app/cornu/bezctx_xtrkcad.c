@@ -205,6 +205,11 @@ new_bezctx_xtrkcad(dynArr_t * segArray, int ends[2], BOOL_T spots) {
     result->draw_spots = spots;
     result->track = TRUE;
 
+    result->segsArray->cnt =0;
+    result->segsArray->ptr =0;
+    result->segsArray->max =0;
+
+
     return &result->base;
 }
 
