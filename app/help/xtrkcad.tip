@@ -3,9 +3,9 @@ XTrackCAD provides demonstrations on most of the program's features.  The demos 
 The notation "Menu|Item" is used in the documentation (and the on-line demos and tips) to indicate the selection of a menu item.\
 For example File|Open means to open the menu by clicking on File on the menu bar of the Main window and then selecting the Open item from that menu.
 
-A number of example layouts are provided.  These files are located in the 'examples' directory where you installed XTrackCAD.  The "File|Open" command will open that directory when first used.
+A number of example layouts are provided.  These files are located in the 'examples' directory where you installed XTrackCAD.
 
-When installed, the program measures all units in inches.  You can change this on the "Options|Preferences" dialog by changing the Units item to Metric instead of English.
+When installed, the length units are set based on your contry: inches for United States and centimeters elsewhere.  You can change this on the "Options|Preferences" dialog by choosing between Metric and English.
 
 You can change the overall size of your layout on the "Options|Layout" dialog.
 
