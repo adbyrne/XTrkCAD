@@ -2334,8 +2334,6 @@ LOG( log_turnout, 1, ( "   Attach! epx=%d\n", epx ) )
 		AuditTracks( "addTurnout [%d] before splitTrack", i );
 				EPINX_T ept,epl;
 				if (SplitTrack( trk, epPos, epx, &leftover(i).trk, TRUE )) {
-LogPrintf( "turnoutSplit: T%d[%d] T%d EPT=%d EPL=%d \n",
-									GetTrkIndex(trk), epx, GetTrkIndex(leftover(i).trk), ept, epl );
 		AuditTracks( "addTurnout [%d], after splitTrack", i );
 					/* remember so we can fix up connection later */
 					connection(i).trk = trk;
@@ -2354,8 +2352,6 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 										GetTrkIndex(leftover(i).trk) ) )
 								leftover(j).trk = NULL;
 		AuditTracks( "addTurnout [%d] before delete", i );
-LogPrintf( "turnoutDelete: T%d\n",
-								GetTrkIndex(leftover(i).trk));
 								DeleteTrack( leftover(i).trk, FALSE );
 		AuditTracks( "addTurnout [%d] before delete", i );
 								leftover(i).trk = NULL;
@@ -2409,8 +2405,6 @@ LogPrintf( "turnoutDelete: T%d\n",
 				trk1 = connection(i).trk;
 				ep0 = connection(i).ep;
 				DrawEndPt( &mainD, trk1, ep0, wDrawColorWhite );
-LogPrintf( "turnoutConnect: T%d[%d] T%d[%d]\n",
-					GetTrkIndex(newTrk), i, GetTrkIndex(trk1), ep0 );
 				ConnectTracks( newTrk, i, trk1, ep0 );
 				visible |= GetTrkVisible(trk1);
 				DrawEndPt( &mainD, trk1, ep0, wDrawColorBlack );
@@ -2457,7 +2451,7 @@ LogPrintf( "turnoutConnect: T%d[%d] T%d[%d]\n",
 						dd = d;
 						nearest_ep = ep;
 					}
-;				}
+				}
 				if (off.x > maxX)
 					maxX = off.x;
 			}
@@ -2465,19 +2459,13 @@ LogPrintf( "turnoutConnect: T%d[%d] T%d[%d]\n",
 			pos = Dto.pos;
 			if (QueryTrack(lt,Q_IS_CORNU)) {
 				if (nearest_ep >=0) {
-LogPrintf( "turnoutAdjust: T%d[%d] T%d[%d]\n",
-						GetTrkIndex(lt), le, GetTrkIndex(newTrk), nearest_ep );
 					SetCornuEndPt(lt, le, nearest_pos, nearest_center, nearest_angle, nearest_radius);
 					ConnectTracks(newTrk,nearest_ep,lt,le);
 				} else {
-LogPrintf( "turnoutAdjustDel: T%d\n",
-								GetTrkIndex(lt));
 					DeleteTrack(lt,TRUE);
 				}
 			} else {
 	AuditTracks( "addTurnout T%d[%d] before trimming L%d[%d]", GetTrkIndex(newTrk), i, GetTrkIndex(lt), le );
-LogPrintf( "turnoutTrim: T%d[%d]\n",
-								GetTrkIndex(lt),le);
 				wBool_t rc = TrimTrack( lt, le, maxX, nearest_pos, nearest_angle, nearest_radius, nearest_center );
 	AuditTracks( "addTurnout T%d[%d] after trimming L%d[%d]", GetTrkIndex(newTrk), i, GetTrkIndex(lt), le );
 			}
