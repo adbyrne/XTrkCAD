@@ -1183,39 +1183,36 @@ static void MoveTracks(
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
 		trk = Tlist(inx);
 		UndoModify( trk );
-		if (move)
-			MoveTrack( trk, base );
-		if (rotate)
-			RotateTrack( trk, orig, angle );
-		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
-			if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
-					!GetTrkSelected(trk1)) {
-				ep1 = GetEndPtConnectedToMe( trk1, trk );
-				DisconnectTracks( trk, ep, trk1, ep1 );
-				if (QueryTrack(trk1,Q_IS_CORNU)) {  		//Cornu at end stays connected
-					GetTrackParams(PARAMS_CORNU,trk,GetTrkEndPos(trk,ep),&trackParms);
-					if (trackParms.type == curveTypeStraight) {
-						endRadius = 0;
-						endCenter = zero;
-					} else {
-						endRadius = trackParms.arcR;
-						endCenter = trackParms.arcP;
-					}
-					DrawTrack(trk1,&mainD,wDrawColorWhite);
-					DrawTrack(trk1,&mapD,wDrawColorWhite);
-					endAngle = NormalizeAngle(GetTrkEndAngle(trk,ep)+180);
-					if (SetCornuEndPt(trk1,ep1,GetTrkEndPos(trk,ep),endCenter,endAngle,endRadius)) {
-						ConnectTracks(trk,ep,trk1,ep1);
-						DrawTrack(trk1,&mainD,wDrawColorBlack);
-						DrawTrack(trk1,&mapD,wDrawColorBlack);
-					} else {
-						DeleteTrack(trk1,TRUE);
-						ErrorMessage(_("Cornu too tight - it was deleted"));
-						MapRedraw();
-						MainRedraw();
-					}
-				} else {
-					if (QueryTrack(trk,Q_IS_CORNU)) {		//I am a Cornu myself!
+		BOOL_T fixed_end;
+		fixed_end = FALSE;
+		if (QueryTrack(trk, Q_IS_CORNU)) {
+			for (int i=0;i<2;i++) {
+				track_p te;
+				if ((te = GetTrkEndTrk(trk,i)) && !GetTrkSelected(te)) {
+					fixed_end = TRUE;
+				}
+			}
+		}
+
+	    if (!fixed_end) {
+			if (move)
+				MoveTrack( trk, base );
+			if (rotate)
+				RotateTrack( trk, orig, angle );
+			for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
+				if ((trk1 = GetTrkEndTrk(trk,ep)) != NULL &&
+						!GetTrkSelected(trk1)) {
+					ep1 = GetEndPtConnectedToMe( trk1, trk );
+					DisconnectTracks( trk, ep, trk1, ep1 );
+					DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
+				}
+			}
+	    } else {
+			if (QueryTrack(trk, Q_IS_CORNU)) {			//Cornu will be at the end of selected set
+				for (int i=0;i<2;i++) {
+					if ((trk1 = GetTrkEndTrk(trk,i)) && GetTrkSelected(trk1)) {
+						ep1 = GetEndPtConnectedToMe( trk1, trk );
+						DisconnectTracks(trk,i,trk1,ep1);
 						GetTrackParams(PARAMS_CORNU,trk1,GetTrkEndPos(trk1,ep1),&trackParms);
 						if (trackParms.type == curveTypeStraight) {
 							endRadius = 0;
@@ -1225,22 +1222,23 @@ static void MoveTracks(
 							endCenter = trackParms.arcP;
 						}
 						DrawTrack(trk,&mainD,wDrawColorWhite);
-						DrawTrack(trk1,&mapD,wDrawColorWhite);
+						DrawTrack(trk,&mapD,wDrawColorWhite);
 						endAngle = NormalizeAngle(GetTrkEndAngle(trk1,ep1)+180);
-						if (SetCornuEndPt(trk,ep,GetTrkEndPos(trk1,ep1),endCenter,endAngle,endRadius)) {
-							ConnectTracks(trk,ep,trk1,ep1);
+						if (SetCornuEndPt(trk,i,GetTrkEndPos(trk1,ep1),endCenter,endAngle,endRadius)) {
+							ConnectTracks(trk,i,trk1,ep1);
 							DrawTrack(trk,&mainD,wDrawColorBlack);
 							DrawTrack(trk,&mapD,wDrawColorBlack);
 						} else {
-							ErrorMessage(_("Cornu selected too tight after move - it was left alone"));
-							DrawTrack(trk,&mainD,wDrawColorBlack);
-							DrawTrack(trk,&mapD,wDrawColorBlack);
+							DeleteTrack(trk,TRUE);
+							ErrorMessage(_("Cornu too tight - it was deleted"));
+							MapRedraw();
+							MainRedraw();
+							return;
 						}
 					}
 				}
-				DrawEndPt( &mainD, trk1, ep1, wDrawColorBlack );
 			}
-		}
+	    }
 
 		InfoCount( inx );
 #ifdef LATER
@@ -2158,7 +2156,7 @@ static STATUS_T SelectArea(
 		if (state == 0) {
 			state = 1;
 		} else {
-			DrawHilight( &mainD, base, size );
+			//DrawHilight( &mainD, base, size );
 		}
 		base = pos0;
 		size.x = pos.x - pos0.x;
@@ -2212,8 +2210,7 @@ static STATUS_T SelectArea(
 				}
 			}
 			SelectedTrackCountChange();
-			if (cnt > incrementalDrawLimit)
-				MainRedraw();
+			MainRedraw();
 		}
 		return C_CONTINUE;
 
@@ -2385,6 +2382,7 @@ static STATUS_T CmdSelect(
 			break;
 		case AREA:
 			rc = SelectArea( action, pos );
+
 			break;
 		}
 		return rc;
