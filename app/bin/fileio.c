@@ -1336,8 +1336,6 @@ EXPORT void FileInit( void )
 	}
 	if ( (workingDir = wGetAppWorkDir()) == NULL )
 		AbortProg( "wGetAppWorkDir()" );
-	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
-	SetCurrentPath( LAYOUTPATHKEY, message );
 }
 
 EXPORT BOOL_T ParamFileInit( void )
