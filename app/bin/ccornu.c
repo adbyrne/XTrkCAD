@@ -612,7 +612,7 @@ void DrawTempCornu() {
 				  Da.extend[0]?&Da.extendSeg[0]:NULL,
 				  Da.extend[1]?&Da.extendSeg[1]:NULL,
 				  (trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,
-				  Da.minRadius<(GetLayoutMinTrackRadius()-EPSILON)?exceptionColor:normalColor);
+				  fabs(Da.minRadius)<(GetLayoutMinTrackRadius()-EPSILON)?exceptionColor:normalColor);
 
 }
 

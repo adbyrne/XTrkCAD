@@ -1207,7 +1207,7 @@ static BOOL_T QueryCornu( track_p trk, int query )
 		return TRUE;
 		break;
 	case Q_EXCEPTION:
-		return xx->cornuData.minCurveRadius < (GetLayoutMinTrackRadius()-EPSILON);
+		return fabs(xx->cornuData.minCurveRadius) < (GetLayoutMinTrackRadius()-EPSILON);
 		break;
 	case Q_IS_CORNU:
 		return TRUE;
