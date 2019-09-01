@@ -306,21 +306,23 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 				
 				// else try to find the current filter and parse its name
 				GtkFileFilter *currentFilter = gtk_file_chooser_get_filter (GTK_FILE_CHOOSER(fs->window) );
-				const char *nameOfFilter = gtk_file_filter_get_name( currentFilter );
-				char *pattern = strdup( nameOfFilter );
-				char *extension = fs->defaultExtension;
-				char *startDelimiter = strstr( pattern, "(*." );
-				
-				if(startDelimiter) {
-					char *endDelimiter = strpbrk(startDelimiter + 3, ",;) ");
-					if( endDelimiter ) {
-						*endDelimiter = '\0';
-						extension = startDelimiter + 2;
+				if (currentFilter) {
+					const char *nameOfFilter = gtk_file_filter_get_name( currentFilter );
+					char *pattern = strdup( nameOfFilter );
+					char *extension = fs->defaultExtension;
+					char *startDelimiter = strstr( pattern, "(*." );
+
+					if(startDelimiter) {
+						char *endDelimiter = strpbrk(startDelimiter + 3, ",;) ");
+						if( endDelimiter ) {
+							*endDelimiter = '\0';
+							extension = startDelimiter + 2;
+						}
 					}
-				}	
-				file = g_realloc( file, strlen(file)+strlen(extension));
-				strcat( file, extension );										
-				free( pattern );
+					file = g_realloc( file, strlen(file)+strlen(extension));
+					strcat( file, extension );
+					free( pattern );
+				}
 			}	
 			fileNames[ i ] = file;
 			g_free( g_slist_nth_data ( fileNameList, i));
