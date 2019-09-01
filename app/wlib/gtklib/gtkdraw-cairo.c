@@ -517,7 +517,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		mid0.y = (d0y/2)+points[j].y;
 		mid1.x = (d1x/2)+points[i].x;
 		mid1.y = (d1y/2)+points[i].y;
-		if ((type[i] == 2) && (len1>0) && (len0>0)) {
+		if (type && (type[i] == 2) && (len1>0) && (len0>0)) {
 			double ratio = sqrt(len0/len1);
 			if (len0 < len1) {
 				mid1.x = ((d1x*ratio)/2)+points[i].x;
@@ -542,7 +542,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 		mid4.x = round(mid4.x)+0.5;
 		mid4.y = round(mid4.y)+0.5;
 		if(i==0) {
-			if (type[i] == 0 || open) {
+			if (!type || type[i] == 0 || open) {
 				cairo_move_to(cairo, points[i].x, points[i].y);
 				save = points[0];
 			} else {
@@ -553,7 +553,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 					cairo_curve_to(cairo, mid3.x, mid3.y, mid4.x, mid4.y, mid1.x, mid1.y);
 				save = mid0;
 			}
-		} else if (type[i] == 0 || (open && (i==cnt-1))) {
+		} else if (!type || type[i] == 0 || (open && (i==cnt-1))) {
 			cairo_line_to(cairo, points[i].x, points[i].y);
 		} else {
 			cairo_line_to(cairo, mid0.x, mid0.y);
@@ -704,6 +704,9 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 				cairo_rectangle(cairo, xx-0.5, yy-0.5, 1, 1);
 				cairo_fill(cairo);
 			}
+	if (gdk_window != bd->pixmap)
+		gdk_window_invalidate_rect(gdk_window,NULL,0);
+
 	gtk_widget_queue_draw(GTK_WIDGET(bd->widget));
 
 	cairo_destroy(cairo);
