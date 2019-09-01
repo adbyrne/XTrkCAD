@@ -310,12 +310,12 @@ typedef struct {
 						FALSE, pc, pp[1] );
 					return -1;
 				}
-				d = FindDistance(
-						GetSegEndPt( &segs[segInx[0]], 1-segEp[0], FALSE, NULL ),
-						GetSegEndPt( &segs[segInx[1]], segEp[1], FALSE, NULL ) );
+				coOrd p0 = GetSegEndPt( &segs[segInx[0]], 1-segEp[0], FALSE, NULL );
+				coOrd p1 = GetSegEndPt( &segs[segInx[1]], segEp[1], FALSE, NULL );
+				d = FindDistance(p0,p1);
 				if (d > MIN_TURNOUT_SEG_CONNECT_DIST) {
-					InputError( _("Turnout path[%d] %d-%d not connected: %0.3f"),
-						FALSE, pc, pp[0], pp[1], d );
+					InputError( _("Turnout path[%d] %d-%d not connected: %0.3f P0(%f,%f) P1(%f,%f)"),
+						FALSE, pc, pp[0], pp[1], d, p0.x, p0.y, p1.x, p1.y );
 					return -1;
 				}
 			}
