@@ -268,8 +268,8 @@ static int CustomDoExport(
 static void CustomExport( void * junk )
 {
 	if ( customMgmExport_fs == NULL )
-		customMgmExport_fs = wFilSelCreate( mainW, FS_UPDATE, 0, _("Move To XTP"),
-				_("Parameter File|*.xtp"), CustomDoExport, NULL );
+		customMgmExport_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Move To XTP"),
+				_("Parameter File (*.xtp)|*.xtp"), CustomDoExport, NULL );
 	wFilSelect( customMgmExport_fs, GetCurrentPath(CUSTOMPATHKEY));
 }
 
