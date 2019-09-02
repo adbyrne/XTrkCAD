@@ -107,12 +107,16 @@ int wNoticeEx(int type,
         parent = GTK_WINDOW(gtkMainW->gtkwin);
     }
 
+    wDestroySplash();
+
     dialog = gtk_message_dialog_new(parent,
                                     GTK_DIALOG_DESTROY_WITH_PARENT,
                                     flag,
                                     ((no==NULL)?GTK_BUTTONS_OK:GTK_BUTTONS_YES_NO),
                                     "%s", msg);
     gtk_window_set_title(GTK_WINDOW(dialog), headline);
+
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
     res = gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);

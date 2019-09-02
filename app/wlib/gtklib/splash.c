@@ -63,7 +63,7 @@ wCreateSplash(char *appName, char *appVer)
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     gtk_window_set_resizable(GTK_WINDOW(window), FALSE);
     gtk_window_set_type_hint(GTK_WINDOW(window), GDK_WINDOW_TYPE_HINT_SPLASHSCREEN);
-#if GTK_MINOR_VERSION > 5
+#if GTK_MAJOR_VERSION > 1 || GTK_MINOR_VERSION > 5
     gtk_window_set_focus_on_map(GTK_WINDOW(window), FALSE);
 #endif
 
@@ -139,6 +139,8 @@ void
 wDestroySplash(void)
 {
     /* kill window */
-    gtk_widget_destroy(window);
+    if (window) gtk_widget_destroy(window);
+    window = NULL;
+
     return;
 }
