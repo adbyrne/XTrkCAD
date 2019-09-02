@@ -993,13 +993,6 @@ BOOL_T WriteCompound(
 	case TOpier:
 		rc &= fprintf( f, "\tX %s %0.6f \"%s\"\n", PIER, xx->u.pier.height, xx->u.pier.name )>0;
 		break;
-//	case TOcurved:
-//		rc &= fprintf( f, "\tX %s", CURVED )>0;
-//		for (ep=0; ep<epCnt; ep++) {
-//			fprintf( f, " %0.6f", DYNARR_N(DIST_T,xx->u.curved.radii,ep));
-//		}
-// 		rc &= fprintf( f, "\n")>0;
-//		break;
 
 	default:
 		;
@@ -1201,21 +1194,6 @@ void ReadCompound(
 			GetArgs( tempSpecial+strlen(PIER), "fq",
 						&xx->u.pier.height, &xx->u.pier.name );
 
-		} else if (strncmp( tempSpecial, CURVED, strlen(CURVED))== 0) {
-//			xx->special = TOcurved;
-//			int cnt = GetTrkEndPtCnt(trk);
-//			xx->u.curved.radii.cnt = 0;
-//			xx->u.curved.radii.max = 0;
-//			xx->u.curved.radii.ptr = 0;
-//			DYNARR_SET(DIST_T,xx->u.curved.radii,cnt);
-//			char * cp;
-//			cp = tempSpecial + strlen(CURVED);
-//			for (int i=0;i<cnt;i++) {
-//				if (cp && cp[0] != '\0') {
-//					GetArgs( cp,"f",&DYNARR_N(DIST_T,xx->u.curved.radii,i));
-//					cp = strchr(cp,' ');
-//				} else
-//					DYNARR_N(DIST_T,xx->u.curved.radii,i) = 0.0;
 		} else {
 			InputError("Unknown special case", TRUE);
 		}

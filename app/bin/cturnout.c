@@ -348,18 +348,6 @@ static BOOL_T ReadTurnoutParam(
 				to->special = TOadjustable;
 				GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
 						&to->u.adjustable.minD, &to->u.adjustable.maxD );
-			} else if (strncmp( tempSpecial, CURVED, strlen(CURVED) ) == 0) {
-				to->special = TOcurved;
-				char * cp = tempSpecial +strlen(CURVED);
-				DYNARR_SET(DIST_T,to->u.curved.radii,tempEndPts_da.cnt);
-				for (int i=0; i<tempEndPts_da.cnt;i++) {
-					if (cp && (cp != '\0')) {
-						GetArgs(cp, "f", &DYNARR_N(DIST_T,to->u.curved.radii,i));
-						cp = strchr(cp,' ');
-					} else {
-						DYNARR_N(DIST_T,to->u.curved.radii,i) = 0.0;
-					}
-				}
 			} else {
 				InputError(_("Unknown special case"), TRUE);
 			}
