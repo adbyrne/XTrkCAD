@@ -665,6 +665,9 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	y = INMAPY( bd, y-bm->y )-bm->h;
 	wb = (bm->w+7)/8;
 
+	if (opts == wDrawOptCursorRmv) color = wDrawColorWhite;   //Wipeout existing cursor draw (simplistic first)
+	if (opts == wDrawOptCursorClr ) return;
+
 	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opts);
 	cairo_window = bd->pixmap;
 
@@ -701,7 +704,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 					cairo_window = gdk_window;
 				}
 
-				cairo_rectangle(cairo, xx-0.5, yy-0.5, 1, 1);
+				cairo_rectangle(cairo, xx, yy, 1, 1);
 				cairo_fill(cairo);
 			}
 	if (gdk_window != bd->pixmap)
