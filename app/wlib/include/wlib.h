@@ -454,6 +454,9 @@ void wTextSetPosition(		wText_p bt, int pos );
 typedef int wDrawOpts;
 #define wDrawOptTemp	(1<<0)
 #define wDrawOptNoClip	(1<<1)
+#define wDrawOptCursor  (1<<2)
+#define wDrawOptCursorClr (1<<3)
+#define wDrawOptCursorRmv (1<<4)
 #define wDrawOutlineFont (1<<11)
 #define wDrawOptOpaque   (1<<12)
 
