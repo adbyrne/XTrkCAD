@@ -868,7 +868,7 @@ void pullMenuEnter(int key) {
 
 void InitCmdPull( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP2|IC_CMDMENU|IC_WANT_MOVE, ACCL_CONNECT, NULL );
+	AddMenuButton( menu, CmdPull, "cmdConnect", _("Connect Two Tracks"), wIconCreatePixMap(pull_xpm), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_LCLICK|IC_POPUP2|IC_CMDMENU|IC_WANT_MOVE, ACCL_CONNECT, NULL );
 	pullPopupM = MenuRegister( "Connect Options" );
 	pullConnectMultiple = wMenuPushCreate( pullPopupM, "", _("Connect All Selected - 'S'"), 0, (wMenuCallBack_p)pullMenuEnter, (void*) 'S');
 }
