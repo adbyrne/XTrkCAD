@@ -151,7 +151,7 @@ static int verbose = 0;
 static wMenuList_p winList_mi;
 static BOOL_T inMainW = TRUE;
 
-static long stickySet;
+static long stickySet = 0;
 static long stickyCnt = 0;
 static char * stickyLabels[33];
 #define TOOLBARSET_INIT				(0xFFFF)
@@ -1544,7 +1544,10 @@ EXPORT wIndex_t AddMenuButton(
 			stickyLabels[stickyCnt-1] = buttonGroupStickyLabel;
 		}
 		stickyLabels[stickyCnt] = NULL;
-		commandList[cmdInx].stickyMask = 1L<<(stickyCnt-1);
+		long stickyMask = 1L<<(stickyCnt-1);
+		commandList[cmdInx].stickyMask = stickyMask;
+		if ( ( commandList[cmdInx].options & IC_INITNOTSTICKY ) == 0 )
+			stickySet |= stickyMask;
 	}
 	if ( buttonGroupPopupM ) {
 		commandList[cmdInx].menu[0] =
@@ -2472,6 +2475,7 @@ static void CreateMenus( void )
 	SetAccelKey( "zoomDown", wAccelKey_Numpad_Subtract, WKEY_CTRL, (wAccelKeyCallBack_p)DoZoomDown, (void*)1 );
 
 	InitBenchDialog();
+	wPrefGetInteger( "DialogItem", "sticky-set", &stickySet, stickySet );
 }
 
 

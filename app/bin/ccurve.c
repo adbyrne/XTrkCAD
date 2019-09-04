@@ -816,7 +816,7 @@ EXPORT void InitCmdCurve( wMenu_p menu )
 void InitCmdHelix(wMenu_p menu)
 {
     AddMenuButton(menu, CmdHelix, "cmdHelix", _("Helix"), NULL, LEVEL0_50,
-                  IC_STICKY|IC_POPUP2, ACCL_HELIX, NULL);
+                  IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HELIX, NULL);
     ParamRegister(&helixPG);
     RegisterChangeNotification(ChangeHelixW);
 }
