@@ -270,27 +270,6 @@ static STATUS_T CmdModify(
 		tempSegs(1).color = wDrawColorBlack;
 		tempSegs(1).width = 0;
 		tempSegs_da.cnt = 0;
-		//SnapPos( &pos );
-		//If on a different track
-		//track_p trk = OnTrack( &pos, TRUE, FALSE );
-		//if (!modifyRulerMode && trk && Dex.Trk && trk != Dex.Trk) {
-		//	action = C_FINISH;
-		//	if ( modifyBezierMode ) {
-		//		rc = ModifyBezier(C_FINISH, pos);
-		//	} else if ( modifyCornuMode ) {
-		//		rc = ModifyCornu(C_FINISH, pos);
-		//	} else if ( modifyDrawPolyMode) {
-		//		rc = ModifyDrawPoly(C_FINISH, pos);
-		//	} else rc = ModifyTrack( Dex.Trk, C_FINISH, pos );
-		//	Dex.Trk = trk;
-		//	tempSegs_da.cnt = 0;
-			/*ChangeParameter( &easementPD );*/
-		//	trackGauge = 0.0;
-		//	changeTrackMode = modifyRulerMode = FALSE;
-		//	modifyBezierMode = FALSE;
-		//	modifyCornuMode = FALSE;
-		//	modifyDrawMode = FALSE;
-		//}
 		Dex.Trk = OnTrack( &pos, TRUE, FALSE );
 		//Dex.Trk = trk;
 		if (Dex.Trk == NULL) {
@@ -394,11 +373,11 @@ static STATUS_T CmdModify(
 					if (ep != -1) {
 						if (MyGetKeyState()&WKEY_CTRL) {
 							pos = GetTrkEndPos(t,ep);
-							CreateEndAnchor(pos,TRUE);
+							CreateEndAnchor(pos,FALSE);
 							CreateRadiusAnchor(pos,GetTrkEndAngle(t,ep),FALSE);
 							CreateRadiusAnchor(pos,GetTrkEndAngle(t,ep)+90,TRUE);
 						} else {
-							CreateEndAnchor(pos,TRUE);
+							CreateEndAnchor(pos,FALSE);
 							if ((MyGetKeyState()&WKEY_SHIFT) && 					//Shift Down
 								QueryTrack( t, Q_CAN_MODIFYRADIUS ) &&				// Straight or Curve
 								((inx=PickUnconnectedEndPointSilent(pos,t)) >= 0 )) { //Which has an open end
@@ -408,11 +387,17 @@ static STATUS_T CmdModify(
 							CreateRadiusAnchor(pos,GetAngleAtPoint(t,pos,NULL,NULL),TRUE);
 						}
 					}
-
-				} else if (ep>=0){
+				} else if (ep>=0){													//Turnout
 					pos = GetTrkEndPos(t, ep);
 					CreateEndAnchor(pos,TRUE);
-					CreateRadiusAnchor(pos,NormalizeAngle(GetTrkEndAngle(t,ep)),FALSE);
+					if ( (MyGetKeyState()&WKEY_CTRL)) {
+						CreateRadiusAnchor(pos,NormalizeAngle(GetTrkEndAngle(t,ep)),FALSE);
+						CreateRadiusAnchor(pos,GetTrkEndAngle(t,ep)+90,TRUE);
+						CreateEndAnchor(pos,TRUE);
+					} else {
+						CreateRadiusAnchor(pos,NormalizeAngle(GetTrkEndAngle(t,ep)),FALSE);
+						CreateEndAnchor(pos,TRUE);
+					}
 				}
 			}
 		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL) && !GetLayerFrozen( GetTrkLayer( t )) && QueryTrack( t, Q_IS_DRAW )) {
