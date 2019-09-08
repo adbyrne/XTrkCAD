@@ -234,4 +234,5 @@ extern long playbackDelay;
 void MovePlaybackCursor( drawCmd_p, wPos_t, wPos_t );
 typedef void (*playbackProc)( wAction_t, coOrd );
 void PlaybackMouse( playbackProc, drawCmd_p, wAction_t, coOrd, wDrawColor );
+void RedrawPlaybackCursor();
 #endif

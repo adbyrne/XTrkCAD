@@ -467,7 +467,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if (wGetKeyState()&WKEY_CTRL) {
+		if (MyGetKeyState()&WKEY_CTRL) {
 			CreateMoveAnchor(pos);
 			return C_CONTINUE;
 		}
@@ -498,7 +498,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 	case C_DOWN:
 	case C_MOVE:
 	case C_UP:
-		if (wGetKeyState()&WKEY_CTRL)
+		if (MyGetKeyState()&WKEY_CTRL)
 			CmdMoveDescription( action, pos );
 		return C_CONTINUE;
 	case C_LCLICK:

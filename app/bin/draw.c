@@ -1362,6 +1362,7 @@ lprintf("mainRedraw\n");
 	DrawMarkers();
 	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
+	RedrawPlaybackCursor();              //If in playback
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
@@ -2728,7 +2729,7 @@ static STATUS_T CmdPan(
         wSetCursor(mainD.d,wCursorSizeAll);
 		 break;
 	case C_DOWN:
-		if ((wGetKeyState()&WKEY_CTRL) == 0) {
+		if ((MyGetKeyState()&WKEY_CTRL) == 0) {
 			panmode = PAN;
 			start_pos = pos;
 			InfoMessage(_("Pan Mode - drag point to new position"));
