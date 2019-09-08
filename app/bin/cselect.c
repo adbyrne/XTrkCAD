@@ -1322,28 +1322,30 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 			pos2 = pos1;
 			track_p tt;
 			if ((tt=OnTrackIgnore(&pos2,FALSE,TRUE,ts))!=NULL) {
-				EPINX_T epp = PickUnconnectedEndPointSilent(pos2, tt);
-				if (epp>=0) {
-					DIST_T d = FindDistance(pos1,GetTrkEndPos(tt,epp));
-					if (IsClose(d)) {
-						*ep1 = epp;
-						*ep2 = i;
-						*t1 = tt;
-						*t2 = ts;
-						return TRUE;
-					}
-				} else {
-					epp = PickEndPoint(pos2,tt);      //Any close end point (even joined)
+				if (!GetTrkSelected(tt)) {							//Ignore if new track is selected
+					EPINX_T epp = PickUnconnectedEndPointSilent(pos2, tt);
 					if (epp>=0) {
-						ct = GetTrkEndTrk(tt,epp);
-						if (ct && !GetTrkSelected(ct)) {  //Point is junction to selected track - so will be broken
-							DIST_T d = FindDistance(pos1,GetTrkEndPos(tt,epp));
-							if (IsClose(d)) {
-								*ep1 = epp;
-								*ep2 = i;
-								*t1 = tt;
-								*t2 = ts;
-								return TRUE;
+						DIST_T d = FindDistance(pos1,GetTrkEndPos(tt,epp));
+						if (IsClose(d)) {
+							*ep1 = epp;
+							*ep2 = i;
+							*t1 = tt;
+							*t2 = ts;
+							return TRUE;
+						}
+					} else {
+						epp = PickEndPoint(pos2,tt);      //Any close end point (even joined)
+						if (epp>=0) {
+							ct = GetTrkEndTrk(tt,epp);
+							if (ct && GetTrkSelected(ct)) {  //Point is junction to selected track - so will be broken
+								DIST_T d = FindDistance(pos1,GetTrkEndPos(tt,epp));
+								if (IsClose(d)) {
+									*ep1 = epp;
+									*ep2 = i;
+									*t1 = tt;
+									*t2 = ts;
+									return TRUE;
+								}
 							}
 						}
 					}
@@ -2342,9 +2344,9 @@ static STATUS_T CmdSelect(
 		if ((selectedTrackCount==0) && (t == NULL)) return C_CONTINUE;
 		if (selectedTrackCount>0) {
 			if ((ht = IsInsideABox(pos)) != NULL) {
-				if ((wGetKeyState()&WKEY_CTRL)) {
+				if ((MyGetKeyState()&WKEY_CTRL)) {
 					CreateRotateAnchor(pos);
-				} else if ((wGetKeyState()&WKEY_SHIFT)) {
+				} else if ((MyGetKeyState()&WKEY_SHIFT)) {
 					CreateMoveAnchor(pos);
 				}
 			}
@@ -2363,12 +2365,12 @@ static STATUS_T CmdSelect(
 				rc = C_TERMINATE;
 				doingMove = FALSE;
 				doingRotate = FALSE;
-			} else if ((action >= C_DOWN && action <= C_UP) && (doingRotate || (wGetKeyState()&WKEY_CTRL)))	{
+			} else if ((action >= C_DOWN && action <= C_UP) && (doingRotate || (MyGetKeyState()&WKEY_CTRL)))	{
 				RotateAlign( FALSE );
 				rc = CmdRotate( action, pos );
 				doingMove = FALSE;
 				doingRotate = TRUE;
-			} else if ((action >= C_DOWN && action <= C_UP) && (doingMove || (wGetKeyState()&WKEY_SHIFT))) {
+			} else if ((action >= C_DOWN && action <= C_UP) && (doingMove || (MyGetKeyState()&WKEY_SHIFT))) {
 				rc = CmdMove( action, pos );
 				doingMove = TRUE;
 				doingRotate = FALSE;
