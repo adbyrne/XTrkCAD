@@ -168,6 +168,9 @@ DRAW 20 0.000000 0.000000 0.000000
 	END
 REDRAW
 RESET
+#Ensure in Select Mode
+COMMAND Select
+MOUSE 1 50.000 40.000
 MESSAGE
 The <Select> command is used to select tracks.
 
@@ -179,30 +182,61 @@ BIGPAUSE
 MESSAGE
 _________________________________________
 
-A single Left-Click selects tracks.
+A Left-Click selects a track
 END
 STEP
 MOUSE 2 18.347 2.773
 MOUSE 4 18.347 2.773
+MESSAGE 
+-----------------------------------------
+A Ctrl-Left-Click adds tracks to the selection
+END
+STEP
+KEYSTATE 4
 MOUSE 2 27.733 6.613
+KEYSTATE 4
 MOUSE 4 27.733 6.613
+KEYSTATE 4
 MOUSE 2 30.720 9.920
+KEYSTATE 4
 MOUSE 4 30.720 9.920
+KEYSTATE 4
 MOUSE 2 12.373 13.013
+KEYSTATE 4
 MOUSE 4 12.373 13.013
 BIGPAUSE
 MESSAGE
-_________________________________________
+___________________________________________
 
-Selecting a selected track de-selects it.
+Selecting a selected track re-selects only it.
 END
 STEP
 MOUSE 2 27.840 8.213
 MOUSE 4 27.840 8.213
 MESSAGE
-=========================================
+___________________________________________
+
+Selecting off all tracks de-selects them.
 END
 STEP
+MOUSE 2 12.840 8.213
+MOUSE 4 12.840 8.213
+CLEAR
+MESSAGE
+=========================================
+
+Select two tracks at the end of a section 
+
+END
+STEP
+KEYSTATE 4
+MOUSE 2 10.347 2.773
+KEYSTATE 4
+MOUSE 4 10.347 2.773
+KEYSTATE 4
+MOUSE 2 27.733 6.613
+KEYSTATE 4
+MOUSE 4 27.733 6.613
 CLEAR
 MESSAGE
 Shift-Left-Click on a track will select all unselected tracks connected to the track.  Selection stops at a previously selected track.
@@ -246,83 +280,27 @@ MOUSE 4 37.480 -1.600
 MESSAGE
 _________________________________________
 
-And Right-Drag de-selects all tracks within an area.
-END
-STEP
-MOUSE 5 12.480 2.453
-MOUSE 7 37.707 0.107
-MESSAGE
-=========================================
-END
-STEP
-CLEAR
-MESSAGE
 Shift-Left-Drag is used to move selected tracks.
 
 When you move selected tracks that are connected to unselected tracks, the tracks will be disconnected.  These points are marked by a Red cross on the layout.
+
+If the disconnected end point of a track and one being moved a re close enough two circles are displayed, showing where the tracks will be snapped together. 
 END
 STEP
 KEYSTATE 2
-MOUSE 2 14.827 8.960
+MOUSE 1 27.840 8.213
+KEYSTATE 2
+MOUSE 2 27.840 8.213
 KEYSTATE 2
 MOUSE 3 21.653 8.640
 KEYSTATE 2
 MOUSE 4 21.653 8.640
 MESSAGE
-=========================================
+__________________________________________
+
 END
 STEP
-CLEAR
-MESSAGE
-Drawing the tracks while moving can be very time-consuming.  We had just used the "Normal" method of drawing tracks.
 
-The Command Options dialog (from the Options menu) contains a Radio button group which you can use to pick the drawing method.
-
-You can also popup the Command Options Menu by pressing Shift-Right-Click which includes options for setting the drawing method.  These options are also available for the Move and Rotate Command Options Menu.
-END
-STEP
-PARAMETER misc cmdCmdopt
-MESSAGE
-_________________________________________
-
-The next method is "Simple" draws.  Here tracks are drawn using one line, no End-Points are drawn, lines are not drawn and structures are drawn using a box outline.
-
-Note: you can move the Command Options dialog if it obscures the main window.
-END
-STEP
-PARAMETER cmdopt move-quick 1
-BIGPAUSE
-KEYSTATE 2
-MOUSE 2 24.533 2.027
-KEYSTATE 2
-MOUSE 3 20.267 2.453
-KEYSTATE 2
-MOUSE 4 20.267 2.453
-MESSAGE
-_________________________________________
-
-The next method is to just draw the End-Points of the selected tracks.
-
-Unconnected End-Points are indicated by Red crosses, and connected End-Points are indicated by Red lines.
-END
-STEP
-PARAMETER cmdopt move-quick 2
-BIGPAUSE
-KEYSTATE 2
-MOUSE 2 17.493 0.427
-KEYSTATE 2
-MOUSE 3 17.493 3.427
-KEYSTATE 2
-MOUSE 4 15.787 1.600
-MESSAGE
-_________________________________________
-
-Now we will go back to using the Normal method again.
-END
-STEP
-PARAMETER cmdopt move-quick 0
-BIGPAUSE
-PARAMETER cmdopt ok
 MESSAGE
 =========================================
 END
