@@ -291,19 +291,33 @@ static drawCmd_p playbackD;
 static wPos_t playbackX, playbackY;
 
 #include "bitmaps/arrow0.xbm"
+#include "bitmaps/arrow0_shift.xbm"
+#include "bitmaps/arrow0_ctl.xbm"
 #include "bitmaps/arrow3.xbm"
+#include "bitmaps/arrow3_shift.xbm"
+#include "bitmaps/arrow3_ctl.xbm"
 #include "bitmaps/arrows.xbm"
+#include "bitmaps/arrowr3.xbm"
+#include "bitmaps/arrowr3_shift.xbm"
+#include "bitmaps/arrowr3_ctl.xbm"
 #include "bitmaps/flash.xbm"
 
 static wDrawColor rightDragColor;
 static wDrawColor leftDragColor;
 static wDrawBitMap_p arrow0_bm;
+static wDrawBitMap_p arrow0_shift_bm;
+static wDrawBitMap_p arrow0_ctl_bm;
 static wDrawBitMap_p arrow3_bm;
+static wDrawBitMap_p arrow3_shift_bm;
+static wDrawBitMap_p arrow3_ctl_bm;
 static wDrawBitMap_p arrows_bm;
+static wDrawBitMap_p arrowr3_bm;
+static wDrawBitMap_p arrowr3_shift_bm;
+static wDrawBitMap_p arrowr3_ctl_bm;
 static wDrawBitMap_p flash_bm;
 
-static long flashTO = 60;
-static DIST_T PixelsPerStep = 20;
+static long flashTO = 120;
+static DIST_T PixelsPerStep = 5;
 static long stepTO = 100;
 EXPORT unsigned long playbackTimer;
 
@@ -313,7 +327,7 @@ static wBool_t flashTwice = FALSE;
 int DBMCount=0;
 
 #define DRAWALL
-typedef enum { FLASH_PLUS, FLASH_MINUS, REDRAW, CLEAR, DRAW, RESET, ORIG, MOVE_PLYBCK1, MOVE_PLYBCK2, MOVE_PLYBCK3, MOVE_PLYBCK4 } DrawBitMap_e;
+typedef enum { FLASH_PLUS, FLASH_MINUS, REDRAW, CLEAR, DRAW, RESET, ORIG, MOVE_PLYBCK1, MOVE_PLYBCK2, MOVE_PLYBCK3, MOVE_PLYBCK4, QUIT } DrawBitMap_e;
 
 char * DrawBitMapToString(DrawBitMap_e dbm) {
 	switch(dbm) {
@@ -339,6 +353,8 @@ char * DrawBitMapToString(DrawBitMap_e dbm) {
 		return "MPBC3";
 	case MOVE_PLYBCK4:
 		return "MPBC4";
+	case QUIT:
+		return "Quit";
 	default:
 		return "";
 	}
@@ -352,7 +368,7 @@ static void MacroDrawBitMap(
 		wPos_t y,
 		wDrawColor color )
 {
-	wDrawOpts opts;
+	wDrawOpts opts = 0;
 	switch(dbm) {
 		case RESET:
 		case DRAW:
@@ -371,6 +387,9 @@ static void MacroDrawBitMap(
 		case MOVE_PLYBCK2:
 			opts = wDrawOptCursorClr;
 			break;
+		case QUIT:
+			opts = wDrawOptCursorQuit;
+			break;
 		default:
 			opts = 0;
 		}
@@ -386,9 +405,8 @@ static void Flash( drawCmd_p d, wPos_t x, wPos_t y, wDrawColor flashColor )
 	if (playbackTimer != 0)
 		return;
 	MacroDrawBitMap( FLASH_PLUS, d, flash_bm, x, y, flashColor );
-	wPause( flashTO );
+	wPause( flashTO*2 );
 	MacroDrawBitMap( FLASH_MINUS, d, flash_bm, x, y, flashColor );
-	wPause( flashTO );
 }
 
 
@@ -410,10 +428,10 @@ static void SetPlaybackSpeed(
 	playbackSpeed = inx;
 }
 
-static void ClearPlaybackCursor( void )
+static void ClearPlaybackCursor( BOOL_T quit )
 {
 	if (playbackBm != NULL) {
-		MacroDrawBitMap( CLEAR, playbackD, playbackBm, playbackX, playbackY, playbackColor );
+		MacroDrawBitMap( quit?QUIT:CLEAR, playbackD, playbackBm, playbackX, playbackY, playbackColor );
 	}
 	playbackBm = NULL;
 }
@@ -428,6 +446,11 @@ static void DrawPlaybackCursor(
 	if ( playbackBm )
 		printf( "DrawPlayBack: playbackBm not null\n" );
 	MacroDrawBitMap( DRAW,  playbackD=d, playbackBm=bm, playbackX=xx, playbackY=yy, playbackColor=color );
+}
+
+EXPORT void RedrawPlaybackCursor() {
+	if ( playbackBm && inPlayback)
+		MacroDrawBitMap( DRAW,  playbackD, playbackBm, playbackX, playbackY, playbackColor );
 }
 
 static void MoveCursor(
@@ -454,6 +477,11 @@ static void MoveCursor(
 	if (playbackTimer == 0 && playbackD == d && !didPause) {
 		dx = (DIST_T)(x-x0);
 		dy = (DIST_T)(y-y0);
+		if ((dx==0) && (dy==0)) {
+			ClearPlaybackCursor(FALSE);
+			DrawPlaybackCursor( d, bm, x0, y0, color );
+			return;
+		}
 		dist = sqrt( dx*dx + dy*dy );
 		steps = (int)(dist / PixelsPerStep ) + 1;
 		dx /= steps;
@@ -461,26 +489,38 @@ static void MoveCursor(
 		d->Pix2CoOrd( d, x0, y0, &pos1 );
 		dpos.x = (pos.x-pos1.x)/steps;
 		dpos.y = (pos.y-pos1.y)/steps;
+
 		for ( i=1; i<=steps; i++ ) {
-			ClearPlaybackCursor();
+			ClearPlaybackCursor(FALSE);
 			xx = x0+(wPos_t)(i*dx);
 			yy = y0+(wPos_t)(i*dy);
+
+			if (d->d == mainD.d && !proc) {
+				InfoPos( pos1 );  						//Calls Redraw which calls Clear
+			}
+			if (proc)
+				proc( action, pos1 );					//May call redraw
+			if (!IsClose(FindDistance(pos1,pos))) wPause( 10 );
+			else if (!IsClose(FindDistance(pos1,pos))) wPause( stepTO*playbackDelay/50 );
+			else wPause(100);
+			//MainRedraw();
 			DrawPlaybackCursor( d, bm, xx, yy, color );
 			pos1.x += dpos.x;
 			pos1.y += dpos.y;
-			if (proc)
-				proc( action, pos1 );
-			if (d->d == mainD.d) {
-				InfoPos( pos1 );
-			}
-			wPause( stepTO*playbackDelay/100 );
+
+			if (!IsClose(FindDistance(pos1,pos))) {
+				wPause( stepTO*playbackDelay/1000 );
+			} else if (!IsClose(FindDistance(pos1,pos)/2)) {
+				wPause( stepTO*playbackDelay/500 );
+			} else
+				wPause( stepTO*playbackDelay/100 );
 			if (!inPlayback) {
-				ClearPlaybackCursor();
+				ClearPlaybackCursor(FALSE);
 				return;
 			}
 		}
 	} else {
-		ClearPlaybackCursor();
+		ClearPlaybackCursor(FALSE);
 		DrawPlaybackCursor( d, bm, x, y, color );
 	}
 }
@@ -501,61 +541,76 @@ static void PlaybackCursor(
 
 	d->CoOrd2Pix( d, pos, &x, &y );
 
+
 	switch( action ) {
 
 	case wActionMove:
-		MoveCursor( d, NULL, wActionMove, pos, arrow0_bm, color );
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm); //0 is normal, shift, ctrl
+		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );
+		//( REDRAW, playbackD, playbackBm, playbackX, playbackY, playbackColor );
 		break;
 
 	case C_DOWN:
-		MoveCursor( d, proc, wActionMove, pos, arrow0_bm, wDrawColorBlack );
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		MoveCursor( d, NULL, wActionMove, pos, bm, wDrawColorBlack );  //Go to spot
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow3_bm);
 		if (flashTwice) Flash( d, x, y, rightDragColor );
-		proc( action, pos );
 		Flash( d, x, y, playbackColor=rightDragColor );
-		// Fallthru
+		proc( action, pos );
+		MoveCursor( d, NULL, 0, pos, bm, rightDragColor );
+		/* no break */
 
 	case C_MOVE:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrows_bm:arrow3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow3_bm);
 		MoveCursor( d, proc, C_MOVE, pos, bm, rightDragColor );
 		break;
 
 	case C_UP:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrows_bm:arrow3_bm);
-		MoveCursor( d, proc, C_MOVE, pos, bm, rightDragColor );
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow0_bm);
+		MoveCursor( d, NULL, C_MOVE, pos, bm, rightDragColor );
 		if (flashTwice) Flash( d, x, y, rightDragColor );
 		Flash( d, x, y, rightDragColor );
-		MoveCursor( d, NULL, wActionMove, pos, arrow0_bm, wDrawColorBlack );
 		proc( action, pos );
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		MoveCursor( d, NULL, 0, pos, bm, wDrawColorBlack );
 		break;
 
 	case C_RDOWN:
-		MoveCursor( d, proc, wActionMove, pos, arrow0_bm, wDrawColorBlack );
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		MoveCursor( d, NULL, wActionMove, pos, bm, wDrawColorBlack );  //Go to spot
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrowr3_ctl_bm:arrowr3_bm);
 		if (flashTwice) Flash( d, x, y, leftDragColor );
 		proc( action, pos );
 		Flash( d, x, y, playbackColor=leftDragColor );
-		// Fallthru
+		MoveCursor( d, NULL, 0, pos, bm, rightDragColor );
+		/* no break */
 
 	case C_RMOVE:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrows_bm:arrow3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrowr3_ctl_bm:arrowr3_bm);
 		MoveCursor( d, proc, C_RMOVE, pos, bm, leftDragColor );
 		break;
 
 	case C_RUP:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrows_bm:arrow3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrowr3_ctl_bm:arrowr3_bm);
 		MoveCursor( d, proc, C_RMOVE, pos, bm, leftDragColor );
 		if (flashTwice) Flash( d, x, y, leftDragColor );
 		Flash( d, x, y, leftDragColor );
-		MoveCursor( d, NULL, wActionMove, pos, arrow0_bm, wDrawColorBlack );
 		proc( action, pos );
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		MoveCursor( d, NULL, 0, pos, bm, wDrawColorBlack );
 		break;
 
 	case C_REDRAW:
+		proc( action, pos );																	//Send Redraw to functions
 		MacroDrawBitMap( REDRAW, playbackD, playbackBm, playbackX, playbackY, playbackColor );
 		break;
 
 	default:
 		;
 	}
+
+	playbackBm = bm;
+	MainRedraw();
 	time1 = wGetTimer();
 	adjTimer += (time1-time0);
 }
@@ -680,7 +735,7 @@ static void PlaybackQuit( void )
 	if (!inPlayback)
 		return;
 	inPlaybackQuit = TRUE;
-	ClearPlaybackCursor();
+	ClearPlaybackCursor(TRUE);
 	wPrefReset();
 	wHide( demoW );
 	wWinSetBusy( mainW, FALSE );
@@ -823,6 +878,8 @@ static void PlaybackSetup( void )
 	oldMainSize = mainD.size;
 	oldMainScale = mainD.scale;
 	oldScaleName = curScaleName;
+	playbackX = 0;
+	playbackY = 0;
 	Reset();
 	paramVersion = -1;
 	playbackColor=wDrawColorBlack;
@@ -858,7 +915,7 @@ static void Playback( void )
 		if ( paramFile == NULL ||
 			 fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
 			paramTogglePlaybackHilite = FALSE;
-			ClearPlaybackCursor();
+			ClearPlaybackCursor(FALSE);
 			CloseDemoWindows();
 			if (paramFile) {
 				fclose( paramFile );
@@ -1411,7 +1468,14 @@ EXPORT BOOL_T MacroInit( void )
 	leftDragColor = drawColorBlue;
 
 	arrow0_bm = wDrawBitMapCreate( mainD.d, arrow0_width, arrow0_height, 12, 12, arrow0_bits );
+	arrow0_shift_bm = wDrawBitMapCreate( mainD.d, arrow0_shift_width, arrow0_shift_height, 12, 12, arrow0_shift_bits );
+	arrow0_ctl_bm = wDrawBitMapCreate( mainD.d, arrow0_ctl_width, arrow0_ctl_height, 12, 12, arrow0_ctl_bits );
 	arrow3_bm = wDrawBitMapCreate( mainD.d, arrow3_width, arrow3_height, 12, 12, arrow3_bits );
+	arrow3_shift_bm = wDrawBitMapCreate( mainD.d, arrow3_shift_width, arrow3_shift_height, 12, 12, arrow3_shift_bits );
+	arrow3_ctl_bm = wDrawBitMapCreate( mainD.d, arrow3_ctl_width, arrow3_ctl_height, 12, 12, arrow3_ctl_bits );
+	arrowr3_bm = wDrawBitMapCreate( mainD.d, arrowr3_width, arrowr3_height, 12, 12, arrowr3_bits );
+    arrowr3_shift_bm = wDrawBitMapCreate( mainD.d, arrowr3_shift_width, arrowr3_shift_height, 12, 12, arrowr3_shift_bits );
+	arrowr3_ctl_bm = wDrawBitMapCreate( mainD.d, arrowr3_ctl_width, arrowr3_ctl_height, 12, 12, arrowr3_ctl_bits );
 	arrows_bm = wDrawBitMapCreate( mainD.d, arrows_width, arrows_height, 12, 12, arrows_bits );
 	flash_bm = wDrawBitMapCreate( mainD.d, flash_width, flash_height, 12, 12, flash_bits );
 
