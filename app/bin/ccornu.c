@@ -1988,6 +1988,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		if (anchors_da.cnt)
 			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 
+		if (MyGetKeyState()&WKEY_SHIFT) DrawHighlightBoxes();
+
 		return C_CONTINUE;
 			
 	case C_MOVE:
@@ -2078,6 +2080,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		}
 		if (anchors_da.cnt)
 					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		if (MyGetKeyState()&WKEY_SHIFT) DrawHighlightBoxes();
+
 		return C_CONTINUE;
 
 	case C_CANCEL:

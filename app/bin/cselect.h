@@ -50,5 +50,6 @@ void WriteSelectedTracksToTempSegs( void );
 void DoRescale( void );
 STATUS_T CmdMoveDescription( wAction_t, coOrd );
 void UpdateQuickMove( void * );
+void DrawHighlightBoxes();
 
 #endif
