@@ -2138,6 +2138,7 @@ static STATUS_T SelectArea(
 	static coOrd pos0;
 	static int state;
 	static coOrd base, size, lo, hi;
+	static BOOL_T add;
 	int cnt;
 
 	track_p trk;
@@ -2151,6 +2152,7 @@ static STATUS_T SelectArea(
 	case C_DOWN:
 	case C_RDOWN:
 		pos0 = pos;
+		add = (action == C_DOWN);
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -2171,25 +2173,24 @@ static STATUS_T SelectArea(
 			size.y = - size.y;
 			base.y = pos.y;
 		}
-		DrawHilight( &mainD, base, size );
+		DrawHilight( &mainD, base, size, action == C_MOVE );
 		return C_CONTINUE;
 
 	case C_UP:
 	case C_RUP:
 		if (state == 1) {
 			state = 0;
-			DrawHilight( &mainD, base, size );
+			DrawHilight( &mainD, base, size, action == C_UP );
 			cnt = 0;
 			trk = NULL;
-			SetAllTrackSelect( FALSE );							//Remove all tracks first
+			if (action==C_UP) SetAllTrackSelect( FALSE );							//Remove all tracks first
 			while ( TrackIterate( &trk ) ) {
 				GetBoundingBox( trk, &hi, &lo );
 				if (GetLayerVisible( GetTrkLayer( trk ) ) &&
 					lo.x >= base.x && hi.x <= base.x+size.x &&
 					lo.y >= base.y && hi.y <= base.y+size.y) {
-					if ( (GetTrkSelected( trk )==0) == (action==C_UP) ) {
-						cnt++;
-					}
+					if ( (GetTrkSelected( trk )==0) == (action==C_UP) )
+					  cnt++;
 				}
 			}
 			trk = NULL;
@@ -2218,7 +2219,7 @@ static STATUS_T SelectArea(
 
 	case C_CANCEL:
 		if (state == 1) {
-			DrawHilight( &mainD, base, size );
+			DrawHilight( &mainD, base, size, add);
 			state = 0;
 		}
 		break;
@@ -2226,7 +2227,7 @@ static STATUS_T SelectArea(
 	case C_REDRAW:
 		if (state == 0)
 			break;
-		DrawHilight( &mainD, base, size );
+		DrawHilight( &mainD, base, size, add );
 		break;
 
 	}
@@ -2316,7 +2317,7 @@ static STATUS_T CmdSelect(
 	STATUS_T rc=C_CONTINUE;
 	track_p t;
 
-	if ( action == C_DOWN ) {
+	if ( action == C_DOWN || action == C_RDOWN ) {
 		mode = AREA;
 		if (MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) {
 			mode = MOVE;
@@ -2357,6 +2358,9 @@ static STATUS_T CmdSelect(
 		break;
 
 	case C_DOWN:
+	case C_RDOWN:
+	case C_RMOVE:
+	case C_RUP:
 	case C_UP:
 	case C_MOVE:
 		switch (mode) {

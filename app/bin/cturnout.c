@@ -1955,7 +1955,7 @@ LOG( log_turnout, 2, ( "SelTurnout(%s)\n", (curTurnout?curTurnout->title:"<NULL>
 	p.x = curTurnout->endPt[0].pos.x - trackGauge;
 	p.y = curTurnout->endPt[0].pos.y - trackGauge;
 	s.x = s.y = trackGauge*2.0 /*+ turnoutD.minSize*/;
-	DrawHilight( &turnoutD, p, s );
+	DrawHilight( &turnoutD, p, s, FALSE );
 }
 
 
@@ -2008,7 +2008,7 @@ static void HilightEndPt( void )
 	p.x = curTurnout->endPt[(int)curTurnoutEp].pos.x - trackGauge;
 	p.y = curTurnout->endPt[(int)curTurnoutEp].pos.y - trackGauge;
 	s.x = s.y = trackGauge*2.0 /*+ turnoutD.minSize*/;
-	DrawHilight( &turnoutD, p, s );
+	DrawHilight( &turnoutD, p, s, FALSE );
 }
 
 

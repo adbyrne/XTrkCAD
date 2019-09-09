@@ -70,12 +70,6 @@ extern long zoomCorner;
  *
  */
 
-#define INIT_MAIN_SCALE (8.0)
-#define INIT_MAP_SCALE	(64.0)
-#define MAX_MAIN_SCALE	(256.0)
-#define MIN_MAIN_SCALE	(1.0)
-#define MIN_MAIN_MACRO  (0.10)
-
 // static char FAR message[STR_LONG_SIZE];
 
 EXPORT wPos_t closePixels = 10;
@@ -470,7 +464,7 @@ static void DDrawFillCircle(
 }
 
 
-EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s )
+EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s, BOOL_T add )
 {
 	wPos_t x, y, w, h;
 	if (d == &mapD && !mapVisible)
@@ -485,7 +479,7 @@ EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s )
 	w = (wPos_t)((s.x/d->scale)*d->dpi+0.5);
 	h = (wPos_t)((s.y/d->scale)*d->dpi+0.5);
 	d->CoOrd2Pix(d,p,&x,&y);
-	if (d == &mapD)
+	if ((d == &mapD) || add)
 		wDrawFilledRectangle( d->d, x, y, w, h, drawColorPowderedBlue, wDrawOptTemp );
 	else
 		wDrawFilledRectangle( d->d, x, y, w, h, selectedColor, wDrawOptTemp );
@@ -1758,7 +1752,7 @@ EXPORT void DrawMapBoundingBox( BOOL_T set )
 {
 	if (mainD.d == NULL || mapD.d == NULL)
 		return;
-	DrawHilight( &mapD, mainD.orig, mainD.size );
+	DrawHilight( &mapD, mainD.orig, mainD.size, FALSE );
 }
 
 
@@ -2554,12 +2548,34 @@ static wBool_t PlaybackMain( char * line )
 	char *oldLocale = NULL;
 
 	oldLocale = SaveLocale("C");
+
 	rc=sscanf( line, "%d " SCANF_FLOAT_FORMAT SCANF_FLOAT_FORMAT, &action, &pos.x, &pos.y);
 	RestoreLocale(oldLocale);
 
 	if (rc != 3) {
 		SyntaxError( "MOUSE", rc, 3 );
 	} else {
+		PlaybackMouse( DoMouse, &mainD, (wAction_t)action, pos, wDrawColorBlack );
+	}
+	return TRUE;
+}
+
+static wBool_t PlaybackKey( char * line )
+{
+	int rc;
+	int action = C_TEXT;
+	coOrd pos;
+	char *oldLocale = NULL;
+	int c;
+
+	oldLocale = SaveLocale("C");
+	rc=sscanf( line, "%d " SCANF_FLOAT_FORMAT SCANF_FLOAT_FORMAT, &c, &pos.x, &pos.y );
+	RestoreLocale(oldLocale);
+
+	if (rc != 3) {
+		SyntaxError( "MOUSE", rc, 3 );
+	} else {
+		action = action||c<<8;
 		PlaybackMouse( DoMouse, &mainD, (wAction_t)action, pos, wDrawColorBlack );
 	}
 	return TRUE;
@@ -2686,6 +2702,7 @@ EXPORT void DrawInit( int initialZoom )
 	log_zoom = LogFindIndex( "zoom" );
 	log_mouse = LogFindIndex( "mouse" );
 	AddPlaybackProc( "MOUSE ", (playbackProc_p)PlaybackMain, NULL );
+	AddPlaybackProc( "KEY ", (playbackProc_p)PlaybackKey, NULL );
 
 	rulerFp = wStandardFont( F_HELV, FALSE, FALSE );
 
@@ -2821,7 +2838,7 @@ static STATUS_T CmdPan(
 	case C_REDRAW:
 		if (panmode == ZOOM) {
 			if (base.x && base.y && size.x && size.y)
-				DrawHilight( &mainD, base, size );
+				DrawHilight( &mainD, base, size, TRUE );
 		}
 		break;
 	case C_CANCEL:

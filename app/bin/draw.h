@@ -37,6 +37,12 @@
 #define DC_SEGTRACK		(1<<9)
 #define DC_TIES			(1<<10)
 
+#define INIT_MAIN_SCALE (8.0)
+#define INIT_MAP_SCALE	(64.0)
+#define MAX_MAIN_SCALE	(256.0)
+#define MIN_MAIN_SCALE	(1.0)
+#define MIN_MAIN_MACRO  (0.10)
+
 typedef struct drawCmd_t * drawCmd_p;
 
 typedef struct {
@@ -182,7 +188,7 @@ drawFuncs_t printDrawFuncs;
 #define OFF_MAIND( LO, HI ) \
 		OFF_D( mainD.orig, mainD.size, LO, HI )
 
-void DrawHilight( drawCmd_p, coOrd, coOrd );
+void DrawHilight( drawCmd_p, coOrd, coOrd, BOOL_T add );
 void DrawHilightPolygon( drawCmd_p, coOrd *, int );
 #define BOX_NONE		(0)
 #define BOX_UNDERLINE	(1)
@@ -231,7 +237,7 @@ void FakeDownMouseState( void );
 void GetMousePosition( int  *x, int *y );
 void RecordMouse( char *, wAction_t, POS_T, POS_T );
 extern long playbackDelay;
-void MovePlaybackCursor( drawCmd_p, wPos_t, wPos_t );
+void MovePlaybackCursor( drawCmd_p, wPos_t, wPos_t, wBool_t, wControl_p );
 typedef void (*playbackProc)( wAction_t, coOrd );
 void PlaybackMouse( playbackProc, drawCmd_p, wAction_t, coOrd, wDrawColor );
 void RedrawPlaybackCursor();
