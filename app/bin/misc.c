@@ -1441,7 +1441,8 @@ EXPORT void PlaybackButtonMouse(wIndex_t buttInx) {
 	cmdX = buttonList[buttInx].x + 17;
 	cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
 			+ (wPos_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
-	MovePlaybackCursor(&mainD, cmdX, cmdY);
+
+	MovePlaybackCursor(&mainD, cmdX, cmdY,TRUE,buttonList[buttInx].control);
 	if (playbackTimer == 0) {
 		wButtonSetBusy((wButton_p) buttonList[buttInx].control, TRUE);
 		wFlush();
@@ -1590,7 +1591,7 @@ EXPORT void PlaybackCommand(char * line, wIndex_t lineNum) {
 			cmdX = buttonList[buttInx].x + 17;
 			cmdY = toolbarHeight - (buttonList[buttInx].y + 17)
 					+ (wPos_t) (mainD.size.y / mainD.scale * mainD.dpi) + 30;
-			MovePlaybackCursor(&mainD, cmdX, cmdY);
+			MovePlaybackCursor(&mainD, cmdX, cmdY,TRUE,buttonList[buttInx].control);
 		}
 		if (strcmp(line + 8, "Undo") == 0) {
 			if (buttInx > 0 && playbackTimer == 0) {
@@ -1663,7 +1664,7 @@ void MenuPlayback(char * line) {
 	for (mt = &menuTrace(0); mt < &menuTrace(menuTrace_da.cnt); mt++) {
 		if (strcmp(mt->label, menuName) == 0) {
 			mainD.CoOrd2Pix(&mainD, pos, &x, &y);
-			MovePlaybackCursor(&mainD, x, y);
+			MovePlaybackCursor(&mainD, x, y, FALSE, NULL);
 			oldMarker = cmdMenuPos = pos;
 			wMenuAction(mt->menu, _(itemName));
 			return;

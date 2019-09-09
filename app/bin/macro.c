@@ -375,16 +375,16 @@ static void MacroDrawBitMap(
 		case ORIG:
 		case FLASH_PLUS:
 		case REDRAW:
-		case MOVE_PLYBCK3:
-		case MOVE_PLYBCK4:
+		case MOVE_PLYBCK1:
+		case MOVE_PLYBCK2:
 			opts = wDrawOptCursor;
 			break;
 		case FLASH_MINUS:
 			opts = wDrawOptCursorRmv;
 			break;
 		case CLEAR:
-		case MOVE_PLYBCK1:
-		case MOVE_PLYBCK2:
+		case MOVE_PLYBCK3:
+		case MOVE_PLYBCK4:
 			opts = wDrawOptCursorClr;
 			break;
 		case QUIT:
@@ -494,26 +494,20 @@ static void MoveCursor(
 			ClearPlaybackCursor(FALSE);
 			xx = x0+(wPos_t)(i*dx);
 			yy = y0+(wPos_t)(i*dy);
-
-			if (d->d == mainD.d && !proc) {
-				InfoPos( pos1 );  						//Calls Redraw which calls Clear
+			if (IsClose(FindDistance(pos1,pos)/10) || steps%4) {
+				if (d->d == mainD.d && !proc) {
+					InfoPos( pos1 );  						//Calls Redraw which calls Clear
+				}
+				if (proc)
+					proc( action, pos1 );					//May call redraw
+				if (IsClose(FindDistance(pos1,pos))) wPause( 200 );
+				else if (IsClose(FindDistance(pos1,pos)/10)) wPause( stepTO*playbackDelay/100 );
+				//MainRedraw();
+				DrawPlaybackCursor( d, bm, xx, yy, color );
+				wPause(playbackDelay/5);
 			}
-			if (proc)
-				proc( action, pos1 );					//May call redraw
-			if (!IsClose(FindDistance(pos1,pos))) wPause( 10 );
-			else if (!IsClose(FindDistance(pos1,pos))) wPause( stepTO*playbackDelay/50 );
-			else wPause(100);
-			//MainRedraw();
-			DrawPlaybackCursor( d, bm, xx, yy, color );
 			pos1.x += dpos.x;
 			pos1.y += dpos.y;
-
-			if (!IsClose(FindDistance(pos1,pos))) {
-				wPause( stepTO*playbackDelay/1000 );
-			} else if (!IsClose(FindDistance(pos1,pos)/2)) {
-				wPause( stepTO*playbackDelay/500 );
-			} else
-				wPause( stepTO*playbackDelay/100 );
 			if (!inPlayback) {
 				ClearPlaybackCursor(FALSE);
 				return;
@@ -542,7 +536,8 @@ static void PlaybackCursor(
 	d->CoOrd2Pix( d, pos, &x, &y );
 
 
-	switch( action ) {
+
+	switch( action&0xFF ) {
 
 	case wActionMove:
 		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm); //0 is normal, shift, ctrl
@@ -605,6 +600,13 @@ static void PlaybackCursor(
 		MacroDrawBitMap( REDRAW, playbackD, playbackBm, playbackX, playbackY, playbackColor );
 		break;
 
+	case C_TEXT:
+		proc( action, pos);
+		char c = action>>8;
+		InfoMessage("Key '%c' value - %d - pressed", c, c);
+		break;
+
+
 	default:
 		;
 	}
@@ -631,17 +633,28 @@ EXPORT void PlaybackMouse(
 EXPORT void MovePlaybackCursor(
 		drawCmd_p d,
 		wPos_t x,
-		wPos_t y )
+		wPos_t y, wBool_t direct, wControl_p control)
 {
 	coOrd pos;
 	d->Pix2CoOrd( d, x, y, &pos );
 	d->CoOrd2Pix( d, pos, &x, &y );
-	MoveCursor( d, NULL, wActionMove, pos, arrow0_bm, wDrawColorBlack );
+	if (!direct)
+		MoveCursor( d, NULL, wActionMove, pos, arrow0_bm, wDrawColorBlack );
+	else
+		ClearPlaybackCursor(FALSE);
 	MacroDrawBitMap( MOVE_PLYBCK1, d, arrow0_bm, x, y, wDrawColorBlack );
 	MacroDrawBitMap( MOVE_PLYBCK2, d, arrow3_bm, x, y, rightDragColor );
+
 	Flash( d, x, y, rightDragColor );
+	if (direct) {
+		wControlHilite(control,TRUE);
+	}
 	MacroDrawBitMap( MOVE_PLYBCK3, d, arrow3_bm, x, y, rightDragColor );
 	MacroDrawBitMap( MOVE_PLYBCK4, d, arrow0_bm, x, y, wDrawColorBlack );
+	if (direct) {
+		wPause(1000);
+		wControlHilite(control,FALSE);
+	}
 }
 
 /*****************************************************************************
@@ -1030,7 +1043,8 @@ static void Playback( void )
 			PlaybackCommand( paramLine, paramLineNum );
 		} else if (strncmp( paramLine, "RESET", 5 ) == 0) {
 			paramTogglePlaybackHilite = TRUE;
-			Reset();
+			InfoMessage("Esc Key Pressed");
+			ConfirmReset(TRUE);
 			if (playbackD != NULL && playbackBm != NULL)
 				MacroDrawBitMap( RESET, playbackD, playbackBm, playbackX, playbackY, playbackColor );
 		} else if (strncmp( paramLine, "VERSION", 7 ) == 0) {
@@ -1046,7 +1060,18 @@ static void Playback( void )
 		} else if (strncmp( paramLine, "ORIG ", 5 ) == 0) {
 			if ( !GetArgs( paramLine+5, "fff", &zoom, &x, &y ) )
 				continue;
+			if (zoom == 0.0) {
+				double scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
+				double scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
+				if (scale_x<scale_y)
+					scale_x = scale_y;
+				scale_x = ceil(scale_x);
+				if (scale_x < 1) scale_x = 1;
+				if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
+				zoom = scale_x;
+			}
 			mainD.scale = zoom;
+			InfoMessage("Zoom Set to %d", zoom);
 			mainD.orig.x = x;
 			mainD.orig.y = y;
 			SetMainSize();
