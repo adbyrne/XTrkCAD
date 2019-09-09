@@ -647,7 +647,7 @@ void CreateBothEnds(int selectEndPoint, int selectMidPoint ) {
 BOOL_T GetConnectedTrackParms(track_p t, const coOrd pos, int end, EPINX_T track_end, wBool_t extend) {
 	trackParams_t trackParams;
 	coOrd pos1;
-	if (extend) pos1 = GetTrkEndPos(t,track_end);
+	if ((track_end>=0) && extend) pos1 = GetTrkEndPos(t,track_end);
 	else pos1 = pos;
 	if (!GetTrackParams(PARAMS_CORNU, t, pos1, &trackParams)) return FALSE;
 	Da.radius[end] = 0.0;
@@ -986,19 +986,41 @@ EXPORT STATUS_T AdjustCornuCurve(
 					if (!QueryTrack(Da.trk[Da.selectEndPoint],Q_CORNU_CAN_MODIFY)) {  //Turnouts
 						InfoMessage(_("Track can't be split"));
 						inside = FALSE;
-						if (Da.ep[sel]>=0)											//Ignore if turntable
+						if (Da.ep[sel]>=0)	{										//If not turntable
 							Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
+						} else {
+							if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)){     //Turntable
+								trackParams_t tp;
+								if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) return C_CONTINUE;
+								ANGLE_T a = FindAngle(tp.ttcenter,pos);
+								Translate(&pos,tp.ttcenter,a,tp.ttradius);
+							}
+						}
 						return C_CONTINUE;
 					}
 				} else {
 					pos = pos2;				//Put Back to original position as outside track
 				}
 				if (!inside) {
-					ANGLE_T diff = NormalizeAngle(GetTrkEndAngle(Da.trk[sel],Da.ep[sel])-FindAngle(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos));
-					if (diff>90.0 && diff<270.0) {
-						Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
-						return C_CONTINUE;
+					if (Da.ep[sel]>=0) {				//Ignore if no end
+						ANGLE_T diff = NormalizeAngle(GetTrkEndAngle(Da.trk[sel],Da.ep[sel])-FindAngle(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos));
+						if (diff>90.0 && diff<270.0) {
+							Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
+							return C_CONTINUE;
+						}
+					} else {
+						if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)){     //Turntable
+							trackParams_t tp;
+							if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) return C_CONTINUE;
+							ANGLE_T a = tp.angle;
+							coOrd edge;
+							Translate(&edge,tp.ttcenter,a,tp.ttradius);
+							DIST_T d = fabs(FindDistance(edge,pos));
+							Translate(&pos,edge,a,d);
+							Da.pos[sel] = pos;
+						} else return C_CONTINUE;
 					}
+
 				}
 				// Stop the user extending right through the other track
 				if (Da.ep[sel]>=0 && QueryTrack(Da.trk[sel],Q_CORNU_CAN_MODIFY)) { //For non-turnouts
@@ -1015,7 +1037,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 							pos = GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]);  //Make other end of track
 						}
 					}
-				} else if (inside) {
+				} else if (Da.ep[sel]>=0 && inside) {
 					InfoMessage(_("Can't move end inside a Turnout"));		//Turnouts are stuck to end-point
 					Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 					CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint);
@@ -1851,7 +1873,14 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 					}
 					ep = -1;                                            //Not a real ep yet
 		    	} else ep = PickUnconnectedEndPointSilent(p, t);		//EP
-				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  		//Don't attach to Turntable
+				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {
+					ep=-1;  		            //Don't attach to Turntable
+					trackParams_t tp;
+					if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
+					ANGLE_T a = tp.angle;
+					Translate(&pos,tp.ttcenter,a,tp.ttradius);
+					p = pos;										//Fix to wall of turntable initially
+				}
 				if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
 					wBeep();
 					InfoMessage(_("No Valid end point on that track"));
@@ -1866,7 +1895,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			if (ep>=0 && t) {				//Real end point, real track
 				Da.trk[end] = t;
 				Da.ep[end] = ep;           // Note: -1 for Turntable or Circle
-
 				pos = GetTrkEndPos(t,ep);
 				Da.pos[end] = pos;
 				InfoMessage( _("Place 2nd end point of Cornu track on track with an unconnected end-point") );
@@ -1898,6 +1926,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				InfoMessage(_("No Unconnected Track End there"));  //Not creating a Cornu - Join can't be open
 				return C_CONTINUE;
 			} else {
+				Da.pos[end] = p;
 				//Either a real end or a track but no end
 			}
 			if (Da.state == NONE) {
@@ -1911,6 +1940,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				if (ep<0) {
 					Da.trk[0] = t;
 					Da.pos[0] = p;
+					Da.ep[0] = ep;
 				}
 				Da.state = POS_1;
 				Da.selectEndPoint = 0;        //Select first end point
@@ -1980,7 +2010,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			trackParams_t tp;        //Turntable or extendable track
 			if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
 			if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {
-				ANGLE_T a = FindAngle(tp.ttcenter,pos);
+				if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
+				ANGLE_T a = tp.angle;
 				Translate(&pos,tp.ttcenter,a,tp.ttradius);
 				CreateCornuEndAnchor(pos,TRUE);
 			} else CreateCornuEndAnchor(pos,TRUE);

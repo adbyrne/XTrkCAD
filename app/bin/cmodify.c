@@ -366,7 +366,7 @@ static STATUS_T CmdModify(
 				} else if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)){     //Turntable
 					trackParams_t tp;
 					if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
-					ANGLE_T a = FindAngle(tp.ttcenter,pos);
+					ANGLE_T a = tp.angle;
 					Translate(&pos,tp.ttcenter,a,tp.ttradius);
 					CreateRadiusAnchor(pos,a,FALSE);
 				} else if (QueryTrack(t,Q_CAN_EXTEND)) {
