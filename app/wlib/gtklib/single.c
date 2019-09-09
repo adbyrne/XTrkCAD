@@ -213,6 +213,13 @@ static gboolean stringActivated(
 	return( TRUE );
 }
 
+static gboolean stringExposed(GtkWidget* widget, GdkEventExpose * event, gpointer g )
+{
+	wControl_p b = (wControl_p)g;
+	return wControlExpose(widget,event,b);
+}
+
+
 /**
  * Signal handler for changes in an entry field
  *
@@ -338,6 +345,8 @@ wString_p wStringCreate(
 	//if (option&BO_ENTER)
 		g_signal_connect(GTK_OBJECT(b->widget), "activate", G_CALLBACK(stringActivated), b);
 	b->hasSignal = 1;
+		g_signal_connect_after(GTK_OBJECT(b->widget), "expose-event",
+	    							G_CALLBACK(stringExposed), b);
 	
 	// set the default text	and select it to make replacing it easier
 	if (b->valueP) {

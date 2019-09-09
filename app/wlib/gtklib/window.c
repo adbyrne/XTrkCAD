@@ -631,11 +631,22 @@ static int fixed_expose_event(
     GdkEventExpose * event,
     wWin_p win)
 {
+	int rc;
+
     if (event->count==0) {
-        return window_redraw(win, TRUE);
+        rc = window_redraw(win, TRUE);
     } else {
-        return FALSE;
+        rc = FALSE;
     }
+    cairo_t* cr = gdk_cairo_create (gtk_widget_get_window(widget));
+    if (win && win->cursor_surface.surface && win->cursor_surface.show) {
+		cairo_set_source_surface(cr,win->cursor_surface.surface,event->area.x, event->area.y);
+		cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
+		cairo_rectangle(cr,event->area.x, event->area.y,
+				event->area.width, event->area.height);
+		cairo_fill(cr);
+	}
+    return rc;
 }
 
 static int resizeTime(wWin_p win) {
@@ -912,6 +923,7 @@ static wWin_p wWinCommonCreate(
     }
     if (winType != W_MAIN) {
             getWinSize(w, nameStr);
+            gtk_widget_set_app_paintable (w->gtkwin,TRUE);
     }
 
     if (option & F_HIDE) {

@@ -40,6 +40,14 @@
 
 extern wWin_p gtkMainW;
 
+typedef struct {
+		cairo_surface_t* surface;
+		wPos_t width;
+		wPos_t height;
+		wBool_t show;
+} wCursorSurface_t, * wSurface_p;
+
+
 typedef enum {
 		W_MAIN, W_POPUP,
 		B_BUTTON, B_CANCEL, B_POPUP, B_TEXT, B_INTEGER, B_FLOAT,
@@ -69,6 +77,8 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		GtkWidget * widget; \
 		GtkWidget * label; \
 		doneProcCallback_p doneProc; \
+		wCursorSurface_t cursor_surface; \
+		wBool_t outline; \
 		void * data;
 
 struct wWin_t {
@@ -172,6 +182,7 @@ typedef struct {
 GdkColor *wlibGetColor(wDrawColor color, wBool_t normal);
 
 /* control.c */
+wBool_t wControlExpose (GtkWidget * widget, GdkEventExpose * event, wControl_p b);
 
 /* droplist.c */
 enum columns {
@@ -256,6 +267,7 @@ struct wDraw_t {
 
 		GdkPixmap * pixmap;
 		GdkPixmap * pixmapBackup;
+
 
 		double dpi;
 

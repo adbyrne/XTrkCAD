@@ -172,6 +172,18 @@ static void pushButt(
 }
 
 /**
+ * Called after expose event default hander - allows the button to be outlined
+ */
+static wBool_t exposeButt(
+		GtkWidget *widget,
+		GdkEventExpose *event,
+		gpointer g)
+{
+	wControl_p b = (wControl_p)g;
+	return wControlExpose(widget,event,b);
+}
+
+/**
  * Create a button
  *
  * \param parent IN parent window
@@ -206,6 +218,8 @@ wButton_p wButtonCreate(
     b->widget = gtk_toggle_button_new();
     g_signal_connect(GTK_OBJECT(b->widget), "clicked",
                          G_CALLBACK(pushButt), b);
+    g_signal_connect_after(GTK_OBJECT(b->widget), "expose-event",
+    					G_CALLBACK(exposeButt), b);
     if (width > 0) {
         gtk_widget_set_size_request(b->widget, width, -1);
     }
@@ -484,6 +498,8 @@ wChoice_p wRadioCreate(
     b->valueP = valueP;
     wlibComputePos((wControl_p)b);
 
+    ((wControl_p)b)->outline = FALSE;
+
     if (option&BC_HORZ) {
         b->widget = gtk_hbox_new(FALSE, 0);
     } else {
@@ -506,6 +522,8 @@ wChoice_p wRadioCreate(
         gtk_widget_show(butt);
         g_signal_connect(GTK_OBJECT(butt), "toggled",
                          G_CALLBACK(pushChoice), b);
+        g_signal_connect_after(GTK_OBJECT(b->widget), "expose-event",
+            					G_CALLBACK(exposeButt), b);
         wlibAddHelpString(butt, helpStr);
     }
 
@@ -586,6 +604,8 @@ wChoice_p wToggleCreate(
     b->action = action;
     wlibComputePos((wControl_p)b);
 
+    ((wControl_p)b)->outline = FALSE;
+
     if (option&BC_HORZ) {
         b->widget = gtk_hbox_new(FALSE, 0);
     } else {
@@ -604,6 +624,8 @@ wChoice_p wToggleCreate(
         gtk_widget_show(butt);
         g_signal_connect(GTK_OBJECT(butt), "toggled",
                          G_CALLBACK(pushChoice), b);
+        g_signal_connect_after(GTK_OBJECT(b->widget), "expose-event",
+            					G_CALLBACK(exposeButt), b);
         wlibAddHelpString(butt, helpStr);
     }
 

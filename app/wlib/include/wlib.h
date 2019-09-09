@@ -457,6 +457,7 @@ typedef int wDrawOpts;
 #define wDrawOptCursor  (1<<2)
 #define wDrawOptCursorClr (1<<3)
 #define wDrawOptCursorRmv (1<<4)
+#define wDrawOptCursorQuit (1<<5)
 #define wDrawOutlineFont (1<<11)
 #define wDrawOptOpaque   (1<<12)
 

@@ -197,6 +197,8 @@ void * wlibAlloc(
         abort();
     }
 
+    w->outline = FALSE;
+
     w->type = type;
     w->parent = parent;
     w->origX = origX;

@@ -35,7 +35,7 @@
 
 #include "gtkint.h"
 
-#define  GTKCONTROLHILITEWIDTH (2)
+#define  GTKCONTROLHILITEWIDTH (4)
 
 /**
  * Cause the control <b> to be displayed or hidden.
@@ -252,6 +252,44 @@ void wControlSetFocus(
 {
 }
 
+wBool_t wControlExpose (
+		 GtkWidget * widget,
+		 GdkEventExpose * event,
+		 wControl_p b
+		)
+{
+	GdkWindow * win = gtk_widget_get_window(b->widget);
+	cairo_t * cr = NULL;
+	if (win) {
+		cr = gdk_cairo_create(win);
+	} else return TRUE;
+
+	if (b && b->cursor_surface.surface && b->cursor_surface.show) {
+		cairo_set_source_surface(cr,b->cursor_surface.surface,event->area.x, event->area.y);
+		cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
+		cairo_rectangle(cr,event->area.x, event->area.y,
+				event->area.width, event->area.height);
+		cairo_fill(cr);
+	}
+
+	if (b->outline) {
+		cairo_set_source_rgb(cr, 0.23, 0.37, 0.80);
+		cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+		cairo_set_line_width(cr, GTKCONTROLHILITEWIDTH);
+		cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
+		cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
+		cairo_rectangle(cr,event->area.x+2, event->area.y+2,
+						event->area.width-4, event->area.height-4);
+		cairo_stroke(cr);
+	}
+
+
+	cairo_destroy(cr);
+
+
+    return FALSE;
+}
+
 /**
  * Draw a rectangle around a control
  * \param b IN the control
@@ -279,17 +317,7 @@ void wControlHilite(
         return;
     }
 
-    cr = gdk_cairo_create(gtk_widget_get_window(b->parent->gtkwin));
-    cairo_set_source_rgb(cr, 0.23, 0.37, 0.80);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_set_line_width(cr, GTKCONTROLHILITEWIDTH);
-    cairo_set_line_cap(cr, CAIRO_LINE_CAP_BUTT);
-    cairo_set_line_join(cr, CAIRO_LINE_JOIN_MITER);
-    cairo_rectangle(cr,
-                    b->realX - GTKCONTROLHILITEWIDTH,
-                    b->realY - off,
-                    b->w + GTKCONTROLHILITEWIDTH,
-                    b->h + off + 1);
-    cairo_stroke(cr);
-    cairo_destroy(cr);
+    b->outline = hilite;
+
+    gtk_widget_queue_draw(b->widget);
 }
