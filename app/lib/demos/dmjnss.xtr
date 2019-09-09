@@ -12,13 +12,26 @@ STRAIGHT 2 DEMO 1
 REDRAW
 RESET
 MESSAGE
-Two straight tracks are joined by selecting the two End-Points.  The selected End-Points will be those closest to the cursor when the track is selected.
+Two straight tracks can be joined by selecting the two End-Points.  The selected End-Points will be those closest to the cursor when the track is selected.
 
+First, we will select Easements None and then select Join
 END
 STEP
+PARAMETER misc cmdEasement
+PARAMETER easement val 0.0
+BIGPAUSE
+PARAMETER easement ok
 COMMAND Join
+STEP
+MESSAGE
+_____________________________________________________
+
+Now we select two points on the tracks
+END
+MOUSE 1 16.583 10.417
 MOUSE 2 16.583 10.417
 MOUSE 4 16.583 10.417
+MOUSE 1 17.083 4.583
 MOUSE 2 17.083 4.583
 MESSAGE
 _________________________________________
@@ -59,3 +72,65 @@ MESSAGE
 END
 STEP
 CLEAR
+PARAMETER misc cmdUndo
+MESSAGE
+Now we will do this with Cornu Easements  
+
+First, we will select Easements Cornu and then select Join
+END
+STEP
+PARAMETER misc cmdEasement
+PARAMETER easement val -1.0
+BIGPAUSE
+PARAMETER easement ok
+COMMAND Join
+STEP
+MESSAGE
+_____________________________________________________
+
+Now we again select two points on the tracks
+END
+MOUSE 1 16.583 10.417
+MOUSE 2 16.583 10.417
+MOUSE 4 16.583 10.417
+MOUSE 1 17.083 4.583
+MOUSE 2 17.083 4.583
+MESSAGE
+_________________________________________
+
+A connecting cornu is drawn between the two tracks.  Notice how it behaves as the cursor is dragged along the second track.
+END
+STEP
+MOUSE 3 17.167 4.583
+MOUSE 3 21.917 4.583
+BIGPAUSE
+MOUSE 3 21.917 4.583
+MOUSE 3 14.833 4.250
+MESSAGE
+_________________________________________
+
+Note that either tracks can be extended if you move past the end of it.
+END
+STEP
+MOUSE 3 14.750 4.250
+MOUSE 3 9.000 4.000
+MESSAGE
+_________________________________________
+
+Notice this time what happens if you drag past the intersection points of the two tracks.
+END
+STEP
+MOUSE 3 8.833 4.000
+MOUSE 3 -0.667 2.750
+MESSAGE
+_________________________________________
+
+This is more useful because you can move the other end as well.
+END
+MOUSE 4 -0.667 2.750
+MOUSE 1 13.216667 8.383333
+MOUSE 2 13.216667 8.383333
+MOUSE 3 16.583 10.417
+MOUSE 4 16.583 10.417
+MESSAGE
+=========================================

@@ -1,6 +1,6 @@
 VERSION 2
 DEMOINIT
-ORIG 8.000 0.000 0.000
+ORIG 4 0.000 0.000
 PARAMETER pref dragtimeout 2000
 STRAIGHT 1 DEMO 1
 	T 2 7.466667 2.666667 270.000000
@@ -168,9 +168,8 @@ DRAW 20 0.000000 0.000000 0.000000
 	END
 REDRAW
 RESET
-#Ensure in Select Mode
-COMMAND Select
-MOUSE 1 50.000 40.000
+CLEAR
+MOUSE 1 1.000 1.000
 MESSAGE
 The <Select> command is used to select tracks.
 
@@ -178,7 +177,8 @@ Selected tracks can be moved or rotated during the <Select> command.
 
 Selected tracks can also be deleted, hidden, listed and exported.
 END
-BIGPAUSE
+STEP
+COMMAND Select
 MESSAGE
 _________________________________________
 
@@ -204,7 +204,6 @@ KEYSTATE 4
 MOUSE 2 12.373 13.013
 KEYSTATE 4
 MOUSE 4 12.373 13.013
-BIGPAUSE
 MESSAGE
 ___________________________________________
 
@@ -225,7 +224,7 @@ CLEAR
 MESSAGE
 =========================================
 
-Select two tracks at the end of a section 
+To demonstrate Select Connected, first select two tracks at the end of a part to be selected 
 
 END
 STEP
@@ -239,6 +238,8 @@ KEYSTATE 4
 MOUSE 4 27.733 6.613
 CLEAR
 MESSAGE
+__________________________________________
+
 Shift-Left-Click on a track will select all unselected tracks connected to the track.  Selection stops at a previously selected track.
 END
 STEP
@@ -249,7 +250,7 @@ MOUSE 4 27.627 14.400
 MESSAGE
 _________________________________________
 
-Be careful with this because its easy to select all tracks this way.
+Be careful with this because its very easy to select all tracks this way
 END
 STEP
 KEYSTATE 2
@@ -262,10 +263,10 @@ _________________________________________
 The <esc> key will deselect all objects.
 END
 STEP
-MOUSE 6920 19.840 2.560
+MOUSE 6200 19.840 2.560
 RESET
 MESSAGE
-=========================================
+_________________________________________
 END
 STEP
 CLEAR
@@ -284,107 +285,105 @@ Shift-Left-Drag is used to move selected tracks.
 
 When you move selected tracks that are connected to unselected tracks, the tracks will be disconnected.  These points are marked by a Red cross on the layout.
 
-If the disconnected end point of a track and one being moved a re close enough two circles are displayed, showing where the tracks will be snapped together. 
+If the unconnected end point of a track and one being moved are close enough, two circles are displayed, showing where the tracks will be snapped together. 
 END
 STEP
 KEYSTATE 2
-MOUSE 1 27.840 8.213
+MOUSE 1 13.370000 2.144667
 KEYSTATE 2
-MOUSE 2 27.840 8.213
+MOUSE 2 13.370000 2.144667
 KEYSTATE 2
-MOUSE 3 21.653 8.640
+MOUSE 3 35.735615 16.2
 KEYSTATE 2
-MOUSE 4 21.653 8.640
+MOUSE 4 35.735615 16.2
 MESSAGE
 __________________________________________
 
+Ctrl-Left-Drag rotates the selected tracks about the pivot point (which is where you started the drag)
 END
 STEP
-
+KEYSTATE 4
+MOUSE 1 35.735615 15.54695
+BIGPAUSE
+KEYSTATE 4
+MOUSE 2 35.735615 15.54695
+KEYSTATE 4
+MOUSE 3 41.653 18.640
+PAUSE 200
+KEYSTATE 4
+MOUSE 3 44.960 19.813
+PAUSE 200
+KEYSTATE 4
+MOUSE 3 45.067 20.240
+KEYSTATE 4
+MOUSE 3 45.173 20.453
+KEYSTATE 4
+MOUSE 3 45.280 20.773
+KEYSTATE 4
+MOUSE 3 45.387 21.093
+KEYSTATE 4
+MOUSE 3 45.493 21.520
+KEYSTATE 4
+MOUSE 3 45.813 21.947
+KEYSTATE 4
+MOUSE 3 46.133 22.480
+KEYSTATE 4
+MOUSE 3 46.453 22.800
+KEYSTATE 2
+MOUSE 3 46.987 22.907
+KEYSTATE 4
+MOUSE 3 47.627 23.227
+KEYSTATE 4
+MOUSE 3 48.053 23.227
+KEYSTATE 4
+MOUSE 3 48.267 23.227
+KEYSTATE 4
+MOUSE 3 48.480 23.227
+KEYSTATE 4
+MOUSE 3 48.267 23.227
+KEYSTATE 4
+MOUSE 3 48.373 23.227
+KEYSTATE 4
+MOUSE 4 48.373 23.227
 MESSAGE
 =========================================
 END
 STEP
 CLEAR
 MESSAGE
-Shift-Right-Drag rotates the selected tracks about the pivot point (which is where you started the drag)
-END
-STEP
-KEYSTATE 2
-MOUSE 5 25.280 9.387
-PAUSE 200
-KEYSTATE 2
-MOUSE 6 24.960 9.387
-PAUSE 200
-KEYSTATE 2
-MOUSE 6 24.960 9.813
-PAUSE 200
-KEYSTATE 2
-MOUSE 6 25.067 10.240
-KEYSTATE 2
-MOUSE 6 25.173 10.453
-KEYSTATE 2
-MOUSE 6 25.280 10.773
-KEYSTATE 2
-MOUSE 6 25.387 11.093
-KEYSTATE 2
-MOUSE 6 25.493 11.520
-KEYSTATE 2
-MOUSE 6 25.813 11.947
-KEYSTATE 2
-MOUSE 6 26.133 12.480
-KEYSTATE 2
-MOUSE 6 26.453 12.800
-KEYSTATE 2
-MOUSE 6 26.987 12.907
-KEYSTATE 2
-MOUSE 6 27.627 13.227
-KEYSTATE 2
-MOUSE 6 28.053 13.227
-KEYSTATE 2
-MOUSE 6 28.267 13.227
-KEYSTATE 2
-MOUSE 6 28.480 13.227
-KEYSTATE 2
-MOUSE 6 28.267 13.227
-KEYSTATE 2
-MOUSE 6 28.373 13.227
-KEYSTATE 2
-MOUSE 7 28.373 13.227
-MESSAGE
-=========================================
-END
-STEP
-CLEAR
-MESSAGE
-Next we select the <Join Tracks> command.  You can use Shift-Left-Click to move an End-Point of a selected track to join with an unselected track.
+__________________________________________
 
-Note: because of differing display resolutions the next mouse click may not be positioned correctly in this demo and the Move-To-Join operation may not be demonstrated.
+Next we select the <Join Tracks> command to demonstrate "Move To Join"  
 END
 STEP
 COMMAND Join
-BIGPAUSE
-#MOUSE 5 14.40 12.37
-#MOUSE 7 14.40 12.37
-#MOUSE 5 14.40 14.61
-#MOUSE 7 14.40 14.61
-#MOUSE 5 13.90 14.287
-#MOUSE 7 13.90 14.287
-#MOUSE 5 14.21 13.95
-#MOUSE 7 14.21 13.95
-KEYSTATE 2
-MOUSE 2 13.077 10.857
-#MOUSE 2 16.39 14.51
-KEYSTATE 2
-MOUSE 4 13.077 10.857
-#MOUSE 4 16.39 14.51
-BIGPAUSE
-KEYSTATE 2
-MOUSE 2 13.333 2.773
-KEYSTATE 2
-MOUSE 4 13.333 2.773
 MESSAGE
-=========================================
+__________________________________________
+
+You can use Shift-Left-Click to select an open End-Point of a selected track to join with an unselected track. 
+
+END
+STEP
+KEYSTATE 2
+MOUSE 1 35.735615 15.2
+PAUSE 500
+KEYSTATE 2
+MOUSE 2 35.735615 15.2
+KEYSTATE 2
+MOUSE 4 35.735615 15.2
+MESSAGE
+__________________________________________
+
+You then Left-Click to select an End-Point of a unselected track to move the selected tracks to join. 
+
+END
+STEP
+MOUSE 1 13.405000 2.666667
+PAUSE 500
+MOUSE 2 13.405000 2.666667
+MOUSE 4 13.405000 2.666667
+MESSAGE
+================================================
 END
 STEP
 CLEAR

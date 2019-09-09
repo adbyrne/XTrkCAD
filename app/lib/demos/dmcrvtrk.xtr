@@ -15,6 +15,7 @@ END
 STEP
 COMMAND CurveEndPt
 MOUSE 2 6.500 1.625
+MOUSE 3 31.250 2.750
 MOUSE 4 31.250 2.750
 MESSAGE
 _________________________________________
@@ -25,6 +26,7 @@ Click and drag on one of the Red arrows to complete the Curve.
 END
 STEP
 MOUSE 2 31.125 2.500
+MOUSE 3 20.375 17.875
 MOUSE 4 20.375 17.875
 RESET
 RESET
@@ -37,6 +39,7 @@ STEP
 PARAMETER misc cmdUndo
 COMMAND CurveTangent
 MOUSE 2 8.250 2.250
+MOUSE 3 31.875 2.500
 MOUSE 4 31.875 2.500
 MESSAGE
 _________________________________________
@@ -47,6 +50,7 @@ As before, drag on one of the Red arrows to complete the Curve.
 END
 STEP
 MOUSE 2 8.875 2.500
+MOUSE 3 17.375 19.125
 MOUSE 4 17.375 19.125
 RESET
 RESET
@@ -59,6 +63,7 @@ STEP
 PARAMETER misc cmdUndo
 COMMAND CurveCenter
 MOUSE 2 27.375 4.250
+MOUSE 3 5.000 4.250
 MOUSE 4 5.000 4.250
 MESSAGE
 _________________________________________
@@ -67,6 +72,7 @@ Once again, drag on a Red arrow to complete the Curve.
 END
 STEP
 MOUSE 2 5.000 4.375
+MOUSE 3 15.625 18.875
 MOUSE 4 15.625 18.875
 RESET
 MESSAGE
@@ -79,6 +85,7 @@ RESET
 PARAMETER misc cmdUndo
 COMMAND CurveChord
 MOUSE 2 5.625 1.500
+MOUSE 3 37.125 1.500
 MOUSE 4 37.125 1.500
 MESSAGE
 _________________________________________
@@ -87,6 +94,7 @@ Now drag on a Red arrow to complete the Curve.
 END
 STEP
 MOUSE 2 21.250 2.125
+MOUSE 3 20.750 16.750
 MOUSE 4 20.750 16.750
 RESET
 MESSAGE

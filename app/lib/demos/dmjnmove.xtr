@@ -19,12 +19,20 @@ RESET
 MESSAGE
 The <Join> command can move one group of tracks to join with another.
 
-First <Select> the tracks you want to move.
+First <Select> the tracks you want to move with Ctrl so that they are both selected.
 END
 STEP
+KEYSTATE 4
+MOUSE 1 24.000 13.013
+KEYSTATE 4
 MOUSE 2 24.000 13.013
+KEYSTATE 4
 MOUSE 4 24.000 13.013
+KEYSTATE 4
+MOUSE 1 15.893 12.160
+KEYSTATE 4
 MOUSE 2 15.893 12.160
+KEYSTATE 4
 MOUSE 4 15.893 12.160
 MESSAGE
 _________________________________________

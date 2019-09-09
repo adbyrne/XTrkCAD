@@ -12,10 +12,85 @@ STRAIGHT 2 DEMO 1
 REDRAW
 RESET
 MESSAGE
+_____________________________________
+
 This example will show the effect of using easements while joining tracks.
 
-First, we'll enable easements.
+First, we will enable Cornu Easements and select Join
 END
+STEP
+PARAMETER misc cmdEasement
+PARAMETER easement val -1.0
+BIGPAUSE
+PARAMETER easement ok
+COMMAND Join
+STEP
+MESSAGE
+_____________________________________
+
+First select one end of the track
+
+END
+STEP
+MOUSE 1 1.917 12.167
+MOUSE 2 1.917 12.167
+MOUSE 3 1.917 13.167
+MOUSE 4 1.917 13.167
+MESSAGE
+_____________________________________
+
+Now the end of different track
+
+END
+STEP
+MOUSE 1 12.000 0.833
+MOUSE 2 12.000 0.833
+MOUSE 4 12.000 0.833
+MESSAGE
+_____________________________________
+
+You can reposition the ends by dragging them 
+
+END
+STEP
+MOUSE 1 1.917 13.167
+MOUSE 2 1.917 13.167
+MOUSE 3 1.917 13.167
+MOUSE 3 1.917 15.000
+MOUSE 4 1.917 15.000
+MOUSE 1 12.000 0.833
+MOUSE 2 12.000 0.833
+MOUSE 3 15.000 0.833
+MOUSE 4 15.000 0.833
+MESSAGE
+_____________________________________
+
+When you are happy, Hit Enter or Space, if not use Esc
+
+END
+STEP
+MOUSE 8200 15.000 0.833
+MESSAGE
+_____________________________________
+
+The Curve is made up of Beziers parts that smooth the shape the best way it can be in the space available
+
+END
+STEP
+COMMAND Describe
+PAUSE 100
+MOUSE 1 14.000 0.833
+MOUSE 2 14.000 0.833
+MOUSE 4 14.000 0.833
+BIGPAUSE
+STEP
+MESSAGE
+______________________________________
+
+Now, we'll show traditional easements instead.
+END
+RESET
+PARAMETER misc cmdUndo
 PARAMETER misc cmdEasement
 STEP
 PARAMETER easement val 0.500
@@ -30,9 +105,11 @@ Notice the label on the Easement button has changed to 'Sharp'.
 END
 STEP
 COMMAND Join
+MOUSE 1 1.917 12.167
 MOUSE 2 1.917 12.167
 MOUSE 3 1.917 12.167
 MOUSE 4 1.917 12.167
+MOUSE 1 12.000 0.833
 MOUSE 2 12.000 0.833
 MESSAGE
 _________________________________________
@@ -59,14 +136,22 @@ The connecting curve is made of three tracks, the curve and two easement segment
 END
 STEP
 COMMAND Describe
+MOUSE 1 5.750 4.083
 MOUSE 2 5.750 4.083
 MOUSE 4 5.750 4.083
+PAUSE 200
+MOUSE 1 14.333 0.500
 MOUSE 2 14.333 0.500
 MOUSE 4 14.333 0.500
+PAUSE 200
+MOUSE 1 1.917 13.333
 MOUSE 2 1.917 13.333
 MOUSE 4 1.917 13.333
-MESSAGE
-=========================================
-END
-STEP
+PAUSE 200
 CLEAR
+
+
+
+
+
+
