@@ -992,11 +992,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 							if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)){     //Turntable
 								trackParams_t tp;
 								if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) return C_CONTINUE;
-								ANGLE_T a = FindAngle(tp.ttcenter,pos);
+								ANGLE_T a = tp.angle;
 								Translate(&pos,tp.ttcenter,a,tp.ttradius);
-							}
+							} else return C_CONTINUE;
 						}
-						return C_CONTINUE;
 					}
 				} else {
 					pos = pos2;				//Put Back to original position as outside track
@@ -1015,7 +1014,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 							ANGLE_T a = tp.angle;
 							coOrd edge;
 							Translate(&edge,tp.ttcenter,a,tp.ttradius);
-							DIST_T d = fabs(FindDistance(edge,pos));
+							ANGLE_T da = DifferenceBetweenAngles(FindAngle(edge,pos),a);
+							DIST_T d = fabs(FindDistance(edge,pos)*cos(R2D(da)));
 							Translate(&pos,edge,a,d);
 							Da.pos[sel] = pos;
 						} else return C_CONTINUE;
