@@ -823,7 +823,7 @@ STATUS_T DrawGeomMouse(
 			return C_CONTINUE;
 		}
 		context->Started = FALSE;
-		context->Changed = TRUE;
+		context->Changed = TRUE;					//Update screen shown
 		/*CheckOk();*/
 		if (context->State == 2 && IsCurCommandSticky()) {
 			segCnt = tempSegs_da.cnt;
@@ -833,7 +833,8 @@ STATUS_T DrawGeomMouse(
 		context->D->funcs->options = oldOptions;
 		DrawGeomOk();
 		context->State = 0;
-		context->message(_("Enter to accept, Esc to cancel"));
+		context->Changed = FALSE;
+		context->message("");
 		return C_TERMINATE;
 
 	case wActionText:
@@ -864,6 +865,12 @@ STATUS_T DrawGeomMouse(
 		return C_TERMINATE;
 
 	case C_CANCEL:
+		if (context->Changed) {				//If the update values were shown
+			if (context->State == 2) {
+				tempSegs_da.cnt = segCnt;
+				DrawGeomOk();
+			}
+		}
 		DYNARR_RESET(trkSeg_t, anchors_da );
 		oldOptions = context->D->funcs->options;
 		context->D->funcs->options |= wDrawOptTemp;
