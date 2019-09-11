@@ -227,6 +227,14 @@ InitializeRegionCode(void)
 }
 
 /**
+ * Use Metric measures everywhere except United States and Canada\
+ */
+static bool UseMetric()
+{
+	return ( strcmp( regionCode, "US" ) != 0 &&
+		 strcmp( regionCode, "CA" ) != 0 );
+}
+/**
  * For the US the classical 4x8 sheet is used as default size. in the metric world 1,25x2,0m is used.
  */
 
@@ -234,11 +242,11 @@ static double
 GetLocalRoomSize(struct appDefault *ptrDefault, void *data)
 {
     if (!strcmp(ptrDefault->defaultKey, "draw.roomsizeY")) {
-        return (strcmp(regionCode, "US") ? 125.0/2.54 : 48);
+        return (UseMetric() ? 125.0/2.54 : 48);
     }
 
     if (!strcmp(ptrDefault->defaultKey, "draw.roomsizeX")) {
-        return (strcmp(regionCode, "US") ? 200.0 / 2.54 : 96);
+        return (UseMetric() ? 200.0 / 2.54 : 96);
     }
 
     return (0.0);		// should never get here
@@ -255,21 +263,21 @@ GetLocalPopularScale(struct appDefault *ptrDefault, void *data)
 }
 
 /**
- *	The measurement system is english for the US and metric elsewhere
+ *	The measurement system is english for the US and Canada and metric elsewhere
  */
 static int
 GetLocalMeasureSystem(struct appDefault *ptrDefault, void *data)
 {
-    return (strcmp(regionCode, "US") ? 1 : 0);
+    return (UseMetric() ? 1 : 0);
 }
 
 /**
-*	The distance format is 999.9 cm for metric and ?? for english
+*	The distance format is 999.9 cm for metric and 999.99 for english
 */
 static int
 GetLocalDistanceFormat(struct appDefault *ptrDefault, void *data)
 {
-    return (strcmp(regionCode, "US") ? 8 : 5);
+    return (UseMetric() ? 8 : 4);
 }
 
 /**
