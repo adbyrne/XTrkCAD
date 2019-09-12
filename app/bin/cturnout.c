@@ -52,6 +52,7 @@ EXPORT dynArr_t turnoutInfo_da;
 
 EXPORT turnoutInfo_t * curTurnout = NULL;
 EXPORT long curTurnoutEp = 0;
+static int curTurnoutInx = -1;
 
 static int log_turnout = 0;
 static int log_traverseTurnout = 0;
@@ -2019,6 +2020,15 @@ static void SelTurnoutEndPt(
 	if (action != C_DOWN) return;
 
 	HilightEndPt();
+	wDrawClear( turnoutD.d );
+	if (curTurnout == NULL) {
+		return;
+	}
+	turnoutD.orig.x = curTurnout->orig.x - trackGauge;
+	turnoutD.orig.y = (curTurnout->size.y + curTurnout->orig.y) - turnoutD.size.y + trackGauge;
+	DrawSegs( &turnoutD, zero, 0.0, curTurnout->segs, curTurnout->segCnt,
+					 trackGauge, wDrawColorBlack );
+
 	curTurnoutEp = TOpickEndPoint( pos, curTurnout );
 	HilightEndPt();
 LOG( log_turnout, 3, (" selected (action=%d) %ld\n", action, curTurnoutEp ) )
@@ -2488,6 +2498,51 @@ static void TurnoutRotate( void * pangle )
 		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
 	Dto.state = 1;
 }
+
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
+
+void static CreateArrowAnchor(coOrd pos,ANGLE_T a,DIST_T len) {
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = SEG_STRLIN;
+	anchors(i).width = 0;
+	anchors(i).u.l.pos[0] = pos;
+	Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a+135),len);
+	anchors(i).color = wDrawColorBlue;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	i = anchors_da.cnt-1;
+	anchors(i).type = SEG_STRLIN;
+	anchors(i).width = 0;
+	anchors(i).u.l.pos[0] = pos;
+	Translate(&anchors(i).u.l.pos[1],pos,NormalizeAngle(a-135),len);
+	anchors(i).color = wDrawColorBlue;
+}
+
+void static CreateRotateAnchor(coOrd pos) {
+	DIST_T d = tempD.scale*0.15;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = SEG_CRVLIN;
+	anchors(i).width = 0.5;
+	anchors(i).u.c.center = pos;
+	anchors(i).u.c.a0 = 180.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).u.c.radius = d*2;
+	anchors(i).color = wDrawColorAqua;
+	coOrd head;					//Arrows
+	for (int j=0;j<3;j++) {
+		Translate(&head,pos,j*120,d*2);
+		CreateArrowAnchor(head,NormalizeAngle((j*120)+90),d);
+	}
+}
+
+void static CreateMoveAnchor(coOrd pos) {
+	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
+	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,90,TRUE,wDrawColorBlue);
+}
 	
 /**
  * Process the mouse events for laying track.
@@ -2508,52 +2563,73 @@ EXPORT STATUS_T CmdTurnoutAction(
 #ifdef NEWROTATE
 	static ANGLE_T origAngle;
 #endif
+
 	switch (action & 0xFF) {
 
 	case C_START:
 		Dto.state = 0;
 		Dto.trk = NULL;
 		Dto.angle = 0.0;
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		return C_CONTINUE;
 
-	case C_DOWN:
-		if ( curTurnout == NULL ) return C_CONTINUE;
-		if (Dto.state == 1) {
-			DrawSegs( &tempD, Dto.pos, Dto.angle,
-				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (Dto.state && (MyGetKeyState()&WKEY_CTRL)) {
+			CreateRotateAnchor(pos);
+		} else {
+			CreateMoveAnchor(pos);
 		}
+		if (anchors_da.cnt>0)
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		MainRedraw();
+		return C_CONTINUE;
+		break;
+	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if ( curTurnout == NULL ) return C_CONTINUE;
+		//if (Dto.state == 1) {
+		//	DrawSegs( &tempD, Dto.pos, Dto.angle,
+		//		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+		//}
 		PlaceTurnout( pos );
 		Dto.state = 1;
-		DrawSegs( &tempD, Dto.pos, Dto.angle,
-				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+		MainRedraw();
+		//DrawSegs( &tempD, Dto.pos, Dto.angle,
+		//		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
 		return C_CONTINUE;
 
 	case C_MOVE:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curTurnout == NULL ) return C_CONTINUE;
 		if ( curTurnoutEp >= (long)curTurnout->endCnt )
 			curTurnoutEp = 0;
-		if (Dto.state == 1) {
-			DrawSegs( &tempD, Dto.pos, Dto.angle,
-					curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
-		} else {
-			Dto.state = 1;
-		}
+		//if (Dto.state == 1) {
+		//	DrawSegs( &tempD, Dto.pos, Dto.angle,
+		//			curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+		//} else {
+
+		Dto.state = 1;
+		//}
 		PlaceTurnout( pos );
-		DrawSegs( &tempD, Dto.pos, Dto.angle,
-				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+		MainRedraw();
+		//DrawSegs( &tempD, Dto.pos, Dto.angle,
+		//		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
 		return C_CONTINUE;
 
 	case C_UP:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		InfoMessage( _("Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
 		return C_CONTINUE;
 
 	case C_RDOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curTurnout == NULL ) return C_CONTINUE;
-		if (Dto.state == 1)
-			DrawSegs( &tempD, Dto.pos, Dto.angle,
-				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
-		else
-			Dto.pos = pos;
+		//if (Dto.state == 1)
+		//	DrawSegs( &tempD, Dto.pos, Dto.angle,
+		//		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+		//else
+		Dto.pos = pos;
 		Dto.rot0 = Dto.rot1 = pos;
 		DrawLine( &tempD, Dto.rot0, Dto.rot1, 0, wDrawColorBlack );
 		Dto.state = 1;
@@ -2563,16 +2639,19 @@ EXPORT STATUS_T CmdTurnoutAction(
 #else
 		Rotate( &origPos, Dto.rot0, -(Dto.angle + curTurnout->endPt[(int)curTurnoutEp].angle) );
 #endif
-		DrawSegs( &tempD, Dto.pos, Dto.angle,
-				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+		MainRedraw();
+		//DrawSegs( &tempD, Dto.pos, Dto.angle,
+		//		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
 		validAngle = FALSE;
 		return C_CONTINUE;
 
 	case C_RMOVE:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curTurnout == NULL ) return C_CONTINUE;
-		DrawSegs( &tempD, Dto.pos, Dto.angle,
-				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
-		DrawLine( &tempD, Dto.rot0, Dto.rot1, 0, wDrawColorBlack );
+		//DrawSegs( &tempD, Dto.pos, Dto.angle,
+		//		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+
+		//DrawLine( &tempD, Dto.rot0, Dto.rot1, 0, wDrawColorBlack );
 		Dto.rot1 = pos;
 		if ( FindDistance(Dto.rot0, Dto.rot1) > 0.1*mainD.scale ) {
 			angle = FindAngle( Dto.rot0, Dto.rot1 );
@@ -2592,23 +2671,27 @@ EXPORT STATUS_T CmdTurnoutAction(
 		}
 		FormatCompoundTitle( listLabels, curTurnout->title );
 		InfoMessage( _("Angle = %0.3f (%s)"), PutAngle( NormalizeAngle(Dto.angle + 90.0) ), message );
+		MainRedraw();
 		DrawLine( &tempD, Dto.rot0, Dto.rot1, 0, wDrawColorBlack );
-		DrawSegs( &tempD, Dto.pos, Dto.angle,
-				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+		//DrawSegs( &tempD, Dto.pos, Dto.angle,
+		//		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
 		return C_CONTINUE;
 
 	case C_RUP:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curTurnout == NULL ) return C_CONTINUE;
-		DrawLine( &tempD, Dto.rot0, Dto.rot1, 0, wDrawColorBlack );
+		//DrawLine( &tempD, Dto.rot0, Dto.rot1, 0, wDrawColorBlack );
+		MainRedraw();
 		InfoMessage( _("Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
 		return C_CONTINUE;
 
 	case C_LCLICK:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curTurnout == NULL ) return C_CONTINUE;
 		if ( MyGetKeyState() & WKEY_SHIFT ) {
-			if (Dto.state == 1)
-				DrawSegs( &tempD, Dto.pos, Dto.angle,
-					curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+			//if (Dto.state == 1)
+			//	DrawSegs( &tempD, Dto.pos, Dto.angle,
+			//		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
 			angle = curTurnout->endPt[(int)curTurnoutEp].angle;
 			curTurnoutEp++;
 			if (curTurnoutEp >= (long)curTurnout->endCnt)
@@ -2616,9 +2699,10 @@ EXPORT STATUS_T CmdTurnoutAction(
 			if (Dto.trk == NULL)
 				Dto.angle = NormalizeAngle( Dto.angle + (angle - curTurnout->endPt[(int)curTurnoutEp].angle ) );
 			PlaceTurnout( Dto.place );
-			if (Dto.state == 1)
-				DrawSegs( &tempD, Dto.pos, Dto.angle,
-					curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+			MainRedraw();
+			//if (Dto.state == 1)
+			//	DrawSegs( &tempD, Dto.pos, Dto.angle,
+			//		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
 		} else {
 			CmdTurnoutAction( C_DOWN, pos );
 			CmdTurnoutAction( C_UP, pos );
@@ -2626,15 +2710,20 @@ EXPORT STATUS_T CmdTurnoutAction(
 		return C_CONTINUE;
 
 	case C_REDRAW:
-		if (Dto.state)
+		if (Dto.state) {
 			DrawSegs( &tempD, Dto.pos, Dto.angle,
 				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+		}
+		if (anchors_da.cnt>0) {
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		}
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		if (Dto.state)
-			DrawSegs( &tempD, Dto.pos, Dto.angle,
-				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		//if (Dto.state)
+		//	DrawSegs( &tempD, Dto.pos, Dto.angle,
+		//		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
 		Dto.state = 0;
 		Dto.trk = NULL;
 		/*wHide( newTurn.reg.win );*/
@@ -2644,6 +2733,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		if ((action>>8) != ' ') 
 			return C_CONTINUE;
 	case C_OK:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		AddTurnout();
 		Dto.state=0;
 		return C_TERMINATE;
@@ -2704,12 +2794,21 @@ static STATUS_T CmdTurnout(
 		ParamGroupRecord( &turnoutPG );
 		return CmdTurnoutAction( action, pos );
 
+	case wActionMove:
+		return CmdTurnoutAction( action, pos );
+
 	case C_DOWN:
 	case C_RDOWN:
 		ParamDialogOkActive( &turnoutPG, TRUE );
 		if (hideTurnoutWindow)
 			wHide( turnoutW );
+		 if (((action&0xFF) == C_DOWN) && (MyGetKeyState()&WKEY_CTRL))
+			return CmdTurnoutAction(C_RDOWN, pos);     //Convert CTRL into Right
+		/*no break*/
 	case C_MOVE:
+		if (MyGetKeyState()&WKEY_CTRL)
+			return CmdTurnoutAction (C_RMOVE, pos);
+		/*no break*/
 	case C_RMOVE:
 		return CmdTurnoutAction( action, pos );
 
@@ -2717,7 +2816,10 @@ static STATUS_T CmdTurnout(
 	case C_RUP:
 		if (hideTurnoutWindow)
 			wShow( turnoutW );
-		InfoMessage( _("Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
+
+		InfoMessage( _("Left drag to move, +Ctrl drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
+		if (((action&0xFF) == C_UP) && (MyGetKeyState()&WKEY_CTRL))
+						return CmdTurnoutAction (C_RUP, pos);
 		return CmdTurnoutAction( action, pos );
 
 	case C_LCLICK:
@@ -2766,7 +2868,7 @@ static char * CmdTurnoutHotBarProc(
 	case HB_SELECT:		/* new element is selected */
 		CmdTurnoutAction( C_FINISH, zero ); 		/* finish current operation */
 		curTurnout = to;
-		DoCommandB( (void*)(intptr_t)turnoutHotBarCmdInx ); /* continue with new turnut / structure */
+		DoCommandB( (void*)(intptr_t)turnoutHotBarCmdInx ); /* continue with new turnout / structure */
 		return NULL;
 	case HB_LISTTITLE:
 		FormatCompoundTitle( listLabels, to->title );
@@ -2823,24 +2925,49 @@ static STATUS_T CmdTurnoutHotBar(
 		}
 		FormatCompoundTitle( listLabels|LABEL_DESCR, curTurnout->title );
 		InfoMessage( _("Place %s and draw into position"), message );
-		ParamLoadControls( &turnoutPG );
-		ParamGroupRecord( &turnoutPG );
+		return CmdTurnoutAction( action, pos );
+
+	case wActionMove:
+		return CmdTurnoutAction( action, pos );
+
+	case C_DOWN:
+		if (MyGetKeyState()&WKEY_CTRL) {
+			return CmdTurnoutAction( C_RDOWN, pos );
+		}
+		/*no break*/
+	case C_RDOWN:
+		return CmdTurnoutAction( action, pos );
+
+	case C_MOVE:
+		if (MyGetKeyState()&WKEY_CTRL) {
+			return CmdTurnoutAction( C_RMOVE, pos );
+		}
+		/*no break*/
+	case C_RMOVE:
 		return CmdTurnoutAction( action, pos );
 
 	case C_UP:
+		if (MyGetKeyState()&WKEY_CTRL) {
+			return CmdTurnoutAction( C_RUP, pos );
+		}
+		/*no break*/
 	case C_RUP:
-		InfoMessage( _("Left drag to move, right drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
+		InfoMessage( _("Left drag to move, +Ctrl drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
 		return CmdTurnoutAction( action, pos );
 
+	case C_REDRAW:
+			return CmdTurnoutAction( action, pos );
 	case C_TEXT:
 		if ((action>>8) != ' ')
 			return C_CONTINUE;
+		/* no break*/
 	case C_OK:
 		CmdTurnoutAction( action, pos );
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		HotBarCancel();
+		/*no break*/
 	default:
 		return CmdTurnoutAction( action, pos );
 	}
@@ -2852,8 +2979,8 @@ static STATUS_T CmdTurnoutHotBar(
 
 EXPORT void InitCmdTurnout( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdTurnout, "cmdTurnout", _("Turnout"), wIconCreatePixMap(turnout_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_TURNOUT, NULL );
-	turnoutHotBarCmdInx = AddMenuButton( menu, CmdTurnoutHotBar, "cmdTurnoutHotBar", "", NULL, LEVEL0_50, IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, 0, NULL );
+	AddMenuButton( menu, CmdTurnout, "cmdTurnout", _("Turnout"), wIconCreatePixMap(turnout_xpm), LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_TURNOUT, NULL );
+	turnoutHotBarCmdInx = AddMenuButton( menu, CmdTurnoutHotBar, "cmdTurnoutHotBar", "", NULL, LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_LCLICK|IC_CMDMENU|IC_POPUP2, 0, NULL );
 	RegisterChangeNotification( TurnoutChange );
 	ParamRegister( &turnoutPG );
 	log_turnout = LogFindIndex( "turnout" );

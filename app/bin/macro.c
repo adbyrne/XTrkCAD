@@ -1336,7 +1336,7 @@ static char * demoInitParams[] = {
 		"display hideTrainsInTunnels 0",
 		"GROUP display",
 		"cmdopt move-quick 0",
-		"pref turntable-angle 7.500",
+		"pref turntable-angle 15.00",
 		"cmdopt preselect 1",
 		"pref coupling-speed-max 100",
 		"cmdopt rightclickmode 0",
