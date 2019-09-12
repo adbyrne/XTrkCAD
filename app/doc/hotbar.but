@@ -36,7 +36,7 @@ If you \e{Left+Drag} a turnout onto a track, the active endpoint (\K{generalTerm
 
 \e{XTrackCAD} will automatically connect the turnout's endpoints to any other tracks they are aligned with.  The number of endpoints that will be connected is displayed on the Status Bar, as well as the Maximum displacement between these endpoints and the tracks they will be connected to. \e{XTrackCAD} will adjust the position of the Turnout to give you the best fit for locating the turnout.  You can override this adjustment by holding down the \e{Shift} key while \e{Dragging}.
 
-\e{Right+Drag} (\K{windowTerms}) can be used to rotate the turnout on the layout. \e{Shift+Right-Click} (\K{cmdAcclKeys}) displays a pop-up menu allowing you to rotate the turnout by various angles.
+\e{Right+Drag} or \e{Ctrl+Left+Drag} (\K{windowTerms}) can be used to rotate the turnout on the layout. \e{Shift+Right-Click} (\K{cmdAcclKeys}) displays a pop-up menu allowing you to rotate the turnout by various angles.
 
 When you press the \e{Space} key, the turnout is positioned on the layout.  Any tracks that are aligned with any of the turnout's endpoints will be connected to the turnout automatically. If you are using the Turnout (\K{cmdTurnout}) command then you can also click the \e{OK} button on the dialog.
 
