@@ -58,7 +58,7 @@ EXPORT DIST_T curScaleRatio;
 EXPORT char * curScaleName;
 EXPORT DIST_T trackGauge;
 EXPORT long labelScale = 8;
-EXPORT long labelEnable = ((1<<0)|LABELENABLE_LENGTHS|LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
+EXPORT long labelEnable = (LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
 EXPORT long labelWhen = 2;
 EXPORT long colorLayers = 0;
 EXPORT long zoomCorner = 0;
