@@ -14,7 +14,7 @@ The arrow buttons on either side of the \e{Hot bar} move the list one object to 
 
 A \e{Right-Click} over the \e{Hot Bar} will display a pop-up menu listing the contents of the \e{Hot Bar}. Selecting an item from this list causes the \e{Hot Bar} to jump to the relative spot on the list.
 
-Objects on the \e{Hot Bar} are placed on the drawing canvas by first clicking on the object, \e{Dragging} it the Main window, positioning it then pressing the \e{Space} key to set it in place.
+Objects on the \e{Hot Bar} are placed on the drawing canvas by first clicking on the object, \e{Dragging} it the Main window, rotating it with \e{Ctrl+Left-Drag} or \e{Right-Drag} positioning it then pressing the \e{Space} key to set it in place.
 
 \rule
 
@@ -30,7 +30,7 @@ Refer to \K{cmdStructure} for information pertaining to use of the \e{Structure}
 
 \S{hbTurnouts} Turnouts
 
-\e{Turnouts} have an active endpoint (\K{generalTerms}) which is the handle used to position the \e{Turnout}.  You can change the \e{active endpoint} by a \e{Shift+Left-Click} which causes the next endpoint to become Active.
+\e{Turnouts} have an active endpoint (\K{generalTerms}) which is the handle used to position the \e{Turnout}.  You can change the \e{active endpoint} by a \e{Shift+Left-Click} which causes the next endpoint to become Active. 
 
 If you \e{Left+Drag} a turnout onto a track, the active endpoint (\K{generalTerms}) is aligned with the selected track.  On flex-track, you can flip the turnout by moving the cursor from one side of the track centerline to the other.  On another turnout, the new turnout will be placed at the endpoint closest to the cursor.
 

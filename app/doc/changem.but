@@ -304,7 +304,6 @@ For detail about;
 
 \rule
 
-
 \S2{joinTrackCurve} Using Curved Flex-Track
 
 This method of joining track may be used using Normal Easments where tracks are either joined with a 'simple curve'\k{joinNormalEasment}, e.g. one which uses a curve in a single direction as opposed to using reverse curves (\K{generalTerms}) or using complex curves if Easement is set to Cornu \K{joinCornu}.
@@ -530,7 +529,7 @@ This method of joining track may be used to move, align and join one section of 
 
 \u000
 
-\n Before initiating the \f{Join} command, the track that will be moved, aligned then joined must be selected using the \f{Select} command (\K{cmdSelect}).
+\n Before initiating the \f{Join} command, the track that will be moved, aligned and then joined must be selected using the \f{Select} command (\K{cmdSelect}).
 
 \lcont{
 
@@ -566,7 +565,7 @@ This method of joining track may be used to move, align and join one section of 
 
 }
 
-\n Move the mouse pointer over the endpoint of the other track then \e{Shift+Left-Click}. The selected track will be moved, aligned then joined to the stationary section of track. 
+\n Then move the mouse pointer over the endpoint of the other (unselected and stationary) track with \e{Shift+Left-Click}. The selected track will be moved, aligned then joined to the stationary section of track. 
 
 For detail about;
 
@@ -893,7 +892,7 @@ A move can be achieved using one of the following methods;
 
 \u000
 
-During a Move of tracks, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. This indicates that the two points will auto-snap and the moved track will align to the unselected point if the Move is stopped. 
+During a Move of tracks, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. This indicates that the two points will auto-join and that all the moved tracks will align to the unselected point if the Move is stopped. 
 
 \rule
 
@@ -998,7 +997,7 @@ Choose a path by using \e{Left-Click} on endpoints.  As each endpoint is chosen,
 
 If no route is possible an error message is displayed.  There are several reasons why this might happen:
 
-\b The tracks are not connected. Check this by using \e{Shift+Left-Click} on one track using the \f{Select} command (\K{cmdSelect}). This selects all tracks connected (directly or indirectly). See if the other track is selected.
+\b The tracks are not connected. You can see this more easily if you turn on Display->Option->"Display Unconnected End Points" as Exception. You can also check this by using \e{Shift+Left-Click} on one track using the \f{Select} command (\K{cmdSelect}). This selects all tracks connected (directly or indirectly). See if the other track is selected.
 
 \u000
 
@@ -1091,7 +1090,7 @@ Rotation can be achieved using one of the following methods;
 
 \dd Aligning the selected object with another object on the layout. See \K{rotateByAlign} for detail.
 
-During Rotation of a track, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. This indicates that the two points will auto-snap and the moved track will align to the unselected point if the Rotation is stopped. 
+During Rotation of a track, if one of the end-points of the selected objects is close to an open end of a unselected point, two anchors (an open an closed blue ball) will appear. This indicates that the two points will auto-snap and the moved track will align to the unselected point if the Rotation is stopped. Note that this also applies to \K{cmdMove}.  
 
 \rule
 
@@ -1251,7 +1250,7 @@ In combination with the mouse, the \f{Select} command can be used as follows;
 
 \u000
 
-\dd \e{Left-Click} - selects just the object. Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog). If an point without a track is selected, all currently selected tracks are unselected.
+\dd \e{Left-Click} - selects just the object. Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog) and a blue selection box. If an point without a track is selected, all currently selected tracks are unselected.
 
 \u000
 
@@ -1267,6 +1266,10 @@ In combination with the mouse, the \f{Select} command can be used as follows;
 
 \u000
 
+\dd \e{Right-Drag} - highlights an area, and the objects within the area are unselected.
+
+\u000
+
 \dd \e{Right-Click} - displays a pop-up menu of commands.
 
 \lcont{
@@ -1279,21 +1282,25 @@ In combination with the mouse, the \f{Select} command can be used as follows;
 
 }
 
+\u000 
+
+\dd Hovering over a selected object (inside the blue highlight area) with either a shift or a ctrl button shows that a Left-Drag will Move or Rotate the selected items.
+
 \u000
 
 \dd \e{Shift+Right-Click} (\K{cmdAcclKeys}) - displays a pop-up menu of options controlling how objects are drawn during moves and rotates (below).  If there are selected objects then additional menu items allow you to rotate the selected objects by various angles.
 
 \u000
 
-\dd \e{Shift+Left-Click+Drag} - moves the selected objects (the Move (\K{cmdMove}) command).
+\dd \e{Shift+Left-Click+Drag} - on a selected object moves the selected objects (the Move (\K{cmdMove}) command).
 
 \u000
 
-\dd \e{Ctrl+Left-Click+Drag} - rotates the selected objects (the \f{Rotate} (\K{cmdRotate}) command).
+\dd \e{Ctrl+Left-Click+Drag} - on a selected object rotates the selected objects (the \f{Rotate} (\K{cmdRotate}) command).
 
 \lcont{
 
-\b If the \e{Shift} key is pressed while dragging then rotation will occur in 15\u00B0 increments.
+\b If the \e{Shift} key is pressed while dragging in rotation then rotation will occur in 15\u00B0 increments.
 
 }
 
@@ -1327,11 +1334,11 @@ The \f{Cut}, \f{Copy} and \f{Paste} commands found on the \f{Edit} (\K{editM}) m
 
 Notes:
 
-\b A Filled Shape (\K{cmdDraw}) can be selected by clicking on its edge.
+\b Connections between selected and unselected tracks will be broken when selected tracks are moved.  If the Drawing Scale is 8:1 or smaller, these about-to-be broken connections are marked with a red X.
 
 \u000
 
-\b Connections between selected and unselected tracks will be broken when selected tracks are moved.  If the Drawing Scale is 8:1 or smaller, these about-to-be broken connections are marked with a red X.
+\b During Move or Rotate operations, if an track end that will be disconnected during the operation comes close to a disconnected end of track that isn't selected, a pair of blue circles (one empty and one filled) will turn on. This shows that if the drag is stopped, those two points will be joined and the other selected tracks aligned. This represents a faster alternative to the \K{joinTrackMove} command.
 
 \u000
 
@@ -1343,7 +1350,7 @@ Notes:
 
 \u000
 
-\b Pressing the \e{Escape} key will deselect all selected tracks. Alternatively clicking on an empty area will also work.
+\b Pressing the \e{Escape} key will deselect all selected tracks. Alternatively left-clicking on an empty area will also work.
 
 \rule
 

@@ -79,6 +79,9 @@ static track_p *tlist2 = NULL;
 static wMenu_p selectPopup1M;
 static wMenu_p selectPopup2M;
 
+static BOOL_T doingAlign = FALSE;
+static enum { AREA, MOVE } mode;
+
 static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color );
 
 static dynArr_t anchors_da;
@@ -1528,7 +1531,9 @@ static void RotateAlign( BOOL_T align )
 	rotateAlignState = 0;
 	if (align) {
 		rotateAlignState = 1;
-		InfoMessage( _("Click on selected object to align") );
+		doingAlign = TRUE;
+		mode = MOVE;
+		InfoMessage( _("Align: Click on a selected object to be aligned") );
 	}
 }
 
@@ -1598,8 +1603,10 @@ static STATUS_T CmdRotate(
 						}
 					}
 				}
+				CreateRotateAnchor(orig);
 				GetMovedTracks(FALSE);
 				SetMoveD( FALSE, base, angle );
+
 				/*DrawLine( &mainD, base, orig, 0, wDrawColorBlack );
 				DrawMovedTracks(FALSE, orig, angle);*/
 			} else {
@@ -1696,6 +1703,7 @@ static STATUS_T CmdRotate(
 					angle = NormalizeAngle(floor((angle+7.5)/15.0)*15.0);
 					Translate( &base, orig, angle, FindDistance(orig,pos) );
 				}
+				CreateRotateAnchor(orig);
 				DrawLine( &tempD, base, orig, 0, wDrawColorBlack );
 				SetMoveD( FALSE, orig, angle );
 				if (FindEndIntersection(zero,orig,angle,&t1,&ep1,&t2,&ep2)) {
@@ -1717,16 +1725,18 @@ static STATUS_T CmdRotate(
             MainRedraw();
             MapRedraw();
 			return C_CONTINUE;
+
 		case C_UP:
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			state = 0;
 			if (t1 && ep1>=0 && t2 && ep2>=0) {
 				MoveToJoin(t2,ep2,t1,ep1);
 				CleanSegs(&tempSegs_da);
+				rotateAlignState = 0;
 			} else {
 				if ( rotateAlignState == 1 ) {
 					if ( trk && GetTrkSelected(trk) ) {
-						InfoMessage( _("Click on the 2nd Unselected object") );
+						InfoMessage( _("Align: Click on the 2nd Unselected object") );
 						rotateAlignState = 2;
 					}
 					return C_CONTINUE;
@@ -2311,16 +2321,23 @@ static STATUS_T CmdSelect(
 		wAction_t action,
 		coOrd pos )
 {
-	static enum { AREA, MOVE } mode;
-	static BOOL_T doingMove = FALSE;
-	static BOOL_T doingRotate = FALSE;
+
+	static BOOL_T doingMove;
+	static BOOL_T doingRotate;
+
 	STATUS_T rc=C_CONTINUE;
 	track_p t;
 
-	if ( action == C_DOWN || action == C_RDOWN ) {
-		mode = AREA;
-		if (MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) {
-			mode = MOVE;
+	mode = AREA;
+	if (doingAlign || doingRotate || doingMove)
+		mode = MOVE;
+	else {
+		if ( action == C_DOWN || action == C_RDOWN ) {
+			mode = AREA;
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL))
+				 && IsInsideABox(pos)) {
+				mode = MOVE;
+			}
 		}
 	}
 
@@ -2330,6 +2347,7 @@ static STATUS_T CmdSelect(
 		importMove = FALSE;
 		doingMove = FALSE;
 		doingRotate = FALSE;
+		doingAlign = FALSE;
 		SelectArea( action, pos );
 		wMenuPushEnable( rotateAlignMI, FALSE );
 		wSetCursor(mainD.d,defaultCursor);
@@ -2345,54 +2363,101 @@ static STATUS_T CmdSelect(
 		if ((selectedTrackCount==0) && (t == NULL)) return C_CONTINUE;
 		if (selectedTrackCount>0) {
 			if ((ht = IsInsideABox(pos)) != NULL) {
-				if ((MyGetKeyState()&WKEY_CTRL)) {
-					CreateRotateAnchor(pos);
-				} else if ((MyGetKeyState()&WKEY_SHIFT)) {
+				if ((MyGetKeyState()&WKEY_SHIFT)) {
 					CreateMoveAnchor(pos);
+				} else if ((MyGetKeyState()&WKEY_CTRL)) {
+					CreateRotateAnchor(pos);
 				}
 			}
-			if (anchors_da.cnt)
-					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-		} if (!t) return C_CONTINUE;
-		if (!GetTrkSelected(t)) DrawTrack(t,&mainD,wDrawColorBlue);
+		}
+		if (!(MyGetKeyState()&WKEY_CTRL) && t && !GetTrkSelected(t))
+			DrawTrack(t,&mainD,wDrawColorBlue);
+		if (anchors_da.cnt)
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		break;
 
 	case C_DOWN:
 	case C_RDOWN:
-	case C_RMOVE:
-	case C_RUP:
-	case C_UP:
-	case C_MOVE:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		switch (mode) {
 		case MOVE:
-			if (SelectedTracksAreFrozen()) {
+			if (SelectedTracksAreFrozen() || (selectedTrackCount==0)) {
 				rc = C_TERMINATE;
 				doingMove = FALSE;
-				doingRotate = FALSE;
-			} else if ((action >= C_DOWN && action <= C_UP) && (doingRotate || (MyGetKeyState()&WKEY_CTRL)))	{
+			} else if ((MyGetKeyState()&WKEY_CTRL)) {
+				doingRotate = TRUE;
+				doingMove = FALSE;
 				RotateAlign( FALSE );
 				rc = CmdRotate( action, pos );
-				doingMove = FALSE;
-				doingRotate = TRUE;
-			} else if ((action >= C_DOWN && action <= C_UP) && (doingMove || (MyGetKeyState()&WKEY_SHIFT))) {
-				rc = CmdMove( action, pos );
+			} else if ((MyGetKeyState()&WKEY_SHIFT)) {
 				doingMove = TRUE;
 				doingRotate = FALSE;
-			}
-			if (action == C_UP) {
-				doingMove = FALSE;
-				doingRotate = FALSE;
-				mode = AREA;
-				InfoMessage(_("Select Track, +Ctrl to Add, +Shift to add joined"));
+				rc = CmdMove( action, pos );
 			}
 			break;
 		case AREA:
+			doingMove = FALSE;
+			doingRotate = FALSE;
 			rc = SelectArea( action, pos );
-
 			break;
+		default: ;
 		}
 		return rc;
 		break;
+	case C_RMOVE:
+	case C_MOVE:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		switch (mode) {
+		case MOVE:
+			if (SelectedTracksAreFrozen() || (selectedTrackCount==0)) {
+				rc = C_TERMINATE;
+				doingMove = FALSE;
+				doingRotate = FALSE;
+			} else if (doingRotate == TRUE) {
+				RotateAlign( FALSE );
+				rc = CmdRotate( action, pos );
+			} else if (doingMove == TRUE) {
+				rc = CmdMove( action, pos );
+			}
+			break;
+		case AREA:
+			doingMove = FALSE;
+			doingRotate = FALSE;
+			rc = SelectArea( action, pos );
+			break;
+		default: ;
+		}
+		return rc;
+		break;
+	case C_RUP:
+	case C_UP:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		switch (mode) {
+		case MOVE:
+			if (SelectedTracksAreFrozen() || (selectedTrackCount==0)) {
+				rc = C_TERMINATE;
+				doingMove = FALSE;
+				doingRotate = FALSE;
+			} else if (doingRotate == TRUE) {
+				RotateAlign( FALSE );
+				rc = CmdRotate( action, pos );
+			} else if (doingMove == TRUE) {
+				rc = CmdMove( action, pos );
+			}
+			break;
+		case AREA:
+			doingMove = FALSE;
+			doingRotate = FALSE;
+			rc = SelectArea( action, pos );
+			break;
+		default: ;
+		}
+		doingMove = FALSE;
+		doingRotate = FALSE;
+		mode = AREA;
+		return rc;
+		break;
+
 	case C_REDRAW:
 		if (doingMove) {
 			rc = CmdMove( C_REDRAW, pos );
@@ -2410,8 +2475,14 @@ static STATUS_T CmdSelect(
 		switch (mode) {
 		case MOVE:
 		case AREA:
-			rc = SelectTrack( pos );
+			if (doingAlign) {
+				rc = CmdRotate (C_DOWN, pos);
+				rc = CmdRotate (C_UP, pos);
+			} else
+				rc = SelectTrack( pos );
 			MainRedraw();
+			doingRotate = FALSE;
+			doingMove = FALSE;
 			return rc;
 		}
 		mode = AREA;
@@ -2444,6 +2515,8 @@ static STATUS_T CmdSelect(
 			if ((trk)) {
 				wMenuPushEnable(descriptionMI, QueryTrack( trk, Q_HAS_DESC ));
 			}
+			if (selectedTrackCount>0)
+				wMenuPushEnable( rotateAlignMI, TRUE );
 			wMenuPopupShow( selectPopup2M );
 		}
 		return C_CONTINUE;
