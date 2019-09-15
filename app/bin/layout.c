@@ -32,6 +32,7 @@
 #include "track.h"
 #include "wlib.h"
 #include "fileio.h"
+#include "utility.h"
 
 #define MINTRACKRADIUSPREFS "minTrackRadius"
 
@@ -66,7 +67,7 @@ static struct sDataLayout thisLayout = {
 static paramFloatRange_t r0_90 = { 0, 90 };
 static paramFloatRange_t r1_10000 = { 1, 10000 };
 static paramFloatRange_t r1_9999999 = { 1, 9999999 };
-static paramFloatRange_t r0_360 = { 0, 360 };
+static paramFloatRange_t r360_360 = { -360, 360 };
 static paramFloatRange_t rN_9999999 = { -99999, 99999 };
 static paramIntegerRange_t i0_100 = { 0, 100 };
 
@@ -478,7 +479,7 @@ static paramData_t layoutPLs[] = {
 #define BACKGROUNDSCREEN (14)
 	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDANGLE (15)
-	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW, &r0_360, N_("Background Angle"), 0, (void*)(CHANGE_BACKGROUND) }
+	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW, &r360_360, N_("Background Angle"), 0, (void*)(CHANGE_BACKGROUND) }
 
 };
 
@@ -517,6 +518,7 @@ static void LayoutOk(void * junk)
     }
 
     if ((changes & CHANGE_BACKGROUND) || file_changed) {
+
     	LayoutBackGroundSave();
     	file_changed = FALSE;
     }
@@ -646,7 +648,10 @@ LayoutDlgUpdate(
     	MainRedraw();
     }
     if (inx == BACKGROUNDANGLE) {
-    	SetLayoutBackGroundAngle(*(double *)valueP);
+
+    	ANGLE_T angle = NormalizeAngle(*(double *)valueP);
+    	wStringSetValue((wString_p)layoutPLs[BACKGROUNDANGLE].control,FormatLong(angle));
+    	SetLayoutBackGroundAngle(angle);
     	MainRedraw();
     }
 
