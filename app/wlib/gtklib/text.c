@@ -112,15 +112,17 @@ void wTextAppend(wText_p bt,
     gtk_text_buffer_get_end_iter(tb, &ti1);
     gtk_text_buffer_insert(tb, &ti1, text, -1);
     
-    // and scroll to end of text
-    gtk_text_buffer_get_end_iter(tb, &ti1);
-    tm = gtk_text_buffer_create_mark(tb, 
-								"endoftext",
-								&ti1,
-								TRUE );
-    gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW(bt->text),
-								  tm );
-	gtk_text_buffer_delete_mark( tb, tm );							
+    if ( bt->option & BT_TOP ) {
+        // and scroll to start of text
+        gtk_text_buffer_get_start_iter(tb, &ti1);
+    } else {
+        // and scroll to end of text
+        gtk_text_buffer_get_end_iter(tb, &ti1);
+    }
+    tm = gtk_text_buffer_create_mark(tb, NULL, &ti1, TRUE );
+    gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW(bt->text), tm );
+    gtk_text_buffer_delete_mark( tb, tm );
+ 
     bt->changed = FALSE;
 }
 

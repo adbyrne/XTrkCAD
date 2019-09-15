@@ -414,6 +414,7 @@ wLine_p wLineCreate(		wWin_p, const char *, int, wLines_t *);
 #define BT_CHARUNITS	(1L<<23)
 #define BT_FIXEDFONT	(1L<<22)
 #define BT_DOBOLD	(1L<<21)
+#define BT_TOP		(1L<<20)	/* Show the top of the text */
 
 wText_p wTextCreate(		wWin_p, wPos_t, wPos_t, const char *, const char *, long,
 				wPos_t, wPos_t );
