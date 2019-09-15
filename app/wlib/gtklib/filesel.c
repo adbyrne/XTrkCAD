@@ -328,9 +328,6 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			g_free( g_slist_nth_data ( fileNameList, i));
 		}
 		
-		if (fs->data)
-			strcpy( fs->data, fileNames[ 0 ] );
-		
 		if (fs->action) {
 			fs->action( g_slist_length(fileNameList), fileNames, fs->data );
 		}
