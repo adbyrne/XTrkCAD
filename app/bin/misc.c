@@ -554,6 +554,17 @@ EXPORT int NoticeMessage2(int playbackRC, char * format, char * yes, char * no,
 	va_end(ap);
 	return wNoticeEx( NT_INFORMATION, message2, yes, no);
 }
+
+/**
+* Set the file's changed flag and update the window title.
+*/
+
+void
+FileIsChanged(void)
+{
+	changed = TRUE;
+	SetWindowTitle();
+}
 
 /*****************************************************************************
  *

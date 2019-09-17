@@ -23,7 +23,6 @@
 #include <string.h>
 #include "wlib.h"
 
-#define FILEPROTOCOL ("file:///")
 static char *reservedChars = "?#[]@!$&'()*+,;= ";
 
 unsigned 
@@ -32,11 +31,8 @@ File2URI(char *fileName, unsigned resultLen, char *resultBuffer)
 	char *currentSource = fileName;
 	char *currentDest; 
 
-	if (resultLen >= strlen(FILEPROTOCOL) + 1) {
-		strcpy(resultBuffer, FILEPROTOCOL);
-	}
+	currentDest = resultBuffer;
 
-	currentDest = resultBuffer + strlen(resultBuffer);
 	while (*currentSource && ((unsigned)(currentDest - resultBuffer) < resultLen - 1)) {
 		if (*currentSource == FILE_SEP_CHAR[ 0 ]) {
 			*currentDest++ = '/';
@@ -63,10 +59,7 @@ URI2File(char *encodedFileName, unsigned resultLen, char *resultBuffer)
 	char *currentSource = encodedFileName;
 	char *currentDest = resultBuffer;
 
-	if (strncmp(encodedFileName, FILEPROTOCOL, sizeof( FILEPROTOCOL )-1)) {
-		return(0);
-	}
-	currentSource = encodedFileName + sizeof(FILEPROTOCOL) - 1;
+	currentSource = encodedFileName;
 	while (*currentSource && ((unsigned)(currentDest - resultBuffer) < resultLen - 1)) {
 		if (*currentSource == '/') {
 			*currentDest++ = FILE_SEP_CHAR[0];

@@ -56,11 +56,17 @@ wPrefGetFloatBasic(const char *section, const char *name, double *result, double
 	return(TRUE);
 }
 
-const char * wPrefGetStringBasic(const char *section, const char *name)
+char * wPrefGetStringBasic(const char *section, const char *name)
 {
 	return(NULL);
 }
 
+/* dummy to make the linker happy */
+void 
+wPrefSetInteger(const char *section, const char *name,  long value)
+{
+	return;
+}
 static void BinarySearch(void **state)
 {
 	int result;
