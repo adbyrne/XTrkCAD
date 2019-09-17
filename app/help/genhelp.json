@@ -118,7 +118,7 @@
 		{"line": "cmdSwitchMotorEdit", "contents": "Edit a switchmotor definition" },
 		{"line": "cmdText", "contents": "Enter text on the layout" },
 		{"line": "cmdTextSize", "contents": "Controls the size of the entered text" },
-		{"line": "cmdTextNote", "contents": "Comment"},
+		{"line": "cmdTextNote", "contents": "Plain Text"},
 		{"line": "cmdTip", "contents": "Tip of the Day window" },
 		{"line": "cmdTrain", "contents": "Run Trains" },
 		{"line": "cmdTrainPause", "contents": "Pause/Resume Trains" },
