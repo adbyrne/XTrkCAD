@@ -1526,9 +1526,9 @@ EXPORT void DrawRuler(
 	wFontSize_t fs;
 	long mm, mm0, mm1, power;
 	wPos_t x0, y0, x1, y1;
-	long dxn, dyn;
-	static int lengths[16] = {
-		0, 2, 4, 2, 6, 2, 4, 2, 8, 2, 4, 2, 6, 2, 4, 2 };
+	
+	static double lengths[16] = {
+		0, 2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0, 8.0, 2.0, 4.0, 2.0, 6.0, 2.0, 4.0, 2.0 };
 	int fraction, incr, firstFraction, lastFraction;
 	int majorLength;
 	coOrd p0, p1;
@@ -1538,17 +1538,8 @@ EXPORT void DrawRuler(
 	Translate( &pos0, pos0, a, offset );
 	Translate( &pos1, pos1, a, offset );
 	aa = NormalizeAngle(a+(tickSide==0?+90:-90));
-	if (aa > 90.0 && aa < 270.0) {
-#ifdef WINDOWS
-		dyn = -17;
-#else
-		dyn = -12;
-#endif
-	} else {
-		dyn = +3;
-	}
 	sin_aa = sin(D2R(aa));
-	dxn = 10.0;
+
 	end = FindDistance( pos0, pos1 );
 	if (end < 0.1)
 		return;
