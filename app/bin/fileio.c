@@ -78,6 +78,9 @@ EXPORT char * clipBoardN;
 
 static int log_paramFile;
 
+EXPORT wBool_t bExample = FALSE;
+EXPORT wBool_t bReadOnly = FALSE;
+
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
 
@@ -694,9 +697,11 @@ void SetWindowTitle( void )
 		return;
 
 	filename = GetLayoutFilename();
-	sprintf( message, "%s%s - %s(%s)",
+	sprintf( message, "%s%s%s - %s(%s)",
 		(filename && filename[0])?filename: _("Unnamed Trackplan"),
-		changed>0?"*":"", sProdName, sVersion );
+		bReadOnly?"=":"",
+		changed>0?"*":"",
+		sProdName, sVersion );
 	wWinSetTitle( mainW, message );
 }
 
@@ -708,6 +713,7 @@ void SetWindowTitle( void )
 
 static struct wFilSel_t * loadFile_fs = NULL;
 static struct wFilSel_t * saveFile_fs = NULL;
+static struct wFilSel_t * examplesFile_fs = NULL;
 
 static wWin_p checkPointingW;
 static paramData_t checkPointingPLs[] = {
@@ -874,7 +880,9 @@ EXPORT int LoadTracks(
 	assert( fileName != NULL );
 	assert( cnt == 1 ); 
 
-	SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
+	if ( ! bExample )
+		SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
+	bReadOnly = bExample;
 	paramVersion = -1;
 	wSetCursor( wCursorWait );
 	Reset();
@@ -888,8 +896,15 @@ EXPORT int LoadTracks(
 #endif
 	nameOfFile = FindFilename( fileName[ 0 ] );
 
+	if ( bExample )
+		bReadOnly = TRUE;
+	else if ( access( fileName[0], W_OK ) == -1 )
+		bReadOnly = TRUE;
+	else
+		bReadOnly = FALSE;
 	if (ReadTrackFile( fileName[ 0 ], nameOfFile, TRUE, FALSE, TRUE )) {
-		wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]) );
+		if ( ! bExample )
+			wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]) );
 		ResolveIndex();
 #ifdef TIME_READTRACKFILE
 		time1 = wGetTimer();
@@ -963,6 +978,7 @@ static BOOL_T DoSaveTracks(
 	if ( !rc )
 		NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName );
 	fclose(f);
+	bReadOnly = FALSE;
 
 	RestoreLocale( oldLocale );
 
@@ -1003,7 +1019,7 @@ static int SaveTracks(
 EXPORT void DoSave( doSaveCallBack_p after )
 {
 	doAfterSave = after;
-	if (*(GetLayoutFilename()) == '\0') {
+	if ( bReadOnly || *(GetLayoutFilename()) == '\0') {
 		if (saveFile_fs == NULL)
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
 				sSourceFilePattern, SaveTracks, NULL );
@@ -1030,7 +1046,21 @@ EXPORT void DoLoad( void )
 	if (loadFile_fs == NULL)
 		loadFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Open Tracks"),
 			sSourceFilePattern, LoadTracks, NULL );
+	bExample = FALSE;
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+}
+
+
+EXPORT void DoExamples( void )
+{
+	if (examplesFile_fs == NULL) {
+		static wBool_t bExample = TRUE;
+		examplesFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Example Tracks"),
+			sSourceFilePattern, LoadTracks, &bExample );
+	}
+	bExample = TRUE;
+	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
+	wFilSelect( examplesFile_fs, message );
 }
 
 

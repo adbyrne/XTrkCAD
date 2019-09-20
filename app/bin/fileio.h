@@ -41,6 +41,9 @@ typedef BOOL_T (*readParam_t) ( char * );
 extern const char * workingDir;
 extern const char * libDir;
 
+extern wBool_t bReadOnly;
+extern wBool_t bExample;
+
 #define PARAM_CUSTOM	(-2)
 #define PARAM_LAYOUT	(-3)
 extern int curParamFileIndex;
@@ -99,6 +102,7 @@ typedef void (*doSaveCallBack_p)( void );
 void DoSave( doSaveCallBack_p );
 void DoSaveAs( doSaveCallBack_p );
 void DoLoad( void );
+void DoExamples( void );
 void DoFileList( int, char *, void * );
 void DoCheckPoint( void );
 void CleanupFiles( void );

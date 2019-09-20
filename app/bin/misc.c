@@ -569,6 +569,11 @@ static void ChkLoad( void )
 	Confirm(_("Load"), DoLoad);
 }
 
+static void ChkExamples( void )
+{
+	Confirm(_("examples"), DoExamples);
+}
+
 static void ChkRevert( void )
 {
 	int rc;
@@ -617,6 +622,7 @@ EXPORT void SaveState( void )
 	ParamUpdatePrefs();
 
 	wPrefSetString( "misc", "lastlayout", GetLayoutFullPath());
+	wPrefSetInteger( "misc", "lastlayoutexample", bExample );
 
 	if ( fileList_ml ) {
 		strcpy( file, "file" );
@@ -670,6 +676,7 @@ static void DoClearAfter( void )
 	checkPtMark = 0;
 	Reset();
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
+	bReadOnly = TRUE;
 	EnableCommands();
 	SetLayoutFullPath("");
 	SetWindowTitle();
@@ -2412,6 +2419,7 @@ static void CreateMenus( void )
 	wMenuSeparatorCreate( helpM );
 	wMenuPushCreate( helpM, "cmdTip", _("Tip of the Day..."), 0, (wMenuCallBack_p)ShowTip, (void *)(SHOWTIP_FORCESHOW | SHOWTIP_NEXTTIP));
 	demoM = wMenuMenuCreate( helpM, "cmdDemo", _("&Demos") );
+	wMenuPushCreate( helpM, "cmdExamples", _("Examples..."), 0, (wMenuCallBack_p)ChkExamples, (void *)0);
 
 	/* about window */
 	wMenuSeparatorCreate( helpM );
@@ -2810,7 +2818,10 @@ LOG1( log_init, ( "Initialization complete\n" ) )
 	if (!resumeWork) {
 		/* if work is to be resumed and no filename was given on startup, load last layout */
 		if ((onStartup == 0) && (!initialFile || !strlen(initialFile))) {
+			long iExample;
 			initialFile = (char*)wPrefGetString("misc", "lastlayout");
+			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
+			bExample = (iExample == 1);
 		}
 
 		if (initialFile && strlen(initialFile)) {

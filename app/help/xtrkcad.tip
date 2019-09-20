@@ -1,11 +1,11 @@
 XTrackCAD provides demonstrations on most of the program's features.  The demos can be run by clicking on the Help menu on the Main window and then selecting Demos.
 
 The notation "Menu|Item" is used in the documentation (and the on-line demos and tips) to indicate the selection of a menu item.\
-For example File|Open means to open the menu by clicking on File on the menu bar of the Main window and then selecting the Open item from that menu.
+For example, "File|Open" means to open the menu by clicking on File on the menu bar of the Main window and then selecting the Open item from that menu.
 
 Set your modeling scale on the "Options|Layout" dialog.  This controls the Turnouts and Structures that are available, Easement values and track gauge.
 
-A number of example layouts are provided.  These files are located in the 'examples' directory where you installed XTrackCAD.
+A number of example layouts are provided.  These files can be accessed by "Help|Examples".
 
 When installed, the length units are set based on your contry: inches for United States or Canada and centimeters elsewhere.  You can change this on the "Options|Preferences" dialog by choosing between Metric and English.
 
@@ -73,9 +73,9 @@ Select the track at the beginning and end of the section.  The total length of t
 Note: the Profile selects the shortest path between the two selected tracks, which might not be the path you are interested in.  In this case, select the first track and then select other tracks along the path.
 
 Layers can be used to contain different groups of tracks or other features.  You might use one layer for the main-line, another of staging tracks and another of benchwork.\
-You can give each layer a name (by using the Manage|Layer dialog).  This name will be displayed as the Balloon Help for the corresponding Layer button, if you have Balloon Help enabled on the Options|Display dialog.
+You can give each layer a name (by using the "Manage|Layer" dialog).  This name will be displayed as the Balloon Help for the corresponding Layer button, if you have Balloon Help enabled on the "Options|Display" dialog.
 
-You can remove groups of buttons or the Hot Bar from the Main window to give you more room if you are not using some features.  Also, the number of Layer buttons displayed is controlled by the Manage|Layers dialog.
+You can remove groups of buttons or the Hot Bar from the Main window to give you more room if you are not using some features.  Also, the number of Layer buttons displayed is controlled by the "Manage|Layers" dialog.
 
 The size of the Map window is controlled by the overall size of the room (specified on the Layout dialog) and the Map Scale (on the Display dialog).  You can make the Map window larger (or smaller) by decreasing (or increasing) the Map Scale.\
 XTrackCad will prevent you from making the Map window too small or too large.
