@@ -10,12 +10,6 @@
 
 The \f{Help Menu} displays information on various topics. The contents of the menu vary depending on the operating system.
 
-\dd \G{png.d/mhelpdemos.png}
-
-\dd \e{Demo Menu}
-
-The \f{Demos} command (\K{cmdDemo}) opens a cascading menu which invokes various demonstrations of \e{XTrackCAD} features.
-
 \dd \G{png.d/mhelprecent.png}
 
 \dd \e{Recent Messages}
@@ -28,6 +22,14 @@ The \f{Recent Messages} command opens a cascading menu containing recent error m
 
 The \f{Tip of the Day} item displays a useful tip about the operation of \e{XTrackCAD}. By default, a new tip is displayed each time you start the program.
 
+\dd \G{png.d/mhelpdemos.png}
+
+\dd \e{Demo Menu}
+
+The \f{Demos} command (\K{cmdDemo}) opens a cascading menu which invokes various demonstrations of \e{XTrackCAD} features.
+
+The \f{Examples} command displays the list of included example programs which you can examine.
+ 
 \rule
 
 \S{cmdDemo} Demo Mode
