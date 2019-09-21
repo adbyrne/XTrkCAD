@@ -8,7 +8,7 @@
 
 \G{png.d/hotbar.png}
 
-The \e{Hot Bar} is a scrolling list of all the turnouts, sectional track and structures available through the Turnout (\K{cmdTurnout}) and Structure (\K{cmdStructure}) commands. The Description and/or Part Number under each object can be displayed by enabling the \e{Hot Bar Labels} radio button on the Display (\K{cmdDisplay}) dialog.
+The \e{Hot Bar} is a list of a flextrack of the current gauge, and then a scrolling list of all the turnouts, sectional track and structures available through the Turnout (\K{cmdTurnout}) and Structure (\K{cmdStructure}) commands. The Description and/or Part Number under each object can be displayed by enabling the \e{Hot Bar Labels} radio button on the Display (\K{cmdDisplay}) dialog.
 
 The arrow buttons on either side of the \e{Hot bar} move the list one object to the right or left. Holding down the Shift key will move the list by greater amounts.  About eight Shift+Clicks are required to move the list through the entire range of objects. Also, pressing the keys \e{1} through \e{9} and \e{0} will cause the \e{Hot Bar} to jump relative spots on the list.
 
@@ -18,6 +18,13 @@ Objects on the \e{Hot Bar} are placed on the drawing canvas by first clicking on
 
 \rule
 
+\S{hbFlextrack} FlexTrack
+
+A flextrack unit is placed for convienience on the left-hand side of the HotBar. It can be recognised because it is the only diagonally facing track element. It is used by selecting it, clicking on the layout where one end should be placed. This will create a piece of flextrack about 15" long. If the end was over an unconnected end, the flextrack will be connected to it. 
+
+The track can then be manipulated like a \k{chgCornu} Cornu Curved Track, by selecting and moving ends, adding and removing "pins" and altering the end anchor angle and radius if the flextrack is not connected at that end.  If the disconnected end is moved over an open end of another track, it will be connected like a Join with a Cornu easement.
+
+\rule
 
 \S{hbStructures} Structures
 

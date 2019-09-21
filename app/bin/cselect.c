@@ -122,6 +122,28 @@ void static CreateRotateAnchor(coOrd pos) {
 	}
 }
 
+void static CreateModifyAnchor(coOrd pos) {
+	DIST_T d = tempD.scale*0.15;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = SEG_FILCRCL;
+	anchors(i).width = 0;
+	anchors(i).u.c.center = pos;
+	anchors(i).u.c.a0 = 180.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).color = wDrawColorPowderedBlue;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	i = anchors_da.cnt-1;
+	anchors(i).type = SEG_CRVLIN;
+	anchors(i).width = 0;
+	anchors(i).u.c.center = pos;
+	anchors(i).u.c.a0 = 180.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).u.c.radius = d;
+	anchors(i).color = wDrawColorPowderedBlue;
+}
+
 void static CreateMoveAnchor(coOrd pos) {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
@@ -1101,7 +1123,8 @@ static void DrawMovedTracks( void )
 						center[i] = trackParams.cornuCenter[i];
 						angle[i] = trackParams.cornuAngle[i];
 						radius[i] = trackParams.cornuRadius[i];
-						if (GetTrkEndTrk(trk,i) && GetTrkSelected(GetTrkEndTrk(trk,i))) {
+						if (!GetTrkEndTrk(trk,i) ||
+							(GetTrkEndTrk(trk,i) && GetTrkSelected(GetTrkEndTrk(trk,i)))) {
 							if (!move0B) {
 								Rotate( &pos[i], zero, moveAngle );
 								Rotate( &center[i],zero, moveAngle );
@@ -1238,6 +1261,30 @@ static void MoveTracks(
 							MainRedraw();
 							return;
 						}
+					} else if (!trk1) {									//No end track
+						DrawTrack(trk,&mainD,wDrawColorWhite);
+						DrawTrack(trk,&mapD,wDrawColorWhite);
+						GetTrackParams(PARAMS_CORNU,trk,GetTrkEndPos(trk,i),&trackParms);
+						if (move) {
+							coOrd end_pos, end_center;
+							end_pos = trackParms.cornuEnd[i];
+							end_pos.x += base.x;
+							end_pos.y += base.y;
+							end_center = trackParms.cornuCenter[i];
+							end_center.x += base.x;
+							end_center.y += base.y;
+							SetCornuEndPt(trk,i,end_pos,end_center,trackParms.cornuAngle[i],trackParms.cornuRadius[i]);
+						}
+						if (rotate) {
+							coOrd end_pos, end_center;
+							ANGLE_T end_angle;
+							end_pos = trackParms.cornuEnd[i];
+							Rotate( &end_pos, orig, angle );
+							end_angle = NormalizeAngle( trackParms.cornuAngle[i] + angle );
+							SetCornuEndPt(trk,i,end_pos,end_center,end_angle,trackParms.cornuRadius[i]);
+						}
+						DrawTrack(trk,&mainD,wDrawColorBlack);
+						DrawTrack(trk,&mapD,wDrawColorBlack);
 					}
 				}
 			}
@@ -1425,7 +1472,6 @@ static STATUS_T CmdMove(
 			SnapPos( &base );
 			SetMoveD( TRUE, base, 0.0 );
 
-			//
 
 			if (FindEndIntersection(base,zero,0.0,&t1,&ep1,&t2,&ep2)) {
 				coOrd pos2 = GetTrkEndPos(t2,ep2);
@@ -1470,7 +1516,6 @@ static STATUS_T CmdMove(
 				break;
 			DrawSelectedTracksD( &mainD, wDrawColorWhite );
 			DrawMovedTracks();
-
 
 			break;
 
@@ -2278,6 +2323,7 @@ static STATUS_T Activate( coOrd pos) {
 	ActivateTrack(trk);
 
 	return C_CONTINUE;
+
 }
 
 track_p IsInsideABox(coOrd pos) {
@@ -2315,6 +2361,15 @@ void DrawHighlightBoxes() {
 	}
 
 }
+static BOOL_T doingDouble;
+
+static STATUS_T CallModify(wAction_t action,
+		coOrd pos ) {
+	int rc = CmdModify(action,pos);
+	if (rc != C_CONTINUE)
+		doingDouble = FALSE;
+	return rc;
+}
 
 
 static STATUS_T CmdSelect(
@@ -2325,14 +2380,15 @@ static STATUS_T CmdSelect(
 	static BOOL_T doingMove;
 	static BOOL_T doingRotate;
 
+
 	STATUS_T rc=C_CONTINUE;
 	track_p t;
 
 	mode = AREA;
-	if (doingAlign || doingRotate || doingMove)
+	if (doingAlign || doingRotate || doingMove )
 		mode = MOVE;
 	else {
-		if ( action == C_DOWN || action == C_RDOWN ) {
+		if ( action == C_DOWN || action == C_RDOWN || ((action&0xFF) == wActionExtKey) ) {
 			mode = AREA;
 			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL))
 				 && IsInsideABox(pos)) {
@@ -2341,13 +2397,16 @@ static STATUS_T CmdSelect(
 		}
 	}
 
-	switch (action) {
+
+
+	switch (action&0xFF) {
 	case C_START:
 		InfoMessage( _("Select track") );
 		importMove = FALSE;
 		doingMove = FALSE;
 		doingRotate = FALSE;
 		doingAlign = FALSE;
+		doingDouble = FALSE;
 		SelectArea( action, pos );
 		wMenuPushEnable( rotateAlignMI, FALSE );
 		wSetCursor(mainD.d,defaultCursor);
@@ -2356,17 +2415,29 @@ static STATUS_T CmdSelect(
 		break;
 
 	case wActionMove:
+		if (doingDouble) {
+			return CallModify(action,pos);
+		}
+
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		coOrd p = pos;
 		t = OnTrack( &p, FALSE, FALSE );
 		track_p ht;
 		if ((selectedTrackCount==0) && (t == NULL)) return C_CONTINUE;
+		if (t && !CheckTrackLayer( t ) ) {
+			t = NULL;
+			return C_TERMINATE;
+		}
 		if (selectedTrackCount>0) {
 			if ((ht = IsInsideABox(pos)) != NULL) {
 				if ((MyGetKeyState()&WKEY_SHIFT)) {
 					CreateMoveAnchor(pos);
 				} else if ((MyGetKeyState()&WKEY_CTRL)) {
 					CreateRotateAnchor(pos);
+				} else if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
+						QueryTrack( ht, Q_IS_CORNU ) ||
+						QueryTrack( ht, Q_IS_DRAW )) {
+					CreateModifyAnchor(pos);
 				}
 			}
 		}
@@ -2378,6 +2449,9 @@ static STATUS_T CmdSelect(
 
 	case C_DOWN:
 	case C_RDOWN:
+		if (doingDouble) {
+			return CallModify(action,pos);
+		}
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		switch (mode) {
 		case MOVE:
@@ -2404,8 +2478,14 @@ static STATUS_T CmdSelect(
 		}
 		return rc;
 		break;
+	case wActionExtKey:
 	case C_RMOVE:
 	case C_MOVE:
+		if (doingDouble) {
+			return CallModify(action,pos);
+		}
+		if ((action&0xFF) == wActionExtKey && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) == (WKEY_SHIFT|WKEY_CTRL)))  //Both
+				doingMove = TRUE;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		switch (mode) {
 		case MOVE:
@@ -2427,10 +2507,15 @@ static STATUS_T CmdSelect(
 			break;
 		default: ;
 		}
+		if ((action&0xFF) == wActionExtKey && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) == (WKEY_SHIFT|WKEY_CTRL)))  //Both
+				doingMove = FALSE;
 		return rc;
 		break;
 	case C_RUP:
 	case C_UP:
+		if (doingDouble) {
+			return CallModify(action,pos);
+		}
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		switch (mode) {
 		case MOVE:
@@ -2459,6 +2544,9 @@ static STATUS_T CmdSelect(
 		break;
 
 	case C_REDRAW:
+		if (doingDouble) {
+			return CallModify(action,pos);
+		}
 		if (doingMove) {
 			rc = CmdMove( C_REDRAW, pos );
 		} else if (doingRotate) {
@@ -2472,6 +2560,9 @@ static STATUS_T CmdSelect(
 		return rc;
 
 	case C_LCLICK:
+		if (doingDouble) {
+			return CallModify(action,pos);
+		}
 		switch (mode) {
 		case MOVE:
 		case AREA:
@@ -2489,14 +2580,31 @@ static STATUS_T CmdSelect(
 		break;
 
 	case C_LDOUBLE:
+		if (doingDouble) {
+			return CallModify(action,pos);
+		}
 		switch (mode) {
 			case AREA:
-				return Activate(pos);
+				if ((ht = OnTrack(&pos,FALSE,FALSE))!=NULL) {
+					if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
+						QueryTrack( ht, Q_IS_CORNU ) ||
+						QueryTrack( ht, Q_IS_DRAW )) {
+						doingDouble = TRUE;
+						CmdModify(C_START,pos);
+						CmdModify(C_DOWN,pos);
+						return CmdModify(C_UP,pos);
+					}
+				} else return Activate(pos);
+				break;
+			case MOVE:
 			default:
 				break;
 		}
 		break;
 	case C_CMDMENU:
+		if (doingDouble) {
+			return CallModify(action,pos);
+		}
 		if (selectedTrackCount <= 0) {
 			wMenuPopupShow( selectPopup1M );
 		} else {
@@ -2520,7 +2628,10 @@ static STATUS_T CmdSelect(
 			wMenuPopupShow( selectPopup2M );
 		}
 		return C_CONTINUE;
+	default:
+		if (doingDouble) return CallModify(action, pos);
 	}
+
 	return C_CONTINUE;
 }
 
