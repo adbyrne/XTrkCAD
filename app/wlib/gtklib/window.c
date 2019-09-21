@@ -774,11 +774,9 @@ wBool_t catch_shift_ctrl_alt_keys(
     GdkEventKey *event,
     void * data)
 {
-    int state;
-    state = 0;
-    keyState = state;				//Initialize to clear
+    int state = 0;
 
-    switch (event->keyval) {
+    switch (event->keyval ) {
     case GDK_KEY_Shift_L:
     case GDK_KEY_Shift_R:
         state |= WKEY_SHIFT;
