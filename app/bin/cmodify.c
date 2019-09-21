@@ -719,6 +719,13 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 			return ModifyDraw(action, pos);
 		return ModifyTrack( Dex.Trk, action, pos );
 
+	case C_LCLICK:
+		if ( modifyDrawMode) {
+			rc = ModifyDraw(C_DOWN, pos);
+			if (rc == C_CONTINUE)
+				return ModifyDraw(C_UP, pos);
+		}
+		/*no break*/
 	default:
 		if (modifyBezierMode) return ModifyBezier(action, pos);
 		if (modifyCornuMode)  return ModifyCornu(action, pos);
