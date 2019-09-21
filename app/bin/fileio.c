@@ -1410,23 +1410,10 @@ EXPORT void FileInit( void )
 	if ( (workingDir = wGetAppWorkDir()) == NULL )
 		AbortProg( "wGetAppWorkDir()" );
 
-}
-
-EXPORT BOOL_T ParamFileInit( void )
-{
-	curParamFileIndex = PARAM_DEMO;
-	log_paramFile = LogFindIndex( "paramFile" );
-	if ( ReadParams( lParamKey, libDir, sParamQF ) == FALSE )
-		return FALSE;
-
-	curParamFileIndex = PARAM_CUSTOM;
-	if (lParamKey == 0) {
-		ReadParamFiles();
-		ReadCustom();
-}
-
 	SetLayoutFullPath("");
-	MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
+		MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
+
 }
+
 
 
