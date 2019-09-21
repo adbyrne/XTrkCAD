@@ -2874,7 +2874,7 @@ EXPORT void AddHotBarTurnouts( void )
 				to->segCnt > 0 &&
 				CompatibleScale( TRUE, to->scaleInx, GetLayoutCurScale()) ) )
 				continue;
-		AddHotBarElement( to->contentsLabel, to->size, to->orig, TRUE, to->barScale, to, CmdTurnoutHotBarProc );
+		AddHotBarElement( to->contentsLabel, to->size, to->orig, TRUE, FALSE, to->barScale, to, CmdTurnoutHotBarProc );
 	}
 }
 

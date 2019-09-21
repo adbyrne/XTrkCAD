@@ -57,6 +57,7 @@ static int log_modify;
 static BOOL_T modifyBezierMode;
 static BOOL_T modifyCornuMode;
 static BOOL_T modifyDrawMode;
+static BOOL_T modifyRulerMode;
 
 
 static void CreateEndAnchor(coOrd p, wBool_t lock) {
@@ -211,7 +212,9 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 	}
 	return rc;
 }
-static STATUS_T CmdModify(
+
+
+STATUS_T CmdModify(
 		wAction_t action,
 		coOrd pos )
 /*
@@ -229,7 +232,7 @@ static STATUS_T CmdModify(
 	EPINX_T inx;
 	curveType_e curveType;
 	static BOOL_T changeTrackMode;
-	static BOOL_T modifyRulerMode;
+
 
 	STATUS_T rc;
 	static DIST_T trackGauge;

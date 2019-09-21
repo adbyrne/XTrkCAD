@@ -978,7 +978,7 @@ EXPORT void AddHotBarStructures( void )
 			 /*( (strcmp( to->scale, "*" ) == 0 && strcasecmp( curScaleName, "DEMO" ) != 0 ) ||
 			   strncasecmp( to->scale, curScaleName, strlen(to->scale) ) == 0 ) ) )*/
 				continue;
-		AddHotBarElement( to->contentsLabel, to->size, to->orig, FALSE, to->barScale, to, CmdStructureHotBarProc );
+		AddHotBarElement( to->contentsLabel, to->size, to->orig, FALSE, FALSE, to->barScale, to, CmdStructureHotBarProc );
 	}
 }
 

@@ -702,7 +702,7 @@ void HideHotBar( void );
 void LayoutHotBar ( void *);
 typedef enum { HB_SELECT, HB_DRAW, HB_LISTTITLE, HB_BARTITLE, HB_FULLTITLE } hotBarProc_e;
 typedef char * (*hotBarProc_t)( hotBarProc_e, void *, drawCmd_p, coOrd * );
-void AddHotBarElement( char *, coOrd, coOrd, BOOL_T, DIST_T, void *, hotBarProc_t );
+void AddHotBarElement( char *, coOrd, coOrd, BOOL_T, BOOL_T, DIST_T, void *, hotBarProc_t );
 void HotBarCancel( void );
 void AddHotBarTurnouts( void );
 void AddHotBarStructures( void );

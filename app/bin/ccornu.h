@@ -14,6 +14,7 @@ typedef void (*cornuMessageProc)( char *, ... );
 #define cornuCmdNone   		  (0)
 #define cornuJoinTrack        (1)
 #define cornuCmdCreateTrack   (2)
+#define cornuCmdHotBar		  (3)
 
 
 #endif /* APP_BIN_CCORNU_H_ */
@@ -29,3 +30,5 @@ DIST_T CornuTotalWindingArc(coOrd pos[4],dynArr_t segs);
 STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG);
 
 void InitCmdCornu( wMenu_p menu );
+
+void AddHotBarCornu( void );

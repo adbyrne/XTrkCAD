@@ -90,6 +90,7 @@ Then you can rotate the turnout by Right dragging.
 You can also use Shift-Right-Click to display a popup menu that lets you rotate the Turnout by specific angles.
 END
 STEP
+MOUSE 1 13.250 8.500
 MOUSE 5 13.250 8.500
 PAUSE 390
 MOUSE 6 13.250 8.583
@@ -181,7 +182,7 @@ PAUSE 170
 MESSAGE
 _________________________________________
 
-By moving the cursor from one side to the other of the track centerline you can flip the turnout 180°.
+By moving the cursor from one side to the other of the track centerline you can flip the turnout 180ï¿½.
 END
 STEP
 MOUSE 3 10.667 1.333

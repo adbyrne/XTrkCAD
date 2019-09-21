@@ -426,4 +426,6 @@ void InitCmdControl ( wMenu_p menu );
 /* csensor.c */
 void SensorMgmLoad ( void );
 void InitCmdSensor ( wMenu_p menu );
+/* cmodify.c */
+STATUS_T CmdModify(wAction_t action,coOrd pos );
 #endif
