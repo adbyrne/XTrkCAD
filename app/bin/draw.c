@@ -60,6 +60,8 @@ static int log_pan = 0;
 static int log_zoom = 0;
 static int log_mouse = 0;
 
+static BOOL_T hideBox = FALSE;
+
 static wFontSize_t drawMaxTextFontSize = 100;
 
 extern long zoomCorner; 
@@ -1209,7 +1211,7 @@ EXPORT void GetRoomSize( coOrd * froomSize )
 }
 
 
-EXPORT void MapRedraw( void )
+EXPORT void MapRedraw()
 {
 	if (inPlaybackQuit)
 		return;
@@ -1218,13 +1220,13 @@ lprintf("MapRedraw\n");
 #endif
 	if (!mapVisible)
 		return;
-
 	if (delayUpdate)
 	wDrawDelayUpdate( mapD.d, TRUE );
 	//wSetCursor( mapD.d, wCursorWait );
 	wDrawClear( mapD.d );
 	DrawTracks( &mapD, mapD.scale, mapD.orig, mapD.size );
-	DrawMapBoundingBox( TRUE );
+	if (!hideBox)
+		DrawMapBoundingBox( TRUE );
 	//wSetCursor( mapD.d, defaultCursor );
 	wDrawDelayUpdate( mapD.d, FALSE );
 }
@@ -2039,8 +2041,9 @@ static void DoMapPan( wAction_t action, coOrd pos )
 {
 	static coOrd mapOrig;
 	static coOrd oldOrig, newOrig;
-	static coOrd size;
+	static coOrd size, newSize;
 	static DIST_T xscale, yscale;
+	static DIST_T mainWidth,mainHeight;
 	static enum { noPan, movePan, resizePan } mode = noPan;
 	wPos_t x, y;
 
@@ -2087,16 +2090,16 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			mode = resizePan;
 		else
 			break;
-		newOrig = pos;
-		oldOrig = newOrig;
-		xscale = 1;
-		size.x = mainD.size.x/mainD.scale;
+		mapOrig = pos;
+		oldOrig = newOrig = mainD.orig;
+		size.x = mainD.size.x/mainD.scale;							//How big screen?
 		size.y = mainD.size.y/mainD.scale;
+		xscale = mainD.scale; //start at current
 		newOrig.x -= size.x/2.0;
 		newOrig.y -= size.y/2.0;
-		tempD.size = mainD.size = size;
-		tempD.orig = mainD.orig = newOrig;
+		hideBox = TRUE;
 		MapRedraw();
+		hideBox = FALSE;
 		break;
 
 	case C_RMOVE:
@@ -2110,31 +2113,37 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 			pos.y = 0;
 		if (pos.y > mapD.size.y)
 			pos.y = mapD.size.y;
-		size.x = (pos.x - oldOrig.x)*2.0;
-		size.y = (pos.y - oldOrig.y)*2.0;
-		if (size.x < 0) {
-			size.x = - size.x;
-		}
-		if (size.y < 0) {
-			size.y = - size.y;
-		}
-		xscale = size.x / (mapD.size.x/mapD.scale);
-		yscale = size.y / (mapD.size.y/mapD.scale);
+		coOrd sizeMap;
+		DIST_T xRatio,yRatio;
+
+		sizeMap.x = pos.x - mapOrig.x;
+		sizeMap.y = pos.y - mapOrig.y;
+
+		xscale = fabs(sizeMap.x/size.x);
+		yscale = fabs(sizeMap.y/size.y);
 		if (xscale < yscale)
 			xscale = yscale;
 		xscale = ceil( xscale );
-		if (xscale < 1)
-			xscale = 1;
+
+		if (xscale < 0.01)
+			xscale = 0.01;
 		if (xscale > 64)
 			xscale = 64;
-		size.x = (mainD.size.x/mainD.scale) * xscale;
-		size.y = (mainD.size.y/mainD.scale) * xscale;
-		newOrig = oldOrig;
-		newOrig.x -= size.x/2.0;
-		newOrig.y -= size.y/2.0;
-		tempD.size = mainD.size = size;
+
+		newSize.x = fabs(sizeMap.x/xscale);
+		newSize.y = fabs(sizeMap.y/xscale);
+
+		newOrig = mapOrig;
+		if (sizeMap.x<0)
+			newOrig.x += sizeMap.x;
+		if (sizeMap.y<0)
+			newOrig.y += sizeMap.y;
+		tempD.size = mainD.size = newSize;
 		tempD.orig = mainD.orig = newOrig;
+		hideBox = TRUE;
 		MapRedraw();
+		hideBox = FALSE;
+		DrawHilight( &mapD, mapOrig, sizeMap, FALSE );
 		if (liveMap) MainRedraw();
 
 	    break;
@@ -2142,10 +2151,10 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 	case C_RUP:
 		if ( mode != resizePan )
 			break;
-		tempD.size = mainD.size = size;
+		tempD.size = mainD.size = newSize;
 		tempD.orig = mainD.orig = newOrig;
-		mainCenter.x = newOrig.x + mainD.size.x/2.0;
-		mainCenter.y = newOrig.y + mainD.size.y/2.0;
+		mainCenter.x = newOrig.x+newSize.x/2;
+		mainCenter.y = newOrig.y+newSize.y/2;
 		DoNewScale( xscale );
 		mode = noPan;
 		break;
