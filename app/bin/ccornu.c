@@ -67,6 +67,7 @@
  */
 
 
+#include <stdint.h>
 #include "track.h"
 #include "spiro.h"
 #include "spiroentrypoints.h"
