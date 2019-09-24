@@ -822,6 +822,12 @@ int LoadTracks(
 		free(zip_input);
 
 	}
+	if ( bExample )
+		bReadOnly = TRUE;
+	else if ( access( fileName[0], W_OK ) == -1 )
+		bReadOnly = TRUE;
+	else
+		bReadOnly = FALSE;
 
 	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, FALSE, TRUE )) {
 
@@ -835,13 +841,6 @@ int LoadTracks(
 			full_path = fileName[0];
 		}
 
-	if ( bExample )
-		bReadOnly = TRUE;
-	else if ( access( fileName[0], W_OK ) == -1 )
-		bReadOnly = TRUE;
-	else
-		bReadOnly = FALSE;
-	if (ReadTrackFile( fileName[ 0 ], nameOfFile, TRUE, FALSE, TRUE )) {
 		if ( ! bExample )
 			wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]) );
 
@@ -1125,6 +1124,7 @@ EXPORT void DoExamples( void )
 	bExample = TRUE;
 	sprintf( message, "%s" FILE_SEP_CHAR "examples" FILE_SEP_CHAR, libDir );
 	wFilSelect( examplesFile_fs, message );
+	SaveState();
 }
 
 
