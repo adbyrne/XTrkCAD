@@ -90,6 +90,8 @@
 #include "cselect.h"
 #include "fileio.h"
 
+#include <stdint.h>
+
 extern drawCmd_t tempD;
 extern TRKTYP_T T_BEZIER;
 extern TRKTYP_T T_CORNU;
