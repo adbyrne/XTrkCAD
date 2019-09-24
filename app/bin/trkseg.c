@@ -1949,23 +1949,21 @@ EXPORT void DrawSegsO(
 			break;
 		case SEG_FILPOLY:
 		case SEG_POLY:
-			if ( (d->options&DC_GROUP) == 0 &&
-				 d->funcs != &tempSegDrawFuncs ) {
-				/* Note: if we call tempSegDrawFillPoly we get a nasty bug
-				/+ because we don't make a private copy of p.pts */
-				coOrd *tempPts = malloc(sizeof(coOrd)*segPtr->u.p.cnt);
-				int *tempTypes = malloc(sizeof(int)*segPtr->u.p.cnt);
+			;
+			/* Note: if we call tempSegDrawFillPoly we get a nasty bug
+			/+ because we don't make a private copy of p.pts */
+			coOrd *tempPts = malloc(sizeof(coOrd)*segPtr->u.p.cnt);
+			int *tempTypes = malloc(sizeof(int)*segPtr->u.p.cnt);
 //				coOrd tempPts[segPtr->u.p.cnt];
-				for (j=0;j<segPtr->u.p.cnt;j++) {
-					REORIGIN( tempPts[j], segPtr->u.p.pts[j].pt, angle, orig );
-					tempTypes[j] = segPtr->u.p.pts[j].pt_type;
-				}
-				DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, (wDrawWidth)floor(segPtr->width*factor+0.5), segPtr->type==SEG_FILPOLY?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
-				free(tempPts);
-				free(tempTypes);
-				break;
-			} /* else fall thru */
-			/* no break */
+			for (j=0;j<segPtr->u.p.cnt;j++) {
+				REORIGIN( tempPts[j], segPtr->u.p.pts[j].pt, angle, orig );
+				tempTypes[j] = segPtr->u.p.pts[j].pt_type;
+			}
+			BOOL_T fill = ((d->options&DC_GROUP) == 0 && (d->funcs != &tempSegDrawFuncs));
+			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, (wDrawWidth)floor(segPtr->width*factor+0.5), (fill && (segPtr->type==SEG_FILPOLY))?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
+			free(tempPts);
+			free(tempTypes);
+			break;
 		case SEG_FILCRCL:
 			REORIGIN( c, segPtr->u.c.center, angle, orig )
 			if ( (d->options&DC_GROUP) != 0 ||

@@ -850,7 +850,26 @@ static void TempSegPoly(
 		int fill,
 		int open )
 {
-	return;
+	//Note - no curved/smooth points in Poly temp draw at the moment for simplicity and to avoid copying the array
+	for (int i=0;i<=cnt-1;i++) {
+		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10);
+		tempSegs(tempSegs_da.cnt-1).type = SEG_STRLIN;
+		tempSegs(tempSegs_da.cnt-1).color = color;
+		if (d->options&DC_SIMPLE)
+			tempSegs(tempSegs_da.cnt-1).width = 0;
+		else
+			tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
+		if (i==cnt-1) {
+			if( !open) {
+				tempSegs(tempSegs_da.cnt-1).u.l.pos[0] = pts[i];
+				tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pts[0];
+			}
+		} else {
+			tempSegs(tempSegs_da.cnt-1).u.l.pos[0] = pts[i];
+			tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pts[i+1];
+		}
+	}
+
 }
 
 
