@@ -965,6 +965,8 @@ static char * CmdStructureHotBarProc(
 	case HB_FULLTITLE:
 		return to->title;
 	case HB_DRAW:
+		origP->x -= to->orig.x;
+		origP->y -= to->orig.y;
 		DrawSegs( d, *origP, 0.0, to->segs, to->segCnt, trackGauge, wDrawColorBlack );
 		return NULL;
 	}
