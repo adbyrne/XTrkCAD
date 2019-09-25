@@ -125,6 +125,7 @@ SET(SOURCES
 	shortentext.c
 	shrtpath.c
 	smalldlg.c
+	stringxtc.c
 	tbezier.c
 	tcornu.c
 	tcurve.c
@@ -142,16 +143,6 @@ SET(SOURCES
 	manifest.h
 	validator.h
 	)
-
-check_symbol_exists(strlcpy string.h HAVE_STRLCPY )
-
-if( NOT HAVE_STRLCPY )
-	set (SOURCES
-		 ${SOURCES}
-		 strlcpy.c)
-	message( STATUS "Add own version of strlcpy")	 
-endif( NOT HAVE_STRLCPY )
-
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})
