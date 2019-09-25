@@ -215,10 +215,7 @@ STATUS_T DrawGeomMouse(
 		break;
 		case OP_BOX:
 		case OP_FILLBOX:
-			for (int i=0; i<4;i++) {
-				pts[i].pt = tempSegs(0).u.p.pts[i].pt;
-				pts[i].pt_type = 0;
-			}
+			pts = tempSegs(0).u.p.pts;
 			a1 = FindAngle(pts[0].pt,pts[1].pt);
 			Translate(&pts[1].pt,pts[0].pt,a1,context->length);
 			a2 = FindAngle(pts[0].pt,pts[3].pt);
@@ -1546,6 +1543,7 @@ void BuildCircleContext(drawModContext_t * context,int segInx) {
 	} else {
 		context->pm = context->p0;
 		context->disp = 0;
+		context->arc_angle = 360.0;
 	}
 }
 
@@ -2176,8 +2174,9 @@ STATUS_T DrawGeomModify(
 			break;
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
-			if ( tempSegs(0).u.c.a1 >= 360.0 ) {
+			if ( (tempSegs(0).type == SEG_FILCRCL) || (tempSegs(0).u.c.a1 == 360.0 || tempSegs(0).u.c.a1 == 0.0) ) {
 				context->radius = fabs(tempSegs(0).u.c.radius);
+				context->arc_angle = 360.0;
 			} else {
 				p0 = context->p0;
 				p1 = context->p1;
@@ -2227,7 +2226,16 @@ STATUS_T DrawGeomModify(
 					break;
 				case SEG_CRVLIN:
 				case SEG_FILCRCL:
-					tempSegs(0).u.c.a1 = context->arc_angle;
+					if (tempSegs(0).u.c.a1 == 360.0 || tempSegs(0).u.c.a1 == 0.0) {
+						tempSegs(0).u.c.a1 = 360.0;
+						tempSegs(0).u.c.radius = context->radius;
+						Translate(&p0,tempSegs(0).u.c.center,tempSegs(0).u.c.a0,tempSegs(0).u.c.radius);
+						context->p0 = p0;
+						context->p1 = p0;
+						context->pm = p0;
+						context->pc = tempSegs(0).u.c.center;
+						break;
+					}
 					if (context->radius < 0) { //swap ends
 						context->radius = fabs(context->radius);
 						p1 = context->p0;
@@ -2280,6 +2288,7 @@ STATUS_T DrawGeomModify(
 					tempSegs(0).u.c.center = context->pc;
 					tempSegs(0).u.c.a0 = FindAngle(context->pc,context->p0);
 					tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(context->pc,context->p1)-tempSegs(0).u.c.a0);
+					if (tempSegs(0).u.c.a1 == 0.0) tempSegs(0).u.c.a1 = 360.0;
 					tempSegs(0).u.c.radius = context->radius;
 					CreateCurveAnchors(context->last_inx,context->pm,context->pc,context->p0,context->p1);
 					break;
@@ -2343,6 +2352,7 @@ STATUS_T DrawGeomModify(
 				p1.y -= context->rot_center.y;
 				context->segPtr[segInx].u.c.a0 = FindAngle(pc,p0);
 				context->segPtr[segInx].u.c.a1 = NormalizeAngle(FindAngle(pc,p1)-FindAngle(pc,p0));
+				if (context->segPtr[segInx].u.c.a1 == 0) context->segPtr[segInx].u.c.a1 = 360.0;
 				context->segPtr[segInx].u.c.radius = context->radius;
 				break;
 			case SEG_POLY:
