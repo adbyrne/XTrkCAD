@@ -37,6 +37,7 @@
 #include "note.h"
 #include "param.h"
 #include "paths.h"
+#include "stringxtc.h"
 #include "track.h"
 #include "wlib.h"
 
@@ -120,7 +121,7 @@ int LoadDocumentFile(
 {
 	wControlActive(fileEditPLs[I_OPEN].control, TRUE);
 	ParamDialogOkActive(&fileEditPG, TRUE);
-	strlcpy(noteDataInUI.noteData.fileData.path, *fileName, PATHMAXIMUMLENGTH - 1);
+	strscpy(noteDataInUI.noteData.fileData.path, *fileName, PATHMAXIMUMLENGTH );
 	ParamLoadControl(&fileEditPG, I_PATH);
 
 	return(0);
@@ -257,8 +258,8 @@ void CreateEditFileDialog(track_p trk, char * windowTitle)
     noteDataInUI.pos = xx->pos;
 	noteDataInUI.layer = xx->layer;
     noteDataInUI.trk = trk;
-	strlcpy(noteDataInUI.noteData.fileData.title, xx->noteData.fileData.title, MYMIN(TITLEMAXIMUMLENGTH + 1, strlen(xx->noteData.fileData.title) + 1));
-	strlcpy(noteDataInUI.noteData.fileData.path, xx->noteData.fileData.path, MYMIN(PATHMAXIMUMLENGTH + 1, strlen(xx->noteData.fileData.path) + 1));
+	strscpy(noteDataInUI.noteData.fileData.title, xx->noteData.fileData.title, TITLEMAXIMUMLENGTH);
+	strscpy(noteDataInUI.noteData.fileData.path, xx->noteData.fileData.path, PATHMAXIMUMLENGTH);
 	FillLayerList((wList_p)fileEditPLs[I_LAYER].control);
 	ParamLoadControls(&fileEditPG);
 	wControlActive(fileEditPLs[I_OPEN].control, (IsFileValid(noteDataInUI.noteData.fileData.path)?TRUE:FALSE));

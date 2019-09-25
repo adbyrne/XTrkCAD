@@ -29,6 +29,7 @@
 #include "misc.h"
 #include "note.h"
 #include "param.h"
+#include "stringxtc.h"
 #include "track.h"
 #include "validator.h"
 #include "wlib.h"
@@ -176,8 +177,8 @@ CreateEditLinkDialog(track_p trk, char *title)
     noteDataInUI.pos = xx->pos;
 	noteDataInUI.layer = xx->layer;
     noteDataInUI.trk = trk;
-	strlcpy(noteDataInUI.noteData.linkData.url, xx->noteData.linkData.url, MYMIN(URLMAXIMUMLENGTH + 1, strlen(xx->noteData.linkData.url) + 1));
-	strlcpy(noteDataInUI.noteData.linkData.title, xx->noteData.linkData.title, MYMIN(TITLEMAXIMUMLENGTH + 1, strlen(xx->noteData.linkData.title) + 1));
+	strscpy(noteDataInUI.noteData.linkData.url, xx->noteData.linkData.url,URLMAXIMUMLENGTH );
+	strscpy(noteDataInUI.noteData.linkData.title, xx->noteData.linkData.title, TITLEMAXIMUMLENGTH );
 	
 	FillLayerList((wList_p)linkEditPLs[I_LAYER].control);
 	ParamLoadControls(&linkEditPG);
