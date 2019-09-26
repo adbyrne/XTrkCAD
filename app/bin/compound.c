@@ -939,6 +939,7 @@ void DeleteCompound(
 	struct extraData *xx = GetTrkExtraData(t);
 	FreeFilledDraw( xx->segCnt, xx->segs );
 	MyFree( xx->segs );
+	xx->segs = NULL;
 }
 
 

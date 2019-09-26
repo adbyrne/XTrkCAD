@@ -866,6 +866,7 @@ static void DeleteDraw( track_p t )
 	if (xx->segs[0].type == SEG_POLY ||
 			xx->segs[0].type == SEG_FILPOLY) {
 		MyFree(xx->segs[0].u.p.pts);
+		xx->segs[0].u.p.pts = NULL;
 	}
 }
 

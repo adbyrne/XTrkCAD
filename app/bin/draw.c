@@ -831,6 +831,7 @@ static void TempSegString(
 	DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 	tempSegs(tempSegs_da.cnt-1).type = SEG_TEXT;
 	tempSegs(tempSegs_da.cnt-1).color = color;
+	tempSegs(tempSegs_da.cnt-1).u.t.boxed = FALSE;
 	tempSegs(tempSegs_da.cnt-1).width = 0;
 	tempSegs(tempSegs_da.cnt-1).u.t.pos = p;
 	tempSegs(tempSegs_da.cnt-1).u.t.angle = a;
@@ -850,24 +851,21 @@ static void TempSegPoly(
 		int fill,
 		int open )
 {
-	//Note - no curved/smooth points in Poly temp draw at the moment for simplicity and to avoid copying the array
+	DYNARR_APPEND( trkSeg_t, tempSegs_da, 1);
+	tempSegs(tempSegs_da.cnt-1).type = fill?SEG_FILPOLY:SEG_POLY;
+	tempSegs(tempSegs_da.cnt-1).color = color;
+	if (d->options&DC_SIMPLE)
+		tempSegs(tempSegs_da.cnt-1).width = 0;
+	else
+		tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
+	tempSegs(tempSegs_da.cnt-1).u.p.polyType = open?POLYLINE:FREEFORM;
+	tempSegs(tempSegs_da.cnt-1).u.p.cnt = cnt;
+	tempSegs(tempSegs_da.cnt-1).u.p.orig = zero;
+	tempSegs(tempSegs_da.cnt-1).u.p.angle = 0.0;
+	tempSegs(tempSegs_da.cnt-1).u.p.pts = (pts_t *)MyMalloc(cnt*sizeof(pts_t));
 	for (int i=0;i<=cnt-1;i++) {
-		DYNARR_APPEND( trkSeg_t, tempSegs_da, 10);
-		tempSegs(tempSegs_da.cnt-1).type = SEG_STRLIN;
-		tempSegs(tempSegs_da.cnt-1).color = color;
-		if (d->options&DC_SIMPLE)
-			tempSegs(tempSegs_da.cnt-1).width = 0;
-		else
-			tempSegs(tempSegs_da.cnt-1).width = width*d->scale/d->dpi;
-		if (i==cnt-1) {
-			if( !open) {
-				tempSegs(tempSegs_da.cnt-1).u.l.pos[0] = pts[i];
-				tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pts[0];
-			}
-		} else {
-			tempSegs(tempSegs_da.cnt-1).u.l.pos[0] = pts[i];
-			tempSegs(tempSegs_da.cnt-1).u.l.pos[1] = pts[i+1];
-		}
+		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt = pts[i];
+		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt_type = (d->options&DC_GROUP)?types[i]:0;
 	}
 
 }

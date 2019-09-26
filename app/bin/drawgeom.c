@@ -70,7 +70,6 @@ static void EndPoly( drawContext_t * context, int cnt, wBool_t open)
 		pts[inx].pt = tempSegs(inx).u.l.pos[0];
 		pts[inx].pt_type = 0;
 	}
-	//pts[cnt-1] = tempSegs(cnt-1).u.l.pos[1];
 	DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 	segPtr = &tempSegs(0);
 	segPtr->type = ( (context->Op == OP_POLY || context->Op == OP_POLYLINE )? SEG_POLY:SEG_FILPOLY );
@@ -668,13 +667,15 @@ STATUS_T DrawGeomMouse(
 					} else {
 						PlotCurve( drawGeomCurveMode, pos0, pos0x, pos1, &context->ArcData, FALSE );
 						if (context->ArcData.type == curveTypeStraight) {
+							CleanSegs(&tempSegs_da);
 							tempSegs(0).type = SEG_STRLIN;
 							tempSegs(0).u.l.pos[0] = pos0;
 							tempSegs(0).u.l.pos[1] = context->ArcData.pos1;
 							tempSegs_da.cnt = 1;
 						} else if (context->ArcData.type == curveTypeNone) {
-							tempSegs_da.cnt = 0;
+							CleanSegs(&tempSegs_da);
 						} else if (context->ArcData.type == curveTypeCurve) {
+							CleanSegs(&tempSegs_da);
 							tempSegs(0).type = SEG_CRVLIN;
 							tempSegs(0).u.c.center = context->ArcData.curvePos;
 							tempSegs(0).u.c.radius = context->ArcData.curveRadius;
@@ -709,7 +710,7 @@ STATUS_T DrawGeomMouse(
 				context->message( _("Drag on Red arrows to adjust curve") );
 				return C_CONTINUE;
 			} else {
-				tempSegs_da.cnt = 0;
+				CleanSegs(&tempSegs_da);
 				if (context->ArcData.type == curveTypeCurve) {
 					tempSegs_da.cnt = 1;
 					segPtr = &tempSegs(0);
@@ -785,7 +786,7 @@ STATUS_T DrawGeomMouse(
 			if ( segCnt>2 && IsClose(FindDistance(tempSegs(0).u.l.pos[0], pos))) {
 				EndPoly(context, tempSegs_da.cnt, context->Op==OP_POLYLINE);
 				DYNARR_RESET(pts_t, points_da);
-				DYNARR_RESET(trkSeg_t,tempSegs_da);
+				CleanSegs(&tempSegs_da);
 				context->State = 0;
 				segCnt = 0;
 				return C_TERMINATE;
@@ -1508,6 +1509,7 @@ STATUS_T DrawGeomPolyModify(
 				context->segPtr[segInx].u.p.pts[i].pt_type = points(i).pt_type;
 			}
 			MyFree(oldPts);
+			oldPts = NULL;
 			polyState = POLY_NONE;
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			DYNARR_RESET(trkSeg_t,tempSegs_da);

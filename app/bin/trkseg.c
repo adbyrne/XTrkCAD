@@ -1959,7 +1959,7 @@ EXPORT void DrawSegsO(
 				REORIGIN( tempPts[j], segPtr->u.p.pts[j].pt, angle, orig );
 				tempTypes[j] = segPtr->u.p.pts[j].pt_type;
 			}
-			BOOL_T fill = ((d->options&DC_GROUP) == 0 && (d->funcs != &tempSegDrawFuncs));
+			BOOL_T fill = ((d->options&DC_GROUP) != 0 || (d->funcs != &tempSegDrawFuncs));
 			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, (wDrawWidth)floor(segPtr->width*factor+0.5), (fill && (segPtr->type==SEG_FILPOLY))?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
 			free(tempPts);
 			free(tempTypes);
