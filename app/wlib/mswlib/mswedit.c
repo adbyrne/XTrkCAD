@@ -1,25 +1,3 @@
-/** \file mswedit.c
- * Edit field handling
- */
-
- /*  XTrackCAD - Model Railroad CAD
-  *  Copyright (C) 2005 Dave Bullis
-  *
-  *  This program is free software; you can redistribute it and/or modify
-  *  it under the terms of the GNU General Public License as published by
-  *  the Free Software Foundation; either version 2 of the License, or
-  *  (at your option) any later version.
-  *
-  *  This program is distributed in the hope that it will be useful,
-  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  *  GNU General Public License for more details.
-  *
-  *  You should have received a copy of the GNU General Public License
-  *  along with this program; if not, write to the Free Software
-  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-  */
-
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
@@ -57,7 +35,11 @@ struct wFloat_t {
 static XWNDPROC oldEditProc = NULL;
 static XWNDPROC newEditProc;
 static void triggerString( wControl_p b );
-static void triggerStringReturn( wControl_p b);
+#ifdef LATER
+static void triggerInteger( wControl_p b );
+static void triggerFloat( wControl_p b );
+#endif
+
 
 long FAR PASCAL _export pushEdit(
 		HWND hWnd,
@@ -66,20 +48,19 @@ long FAR PASCAL _export pushEdit(
 		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-	long inx = GetWindowLong(hWnd, GWL_ID);
-	//short inx = GetWindowWord( hWnd, GWW_ID );
+#ifdef WIN32
+	long inx = GetWindowLong( hWnd, GWL_ID );
+#else
+	short inx = GetWindowWord( hWnd, GWW_ID );
+#endif
 	wControl_p b = mswMapIndex( inx );
 
 	switch (message) {
 	case WM_CHAR:
 		if ( b != NULL) {
 			switch( wParam ) {
-			case 0x1B:
-				if (b->option && (BO_ENTER)) {
-					if (((wString_p)b)->action)
-						mswSetTrigger( (wControl_p)b, triggerStringReturn );
-				}
 			case 0x0D:
+			case 0x1B:
 			case 0x09:
 				SetFocus( ((wControl_p)(b->parent))->hWnd ); 
 				SendMessage( ((wControl_p)(b->parent))->hWnd, WM_CHAR,
@@ -92,12 +73,23 @@ long FAR PASCAL _export pushEdit(
 		break;
 
 	case WM_KEYUP:
-		if (b != NULL)
+	case WM_PASTE:
+		if ( b != NULL)
 			switch (b->type) {
 			case B_STRING:
 				if (((wString_p)b)->action)
 					mswSetTrigger( (wControl_p)b, triggerString );
 				break;
+#ifdef LATER
+			case B_INTEGER:
+				if (((wInteger_p)b)->action)
+					mswSetTrigger( (wControl_p)b, triggerInteger );
+				break;
+			case B_FLOAT:
+				if (((wFloat_p)b)->action)
+					mswSetTrigger( (wControl_p)b, triggerFloat );
+				break;
+#endif
 			}
 		break;
 
@@ -105,7 +97,6 @@ long FAR PASCAL _export pushEdit(
 	return CallWindowProc( oldEditProc, hWnd, message, wParam, lParam );
 }
 
-
 /*
  *****************************************************************************
  *
@@ -150,78 +141,78 @@ const char * wStringGetValue(
 	return buff;
 }
 
-static void triggerStringReturn(
-		wControl_p b )
+static char *getString(wString_p bs)
 {
-	wString_p bs = (wString_p)b;
-	int cnt;
-	if (b->option && (BO_ENTER))
+    char *tmpBuffer = NULL;
+    UINT chars = SendMessage(bs->hWnd, EM_LINELENGTH, (WPARAM)0, 0L);
 
-	if (bs->action) {
-		*(WPARAM*)&mswTmpBuff[0] = 78;
-		cnt = (int)SendMessage( bs->hWnd, (UINT)EM_GETLINE, 0, (DWORD)(LPSTR)mswTmpBuff );
-		mswTmpBuff[cnt] = '\n';
-		mswTmpBuff[cnt+1] = '\0';
-		if (bs->valueP)
-			strcpy( bs->valueP, mswTmpBuff );
-		bs->action( mswTmpBuff, bs->data );
-		mswSetTrigger( NULL, NULL );
-	}
+    if (chars) {
+        tmpBuffer = malloc(chars > sizeof(WORD)? chars + 1 : sizeof(WORD) + 1);
+        *(WORD *)tmpBuffer = chars;
+        SendMessage(bs->hWnd, (UINT)EM_GETLINE, 0, (LPARAM)tmpBuffer);
+        tmpBuffer[chars] = '\0';
+    }
+
+    return (tmpBuffer);
 }
 
-static void triggerString(
-		wControl_p b )
-{
-	wString_p bs = (wString_p)b;
-	int cnt;
 
-	if (bs->action) {
-		*(WPARAM*)&mswTmpBuff[0] = 78;
-		cnt = (int)SendMessage( bs->hWnd, (UINT)EM_GETLINE, 0, (DWORD)(LPSTR)mswTmpBuff );
-		mswTmpBuff[cnt] = '\0';
-		if (bs->valueP)
-			strcpy( bs->valueP, mswTmpBuff );
-		bs->action( mswTmpBuff, bs->data );
-		mswSetTrigger( NULL, NULL );
-	}
+static void triggerString(
+    wControl_p b)
+{
+    wString_p bs = (wString_p)b;
+
+    if (bs->action) {
+        char *enteredString = getString(bs);
+        if (enteredString) {
+            if (bs->valueP) {
+                strcpy(bs->valueP, enteredString);
+            }
+            bs->action(enteredString, bs->data);
+            mswSetTrigger(NULL, NULL);
+            free(enteredString);
+        }
+    }
 }
 
 
 LRESULT stringProc(
-		wControl_p b,
-		HWND hWnd,
-		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
+    wControl_p b,
+    HWND hWnd,
+    UINT message,
+    WPARAM wParam,
+    LPARAM lParam)
 {
-	wString_p bs = (wString_p)b;
-	int cnt;
-	int modified;
+    wString_p bs = (wString_p)b;
+    int modified;
 
-	switch( message ) {
+    switch (message) {
 
-	case WM_COMMAND:
-		switch (WCMD_PARAM_NOTF) {
-		case EN_KILLFOCUS:
-			modified = (int)SendMessage( bs->hWnd, (UINT)EM_GETMODIFY, 0, 0L );
-			if (!modified)
-				break;
-			*(WPARAM*)&mswTmpBuff[0] = 78;
-			cnt = (int)SendMessage( bs->hWnd, (UINT)EM_GETLINE, 0, (DWORD)(LPSTR)mswTmpBuff );
-			mswTmpBuff[cnt] = '\0';
-			if (bs->valueP)
-				strncpy( bs->valueP, mswTmpBuff, bs->valueL );
-			if (bs->action) {
-				bs->action( mswTmpBuff, bs->data );
-				mswSetTrigger( NULL, NULL );
-			}
-			break;
-			SendMessage( bs->hWnd, (UINT)EM_SETMODIFY, FALSE, 0L );
-		}
-		break;
-	}
+    case WM_COMMAND:
+        switch (WCMD_PARAM_NOTF) {
+        case EN_KILLFOCUS:
+            modified = (int)SendMessage(bs->hWnd, (UINT)EM_GETMODIFY, 0, 0L);
+            if (!modified) {
+                break;
+            }
 
-	return DefWindowProc( hWnd, message, wParam, lParam );
+            char *enteredString = getString(bs);
+            if (enteredString) {
+                if (bs->valueP) {
+                    strcpy(bs->valueP, enteredString);
+                }
+                if (bs->action) {
+                    bs->action(enteredString, bs->data);
+                    mswSetTrigger(NULL, NULL);
+                }
+                free(enteredString);
+            }
+            SendMessage(bs->hWnd, (UINT)EM_SETMODIFY, FALSE, 0L);
+        }
+        break;
+    }
+
+    return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 
