@@ -73,6 +73,7 @@ long FAR PASCAL _export pushEdit(
 		break;
 
 	case WM_KEYUP:
+	case WM_PASTE:
 		if ( b != NULL)
 			switch (b->type) {
 			case B_STRING:
@@ -140,60 +141,78 @@ const char * wStringGetValue(
 	return buff;
 }
 
+static char *getString(wString_p bs)
+{
+    char *tmpBuffer = NULL;
+    UINT chars = SendMessage(bs->hWnd, EM_LINELENGTH, (WPARAM)0, 0L);
+
+    if (chars) {
+        tmpBuffer = malloc(chars > sizeof(WORD)? chars + 1 : sizeof(WORD) + 1);
+        *(WORD *)tmpBuffer = chars;
+        SendMessage(bs->hWnd, (UINT)EM_GETLINE, 0, (LPARAM)tmpBuffer);
+        tmpBuffer[chars] = '\0';
+    }
+
+    return (tmpBuffer);
+}
+
 
 static void triggerString(
-		wControl_p b )
+    wControl_p b)
 {
-	wString_p bs = (wString_p)b;
-	int cnt;
+    wString_p bs = (wString_p)b;
 
-	if (bs->action) {
-		*(WPARAM*)&mswTmpBuff[0] = 78;
-		cnt = (int)SendMessage( bs->hWnd, (UINT)EM_GETLINE, 0, (DWORD)(LPSTR)mswTmpBuff );
-		mswTmpBuff[cnt] = '\0';
-		if (bs->valueP)
-			strcpy( bs->valueP, mswTmpBuff );
-		bs->action( mswTmpBuff, bs->data );
-		mswSetTrigger( NULL, NULL );
-	}
+    if (bs->action) {
+        char *enteredString = getString(bs);
+        if (enteredString) {
+            if (bs->valueP) {
+                strcpy(bs->valueP, enteredString);
+            }
+            bs->action(enteredString, bs->data);
+            mswSetTrigger(NULL, NULL);
+            free(enteredString);
+        }
+    }
 }
 
 
 LRESULT stringProc(
-		wControl_p b,
-		HWND hWnd,
-		UINT message,
-		WPARAM wParam,
-		LPARAM lParam )
+    wControl_p b,
+    HWND hWnd,
+    UINT message,
+    WPARAM wParam,
+    LPARAM lParam)
 {
-	wString_p bs = (wString_p)b;
-	int cnt;
-	int modified;
+    wString_p bs = (wString_p)b;
+    int modified;
 
-	switch( message ) {
+    switch (message) {
 
-	case WM_COMMAND:
-		switch (WCMD_PARAM_NOTF) {
-		case EN_KILLFOCUS:
-			modified = (int)SendMessage( bs->hWnd, (UINT)EM_GETMODIFY, 0, 0L );
-			if (!modified)
-				break;
-			*(WPARAM*)&mswTmpBuff[0] = 78;
-			cnt = (int)SendMessage( bs->hWnd, (UINT)EM_GETLINE, 0, (DWORD)(LPSTR)mswTmpBuff );
-			mswTmpBuff[cnt] = '\0';
-			if (bs->valueP)
-				strncpy( bs->valueP, mswTmpBuff, bs->valueL );
-			if (bs->action) {
-				bs->action( mswTmpBuff, bs->data );
-				mswSetTrigger( NULL, NULL );
-			}
-			break;
-			SendMessage( bs->hWnd, (UINT)EM_SETMODIFY, FALSE, 0L );
-		}
-		break;
-	}
+    case WM_COMMAND:
+        switch (WCMD_PARAM_NOTF) {
+        case EN_KILLFOCUS:
+            modified = (int)SendMessage(bs->hWnd, (UINT)EM_GETMODIFY, 0, 0L);
+            if (!modified) {
+                break;
+            }
 
-	return DefWindowProc( hWnd, message, wParam, lParam );
+            char *enteredString = getString(bs);
+            if (enteredString) {
+                if (bs->valueP) {
+                    strcpy(bs->valueP, enteredString);
+                }
+                if (bs->action) {
+                    bs->action(enteredString, bs->data);
+                    mswSetTrigger(NULL, NULL);
+                }
+                free(enteredString);
+            }
+            SendMessage(bs->hWnd, (UINT)EM_SETMODIFY, FALSE, 0L);
+        }
+        break;
+    }
+
+    return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 
