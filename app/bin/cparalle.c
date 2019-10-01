@@ -158,7 +158,8 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, &t, NULL, NULL ) ) {
 			return C_TERMINATE;
 		}
-		//CopyAttributes( Dpa.Trk, t );    Don't force scale or track width
+		//CopyAttributes( Dpa.Trk, t );    Don't force scale or track width or Layer
+		SetTrkBits(t,(GetTrkBits(t)&TB_HIDEDESC) | (GetTrkBits(Dpa.Trk)&~TB_HIDEDESC));
 
 		if ( t0 ) {
 			a = NormalizeAngle( GetTrkEndAngle( t0, ep0 ) - GetTrkEndAngle( t, 0 ) + (180.0+connectAngle/2.0) ); 
