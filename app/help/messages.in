@@ -551,9 +551,9 @@ END
 
 # cparalle.c
 MESSAGE MSG_PARALLEL_SEP_GTR_0
-Parallel separation must be greater than 0.
+Parallel separation must be greater than 0, or the new guage must be different than the old.
 HELP
-A parallel track with a separation of 0 or less cannot be created. Specify a positive value in the \f{Separation} field that appears in the Status Bar.
+A parallel track with an identical gauge and separation of 0 or less cannot be created. Specify a positive value in the \f{Separation} field that appears in the Status Bar, or select a track with a different guage.
 
 Refer to \k{cmdParallel} for detail.
 END
