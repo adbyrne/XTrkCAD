@@ -538,6 +538,8 @@ static void DrawCornu( track_p t, drawCmd_p d, wDrawColor color )
 		DrawCornuDescription( t, d, color );
 	}
 	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
+	if (GetTrkBridge(t)) widthOptions |= DTS_BRIDGE;
+		else widthOptions &=~DTS_BRIDGE;
 	if ( tieDrawMode!=TIEDRAWMODE_NONE &&
 			 d!=&mapD &&
 			 (d->options&DC_TIES)!=0 &&
@@ -588,7 +590,7 @@ static BOOL_T WriteCornu( track_p t, FILE * f )
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 ) options |= 0x80;
 	rc &= fprintf(f, "%s %d %d %ld 0 0 %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f \n",
 		"CORNU",GetTrkIndex(t), GetTrkLayer(t), (long)options,
-                  GetTrkScaleName(t), GetTrkVisible(t),
+                  GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)<<1)|(GetTrkBridge(t)<<2),
 				  xx->cornuData.pos[0].x, xx->cornuData.pos[0].y,
 				  xx->cornuData.a[0],
 				  xx->cornuData.r[0],
@@ -627,7 +629,9 @@ static void ReadCornu( char * line )
 	t = NewTrack( index, T_CORNU, 0, sizeof *xx );
 
 	xx = GetTrkExtraData(t);
-	SetTrkVisible(t, visible);
+	SetTrkVisible(t, visible&1);
+	SetTrkNoTies(t, visible&2);
+	SetTrkBridge(t, visible&4);
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&0x0F));

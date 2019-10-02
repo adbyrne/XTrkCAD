@@ -59,6 +59,8 @@
 #define ACCL_PROFILE	(WCTL+WSHIFT+'f')
 #define ACCL_DELETE		(WCTL+'d')
 #define ACCL_TUNNEL		(WCTL+WSHIFT+'t')
+#define ACCL_BRIDGE     (0)
+#define ACCL_TIES       (0)
 #define ACCL_HNDLDTO	(WCTL+WSHIFT+'i')
 #define ACCL_TEXT		(WCTL+WSHIFT+'x')
 #define ACCL_DRAWLINE	(WCTL+WSHIFT+'1')
@@ -154,6 +156,7 @@
 #define ACCL_PLAYBACK	(WALT+WCTL+'b')
 
 #define ACCL_BRIDGE		(0)
+#define ACCL_TIES		(0)
 
 /* Blocks */
 #define ACCL_BLOCK1	(0)

@@ -2215,16 +2215,24 @@ static void CreateMenus(void) {
 	MiscMenuItemCreate(editM, NULL, "cmdBelow", _("Move to &Bottom"), ACCL_BELOW,
 			(void*) (wMenuCallBack_p) SelectBelow, IC_SELECTED, (void *) 0);
 
-	wMenuSeparatorCreate(editM);
-	MiscMenuItemCreate(editM, NULL, "cmdWidth0", _("Thin Tracks"), ACCL_THIN,
-			(void*) (wMenuCallBack_p) SelectTrackWidth, IC_SELECTED,
-			(void *) 0);
-	MiscMenuItemCreate(editM, NULL, "cmdWidth2", _("Medium Tracks"),
-			ACCL_MEDIUM, (void*) (wMenuCallBack_p) SelectTrackWidth,
-			IC_SELECTED, (void *) 2);
-	MiscMenuItemCreate(editM, NULL, "cmdWidth3", _("Thick Tracks"), ACCL_THICK,
-			(void*) (wMenuCallBack_p) SelectTrackWidth, IC_SELECTED,
-			(void *) 3);
+	wMenuSeparatorCreate( editM );
+	menuPLs[menuPG.paramCnt].context = (void*)1;
+	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", _("Select &All"), ACCL_SELECTALL, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)1 );
+	MiscMenuItemCreate( editM, NULL, "cmdSelectCurrentLayer", _("Select Current Layer"), ACCL_SETCURLAYER, (void*)(wMenuCallBack_p)SelectCurrentLayer, 0, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdDeselectAll", _("&Deselect All"), ACCL_DESELECTALL, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)0 );
+	MiscMenuItemCreate( editM, NULL,  "cmdSelectInvert", _("&Invert Selection"), 0L, (void*)(wMenuCallBack_p)InvertTrackSelect, 0, (void *)0 );
+	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned", _("Select Stranded Track"), 0L, (void*)(wMenuCallBack_p)OrphanedTrackSelect, 0, (void *)0 );
+	wMenuSeparatorCreate( editM );
+	MiscMenuItemCreate( editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL, (void*)(wMenuCallBack_p)SelectTunnel, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdBridge", _("B&ridge"), ACCL_BRIDGE, (void*)(wMenuCallBack_p)SelectBridge, IC_SELECTED, (void *)0);
+	MiscMenuItemCreate( editM, NULL, "cmdTies", _("Ties/NoTies"), ACCL_TIES, (void*)(wMenuCallBack_p)SelectTies, IC_SELECTED, (void *)0);
+	MiscMenuItemCreate( editM, NULL, "cmdAbove", _("Move to &Front"), ACCL_ABOVE, (void*)(wMenuCallBack_p)SelectAbove, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdBelow", _("Move to &Back"), ACCL_BELOW, (void*)(wMenuCallBack_p)SelectBelow, IC_SELECTED, (void *)0 );
+
+	wMenuSeparatorCreate( editM );
+	MiscMenuItemCreate( editM, NULL, "cmdWidth0", _("Thin Tracks"), ACCL_THIN, (void*)(wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdWidth2", _("Medium Tracks"), ACCL_MEDIUM, (void*)(wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, (void *)2 );
+	MiscMenuItemCreate( editM, NULL, "cmdWidth3", _("Thick Tracks"), ACCL_THICK, (void*)(wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, (void *)3 );
 
 	/*
 	 * VIEW MENU

@@ -459,6 +459,7 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T junk )
 		flipHiddenDoSelectRecount = TRUE;
 	if (GetTrkVisible(trk)) {
 		ClrTrkBits( trk, TB_VISIBLE|(drawTunnel==0?TB_SELECTED:0) );
+		ClrTrkBits (trk, TB_BRIDGE);
 	} else {
 		SetTrkBits( trk, TB_VISIBLE );
 	}
@@ -472,6 +473,34 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T junk )
 	return TRUE;
 }
 
+static BOOL_T FlipBridge( track_p trk, BOOL_T junk )
+{
+	EPINX_T i;
+	track_p trk2;
+
+	UndoModify( trk );
+	if (GetTrkBridge(trk)) {
+		ClrTrkBits( trk, TB_BRIDGE );
+	} else {
+		SetTrkBits( trk, TB_BRIDGE );
+		SetTrkBits( trk, TB_VISIBLE);
+	}
+	return TRUE;
+}
+
+static BOOL_T FlipTies( track_p trk, BOOL_T junk )
+{
+	EPINX_T i;
+	track_p trk2;
+
+	UndoModify( trk );
+	if (GetTrkNoTies(trk)) {
+		ClrTrkBits( trk, TB_NOTIES );
+	} else {
+		SetTrkBits( trk, TB_NOTIES );
+	}
+	return TRUE;
+}
 
 EXPORT void SelectTunnel( void )
 {
@@ -491,6 +520,39 @@ EXPORT void SelectTunnel( void )
 		SelectRecount();
 }
 
+EXPORT void SelectBridge( void )
+{
+	if (SelectedTracksAreFrozen())
+		return;
+	if (selectedTrackCount>0) {
+		flipHiddenDoSelectRecount = FALSE;
+		UndoStart( _("Bridge Tracks "), "bridge" );
+		wDrawDelayUpdate( mainD.d, TRUE );
+		DoSelectedTracks( FlipBridge );
+		wDrawDelayUpdate( mainD.d, FALSE );
+		UndoEnd();
+	} else {
+		ErrorMessage( MSG_NO_SELECTED_TRK );
+	}
+	MainRedraw();
+}
+
+EXPORT void SelectTies( void )
+{
+	if (SelectedTracksAreFrozen())
+		return;
+	if (selectedTrackCount>0) {
+		flipHiddenDoSelectRecount = FALSE;
+		UndoStart( _("Ties Tracks "), "noties" );
+		wDrawDelayUpdate( mainD.d, TRUE );
+		DoSelectedTracks( FlipTies );
+		wDrawDelayUpdate( mainD.d, FALSE );
+		UndoEnd();
+	} else {
+		ErrorMessage( MSG_NO_SELECTED_TRK );
+	}
+	MainRedraw();
+}
 
 void SelectRecount( void )
 {

@@ -142,7 +142,7 @@ The \f{Display} dialog contains items which control the display of objects on th
 
 \u000
 
-\dd \f{Draw Ties} - how to draw ties under the rails when the drawing Scale is smaller than half of the \f{Two Rail Scale}.
+\dd \f{Draw Ties} - how to draw ties under the rails when the drawing Scale is smaller than half of the \f{Two Rail Scale}. Note that \K{cmdTies} can be used to hide ties for selected tracks.
 
 \u000
 

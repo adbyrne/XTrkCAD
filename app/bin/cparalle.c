@@ -158,6 +158,8 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, &t, NULL, NULL ) ) {
 			return C_TERMINATE;
 		}
+		if (GetTrkGauge( Dpa.Trk )> parSeparation)
+				SetTrkNoTies(t, TRUE);
 		//CopyAttributes( Dpa.Trk, t );    Don't force scale or track width or Layer
 		SetTrkBits(t,(GetTrkBits(t)&TB_HIDEDESC) | (GetTrkBits(Dpa.Trk)&~TB_HIDEDESC));
 

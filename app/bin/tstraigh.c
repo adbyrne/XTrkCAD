@@ -279,6 +279,8 @@ static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 		widthOptions |= DTS_THICK2;
 	if (GetTrkWidth(t) == 3)
 		widthOptions |= DTS_THICK3;
+	if (GetTrkBridge(t)) widthOptions |= DTS_BRIDGE;
+		else widthOptions &=~DTS_BRIDGE;
 	DrawStraightTrack( d, GetTrkEndPos(t,0), GetTrkEndPos(t,1),
 				GetTrkEndAngle(t,0),
 				t, GetTrkGauge(t), color, widthOptions );
@@ -297,7 +299,7 @@ static BOOL_T WriteStraight( track_p t, FILE * f )
 	BOOL_T rc = TRUE;
 	rc &= fprintf(f, "STRAIGHT %d %d %ld 0 0 %s %d\n",
 				GetTrkIndex(t), GetTrkLayer(t), (long)GetTrkWidth(t),
-				GetTrkScaleName(t), GetTrkVisible(t) )>0;
+				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)<<1)|(GetTrkBridge(t)<<2) )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
 	rc &= fprintf(f, "\tEND\n" )>0;
@@ -317,7 +319,9 @@ static void ReadStraight( char * line )
 		return;
 	trk = NewTrack( index, T_STRAIGHT, 0, 0 );
 	SetTrkScale( trk, LookupScale(scale) );
-	SetTrkVisible(trk, visible);
+	SetTrkVisible(trk, visible&1);
+	SetTrkNoTies(trk, visible&2);
+	SetTrkBridge(trk, visible&4);
 	SetTrkLayer(trk, layer);
 	SetTrkWidth( trk, (int)(options&3) );
 	ReadSegs();

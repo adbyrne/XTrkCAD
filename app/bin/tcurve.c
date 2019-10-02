@@ -683,6 +683,9 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 		 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
 		DrawCurveDescription( t, d, color );
 	}
+	if (GetTrkBridge(t)) widthOptions |= DTS_BRIDGE;
+	else widthOptions &=~DTS_BRIDGE;
+
 	DrawCurvedTrack( d, xx->pos, xx->radius, a0, a1,
 				GetTrkEndPos(t,0), GetTrkEndPos(t,1),
 				t, GetTrkGauge(t), color, widthOptions );
@@ -708,7 +711,7 @@ static BOOL_T WriteCurve( track_p t, FILE * f )
 		options |= 0x80;
 	rc &= fprintf(f, "CURVE %d %d %ld 0 0 %s %d %0.6f %0.6f 0 %0.6f %ld %0.6f %0.6f\n", 
 		GetTrkIndex(t), GetTrkLayer(t), (long)options,
-		GetTrkScaleName(t), GetTrkVisible(t), xx->pos.x, xx->pos.y, xx->radius,
+		GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)<<1)|(GetTrkBridge(t)<<2), xx->pos.x, xx->pos.y, xx->radius,
 		xx->helixTurns, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
@@ -736,7 +739,9 @@ static void ReadCurve( char * line )
 	}
 	t = NewTrack( index, T_CURVE, 0, sizeof *xx );
 	xx = GetTrkExtraData(t);
-	SetTrkVisible(t, visible);
+	SetTrkVisible(t, visible&1);
+	SetTrkNoTies(t, visible&2);
+	SetTrkBridge(t, visible&4);
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&3));

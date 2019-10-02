@@ -2446,6 +2446,7 @@ EXPORT void DrawCurvedTies(
 
 	if ( (!GetTrkVisible(trk)) && drawTunnel!=DRAW_TUNNEL_SOLID )
 		return;
+	if (GetTrkNoTies(trk)) return;	//No Ties for this Track
 	if (color == wDrawColorBlack)
 		color = tieColor;
 	len = 2*M_PI*r*a1/360.0;
@@ -2538,6 +2539,38 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) R%0.3f A%0.3f..%0.3f)\n",
 			 }
 		}
 	}
+	if (options & DTS_BRIDGE) {
+
+			ANGLE_T a2,a3;
+			coOrd pp0,pp1,pp2,pp3;
+
+			a2 = a0+R2D(trackGauge*1.0/r);
+			a3 = a1-R2D(trackGauge*2.0/r);
+
+			wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/75.0);
+
+			DrawArc( d, p, r+(trackGauge*1.5), a2, a3, 0, width2, color );
+
+			PointOnCircle(&pp0,p,r+(trackGauge*1.5),a2);
+			PointOnCircle(&pp1,p,r+(trackGauge*1.5),a3+a2);
+
+			Translate( &pp2,pp0, a2-90+45, trackGauge);
+			DrawLine( d, pp0, pp2, width2, color );
+			Translate( &pp3,pp1, a2+a3+90-45, trackGauge);
+			DrawLine( d, pp1, pp3, width2, color );
+
+			DrawArc( d, p, r-(trackGauge*1.5), a2, a3, 0, width2, color );
+
+			PointOnCircle(&pp0,p,r-(trackGauge*1.5),a2);
+			PointOnCircle(&pp1,p,r-(trackGauge*1.5),a3+a2);
+
+			Translate( &pp2,pp0, a2-90-45, trackGauge);
+			DrawLine( d, pp0, pp2, width2, color );
+			Translate( &pp3,pp1, a2+a3+90+45, trackGauge);
+			DrawLine( d, pp1, pp3, width2, color );
+
+		}
+
 }
 
 
@@ -2563,6 +2596,7 @@ EXPORT void DrawStraightTies(
 	td = GetScaleTieData(GetTrkScale(trk));
 	if ( (!GetTrkVisible(trk)) && drawTunnel!=DRAW_TUNNEL_SOLID )
 		return;
+	if (GetTrkNoTies(trk)) return;	//No Ties for this Track
 	if ( color == wDrawColorBlack )
 		color = tieColor;
 	td = GetScaleTieData( GetTrkScale(trk) );
@@ -2664,6 +2698,32 @@ LOG( log_track, 4, ( "DST( (%0.3f %0.3f) .. (%0.3f..%0.3f)\n",
 			 }
 		}
 	}
+	if (options & DTS_BRIDGE) {
+
+		coOrd pp2,pp3;
+		wDrawWidth width2 = (wDrawWidth)round((2.0 * d->dpi)/75.0);
+
+		Translate( &pp0, p0, angle+90, trackGauge*1.5 );
+		Translate( &pp1, p1, angle+90, trackGauge*1.5 );
+		Translate( &pp0, pp0, angle+180, trackGauge*1.5 );
+		Translate( &pp1, pp1, angle, trackGauge*1.5 );
+		DrawLine( d, pp0, pp1, width2, color );
+		Translate( &pp2,pp0, angle+90-45, trackGauge);
+		DrawLine( d, pp0, pp2, width2, color );
+		Translate( &pp3,pp1, angle+90+45, trackGauge);
+		DrawLine( d, pp1, pp3, width2, color );
+
+		Translate( &pp0, p0, angle-90, trackGauge*1.5 );
+		Translate( &pp1, p1, angle-90, trackGauge*1.5 );
+		Translate( &pp0, pp0, angle+180, trackGauge*1.5 );
+		Translate( &pp1, pp1, angle, trackGauge*1.5 );
+		DrawLine( d, pp0, pp1, width2, color );
+		Translate( &pp2,pp0, angle-90+45, trackGauge);
+		DrawLine( d, pp0, pp2, width2, color );
+		Translate( &pp3,pp1, angle-90-45, trackGauge);
+		DrawLine( d, pp1, pp3, width2, color );
+
+	}
 }
 
 
@@ -2722,6 +2782,7 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 			color = GetTrkColor( trk, d );
 		}
 	}
+
 	if (d == &mapD && !GetLayerOnMap(curTrackLayer))
 		return;
 	if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) &&
