@@ -2701,6 +2701,7 @@ static STATUS_T CmdSelect(
 #include "bitmaps/select.xpm"
 #include "bitmaps/delete.xpm"
 #include "bitmaps/tunnel.xpm"
+#include "bitmaps/bridge.xpm"
 #include "bitmaps/move.xpm"
 #include "bitmaps/rotate.xpm"
 #include "bitmaps/flip.xpm"
@@ -2766,11 +2767,13 @@ EXPORT void InitCmdTunnel( void )
 	wIcon_p icon;
 	icon = wIconCreatePixMap( tunnel_xpm );
 	AddToolbarButton( "cmdTunnel", icon, IC_SELECTED|IC_POPUP, (addButtonCallBack_t)SelectTunnel, NULL );
-#ifdef LATER
-	tunnelCmdInx = AddButton( "cmdTunnel", _("Tunnel"),
-		(addButtonCallBack_t)SelectTunnel, NULL, IC_SELECTED|IC_POPUP, NULL, LEVEL0_50, ACCL_TUNNEL,
-		(wControl_p)wButtonCreate(mainW, 0, 0, "cmdTunnel", (char*)bm_p, BO_ICON, 0, (wButtonCallBack_p)SelectTunnel, 0 ) );
-#endif
+}
+
+EXPORT void InitCmdBridge( void)
+{
+	wIcon_p icon;
+	icon = wIconCreatePixMap( bridge_xpm );
+	AddToolbarButton( "cmdBridge", icon, IC_SELECTED|IC_POPUP, (addButtonCallBack_t)SelectBridge, NULL );
 }
 
 

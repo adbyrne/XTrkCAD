@@ -129,6 +129,7 @@
 		{"line": "cmdTrainNewCar", "contents": "Place a car on the layout" },
 		{"line": "cmdTrainExit", "contents": "Exit Trains" },
 		{"line": "cmdTunnel", "contents": "Hide/Unhide a track" },
+		{"line": "cmdBridge", "contents": "Make/Umake a track a Bridge" },
 		{"line": "cmdTurnout", "contents": "Place a turnout or sectional track" },
 		{"line": "cmdTurnoutNew", "contents": "Create a new turnout definition" },
 		{"line": "cmdTurntable", "contents": "Place a turntable" },

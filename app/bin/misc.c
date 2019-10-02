@@ -2089,6 +2089,10 @@ static void CreateMenus(void) {
 			(wMenuCallBack_p) DoCommandBIndirect, &rotateCmdInx);
 	MiscMenuItemCreate(popup2M, NULL, "cmdTunnel", _("Tunnel"), 0,
 			(void*) (wMenuCallBack_p) SelectTunnel, 0, (void *) 0);
+	MiscMenuItemCreate(popup2M, NULL, "cmdBridge", _("Bridge"), 0,
+			(void*) (wMenuCallBack_p) SelectBridge, 0, (void *) 0);
+	MiscMenuItemCreate(popup2M, NULL, "cmdTies", _("NoTies/Ties"), 0,
+			(void*) (wMenuCallBack_p) SelectTies, 0, (void *) 0);
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDelete", _("Delete"), 0,
@@ -2210,6 +2214,10 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate(editM);
 	MiscMenuItemCreate(editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL,
 			(void*) (wMenuCallBack_p) SelectTunnel, IC_SELECTED, (void *) 0);
+	MiscMenuItemCreate(editM, NULL, "cmdBridge", _("&Bridge"), ACCL_BRIDGE,
+			(void*) (wMenuCallBack_p) SelectBridge, IC_SELECTED, (void *) 0);
+	MiscMenuItemCreate(editM, NULL, "cmdTies", _("&NoTies/Ties"), ACCL_TIES,
+				(void*) (wMenuCallBack_p) SelectTies, IC_SELECTED, (void *) 0);
 	MiscMenuItemCreate(editM, NULL, "cmdAbove", _("Move to &Top"), ACCL_ABOVE,
 			(void*) (wMenuCallBack_p) SelectAbove, IC_SELECTED, (void *) 0);
 	MiscMenuItemCreate(editM, NULL, "cmdBelow", _("Move to &Bottom"), ACCL_BELOW,
@@ -2324,6 +2332,7 @@ static void CreateMenus(void) {
 	InitCmdMove(changeM);
 	InitCmdDelete();
 	InitCmdTunnel();
+	InitCmdBridge();
 	InitCmdAboveBelow();
 
 	cmdGroup = BG_TRKMOD;
