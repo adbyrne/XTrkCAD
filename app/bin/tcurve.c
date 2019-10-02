@@ -711,7 +711,7 @@ static BOOL_T WriteCurve( track_p t, FILE * f )
 		options |= 0x80;
 	rc &= fprintf(f, "CURVE %d %d %ld 0 0 %s %d %0.6f %0.6f 0 %0.6f %ld %0.6f %0.6f\n", 
 		GetTrkIndex(t), GetTrkLayer(t), (long)options,
-		GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)<<1)|(GetTrkBridge(t)<<2), xx->pos.x, xx->pos.y, xx->radius,
+		GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0), xx->pos.x, xx->pos.y, xx->radius,
 		xx->helixTurns, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
@@ -739,9 +739,9 @@ static void ReadCurve( char * line )
 	}
 	t = NewTrack( index, T_CURVE, 0, sizeof *xx );
 	xx = GetTrkExtraData(t);
-	SetTrkVisible(t, visible&1);
-	SetTrkNoTies(t, visible&2);
-	SetTrkBridge(t, visible&4);
+	SetTrkVisible(t, visible&2);
+	SetTrkNoTies(t, visible&4);
+	SetTrkBridge(t, visible&8);
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&3));

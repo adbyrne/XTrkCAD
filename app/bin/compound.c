@@ -981,7 +981,7 @@ BOOL_T WriteCompound(
 	rc &= fprintf(f, "%s %d %d %ld %ld 0 %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
 				GetTrkTypeName(t),
 				GetTrkIndex(t), GetTrkLayer(t), options, position,
-				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)<<1),
+				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0),
 				xx->orig.x, xx->orig.y, xx->angle,
 				PutTitle(xtitle(xx)) )>0;
 	for (ep=0; ep<epCnt; ep++ )
@@ -1126,9 +1126,9 @@ void ReadCompound(
 	}
 	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL, NULL, pathCnt, (char *)path, tempSegs_da.cnt, &tempSegs(0) );
 	SetEndPts( trk, 0 );
-	SetTrkVisible(trk, visible&1);
-	SetTrkNoTies(trk, visible&2);
-	SetTrkBridge(trk, visible&4);
+	SetTrkVisible(trk, visible&2);
+	SetTrkNoTies(trk, visible&4);
+	SetTrkBridge(trk, visible&8);
 	SetTrkScale(trk, LookupScale( scale ));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));

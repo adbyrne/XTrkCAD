@@ -533,7 +533,7 @@ static BOOL_T WriteBezier( track_p t, FILE * f )
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 ) options |= 0x80;
 	rc &= fprintf(f, "%s %d %u %ld %ld %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f \n",
 		track?"BEZIER":"BZRLIN",GetTrkIndex(t), GetTrkLayer(t), (long)options, wDrawGetRGB(xx->bezierData.segsColor), xx->bezierData.segsWidth,
-                  GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)<<1)|(GetTrkBridge(t)<<2),
+                  GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0),
 				  xx->bezierData.pos[0].x, xx->bezierData.pos[0].y,
 				  xx->bezierData.pos[1].x, xx->bezierData.pos[1].y,
 				  xx->bezierData.pos[2].x, xx->bezierData.pos[2].y,
@@ -570,9 +570,9 @@ static void ReadBezier( char * line )
 	else
 		t = NewTrack( index, T_BZRLIN, 0, sizeof *xx );
 	xx = GetTrkExtraData(t);
-	SetTrkVisible(t, visible&1);
-	SetTrkNoTies(t,visible&2);
-	SetTrkBridge(t,visible&4);
+	SetTrkVisible(t, visible&2);
+	SetTrkNoTies(t,visible&4);
+	SetTrkBridge(t,visible&8);
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&0x0F));
