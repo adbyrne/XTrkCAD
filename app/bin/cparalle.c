@@ -30,6 +30,7 @@
 #include "param.h"
 #include "track.h"
 #include "utility.h"
+#include "layout.h"
 
 static struct {
 		track_p Trk;
@@ -38,7 +39,7 @@ static struct {
 
 static DIST_T parSeparation = 1.0;
 
-static paramFloatRange_t r_0o1_100 = { 0.1, 100.0, 100 };
+static paramFloatRange_t r_0o1_100 = { 0.0, 100.0, 100 };
 static paramData_t parSepPLs[] = {
 #define parSepPD (parSepPLs[0])
 	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NOPREF|PDO_NOPREF, &r_0o1_100, N_("Separation") } };
@@ -77,10 +78,11 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_DOWN:
-		if ( parSeparation <= 0.0 ) {
+		if ( parSeparation < 0.0 ) {
 			ErrorMessage( MSG_PARALLEL_SEP_GTR_0 );
 			return C_ERROR;
 		}
+
 		controls[0] = parSepPD.control;
 		controls[1] = NULL;
 		labels[0] = N_("Separation");
@@ -96,12 +98,22 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 			InfoMessage(_(" Track doesn't support parallel"));
 			return C_CONTINUE;
 		}
+		if (parSeparation == 0.0) {
+			DIST_T orig_gauge = GetTrkGauge( Dpa.Trk );
+			DIST_T new_gauge = GetScaleTrackGauge(GetLayoutCurScale());
+			if (orig_gauge == new_gauge) {
+				ErrorMessage( MSG_PARALLEL_SEP_GTR_0 );
+					return C_ERROR;
+			}
+			parSeparation = fabs(orig_gauge/2-new_gauge/2);
+		}
 		/* in case query has changed things (eg joint) */
 		/* 
 		 * this seems to cause problems so I commented it out
 		 * until further investigation shows the necessity
 		 */
 		//Dpa.Trk = OnTrack( &Dpa.orig, TRUE, TRUE ); 
+
 		tempSegs_da.cnt = 0;
 
 	case C_MOVE:
@@ -146,7 +158,8 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, &t, NULL, NULL ) ) {
 			return C_TERMINATE;
 		}
-		CopyAttributes( Dpa.Trk, t );
+		//CopyAttributes( Dpa.Trk, t );    Don't force scale or track width
+
 		if ( t0 ) {
 			a = NormalizeAngle( GetTrkEndAngle( t0, ep0 ) - GetTrkEndAngle( t, 0 ) + (180.0+connectAngle/2.0) ); 
 			if (a < connectAngle) {

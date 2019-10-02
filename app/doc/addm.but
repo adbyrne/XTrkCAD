@@ -215,11 +215,12 @@ A label for the helix is drawn at it's the center.  If the elevations are set (e
 
 \G{png.d/bparalle.png}
 
-You can create a new track parallel to any straight, curved or easement track.
+You can create a new track parallel to any straight, curved, bezier, cornu or easement track.
 
 \G{png.d/satusbarparallel.png}
 
-The \f{Parallel Separation} control (Visible in the Status Bar) displays the current separation between parallel tracks.  This value can be changed before selecting a track.  The value must be greater than 0.0.
+The \f{Parallel Separation} control (Visible in the Status Bar) displays the current separation between parallel tracks.  This value can be changed before selecting a track.  The value must be greater than 0.0 if the gauges are equal.
+If the gauges are equal, a value of 0 means that the rail of the second track is overlaid on the first to simulate dual guage track.
 
 Select the track you want to parallel, and the new parallel track will appear beside it.  You control which side the new track will be on by moving the cursor from one side to the other of the selected track.
 
