@@ -748,6 +748,8 @@ static void DrawJointSegment(
 	}
 
 	widthOptions |= DTS_RIGHT|DTS_LEFT|DTS_TIES;
+	if (GetTrkBridge(trk)) widthOptions |= DTS_BRIDGE;
+		else widthOptions &=~DTS_BRIDGE;
 	GetJointPos( &p0, NULL, l0, R, L, P, A, N );
 	for (i=1; i<=cnt1; i++) {
 		a0 += a1;
@@ -937,7 +939,7 @@ static void ReadJoint(
 		return;
 	trk = NewTrack( index, T_EASEMENT, 0, sizeof e );
 	xx = GetTrkExtraData(trk);
-	SetTrkVisible(trk, visible);
+	SetTrkVisible(trk, visible&1);
 	SetTrkScale(trk, LookupScale(scale));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));

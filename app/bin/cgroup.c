@@ -477,6 +477,7 @@ LOG( log_group, 1, ( " EP%d = [%0.3f %0.3f] A%0.3f T%d.%d\n", ep, epp->pos.x, ep
 		xx1->ungrouped = TRUE;
 
 		SetTrkVisible( trk1, TRUE );
+		SetTrkNoTies( trk1, FALSE );
 		SetTrkBits( trk1, TB_SELECTED );
 		for ( segInx=0; segInx<segCnt; segInx++ ) {
 			if ( refCount(segInx) == inx ) {

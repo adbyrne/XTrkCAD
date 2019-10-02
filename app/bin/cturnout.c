@@ -2015,6 +2015,7 @@ static void AddTurnout( void )
 #define connection(N) DYNARR_N( junk_t, connection_da, N )
 #define leftover(N) DYNARR_N( junk_t, leftover_da, N )
 	BOOL_T visible;
+	BOOL_T no_ties;
 	BOOL_T noConnections;
 	coOrd p0, p1;
 
@@ -2132,6 +2133,7 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 	/* Make the connections */
 
 	visible = FALSE;
+	no_ties = FALSE;
 	noConnections = TRUE;
 	AuditTracks( "addTurnout T%d before connection", GetTrkIndex(newTrk) );
 	for (i=0;i<curTurnout->endCnt;i++) {
@@ -2149,6 +2151,7 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 				DrawEndPt( &mainD, trk1, ep0, wDrawColorWhite );
 				ConnectTracks( newTrk, i, trk1, ep0 );
 				visible |= GetTrkVisible(trk1);
+				no_ties |= GetTrkNoTies(trk1);
 				DrawEndPt( &mainD, trk1, ep0, wDrawColorBlack );
 			}
 		}
@@ -2156,6 +2159,8 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 	if (noConnections)
 		visible = TRUE;
 	SetTrkVisible( newTrk, visible);
+	SetTrkNoTies(newTrk, no_ties);
+	SetTrkBridge(newTrk, FALSE);
 #ifdef LATER
 	SetTrkScale( newTrk, curScaleInx );
 	ComputeCompoundBoundingBox( newTrk );

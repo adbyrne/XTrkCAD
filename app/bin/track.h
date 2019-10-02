@@ -408,6 +408,8 @@ void SetDebug( char * );
 #define TB_SHRTPATH		(1<<5)
 #define TB_HIDEDESC		(1<<6)
 #define TB_CARATTACHED	(1<<7)
+#define TB_NOTIES       (1<<8)
+#define TB_BRIDGE       (1<<9)
 #define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED)
 
 /* track.c */
@@ -473,7 +475,11 @@ BOOL_T IsTrackDeleted( track_p );
 
 #define GetTrkSelected(T)		(GetTrkBits(T)&TB_SELECTED)
 #define GetTrkVisible(T)		(GetTrkBits(T)&TB_VISIBLE)
+#define GetTrkNoTies(T)			(GetTrkBits(T)&TB_NOTIES)
+#define GetTrkBridge(T)         (GetTrkBits(T)&TB_BRIDGE)
 #define SetTrkVisible(T,V)		((V)?SetTrkBits(T,TB_VISIBLE):ClrTrkBits(T,TB_VISIBLE))
+#define SetTrkNoTies(T,V)		((V)?SetTrkBits(T,TB_NOTIES):ClrTrkBits(T,TB_NOTIES))
+#define SetTrkBridge(T,V)		((V)?SetTrkBits(T,TB_BRIDGE):ClrTrkBits(T,TB_BRIDGE))
 int ClrAllTrkBits( int );
 
 void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
@@ -531,6 +537,7 @@ BOOL_T ComputeElev( track_p, EPINX_T, BOOL_T, DIST_T *, DIST_T * );
 #define DTS_THICK3		(1<<3)
 #define DTS_TIES		(1<<4)
 #define DTS_NOCENTER	(1<<5)
+#define DTS_BRIDGE      (1<<6)
 
 void DrawCurvedTies( drawCmd_p, track_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, wDrawColor );
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_p, DIST_T, wDrawColor, long );

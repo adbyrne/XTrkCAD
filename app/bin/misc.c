@@ -2248,8 +2248,10 @@ static void CreateMenus( void )
 	MiscMenuItemCreate( editM, NULL,  "cmdSelectOrphaned", _("Select Stranded Track"), 0L, (void*)(wMenuCallBack_p)OrphanedTrackSelect, 0, (void *)0 );
 	wMenuSeparatorCreate( editM );
 	MiscMenuItemCreate( editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL, (void*)(wMenuCallBack_p)SelectTunnel, IC_SELECTED, (void *)0 );
-	MiscMenuItemCreate( editM, NULL, "cmdAbove", _("A&bove"), ACCL_ABOVE, (void*)(wMenuCallBack_p)SelectAbove, IC_SELECTED, (void *)0 );
-	MiscMenuItemCreate( editM, NULL, "cmdBelow", _("Belo&w"), ACCL_BELOW, (void*)(wMenuCallBack_p)SelectBelow, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdBridge", _("B&ridge"), ACCL_BRIDGE, (void*)(wMenuCallBack_p)SelectBridge, IC_SELECTED, (void *)0);
+	MiscMenuItemCreate( editM, NULL, "cmdTies", _("Ties/NoTies"), ACCL_TIES, (void*)(wMenuCallBack_p)SelectTies, IC_SELECTED, (void *)0);
+	MiscMenuItemCreate( editM, NULL, "cmdAbove", _("Move to &Front"), ACCL_ABOVE, (void*)(wMenuCallBack_p)SelectAbove, IC_SELECTED, (void *)0 );
+	MiscMenuItemCreate( editM, NULL, "cmdBelow", _("Move to &Back"), ACCL_BELOW, (void*)(wMenuCallBack_p)SelectBelow, IC_SELECTED, (void *)0 );
 
 	wMenuSeparatorCreate( editM );
 	MiscMenuItemCreate( editM, NULL, "cmdWidth0", _("Thin Tracks"), ACCL_THIN, (void*)(wMenuCallBack_p)SelectTrackWidth, IC_SELECTED, (void *)0 );

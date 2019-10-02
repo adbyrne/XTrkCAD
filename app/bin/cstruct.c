@@ -587,6 +587,8 @@ static void NewStructure( void )
 	}
 		
 	SetTrkVisible( trk, TRUE );
+	SetTrkNoTies( trk, FALSE);
+	SetTrkBridge( trk, FALSE);
 #ifdef LATER
 	ComputeCompoundBoundingBox( trk );
 

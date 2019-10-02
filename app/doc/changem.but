@@ -1197,7 +1197,11 @@ The following commands operate on the objects you have selected:
 
 \b \f{Hide} (or unhide) in a Tunnel (\K{cmdTunnel}).
 
-\b \f{Move} Above or Below (\K{cmdAboveBelow}).
+\b \f{Draw Abutments} (or dont) for a Bridge (\K{cmdBridge}). 
+
+\b \f{Draw Ties} (or dont) (\K{cmdTies}).
+
+\b \f{Move} To Front or To Back (\K{cmdAboveBelow}).
 
 \b \f{Parts List} (\K{cmdEnum}) of the selected objects.
 
