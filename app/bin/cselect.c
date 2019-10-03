@@ -224,7 +224,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 	selectedTrackCount = 0;
 	trk = NULL;
 	while ( TrackIterate( &trk ) ) {
-		if ((!select) || GetLayerVisible( GetTrkLayer( trk ))) {
+		if (((!select) || GetLayerVisible( GetTrkLayer( trk ))) && !GetLayerModule(GetTrkLayer( trk ))) {
 			if (select)
 				selectedTrackCount++;
 			if ((GetTrkSelected(trk)!=0) != select) {
@@ -248,7 +248,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 	}
 }
 
-/* Invert selected state of all visible objects.
+/* Invert selected state of all visible non module objects.
  *
  * \param none
  * \return none
@@ -260,7 +260,8 @@ EXPORT void InvertTrackSelect( void *ptr )
 
 	trk = NULL;
 	while ( TrackIterate( &trk ) ) {
-		if (GetLayerVisible( GetTrkLayer( trk ))) {
+		if (GetLayerVisible( GetTrkLayer( trk )) &&
+			!GetLayerModule(GetTrkLayer( trk ))) {
 			if (GetTrkSelected(trk))
 			{
 				ClrTrkBits( trk, TB_SELECTED );
@@ -293,7 +294,7 @@ EXPORT void OrphanedTrackSelect( void *ptr )
 	
 	while( TrackIterate( &trk ) ) {
 		cnt = 0;
-		if( GetLayerVisible( GetTrkLayer( trk ))) {
+		if( GetLayerVisible( GetTrkLayer( trk ) && !GetLayerModule(GetTrkLayer(trk)))) {
 			for( ep = 0; ep < GetTrkEndPtCnt( trk ); ep++ ) {
 				if( GetTrkEndTrk( trk, ep ) )
 					cnt++;				
@@ -352,8 +353,12 @@ static void SelectConnectedTracks(
 			}
 		}
 		if (!GetTrkSelected(trk)) {
-			SelectOneTrack( trk, TRUE );
-			InfoCount( inx+1 );
+			if (GetLayerModule(GetTrkLayer(trk))) {
+				continue;
+			} else {
+				SelectOneTrack( trk, TRUE );
+				InfoCount( inx+1 );
+			}
 		}
 		SetTrkBits(trk, TB_SELECTED);
 	}
@@ -362,7 +367,23 @@ static void SelectConnectedTracks(
 	InfoCount( trackCount );
 }
 
+typedef void (*doModuleTrackCallBack_t)(track_p, BOOL_T);
+static int DoModuleTracks( int moduleLayer, doModuleTrackCallBack_t doit, BOOL_T val)
+{
+	track_p trk;
+	trk = NULL;
+	int cnt = 0;
+	while ( TrackIterate( &trk ) ) {
+		if (GetTrkLayer(trk) == moduleLayer) {
+			 doit( trk, val );
+		}
+	}
+	return cnt;
+}
 
+static void DrawSingleTrack(track_p trk, BOOL_T bit) {
+	DrawTrack(trk,&mainD,wDrawColorBlue);
+}
 
 typedef BOOL_T (*doSelectedTrackCallBack_t)(track_p, BOOL_T);
 static void DoSelectedTracks( doSelectedTrackCallBack_t doit )
@@ -2317,7 +2338,12 @@ static STATUS_T SelectArea(
 					lo.x >= base.x && hi.x <= base.x+size.x &&
 					lo.y >= base.y && hi.y <= base.y+size.y) {
 					if ( (GetTrkSelected( trk )==0) == (action==C_UP) ) {
-						if (cnt > incrementalDrawLimit) {
+						if (GetLayerModule(GetTrkLayer(trk))) {
+							if (action==C_UP)
+								DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,TRUE);
+							else
+								DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,FALSE);
+						} else if (cnt > incrementalDrawLimit) {
 							selectedTrackCount += (action==C_UP?1:-1);
 							if (action==C_UP)
 								SetTrkBits( trk, TB_SELECTED );
@@ -2365,6 +2391,15 @@ static STATUS_T SelectTrack(
 	}
 	DescribeTrack( trk, msg, sizeof msg );
 	InfoMessage( msg );
+	if (GetLayerModule(GetTrkLayer(trk))) {
+		if (MyGetKeyState() & WKEY_CTRL) {
+			DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,!GetTrkSelected(trk));
+		} else {
+			SetAllTrackSelect( FALSE );							//Just this Track
+			DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,!GetTrkSelected(trk));
+		}
+		return C_CONTINUE;
+	}
 	if (MyGetKeyState() & WKEY_SHIFT) {						//All track up to
 		SelectConnectedTracks( trk );
 	} else if (MyGetKeyState() & WKEY_CTRL) {
@@ -2381,6 +2416,9 @@ static STATUS_T Activate( coOrd pos) {
 	track_p trk;
 	if ((trk = OnTrack( &pos, TRUE, FALSE )) == NULL) {
 				return C_CONTINUE;
+	}
+	if (GetLayerModule(GetTrkLayer(trk))) {
+		return C_CONTINUE;
 	}
 	ActivateTrack(trk);
 
@@ -2486,9 +2524,11 @@ static STATUS_T CmdSelect(
 		t = OnTrack( &p, FALSE, FALSE );
 		track_p ht;
 		if ((selectedTrackCount==0) && (t == NULL)) return C_CONTINUE;
-		if (t && !CheckTrackLayer( t ) ) {
-			t = NULL;
-			return C_TERMINATE;
+		if (t && !CheckTrackLayerSilent( t ) ) {
+			if (!GetLayerModule(GetTrkLayer(t)) ) {
+				t = NULL;
+				return C_TERMINATE;
+			}
 		}
 		if (selectedTrackCount>0) {
 			if ((ht = IsInsideABox(pos)) != NULL) {
@@ -2496,15 +2536,23 @@ static STATUS_T CmdSelect(
 					CreateMoveAnchor(pos);
 				} else if ((MyGetKeyState()&WKEY_CTRL)) {
 					CreateRotateAnchor(pos);
-				} else if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
-						QueryTrack( ht, Q_IS_CORNU ) ||
-						QueryTrack( ht, Q_IS_DRAW )) {
-					CreateModifyAnchor(pos);
+				} else if (!GetLayerModule(GetTrkLayer(ht))) {
+					if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
+					QueryTrack( ht, Q_IS_CORNU ) ||
+					QueryTrack( ht, Q_IS_DRAW )) {
+						CreateModifyAnchor(pos);
+					}
 				}
 			}
 		}
-		if (!(MyGetKeyState()&WKEY_CTRL) && t && !GetTrkSelected(t))
-			DrawTrack(t,&mainD,wDrawColorBlue);
+		if (!(MyGetKeyState()&WKEY_CTRL) && t && !GetTrkSelected(t)) {
+			if (GetLayerModule(GetTrkLayer(t))) {
+				track_p lt;
+				DoModuleTracks(GetTrkLayer(t),DrawSingleTrack,TRUE);
+			} else {
+				DrawTrack(t,&mainD,wDrawColorBlue);
+			}
+		}
 		if (anchors_da.cnt)
 			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		break;

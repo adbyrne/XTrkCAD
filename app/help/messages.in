@@ -170,6 +170,15 @@ The current \f{Layer} is where most new objects are created. It's not possible t
 Refer to \k{cmdLayer} for detail.
 END
 
+# dlayer.c
+MESSAGE MSG_LAYER_MODULE
+Cannot turn current layer into a Module
+HELP
+The current \f{Layer} is where new objects are created. It's not possible to turn this layer into a module, since then the objects can't be chnaged or added. Change the current \f{Layer} to some other \f{Layer} before trying to make this Layer into a module.
+
+Refer to \k{cmdLayer} for detail.
+END
+
 # cjoin.c track.c:getTrackParams/PARAMS_..._JOIN
 MESSAGE MSG_JOIN_EASEMENTS
 Cannot Join; Easements do not align or abut.
@@ -951,6 +960,15 @@ MESSAGE MSG_CANT_MODIFY_FROZEN_TRK
 Tracks in a frozen layer cannot be modified.
 HELP
 This operation cannot be executed as the selected track is present on a frozen layer. Track modifications may be performed only on unfrozen layers. Move the object to a \f{Layer} that's not frozen or unfreeze the layer.
+
+Refer to \k{cmdLayer} for detail.
+END
+
+# track.c
+MESSAGE MSG_CANT_MODIFY_MODULE_TRK
+Tracks in a module cannot be modified.
+HELP
+This operation cannot be executed as the selected track is present in a module layer. Track modifications may be performed only on unfrozen, non-module layers.
 
 Refer to \k{cmdLayer} for detail.
 END

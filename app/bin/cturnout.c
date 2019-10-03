@@ -2104,7 +2104,8 @@ static void PlaceTurnoutTrial(
 		 ! ( GetTrkType(trk) == T_TURNOUT &&
 			 (trk1=GetTrkEndTrk(trk,ep0)) &&
 			 GetTrkType(trk1) == T_TURNOUT) &&
-		 ! GetLayerFrozen(GetTrkLayer(trk)) ) {
+		 ! GetLayerFrozen(GetTrkLayer(trk)) &&
+		 ! GetLayerModule(GetTrkLayer(trk))) {
 		epPos = GetTrkEndPos( trk, ep0 );
 		d = FindDistance( pos, epPos );
 		if (d <= minLength)
@@ -2138,7 +2139,8 @@ LOG( log_turnout, 3, ( "placeTurnout T%d (%0.3f %0.3f) A%0.3f\n",
 			epAngle = NormalizeAngle( curTurnout->endPt[i].angle + angle );
 			conPos = epPos;
 			if ((trk = OnTrack(&conPos, FALSE, TRUE)) != NULL &&
-				!GetLayerFrozen(GetTrkLayer(trk))) {
+				!GetLayerFrozen(GetTrkLayer(trk)) &&
+				!GetLayerModule(GetTrkLayer(trk))) {
 				v->off = FindDistance( epPos, conPos );
 				v->angle = FindAngle( epPos, conPos );
 				if ( GetTrkType(trk) == T_TURNOUT ) {
@@ -2303,6 +2305,7 @@ static void AddTurnout( void )
 		epPos = tempEndPts(i).pos;
 		if ((trk = OnTrack(&epPos, FALSE, TRUE)) != NULL &&    //Adjust epPos onto existing track
 			(!GetLayerFrozen(GetTrkLayer(trk))) &&
+			(!GetLayerModule(GetTrkLayer(trk)))  &&
 			(!QueryTrack(trk,Q_CANNOT_PLACE_TURNOUT)) ) {
 LOG( log_turnout, 1, ( "ep[%d] on T%d @(%0.3f %0.3f)\n",
 					i, GetTrkIndex(trk), epPos.x, epPos.y ) )

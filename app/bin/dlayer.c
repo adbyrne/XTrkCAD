@@ -44,6 +44,7 @@
 #define LAYERPREF_FROZEN  (1)
 #define LAYERPREF_ONMAP	  (2)
 #define LAYERPREF_VISIBLE (4)
+#define LAYERPREF_MODULE  (8)
 #define LAYERPREF_SECTION ("Layers")
 #define LAYERPREF_NAME 	"name"
 #define LAYERPREF_COLOR "color"
@@ -70,6 +71,7 @@ typedef struct {
     BOOL_T frozen;						/**< Frozen flag */
     BOOL_T visible;						/**< visible flag */
     BOOL_T onMap;						/**< is layer shown map */
+    BOOL_T module;						/**< is layer a module (all or nothing) */
     long objCount;						/**< number of objects on layer */
 } layer_t;
 
@@ -177,6 +179,22 @@ BOOL_T GetLayerOnMap(unsigned int layer)
     }
 }
 
+BOOL_T GetLayerModule(unsigned int layer)
+{
+    if (!IsLayerValid(layer)) {
+        return TRUE;
+    } else {
+        return layers[layer].module;
+    }
+}
+
+void SetLayerModule(unsigned int layer, BOOL_T module)
+{
+	if (!IsLayerValid(layer)) {
+		layers[layer].module = module;
+	}
+}
+
 
 char * GetLayerName(unsigned int layer)
 {
@@ -185,6 +203,12 @@ char * GetLayerName(unsigned int layer)
     } else {
         return layers[layer].name;
     }
+}
+
+void SetLayerName(unsigned int layer, char* name) {
+	if (IsLayerValid(layer)) {
+		strcpy(layers[layer].name,name);
+	}
 }
 
 wDrawColor GetLayerColor(unsigned int layer)
@@ -219,7 +243,7 @@ static void FlipLayer(unsigned int layer)
     RedrawLayer(layer, TRUE);
 }
 
-static void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
+void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
                          void * listContext, void * arg)
 {
     unsigned int newLayer = (unsigned int)inx;
@@ -426,6 +450,7 @@ static wDrawColor layerColor;
 static long layerVisible = TRUE;
 static long layerFrozen = FALSE;
 static long layerOnMap = TRUE;
+static long layerModule = FALSE;
 static void LayerOk(void *);
 static BOOL_T layerRedrawMap = FALSE;
 
@@ -436,6 +461,7 @@ static BOOL_T layerRedrawMap = FALSE;
 static char *visibleLabels[] = { "", NULL };
 static char *frozenLabels[] = { "", NULL };
 static char *onMapLabels[] = { "", NULL };
+static char *moduleLabels[] = { "", NULL };
 static paramIntegerRange_t i0_20 = { 0, NUM_BUTTONS };
 
 static paramData_t layerPLs[] = {
@@ -451,7 +477,9 @@ static paramData_t layerPLs[] = {
     { PD_TOGGLE, &layerFrozen, "frozen", PDO_NOPREF|PDO_DLGHORZ, frozenLabels, N_("Frozen"), BC_HORZ|BC_NOBORDER },
 #define I_MAP	(5)
     { PD_TOGGLE, &layerOnMap, "onmap", PDO_NOPREF|PDO_DLGHORZ, onMapLabels, N_("On Map"), BC_HORZ|BC_NOBORDER },
-#define I_COUNT (6)
+#define I_MOD 	(6)
+	{ PD_TOGGLE, &layerModule, "module", PDO_NOPREF|PDO_DLGHORZ, moduleLabels, N_("Module"), BC_HORZ|BC_NOBORDER },
+#define I_COUNT (7)
     { PD_STRING, NULL, "object-count", PDO_NOPREF|PDO_DLGBOXEND, (void*)(80), N_("Count"), BO_READONLY },
     { PD_MESSAGE, N_("Personal Preferences"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
     { PD_BUTTON, (void*)DoLayerOp, "reset", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, (void *)ENUMLAYER_RELOAD },
@@ -478,6 +506,7 @@ LayerSystemDefaults(void)
         layers[inx].visible = TRUE;
         layers[inx].frozen = FALSE;
         layers[inx].onMap = TRUE;
+        layers[inx].module = FALSE;
         layers[inx].objCount = 0;
         SetLayerColor(inx, layerColorTab[inx%COUNT(layerColorTab)]);
     }
@@ -567,6 +596,7 @@ UpdateLayerDlg()
     layerVisible = layers[curLayer].visible;
     layerFrozen = layers[curLayer].frozen;
     layerOnMap = layers[curLayer].onMap;
+    layerModule = layers[curLayer].module;
     layerColor = layers[curLayer].color;
     strcpy(layerName, layers[curLayer].name);
     layerCurrent = curLayer;
@@ -669,6 +699,10 @@ LayerPrefSave(void)
                 flags |= LAYERPREF_VISIBLE;
             }
 
+            if (layers[inx].module) {
+            	flags |= LAYERPREF_MODULE;
+            }
+
             sprintf(buffer, LAYERPREF_FLAGS ".%0u", inx);
             wPrefSetInteger(LAYERPREF_SECTION, buffer, flags);
 
@@ -733,6 +767,7 @@ LayerPrefLoad(void)
             layers[inx].frozen = ((flags & LAYERPREF_FROZEN) != 0);
             layers[inx].onMap = ((flags & LAYERPREF_ONMAP) != 0);
             layers[inx].visible = ((flags & LAYERPREF_VISIBLE) != 0);
+            layers[inx].module = ((flags & LAYERPREF_MODULE) !=0);
             prefString = strtok(NULL, ",");
         }
     }
@@ -784,6 +819,14 @@ void LayerSetCounts(void)
     }
 }
 
+int FindUnusedLayer(unsigned int start) {
+	int inx;
+	for (inx=start; inx<NUM_LAYERS; inx++) {
+	    if (layers[inx].objCount == 0 && !layers[inx].frozen) return inx;
+	}
+	return -1;
+}
+
 /**
  * Reset layer options to their default values. The default values are loaded
  * from the preferences file.
@@ -828,11 +871,18 @@ static void LayerUpdate(void)
         ParamLoadControl(&layerPG, I_VIS);
     }
 
+    if (layerCurrent == curLayer && layerModule) {
+            NoticeMessage(MSG_LAYER_MODULE, _("Ok"), NULL);
+            layerModule = FALSE;
+            ParamLoadControl(&layerPG, I_MOD);
+    }
+
     if (strcmp(layers[(int)layerCurrent].name, layerName) ||
             layerColor != layers[(int)layerCurrent].color ||
             layers[(int)layerCurrent].visible != (BOOL_T)layerVisible ||
             layers[(int)layerCurrent].frozen != (BOOL_T)layerFrozen ||
-            layers[(int)layerCurrent].onMap != (BOOL_T)layerOnMap) {
+            layers[(int)layerCurrent].onMap != (BOOL_T)layerOnMap ||
+			layers[(int)layerCurrent].module != (BOOL_T)layerModule) {
         changed = TRUE;
         SetWindowTitle();
     }
@@ -876,6 +926,7 @@ static void LayerUpdate(void)
     layers[(int)layerCurrent].visible = (BOOL_T)layerVisible;
     layers[(int)layerCurrent].frozen = (BOOL_T)layerFrozen;
     layers[(int)layerCurrent].onMap = (BOOL_T)layerOnMap;
+    layers[(int)layerCurrent].module = (BOOL_T)layerModule;
 
     if (layerRedrawMap) {
         DoRedraw();
@@ -901,6 +952,7 @@ static void LayerSelect(
     layerVisible = layers[inx].visible;
     layerFrozen = layers[inx].frozen;
     layerOnMap = layers[inx].onMap;
+    layerModule = layers[inx].module;
     layerColor = layers[inx].color;
     sprintf(message, "%ld", layers[inx].objCount);
     ParamLoadMessage(&layerPG, I_COUNT, message);
@@ -916,6 +968,7 @@ void ResetLayers(void)
         layers[inx].visible = TRUE;
         layers[inx].frozen = FALSE;
         layers[inx].onMap = TRUE;
+        layers[inx].module = FALSE;
         layers[inx].objCount = 0;
         SetLayerColor(inx, layerColorTab[inx%COUNT(layerColorTab)]);
 
@@ -934,6 +987,7 @@ void ResetLayers(void)
     layerVisible = TRUE;
     layerFrozen = FALSE;
     layerOnMap = TRUE;
+    layerModule = FALSE;
     layerColor = layers[0].color;
     strcpy(layerName, layers[0].name);
     LoadLayerLists();
@@ -1061,7 +1115,7 @@ static void DoLayer(void * junk)
 BOOL_T ReadLayers(char * line)
 {
     char * name;
-    int inx, visible, frozen, color, onMap;
+    int inx, visible, frozen, color, onMap, module;
     unsigned long rgb;
 
     /* older files didn't support layers */
@@ -1092,7 +1146,7 @@ BOOL_T ReadLayers(char * line)
 
     /* get the properties for a layer from the file and update the layer accordingly */
 
-    if (!GetArgs(line, "ddddu0000q", &inx, &visible, &frozen, &onMap, &rgb,
+    if (!GetArgs(line, "ddddud000q", &inx, &visible, &frozen, &onMap, &rgb, &module,
                  &name)) {
         return FALSE;
     }
@@ -1116,6 +1170,7 @@ BOOL_T ReadLayers(char * line)
     layers[inx].visible = visible;
     layers[inx].frozen = frozen;
     layers[inx].onMap = onMap;
+    layers[inx].module = module;
     layers[inx].color = color;
 
     if (inx<NUM_BUTTONS) {
@@ -1140,12 +1195,13 @@ BOOL_T ReadLayers(char * line)
  * \return TRUE if configured, FALSE if not
  */
 
-bool
+BOOL_T
 IsLayerConfigured(unsigned int layerNumber)
 {
     return (!layers[layerNumber].visible ||
             layers[layerNumber].frozen ||
             !layers[layerNumber].onMap ||
+			layers[layerNumber].module ||
             layers[layerNumber].color !=
             layerColorTab[layerNumber % (COUNT(layerColorTab))] ||
             layers[layerNumber].name[0] ||
@@ -1171,7 +1227,8 @@ BOOL_T WriteLayers(FILE * f)
                     layers[inx].frozen,
                     layers[inx].onMap,
                     wDrawGetRGB(layers[inx].color),
-                    0, 0, 0, 0,
+                    layers[inx].module,
+					0, 0, 0,
                     PutTitle(layers[inx].name));
         }
     }
