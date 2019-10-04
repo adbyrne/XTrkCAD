@@ -1,3 +1,25 @@
+/** \file mswedit.c
+ * Text entry widgets
+ */
+ 
+/*  XTrackCAD - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+ 
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
@@ -15,6 +37,7 @@ struct wString_t {
 		wStringCallBack_p action;
 		};
 
+#ifdef LATER
 struct wInteger_t {
 		WOBJ_COMMON
 		long low, high;
@@ -30,6 +53,7 @@ struct wFloat_t {
 		double oldValue;
 		wFloatCallBack_p action;
 		};
+#endif // LATER
 
 
 static XWNDPROC oldEditProc = NULL;
@@ -47,54 +71,34 @@ long FAR PASCAL _export pushEdit(
 		UINT wParam,
 		LONG lParam )
 {
-	/* Catch <Return> and cause focus to leave control */
+
 #ifdef WIN32
 	long inx = GetWindowLong( hWnd, GWL_ID );
 #else
 	short inx = GetWindowWord( hWnd, GWW_ID );
 #endif
-	wControl_p b = mswMapIndex( inx );
+	wControl_p b = mswMapIndex(inx);
 
-	switch (message) {
+	switch (message)
+	{
 	case WM_CHAR:
-		if ( b != NULL) {
-			switch( wParam ) {
-			case 0x0D:
-			case 0x1B:
-			case 0x09:
-				SetFocus( ((wControl_p)(b->parent))->hWnd ); 
-				SendMessage( ((wControl_p)(b->parent))->hWnd, WM_CHAR,
-						wParam, lParam );
-				/*SendMessage( ((wControl_p)(b->parent))->hWnd, WM_COMMAND,
-						inx, MAKELONG( hWnd, EN_KILLFOCUS ) );*/
-				return 0L;
-			}
-		}
-		break;
-
-	case WM_KEYUP:
-	case WM_PASTE:
-		if ( b != NULL)
-			switch (b->type) {
-			case B_STRING:
-				if (((wString_p)b)->action)
-					mswSetTrigger( (wControl_p)b, triggerString );
-				break;
-#ifdef LATER
-			case B_INTEGER:
-				if (((wInteger_p)b)->action)
-					mswSetTrigger( (wControl_p)b, triggerInteger );
-				break;
-			case B_FLOAT:
-				if (((wFloat_p)b)->action)
-					mswSetTrigger( (wControl_p)b, triggerFloat );
-				break;
-#endif
-			}
-		break;
-
+	    if (b != NULL) {
+	        switch (wParam) {
+	        case VK_RETURN:
+	            triggerString(b);
+	            return (0L);
+	            break;
+	        case 0x1B:
+	        case 0x09:
+	            SetFocus(((wControl_p)(b->parent))->hWnd);
+	            SendMessage(((wControl_p)(b->parent))->hWnd, WM_CHAR,
+	                        wParam, lParam);
+	            return 0L;
+	        }
+	    }
+	    break;
 	}
-	return CallWindowProc( oldEditProc, hWnd, message, wParam, lParam );
+	return CallWindowProc(oldEditProc, hWnd, message, wParam, lParam);
 }
 
 /*
@@ -113,7 +117,7 @@ void wStringSetValue(
 	WORD len = (WORD)strlen( arg );
 	SendMessage( b->hWnd, WM_SETTEXT, 0, (DWORD)arg );
 #ifdef WIN32
-	SendMessage( b->hWnd, EM_SETSEL, len, len );
+	SendMessage( b->hWnd, EM_SETSEL, 0, -1 );
 	SendMessage( b->hWnd, EM_SCROLLCARET, 0, 0L );
 #else
 	SendMessage( b->hWnd, EM_SETSEL, 0, MAKELPARAM(len,len) );
@@ -141,6 +145,14 @@ const char * wStringGetValue(
 	return buff;
 }
 
+/**
+ * Get the string from a entry field. The returned pointer has to be free() after processing is complete.
+ * 
+ * \param bs IN string entry field
+ * 
+ * \return    pointer to entered string or NULL if entry field is empty.
+ */
+
 static char *getString(wString_p bs)
 {
     char *tmpBuffer = NULL;
@@ -156,22 +168,28 @@ static char *getString(wString_p bs)
     return (tmpBuffer);
 }
 
+/**
+ * Retrieve and process string entry. If a string has been entered, the callback for
+ * the specific entry field is called.
+ *
+ * \param b IN string entry field
+ */
 
 static void triggerString(
     wControl_p b)
 {
     wString_p bs = (wString_p)b;
 
-    if (bs->action) {
-        char *enteredString = getString(bs);
-        if (enteredString) {
-            if (bs->valueP) {
-                strcpy(bs->valueP, enteredString);
-            }
-            bs->action(enteredString, bs->data);
-            mswSetTrigger(NULL, NULL);
-            free(enteredString);
+    char *enteredString = getString(bs);
+    if (enteredString)
+    {
+        if (bs->valueP) {
+            strcpy(bs->valueP, enteredString);
         }
+        if (bs->action) {
+            bs->action(enteredString, bs->data);
+        }
+        free(enteredString);
     }
 }
 
@@ -195,18 +213,7 @@ LRESULT stringProc(
             if (!modified) {
                 break;
             }
-
-            char *enteredString = getString(bs);
-            if (enteredString) {
-                if (bs->valueP) {
-                    strcpy(bs->valueP, enteredString);
-                }
-                if (bs->action) {
-                    bs->action(enteredString, bs->data);
-                    mswSetTrigger(NULL, NULL);
-                }
-                free(enteredString);
-            }
+			triggerString(b);
             SendMessage(bs->hWnd, (UINT)EM_SETMODIFY, FALSE, 0L);
         }
         break;
@@ -267,10 +274,6 @@ wString_p wStringCreate(
 		mswFail("CreateWindow(STRING)");
 		return b;
 	}
-
-#ifdef CONTROL3D
-	Ctl3dSubclassCtl( b->hWnd);
-#endif
 
 	newEditProc = MakeProcInstance( (XWNDPROC)pushEdit, mswHInst );
 	oldEditProc = (XWNDPROC)GetWindowLong(b->hWnd, GWL_WNDPROC );
