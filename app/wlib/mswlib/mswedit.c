@@ -1,3 +1,25 @@
+/** \file mswedit.c
+ * Edit field handling
+ */
+
+ /*  XTrackCAD - Model Railroad CAD
+  *  Copyright (C) 2005 Dave Bullis
+  *
+  *  This program is free software; you can redistribute it and/or modify
+  *  it under the terms of the GNU General Public License as published by
+  *  the Free Software Foundation; either version 2 of the License, or
+  *  (at your option) any later version.
+  *
+  *  This program is distributed in the hope that it will be useful,
+  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  *  GNU General Public License for more details.
+  *
+  *  You should have received a copy of the GNU General Public License
+  *  along with this program; if not, write to the Free Software
+  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+  */
+
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
@@ -44,7 +66,8 @@ long FAR PASCAL _export pushEdit(
 		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-	short inx = GetWindowWord( hWnd, GWW_ID );
+	long inx = GetWindowLong(hWnd, GWL_ID);
+	//short inx = GetWindowWord( hWnd, GWW_ID );
 	wControl_p b = mswMapIndex( inx );
 
 	switch (message) {
@@ -54,7 +77,7 @@ long FAR PASCAL _export pushEdit(
 			case 0x1B:
 				if (b->option && (BO_ENTER)) {
 					if (((wString_p)b)->action)
-						mswSetTriggerReturn( (wControl_p)b, triggerStringReturn );
+						mswSetTrigger( (wControl_p)b, triggerStringReturn );
 				}
 			case 0x0D:
 			case 0x09:
@@ -141,7 +164,7 @@ static void triggerStringReturn(
 		mswTmpBuff[cnt+1] = '\0';
 		if (bs->valueP)
 			strcpy( bs->valueP, mswTmpBuff );
-		bs->action( mswTmpBuff, bs->data, 0 );
+		bs->action( mswTmpBuff, bs->data );
 		mswSetTrigger( NULL, NULL );
 	}
 }
@@ -158,7 +181,7 @@ static void triggerString(
 		mswTmpBuff[cnt] = '\0';
 		if (bs->valueP)
 			strcpy( bs->valueP, mswTmpBuff );
-		bs->action( mswTmpBuff, bs->data, 0 );
+		bs->action( mswTmpBuff, bs->data );
 		mswSetTrigger( NULL, NULL );
 	}
 }
@@ -189,7 +212,7 @@ LRESULT stringProc(
 			if (bs->valueP)
 				strncpy( bs->valueP, mswTmpBuff, bs->valueL );
 			if (bs->action) {
-				bs->action( mswTmpBuff, bs->data, 0 );
+				bs->action( mswTmpBuff, bs->data );
 				mswSetTrigger( NULL, NULL );
 			}
 			break;

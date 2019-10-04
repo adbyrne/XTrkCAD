@@ -1,6 +1,24 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswdraw.c,v 1.6 2009-05-15 18:16:16 m_fischer Exp $
+/** \file mswdraw.c
+ * Draw basic geometric shapes
  */
+
+/*  XTrackCAD - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */	
 
 #define _WIN32_WINNT 0x0500		/* for wheel mouse supposrt */
 #include <windows.h>
@@ -16,6 +34,8 @@
 #else
 #define wFont_t tagLOGFONT
 #endif
+//#include "common.h"
+#include "misc.h"
 #include "mswint.h"
 
 /*
@@ -937,27 +957,37 @@ static FILE * logF;
 static int wFillPointsMax = 0;
 static dynArr_t wFillPoints_da;
 static dynArr_t wFillType_da;
-static POINT * wFillPoints;
-static BYTE * wTypePoints;
+//static POINT * wFillPoints;
+//static BYTE * wTypePoints;
+
+#define POINTTYPE(N) DYNARR_N( BYTE, wFillType_da, N )
+#define POINTPOS(N) DYNARR_N( POINT, wFillPoints_da, N )
 
 static void addPoint(
-		int * pk,
-		POINT * pp,
-		BYTE * type,
-		RECT * pr )
+	int * pk,
+	POINT * pp,
+	BYTE type,
+	RECT * pr)
 {
 #ifdef DRAWFILLPOLYLOG
-fprintf( logF, "	q[%d] = {%d,%d}\n", *pk, pp->x, pp->y );
+	fprintf(logF, "	q[%d] = {%d,%d}\n", *pk, pp->x, pp->y);
 #endif
 
-	if ( *pk > 0 && wTypePoints[ (*pk)-1] == *type &&
-		 wFillPoints[(*pk)-1].x == pp->x && wFillPoints[(*pk)-1].y == pp->y )
-		return;
+	if ( *pk > 0 ) {
+		if (POINTTYPE((*pk) - 1) == type &&
+			POINTPOS((*pk) - 1).x == pp->x &&
+			POINTPOS((*pk) - 1).y == pp->y) {
+			return;
+		}
+		//	&& wTypePoints[(*pk) - 1] == type &&
+		//	 wFillPoints[(*pk)-1].x == pp->x && wFillPoints[(*pk)-1].y == pp->y )
+		//	return;
+	}
 
 	DYNARR_APPEND(POINT,wFillPoints_da,1);
 	DYNARR_APPEND(BYTE,wFillType_da,1);
-	wFillPoints[ (*pk)++ ] = *pp;
-	wTypePoints[ (*pk)] = *type;
+	//wFillPoints[ (*pk)++ ] = *pp;
+	//wTypePoints[ (*pk)] = type;
 	if (pp->x<pr->left)
 		pr->left = pp->x;
 	if (pp->x>pr->right)
@@ -1056,13 +1086,13 @@ fprintf( logF, "\np[%d] = {%d,%d}\n", cnt-1, p1.x, p1.y );
 			} else {
 				addPoint( &k, &p0, PT_LINETO, &rect );
 				if (type[i] == 1) {
-					addPoint( &k, &point, PT_CURVETO, &rect );
-					addPoint( &k, &point, PT_CURVETO, &rect );
-					addPoint( &k, &p1, PT_CURVETO, &rect );
+					addPoint( &k, &point, PT_BEZIERTO, &rect );
+					addPoint( &k, &point, PT_BEZIERTO, &rect );
+					addPoint( &k, &p1, PT_BEZIERTO, &rect );
 				} else {
-					addPoint( &k, &p3, PT_CURVETO, &rect );
-					addPoint( &k, &p4, PT_CURVETO, &rect );
-					addPoint( &k, &p1, PT_CURVETO, &rect );
+					addPoint( &k, &p3, PT_BEZIERTO, &rect );
+					addPoint( &k, &p4, PT_BEZIERTO, &rect );
+					addPoint( &k, &p1, PT_BEZIERTO, &rect );
 				}
 				save = p0;
 			}
@@ -1072,13 +1102,13 @@ fprintf( logF, "\np[%d] = {%d,%d}\n", cnt-1, p1.x, p1.y );
 			if (i==cnt-1 && !open) closed = TRUE;
 			addPoint( &k, &p0, PT_LINETO, &rect );
 			if (type[i] == 1) {
-				addPoint( &k, &point, PT_CURVETO, &rect );
-				addPoint( &k, &point, PT_CURVETO, &rect );
-				addPoint( &k, &p1, PT_CURVETO|(closed?PT_CLOSEFIGURE:0), &rect );
+				addPoint( &k, &point, PT_BEZIERTO, &rect );
+				addPoint( &k, &point, PT_BEZIERTO, &rect );
+				addPoint( &k, &p1, PT_BEZIERTO |(closed?PT_CLOSEFIGURE:0), &rect );
 			} else {
-				addPoint( &k, &p3, PT_CURVETO, &rect );
-				addPoint( &k, &p4, PT_CURVETO, &rect );
-				addPoint( &k, &p1, PT_CURVETO|(closed?PT_CLOSEFIGURE:0), &rect );
+				addPoint( &k, &p3, PT_BEZIERTO, &rect );
+				addPoint( &k, &p4, PT_BEZIERTO, &rect );
+				addPoint( &k, &p1, PT_BEZIERTO |(closed?PT_CLOSEFIGURE:0), &rect );
 			}
 		}
 	}
@@ -1130,7 +1160,8 @@ void wDrawFilledCircle(
 			circlePts[inx][0] = x + (int)(r * mswcos( inx*dang ) + 0.5 );
 			circlePts[inx][1] = y + (int)(r * mswsin( inx*dang ) + 0.5 );
 		}
-		wDrawFilledPolygon( d, circlePts, NULL, cnt, color, opts );
+		//wDrawFilledPolygon( d, circlePts, NULL, cnt, color, opts );
+		wDrawPolygon(d, circlePts, NULL, cnt, color, 1, wDrawLineSolid,opts, TRUE, FALSE );
 	} else {
 		Ellipse( d->hDc, p0.x, p0.y, p1.x, p1.y );
 		if (d->hWnd) {
