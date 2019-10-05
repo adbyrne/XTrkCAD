@@ -2322,7 +2322,12 @@ STATUS_T DrawGeomModify(
 		if (action>>8 != 32 && action>>8 != 13) return C_CONTINUE;
 		/* no break */
 	case C_FINISH:
-		if (polyMode) return DrawGeomPolyModify(action,pos,context);
+		if (polyMode) {
+			DrawGeomPolyModify(action,pos,context);
+			context->segPtr[segInx].type = context->type;
+			context->segPtr[segInx].u.p.polyType = context->subtype;
+			return C_TERMINATE;
+		}
 		//copy changes back into track
 		context->orig.x = context->rot_center.x;
 		context->orig.y = context->rot_center.y;
