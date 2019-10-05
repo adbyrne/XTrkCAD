@@ -34,6 +34,8 @@
 #include <ctype.h>
 #ifdef WINDOWS
 	#include <io.h>
+	#define W_OK (2)
+	#define access	_access
 	#include <windows.h>
 	//#if _MSC_VER >=1400
 	//	#define strdup _strdup
