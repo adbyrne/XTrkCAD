@@ -973,21 +973,13 @@ static void addPoint(
 	fprintf(logF, "	q[%d] = {%d,%d}\n", *pk, pp->x, pp->y);
 #endif
 
-	if ( *pk > 0 ) {
-		if (POINTTYPE((*pk) - 1) == type &&
-			POINTPOS((*pk) - 1).x == pp->x &&
-			POINTPOS((*pk) - 1).y == pp->y) {
-			return;
-		}
-		//	&& wTypePoints[(*pk) - 1] == type &&
-		//	 wFillPoints[(*pk)-1].x == pp->x && wFillPoints[(*pk)-1].y == pp->y )
-		//	return;
-	}
 
 	DYNARR_APPEND(POINT,wFillPoints_da,1);
 	DYNARR_APPEND(BYTE,wFillType_da,1);
-	//wFillPoints[ (*pk)++ ] = *pp;
-	//wTypePoints[ (*pk)] = type;
+
+	DYNARR_LAST(POINT,wFillPoints_da) = *pp;    //add to array of points
+	DYNARR_LAST(BYTE,wFillType_da) = type;		//add to array of point types
+
 	if (pp->x<pr->left)
 		pr->left = pp->x;
 	if (pp->x>pr->right)
@@ -1023,9 +1015,7 @@ void wDrawPolygon(
 	if (d == NULL)
 		return;
 	DYNARR_RESET(POINT,wFillPoints_da);
-	DYNARR_SET(POINT,wFillPoints_da,cnt);
 	DYNARR_RESET(BYTE,wFillType_da);
-	DYNARR_SET(POINT,wFillType_da,cnt);
 
 	if (fill)
 		setDrawBrush( d->hDc, d, color, opts );
@@ -1084,7 +1074,7 @@ fprintf( logF, "\np[%d] = {%d,%d}\n", cnt-1, p1.x, p1.y );
 				MoveTo( d->hDc, point.x, point.y );
 				save = point;
 			} else {
-				addPoint( &k, &p0, PT_LINETO, &rect );
+				MoveTo( d->hDc, p0.x, p0.y );
 				if (type[i] == 1) {
 					addPoint( &k, &point, PT_BEZIERTO, &rect );
 					addPoint( &k, &point, PT_BEZIERTO, &rect );
@@ -1097,7 +1087,8 @@ fprintf( logF, "\np[%d] = {%d,%d}\n", cnt-1, p1.x, p1.y );
 				save = p0;
 			}
 		} else if (type[i] == 0 || (open && (i==cnt-1))) {
-			addPoint( &k, &point, PT_LINETO, &rect );
+			if (i==cnt-1 && !open) closed = TRUE;
+			addPoint( &k, &point, PT_LINETO|(closed?PT_CLOSEFIGURE:0), &rect );
 		} else {
 			if (i==cnt-1 && !open) closed = TRUE;
 			addPoint( &k, &p0, PT_LINETO, &rect );
@@ -1112,7 +1103,7 @@ fprintf( logF, "\np[%d] = {%d,%d}\n", cnt-1, p1.x, p1.y );
 			}
 		}
 	}
-	PolyDraw(d->hDc, wFillPoints_da.ptr, wFillType_da.ptr, cnt );
+	PolyDraw(d->hDc, wFillPoints_da.ptr, wFillType_da.ptr, wFillPoints_da.cnt );
 	if (fill && !open) {
 		FillPath(d->hDc);
 	} else
