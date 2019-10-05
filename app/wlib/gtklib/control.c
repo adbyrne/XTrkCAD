@@ -319,5 +319,6 @@ void wControlHilite(
 
     b->outline = hilite;
 
-    gtk_widget_queue_draw(b->widget);
+    if (b->widget)
+    	gtk_widget_queue_draw(b->widget);
 }
