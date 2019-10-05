@@ -214,7 +214,7 @@ static void OutputBitMapOk( void * junk )
 #ifdef WINDOWS
 				_("Bitmap files|*.bmp"),
 #else
-				_("Bitmap files|*.xpm"),
+				_("Bitmap files|*.png"),
 #endif
 				SaveBitmapFile, NULL );
 	wFilSelect( bitmap_fs, GetCurrentPath( BITMAPPATHKEY ));
