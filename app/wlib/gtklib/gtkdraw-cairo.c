@@ -1294,6 +1294,7 @@ wDraw_p wBitMapCreate(          wPos_t w, wPos_t h, int arg )
 	bd->maxH = bd->h = h;
 
 	bd->pixmap = gdk_pixmap_new( gtkMainW->widget->window, w, h, -1 );
+	bd->widget = gtk_pixmap_new(bd->pixmap, NULL);
 	if ( bd->pixmap == NULL ) {
 		wNoticeEx( NT_ERROR, "CreateBitMap: pixmap_new failed", "Ok", NULL );
 		return FALSE;
