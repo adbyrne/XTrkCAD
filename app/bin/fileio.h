@@ -117,7 +117,7 @@ void DoCheckPoint( void );
 void CleanupFiles( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( void );
-void DoImport( void );
+void DoImport( void * );
 void DoExport( void );
 void DoExportDXF( void );
 BOOL_T EditCopy( void );

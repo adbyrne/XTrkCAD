@@ -221,9 +221,21 @@ EXPORT BOOL_T CheckTrackLayer( track_p trk )
 	if (GetLayerFrozen( GetTrkLayer( trk ) ) ) {
 		ErrorMessage( MSG_CANT_MODIFY_FROZEN_TRK );
 		return FALSE;
-	} else {
+	} else if (GetLayerModule( GetTrkLayer( trk ) ) ) {
+		ErrorMessage( MSG_CANT_MODIFY_MODULE_TRK );
+		return FALSE;
+	} else
 		return TRUE;
-	}
+}
+
+EXPORT BOOL_T CheckTrackLayerSilent( track_p trk )
+{
+	if (GetLayerFrozen( GetTrkLayer( trk ) ) ) {
+		return FALSE;
+	} else if (GetLayerModule( GetTrkLayer( trk ) ) ) {
+		return FALSE;
+	} else
+		return TRUE;
 }
 
 /******************************************************************************

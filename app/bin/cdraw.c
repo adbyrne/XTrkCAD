@@ -1325,6 +1325,9 @@ static BOOL_T QueryDraw( track_p trk, int query )
 		}
 		else
 			return FALSE;
+	case Q_IS_TEXT:
+		if (xx->segs[0].type== SEG_TEXT) return TRUE;
+		else return FALSE;
 	default:
 		return FALSE;
 	}

@@ -127,6 +127,7 @@ typedef struct {
 #define Q_ISTRAIN                       (25)
 #define Q_IS_POLY                       (26)
 #define Q_IS_DRAW					    (27)
+#define Q_IS_TEXT						(28)
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track
@@ -512,6 +513,7 @@ void ClearElevPath( void );
 BOOL_T GetTrkOnElevPath( track_p, DIST_T * elev );
 void SetTrkLayer( track_p, int );
 BOOL_T CheckTrackLayer( track_p );
+BOOL_T CheckTrackLayerSilent(track_p);
 void CopyAttributes( track_p, track_p );
 
 #define GetTrkGauge( T )		GetScaleTrackGauge(GetTrkScale(T))

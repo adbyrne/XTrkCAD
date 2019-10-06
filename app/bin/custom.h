@@ -45,6 +45,7 @@
 #define BG_COUNT		(13)
 #define BG_FILE			(14)
 #define BG_CONTROL		(15)
+#define BG_EXPORTIMPORT (16)
 #define BG_BIGGAP		(1<<8)
 extern int cmdGroup;
 

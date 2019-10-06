@@ -118,6 +118,7 @@
 #define ACCL_THICK		(WCTL+'3')
 #define ACCL_EXPORT		(WALT+WCTL+'x')
 #define ACCL_IMPORT		(WALT+WCTL+'i')
+#define ACCL_IMPORT_MOD	(0)
 #define ACCL_EXPORTDXF	(0)
 #define ACCL_LOOSEN		(WCTL+WSHIFT+'k')
 #define ACCL_GROUP		(WCTL+WSHIFT+'g')

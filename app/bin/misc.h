@@ -398,6 +398,7 @@ void ContMgmLoad (wIcon_p,contMgmCallBack_p,void *);
 
 /* dlayer.c */
 void LayerSetCounts();
+int FindUnusedLayer(unsigned int start);
 void DecrementLayerObjects(unsigned int index);
 void IncrementLayerObjects(unsigned int index);
 
