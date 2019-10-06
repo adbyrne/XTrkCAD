@@ -283,7 +283,7 @@ void DoParamFiles(void * junk)
                                        MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, ParamFileCancel,
                                        TRUE, NULL, 0, ParamFileDlgUpdate);
         paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FS_MULTIPLEFILES,
-                                     _("Load Parameters"), _("Parameter files|*.xtp"), LoadParamFile, NULL);
+                                     _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);
     }
     ParamLoadControls(&paramFilePG);
     ParamGroupRecord(&paramFilePG);

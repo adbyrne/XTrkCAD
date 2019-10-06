@@ -4402,7 +4402,7 @@ static void CarInvDlgSaveText( void )
 {
 	if ( carInvSaveText_fs == NULL )
 		carInvSaveText_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("List Cars"),
-				"Text|*.txt", CarInvSaveText, NULL );
+				"Text (*.txt)|*.txt", CarInvSaveText, NULL );
 	wFilSelect( carInvSaveText_fs, GetCurrentPath(CARSPATHKEY));
 }
 
@@ -4687,7 +4687,7 @@ static void CarInvDlgImportCsv( void )
 {
 	if ( carInvImportCsv_fs == NULL )
 		carInvImportCsv_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Cars"),
-				_("Comma-Separated-Values|*.csv"), CarInvImportCsv, NULL );
+				_("Comma-Separated-Values (*.csv)|*.csv"), CarInvImportCsv, NULL );
 	wFilSelect( carInvImportCsv_fs, GetCurrentPath(CARSPATHKEY));
 }
 
@@ -4809,7 +4809,7 @@ static void CarInvDlgExportCsv( void )
 		return;
 	if ( carInvExportCsv_fs == NULL )
 		carInvExportCsv_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Export Cars"),
-				_("Comma-Separated-Values|*.csv"), CarInvExportCsv, NULL );
+				_("Comma-Separated-Values (*.csv)|*.csv"), CarInvExportCsv, NULL );
 	wFilSelect( carInvExportCsv_fs, GetCurrentPath(CARSPATHKEY));
 }
 

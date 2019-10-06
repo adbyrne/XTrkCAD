@@ -198,31 +198,31 @@ void InitCustom( void )
 	}
 	if (sImportFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Import Files|*.xti"), Product );
+		sprintf(buf, _("%s Import Files (*.xti)|*.xti"), Product );
 		sImportFilePattern = strdup(buf);
 	}
 	if (sDXFFilePattern == NULL)
 	{
-		sDXFFilePattern = strdup(_("Data Exchange Format Files|*.dxf"));
+		sDXFFilePattern = strdup(_("Data Exchange Format Files (*.dxf)|*.dxf"));
 	}
 	if (sRecordFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Record Files|*.xtr"), Product);
+		sprintf(buf, _("%s Record Files (*.xtr)|*.xtr"), Product);
 		sRecordFilePattern = strdup(buf);
 	}
 	if (sNoteFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Note Files|*.not"), Product);
+		sprintf(buf, _("%s Note Files (*.not)|*.not"), Product);
 		sNoteFilePattern = strdup(buf);
 	}
 	if (sLogFilePattern == NULL)
 	{
-		sprintf(buf, _("%s Log Files|*.log"), Product);
+		sprintf(buf, _("%s Log Files (*.log)|*.log"), Product);
 		sLogFilePattern = strdup(buf);
 	}
 	if (sPartsListFilePattern == NULL)
 	{
-		sprintf(buf, _("%s PartsList Files|*.txt"), Product);
+		sprintf(buf, _("%s PartsList Files (*.txt)|*.txt"), Product);
 		sPartsListFilePattern = strdup(buf);
 	}
 
