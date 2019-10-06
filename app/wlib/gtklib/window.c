@@ -116,11 +116,11 @@ static void getWinSize(wWin_p win, const char * nameStr)
 
     GdkRectangle monitor_dimensions = getMonitorDimensions(GTK_WIDGET(win->gtkwin));
 
-    wPos_t maxDisplayWidth = monitor_dimensions.width-5;
-    wPos_t maxDisplayHeight = monitor_dimensions.height-25;
+    wPos_t maxDisplayWidth = monitor_dimensions.width-10;
+    wPos_t maxDisplayHeight = monitor_dimensions.height-50;
 
 
-    if ((win->option&F_RESIZE) &&
+    if ((win->option&F_RECALLSIZE) &&
             (win->option&F_RECALLPOS) &&
             (cp = wPrefGetString(SECTIONWINDOWSIZE, nameStr)) &&
             (w = strtod(cp, &cp1), cp != cp1) &&
@@ -152,8 +152,7 @@ static void getWinSize(wWin_p win, const char * nameStr)
 static void saveSize(wWin_p win)
 {
 
-    if ((win->option&F_RESIZE) &&
-            (win->option&F_RECALLPOS) &&
+    if ((win->option&F_RECALLSIZE) &&
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
         char pos_s[20];
 
@@ -210,7 +209,7 @@ static void getPos(wWin_p win)
             }
 
             gtk_window_move(GTK_WINDOW(win->gtkwin), x, y);
-            gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
+            //gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
         }
     }
 }
@@ -328,25 +327,28 @@ void wWinShow(
         keyState = 0;
         getPos(win);
 
+        if (!win->shown) {
+			gtk_widget_show(win->gtkwin);
+			gtk_widget_show(win->widget);
+		}
+
         if (win->option & F_AUTOSIZE) {
         	GtkAllocation allocation;
-        	gtk_widget_get_allocation(win->widget, &allocation);
+        	GtkRequisition requistion;
+        	gtk_widget_size_request(win->widget,&requistion);
 
         	width = win->w;
         	height = win->h;
 
-        	if (win->realX > width) width = win->realX;
-        	if (win->realY > height) height = win->realY;
+            if (requistion.width != width || requistion.height != height ) {
 
-            if (allocation.width != width || allocation.height != height ) {
-            	GdkGeometry geometry;
-            	geometry.min_width = width;
-            	geometry.min_height = height;
+				width = requistion.width;
+				height = requistion.height;
 
-            	gtk_window_set_geometry_hints (GTK_WINDOW(win->gtkwin),
-            								   win->widget,
-            	                               &geometry,
-            	                               GDK_HINT_MIN_SIZE);
+            	win->w = width;
+            	win->h = height;
+
+
             	gtk_window_set_resizable(GTK_WINDOW(win->gtkwin),TRUE);
 
                 if (win->option&F_MENUBAR) {
@@ -360,10 +362,7 @@ void wWinShow(
         }
 
 
-        if (!win->shown) {
-            gtk_widget_show(win->gtkwin);
-            gtk_widget_show(win->widget);
-        }
+
 
         gdk_window_raise(gtk_widget_get_window(win->gtkwin));
 
