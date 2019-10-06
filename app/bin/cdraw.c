@@ -430,7 +430,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			case SEG_BENCH:
 			case SEG_TBLEDGE:
 				for (int i=0;i<2;i++) {
-					REORIGIN( drawData.endPt[i], segPtr->u.p.pts[i].pt, xx->angle, xx->orig );
+					REORIGIN( drawData.endPt[i], segPtr->u.l.pos[i], xx->angle, xx->orig );
 				}
 				drawDesc[E0].mode |= DESC_CHANGE;
 				drawDesc[E1].mode |= DESC_CHANGE;
