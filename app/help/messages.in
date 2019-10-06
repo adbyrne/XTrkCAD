@@ -547,6 +547,13 @@ The current command operates on \f{Select}ed tracks of which there are none. \f{
 Refer to \k{cmdSelect} for detail.
 END
 
+# dlayer.c
+MESSAGE MSG_NO_EMPTY_LAYER
+No layer was found that has no contents, so the module can not be imported
+HELP
+The import module function needs an empty layer to work with, but none could be found. Clear a layer and retry.
+END
+
 # dcmpnd.c:refreshCompound
 MESSAGE MSG_NO_TURNOUTS_AVAILABLE
 No %s are available.

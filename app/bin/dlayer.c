@@ -190,7 +190,7 @@ BOOL_T GetLayerModule(unsigned int layer)
 
 void SetLayerModule(unsigned int layer, BOOL_T module)
 {
-	if (!IsLayerValid(layer)) {
+	if (IsLayerValid(layer)) {
 		layers[layer].module = module;
 	}
 }
@@ -824,6 +824,7 @@ int FindUnusedLayer(unsigned int start) {
 	for (inx=start; inx<NUM_LAYERS; inx++) {
 	    if (layers[inx].objCount == 0 && !layers[inx].frozen) return inx;
 	}
+	ErrorMessage( MSG_NO_EMPTY_LAYER );
 	return -1;
 }
 

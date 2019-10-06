@@ -351,7 +351,7 @@ If you modify a definition from a \e{XTrackCAD} Library parameter file, the new 
 
 \S{cmdLayer} Layers Dialog
 
-Each object is contained in a layer.  Objects which are created independently of other objects (such as straight tracks (\K{cmdStraight}) or text (\K{cmdText})) are created in the current layer.  Objects which are associated with other objects (such as tracks created by the \f{Modify} (\K{cmdModify}) or \f{Join} (\K{cmdJoin}) commands) are created in the same layer as the associated object(s).
+Each object is contained in a layer - which is a custom group of objects that do not have a particular visual order, but can be treated as a set for certain commands.  Objects which are created independently of other objects (such as straight tracks (\K{cmdStraight}) or text (\K{cmdText})) are created in the current layer.  Objects which are associated with other objects (such as tracks created by the \f{Modify} (\K{cmdModify}) or \f{Join} (\K{cmdJoin}) commands) are created in the same layer as the associated object(s).
 
 The \f{Layers} dialog allows you to change various attributes of each of the 99 possible \f{layers}.
 
@@ -370,6 +370,8 @@ The \f{Visible} check-box controls whether the \f{Layer} is drawn on the Main (\
 The \f{Frozen} check-box indicates that tracks in that \f{Layer} can not be modified or deleted.
 
 The \f{On Map} check-box controls whether the \f{Layer} is drawn on the Map (\K{cmdMap}) window.
+
+The \f{Module} check-box controls whether the \f{Layer} is selected and moved or rotated as a group - this can be used to denote a track module in a modular layout - allowing the modules to be positioned as units. Objects in a Module Layer can not be individually modified.  One way of getting a modules in is to build a library with \f{Export} and then \f{Import As Module} - this creates one layer per module, names it and sets the \f{Module} check-box.  
 
 You cannot uncheck \f{Visible} or check \f{Frozen} for the \f{Current Layer}.
 

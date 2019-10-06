@@ -127,6 +127,7 @@ typedef struct {
 #define Q_ISTRAIN                       (25)
 #define Q_IS_POLY                       (26)
 #define Q_IS_DRAW					    (27)
+#define Q_IS_TEXT						(28)
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track

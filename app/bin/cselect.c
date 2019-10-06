@@ -224,7 +224,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 	selectedTrackCount = 0;
 	trk = NULL;
 	while ( TrackIterate( &trk ) ) {
-		if (((!select) || GetLayerVisible( GetTrkLayer( trk ))) && !GetLayerModule(GetTrkLayer( trk ))) {
+		if ((!select) || GetLayerVisible( GetTrkLayer( trk ))) {
 			if (select)
 				selectedTrackCount++;
 			if ((GetTrkSelected(trk)!=0) != select) {
@@ -248,7 +248,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 	}
 }
 
-/* Invert selected state of all visible non module objects.
+/* Invert selected state of all visible non-module objects.
  *
  * \param none
  * \return none
@@ -376,6 +376,7 @@ static int DoModuleTracks( int moduleLayer, doModuleTrackCallBack_t doit, BOOL_T
 	while ( TrackIterate( &trk ) ) {
 		if (GetTrkLayer(trk) == moduleLayer) {
 			 doit( trk, val );
+			 cnt++;
 		}
 	}
 	return cnt;
@@ -1489,7 +1490,52 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 	return FALSE;
 }
 
-
+void DrawHighlightLayer(int layer) {
+	track_p ts = NULL;
+	BOOL_T initial = TRUE;
+	coOrd layer_hi = zero,layer_lo = zero;
+	while ( TrackIterate( &ts ) ) {
+		if ( !GetLayerVisible( GetTrkLayer( ts))) continue;
+		if (!GetTrkSelected(ts)) continue;
+		if (GetTrkLayer(ts) != layer) continue;
+		coOrd hi,lo;
+		GetBoundingBox(ts, &hi, &lo);
+		if (initial) {
+			layer_hi = hi;
+			layer_lo = lo;
+			initial = FALSE;
+		} else {
+			if (layer_hi.x < hi.x ) layer_hi.x = hi.x;
+			if (layer_hi.y < hi.y ) layer_hi.y = hi.y;
+			if (layer_lo.x > lo.x ) layer_lo.x = lo.x;
+			if (layer_lo.y > lo.y ) layer_lo.y = lo.y;
+		}
+	}
+	wPos_t margin = (10.5*mainD.scale/mainD.dpi);
+	layer_hi.x +=margin;
+	layer_hi.y +=margin;
+	layer_lo.x -=margin;
+	layer_lo.y -=margin;
+	//coOrd size;
+	//size.x = layer_hi.x-layer_lo.x;
+	//size.y = layer_hi.y-layer_lo.y;
+	//DIST_T w,h;
+	//w = (wPos_t)((size.x/mainD.scale)*mainD.dpi+0.5+10);
+	//h = (wPos_t)((size.y/mainD.scale)*mainD.dpi+0.5+10);
+	wPos_t x, y;
+	wPos_t rect[4][2];
+	int type[4];
+	coOrd top_left, bot_right;
+	top_left.x = layer_lo.x; top_left.y = layer_hi.y;
+	bot_right.x = layer_hi.x; bot_right.y = layer_lo.y;
+	type[0] = type[1] = type[2] = type[3] = 0;
+	mainD.CoOrd2Pix(&mainD,layer_lo,&rect[0][0],&rect[0][1]);
+	mainD.CoOrd2Pix(&mainD,top_left,&rect[1][0],&rect[1][1]);
+	mainD.CoOrd2Pix(&mainD,layer_hi,&rect[2][0],&rect[2][1]);
+	mainD.CoOrd2Pix(&mainD,bot_right,&rect[3][0],&rect[3][1]);
+	wDrawPolygon(mainD.d,rect,type,4,wDrawColorPowderedBlue,0,wDrawLineDash,wDrawOptTemp,0,0);
+	//wDrawFilledRectangle(mainD.d, x-5, y-5, w, h, wDrawColorGrey90, wDrawOptTemp);
+}
 
 
 static STATUS_T CmdMove(
@@ -2396,7 +2442,7 @@ static STATUS_T SelectTrack(
 			DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,!GetTrkSelected(trk));
 		} else {
 			SetAllTrackSelect( FALSE );							//Just this Track
-			DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,!GetTrkSelected(trk));
+			DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,TRUE);
 		}
 		return C_CONTINUE;
 	}
@@ -2441,11 +2487,16 @@ track_p IsInsideABox(coOrd pos) {
 	return NULL;
 }
 
+
+
 void DrawHighlightBoxes() {
 	track_p ts = NULL;
 	while ( TrackIterate( &ts ) ) {
 		if ( !GetLayerVisible( GetTrkLayer( ts))) continue;
 		if (!GetTrkSelected(ts)) continue;
+		if (GetLayerModule(GetTrkLayer(ts))) {
+			DrawHighlightLayer(GetTrkLayer(ts));
+		}
 		coOrd hi,lo;
 		GetBoundingBox(ts, &hi, &lo);
 		coOrd hilite,size;
@@ -2525,7 +2576,7 @@ static STATUS_T CmdSelect(
 		track_p ht;
 		if ((selectedTrackCount==0) && (t == NULL)) return C_CONTINUE;
 		if (t && !CheckTrackLayerSilent( t ) ) {
-			if (!GetLayerModule(GetTrkLayer(t)) ) {
+			if (GetLayerFrozen(GetTrkLayer(t)) ) {
 				t = NULL;
 				return C_TERMINATE;
 			}
@@ -2539,16 +2590,17 @@ static STATUS_T CmdSelect(
 				} else if (!GetLayerModule(GetTrkLayer(ht))) {
 					if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
 					QueryTrack( ht, Q_IS_CORNU ) ||
-					QueryTrack( ht, Q_IS_DRAW )) {
+					(QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT))) {
 						CreateModifyAnchor(pos);
 					}
 				}
 			}
 		}
-		if (!(MyGetKeyState()&WKEY_CTRL) && t && !GetTrkSelected(t)) {
+		if (t && !GetTrkSelected(t)) {
 			if (GetLayerModule(GetTrkLayer(t))) {
 				track_p lt;
 				DoModuleTracks(GetTrkLayer(t),DrawSingleTrack,TRUE);
+				DrawHighlightLayer(GetTrkLayer(t));
 			} else {
 				DrawTrack(t,&mainD,wDrawColorBlue);
 			}
@@ -2698,7 +2750,7 @@ static STATUS_T CmdSelect(
 				if ((ht = OnTrack(&pos,FALSE,FALSE))!=NULL) {
 					if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
 						QueryTrack( ht, Q_IS_CORNU ) ||
-						QueryTrack( ht, Q_IS_DRAW )) {
+						(QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT ))) {
 						doingDouble = TRUE;
 						CmdModify(C_START,pos);
 						CmdModify(C_DOWN,pos);

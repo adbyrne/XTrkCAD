@@ -1248,6 +1248,17 @@ EXPORT int LoadCheckpoint( void )
 static struct wFilSel_t * exportFile_fs;
 static struct wFilSel_t * importFile_fs;
 
+static int importAsModule;
+
+
+
+/*******************************************************************************
+ *
+ * Import Layout Dialog
+ *
+ */
+
+
 
 static int ImportTracks(
 		int cnt,
@@ -1265,19 +1276,23 @@ static int ImportTracks(
 	wSetCursor( mainD.d, wCursorWait );
 	Reset();
 	SetAllTrackSelect( FALSE );
+	int saveLayer = curLayer;
+	int layer;
+	if (importAsModule) {
+		layer = FindUnusedLayer(0);
+		if (layer==-1) return FALSE;
+		char LayerName[80];
+		LayerName[0] = '\0';
+		sprintf(LayerName,_("Module - %s"),nameOfFile);
+		if (layer>=0) SetCurrLayer(layer, NULL, 0, NULL, NULL);
+		SetLayerName(layer,LayerName);
+	}
 	ImportStart();
 	UndoStart( _("Import Tracks"), "importTracks" );
-	int saveLayer = curLayer;
-	int layer = FindUnusedLayer(0);
-	char LayerName[40];
-	LayerName[0] = '\0';
-	sprintf(LayerName,_("Module - %d"),layer);
-	if (layer>=0) SetCurrLayer(layer, NULL, 0, NULL, NULL);
-	SetLayerName(layer,LayerName);
 	useCurrentLayer = TRUE;
 	ReadTrackFile( fileName[ 0 ], nameOfFile, FALSE, FALSE, TRUE );
 	ImportEnd();
-	SetLayerModule(layer,TRUE);
+	if (importAsModule) SetLayerModule(layer,TRUE);
 	useCurrentLayer = FALSE;
 	SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
 	/*DoRedraw();*/
@@ -1290,9 +1305,9 @@ static int ImportTracks(
 	return TRUE;
 }
 
-
-EXPORT void DoImport( void )
+EXPORT void DoImport( void * type )
 {
+	importAsModule = (int)type;
 	if (importFile_fs == NULL)
 		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Tracks"),
 			sImportFilePattern, ImportTracks, NULL );

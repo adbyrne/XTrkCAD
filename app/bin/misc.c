@@ -1713,7 +1713,7 @@ static void DoSticky(void) {
  * specified in the following array.
  * Note: text and choices must be given in the same order.
  */
-static char *AllToolbarLabels[] = { N_("File Buttons"), N_("Zoom Buttons"), N_(
+static char *AllToolbarLabels[] = { N_("File Buttons"), N_("Import/Export Buttons"), N_("Zoom Buttons"), N_(
 		"Undo Buttons"), N_("Easement Button"), N_("SnapGrid Buttons"), N_(
 		"Create Track Buttons"), N_("Layout Control Elements"), N_(
 		"Modify Track Buttons"), N_("Properties/Select"), N_(
@@ -1721,7 +1721,7 @@ static char *AllToolbarLabels[] = { N_("File Buttons"), N_("Zoom Buttons"), N_(
 		"Create Misc Buttons"), N_("Ruler Button"), N_("Layer Buttons"), N_(
 		"Hot Bar"),
 NULL };
-static long AllToolbarMasks[] = { 1 << BG_FILE, 1 << BG_ZOOM, 1 << BG_UNDO, 1
+static long AllToolbarMasks[] = { 1 << BG_FILE, 1<< BG_EXPORTIMPORT, 1 << BG_ZOOM, 1 << BG_UNDO, 1
 		<< BG_EASE, 1 << BG_SNAP, 1 << BG_TRKCRT, 1 << BG_CONTROL, 1
 		<< BG_TRKMOD, 1 << BG_SELECT, 1 << BG_TRKGRP, 1 << BG_TRAIN, 1
 		<< BG_MISCCRT, 1 << BG_RULER, 1 << BG_LAYER, 1 << BG_HOTBAR };
@@ -2020,7 +2020,9 @@ static void SetAccelKey(char * prefName, wAccelKey_e key, int mode,
 #include "bitmaps/edit-redo.xpm"
 #include "bitmaps/partlist.xpm"
 #include "bitmaps/export.xpm"
+#include "bitmaps/export_dxf.xpm"
 #include "bitmaps/import.xpm"
+#include "bitmaps/importmod.xpm"
 #include "bitmaps/document-new.xpm"
 #include "bitmaps/document-save.xpm"
 #include "bitmaps/document-open.xpm"
@@ -2109,6 +2111,8 @@ static void CreateMenus(void) {
 	AddToolbarButton("menuFile-save", wIconCreatePixMap(document_save),
 			IC_MODETRAIN_TOO, (addButtonCallBack_t) DoSave, NULL);
 
+	InitCmdExport();
+
 	cmdGroup = BG_ZOOM;
 	zoomUpB = AddToolbarButton("cmdZoomIn", wIconCreatePixMap(zoomin_xpm),
 			IC_MODETRAIN_TOO, (addButtonCallBack_t) DoZoomUp, NULL);
@@ -2152,6 +2156,8 @@ static void CreateMenus(void) {
 	wMenuSeparatorCreate(fileM);
 	MiscMenuItemCreate(fileM, NULL, "cmdImport", _("&Import"), ACCL_IMPORT,
 			(void*) (wMenuCallBack_p) DoImport, 0, (void *) 0);
+	MiscMenuItemCreate(fileM, NULL, "cmdImportModule", _("Import &Module"), ACCL_IMPORT_MOD,
+				(void*) (wMenuCallBack_p) DoImport, 0, (void *) 1);
 	MiscMenuItemCreate(fileM, NULL, "cmdOutputbitmap", _("Export to &Bitmap"),
 			ACCL_PRINTBM, (void*) (wMenuCallBack_p) OutputBitMapInit(), 0,
 			(void *) 0);
@@ -2563,10 +2569,17 @@ EXPORT void InitCmdEnumerate(void) {
 }
 
 EXPORT void InitCmdExport(void) {
+	ButtonGroupBegin( _("Import/Export"), "cmdExportImportSetCmd", _("Import/Export") );
+	cmdGroup = BG_EXPORTIMPORT;
 	AddToolbarButton("cmdExport", wIconCreatePixMap(export_xpm),
 			IC_SELECTED | IC_ACCLKEY, (addButtonCallBack_t) DoExport, NULL);
 	AddToolbarButton("cmdImport", wIconCreatePixMap(import_xpm), IC_ACCLKEY,
-			(addButtonCallBack_t) DoImport, NULL);
+			(addButtonCallBack_t) DoImport, (void*)0);
+	AddToolbarButton("cmdImportModule", wIconCreatePixMap(importmod_xpm), IC_ACCLKEY,
+				(addButtonCallBack_t) DoImport, (void*)1);
+	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(export_dxf_xpm), IC_SELECTED | IC_ACCLKEY,
+					(addButtonCallBack_t) DoExportDXF, (void*)1);
+	ButtonGroupEnd();
 }
 
 /* Give user the option to continue work after crash. This function gives the user

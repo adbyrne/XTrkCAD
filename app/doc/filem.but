@@ -25,11 +25,11 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Export} - Exports the selected objects to a file in \e{XTrackCAD} (*.xti) format. The exported file can then be imported into another layout design. Refer to the Import command listed above.
+\dd \f{Export} - Exports the selected objects to a file in \e{XTrackCAD} (*.xti) format. The exported file can then be imported into another layout design. Refer to the Import command listed below.
 
 \u000
 
-\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout.
+\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. On Windows this is a *.bmp file, on Linux and Mac it is a *.png file.
 
 \u000
 
@@ -41,8 +41,11 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Import} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport}) file. This function can be used to transfer parts like a yard design from one layout design to another.
+\dd \f{Import} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) files. This function can be used to transfer parts like a yard design from one layout design to another.
 
+\u000
+
+\dd \f{Import Module} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) file. The imported parts are put into a empty layer, sets the layer name to the imported filename and sets the layer to be a module - see (\K{cmdLayer}).
 \u000
 
 \dd \G{png.d/bnew.png} \f{New} - Clears the current layout.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation. After that the Layout Options (\K{cmdLayout}) dialog will be opened.
