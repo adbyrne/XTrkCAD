@@ -2072,32 +2072,35 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			int end = 0;
 			if (Da.state != NONE) end=1;
 			EPINX_T ep = -1;
-			//Lock to endpoint if one is available and under pointer
-		    if ((t = OnTrack(&p, FALSE, TRUE)) != NULL && t != Da.selectTrack) {
-		    	if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
-		    		if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
-						InfoMessage(_("Helix Already Connected"));
-						return C_CONTINUE;
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
+				//Lock to endpoint if one is available and under pointer
+				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL && t != Da.selectTrack) {
+					if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
+						if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
+							wBeep();
+							InfoMessage(_("Helix Already Connected"));
+							t= NULL;
+						}
+						ep = -1;                                            //Not a real ep yet
+					} else ep = PickUnconnectedEndPointSilent(p, t);		//EP
+					if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {
+						ep=-1;  		            //Don't attach to Turntable
+						trackParams_t tp;
+						if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
+						ANGLE_T a = tp.angle;
+						Translate(&pos,tp.ttcenter,a,tp.ttradius);
+						p = pos;										//Fix to wall of turntable initially
 					}
-					ep = -1;                                            //Not a real ep yet
-		    	} else ep = PickUnconnectedEndPointSilent(p, t);		//EP
-				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {
-					ep=-1;  		            //Don't attach to Turntable
-					trackParams_t tp;
-					if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
-					ANGLE_T a = tp.angle;
-					Translate(&pos,tp.ttcenter,a,tp.ttradius);
-					p = pos;										//Fix to wall of turntable initially
-				}
-				if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
-					wBeep();
-					InfoMessage(_("No Valid end point on that track"));
-					return C_CONTINUE;
-				}
-				if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
-					wBeep();
-					InfoMessage(_("Track is different scale"));
-					return C_CONTINUE;
+					if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
+						wBeep();
+						InfoMessage(_("No Valid open end point on that track"));
+						t = NULL;
+					}
+					if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
+						wBeep();
+						InfoMessage(_("Track is different gauge"));
+						t = NULL;
+					}
 				}
 			}
 			if (ep>=0 && t) {				//Real end point, real track
@@ -2108,6 +2111,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				InfoMessage( _("Place 2nd end point of Cornu track on track with an unconnected end-point") );
 			} else if (t == NULL) {      //end not on Track, OK for CreateCornu -> empty end point
 				pos = p;	//Reset to initial
+				SnapPos( &pos );
 				if (Da.cmdType == cornuCmdCreateTrack || Da.cmdType == cornuCmdHotBar) {
 					Da.trk[end] = NULL;
 					Da.pos[end] = pos;
@@ -2201,22 +2205,24 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		if (Da.state != NONE && Da.state != LOC_2) return C_CONTINUE;
 		if (Da.trk[0] && Da.trk[1]) return C_CONTINUE;
 		EPINX_T ep = -1;
-		//Lock to endpoint if one is available and under pointer
-		if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL && t != Da.selectTrack) {
-			if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
-				if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
+		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
+			//Lock to endpoint if one is available and under pointer
+			if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL && t != Da.selectTrack) {
+				if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
+					if ((GetTrkEndTrk(t,0) != NULL) && (GetTrkEndTrk(t,1) != NULL)) {
+						return C_CONTINUE;
+					}
+					ep = -1;                                            //Not a real ep yet
+				} else ep = PickUnconnectedEndPointSilent(pos, t);		//EP
+				if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  		//Don't attach to Turntable
+				if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
 					return C_CONTINUE;
 				}
-				ep = -1;                                            //Not a real ep yet
-			} else ep = PickUnconnectedEndPointSilent(pos, t);		//EP
-			if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) ep=-1;  		//Don't attach to Turntable
-			if ( ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
-				return C_CONTINUE;
+				if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
+					return C_CONTINUE;
+				}
+				if (Da.state != NONE && t==Da.trk[0]) return C_CONTINUE;
 			}
-			if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
-				return C_CONTINUE;
-			}
-			if (Da.state != NONE && t==Da.trk[0]) return C_CONTINUE;
 		}
 		if (ep>=0 && t) {
 			pos = GetTrkEndPos(t,ep);

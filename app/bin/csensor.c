@@ -491,7 +491,7 @@ static void DrawSensorTrackHilite( void )
 	w = (wPos_t)((ctlhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
 	h = (wPos_t)((ctlhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,ctlhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp );
+	wDrawFilledRectangle( tempD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp );
 }
 
 static int SensorMgmProc ( int cmd, void * data )

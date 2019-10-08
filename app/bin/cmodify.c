@@ -404,7 +404,7 @@ STATUS_T CmdModify(
 					}
 				}
 			}
-		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL) && !GetLayerFrozen( GetTrkLayer( t )) && !GetLayerModule( GetTrkLayer( t )) && QueryTrack( t, Q_IS_DRAW )) {
+		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL) && (!(GetLayerFrozen(GetTrkLayer(t)) && GetLayerModule(GetTrkLayer(t)))) && QueryTrack(t, Q_IS_DRAW )) {
 			DrawTrack( t, &mainD, wDrawColorBlue );
 			CreateEndAnchor(pos,FALSE);
 		}

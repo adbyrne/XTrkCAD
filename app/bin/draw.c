@@ -471,13 +471,6 @@ EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s, BOOL_T add )
 	wPos_t x, y, w, h;
 	if (d == &mapD && !mapVisible)
 		return;
-#ifdef LATER
-	if (d->options&DC_TEMPSEGS) {
-		return;
-	}
-	if (d->options&DC_PRINT)
-		return;
-#endif
 	w = (wPos_t)((s.x/d->scale)*d->dpi+0.5);
 	h = (wPos_t)((s.y/d->scale)*d->dpi+0.5);
 	d->CoOrd2Pix(d,p,&x,&y);
@@ -2855,7 +2848,7 @@ static STATUS_T CmdPan(
 	case C_REDRAW:
 		if (panmode == ZOOM) {
 			if (base.x && base.y && size.x && size.y)
-				DrawHilight( &mainD, base, size, TRUE );
+				DrawHilight( &tempD, base, size, TRUE );
 		}
 		break;
 	case C_CANCEL:

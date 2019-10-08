@@ -1533,7 +1533,7 @@ void DrawHighlightLayer(int layer) {
 	mainD.CoOrd2Pix(&mainD,top_left,&rect[1][0],&rect[1][1]);
 	mainD.CoOrd2Pix(&mainD,layer_hi,&rect[2][0],&rect[2][1]);
 	mainD.CoOrd2Pix(&mainD,bot_right,&rect[3][0],&rect[3][1]);
-	wDrawPolygon(mainD.d,rect,type,4,wDrawColorPowderedBlue,0,wDrawLineDash,wDrawOptTemp,0,0);
+	wDrawPolygon(tempD.d,rect,type,4,wDrawColorPowderedBlue,0,wDrawLineDash,wDrawOptTemp,0,0);
 	//wDrawFilledRectangle(mainD.d, x-5, y-5, w, h, wDrawColorGrey90, wDrawOptTemp);
 }
 
@@ -2357,14 +2357,14 @@ static STATUS_T SelectArea(
 			size.y = - size.y;
 			base.y = pos.y;
 		}
-		DrawHilight( &mainD, base, size, action == C_MOVE );
+		DrawHilight( &tempD, base, size, action == C_MOVE );
 		return C_CONTINUE;
 
 	case C_UP:
 	case C_RUP:
 		if (state == 1) {
 			state = 0;
-			DrawHilight( &mainD, base, size, action == C_UP );
+			DrawHilight( &tempD, base, size, action == C_UP );
 			cnt = 0;
 			trk = NULL;
 			if (action==C_UP) SetAllTrackSelect( FALSE );							//Remove all tracks first
@@ -2408,7 +2408,7 @@ static STATUS_T SelectArea(
 
 	case C_CANCEL:
 		if (state == 1) {
-			DrawHilight( &mainD, base, size, add);
+			DrawHilight( &tempD, base, size, add);
 			state = 0;
 		}
 		break;
@@ -2416,7 +2416,7 @@ static STATUS_T SelectArea(
 	case C_REDRAW:
 		if (state == 0)
 			break;
-		DrawHilight( &mainD, base, size, add );
+		DrawHilight( &tempD, base, size, add );
 		break;
 
 	}
@@ -2508,7 +2508,7 @@ void DrawHighlightBoxes() {
 		h = (wPos_t)((size.y/mainD.scale)*mainD.dpi+0.5+10);
 		wPos_t x, y;
 		mainD.CoOrd2Pix(&mainD,hilite,&x,&y);
-		wDrawFilledRectangle(mainD.d, x-5, y-5, w, h, wDrawColorPowderedBlue, wDrawOptTemp);
+		wDrawFilledRectangle(tempD.d, x-5, y-5, w, h, wDrawColorPowderedBlue, wDrawOptTemp);
 	}
 
 }

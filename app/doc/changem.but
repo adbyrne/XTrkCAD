@@ -398,6 +398,14 @@ Because Cornu are mathematically generated, they can be regenerated at will and 
 
 Cornu Joins will use whatever space is available - that is their "tightness" (rate of change of curvature) is variable and dynamic. 
 
+\S2{cornuTrackPins}
+
+XtrackCAD Cornu can have "track pins" added that constrain the track to pass through those points in addition to meeting the end-conditions. This allows the track to be skewed or slewed around obstacles, or to suit some other constraint. 
+
+The pins can be added when Cornus are created \K{cmdCurve} or during \K{cmdModify} by clicking on the track. They can be selected and then dragged to alter the curve shape or deleted with \f{Delete}. 
+
+When a Cornu Track with pins is saved, it is split into two Cornu joined at the pin. If a Cornu that is joined to another Cornu is Modified with \K{cmdModify}, the joints are rendered as Pins and the Modify is one continuous Cornu.
+
 \u000
 
 \n First, ensure that the Easement type option is set to Cornu - see \k{cmdEasement}

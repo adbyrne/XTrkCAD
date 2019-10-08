@@ -109,34 +109,33 @@ Creating a curve is a two step operation.
 The five methods (with their Shortcut keys) used to create a Curved Track are:
 
 \dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release.  Click and Drag the red arrows to position the second endpoint. 
-If \e{Shift} is held down when the first endpoint is being placed and the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you can drag out the second end aligned to that track. After a track is competed, the new track will be connected to this first track.
+While the first endpoint is being placed, unless \e{Shift} is held, if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you will drag out the second end in aligned to that track, once you are dragging the second end it will be restricted to an arc that has the same end angle as the first endpoint. After a track is competed, the new track will be connected to this first track.
 
 \u000
 
-\dd \G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release.  Click and Drag to position the second endpoint.
-If \e{Shift} is held down when the first endpoint is being placed and the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you can drag out the center at right angles aligned to that end. After a track is competed, the new track will be connected to this first track.
+\dd \G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release.  Click and Drag on the arrows to position the second endpoint.
+While the first endpoint is being placed, unless \e{Shift} is held, if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you can only drag out the center at right angles aligned to that end. After a track is competed, the new track will be connected to this first track.
 
 \u000
 
 \dd \G{png.d/bcurve3.png} (\c{Control-6}) Drag from the Center of the Curved track to one of the endpoints and release.  Click and Drag to position the second endpoint.
-\e{Shift} snaps for the second point.
 
 \u000
 
 \dd \G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.  Click on the center of the track and Drag to form the Curve.
-\e{Shift} snaps for the first and second point.
+While the first end point is being placed, unles \e{Shift} is held, if the cursor is on a track, the point snaps to an open endpoint and the chord starts at right-angles to the end track. After a track is competed, the new track will be connected to this first track.
 
 \u000
 
 \dd \G{png.d/bezier.png} Place one endpoint and drag out the first control point and release, Place the second Endpoint and drag out the second control point and release. Once all 4 points are placed, you can pick one at a time and drag it to move it. Complete the Curve by pressing Enter, or Reject it with Esc.
-If Shift is held down when either endpoint is being placed it will "Snap" to an open track endpoint of the track underneath the cursor and you can only drag out the control point aligned to the end of the track. After the new track is competed, it will be connected to this existing track.
+While the endpoints are being placed, unless \e{Shift} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks. After the new track is completed, it will be connected to these existing track.
 
 \u000
 
 \dd \G{png.d/bcornu.png} Place each endpoint, Place the second Endpoint. Add Pins by clicking on the Cornu and drag them to constrain the curve to smoothly pass through points between them. Complete the Curve by pressing Enter, or Reject it with Esc.
-If Shift is held down when either endpoint is being placed it will "Snap" to an open track endpoint of the track underneath the cursor and you can only move the point along that track, or in an extension of it. After the new track is completed, it will be connected to this existing track.
-If the end is not connected, the end radius is assumed to be zero and the angle will be picked to minimize overall curvature, this means that two such end points will define a straight track, but adding one intermediate pin will create a smooth arc through the three points.
-\e{Shift} snaps the end poinst to open track ends.
+When either endpoint is being placed it will "Snap" to an open track endpoint of the tracks underneath the cursor unless \e{Shift} is held. You can only move the point along that track, or in an extension of it once it is snapped. After the new track is completed, it will be connected to these existing tracks.
+Cornu Track Pins as explained in \K{joinCornu} may be added to the Cornu to alter its shape. You can place them by clicking on the Cornu and move them around or delete them.
+If the end is not connected, an anchor will enable the end-angle and radius to be set by dragging. Initially the end radius is set to be zero and the angle will be picked to minimize overall curvature. If track pins may be added, two such end points with zero end radius defines a straight track, and such a track with one added track pin will create a smooth arc through the three points.
 
 \u000
 
@@ -146,11 +145,11 @@ A drop down menu, which allows selection of the Curved Track creation method, is
 
 \dd \e{Curved Track Button Menu}
 
-In all but the bezier case, two Red arrow heads will be drawn after the first step to indicate where you can Drag to complete the second step.
+In all but the Bezier case, two Red arrow heads will be drawn after the first step to indicate where you can Drag to complete the second step.
 
 A straight track will be created if the second endpoint is lined up with the first endpoint.
 
-If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid.
+If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid if they are not snapped to another object. \e{Shift} ensures that other objects will be ignored.
 
 Optionally, the curve center point and radius can be displayed for the Curve.  This is enabled by the Move Label (\K{cmdMoveLabel}) command.
 

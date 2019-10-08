@@ -1674,7 +1674,6 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionMove:
 	case wActionRDown:
 	case wActionRDrag:
-	case wActionText:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		if (!((MyGetKeyState() & WKEY_SHIFT) != 0)) {
 			SnapPos( &pos );
@@ -1773,7 +1772,9 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		InfoSubstituteControls( NULL, NULL );
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( action, pos, &drawCmdContext);
-
+	case C_TEXT:
+		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(action, pos);
+		return DrawGeomMouse( action, pos, &drawCmdContext);
 	case C_OK:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
 		return DrawGeomMouse( (0x0D<<8|wActionText), pos, &drawCmdContext);

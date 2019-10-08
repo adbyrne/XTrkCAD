@@ -1597,6 +1597,7 @@ LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*ma
 					curveData->a0 = NormalizeAngle( a2-180-curveData->a1 );
 					curveData->negative = TRUE;
 				}
+				Translate(&curveData->pos2,curveData->curvePos,FindAngle(curveData->curvePos,pos2),curveData->curveRadius);
 				curveData->type = curveTypeCurve;
 			}
 		}
@@ -1620,6 +1621,7 @@ LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*ma
 			curveData->a0 = a1;
 			curveData->a1 = NormalizeAngle(a0-a1);
 		}
+		Translate(&curveData->pos2,curveData->curvePos,FindAngle(curveData->curvePos,pos2),curveData->curveRadius);
 		curveData->type = curveTypeCurve;
 		break;
 	case crvCmdFromChord:
@@ -1652,6 +1654,7 @@ LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*ma
 			curveData->a1 = NormalizeAngle(a0-a1);
 			curveData->negative = TRUE;
 		}
+		Translate(&curveData->pos2,curveData->curvePos,FindAngle(curveData->curvePos,pos2),curveData->curveRadius);
 		curveData->type = curveTypeCurve;
 		break;
 	}

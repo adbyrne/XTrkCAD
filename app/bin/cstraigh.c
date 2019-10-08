@@ -74,7 +74,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		Dl.trk = NULL;
 		Dl.ep=-1;
 		Dl.down = FALSE;
-		InfoMessage( _("Place 1st end point of straight track + Shift -> snap to unconnected endpoint") );
+		InfoMessage( _("Place 1st end point of straight track snap to unconnected endpoint") );
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -82,30 +82,20 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		p = pos;
 		BOOL_T found = FALSE;
 		Dl.trk = NULL;
-		if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
+		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
 			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 			   EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 			   if (ep != -1) {
-				   if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
+				   if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
 				   		wBeep();
-				   		InfoMessage(_("Track is different scale"));
+				   		InfoMessage(_("Track is different gauge"));
 				   		return C_CONTINUE;
 				   	}
 			   		Dl.trk = t;
 			   		Dl.ep = ep;
 			   		pos = GetTrkEndPos(t, ep);
 			   		found = TRUE;
-			   } else {
-				   InfoMessage(_("No unconnected end-point on track - Try again or release Shift and click"));
-				   Dl.pos0=pos;
-				   Dl.pos1=pos;
-				   return C_CONTINUE;
 			   }
-			} else {
-				InfoMessage(_("Not on a track - Try again or release Shift and click"));
-				Dl.pos0=pos;
-				Dl.pos1=pos;
-				return C_CONTINUE;
 			}
 		}
 		Dl.down = TRUE;	
@@ -124,13 +114,14 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (!Dl.down) {
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT) {
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
 				p = pos;
 				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
-					if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
+					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
 					   EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 					   if (ep != -1) {
-							   CreateEndAnchor(GetTrkEndPos(t,ep),TRUE);
+						   if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale()))
+							   CreateEndAnchor(GetTrkEndPos(t,ep),FALSE);
 					   }
 					}
 				}

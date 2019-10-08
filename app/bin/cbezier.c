@@ -1022,7 +1022,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
 		Da.cp1Segs_da_cnt = 0;
 		Da.cp2Segs_da_cnt = 0;
-		InfoMessage( _("Place 1st end point of Bezier + Shift -> snap to %s end"), Da.track?"Unconnected Track":"Line" );
+		InfoMessage( _("Place 1st end point of Bezier - snap to %s"), Da.track?"Unconnected Track":"Line" );
 		return C_CONTINUE;
 
 
@@ -1034,38 +1034,31 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			int end = Da.state==POS_1?0:1;
 			EPINX_T ep;
 			if (Da.track) {
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Snap Track
+				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {   //Snap Track
 					if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 						ep = PickUnconnectedEndPointSilent(p, t);
 						if (ep != -1) {
-							if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
+							if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
 								wBeep();
-								InfoMessage(_("Shift used but Track is different scale"));
-								return C_CONTINUE;
+								InfoMessage(_("Track is different gauge"));
+								ep = -1;
+								t = NULL;
+							} else {
+								Da.trk[end] = t;
+								Da.ep[end] = ep;
+								pos = GetTrkEndPos(t, ep);
+								found = TRUE;
 							}
-							Da.trk[end] = t;
-							Da.ep[end] = ep;
-							pos = GetTrkEndPos(t, ep);
-							found = TRUE;
 						}
-					}
-					if (!found) {
-						wBeep();
-						InfoMessage(_("Shift used, but no Unconnected Track End there"));
-						return C_CONTINUE;
 					}
 				}
 			} else {													//Snap Bez Line to Lines
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
+				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
 					if ((t = OnTrack(&p,FALSE, FALSE)) != NULL) {
 						if (GetClosestEndPt(t,&p)) {
 							pos = p;
 							found = TRUE;
 						}
-					} else {
-						wBeep();
-						InfoMessage(_("Shift used, but no Line End there"));
-						return C_CONTINUE;
 					}
 				}
 			}
@@ -1099,19 +1092,19 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( Da.state != POS_1 && Da.state != POS_2) return C_CONTINUE;
 		if (Da.track)  {
-			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
 				if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL) {
 					EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 					if (ep != -1) {
-						if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
+						if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
 							pos = GetTrkEndPos(t, ep);
-							CreateEndAnchor(pos,TRUE);
+							CreateEndAnchor(pos,FALSE);
 						}
 					}
 				}
 			}
 		} else {
-			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
+			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
 				if ((t = OnTrack(&pos,FALSE, FALSE)) != NULL) {
 					CreateEndAnchor(pos,TRUE);
 				}
@@ -1123,11 +1116,11 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			
 	case C_MOVE:
 		if (Da.state == POS_1) {
-			InfoMessage( _("Place 1st end point of Bezier + Shift -> snap to %s end"), Da.track?"Unconnected Track":"Line" );
+			InfoMessage( _("Place 1st end point of Bezier - snap to %s end"), Da.track?"Unconnected Track":"Line" );
 			return C_CONTINUE;
 		}
 		if (Da.state == POS_2) {
-			InfoMessage( _("Select other end of Bezier, +Shift -> snap to %s end"), Da.track?"Unconnected Track":"Line" );
+			InfoMessage( _("Select other end of Bezier - snap to %s end"), Da.track?"Unconnected Track":"Line" );
 		}
 		if (Da.state == CONTROL_ARM_1 ) {
 			DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,NULL,0,NULL,0,drawColorWhite);
@@ -1167,7 +1160,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			Da.state = POS_2;
-			InfoMessage( _("Select other end of Bezier, +Shift -> snap to %s end"), Da.track?"Unconnected Track":"Line" );
+			InfoMessage( _("Select other end of Bezier - snap to %s end"), Da.track?"Unconnected Track":"Line" );
 			Da.cp1Segs_da_cnt = createControlArm(Da.cp1Segs_da, Da.pos[0], Da.pos[1], Da.track, FALSE, Da.trk[0]!=NULL, -1, wDrawColorBlack);
 			MainRedraw();
 			return C_CONTINUE;
