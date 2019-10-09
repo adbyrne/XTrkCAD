@@ -162,6 +162,7 @@ static struct {
 		endHandle endHandle[2];
 
 		bezctx * bezc;
+
 		} Da;
 
 static trkSeg_p curCornu;
@@ -969,7 +970,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 	DIST_T dd;
 	EPINX_T ep;
 	cornuParm_t cp;
-
 
 	Da.cmdType = (long)commandContext;
 
@@ -2199,7 +2199,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		}
 		return C_CONTINUE;
 
-
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != NONE && Da.state != LOC_2) return C_CONTINUE;
@@ -2433,15 +2432,7 @@ static STATUS_T cmdCornuCreate(
 	int rc = 0;
 
 	switch(action&0xFF) {
-	case C_START:
 
-		createState = 0;
-		commandContext = (void *)cornuCmdHotBar;
-		rc = CmdCornu(C_START, pos);
-		Da.radius[0] = Da.radius[1] = -1.0;
-		Da.angle[0] = Da.angle[1] = 0.0;
-		Da.ends[0] = Da.ends[1] = FALSE;
-		return rc;
 	case C_DOWN:
 		return CmdCornu(C_DOWN,pos);
 	case C_UP:
@@ -2465,7 +2456,9 @@ static STATUS_T cmdCornuCreate(
 			for (int i=0;i<2;i++) {
 				if (Da.trk[i]) continue;
 				coOrd p = Da.pos[i];
-				Da.angle[i] = NormalizeAngle((i?0:180)+GetAngleSegs(Da.crvSegs_da_cnt,Da.crvSegs_da.ptr,&p,NULL,NULL,NULL,NULL,NULL));
+				BOOL_T back;
+				Da.angle[i] = NormalizeAngle((i?0:180)+GetAngleSegs(Da.crvSegs_da_cnt,Da.crvSegs_da.ptr,&p,NULL,NULL,&back,NULL,NULL));
+				if (back) Da.angle[i] = NormalizeAngle(Da.angle[i]+180);
 			}
 			CreateBothEnds(-1,-1);
 			DrawTempCornu();
@@ -2480,6 +2473,7 @@ static STATUS_T cmdCornuCreate(
 			CmdCornu( C_OK, pos );
 		} else
 			CmdCornu( C_CANCEL, pos );
+
 		return C_TERMINATE;
 	case C_TEXT:
 		if ((action>>8) != ' ')
@@ -2492,7 +2486,17 @@ static STATUS_T cmdCornuCreate(
 		HotBarCancel();
 		CmdCornu(C_CANCEL, pos);
 		createState = 0;
-		return C_TERMINATE;
+		rc = C_TERMINATE;
+		/* no break */
+	case C_START:
+		createState = 0;
+		commandContext = (void *)cornuCmdHotBar;
+		rc = CmdCornu(C_START, pos);
+		Da.radius[0] = Da.radius[1] = -1.0;
+		Da.angle[0] = Da.angle[1] = 0.0;
+		Da.ends[0] = Da.ends[1] = FALSE;
+		Da.endHandle[0].end_valid = Da.endHandle[1].end_valid = FALSE;
+		return rc;
 	default:
 		return CmdCornu(action,pos);
 	}

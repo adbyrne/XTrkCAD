@@ -157,9 +157,9 @@ static int mousePositionx, mousePositiony;	/**< position of mouse pointer */
 
 static int delayUpdate = 1;
 
-static char xLabel[] = "X : ";
-static char yLabel[] = "Y : ";
-static char zoomLabel[] = "Zoom : ";
+static char xLabel[] = "X: ";
+static char yLabel[] = "Y: ";
+static char zoomLabel[] = "Zoom: ";
 
 static struct {
 		char * name;
@@ -1003,8 +1003,8 @@ EXPORT void InitInfoBar( void )
 	y -= 19; /* Kludge for MSW */
 #endif
 
-	infoD.pos_w = GetInfoPosWidth() + 2;
-	infoD.scale_w = wStatusGetWidth( "999:1" ) + wStatusGetWidth( zoomLabel ) + 6;
+	infoD.pos_w = GetInfoPosWidth();
+	infoD.scale_w = wStatusGetWidth( "999:1" ) + wStatusGetWidth( zoomLabel );
 	/* we do not use the count label for the moment */
 	infoD.count_w = 0;
 	infoD.info_w = width - 20 - infoD.pos_w*2 - infoD.scale_w - infoD.count_w - 45;      // Allow Window to resize down
@@ -1017,13 +1017,13 @@ EXPORT void InitInfoBar( void )
 		x = 2;
 		infoD.scale_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.scale_w, boxH );
 		infoD.scale_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarScale", infoD.scale_w-six, zoomLabel);
-		x += infoD.scale_w + 10;
+		x += infoD.scale_w + 2;
 		infoD.posX_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
 		infoD.posX_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarPosX", infoD.pos_w-six, xLabel );
-		x += infoD.pos_w + 5;
+		x += infoD.pos_w + 2;
 		infoD.posY_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.pos_w, boxH );
 		infoD.posY_m = wStatusCreate( mainW, x+info_xm_offset, ym, "infoBarPosY", infoD.pos_w-six, yLabel );
-		x += infoD.pos_w + 10;
+		x += infoD.pos_w + 2;
 		messageOrControlX = x+info_xm_offset;									//Remember Position
 		messageOrControlY = ym;
 		infoD.info_b = wBoxCreate( mainW, x, yb, NULL, wBoxBelow, infoD.info_w, boxH );
@@ -1042,7 +1042,7 @@ static void SetInfoBar( void )
 	y = height - max(infoHeight,textHeight)-10;
 	newDistanceFormat = GetDistanceFormat();
 	if ( newDistanceFormat != oldDistanceFormat ) {
-		infoD.pos_w = GetInfoPosWidth() + 2;
+		infoD.pos_w = GetInfoPosWidth();
 		wBoxSetSize( infoD.posX_b, infoD.pos_w, infoHeight-3 );
 		wStatusSetWidth( infoD.posX_m, infoD.pos_w-six );
 		wBoxSetSize( infoD.posY_b, infoD.pos_w, infoHeight-3 );

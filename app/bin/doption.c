@@ -302,6 +302,7 @@ typedef struct {
 		long fmt;
 	} dstFmts_t;
 static dstFmts_t englishDstFmts[] = {
+		{ N_("999.999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|3 },
 		{ N_("999.999999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|6 },
 		{ N_("999.99999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|5 },
 		{ N_("999.9999"),			DISTFMT_FMT_NONE|DISTFMT_FRACT_NUM|4 },
@@ -334,7 +335,6 @@ static dstFmts_t metricDstFmts[] = {
 		{ N_("999.999m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|3 },
 		{ N_("999.99m"),			DISTFMT_FMT_M|DISTFMT_FRACT_NUM|2 },
 		{ N_("999.9m"),				DISTFMT_FMT_M|DISTFMT_FRACT_NUM|1 },
-		{ NULL, 0 },
 		{ NULL, 0 },
 		{ NULL, 0 },
 		{ NULL, 0 },

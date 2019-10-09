@@ -63,11 +63,51 @@ static paramGroup_t elevationPG = { "elev", 0, elevationPLs, sizeof elevationPLs
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
+static void CreateSquareAnchor(coOrd p) {
+	DIST_T d = tempD.scale*0.25;
+	int i = anchors_da.cnt;
+	DYNARR_SET(trkSeg_t,anchors_da,i+4);
+	for (int j =0; j<4;j++) {
+		anchors(i+j).type = SEG_STRLIN;
+		anchors(i+j).color = wDrawColorBlue;
+		anchors(i+j).width = 0;
+	}
+	anchors(i).u.l.pos[0].x = anchors(i+2).u.l.pos[1].x =
+	anchors(i+3).u.l.pos[0].x = anchors(i+3).u.l.pos[1].x = p.x-d/2;
+
+	anchors(i).u.l.pos[0].y = anchors(i).u.l.pos[1].y =
+	anchors(i+1).u.l.pos[0].y =	anchors(i+3).u.l.pos[1].y = p.y-d/2;
+
+	anchors(i).u.l.pos[1].x =
+	anchors(i+1).u.l.pos[0].x = anchors(i+1).u.l.pos[1].x =
+	anchors(i+2).u.l.pos[0].x = p.x+d/2;
+
+	anchors(i+1).u.l.pos[1].y =
+	anchors(i+2).u.l.pos[0].y = anchors(i+2).u.l.pos[1].y =
+	anchors(i+3).u.l.pos[0].y = p.y+d/2;
+}
+
+static void CreateEndAnchor(coOrd p, wBool_t lock) {
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+}
+
 void static CreateMoveAnchor(coOrd pos) {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,90,TRUE,wDrawColorBlue);
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	CreateSquareAnchor(pos);
 }
 
 static void LayoutElevW(
@@ -467,20 +507,23 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if (MyGetKeyState()&WKEY_CTRL) {
-			CreateMoveAnchor(pos);
-			return C_CONTINUE;
-		}
 		if ((trk0 = OnTrack2(&pos,FALSE, TRUE, FALSE, NULL)) != NULL) {
+			if (MyGetKeyState()&WKEY_CTRL) {
+				if ((labelWhen < 2 || mainD.scale > labelScale ||
+				 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ));
+				else
+					CreateMoveAnchor(pos);
+				return C_CONTINUE;
+			}
 			EPINX_T ep0 = 0, ep1 = 1;
 			DIST_T elev0, elev1;
 			if (GetTrkEndPtCnt(trk0) == 2) {
 				if (!GetPointElev(trk0,pos,&elev0)) {
-					InfoMessage( _("Select End-Point") );
+					InfoMessage( _("Select End-Point - Shift to add a  split") );
 					return C_CONTINUE;
 				}
 			} else {
-				InfoMessage( _("Select End-Point") );
+				InfoMessage( _("Select End-Point - Shift to add a split") );
 				return C_CONTINUE;
 			}
 			if ((trk1 = OnTrack2(&pos,FALSE, TRUE, FALSE, trk0)) != NULL) {
@@ -490,6 +533,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 					return C_CONTINUE;
 				}
 			}
+			if (MyGetKeyState()&WKEY_SHIFT) CreateEndAnchor(pos,TRUE);
+			else if ((ep0 = PickEndPoint( pos, trk0 )) != -1) CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
 			InfoMessage (_("Track Elevation %0.3f"), elev0);
 		} else InfoMessage( _("Select End-Point") );
 		if (anchors_da.cnt)

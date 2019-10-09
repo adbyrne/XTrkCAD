@@ -141,7 +141,7 @@ wStatusGetWidth(const char *testString)
     gtk_widget_destroy(entry);
     g_object_unref(entry);
 
-    return (requisition.width+8);
+    return (requisition.width);
 }
 
 /**
