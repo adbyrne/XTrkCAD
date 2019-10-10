@@ -54,7 +54,7 @@ BOOL_T RebuildCornu (track_p trk);
 DIST_T DistanceCornu( track_p t, coOrd * p );
 
 STATUS_T CornuDescriptionMove(track_p trk,wAction_t action,coOrd pos );
-DIST_T CornuDescriptionDistance(coOrd pos,track_p trk, BOOL_T show_hidden, BOOL_T * hidden );
+DIST_T CornuDescriptionDistance(coOrd pos,track_p trk, coOrd *, BOOL_T show_hidden, BOOL_T * hidden );
 void GetCornuParmsNear(track_p t, int sel, coOrd * pos, coOrd * center, ANGLE_T * angle,  DIST_T * radius );
 void GetCornuParmsTemp(dynArr_t *, int sel, coOrd * pos2, coOrd * center, ANGLE_T * angle2,  DIST_T * radius );
 

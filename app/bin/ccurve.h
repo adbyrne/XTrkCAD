@@ -53,7 +53,7 @@ STATUS_T CreateCurve( wAction_t, coOrd, BOOL_T, wDrawColor, DIST_T, long, dynArr
 int IsCurveCircle( track_p );
 void PlotCurve( long, coOrd, coOrd, coOrd, curveData_t *, BOOL_T );
 track_p NewCurvedTrack( coOrd, DIST_T, ANGLE_T, ANGLE_T, long );
-DIST_T CurveDescriptionDistance( coOrd, track_p, BOOL_T, BOOL_T * );
+DIST_T CurveDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T CurveDescriptionMove( track_p, wAction_t, coOrd );
 BOOL_T GetCurveMiddle( track_p , coOrd * );
 int DrawArrowHeads(trkSeg_p sp, coOrd pos,	ANGLE_T angle, BOOL_T bidirectional, wDrawColor color );

@@ -173,6 +173,7 @@ BOOL_T GetCurveMiddle( track_p trk, coOrd * pos )
 DIST_T CurveDescriptionDistance(
 		coOrd pos,
 		track_p trk,
+		coOrd * dpos,
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
@@ -196,6 +197,7 @@ DIST_T CurveDescriptionDistance(
 		Translate( &p1, xx->pos, a, xx->radius * ratio );
 	}
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
+	*dpos = p1;
 	return FindDistance( p1, pos );
 }
 
@@ -237,15 +239,15 @@ static void DrawCurveDescription(
 		}
 		fp = wStandardFont( F_TIMES, FALSE, FALSE );
 		if (elevValid)
-			sprintf( message, _("Helix: turns=%ld length=%s grade=%0.1f%% sep=%s"),
+			sprintf( message, _("Helix: turns=%ld len=%0.2f grade=%0.1f%% sep=%0.2f"),
 				xx->helixTurns,
-				FormatDistance(dist),
+				dist,
 				grade*100.0,
-				FormatDistance(sep) );
+				sep );
 		else
-			sprintf( message, _("Helix: turns=%ld length=%s"),
+			sprintf( message, _("Helix: turns=%ld len=%0.2f"),
 				xx->helixTurns,
-				FormatDistance(dist) );
+				dist );
 		DrawBoxedString( BOX_BOX, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
 	} else {
 		dist = trackGauge/2.0;

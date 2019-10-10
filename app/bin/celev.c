@@ -148,44 +148,6 @@ static int GetElevMode( void )
 }
 
 
-#ifdef LATER
-static void DoElevRadio( long mode, void * context )
-{
-	if ( mode < 0 || mode >= 7 )
-		return;
-#ifdef ELEVM
-	ParamLoadMessage( elevMessageM, "" );
-#endif
-	ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
-	ParamControlActive( &elevationPG, I_STATION, FALSE );
-	switch ( mode ) {
-	case 0:
-		break;
-	case 1:
-	case 2:
-		ParamControlActive( &elevationPG, I_HEIGHT, TRUE );
-		break;
-	case 3:
-	case 4:
-#ifdef OLDELEV
-		if ( !( (rc0 == FDE_DEF && rc1 == FDE_DEF) ||
-				(rc0 == FDE_DEF && rc1 == FDE_END) ||
-				(rc0 == FDE_END && rc1 == FDE_DEF) ) ) {
-			ParamLoadMessage( &elevationPG, I_MSG, _("There are no reachable Defined Elevations") );
-			ParamLoadControl( &elevationPG, I_MODE );
-			return;
-		}
-#endif
-		break;
-	case 5:
-		wControlActive( (wControl_p)elevStationS, TRUE );
-		break;
-	}
-	elevModeV = mode;
-	DoElevUpdate( NULL, 1, NULL );
-}
-#endif
-
 
 static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 {
@@ -198,9 +160,6 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 		long mode = *(long*)valueP;
 		if ( mode < 0 || mode >= 7 )
 			return;
-#ifdef ELEVM
-		ParamLoadMessage( elevMessageM, "" );
-#endif
 		ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
 		ParamControlActive( &elevationPG, I_STATION, FALSE );
 		switch ( mode ) {
@@ -212,15 +171,6 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 			break;
 		case 3:
 		case 4:
-#ifdef OLDELEV
-			if ( !( (rc0 == FDE_DEF && rc1 == FDE_DEF) ||
-					(rc0 == FDE_DEF && rc1 == FDE_END) ||
-					(rc0 == FDE_END && rc1 == FDE_DEF) ) ) {
-				ParamLoadMessage( &elevationPG, I_MSG, _("There are no reachable Defined Elevations") );
-				ParamLoadControl( &elevationPG, I_MODE );
-				return;
-			}
-#endif
 			break;
 		case 5:
 			ParamControlActive( &elevationPG, I_STATION, TRUE );
@@ -345,71 +295,8 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	}
 	elevModeV = radio;
 	ParamLoadControl( &elevationPG, I_MODE );
-#ifdef OLDELEV
-if (oldElevationEvaluation) {
-	int dir;
-	ANGLE_T a;
-	int rc0, rc1;
-	DIST_T elev0, elev1, dist0, dist1;
-	a = GetTrkEndAngle( trk, ep );
-	dir = ( a > 270 || a < 90 );
-	rc0 = FindDefinedElev( trk, ep, dir, FALSE, &elev0, &dist0 );
-	rc1 = FindDefinedElev( trk, ep, 1-dir, FALSE, &elev1, &dist1 );
-	if ( rc0 == FDE_DEF ) {
-		sprintf( message, _("Elev = %s"), FormatDistance(elev0) );
-		ParamLoadMessage( elev1ElevM, message );
-		sprintf( message, _("Dist = %s"), FormatDistance(dist0) );
-		ParamLoadMessage( elev1DistM, message );
-#ifdef LATER
-		if (dist0 > 0.1)
-			sprintf( message, "%0.1f%%", elev0/dist0 );
-		else
-			sprintf( message, _("Undefined") );
-		ParamLoadMessage( elev1GradeM, message );
-#endif
-	} else {
-		ParamLoadMessage( elev1ElevM, "" );
-		ParamLoadMessage( elev1DistM, "" );
-		/*ParamLoadMessage( elev1GradeM, "" );*/
-	}
-	if ( rc1 == FDE_DEF ) {
-		sprintf( message, _("Elev = %s"), FormatDistance(elev1) );
-		ParamLoadMessage( elev2ElevM, message );
-		sprintf( message, _("Dist = %s"), FormatDistance(dist1) );
-		ParamLoadMessage( elev2DistM, message );
-#ifdef LATER
-		if (dist1 > 0.1)
-			sprintf( message, "%0.1f%%", elev1/dist1 );
-		else
-			sprintf( message, _("Undefined") );
-		ParamLoadMessage( elev2GradeM, message );
-#endif
-	} else {
-		ParamLoadMessage( elev2ElevM, "" );
-		ParamLoadMessage( elev2DistM, "" );
-		/*ParamLoadMessage( elev2GradeM, "" );*/
-	}
-	computedOk = TRUE;
-	if (rc0 == FDE_DEF && rc1 == FDE_DEF) {
-		grade = (elev1-elev0)/(dist0+dist1);
-		elevX = elev0 + grade*dist0;
-	} else if (rc0 == FDE_DEF && rc1 == FDE_END) {
-		grade = 0.0;
-		elevX = elev0;
-	} else if (rc0 == FDE_END && rc1 == FDE_DEF) {
-		elevX = elev1;
-		grade = 0.0;
-	} else {
-		gradeOk = FALSE;
-		computedOk = FALSE;
-	}
-} else {
-#endif
 	gradeOk = ComputeElev( trk, ep, FALSE, &elevX, &grade, TRUE );
 	computedOk = TRUE;
-#ifdef OLDELEV
-}
-#endif
 	if (oldElevationEvaluation || computedOk) {
 		sprintf( message, "%0.2f%s", round(PutDim( elevX )*100.0)/100.0, (units==UNITS_METRIC?"cm":"\"") );
 		ParamLoadMessage( &elevationPG, I_COMPUTED, message );
@@ -441,6 +328,7 @@ if (oldElevationEvaluation) {
 			ParamLoadControl( &elevationPG, I_HEIGHT );
 		}
 	}
+	wShow(elevW);
 	HilightSelectedEndPt(TRUE, elevTrk, elevEp);
 }
 
@@ -494,86 +382,116 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		elevStationV[0] = 0;
 		ParamLoadControls( &elevationPG );
 		ParamGroupRecord( &elevationPG );
-		wShow( elevW );
+		//wShow( elevW );
 		ParamControlActive( &elevationPG, I_MODE, FALSE );
 		ParamControlActive( &elevationPG, I_HEIGHT, FALSE );
 		ParamControlActive( &elevationPG, I_STATION, FALSE );
 		ParamLoadMessage( &elevationPG, I_COMPUTED, "" );
 		ParamLoadMessage( &elevationPG, I_GRADE, "" );
-		InfoMessage( _("Select End-Point") );
+		InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
 		HilightElevations( TRUE );
 		elevTrk = NULL;
 		elevUndo = FALSE;
 		return C_CONTINUE;
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if ((trk0 = OnTrack2(&pos,FALSE, TRUE, FALSE, NULL)) != NULL) {
-			if (MyGetKeyState()&WKEY_CTRL) {
-				if ((labelWhen < 2 || mainD.scale > labelScale ||
-				 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ));
-				else
-					CreateMoveAnchor(pos);
-				return C_CONTINUE;
-			}
+		if (MyGetKeyState()&WKEY_CTRL) {
+			commandContext = (void*) 1;        //Just end points
+			CmdMoveDescription( action, pos );
+			return C_CONTINUE;
+		}
+		BOOL_T xing = FALSE;
+		coOrd p0 = pos, p2=pos;
+		if ((trk0 = OnTrack2(&p0,FALSE, TRUE, FALSE, NULL)) != NULL) {
 			EPINX_T ep0 = 0, ep1 = 1;
 			DIST_T elev0, elev1;
 			if (GetTrkEndPtCnt(trk0) == 2) {
-				if (!GetPointElev(trk0,pos,&elev0)) {
-					InfoMessage( _("Select End-Point - Shift to add a  split") );
+				if (!GetPointElev(trk0,p0,&elev0)) {
+					InfoMessage( _("Move to End or Track Xing +Shift to split") );
 					return C_CONTINUE;
 				}
 			} else {
-				InfoMessage( _("Select End-Point - Shift to add a split") );
+				InfoMessage( _("Move to End-Point or Track Crossing") );
 				return C_CONTINUE;
 			}
-			if ((trk1 = OnTrack2(&pos,FALSE, TRUE, FALSE, trk0)) != NULL) {
-				if (GetTrkEndPtCnt(trk1) == 2) {
-					if (GetPointElev(trk1,pos, &elev1))
-						InfoMessage (_("Track Elevation %0.3f, Clearance %0.3f"), elev0, elev0-elev1);
-					return C_CONTINUE;
+			if ((trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0)) != NULL) {
+				if (GetEndPtConnectedToMe(trk0,trk1) == -1) {	//Not simply connected to each other!!!
+					if (GetTrkEndPtCnt(trk1) == 2) {
+						if (GetPointElev(trk1,p2,&elev1)) {
+							if (MyGetKeyState()&WKEY_SHIFT) {
+								InfoMessage (_("Xing - LowElev %0.3f, High %0.3f, Clearance %0.3f - Click to Split"), elev0, elev1, fabs(elev0-elev1));
+							} else
+								InfoMessage (_("Xing - LowElev %0.3f, High %0.3f, Clearance %0.3f"), elev0, elev1, fabs(elev0-elev1));
+						}
+						CreateSquareAnchor(p2);
+						return C_CONTINUE;
+					}
 				}
 			}
-			if (MyGetKeyState()&WKEY_SHIFT) CreateEndAnchor(pos,TRUE);
-			else if ((ep0 = PickEndPoint( pos, trk0 )) != -1) CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
-			InfoMessage (_("Track Elevation %0.3f"), elev0);
-		} else InfoMessage( _("Select End-Point") );
+			if ((ep0 = PickEndPoint( p0, trk0 )) != -1)  {
+				if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
+					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
+					InfoMessage (_("Track Elevation %0.3f"), elev0);
+				} else if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
+					InfoMessage( _("Click to Split here - Elevation %0.3f"), elev0);
+					CreateEndAnchor(p0,TRUE);
+				}
+			} else InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
+		} else
+			InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
 		if (anchors_da.cnt)
 			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 	case C_DOWN:
 	case C_MOVE:
 	case C_UP:
-		if (MyGetKeyState()&WKEY_CTRL)
+		if (MyGetKeyState()&WKEY_CTRL) {
+			commandContext = (void*) 1;        //Just end points
 			CmdMoveDescription( action, pos );
-		return C_CONTINUE;
-	case C_LCLICK:
-		if ((trk0 = OnTrack( &pos, TRUE, TRUE )) == NULL) {
+			DYNARR_RESET(trkSeg_t,anchors_da);
+			elevTrk = NULL;
+			MainRedraw();
 			return C_CONTINUE;
 		}
-		if ( (MyGetKeyState()&WKEY_SHIFT) ) {
-			ep0 = PickEndPoint( pos, trk0 );
-			UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
-			oldTrackCount = trackCount;
-			if (!SplitTrack( trk0, pos, ep0, &trk1, FALSE ))
-				return C_CONTINUE;
-			ElevSelect( trk0, ep0 );
-			UndoEnd();
-			elevUndo = FALSE;
+		/*no break*/
+	case C_LCLICK:
+		;
+		p0= pos;
+		if ((trk0 = OnTrack( &p0, TRUE, TRUE )) == NULL) {
+			wHide(elevW);
+			elevTrk = NULL;
+			InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
 		} else {
-			ep0 = PickEndPoint( pos, trk0 );
-			ElevSelect( trk0, ep0 );
-			return C_CONTINUE;
+			ep0 = PickEndPoint( p0, trk0 );
+			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
+				InfoMessage( _("Point Selected!") );
+				ElevSelect( trk0, ep0 );
+				return C_CONTINUE;
+			} else if ( (MyGetKeyState()&WKEY_SHIFT) ) {
+				UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
+				oldTrackCount = trackCount;
+				if (!SplitTrack( trk0, p0, ep0, &trk1, FALSE ))
+					return C_CONTINUE;
+				InfoMessage( _("Track Split!") );
+				ElevSelect( trk0, ep0 );
+				UndoEnd();
+				elevUndo = FALSE;
+			}
 		}
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		elevTrk = NULL;
+		MainRedraw();
 		return C_CONTINUE;
 	case C_OK:
 		DoElevDone(NULL);
+		InfoMessage( _("") );
 		return C_TERMINATE;
 	case C_CANCEL:
 		HilightElevations( FALSE );
 		HilightSelectedEndPt( FALSE, elevTrk, elevEp );
 		elevTrk = NULL;
 		wHide( elevW );
+		InfoMessage( _("") );
 		return C_TERMINATE;
 	case C_REDRAW:
 		DoElevHilight( NULL );

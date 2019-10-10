@@ -1626,12 +1626,14 @@ EXPORT DIST_T EndPtDescriptionDistance(
 		coOrd pos,
 		track_p trk,
 		EPINX_T ep,
+		coOrd *dpos,
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
 	elev_t *e;
 	coOrd pos1;
 	track_p trk1;
+	*dpos = pos;
 	if (hidden) *hidden = FALSE;
 	e = &trk->endPt[ep].elev;
 	if ((e->option&ELEV_MASK)==ELEV_NONE)
@@ -1648,6 +1650,7 @@ EXPORT DIST_T EndPtDescriptionDistance(
 	pos1 = GetTrkEndPos(trk,ep);
 	pos1.x += e->doff.x;
 	pos1.y += e->doff.y;
+	*dpos = pos1;
 	if (hidden) *hidden = !(e->option&ELEV_VISIBLE);
 	return FindDistance( pos1, pos );
 }
@@ -3218,19 +3221,15 @@ EXPORT void HilightElevations( BOOL_T hilight )
 
 EXPORT void HilightSelectedEndPt( BOOL_T show, track_p trk, EPINX_T ep )
 {
-	static BOOL_T lastShow = FALSE;
-	static long lastRedraw = -1;
 	coOrd pos;
-	if (trk == NULL)
-		return;
-	if (currRedraw > lastRedraw) {
-		lastRedraw = currRedraw;
-		lastShow = FALSE;
-	}
-	if (lastShow != show) {
+	if (!trk || (ep==-1)) return;
+	pos = GetTrkEndPos( trk, ep );
+	if ( show == TRUE ) {
 		pos = GetTrkEndPos( trk, ep );
 		DrawFillCircle( &tempD, pos, 0.10*mainD.scale, selectedColor );
-		lastShow = show;
+	} else 	 {
+		pos = GetTrkEndPos( trk, ep );
+		DrawFillCircle( &tempD, pos, 0.10*mainD.scale, wDrawColorWhite );
 	}
 }
 

@@ -179,7 +179,13 @@ The resulting track(s) will mimic the shape of the Cornu/Bezier(s) exactly. This
 
 \G{png.d/belev.png}
 
-The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, you can click on the respective endpoint to set its elevation properties. The endpoint on which you work is indicated with a big red dot.
+The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, The Message Bar will show the computed elevation at the cursor. There will be an open blue circle if an endpoint will be selected with \f{Left-Click}. You click on the respective endpoint to set its elevation properties. The endpoint which you are working on is indicated with a big red dot.
+
+If you hover over a point where two unconnected tracks pass over one another, a blue square will be drawn and the Message Bar will show the two elevations and the Clearance between them.
+
+If you add \f{Shift} as you move the cursor before clicking you will see a filled dot when it is over a track if a \f{Shift-Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation.
+
+Adding \f{Ctrl} allows you to \f{Ctrl+Left-Click} to Select and \f{Left-Drag} to move Elevation Labels if both the option is set for them to be displayed and the Zoom level is correct,, Only Defined and Station endpoint labels can be moved. 
 
 \G{png.d/celev.png}
 
@@ -201,13 +207,11 @@ An endpoint can have one of several elevation types:
 
 \b \f{Station} - assigns a name to the endpoint.
 
-\f{Note:} Only one of these attributes can be assigned to an endpoint. For example, an endpoint can not be defined as a Grade and a Station at the same time.
+\f{Note:} Only one of these attributes can be assigned to an endpoint at a time. For example, an endpoint can not be defined as a Grade and a Station at the same time.
 
 When an endpoint is selected on the layout by \e{Left-Click}, it is highlighted by a large red dot and its elevation type and values are displayed in the dialog.
 
 Additionally, \f{Defined Elevation} endpoints are indicated on the layout by gold colored dots. \f{Ignored Elevation} endpoints are indicated by blue colored dots.
-
-\e{Shift+Left-Click} splits the track at the specified point and adds an elevation point.
 
 The grade at the specified endpoint is displayed next to the \f{Grade} radio button. For \f{Defined Elevation} endpoints, the grade on each side of the endpoint is displayed.
 
@@ -981,9 +985,9 @@ Use \e{Left+Drag} to move the label to a new position and unhide if hidden. Once
 
 This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select mode (\K{cmdSelect}).
 
-\e{Shift+Right-Click}, the Context Menu command, can be used to toggle display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels.
+The letter "\f{h}", can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels. The letter"\f{s} will show a hidden description. There is a \f{Context Menu} Show/Hide Toggle as well. 
 
-Note - existing elevation labels can be moved, but controlling thier visbility is done with the \K{cmdElev} command.
+Note - existing defined elevation labels can be moved, but controlling thier visbility is done with the \K{cmdElev} command.
 
 \rule
 

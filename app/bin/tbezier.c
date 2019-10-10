@@ -135,6 +135,7 @@ static void ComputeBezierBoundingBox( track_p trk, struct extraData * xx )
 DIST_T BezierDescriptionDistance(
 		coOrd pos,
 		track_p trk,
+		coOrd * dpos,
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
@@ -151,6 +152,7 @@ DIST_T BezierDescriptionDistance(
 	p1.x = xx->bezierData.pos[0].x + ((xx->bezierData.pos[3].x-xx->bezierData.pos[0].x)/2) + offset.x;
 	p1.y = xx->bezierData.pos[0].y + ((xx->bezierData.pos[3].y-xx->bezierData.pos[0].y)/2) + offset.y;
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
+	*dpos = p1;
 	return FindDistance( p1, pos );
 }
 
@@ -173,8 +175,8 @@ static void DrawBezierDescription(
     pos.x += xx->bezierData.descriptionOff.x;
     pos.y += xx->bezierData.descriptionOff.y;
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
-    sprintf( message, _("Bezier Curve: length=%s min radius=%s"),
-				FormatDistance(xx->bezierData.length), FormatDistance(xx->bezierData.minCurveRadius));
+    sprintf( message, _("Bezier: len=%0.2f min_rad=%0.2f"),
+				xx->bezierData.length, xx->bezierData.minCurveRadius>10000?0.0:xx->bezierData.minCurveRadius);
     DrawBoxedString( BOX_BOX, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
 }
 

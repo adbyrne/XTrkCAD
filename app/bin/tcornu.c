@@ -179,6 +179,7 @@ static void ComputeCornuBoundingBox( track_p trk, struct extraData * xx )
 DIST_T CornuDescriptionDistance(
 		coOrd pos,
 		track_p trk,
+		coOrd * dpos,
 		BOOL_T show_hidden,
 		BOOL_T * hidden)
 {
@@ -194,6 +195,7 @@ DIST_T CornuDescriptionDistance(
 	p1.x = xx->cornuData.pos[0].x + ((xx->cornuData.pos[1].x-xx->cornuData.pos[0].x)/2) + offset.x;
 	p1.y = xx->cornuData.pos[0].y + ((xx->cornuData.pos[1].y-xx->cornuData.pos[0].y)/2) + offset.y;
 	if (hidden) *hidden = (GetTrkBits( trk ) & TB_HIDEDESC);
+	*dpos = p1;
 	return FindDistance( p1, pos );
 }
 
@@ -216,8 +218,9 @@ static void DrawCornuDescription(
     pos.x += xx->cornuData.descriptionOff.x;
     pos.y += xx->cornuData.descriptionOff.y;
     fp = wStandardFont( F_TIMES, FALSE, FALSE );
-    sprintf( message, _("Cornu Curve: length=%0.3f min radius=%0.3f"),
-						xx->cornuData.length, xx->cornuData.minCurveRadius);
+
+    sprintf( message, _("Cornu: len=%0.2f min_rad=%0.2f"),
+						xx->cornuData.length, (xx->cornuData.minCurveRadius>=10000.00)?0.0:xx->cornuData.minCurveRadius);
     DrawBoxedString( BOX_BOX, d, pos, message, fp, (wFontSize_t)descriptionFontSize, color, 0.0 );
 }
 

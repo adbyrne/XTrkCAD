@@ -2014,8 +2014,10 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 	 	track_p trk = NULL;
 		DIST_T d, dd = 10000;
 		track_p trk1 = NULL;
-		EPINX_T ep1, ep;
+		EPINX_T ep1=-1, ep=-1;
 		BOOL_T hidden_t, hidden;
+		coOrd dpos = pos;
+		coOrd cpos;
 		int mode;
 		if (hidden) *hidden_o = FALSE;
 		while ( TrackIterate( &trk1 ) ) {
@@ -2023,59 +2025,65 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 				continue;
 			if ( (!GetTrkVisible(trk1)) && drawTunnel==0 )
 				continue;
-			if ( (labelEnable&LABELENABLE_ENDPT_ELEV)!=0) {
+			if ( (labelEnable&LABELENABLE_ENDPT_ELEV)!=0 && *mode_o <= 0) {
 				for ( ep1=0; ep1<GetTrkEndPtCnt(trk1); ep1++ ) {
-					d = EndPtDescriptionDistance( pos, trk1, ep1, FALSE, NULL );  //No hidden
+					d = EndPtDescriptionDistance( pos, trk1, ep1, &dpos, FALSE, NULL );  //No hidden
 					if ( d < dd ) {
 						dd = d;
 						trk = trk1;
 						ep = ep1;
 						mode = 0;
 						hidden = FALSE;
+						cpos= dpos;
 					}
 				}
 			}
-			if ( !QueryTrack( trk1, Q_HAS_DESC ) )
+			if ( !QueryTrack( trk1, Q_HAS_DESC ) && (mode <0 || mode > 0) )
 				continue;
 			if ((labelEnable&LABELENABLE_TRKDESC)==0)
 				continue;
 			if ( ( GetTrkBits( trk1 ) & TB_HIDEDESC ) != 0 ) {
 				if ( !show_hidden ) continue;
 			}
-			d = CompoundDescriptionDistance( pos, trk1, show_hidden, &hidden_t );
+			d = CompoundDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
 			if ( d < dd ) {
 				dd = d;
 				trk = trk1;
 				ep = -1;
 				mode = 1;
 				hidden = hidden_t;
+				cpos = dpos;
 			}
-			d = CurveDescriptionDistance( pos, trk1, show_hidden, &hidden_t );
+			d = CurveDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
 			if ( d < dd ) {
 				dd = d;
 				trk = trk1;
 				ep = -1;
 				mode = 2;
 				hidden = hidden_t;
+				cpos = dpos;
 			}
-			d = CornuDescriptionDistance( pos, trk1, show_hidden, &hidden_t );
+			d = CornuDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
 			if ( d < dd ) {
 				dd = d;
 				trk = trk1;
 				ep = -1;
 				mode = 3;
 				hidden = hidden_t;
+				cpos = dpos;
 			}
-			d = BezierDescriptionDistance( pos, trk1, show_hidden, &hidden_t );
+			d = BezierDescriptionDistance( pos, trk1, &dpos, show_hidden, &hidden_t );
 			if ( d < dd ) {
 				dd = d;
 				trk = trk1;
 				ep = -1;
 				mode = 4;
 				hidden = hidden_t;
+				cpos = dpos;
 			}
 		}
-		if (trk != NULL) {       //Only when close to a label not anywhere on layout!
+		if ((trk != NULL && (trk == OnTrack(&pos, FALSE, FALSE))) ||
+			IsClose(d) || IsClose(FindDistance( pos, cpos) )) {  //Only when close to a label or the track - not anywhere on layout!
 			if (ep_o) *ep_o = ep;
 			if (mode_o) *mode_o = mode;
 			if (hidden_o) *hidden_o = hidden;
@@ -2083,6 +2091,8 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 		}
 		else return NULL;
 }
+
+static long moveDescMode;
 
 STATUS_T CmdMoveDescription(
 		wAction_t action,
@@ -2096,33 +2106,52 @@ STATUS_T CmdMoveDescription(
 	static BOOL_T hidden;
 	static int mode;
 
-	switch (action) {
+	moveDescMode = (long)commandContext;   //Context 0 = everything, 1 means elevations, 2 means descriptions
+
+	switch (action&0xFF) {
 	case C_START:
 		if ( labelWhen < 2 || mainD.scale > labelScale ||
 			 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
 			ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_TERMINATE;
 		}
+		moveDescTrk = NULL;
 		trk = NULL;
 		hidden = FALSE;
 		mode = -1;
 		InfoMessage( _("Select and drag a description") );
 		break;
+	case C_TEXT:
+		if (!moveDescTrk) return C_CONTINUE;
+		if (action>>8 == 's') {
+			ClrTrkBits( moveDescTrk, TB_HIDEDESC );
+		} else if (action>>8 == 'h')  {
+			SetTrkBits( moveDescTrk, TB_HIDEDESC );
+		}
+		/*no break*/
 	case wActionMove:
 		if ( labelWhen < 2 || mainD.scale > labelScale ) return C_CONTINUE;
-		if ((trk=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden))!=NULL) {
+		track_p t = NULL;
+		mode = moveDescMode-1;   // -1 means everything, 0 means elevations only, 1 means descriptions only
+		if ((t=FindTrackDescription(pos,&ep,&mode,TRUE,&hidden))!=NULL) {
 			if (mode==0) {
-				if (!hidden)
-					DrawEndPt2( &mainD, trk, ep, wDrawColorBlue );
+				DrawEndPt2( &mainD, t, ep, wDrawColorBlue );
+				InfoMessage(_("Elevation description"));
 			} else {
 				if (hidden) {
-					DrawTrack(trk,&mainD,wDrawColorAqua);
-					InfoMessage(_("Hidden description"));
-				} else
-					DrawTrack(trk,&mainD,wDrawColorBlue);
+					ClrTrkBits( t, TB_HIDEDESC );
+					DrawTrack( t,&mainD,wDrawColorAqua);
+					SetTrkBits( t, TB_HIDEDESC );
+					InfoMessage(_("Hidden description - 's' to Show"));
+					moveDescTrk = t;
+				} else {
+					DrawTrack( t,&mainD,wDrawColorBlue);
+					InfoMessage(_("Shown description - 'h' to Hide"));
+					moveDescTrk = t;
+				}
 			}
+			return C_CONTINUE;
 		}
-		MainRedraw();
 		break;
 	case C_DOWN:
 		if (( labelWhen < 2 || mainD.scale > labelScale ) ||
@@ -2130,10 +2159,10 @@ STATUS_T CmdMoveDescription(
 			 	 ErrorMessage( MSG_DESC_NOT_VISIBLE );
 			return C_TERMINATE;
 		 }
+		mode = moveDescMode-1;
 		trk = FindTrackDescription(pos,&ep,&mode,TRUE,&hidden);
 		if (trk != NULL ) {
 			if (hidden) {
-				if (mode == 0) return C_CONTINUE;
 				InfoMessage(_("Hidden Label - Drag to reveal"));
 			} else {
 				InfoMessage(_("Drag label"));
@@ -2175,7 +2204,7 @@ STATUS_T CmdMoveDescription(
 				if (( GetTrkBits( trk ) & TB_HIDEDESC ) != 0 )
 					DrawTrack(trk,&mainD,wDrawColorAqua);
 				else
-					DrawTrack(trk,&mainD,wDrawColorBlue);
+					DrawTrack(trk,&mainD,wDrawColorRed);
 			}
 		}
 		break;
@@ -2188,7 +2217,7 @@ STATUS_T CmdMoveDescription(
 		if ( ! QueryTrack( moveDescTrk, Q_HAS_DESC ) ) break;
 		if ( moveDescM == NULL ) {
 			moveDescM = MenuRegister( "Move Desc Toggle" );
-			moveDescMI = wMenuToggleCreate( moveDescM, "", _("Show Description"), 0, TRUE, ChangeDescFlag, NULL );
+			moveDescMI = wMenuToggleCreate( moveDescM, "", _("Show/Hide Description"), 0, TRUE, ChangeDescFlag, NULL );
 		}
 		wMenuToggleSet( moveDescMI, ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC ) == 0 );
 		wMenuPopupShow( moveDescM );
@@ -2846,7 +2875,7 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 	wMenuSeparatorCreate( selectPopup2M );
 	AddRotateMenu( selectPopup2M, QuickRotate );
 	wMenuSeparatorCreate( selectPopup2M );
-	descriptionMI = wMenuPushCreate(selectPopup2M, "cmdMoveLabel", _("Move Description"), 0, (wMenuCallBack_p)moveDescription, NULL);
+	descriptionMI = wMenuPushCreate(selectPopup2M, "cmdMoveLabel", _("Move Description"), 0, (wMenuCallBack_p)moveDescription, (void*) 0);
 	rotateAlignMI = wMenuPushCreate( selectPopup2M, "", _("Align"), 0, (wMenuCallBack_p)RotateAlign, (void* ) 1 );
 	ParamRegister( &rescalePG );
 }
@@ -2880,7 +2909,7 @@ EXPORT void InitCmdBridge( void)
 EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"), wIconCreatePixMap(movedesc_xpm),
-				LEVEL0, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, NULL );
+				LEVEL0, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, (void*) 0 );
 }
 
 
