@@ -274,7 +274,9 @@ STATUS_T DrawGeomMouse(
 						coOrd p = pos;
 						track_p t;
 						if ((t=OnTrack(&p,FALSE,FALSE))!=NULL) {
-							if (!IsTrack(t)) CreateEndAnchor(p,FALSE);
+							if (context->Op == OP_DIMLINE ) {
+								CreateEndAnchor(p,FALSE);
+							} else if (!IsTrack(t)) CreateEndAnchor(p,FALSE);
 						}
 					};
 					break;
@@ -464,12 +466,14 @@ STATUS_T DrawGeomMouse(
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 			(context->Op == OP_CURVE2 && context->State == 0) ||
 			(context->Op == OP_CURVE4 && context->State != 2) ||
-			(context->Op == OP_LINE) || (context->Op == OP_DIMLINE) ||
+			(context->Op == OP_LINE) ||
 			(context->Op == OP_BENCH) ) {
 			if ( (MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
 				if (OnTrack( &pos, FALSE, FALSE )!=NULL)
 					CreateEndAnchor(pos,TRUE);
 			}
+		} else if (context->Op == OP_DIMLINE) {
+			if (OnTrack( &pos, FALSE, FALSE )!=NULL) CreateEndAnchor(pos,TRUE);
 		}
 
 		pos1 = pos;
