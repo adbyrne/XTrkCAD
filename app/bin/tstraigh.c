@@ -277,7 +277,7 @@ static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 	long widthOptions = DTS_LEFT|DTS_RIGHT|DTS_TIES;
 	if (GetTrkWidth(t) == 2)
 		widthOptions |= DTS_THICK2;
-	if (GetTrkWidth(t) == 3)
+	if ((GetTrkWidth(t) == 3) || (d->options & DC_THICK))
 		widthOptions |= DTS_THICK3;
 	if (GetTrkBridge(t)) widthOptions |= DTS_BRIDGE;
 		else widthOptions &=~DTS_BRIDGE;

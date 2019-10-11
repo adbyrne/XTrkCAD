@@ -36,6 +36,7 @@
 #define DC_CENTERLINE	(1<<8)
 #define DC_SEGTRACK		(1<<9)
 #define DC_TIES			(1<<10)
+#define DC_THICK        (1<<11)
 
 #define INIT_MAIN_SCALE (8.0)
 #define INIT_MAP_SCALE	(64.0)
@@ -120,6 +121,7 @@ extern wDrawColor drawColorBlue;
 extern wDrawColor drawColorGreen;
 extern wDrawColor drawColorAqua;
 extern wDrawColor drawColorPowderedBlue;
+extern wDrawColor drawColorBlueHighlight;
 extern wDrawColor drawColorPurple;
 extern wDrawColor drawColorGold;
 extern wDrawColor drawColorGrey10;
@@ -135,6 +137,7 @@ extern wDrawColor drawColorGrey90;
 #define wDrawColorBlack drawColorBlack
 #define wDrawColorWhite drawColorWhite
 #define wDrawColorBlue  drawColorBlue
+#define wDrawColorBlueHighlight drawColorBlueHighlight
 #define wDrawColorPowderedBlue drawColorPowderedBlue
 #define wDrawColorAqua  drawColorAqua
 #define wDrawColorRed	drawColorRed

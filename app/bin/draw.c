@@ -86,6 +86,7 @@ EXPORT wDrawColor drawColorRed;
 EXPORT wDrawColor drawColorBlue;
 EXPORT wDrawColor drawColorGreen;
 EXPORT wDrawColor drawColorAqua;
+EXPORT wDrawColor drawColorBlueHighlight;
 EXPORT wDrawColor drawColorPowderedBlue;
 EXPORT wDrawColor drawColorPurple;
 EXPORT wDrawColor drawColorGold;

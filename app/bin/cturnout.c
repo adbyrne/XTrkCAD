@@ -684,7 +684,7 @@ static void DrawTurnout(
     
 	if (GetTrkWidth(trk) == 2)
 		widthOptions |= DTS_THICK2;
-	if (GetTrkWidth(trk) == 3)
+	if ((GetTrkWidth(trk) == 3) || (d->options & DC_THICK))
 		widthOptions |= DTS_THICK3;
 	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	if ( tieDrawMode!=TIEDRAWMODE_NONE &&

@@ -2631,7 +2631,7 @@ static STATUS_T CmdSelect(
 				DoModuleTracks(GetTrkLayer(t),DrawSingleTrack,TRUE);
 				DrawHighlightLayer(GetTrkLayer(t));
 			} else {
-				DrawTrack(t,&mainD,wDrawColorBlue);
+				DrawTrack(t,&mainD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
 			}
 		}
 		if (anchors_da.cnt)

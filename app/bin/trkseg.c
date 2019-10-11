@@ -1668,15 +1668,15 @@ EXPORT void DrawDimLine(
 
 	if ( ( option & 0x10 ) == 0 ) {
 		Translate( &p, p0, a0-45, dist );
-		DrawLine( d, p0, p, 0, color );
+		DrawLine( d, p0, p, width, color );
 		Translate( &p, p0, a0+45, dist );
-		DrawLine( d, p0, p, 0, color );
+		DrawLine( d, p0, p, width, color );
 	}
 	if ( ( option & 0x20 ) == 0 ) {
 		Translate( &p, p1, a0-135, dist );
-		DrawLine( d, p1, p, 0, color );
+		DrawLine( d, p1, p, width, color );
 		Translate( &p, p1, a0+135, dist );
-		DrawLine( d, p1, p, 0, color );
+		DrawLine( d, p1, p, width, color );
 	}
 
 	if ( fs < 2*d->scale ) {
@@ -1690,7 +1690,7 @@ EXPORT void DrawDimLine(
 	size.y = textsize.y/2.0;
 	dist1 = FindDistance( zero, size );
 	if ( dist <= dist1*2 ) {
-		DrawLine( d, p0, p1, 0, color );
+		DrawLine( d, p0, p1, width, color );
 		return;
 	}
 		a1 = FindAngle( zero, size );
@@ -1719,11 +1719,11 @@ EXPORT void DrawDimLine(
 		p = pc;
 		p.x -= fx*x;
 		p.y -= fy*y;
-		DrawLine( d, p0, p, 0, color );
+		DrawLine( d, p0, p, width, color );
 		p = pc;
 		p.x += fx*x;
 		p.y += fy*y;
-		DrawLine( d, p, p1, 0, color );
+		DrawLine( d, p, p1, width, color );
 }
 
 /*
@@ -1812,6 +1812,10 @@ EXPORT void DrawSegsO(
 				trackGauge != 0.0)
 				return;
 		}
+		wDrawWidth thick = 3;
+#ifdef WINDOWS
+		thick *= (wDrawWidth)(d->dpi/mainD.dpi);
+#endif
 		switch (segPtr->type) {
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
@@ -1832,7 +1836,7 @@ EXPORT void DrawSegsO(
 					NULL, trackGauge, color1, options );
 				break;
 			case SEG_STRLIN:
-				DrawLine( d, p0, p1, (wDrawWidth)floor(segPtr->width*factor+0.5), color1 );
+				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:(wDrawWidth)floor(segPtr->width*factor+0.5), color1 );
 				break;
 			case SEG_DIMLIN:
 			case SEG_BENCH:
@@ -1852,7 +1856,7 @@ EXPORT void DrawSegsO(
 						fs /= (option==0?8:option==1?4:option==2?2:1);
 						if ( fs < 2 )
 							fs = 2;
-						DrawDimLine( d, p0, p1, FormatDistance(FindDistance(p0,p1)), fs, 0.5, 0, color, option & 0x00 );
+						DrawDimLine( d, p0, p1, FormatDistance(FindDistance(p0,p1)), fs, 0.5, (d->options&DC_THICK)?thick:0, color, option & 0x00 );
 						break;
 					case SEG_BENCH:
 						DrawBench( d, p0, p1, color1, color2, options, segPtr->u.l.option );
@@ -1883,7 +1887,7 @@ EXPORT void DrawSegsO(
 					NULL, trackGauge, color1, options );
 			} else {
 				DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
-						FALSE, (wDrawWidth)floor(segPtr->width*factor+0.5), color1 );
+						FALSE, (d->options&DC_THICK)?thick:(wDrawWidth)floor(segPtr->width*factor+0.5), color1 );
 			}
 			break;
         case SEG_BEZTRK:
@@ -1918,7 +1922,7 @@ EXPORT void DrawSegsO(
             		   					NULL, trackGauge, color1, options );
         				} else if (tempPtr->type == SEG_CRVLIN) {
         					DrawArc( d, c, fabs(tempPtr->u.c.radius), a0, tempPtr->u.c.a1,
-        							FALSE, (wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
+        							FALSE, (d->options&DC_THICK)?thick:(wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
         				}
         				break;
         			case SEG_STRTRK:
@@ -1934,7 +1938,7 @@ EXPORT void DrawSegsO(
         			case SEG_STRLIN:
         				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
         				REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
-        				DrawLine( d, p0, p1, (wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
+        				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:(wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
         				break;
             	}
             }
@@ -1960,7 +1964,7 @@ EXPORT void DrawSegsO(
 				tempTypes[j] = segPtr->u.p.pts[j].pt_type;
 			}
 			BOOL_T fill = ((d->options&DC_GROUP) != 0 || (d->funcs != &tempSegDrawFuncs));
-			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, (wDrawWidth)floor(segPtr->width*factor+0.5), (fill && (segPtr->type==SEG_FILPOLY))?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
+			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, (d->options&DC_THICK)?thick:(wDrawWidth)floor(segPtr->width*factor+0.5), (fill && (segPtr->type==SEG_FILPOLY))?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
 			free(tempPts);
 			free(tempTypes);
 			break;
@@ -1971,7 +1975,7 @@ EXPORT void DrawSegsO(
 				DrawFillCircle( d, c, fabs(segPtr->u.c.radius), color1 );
 			} else {
 				DrawArc( d, c, fabs(segPtr->u.c.radius), 0, 360,
-						FALSE, (wDrawWidth)0, color1 );
+						FALSE, (d->options&DC_THICK)?thick:(wDrawWidth)0, color1 );
 			}
 			break;
 		}

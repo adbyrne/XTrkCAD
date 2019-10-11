@@ -2796,6 +2796,9 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 		if (color == wDrawColorBlack) {
 			color = GetTrkColor( trk, d );
 		}
+		if (color == wDrawColorBlueHighlight) {
+			d->options |= DC_THICK;
+		}
 	}
 
 	if (d == &mapD && !GetLayerOnMap(curTrackLayer))
@@ -2817,6 +2820,8 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 		d->options &= ~DC_TIES;
 	}
 	d->options &= ~DC_DASH;
+
+	d->options &= ~DC_THICK;
 
 	DrawTrackElev( trk, d, color!=wDrawColorWhite );
 }
