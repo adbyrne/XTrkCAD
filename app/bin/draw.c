@@ -1340,6 +1340,10 @@ lprintf("mainRedraw\n");
 	tempD.orig = mainD.orig;
 	wDrawClear( mainD.d );
 
+	//mainD.d->option = 0;
+	//mainD.options = 0;
+	mainD.funcs->options = 0;		//Force MainD back from Temp
+
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= LBORDER/mainD.dpi*mainD.scale;
@@ -2730,7 +2734,7 @@ EXPORT void DrawInit( int initialZoom )
 
 #include "bitmaps/pan.xpm"
 
-static wMenu_p panPopupM;
+EXPORT static wMenu_p panPopupM;
 
 static STATUS_T CmdPan(
 		wAction_t action,
@@ -2844,6 +2848,7 @@ static STATUS_T CmdPan(
 			break;
 		} else if (panmode == PAN) {
 			panmode = NONE;
+			MapRedraw();
 		}
 		break;
 	case C_REDRAW:
@@ -2858,7 +2863,8 @@ static STATUS_T CmdPan(
 		return C_TERMINATE;
 	case C_TEXT:
 		panmode = NONE;
-		if ((action>>8) == 0x65) {     //"e"
+
+		if ((action>>8) == 'e') {     //"e"
 			scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
 			scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
 			if (scale_x<scale_y)
@@ -2875,21 +2881,28 @@ static STATUS_T CmdPan(
 			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 			MapRedraw();
 			MainRedraw();
-		}
-		if (((action>>8) == 0x30) || ((action>>8) == 0x6F)) {     //"0" or "o"
+		} else if (((action>>8) == '0') || ((action>>8) == 'o')) {     //"0" or "o"
 			mainD.orig = zero;
 			ConstraintOrig( &mainD.orig, mainD.size, TRUE);
 			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
 			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
 			MapRedraw();
 			MainRedraw();
-		}
-		if ((action>>8) >= 0x31 && (action>>8) <= 0x39) {         //"1" to "9"
+		} else if ((action>>8) >= '1' && (action>>8) <= '9') {         //"1" to "9"
 			scale_x = (action>>8)&0x0F;
 			DoNewScale(scale_x);
 			MapRedraw();
 			MainRedraw();
+		} else if ((action>>8) == '@') {								// "@"
+			mainD.orig.x = pos.x - mainD.size.x/2.0;
+			mainD.orig.y = pos.y - mainD.size.y/2.0;
+			ConstraintOrig( &mainD.orig, mainD.size, TRUE);
+			mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
+			mainCenter.y = mainD.orig.y + mainD.size.y/2.0;
+			MapRedraw();
+			MainRedraw();
 		}
+
 		if ((action>>8) == 0x0D) {
 			wSetCursor(mainD.d,defaultCursor);
 			return C_TERMINATE;
@@ -2906,7 +2919,7 @@ static STATUS_T CmdPan(
 
 	return C_CONTINUE;
 }
-static wMenuPush_p zoomExtents,panOrig;
+static wMenuPush_p zoomExtents,panOrig,panHere;
 static wMenuPush_p zoomLvl1,zoomLvl2,zoomLvl3,zoomLvl4,zoomLvl5,zoomLvl6,zoomLvl7,zoomLvl8,zoomLvl9;
 
 void panMenuEnter(int key) {

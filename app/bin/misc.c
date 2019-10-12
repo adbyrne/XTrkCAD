@@ -1878,7 +1878,7 @@ EXPORT void AddRotateMenu(wMenu_p m, rotateDialogCallBack_t func) {
 	wMenuPushCreate(m, "", _("Enter Angle ..."), 0,
 			(wMenuCallBack_p) StartRotateDialog, (void*) func);
 }
-
+
 /*****************************************************************************
  *
  * INITIALIZATON
@@ -2200,35 +2200,6 @@ static void CreateMenus(void) {
 			_("Move To Current Layer"), ACCL_MOVCURLAYER,
 			(void*) (wMenuCallBack_p) MoveSelectedTracksToCurrentLayer,
 			IC_SELECTED, (void *) 0);
-
-	wMenuSeparatorCreate(editM);
-	menuPLs[menuPG.paramCnt].context = (void*) 1;
-	MiscMenuItemCreate(editM, NULL, "cmdSelectAll", _("Select &All"),
-			ACCL_SELECTALL, (void*) (wMenuCallBack_p) SetAllTrackSelect, 0,
-			(void *) 1);
-	MiscMenuItemCreate(editM, NULL, "cmdSelectCurrentLayer",
-			_("Select Current Layer"), ACCL_SETCURLAYER,
-			(void*) (wMenuCallBack_p) SelectCurrentLayer, 0, (void *) 0);
-	MiscMenuItemCreate(editM, NULL, "cmdDeselectAll", _("&Deselect All"),
-			ACCL_DESELECTALL, (void*) (wMenuCallBack_p) SetAllTrackSelect, 0,
-			(void *) 0);
-	MiscMenuItemCreate(editM, NULL, "cmdSelectInvert", _("&Invert Selection"),
-			0L, (void*) (wMenuCallBack_p) InvertTrackSelect, 0, (void *) 0);
-	MiscMenuItemCreate(editM, NULL, "cmdSelectOrphaned",
-			_("Select Stranded Track"), 0L,
-			(void*) (wMenuCallBack_p) OrphanedTrackSelect, 0, (void *) 0);
-	wMenuSeparatorCreate(editM);
-	MiscMenuItemCreate(editM, NULL, "cmdTunnel", _("Tu&nnel"), ACCL_TUNNEL,
-			(void*) (wMenuCallBack_p) SelectTunnel, IC_SELECTED, (void *) 0);
-	MiscMenuItemCreate(editM, NULL, "cmdBridge", _("&Bridge"), ACCL_BRIDGE,
-			(void*) (wMenuCallBack_p) SelectBridge, IC_SELECTED, (void *) 0);
-	MiscMenuItemCreate(editM, NULL, "cmdTies", _("&NoTies/Ties"), ACCL_TIES,
-				(void*) (wMenuCallBack_p) SelectTies, IC_SELECTED, (void *) 0);
-	MiscMenuItemCreate(editM, NULL, "cmdAbove", _("Move to &Top"), ACCL_ABOVE,
-			(void*) (wMenuCallBack_p) SelectAbove, IC_SELECTED, (void *) 0);
-	MiscMenuItemCreate(editM, NULL, "cmdBelow", _("Move to &Bottom"), ACCL_BELOW,
-			(void*) (wMenuCallBack_p) SelectBelow, IC_SELECTED, (void *) 0);
-
 	wMenuSeparatorCreate( editM );
 	menuPLs[menuPG.paramCnt].context = (void*)1;
 	MiscMenuItemCreate( editM, NULL, "cmdSelectAll", _("Select &All"), ACCL_SELECTALL, (void*)(wMenuCallBack_p)SetAllTrackSelect, 0, (void *)1 );
