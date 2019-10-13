@@ -62,15 +62,19 @@ The \f{Edit Menu} shows commands affecting the \f{Main Canvas} (\K{mainW}).
 
 \u000
 
-\dd \f{Thin, Medium and Thick Tracks} - set rail width of selected tracks.
+\dd \f{Thin, Medium and Thick Tracks} - set displayed rail width of selected tracks.
 
 \u000
 
-\dd \f{Tunnel} - Hides or reveals selected tracks.
+\dd \f{Tunnel} - Hides or reveals selected tracks and adds a tunnel portal symbol where the track passes from one to the other.
 
 \u000
 
-\dd \f{Undo} - Undoes the last command.  Up to the last ten commands can be undone.  If there are no commands that can be undone the \f{Undo} item is disabled.  The \f{Undo} command can also be invoked by the \f{Undo} button (\K{cmdUndo}).
+\dd \f{Bridge} - Adds parapet symbols to the sides of the track.
+
+\u000
+
+\dd \f{Undo} - Reverses the last command.  Up to the last ten commands can be undone.  If there are no commands that can be undone the \f{Undo} item is disabled.  The \f{Undo} command can also be invoked by the \f{Undo} button (\K{cmdUndo}).
 
 For more information on working with selected objects, see the Select (\K{cmdSelect}) command.
 
@@ -94,23 +98,23 @@ Selected objects moved to the \f{Background} become unselected.
 
 Additional Shortcut keys perform the following:
 
-\dd \e{Shift+Backspace} - Undo
+\dd \c{Shift+Backspace} - Undo
 
 \u000
 
-\dd \e{Ctrl+Insert} - Copy
+\dd \c{Ctrl+Insert} - Copy
 
 \u000
 
-\dd \e{Shift+Insert} - Paste
+\dd \c{Shift+Insert} - Paste
 
 \u000
 
-\dd Shift+Delete - Cut
+\dd \c{Shift+Delete} - Cut
 
 \u000
 
-\dd Esc - Deselect All
+\dd \c{Esc} - Deselect All
 
 \rule
 
@@ -123,7 +127,7 @@ The \f{Delete} button is used to delete selected objects.  Remember, the \f{Undo
 
 Deleting a track that is connected to an easement (\K{cmdEasement}) causes the easement to be deleted as well.
 
-The \f{Delete} key invokes the Delete command.
+The \e{Delete} key invokes the Delete command.
 
 \rule
 

@@ -269,7 +269,7 @@ As an additional aid, the numbers of the next pages are printed on each edge.
 \dd \f{Angle} - of the grid.
 
 
-These values can be set directly or by dragging on the layout.  \e{Shift+Left+Drag} moves the grid and \e{Shift+Right+Drag} rotates the grid.  The \f{Reset} button resets the values to 0.
+These values can be set directly or by dragging on the layout.  \c{Shift+Left+Drag} moves the grid and \c{Shift+Right+Drag} rotates the grid.  The \f{Reset} button resets the values to 0.
 
 The \f{Print} button prints the selected pages and closes the \f{Print} dialog.  It is not enabled until you have selected some pages to print.
 

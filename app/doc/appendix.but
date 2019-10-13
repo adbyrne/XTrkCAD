@@ -12,9 +12,10 @@
 
 The best way to move your design from computer to roadbed is to print out a full scale copy (or portions) of the layout. During the print process the orientation of the print grid can be adjusted so the printout will line up with the tracks. 
 
-If you have cut-sheet printer (like a laser or ink-jet) set the Ignore Page Margins toggle on the print dialog. Normally there is an unprintable margin around the edge of the page and \e{XTrackCAD} only prints on the printable area, which means you would have to trim or overlay the pages. Setting the Ignore Page Margins toggle makes \e{XTrackCAD} ignore this margin so you can just abut the paper. Also, turn on Print Roadbed Outline and set your roadbed width. 
+If you have cut-sheet printer (like a laser or ink-jet) set the Ignore Page Margins toggle on the print dialog. Normally there is an unprintable margin around the edge of the page and \e{XTrackCAD} only prints on the printable area, which means you would have to trim or overlay the pages. 
+Setting the Ignore Page Margins toggle makes \e{XTrackCAD} ignore this margin so you can just abut the paper. Also, turn on Print Roadbed Outline and set your roadbed width. 
 
-If you have a continuous form printer (like a dot matrix) you can print a series of pages to form a continuous strip as long as you need. I use an old wide carriage printer that was being thrown out and can print 8' by 13.2" strips. Accuracy is not critical, 9-pin will do fine. You may need to experiment with setting the Landscape/Portrait modes on the Printer Setup and the Print dialogs and rotating the Print Grid to get the pages in the correct orientation. In particular I've found it best to set the Printer Setup dialog to Portrait mode and select Landscape Page Format on the \e{XTrackCAD} Printer dialog. 
+For large scale printouts, the ability of many platforms to print as PDF is very helpful. Commercial printers can oftem print very large strips of paper.
 
 Once you have a full scale print-out of your layout (or portion, if you have a larger layout you don't want to do it all at once) you need to transfer this to the roadbed. Here's two methods that can be used:
 
@@ -23,6 +24,8 @@ Once you have a full scale print-out of your layout (or portion, if you have a l
 \u000
 
 \b Tape the print-out to the roadbed then using a tracing wheel (available at Sewing shops), trace the center-line of the track and roadbed outline. At this point consider places when you'll want to widen the roadbed to support signals, switch machines, joints etc.
+
+\b Some users have reported that they successfully used the DXF export to get a file into Computer Controlled Machines that can cut out trackbed. 
 
 \rule
 
@@ -67,17 +70,6 @@ There's nothing wrong, you just need to load a Prototype definition file.
 \b Open the \f{Parameter dialog} window (\f{File>Parameter}) then click on Browse. Scroll through the list of \c{*.xtp} files to locate the file named \c{protoam.xtp}. Select this file then click the OK button. Click OK on the Parameter File dialog to complete installation of the prototype file. You should now be able to add cars to the Car Inventory list.
 
 Other prototype definitions can be created using the Car Prototype dialog. Refer to \K{carprototype} for detail.
-
-\rule
-
-
-\H{faqsButtonColor} Button Bar Icons Missing or Obscure
-
-\f{Why are Button Bar icons missing or obscure?}
-
-On systems restricted to 256 colors, it's not possible to display all colors on button faces. In this case, Windows chooses the closest matching color, which may be the same as the buttons background color. When this occurs the Button Bar icon may be obscured or appear to be missing.
-
-In cases where Layer Buttons are affected the number on the button may not be visible. Although it may not be possible to view the layer number, the correct color will be used to color objects that appear on the layer.
 
 \rule
 

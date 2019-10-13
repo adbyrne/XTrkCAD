@@ -108,33 +108,33 @@ Creating a curve is a two step operation.
 
 The five methods (with their Shortcut keys) used to create a Curved Track are:
 
-\dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release.  Click and Drag the red arrows to position the second endpoint. 
+\dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release. \c{Left-Drag} the red arrows to position the second endpoint. 
 While the first endpoint is being placed, unless \e{Shift} is held, if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you will drag out the second end in aligned to that track, once you are dragging the second end it will be restricted to an arc that has the same end angle as the first endpoint. After a track is competed, the new track will be connected to this first track.
 
 \u000
 
-\dd \G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release.  Click and Drag on the arrows to position the second endpoint.
-While the first endpoint is being placed, unless \e{Shift} is held, if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you can only drag out the center at right angles aligned to that end. After a track is competed, the new track will be connected to this first track.
+\dd \G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release.  \c{Left-Drag} on the arrows to position the second endpoint.
+While the first endpoint is being placed, unless \c{Shift} is held down, if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you can only drag out the center at right angles aligned to that end. After a track is competed, the new track will be connected to this first track.
 
 \u000
 
-\dd \G{png.d/bcurve3.png} (\c{Control-6}) Drag from the Center of the Curved track to one of the endpoints and release.  Click and Drag to position the second endpoint.
+\dd \G{png.d/bcurve3.png} (\c{Control-6}) Drag from the Center of the Curved track to one of the endpoints and release.  \c{Left-Drag} to position the second endpoint.
 
 \u000
 
-\dd \G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.  Click on the center of the track and Drag to form the Curve.
-While the first end point is being placed, unles \e{Shift} is held, if the cursor is on a track, the point snaps to an open endpoint and the chord starts at right-angles to the end track. After a track is competed, the new track will be connected to this first track.
+\dd \G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.  \c{Left-Click} on the center of the track and Drag to form the Curve.
+While the first end point is being placed, unles \c{Shift} is held, if the cursor is on a track, the point snaps to an open endpoint and the chord starts at right-angles to the end track. After a track is competed, the new track will be connected to this first track.
 
 \u000
 
-\dd \G{png.d/bezier.png} Place one endpoint and drag out the first control point and release, Place the second Endpoint and drag out the second control point and release. Once all 4 points are placed, you can pick one at a time and drag it to move it. Complete the Curve by pressing Enter, or Reject it with Esc.
-While the endpoints are being placed, unless \e{Shift} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks. After the new track is completed, it will be connected to these existing track.
+\dd \G{png.d/bezier.png} Place one endpoint and drag out the first control point and release, \c{Left-Click} to place the second Endpoint and \c{Left-Drag} out the second control point and release. Once all 4 points are placed, you can pick one at a time and drag it to move it. Complete the Curve by pressing \c{Enter|, or Reject it with c\{Esc}.
+While the endpoints are being placed, unless \c{Shift} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks. After the new track is completed, it will be connected to these existing track.
 
 \u000
 
-\dd \G{png.d/bcornu.png} Place each endpoint, Place the second Endpoint. Add Pins by clicking on the Cornu and drag them to constrain the curve to smoothly pass through points between them. Complete the Curve by pressing Enter, or Reject it with Esc.
-When either endpoint is being placed it will "Snap" to an open track endpoint of the tracks underneath the cursor unless \e{Shift} is held. You can only move the point along that track, or in an extension of it once it is snapped. After the new track is completed, it will be connected to these existing tracks.
-Cornu Track Pins as explained in \K{joinCornu} may be added to the Cornu to alter its shape. You can place them by clicking on the Cornu and move them around or delete them.
+\dd \G{png.d/bcornu.png} \c{Left-Click} to place each endpoint, \c{Left-Click} to place the second Endpoint. Add Pins with \c{Left-Click} on the Cornu and \c{Left-Drag} them to constrain the curve to smoothly pass through points between them. Complete the Curve by pressing \c{Enter}, or Reject it with \c{Esc}.
+When either endpoint is being placed it will "Snap" to an open track endpoint of the tracks underneath the cursor unless \c{Shift} is held. You can only move the point along that track, or in an extension of it once it is snapped. After the new track is completed, it will be connected to these existing tracks.
+Cornu Track Pins are explained in \K{joinCornu} to alter its shape. You can place them by clicking on the Cornu and move them around or delete them.
 If the end is not connected, an anchor will enable the end-angle and radius to be set by dragging. Initially the end radius is set to be zero and the angle will be picked to minimize overall curvature. If track pins may be added, two such end points with zero end radius defines a straight track, and such a track with one added track pin will create a smooth arc through the three points.
 
 \u000
@@ -149,13 +149,13 @@ In all but the Bezier case, two Red arrow heads will be drawn after the first st
 
 A straight track will be created if the second endpoint is lined up with the first endpoint.
 
-If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid if they are not snapped to another object. \e{Shift} ensures that other objects will be ignored.
+If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid if they are not snapped to another object. \c{Shift} ensures that other objects will be ignored.
 
 Optionally, the curve center point and radius can be displayed for the Curve.  This is enabled by the Move Label (\K{cmdMoveLabel}) command.
 
 For Beziers, the active control point will be drawn in red and the available endpoints are shown with circles.  
 
-\f{Note:} You can also create Straight and Curved tracks using \k{cmdModify} by dragging out extra track from an open end-point.
+\f{Note:} You can also create Straight and Curved tracks using \k{cmdModify} by \c{Left-Drag}ing out extra track from an open end-point.
 
 \rule
 
@@ -174,7 +174,7 @@ Hand-laid turnouts are created by specifying 3 values:
 
 First select the position for the Frog (\K{generalTerms}) on an existing track and then \e{Drag} away to specify the angle of the \e{Frog}.  The angle in degrees and equivalent frog number is displayed on the status bar.  When you release, the line indicating the angle jumps to one side of the track to show you the center line of the new leg of the turnout.
 
-Next \e{Click} and \e{Drag} to position the Points (\K{generalTerms}) for the turnout.  As you \e{Drag}, tracks will be drawn showing the turnout.  When you release the turnout is created.
+Next \c{Left-Click} and \c{Left-Drag} to position the Points (\K{generalTerms}) for the turnout.  As you \c{Left-Drag}, tracks will be drawn showing the turnout.  When you release the turnout is created.
 
 You cannot place the \e{Frog} or \e{Points} on a turnout, circle or helix.  However, you can create overlapping Hand-laid Turnouts.
 
@@ -221,13 +221,13 @@ You can create a new track parallel to any straight, curved, bezier, cornu or ea
 The \f{Parallel Separation} control (Visible in the Status Bar) displays the current separation between parallel tracks.  This value can be changed before selecting a track.  The value must be greater than 0.0 if the gauges are equal.
 If the gauges are equal, a value of 0 means that the rail of the second track is overlaid on the first to simulate dual guage track.
 
-Select the track you want to parallel, and the new parallel track will appear beside it.  You control which side the new track will be on by moving the cursor from one side to the other of the selected track.
+Select the track you want to parallel with \c{Left-Click}, and the new parallel track will appear beside it.  You control which side the new track will be on by moving the cursor from one side to the other of the selected track.
 
 This is very useful for creating sidings and yards.
 
 You cannot create tracks parallel to turnouts or sectional track.
 
-It is possible to create tracks that abut (the endpoints are very close and aligned).  These endpoints will be automatically connected.
+It is possible to create tracks that abut (the endpoints are very close and aligned). These endpoints will be automatically connected.
 
 \rule
 
@@ -236,8 +236,8 @@ It is possible to create tracks that abut (the endpoints are very close and alig
 
 \G{png.d/bstraigh.png}
 
-Straight track is a created by selecting the first endpoint then dragging the cursor to the point where you want the second endpoint to be.
-If Shift is held down when the first endpoint is being placed and the cursor is on a track, the new straight end will "Snap" to the nearest open track endpoint and you can drag out the second end aligned to that track. After a track is competed, the new track will be connected to the existing track.
+Straight track is a created by \c{Left-Click} to select the first endpoint then \c{Left-Drag}ing the cursor to the point where you want the second endpoint to be.
+Unless \c{Shift} is held down when the first endpoint is being placed and the cursor is on a track, the new straight end will "Snap" to the nearest open track endpoint and you can drag out the second end aligned to that track. After a track is competed, the new track will be connected to the existing track.
 
 If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained to the grid.
 
@@ -273,7 +273,7 @@ You can use the Parameter File Dialog (\K{cmdPrmfile}) to control what turnouts 
 
 \G{png.d/turnsel.png}
 
-Select a turnout from the scrolling list.  A picture of the selected turnout is drawn in the diagram canvas.  You can pick the Active endpoint (\K{generalTerms}) by clicking on an endpoint in the diagram.  The Active endpoint (\K{generalTerms}) is indicated by a highlighted square.
+Select a turnout from the scrolling list by \c{Left-Click}ing on it. Move to the Layout and \c{Left-Click} where the turnout should be placed. The Turnout will snap to nearby flextracks or open endpoints. By \c{Left-Drag}ing you can move the turnout around. Additional \c{Left-Click}s change the way the turnout is placed.
 
 The \f{New} button invokes the Turnout Designer (\K{cmdTurnoutNew}) dialog.  This button displays a pop-up-menu list of various types of turnouts and sectional track.
 

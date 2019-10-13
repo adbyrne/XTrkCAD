@@ -9,8 +9,7 @@
 
 The Main Window includes a title bar along the top that describes the contents of the window, followed by a tool bar that contains user interface buttons. Most of the window's remaining area is used to display the layout. A footer border contains information including system messages. 
 
-Most windows can be opened, closed, resized, minimized, and moved around the screen. The close, minimize, and zoom buttons are located on the right side of the title bar. Minimizing a window will close the contents of the window, but store a reference to it in the Task bar. Closing a window will make it disappear completely (so you may be asked to save your changes first). To move a window, click on the title bar and drag the window where you want it. To resize a window, either click the Zoom button 
-
+Most windows can be opened, closed, resized, minimized, and moved around the screen. The close, minimize, and zoom buttons are located on the right side of the title bar. Minimizing a window will close the contents of the window, but store a reference to it in the Task bar. Closing a window will make it disappear completely (so you may be asked to save your changes first). To move a window, click on the title bar and drag the window where you want it. 
 
 \H{mainW} \i{Main Window Overview}
 

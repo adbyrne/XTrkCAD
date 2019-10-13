@@ -594,21 +594,26 @@ For detail about;
 
 \G{png.d/bmodify.png}
 
-The \f{Modify} command is used to change characteristics of or extend existing track by adding new track. This command works with any unconnected track endpoint, or with \e{Cornu(s)} or \e{Bezier} track even if connected.  Selecting one Cornu which is connected to other Cornu(s) results in a single curve with added control "Pins" at the connections.
+The \f{Modify} command is used to change characteristics of tracks or draw elements or extend existing track by adding new track. The extend type of Modify command works with any unconnected track endpoint, or with \e{Turntables}. \e{Cornu(s)} or \e{Bezier} track can be modified even if connected.  Selecting one Cornu which is connected to other Cornu(s) results in a single modification curve with control "Pins" at the connections.
 
-The \f{Modify} command can be invoked using the \f{Change>Modify} menu item, the \f{Modify} button or the menu raised by a \e{Right-Click} over the \f{Main Canvas}.
+The \f{Modify} command can be invoked using the \f{Change>Modify} menu item, the \f{Modify} button, by \e{Double-Click} in Select when hovering over a selected item or the menu raised by a \e{Right-Click} over the \f{Main Canvas}.
 
-Before a track is selected for Modify, a dynamic blue anchor will show which track the command will take effect on if the cursor is close enough to a modifyable track or object. It will show arrows to indicate if the track can be extended or trimmed and if its radius can be modified (if Shift is depressed).  
+Before a track is selected for Modify, a dynamic blue anchor will show which track the command will take effect on if the cursor is close enough to a modifyable track or object. Arrows are shown to indicate if the track can be extended or trimmed and also if its radius can be modified if Shift is depressed as the cursor is moved over the track.  
+
+\S2{extendModify} Extending Track
 
 Either the left mouse button (for changing length or creating a tangent track) or the right mouse button (for extending with a new track) is used to modify an unconnected endpoint.
 
-The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.  A \e{Box} or a \e{FilledBox} can be modified by selecting a corner and dragging in two dimensions, or a side and dragging it orthogonally. These modifications preserve a 4-sided rectangle.
+\S2{objectModify} Modifying Objects
 
-The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be changed. Control "Pins" can be added, moved or selected and removed from \e{Cornus}.
+\n The endpoints of a \e{Line}, \e{Dimension Line}, \e{Table Edge} or \e{Bench-work} can be dragged to new positions.  
 
-\e{Curved Lines} are modified by dragging the end points and dragging the amount of central deflection (radius).
+\n A \e{Box} or a \e{FilledBox} can be modified by selecting a corner and dragging in two dimensions, or a side and dragging it orthogonally. This modifications preserve a 4-sided rectangle.
 
-Selecting a corner of a \e{PolyLine} or \e{Polygon} moves that corner to a new position, and if moved close to a neighboring corner will merge the two corners and delete the edge between them. Selecting an edge will create a new corner that can be dragged to a new position.
+\n The controlpoints of a \e{Cornu Track}, \e{Bezier Track} or \e{Bezier Line} can be changed. Control "Pins" can be added, moved or selected and removed from \e{Cornus}.
+
+\n \e{Curved Lines} are modified by dragging the end points and dragging the amount of central deflection (radius).
+
 
 Any tracks created during the \f{Modify} command will have the following properties inherited from the first track: selected state, hidden state, scale, track gauge and Layer. 
 
@@ -631,6 +636,10 @@ For more detail about;
 \u000
 
 \dd Modifying Draw elements refer to \K{chgDraw}
+
+\u000
+
+\dd Modifying Polygons and PolyLines refer to \K{polyModify}
 
 \u000
 
@@ -801,17 +810,68 @@ In Points Mode,
 
 \u000
 
-\dd Polygons have nodes that can be selected and dragged. Selected nodes are highlighted. \e{Shift+Click} will add to selected nodes and dragging will then move all of the selected points together. If \e{Shift} is held down while dragging, the relative angle for the first selected point to its predecessor point will be locked to a multiple of 90 degrees. Clicking between existing nodes will add a new node while \e{Delete} will delete all currently selected nodes. If a single node is selected, text entry boxes for length and relative angle (the deviation angle from the preceeding side) can be used to fine-tune it. 
+\dd Bezier Lines - see \K{chgBezier}
 
-If no points are selected, the context menu can be used to close an polyline into a polygon (shortcut "c") or open (shortcut "o") a non-filled polygon between its last and first points. A non-filled polygon can also be filled (shortcut "f") or a filled one emptied (shortcut "e").
-A selected Polygon or Polyline point can be deleted (shortcut "Delete") as long as there are at least three points left. It can also be curved (shortcut "c"), rounded (shortcut "r") or made back into a sharp point (shortcut "s") as long as it isn't an end point on a Polyline.
+\S3{polyModify} Modifying PolyLines and Polygons
 
-Curved "poly-points" create a short Bezier curve that goes from halfway along the intersection line to the next point and which has a control arm until the 3 quarter point of that line. A rounded point starts at the halfway point of the shorter of the two lines on both sides has control arms that extend to the point and then has the other point an equal distance away as the first (ensuring an arc). By manipulating the nearest point (for example by adding a point, the curve at the desired location can be controlled.
-For defined radii rounding a point will work best, but curvng it will be more naturalistic.
+When a Polygon or a PolyLine is modified, open blue circle anchors show the position of its "nodes", these are selected with \f{Left-Click} and are shown as filled circles.
+
+\b \f{Left-Drag} of a selected node of a \e{PolyLine} or \e{Polygon} moves that node to a new position, and if moved close enough to a neighboring node will merge the two nodes and delete the edge between them. 
 
 \u000
 
-\dd Bezier Lines - see \K{chgBezier}
+\b \f{Delete} will remove a selected node.
+
+\u000
+
+\b \f{Left-Clicking} on an edge will create a new node that can be dragged to position it.
+
+\u000
+
+\b Multiple points can be selected using \f{Shift+Left-Click}. If these are then \f{Left-Drag}ed all the selected points move together, preserving relative position. 
+
+\u000
+
+\b There is a context menu that has controls for a selected point. It has options to alter the node into a rounded node (shortcut "r") or a smooth node (shortcut "s"). To turn it back into a sharp (vertex) node (shortcut "v").
+
+\u000
+
+\b If \e{Shift} is held down while dragging, the relative angle for the first selected point to its predecessor point will be locked to a multiple of 90 degrees. 
+
+\u000
+
+\b When a node or nodes is/are selected, text entry boxes for length and relative angle (the deviation angle from the direction of preceeding side) can be used to fine-tune the position of the first node in the sequence. A arc indicator identifies the angle in question.
+
+\u000
+
+If no nodes are selected, 
+
+\u000
+
+\b A context menu can be used to close a polyline into a polygon (shortcut "c") or open it (shortcut "o") into a non-filled polygon between its last and first nodes. 
+
+\u000
+
+\b A unfilled polygon can also be filled (shortcut "f") or a filled one emptied (shortcut "e").
+
+\u000
+
+Notes 
+
+\u000
+
+\dd A selected Polygon or Polyline node can only be deleted if there are at least three nodes left. It can only be round or smooth if long as it isn't an end node of a Polyline.
+
+\u000
+
+\dd Smoothed nodes implement a short Bezier curve that goes from halfway along the line of to the next node and which has a control arm that ends at the node. These are typically of most use to fine-tune a series of nodes that simulate a complex curve.
+
+\u000
+
+\dd Rounded nodes start at a distance that is half the shorter of the lines from the last node and to the next node and has control arms that extend to the half-way point to the node. 
+This produces an arc whose radius is determined by the distance of the closet node. By manipulating the nearest node (for example, by adding a point) the radius at the node can be controlled.
+
+\u000
 
 \rule
 

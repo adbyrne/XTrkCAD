@@ -77,7 +77,8 @@ If \e{Shift} is held down when the button is released for the second end, it wil
 
 \dd \G{png.d/dcurve2.png} Select one end of the curve and drag to the center.
 
-To complete the command, drag on the red arrows to adjust the curve.
+If \e{Shift} is held down as the left mouse button is clicked for the first end point of the curve and the cursor is over a line object the position will snap to the nearest end of that line.
+To complete the command, drag on the red arrows to adjust the curve from the initial end.
 
 \u000
 
@@ -97,7 +98,7 @@ To complete the command, drag on the red arrows to adjust the curve.
 
 If \e{Shift} is held while the end points are selected, the curve will lock to the ends of nearby line objects.
 
-To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a control point. Hit \e{Enter} to accept, \e{Esc} to reject.
+To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a control point. Hit \e{Enter} or \e{Space} to accept, \e{Esc} to reject.
 
 \rule
 
@@ -151,18 +152,22 @@ Shapes are drawn by:
 
 \u000
 
-\dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \G{png.d/dpolyline} \f{PolyLines} and \f{Polygons} are created by \e{Left+Drag}, and a new corner is placed when you press the left mouse button. You can drag it until you release the button.
-If \e{Shift} is pressed, an anchor point will be shown on nearby objects that the next point will be snapped to. 
-If \e{Ctrl} is held down when a new point is placed, it will snap the relative angle of the new side to a multiple of 90 degrees.
-If \e{Sticky} is set for draw objects, after the object is created, precise dimensions can be entered to alter the new object, before it is completed either with a \e{Space} or \e{Return} or by selecting a new operation.
+\dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \G{png.d/dpolyline} \f{PolyLines} and \f{Polygons} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. When using Drag, the node will be positioned when you release the button.
+\u If \c{Shift} is pressed, an anchor point will be shown on nearby draw objects that the next point will be snapped to. 
+\u If \c{Ctrl} is held down when a new point is placed, it will snap the relative angle of the new side to a multiple of 90 degrees from the previous side.
+\u A special square anchor will show when the cursor is in a position such that it is 90 degrees away from both the last point and the first point of the Polygon.
+\u The last polygon segment dimensions can be altered using the text boxes that appear showing the segment length and the relative angle to the previous segment.
+\u A polygon is closed if the next node is place over the start of the polygon
+\u The polygon or polyline are ended using \c{Enter} or \c{Space}. A polygon will be auto-closed.
+
+If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, before it is completed either with a \c{Space} or \c{Return} or by selecting a new operation.
  
-The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \e{Space} or \e{Return} key or by selecting another operation. Before they are finished, precise dimensions can be entered for the last side drawn.
+The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \c{Space} or \c{Return} key or by selecting another operation. Before they are finished, precise dimensions can be entered for the last side drawn.
 All Polylines and Polygons must have more than 2 corners to be created successfully. 
 
-Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been finished to alter individual points to make them curved or rounded points.
+Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been finished to alter individual points and to make them curved or rounded points.
 
 \rule
-
 
 \S{cmdStraightL} Straight Objects
 
@@ -171,9 +176,9 @@ Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been
 Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.  
 
 \dd \G{png.d/dline.png} Creates a \f{Straight Line} of specified color and width.
-If \e{Shift} is held down for the first end point and the cursor is near a line object the new line start position will snap to the nearest draw object, as shown by the anchor.
-If \e{Shift} is held down during \e{Left+Drag} the line end position will snap to the nearest point of any draw object as shown by the anchor.
-If \e{Ctrl} is held down during \e{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees. 
+If \c{Shift} is held down for the first end point and the cursor is near a line object the new line start position will snap to the nearest draw object, as shown by the anchor.
+If \c{Shift} is held down during \c{Left+Drag} the line end position will snap to the nearest point of any draw object as shown by the anchor.
+If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees. 
 
 
 \u000
@@ -212,9 +217,9 @@ The \f{Text} command lets you enter text on the layout at the selected position.
 
 The font size can be changed by the Font Size drop list on the \f{Status-bar} (\K{mainW}).  The font size is scaled along with everything else on the layout so text is always the same relative size as other layout objects.
 
-The font can be selected by the \f{Font Selection} (\K{fontSelW}) dialog invoked by the \f{Options>Fonts} menu item or by \e{Shift+Right-Click} (\K{cmdAcclKeys}).
+The font can be selected by the \f{Font Selection} (\K{fontSelW}) dialog invoked by the \f{Options>Fonts} menu item or by \c{Shift+Right-Click} (\K{cmdAcclKeys}).
 
-The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \e{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \e{Left-Click+Drag}ing the text to any desired postion on the layout.
+The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \c{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \c{Left-Click+Drag}ing the text to any desired postion on the layout.
 
 The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents of existing \f{Text} objects and to draw boxes around them.
 

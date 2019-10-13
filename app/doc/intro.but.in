@@ -109,25 +109,37 @@ Be sure to visit the project web page for latest news and updates: \W{http://www
 
 \f{Easy to use}
 
-As much as possible, \e{XTrackCAD} is designed to operate the same as pencil and paper: create tracks by simply dragging the mouse, place turnouts anywhere on existing tracks, use circles for initial design and create stall tracks by drawing from the turntable. 
+ \e{XTrackCAD} was designed to operate in a similar way to pencil and paper: You can draw tracks by dragging the mouse, you select and place turnout "templates" anywhere on existing tracks, and you can use fixed radii for initial design. 
+ 
+But extra capabilities have been added that give more power by using FlexTracks (Cornu) you have tracks that automatically redraw as you drag turnouts around, creating smooth curves, you can zoom in and out, and of course, undo and deleting tracks are easier!
 
-You don't have to be an expert CAD user to make the most of \e{XTrackCAD}. You don't specify line lengths or angles, just draw. 
+You don't have to be an expert CAD user to make the most of \e{XTrackCAD} but the program will ensure that dimensions, radii and angles are accurate. 
 
-\e{XTrackCAD} deals with tracks as tracks, not line segments. Tracks are connected to each other and can be drawn showing endpoints of turnouts and other components. As you zoom in, both rails are drawn. 
+You don't have to specify line lengths or angles and just draw. But if you want to be more precise, you can enter precise dimensions both in real-world and scale sizes.
 
-On-line demonstrations show the actual operation of many of the program's features. Extensive help is available for all commands and operations. 
+\e{XTrackCAD} is a specialized CAD for railway modelling, it deals with tracks as tracks, not as line segments. Tracks are connected correctly to each other and with endpoints of turnouts and other components. 
+
+As you zoom in, the rails are drawn and then ties are added. 
+
+\f{Free}
+
+Thanks to the generosity of Dave Bullis, who wrote the progam, and the active help of open-source volunteers, XTrackCAD is free to own and use. You can even take up the cudgels and help!
+
+\f{Available Help}
+
+On-line demonstrations show the actual operation of many of the program's features. Extensive help is available for all commands and operations.  There are communities of users and developers who can answer quaestions.
 
 \f{Packed with features}
 
-\e{XTrackCAD} is designed from the ground up to be a complete tool for Model Railroad layout design. 
+\e{XTrackCAD} is designed from the ground up to be a complete tool for many aspects of Model Railroad layout design. 
 
 \dt \e{Train Simulation and Car Inventory}
 
-\dd Any number of Cars and Locomotives can be placed on your layout to check clearances, siding capacities and track layout. Trains can be animated to simulate operations and switching on your layout. But be careful you don't crash! 
+\dd Any number of Cars and Locomotives can be placed on your layout to check clearances, siding capacities and track layout. Trains can be animated to simulate operations and switching on your layout.
 
 \u000
 
-\dd The Car Inventory dialog records your cars and locomotives. 
+\dd The Car Inventory dialog records your cars and locomotives and these can be exported and imported from spreadsheets. 
 
 \u000
 
@@ -141,25 +153,32 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
+\dd The Cornu tracks features create dynamically variable easment tracks that optimise the curvature of tracks to ensure a protypical appearance. They alter as the other tracks are moved just as flextrack will in the 12 inches to the foot world! 
+
+\u000
+
 \dd The Parallel command easily creates new straight or curved tracks, laying out yards and sidings in a few easy steps. 
 
 \u000
 
-\dd The Join command links any two tracks (straight, curved, Turnouts or Turntables) with accurate aligned connecting track segments. The connected tracks are trimmed or extended as required. 
+\dd The Join command links any two tracks (Straights, Curves, Turnouts or Turntables) with accurate aligned connecting track segments. The connected tracks are trimmed or extended as required. 
 
 \u000
 
-\dd The Helix Track command computes the number of turns, radius, grade and vertical separation to based on your criteria. 
+\dd The Helix Track command computes the number of turns, radius, grade and vertical separation based on your criteria. 
 
 \u000
+
+\dd Turntables can be constructed with any radius and can either have fixed or dynamic bay tracks
 
 \dt \e{Turnout Select and Placement}
 
-\dd The Turnout Hot Bar contains a scrolling list of Turnouts, Sectional Tracks and Structures available in the current Scale. Simply click on one and drag it onto the layout. 
+\dd The Turnout Hot Bar contains a scrolling list of Turnouts, Sectional Tracks and Structures available in the current Scale. Simply click on one and click again drop it onto the layout. 
 
 \u000
 
-\dd As Turnouts are dragged over existing tracks they are automatically aligned. \e{XTrackCAD} searches for any other tracks that align with each of the Turnout's Endpoints, and shows you the number of connections that will be made and the maximum offset as you position the Turnout. Just adjust the Turnout's position to minimize the offset to ensure the best fit. 
+\dd As Turnouts are dragged over existing tracks they are automatically aligned. \e{XTrackCAD} searches for any other tracks that align with each of the Turnout's Endpoints, and shows you the number of connections that will be made and the maximum offset as you position the Turnout. 
+Just adjust the Turnout's position to minimize the offset to ensure the best fit. 
 
 \u000
 
@@ -169,11 +188,15 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \dt \e{Layers}
 
-\dd Layers are an important feature for designing layouts of any complexity. Use one layer for the main-line and others for staging tracks, Bench-work or scenery. Multilevel designs can have groups of layers for each level. 
+\dd Layers are an important feature for manageing the design for layouts of any complexity. Use one layer for the main-line and others for staging tracks, Bench-work or scenery. Multilevel designs can have groups of layers for each level. 
 
 \u000
 
-\dd \e{XTrackCAD} allows up to 99 layers and the first 20 layers can have their own button to control visibility. Each layer can have a name which is displayed as the balloon help for the layer button. 
+\dd \e{XTrackCAD} allows up to 99 layers layers can have their own button to control visibility. Each layer can have a name which is displayed as the balloon help for the layer button. 
+
+\u000
+
+\dd Modular Layout assembly is supported with Modular Layers which ensure thier contents are moved as a set.
 
 \u000
 
@@ -183,7 +206,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \dt \e{Elevations and Profile}
 
-\dd Elevations are one of the most powerful features of \e{XTrackCAD}. 
+\dd Elevations are one of the most powerful features of \e{XTrackCAD} they are dynamically recalulated as the layout changes. 
 
 \u000
 
@@ -211,7 +234,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \dt \e{Flexible and Powerful Printing}
 
-\dd Printing is an important part of a layout design program, and \e{XTrackCAD} has a flexible Print command to get your design onto the layout. 
+\dd Printing is an important part of a layout design program, and \e{XTrackCAD} has a flexible Print command to get your design onto the layout.
 
 \u000
 
@@ -261,7 +284,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd The \e{XTrackCAD} Draw command is used to draw lines (straight, curved and circles) and shapes (filled boxes, circles and polygons). These can be different colors and lines can have different widths. These are useful for drawing scenic features (rivers, bridges, mountains). 
+\dd The \e{XTrackCAD} Draw command is used to draw lines (straight, curved and circles) and shapes (filled boxes, circles, polylines and polygons). These can be different colors and lines can have different widths. The Polylines and Polygons can have curved sides. These are useful for drawing scenic features (rivers, bridges, mountains). 
 
 \u000
 
@@ -273,11 +296,11 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd Text can be drawn on the layout too. 
+\dd Text can be added to the layout. 
 
 \u000
 
-\dd Notes can be attached to particular spots on the layout. When selected they can display special information about that part of the layout, such as prototype features, construction details or operation notes. 
+\dd Notes can be attached to particular spots on the layout. When selected they can display special information about that part of the layout, such as prototype features, construction details or operation notes.  This includes URL links to files on the Internet.
 
 \u000
 
@@ -334,7 +357,7 @@ Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrackCAD} feat
 
 \u000
 
-\b Draw lines, arcs and filled shapes (for showing river edges etc.)
+\b Draw lines, arcs, polylines and polygons and filled polygons or circular shapes (for showing river edges etc.)
 
 \u000
 
@@ -390,11 +413,11 @@ Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrackCAD} feat
 
 \u000
 
-\b Panning via a map window
+\b Panning and zooming via a map window and also in Pan/Zoom Mode
 
 \u000
 
-\b Price lists
+\b Price lists can be entered to allow the layout to be priced
 
 \u000
 
@@ -447,6 +470,10 @@ Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrackCAD} feat
 
 \u000
 
+\b Sections of track can be tagged as bridge tracks which draws a bridge parapet on each side.
+
+\u000
+
 \b Drawing Turntable stall tracks is easy, just drag from the Turntable with the Modify command. The minimum angle between tracks can be set to ensure accurate, evenly spaced tracks.
 
 \u000
@@ -489,8 +516,9 @@ Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrackCAD} feat
 
 \b You can rescale and flip objects, trim turnouts and create block gaps. 
 
-\rule
+\u000
 
+\rule
 
 \H{aboutmanual} About This Manual
 
@@ -529,7 +557,7 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \H{installSoftware} Installation
 
-\e{XTrackCAD} is designed to operate under Linux or MS Windows. Information within this section of the manual pertains to installation of the application in either of these environments.
+\e{XTrackCAD} is designed to operate under Linux, OSX or MS Windows. Information within this section of the manual pertains to installation of the application in either of these environments.
 
 \rule
 
@@ -559,20 +587,20 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \S{OSXInstall} \i{OSX Installation} \i{Mac Installation}
 
-\e{XTrackCAD} for LINUX is shipped as a package containing an application.
+\e{XTrackCAD} for OSX is shipped as a package containing an application.
 
-\n Start the installation by opening the \f{XTCOSXPack} package and dragging the contained application into the \e{Applications} folder using the shortcut in the package. 
+\n Start the installation by opening the package and dragging the contained application into the \e{Applications} folder using the shortcut in the package. 
 The application includes the program, documentation, parameter and example files within it.  
 
 \lcont{\u000}
 
-\n To run on modern OSX levels, the \e{XQuartz} package must also have been installed - see \W{http://www.xquartz.org}{http://www.xquartz.org}.
+\n To run on OSX, the \e{XQuartz} package must also have been installed - see \W{http://www.xquartz.org}{http://www.xquartz.org}. XQuartz will need to be upgraded after each OS version upgrade.
 
 \lcont{\u000}
 
-\n \i{OSX Run Security} When the application is first run, it will need to be authorized by OSX. There will be a OSX prompt that asks if it should be opened. And then it fail to run. 
-After opening it for the first time, go to \e{System Preferences} and then \e{Security & Privacy} and you will see that the app is named as having been blocked. Hit the \e{Run Anyway} button and the program should start.
-This sequence will be necessary after each fresh install.
+\n \i{OSX Run Security} When the application is first run, it will need to be authorized by OSX. There will be a OSX prompt that asks if it should be opened. And then it will still fail to run. 
+After opening it for the first time, go to \e{System Preferences>Security & Privacy} and you will see that the app is named as having been blocked. Hit the \e{Run Anyway} button and the program should start.
+This sequence may be necessary after each OS upgrade.
 
 \rule
 
