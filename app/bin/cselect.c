@@ -63,6 +63,8 @@ struct extraData { char junk[2000]; };
 static wDrawBitMap_p endpt_bm;
 static wDrawBitMap_p angle_bm[4];
 
+static track_p moveDescTrk;
+
  long quickMove = 0;
  BOOL_T importMove = 0;
  int incrementalDrawLimit = 20;
@@ -1634,7 +1636,20 @@ static STATUS_T CmdMove(
 			return C_TERMINATE;
 
 		case C_CMDMENU:
-			wMenuPopupShow( selectPopup1M );
+			base = pos;
+			track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
+			if ((trk) &&
+				QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
+				trackParams_t trackParams;
+				if (GetTrackParams(PARAMS_CORNU, trk, pos, &trackParams)) {
+					DIST_T dist = FindDistance(base, trackParams.ttcenter);
+					if (dist < trackParams.ttradius/4) {
+							cmdMenuPos = trackParams.ttcenter;
+					}
+				}
+			}
+			moveDescTrk = trk;
+			wMenuPopupShow( selectPopup2M );
 			return C_CONTINUE;
 
 		case C_REDRAW:
@@ -1944,6 +1959,7 @@ static STATUS_T CmdRotate(
 					}
 				}
 			}
+			moveDescTrk = trk;
 			wMenuPopupShow( selectPopup2M );
 			return C_CONTINUE;
 
@@ -1995,7 +2011,7 @@ static void QuickRotate( void* pangle )
 
 static wMenu_p moveDescM;
 static wMenuToggle_p moveDescMI;
-static track_p moveDescTrk;
+
 static void ChangeDescFlag( wBool_t set, void * mode )
 {
 	wDrawDelayUpdate( mainD.d, TRUE );
@@ -2813,6 +2829,7 @@ static STATUS_T CmdSelect(
 			}
 			if ((trk)) {
 				wMenuPushEnable(descriptionMI, QueryTrack( trk, Q_HAS_DESC ));
+				moveDescTrk = trk;
 			}
 			if (selectedTrackCount>0)
 				wMenuPushEnable( rotateAlignMI, TRUE );
@@ -2847,7 +2864,12 @@ static void SetMoveMode( char * line )
 }
 
 static void moveDescription( void ) {
-
+	if (!moveDescTrk) return;
+	int hidden = GetTrkBits( moveDescTrk) &TB_HIDEDESC ;
+	if (hidden)
+		ClrTrkBits( moveDescTrk, TB_HIDEDESC );
+	else
+		SetTrkBits( moveDescTrk, TB_HIDEDESC );
 }
 
 
@@ -2864,18 +2886,18 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 	wPrefGetInteger( "draw", "movemode", &moveMode, MAXMOVEMODE );
 	if (moveMode > MAXMOVEMODE || moveMode < 0)
 		moveMode = MAXMOVEMODE;
-
-	selectPopup1M = MenuRegister( "Move Draw Mode" );
+	selectPopup1M = MenuRegister( "Select Menu" );
+	wMenuSeparatorCreate( selectPopup1M );
 	quickMove1M[0] = wMenuToggleCreate( selectPopup1M, "", _("Normal"), 0, quickMove==0, ChangeQuickMove, (void *) 0 );
 	quickMove1M[1] = wMenuToggleCreate( selectPopup1M, "", _("Simple"), 0, quickMove==1, ChangeQuickMove, (void *) 1 );
 	quickMove1M[2] = wMenuToggleCreate( selectPopup1M, "", _("End Points"), 0, quickMove==2, ChangeQuickMove, (void *) 2 );
-	selectPopup2M = MenuRegister( "Move Draw Mode " );
+	selectPopup2M = MenuRegister( "Track Selected Menu " );
 	wMenuSeparatorCreate( selectPopup2M );
 	AddMoveMenu( selectPopup2M, QuickMove);
 	wMenuSeparatorCreate( selectPopup2M );
 	AddRotateMenu( selectPopup2M, QuickRotate );
 	wMenuSeparatorCreate( selectPopup2M );
-	descriptionMI = wMenuPushCreate(selectPopup2M, "cmdMoveLabel", _("Move Description"), 0, (wMenuCallBack_p)moveDescription, (void*) 0);
+	descriptionMI = wMenuPushCreate(selectPopup2M, "cmdMoveLabel", _("Show/Hide Description"), 0, (wMenuCallBack_p)moveDescription, (void*) 0);
 	rotateAlignMI = wMenuPushCreate( selectPopup2M, "", _("Align"), 0, (wMenuCallBack_p)RotateAlign, (void* ) 1 );
 	ParamRegister( &rescalePG );
 }
