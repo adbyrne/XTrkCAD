@@ -952,179 +952,216 @@ void wDrawFilledRectangle(
 }
 
 #ifdef DRAWFILLPOLYLOG
-static FILE * logF;
+    static FILE * logF;
 #endif
-static int wFillPointsMax = 0;
+
 static dynArr_t wFillPoints_da;
 static dynArr_t wFillType_da;
-//static POINT * wFillPoints;
-//static BYTE * wTypePoints;
 
-#define POINTTYPE(N) DYNARR_N( BYTE, wFillType_da, N )
-#define POINTPOS(N) DYNARR_N( POINT, wFillPoints_da, N )
+#define POINTTYPE(N) DYNARR_N( BYTE, wFillType_da, (N) )
+#define POINTPOS(N) DYNARR_N( POINT, wFillPoints_da, (N) )
+
+/**
+ * Add a point definition to the list. The clipping rectangle is recalculated to
+ * include the new point.
+ *
+ * \param d IN drawing context
+ * \param pk IN index of new point
+ * \param pp IN pointer to the point's coordinates
+ * \param type IN line type
+ * \param pr IN/OUT clipping rectangle
+ */
 
 static void addPoint(
-	int * pk,
-	POINT * pp,
-	BYTE type,
-	RECT * pr)
+    wDraw_p d,
+    int pk,
+    coOrd * pp,
+    BYTE type, RECT * pr)
 {
+    POINT p;
+    p.x = XINCH2PIX(d, pp->x);
+    p.y = YINCH2PIX(d, pp->y);
+
 #ifdef DRAWFILLPOLYLOG
-	fprintf(logF, "	q[%d] = {%d,%d}\n", *pk, pp->x, pp->y);
+    fprintf(logF, "	q[%d] = {%d,%d}\n", pk, p.x, p.y);
 #endif
 
-	if ( *pk > 0 ) {
-		if (POINTTYPE((*pk) - 1) == type &&
-			POINTPOS((*pk) - 1).x == pp->x &&
-			POINTPOS((*pk) - 1).y == pp->y) {
-			return;
-		}
-		//	&& wTypePoints[(*pk) - 1] == type &&
-		//	 wFillPoints[(*pk)-1].x == pp->x && wFillPoints[(*pk)-1].y == pp->y )
-		//	return;
-	}
+    DYNARR_N(POINT, wFillPoints_da, pk) = p;
+    DYNARR_N(BYTE, wFillType_da, pk) = type;
 
-	DYNARR_APPEND(POINT,wFillPoints_da,1);
-	DYNARR_APPEND(BYTE,wFillType_da,1);
-	//wFillPoints[ (*pk)++ ] = *pp;
-	//wTypePoints[ (*pk)] = type;
-	if (pp->x<pr->left)
-		pr->left = pp->x;
-	if (pp->x>pr->right)
-		pr->right = pp->x;
-	if (pp->y<pr->top)
-		pr->top = pp->y;
-	if (pp->y>pr->bottom)
-		pr->bottom = pp->y;
-
+    if (p.x < pr->left) {
+        pr->left = p.x;
+    }
+    if (p.x > pr->right) {
+        pr->right = p.x;
+    }
+    if (p.y < pr->top) {
+        pr->top = p.y;
+    }
+    if (p.y > pr->bottom) {
+        pr->bottom = p.y;
+    }
 }
 
+/**
+ * Draw a polyline consisting of straights with smoothed or rounded corners.
+ * Optionally the area can be filled.
+ *
+ * \param d	IN	drawing context
+ * \param node IN 2 dimensional array of coordinates
+ * \param type IN type of corener (vertex, smooth or round)
+ * \param cnt IN number of points
+ * \param color IN color
+ * \param dw IN line width
+ * \param lt IN line type
+ * \param opts IN drawing options
+ * \param fill IN area will be filled if true
+ * \param open IN do not close area
+ */
 
 void wDrawPolygon(
-		wDraw_p d,
-		wPos_t p[][2],
-		wIndex_t type[],
-		wIndex_t cnt,
-		wDrawColor color,
-		wDrawWidth dw,
-		wDrawLineType_e lt,
-		wDrawOpts opts,
-		int fill,
-		int open)
-{				 
-	RECT rect;
-	int i, j, k;
-	POINT p0, p1, p3, p4, point, save;
-	coOrd mid0, mid1, mid3, mid4;
-	static POINT zero = { 0, 0 };
+    wDraw_p d,
+    wPos_t node[][2],
+    wPolyLine_e type[],
+    wIndex_t cnt,
+    wDrawColor color,
+    wDrawWidth dw,
+    wDrawLineType_e lt,
+    wDrawOpts opts,
+    int fill,
+    int open)
+{
+    RECT rect;
+    int i, prevNode, nextNode;
+    int pointCount = 0;
+    coOrd endPoint0, endPoint1, controlPoint0, controlPoint1;
+    coOrd point, startingPoint;
+    BOOL rc;
+    int closed = 0;
 
-	wBool_t p1Clipped;
+    if (d == NULL) {
+        return;
+    }
 
-	if (d == NULL)
-		return;
-	DYNARR_RESET(POINT,wFillPoints_da);
-	DYNARR_SET(POINT,wFillPoints_da,cnt);
-	DYNARR_RESET(BYTE,wFillType_da);
-	DYNARR_SET(POINT,wFillType_da,cnt);
+    // make sure the array for the points is large enough
+    // worst case are rounded corners that require 4 points
+    DYNARR_RESET(POINT,wFillPoints_da);
+    DYNARR_SET(POINT,wFillPoints_da,(cnt + 1) * 4);
+    DYNARR_RESET(BYTE,wFillType_da);
+    DYNARR_SET(POINT,wFillType_da, (cnt + 1) * 4);
 
-	if (fill)
-		setDrawBrush( d->hDc, d, color, opts );
-	else {
-		setDrawMode( d->hDc, d, dw, lt, color, opts );
-	}
+    BeginPath(d->hDc);
 
-	p1.x = rect.left = rect.right = XINCH2PIX(d,p[cnt-1][0]-1);
-	p1.y = rect.top = rect.bottom = YINCH2PIX(d,p[cnt-1][1]+1);
+    if (fill) {
+        setDrawBrush(d->hDc, d, color, opts);
+    } else {
+        setDrawMode(d->hDc, d, dw, lt, color, opts);
+    }
 
+    rect.left = rect.right = XINCH2PIX(d,node[cnt-1][0]-1);
+    rect.top = rect.bottom = YINCH2PIX(d,node[cnt-1][1]+1);
 
 #ifdef DRAWFILLPOLYLOG
-logF = fopen( "log.txt", "a" );
-fprintf( logF, "\np[%d] = {%d,%d}\n", cnt-1, p1.x, p1.y );
+    logF = fopen("log.txt", "a");
+    fprintf(logF, "\np[%d] = {%d,%d}\n", cnt-1, node[0][0], node[0][1]);
 #endif
-	int closed = 0;
-	for ( i=k=0; i<cnt; i++ ) {
-		j = i==0?cnt-1:i-1;
-		k = (i==cnt-1)?0:i+1;
-		int d1x = p[k][0]-p[i][0];
-		int d1y = p[k][1]-p[i][1];
-		int d0x = p[i][0]-p[j][0];
-		int d0y = p[i][1]-p[j][1];
-		double len1 = (d1x*d1x+d1y+d1y);
-		double len0 = (d0x*d0x+d0y+d0y);
-		mid0.x = (d0x/2)+p[j][0];
-		mid0.y = (d0y/2)+p[j][1];
-		mid1.x = (d1x/2)+p[i][0];
-		mid1.y = (d1y/2)+p[i][1];
-		if ((type[i] == 2) && (len1>0) && (len0>0)) {
-			double ratio = sqrt(len1/len0);
-			if (len0 < len1) {
-				mid1.x = ((d1x*ratio)/2)+p[i][0];
-				mid1.y = ((d1y*ratio)/2)+p[i][1];
-			} else {
-				mid0.x = p[i][0]-(d0x/(2*ratio));
-				mid0.y = p[i][1]-(d0y/(2*ratio));
-			}
-		}
-		mid3.x = (p[i][0]-mid0.x)/2+mid0.x;
-		mid3.y = (p[i][1]-mid0.y)/2+mid0.y;
-		mid4.x = (mid1.x-p[i][0])/2+p[i][0];
-		mid4.y = (mid1.y-p[i][1])/2+p[i][1];
-		point.x = XINCH2PIX(d,p[1][0]);
-		point.y = YINCH2PIX(d,p[1][1]);
-		p0.x = XINCH2PIX(d,mid0.x);
-		p0.y = YINCH2PIX(d,mid0.y);
-		p1.x = XINCH2PIX(d,mid1.x);
-		p1.y = YINCH2PIX(d,mid1.y);
-		p3.x = XINCH2PIX(d,mid3.x);
-		p3.y = YINCH2PIX(d,mid3.y);
-		p4.x = XINCH2PIX(d,mid4.x);
-		p4.y = YINCH2PIX(d,mid4.y);
-		if(i==0) {
-			if (type[i] == 0 || open) {
-				MoveTo( d->hDc, point.x, point.y );
-				save = point;
-			} else {
-				addPoint( &k, &p0, PT_LINETO, &rect );
-				if (type[i] == 1) {
-					addPoint( &k, &point, PT_BEZIERTO, &rect );
-					addPoint( &k, &point, PT_BEZIERTO, &rect );
-					addPoint( &k, &p1, PT_BEZIERTO, &rect );
-				} else {
-					addPoint( &k, &p3, PT_BEZIERTO, &rect );
-					addPoint( &k, &p4, PT_BEZIERTO, &rect );
-					addPoint( &k, &p1, PT_BEZIERTO, &rect );
-				}
-				save = p0;
-			}
-		} else if (type[i] == 0 || (open && (i==cnt-1))) {
-			addPoint( &k, &point, PT_LINETO, &rect );
-		} else {
-			if (i==cnt-1 && !open) closed = TRUE;
-			addPoint( &k, &p0, PT_LINETO, &rect );
-			if (type[i] == 1) {
-				addPoint( &k, &point, PT_BEZIERTO, &rect );
-				addPoint( &k, &point, PT_BEZIERTO, &rect );
-				addPoint( &k, &p1, PT_BEZIERTO |(closed?PT_CLOSEFIGURE:0), &rect );
-			} else {
-				addPoint( &k, &p3, PT_BEZIERTO, &rect );
-				addPoint( &k, &p4, PT_BEZIERTO, &rect );
-				addPoint( &k, &p1, PT_BEZIERTO |(closed?PT_CLOSEFIGURE:0), &rect );
-			}
-		}
-	}
-	PolyDraw(d->hDc, wFillPoints_da.ptr, wFillType_da.ptr, cnt );
-	if (fill && !open) {
-		FillPath(d->hDc);
-	} else
-		StrokePath(d->hDc);
 
-	if (d->hWnd) {
-		rect.top--;
-		rect.left--;
-		rect.bottom++;
-		rect.right++;
-		myInvalidateRect( d, &rect );
-	}
+    for (i=0; i<cnt; i++) {
+        point.x = node[i][0];
+        point.y = node[i][1];
+
+        if (type[i] == wPolyLineRound || type[i] == wPolyLineSmooth) {
+            prevNode = (i == 0) ? cnt - 1 : i - 1;
+            nextNode = (i == cnt - 1) ? 0 : i + 1;
+
+            // calculate distance to neighboring nodes
+            int prevXDistance = node[i][0] - node[prevNode][0];
+            int prevYDistance = node[i][1] - node[prevNode][1];
+            int nextXDistance = node[nextNode][0]-node[i][0];
+            int nextYDistance = node[nextNode][1]-node[i][1];
+
+            // distance from node to endpoints of curve is half the line length
+            endPoint0.x = (prevXDistance/2)+node[prevNode][0];
+            endPoint0.y = (prevYDistance/2)+node[prevNode][1];
+            endPoint1.x = (nextXDistance/2)+node[i][0];
+            endPoint1.y = (nextYDistance/2)+node[i][1];
+
+            if (type[i] == wPolyLineRound) {
+                double distNext = (nextXDistance*nextXDistance + nextYDistance * nextYDistance);
+                double distPrev = (prevXDistance*prevXDistance + prevYDistance * prevYDistance);
+                // but should be half of the shortest line length (equidistant from node) for round
+                if ((distPrev > 0) && (distNext > 0)) {
+                    double ratio = sqrt(distPrev / distNext);
+                    if (distPrev < distNext) {
+                        endPoint1.x = ((nextXDistance*ratio) / 2) + node[i][0];
+                        endPoint1.y = ((nextYDistance*ratio) / 2) + node[i][1];
+                    } else {
+                        endPoint0.x = node[i][0] - (prevXDistance / (2 * ratio));
+                        endPoint0.y = node[i][1] - (prevYDistance / (2 * ratio));
+                    }
+                }
+                // experience says that the best look is achieved if the
+                // control points are in the middle between end point and node
+                controlPoint0.x = (node[i][0] - endPoint0.x) / 2 + endPoint0.x;
+                controlPoint0.y = (node[i][1] - endPoint0.y) / 2 + endPoint0.y;
+
+                controlPoint1.x = (endPoint1.x - node[i][0]) / 2 + node[i][0];
+                controlPoint1.y = (endPoint1.y - node[i][1]) / 2 + node[i][1];
+            } else {
+                controlPoint0 = point;
+                controlPoint1 = point;
+            }
+        }
+
+        if (i==0) {
+            if (type[i] == wPolyLineStraight || open) {
+                // for straight lines or open shapes use the starting point as passed
+                addPoint(d, pointCount++, &point, PT_MOVETO, &rect);
+                startingPoint = point;
+            } else {
+                // for Bezier begin with the calculated starting point
+                addPoint(d, pointCount++, &endPoint0, PT_MOVETO, &rect);
+                addPoint(d, pointCount++, &controlPoint0, PT_BEZIERTO, &rect);
+                addPoint(d, pointCount++, &controlPoint1, PT_BEZIERTO, &rect);
+                addPoint(d, pointCount++, &endPoint1, PT_BEZIERTO, &rect);
+                startingPoint = endPoint0;
+            }
+        } else {
+            if (type[i] == wPolyLineStraight || (open && (i==cnt-1))) {
+                addPoint(d, pointCount++, &point, PT_LINETO, &rect);
+            } else {
+                if (i==cnt-1 && !open) {
+                    closed = TRUE;
+                }
+                addPoint(d, pointCount++, &endPoint0, PT_LINETO, &rect);
+                addPoint(d, pointCount++, &controlPoint0, PT_BEZIERTO, &rect);
+                addPoint(d, pointCount++, &controlPoint1, PT_BEZIERTO, &rect);
+                addPoint(d, pointCount++, &endPoint1,
+                         PT_BEZIERTO | (closed ? PT_CLOSEFIGURE : 0), &rect);
+            }
+        }
+    }
+
+    if (!open && !closed) {
+        addPoint(d, pointCount++, &startingPoint, PT_LINETO, &rect);
+    }
+    rc = PolyDraw(d->hDc, wFillPoints_da.ptr, wFillType_da.ptr, pointCount);
+
+    EndPath(d->hDc);
+
+    if (fill && !open) {
+        FillPath(d->hDc);
+    } else {
+        StrokePath(d->hDc);
+    }
+
+    if (d->hWnd) {
+        rect.top--;
+        rect.left--;
+        rect.bottom++;
+        rect.right++;
+        myInvalidateRect(d, &rect);
+    }
 }
 
 #define MAX_FILLCIRCLE_POINTS	(30)

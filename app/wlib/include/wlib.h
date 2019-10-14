@@ -468,6 +468,12 @@ typedef enum {
 	wDrawLineDash }
 		wDrawLineType_e;
 
+typedef enum {
+	wPolyLineStraight,
+	wPolyLineSmooth,
+	wPolyLineRound}
+	wPolyLine_e;
+
 typedef int wAction_t;
 #define wActionMove		(1)
 #define wActionLDown		(2)
@@ -519,7 +525,7 @@ void wDrawString(		wDraw_p, wPos_t, wPos_t, wAngle_t, const char *, wFont_p,
 		  		wFontSize_t, wDrawColor, wDrawOpts );
 void wDrawFilledRectangle(	wDraw_p, wPos_t, wPos_t, wPos_t, wPos_t,
 				wDrawColor, wDrawOpts );
-void wDrawPolygon(	wDraw_p, wPos_t [][2], wIndex_t [], wIndex_t, wDrawColor, wDrawWidth, wDrawLineType_e,
+void wDrawPolygon(	wDraw_p, wPos_t [][2], wPolyLine_e [], wIndex_t, wDrawColor, wDrawWidth, wDrawLineType_e,
 				wDrawOpts, int, int );
 void wDrawFilledCircle(		wDraw_p, wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
 
