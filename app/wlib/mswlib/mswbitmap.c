@@ -434,11 +434,14 @@ wIcon_p wIconCreatePixMap( char *pm[])
 
 			/* look up pixel info in color table */
 			k = 0;
-			while( pixel != keys[ k ] )
+			while( pixel != keys[ k ] && k < col )
 				k++;
-
-			/* save the index into color table */
-			*(cq + j) = k;
+			if (pixel == keys[k]) {
+				/* save the index into color table */
+				*(cq + j) = k;
+			} else {
+				*(cq + j) = 0;
+			}
 		}
 	}		
 	free( keys );
