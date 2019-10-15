@@ -102,29 +102,57 @@ To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a control point.
 
 \rule
 
-
-\S{cmdNote} Note
+\S{cmdNote} Note Variants
 
 \G{png.d/mnote.png}
 
-The \f{Note} command allows you to attach text notes (\G{png.d/iconnote.png}) or weblinks (\G{png.d/iconlink.png}) to selected places on the layout.
+The \f{Note} command allows you to attach \f{plain text notes} (\K{cmdTextEdit}),
+\f{weblinks} (\K{cmdLinkEdit}) or \f{document references}
+(\K{cmdFileEdit}) to selected places on the layout.
 
-\dd \G{png.d/bnote.png} \G{png.d/iconnote.png} Click and drag on the Main Canvas (\K{mainW}) to place the note.
+\S2{cmdTextEdit} Plain Text
+
+\G{png.d/bnote.png} \G{png.d/iconnote.png} Click and drag on the Main Canvas (\K{mainW}) to place the note.
 
 When you release, the \e{Note Editor} dialog is displayed.  You can enter the note in the text area.
 
+\G{png.d/notetext.png}
+
 When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Note} will display the \e{Property Sheet} to let you read or modify the note.
 
-\dd \G{png.d/blink.png} \G{png.d/iconlink.png} Similar to text notes you can place a weblink on the layout.
+\S2{cmdLinkEdit} Weblink
 
-After releasing the mouse button, the \e{Link Editor} dialog is displayed. You can enter the URL
+\G{png.d/blink.png} \G{png.d/iconlink.png} Similar to text notes you can place a weblink on the layout.
+
+After releasing the mouse button, the \e{Link Editor} dialog is displayed.
+
+\G{png.d/notelink.png}
+
+You can enter the URL
 of the website and a short description. When clicking on the Open button, your default browser is
 used to display the website.
 
- When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Webink Note} will display the \e{Property Sheet} to let you read or modify the URL or the
+ When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Weblink Note}
+ will display the \e{Property Sheet} to let you read or modify the URL or the
  description.
 
- Double clicking on a weblink icon opens the website in your default browser. 
+Double clicking on a weblink icon opens the website in your default browser.
+
+\S2{cmdFileEdit} Document
+
+\G{png.d/bfile.png} \G{png.d/iconfile.png} Similar to text notes you can place a reference to a file on the layout.
+
+After releasing the mouse button, the \e{Document Editor} dialog is displayed.
+
+\G{png.d/notefile.png}
+
+You can select the file and a enter a short description. When clicking on the Open button the file is opened with the default program for that file type.
+
+When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Document Note} will display the \e{Property Sheet} to let you read or modify the filename or the
+ description.
+
+Double clicking on a document reference icon opens the document  in the default program.
+
 
 \rule
 

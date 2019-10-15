@@ -97,6 +97,7 @@ long FAR PASCAL _export pushEdit(
 	        }
 	    }
 	    break;
+
 	}
 	return CallWindowProc(oldEditProc, hWnd, message, wParam, lParam);
 }
@@ -186,11 +187,11 @@ static void triggerString(
         if (bs->valueP) {
             strcpy(bs->valueP, enteredString);
         }
-        if (bs->action) {
+		if (bs->action) {
             bs->action(enteredString, bs->data);
         }
-        free(enteredString);
-    }
+		free(enteredString);
+	}
 }
 
 
@@ -213,7 +214,18 @@ LRESULT stringProc(
             if (!modified) {
                 break;
             }
-			triggerString(b);
+
+            char *enteredString = getString(bs);
+            if (enteredString) {
+                if (bs->valueP) {
+                    strcpy(bs->valueP, enteredString);
+                }
+                if (bs->action) {
+                    bs->action(enteredString, bs->data);
+                    mswSetTrigger(NULL, NULL);
+                }
+                free(enteredString);
+            }
             SendMessage(bs->hWnd, (UINT)EM_SETMODIFY, FALSE, 0L);
         }
         break;
