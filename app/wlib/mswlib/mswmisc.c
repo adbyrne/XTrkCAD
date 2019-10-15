@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <htmlhelp.h>
+#include "misc.h"
 #include "mswint.h"
 #include "i18n.h"
 #include "FreeImage.h"
@@ -1429,7 +1430,7 @@ void wWinClear(
 {
 }
 
-void wSetCursor( wWin_p win,
+void wSetCursor(wDraw_p win,
     wCursor_t cursor)
 {
     switch (cursor) {
@@ -3364,7 +3365,7 @@ static BOOL InitApplication(HINSTANCE hinstCurrent)
     wc.cbWndExtra = 4;
 
     if (!RegisterClass(&wc)) {
-        mswFail("RegisterClass(drawClass)");
+		mswFail("RegisterClass(drawClass)");
         return FALSE;
     }
 
