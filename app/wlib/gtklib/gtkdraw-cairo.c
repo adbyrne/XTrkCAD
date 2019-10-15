@@ -642,7 +642,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 			else
 				cairo_curve_to(cairo, mid3.x, mid3.y, mid4.x, mid4.y, mid1.x, mid1.y);
 		}
-		if ((i==cnt-1) && (!fill && !open)) {
+		if ((i==cnt-1) && !open) {
 			cairo_line_to(cairo, save.x, save.y);
 		}
 	}

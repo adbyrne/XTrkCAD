@@ -252,7 +252,7 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
     new_page_setup = gtk_print_run_page_setup_dialog(GTK_WINDOW(gtkMainW->gtkwin),
                      page_setup, settings);
 
-    if (page_setup) {
+    if (page_setup && (page_setup != new_page_setup)) {      //Can be the same if no mods...
         g_object_unref(page_setup);
     }
 
@@ -508,10 +508,11 @@ void psPrintFillPolygon(
     wPos_t mid0[2], mid1[2], mid2[2], mid3[2], mid4[2];
 
     for (inx=0; inx<cnt; inx++) {
-    	int j = cnt-1;
-		int k = 1;
+    	int j = inx-1;
+    	int k = inx+1;
+    	if (j < 0) j = cnt-1;
+    	if (k > cnt-1) k = 0;
 		double len0, len1;
-
 		double d0x = (p[inx][0]-p[j][0]);
 		double d0y = (p[inx][1]-p[j][1]);
 		double d1x = (p[k][0]-p[inx][0]);
@@ -543,6 +544,10 @@ void psPrintFillPolygon(
 				 save[0] = p[0][0]; save[1] = p[0][1];
 			 } else {
 				 cairo_move_to(cr, mid0[0], mid0[1]);
+				 if (type[inx] == wPolyLineSmooth)
+				 	cairo_curve_to(cr, p[inx][0], p[inx][1], p[inx][0], p[inx][1], mid1[0], mid1[1]);
+				 else
+				 	cairo_curve_to(cr, mid3[0], mid3[1], mid4[0], mid4[1], mid1[0], mid1[1]);
 				 save[0] = mid0[0]; save[1] = mid0[1];
 			 }
 		} else if (!type || (type && type[inx] == wPolyLineStraight) || (open && (inx==cnt-1)) ) {
@@ -554,7 +559,7 @@ void psPrintFillPolygon(
 			else
 				cairo_curve_to(cr, mid3[0],mid3[1],mid4[0],mid4[1],mid1[0],mid1[1]);
 		}
-		if (!type || type[inx] == wPolyLineStraight || open) {
+		if ((inx==cnt-1) && !open) {
 			cairo_line_to(cr, save[0], save[1]);
 		}
     }
