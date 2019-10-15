@@ -2578,6 +2578,7 @@ static void ParamDlgProc(
 		else
 			LayoutControls( pg, ParamPositionControl, NULL, NULL );
 		break;
+	default:
 		break;
 	}
 }

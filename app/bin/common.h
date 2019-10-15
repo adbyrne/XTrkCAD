@@ -46,11 +46,9 @@ typedef struct {
 		POS_T x,y;
 		} coOrd;
 
-typedef enum { NODE, CURVED, SMOOTH } PtType_e;
-
 typedef struct {
 	coOrd pt;
-	PtType_e pt_type;
+	int pt_type;
 } pts_t;
 
 typedef int INT_T;

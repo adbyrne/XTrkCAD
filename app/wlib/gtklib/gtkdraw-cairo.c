@@ -32,6 +32,8 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
+
+
 #include "gtkint.h"
 #include "gdk/gdkkeysyms.h"
 
@@ -543,7 +545,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
  void wDrawPolygon(
 		wDraw_p bd,
 		wPos_t p[][2],
-		int type[],
+		wPolyLine_e type[],
 		int cnt,
 		wDrawColor color,
 		wDrawWidth dw,
@@ -595,7 +597,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 		mid0.y = (d0y/2)+points[j].y;
 		mid1.x = (d1x/2)+points[i].x;
 		mid1.y = (d1y/2)+points[i].y;
-		if (type && (type[i] == 2) && (len1>0) && (len0>0)) {
+		if (type && (type[i] == wPolyLineRound) && (len1>0) && (len0>0)) {
 			double ratio = sqrt(len0/len1);
 			if (len0 < len1) {
 				mid1.x = ((d1x*ratio)/2)+points[i].x;
@@ -620,7 +622,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 		mid4.x = round(mid4.x)+0.5;
 		mid4.y = round(mid4.y)+0.5;
 		if(i==0) {
-			if (!type || type[i] == 0 || open) {
+			if (!type || type[i] == wPolyLineStraight || open) {
 				cairo_move_to(cairo, points[i].x, points[i].y);
 				save = points[0];
 			} else {
@@ -631,16 +633,16 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 					cairo_curve_to(cairo, mid3.x, mid3.y, mid4.x, mid4.y, mid1.x, mid1.y);
 				save = mid0;
 			}
-		} else if (!type || type[i] == 0 || (open && (i==cnt-1))) {
+		} else if (!type || type[i] == wPolyLineStraight || (open && (i==cnt-1))) {
 			cairo_line_to(cairo, points[i].x, points[i].y);
 		} else {
 			cairo_line_to(cairo, mid0.x, mid0.y);
-			if (type[i] == 1)
+			if (type[i] == wPolyLineSmooth)
 				cairo_curve_to(cairo, points[i].x, points[i].y, points[i].x, points[i].y, mid1.x, mid1.y);
 			else
 				cairo_curve_to(cairo, mid3.x, mid3.y, mid4.x, mid4.y, mid1.x, mid1.y);
 		}
-		if ((i==cnt-1) && (!fill && !open)) {
+		if ((i==cnt-1) && !open) {
 			cairo_line_to(cairo, save.x, save.y);
 		}
 	}

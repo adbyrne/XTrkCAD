@@ -68,7 +68,7 @@ static void EndPoly( drawContext_t * context, int cnt, wBool_t open)
 	pts = (pts_t*)MyMalloc( (cnt) * sizeof (pts_t) );
 	for ( inx=0; inx<cnt; inx++ ) {
 		pts[inx].pt = tempSegs(inx).u.l.pos[0];
-		pts[inx].pt_type = 0;
+		pts[inx].pt_type = wPolyLineStraight;
 	}
 	DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 	segPtr = &tempSegs(0);
@@ -778,7 +778,7 @@ STATUS_T DrawGeomMouse(
 			pts = (pts_t*)MyMalloc( 4 * sizeof (pts_t) );
 			for ( inx=0; inx<4; inx++ ) {
 				pts[inx].pt = tempSegs(inx).u.l.pos[0];
-				pts[inx].pt_type = 0;
+				pts[inx].pt_type = wPolyLineStraight;
 			}
 			tempSegs(0).type = (context->Op == OP_FILLBOX)?SEG_FILPOLY:SEG_POLY;
 			tempSegs(0).u.p.cnt = 4;
@@ -1188,7 +1188,7 @@ STATUS_T DrawGeomPolyModify(
 					for (inx=points_da.cnt-1; inx>polyInx; inx-- ) {
 						points(inx) = points(inx-1);
 					}
-					points(polyInx).pt_type = 0;
+					points(polyInx).pt_type = wPolyLineStraight;
 					tempSegs(0).u.p.cnt = points_da.cnt;
 					context->max_inx = points_da.cnt-1;
 				}
@@ -1433,13 +1433,13 @@ STATUS_T DrawGeomPolyModify(
 					((action>>8 == 's') || (action>>8 == 'v') || (action>>8 == 'r')))  {
 				switch(action>>8) {
 				case 's':
-					points(context->prev_inx).pt_type = 1;
+					points(context->prev_inx).pt_type = wPolyLineSmooth;
 					break;
 				case 'v':
-					points(context->prev_inx).pt_type = 0;
+					points(context->prev_inx).pt_type = wPolyLineStraight;
 					break;
 				case 'r':
-					points(context->prev_inx).pt_type = 2;
+					points(context->prev_inx).pt_type = wPolyLineRound;
 					break;
 				default:
 					return C_CONTINUE;
