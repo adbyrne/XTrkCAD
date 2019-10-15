@@ -788,6 +788,7 @@ void wDrawString(
     y = YINCH2PIX(d,py) + (int)(mswcos(angle)*fp->lfHeight-0.5);
 
     if (noNegDrawArgs > 0 && (x < 0 || y < 0)) {
+		DeleteObject(newFont);
         return;
     }
 
