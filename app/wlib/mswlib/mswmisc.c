@@ -1748,7 +1748,7 @@ void wControlSetLabel(
     wControl_p b,
     const char * labelStr)
 {
-    if (b->type == B_RADIO || b->type == B_TOGGLE) {
+    if (b->type == B_RADIO ) {
         ;
     } else {
         int lab_l;
