@@ -1535,7 +1535,7 @@ void DrawHighlightLayer(int layer) {
 	mainD.CoOrd2Pix(&mainD,top_left,&rect[1][0],&rect[1][1]);
 	mainD.CoOrd2Pix(&mainD,layer_hi,&rect[2][0],&rect[2][1]);
 	mainD.CoOrd2Pix(&mainD,bot_right,&rect[3][0],&rect[3][1]);
-	wDrawPolygon(tempD.d,rect,type,4,wDrawColorPowderedBlue,0,wDrawLineDash,wDrawOptTemp,0,0);
+	wDrawPolygon(tempD.d,rect,(wPolyLine_e *)type,4,wDrawColorPowderedBlue,0,wDrawLineDash,wDrawOptTemp,0,0);
 	//wDrawFilledRectangle(mainD.d, x-5, y-5, w, h, wDrawColorGrey90, wDrawOptTemp);
 }
 

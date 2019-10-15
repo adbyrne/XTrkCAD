@@ -485,7 +485,7 @@ void psPrintFillRectangle(
 
 void psPrintFillPolygon(
     wPos_t p[][2],
-	int type[],
+	wPolyLine_e type[],
     int cnt,
     wDrawColor color,
     wDrawOpts opts,
@@ -505,41 +505,62 @@ void psPrintFillPolygon(
 
     psSetColor(color);
 
-    wPos_t mid1[2], mid2[2], mid3[2], mid4[2];
+    wPos_t mid0[2], mid1[2], mid2[2], mid3[2], mid4[2];
 
     for (inx=0; inx<cnt; inx++) {
     	int j = cnt-1;
 		int k = 1;
-		mid1[0] = ((p[inx][0]-p[j][0])/2)+p[j][0];
-		mid1[1] = ((p[inx][1]-p[j][1])/2)+p[j][1];
-		mid2[0] = ((p[inx][0]-mid1[0])/2)+mid1[0];
-		mid2[1] = ((p[inx][1]-mid1[1])/2)+mid1[1];
-		mid4[0] = ((p[k][0]-p[inx][0])/2)+p[inx][0];
-		mid4[1] = ((p[k][1]-p[inx][1])/2)+p[inx][1];
-		mid3[0] = ((mid4[0]-p[inx][0])/2)+p[inx][0];
-		mid3[1] = ((mid4[1]-p[inx][1])/2)+p[inx][1];
+		double len0, len1;
+
+		double d0x = (p[inx][0]-p[j][0]);
+		double d0y = (p[inx][1]-p[j][1]);
+		double d1x = (p[k][0]-p[inx][0]);
+		double d1y = (p[k][1]-p[inx][1]);
+		len0 = (d0x*d0x+d0y*d0y);
+		len1 = (d1x*d1x+d1y*d1y);
+		mid0[0] = (d0x/2)+p[j][0];
+		mid0[1] = (d0y/2)+p[j][1];
+		mid1[0] = (d1x/2)+p[inx][0];
+		mid1[1] = (d1y/2)+p[inx][1];
+		if (type && (type[inx] == wPolyLineRound) && (len1>0) && (len0>0)) {
+			double ratio = sqrt(len0/len1);
+			if (len0 < len1) {
+				mid1[0] = ((d1x*ratio)/2)+p[inx][0];
+				mid1[1] = ((d1y*ratio)/2)+p[inx][1];
+			} else {
+				mid0[0] = p[inx][0]-(d0x/(2*ratio));
+				mid0[1] = p[inx][1]-(d0y/(2*ratio));
+			}
+		}
+		mid3[0] = (p[inx][0]-mid0[0])/2+mid0[0];
+		mid3[1] = (p[inx][1]-mid0[1])/2+mid0[1];
+		mid4[0] = (mid1[0]-p[inx][0])/2+p[inx][0];
+		mid4[1] = (mid1[1]-p[inx][1])/2+p[inx][1];
+		wPos_t save[2];
 		if (inx==0) {
-			 if (type[0] == 0)
+			 if (!type || (type && type[0] == wPolyLineStraight) || open) {
 				 cairo_move_to(cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ]);
-			else
-				 cairo_move_to(cr, mid1[0], mid1[1]);
-		}
-		if (type[inx] == 0 ) {
+				 save[0] = p[0][0]; save[1] = p[0][1];
+			 } else {
+				 cairo_move_to(cr, mid0[0], mid0[1]);
+				 save[0] = mid0[0]; save[1] = mid0[1];
+			 }
+		} else if (!type || (type && type[inx] == wPolyLineStraight) || (open && (inx==cnt-1)) ) {
 			cairo_line_to(cr, p[ inx ][ 0 ], p[ inx ][ 1 ]);
+		} else {
+			cairo_line_to(cr, mid0[ 0 ], mid0[ 1 ]);
+			if (type && type[inx] == wPolyLineSmooth)
+				cairo_curve_to(cr, p[inx][0],p[inx][1],p[inx][0],p[inx][1],mid1[0],mid1[1]);
+			else
+				cairo_curve_to(cr, mid3[0],mid3[1],mid4[0],mid4[1],mid1[0],mid1[1]);
 		}
-		else if (type[inx] == 1) {
-			cairo_line_to(cr, mid1[ 0 ], mid1[ 1 ]);
-			cairo_curve_to(cr, p[inx][0],p[inx][1],p[inx][0],p[inx][1],mid4[0],mid4[1]);
-		}
-
-		else if (type[inx] == 2) {
-			cairo_line_to(cr, mid1[ 0 ], mid1[ 1 ]);
-			cairo_curve_to(cr, mid2[0],mid2[1],mid3[0],mid3[1],mid4[0],mid4[1]);
-
+		if (!type || type[inx] == wPolyLineStraight || open) {
+			cairo_line_to(cr, save[0], save[1]);
 		}
     }
 
-    if (fill) cairo_fill(cr);
+    if (fill && !open) cairo_fill(cr);
+    else cairo_stroke(cr);
 }
 
 /**

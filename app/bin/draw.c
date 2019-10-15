@@ -417,7 +417,7 @@ static void DDrawPoly(
 	DYNARR_SET( wPos2, wpts_da, cnt * 2 );
 	DYNARR_SET( int, wpts_type_da, cnt);
 #define wpts(N) DYNARR_N( wPos2, wpts_da, N )
-#define wtype(N) DYNARR_N( int, wpts_type_da, N )
+#define wtype(N) DYNARR_N( wPolyLine_e, wpts_type_da, N )
 	for ( inx=0; inx<cnt; inx++ ) {
 		d->CoOrd2Pix( d, pts[inx], &x, &y );
 		wpts(inx)[0] = x;
@@ -425,7 +425,7 @@ static void DDrawPoly(
 		if (!types)
 			wtype(inx) = 0;
 		else
-			wtype(inx) = types[inx];
+			wtype(inx) = (wPolyLine_e)types[inx];
 	}
 	wDrawPolygon( d->d, &wpts(0), &wtype(0), cnt, color, width, ((d->options&DC_DASH)==0)?wDrawLineSolid:wDrawLineDash, (wDrawOpts)d->funcs->options, fill, open );
 }
@@ -859,7 +859,7 @@ static void TempSegPoly(
 	tempSegs(tempSegs_da.cnt-1).u.p.pts = (pts_t *)MyMalloc(cnt*sizeof(pts_t));
 	for (int i=0;i<=cnt-1;i++) {
 		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt = pts[i];
-		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt_type = (d->options&DC_GROUP)?types[i]:0;
+		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt_type = (d->options&DC_GROUP)?types[i]:wPolyLineStraight;
 	}
 
 }

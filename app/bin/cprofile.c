@@ -191,18 +191,18 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 		pt.x = profElem(inx).dist;
 		DYNARR_APPEND( pts_t, points_da, 10 );
 		points(points_da.cnt-1).pt = pt;
-		points(points_da.cnt-1).pt_type = 0;
+		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 	}
 	pb.y = pt.y = prof.minE;
 	if ( points_da.cnt > 1 ) {
 		DYNARR_APPEND( coOrd, points_da, 10 );
 		pt.x = prof.totalD;
 		points(points_da.cnt-1).pt = pt;
-		points(points_da.cnt-1).pt_type = 0;
+		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 		DYNARR_APPEND( pts_t, points_da, 10 );
 		pb.x = 0;
 		points(points_da.cnt-1).pt = pb;
-		points(points_da.cnt-1).pt_type = 0;
+		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 		DrawPoly( D, points_da.cnt, points_da.ptr, NULL, 0, profileColorFill, 1, 0 );
 		DrawLine( D, pb, pt, lw, borderColor );
 	}
