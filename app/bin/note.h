@@ -26,18 +26,45 @@
 #include "track.h"
 
 #define URLMAXIMUMLENGTH (2048)
+#define PATHMAXIMUMLENGTH (2048)
 #define TITLEMAXIMUMLENGTH (81)
 
+#define MYMIN(x, y) (((x) < (y)) ? (x) : (y))
+
+#define DELIMITER "--|--"
+
+enum noteCommands {
+	OP_NOTETEXT,
+	OP_NOTELINK,
+	OP_NOTEFILE
+} noteOperations;
+
+/** hold the data for the note */
 struct extraDataNote {
-	coOrd pos;
-	char * text;
+	coOrd pos;					/**< position */
+	unsigned int layer;
+	enum noteCommands op;		/**< note type */
+	track_p trk;				/**< track */
+	union {
+		char * text;			/**< used for text only note */
+		struct {
+			char *title;
+			char *url;
+		} linkData;				/**< used for link note */
+		struct {
+			char *path;
+			char *title;
+			BOOL_T inArchive;
+		} fileData;				/**< used for file note */
+	} noteData;
 };
 
-struct noteTextData {
-	coOrd pos;
-	unsigned int layer;
-	char *text;
-};
+//struct noteTextData {
+//	coOrd pos;
+//	unsigned int layer;
+//	char *text;
+//	track_p trk;
+//};
 
 struct noteLinkData {
 	coOrd pos;
@@ -47,22 +74,37 @@ struct noteLinkData {
 	track_p trk;
 };
 
-enum { OR_TEXT, LY_TEXT, TX_TEXT };
-enum { OR_LINK, LY_LINK, TITLE_LINK, TX_LINK, OK_LINK };
+struct noteFileData {
+	coOrd pos;
+	unsigned int layer;
+	char title[TITLEMAXIMUMLENGTH];
+	char path[PATHMAXIMUMLENGTH];
+	track_p trk;
+	BOOL_T inArchive;
+};
+
+enum { OR_NOTE, LY_NOTE, TX_TEXT, OK_TEXT,  TITLE_LINK, TX_LINK, OK_LINK, TITLE_FILE, OK_FILE, CANCEL_NOTE };
 
 /* linknoteui.c */
 void NewLinkNoteUI(track_p trk);
-struct noteLinkData *GetNoteLinkData(void);
-bool IsLinkNote(track_p trk);
+BOOL_T IsLinkNote(track_p trk);
 void DescribeLinkNote(track_p trk, char * str, CSIZE_T len);
 void ActivateLinkNote(track_p trk);
 
+/* filenozeui.c */
+void NewFileNoteUI(track_p trk);
+BOOL_T IsFileNote(track_p trk);
+void DescribeFileNote(track_p trk, char * str, CSIZE_T len);
+void ActivateFileNote(track_p trk);
+
 /* textnoteui.c */
 void NewTextNoteUI(track_p trk);
-struct noteTextData *GetNoteTextData(void);
 void DescribeTextNote(track_p trk, char * str, CSIZE_T len);
 
 /* trknote.c */
-void UpdateNote(track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart);
-void UpdateLink(track_p trk, int inx, descData_p descUpd, BOOL_T needUndoStart);
+void NoteStateSave(track_p trk);
+
+void UpdateFile(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart);
+void UpdateText(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart);
+void UpdateLink(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart);
 #endif // !HAVE_NOTE_H

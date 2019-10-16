@@ -41,6 +41,11 @@ char *wPrefGetStringExt(const char *section, const char *key)
 	return(NULL);
 }
 
+char *wPrefGetString(const char *section, const char *key)
+{
+	return(DEFAULTPATH);
+}
+
 const char *wGetUserHomeDir(void)
 {
 	return(DEFAULTPATH);

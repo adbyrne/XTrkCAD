@@ -85,12 +85,12 @@ IF(XTRKCAD_USE_PACKAGEMAKER)
 ENDIF(XTRKCAD_USE_PACKAGEMAKER)
 
 # Find unit testing framework
-#find_package(CMocka)
-#if(CMOCKA_FOUND)
-#  include_directories(${CMOCKA_INCLUDE_DIR})
-#  set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
-#  option( XTRKCAD_TESTING "Build unittests" ON)
-#endif()
+find_package(CMocka)
+if(CMOCKA_FOUND)
+ include_directories(${CMOCKA_INCLUDE_DIR})
+ set(LIBS ${LIBS} ${CMOCKA_LIBRARIES})
+ option( XTRKCAD_TESTING "Build unittests" ON)
+endif()
 
 # Find document conversion tool
 find_package(Pandoc)

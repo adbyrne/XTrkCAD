@@ -111,7 +111,10 @@ SET(SOURCES
 	dxfformat.c
 	dxfoutput.c
 	elev.c
+	file2uri.c
+	file2uri.h
 	fileio.c
+	filenoteui.c
 	i18n.c
 	layout.c
 	linknoteui.c
@@ -125,8 +128,10 @@ SET(SOURCES
 	paramfilelist.c
 	paramfilelist.h
 	paths.c
+	shortentext.c
 	shrtpath.c
 	smalldlg.c
+	stringxtc.c
 	tbezier.c
 	tcornu.c
 	tcurve.c
@@ -137,21 +142,13 @@ SET(SOURCES
 	trkseg.c
 	tstraigh.c
 	utility.c
+	validator.c
 	cJSON.c
 	archive.h
 	directory.h
 	manifest.h
+	validator.h
 	)
-
-check_symbol_exists(strlcpy string.h HAVE_STRLCPY )
-
-if( NOT HAVE_STRLCPY )
-	set (SOURCES
-		 ${SOURCES}
-		 strlcpy.c)
-	message( STATUS "Add own version of strlcpy")	 
-endif( NOT HAVE_STRLCPY )
-
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
 INCLUDE_DIRECTORIES(${XTrkCAD_BINARY_DIR})

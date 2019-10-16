@@ -225,6 +225,7 @@ int NoticeMessage( char *, char*, char *, ... );
 int NoticeMessage2( int, char *, char*, char *, ... );
 void DoQuit( void );
 
+void FileIsChanged(void);
 char * ConvertFromEscapedText(const char * text);
 char * ConvertToEscapedText(const char * text);
 

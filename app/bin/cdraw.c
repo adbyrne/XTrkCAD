@@ -817,6 +817,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 					REORIGIN( drawData.endPt[i], segPtr->u.p.pts[i].pt, xx->angle, xx->orig );
 				}
 				drawData.oldE0 = drawData.endPt[0];
+				drawDesc[E0].mode = DESC_IGNORE;
 				drawData.origin = xx->orig;
 				break;
 			case POLYLINE:
@@ -856,7 +857,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 				for(int i=0;i<4;i++) {
 					REORIGIN( drawData.endPt[i], segPtr->u.p.pts[i].pt, xx->angle, xx->orig );
 				}
-				drawDesc[E0].mode = 0;
+				drawDesc[E0].mode = DESC_IGNORE;
 				drawData.oldE0 = drawData.endPt[0];
 				drawData.origin = xx->orig;
 				break;

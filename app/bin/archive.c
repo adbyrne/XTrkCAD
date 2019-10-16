@@ -58,6 +58,52 @@
 
 int log_zip = 0;
 
+char *
+NativeToUtf8(const char *nativeString)
+{
+
+#ifdef WINDOWS
+
+	int cnt = 2 * (strlen(nativeString) + 1);
+	char *tempBuffer = MyMalloc( cnt );
+	char *destBuffer = MyMalloc( cnt );
+
+	//// find the 
+	//cnt = MultiByteToWideChar(CP_ACP,
+	//	0,
+	//	nativeString,
+	//	-1,
+	//	tempBuffer,
+	//	0);
+
+	//tempBuffer = realloc(tempBuffer, cnt * 2 + 4);
+
+	// convert to wide character (UTF16)
+	MultiByteToWideChar(CP_ACP,
+		0,
+		nativeString,
+		-1,
+		(LPWSTR)tempBuffer,
+		cnt);
+
+	// convert from wide char to UTF-8
+	WideCharToMultiByte(CP_UTF8,
+		0,
+		(LPCWCH)tempBuffer,
+		-1,
+		(LPSTR)destBuffer,
+		cnt,
+		NULL,
+		NULL);
+
+	MyFree(tempBuffer);
+#else
+	char * destBuffer = MyStrdup(nativeString);
+#endif
+
+	return(destBuffer);
+}
+
 /**
  * Create the full path for temporary directories used in zip archive operations
  *
@@ -178,7 +224,8 @@ BOOL_T AddDirectoryToArchive(
             free(arch_path);
             continue;
         } else {
-            zt = zip_source_file(za, full_path, 0, -1);
+			char *fullPathUtf8 = NativeToUtf8(full_path);
+            zt = zip_source_file(za, fullPathUtf8, 0, -1);
             if (zip_file_add(za, arch_path, zt, 0) == -1) {
                 zip_error_t  *ziperr = zip_get_error(za);
                 buf = zip_error_strerror(ziperr);
@@ -186,8 +233,10 @@ BOOL_T AddDirectoryToArchive(
                               buf);
                 free(full_path);
                 free(arch_path);
+				MyFree(fullPathUtf8);
                 return FALSE;
             }
+			MyFree(fullPathUtf8);
 #if DEBUG
             printf("Added File %s", full_path);
 #endif
@@ -217,18 +266,21 @@ BOOL_T CreateArchive(
     int err;
     char buf[100];
 
-    char * archive = strdup(fileName);  	// Because of const char
+    char * archive = MyStrdup(fileName);  	// Because of const char
     char * archive_name = FindFilename(archive);
     char * archive_path;
+	char * archiveUtf8;
 
     MakeFullpath(&archive_path, workingDir, archive_name, NULL);
+	    
+	archiveUtf8 = NativeToUtf8(archive_path);
 
-    free(archive);
+	MyFree(archive);
 
-    if ((za = zip_open(archive_path, ZIP_CREATE, &err)) == NULL) {
+    if ((za = zip_open(archiveUtf8, ZIP_CREATE, &err)) == NULL) {
         zip_error_to_str(buf, sizeof(buf), err, errno);
-        NoticeMessage(MSG_ZIP_CREATE_FAIL, _("Continue"), NULL, archive_path, buf);
-        free(archive_path);
+        NoticeMessage(MSG_ZIP_CREATE_FAIL, _("Continue"), NULL, archiveUtf8, buf);
+        MyFree(archiveUtf8);
         return FALSE;
     }
 #if DEBUG
@@ -240,19 +292,22 @@ BOOL_T CreateArchive(
 
     if (zip_close(za) == -1) {
         zip_error_to_str(buf, sizeof(buf), err, errno);
-        NoticeMessage(MSG_ZIP_CLOSE_FAIL, _("Continue"), NULL, archive_path, buf);
-        free(archive_path);
+        NoticeMessage(MSG_ZIP_CLOSE_FAIL, _("Continue"), NULL, archiveUtf8, buf);
+		free(archive_path);
+		MyFree(archiveUtf8);
         return FALSE;
     }
 
     unlink(fileName); 							//Delete Old
     if (rename(archive_path, fileName) == -1) {	//Move zip into place
-        NoticeMessage(MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archive_path, fileName,
+        NoticeMessage(MSG_ZIP_RENAME_FAIL, _("Continue"), NULL, archiveUtf8, fileName,
                       strerror(errno));
-        free(archive_path);
+		free(archive_path);
+		MyFree(archiveUtf8);
         return FALSE;
     }
-    free(archive_path);
+	free(archive_path);
+	MyFree(archiveUtf8);
 
 #if DEBUG
     printf("Moved Archive to %s", fileName);
@@ -287,12 +342,15 @@ BOOL_T UnpackArchiveFor(
     FILE  *fd;
     long long sum;
 
+	char *destBuffer = NativeToUtf8(pathName);
 
-    if ((za = zip_open(pathName, 0, &err)) == NULL) {
+    if ((za = zip_open(destBuffer, 0, &err)) == NULL) {
         zip_error_to_str(buf, sizeof(buf), err, errno);
         NoticeMessage(MSG_ZIP_OPEN_FAIL, _("Continue"), NULL, pathName, buf);
         fprintf(stderr, "xtrkcad: can't open xtrkcad zip archive `%s': %s \n",
                 pathName, buf);
+
+		MyFree(destBuffer);
         return FALSE;
     }
 
@@ -365,6 +423,8 @@ BOOL_T UnpackArchiveFor(
 #endif
         }
     }
+
+	MyFree(destBuffer);
 
     if (zip_close(za) == -1) {
         NoticeMessage(MSG_ZIP_CLOSE_FAIL, _("Continue"), NULL, dirName, &sb.name[0]);

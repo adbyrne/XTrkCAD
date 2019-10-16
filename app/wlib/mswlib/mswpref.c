@@ -5,6 +5,7 @@
 #include <commdlg.h>
 #include <math.h>
 #include <stdio.h>
+#include "misc.h"
 #include "mswint.h"
 #include <shlobj.h>
 #include <Shlwapi.h>

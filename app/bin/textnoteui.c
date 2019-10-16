@@ -23,58 +23,207 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "custom.h"
+#include "dynstring.h"
 #include "i18n.h"
 #include "misc.h"
 #include "note.h"
 #include "param.h"
+#include "shortentext.h"
 #include "track.h" 
+#include "wlib.h"
 
-static struct noteTextData noteData;
+static struct extraDataNote	noteDataInUI;
 
-descData_t noteDesc[] = {
-    /*OR_TEXT*/	{ DESC_POS, N_("Position"), &noteData.pos },
-    /*LY_TEXT*/	{ DESC_LAYER, N_("Layer"), &noteData.layer },
-    /*TX_TEXT*/	{ DESC_TEXT, NULL, NULL },
-    { DESC_NULL }
+static paramTextData_t noteTextData = { 300, 150 };
+static paramFloatRange_t r_1000_1000 = { -1000.0, 1000.0, 80 };
+static paramData_t textEditPLs[] = {
+#define I_ORIGX (0)
+	/*0*/ { PD_FLOAT, &noteDataInUI.pos.x, "origx", PDO_DIM, &r_1000_1000, N_("Position X") },
+#define I_ORIGY (1)
+	/*1*/ { PD_FLOAT, &noteDataInUI.pos.y, "origy", PDO_DIM, &r_1000_1000, N_("Position Y") },
+#define I_LAYER (2)
+	/*2*/ { PD_DROPLIST, &noteDataInUI.layer, "layer", 0, (void*)150, "Layer", 0 },
+#define I_TEXT (3)
+	/*3*/ { PD_TEXT, NULL, "text", PDO_NOPREF, &noteTextData, N_("Note") }
 };
 
-/**
- * Return the current values entered
- */
-struct noteTextData *GetNoteTextData()
-{
-	if (wTextGetModified((wText_p)noteDesc[TX_TEXT].control0)) {
-		int len;
+static paramGroup_t textEditPG = { "textEdit", 0, textEditPLs, sizeof textEditPLs / sizeof textEditPLs[0] };
+static wWin_p textEditW;
 
-		MyFree(noteData.text);
-		len = wTextGetSize((wText_p)noteDesc[TX_TEXT].control0);
-		noteData.text = (char*)MyMalloc(len + 2);
-		wTextGetText((wText_p)noteDesc[TX_TEXT].control0, noteData.text, len+1);
+#define textEntry	((wText_p)textEditPLs[I_TEXT].control)
+
+extern BOOL_T inDescribeCmd;
+
+/**
+ * Return the current text 
+ * 
+ */
+static void GetNoteTextData()
+{
+	int len;
+
+	if (noteDataInUI.noteData.text ) {
+		MyFree(noteDataInUI.noteData.text);
 	}
-	return(&noteData);
+	len = wTextGetSize(textEntry);
+	noteDataInUI.noteData.text = (char*)MyMalloc(len + 2);
+	wTextGetText(textEntry, noteDataInUI.noteData.text, len);
+	return;
+}
+
+/**
+ * Check validity of entered text
+ * 
+ * \return always TRUE for testing
+ */
+BOOL_T
+IsValidText(char * text)
+{
+	return(TRUE);
 }
 
 
+/**
+ * Callback for text note dialog
+ *
+ * \param pg IN unused
+ * \param inx IN index into dialog template
+ * \param valueP IN unused
+ */
+static void
+TextDlgUpdate(
+	paramGroup_p pg,
+	int inx,
+	void * valueP)
+{
+	switch (inx) {
+	case I_ORIGX:
+	case I_ORIGY:
+		UpdateText(&noteDataInUI, OR_NOTE, FALSE);
+		break;
+	case I_LAYER:
+		UpdateText(&noteDataInUI, LY_NOTE, FALSE);
+		break;
+	case I_TEXT:
+		/** TODO: this is never called, why doesn't text update trigger this callback? */
+		GetNoteTextData();
+		if (IsValidText(noteDataInUI.noteData.text)) {
+			ParamDialogOkActive(&textEditPG, TRUE);
+		} else {
+			ParamDialogOkActive(&textEditPG, FALSE);
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+/**
+* Handle Cancel button: restore old values for layer and position
+*/
+
+static void
+TextEditCancel( wWin_p junk )
+{
+	if (inDescribeCmd) {
+		UpdateText(&noteDataInUI, CANCEL_NOTE, FALSE);
+	}
+	ResetIfNotSticky();
+	wHide(textEditW);
+}
+
+/**
+ * Handle OK button: make sure the entered URL is syntactically valid, update
+ * the layout and close the dialog
+ *
+ * \param junk
+ */
+
+static void
+TextEditOK(void *junk)
+{
+	GetNoteTextData();
+	UpdateText(&noteDataInUI, OK_TEXT, FALSE);
+	wHide(textEditW);
+	ResetIfNotSticky();
+	FileIsChanged();
+}
+
+
+
+/**
+ * Create the edit dialog for text notes.
+ * 
+ * \param trk IN selected note
+ * \param title IN dialog title
+ */
+static void
+CreateEditTextNote(track_p trk, char *title)
+{
+	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+
+	// create the dialog if necessary
+	if (!textEditW) {
+		ParamRegister(&textEditPG);
+		textEditW = ParamCreateDialog(&textEditPG,
+			"",
+			_("Done"), TextEditOK,
+			TextEditCancel, TRUE, NULL,
+			F_BLOCK,
+			TextDlgUpdate);
+	}
+
+	wWinSetTitle(textEditPG.win, MakeWindowTitle(title));
+
+	// initialize the dialog fields
+	noteDataInUI.pos = xx->pos;
+	noteDataInUI.layer = xx->layer;
+	noteDataInUI.trk = trk;
+
+	wTextClear(textEntry);
+	wTextAppend(textEntry, xx->noteData.text );
+	wTextSetReadonly(textEntry, FALSE);
+	FillLayerList((wList_p)textEditPLs[I_LAYER].control);
+	ParamLoadControls(&textEditPG);
+	
+	// and show the dialog
+	wShow(textEditW);
+}
+
+/**
+ * Show details in statusbar. If running in Describe mode, the describe dialog is opened for editing the note
+ *
+ * \param trk IN the selected track (note)
+ * \param str IN the buffer for the description string
+ * \param len IN length of string buffer str
+*/
+
 void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 {
-    struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
-    strcpy(str, _("Note: "));
-    len -= strlen(_("Note: "));
-    str += strlen(_("Note: "));
-    strncpy(str, xx->text, len);
+	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
+	char *noteText;
+	DynString statusLine;
 
-    for (; *str; str++) {
-        if (*str == '\n') {
-            *str = ' ';
-        }
-    }
+	noteText = MyMalloc(strlen(xx->noteData.text) + 1);
+	RemoveFormatChars(xx->noteData.text, noteText);
+	EllipsizeString(noteText, NULL, 80);
+	DynStringMalloc(&statusLine, 100);
+	   
+	DynStringPrintf(&statusLine, 
+					_("Note: Layer=%d %-.80s"), 
+					GetTrkLayer(trk)+1, 
+					noteText );
+	strcpy(str, DynStringToCStr(&statusLine));
 
-    noteData.pos = xx->pos;
-    noteDesc[TX_TEXT].valueP = xx->text;
-    noteDesc[OR_TEXT].mode = 0;
-    noteDesc[TX_TEXT].mode = 0;
-    noteDesc[LY_TEXT].mode = DESC_NOREDRAW;
-    DoDescribe(_("Note"), trk, noteDesc, UpdateNote);
+	DynStringFree(&statusLine);
+	MyFree(noteText);
+
+	if (inDescribeCmd) {
+		NoteStateSave(trk);
+
+		CreateEditTextNote(trk, _("Update comment"));
+	}
 }
 
 /**
@@ -85,12 +234,10 @@ void DescribeTextNote(track_p trk, char * str, CSIZE_T len)
 
 void NewTextNoteUI(track_p trk) {
 	struct extraDataNote * xx = (struct extraDataNote *)GetTrkExtraData(trk);
-	char *tmpPtrText;
+	char *tmpPtrText = _("Replace this text with your note");
 
-	tmpPtrText = _("Replace this text with your note");
-	xx->text = (char*)MyMalloc(strlen(tmpPtrText) + 1);
-	strcpy(xx->text, tmpPtrText);
+	xx->noteData.text = MyStrdup(tmpPtrText);
 
-	DescribeTextNote(trk, message, sizeof message);
+	CreateEditTextNote(trk, _("Create Text Note"));
 }
 
