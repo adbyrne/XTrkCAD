@@ -1123,6 +1123,35 @@ static gint draw_motion_event(
 	return TRUE;
 }
 
+static gint draw_char_release_event(
+		GtkWidget * widget,
+		GdkEventKey *event,
+		wDraw_p bd )
+{
+		GdkModifierType modifiers;
+		guint key = event->keyval;
+		wModKey_e modKey = wModKey_None;
+		switch (key) {
+			case GDK_KEY_Alt_L:     modKey = wModKey_Alt; break;
+			case GDK_KEY_Alt_R:     modKey = wModKey_Alt; break;
+			case GDK_KEY_Shift_L:	modKey = wModKey_Shift; break;
+			case GDK_KEY_Shift_R:	modKey = wModKey_Shift; break;
+			case GDK_KEY_Control_L:	modKey = wModKey_Ctrl; break;
+			case GDK_KEY_Control_R:	modKey = wModKey_Ctrl; break;
+				default: ;
+		}
+
+		if (modKey!= wModKey_None && (bd->option & BD_MODKEYS)) {
+			 bd->action(bd, bd->context, wActionModKey+((int)modKey<<8), bd->lastX, bd->lastY );
+			 	 if (!(bd->option & BD_NOFOCUS))
+			 		 gtk_widget_grab_focus( bd->widget );
+			 	 return TRUE;
+		} else {
+			return FALSE;
+		}
+		return FALSE;
+}
+
 
 static gint draw_char_event(
 		GtkWidget * widget,
@@ -1248,6 +1277,8 @@ int xw, xh, cw, ch;
 						   (GtkSignalFunc) draw_scroll_event, bd);
 	gtk_signal_connect_after (GTK_OBJECT (bd->widget), "key_press_event",
 						   (GtkSignalFunc) draw_char_event, bd);
+	gtk_signal_connect_after (GTK_OBJECT (bd->widget), "key_release_event",
+							   (GtkSignalFunc) draw_char_release_event, bd);
 	gtk_signal_connect (GTK_OBJECT (bd->widget), "leave_notify_event",
 						   (GtkSignalFunc) draw_leave_event, bd);
 	gtk_widget_set_can_focus(bd->widget,!(option & BD_NOFOCUS));

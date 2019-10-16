@@ -2651,7 +2651,9 @@ static STATUS_T CmdSelect(
 				DrawTrack(t,&mainD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
 			}
 		}
-		if (anchors_da.cnt)
+		if ((action&0xFF) == wActionModKey)
+				MainRedraw();
+		else if (anchors_da.cnt)
 			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		break;
 
