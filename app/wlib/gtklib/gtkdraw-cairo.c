@@ -1132,6 +1132,7 @@ static gint draw_char_event(
 	GdkModifierType modifiers;
 	guint key = event->keyval;
 	wAccelKey_e extKey = wAccelKey_None;
+	wModKey_e modKey = wModKey_None;
 	switch (key) {
 	case GDK_KEY_Escape:	key = 0x1B; break;
 	case GDK_KEY_Return:
@@ -1165,7 +1166,13 @@ static gint draw_char_event(
 	case GDK_KEY_F10:       extKey = wAccelKey_F10; break;
 	case GDK_KEY_F11:       extKey = wAccelKey_F11; break;
 	case GDK_KEY_F12:       extKey = wAccelKey_F12; break;
-	default: ;
+	case GDK_KEY_Alt_L:     modKey = wModKey_Alt; break;
+	case GDK_KEY_Alt_R:     modKey = wModKey_Alt; break;
+	case GDK_KEY_Shift_L:	modKey = wModKey_Shift; break;
+	case GDK_KEY_Shift_R:	modKey = wModKey_Shift; break;
+	case GDK_KEY_Control_L:	modKey = wModKey_Ctrl; break;
+	case GDK_KEY_Control_R:	modKey = wModKey_Ctrl; break;
+		default: ;
 	}
 
 	if (extKey != wAccelKey_None) {
@@ -1180,6 +1187,11 @@ static gint draw_char_event(
 		if (!(bd->option & BD_NOFOCUS))
 				gtk_widget_grab_focus( bd->widget );
 		return TRUE;
+	} else if (modKey!= wModKey_None && (bd->option & BD_MODKEYS)) {
+				bd->action(bd, bd->context, wActionModKey+((int)modKey<<8), bd->lastX, bd->lastY );
+				if (!(bd->option & BD_NOFOCUS))
+								gtk_widget_grab_focus( bd->widget );
+				return TRUE;
 	} else {
 		return FALSE;
 	}

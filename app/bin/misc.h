@@ -137,6 +137,7 @@ extern long programMode;
 #define C_WUP			wActionWheelUp
 #define C_WDOWN			wActionWheelDown
 #define C_LDOUBLE       wActionLDownDouble
+#define C_MODKEY        wActionModKey
 #define C_INIT			(wActionLast+1)
 #define C_START			(wActionLast+2)
 #define C_REDRAW		(wActionLast+3)
@@ -259,6 +260,7 @@ void LayoutToolBar( void * );
 #define IC_MODETRAIN_ONLY       (1<<14)
 #define IC_WANT_MOVE            (1<<15)
 #define IC_PLAYBACK_PUSH        (1<<16)
+#define IC_WANT_MODKEYS         (1<<17)
 wIndex_t InitCommand( wMenu_p, procCommand_t, char *, char *,  int, long, long );
 void AddToolbarControl( wControl_p, long );
 BOOL_T CommandEnabled( wIndex_t );

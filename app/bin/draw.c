@@ -2440,6 +2440,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 				ConfirmReset( TRUE );
 				return;
 			}
+		case C_MODKEY:
 		case C_MOVE:
 		case C_UP:
 		case C_RMOVE:
@@ -2678,7 +2679,7 @@ EXPORT void DrawInit( int initialZoom )
 	h = h - (toolbarHeight+max(textHeight,infoHeight)+10);
 	if ( w <= 0 ) w = 1;
 	if ( h <= 0 ) h = 1;
-	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "", BD_TICKS,
+	tempD.d = mainD.d = wDrawCreate( mainW, 0, toolbarHeight, "", BD_TICKS|BD_MODKEYS,
 												w, h, &mainD,
 				(wDrawRedrawCallBack_p)MainRedraw, DoMousew );
 
