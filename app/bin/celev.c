@@ -484,14 +484,14 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 	case C_OK:
 		DoElevDone(NULL);
-		InfoMessage( _("") );
+		InfoMessage( "" );
 		return C_TERMINATE;
 	case C_CANCEL:
 		HilightElevations( FALSE );
 		HilightSelectedEndPt( FALSE, elevTrk, elevEp );
 		elevTrk = NULL;
 		wHide( elevW );
-		InfoMessage( _("") );
+		InfoMessage( "" );
 		return C_TERMINATE;
 	case C_REDRAW:
 		DoElevHilight( NULL );
