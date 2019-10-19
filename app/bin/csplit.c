@@ -115,14 +115,15 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 				onTrackInSplit = FALSE;
 				return C_TERMINATE;
 			}
-			if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
-				onTrackInSplit = FALSE;
-				InfoMessage(_("Can't Split that Track"));
-				return C_CONTINUE;
-			}
 			ep0 = PickEndPoint( pos, trk0 );
 			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos)) && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
 				pos = GetTrkEndPos(trk0,ep0);
+			} else {
+				if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
+					onTrackInSplit = FALSE;
+					InfoMessage(_("Can't Split that Track"));
+					return C_CONTINUE;
+				}
 			}
 			onTrackInSplit = FALSE;
 			if (ep0 < 0) {
@@ -183,12 +184,10 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ((trk0 = OnTrack( &pos, FALSE, TRUE ))!=NULL && CheckTrackLayer( trk0 )) {
-			if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
-				ep0 = PickEndPoint( pos, trk0 );
-				if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))&& (GetTrkEndTrk(trk0,ep0)!=NULL)) {
-
-					CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
-				} else
+			ep0 = PickEndPoint( pos, trk0 );
+			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos)) && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
+				CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
+			} else if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 					CreateSplitAnchor(pos,trk0,FALSE);
 			}
 		}
