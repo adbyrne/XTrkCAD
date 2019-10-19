@@ -2416,5 +2416,5 @@ STATUS_T DrawGeomModify(
 	default:
 		;
 	}
-	return C_ERROR;
+	return C_CONTINUE;
 }
