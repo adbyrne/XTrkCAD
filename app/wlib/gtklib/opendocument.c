@@ -96,8 +96,9 @@ unsigned wOpenFileExternal(char * filename)
     DynStringMalloc(&commandLine, 16);
     DynStringCatCStrs(&commandLine,
                       DEFAULTOPENCOMMAND,
-                      " ",
+                      " \"",
                       filename,
+					  "\"",
                       NULL);
 
     // the command should be found via the PATH
