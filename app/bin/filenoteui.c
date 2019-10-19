@@ -45,7 +45,7 @@ extern BOOL_T inDescribeCmd;
 
 #define MYMIN(x, y) (((x) < (y)) ? (x) : (y))
 
-#define DOCUMENTFILEPATTERN "*"
+#define DOCUMENTFILEPATTERN "All Files (*.*)|*.*"
 #define DOCUMENTPATHKEY "document"
 
 static struct extraDataNote noteDataInUI;
