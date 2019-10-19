@@ -785,8 +785,8 @@ Draw elements have blue handles that show how they can be modified. They also ha
 
 There is a context menu accessed via \e{Right-Click} for Draw Objects that can change the edit mode from the initial "Points Mode" to "Origin Mode" where \e{Click} sets the position of the drawn object's origin - which will cause subsequent rotations using \K{cmdModify} to be centered about that point. 
 
-The context menu can be used to go back to Points Mode, or to set the origin to defined points. 
-The shortcuts are "o" for Origin Mode, "p" for Points Mode. 
+The context menu can be used to go back to Points Mode, or to set the origin to one of a number of defined points. 
+There are text shortcuts - "o" for Origin Mode and "p" for Points Mode. 
 
 In Origin Mode, 
 
@@ -1112,9 +1112,106 @@ A \e{Left-Click} on an object while in \f{Properties} mode causes a properties d
 
 \G{png.d/dproperties.png}
 
-The selected object is highlighted by a grey area.
+The selected object is highlighted by a grey area. If it is a line, curve, circle or polygon object, and the rotation origin is non-zero, a large blue cross will show its position.
 
 \G{png.d/dpropertieshighlight.png}
+
+
+\S2{drawDescribe} Draw Object Features in Describe 
+
+
+\S3{drawDescribeStr} Straight Lines
+
+\dt End Pt 1
+
+\dd For Straight Lines the object has a starting position (or first point) - altering this value causes the whole object to move relative to the layout origin. 
+
+\dt End Pt 2
+
+\dd Straight Lines have a second point, altering this, moves just that end of the line, altering its length as needed.
+
+\dt Angle
+
+\dd Straight Lines have an angle - this is the angle between the two points, altering this moves End Pt2. 
+
+\dt Length
+
+\dd The Length control can add to the start or end or both of a Line object depending on the setting of the Pivot control.
+
+
+\S3{drawDescribeCurve} Curves and Circles
+
+\dt Center
+
+\dd Curved Lines and Circles have a center. Moving this moves the object.
+
+\dt CW Angle and CCW Angle
+
+\dd Curved Lines have an angle relative to the center that the arc starts and and one where it ends
+ 
+ 
+\S3{drawDescribePoly} Polygons
+
+\dt Fill
+
+\dd Some draw objects (Circles, Polygons) can be filled or emptied - note that Polylines can not be filled - they have to be closed first.
+
+\dt Open
+
+\dd Polygons can be opened to become Polylines or Polylines closed to become Polygons using Describe. 
+
+\dt Point Count
+
+\dd Polygons and PolyLines have a count of nodes - this is read-only.
+ 
+  
+\S3{drawDescribeRect} Rectangles
+
+\dt Height and Width
+
+\dd Rectangular Polygons have two properties that can alter the Height and Width of the Polygon  
+ 
+ 
+\S3{drawDescribeText} Text
+
+\dt Text Angle
+
+\dd For Text objects, the Text Angle determines the angle the text is rendered at. This is independent of the rotation of the starting position which is gained from the Rotation Angle and the Rotation Origin.
+ 
+ 
+\S3{drawDescribeMulti} Multiple Types
+
+\dt Line Width
+
+\dd The width of the line for a line, curve or unfilled object can be set. 0 means a pixel width at all scales. 
+Other values are the width of the line in scale units.
+
+\dt Pivot 
+
+\dd The Pivot control can be set to the start, or the middle or the end, and it applies to the Length and Angle controls
+
+\dt Rotation Angle
+
+\dd Some Draw objects (Polygon, Polyline, Lines, Curves, Circles) can be rotated about their rotation origin in Describe. 
+After the rotation completes, the rotation angle will be set to zero, as all the points of the object will be adjusted to thier absolute position in the layout.
+
+\dt Rotation Origin 
+
+\dd By default the rotation origin is the Layout origin \{0,0\}. 
+By setting a different Rotation Origin, subsequent Rotations will be about that new point. This may be useful when using Draw objects as part of larger collections.
+
+\dt Lock Rotation Origin
+
+\dd For ease of use, the rotation origin can be locked to be relative to the First Point. If this is done, altering either the First Point or the Rotation Origin will move both. 
+This value is set to locked if the origin is non-zero when the Describe command is started but can be unset to allow repositioning of the Rotate Origin. 
+
+\dt Layer
+
+\dd The object can be moved between layers
+
+\dt Color
+
+\dd The color of the line or the fill can be set
 
 Most commands return to \f{Properties} mode then they terminate unless the command is sticky (\K{cmdSticky}).
 
@@ -1145,6 +1242,8 @@ The \f{Rotate} command can be invoked using the \f{Change>Rotate} menu item, the
 Successful use of this command requires selection of the object(s) to be rotated before attempting to rotate it. An object is selected by using the \e{Left-Click} command. A group of connected objects can be selected using the \e{Shift+Left-Click} command, or indivdual tracks added with \e{Ctrl+Left-Click}.
 
 A pop-up menu with commands controlling how objects move during the \f{Rotate} function can be activated by entering a \e{Shift+Right-Click} command while hovering over the \f{Main Canvas}.
+
+Note that a Rotate command for a Draw object does not use the Rotation Origin of that Object, even if has been defined as non-zero, instead it uses the position defined by the mouse or context command, and does not rotate the rotation origin.  
 
 \G{png.d/mrotatemove.png}
 

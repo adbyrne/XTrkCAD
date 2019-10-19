@@ -698,6 +698,7 @@ void DrawTrackElev( track_p, drawCmd_p, BOOL_T );
 
 /* cdraw.c */
 track_p MakeDrawFromSeg( coOrd, ANGLE_T, trkSeg_p );
+void DrawOriginAnchor(track_p);
 BOOL_T OnTableEdgeEndPt( track_p, coOrd * );
 BOOL_T GetClosestEndPt( track_p, coOrd * );
 BOOL_T ReadTableEdge( char * );

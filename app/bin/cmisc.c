@@ -23,6 +23,7 @@
 #include <stdint.h>
 
 #include "common.h"
+#include "utility.h"
 #include "cundo.h"
 #include "i18n.h"
 #include "messages.h"
@@ -617,6 +618,9 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
         if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
             DrawDescHilite(TRUE);
+            if (descTrk && QueryTrack(descTrk, Q_IS_DRAW)) {
+				DrawOriginAnchor(descTrk);
+			}
         } else if (trk){
         	DrawTrack(trk,&mainD,wDrawColorBlue);
         }

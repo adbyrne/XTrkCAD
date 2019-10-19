@@ -193,6 +193,7 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			if (rc != C_CONTINUE) modifyDrawMode = FALSE;
 			UndoEnd();
 			break;
+		case C_CANCEL:
 		case C_FINISH:
 		case C_CONFIRM:
 		case C_TERMINATE:

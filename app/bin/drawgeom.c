@@ -2349,7 +2349,7 @@ STATUS_T DrawGeomModify(
 		context->orig.x = context->rot_center.x;
 		context->orig.y = context->rot_center.y;
 		context->rot_moved = FALSE;
-		context->angle = 0;
+		context->angle = 0.0;
 		switch (tempSegs(0).type) {
 			case SEG_TBLEDGE:
 			case SEG_STRLIN:
@@ -2404,6 +2404,7 @@ STATUS_T DrawGeomModify(
 		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack);
 		DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		break;
+	case C_CANCEL:
 	case C_CONFIRM:
 	case C_TERMINATE:
 		context->state = MOD_NONE;
