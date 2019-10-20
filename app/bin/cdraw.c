@@ -788,6 +788,8 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	DoCurCommand( C_REDRAW, zero );
 }
 
+extern BOOL_T inDescribeCmd;
+
 static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
@@ -1000,15 +1002,19 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		title = _("Text");
 		break;
 	default:
-		AbortProg( "bad seg type" );
+		;
 	}
 
-	sprintf( str, _("%s: Layer=%d"), title, GetTrkLayer(trk)+1 );
+	snprintf( str, len, _("%s(%d) Layer=%d"), title, GetTrkIndex(trk), GetTrkLayer(trk)+1 );
+
+	if (!inDescribeCmd) return;
 
 	drawData.oldE0 = drawData.endPt[0];
 	drawData.oldE1 = drawData.endPt[1];
 	drawData.oldAngle = drawData.angle;
 	drawData.oldOrigin = drawData.origin;
+
+
 
 	DoDescribe( title, trk, drawDesc, UpdateDraw );
 	if ( segPtr->type==SEG_BENCH && drawDesc[BE].control0!=NULL && drawDesc[OR].control0!=NULL) {

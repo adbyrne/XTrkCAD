@@ -294,10 +294,12 @@ void DescribeFileNote(track_p trk, char * str, CSIZE_T len)
     DynStringMalloc(&statusLine, 80);
 
     DynStringPrintf(&statusLine, 
-					_("Document: Layer=%d %-.80s (%s)"), 
+					_("Document(%d) Layer=%d %-.80s [%s]"),
+					GetTrkIndex(trk),
 					GetTrkLayer(trk) + 1,
 					xx->noteData.fileData.title, 
 					xx->noteData.fileData.path);
+
     strcpy(str, DynStringToCStr(&statusLine));
     DynStringFree(&statusLine);
 

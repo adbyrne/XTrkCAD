@@ -2518,7 +2518,7 @@ static STATUS_T SelectArea(
 	return C_CONTINUE;
 }
 
-
+extern BOOL_T inDescribeCmd;
 
 static STATUS_T SelectTrack( 
 		coOrd pos )
@@ -2530,6 +2530,7 @@ static STATUS_T SelectTrack(
 		SetAllTrackSelect( FALSE );							//Unselect all
 		return C_CONTINUE;
 	}
+	inDescribeCmd = FALSE;
 	DescribeTrack( trk, msg, sizeof msg );
 	InfoMessage( msg );
 	if (GetLayerModule(GetTrkLayer(trk))) {
