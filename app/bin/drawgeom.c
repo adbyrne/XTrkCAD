@@ -1025,9 +1025,11 @@ void static CreatePolyAnchors(int index) {
 		coOrd p;
 		for ( int inx=0; inx<points_da.cnt; inx++ ) {
 			DYNARR_APPEND(trkSeg_t,anchors_da,3);
+
 			anchors(inx).type = point_selected(inx)?SEG_FILCRCL:SEG_CRVLIN;
 			anchors(inx).u.c.a0 = 0.0;
 			anchors(inx).u.c.a1 = 360.0;
+			anchors(inx).width = 0;
 			anchors(inx).color = wDrawColorBlue;
 			anchors(inx).u.c.radius = d/2;
 			anchors(inx).u.c.center = points(inx).pt;

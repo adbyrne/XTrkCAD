@@ -847,13 +847,19 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			break;
 		case SEG_DIMLIN:
 			title = _("Dimension Line");
-			drawDesc[CO].mode = DESC_IGNORE;
-			drawDesc[LW].mode = DESC_IGNORE;
+			drawDesc[CO].mode =
+			drawDesc[LW].mode =
+			drawDesc[LK].mode =
+			drawDesc[OI].mode =
+			drawDesc[RA].mode = DESC_IGNORE;
 			drawData.dimenSize = (wIndex_t)segPtr->u.l.option;
 			drawDesc[DS].mode = 0;
 			break;
 		case SEG_BENCH:
 			title = _("Lumber");
+			drawDesc[LK].mode =
+			drawDesc[OI].mode =
+			drawDesc[RA].mode =
 			drawDesc[LW].mode = DESC_IGNORE;
 			drawDesc[BE].mode =
 			drawDesc[OR].mode = 0;
@@ -862,6 +868,9 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			break;
 		case SEG_TBLEDGE:
 			title = _("Table Edge");
+			drawDesc[LK].mode =
+			drawDesc[OI].mode =
+			drawDesc[RA].mode = DESC_IGNORE;
 			drawDesc[CO].mode = DESC_IGNORE;
 			drawDesc[LW].mode = DESC_IGNORE;
 			break;

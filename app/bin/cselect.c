@@ -144,6 +144,56 @@ void static CreateModifyAnchor(coOrd pos) {
 	anchors(i).u.c.a1 = 360.0;
 	anchors(i).u.c.radius = d;
 	anchors(i).color = wDrawColorPowderedBlue;
+
+}
+
+void CreateDescribeAnchor(coOrd pos) {
+	DIST_T d = tempD.scale*0.15;
+	for (int j=0;j<2;j++) {
+		pos.x += j*d*3/4;
+		pos.y += j*d/2;
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		int i = anchors_da.cnt-1;
+		anchors(i).type = SEG_CRVLIN;
+		anchors(i).width = d/4;
+		anchors(i).u.c.center = pos;
+		anchors(i).u.c.a0 = 270.0;
+		anchors(i).u.c.a1 = 270.0;
+		anchors(i).u.c.radius = d*3/4;
+		anchors(i).color = wDrawColorPowderedBlue;
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		i = anchors_da.cnt-1;
+		anchors(i).type = SEG_STRLIN;
+		anchors(i).width = d/4;
+		Translate(&anchors(i).u.l.pos[0],pos,180.0,d*3/4);
+		Translate(&anchors(i).u.l.pos[1],pos,180.0,d*1.5);
+		anchors(i).color = wDrawColorPowderedBlue;
+	}
+}
+
+void CreateActivateAnchor(coOrd pos) {
+	DIST_T d = tempD.scale*0.15;
+	coOrd c = pos;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = SEG_CRVLIN;
+	anchors(i).width = 0;
+	c.x -= d*3/4;
+	anchors(i).u.c.center = c;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).u.c.radius = d;
+	anchors(i).color = wDrawColorPowderedBlue;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	i = anchors_da.cnt-1;
+	c.x += d*1.5;
+	anchors(i).type = SEG_CRVLIN;
+	anchors(i).width = 0;
+	anchors(i).u.c.center = pos;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).u.c.radius = d;
+	anchors(i).color = wDrawColorPowderedBlue;
 }
 
 void static CreateMoveAnchor(coOrd pos) {
@@ -2511,7 +2561,7 @@ static STATUS_T Activate( coOrd pos) {
 	if (GetLayerModule(GetTrkLayer(trk))) {
 		return C_CONTINUE;
 	}
-	ActivateTrack(trk);
+	if (QueryTrack(trk,Q_IS_ACTIVATEABLE)) ActivateTrack(trk);
 
 	return C_CONTINUE;
 
@@ -2567,6 +2617,10 @@ static STATUS_T CallModify(wAction_t action,
 	return rc;
 }
 
+static STATUS_T CallDescribe(wAction_t action, coOrd pos) {
+	int rc = CmdDescribe(action, pos);
+	return rc;
+}
 
 static STATUS_T CmdSelect(
 		wAction_t action,
@@ -2638,6 +2692,11 @@ static STATUS_T CmdSelect(
 					QueryTrack( ht, Q_IS_CORNU ) ||
 					(QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT))) {
 						CreateModifyAnchor(pos);
+					} else {
+						if (QueryTrack(ht,Q_IS_ACTIVATEABLE))
+							CreateActivateAnchor(pos);
+						else
+							CreateDescribeAnchor(pos);
 					}
 				}
 			}
@@ -2803,8 +2862,14 @@ static STATUS_T CmdSelect(
 						CmdModify(C_START,pos);
 						CmdModify(C_DOWN,pos);
 						return CmdModify(C_UP,pos);
+					} else if (QueryTrack( ht, Q_IS_ACTIVATEABLE)){
+						return Activate(pos);
+					} else {
+						CmdDescribe(C_START,pos);
+						CmdDescribe(C_DOWN, pos);
+						return CmdDescribe(C_UP, pos);
 					}
-				} else return Activate(pos);
+				}
 				break;
 			case MOVE:
 			default:

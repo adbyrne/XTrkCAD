@@ -1108,78 +1108,21 @@ Clicking on the \f{Properties} (Describe Mode) button cancels all active command
 
 Until an object is selected, the object under the cursor that will be selected with \e{Left-Click} is highlighted in blue.
 
-A \e{Left-Click} on an object while in \f{Properties} mode causes a properties dialog window to appear. The properties dialog contains information pertaining to the selected objects position, size, color and layer as appropriate for each type of object. Certain values can be changed to modify the object. If a track is connected to other tracks, then some values, e.g., endpoint positions, can not be changed.
+A \e{Left-Click} on an object while in \f{Properties} mode causes a properties dialog window to appear. 
+The properties dialog contains information pertaining to the selected objects position, size, color and layer as appropriate for each type of object. 
+Certain values can be changed to modify the object. If a track is connected to other tracks, then some values, e.g., endpoint positions, can not be changed.
 
 \G{png.d/dproperties.png}
 
-The selected object is highlighted by a grey area. If it is a line, curve, circle or polygon object, and the rotation origin is non-zero, a large blue cross will show its position.
+The selected object is highlighted by a grey area. 
+
+If it is a Line, Curve, Circle or Polygon object, and the rotation origin is non-zero, a large blue cross will show its position.
 
 \G{png.d/dpropertieshighlight.png}
 
+\S2{drawDescribe} Draw Object Fields 
 
-\S2{drawDescribe} Draw Object Features in Describe 
-
-
-\S3{drawDescribeStr} Straight Lines
-
-\dt End Pt 1
-
-\dd For Straight Lines the object has a starting position (or first point) - altering this value causes the whole object to move relative to the layout origin. 
-
-\dt End Pt 2
-
-\dd Straight Lines have a second point, altering this, moves just that end of the line, altering its length as needed.
-
-\dt Angle
-
-\dd Straight Lines have an angle - this is the angle between the two points, altering this moves End Pt2. 
-
-\dt Length
-
-\dd The Length control can add to the start or end or both of a Line object depending on the setting of the Pivot control.
-
-
-\S3{drawDescribeCurve} Curves and Circles
-
-\dt Center
-
-\dd Curved Lines and Circles have a center. Moving this moves the object.
-
-\dt CW Angle and CCW Angle
-
-\dd Curved Lines have an angle relative to the center that the arc starts and and one where it ends
- 
- 
-\S3{drawDescribePoly} Polygons
-
-\dt Fill
-
-\dd Some draw objects (Circles, Polygons) can be filled or emptied - note that Polylines can not be filled - they have to be closed first.
-
-\dt Open
-
-\dd Polygons can be opened to become Polylines or Polylines closed to become Polygons using Describe. 
-
-\dt Point Count
-
-\dd Polygons and PolyLines have a count of nodes - this is read-only.
- 
-  
-\S3{drawDescribeRect} Rectangles
-
-\dt Height and Width
-
-\dd Rectangular Polygons have two properties that can alter the Height and Width of the Polygon  
- 
- 
-\S3{drawDescribeText} Text
-
-\dt Text Angle
-
-\dd For Text objects, the Text Angle determines the angle the text is rendered at. This is independent of the rotation of the starting position which is gained from the Rotation Angle and the Rotation Origin.
- 
- 
-\S3{drawDescribeMulti} Multiple Types
+Some fields are used by multiple types of objects - these are listed below
 
 \dt Line Width
 
@@ -1212,6 +1155,75 @@ This value is set to locked if the origin is non-zero when the Describe command 
 \dt Color
 
 \dd The color of the line or the fill can be set
+
+\S3{drawDescribeStr} Straight Line Objects
+
+\dt End Pt 1
+
+\dd For Straight Lines the object has a starting position (or first point) - altering this value causes the whole object to move relative to the layout origin. 
+
+\dt End Pt 2
+
+\dd Straight Lines have a second point, altering this, moves just that end of the line, altering its length as needed.
+
+\dt Angle
+
+\dd Straight Lines have an angle - this is the angle between the two points, altering this moves End Pt2. 
+
+\dt Length
+
+\dd The Length control can add to the start or end or both of a Line object depending on the setting of the Pivot control.
+
+\S3{drawDescribeDim} Dimension Line Objects
+
+\dt Size
+
+\dd The size of the arrows and text can be set to Tine, Small, Medium or Large. 
+
+\S3{drawDescribeBench} BenchWork Objects
+
+\dt Lumber
+
+\dd A set of standard dimensions of timber sizes that are often used to construct benchwork. They are specified in "nominal" dimensions but drawn in "actual" dimensions.
+
+\dt Orientation
+
+\dd The timber can be orientated "On Edge" which will draw the smaller dimension or "Flat". 
+
+\S3{drawDescribeCurve} Curved and Circle Objects
+
+\dt Center
+
+\dd Curved Lines and Circles have a center. Moving this moves the object.
+
+\dt CW Angle and CCW Angle
+
+\dd Curved Lines have an angle relative to the center that the arc starts and and one where it ends
+ 
+\S3{drawDescribePoly} Polygon Objects
+
+\dt Fill
+
+\dd Some draw objects (Circles, Polygons) can be filled or emptied - note that Polylines can not be filled - they have to be closed first.
+
+\dt Open
+
+\dd Polygons can be opened to become Polylines or Polylines closed to become Polygons using Describe. 
+
+\dt Point Count
+
+\dd Polygons and PolyLines have a count of nodes - this is read-only.
+
+\dt Height and Width
+
+\dd Rectangular Polygons have two properties that can alter the Height and Width of the Polygon  
+ 
+\S3{drawDescribeText} Text Objects
+
+\dt Text Angle
+
+\dd For Text objects, the Text Angle determines the angle the text is rendered at. This is independent of the rotation of the starting position which is gained from the Rotation Angle and the Rotation Origin.
+ 
 
 Most commands return to \f{Properties} mode then they terminate unless the command is sticky (\K{cmdSticky}).
 

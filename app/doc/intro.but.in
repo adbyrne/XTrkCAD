@@ -133,6 +133,10 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \e{XTrackCAD} is designed from the ground up to be a complete tool for many aspects of Model Railroad layout design. 
 
+\dt \e{Active UI Prompting}
+
+\dd As the mouse moves over the layout objects, a set of different anchors are shown to indicate what is possible in each command with each modifier key if clicked or double clicked at that location.
+
 \dt \e{Train Simulation and Car Inventory}
 
 \dd Any number of Cars and Locomotives can be placed on your layout to check clearances, siding capacities and track layout. Trains can be animated to simulate operations and switching on your layout.

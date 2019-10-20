@@ -820,47 +820,67 @@ Note Dialog
 
 \H{cmdAcclKeys} \i{Mouse Actions}
 
-\dt \e{XTrackCAD} uses the left and right mouse buttons when manipulating tracks and other objects on the layout.  Their meaning depends on the particular command but in general:
+\e{XTrackCAD} uses the left and right mouse buttons when manipulating tracks and other objects on the layout.  Their meaning depends on the particular command:
 
-\u00
+\e{Select Command}
 
-\dd \e{Left-Click} - selects an object or an endpoint.
+\dt \e{Left-Click}
+ 
+\dd Selects one object, deselects all objects if clicked off all objects.
 
-\u00
+\dt \e{Shift-Left-Click} 
 
-\dd \e{Left+Drag} - modifies an object, such as extending it.
+\dd Selects all connected tracks to the one clicked on up to the next selected item in each direction.
 
-\u00
+\dt \e{Ctrl+Left-Click} 
 
-\dd \e{Right-Click} - displays a pop-up menu of commands.
+\dd Adds an object to the selection.
 
-\u00
+\dt \e{Double-Left-Click} 
 
-\dd \e{Shift+Right-Click} - displays a pop-up menu of command options (for some commands).
+\dd Opens modify for Cornu and Draw Objects other than Text, Activates Link and Document Notes, otherwise opens Describe.
 
-\u00
+\dt \e{Left+Drag} 
 
-\dd \e{Rotate Wheel} - zooms drawing area in and out.
+\dd Selects all objects in an rubber-banded area and deselects all others.
 
-\u000
+\dt \e{Shift+Left-Drag} 
 
-\u000
+\dd Moves selected objects if in a selected area, if off selected objects, like Left-Drag.
 
-\dt When Moving and Rotating ( Placing Turnouts and Structures, Moving the Print and Snap Grids, ... ):
+\dt \e{Ctrl+Left-Drag} 
 
-\u00
+\dd Rotates selected objects if in a selected area, if off selected objects, like Left-Drag. 
 
-\dd \e{(Left+Drag)} - moves the objects or grid.
+\dt \e{Right-Click} 
 
-\u00
+\dd Displays a pop-up menu of context commands (in Select, Move and Rotate options) if in a selected area.
 
-\dd \e{(Right+Drag)} - rotates the objects or grid about the pivot point, which is
-the point you started the drag operation.
+\dt \e{Shift+Right-Click} 
 
-Some commands use the \c{Shift} or \c{Ctrl} key to modify the meaning of button presses.
+\dd Displays a pop-up menu of commands.
+
+\dt \e{Right+Drag} 
+
+\dd Deselects all objects in an rubber-banded area from the current set.
+
+\dt \e{Rotate Wheel} 
+
+\dd Zooms drawing area in and out.
+
+\e{When Moving and Rotating} ( Placing Turnouts and Structures, Moving the Print and Snap Grids, ... ):
+
+\dt \e{(Shift+Left+Drag)} 
+
+\dd Moves the objects or grid.
+
+\dt \e{(Ctrl+Left+Drag)} 
+
+\dd Rotates the objects or grid about the pivot point, which is the point you started the drag operation.
+
+Some other commands use the \c{Shift} or \c{Ctrl} key to modify the meaning of button presses.
 
 \rule
-
 
 \S{mouseBcmd} Context Sensitive Menus
 

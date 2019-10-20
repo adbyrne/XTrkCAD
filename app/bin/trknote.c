@@ -509,6 +509,19 @@ static void ActivateNote(track_p trk) {
 	}
 }
 
+static BOOL_T QueryNote( track_p trk, int query )
+{
+	switch ( query ) {
+	case Q_IS_ACTIVATEABLE:;
+		if (IsFileNote(trk)) return TRUE;
+		if (IsLinkNote(trk)) return TRUE;
+		break;
+	default:
+		return FALSE;
+	}
+	return FALSE;
+}
+
 static trackCmd_t noteCmds = {
     "NOTE",
     DrawNote,
@@ -532,7 +545,7 @@ static trackCmd_t noteCmds = {
 	NULL,       /*getLength*/
 	NULL,       /*getTrackParams*/
 	NULL,       /*moveEndPt*/
-	NULL,       /*query*/
+	QueryNote,  /*query*/
 	NULL,       /*ungroup*/
 	NULL,       /*flip*/
 	NULL,       /*drawPositionIndicator*/

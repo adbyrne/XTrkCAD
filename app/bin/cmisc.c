@@ -563,7 +563,7 @@ EXPORT void DescribeCancel(void)
 }
 
 
-static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
+EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 {
     static track_p trk;
     char msg[STR_SIZE];

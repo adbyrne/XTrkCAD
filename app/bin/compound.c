@@ -533,7 +533,7 @@ static struct {
 		DIST_T length;
 		unsigned int layerNumber;
 		} compoundData;
-typedef enum { E0, A0, C0, R0, Z0, E1, A1, C1, R1, Z1, E2, A2, C2, R2, Z2, E3, A3, C3, R3, Z3, GR, OR, AN, PV, MN, NM, PN, EC, SC, LY } compoundDesc_e;
+typedef enum { E0, A0, C0, R0, Z0, E1, A1, C1, R1, Z1, E2, A2, C2, R2, Z2, E3, A3, C3, R3, Z3, GR, OR, AN, PV, MN, NM, PN, SC, LY } compoundDesc_e;
 static descData_t compoundDesc[] = {
 /*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &compoundData.endPt[0] },
 /*A0*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[0] },
@@ -562,7 +562,6 @@ static descData_t compoundDesc[] = {
 /*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf, sizeof(compoundData.manuf)},
 /*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name, sizeof(compoundData.name) },
 /*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno, sizeof(compoundData.partno)},
-/*EC*/	{ DESC_LONG, N_("# End Pts"), &compoundData.epCnt },
 /*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &compoundData.layerNumber },
 		{ DESC_NULL } };
@@ -898,7 +897,6 @@ void DescribeCompound(
 	compoundDesc[MN].mode =
 	compoundDesc[NM].mode =
 	compoundDesc[PN].mode = 0 /*DESC_NOREDRAW*/;
-	compoundDesc[EC].mode =
 	compoundDesc[SC].mode = DESC_RO;
 	compoundDesc[LY].mode = DESC_NOREDRAW;
 	compoundDesc[PV].mode = 0;
