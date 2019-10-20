@@ -930,7 +930,7 @@ static ANGLE_T rotate_angle;
 static dynArr_t origin_da;
 
 
-void static CreateCircleAnchor(wBool_t selected,coOrd center, DIST_T rad) {
+void static CreateCircleAnchor(wBool_t selected,coOrd center, DIST_T rad, ANGLE_T angle) {
 	DYNARR_RESET(trkSeg_t,anchors_da);
 	double d = tempD.scale*0.15;
 	DYNARR_APPEND(trkSeg_t,anchors_da,2);
@@ -938,7 +938,7 @@ void static CreateCircleAnchor(wBool_t selected,coOrd center, DIST_T rad) {
 	anchors(0).u.c.a1 = 360.0;
 	anchors(0).color = wDrawColorBlue;
 	anchors(0).u.c.radius = d/2;
-	PointOnCircle(&anchors(0).u.c.center,center,rad,315.0);
+	PointOnCircle(&anchors(0).u.c.center,center,rad,angle);
 }
 
 void static CreateLineAnchors(int index, coOrd p0, coOrd p1) {
@@ -1789,7 +1789,8 @@ STATUS_T DrawGeomModify(
 				tempSegs_da.cnt = 1;
 				if (tempSegs(0).u.c.a1<360.0) {
 					CreateCurveAnchors(-1,context->pm,context->pc,context->p0,context->p1);
-				}
+				} else
+					CreateCircleAnchor(FALSE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,FindAngle(tempSegs(0).u.c.center,pos));
 				context->last_inx = 2;
 				break;
 			case SEG_POLY:
@@ -1870,6 +1871,7 @@ STATUS_T DrawGeomModify(
 				tempSegs(0).u.c.a0 = 0.0;
 				tempSegs(0).u.c.a1 = 360.0;
 				InfoMessage("Drag to Change Radius");
+				CreateCircleAnchor(TRUE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,FindAngle(tempSegs(0).u.c.center,pos));
 			} else {
 				p0 = context->p0;
 				p1 = context->p1;
@@ -2018,6 +2020,7 @@ STATUS_T DrawGeomModify(
 		case SEG_FILCRCL:
 			if (tempSegs(0).u.c.a1 >= 360.0) {
 				tempSegs(0).u.c.radius = FindDistance( context->pc, pos );
+				CreateCircleAnchor(TRUE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,FindAngle(tempSegs(0).u.c.center,pos));
 			} else {
 				if (context->state != MOD_SELECTED_PT) return C_CONTINUE;
 				if (curveInx < 0 || curveInx > 2) return C_CONTINUE;
@@ -2198,6 +2201,7 @@ STATUS_T DrawGeomModify(
 			if ( (tempSegs(0).type == SEG_FILCRCL) || (tempSegs(0).u.c.a1 == 360.0 || tempSegs(0).u.c.a1 == 0.0) ) {
 				context->radius = fabs(tempSegs(0).u.c.radius);
 				context->arc_angle = 360.0;
+				CreateCircleAnchor(FALSE,tempSegs(0).u.c.center,tempSegs(0).u.c.radius,FindAngle(tempSegs(0).u.c.center,pos));
 			} else {
 				p0 = context->p0;
 				p1 = context->p1;

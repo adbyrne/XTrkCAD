@@ -342,7 +342,6 @@ STATUS_T CmdModify(
 			}
 			ErrorMessage( MSG_CANNOT_CHANGE );
 		}
-		InfoMessage(_("Drag to set size, +Shift to change radius"));
 		ModifyTrack(Dex.Trk, C_START, pos);         //Basically trim via Modify...
 		rc = ModifyTrack( Dex.Trk, C_DOWN, pos );
 		if ( rc != C_CONTINUE ) {
