@@ -33,6 +33,10 @@
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
 
+extern wIndex_t selectCmdInx;
+extern wIndex_t joinCmdInx;
+extern wIndex_t modifyCmdInx;
+
 static track_p descTrk;
 static descData_p descData;
 static descUpdate_t descUpdateFunc;
@@ -43,6 +47,8 @@ static BOOL_T descUndoStarted;
 static BOOL_T descNeedDrawHilite;
 static wPos_t describeW_posy;
 static wPos_t describeCmdButtonEnd;
+
+static wMenu_p descPopupM;
 
 static unsigned int editableLayerList[NUM_LAYERS];		/**< list of non-frozen layers */
 static int * layerValue;								/**pointer to current Layer (int *) */
@@ -632,7 +638,12 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         DescribeCancel();
         wSetCursor(mainD.d,defaultCursor);
         return C_CONTINUE;
+
+    case C_CMDMENU:
+    	if (!trk) wMenuPopupShow(descPopupM);
+    	return C_CONTINUE;
     }
+
 
     return C_CONTINUE;
 }
@@ -641,11 +652,23 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
 #include "bitmaps/describe.xpm"
 
+extern wIndex_t selectCmdInx;
+extern wIndex_t modifyCmdInx;
+extern wIndex_t panCmdInx;
+
 void InitCmdDescribe(wMenu_p menu)
 {
     describeCmdInx = AddMenuButton(menu, CmdDescribe, "cmdDescribe",
                                    _("Properties"), wIconCreatePixMap(describe_xpm),
-                                   LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE, ACCL_DESCRIBE, NULL);
+                                   LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_DESCRIBE, NULL);
     RegisterChangeNotification(DescChange);
     ParamRegister(&describePG);
+}
+void InitCmdDescribe2(wMenu_p menu)
+{
+    descPopupM = MenuRegister( "Describe Context Menu" );
+    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr(_("cmdSelectMode")), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
+    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr(_("cmdModifyMode")), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
+    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr(_("cmdPanMode")), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+
 }

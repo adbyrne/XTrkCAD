@@ -2265,9 +2265,10 @@ void MenuMode(int mode) {
 		InfoSubstituteControls( NULL, NULL );
 		infoSubst = FALSE;
 	}
-	if (mode == 1)
+	if (mode == 1) {
 		DrawGeomOriginMove(C_START,zero,&drawModCmdContext);
-	else  {
+		InfoMessage("Origin Mode");
+	} else  {
 		DrawGeomModify(C_START,zero,&drawModCmdContext);
 		InfoMessage("Points Mode");
 	}

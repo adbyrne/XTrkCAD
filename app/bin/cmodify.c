@@ -50,6 +50,12 @@ static struct {
 		BOOL_T first;
 		} Dex;
 
+static wMenu_p modPopupM;
+
+extern wIndex_t selectCmdInx;
+extern wIndex_t joinCmdInx;
+extern wIndex_t describeCmdInx;
+
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
@@ -720,6 +726,19 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 			return ModifyDraw(action, pos);
 		return ModifyTrack( Dex.Trk, action, pos );
 
+	case C_CMDMENU:
+		if ( !Dex.Trk ) {
+			wMenuPopupShow(modPopupM);
+			return C_CONTINUE;
+		}
+		if (modifyBezierMode)
+			return ModifyBezier(action, pos);
+		if (modifyCornuMode)
+			return ModifyCornu(action, pos);
+		if (modifyDrawMode)
+			return ModifyDraw(action, pos);
+		return ModifyTrack( Dex.Trk, action, pos );
+
 	case C_LCLICK:
 		if ( modifyDrawMode) {
 			rc = ModifyDraw(C_DOWN, pos);
@@ -746,9 +765,17 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
  */
 
 #include "bitmaps/extend.xpm"
+extern wIndex_t panCmdInx;
+extern wIndex_t selectCmdInx;
+extern wIndex_t describeCmdInx;
+
 
 void InitCmdModify( wMenu_p menu )
 {
 	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"), wIconCreatePixMap(extend_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
 	log_modify = LogFindIndex( "modify" );
+	modPopupM = MenuRegister( "Modify Context Menu" );
+	wMenuPushCreate(modPopupM, "cmdSelectMode", GetBalloonHelpStr(_("cmdSelectMode")), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
+	wMenuPushCreate(modPopupM, "cmdDescribeMode", GetBalloonHelpStr(_("cmdDescribeMode")), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
+	wMenuPushCreate(modPopupM, "cmdPanMode", GetBalloonHelpStr(_("cmdPanMode")), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
 }

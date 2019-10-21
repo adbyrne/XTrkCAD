@@ -2487,6 +2487,10 @@ static void CreateMenus(void) {
 
 	cmdGroup = BG_LAYER | BG_BIGGAP;
 
+	InitCmdSelect2(changeM);
+	InitCmdDescribe2(changeM);
+	InitCmdPan2(changeM);
+
 	InitLayers();
 
 	cmdGroup = BG_HOTBAR;
