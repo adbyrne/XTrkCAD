@@ -1326,7 +1326,8 @@ static void MoveTracks(
 		BOOL_T rotate,
 		coOrd base,
 		coOrd orig,
-		ANGLE_T angle )
+		ANGLE_T angle,
+		BOOL_T undo)
 {
 	track_p trk, trk1;
 	EPINX_T ep, ep1;
@@ -1442,7 +1443,7 @@ static void MoveTracks(
 		DrawMapBoundingBox( TRUE );
 	}
 	wSetCursor( mainD.d, defaultCursor );
-	UndoEnd();
+	if (undo) UndoEnd();
 	tempSegDrawFuncs.options = 0;
 	InfoCount( trackCount );
 }
@@ -1468,7 +1469,7 @@ void MoveToJoin(
 		angle += 180.0;
 		angle = NormalizeAngle( angle );
 		GetMovedTracks( FALSE );
-		MoveTracks( TRUE, TRUE, TRUE, base, orig, angle );
+		MoveTracks( TRUE, TRUE, TRUE, base, orig, angle, TRUE );
 		UndrawNewTrack( trk0 );
 		UndrawNewTrack( trk1 );
 		ConnectTracks( trk0, ep0, trk1, ep1 );
@@ -1604,8 +1605,9 @@ static STATUS_T CmdMove(
 	static EPINX_T ep2;
 	static track_p t1;
 	static track_p t2;
+	static BOOL_T doingMove;
 
-	switch( action&0xFF) {
+	switch( action & 0xFF) {
 
 		case C_START:
 			DYNARR_RESET(trkSeg_t,anchors_da);
@@ -1620,6 +1622,7 @@ static STATUS_T CmdMove(
 			state = 0;
 			ep1 = -1;
 			ep2 = -1;
+			doingMove = FALSE;
 			break;
 
 		case wActionMove:
@@ -1630,12 +1633,18 @@ static STATUS_T CmdMove(
 			break;
 		case C_DOWN:
 			DYNARR_RESET(trkSeg_t,anchors_da);
+			if (doingMove) {
+				doingMove = FALSE;
+				UndoEnd();
+			}
+
 			if (SelectedTracksAreFrozen()) {
 				return C_TERMINATE;
 			}
 			UndoStart( _("Move Tracks"), "move" );
 			base = zero;
 			orig = pos;
+
 			GetMovedTracks(quickMove != MOVE_QUICK);
 			SetMoveD( TRUE, base, 0.0 );
 			//DrawMovedTracks();
@@ -1681,13 +1690,15 @@ static STATUS_T CmdMove(
 			if (t1 && ep1>=0 && t2 && ep2>=0) {
 				MoveToJoin(t2,ep2,t1,ep1);
 			} else {
-				MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, base, zero, 0.0 );
+				MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, base, zero, 0.0, TRUE );
 			}
 			ep1 = -1;
 			ep2 = -1;
 			return C_TERMINATE;
 
 		case C_CMDMENU:
+			if (doingMove) UndoEnd();
+			doingMove = FALSE;
 			base = pos;
 			track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
 			if ((trk) &&
@@ -1743,10 +1754,11 @@ static STATUS_T CmdMove(
 
 			drawEnable = enableMoveDraw;
 			GetMovedTracks(quickMove!=MOVE_QUICK);
-			UndoStart( _("Move Tracks"), "move" );
+			if (!doingMove) UndoStart( _("Move Tracks"), "move" );
+			doingMove = TRUE;
 			SetMoveD( TRUE, base, 0.0 );
 			DrawSelectedTracksD( &mainD, wDrawColorWhite );
-			MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, base, zero, 0.0 );
+			MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, base, zero, 0.0, FALSE );
 			++microCount;
 			if (microCount>5) {
 				microCount = 0;
@@ -1757,6 +1769,20 @@ static STATUS_T CmdMove(
 			}
 			break;
 
+		case C_FINISH:
+			if (doingMove) {
+				doingMove = FALSE;
+				UndoEnd();
+			}
+			break;
+		case C_CONFIRM:
+		case C_CANCEL:
+			if (doingMove) {
+				doingMove = FALSE;
+				UndoUndo();
+			}
+
+			break;
 		default:
 			break;
 	}
@@ -1986,12 +2012,12 @@ static STATUS_T CmdRotate(
 				CleanSegs(&tempSegs_da);
 				if ( rotateAlignState == 2 ) {
 					//DrawMovedTracks();
-					MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, orig, angle );
+					MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, orig, angle, TRUE );
 					rotateAlignState = 0;
 				} else if (drawnAngle) {
 					DrawLine( &tempD, base, orig, 0, wDrawColorBlack );
 					//DrawMovedTracks();
-					MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, orig, angle );
+					MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, orig, angle, TRUE );
 				}
 			}
 			UndoEnd();
@@ -2041,7 +2067,7 @@ static void QuickMove( void* pos) {
 	GetMovedTracks(FALSE);
 	DrawSelectedTracksD( &mainD, wDrawColorWhite );
 	UndoStart( _("Move Tracks"), "Move Tracks" );
-	MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, move_pos, zero, 0.0 );
+	MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, move_pos, zero, 0.0, TRUE );
 	wDrawDelayUpdate( mainD.d, FALSE );
 	MainRedraw();
 	MapRedraw();
@@ -2056,7 +2082,7 @@ static void QuickRotate( void* pangle )
 	GetMovedTracks(FALSE);
 	DrawSelectedTracksD( &mainD, wDrawColorWhite );
 	UndoStart( _("Rotate Tracks"), "Rotate Tracks" );
-	MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, cmdMenuPos, angle );
+	MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, cmdMenuPos, angle, TRUE);
 	wDrawDelayUpdate( mainD.d, FALSE );
 	MainRedraw();
 	MapRedraw();
@@ -2937,6 +2963,9 @@ static STATUS_T CmdSelect(
 			wMenuPopupShow( selectPopup2M );
 		}
 		return C_CONTINUE;
+	case C_FINISH:
+		if (doingMove) UndoEnd();
+		break;
 	default:
 		if (doingDouble) return CallModify(action, pos);
 	}
