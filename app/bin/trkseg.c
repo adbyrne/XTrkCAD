@@ -2025,6 +2025,56 @@ EXPORT void CleanSegs(dynArr_t * seg_p) {
 	seg_p->max = 0;
 }
 
+/*
+ * Copy Segs from one array to another
+ */
+EXPORT void AppendSegs(dynArr_t * seg_to, dynArr_t * seg_from) {
+	if (seg_from->cnt ==0) return;
+	int j = 0;
+	DYNARR_APPEND(trkSeg_t, * seg_to, seg_from->cnt);
+	for (int i=0; i<seg_from->cnt;i++,j++) {
+		trkSeg_p from_p = &DYNARR_N(trkSeg_t, * seg_from,j);
+		trkSeg_p to_p = &DYNARR_N(trkSeg_t, * seg_to,i);
+		memcpy((void *)to_p,(void *)from_p,sizeof( trkSeg_t));
+		if (from_p->type == SEG_BEZLIN || from_p->type == SEG_BEZTRK) {
+			if (from_p->bezSegs.ptr) {
+				to_p->bezSegs.ptr = memdup(from_p->bezSegs.ptr,from_p->bezSegs.cnt*sizeof(trkSeg_t));
+			}
+		}
+		if (from_p->type == SEG_POLY || from_p->type == SEG_FILPOLY) {
+			if (from_p->u.p.pts) {
+				to_p->u.p.pts = memdup(from_p->u.p.pts,from_p->u.p.cnt*sizeof(pts_t));
+			}
+		}
+	}
+}
+
+EXPORT void AppendTransformedSegs(dynArr_t * seg_to, dynArr_t * seg_from, coOrd orig, coOrd rotateOrig, ANGLE_T angle) {
+	if (seg_from->cnt ==0) return;
+	int j = 0;
+	DYNARR_APPEND(trkSeg_t, * seg_to, seg_from->cnt);
+	for (int i=0; i<seg_from->cnt;i++,j++) {
+		trkSeg_p from_p = &DYNARR_N(trkSeg_t, * seg_from,j);
+		trkSeg_p to_p = &DYNARR_N(trkSeg_t, * seg_to,i);
+		memcpy((void *)to_p,(void *)from_p,sizeof( trkSeg_t));
+		if (from_p->type == SEG_BEZLIN || from_p->type == SEG_BEZTRK) {
+			if (from_p->bezSegs.ptr) {
+				to_p->bezSegs.ptr = memdup(from_p->bezSegs.ptr,from_p->bezSegs.cnt*sizeof(trkSeg_t));
+			}
+		}
+		if (from_p->type == SEG_POLY || from_p->type == SEG_FILPOLY) {
+			if (from_p->u.p.pts) {
+				to_p->u.p.pts = memdup(from_p->u.p.pts,from_p->u.p.cnt*sizeof(pts_t);
+			}
+		}
+		RotateSegs(1,to_p,rotateOrig,angle);
+		coOrd move;
+		move.x = orig.x - rotateOrig.x;
+		move.y = orig.y - rotateOrig.y;
+		MoveSegs(1,to_p,move);
+	}
+}
+
 EXPORT void CopyPoly(trkSeg_p p, wIndex_t segCnt) {
 	pts_t * newPts;
 	for (int i=0;i<segCnt;i++,p++) {
