@@ -538,7 +538,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 
 	gtkDrawDestroyCairoContext(cairo);
 	if (bd->widget)
-		gtk_widget_queue_draw(GTK_WIDGET(bd->widget));
+		gtk_widget_queue_draw_area(GTK_WIDGET(bd->widget),x,y,w,h);
 
 }
 
@@ -826,7 +826,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 	cairo_destroy(cairo);
 
 	if (widget)
-		gtk_widget_queue_draw(GTK_WIDGET(widget));
+		gtk_widget_queue_draw_area(GTK_WIDGET(widget),bd->realX,bd->realY,bm->w,bm->h);
 
 }
 
