@@ -1037,27 +1037,24 @@ static char *quickMoveMsgs[] = {
 		N_("Draw moving track simply"),
 		N_("Draw moving track as end-points") };
 static wMenuToggle_p quickMove1M[3];
-static wMenuToggle_p quickMove2M[3];
 
-static void ChangeQuickMove( wBool_t set, void * mode )
+static void ChangeQuickMove(wBool_t set, void * mode)
 {
-	long inx;
-	quickMove = (long)mode;
-	InfoMessage( quickMoveMsgs[quickMove] );
-	DoChangeNotification( CHANGE_CMDOPT );
-	for (inx = 0; inx<3; inx++) {
-		wMenuToggleSet( quickMove1M[inx], quickMove == inx );
-		wMenuToggleSet( quickMove2M[inx], quickMove == inx );
-	}
+    long inx;
+    quickMove = (long)mode;
+    InfoMessage(quickMoveMsgs[quickMove]);
+    DoChangeNotification(CHANGE_CMDOPT);
+    for (inx = 0; inx<3; inx++) {
+        wMenuToggleSet(quickMove1M[inx], quickMove == inx);
+    }
 }
 
-EXPORT void UpdateQuickMove( void * junk )
+EXPORT void UpdateQuickMove(void * junk)
 {
-	long inx;
-	for (inx = 0; inx<3; inx++) {
-		wMenuToggleSet( quickMove1M[inx], quickMove == inx );
-		wMenuToggleSet( quickMove2M[inx], quickMove == inx );
-	}
+    long inx;
+    for (inx = 0; inx<3; inx++) {
+        wMenuToggleSet(quickMove1M[inx], quickMove == inx);
+    }
 }
 
 
