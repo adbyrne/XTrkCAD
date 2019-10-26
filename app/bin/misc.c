@@ -2035,10 +2035,10 @@ static void SetAccelKey(char * prefName, wAccelKey_e key, int mode,
 #include "bitmaps/edit-undo.xpm"
 #include "bitmaps/edit-redo.xpm"
 #include "bitmaps/partlist.xpm"
-#include "bitmaps/export.xpm"
-#include "bitmaps/export_dxf.xpm"
-#include "bitmaps/import.xpm"
-#include "bitmaps/importmod.xpm"
+#include "bitmaps/document-export.xpm"
+#include "bitmaps/document-exportdxf.xpm"
+#include "bitmaps/document-import.xpm"
+#include "bitmaps/document-importmod.xpm"
 #include "bitmaps/document-new.xpm"
 #include "bitmaps/document-save.xpm"
 #include "bitmaps/document-open.xpm"
@@ -2564,12 +2564,12 @@ EXPORT void InitCmdExport(void) {
 	cmdGroup = BG_EXPORTIMPORT;
 	AddToolbarButton("cmdExport", wIconCreatePixMap(export_xpm),
 			IC_SELECTED | IC_ACCLKEY, (addButtonCallBack_t) DoExport, NULL);
+	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(export_dxf_xpm), IC_SELECTED | IC_ACCLKEY,
+		(addButtonCallBack_t)DoExportDXF, (void*)1);
 	AddToolbarButton("cmdImport", wIconCreatePixMap(import_xpm), IC_ACCLKEY,
 			(addButtonCallBack_t) DoImport, (void*)0);
 	AddToolbarButton("cmdImportModule", wIconCreatePixMap(importmod_xpm), IC_ACCLKEY,
 				(addButtonCallBack_t) DoImport, (void*)1);
-	AddToolbarButton("cmdExportDXF", wIconCreatePixMap(export_dxf_xpm), IC_SELECTED | IC_ACCLKEY,
-					(addButtonCallBack_t) DoExportDXF, (void*)1);
 	ButtonGroupEnd();
 }
 
