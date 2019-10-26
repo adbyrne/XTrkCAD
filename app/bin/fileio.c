@@ -536,7 +536,7 @@ void SetWindowTitle( void )
 	filename = GetLayoutFilename();
 	sprintf( message, "%s%s%s - %s(%s)",
 		(filename && filename[0])?filename: _("Unnamed Trackplan"),
-		bReadOnly?"=":"",
+		bReadOnly?_(" (R/O)"):"",
 		changed>0?"*":"",
 		sProdName, sVersion );
 	wWinSetTitle( mainW, message );
@@ -878,7 +878,7 @@ EXPORT void DoFileList(
 		void * data )
 {
 	char *pathName = (char*)data;
-
+	bExample = FALSE;
 	LoadTracks( 1, &pathName, NULL );
 }
 
