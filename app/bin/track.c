@@ -2465,15 +2465,17 @@ EXPORT void DrawCurvedTies(
 	if (color == wDrawColorBlack)
 		color = tieColor;
 	len = 2*M_PI*r*a1/360.0;
-	cnt = (int)(len/td->spacing);
-	if ( len-td->spacing*cnt-td->width > (td->spacing-td->width)/2 )
+	cnt = (int)floor(len/td->spacing+0.5);
+	if ( len-td->spacing*cnt-(td->width/2) > (td->spacing-td->width)/2 ) {
 		cnt++;
+	}
 	if ( cnt != 0 ) {
-		dang = a1/cnt;
+		dang = (360.0*(len)/cnt)/(2*M_PI*r);
 		for ( ang=a0+dang/2; cnt; cnt--,ang+=dang ) {
 			PointOnCircle( &pos, p, r, ang );
 			DrawTie( d, pos, ang+90, td->length, td->width, color, tieDrawMode==TIEDRAWMODE_SOLID );
 		}
+
 	}
 }
 
@@ -2618,11 +2620,13 @@ EXPORT void DrawStraightTies(
 	len = FindDistance( p0, p1 );
 	len -= tieOff0+tieOff1;
 	angle = FindAngle( p0, p1 );
-	cnt = (int)(len/td->spacing);
-	if ( len-td->spacing*cnt-td->width > (td->spacing-td->width)/2 )
+	cnt = (int)floor(len/td->spacing+0.5);
+	if ( len-td->spacing*cnt-td->width > (td->spacing-td->width)/2 ) {
 		cnt++;
+	}
 	if ( cnt != 0 ) {
-		dlen = len/cnt;
+		dlen = FindDistance( p0, p1 )/cnt;
+		double endsize = FindDistance( p0, p1 )-cnt*dlen-td->width;
 		for ( len=dlen/2; cnt; cnt--,len+=dlen ) {
 			Translate( &pos, p0, angle, len );
 			DrawTie( d, pos, angle, td->length, td->width, color, tieDrawMode==TIEDRAWMODE_SOLID );
