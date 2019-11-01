@@ -100,7 +100,21 @@ LinkDlgUpdate(
 {
     switch (inx) {
     case I_URL:
-        if (strlen(noteDataInUI.noteData.linkData.url) == 0 || IsValidURL(noteDataInUI.noteData.linkData.url)) {
+		if (strlen(noteDataInUI.noteData.linkData.url) > 100) {
+			DynString message;
+
+			DynStringMalloc(&message, 80);
+			DynStringPrintf(&message, _("The entered URL is too long. The maximum allowed length is %d. Please edit the entered value."), 100);
+			wNoticeEx(NT_ERROR,
+				DynStringToCStr(&message),
+				_("Re-edit"),
+				NULL);
+			DynStringFree(&message);
+		}
+
+        if (IsValidURL(noteDataInUI.noteData.linkData.url) && 
+			(strlen(noteDataInUI.noteData.linkData.url) <= 100))
+		{
             wControlActive(linkEditPLs[I_OPEN].control, TRUE);
             ParamDialogOkActive(&linkEditPG, TRUE);
         } else {
