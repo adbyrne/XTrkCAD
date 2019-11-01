@@ -29,7 +29,7 @@
 * hostname has at least 5 characters
 *
 * \param testString
-* \return TRUE if valid, FALSE on error
+* \return TRUE if valid, FALSE otherwise
 */
 
 enum URLSCANSTATE { STATE_SCHEME, STATE_ENDOFSCHEME, STATE_HIER, STATE_PATH, STATE_ERROR };
@@ -42,6 +42,10 @@ IsValidURL(char *testString)
 	char *result = testString;
 	char *hostname = testString;
 	enum URLSCANSTATE state = STATE_SCHEME;
+
+	if (!*result) {
+		return(false);
+	}
 
 	while (*result && state != STATE_ERROR) {
 		switch (*result) {
