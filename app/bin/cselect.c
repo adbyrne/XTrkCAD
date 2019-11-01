@@ -40,6 +40,7 @@
 #include "track.h"
 #include "utility.h"
 #include "draw.h"
+#include "misc.h"
 
 
 #include "bitmaps/bmendpt.xbm"
@@ -498,6 +499,8 @@ EXPORT void SelectTrackWidth( void* width )
 
 EXPORT void SelectDelete( void )
 {
+	if (GetCurrentCommand() != selectCmdInx) return;
+
 	if (SelectedTracksAreFrozen())
 		return;
 	if (selectedTrackCount>0) {

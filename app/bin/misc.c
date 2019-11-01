@@ -945,6 +945,10 @@ EXPORT void EnableCommands(void) {
 	}
 }
 
+EXPORT wIndex_t GetCurrentCommand() {
+	return curCommand;
+}
+
 EXPORT void Reset(void) {
 	if (recordF) {
 		fprintf(recordF, "RESET\n");

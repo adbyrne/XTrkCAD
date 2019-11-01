@@ -239,6 +239,7 @@ void CheckRoomSize( BOOL_T );
 const char * GetBalloonHelpStr( char* );
 void EnableCommands( void );
 void Reset( void );
+wIndex_t GetCurrentCommand(void);
 BOOL_T IsCurCommandSticky(void);
 void ResetIfNotSticky( void );
 wBool_t DoCurCommand( wAction_t, coOrd );
