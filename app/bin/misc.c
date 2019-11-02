@@ -2722,7 +2722,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	drawColorBlue   = wDrawFindColor( wRGB(  0,  0,255) );
 	drawColorGreen  = wDrawFindColor( wRGB(  0,255,  0) );
 	drawColorAqua   = wDrawFindColor( wRGB(  0,255,255) );
-	drawColorBlueHighlight = wDrawFindColor( wRGB ( 1, 1, 255) );   //Special Blue
+	drawColorBlueHighlight = wDrawFindColor( wRGB ( 6, 6, 255) );   //Special Blue
 	drawColorPowderedBlue = wDrawFindColor( wRGB(129, 212, 250) );
 	drawColorPurple = wDrawFindColor( wRGB(255,  0,255) );
 	drawColorGold   = wDrawFindColor( wRGB(255,215,  0) );

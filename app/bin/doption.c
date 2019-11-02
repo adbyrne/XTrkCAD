@@ -43,6 +43,9 @@ static paramFloatRange_t r1_10 = { 1, 10 };
 static paramFloatRange_t r1_1000 = { 1, 1000 };
 static paramFloatRange_t r0_180 = { 0, 180 };
 
+static long colorTrack;
+static long colorDraw;
+
 static void UpdatePrefD( void );
 static void UpdateMeasureFmt(void);
 
@@ -84,6 +87,14 @@ static void OptionDlgUpdate(
 		if (pg->paramPtr[inx].valueP == &distanceFormatInx) {
 			UpdateMeasureFmt();
 		}
+		if (pg->paramPtr[inx].valueP == &colorTrack) {
+			if (colorTrack == 1) colorLayers |= 1;
+			else colorLayers &= ~1;
+		}
+		if (pg->paramPtr[inx].valueP == &colorDraw) {
+			if (colorDraw == 1 ) colorLayers |= 2;
+			else colorLayers &= ~2;
+		}
 	}
 }
 
@@ -113,15 +124,19 @@ static char * drawCenterCircle[] = { N_("Off"), N_("On"), NULL };
 static char * labelEnableLabels[] = { N_("Track Descriptions"), N_("Lengths"), N_("EndPt Elevations"), N_("Track Elevations"), N_("Cars"), NULL };
 static char * hotBarLabelsLabels[] = { N_("Part No"), N_("Descr"), NULL };
 static char * listLabelsLabels[] = { N_("Manuf"), N_("Part No"), N_("Descr"), NULL };
-static char * colorLayersLabels[] = { N_("Tracks"), N_("Other"), NULL };
+static char * colorTrackLabels[] = { N_("Object"), N_("Layer"), NULL };
+static char * colorDrawLabels[] = { N_("Object"), N_("Layer"), NULL };
 static char * liveMapLabels[] = { N_("Live Map"), NULL };
 static char * hideTrainsInTunnelsLabels[] = { N_("Hide Trains On Hidden Track"), NULL };
 static char * zoomCornerLabels[] = {N_("Zoom keeps lower corner in view"), NULL};
 
 extern long trainPause;
 
+
+
 static paramData_t displayPLs[] = {
-	{ PD_TOGGLE, &colorLayers, "color-layers", PDO_NOPSHUPD|PDO_DRAW, colorLayersLabels, N_("Color Layers"), BC_HORZ, (void*)(CHANGE_MAIN) },
+	{ PD_RADIO, &colorTrack, "color-track", PDO_NOPSHUPD|PDO_DRAW, colorTrackLabels, N_("Color Track"), BC_HORZ, (void*)(CHANGE_MAIN) },
+	{ PD_RADIO, &colorDraw, "color-draw", PDO_NOPSHUPD|PDO_DRAW, colorDrawLabels, N_("Color Draw"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &drawTunnel, "tunnels", PDO_NOPSHUPD|PDO_DRAW, drawTunnelLabels, N_("Draw Tunnel"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &drawEndPtV, "endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtLabels3, N_("Draw EndPts"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_RADIO, &drawUnconnectedEndPt, "unconnected-endpt", PDO_NOPSHUPD|PDO_DRAW, drawEndPtUnconnectedSize, N_("Draw Unconnected EndPts"), BC_HORZ, (void*)(CHANGE_MAIN) },
@@ -139,7 +154,7 @@ static paramData_t displayPLs[] = {
 	{ PD_TOGGLE, &layoutLabels, "layoutlabels", PDO_NOPSHUPD, listLabelsLabels, N_("Layout Labels"), BC_HORZ, (void*)(CHANGE_MAIN) },
 	{ PD_TOGGLE, &listLabels, "listlabels", PDO_NOPSHUPD, listLabelsLabels, N_("List Labels"), BC_HORZ, (void*)(CHANGE_PARAMS) },
 /* ATTENTION: update the define below if you add entries above */
-#define I_HOTBARLABELS	(17)
+#define I_HOTBARLABELS	(18)
 	{ PD_DROPLIST, &carHotbarModeInx, "carhotbarlabels", PDO_NOPSHUPD|PDO_DLGUNDERCMDBUTT|PDO_LISTINDEX, (void*)250, N_("Car Labels"), 0, (void*)CHANGE_SCALE },
 	{ PD_LONG, &trainPause, "trainpause", PDO_NOPSHUPD, &i10_1000 , N_("Train Update Delay"), 0, 0 },
 	{ PD_TOGGLE, &hideTrainsInTunnels, "hideTrainsInTunnels", PDO_NOPSHUPD, hideTrainsInTunnelsLabels, "", BC_HORZ }
@@ -178,6 +193,11 @@ static void DoDisplay( void * junk )
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Part Number"), NULL, (void*)0x0321 );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Partno/Item"), NULL, (void*)0x4321 );
 	}
+	if (colorLayers&1) colorTrack = 1;
+	else colorTrack = 0;
+	if (colorLayers&2) colorDraw = 1;
+	else colorTrack = 0;
+
 	ParamLoadControls( &displayPG );
 	wShow( displayW );
 #ifdef LATER
