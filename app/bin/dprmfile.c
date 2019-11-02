@@ -76,24 +76,69 @@ static paramData_t paramFilePLs[] = {
 
 static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };
 
+static dynArr_t *sortFiles;
+
+/** Comparison function per C runtime conventions. Elements are ordered by compatibility
+ *  state first and name of contents second. 
+ * 
+ * \param index1 IN first element
+ * \param index2 IN second element
+ * \return 
+ */
+
+int
+CompareParameterFiles(const int *index1, const int *index2)
+{
+    paramFileInfo_t paramFile1 = DYNARR_N(paramFileInfo_t, (*sortFiles), *index1);
+    paramFileInfo_t paramFile2 = DYNARR_N(paramFileInfo_t, (*sortFiles), *index2);
+
+    if (paramFile2.trackState != paramFile1.trackState) {
+        return (paramFile2.trackState - paramFile1.trackState);
+    } else {
+        return (strcmp(paramFile1.contents, paramFile2.contents));
+    }
+}
+
+/**
+ * Create a sorted list of indexes into the parameter file array. That way, the elements
+ * in the array will not be moved. Instead the list is used for the order in which the
+ * list box is populated.
+ *
+ * \param cnt IN number of parameter files
+ * \param files IN parameter file array
+ * \param list OUT the ordered list
+ */
+
+void
+SortParamFileList(size_t cnt,  dynArr_t *files, int *list)
+{
+    for (size_t i = 0; i < cnt; i++) {
+        list[i] = i;
+    }
+
+    sortFiles = files;
+
+    qsort((void *)list, (size_t)cnt, sizeof(int), CompareParameterFiles);
+}
+
+
 /**
  * Reload the listbox showing the current parameter files
  */
 void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 {
-    wIndex_t listInx;
-    int fileInx;
     DynString description;
     DynStringMalloc(&description, STR_SHORT_SIZE);
-
+	int *sortedIndex = MyMalloc(sizeof(int)*paramFileCnt);
+	
+	SortParamFileList(paramFileCnt, paramFiles, sortedIndex);
 
 	wControlShow((wControl_p)paramFileL, FALSE);
-	listInx = wListGetIndex(paramFileL);
 	wListClear(paramFileL);
 
-	for (fileInx = 0; fileInx < paramFileCnt; fileInx++) {
+	for (int i = 0; i < paramFileCnt; i++) {
 		paramFileInfo_t paramFileInfo = DYNARR_N(paramFileInfo_t, (*paramFiles),
-										fileInx);
+										sortedIndex[ i ]);
 		if (paramFileInfo.valid) {
 			DynStringClear(&description);
 			DynStringCatCStr(&description,
@@ -104,12 +149,12 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 			wListAddValue(paramFileL,
 						  DynStringToCStr(&description),
 						  indicatorIcons[paramFileInfo.trackState],
-						  (void*)(intptr_t)fileInx);
+						  (void*)(intptr_t)sortedIndex[i]);
 		}
 	}
-	wListSetIndex(paramFileL, listInx);
 	wControlShow((wControl_p)paramFileL, TRUE);
     DynStringFree(&description);
+	MyFree(sortedIndex);
 }
 
 
