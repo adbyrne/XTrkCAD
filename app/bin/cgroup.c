@@ -624,6 +624,7 @@ static paramData_t groupPLs[] = {
 /*1*/ { PD_STRING, groupDesc, "desc", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)230, N_("Description"), 0, 0, sizeof(groupDesc)},
 /*2*/ { PD_STRING, groupPartno, "partno", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGIGNORELABELWIDTH|PDO_STRINGLIMITLENGTH, (void*)100, N_("#"), 0, 0, sizeof(groupPartno)},
 /*3*/ { PD_LONG, &groupSegCnt, "segcnt", PDO_NOPREF, &r0_999999, N_("# Segments"), BO_READONLY },
+#define I_GROUP_ORIGIN_OFFSET 4  /* Need to change if add above */
 /*4*/ { PD_FLOAT, &groupOriginX, "orig", PDO_DIM, &r_1000_1000, N_("Offset X,Y:")},
 /*5*/ { PD_FLOAT, &groupOriginY, "origy",PDO_DIM | PDO_DLGHORZ, &r_1000_1000, ""},
 /*6*/ { PD_TOGGLE, &groupReplace, "replace", 0, groupReplaceLabels, "", BC_HORZ|BC_NOBORDER } };
@@ -945,6 +946,7 @@ void AddSegsToSegMap(int start, int end, wBool_t track) {
 
 static dynArr_t trackSegs_da;
 #define trackSegs(N) DYNARR_N( trkSeg_t, trackSegs_da, N )
+
 
 trkSeg_p GetSegFromSegMap(int index) {
 	if (DYNARR_N( segInMap_t, segInMap_da, index).track) {
@@ -1444,6 +1446,7 @@ groupSimpleTurnout:
 		 * Copy and Reorigin Segments - Start by putting them out in the original order
 		 */
 
+
 		DYNARR_RESET(trkSeg_t, outputSegs_da);
 		for (int i=0; i<segInMap_da.cnt;i++) {
 			DYNARR_APPEND(trkSeg_t,outputSegs_da,10);
@@ -1466,11 +1469,9 @@ groupSimpleTurnout:
 		 * Final: create new definition
 		 */
 
-		CheckPaths( trackSegs_da.cnt, &trackSegs(0), path );
-		//for (int ep =0; ep<tempEndPts_da.cnt;ep++) {
-        //TODO Test to see if end is curved and if so set special and add radius to list
-		//}
-		to = CreateNewTurnout( curScaleName, groupTitle, trackSegs_da.cnt, &trackSegs(0), pathLen, path, tempEndPts_da.cnt, &tempEndPts(0), NULL, TRUE );
+		CheckPaths( outputSegs_da.cnt, &outputSegs(0), path );
+
+		to = CreateNewTurnout( curScaleName, groupTitle, outputSegs_da.cnt, &outputSegs(0), pathLen, path, tempEndPts_da.cnt, &tempEndPts(0), NULL, TRUE );
 
 		f = OpenCustom("a");
 		if (f && to) {
@@ -1502,8 +1503,7 @@ groupSimpleTurnout:
 					trackCount--;
 				}
 			}
-			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, pathLen, (char *)path, trackSegs_da.cnt, &trackSegs(0) );
-			SetTrkVisible( trk, TRUE );
+			trk = NewCompound( T_TURNOUT, 0, orig, 0.0, to->title, tempEndPts_da.cnt, &tempEndPts(0), NULL, pathLen, (char *)path, outputSegs_da.cnt, &outputSegs(0) );
 
 			SetTrkVisible( trk, TRUE );
 			for ( ep=0; ep<tempEndPts_da.cnt; ep++ ) {
@@ -1518,8 +1518,9 @@ groupSimpleTurnout:
 	} else {
 		CloneFilledDraw( tempSegs_da.cnt, &tempSegs(0), TRUE );
 		GetSegBounds( zero, 0, tempSegs_da.cnt, &tempSegs(0), &orig, &size );
-		orig.x = - orig.x+groupOriginX;  //Include orig offset
-		orig.y = - orig.y+groupOriginY;
+
+		orig.x = - orig.x-groupOriginX;  //Include orig offset
+		orig.y = - orig.y-groupOriginY;
 		MoveSegs( tempSegs_da.cnt, &tempSegs(0), orig );
 		to = CreateNewStructure( curScaleName, groupTitle, tempSegs_da.cnt, &tempSegs(0), TRUE );
 		f = OpenCustom("a");
@@ -1538,7 +1539,7 @@ groupSimpleTurnout:
 					trackCount--;
 				}
 			}
-			orig.x = - orig.x;   //Put back
+			orig.x = - orig.x;
 			orig.y = - orig.y;
 			trk = NewCompound( T_STRUCTURE, 0, orig, 0.0, groupTitle, 0, NULL, NULL, 0, "", tempSegs_da.cnt, &tempSegs(0) );
 			SetTrkVisible( trk, TRUE );
@@ -1566,10 +1567,12 @@ EXPORT void DoGroup( void )
 	groupCompoundCount = 0;
 	groupOriginX = 0.0;
 	groupOriginY = 0.0;
+	BOOL_T isTurnout = FALSE;
 
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
 			trkType = GetTrkType(trk);
+			if ( IsTrack(trk) ) isTurnout = TRUE;
 			if ( trkType == T_TURNOUT || trkType == T_STRUCTURE ) {
 				xx = GetTrkExtraData(trk);
 				groupSegCnt += xx->segCnt;
@@ -1590,6 +1593,18 @@ EXPORT void DoGroup( void )
 		groupW = ParamCreateDialog( &groupPG, MakeWindowTitle(_("Group Objects")), _("Ok"), GroupOk, wHide, TRUE, NULL, F_BLOCK, NULL );
 		groupD.dpi = mainD.dpi;
 	}
+	if (isTurnout) {
+		groupPLs[4].option |= PDO_DLGIGNORE;
+		wControlShow( groupPLs[4].control, FALSE );
+		groupPLs[5].option |= PDO_DLGIGNORE;
+		wControlShow( groupPLs[5].control, FALSE );
+	} else {
+		groupPLs[4].option &= ~PDO_DLGIGNORE;
+		wControlShow( groupPLs[4].control, TRUE );
+		groupPLs[5].option &= ~PDO_DLGIGNORE;
+		wControlShow( groupPLs[5].control, TRUE );
+	}
+
 	ParamLoadControls( &groupPG );
 	wShow( groupW );
 }
