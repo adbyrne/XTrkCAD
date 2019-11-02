@@ -10,9 +10,11 @@
 
 The \e{Hot Bar} starts with a flextrack of the current gauge, and then a scrolling list of all the turnouts, sectional track and structures available through the Turnout (\K{cmdTurnout}) and Structure (\K{cmdStructure}) commands. The Description and/or Part Number under each object can be displayed by enabling the \e{Hot Bar Labels} radio button on the Display (\K{cmdDisplay}) dialog.
 
+Only those items taken from files which are in the current scale/gauge are displayed in the HotBar. They are shown in order - A FlexTrack - then the Contents of Files in the File->Parameter Files... List in listed order - and then any Custom objects created in this Layout as listed in the Manage->Custom Defined Parts dialog.
+
 The arrow buttons on either side of the \e{Hot bar} move the list one object to the right or left. Holding down the Shift key will move the list by greater amounts.  About eight \c{Shift+Click}s are required to move the list through the entire range of objects. Also, pressing the keys \c{1} through \c{9} and \c{0} will cause the \e{Hot Bar} to jump relative spots on the list.
 
-A \c{Right-Click} over the \e{Hot Bar} will display a pop-up menu listing the contents of the \e{Hot Bar}. Selecting an item from this list causes the \e{Hot Bar} to jump to the relative spot on the list.
+A \c{Right-Click} over the \e{Hot Bar} will display a pop-up menu listing the files with contents on the \e{Hot Bar}. Selecting an item from this list causes the \e{Hot Bar} to jump to the relative spot on the whole list.
 
 Objects on the \e{Hot Bar} are placed on the drawing canvas by first clicking on the object, \e{Dragging} it the Main window, rotating it with \c{Ctrl+Left-Drag} or \c{Right-Drag} positioning it then pressing the \c{Space} key to set it in place.
 
