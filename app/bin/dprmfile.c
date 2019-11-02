@@ -87,10 +87,10 @@ static dynArr_t *sortFiles;
  */
 
 int
-CompareParameterFiles(const int *index1, const int *index2)
+CompareParameterFiles(const void *index1, const void *index2)
 {
-    paramFileInfo_t paramFile1 = DYNARR_N(paramFileInfo_t, (*sortFiles), *index1);
-    paramFileInfo_t paramFile2 = DYNARR_N(paramFileInfo_t, (*sortFiles), *index2);
+    paramFileInfo_t paramFile1 = DYNARR_N(paramFileInfo_t, (*sortFiles), *(int*)index1);
+    paramFileInfo_t paramFile2 = DYNARR_N(paramFileInfo_t, (*sortFiles), *(int*)index2);
 
     if (paramFile2.trackState != paramFile1.trackState) {
         return (paramFile2.trackState - paramFile1.trackState);
