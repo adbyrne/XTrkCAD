@@ -961,9 +961,10 @@ void static CreateBoxAnchors(int index, pts_t pt[4]) {
 	DYNARR_RESET(trkSeg_t,anchors_da);
 	double d = tempD.scale*0.15;
 	ANGLE_T a = FindAngle(pt[0].pt,pt[1].pt);
+	ANGLE_T diag = FindAngle(pt[0].pt,pt[2].pt);
 	for (int i=0;i<4;i++) {
 		DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-		DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pt[i].pt,45.0+a+(90.0*(i)),TRUE,i==index?wDrawColorRed:wDrawColorBlue);
+		DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pt[i].pt,(diag>a?45.0:-45.0)+a+(90.0*(i)),TRUE,i==index?wDrawColorRed:wDrawColorBlue);
 	}
 	coOrd pp;
 	for (int i=0;i<4;i++) {
