@@ -1096,6 +1096,8 @@ static BOOL_T MergeCornu(
 BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs) {
 	struct extraData * xx = GetTrkExtraData(trk);
 	for (int i=0;i<xx->cornuData.arcSegs.cnt;i++) {
+		trkSeg_p p = (trkSeg_t *) xx->cornuData.arcSegs.ptr+i;
+		if (p->type == SEG_BEZTRK) {
 			DYNARR_APPEND(trkSeg_t, * segs, 10);
 			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
 			segPtr->type = SEG_BEZTRK;
@@ -1105,9 +1107,28 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs) {
 			segPtr->bezSegs.cnt = 0;
 			segPtr->bezSegs.max = 0;
 			segPtr->bezSegs.ptr = NULL;
-			trkSeg_p p = (trkSeg_t *) xx->cornuData.arcSegs.ptr+i;
 			for (int j=0;j<4;j++) segPtr->u.b.pos[j] = p->u.b.pos[j];
 			FixUpBezierSeg(segPtr->u.b.pos,segPtr,TRUE);
+		} else if (p->type == SEG_STRTRK) {
+			DYNARR_APPEND(trkSeg_t, * segs, 1);
+			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
+			segPtr->type = SEG_STRTRK;
+			segPtr->color = wDrawColorBlack;
+			segPtr->width = 0;
+			for (int j=0;j<2;j++) segPtr->u.l.pos[i] = p->u.l.pos[i];
+			segPtr->u.l.angle = p->u.l.angle;
+			segPtr->u.l.option = 0;
+		} else if (p->type == SEG_CRVTRK) {
+			DYNARR_APPEND(trkSeg_t, * segs, 1);
+			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
+			segPtr->type = SEG_CRVTRK;
+			segPtr->color = wDrawColorBlack;
+			segPtr->width = 0;
+			segPtr->u.c.a0 = p->u.c.a0;
+			segPtr->u.c.a1 = p->u.c.a1;
+			segPtr->u.c.center = p->u.c.center;
+			segPtr->u.c.radius = p->u.c.radius;
+		}
 	}
 	return TRUE;
 }
