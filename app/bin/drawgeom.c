@@ -1916,6 +1916,11 @@ STATUS_T DrawGeomModify(
 			d = 10000;
 			polyInx = 0;
 			for ( inx=0; inx<4; inx++ ) {
+				if (IsClose(FindDistance(pos,points(inx).pt))) {
+					corner_mode = TRUE;
+					polyInx = inx;
+					break;
+				}
 				p0 = pos;
 				dd = LineDistance( &p0, points( inx==0?3:inx-1).pt, points( inx ).pt );
 				if ( d > dd ) {
@@ -1923,26 +1928,25 @@ STATUS_T DrawGeomModify(
 					inx_line = inx;
 				}
 			}
-			d1 = FindDistance( points(inx_line).pt, pos );
-			d2 = FindDistance( points(inx_line==0?3:inx_line-1).pt, pos );
-			if (d2<d1) {
-				polyInx = inx_line==0?3:inx_line-1;
-			} else {
-				polyInx = inx_line;
+			if (!corner_mode) {
+				d1 = FindDistance( points(inx_line).pt, pos );
+				d2 = FindDistance( points(inx_line==0?3:inx_line-1).pt, pos );
+				if (d2<d1) {
+					polyInx = inx_line==0?3:inx_line-1;
+				} else {
+					polyInx = inx_line;
+				}
 			}
-			//polyInx is closest point inx_line is the closest line
 			inx1 = (polyInx==0?3:polyInx-1);  //Prev point
 			inx2 = (polyInx==3?0:polyInx+1);  //Next Point
 			inx_origin = (inx2==3?0:inx2+1);  //Opposite point
-			if ( IsClose(d2) || IsClose(d1) ) {
-				corner_mode = TRUE;
+			if ( corner_mode ) {
 				start_pos = pos;
+				pos = points(inx).pt;
 				DYNARR_SET(trkSeg_t,anchors_da,5);
-				polyInx = inx_line;
 				DrawArrowHeads( &anchors(0), pos, FindAngle(points(polyInx).pt,points(inx_origin).pt), TRUE, wDrawColorRed );
 				InfoMessage( _("Drag to Move Corner Point"));
 			} else {
-				corner_mode = FALSE;
 				start_pos = pos;
 				pos.x = (points(inx_line).pt.x + points(inx_line==0?3:inx_line-1).pt.x)/2;
 				pos.y = (points(inx_line).pt.y + points(inx_line==0?3:inx_line-1).pt.y)/2;
