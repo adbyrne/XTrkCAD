@@ -48,8 +48,15 @@ static struct wFilSel_t * paramFile_fs;
 #include "bitmaps/greydot.xpm"
 #include "bitmaps/yellowdot.xpm"
 #include "bitmaps/reddot.xpm"
+#include "bitmaps/greenstar.xpm"
+#include "bitmaps/greystar.xpm"
+#include "bitmaps/yellowstar.xpm"
+#include "bitmaps/redstar.xpm"
 
-static wIcon_p indicatorIcons[PARAMFILE_MAXSTATE];
+#define FAVORITE_PARAM 1
+#define STANDARD_PARAM 0
+
+static wIcon_p indicatorIcons[ 2 ][PARAMFILE_MAXSTATE];
 
 static wWin_p paramFileW;
 
@@ -141,14 +148,14 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 										sortedIndex[ i ]);
 		if (paramFileInfo.valid) {
 			DynStringClear(&description);
-			DynStringCatCStr(&description,
+			DynStringCatCStr(&description, 
 							 ((!paramFileSel) && paramFileInfo.contents) ?
 							 paramFileInfo.contents :
 							 paramFileInfo.name);
 
 			wListAddValue(paramFileL,
 						  DynStringToCStr(&description),
-						  indicatorIcons[paramFileInfo.trackState],
+						  indicatorIcons[ STANDARD_PARAM ][paramFileInfo.trackState],
 						  (void*)(intptr_t)sortedIndex[i]);
 		}
 	}
@@ -317,10 +324,14 @@ void DoParamFiles(void * junk)
     void * data;
 
     if (paramFileW == NULL) {
-        indicatorIcons[ PARAMFILE_UNLOADED ] = wIconCreatePixMap(greydot);
-        indicatorIcons[ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(reddot);
-        indicatorIcons[ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(yellowdot);
-        indicatorIcons[ PARAMFILE_FIT] = wIconCreatePixMap(greendot);
+        indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixMap(greydot);
+        indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(reddot);
+        indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(yellowdot);
+        indicatorIcons[ STANDARD_PARAM ][ PARAMFILE_FIT] = wIconCreatePixMap(greendot);
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_UNLOADED ] = wIconCreatePixMap(greystar);
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_NOTUSABLE ] = wIconCreatePixMap(redstar);
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_COMPATIBLE ] = wIconCreatePixMap(yellowstar);
+		indicatorIcons[ FAVORITE_PARAM ][ PARAMFILE_FIT ] = wIconCreatePixMap(greenstar);
 
         ParamRegister(&paramFilePG);
 
