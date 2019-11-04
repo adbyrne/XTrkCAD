@@ -496,10 +496,12 @@ EXPORT void SelectTrackWidth( void* width )
 	UndoEnd();
 }
 
+static BOOL_T doingDouble;
 
 EXPORT void SelectDelete( void )
 {
 	if (GetCurrentCommand() != selectCmdInx) return;
+	if (doingDouble) return;
 
 	if (SelectedTracksAreFrozen())
 		return;
@@ -2647,7 +2649,6 @@ void DrawHighlightBoxes() {
 	}
 
 }
-static BOOL_T doingDouble;
 
 static STATUS_T CallModify(wAction_t action,
 		coOrd pos ) {
@@ -2965,6 +2966,7 @@ static STATUS_T CmdSelect(
 		return C_CONTINUE;
 	case C_FINISH:
 		if (doingMove) UndoEnd();
+		doingDouble = FALSE;
 		break;
 	default:
 		if (doingDouble) return CallModify(action, pos);
