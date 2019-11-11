@@ -204,6 +204,204 @@ EXPORT track_p MakeDrawFromSeg(
 	return MakeDrawFromSeg1( 0, pos, angle, sp );
 }
 
+/* Only straight, curved and PolyLine */
+EXPORT track_p MakePolyLineFromSegs(
+		coOrd pos,
+		ANGLE_T angle,
+		dynArr_t * segsArr)
+{
+	struct extraData * xx;
+	track_p trk;
+	trk = NewTrack( 0, T_DRAW, 0, sizeof *xx );
+	xx = GetTrkExtraData( trk );
+	xx->orig = pos;
+	xx->angle = angle;
+	xx->segCnt = 1;
+	xx->segs[0].type = SEG_POLY;
+	xx->segs[0].width = 0;
+	xx->segs[0].u.p.polyType = POLYLINE;
+	xx->segs[0].color = wDrawColorBlack;
+	coOrd last;
+	BOOL_T first = TRUE;
+	int cnt = 0;
+	for (int i=0;i<segsArr->cnt;i++) {
+		trkSeg_p sp = &DYNARR_N(trkSeg_t,*segsArr,i);
+		if (sp->type == SEG_BEZLIN || sp->type == SEG_BEZTRK ) {
+			for (int j=0;j<sp->bezSegs.cnt;j++) {
+				trkSeg_p spb = &DYNARR_N(trkSeg_t,sp->bezSegs,j);
+				if (spb->type == SEG_STRLIN || spb->type == SEG_STRTRK) {
+					if (!first && IsClose(FindDistance(spb->u.l.pos[0], last)))
+						cnt++;
+					else
+						cnt=cnt+2;
+					last = spb->u.l.pos[1];
+					first = FALSE;
+				}
+				else if (spb->type == SEG_CRVLIN || spb->type == SEG_CRVTRK) {
+					coOrd this;
+					if (spb->u.c.radius > 0)
+						Translate(&this, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
+					else
+						Translate(&this, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
+					if (first || !IsClose(FindDistance(this, last))) {
+						cnt++;									//Add first point
+					}
+					cnt += floor(spb->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
+					if (spb->u.c.radius > 0)
+						Translate(&last, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
+					else
+						Translate(&last, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
+					first = FALSE;
+				}
+			}
+		}
+		else if (sp->type == SEG_STRLIN || sp->type == SEG_STRTRK) {
+			if (!first && IsClose(FindDistance(sp->u.l.pos[0], last)))
+				cnt++;
+			else
+				cnt=cnt+2;
+			last = sp->u.l.pos[1];
+			first = FALSE;
+		}
+		else if (sp->type == SEG_CRVLIN || sp->type == SEG_CRVTRK) {
+			coOrd this;
+			if (sp->u.c.radius > 0)
+				Translate(&this, sp->u.c.center, sp->u.c.a0, fabs(sp->u.c.radius));
+			else
+				Translate(&this, sp->u.c.center, sp->u.c.a0+sp->u.c.a1, fabs(sp->u.c.radius));
+			if (first || !IsClose(FindDistance(this, last))) {
+				cnt++;									//Add first point
+			}
+			cnt += floor(sp->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
+			if (sp->u.c.radius > 0)
+				Translate(&last, sp->u.c.center, sp->u.c.a0+sp->u.c.a1, fabs(sp->u.c.radius));
+			else
+				Translate(&last, sp->u.c.center, sp->u.c.a0, fabs(sp->u.c.radius));
+			first = FALSE;
+		}
+		else if (sp->type == SEG_POLY) {
+			if (!first && IsClose(FindDistance(sp->u.p.pts[0].pt, last)))
+				cnt = cnt + sp->u.p.cnt-1;
+			else
+				cnt = cnt + sp->u.p.cnt;
+			last = sp->u.p.pts[sp->u.p.cnt-1].pt;
+			first = FALSE;
+		}
+	}
+	xx->segs[0].u.p.cnt = cnt;
+	xx->segs[0].u.p.pts = (pts_t*)MyMalloc( (cnt) * sizeof (pts_t) );
+	first = TRUE;
+	int j =0;
+	for (int i=0;i<segsArr->cnt;i++) {
+		trkSeg_p sp = &DYNARR_N(trkSeg_t,*segsArr,i);
+		if (sp->type == SEG_BEZLIN || sp->type == SEG_BEZTRK ) {
+			for (int l=0;l<sp->bezSegs.cnt;l++) {
+				trkSeg_p spb = &DYNARR_N(trkSeg_t,sp->bezSegs,l);
+				if (spb->type == SEG_STRLIN || spb->type == SEG_STRTRK) {
+					if (first || !IsClose(FindDistance(spb->u.l.pos[0], last))) {
+						xx->segs[0].u.p.pts[j].pt = spb->u.l.pos[0];
+						xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
+						j++;
+					}
+					xx->segs[0].u.p.pts[j].pt = last = spb->u.l.pos[1];
+					xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
+					last = xx->segs[0].u.p.pts[j].pt;
+					j ++;
+					first = FALSE;
+				}
+				if (spb->type == SEG_CRVLIN || spb->type == SEG_CRVTRK) {
+					coOrd this;
+					if (spb->u.c.radius>0)
+						Translate(&this, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
+					else
+						Translate(&this, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
+					if (first || !IsClose(FindDistance(this, last))) {
+						xx->segs[0].u.p.pts[j].pt= this;
+						xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
+						j++;
+					}
+					int slices = floor(spb->u.c.a1/22.5);
+					for (int k=1; k<=slices;k++) {
+						if (spb->u.c.radius>0)
+							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+(k*(spb->u.c.a1/(slices+1))), fabs(spb->u.c.radius));
+						else
+							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+((slices+1-k)*(spb->u.c.a1/(slices+1))), fabs(spb->u.c.radius));
+						xx->segs[0].u.p.pts[j].pt_type = wPolyLineSmooth;
+						j++;
+					}
+					if (spb->u.c.radius>0)
+						Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
+					else
+						Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
+
+					xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
+					last = xx->segs[0].u.p.pts[j].pt;
+					j++;
+					first = FALSE;
+				}
+			}
+		}
+		if (sp->type == SEG_STRLIN || sp->type == SEG_STRTRK) {
+			if (first || !IsClose(FindDistance(sp->u.l.pos[0], last))) {
+				xx->segs[0].u.p.pts[j].pt = sp->u.l.pos[0];
+				xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
+				j++;
+			}
+			xx->segs[0].u.p.pts[j].pt = last = sp->u.l.pos[1];
+			xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
+			last = xx->segs[0].u.p.pts[j].pt;
+			j++;
+			first = FALSE;
+		}
+		if (sp->type == SEG_CRVLIN || sp->type == SEG_CRVTRK) {
+			coOrd this;
+			if (sp->u.c.radius>0)
+				Translate(&this, sp->u.c.center, sp->u.c.a0, fabs(sp->u.c.radius));
+			else
+				Translate(&this, sp->u.c.center, sp->u.c.a0+sp->u.c.a1, fabs(sp->u.c.radius));
+			if (first || !IsClose(FindDistance(this, last))) {
+				xx->segs[0].u.p.pts[j].pt= this;
+				xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
+				j++;
+			}
+			int slices = floor(sp->u.c.a1/22.5);
+			for (int k=1; k<=slices;k++) {
+				if (sp->u.c.radius>0)
+					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+(k*(sp->u.c.a1/(slices+1))), fabs(sp->u.c.radius));
+				else
+					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+((slices+1-k)*(sp->u.c.a1/(slices+1))), fabs(sp->u.c.radius));
+				xx->segs[0].u.p.pts[j].pt_type = wPolyLineSmooth;
+				j++;
+			}
+			if (sp->u.c.radius>0)
+				Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+sp->u.c.a1, fabs(sp->u.c.radius));
+			else
+				Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0, fabs(sp->u.c.radius));
+
+			xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
+			last = xx->segs[0].u.p.pts[j].pt;
+			j++;
+			first = FALSE;
+		}
+		if (sp->type == SEG_POLY) {
+			if (first || !IsClose(FindDistance(xx->segs[0].u.p.pts[j].pt, last))) {
+				xx->segs[0].u.p.pts[j] = sp->u.p.pts[0];
+				j++;
+			}
+			memcpy(&xx->segs[0].u.p.pts[j],&sp->u.p.pts[1], sp->u.p.cnt-1 * sizeof (pts_t));
+			last = xx->segs[0].u.p.pts[sp->u.p.cnt-1].pt;
+			j +=sp->u.p.cnt;
+			first = FALSE;
+		}
+		ASSERT(j<=cnt);
+
+	}
+
+	ComputeDrawBoundingBox( trk );
+	return trk;
+}
+
+
 static dynArr_t anchors_da;
 #define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 

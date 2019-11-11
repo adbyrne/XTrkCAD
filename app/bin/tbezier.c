@@ -1067,7 +1067,8 @@ static BOOL_T MakeParallelBezier(
 		DIST_T sep,
 		track_p * newTrkR,
 		coOrd * p0R,
-		coOrd * p1R )
+		coOrd * p1R,
+		BOOL_T track)
 {
 	struct extraData * xx = GetTrkExtraData(trk);
     coOrd np[4], p;
@@ -1100,13 +1101,16 @@ static BOOL_T MakeParallelBezier(
     }
 
 	if ( newTrkR ) {
-		*newTrkR = NewBezierTrack( np, NULL, 0);
+		if (track)
+			*newTrkR = NewBezierTrack( np, NULL, 0);
+		else
+			*newTrkR = NewBezierLine( np, NULL, 0, wDrawColorBlack, 0);
 	} else {
 		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
 		tempSegs_da.cnt = 1;
-		tempSegs(0).type = SEG_BEZTRK;
+		tempSegs(0).type = track?SEG_BEZTRK:SEG_BEZLIN;
 		if (tempSegs(0).bezSegs.ptr) MyFree(tempSegs(0).bezSegs.ptr);
 		tempSegs(0).bezSegs.max = 0;
 		tempSegs(0).bezSegs.cnt = 0;

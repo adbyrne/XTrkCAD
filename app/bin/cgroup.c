@@ -1063,7 +1063,7 @@ static void GroupOk( void * junk )
 
 					int start = trackSegs_da.cnt;
 
-					GetBezierSegmentsFromCornu(trk,&trackSegs_da);  //Only give back Bezier - cant be undone
+					GetBezierSegmentsFromCornu(trk,&trackSegs_da,TRUE);  //Only give back Bezier - cant be undone
 
 					AddSegsToSegMap(start,trackSegs_da.cnt-1,TRUE);  /* Add Multiple Track Segs */
 

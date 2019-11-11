@@ -168,7 +168,7 @@ typedef struct {
 		void (*drawPositionIndicator)( track_p, wDrawColor );
 		void (*advancePositionIndicator)( track_p, coOrd, coOrd *, ANGLE_T * );
 		BOOL_T (*checkTraverse)( track_p, coOrd );
-		BOOL_T (*makeParallel)( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
+		BOOL_T (*makeParallel)( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd *, BOOL_T );
 		void (*drawDesc)( track_p, drawCmd_p, wDrawColor );
 		BOOL_T (*rebuildSegs)(track_p);
 		BOOL_T (*replayData)(track_p, void *,long );
@@ -642,7 +642,7 @@ void FlipTrack( track_p, coOrd, ANGLE_T );
 void DrawPositionIndicators( void );
 void AdvancePositionIndicator( track_p, coOrd, coOrd *, ANGLE_T * );
 
-BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
+BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * , BOOL_T);
 
 
 /* cmisc.c */
@@ -700,6 +700,7 @@ void DrawTrackElev( track_p, drawCmd_p, BOOL_T );
 
 /* cdraw.c */
 track_p MakeDrawFromSeg( coOrd, ANGLE_T, trkSeg_p );
+track_p MakePolyLineFromSegs( coOrd, ANGLE_T, dynArr_t * );
 void DrawOriginAnchor(track_p);
 BOOL_T OnTableEdgeEndPt( track_p, coOrd * );
 BOOL_T GetClosestEndPt( track_p, coOrd * );

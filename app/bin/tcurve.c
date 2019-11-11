@@ -1316,7 +1316,8 @@ static BOOL_T MakeParallelCurve(
 		DIST_T sep,
 		track_p * newTrkR,
 		coOrd * p0R,
-		coOrd * p1R )
+		coOrd * p1R,
+		BOOL_T track)
 {
 	struct extraData * xx = GetTrkExtraData(trk);
 	struct extraData * xx1;
@@ -1330,10 +1331,25 @@ static BOOL_T MakeParallelCurve(
 		rad = xx->radius - sep;
 	GetCurveAngles( &a0, &a1, trk );
 	if ( newTrkR ) {
-		*newTrkR = NewCurvedTrack( xx->pos, rad, a0, a1, 0 );
-		xx1 = GetTrkExtraData(*newTrkR);
-		xx1->helixTurns = xx->helixTurns;
-		xx1->circle = xx->circle;
+		if (track) {
+			*newTrkR = NewCurvedTrack( xx->pos, rad, a0, a1, 0 );
+			xx1 = GetTrkExtraData(*newTrkR);
+			xx1->helixTurns = xx->helixTurns;
+			xx1->circle = xx->circle;
+		}
+		else {
+			tempSegs(0).color = wDrawColorBlack;
+			tempSegs(0).width = 0;
+			tempSegs_da.cnt = 1;
+			tempSegs(0).type = SEG_CRVLIN;
+			tempSegs(0).u.c.center = xx->pos;
+			tempSegs(0).u.c.radius = rad;
+			tempSegs(0).u.c.a0 = a0;
+			tempSegs(0).u.c.a1 = a1;
+			*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+			return TRUE;
+		}
+
 		ComputeCurveBoundingBox( *newTrkR, xx1 );
 	} else {
 		if ( xx->helixTurns > 0) {
@@ -1343,7 +1359,7 @@ static BOOL_T MakeParallelCurve(
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
 		tempSegs_da.cnt = 1;
-		tempSegs(0).type = SEG_CRVTRK;
+		tempSegs(0).type = track?SEG_CRVTRK:SEG_CRVLIN;
 		tempSegs(0).u.c.center = xx->pos;
 		tempSegs(0).u.c.radius = rad;
 		tempSegs(0).u.c.a0 = a0;

@@ -1759,7 +1759,8 @@ static BOOL_T MakeParallelTurnout(
 		DIST_T sep,
 		track_p * newTrk,
 		coOrd * p0R,
-		coOrd * p1R )
+		coOrd * p1R,
+		BOOL_T track)
 {
 	ANGLE_T angle = GetTrkEndAngle(trk,1);
 	struct extraData *xx, *yy;
@@ -1787,51 +1788,61 @@ static BOOL_T MakeParallelTurnout(
 	 */
 
 	if( newTrk ) {
-		endPt = MyMalloc( GetTrkEndPtCnt( trk ) * sizeof( trkEndPt_t ));
-		endPt[ 0 ].pos = endPts[ 0 ];
-		endPt[ 0 ].angle = GetTrkEndAngle( trk, 0 );
-		endPt[ 1 ].pos = endPts[ 1 ];
-		endPt[ 1 ].angle = GetTrkEndAngle( trk, 1 ); 
+		if (track) {
+			endPt = MyMalloc( GetTrkEndPtCnt( trk ) * sizeof( trkEndPt_t ));
+			endPt[ 0 ].pos = endPts[ 0 ];
+			endPt[ 0 ].angle = GetTrkEndAngle( trk, 0 );
+			endPt[ 1 ].pos = endPts[ 1 ];
+			endPt[ 1 ].angle = GetTrkEndAngle( trk, 1 );
 
-		yy = GetTrkExtraData(trk);
+			yy = GetTrkExtraData(trk);
 
-		DIST_T * radii = NULL;
-		if (yy->special == TOcurved) {
-			radii = MyMalloc(GetTrkEndPtCnt(trk) * sizeof(DIST_T));
-			for (int i=0;i<GetTrkEndPtCnt( trk );i++) {
-				radii[i] = DYNARR_N(DIST_T,yy->u.curved.radii,i);
+			DIST_T * radii = NULL;
+			if (yy->special == TOcurved) {
+				radii = MyMalloc(GetTrkEndPtCnt(trk) * sizeof(DIST_T));
+				for (int i=0;i<GetTrkEndPtCnt( trk );i++) {
+					radii[i] = DYNARR_N(DIST_T,yy->u.curved.radii,i);
+				}
 			}
+
+			*newTrk = NewCompound( T_TURNOUT, 0, endPt[ 0 ].pos, endPt[ 0 ].angle + 90.0, yy->title, 2, endPt, radii, yy->pathLen, (char *)yy->paths, yy->segCnt, yy->segs );
+			xx = GetTrkExtraData(*newTrk);
+			xx->customInfo = yy->customInfo;
+
+			/*	if (connection((int)curTurnoutEp).trk) {
+				CopyAttributes( connection((int)curTurnoutEp).trk, newTrk );
+				SetTrkScale( newTrk, curScaleInx );
+			} */
+			xx->special = yy->special;
+
+			xx->u = yy->u;
+
+			SetDescriptionOrig( *newTrk );
+			xx->descriptionOff = zero;
+			xx->descriptionSize = zero;
+
+			SetTrkElev(*newTrk, GetTrkElevMode(trk), GetTrkElev(trk));
+			GetTrkEndElev( trk, 0, &option, &d );
+			SetTrkEndElev( *newTrk, 0, option, d, NULL );
+			GetTrkEndElev( trk, 1, &option, &d );
+			SetTrkEndElev( *newTrk, 1, option, d, NULL );
+
+			MyFree( endPt );
+		} else {
+			tempSegs(0).color = wDrawColorBlack;
+			tempSegs(0).width = 0;
+			tempSegs_da.cnt = 1;
+			tempSegs(0).type = track?SEG_STRTRK:SEG_STRLIN;
+			tempSegs(0).u.l.pos[0] = endPts[ 0 ];
+			tempSegs(0).u.l.pos[1] = endPts[ 1 ];
+			*newTrk = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
 		}
-
-		*newTrk = NewCompound( T_TURNOUT, 0, endPt[ 0 ].pos, endPt[ 0 ].angle + 90.0, yy->title, 2, endPt, radii, yy->pathLen, (char *)yy->paths, yy->segCnt, yy->segs );
-		xx = GetTrkExtraData(*newTrk);
-		xx->customInfo = yy->customInfo;
-
-		/*	if (connection((int)curTurnoutEp).trk) {
-			CopyAttributes( connection((int)curTurnoutEp).trk, newTrk );
-			SetTrkScale( newTrk, curScaleInx );
-		} */
-		xx->special = yy->special;
-
-		xx->u = yy->u;
-
-		SetDescriptionOrig( *newTrk );
-		xx->descriptionOff = zero;
-		xx->descriptionSize = zero;
-
-		SetTrkElev(*newTrk, GetTrkElevMode(trk), GetTrkElev(trk));
-		GetTrkEndElev( trk, 0, &option, &d );
-		SetTrkEndElev( *newTrk, 0, option, d, NULL );
-		GetTrkEndElev( trk, 1, &option, &d );
-		SetTrkEndElev( *newTrk, 1, option, d, NULL );
-
-		MyFree( endPt );
 	} else { 
 		/* draw some temporary track while command is in process */
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
 		tempSegs_da.cnt = 1;
-		tempSegs(0).type = SEG_STRTRK;
+		tempSegs(0).type = track?SEG_STRTRK:SEG_STRLIN;
 		tempSegs(0).u.l.pos[0] = endPts[ 0 ];
 		tempSegs(0).u.l.pos[1] = endPts[ 1 ];
 	}

@@ -1093,26 +1093,39 @@ static BOOL_T MergeCornu(
 	return TRUE;
 }
 
-BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs) {
+BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs, BOOL_T track) {
 	struct extraData * xx = GetTrkExtraData(trk);
 	for (int i=0;i<xx->cornuData.arcSegs.cnt;i++) {
 		trkSeg_p p = (trkSeg_t *) xx->cornuData.arcSegs.ptr+i;
 		if (p->type == SEG_BEZTRK) {
-			DYNARR_APPEND(trkSeg_t, * segs, 10);
-			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
-			segPtr->type = SEG_BEZTRK;
-			segPtr->color = wDrawColorBlack;
-			segPtr->width = 0;
-			if (segPtr->bezSegs.ptr) MyFree(segPtr->bezSegs.ptr);
-			segPtr->bezSegs.cnt = 0;
-			segPtr->bezSegs.max = 0;
-			segPtr->bezSegs.ptr = NULL;
-			for (int j=0;j<4;j++) segPtr->u.b.pos[j] = p->u.b.pos[j];
-			FixUpBezierSeg(segPtr->u.b.pos,segPtr,TRUE);
+			if (track) {
+				DYNARR_APPEND(trkSeg_t, * segs, 10);
+				trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
+				segPtr->type = SEG_BEZTRK;
+				segPtr->color = wDrawColorBlack;
+				segPtr->width = 0;
+				if (segPtr->bezSegs.ptr) MyFree(segPtr->bezSegs.ptr);
+				segPtr->bezSegs.cnt = 0;
+				segPtr->bezSegs.max = 0;
+				segPtr->bezSegs.ptr = NULL;
+				for (int j=0;j<4;j++) segPtr->u.b.pos[j] = p->u.b.pos[j];
+				FixUpBezierSeg(segPtr->u.b.pos,segPtr,TRUE);
+			} else {
+				for (int j=0;j<p->bezSegs.cnt;j++) {
+					trkSeg_p bez_p = &DYNARR_N(trkSeg_t,p->bezSegs,j);
+					DYNARR_APPEND(trkSeg_t, * segs, 10);
+					trkSeg_p segPtr = &DYNARR_LAST(trkSeg_t,* segs);
+					if (bez_p->type == SEG_CRVTRK) segPtr->type = SEG_CRVLIN;
+					if (bez_p->type == SEG_STRTRK) segPtr->type = SEG_STRLIN;
+					segPtr->u = bez_p->u;
+					segPtr->width = bez_p->width;
+					segPtr->color = bez_p->color;
+				}
+			}
 		} else if (p->type == SEG_STRTRK) {
 			DYNARR_APPEND(trkSeg_t, * segs, 1);
 			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
-			segPtr->type = SEG_STRTRK;
+			segPtr->type = track?SEG_STRTRK:SEG_STRLIN;
 			segPtr->color = wDrawColorBlack;
 			segPtr->width = 0;
 			for (int j=0;j<2;j++) segPtr->u.l.pos[i] = p->u.l.pos[i];
@@ -1121,7 +1134,7 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs) {
 		} else if (p->type == SEG_CRVTRK) {
 			DYNARR_APPEND(trkSeg_t, * segs, 1);
 			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
-			segPtr->type = SEG_CRVTRK;
+			segPtr->type = track?SEG_CRVTRK:SEG_CRVLIN;
 			segPtr->color = wDrawColorBlack;
 			segPtr->width = 0;
 			segPtr->u.c.a0 = p->u.c.a0;
@@ -1129,25 +1142,6 @@ BOOL_T GetBezierSegmentsFromCornu(track_p trk, dynArr_t * segs) {
 			segPtr->u.c.center = p->u.c.center;
 			segPtr->u.c.radius = p->u.c.radius;
 		}
-	}
-	return TRUE;
-}
-
-BOOL_T GetSegmentsFromCornu(track_p trk, dynArr_t * segs) {
-	struct extraData * xx = GetTrkExtraData(trk);
-	for (int i=0;i<xx->cornuData.arcSegs.cnt;i++) {
-			DYNARR_APPEND(trkSeg_t, * segs, 10);
-			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,* segs,segs->cnt-1);
-			segPtr->type = SEG_BEZTRK;
-			segPtr->color = wDrawColorBlack;
-			segPtr->width = 0;
-			if (segPtr->bezSegs.ptr) MyFree(segPtr->bezSegs.ptr);
-			segPtr->bezSegs.cnt = 0;
-			segPtr->bezSegs.max = 0;
-			segPtr->bezSegs.ptr = NULL;
-			trkSeg_p p = (trkSeg_t *) xx->cornuData.arcSegs.ptr+i;
-			for (int j=0;j<4;j++) segPtr->u.b.pos[j] = p->u.b.pos[j];
-			FixUpBezierSeg(segPtr->u.b.pos,segPtr,TRUE);
 	}
 	return TRUE;
 }
@@ -1315,6 +1309,7 @@ BOOL_T GetCornuSegmentFromTrack(track_p trk, trkSeg_p seg_p) {
 	return TRUE;
 }
 
+static dynArr_t cornuSegs_da;
 
 static BOOL_T MakeParallelCornu(
 		track_p trk,
@@ -1322,7 +1317,8 @@ static BOOL_T MakeParallelCornu(
 		DIST_T sep,
 		track_p * newTrkR,
 		coOrd * p0R,
-		coOrd * p1R )
+		coOrd * p1R,
+		BOOL_T track )
 {
 	struct extraData * xx = GetTrkExtraData(trk);
     coOrd np[4], p, nc[2];
@@ -1373,10 +1369,11 @@ static BOOL_T MakeParallelCornu(
      }
 
 	if ( newTrkR ) {
-		*newTrkR = NewCornuTrack( np, nc, na, nr, NULL, 0);
-		if (*newTrkR==NULL) {
-			wBeep();
-			InfoMessage(_("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
+		if (track) {
+			*newTrkR = NewCornuTrack( np, nc, na, nr, NULL, 0);
+			if (*newTrkR==NULL) {
+				wBeep();
+				InfoMessage(_("Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"),
 						np[0].x,np[0].y,
 						np[1].x,np[1].y,
 						nc[0].x,nc[0].y,
@@ -1385,10 +1382,30 @@ static BOOL_T MakeParallelCornu(
 						FormatDistance(nr[0]),FormatDistance(nr[1]));
 				return FALSE;
 			}
+		} else {
+			tempSegs_da.cnt = 0;
+			CallCornu0(np,nc,na,nr,&tempSegs_da,FALSE);
+			*newTrkR = MakePolyLineFromSegs( zero, 0.0, &tempSegs_da );
+		}
 
 	} else {
 		tempSegs_da.cnt = 0;
 		CallCornu0(np,nc,na,nr,&tempSegs_da,FALSE);
+		if (!track) {
+			for (int i=0;i<tempSegs_da.cnt;i++) {
+				trkSeg_p seg = &tempSegs(i);
+				if (seg->type == SEG_STRTRK) {
+					seg->type = SEG_STRLIN;
+					seg->color = wDrawColorBlack;
+					seg->width = 0;
+				}
+				if (seg->type == SEG_CRVTRK) {
+					seg->type = SEG_CRVLIN;
+					seg->color = wDrawColorBlack;
+					seg->width = 0;
+				}
+			}
+		}
 	}
 	if ( p0R ) *p0R = np[0];
 	if ( p1R ) *p1R = np[1];

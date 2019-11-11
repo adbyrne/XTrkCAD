@@ -38,11 +38,16 @@ static struct {
 		} Dpa;
 
 static DIST_T parSeparation = 1.0;
+static long parType;
+
+enum PAR_TYPE_E { PAR_TRACK, PAR_LINE };
+static char * parTypeLabels[] = { N_("Track"), N_("Line"), NULL };
 
 static paramFloatRange_t r_0o1_100 = { 0.0, 100.0, 100 };
 static paramData_t parSepPLs[] = {
-#define parSepPD (parSepPLs[0])
-	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NOPREF|PDO_NOPREF, &r_0o1_100, N_("Separation") } };
+#define parSepPD (parSepPLs[1])
+	{   PD_RADIO, &parType, "type", 0, parTypeLabels, N_("Output Type"), BC_HORZ|BC_NONE },
+	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NOPREF, &r_0o1_100, N_("Separation") } };
 static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, sizeof parSepPLs/sizeof parSepPLs[0] };
 
 
@@ -56,23 +61,27 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 	ANGLE_T a;
 	track_p t0, t1;
 	EPINX_T ep0=-1, ep1=-1;
-	wControl_p controls[2];
-	char * labels[1];
+	wControl_p controls[3];
+	char * labels[2];
+	long save_options;
 
 	switch (action) {
 
 	case C_START:
-		if (parSepPD.control==NULL) {
+		if (parSepPLs[0].control==NULL) {
 			ParamCreateControls( &parSepPG, NULL );
 		}
 		sprintf( message, "parallel-separation-%s", curScaleName );
 		parSeparation = ceil(13.0*12.0/curScaleRatio);
 		wPrefGetFloat( "misc", message, &parSeparation, parSeparation );
+		parType = PAR_TRACK;
 		ParamLoadControls( &parSepPG );
 		ParamGroupRecord( &parSepPG );
 		controls[0] = parSepPD.control;
-		controls[1] = NULL;
+		controls[1] = parSepPLs[0].control;
+		controls[2] = NULL;
 		labels[0] = N_("Separation");
+		labels[1] = N_("Type:");
 		InfoSubstituteControls( controls, labels );
 		/*InfoMessage( "Select track" );*/
 		return C_CONTINUE;
@@ -84,8 +93,10 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		}
 
 		controls[0] = parSepPD.control;
-		controls[1] = NULL;
+		controls[1] = parSepPLs[0].control;
+		controls[2] = NULL;
 		labels[0] = N_("Separation");
+		labels[1] = N_("Type:");
 		InfoSubstituteControls( controls, labels );
 		ParamLoadData( &parSepPG );
 		Dpa.orig = pos;
@@ -117,20 +128,22 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		tempSegs_da.cnt = 0;
 
 	case C_MOVE:
-
 		if (Dpa.Trk == NULL) return C_CONTINUE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
-		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, NULL, &p0, &p1 ) ) {
+		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
+		tempSegs_da.cnt = 0;
+		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, NULL, &p0, &p1, parType == PAR_TRACK ) ) {
 			Dpa.Trk = NULL;
+			tempD.options = save_options;
 			return C_CONTINUE;
 		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack ); 
+		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
 		if (Dpa.Trk == NULL) return C_CONTINUE;
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
+		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		p = p0;
+		tempSegs_da.cnt = 0;
 		if ((t0=OnTrack( &p, FALSE, TRUE )) != NULL) {
 			ep0 = PickEndPoint( p, t0 );
 			if ( GetTrkEndTrk(t0,ep0) != NULL ) {
@@ -155,7 +168,10 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 			}
 		}
 		UndoStart( _("Create Parallel Track"), "newParallel" );
-		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, &t, NULL, NULL ) ) {
+		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, &t, NULL, NULL, parType == PAR_TRACK ) ) {
+			tempSegs_da.cnt = 0;
+			MainRedraw();
+			MapRedraw();
 			return C_TERMINATE;
 		}
 		if (GetTrkGauge( Dpa.Trk )> parSeparation)
@@ -184,9 +200,15 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		InfoSubstituteControls( NULL, NULL );
 		sprintf( message, "parallel-separation-%s", curScaleName );
 		wPrefSetFloat( "misc", message, parSeparation );
+		tempSegs_da.cnt = 0;
+		MainRedraw();
+		MapRedraw();
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		if (tempSegs_da.cnt>0) {
+			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		}
 		return C_CONTINUE;
 
 	case C_CANCEL:

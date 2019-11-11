@@ -61,7 +61,7 @@ void GetCornuParmsTemp(dynArr_t *, int sel, coOrd * pos2, coOrd * center, ANGLE_
 BOOL_T CallCornu(coOrd[2],track_p[2],EPINX_T[2],dynArr_t *,cornuParm_t *);
 BOOL_T CallCornu0(coOrd[2], coOrd[2], ANGLE_T[2], DIST_T[2], dynArr_t *,BOOL_T);
 
-BOOL_T GetBezierSegmentsFromCornu(track_p, dynArr_t *);
+BOOL_T GetBezierSegmentsFromCornu(track_p, dynArr_t *, BOOL_T);
 
 char * CreateSegPathList(track_p trk);
 

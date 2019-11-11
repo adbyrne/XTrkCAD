@@ -917,10 +917,11 @@ EXPORT BOOL_T MakeParallelTrack(
 		DIST_T dist,
 		track_p * newTrkR,
 		coOrd * p0R,
-		coOrd * p1R )
+		coOrd * p1R,
+		BOOL_T track)
 {
 	if ( trackCmds(trk->type)->makeParallel )
-		return trackCmds(trk->type)->makeParallel( trk, pos, dist, newTrkR, p0R, p1R );
+		return trackCmds(trk->type)->makeParallel( trk, pos, dist, newTrkR, p0R, p1R, track);
 	return FALSE;
 }
 

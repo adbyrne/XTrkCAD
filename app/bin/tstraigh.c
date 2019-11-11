@@ -664,7 +664,8 @@ static BOOL_T MakeParallelStraight(
 		DIST_T sep,
 		track_p * newTrkR,
 		coOrd * p0R,
-		coOrd * p1R )
+		coOrd * p1R,
+		BOOL_T track)
 {
 	ANGLE_T angle = GetTrkEndAngle(trk,1);
 	coOrd p0, p1;
@@ -675,12 +676,23 @@ static BOOL_T MakeParallelStraight(
 	Translate( &p0, GetTrkEndPos(trk,0), angle, sep );
 	Translate( &p1, GetTrkEndPos(trk,1), angle, sep );
 	if ( newTrkR ) {
-		*newTrkR = NewStraightTrack( p0, p1 );
+		if (track)
+			*newTrkR = NewStraightTrack( p0, p1 );
+		else {
+			tempSegs(0).color = wDrawColorBlack;
+			tempSegs(0).width = 0;
+			tempSegs_da.cnt = 1;
+			tempSegs(0).type = SEG_STRLIN;
+			tempSegs(0).u.l.pos[0] = p0;
+			tempSegs(0).u.l.pos[1] = p1;
+			*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+		}
+
 	} else {
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
 		tempSegs_da.cnt = 1;
-		tempSegs(0).type = SEG_STRTRK;
+		tempSegs(0).type = track?SEG_STRTRK:SEG_STRLIN;
 		tempSegs(0).u.l.pos[0] = p0;
 		tempSegs(0).u.l.pos[1] = p1;
 	}
@@ -823,6 +835,8 @@ EXPORT void StraightSegProc(
  * GRAPHICS EDITING
  *
  */
+
+
 
 
 track_p NewStraightTrack( coOrd p0, coOrd p1 )

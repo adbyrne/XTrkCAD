@@ -1378,7 +1378,8 @@ static BOOL_T MakeParallelJoint(
 		DIST_T sep,
 		track_p * newTrkR,
 		coOrd * p0R,
-		coOrd * p1R )
+		coOrd * p1R,
+		BOOL_T track)
 {
 	struct extraData * xx = GetTrkExtraData(trk), *xx1;
 	ANGLE_T angle, A;
@@ -1430,18 +1431,41 @@ static BOOL_T MakeParallelJoint(
 	}
 
 	if ( newTrkR ) {
-		*newTrkR = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
-		xx1 = GetTrkExtraData( *newTrkR );
-		*xx1 = *xx;
-		xx1->angle = A;
-		xx1->R = R;
-		xx1->L = L;
-		xx1->l0 = l0;
-		xx1->l1 = l1;
-		xx1->pos = P;
-		SetTrkEndPoint( *newTrkR, 0, p0, GetTrkEndAngle(trk,0) );
-		SetTrkEndPoint( *newTrkR, 1, p1, GetTrkEndAngle(trk,1) );
-		ComputeBoundingBox( *newTrkR );
+		if (track) {
+			*newTrkR = NewTrack( 0, T_EASEMENT, 2, sizeof *xx );
+			xx1 = GetTrkExtraData( *newTrkR );
+			*xx1 = *xx;
+			xx1->angle = A;
+			xx1->R = R;
+			xx1->L = L;
+			xx1->l0 = l0;
+			xx1->l1 = l1;
+			xx1->pos = P;
+			SetTrkEndPoint( *newTrkR, 0, p0, GetTrkEndAngle(trk,0) );
+			SetTrkEndPoint( *newTrkR, 1, p1, GetTrkEndAngle(trk,1) );
+			ComputeBoundingBox( *newTrkR );
+		} else {
+			dl = fabs(l0-l1);
+			len = dl/(0.20*mainD.scale);
+			cnt = (int)ceil(len);
+			if (cnt == 0 || (mainD.options&DC_QUICK)) cnt = 1;
+			dl /= cnt;
+			DYNARR_SET( trkSeg_t, tempSegs_da, cnt );
+			for ( inx=0; inx<cnt; inx++ ) {
+				tempSegs(inx).color = wDrawColorBlack;
+				tempSegs(inx).width = 0;
+				tempSegs(inx).type = track?SEG_STRTRK:SEG_STRLIN;
+				if ( inx == 0 ) {
+					GetJointPos( &tempSegs(inx).u.l.pos[0], NULL, l0, R, L, P, A, xx->negate );
+				} else {
+					tempSegs(inx).u.l.pos[0] = tempSegs(inx-1).u.l.pos[1];
+				}
+				l0 += dl;
+				GetJointPos( &tempSegs(inx).u.l.pos[1], NULL, l0, R, L, P, A, xx->negate );
+				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(inx) );
+			}
+			tempSegs_da.cnt = cnt;
+		}
 	} else {
 		/* print segments about 0.20" long */
 		dl = fabs(l0-l1);
@@ -1453,7 +1477,7 @@ static BOOL_T MakeParallelJoint(
 		for ( inx=0; inx<cnt; inx++ ) {
 			tempSegs(inx).color = wDrawColorBlack;
 			tempSegs(inx).width = 0;
-			tempSegs(inx).type = SEG_STRTRK;
+			tempSegs(inx).type = track?SEG_STRTRK:SEG_STRLIN;
 			if ( inx == 0 ) {
 				GetJointPos( &tempSegs(inx).u.l.pos[0], NULL, l0, R, L, P, A, xx->negate );
 			} else {
