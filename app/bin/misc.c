@@ -2115,6 +2115,10 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) SelectBridge, 0, (void *) 0);
 	MiscMenuItemCreate(popup2M, NULL, "cmdTies", _("NoTies/Ties"), 0,
 			(void*) (wMenuCallBack_p) SelectTies, 0, (void *) 0);
+	MiscMenuItemCreate(popup2M, NULL, "cmdAbove", _("Move To Front"), 0,
+			(void*) (wMenuCallBack_p) SelectAbove, 0, (void *) 0);
+	MiscMenuItemCreate(popup2M, NULL, "cmdBelow", _("Move To Back"), 0,
+			(void*) (wMenuCallBack_p) SelectBelow, 0, (void *) 0);
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDelete", _("Delete"), 0,

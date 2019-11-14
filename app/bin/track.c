@@ -1263,9 +1263,9 @@ EXPORT void InitCmdAboveBelow( void )
 {
 	wIcon_p bm_p;
 	bm_p = wIconCreatePixMap( above_xpm );
-	AddToolbarButton( "cmdAbove", bm_p, IC_SELECTED, (addButtonCallBack_t)SelectAbove, NULL );
+	AddToolbarButton( "cmdAbove", bm_p, IC_SELECTED|IC_POPUP, (addButtonCallBack_t)SelectAbove, NULL );
 	bm_p = wIconCreatePixMap( below_xpm );
-	AddToolbarButton( "cmdBelow", bm_p, IC_SELECTED, (addButtonCallBack_t)SelectBelow, NULL );
+	AddToolbarButton( "cmdBelow", bm_p, IC_SELECTED|IC_POPUP, (addButtonCallBack_t)SelectBelow, NULL );
 }
 
 /*****************************************************************************
