@@ -68,6 +68,7 @@ static wList_p setLayerL;
 typedef struct {
     char name[STR_SHORT_SIZE];			/**< Layer name */
     wDrawColor color;					/**< layer color, is an index into a color table */
+    BOOL_T useColor;					/**< Use Layer color */
     BOOL_T frozen;						/**< Frozen flag */
     BOOL_T visible;						/**< visible flag */
     BOOL_T onMap;						/**< is layer shown map */
@@ -209,6 +210,10 @@ void SetLayerName(unsigned int layer, char* name) {
 	if (IsLayerValid(layer)) {
 		strcpy(layers[layer].name,name);
 	}
+}
+
+BOOL_T GetLayerUseColor(unsigned int layer) {
+	return layers[layer].useColor;
 }
 
 wDrawColor GetLayerColor(unsigned int layer)
@@ -447,6 +452,7 @@ static  wDrawColor layerColorTab[COUNT(layerRawColorTab)];
 static wWin_p layerW;
 static char layerName[STR_SHORT_SIZE];
 static wDrawColor layerColor;
+static long layerUseColor = TRUE;
 static long layerVisible = TRUE;
 static long layerFrozen = FALSE;
 static long layerOnMap = TRUE;
@@ -462,6 +468,7 @@ static char *visibleLabels[] = { "", NULL };
 static char *frozenLabels[] = { "", NULL };
 static char *onMapLabels[] = { "", NULL };
 static char *moduleLabels[] = { "", NULL };
+static char *layerColorLabels[] = { "", NULL };
 static paramIntegerRange_t i0_20 = { 0, NUM_BUTTONS };
 
 static paramData_t layerPLs[] = {
@@ -471,15 +478,17 @@ static paramData_t layerPLs[] = {
     { PD_STRING, layerName, "name", PDO_NOPREF|PDO_STRINGLIMITLENGTH, (void*)(250-54), N_("Name"), 0, 0, sizeof(layerName) },
 #define I_COLOR	(2)
     { PD_COLORLIST, &layerColor, "color", PDO_NOPREF, NULL, N_("Color") },
-#define I_VIS	(3)
+#define I_USE_COLOR (3)
+	{ PD_TOGGLE, &layerUseColor, "layercolor", PDO_NOPREF|PDO_DLGHORZ, layerColorLabels, N_("Use Color"), BC_HORZ|BC_NOBORDER },
+#define I_VIS	(4)
     { PD_TOGGLE, &layerVisible, "visible", PDO_NOPREF, visibleLabels, N_("Visible"), BC_HORZ|BC_NOBORDER },
-#define I_FRZ	(4)
+#define I_FRZ	(5)
     { PD_TOGGLE, &layerFrozen, "frozen", PDO_NOPREF|PDO_DLGHORZ, frozenLabels, N_("Frozen"), BC_HORZ|BC_NOBORDER },
-#define I_MAP	(5)
+#define I_MAP	(6)
     { PD_TOGGLE, &layerOnMap, "onmap", PDO_NOPREF|PDO_DLGHORZ, onMapLabels, N_("On Map"), BC_HORZ|BC_NOBORDER },
-#define I_MOD 	(6)
+#define I_MOD 	(7)
 	{ PD_TOGGLE, &layerModule, "module", PDO_NOPREF|PDO_DLGHORZ, moduleLabels, N_("Module"), BC_HORZ|BC_NOBORDER },
-#define I_COUNT (7)
+#define I_COUNT (8)
     { PD_STRING, NULL, "object-count", PDO_NOPREF|PDO_DLGBOXEND, (void*)(80), N_("Count"), BO_READONLY },
     { PD_MESSAGE, N_("Personal Preferences"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
     { PD_BUTTON, (void*)DoLayerOp, "reset", PDO_DLGRESETMARGIN, 0, N_("Load"), 0, (void *)ENUMLAYER_RELOAD },
@@ -598,6 +607,7 @@ UpdateLayerDlg()
     layerOnMap = layers[curLayer].onMap;
     layerModule = layers[curLayer].module;
     layerColor = layers[curLayer].color;
+    layerUseColor = layers[curLayer].useColor;
     strcpy(layerName, layers[curLayer].name);
     layerCurrent = curLayer;
     /* now re-load the layer list boxes */
@@ -880,6 +890,7 @@ static void LayerUpdate(void)
 
     if (strcmp(layers[(int)layerCurrent].name, layerName) ||
             layerColor != layers[(int)layerCurrent].color ||
+			layers[(int)layerCurrent].useColor != (BOOL_T)layerUseColor ||
             layers[(int)layerCurrent].visible != (BOOL_T)layerVisible ||
             layers[(int)layerCurrent].frozen != (BOOL_T)layerFrozen ||
             layers[(int)layerCurrent].onMap != (BOOL_T)layerOnMap ||
@@ -911,6 +922,7 @@ static void LayerUpdate(void)
     }
 
     redraw = (layerColor != layers[(int)layerCurrent].color ||
+    		layers[(int)layerCurrent].useColor != (BOOL_T)layerUseColor ||
               (BOOL_T)layerVisible != layers[(int)layerCurrent].visible);
 
     if ((!layerRedrawMap) && redraw) {
@@ -924,6 +936,7 @@ static void LayerUpdate(void)
         wButtonSetBusy(layer_btns[(int)layerCurrent], layerVisible);
     }
 
+    layers[(int)layerCurrent].useColor = (BOOL_T)layerUseColor;
     layers[(int)layerCurrent].visible = (BOOL_T)layerVisible;
     layers[(int)layerCurrent].frozen = (BOOL_T)layerFrozen;
     layers[(int)layerCurrent].onMap = (BOOL_T)layerOnMap;
@@ -955,6 +968,7 @@ static void LayerSelect(
     layerOnMap = layers[inx].onMap;
     layerModule = layers[inx].module;
     layerColor = layers[inx].color;
+    layerUseColor = layers[inx].useColor;
     sprintf(message, "%ld", layers[inx].objCount);
     ParamLoadMessage(&layerPG, I_COUNT, message);
     ParamLoadControls(&layerPG);
@@ -990,6 +1004,7 @@ void ResetLayers(void)
     layerOnMap = TRUE;
     layerModule = FALSE;
     layerColor = layers[0].color;
+    layerUseColor = TRUE;
     strcpy(layerName, layers[0].name);
     LoadLayerLists();
 
@@ -1116,7 +1131,7 @@ static void DoLayer(void * junk)
 BOOL_T ReadLayers(char * line)
 {
     char * name;
-    int inx, visible, frozen, color, onMap, module;
+    int inx, visible, frozen, color, onMap, module, dontUseColor;
     unsigned long rgb;
 
     /* older files didn't support layers */
@@ -1147,7 +1162,7 @@ BOOL_T ReadLayers(char * line)
 
     /* get the properties for a layer from the file and update the layer accordingly */
 
-    if (!GetArgs(line, "ddddud000q", &inx, &visible, &frozen, &onMap, &rgb, &module,
+    if (!GetArgs(line, "ddddudd00q", &inx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor,
                  &name)) {
         return FALSE;
     }
@@ -1173,6 +1188,7 @@ BOOL_T ReadLayers(char * line)
     layers[inx].onMap = onMap;
     layers[inx].module = module;
     layers[inx].color = color;
+    layers[inx].useColor = !dontUseColor;
 
     if (inx<NUM_BUTTONS) {
         if (strlen(name) > 0) {
@@ -1229,7 +1245,8 @@ BOOL_T WriteLayers(FILE * f)
                     layers[inx].onMap,
                     wDrawGetRGB(layers[inx].color),
                     layers[inx].module,
-					0, 0, 0,
+					layers[inx].useColor?0:1,
+					0, 0,
                     PutTitle(layers[inx].name));
         }
     }
@@ -1255,6 +1272,7 @@ void InitLayers(void)
         show_layer_bmps[i] = wIconCreateBitMap(l1_width, l1_height, show_layer_bits[i],
                                                layerColorTab[i%(COUNT(layerColorTab))]);
         layers[i].color = layerColorTab[i%(COUNT(layerColorTab))];
+        layers[i].useColor = TRUE;
     }
 
     /* layer list for toolbar */

@@ -2778,7 +2778,8 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 	}
 	if ( (d->options&(DC_GROUP)) == 0 ) {
 		if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) )
-			return GetLayerColor((unsigned int)curTrackLayer);
+			if (GetLayerUseColor((unsigned int)curTrackLayer))
+				return GetLayerColor((unsigned int)curTrackLayer);
 	}
 	return wDrawColorBlack;
 }
@@ -2810,7 +2811,8 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 		return;
 	if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) &&
 		d != &mapD && color == wDrawColorBlack )
-		color = GetLayerColor((unsigned int)curTrackLayer);
+		if (GetLayerUseColor((unsigned int)curTrackLayer))
+			color = GetLayerColor((unsigned int)curTrackLayer);
 	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 	if ( inDrawTracks &&
 		 tieDrawMode!=TIEDRAWMODE_NONE &&
