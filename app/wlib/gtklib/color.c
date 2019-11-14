@@ -215,9 +215,9 @@ wDrawColor wDrawFindColor(
     colorMap_t tempMapValue;
     wlibGetColorMap();
     cc = wDrawColorBlack;
-    r0 = (int)(rgb0>>16)&0xFF;
-    g0 = (int)(rgb0>>8)&0xFF;
-    b0 = (int)(rgb0)&0xFF;
+    r0 = (unsigned int)(rgb0>>16)&0xFF;
+    g0 = (unsigned int)(rgb0>>8)&0xFF;
+    b0 = (unsigned int)(rgb0)&0xFF;
     d0 = 256*3;
 
     // Initialize garray if needed
