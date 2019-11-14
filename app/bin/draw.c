@@ -2946,7 +2946,6 @@ EXPORT void InitCmdPan2( wMenu_p menu )
 	wMenuPushCreate(panPopupM, "cmdSelectMode", GetBalloonHelpStr(_("cmdSelectMode")), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
 	wMenuPushCreate(panPopupM, "cmdDescribeMode", GetBalloonHelpStr(_("cmdDescribeMode")), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
 	wMenuPushCreate(panPopupM, "cmdModifyMode", GetBalloonHelpStr(_("cmdModifyMode")), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
-	wMenuPushCreate(panPopupM, "cmdJoinMode", GetBalloonHelpStr(_("cmdJoinMode")), 0, DoCommandB, (void*) (intptr_t) joinCmdInx);
 	wMenuSeparatorCreate(panPopupM);
 	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom To Extents - 'e'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'e');
 	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::1 - '1'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '1');

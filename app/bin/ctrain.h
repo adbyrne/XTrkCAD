@@ -27,6 +27,8 @@
 #include "paramfile.h"
 #include "track.h"
 
+wIndex_t trainCmdInx;
+
 struct carItem_t;
 typedef struct carItem_t carItem_t;
 typedef carItem_t * carItem_p;

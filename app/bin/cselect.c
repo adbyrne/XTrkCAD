@@ -81,7 +81,11 @@ static dynArr_t tlist_da;
 static track_p *tlist2 = NULL;
 
 static wMenu_p selectPopup1M;
+static wMenu_p selectPopup1CM;
 static wMenu_p selectPopup2M;
+static wMenu_p selectPopup2CM;
+static wMenu_p selectPopup2RM;
+static wMenu_p selectPopup2TM;
 static wMenuPush_p menuPushModify;
 
 static BOOL_T doingAlign = FALSE;
@@ -2560,6 +2564,7 @@ extern BOOL_T inDescribeCmd;
 extern wIndex_t modifyCmdInx;
 extern wIndex_t describeCmdInx;
 extern wIndex_t panCmdInx;
+extern wIndex_t trainCmdInx;
 
 static STATUS_T SelectTrack( 
 		coOrd pos )
@@ -3011,6 +3016,8 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 				LEVEL0, IC_CANCEL|IC_POPUP|IC_LCLICK|IC_CMDMENU|IC_WANT_MOVE|IC_WANT_MODKEYS, ACCL_SELECT, NULL );
 }
 
+extern wIndex_t trainCmdInx;
+
 EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	endpt_bm = wDrawBitMapCreate( mainD.d, bmendpt_width, bmendpt_width, 7, 7, bmendpt_bits );
 	angle_bm[0] = wDrawBitMapCreate( mainD.d, bma90_width, bma90_width, 7, 7, bma90_bits );
@@ -3022,23 +3029,57 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	if (moveMode > MAXMOVEMODE || moveMode < 0)
 		moveMode = MAXMOVEMODE;
 	selectPopup1M = MenuRegister( "Select Mode Menu" );
-	wMenuPushCreate(selectPopup1M, "cmdDescribeMode", GetBalloonHelpStr(_("cmdDescribeMode")), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
-	wMenuPushCreate(selectPopup1M, "cmdModifyMode", GetBalloonHelpStr(_("cmdModifyMode")), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
-	wMenuPushCreate(selectPopup1M, "cmdPanMode", GetBalloonHelpStr(_("cmdPanMode")), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+	wMenuPushCreate(selectPopup1M, "", _("Undo"), 0,(wMenuCallBack_p) UndoUndo, (void *) 0);
+	wMenuPushCreate(selectPopup1M, "", _("Redo"), 0,(wMenuCallBack_p) UndoRedo, (void *) 0);
+	wMenuSeparatorCreate( selectPopup1M );
+	wMenuPushCreate(selectPopup1M, "cmdDescribeMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
+	wMenuPushCreate(selectPopup1M, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+	wMenuPushCreate(selectPopup1M, "cmdTrainMode", GetBalloonHelpStr("cmdTrainMode"), 0, DoCommandB, (void*) (intptr_t) trainCmdInx);
+	wMenuSeparatorCreate( selectPopup1M );
+	wMenuPushCreate(selectPopup1M, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
+	wMenuPushCreate(selectPopup1M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
+	wMenuSeparatorCreate( selectPopup1M );
+	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,(wMenuCallBack_p) SetAllTrackSelect, (void *) 1);
+	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0,(wMenuCallBack_p) SelectCurrentLayer, (void *) 0);
 	wMenuSeparatorCreate( selectPopup1M );
 	quickMove1M[0] = wMenuToggleCreate( selectPopup1M, "", _("Normal"), 0, quickMove==0, ChangeQuickMove, (void *) 0 );
 	quickMove1M[1] = wMenuToggleCreate( selectPopup1M, "", _("Simple"), 0, quickMove==1, ChangeQuickMove, (void *) 1 );
 	quickMove1M[2] = wMenuToggleCreate( selectPopup1M, "", _("End Points"), 0, quickMove==2, ChangeQuickMove, (void *) 2 );
+	wMenuSeparatorCreate( selectPopup1M );
 	selectPopup2M = MenuRegister( "Track Selected Menu " );
+	wMenuPushCreate(selectPopup2M, "", _("Undo"), 0,(wMenuCallBack_p) UndoUndo, (void *) 0);
+	wMenuPushCreate(selectPopup2M, "", _("Redo"), 0,(wMenuCallBack_p) UndoRedo, (void *) 0);
+	wMenuSeparatorCreate( selectPopup2M );
+	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0, (wMenuCallBack_p) SetAllTrackSelect, (void *) 0);
+	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Describe Track"), 0,(wMenuCallBack_p) CallPushDescribe, (void*)0);
 	menuPushModify = wMenuPushCreate(selectPopup2M, "", _("Modify/Activate Track"), 0,(wMenuCallBack_p) CallPushModify, (void*)0);
 	wMenuSeparatorCreate( selectPopup2M );
+	wMenuPushCreate(selectPopup2M, "", _("Cut"), 0,(wMenuCallBack_p) EditCut, (void *) 0);
+	wMenuPushCreate(selectPopup2M, "", _("Copy"), 0,(wMenuCallBack_p) EditCopy, (void *) 0);
+	wMenuPushCreate(selectPopup2M,  "", _("Paste"), 0, (wMenuCallBack_p) EditPaste, (void *) 0);
 	AddMoveMenu( selectPopup2M, QuickMove);
-	wMenuSeparatorCreate( selectPopup2M );
-	AddRotateMenu( selectPopup2M, QuickRotate );
+	selectPopup2RM = wMenuMenuCreate(selectPopup2M, "", _("Rotate..."));
+	AddRotateMenu( selectPopup2RM, QuickRotate );
+	rotateAlignMI = wMenuPushCreate( selectPopup2RM, "", _("Align"), 0, (wMenuCallBack_p)RotateAlign, (void* ) 1 );
 	wMenuSeparatorCreate( selectPopup2M );
 	descriptionMI = wMenuPushCreate(selectPopup2M, "cmdMoveLabel", _("Show/Hide Description"), 0, (wMenuCallBack_p)moveDescription, (void*) 0);
-	rotateAlignMI = wMenuPushCreate( selectPopup2M, "", _("Align"), 0, (wMenuCallBack_p)RotateAlign, (void* ) 1 );
+	wMenuSeparatorCreate( selectPopup2M );
+	wMenuPushCreate(selectPopup2M, "", _("Hide/NoHide"), 0,(wMenuCallBack_p) SelectTunnel, (void *) 0);
+	wMenuPushCreate(selectPopup2M, "", _("Bridge/NoBridge"), 0,(wMenuCallBack_p) SelectBridge, (void *) 0);
+	wMenuPushCreate(selectPopup2M, "", _("NoTies/Ties"), 0,(wMenuCallBack_p) SelectTies, (void *) 0);
+	selectPopup2TM = wMenuMenuCreate(selectPopup2M, "", _("Thickness..."));
+	wMenuPushCreate( selectPopup2TM, "", _("Thin Tracks"), 0, (void*)(wMenuCallBack_p)SelectTrackWidth, (void *)0 );
+	wMenuPushCreate( selectPopup2TM, "", _("Medium Tracks"), 0, (void*)(wMenuCallBack_p)SelectTrackWidth, (void *)2 );
+	wMenuPushCreate( selectPopup2TM, "", _("Thick Tracks"), 0, (void*)(wMenuCallBack_p)SelectTrackWidth, (void *)3 );
+	wMenuSeparatorCreate( selectPopup2M );
+	wMenuPushCreate(selectPopup2M, "", _("Move To Front"), 0,(wMenuCallBack_p) SelectAbove,(void *) 0);
+	wMenuPushCreate(selectPopup2M, "", _("Move To Back"), 0,(wMenuCallBack_p) SelectBelow, (void *) 0);
+	wMenuSeparatorCreate( selectPopup2M );
+	wMenuPushCreate(selectPopup2M, "", _("Group"), 0,(wMenuCallBack_p) DoGroup, (void *) 0);
+	wMenuPushCreate(selectPopup2M, "", _("UnGroup"), 0,(wMenuCallBack_p) DoUngroup, (void *) 0);
+	wMenuSeparatorCreate( selectPopup2M );
+
 	ParamRegister( &rescalePG );
 }
 

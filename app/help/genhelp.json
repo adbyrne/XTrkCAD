@@ -133,6 +133,7 @@
 		{"line": "cmdTextNote", "contents": "Plain Text"},
 		{"line": "cmdTip", "contents": "Tip of the Day window" },
 		{"line": "cmdTrain", "contents": "Run Trains" },
+		{"line": "cmdTrainMode", "contents": "Change To Run Trains Mode" },
 		{"line": "cmdTrainPause", "contents": "Pause/Resume Trains" },
 		{"line": "cmdTrainNewCar", "contents": "Place a car on the layout" },
 		{"line": "cmdTrainExit", "contents": "Exit Trains" },

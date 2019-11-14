@@ -2071,9 +2071,39 @@ static void CreateMenus(void) {
 	/*
 	 * POPUP MENUS
 	 */
+	/* Select Commands */
+	/* Select All */
+	/* Select All Current */
 
-	popup1M = wMenuPopupCreate(mainW, _("Commands"));
-	popup2M = wMenuPopupCreate(mainW, _("Commands"));
+	/* Common View Commands Menu */
+	/* Zoom In/Out */
+	/* Snap Grid Menu */
+	/* Show/Hide Map */
+	/* Show/Hide Background */
+
+	/* Selected Commands */
+	/*--------------*/
+	/* DeSelect All */
+	/* Select All */
+	/* Select All Current */
+	/*--------------*/
+	/* Quick Move */
+	/* Quick Rotate */
+	/* Quick Align */
+	/*--------------*/
+	/* Move To Current Layer */
+	/* Move/Rotate Cmds */
+	/* Cut/Paste/Delete */
+	/* Group/Un-group Selected */
+	/*----------*/
+	/* Thick/Thin */
+	/* Bridge/Tunnel */
+	/* Ties/NoTies */
+	/*-----------*/
+	/* More Commands */
+
+	popup1M = wMenuPopupCreate(mainW, _("Conext Commands"));
+	popup2M = wMenuPopupCreate(mainW, _("Shift Context Commands"));
 	MiscMenuItemCreate(popup1M, popup2M, "cmdUndo", _("Undo"), 0,
 			(void*) (wMenuCallBack_p) UndoUndo, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdRedo", _("Redo"), 0,
@@ -2092,6 +2122,8 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) SnapGridShow, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdMapShow", _("Show/Hide Map"), 0,
 			(void*) (wMenuCallBack_p) MapWindowToggleShow, 0, (void *) 0);
+	MiscMenuItemCreate(popup1M, popup2M, "cmdBackgroundShow", _("Show/Hide Background"), 0,
+			(void*) (wMenuCallBack_p) BackgroundToggleShow, 0, (void *) 0);
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
 	MiscMenuItemCreate(popup2M, NULL, "cmdCopy", _("Copy"), 0,
@@ -2109,16 +2141,6 @@ static void CreateMenus(void) {
 			(wMenuCallBack_p) DoCommandBIndirect, &moveCmdInx);
 	wMenuPushCreate(popup2M, "cmdRotate", _("Rotate"), 0,
 			(wMenuCallBack_p) DoCommandBIndirect, &rotateCmdInx);
-	MiscMenuItemCreate(popup2M, NULL, "cmdTunnel", _("Tunnel"), 0,
-			(void*) (wMenuCallBack_p) SelectTunnel, 0, (void *) 0);
-	MiscMenuItemCreate(popup2M, NULL, "cmdBridge", _("Bridge"), 0,
-			(void*) (wMenuCallBack_p) SelectBridge, 0, (void *) 0);
-	MiscMenuItemCreate(popup2M, NULL, "cmdTies", _("NoTies/Ties"), 0,
-			(void*) (wMenuCallBack_p) SelectTies, 0, (void *) 0);
-	MiscMenuItemCreate(popup2M, NULL, "cmdAbove", _("Move To Front"), 0,
-			(void*) (wMenuCallBack_p) SelectAbove, 0, (void *) 0);
-	MiscMenuItemCreate(popup2M, NULL, "cmdBelow", _("Move To Back"), 0,
-			(void*) (wMenuCallBack_p) SelectBelow, 0, (void *) 0);
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDelete", _("Delete"), 0,
