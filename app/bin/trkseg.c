@@ -2028,7 +2028,7 @@ EXPORT void CleanSegs(dynArr_t * seg_p) {
 /*
  * Copy Segs from one array to another
  */
-EXPORT void AppendSegs(dynArr_t * seg_to, dynArr_t * seg_from) {
+EXPORT void AppendSegsToArray(dynArr_t * seg_to, dynArr_t * seg_from) {
 	if (seg_from->cnt ==0) return;
 	int j = 0;
 	DYNARR_APPEND(trkSeg_t, * seg_to, seg_from->cnt);
@@ -2064,7 +2064,7 @@ EXPORT void AppendTransformedSegs(dynArr_t * seg_to, dynArr_t * seg_from, coOrd 
 		}
 		if (from_p->type == SEG_POLY || from_p->type == SEG_FILPOLY) {
 			if (from_p->u.p.pts) {
-				to_p->u.p.pts = memdup(from_p->u.p.pts,from_p->u.p.cnt*sizeof(pts_t);
+				to_p->u.p.pts = memdup(from_p->u.p.pts,from_p->u.p.cnt*sizeof(pts_t));
 			}
 		}
 		RotateSegs(1,to_p,rotateOrig,angle);

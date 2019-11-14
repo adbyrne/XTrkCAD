@@ -130,11 +130,13 @@ The \f{Display} dialog contains items which control the display of objects on th
 
 \u000
 
-\dd \f{Color Tracks} - when set to layers, tracks are drawn with color of the layer (\K{cmdLayer}) they belong to and not the normal track color.
+\dd \f{Color Tracks} - when set to layers, tracks are drawn with color of the layer (\K{cmdLayer}) they belong to and not the normal track color. 
+This can be disabled in the Layer dialog for each Layer by unchecking the \f{Use Color} checkbox.
 
 \u000
 
 \dd \f{Color Draws} - when set to layers, non-tracks (lines, table edges and structures) are drawn with color of the layer (\K{cmdLayer}) they belong to rather than based on thier own object setting.
+This can be disabled in the Layer dialog for each Layer by unchecking the \f{Use Color} checkbox.
 
 \u000
 

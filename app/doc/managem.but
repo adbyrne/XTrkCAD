@@ -363,7 +363,7 @@ The drop down list at the top of the dialog selects the \f{Layer} you are intere
 
 The \f{Name} edit box contains the name of the \f{Layer}.  This name is listed in the \f{Current Layer} drop down list on the \f{Tool-bar} (\K{mainW}).  Also the \f{Name} is displayed as the balloon help for the corresponding \f{Layer Button}.
 
-The \f{Color} button specifies the color of tracks if \f{Color Layers} (\K{cmdDisplay}) radio button on the \f{Display} dialog is checked.
+The \f{Color} button specifies the color of tracks if either of the two \f{Color Layers} (\K{cmdDisplay}) radio buttons on the \f{Display} dialog is checked and the \f{Use Color} button for this layer is checked.
 
 The \f{Visible} check-box controls whether the \f{Layer} is drawn on the Main (\K{mainW}) window.
 
@@ -393,8 +393,8 @@ The current layer is selected by picking a value from the drop down layer list. 
 
 You can hide (or show if not visible) the different layers by pushing one of the \f{Layer Buttons} on the Tool-bar (if you have configured the tool-bar (\K{toolbarM}) to show the Layer buttons).  If a layer is not visible then the corresponding layer button will be raised.  The active or current layer cannot be hidden.
 
-The color of each layer button shows the color that will be used to draw tracks in that layer, if you select \f{Color Layers} (\K{cmdDisplay}) on the \f{Display} dialog.
-
+The color of each layer button shows the color that will be used to draw tracks or draw objects in that layer, if you have selected the \f{Color Layers} (\K{cmdDisplay}) on the \f{Display} dialog. The \f{Use Color} button allows this layer to opt in or out - which can be usefu if you want to color other layers but a layer contains pre-colored objects (like Structures or Scenery).
+ 
 Any selected objects are unselected when the Layer is set to not visible.  If a layer is not visible, you cannot select objects in the Layer.  It is as if the objects do not exist until you show the layer again.
 
 The \f{Move To Current Layer} command on Edit menu (\K{editM}) will move all selected (\K{cmdSelect}) tracks to the current Layer.
