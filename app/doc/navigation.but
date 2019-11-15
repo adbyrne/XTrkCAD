@@ -117,6 +117,10 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \u000
 
+\dd The center of the \f{Main Canvas} can be moved to be at the cursor in \f{Select}, \f{Modify} and \f{Pan/Zoom} using the "@" key.
+
+\u000
+
 \dd The scale of the \f{Main Canvas} can be changed using the;
 
 \lcont{

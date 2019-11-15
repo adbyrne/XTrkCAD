@@ -1059,6 +1059,31 @@ This command is used to move or resize the viewport using the mouse or keyboard.
 
 There is a context menu that contains these text based items as well.
 
+\dd \e{\i{Zoom/Pan Shortcut Keys}} 
+
+\lcont{
+
+\u000
+
+\b Keys '1'-'9' set the zoom to between 1::1 and 1::9. 
+
+\u000
+
+\b Key 'e' sets the zoom to a value that allows all the room to be shown
+
+\u000
+
+\b Key '0' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
+
+\u000
+
+\b Key '@' moves the center of the window to the cursor position
+
+}
+
+As the window is Zoomed in and out, the setting of \f{Zoom Keeps Current Corner in View} setting in the \K{cmdDisplay} determines where the zoom is about. 
+If this is not selected, the window center will stay fixed as the zoom changes.
+
 \S{cmdProfile} Profile
 
 The \f{Profile} dialog draws a profile showing elevations, distances and grades for a path on the layout.
