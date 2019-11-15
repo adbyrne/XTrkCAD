@@ -1964,12 +1964,12 @@ EXPORT void DoZoomUp( void * mode )
 				if (mainD.scale <=1.0) 
 					InfoMessage(_("Macro Zoom Mode"));
 				else
-					InfoMessage(_("Use Shift+PageDwn to jump to preset Zoom In"));
+					InfoMessage(_(""));
 				DoNewScale( zoomList[ i - 1 ].value );	
 				
-			} else InfoMessage("Min Macro Zoom");
+			} else InfoMessage("Minimum Macro Zoom");
 		} else {
-			InfoMessage(_("Scale 1:1 - Use Ctrl+PageDwn to go to Macro Zoom Mode"));
+			InfoMessage(_("Scale 1:1 - Use Ctrl+ to go to Macro Zoom Mode"));
 		}
 	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomin", &newScale, 4 );
@@ -1997,7 +1997,7 @@ EXPORT void DoZoomDown( void  * mode)
 		i = ScaleInx( mainD.scale );
 		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
 		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
-			InfoMessage(_("Use Shift+PageUp to jump to preset Zoom Out"));
+			InfoMessage(_(""));
 			DoNewScale( zoomList[ i + 1 ].value );
 		} else
 			InfoMessage(_("At Maximum Zoom Out"));
