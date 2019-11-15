@@ -1611,6 +1611,7 @@ void SetUpMenu2(coOrd pos, track_p trk) {
 	wMenuPushEnable( hideMI, FALSE );
 	wMenuPushEnable( bridgeMI, FALSE );
 	wMenuPushEnable( tiesMI, FALSE );
+	panCenter = pos;
 	if ((trk) &&
 		QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
 		trackParams_t trackParams;
@@ -1767,6 +1768,12 @@ static STATUS_T CmdMove(
 			wMenuPopupShow( selectPopup2M );
 			return C_CONTINUE;
 
+		case C_TEXT:
+			if ((action>>8) == '@') {
+				panCenter = pos;
+				PanHere((void*)0);
+			}
+			break;
 		case C_REDRAW:
 			/* DO_REDRAW */
 			if (anchors_da.cnt)
@@ -2094,6 +2101,12 @@ static STATUS_T CmdRotate(
 			wMenuPopupShow( selectPopup2M );
 			return C_CONTINUE;
 
+		case C_TEXT:
+			if ((action>>8) == '@') {
+				panCenter = pos;
+				PanHere((void*)0);
+			}
+			break;
 		case C_REDRAW:
 			if (anchors_da.cnt)
 				DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
@@ -2595,6 +2608,12 @@ static STATUS_T SelectArea(
 		}
 		break;
 
+	case C_TEXT:
+		if ((action>>8) == '@') {
+			panCenter = pos;
+			PanHere((void*)0);
+		}
+		break;
 	case C_REDRAW:
 		if (state == 0)
 			break;
@@ -2984,6 +3003,7 @@ static STATUS_T CmdSelect(
 			return CallModify(action,pos);
 		}
 		if (selectedTrackCount <= 0) {
+			panCenter = pos;
 			wMenuPopupShow( selectPopup1M );
 		} else {
 			coOrd base = pos;
@@ -2992,6 +3012,12 @@ static STATUS_T CmdSelect(
 			wMenuPopupShow( selectPopup2M );
 		}
 		return C_CONTINUE;
+	case C_TEXT:
+		if ((action>>8) == '@') {
+			panCenter = pos;
+			PanHere((void*)0);
+		}
+		break;
 	case C_FINISH:
 		if (doingMove) UndoEnd();
 		doingDouble = FALSE;
@@ -3061,6 +3087,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(selectPopup1M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
+	wMenuPushCreate(selectPopup1M, "", _("Pan Center Here - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 0);
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,(wMenuCallBack_p) SetAllTrackSelect, (void *) 1);
 	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0,(wMenuCallBack_p) SelectCurrentLayer, (void *) 0);
@@ -3073,6 +3100,10 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	selectPopup2M = MenuRegister( "Track Selected Menu " );
 	wMenuPushCreate(selectPopup2M, "", _("Undo"), 0,(wMenuCallBack_p) UndoUndo, (void *) 0);
 	wMenuPushCreate(selectPopup2M, "", _("Redo"), 0,(wMenuCallBack_p) UndoRedo, (void *) 0);
+	wMenuSeparatorCreate( selectPopup2M );
+	wMenuPushCreate(selectPopup2M, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
+	wMenuPushCreate(selectPopup2M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
+	wMenuPushCreate(selectPopup2M, "", _("Pan Center Here - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 0);
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0, (wMenuCallBack_p) SetAllTrackSelect, (void *) 0);
 	wMenuSeparatorCreate( selectPopup2M );
