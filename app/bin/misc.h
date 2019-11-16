@@ -263,6 +263,7 @@ void LayoutToolBar( void * );
 #define IC_WANT_MOVE            (1<<15)
 #define IC_PLAYBACK_PUSH        (1<<16)
 #define IC_WANT_MODKEYS         (1<<17)
+#define IC_POPUP3				(1<<18)
 wIndex_t InitCommand( wMenu_p, procCommand_t, char *, char *,  int, long, long );
 void AddToolbarControl( wControl_p, long );
 BOOL_T CommandEnabled( wIndex_t );

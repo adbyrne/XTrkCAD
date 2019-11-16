@@ -3038,7 +3038,7 @@ void InitCmdTrain(wMenu_p menu)
     trainPLs[I_ZERO].winLabel = (char*)wIconCreatePixMap(zero_xpm);
     ParamRegister(&trainPG);
     trainCmdInx = AddMenuButton(menu, CmdTrain, "cmdTrain", _("Train"),
-                  wIconCreatePixMap(train_xpm), LEVEL0_50, IC_POPUP2|IC_LCLICK|IC_RCLICK, 0,
+                  wIconCreatePixMap(train_xpm), LEVEL0_50, IC_POPUP3|IC_LCLICK|IC_RCLICK, 0,
                   NULL);
     stopI = wIconCreatePixMap(ballred);
     goI = wIconCreatePixMap(ballgreen);

@@ -3168,7 +3168,7 @@ EXPORT void InitCmdBridge( void)
 EXPORT void InitCmdMoveDescription( wMenu_p menu )
 {
 	AddMenuButton( menu, CmdMoveDescription, "cmdMoveLabel", _("Move Description"), wIconCreatePixMap(movedesc_xpm),
-				LEVEL0, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, (void*) 0 );
+				LEVEL0, IC_STICKY|IC_POPUP3|IC_CMDMENU|IC_WANT_MOVE, ACCL_MOVEDESC, (void*) 0 );
 }
 
 

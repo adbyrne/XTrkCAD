@@ -123,6 +123,7 @@ EXPORT wIndex_t checkPtMark = 0;
 EXPORT wMenu_p demoM;
 EXPORT wMenu_p popup1M, popup2M;
 EXPORT wMenu_p popup1aM, popup2aM;
+EXPORT wMenu_p popup1mM, popup2mM;
 
 static wIndex_t curCommand = 0;
 EXPORT void * commandContext;
@@ -1531,12 +1532,17 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 					(void*) buttonGroupPopupM);
 			newButtonGroup = TRUE;
 			commandsSubmenu = wMenuMenuCreate(menu, "", buttonGroupMenuTitle);
-			popup1Submenu = wMenuMenuCreate(
-					((options & IC_POPUP2) ? popup1aM : popup1M), "",
-					buttonGroupMenuTitle);
-			popup2Submenu = wMenuMenuCreate(
-					((options & IC_POPUP2) ? popup2aM : popup2M), "",
-					buttonGroupMenuTitle);
+			if (options & IC_POPUP2) {
+				popup1Submenu = wMenuMenuCreate(popup1aM, "",	buttonGroupMenuTitle);
+				popup2Submenu = wMenuMenuCreate(popup2aM, "",	buttonGroupMenuTitle);
+			} else if (options & IC_POPUP3) {
+				popup1Submenu= wMenuMenuCreate(popup1mM, "",	buttonGroupMenuTitle);
+				popup2Submenu = wMenuMenuCreate(popup2mM, "",	buttonGroupMenuTitle);
+
+			} else {
+				popup1Submenu = wMenuMenuCreate(popup1M, "",	buttonGroupMenuTitle);
+				popup2Submenu = wMenuMenuCreate(popup2M, "",	buttonGroupMenuTitle);
+			}
 		}
 	}
 	cmdInx = AddCommand(command, helpKey, nameStr, icon, reqLevel, options,
@@ -1570,12 +1576,12 @@ EXPORT wIndex_t AddMenuButton(wMenu_p menu, procCommand_t command,
 		p2m = popup2Submenu;
 	} else {
 		tm = menu;
-		p1m = (options & IC_POPUP2) ? popup1aM : popup1M;
-		p2m = (options & IC_POPUP2) ? popup2aM : popup2M;
+		p1m = (options & IC_POPUP2) ? popup1aM : (options & IC_POPUP3) ? popup1mM : popup1M;
+		p2m = (options & IC_POPUP2) ? popup2aM : (options & IC_POPUP3) ? popup2mM : popup2M;
 	}
 	commandList[cmdInx].menu[1] = wMenuPushCreate(tm, helpKey, nameStr, acclKey,
 			DoCommandB, (void*) (intptr_t) cmdInx);
-	if ((options & (IC_POPUP | IC_POPUP2))) {
+	if ((options & (IC_POPUP | IC_POPUP2 | IC_POPUP3))) {
 		if (!(options & IC_SELECTED)) {
 			commandList[cmdInx].menu[2] = wMenuPushCreate(p1m, helpKey, nameStr,
 					0, DoCommandB, (void*) (intptr_t) cmdInx);
@@ -2102,12 +2108,13 @@ static void CreateMenus(void) {
 	/*-----------*/
 	/* More Commands */
 
-	popup1M = wMenuPopupCreate(mainW, _("Conext Commands"));
+	popup1M = wMenuPopupCreate(mainW, _("Context Commands"));
 	popup2M = wMenuPopupCreate(mainW, _("Shift Context Commands"));
 	MiscMenuItemCreate(popup1M, popup2M, "cmdUndo", _("Undo"), 0,
 			(void*) (wMenuCallBack_p) UndoUndo, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdRedo", _("Redo"), 0,
 			(void*) (wMenuCallBack_p) UndoRedo, 0, (void *) 0);
+	/* Zoom */
 	wMenuPushCreate(popup1M, "cmdZoomIn", _("Zoom In"), 0,
 			(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(popup2M, "cmdZoomIn", _("Zoom In"), 0,
@@ -2116,6 +2123,7 @@ static void CreateMenus(void) {
 			(wMenuCallBack_p) DoZoomDown, (void*) 1);
 	wMenuPushCreate(popup2M, "cmdZoomOut", _("Zoom Out"), 0,
 			(wMenuCallBack_p) DoZoomDown, (void*) 1);
+	/* Display */
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridEnable", _("SnapGrid Enable"),
 			0, (void*) (wMenuCallBack_p) SnapGridEnable, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridShow", _("SnapGrid Show"), 0,
@@ -2126,10 +2134,14 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) BackgroundToggleShow, 0, (void *) 0);
 	wMenuSeparatorCreate(popup1M);
 	wMenuSeparatorCreate(popup2M);
+	/* Copy/Paste */
+	MiscMenuItemCreate(popup2M, NULL, "cmdCut", _("Cut"), 0,
+				(void*) (wMenuCallBack_p) EditCut, 0, (void *) 0);
 	MiscMenuItemCreate(popup2M, NULL, "cmdCopy", _("Copy"), 0,
 			(void*) (wMenuCallBack_p) EditCopy, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdPaste", _("Paste"), 0,
 			(void*) (wMenuCallBack_p) EditPaste, 0, (void *) 0);
+	/*Select*/
 	MiscMenuItemCreate(popup1M, popup2M, "cmdSelectAll", _("Select All"), 0,
 			(void*) (wMenuCallBack_p) SetAllTrackSelect, 0, (void *) 1);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdSelectCurrentLayer",
@@ -2137,6 +2149,7 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) SelectCurrentLayer, 0, (void *) 0);
 	MiscMenuItemCreate(popup2M, NULL, "cmdDeselectAll", _("Deselect All"), 0,
 			(void*) (wMenuCallBack_p) SetAllTrackSelect, 0, (void *) 0);
+	/* Modify */
 	wMenuPushCreate(popup2M, "cmdMove", _("Move"), 0,
 			(wMenuCallBack_p) DoCommandBIndirect, &moveCmdInx);
 	wMenuPushCreate(popup2M, "cmdRotate", _("Rotate"), 0,
@@ -2146,8 +2159,12 @@ static void CreateMenus(void) {
 	MiscMenuItemCreate(popup2M, NULL, "cmdDelete", _("Delete"), 0,
 			(void*) (wMenuCallBack_p) SelectDelete, 0, (void *) 0);
 	wMenuSeparatorCreate(popup2M);
-	popup1aM = wMenuMenuCreate(popup1M, "", _("More"));
-	popup2aM = wMenuMenuCreate(popup2M, "", _("More"));
+	popup1aM = wMenuMenuCreate(popup1M, "", _("Add..."));
+	popup2aM = wMenuMenuCreate(popup2M, "", _("Add..."));
+	wMenuSeparatorCreate(popup2M);
+	wMenuSeparatorCreate(popup1M);
+	popup1mM = wMenuMenuCreate(popup1M, "", _("More..."));
+	popup2mM = wMenuMenuCreate(popup2M, "", _("More..."));
 
 	cmdGroup = BG_FILE;
 	AddToolbarButton("menuFile-clear", wIconCreatePixMap(document_new),

@@ -1341,7 +1341,7 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	RegisterChangeNotification( PrintChange );
 	printGridPopupM = MenuRegister( "Print Grid Rotate" );
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
-	return InitCommand( menu, CmdPrint, N_("Print..."), NULL, LEVEL0, IC_LCLICK|IC_POPUP2|IC_CMDMENU, ACCL_PRINT );
+	return InitCommand( menu, CmdPrint, N_("Print..."), NULL, LEVEL0, IC_LCLICK|IC_POPUP3|IC_CMDMENU, ACCL_PRINT );
 }
 
 /*****************************************************************************

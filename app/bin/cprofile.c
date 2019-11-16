@@ -1416,7 +1416,7 @@ EXPORT void InitCmdProfile( wMenu_p menu )
 #ifdef LATER
 	AddPlaybackProc( "PROFILEMOUSE", (playbackProc_p)profilePlayback, NULL );
 #endif
-	AddMenuButton( menu, CmdProfile, "cmdProfile", _("Profile"), wIconCreatePixMap(profile_xpm), LEVEL0_50, IC_LCLICK|IC_CMDMENU|IC_POPUP2, ACCL_PROFILE, NULL );
+	AddMenuButton( menu, CmdProfile, "cmdProfile", _("Profile"), wIconCreatePixMap(profile_xpm), LEVEL0_50, IC_LCLICK|IC_CMDMENU|IC_POPUP3, ACCL_PROFILE, NULL );
 	profilePopupM = MenuRegister( "Profile Mode" );
 	profilePopupToggles[0] = wMenuToggleCreate( profilePopupM, "", _("Define"), 0, FALSE, ProfileSubCommand, (void*)0 );
 	profilePopupToggles[1] = wMenuToggleCreate( profilePopupM, "", _("Ignore"), 0, FALSE, ProfileSubCommand, (void*)1 );
