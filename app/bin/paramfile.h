@@ -11,9 +11,11 @@
 	void ParamCheckSumLine(char * line);
 	wBool_t IsParamValid(int fileInx);
 	bool IsParamFileDeleted(int fileInx);
+	bool IsParamFileFavorite(int fileInx);
 	void SetParamFileState(int index);
 	int ReadParamFile(const char *fileName);
 	void SetParamFileDeleted(int fileInx, bool deleted);
+	void SetParamFileFavorite(int fileInx, bool favorite);
 	char * GetParamFileName(int fileInx);
 	char * GetParamFileContents(int fileInx);
 	bool ReadParams(long key, const char * dirName, const char * fileName);

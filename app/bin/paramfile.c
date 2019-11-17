@@ -43,13 +43,14 @@
 
 static long paramCheckSum;
 
-typedef enum paramFileState(*GetCompatibilityFunction)(int index, SCALEINX_T scale);
+typedef enum paramFileState(*GetCompatibilityFunction)(int index,
+        SCALEINX_T scale);
 
 GetCompatibilityFunction GetCompatibility[] = {
-		GetTrackCompatibility,
-		GetStructureCompatibility,
-		GetCarProtoCompatibility,
-		GetCarPartCompatibility
+    GetTrackCompatibility,
+    GetStructureCompatibility,
+    GetCarProtoCompatibility,
+    GetCarPartCompatibility
 };
 
 #define COMPATIBILITYCHECKSCOUNT (sizeof(GetCompatibility)/sizeof(GetCompatibility[0]))
@@ -79,13 +80,13 @@ wBool_t IsParamValid(
 
 char *GetParamFileDir(void)
 {
-	return (GetCurrentPath(PARAMETERPATHKEY));
+    return (GetCurrentPath(PARAMETERPATHKEY));
 }
 
 void
 SetParamFileDir(char *fullPath)
 {
-	SetCurrentPath(PARAMETERPATHKEY, fullPath);
+    SetCurrentPath(PARAMETERPATHKEY, fullPath);
 }
 
 char * GetParamFileName(
@@ -105,9 +106,19 @@ bool IsParamFileDeleted(int inx)
     return paramFileInfo(inx).deleted;
 }
 
+bool IsParamFileFavorite(int inx)
+{
+    return paramFileInfo(inx).favorite;
+}
+
 void SetParamFileDeleted(int fileInx, bool deleted)
 {
     paramFileInfo(fileInx).deleted = deleted;
+}
+
+void SetParamFileFavorite(int fileInx, bool favorite)
+{
+    paramFileInfo(fileInx).favorite = favorite;
 }
 
 void ParamCheckSumLine(char * line)
@@ -120,58 +131,59 @@ void ParamCheckSumLine(char * line)
 
 /**
  * Set the compatibility state of a parameter file
- * 
+ *
  * \param index parameter file number in list
- * \return 
+ * \return
  */
 
-void SetParamFileState(int index )
+void SetParamFileState(int index)
 {
-	enum paramFileState state = PARAMFILE_NOTUSABLE;
-	enum paramFileState newState;
-	SCALEINX_T scale = GetLayoutCurScale();
+    enum paramFileState state = PARAMFILE_NOTUSABLE;
+    enum paramFileState newState;
+    SCALEINX_T scale = GetLayoutCurScale();
 
-	for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT && state != PARAMFILE_UNLOADED; i++) {
-		newState = (*GetCompatibility[i])(index, scale);
-		if (newState > state || newState == PARAMFILE_UNLOADED) {
-			state = newState;
-		}
-	}
+    for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
+            state != PARAMFILE_UNLOADED; i++) {
+        newState = (*GetCompatibility[i])(index, scale);
+        if (newState > state || newState == PARAMFILE_UNLOADED) {
+            state = newState;
+        }
+    }
 
-	paramFileInfo(index).trackState = state;
+    paramFileInfo(index).trackState = state;
 }
 
 /**
  * Read a single parameter file and update the parameter file list
- * 
+ *
  * \param fileName full path for parameter file
- * \return 
+ * \return
  */
 
 int
 ReadParamFile(const char *fileName)
 {
-	DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
-	curParamFileIndex = paramFileInfo_da.cnt - 1;
-	paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
-	paramFileInfo(curParamFileIndex).deleted = FALSE;
-	paramFileInfo(curParamFileIndex).valid = TRUE;
-	paramFileInfo(curParamFileIndex).deletedShadow =
-	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
-	paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
+    DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
+    curParamFileIndex = paramFileInfo_da.cnt - 1;
+    paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
+    paramFileInfo(curParamFileIndex).deleted = FALSE;
+    paramFileInfo(curParamFileIndex).valid = TRUE;
+    paramFileInfo(curParamFileIndex).deletedShadow =
+        paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
+    paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
 
-	SetParamFileState(curParamFileIndex);
+    SetParamFileState(curParamFileIndex);
 
-	return(curParamFileIndex);
+    return (curParamFileIndex);
 }
 
 /**
  * Paramter file reader and interpreter
- * 
+ *
  * \param key unused
  * \param dirName prefix for parameter file path
  * \param fileName name of parameter file
- * \return 
+ * \return
  */
 
 bool ReadParams(
