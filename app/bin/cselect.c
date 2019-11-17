@@ -2693,10 +2693,10 @@ track_p IsInsideABox(coOrd pos) {
 	return NULL;
 }
 
-
-
 void DrawHighlightBoxes() {
 	track_p ts = NULL;
+	coOrd origin,max;
+	BOOL_T first = TRUE;
 	while ( TrackIterate( &ts ) ) {
 		if ( !GetLayerVisible( GetTrkLayer( ts))) continue;
 		if (!GetTrkSelected(ts)) continue;
@@ -2705,16 +2705,27 @@ void DrawHighlightBoxes() {
 		}
 		coOrd hi,lo;
 		GetBoundingBox(ts, &hi, &lo);
-		coOrd hilite,size;
-		hilite = lo;
-		size.x = hi.x-lo.x;
-		size.y = hi.y-lo.y;
+		if (first) {
+			origin = lo;
+			max = hi;
+			first = FALSE;
+		} else {
+			if (lo.x <origin.x) origin.x = lo.x;
+			if (lo.y <origin.y) origin.y = lo.y;
+			if (hi.x >max.x) max.x = hi.x;
+			if (hi.y >max.y) max.y = hi.y;
+		}
+	}
+	if (!first) {
+		coOrd size;
+		size.x = max.x-origin.x;
+		size.y = max.y-origin.y;
 		DIST_T w,h;
 		w = (wPos_t)((size.x/mainD.scale)*mainD.dpi+0.5+10);
 		h = (wPos_t)((size.y/mainD.scale)*mainD.dpi+0.5+10);
 		wPos_t x, y;
-		mainD.CoOrd2Pix(&mainD,hilite,&x,&y);
-		wDrawFilledRectangle(tempD.d, x-5, y-5, w, h, wDrawColorPowderedBlue, wDrawOptTemp);
+		mainD.CoOrd2Pix(&mainD,origin,&x,&y);
+		wDrawFilledRectangle(mainD.d, x-5, y-5, w, h, wDrawColorPowderedBlue, wDrawOptTemp);
 	}
 
 }
