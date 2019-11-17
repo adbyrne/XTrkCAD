@@ -92,7 +92,6 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 	case wActionMove:
 		tempSegs_da.cnt = 0;
 		Dpa.anchor_Trk = NULL;
-		TempRedraw();
 		Dpa.anchor_Trk = OnTrack( &pos, FALSE, TRUE );
 		if (!Dpa.anchor_Trk) {
 			return C_CONTINUE;
@@ -100,10 +99,10 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		if (Dpa.anchor_Trk && !CheckTrackLayerSilent( Dpa.anchor_Trk ) ) {
 			return C_CONTINUE;
 		}
-		if (!MakeParallelTrack( Dpa.anchor_Trk, pos, parSeparation, NULL, &p0, &p1, parType == PAR_TRACK )) {
+		if (!QueryTrack(Dpa.anchor_Trk, Q_CAN_PARALLEL)) {
 			return C_CONTINUE;
 		}
-		DrawTrack(Dpa.anchor_Trk,&anchorD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+		DrawTrack(Dpa.anchor_Trk,&mainD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
 		break;
 	case C_DOWN:
 		Dpa.anchor_Trk = NULL;
@@ -148,7 +147,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		tempSegs_da.cnt = 0;
 
 	case C_MOVE:
-		TempRedraw();
+		MainRedraw();
 		if (Dpa.Trk == NULL) return C_CONTINUE;
 		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
@@ -157,7 +156,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 			tempD.options = save_options;
 			return C_CONTINUE;
 		}
-		DrawSegs( &anchorD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
@@ -229,7 +228,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 
 	case C_REDRAW:
 		if (Dpa.anchor_Trk) {
-			DrawTrack(Dpa.anchor_Trk,&anchorD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+			DrawTrack(Dpa.anchor_Trk,&mainD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
 		}
 		if (tempSegs_da.cnt>0) {
 			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
