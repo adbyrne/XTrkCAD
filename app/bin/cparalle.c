@@ -35,6 +35,7 @@
 static struct {
 		track_p Trk;
 		coOrd orig;
+		track_p anchor_Trk;
 		} Dpa;
 
 static DIST_T parSeparation = 1.0;
@@ -83,10 +84,30 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		labels[0] = N_("Separation");
 		labels[1] = N_("Type:");
 		InfoSubstituteControls( controls, labels );
+		Dpa.anchor_Trk = NULL;
+		tempSegs_da.cnt = 0;
 		/*InfoMessage( "Select track" );*/
 		return C_CONTINUE;
 
+	case wActionMove:
+		tempSegs_da.cnt = 0;
+		Dpa.anchor_Trk = NULL;
+		TempRedraw();
+		Dpa.anchor_Trk = OnTrack( &pos, FALSE, TRUE );
+		if (!Dpa.anchor_Trk) {
+			return C_CONTINUE;
+		}
+		if (Dpa.anchor_Trk && !CheckTrackLayerSilent( Dpa.anchor_Trk ) ) {
+			return C_CONTINUE;
+		}
+		if (!MakeParallelTrack( Dpa.anchor_Trk, pos, parSeparation, NULL, &p0, &p1, parType == PAR_TRACK )) {
+			return C_CONTINUE;
+		}
+		DrawTrack(Dpa.anchor_Trk,&anchorD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+		break;
 	case C_DOWN:
+		Dpa.anchor_Trk = NULL;
+		tempSegs_da.cnt = 0;
 		if ( parSeparation < 0.0 ) {
 			ErrorMessage( MSG_PARALLEL_SEP_GTR_0 );
 			return C_ERROR;
@@ -124,10 +145,10 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		 * until further investigation shows the necessity
 		 */
 		//Dpa.Trk = OnTrack( &Dpa.orig, TRUE, TRUE ); 
-
 		tempSegs_da.cnt = 0;
 
 	case C_MOVE:
+		TempRedraw();
 		if (Dpa.Trk == NULL) return C_CONTINUE;
 		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
@@ -136,10 +157,11 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 			tempD.options = save_options;
 			return C_CONTINUE;
 		}
-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+		DrawSegs( &anchorD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
+		Dpa.anchor_Trk = NULL;
 		if (Dpa.Trk == NULL) return C_CONTINUE;
 		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		p = p0;
@@ -206,12 +228,17 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		if (Dpa.anchor_Trk) {
+			DrawTrack(Dpa.anchor_Trk,&anchorD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+		}
 		if (tempSegs_da.cnt>0) {
 			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		}
 		return C_CONTINUE;
 
 	case C_CANCEL:
+		Dpa.anchor_Trk = NULL;
+		tempSegs_da.cnt = 0;
 		InfoSubstituteControls( NULL, NULL );
 		return C_TERMINATE;
 
@@ -224,6 +251,6 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 
 EXPORT void InitCmdParallel( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdParallel, "cmdParallel", _("Parallel"), wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_PARALLEL, NULL );
+	AddMenuButton( menu, CmdParallel, "cmdParallel", _("Parallel"), wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, NULL );
 	ParamRegister( &parSepPG );
 }
