@@ -516,6 +516,7 @@ static void DeleteBezier( track_p t )
 			if (s.bezSegs.ptr) MyFree(s.bezSegs.ptr);
 			s.bezSegs.max = 0;
 			s.bezSegs.cnt = 0;
+			s.bezSegs.ptr = NULL;
 		}
 	}
 	if (xx->bezierData.arcSegs.ptr && !xx->bezierData.arcSegs.max)
@@ -1005,6 +1006,7 @@ BOOL_T GetBezierSegmentFromTrack(track_p trk, trkSeg_p seg_p) {
 	seg_p->bezSegs.cnt = 0;
 	if (seg_p->bezSegs.ptr) MyFree(seg_p->bezSegs.ptr);
 	seg_p->bezSegs.max = 0;
+	seg_p->bezSegs.ptr = NULL;
 	FixUpBezierSeg(seg_p->u.b.pos,seg_p,seg_p->type == SEG_BEZTRK);
 	return TRUE;
 
@@ -1056,6 +1058,9 @@ BOOL_T GetTracksFromBezierTrack(track_p trk, track_p newTracks[2]) {
 	FixUpBezierSeg(seg_temp.u.b.pos,&seg_temp,TRUE);
 	GetTracksFromBezierSegment(&seg_temp, newTracks);
 	MyFree(seg_temp.bezSegs.ptr);
+	seg_temp.bezSegs.cnt = 0;
+	seg_temp.bezSegs.max = 0;
+	seg_temp.bezSegs.ptr = NULL;
 	return TRUE;
 
 }
