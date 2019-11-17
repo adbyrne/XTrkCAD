@@ -1112,6 +1112,7 @@ static BOOL_T MakeParallelBezier(
 		tempSegs_da.cnt = 1;
 		tempSegs(0).type = track?SEG_BEZTRK:SEG_BEZLIN;
 		if (tempSegs(0).bezSegs.ptr) MyFree(tempSegs(0).bezSegs.ptr);
+		tempSegs(0).bezSegs.ptr = 0;
 		tempSegs(0).bezSegs.max = 0;
 		tempSegs(0).bezSegs.cnt = 0;
 		for (int i=0;i<4;i++) tempSegs(0).u.b.pos[i] = np[i];
