@@ -699,6 +699,11 @@ void UpdateTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
 void DrawTrackElev( track_p, drawCmd_p, BOOL_T );
 
 /* cdraw.c */
+typedef enum {DRAWLINESOLID,
+			DRAWLINEDASH,
+			DRAWLINEDOT,
+			DRAWLINEDASHDOT,
+			DRAWLINEDASHDOTDOT} drawLineType_e;
 track_p MakeDrawFromSeg( coOrd, ANGLE_T, trkSeg_p );
 track_p MakePolyLineFromSegs( coOrd, ANGLE_T, dynArr_t * );
 void DrawOriginAnchor(track_p);

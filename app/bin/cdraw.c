@@ -149,12 +149,6 @@ EXPORT void UpdateFontSizeList(
  *
  */
 
-typedef enum {DRAWLINESOLID,
-			DRAWLINEDASH,
-			DRAWLINEDOT,
-			DRAWLINEDASHDOT,
-			DRAWLINEDASHDOTDOT} drawLineType_e;
-
 
 struct extraData {
 		coOrd orig;
@@ -2537,7 +2531,7 @@ void MenuEnter(int key) {
 
 void MenuLine(int key) {
 	struct extraData * xx = GetTrkExtraData(drawModCmdContext.trk);
-	if ( drawModCmdContext.type==SEG_STRLIN || drawModCmdContext.type==SEG_CRVLIN || drawModCmdContext.type==SEG_POLY) {
+	if ( drawModCmdContext.type==SEG_STRLIN || drawModCmdContext.type==SEG_CRVLIN || drawModCmdContext.type==SEG_POLY ) {
 		switch(key) {
 		case '0':
 			xx->lineType = DRAWLINESOLID;
@@ -2562,7 +2556,7 @@ void MenuLine(int key) {
 EXPORT void SetLineType( track_p trk, int width ) {
 	if (QueryTrack(trk, Q_IS_DRAW)) {
 		struct extraData * xx = GetTrkExtraData(trk);
-		if ( drawModCmdContext.type==SEG_STRLIN || drawModCmdContext.type==SEG_CRVLIN || drawModCmdContext.type==SEG_POLY) {
+		if ( xx->segs[0].type==SEG_STRLIN || xx->segs[0].type==SEG_CRVLIN || xx->segs[0].type==SEG_POLY) {
 			switch(width) {
 			case 0:
 				xx->lineType = DRAWLINESOLID;

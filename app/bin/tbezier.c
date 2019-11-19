@@ -238,8 +238,9 @@ static struct {
 		dynArr_t segs;
 		long width;
 		wDrawColor color;
+		long lineType;
 		} bezData;
-typedef enum { P0, A0, R0, C0, Z0, CP1, CP2, P1, A1, R1, C1, Z1, RA, LN, GR, LY, WI, CO } crvDesc_e;
+typedef enum { P0, A0, R0, C0, Z0, CP1, CP2, P1, A1, R1, C1, Z1, RA, LN, GR, LT, WI, CO, LY} crvDesc_e;
 static descData_t bezDesc[] = {
 /*P0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &bezData.pos[0] },
 /*A0*/  { DESC_ANGLE, N_("End Angle"), &bezData.angle[0] },
@@ -256,9 +257,10 @@ static descData_t bezDesc[] = {
 /*RA*/	{ DESC_DIM, N_("MinRadius"), &bezData.radius },
 /*LN*/	{ DESC_DIM, N_("Length"), &bezData.length },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &bezData.grade },
-/*LY*/	{ DESC_LAYER, N_("Layer"), &bezData.layerNumber },
+/*LT*/  { DESC_LIST, N_("Line Type"), &bezData.lineType},
 /*WI*/  { DESC_LONG, N_("Line Width"), &bezData.width},
 /*CO*/  { DESC_COLOR, N_("Line Color"), &bezData.color},
+/*LY*/	{ DESC_LAYER, N_("Layer"), &bezData.layerNumber },
 		{ DESC_NULL } };
 
 static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final )
@@ -329,6 +331,9 @@ static void UpdateBezier( track_p trk, int inx, descData_p descUpd, BOOL_T final
 		break;
 	case CO:
 		xx->bezierData.segsColor = bezData.color;
+		break;
+	case LT:
+		xx->bezierData.lineType = bezData.lineType;
 		break;
 	default:
 		AbortProg( "updateBezier: Bad inx %d", inx );
@@ -423,9 +428,13 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
     if (GetTrkType(trk) == T_BEZIER) {
     	bezDesc[Z0].mode = EndPtIsDefinedElev(trk,0)?0:DESC_RO;
 		bezDesc[Z1].mode = EndPtIsDefinedElev(trk,1)?0:DESC_RO;
+		bezDesc[LT].mode = DESC_IGNORE;
     }
-    else
+    else {
     	bezDesc[Z0].mode = bezDesc[Z1].mode = DESC_IGNORE;
+    	bezDesc[LT].mode = 0;
+    	bezData.lineType = xx->bezierData.lineType;
+    }
 	bezDesc[A0].mode = DESC_RO;
 	bezDesc[A1].mode = DESC_RO;
 	bezDesc[C0].mode = DESC_RO;
@@ -442,9 +451,42 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 	
 	if (GetTrkType(trk) == T_BEZIER)
 		DoDescribe( _("Bezier Track"), trk, bezDesc, UpdateBezier );
-	else
+	else {
 		DoDescribe( _("Bezier Line"), trk, bezDesc, UpdateBezier );
+		if (bezDesc[LT].control0!=NULL) {
+			wListClear( (wList_p)bezDesc[LT].control0 );
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("Solid"), NULL, (void*)0 );
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("Dash"), NULL, (void*)1 );
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("Dot"), NULL, (void*)2 );
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
+			wListSetIndex( (wList_p)bezDesc[LT].control0, bezData.lineType );
+		}
+	}
 
+}
+
+EXPORT void SetBezierLineType( track_p trk, int width ) {
+	if (GetTrkType(trk) == T_BZRLIN) {
+		struct extraData * xx = GetTrkExtraData(trk);
+		switch(width) {
+		case 0:
+			xx->bezierData.lineType = DRAWLINESOLID;
+			break;
+		case 1:
+			xx->bezierData.lineType = DRAWLINEDASH;
+			break;
+		case 2:
+			xx->bezierData.lineType = DRAWLINEDOT;
+			break;
+		case 3:
+			xx->bezierData.lineType = DRAWLINEDASHDOT;
+			break;
+		case 4:
+			xx->bezierData.lineType = DRAWLINEDASHDOTDOT;
+			break;
+		}
+	}
 }
 
 static DIST_T DistanceBezier( track_p t, coOrd * p )
@@ -472,8 +514,16 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
 
-		if (GetTrkType(t) == T_BZRLIN) {
+	if (GetTrkType(t) == T_BZRLIN) {
+		unsigned long NotSolid = ~(DC_NOTSOLIDLINE);
+		d->options &= NotSolid;
+		if (xx->bezierData.lineType == DRAWLINESOLID) {}
+		else if (xx->bezierData.lineType == DRAWLINEDASH) d->options |= DC_DASH;
+		else if (xx->bezierData.lineType == DRAWLINEDOT) d->options |= DC_DOT;
+		else if (xx->bezierData.lineType == DRAWLINEDASHDOT) d->options |= DC_DASHDOT;
+		else if (xx->bezierData.lineType == DRAWLINEDASHDOTDOT) d->options |= DC_DASHDOTDOT;
 		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, 0.0, color, 0);
+		d->options &= NotSolid;
 		return;
 	}
 
@@ -534,13 +584,14 @@ static BOOL_T WriteBezier( track_p t, FILE * f )
 	BOOL_T track =(GetTrkType(t)==T_BEZIER);
 	options = GetTrkWidth(t) & 0x0F;
 	if ( ( GetTrkBits(t) & TB_HIDEDESC ) == 0 ) options |= 0x80;
-	rc &= fprintf(f, "%s %d %u %ld %ld %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f 0 %0.6f %0.6f \n",
+	rc &= fprintf(f, "%s %d %u %ld %ld %0.6f %s %d %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %d %0.6f %0.6f \n",
 		track?"BEZIER":"BZRLIN",GetTrkIndex(t), GetTrkLayer(t), (long)options, wDrawGetRGB(xx->bezierData.segsColor), xx->bezierData.segsWidth,
                   GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0),
 				  xx->bezierData.pos[0].x, xx->bezierData.pos[0].y,
 				  xx->bezierData.pos[1].x, xx->bezierData.pos[1].y,
 				  xx->bezierData.pos[2].x, xx->bezierData.pos[2].y,
 				  xx->bezierData.pos[3].x, xx->bezierData.pos[3].y,
+				  xx->bezierData.lineType,
 				  xx->bezierData.descriptionOff.x, xx->bezierData.descriptionOff.y )>0;
 	if (track) {
 			rc &= WriteEndPt( f, t, 0 );
@@ -560,12 +611,13 @@ static void ReadBezier( char * line )
 	char scale[10];
 	wIndex_t layer;
 	long options;
+	int lt;
 	char * cp = NULL;
 	unsigned long rgb;
 	DIST_T width;
 
-	if (!GetArgs( line+6, "dLluwsdpppp0p",
-		&index, &layer, &options, &rgb, &width, scale, &visible, &p0, &c1, &c2, &p1, &dp ) ) {
+	if (!GetArgs( line+6, "dLluwsdppppdp",
+		&index, &layer, &options, &rgb, &width, scale, &visible, &p0, &c1, &c2, &p1, &lt, &dp ) ) {
 		return;
 	}
 	if (strncmp(line,"BEZIER",6)==0)
@@ -584,6 +636,7 @@ static void ReadBezier( char * line )
     xx->bezierData.pos[1] = c1;
     xx->bezierData.pos[2] = c2;
     xx->bezierData.pos[3] = p1;
+    xx->bezierData.lineType = lt;
     xx->bezierData.descriptionOff = dp;
     xx->bezierData.segsWidth = width;
     xx->bezierData.segsColor = wDrawFindColor( rgb );
