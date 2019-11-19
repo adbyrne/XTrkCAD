@@ -299,12 +299,39 @@ static void setLineType(
     }
 
     cairo_set_line_width(cr, lineWidth);
-
-    if (lineType == wDrawLineDash) {
-        cairo_set_dash(cr, dashes, len_dashes, 0.0);
-    } else {
-        cairo_set_dash(cr, NULL, 0, 0.0);
+    switch(lineType) {
+    	case wDrawLineDot:
+    	{
+    		double dashes[] = { 1,  2 , 1,  2};
+    	    static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+    	    cairo_set_dash(cr, dashes, len_dashes, 0.0);
+    	    break;
+    	}
+    	case wDrawLineDash:
+    	{
+    		double dashes[] = { DASH_LENGTH, 3 };							//Reduce gap in between dashes
+    		static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+    		cairo_set_dash(cr, dashes, len_dashes, 0.0);
+			break;
+    	}
+    	case wDrawLineDashDot:
+    	{
+    		double dashes[] = { 3, 2, 1, 2};
+    		static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+    		cairo_set_dash(cr, dashes, len_dashes, 0.0);
+    		break;
+    	}
+    	case wDrawLineDashDotDot:
+    	{
+    		double dashes[] = { 3, 2, 1, 2, 1, 2};
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cr, dashes, len_dashes, 0.0);
+			break;
+    	}
+    	default:
+    		cairo_set_dash(cr, NULL, 0, 0.0);
     }
+
 }
 
 /**

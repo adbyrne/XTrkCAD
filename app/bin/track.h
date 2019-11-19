@@ -706,6 +706,7 @@ BOOL_T OnTableEdgeEndPt( track_p, coOrd * );
 BOOL_T GetClosestEndPt( track_p, coOrd * );
 BOOL_T ReadTableEdge( char * );
 BOOL_T ReadText( char * );
+void SetLineType( track_p trk, int width );
 void MenuMode(int );
 
 /* chotbar.c */

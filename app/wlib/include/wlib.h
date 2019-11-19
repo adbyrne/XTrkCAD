@@ -465,7 +465,10 @@ typedef int wDrawOpts;
 
 typedef enum {
 	wDrawLineSolid,
-	wDrawLineDash }
+	wDrawLineDash,
+	wDrawLineDot,
+	wDrawLineDashDot,
+	wDrawLineDashDotDot}
 		wDrawLineType_e;
 
 typedef enum {

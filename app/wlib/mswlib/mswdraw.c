@@ -203,8 +203,14 @@ static void setDrawMode(
 				0,
 				NULL );
 				/*colorPalette.palPalEntry[dc] );*/
-	} else {
+	} else if (lt == wDrawLineDot) {
 		d->hPen = CreatePen( PS_DOT, 0, mswGetColor( d->hasPalette, dc ) );
+	} else if (lt == wDrawLineDash) {
+		d->hPen = CreatePen( PS_DASH, 0, mswGetColor( d->hasPalette, dc ) );
+	} else if (lt == wDrawLineDashDot) {
+		d->hPen = CreatePen( PS_DASHDOT, 0, mswGetColor( d->hasPalette, dc ) );
+	} else {
+		d->hPen = CreatePen( PS_DASHDOTDOT, 0, mswGetColor( d->hasPalette, dc ) );
 	}
 	hOldPen = SelectObject( hDc, d->hPen );
 	DeleteObject( hOldPen );

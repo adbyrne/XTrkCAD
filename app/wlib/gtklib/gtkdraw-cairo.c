@@ -136,6 +136,28 @@ static cairo_t* gtkDrawCreateCairoCursorContext(
 			cairo_set_dash(cairo, dashes, len_dashes, 0);
 			break;
 		}
+		case wDrawLineDot:
+		{
+			double dashes[] = { 1, 2 };
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0);
+			break;
+		}
+		case wDrawLineDashDot:
+		{
+			double dashes[] = { 5, 2, 1, 2 };
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0);
+			break;
+		}
+		case wDrawLineDashDotDot:
+		{
+			double dashes[] = { 5, 2, 1, 2, 1, 2 };
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0);
+			break;
+		}
+
 	}
 	GdkColor * gcolor;
 
@@ -189,6 +211,28 @@ static cairo_t* gtkDrawCreateCairoContext(
 			cairo_set_dash(cairo, dashes, len_dashes, 0);
 			break;
 		}
+		case wDrawLineDot:
+		{
+			double dashes[] = { 1, 2 };
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0);
+			break;
+		}
+		case wDrawLineDashDot:
+		{
+			double dashes[] = { 5, 2, 1, 2 };
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0);
+			break;
+		}
+		case wDrawLineDashDotDot:
+		{
+			double dashes[] = { 5, 2, 1, 2, 1, 2 };
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0);
+			break;
+		}
+
 	}
 	GdkColor * gcolor;
 
@@ -577,7 +621,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
     	points[i].y = INMAPY(bd,p[i][1]);
 	}
 
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, fill?0:dw, fill?lt:wDrawLineSolid, color, opt);
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, fill?0:dw, fill?wDrawLineSolid:lt, color, opt);
 
 	for(i = 0; i < cnt; ++i)
 	{

@@ -128,7 +128,9 @@ static paramData_t describePLs[] = {
 #define I_LIST_0		I_COLOR_N
     { PD_DROPLIST, NULL, "L1", 0, (void*)150, NULL, 0 },
     { PD_DROPLIST, NULL, "L2", 0, (void*)150, NULL, 0 },
-#define I_LIST_N		I_LIST_0+2
+	{ PD_DROPLIST, NULL, "L3", 0, (void*)150, NULL, 0 },
+	{ PD_DROPLIST, NULL, "L4", 0, (void*)150, NULL, 0 },
+#define I_LIST_N		I_LIST_0+4
 
 #define I_EDITLIST_0	I_LIST_N
     { PD_DROPLIST, NULL, "LE1", 0, (void*)150, NULL, BL_EDITABLE },
