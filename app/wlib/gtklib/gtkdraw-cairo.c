@@ -1021,14 +1021,14 @@ static gint draw_expose_event(
 {
 
 	cairo_t* cairo = gdk_cairo_create (widget->window);
-	gdk_cairo_set_source_pixmap(cairo,bd->pixmap,event->area.x, event->area.y);
+	gdk_cairo_set_source_pixmap(cairo,bd->pixmap,0,0);
 	cairo_rectangle(cairo,event->area.x, event->area.y,
 					event->area.width, event->area.height);
 	cairo_set_operator(cairo,CAIRO_OPERATOR_SOURCE);
 	cairo_fill(cairo);
 
 	if (bd->cursor_surface.surface && bd->cursor_surface.show) {
-		cairo_set_source_surface(cairo,bd->cursor_surface.surface,event->area.x, event->area.y);
+		cairo_set_source_surface(cairo,bd->cursor_surface.surface,0,0);
 		cairo_set_operator(cairo,CAIRO_OPERATOR_OVER);
 		cairo_rectangle(cairo,event->area.x, event->area.y,
 				       event->area.width, event->area.height);
