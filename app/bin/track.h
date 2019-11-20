@@ -129,6 +129,7 @@ typedef struct {
 #define Q_IS_DRAW					    (27)
 #define Q_IS_TEXT						(28)
 #define Q_IS_ACTIVATEABLE				(29)
+#define Q_IS_STRUCTURE					(30)
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track
@@ -556,6 +557,10 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 #define DTS_TIES		(1<<4)
 #define DTS_NOCENTER	(1<<5)
 #define DTS_BRIDGE      (1<<6)
+#define DTS_DOT			(1<<7)
+#define DTS_DASH		(1<<8)
+#define DTS_DASHDOT		(1<<9)
+#define DTS_DASHDOTDOT  (1<<10)
 
 void DrawCurvedTies( drawCmd_p, track_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, wDrawColor );
 void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_p, DIST_T, wDrawColor, long );

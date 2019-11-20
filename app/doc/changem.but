@@ -1245,7 +1245,7 @@ This value is set to locked if the origin is non-zero when the Describe command 
 
 \dt Line Type
 
-\dd Straight and Curved Lines and PolyLines and Polygons can be drawn with dotted, dashed, dash-dotted and dash-dot-dotted lines.    
+\dd Straight and Curved Lines, PolyLines, Polygons and Structures can be drawn with dotted, dashed, dash-dotted and dash-dot-dotted lines.    
  
 \S3{drawDescribeText} Text Objects
 

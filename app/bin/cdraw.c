@@ -1944,7 +1944,9 @@ static paramData_t drawPLs[] = {
 #define drawAngleInx					8
 	{ PD_FLOAT, &drawCmdContext.angle, "Angle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Angle") },
 #define drawRadiusPD            (drawPLs[9])
-	{ PD_FLOAT, &drawCmdContext.radius, "Radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") }
+	{ PD_FLOAT, &drawCmdContext.radius, "Radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") },
+#define drawLineTypePD			(drawPLs[10])
+	{ PD_DROPLIST, &drawCmdContext.lineType, "Type", PDO_DIM|PDO_NORECORD|BO_ENTER, (void*)0, N_("Line Type") },
 };
 static paramGroup_t drawPG = { "draw", 0, drawPLs, sizeof drawPLs/sizeof drawPLs[0] };
 
@@ -2013,13 +2015,23 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_POLYLINE:
 			controls[0] = drawLineWidthPD.control;
 			controls[1] = drawColorPD.control;
+			controls[2] = drawLineTypePD.control;
 			controls[2] = NULL;
 			sprintf( labelName, _("%s Line Width"), _(objectName[drawCmdContext.Op]) );
 			labels[0] = labelName;
 			labels[1] = N_("Color");
+			labels[2] = N_("Type");
+			if ( wListGetCount( (wList_p)drawLineTypePD.control ) == 0 ) {
+				wListAddValue( (wList_p)drawLineTypePD.control, _("Solid"), NULL, NULL );
+				wListAddValue( (wList_p)drawLineTypePD.control, _("Dot"), NULL, NULL );
+				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash"), NULL, NULL );
+				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot"), NULL, NULL );
+				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot-Dot"), NULL, NULL );
+			}
 			InfoSubstituteControls( controls, labels );
 			drawLineWidthPD.option &= ~PDO_NORECORD;
 			drawColorPD.option &= ~PDO_NORECORD;
+			drawLineTypePD.option &= ~PDO_NORECORD;
 			break;
 		case OP_FILLCIRCLE2:
 		case OP_FILLCIRCLE3:

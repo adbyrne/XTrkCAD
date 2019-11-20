@@ -858,7 +858,7 @@ Note Dialog
 
 \dt \e{Right-Click} 
 
-\dd Displays a pop-up menu of context commands (in Select, Move and Rotate options) if in a selected area.
+\dd Displays a pop-up menu of context commands (in Select, Move, Modify and Rotate commands) if in a selected area.
 
 \dt \e{Shift+Right-Click} 
 

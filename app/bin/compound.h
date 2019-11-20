@@ -95,6 +95,7 @@ struct extraData {
 		wIndex_t segCnt;
 		trkSeg_t * segs;
 		DIST_T * radii;
+		drawLineType_e lineType;
 		};
 #endif
 
@@ -142,6 +143,7 @@ void RotateCompound( track_p, coOrd, ANGLE_T );
 void RescaleCompound( track_p, FLOAT_T );
 void FlipCompound( track_p, coOrd, ANGLE_T );
 BOOL_T EnumerateCompound( track_p );
+void SetCompoundLineType( track_p trk, int width );
 
 /* cgroup.c */
 void UngroupCompound( track_p );

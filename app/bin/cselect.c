@@ -524,8 +524,11 @@ EXPORT void SelectLineType( void* width )
 			UndoModify( trk );
 			if (QueryTrack(trk, Q_CAN_MODIFY_CONTROL_POINTS))
 				SetBezierLineType(trk, (int) (long) width);
-			else
+			else if (QueryTrack(trk, Q_IS_DRAW))
 				SetLineType( trk, (int)(long)width );
+			else if (QueryTrack(trk, Q_IS_STRUCTURE)) {
+				SetCompoundLineType(trk, (int)(long)width);
+			}
 		}
 	}
 	wDrawDelayUpdate( mainD.d, FALSE );
