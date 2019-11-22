@@ -457,7 +457,20 @@ static void CreateCornuEndAnchor(coOrd p, wBool_t lock) {
 
 static void CreateCornuExtendAnchor(coOrd p, ANGLE_T a, wBool_t selected) {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),p,a,TRUE,wDrawColorBlue);
+	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),p,a,FALSE,wDrawColorBlue);
+}
+
+static void CreateCornuAnchor(coOrd p, wBool_t open) {
+	DIST_T d = tempD.scale*0.15;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = open?SEG_CRVLIN:SEG_FILCRCL;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
 }
 
 /*
@@ -1004,67 +1017,97 @@ EXPORT STATUS_T AdjustCornuCurve(
 	case wActionMove:
 		if (Da.state == NONE || Da.state == PICK_POINT) {
 			DYNARR_RESET(trkSeg_t,anchors_da);
-			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
-				for(int i=0;i<2;i++) {
-					if (IsClose(FindDistance(pos,Da.pos[i]))) {
-						CreateCornuExtendAnchor(pos, Da.angle[i], FALSE);
+			for(int i=0;i<2;i++) {
+				if (IsClose(FindDistance(pos,Da.pos[i]))) {
+					if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
+						CreateCornuExtendAnchor(Da.pos[i], Da.angle[i], FALSE);
+						return C_CONTINUE;
+					} else {
+						CreateCornuAnchor(Da.pos[i], FALSE);
 						return C_CONTINUE;
 					}
 				}
 			}
 			CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint);
+			Da.selectEndPoint = -1;
+			for (int i=0;i<Da.mid_points.cnt;i++) {
+				d = FindDistance(DYNARR_N(coOrd,Da.mid_points,i),pos);
+				if (IsClose(d)) {
+					CreateCornuAnchor(DYNARR_N(coOrd,Da.mid_points,i),FALSE);
+					return C_CONTINUE;
+				}
+			}
+			for (int i=0;i<2;i++) {
+				if (Da.endHandle[i].end_valid == FALSE) continue;
+				d = FindDistance(Da.endHandle[i].end_center,pos);
+				if (IsClose(d)) {
+					CreateCornuAnchor(Da.endHandle[i].end_center, FALSE);
+					return C_CONTINUE;
+				}
+			}
+			for (int i=0;i<2;i++) {
+				if (Da.endHandle[i].end_valid == FALSE) continue;
+				d = FindDistance(Da.endHandle[i].end_curve,pos);
+				if (IsClose(d)) {
+					CreateCornuAnchor(Da.endHandle[i].end_curve, FALSE);
+					return C_CONTINUE;
+				}
+			}
+			coOrd temp_pos = pos;
+			if (IsClose(DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,NULL))) {
+				CreateCornuAnchor(temp_pos, TRUE);
+			}
 		}
 		return C_CONTINUE;
 
 	case C_DOWN:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != PICK_POINT) return C_CONTINUE;
-		dd = 10000.0;
 		Da.selectEndPoint = -1;
 		Da.selectMidPoint = -1;
 		Da.selectEndHandle = -1;
 		for (int i=0;i<2;i++) {
 			d = FindDistance(Da.pos[i],pos);
-			if (d < dd) {
-				dd = d;
+			if (IsClose(d)) {
 				Da.selectEndPoint = i;
+				CreateCornuAnchor(Da.pos[i],FALSE);
+				break;
 			}
 		}
-		if (!IsClose(dd) ) {
-			Da.selectEndPoint = -1;
+		if (Da.selectEndPoint == -1) {
 			for (int i=0;i<Da.mid_points.cnt;i++) {
 				d = FindDistance(DYNARR_N(coOrd,Da.mid_points,i),pos);
-				if (d < dd) {
-					dd = d;
+				if (IsClose(d)) {
 					Da.selectMidPoint = i;
 					Da.selectEndPoint = -1;
+					CreateCornuAnchor(DYNARR_N(coOrd,Da.mid_points,i),FALSE);
+					break;
 				}
 			}
-			if (!IsClose(dd) ) {
-				Da.selectMidPoint = -1;
+			if (Da.selectMidPoint == -1 ) {
 				for (int i=0;i<2;i++) {
 					if (Da.endHandle[i].end_valid == FALSE) continue;
 					d = FindDistance(Da.endHandle[i].end_center,pos);
-					if (d < dd) {
-						dd = d;
+					if (IsClose(d)) {
 						Da.selectEndHandle = i*2;
 						Da.selectEndPoint = -1;
 						Da.selectMidPoint = -1;
+						CreateCornuAnchor(Da.endHandle[i].end_center,i);
+						break;
 					}
 				}
-				if (!IsClose(dd) ) {
-					Da.selectEndHandle = -1;
+				if (Da.selectEndHandle == -1) {
 					for (int i=0;i<2;i++) {
 						if (Da.endHandle[i].end_valid == FALSE) continue;
 						d = FindDistance(Da.endHandle[i].end_curve,pos);
-						if (d < dd) {
-							dd = d;
+						if (IsClose(d)) {
 							Da.selectEndHandle = 1+i*2;
 							Da.selectEndPoint = -1;
 							Da.selectMidPoint = -1;
+							CreateCornuAnchor(Da.endHandle[i].end_curve,i);
+							break;
 						}
 					}
-					if (!IsClose(dd) ) Da.selectEndHandle = -1;
 				}
 			}
 		} else {      //We picked an end point
@@ -1102,6 +1145,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 				DYNARR_N(coOrd,Da.mid_points,closest) = pos;
 				Da.selectMidPoint = closest;
 				Da.number_of_points++;
+				CreateCornuAnchor(pos,FALSE);
+				InfoMessage("Pin Point Added");
 			} else {
 				wBeep();
 				InfoMessage("Add Point Is Not on Track");
@@ -1110,7 +1155,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		}
 		if (Da.selectEndPoint == -1  && Da.selectMidPoint == -1 && Da.selectEndHandle ==-1) {
 			wBeep();
-			InfoMessage( _("Not close enough to point, reselect") );
+			InfoMessage( _("Not close enough to track or point, reselect") );
 			return C_CONTINUE;
 		} else {
 			if (Da.selectEndPoint >=0 ) {
@@ -1785,7 +1830,7 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 			return AdjustCornuCurve(action, pos, InfoMessage);
 		}
 		//Space bar or enter means done
-		if (((action>>8) != 32) || ((action>>8) != 13))
+		if ( (action>>8 != ' ') && (action>>8 != 13) )
 			return C_CONTINUE;
 		/* no break */
 	case C_OK:

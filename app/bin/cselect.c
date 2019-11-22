@@ -3028,6 +3028,9 @@ static STATUS_T CmdSelect(
 			panCenter = pos;
 			PanHere((void*)0);
 		}
+		if (doingDouble) {
+			return CallModify(action,pos);
+		}
 		break;
 	case C_FINISH:
 		if (doingMove) UndoEnd();
