@@ -400,6 +400,7 @@
 		{"line": "outputbitmap-density", "contents": "Specifies number of pixels per inch (or centimeter)" },
 		{"line": "outputbitmap-ok", "contents": "" },
 		{"line": "outputbitmap-toggles", "contents": "Specifies whether Layout Titles, Borders or Track Centerlines are printed on the BitMap" },
+		{"line": "parallel-factor", "contents": "Specifies the amount of increase in seperation based on radius. Zero is no increase" },
 		{"line": "parallel-separation", "contents": "Specifies the separation between the original track and the parallel track/line" },
 		{"line": "parallel-type", "contents": "Specifies the type of the parallel object" },
 		{"line": "parameter-name", "contents": "Enter your name as specified in the XTrackCAD Registration Notice" },

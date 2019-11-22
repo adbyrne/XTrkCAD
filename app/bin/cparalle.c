@@ -39,16 +39,20 @@ static struct {
 		} Dpa;
 
 static DIST_T parSeparation = 1.0;
+static double parSepFactor = 0.0;
 static long parType;
 
 enum PAR_TYPE_E { PAR_TRACK, PAR_LINE };
 static char * parTypeLabels[] = { N_("Track"), N_("Line"), NULL };
 
 static paramFloatRange_t r_0o1_100 = { 0.0, 100.0, 100 };
+static paramFloatRange_t r_0_10 = { 0.0, 10.0 };
 static paramData_t parSepPLs[] = {
-#define parSepPD (parSepPLs[1])
 	{   PD_RADIO, &parType, "type", 0, parTypeLabels, N_("Output Type"), BC_HORZ|BC_NONE },
-	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NOPREF, &r_0o1_100, N_("Separation") } };
+#define parSepPD (parSepPLs[1])
+	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NOPREF, &r_0o1_100, N_("Separation") },
+#define parFactorPD (parSepPLs[2])
+	{   PD_FLOAT, &parSepFactor, "factor", PDO_NOPREF, &r_0_10, N_("Radius Factor") } };
 static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, sizeof parSepPLs/sizeof parSepPLs[0] };
 
 
@@ -62,9 +66,10 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 	ANGLE_T a;
 	track_p t0, t1;
 	EPINX_T ep0=-1, ep1=-1;
-	wControl_p controls[3];
-	char * labels[2];
+	wControl_p controls[4];
+	char * labels[3];
 	long save_options;
+	static DIST_T parRFactor;
 
 	switch (action) {
 
@@ -75,14 +80,17 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		sprintf( message, "parallel-separation-%s", curScaleName );
 		parSeparation = ceil(13.0*12.0/curScaleRatio);
 		wPrefGetFloat( "misc", message, &parSeparation, parSeparation );
+		parRFactor = 0.0;
 		parType = PAR_TRACK;
 		ParamLoadControls( &parSepPG );
 		ParamGroupRecord( &parSepPG );
 		controls[0] = parSepPD.control;
 		controls[1] = parSepPLs[0].control;
-		controls[2] = NULL;
+		controls[2] = parFactorPD.control;
+		controls[3] = NULL;
 		labels[0] = N_("Separation");
 		labels[1] = N_("Type:");
+		labels[2] = N_("Radius Factor");
 		InfoSubstituteControls( controls, labels );
 		Dpa.anchor_Trk = NULL;
 		tempSegs_da.cnt = 0;
@@ -114,9 +122,11 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 
 		controls[0] = parSepPD.control;
 		controls[1] = parSepPLs[0].control;
-		controls[2] = NULL;
+		controls[2] = parFactorPD.control;
+		controls[3] = NULL;
 		labels[0] = N_("Separation");
 		labels[1] = N_("Type:");
+		labels[2] = N_("Radius Factor");
 		InfoSubstituteControls( controls, labels );
 		ParamLoadData( &parSepPG );
 		Dpa.orig = pos;
@@ -129,6 +139,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 			InfoMessage(_(" Track doesn't support parallel"));
 			return C_CONTINUE;
 		}
+		parRFactor = (2864.0*(double)parSepFactor)/curScaleRatio;
 		if (parSeparation == 0.0) {
 			DIST_T orig_gauge = GetTrkGauge( Dpa.Trk );
 			DIST_T new_gauge = GetScaleTrackGauge(GetLayoutCurScale());
@@ -137,6 +148,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 					return C_ERROR;
 			}
 			parSeparation = fabs(orig_gauge/2-new_gauge/2);
+			parRFactor = 0.0;
 		}
 		/* in case query has changed things (eg joint) */
 		/* 
@@ -151,7 +163,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		if (Dpa.Trk == NULL) return C_CONTINUE;
 		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
-		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, NULL, &p0, &p1, parType == PAR_TRACK ) ) {
+		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, parRFactor, NULL, &p0, &p1, parType == PAR_TRACK ) ) {
 			Dpa.Trk = NULL;
 			tempD.options = save_options;
 			return C_CONTINUE;
@@ -189,7 +201,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 			}
 		}
 		UndoStart( _("Create Parallel Track"), "newParallel" );
-		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, &t, NULL, NULL, parType == PAR_TRACK ) ) {
+		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, parRFactor, &t, NULL, NULL, parType == PAR_TRACK ) ) {
 			tempSegs_da.cnt = 0;
 			MainRedraw();
 			MapRedraw();

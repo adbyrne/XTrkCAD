@@ -1314,6 +1314,7 @@ static BOOL_T MakeParallelCurve(
 		track_p trk,
 		coOrd pos,
 		DIST_T sep,
+		DIST_T factor,
 		track_p * newTrkR,
 		coOrd * p0R,
 		coOrd * p1R,
@@ -1325,6 +1326,7 @@ static BOOL_T MakeParallelCurve(
 	ANGLE_T a0, a1;
 
 	rad = FindDistance( pos, xx->pos );
+	sep = sep+factor/xx->radius;
 	if ( rad > xx->radius )
 		rad = xx->radius + sep;
 	else
