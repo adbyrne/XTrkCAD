@@ -152,6 +152,7 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 		case C_UP:
 		case C_OK:
 		case C_TEXT:
+		case wActionMove:
 			trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 			rc = CmdCornuModify(Dex.Trk, action, pos, trackGauge);
 			break;
@@ -362,7 +363,7 @@ STATUS_T CmdModify(
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (modifyBezierMode) return C_CONTINUE;
-		if (modifyCornuMode) return C_CONTINUE;
+		if (modifyCornuMode) return ModifyCornu(wActionMove,pos);
 		if (modifyDrawMode) return C_CONTINUE;
 		track_p t;
 		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayer( t )) {
