@@ -1376,6 +1376,7 @@ static BOOL_T MakeParallelJoint(
 		track_p trk,
 		coOrd pos,
 		DIST_T sep,
+		DIST_T factor,
 		track_p * newTrkR,
 		coOrd * p0R,
 		coOrd * p1R,
@@ -1401,13 +1402,13 @@ static BOOL_T MakeParallelJoint(
 	p0 = GetTrkEndPos(trk,0);
 	p1 = GetTrkEndPos(trk,1);
 	d0 = FindDistance( p0, p1 );
+	sep = sep+factor/(xx->R);
 	Translate( &p0, p0, GetTrkEndAngle(trk,0)+angle, sep );
 	Translate( &p1, p1, GetTrkEndAngle(trk,1)-angle, sep );
 	d = FindDistance( p0, p1 );
 	angle = R2D(asin(xx->L/2/xx->R));
 	A = xx->angle;
 	R = xx->R + sep*sin(D2R(angle));
-
 	dl = JoinD( xx->l1, xx->R, xx->L ) - JoinD( xx->l0, xx->R, xx->L );
 /*printf( "D = %0.3f %0.3f\n", d, dl );*/
 	d /= d0;

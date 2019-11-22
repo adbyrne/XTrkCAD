@@ -915,13 +915,14 @@ EXPORT BOOL_T MakeParallelTrack(
 		track_p trk,
 		coOrd pos,
 		DIST_T dist,
+		DIST_T factor,
 		track_p * newTrkR,
 		coOrd * p0R,
 		coOrd * p1R,
 		BOOL_T track)
 {
 	if ( trackCmds(trk->type)->makeParallel )
-		return trackCmds(trk->type)->makeParallel( trk, pos, dist, newTrkR, p0R, p1R, track);
+		return trackCmds(trk->type)->makeParallel( trk, pos, dist, factor, newTrkR, p0R, p1R, track);
 	return FALSE;
 }
 

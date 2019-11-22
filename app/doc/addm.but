@@ -221,7 +221,11 @@ You can create a new track or line parallel to any straight, curved, bezier, cor
 The \f{Parallel Separation} control (Visible in the Status Bar) displays the current separation between parallel tracks.  This value can be changed before selecting a track.  The value must be greater than 0.0 if the gauges are equal.
 If the gauges are equal, a value of 0 means that the rail of the second track is overlaid on the first to simulate dual guage track.
 
-The type of the output can be changed using the Type radio button to be a Track or a Line.
+The type of the output can be changed using the \f{Type} radio button to be a Track or a Line.
+
+The seperation can be automatically increased using the \f{Radius Factor} value. If this is set to 0.0 (default) the seperation value will be used regardless of radius. 
+If the value is set to 1.0, the seperation will be increased by a scaled 2864 inches per inch of curvature of the paralled track - this is in accordance with North American prototype practice. 
+Other values of Radius Factor will alter by an equivalent percentage. For example, 0.5 would use 50% of this increase. 
 
 Select the track you want to parallel with \c{Left-Click}, and the new parallel track/line will appear beside it.  You control which side the new track will be on by dragging the cursor from one side to the other of the selected track before releasing it.
 

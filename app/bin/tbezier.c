@@ -1123,6 +1123,7 @@ static BOOL_T MakeParallelBezier(
 		track_p trk,
 		coOrd pos,
 		DIST_T sep,
+		DIST_T factor,
 		track_p * newTrkR,
 		coOrd * p0R,
 		coOrd * p1R,
@@ -1131,6 +1132,7 @@ static BOOL_T MakeParallelBezier(
 	struct extraData * xx = GetTrkExtraData(trk);
     coOrd np[4], p;
     ANGLE_T a,a2;
+    DIST_T sep0,sep1;
 
 	//Produce bezier that is translated parallel to the existing Bezier
     // - not a precise result if the bezier end angles are not in the same general direction.
@@ -1145,7 +1147,8 @@ static BOOL_T MakeParallelBezier(
     for (int i =0; i<4;i++) {
     	np[i] = xx->bezierData.pos[i];
     }
-
+    sep = sep+factor/xx->bezierData.minCurveRadius;
+    // Adjust sep based on radius and factor
     if ( a2 > 180 ) {
         Translate(&np[0],np[0],a+90,sep);
         Translate(&np[1],np[1],a+90,sep);

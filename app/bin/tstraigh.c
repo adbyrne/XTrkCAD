@@ -662,6 +662,7 @@ static BOOL_T MakeParallelStraight(
 		track_p trk,
 		coOrd pos,
 		DIST_T sep,
+		DIST_T factor,
 		track_p * newTrkR,
 		coOrd * p0R,
 		coOrd * p1R,
