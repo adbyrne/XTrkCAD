@@ -37,6 +37,11 @@
 #define DC_SEGTRACK		(1<<9)
 #define DC_TIES			(1<<10)
 #define DC_THICK        (1<<11)
+#define DC_DOT          (1<<12)
+#define DC_DASHDOT      (1<<13)
+#define DC_DASHDOTDOT   (1<<14)
+
+#define DC_NOTSOLIDLINE (DC_DASH|DC_DOT|DC_DASHDOT|DC_DASHDOTDOT)
 
 #define INIT_MAIN_SCALE (8.0)
 #define INIT_MAP_SCALE	(64.0)
@@ -61,7 +66,7 @@ typedef void (*drawConvertCoOrd2Pix)( drawCmd_p, coOrd, wPos_t *, wPos_t * );
 typedef struct drawCmd_t {
 		wDraw_p d;
 		drawFuncs_t * funcs;
-		long options;
+		unsigned long options;
 		DIST_T scale;
 		ANGLE_T angle;
 		coOrd orig;

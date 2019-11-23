@@ -278,7 +278,25 @@ static void DrawStructure(
 		DrawLine( d, pxy, p0y, 0, color );
 		DrawLine( d, p0y, p00, 0, color );
 	} else {
+		d->options &= ~DC_NOTSOLIDLINE;
+		switch(xx->lineType) {
+		case DRAWLINESOLID:
+			break;
+		case DRAWLINEDASH:
+			d->options |= DC_DASH;
+			break;
+		case DRAWLINEDOT:
+			d->options |= DC_DOT;
+			break;
+		case DRAWLINEDASHDOT:
+			d->options |= DC_DASHDOT;
+			break;
+		case DRAWLINEDASHDOTDOT:
+			d->options |= DC_DASHDOTDOT;
+			break;
+		}
 		DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
+		d->options &= ~DC_NOTSOLIDLINE;
 		if ( ((d->funcs->options&wDrawOptTemp)==0) &&
 			 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
 			 labelScale >= d->scale &&
@@ -319,6 +337,8 @@ static BOOL_T QueryStructure( track_p trk, int query )
 {
 	switch ( query ) {
 	case Q_HAS_DESC:
+		return TRUE;
+	case Q_IS_STRUCTURE:
 		return TRUE;
 	default:
 		return FALSE;

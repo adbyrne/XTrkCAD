@@ -86,6 +86,7 @@ static wMenu_p selectPopup2M;
 static wMenu_p selectPopup2CM;
 static wMenu_p selectPopup2RM;
 static wMenu_p selectPopup2TM;
+static wMenu_p selectPopup2TYM;
 static wMenuPush_p menuPushModify;
 static wMenuPush_p rotateAlignMI;
 static wMenuPush_p descriptionMI;
@@ -500,6 +501,34 @@ EXPORT void SelectTrackWidth( void* width )
 			UndoModify( trk );
 			SetTrkWidth( trk, (int)(long)width );
 			DrawTrackAndEndPts( trk, wDrawColorBlack );
+		}
+	}
+	wDrawDelayUpdate( mainD.d, FALSE );
+	UndoEnd();
+}
+
+EXPORT void SelectLineType( void* width )
+{
+	track_p trk;
+	if (SelectedTracksAreFrozen())
+		return;
+	if (selectedTrackCount<=0) {
+		ErrorMessage( MSG_NO_SELECTED_TRK );
+		return;
+	}
+	UndoStart( _("Change Line Type"), "linetype" );
+	trk = NULL;
+	wDrawDelayUpdate( mainD.d, TRUE );
+	while ( TrackIterate( &trk ) ) {
+		if (GetTrkSelected(trk)) {
+			UndoModify( trk );
+			if (QueryTrack(trk, Q_CAN_MODIFY_CONTROL_POINTS))
+				SetBezierLineType(trk, (int) (long) width);
+			else if (QueryTrack(trk, Q_IS_DRAW))
+				SetLineType( trk, (int)(long)width );
+			else if (QueryTrack(trk, Q_IS_STRUCTURE)) {
+				SetCompoundLineType(trk, (int)(long)width);
+			}
 		}
 	}
 	wDrawDelayUpdate( mainD.d, FALSE );
@@ -3141,6 +3170,12 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuPushCreate( selectPopup2TM, "", _("Thin Tracks"), 0, (void*)(wMenuCallBack_p)SelectTrackWidth, (void *)0 );
 	wMenuPushCreate( selectPopup2TM, "", _("Medium Tracks"), 0, (void*)(wMenuCallBack_p)SelectTrackWidth, (void *)2 );
 	wMenuPushCreate( selectPopup2TM, "", _("Thick Tracks"), 0, (void*)(wMenuCallBack_p)SelectTrackWidth, (void *)3 );
+	selectPopup2TYM = wMenuMenuCreate( selectPopup2M, "", _("LineType...") );
+	wMenuPushCreate( selectPopup2TYM, "", _("Solid Line"), 0, (wMenuCallBack_p)SelectLineType, (void*)0 );
+	wMenuPushCreate( selectPopup2TYM, "", _("Dashed Line"), 0, (wMenuCallBack_p)SelectLineType, (void*)1 );
+	wMenuPushCreate( selectPopup2TYM, "", _("Dotted Line"), 0, (wMenuCallBack_p)SelectLineType, (void*)2 );
+	wMenuPushCreate( selectPopup2TYM, "", _("Dash-Dotted Line"), 0, (wMenuCallBack_p)SelectLineType, (void*)3 );
+	wMenuPushCreate( selectPopup2TYM, "", _("Dash-Dot-Dotted Line"), 0, (wMenuCallBack_p)SelectLineType, (void*)4 );
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Move To Front"), 0,(wMenuCallBack_p) SelectAbove,(void *) 0);
 	wMenuPushCreate(selectPopup2M, "", _("Move To Back"), 0,(wMenuCallBack_p) SelectBelow, (void *) 0);

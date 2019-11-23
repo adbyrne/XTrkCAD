@@ -305,9 +305,21 @@ static void DDrawLine(
 	d->CoOrd2Pix(d,p0,&x0,&y0);
 	d->CoOrd2Pix(d,p1,&x1,&y1);
 	drawCount++;
+	wDrawLineType_e lineOpt = wDrawLineSolid;
+	unsigned long NotSolid = DC_NOTSOLIDLINE;
+	unsigned long opt = d->options&NotSolid;
+		if (opt == DC_DASH)
+			lineOpt = wDrawLineDash;
+		else if(opt == DC_DOT)
+			lineOpt = wDrawLineDot;
+		else if(opt == DC_DASHDOT)
+			lineOpt = wDrawLineDashDot;
+		else if (opt == DC_DASHDOTDOT)
+			lineOpt = wDrawLineDashDotDot;
 	if (drawEnable) {
 		wDrawLine( d->d, x0, y0, x1, y1,
-				width, ((d->options&DC_DASH)==0)?wDrawLineSolid:wDrawLineDash,
+				width,
+				lineOpt,
 				color, (wDrawOpts)d->funcs->options );
 	}
 }
@@ -374,10 +386,21 @@ static void DDrawArc(
     }
     d->CoOrd2Pix(d,p,&x,&y);
     drawCount++;
+    wDrawLineType_e lineOpt = wDrawLineSolid;
+    unsigned long NotSolid = DC_NOTSOLIDLINE;
+    unsigned long opt = d->options&NotSolid;
+	if (opt == DC_DASH)
+		lineOpt = wDrawLineDash;
+	else if(opt == DC_DOT)
+		lineOpt = wDrawLineDot;
+	else if(opt == DC_DASHDOT)
+		lineOpt = wDrawLineDashDot;
+	else if (opt == DC_DASHDOTDOT)
+		lineOpt = wDrawLineDashDotDot;
     if (drawEnable)
     {
         wDrawArc(d->d, x, y, (wPos_t)(rr), angle0, angle1, drawCenter,
-                 width, ((d->options&DC_DASH)==0)?wDrawLineSolid:wDrawLineDash,
+                 width, lineOpt,
                  color, (wDrawOpts)d->funcs->options);
     }
 }
@@ -429,7 +452,18 @@ static void DDrawPoly(
 		else
 			wtype(inx) = (wPolyLine_e)types[inx];
 	}
-	wDrawPolygon( d->d, &wpts(0), &wtype(0), cnt, color, width, ((d->options&DC_DASH)==0)?wDrawLineSolid:wDrawLineDash, (wDrawOpts)d->funcs->options, fill, open );
+	wDrawLineType_e lineOpt = wDrawLineSolid;
+	unsigned long NotSolid = DC_NOTSOLIDLINE;
+	unsigned long opt = d->options&NotSolid;
+	if (opt == DC_DASH)
+		lineOpt = wDrawLineDash;
+	else if(opt == DC_DOT)
+		lineOpt = wDrawLineDot;
+	else if(opt == DC_DASHDOT)
+		lineOpt = wDrawLineDashDot;
+	else if (opt == DC_DASHDOTDOT)
+		lineOpt = wDrawLineDashDotDot;
+	wDrawPolygon( d->d, &wpts(0), &wtype(0), cnt, color, width, lineOpt, (wDrawOpts)d->funcs->options, fill, open );
 }
 
 
@@ -598,7 +632,7 @@ EXPORT void DrawBoxedString(
 	coOrd size, p[4], p0=pos, p1, p2;
 	static int bw=5, bh=4, br=2, bb=2;
 	static double arrowScale = 0.5;
-	long options = d->options;
+	unsigned long options = d->options;
 	POS_T descent;
 	/*DrawMultiString( d, pos, text, fp, fs, color, a, &lo, &hi );*/
 	if ( fs < 2*d->scale )

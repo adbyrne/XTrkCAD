@@ -531,9 +531,10 @@ static struct {
 		long pathCnt;
 		FLOAT_T grade;
 		DIST_T length;
+		drawLineType_e linetype;
 		unsigned int layerNumber;
 		} compoundData;
-typedef enum { E0, A0, C0, R0, Z0, E1, A1, C1, R1, Z1, E2, A2, C2, R2, Z2, E3, A3, C3, R3, Z3, GR, OR, AN, PV, MN, NM, PN, SC, LY } compoundDesc_e;
+typedef enum { E0, A0, C0, R0, Z0, E1, A1, C1, R1, Z1, E2, A2, C2, R2, Z2, E3, A3, C3, R3, Z3, GR, OR, AN, PV, MN, NM, PN, LT, SC, LY } compoundDesc_e;
 static descData_t compoundDesc[] = {
 /*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &compoundData.endPt[0] },
 /*A0*/  { DESC_ANGLE, N_("Angle"), &compoundData.endAngle[0] },
@@ -562,6 +563,7 @@ static descData_t compoundDesc[] = {
 /*MN*/	{ DESC_STRING, N_("Manufacturer"), &compoundData.manuf, sizeof(compoundData.manuf)},
 /*NM*/	{ DESC_STRING, N_("Name"), &compoundData.name, sizeof(compoundData.name) },
 /*PN*/	{ DESC_STRING, N_("Part No"), &compoundData.partno, sizeof(compoundData.partno)},
+/*LT*/  { DESC_LIST, N_("LineType"), &compoundData.linetype },
 /*SC*/	{ DESC_LONG, N_("# Segments"), &compoundData.segCnt },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &compoundData.layerNumber },
 		{ DESC_NULL } };
@@ -778,6 +780,9 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 			}
 		}
     	break;
+    case LT:
+    	xx->lineType = compoundData.linetype;
+    	break;
     default:
     	break;
 	};
@@ -928,7 +933,22 @@ void DescribeCompound(
 	else
 		compoundData.grade = 0.0;
 
+	if (GetTrkEndPtCnt(trk) == 0) {
+		compoundDesc[LT].mode = 0;
+	} else
+		compoundDesc[LT].mode = DESC_IGNORE;
+
 	DoDescribe(trackType, trk, compoundDesc, UpdateCompound);
+
+	if (  compoundDesc[LT].control0!=NULL) {
+		wListClear( (wList_p)compoundDesc[LT].control0 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Solid"), NULL, (void*)0 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dash"), NULL, (void*)1 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dot"), NULL, (void*)2 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
+		wListSetIndex( (wList_p)compoundDesc[LT].control0, compoundData.linetype );
+	}
 
 }
 
@@ -951,6 +971,7 @@ BOOL_T WriteCompound(
 	EPINX_T ep, epCnt;
 	long options;
 	long position = 0;
+	drawLineType_e lineType = 0;
 	PATHPTR_T path;
 	BOOL_T rc = TRUE;
 
@@ -978,9 +999,10 @@ BOOL_T WriteCompound(
 			position++;
 		}
 	}
-	rc &= fprintf(f, "%s %d %d %ld %ld 0 %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
+	lineType = xx->lineType;
+	rc &= fprintf(f, "%s %d %d %ld %ld %d %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
 				GetTrkTypeName(t),
-				GetTrkIndex(t), GetTrkLayer(t), options, position,
+				GetTrkIndex(t), GetTrkLayer(t), options, position, lineType,
 				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0),
 				xx->orig.x, xx->orig.y, xx->angle,
 				PutTitle(xtitle(xx)) )>0;
@@ -1011,6 +1033,28 @@ BOOL_T WriteCompound(
  * Generic Functions
  *
  */
+
+EXPORT void SetCompoundLineType( track_p trk, int width ) {
+	struct extraData * xx = GetTrkExtraData(trk);
+	switch(width) {
+	case 0:
+		xx->lineType = DRAWLINESOLID;
+		break;
+	case 1:
+		xx->lineType = DRAWLINEDASH;
+		break;
+	case 2:
+		xx->lineType = DRAWLINEDOT;
+		break;
+	case 3:
+		xx->lineType = DRAWLINEDASHDOT;
+		break;
+	case 4:
+		xx->lineType = DRAWLINEDASHDOTDOT;
+		break;
+	}
+}
+
 
 
 EXPORT track_p NewCompound(
@@ -1090,6 +1134,7 @@ void ReadCompound(
 	char *cp;
 	long options = 0;
 	long position = 0;
+	long lineType = 0;
 	PATHPTR_T path=NULL;
 
 	if (paramVersion<3) {
@@ -1101,8 +1146,8 @@ void ReadCompound(
 			&index, &layer, scale, &visible, &orig, &angle, &title ) )
 			return;
 	} else {
-		if ( !GetArgs( line, paramVersion<9?"dLll0sdpYfq":"dLll0sdpffq",
-			&index, &layer, &options, &position, scale, &visible, &orig, &elev, &angle, &title ) )
+		if ( !GetArgs( line, paramVersion<9?"dLlldsdpYfq":"dLlldsdpffq",
+			&index, &layer, &options, &position, &lineType, scale, &visible, &orig, &elev, &angle, &title ) )
 			return;
 	}
 	if (paramVersion >=3 && paramVersion <= 5 && trkType == T_STRUCTURE)
@@ -1137,54 +1182,10 @@ void ReadCompound(
 	xx->flipped = (int)((options&0x10)!=0);
 	xx->ungrouped = (int)((options&0x20)!=0);
 	xx->split = (int)((options&0x40)!=0);
+	xx->lineType = lineType;
 	xx->descriptionOff = descriptionOff;
 	if ( ( options & 0x80 ) != 0 )
 		SetTrkBits( trk, TB_HIDEDESC );
-#ifdef LATER
-	trk = NewTrack( index, trkType, 0, sizeof (*xx) + 1 );
-	SetEndPts( trk, 0 );
-	xx = GetTrkExtraData(trk);
-	SetTrkVisible(trk, visible);
-	SetTrkScale(trk, LookupScale( scale ));
-	SetTrkLayer(trk, layer);
-	SetTrkWidth(trk, (int)(options&3));
-	xx->orig = orig;
-	xx->angle = angle;
-	xx->customInfo = NULL;
-	xx->handlaid = (int)((options>>3)&0x01);
-	xx->flipped = (int)((options>>4)&0x01);
-	xx->segCnt = tempSegs_da.cnt;
-	xx->segs = MyMalloc( (tempSegs_da.cnt)*sizeof xx->segs[0] );
-	if (paramVersion<6 && strlen( title ) > 2) {
-		cp = strchr( title, '\t' );
-		if (cp != NULL) {
-			cp = strchr( cp, '\t' );
-		}
-		if (cp == NULL) {
-			UpdateTitleMark(title, GetTrkScale(trk));
-		}
-	}
-	xx->title = title;
-	if ( GetTrkEndPtCnt(trk) > 0 && pathCnt <= 1 ) {
-		xx->pathLen = 10;
-		xx->paths = xx->pathCurr = (PATHPTR_T)Malloc( xx->pathLen );
-		memcpy( xx->paths, "Normal\01\0\0", xx->pathLen );
-	} else {
-		xx->pathLen = pathCnt;
-		if (pathCnt > 0) {
-			xx->paths = xx->pathCurr = (PATHPTR_T)Malloc( pathCnt );
-			memcpy( xpaths(xx), pathPtr, pathCnt );
-		} else {
-			xx->paths = xx->pathCurr = NULL;
-		}
-	}
-	xx->segCnt = tempSegs_da.cnt;
-	memcpy( xx->segs, tempSegs_da.ptr, tempSegs_da.cnt * sizeof *xx->segs );
-
-	ComputeCompoundBoundingBox( trk );
-	SetDescriptionOrig( trk );
-	xx->descriptionOff = descriptionOff;
-#endif
 
 	if (tempSpecial[0] != '\0') {
 		if (strncmp( tempSpecial, ADJUSTABLE, strlen(ADJUSTABLE) ) == 0) {

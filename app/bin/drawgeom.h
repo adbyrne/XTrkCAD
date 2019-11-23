@@ -62,6 +62,7 @@ typedef struct {
 				double length;
 				double radius;
 				long benchOption;
+				drawLineType_e lineType;
 				int State;
 				int index;
 				curveData_t ArcData;

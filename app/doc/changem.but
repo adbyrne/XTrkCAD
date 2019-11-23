@@ -1241,7 +1241,11 @@ This value is set to locked if the origin is non-zero when the Describe command 
 
 \dt Height and Width
 
-\dd Rectangular Polygons have two properties that can alter the Height and Width of the Polygon  
+\dd Rectangular Polygons have two properties that can alter the Height and Width of the Polygon
+
+\dt Line Type
+
+\dd Straight and Curved Lines, PolyLines, Polygons and Structures can be drawn with dotted, dashed, dash-dotted and dash-dot-dotted lines.    
  
 \S3{drawDescribeText} Text Objects
 

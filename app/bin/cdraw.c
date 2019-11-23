@@ -38,6 +38,7 @@
 extern TRKTYP_T T_BZRLIN;
 
 static wMenu_p drawModDelMI;
+static wMenu_p drawModLinMI;
 static wMenuPush_p drawModDel;
 static wMenuPush_p drawModSmooth;
 static wMenuPush_p drawModVertex;
@@ -51,6 +52,11 @@ static wMenuPush_p drawModClose;
 static wMenuPush_p drawModOpen;
 static wMenuPush_p drawModFill;
 static wMenuPush_p drawModEmpty;
+static wMenuPush_p drawModSolid;
+static wMenuPush_p drawModDot;
+static wMenuPush_p drawModDash;
+static wMenuPush_p drawModDashDot;
+static wMenuPush_p drawModDashDotDot;
 
 extern void wSetSelectedFontSize(int size);
 
@@ -143,9 +149,11 @@ EXPORT void UpdateFontSizeList(
  *
  */
 
+
 struct extraData {
 		coOrd orig;
 		ANGLE_T angle;
+		drawLineType_e lineType;
 		wIndex_t segCnt;
 		trkSeg_t segs[1];
 		};
@@ -182,6 +190,7 @@ static track_p MakeDrawFromSeg1(
 	xx->orig = pos;
 	xx->angle = angle;
 	xx->segCnt = 1;
+	xx->lineType = DRAWLINESOLID;
 	memcpy( xx->segs, sp, sizeof *(trkSeg_p)0 );
 
 	if (xx->segs[0].type == SEG_POLY ||
@@ -216,6 +225,7 @@ EXPORT track_p MakePolyLineFromSegs(
 	xx = GetTrkExtraData( trk );
 	xx->orig = pos;
 	xx->angle = angle;
+	xx->lineType = DRAWLINESOLID;
 	xx->segCnt = 1;
 	xx->segs[0].type = SEG_POLY;
 	xx->segs[0].width = 0;
@@ -481,8 +491,9 @@ static struct {
 		wIndex_t fontSizeInx;
 		char text[STR_LONG_SIZE];
 		unsigned int layer;
+		wIndex_t lineType;
 		} drawData;
-typedef enum { E0, E1, PP, CE, AL, A1, A2, RD, LN, HT, WT, LK, OI, RA, VC, LW, CO, FL, OP, BX, BE, OR, DS, TP, TA, TS, TX, PV, LY } drawDesc_e;
+typedef enum { E0, E1, PP, CE, AL, A1, A2, RD, LN, HT, WT, LK, OI, RA, VC, LW, LT, CO, FL, OP, BX, BE, OR, DS, TP, TA, TS, TX, PV, LY } drawDesc_e;
 static descData_t drawDesc[] = {
 /*E0*/	{ DESC_POS, N_("End Pt 1: X,Y"), &drawData.endPt[0] },
 /*E1*/	{ DESC_POS, N_("End Pt 2: X,Y"), &drawData.endPt[1] },
@@ -500,6 +511,7 @@ static descData_t drawDesc[] = {
 /*RA*/  { DESC_FLOAT, N_("Rotate Angle"), &drawData.angle },
 /*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
 /*LW*/	{ DESC_LONG, N_("Line Width"), &drawData.lineWidth },
+/*LT*/  { DESC_LIST, N_("Line Type"), &drawData.lineType },
 /*CO*/	{ DESC_COLOR, N_("Color"), &drawData.color },
 /*FL*/	{ DESC_BOXED, N_("Filled"), &drawData.filled },
 /*OP*/  { DESC_BOXED, N_("Open End"), &drawData.open },
@@ -973,6 +985,9 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		break;
 	case LK:
 		break;
+	case LT:
+		xx->lineType = drawData.lineType;
+		break;
 	default:
 		AbortProg( "bad op" );
 	}
@@ -1014,6 +1029,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 	drawDesc[LY].mode = DESC_NOREDRAW;
 	drawDesc[BE].mode =
 	drawDesc[OR].mode =
+	drawDesc[LT].mode =
 	drawDesc[DS].mode = DESC_IGNORE;
 	drawData.pivot = DESC_PIVOT_MID;
 
@@ -1044,6 +1060,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		switch (segPtr->type) {
 		case SEG_STRLIN:
 			title = _("Straight Line");
+			drawDesc[LT].mode = 0;
+			drawData.lineType = (wIndex_t)xx->lineType;
 			break;
 		case SEG_DIMLIN:
 			title = _("Dimension Line");
@@ -1084,6 +1102,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[RA].mode =
 		drawDesc[CE].mode =
 		drawDesc[RD].mode = 0;
+		drawDesc[LT].mode = 0;
+		drawData.lineType = (wIndex_t)xx->lineType;
 		if ( segPtr->u.c.a1 >= 360.0 ) {
 			title = _("Circle");
 			drawDesc[FL].mode = 0;
@@ -1126,6 +1146,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		drawDesc[OI].mode = 0;
 		drawData.open=FALSE;
 		drawDesc[OP].mode = 0;
+		drawDesc[LT].mode = 0;
+		drawData.lineType = (wIndex_t)xx->lineType;
 		switch (segPtr->u.p.polyType) {
 			case RECTANGLE:
 				title = _("Rectangle");
@@ -1221,6 +1243,15 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		BenchUpdateOrientationList( (long)wListGetItemContext((wList_p)drawDesc[BE].control0, drawData.benchChoice ), (wList_p)drawDesc[OR].control0 );
 		wListSetIndex( (wList_p)drawDesc[OR].control0, drawData.benchOrient );
 	}
+	if ( (segPtr->type==SEG_STRLIN || segPtr->type==SEG_CRVLIN || segPtr->type==SEG_POLY) && drawDesc[LT].control0!=NULL) {
+		wListClear( (wList_p)drawDesc[LT].control0 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("Solid"), NULL, (void*)0 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dash"), NULL, (void*)1 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dot"), NULL, (void*)2 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
+		wListSetIndex( (wList_p)drawDesc[LT].control0, drawData.lineType );
+	}
 	if ( segPtr->type==SEG_DIMLIN && drawDesc[DS].control0!=NULL ) {
 		wListClear( (wList_p)drawDesc[DS].control0 );
 		wListAddValue( (wList_p)drawDesc[DS].control0, _("Tiny"), NULL, (void*)0 );
@@ -1238,8 +1269,16 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 static void DrawDraw( track_p t, drawCmd_p d, wDrawColor color )
 {
 	struct extraData * xx = GetTrkExtraData(t);
+	unsigned long NotSolid = ~(DC_NOTSOLIDLINE);
+	d->options &= NotSolid;
+	if (xx->lineType == DRAWLINESOLID) {}
+	else if (xx->lineType == DRAWLINEDASH) d->options |= DC_DASH;
+	else if (xx->lineType == DRAWLINEDOT) d->options |= DC_DOT;
+	else if (xx->lineType == DRAWLINEDASHDOT) d->options |= DC_DASHDOT;
+	else if (xx->lineType == DRAWLINEDASHDOTDOT) d->options |= DC_DASHDOTDOT;
 	if ( (d->funcs->options&DC_QUICK) == 0 )
 		DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
+	d->options = d->options&~(DC_NOTSOLIDLINE);
 }
 
 
@@ -1274,10 +1313,11 @@ static void ReadDraw( char * header )
 	DIST_T elev;
 	ANGLE_T angle;
 	wIndex_t layer;
+	int lineType;
 	struct extraData * xx;
 
-	if ( !GetArgs( header+5, paramVersion<3?"dXpYf":paramVersion<9?"dL000pYf":"dL000pff",
-				&index, &layer, &orig, &elev, &angle ) )
+	if ( !GetArgs( header+5, paramVersion<3?"dXpYf":paramVersion<9?"dL000pYf":"dLd00pff",
+				&index, &layer, &lineType, &orig, &elev, &angle ) )
 		return;
 	ReadSegs();
 	if (tempSegs_da.cnt == 1) {
@@ -1290,6 +1330,7 @@ static void ReadDraw( char * header )
 		xx->orig = orig;
 		xx->angle = angle;
 		xx->segCnt = tempSegs_da.cnt;
+		xx->lineType = lineType;
 		memcpy( xx->segs, tempSegs_da.ptr, tempSegs_da.cnt * sizeof *(trkSeg_p)0 );
 		ComputeDrawBoundingBox( trk );
 	}
@@ -1532,6 +1573,11 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		wMenuPushEnable( drawModEmpty, FALSE);
 		wMenuPushEnable( drawModClose, FALSE);
 		wMenuPushEnable( drawModOpen, FALSE);
+		wMenuPushEnable( drawModSolid, TRUE);
+		wMenuPushEnable( drawModDot, TRUE);
+		wMenuPushEnable( drawModDash, TRUE);
+		wMenuPushEnable( drawModDashDot, TRUE);
+		wMenuPushEnable( drawModDashDotDot, TRUE);
 		if (!drawModCmdContext.rotate_state && (drawModCmdContext.type == SEG_POLY || drawModCmdContext.type == SEG_FILPOLY)) {
 			wMenuPushEnable( drawModDel,drawModCmdContext.prev_inx>=0);
 			if ((!drawModCmdContext.open && drawModCmdContext.prev_inx>=0) ||
@@ -1898,7 +1944,9 @@ static paramData_t drawPLs[] = {
 #define drawAngleInx					8
 	{ PD_FLOAT, &drawCmdContext.angle, "Angle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Angle") },
 #define drawRadiusPD            (drawPLs[9])
-	{ PD_FLOAT, &drawCmdContext.radius, "Radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") }
+	{ PD_FLOAT, &drawCmdContext.radius, "Radius", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Radius") },
+#define drawLineTypePD			(drawPLs[10])
+	{ PD_DROPLIST, &drawCmdContext.lineType, "Type", PDO_DIM|PDO_NORECORD|BO_ENTER, (void*)0, N_("Line Type") },
 };
 static paramGroup_t drawPG = { "draw", 0, drawPLs, sizeof drawPLs/sizeof drawPLs[0] };
 
@@ -1967,13 +2015,23 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 		case OP_POLYLINE:
 			controls[0] = drawLineWidthPD.control;
 			controls[1] = drawColorPD.control;
+			controls[2] = drawLineTypePD.control;
 			controls[2] = NULL;
 			sprintf( labelName, _("%s Line Width"), _(objectName[drawCmdContext.Op]) );
 			labels[0] = labelName;
 			labels[1] = N_("Color");
+			labels[2] = N_("Type");
+			if ( wListGetCount( (wList_p)drawLineTypePD.control ) == 0 ) {
+				wListAddValue( (wList_p)drawLineTypePD.control, _("Solid"), NULL, NULL );
+				wListAddValue( (wList_p)drawLineTypePD.control, _("Dot"), NULL, NULL );
+				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash"), NULL, NULL );
+				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot"), NULL, NULL );
+				wListAddValue( (wList_p)drawLineTypePD.control, _("Dash-Dot-Dot"), NULL, NULL );
+			}
 			InfoSubstituteControls( controls, labels );
 			drawLineWidthPD.option &= ~PDO_NORECORD;
 			drawColorPD.option &= ~PDO_NORECORD;
+			drawLineTypePD.option &= ~PDO_NORECORD;
 			break;
 		case OP_FILLCIRCLE2:
 		case OP_FILLCIRCLE3:
@@ -2483,6 +2541,55 @@ void MenuEnter(int key) {
 		DrawGeomModify(action,zero,&drawModCmdContext);
 }
 
+void MenuLine(int key) {
+	struct extraData * xx = GetTrkExtraData(drawModCmdContext.trk);
+	if ( drawModCmdContext.type==SEG_STRLIN || drawModCmdContext.type==SEG_CRVLIN || drawModCmdContext.type==SEG_POLY ) {
+		switch(key) {
+		case '0':
+			xx->lineType = DRAWLINESOLID;
+			break;
+		case '1':
+			xx->lineType = DRAWLINEDASH;
+			break;
+		case '2':
+			xx->lineType = DRAWLINEDOT;
+			break;
+		case '3':
+			xx->lineType = DRAWLINEDASHDOT;
+			break;
+		case '4':
+			xx->lineType = DRAWLINEDASHDOTDOT;
+			break;
+		}
+		MainRedraw();
+	}
+}
+
+EXPORT void SetLineType( track_p trk, int width ) {
+	if (QueryTrack(trk, Q_IS_DRAW)) {
+		struct extraData * xx = GetTrkExtraData(trk);
+		if ( xx->segs[0].type==SEG_STRLIN || xx->segs[0].type==SEG_CRVLIN || xx->segs[0].type==SEG_POLY) {
+			switch(width) {
+			case 0:
+				xx->lineType = DRAWLINESOLID;
+				break;
+			case 1:
+				xx->lineType = DRAWLINEDASH;
+				break;
+			case 2:
+				xx->lineType = DRAWLINEDOT;
+				break;
+			case 3:
+				xx->lineType = DRAWLINEDASHDOT;
+				break;
+			case 4:
+				xx->lineType = DRAWLINEDASHDOTDOT;
+				break;
+			}
+		}
+	}
+}
+
 EXPORT void InitTrkDraw( void )
 {
 	T_DRAW = InitObject( &drawCmds );
@@ -2500,6 +2607,13 @@ EXPORT void InitTrkDraw( void )
 	drawModVertex = wMenuPushCreate( drawModDelMI, "", _("Vertex Point - 'v'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'v' );
 	drawModRound =  wMenuPushCreate( drawModDelMI, "", _("Round Corner - 'r'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'r' );
 	drawModSmooth =  wMenuPushCreate( drawModDelMI, "", _("Smooth Corner - 's'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 's' );
+	wMenuSeparatorCreate( drawModDelMI );
+	drawModLinMI = wMenuMenuCreate( drawModDelMI, "", _("LineType...") );
+	drawModSolid =  wMenuPushCreate( drawModLinMI, "", _("Solid Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '0' );
+	drawModDot =  wMenuPushCreate( drawModLinMI, "", _("Dashed Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '1' );
+	drawModDash =  wMenuPushCreate( drawModLinMI, "", _("Dotted Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '2' );
+	drawModDashDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '3' );
+	drawModDashDotDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '4' );
 	wMenuSeparatorCreate( drawModDelMI );
 	drawModriginMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, (wMenuCallBack_p)MenuMode, (void*) 1 );
 	drawModOrigin = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );

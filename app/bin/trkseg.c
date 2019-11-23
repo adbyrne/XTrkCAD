@@ -1897,7 +1897,7 @@ EXPORT void DrawSegsO(
                     color1 = normalColor;
                 if ( segPtr->color == wDrawColorWhite )
                     break;
-            }
+            } else
             REORIGIN(p0, segPtr->u.b.pos[0], angle, orig);
             REORIGIN(p1, segPtr->u.b.pos[1], angle, orig);
             REORIGIN(p2, segPtr->u.b.pos[2], angle, orig);
