@@ -514,20 +514,25 @@ static void CarProtoDlgCreateDummyOutline(
 	if ( isLoco ) {
 		pts->pt.x = length;
 		pts->pt.y = width/2.0;
+		pts->pt_type = 0;
 		pts++;
 		length2 -= width/2.0;
 	}
 	pts->pt.x = length2;
 	pts->pt.y = 0.0;
+	pts->pt_type = 0;
 	pts++;
 	pts->pt.x = 0.0;
 	pts->pt.y = 0.0;
+	pts->pt_type = 0;
 	pts++;
 	pts->pt.x = 0.0;
 	pts->pt.y = width;
+	pts->pt_type = 0;
 	pts++;
 	pts->pt.x = length2;
 	pts->pt.y = width;
+	pts->pt_type = 0;
 }
 
 
@@ -1851,6 +1856,10 @@ EXPORT void CarItemDraw(
 		simplePts[1].pt.x = simplePts[2].pt.x = size.x/2.0;
 		simplePts[0].pt.y = simplePts[1].pt.y = -size.y/2.0;
 		simplePts[2].pt.y = simplePts[3].pt.y = size.y/2.0;
+		simplePts[0].pt_type = 0;
+		simplePts[1].pt_type = 0;
+		simplePts[2].pt_type = 0;
+		simplePts[3].pt_type = 0;
 		simpleSegs[0].type = SEG_FILPOLY;
 		simpleSegs[0].color = item->color;
 		simpleSegs[0].width = 0;
