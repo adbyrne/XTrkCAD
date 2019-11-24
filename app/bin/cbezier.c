@@ -552,6 +552,19 @@ void CreateBothControlArms(int selectPoint, BOOL_T track) {
 	}
 }
 
+void CreateMoveAnchor(coOrd pos,BOOL_T fill) {
+	double d = tempD.scale*0.15;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int inx = anchors_da.cnt-1;
+	anchors(inx).type = fill?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(inx).u.c.a0 = 0.0;
+	anchors(inx).u.c.a1 = 360.0;
+	anchors(inx).width = 0;
+	anchors(inx).color = wDrawColorBlue;
+	anchors(inx).u.c.radius = d/4;
+	anchors(inx).u.c.center = pos;
+}
+
 /*
  * AdjustBezCurve
  *
@@ -602,6 +615,20 @@ EXPORT STATUS_T AdjustBezCurve(
 				InfoMessage( _("Select End-Point") );
 			DrawTempBezier(Da.track);
 			return C_CONTINUE;
+
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (Da.state != PICK_POINT) return C_CONTINUE;
+		DrawTempBezier(Da.track);
+		if (Da.state != PICK_POINT) return C_CONTINUE;
+		for (int i=0;i<4;i++) {
+			if (i==0 && Da.trk[0]) continue;
+			if (i==3 && Da.trk[1]) continue;   //ignore locked points
+			d = FindDistance(Da.pos[i],pos);
+			if (IsClose(d))	CreateMoveAnchor(Da.pos[i],TRUE);
+		}
+		MainRedraw();
+		break;
 
 	case C_DOWN:
 		if (Da.state != PICK_POINT) return C_CONTINUE;
@@ -783,11 +810,15 @@ EXPORT STATUS_T AdjustBezCurve(
 	case C_REDRAW:
 		if (Da.state != NONE)
 			DrawTempBezier(Da.track);
+		if (anchors_da.cnt>0)
+			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	default:
 		return C_CONTINUE;
 	}
+
+	return C_CONTINUE;
 
 
 }
@@ -849,6 +880,9 @@ STATUS_T CmdBezModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG) 
 		DrawTrack(Da.selectTrack,&mainD,wDrawColorWhite);                    //Wipe out real track, draw replacement
 		return AdjustBezCurve(C_START, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);
 
+	case wActionMove:
+		if (Da.state == NONE) return C_CONTINUE;
+		return AdjustBezCurve(wActionMove, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);
 	case C_DOWN:
 		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up
 		return AdjustBezCurve(C_DOWN, pos, Da.track, xx->bezierData.segsColor, xx->bezierData.segsWidth, InfoMessage);

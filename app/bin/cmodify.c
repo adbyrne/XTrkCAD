@@ -123,6 +123,7 @@ static STATUS_T ModifyBezier(wAction_t action, coOrd pos) {
 		case C_UP:
 		case C_OK:
 		case C_TEXT:
+		case wActionMove:
 			trackGauge = (IsTrack(Dex.Trk)?GetTrkGauge(Dex.Trk):0.0);
 			rc = CmdBezModify(Dex.Trk, action, pos, trackGauge);
 			break;
@@ -370,9 +371,9 @@ STATUS_T CmdModify(
 
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if (modifyBezierMode) return C_CONTINUE;
 		if (modifyCornuMode) return ModifyCornu(wActionMove,pos);
 		if (modifyDrawMode) return ModifyDraw(wActionMove,pos);
+		if (modifyBezierMode) return ModifyBezier(wActionMove, pos);
 		track_p t;
 		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayer( t )) {
 			if (GetTrkScale(t) == (char)GetLayoutCurScale()) {

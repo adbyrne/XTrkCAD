@@ -54,7 +54,6 @@
 EXPORT TRKTYP_T T_BEZIER = -1;
 EXPORT TRKTYP_T T_BZRLIN = -1;
 
-
 struct extraData {
 		BezierData_t bezierData;
 		};

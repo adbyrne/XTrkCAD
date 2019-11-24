@@ -1878,6 +1878,46 @@ STATUS_T DrawGeomModify(
 		break;
 	case wActionMove:
 		if (polyMode) return DrawGeomPolyModify(action,pos,context);
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		switch( context->type) {
+		case SEG_TBLEDGE:
+		case SEG_STRLIN:
+		case SEG_DIMLIN:
+		case SEG_BENCH:
+			CreateLineAnchors(lineInx,context->p0,context->p1);
+			dd = FindDistance( context->p0, pos );
+			if ( IsClose(dd)) {
+				CreateMovingAnchor(context->p0,TRUE);
+			} else {
+				dd = FindDistance( context->p1, pos );
+				if ( IsClose(dd)) {
+					CreateMovingAnchor(context->p1,TRUE);
+				}
+			}
+		break;
+		case SEG_CRVLIN:
+		case SEG_FILCRCL:
+			if (tempSegs(0).u.c.a1 < 360.0)
+					CreateCurveAnchors(curveInx,context->pm,context->pc,context->p0,context->p1);
+			dd = FindDistance( context->p0, pos );
+			if ( IsClose(dd)) {
+				CreateMovingAnchor(context->p0,TRUE);
+			} else {
+				dd = FindDistance( context->p1, pos );
+				if ( IsClose(dd)) {
+					CreateMovingAnchor(context->p1,TRUE);
+				} else {
+					dd = FindDistance( context->pm, pos );
+					if ( IsClose(dd)) {
+						CreateMovingAnchor(context->pm,TRUE);
+					}
+				}
+			}
+		break;
+		default:;
+		}
+		MainRedraw();
+		return C_CONTINUE;
 		break;
 	case C_DOWN:
 		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
