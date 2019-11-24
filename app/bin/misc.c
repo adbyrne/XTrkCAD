@@ -994,6 +994,11 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 	DIST_T distDelta;
 
 	switch (*action) {
+	case C_LDOUBLE:
+		if (!checkLeft)
+			return TRUE;
+		time0 = 0;
+		break;
 	case C_DOWN:
 		if (!checkLeft)
 			return TRUE;

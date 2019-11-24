@@ -3016,7 +3016,7 @@ static STATUS_T CmdSelect(
 
 	case C_LDOUBLE:
 		if (doingDouble) {
-			return CallModify(action,pos);
+			return C_CONTINUE;
 		}
 		switch (mode) {
 			case AREA:
@@ -3025,9 +3025,9 @@ static STATUS_T CmdSelect(
 						QueryTrack( ht, Q_IS_CORNU ) ||
 						(QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT ))) {
 						doingDouble = TRUE;
-						CmdModify(C_START,pos);
-						CmdModify(C_DOWN,pos);
-						return CmdModify(C_UP,pos);
+						CallModify(C_START,pos);
+						if (doingDouble == FALSE) return C_CONTINUE;
+						CallModify(C_LDOUBLE,pos);
 					} else if (QueryTrack( ht, Q_IS_ACTIVATEABLE)){
 						return Activate(pos);
 					}
@@ -3038,6 +3038,7 @@ static STATUS_T CmdSelect(
 				break;
 		}
 		break;
+
 	case C_CMDMENU:
 		if (doingDouble) {
 			return CallModify(action,pos);

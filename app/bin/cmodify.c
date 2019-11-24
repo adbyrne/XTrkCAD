@@ -181,6 +181,9 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 		case C_UP:
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			break;
+		case wActionMove:
+			rc = ModifyTrack( Dex.Trk, action, pos );
+			break;
 		case C_TEXT:
 			//Delete or '0' - continues
 			if (action>>8 == 127 || action>>8 == 8 || 	// Del or backspace
@@ -276,6 +279,8 @@ STATUS_T CmdModify(
 			return ModifyCornu(C_DOWN, pos);
 		if (modifyDrawMode)
 			return ModifyDraw(C_DOWN, pos);
+		/*no break*/
+	case C_LDOUBLE:
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
@@ -307,9 +312,10 @@ STATUS_T CmdModify(
 		if (QueryTrack( Dex.Trk, Q_IS_CORNU )) { 					//Cornu
 			modifyCornuMode = TRUE;
 			if (ModifyCornu(C_START, pos) != C_CONTINUE) {			//Call Start with track
-				modifyCornuMode = FALSE;							//Function rejected Bezier
+				modifyCornuMode = FALSE;							//Function rejected Cornu
 				Dex.Trk =NULL;
 				tempSegs_da.cnt = 0;
+
 			}
 			return C_CONTINUE;										//That's it
 		}
@@ -323,6 +329,8 @@ STATUS_T CmdModify(
 			}
 			return C_CONTINUE;
 		}
+
+		if ((action&0xFF) == C_LDOUBLE) return C_ERROR;
 
 		if ((MyGetKeyState()&WKEY_CTRL)) goto extendTrack;
 
@@ -364,7 +372,7 @@ STATUS_T CmdModify(
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (modifyBezierMode) return C_CONTINUE;
 		if (modifyCornuMode) return ModifyCornu(wActionMove,pos);
-		if (modifyDrawMode) return C_CONTINUE;
+		if (modifyDrawMode) return ModifyDraw(wActionMove,pos);
 		track_p t;
 		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayer( t )) {
 			if (GetTrkScale(t) == (char)GetLayoutCurScale()) {

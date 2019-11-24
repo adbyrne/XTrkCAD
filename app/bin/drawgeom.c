@@ -1062,6 +1062,19 @@ void static CreatePolyAnchors(int index) {
 		}
 }
 
+void CreateMovingAnchor(coOrd pos,BOOL_T fill) {
+	double d = tempD.scale*0.15;
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int inx = anchors_da.cnt-1;
+	anchors(inx).type = fill?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(inx).u.c.a0 = 0.0;
+	anchors(inx).u.c.a1 = 360.0;
+	anchors(inx).width = 0;
+	anchors(inx).color = wDrawColorBlue;
+	anchors(inx).u.c.radius = d/4;
+	anchors(inx).u.c.center = pos;
+}
+
 /*
  * Modify Polygons. Polygons have a variable number of nodes.
  *
@@ -1107,6 +1120,7 @@ STATUS_T DrawGeomPolyModify(
 				points(inx).pt_type = context->segPtr[segInx].u.p.pts[inx].pt_type;
 				point_selected(inx) = FALSE;
 			}
+			context->prev_inx = -1;
 			context->max_inx = points_da.cnt-1;
 			selected_count=0;
 			rotate_origin = context->orig;
@@ -1128,6 +1142,38 @@ STATUS_T DrawGeomPolyModify(
 			InfoMessage(_("Select Points, or use Context Menu"));
 			//MainRedraw();
 			return C_CONTINUE;
+		case wActionMove:
+			DYNARR_RESET(trkSeg_t,anchors_da);
+			CreatePolyAnchors(context->prev_inx);
+			for (int i = 0; i<points_da.cnt; i++) {
+				if (IsClose(FindDistance(pos,points(i).pt))) {
+					CreateMovingAnchor(points(i).pt,TRUE);
+					MainRedraw();
+					return C_CONTINUE;
+				}
+			}
+			int pInx=0;
+			coOrd pm0,pm1;
+			DIST_T dm = 10000.0;
+			for ( int inx=0; inx<points_da.cnt; inx++ ) {
+				pm0 = pos;
+				DIST_T ddm = LineDistance( &pm0, points( inx==0?points_da.cnt-1:inx-1).pt, points(inx).pt );
+				if ( dm > ddm ) {
+					dm = ddm;
+					pm1 = pm0;
+					pInx = inx;
+				}
+			}
+			if (!IsClose(dm)) return C_CONTINUE;
+			int inxm = pInx==0?points_da.cnt-1:pInx-1;
+			dm = FindDistance( points(inxm).pt, pm1 );
+			DIST_T ddm = FindDistance( points(inxm).pt, points(pInx).pt );
+			if ( (dm > 0.25*ddm) && (dm < 0.75*ddm)) {
+				CreateMovingAnchor(pm1,FALSE);
+				MainRedraw();
+			}
+			return C_CONTINUE;
+			break;
 		case C_DOWN:
 			d = 10000.0;
 			polyInx = -1;
@@ -1167,6 +1213,7 @@ STATUS_T DrawGeomPolyModify(
 				selected_count = 0;
 				CreatePolyAnchors( -1);
 				MainRedraw();
+				context->prev_inx = -1;
 				return C_CONTINUE; //Not close to any line
 			}
 			polyState = POLYPOINT_SELECTED;
@@ -1823,6 +1870,10 @@ STATUS_T DrawGeomModify(
 		InfoMessage("Points Mode - Select and drag Anchor Point");
 		MainRedraw();
 		return C_CONTINUE;
+		break;
+	case wActionMove:
+		if (polyMode) return DrawGeomPolyModify(action,pos,context);
+		break;
 	case C_DOWN:
 		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
 		if (polyMode) return DrawGeomPolyModify(action,pos,context);
@@ -2183,7 +2234,8 @@ STATUS_T DrawGeomModify(
 		if (polyMode) {
 			int rc;
 			rc = DrawGeomPolyModify(action,pos,context);
-			context->state = MOD_AFTER_PT;
+			if (context->prev_inx != -1)
+				context->state = MOD_AFTER_PT;
 			return rc;
 		}
 
