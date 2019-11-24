@@ -1171,6 +1171,11 @@ STATUS_T DrawGeomPolyModify(
 			if ( (dm > 0.25*ddm) && (dm < 0.75*ddm)) {
 				CreateMovingAnchor(pm1,FALSE);
 				MainRedraw();
+			} else {
+				if (dm < FindDistance( points(pInx).pt, pm1 ))
+					CreateMovingAnchor(points(inxm).pt,TRUE);
+				else
+					CreateMovingAnchor(points(pInx).pt,TRUE);
 			}
 			return C_CONTINUE;
 			break;
