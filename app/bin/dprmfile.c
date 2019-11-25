@@ -76,6 +76,7 @@ static paramData_t paramFilePLs[] = {
 #define I_PRMFILACTION	(4)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
     {	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_("Unload"), 0L, FALSE },
+
     {	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") }
 };
 
