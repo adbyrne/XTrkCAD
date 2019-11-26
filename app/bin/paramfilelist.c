@@ -149,6 +149,7 @@ void LoadParamFileList(void)
     BOOL_T updated = FALSE;
 	long *favoriteList = NULL;
 	long favorites;
+	int nextFavorite = 0;
 
     updated = UpdateParamFiles();
 
@@ -173,7 +174,7 @@ void LoadParamFileList(void)
         const char *fileName;
         const char * contents;
         enum paramFileState structState = PARAMFILE_UNLOADED;
-		int nextFavorite = 0;
+
 
         sprintf(message, "File%d", fileNo);
         contents = wPrefGetString("Parameter File Names", message);
@@ -195,7 +196,9 @@ void LoadParamFileList(void)
         paramFileInfo(curParamFileIndex).contents = curContents;
 		if (fileNo == favoriteList[nextFavorite]) {
 			paramFileInfo(curParamFileIndex).favorite = TRUE;
-			nextFavorite++;
+			if (nextFavorite < favorites - 1) {
+				nextFavorite++;
+			}
 		}
 		
     }
@@ -222,7 +225,7 @@ void SaveParamFileList(void)
 
     for (fileInx = 0, fileNo = 1, favorites = 0; fileInx < paramFileInfo_da.cnt;
             fileInx++, fileNo++) {
-        if (paramFileInfo(fileInx).valid && !paramFileInfo(fileInx).deleted) {
+        if (paramFileInfo(fileInx).valid && (!paramFileInfo(fileInx).deleted || paramFileInfo(fileInx).favorite)) {
             sprintf(message, "File%d", fileNo);
             contents = paramFileInfo(fileInx).contents;
             for (cp = contents; *cp; cp++) {
