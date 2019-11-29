@@ -2808,8 +2808,9 @@ static STATUS_T CmdSelect(
 	else {
 		if ( action == C_DOWN || action == C_RDOWN || ((action&0xFF) == wActionExtKey) ) {
 			mode = AREA;
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL))
-				 && IsInsideABox(pos)) {
+			if ( ((action&0xFF) == wActionExtKey) || (						//Moves don't need to be in a box
+				 ( MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL) ) && IsInsideABox(pos)) )  //But cursors do
+			{
 				mode = MOVE;
 			}
 		}
@@ -2818,7 +2819,6 @@ static STATUS_T CmdSelect(
 
 
 	switch (action&0xFF) {
-	case C_START:
 		InfoMessage( _("Select track") );
 		importMove = FALSE;
 		doingMove = FALSE;
