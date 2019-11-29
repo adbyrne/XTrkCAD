@@ -3061,6 +3061,13 @@ static STATUS_T CmdSelect(
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
+		if ((action>>8) == '?') {
+			if((moveDescTrk = OnTrack(&pos,FALSE,FALSE)) != NULL)
+				moveDescPos = pos;
+				CallPushDescribe((void*)0);
+			wSetCursor(mainD.d,defaultCursor);
+			moveDescTrk = NULL;
+		}
 		break;
 	case C_FINISH:
 		if (doingMove) UndoEnd();
@@ -3151,7 +3158,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0, (wMenuCallBack_p) SetAllTrackSelect, (void *) 0);
 	wMenuSeparatorCreate( selectPopup2M );
-	wMenuPushCreate(selectPopup2M, "", _("Describe Track"), 0,(wMenuCallBack_p) CallPushDescribe, (void*)0);
+	wMenuPushCreate(selectPopup2M, "", _("Properties -'?'"), 0,(wMenuCallBack_p) CallPushDescribe, (void*)0);
 	menuPushModify = wMenuPushCreate(selectPopup2M, "", _("Modify/Activate Track"), 0,(wMenuCallBack_p) CallPushModify, (void*)0);
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Cut"), 0,(wMenuCallBack_p) EditCut, (void *) 0);

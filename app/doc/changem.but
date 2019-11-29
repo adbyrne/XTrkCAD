@@ -1462,7 +1462,7 @@ In combination with the mouse, the \f{Select} command can be used as follows;
 
 \u000
 
-\dd \e{Left-Click} - selects just the object. Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog) and a blue selection box. If an point without a track is selected, all currently selected tracks are unselected.
+\dd \e{Left-Click} - selects just the object. Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog) and a blue selection box surrounds all currently selected objects. If an point without a track is selected, all currently selected tracks are unselected.
 
 \u000
 
@@ -1484,6 +1484,16 @@ In combination with the mouse, the \f{Select} command can be used as follows;
 
 \dd \e{Right-Click} - displays a pop-up menu of commands.
 
+\u000
+
+\dd \e{"?"} - displays the Property menu for the object hovered over
+
+\u000
+
+\dd \e{"@"} - moves the center of the window (i.e., Pans) to be at the cursor position
+
+\dd \e{Shift+Ctrl} plus the \e{Arrow Keys} will move the selected items a pixel at a time at the current zoom level. No autosnap will occur to permit fine tuning.
+
 \lcont{
 
 \u000
@@ -1496,7 +1506,7 @@ In combination with the mouse, the \f{Select} command can be used as follows;
 
 \u000 
 
-\dd Hovering over a selected object (inside the blue highlight area) with either a shift or a ctrl button shows that a Left-Drag will Move or Rotate the selected items.
+\dd Hovering over a selected object (inside the blue highlight area) with either a \e{Shift} or a \e{Ctrl} button depressed displays an anchor that shows that a Left-Drag will either Move or Rotate the selected items.
 
 \u000
 
@@ -1513,6 +1523,9 @@ In combination with the mouse, the \f{Select} command can be used as follows;
 \lcont{
 
 \b If the \e{Shift} key is pressed while dragging in rotation then rotation will occur in 15\u00B0 increments.
+
+\b If the selected items(s) are moved or rotated using the cursor, and an open end of unselected tracks is close to an end of the selected tracks that will be open after the move, a pair ot anchors shows that an autosnap with alignment will occur. 
+Upon release of the button, all the selected tracks will be moved and aligned and the tracks joined.
 
 }
 
