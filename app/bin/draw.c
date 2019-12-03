@@ -533,7 +533,7 @@ EXPORT void DrawHilightPolygon( drawCmd_p d, coOrd *p, int cnt )
 	for (i=0; i<cnt; i++) {
 		d->CoOrd2Pix(d,p[i],&q[i][0],&q[i][1]);
 	}
-	wDrawPolygon( d->d, q, NULL, cnt, wDrawColorBlack, 0, 0, wDrawOptTemp, 1, 0 );
+	wDrawPolygon( d->d, q, NULL, cnt, wDrawColorBlack, 0, 0, wDrawOptTemp|wDrawOptTransparent, 1, 0 );
 }
 
 
@@ -1520,13 +1520,13 @@ static void DrawRoomWalls( wBool_t drawBackground )
 		mainD.CoOrd2Pix(&mainD,end,&p2,&p3);
 		p2 -= p0;
 		p3 -= p1;
-		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorGrey80, wDrawOptTemp );
+		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorGrey80, wDrawOptTemp|wDrawOptTransparent );
 
 		mainD.CoOrd2Pix(&mainD,zero,&p0,&p1);
 		mainD.CoOrd2Pix(&mainD,mapD.size,&p2,&p3);
 		p2 -= p0;
 		p3 -= p1;
-		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorWhite, wDrawOptOpaque);
+		wDrawFilledRectangle( mainD.d, p0, p1, p2, p3, drawColorWhite, 0 );
 
 	} else {
 

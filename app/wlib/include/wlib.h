@@ -460,7 +460,7 @@ typedef int wDrawOpts;
 #define wDrawOptCursorRmv (1<<4)
 #define wDrawOptCursorQuit (1<<5)
 #define wDrawOutlineFont (1<<11)
-#define wDrawOptOpaque   (1<<12)
+#define wDrawOptTransparent   (1<<12)
 
 
 typedef enum {

@@ -211,7 +211,7 @@ static void DrawDescHilite(BOOL_T selected)
     w = (wPos_t)((descSize.x/mainD.scale)*mainD.dpi+0.5);
     h = (wPos_t)((descSize.y/mainD.scale)*mainD.dpi+0.5);
     mainD.CoOrd2Pix(&mainD,descOrig,&x,&y);
-    wDrawFilledRectangle(mainD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp);
+    wDrawFilledRectangle(mainD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
 }
 
 

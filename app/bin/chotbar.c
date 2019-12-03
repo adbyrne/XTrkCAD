@@ -78,10 +78,10 @@ static void HotBarHighlight( int inx, DIST_T fixed_x )
 	wPos_t x0;
 	if ( inx == 0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed) {
 		x0 = (wPos_t)0;
-		wDrawFilledRectangle( hotBarD.d, x0, 0, (wPos_t)(hotBarMap(0).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTemp );
+		wDrawFilledRectangle( hotBarD.d, x0, 0, (wPos_t)(hotBarMap(0).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTemp|wDrawOptTransparent );
 	} else if ( inx >= hotBarCurrStart && inx < hotBarCurrEnd ) {
 		x0 = (wPos_t)((hotBarMap(inx).x-hotBarMap((int)hotBarCurrStart).x + (inx>0?fixed_x:0))*hotBarD.dpi);
-		wDrawFilledRectangle( hotBarD.d, x0, 0, (wPos_t)(hotBarMap(inx).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTemp );
+		wDrawFilledRectangle( hotBarD.d, x0, 0, (wPos_t)(hotBarMap(inx).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTemp|wDrawOptTransparent );
 	}
 }
 
