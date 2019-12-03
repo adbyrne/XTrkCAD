@@ -59,6 +59,7 @@ static void ConstraintOrig( coOrd *, coOrd, int );
 static int log_pan = 0;
 static int log_zoom = 0;
 static int log_mouse = 0;
+static int log_redraw = 0;
 
 static BOOL_T hideBox = FALSE;
 
@@ -1262,9 +1263,8 @@ EXPORT void MapRedraw()
 {
 	if (inPlaybackQuit)
 		return;
-#ifdef VERBOSE
-lprintf("MapRedraw\n");
-#endif
+	static int cMR = 0;
+	LOG( log_redraw, 2, ( "MapRedraw: %d\n", cMR++ ) );
 	if (!mapVisible)
 		return;
 	if (delayUpdate)
@@ -1325,6 +1325,24 @@ EXPORT void SetMainSize( void )
 	tempD.size = mainD.size;
 }
 
+/* Update temp_surface after executing a command
+ */
+EXPORT void TempRedraw( void ) {
+
+	static int cTR = 0;
+	LOG( log_redraw, 2, ( "TempRedraw: %d\n", cTR++ ) );
+#ifdef WINDOWS
+	// Remove this ifdef after windows supports GTK
+	MainRedraw(); // TempRedraw - windows
+#else
+	wDrawDelayUpdate( tempD.d, TRUE );
+	wDrawClearTemp( tempD.d );
+	DrawMarkers();
+	DoCurCommand( C_REDRAW, zero );
+	RulerRedraw( FALSE );
+	wDrawDelayUpdate( tempD.d, FALSE );
+#endif
+}
 
 EXPORT void MainRedraw( void )
 {
@@ -1337,9 +1355,8 @@ EXPORT void MainRedraw( void )
 	DIST_T t1;
 	if (inPlaybackQuit)
 		return;
-#ifdef VERBOSE
-lprintf("mainRedraw\n");
-#endif
+	static int cMR = 0;
+	LOG( log_redraw, 1, ( "MainRedraw: %d\n", cMR++ ) );
 
 	//wSetCursor( mainD.d, wCursorWait );
 	if (delayUpdate)
@@ -1404,11 +1421,13 @@ lprintf("mainRedraw\n");
 	size.x += (RBORDER+LBORDER)/mainD.dpi*mainD.scale;
 	size.y += (BBORDER+TBORDER)/mainD.dpi*mainD.scale;
 	DrawTracks( &mainD, mainD.scale, orig, size );
-	RulerRedraw( FALSE );
-	DoCurCommand( C_REDRAW, zero );
-	DrawMarkers();
 	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
+	// The remainder is from TempRedraw
+	wDrawClearTemp( tempD.d );
+	DrawMarkers();
+	DoCurCommand( C_REDRAW, zero );
+	RulerRedraw( FALSE );
 	RedrawPlaybackCursor();              //If in playback
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
@@ -2763,6 +2782,7 @@ EXPORT void DrawInit( int initialZoom )
 	log_pan = LogFindIndex( "pan" );
 	log_zoom = LogFindIndex( "zoom" );
 	log_mouse = LogFindIndex( "mouse" );
+	log_redraw = LogFindIndex( "redraw" );
 	AddPlaybackProc( "MOUSE ", (playbackProc_p)PlaybackMain, NULL );
 	AddPlaybackProc( "KEY ", (playbackProc_p)PlaybackKey, NULL );
 

@@ -1069,29 +1069,26 @@ static BOOL_T CheckClick(wAction_t *action, coOrd *pos, BOOL_T checkLeft,
 EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 	wAction_t rc;
 	int mode;
+	wBool_t bExit = FALSE;
 
 	if (action == wActionMove) {
-		if ((commandList[curCommand].options & IC_WANT_MOVE) == 0)
-			return C_CONTINUE;
-	}
-
-	if ((action&0xFF) == wActionModKey) {
-		if ((commandList[curCommand].options & IC_WANT_MODKEYS) == 0)
-			return C_CONTINUE;
-	}
-
-
-	if (!CheckClick(&action, &pos,
-			(int) (commandList[curCommand].options & IC_LCLICK), TRUE))
-		return C_CONTINUE;
-
-	if (action == C_RCLICK
+		if ((commandList[curCommand].options & IC_WANT_MOVE) == 0) {
+			bExit = TRUE;
+		}
+	} else if ((action&0xFF) == wActionModKey) {
+		if ((commandList[curCommand].options & IC_WANT_MODKEYS) == 0) {
+			bExit = TRUE;
+		}
+	} else if (!CheckClick(&action, &pos,
+			(int) (commandList[curCommand].options & IC_LCLICK), TRUE)) {
+		bExit = TRUE;
+	} else if (action == C_RCLICK
 			&& (commandList[curCommand].options & IC_RCLICK) == 0) {
 		if (!inPlayback) {
 			mode = MyGetKeyState();
 			if ((mode & (~WKEY_SHIFT)) != 0) {
 				wBeep();
-				return C_CONTINUE;
+				bExit = TRUE;
 			}
 			if (((mode & WKEY_SHIFT) == 0) == (rightClickMode == 0)) {
 				if (selectedTrackCount > 0) {
@@ -1101,23 +1098,45 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 				} else {
 					wMenuPopupShow(popup1M);
 				}
-				return C_CONTINUE;
+				bExit = TRUE;
 			} else if ((commandList[curCommand].options & IC_CMDMENU)) {
 				cmdMenuPos = pos;
 				action = C_CMDMENU;
 			} else {
 				wBeep();
-				return C_CONTINUE;
+				bExit = TRUE;
 			}
 		} else {
-			return C_CONTINUE;
+			bExit = TRUE;
 		}
+	}
+	if ( bExit ) {
+		TempRedraw(); // DoCurCommand: precommand
+		return C_CONTINUE;
 	}
 
 	LOG(log_command, 2,
 			( "COMMAND MOUSE %s %d @ %0.3f %0.3f\n", commandList[curCommand].helpKey, (int)action, pos.x, pos.y ))
 	rc = commandList[curCommand].cmdProc(action, pos);
 	LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))
+	switch ( action & 0xFF ) {
+	case wActionMove:
+	case wActionModKey:
+	case C_DOWN:
+	case C_MOVE:
+	case C_UP:
+	case C_RDOWN:
+	case C_RMOVE:
+	case C_RUP:
+	case C_LCLICK:
+	case C_RCLICK:
+	case C_TEXT:
+	case C_OK:
+		TempRedraw(); // DoCurCommand: postcommand
+		break;
+	default:
+		break;
+	}
 	if ((rc == C_TERMINATE || rc == C_INFO)
 			&& (commandList[curCommand].options & IC_STICKY)
 			&& (commandList[curCommand].stickyMask & stickySet)) {
@@ -1185,11 +1204,11 @@ EXPORT void ConfirmReset(BOOL_T retry) {
 			return;
 		}
 	}
-	Reset();
 	if (retry) {
 		/* because user pressed esc */
 		SetAllTrackSelect( FALSE);
 	}
+	Reset();
 	LOG(log_command, 1,
 			( "COMMAND RESET %s\n", commandList[curCommand].helpKey ))
 	commandList[curCommand].cmdProc( C_START, zero);
