@@ -267,7 +267,7 @@ struct wDraw_t {
 
 		GdkPixmap * pixmap;
 		GdkPixmap * pixmapBackup;
-
+		cairo_surface_t * temp_surface;
 
 		double dpi;
 
