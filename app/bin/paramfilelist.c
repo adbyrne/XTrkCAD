@@ -52,7 +52,8 @@ static char * customPathBak;
 
 #define FAVORITESECTION "Parameter File Favorites"
 #define FAVORITETOTALS "Total"
-
+#define FAVORITEKEY "Favorite%d"
+#define	FAVORITEDELETED "Deleted%d"
 
 int GetParamFileCount()
 {
@@ -147,28 +148,28 @@ void LoadParamFileList(void)
 {
     int fileNo;
     BOOL_T updated = FALSE;
-	long *favoriteList = NULL;
-	long favorites;
-	int nextFavorite = 0;
+    long *favoriteList = NULL;
+    long favorites;
+    int nextFavorite = 0;
 
     updated = UpdateParamFiles();
 
-	wPrefGetIntegerBasic(FAVORITESECTION, FAVORITETOTALS, &favorites, 0);
-	if (favorites) {
-		DynString topic;
-		favoriteList = MyMalloc(sizeof(long)*favorites);
-		if (!favoriteList) {
-			AbortProg("Couldn't allocate memory for favorite list!\n");
-		}
+    wPrefGetIntegerBasic(FAVORITESECTION, FAVORITETOTALS, &favorites, 0);
+    if (favorites) {
+        DynString topic;
+        favoriteList = MyMalloc(sizeof(long)*favorites);
+        if (!favoriteList) {
+            AbortProg("Couldn't allocate memory for favorite list!\n");
+        }
 
-		DynStringMalloc(&topic, 16);
-		for (int i = 0; i < favorites; i++) {
-			DynStringPrintf(&topic, "Favorite%d", i);
-			wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &favoriteList[i], 0);
-		}
-		DynStringFree(&topic);
-	}
-
+        DynStringMalloc(&topic, 16);
+        for (int i = 0; i < favorites; i++) {
+            DynStringPrintf(&topic, FAVORITEKEY, i);
+            wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &favoriteList[i],
+                                 0);
+        }
+        DynStringFree(&topic);
+    }
 
     for (fileNo = 1; ; fileNo++) {
         const char *fileName;
@@ -194,26 +195,34 @@ void LoadParamFileList(void)
             curContents = curSubContents = MyStrdup(contents);
         }
         paramFileInfo(curParamFileIndex).contents = curContents;
-		if (fileNo == favoriteList[nextFavorite]) {
-			paramFileInfo(curParamFileIndex).favorite = TRUE;
-			if (nextFavorite < favorites - 1) {
-				nextFavorite++;
-			}
-		}
-		
+        if (favoriteList && fileNo == favoriteList[nextFavorite]) {
+            DynString topic;
+            long deleted;
+            DynStringMalloc(&topic, 16);
+            DynStringPrintf(&topic, FAVORITEDELETED, fileNo);
+
+            wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &deleted, 0L);
+            paramFileInfo(curParamFileIndex).favorite = TRUE;
+            paramFileInfo(curParamFileIndex).deleted = deleted;
+            if (nextFavorite < favorites - 1) {
+                nextFavorite++;
+            }
+            DynStringFree(&topic);
+        }
+
     }
     curParamFileIndex = PARAM_CUSTOM;
     if (updated) {
         SaveParamFileList();
     }
 
-	MyFree(favoriteList);
+    MyFree(favoriteList);
 }
 
 /**
  * Save the currently selected parameter files. Parameter files that have been unloaded
  * are not saved.
- * 
+ *
  */
 
 void SaveParamFileList(void)
@@ -224,8 +233,9 @@ void SaveParamFileList(void)
     char * contents, *cp;
 
     for (fileInx = 0, fileNo = 1, favorites = 0; fileInx < paramFileInfo_da.cnt;
-            fileInx++, fileNo++) {
-        if (paramFileInfo(fileInx).valid && (!paramFileInfo(fileInx).deleted || paramFileInfo(fileInx).favorite)) {
+            fileInx++) {
+        if (paramFileInfo(fileInx).valid && (!paramFileInfo(fileInx).deleted ||
+                                             paramFileInfo(fileInx).favorite)) {
             sprintf(message, "File%d", fileNo);
             contents = paramFileInfo(fileInx).contents;
             for (cp = contents; *cp; cp++) {
@@ -236,12 +246,16 @@ void SaveParamFileList(void)
             wPrefSetString("Parameter File Names", message, contents);
             wPrefSetString("Parameter File Map", contents, paramFileInfo(fileInx).name);
             if (paramFileInfo(fileInx).favorite) {
-                sprintf(message, "Favorite%d", favorites++);
+                sprintf(message, FAVORITEKEY, favorites);
                 wPrefSetInteger(FAVORITESECTION, message, fileNo);
+                sprintf(message, FAVORITEDELETED, fileNo);
+                wPrefSetInteger(FAVORITESECTION, message, paramFileInfo(fileInx).deleted);
+                favorites++;
             }
+            fileNo++;
         }
     }
-    sprintf(message, "File%d", fileNo++);
+    sprintf(message, "File%d", fileNo);
     wPrefSetString("Parameter File Names", message, "");
     wPrefSetInteger(FAVORITESECTION, FAVORITETOTALS, favorites);
 }

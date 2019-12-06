@@ -51,6 +51,9 @@ static struct wFilSel_t * paramFile_fs;
 #define FAVORITE_PARAM 1
 #define STANDARD_PARAM 0
 
+#define PARAMBUTTON_HIDE "Hide"
+#define PARAMBUTTON_UNHIDE "Unhide"
+
 static wIcon_p indicatorIcons[ 2 ][PARAMFILE_MAXSTATE];
 
 static wWin_p paramFileW;
@@ -75,7 +78,7 @@ static paramData_t paramFilePLs[] = {
     {   PD_BUTTON, (void *)ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, (void *)TRUE, N_("Favorite")},
 #define I_PRMFILACTION	(4)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
-    {	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_("Unload"), 0L, FALSE },
+    {	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_HIDE), 0L, FALSE },
 
     {	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") }
 };
@@ -199,7 +202,7 @@ static void UpdateParamFileButton(void)
     }
 
     // set the default
-    wButtonSetLabel(paramFileActionB, _("Unload"));
+    wButtonSetLabel(paramFileActionB, _(PARAMBUTTON_HIDE));
     paramFilePLs[ I_PRMFILACTION ].context = FALSE;
     paramFilePLs[I_PRMFILEFAVORITE].context = FALSE;
 
@@ -216,14 +219,12 @@ static void UpdateParamFileButton(void)
                 return;
             }
             if (IsParamFileDeleted(fileInx)) {
-                // if selected file was unloaded, set button to reload and finish loop
-                wButtonSetLabel(paramFileActionB, _("Reload"));
+                // if selected file was unloaded, set button to reload 
+                wButtonSetLabel(paramFileActionB, _(PARAMBUTTON_UNHIDE));
                 paramFilePLs[ I_PRMFILACTION ].context = (void *)TRUE;
-                break;
             }
             if (!IsParamFileFavorite(fileInx)) {
                 paramFilePLs[I_PRMFILEFAVORITE].context = (void *)TRUE;
-                break;
             }
         }
     }
