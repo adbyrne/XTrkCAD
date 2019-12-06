@@ -31,6 +31,7 @@
 #include "common.h"
 #include "compound.h"
 #include "custom.h"
+#include "dynstring.h"
 #include "fileio.h"
 #include "i18n.h"
 #include "layout.h"
@@ -49,7 +50,10 @@ static int log_paramFile;
 static char * customPath;
 static char * customPathBak;
 
-
+#define FAVORITESECTION "Parameter File Favorites"
+#define FAVORITETOTALS "Total"
+#define FAVORITEKEY "Favorite%d"
+#define	FAVORITEDELETED "Deleted%d"
 
 int GetParamFileCount()
 {
@@ -137,20 +141,41 @@ static BOOL_T UpdateParamFiles(void)
 }
 
 /**
- * Read the list of parameter files from configuration.
+ * Read the list of parameter files from configuration and load the files.
  *
  */
 void LoadParamFileList(void)
 {
     int fileNo;
     BOOL_T updated = FALSE;
+    long *favoriteList = NULL;
+    long favorites;
+    int nextFavorite = 0;
 
     updated = UpdateParamFiles();
+
+    wPrefGetIntegerBasic(FAVORITESECTION, FAVORITETOTALS, &favorites, 0);
+    if (favorites) {
+        DynString topic;
+        favoriteList = MyMalloc(sizeof(long)*favorites);
+        if (!favoriteList) {
+            AbortProg("Couldn't allocate memory for favorite list!\n");
+        }
+
+        DynStringMalloc(&topic, 16);
+        for (int i = 0; i < favorites; i++) {
+            DynStringPrintf(&topic, FAVORITEKEY, i);
+            wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &favoriteList[i],
+                                 0);
+        }
+        DynStringFree(&topic);
+    }
 
     for (fileNo = 1; ; fileNo++) {
         const char *fileName;
         const char * contents;
         enum paramFileState structState = PARAMFILE_UNLOADED;
+
 
         sprintf(message, "File%d", fileNo);
         contents = wPrefGetString("Parameter File Names", message);
@@ -170,23 +195,48 @@ void LoadParamFileList(void)
             curContents = curSubContents = MyStrdup(contents);
         }
         paramFileInfo(curParamFileIndex).contents = curContents;
+        if (favoriteList && fileNo == favoriteList[nextFavorite]) {
+            DynString topic;
+            long deleted;
+            DynStringMalloc(&topic, 16);
+            DynStringPrintf(&topic, FAVORITEDELETED, fileNo);
+
+            wPrefGetIntegerBasic(FAVORITESECTION, DynStringToCStr(&topic), &deleted, 0L);
+            paramFileInfo(curParamFileIndex).favorite = TRUE;
+            paramFileInfo(curParamFileIndex).deleted = deleted;
+            if (nextFavorite < favorites - 1) {
+                nextFavorite++;
+            }
+            DynStringFree(&topic);
+        }
+
     }
     curParamFileIndex = PARAM_CUSTOM;
     if (updated) {
         SaveParamFileList();
     }
+
+    MyFree(favoriteList);
 }
 
+/**
+ * Save the currently selected parameter files. Parameter files that have been unloaded
+ * are not saved.
+ *
+ */
 
 void SaveParamFileList(void)
 {
     int fileInx;
     int fileNo;
+    int favorites;
     char * contents, *cp;
 
-    for (fileInx = 0, fileNo = 1; fileInx < paramFileInfo_da.cnt; fileInx++) {
-        if (paramFileInfo(fileInx).valid && !paramFileInfo(fileInx).deleted) {
-            sprintf(message, "File%d", fileNo++);
+    for (fileInx = 0, fileNo = 1, favorites = 0; fileInx < paramFileInfo_da.cnt;
+            fileInx++) {
+        if (paramFileInfo(fileInx).valid && (!paramFileInfo(fileInx).deleted ||
+                                             paramFileInfo(fileInx).favorite)) {
+            sprintf(message, "File%d", fileNo);
             contents = paramFileInfo(fileInx).contents;
             for (cp = contents; *cp; cp++) {
                 if (*cp == '=' || *cp == '\'' || *cp == '"' || *cp == ':' || *cp == '.') {
@@ -195,10 +245,19 @@ void SaveParamFileList(void)
             }
             wPrefSetString("Parameter File Names", message, contents);
             wPrefSetString("Parameter File Map", contents, paramFileInfo(fileInx).name);
+            if (paramFileInfo(fileInx).favorite) {
+                sprintf(message, FAVORITEKEY, favorites);
+                wPrefSetInteger(FAVORITESECTION, message, fileNo);
+                sprintf(message, FAVORITEDELETED, fileNo);
+                wPrefSetInteger(FAVORITESECTION, message, paramFileInfo(fileInx).deleted);
+                favorites++;
+            }
+            fileNo++;
         }
     }
-    sprintf(message, "File%d", fileNo++);
+    sprintf(message, "File%d", fileNo);
     wPrefSetString("Parameter File Names", message, "");
+    wPrefSetInteger(FAVORITESECTION, FAVORITETOTALS, favorites);
 }
 
 void
@@ -354,9 +413,17 @@ addButtonCallBack_t ParamFilesInit(void)
     return &DoParamFileListDialog;
 }
 
+/**
+ * Get the initial parameter files. The Xtrkcad.xtq file containing scale and
+ * demo definitions is read.
+ * 
+ * \return FALSE on error, TRUE otherwise
+ */
 BOOL_T ParamFileListInit(void)
 {
     log_paramFile = LogFindIndex("paramFile");
+
+	// get the default definitions
     if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
         return FALSE;
     }

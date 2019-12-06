@@ -9,6 +9,7 @@
 		int deleted;
 		int deletedShadow;
 		int valid;					/** < FALSE for dropped file */
+		bool favorite;
 		enum paramFileState trackState;
 		enum paramFileState structureState;
 	} paramFileInfo_t;
