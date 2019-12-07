@@ -285,6 +285,7 @@ STATUS_T CurveDescriptionMove(
 
 	switch (action) {
 	case C_DOWN:
+		DrawCurveDescription( trk, &mainD, wDrawColorWhite );
 	case C_MOVE:
 	case C_UP:
 		editMode = TRUE;
@@ -293,8 +294,8 @@ STATUS_T CurveDescriptionMove(
 			xx->descriptionOff.x = (pos.x-xx->pos.x);
 			xx->descriptionOff.y = (pos.y-xx->pos.y);
 			p1 = pos;
-			if (action != C_UP)
-				DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+//-			if (action != C_UP)
+//-				DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
 		} else {
 			p1 = pos;
 			GetCurveAngles( &a0, &a1, trk );
@@ -321,14 +322,18 @@ STATUS_T CurveDescriptionMove(
 			a = a0 + (0.5 * a1);
 			PointOnCircle( &p0, xx->pos, xx->radius/2, a );
 		}
-		if (action == C_UP) editMode = FALSE;
-		MainRedraw();
-		MapRedraw();
+		if (action == C_UP) {
+			editMode = FALSE;
+			DrawCurveDescription( trk, &mainD, wDrawColorBlack );
+		}
+		XMainRedraw();
+		XMapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
 		if (editMode) {
-			DrawLine( &tempD, p1, p0, 0, wDrawColorBlack );
+			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+			DrawCurveDescription( trk, &tempD, wDrawColorBlack );
 		}
 		break;
 		

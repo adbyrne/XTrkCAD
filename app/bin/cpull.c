@@ -763,7 +763,7 @@ static STATUS_T CmdPull(
 				return C_CONTINUE;
 			CreateConnectAnchor(t_ep1,t1,TRUE);
 		}
-		MainRedraw();
+		XMainRedraw();
 		break;
 
 	case C_LCLICK:
@@ -827,9 +827,11 @@ static STATUS_T CmdPull(
 		return C_CONTINUE;
 
 	case C_TEXT:
-		if (action>>8 == 'S')
-			return ConnectMultiple();
-
+		if (action>>8 == 'S') {
+			wBool_t rc =  ConnectMultiple();
+			MainRedraw(); // CmdPull: ConnectMultiple
+			return rc;
+		}
 		break;
 
 	case C_CANCEL:

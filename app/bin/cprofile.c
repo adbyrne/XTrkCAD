@@ -760,8 +760,8 @@ static void DoProfileDone( void * junk )
 	HilightProfileElevations( FALSE );
 	wHide( profileW );
 	ClrAllTrkBits( TB_PROFILEPATH );
-	MainRedraw();
-	MapRedraw();
+	XMainRedraw();
+	XMapRedraw();
 #endif
 	Reset();
 }
@@ -772,8 +772,8 @@ static void DoProfileClear( void * junk )
 	profElem_da.cnt = 0;
 	station_da.cnt = 0;
 	if (ClrAllTrkBits( TB_PROFILEPATH )) {
-		MainRedraw();
-		MapRedraw();
+		XMainRedraw();
+		XMapRedraw();
 	}
 	pathStartTrk = pathEndTrk = NULL;
 	RedrawProfileW();
@@ -1166,7 +1166,7 @@ if (log_profile>=1) {
 	if (!PathListCheck())
 		return;
 
-	HilightProfileElevations( FALSE );
+//-	HilightProfileElevations( FALSE );
 
 	if ( PathListEmpty() ) {
 		pathStartTrk = trkN;
@@ -1193,7 +1193,7 @@ LOG( log_profile, 2, ("Removing last element\n") )
 
 	} else if ( (GetTrkBits(trkN)&TB_PROFILEPATH) || (trkP && (GetTrkBits(trkP)&TB_PROFILEPATH)) ) {
 		ErrorMessage( MSG_EP_ON_PATH );
-		HilightProfileElevations( TRUE );
+//-		HilightProfileElevations( TRUE );
 		return;
 
 	} else if ( ( rc = FindProfileShortestPath( trkN, epN ) ) > 0 ) {
@@ -1231,11 +1231,11 @@ LOG( log_profile, 2, ( "Flip/Appending Path\n" ) )
 
 	} else {
 		ErrorMessage( MSG_NO_PATH_TO_EP );
-		HilightProfileElevations( TRUE );
+//-		HilightProfileElevations( TRUE );
 		return;
 	}
 
-	HilightProfileElevations( TRUE );
+//-	HilightProfileElevations( TRUE );
 	ComputeProfElem();
 	RedrawProfileW();
 	DoProfileChangeMode( NULL );
@@ -1269,12 +1269,12 @@ static void ProfileSubCommand( wBool_t set, void* pcmd )
 		radius = trackGauge/2.0;
 	pos = GetTrkEndPos( profilePopupTrk, profilePopupEp );
 	mode = GetTrkEndElevMode( profilePopupTrk, profilePopupEp );
-	if ( (mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE )
-		DrawFillCircle( &tempD, pos, radius,
-			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
-	if ( (mode&ELEV_MASK)==ELEV_DEF )
+//-	if ( (mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE )
+//-		DrawFillCircle( &tempD, pos, radius,
+//-			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
+//-	if ( (mode&ELEV_MASK)==ELEV_DEF )
 
-	DrawEndPt2( &mainD, profilePopupTrk, profilePopupEp, drawColorWhite );
+//-	DrawEndPt2( &mainD, profilePopupTrk, profilePopupEp, drawColorWhite );
 	elev = 0.0;
 	switch (cmd) {
 	case 0:
@@ -1293,11 +1293,12 @@ static void ProfileSubCommand( wBool_t set, void* pcmd )
 		break;
 	}
 	UpdateTrkEndElev( profilePopupTrk, profilePopupEp, mode, elev, NULL );
-	if ( (mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE )
-		DrawFillCircle( &tempD, pos, radius,
-			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
+//-	if ( (mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE )
+//-		DrawFillCircle( &tempD, pos, radius,
+//-			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
 	ComputeProfElem();
 	RedrawProfileW();
+	TempRedraw(); // ProfileSubCommand
 }
 
 
@@ -1322,18 +1323,19 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 		ParamGroupRecord( &profilePG );
 		wShow( profileW );
 		ParamLoadMessage( &profilePG, I_PROFILEMSG, _("Drag to change Elevation") );
-		HilightProfileElevations( TRUE );
+//-		HilightProfileElevations( TRUE );
 		profElem_da.cnt = 0;
 		station_da.cnt = 0;
 		RedrawProfileW();
 		if ( ClrAllTrkBits( TB_PROFILEPATH ) ) {
-			MainRedraw();
-			MapRedraw();
+			XMainRedraw();
+			XMapRedraw();
 		}
 		pathStartTrk = NULL;
 		SetAllTrackSelect( FALSE );
 		profileUndo = FALSE;
 		InfoMessage( _("Select a Defined Elevation to start profile") );
+		TempRedraw(); // CmdProfile C_START
 		return C_CONTINUE;
 	case C_LCLICK:
 		InfoMessage( "" );
@@ -1383,10 +1385,10 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 	case C_CANCEL:
 		wHide(profileW);
-		HilightProfileElevations( FALSE );
+//-		HilightProfileElevations( FALSE );
 		if (ClrAllTrkBits(TB_PROFILEPATH)) {
-			MainRedraw();
-			MapRedraw();
+			XMainRedraw();
+			XMapRedraw();
 		}
 		return C_TERMINATE;
 	case C_REDRAW:

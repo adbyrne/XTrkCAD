@@ -437,9 +437,10 @@ static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, 
 					AdjustStraightEndPt( trk, ep, pos );
 					DrawNewTrack( trk );
 	} else {
+		UndrawNewTrack( trk );
 		DeleteTrack( trk, TRUE );
-		MainRedraw();
-		MapRedraw();
+		XMainRedraw();
+		XMapRedraw();
 	}
 	return TRUE;
 }
@@ -505,9 +506,10 @@ BOOL_T ExtendStraightToJoin(
 			DisconnectTracks( trk1, 1-ep1, trk1x, ep1x );
 		}
 		if (trk2) {
+			UndrawNewTrack( trk1 );
 			DeleteTrack( trk1, TRUE );
-			MainRedraw();
-			MapRedraw();
+			XMainRedraw();
+			XMapRedraw();
 		} else {
 			trk2 = trk1;
 			UndrawNewTrack( trk2 );
@@ -569,17 +571,17 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		if (action == C_MOVE)
 			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 					FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
-        MainRedraw();
-        MapRedraw();
+        XMainRedraw();
+        XMapRedraw();
 		return C_CONTINUE;
 
 	case C_UP:
 		if (valid)
 			AdjustStraightEndPt( trk, ep, tempSegs(0).u.l.pos[1] );
 		tempSegs_da.cnt = 0;
-        DrawNewTrack( trk );
-        MainRedraw();
-        MapRedraw();
+	        DrawNewTrack( trk );
+        XMainRedraw();
+        XMapRedraw();
 		return C_TERMINATE;
 
 	default:

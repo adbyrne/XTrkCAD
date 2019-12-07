@@ -242,6 +242,7 @@ STATUS_T CornuDescriptionMove(
 
 	switch (action) {
 	case C_DOWN:
+		DrawCornuDescription( trk, &mainD, wDrawColorWhite );
 	case C_MOVE:
 	case C_UP:
 		editState = TRUE;
@@ -249,17 +250,19 @@ STATUS_T CornuDescriptionMove(
 		color = GetTrkColor( trk, &mainD );
         xx->cornuData.descriptionOff.x = pos.x - p0.x;
         xx->cornuData.descriptionOff.y = pos.y - p0.y;
-        DrawCornuDescription( trk, &mainD, color );
+//-        DrawCornuDescription( trk, &mainD, color );
         if (action == C_UP) {
         	editState = FALSE;
         }
-		MainRedraw();
-		MapRedraw();
+		XMainRedraw();
+		XMapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
-		if (editState)
+		if (editState) {
+		        DrawCornuDescription( trk, &tempD, wDrawColorBlack );
 			DrawLine( &mainD, p1, p0, 0, wDrawColorBlack );
+		}
 		break;
 		
 	}
@@ -882,10 +885,14 @@ BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 	track_p trk2;
 	if (SplitTrack(*trk,pos,*ep,&trk2,TRUE)) {
 		struct extraData *xx = GetTrkExtraData(*trk);
-		if (trk2) DeleteTrack(trk2,TRUE);
+		if (trk2) {
+			UndrawNewTrack( trk2 );
+			DeleteTrack(trk2,TRUE);
+		}
 		SetTrkEndPoint( *trk, *ep, *ep?xx->cornuData.pos[1]:xx->cornuData.pos[0], *ep?xx->cornuData.a[1]:xx->cornuData.a[0] );
-		MainRedraw();
-		MapRedraw();
+		DrawNewTrack( *trk );
+		XMainRedraw();
+		XMapRedraw();
 		return TRUE;
 	}
 	return FALSE;
@@ -1087,8 +1094,8 @@ static BOOL_T MergeCornu(
 	}
 	DrawNewTrack( trk3 );
 	UndoEnd();
-	MainRedraw();
-	MapRedraw();
+	XMainRedraw();
+	XMapRedraw();
 
 	return TRUE;
 }
@@ -1416,10 +1423,12 @@ static BOOL_T MakeParallelCornu(
 static BOOL_T TrimCornu( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center ) {
 	UndoModify(trk);
 	if (dist>0.0 && dist<minLength) {
+		UndrawNewTrack( trk );
 		DeleteTrack(trk, TRUE);
 		return FALSE;
 	} else {
 		struct extraData *xx;
+		UndrawNewTrack( trk );
 		xx = GetTrkExtraData(trk);
 		xx->cornuData.a[ep] = angle;
 		xx->cornuData.c[ep] = center;
@@ -1427,9 +1436,10 @@ static BOOL_T TrimCornu( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANG
 		xx->cornuData.pos[ep] = endpos;
 		RebuildCornu(trk);
 		SetTrkEndPoint(trk, ep, xx->cornuData.pos[ep], xx->cornuData.a[ep]);
+		DrawNewTrack( trk );
 	}
-	MainRedraw();
-	MapRedraw();
+	XMainRedraw();
+	XMapRedraw();
 	return TRUE;
 }
 

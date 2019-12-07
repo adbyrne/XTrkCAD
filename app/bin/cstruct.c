@@ -740,9 +740,9 @@ EXPORT STATUS_T CmdStructureAction(
 		} else {
 			CreateMoveAnchor(pos);
 		}
-		if (anchors_da.cnt>0)
-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-		MainRedraw();
+//-		if (anchors_da.cnt>0)
+//-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		XMainRedraw();
 		return C_CONTINUE;
 		break;
 
@@ -757,7 +757,7 @@ EXPORT STATUS_T CmdStructureAction(
 		Dst.state = 1;
 		InfoMessage( _("Drag to place") );
 		CreateMoveAnchor(pos);
-		MainRedraw();
+		XMainRedraw();
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -765,8 +765,8 @@ EXPORT STATUS_T CmdStructureAction(
 		if ( curStructure == NULL ) return C_CONTINUE;
 		PlaceStructure( rot0, pos, origPos, &Dst.pos, &Dst.angle );
 		CreateMoveAnchor(pos);
-        MainRedraw();
-        MapRedraw();
+        XMainRedraw();
+        XMapRedraw();
 		InfoMessage( "[ %0.3f %0.3f ]", pos.x - origPos.x, pos.y - origPos.y );
 		return C_CONTINUE;
 
@@ -782,7 +782,7 @@ EXPORT STATUS_T CmdStructureAction(
 		origAngle = Dst.angle;
 		InfoMessage( _("Drag to rotate") );
 		Dst.state = 2;
-		MainRedraw();
+		XMainRedraw();
 		validAngle = FALSE;
 		return C_CONTINUE;
 
@@ -804,7 +804,7 @@ EXPORT STATUS_T CmdStructureAction(
 		InfoMessage( _("Angle = %0.3f"), Dst.angle );
 		Dst.state = 2;
 		CreateRotateAnchor(rot0);
-		MainRedraw();
+		XMainRedraw();
 		return C_CONTINUE;
 		
 	case C_RUP:
@@ -813,8 +813,8 @@ EXPORT STATUS_T CmdStructureAction(
 		CreateMoveAnchor(pos);
 		Dst.state = 1;
 		InfoMessage(_("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel"));
-        MainRedraw();
-        MapRedraw();
+        XMainRedraw();
+        XMapRedraw();
 		return C_CONTINUE;
 
 	case C_CMDMENU:
@@ -831,17 +831,17 @@ EXPORT STATUS_T CmdStructureAction(
 			DrawSegs( &tempD, Dst.pos, Dst.angle,
 				curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlue );
 		if (anchors_da.cnt>0) {
-				DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 			}
 		if (Dst.state == 2)
-			DrawLine( &mainD, rot0, rot1, 0, wDrawColorBlack );
+			DrawLine( &tempD, rot0, rot1, 0, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if (Dst.state == 1)
-			DrawSegs( &tempD, Dst.pos, Dst.angle,
-				curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
+//-		if (Dst.state == 1)
+//-			DrawSegs( &tempD, Dst.pos, Dst.angle,
+//-				curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
 		Dst.state = 0;
 		InfoSubstituteControls( NULL, NULL );
 		HotBarCancel();
@@ -913,9 +913,9 @@ static STATUS_T CmdStructure(
 		} else {
 			CreateMoveAnchor(pos);
 		}
-		if (anchors_da.cnt>0)
-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-		MainRedraw();
+//-		if (anchors_da.cnt>0)
+//-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		XMainRedraw();
 		return C_CONTINUE;
 		break;
 	case C_DOWN:
@@ -949,11 +949,13 @@ static STATUS_T CmdStructure(
 	case C_CANCEL:
 		wHide( structureW );
 		/*no break*/
+	case C_REDRAW:
+		if (anchors_da.cnt>0)
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 	case C_TEXT:
 	case C_OK:
 	case C_FINISH:
 	case C_CMDMENU:
-	case C_REDRAW:
 		return CmdStructureAction( action, pos );
 
 	default:

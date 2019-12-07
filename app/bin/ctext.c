@@ -109,8 +109,8 @@ static void TextDlgUpdate(
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL, Dt.boxed );
 		}
-        MainRedraw();
-        MapRedraw();
+        XMainRedraw();
+        XMapRedraw();
         break;
 	}
 }
@@ -160,7 +160,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 		break;
 	case C_DOWN:
-		if (Dt.state != 0) {
+		if (Dt.state != POSITION_TEXT) {
 		}
 		Dt.pos = pos;
 		Dt.cursPos0.y = Dt.cursPos1.y = pos.y + Dt.lastLineOffset;
@@ -168,21 +168,21 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		DrawTextSize(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size);  //In case fontsize change
 		Dt.cursHeight = size.y;
 		Dt.cursPos1.y += Dt.cursHeight;
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
+//-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+//-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
         Dt.state = SHOW_TEXT;
-        MainRedraw();
-        MapRedraw();
+        XMainRedraw();
+        XMapRedraw();
 		return C_CONTINUE;
 	case C_MOVE:
 		Dt.pos = pos;
 		Dt.cursPos0.y = Dt.cursPos1.y = pos.y + Dt.lastLineOffset;
 		Dt.cursPos0.x = Dt.cursPos1.x = pos.x + Dt.lastLineLen;
 		Dt.cursPos1.y += Dt.cursHeight;
-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
-        MainRedraw();
-        MapRedraw();
+//-		DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, wDrawColorBlack );
+//-		DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
+        XMainRedraw();
+        XMapRedraw();
         return C_CONTINUE;
 	case C_UP:
 		return C_CONTINUE;
@@ -236,13 +236,13 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.cursHeight = size.y;
 		Dt.cursPos0.y -=descent;
 		Dt.cursPos1.y +=Dt.cursHeight;
-		MainRedraw();
-		MapRedraw();
+		XMainRedraw();
+		XMapRedraw();
 		//DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 		//DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
 		return C_CONTINUE;
 	case C_REDRAW:
-		if (Dt.state == 1) {
+		if (Dt.state == SHOW_TEXT) {
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 			DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
 		}
@@ -252,8 +252,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			Dt.state = POSITION_TEXT;
 		}
 		InfoSubstituteControls( NULL, NULL );
-		MainRedraw();
-		MapRedraw();
+		XMainRedraw();
+		XMapRedraw();
 		return C_TERMINATE;
 	case C_OK:
 		if (Dt.state != POSITION_TEXT) {
@@ -267,8 +267,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 			}
 		}
 		InfoSubstituteControls( NULL, NULL );
-        MainRedraw();
-        MapRedraw();
+        XMainRedraw();
+        XMapRedraw();
 		return C_TERMINATE;
 
 	case C_FINISH:

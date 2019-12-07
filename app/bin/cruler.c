@@ -71,7 +71,7 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 			Dr.state = DR_OFF;
 			break;
 		}
-        MainRedraw();
+        XMainRedraw();
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -82,23 +82,23 @@ static STATUS_T CmdRuler( wAction_t action, coOrd pos )
 		Dr.state = DR_ON;
 		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
 		InfoMessage( "0.0" );
-        MainRedraw();
+        XMainRedraw();
 		return C_CONTINUE;
 
 	case C_MOVE:
-		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorWhite );
+//-		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorWhite );
 		Dr.pos1 = pos;
-		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
 		InfoMessage( "%s", FormatDistance( FindDistance( Dr.pos0, Dr.pos1 ) ) );
-        MainRedraw();
+        XMainRedraw();
 		return C_CONTINUE;
 
 	case C_UP:
 		inError = TRUE;
-        MainRedraw();
+        XMainRedraw();
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_CANCEL:
@@ -126,21 +126,24 @@ STATUS_T ModifyRuler(
 			return C_ERROR;
 		}
 	case C_MOVE:
-		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorWhite );
+//-		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorWhite );
 		if ( Dr.modifyingEnd == 0 ) {
 			Dr.pos0 = pos;
 		} else {
 			Dr.pos1 = pos;
 		}
-		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
 		InfoMessage( "%s", FormatDistance( FindDistance( Dr.pos0, Dr.pos1 ) ) );
-        MainRedraw();
+        XMainRedraw();
 		return C_CONTINUE;
 	case C_UP:
 		return C_CONTINUE;
+	case C_REDRAW:
+		DrawRuler( &tempD, Dr.pos0, Dr.pos1, 0.0, TRUE, TRUE, wDrawColorBlack );
+		break;
 	default:
 		return C_ERROR;
 	}
+	return C_CONTINUE;
 }
 
 

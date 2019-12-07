@@ -398,6 +398,7 @@ STATUS_T CompoundDescriptionMove(
 	case C_DOWN:
 		editMode = TRUE;
 		REORIGIN( p0, xx->descriptionOrig, xx->angle, xx->orig )
+		DrawCompoundDescription( trk, &mainD, wDrawColorWhite );
 
 	case C_MOVE:
 	case C_UP:
@@ -411,12 +412,16 @@ STATUS_T CompoundDescriptionMove(
 		if (action == C_UP) {
 			editMode = FALSE;
 		}
-		MainRedraw();
-		MapRedraw();
+		XMainRedraw();
+		XMapRedraw();
+		if ( action == C_UP ) {
+			DrawCompoundDescription( trk, &mainD, color );
+		}
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 		break;
 	case C_REDRAW:
 		if (editMode) {
+			DrawCompoundDescription( trk, &tempD, wDrawColorBlack );
 			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
 		}
 	}
@@ -657,20 +662,20 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		   UndoStart( _("Change Track"), "Change Track" );
 		UndoModify( trk );
 		GetBoundingBox( trk, &hi, &lo );
-		if ( labelScale >= mainD.scale &&
-			 !OFF_MAIND( lo, hi ) ) {
-			DrawCompoundDescription( trk, &tempD, wDrawColorWhite );
-		}
+//-		if ( labelScale >= mainD.scale &&
+//-			 !OFF_MAIND( lo, hi ) ) {
+//-			DrawCompoundDescription( trk, &tempD, wDrawColorWhite );
+//-		}
 		/*sprintf( message, "%s\t%s\t%s", manufS, nameS, partnoS );*/
 		if (xx->title) MyFree(xx->title);
 		xx->title = newTitle;
 		xx->flipped = flipped;
 		xx->ungrouped = ungrouped;
 		xx->split = split;
-		if ( labelScale >= mainD.scale &&
-			 !OFF_MAIND( lo, hi ) ) {
-			DrawCompoundDescription( trk, &tempD, GetTrkColor(trk,&tempD) );
-		}
+//-		if ( labelScale >= mainD.scale &&
+//-			 !OFF_MAIND( lo, hi ) ) {
+//-			DrawCompoundDescription( trk, &tempD, GetTrkColor(trk,&tempD) );
+//-		}
 		return;
 	}
 

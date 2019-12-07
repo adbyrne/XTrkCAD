@@ -976,7 +976,7 @@ EXPORT void Reset(void) {
 		DoCheckPoint();
 		checkPtMark = changed;
 	}
-	MainRedraw();
+	MainRedraw(); // Reset
 	MapRedraw();
 	EnableCommands();
 	ResetMouseState();
@@ -1089,8 +1089,7 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 			if ((mode & (~WKEY_SHIFT)) != 0) {
 				wBeep();
 				bExit = TRUE;
-			}
-			if (((mode & WKEY_SHIFT) == 0) == (rightClickMode == 0)) {
+			} else if (((mode & WKEY_SHIFT) == 0) == (rightClickMode == 0)) {
 				if (selectedTrackCount > 0) {
 					if (commandList[curCommand].options & IC_CMDMENU) {
 					}
@@ -1142,8 +1141,8 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 			&& (commandList[curCommand].stickyMask & stickySet)) {
 		tempSegs_da.cnt = 0;
 		UpdateAllElevations();
-        MainRedraw();
-        MapRedraw();
+        XMainRedraw();
+        XMapRedraw();
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
 		}

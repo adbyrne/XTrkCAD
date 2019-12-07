@@ -1808,9 +1808,9 @@ EXPORT void DrawSegsO(
 		default:
 			if (d->options&DC_QUICK)
 				return;
-			if ((d->options&DC_SIMPLE) != 0 &&
-				trackGauge != 0.0)
-				return;
+//-			if ((d->options&DC_SIMPLE) != 0 &&
+//-				trackGauge != 0.0)
+//-				return;
 		}
 		wDrawWidth thick = 3;
 #ifdef WINDOWS

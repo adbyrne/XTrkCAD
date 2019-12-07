@@ -159,22 +159,22 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		tempSegs_da.cnt = 0;
 
 	case C_MOVE:
-		MainRedraw();
+		XMainRedraw();
 		if (Dpa.Trk == NULL) return C_CONTINUE;
-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
+//-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, parRFactor, NULL, &p0, &p1, parType == PAR_TRACK ) ) {
 			Dpa.Trk = NULL;
 			tempD.options = save_options;
 			return C_CONTINUE;
 		}
-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+//-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
 		Dpa.anchor_Trk = NULL;
 		if (Dpa.Trk == NULL) return C_CONTINUE;
-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
+//-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		p = p0;
 		tempSegs_da.cnt = 0;
 		if ((t0=OnTrack( &p, FALSE, TRUE )) != NULL) {
@@ -203,8 +203,8 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		UndoStart( _("Create Parallel Track"), "newParallel" );
 		if ( !MakeParallelTrack( Dpa.Trk, pos, parSeparation, parRFactor, &t, NULL, NULL, parType == PAR_TRACK ) ) {
 			tempSegs_da.cnt = 0;
-			MainRedraw();
-			MapRedraw();
+			XMainRedraw();
+			XMapRedraw();
 			return C_TERMINATE;
 		}
 		if (GetTrkGauge( Dpa.Trk )> parSeparation)
@@ -234,8 +234,8 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		sprintf( message, "parallel-separation-%s", curScaleName );
 		wPrefSetFloat( "misc", message, parSeparation );
 		tempSegs_da.cnt = 0;
-		MainRedraw();
-		MapRedraw();
+		XMainRedraw();
+		XMapRedraw();
 		return C_TERMINATE;
 
 	case C_REDRAW:
@@ -243,7 +243,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 			DrawTrack(Dpa.anchor_Trk,&mainD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
 		}
 		if (tempSegs_da.cnt>0) {
-			DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		}
 		return C_CONTINUE;
 
