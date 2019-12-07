@@ -3194,8 +3194,8 @@ EXPORT void DrawSelectedTracks( drawCmd_p d )
 
 EXPORT void HilightElevations( BOOL_T hilight )
 {
-	static long lastRedraw = -1;
-	static BOOL_T lastHilight = FALSE;
+//-	static long lastRedraw = -1;
+//-	static BOOL_T lastHilight = FALSE;
 	track_p trk, trk1;
 	EPINX_T ep;
 	int mode;
@@ -3203,12 +3203,12 @@ EXPORT void HilightElevations( BOOL_T hilight )
 	coOrd pos;
 	DIST_T radius;
 
-	if (currRedraw > lastRedraw) {
-		lastRedraw = currRedraw;
-		lastHilight = FALSE;
-	}
-	if (lastHilight == hilight)
-		return;
+//-	if (currRedraw > lastRedraw) {
+//-		lastRedraw = currRedraw;
+//-		lastHilight = FALSE;
+//-	}
+//-	if (lastHilight == hilight)
+//-		return;
 	radius = 0.05*mainD.scale;
 	if ( radius < trackGauge/2.0 )
 		radius = trackGauge/2.0;
@@ -3232,7 +3232,7 @@ EXPORT void HilightElevations( BOOL_T hilight )
 			}
 		}
 	}
-	lastHilight = hilight;
+//-	lastHilight = hilight;
 }
 
 
