@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "cundo.h"
 #include "custom.h"
@@ -439,7 +440,8 @@ ReadTrackNote(char *line)
 	
 	cp = GetNextLine();
 	
-	if (strcmp(cp, "    END")) {
+	while ( *cp && isspace(*cp ) ) cp++;
+	if (strncmp(cp, "END", 3)) {
 		InputError(_("Expected END statement not found!"),
 				TRUE );
 		exit(1);
