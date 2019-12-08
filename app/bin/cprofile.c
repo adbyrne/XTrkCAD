@@ -159,7 +159,7 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 	DIST_T grade;
 	wFont_p fp;
 	static dynArr_t points_da;
-#define points(N) DYNARR_N( pts_t, points_da, N )
+#define points(N) DYNARR_N( coOrd, points_da, N )
 	wDrawWidth lw;
 	station_p ps;
 	coOrd textsize;
@@ -190,19 +190,19 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 		pt.y = profElem(inx).elev;
 		pt.x = profElem(inx).dist;
 		DYNARR_APPEND( pts_t, points_da, 10 );
-		points(points_da.cnt-1).pt = pt;
-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
+		points(points_da.cnt-1) = pt;
+//-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 	}
 	pb.y = pt.y = prof.minE;
 	if ( points_da.cnt > 1 ) {
 		DYNARR_APPEND( coOrd, points_da, 10 );
 		pt.x = prof.totalD;
-		points(points_da.cnt-1).pt = pt;
-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
+		points(points_da.cnt-1) = pt;
+//-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 		DYNARR_APPEND( pts_t, points_da, 10 );
 		pb.x = 0;
-		points(points_da.cnt-1).pt = pb;
-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
+		points(points_da.cnt-1) = pb;
+//-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 		DrawPoly( D, points_da.cnt, points_da.ptr, NULL, 0, profileColorFill, 1, 0 );
 		DrawLine( D, pb, pt, lw, borderColor );
 	}
@@ -220,9 +220,13 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 	}
 
 	pb.x = 0.0; pb.y = prof.minE;
-	pt = points(0).pt;
+	pt = points(0);
 	DrawLine( D, pb, pt, lw, borderColor );
-	sprintf( message, "%0.1f", PutDim(profElem(0).elev) );
+	if (units==UNITS_ENGLISH) {
+		sprintf( message, "%0.1f\"", PutDim(profElem(0).elev)+0.05 );
+	} else {
+		sprintf( message, "%0.1fmm", PutDim(profElem(0).elev)+0.05 );
+	}
 	if (printVert) {
 		pl.x = pt.x + LABELH/2.0/prof.scaleX*D->scale;
 		pl.y = pt.y + 2.0/mainD.dpi/prof.scaleY*D->scale;
@@ -239,7 +243,7 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 	for (inx=1; inx<profElem_da.cnt; inx++ ) {
 		pt.y = profElem(inx).elev;
 		pb.x = pt.x = profElem(inx).dist;
-		pt = points(inx).pt;
+		pt = points(inx);
 		pb.x = pt.x;
 		DrawLine( D, pl, pt, lw, (profElem(inx).defined?profileColorDefinedProfile:profileColorUndefinedProfile) );
 		DrawLine( D, pb, pt, lw, borderColor );
@@ -248,8 +252,8 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 				(profElem(inx).dist-profElem(inx-1).dist);
 			sprintf( message, "%0.1f%%", round(grade*1000.0)/10.0 );
 			DrawTextSize( &mainD, message, fp, fontSize, FALSE, &textsize );
-			pl.x = (points(inx).pt.x+points(inx-1).pt.x)/2.0;
-			pl.y = (points(inx).pt.y+points(inx-1).pt.y)/2.0;
+			pl.x = (points(inx).x+points(inx-1).x)/2.0;
+			pl.y = (points(inx).y+points(inx-1).y)/2.0;
 			if (printVert) {
 				pl.x += (LABELH/2)/prof.scaleX*D->scale;
 				pl.y += ((LABELH/2)*grade/prof.scaleX + 2.0/mainD.dpi/prof.scaleY)*D->scale;
