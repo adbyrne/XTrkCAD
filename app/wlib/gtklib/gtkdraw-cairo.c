@@ -197,6 +197,8 @@ static cairo_t* gtkDrawCreateCairoContext(
 	}
 
 	width = width ? abs(width) : 1;
+	if ( color == wDrawColorWhite )
+		width += 1;  // Remove ghosts
 	cairo_set_line_width(cairo, width);
 
 	cairo_set_line_cap(cairo, CAIRO_LINE_CAP_BUTT);
@@ -386,6 +388,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 		cairo_move_to(cairo, INMAPX(bd, x0), INMAPY(bd, y0 - (CENTERMARK_LENGTH / 2 )));
 		cairo_line_to(cairo, INMAPX(bd, x0) , INMAPY(bd, y0  + (CENTERMARK_LENGTH / 2)));
 		cairo_new_sub_path( cairo );
+
 	}
 
 	// draw the curve itself
@@ -395,6 +398,8 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 	gtkDrawDestroyCairoContext(cairo);
 	if (bd->widget && !bd->delayUpdate)
 			gtk_widget_queue_draw_area(bd->widget,x,y,w,h);
+
+
 
 }
 
@@ -464,8 +469,8 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 									  (int *) &w, (int *) &h,
 									  (int *) &ascent, (int *) &descent, (int *) &baseline);
 
-	/* cairo does not support the old method of text removal by overwrite; force always write here and
-           refresh on cancel event */
+	/* cairo does not support the old method of text removal by overwrite;
+	 * if color is White, then overwrite old text with a White rectangle */
 	GdkColor* const gcolor = wlibGetColor(color, TRUE);
 	cairo_set_source_rgb(cairo, gcolor->red / 65535.0, gcolor->green / 65535.0, gcolor->blue / 65535.0);
 
@@ -475,9 +480,17 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 
 	cairo_move_to(cairo, 0, 0);
 
-	pango_cairo_update_layout(cairo, layout);
-
-	pango_cairo_show_layout(cairo, layout);
+	if ( color == wDrawColorWhite ) {
+		// Draw an empty rectangle
+		cairo_rel_line_to( cairo, w, 0 );
+		cairo_rel_line_to( cairo, 0, h );
+		cairo_rel_line_to( cairo, -w, 0 );
+		cairo_rel_line_to( cairo, 0, -h );
+		cairo_fill( cairo );
+	} else {
+		pango_cairo_update_layout(cairo, layout);
+		pango_cairo_show_layout(cairo, layout);
+	}
 	wlibFontDestroyPangoLayout(layout);
 	cairo_restore( cairo );
 	gtkDrawDestroyCairoContext(cairo);
@@ -835,7 +848,11 @@ static void wlibDrawFilled(
 	wControl_p b;
 	wWin_p win;
 	GdkDrawable * gdk_drawable, * cairo_surface;
-	GtkWidget * widget;
+	GtkWidget * widget = bd->widget;
+	
+	static long cDBM = 0;
+	if ( iDrawLog )
+		printf( "wDrawBitMap %ld\n", cDBM++ );
 
 	x = INMAPX( bd, x-bm->x );
 	y = INMAPY( bd, y-bm->y )-bm->h;
@@ -919,7 +936,8 @@ static void wlibDrawFilled(
 	cairo_destroy(cairo);
 
 	if (widget && !bd->delayUpdate)
-		gtk_widget_queue_draw_area(GTK_WIDGET(widget),bd->realX,bd->realY,bm->w,bm->h);
+		gtk_widget_queue_draw_area(GTK_WIDGET(widget), x, y, bm->w, bm->h);
+
 }
 
 
