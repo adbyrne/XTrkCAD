@@ -41,6 +41,7 @@
 #include "utility.h"
 #include "draw.h"
 #include "misc.h"
+#include "trackx.h"
 
 
 #include "bitmaps/bmendpt.xbm"
@@ -280,6 +281,88 @@ static void DrawTrackAndEndPts(
 }
 
 
+
+static void RedrawSelectedTracksBoundary()
+{
+/* Truth table: 4 cases for a track trk, connected to trk1
+ *           SELREDRAW
+ * trk, trk1:  F, F   - No changes, nothing to draw
+ *             T, F   - trk changes but trk1 didn't, flip drawing of select boundary marker
+ *             F, T   - trk didn't change but trk1 did, handle redrawing when we get to 2nd track
+ *             T, T   - both changed, but we don't need to redraw anything
+ *                      unfortunately we will do a redundant redraw when we get to the 2nd track
+ */
+//	if (importTrack != NULL)
+//		return;
+	track_p trk;
+	TRK_ITERATE( trk ) {
+		if ( GetTrkBits(trk) & TB_SELREDRAW ) {
+			// This track has changed
+			for ( EPINX_T ep = 0; ep < GetTrkEndPtCnt(trk); ep++ ) {
+				track_p trk1 = GetTrkEndTrk( trk, ep );
+				if ( trk1 == NULL )
+					continue;
+
+//				if ( GetTrkIndex( trk ) < GetTrkIndex( trk1 )
+//					continue;
+				if ( ( GetTrkBits(trk1) & TB_SELREDRAW ) == 0 ) {
+					// Connected track hasn't changed
+					wDrawColor color = selectedColor;
+					if ( ( GetTrkBits(trk) & TB_SELECTED ) == ( GetTrkBits(trk1) & TB_SELECTED ) ) {
+						// There was a select boundary here, but not now.
+						// Undraw old X
+						color = wDrawColorWhite;
+					}
+					DIST_T len;
+					coOrd p = GetTrkEndPos( trk, ep );
+					ANGLE_T a = GetTrkEndAngle( trk, ep );
+					coOrd p0, p1, p2;
+					len = trackGauge*2.0;
+					if (len < 0.10*mainD.scale)
+						len = 0.10*mainD.scale;
+					Translate( &p1, p, a+45, len );
+					Translate( &p2, p, a+225, len );
+					DrawLine( &mainD, p1, p2, 2, color );
+					Translate( &p1, p, a-45, len );
+					Translate( &p2, p, a-225, len );
+					DrawLine( &mainD, p1, p2, 2, color );
+					if ( color == wDrawColorWhite ) {
+						// Fill in holes by undraw cross
+						DIST_T len2 = sqrt( trackGauge*trackGauge/2.0 );
+						DIST_T len3 = 0.1*mainD.scale;
+						color = GetTrkColor( trk, &mainD );
+						if ( mainD.scale < twoRailScale ) {
+							Translate( &p0, p, a-225, len2 );
+							Translate( &p1, p0, a, len3 );
+							Translate( &p2, p0, a+180, len3 );
+							DrawLine( &mainD, p1, p2, GetTrkWidth(trk), color );
+							Translate( &p0, p, a+225, len2 );
+							Translate( &p1, p0, a, len3 );
+							Translate( &p2, p0, a+180, len3 );
+							DrawLine( &mainD, p1, p2, GetTrkWidth(trk), color );
+							color = GetTrkColor( trk1, &mainD );
+							Translate( &p0, p, a-45, len2 );
+							Translate( &p1, p0, a, len3 );
+							Translate( &p2, p0, a+180, len3 );
+							DrawLine( &mainD, p1, p2, GetTrkWidth(trk1), color );
+							Translate( &p0, p, a+45, len2 );
+							Translate( &p1, p0, a, len3 );
+							Translate( &p2, p0, a+180, len3 );
+							DrawLine( &mainD, p1, p2, GetTrkWidth(trk1), color );
+						} else {
+							Translate( &p1, p, a, len3 );
+							Translate( &p2, p, a+180, len3 );
+							DrawLine( &mainD, p1, p2, GetTrkWidth(trk), color );
+						}
+					}
+				}
+			}
+			ClrTrkBits( trk, TB_SELREDRAW );
+		}
+	}
+}
+
+
 EXPORT void SetAllTrackSelect( BOOL_T select )
 {
 	track_p trk;
@@ -304,6 +387,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 				else
 					ClrTrkBits( trk, TB_SELECTED );
 				if (!doRedraw)
+					SetTrkBits( trk, TB_SELREDRAW );
 					DrawTrackAndEndPts( trk, wDrawColorBlack );
 			}
 		}
@@ -313,6 +397,7 @@ EXPORT void SetAllTrackSelect( BOOL_T select )
 		MainRedraw(); // SetAllTrackSelect
 //-		MapRedraw();
 	} else {
+		RedrawSelectedTracksBoundary();
 		wDrawDelayUpdate( mainD.d, FALSE );
 	}
 }
@@ -343,6 +428,7 @@ EXPORT void InvertTrackSelect( void *ptr )
 		}
 	}
 	
+	RedrawSelectedTracksBoundary();
 	SelectedTrackCountChange();
 	MainRedraw(); // InvertTrackSelect
 //-	MapRedraw();
@@ -377,17 +463,23 @@ EXPORT void OrphanedTrackSelect( void *ptr )
 			}		
 		}
 	}
+	RedrawSelectedTracksBoundary();
 	SelectedTrackCountChange();
 	MainRedraw(); // OrphanTrackSelect
 //-	MapRedraw();
 }
 
-
-static void SelectOneTrack(
+EXPORT void SelectOneTrack(
 		track_p trk,
 		wBool_t selected )
 {
-		DrawTrackAndEndPts( trk, wDrawColorWhite );
+//-		DrawTrackAndEndPts( trk, wDrawColorWhite );
+		BOOL_T bRedraw = (GetTrkSelected(trk) != 0) != selected;
+		if ( !bRedraw ) {
+			ClrTrkBits( trk, TB_SELREDRAW );
+			return;
+		}
+		SetTrkBits( trk, TB_SELREDRAW );
 		if (selected) {
 			SetTrkBits( trk, TB_SELECTED );
 			selectedTrackCount++;
@@ -433,6 +525,7 @@ static void SelectConnectedTracks(
 		}
 //-		SetTrkBits(trk, TB_SELECTED);
 	}
+	RedrawSelectedTracksBoundary();
 	wDrawDelayUpdate( mainD.d, TRUE );	
 	wFlush();	
 	InfoCount( trackCount );
@@ -583,7 +676,7 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T junk )
 	if ( drawTunnel == 0 )
 		flipHiddenDoSelectRecount = TRUE;
 	if (GetTrkVisible(trk)) {
-		ClrTrkBits( trk, TB_VISIBLE|(drawTunnel==0?TB_SELECTED:0) );
+		ClrTrkBits( trk, TB_VISIBLE|(drawTunnel==0?(TB_SELECTED|TB_SELREDRAW):0) );
 		ClrTrkBits (trk, TB_BRIDGE);
 	} else {
 		SetTrkBits( trk, TB_VISIBLE );
@@ -722,6 +815,7 @@ EXPORT void SelectCurrentLayer( void )
 			SelectOneTrack( trk, TRUE );
 		}
 	}
+	RedrawSelectedTracksBoundary();
 }
 
 
@@ -1141,7 +1235,7 @@ static ANGLE_T moveAngle;
 static coOrd moveD_hi, moveD_lo;
 
 static drawCmd_t moveD = {
-		NULL, &tempDrawFuncs, 0 /*-DC_SIMPLE*/, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
+		NULL, &tempDrawFuncs, 0/*-DC_SIMPLE*/, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
 
 
 
@@ -2634,8 +2728,12 @@ static STATUS_T SelectArea(
 					}
 				}
 			}
+			if (cnt > incrementalDrawLimit) {
+				MainRedraw(); // SelectArea C_UP
+			} else {
+				RedrawSelectedTracksBoundary();
+			}
 			SelectedTrackCountChange();
-			MainRedraw(); // SelectArea C_UP
 		}
 		return C_CONTINUE;
 
@@ -2688,6 +2786,7 @@ static STATUS_T SelectTrack(
 			SetAllTrackSelect( FALSE );							//Just this Track
 			DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,TRUE);
 		}
+		RedrawSelectedTracksBoundary();
 		return C_CONTINUE;
 	}
 	if (MyGetKeyState() & WKEY_SHIFT) {						//All track up to
@@ -2698,6 +2797,7 @@ static STATUS_T SelectTrack(
 		SetAllTrackSelect( FALSE );							//Just this Track
 		SelectOneTrack( trk, !GetTrkSelected(trk) );
 	}
+	RedrawSelectedTracksBoundary();
 
 	return C_CONTINUE;
 }

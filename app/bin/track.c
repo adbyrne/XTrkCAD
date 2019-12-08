@@ -3037,17 +3037,20 @@ EXPORT void DrawEndPt(
 			return;
 
 	sepBoundary = FALSE;
-	if ((d->options&DC_PRINT)==0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
+	if ( inDrawTracks && (d->options&DC_PRINT)==0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
 		DIST_T len;
 		len = trackGauge*2.0;
 		if (len < 0.10*d->scale)
 			len = 0.10*d->scale;
+		long oldOptions = d->options;
+		d->options &= ~DC_NOTSOLIDLINE;
 		Translate( &p0, p, a+45, len );
 		Translate( &p1, p, a+225, len );
-		DrawLine( d, p0, p1, 0, selectedColor );
+		DrawLine( d, p0, p1, 2, selectedColor );
 		Translate( &p0, p, a-45, len );
 		Translate( &p1, p, a-225, len );
-		DrawLine( d, p0, p1, 0, selectedColor );
+		DrawLine( d, p0, p1, 2, selectedColor );
+		d->options = oldOptions;
 		sepBoundary = TRUE;
 	} else if ((d->options&DC_PRINT)==0 && importTrack == NULL && (!GetTrkSelected(trk)) && GetTrkSelected(trk1)) {
 		sepBoundary = TRUE;

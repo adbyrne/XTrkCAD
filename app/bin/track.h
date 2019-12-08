@@ -425,6 +425,7 @@ void SetDebug( char * );
 #define TB_CARATTACHED	(1<<7)
 #define TB_NOTIES       (1<<8)
 #define TB_BRIDGE       (1<<9)
+#define TB_SELREDRAW	(1<<10)
 #define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED)
 
 /* track.c */
