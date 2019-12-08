@@ -775,7 +775,7 @@ static void DoProfileClear( void * junk )
 {
 	profElem_da.cnt = 0;
 	station_da.cnt = 0;
-	if (ClrAllTrkBits( TB_PROFILEPATH )) {
+	if (ClrAllTrkBitsRedraw( TB_PROFILEPATH, TRUE )) {
 		XMainRedraw();
 		XMapRedraw();
 	}
@@ -1318,7 +1318,7 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 			profileColorDefinedProfile = drawColorBlue;
 			profileColorUndefinedProfile = drawColorRed;
 			profileColorFill = drawColorAqua;
-			DrawTextSize( &mainD, "999", wStandardFont( F_HELV, FALSE, FALSE ), screenProfileFontSize, FALSE, &textsize );
+			DrawTextSize( &mainD, "999.9", wStandardFont( F_HELV, FALSE, FALSE ), screenProfileFontSize, FALSE, &textsize );
 			labelH = textsize.y;
 			labelW = textsize.x;
 			profileW = ParamCreateDialog( &profilePG, MakeWindowTitle(_("Profile")), _("Done"), DoProfileDone, (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE, NULL );
@@ -1331,7 +1331,7 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 		profElem_da.cnt = 0;
 		station_da.cnt = 0;
 		RedrawProfileW();
-		if ( ClrAllTrkBits( TB_PROFILEPATH ) ) {
+		if ( ClrAllTrkBitsRedraw( TB_PROFILEPATH, TRUE ) ) {
 			XMainRedraw();
 			XMapRedraw();
 		}
@@ -1390,7 +1390,7 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 	case C_CANCEL:
 		wHide(profileW);
 //-		HilightProfileElevations( FALSE );
-		if (ClrAllTrkBits(TB_PROFILEPATH)) {
+		if (ClrAllTrkBitsRedraw(TB_PROFILEPATH, TRUE)) {
 			XMainRedraw();
 			XMapRedraw();
 		}

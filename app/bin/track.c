@@ -568,13 +568,21 @@ void SetTrkLayer( track_p trk, int layer )
 
 EXPORT int ClrAllTrkBits( int bits )
 {
+	return ClrAllTrkBitsRedraw( bits, FALSE );
+}
+
+
+EXPORT int ClrAllTrkBitsRedraw( int bits, wBool_t bRedraw )
+{
 	track_p trk;
-	int cnt;
-	cnt = 0;
+	int cnt = 0;
 	TRK_ITERATE( trk ) {
-		if (trk->bits&bits)
+		if (trk->bits&bits) {
 			cnt++;
-		trk->bits &= ~bits;
+			trk->bits &= ~bits;
+			if ( bRedraw )
+				DrawNewTrack( trk );
+		}
 	}
 	return cnt;
 }

@@ -496,6 +496,7 @@ BOOL_T IsTrackDeleted( track_p );
 #define SetTrkNoTies(T,V)		((V)?SetTrkBits(T,TB_NOTIES):ClrTrkBits(T,TB_NOTIES))
 #define SetTrkBridge(T,V)		((V)?SetTrkBits(T,TB_BRIDGE):ClrTrkBits(T,TB_BRIDGE))
 int ClrAllTrkBits( int );
+int ClrAllTrkBitsRedraw( int, wBool_t );
 
 void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
 void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
