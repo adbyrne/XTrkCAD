@@ -2000,7 +2000,7 @@ static void DoNewScale( DIST_T scale )
 		mainD.orig.x = mainCenter.x - mainD.size.x/2.0;
 		mainD.orig.y = mainCenter.y - mainD.size.y/2.0;
 	}
-	ConstraintOrig( &mainD.orig, mainD.size, FALSE );
+	ConstraintOrig( &mainD.orig, mainD.size, TRUE );
 	MainRedraw(); // DoNewScale
 	tempD.orig = mainD.orig;
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
