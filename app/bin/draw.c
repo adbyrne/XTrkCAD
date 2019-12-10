@@ -633,7 +633,8 @@ EXPORT void DrawBoxedString(
 		ANGLE_T a )
 {
 	coOrd size, p[4], p0=pos, p1, p2;
-	static int bw=5, bh=4, br=2, bb=2;
+//-	static int bw=5, bh=4, br=2, bb=2;
+	static int bw=0, bh=0, br=0, bb=0;
 	static double arrowScale = 0.5;
 	unsigned long options = d->options;
 	POS_T descent;
@@ -662,7 +663,7 @@ EXPORT void DrawBoxedString(
 	}
 	size.x += bw*d->scale/d->dpi;
 	size.y += bh*d->scale/d->dpi;
-	size.y += descent;
+//-	size.y += descent;
 	p[0] = p0;
 	p[0].x -= br*d->scale/d->dpi;
 	p[0].y -= bb*d->scale/d->dpi+descent;
