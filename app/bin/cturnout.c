@@ -1506,7 +1506,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
         } else {
             double x, y;
             x = 0; y = 0;
-            for (int i=0;i<=epCnt; i++) {
+            for (int i=0;i<epCnt; i++) {
                 coOrd cpos = GetTrkEndPos(trk,i);
                 x += cpos.x;
                 y += cpos.y;
