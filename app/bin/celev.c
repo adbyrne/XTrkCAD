@@ -468,7 +468,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
 				InfoMessage( _("Point Selected!") );
 				ElevSelect( trk0, ep0 );
-				return C_CONTINUE;
+//-				return C_CONTINUE;
 			} else if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 				UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 				oldTrackCount = trackCount;
@@ -481,7 +481,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			}
 		}
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		elevTrk = NULL;
+//-		elevTrk = NULL;
 		XMainRedraw();
 		return C_CONTINUE;
 	case C_OK:
@@ -499,7 +499,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		DoElevHilight( NULL );
 		HilightSelectedEndPt( TRUE, elevTrk, elevEp );
 		if (anchors_da.cnt)
-					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 	}
 	return C_CONTINUE;

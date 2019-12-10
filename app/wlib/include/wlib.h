@@ -538,6 +538,7 @@ void wDrawGetTextSize(		wPos_t *, wPos_t *, wPos_t *, wDraw_p, const char *, wFo
 				wFontSize_t );
 void wDrawClear(		wDraw_p );
 void wDrawClearTemp(		wDraw_p );
+wBool_t wDrawSetTempMode(	wDraw_p, wBool_t );
 
 void wDrawDelayUpdate(		wDraw_p, wBool_t );
 void wDrawClip(			wDraw_p, wPos_t, wPos_t, wPos_t, wPos_t );

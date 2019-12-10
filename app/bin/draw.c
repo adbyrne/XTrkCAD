@@ -512,10 +512,12 @@ EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s, BOOL_T add )
 	w = (wPos_t)((s.x/d->scale)*d->dpi+0.5);
 	h = (wPos_t)((s.y/d->scale)*d->dpi+0.5);
 	d->CoOrd2Pix(d,p,&x,&y);
+	wBool_t bTemp = wDrawSetTempMode( d->d, TRUE );
 	if ((d == &mapD) || add)
 		wDrawFilledRectangle( d->d, x, y, w, h, drawColorPowderedBlue, wDrawOptTemp|wDrawOptTransparent );
 	else
 		wDrawFilledRectangle( d->d, x, y, w, h, selectedColor, wDrawOptTemp|wDrawOptTransparent );
+	wDrawSetTempMode( d->d, bTemp );
 
 }
 
@@ -1149,7 +1151,9 @@ EXPORT void InfoPos( coOrd pos )
 	
 	XMainRedraw();
 	oldMarker = pos;
+	wBool_t bTemp = wDrawSetTempMode( tempD.d, TRUE );
 	DrawMarkers();
+	wDrawSetTempMode( tempD.d, bTemp );
 }
 
 static wControl_p deferSubstituteControls[NUM_INFOCTL+1];
@@ -1335,10 +1339,12 @@ EXPORT void TempRedraw( void ) {
 	MainRedraw(); // TempRedraw - windows
 #else
 	wDrawDelayUpdate( tempD.d, TRUE );
+	wDrawSetTempMode( tempD.d, TRUE );
 	wDrawClearTemp( tempD.d );
 	DrawMarkers();
 	DoCurCommand( C_REDRAW, zero );
 	RulerRedraw( FALSE );
+	wDrawSetTempMode( tempD.d, FALSE );
 	wDrawDelayUpdate( tempD.d, FALSE );
 #endif
 }
@@ -1390,6 +1396,9 @@ EXPORT void MainRedraw( void )
 	}
 	ConstraintOrig( &mainD.orig, mainD.size, FALSE );
 	tempD.orig = mainD.orig;
+
+	wDrawDelayUpdate( mainD.d, TRUE );
+
 	wDrawClear( mainD.d );
 
 	//mainD.d->option = 0;
@@ -1423,11 +1432,13 @@ EXPORT void MainRedraw( void )
 	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
 	// The remainder is from TempRedraw
+	wDrawSetTempMode( tempD.d, TRUE );
 	wDrawClearTemp( tempD.d );
 	DrawMarkers();
 	DoCurCommand( C_REDRAW, zero );
 	RulerRedraw( FALSE );
 	RedrawPlaybackCursor();              //If in playback
+	wDrawSetTempMode( tempD.d, FALSE );
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
@@ -1575,9 +1586,9 @@ EXPORT void DrawMarkers( void )
 {
 	wPos_t x, y;
 	mainD.CoOrd2Pix(&mainD,oldMarker,&x,&y);
-	wDrawLine( mainD.d, 0, y, (wPos_t)LBORDER, y,
+	wDrawLine( tempD.d, 0, y, (wPos_t)LBORDER, y,
 				0, wDrawLineSolid, markerColor, wDrawOptTemp );
-	wDrawLine( mainD.d, x, 0, x, (wPos_t)BBORDER,
+	wDrawLine( tempD.d, x, 0, x, (wPos_t)BBORDER,
 				0, wDrawLineSolid, markerColor, wDrawOptTemp );
 }
 
@@ -2731,7 +2742,7 @@ static void MapDlgUpdate(
 static void DrawChange( long changes )
 {
 	if (changes & CHANGE_MAIN) {
-		MainRedraw(); // drawChange: CHANGEMAIN
+		MainRedraw(); // DrawChange: CHANGE_MAIN
 		MapRedraw();
 	}
 	if (changes &CHANGE_UNITS)

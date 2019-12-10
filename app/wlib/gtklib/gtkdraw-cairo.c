@@ -177,6 +177,15 @@ static cairo_t* gtkDrawCreateCairoCursorContext(
 }
 
 
+wBool_t wDrawSetTempMode(
+	wDraw_p bd,
+	wBool_t bTemp )
+{
+	wBool_t ret = bd->bTempMode;
+	bd->bTempMode = bTemp;
+	return ret;
+}
+
 static cairo_t* gtkDrawCreateCairoContext(
 		wDraw_p bd,
 		GdkDrawable * win,
@@ -190,10 +199,15 @@ static cairo_t* gtkDrawCreateCairoContext(
 	if (win)
 		cairo = gdk_cairo_create(win);
 	else {
-		if (opts & wDrawOptTemp)
+		if (opts & wDrawOptTemp) {
+			if ( ! bd->bTempMode )
+				printf( "Temp draw in Main Mode\n" );
 			cairo = cairo_create(bd->temp_surface);
-		else
+		} else {
+			if ( bd->bTempMode )
+				printf( "Main draw in Temp Mode\n" );
 			cairo = gdk_cairo_create(bd->pixmap);
+		}
 	}
 
 	width = width ? abs(width) : 1;
@@ -530,7 +544,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 	*h = 0;
 
 	/* draw text */
-	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorBlack, 0);
+	cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorBlack, bd->bTempMode?wDrawOptTemp:0 );
 
 	cairo_identity_matrix(cairo);
 
@@ -1382,6 +1396,7 @@ int xw, xh, cw, ch;
 	bd->context = context;
 	bd->redraw = redraw;
 	bd->action = action;
+	bd->bTempMode = FALSE;
 	wlibComputePos( (wControl_p)bd );
 
 	bd->widget = gtk_drawing_area_new();
@@ -1519,7 +1534,7 @@ int wDrawSetBackground(    wDraw_p bd, char * path, char ** error) {
 void wDrawShowBackground( wDraw_p bd, wPos_t pos_x, wPos_t pos_y, wPos_t size, wAngle_t angle, int screen) {
 
 	if (bd->background) {
-		cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorWhite, 0);
+		cairo_t* cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, wDrawColorWhite, bd->bTempMode?wDrawOptTemp:0 );
 		cairo_save(cairo);
 		int pixels_width = gdk_pixbuf_get_width(bd->background);
 		int pixels_height = gdk_pixbuf_get_height(bd->background);

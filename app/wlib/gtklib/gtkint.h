@@ -287,6 +287,8 @@ struct wDraw_t {
 		cairo_t *printContext;
 		cairo_surface_t *curPrintSurface;
 		GdkPixbuf * background;
+
+		wBool_t bTempMode;
 		};
 
 void WlibApplySettings(GtkPrintOperation *op);

@@ -393,7 +393,9 @@ static void MacroDrawBitMap(
 		default:
 			opts = 0;
 		}
+	wBool_t bTemp = wDrawSetTempMode( d->d, TRUE );
 	wDrawBitMap( d->d, bm, x, y, color, opts|wDrawOptTemp|wDrawOptNoClip );
+	wDrawSetTempMode( d->d, bTemp );
 	wFlush();
 	LOG( log_playbackCursor, 1, ("%s %d DrawBitMap( %p %p %d %d %d %d )\n", DrawBitMapToString(dbm), DBMCount, d->d, bm, x, y, color, opts|wDrawOptTemp|wDrawOptNoClip ) );
 	DBMCount++;

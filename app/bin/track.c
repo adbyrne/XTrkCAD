@@ -1709,8 +1709,8 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
-		DrawEndElev( &tempD, trk, ep, wDrawColorBlack );
-		DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+		DrawEndElev( &tempD, trk, ep, wDrawColorBlue );
+		DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
 		break;
 	}
 	return C_CONTINUE;

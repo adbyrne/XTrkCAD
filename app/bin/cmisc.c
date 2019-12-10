@@ -211,7 +211,7 @@ static void DrawDescHilite(BOOL_T selected)
     w = (wPos_t)((descSize.x/mainD.scale)*mainD.dpi+0.5);
     h = (wPos_t)((descSize.y/mainD.scale)*mainD.dpi+0.5);
     mainD.CoOrd2Pix(&mainD,descOrig,&x,&y);
-    wDrawFilledRectangle(mainD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
+    wDrawFilledRectangle(tempD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
 }
 
 
@@ -238,9 +238,9 @@ static void DescribeUpdate(
         return;
     }
 
-    if ((ddp->mode&DESC_NOREDRAW) == 0) {
-        DrawDescHilite(TRUE);
-    }
+//-    if ((ddp->mode&DESC_NOREDRAW) == 0) {
+//-        DrawDescHilite(TRUE);
+//-    }
 
     if (!descUndoStarted) {
         UndoStart(_("Change Track"), "Change Track");
@@ -269,7 +269,7 @@ static void DescribeUpdate(
         descOrig.y -= descBorder;
         descSize.x -= descOrig.x-descBorder;
         descSize.y -= descOrig.y-descBorder;
-        DrawDescHilite(TRUE);
+//-        DrawDescHilite(TRUE);
     }
 
     for (inx = 0; inx < sizeof describePLs/sizeof describePLs[0]; inx++) {
@@ -305,9 +305,9 @@ static void DescOk(void * junk)
 {
     wHide(describePG.win);
 
-    if (descTrk) {
-        DrawDescHilite(TRUE);
-    }
+//-    if (descTrk) {
+//-        DrawDescHilite(TRUE);
+//-    }
     if (layerValue && *layerValue>=0) {
     	SetTrkLayer(descTrk, editableLayerList[*layerValue]);  //int found that is really in the parm controls.
     }
@@ -321,7 +321,7 @@ static void DescOk(void * junk)
     }
 
     descNeedDrawHilite = FALSE;
-    Reset();
+    Reset(); // DescOk
 }
 
 
@@ -555,7 +555,7 @@ EXPORT void DescribeCancel(void)
         	if (!IsTrackDeleted(descTrk))
         		descUpdateFunc(descTrk, -1, descData, TRUE);
         	descTrk = NULL;
-        	DrawDescHilite(TRUE);
+//-        	DrawDescHilite(TRUE);
 
         }
 
@@ -585,16 +585,16 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case wActionMove:
-    	if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
-    		DrawTrack(trk,&mainD,wDrawColorBlue);
-    	}
+//-    	if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
+//-    		DrawTrack(trk,&mainD,wDrawColorBlue);
+//-    	}
     	return C_CONTINUE;
 
 
     case C_DOWN:
         if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
             if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
-                DrawDescHilite(TRUE);
+//-                DrawDescHilite(TRUE);
                 descUpdateFunc(descTrk, -1, descData, TRUE);
                 descTrk = NULL;
             }
@@ -612,7 +612,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
             descSize.x -= descOrig.x-descBorder;
             descSize.y -= descOrig.y-descBorder;
             descNeedDrawHilite = TRUE;
-            DrawDescHilite(TRUE);
+//-            DrawDescHilite(TRUE);
             DescribeTrack(trk, msg, 255);
             inDescribeCmd = FALSE;
             InfoMessage(msg);
@@ -630,7 +630,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 				DrawOriginAnchor(descTrk);
 			}
         } else if (trk){
-        	DrawTrack(trk,&mainD,wDrawColorBlue);
+        	DrawTrack(trk,&tempD,wDrawColorBlue);
         }
 
 

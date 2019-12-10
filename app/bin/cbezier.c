@@ -512,11 +512,11 @@ EXPORT void DrawBezCurve(trkSeg_p control_arm1,
 /*
  * Undraw the temp Bezier
  */
-void UnDrawTempBezier(BOOL_T track) {
-  if (track) DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt, (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,drawColorWhite);
-  else
-	DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt, (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,drawColorWhite);
-}
+//-void UnDrawTempBezier(BOOL_T track) {
+//-  if (track) DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt, (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,drawColorWhite);
+//-  else
+//-	DrawBezCurve(Da.cp1Segs_da,Da.cp1Segs_da_cnt,Da.cp2Segs_da,Da.cp2Segs_da_cnt, (trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt,drawColorWhite);
+//-}
 
 /*
  * If Track, make it red if the radius is below minimum
@@ -619,7 +619,7 @@ EXPORT STATUS_T AdjustBezCurve(
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.state != PICK_POINT) return C_CONTINUE;
-		DrawTempBezier(Da.track);
+//-		DrawTempBezier(Da.track);
 		if (Da.state != PICK_POINT) return C_CONTINUE;
 		for (int i=0;i<4;i++) {
 			if (i==0 && Da.trk[0]) continue;
@@ -647,7 +647,7 @@ EXPORT STATUS_T AdjustBezCurve(
 		if (!IsClose(dd) )	Da.selectPoint = -1;
 		if (Da.selectPoint == -1) {
 			InfoMessage( _("Not close enough to any valid, selectable point, reselect") );
-			DrawTempBezier(Da.track);
+//-			DrawTempBezier(Da.track);
 			return C_CONTINUE;
 		} else {
 			pos = Da.pos[Da.selectPoint];

@@ -1687,7 +1687,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		if (Da.state == NONE) return C_CONTINUE;
 		DrawTempCornu();
 		if (anchors_da.cnt) {
-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		}
 		return C_CONTINUE;
 
@@ -2337,7 +2337,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.selectEndPoint = 0;
 				Da.pos[0] = pos;			//Move end as dictated
 				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],TRUE,TRUE,TRUE,FALSE,0.0,0.0,zero,NULL);
-				DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack);
+//-				DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,NULL,0,NULL,0,NULL,NULL,NULL,NULL,0,drawColorBlack);
 				return C_CONTINUE;
 			}
 			EPINX_T ep = 0;
