@@ -186,7 +186,6 @@ if (oldElevationEvaluation) {
 		elev0 = GetTrkEndElevHeight(trk,ep);
 		rc = FALSE;
 	} else {
-		DIST_T height,length;
 		if (force || (!GetTrkEndElevCachedHeight(trk,ep,&elev0,&dist0))) {
 			elev0 = GetElevation( trk );
 			dist0 = GetTrkLength( trk, ep, -1 );

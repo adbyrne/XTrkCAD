@@ -256,7 +256,7 @@ EXPORT track_p MakePolyLineFromSegs(
 					if (first || !IsClose(FindDistance(this, last))) {
 						cnt++;									//Add first point
 					}
-					cnt += floor(spb->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
+					cnt += (int)floor(spb->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
 					if (spb->u.c.radius > 0)
 						Translate(&last, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
 					else
@@ -282,7 +282,7 @@ EXPORT track_p MakePolyLineFromSegs(
 			if (first || !IsClose(FindDistance(this, last))) {
 				cnt++;									//Add first point
 			}
-			cnt += floor(sp->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
+			cnt += (int)floor(sp->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
 			if (sp->u.c.radius > 0)
 				Translate(&last, sp->u.c.center, sp->u.c.a0+sp->u.c.a1, fabs(sp->u.c.radius));
 			else
@@ -330,7 +330,7 @@ EXPORT track_p MakePolyLineFromSegs(
 						xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 						j++;
 					}
-					int slices = floor(spb->u.c.a1/22.5);
+					int slices = (int)floor(spb->u.c.a1/22.5);
 					for (int k=1; k<=slices;k++) {
 						if (spb->u.c.radius>0)
 							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+(k*(spb->u.c.a1/(slices+1))), fabs(spb->u.c.radius));
@@ -374,7 +374,7 @@ EXPORT track_p MakePolyLineFromSegs(
 				xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 				j++;
 			}
-			int slices = floor(sp->u.c.a1/22.5);
+			int slices = (int)floor(sp->u.c.a1/22.5);
 			for (int k=1; k<=slices;k++) {
 				if (sp->u.c.radius>0)
 					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+(k*(sp->u.c.a1/(slices+1))), fabs(sp->u.c.radius));
@@ -2496,7 +2496,6 @@ EXPORT BOOL_T ReadText( char * line )
 	wIndex_t layer;
 	track_p trk;
 	ANGLE_T angle;
-	BOOL_T boxed;
     wDrawColor color = wDrawColorBlack;
     if ( paramVersion<3 ) {
         if (!GetArgs( line, "XXpYql", &index, &layer, &pos, &angle, &text, &textSize ))

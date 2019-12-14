@@ -278,7 +278,7 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wPos_t w,
 		return;
 	tbm = &hotBarMap(inx);
 	if (inx==0) {
-		px = (tbm->x-hotBarMap(0).x)*hotBarD.dpi;
+		px = (wPos_t)((tbm->x-hotBarMap(0).x)*hotBarD.dpi);
 	} else {
 		px = (wPos_t)(((tbm->x-hotBarMap(hotBarCurrStart).x)+fixed_x)*hotBarD.dpi);
 	}

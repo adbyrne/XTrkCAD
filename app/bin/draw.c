@@ -2175,7 +2175,6 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", pos.x, pos.y ) )
 		if (pos.y > mapD.size.y)
 			pos.y = mapD.size.y;
 		coOrd sizeMap;
-		DIST_T xRatio,yRatio;
 
 		sizeMap.x = pos.x - mapOrig.x;
 		sizeMap.y = pos.y - mapOrig.y;
