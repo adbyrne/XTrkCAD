@@ -567,10 +567,11 @@ static void BlockOk ( void * junk )
 	while ( TrackIterate( &trk ) ) {
 		if ( GetTrkSelected( trk ) ) {
 			if ( IsTrack(trk) ) {
-				DYNARR_APPEND( btrackinfo_p *, blockTrk_da, 10 );
+				DYNARR_APPEND( btrackinfo_t, blockTrk_da, 10 );
+				blockTrk(blockTrk_da.cnt - 1).t = trk;
+				blockTrk(blockTrk_da.cnt - 1).i = GetTrkIndex(trk);
 				LOG( log_block, 1, ("*** BlockOk(): adding track T%d\n",GetTrkIndex(trk)))
-                                blockTrk(blockTrk_da.cnt-1).t = trk;
-                                blockTrk(blockTrk_da.cnt-1).i = GetTrkIndex(trk);
+
 			}
 		}
 	}
