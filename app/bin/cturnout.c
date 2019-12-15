@@ -238,11 +238,10 @@ EXPORT wIndex_t CheckPaths(
 {
 	int pc, ps;
 	PATHPTR_T pp = 0;
-	int inx, inx1;
+	int inx;
 	static dynArr_t segMap_da;
 	int segInx[2], segEp[2];
 	int segTrkLast = -1;
-	trkSeg_t tempSeg;
 	
 typedef struct {
 	trkSeg_p seg;
@@ -650,7 +649,6 @@ static coOrd MapPathPos(
 		EPINX_T ep )
 {
 	trkSeg_p segPtr;
-	wIndex_t inx;
 	coOrd pos;
 
 	if ( segInx < 0 ) {
@@ -732,7 +730,6 @@ static ANGLE_T GetAngleTurnout(
 	struct extraData * xx = GetTrkExtraData(trk);
 	wIndex_t segCnt, segInx;
 	ANGLE_T angle;
-	trkSeg_p p;
 
 	if ( ep0 && ep1 )
 		*ep0 = *ep1 = PickEndPoint( pos, trk );
@@ -1541,11 +1538,9 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		//	return TRUE;
 		//}
 		/* Find the path we are closest to */
-		PATHPTR_T path, pathCurr = 0;
-		int segInx, subSegInx, segEP;
+		PATHPTR_T pathCurr = 0;
+		int segInx, subSegInx;
 		trkSeg_p segPtr;
-		segProcData_t segProcData;
-		coOrd pos2;
 		double d = 10000;
 		struct extraData * xx = GetTrkExtraData(trk);
 		/* Get parms from that seg */
@@ -2351,7 +2346,6 @@ LOG( log_turnout, 1, ( "   Attach! epx=%d\n", epx ) )
 				}
 				/* split the track at the intersection point */
 		AuditTracks( "addTurnout [%d] before splitTrack", i );
-				EPINX_T ept,epl;
 				if (SplitTrack( trk, epPos, epx, &leftover(i).trk, TRUE )) {
 		AuditTracks( "addTurnout [%d], after splitTrack", i );
 					/* remember so we can fix up connection later */

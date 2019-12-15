@@ -370,7 +370,7 @@ int createEndPoint(
     		}
 			PointOnCircle( &endHandle->end_curve, centert,radius,NormalizeAngle(FindAngle(centert,pos0)+a1));
 			PointOnCircle( &endHandle->end_center,centert,radius,NormalizeAngle(FindAngle(centert,pos0)+(a1/2.0)));
-			coOrd cm,pm;
+			coOrd cm;
 			cm = endHandle->end_center;
 			ANGLE_T a = FindAngle(endHandle->end_curve,pos0);
 			Rotate(&cm,endHandle->end_curve,-a );
@@ -525,7 +525,6 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2], cornuParm_
 	//Find remote end point of track, create start knot
 	int ends[2];
 	ends[0] = (end[0]?2:0); ends[1] = (end[0]?3:1)+extra_points.cnt;
-	dynArr_t spiro_cp_array;
 	spiro_cp * knots;
 	coOrd * posk;
 	char * type;
@@ -894,7 +893,6 @@ track_p CreateCornuFromPoints(coOrd pos[2],BOOL_T track_end[2]) {
 		coOrd center[2];
 		DIST_T radius[2];
 		ANGLE_T angle[2];
-		dynArr_t segs;
 		BOOL_T back, neg;
 		cornuParm_t new;
 		int inx,subinx;
@@ -985,7 +983,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 	track_p t;
 	DIST_T d;
 	ANGLE_T a, a2;
-	DIST_T dd;
 	EPINX_T ep;
 	cornuParm_t cp;
 
@@ -1272,7 +1269,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 						Da.center[sel] = xx->cornuData.c[sel];			//Reset center
 					}
 					if (!inside && Da.extend[sel]) {   //Shift extends out old track
-						coOrd pos2 = Da.pos[sel];
 						SetUpCornuParms(&cp);
 						CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,FALSE);
 						//GetCornuParmsTemp(&Da.crvSegs_da, sel, &pos2, &Da.center[sel], &Da.angle[sel],  &Da.radius[sel] );
@@ -1448,7 +1444,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 			if (Da.selectEndHandle%2 == 0) {						//Radius
 				coOrd p0 = Da.pos[end];								//Start
 				coOrd p1 = Da.endHandle[end].end_curve;				//End
-				coOrd pm = Da.endHandle[end].end_center;			//Middle Point on Curve
 				ANGLE_T a0 = FindAngle( p1, p0 );
 				DIST_T d0 = FindDistance( p0, p1 )/2.0;             //Distance to Middle of Chord
 				coOrd pos2 = pos;									//New pos
@@ -1713,7 +1708,6 @@ EXPORT STATUS_T AdjustCornuCurve(
  *
  */
 STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG ) {
-	track_p t;
 	struct extraData *xx = GetTrkExtraData(trk);
 
 	Da.trackGauge = trackG;
@@ -2447,7 +2441,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 }
 
 BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
-	trkSeg_t seg_temp;
 	track_p trk_old = NULL;
 	newTracks[0] = NULL, newTracks[1] = NULL;
 	struct extraData * xx = GetTrkExtraData(trk);
@@ -2587,7 +2580,7 @@ static STATUS_T CmdConvertTo(
 		wAction_t action,
 		coOrd pos )
 {
-	track_p trk,trk1,trk2;
+	track_p trk;
 	cornuParm_t cp;
 	switch (action) {
 
@@ -2786,7 +2779,6 @@ static STATUS_T CmdConvertFrom(
 		coOrd pos )
 {
 	track_p trk,trk1,trk2;
-	cornuParm_t cp;
 	switch (action) {
 
 		case C_LCLICK:
@@ -2812,7 +2804,6 @@ static STATUS_T CmdConvertFrom(
 			}
 			dynArr_t trackSegs_da;
 			DYNARR_RESET(trkSeg_t,trackSegs_da);
-			trkSeg_t segPtr;
 			trk1 = NULL;
 			trk2 = NULL;
 			UndoStart( _("Convert Bezier and Cornu"),"Try to convert all selected tracks");

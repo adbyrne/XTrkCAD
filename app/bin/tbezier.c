@@ -1078,7 +1078,6 @@ BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2]) {
 		if (newTracks[0] == NULL) newTracks[0] = new_trk;
 		newTracks[1] = new_trk;
 		if (trk_old) {
-			EPINX_T ep1, ep2;
 			for (int i=0;i<2;i++) {
 				if (GetTrkEndTrk(trk_old,i)==NULL) {
 					coOrd pos = GetTrkEndPos(trk_old,i);
@@ -1131,7 +1130,6 @@ static BOOL_T MakeParallelBezier(
 	struct extraData * xx = GetTrkExtraData(trk);
     coOrd np[4], p;
     ANGLE_T a,a2;
-    DIST_T sep0,sep1;
 
 	//Produce bezier that is translated parallel to the existing Bezier
     // - not a precise result if the bezier end angles are not in the same general direction.

@@ -489,7 +489,7 @@ STATUS_T DrawGeomMouse(
 				//Snap to Right-Angle from previous or from 0
 				DIST_T l = FindDistance(pos0, pos);
 				ANGLE_T angle2 = NormalizeAngle(FindAngle(pos0, pos)-line_angle);
-				int quad = (int)(angle2+45.0)/90.0;
+				int quad = (int)((angle2 + 45.0) / 90.0);
 				if (tempSegs_da.cnt != 1 && (quad == 2)) {
 					pos1 = pos0;
 				} else if (quad == 1 || quad == 3) {
@@ -528,7 +528,7 @@ STATUS_T DrawGeomMouse(
 				//Snap to Right-Angle from previous or from 0
 				DIST_T l = FindDistance(tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos);
 				ANGLE_T angle2 = NormalizeAngle(FindAngle(tempSegs(tempSegs_da.cnt-1).u.l.pos[0], pos)-last_angle);
-				int quad = (int)(angle2+45.0)/90.0;
+				int quad = (int)((angle2+45.0)/90.0);
 				if (tempSegs_da.cnt != 1 && (quad == 2)) {
 					pos = tempSegs(tempSegs_da.cnt-1).u.l.pos[0];
 				} else if (quad == 1 || quad == 3) {
@@ -1023,7 +1023,6 @@ void static CreateCurveAnchors(int index, coOrd pm, coOrd pc, coOrd p0, coOrd p1
 void static CreatePolyAnchors(int index) {
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		double d = tempD.scale*0.15;
-		coOrd p;
 		for ( int inx=0; inx<points_da.cnt; inx++ ) {
 			DYNARR_APPEND(trkSeg_t,anchors_da,3);
 
@@ -1092,8 +1091,6 @@ STATUS_T DrawGeomPolyModify(
 	static int segInx;
 	static int prev_inx;
 	static wDrawColor save_color;
-	int prior_pnt, next_pnt, orig_pnt;
-	ANGLE_T prior_angle, next_angle, line_angle;
 	static wBool_t drawnAngle;
 	static double currentAngle;
 	static double baseAngle;
@@ -1374,7 +1371,7 @@ STATUS_T DrawGeomPolyModify(
 					//Snap to Right-Angle from previous or from 0
 					DIST_T l = FindDistance(last_point, pos_lock);
 					ANGLE_T angle2 = NormalizeAngle(FindAngle(last_point, pos_lock)-last_angle);
-					int quad = (int)(angle2+45.0)/90.0;
+					int quad = (int)((angle2+45.0)/90.0);
 					if (tempSegs_da.cnt != 1 && (quad == 2)) {
 						pos_lock = last_point;
 					} else if (quad == 1 || quad == 3) {
@@ -1609,7 +1606,7 @@ void BuildCircleContext(drawModContext_t * context,int segInx) {
 		context->arc_angle = context->segPtr[segInx].u.c.a1;
 		PointOnCircle( &context->pm, context->segPtr[segInx].u.c.center, fabs(context->segPtr[segInx].u.c.radius), context->segPtr[segInx].u.c.a0 + (context->segPtr[segInx].u.c.a1/2));
 		REORIGIN( context->pm, context->pm, context->angle, context->orig );
-		coOrd cm,pm;
+		coOrd cm;
 		cm = context->pm;
 		ANGLE_T a = FindAngle(context->p1,context->p0);
 		Rotate(&cm,context->p1,-a );
@@ -1792,9 +1789,7 @@ STATUS_T DrawGeomModify(
 	int inx, inx1, inx2;
 	DIST_T d, d1, d2, dd;
 	coOrd * newPts = NULL;
-	int mergePoints;
 	tempSegs_da.cnt = 1;
-	wDrawColor save_color;
 	switch ( action&0xFF ) {
 	case C_START:
 		if (!context->rotate_state && !context->rot_moved) {
