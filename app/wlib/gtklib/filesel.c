@@ -328,6 +328,7 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			g_free( g_slist_nth_data ( fileNameList, i));
 		}
 		
+		gtk_widget_hide( GTK_WIDGET( fs->window ));
 		if (fs->action) {
 			fs->action( g_slist_length(fileNameList), fileNames, fs->data );
 		}
@@ -337,8 +338,9 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 		}
 		free( fileNames );
 		g_slist_free (fileNameList);	
+	} else {
+		gtk_widget_hide( GTK_WIDGET( fs->window ));
 	}
-	gtk_widget_hide( GTK_WIDGET( fs->window ));
 	
 	return 1;
 }
