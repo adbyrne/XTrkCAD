@@ -632,8 +632,8 @@ static void NewStructure( void )
 		wListGetIndex(pierL) == -1) {
 		return;
 	}
-	DrawSegs( &tempD, Dst.pos, Dst.angle,
-		curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
+//-	DrawSegs( &tempD, Dst.pos, Dst.angle,
+//-		curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
 	UndoStart( _("Place Structure"), "newStruct" );
 	titleLen = strlen( curStructure->title );
 	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, 0, "", curStructure->segCnt, curStructure->segs );
@@ -950,8 +950,6 @@ static STATUS_T CmdStructure(
 		wHide( structureW );
 		/*no break*/
 	case C_REDRAW:
-		if (anchors_da.cnt>0)
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 	case C_TEXT:
 	case C_OK:
 	case C_FINISH:
