@@ -1304,6 +1304,7 @@ EXPORT void DoCommandB(void * data) {
 			( "COMMAND START %s\n", commandList[curCommand].helpKey ))
 	rc = commandList[curCommand].cmdProc( C_START, pos);
 	LOG(log_command, 4, ( "    COMMAND returns %d\n", rc ))
+	TempRedraw(); // DoCommandB
 	switch (rc) {
 	case C_CONTINUE:
 		break;

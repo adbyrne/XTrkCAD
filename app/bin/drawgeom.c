@@ -250,7 +250,7 @@ STATUS_T DrawGeomMouse(
 		segCnt = 0;
 		CleanSegs(&tempSegs_da);
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
-		DYNARR_SET(trkSeg_t,tempSegs_da,5);
+//-		DYNARR_SET(trkSeg_t,tempSegs_da,5);
 		DYNARR_RESET( trkSeg_t, anchors_da );
 		lock = FALSE;
 		InfoMessage(_("+Shift to lock to nearby objects"));
@@ -727,7 +727,7 @@ STATUS_T DrawGeomMouse(
 				context->ArcAngle = FindAngle( pos0, pos1 );
 				pos0x = pos1;
 				CreateCurve( C_UP, pos, FALSE, context->Color, width, drawGeomCurveMode, &anchors_da, context->message );
-				DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+//-				DrawSegs( context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 				context->message( _("Drag on Red arrows to adjust curve") );
 				return C_CONTINUE;
 			} else {
@@ -898,15 +898,14 @@ STATUS_T DrawGeomMouse(
 		segCnt = 0;
 		lastValid = FALSE;
 		return C_TERMINATE;
-
 	case C_REDRAW:
 //-		oldOptions = context->D->funcs->options;
 //-		context->D->funcs->options |= wDrawOptTemp;
-		if (context->State !=0) {
-			DrawSegs(context->D, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-		}
+//-		if (context->State !=0) {
+		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+//-		}
 		if (anchors_da.cnt > 0) {
-			DrawSegs(context->D, zero, 0.0, &anchors(0), anchors_da.cnt, 0.0, wDrawColorBlack );
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, 0.0, wDrawColorBlack );
 		}
 //-		context->D->funcs->options = oldOptions;
 		return C_CONTINUE;
@@ -2078,6 +2077,7 @@ STATUS_T DrawGeomModify(
 			}
 		}
 		XMainRedraw();
+		UndrawNewTrack( context->trk );
 		return C_CONTINUE;
 	case C_MOVE:
 		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
