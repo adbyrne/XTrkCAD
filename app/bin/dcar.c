@@ -4039,7 +4039,7 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 	int inx;
 
 	if ( carDlgPG.win == NULL ) {
-		ParamCreateDialog( &carDlgPG, MakeWindowTitle(_("New Car Part")), _("Add"), CarDlgOk, CarDlgClose, TRUE, CarDlgLayout, F_BLOCK|PD_F_ALT_CANCELLABEL, CarDlgUpdate );
+		ParamCreateDialog( &carDlgPG, MakeWindowTitle(_("New Car Part")), _("Add"), CarDlgOk, CarDlgClose, TRUE, CarDlgLayout, F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, CarDlgUpdate );
 
 		if ( carDlgDim.carWidth==0 )
 			carDlgDim.carWidth = 12.0*10.0/curScaleRatio;
