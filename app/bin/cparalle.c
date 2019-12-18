@@ -110,7 +110,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 		if (!QueryTrack(Dpa.anchor_Trk, Q_CAN_PARALLEL)) {
 			return C_CONTINUE;
 		}
-		DrawTrack(Dpa.anchor_Trk,&mainD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+//-`		DrawTrack(Dpa.anchor_Trk,&mainD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
 		break;
 	case C_DOWN:
 		Dpa.anchor_Trk = NULL;
@@ -240,7 +240,7 @@ static STATUS_T CmdParallel( wAction_t action, coOrd pos )
 
 	case C_REDRAW:
 		if (Dpa.anchor_Trk) {
-			DrawTrack(Dpa.anchor_Trk,&mainD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+			DrawTrack(Dpa.anchor_Trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
 		}
 		if (tempSegs_da.cnt>0) {
 			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );

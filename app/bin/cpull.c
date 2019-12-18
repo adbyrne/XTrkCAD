@@ -819,11 +819,11 @@ static STATUS_T CmdPull(
 
 	case C_REDRAW:
 		if (anchors_da.cnt)
-					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		if (t1 && t_turn1)
-					DrawTrack(t1,&mainD,wDrawColorBlue);
+					DrawTrack(t1,&tempD,wDrawColorBlue);
 		if (t2 && t_turn2)
-					DrawTrack(t2,&mainD,wDrawColorBlue);
+					DrawTrack(t2,&tempD,wDrawColorBlue);
 		return C_CONTINUE;
 
 	case C_TEXT:

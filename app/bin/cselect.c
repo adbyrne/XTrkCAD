@@ -2606,20 +2606,20 @@ static STATUS_T CmdFlip(
 				return C_TERMINATE;
 			}
 			pos0 = pos1 = pos;
-			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
+//-			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
             XMainRedraw();
             XMapRedraw();
 			return C_CONTINUE;
 		case C_MOVE:
-			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
+//-			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
 			pos1 = pos;
-			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
+//-			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
 			InfoMessage( _("Angle %0.2f"), FindAngle( pos0, pos1 ) );
             XMainRedraw();
             XMapRedraw();
 			return C_CONTINUE;
 		case C_UP:
-			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
+//-			DrawLine( &tempD, pos0, pos1, 0, wDrawColorBlack );
 			UndoStart( _("Flip Tracks"), "flip" );
 			FlipTracks( pos0, FindAngle( pos0, pos1 ) );
 			state = 0;
