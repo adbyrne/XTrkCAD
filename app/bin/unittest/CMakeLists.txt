@@ -39,3 +39,25 @@ target_link_libraries(shortentest
 					${LIBS})
 
 add_test(ShortenTest shortentest)
+
+add_test(CatalogTest catalogtest)
+
+set (TESTXTP 
+	"atl83ho.xtp" "atlasn.xtp" "HO-Peco-Code83.xtp"
+	)
+
+foreach(testfile IN LISTS TESTXTP )
+	configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/testfiles/${testfile}
+                ${CMAKE_CURRENT_BINARY_DIR}
+				COPYONLY )
+endforeach()
+
+add_executable(catalogtest
+				catalogtest.c
+				../readxtp.c
+				../partcatalog.c
+				../paths.c)
+
+target_link_libraries(catalogtest
+					dynstring
+					${LIBS})
