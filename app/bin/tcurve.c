@@ -746,9 +746,15 @@ static void ReadCurve( char * line )
 	}
 	t = NewTrack( index, T_CURVE, 0, sizeof *xx );
 	xx = GetTrkExtraData(t);
-	SetTrkVisible(t, visible&2);
-	SetTrkNoTies(t, visible&4);
-	SetTrkBridge(t, visible&8);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(t, visible!=0);
+		SetTrkNoTies(t, FALSE);
+		SetTrkBridge(t, FALSE);
+	} else {
+		SetTrkVisible(t, visible&2);
+		SetTrkNoTies(t, visible&4);
+		SetTrkBridge(t, visible&8);
+	}
 	SetTrkScale(t, LookupScale(scale));
 	SetTrkLayer(t, layer );
 	SetTrkWidth(t, (int)(options&3));

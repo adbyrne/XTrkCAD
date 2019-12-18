@@ -340,7 +340,11 @@ static void ReadTurntable( char * line )
 	ReadSegs();
 	SetEndPts( trk, 0 );
 	xx = GetTrkExtraData(trk);
-	SetTrkVisible(trk, visible);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+	} else {
+		SetTrkVisible(trk, visible&2);
+	}
 	SetTrkScale(trk, LookupScale( scale ) );
 	SetTrkLayer(trk, layer);
 	xx->pos = p;
