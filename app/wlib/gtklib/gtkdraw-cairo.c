@@ -273,6 +273,7 @@ static cairo_t* gtkDrawDestroyCairoContext(cairo_t *cairo) {
 	return NULL;
 }
 
+#ifdef CURSOR_SURFACE
 cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wPos_t height, wDrawColor color, wDrawOpts opts) {
 
 		cairo_t * cairo = NULL;
@@ -300,7 +301,8 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 		return cairo;
 
 }
-
+#endif
+ 
  void wDrawDelayUpdate(
 		wDraw_p bd,
 		wBool_t delay )
@@ -874,6 +876,7 @@ static void wlibDrawFilled(
 
 	cairo_t* cairo;
 
+#ifdef CURSOR_SURFACE
 	if (opts&wDrawOptCursorRmv) color = wDrawColorWhite;   //Wipeout existing cursor draw (simplistic first)
 
 
@@ -898,12 +901,16 @@ static void wlibDrawFilled(
 	GdkWindow * gdk_window = NULL;
 
 	win = bd->parent;
+#endif
+	cairo = gtkDrawCreateCairoContext(bd, NULL, 0, wDrawLineSolid, color, opts);
+
 
 	for ( i=0; i<bm->w; i++ )
 		for ( j=0; j<bm->h; j++ )
 			if ( bm->bits[ j*wb+(i>>3) ] & (1<<(i&07)) ) {
 				xx = x+i;
 				yy = y+j;
+#ifdef CURSOR_SURFACE
 				if ( 0 <= xx && xx < bd->w &&
 					 0 <= yy && yy < bd->h ) {
 					b = (wControl_p)bd;
@@ -943,6 +950,7 @@ static void wlibDrawFilled(
 					widget = new_widget;
 				}
 				if ((opts&wDrawOptCursorQuit) || (opts&wDrawOptCursorQuit) ) continue;
+#endif
 				cairo_rectangle(cairo, xx, yy, 1, 1);
 				cairo_fill(cairo);
 			}
@@ -1121,6 +1129,7 @@ static gint draw_expose_event(
 	cairo_set_operator(cairo,CAIRO_OPERATOR_OVER);
 	cairo_fill(cairo);
 
+#ifdef CURSOR_SURFACE
 	if (bd->cursor_surface.surface && bd->cursor_surface.show) {
 		cairo_set_source_surface(cairo,bd->cursor_surface.surface,0,0);
 		cairo_set_operator(cairo,CAIRO_OPERATOR_OVER);
@@ -1128,6 +1137,7 @@ static gint draw_expose_event(
 				       event->area.width, event->area.height);
 		cairo_fill(cairo);
 	}
+#endif
 	cairo_destroy(cairo);
 
 	return TRUE;

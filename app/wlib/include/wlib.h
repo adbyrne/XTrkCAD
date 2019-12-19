@@ -455,12 +455,16 @@ void wTextSetPosition(		wText_p bt, int pos );
 typedef int wDrawOpts;
 #define wDrawOptTemp	(1<<0)
 #define wDrawOptNoClip	(1<<1)
-#define wDrawOptCursor  (1<<2)
-#define wDrawOptCursorClr (1<<3)
-#define wDrawOptCursorRmv (1<<4)
-#define wDrawOptCursorQuit (1<<5)
-#define wDrawOutlineFont (1<<11)
-#define wDrawOptTransparent   (1<<12)
+#define wDrawOptTransparent  (1<<2)
+#define wDrawOutlineFont (1<<3)
+#ifdef CURSOR_SURFACE
+#define wDrawOptCursor  (1<<4)
+#define wDrawOptCursorClr (1<<5)
+#define wDrawOptCursorClr (1<<6)
+#define wDrawOptCursorRmv (1<<7)
+#define wDrawOptCursorQuit (1<<8)
+#define wDrawOptOpaque   (1<<9)
+#endif
 
 
 typedef enum {

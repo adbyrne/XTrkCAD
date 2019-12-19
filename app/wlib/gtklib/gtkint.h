@@ -40,12 +40,14 @@
 
 extern wWin_p gtkMainW;
 
+#ifdef CURSOR_SURFACE
 typedef struct {
 		cairo_surface_t* surface;
 		wPos_t width;
 		wPos_t height;
 		wBool_t show;
 } wCursorSurface_t, * wSurface_p;
+#endif
 
 
 typedef enum {
@@ -77,7 +79,7 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		GtkWidget * widget; \
 		GtkWidget * label; \
 		doneProcCallback_p doneProc; \
-		wCursorSurface_t cursor_surface; \
+		/* CURSOR_SURFACE wCursorSurface_t cursor_surface;*/ \
 		wBool_t outline; \
 		void * data;
 
