@@ -127,6 +127,7 @@ SET(SOURCES
 	paramfile.h
 	paramfilelist.c
 	paramfilelist.h
+	paramfilesearch_ui.c
 	partcatalog.c
 	paths.c
 	readxtp.c

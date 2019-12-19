@@ -79,8 +79,7 @@ static paramData_t paramFilePLs[] = {
 #define I_PRMFILACTION	(4)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
     {	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_HIDE), 0L, FALSE },
-
-    {	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") }
+    {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Find ...") }
 };
 
 static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };
@@ -325,14 +324,14 @@ static void ParamFileSelectAll(void *junk)
     UpdateParamFileButton();
 }
 
-static void ParamFileOk(void * junk)
+static void SearchUiOk(void * junk)
 {
     ParamFileListConfirmChange();
     wHide(paramFileW);
 }
 
 
-static void ParamFileCancel(wWin_p junk)
+static void SearchUiCancel(wWin_p junk)
 {
     ParamFileListCancelChange();
     wHide(paramFileW);
@@ -396,7 +395,7 @@ void DoParamFiles(void * junk)
         ParamRegister(&paramFilePG);
 
         paramFileW = ParamCreateDialog(&paramFilePG,
-                                       MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, ParamFileCancel,
+                                       MakeWindowTitle(_("Parameter Files")), _("Ok"), SearchUiOk, SearchUiCancel,
                                        TRUE, NULL, 0, ParamFileDlgUpdate);
         paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FS_MULTIPLEFILES,
                                      _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);

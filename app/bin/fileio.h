@@ -143,4 +143,7 @@ BOOL_T MacroInit( void );
 char *SaveLocale( char *newLocale );
 void RestoreLocale( char * locale );
 
+// Parameter file search
+void DoSearchParams(void * junk);
+
 #endif
