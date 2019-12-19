@@ -1,6 +1,6 @@
 VERSION 2
 DEMOINIT
-ORIG 8.000 0.000 0.000
+ORIG 5.000 0.000 0.000
 STRAIGHT 1 DEMO 1
 	E 16.166667 2.333333 260.498723
 	E 36.083333 5.666667 80.498723
@@ -27,7 +27,7 @@ The unconnected End-Points of a straight or curved track can be changed with the
 END
 STEP
 COMMAND Modify
-MOUSE 1 40.917 5.917
+MOUSE 1 35.833 5.917
 MESSAGE
 _________________________________________
 

@@ -1,6 +1,6 @@
 VERSION 2
 DEMOINIT
-ORIG 8.000 0.000 0.000
+ORIG 4.000 0.000 0.000
 PARAMETER display description-fontsize 24
 PARAMETER turnout hide 1
 STRAIGHT 1 DEMO 1
@@ -97,6 +97,7 @@ XTrackCAD adjusts the turnout position for the best fit to minimize any connecti
 END
 STEP
 MOUSE 4 29.625 2.667
+#MOUSE 4 27.625 2.9
 PARAMETER turnout ok
 #RESET
 MESSAGE
@@ -112,7 +113,7 @@ MOUSE 2 30.229 3.042
 MOUSE 4 30.229 3.042
 PARAMETER misc cmdDelete
 BIGPAUSE
-ORIG 8.000 0.000 0.000
+ORIG 4.000 0.000 0.000
 MESSAGE
 _________________________________________
 
@@ -141,7 +142,7 @@ MOUSE 2 22.688 4.438
 MOUSE 4 22.688 4.438
 PARAMETER misc cmdDelete
 BIGPAUSE
-ORIG 8.000 0.000 0.000
+ORIG 4.000 0.000 0.000
 MESSAGE
 _________________________________________
 
@@ -177,7 +178,7 @@ MOUSE 3 14.000 5.000
 MOUSE 4 14.000 5.000
 MOUSE 1280 14.000 5.000
 BIGPAUSE
-ORIG 8.000 0.000 0.000
+ORIG 4.000 0.000 0.000
 MESSAGE
 =========================================
 END

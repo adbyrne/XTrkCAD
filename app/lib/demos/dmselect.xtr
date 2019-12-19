@@ -176,6 +176,8 @@ The <Select> command is used to select tracks.
 Selected tracks can be moved or rotated during the <Select> command.
 
 Selected tracks can also be deleted, hidden, listed and exported.
+
+When you move the cursor near a track that could be selected, the track is drawn with think blue lines.
 END
 STEP
 COMMAND Select
@@ -368,9 +370,9 @@ KEYSTATE 2
 MOUSE 1 35.735615 15.2
 PAUSE 500
 KEYSTATE 2
-MOUSE 2 35.735615 15.2
+MOUSE 2 35.735615 16.2
 KEYSTATE 2
-MOUSE 4 35.735615 15.2
+MOUSE 4 35.735615 16.2
 MESSAGE
 __________________________________________
 

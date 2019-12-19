@@ -141,6 +141,7 @@ PARAMETER misc cmdGridShow
 PARAMETER misc cmdGridEnable
 ORIG 2.000 0.000 2.000
 CLEAR
+PARAMETER layout ok
 MESSAGE
 First step: draw the lines representing the tracks.
 

@@ -39,7 +39,9 @@ STEP
 COMMAND Select
 MOUSE 2 6.417 1.833
 MOUSE 4 6.417 1.833
+KEYSTATE 4
 MOUSE 2 11.833 2.083
+KEYSTATE 4
 MOUSE 4 11.833 2.083
 PARAMETER misc cmdDelete
 MESSAGE
@@ -71,6 +73,8 @@ Note, only tracks within the selected area are deleted.  Since the easement curv
 END
 STEP
 MOUSE 2 3.167 3.333
+#MOUSE 3 3.167 3.333
+#MOUSE 3 22.083 0.667
 MOUSE 4 22.083 0.667
 PARAMETER misc cmdDelete
 MESSAGE
