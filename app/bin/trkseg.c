@@ -1362,7 +1362,7 @@ EXPORT BOOL_T ReadSegs( void )
 			s->u.p.pts = (pts_t*)MyMalloc( s->u.p.cnt * sizeof (pts_t) );
 			for ( i=0; i<s->u.p.cnt; i++ ) {
 				cp = GetNextLine();
-				if (cp == NULL || !GetArgs( cp, "pd", &s->u.p.pts[i].pt,&s->u.p.pts[i].pt_type)) {
+				if (cp == NULL || !GetArgs( cp, paramVersion>=8?"pd":"pX", &s->u.p.pts[i].pt,&s->u.p.pts[i].pt_type)) {
 					rc = FALSE;
 				}
 				if (!noVersion) {
