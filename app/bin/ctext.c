@@ -88,10 +88,10 @@ static void TextDlgUpdate(
 	case 0:
 	case 1:
 	case 2:
-		if ( Dt.state == SHOW_TEXT) {
-			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL, Dt.boxed );
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-		}
+//-		if ( Dt.state == SHOW_TEXT) {
+//-			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL, Dt.boxed );
+//-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+//-		}
 		UpdateFontSizeList( &Dt.size, (wList_p)textPLs[0].control, Dt.fontSizeInx );
 		/*wWinSetBusy( mainW, TRUE );*/
 		if ( Dt.state == SHOW_TEXT) {
@@ -106,8 +106,8 @@ static void TextDlgUpdate(
 		if ( Dt.state == SHOW_TEXT) {
 			Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x+Dt.lastLineLen;
 			Dt.cursPos1.y = Dt.pos.y+Dt.cursHeight+Dt.lastLineOffset;
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
-			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL, Dt.boxed );
+//-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+//-			DrawMultiString( &tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0, NULL, NULL, Dt.boxed );
 		}
         XMainRedraw();
         XMapRedraw();
@@ -242,10 +242,10 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		//DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL );
 		return C_CONTINUE;
 	case C_REDRAW:
-		if (Dt.state == SHOW_TEXT) {
+//-		if (Dt.state == SHOW_TEXT) {
 			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 			DrawMultiString(&tempD, Dt.pos, Dt.text, NULL, (FONTSIZE_T)Dt.size, Dt.color, 0.0, NULL, NULL, Dt.boxed );
-		}
+//-		}
 		return C_CONTINUE;
 	case C_CANCEL:
 		if (Dt.state != POSITION_TEXT) {
@@ -257,7 +257,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 	case C_OK:
 		if (Dt.state != POSITION_TEXT) {
-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
+//-			DrawLine( &tempD, Dt.cursPos0, Dt.cursPos1, 0, Dt.color );
 			Dt.state = POSITION_TEXT;
 			if (Dt.len) {
 				UndoStart( _("Create Text"), "newText - OK" );
