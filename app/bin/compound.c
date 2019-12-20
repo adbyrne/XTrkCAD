@@ -587,7 +587,11 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	BOOL_T titleChanged, flipped, ungrouped, split;
 	char * newTitle;
 
-	if ( inx == -1 ) {
+	switch ( inx ) {
+	case -1:
+	case MN:
+	case NM:
+	case PN:
 		titleChanged = FALSE;
 		ParseCompoundTitle( xtitle(xx), &mP, &mL, &nP, &nL, &pP, &pL );
 		if (mP == NULL) mP = "";
@@ -662,20 +666,20 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		   UndoStart( _("Change Track"), "Change Track" );
 		UndoModify( trk );
 		GetBoundingBox( trk, &hi, &lo );
-//-		if ( labelScale >= mainD.scale &&
-//-			 !OFF_MAIND( lo, hi ) ) {
-//-			DrawCompoundDescription( trk, &tempD, wDrawColorWhite );
-//-		}
+		if ( labelScale >= mainD.scale &&
+			 !OFF_MAIND( lo, hi ) ) {
+			DrawCompoundDescription( trk, &mainD, wDrawColorWhite );
+		}
 		/*sprintf( message, "%s\t%s\t%s", manufS, nameS, partnoS );*/
 		if (xx->title) MyFree(xx->title);
 		xx->title = newTitle;
 		xx->flipped = flipped;
 		xx->ungrouped = ungrouped;
 		xx->split = split;
-//-		if ( labelScale >= mainD.scale &&
-//-			 !OFF_MAIND( lo, hi ) ) {
-//-			DrawCompoundDescription( trk, &tempD, GetTrkColor(trk,&tempD) );
-//-		}
+		if ( labelScale >= mainD.scale &&
+			 !OFF_MAIND( lo, hi ) ) {
+			DrawCompoundDescription( trk, &mainD, GetTrkColor(trk,&tempD) );
+		}
 		return;
 	}
 
