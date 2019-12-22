@@ -39,9 +39,11 @@ MOUSE 1 35.833 5.917
 PAUSE 200
 MOUSE 2 35.833 5.917
 MOUSE 3 35.833 5.917
-MOUSE 3 56.750 15.167
+#MOUSE 3 56.750 15.167
+MOUSE 3 58 9.5
 PAUSE 200
-MOUSE 4 56.750 15.167
+#MOUSE 4 56.750 15.167
+MOUSE 4 58 9.5
 BIGPAUSE
 MESSAGE
 _________________________________________
@@ -50,12 +52,17 @@ If you try to drag the selected End-Point beyond the far End-Point, the track ex
 
 END
 STEP
-MOUSE 1 16.167 2.667
+#MOUSE 1 16.167 2.667
+MOUSE 1 58 9.5
 PAUSE 200
-MOUSE 2 16.167 2.667
+#MOUSE 2 16.167 2.667
+MOUSE 2 58 9.5
+#MOUSE 3 10.583 1.500
 MOUSE 3 10.583 1.500
-PAUSE 200
+BIGPAUSE
+#MOUSE 3 34.333 5.917
 MOUSE 3 34.333 5.917
+#MOUSE 4 34.333 5.917
 MOUSE 4 34.333 5.917
 BIGPAUSE
 MESSAGE
@@ -111,7 +118,7 @@ END
 MOUSE 1 7.60 3.167
 BIGPAUSE
 MOUSE 2 7.60 3.167
-BIGPAUSE
+STEP
 MOUSE 3 8.417 3.167
 PAUSE 60
 MOUSE 3 8.917 3.500
@@ -134,6 +141,7 @@ PAUSE 50
 MOUSE 3 10.333 4.667
 PAUSE 50
 MOUSE 3 13.583 6.833
+STEP
 PAUSE 200
 MOUSE 4 13.583 6.833
 MESSAGE
@@ -191,13 +199,13 @@ END
 STEP
 KEYSTATE 2
 MOUSE 1 28 13
-PAUSE 50
+BIGPAUSE
 KEYSTATE 2
 MOUSE 2 28 13
 KEYSTATE 2
-MOUSE 3 31 21
+MOUSE 3 31 20
 KEYSTATE 2
-MOUSE 4 31 21
+MOUSE 4 31 20
 MESSAGE
 _________________________________________
 
@@ -209,14 +217,15 @@ PARAMETER misc cmdUndo
 CLEAR
 MESSAGE
 You can form an extension of a Straight or Curved Track that is connected at one End-Point using an easment by holding down the Ctrl key while Left-dragging on it.
-The Blue half cross anchor shows that this is possible when control is held down with no button
+The Blue half cross anchor shows that this is possible when the Ctrl key is held down with no mouse button.
 END
 STEP
+COMMAND Modify
 KEYSTATE 4
-MOUSE 1 28.583 12.083
+MOUSE 1 28.583 11.083
 PAUSE 50
 KEYSTATE 4
-MOUSE 2 28.583 12.083
+MOUSE 2 28.583 11.083
 KEYSTATE 4
 MOUSE 3 31 50
 KEYSTATE 4

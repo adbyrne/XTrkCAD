@@ -348,6 +348,7 @@ STATUS_T CmdModify(
 				UndoStart( _("Change Track"), "Change( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
 				inx = GetEndPtConnectedToMe( trk1, trk );
                 Dex.Trk = NULL;
+		UndrawNewTrack( trk );
                 DeleteTrack(trk, TRUE);					//Get rid of original track
 				if ( !GetTrkEndTrk( trk1, inx ) ) {
 					Dex.Trk = trk1;
