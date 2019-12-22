@@ -324,14 +324,14 @@ static void ParamFileSelectAll(void *junk)
     UpdateParamFileButton();
 }
 
-static void SearchUiOk(void * junk)
+static void ParamFileOk(void * junk)
 {
     ParamFileListConfirmChange();
     wHide(paramFileW);
 }
 
 
-static void SearchUiCancel(wWin_p junk)
+static void ParamFileCancel(wWin_p junk)
 {
     ParamFileListCancelChange();
     wHide(paramFileW);
@@ -395,7 +395,7 @@ void DoParamFiles(void * junk)
         ParamRegister(&paramFilePG);
 
         paramFileW = ParamCreateDialog(&paramFilePG,
-                                       MakeWindowTitle(_("Parameter Files")), _("Ok"), SearchUiOk, SearchUiCancel,
+                                       MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, ParamFileCancel,
                                        TRUE, NULL, 0, ParamFileDlgUpdate);
         paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FS_MULTIPLEFILES,
                                      _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);
