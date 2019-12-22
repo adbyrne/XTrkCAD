@@ -2790,9 +2790,11 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 			return selectedColor;
 	}
 	if ( (d->options&(DC_GROUP)) == 0 ) {
-		if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) )
-			if (GetLayerUseColor((unsigned int)curTrackLayer))
-				return GetLayerColor((unsigned int)curTrackLayer);
+		if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) ) {
+			unsigned int iLayer = GetTrkLayer( trk );
+			if (GetLayerUseColor( iLayer ) )
+				return GetLayerColor( iLayer );
+		}
 	}
 	return wDrawColorBlack;
 }
