@@ -393,6 +393,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 //-		HilightElevations( TRUE );
 		elevTrk = NULL;
 		elevUndo = FALSE;
+		CmdMoveDescription( action, pos );
 		TempRedraw(); // CmdElevation C_START
 		return C_CONTINUE;
 	case wActionMove:
@@ -500,6 +501,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		HilightSelectedEndPt( TRUE, elevTrk, elevEp );
 		if (anchors_da.cnt)
 					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		CmdMoveDescription( action, pos );
 		return C_CONTINUE;
 	}
 	return C_CONTINUE;
