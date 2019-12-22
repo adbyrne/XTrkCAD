@@ -616,8 +616,9 @@ extendTrackMove:
 						return C_CONTINUE;
 					}
 					if ( NormalizeAngle( FindAngle( Dex.pos00, pos ) - Dex.angle ) > 180.0 )
-						if (ComputeJoint( Dex.params.arcR, Dex.r1, &Dex.jointD ) == E_ERROR)
-							return C_CONTINUE;
+						Dex.r1 = - Dex.r1;
+					if (ComputeJoint( Dex.params.arcR, Dex.r1, &Dex.jointD ) == E_ERROR)
+						return C_CONTINUE;
 					d = Dex.params.len - Dex.jointD.d0;
 					if (d <= minLength) {
 						ErrorMessage( MSG_TRK_TOO_SHORT, "First ", PutDim(fabs(minLength-d)) );
