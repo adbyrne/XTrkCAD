@@ -1,6 +1,6 @@
 VERSION 2
 DEMOINIT
-ORIG 4.000 0.000 0.000
+ORIG 2.000 0.000 0.000
 PARAMETER display labelenable 4
 STRAIGHT 1 DEMO 1
 	E 0.051703 4.160000 270.000000
@@ -55,29 +55,23 @@ MOUSE 4 4.320 4.693
 MOUSE 2 4.373 4.693
 MOUSE 3 4.533 5.120
 MOUSE 4 4.533 5.120
-MOUSE 2 0.267 5.120
-MOUSE 3 0.587 4.747
-MOUSE 4 0.587 4.747
+MOUSE 2 0.533 4.693
+MOUSE 3 0.533 4.693
+MOUSE 4 0.267 5.120
 MOUSE 2 0.267 3.253
 MOUSE 3 0.533 3.787
 MOUSE 4 0.533 3.787
 MESSAGE
 _________________________________________
 
-Drawing lines with the Shift key held down will use the previous line End-Point as the starting position.  This makes it easy to draw connected lines.
+The new line origin will snap to the nearest draw object (marked by a blue circle).
 END
 STEP
-KEYSTATE 2
-MOUSE 2 3.520 3.680
-KEYSTATE 2
+MOUSE 2 0.750 3.680
 MOUSE 3 4.320 3.787
-KEYSTATE 2
 MOUSE 4 4.320 3.787
-KEYSTATE 2
 MOUSE 2 4.533 3.307
-KEYSTATE 2
 MOUSE 3 4.533 3.307
-KEYSTATE 2
 MOUSE 4 4.533 3.307
 MESSAGE
 _________________________________________
@@ -85,25 +79,17 @@ _________________________________________
 You also draw in various colors and line widths.
 END
 PARAMETER draw linecolor 255
-PARAMETER draw linewidth 2
+PARAMETER draw linewidth 6
 STEP
 MOUSE 2 0.747 4.800
 MOUSE 4 0.693 6.560
-KEYSTATE 2
 MOUSE 2 0.693 6.560
-KEYSTATE 2
 MOUSE 4 1.493 7.573
-KEYSTATE 2
 MOUSE 2 1.547 7.573
-KEYSTATE 2
 MOUSE 4 3.147 7.467
-KEYSTATE 2
-MOUSE 2 3.787 6.773
-KEYSTATE 2
+MOUSE 2 3.147 7.467
 MOUSE 4 4.213 5.813
-KEYSTATE 2
-MOUSE 2 4.107 5.173
-KEYSTATE 2
+MOUSE 2 4.207 5.800
 MOUSE 4 4.107 4.693
 MESSAGE
 _________________________________________

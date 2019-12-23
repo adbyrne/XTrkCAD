@@ -1,6 +1,6 @@
 VERSION 7
 DEMOINIT
-ORIG 4.000 0.000 0.000
+ORIG 2.000 0.000 2.000
 PARAMETER display labelenable 4
 PARAMETER display description-fontsize 24
 STRAIGHT 1 0 0 0 0 DEMO 2
@@ -132,9 +132,9 @@ MOUSE 8200 0.316 8.842
 MESSAGE
 _________________________________________
 
-A Polygon is drawn in the same way
+A Filled Polygon is drawn in the same way.
 END
-COMMAND DrawPolygon
+COMMAND DrawFilledPolygon
 PARAMETER draw linecolor 65280
 STEP
 MOUSE 2 0.579 6.211
@@ -155,6 +155,12 @@ MOUSE 2 5.789 8.737
 MOUSE 4 5.789 8.737
 MOUSE 2 0.421 8.684
 MOUSE 4 0.421 8.684
+MESSAGE
+_________________________________________
+
+When you are finished, press the <Space> key to complete the polygon.
+END
+STEP
 MOUSE 8200 0.421 8.684
 MESSAGE
 _________________________________________
