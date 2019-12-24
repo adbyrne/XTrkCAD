@@ -695,13 +695,13 @@ void DoQuit(void) {
 
 static void DoClearAfter(void) {
 
+	Reset();
 	ClearTracks();
 
 	/* set all layers to their default properties and set current layer to 0 */
-	DefaultLayerProperties();
+//-	DefaultLayerProperties();
 	DoLayout(NULL);
 	checkPtMark = 0;
-	Reset();
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
 	bReadOnly = TRUE;
 	EnableCommands();
