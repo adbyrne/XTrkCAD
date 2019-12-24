@@ -33,7 +33,12 @@
 #define strdup _strdup
 #endif
 
-static char buffer[512];
+/**
+ * Get the contents description from a parameter file. Returned string has to be freed after use.
+ * 
+ * \param file IN xtpfile
+ * \return pointer to found contents or NULL if not present
+ */
 
 char *
 GetParameterFileContent(char *file)
@@ -46,6 +51,7 @@ GetParameterFileContent(char *file)
 		bool found = false;
 
 		while (!found) {
+			char buffer[512];
 			if (fgets(buffer, sizeof(buffer), fh)) {
 				char *ptr = strtok(buffer, " \t");
 
@@ -65,3 +71,4 @@ GetParameterFileContent(char *file)
 	}
 	return(result);
 }
+

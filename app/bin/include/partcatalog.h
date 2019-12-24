@@ -25,7 +25,7 @@
 #include <stdbool.h>
 
 #define MAXFILESPERCONTENT	10					/**< count of files with the same content header */
-#define ESTIMATED_CONTENTS_WORDS 8				/**< average count of words in CONTENTS header */
+#define ESTIMATED_CONTENTS_WORDS 10				/**< average count of words in CONTENTS header */
 
 struct sCatalogEntry {
     struct sCatalogEntry *next;
@@ -53,16 +53,14 @@ struct sTrackLibrary {
 typedef struct sTrackLibrary
 		TrackLibrary;							/**< core data structure for the catalog */
 
-struct sSearchResult {
-	CatalogEntry **entries;						/**< list of results */
-	unsigned count;								/**< count of results */
-};
-
-typedef struct sSearchResult SearchResult;
-
-bool CreateLibrary(TrackLibrary **trackLibrary);
+CatalogEntry *InitCatalog(void);
+TrackLibrary *InitLibrary(void);
+TrackLibrary *CreateLibrary(char *directory);
 bool GetTrackFiles(TrackLibrary *trackLib, unsigned char *directory);
+int GetParameterFileInfo(int files, char ** fileName, void * data);
 unsigned CreateLibraryIndex(TrackLibrary *trackLib);
-unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, SearchResult **results);
-bool FreeResults(SearchResult **results);
+unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
+unsigned CountCatalogEntries(CatalogEntry *listHeader);
+void EmptyCatalog(CatalogEntry *listHeader);
+unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
 #endif // !HAVE_TRACKCATALOG_H
