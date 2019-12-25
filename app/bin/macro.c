@@ -746,11 +746,11 @@ static void PlaybackQuit( void )
 	tempD.orig = mainD.orig;
 	tempD.size = mainD.size;
 	tempD.scale = mainD.scale;
+	Reset();
 	ClearTracks();
 	checkPtMark = changed = 0;
 	RestoreTrackState();
 	inPlaybackQuit = FALSE;
-	Reset();
 	DoSetScale( oldScaleName );
 	DoChangeNotification( CHANGE_ALL );
 	CloseDemoWindows();
