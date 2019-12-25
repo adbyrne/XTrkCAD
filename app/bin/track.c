@@ -1786,21 +1786,11 @@ LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f
 	d = FindDistance( pos0, pos1 );
 	a = NormalizeAngle( trk0->endPt[inx0].angle -
 						trk1->endPt[inx1].angle + 180.0 );
-	if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle) || (log_endPt>0 && logTable(log_endPt).level>=1)) {
-#ifndef WINDOWS
-		LogPrintf( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n   %d ",
-				trk0->index, inx0, trk1->index, inx1, d, a, trk0->index );
-		/*PrintEndPt( logFile, trk0, 0 );
-		PrintEndPt( logFile, trk0, 1 );???*/
-		LogPrintf( "\n   %d ", trk1->index );
-		/*PrintEndPt( logFile, trk1, 0 );
-		PrintEndPt( logFile, trk1, 1 );???*/
-		LogPrintf("\n");
-#endif
-		if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle)) {
-			NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
-			return -1; /* Stop connecting out of alignment tracks! */
-		}
+	if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle) ) {
+		LOG( log_endPt, 1, ( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n",
+				trk0->index, inx0, trk1->index, inx1, d, a ) );
+		NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
+		return -1; /* Stop connecting out of alignment tracks! */
 	}
 	UndoModify( trk0 );
 	UndoModify( trk1 );
