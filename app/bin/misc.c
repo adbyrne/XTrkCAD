@@ -62,7 +62,7 @@
 #include "messages.h"
 #include "misc.h"
 #include "param.h"
-#include "paramfilelist.h"
+#include "include/paramfilelist.h"
 #include "paths.h"
 #include "smalldlg.h"
 #include "track.h"
