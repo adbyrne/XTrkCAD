@@ -38,7 +38,7 @@
 #include "track.h"
 #include "utility.h"
 #include "messages.h"
-#include "paramfile.h"
+#include "include/paramfile.h"
 
 /*****************************************************************************
  *

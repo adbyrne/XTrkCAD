@@ -67,7 +67,7 @@
 #include "messages.h"
 #include "misc.h"
 #include "param.h"
-#include "paramfile.h"
+#include "include/paramfile.h"
 #include "paths.h"
 #include "track.h"
 #include "utility.h"

@@ -31,8 +31,8 @@
 #include "i18n.h"
 #include "messages.h"
 #include "param.h"
-#include "paramfile.h"
-#include "paramfilelist.h"
+#include "include/paramfile.h"
+#include "include/paramfilelist.h"
 #include "paths.h"
 #include "track.h"
 

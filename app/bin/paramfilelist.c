@@ -38,8 +38,8 @@
 #include "messages.h"
 #include "misc2.h"
 #include "paths.h"
-#include "paramfile.h"
-#include "paramfilelist.h"
+#include "include/paramfile.h"
+#include "include/paramfilelist.h"
 
 dynArr_t paramFileInfo_da;
 

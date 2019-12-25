@@ -35,7 +35,7 @@
     #include "include/dirent.h"
 #endif
 
-#include "include/readxtp.h"
+#include "include/paramfile.h"
 #include "include/partcatalog.h"
 #include "paths.h"
 

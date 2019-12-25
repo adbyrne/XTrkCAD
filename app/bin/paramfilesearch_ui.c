@@ -32,7 +32,7 @@
 #include "param.h"
 #include "include/partcatalog.h"
 #include "paths.h"
-#include "paramfilelist.h"
+#include "include/paramfilelist.h"
 
 #include "bitmaps/magnifier.xpm"
 
@@ -56,11 +56,11 @@ static char * searchUiLabels[] = { N_("Show File Names"), NULL };
 
 static paramData_t searchUiPLs[] = {
 #define I_QUERYSTRING  (0)
-	{ PD_STRING, searchUiQuery, "query", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)(250), N_(""), 0, 0, MAXQUERYLENGTH-1 },
+	{ PD_STRING, searchUiQuery, "query", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)(340), N_(""), 0, 0, MAXQUERYLENGTH-1 },
 #define I_SEARCHBUTTON (1)
 	{ PD_BUTTON, (void*)SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, (void *)NULL },
 #define I_MESSAGE (2)
-	{ PD_MESSAGE, N_("No results"), NULL, PDO_DLGBOXEND, (void *)180 },
+	{ PD_MESSAGE, N_("Enter single search word"), NULL, PDO_DLGBOXEND, (void *)370 },
 #define I_RESULTLIST	(3)
     {	PD_LIST, NULL, "inx", 0, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_MODETOGGLE	(4)
@@ -76,6 +76,8 @@ static paramData_t searchUiPLs[] = {
 #define RESULTLIST	 ((wList_p)searchUiPLs[I_RESULTLIST].control)
 #define APPLYBUTTON  ((wButton_p)searchUiPLs[I_APPLYBUTTON].control)
 #define SELECTALLBUTTON  ((wButton_p)searchUiPLs[I_SELECTALLBUTTON].control)
+#define MESSAGETEXT ((wMessage_p)searchUiPLs[I_MESSAGE].control)
+#define QUERYSTRING ((wString_p)searchUiPLs[I_QUERYSTRING].control)
 
 static paramGroup_t searchUiPG = { "searchgui", 0, searchUiPLs, sizeof searchUiPLs/sizeof searchUiPLs[0] };
 static wWin_p searchUiW;
@@ -165,11 +167,17 @@ static void SearchUiDoSearch(void * ptr)
 
 	result = SearchLibrary(trackLibrary, searchUiQuery, catalogFileBrowse);
 	if(result) {
+		DynString hitsMessage;
+		DynStringMalloc(&hitsMessage, 16);
+		DynStringPrintf(&hitsMessage, _("%d parameter files found."), result);
+		wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
+		DynStringFree(&hitsMessage);
+
 		SearchFileListLoad(catalogFileBrowse);
 	} else {
 		wListClear(RESULTLIST);
 		wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
-		// Nichts gefunden, message ausgeben
+		wMessageSetValue(MESSAGETEXT, _("No matches found."));
 	}
 }
 
@@ -277,6 +285,13 @@ void DoSearchParams(void * junk)
     ParamLoadControls(&searchUiPG);
     ParamGroupRecord(&searchUiPG);
 
+	if (!trackLibrary) {
+		wControlActive((wControl_p)SEARCHBUTTON, FALSE);
+		wControlActive((wControl_p)QUERYSTRING, FALSE);
+		wMessageSetValue(MESSAGETEXT, _("No parameter files found, search is disabled."));
+	} else {
+		wStringSetValue(QUERYSTRING, "");
+	}
     wShow(searchUiW);
 }
 
