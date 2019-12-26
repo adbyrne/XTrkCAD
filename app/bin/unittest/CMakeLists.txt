@@ -54,9 +54,9 @@ endforeach()
 
 add_executable(catalogtest
 				catalogtest.c
-				../readxtp.c
 				../partcatalog.c
-				../paths.c)
+				../paths.c
+				)
 
 target_link_libraries(catalogtest
 					dynstring

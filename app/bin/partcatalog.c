@@ -35,6 +35,7 @@
     #include "include/dirent.h"
 #endif
 
+#include "misc.h"
 #include "include/paramfile.h"
 #include "include/partcatalog.h"
 #include "paths.h"
@@ -44,6 +45,8 @@
     #define strnicmp _strnicmp
     #define strdup _strdup
 #endif
+
+#define PUNCTUATION "+-*/.,&%=#"
 
 /**
  * Create and initialize the linked list for the catalog entries
@@ -176,7 +179,7 @@ UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents)
     if (entry->files < MAXFILESPERCONTENT) {
         entry->fullFileName[entry->files++] = strdup(path);
     } else {
-        abort(); // too many files for same contents
+		AbortProg("Number of file with same content too large!", NULL);
     }
 }
 
@@ -304,6 +307,31 @@ CompareIndex(const IndexEntry *entry1, const IndexEntry *entry2)
     return (strcmp(entry1->keyWord, entry2->keyWord));
 }
 
+/*!
+ * Filter keywords. Current rules:
+ *	- single character string that only consist of a punctuation char
+ * 
+ * \param word IN keyword
+ * \return true if any rule applies, false otherwise
+ */
+ 
+bool
+FilterKeyword(char *word)
+{
+	if (strlen(word) == 1 && strpbrk(word, PUNCTUATION )) {
+		return(true);
+	}
+	return(false);
+}
+
+/**
+ * Create the keyword index from a list of parameter files
+ * 
+ * \param catalog IN list of parameter files
+ * \param index IN index table to be filled
+ * \param capacityOfIndex IN total maximum of keywords
+ * \return number of indexed keywords
+ */
 static unsigned
 CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index,
                     unsigned capacityOfIndex)
@@ -335,14 +363,15 @@ CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index,
             for (; *p; ++p) {
                 *p = tolower(*p);
             }
-
-            index[wordCount].value = currentEntry;
-            index[wordCount].keyWord = wordListPtr;
-            wordListPtr += strlen(word) + 1;
-            wordCount++;
-            if (wordCount > capacityOfIndex) {
-                abort();	/** TODO: Improve error handling when tto many words were used */
-            }
+			if (!FilterKeyword(wordListPtr)) {
+				index[wordCount].value = currentEntry;
+				index[wordCount].keyWord = wordListPtr;
+				wordListPtr += strlen(word) + 1;
+				wordCount++;
+				if (wordCount > capacityOfIndex) {
+					AbortProg("Too many keywords were used!", NULL);
+				}
+			}
             word = strtok(NULL, " \t\n\r");
         }
         free(content);
@@ -616,3 +645,40 @@ SearchLibrary(TrackLibrary *library, char *searchExpression,
     return (entryCount);
 }
 
+/**
+ * Get the contents description from a parameter file. Returned string has to be freed after use.
+ *
+ * \param file IN xtpfile
+ * \return pointer to found contents or NULL if not present
+ */
+
+char *
+GetParameterFileContent(char *file)
+{
+	FILE *fh;
+	char *result = NULL;
+
+	fh = fopen(file, "rt");
+	if (fh) {
+		bool found = false;
+
+		while (!found) {
+			char buffer[512];
+			if (fgets(buffer, sizeof(buffer), fh)) {
+				char *ptr = strtok(buffer, " \t");
+
+				if (!stricmp(ptr, CONTENTSCOMMAND)) {
+					/* if found, store the rest of the line and the filename	*/
+					ptr = strtok(NULL, "\t\n");
+					result = strdup(ptr);
+					found = true;
+				}
+			} else {
+				fprintf(stderr, "Nothing found in %s\n", file);
+				found = true;
+			}
+		}
+		fclose(fh);
+	}
+	return(result);
+}

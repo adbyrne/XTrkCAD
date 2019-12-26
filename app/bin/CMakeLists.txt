@@ -125,7 +125,6 @@ SET(SOURCES
 	param.c
 	paramfile.c
 	paramfilelist.c
-	paramfilelist.h
 	paramfilesearch_ui.c
 	partcatalog.c
 	paths.c
@@ -155,6 +154,7 @@ set (SOURCES
 	${SOURCES}
 	include/dirent.h
 	include/paramfile.h
+	include/paramfilelist.h
 )
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})

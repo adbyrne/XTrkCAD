@@ -13,6 +13,7 @@
 #include "../include/partcatalog.h"
 
 TrackLibrary *trackLib;
+CatalogEntry *catalog;
 
 
 // some dummy functions to suppress linking problems
@@ -31,12 +32,16 @@ wPrefGetString()
 
 }
 
+AbortProg()
+{
+
+}
 
 static void
 CreateLib(void **state)
 {
 	(void)state;
-	CreateLibrary(&trackLib);
+	trackLib = CreateLibrary(".");
 	assert_non_null((void *)trackLib);
 }
 
@@ -44,7 +49,7 @@ static void ScanEmptyDir(void **state)
 {
 	(void)state;
 	bool success;
-
+	EmptyCatalog(trackLib->catalog);
 	success = GetTrackFiles(trackLib, "//");
 	assert_false(success);
 }
@@ -53,7 +58,7 @@ static void ScanTestFiles(void **state)
 {
 	(void)state;
 	bool success;
-
+	EmptyCatalog(trackLib->catalog);
 	success = GetTrackFiles(trackLib, ".");
 	assert_true(success);
 }
@@ -68,28 +73,36 @@ static void CreateIndex(void **state)
 static void SearchNothing(void **state)
 {
 	(void)state;
-	SearchResult *result = NULL;
-	int files = SearchLibrary(trackLib, "djfhdkljhf", &result);
+	unsigned int files = SearchLibrary(trackLib, "djfhdkljhf", catalog);
 	assert_true(files == 0);
-	FreeResults(&result);
+	EmptyCatalog(catalog);
 }
 
 static void SearchSingle(void **state)
 {
 	(void)state;
-	SearchResult *result = NULL;
-	int files = SearchLibrary(trackLib, "peco", &result );
+	int files = SearchLibrary(trackLib, "peco", catalog );
 	assert_true(files==1);
-	FreeResults(&result);
+	EmptyCatalog(catalog);
 }
 
 static void SearchMultiple(void **state)
 {
 	(void)state;
-	SearchResult *result = NULL;
-	int files = SearchLibrary(trackLib, "atlas", &result);
+	int files = SearchLibrary(trackLib, "atlas", catalog);
 	assert_true(files == 2);
-	FreeResults(&result);
+	EmptyCatalog(catalog);
+}
+
+static void FilterTest(void **state)
+{
+	(void)state;
+	bool res;
+
+	res = FilterKeyword("test");
+	assert_false(res);
+	assert_true(FilterKeyword("&"));
+	assert_false(FilterKeyword("n"));
 }
 
 int main(void)
@@ -102,7 +115,10 @@ int main(void)
 		cmocka_unit_test(SearchNothing),
 		cmocka_unit_test(SearchSingle),
 		cmocka_unit_test(SearchMultiple),
+		cmocka_unit_test(FilterTest),
     };
+
+	catalog = InitCatalog();
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

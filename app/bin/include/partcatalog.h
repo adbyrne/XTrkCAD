@@ -63,4 +63,5 @@ unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEnt
 unsigned CountCatalogEntries(CatalogEntry *listHeader);
 void EmptyCatalog(CatalogEntry *listHeader);
 unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
+bool FilterKeyword(char *word);
 #endif // !HAVE_TRACKCATALOG_H
