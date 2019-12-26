@@ -273,7 +273,7 @@ void DoSearchParams(void * junk)
         ParamRegister(&searchUiPG);
 
         searchUiW = ParamCreateDialog(&searchUiPG,
-                                       MakeWindowTitle(_("Search part catalog")), _("Done"), SearchUiOk, NULL,
+                                       MakeWindowTitle(_("Find parameter files")), _("Done"), SearchUiOk, NULL,
                                        TRUE, NULL, 0, SearchUiDlgUpdate);
 		
 		wControlActive((wControl_p)APPLYBUTTON, FALSE);
