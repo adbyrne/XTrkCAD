@@ -1,4 +1,4 @@
-CONTENTS Micro-Engineering N-Scale Structures
+CONTENTS Micro Engineering N Scale Structures
 STRUCTURE N "Micro-Engineering	Transworld Truck Terminal	55-002"
 	F3 14737632 0.000000 4
 		0.015625 3.015625 0
@@ -331,4 +331,3 @@ STRUCTURE N "Micro-Engineering	Doyle Distribution Center	55-007"
 	L3 0 0.104167 8.020833 4.395833 0 7.020833 4.395833 0
 	G3 8421504 0.000000 0.100000 6.520833 2.770833 0
 	END
-

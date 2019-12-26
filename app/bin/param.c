@@ -2499,7 +2499,7 @@ SkipControl:
 				if ( group->boxs == NULL ) {
 					group->boxs = (wBox_p*)MyMalloc( boxCnt * sizeof *(wBox_p*)0 );
 					for ( box=0; box<boxCnt; box++ ) {
-						group->boxs[box] = wBoxCreate( group->win, DlgSepLeft, boxTop, NULL, wBoxBelow, columnK.term.x, boxPos[box]-boxTop );
+						group->boxs[box] = wBoxCreate( group->win, DlgSepLeft, boxTop, NULL, wBoxThickW, columnK.term.x, boxPos[box]-boxTop );
 						boxTop = boxPos[box] + 4;
 					}
 				} else {

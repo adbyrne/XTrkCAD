@@ -1,4 +1,4 @@
-CONTENTS Fast Track HO Scale
+CONTENTS Fast Tracks HO Scale
 SUBCONTENTS Fast Track HO Scale - #6 Curve Turnouts
 TURNOUT HO "Fast Tracks	#6 Left Curve 24-18 Turnout	FT-6-L-24-18"
 	P "Normal" 1 6 4 5
@@ -926,5 +926,3 @@ TURNOUT HO "Fast Tracks	#8 Double Cross Over	FT-C-8"
 	S 0 0.000000 12.733473 1.100844 14.016527 0.899156
 	C 0 0.000000 -74.146233 25.528772 74.146218 180.000076 8.932043
 	END
-
-

@@ -141,7 +141,7 @@ After importing the objects from the file, the imported objects are in selected 
 
 \S{cmdPrmfile} \i{Parameter Files}
 
-\e{Parameter Files} contain turnout, sectional track and structure definitions.  Parameter Files are loaded and unloaded with the \f{Parameter Files} dialog.
+\e{Parameter Files} contain turnout, sectional track and structure definitions.  Active Parameter Files are managed with the \f{Parameter Files} dialog.
 
 \G{png.d/dprmfile.png}
 
@@ -165,7 +165,7 @@ the program is terminated.
 Definition files can be marked as \e{favorite}. The indicator for favorites is a star.
 The meaning of the colors isn't changed.
 
-Loaded definition files that are marked with a yellow or a green indictor appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An unloaded file may be \e{reloaded} by selecting the  \f{Reload} button (The \f{Unload} button changes to \f{Reload} when a selected file is unloaded). Note that loading a file does not change the existing definitions in the layout. To do that after loading, use \K{cmdRefreshSpecial}.
+Loaded definition files that are marked with a yellow or a green indicator appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An unloaded file may be \e{reloaded} by selecting the  \f{Reload} button (The \f{Unload} button changes to \f{Reload} when a selected file is unloaded). Note that loading a file does not change the existing definitions in the layout. To do that after loading, use \K{cmdRefreshSpecial}.
 
 It is possible to change the state of several files at once. The \f{Select All} button allows you to select all parameter files for the next operation.
 
@@ -177,11 +177,24 @@ way the hotbar can be kept short containing only the relevant elements.
 
 Files can be listed by either their file name or by their contents description. This is controlled by the \f{Show File Names} check box.
 
-The \f{Browse} button allows you to load other \e{parameter files} such as provided by other users or downloaded from the Internet.
+The \f{Find} button opens the \e{Find Parameter File} dialog (\K{searchgui}).
 
-When first installed, all available parameter files are loaded. You can unload parameter files you don't use to speed up \e{XTrackCAD} startup time.
+When first installed, parameter files for all common scales are loaded. You can unload parameter files you don't use to speed up \e{XTrackCAD} startup time.
 
 The order in this list controls the order of turnouts and structures on the \f{Hot Bar} (\K{cmdHotBar}). You can move a parameter file to the end of the list by \e{Unloading} it, and then loading it via the \f{Browse} button.
+
+\S{searchgui} \i{Find Parameter Files}
+
+Selecting and loading additional parameter files is done in the \f{Find Parameter Files} dialog.
+
+\G{png.d/paramsearch.png}
+
+Using the Search function you can find and select parameter files that are part of the  XTrackCAD installation.
+Enter a single search word and select the Search button. Search results are shown in the list box. Select the files
+you're interested in and press the \f{Apply} button to add them to you parameter list.
+
+Addionally you can browse your local system allows you to load other \e{parameter files} such as provided by other users or downloaded from the Internet.
+Select the \f{Browse} button and navigate to the correct directory.
 
 \rule
 

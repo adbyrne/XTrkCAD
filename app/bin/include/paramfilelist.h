@@ -1,7 +1,7 @@
 #ifndef HAVE_PARAMFILELIST_H
 	#define HAVE_PARAMFILELIST_H
 	#include <stdbool.h>
-	#include "paramfile.h"
+	#include "include/paramfile.h"
 
 	typedef struct {
 		char * name;				/** < name of parameter file */

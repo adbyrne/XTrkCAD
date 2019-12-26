@@ -38,8 +38,12 @@
 #include "messages.h"
 #include "misc2.h"
 #include "paths.h"
-#include "paramfile.h"
-#include "paramfilelist.h"
+#include "include/paramfile.h"
+#include "include/paramfilelist.h"
+
+#if _MSC_VER >1300
+	#define stricmp( a, b ) _stricmp(a, b )
+#endif
 
 static long paramCheckSum;
 
@@ -311,4 +315,5 @@ nextLine:
 
     return TRUE;
 }
+
 
