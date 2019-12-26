@@ -1,4 +1,4 @@
-CONTENTS Arnold-Tracks N-Scale
+CONTENTS Arnold-Tracks N Scale
 # From 'Märklin Complete Program 1994/95 E'
 # Elementos diseñados por MAA - 7.086614
 # Straight Section Design by MAA - 22.200000
@@ -220,7 +220,7 @@ TURNOUT N "Arnold	Three Way Turnout	1749"
 	P "Normal" 1 6
 	P "Right" 1 4 5
 	E 0.000000 0.000000 270.000000
-	E 4.370079 0.590551 75.000000 
+	E 4.370079 0.590551 75.000000
 	E 4.370079 -0.590551 105.000000
 	E 4.370079 0.000000 90.000000
 	S 0 0 0.000000 0.000000 0.353100 0.000000
@@ -230,4 +230,3 @@ TURNOUT N "Arnold	Three Way Turnout	1749"
 	S 0 0 3.917422 -0.469256 4.370079 -0.590551
 	S 0 0 0.353100 0.000000 4.370079 0.000000
 	END
-

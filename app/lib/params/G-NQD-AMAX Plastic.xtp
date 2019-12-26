@@ -1,4 +1,4 @@
-CONTENTS Newqida/AMAX G-Scale Plastic Track
+CONTENTS Newqida/AMAX G Scale Plastic Track
 SUBCONTENTS Straight Track
 TURNOUT G "Newqida/AMAX	Straight 300mm	78010"
 	P "Normal" 1
@@ -8,7 +8,7 @@ TURNOUT G "Newqida/AMAX	Straight 300mm	78010"
 	END
 
 SUBCONTENTS Curve Track
-TURNOUT G "Newqida/AMAX	Curved 650mm 30°	78020"
+TURNOUT G "Newqida/AMAX	Curved 650mm 30ï¿½	78020"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 12.795276 3.428484 60.000000
