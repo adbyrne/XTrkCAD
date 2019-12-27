@@ -1673,8 +1673,8 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		coOrd pos )
 {
 	static coOrd p0, p1;
+	static BOOL_T editState = FALSE;
 	elev_t *e, *e1;
-	wDrawColor color;
 	track_p trk1;
 
 	e = &trk->endPt[ep].elev;
@@ -1688,9 +1688,9 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		/*no break*/
 	case C_MOVE:
 	case C_UP:
+		editState = TRUE;
 //-		if (action != C_DOWN)
 //-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
-		color = GetTrkColor( trk, &mainD );
 //-		DrawEndElev( &tempD, trk, ep, color );
 		p1 = pos;
 		e->doff.x = (pos.x-p0.x);
@@ -1702,15 +1702,20 @@ EXPORT STATUS_T EndPtDescriptionMove(
 //-		DrawEndElev( &tempD, trk, ep, color );
 //-		if (action != C_UP)
 //-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
-		if ( action == C_UP )
+		if ( action == C_UP ) {
+			editState = FALSE;
+			wDrawColor color = GetTrkColor( trk, &mainD );
 			DrawEndElev( &mainD, trk, ep, color );
+		}
         XMainRedraw();
         XMapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
 		DrawEndElev( &tempD, trk, ep, wDrawColorBlue );
-		DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
+		if ( editState ) {
+			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
+		}
 		break;
 	}
 	return C_CONTINUE;

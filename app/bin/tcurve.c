@@ -332,8 +332,8 @@ STATUS_T CurveDescriptionMove(
 
 	case C_REDRAW:
 		if (editMode) {
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
-			DrawCurveDescription( trk, &tempD, wDrawColorBlack );
+			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
+			DrawCurveDescription( trk, &tempD, wDrawColorBlue );
 		}
 		break;
 		

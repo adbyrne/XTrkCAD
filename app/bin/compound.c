@@ -421,8 +421,8 @@ STATUS_T CompoundDescriptionMove(
 		break;
 	case C_REDRAW:
 		if (editMode) {
-			DrawCompoundDescription( trk, &tempD, wDrawColorBlack );
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+			DrawCompoundDescription( trk, &tempD, wDrawColorBlue );
+			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
 		}
 	}
 

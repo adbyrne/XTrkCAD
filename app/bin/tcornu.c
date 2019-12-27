@@ -233,7 +233,6 @@ STATUS_T CornuDescriptionMove(
 	struct extraData *xx = GetTrkExtraData(trk);
 	static coOrd p0,p1;
 	static BOOL_T editState;
-	wDrawColor color;
 
 	if (GetTrkType(trk) != T_CORNU) return C_TERMINATE;
 
@@ -247,12 +246,12 @@ STATUS_T CornuDescriptionMove(
 	case C_UP:
 		editState = TRUE;
 		p1 = pos;
-		color = GetTrkColor( trk, &mainD );
         xx->cornuData.descriptionOff.x = pos.x - p0.x;
         xx->cornuData.descriptionOff.y = pos.y - p0.y;
-//-        DrawCornuDescription( trk, &mainD, color );
         if (action == C_UP) {
         	editState = FALSE;
+		wDrawColor color = GetTrkColor( trk, &mainD );
+	        DrawCornuDescription( trk, &mainD, color );
         }
 		XMainRedraw();
 		XMapRedraw();
@@ -260,8 +259,8 @@ STATUS_T CornuDescriptionMove(
 
 	case C_REDRAW:
 		if (editState) {
-		        DrawCornuDescription( trk, &tempD, wDrawColorBlack );
-			DrawLine( &mainD, p1, p0, 0, wDrawColorBlack );
+		        DrawCornuDescription( trk, &tempD, wDrawColorBlue );
+			DrawLine( &tempD, p1, p0, 0, wDrawColorBlue );
 		}
 		break;
 		

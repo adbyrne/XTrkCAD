@@ -2396,9 +2396,11 @@ STATUS_T CmdMoveDescription(
 	DIST_T d, dd;
 	static BOOL_T hidden;
 	static int mode;
+	BOOL_T bChanged;
 
 	moveDescMode = (long)commandContext;   //Context 0 = everything, 1 means elevations, 2 means descriptions
 
+	bChanged = FALSE;
 	switch (action&0xFF) {
 	case C_START:
 		if ( labelWhen < 2 || mainD.scale > labelScale ||
@@ -2415,10 +2417,20 @@ STATUS_T CmdMoveDescription(
 		break;
 	case C_TEXT:
 		if (!moveDescTrk) return C_CONTINUE;
+		bChanged = FALSE;
 		if (action>>8 == 's') {
+			if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC) != 0 )
+				bChanged = TRUE;
 			ClrTrkBits( moveDescTrk, TB_HIDEDESC );
 		} else if (action>>8 == 'h')  {
+			if ( ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC) == 0 )
+				bChanged = TRUE;
 			SetTrkBits( moveDescTrk, TB_HIDEDESC );
+		}
+		if ( bChanged ) {
+			// We should push the draw/undraw of the description down
+			// but there is no clear way to do that
+			MainRedraw(); // CmdMoveDescription
 		}
 		/*no break*/
 	case wActionMove:
@@ -2445,6 +2457,7 @@ STATUS_T CmdMoveDescription(
 			}
 			return C_CONTINUE;
 		}
+		InfoMessage( _("Select and drag a description") );
 		break;
 	case C_DOWN:
 		if (( labelWhen < 2 || mainD.scale > labelScale ) ||
@@ -2457,6 +2470,7 @@ STATUS_T CmdMoveDescription(
 		if (trk == NULL )
 			return C_CONTINUE;
 		if (hidden) {
+			ClrTrkBits( trk, TB_HIDEDESC );
 			InfoMessage(_("Hidden Label - Drag to reveal"));
 		} else {
 			InfoMessage(_("Drag label"));
