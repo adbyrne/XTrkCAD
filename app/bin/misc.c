@@ -572,28 +572,39 @@ FileIsChanged(void)
  * MAIN BUTTON HANDLERS
  *
  */
+ /**
+  * Confirm a requested operation in case of possible loss of changes.
+  *
+  * \param label2 IN operation to be cancelled, unused at the moment
+  * \param after IN function to be executed on positive confirmation
+  * \return true if proceed, false if cancel operation
+  */
+  
+/** TODO: make sensible messages when requesting confirmation */
 
-EXPORT void Confirm(char * label2, doSaveCallBack_p after) {
-	int rc;
+bool
+Confirm(char * label2, doSaveCallBack_p after)
+{
+	int rc = -1;
 	if (changed) {
-		rc =
-				wNotice3(
-						_(
-								"Save changes to the layout design before closing?\n\n"
-										"If you don't save now, your unsaved changes will be discarded."),
-						_("&Save"), _("&Cancel"), _("&Don't Save"));
-		if (rc == 1) {
-			LayoutBackGroundInit(FALSE);
-			LayoutBackGroundSave();
-			DoSave(after);
-			return;
-		} else if (rc == 0) {
-			return;
-		}
+		rc = wNotice3(_("Save changes to the layout design before closing?\n\n"
+			"If you don't save now, your unsaved changes will be discarded."),
+			_("&Save"), _("&Cancel"), _("&Don't Save"));
 	}
 
-	after();
-	return;
+	switch (rc) {
+	case -1:	/* do not save */
+		after();
+		break;
+	case 0:		/* cancel operation */
+		break;
+	case 1:		/* save */
+		LayoutBackGroundInit(FALSE);
+		LayoutBackGroundSave();
+		DoSave(after);
+		break;
+	}
+	return(rc != 0);
 }
 
 static void ChkLoad(void) {
@@ -605,23 +616,21 @@ static void ChkExamples( void )
 	Confirm(_("examples"), DoExamples);
 }
 
-static void ChkRevert( void )
+static void ChkRevert(void)
 {
-	int rc;
+    int rc;
 
-	if (changed) {
-		rc =
-				wNoticeEx( NT_WARNING,
-						_(
-								"Do you want to return to the last saved state?\n\n"
-										"Revert will cause all changes done since last save to be lost."),
-						_("&Revert"), _("&Cancel"));
-		if (rc) {
-			/* load the file */
-			char *filename = GetLayoutFullPath();
-			LoadTracks(1, &filename, NULL);
-		}
-	}
+    if (changed) {
+        rc = wNoticeEx(NT_WARNING,
+                       _("Do you want to return to the last saved state?\n\n"
+                         "Revert will cause all changes done since last save to be lost."),
+                       _("&Revert"), _("&Cancel"));
+        if (rc) {
+            /* load the file */
+            char *filename = GetLayoutFullPath();
+            LoadTracks(1, &filename, NULL);
+        }
+    }
 }
 
 static char * fileListPathName;
@@ -685,12 +694,14 @@ static void DoQuitAfter(void) {
  * prevent data loss.
  */
 void DoQuit(void) {
-	Confirm(_("Quit"), DoQuitAfter);
+	if (Confirm(_("Quit"), DoQuitAfter)) {
+
 #ifdef CHECK_UNUSED_BALLOONHELP
-	ShowUnusedBalloonHelp();
+		ShowUnusedBalloonHelp();
 #endif
-	LogClose();
-	wExit(0);
+		LogClose();
+		wExit(0);
+	}
 }
 
 static void DoClearAfter(void) {
