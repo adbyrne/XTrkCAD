@@ -2777,7 +2777,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	wGetDisplaySize(&displayWidth, &displayHeight);
 	mainW = wWinMainCreate(buffer, (displayWidth * 2) / 3,
 			(displayHeight * 2) / 3, "xtrkcadW", message, "main",
-			F_RESIZE | F_MENUBAR | F_NOTAB | F_RECALLPOS | F_HIDE, MainProc,
+			F_RESIZE | F_MENUBAR | F_NOTAB | F_RECALLPOS | F_RECALLSIZE | F_HIDE, MainProc,
 			NULL);
 	if (mainW == NULL)
 		return NULL;

@@ -921,8 +921,8 @@ static wWin_p wWinCommonCreate(
                                          GTK_WINDOW(gtkMainW->gtkwin));
         }
     }
+    getWinSize(w, nameStr);
     if (winType != W_MAIN) {
-            getWinSize(w, nameStr);
             gtk_widget_set_app_paintable (w->gtkwin,TRUE);
     }
 
