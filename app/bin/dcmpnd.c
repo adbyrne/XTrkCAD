@@ -30,7 +30,7 @@
 #include "i18n.h"
 #include "messages.h"
 #include "param.h"
-#include "paramfile.h"
+#include "include/paramfile.h"
 #include "shrtpath.h"
 #include "track.h"
 #include "utility.h"

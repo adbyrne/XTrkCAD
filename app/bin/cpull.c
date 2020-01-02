@@ -707,8 +707,6 @@ static STATUS_T CmdPull(
 
 	int countTracksR0 = 0, countTracksR1 = 0, possibleEndPoints = 0;
 	BOOL_T found = FALSE;
-	ANGLE_T a;
-	DIST_T d;
 
 	switch (action&0xFF) {
 

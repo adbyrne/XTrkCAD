@@ -1294,7 +1294,7 @@ static toDesignSchema_t * LoadSegs(
 	char *segOrder;
 	coOrd pos;
 	wIndex_t segCnt;
-	ANGLE_T angle0, angle1, angle2, angle3, angle4;
+	ANGLE_T angle0, angle1, angle2, angle3;
 	trkSeg_p segPtr;
 	struct {
 		coOrd pos[10];
@@ -1603,7 +1603,7 @@ LogPrintf( "ctoDes0-%d: EP(%f,%f) NEP(%f,%f) EA(%f) NEA(%f) R(%f) ARC(%f) EC(%f,
 			/* Ready to find Toe points */
 
 			DYNARR_RESET( trkSeg_t, tempSegs_da );
-			trkSeg_t * temp_p, * cornu_p;
+			trkSeg_t * temp_p;
 			temp_p = &tempSegs(0);
 
 
@@ -1936,7 +1936,6 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 			/* Generate Paths */
 
 			static char pathChar[512];
-			unsigned char c;
 			if (dp->type == NTO_CORNU3WAY) {
 				strcpy(pathChar,"Normal");  /* Also resets array */
 				pathLen = strlen(pathChar)+1;
@@ -1952,7 +1951,7 @@ LogPrintf( "ctoDes2: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 				pathLen += strlen(&pathChar[pathLen])+1;
 			} else {
 				strcpy(pathChar,"Left");
-				pathLen += strlen(&pathChar[pathLen])+1;
+				pathLen = strlen(pathChar)+1;
 			}
 			for (uint8_t i=0;i<Toe1Seg;i++) {
 				pathChar[pathLen] = i+1;
@@ -2349,7 +2348,6 @@ LogPrintf( "ctoDes3: R(%f) A0(%f) A1(%f) C(%f,%f) P(%f,%f) EP(%f,%f) RP0(%f,%f) 
 			}
 
 			static char pathChar[512];
-			unsigned char c;
 			strcpy(pathChar,"Normal");  /* Also resets array */
 
 			pathLen = strlen(pathChar)+1;

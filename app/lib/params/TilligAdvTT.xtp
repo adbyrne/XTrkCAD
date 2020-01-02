@@ -1,4 +1,4 @@
-CONTENTS Pilz/Tillig Advance Track System
+CONTENTS Pilz/Tillig Advance Track System TT Scale
 SUBCONTENTS Pilz/Tillig TT-Scale Advance Track - Straight Track
 TURNOUT TT  "Pilz/Tillig Track	G1 Straight 6.535 166mm	83101"
 	P "Normal" 1
@@ -136,8 +136,8 @@ TURNOUT TT  "Pilz/Tillig Track	Isolation Track 1.633 41.5mm	83150"
 
 SUBCONTENTS Pilz/Tillig TT-Scale Advance Track - Turnouts
 TURNOUT TT "Tillig	EW1-left 15d	83322/27"
-	P "Normal" 1 
-	P "Reverse" 2 3 
+	P "Normal" 1
+	P "Reverse" 2 3
 	E 0.000000 0.000000 270.000000
 	E 5.098425 0.000000 90.000000
 	E 4.985016 0.845476 75.000000
@@ -146,7 +146,7 @@ TURNOUT TT "Tillig	EW1-left 15d	83322/27"
 	S 0 0.000000 3.596973 0.473551 4.985016 0.845476
 	END
 TURNOUT TT "Tillig	EW1-right 15d	83321/26"
-	P "Normal" 1 
+	P "Normal" 1
 	P "Reverse" 2 3
 	E 0.000000 0.000000 270.000000
 	E 5.098425 0.000000 90.000000
@@ -321,4 +321,3 @@ TURNOUT TT "Tillig	K2-30 Crossing	83170"
 	S 0 0.000000 0.000000 0.000000 3.267717 0.000000
 	S 0 0.000000 0.218894 0.816927 3.048823 -0.816927
 END
-

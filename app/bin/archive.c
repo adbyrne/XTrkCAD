@@ -31,7 +31,7 @@
 #include <zip.h>
 
 #ifdef WINDOWS
-    #include "../wlib/mswlib/dirent.h"
+    #include "include/dirent.h"
     #include <direct.h>
     #include <io.h>
     #include <process.h>

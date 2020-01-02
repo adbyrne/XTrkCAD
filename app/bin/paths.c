@@ -186,7 +186,7 @@ char *FindFilename(char *path)
  * Find file extension in a filename
  *
  * \param path IN full or partial path
- * \return pointer to the file extension part
+ * \return pointer to the file extension part, empty string if no extension present
  */
 
 char *FindFileExtension(char *path) {
@@ -195,6 +195,8 @@ char *FindFileExtension(char *path) {
 
 	if (ext) {
 		ext++;
+	} else {
+		ext = path + strlen(path);
 	}
 
 	return ext;

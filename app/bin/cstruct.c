@@ -33,7 +33,7 @@
 #include "layout.h"
 #include "messages.h"
 #include "param.h"
-#include "paramfile.h"
+#include "include/paramfile.h"
 #include "track.h"
 #include "utility.h"
 #include "ccurve.h"

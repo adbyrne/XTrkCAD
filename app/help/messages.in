@@ -208,7 +208,7 @@ You cannot select a \f{Turntable} as the second track in \f{Join} command. If yo
 Refer to \k{cmdJoin} for detail.
 END
 
- ccornu.c
+# ccornu.c
 MESSAGE MSG_JOIN_CORNU_SAME
 Cannot Join; Selected endpoints are on same track.
 HELP

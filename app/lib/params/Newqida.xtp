@@ -1,4 +1,4 @@
-CONTENTS Newqida G-Scale Plastic Track
+CONTENTS Newqida G Scale Plastic Track
 SUBCONTENTS Straight Track
 TURNOUT G "Newqida	Straight 300mm	78010"
 	P "Normal" 1
@@ -8,14 +8,14 @@ TURNOUT G "Newqida	Straight 300mm	78010"
 	END
 
 SUBCONTENTS Curve Track
-TURNOUT G "Newqida	Curved 650mm 30°	78020"
+TURNOUT G "Newqida	Curved 650mm 30ï¿½	78020"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 12.273613 3.288702 60.000000
 	C 0 0.000000 -24.547244 0.000033 24.547244 150.000076 30.000000
 	END
 
-TURNOUT G "Newqida	Curved 650mm 15°	Custom"
+TURNOUT G "Newqida	Curved 650mm 15ï¿½	Custom"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 6.353289 0.836426 75.000000

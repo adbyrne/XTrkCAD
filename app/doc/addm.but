@@ -12,19 +12,19 @@
 
 \H{addM}\i{Add Menu}
 
-\G{png.d/madd.png} 
+\G{png.d/madd.png}
 
-The \f{Add Menu} has all the actions related to adding track pieces to the layout. 
+The \f{Add Menu} has all the actions related to adding track pieces to the layout.
 
 \dd \f{Circle Track} - place a circle of track by selecting radius, tangent and or center (\K{cmdCircle}).
 
 \u000
 
-\dd \f{Curved Track} - lay curved track pieces using different modes for selecting start and endpoints and radius (\K{cmdCurve}). 
+\dd \f{Curved Track} - lay curved track pieces using different modes for selecting start and endpoints and radius (\K{cmdCurve}).
 
 \u000
 
-\dd \f{Hand-laid Turnout} - lay a turnout in place on the layout. 
+\dd \f{Hand-laid Turnout} - lay a turnout in place on the layout.
 
 \u000
 
@@ -36,19 +36,19 @@ The \f{Add Menu} has all the actions related to adding track pieces to the layou
 
 \u000
 
-\dd \f{Straight Track} - lay straight track pieces of arbitrary lengths 
+\dd \f{Straight Track} - lay straight track pieces of arbitrary lengths
 
 \u000
 
-\dd \f{Structure} - Add a predefined structure to the layout. 
+\dd \f{Structure} - Add a predefined structure to the layout.
 
 \u000
 
-\dd \f{Turnout} - select a turnout or a piece of fixed track and place on layout.
+\dd \f{Predefined Track} - select a turnout or a piece of fixed track and place on layout.
 
 \u000
 
-\dd \f{Turntable} - Place a turntable.
+\dd \f{Custom Turntable} - Place a turntable.
 
 \u000
 
@@ -104,11 +104,11 @@ You can join to and from circles, after which they become curved tracks.
 
 \G{png.d/bcurve.png}
 
-Creating a curve is a two step operation.  
+Creating a curve is a two step operation.
 
 The five methods (with their Shortcut keys) used to create a Curved Track are:
 
-\dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release. \c{Left-Drag} the red arrows to position the second endpoint. 
+\dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release. \c{Left-Drag} the red arrows to position the second endpoint.
 While the first endpoint is being placed, unless \e{Shift} is held, if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you will drag out the second end in aligned to that track, once you are dragging the second end it will be restricted to an arc that has the same end angle as the first endpoint. After a track is competed, the new track will be connected to this first track.
 
 \u000
@@ -153,7 +153,7 @@ If the Snap Grid (\K{cmdGrid}) is enabled then the endpoints will be constrained
 
 Optionally, the curve center point and radius can be displayed for the Curve.  This is enabled by the Move Label (\K{cmdMoveLabel}) command.
 
-For Beziers, the active control point will be drawn in red and the available endpoints are shown with circles.  
+For Beziers, the active control point will be drawn in red and the available endpoints are shown with circles.
 
 \f{Note:} You can also create Straight and Curved tracks using \k{cmdModify} by \c{Left-Drag}ing out extra track from an open end-point.
 
@@ -223,17 +223,17 @@ If the gauges are equal, a value of 0 means that the rail of the second track is
 
 The type of the output can be changed using the \f{Type} radio button to be a Track or a Line.
 
-The seperation can be automatically increased using the \f{Radius Factor} value. If this is set to 0.0 (default) the seperation value will be used regardless of radius. 
-If the value is set to 1.0, the seperation will be increased by a scaled 2864 inches per inch of curvature of the paralled track - this is in accordance with North American prototype practice. 
-Other values of Radius Factor will alter by an equivalent percentage. For example, 0.5 would use 50% of this increase. 
+The seperation can be automatically increased using the \f{Radius Factor} value. If this is set to 0.0 (default) the seperation value will be used regardless of radius.
+If the value is set to 1.0, the seperation will be increased by a scaled 2864 inches per inch of curvature of the paralled track - this is in accordance with North American prototype practice.
+Other values of Radius Factor will alter by an equivalent percentage. For example, 0.5 would use 50% of this increase.
 
 Select the track you want to parallel with \c{Left-Click}, and the new parallel track/line will appear beside it.  You control which side the new track will be on by dragging the cursor from one side to the other of the selected track before releasing it.
 
 This is very useful for creating sidings and yards.
 
-No parallel to a turnouts or a non-straight piece of sectional track is created. 
+No parallel to a turnouts or a non-straight piece of sectional track is created.
 
-It is possible to create tracks that abut (the endpoints are very close and aligned). These endpoints will be automatically connected. 
+It is possible to create tracks that abut (the endpoints are very close and aligned). These endpoints will be automatically connected.
 
 \rule
 
@@ -310,14 +310,14 @@ The \f{Turntable Angle} control on the Preferences (\K{cmdPref}) dialog controls
 
 \G{png.d/bblock.png}
 
-A block is created by first selecting the track segments in the block and then 
-selecting \f{Create Block} from either the Add menu \K{cmdAdd} or from the block menu on the 
-hotbar.  A block gets a name and a script.  The name is only used for 
-identification and the script is used by the layout control software.  The 
-script should provide whatever information is needed by the layout control 
-software to determine block occupancy.  This could be a code snippet to 
-retrieve the state of the block occupancy or it could be the address of the 
-sensor, etc. 
+A block is created by first selecting the track segments in the block and then
+selecting \f{Create Block} from either the Add menu \K{cmdAdd} or from the block menu on the
+hotbar.  A block gets a name and a script.  The name is only used for
+identification and the script is used by the layout control software.  The
+script should provide whatever information is needed by the layout control
+software to determine block occupancy.  This could be a code snippet to
+retrieve the state of the block occupancy or it could be the address of the
+sensor, etc.
 
 \G{png.d/block.png}
 
@@ -325,9 +325,9 @@ The create block dialog has spaces for two text strings. One is the name and
 the other is a block occupancy script. The name identifies the block and the
 script is information used by the layout control software to detect block
 occupancy. The script could be a code snippet or I/O device address
-information, etc. 
+information, etc.
 
-\rule 
+\rule
 
 \S{cmdSwitchmotor} Switchmotor
 
@@ -340,7 +340,7 @@ identification and the three scripts are used by the layout control software.
 The three scripts are for throwing the turnout to its "normal" position,
 throwing the turnout to its "reverse" position, and a script to read a point
 position sensor. These scripts could be code snippets or they could be
-addresses of I/O devices, etc. 
+addresses of I/O devices, etc.
 
 \G{png.d/switchmotor.png}
 
@@ -359,20 +359,20 @@ could be code snippets or I/O device address information, etc.
 
 A signal is created by selecting \f{Create Signal} from either the Add menu \K{cmdAdd} or
 from the hotbar. Use the mouse to select a location (left button) and then
-draging (left button down) the signal to set its orientation. Once the left 
-button is released, a Create/Edit Signal dialog box is displayed, and you can 
-fill in the signal's properties: name, fine tune the location and orientation, 
+draging (left button down) the signal to set its orientation. Once the left
+button is released, a Create/Edit Signal dialog box is displayed, and you can
+fill in the signal's properties: name, fine tune the location and orientation,
 number of heads, and the aspects.
 
 \G{png.d/signal.png}
 
-The create/edit signal dialog has spaces for the name of the signal, its 
-location and orientation, the number of heads (1, 2, or 3), and a list of 
-aspects.  Each aspect has a name and a script.  The name could be a rule book 
-name (Clear, Aproach, Stop, etc.) or the actual color(s) displayed (green, 
-yellow, red, etc.).  The script is just some information for the layout 
-control software to actually effect the display of the aspect -- this could be 
-the LCC event id to trigger the aspect or it could be a code snippet that 
+The create/edit signal dialog has spaces for the name of the signal, its
+location and orientation, the number of heads (1, 2, or 3), and a list of
+aspects.  Each aspect has a name and a script.  The name could be a rule book
+name (Clear, Aproach, Stop, etc.) or the actual color(s) displayed (green,
+yellow, red, etc.).  The script is just some information for the layout
+control software to actually effect the display of the aspect -- this could be
+the LCC event id to trigger the aspect or it could be a code snippet that
 causes the aspect to be displayed.
 
 \rule
@@ -381,11 +381,11 @@ causes the aspect to be displayed.
 
 \G{png.d/bControl.png}
 
-A control is created by selecting \f{Create Control} from either the Add menu \K{cmdAdd} or 
-from the hotbar. Use the mouse to select a location (left button) and then 
-dragging (left button down) the control to where you want it.  Once the left 
-button is released, a Create/Edit Control dialog box is displayed, and you can 
-fill in the control's properties: name, fine tune the location, and the on and 
+A control is created by selecting \f{Create Control} from either the Add menu \K{cmdAdd} or
+from the hotbar. Use the mouse to select a location (left button) and then
+dragging (left button down) the control to where you want it.  Once the left
+button is released, a Create/Edit Control dialog box is displayed, and you can
+fill in the control's properties: name, fine tune the location, and the on and
 off scripts.
 
 \G{png.d/control.png}
@@ -409,6 +409,6 @@ fill in the sensor's properties: name, fine tune the location, and the script.
 
 \G{png.d/sensor.png}
 
-The create/edit sensor dialog has spaces for the name of the sensor, its 
-location, and a script. The script is just some information for the layout 
+The create/edit sensor dialog has spaces for the name of the sensor, its
+location, and a script. The script is just some information for the layout
 control software to actually return the state of the sensor (on or off).

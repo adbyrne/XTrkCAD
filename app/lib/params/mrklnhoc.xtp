@@ -1,4 +1,4 @@
-CONTENTS Märklin C-Track HO-Scale
+CONTENTS Märklin C-Track HO Scale
 SUBCONTENTS Märklin C-Track Straight Track
 TURNOUT HO "Märklin C-Track	Straight 64.3mm	24064"
 	U "Straight Section" "XtrkCad" "Märklin C-Track" "Straight 64.3mm" "24064" 2.531496
@@ -371,7 +371,7 @@ TURNOUT HO "Märklin C-Track	Wide Angle Crossing 236.1mm 12.1°	24740"
 
 SUBCONTENTS Märklin C-Track Miscellaneous Track
 TURNOUT HO "Märklin C-Track	Bumper 77.5mm	24977"
-	U "Straight Section" "XtrkCad" "Märklin C-Track" "Bumper" "24977" 3.051181 
+	U "Straight Section" "XtrkCad" "Märklin C-Track" "Bumper" "24977" 3.051181
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	S 0 0.000000 0.000000 0.000000 3.051181 0.000000

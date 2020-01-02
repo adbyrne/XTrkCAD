@@ -469,7 +469,7 @@ EXPORT void OrphanedTrackSelect( void *ptr )
 //-	MapRedraw();
 }
 
-EXPORT void SelectOneTrack(
+static void SelectOneTrack(
 		track_p trk,
 		wBool_t selected )
 {
@@ -693,9 +693,6 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T junk )
 
 static BOOL_T FlipBridge( track_p trk, BOOL_T junk )
 {
-	EPINX_T i;
-	track_p trk2;
-
 	UndoModify( trk );
 	if (GetTrkBridge(trk)) {
 		ClrTrkBits( trk, TB_BRIDGE );
@@ -708,9 +705,6 @@ static BOOL_T FlipBridge( track_p trk, BOOL_T junk )
 
 static BOOL_T FlipTies( track_p trk, BOOL_T junk )
 {
-	EPINX_T i;
-	track_p trk2;
-
 	UndoModify( trk );
 	if (GetTrkNoTies(trk)) {
 		ClrTrkBits( trk, TB_NOTIES );
@@ -1561,7 +1555,8 @@ static void MoveTracks(
 							coOrd end_pos, end_center;
 							ANGLE_T end_angle;
 							end_pos = trackParms.cornuEnd[i];
-							Rotate( &end_pos, orig, angle );
+							end_center = trackParms.cornuCenter[i];
+							Rotate(&end_center, orig, angle);
 							end_angle = NormalizeAngle( trackParms.cornuAngle[i] + angle );
 							SetCornuEndPt(trk,i,end_pos,end_center,end_angle,trackParms.cornuRadius[i]);
 						}
@@ -1709,18 +1704,12 @@ void DrawHighlightLayer(int layer) {
 			if (layer_lo.y > lo.y ) layer_lo.y = lo.y;
 		}
 	}
-	wPos_t margin = (10.5*mainD.scale/mainD.dpi);
+	wPos_t margin = (wPos_t)(10.5*mainD.scale/mainD.dpi);
 	layer_hi.x +=margin;
 	layer_hi.y +=margin;
 	layer_lo.x -=margin;
 	layer_lo.y -=margin;
-	//coOrd size;
-	//size.x = layer_hi.x-layer_lo.x;
-	//size.y = layer_hi.y-layer_lo.y;
-	//DIST_T w,h;
-	//w = (wPos_t)((size.x/mainD.scale)*mainD.dpi+0.5+10);
-	//h = (wPos_t)((size.y/mainD.scale)*mainD.dpi+0.5+10);
-	wPos_t x, y;
+
 	wPos_t rect[4][2];
 	int type[4];
 	coOrd top_left, bot_right;
@@ -1732,7 +1721,6 @@ void DrawHighlightLayer(int layer) {
 	mainD.CoOrd2Pix(&mainD,layer_hi,&rect[2][0],&rect[2][1]);
 	mainD.CoOrd2Pix(&mainD,bot_right,&rect[3][0],&rect[3][1]);
 	wDrawPolygon(tempD.d,rect,(wPolyLine_e *)type,4,wDrawColorPowderedBlue,0,wDrawLineDash,wDrawOptTemp,0,0);
-	//wDrawFilledRectangle(mainD.d, x-5, y-5, w, h, wDrawColorGrey90, wDrawOptTemp|wDrawOptTransparent);
 }
 
 void SetUpMenu2(coOrd pos, track_p trk) {
@@ -2310,7 +2298,6 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 		coOrd dpos = pos;
 		coOrd cpos;
 		int mode;
-		if (hidden) *hidden_o = FALSE;
 		while ( TrackIterate( &trk1 ) ) {
 			if ( !GetLayerVisible(GetTrkLayer(trk1)) )
 				continue;
@@ -2391,9 +2378,6 @@ STATUS_T CmdMoveDescription(
 {
 	static track_p trk;
 	static EPINX_T ep;
-	track_p trk1;
-	EPINX_T ep1;
-	DIST_T d, dd;
 	static BOOL_T hidden;
 	static int mode;
 	BOOL_T bChanged;
@@ -2403,16 +2387,16 @@ STATUS_T CmdMoveDescription(
 	bChanged = FALSE;
 	switch (action&0xFF) {
 	case C_START:
-		if ( labelWhen < 2 || mainD.scale > labelScale ||
-			 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
-			ErrorMessage( MSG_DESC_NOT_VISIBLE );
-			return C_TERMINATE;
-		}
 		moveDescTrk = NULL;
 		moveDescPos = zero;
 		trk = NULL;
 		hidden = FALSE;
 		mode = -1;
+		if ( labelWhen < 2 || mainD.scale > labelScale ||
+			 (labelEnable&(LABELENABLE_TRKDESC|LABELENABLE_ENDPT_ELEV))==0 ) {
+			ErrorMessage( MSG_DESC_NOT_VISIBLE );
+			return C_TERMINATE;
+		}
 		InfoMessage( _("Select and drag a description") );
 		break;
 	case C_TEXT:
@@ -2872,7 +2856,7 @@ void DrawHighlightBoxes() {
 		coOrd size;
 		size.x = max.x-origin.x;
 		size.y = max.y-origin.y;
-		DIST_T w,h;
+		wPos_t w,h;
 		w = (wPos_t)((size.x/mainD.scale)*mainD.dpi+0.5+10);
 		h = (wPos_t)((size.y/mainD.scale)*mainD.dpi+0.5+10);
 		wPos_t x, y;
@@ -3187,7 +3171,6 @@ static STATUS_T CmdSelect(
 			panCenter = pos;
 			wMenuPopupShow( selectPopup1M );
 		} else {
-			coOrd base = pos;
 		    track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
 			SetUpMenu2(pos,trk);
 			wMenuPopupShow( selectPopup2M );

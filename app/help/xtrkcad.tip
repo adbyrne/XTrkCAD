@@ -73,6 +73,7 @@ Select the track at the beginning and end of the section.  The total length of t
 Note: the Profile selects the shortest path between the two selected tracks, which might not be the path you are interested in.  In this case, select the first track and then select other tracks along the path.
 
 Layers can be used to contain different groups of tracks or other features.  You might use one layer for the main-line, another of staging tracks and another of benchwork.\
+
 You can give each layer a name (by using the "Manage|Layer" dialog).  This name will be displayed as the Balloon Help for the corresponding Layer button, if you have Balloon Help enabled on the "Options|Display" dialog.
 
 You can remove groups of buttons or the Hot Bar from the Main window to give you more room if you are not using some features.  Also, the number of Layer buttons displayed is controlled by the "Manage|Layers" dialog.
