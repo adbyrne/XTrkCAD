@@ -139,6 +139,13 @@ void wDrawDelayUpdate(
 {
 }
 
+wBool_t wDrawSetTempMode(
+	wDraw_p bd,
+	wBool_t bTemp )
+{
+	return 0;
+}
+
 /**
  * Sets the proper pen and composition for the next drawing operation
  * 
