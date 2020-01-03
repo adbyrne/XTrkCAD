@@ -56,7 +56,7 @@ typedef struct sTrackLibrary
 CatalogEntry *InitCatalog(void);
 TrackLibrary *InitLibrary(void);
 TrackLibrary *CreateLibrary(char *directory);
-bool GetTrackFiles(TrackLibrary *trackLib, unsigned char *directory);
+bool GetTrackFiles(TrackLibrary *trackLib, char *directory);
 int GetParameterFileInfo(int files, char ** fileName, void * data);
 unsigned CreateLibraryIndex(TrackLibrary *trackLib);
 unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
