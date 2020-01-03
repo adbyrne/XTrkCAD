@@ -470,7 +470,7 @@ static STATUS_T CmdJoin(
 		return C_CONTINUE;
 
 	case wActionMove:
-		if (easementVal < 0)
+		if ((easementVal < 0) && Dj.cornuMode )
 			return CmdCornu(action, pos);
 		break;
 
@@ -478,7 +478,7 @@ static STATUS_T CmdJoin(
 
 		if ( !Dj.cornuMode && ((Dj.state == 0 && (MyGetKeyState() & WKEY_SHIFT) != 0) || Dj.joinMoveState != 0) )
 			return DoMoveToJoin( pos );
-		if (easementVal < 0.0) {
+		if (easementVal < 0.0 && Dj.joinMoveState == 0) {
 			Dj.cornuMode = TRUE;
 			return CmdCornu(action, pos);
 		}
@@ -571,7 +571,7 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 		tempSegs_da.cnt = 0;
 
 	case C_MOVE:
-		if (easementVal < 0)
+		if (easementVal < 0 && Dj.cornuMode)
 			return CmdCornu(action, pos);
 
 LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
@@ -817,8 +817,8 @@ errorReturn:
 	case C_UP:
 
 		if (Dj.state == 0) {
-			if (easementVal<0)
-						return CmdCornu(action, pos);
+			if (easementVal<0 && Dj.cornuMode)
+				return CmdCornu(action, pos);
 			else
 				return C_CONTINUE;
 		}
@@ -875,7 +875,7 @@ errorReturn:
 
 		if ( Dj.joinMoveState == 1 || Dj.state == 1 ) {
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
-		} else if (easementVal<0 )
+		} else if (easementVal<0 && Dj.cornuMode)
 				return CmdCornu(action,pos);
 
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
@@ -883,8 +883,8 @@ errorReturn:
 
 	case C_TEXT:
 	case C_OK:
-		if (easementVal<0 )
-				return CmdCornu(action,pos);
+		if (easementVal<0 && Dj.cornuMode)
+			return CmdCornu(action,pos);
 
 	}
 
