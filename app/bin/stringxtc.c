@@ -7,9 +7,10 @@
   * stupid library routines.
   */
 
+#include <ctype.h>
 #include <stddef.h>  
 #include <errno.h>
-#include "stringxtc.h"
+#include "include/stringxtc.h"
 
 /**
  * strscpy - Copy a C-string into a sized buffer
@@ -59,3 +60,47 @@ size_t strscpy(char *dest, const char *src, size_t count)
 
 	return -E2BIG;
 }
+
+/**
+ * Convert a string to lower case
+ * Taken from https://stackoverflow.com/questions/23618316/undefined-reference-to-strlwr
+ * 
+ * \param str IN string to convert
+ * \return pointer to converted string
+ */
+
+char *
+XtcStrlwr(char *str)
+{
+	unsigned char *p = (unsigned char *)str;
+
+	while (*p) {
+		*p = tolower((unsigned char)*p);
+		p++;
+	}
+
+	return str;
+}
+
+/**
+ * Compare two strings case insensitive
+ * Taken from https://stackoverflow.com/questions/30733786/c99-remove-stricmp-and-strnicmp
+ * 
+ * \param a, b IN strings to compare
+  * \return 
+ */
+ 
+int
+XtcStricmp(const char *a, const char *b)
+{
+    int ca, cb;
+    do {
+        ca = (unsigned char) *a++;
+        cb = (unsigned char) *b++;
+        ca = tolower(toupper(ca));
+        cb = tolower(toupper(cb));
+    } while (ca == cb && ca != '\0');
+    return ca - cb;
+}
+
+
