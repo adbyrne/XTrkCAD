@@ -43,25 +43,15 @@
 #include "include/paramfile.h"
 #include "include/partcatalog.h"
 #include "paths.h"
+#include "include/stringxtc.h"
 
 #if _MSC_VER > 1300
-    #define wal_stricmp _wal_stricmp
     #define strnicmp _strnicmp
     #define strdup _strdup
 #endif
 
 #define PUNCTUATION "+-*/.,&%=#"
 
-int wal_stricmp(const char *a, const char *b) {
-  int ca, cb;
-  do {
-     ca = (unsigned char) *a++;
-     cb = (unsigned char) *b++;
-     ca = tolower(toupper(ca));
-     cb = tolower(toupper(cb));
-   } while (ca == cb && ca != '\0');
-   return ca - cb;
-}
 
 /**
  * Create and initialize the linked list for the catalog entries
@@ -165,7 +155,7 @@ IsExistingContents(CatalogEntry *listHeader, const char *contents)
     CatalogEntry *currentEntry = listHeader->next;
 
     while (currentEntry != currentEntry->next) {
-        if (!wal_stricmp(currentEntry->contents, contents)) {
+        if (!XtcStricmp(currentEntry->contents, contents)) {
             printf("%s already exists in %s\n", contents, currentEntry->fullFileName[0]);
             return (currentEntry);
         }
@@ -247,7 +237,7 @@ GetNextParameterFile(DIR *dir, const char *dirName, char **fileName)
         ent = readdir(dir);
 
         if (ent) {
-            if (!wal_stricmp(FindFileExtension(ent->d_name), "xtp")) {
+            if (!XtcStricmp(FindFileExtension(ent->d_name), "xtp")) {
                 /* create full file name and get the state for that file */
                 MakeFullpath(fileName, dirName, ent->d_name, NULL);
 
@@ -417,7 +407,7 @@ static int SearchInIndex(IndexEntry arr[], int l, int r, char *key)
 {
     if (r >= l) {
         int mid = l + (r - l) / 2;
-        int res = wal_stricmp(key, arr[mid].keyWord);
+        int res = XtcStricmp(key, arr[mid].keyWord);
 
         // If the element is present at the middle itself
         if (!res) {
@@ -494,11 +484,11 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
         int upper = found;
         int i;
 
-        while (lower > 0 && !wal_stricmp(index[lower-1].keyWord, search)) {
+        while (lower > 0 && !XtcStricmp(index[lower-1].keyWord, search)) {
             lower--;
         }
 
-        while (upper < length - 1 && !wal_stricmp(index[upper + 1].keyWord, search)) {
+        while (upper < length - 1 && !XtcStricmp(index[upper + 1].keyWord, search)) {
             upper++;
         }
 
@@ -684,7 +674,7 @@ GetParameterFileContent(char *file)
 			if (fgets(buffer, sizeof(buffer), fh)) {
 				char *ptr = strtok(buffer, " \t");
 
-				if (!wal_stricmp(ptr, CONTENTSCOMMAND)) {
+				if (!XtcStricmp(ptr, CONTENTSCOMMAND)) {
 					/* if found, store the rest of the line and the filename	*/
 					ptr = strtok(NULL, "\t\n");
 					result = strdup(ptr);

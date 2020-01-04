@@ -29,7 +29,7 @@
 #include "misc.h"
 #include "note.h"
 #include "param.h"
-#include "stringxtc.h"
+#include "include/stringxtc.h"
 #include "track.h"
 #include "validator.h"
 #include "wlib.h"
