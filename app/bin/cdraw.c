@@ -1316,7 +1316,7 @@ static void ReadDraw( char * header )
 	int lineType;
 	struct extraData * xx;
 
-	if ( !GetArgs( header+5, paramVersion<3?"dXpYf":paramVersion<9?"dL000pYf":"dLd00pff",
+	if ( !GetArgs( header+5, paramVersion<3?"dXXpYf":paramVersion<9?"dLX00pYf":"dLd00pff",
 				&index, &layer, &lineType, &orig, &elev, &angle ) )
 		return;
 	ReadSegs();
