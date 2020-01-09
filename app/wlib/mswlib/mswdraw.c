@@ -1254,6 +1254,11 @@ void wDrawRestoreImage(
 }
 
 
+void wDrawClearTemp( wDraw_p d )
+{
+}
+
+
 void wDrawClear( wDraw_p d )
 {
 	RECT rect;
