@@ -1133,7 +1133,7 @@ EXPORT BOOL_T ReadSegs( void )
 	int i;
 	DIST_T elev0, elev1;
 	BOOL_T hasElev;
-	BOOL_T isPolyV2, noVersion;
+	BOOL_T isPolyV1, isPolyV2, noVersion;
 	BOOL_T improvedEnds;
 	FLOAT_T ignoreFloat;
 	char type;
@@ -1169,20 +1169,17 @@ EXPORT BOOL_T ReadSegs( void )
 		}
 		if (subsegs) continue;
 		type = *cp++;
-		hasElev = FALSE;
+		improvedEnds = isPolyV2 = hasElev = isPolyV1 = FALSE;
 		noVersion = TRUE;
 		if ( *cp != ' ')
 			noVersion = FALSE;
 		if ( *cp == '3' ) {
 			cp++;
-			hasElev = TRUE;
+			hasElev = isPolyV1 = TRUE;
 		}
-		isPolyV2 = FALSE;
 		if (*cp == '4') {
 			cp++;
-			hasElev = TRUE;
-			isPolyV2 = TRUE;
-			improvedEnds = TRUE;
+			improvedEnds = isPolyV2 = hasElev = isPolyV1 = TRUE;
 		}
 		switch (type) {
 		case SEG_STRLIN:
@@ -1343,33 +1340,27 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
 			s->u.p.polyType = FREEFORM;
-			if (isPolyV2) {
-				if ( !GetArgs( cp, "lwdd",
-					 &rgb, &s->width,
-					 &s->u.p.cnt, &s->u.p.polyType) ) {
-					rc = FALSE;
-					/*??*/break;
-				}
-			} else {
-				if ( !GetArgs( cp, "lwd",
-						&rgb, &s->width,
-						&s->u.p.cnt) ) {
-					rc = FALSE;
-					/*??*/break;
-				}
+			if ( !GetArgs( cp,
+				isPolyV2?"lwdd":"lwdX",
+				 &rgb,
+				 &s->width,
+				 &s->u.p.cnt,
+				 &s->u.p.polyType) ) {
+				rc = FALSE;
+				/*??*/break;
 			}
 			s->color = wDrawFindColor( rgb );
 			s->u.p.pts = (pts_t*)MyMalloc( s->u.p.cnt * sizeof (pts_t) );
 			for ( i=0; i<s->u.p.cnt; i++ ) {
 				cp = GetNextLine();
-				if (cp == NULL || !GetArgs( cp, "pd", &s->u.p.pts[i].pt,&s->u.p.pts[i].pt_type)) {
+				if (cp == NULL ||
+				    !GetArgs( cp,
+// TODO: does elev belong here instead of the seg header?
+					isPolyV2?"pdY":isPolyV1?"pXf":"pXY",
+					&s->u.p.pts[i].pt,
+					&s->u.p.pts[i].pt_type,
+					&elev0 )) {
 					rc = FALSE;
-				}
-				if (!noVersion) {
-					if (cp == NULL || !GetArgs( cp, hasElev?"f":"Y", &elev0 ) ) {
-						rc = FALSE;
-						/*??*/break;
-					}
 				}
 			}
 			s->u.p.angle = 0.0;
@@ -1587,6 +1578,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
+// TODO: to be consistent, we should add a dummy 0 for elev. See ReadSegs/SEG_POLY
 			rc &= fprintf( f, "\t%c4 %ld %0.6f %d %d \n",
 				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
 				segs[i].u.p.cnt, segs[i].u.p.polyType ) > 0;
