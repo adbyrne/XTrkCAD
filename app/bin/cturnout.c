@@ -2442,10 +2442,10 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 			DIST_T maxX;
 			track_p lt = leftover(i).trk;
 			EPINX_T ep, le = leftover(i).ep, nearest_ep =-1;
-			coOrd pos, nearest_pos;
-			ANGLE_T nearest_angle;
-			DIST_T nearest_radius;
-			coOrd nearest_center;
+			coOrd pos, nearest_pos = zero;
+			ANGLE_T nearest_angle = 0.0;
+			DIST_T nearest_radius = 0.0;
+			coOrd nearest_center = zero;
 			trackParams_t params;
 			maxX = 0.0;
 			DIST_T dd = 10000.0;

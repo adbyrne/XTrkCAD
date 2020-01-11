@@ -2297,7 +2297,7 @@ track_p FindTrackDescription(coOrd pos, EPINX_T * ep_o, int * mode_o, BOOL_T sho
 		BOOL_T hidden_t, hidden;
 		coOrd dpos = pos;
 		coOrd cpos;
-		int mode;
+		int mode = -1;
 		while ( TrackIterate( &trk1 ) ) {
 			if ( !GetLayerVisible(GetTrkLayer(trk1)) )
 				continue;
