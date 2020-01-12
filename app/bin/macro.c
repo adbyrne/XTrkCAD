@@ -1061,7 +1061,7 @@ static void Playback( void )
 				zoom = scale_x;
 			}
 			mainD.scale = zoom;
-			InfoMessage("Zoom Set to %d", zoom);
+			InfoMessage("Zoom Set to %.0f", zoom);
 			mainD.orig.x = x;
 			mainD.orig.y = y;
 			SetMainSize();
