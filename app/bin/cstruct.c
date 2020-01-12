@@ -697,17 +697,15 @@ static void NewStructure( void )
 
 static void StructRotate( void * pangle )
 {
+	if (Dst.state == 0)
+		return;
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
-	if (Dst.state == 1)
-		DrawSegs( &tempD, Dst.pos, Dst.angle,
-			curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
-	else
-		Dst.pos = cmdMenuPos;
+	Dst.pos = cmdMenuPos;
 	Rotate( &Dst.pos, cmdMenuPos, angle );
 	Dst.angle += angle;
-	DrawSegs( &tempD, Dst.pos, Dst.angle,
-		curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
-	Dst.state = 1;
+	TempRedraw(); // StructRotate
+//-	DrawSegs( Dst.state==0?&mainD:&tempD, Dst.pos, Dst.angle,
+//-		curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
 }
 
 
@@ -819,10 +817,6 @@ EXPORT STATUS_T CmdStructureAction(
 
 	case C_CMDMENU:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if ( structPopupM == NULL ) {
-			structPopupM = MenuRegister( "Structure Rotate" );
-			AddRotateMenu( structPopupM, StructRotate );
-		}
 		wMenuPopupShow( structPopupM );
 		return C_CONTINUE;
 
@@ -1083,6 +1077,10 @@ EXPORT void InitCmdStruct( wMenu_p menu )
 	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"), wIconCreatePixMap(struct_xpm), LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
 	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar, "cmdStructureHotBar", "", NULL, LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, 0, NULL );
 	ParamRegister( &structurePG );
+	if ( structPopupM == NULL ) {
+		structPopupM = MenuRegister( "Structure Rotate" );
+		AddRotateMenu( structPopupM, StructRotate );
+	}
 }
 #endif
 

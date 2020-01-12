@@ -2504,17 +2504,15 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 
 static void TurnoutRotate( void * pangle )
 {
+	if (Dto.state == 0)
+		return;
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
-	if (Dto.state == 1)
-		DrawSegs( &tempD, Dto.pos, Dto.angle,
-			curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
-	else
-		Dto.pos = cmdMenuPos;
+	Dto.pos = cmdMenuPos;
 	Rotate( &Dto.pos, cmdMenuPos, angle );
 	Dto.angle += angle;
-	DrawSegs( &tempD, Dto.pos, Dto.angle,
-		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
-	Dto.state = 1;
+	TempRedraw(); // TurnoutRotate
+//-	DrawSegs( &mainD, Dto.pos, Dto.angle,
+//-		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
 }
 
 static dynArr_t anchors_da;
@@ -2740,10 +2738,6 @@ EXPORT STATUS_T CmdTurnoutAction(
 		return C_TERMINATE;
 
 	case C_CMDMENU:
-		if ( turnoutPopupM == NULL ) {
-			turnoutPopupM = MenuRegister( "Turnout Rotate" );
-			AddRotateMenu( turnoutPopupM, TurnoutRotate );
-		}
 		wMenuPopupShow( turnoutPopupM );
 		return C_CONTINUE;
 
@@ -2984,6 +2978,10 @@ EXPORT void InitCmdTurnout( wMenu_p menu )
 	ParamRegister( &turnoutPG );
 	log_turnout = LogFindIndex( "turnout" );
 	log_traverseTurnout = LogFindIndex( "traverseTurnout" );
+	if ( turnoutPopupM == NULL ) {
+		turnoutPopupM = MenuRegister( "Turnout Rotate" );
+		AddRotateMenu( turnoutPopupM, TurnoutRotate );
+	}
 }
 #endif
 
