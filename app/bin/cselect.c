@@ -2145,8 +2145,8 @@ static STATUS_T CmdRotate(
 				angle = NormalizeAngle( angle-baseAngle );
 				if ( MyGetKeyState()&WKEY_SHIFT ) {
 					angle = NormalizeAngle(floor((angle+7.5)/15.0)*15.0);
-					Translate( &base, orig, angle, FindDistance(orig,pos) );
 				}
+				Translate( &base, orig, angle, FindDistance(orig,pos) );
 				CreateRotateAnchor(orig);
 //-				DrawLine( &tempD, base, orig, 0, wDrawColorBlack );
 				SetMoveD( FALSE, orig, angle );
