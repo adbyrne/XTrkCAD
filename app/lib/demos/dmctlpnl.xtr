@@ -706,13 +706,13 @@ Note: Win95/Win98/WinME does not support drawing lines with flat end-caps, but o
 Users on those platforms will not see the gap.
 END
 STEP
-ORIG 0.500 2.000 4.000
+ORIG 1 2.000 4.000
 HOTBARSELECT Symbols	¼" DOT	 
 MOUSE 2 3.000 5.000
 MOUSE 4 3.000 5.000
 BIGPAUSE
 MOUSE 8200 3.000 5.000
-ORIG 0.5 8.000 4.000
+ORIG 1 8.000 4.000
 HOTBARSELECT Symbols	¼" DOT	 
 MOUSE 2 9.000 5.000
 MOUSE 4 9.000 5.000
