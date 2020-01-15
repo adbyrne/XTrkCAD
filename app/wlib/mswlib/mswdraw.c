@@ -941,10 +941,18 @@ void wDrawFilledRectangle(
 		wDrawColor color,
 		wDrawOpts opts )
 {
+	int mode;
 	RECT rect;
 	if (d == NULL)
 		return;
 	setDrawBrush( d->hDc, d, color, opts );
+	if (opts & wDrawOptTransparent) {
+		mode = R2_NOTXORPEN;
+	}
+	else {
+		mode = R2_COPYPEN;
+	}
+	SetROP2(d->hDc, mode);
 	rect.left = XINCH2PIX(d,px);
 	rect.right = XINCH2PIX(d,px+sx);
 	rect.top = YINCH2PIX(d,py+sy);
@@ -1075,7 +1083,16 @@ void wDrawPolygon(
     BeginPath(d->hDc);
 
     if (fill) {
+		int mode;
         setDrawBrush(d->hDc, d, color, opts);
+		if (opts & wDrawOptTransparent) {
+			mode = R2_NOTXORPEN;
+		}
+		else {
+			mode = R2_COPYPEN;
+		}
+		SetROP2(d->hDc, mode);
+
     } else {
         setDrawMode(d->hDc, d, dw, lt, color, opts);
     }
