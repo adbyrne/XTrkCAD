@@ -184,11 +184,15 @@ static void setDrawMode(
 		}
 	}
 
+#ifdef NOTEMPDRAW
 	if (dopt & wDrawOptTemp) {
 		mode = R2_NOTXORPEN;
 	} else {
+#endif
 		mode = R2_COPYPEN;
+#ifdef NOTEMPDRAW
 	}
+#endif
 	SetROP2( hDc, mode );
 	if ( d == d0 && mode == mode0 && dw0 == dw && lt == lt0 && dc == dc0 )
 		return;
@@ -805,6 +809,7 @@ void wDrawString(
         return;
     }
 
+#ifdef NOTEMPDRAW
     if (dopts & wDrawOptTemp) {
         setDrawMode(d->hDc, d, 0, wDrawLineSolid, dc, dopts);
         newDc = CreateCompatibleDC(d->hDc);
@@ -837,6 +842,7 @@ void wDrawString(
             myInvalidateRect(d, &rect);
         }
     } else {
+#endif
         prevFont = SelectObject(d->hDc, newFont);
         SetBkMode(d->hDc, TRANSPARENT);
 
@@ -873,7 +879,9 @@ void wDrawString(
             rect.right = x + (w + h + 1);
             myInvalidateRect(d, &rect);
         }
+#ifdef NOTEMPDRAW
     }
+#endif
 
     DeleteObject(newFont);
     fp->lfHeight = oldLfHeight;
@@ -1395,9 +1403,12 @@ void wDrawBitMap(
 	if ( noNegDrawArgs > 0 && ( x0 < 0 || y0 < 0 ) )
 		return;
 #endif
+#ifdef NOTEMPDRAW
 	if (dopt & wDrawOptTemp) {
 		mode = tmpOp;
-	} else if (dc == wDrawColorWhite) {
+	} else 
+#endif
+		if (dc == wDrawColorWhite) {
 		mode = clrOp;
 		dc = wDrawColorBlack;
 	} else {
@@ -1411,6 +1422,7 @@ void wDrawBitMap(
 				RGB( 255, 255, 255 ), bm->w, bm->h, bm->bmx );
 		bm->color = dc;
 	}
+#ifdef NOTEMPDRAW
 	if ( (dopt & wDrawOptNoClip) != 0 &&
 		 ( px < 0 || px >= d->w || py < 0 || py >= d->h ) ) {
 		x0 += d->x;
@@ -1424,6 +1436,7 @@ void wDrawBitMap(
 		ReleaseDC( ((wControl_p)(d->parent))->hWnd, hDc );
 		return;
 	}
+#endif
 
 	bmDc = CreateCompatibleDC( d->hDc );
 	setDrawMode( d->hDc, d, 0, wDrawLineSolid, dc, dopt );
