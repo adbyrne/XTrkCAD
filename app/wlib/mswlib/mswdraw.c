@@ -1081,10 +1081,15 @@ void wDrawPolygon(
 #endif
 
     for (i=0; i<cnt; i++) {
+        wPolyLine_e type1;
         point.x = node[i][0];
         point.y = node[i][1];
+		if (type != NULL)
+			type1 = type[i];
+		else
+			type1 = wPolyLineStraight;
 
-        if (type[i] == wPolyLineRound || type[i] == wPolyLineSmooth) {
+        if (type1 == wPolyLineRound || type1 == wPolyLineSmooth) {
             prevNode = (i == 0) ? cnt - 1 : i - 1;
             nextNode = (i == cnt - 1) ? 0 : i + 1;
 
@@ -1100,7 +1105,7 @@ void wDrawPolygon(
             endPoint1.x = (nextXDistance/2)+node[i][0];
             endPoint1.y = (nextYDistance/2)+node[i][1];
 
-            if (type[i] == wPolyLineRound) {
+            if (type1 == wPolyLineRound) {
                 double distNext = (nextXDistance*nextXDistance + nextYDistance * nextYDistance);
                 double distPrev = (prevXDistance*prevXDistance + prevYDistance * prevYDistance);
                 // but should be half of the shortest line length (equidistant from node) for round
@@ -1128,7 +1133,7 @@ void wDrawPolygon(
         }
 
         if (i==0) {
-            if (type[i] == wPolyLineStraight || open) {
+            if (type1 == wPolyLineStraight || open) {
                 // for straight lines or open shapes use the starting point as passed
                 addPoint(d, pointCount++, &point, PT_MOVETO, &rect);
                 startingPoint = point;
@@ -1141,7 +1146,7 @@ void wDrawPolygon(
                 startingPoint = endPoint0;
             }
         } else {
-            if (type[i] == wPolyLineStraight || (open && (i==cnt-1))) {
+            if (type1 == wPolyLineStraight || (open && (i==cnt-1))) {
                 addPoint(d, pointCount++, &point, PT_LINETO, &rect);
             } else {
                 if (i==cnt-1 && !open) {
