@@ -3064,23 +3064,23 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         wSetCursor(NULL, curCursor);
 
         if (!mswAllowBalloonHelp) {
-            break;
+            return TRUE;
         }
 
         if (IsIconic(mswHWnd)) {
-            break;
+            return TRUE;
         }
 
         b = getControlFromCursor(hWnd, NULL);
 
         if (b == balloonControlButton) {
-            break;
+            return TRUE;
         }
 
         if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
                                          (!b) || b->type == B_DRAW || b->helpStr == NULL) {
             closeBalloonHelp();
-            break;
+            return TRUE;
         }
 
         if (b != balloonHelpButton) {
@@ -3088,19 +3088,19 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         if (balloonHelpState != balloonHelpIdle) {
-            break;
+            return TRUE;
         }
 
         balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
                                     balloonHelpTimeOut, NULL);
 
         if (balloonHelpTimer == (UINT)0) {
-            break;
+            return TRUE;
         }
 
         balloonHelpState = balloonHelpWait;
         balloonHelpButton = b;
-        break;
+        return TRUE;
 
     case WM_SYSCOMMAND:
         inx = GetWindowWord(hWnd, 0);
