@@ -2365,6 +2365,7 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 										GetTrkIndex(leftover(i).trk) ) )
 								leftover(j).trk = NULL;
 		AuditTracks( "addTurnout [%d] before delete", i );
+								UndrawNewTrack( leftover(i).trk );
 								DeleteTrack( leftover(i).trk, FALSE );
 		AuditTracks( "addTurnout [%d] before delete", i );
 								leftover(i).trk = NULL;
@@ -2478,6 +2479,7 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 					SetCornuEndPt(lt, le, nearest_pos, nearest_center, nearest_angle, nearest_radius);
 					ConnectTracks(newTrk,nearest_ep,lt,le);
 				} else {
+					UndrawNewTrack(lt);
 					DeleteTrack(lt,TRUE);
 				}
 			} else {
