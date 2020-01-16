@@ -816,6 +816,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 {
 	track_p t;
 	static coOrd pos0;
+	static int state = 0;
 	wControl_p controls[2];
 	char * labels[1];
 
@@ -834,6 +835,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		labels[0] = N_("Diameter");
 		InfoSubstituteControls( controls, labels );
 		/*InfoMessage( "Place Turntable");*/
+		state = 0;
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -849,6 +851,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		ParamLoadData( &turntablePG );
 		pos0 = pos;
 //-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		state = 1;
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -868,10 +871,13 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		InfoSubstituteControls( NULL, NULL );
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		wPrefSetFloat( "misc", message, turntableDiameter );
+		state = 0;
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		if ( state > 0 ) {
+			DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		}
 		return C_CONTINUE;
 
 	case C_CANCEL:
