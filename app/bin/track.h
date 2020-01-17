@@ -426,7 +426,9 @@ void SetDebug( char * );
 #define TB_NOTIES       (1<<8)
 #define TB_BRIDGE       (1<<9)
 #define TB_SELREDRAW	(1<<10)
-#define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED)
+// Track has been undrawn, don't draw it on Redraw
+#define TB_UNDRAWN	(1<<11)
+#define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED|TB_UNDRAWN)
 
 /* track.c */
 #ifdef FASTTRACK

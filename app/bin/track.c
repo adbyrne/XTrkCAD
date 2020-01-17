@@ -2800,6 +2800,9 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 	DIST_T scale2rail;
 	TRKTYP_T trkTyp;
 
+	// Hack for WINDOWS
+	if ( trk->bits & TB_UNDRAWN )
+		return;
 	trkTyp = GetTrkType(trk);
 	curTrackLayer = GetTrkLayer(trk);
 	if (d != &mapD ) {
@@ -2855,12 +2858,14 @@ static void DrawATrack( track_cp trk, wDrawColor color )
 
 EXPORT void DrawNewTrack( track_cp t )
 {
+	t->bits &= ~TB_UNDRAWN;
 	DrawATrack( t, wDrawColorBlack );
 }
 
 EXPORT void UndrawNewTrack( track_cp t )
 {
 	DrawATrack( t, wDrawColorWhite );
+	t->bits |= TB_UNDRAWN;
 }
 
 EXPORT int doDrawPositionIndicator = 1;
