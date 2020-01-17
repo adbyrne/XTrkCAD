@@ -586,7 +586,7 @@ static void PlaybackCursor(
 	case C_TEXT:
 		proc( action, pos);
 		char c = action>>8;
-		InfoMessage("Key '%c' value - %d - pressed", c, c);
+//-		InfoMessage("Key '%c' value - %d - pressed", c, c);
 		bm = playbackBm;
 		break;
 
