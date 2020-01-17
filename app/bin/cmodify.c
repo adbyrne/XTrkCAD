@@ -706,7 +706,9 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 		}
 		CopyAttributes( Dex.Trk, trk );
 		if (Dex.jointD.d1 == 0) {
+			DrawEndPt( &mainD, Dex.Trk, Dex.params.ep, wDrawColorWhite );
 			ConnectTracks(Dex.Trk, Dex.params.ep, trk, inx);
+			DrawEndPt( &mainD, Dex.Trk, Dex.params.ep, wDrawColorBlack );
 		} else {
 			UndrawNewTrack( Dex.Trk );
 			JoinTracks( Dex.Trk, Dex.params.ep, Dex.pos00, trk, inx, Dex.pos01, &Dex.jointD );
