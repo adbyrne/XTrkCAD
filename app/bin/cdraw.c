@@ -1606,9 +1606,11 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 					infoSubst = FALSE;
 		}
 		XMainRedraw();
+		ignoredDraw = NULL;
 		if (rc == C_CONTINUE) break;
 		/* no break*/
 	case C_FINISH:
+		ignoredDraw = trk;
 		rc = DrawGeomModify( C_FINISH, pos, &drawModCmdContext  );
 		xx->angle = drawModCmdContext.angle;
 		xx->orig = drawModCmdContext.orig;
