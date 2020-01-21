@@ -1137,6 +1137,7 @@ STATUS_T DrawGeomPolyModify(
 			tempSegs(0).u.p.pts = &points(0);
 			CreatePolyAnchors( -1);
 			InfoMessage(_("Select Points, or use Context Menu"));
+			ClrAllTrkBitsRedraw( TB_UNDRAWN, TRUE );
 			UndrawNewTrack( context->trk );
 			XMainRedraw();
 			return C_CONTINUE;

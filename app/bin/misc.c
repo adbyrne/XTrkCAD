@@ -987,6 +987,7 @@ EXPORT void Reset(void) {
 		DoCheckPoint();
 		checkPtMark = changed;
 	}
+	ClrAllTrkBits( TB_UNDRAWN );
 	MainRedraw(); // Reset
 	MapRedraw();
 	EnableCommands();
