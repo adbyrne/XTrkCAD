@@ -1927,6 +1927,8 @@ STATUS_T DrawGeomModify(
 		tempSegs(0).color = context->segPtr[segInx].color;
 		switch ( context->type ) {
 		case SEG_TBLEDGE:
+			if ( MyGetKeyState() & WKEY_CTRL )
+				OnTableEdgeEndPt( NULL, &pos );
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
@@ -2103,6 +2105,8 @@ STATUS_T DrawGeomModify(
 		tempSegs_da.cnt = 1;
 		switch (tempSegs(0).type) {
 		case SEG_TBLEDGE:
+			if ( MyGetKeyState() & WKEY_CTRL )
+				OnTableEdgeEndPt( NULL, &pos );
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
