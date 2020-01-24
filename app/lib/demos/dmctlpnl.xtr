@@ -136,29 +136,32 @@ Now, clear the layout and turn on the Snap Grid.
 END
 STEP
 PARAMETER grid ok
-PARAMETER misc menuFile-clear
+#PARAMETER misc menuFile-clear
 PARAMETER misc cmdGridShow
 PARAMETER misc cmdGridEnable
 ORIG 2.000 0.000 2.000
-CLEAR
-PARAMETER layout ok
+#CLEAR
+#PARAMETER layout ok
+PARAMETER misc cmdSelectAll
+PARAMETER misc cmdDelete
 MESSAGE
 First step: draw the lines representing the tracks.
 
-We specify the line width in pixels.
+We specify the line width in pixels when at 1:1 zoom.
 
-To create a ¼" line, divide the dots-per-inch (DPI) of your display by 4 and then by the drawing scale (which is 2 right now).
+To create a ¼" line, divide the dots-per-inch (DPI) of your display by 4.
 
-For MS-Windows the DPI is usually 98, so choose: 98/4/2 = 12 (approximately).
-For Linux, the DPI is usually 72, so choose: 72/4/2 = 9.
+For MS-Windows the DPI is usually 98, so choose: 98/4 = 24 (approximately).
+For Linux, the DPI is usually 72, so choose: 72/4 = 18.
 END
 STEP
 COMMAND DrawLine
 PARAMETER draw linewidth 0
 PARAMETER draw linecolor 0
 PARAMETER GROUP draw
-PARAMETER draw linewidth 12
+PARAMETER draw linewidth 24
 STEP
+KEYSTATE 2
 MOUSE 2 1.000 6.000
 #MOUSE 3 1.016 6.000
 #MOUSE 3 1.016 6.016
@@ -317,16 +320,24 @@ MOUSE 2 1.000 6.000
 #MOUSE 3 11.000 6.000
 #MOUSE 3 11.000 6.000
 #MOUSE 3 11.000 5.984
-MOUSE 4 11.000 5.984
-BIGPAUSE
-MOUSE 2 3.000 4.984
-MOUSE 4 8.969 5.047
-BIGPAUSE
-MOUSE 2 2.000 6.016
-MOUSE 4 2.969 5.031
-BIGPAUSE
-MOUSE 2 10.000 6.016
+KEYSTATE 2
+MOUSE 4 11.000 6.000
+KEYSTATE 2
+MOUSE 2 10.000 6.000
+KEYSTATE 2
 MOUSE 4 9.000 5.000
+BIGPAUSE
+KEYSTATE 2
+MOUSE 2 9.000 5.000
+KEYSTATE 2
+MOUSE 4 3.000 5.000
+BIGPAUSE
+KEYSTATE 2
+MOUSE 2 3.000 5.000
+KEYSTATE 2
+MOUSE 4 2.000 6.000
+BIGPAUSE
+KEYSTATE 2
 MOUSE 2 6.000 5.000
 #MOUSE 3 6.000 4.984
 #MOUSE 3 6.000 4.984
@@ -479,7 +490,8 @@ MOUSE 2 6.000 5.000
 #MOUSE 3 8.031 3.062
 #MOUSE 3 8.031 3.047
 #MOUSE 3 8.031 3.031
-MOUSE 4 8.031 3.031
+KEYSTATE 2
+MOUSE 4 8.000 3.000
 MESSAGE
 _________________________________________
 
@@ -880,12 +892,12 @@ MOUSE 2 10.984 6.047
 BIGPAUSE
 MOUSE 4 9.772 6.000
 MOUSE 8200 9.672 6.000
-MOUSE 2 8.900 4.906
-MOUSE 4 8.900 4.906
-MOUSE 2 8.900 4.906
+MOUSE 2 8.900 5.000
+MOUSE 4 8.900 5.000
+MOUSE 2 8.900 5.000
 BIGPAUSE
-MOUSE 4 7.666 5.031
-MOUSE 8200 7.666 5.031
+MOUSE 4 7.666 5.000
+MOUSE 8200 7.666 5.000
 ORIG 2 0.000 2.000
 MESSAGE
 _________________________________________
