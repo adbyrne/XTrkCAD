@@ -29,7 +29,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. On Windows this is a *.bmp file, on Linux and Mac it is a *.png file.
+\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. The bitmap will be saved in PNG format.
 
 \u000
 
@@ -115,7 +115,7 @@ Note: This command can create a very large file and consume a lot of memory and 
 
 Pressing the \f{OK} button invokes a \f{File Save} dialog so you can choose the file name for the Bitmap.
 
-The format of the file depends on the Operating System: on MS-Windows it is a Windows Bitmap (.BMP) file, on Linux it is a X11 Pixmap (.XPM) file.
+The format of the file is PNG on all operating systems.
 
 \rule
 

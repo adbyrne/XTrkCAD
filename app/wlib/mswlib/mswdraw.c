@@ -34,9 +34,10 @@
 #else
 #define wFont_t tagLOGFONT
 #endif
-//#include "common.h"
+
 #include "misc.h"
 #include "mswint.h"
+#include <FreeImage.h>
 
 /*
  *****************************************************************************
@@ -1895,74 +1896,75 @@ wBool_t wBitMapDelete( wDraw_p d )
 	return TRUE;
 }
 
-wBool_t wBitMapWriteFile( wDraw_p d, const char * fileName )
+/**
+ * write bitmap file. The bitmap in d must contain a valid HBITMAP
+ *
+ * \param  d	    A wDraw_p to process.
+ * \param  fileName Filename of the file.
+ *
+ * \returns A wBool_t. TRUE on success
+ */
+
+wBool_t
+wBitMapWriteFile(wDraw_p d, const char * fileName)
 {
-	char *pixels;
-	int j, ww, chunk;
-	FILE * f;
-	BITMAPFILEHEADER bmfh;
-	struct {
-		BITMAPINFOHEADER bmih;
-		RGBQUAD colors[256];
-	} bmi;
-	int rc;
-	
-	if ( d->hBm == 0)
-		return FALSE;
-	f = wFileOpen( fileName, "wb" );
-	if (!f) {
-		wNoticeEx( NT_ERROR, fileName, "Ok", NULL );
-		return FALSE;
-	}
-	ww = ((d->w +3) / 4) * 4;
-	bmfh.bfType = 'B'+('M'<<8);
-	bmfh.bfSize = (long)(sizeof bmfh) + (long)(sizeof bmi.bmih) + (long)(sizeof bmi.colors) + (long)ww * (long)(d->h);
-	bmfh.bfReserved1 = 0;
-	bmfh.bfReserved2 = 0;
-	bmfh.bfOffBits = sizeof bmfh + sizeof bmi.bmih + sizeof bmi.colors;
-	fwrite( &bmfh, 1, sizeof bmfh, f );
-	bmi.bmih.biSize = sizeof bmi.bmih;
-	bmi.bmih.biWidth = d->w;
-	bmi.bmih.biHeight = d->h;
-	bmi.bmih.biPlanes = 1;
-	bmi.bmih.biBitCount = 8;
-	bmi.bmih.biCompression = BI_RGB;
-	bmi.bmih.biSizeImage = 0;
-	bmi.bmih.biXPelsPerMeter = 75*(10000/254);
-	bmi.bmih.biYPelsPerMeter = 75*(10000/254);
-	bmi.bmih.biClrUsed = bmi.bmih.biClrImportant = mswGetColorList( bmi.colors );
-	SelectObject( d->hDc, d->hBmOld );
-	rc = GetDIBits( d->hDc, d->hBm, 0, 1, NULL, (BITMAPINFO*)&bmi, DIB_RGB_COLORS );
-	if ( rc == 0 ) {
-		wNoticeEx( NT_ERROR, "WriteBitMap: Can't get bitmapinfo from Bitmap", "Ok", NULL );
-		return FALSE;
-	}
-	bmi.bmih.biClrUsed = 256;
-	fwrite( &bmi.bmih, 1, sizeof bmi.bmih, f );
-	fwrite( bmi.colors, 1, sizeof bmi.colors, f );
-	chunk = 32000/ww;
-	pixels = (char*)malloc( ww*chunk );
-	if ( pixels == NULL ) {
-		wNoticeEx( NT_ERROR, "WriteBitMap: no memory", "OK", NULL );
-		return FALSE;
-	}
-	for (j=0;j<d->h;j+=chunk) {
-		if (j+chunk>d->h)
-			chunk = d->h-j;
-		rc = GetDIBits( d->hDc, d->hBm, j, chunk, pixels, (BITMAPINFO*)&bmi, DIB_RGB_COLORS );
-		if ( rc == 0 ) 
-		if ( rc == 0 ) {
-			wNoticeEx( NT_ERROR, "WriteBitMap: Can't get bits from Bitmap", "Ok", NULL );
-			return FALSE;
-		}
-		rc = fwrite( pixels, 1, ww*chunk, f );
-		if (rc != ww*chunk) {
-			wNoticeEx( NT_ERROR, "WriteBitMap: Bad fwrite", "Ok", NULL);
-		}
-	}
-	free( pixels );
-	SelectObject( d->hDc, d->hBm );
-	fclose( f );
-	return TRUE;
+    FIBITMAP *dib = NULL;
+    FIBITMAP *dib2 = NULL;
+    FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
+    BOOL bSuccess = FALSE;
+
+    if (d->hBm) {
+
+        BITMAP bm;
+        GetObject(d->hBm, sizeof(BITMAP), (LPSTR)&bm);
+        dib = FreeImage_Allocate(bm.bmWidth, bm.bmHeight, bm.bmBitsPixel, 0, 0, 0);
+        // The GetDIBits function clears the biClrUsed and biClrImportant BITMAPINFO members (dont't know why)
+        // So we save these infos below. This is needed for palettized images only.
+        int nColors = FreeImage_GetColorsUsed(dib);
+        HDC dc = GetDC(NULL);
+        GetDIBits(dc,
+                  d->hBm,
+                  0,
+                  FreeImage_GetHeight(dib),
+                  FreeImage_GetBits(dib),
+                  FreeImage_GetInfo(dib),
+                  DIB_RGB_COLORS);
+        ReleaseDC(NULL, dc);
+
+        // restore BITMAPINFO members
+        FreeImage_GetInfoHeader(dib)->biClrUsed = nColors;
+        FreeImage_GetInfoHeader(dib)->biClrImportant = nColors;
+        // we will get a 32 bit bitmap on Windows systems with invalid alpha
+        // so it needs to be converted to 24 bits.
+        // (see: https://sourceforge.net/p/freeimage/discussion/36110/thread/0699ce8e/ )
+        dib2 = FreeImage_ConvertTo24Bits(dib);
+        FreeImage_Unload(dib);
+    }
+
+    // Try to guess the file format from the file extension
+    fif = FreeImage_GetFIFFromFilename(fileName);
+    if (fif != FIF_UNKNOWN) {
+        // Check that the dib can be saved in this format
+        BOOL bCanSave;
+
+        FREE_IMAGE_TYPE image_type = FreeImage_GetImageType(dib2);
+        if (image_type == FIT_BITMAP) {
+            // standard bitmap type
+            WORD bpp = FreeImage_GetBPP(dib2);
+            bCanSave = (FreeImage_FIFSupportsWriting(fif) &&
+                        FreeImage_FIFSupportsExportBPP(fif, bpp));
+        } else {
+            // special bitmap type
+            bCanSave = FreeImage_FIFSupportsExportType(fif, image_type);
+        }
+
+        if (bCanSave) {
+            bSuccess = FreeImage_Save(fif, dib2, fileName, PNG_DEFAULT);
+            return bSuccess;
+        }
+    }
+    FreeImage_Unload(dib2);
+
+    return bSuccess;
 }
 
