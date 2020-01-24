@@ -1210,7 +1210,11 @@ static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color )
 			if ( OFF_D( d->orig, d->size, lo, hi ) )
 				continue;
 		}
+		if (color != wDrawColorWhite)
+			ClrTrkBits(trk, TB_UNDRAWN);
 		DrawTrack( trk, d, color );
+		if (color == wDrawColorWhite)
+			SetTrkBits( trk, TB_UNDRAWN );
 	}
 	/*wDrawDelayUpdate( d->d, FALSE );*/
 }
