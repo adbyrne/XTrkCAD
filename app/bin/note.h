@@ -25,7 +25,7 @@
 #include <stdbool.h>
 #include "track.h"
 
-#define URLMAXIMUMLENGTH (2048)
+#define URLMAXIMUMLENGTH (512)
 #define PATHMAXIMUMLENGTH (2048)
 #define TITLEMAXIMUMLENGTH (81)
 
