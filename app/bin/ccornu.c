@@ -1009,7 +1009,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 		Da.minRadius = CornuMinRadius(Da.pos,Da.crvSegs_da);
 		InfoMessage( _("Select Point, or Add Point") );
 //-		DrawTempCornu();
-		TempRedraw; // AdjustCornuCurve C_START
+		TempRedraw(); // AdjustCornuCurve C_START
 		return C_CONTINUE;
 
 	case wActionMove:
@@ -1212,6 +1212,11 @@ EXPORT STATUS_T AdjustCornuCurve(
 								if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) return C_CONTINUE;
 								ANGLE_T a = tp.angle;
 								Translate(&pos,tp.ttcenter,a,tp.ttradius);
+								Da.angle[sel] = NormalizeAngle(a+180);
+								SetUpCornuParms(&cp);
+								if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
+								else Da.crvSegs_da_cnt = 0;
+								XMainRedraw();
 							} else return C_CONTINUE;
 						}
 					}
@@ -1219,13 +1224,14 @@ EXPORT STATUS_T AdjustCornuCurve(
 					pos = pos2;				//Put Back to original position as outside track
 				}
 				if (!inside) {
-					if (Da.ep[sel]>=0) {				//Ignore if no end
+					if (Da.ep[sel]>=0) {				//Track defined end point
 						ANGLE_T diff = NormalizeAngle(GetTrkEndAngle(Da.trk[sel],Da.ep[sel])-FindAngle(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos));
-						if (diff>90.0 && diff<270.0) {
+						if (diff>90.0 && diff<270.0) {  //The point is not on track but outside cone of end angle+/-90
 							Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
+							CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint);
 							return C_CONTINUE;
 						}
-					} else {
+					} else {							//Not an end point
 						if (QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS)){     //Turntable
 							trackParams_t tp;
 							if (!GetTrackParams(PARAMS_CORNU, Da.trk[sel], pos, &tp)) return C_CONTINUE;
@@ -1235,14 +1241,27 @@ EXPORT STATUS_T AdjustCornuCurve(
 							ANGLE_T da = DifferenceBetweenAngles(FindAngle(edge,pos),a);
 							DIST_T d = fabs(FindDistance(edge,pos)*cos(R2D(da)));
 							Translate(&pos,edge,a,d);
+							Da.angle[sel] = NormalizeAngle(a+180);
 							Da.pos[sel] = pos;
+							CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint);
+							Da.extendSeg[sel].type = SEG_STRTRK;
+							Da.extendSeg[sel].width = 0;
+							Da.extendSeg[sel].color = wDrawColorBlack;
+							Da.extendSeg[sel].u.l.pos[1-sel] = pos;
+							Da.extendSeg[sel].u.l.pos[sel] = edge;
+							Da.extend[sel] = TRUE;
+							SetUpCornuParms(&cp);
+							if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
+							else Da.crvSegs_da_cnt = 0;
+							XMainRedraw();
+							return C_CONTINUE;        //Stop moving end point
 						} else return C_CONTINUE;
 					}
 				}
 				// Stop the user extending right through the other track
 				if (Da.ep[sel]>=0 && QueryTrack(Da.trk[sel],Q_CORNU_CAN_MODIFY)) { //For non-turnouts
-					if ((!QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS))        // But Not Helix or Circle
-					&& (!QueryTrack(Da.trk[sel],Q_HAS_VARIABLE_ENDPOINTS))) { // Not a Turntable
+					if ((!QueryTrack(Da.trk[sel],Q_CAN_ADD_ENDPOINTS))        // Not Turntable - may not be needed
+					&& (!QueryTrack(Da.trk[sel],Q_HAS_VARIABLE_ENDPOINTS))) { // Not Helix or a Circle
 						DIST_T ab = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]));
 						DIST_T ac = FindDistance(GetTrkEndPos(Da.trk[sel],Da.ep[sel]),pos);
 						DIST_T cb = FindDistance(GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]),pos);
@@ -1254,8 +1273,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 							pos = GetTrkEndPos(Da.trk[sel],1-Da.ep[sel]);  //Make other end of track
 						}
 					}
-				} else if (Da.ep[sel]>=0 && inside) {
-					InfoMessage(_("Can't move end inside a Turnout"));		//Turnouts are stuck to end-point
+				} else if (Da.ep[sel]>=0 && inside) {                     //Has a point and inside track
+					InfoMessage(_("Can't move end inside a Turnout"));	  //Turnouts are stuck to end-point
 					Da.pos[sel] = pos = GetTrkEndPos(Da.trk[sel],Da.ep[sel]);
 					CreateBothEnds(Da.selectEndPoint,Da.selectMidPoint);
 					return C_CONTINUE;
