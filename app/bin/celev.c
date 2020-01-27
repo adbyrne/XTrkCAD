@@ -435,7 +435,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
 					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
 					InfoMessage (_("Track Elevation %0.3f"), elev0);
-				} else if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
+				} else if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
+						&& !(QueryTrack(trk0,Q_IS_TURNOUT))) {
 					InfoMessage( _("Click to Split here - Elevation %0.3f"), elev0);
 					CreateEndAnchor(p0,TRUE);
 				}
@@ -473,7 +474,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			} else if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 				UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 				oldTrackCount = trackCount;
-				if (!SplitTrack( trk0, p0, ep0, &trk1, FALSE ))
+				if (!QueryTrack(trk0,Q_IS_TURNOUT) &&
+					!SplitTrack( trk0, p0, ep0, &trk1, FALSE ))
 					return C_CONTINUE;
 				InfoMessage( _("Track Split!") );
 				ElevSelect( trk0, ep0 );

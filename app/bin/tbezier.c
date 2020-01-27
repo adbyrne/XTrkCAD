@@ -1452,8 +1452,33 @@ LOG( log_bezierSegments, 1, ( "    BezTr-Exit2 --> SI%d A%0.3f P[%0.3f %0.3f] D%
 		}
 		break;
 
-	case SEGPROC_SPLIT:
-		//TODO Split
+	case SEGPROC_SPLIT: ;
+		wIndex_t subinx;
+		double t;
+		double dd;
+		coOrd split_p = data->split.pos;
+		ANGLE_T angle = GetAngleSegs(segPtr->bezSegs.cnt,subSegsPtr, &split_p, &inx, &dd, &back, &subinx, NULL);
+		coOrd current[4], newl[4], newr[4];
+
+		BezierMathDistance(&split_p, segPtr->u.b.pos, 500, &t);  //Find t value
+
+		for (int i=0;i<4;i++) {
+			current[i] = segPtr->u.b.pos[i];
+
+		}
+		for (int i=0;i<2;i++) {
+			data->split.newSeg[i].type = segPtr->type;
+		}
+		BezierSplit(segPtr->u.b.pos, data->split.newSeg[0].u.b.pos, data->split.newSeg[1].u.b.pos, t);
+
+		FixUpBezierSeg(data->split.newSeg[0].u.b.pos,&data->split.newSeg[0],segPtr->type == SEG_BEZTRK);
+		FixUpBezierSeg(data->split.newSeg[1].u.b.pos,&data->split.newSeg[1],segPtr->type == SEG_BEZTRK);
+
+		data->split.length[0] = data->split.newSeg[0].u.b.length;
+		data->split.length[1] = data->split.newSeg[1].u.b.length;
+
+		data->split.pos = split_p;
+
 		break;
 
 	case SEGPROC_GETANGLE:

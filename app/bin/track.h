@@ -130,6 +130,7 @@ typedef struct {
 #define Q_IS_TEXT						(28)
 #define Q_IS_ACTIVATEABLE				(29)
 #define Q_IS_STRUCTURE					(30)
+#define Q_IS_TURNOUT                    (31)
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track

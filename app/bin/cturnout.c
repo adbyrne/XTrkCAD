@@ -1648,12 +1648,9 @@ static BOOL_T QueryTurnout( track_p trk, int query )
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
 		return TRUE;
 	case Q_MODIFY_CAN_SPLIT:
-		if (GetTrkEndPtCnt(trk) <= 2) {	// allow splitting of simple track und buffers
-			return TRUE ;
-		}
-		else {
-			return FALSE;
-		}
+		return TRUE;
+	case Q_IS_TURNOUT:
+		return TRUE;
 	case Q_CAN_PARALLEL:
 		if( GetTrkEndPtCnt( trk ) == 2 && fabs( GetTrkEndAngle( trk, 0 ) - GetTrkEndAngle( trk, 1 )) == 180.0 )
 			return TRUE;

@@ -1945,8 +1945,8 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 			trkl = *leftover;
 			ep0 = epl;
 			if ( !disconnect )
-				ConnectTracks( trk, ep, trkl, 1-ep );
-			ep0 = ep;
+				ConnectTracks( trk, ep, trkl, epl );
+			ep0 = 1-epl;
 			while ( 1 ) {
 				CopyAttributes( trk, trkl );
 				ClrTrkElev( trkl );

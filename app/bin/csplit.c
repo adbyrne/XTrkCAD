@@ -25,6 +25,7 @@
 #include "messages.h"
 #include "track.h"
 #include "utility.h"
+#include "fileio.h"
 
 static wMenu_p splitPopupM[2];
 static wMenuToggle_p splitPopupMI[2][4];
@@ -183,14 +184,23 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 		break;
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		onTrackInSplit = TRUE;
 		if ((trk0 = OnTrack( &pos, FALSE, TRUE ))!=NULL && CheckTrackLayer( trk0 )) {
+			onTrackInSplit = FALSE;
 			ep0 = PickEndPoint( pos, trk0 );
 			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos)) && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
 				CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
-			} else if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
+			} else if (QueryTrack(trk0,Q_IS_TURNOUT)) {
+				if ((MyGetKeyState()&WKEY_SHIFT) != 0 )
 					CreateSplitAnchor(pos,trk0,FALSE);
+				else
+					CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
+				break;
+			} else if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
+				CreateSplitAnchor(pos,trk0,FALSE);
 			}
 		}
+		onTrackInSplit = FALSE;
 		break;
 	case C_REDRAW:
 		if (anchors_da.cnt)
