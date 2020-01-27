@@ -55,6 +55,7 @@
 static void DrawRoomWalls( wBool_t );
 EXPORT void DrawMarkers( void );
 static void ConstraintOrig( coOrd *, coOrd, int );
+static void DoMouse( wAction_t action, coOrd pos );
 
 static int log_pan = 0;
 static int log_zoom = 0;
@@ -1882,6 +1883,14 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
 	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
 LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
+	wAction_t action = wActionMove;
+	coOrd pos;
+	if ( mouseState == mouseLeft )
+		action = wActionLDrag;
+	if ( mouseState == mouseRight )
+		action = wActionRDrag;
+	mainD.Pix2CoOrd( &mainD, mousePositionx, mousePositiony, &pos );
+	DoMouse( action, pos );
 }
 
 /**
