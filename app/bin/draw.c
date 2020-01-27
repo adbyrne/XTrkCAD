@@ -2522,8 +2522,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 			default:
 				return;
 			}
-			mainD.Pix2CoOrd( &mainD, x, y, &pos );
-			InfoPos( pos );
+//-			mainD.Pix2CoOrd( &mainD, x, y, &pos );
+//-			InfoPos( pos );
 			return;
 		case C_TEXT:
 			if ((action>>8) == 0x0D) {
@@ -2642,8 +2642,21 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 		}
 	}
 	mainD.Pix2CoOrd( &mainD, x, y, &pos );
-	mousePositionx = x;
-	mousePositiony = y;
+	switch (action & 0xFF) {
+	case wActionMove:
+	case wActionLDown:
+	case wActionLDrag:
+	case wActionLUp:
+	case wActionRDown:
+	case wActionRDrag:
+	case wActionRUp:
+	case wActionLDownDouble:
+		mousePositionx = x;
+		mousePositiony = y;
+		break;
+	default:
+		break;
+	}
 
 	DoMouse( action, pos );
 }
