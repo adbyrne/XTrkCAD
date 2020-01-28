@@ -1074,10 +1074,6 @@ foundSeg:
 		epPos = GetSegEndPt( &segProcDataSplit.split.newSeg[s1], s0, FALSE, &epAngle );
 		epAngle += 180.0;
 	}
-#ifdef LATER
-	if ( segProcDataSplit.split.length[s1] <= minLength && splitTurnoutPath[1] == '\0' )
-		return FALSE;
-#endif
 
 	/*
 	 * 4. Map the old segments to new
@@ -1107,6 +1103,7 @@ foundSeg:
 			} else {
 				tempSegs(segIndexMap(segInx)-1) = xx->segs[segInx];
 			}
+			posCnt++;
 		}
 	}
 
@@ -1164,6 +1161,7 @@ foundSeg:
 	/*
 	 * 7. Convert trailing segments to new tracks
 	 */
+	int trks = 0;
 	path = splitTurnoutPath;
 	if ( segProcDataSplit.split.length[s1] < minLength )
 		path += splitTurnoutDir;
@@ -1188,6 +1186,7 @@ foundSeg:
 			trk2 = segProcDataNewTrack.newTrack.trk;
 			ep2 = 1-epN;
 		}
+		++trks;
 		path += splitTurnoutDir;
 	}
 

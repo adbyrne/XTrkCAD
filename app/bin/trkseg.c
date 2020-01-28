@@ -142,8 +142,14 @@ EXPORT coOrd GetSegEndPt(
 		break;
     case SEG_BEZTRK:
     case SEG_BEZLIN:
-        if (ep ==1) pos = segPtr->u.b.pos[3];       //For Bezier, use the End Points of the overall curve
-        else pos = segPtr->u.b.pos[0];
+        if (ep ==1) {
+        	pos = segPtr->u.b.pos[3];       //For Bezier, use the End Points of the overall curve
+        	angle = FindAngle(segPtr->u.b.pos[2],segPtr->u.b.pos[3]);
+        } else {
+        	pos = segPtr->u.b.pos[0];
+        	angle = FindAngle(segPtr->u.b.pos[1],segPtr->u.b.pos[0]);
+        }
+
         break;
     default:
 		AbortProg("GetSegCntPt(%c)", segPtr->type );

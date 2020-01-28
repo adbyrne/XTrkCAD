@@ -1457,7 +1457,7 @@ LOG( log_bezierSegments, 1, ( "    BezTr-Exit2 --> SI%d A%0.3f P[%0.3f %0.3f] D%
 		double t;
 		double dd;
 		coOrd split_p = data->split.pos;
-		ANGLE_T angle = GetAngleSegs(segPtr->bezSegs.cnt,subSegsPtr, &split_p, &inx, &dd, &back, &subinx, NULL);
+		ANGLE_T angle = GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_p)segPtr->bezSegs.ptr, &split_p, &inx, &dd, &back, &subinx, NULL);
 		coOrd current[4], newl[4], newr[4];
 
 		BezierMathDistance(&split_p, segPtr->u.b.pos, 500, &t);  //Find t value
@@ -1468,6 +1468,11 @@ LOG( log_bezierSegments, 1, ( "    BezTr-Exit2 --> SI%d A%0.3f P[%0.3f %0.3f] D%
 		}
 		for (int i=0;i<2;i++) {
 			data->split.newSeg[i].type = segPtr->type;
+			data->split.newSeg[i].color = segPtr->color;
+			data->split.newSeg[i].width = segPtr->width;
+			data->split.newSeg[i].bezSegs.ptr = NULL;
+			data->split.newSeg[i].bezSegs.cnt = 0;
+			data->split.newSeg[i].bezSegs.max = 0;
 		}
 		BezierSplit(segPtr->u.b.pos, data->split.newSeg[0].u.b.pos, data->split.newSeg[1].u.b.pos, t);
 
