@@ -55,6 +55,7 @@
 static void DrawRoomWalls( wBool_t );
 EXPORT void DrawMarkers( void );
 static void ConstraintOrig( coOrd *, coOrd, int );
+static void DoMouse( wAction_t action, coOrd pos );
 
 static int log_pan = 0;
 static int log_zoom = 0;
@@ -1882,6 +1883,14 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
 	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
 LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
+	wAction_t action = wActionMove;
+	coOrd pos;
+	if ( mouseState == mouseLeft )
+		action = wActionLDrag;
+	if ( mouseState == mouseRight )
+		action = wActionRDrag;
+	mainD.Pix2CoOrd( &mainD, mousePositionx, mousePositiony, &pos );
+	DoMouse( action, pos );
 }
 
 /**
@@ -2513,8 +2522,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 			default:
 				return;
 			}
-			mainD.Pix2CoOrd( &mainD, x, y, &pos );
-			InfoPos( pos );
+//-			mainD.Pix2CoOrd( &mainD, x, y, &pos );
+//-			InfoPos( pos );
 			return;
 		case C_TEXT:
 			if ((action>>8) == 0x0D) {
@@ -2633,8 +2642,21 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 		}
 	}
 	mainD.Pix2CoOrd( &mainD, x, y, &pos );
-	mousePositionx = x;
-	mousePositiony = y;
+	switch (action & 0xFF) {
+	case wActionMove:
+	case wActionLDown:
+	case wActionLDrag:
+	case wActionLUp:
+	case wActionRDown:
+	case wActionRDrag:
+	case wActionRUp:
+	case wActionLDownDouble:
+		mousePositionx = x;
+		mousePositiony = y;
+		break;
+	default:
+		break;
+	}
 
 	DoMouse( action, pos );
 }
