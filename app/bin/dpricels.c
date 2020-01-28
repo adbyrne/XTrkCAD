@@ -151,7 +151,7 @@ static void PriceListDlgUpdate(
 static void DoPriceList( void * junk )
 {
 	if (priceListW == NULL)
-		priceListW = ParamCreateDialog( &priceListPG, MakeWindowTitle(_("Price List")), _("Done"), PriceListOk, NULL, TRUE, NULL, 0, PriceListDlgUpdate );
+		priceListW = ParamCreateDialog( &priceListPG, MakeWindowTitle(_("Price List")), _("Done"), PriceListOk, NULL, TRUE, NULL, F_RESIZE, PriceListDlgUpdate );
 	wShow( priceListW );
 	PriceListChange( CHANGE_SCALE|CHANGE_PARAMS );
 }

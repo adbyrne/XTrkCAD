@@ -742,7 +742,7 @@ static void DrawSWMotorTrackHilite( void )
 	w = (wPos_t)((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
 	h = (wPos_t)((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,swmhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp );
+	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
 
 static int SwitchmotorMgmProc ( int cmd, void * data )

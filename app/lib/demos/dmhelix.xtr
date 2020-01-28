@@ -3,11 +3,11 @@ DEMOINIT
 ORIG 10.000 0.000 0.000
 PARAMETER display labelscale 10
 PARAMETER display description-fontsize 144
-STRAIGHT 1 0 0 0 0 N -1
+STRAIGHT 1 0 0 0 0 DEMO 2
 	E 23.086096 1.459535 254.675892
 	E 72.500000 15.000000 74.675892
 	END
-STRAIGHT 2 0 0 0 0 N -1
+STRAIGHT 2 0 0 0 0 DEMO 2
 	E 1.770859 28.642902 189.520022
 	E 5.625000 51.625000 9.520022
 	END
@@ -104,6 +104,10 @@ MOUSE 3 15.375 20.500
 MOUSE 3 16.000 16.000
 STEP
 MOUSE 4 16.000 16.000
+PARAMETER display labelenable 1
+COMMAND MoveLabel
+MOUSE 2 16.000 16.000
+MOUSE 4 16.000 16.000
 RESET
 MESSAGE
 _________________________________________
@@ -182,6 +186,7 @@ _________________________________________
 
 The helix description can be moved by the <Move Label> command.
 END
+PARAMETER display labelenable 1
 COMMAND MoveLabel
 MOUSE 2 15.875 16.125
 MOUSE 3 16.125 6.250

@@ -1074,10 +1074,6 @@ foundSeg:
 		epPos = GetSegEndPt( &segProcDataSplit.split.newSeg[s1], s0, FALSE, &epAngle );
 		epAngle += 180.0;
 	}
-#ifdef LATER
-	if ( segProcDataSplit.split.length[s1] <= minLength && splitTurnoutPath[1] == '\0' )
-		return FALSE;
-#endif
 
 	/*
 	 * 4. Map the old segments to new
@@ -1107,6 +1103,7 @@ foundSeg:
 			} else {
 				tempSegs(segIndexMap(segInx)-1) = xx->segs[segInx];
 			}
+			posCnt++;
 		}
 	}
 
@@ -1164,6 +1161,7 @@ foundSeg:
 	/*
 	 * 7. Convert trailing segments to new tracks
 	 */
+	int trks = 0;
 	path = splitTurnoutPath;
 	if ( segProcDataSplit.split.length[s1] < minLength )
 		path += splitTurnoutDir;
@@ -1188,6 +1186,7 @@ foundSeg:
 			trk2 = segProcDataNewTrack.newTrack.trk;
 			ep2 = 1-epN;
 		}
+		++trks;
 		path += splitTurnoutDir;
 	}
 
@@ -1503,7 +1502,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
         } else {
             double x, y;
             x = 0; y = 0;
-            for (int i=0;i<=epCnt; i++) {
+            for (int i=0;i<epCnt; i++) {
                 coOrd cpos = GetTrkEndPos(trk,i);
                 x += cpos.x;
                 y += cpos.y;
@@ -1648,12 +1647,9 @@ static BOOL_T QueryTurnout( track_p trk, int query )
 	case Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK:
 		return TRUE;
 	case Q_MODIFY_CAN_SPLIT:
-		if (GetTrkEndPtCnt(trk) <= 2) {	// allow splitting of simple track und buffers
-			return TRUE ;
-		}
-		else {
-			return FALSE;
-		}
+		return TRUE;
+	case Q_IS_TURNOUT:
+		return TRUE;
 	case Q_CAN_PARALLEL:
 		if( GetTrkEndPtCnt( trk ) == 2 && fabs( GetTrkEndAngle( trk, 0 ) - GetTrkEndAngle( trk, 1 )) == 180.0 )
 			return TRUE;
@@ -1689,7 +1685,7 @@ static void DrawTurnoutPositionIndicator(
 			pos0 = MapPathPos( xx, path[1], 0 );
 		} else if ( path[1] == 0 ) {
 			pos1 = MapPathPos( xx, path[0], 1 );
-			DrawLine( &mainD, pos0, pos1, drawTurnoutPositionWidth, color );
+			DrawLine( &tempD, pos0, pos1, drawTurnoutPositionWidth, color );
 		}
 	}
 }
@@ -1709,7 +1705,7 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 	if ( GetTrkType(trk) != T_TURNOUT )
 		AbortProg( "nextTurnoutPosition" );
 
-	DrawTurnoutPositionIndicator( trk, wDrawColorWhite );
+//-	DrawTurnoutPositionIndicator( trk, wDrawColorWhite );
 	path = xx->pathCurr;
 	path += strlen((char *)path)+1;
 	while ( path[0] || path[1] )
@@ -1718,7 +1714,7 @@ EXPORT void AdvanceTurnoutPositionIndicator(
 	if ( *path == 0 )
 		path = xx->paths;
 	xx->pathCurr = path;
-	DrawTurnoutPositionIndicator( trk, selectedColor );
+//-	DrawTurnoutPositionIndicator( trk, selectedColor );
 	if ( angleR == NULL || posR == NULL )
 		return;
 	trvtrk.trk = trk;
@@ -2287,8 +2283,8 @@ static void AddTurnout( void )
 		AbortProg( "addTurnout: bad cnt" );
 	}
 
-	DrawSegs( &tempD, Dto.pos, Dto.angle,
-		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
+//-	DrawSegs( &tempD, Dto.pos, Dto.angle,
+//-		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
 	UndoStart( _("Place New Turnout"), "addTurnout" );
 	titleLen = strlen( curTurnout->title );
 
@@ -2365,6 +2361,7 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 										GetTrkIndex(leftover(i).trk) ) )
 								leftover(j).trk = NULL;
 		AuditTracks( "addTurnout [%d] before delete", i );
+								UndrawNewTrack( leftover(i).trk );
 								DeleteTrack( leftover(i).trk, FALSE );
 		AuditTracks( "addTurnout [%d] before delete", i );
 								leftover(i).trk = NULL;
@@ -2376,8 +2373,8 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 			}
 		}
 	}
-	MapRedraw();
-	MainRedraw();
+	XMapRedraw();
+	XMainRedraw();
 
 	AuditTracks( "addTurnout after loop" );
 
@@ -2442,10 +2439,10 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 			DIST_T maxX;
 			track_p lt = leftover(i).trk;
 			EPINX_T ep, le = leftover(i).ep, nearest_ep =-1;
-			coOrd pos, nearest_pos;
-			ANGLE_T nearest_angle;
-			DIST_T nearest_radius;
-			coOrd nearest_center;
+			coOrd pos, nearest_pos = zero;
+			ANGLE_T nearest_angle = 0.0;
+			DIST_T nearest_radius = 0.0;
+			coOrd nearest_center = zero;
 			trackParams_t params;
 			maxX = 0.0;
 			DIST_T dd = 10000.0;
@@ -2478,6 +2475,7 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 					SetCornuEndPt(lt, le, nearest_pos, nearest_center, nearest_angle, nearest_radius);
 					ConnectTracks(newTrk,nearest_ep,lt,le);
 				} else {
+					UndrawNewTrack(lt);
 					DeleteTrack(lt,TRUE);
 				}
 			} else {
@@ -2504,17 +2502,15 @@ LOG( log_turnout, 1, ( "   deleting leftover T%d\n",
 
 static void TurnoutRotate( void * pangle )
 {
+	if (Dto.state == 0)
+		return;
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
-	if (Dto.state == 1)
-		DrawSegs( &tempD, Dto.pos, Dto.angle,
-			curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
-	else
-		Dto.pos = cmdMenuPos;
+	Dto.pos = cmdMenuPos;
 	Rotate( &Dto.pos, cmdMenuPos, angle );
 	Dto.angle += angle;
-	DrawSegs( &tempD, Dto.pos, Dto.angle,
-		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
-	Dto.state = 1;
+	TempRedraw(); // TurnoutRotate
+//-	DrawSegs( &mainD, Dto.pos, Dto.angle,
+//-		curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlack );
 }
 
 static dynArr_t anchors_da;
@@ -2598,9 +2594,9 @@ EXPORT STATUS_T CmdTurnoutAction(
 		} else {
 			CreateMoveAnchor(pos);
 		}
-		if (anchors_da.cnt>0)
-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-		MainRedraw();
+//-		if (anchors_da.cnt>0)
+//-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		XMainRedraw();
 		return C_CONTINUE;
 		break;
 	case C_DOWN:
@@ -2609,7 +2605,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		PlaceTurnout( pos );
 		Dto.state = 1;
 		CreateMoveAnchor(pos);
-		MainRedraw();
+		XMainRedraw();
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -2620,7 +2616,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		Dto.state = 1;
 		PlaceTurnout( pos );
 		CreateMoveAnchor(pos);
-		MainRedraw();
+		XMainRedraw();
 		return C_CONTINUE;
 
 	case C_UP:
@@ -2644,7 +2640,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 #else
 		Rotate( &origPos, Dto.rot0, -(Dto.angle + curTurnout->endPt[(int)curTurnoutEp].angle) );
 #endif
-		MainRedraw();
+		XMainRedraw();
 		validAngle = FALSE;
 		return C_CONTINUE;
 
@@ -2672,7 +2668,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		InfoMessage( _("Angle = %0.3f (%s)"), PutAngle( NormalizeAngle(Dto.angle + 90.0) ), message );
 		Dto.state = 2;
 		CreateRotateAnchor(Dto.rot0);
-		MainRedraw();
+		XMainRedraw();
 		return C_CONTINUE;
 
 	case C_RUP:
@@ -2680,7 +2676,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		if ( curTurnout == NULL ) return C_CONTINUE;
 		Dto.state = 1;
 		CreateMoveAnchor(pos);
-		MainRedraw();
+		XMainRedraw();
 		InfoMessage( _("Left-drag to move, ctl+left-drag or right-drag to rotate, press Space or Return to accept or Esc to cancel") );
 		return C_CONTINUE;
 
@@ -2695,7 +2691,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 			if (Dto.trk == NULL)
 				Dto.angle = NormalizeAngle( Dto.angle + (angle - curTurnout->endPt[(int)curTurnoutEp].angle ) );
 			PlaceTurnout( Dto.place );
-			MainRedraw();
+			XMainRedraw();
 		} else {
 			CmdTurnoutAction( C_DOWN, pos );
 			CmdTurnoutAction( C_UP, pos );
@@ -2708,7 +2704,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 				curTurnout->segs, curTurnout->segCnt, trackGauge, wDrawColorBlue );
 		}
 		if (anchors_da.cnt>0) {
-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		}
 		if (Dto.state == 2)
 			DrawLine( &tempD, Dto.rot0, Dto.rot1, 0, wDrawColorBlack );
@@ -2740,10 +2736,6 @@ EXPORT STATUS_T CmdTurnoutAction(
 		return C_TERMINATE;
 
 	case C_CMDMENU:
-		if ( turnoutPopupM == NULL ) {
-			turnoutPopupM = MenuRegister( "Turnout Rotate" );
-			AddRotateMenu( turnoutPopupM, TurnoutRotate );
-		}
 		wMenuPopupShow( turnoutPopupM );
 		return C_CONTINUE;
 
@@ -2984,6 +2976,10 @@ EXPORT void InitCmdTurnout( wMenu_p menu )
 	ParamRegister( &turnoutPG );
 	log_turnout = LogFindIndex( "turnout" );
 	log_traverseTurnout = LogFindIndex( "traverseTurnout" );
+	if ( turnoutPopupM == NULL ) {
+		turnoutPopupM = MenuRegister( "Turnout Rotate" );
+		AddRotateMenu( turnoutPopupM, TurnoutRotate );
+	}
 }
 #endif
 

@@ -340,7 +340,11 @@ static void ReadTurntable( char * line )
 	ReadSegs();
 	SetEndPts( trk, 0 );
 	xx = GetTrkExtraData(trk);
-	SetTrkVisible(trk, visible);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+	} else {
+		SetTrkVisible(trk, visible&2);
+	}
 	SetTrkScale(trk, LookupScale( scale ) );
 	SetTrkLayer(trk, layer);
 	xx->pos = p;
@@ -812,6 +816,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 {
 	track_p t;
 	static coOrd pos0;
+	static int state = 0;
 	wControl_p controls[2];
 	char * labels[1];
 
@@ -830,6 +835,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		labels[0] = N_("Diameter");
 		InfoSubstituteControls( controls, labels );
 		/*InfoMessage( "Place Turntable");*/
+		state = 0;
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -844,18 +850,19 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		InfoSubstituteControls( controls, labels );
 		ParamLoadData( &turntablePG );
 		pos0 = pos;
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+//-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		state = 1;
 		return C_CONTINUE;
 
 	case C_MOVE:
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+//-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		SnapPos( &pos );
 		pos0 = pos;
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+//-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+//-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		SnapPos( &pos );
 		UndoStart( _("Create Turntable"), "NewTurntable" );
 		t = NewTurntable( pos, turntableDiameter/2.0 );
@@ -864,10 +871,13 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		InfoSubstituteControls( NULL, NULL );
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		wPrefSetFloat( "misc", message, turntableDiameter );
+		state = 0;
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		if ( state > 0 ) {
+			DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		}
 		return C_CONTINUE;
 
 	case C_CANCEL:

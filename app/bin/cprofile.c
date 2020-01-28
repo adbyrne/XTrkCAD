@@ -159,7 +159,7 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 	DIST_T grade;
 	wFont_p fp;
 	static dynArr_t points_da;
-#define points(N) DYNARR_N( pts_t, points_da, N )
+#define points(N) DYNARR_N( coOrd, points_da, N )
 	wDrawWidth lw;
 	station_p ps;
 	coOrd textsize;
@@ -190,19 +190,19 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 		pt.y = profElem(inx).elev;
 		pt.x = profElem(inx).dist;
 		DYNARR_APPEND( pts_t, points_da, 10 );
-		points(points_da.cnt-1).pt = pt;
-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
+		points(points_da.cnt-1) = pt;
+//-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 	}
 	pb.y = pt.y = prof.minE;
 	if ( points_da.cnt > 1 ) {
 		DYNARR_APPEND( coOrd, points_da, 10 );
 		pt.x = prof.totalD;
-		points(points_da.cnt-1).pt = pt;
-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
+		points(points_da.cnt-1) = pt;
+//-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 		DYNARR_APPEND( pts_t, points_da, 10 );
 		pb.x = 0;
-		points(points_da.cnt-1).pt = pb;
-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
+		points(points_da.cnt-1) = pb;
+//-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 		DrawPoly( D, points_da.cnt, points_da.ptr, NULL, 0, profileColorFill, 1, 0 );
 		DrawLine( D, pb, pt, lw, borderColor );
 	}
@@ -220,9 +220,13 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 	}
 
 	pb.x = 0.0; pb.y = prof.minE;
-	pt = points(0).pt;
+	pt = points(0);
 	DrawLine( D, pb, pt, lw, borderColor );
-	sprintf( message, "%0.1f", PutDim(profElem(0).elev) );
+	if (units==UNITS_ENGLISH) {
+		sprintf( message, "%0.1f\"", PutDim(profElem(0).elev)+0.05 );
+	} else {
+		sprintf( message, "%0.1fmm", PutDim(profElem(0).elev)+0.05 );
+	}
 	if (printVert) {
 		pl.x = pt.x + LABELH/2.0/prof.scaleX*D->scale;
 		pl.y = pt.y + 2.0/mainD.dpi/prof.scaleY*D->scale;
@@ -239,7 +243,7 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 	for (inx=1; inx<profElem_da.cnt; inx++ ) {
 		pt.y = profElem(inx).elev;
 		pb.x = pt.x = profElem(inx).dist;
-		pt = points(inx).pt;
+		pt = points(inx);
 		pb.x = pt.x;
 		DrawLine( D, pl, pt, lw, (profElem(inx).defined?profileColorDefinedProfile:profileColorUndefinedProfile) );
 		DrawLine( D, pb, pt, lw, borderColor );
@@ -248,8 +252,8 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 				(profElem(inx).dist-profElem(inx-1).dist);
 			sprintf( message, "%0.1f%%", round(grade*1000.0)/10.0 );
 			DrawTextSize( &mainD, message, fp, fontSize, FALSE, &textsize );
-			pl.x = (points(inx).pt.x+points(inx-1).pt.x)/2.0;
-			pl.y = (points(inx).pt.y+points(inx-1).pt.y)/2.0;
+			pl.x = (points(inx).x+points(inx-1).x)/2.0;
+			pl.y = (points(inx).y+points(inx-1).y)/2.0;
 			if (printVert) {
 				pl.x += (LABELH/2)/prof.scaleX*D->scale;
 				pl.y += ((LABELH/2)*grade/prof.scaleX + 2.0/mainD.dpi/prof.scaleY)*D->scale;
@@ -760,8 +764,8 @@ static void DoProfileDone( void * junk )
 	HilightProfileElevations( FALSE );
 	wHide( profileW );
 	ClrAllTrkBits( TB_PROFILEPATH );
-	MainRedraw();
-	MapRedraw();
+	XMainRedraw();
+	XMapRedraw();
 #endif
 	Reset();
 }
@@ -771,9 +775,9 @@ static void DoProfileClear( void * junk )
 {
 	profElem_da.cnt = 0;
 	station_da.cnt = 0;
-	if (ClrAllTrkBits( TB_PROFILEPATH )) {
-		MainRedraw();
-		MapRedraw();
+	if (ClrAllTrkBitsRedraw( TB_PROFILEPATH, TRUE )) {
+		XMainRedraw();
+		XMapRedraw();
 	}
 	pathStartTrk = pathEndTrk = NULL;
 	RedrawProfileW();
@@ -1166,7 +1170,7 @@ if (log_profile>=1) {
 	if (!PathListCheck())
 		return;
 
-	HilightProfileElevations( FALSE );
+//-	HilightProfileElevations( FALSE );
 
 	if ( PathListEmpty() ) {
 		pathStartTrk = trkN;
@@ -1193,7 +1197,7 @@ LOG( log_profile, 2, ("Removing last element\n") )
 
 	} else if ( (GetTrkBits(trkN)&TB_PROFILEPATH) || (trkP && (GetTrkBits(trkP)&TB_PROFILEPATH)) ) {
 		ErrorMessage( MSG_EP_ON_PATH );
-		HilightProfileElevations( TRUE );
+//-		HilightProfileElevations( TRUE );
 		return;
 
 	} else if ( ( rc = FindProfileShortestPath( trkN, epN ) ) > 0 ) {
@@ -1231,11 +1235,11 @@ LOG( log_profile, 2, ( "Flip/Appending Path\n" ) )
 
 	} else {
 		ErrorMessage( MSG_NO_PATH_TO_EP );
-		HilightProfileElevations( TRUE );
+//-		HilightProfileElevations( TRUE );
 		return;
 	}
 
-	HilightProfileElevations( TRUE );
+//-	HilightProfileElevations( TRUE );
 	ComputeProfElem();
 	RedrawProfileW();
 	DoProfileChangeMode( NULL );
@@ -1269,12 +1273,12 @@ static void ProfileSubCommand( wBool_t set, void* pcmd )
 		radius = trackGauge/2.0;
 	pos = GetTrkEndPos( profilePopupTrk, profilePopupEp );
 	mode = GetTrkEndElevMode( profilePopupTrk, profilePopupEp );
-	if ( (mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE )
-		DrawFillCircle( &tempD, pos, radius,
-			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
-	if ( (mode&ELEV_MASK)==ELEV_DEF )
+//-	if ( (mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE )
+//-		DrawFillCircle( &tempD, pos, radius,
+//-			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
+//-	if ( (mode&ELEV_MASK)==ELEV_DEF )
 
-	DrawEndPt2( &mainD, profilePopupTrk, profilePopupEp, drawColorWhite );
+//-	DrawEndPt2( &mainD, profilePopupTrk, profilePopupEp, drawColorWhite );
 	elev = 0.0;
 	switch (cmd) {
 	case 0:
@@ -1293,11 +1297,12 @@ static void ProfileSubCommand( wBool_t set, void* pcmd )
 		break;
 	}
 	UpdateTrkEndElev( profilePopupTrk, profilePopupEp, mode, elev, NULL );
-	if ( (mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE )
-		DrawFillCircle( &tempD, pos, radius,
-			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
+//-	if ( (mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE )
+//-		DrawFillCircle( &tempD, pos, radius,
+//-			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
 	ComputeProfElem();
 	RedrawProfileW();
+	TempRedraw(); // ProfileSubCommand
 }
 
 
@@ -1313,7 +1318,7 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 			profileColorDefinedProfile = drawColorBlue;
 			profileColorUndefinedProfile = drawColorRed;
 			profileColorFill = drawColorAqua;
-			DrawTextSize( &mainD, "999", wStandardFont( F_HELV, FALSE, FALSE ), screenProfileFontSize, FALSE, &textsize );
+			DrawTextSize( &mainD, "999.9", wStandardFont( F_HELV, FALSE, FALSE ), screenProfileFontSize, FALSE, &textsize );
 			labelH = textsize.y;
 			labelW = textsize.x;
 			profileW = ParamCreateDialog( &profilePG, MakeWindowTitle(_("Profile")), _("Done"), DoProfileDone, (paramActionCancelProc)Reset, TRUE, NULL, F_RESIZE, NULL );
@@ -1322,18 +1327,19 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 		ParamGroupRecord( &profilePG );
 		wShow( profileW );
 		ParamLoadMessage( &profilePG, I_PROFILEMSG, _("Drag to change Elevation") );
-		HilightProfileElevations( TRUE );
+//-		HilightProfileElevations( TRUE );
 		profElem_da.cnt = 0;
 		station_da.cnt = 0;
 		RedrawProfileW();
-		if ( ClrAllTrkBits( TB_PROFILEPATH ) ) {
-			MainRedraw();
-			MapRedraw();
+		if ( ClrAllTrkBitsRedraw( TB_PROFILEPATH, TRUE ) ) {
+			XMainRedraw();
+			XMapRedraw();
 		}
 		pathStartTrk = NULL;
 		SetAllTrackSelect( FALSE );
 		profileUndo = FALSE;
 		InfoMessage( _("Select a Defined Elevation to start profile") );
+		TempRedraw(); // CmdProfile C_START
 		return C_CONTINUE;
 	case C_LCLICK:
 		InfoMessage( "" );
@@ -1383,10 +1389,10 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 	case C_CANCEL:
 		wHide(profileW);
-		HilightProfileElevations( FALSE );
-		if (ClrAllTrkBits(TB_PROFILEPATH)) {
-			MainRedraw();
-			MapRedraw();
+//-		HilightProfileElevations( FALSE );
+		if (ClrAllTrkBitsRedraw(TB_PROFILEPATH, TRUE)) {
+			XMainRedraw();
+			XMapRedraw();
 		}
 		return C_TERMINATE;
 	case C_REDRAW:

@@ -140,6 +140,13 @@ void wDrawDelayUpdate(
 {
 }
 
+wBool_t wDrawSetTempMode(
+	wDraw_p bd,
+	wBool_t bTemp )
+{
+	return 0;
+}
+
 /**
  * Sets the proper pen and composition for the next drawing operation
  * 
@@ -178,11 +185,15 @@ static void setDrawMode(
 		}
 	}
 
+#ifdef NOTEMPDRAW
 	if (dopt & wDrawOptTemp) {
 		mode = R2_NOTXORPEN;
 	} else {
+#endif
 		mode = R2_COPYPEN;
+#ifdef NOTEMPDRAW
 	}
+#endif
 	SetROP2( hDc, mode );
 	if ( d == d0 && mode == mode0 && dw0 == dw && lt == lt0 && dc == dc0 )
 		return;
@@ -799,6 +810,7 @@ void wDrawString(
         return;
     }
 
+#ifdef NOTEMPDRAW
     if (dopts & wDrawOptTemp) {
         setDrawMode(d->hDc, d, 0, wDrawLineSolid, dc, dopts);
         newDc = CreateCompatibleDC(d->hDc);
@@ -831,6 +843,7 @@ void wDrawString(
             myInvalidateRect(d, &rect);
         }
     } else {
+#endif
         prevFont = SelectObject(d->hDc, newFont);
         SetBkMode(d->hDc, TRANSPARENT);
 
@@ -867,7 +880,9 @@ void wDrawString(
             rect.right = x + (w + h + 1);
             myInvalidateRect(d, &rect);
         }
+#ifdef NOTEMPDRAW
     }
+#endif
 
     DeleteObject(newFont);
     fp->lfHeight = oldLfHeight;
@@ -927,10 +942,18 @@ void wDrawFilledRectangle(
 		wDrawColor color,
 		wDrawOpts opts )
 {
+	int mode;
 	RECT rect;
 	if (d == NULL)
 		return;
 	setDrawBrush( d->hDc, d, color, opts );
+	if (opts & wDrawOptTransparent) {
+		mode = R2_NOTXORPEN;
+	}
+	else {
+		mode = R2_COPYPEN;
+	}
+	SetROP2(d->hDc, mode);
 	rect.left = XINCH2PIX(d,px);
 	rect.right = XINCH2PIX(d,px+sx);
 	rect.top = YINCH2PIX(d,py+sy);
@@ -1061,7 +1084,16 @@ void wDrawPolygon(
     BeginPath(d->hDc);
 
     if (fill) {
+		int mode;
         setDrawBrush(d->hDc, d, color, opts);
+		if (opts & wDrawOptTransparent) {
+			mode = R2_NOTXORPEN;
+		}
+		else {
+			mode = R2_COPYPEN;
+		}
+		SetROP2(d->hDc, mode);
+
     } else {
         setDrawMode(d->hDc, d, dw, lt, color, opts);
     }
@@ -1075,10 +1107,15 @@ void wDrawPolygon(
 #endif
 
     for (i=0; i<cnt; i++) {
+        wPolyLine_e type1;
         point.x = node[i][0];
         point.y = node[i][1];
+		if (type != NULL)
+			type1 = type[i];
+		else
+			type1 = wPolyLineStraight;
 
-        if (type[i] == wPolyLineRound || type[i] == wPolyLineSmooth) {
+        if (type1 == wPolyLineRound || type1 == wPolyLineSmooth) {
             prevNode = (i == 0) ? cnt - 1 : i - 1;
             nextNode = (i == cnt - 1) ? 0 : i + 1;
 
@@ -1094,7 +1131,7 @@ void wDrawPolygon(
             endPoint1.x = (nextXDistance/2)+node[i][0];
             endPoint1.y = (nextYDistance/2)+node[i][1];
 
-            if (type[i] == wPolyLineRound) {
+            if (type1 == wPolyLineRound) {
                 double distNext = (nextXDistance*nextXDistance + nextYDistance * nextYDistance);
                 double distPrev = (prevXDistance*prevXDistance + prevYDistance * prevYDistance);
                 // but should be half of the shortest line length (equidistant from node) for round
@@ -1122,7 +1159,7 @@ void wDrawPolygon(
         }
 
         if (i==0) {
-            if (type[i] == wPolyLineStraight || open) {
+            if (type1 == wPolyLineStraight || open) {
                 // for straight lines or open shapes use the starting point as passed
                 addPoint(d, pointCount++, &point, PT_MOVETO, &rect);
                 startingPoint = point;
@@ -1135,7 +1172,7 @@ void wDrawPolygon(
                 startingPoint = endPoint0;
             }
         } else {
-            if (type[i] == wPolyLineStraight || (open && (i==cnt-1))) {
+            if (type1 == wPolyLineStraight || (open && (i==cnt-1))) {
                 addPoint(d, pointCount++, &point, PT_LINETO, &rect);
             } else {
                 if (i==cnt-1 && !open) {
@@ -1252,6 +1289,11 @@ void wDrawRestoreImage(
 	}
 	BitBlt( bd->hDc, 0, 0, bd->w, bd->h, bd->hDcBackup, 0, 0, SRCCOPY );
 	InvalidateRect( bd->hWnd, NULL, FALSE );
+}
+
+
+void wDrawClearTemp( wDraw_p d )
+{
 }
 
 
@@ -1379,9 +1421,12 @@ void wDrawBitMap(
 	if ( noNegDrawArgs > 0 && ( x0 < 0 || y0 < 0 ) )
 		return;
 #endif
+#ifdef NOTEMPDRAW
 	if (dopt & wDrawOptTemp) {
 		mode = tmpOp;
-	} else if (dc == wDrawColorWhite) {
+	} else 
+#endif
+		if (dc == wDrawColorWhite) {
 		mode = clrOp;
 		dc = wDrawColorBlack;
 	} else {
@@ -1395,6 +1440,7 @@ void wDrawBitMap(
 				RGB( 255, 255, 255 ), bm->w, bm->h, bm->bmx );
 		bm->color = dc;
 	}
+#ifdef NOTEMPDRAW
 	if ( (dopt & wDrawOptNoClip) != 0 &&
 		 ( px < 0 || px >= d->w || py < 0 || py >= d->h ) ) {
 		x0 += d->x;
@@ -1408,6 +1454,7 @@ void wDrawBitMap(
 		ReleaseDC( ((wControl_p)(d->parent))->hWnd, hDc );
 		return;
 	}
+#endif
 
 	bmDc = CreateCompatibleDC( d->hDc );
 	setDrawMode( d->hDc, d, 0, wDrawLineSolid, dc, dopt );

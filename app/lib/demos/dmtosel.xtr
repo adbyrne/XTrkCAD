@@ -1,6 +1,6 @@
 VERSION 2
 DEMOINIT
-ORIG 8.000 0.000 0.000
+ORIG 4.000 0.000 0.000
 PARAMETER turnout hide 1
 STRAIGHT 1 DEMO 1
 	E 2.050000 1.050000 270.000000
@@ -138,7 +138,7 @@ _________________________________________
 
 When you are satisfied with the position and orientation of the turnout press Space bar or the Return key on the keyboard to finish placing the turnout.
 
-Pressing the Ok button on the Turnout dialog will end the <Turnout> command as well as placing the turnout.
+Pressing the Close button on the Turnout dialog will end the <Turnout> command as well as placing the turnout.
 END
 STEP
 MOUSE 3336 10.500 10.250

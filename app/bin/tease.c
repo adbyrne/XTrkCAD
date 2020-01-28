@@ -955,7 +955,15 @@ static void ReadJoint(
 		return;
 	trk = NewTrack( index, T_EASEMENT, 0, sizeof e );
 	xx = GetTrkExtraData(trk);
-	SetTrkVisible(trk, visible&2);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+		SetTrkNoTies(trk, FALSE);
+		SetTrkBridge(trk, FALSE);
+	} else {
+		SetTrkVisible(trk, visible&2);
+		SetTrkNoTies(trk, visible&4);
+		SetTrkBridge(trk, visible&8);
+	}
 	SetTrkScale(trk, LookupScale(scale));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
@@ -1251,8 +1259,8 @@ static BOOL_T EnumerateJoint( track_p trk )
 static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T maxX, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center )
 {
 	DeleteTrack( trk, FALSE );
-	MainRedraw();
-	MapRedraw();
+	XMainRedraw();
+	XMapRedraw();
 	return TRUE;
 }
 
@@ -1307,8 +1315,8 @@ static BOOL_T MergeJoint(
 		ConnectTracks( trk0, ep0, trk2, ep2 );
 	}
 	DrawNewTrack( trk0 );
-	MainRedraw();
-	MapRedraw();
+	XMainRedraw();
+	XMapRedraw();
 	return TRUE;
 }
 

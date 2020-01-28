@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "cundo.h"
 #include "custom.h"
@@ -213,7 +214,7 @@ CommonUpdateNote(track_p trk, int inx, struct extraDataNote *noteData )
 		CommonCancelNote(trk);
 		break;
 	}
-	MainRedraw();
+	XMainRedraw();
 }
 
 
@@ -439,7 +440,8 @@ ReadTrackNote(char *line)
 	
 	cp = GetNextLine();
 	
-	if (strcmp(cp, "    END")) {
+	while ( *cp && isspace(*cp ) ) cp++;
+	if (strncmp(cp, "END", 3)) {
 		InputError(_("Expected END statement not found!"),
 				TRUE );
 		exit(1);
@@ -580,18 +582,18 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     case C_DOWN:
         state_on = TRUE;
         oldPos = pos;
-        MainRedraw();
+        XMainRedraw();
         return C_CONTINUE;
 
     case C_MOVE:
         oldPos = pos;
-        MainRedraw();
+        XMainRedraw();
         return C_CONTINUE;
 
     case C_UP:
         UndoStart(_("New Note"), "New Note");
         state_on = FALSE;
-        MainRedraw();
+        XMainRedraw();
         trk = NewNote(-1, pos, curNoteType );
 		inDescribeCmd = TRUE;
         DrawNewTrack(trk);
@@ -629,7 +631,7 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     case C_CANCEL:
         DescribeCancel();
         state_on = FALSE;
-        MainRedraw();
+        XMainRedraw();
         return C_CONTINUE;
     }
 

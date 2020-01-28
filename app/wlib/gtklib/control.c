@@ -264,6 +264,7 @@ wBool_t wControlExpose (
 		cr = gdk_cairo_create(win);
 	} else return TRUE;
 
+#ifdef CURSOR_SURFACE
 	if (b && b->cursor_surface.surface && b->cursor_surface.show) {
 		cairo_set_source_surface(cr,b->cursor_surface.surface,event->area.x, event->area.y);
 		cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
@@ -271,6 +272,7 @@ wBool_t wControlExpose (
 				event->area.width, event->area.height);
 		cairo_fill(cr);
 	}
+#endif
 
 	if (b->outline) {
 		cairo_set_source_rgb(cr, 0.23, 0.37, 0.80);

@@ -24,6 +24,7 @@
 #define COMMON_H
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #ifndef TRUE
 #define TRUE	(1)

@@ -398,6 +398,7 @@ STATUS_T CompoundDescriptionMove(
 	case C_DOWN:
 		editMode = TRUE;
 		REORIGIN( p0, xx->descriptionOrig, xx->angle, xx->orig )
+		DrawCompoundDescription( trk, &mainD, wDrawColorWhite );
 
 	case C_MOVE:
 	case C_UP:
@@ -411,13 +412,17 @@ STATUS_T CompoundDescriptionMove(
 		if (action == C_UP) {
 			editMode = FALSE;
 		}
-		MainRedraw();
-		MapRedraw();
+		XMainRedraw();
+		XMapRedraw();
+		if ( action == C_UP ) {
+			DrawCompoundDescription( trk, &mainD, color );
+		}
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 		break;
 	case C_REDRAW:
 		if (editMode) {
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+			DrawCompoundDescription( trk, &tempD, wDrawColorBlue );
+			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
 		}
 	}
 
@@ -582,7 +587,11 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	BOOL_T titleChanged, flipped, ungrouped, split;
 	char * newTitle;
 
-	if ( inx == -1 ) {
+	switch ( inx ) {
+	case -1:
+	case MN:
+	case NM:
+	case PN:
 		titleChanged = FALSE;
 		ParseCompoundTitle( xtitle(xx), &mP, &mL, &nP, &nL, &pP, &pL );
 		if (mP == NULL) mP = "";
@@ -659,7 +668,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		GetBoundingBox( trk, &hi, &lo );
 		if ( labelScale >= mainD.scale &&
 			 !OFF_MAIND( lo, hi ) ) {
-			DrawCompoundDescription( trk, &tempD, wDrawColorWhite );
+			DrawCompoundDescription( trk, &mainD, wDrawColorWhite );
 		}
 		/*sprintf( message, "%s\t%s\t%s", manufS, nameS, partnoS );*/
 		if (xx->title) MyFree(xx->title);
@@ -669,7 +678,7 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 		xx->split = split;
 		if ( labelScale >= mainD.scale &&
 			 !OFF_MAIND( lo, hi ) ) {
-			DrawCompoundDescription( trk, &tempD, GetTrkColor(trk,&tempD) );
+			DrawCompoundDescription( trk, &mainD, GetTrkColor(trk,&tempD) );
 		}
 		return;
 	}
@@ -1171,9 +1180,15 @@ void ReadCompound(
 	}
 	trk = NewCompound( trkType, index, orig, angle, title, 0, NULL, NULL, pathCnt, (char *)path, tempSegs_da.cnt, &tempSegs(0) );
 	SetEndPts( trk, 0 );
-	SetTrkVisible(trk, visible&2);
-	SetTrkNoTies(trk, visible&4);
-	SetTrkBridge(trk, visible&8);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+		SetTrkNoTies(trk, FALSE);
+		SetTrkBridge(trk, FALSE);
+	} else {
+		SetTrkVisible(trk, visible&2);
+		SetTrkNoTies(trk, visible&4);
+		SetTrkBridge(trk, visible&8);
+	}
 	SetTrkScale(trk, LookupScale( scale ));
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));

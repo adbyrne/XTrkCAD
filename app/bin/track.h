@@ -130,6 +130,7 @@ typedef struct {
 #define Q_IS_TEXT						(28)
 #define Q_IS_ACTIVATEABLE				(29)
 #define Q_IS_STRUCTURE					(30)
+#define Q_IS_TURNOUT                    (31)
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track
@@ -425,7 +426,10 @@ void SetDebug( char * );
 #define TB_CARATTACHED	(1<<7)
 #define TB_NOTIES       (1<<8)
 #define TB_BRIDGE       (1<<9)
-#define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED)
+#define TB_SELREDRAW	(1<<10)
+// Track has been undrawn, don't draw it on Redraw
+#define TB_UNDRAWN	(1<<11)
+#define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED|TB_UNDRAWN)
 
 /* track.c */
 #ifdef FASTTRACK
@@ -496,6 +500,7 @@ BOOL_T IsTrackDeleted( track_p );
 #define SetTrkNoTies(T,V)		((V)?SetTrkBits(T,TB_NOTIES):ClrTrkBits(T,TB_NOTIES))
 #define SetTrkBridge(T,V)		((V)?SetTrkBits(T,TB_BRIDGE):ClrTrkBits(T,TB_BRIDGE))
 int ClrAllTrkBits( int );
+int ClrAllTrkBitsRedraw( int, wBool_t );
 
 void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
 void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );

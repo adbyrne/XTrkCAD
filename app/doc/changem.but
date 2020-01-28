@@ -1652,7 +1652,9 @@ Dividing a section of flex track into two connected pieces;
 
 \n Click the \f{Split} button (\G{png.d/bsplit.png}) to activate the \f{Split} command.
 
-\n Place the mouse pointer over the point on the track where the it should be divided then \e{Left-Click}. A blue anchor bar across the track under the cursor will indicate the current split point.
+\n Place the mouse pointer over the point on the track where the it should be divided. A blue anchor bar across the track under the cursor will indicate the current split point. Then \e{Left-Click}. 
+
+\n To divide a Turnout, \e{Shift} must be held. The result will be a shorter Turnout with plain track replacing the rest of it. Note that the program will not stop division of the turnout between the switch blades and the frog - which would not be desireable in the real world. 
 
 \lcont{\u000}
 

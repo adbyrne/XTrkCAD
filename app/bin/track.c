@@ -268,7 +268,7 @@ EXPORT void EnumerateTracks( void )
 			trackCmds(inx)->enumerate( NULL );
 
 	EnumerateEnd();
-	Reset();
+//-	Reset();
 }
 
 /*****************************************************************************
@@ -568,13 +568,21 @@ void SetTrkLayer( track_p trk, int layer )
 
 EXPORT int ClrAllTrkBits( int bits )
 {
+	return ClrAllTrkBitsRedraw( bits, FALSE );
+}
+
+
+EXPORT int ClrAllTrkBitsRedraw( int bits, wBool_t bRedraw )
+{
 	track_p trk;
-	int cnt;
-	cnt = 0;
+	int cnt = 0;
 	TRK_ITERATE( trk ) {
-		if (trk->bits&bits)
+		if (trk->bits&bits) {
 			cnt++;
-		trk->bits &= ~bits;
+			trk->bits &= ~bits;
+			if ( bRedraw )
+				DrawNewTrack( trk );
+		}
 	}
 	return cnt;
 }
@@ -1127,8 +1135,8 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
 	UndoDelete(trk);					/**< Attention: trk is invalidated during that call */
-	//MainRedraw();
-	//MapRedraw();
+	XMainRedraw();
+	XMapRedraw();
 	InfoCount( trackCount );
 	return TRUE;
 }
@@ -1665,8 +1673,8 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		coOrd pos )
 {
 	static coOrd p0, p1;
+	static BOOL_T editState = FALSE;
 	elev_t *e, *e1;
-	wDrawColor color;
 	track_p trk1;
 
 	e = &trk->endPt[ep].elev;
@@ -1675,14 +1683,15 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		p0 = GetTrkEndPos(trk,ep);
 		p1 = pos;
 		e->option |= ELEV_VISIBLE; //Make sure we make visible
+		DrawEndElev( &mainD, trk, ep, wDrawColorWhite );
 		/*REORIGIN( p0, e->doff, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );*/
 		/*no break*/
 	case C_MOVE:
 	case C_UP:
-		if (action != C_DOWN)
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
-		color = GetTrkColor( trk, &mainD );
-		DrawEndElev( &tempD, trk, ep, color );
+		editState = TRUE;
+//-		if (action != C_DOWN)
+//-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+//-		DrawEndElev( &tempD, trk, ep, color );
 		p1 = pos;
 		e->doff.x = (pos.x-p0.x);
 		e->doff.y = (pos.y-p0.y);
@@ -1690,15 +1699,23 @@ EXPORT STATUS_T EndPtDescriptionMove(
 			e1 = &trk1->endPt[GetEndPtConnectedToMe(trk1,trk)].elev;
 			e1->doff = e->doff;
 		}
-		DrawEndElev( &tempD, trk, ep, color );
-		if (action != C_UP)
-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
-        MainRedraw();
-        MapRedraw();
+//-		DrawEndElev( &tempD, trk, ep, color );
+//-		if (action != C_UP)
+//-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+		if ( action == C_UP ) {
+			editState = FALSE;
+			wDrawColor color = GetTrkColor( trk, &mainD );
+			DrawEndElev( &mainD, trk, ep, color );
+		}
+        XMainRedraw();
+        XMapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
-		DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
+		DrawEndElev( &tempD, trk, ep, wDrawColorBlue );
+		if ( editState ) {
+			DrawLine( &tempD, p0, p1, 0, wDrawColorBlue );
+		}
 		break;
 	}
 	return C_CONTINUE;
@@ -1749,7 +1766,7 @@ EXPORT void LoosenTracks( void )
 		}
 	}
 	if (count)
-		MainRedraw();
+		MainRedraw(); // LoosenTracks
 	else
 		InfoMessage(_("No tracks loosened"));
 }
@@ -1774,21 +1791,11 @@ LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f
 	d = FindDistance( pos0, pos1 );
 	a = NormalizeAngle( trk0->endPt[inx0].angle -
 						trk1->endPt[inx1].angle + 180.0 );
-	if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle) || (log_endPt>0 && logTable(log_endPt).level>=1)) {
-#ifndef WINDOWS
-		LogPrintf( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n   %d ",
-				trk0->index, inx0, trk1->index, inx1, d, a, trk0->index );
-		/*PrintEndPt( logFile, trk0, 0 );
-		PrintEndPt( logFile, trk0, 1 );???*/
-		LogPrintf( "\n   %d ", trk1->index );
-		/*PrintEndPt( logFile, trk1, 0 );
-		PrintEndPt( logFile, trk1, 1 );???*/
-		LogPrintf("\n");
-#endif
-		if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle)) {
-			NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
-			return -1; /* Stop connecting out of alignment tracks! */
-		}
+	if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle) ) {
+		LOG( log_endPt, 1, ( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n",
+				trk0->index, inx0, trk1->index, inx1, d, a ) );
+		NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
+		return -1; /* Stop connecting out of alignment tracks! */
 	}
 	UndoModify( trk0 );
 	UndoModify( trk1 );
@@ -1938,8 +1945,8 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 			trkl = *leftover;
 			ep0 = epl;
 			if ( !disconnect )
-				ConnectTracks( trk, ep, trkl, 1-ep );
-			ep0 = ep;
+				ConnectTracks( trk, ep, trkl, epl );
+			ep0 = 1-epl;
 			while ( 1 ) {
 				CopyAttributes( trk, trkl );
 				ClrTrkElev( trkl );
@@ -2778,9 +2785,11 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 			return selectedColor;
 	}
 	if ( (d->options&(DC_GROUP)) == 0 ) {
-		if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) )
-			if (GetLayerUseColor((unsigned int)curTrackLayer))
-				return GetLayerColor((unsigned int)curTrackLayer);
+		if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) ) {
+			unsigned int iLayer = GetTrkLayer( trk );
+			if (GetLayerUseColor( iLayer ) )
+				return GetLayerColor( iLayer );
+		}
 	}
 	return wDrawColorBlack;
 }
@@ -2791,6 +2800,9 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 	DIST_T scale2rail;
 	TRKTYP_T trkTyp;
 
+	// Hack for WINDOWS
+	if ( trk->bits & TB_UNDRAWN )
+		return;
 	trkTyp = GetTrkType(trk);
 	curTrackLayer = GetTrkLayer(trk);
 	if (d != &mapD ) {
@@ -2846,12 +2858,14 @@ static void DrawATrack( track_cp trk, wDrawColor color )
 
 EXPORT void DrawNewTrack( track_cp t )
 {
+	t->bits &= ~TB_UNDRAWN;
 	DrawATrack( t, wDrawColorBlack );
 }
 
 EXPORT void UndrawNewTrack( track_cp t )
 {
 	DrawATrack( t, wDrawColorWhite );
+	t->bits |= TB_UNDRAWN;
 }
 
 EXPORT int doDrawPositionIndicator = 1;
@@ -3025,17 +3039,20 @@ EXPORT void DrawEndPt(
 			return;
 
 	sepBoundary = FALSE;
-	if ((d->options&DC_PRINT)==0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
+	if ( inDrawTracks && (d->options&DC_PRINT)==0 && importTrack == NULL && GetTrkSelected(trk) && (!GetTrkSelected(trk1))) {
 		DIST_T len;
 		len = trackGauge*2.0;
 		if (len < 0.10*d->scale)
 			len = 0.10*d->scale;
+		long oldOptions = d->options;
+		d->options &= ~DC_NOTSOLIDLINE;
 		Translate( &p0, p, a+45, len );
 		Translate( &p1, p, a+225, len );
-		DrawLine( &tempD, p0, p1, 0, selectedColor );
+		DrawLine( d, p0, p1, 2, selectedColor );
 		Translate( &p0, p, a-45, len );
 		Translate( &p1, p, a-225, len );
-		DrawLine( &tempD, p0, p1, 0, selectedColor );
+		DrawLine( d, p0, p1, 2, selectedColor );
+		d->options = oldOptions;
 		sepBoundary = TRUE;
 	} else if ((d->options&DC_PRINT)==0 && importTrack == NULL && (!GetTrkSelected(trk)) && GetTrkSelected(trk1)) {
 		sepBoundary = TRUE;
@@ -3161,7 +3178,7 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 
 EXPORT void RedrawLayer( unsigned int l, BOOL_T draw )
 {
-	MainRedraw();
+	MainRedraw(); // RedrawLayer
 	MapRedraw();
 
 }
@@ -3190,8 +3207,8 @@ EXPORT void DrawSelectedTracks( drawCmd_p d )
 
 EXPORT void HilightElevations( BOOL_T hilight )
 {
-	static long lastRedraw = -1;
-	static BOOL_T lastHilight = FALSE;
+//-	static long lastRedraw = -1;
+//-	static BOOL_T lastHilight = FALSE;
 	track_p trk, trk1;
 	EPINX_T ep;
 	int mode;
@@ -3199,12 +3216,12 @@ EXPORT void HilightElevations( BOOL_T hilight )
 	coOrd pos;
 	DIST_T radius;
 
-	if (currRedraw > lastRedraw) {
-		lastRedraw = currRedraw;
-		lastHilight = FALSE;
-	}
-	if (lastHilight == hilight)
-		return;
+//-	if (currRedraw > lastRedraw) {
+//-		lastRedraw = currRedraw;
+//-		lastHilight = FALSE;
+//-	}
+//-	if (lastHilight == hilight)
+//-		return;
 	radius = 0.05*mainD.scale;
 	if ( radius < trackGauge/2.0 )
 		radius = trackGauge/2.0;
@@ -3228,7 +3245,7 @@ EXPORT void HilightElevations( BOOL_T hilight )
 			}
 		}
 	}
-	lastHilight = hilight;
+//-	lastHilight = hilight;
 }
 
 

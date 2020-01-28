@@ -319,9 +319,15 @@ static void ReadStraight( char * line )
 		return;
 	trk = NewTrack( index, T_STRAIGHT, 0, 0 );
 	SetTrkScale( trk, LookupScale(scale) );
-	SetTrkVisible(trk, visible&2);
-	SetTrkNoTies(trk, visible&4);
-	SetTrkBridge(trk, visible&8);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+		SetTrkNoTies(trk, FALSE);
+		SetTrkBridge(trk, FALSE);
+	} else {
+		SetTrkVisible(trk, visible&2);
+		SetTrkNoTies(trk, visible&4);
+		SetTrkBridge(trk, visible&8);
+	}
 	SetTrkLayer(trk, layer);
 	SetTrkWidth( trk, (int)(options&3) );
 	ReadSegs();
@@ -437,9 +443,10 @@ static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, 
 					AdjustStraightEndPt( trk, ep, pos );
 					DrawNewTrack( trk );
 	} else {
+		UndrawNewTrack( trk );
 		DeleteTrack( trk, TRUE );
-		MainRedraw();
-		MapRedraw();
+		XMainRedraw();
+		XMapRedraw();
 	}
 	return TRUE;
 }
@@ -505,9 +512,10 @@ BOOL_T ExtendStraightToJoin(
 			DisconnectTracks( trk1, 1-ep1, trk1x, ep1x );
 		}
 		if (trk2) {
+			UndrawNewTrack( trk1 );
 			DeleteTrack( trk1, TRUE );
-			MainRedraw();
-			MapRedraw();
+			XMainRedraw();
+			XMapRedraw();
 		} else {
 			trk2 = trk1;
 			UndrawNewTrack( trk2 );
@@ -569,17 +577,17 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		if (action == C_MOVE)
 			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 					FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
-        MainRedraw();
-        MapRedraw();
+        XMainRedraw();
+        XMapRedraw();
 		return C_CONTINUE;
 
 	case C_UP:
 		if (valid)
 			AdjustStraightEndPt( trk, ep, tempSegs(0).u.l.pos[1] );
 		tempSegs_da.cnt = 0;
-        DrawNewTrack( trk );
-        MainRedraw();
-        MapRedraw();
+	        DrawNewTrack( trk );
+        XMainRedraw();
+        XMapRedraw();
 		return C_TERMINATE;
 
 	default:

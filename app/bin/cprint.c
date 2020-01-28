@@ -281,7 +281,7 @@ static void SelectPage( coOrd pos )
 	selected = BITMAP( bm, x, y );
 	pageCount += (selected?-1:1);
 	BITMAP( bm, x, y ) = !selected;
-	MarkPage( x, y );
+//-	MarkPage( x, y );
 	UpdatePageCount();
 }
 
@@ -500,7 +500,7 @@ static void PrintUpdate( int inx0 )
 {
 	int inx;
 
-	DrawPrintGrid();
+//-	DrawPrintGrid();
 	ParamLoadData( &printPG );
 
 	if (newPrintGrid.size.x > maxPageSize.x+0.01 ||
@@ -522,7 +522,7 @@ static void PrintUpdate( int inx0 )
 			ParamLoadControl( &printPG, inx );
 	}
 	ChangeDim();
-	DrawPrintGrid();
+//-	DrawPrintGrid();
 }
 
 
@@ -559,15 +559,16 @@ static void SetPageSize( BOOL_T doScale )
 
 static void SelectAllPages(void)
 {
-	DrawPrintGrid();
+//-	DrawPrintGrid();
 	for (int y = bm.y0; y < bm.y1; y++) {
 		for (int x = bm.x0; x < bm.x1; x++) {
 			BITMAP(bm, x, y) = TRUE;
 		}
 	}
-	DrawPrintGrid();
+//-	DrawPrintGrid();
 	pageCount = (bm.x1 - bm.x0) * (bm.y1 - bm.y0);
 	UpdatePageCount();
+	TempRedraw(); // SelectAllPages
 }
 
 static void PrintMaxPageSize( void )
@@ -577,13 +578,14 @@ static void PrintMaxPageSize( void )
  * (depending on paper size, scale and orientation)
  */
 {
-	DrawPrintGrid();
+//-	DrawPrintGrid();
 	SetPageSize( TRUE );
 	currPrintGrid.size = maxPageSize;
 	newPrintGrid = currPrintGrid;
 	ParamLoadControls( &printPG );
 	ChangeDim();
-	DrawPrintGrid();
+//-	DrawPrintGrid();
+	TempRedraw(); // PrintMaxSize
 	wShow( printWin);
 }
 
@@ -617,10 +619,11 @@ static void PrintClear( void )
 		for (x=bm.x0; x<bm.x1; x++)
 			if (BITMAP(bm,x,y)) {
 				BITMAP(bm,x,y) = 0;
-				MarkPage( x, y );
+//-				MarkPage( x, y );
 			}
 	pageCount = 0;
 	UpdatePageCount();
+	TempRedraw(); // PrintClear
 }
 
 
@@ -638,7 +641,7 @@ static void PrintSnapShot( void )
 	POS_T t;
 
 	PrintClear();
-	DrawPrintGrid();
+//-	DrawPrintGrid();
 	SetPageSize( FALSE );
 	pageSize = realPageSize;
 	if (pageSize.x > pageSize.y) {
@@ -699,10 +702,11 @@ static void PrintSnapShot( void )
 	ChangeDim();
 	pageCount = 1;
 	BITMAP(bm,0,0) = TRUE;
-	DrawPrintGrid();
+//-	DrawPrintGrid();
 	UpdatePageCount();
 	PrintEnableControls();
 	wShow( printWin );
+	TempRedraw(); // PrintSnapShot
 }
 
 
@@ -1081,7 +1085,7 @@ static BOOL_T PrintPage(
 				if ( !wPrintPageEnd( print_d.d ) )
 					return FALSE;
 				/*BITMAP(bm,x,y) = 0;*/
-				MarkPage( x, y );
+//-				MarkPage( x, y );
 	}
 	return TRUE;
 }
@@ -1126,10 +1130,10 @@ static void DoPrintPrint( void * junk )
 		for (y=bm.y0; y<bm.y1; y++)
 			for (x=bm.x0; x<bm.x1; x++)
 				if (BITMAP(bm,x,y)) {
-					if (copy < copies)
-						MarkPage( x, y );
-					else
+					if (copy >= copies)
 						BITMAP(bm,x,y) = 0;
+//-					else
+//-						MarkPage( x, y );
 				}
 	}
 
@@ -1142,26 +1146,28 @@ quitPrinting:
 
 static void DoResetGrid( void )
 {
-	DrawPrintGrid();
+//-	DrawPrintGrid();
 	currPrintGrid.orig = zero;
 	currPrintGrid.angle = 0.0;
 	ChangeDim();
 	newPrintGrid = currPrintGrid;
 	ParamLoadControls( &printPG );
-	DrawPrintGrid();
+//-	DrawPrintGrid();
+	TempRedraw(); // DoResetGrid
 }
 
 
 static void PrintGridRotate( void * pangle )
 {
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
-	DrawPrintGrid();
+//-	DrawPrintGrid();
 	currPrintGrid.orig = cmdMenuPos;
 	currPrintGrid.angle += angle;
 	newPrintGrid = currPrintGrid;
 	ParamLoadControls( &printPG );
 	ChangeDim();
-	DrawPrintGrid();
+//-	DrawPrintGrid();
+	TempRedraw(); // PrintGridRotate
 }
 
 /*****************************************************************************
@@ -1194,6 +1200,7 @@ static void PrintDlgUpdate(
 	else if ( pg->paramPtr[inx].context == (void*)2 )
 		PrintUpdate( inx );
 	ParamControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
+	TempRedraw(); // PrintDlgUpdate
 }
 
 static STATUS_T CmdPrint(
@@ -1236,7 +1243,7 @@ static STATUS_T CmdPrint(
 			currPrintGrid.size.y = maxPageSize.y;
 		newPrintGrid = currPrintGrid;
 		ParamLoadControls( &printPG );
-		DrawPrintGrid();
+//-		DrawPrintGrid();
 		pageCount = 0;
 		UpdatePageCount();
 LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrintGrid.size.y ) )
@@ -1245,6 +1252,7 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 		InfoMessage( _("Select pages to print, or drag to move print grid") );
 		downShift = FALSE;
 		ParamControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
+		TempRedraw(); // CmdPrint C_START
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -1267,10 +1275,10 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 		if (downShift) {
 			rc = GridAction( action, pos, &newPrintGrid.orig, &newPrintGrid.angle );
 			ParamLoadControls( &printPG );
-			DrawPrintGrid();
+//-			DrawPrintGrid();
 			currPrintGrid = newPrintGrid;
 			ChangeDim();
-			DrawPrintGrid();
+//-			DrawPrintGrid();
 			downShift = FALSE;
 		}
 		return C_CONTINUE;
@@ -1299,10 +1307,10 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 		if (downShift) {
 			rc = GridAction( action, pos, &newPrintGrid.orig, &newPrintGrid.angle );
 			ParamLoadControls( &printPG );
-			DrawPrintGrid();
+//-			DrawPrintGrid();
 			currPrintGrid = newPrintGrid;
 			ChangeDim();
-			DrawPrintGrid();
+//-			DrawPrintGrid();
 			downShift = FALSE;
 			ParamControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
 		}
@@ -1310,13 +1318,14 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 
 	case C_REDRAW:
 		DrawPrintGrid();
+		rc = GridAction( action, pos, &newPrintGrid.orig, &newPrintGrid.angle );
 		return C_TERMINATE;
 
 	case C_CANCEL:
 		if (printWin == NULL)
 			return C_TERMINATE;
 		PrintClear();
-		DrawPrintGrid();
+//-		DrawPrintGrid();
 		wHide( printWin );
 		return C_TERMINATE;
 

@@ -14,13 +14,26 @@ MESSAGE
 _________________________________________
 
 Here we are going to make some changes to the Display dialog.  Notice how this is simulated.
+First we are setting 'Draw Tunnel' to 'Normal'
 END
 STEP
 PARAMETER display tunnels 2
+MESSAGE
+Now we're changing 'Label Font Size' to '56'
+END
+STEP
 PARAMETER display description-fontsize 56
+MESSAGE
+We'll change some other options
+END
+STEP
+PAUSE 500
 PARAMETER display layoutlabels 4
+PAUSE 500
 PARAMETER display layoutlabels 0
+PAUSE 500
 PARAMETER display mapscale 50
+PAUSE 500
 PARAMETER display carhotbarlabels 4 Manuf/Proto
 MESSAGE
 _________________________________________

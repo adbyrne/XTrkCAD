@@ -7,7 +7,7 @@ MESSAGE
 The <Note> command lets you attach notes to various spots on the layout.
 END
 STEP
-COMMAND Note
+COMMAND TextNote
 MOUSE 2 15.167 7.833
 MOUSE 3 9.917 7.167
 MOUSE 4 9.917 7.167

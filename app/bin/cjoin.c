@@ -416,7 +416,7 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 				_("Click on an unselected End-Point"):
 				_("Click on a selected End-Point") );
 			Dj.inp[0].pos = pos;
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
+//-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			return C_CONTINUE;
 		}
 		if ( GetTrkSelected(Dj.inp[0].trk) == GetTrkSelected(Dj.inp[1].trk) ) {
@@ -424,7 +424,7 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 					?  _("unselected") : _("selected") );
 			return C_CONTINUE;
 		}
-		DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
+//-		DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 		if (GetTrkSelected(Dj.inp[0].trk))
 			MoveToJoin( Dj.inp[0].trk, Dj.inp[0].params.ep, Dj.inp[1].trk, Dj.inp[1].params.ep );
 		else
@@ -506,7 +506,7 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			Dj.inp[0].realType = GetTrkType(Dj.inp[0].trk);
 			InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
+//-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			return C_CONTINUE;
 		} else {
 			if ( (Dj.inp[1].trk = OnTrack( &pos, TRUE, TRUE )) == NULL)
@@ -555,7 +555,7 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 					rc = C_TERMINATE;
 			}
 			if ( rc == C_TERMINATE ) {
-				DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
+//-				DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 				return rc;
 			}
 			if ( QueryTrack( Dj.inp[0].trk, Q_CANNOT_BE_ON_END ) ||
@@ -564,7 +564,7 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 				return C_CONTINUE;
 			}
 
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
+//-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			Dj.state = 2;
 			Dj.jRes.flip = FALSE;
 		}
@@ -578,7 +578,7 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 		if (Dj.state != 2)
 			return C_CONTINUE;
 
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorWhite );
+//-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorWhite );
 		tempSegs_da.cnt = 0;
 		tempSegs(0).color = drawColorBlack;
 		ok = FALSE;
@@ -809,7 +809,7 @@ errorReturn:
 		default:
 			AbortProg( "Bad track type %d", Dj.jRes.type );
 		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorBlack );
+//-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorBlack );
 		if (!ok)
 			Dj.jRes.type = curveTypeNone;
 		return C_CONTINUE;
@@ -826,12 +826,12 @@ errorReturn:
 			InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
 		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorWhite );
+//-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorWhite );
 		tempSegs(0).color = drawColorBlack;
 		tempSegs_da.cnt = 0;
 		if (Dj.jRes.type == curveTypeNone) {
 			Dj.state = 1;
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
+//-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
 		}
@@ -870,9 +870,9 @@ errorReturn:
 		return rc;
 
 	case C_CANCEL:
+		break;
+
 	case C_REDRAW:
-
-
 		if ( Dj.joinMoveState == 1 || Dj.state == 1 ) {
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 		} else if (easementVal<0 && Dj.cornuMode)

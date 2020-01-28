@@ -847,7 +847,7 @@ static void DrawBlockTrackHilite( void )
 	w = (wPos_t)((blkhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
 	h = (wPos_t)((blkhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,blkhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, blkhiliteColor, wDrawOptTemp );
+	wDrawFilledRectangle( mainD.d, x, y, w, h, blkhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
 
 

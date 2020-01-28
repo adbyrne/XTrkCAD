@@ -638,6 +638,7 @@ static int fixed_expose_event(
         rc = FALSE;
     }
     cairo_t* cr = gdk_cairo_create (gtk_widget_get_window(widget));
+#ifdef CURSOR_SURFACE
     if (win && win->cursor_surface.surface && win->cursor_surface.show) {
 		cairo_set_source_surface(cr,win->cursor_surface.surface,event->area.x, event->area.y);
 		cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
@@ -645,6 +646,7 @@ static int fixed_expose_event(
 				event->area.width, event->area.height);
 		cairo_fill(cr);
 	}
+#endif
     return rc;
 }
 
@@ -919,8 +921,8 @@ static wWin_p wWinCommonCreate(
                                          GTK_WINDOW(gtkMainW->gtkwin));
         }
     }
+    getWinSize(w, nameStr);
     if (winType != W_MAIN) {
-            getWinSize(w, nameStr);
             gtk_widget_set_app_paintable (w->gtkwin,TRUE);
     }
 

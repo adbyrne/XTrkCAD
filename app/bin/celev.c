@@ -152,9 +152,9 @@ static int GetElevMode( void )
 static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 {
 	int oldMode, newMode;
-	coOrd pos;
+//-	coOrd pos;
 	DIST_T elevNewValue, elevOldValue, diff;
-	DIST_T radius;
+//-	DIST_T radius;
 
 	if ( inx == 0 ) {
 		long mode = *(long*)valueP;
@@ -205,27 +205,28 @@ static void DoElevUpdate( paramGroup_p pg, int inx, void * valueP )
 		UndoStart( _("Set Elevation"), "Set Elevation" );
 		elevUndo = TRUE;
 	}
-	pos = GetTrkEndPos( elevTrk, elevEp );
-	radius = 0.05*mainD.scale;
-	if ( radius < trackGauge/2.0 )
-		radius = trackGauge/2.0;
-	if ( (oldMode&ELEV_MASK)==ELEV_DEF || (oldMode&ELEV_MASK)==ELEV_IGNORE )
-		DrawFillCircle( &tempD, pos, radius,
-			((oldMode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
-	HilightSelectedEndPt(FALSE, elevTrk, elevEp);
+//-	pos = GetTrkEndPos( elevTrk, elevEp );
+//-	radius = 0.05*mainD.scale;
+//-	if ( radius < trackGauge/2.0 )
+//-		radius = trackGauge/2.0;
+//-	if ( (oldMode&ELEV_MASK)==ELEV_DEF || (oldMode&ELEV_MASK)==ELEV_IGNORE )
+//-		DrawFillCircle( &tempD, pos, radius,
+//-			((oldMode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
+//-	HilightSelectedEndPt(FALSE, elevTrk, elevEp);
 	UpdateTrkEndElev( elevTrk, elevEp, newMode, elevNewValue, elevStationV );
-	HilightSelectedEndPt(TRUE, elevTrk, elevEp);
-	if ( (newMode&ELEV_MASK)==ELEV_DEF || (newMode&ELEV_MASK)==ELEV_IGNORE )
-		DrawFillCircle( &tempD, pos, radius,
-			((newMode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
+//-	HilightSelectedEndPt(TRUE, elevTrk, elevEp);
+//-	if ( (newMode&ELEV_MASK)==ELEV_DEF || (newMode&ELEV_MASK)==ELEV_IGNORE )
+//-		DrawFillCircle( &tempD, pos, radius,
+//-			((newMode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
+	TempRedraw(); // DoElevUpdate
 }
 
 
 static void DoElevDone( void * arg )
 {
 	DoElevUpdate( NULL, 1, NULL );
-	HilightElevations( FALSE );
-	HilightSelectedEndPt( FALSE, elevTrk, elevEp );
+//-	HilightElevations( FALSE );
+//-	HilightSelectedEndPt( FALSE, elevTrk, elevEp );
 	elevTrk = NULL;
 	Reset();
 }
@@ -251,7 +252,7 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 	elevOldValue = 0.0;
 	elevHeightV = 0.0;
 	elevStationV[0] = 0;
-	HilightSelectedEndPt(FALSE, elevTrk, elevEp);
+//-	HilightSelectedEndPt(FALSE, elevTrk, elevEp);
 	elevTrk = trk;
 	elevEp = ep;
 	mode = GetTrkEndElevUnmaskedMode( trk, ep );
@@ -329,7 +330,7 @@ static void ElevSelect( track_p trk, EPINX_T ep )
 		}
 	}
 	wShow(elevW);
-	HilightSelectedEndPt(TRUE, elevTrk, elevEp);
+//-	HilightSelectedEndPt(TRUE, elevTrk, elevEp);
 }
 
 static BOOL_T GetPointElev(track_p trk, coOrd pos, DIST_T * height) {
@@ -389,9 +390,11 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		ParamLoadMessage( &elevationPG, I_COMPUTED, "" );
 		ParamLoadMessage( &elevationPG, I_GRADE, "" );
 		InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
-		HilightElevations( TRUE );
+//-		HilightElevations( TRUE );
 		elevTrk = NULL;
 		elevUndo = FALSE;
+		CmdMoveDescription( action, pos );
+		TempRedraw(); // CmdElevation C_START
 		return C_CONTINUE;
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
@@ -432,15 +435,16 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
 					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
 					InfoMessage (_("Track Elevation %0.3f"), elev0);
-				} else if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
+				} else if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
+						&& !(QueryTrack(trk0,Q_IS_TURNOUT))) {
 					InfoMessage( _("Click to Split here - Elevation %0.3f"), elev0);
 					CreateEndAnchor(p0,TRUE);
 				}
 			} else InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
 		} else
 			InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
-		if (anchors_da.cnt)
-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+//-		if (anchors_da.cnt)
+//-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 	case C_DOWN:
 	case C_MOVE:
@@ -450,7 +454,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			CmdMoveDescription( action, pos );
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			elevTrk = NULL;
-			MainRedraw();
+			XMainRedraw();
 			return C_CONTINUE;
 		}
 		/*no break*/
@@ -466,11 +470,12 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
 				InfoMessage( _("Point Selected!") );
 				ElevSelect( trk0, ep0 );
-				return C_CONTINUE;
+//-				return C_CONTINUE;
 			} else if ( (MyGetKeyState()&WKEY_SHIFT) ) {
 				UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 				oldTrackCount = trackCount;
-				if (!SplitTrack( trk0, p0, ep0, &trk1, FALSE ))
+				if (!QueryTrack(trk0,Q_IS_TURNOUT) &&
+					!SplitTrack( trk0, p0, ep0, &trk1, FALSE ))
 					return C_CONTINUE;
 				InfoMessage( _("Track Split!") );
 				ElevSelect( trk0, ep0 );
@@ -479,16 +484,16 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			}
 		}
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		elevTrk = NULL;
-		MainRedraw();
+//-		elevTrk = NULL;
+		XMainRedraw();
 		return C_CONTINUE;
 	case C_OK:
 		DoElevDone(NULL);
 		InfoMessage( "" );
 		return C_TERMINATE;
 	case C_CANCEL:
-		HilightElevations( FALSE );
-		HilightSelectedEndPt( FALSE, elevTrk, elevEp );
+//-		HilightElevations( FALSE );
+//-		HilightSelectedEndPt( FALSE, elevTrk, elevEp );
 		elevTrk = NULL;
 		wHide( elevW );
 		InfoMessage( "" );
@@ -497,7 +502,8 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		DoElevHilight( NULL );
 		HilightSelectedEndPt( TRUE, elevTrk, elevEp );
 		if (anchors_da.cnt)
-					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		CmdMoveDescription( action, pos );
 		return C_CONTINUE;
 	}
 	return C_CONTINUE;

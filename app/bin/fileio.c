@@ -251,6 +251,23 @@ EXPORT void SyntaxError(
  * \param format IN ???
  *
  * \return FALSE in case of parsing error, TRUE on success
+ *
+ * format chars are:
+ * 0 - read a number and discard
+ * X - no read, *pi = 0
+ * Y - no read, *pf = 0L
+ * Z - no read, *pl = 0.0
+ * L - *pi = number
+ * d - *pi = number
+ * w - *pf = read a width
+ * u - *pul = number
+ * l - *pl = number
+ * f - *pf = number
+ * z - *pf = 0.0
+ * p - *pp = ( number, number ) a coOrd
+ * s - *ps = string
+ * q - *ps = quoted string
+ * c - *qp = position of next non-space char or NULL
  */
 
 EXPORT BOOL_T GetArgs(
@@ -1306,7 +1323,7 @@ static int ImportTracks(
 
 EXPORT void DoImport( void * type )
 {
-	importAsModule = (int)type;
+	importAsModule = (int)(long)type;
 	if (importFile_fs == NULL)
 		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Tracks"),
 			sImportFilePattern, ImportTracks, NULL );

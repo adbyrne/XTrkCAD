@@ -1000,7 +1000,7 @@ EXPORT void RecomputeElevations( void )
 	PropogateForkElevs();
 	PropogateDefElevs();
 	FindIslandElevs();
-	MainRedraw();
+	MainRedraw(); // RecomputeElevations
 LOG( log_fillElev, 1, ( "%s: Total (%ld)\n", elevPrefix, wGetTimer()-time0 ) )
 	if ( log_dumpElev > 0 ) {
 		track_p trk;

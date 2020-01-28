@@ -196,7 +196,7 @@ static void DoDisplay( void * junk )
 	if (colorLayers&1) colorTrack = 1;
 	else colorTrack = 0;
 	if (colorLayers&2) colorDraw = 1;
-	else colorTrack = 0;
+	else colorDraw = 0;
 
 	ParamLoadControls( &displayPG );
 	wShow( displayW );
