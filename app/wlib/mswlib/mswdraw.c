@@ -727,6 +727,7 @@ void wDrawGetTextSize(
 		wPos_t *w,
 		wPos_t *h,
 		wPos_t *d,
+		wPos_t *a,
 		wDraw_p bd,
 		const char * text,
 		wFont_p fp,
@@ -755,6 +756,7 @@ void wDrawGetTextSize(
 	*w = XPIXELSTOINCH( bd, x );
 	*h = YPIXELSTOINCH( bd, y );
 	*d = YPIXELSTOINCH(bd, textMetric.tmDescent );
+	*a = YPIXELSTOINCH(bd, textMetric.tmAscent );
 
 	SelectObject( bd->hDc, prevFont );
 	DeleteObject( newFont );

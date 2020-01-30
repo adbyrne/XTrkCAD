@@ -531,6 +531,7 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 		wPos_t *w,
 		wPos_t *h,
 		wPos_t *d,
+		wPos_t *a,
 		wDraw_p bd,
 		const char * s,
 		wFont_p fp,
@@ -557,7 +558,9 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 
 	*w = (wPos_t) textWidth;
 	*h = (wPos_t) textHeight;
-	*d = (wPos_t) textHeight-ascent;
+	*a = (wPos_t) ascent;
+	//*d = (wPos_t) textHeight-ascent;
+	*d = (wPos_t) descent;
 
 	if (debugWindow >= 3)
 		fprintf(stderr, "text metrics: w=%d, h=%d, d=%d\n", *w, *h, *d);

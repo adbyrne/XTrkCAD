@@ -231,8 +231,8 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		Dt.lastLineOffset = lastline.y;
 		Dt.cursPos0.x = Dt.cursPos1.x = Dt.pos.x + Dt.lastLineLen;
 		Dt.cursPos0.y = Dt.cursPos1.y = Dt.pos.y + Dt.lastLineOffset;
-		POS_T descent;
-		DrawTextSize2(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size, &descent);  //In case fontsize change
+		POS_T descent, ascent;
+		DrawTextSize2(&mainD, "Aquilp", NULL, Dt.size, TRUE, &size, &descent, &ascent);  //In case fontsize change
 		Dt.cursHeight = size.y;
 		Dt.cursPos0.y -=descent;
 		Dt.cursPos1.y +=Dt.cursHeight;

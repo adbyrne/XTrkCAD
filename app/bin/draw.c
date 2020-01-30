@@ -557,7 +557,7 @@ EXPORT void DrawMultiString(
 	char * cp1;
 	POS_T lineH, lineW;
 	coOrd size, textsize, posl, orig;
-	POS_T descent;
+	POS_T descent, ascent;
 	char *line;
 
 	if (!text || !*text) {
@@ -565,9 +565,9 @@ EXPORT void DrawMultiString(
 	}
 	line = malloc(strlen(text) + 1);
 
-	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent);
-	POS_T ascent = textsize.y-descent;
-	lineH = ascent+descent*1.5;
+	DrawTextSize2( &mainD, "Aqjlp", fp, fs, TRUE, &textsize, &descent, &ascent);
+	//POS_T ascent = textsize.y-descent;
+	lineH = (ascent+descent)*1.0;
 	size.x = 0.0;
 	size.y = 0.0;
 	orig.x = pos.x;
@@ -578,7 +578,7 @@ EXPORT void DrawMultiString(
 		while (*text != '\0' && *text != '\n')
 			*cp++ = *text++;
 		*cp = '\0';
-		DrawTextSize2( &mainD, cp1, fp, fs, TRUE, &textsize, &descent);
+		DrawTextSize2( &mainD, cp1, fp, fs, TRUE, &textsize, &descent, &ascent);
 		lineW = textsize.x;
 		if (lineW>size.x)
 			size.x = lineW;
@@ -602,7 +602,7 @@ EXPORT void DrawMultiString(
 		hi->y = orig.y+ascent;
 	}
 	if (boxed && (d != &mapD)) {
-		int bw=5, bh=4, br=2, bb=2;
+		int bw=2, bh=2, br=1, bb=1;
 		size.x += bw*d->scale/d->dpi;
 		size.y = fabs(orig.y-posl.y)+bh*d->scale/d->dpi;
 		size.y += descent+ascent;
@@ -634,25 +634,25 @@ EXPORT void DrawBoxedString(
 		ANGLE_T a )
 {
 	coOrd size, p[4], p0=pos, p1, p2;
-//-	static int bw=5, bh=4, br=2, bb=2;
-	static int bw=0, bh=0, br=0, bb=0;
+	static int bw=2, bh=2, br=1, bb=1;
 	static double arrowScale = 0.5;
 	unsigned long options = d->options;
-	POS_T descent;
+	POS_T descent, ascent;
 	/*DrawMultiString( d, pos, text, fp, fs, color, a, &lo, &hi );*/
 	if ( fs < 2*d->scale )
 		return;
 #ifndef WINDOWS
 	if ( ( d->options & DC_PRINT) != 0 ) {
 		double scale = ((FLOAT_T)fs)/((FLOAT_T)drawMaxTextFontSize)/72.0;
-		wPos_t w, h, d;
-		wDrawGetTextSize( &w, &h, &d, mainD.d, text, fp, drawMaxTextFontSize );
+		wPos_t w, h, d, a;
+		wDrawGetTextSize( &w, &h, &d, &a, mainD.d, text, fp, drawMaxTextFontSize );
 		size.x = w*scale;
 		size.y = h*scale;
 		descent = d*scale;
+		ascent = a*scale;
 	} else
 #endif
-		DrawTextSize2( &mainD, text, fp, fs, TRUE, &size, &descent );
+		DrawTextSize2( &mainD, text, fp, fs, TRUE, &size, &descent, &ascent );
 #ifdef WINDOWS
 	/*h -= 15;*/
 #endif
@@ -664,10 +664,9 @@ EXPORT void DrawBoxedString(
 	}
 	size.x += bw*d->scale/d->dpi;
 	size.y += bh*d->scale/d->dpi;
-//-	size.y += descent;
 	p[0] = p0;
 	p[0].x -= br*d->scale/d->dpi;
-	p[0].y -= bb*d->scale/d->dpi+descent;
+	p[0].y -= (bb*d->scale/d->dpi+descent);
 	p[1].y = p[0].y;
 	p[2].y = p[3].y = p[0].y + size.y;
 	p[1].x = p[2].x = p[0].x + size.x;
@@ -712,9 +711,10 @@ EXPORT void DrawTextSize2(
 		wFontSize_t fs,
 		BOOL_T relative,
 		coOrd * size,
-		POS_T * descent )
+		POS_T * descent,
+		POS_T * ascent)
 {
-	wPos_t w, h, d;
+	wPos_t w, h, d, a;
 	FLOAT_T scale = 1.0;
 	if ( relative )
 		fs /= dp->scale;
@@ -722,14 +722,16 @@ EXPORT void DrawTextSize2(
 		scale = ((FLOAT_T)fs)/((FLOAT_T)drawMaxTextFontSize);
 		fs = drawMaxTextFontSize;
 	}
-	wDrawGetTextSize( &w, &h, &d, dp->d, text, fp, fs );
+	wDrawGetTextSize( &w, &h, &d, &a, dp->d, text, fp, fs );
 	size->x = SCALEX(mainD,w)*scale;
 	size->y = SCALEY(mainD,h)*scale;
 	*descent = SCALEY(mainD,d)*scale;
+	*ascent = SCALEY(mainD,a)*scale;
 	if ( relative ) {
 		size->x *= dp->scale;
 		size->y *= dp->scale;
 		*descent *= dp->scale;
+		*ascent *=dp->scale;
 	}
 /*	printf( "DTS2(\"%s\",%0.3f,%d) = (w%d,h%d,d%d) *%0.3f x%0.3f y%0.3f %0.3f\n", text, fs, relative, w, h, d, scale, size->x, size->y, *descent );*/
 }
@@ -742,8 +744,8 @@ EXPORT void DrawTextSize(
 		BOOL_T relative,
 		coOrd * size )
 {
-	POS_T descent;
-	DrawTextSize2( dp, text, fp, fs, relative, size, &descent );
+	POS_T descent, ascent;
+	DrawTextSize2( dp, text, fp, fs, relative, size, &descent, &ascent );
 }
 
 EXPORT void DrawMultiLineTextSize(
@@ -755,15 +757,14 @@ EXPORT void DrawMultiLineTextSize(
 		coOrd * size,
 		coOrd * lastline )
 {
-	POS_T descent, lineW, lineH;
+	POS_T descent, ascent, lineW, lineH;
 	coOrd textsize, blocksize;
 
 	char *cp;
 	char *line = malloc(strlen(text) + 1);
 
-	DrawTextSize2( &mainD, "Aqlip", fp, fs, TRUE, &textsize, &descent);
-	POS_T ascent = textsize.y-descent;
-	lineH = ascent+descent*1.5;
+	DrawTextSize2( &mainD, "Aqlip", fp, fs, TRUE, &textsize, &descent, &ascent);
+	lineH = (ascent+descent)*1.0;
 	blocksize.x = 0;
 	blocksize.y = 0;
 	lastline->x = 0;
@@ -774,7 +775,7 @@ EXPORT void DrawMultiLineTextSize(
 			*cp++ = *text++;
 		*cp = '\0';
 		blocksize.y += lineH;
-		DrawTextSize2( &mainD, line, fp, fs, TRUE, &textsize, &descent);
+		DrawTextSize2( &mainD, line, fp, fs, TRUE, &textsize, &descent, &ascent);
 		lineW = textsize.x;
 		if (lineW>blocksize.x)
 			blocksize.x = lineW;
