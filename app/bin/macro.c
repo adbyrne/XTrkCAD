@@ -476,7 +476,7 @@ static void MoveCursor(
 
 			pos1.x += dpos.x;
 			pos1.y += dpos.y;
-			wDrawClearTemp( tempD.d );
+//-			wDrawClearTemp( tempD.d );
 			if ( proc != NULL ) {
 				proc( action, pos1 );
 			} else {
