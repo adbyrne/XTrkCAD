@@ -44,6 +44,10 @@ int iDrawLog = 0;
 
 static long drawVerbose = 0;
 
+// Hack to do TempRedraw or MainRedraw
+// For Windows only
+wBool_t wDrawDoTempDraw = TRUE;
+
 struct wDrawBitMap_t {
 		int w;
 		int h;

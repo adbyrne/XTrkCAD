@@ -1360,16 +1360,19 @@ EXPORT void SetMainSize( void )
 	tempD.size = mainD.size;
 }
 
+// Hack to switch between TempRedraw and MainRedraw
+extern wBool_t wDrawDoTempDraw;
+
 /* Update temp_surface after executing a command
  */
 EXPORT void TempRedraw( void ) {
 
 	static int cTR = 0;
 	LOG( log_redraw, 2, ( "TempRedraw: %d\n", cTR++ ) );
-#ifdef WINDOWS
-	// Remove this ifdef after windows supports GTK
+if (wDrawDoTempDraw == FALSE) {
+	// Remove this after windows supports GTK
 	MainRedraw(); // TempRedraw - windows
-#else
+} else {
 	wDrawDelayUpdate( tempD.d, TRUE );
 	wDrawSetTempMode( tempD.d, TRUE );
 	wDrawClearTemp( tempD.d );
@@ -1378,7 +1381,7 @@ EXPORT void TempRedraw( void ) {
 	RulerRedraw( FALSE );
 	wDrawSetTempMode( tempD.d, FALSE );
 	wDrawDelayUpdate( tempD.d, FALSE );
-#endif
+}
 }
 
 EXPORT void MainRedraw( void )
@@ -1913,17 +1916,17 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
 	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
 LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
-#ifndef WINDOWS
+	if ( wDrawDoTempDraw ) {
 // Temporary until mswlib supports TempDraw
-	wAction_t action = wActionMove;
-	coOrd pos;
-	if ( mouseState == mouseLeft )
-		action = wActionLDrag;
-	if ( mouseState == mouseRight )
+		wAction_t action = wActionMove;
+		coOrd pos;
+		if ( mouseState == mouseLeft )
+			action = wActionLDrag;
+		if ( mouseState == mouseRight )
 		action = wActionRDrag;
-	mainD.Pix2CoOrd( &mainD, mousePositionx, mousePositiony, &pos );
-	DoMouse( action, pos );
-#endif
+		mainD.Pix2CoOrd( &mainD, mousePositionx, mousePositiony, &pos );
+		DoMouse( action, pos );
+	}
 }
 
 /**

@@ -39,6 +39,7 @@
 #include "mswint.h"
 #include <FreeImage.h>
 
+wBool_t wDrawDoTempDraw = TRUE;
 /*
  *****************************************************************************
  *
@@ -144,7 +145,9 @@ wBool_t wDrawSetTempMode(
 	wDraw_p bd,
 	wBool_t bTemp )
 {
-	return 0;
+	wBool_t rc = bd->bTempMode;
+	bd->bTempMode = bTemp;
+	return rc;
 }
 
 /**
@@ -158,51 +161,43 @@ wBool_t wDrawSetTempMode(
  * \param dc IN color
  * \param dopt IN ????
  */
-
 static void setDrawMode(
-		HDC hDc,
 		wDraw_p d,
 		wDrawWidth dw,
 		wDrawLineType_e lt,
 		wDrawColor dc,
 		wDrawOpts dopt )
 {
-	int mode;
 	HPEN hOldPen;
 	static wDraw_p d0;
 	static wDrawWidth dw0 = -1;
 	static wDrawLineType_e lt0 = (wDrawLineType_e)-1;
 	static wDrawColor dc0 = -1;
-	static int mode0 = -1;
 	static LOGBRUSH logBrush = { 0, 0, 0 };
 	DWORD penStyle;
+
+	if ( wDrawDoTempDraw && (dopt & wDrawOptTemp) )
+		SelectObject(d->hDc, d->hBmTemp);
+	else
+		SelectObject(d->hDc, d->hBmMain);
 
 	if ( d->hasPalette ) {
 		int winPaletteClock = mswGetPaletteClock();
 		if ( d->paletteClock < winPaletteClock ) {
-			RealizePalette( hDc );
+			RealizePalette( d->hDc );
 			d->paletteClock = winPaletteClock;
 		}
 	}
 
-#ifdef NOTEMPDRAW
-	if (dopt & wDrawOptTemp) {
-		mode = R2_NOTXORPEN;
-	} else {
-#endif
-		mode = R2_COPYPEN;
-#ifdef NOTEMPDRAW
-	}
-#endif
-	SetROP2( hDc, mode );
-	if ( d == d0 && mode == mode0 && dw0 == dw && lt == lt0 && dc == dc0 )
+	SetROP2( d->hDc, R2_COPYPEN );
+	if ( d == d0 && dw0 == dw && lt == lt0 && dc == dc0 )
 		return;
 
 	// make sure that the line width is at least 1!
 	if( !dw ) 
 		dw++;
 
-	d0 = d; mode0 = mode; dw0 = dw; lt0 = lt; dc0 = dc;
+	d0 = d; dw0 = dw; lt0 = lt; dc0 = dc;
 
 	logBrush.lbColor = mswGetColor(d->hasPalette,dc);
 	if ( lt==wDrawLineSolid ) {
@@ -224,12 +219,11 @@ static void setDrawMode(
 	} else {
 		d->hPen = CreatePen( PS_DASHDOTDOT, 0, mswGetColor( d->hasPalette, dc ) );
 	}
-	hOldPen = SelectObject( hDc, d->hPen );
+	hOldPen = SelectObject( d->hDc, d->hPen );
 	DeleteObject( hOldPen );
 }
 
 static void setDrawBrush(
-		HDC hDc,
 		wDraw_p d,
 		wDrawColor dc,
 		wDrawOpts dopt )
@@ -238,7 +232,7 @@ static void setDrawBrush(
 	static wDraw_p d0;
 	static wDrawColor dc0 = -1;
 
-	setDrawMode( hDc, d, 0, wDrawLineSolid, dc, dopt );
+	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 	if ( d == d0 && dc == dc0 )
 		return;
 
@@ -246,7 +240,7 @@ static void setDrawBrush(
 
 	d->hBrush = CreateSolidBrush( 
 				mswGetColor(d->hasPalette,dc) );
-	hOldBrush = SelectObject( hDc, d->hBrush );
+	hOldBrush = SelectObject( d->hDc, d->hBrush );
 	DeleteObject( hOldBrush );
 }
 
@@ -308,7 +302,7 @@ void wDrawLine(
 {
 	POINT p0, p1;
 	RECT rect;
-	setDrawMode( d->hDc, d, dw, lt, dc, dopt );
+	setDrawMode( d, dw, lt, dc, dopt );
 	p0.x = XINCH2PIX(d,p0x);
 	p0.y = YINCH2PIX(d,p0y);
 	p1.x = XINCH2PIX(d,p1x);
@@ -419,7 +413,7 @@ void wDrawArc(
 	pe.x = XINCH2PIX(d,(wPos_t)pex);
 	pe.y = YINCH2PIX(d,(wPos_t)pey);
 
-	setDrawMode( d->hDc, d, dw, lt, dc, dopt );
+	setDrawMode( d, dw, lt, dc, dopt );
 
 	if (dw == 0)
 		dw = 1;
@@ -533,7 +527,7 @@ void wDrawPoint(
 		return;
 	if ( p0.x >= d->w || p0.y >= d->h )
 		return;
-	setDrawMode( d->hDc, d, 0, wDrawLineSolid, dc, dopt );
+	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 
 	SetPixel( d->hDc, p0.x, p0.y, mswGetColor(d->hasPalette,dc) /*colorPalette.palPalEntry[dc]*/ );
 	if (d->hWnd) {
@@ -788,8 +782,6 @@ void wDrawString(
 {
     int x, y;
     HFONT newFont, prevFont;
-    HDC newDc;
-    HBITMAP oldBm, newBm;
     DWORD extent;
     int w, h;
     RECT rect;
@@ -812,41 +804,8 @@ void wDrawString(
         return;
     }
 
-#ifdef NOTEMPDRAW
-    if (dopts & wDrawOptTemp) {
-        setDrawMode(d->hDc, d, 0, wDrawLineSolid, dc, dopts);
-        newDc = CreateCompatibleDC(d->hDc);
-        prevFont = SelectObject(newDc, newFont);
-        extent = GetTextExtent(newDc, CAST_AWAY_CONST text, strlen(text));
-        w = LOWORD(extent);
-        h = HIWORD(extent);
-
-        if (h > w) {
-            w = h;
-        }
-
-        newBm = CreateCompatibleBitmap(d->hDc, w*2, w*2);
-        oldBm = SelectObject(newDc, newBm);
-        rect.top = rect.left = 0;
-        rect.bottom = rect.right = w*2;
-        FillRect(newDc, &rect, GetStockObject(WHITE_BRUSH));
-        TextOut(newDc, w, w, text, strlen(text));
-        BitBlt(d->hDc, x-w, y-w, w*2, w*2, newDc, 0, 0, tmpOp);
-        SelectObject(newDc, oldBm);
-        DeleteObject(newBm);
-        SelectObject(newDc, prevFont);
-        DeleteDC(newDc);
-
-        if (d->hWnd) {
-            rect.top = y-(w+1);
-            rect.bottom = y+(w+1);
-            rect.left = x-(w+1);
-            rect.right = x+(w+1);
-            myInvalidateRect(d, &rect);
-        }
-    } else {
-#endif
-        prevFont = SelectObject(d->hDc, newFont);
+		setDrawMode( d, 0, wDrawLineSolid, dc, dopts );
+		prevFont = SelectObject(d->hDc, newFont);
         SetBkMode(d->hDc, TRANSPARENT);
 
         if (dopts & wDrawOutlineFont) {
@@ -882,9 +841,6 @@ void wDrawString(
             rect.right = x + (w + h + 1);
             myInvalidateRect(d, &rect);
         }
-#ifdef NOTEMPDRAW
-    }
-#endif
 
     DeleteObject(newFont);
     fp->lfHeight = oldLfHeight;
@@ -948,7 +904,7 @@ void wDrawFilledRectangle(
 	RECT rect;
 	if (d == NULL)
 		return;
-	setDrawBrush( d->hDc, d, color, opts );
+	setDrawBrush( d, color, opts );
 	if (opts & wDrawOptTransparent) {
 		mode = R2_NOTXORPEN;
 	}
@@ -1087,7 +1043,7 @@ void wDrawPolygon(
 
     if (fill) {
 		int mode;
-        setDrawBrush(d->hDc, d, color, opts);
+        setDrawBrush(d, color, opts);
 		if (opts & wDrawOptTransparent) {
 			mode = R2_NOTXORPEN;
 		}
@@ -1097,7 +1053,7 @@ void wDrawPolygon(
 		SetROP2(d->hDc, mode);
 
     } else {
-        setDrawMode(d->hDc, d, dw, lt, color, opts);
+        setDrawMode(d, dw, lt, color, opts);
     }
 
     rect.left = rect.right = XINCH2PIX(d,node[cnt-1][0]-1);
@@ -1231,7 +1187,7 @@ void wDrawFilledCircle(
 	p1.x = XINCH2PIX(d,x+r);
 	p1.y = YINCH2PIX(d,y-r)+1;
 						   
-	setDrawBrush( d->hDc, d, color, opts );						  
+	setDrawBrush( d, color, opts );						  
 	if ( noNegDrawArgs > 0 && ( p0.x < 0 || p0.y < 0 ) ) {
 		if ( r > MAX_FILLCIRCLE_POINTS )
 			cnt = MAX_FILLCIRCLE_POINTS;
@@ -1296,21 +1252,25 @@ void wDrawRestoreImage(
 
 void wDrawClearTemp( wDraw_p d )
 {
+	RECT rect;
+	SelectObject( d->hDc, d->hBmTemp );
+	BitBlt(d->hDc, 0, 0, d->w, d->h, d->hDc, 0, 0, WHITENESS);
+	if (d->hWnd) {
+		rect.top = 0;
+		rect.bottom = d->h;
+		rect.left = 0;
+		rect.right = d->w;
+		InvalidateRect( d->hWnd, &rect, FALSE );
+	}
 }
 
 
 void wDrawClear( wDraw_p d )
 {
-	RECT rect;
-	SetROP2( d->hDc, R2_WHITE );
-	Rectangle( d->hDc, 0, 0, d->w, d->h );
-	if (d->hWnd) {
-	rect.top = 0;
-	rect.bottom = d->h;
-	rect.left = 0;
-	rect.right = d->w;
-	InvalidateRect( d->hWnd, &rect, FALSE );
-	}
+	SelectObject( d->hDc, d->hBmMain );
+	// BitBlt is faster than Rectangle
+	BitBlt(d->hDc, 0, 0, d->w, d->h, d->hDc, 0, 0, WHITENESS);
+	wDrawClearTemp(d);
 }
 
 
@@ -1411,7 +1371,7 @@ void wDrawBitMap(
 		wDrawColor dc,
 		wDrawOpts dopt )
 {
-	HDC bmDc, hDc;
+	HDC bmDc;
 	HBITMAP oldBm;
 	DWORD mode;
 	int x0, y0;
@@ -1423,12 +1383,7 @@ void wDrawBitMap(
 	if ( noNegDrawArgs > 0 && ( x0 < 0 || y0 < 0 ) )
 		return;
 #endif
-#ifdef NOTEMPDRAW
-	if (dopt & wDrawOptTemp) {
-		mode = tmpOp;
-	} else 
-#endif
-		if (dc == wDrawColorWhite) {
+	if (dc == wDrawColorWhite) {
 		mode = clrOp;
 		dc = wDrawColorBlack;
 	} else {
@@ -1442,24 +1397,9 @@ void wDrawBitMap(
 				RGB( 255, 255, 255 ), bm->w, bm->h, bm->bmx );
 		bm->color = dc;
 	}
-#ifdef NOTEMPDRAW
-	if ( (dopt & wDrawOptNoClip) != 0 &&
-		 ( px < 0 || px >= d->w || py < 0 || py >= d->h ) ) {
-		x0 += d->x;
-		y0 += d->y;
-		hDc = GetDC( ((wControl_p)(d->parent))->hWnd );
-		bmDc = CreateCompatibleDC( hDc );
-		oldBm = SelectObject( bmDc, bm->bm );
-		BitBlt( hDc, x0, y0, bm->w, bm->h, bmDc, 0, 0, tmpOp );
-		SelectObject( bmDc, oldBm );
-		DeleteDC( bmDc );
-		ReleaseDC( ((wControl_p)(d->parent))->hWnd, hDc );
-		return;
-	}
-#endif
 
 	bmDc = CreateCompatibleDC( d->hDc );
-	setDrawMode( d->hDc, d, 0, wDrawLineSolid, dc, dopt );
+	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 	oldBm = SelectObject( bmDc, bm->bm );
 	BitBlt( d->hDc, x0, y0, bm->w, bm->h, bmDc, 0, 0, mode );
 	SelectObject( bmDc, oldBm );
@@ -1542,12 +1482,14 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		hDc = GetDC(hWnd);
 		if ( b->option & BD_DIRECT ) {
 			b->hDc = hDc;
-			b->hBm = 0;
+			b->hBmMain = 0;
+			b->hBmTemp = 0;
 			b->hBmOld = 0;
 		} else {
 			b->hDc = CreateCompatibleDC( hDc ); 
-			b->hBm = CreateCompatibleBitmap( hDc, b->w, b->h );
-			b->hBmOld = SelectObject( b->hDc, b->hBm );
+			b->hBmMain = CreateCompatibleBitmap( hDc, b->w, b->h );
+			b->hBmTemp = CreateCompatibleBitmap( hDc, b->w, b->h );
+			b->hBmOld = SelectObject( b->hDc, b->hBmMain );
 		}
 		if (mswPalette) {
 			SelectPalette( b->hDc, mswPalette, 0 );
@@ -1575,8 +1517,12 @@ long FAR PASCAL XEXPORT mswDrawPush(
 			if ( b->option & BD_DIRECT ) {
 			} else {
 			hDc = GetDC( b->hWnd );
-			b->hBm = CreateCompatibleBitmap( hDc, b->w, b->h );
-			DeleteObject(SelectObject( b->hDc, b->hBm ));
+//-			DeleteObject( b->hBmOld );
+			DeleteObject( b->hBmMain );
+			DeleteObject( b->hBmTemp );
+			b->hBmMain = CreateCompatibleBitmap( hDc, b->w, b->h );
+			b->hBmTemp = CreateCompatibleBitmap( hDc, b->w, b->h );
+//-			b->hBmOld = SelectObject( b->hDc, b->hBmMain );
 			ReleaseDC( b->hWnd, hDc );
 			SetROP2( b->hDc, R2_WHITE );
 			Rectangle( b->hDc, 0, 0, b->w, b->h );
@@ -1691,10 +1637,17 @@ long FAR PASCAL XEXPORT mswDrawPush(
 						b->paletteClock = winPaletteClock;
 					}
 				}
+				HBITMAP hBmOld = SelectObject( b->hDc, b->hBmMain );
 				BitBlt( hDc, rect.left, rect.top,
 						rect.right-rect.left, rect.bottom-rect.top,
 						b->hDc, rect.left, rect.top,
 						SRCCOPY );
+				SelectObject( b->hDc, b->hBmTemp );
+				BitBlt( hDc, rect.left, rect.top,
+						rect.right-rect.left, rect.bottom-rect.top,
+						b->hDc, rect.left, rect.top,
+						SRCAND );
+				SelectObject( b->hDc, hBmOld );
 				EndPaint( hWnd, &ps );
 			}
 		}
@@ -1744,10 +1697,12 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 static void drawDoneProc( wControl_p b )
 {
 	wDraw_p d = (wDraw_p)b;
-	if (d->hBm) {
+	if (d->hBmMain) {
 		SelectObject( d->hDc, d->hBmOld );
-		DeleteObject( d->hBm );
-		d->hBm = (HBITMAP)0;
+		DeleteObject( d->hBmMain );
+		d->hBmMain = (HBITMAP)0;
+		DeleteObject( d->hBmTemp );
+		d->hBmTemp = (HBITMAP)0;
 	}
 	if (d->hPen) {
 		SelectObject( d->hDc, GetStockObject( BLACK_PEN ) );
@@ -1803,10 +1758,17 @@ void mswRepaintAll( void )
 	for ( b=drawList; b; b=b->drawNext ) {
 		if (GetUpdateRect( b->hWnd, &rect, FALSE )) {
 			hDc = BeginPaint( b->hWnd, &ps );
+			HBITMAP hBmOld = SelectObject( b->hDc, b->hBmMain );
 			BitBlt( hDc, rect.left, rect.top,
 						rect.right-rect.left, rect.bottom-rect.top,
 						b->hDc, rect.left, rect.top,
 						SRCCOPY );
+			SelectObject( b->hDc, b->hBmTemp );
+			BitBlt( hDc, rect.left, rect.top,
+						rect.right-rect.left, rect.bottom-rect.top,
+						b->hDc, rect.left, rect.top,
+						SRCAND );
+			SelectObject( b->hDc, hBmOld );
 			EndPaint( b->hWnd, &ps );
 		}
 	}
@@ -1904,14 +1866,19 @@ wDraw_p wBitMapCreate( wPos_t w, wPos_t h, int planes )
 		wNoticeEx( NT_ERROR, "CreateBitMap: CreateDC fails", "Ok", NULL );
 		return FALSE;
 	}
-	d->hBm = CreateCompatibleBitmap( hDc, d->w, d->h );
-	if ( d->hBm == (HBITMAP)0 ) {
-		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM fails", "Ok", NULL );
+	d->hBmMain = CreateCompatibleBitmap( hDc, d->w, d->h );
+	if ( d->hBmMain == (HBITMAP)0 ) {
+		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM Main fails", "Ok", NULL );
+		return FALSE;
+	}
+	d->hBmTemp = CreateCompatibleBitmap( hDc, d->w, d->h );
+	if ( d->hBmTemp == (HBITMAP)0 ) {
+		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM Temp fails", "Ok", NULL );
 		return FALSE;
 	}
 	d->hasPalette = (GetDeviceCaps(hDc,RASTERCAPS ) & RC_PALETTE) != 0;
 	ReleaseDC( mswHWnd, hDc );
-	d->hBmOld = SelectObject( d->hDc, d->hBm );
+	d->hBmOld = SelectObject( d->hDc, d->hBmMain );
 	if (mswPalette) {
 		SelectPalette( d->hDc, mswPalette, 0 );
 		RealizePalette( d->hDc );
@@ -1920,8 +1887,9 @@ wDraw_p wBitMapCreate( wPos_t w, wPos_t h, int planes )
 	d->hFactor = (double)GetDeviceCaps( d->hDc, LOGPIXELSY );
 	d->DPI = 96.0; /*min( d->wFactor, d->hFactor );*/
 	d->hWnd = 0;
-	SetROP2( d->hDc, R2_WHITE );
-	Rectangle( d->hDc, 0, 0, d->w, d->h );
+	wDrawClear(d);
+//-	SetROP2( d->hDc, R2_WHITE );
+//-	Rectangle( d->hDc, 0, 0, d->w, d->h );
 	return d;
 }
 
@@ -1932,10 +1900,12 @@ wBool_t wBitMapDelete( wDraw_p d )
 		DeleteObject( d->hPen );
 		d->hPen = (HPEN)0;
 	}
-	if (d->hBm) {
+	if (d->hBmMain) {
 		SelectObject( d->hDc, d->hBmOld );
-		DeleteObject( d->hBm );
-		d->hBm = (HBITMAP)0;
+		DeleteObject( d->hBmMain );
+		d->hBmMain = (HBITMAP)0;
+		DeleteObject( d->hBmTemp );
+		d->hBmTemp = (HBITMAP)0;
 	}
 	if (d->hDc) {
 		DeleteDC( d->hDc );
@@ -1962,17 +1932,17 @@ wBitMapWriteFile(wDraw_p d, const char * fileName)
     FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
     BOOL bSuccess = FALSE;
 
-    if (d->hBm) {
+    if (d->hBmMain) {
 
         BITMAP bm;
-        GetObject(d->hBm, sizeof(BITMAP), (LPSTR)&bm);
+        GetObject(d->hBmMain, sizeof(BITMAP), (LPSTR)&bm);
         dib = FreeImage_Allocate(bm.bmWidth, bm.bmHeight, bm.bmBitsPixel, 0, 0, 0);
         // The GetDIBits function clears the biClrUsed and biClrImportant BITMAPINFO members (dont't know why)
         // So we save these infos below. This is needed for palettized images only.
         int nColors = FreeImage_GetColorsUsed(dib);
         HDC dc = GetDC(NULL);
         GetDIBits(dc,
-                  d->hBm,
+                  d->hBmMain,
                   0,
                   FreeImage_GetHeight(dib),
                   FreeImage_GetBits(dib),

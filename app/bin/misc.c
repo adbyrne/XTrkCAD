@@ -173,6 +173,8 @@ static wIndex_t gridCmdInx;
 static paramData_t menuPLs[101] = { { PD_LONG, &toolbarSet, "toolbarset" }, {
 		PD_LONG, &curTurnoutEp, "cur-turnout-ep" } };
 static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
+
+extern wBool_t wDrawDoTempDraw;
 
 /****************************************************************************
  *
@@ -2720,7 +2722,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	opterr = 0;
 
-	while ((c = getopt(argc, argv, "vl:d:c:")) != -1)
+	while ((c = getopt(argc, argv, "vl:d:c:m")) != -1)
 		switch (c) {
 		case 'c': /* configuration name */
 			/* test for valid filename */
@@ -2757,6 +2759,9 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 		case '?':
 			NoticeMessage(MSG_BAD_OPTION, _("Ok"), NULL, argv[optind - 1]);
 			exit(1);
+		case 'm': // temporary: use MainRedraw instead of TempRedraw
+			wDrawDoTempDraw = FALSE;
+			break;
 		case ':':
 			NoticeMessage("Missing parameter for %s", _("Ok"), NULL,
 					argv[optind - 1]);
