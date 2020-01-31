@@ -56,6 +56,15 @@ static void DrawRoomWalls( wBool_t );
 EXPORT void DrawMarkers( void );
 static void ConstraintOrig( coOrd *, coOrd, int );
 static void DoMouse( wAction_t action, coOrd pos );
+static void DDrawPoly(
+		drawCmd_p d,
+		int cnt,
+		coOrd * pts,
+		int * types,
+		wDrawColor color,
+		wDrawWidth width,
+		int fill,
+		int open );
 
 static int log_pan = 0;
 static int log_zoom = 0;
@@ -420,9 +429,29 @@ static void DDrawString(
 	wPos_t x, y;
 	if (d == &mapD && !mapVisible)
 		return;
-	fontSize /= d->scale;
 	d->CoOrd2Pix(d,p,&x,&y);
-	wDrawString( d->d, x, y, d->angle-a, s, fp, fontSize, color, (wDrawOpts)d->funcs->options );
+	if ( color == wDrawColorWhite ) {
+		wPos_t width, height, descent, ascent;
+		coOrd pos[4], size;
+		double scale = 1.0;
+		wDrawGetTextSize( &width, &height, &descent, &ascent, d->d, s, fp, fontSize );
+		pos[0] = p;
+		size.x = SCALEX(mainD,width)*scale;
+		size.y = SCALEY(mainD,height)*scale;
+		pos[1].x = p.x+size.x;
+		pos[1].y = p.y;
+		pos[2].x = p.x+size.x;
+		pos[2].y = p.y+size.y;
+		pos[3].x = p.x;
+		pos[3].y = p.y+size.y;
+		Rotate( &pos[1], pos[0], a );
+		Rotate( &pos[2], pos[0], a );
+		Rotate( &pos[3], pos[0], a );
+		DDrawPoly( d, 4, pos, NULL, color, 0, 1, 0 );
+	} else {
+		fontSize /= d->scale;
+		wDrawString( d->d, x, y, d->angle-a, s, fp, fontSize, color, (wDrawOpts)d->funcs->options );
+	}
 }
 
 
