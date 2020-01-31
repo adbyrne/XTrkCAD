@@ -2827,7 +2827,7 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 		if (GetLayerUseColor((unsigned int)curTrackLayer))
 			color = GetLayerColor((unsigned int)curTrackLayer);
 	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
-	if ( inDrawTracks &&
+	if ( (!inDrawTracks) &&
 		 tieDrawMode!=TIEDRAWMODE_NONE &&
 		 d != &mapD &&
 		 d->scale<scale2rail/2 &&
