@@ -675,7 +675,12 @@ static void wlibDrawFilled(
 		int k = i+1;
 		if (j < 0) j = cnt-1;
 		if (k > cnt-1) k = 0;
-		GdkPoint mid0, mid1, mid3, mid4, save;
+		GdkPoint mid0, mid1, mid3, mid4;
+		// save is static because of an apparent compiler bug on Linux
+		// This happens with RelWithDebInfo target
+		// If the first segment is a line then save should = points[0]
+		// However it becomes mid0 instead which causes the last corner to be misplaced.
+		static GdkPoint save;
 		double len0, len1;
 		double d0x = (points[i].x-points[j].x);
 		double d0y = (points[i].y-points[j].y);
