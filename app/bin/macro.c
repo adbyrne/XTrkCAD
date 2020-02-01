@@ -1311,7 +1311,6 @@ static char * demoInitParams[] = {
 		"display carhotbarlabels 1",
 		"display hideTrainsInTunnels 0",
 		"GROUP display",
-		"cmdopt move-quick 0",
 		"pref turntable-angle 15.00",
 		"cmdopt preselect 1",
 		"pref coupling-speed-max 100",
