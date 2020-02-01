@@ -199,7 +199,6 @@ STATUS_T BezierDescriptionMove(
 	case C_UP:
 		editState = TRUE;
 		p1 = pos;
-//-        DrawLine( &mainD, p0, pos, 0, wDrawColorBlack );
         xx->bezierData.descriptionOff.x = pos.x - p0.x;
         xx->bezierData.descriptionOff.y = pos.y - p0.y;
         if (action == C_UP) {
@@ -207,8 +206,6 @@ STATUS_T BezierDescriptionMove(
 		wDrawColor color = GetTrkColor( trk, &mainD );
 		DrawBezierDescription( trk, &mainD, color );
         }
-		XMainRedraw();
-		XMapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 	case C_REDRAW:
 		if (editState) {
@@ -906,10 +903,6 @@ static BOOL_T MergeBezier(
 	}
 	DrawNewTrack( trk0 );
 
-	XMainRedraw();
-	XMapRedraw();
-
-
 	return TRUE;
 }
 
@@ -980,8 +973,6 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 static BOOL_T TrimBezier( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center ) {
 	UndrawNewTrack( trk );
 	DeleteTrack(trk, TRUE);
-	XMainRedraw();
-	XMapRedraw();
 	return TRUE;
 }
 
@@ -1213,9 +1204,7 @@ BOOL_T MoveBezierEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 		UndrawNewTrack( *trk );
 		xx = GetTrkExtraData(*trk);
 		SetTrkEndPoint( *trk, *ep, *ep?xx->bezierData.pos[3]:xx->bezierData.pos[0], *ep?xx->bezierData.a1:xx->bezierData.a0 );
-		XMainRedraw();
 		DrawNewTrack( *trk );
-		XMapRedraw();
 		return TRUE;
 	}
 	return FALSE;

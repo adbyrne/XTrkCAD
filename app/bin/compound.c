@@ -412,8 +412,6 @@ STATUS_T CompoundDescriptionMove(
 		if (action == C_UP) {
 			editMode = FALSE;
 		}
-		XMainRedraw();
-		XMapRedraw();
 		if ( action == C_UP ) {
 			DrawCompoundDescription( trk, &mainD, color );
 		}

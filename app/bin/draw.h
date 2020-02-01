@@ -218,8 +218,6 @@ void SetMainSize( void );
 void MainRedraw( void );
 void MapRedraw( void );
 void TempRedraw( void );
-void XMainRedraw( void );
-void XMapRedraw( void );
 void DrawMarkers( void );
 void DrawMapBoundingBox( BOOL_T );
 void DrawTicks( drawCmd_p, coOrd );

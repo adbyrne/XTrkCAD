@@ -761,7 +761,6 @@ static STATUS_T CmdPull(
 				return C_CONTINUE;
 			CreateConnectAnchor(t_ep1,t1,TRUE);
 		}
-		XMainRedraw();
 		break;
 
 	case C_LCLICK:

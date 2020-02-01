@@ -1181,7 +1181,6 @@ EXPORT void InfoPos( coOrd pos )
 	sprintf( message, "%s%s", yLabel, FormatDistance(pos.y) );
 	wStatusSetValue( infoD.posY_m, message );
 	
-	XMainRedraw();
 	oldMarker = pos;
 	wBool_t bTemp = wDrawSetTempMode( tempD.d, TRUE );
 	DrawMarkers();
@@ -1475,14 +1474,6 @@ EXPORT void MainRedraw( void )
 	RedrawPlaybackCursor();              //If in playback
 	wDrawSetTempMode( tempD.d, FALSE );
 	wDrawDelayUpdate( mainD.d, FALSE );
-}
-
-EXPORT void XMainRedraw()
-{
-}
-
-EXPORT void XMapRedraw()
-{
 }
 
 /**
@@ -2558,8 +2549,6 @@ static void DoMouse( wAction_t action, coOrd pos )
 			default:
 				return;
 			}
-//-			mainD.Pix2CoOrd( &mainD, x, y, &pos );
-//-			InfoPos( pos );
 			return;
 		case C_TEXT:
 			if ((action>>8) == 0x0D) {
@@ -2663,12 +2652,9 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 					}
 					ConstraintOrig( &orig, mainD.size, TRUE );
 					if ( orig.x != mainD.orig.x || orig.y != mainD.orig.y ) {
-						//DrawMapBoundingBox( FALSE );
 						mainD.orig = orig;
 						MainRedraw(); // DoMouseW: autopan
 						MapRedraw();
-						/*DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );*/
-						//DrawMapBoundingBox( TRUE );
 						wFlush();
 					}
 				}

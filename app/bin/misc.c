@@ -712,7 +712,6 @@ static void DoClearAfter(void) {
 	ClearTracks();
 
 	/* set all layers to their default properties and set current layer to 0 */
-//-	DefaultLayerProperties();
 	DoLayout(NULL);
 	checkPtMark = 0;
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
@@ -1155,8 +1154,6 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 			&& (commandList[curCommand].stickyMask & stickySet)) {
 		tempSegs_da.cnt = 0;
 		UpdateAllElevations();
-        XMainRedraw();
-        XMapRedraw();
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
 		}

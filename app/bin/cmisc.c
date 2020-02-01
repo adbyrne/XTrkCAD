@@ -238,10 +238,6 @@ static void DescribeUpdate(
         return;
     }
 
-//-    if ((ddp->mode&DESC_NOREDRAW) == 0) {
-//-        DrawDescHilite(TRUE);
-//-    }
-
     if (!descUndoStarted) {
         UndoStart(_("Change Track"), "Change Track");
         descUndoStarted = TRUE;
@@ -269,7 +265,6 @@ static void DescribeUpdate(
         descOrig.y -= descBorder;
         descSize.x -= descOrig.x-descBorder;
         descSize.y -= descOrig.y-descBorder;
-//-        DrawDescHilite(TRUE);
     }
 
     for (inx = 0; inx < sizeof describePLs/sizeof describePLs[0]; inx++) {
@@ -305,9 +300,6 @@ static void DescOk(void * junk)
 {
     wHide(describePG.win);
 
-//-    if (descTrk) {
-//-        DrawDescHilite(TRUE);
-//-    }
     if (layerValue && *layerValue>=0) {
     	SetTrkLayer(descTrk, editableLayerList[*layerValue]);  //int found that is really in the parm controls.
     }
@@ -555,7 +547,6 @@ EXPORT void DescribeCancel(void)
         	if (!IsTrackDeleted(descTrk))
         		descUpdateFunc(descTrk, -1, descData, TRUE);
         	descTrk = NULL;
-//-        	DrawDescHilite(TRUE);
 
         }
 
@@ -585,16 +576,12 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case wActionMove:
-//-    	if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
-//-    		DrawTrack(trk,&mainD,wDrawColorBlue);
-//-    	}
     	return C_CONTINUE;
 
 
     case C_DOWN:
         if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
             if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
-//-                DrawDescHilite(TRUE);
                 descUpdateFunc(descTrk, -1, descData, TRUE);
                 descTrk = NULL;
             }
@@ -612,7 +599,6 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
             descSize.x -= descOrig.x-descBorder;
             descSize.y -= descOrig.y-descBorder;
             descNeedDrawHilite = TRUE;
-//-            DrawDescHilite(TRUE);
             DescribeTrack(trk, msg, 255);
             inDescribeCmd = FALSE;
             InfoMessage(msg);

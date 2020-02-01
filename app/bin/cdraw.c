@@ -567,8 +567,6 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		if (segPtr->type != SEG_TEXT) return;
 		else inx = TX;  //Always look at TextField for SEG_TEXT on "Done"
 	}
-    XMainRedraw();
-    XMapRedraw();
 	UndrawNewTrack( trk );
 	coOrd pt;
 	coOrd off;
@@ -997,7 +995,6 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	drawData.oldOrigin = drawData.origin;
 	ComputeDrawBoundingBox( trk );
 	DrawNewTrack( trk );
-	XMainRedraw();
 	TempRedraw(); // UpdateDraw
 }
 
@@ -1491,7 +1488,6 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		rc = DrawGeomModify( action, pos, &drawModCmdContext );
 		ignoredDraw = NULL;
 		ComputeDrawBoundingBox( trk );
-		//DrawNewTrack( trk );
 		if (drawModCmdContext.state == MOD_AFTER_PT) {
 			switch(drawModCmdContext.type) {
 			case SEG_POLY:
@@ -1605,7 +1601,6 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 					InfoSubstituteControls( NULL, NULL );
 					infoSubst = FALSE;
 		}
-		XMainRedraw();
 		ignoredDraw = NULL;
 		if (rc == C_CONTINUE) break;
 		/* no break*/
@@ -1621,7 +1616,6 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
-		XMainRedraw();
 		break;
 	case C_CANCEL:
 	case C_CONFIRM:
@@ -1633,7 +1627,6 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
-		XMainRedraw();
 		break;
 
 	default:
@@ -1658,8 +1651,6 @@ static void UngroupDraw( track_p trk )
 			DrawNewTrack( trk );
 		}
 	}
-	XMapRedraw();
-	XMainRedraw();
 }
 
 
@@ -2532,7 +2523,6 @@ void MenuMode(int mode) {
 		DrawGeomModify(C_START,zero,&drawModCmdContext);
 		InfoMessage("Points Mode");
 	}
-	XMainRedraw();
 }
 
 void MenuEnter(int key) {

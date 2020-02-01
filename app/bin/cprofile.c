@@ -191,18 +191,15 @@ static void DrawProfile( drawCmd_p D, wFontSize_t fontSize, BOOL_T printVert )
 		pt.x = profElem(inx).dist;
 		DYNARR_APPEND( pts_t, points_da, 10 );
 		points(points_da.cnt-1) = pt;
-//-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 	}
 	pb.y = pt.y = prof.minE;
 	if ( points_da.cnt > 1 ) {
 		DYNARR_APPEND( coOrd, points_da, 10 );
 		pt.x = prof.totalD;
 		points(points_da.cnt-1) = pt;
-//-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 		DYNARR_APPEND( pts_t, points_da, 10 );
 		pb.x = 0;
 		points(points_da.cnt-1) = pb;
-//-		points(points_da.cnt-1).pt_type = wPolyLineStraight;
 		DrawPoly( D, points_da.cnt, points_da.ptr, NULL, 0, profileColorFill, 1, 0 );
 		DrawLine( D, pb, pt, lw, borderColor );
 	}
@@ -760,13 +757,6 @@ static void HilightProfileElevations( BOOL_T show )
 
 static void DoProfileDone( void * junk )
 {
-#ifdef LATER
-	HilightProfileElevations( FALSE );
-	wHide( profileW );
-	ClrAllTrkBits( TB_PROFILEPATH );
-	XMainRedraw();
-	XMapRedraw();
-#endif
 	Reset();
 }
 
@@ -775,10 +765,7 @@ static void DoProfileClear( void * junk )
 {
 	profElem_da.cnt = 0;
 	station_da.cnt = 0;
-	if (ClrAllTrkBitsRedraw( TB_PROFILEPATH, TRUE )) {
-		XMainRedraw();
-		XMapRedraw();
-	}
+	ClrAllTrkBitsRedraw( TB_PROFILEPATH, TRUE );
 	pathStartTrk = pathEndTrk = NULL;
 	RedrawProfileW();
 }
@@ -1170,8 +1157,6 @@ if (log_profile>=1) {
 	if (!PathListCheck())
 		return;
 
-//-	HilightProfileElevations( FALSE );
-
 	if ( PathListEmpty() ) {
 		pathStartTrk = trkN;
 		pathStartEp = epN;
@@ -1197,7 +1182,6 @@ LOG( log_profile, 2, ("Removing last element\n") )
 
 	} else if ( (GetTrkBits(trkN)&TB_PROFILEPATH) || (trkP && (GetTrkBits(trkP)&TB_PROFILEPATH)) ) {
 		ErrorMessage( MSG_EP_ON_PATH );
-//-		HilightProfileElevations( TRUE );
 		return;
 
 	} else if ( ( rc = FindProfileShortestPath( trkN, epN ) ) > 0 ) {
@@ -1235,11 +1219,9 @@ LOG( log_profile, 2, ( "Flip/Appending Path\n" ) )
 
 	} else {
 		ErrorMessage( MSG_NO_PATH_TO_EP );
-//-		HilightProfileElevations( TRUE );
 		return;
 	}
 
-//-	HilightProfileElevations( TRUE );
 	ComputeProfElem();
 	RedrawProfileW();
 	DoProfileChangeMode( NULL );
@@ -1273,12 +1255,7 @@ static void ProfileSubCommand( wBool_t set, void* pcmd )
 		radius = trackGauge/2.0;
 	pos = GetTrkEndPos( profilePopupTrk, profilePopupEp );
 	mode = GetTrkEndElevMode( profilePopupTrk, profilePopupEp );
-//-	if ( (mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE )
-//-		DrawFillCircle( &tempD, pos, radius,
-//-			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
-//-	if ( (mode&ELEV_MASK)==ELEV_DEF )
 
-//-	DrawEndPt2( &mainD, profilePopupTrk, profilePopupEp, drawColorWhite );
 	elev = 0.0;
 	switch (cmd) {
 	case 0:
@@ -1297,9 +1274,6 @@ static void ProfileSubCommand( wBool_t set, void* pcmd )
 		break;
 	}
 	UpdateTrkEndElev( profilePopupTrk, profilePopupEp, mode, elev, NULL );
-//-	if ( (mode&ELEV_MASK)==ELEV_DEF || (mode&ELEV_MASK)==ELEV_IGNORE )
-//-		DrawFillCircle( &tempD, pos, radius,
-//-			((mode&ELEV_MASK)==ELEV_DEF?elevColorDefined:elevColorIgnore));
 	ComputeProfElem();
 	RedrawProfileW();
 	TempRedraw(); // ProfileSubCommand
@@ -1327,14 +1301,10 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 		ParamGroupRecord( &profilePG );
 		wShow( profileW );
 		ParamLoadMessage( &profilePG, I_PROFILEMSG, _("Drag to change Elevation") );
-//-		HilightProfileElevations( TRUE );
 		profElem_da.cnt = 0;
 		station_da.cnt = 0;
 		RedrawProfileW();
-		if ( ClrAllTrkBitsRedraw( TB_PROFILEPATH, TRUE ) ) {
-			XMainRedraw();
-			XMapRedraw();
-		}
+		ClrAllTrkBitsRedraw( TB_PROFILEPATH, TRUE );
 		pathStartTrk = NULL;
 		SetAllTrackSelect( FALSE );
 		profileUndo = FALSE;
@@ -1389,16 +1359,11 @@ static STATUS_T CmdProfile( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 	case C_CANCEL:
 		wHide(profileW);
-//-		HilightProfileElevations( FALSE );
-		if (ClrAllTrkBitsRedraw(TB_PROFILEPATH, TRUE)) {
-			XMainRedraw();
-			XMapRedraw();
-		}
+		ClrAllTrkBitsRedraw(TB_PROFILEPATH, TRUE);
 		return C_TERMINATE;
 	case C_REDRAW:
 		if ( wWinIsVisible(profileW) ) {
 			HilightProfileElevations( wWinIsVisible(profileW) );
-			/*RedrawProfileW();*/
 		}
 		return C_CONTINUE;
 	}

@@ -281,7 +281,6 @@ static void SelectPage( coOrd pos )
 	selected = BITMAP( bm, x, y );
 	pageCount += (selected?-1:1);
 	BITMAP( bm, x, y ) = !selected;
-//-	MarkPage( x, y );
 	UpdatePageCount();
 }
 
@@ -500,7 +499,6 @@ static void PrintUpdate( int inx0 )
 {
 	int inx;
 
-//-	DrawPrintGrid();
 	ParamLoadData( &printPG );
 
 	if (newPrintGrid.size.x > maxPageSize.x+0.01 ||
@@ -522,7 +520,6 @@ static void PrintUpdate( int inx0 )
 			ParamLoadControl( &printPG, inx );
 	}
 	ChangeDim();
-//-	DrawPrintGrid();
 }
 
 
@@ -559,13 +556,11 @@ static void SetPageSize( BOOL_T doScale )
 
 static void SelectAllPages(void)
 {
-//-	DrawPrintGrid();
 	for (int y = bm.y0; y < bm.y1; y++) {
 		for (int x = bm.x0; x < bm.x1; x++) {
 			BITMAP(bm, x, y) = TRUE;
 		}
 	}
-//-	DrawPrintGrid();
 	pageCount = (bm.x1 - bm.x0) * (bm.y1 - bm.y0);
 	UpdatePageCount();
 	TempRedraw(); // SelectAllPages
@@ -578,13 +573,11 @@ static void PrintMaxPageSize( void )
  * (depending on paper size, scale and orientation)
  */
 {
-//-	DrawPrintGrid();
 	SetPageSize( TRUE );
 	currPrintGrid.size = maxPageSize;
 	newPrintGrid = currPrintGrid;
 	ParamLoadControls( &printPG );
 	ChangeDim();
-//-	DrawPrintGrid();
 	TempRedraw(); // PrintMaxSize
 	wShow( printWin);
 }
@@ -619,7 +612,6 @@ static void PrintClear( void )
 		for (x=bm.x0; x<bm.x1; x++)
 			if (BITMAP(bm,x,y)) {
 				BITMAP(bm,x,y) = 0;
-//-				MarkPage( x, y );
 			}
 	pageCount = 0;
 	UpdatePageCount();
@@ -641,7 +633,6 @@ static void PrintSnapShot( void )
 	POS_T t;
 
 	PrintClear();
-//-	DrawPrintGrid();
 	SetPageSize( FALSE );
 	pageSize = realPageSize;
 	if (pageSize.x > pageSize.y) {
@@ -702,7 +693,6 @@ static void PrintSnapShot( void )
 	ChangeDim();
 	pageCount = 1;
 	BITMAP(bm,0,0) = TRUE;
-//-	DrawPrintGrid();
 	UpdatePageCount();
 	PrintEnableControls();
 	wShow( printWin );
@@ -1084,8 +1074,6 @@ static BOOL_T PrintPage(
 				}
 				if ( !wPrintPageEnd( print_d.d ) )
 					return FALSE;
-				/*BITMAP(bm,x,y) = 0;*/
-//-				MarkPage( x, y );
 	}
 	return TRUE;
 }
@@ -1132,8 +1120,6 @@ static void DoPrintPrint( void * junk )
 				if (BITMAP(bm,x,y)) {
 					if (copy >= copies)
 						BITMAP(bm,x,y) = 0;
-//-					else
-//-						MarkPage( x, y );
 				}
 	}
 
@@ -1146,13 +1132,11 @@ quitPrinting:
 
 static void DoResetGrid( void )
 {
-//-	DrawPrintGrid();
 	currPrintGrid.orig = zero;
 	currPrintGrid.angle = 0.0;
 	ChangeDim();
 	newPrintGrid = currPrintGrid;
 	ParamLoadControls( &printPG );
-//-	DrawPrintGrid();
 	TempRedraw(); // DoResetGrid
 }
 
@@ -1160,13 +1144,11 @@ static void DoResetGrid( void )
 static void PrintGridRotate( void * pangle )
 {
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
-//-	DrawPrintGrid();
 	currPrintGrid.orig = cmdMenuPos;
 	currPrintGrid.angle += angle;
 	newPrintGrid = currPrintGrid;
 	ParamLoadControls( &printPG );
 	ChangeDim();
-//-	DrawPrintGrid();
 	TempRedraw(); // PrintGridRotate
 }
 
@@ -1243,7 +1225,6 @@ static STATUS_T CmdPrint(
 			currPrintGrid.size.y = maxPageSize.y;
 		newPrintGrid = currPrintGrid;
 		ParamLoadControls( &printPG );
-//-		DrawPrintGrid();
 		pageCount = 0;
 		UpdatePageCount();
 LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrintGrid.size.y ) )
@@ -1275,10 +1256,8 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 		if (downShift) {
 			rc = GridAction( action, pos, &newPrintGrid.orig, &newPrintGrid.angle );
 			ParamLoadControls( &printPG );
-//-			DrawPrintGrid();
 			currPrintGrid = newPrintGrid;
 			ChangeDim();
-//-			DrawPrintGrid();
 			downShift = FALSE;
 		}
 		return C_CONTINUE;
@@ -1307,10 +1286,8 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 		if (downShift) {
 			rc = GridAction( action, pos, &newPrintGrid.orig, &newPrintGrid.angle );
 			ParamLoadControls( &printPG );
-//-			DrawPrintGrid();
 			currPrintGrid = newPrintGrid;
 			ChangeDim();
-//-			DrawPrintGrid();
 			downShift = FALSE;
 			ParamControlActive( &printPG, I_RULER, currPrintGrid.angle == 0 );
 		}
@@ -1325,7 +1302,6 @@ LOG( log_print, 2, ( "Page size = %0.3f %0.3f\n", currPrintGrid.size.x, currPrin
 		if (printWin == NULL)
 			return C_TERMINATE;
 		PrintClear();
-//-		DrawPrintGrid();
 		wHide( printWin );
 		return C_TERMINATE;
 

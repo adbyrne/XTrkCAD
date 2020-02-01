@@ -384,7 +384,6 @@ static void Flash( drawCmd_p d, wPos_t x, wPos_t y, wDrawColor flashColor )
 
 	MacroDrawBitMap( FLASH_PLUS, d, flash_bm, x, y, flashColor );
 	wPause( flashTO*2 );
-//-	MacroDrawBitMap( FLASH_MINUS, d, flash_bm, x, y, flashColor );
 }
 
 
@@ -453,12 +452,6 @@ static void MoveCursor(
 	if (playbackTimer == 0 && playbackD == d /*&& !didPause*/) {
 		dx = (DIST_T)(x-x0);
 		dy = (DIST_T)(y-y0);
-
-//-		if ((dx==0) && (dy==0)) {
-//-			ClearPlaybackCursor(FALSE);
-//-			DrawPlaybackCursor( d, bm, x0, y0, color );
-//-			return;
-//-		}
 		dist = sqrt( dx*dx + dy*dy );
 		steps = (int)(dist / PixelsPerStep ) + 1;
 		dx /= steps;
@@ -476,7 +469,6 @@ static void MoveCursor(
 
 			pos1.x += dpos.x;
 			pos1.y += dpos.y;
-//-			wDrawClearTemp( tempD.d );
 			if ( proc != NULL ) {
 				proc( action, pos1 );
 			} else {
@@ -525,7 +517,6 @@ static void PlaybackCursor(
 	case wActionMove:
 		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm); //0 is normal, shift, ctrl
 		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );
-		//( REDRAW, playbackD, playbackBm, playbackX, playbackY, playbackColor );
 		break;
 
 	case C_DOWN:
@@ -535,7 +526,6 @@ static void PlaybackCursor(
 		if (flashTwice) Flash( d, x, y, rightDragColor );
 		Flash( d, x, y, playbackColor=rightDragColor );
 		proc( action, pos );
-//-		MoveCursor( d, NULL, 0, pos, bm, rightDragColor );
 		/* no break */
 
 	case C_MOVE:
@@ -560,7 +550,6 @@ static void PlaybackCursor(
 		if (flashTwice) Flash( d, x, y, leftDragColor );
 		Flash( d, x, y, playbackColor=leftDragColor );
 		proc( action, pos );
-//-		MoveCursor( d, NULL, 0, pos, bm, rightDragColor );
 		/* no break */
 
 	case C_RMOVE:
@@ -586,7 +575,6 @@ static void PlaybackCursor(
 	case C_TEXT:
 		proc( action, pos);
 		char c = action>>8;
-//-		InfoMessage("Key '%c' value - %d - pressed", c, c);
 		bm = playbackBm;
 		break;
 
@@ -596,7 +584,6 @@ static void PlaybackCursor(
 	}
 
 	playbackBm = bm;
-	XMainRedraw();
 	time1 = wGetTimer();
 	adjTimer += (time1-time0);
 }
@@ -864,7 +851,6 @@ static void PlaybackSetup( void )
 	wTextClear( demoT );
 	wShow( demoW );
 	wFlush();
-//-	RulerRedraw( TRUE );
 	wPrefFlush();
 	wWinSetBusy( mainW, TRUE );
 	wWinSetBusy( mapW, TRUE );
@@ -943,7 +929,6 @@ static void Playback( void )
 			UndoSuspend();
 			wWinBlockEnable( FALSE );
 			checkPtMark = 0;
-//-			RulerRedraw( TRUE );
 			DoChangeNotification( CHANGE_ALL );
 			CompoundClearDemoDefns();
 			if ( fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
@@ -1376,7 +1361,6 @@ static char * demoInitParams[] = {
 		"GROUP grid",
 		"misc toolbarset 65535",
 		"GROUP misc",
-//-		"sticky set 268435383", /* 0xfffffb7 - all but Helix and Turntable */
 		"sticky set 67108479", /* 0x3fffe7f - all but Helix and Turntable */
 		"GROUP sticky",
 		"turnout hide 0",

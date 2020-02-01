@@ -109,7 +109,6 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         if (!QueryTrack(Dpa.anchor_Trk, Q_CAN_PARALLEL)) {
             return C_CONTINUE;
         }
-//-`		DrawTrack(Dpa.anchor_Trk,&mainD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
         break;
     case C_DOWN:
         Dpa.anchor_Trk = NULL;
@@ -158,18 +157,15 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         tempSegs_da.cnt = 0;
 
     case C_MOVE:
-		XMainRedraw();
         if (Dpa.Trk == NULL) {
             return C_CONTINUE;
         }
-//-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
         tempSegs_da.cnt = 0;
         if (!MakeParallelTrack(Dpa.Trk, pos, parSeparation, parRFactor, NULL, &p0, &p1,
                                parType == PAR_TRACK)) {
             Dpa.Trk = NULL;
             return C_CONTINUE;
         }
-//-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
         return C_CONTINUE;
 
     case C_UP:
@@ -177,7 +173,6 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         if (Dpa.Trk == NULL) {
             return C_CONTINUE;
         }
-//-		DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
         p = p0;
         tempSegs_da.cnt = 0;
         if ((t0=OnTrack(&p, FALSE, TRUE)) != NULL) {
@@ -209,8 +204,6 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         if (!MakeParallelTrack(Dpa.Trk, pos, parSeparation, parRFactor, &t, NULL, NULL,
                                parType == PAR_TRACK)) {
             tempSegs_da.cnt = 0;
-			XMainRedraw();
-			XMapRedraw();
             return C_TERMINATE;
         }
         if (GetTrkGauge(Dpa.Trk)> parSeparation) {
@@ -243,8 +236,6 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         sprintf(message, "parallel-separation-%s", curScaleName);
         wPrefSetFloat("misc", message, parSeparation);
         tempSegs_da.cnt = 0;
-		XMainRedraw();
-		XMapRedraw();
         return C_TERMINATE;
 
     case C_REDRAW:

@@ -268,7 +268,6 @@ EXPORT void EnumerateTracks( void )
 			trackCmds(inx)->enumerate( NULL );
 
 	EnumerateEnd();
-//-	Reset();
 }
 
 /*****************************************************************************
@@ -1114,19 +1113,14 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 			}
 		}
 	}
-	//UndrawNewTrack( trk );
 	for (i=0;i<trk->endCnt;i++) {
 		if ((trk2=trk->endPt[i].track) != NULL) {
 			ep2 = GetEndPtConnectedToMe( trk2, trk );
-			/*UndrawNewTrack( trk2 );*/
-			//DrawEndPt( &mainD, trk2, ep2, wDrawColorWhite );
 			DisconnectTracks( trk2, ep2, trk, i );
-			/*DrawNewTrack( trk2 );*/
 			if (!QueryTrack(trk2,Q_DONT_DRAW_ENDPOINT))
 				//DrawEndPt( &mainD, trk2, ep2, wDrawColorBlack );
 			if ( QueryTrack(trk,Q_CANNOT_BE_ON_END) )
 				UndoJoint( trk2, ep2, trk, i );
-			//ClrTrkElev( trk2 );
 		}
 	}
     CheckDeleteSwitchmotor( trk );
@@ -1135,8 +1129,6 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
 	UndoDelete(trk);					/**< Attention: trk is invalidated during that call */
-	XMainRedraw();
-	XMapRedraw();
 	InfoCount( trackCount );
 	return TRUE;
 }
@@ -1684,14 +1676,10 @@ EXPORT STATUS_T EndPtDescriptionMove(
 		p1 = pos;
 		e->option |= ELEV_VISIBLE; //Make sure we make visible
 		DrawEndElev( &mainD, trk, ep, wDrawColorWhite );
-		/*REORIGIN( p0, e->doff, GetTrkEndPos(trk,ep), GetTrkEndAngle(trk,ep) );*/
 		/*no break*/
 	case C_MOVE:
 	case C_UP:
 		editState = TRUE;
-//-		if (action != C_DOWN)
-//-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
-//-		DrawEndElev( &tempD, trk, ep, color );
 		p1 = pos;
 		e->doff.x = (pos.x-p0.x);
 		e->doff.y = (pos.y-p0.y);
@@ -1699,16 +1687,11 @@ EXPORT STATUS_T EndPtDescriptionMove(
 			e1 = &trk1->endPt[GetEndPtConnectedToMe(trk1,trk)].elev;
 			e1->doff = e->doff;
 		}
-//-		DrawEndElev( &tempD, trk, ep, color );
-//-		if (action != C_UP)
-//-			DrawLine( &tempD, p0, p1, 0, wDrawColorBlack );
 		if ( action == C_UP ) {
 			editState = FALSE;
 			wDrawColor color = GetTrkColor( trk, &mainD );
 			DrawEndElev( &mainD, trk, ep, color );
 		}
-        XMainRedraw();
-        XMapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
@@ -3207,8 +3190,6 @@ EXPORT void DrawSelectedTracks( drawCmd_p d )
 
 EXPORT void HilightElevations( BOOL_T hilight )
 {
-//-	static long lastRedraw = -1;
-//-	static BOOL_T lastHilight = FALSE;
 	track_p trk, trk1;
 	EPINX_T ep;
 	int mode;
@@ -3216,12 +3197,6 @@ EXPORT void HilightElevations( BOOL_T hilight )
 	coOrd pos;
 	DIST_T radius;
 
-//-	if (currRedraw > lastRedraw) {
-//-		lastRedraw = currRedraw;
-//-		lastHilight = FALSE;
-//-	}
-//-	if (lastHilight == hilight)
-//-		return;
 	radius = 0.05*mainD.scale;
 	if ( radius < trackGauge/2.0 )
 		radius = trackGauge/2.0;
@@ -3245,7 +3220,6 @@ EXPORT void HilightElevations( BOOL_T hilight )
 			}
 		}
 	}
-//-	lastHilight = hilight;
 }
 
 
