@@ -972,7 +972,7 @@ void static CreateBoxAnchors(int index, pts_t pt[4]) {
 		pp.y = (i==3?((((pt[0].pt.y - pt[i].pt.y)/2))+pt[i].pt.y):((pt[i+1].pt.y - pt[i].pt.y)/2)+pt[i].pt.y);
 
 		DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
-		DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pp,90.0*(i-1)+a,TRUE,i==index?wDrawColorRed:wDrawColorBlue);
+		DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pp,90.0*(i-1)+a,TRUE,i==index+5?wDrawColorRed:wDrawColorBlue);
 	}
 }
 
@@ -1882,6 +1882,7 @@ STATUS_T DrawGeomModify(
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:
+			DYNARR_RESET(trkSeg_t,anchors_da);
 			CreateLineAnchors(lineInx,context->p0,context->p1);
 			dd = FindDistance( context->p0, pos );
 			if ( IsClose(dd)) {
@@ -1895,6 +1896,7 @@ STATUS_T DrawGeomModify(
 		break;
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
+			DYNARR_RESET(trkSeg_t,anchors_da);
 			if (tempSegs(0).u.c.a1 < 360.0)
 					CreateCurveAnchors(curveInx,context->pm,context->pc,context->p0,context->p1);
 			dd = FindDistance( context->p0, pos );
@@ -1912,6 +1914,10 @@ STATUS_T DrawGeomModify(
 				}
 			}
 		break;
+		case SEG_POLY:
+		case SEG_FILPOLY:;
+			CreateBoxAnchors(-1,&points(0));
+			break;
 		default:;
 		}
 		XMainRedraw();
@@ -2327,6 +2333,7 @@ STATUS_T DrawGeomModify(
 			context->width = FindDistance(tempSegs(0).u.p.pts[0].pt,tempSegs(0).u.p.pts[1].pt);
 			context->height = FindDistance(tempSegs(0).u.p.pts[1].pt,tempSegs(0).u.p.pts[2].pt);
 			context->last_inx = polyInx;
+			if (corner_mode) context->last_inx +=5;
 			break;
 		default:
 			;
