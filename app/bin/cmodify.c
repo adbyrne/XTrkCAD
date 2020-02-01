@@ -365,9 +365,6 @@ STATUS_T CmdModify(
 			Dex.Trk = NULL;
 			rc = C_CONTINUE;
 		}
-//-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-        XMainRedraw();
-        XMapRedraw();
 		return rc;
 
 	case wActionMove:
@@ -422,13 +419,8 @@ STATUS_T CmdModify(
 				}
 			}
 		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL) && (!(GetLayerFrozen(GetTrkLayer(t)) && GetLayerModule(GetTrkLayer(t)))) && QueryTrack(t, Q_IS_DRAW )) {
-//-			DrawTrack( t, &mainD, wDrawColorBlue );
 			CreateEndAnchor(pos,FALSE);
 		}
-//-		if (anchors_da.cnt)
-//-				DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-//-		if (tempSegs_da.cnt)
-//-				DrawSegs( &mainD, zero, 0.0, &anchors(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -444,7 +436,6 @@ STATUS_T CmdModify(
 			return ModifyDraw(C_MOVE, pos);
 		if ((MyGetKeyState()&WKEY_CTRL))
 			goto extendTrackMove;
-//-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 
 		SnapPos( &pos );
@@ -453,8 +444,6 @@ STATUS_T CmdModify(
 			rc = C_CONTINUE;
 			Dex.Trk = NULL;
 		}
-        XMainRedraw();
-        XMapRedraw();
 		return rc;
 
 	case C_UP:
@@ -471,7 +460,6 @@ STATUS_T CmdModify(
 			return ModifyDraw(C_UP, pos);
 		if ((MyGetKeyState()&WKEY_CTRL)) goto extendTrackUp;
 
-//-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 
 		SnapPos( &pos );
@@ -480,8 +468,6 @@ STATUS_T CmdModify(
 		rc = ModifyTrack( Dex.Trk, C_UP, pos );
 		UndoEnd();
         Dex.Trk = NULL;
-        XMainRedraw();
-        XMapRedraw();
 		return rc;
 
 	case C_RDOWN:									//This is same as context menu....
@@ -521,13 +507,10 @@ LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
 			}
 		}
 		Dex.first = TRUE;
-        XMainRedraw();
-        XMapRedraw();
         /* no break */
 	case C_RMOVE:
 extendTrackMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-//-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		Dex.valid = FALSE;
 		if (Dex.Trk == NULL) return C_CONTINUE;
@@ -659,8 +642,6 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 					FormatDistance( Dex.curveData.curveRadius * da),
 					Dex.curveData.a1 );
 		}
-        XMainRedraw();
-        XMapRedraw();
 		return C_CONTINUE;
 
 	case C_RUP:
@@ -682,8 +663,6 @@ extendTrackUp:
 					AdjustStraightEndPt( Dex.Trk, Dex.params.ep, Dex.curveData.pos1 );
 					UndoEnd();
 					DrawNewTrack(Dex.Trk );
-					XMainRedraw();
-					XMapRedraw();
 					return C_TERMINATE;
 			}
 			if (FindDistance(Dex.pos01, Dex.curveData.pos1) == 0) return C_ERROR;
@@ -716,8 +695,6 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 		}
 		UndoEnd();
 		tempSegs_da.cnt = 0;
-        XMainRedraw();
-        XMapRedraw();
 		DrawNewTrack( trk );
 		return C_TERMINATE;
 
@@ -725,8 +702,6 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 		if (modifyBezierMode) return ModifyBezier(C_REDRAW, pos);
 		if (modifyCornuMode) return ModifyCornu(C_REDRAW, pos);
 		if (modifyDrawMode) return ModifyDraw(C_REDRAW, pos);
-//-		if ( (!changeTrackMode) && Dex.Trk && !QueryTrack( Dex.Trk,	 Q_MODIFY_REDRAW_DONT_UNDRAW_TRACK ) )
-//-		   UndrawNewTrack( Dex.Trk );
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		if (anchors_da.cnt)
 			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );

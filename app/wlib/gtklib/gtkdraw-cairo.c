@@ -44,6 +44,10 @@ int iDrawLog = 0;
 
 static long drawVerbose = 0;
 
+// Hack to do TempRedraw or MainRedraw
+// For Windows only
+wBool_t wDrawDoTempDraw = TRUE;
+
 struct wDrawBitMap_t {
 		int w;
 		int h;
@@ -496,17 +500,8 @@ cairo_t* CreateCursorSurface(wControl_p ct, wSurface_p surface, wPos_t width, wP
 
 	cairo_move_to(cairo, 0, 0);
 
-	if ( color == wDrawColorWhite ) {
-		// Draw an empty rectangle
-		cairo_rel_line_to( cairo, w, 0 );
-		cairo_rel_line_to( cairo, 0, h );
-		cairo_rel_line_to( cairo, -w, 0 );
-		cairo_rel_line_to( cairo, 0, -h );
-		cairo_fill( cairo );
-	} else {
-		pango_cairo_update_layout(cairo, layout);
-		pango_cairo_show_layout(cairo, layout);
-	}
+	pango_cairo_update_layout(cairo, layout);
+	pango_cairo_show_layout(cairo, layout);
 	wlibFontDestroyPangoLayout(layout);
 	cairo_restore( cairo );
 	gtkDrawDestroyCairoContext(cairo);

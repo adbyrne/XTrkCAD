@@ -56,6 +56,15 @@ static void DrawRoomWalls( wBool_t );
 EXPORT void DrawMarkers( void );
 static void ConstraintOrig( coOrd *, coOrd, int );
 static void DoMouse( wAction_t action, coOrd pos );
+static void DDrawPoly(
+		drawCmd_p d,
+		int cnt,
+		coOrd * pts,
+		int * types,
+		wDrawColor color,
+		wDrawWidth width,
+		int fill,
+		int open );
 
 static int log_pan = 0;
 static int log_zoom = 0;
@@ -420,9 +429,29 @@ static void DDrawString(
 	wPos_t x, y;
 	if (d == &mapD && !mapVisible)
 		return;
-	fontSize /= d->scale;
 	d->CoOrd2Pix(d,p,&x,&y);
-	wDrawString( d->d, x, y, d->angle-a, s, fp, fontSize, color, (wDrawOpts)d->funcs->options );
+	if ( color == wDrawColorWhite ) {
+		wPos_t width, height, descent, ascent;
+		coOrd pos[4], size;
+		double scale = 1.0;
+		wDrawGetTextSize( &width, &height, &descent, &ascent, d->d, s, fp, fontSize );
+		pos[0] = p;
+		size.x = SCALEX(mainD,width)*scale;
+		size.y = SCALEY(mainD,height)*scale;
+		pos[1].x = p.x+size.x;
+		pos[1].y = p.y;
+		pos[2].x = p.x+size.x;
+		pos[2].y = p.y+size.y;
+		pos[3].x = p.x;
+		pos[3].y = p.y+size.y;
+		Rotate( &pos[1], pos[0], a );
+		Rotate( &pos[2], pos[0], a );
+		Rotate( &pos[3], pos[0], a );
+		DDrawPoly( d, 4, pos, NULL, color, 0, 1, 0 );
+	} else {
+		fontSize /= d->scale;
+		wDrawString( d->d, x, y, d->angle-a, s, fp, fontSize, color, (wDrawOpts)d->funcs->options );
+	}
 }
 
 
@@ -1152,7 +1181,6 @@ EXPORT void InfoPos( coOrd pos )
 	sprintf( message, "%s%s", yLabel, FormatDistance(pos.y) );
 	wStatusSetValue( infoD.posY_m, message );
 	
-	XMainRedraw();
 	oldMarker = pos;
 	wBool_t bTemp = wDrawSetTempMode( tempD.d, TRUE );
 	DrawMarkers();
@@ -1331,16 +1359,19 @@ EXPORT void SetMainSize( void )
 	tempD.size = mainD.size;
 }
 
+// Hack to switch between TempRedraw and MainRedraw
+extern wBool_t wDrawDoTempDraw;
+
 /* Update temp_surface after executing a command
  */
 EXPORT void TempRedraw( void ) {
 
 	static int cTR = 0;
 	LOG( log_redraw, 2, ( "TempRedraw: %d\n", cTR++ ) );
-#ifdef WINDOWS
-	// Remove this ifdef after windows supports GTK
+if (wDrawDoTempDraw == FALSE) {
+	// Remove this after windows supports GTK
 	MainRedraw(); // TempRedraw - windows
-#else
+} else {
 	wDrawDelayUpdate( tempD.d, TRUE );
 	wDrawSetTempMode( tempD.d, TRUE );
 	wDrawClearTemp( tempD.d );
@@ -1349,7 +1380,7 @@ EXPORT void TempRedraw( void ) {
 	RulerRedraw( FALSE );
 	wDrawSetTempMode( tempD.d, FALSE );
 	wDrawDelayUpdate( tempD.d, FALSE );
-#endif
+}
 }
 
 EXPORT void MainRedraw( void )
@@ -1443,14 +1474,6 @@ EXPORT void MainRedraw( void )
 	RedrawPlaybackCursor();              //If in playback
 	wDrawSetTempMode( tempD.d, FALSE );
 	wDrawDelayUpdate( mainD.d, FALSE );
-}
-
-EXPORT void XMainRedraw()
-{
-}
-
-EXPORT void XMapRedraw()
-{
 }
 
 /**
@@ -1884,17 +1907,17 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
 	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
 LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
-#ifndef WINDOWS
+	if ( wDrawDoTempDraw ) {
 // Temporary until mswlib supports TempDraw
-	wAction_t action = wActionMove;
-	coOrd pos;
-	if ( mouseState == mouseLeft )
-		action = wActionLDrag;
-	if ( mouseState == mouseRight )
+		wAction_t action = wActionMove;
+		coOrd pos;
+		if ( mouseState == mouseLeft )
+			action = wActionLDrag;
+		if ( mouseState == mouseRight )
 		action = wActionRDrag;
-	mainD.Pix2CoOrd( &mainD, mousePositionx, mousePositiony, &pos );
-	DoMouse( action, pos );
-#endif
+		mainD.Pix2CoOrd( &mainD, mousePositionx, mousePositiony, &pos );
+		DoMouse( action, pos );
+	}
 }
 
 /**
@@ -2526,8 +2549,6 @@ static void DoMouse( wAction_t action, coOrd pos )
 			default:
 				return;
 			}
-//-			mainD.Pix2CoOrd( &mainD, x, y, &pos );
-//-			InfoPos( pos );
 			return;
 		case C_TEXT:
 			if ((action>>8) == 0x0D) {
@@ -2631,12 +2652,9 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 					}
 					ConstraintOrig( &orig, mainD.size, TRUE );
 					if ( orig.x != mainD.orig.x || orig.y != mainD.orig.y ) {
-						//DrawMapBoundingBox( FALSE );
 						mainD.orig = orig;
 						MainRedraw(); // DoMouseW: autopan
 						MapRedraw();
-						/*DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );*/
-						//DrawMapBoundingBox( TRUE );
 						wFlush();
 					}
 				}

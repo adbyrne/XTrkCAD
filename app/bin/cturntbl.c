@@ -850,19 +850,15 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		InfoSubstituteControls( controls, labels );
 		ParamLoadData( &turntablePG );
 		pos0 = pos;
-//-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		state = 1;
 		return C_CONTINUE;
 
 	case C_MOVE:
-//-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		SnapPos( &pos );
 		pos0 = pos;
-//-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
-//-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		SnapPos( &pos );
 		UndoStart( _("Create Turntable"), "NewTurntable" );
 		t = NewTurntable( pos, turntableDiameter/2.0 );

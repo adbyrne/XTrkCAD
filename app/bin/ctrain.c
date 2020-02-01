@@ -1068,13 +1068,10 @@ static void MoveMainWindow(
 
     dist *= factor;
     Translate(&pos, pos, angle, dist);
-    //DrawMapBoundingBox(FALSE);
     mainCenter = pos;
     mainD.orig.x = pos.x-mainD.size.x/2;;
     mainD.orig.y = pos.y-mainD.size.y/2;;
     MainRedraw(); // MoveTrainWindow
-    XMapRedraw();
-    //DrawMapBoundingBox(TRUE);
 }
 
 
@@ -1197,7 +1194,6 @@ static void ControllerDialogUpdate(
         wButtonSetLabel((wButton_p)pg->paramPtr[I_DIR].control,
                         (dlg->direction?_("Reverse"):_("Forward")));
         SetTrainDirection(dlg->train);
-//-        DrawAllCars();
         break;
 
     case I_STOP:
@@ -2076,7 +2072,6 @@ static BOOL_T MoveTrains(long timeD)
     }
 
     ControllerDialogSyncAll();
-//-    DrawAllCars();
     TempRedraw(); // MoveTrains
     return trains_moved;
 }
@@ -2476,7 +2471,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         wButtonSetLabel(trainPauseB, (char*)goI);
         trainTime0 = 0;
         AttachTrains();
-//-        DrawAllCars();
         curTrainDlg->train = NULL;
         curTrainDlg->speed = -1;
         wDrawClear((wDraw_p)curTrainDlg->trainPGp->paramPtr[I_SLIDER].control);
@@ -2580,7 +2574,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             SetCurTrain(trk0);
         }
 
-//-        DrawAllCars();
         return C_CONTINUE;
 
     case C_MOVE:
@@ -2591,7 +2584,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         pos.x += delta.x;
         pos.y += delta.y;
         pos0 = pos;
-        /*DrawCars( &tempD, currCar, FALSE );*/
         xx = GetTrkExtraData(currCar);
         trk0 = OnTrack(&pos0, FALSE, TRUE);
 
@@ -2615,7 +2607,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         PlaceTrainInit(currCar, trk0, pos0, xx->trvTrk.angle,
                        (MyGetKeyState()&WKEY_SHIFT) == 0);
         ControllerDialogSync(curTrainDlg);
-//-        DrawAllCars();
         return C_CONTINUE;
 
     case C_UP:
@@ -2631,11 +2622,9 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             }
 
             Dtrain.state = 1;
-            /*MainRedraw();*/
             ControllerDialogSync(curTrainDlg);
         }
 
-//-        DrawAllCars();
         InfoSubstituteControls(NULL, NULL);
         currCar = trk0 = NULL;
         currCarItemPtr = NULL;
@@ -2670,14 +2659,12 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
                     xx->trvTrk.pos = pos1;
                     xx->trvTrk.angle = angle1;
                     PlaceTrain(trk1, FALSE, TRUE);
-//-                    DrawAllCars();
                 }
             }
 
             programMode = MODE_TRAIN;
             trk0 = NULL;
             MainRedraw(); //CmdTrain: Make sure track is redrawn after switch thrown
-            XMapRedraw();
         } else {
             trk0 = FindCar(&pos);
 
@@ -2764,7 +2751,6 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         }
 
         MainRedraw(); // CmdTrain: Exit
-        XMapRedraw();
         curTrainDlg->train = NULL;
         return C_CONTINUE;
 
@@ -2846,8 +2832,6 @@ static void CmdTrainExit(void * junk)
 {
     Reset();
     InfoSubstituteControls(NULL, NULL);
-    XMainRedraw();
-    XMapRedraw();
 }
 
 
@@ -3022,12 +3006,10 @@ static void TrainFunc(
     }
 
     MainRedraw();  //TrainFunc: Redraw if Train altered
-    XMapRedraw();
 
     if (trainsState == TRAINS_PAUSE) {
         RestartTrains();
     } else {
-//-        DrawAllCars();
     }
 }
 

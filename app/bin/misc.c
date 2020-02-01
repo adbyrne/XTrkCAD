@@ -173,6 +173,8 @@ static wIndex_t gridCmdInx;
 static paramData_t menuPLs[101] = { { PD_LONG, &toolbarSet, "toolbarset" }, {
 		PD_LONG, &curTurnoutEp, "cur-turnout-ep" } };
 static paramGroup_t menuPG = { "misc", PGO_RECORD, menuPLs, 2 };
+
+extern wBool_t wDrawDoTempDraw;
 
 /****************************************************************************
  *
@@ -710,7 +712,6 @@ static void DoClearAfter(void) {
 	ClearTracks();
 
 	/* set all layers to their default properties and set current layer to 0 */
-//-	DefaultLayerProperties();
 	DoLayout(NULL);
 	checkPtMark = 0;
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
@@ -1153,8 +1154,6 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 			&& (commandList[curCommand].stickyMask & stickySet)) {
 		tempSegs_da.cnt = 0;
 		UpdateAllElevations();
-        XMainRedraw();
-        XMapRedraw();
 		if (commandList[curCommand].options & IC_NORESTART) {
 			return C_CONTINUE;
 		}
@@ -2720,7 +2719,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	opterr = 0;
 
-	while ((c = getopt(argc, argv, "vl:d:c:")) != -1)
+	while ((c = getopt(argc, argv, "vl:d:c:m")) != -1)
 		switch (c) {
 		case 'c': /* configuration name */
 			/* test for valid filename */
@@ -2757,6 +2756,9 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 		case '?':
 			NoticeMessage(MSG_BAD_OPTION, _("Ok"), NULL, argv[optind - 1]);
 			exit(1);
+		case 'm': // temporary: use MainRedraw instead of TempRedraw
+			wDrawDoTempDraw = FALSE;
+			break;
 		case ':':
 			NoticeMessage("Missing parameter for %s", _("Ok"), NULL,
 					argv[optind - 1]);

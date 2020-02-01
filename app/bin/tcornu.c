@@ -253,8 +253,6 @@ STATUS_T CornuDescriptionMove(
 		wDrawColor color = GetTrkColor( trk, &mainD );
 	        DrawCornuDescription( trk, &mainD, color );
         }
-		XMainRedraw();
-		XMapRedraw();
 		return action==C_UP?C_TERMINATE:C_CONTINUE;
 
 	case C_REDRAW:
@@ -890,8 +888,6 @@ BOOL_T MoveCornuEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 		}
 		SetTrkEndPoint( *trk, *ep, *ep?xx->cornuData.pos[1]:xx->cornuData.pos[0], *ep?xx->cornuData.a[1]:xx->cornuData.a[0] );
 		DrawNewTrack( *trk );
-		XMainRedraw();
-		XMapRedraw();
 		return TRUE;
 	}
 	return FALSE;
@@ -1093,8 +1089,6 @@ static BOOL_T MergeCornu(
 	}
 	DrawNewTrack( trk3 );
 	UndoEnd();
-	XMainRedraw();
-	XMapRedraw();
 
 	return TRUE;
 }
@@ -1437,8 +1431,6 @@ static BOOL_T TrimCornu( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, ANG
 		SetTrkEndPoint(trk, ep, xx->cornuData.pos[ep], xx->cornuData.a[ep]);
 		DrawNewTrack( trk );
 	}
-	XMainRedraw();
-	XMapRedraw();
 	return TRUE;
 }
 

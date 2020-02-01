@@ -1259,8 +1259,6 @@ static BOOL_T EnumerateJoint( track_p trk )
 static BOOL_T TrimJoint( track_p trk, EPINX_T ep, DIST_T maxX, coOrd endpos, ANGLE_T angle, DIST_T radius, coOrd center )
 {
 	DeleteTrack( trk, FALSE );
-	XMainRedraw();
-	XMapRedraw();
 	return TRUE;
 }
 
@@ -1315,8 +1313,6 @@ static BOOL_T MergeJoint(
 		ConnectTracks( trk0, ep0, trk2, ep2 );
 	}
 	DrawNewTrack( trk0 );
-	XMainRedraw();
-	XMapRedraw();
 	return TRUE;
 }
 
