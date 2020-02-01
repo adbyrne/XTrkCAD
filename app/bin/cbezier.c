@@ -636,11 +636,13 @@ EXPORT STATUS_T AdjustBezCurve(
 
 		}
 		if (!IsClose(dd) )	Da.selectPoint = -1;
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (Da.selectPoint == -1) {
 			InfoMessage( _("Not close enough to any valid, selectable point, reselect") );
 			return C_CONTINUE;
 		} else {
 			pos = Da.pos[Da.selectPoint];
+			CreateMoveAnchor(pos,TRUE);
 			Da.state = POINT_PICKED;
 			InfoMessage( _("Drag point %d to new location and release it"),Da.selectPoint+1 );
 		}
@@ -654,8 +656,9 @@ EXPORT STATUS_T AdjustBezCurve(
 			InfoMessage(_("Pick any circle to adjust it - Enter to confirm, ESC to abort"));
 			return C_CONTINUE;
 		}
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		//If locked, reset pos to be on line from other track
-            if (Da.selectPoint == 1 || Da.selectPoint == 2) {  //CPs
+		if (Da.selectPoint == 1 || Da.selectPoint == 2) {  //CPs
 			int controlArm = Da.selectPoint-1;			//Snap to direction of track
 			if (Da.trk[controlArm]) {
 				angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk[controlArm], Da.ep[controlArm]));
@@ -666,6 +669,7 @@ EXPORT STATUS_T AdjustBezCurve(
 			} // Dont Snap control points
 		} else SnapPos(&pos);
 		Da.pos[Da.selectPoint] = pos;
+		CreateMoveAnchor(pos,TRUE);
 		CreateBothControlArms(Da.selectPoint, track);
 		if (ConvertToArcs(Da.pos,&Da.crvSegs_da,track, color, Da.width)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
 		Da.minRadius = BezierMinRadius(Da.pos,Da.crvSegs_da);
@@ -697,9 +701,8 @@ EXPORT STATUS_T AdjustBezCurve(
 		//Take last pos and decide if it should be snapped to a track because SHIFT is held (pos0 and pos3)
 		ep = 0;
 		BOOL_T found = FALSE;
-
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		p = pos;
-
 		if (track && (Da.selectPoint == 0 || Da.selectPoint == 3)) {  //EPs
 			if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Snap Track
 				if ((t = OnTrackIgnore(&p, FALSE, TRUE, Da.selectTrack)) != NULL) { //Snap to endPoint
@@ -722,6 +725,7 @@ EXPORT STATUS_T AdjustBezCurve(
 			angle2 = NormalizeAngle(FindAngle(pos, pos0)-angle1);
 			Translate(&Da.pos[Da.selectPoint==0?1:2], Da.pos[Da.selectPoint==0?0:3], angle1, FindDistance(Da.pos[Da.selectPoint==0?1:2],pos)*cos(D2R(angle2)));
 		}
+
 		Da.selectPoint = -1;
 		CreateBothControlArms(Da.selectPoint,track);
 		if (ConvertToArcs(Da.pos,&Da.crvSegs_da,track,color,Da.width)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
@@ -780,6 +784,7 @@ EXPORT STATUS_T AdjustBezCurve(
 			else t = NewBezierLine(Da.pos, (trkSeg_p)Da.crvSegs_da.ptr, Da.crvSegs_da.cnt,color,width);
 			UndoEnd();
 			if (Da.crvSegs_da.ptr) MyFree(Da.crvSegs_da.ptr);
+			DYNARR_RESET(trkSeg_t,anchors_da);
 			Da.crvSegs_da.ptr = NULL;
 			Da.crvSegs_da.cnt = 0;
 			Da.crvSegs_da.max = 0;

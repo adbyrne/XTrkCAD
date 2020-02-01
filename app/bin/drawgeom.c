@@ -1884,6 +1884,8 @@ STATUS_T DrawGeomModify(
 				InfoMessage("End Selected Drag to Reposition");
 				context->state = MOD_SELECTED_PT;
 			}
+			tempSegs(0).color = wDrawColorBlack;
+			tempSegs(0).width = 0;
 			tempSegs(0).type = context->type;
 			tempSegs(0).u.l.pos[0] = p0;
 			tempSegs(0).u.l.pos[1] = p1;
@@ -1895,6 +1897,8 @@ STATUS_T DrawGeomModify(
 		case SEG_CRVLIN:
 		case SEG_FILCRCL:
 			curveInx = -1;
+			tempSegs(0).color = wDrawColorBlack;
+			tempSegs(0).width = 0;
 			tempSegs(0).type = context->type;
 			tempSegs(0).u.c.center = context->pc;
 			tempSegs(0).u.c.radius = context->radius;
