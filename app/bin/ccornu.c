@@ -168,13 +168,21 @@ static struct {
 static trkSeg_p curCornu;
 static wIndex_t cornuHotBarCmdInx;
 
+static struct {
+	trkSeg_t st;
+	trkSeg_t back;
+	trkSeg_t txt;
+	int count;
+} hotB;
+
+
 static char * CmdCornuHotBarProc(
 				hotBarProc_e op,
 				void * data,
 				drawCmd_p d,
 				coOrd * origP )
 {
-	trkSeg_p trkseg = (trkSeg_p)data;
+	trkSeg_p trkseg = &hotB.st;
 	switch ( op ) {
 	case HB_SELECT:
 		CmdCornu( C_FINISH, zero );
@@ -191,90 +199,65 @@ static char * CmdCornuHotBarProc(
 		sprintf(message,_("%s FlexTrack"),GetScaleName(GetLayoutCurScale()));
 		return message;
 	case HB_DRAW:
-		DrawSegs( d, *origP, 0.0, trkseg, 1, trackGauge, wDrawColorBlack );
+		DrawSegs( d, *origP, 0.0, trkseg, hotB.count, trackGauge, wDrawColorBlack );
 		return NULL;
 	}
 	return NULL;
 }
 
-static trkSeg_t co[8];
-static trkSeg_t st;
+static pts_t pts[4];
+
 
 EXPORT void AddHotBarCornu( void )
 {
-	st.type = SEG_STRTRK;
-	st.color = wDrawColorBlack;
-	st.u.l.pos[0] = zero;
-	Translate(&st.u.l.pos[1],zero,45.0,15.0);
-	st.u.l.angle = 45.0;
+	hotB.st.type = SEG_STRTRK;
+	hotB.st.color = wDrawColorBlack;
+	hotB.st.u.l.pos[0] = zero;
+	DIST_T ratio = 150.0/curScaleRatio;
+	Translate(&hotB.st.u.l.pos[1],zero,45.0,15.0*ratio);
+	hotB.st.u.l.angle = 45.0;
 
-	for (int i = 0;i<8;i++) {
-		co[i].type = SEG_CRVTRK;
-		co[i].color = wDrawColorBlack;
-	}
-	//49.877590 42.778979 -25.666166 301.221124 4.436209
-	co[0].u.c.a0 = 301.221124;
-	co[0].u.c.a1 = 4.436209;
-	co[0].u.c.radius = 49.877590;
-	co[0].u.c.center.x = 42.778979;
-	co[0].u.c.center.y =  -25.666166;
+	pts[0].pt_type = wPolyLineStraight;
+	pts[0].pt.x = 4.0*ratio;
+	pts[0].pt.y = 4.0*ratio;
+	pts[1].pt_type = wPolyLineStraight;
+	pts[1].pt.x = 4.0*ratio;
+	pts[1].pt.y = 6.5*ratio;
+	pts[2].pt_type = wPolyLineStraight;
+	pts[2].pt.x = 8.0*ratio;
+	pts[2].pt.y = 6.5*ratio;
+	pts[3].pt_type = wPolyLineStraight;
+	pts[3].pt.x = 8.0*ratio;
+	pts[3].pt.y = 4.0*ratio;
 
-	//17.098658 15.955383 -6.817947 306.736161 12.940813
-	co[1].u.c.a0 = 306.736161;
-	co[1].u.c.a1 = 12.940813;
-	co[1].u.c.radius = 17.098658;
-	co[1].u.c.center.x = 15.955383;
-	co[1].u.c.center.y =  -6.817947;
+	hotB.back.type = SEG_FILPOLY;
+	hotB.back.color = wDrawColorWhite;
+	hotB.back.u.p.orig.x = 0.0;
+	hotB.back.u.p.orig.y = 0.0;
+	hotB.back.u.p.cnt = 4;
+	hotB.back.u.p.angle = 0.0;
+	hotB.back.u.p.polyType = RECTANGLE;
+	hotB.back.u.p.pts = &pts[0];
 
-	//20.437827 17.921514 -9.526881 320.388911 10.826800
-	co[2].u.c.a0 = 320.388911;
-	co[2].u.c.a1 = 10.826800;
-	co[2].u.c.radius = 20.437827;
-	co[2].u.c.center.x = 17.921514;
-	co[2].u.c.center.y =  -9.526881;
-
-	//87.474172 49.752751 -68.524379 331.549734 2.529657
-	co[3].u.c.a0 = 331.549734;
-	co[3].u.c.a1 = 2.529657;
-	co[3].u.c.radius = 87.474172;
-	co[3].u.c.center.x = 49.752751;
-	co[3].u.c.center.y =  -68.524379;
-
-	//-29.471535 -1.386573 36.647226 146.529251 7.508211
-	co[4].u.c.a0 = 146.529251;
-	co[4].u.c.a1 = 7.508211;
-	co[4].u.c.radius = 29.471535;
-	co[4].u.c.center.x = -1.386573;
-	co[4].u.c.center.y =  36.647226;
-
-	//-14.931142 6.540886 24.456968 131.286736 14.819502
-	co[5].u.c.a0 = 131.286736;
-	co[5].u.c.a1 = 14.819502;
-	co[5].u.c.radius = 14.931142;
-	co[5].u.c.center.x = 6.540886;
-	co[5].u.c.center.y = 24.456968;
-
-	//-14.765676 6.529671 24.191224 115.498028 14.985125
-	co[6].u.c.a0 = 115.498028;
-	co[6].u.c.a1 = 14.985125;
-	co[6].u.c.radius = 14.765676;
-	co[6].u.c.center.x = 6.529671;
-	co[6].u.c.center.y = 24.191224;
-
-	//-62.179610 -36.798151 43.456729 110.775964 3.558448
-	co[7].u.c.a0 = 110.775964;
-	co[7].u.c.a1 = 3.558448;
-	co[7].u.c.radius = 62.179610;
-	co[7].u.c.center.x = -36.798151;
-	co[7].u.c.center.y =  43.456729;
+	hotB.txt.type = SEG_TEXT;
+	hotB.txt.color = wDrawColorBlack;
+	hotB.txt.u.t.pos.x = 3.5*ratio;
+	hotB.txt.u.t.pos.y = 5.0*ratio;
+	hotB.txt.u.t.boxed = TRUE;
+	hotB.txt.u.t.string = " FLEX ";
+	hotB.txt.u.t.fontP = NULL;
+	hotB.txt.u.t.fontSize = 60.0*ratio;
+	hotB.txt.u.t.angle = 0.0;
 
 	char * label = MyMalloc(256);
 	sprintf(label,_("%s FlexTrack"),GetScaleName(GetLayoutCurScale()));
 	coOrd end;
-	end = st.u.l.pos[1];
+	end = hotB.st.u.l.pos[1];
 	//end.x = 21.25;
 	//end.y = 21.25;
-	AddHotBarElement( label, end, zero, TRUE, TRUE, curBarScale>0?curBarScale:-1, &st, CmdCornuHotBarProc );
+	hotB.count = 3;
+	//hotB.st.u.l.pos[1] = end;
+	AddHotBarElement( label, end, zero, TRUE, TRUE, curBarScale>0?curBarScale:-1, &hotB, CmdCornuHotBarProc );
 }
 
 int createMidPoint(dynArr_t * ap,
@@ -2525,7 +2508,7 @@ static STATUS_T cmdCornuCreate(
 
 		return C_TERMINATE;
 	case C_TEXT:
-		if ((action>>8) != ' ')
+		if ((action>>8) != ' ' && (action>>8) != 32)
 			return CmdCornu(action,pos);
 		/*no break*/
 	case C_OK:
