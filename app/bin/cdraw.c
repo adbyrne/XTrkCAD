@@ -1420,8 +1420,7 @@ static void DrawModDlgUpdate(
 	 ParamLoadControl(&drawModPG,drawModRotCenterInx-1);	  	//Make sure the angle is updated in case center moved
 	 ParamLoadControl(&drawModPG,drawModRadius);			 	// Make sure Radius updated
 	 ParamLoadControl(&drawModPG,drawModRelAngle);				//Relative Angle as well
-	 TempRedraw();
-
+	 MainRedraw();
 
 }
 
