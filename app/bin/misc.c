@@ -1144,7 +1144,8 @@ EXPORT wBool_t DoCurCommand(wAction_t action, coOrd pos) {
 	case C_RCLICK:
 	case C_TEXT:
 	case C_OK:
-		TempRedraw(); // DoCurCommand: postcommand
+		if (rc== C_TERMINATE) MainRedraw();
+		else TempRedraw(); // DoCurCommand: postcommand
 		break;
 	default:
 		break;
