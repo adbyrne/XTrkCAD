@@ -1907,6 +1907,7 @@ LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%
 	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
 	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
 LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
+#ifdef LATER
 	if ( wDrawDoTempDraw ) {
 // Temporary until mswlib supports TempDraw
 		wAction_t action = wActionMove;
@@ -1918,6 +1919,7 @@ LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
 		mainD.Pix2CoOrd( &mainD, mousePositionx, mousePositiony, &pos );
 		DoMouse( action, pos );
 	}
+#endif
 }
 
 /**

@@ -68,7 +68,6 @@ static wDrawBitMap_p angle_bm[4];
 static track_p moveDescTrk;
 static coOrd moveDescPos;
 
- long quickMove = 0;
  BOOL_T importMove = 0;
  int incrementalDrawLimit = 20;
  static int microCount = 0;
@@ -1150,35 +1149,6 @@ EXPORT void DoRescale( void )
 	
 	wShow( rescalePG.win );
 }
-
-
-#define MOVE_NORMAL		(0)
-#define MOVE_FAST		(1)
-#define MOVE_QUICK		(2)
-static char *quickMoveMsgs[] = {
-		N_("Draw moving track normally"),
-		N_("Draw moving track simply"),
-		N_("Draw moving track as end-points") };
-static wMenuToggle_p quickMove1M[3];
-
-static void ChangeQuickMove(wBool_t set, void * mode)
-{
-    long inx;
-    quickMove = (long)mode;
-    InfoMessage(quickMoveMsgs[quickMove]);
-    DoChangeNotification(CHANGE_CMDOPT);
-    for (inx = 0; inx<3; inx++) {
-        wMenuToggleSet(quickMove1M[inx], quickMove == inx);
-    }
-}
-
-EXPORT void UpdateQuickMove(void * junk)
-{
-    long inx;
-    for (inx = 0; inx<3; inx++) {
-        wMenuToggleSet(quickMove1M[inx], quickMove == inx);
-    }
-}
 
 
 static void DrawSelectedTracksD( drawCmd_p d, wDrawColor color )
@@ -1236,22 +1206,12 @@ static void AccumulateTracks( void )
 	coOrd lo, hi;
 
 	/*wDrawDelayUpdate( moveD.d, TRUE );*/
-		if (quickMove == MOVE_FAST)
-			moveD.options |= DC_QUICK;
 		for ( inx = 0; inx<tlist_da.cnt; inx++ ) {
 			trk = tlist2[inx];
 			if (trk) {
 				GetBoundingBox( trk, &hi, &lo );
 				if (lo.x <= moveD_hi.x && hi.x >= moveD_lo.x &&
 					lo.y <= moveD_hi.y && hi.y >= moveD_lo.y ) {
-					if (quickMove != MOVE_QUICK)
-#if defined(WINDOWS) && ! defined(WIN32)
-						if ( tempSegs_da.cnt+100 > 65500 / sizeof(*(trkSeg_p)NULL) ) {
-							ErrorMessage( MSG_TOO_MANY_SEL_TRKS );
-
-							quickMove = MOVE_QUICK;
-						} else
-#endif
 						if (!QueryTrack(trk,Q_IS_CORNU))
 							DrawTrack( trk, &moveD, wDrawColorBlack );
 					}
@@ -1358,88 +1318,50 @@ static void DrawMovedTracks( void )
 {
 	int inx;
 	track_p trk;
-	track_p other;
-	EPINX_T i;
-	coOrd pos;
-	wDrawBitMap_p bm;
-	ANGLE_T a;
-	int ia;
 	dynArr_t cornu_segs;
 
-	if ( quickMove != MOVE_QUICK) {
-		DrawSegs( &tempD, moveOrig, moveAngle, &tempSegs(0), tempSegs_da.cnt,
-						0.0, wDrawColorBlack );
+	DrawSegs( &tempD, moveOrig, moveAngle, &tempSegs(0), tempSegs_da.cnt,
+					0.0, wDrawColorBlack );
 
-		for ( inx=0; inx<tlist_da.cnt; inx++ ) {
-			trk = Tlist(inx);
-			if (QueryTrack(trk,Q_IS_CORNU)) {
-				DYNARR_RESET(trkSeg_t,cornu_segs);
-				coOrd pos[2];
-				DIST_T radius[2];
-				ANGLE_T angle[2];
-				coOrd center[2];
-				trackParams_t trackParams;
-				if (GetTrackParams(PARAMS_CORNU, trk, zero, &trackParams)) {
-					for (int i=0;i<2;i++) {
-						pos[i] = trackParams.cornuEnd[i];
-						center[i] = trackParams.cornuCenter[i];
-						angle[i] = trackParams.cornuAngle[i];
-						radius[i] = trackParams.cornuRadius[i];
-						if (!GetTrkEndTrk(trk,i) ||
-							(GetTrkEndTrk(trk,i) && GetTrkSelected(GetTrkEndTrk(trk,i)))) {
-							if (!move0B) {
-								Rotate( &pos[i], zero, moveAngle );
-								Rotate( &center[i],zero, moveAngle );
-								angle[i] = NormalizeAngle(angle[i]+moveAngle);
-							}
-							pos[i].x += moveOrig.x;
-							pos[i].y += moveOrig.y;
-							center[i].x +=moveOrig.x;
-							center[i].y +=moveOrig.y;
-						}
-					}
-					CallCornu0(&pos[0],&center[0],&angle[0],&radius[0],&cornu_segs, FALSE);
-					trkSeg_p cornu_p = &DYNARR_N(trkSeg_t,cornu_segs,0);
-
-					DrawSegs(&tempD, zero, 0.0, cornu_p,cornu_segs.cnt,
-							0.0, wDrawColorBlack );
-				}
-
-			}
-
-		}
-		return;
-	}
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
 		trk = Tlist(inx);
-		if (tlist2[inx] != NULL)
-			continue;
-		for (i=GetTrkEndPtCnt(trk)-1; i>=0; i--) {
-			pos = GetTrkEndPos(trk,i);
-			if (!move0B) {
-				Rotate( &pos, zero, moveAngle );
+		if (QueryTrack(trk,Q_IS_CORNU)) {
+			DYNARR_RESET(trkSeg_t,cornu_segs);
+			coOrd pos[2];
+			DIST_T radius[2];
+			ANGLE_T angle[2];
+			coOrd center[2];
+			trackParams_t trackParams;
+			if (GetTrackParams(PARAMS_CORNU, trk, zero, &trackParams)) {
+				for (int i=0;i<2;i++) {
+					pos[i] = trackParams.cornuEnd[i];
+					center[i] = trackParams.cornuCenter[i];
+					angle[i] = trackParams.cornuAngle[i];
+					radius[i] = trackParams.cornuRadius[i];
+					if (!GetTrkEndTrk(trk,i) ||
+						(GetTrkEndTrk(trk,i) && GetTrkSelected(GetTrkEndTrk(trk,i)))) {
+						if (!move0B) {
+							Rotate( &pos[i], zero, moveAngle );
+							Rotate( &center[i],zero, moveAngle );
+							angle[i] = NormalizeAngle(angle[i]+moveAngle);
+						}
+						pos[i].x += moveOrig.x;
+						pos[i].y += moveOrig.y;
+						center[i].x +=moveOrig.x;
+						center[i].y +=moveOrig.y;
+					}
+				}
+				CallCornu0(&pos[0],&center[0],&angle[0],&radius[0],&cornu_segs, FALSE);
+				trkSeg_p cornu_p = &DYNARR_N(trkSeg_t,cornu_segs,0);
+
+				DrawSegs(&tempD, zero, 0.0, cornu_p,cornu_segs.cnt,
+						0.0, wDrawColorBlack );
 			}
-			pos.x += moveOrig.x;
-			pos.y += moveOrig.y;
-			if ((other=GetTrkEndTrk(trk,i)) == NULL ||
-				!GetTrkSelected(other)) {
-				bm = endpt_bm;
-			} else if (other != NULL && GetTrkIndex(trk) < GetTrkIndex(other)) {
-				a = GetTrkEndAngle(trk,i)+22.5;
-				if (!move0B)
-					a += moveAngle;
-				a = NormalizeAngle( a );
-				if (a>=180.0)
-					a -= 180.0;
-				ia = (int)(a/45.0);
-				bm = angle_bm[ia];
-			} else {
-				continue;
-			}
-			if ( !OFF_MAIND( pos, pos ) )
-				DrawBitMap( &tempD, pos, bm, selectedColor );
+
 		}
+
 	}
+	return;
 }
 
 
@@ -1800,7 +1722,7 @@ static STATUS_T CmdMove(
 			base = zero;
 			orig = pos;
 
-			GetMovedTracks(quickMove != MOVE_QUICK);
+			GetMovedTracks(TRUE);
 			SetMoveD( TRUE, base, 0.0 );
 			drawCount = 0;
 			state = 1;
@@ -1837,7 +1759,7 @@ static STATUS_T CmdMove(
 			if (t1 && ep1>=0 && t2 && ep2>=0) {
 				MoveToJoin(t2,ep2,t1,ep1);
 			} else {
-				MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, base, zero, 0.0, TRUE );
+				MoveTracks( FALSE, TRUE, FALSE, base, zero, 0.0, TRUE );
 			}
 			ep1 = -1;
 			ep2 = -1;
@@ -1906,11 +1828,11 @@ static STATUS_T CmdMove(
 				}
 
 			drawEnable = enableMoveDraw;
-			GetMovedTracks(quickMove!=MOVE_QUICK);
+			GetMovedTracks(TRUE);
 			if (!doingMove) UndoStart( _("Move Tracks"), "move" );
 			doingMove = TRUE;
 			SetMoveD( TRUE, base, 0.0 );
-			MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, base, zero, 0.0, FALSE );
+			MoveTracks( FALSE, TRUE, FALSE, base, zero, 0.0, FALSE );
 			++microCount;
 			if (microCount>5) {
 				microCount = 0;
@@ -2143,10 +2065,10 @@ static STATUS_T CmdRotate(
 				}
 				CleanSegs(&tempSegs_da);
 				if ( rotateAlignState == 2 ) {
-					MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, orig, angle, TRUE );
+					MoveTracks( FALSE, FALSE, TRUE, zero, orig, angle, TRUE );
 					rotateAlignState = 0;
 				} else if (drawnAngle) {
-					MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, orig, angle, TRUE );
+					MoveTracks( FALSE, FALSE, TRUE, zero, orig, angle, TRUE );
 				}
 			}
 			UndoEnd();
@@ -2199,7 +2121,7 @@ static void QuickMove( void* pos) {
 	wDrawDelayUpdate( mainD.d, TRUE );
 	GetMovedTracks(FALSE);
 	UndoStart( _("Move Tracks"), "Move Tracks" );
-	MoveTracks( quickMove==MOVE_QUICK, TRUE, FALSE, move_pos, zero, 0.0, TRUE );
+	MoveTracks( FALSE, TRUE, FALSE, move_pos, zero, 0.0, TRUE );
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
@@ -2212,7 +2134,7 @@ static void QuickRotate( void* pangle )
 	GetMovedTracks(FALSE);
 	DrawSelectedTracksD( &mainD, wDrawColorWhite );
 	UndoStart( _("Rotate Tracks"), "Rotate Tracks" );
-	MoveTracks( quickMove==MOVE_QUICK, FALSE, TRUE, zero, cmdMenuPos, angle, TRUE);
+	MoveTracks( FALSE, FALSE, TRUE, zero, cmdMenuPos, angle, TRUE);
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
@@ -3016,7 +2938,6 @@ static STATUS_T CmdSelect(
 			rc = SelectArea( action, pos );
 		else if (trk && !GetTrkSelected(trk)) {
 			if (GetLayerModule(GetTrkLayer(trk))) {
-				track_p lt;
 				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
 				DrawHighlightLayer(GetTrkLayer(trk));
 			} else {
@@ -3175,10 +3096,6 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,(wMenuCallBack_p) SetAllTrackSelect, (void *) 1);
 	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0,(wMenuCallBack_p) SelectCurrentLayer, (void *) 0);
-	wMenuSeparatorCreate( selectPopup1M );
-	quickMove1M[0] = wMenuToggleCreate( selectPopup1M, "", _("Normal"), 0, quickMove==0, ChangeQuickMove, (void *) 0 );
-	quickMove1M[1] = wMenuToggleCreate( selectPopup1M, "", _("Simple"), 0, quickMove==1, ChangeQuickMove, (void *) 1 );
-	quickMove1M[2] = wMenuToggleCreate( selectPopup1M, "", _("End Points"), 0, quickMove==2, ChangeQuickMove, (void *) 2 );
 	wMenuSeparatorCreate( selectPopup1M );
 
 	selectPopup2M = MenuRegister( "Track Selected Menu " );

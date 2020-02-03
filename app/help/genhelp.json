@@ -242,7 +242,6 @@
 		{"line": "carinv-export", "contents": "Export a Car Item .csv file" },
 		{"line": "carinv-savetext", "contents": "Create a text list of the Car Items" },
 		{"line": "circle-radius", "contents": "Specifies the radius of the circle track" },
-		{"line": "cmdopt-move-quick", "contents": "How to draw track being moved/rotated" },
 		{"line": "cmdopt-preselect", "contents": "Default command is Describe or Select" },
 		{"line": "cmdopt-rightclickmode", "contents": "Action to invoke on Right-Click" },
 		{"line": "cmdopt-ok", "contents": "" },
