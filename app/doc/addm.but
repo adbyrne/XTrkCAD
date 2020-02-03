@@ -132,7 +132,10 @@ While the endpoints are being placed, unless \c{Shift} is held down, they will "
 
 \u000
 
-\dd \G{png.d/bcornu.png} \c{Left-Click} to place each endpoint, \c{Left-Click} to place the second Endpoint. Add Pins with \c{Left-Click} on the Cornu and \c{Left-Drag} them to constrain the curve to smoothly pass through points between them. Complete the Curve by pressing \c{Enter}, or Reject it with \c{Esc}.
+\dd \G{png.d/bcornu.png} \c{Left-Click} to place each endpoint on an open track end, 
+\c{Left-Drag} not on an existing track places the end-point and drags out the end angle of the new track. \c{Left-Click} to place the second Endpoint either on a track endpoint or not. \c{Left-Drag} sets the second end angle. 
+Once the curve is established, add Pins with \c{Left-Click} on the Cornu and \c{Left-Drag} them to constrain the curve to smoothly pass through points between them. Complete the Curve by pressing \c{Enter}, or Reject it with \c{Esc}.
+The ends of the Cornu have anchors that can be used to set the end-angle and radius. These are also available for the just selected end as text entry boxes in the Status Bar.
 When either endpoint is being placed it will "Snap" to an open track endpoint of the tracks underneath the cursor unless \c{Shift} is held. You can only move the point along that track, or in an extension of it once it is snapped. After the new track is completed, it will be connected to these existing tracks.
 Cornu Track Pins are explained in \K{joinCornu} to alter its shape. You can place them by clicking on the Cornu and move them around or delete them.
 If the end is not connected, an anchor will enable the end-angle and radius to be set by dragging. Initially the end radius is set to be zero and the angle will be picked to minimize overall curvature. If track pins may be added, two such end points with zero end radius defines a straight track, and such a track with one added track pin will create a smooth arc through the three points.

@@ -877,7 +877,8 @@ This produces an arc whose radius is determined by the distance of the closet no
 
 \S2{chgCornu} \i{Cornu Easements} Modifying a Cornu Track
 
-Because a Cornu Track is defined by its end points position, angle and radius - it can only be directly modified by dragging an end point along a track. It can also have added "Pins" which constrain the curve to smoothly pass through a point.
+Because a Cornu Track is defined by its end points position, angle and radius - it can only be directly modified by dragging an end point along a track, or altering its end conditions if it is not joined to another track. 
+It can also have added "Pins" which constrain the curve to smoothly pass through a point.
 
 \n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
 
@@ -887,7 +888,11 @@ Because a Cornu Track is defined by its end points position, angle and radius - 
 
 \lcont{\u000}
 
-\n \e{Left-Click} an endpoint and \e{Left-Drag} it to move the endpoint along the connected track, or beyond it if you want that track extended.
+\n \e{Left-Click} an endpoint and \e{Left-Drag} it to move the endpoint along a connected track, or beyond it if you want that track extended. If there is no track the endpoint is free to move.
+
+\lcont{\u000}
+
+\n For an unconnected end point, \e{Left-Click} on the Radius or Angle anchors and \e{Left-Drag} it to adjust them.
 
 \lcont{\u000}
 
