@@ -2319,14 +2319,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				pos = GetTrkEndPos(t,ep);
 				Da.pos[end] = pos;
 				Da.angle[end] = GetTrkEndAngle(t,ep);
-				if (end==1) {
-					Da.angle[0] = GetOpenAngle(Da.pos,Da.angle,0);
-					CreateBothEnds(1,-1,-1,-1);
-					SetUpCornuParms(&cp);
-					if (CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,TRUE))
-							Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
-				} else
-					InfoMessage( _("Drag arm in direction of track") );
 			} else if (t == NULL) {      //end not on Track, OK for CreateCornu -> empty end point
 				pos = p;	//Reset to initial
 				SnapPos( &pos );
@@ -2397,6 +2389,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				if (ep<1) {
 					Da.trk[1] = t;
 					Da.pos[1] = p;
+					Da.radius[1] = 0.0;
 				}
 				CorrectHelixAngles();
 				Da.selectEndPoint = 1;			//Select second end point
@@ -2468,7 +2461,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				if (IsClose(FindDistance(pos,Da.pos[0]))) return C_CONTINUE;
 				Da.selectEndPoint = 0;
 				Da.angle[0] = NormalizeAngle(FindAngle(Da.pos[0],pos)+180);
-				Da.radius[0] = -1.0;  /*No end*/
 				Da.ep1Segs_da_cnt = createEndPoint(Da.ep1Segs, Da.pos[0],TRUE,TRUE,TRUE,FALSE,Da.angle[0],0.0,zero,&Da.endHandle[0]);
 				Da.radius[1] = -1.0;  /*No end*/
 				return C_CONTINUE;
