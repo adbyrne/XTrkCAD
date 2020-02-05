@@ -1657,8 +1657,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 			}
 			UndoEnd();
 			Da.state = NONE;
-			MainRedraw(); // AdjustCornuCurve C_OK
-			MapRedraw();
 			return C_TERMINATE;
 		}
 		return C_CONTINUE;
