@@ -526,7 +526,7 @@ static void LayoutOk(void * junk)
     free(thisLayout.copyOfLayoutProps);
     wHide(layoutW);
 
-    MainLayout();
+    MainLayout( TRUE, TRUE );
 }
 
 
