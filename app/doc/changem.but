@@ -390,15 +390,17 @@ For detail about;
 
 \dd Moving one segment of track to join with another refer to \K{joinTrackMove}.
 
-\S2{joinCornu} \i{Creating a Cornu} \i{Cornu Easements} Join with Cornu Easement
+\S2{joinCornu} \i{Creating a Cornu} \i{Modifying a Cornu} \i{Cornu Easements} Join with Cornu Easement
 
-A Cornu is a form of Join that uses a mathematical approach to creating a curve between two sets of end conditions.
+A Cornu is a form of curve that uses a mathematical approach to creating a curve between two sets of end conditions. The curve is designed to change curvature linearly along its length - which is the characteristic of a railway easement.
 
-The conditions at each end are the radius, angle and position.
+The conditions used at each end are the radius, angle and position.  Cornus can have added constraints in the form of "pins" that force the curve to smoothly pass through that point while still respecting the end conditions.
 
-The curve is designed to change radius (curvature) linearly along its length, which mimics the characteristics of railway easements because it minimizes sudden changes in acceleration towards the center of curvature.
+Cornus are used in XtrCAD to both Join tracks smoothly and form smooth curves that are not joined to other tracks. 
 
-Because Cornu are mathematically generated, they can be regenerated at will and so Cornu Joins are unique in XtrkCAD because they remain connected even if the tracks at the end are moved or even change shape.
+The Cornu curve is designed to change radius (curvature) linearly along its length, which mimics the characteristics of railway easements because it minimizes sudden changes in acceleration towards the center of curvature.
+
+Because Cornu are mathematically generated, they can also be regenerated at will and so Cornu Joins have the unique characteristic in XtrkCAD that they remain connected even if the tracks at the end are moved or even change shape.
 
 Cornu Joins will use whatever space is available - that is their "tightness" (rate of change of curvature) is variable and dynamic.
 
@@ -406,9 +408,9 @@ Cornu Joins will use whatever space is available - that is their "tightness" (ra
 
 XTrackCAD Cornu can have "track pins" added that constrain the track to pass through those points in addition to meeting the end-conditions. This allows the track to be skewed or slewed around obstacles, or to suit some other constraint.
 
-The pins can be added when Cornus are created \K{cmdCurve} or during \K{cmdModify} by clicking on the track. They can be selected and then dragged to alter the curve shape or deleted with \f{Delete}.
+The pins can be added when Cornus are created \K{cmdCornu} or during \K{cmdModify} after clicking on the track. They can be selected and then dragged to alter the curve shape or deleted with \f{Delete}.
 
-When a Cornu Track with pins is saved, it is split into two Cornu joined at the pin. If a Cornu that is joined to another Cornu is Modified with \K{cmdModify}, the joints are rendered as Pins and the Modify is one continuous Cornu.
+When a Cornu Track with pins is saved, it is split into two Cornu joined at the pin. If a Cornu that is joined to another Cornu is Modified with \K{cmdModify}, the joints are rendered as Pins and the Modify is for one continuous Cornu.
 
 \u000
 

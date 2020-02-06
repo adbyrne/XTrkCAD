@@ -144,9 +144,9 @@ static struct {
 		BOOL_T extend[2];
 		trkSeg_t extendSeg[2];
 
-		trkSeg_t ep1Segs[10];
+		trkSeg_t ep1Segs[11];
 		int ep1Segs_da_cnt;
-		trkSeg_t ep2Segs[10];
+		trkSeg_t ep2Segs[11];
 		int ep2Segs_da_cnt;
 		dynArr_t crvSegs_da;
 		int crvSegs_da_cnt;
@@ -378,6 +378,14 @@ int createEndPoint(
 				sp[num].u.l.pos[1] = pos_line[1];
 				sp[num].color = (endHandle->last_selected||endHandle->radius_selected)?drawColorBlue:drawColorRed;
 				num++;
+				pos_line[0]= pos0;
+				Translate(&pos_line[1],pos0,-FindAngle(pos0,endHandle->end_curve),end_length);
+				sp[num].type = SEG_STRLIN;
+				sp[num].width = w;
+				sp[num].u.l.pos[0] = pos_line[0];
+				sp[num].u.l.pos[1] = pos_line[1];
+				sp[num].color = drawColorRed;
+				num++;
 			} else {
 				DIST_T pos_rad;
 				pos_rad = radius+trackGauge/2;
@@ -425,7 +433,17 @@ int createEndPoint(
 			sp[num].u.l.pos[1] = pos_line[1];
 			sp[num].color = (endHandle->last_selected||endHandle->radius_selected)?drawColorBlue:drawColorRed;
 			num++;
+
     	}
+    	coOrd pos_line[2];
+    	pos_line[0]= pos0;
+		Translate(&pos_line[1],pos0,FindAngle(pos0,endHandle->end_curve)+180,end_length);
+		sp[num].type = SEG_STRLIN;
+		sp[num].width = w;
+		sp[num].u.l.pos[0] = pos_line[0];
+		sp[num].u.l.pos[1] = pos_line[1];
+		sp[num].color = drawColorRed;
+		num++;
 		sp[num].type = SEG_CRVLIN;
 		sp[num].u.c.center = endHandle->end_curve;
 		sp[num].u.c.a0 = 0.0;
