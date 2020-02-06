@@ -216,6 +216,7 @@ void GetRoomSize( coOrd * );
 void DoRedraw( void );
 void SetMainSize( void );
 void MainRedraw( void );
+void MainLayout( void );
 void MapRedraw( void );
 void TempRedraw( void );
 void DrawMarkers( void );

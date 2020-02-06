@@ -1808,8 +1808,6 @@ EXPORT STATUS_T AdjustCornuCurve(
 				infoSubst = FALSE;
 			}
 			Da.state = NONE;
-			MainRedraw(); // AdjustCornuCurve C_OK
-			MapRedraw();
 			return C_TERMINATE;
 		}
 		return C_CONTINUE;
@@ -2705,6 +2703,7 @@ static STATUS_T cmdCornuCreate(
 		/*no break*/
 	case C_OK:
 		CmdCornu(C_OK,pos);
+		MainRedraw();
 		return C_CONTINUE;
 	case C_CANCEL:
 		HotBarCancel();

@@ -798,6 +798,9 @@ static void wlibDrawFilled(
 	cairo_rel_line_to(cairo, -bd->w, 0);
 	cairo_fill(cairo);
 	cairo_destroy(cairo);
+
+	if (bd->widget && !bd->delayUpdate)
+		gtk_widget_queue_draw(bd->widget);
  }
 
  void wDrawClear(
@@ -815,10 +818,6 @@ static void wlibDrawFilled(
 	gtkDrawDestroyCairoContext(cairo);
 
 	wDrawClearTemp(bd);
-
-	if (bd->widget && !bd->delayUpdate)
-		gtk_widget_queue_draw(bd->widget);
-
 }
 
  void * wDrawGetContext(

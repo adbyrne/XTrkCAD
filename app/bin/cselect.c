@@ -880,7 +880,6 @@ EXPORT void DoRefreshCompound( void )
 		RefreshCompound( NULL, FALSE );
 		UndoEnd();
 		MainRedraw(); // DoRefreshCompound
-		MapRedraw();
 	} else {
 		ErrorMessage( MSG_NO_SELECTED_TRK );
 	}
@@ -1837,7 +1836,6 @@ static STATUS_T CmdMove(
 			if (microCount>5) {
 				microCount = 0;
 				MainRedraw(); // Micro step move
-				MapRedraw();
 			}
 			return C_CONTINUE;
 			}
