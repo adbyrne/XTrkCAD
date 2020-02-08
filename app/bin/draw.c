@@ -1492,8 +1492,7 @@ EXPORT void MainLayout(
 	if ( bRedraw )
 		MainRedraw();
 
-	if ( wDrawDoTempDraw ) {
-// Temporary until mswlib supports TempDraw
+	if ( bRedraw && wDrawDoTempDraw ) { // Temporary until mswlib supports TempDraw
 		wAction_t action = wActionMove;
 		coOrd pos;
 		if ( mouseState == mouseLeft )
@@ -1501,7 +1500,13 @@ EXPORT void MainLayout(
 		if ( mouseState == mouseRight )
 			action = wActionRDrag;
 		mainD.Pix2CoOrd( &mainD, mousePositionx, mousePositiony, &pos );
-		DoMouse( action, pos );
+		// Prevent recursion if curCommand calls MainLayout when action if a Move or Drag
+		// ie CmdPan
+		static int iRecursion = 0;
+		iRecursion++;
+		if ( iRecursion == 1 )
+			DoMouse( action, pos );
+		iRecursion--;
 	}
 }
 
