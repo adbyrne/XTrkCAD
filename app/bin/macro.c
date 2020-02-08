@@ -369,7 +369,7 @@ static void MacroDrawBitMap(
 		wDrawColor color )
 {
 	wBool_t ret = wDrawSetTempMode( d->d, TRUE );
-	wDrawBitMap( tempD.d, bm, x, y, color, wDrawOptTemp|wDrawOptNoClip );
+	wDrawBitMap( d->d, bm, x, y, color, wDrawOptTemp|wDrawOptNoClip );
 	wDrawSetTempMode( d->d, ret );
 	wFlush();
 
