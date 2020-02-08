@@ -631,8 +631,7 @@ EXPORT void SelectDelete( void )
 		wDrawDelayUpdate( mainD.d, TRUE );
 		wDrawDelayUpdate( mapD.d, TRUE );
 		DoSelectedTracks( DeleteTrack );
-		MainRedraw(); // SelectDelete
-		MapRedraw();
+		DoRedraw(); // SelectDelete
 		wDrawDelayUpdate( mainD.d, FALSE );
 		wDrawDelayUpdate( mapD.d, FALSE );
 		selectedTrackCount = 0;
@@ -1385,7 +1384,6 @@ static void MoveTracks(
 	wSetCursor( mainD.d, wCursorWait );
 	/*UndoStart( "Move/Rotate Tracks", "move/rotate" );*/
 	if (tlist_da.cnt <= incrementalDrawLimit) {
-		DrawMapBoundingBox( FALSE );
 		if (eraseFirst)
 			DrawSelectedTracksD( &mainD, wDrawColorWhite );
 		DrawSelectedTracksD( &mapD, wDrawColorWhite );
@@ -1441,8 +1439,7 @@ static void MoveTracks(
 						} else {
 							DeleteTrack(trk,TRUE);
 							ErrorMessage(_("Cornu too tight - it was deleted"));
-							MapRedraw();
-							MainRedraw(); // MoveTracks: Cornu/delete
+							DoRedraw(); // MoveTracks: Cornu/delete
 							return;
 						}
 					} else if (!trk1) {									//No end track
@@ -1486,7 +1483,6 @@ static void MoveTracks(
 	} else {
 		DrawSelectedTracksD( &mainD, wDrawColorBlack );
 		DrawSelectedTracksD( &mapD, wDrawColorBlack );
-		DrawMapBoundingBox( TRUE );
 	}
 	wSetCursor( mainD.d, defaultCursor );
 	if (undo) UndoEnd();
@@ -2396,7 +2392,6 @@ static void FlipTracks(
 	wSetCursor( mainD.d, wCursorWait );
 	/*UndoStart( "Move/Rotate Tracks", "move/rotate" );*/
 	if (selectedTrackCount <= incrementalDrawLimit) {
-		DrawMapBoundingBox( FALSE );
 		wDrawDelayUpdate( mainD.d, TRUE );
 		wDrawDelayUpdate( mapD.d, TRUE );
 	}
@@ -2427,7 +2422,6 @@ static void FlipTracks(
 	} else {
 		wDrawDelayUpdate( mainD.d, FALSE );
 		wDrawDelayUpdate( mapD.d, FALSE );
-		DrawMapBoundingBox( TRUE );
 	}
 	wSetCursor( mainD.d, defaultCursor );
 	UndoEnd();
@@ -2527,14 +2521,13 @@ static STATUS_T SelectArea(
 			size.y = - size.y;
 			base.y = pos.y;
 		}
-		DrawHilight( &tempD, base, size, action == C_MOVE );
 		return C_CONTINUE;
 
 	case C_UP:
 	case C_RUP:
 		if (state == 1) {
 			state = 0;
-			DrawHilight( &tempD, base, size, action == C_UP );
+			add = (action == C_UP);
 			cnt = 0;
 			trk = NULL;
 			if (action==C_UP) SetAllTrackSelect( FALSE );							//Remove all tracks first
@@ -2581,10 +2574,7 @@ static STATUS_T SelectArea(
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		if (state == 1) {
-			DrawHilight( &tempD, base, size, add);
-			state = 0;
-		}
+		state = 0;
 		break;
 
 	case C_TEXT:

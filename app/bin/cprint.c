@@ -262,7 +262,7 @@ LOG1( log_print, ( "MarkPage( %d, %d )\n", x, y) )
 	Rotate( &p[2], currPrintGrid.orig, currPrintGrid.angle );
 	Rotate( &p[3], currPrintGrid.orig, currPrintGrid.angle );
 LOG( log_print, 2, ( "MP(%d,%d) [%0.3f %0.3f] x [%0.3f %0.3f]\n", x, y, p[0].x, p[0].y, p[2].x, p[2].y ) )
-	DrawHilightPolygon( &mainD, p, 4 );
+	DrawHilightPolygon( &tempD, p, 4 );
 }
 
 

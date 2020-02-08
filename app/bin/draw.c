@@ -53,7 +53,7 @@
 #include "layout.h"
 
 static void DrawRoomWalls( wBool_t );
-EXPORT void DrawMarkers( void );
+static void DrawMarkers( void );
 static void ConstraintOrig( coOrd *, coOrd, int );
 static void DoMouse( wAction_t action, coOrd pos );
 static void DDrawPoly(
@@ -65,6 +65,8 @@ static void DDrawPoly(
 		wDrawWidth width,
 		int fill,
 		int open );
+static void DrawMapBoundingBox( BOOL_T set );
+static void DrawTicks( drawCmd_p d, coOrd size );
 
 static int log_pan = 0;
 static int log_zoom = 0;
@@ -542,12 +544,10 @@ EXPORT void DrawHilight( drawCmd_p d, coOrd p, coOrd s, BOOL_T add )
 	w = (wPos_t)((s.x/d->scale)*d->dpi+0.5);
 	h = (wPos_t)((s.y/d->scale)*d->dpi+0.5);
 	d->CoOrd2Pix(d,p,&x,&y);
-	wBool_t bTemp = wDrawSetTempMode( d->d, TRUE );
-	if ((d == &mapD) || add)
+	if ( add )
 		wDrawFilledRectangle( d->d, x, y, w, h, drawColorPowderedBlue, wDrawOptTemp|wDrawOptTransparent );
 	else
 		wDrawFilledRectangle( d->d, x, y, w, h, selectedColor, wDrawOptTemp|wDrawOptTransparent );
-	wDrawSetTempMode( d->d, bTemp );
 
 }
 
@@ -1182,9 +1182,6 @@ EXPORT void InfoPos( coOrd pos )
 	wStatusSetValue( infoD.posY_m, message );
 	
 	oldMarker = pos;
-	wBool_t bTemp = wDrawSetTempMode( tempD.d, TRUE );
-	DrawMarkers();
-	wDrawSetTempMode( tempD.d, bTemp );
 }
 
 static wControl_p deferSubstituteControls[NUM_INFOCTL+1];
@@ -1290,7 +1287,7 @@ EXPORT void GetRoomSize( coOrd * froomSize )
 }
 
 
-EXPORT void MapRedraw()
+static void MapRedraw()
 {
 	if (inPlaybackQuit)
 		return;
@@ -1303,8 +1300,7 @@ EXPORT void MapRedraw()
 	//wSetCursor( mapD.d, wCursorWait );
 	wDrawClear( mapD.d );
 	DrawTracks( &mapD, mapD.scale, mapD.orig, mapD.size );
-	if (!hideBox)
-		DrawMapBoundingBox( TRUE );
+	DrawMapBoundingBox( TRUE );
 	//wSetCursor( mapD.d, defaultCursor );
 	wDrawDelayUpdate( mapD.d, FALSE );
 }
@@ -1375,6 +1371,7 @@ if (wDrawDoTempDraw == FALSE) {
 	DrawMarkers();
 	DoCurCommand( C_REDRAW, zero );
 	RulerRedraw( FALSE );
+	RedrawPlaybackCursor();              //If in playback
 	wDrawSetTempMode( tempD.d, FALSE );
 	wDrawDelayUpdate( tempD.d, FALSE );
 }
@@ -1634,7 +1631,7 @@ static void DrawRoomWalls( wBool_t drawBackground )
 }
 
 
-EXPORT void DrawMarkers( void )
+static void DrawMarkers( void )
 {
 	wPos_t x, y;
 	mainD.CoOrd2Pix(&mainD,oldMarker,&x,&y);
@@ -1828,7 +1825,7 @@ EXPORT void DrawRuler(
 }
 
 
-EXPORT void DrawTicks( drawCmd_p d, coOrd size )
+static void DrawTicks( drawCmd_p d, coOrd size )
 {
 	coOrd p0, p1;
 	DIST_T offset;
@@ -1881,12 +1878,14 @@ EXPORT void DrawTicks( drawCmd_p d, coOrd size )
 EXPORT coOrd mainCenter;
 
 
-EXPORT void DrawMapBoundingBox( BOOL_T set )
+static void DrawMapBoundingBox( BOOL_T set )
 {
 	if (mainD.d == NULL || mapD.d == NULL)
 		return;
 	wDrawClearTemp( mapD.d );
-	DrawHilight( &mapD, mainD.orig, mainD.size, FALSE );
+	wDrawSetTempMode( mapD.d, TRUE );
+	DrawHilight( &mapD, mainD.orig, mainD.size, TRUE );
+	wDrawSetTempMode( mapD.d, FALSE );
 }
 
 
@@ -2705,7 +2704,6 @@ static void MapDlgUpdate(
 				}
 				wPrefSetInteger( "draw", "mapscale", (long)mapD.scale );
 			}
-			DrawMapBoundingBox( TRUE );
 			break;
 		case -1:
 			MapWindowShow( FALSE );

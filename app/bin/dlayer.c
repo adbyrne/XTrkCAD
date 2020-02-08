@@ -221,6 +221,11 @@ wDrawColor GetLayerColor(unsigned int layer)
     return layers[layer].color;
 }
 
+static void RedrawLayer( unsigned int l, BOOL_T draw )
+{
+	DoRedraw(); // RedrawLayer
+}
+
 
 static void FlipLayer(unsigned int layer)
 {

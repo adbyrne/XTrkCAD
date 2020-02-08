@@ -1379,7 +1379,6 @@ EXPORT void ImportEnd( void )
 	ResolveIndex();
 	to_first = to_firstOld;
 	RenumberTracks();
-	DrawMapBoundingBox( FALSE );
 
 	// move the imported track into place
 	for ( trk=*importTrack; trk; trk=trk->next ) if (!IsTrackDeleted(trk)) {
@@ -1387,7 +1386,6 @@ EXPORT void ImportEnd( void )
 		trk->bits |= TB_SELECTED;
 		DrawTrack( trk, &mainD, wDrawColorBlack );
 	}
-	DrawMapBoundingBox( TRUE );
 	importTrack = NULL; 
 	trackCount = trackCountOld;
 	InfoCount( trackCount );
@@ -2832,10 +2830,8 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 
 static void DrawATrack( track_cp trk, wDrawColor color )
 {
-	DrawMapBoundingBox( FALSE );
 	DrawTrack( trk, &mapD, color );
 	DrawTrack( trk, &mainD, color );
-	DrawMapBoundingBox( TRUE );
 }
 
 
@@ -3156,14 +3152,6 @@ EXPORT void DrawTracks( drawCmd_p d, DIST_T scale, coOrd orig, coOrd size )
 	inDrawTracks = FALSE;
 	if ( doSelectRecount )
 		SelectRecount();
-}
-
-
-EXPORT void RedrawLayer( unsigned int l, BOOL_T draw )
-{
-	MainRedraw(); // RedrawLayer
-	MapRedraw();
-
 }
 
 

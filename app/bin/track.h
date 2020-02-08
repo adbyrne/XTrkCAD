@@ -586,7 +586,6 @@ void DrawEndElev( drawCmd_p, track_p, EPINX_T, wDrawColor );
 wDrawColor GetTrkColor( track_p, drawCmd_p );
 void DrawTrack( track_cp, drawCmd_p, wDrawColor );
 void DrawTracks( drawCmd_p, DIST_T, coOrd, coOrd );
-void RedrawLayer( unsigned int, BOOL_T );
 void DrawNewTrack( track_cp );
 void DrawOneTrack( track_cp, drawCmd_p );
 void UndrawNewTrack( track_cp );
