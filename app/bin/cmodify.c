@@ -64,6 +64,7 @@ static BOOL_T modifyBezierMode;
 static BOOL_T modifyCornuMode;
 static BOOL_T modifyDrawMode;
 static BOOL_T modifyRulerMode;
+static BOOL_T modifyExtendMode;
 
 
 static void CreateEndAnchor(coOrd p, wBool_t lock) {
@@ -270,6 +271,7 @@ STATUS_T CmdModify(
 		modifyBezierMode = FALSE;
 		modifyCornuMode = FALSE;
 		modifyDrawMode = FALSE;
+		modifyExtendMode = FALSE;
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -334,6 +336,8 @@ STATUS_T CmdModify(
 		if ((action&0xFF) == C_LDOUBLE) return C_ERROR;
 
 		if ((MyGetKeyState()&WKEY_CTRL)) goto extendTrack;
+
+
 
 		if ( (MyGetKeyState()&WKEY_SHIFT) &&      //Free to change radius
 			 QueryTrack( Dex.Trk, Q_CAN_MODIFYRADIUS )&&
@@ -434,7 +438,7 @@ STATUS_T CmdModify(
 			return ModifyCornu(C_MOVE, pos);
 		if ( modifyDrawMode)
 			return ModifyDraw(C_MOVE, pos);
-		if ((MyGetKeyState()&WKEY_CTRL))
+		if (modifyExtendMode && (MyGetKeyState()&WKEY_CTRL))
 			goto extendTrackMove;
 		tempSegs_da.cnt = 0;
 
@@ -474,39 +478,49 @@ STATUS_T CmdModify(
 extendTrack:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		changeTrackMode = TRUE;
+		modifyExtendMode = TRUE;
 		modifyRulerMode = FALSE;
 		modifyBezierMode = FALSE;
 		modifyCornuMode = FALSE;
 		modifyDrawMode = FALSE;
-		Dex.Trk = OnTrack( &pos, TRUE, TRUE );
-		if (Dex.Trk) {
-			if (!CheckTrackLayer( Dex.Trk ) ) {
-				Dex.Trk = NULL;
-				return C_CONTINUE;
-			}
-			trackGauge = GetTrkGauge( Dex.Trk );
-			Dex.pos00 = pos;
-CHANGE_TRACK:
-			if (GetTrackParams( PARAMS_EXTEND, Dex.Trk, Dex.pos00, &Dex.params)) {
-				if (Dex.params.ep == -1) {
+		Dex.first = FALSE;
+		if (((action&0xFF) == C_RDOWN) || ((action&0xFF)== C_DOWN)) {
+			Dex.Trk = OnTrack( &pos, TRUE, TRUE );
+			if (Dex.Trk) {
+				if (!CheckTrackLayer( Dex.Trk ) ) {
 					Dex.Trk = NULL;
 					return C_CONTINUE;
-					break;
 				}
-				if (Dex.params.ep == 0) {
-					Dex.params.arcR = -Dex.params.arcR;
+				trackGauge = GetTrkGauge( Dex.Trk );
+				Dex.pos00 = pos;
+	CHANGE_TRACK:
+				if (GetTrackParams( PARAMS_EXTEND, Dex.Trk, Dex.pos00, &Dex.params)) {
+					if (Dex.params.ep == -1) {
+						Dex.Trk = NULL;
+						return C_CONTINUE;
+						break;
+					}
+					if (Dex.params.ep == 0) {
+						Dex.params.arcR = -Dex.params.arcR;
+					}
+					Dex.pos00 = GetTrkEndPos(Dex.Trk,Dex.params.ep);
+					Dex.angle = GetTrkEndAngle( Dex.Trk,Dex.params.ep);
+					Translate( &Dex.pos00x, Dex.pos00, Dex.angle, 10.0 );
+	LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
+								Dex.params.ep, Dex.pos00.x, Dex.pos00.y, Dex.angle ) )
+					InfoMessage( _("Drag to add flex track") );
+				} else {
+					return C_ERROR;
 				}
-				Dex.pos00 = GetTrkEndPos(Dex.Trk,Dex.params.ep);
-				Dex.angle = GetTrkEndAngle( Dex.Trk,Dex.params.ep);
-				Translate( &Dex.pos00x, Dex.pos00, Dex.angle, 10.0 );
-LOG( log_modify, 1, ("extend endPt[%d] = [%0.3f %0.3f] A%0.3f\n",
-							Dex.params.ep, Dex.pos00.x, Dex.pos00.y, Dex.angle ) )
-				InfoMessage( _("Drag to add flex track") );
 			} else {
+				InfoMessage ( _("No Track to extend"));
 				return C_ERROR;
 			}
+			Dex.first = TRUE;
+		} else if (!Dex.Trk) {
+			InfoMessage ( _("No Track selected"));
+			return C_ERROR;
 		}
-		Dex.first = TRUE;
         /* no break */
 	case C_RMOVE:
 extendTrackMove:
@@ -647,6 +661,7 @@ LOG( log_modify, 2, ("A=%0.3f X=%0.3f\n", a0, Dex.jointD.x ) )
 	case C_RUP:
 extendTrackUp:
 		changeTrackMode = FALSE;
+		modifyExtendMode = FALSE;
 		tempSegs_da.cnt = 0;
 		if (Dex.Trk == NULL) return C_CONTINUE;
 		if (!Dex.valid)
