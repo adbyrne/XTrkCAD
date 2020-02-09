@@ -989,8 +989,7 @@ EXPORT void Reset(void) {
 		checkPtMark = changed;
 	}
 	ClrAllTrkBits( TB_UNDRAWN );
-	MainRedraw(); // Reset
-	MapRedraw();
+	DoRedraw(); // Reset
 	EnableCommands();
 	ResetMouseState();
 	LOG(log_command, 1,

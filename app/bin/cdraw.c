@@ -1364,15 +1364,9 @@ static void DoConvertFill(void) {
 
 }
 
-static void DrawModRedraw( void )
-{
-	MainRedraw(); // DrawModifyDraw
-	MapRedraw();
-}
-
 static drawModContext_t drawModCmdContext = {
 		InfoMessage,
-		DrawModRedraw,
+		DoRedraw,
 		&mainD};
 
 
@@ -1891,18 +1885,11 @@ EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
 }
 
 
-static void DrawRedraw(void);
 static drawContext_t drawCmdContext = {
 		InfoMessage,
-		DrawRedraw,
+		DoRedraw,
 		&mainD,
 		OP_LINE };
-
-static void DrawRedraw( void )
-{
-	MainRedraw(); // DrawRedraw
-	MapRedraw();
-}
 
 static wIndex_t benchChoice;
 static wIndex_t benchOrient;

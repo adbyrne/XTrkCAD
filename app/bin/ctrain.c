@@ -1272,7 +1272,6 @@ static void DrawAllCars(void)
     drawCarEnable = TRUE;
     wDrawDelayUpdate(mainD.d, TRUE);
     wDrawRestoreImage(mainD.d);
-    DrawMarkers();
     DrawPositionIndicators();
 
     for (car=NULL; TrackIterate(&car);) {

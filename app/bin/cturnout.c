@@ -74,6 +74,7 @@ static wIndex_t turnoutInx;
 static long hideTurnoutWindow;
 static void RedrawTurnout(void);
 static void SelTurnoutEndPt( wIndex_t, coOrd );
+static void HilightEndPt( void );
 
 static wPos_t turnoutListWidths[] = { 80, 80, 220 };
 static const char * turnoutListTitles[] = { N_("Manufacturer"), N_("Part No"), N_("Description") };
@@ -1959,10 +1960,7 @@ LOG( log_turnout, 2, ( "SelTurnout(%s)\n", (curTurnout?curTurnout->title:"<NULL>
 	DrawSegs( &turnoutD, zero, 0.0, curTurnout->segs, curTurnout->segCnt,
 					 trackGauge, wDrawColorBlack );
 	curTurnoutEp = 0;
-	p.x = curTurnout->endPt[0].pos.x - trackGauge;
-	p.y = curTurnout->endPt[0].pos.y - trackGauge;
-	s.x = s.y = trackGauge*2.0 /*+ turnoutD.minSize*/;
-	DrawHilight( &turnoutD, p, s, FALSE );
+	HilightEndPt();
 }
 
 
@@ -2015,7 +2013,10 @@ static void HilightEndPt( void )
 	p.x = curTurnout->endPt[(int)curTurnoutEp].pos.x - trackGauge;
 	p.y = curTurnout->endPt[(int)curTurnoutEp].pos.y - trackGauge;
 	s.x = s.y = trackGauge*2.0 /*+ turnoutD.minSize*/;
+	wDrawClearTemp( turnoutD.d );
+	wDrawSetTempMode( turnoutD.d, TRUE );
 	DrawHilight( &turnoutD, p, s, FALSE );
+	wDrawSetTempMode( turnoutD.d, FALSE );
 }
 
 
@@ -2024,16 +2025,6 @@ static void SelTurnoutEndPt(
 		coOrd pos )
 {
 	if (action != C_DOWN) return;
-
-	HilightEndPt();
-	wDrawClear( turnoutD.d );
-	if (curTurnout == NULL) {
-		return;
-	}
-	turnoutD.orig.x = curTurnout->orig.x - trackGauge;
-	turnoutD.orig.y = (curTurnout->size.y + curTurnout->orig.y) - turnoutD.size.y + trackGauge;
-	DrawSegs( &turnoutD, zero, 0.0, curTurnout->segs, curTurnout->segCnt,
-					 trackGauge, wDrawColorBlack );
 
 	curTurnoutEp = TOpickEndPoint( pos, curTurnout );
 	HilightEndPt();
@@ -2792,7 +2783,6 @@ static STATUS_T CmdTurnout(
 		return CmdTurnoutAction( action, pos );
 
 	case C_LCLICK:
-		HilightEndPt();
 		CmdTurnoutAction( action, pos );
 		HilightEndPt();
 		return C_CONTINUE;
