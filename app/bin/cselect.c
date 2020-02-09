@@ -128,7 +128,7 @@ void static CreateRotateAnchor(coOrd pos) {
 	DYNARR_APPEND(trkSeg_t,anchors_da,1);
 	int i = anchors_da.cnt-1;
 	anchors(i).type = SEG_CRVLIN;
-	anchors(i).width = 0.5;
+	anchors(i).width = d/8;
 	anchors(i).u.c.center = pos;
 	anchors(i).u.c.a0 = 180.0;
 	anchors(i).u.c.a1 = 360.0;
@@ -316,7 +316,7 @@ static void RedrawSelectedTracksBoundary()
 					coOrd p = GetTrkEndPos( trk, ep );
 					ANGLE_T a = GetTrkEndAngle( trk, ep );
 					coOrd p0, p1, p2;
-					len = trackGauge*2.0;
+					len = GetTrkGauge(trk)*2.0;
 					if (len < 0.10*mainD.scale)
 						len = 0.10*mainD.scale;
 					Translate( &p1, p, a+45, len );
@@ -327,7 +327,7 @@ static void RedrawSelectedTracksBoundary()
 					DrawLine( &mainD, p1, p2, 2, color );
 					if ( color == wDrawColorWhite ) {
 						// Fill in holes by undraw cross
-						DIST_T len2 = sqrt( trackGauge*trackGauge/2.0 );
+						DIST_T len2 = sqrt( GetTrkGauge(trk)*GetTrkGauge(trk)/2.0 );
 						DIST_T len3 = 0.1*mainD.scale;
 						color = GetTrkColor( trk, &mainD );
 						if ( mainD.scale < twoRailScale ) {
@@ -1881,10 +1881,13 @@ static STATUS_T CmdRotate(
 		coOrd pos )
 {
 	static coOrd base;
+	static coOrd orig_base;
 	static coOrd orig;
 	static ANGLE_T angle;
 	static BOOL_T drawnAngle;
 	static ANGLE_T baseAngle;
+	static BOOL_T clockwise;
+	static BOOL_T direction_set;
 	static track_p trk;
 	ANGLE_T angle1;
 	coOrd pos1;
@@ -2014,19 +2017,44 @@ static STATUS_T CmdRotate(
 /*printf( "angle 2 = %0.3f\n", angle );*/
 				return C_CONTINUE;
 			}
+			ANGLE_T diff_angle = 0.0;
 			if ( FindDistance( orig, pos ) > (6.0/75.0)*mainD.scale ) {
 				drawEnable = enableMoveDraw;
+				ANGLE_T old_angle = angle;
 				angle = FindAngle( orig, pos );
 				if (!drawnAngle) {
 					baseAngle = angle;
 					drawnAngle = TRUE;
+					direction_set = FALSE;
+				} else {
+					if (!direction_set) {
+						if (DifferenceBetweenAngles(baseAngle,angle)>=0) clockwise = TRUE;
+						else clockwise = FALSE;
+						direction_set = TRUE;
+					} else {
+						if (clockwise) {
+							if (DifferenceBetweenAngles(baseAngle,angle)<0 && fabs(DifferenceBetweenAngles(baseAngle, old_angle))<5)
+								clockwise = FALSE;
+						} else {
+							if (DifferenceBetweenAngles(baseAngle,angle)>=0 && fabs(DifferenceBetweenAngles(baseAngle,old_angle))<5)
+								clockwise = TRUE;
+						}
+					}
 				}
-				base = pos;
-				angle = NormalizeAngle( angle-baseAngle );
+				orig_base = base = pos;
+				//angle = NormalizeAngle( angle-baseAngle );
+				diff_angle = DifferenceBetweenAngles(baseAngle,angle);
 				if ( MyGetKeyState()&WKEY_SHIFT ) {
-					angle = NormalizeAngle(floor((angle+7.5)/15.0)*15.0);
+					if (clockwise) {
+						if (diff_angle<0) diff_angle+=360;
+					} else {
+						if (diff_angle>0) diff_angle-=360;
+					}
+					diff_angle = floor((diff_angle+7.5)/15.0)*15.0;
+					angle = baseAngle+diff_angle;
 				}
-				Translate( &base, orig, angle, FindDistance(orig,pos) );
+				Translate( &base, orig, angle, FindDistance(orig,pos) );  //Line one
+				Translate( &orig_base,orig, baseAngle, FindDistance(orig,pos) ); //Line two
 				CreateRotateAnchor(orig);
 				SetMoveD( FALSE, orig, angle );
 				if (FindEndIntersection(zero,orig,angle,&t1,&ep1,&t2,&ep2)) {
@@ -2036,10 +2064,11 @@ static STATUS_T CmdRotate(
 					CreateEndAnchor(pos2,FALSE);
 					CreateEndAnchor(pos1,TRUE);
 				}
+
 #ifdef DRAWCOUNT
-				InfoMessage( _("   Angle %0.3f #%ld"), angle, drawCount );
+				InfoMessage( _("   Angle %0.3f #%ld"), fabs(diff_angle), drawCount );
 #else
-				InfoMessage( _("   Angle %0.3f"), angle );
+				InfoMessage( _("   Angle %0.3f %s"), fabs(diff_angle), clockwise?"Clockwise":"Anti-Clockwise" );
 #endif
 				wFlush();
 				drawEnable = TRUE;
@@ -2103,8 +2132,35 @@ static STATUS_T CmdRotate(
 			/* DO_REDRAW */
 			if ( state == 0 )
 				break;
-			if ( rotateAlignState != 2 )
+			if ( rotateAlignState != 2 ) {
 				DrawLine( &tempD, base, orig, 0, wDrawColorBlack );
+				DrawLine( &tempD, orig_base, orig, 0, wDrawColorBlack );
+				ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig, base));
+
+				DIST_T dist = FindDistance(orig,base);
+				DIST_T width = tempD.scale*0.15/4;
+
+				if (clockwise) {
+					if (a<0) a = a + 360;
+					DrawArc( &tempD, orig, dist/2, FindAngle(orig,orig_base), a, FALSE, width, wDrawColorBlue);
+				} else {
+					if (a>0) a = a - 360;
+					DrawArc( &tempD, orig, dist/2, FindAngle(orig,base), fabs(a), FALSE, width, wDrawColorBlue);
+				}
+				DIST_T d;
+				int inx;
+				d = mainD.scale*0.25;
+				ANGLE_T arrow_a = NormalizeAngle(FindAngle(orig,orig_base)+a/2);
+				coOrd arr1,arr2,arr3;
+				Translate(&arr2,orig,arrow_a,dist/2);
+				if (clockwise) arrow_a +=90;
+				else arrow_a -=90;
+				Translate(&arr1,arr2,arrow_a+135,d/2);
+				Translate(&arr3,arr2,arrow_a-135,d/2);
+				DrawLine( &tempD, arr1, arr2, 0, wDrawColorBlue );
+				DrawLine( &tempD, arr2, arr3, 0, wDrawColorBlue );
+
+			}
 			DrawMovedTracks();
 			break;
 
