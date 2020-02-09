@@ -571,7 +571,7 @@ BOOL_T CallCornuM(dynArr_t extra_points, BOOL_T end[2], coOrd pos[2], cornuParm_
 
 	if (Da.bezc) free(Da.bezc);
 
-	Da.bezc = new_bezctx_xtrkcad(array_p,ends,spots);
+	Da.bezc = new_bezctx_xtrkcad(array_p,ends,spots,tempD.scale*0.15/4);
 
 	coOrd pos0 = pos[0];
 
@@ -649,7 +649,7 @@ EXPORT BOOL_T CallCornu0(coOrd pos[2], coOrd center[2], ANGLE_T angle[2], DIST_T
 
 	if (Da.bezc) free(Da.bezc);
 
-	Da.bezc = new_bezctx_xtrkcad(array_p,ends,spots);
+	Da.bezc = new_bezctx_xtrkcad(array_p,ends,spots,tempD.scale*0.15/4);
 
 	coOrd pos0 = pos[0];
 	type[0] = SPIRO_OPEN_CONTOUR;
