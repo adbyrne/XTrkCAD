@@ -2051,7 +2051,6 @@ static STATUS_T CmdRotate(
 				}
 				Translate( &base, orig, angle, FindDistance(orig,pos) );  //Line one
 				Translate( &orig_base,orig, baseAngle, FindDistance(orig,pos) ); //Line two
-				CreateRotateAnchor(orig);
 				SetMoveD( FALSE, orig, angle );
 				if (FindEndIntersection(zero,orig,angle,&t1,&ep1,&t2,&ep2)) {
 					coOrd pos2 = GetTrkEndPos(t2,ep2);
@@ -2129,8 +2128,8 @@ static STATUS_T CmdRotate(
 			if ( state == 0 )
 				break;
 			if ( rotateAlignState != 2 ) {
-				DrawLine( &tempD, base, orig, 0, wDrawColorBlack );
-				DrawLine( &tempD, orig_base, orig, 0, wDrawColorBlack );
+				DrawLine( &tempD, base, orig, 0, wDrawColorBlue );
+				DrawLine( &tempD, orig_base, orig, 0, wDrawColorBlue );
 				ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig, base));
 
 				DIST_T dist = FindDistance(orig,base);
