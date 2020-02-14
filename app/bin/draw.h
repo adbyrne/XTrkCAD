@@ -36,6 +36,7 @@
 #define DC_SEGTRACK		(1<<1)
 // PRINT: we're printing
 #define DC_PRINT		(1<<2)
+#define DC_NOCLIP		(1<<3)
 // CENTERLINE: draw centerlines (for bitmaps)
 #define DC_CENTERLINE		(1<<4)
 // TICKS: draw rulers on edges

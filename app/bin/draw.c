@@ -295,6 +295,7 @@ static void DDrawLine(
 	coOrd orig, size;
 	if (d == &mapD && !mapVisible)
 		return;
+	if ( (d->options&DC_NOCLIP) == 0 ) {
 	if (d->angle == 0.0) {
 		in0 = (p0.x >= d->orig.x && p0.x <= d->orig.x+d->size.x &&
 			   p0.y >= d->orig.y && p0.y <= d->orig.y+d->size.y);
@@ -312,6 +313,7 @@ static void DDrawLine(
 		}
 		if (!ClipLine( &p0, &p1, orig, d->angle, size ))
 			return;
+	}
 	}
 	d->CoOrd2Pix(d,p0,&x0,&y0);
 	d->CoOrd2Pix(d,p1,&x1,&y1);
