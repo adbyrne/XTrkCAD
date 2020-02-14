@@ -763,12 +763,6 @@ EXPORT void DrawCornuCurve(
 							int midSegs_cnt,
 							wDrawColor color
 					) {
-	long oldDrawOptions = tempD.funcs->options;
-	tempD.funcs->options = wDrawOptTemp;
-	long oldOptions = tempD.options;
-	tempD.options = DC_TICKS;
-	tempD.orig = mainD.orig;
-	tempD.angle = mainD.angle;
 	if (first_trk)
 		DrawSegs( &tempD, zero, 0.0, first_trk, 1, Da.trackGauge, drawColorBlack );
 	if (crvSegs_cnt>0 && curveSegs)
@@ -785,8 +779,6 @@ EXPORT void DrawCornuCurve(
 		DrawSegs( &tempD, zero, 0.0, extend1_trk, 1, Da.trackGauge, drawColorBlack);
 	if (extend2_trk)
 		DrawSegs( &tempD, zero, 0.0, extend2_trk, 1, Da.trackGauge, drawColorBlack);
-	tempD.funcs->options = oldDrawOptions;
-	tempD.options = oldOptions;
 
 }
 

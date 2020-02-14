@@ -263,46 +263,30 @@ static void DrawStructure(
 	struct extraData *xx = GetTrkExtraData(t);
 	coOrd p00, px0, pxy, p0y, orig, size;
 
-	if (d->options&DC_QUICK) {
-		GetSegBounds( zero, 0.0, xx->segCnt, xx->segs, &orig, &size );
-		p00.x = p0y.x = orig.x;
-		p00.y = px0.y = orig.y;
-		px0.x = pxy.x = orig.x + size.x;
-		p0y.y = pxy.y = orig.y + size.y;
-		REORIGIN1( p00, xx->angle, xx->orig )
-		REORIGIN1( px0, xx->angle, xx->orig )
-		REORIGIN1( p0y, xx->angle, xx->orig )
-		REORIGIN1( pxy, xx->angle, xx->orig )
-		DrawLine( d, p00, px0, 0, color );
-		DrawLine( d, px0, pxy, 0, color );
-		DrawLine( d, pxy, p0y, 0, color );
-		DrawLine( d, p0y, p00, 0, color );
-	} else {
-		d->options &= ~DC_NOTSOLIDLINE;
-		switch(xx->lineType) {
-		case DRAWLINESOLID:
-			break;
-		case DRAWLINEDASH:
-			d->options |= DC_DASH;
-			break;
-		case DRAWLINEDOT:
-			d->options |= DC_DOT;
-			break;
-		case DRAWLINEDASHDOT:
-			d->options |= DC_DASHDOT;
-			break;
-		case DRAWLINEDASHDOTDOT:
-			d->options |= DC_DASHDOTDOT;
-			break;
-		}
-		DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
-		d->options &= ~DC_NOTSOLIDLINE;
-		if ( ((d->funcs->options&wDrawOptTemp)==0) &&
-			 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
-			 labelScale >= d->scale &&
-			 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
-			DrawCompoundDescription( t, d, color );
-		}
+	d->options &= ~DC_NOTSOLIDLINE;
+	switch(xx->lineType) {
+	case DRAWLINESOLID:
+		break;
+	case DRAWLINEDASH:
+		d->options |= DC_DASH;
+		break;
+	case DRAWLINEDOT:
+		d->options |= DC_DOT;
+		break;
+	case DRAWLINEDASHDOT:
+		d->options |= DC_DASHDOT;
+		break;
+	case DRAWLINEDASHDOTDOT:
+		d->options |= DC_DASHDOTDOT;
+		break;
+	}
+	DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
+	d->options &= ~DC_NOTSOLIDLINE;
+	if ( ((d->options & DC_SIMPLE)==0) &&
+		 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
+		 labelScale >= d->scale &&
+		 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
+		DrawCompoundDescription( t, d, color );
 	}
 }
 

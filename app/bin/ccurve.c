@@ -476,7 +476,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 
 	case C_MOVE:
 		if (Da.state<0) return C_CONTINUE;
-		//mainD.funcs->options = wDrawOptTemp;
 		if ( Da.state == 0 ) {
 		    Da.pos1 = pos;
 			rc = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
@@ -541,7 +540,6 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		/*no break*/
 	case C_UP:
 		if (Da.state<0) return C_CONTINUE;
-		//mainD.funcs->options = wDrawOptTemp;
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord) || (curveMode == crvCmdFromChord && !Da.trk))) {
 			SnapPos( &pos );
 			Da.pos1 = pos;

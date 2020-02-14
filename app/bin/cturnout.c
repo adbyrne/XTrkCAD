@@ -681,24 +681,14 @@ static void DrawTurnout(
 
 	widthOptions = DTS_LEFT|DTS_RIGHT;
     
-	if (GetTrkWidth(trk) == 2)
-		widthOptions |= DTS_THICK2;
-	if ((GetTrkWidth(trk) == 3) || (d->options & DC_THICK))
-		widthOptions |= DTS_THICK3;
 	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
-	if ( tieDrawMode!=TIEDRAWMODE_NONE &&
-		 d!=&mapD &&
-		 (d->options&DC_TIES)!=0 &&
-		 d->scale<scale2rail/2 )
-		DrawSegsO( d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions|DTS_TIES| DTS_NOCENTER );
-	else
-		DrawSegsO( d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions | DTS_NOCENTER );  // no curve center for turnouts
+	DrawSegsO( d, trk, xx->orig, xx->angle, xx->segs, xx->segCnt, GetTrkGauge(trk), color, widthOptions | DTS_NOCENTER );  // no curve center for turnouts
 
 
 	for (i=0; i<GetTrkEndPtCnt(trk); i++) {
 		DrawEndPt( d, trk, i, color );
 	}
-	if ( ((d->funcs->options&wDrawOptTemp)==0) &&
+	if ( (d->options & DC_SIMPLE) == 0 &&
 		 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
 		 labelScale >= d->scale &&
 		 ( GetTrkBits( trk ) & TB_HIDEDESC ) == 0 ) {

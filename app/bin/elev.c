@@ -1300,8 +1300,7 @@ EXPORT void DrawTrackElev( track_cp trk, drawCmd_p d, BOOL_T drawIt )
 		 (labelScale < d->scale) ||
 		 (!GetTrkOnElevPath( trk, &elev )) ||
 		 ((GetTrkBits(trk)&TB_ELEVPATH) == 0) ||
-		 (d->funcs->options & wDrawOptTemp) != 0 ||
-		 (d->options & DC_QUICK) != 0 )
+		 (d->options & DC_SIMPLE) != 0 )
 		return;
 
 	if ( !GetCurveMiddle( trk, &pos ) ) {

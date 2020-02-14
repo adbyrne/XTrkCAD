@@ -2592,7 +2592,7 @@ static void NewTurnPrint(
 						newTurnout_d.size.y/2.0 );
 				DrawStraightTrack( &newTurnout_d, pos, p0,
 						tempEndPts(ep).angle+270.0,
-						NULL, newTurnTrackGauge, wDrawColorBlack, 0 );
+						NULL, wDrawColorBlack, 0 );
 			}
 
 			if ( !wPrintPageEnd( newTurnout_d.d ) )

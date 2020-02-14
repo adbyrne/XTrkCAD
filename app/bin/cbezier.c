@@ -483,7 +483,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
  *
  */
 
-EXPORT void DrawBezCurve(trkSeg_p control_arm1,
+static void DrawBezCurve(trkSeg_p control_arm1,
 					int cp1Segs_cnt,
 					trkSeg_p control_arm2,
 					int cp2Segs_cnt,
@@ -491,20 +491,12 @@ EXPORT void DrawBezCurve(trkSeg_p control_arm1,
 					int crvSegs_cnt,
 					wDrawColor color
 					) {
-	long oldDrawOptions = tempD.funcs->options;
-	tempD.funcs->options = wDrawOptTemp;
-	long oldOptions = tempD.options;
-	tempD.options = DC_TICKS;
-	tempD.orig = mainD.orig;
-	tempD.angle = mainD.angle;
 	if (crvSegs_cnt && curveSegs)
 		DrawSegs( &tempD, zero, 0.0, curveSegs, crvSegs_cnt, Da.trackGauge, color );
 	if (cp1Segs_cnt && control_arm1)
 		DrawSegs( &tempD, zero, 0.0, control_arm1, cp1Segs_cnt, Da.trackGauge, drawColorBlack );
 	if (cp2Segs_cnt && control_arm2)
 		DrawSegs( &tempD, zero, 0.0, control_arm2, cp2Segs_cnt, Da.trackGauge, drawColorBlack );
-	tempD.funcs->options = oldDrawOptions;
-	tempD.options = oldOptions;
 
 }
 

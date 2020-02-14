@@ -326,7 +326,7 @@ static void ProfileCoOrd2Pix( drawCmd_p, coOrd, wPos_t*, wPos_t* );
 static drawCmd_t screenProfileD = {
 		NULL,
 		&screenDrawFuncs,
-		DC_NOCLIP,
+		0,
 		1.0,
 		0.0,
 		{0.0,0.0}, {0.0,0.0},
@@ -511,7 +511,7 @@ static void RedrawProfileW( void )
 static drawCmd_t printProfileD = {
 		NULL,
 		&printDrawFuncs,
-		DC_PRINT|DC_NOCLIP,
+		DC_PRINT,
 		1.0,
 		0.0,
 		{0.0,0.0}, {1.0,1.0},

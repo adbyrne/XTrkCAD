@@ -686,48 +686,6 @@ static DIST_T DistanceJoint(
 }
 
 
-#ifdef LATER
-static void DrawJointSegment1(
-		drawCmd_p d,
-		wIndex_t cnt,
-		DIST_T l0,
-		DIST_T l1,
-		DIST_T R,
-		DIST_T L,
-		coOrd P,
-		ANGLE_T A,
-		BOOL_T N,
-		track_p trk,
-		DIST_T trackGauge,
-		wDrawColor color )
-/*
- * Draw a transition-curve from (l0) to (l1),
- * at angle (A) from origin (P).
- */
-{
-	DIST_T l, lincr;
-	wIndex_t i;
-	coOrd p0, p1;
-	long widthOptions = DTS_RIGHT|DTS_LEFT|DTS_TIES;
-
-	if (GetTrkWidth(trk) == 2)
-		widthOptions |= DTS_THICK2;
-	if (GetTrkWidth(trk) == 3)
-		widthOptions |= DTS_THICK3;
-
-	l = l0;
-	lincr = (l1-l0)/cnt;
-	GetJointPos( &p0, NULL, l0, R, L, P, A, N );
-	for (i=1; i<=cnt; i++) {
-		l += lincr;
-		GetJointPos( &p1, NULL, l, R, L, P, A, N );
-		DrawStraightTrack( d, p0, p1,
-				FindAngle( p1, p0 ), trk, trackGauge, color, widthOptions );
-		p0 = p1;
-	}
-}
-#endif
-
 static void DrawJointSegment(
 		drawCmd_p d,
 		wIndex_t cnt,
@@ -756,22 +714,16 @@ static void DrawJointSegment(
 	ComputeJoinPos( l0, R, L, NULL, &a0, NULL, NULL );
 	ComputeJoinPos( l1, R, L, NULL, &a1, NULL, NULL );
 	a1 = a1-a0;
-	if ( (d->options&DC_QUICK) ) {
-		cnt1 = 1;
-	} else {
-		cnt1 = (int)floor(a1/JOINT_ANGLE_INCR) + 1;
-		a1 /= cnt1;
-	}
+	cnt1 = (int)floor(a1/JOINT_ANGLE_INCR) + 1;
+	a1 /= cnt1;
 
-	widthOptions |= DTS_RIGHT|DTS_LEFT|DTS_TIES;
-	if (GetTrkBridge(trk)) widthOptions |= DTS_BRIDGE;
-		else widthOptions &=~DTS_BRIDGE;
+	widthOptions |= DTS_RIGHT|DTS_LEFT;
 	GetJointPos( &p0, NULL, l0, R, L, P, A, N );
 	for (i=1; i<=cnt1; i++) {
 		a0 += a1;
 		ll = sqrt( sin(D2R(a0)) * 2 * R * L );
 		GetJointPos( &p1, NULL, ll, R, L, P, A, N );
-		DrawStraightTrack( d, p0, p1, FindAngle( p1, p0 ), trk, trackGauge,
+		DrawStraightTrack( d, p0, p1, FindAngle( p1, p0 ), trk,
 								color, widthOptions );
 		p0 = p1;
 	}
@@ -852,10 +804,6 @@ LOG( log_ease, 4, ( "DJT( (X%0.3f Y%0.3f A%0.3f) \n", pos.x, pos.y, angle ) )
 #ifdef LATER
 	scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
 
-	if (options&DTS_THICK2)
-		width = 2;
-	if (options&DTS_THICK3)
-		width = 3;
 #ifdef WINDOWS
 	width *= (wDrawWidth)(d->dpi/mainD.dpi);
 #else
@@ -869,24 +817,22 @@ LOG( log_ease, 4, ( "DJT( (X%0.3f Y%0.3f A%0.3f) \n", pos.x, pos.y, angle ) )
 		/* print segments about 0.20" long */
 		len = (l0-l1)/(0.20*d->scale);
 		cnt = (int)ceil(fabs(len));
-		if (cnt == 0 || (d->options&DC_QUICK)) cnt = 1;
+		if (cnt == 0) cnt = 1;
 		DrawJointSegment( d, cnt, l0, l1, R, L, pos,
 						angle, negate, trackGauge, color, options, trk );
 	} else {
 		/* print segments about 0.20" long */
 		cnt = (int)ceil((l0)/(0.20*d->scale));
-		if (cnt == 0 || (d->options&DC_QUICK)) cnt = 1;
+		if (cnt == 0) cnt = 1;
 		DrawJointSegment( d, cnt, 0, l0, R, L, pos,
 						angle, negate, trackGauge, color, options, trk );
 		cnt = (int)ceil((l1)/(0.20*d->scale));
-		if (cnt == 0 || (d->options&DC_QUICK)) cnt = 1;
+		if (cnt == 0) cnt = 1;
 		DrawJointSegment( d, cnt, 0, l1, R, L, pos,
 						angle+180, negate, trackGauge, color, options, trk );
 	}
-	if ( (d->funcs->options & wDrawOptTemp) == 0 && (d->options&DC_QUICK) == 0 ) {
-		DrawEndPt( d, trk, ep0, color );
-		DrawEndPt( d, trk, ep1, color );
-	}
+	DrawEndPt( d, trk, ep0, color );
+	DrawEndPt( d, trk, ep1, color );
 }
 
 
@@ -901,10 +847,6 @@ static void DrawJoint(
 	struct extraData * xx = GetTrkExtraData(trk);
 	long widthOptions = 0;
 
-	if (GetTrkWidth(trk) == 2)
-		widthOptions = DTS_THICK2;
-	if (GetTrkWidth(trk) == 3)
-		widthOptions = DTS_THICK3;
 	DrawJointTrack( d, xx->pos, xx->angle, xx->l0, xx->l1, xx->R, xx->L, xx->negate, xx->flip, xx->Scurve, trk, 0, 1, GetTrkGauge(trk), color, widthOptions );
 }
 
@@ -1453,7 +1395,7 @@ static BOOL_T MakeParallelJoint(
 			dl = fabs(l0-l1);
 			len = dl/(0.20*mainD.scale);
 			cnt = (int)ceil(len);
-			if (cnt == 0 || (mainD.options&DC_QUICK)) cnt = 1;
+			if (cnt == 0) cnt = 1;
 			dl /= cnt;
 			DYNARR_SET( trkSeg_t, tempSegs_da, cnt );
 			for ( inx=0; inx<cnt; inx++ ) {
@@ -1476,7 +1418,7 @@ static BOOL_T MakeParallelJoint(
 		dl = fabs(l0-l1);
 		len = dl/(0.20*mainD.scale);
 		cnt = (int)ceil(len);
-		if (cnt == 0 || (mainD.options&DC_QUICK)) cnt = 1;
+		if (cnt == 0) cnt = 1;
 		dl /= cnt;
 		DYNARR_SET( trkSeg_t, tempSegs_da, cnt );
 		for ( inx=0; inx<cnt; inx++ ) {
@@ -1852,7 +1794,7 @@ track_p NewTrack( TRKINX_T a, TRKTYP_T b, EPINX_T c, TRKTYP_T d )
 }
 
 void DrawStraightTrack( drawCmd_p a, coOrd b, coOrd c, ANGLE_T d,
-						DIST_T trackGauge, wDrawColor color, int opts )
+						track_p trk, wDrawColor color, int opts )
 {
 }
 

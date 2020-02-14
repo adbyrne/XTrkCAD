@@ -1979,7 +1979,7 @@ static char *dispmodeLabels[] = { N_("Information"), N_("Customize"), NULL };
 static drawCmd_t carDlgD = {
 		NULL,
 		&screenDrawFuncs,
-		DC_NOCLIP,
+		0,
 		1.0,
 		0.0,
 		{ 0, 0 }, { 0, 0 },

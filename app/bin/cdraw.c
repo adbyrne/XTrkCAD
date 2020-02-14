@@ -1273,8 +1273,7 @@ static void DrawDraw( track_p t, drawCmd_p d, wDrawColor color )
 	else if (xx->lineType == DRAWLINEDOT) d->options |= DC_DOT;
 	else if (xx->lineType == DRAWLINEDASHDOT) d->options |= DC_DASHDOT;
 	else if (xx->lineType == DRAWLINEDASHDOTDOT) d->options |= DC_DASHDOTDOT;
-	if ( (d->funcs->options&DC_QUICK) == 0 )
-		DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
+	DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
 	d->options = d->options&~(DC_NOTSOLIDLINE);
 }
 

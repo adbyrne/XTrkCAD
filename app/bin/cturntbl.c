@@ -182,7 +182,7 @@ static void DrawTurntable( track_p t, drawCmd_p d, wDrawColor color )
 	struct extraData *xx = GetTrkExtraData(t);
 	coOrd p0, p1;
 	EPINX_T ep;
-	long widthOptions = DTS_LEFT|DTS_RIGHT|DTS_TIES;
+	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
 
 	if ( !ValidateTurntablePosition(t) ) {
@@ -196,17 +196,12 @@ static void DrawTurntable( track_p t, drawCmd_p d, wDrawColor color )
 	if (color == wDrawColorBlack)
 		color = normalColor;
 	DrawArc( d, xx->pos, xx->radius, 0.0, 360.0, 0, (color == wDrawColorBlueHighlight)?3:0, color );
-	if ( programMode != MODE_DESIGN )
-		return;
-	if ( (d->options&DC_QUICK) == 0 ) {
-		if (color == wDrawColorBlueHighlight) widthOptions |= DTS_THICK3;
-		DrawStraightTrack( d, p0, p1, FindAngle(p0,p1), t, GetTrkGauge(t), color, widthOptions );
-		for ( ep=0; ep<GetTrkEndPtCnt(t); ep++ ) {
-			if (GetTrkEndTrk(t,ep) != NULL )
-				DrawEndPt( d, t, ep, color );
-		}
+	DrawStraightTrack( d, p0, p1, FindAngle(p0,p1), t, color, widthOptions );
+	for ( ep=0; ep<GetTrkEndPtCnt(t); ep++ ) {
+		if (GetTrkEndTrk(t,ep) != NULL )
+			DrawEndPt( d, t, ep, color );
 	}
-	if ( ((d->funcs->options&wDrawOptTemp)==0) &&
+	if ( ((d->options&DC_SIMPLE)==0) &&
 		 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
 		 labelScale >= d->scale ) {
 		LabelLengths( d, t, color );
@@ -704,7 +699,7 @@ static BOOL_T QueryTurntable( track_p trk, int query )
 	switch ( query ) {
 	case Q_REFRESH_JOIN_PARAMS_ON_MOVE:
 	case Q_CANNOT_PLACE_TURNOUT:
-	case Q_DONT_DRAW_ENDPOINT:
+	case Q_NODRAWENDPT:
 	case Q_CAN_NEXT_POSITION:
 	case Q_ISTRACK:
 	case Q_NOT_PLACE_FROGPOINTS:
@@ -742,7 +737,7 @@ static void DrawTurntablePositionIndicator( track_p trk, wDrawColor color )
 	pos0 = GetTrkEndPos(trk,xx->currEp);
 	angle = FindAngle( xx->pos, pos0 );
 	PointOnCircle( &pos1, xx->pos, xx->radius, angle+180.0 );
-	DrawLine( &mainD, pos0, pos1, 3, color );
+	DrawLine( &tempD, pos0, pos1, 3, color );
 }
 
 static void AdvanceTurntablePositionIndicator(
@@ -759,7 +754,6 @@ static void AdvanceTurntablePositionIndicator(
 	angle1 = FindAngle( xx->pos, pos );
 	if ( !FindTurntableEndPt( trk, &angle1, &ep, &reverse ) )
 		return;
-	DrawTurntablePositionIndicator( trk, wDrawColorWhite );
 	angle0 = GetTrkEndAngle(trk,xx->currEp);
 	if ( ep == xx->currEp ) {
 		Rotate( posR, xx->pos, 180.0 );
@@ -777,7 +771,6 @@ static void AdvanceTurntablePositionIndicator(
 	}
 	*angleR = angle1;
 	xx->currEp = ep;
-	DrawTurntablePositionIndicator( trk, selectedColor );
 }
 
 

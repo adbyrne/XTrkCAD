@@ -886,15 +886,12 @@ EXPORT void DoRefreshCompound( void )
 
 
 static drawCmd_t tempSegsD = {
-		NULL, &tempSegDrawFuncs, DC_GROUP, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
+		NULL, &tempSegDrawFuncs, 0, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
 EXPORT void WriteSelectedTracksToTempSegs( void )
 {
 	track_p trk;
-	long oldOptions;
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 	tempSegsD.dpi = mainD.dpi;
-	oldOptions = tempSegDrawFuncs.options;
-	tempSegDrawFuncs.options = wDrawOptTemp;
 	for ( trk=NULL; TrackIterate(&trk); ) {
 		if ( GetTrkSelected( trk ) ) {
 			if ( IsTrack( trk ) )
@@ -904,7 +901,6 @@ EXPORT void WriteSelectedTracksToTempSegs( void )
 			SetTrkBits( trk, TB_SELECTED );
 		}
 	}
-	tempSegDrawFuncs.options = oldOptions;
 }
 
 static char rescaleFromScale[20];
@@ -1185,7 +1181,7 @@ static ANGLE_T moveAngle;
 static coOrd moveD_hi, moveD_lo;
 
 static drawCmd_t moveD = {
-		NULL, &tempDrawFuncs, 0/*-DC_SIMPLE*/, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
+		NULL, &tempSegDrawFuncs, DC_SIMPLE, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
 
 
 
@@ -1217,7 +1213,6 @@ static void AccumulateTracks( void )
 					movedCnt++;
 				}
 		}
-		moveD.options &= ~DC_QUICK;
 
 	InfoCount( movedCnt );
 	/*wDrawDelayUpdate( moveD.d, FALSE );*/
@@ -1250,10 +1245,6 @@ static void GetMovedTracks( BOOL_T undraw )
 		memcpy( tlist2, tlist_da.ptr, (tlist_da.cnt) * sizeof *(track_p*)0 );
 	tlist2[tlist_da.cnt] = NULL;
 	DYNARR_RESET( trkSeg_p, tempSegs_da );
-	moveD = mainD;
-	moveD.funcs = &tempSegDrawFuncs;
-	moveD.options = 0;
-	tempSegDrawFuncs.options = wDrawOptTemp;
 	moveOrig = mainD.orig;
 	movedCnt = 0;
 	InfoCount(0);
@@ -1264,8 +1255,6 @@ static void GetMovedTracks( BOOL_T undraw )
 	AccumulateTracks();
 	if (undraw) {
 		DrawSelectedTracksD( &mainD, wDrawColorWhite );
-		/*DrawSegs( &mainD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt,
-						trackGauge, wDrawColorBlack );*/
 	}
 }
 
@@ -1486,7 +1475,6 @@ static void MoveTracks(
 	}
 	wSetCursor( mainD.d, defaultCursor );
 	if (undo) UndoEnd();
-	tempSegDrawFuncs.options = 0;
 	InfoCount( trackCount );
 }
 

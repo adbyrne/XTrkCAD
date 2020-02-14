@@ -101,10 +101,12 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
     if (d->scale >= 16) {
         return;
     }
-	if ((d->funcs->options & wDrawOptTemp)) {
+	if ((d->options & DC_SIMPLE)) {
 		//while the icon is moved, draw a square
+		//because CmdMove draws all selected object into tempSeg and
+		//tempSegDrawFuncs doesn't have a BitMap drawing func
 		DIST_T dist;
-		dist = 0.1*d->scale;
+		dist = 0.1*mainD.scale;
 		p[0].x = p[1].x = xx->pos.x - dist;
 		p[2].x = p[3].x = xx->pos.x + dist;
 		p[1].y = p[2].y = xx->pos.y - dist;

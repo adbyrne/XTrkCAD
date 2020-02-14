@@ -274,20 +274,12 @@ static DIST_T DistanceStraight( track_p t, coOrd * p )
 
 static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 {
-	long widthOptions = DTS_LEFT|DTS_RIGHT|DTS_TIES;
-	if (GetTrkWidth(t) == 2)
-		widthOptions |= DTS_THICK2;
-	if ((GetTrkWidth(t) == 3) || (d->options & DC_THICK))
-		widthOptions |= DTS_THICK3;
-	if (GetTrkBridge(t)) widthOptions |= DTS_BRIDGE;
-		else widthOptions &=~DTS_BRIDGE;
+	long widthOptions = DTS_LEFT|DTS_RIGHT;
 	DrawStraightTrack( d, GetTrkEndPos(t,0), GetTrkEndPos(t,1),
 				GetTrkEndAngle(t,0),
-				t, GetTrkGauge(t), color, widthOptions );
-	if ( (d->funcs->options & wDrawOptTemp) == 0 && (d->options & DC_QUICK) == 0 ) {
-		DrawEndPt( d, t, 0, color );
-		DrawEndPt( d, t, 1, color );
-	}
+				t, color, widthOptions );
+	DrawEndPt( d, t, 0, color );
+	DrawEndPt( d, t, 1, color );
 }
 
 static void DeleteStraight( track_p t )

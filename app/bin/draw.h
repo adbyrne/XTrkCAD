@@ -26,20 +26,26 @@
 #include "common.h"
 #include "wlib.h"
 
-#define DC_TICKS		(1<<1)
+// drawCmd_t.options
+//
+// SIMPLE: draw simplified objects.
+// 	No endpts, descriptions, wide lines and arcs, ties, centerlines, special color
+//	Draw simple lines for: wide lines and arcs, dimlines, benchwork, tableedge, filled poly andcircle
+#define DC_SIMPLE		(1<<0)
+// SEGTRACK: draw tracks as segments (SEG_*TRK) instead of lines and arcs
+#define DC_SEGTRACK		(1<<1)
+// PRINT: we're printing
 #define DC_PRINT		(1<<2)
-#define DC_NOCLIP		(1<<3)
-#define DC_QUICK		(1<<4)
-#define DC_DASH			(1<<5)
-#define DC_SIMPLE		(1<<6)
-#define DC_GROUP		(1<<7)
-#define DC_CENTERLINE	(1<<8)
-#define DC_SEGTRACK		(1<<9)
-#define DC_TIES			(1<<10)
-#define DC_THICK        (1<<11)
-#define DC_DOT          (1<<12)
-#define DC_DASHDOT      (1<<13)
-#define DC_DASHDOTDOT   (1<<14)
+// CENTERLINE: draw centerlines (for bitmaps)
+#define DC_CENTERLINE		(1<<4)
+// TICKS: draw rulers on edges
+#define DC_TICKS		(1<<5)
+// Line styles
+#define DC_THICK        	(1<<7)
+#define DC_DASH			(1<<12)
+#define DC_DOT          	(1<<13)
+#define DC_DASHDOT      	(1<<14)
+#define DC_DASHDOTDOT   	(1<<15)
 
 #define DC_NOTSOLIDLINE (DC_DASH|DC_DOT|DC_DASHDOT|DC_DASHDOTDOT)
 

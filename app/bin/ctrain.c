@@ -1193,6 +1193,7 @@ static void ControllerDialogUpdate(
         wButtonSetLabel((wButton_p)pg->paramPtr[I_DIR].control,
                         (dlg->direction?_("Reverse"):_("Forward")));
         SetTrainDirection(dlg->train);
+	TempRedraw(); // ctrain: change direction
         break;
 
     case I_STOP:

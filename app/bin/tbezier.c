@@ -527,33 +527,16 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 		return;
 	}
 
-	if (GetTrkWidth(t) == 2)
-		widthOptions |= DTS_THICK2;
-	if ((GetTrkWidth(t) == 3) || (d->options & DC_THICK))
-		widthOptions |= DTS_THICK3;
-	
-
-	if ( ((d->funcs->options&wDrawOptTemp)==0) &&
+	if ( ((d->options&DC_SIMPLE)==0) &&
 		 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
 		 labelScale >= d->scale &&
 		 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
 		DrawBezierDescription( t, d, color );
 	}
 	DIST_T scale2rail = (d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale;
-	if (GetTrkBridge(t)) widthOptions |= DTS_BRIDGE;
-		else widthOptions &=~DTS_BRIDGE;
-	if ( tieDrawMode!=TIEDRAWMODE_NONE &&
-			 d!=&mapD &&
-			 (d->options&DC_TIES)!=0 &&
-			 d->scale<scale2rail/2 )
-		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions|DTS_TIES);
-	else
-		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
-	if ( (d->funcs->options & wDrawOptTemp) == 0 &&
-		 (d->options&DC_QUICK) == 0) {
-		DrawEndPt( d, t, 0, color );
-		DrawEndPt( d, t, 1, color );
-	}
+	DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, GetTrkGauge(t), color, widthOptions);
+	DrawEndPt( d, t, 0, color );
+	DrawEndPt( d, t, 1, color );
 }
 
 static void DeleteBezier( track_p t )

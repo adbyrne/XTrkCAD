@@ -295,7 +295,6 @@ static void DDrawLine(
 	coOrd orig, size;
 	if (d == &mapD && !mapVisible)
 		return;
-	if ( (d->options&DC_NOCLIP) == 0 ) {
 	if (d->angle == 0.0) {
 		in0 = (p0.x >= d->orig.x && p0.x <= d->orig.x+d->size.x &&
 			   p0.y >= d->orig.y && p0.y <= d->orig.y+d->size.y);
@@ -313,7 +312,6 @@ static void DDrawLine(
 		}
 		if (!ClipLine( &p0, &p1, orig, d->angle, size ))
 			return;
-	}
 	}
 	d->CoOrd2Pix(d,p0,&x0,&y0);
 	d->CoOrd2Pix(d,p1,&x1,&y1);
@@ -930,7 +928,7 @@ static void TempSegPoly(
 	tempSegs(tempSegs_da.cnt-1).u.p.pts = (pts_t *)MyMalloc(cnt*sizeof(pts_t));
 	for (int i=0;i<=cnt-1;i++) {
 		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt = pts[i];
-		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt_type = (d->options&DC_GROUP)?types[i]:wPolyLineStraight;
+		tempSegs(tempSegs_da.cnt-1).u.p.pts[i].pt_type = (d->options&DC_SIMPLE)==0?types[i]:wPolyLineStraight;
 	}
 
 }
@@ -1002,7 +1000,7 @@ EXPORT drawCmd_t tempD = {
 		NULL, &tempDrawFuncs, DC_TICKS|DC_SIMPLE, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix };
 
 EXPORT drawCmd_t mapD = {
-		NULL, &screenDrawFuncs, 0, INIT_MAP_SCALE, 0.0, {0.0,0.0}, {96.0,48.0}, Pix2CoOrd, CoOrd2Pix };
+		NULL, &screenDrawFuncs, DC_SIMPLE, INIT_MAP_SCALE, 0.0, {0.0,0.0}, {96.0,48.0}, Pix2CoOrd, CoOrd2Pix };
 
 
 /*****************************************************************************

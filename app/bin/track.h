@@ -104,7 +104,6 @@ typedef struct {
 #define Q_IGNORE_EASEMENT_ON_EXTEND		(2)
 #define Q_REFRESH_JOIN_PARAMS_ON_MOVE	(3)
 #define Q_CANNOT_PLACE_TURNOUT			(4)
-#define Q_DONT_DRAW_ENDPOINT			(5)
 #define Q_DRAWENDPTV_1					(6)
 #define Q_CAN_PARALLEL					(7)
 #define Q_CAN_MODIFYRADIUS				(8)
@@ -523,7 +522,7 @@ BOOL_T CheckTrackLayer( track_p );
 BOOL_T CheckTrackLayerSilent(track_p);
 void CopyAttributes( track_p, track_p );
 
-#define GetTrkGauge( T )		GetScaleTrackGauge(GetTrkScale(T))
+DIST_T GetTrkGauge( track_cp );
 #define GetTrkScaleName( T )	GetScaleName(GetTrkScale(T))
 void SetTrkEndPtCnt( track_p, EPINX_T );
 BOOL_T WriteEndPt( FILE *, track_cp, EPINX_T );
@@ -557,20 +556,14 @@ BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST
 
 #define DTS_LEFT		(1<<0)
 #define DTS_RIGHT		(1<<1)
-#define DTS_THICK2		(1<<2)
-#define DTS_THICK3		(1<<3)
-#define DTS_TIES		(1<<4)
 #define DTS_NOCENTER	(1<<5)
-#define DTS_BRIDGE      (1<<6)
 #define DTS_DOT			(1<<7)
 #define DTS_DASH		(1<<8)
 #define DTS_DASHDOT		(1<<9)
 #define DTS_DASHDOTDOT  (1<<10)
 
-void DrawCurvedTies( drawCmd_p, track_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, wDrawColor );
-void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_p, DIST_T, wDrawColor, long );
-void DrawStraightTies( drawCmd_p, track_p, coOrd, coOrd, wDrawColor );
-void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_p, DIST_T, wDrawColor, long );
+void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_cp, wDrawColor, long );
+void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
 
 ANGLE_T GetAngleAtPoint( track_p, coOrd, EPINX_T *, EPINX_T * );
 DIST_T GetTrkDistance( track_cp, coOrd *);

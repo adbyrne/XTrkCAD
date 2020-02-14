@@ -665,13 +665,8 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 	struct extraData *xx = GetTrkExtraData(t);
 	ANGLE_T a0, a1;
 	track_p tt = t;
-	long widthOptions = DTS_LEFT|DTS_RIGHT|DTS_TIES;
+	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
-
-	if (GetTrkWidth(t) == 2)
-		widthOptions |= DTS_THICK2;
-	if ((GetTrkWidth(t) == 3) || (d->options & DC_THICK))
-		widthOptions |= DTS_THICK3;
 	GetCurveAngles( &a0, &a1, t );
 	if (xx->circle) {
 		tt = NULL;
@@ -680,24 +675,18 @@ static void DrawCurve( track_p t, drawCmd_p d, wDrawColor color )
 		a0 = 0.0;
 		a1 = 360.0;
 	}
-	if ( ((d->funcs->options&wDrawOptTemp)==0) &&
+	if (     ((d->options&(DC_SIMPLE|DC_SEGTRACK))==0) &&
 		 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
 		 labelScale >= d->scale &&
 		 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
 		DrawCurveDescription( t, d, color );
 	}
-	if (GetTrkBridge(t)) widthOptions |= DTS_BRIDGE;
-	else widthOptions &=~DTS_BRIDGE;
 
 	DrawCurvedTrack( d, xx->pos, xx->radius, a0, a1,
 				GetTrkEndPos(t,0), GetTrkEndPos(t,1),
-				t, GetTrkGauge(t), color, widthOptions );
-	if ( (d->funcs->options & wDrawOptTemp) == 0 &&
-		 (d->options&DC_QUICK) == 0 &&
-		 (!IsCurveCircle(t)) ) {
-		DrawEndPt( d, t, 0, color );
-		DrawEndPt( d, t, 1, color );
-	}
+				t, color, widthOptions );
+	DrawEndPt( d, t, 0, color );
+	DrawEndPt( d, t, 1, color );
 }
 
 static void DeleteCurve( track_p t )
@@ -1300,6 +1289,8 @@ static BOOL_T QueryCurve( track_p trk, int query )
 		if ((xx->helixTurns >0) || xx->circle) return TRUE;
 		return FALSE;
 		break;
+	case Q_NODRAWENDPT:
+		return xx->circle;
 	default:
 		return FALSE;
 	}
