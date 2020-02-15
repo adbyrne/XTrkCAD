@@ -1341,8 +1341,8 @@ static void DrawMovedTracks( void )
 				CallCornu0(&pos[0],&center[0],&angle[0],&radius[0],&cornu_segs, FALSE);
 				trkSeg_p cornu_p = &DYNARR_N(trkSeg_t,cornu_segs,0);
 
-				DrawSegs(&tempD, zero, 0.0, cornu_p,cornu_segs.cnt,
-						0.0, wDrawColorBlack );
+				DrawSegsO(&tempD, trk, zero, 0.0, cornu_p,cornu_segs.cnt,
+						GetTrkGauge(trk), wDrawColorBlack, DTS_LEFT|DTS_RIGHT );
 			}
 
 		}
