@@ -1531,6 +1531,7 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 			if ((ct = GetTrkEndTrk(ts,i))!=NULL) {
 				if (GetTrkSelected(ct) || QueryTrack(ts,Q_IS_CORNU)) continue;   // Another selected track or Cornu - ignore
 			}
+
 			coOrd pos1 = GetTrkEndPos(ts,i);
 			if (angle != 0.0)
 				Rotate(&pos1,orig,angle);
@@ -1542,6 +1543,7 @@ wBool_t FindEndIntersection(coOrd base, coOrd orig, ANGLE_T angle, track_p * t1,
 			pos2 = pos1;
 			track_p tt;
 			if ((tt=OnTrackIgnore(&pos2,FALSE,TRUE,ts))!=NULL) {
+				if (GetTrkGauge(ts) != GetTrkGauge(tt)) continue;	//Ignore if different gauges
 				if (!GetTrkSelected(tt)) {							//Ignore if new track is selected
 					EPINX_T epp = PickUnconnectedEndPointSilent(pos2, tt);
 					if (epp>=0) {
