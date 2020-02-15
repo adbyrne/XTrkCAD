@@ -2053,9 +2053,9 @@ static STATUS_T CmdRotate(
 				}
 
 #ifdef DRAWCOUNT
-				InfoMessage( _("   Angle %0.3f #%ld"), fabs(diff_angle), drawCount );
+				InfoMessage( _("Angle %0.3f #%ld"), fabs(diff_angle), drawCount );
 #else
-				InfoMessage( _("   Angle %0.3f %s"), fabs(diff_angle), clockwise?"Clockwise":"Anti-Clockwise" );
+				InfoMessage( _("Angle %0.3f %s"), fabs(diff_angle), clockwise?"Clockwise":"Counter-Clockwise" );
 #endif
 				wFlush();
 				drawEnable = TRUE;
