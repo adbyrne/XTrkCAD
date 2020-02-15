@@ -1450,6 +1450,7 @@ static void MoveTracks(
 							ANGLE_T end_angle;
 							end_pos = trackParms.cornuEnd[i];
 							end_center = trackParms.cornuCenter[i];
+							Rotate(&end_pos, orig, angle);
 							Rotate(&end_center, orig, angle);
 							end_angle = NormalizeAngle( trackParms.cornuAngle[i] + angle );
 							SetCornuEndPt(trk,i,end_pos,end_center,end_angle,trackParms.cornuRadius[i]);
@@ -2002,8 +2003,9 @@ static STATUS_T CmdRotate(
 				return C_CONTINUE;
 			}
 			ANGLE_T diff_angle = 0.0;
-			if ( FindDistance( orig, pos ) > (6.0/75.0)*mainD.scale ) {
-				drawEnable = enableMoveDraw;
+			base = pos;
+			drawEnable = enableMoveDraw;
+			if ( FindDistance( orig, pos ) > (30.0/75.0)*mainD.scale ) {
 				ANGLE_T old_angle = angle;
 				angle = FindAngle( orig, pos );
 				if (!drawnAngle) {
@@ -2039,11 +2041,11 @@ static STATUS_T CmdRotate(
 				}
 				Translate( &base, orig, angle, FindDistance(orig,pos) );  //Line one
 				Translate( &orig_base,orig, baseAngle, FindDistance(orig,pos) ); //Line two
-				SetMoveD( FALSE, orig, angle );
-				if (FindEndIntersection(zero,orig,angle,&t1,&ep1,&t2,&ep2)) {
+				SetMoveD( FALSE, orig, NormalizeAngle( angle-baseAngle ) );
+				if (FindEndIntersection(zero,orig,NormalizeAngle( angle-baseAngle ),&t1,&ep1,&t2,&ep2)) {
 					coOrd pos2 = GetTrkEndPos(t2,ep2);
 					coOrd pos1 = GetTrkEndPos(t1,ep1);
-					Rotate(&pos2,orig,angle);
+					Rotate(&pos2,orig,NormalizeAngle( angle-baseAngle ));
 					CreateEndAnchor(pos2,FALSE);
 					CreateEndAnchor(pos1,TRUE);
 				}
@@ -2078,7 +2080,7 @@ static STATUS_T CmdRotate(
 					MoveTracks( FALSE, FALSE, TRUE, zero, orig, angle, TRUE );
 					rotateAlignState = 0;
 				} else if (drawnAngle) {
-					MoveTracks( FALSE, FALSE, TRUE, zero, orig, angle, TRUE );
+					MoveTracks( FALSE, FALSE, TRUE, zero, orig, NormalizeAngle( angle-baseAngle ), TRUE );
 				}
 			}
 			UndoEnd();
@@ -2117,31 +2119,35 @@ static STATUS_T CmdRotate(
 				break;
 			if ( rotateAlignState != 2 ) {
 				DrawLine( &tempD, base, orig, 0, wDrawColorBlue );
-				DrawLine( &tempD, orig_base, orig, 0, wDrawColorBlue );
-				ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig, base));
+				if (drawnAngle) {
+					DrawLine( &tempD, orig_base, orig, 0, wDrawColorBlue );
+					ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig, base));
 
-				DIST_T dist = FindDistance(orig,base);
-				DIST_T width = tempD.scale*0.15/4;
+					DIST_T dist = FindDistance(orig,base);
+					DIST_T width = tempD.scale*0.15/4;
 
-				if (clockwise) {
-					if (a<0) a = a + 360;
-					DrawArc( &tempD, orig, dist/2, FindAngle(orig,orig_base), a, FALSE, width, wDrawColorBlue);
-				} else {
-					if (a>0) a = a - 360;
-					DrawArc( &tempD, orig, dist/2, FindAngle(orig,base), fabs(a), FALSE, width, wDrawColorBlue);
+					if (direction_set) {
+						if (clockwise) {
+							if (a<0) a = a + 360;
+							DrawArc( &tempD, orig, dist/2, FindAngle(orig,orig_base), a, FALSE, width, wDrawColorBlue);
+						} else {
+							if (a>0) a = a - 360;
+							DrawArc( &tempD, orig, dist/2, FindAngle(orig,base), fabs(a), FALSE, width, wDrawColorBlue);
+						}
+						DIST_T d;
+						int inx;
+						d = mainD.scale*0.25;
+						ANGLE_T arrow_a = NormalizeAngle(FindAngle(orig,orig_base)+a/2);
+						coOrd arr1,arr2,arr3;
+						Translate(&arr2,orig,arrow_a,dist/2);
+						if (clockwise) arrow_a +=90;
+						else arrow_a -=90;
+						Translate(&arr1,arr2,arrow_a+135,d/2);
+						Translate(&arr3,arr2,arrow_a-135,d/2);
+						DrawLine( &tempD, arr1, arr2, 0, wDrawColorBlue );
+						DrawLine( &tempD, arr2, arr3, 0, wDrawColorBlue );
+					}
 				}
-				DIST_T d;
-				int inx;
-				d = mainD.scale*0.25;
-				ANGLE_T arrow_a = NormalizeAngle(FindAngle(orig,orig_base)+a/2);
-				coOrd arr1,arr2,arr3;
-				Translate(&arr2,orig,arrow_a,dist/2);
-				if (clockwise) arrow_a +=90;
-				else arrow_a -=90;
-				Translate(&arr1,arr2,arrow_a+135,d/2);
-				Translate(&arr3,arr2,arrow_a-135,d/2);
-				DrawLine( &tempD, arr1, arr2, 0, wDrawColorBlue );
-				DrawLine( &tempD, arr2, arr3, 0, wDrawColorBlue );
 
 			}
 			DrawMovedTracks();
