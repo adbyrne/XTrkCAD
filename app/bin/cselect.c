@@ -2007,7 +2007,7 @@ static STATUS_T CmdRotate(
 			ANGLE_T diff_angle = 0.0;
 			base = pos;
 			drawEnable = enableMoveDraw;
-			if ( FindDistance( orig, pos ) > (30.0/75.0)*mainD.scale ) {
+			if ( FindDistance( orig, pos ) > (20.0/75.0)*mainD.scale ) {
 				ANGLE_T old_angle = angle;
 				angle = FindAngle( orig, pos );
 				if (!drawnAngle) {
@@ -2059,7 +2059,9 @@ static STATUS_T CmdRotate(
 #endif
 				wFlush();
 				drawEnable = TRUE;
-			}
+			} else
+				InfoMessage( _("Origin Set. Drag away to set start angle"));
+
 			return C_CONTINUE;
 
 		case C_UP:
