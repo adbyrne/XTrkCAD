@@ -135,6 +135,28 @@ static void CreateSquareAnchor(coOrd p) {
 	anchors(i+3).u.l.pos[0].y = p.y+d/2;
 }
 
+BOOL_T FindTempNear(drawContext_t *context, coOrd *p) {
+	if (context->State == 2) {
+		if (context->Op >= OP_CURVE1 && context->Op <= OP_CURVE4) {
+			if (context->ArcData.type == curveTypeCurve) {
+				ANGLE_T a = FindAngle(context->ArcData.curvePos,*p);
+				if (IsClose(FindDistance(context->ArcData.curvePos,*p)-context->ArcData.curveRadius) &&
+						(a>=context->ArcData.a0) && (a<=context->ArcData.a0+context->ArcData.a1)) {
+					Translate(p,context->ArcData.curvePos,a,context->ArcData.curveRadius);
+					return TRUE;
+				}
+			} else {
+				if (IsClose(LineDistance(p,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1])))
+					return TRUE;
+			}
+		} else if ( context->Op >=OP_LINE && context->Op <= OP_BENCH) {
+			if (IsClose(LineDistance(p,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1])))
+				return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 /**
  * Create and draw a graphics primitive (lines, arc, circle). The complete handling of mouse 
  * movements and clicks during the editing process is done here. 
@@ -194,8 +216,13 @@ STATUS_T DrawGeomMouse(
 					Translate(&end,context->ArcData.curvePos,context->ArcData.a0,context->ArcData.curveRadius);
 					tempSegs(0).u.c.radius = context->radius;
 					Translate(&tempSegs(0).u.c.center,end,context->ArcData.a0+180,context->radius);
+					context->ArcData.curvePos = tempSegs(0).u.c.center;
+					context->ArcData.curveRadius = tempSegs(0).u.c.radius;
 				}
 				tempSegs(0).u.c.a1 = context->angle;
+				context->ArcData.a1 = tempSegs(0).u.c.a1;
+				Translate(&context->ArcData.pos1,context->ArcData.curvePos,context->ArcData.a0,context->ArcData.curveRadius);
+				Translate(&context->ArcData.pos2,context->ArcData.curvePos,context->ArcData.a0+context->ArcData.a1,context->ArcData.curveRadius);
 			} else
 				Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,context->length);
 		break;
@@ -236,6 +263,7 @@ STATUS_T DrawGeomMouse(
 		default:
 		break;
 		}
+		MainRedraw();
 		anchors_da.cnt = 0;
 		return C_CONTINUE;
 
@@ -271,8 +299,13 @@ STATUS_T DrawGeomMouse(
 							if (context->Op == OP_DIMLINE ) {
 								CreateEndAnchor(p,FALSE);
 							} else if (!IsTrack(t)) CreateEndAnchor(p,FALSE);
+						} else {
+							p = pos;
+							if (FindTempNear(context,&p)) {
+								CreateEndAnchor(p,FALSE);
+							}
 						}
-					};
+					}
 					break;
 				default:
 					;
@@ -521,17 +554,7 @@ STATUS_T DrawGeomMouse(
 					Translate( &pos, tempSegs(tempSegs_da.cnt-1).u.l.pos[0], NormalizeAngle((quad==0||quad==4)?last_angle:last_angle+180.0), l );
 				}
 				CreateEndAnchor(pos,TRUE);
-				//Show closing 90 degree intersect if close
-				//if (tempSegs_da.cnt > 1) {
-				//	coOrd intersect;
-				//	if (FindIntersection(&intersect,tempSegs(0).u.l.pos[0],initial_angle+90.0,tempSegs(tempSegs_da.cnt-2).u.l.pos[1],last_angle+90.0)) {
-				//		CreateSquareAnchor(intersect);
-				//		d = FindDistance(intersect,pos);
-				//		if (IsClose(d)) {
-				//			pos = intersect;
-				//		}
-				//	}
-				//}
+
 			}
 			//If there is any point on this line that will give a 90 degree return to the first point, show it
 			if (tempSegs_da.cnt > 1) {
