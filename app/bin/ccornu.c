@@ -2452,8 +2452,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			} else CreateCornuEndAnchor(pos,TRUE);
 		}
 
-		if (MyGetKeyState()&WKEY_SHIFT) DrawHighlightBoxes();
-
 		return C_CONTINUE;
 			
 	case C_MOVE:
