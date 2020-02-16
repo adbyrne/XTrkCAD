@@ -378,48 +378,46 @@ STATUS_T CmdModify(
 		if (modifyBezierMode) return ModifyBezier(wActionMove, pos);
 		track_p t;
 		if (((t=OnTrack(&pos,FALSE,TRUE))!= NULL) && CheckTrackLayer( t )) {
-			if (GetTrkScale(t) == (char)GetLayoutCurScale()) {
-				EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
-				if (QueryTrack( t, Q_IS_CORNU )) {
-					CreateCornuAnchor(pos,FALSE);
-				} else if ( QueryTrack( t, Q_CAN_MODIFY_CONTROL_POINTS )) {
-					CreateRadiusAnchor(pos,NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0),TRUE);
-					CreateEndAnchor(pos,FALSE);
-				} else if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)){     //Turntable
-					trackParams_t tp;
-					if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
-					ANGLE_T a = tp.angle;
-					Translate(&pos,tp.ttcenter,a,tp.ttradius);
-					CreateRadiusAnchor(pos,a,FALSE);
-				} else if (QueryTrack(t,Q_CAN_EXTEND)) {
-					if (ep != -1) {
-						if (MyGetKeyState()&WKEY_CTRL) {
-							pos = GetTrkEndPos(t,ep);
-							CreateEndAnchor(pos,FALSE);
-							CreateRadiusAnchor(pos,GetTrkEndAngle(t,ep),FALSE);
-							CreateRadiusAnchor(pos,GetTrkEndAngle(t,ep)+90,TRUE);
-						} else {
-							CreateEndAnchor(pos,FALSE);
-							if ((MyGetKeyState()&WKEY_SHIFT) && 					//Shift Down
-								QueryTrack( t, Q_CAN_MODIFYRADIUS ) &&				// Straight or Curve
-								((inx=PickUnconnectedEndPointSilent(pos,t)) >= 0 )) { //Which has an open end
-								if (GetTrkEndTrk(t,1-inx))					// Has to have a track on other end
-									CreateRadiusAnchor(pos,NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0),TRUE);
-							}
-							CreateRadiusAnchor(pos,GetAngleAtPoint(t,pos,NULL,NULL),TRUE);
-						}
-					}
-				} else if (ep>=0){													//Turnout
-					pos = GetTrkEndPos(t, ep);
-					CreateEndAnchor(pos,TRUE);
-					if ( (MyGetKeyState()&WKEY_CTRL)) {
-						CreateRadiusAnchor(pos,NormalizeAngle(GetTrkEndAngle(t,ep)),FALSE);
+			EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+			if (QueryTrack( t, Q_IS_CORNU )) {
+				CreateCornuAnchor(pos,FALSE);
+			} else if ( QueryTrack( t, Q_CAN_MODIFY_CONTROL_POINTS )) {
+				CreateRadiusAnchor(pos,NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0),TRUE);
+				CreateEndAnchor(pos,FALSE);
+			} else if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)){     //Turntable
+				trackParams_t tp;
+				if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
+				ANGLE_T a = tp.angle;
+				Translate(&pos,tp.ttcenter,a,tp.ttradius);
+				CreateRadiusAnchor(pos,a,FALSE);
+			} else if (QueryTrack(t,Q_CAN_EXTEND)) {
+				if (ep != -1) {
+					if (MyGetKeyState()&WKEY_CTRL) {
+						pos = GetTrkEndPos(t,ep);
+						CreateEndAnchor(pos,FALSE);
+						CreateRadiusAnchor(pos,GetTrkEndAngle(t,ep),FALSE);
 						CreateRadiusAnchor(pos,GetTrkEndAngle(t,ep)+90,TRUE);
-						CreateEndAnchor(pos,TRUE);
 					} else {
-						CreateRadiusAnchor(pos,NormalizeAngle(GetTrkEndAngle(t,ep)),FALSE);
-						CreateEndAnchor(pos,TRUE);
+						CreateEndAnchor(pos,FALSE);
+						if ((MyGetKeyState()&WKEY_SHIFT) && 					//Shift Down
+							QueryTrack( t, Q_CAN_MODIFYRADIUS ) &&				// Straight or Curve
+							((inx=PickUnconnectedEndPointSilent(pos,t)) >= 0 )) { //Which has an open end
+							if (GetTrkEndTrk(t,1-inx))					// Has to have a track on other end
+								CreateRadiusAnchor(pos,NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0),TRUE);
+						}
+						CreateRadiusAnchor(pos,GetAngleAtPoint(t,pos,NULL,NULL),TRUE);
 					}
+				}
+			} else if (ep>=0){													//Turnout
+				pos = GetTrkEndPos(t, ep);
+				CreateEndAnchor(pos,TRUE);
+				if ( (MyGetKeyState()&WKEY_CTRL)) {
+					CreateRadiusAnchor(pos,NormalizeAngle(GetTrkEndAngle(t,ep)),FALSE);
+					CreateRadiusAnchor(pos,GetTrkEndAngle(t,ep)+90,TRUE);
+					CreateEndAnchor(pos,TRUE);
+				} else {
+					CreateRadiusAnchor(pos,NormalizeAngle(GetTrkEndAngle(t,ep)),FALSE);
+					CreateEndAnchor(pos,TRUE);
 				}
 			}
 		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL) && (!(GetLayerFrozen(GetTrkLayer(t)) && GetLayerModule(GetTrkLayer(t)))) && QueryTrack(t, Q_IS_DRAW )) {
