@@ -297,10 +297,7 @@ EXPORT STATUS_T CreateCurve(
 					Translate( &pos, Da.pos0, angle1-90.0, dp );
 			} else if (mode == crvCmdFromTangent) {
 				DIST_T dp = FindDistance(Da.pos0, pos)*sin(D2R(angle2));
-				if (angle2 > 90 && angle2 < 270.0)
-					Translate( &pos, Da.pos0, angle1+90.0, dp );
-				else
-					Translate( &pos, Da.pos0, angle1-90.0, dp );
+				Translate( &pos, Da.pos0, angle1-90.0, dp );
 			}
 		} else SnapPos(&pos);
 		tempSegs_da.cnt =1;
@@ -373,6 +370,10 @@ EXPORT STATUS_T CreateCurve(
 					ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(0.0) );
 					return C_TERMINATE;
 				}
+			} else  if (mode == crvCmdFromTangent) {
+				DIST_T dp = FindDistance(Da.pos0, pos)*sin(D2R(angle2));
+				Translate( &pos, Da.pos0, angle1-90.0, dp );
+				Da.pos1 = pos;
 			} else {
 				DIST_T dp = -FindDistance(Da.pos0, pos)*sin(D2R(angle2));
 				if (angle2 > 180.0)
@@ -422,6 +423,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		tempSegs_da.cnt = 0;
 		segCnt = 0;
 		STATUS_T rcode;
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		return CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
 
 	case C_DOWN:
@@ -558,7 +560,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		tempSegs_da.cnt = 0;
 		segCnt = 0;
 		Da.state = -1;
-		DYNARR_RESET(trkSeg_t,anchors_da);          // No More anchors for this one??
+		DYNARR_RESET(trkSeg_t,anchors_da);          // No More anchors for this one
 		if (Da.curveData.type == curveTypeStraight) {
 			if ((d=FindDistance( Da.pos0, Da.curveData.pos1 )) <= minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
@@ -595,7 +597,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 			mainD.funcs->options = 0;
 		}
-		if (anchors_da.cnt && Da.state >=0)
+		if (anchors_da.cnt)
 			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
