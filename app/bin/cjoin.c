@@ -468,12 +468,11 @@ static STATUS_T CmdJoin(
 		return C_CONTINUE;
 
 	case wActionMove:
-		if ((easementVal < 0) && Dj.cornuMode )
+		if ((easementVal < 0) && Dj.joinMoveState == 0 )
 			return CmdCornu(action, pos);
 		break;
 
 	case C_DOWN:
-
 		if ( !Dj.cornuMode && ((Dj.state == 0 && (MyGetKeyState() & WKEY_SHIFT) != 0) || Dj.joinMoveState != 0) )
 			return DoMoveToJoin( pos );
 		if (easementVal < 0.0 && Dj.joinMoveState == 0) {
@@ -866,8 +865,8 @@ errorReturn:
 	case C_REDRAW:
 		if ( Dj.joinMoveState == 1 || Dj.state == 1 ) {
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
-		} else if (easementVal<0 && Dj.cornuMode)
-				return CmdCornu(action,pos);
+		} else if (easementVal<0 && Dj.joinMoveState == 0)
+			return CmdCornu(action,pos);
 
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		break;
