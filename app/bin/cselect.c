@@ -2042,7 +2042,7 @@ static STATUS_T CmdRotate(
 					angle = baseAngle+diff_angle;
 				}
 				Translate( &base, orig, angle, FindDistance(orig,pos) );  //Line one
-				Translate( &orig_base,orig, baseAngle, FindDistance(orig,pos) ); //Line two
+				Translate( &orig_base,orig, baseAngle, FindDistance(orig,pos)<=(60.0/75.00*mainD.scale)?FindDistance(orig,pos):60.0/75.00*mainD.scale ); //Line two
 				SetMoveD( FALSE, orig, NormalizeAngle( angle-baseAngle ) );
 				if (FindEndIntersection(zero,orig,NormalizeAngle( angle-baseAngle ),&t1,&ep1,&t2,&ep2)) {
 					coOrd pos2 = GetTrkEndPos(t2,ep2);
@@ -2122,21 +2122,22 @@ static STATUS_T CmdRotate(
 			if ( state == 0 )
 				break;
 			if ( rotateAlignState != 2 ) {
+				DIST_T width = mainD.scale*0.5;
 				DrawLine( &tempD, base, orig, 0, wDrawColorBlue );
 				if (drawnAngle) {
-					DrawLine( &tempD, orig_base, orig, 0, wDrawColorBlue );
+					DrawLine( &tempD, orig_base, orig, width, wDrawColorBlue );
 					ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig, base));
 
 					DIST_T dist = FindDistance(orig,base);
-					DIST_T width = tempD.scale*0.15/4;
+					if (dist>(60.0/75.0)*mainD.scale) dist = (60.0/75.0)*mainD.scale;
 
 					if (direction_set) {
 						if (clockwise) {
 							if (a<0) a = a + 360;
-							DrawArc( &tempD, orig, dist/2, FindAngle(orig,orig_base), a, FALSE, width, wDrawColorBlue);
+							DrawArc( &tempD, orig, dist/2, FindAngle(orig,orig_base), a, FALSE, 0, wDrawColorBlue);
 						} else {
 							if (a>0) a = a - 360;
-							DrawArc( &tempD, orig, dist/2, FindAngle(orig,base), fabs(a), FALSE, width, wDrawColorBlue);
+							DrawArc( &tempD, orig, dist/2, FindAngle(orig,base), fabs(a), FALSE, 0, wDrawColorBlue);
 						}
 						DIST_T d;
 						int inx;
