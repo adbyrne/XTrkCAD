@@ -396,7 +396,7 @@ A Cornu is a form of curve that uses a mathematical approach to creating a curve
 
 The conditions used at each end are the radius, angle and position.  Cornus can have added constraints in the form of "pins" that force the curve to smoothly pass through that point while still respecting the end conditions.
 
-Cornus are used in XtrCAD to both Join tracks smoothly and form smooth curves that are not joined to other tracks. 
+Cornus are used in XtrCAD to both Join tracks smoothly and form smooth curves that are not joined to other tracks.
 
 The Cornu curve is designed to change radius (curvature) linearly along its length, which mimics the characteristics of railway easements because it minimizes sudden changes in acceleration towards the center of curvature.
 
@@ -879,7 +879,7 @@ This produces an arc whose radius is determined by the distance of the closet no
 
 \S2{chgCornu} \i{Cornu Easements} Modifying a Cornu Track
 
-Because a Cornu Track is defined by its end points position, angle and radius - it can only be directly modified by dragging an end point along a track, or altering its end conditions if it is not joined to another track. 
+Because a Cornu Track is defined by its end points position, angle and radius - it can only be directly modified by dragging an end point along a track, or altering its end conditions if it is not joined to another track.
 It can also have added "Pins" which constrain the curve to smoothly pass through a point.
 
 \n Click the \f{Modify} button (\G{png.d/bmodify.png}) to activate the \f{Modify} function.
@@ -1105,11 +1105,15 @@ The \f{Grade} between points is displayed between the vertical bars.  The \f{Gra
 
 The heights of \f{Defined Elevations} can be changed by using \e{Left+Drag} on the profile window.  As you \f{Drag}, the new elevation and grades to each side are displayed at the bottom of the profile dialog.
 
-The \f{Done} button closes the dialog.
+The \f{Change} button makes the changes in the Profile dialog permanent.
+
+The \f{Reset} button deletes all changes since the last press of \{Change} or the start of the dialog.
 
 The \f{Clear} button preserves elevation settings established along the current profile path, removes all profile points and leaves the \f{Profile} dialog open for selection of the next set of profile points. This function is useful when there's a need to view elevations along multiple profile paths.
 
 The \f{Print} button prints the dialog.  The aspect ratio is preserved on the print-out.  You will probably want to print in landscape format.
+
+The dialog can be closed with the 'X' button in the window's titlebar.
 
 \rule
 
