@@ -2889,7 +2889,7 @@ static void DrawUnconnectedEndPt( drawCmd_p d, coOrd p, ANGLE_T a, DIST_T trackG
 			Translate( &p, p, a+90.0, 0.2 );
 			Translate( &p0, p, a, trackGauge );
 			Translate( &p1, p, a-180.0, trackGauge );
-			DrawLine( d, p0, p1, (drawUnconnectedEndPt>0)?4:0, (drawUnconnectedEndPt>1)?exceptionColor:color );
+			DrawLine( d, p0, p1, (drawUnconnectedEndPt>0)?4:0, (color==wDrawColorWhite)?color:(drawUnconnectedEndPt>1)?exceptionColor:color );
 		}
 }
 
