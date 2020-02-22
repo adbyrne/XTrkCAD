@@ -1107,7 +1107,7 @@ The heights of \f{Defined Elevations} can be changed by using \e{Left+Drag} on t
 
 The \f{Change} button makes the changes in the Profile dialog permanent.
 
-The \f{Reset} button deletes all changes since the last press of \{Change} or the start of the dialog.
+The \f{Reset} button deletes all changes since the last press of \f{Change} or the start of the dialog.
 
 The \f{Clear} button preserves elevation settings established along the current profile path, removes all profile points and leaves the \f{Profile} dialog open for selection of the next set of profile points. This function is useful when there's a need to view elevations along multiple profile paths.
 
