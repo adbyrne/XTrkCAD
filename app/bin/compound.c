@@ -694,14 +694,12 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 	case A1:
 	case A2:
 	case A3:
-		if (inx==E3) ep=3;
-		else if (inx==E2) ep=2;
-		else if (inx==E1) ep=1;
+		if (inx==A3) ep=3;
+		else if (inx==A2) ep=2;
+		else if (inx==A1) ep=1;
 		else ep=0;
-		RotateTrack( trk, xx->orig, NormalizeAngle( compoundData.endAngle[ep]-xx->angle ) );
+		RotateTrack( trk, GetTrkEndPos(trk,ep), NormalizeAngle( compoundData.endAngle[ep]-GetTrkEndAngle(trk,ep) ) );
 		ComputeCompoundBoundingBox( trk );
-		compoundData.angle = xx->angle;
-		compoundDesc[AN].mode |= DESC_CHANGE;
 		break;
 	case AN:
 		orig = xx->orig;
@@ -786,6 +784,10 @@ static void UpdateCompound( track_p trk, int inx, descData_p descUpd, BOOL_T nee
 				  compoundDesc[i*(E1-E0)+C0].mode |= DESC_CHANGE;
 			}
 		}
+		compoundData.orig = xx->orig;
+		compoundDesc[OR].mode |= DESC_CHANGE;
+		compoundData.angle = xx->angle;
+		compoundDesc[AN].mode |= DESC_CHANGE;
     	break;
     case LT:
     	xx->lineType = compoundData.linetype;
