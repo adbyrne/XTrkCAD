@@ -59,51 +59,48 @@
 typedef struct drawCmd_t * drawCmd_p;
 
 typedef struct {
-		long options;
-		void (*drawLine)( drawCmd_p, coOrd, coOrd, wDrawWidth, wDrawColor );
-		void (*drawArc)( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, BOOL_T, wDrawWidth, wDrawColor );
-		void (*drawString)( drawCmd_p, coOrd, ANGLE_T, char *, wFont_p, FONTSIZE_T, wDrawColor );
-		void (*drawBitMap)( drawCmd_p, coOrd, wDrawBitMap_p, wDrawColor );
-		void (*drawPoly) (drawCmd_p, int, coOrd *, int *, wDrawColor, wDrawWidth, int, int );
-		void (*drawFillCircle) (drawCmd_p, coOrd, DIST_T,  wDrawColor );
-		} drawFuncs_t;
+    long options;
+    void (*drawLine)(drawCmd_p, coOrd, coOrd, wDrawWidth, wDrawColor);
+    void (*drawArc)(drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, BOOL_T, wDrawWidth,
+                    wDrawColor);
+    void (*drawString)(drawCmd_p, coOrd, ANGLE_T, char *, wFont_p, FONTSIZE_T,
+                       wDrawColor);
+    void (*drawBitMap)(drawCmd_p, coOrd, wDrawBitMap_p, wDrawColor);
+    void (*drawPoly)(drawCmd_p, int, coOrd *, int *, wDrawColor, wDrawWidth, int,
+                     int);
+    void (*drawFillCircle)(drawCmd_p, coOrd, DIST_T,  wDrawColor);
+} drawFuncs_t;
 
-typedef void (*drawConvertPix2CoOrd)( drawCmd_p, wPos_t, wPos_t, coOrd * );
-typedef void (*drawConvertCoOrd2Pix)( drawCmd_p, coOrd, wPos_t *, wPos_t * );
+typedef void (*drawConvertPix2CoOrd)(drawCmd_p, wPos_t, wPos_t, coOrd *);
+typedef void (*drawConvertCoOrd2Pix)(drawCmd_p, coOrd, wPos_t *, wPos_t *);
 typedef struct drawCmd_t {
-		wDraw_p d;
-		drawFuncs_t * funcs;
-		unsigned long options;
-		DIST_T scale;
-		ANGLE_T angle;
-		coOrd orig;
-		coOrd size;
-		drawConvertPix2CoOrd Pix2CoOrd;
-		drawConvertCoOrd2Pix CoOrd2Pix;
-		FLOAT_T dpi;
-	} drawCmd_t;
+    wDraw_p d;
+    drawFuncs_t * funcs;
+    unsigned long options;
+    DIST_T scale;
+    ANGLE_T angle;
+    coOrd orig;
+    coOrd size;
+    drawConvertPix2CoOrd Pix2CoOrd;
+    drawConvertCoOrd2Pix CoOrd2Pix;
+    FLOAT_T dpi;
+} drawCmd_t;
 
 #define SCALEX(D,X)		((X)/(D).dpi)
 #define SCALEY(D,Y)		((Y)/(D).dpi)
 
 #ifdef WINDOWS
-#define LBORDER (33)
-#define BBORDER (32)
+    #define LBORDER (33)
+    #define BBORDER (32)
 #else
-#define LBORDER (26)
-#define BBORDER (27)
+    #define LBORDER (26)
+    #define BBORDER (27)
 #endif
 #define RBORDER (9)
 #define TBORDER (8)
 
-#ifdef LATER
-#define Pix2CoOrd( D, pos, X, Y ) { \
-	pos.x = ((long)(((POS_T)((X)-LBORDER)*pixelBins)/D.dpi))/pixelBins * D.scale + D.orig.x; \
-	pos.y = ((long)(((POS_T)((Y)-BBORDER)*pixelBins)/D.dpi))/pixelBins * D.scale + D.orig.y; \
-	}
-#endif
-void Pix2CoOrd( drawCmd_p, wPos_t, wPos_t, coOrd * );
-void CoOrd2Pix( drawCmd_p, coOrd, wPos_t *, wPos_t * );
+void Pix2CoOrd(drawCmd_p, wPos_t, wPos_t, coOrd *);
+void CoOrd2Pix(drawCmd_p, coOrd, wPos_t *, wPos_t *);
 
 extern BOOL_T inError;
 extern DIST_T pixelBins;
@@ -173,7 +170,7 @@ extern wDrawColor snapGridColor;
 extern wDrawColor selectedColor;
 extern wDrawColor profilePathColor;
 
-BOOL_T IsClose( DIST_T );
+BOOL_T IsClose(DIST_T);
 
 drawFuncs_t screenDrawFuncs;
 drawFuncs_t tempDrawFuncs;
@@ -188,73 +185,80 @@ drawFuncs_t printDrawFuncs;
 #define DrawFillCircle( D, P, R, C ) (D)->funcs->drawFillCircle( D, P, R, C );
 
 #define REORIGIN( Q, P, A, O ) { \
-		(Q) = (P); \
-		REORIGIN1( Q, A, O ) \
-		}
+        (Q) = (P); \
+        REORIGIN1( Q, A, O ) \
+    }
 #define REORIGIN1( Q, A, O ) { \
-		if ( (A) != 0.0 ) \
-			Rotate( &(Q), zero, (A) ); \
-		(Q).x += (O).x; \
-		(Q).y += (O).y; \
-	}
+        if ( (A) != 0.0 ) \
+            Rotate( &(Q), zero, (A) ); \
+        (Q).x += (O).x; \
+        (Q).y += (O).y; \
+    }
 #define OFF_D( ORIG, SIZE, LO, HI ) \
-		( (HI).x < (ORIG).x || \
-		  (LO).x > (ORIG).x+(SIZE).x || \
-		  (HI).y < (ORIG).y || \
-		  (LO).y > (ORIG).y+(SIZE).y )
+    ( (HI).x < (ORIG).x || \
+      (LO).x > (ORIG).x+(SIZE).x || \
+      (HI).y < (ORIG).y || \
+      (LO).y > (ORIG).y+(SIZE).y )
 #define OFF_MAIND( LO, HI ) \
-		OFF_D( mainD.orig, mainD.size, LO, HI )
+    OFF_D( mainD.orig, mainD.size, LO, HI )
 
-void DrawHilight( drawCmd_p, coOrd, coOrd, BOOL_T add );
-void DrawHilightPolygon( drawCmd_p, coOrd *, int );
+void DrawHilight(drawCmd_p, coOrd, coOrd, BOOL_T add);
+void DrawHilightPolygon(drawCmd_p, coOrd *, int);
 #define BOX_NONE		(0)
 #define BOX_UNDERLINE	(1)
 #define BOX_BOX			(2)
 #define BOX_INVERT		(3)
 #define BOX_ARROW		(4)
 #define BOX_BACKGROUND	(5)
-void DrawBoxedString( int, drawCmd_p, coOrd, char *, wFont_p, wFontSize_t, wDrawColor, ANGLE_T );
-void DrawMultiLineTextSize(drawCmd_p dp, char * text, wFont_p fp, wFontSize_t fs, BOOL_T relative, coOrd * size, coOrd * lastline );
-void DrawTextSize2( drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *, POS_T *, POS_T *);
-void DrawTextSize( drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd * );
-void DrawMultiString(drawCmd_p d, coOrd pos, char * text, wFont_p fp, wFontSize_t fs, wDrawColor color, ANGLE_T a, coOrd * lo, coOrd * hi, BOOL_T boxed);
-BOOL_T SetRoomSize( coOrd );
-void GetRoomSize( coOrd * );
-void DoRedraw( void );
-void SetMainSize( void );
-void MainRedraw( void );
-void MainLayout( wBool_t, wBool_t );
-void TempRedraw( void );
-void DrawRuler( drawCmd_p, coOrd, coOrd, DIST_T, int, int, wDrawColor );
-void MainProc( wWin_p, winProcEvent, void *, void * );
-void InitInfoBar( void );
-void DrawInit( int );
-void DoZoomUp( void * );
-void DoZoomDown( void * );
-void DoZoom( DIST_T * );
+void DrawBoxedString(int, drawCmd_p, coOrd, char *, wFont_p, wFontSize_t,
+                     wDrawColor, ANGLE_T);
+void DrawMultiLineTextSize(drawCmd_p dp, char * text, wFont_p fp,
+                           wFontSize_t fs, BOOL_T relative, coOrd * size, coOrd * lastline);
+void DrawTextSize2(drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *,
+                   POS_T *, POS_T *);
+void DrawTextSize(drawCmd_p, char *, wFont_p, wFontSize_t, BOOL_T, coOrd *);
+void DrawMultiString(drawCmd_p d, coOrd pos, char * text, wFont_p fp,
+                     wFontSize_t fs, wDrawColor color, ANGLE_T a, coOrd * lo, coOrd * hi,
+                     BOOL_T boxed);
+BOOL_T SetRoomSize(coOrd);
+void GetRoomSize(coOrd *);
+void DoRedraw(void);
+void SetMainSize(void);
+void MainRedraw(void);
+void MainLayout(wBool_t, wBool_t);
+void TempRedraw(void);
+void DrawRuler(drawCmd_p, coOrd, coOrd, DIST_T, int, int, wDrawColor);
+void MainProc(wWin_p, winProcEvent, void *, void *);
+void InitInfoBar(void);
+void DrawInit(int);
+void DoZoomUp(void *);
+void DoZoomDown(void *);
+void DoZoom(DIST_T *);
 void PanHere(void *);
 
-void InitCmdZoom( wMenu_p, wMenu_p );
+void InitCmdZoom(wMenu_p, wMenu_p);
 
-void InfoPos( coOrd );
-void InfoCount( wIndex_t );
-void SetMessage( char * );
+void InfoPos(coOrd);
+void InfoCount(wIndex_t);
+void SetMessage(char *);
 
 wIndex_t panCmdInx;
 
-void InfoSubstituteControls( wControl_p *, char * * );
+void InfoSubstituteControls(wControl_p *, char * *);
 
-void MapGrid( coOrd, coOrd, ANGLE_T, coOrd, ANGLE_T, POS_T, POS_T, int *, int *, int *, int * );
-void DrawGrid( drawCmd_p, coOrd *, POS_T, POS_T, long, long, coOrd, ANGLE_T, wDrawColor, BOOL_T );
-STATUS_T GridAction( wAction_t, coOrd, coOrd *, DIST_T * );
+void MapGrid(coOrd, coOrd, ANGLE_T, coOrd, ANGLE_T, POS_T, POS_T, int *, int *,
+             int *, int *);
+void DrawGrid(drawCmd_p, coOrd *, POS_T, POS_T, long, long, coOrd, ANGLE_T,
+              wDrawColor, BOOL_T);
+STATUS_T GridAction(wAction_t, coOrd, coOrd *, DIST_T *);
 
-void ResetMouseState( void );
-void FakeDownMouseState( void );
-void GetMousePosition( int  *x, int *y );
-void RecordMouse( char *, wAction_t, POS_T, POS_T );
+void ResetMouseState(void);
+void FakeDownMouseState(void);
+void GetMousePosition(int  *x, int *y);
+void RecordMouse(char *, wAction_t, POS_T, POS_T);
 extern long playbackDelay;
-void MovePlaybackCursor( drawCmd_p, wPos_t, wPos_t, wBool_t, wControl_p );
-typedef void (*playbackProc)( wAction_t, coOrd );
-void PlaybackMouse( playbackProc, drawCmd_p, wAction_t, coOrd, wDrawColor );
+void MovePlaybackCursor(drawCmd_p, wPos_t, wPos_t, wBool_t, wControl_p);
+typedef void (*playbackProc)(wAction_t, coOrd);
+void PlaybackMouse(playbackProc, drawCmd_p, wAction_t, coOrd, wDrawColor);
 void RedrawPlaybackCursor();
 #endif
