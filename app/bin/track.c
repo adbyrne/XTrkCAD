@@ -1197,7 +1197,7 @@ BOOL_T TrackIterate( track_p * trk )
 
 wBool_t IsPosClose( coOrd pos1, coOrd pos2 ) {
 	DIST_T d = FindDistance( pos1, pos2 );
-	return d < 0.01;
+	return d < 0.1;
 }
 
 
