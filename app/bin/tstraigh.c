@@ -695,6 +695,12 @@ static BOOL_T MakeParallelStraight(
 }
 
 
+static wBool_t CompareStraight( track_cp trk1, track_cp trk2 )
+{
+	return TRUE;
+}
+
+
 static trackCmd_t straightCmds = {
 		"STRAIGHT",
 		DrawStraight,
@@ -724,8 +730,13 @@ static trackCmd_t straightCmds = {
 		NULL,
 		NULL,
 		NULL,
-		MakeParallelStraight };
-
+		MakeParallelStraight,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		CompareStraight };
 
 EXPORT void StraightSegProc(
 		segProc_e cmd,

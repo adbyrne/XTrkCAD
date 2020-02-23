@@ -1440,6 +1440,21 @@ static BOOL_T MakeParallelJoint(
 	return TRUE;
 }
 
+static wBool_t CompareJoint( track_cp trk1, track_cp trk2 )
+{
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_DIST( "L0", xx1, xx2, l0 );
+	REGRESS_CHECK_DIST( "L1", xx1, xx2, l1 );
+	REGRESS_CHECK_INT( "Flip", xx1, xx2, flip );
+	REGRESS_CHECK_INT( "Negate", xx1, xx2, negate );
+	REGRESS_CHECK_INT( "Scurve", xx1, xx2, Scurve );
+	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos );
+	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle );
+	return TRUE;
+}
+
 
 static trackCmd_t easementCmds = {
 		"JOINT",
@@ -1470,7 +1485,13 @@ static trackCmd_t easementCmds = {
 		NULL,
 		NULL,
 		NULL,
-		MakeParallelJoint };
+		MakeParallelJoint,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		CompareJoint };
 
 
 EXPORT void JointSegProc(

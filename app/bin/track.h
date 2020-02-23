@@ -23,6 +23,7 @@
 #ifndef TRACK_H
 #define TRACK_H
 
+#include <string.h>
 #include "common.h"
 #include "draw.h"
 #include "misc2.h"
@@ -175,6 +176,7 @@ typedef struct {
 		BOOL_T (*replayData)(track_p, void *,long );
 		BOOL_T (*storeData)(track_p, void **,long *);
 		void  (*activate)(track_p);
+		wBool_t (*compare)( track_cp, track_cp );
 		} trackCmd_t;
 
 
@@ -411,6 +413,7 @@ void JointSegProc( segProc_e, trkSeg_p, segProcData_p );
 void BezierSegProc( segProc_e, trkSeg_p, segProcData_p );   //Used in Cornu join
 void CleanSegs( dynArr_t *);
 void CopyPoly(trkSeg_p seg_p, wIndex_t segCnt);
+wBool_t CompareSegs( trkSeg_p, int, trkSeg_p, int );
 
 /* debug.c */
 void SetDebug( char * );
@@ -540,6 +543,50 @@ EPINX_T GetNearestEndPtConnectedToMe( track_p, track_p, coOrd);
 void SetEndPts( track_p, EPINX_T );
 BOOL_T DeleteTrack( track_p, BOOL_T );
 
+#define REGRESS_CHECK_POS( TITLE, P1, P2, FIELD ) \
+	if ( ! IsPosClose( P1->FIELD, P2->FIELD ) ) { \
+		sprintf( cp, TITLE ": Actual [%0.3f %0.3f], Expected [%0.3f %0.3f]\n", \
+			P1->FIELD.x, P1->FIELD.y, \
+			P2->FIELD.x, P2->FIELD.y ); \
+		return FALSE; \
+	}
+#define REGRESS_CHECK_DIST( TITLE, P1, P2, FIELD ) \
+	if ( ! IsDistClose( P1->FIELD, P2->FIELD ) ) { \
+		sprintf( cp, TITLE ": Actual %0.3f, Expected %0.3f\n", \
+			P1->FIELD, P2->FIELD ); \
+		return FALSE; \
+	}
+#define REGRESS_CHECK_WIDTH( TITLE, P1, P2, FIELD ) \
+	if ( ! IsWidthClose( P1->FIELD, P2->FIELD ) ) { \
+		sprintf( cp, TITLE ": Actual %0.3f, Expected %0.3f\n", \
+			P1->FIELD, P2->FIELD ); \
+		return FALSE; \
+	}
+#define REGRESS_CHECK_ANGLE( TITLE, P1, P2, FIELD ) \
+	if ( ! IsAngleClose( P1->FIELD, P2->FIELD ) ) { \
+		sprintf( cp, TITLE ": Actual %0.3f , Expected %0.3f\n", \
+			P1->FIELD, P2->FIELD ); \
+		return FALSE; \
+	}
+#define REGRESS_CHECK_INT( TITLE, P1, P2, FIELD ) \
+	if ( P1->FIELD != P2->FIELD ) { \
+		sprintf( cp, TITLE ": Actual %d, Expected %d\n", \
+			(int)(P1->FIELD), (int)(P2->FIELD) ); \
+		return FALSE; \
+	}
+#define REGRESS_CHECK_COLOR( TITLE, P1, P2, FIELD ) \
+	if ( ! IsColorClose(P1->FIELD, P2->FIELD) ) { \
+		sprintf( cp, TITLE ": Actual %6x, Expected %6x\n", \
+			(int)wDrawGetRGB(P1->FIELD), (int)wDrawGetRGB(P2->FIELD) ); \
+		return FALSE; \
+	}
+wBool_t IsPosClose( coOrd, coOrd );
+wBool_t IsAngleClose( ANGLE_T, ANGLE_T );
+wBool_t IsDistClose( DIST_T, DIST_T );
+wBool_t IsWidthClose( DIST_T, DIST_T );
+wBool_t IsColorClose( wDrawColor, wDrawColor );
+wBool_t CompareTrack( track_cp, track_cp );
+
 void MoveTrack( track_p, coOrd );
 void RotateTrack( track_p, coOrd, ANGLE_T );
 void RescaleTrack( track_p, FLOAT_T, coOrd );
@@ -592,7 +639,7 @@ track_p FindTrack( TRKINX_T );
 void ResolveIndex( void );
 void RenumberTracks( void );
 BOOL_T ReadTrack( char * );
-BOOL_T WriteTracks( FILE * );
+BOOL_T WriteTracks( FILE *, wBool_t );
 BOOL_T ExportTracks( FILE * );
 void ImportStart( void );
 void ImportEnd( void );
@@ -646,6 +693,7 @@ void AdvancePositionIndicator( track_p, coOrd, coOrd *, ANGLE_T * );
 
 BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *, coOrd * , BOOL_T);
 
+void DoRegression();
 
 /* cmisc.c */
 wIndex_t describeCmdInx;

@@ -1435,8 +1435,29 @@ EXPORT BOOL_T RebuildCornu (track_p trk)
 	return TRUE;
 }
 
-EXPORT
 
+static wBool_t CompareCornu( track_cp trk1, track_cp trk2 )
+{
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Pos[0]", xx1, xx2, cornuData.pos[0] )
+	REGRESS_CHECK_POS( "Pos[1]", xx1, xx2, cornuData.pos[1] )
+	REGRESS_CHECK_POS( "C[0]", xx1, xx2, cornuData.c[0] )
+	REGRESS_CHECK_POS( "C[1]", xx1, xx2, cornuData.c[1] )
+	REGRESS_CHECK_ANGLE( "A[0]", xx1, xx2, cornuData.a[0] )
+	REGRESS_CHECK_ANGLE( "A[1]", xx1, xx2, cornuData.a[1] )
+	REGRESS_CHECK_DIST( "R[0]", xx1, xx2, cornuData.r[0] )
+	REGRESS_CHECK_DIST( "R[1]", xx1, xx2, cornuData.r[1] )
+	REGRESS_CHECK_DIST( "MinCurveRadius", xx1, xx2, cornuData.minCurveRadius )
+	REGRESS_CHECK_DIST( "MaxRateofChange", xx1, xx2, cornuData.maxRateofChange )
+	REGRESS_CHECK_DIST( "Length", xx1, xx2, cornuData.length )
+	REGRESS_CHECK_ANGLE( "WindingAngle", xx1, xx2, cornuData.windingAngle )
+	// CHECK arcSegs
+	REGRESS_CHECK_POS( "DescOff", xx1, xx2, cornuData.descriptionOff )
+	// CHECK cornuPath
+	return TRUE;
+}
 
 static trackCmd_t cornuCmds = {
 		"CORNU",
@@ -1469,7 +1490,11 @@ static trackCmd_t cornuCmds = {
 		NULL,
 		MakeParallelCornu,
 		NULL,
-		RebuildCornu
+		RebuildCornu,
+		NULL,
+		NULL,
+		NULL,
+		CompareCornu
 		};
 
 

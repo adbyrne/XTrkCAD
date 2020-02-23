@@ -928,7 +928,7 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
-	rc &= WriteTracks( f );
+	rc &= WriteTracks( f, TRUE );
 	rc &= fprintf(f, "END\n")>0;
 	if ( !rc )
 		NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName );

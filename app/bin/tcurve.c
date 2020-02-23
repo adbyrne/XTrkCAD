@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <string.h>
 
 #include "ccurve.h"
 #include "cjoin.h"
@@ -1371,6 +1372,19 @@ static BOOL_T MakeParallelCurve(
 }
 
 
+static wBool_t CompareCurve( track_cp trk1, track_cp trk2 )
+{
+	struct extraData * ed1 = GetTrkExtraData( trk1 );
+	struct extraData * ed2 = GetTrkExtraData( trk2 );
+	char * cp = message+strlen(message);
+	REGRESS_CHECK_POS( "POS", ed1, ed2, pos )
+	REGRESS_CHECK_DIST( "RADIUS", ed1, ed2, radius )
+	REGRESS_CHECK_INT( "CIRCLE", ed1, ed2, circle )
+	REGRESS_CHECK_INT( "TURNS", ed1, ed2, helixTurns )
+	REGRESS_CHECK_POS( "DESCOFF", ed1, ed2, descriptionOff );
+	return TRUE;
+}
+
 static trackCmd_t curveCmds = {
 		"CURVE",
 		DrawCurve,
@@ -1400,7 +1414,13 @@ static trackCmd_t curveCmds = {
 		NULL,
 		NULL,
 		NULL,
-		MakeParallelCurve };
+		MakeParallelCurve,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		CompareCurve };
 
 
 EXPORT void CurveSegProc(

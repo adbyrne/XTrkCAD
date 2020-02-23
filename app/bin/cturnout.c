@@ -40,6 +40,7 @@
 #include "param.h"
 #include "include/paramfile.h"
 #include "track.h"
+#include "trackx.h"
 #include "utility.h"
 
 EXPORT TRKTYP_T T_TURNOUT = -1;
@@ -1835,6 +1836,24 @@ static BOOL_T MakeParallelTurnout(
 	return TRUE;
 }
 
+static wBool_t CompareTurnout( track_cp trk1, track_cp trk2 )
+{
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
+	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
+	REGRESS_CHECK_INT( "Handlaid", xx1, xx2, handlaid )
+	REGRESS_CHECK_INT( "Flipped", xx1, xx2, flipped )
+	REGRESS_CHECK_INT( "Ungrouped", xx1, xx2, ungrouped )
+	REGRESS_CHECK_INT( "Split", xx1, xx2, split )
+	/* desc orig is not stable
+	REGRESS_CHECK_POS( "DescOrig", xx1, xx2, descriptionOrig ) */
+	REGRESS_CHECK_POS( "DescOff", xx1, xx2, descriptionOff )
+	REGRESS_CHECK_POS( "DescSize", xx1, xx2, descriptionSize )
+	return CompareSegs( xx1->segs, xx1->segCnt, xx1->segs, xx1->segCnt );
+}
+
 static trackCmd_t turnoutCmds = {
 		"TURNOUT ",
 		DrawTurnout,
@@ -1864,7 +1883,13 @@ static trackCmd_t turnoutCmds = {
 		DrawTurnoutPositionIndicator,
 		AdvanceTurnoutPositionIndicator,
 		CheckTraverseTurnout,
-		MakeParallelTurnout };
+		MakeParallelTurnout,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		CompareTurnout };
 
 
 #ifdef TURNOUTCMD
@@ -2181,12 +2206,14 @@ static void PlaceTurnout(
 	
 
 	pos1 = Dto.place = Dto.pos = pos;
+LOG( log_turnout, 1, ( "Place Turnout @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 	if (curTurnoutEp >= (long)curTurnout->endCnt)
 		curTurnoutEp = 0;
 	DYNARR_SET( vector_t, vector_da, curTurnout->endCnt );
 	PlaceTurnoutTrial( &trk1, &pos1, &a1, &a2, &connCnt1, &maxD1, &vector(0) );
 	if (connCnt1 > 0) {
 		Dto.pos = pos1;		//First track pos
+LOG( log_turnout, 1, ( " trial 1 @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 		Dto.trk = trk1;		//Track
 		Dto.angle = a1;		//Angle of track to put down
 		if ( (MyGetKeyState()&WKEY_SHIFT)==0 && connCnt1 > 1 && maxD1 >= 0.001 ) {  //Adjust if Shift
@@ -2208,6 +2235,7 @@ static void PlaceTurnout(
 				PlaceTurnoutTrial( &trk2, &pos2, &a2, &a, &connCnt2, &maxD2, &vector(0) );
 				if ( connCnt2 >= connCnt1 && maxD2 < maxD1 ) {
 					Dto.pos = pos2;
+LOG( log_turnout, 1, ( " trial 2 @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 					Dto.trk = trk2;
 					Dto.angle = a2;
 					maxD1 = maxD2;
@@ -2228,6 +2256,7 @@ static void PlaceTurnout(
 		Rotate( &p, zero, Dto.angle );
 		Dto.pos.x = pos.x - p.x;
 		Dto.pos.y = pos.y - p.y;
+LOG( log_turnout, 1, ( " final @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 	}
 }
 
@@ -2598,6 +2627,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		if ( curTurnout == NULL ) return C_CONTINUE;
 		if (Dto.state == 0) {
 			Dto.pos = pos;      // If first, use pos, otherwise use current
+LOG( log_turnout, 1, ( "RDOWN @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 		}
 		Dto.rot0 = Dto.rot1 = pos;
 		CreateRotateAnchor(pos);
@@ -2622,6 +2652,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 				validAngle = TRUE;
 			}
 			Dto.pos = origPos;
+LOG( log_turnout, 1, ( "RMOVE pre @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 #ifdef NEWROTATE
 			angle -= baseAngle;
 			Dto.angle = NormalizeAngle( origAngle + angle );
@@ -2630,6 +2661,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 			Dto.angle = angle - curTurnout->endPt[(int)curTurnoutEp].angle;
 #endif
 			Rotate( &Dto.pos, Dto.rot0, angle );
+LOG( log_turnout, 1, ( "RMOVE post @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 		}
 		FormatCompoundTitle( listLabels, curTurnout->title );
 		InfoMessage( _("Angle = %0.3f (%s)"), PutAngle( NormalizeAngle(Dto.angle + 90.0) ), message );
