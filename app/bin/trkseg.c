@@ -2053,7 +2053,23 @@ EXPORT wBool_t CompareSegs(
 		trkSeg_p segP2 = &segPtr2[segInx];
 		REGRESS_CHECK_INT( "Type", segP1, segP2, type );
 		REGRESS_CHECK_COLOR( "Color", segP1, segP2, color );
-		REGRESS_CHECK_WIDTH( "Width", segP1, segP2, width );
+		switch( segP1->type ) {
+		case SEG_DIMLIN:
+		case SEG_TBLEDGE:
+		case SEG_BENCH:
+			// These don't have widths
+			break;
+		default:
+			REGRESS_CHECK_WIDTH( "Width", segP1, segP2, width );
+		}
+		switch( segP1->type ) {
+		case SEG_DIMLIN:
+		case SEG_TBLEDGE:
+			// These don't have color
+			break;
+		default:
+			REGRESS_CHECK_COLOR( "Color", segP1, segP2, color );
+		}
 		switch( segP1->type ) {
 		case SEG_STRTRK:
 		case SEG_STRLIN:
