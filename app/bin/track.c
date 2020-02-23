@@ -389,6 +389,7 @@ EXPORT struct extraData * GetTrkExtraData( track_cp trk )
 
 EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 {
+	ASSERT( ep < trk->endCnt );
 	if (trk->endPt[ep].track != NULL) {
 		AbortProg( "setTrkEndPoint: endPt is connected" );
 	}
@@ -398,26 +399,31 @@ EXPORT void SetTrkEndPoint( track_p trk, EPINX_T ep, coOrd pos, ANGLE_T angle )
 
 EXPORT coOrd GetTrkEndPos( track_p trk, EPINX_T e )
 {
+	ASSERT( e < trk->endCnt );
 	return trk->endPt[e].pos;
 }
 
 EXPORT ANGLE_T GetTrkEndAngle( track_p trk, EPINX_T e )
 {
+	ASSERT( e < trk->endCnt );
 	return trk->endPt[e].angle;
 }
 
 EXPORT track_p GetTrkEndTrk( track_p trk, EPINX_T e )
 {
+	ASSERT( e < trk->endCnt );
 	return trk->endPt[e].track;
 }
 
 EXPORT long GetTrkEndOption( track_p trk, EPINX_T e )
 {
+	ASSERT( e < trk->endCnt );
 	return trk->endPt[e].option;
 }
 
 EXPORT long SetTrkEndOption( track_p trk, EPINX_T e, long option )
 {
+	ASSERT( e < trk->endCnt );
 	return trk->endPt[e].option = option;
 }
 
