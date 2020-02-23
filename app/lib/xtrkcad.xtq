@@ -334,7 +334,7 @@ DEMOGROUP Joining Tracks
 DEMO "Straight to straight" dmjnss.xtr
 DEMO "Curve to straight" dmjncs.xtr
 DEMO "Circle to circle" dmjcir.xtr
-DEMO "Joining to turntables" dmjntt.xtr
+#DEMO "Joining to turntables" dmjntt.xtr
 DEMO "Easements" dmease.xtr
 DEMO "Abutting tracks" dmjnabut.xtr
 DEMO "Move to Join" dmjnmove.xtr
