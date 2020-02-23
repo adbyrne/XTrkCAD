@@ -2033,5 +2033,90 @@ EXPORT void CopyPoly(trkSeg_p p, wIndex_t segCnt) {
 }
 
 
-
-
+EXPORT wBool_t CompareSegs(
+	trkSeg_p segPtr1,
+	int segCnt1,
+	trkSeg_p segPtr2,
+	int segCnt2 )
+{
+	char * cp = message+strlen(message);
+	if ( segCnt1 != segCnt2 ) {
+		sprintf( cp, "SegCnt %d %d\n", segCnt1, segCnt2 );
+		return FALSE;
+	}
+	char * cq = cp-2;;
+	for ( int segInx = 0; segInx < segCnt1; segInx++ ) {
+		cp = cq;
+		sprintf( cp, "SEG:%d - ", segInx );
+		cp += strlen( cp );
+		trkSeg_p segP1 = &segPtr1[segInx];
+		trkSeg_p segP2 = &segPtr2[segInx];
+		REGRESS_CHECK_INT( "Type", segP1, segP2, type );
+		REGRESS_CHECK_COLOR( "Color", segP1, segP2, color );
+		REGRESS_CHECK_WIDTH( "Width", segP1, segP2, width );
+		switch( segP1->type ) {
+		case SEG_STRTRK:
+		case SEG_STRLIN:
+		case SEG_DIMLIN:
+		case SEG_BENCH:
+		case SEG_TBLEDGE:
+			REGRESS_CHECK_POS( "Pos[0]", segP1, segP2, u.l.pos[0] )
+			REGRESS_CHECK_POS( "Pos[1]", segP1, segP2, u.l.pos[1] )
+//			REGRESS_CHECK_POS( "Pos[2]", segP1, segP2, u.l.pos[2] )
+//			REGRESS_CHECK_POS( "Pos[3]", segP1, segP2, u.l.pos[3] )
+			REGRESS_CHECK_ANGLE( "Angle", segP1, segP2, u.l.angle )
+			REGRESS_CHECK_INT( "Option", segP1, segP2, u.l.option )
+			break;
+		case SEG_BEZTRK:
+		case SEG_BEZLIN:
+			break; // u.b
+		case SEG_CRVLIN:
+		case SEG_CRVTRK:
+		case SEG_FILCRCL:
+			REGRESS_CHECK_POS( "Center", segP1, segP2, u.c.center )
+			REGRESS_CHECK_ANGLE( "A0", segP1, segP2, u.c.a0 )
+			REGRESS_CHECK_ANGLE( "A1", segP1, segP2, u.c.a1 )
+			REGRESS_CHECK_DIST( "Radius", segP1, segP2, u.c.radius )
+			break; // u.c
+		case SEG_JNTTRK:
+			REGRESS_CHECK_POS( "Pos", segP1, segP2, u.j.pos )
+			REGRESS_CHECK_ANGLE( "Angle", segP1, segP2, u.j.angle )
+			REGRESS_CHECK_DIST( "R", segP1, segP2, u.j.R )
+			REGRESS_CHECK_DIST( "L", segP1, segP2, u.j.L )
+			REGRESS_CHECK_DIST( "L0", segP1, segP2, u.j.l0 )
+			REGRESS_CHECK_DIST( "L1", segP1, segP2, u.j.l1 );
+			REGRESS_CHECK_INT( "Flip", segP1, segP2, u.j.flip )
+			REGRESS_CHECK_INT( "Negate", segP1, segP2, u.j.negate )
+			REGRESS_CHECK_INT( "Scurve", segP1, segP2, u.j.Scurve )
+			break; // u.j
+		case SEG_TEXT:
+			REGRESS_CHECK_POS( "Pos", segP1, segP2, u.t.pos )
+			REGRESS_CHECK_ANGLE( "Angle", segP1, segP2, u.t.angle )
+			// CHECK fontP
+			REGRESS_CHECK_DIST( "Fontsize", segP1, segP2, u.t.fontSize )
+			REGRESS_CHECK_INT( "Boxed", segP1, segP2, u.t.boxed )
+			// CHECK string
+			break; // u.t
+		case SEG_POLY:
+		case SEG_FILPOLY:
+			REGRESS_CHECK_INT( "Cnt", segP1, segP2, u.p.cnt )
+			// CHECK pts
+			REGRESS_CHECK_POS( "Orig", segP1, segP2, u.p.orig )
+			REGRESS_CHECK_ANGLE( "Angle", segP1, segP2, u.p.angle )
+			break; // u.p
+		// EndPts
+		case SEG_UNCEP:
+		case SEG_CONEP:
+			break;
+		// Turnout/Struct
+		case SEG_PATH:
+		case SEG_SPEC:
+		case SEG_CUST:
+		case SEG_DOFF:
+			break;
+		default:
+			break;
+		}
+	}
+	return TRUE;
+}

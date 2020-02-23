@@ -1755,6 +1755,16 @@ static BOOL_T QueryDraw( track_p trk, int query )
 	}
 }
 
+static wBool_t CompareDraw( track_cp trk1, track_cp trk2 )
+{
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
+	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
+	REGRESS_CHECK_INT( "LineType", xx1, xx2, lineType )
+	return CompareSegs( xx1->segs, xx1->segCnt, xx2->segs, xx2->segCnt );
+}
 
 static trackCmd_t drawCmds = {
 		"DRAW",
@@ -1789,7 +1799,9 @@ static trackCmd_t drawCmds = {
 		NULL,
 		NULL, /*MakeSegs*/
 		ReplayDraw,
-		StoreDraw
+		StoreDraw,
+		NULL,
+		CompareDraw
 		};
 
 EXPORT BOOL_T OnTableEdgeEndPt( track_p trk, coOrd * pos )

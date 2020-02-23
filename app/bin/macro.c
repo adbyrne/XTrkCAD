@@ -60,6 +60,7 @@
 #include "param.h" 
 #include "paths.h"
 #include "track.h"
+#include "trackx.h"
 #include "utility.h"
 #include "version.h"
 
@@ -68,6 +69,8 @@ static void DemoInitValues( void );
 
 extern char *userLocale;
 static int log_playbackCursor = 0;
+
+
 
 /*****************************************************************************
  *
@@ -186,7 +189,7 @@ static int StartRecord( int cnt, char ** pathName, void * context )
 	if ( logTable_da.cnt > 11 )
 		lprintf( "StartRecord( %s ) @ %s\n", pathName, ctime(&clock) );
 	ParamStartRecord();
-	WriteTracks( recordF );
+	WriteTracks( recordF, TRUE );
 	WriteLayers( recordF );
 	fprintf( recordF, "REDRAW\n" );
 	fflush( recordF );
@@ -806,6 +809,123 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 	}
 }
 
+/*
+* Regression test
+*/
+static int log_regression = 0;
+wBool_t bWriteEndPtDirectIndex;
+
+void DoRegression( char * sFileName )
+{
+	typedef enum { REGRESSION_NONE, REGRESSION_CHECK, REGRESSION_QUIET, REGRESSION_SAVE } E_REGRESSION;
+	E_REGRESSION eRegression = REGRESSION_NONE;
+	long oldParamVersion;
+	long regressVersion;
+	FILE * fRegression;
+	char * sRegressionFile = "xtrkcad.regress";
+	wBool_t bWroteActualTracks;
+	eRegression = log_regression > 0 ? logTable(log_regression).level : 0;
+	char * cp;
+	regressVersion = strtol( paramLine+16, &cp, 10 );
+	if (cp == paramLine+16 )
+		regressVersion = PARAMVERSION;
+	LOG( log_regression, 1, ("REGRESSION %s %d %s:%d %s\n",
+				eRegression==REGRESSION_SAVE?"SAVE":"CHECK",
+				regressVersion,
+				sFileName, paramLineNum,
+				cp ) );
+	switch ( eRegression ){
+	case REGRESSION_SAVE:
+		fRegression = fopen( sRegressionFile, "a" );
+		if ( fRegression == NULL ) {
+			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sFileName, strerror(errno) );
+		} else {
+			fprintf( fRegression, "REGRESSION START %d %s\n",
+				PARAMVERSION, cp );
+			fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
+			WriteTracks( fRegression, FALSE );
+			fclose( fRegression );
+		}
+		while ( fgets(paramLine, STR_LONG_SIZE, paramFile) != NULL ) {
+			if ( strncmp( paramLine, "REGRESSION END", 14 ) == 0)
+				break;
+		}
+		break;
+	case REGRESSION_CHECK:
+	case REGRESSION_QUIET:
+		oldParamVersion = paramVersion;
+		paramVersion = regressVersion;
+		bWroteActualTracks = FALSE;
+		track_p to_first_save = to_first;
+		track_p* to_last_save = to_last;
+		while ( GetNextLine() ) {
+			// Read Expected track
+			to_first = NULL;
+			to_last = &to_first;
+			paramVersion = regressVersion;
+			if ( !ReadTrack( paramLine ) )
+				break;
+			track_cp tExpected = to_first;
+			to_first = to_first_save;
+			// Find corresponding Actual track
+			track_cp tActual = FindTrack( GetTrkIndex( tExpected ) );
+			strcat( message, "Regression " );
+			if ( ! CompareTrack( tActual, tExpected ) ) {
+				// Actual doesn't match Expected
+				LOG( log_regression, 1, ("  FAIL: %s", message) );
+				fRegression = fopen( sRegressionFile, "a" );
+				if ( fRegression == NULL ) {
+					NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sRegressionFile, strerror(errno) );
+					break;
+				}
+				fprintf( fRegression, "REGRESSION FAIL %d\n",
+					PARAMVERSION );
+				fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
+				fprintf( fRegression, "# %s", message );
+				if ( !bWroteActualTracks ) {
+					// Print Actual tracks
+					fprintf( fRegression, "Actual Tracks\n" );
+					paramVersion = PARAMVERSION;
+					WriteTracks( fRegression, FALSE );
+					bWroteActualTracks = TRUE;
+				}
+				// Print Expected track
+				to_first = tExpected;
+				fprintf( fRegression, "Expected Track\n" );
+				WriteTracks( fRegression, FALSE );
+				fclose( fRegression );
+				strcat( message, "Continue test?" );
+				if ( eRegression == REGRESSION_CHECK ) {
+					int rc = wNoticeEx( NT_ERROR, message, _("Stop"), _("Continue") );
+					if ( !rc ) {
+						while ( GetNextLine() &&
+							strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
+							;
+						break;
+					}
+				}
+			}
+			// Delete Expected track
+			to_first = tExpected;
+			to_last = &to_first;
+			FreeTrack( tExpected );
+		}
+		to_first = to_first_save;
+		to_last = to_last_save;
+		if ( strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
+			InputError( "Expected REGRESSION END", TRUE );
+		paramVersion = oldParamVersion;
+		break;
+	case REGRESSION_NONE:
+	default:
+		while ( GetNextLine() ) {
+			if ( strncmp( paramLine, "REGRESSION END", 14 ) == 0 )
+				break;
+		}
+		break;
+	}
+}
+
 static void EnableButtons(
 		BOOL_T enable )
 {
@@ -1132,6 +1252,9 @@ static void Playback( void )
 			}
 		} else if ( strncmp( paramLine, "DEMOINIT", 8 ) == 0 ) {
 			DemoInitValues();
+		} else if ( strncmp( paramLine, "REGRESSION START", 16 ) == 0 ) {
+			DoRegression( curDemo < 1 ? paramFileName :
+					            demoList(curDemo-1).fileName );
 		} else {
 			if (strncmp( paramLine, "MOUSE ", 6 ) == 0) {
 				thisCmd = mouseCmd;
@@ -1483,6 +1606,7 @@ EXPORT BOOL_T MacroInit( void )
 	ParamRegister( &demoPG );
 
 	log_playbackCursor = LogFindIndex( "playbackcursor" );
+	log_regression = LogFindIndex( "regression" );
 
 	return TRUE;
 }

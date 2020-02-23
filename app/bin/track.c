@@ -43,6 +43,7 @@
 #include "paths.h"
 #include "track.h"
 #include "utility.h"
+#include "misc.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
@@ -109,6 +110,8 @@ static track_p * importTrack;
 EXPORT BOOL_T onTrackInSplit = FALSE;
 
 static BOOL_T inDrawTracks;
+
+static wBool_t bWriteEndPtDirectIndex = FALSE;
 
 #ifndef TRACKDEP
 
@@ -670,7 +673,9 @@ EXPORT BOOL_T WriteEndPt( FILE * f, track_cp trk, EPINX_T ep )
 	long option;
 
 	assert ( endPt != NULL );
-	if (endPt->track == NULL ||
+	if (bWriteEndPtDirectIndex && endPt->index > 0) {
+		rc &= fprintf( f, "\tT4 %d ", endPt->index )>0;
+	} else if (endPt->track == NULL ||
 		( exportingTracks && !GetTrkSelected(endPt->track) ) ) {
 		rc &= fprintf( f, "\tE4 " )>0;
 	} else {
@@ -1188,6 +1193,98 @@ BOOL_T TrackIterate( track_p * trk )
 	*trk = trk1;
 	return trk1 != NULL;
 }
+
+
+wBool_t IsPosClose( coOrd pos1, coOrd pos2 ) {
+	DIST_T d = FindDistance( pos1, pos2 );
+	return d < 0.01;
+}
+
+
+wBool_t IsAngleClose( ANGLE_T angle1, ANGLE_T angle2 )
+{
+	ANGLE_T angle = NormalizeAngle( angle1 - angle2 );
+	if (angle > 180)
+		angle = 360-angle;
+	return angle < 0.01;
+}
+
+
+wBool_t IsDistClose( DIST_T dist1, DIST_T dist2 )
+{
+	DIST_T dist = fabs( dist1 - dist2 );
+	return dist < 0.01;
+}
+
+wBool_t IsWidthClose( DIST_T dist1, DIST_T dist2 )
+{
+	// width is computed by pixels/dpi
+	// problem is when widths are computed on platforms with differing dpi
+	DIST_T dist = fabs( dist1 - dist2 );
+	if ( dist < 0.01 )
+		return TRUE;
+#ifdef WINDOWS
+	dist1 *= 96.0/75.0;
+#else
+	dist1 *= 75.0/96.0;
+#endif
+	dist = fabs( dist1 - dist2 );
+	if ( dist < 0.01 )
+		return TRUE;
+	return FALSE;
+}
+
+wBool_t IsColorClose( wDrawColor color1, wDrawColor color2 )
+{
+	long rgb1 = wDrawGetRGB( color1 );
+	long rgb2 = wDrawGetRGB( color2 );
+	int r1 = (rgb1 >> 16) & 0xff;
+	int g1 = (rgb1 >> 8) & 0xff;
+	int b1 = rgb1 & 0xff;
+	int r2 = (rgb2 >> 16) & 0xff;
+	int g2 = (rgb2 >> 8) & 0xff;
+	int b2 = rgb2 & 0xff;
+	long diff = abs(r1-r2) + abs(g1-g2) + abs(b1-b2);
+	return (diff < 7);
+}
+
+wBool_t CompareTrack( track_cp trk1, track_cp trk2 )
+{
+	wBool_t rc = FALSE;
+	if ( trk1 == NULL ) {
+		sprintf( message, "Compare: T%d not found\n", trk2->index );
+		return FALSE;
+	}
+	sprintf( message, "Compare T:%d - ", GetTrkIndex(trk1) );
+	char * cp = message+strlen(message);
+	REGRESS_CHECK_INT( "Type", trk1, trk2, type ) 
+	REGRESS_CHECK_INT( "Index", trk1, trk2, index ) 
+	REGRESS_CHECK_INT( "Layer", trk1, trk2, layer )
+	REGRESS_CHECK_INT( "Scale", trk1, trk2, scale )
+	REGRESS_CHECK_INT( "EndPtCnt", trk1, trk2, endCnt )
+	char * cq = cp-2;
+	for ( int inx=0; inx<GetTrkEndPtCnt( trk1 ); inx++ ) {
+		cp = cq;
+		sprintf( cp, "EP:%d - ", inx );
+		cp += strlen(cp);
+		REGRESS_CHECK_POS( "Pos", trk1, trk2, endPt[inx].pos )
+		REGRESS_CHECK_ANGLE( "Angle", trk1, trk2, endPt[inx].angle )
+		int inx1 = trk1->endPt[inx].index;
+		track_cp trk1x = GetTrkEndTrk( trk1, inx );
+		if ( trk1x )
+			inx1 = GetTrkIndex( trk1x );
+		int inx2 = trk2->endPt[inx].index;
+		if ( inx1 != inx2 ) {
+			sprintf( cp, "Index: Actual` %d, Expected %d\n", inx1, inx2 );
+			return FALSE;
+		}
+		REGRESS_CHECK_INT( "Option", trk1, trk2, endPt[inx].option )
+	}
+	if ( trackCmds( GetTrkType( trk1 ) )->compare == NULL )
+		return TRUE;
+	return trackCmds( GetTrkType( trk1 ) )->compare( trk1, trk2 );
+}
+
 
 /*****************************************************************************
  *
@@ -1340,15 +1437,20 @@ if (bsearchRead) {
 }
 
 
-EXPORT BOOL_T WriteTracks( FILE * f )
+EXPORT BOOL_T WriteTracks( FILE * f, wBool_t bFull )
 {
 	track_p trk;
 	BOOL_T rc = TRUE;
-	RenumberTracks();
+	if ( bFull )
+		RenumberTracks();
+	if ( !bFull )
+		bWriteEndPtDirectIndex = TRUE;
 	TRK_ITERATE( trk ) {
 		rc &= trackCmds(GetTrkType(trk))->write( trk, f );
 	}
-	rc &= WriteCars( f );
+	bWriteEndPtDirectIndex = FALSE;
+	if ( bFull )
+		rc &= WriteCars( f );
 	return rc;
 }
 
@@ -1583,13 +1685,13 @@ nextEndPt:;
 	if (auditStop)
 		if (NoticeMessage( MSG_AUDIT_WRITE_FILE, _("Yes"), _("No"))) {
 			fprintf( auditFile, "# before undo\n" );
-			WriteTracks(auditFile);
+			WriteTracks(auditFile, TRUE);
 			Rdump( auditFile );
 			if (strcmp("undoUndo",event)==0) {
 				fprintf( auditFile, "# failure in undo\n" );
 			} else if (UndoUndo()) {
 				fprintf( auditFile, "# after undo\n" );
-				WriteTracks(auditFile);
+				WriteTracks(auditFile, TRUE);
 				Rdump( auditFile );
 			} else {
 				fprintf( auditFile, "# undo stack is empty\n" );

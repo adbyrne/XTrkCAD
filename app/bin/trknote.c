@@ -525,6 +525,17 @@ static BOOL_T QueryNote( track_p trk, int query )
 	return FALSE;
 }
 
+static wBool_t CompareNote( track_cp trk1, track_cp trk2 )
+{
+	struct extraDataNote *xx1 = (struct extraDataNote *)GetTrkExtraData( trk1 );
+	struct extraDataNote *xx2 = (struct extraDataNote *)GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
+	REGRESS_CHECK_INT( "Layer", xx1, xx2, layer )
+	REGRESS_CHECK_INT( "Op", xx1, xx2, op )
+	return TRUE;
+}
+
 static trackCmd_t noteCmds = {
     "NOTE",
     DrawNote,
@@ -559,7 +570,8 @@ static trackCmd_t noteCmds = {
 	NULL,       /*rebuildSegs*/
 	NULL,       /*replayData*/
 	NULL,       /*storeData*/
-	ActivateNote
+	ActivateNote,
+	CompareNote
 };
 
 /*****************************************************************************

@@ -740,6 +740,18 @@ static void DrawTurntablePositionIndicator( track_p trk, wDrawColor color )
 	DrawLine( &tempD, pos0, pos1, 3, color );
 }
 
+static wBool_t CompareTurntable( track_cp trk1, track_cp trk2 )
+{
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
+	REGRESS_CHECK_DIST( "Radius", xx1, xx2, radius )
+	REGRESS_CHECK_INT( "CurrEp", xx1, xx2, currEp )
+	REGRESS_CHECK_INT( "Reverse", xx1, xx2, reverse )
+	return TRUE;
+}
+
 static void AdvanceTurntablePositionIndicator(
 		track_p trk,
 		coOrd pos,
@@ -802,7 +814,14 @@ static trackCmd_t turntableCmds = {
 		FlipTurntable,
 		DrawTurntablePositionIndicator,
 		AdvanceTurntablePositionIndicator,
-		CheckTraverseTurntable };
+		CheckTraverseTurntable,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		CompareTurntable };
 
 
 static STATUS_T CmdTurntable( wAction_t action, coOrd pos )

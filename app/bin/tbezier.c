@@ -1193,6 +1193,27 @@ BOOL_T MoveBezierEndPt ( track_p *trk, EPINX_T *ep, coOrd pos, DIST_T d0 ) {
 	return FALSE;
 }
 
+static wBool_t CompareBezier( track_cp trk1, track_cp trk2 )
+{
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Pos[0]", xx1, xx2, bezierData.pos[0] )
+	REGRESS_CHECK_POS( "Pos[1]", xx1, xx2, bezierData.pos[1] )
+	REGRESS_CHECK_POS( "Pos[2]", xx1, xx2, bezierData.pos[2] )
+	REGRESS_CHECK_POS( "Pos[3]", xx1, xx2, bezierData.pos[3] )
+	REGRESS_CHECK_DIST( "MinCurveRadius", xx1, xx2, bezierData.minCurveRadius )
+	REGRESS_CHECK_ANGLE( "A0", xx1, xx2, bezierData.a0 )
+	REGRESS_CHECK_ANGLE( "A1", xx1, xx2, bezierData.a1 )
+	// Check arcSegs
+	REGRESS_CHECK_DIST( "Length", xx1, xx2, bezierData.length )
+	REGRESS_CHECK_POS( "DescOff", xx1, xx2, bezierData.descriptionOff )
+	REGRESS_CHECK_WIDTH( "SegsWidth", xx1, xx2, bezierData.segsWidth )
+	REGRESS_CHECK_COLOR( "SegsColor", xx1, xx2, bezierData.segsColor )
+	REGRESS_CHECK_INT( "LineType", xx1, xx2, bezierData.lineType )
+	return TRUE;
+}
+
 static trackCmd_t bezlinCmds = {
 		"BZRLIN",
 		DrawBezier,
@@ -1224,7 +1245,11 @@ static trackCmd_t bezlinCmds = {
 		NULL,
 		NULL,
 		NULL,
-		RebuildBezier
+		RebuildBezier,
+		NULL,
+		NULL,
+		NULL,
+		CompareBezier
 		};
 
 static trackCmd_t bezierCmds = {
@@ -1258,7 +1283,11 @@ static trackCmd_t bezierCmds = {
 		NULL,
 		MakeParallelBezier,
 		NULL,
-		RebuildBezier
+		RebuildBezier,
+		NULL,
+		NULL,
+		NULL,
+		CompareBezier
 		};
 
 

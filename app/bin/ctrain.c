@@ -521,6 +521,11 @@ static BOOL_T QueryCar(track_p trk, int query)
     }
 }
 
+static wBool_t CompareCar( track_cp trk1, track_cp trk2 )
+{
+	return TRUE;
+}
+
 
 static trackCmd_t carCmds = {
     "CAR ",
@@ -548,6 +553,16 @@ static trackCmd_t carCmds = {
     QueryCar, /* query */
     NULL, /* ungroup */
     NULL, /* flip */
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    CompareCar
 };
 
 /*
