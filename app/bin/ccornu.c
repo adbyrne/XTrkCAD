@@ -2300,15 +2300,14 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 							t= NULL;
 						}
 						ep = -1;                                            //Not a real ep yet
-					} else ep = PickUnconnectedEndPointSilent(p, t);		//EP
-					if (ep>=0 && QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {
-						ep=-1;  		            //Don't attach to Turntable
+					} else if (QueryTrack(t,Q_CAN_ADD_ENDPOINTS)) {
+						ep=-1;  		            //Don't attach to existing Turntable ep
 						trackParams_t tp;
 						if (!GetTrackParams(PARAMS_CORNU, t, pos, &tp)) return C_CONTINUE;
 						ANGLE_T a = tp.angle;
 						Translate(&pos,tp.ttcenter,a,tp.ttradius);
 						p = pos;										//Fix to wall of turntable initially
-					}
+					} else ep = PickUnconnectedEndPointSilent(p, t);		//EP
 					if ( t && ep==-1 && (!QueryTrack(t,Q_CAN_ADD_ENDPOINTS) && !QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS))) {  //No endpoints and not Turntable or Helix/Circle
 						wBeep();
 						InfoMessage(_("No Valid open end point on that track"));
@@ -2397,6 +2396,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				if (ep<1) {
 					Da.trk[1] = t;
 					Da.pos[1] = p;
+					Da.ep[1] = -1;
 					Da.radius[1] = 0.0;
 				}
 				CorrectHelixAngles();

@@ -162,9 +162,19 @@ static ANGLE_T ConstrainTurntableAngle( track_p trk, coOrd pos )
 static EPINX_T NewTurntableEndPt( track_p trk, ANGLE_T angle )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	EPINX_T ep = GetTrkEndPtCnt(trk);
+	EPINX_T ep = -1;
+	/* Reuse an old empty ep if it exists */
+	for (int i =0;i< GetTrkEndPtCnt(trk)-1;i++) {
+		if (GetTrkEndTrk(trk,i) == NULL) {
+			ep = i;
+			break;
+		}
+	}
+	if (ep == -1) {
+		ep = GetTrkEndPtCnt(trk);
+		SetTrkEndPtCnt( trk, ep+1 );
+	}
 	coOrd pos;
-	SetTrkEndPtCnt( trk, ep+1 );
 	PointOnCircle( &pos, xx->pos, xx->radius, angle );
 	SetTrkEndPoint( trk, ep, pos, angle );
 	return ep;
