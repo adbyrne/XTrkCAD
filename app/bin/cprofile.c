@@ -826,7 +826,7 @@ CloseProfileWindow(paramGroup_p pg, int event, void *data)
  * Undo the changes made in the profile window to the layout.
  */
  
-static
+static void
 ResetChanges()
 {
 	if (copyOfprofElem) {
