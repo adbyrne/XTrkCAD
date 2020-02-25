@@ -2393,7 +2393,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 					InfoMessage(_("No Valid Track End there"));
 					return C_CONTINUE;
 				}
-				if (ep<1) {
+				if (ep<0) {
 					Da.trk[1] = t;
 					Da.pos[1] = p;
 					Da.ep[1] = -1;
