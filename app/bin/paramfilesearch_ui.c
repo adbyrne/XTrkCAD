@@ -294,10 +294,14 @@ void DoSearchParams(void * junk)
         wControlActive((wControl_p)APPLYBUTTON, FALSE);
         wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
 
-        searchUi_fs = wFilSelCreate(mainW, FS_LOAD, FS_MULTIPLEFILES,
+        if (searchUi_fs == NULL) {
+
+        	searchUi_fs = wFilSelCreate(searchUiW, FS_LOAD, FS_MULTIPLEFILES,
                                     _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), GetParameterFileInfo,
                                     (void *)catalogFileBrowse);
+        }
     }
+
     ParamLoadControls(&searchUiPG);
     ParamGroupRecord(&searchUiPG);
 
