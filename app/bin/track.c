@@ -1224,9 +1224,9 @@ wBool_t IsWidthClose( DIST_T dist1, DIST_T dist2 )
 	if ( dist < 0.01 )
 		return TRUE;
 #ifdef WINDOWS
-	dist1 *= 96.0/75.0;
+	dist1 *= 96.0/72.0;
 #else
-	dist1 *= 75.0/96.0;
+	dist1 *= 72.0/96.0;
 #endif
 	dist = fabs( dist1 - dist2 );
 	if ( dist < 0.01 )

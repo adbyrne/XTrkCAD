@@ -1,4 +1,5 @@
 /** \file macro.c
+
  * Macros
  */
 
@@ -822,7 +823,7 @@ void DoRegression( char * sFileName )
 	long oldParamVersion;
 	long regressVersion;
 	FILE * fRegression;
-	char * sRegressionFile = "xtrkcad.regress";
+	char * sRegressionFile =  NULL;
 	wBool_t bWroteActualTracks;
 	eRegression = log_regression > 0 ? logTable(log_regression).level : 0;
 	char * cp;
@@ -834,6 +835,7 @@ void DoRegression( char * sFileName )
 				regressVersion,
 				sFileName, paramLineNum,
 				cp ) );
+	MakeFullpath( &sRegressionFile, workingDir, "xtrkcad.regress", NULL );
 	switch ( eRegression ){
 	case REGRESSION_SAVE:
 		fRegression = fopen( sRegressionFile, "a" );
@@ -844,6 +846,7 @@ void DoRegression( char * sFileName )
 				PARAMVERSION, cp );
 			fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
 			WriteTracks( fRegression, FALSE );
+			fprintf( fRegression, "REGRESSION END\n" );
 			fclose( fRegression );
 		}
 		while ( fgets(paramLine, STR_LONG_SIZE, paramFile) != NULL ) {
@@ -924,6 +927,7 @@ void DoRegression( char * sFileName )
 		}
 		break;
 	}
+	free( sRegressionFile );
 }
 
 static void EnableButtons(
