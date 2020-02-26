@@ -20,11 +20,15 @@ Objects on the \e{Hot Bar} are placed on the drawing canvas by first clicking on
 
 \rule
 
-\S{hbFlextrack} FlexTrack
+\S{Flextrack} FlexTrack
 
-A flextrack unit is placed for convienience on the left-hand side of the HotBar. It can be recognised because it is the only diagonally facing track element. It is used by \c{Left-Click} selecting it, and \c{Left-Click} clicking on the layout where one end should be placed. This will create a piece of flextrack about 15" long. If the end was over an unconnected end, the flextrack will be connected to it. 
+A flextrack unit is placed for convienience on the left-hand side of the HotBar. It can be recognised because it is the only diagonally facing track element and has a label "FLEX". It is used by \c{Left-Click} selecting it, and \c{Left-Click} clicking on the layout where the first end should be placed, and then \c{Left-Click} for the second end. 
+If either end is over an unconnected end and \f{Shift} was not held, the flextrack will be connected to the track and the end angle and radius will be set from the track. 
+If an end was not over an unconnected end, it can be manipulated by left dragging out the end angle before releasing. If the second end is not on a track end, differing end angles will produce a smooth curve, if both ends are unconnected, simply \c{Left-Click} without dragging produces a straight track. 
+Once both ends have been defined, the track can then be manipulated like a \k{chgCornu} Cornu Curved Track, by selecting and moving ends, adding and removing "pins" and altering the end anchor angle and radius if the flextrack is not connected at that end.  
+If the disconnected end is dragged and the button released while over an open end of another track, it will be connected to it in the manner of a Join with a Cornu easement.
 
-The track can then be manipulated like a \k{chgCornu} Cornu Curved Track, by selecting and moving ends, adding and removing "pins" and altering the end anchor angle and radius if the flextrack is not connected at that end. If the disconnected end is moved over an open end of another track, it will be connected like a Join with a Cornu easement.
+A flextrack will form a Straight Track if the ends have zero radius and are in a line with opposed end angles. If the ends are not aligned but the end angles are opposed it will be a simple S-curve. It will be a smooth monotonic curve if the ends are not in a line and the end angle lines and chord form a triangle. Otherwise it will be a complex S-curve. 		. 
 
 \rule
 
