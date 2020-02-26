@@ -225,9 +225,7 @@ static DIST_T DistanceTurntable( track_p trk, coOrd * p )
 	ANGLE_T a;
 	coOrd pos0, pos1;
 
-	d = FindDistance( xx->pos, *p ) - xx->radius;
-	if (d < 0.0)
-		d = 0.0;
+	d = FindDistance( xx->pos, *p ) - xx->radius;    //OK to be negative
 	if ( programMode == MODE_DESIGN ) {
 		a = FindAngle( xx->pos, *p );
 		Translate( p, xx->pos, a, d+xx->radius );

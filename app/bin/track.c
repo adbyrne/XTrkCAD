@@ -141,7 +141,7 @@ EXPORT void DescribeTrack( track_cp trk, char * str, CSIZE_T len )
 
 EXPORT DIST_T GetTrkDistance( track_cp trk, coOrd * pos )
 {
-	return trackCmds( GetTrkType(trk) )->distance( trk, pos );
+	return fabs(trackCmds( GetTrkType(trk) )->distance( trk, pos ));
 }
 
 /**
@@ -186,12 +186,13 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 		}
 		p = *fp;
 		distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
-		if (distance < closestDistance) {
+		if (fabs(distance) < fabs(closestDistance)) {
 			closestDistance = distance;
 			closestTrack = trk;
 			closestPos = p;
 		}
 	}
+	if (closestTrack && closestDistance <0 ) closestDistance = 0.0;  //Turntable was closest - inside well
 	if (closestTrack && (closestDistance <= mainD.scale*0.25 || closestDistance <= trackGauge*2.0) ) {
 		*fp = closestPos;
 		return closestTrack;
