@@ -45,7 +45,7 @@ struct wFilSel_t {
 		wFilSelCallBack_p action; 						/**<  */
 		void * data; 									/**<  */
 		int pattCount; 									/**<  number of file patterns*/
-		wBool_t LoadPatternsAdded;						/** Already loaded        	*/
+		wBool_t loadPatternsAdded;						/** Already loaded        	*/
 		GtkFileFilter *filter[ MAX_ALLOWEDFILTERS ]; 	/**< array of file patterns */
 		wFilSelMode_e mode; 							/**< used for load or save */
 		int opt; 										/**< see FS_ options */
@@ -158,7 +158,7 @@ struct wFilSel_t * wFilSelCreate(
 	fs->action = action;
 	fs->data = data;
 	fs->pattCount = 0;
-	fs->LoadPatternsAdded = FALSE;
+	fs->loadPatternsAdded = FALSE;
 
 	if (pattList) {
 		char * cps = strdup(pattList);
@@ -279,12 +279,12 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 			gtk_file_chooser_set_select_multiple ( GTK_FILE_CHOOSER(fs->window), TRUE);
 		}	
 		// add the file filters to the dialog box
-		if( fs->pattCount && !fs->LoadPatternsAdded) {
+		if( fs->pattCount && !fs->loadPatternsAdded) {
 
 			for( i = 0; i < fs->pattCount; i++ ) {
 				gtk_file_chooser_add_filter( GTK_FILE_CHOOSER( fs->window ), fs->filter[ i ] ); 
 			}
-			fs->LoadPatternsAdded = TRUE;
+			fs->loadPatternsAdded = TRUE;
 		}												
     }
     
