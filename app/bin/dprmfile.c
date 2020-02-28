@@ -326,6 +326,7 @@ static void ParamFileSelectAll(void *junk)
 
 static void ParamFileOk(void * junk)
 {
+    SearchUiOk(junk);
     ParamFileListConfirmChange();
     wHide(paramFileW);
 }
@@ -334,6 +335,7 @@ static void ParamFileOk(void * junk)
 static void ParamFileCancel(wWin_p junk)
 {
     ParamFileListCancelChange();
+    SearchUiOk(junk);
     wHide(paramFileW);
     DoChangeNotification(CHANGE_PARAMS);
 }

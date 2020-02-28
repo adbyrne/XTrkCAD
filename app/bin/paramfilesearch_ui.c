@@ -66,7 +66,7 @@ static paramData_t searchUiPLs[] = {
 #define I_MODETOGGLE	(4)
     {	PD_TOGGLE, &searchUiMode, "mode", PDO_DLGBOXEND, searchUiLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_APPLYBUTTON	(5)
-    {	PD_BUTTON, (void *)SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Apply") },
+    {	PD_BUTTON, (void *)SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
 #define I_SELECTALLBUTTON (6)
     {	PD_BUTTON, (void *)SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
     {	PD_BUTTON, (void*)SearchUiBrowse, "browse", 0, NULL, N_("Browse ...") }
@@ -230,14 +230,13 @@ static void SearchUiSelectAll(void *junk)
  * \param junk ignored
  */
 
-static void SearchUiOk(void * junk)
+void SearchUiOk(void * junk)
 {
-    SearchUILoadResults();
     wHide(searchUiW);
 }
 
 /**
- * Handle the Apply button: a list of selected list elements is created and
+ * Handle the Add button: a list of selected list elements is created and
  * passed to the parameter file list.
  *
  * \param junk IN/OUT ignored
@@ -249,7 +248,8 @@ static void SearchUiApply(wWin_p junk)
 }
 
 /**
- * Event handling for the Search dialog
+ * Event handling for the Search dialog. If the 'X' decoration is pressed the 
+ * dialog window is closed.
  *
  * \param pg IN ignored
  * \param inx IN ignored
@@ -268,6 +268,9 @@ static void SearchUiDlgUpdate(
     case I_MODETOGGLE:
         SearchFileListLoad(catalogFileBrowse);
         break;
+	case -1:
+		SearchUiOk(valueP);
+		break;
     }
 }
 
@@ -288,18 +291,15 @@ void DoSearchParams(void * junk)
         ParamRegister(&searchUiPG);
 
         searchUiW = ParamCreateDialog(&searchUiPG,
-                                      MakeWindowTitle(_("Find parameter files")), _("Done"), SearchUiOk, NULL,
+                                      MakeWindowTitle(_("Find parameter files")), _("Done"), NULL, NULL,
                                       TRUE, NULL, 0, SearchUiDlgUpdate);
 
         wControlActive((wControl_p)APPLYBUTTON, FALSE);
         wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
 
-        if (searchUi_fs == NULL) {
-
-        	searchUi_fs = wFilSelCreate(searchUiW, FS_LOAD, FS_MULTIPLEFILES,
+        searchUi_fs = wFilSelCreate(searchUiW, FS_LOAD, FS_MULTIPLEFILES,
                                     _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), GetParameterFileInfo,
                                     (void *)catalogFileBrowse);
-        }
     }
 
     ParamLoadControls(&searchUiPG);

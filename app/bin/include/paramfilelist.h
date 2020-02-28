@@ -30,4 +30,6 @@
 	void ParamFileListCancelChange(void);
 	BOOL_T ParamFileListInit(void);
 
+	void SearchUiOk(void * junk);
+
 #endif // !HAVE_PARAMFILELIST_H
