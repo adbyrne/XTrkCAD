@@ -703,10 +703,7 @@ static BOOL_T ReadTrackFile(
 			SetCurrentPath( LAYOUTPATHKEY, fileName );
 
 		if (full) {
-//			SetCurrentPath(LAYOUTPATHKEY, pathName);
 			SetLayoutFullPath(pathName);
-			//strcpy(curPathName, pathName);
-			//curFileName = &curPathName[fileName-pathName];
 			SetWindowTitle();
 		}
 	}
@@ -760,7 +757,7 @@ int LoadTracks(
 
 	BOOL_T zipped = FALSE;
 	BOOL_T loadXTC = TRUE;
-	char * full_path = fileName[0];
+	char * full_path = fileName[ 0 ]; 
 
 	if (extOfFile && (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0)) {
 
@@ -845,16 +842,15 @@ int LoadTracks(
 	else
 		bReadOnly = FALSE;
 
-	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, FALSE, TRUE )) {
+	char *copyOfFileName = MyStrdup(fileName[0]);
+	if (loadXTC && ReadTrackFile( full_path, FindFilename(full_path), TRUE, FALSE, TRUE )) {
 
 		if (zipped) {  //Put back to zipped extension - change back title and path
-			nameOfFile = FindFilename( fileName[0]);
-			extOfFile = FindFileExtension( fileName[0]);
-			SetCurrentPath( LAYOUTPATHKEY, fileName[0] );
-			SetLayoutFullPath(fileName[0]);
+			nameOfFile = FindFilename( copyOfFileName);
+			extOfFile = FindFileExtension(copyOfFileName);
+			SetCurrentPath( LAYOUTPATHKEY, copyOfFileName);
+			SetLayoutFullPath(copyOfFileName);
 			SetWindowTitle();
-			free(full_path);
-			full_path = fileName[0];
 		}
 
 		if ( ! bExample )
@@ -872,6 +868,7 @@ int LoadTracks(
 		LoadLayerLists();
 		LayerSetCounts();
 	}
+	MyFree(copyOfFileName);
 	UndoResume();
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
