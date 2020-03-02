@@ -841,20 +841,15 @@ int LoadTracks(
 	else
 		bReadOnly = FALSE;
 
+	char *copyOfFileName = MyStrdup(fileName[0]);
+
 	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, TRUE, TRUE )) {
 
 		nameOfFile = NULL;
 		extOfFile = NULL;
-
-		if (zipped) {  //Put back to zipped extension - change back title and path
-			SetCurrentPath( LAYOUTPATHKEY, fileName[0] );
-			SetLayoutFullPath(fileName[0]);
-			SetWindowTitle();
-		} else {
-			SetCurrentPath( LAYOUTPATHKEY, fileName[0] );
-			SetLayoutFullPath(fileName[0]);
-			SetWindowTitle();
-		}
+		SetCurrentPath( LAYOUTPATHKEY, copyOfFileName );
+		SetLayoutFullPath(copyOfFileName);
+		SetWindowTitle();
 
 		if ( ! bExample && (nameOfFile != NULL) ) {
 			char * copyFile = strdup(fileName[0]);
@@ -875,8 +870,11 @@ int LoadTracks(
 		LoadLayerLists();
 		LayerSetCounts();
 	}
+
+	MyFree(copyOfFileName);
 	free(full_path);
 	full_path = NULL;
+
 	UndoResume();
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
