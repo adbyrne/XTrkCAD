@@ -701,14 +701,6 @@ static BOOL_T ReadTrackFile(
 	if( ret ) {
 		if (!noSetCurDir)
 			SetCurrentPath( LAYOUTPATHKEY, fileName );
-
-		if (full) {
-//			SetCurrentPath(LAYOUTPATHKEY, pathName);
-			SetLayoutFullPath(pathName);
-			//strcpy(curPathName, pathName);
-			//curFileName = &curPathName[fileName-pathName];
-			SetWindowTitle();
-		}
 	}
 
 	RestoreLocale( oldLocale );
@@ -716,7 +708,7 @@ static BOOL_T ReadTrackFile(
 	paramFile = NULL;
 
 	free(paramFileName);
-	paramFileName = NULL;
+    paramFileName = NULL;
 	InfoMessage( "%d", count );
 	return ret;
 }
@@ -760,7 +752,7 @@ int LoadTracks(
 
 	BOOL_T zipped = FALSE;
 	BOOL_T loadXTC = TRUE;
-	char * full_path = fileName[0];
+	char * full_path = strdup(fileName[0]);
 
 	if (extOfFile && (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0)) {
 
@@ -809,6 +801,8 @@ int LoadTracks(
 				free(manifest);
 			}
 
+			free(full_path);
+			full_path = NULL;
 			// If no manifest value use same name as the archive
 			if (arch_file && arch_file[0])
 			{
@@ -837,7 +831,9 @@ int LoadTracks(
 
 		free(zip_input);
 
+
 	}
+
 	if ( bExample )
 		bReadOnly = TRUE;
 	else if ( access( fileName[0], W_OK ) == -1 )
@@ -845,20 +841,27 @@ int LoadTracks(
 	else
 		bReadOnly = FALSE;
 
-	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, FALSE, TRUE )) {
+	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, TRUE, TRUE )) {
+
+		nameOfFile = NULL;
+		extOfFile = NULL;
 
 		if (zipped) {  //Put back to zipped extension - change back title and path
-			nameOfFile = FindFilename( fileName[0]);
-			extOfFile = FindFileExtension( fileName[0]);
 			SetCurrentPath( LAYOUTPATHKEY, fileName[0] );
 			SetLayoutFullPath(fileName[0]);
 			SetWindowTitle();
-			free(full_path);
-			full_path = fileName[0];
+		} else {
+			SetCurrentPath( LAYOUTPATHKEY, fileName[0] );
+			SetLayoutFullPath(fileName[0]);
+			SetWindowTitle();
 		}
 
-		if ( ! bExample )
-			wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]) );
+		if ( ! bExample && (nameOfFile != NULL) ) {
+			char * copyFile = strdup(fileName[0]);
+			char * listName = FindFilename(strdup(fileName[0]));  //Make sure the list name is new
+			wMenuListAdd( fileList_ml, 0, listName, copyFile );
+		}
+
 
 		ResolveIndex();
 #ifdef TIME_READTRACKFILE
@@ -872,6 +875,8 @@ int LoadTracks(
 		LoadLayerLists();
 		LayerSetCounts();
 	}
+	free(full_path);
+	full_path = NULL;
 	UndoResume();
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
