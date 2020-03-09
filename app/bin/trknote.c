@@ -199,7 +199,7 @@ CommonCancelNote(track_p trk)
 	}
 }
 
-static void 
+static void
 CommonUpdateNote(track_p trk, int inx, struct extraDataNote *noteData )
 {
 	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
@@ -223,7 +223,7 @@ void UpdateFile(struct extraDataNote *noteUIData, int inx,  BOOL_T needUndoStart
 {
 	track_p trk = noteUIData->trk;
 	struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(trk);
-	
+
 	switch (inx) {
 	case OR_NOTE:
 	case LY_NOTE:
@@ -246,7 +246,7 @@ void UpdateFile(struct extraDataNote *noteUIData, int inx,  BOOL_T needUndoStart
 		//free(result);
 	}
 		break;
-	
+
 	default:
 		break;
 	}
@@ -302,7 +302,7 @@ void UpdateText(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart)
  * no marker is used for backwards compatibility
  *
  * \param command IN the note's command code
- * \return a pointer to the marker string. 
+ * \return a pointer to the marker string.
  */
 
 static char *
@@ -325,12 +325,12 @@ GetNoteMarker(enum noteCommands command )
 
 /**
  * Write the note to file. Handles the complete syntax for a note statement
- * 
+ *
  * \param t IN pointer to the note track element
  * \param f IN file handle for writing
  * \return TRUE for success
  */
-  
+
 static BOOL_T WriteNote(track_p t, FILE * f)
 {
     struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
@@ -355,18 +355,30 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 		break;
 	}
 
+#ifdef WINDOWS
+	if (RequiresConvToUTF8(DynStringToCStr(&noteText))) {
+		char *textString = DynStringToCStr(&noteText);
+		unsigned cnt = strlen(textString) * 2 + 1;
+		unsigned char *out = MyMalloc(cnt);
+
+		wSystemToUTF8(textString, out, cnt);
+		DynStringClear(&noteText);
+		DynStringCatCStr(&noteText, out);
+		MyFree(out);
+	}
+#endif // WINDOWS
+
 	rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d\n", GetTrkIndex(t),
 		GetTrkLayer(t),
-		xx->pos.x, xx->pos.y, (int)(DynStringSize( &noteText ) + strlen(marker))) > 0;
+		xx->pos.x, xx->pos.y, (int)(DynStringSize(&noteText) + strlen(marker))) > 0;
 
 	if (*marker) {
 		rc &= fprintf(f, "%s", marker) > 0;
 	}
-
 	rc &= fprintf(f, "%s", DynStringToCStr(&noteText)) > 0;
     rc &= fprintf(f, "\n    END\n") > 0;
     DynStringFree(&noteText);
-	
+
 	return rc;
 }
 
@@ -401,7 +413,7 @@ ReadTrackNote(char *line)
 	fread(noteText, sizeof(char), size, paramFile);
 	noteType = OP_NOTETEXT;
 
-	if( !strncmp(noteText, DELIMITER, strlen( DELIMITER )) && 
+	if( !strncmp(noteText, DELIMITER, strlen( DELIMITER )) &&
 		!strncmp(noteText + strlen(DELIMITER) + 1, DELIMITER, strlen(DELIMITER)) &&
 			noteText[strlen(DELIMITER)] - '0' > 0 &&
 			noteText[strlen(DELIMITER)] - '0' <= OP_NOTEFILE)
@@ -411,8 +423,12 @@ ReadTrackNote(char *line)
 
     t = NewNote(index, pos, noteType);
     SetTrkLayer(t, layer);
-	   
+
     xx = (struct extraDataNote *)GetTrkExtraData(t);
+
+#ifdef WINDOWS
+	ConvertUTF8ToSystem(noteText);
+#endif // WINDOWS
 
 	switch (noteType) {
 	case OP_NOTETEXT:
@@ -436,11 +452,11 @@ ReadTrackNote(char *line)
 		break;
 	}
 	}
-	
+
 	fgetc(paramFile);
-	
+
 	cp = GetNextLine();
-	
+
 	while ( *cp && isspace(*cp ) ) cp++;
 	if (strncmp(cp, "END", 3)) {
 		InputError(_("Expected END statement not found!"),

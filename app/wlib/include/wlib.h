@@ -11,6 +11,8 @@
 #define FILE_SEP_CHAR "/"
 #endif
 
+#include <stdbool.h>
+
 #ifdef USE_SIMPLE_GETTEXT
 char *bindtextdomain( char *domainname, char *dirname );
 char *bind_textdomain_codeset(char *domainname, char *codeset );
@@ -19,6 +21,11 @@ char *gettext( const char *msgid );
 
 char *g_win32_getlocale (void);
 #endif
+
+// conversion routines to and from UTF-8
+bool wSystemToUTF8(const char *inString, char *outString, unsigned outStringLength);
+bool wUTF8ToSystem(const char *inString, char *outString, unsigned outStringLength);
+bool wIsUTF8(const char * string);
 
 /*
  * Interface types

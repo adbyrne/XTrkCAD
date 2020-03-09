@@ -318,7 +318,11 @@ EXPORT char * ConvertToEscapedText(const char * text) {
 		}
 		text_i++;
 	}
-	char * cout = MyMalloc(strlen(text) + 1 + add);
+	unsigned cnt = strlen(text) + 1 + add;
+#ifdef WINDOWS
+	cnt *= 2;
+#endif
+	char * cout = MyMalloc(cnt);
 	int cout_i = 0;
 	text_i = 0;
 	while (text[text_i]) {
@@ -355,6 +359,10 @@ EXPORT char * ConvertToEscapedText(const char * text) {
 		text_i++;
 	}
 	cout[cout_i] = '\0';
+#ifdef WINDOWS
+	wSystemToUTF8(cout, cout, cnt);
+#endif // WINDOWS
+
 	return cout;
 }
 
@@ -583,7 +591,7 @@ FileIsChanged(void)
   * \param after IN function to be executed on positive confirmation
   * \return true if proceed, false if cancel operation
   */
-  
+
 /** TODO: make sensible messages when requesting confirmation */
 
 bool
@@ -2929,7 +2937,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	/* Set up the data for scale and gauge description */
 	DoSetScaleDesc();
 
-	// get the preferred scale from the configuration file	
+	// get the preferred scale from the configuration file
 	pref = wPrefGetString("misc", "scale");
 	if (!pref)
 		// if preferred scale was not set (eg. during initial run), initialize to a default value
@@ -2989,4 +2997,3 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	inMainW = FALSE;
 	return mainW;
 }
-
