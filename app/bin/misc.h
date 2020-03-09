@@ -93,6 +93,8 @@ extern int enumerateMaxDescLen;
 extern long enableBalloonHelp;
 extern long hotBarLabels;
 extern long rightClickMode;
+extern long selectMode;
+extern long selectZero;
 extern void * commandContext;
 extern coOrd cmdMenuPos;
 #define MODE_DESIGN		(0)

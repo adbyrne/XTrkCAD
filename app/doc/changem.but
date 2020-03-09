@@ -1451,15 +1451,19 @@ Clicking on the \f{Select} button cancels all active commands, closes any open d
 
 In combination with the mouse, the \f{Select} command can be used as follows;
 
-\dd Objects under the cursor that will be selected with a \e{Left-Click} are highlighted in Blue unless they are already selected.
+\dd Objects that will be selected with a \e{Left-Click} are highlighted in Blue. 
 
 \u000
 
-\dd \e{Left-Click} - selects just the object. Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog) and a blue selection box surrounds all currently selected objects. If an point without a track is selected, all currently selected tracks are unselected.
+\dd \e{Left-Click} - selects just the object if the \f{SelectMode} in \K{cmdCmdopt} is set to "Only". If it is set to "Add", it will add the object or remove it if is already selected. 
+Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog) and a blue selection box surrounds all currently selected objects. 
+If \f{SelectZero} is selected in \K{cmdCmdopt} and an point without a track is selected, all currently selected tracks are deselected.
 
 \u000
 
-\dd \e{Ctrl+Left-Click} - Adds the track to the selected tracks, or removes it if it is already selected.
+\dd \e{Ctrl+Left-Click} - in \f{SelectMode} "Only" it adds the track to the selected tracks, or removed it if it is already selected.
+If \f{SelectMode} "Add" is set, only the object is selected, with "Only" the object is added to the select set.
+If \f{SelectZero} is selected in \K{cmdCmdopt} and an point without a track is selected, all currently selected tracks are deselected.
 
 \u000
 

@@ -107,6 +107,14 @@ The \f{Command Option} dialog contains items which control the behavior of some 
 
 \dd \e{Right-Click} - will either display a pop-up menu of available commands or command-specific options depending on whether the \e{Shift} key is being held down or not.  This option allows you to choose which operation occurs.
 
+\u000
+
+\dd \e{Select-Mode} - will either (a) only select the current item unless Ctrl is added or (b) will add the current item to the selection unless Ctrl is added in which case it will only select this item. 
+
+\u000
+
+\dd \e{Select-Zero} - if selected will perform \f{Deselect All} if the selection is not on an object.
+
 \rule
 
 

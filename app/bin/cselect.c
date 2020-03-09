@@ -78,6 +78,13 @@ static dynArr_t tlist_da;
 #define TlistAppend( T ) \
 		{ DYNARR_APPEND( track_p, tlist_da, 10 );\
 		  Tlist(tlist_da.cnt-1) = T; }
+
+BOOL_T TListSearch(track_p T) {
+	for (int i=0;i<tlist_da.cnt-1;i++) { \
+		if (Tlist(i) == T) return TRUE;
+	}
+	return FALSE;
+}
 static track_p *tlist2 = NULL;
 
 static wMenu_p selectPopup1M;
@@ -478,7 +485,7 @@ static void SelectOneTrack(
 
 
 static void SelectConnectedTracks(
-		track_p trk )
+		track_p trk, BOOL_T display_only )
 {
 	track_p trk1;
 	int inx;
@@ -486,9 +493,9 @@ static void SelectConnectedTracks(
 	tlist_da.cnt = 0;
 	TlistAppend( trk );
 	InfoCount( 0 );
-	wDrawDelayUpdate( mainD.d, FALSE );
+	if (!display_only) wDrawDelayUpdate( mainD.d, FALSE );
 	for (inx=0; inx<tlist_da.cnt; inx++) {
-		if ( inx > 0 && selectedTrackCount == 0 )
+		if ( inx > 0 && (selectedTrackCount == 0) && !display_only )
 			return;
 		trk = Tlist(inx);
 		if (inx!=0 && 
@@ -496,11 +503,12 @@ static void SelectConnectedTracks(
 			continue;
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
 			trk1 = GetTrkEndTrk( trk, ep );
-			if (trk1 && (!GetTrkSelected(trk1)) && GetLayerVisible( GetTrkLayer( trk1 )) ) {
+			if (trk1 && (!GetTrkSelected(trk1) && !TListSearch(trk1)) && GetLayerVisible( GetTrkLayer( trk1 )) ) {
 				TlistAppend( trk1 )
 			}
 		}
-		if (!GetTrkSelected(trk)) {
+		if (display_only) DrawTrack(trk,&tempD,wDrawColorBlueHighlight);
+		else if (!GetTrkSelected(trk)) {
 			if (GetLayerModule(GetTrkLayer(trk))) {
 				continue;
 			} else {
@@ -509,10 +517,12 @@ static void SelectConnectedTracks(
 			}
 		}
 	}
-	RedrawSelectedTracksBoundary();
-	wDrawDelayUpdate( mainD.d, TRUE );	
-	wFlush();	
-	InfoCount( trackCount );
+	if (!display_only) {
+		RedrawSelectedTracksBoundary();
+		wDrawDelayUpdate( mainD.d, TRUE );
+		wFlush();
+		InfoCount( trackCount );
+	}
 }
 
 typedef void (*doModuleTrackCallBack_t)(track_p, BOOL_T);
@@ -2659,26 +2669,29 @@ static STATUS_T SelectTrack(
 	track_p trk;
 	char msg[STR_SIZE];
 
-	if ((trk = OnTrack( &pos, FALSE, FALSE )) == NULL) {
+	if (((trk = OnTrack( &pos, FALSE, FALSE )) == NULL) && selectZero) {   //If option set and !ctrl or unset and ctrl
 		SetAllTrackSelect( FALSE );							//Unselect all
 		return C_CONTINUE;
 	}
+	if (trk == NULL) return C_CONTINUE;
 	inDescribeCmd = FALSE;
 	DescribeTrack( trk, msg, sizeof msg );
 	InfoMessage( msg );
 	if (GetLayerModule(GetTrkLayer(trk))) {
-		if (MyGetKeyState() & WKEY_CTRL) {
+		if (((MyGetKeyState() & WKEY_CTRL) && (selectMode==0)) || (!(MyGetKeyState() & WKEY_CTRL) && (selectMode==1)) )  {
 			DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,!GetTrkSelected(trk));
 		} else {
-			SetAllTrackSelect( FALSE );							//Just this Track
+			SetAllTrackSelect( FALSE );	 //Just this Track if selectMode = 0 and !CTRL or selectMode = 1 and CTRL
 			DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,TRUE);
 		}
 		RedrawSelectedTracksBoundary();
 		return C_CONTINUE;
 	}
 	if (MyGetKeyState() & WKEY_SHIFT) {						//All track up to
-		SelectConnectedTracks( trk );
-	} else if (MyGetKeyState() & WKEY_CTRL) {
+		SelectConnectedTracks( trk, FALSE );
+	} else if ((MyGetKeyState() & WKEY_CTRL) && (selectMode==0)) {
+		SelectOneTrack( trk, !GetTrkSelected(trk) );
+	} else if (!(MyGetKeyState() & WKEY_CTRL) && (selectMode==1)) {
 		SelectOneTrack( trk, !GetTrkSelected(trk) );
 	} else {
 		SetAllTrackSelect( FALSE );							//Just this Track
@@ -2718,7 +2731,7 @@ track_p IsInsideABox(coOrd pos) {
 	return NULL;
 }
 
-void DrawHighlightBoxes() {
+void DrawHighlightBoxes(BOOL_T highlight_selected, track_p not_this) {
 	track_p ts = NULL;
 	coOrd origin,max;
 	BOOL_T first = TRUE;
@@ -2729,6 +2742,7 @@ void DrawHighlightBoxes() {
 			DrawHighlightLayer(GetTrkLayer(ts));
 		}
 		coOrd hi,lo;
+		if (highlight_selected && (ts != not_this)) DrawTrack(ts,&tempD,wDrawColorBlueHighlight);
 		GetBoundingBox(ts, &hi, &lo);
 		if (first) {
 			origin = lo;
@@ -2986,10 +3000,28 @@ static STATUS_T CmdSelect(
 				DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
 			}
 		}
-		if ( trk && !IsTrackDeleted(trk) )
-			DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
-		if (!doingMove && !doingRotate)
-			DrawHighlightBoxes();
+		if ( trk && !IsTrackDeleted(trk)) {
+			if (selectMode == 0)
+				DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+			else if ((selectMode == 1) && !GetTrkSelected(trk))
+				DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+			if ((MyGetKeyState() & WKEY_SHIFT))
+				SelectConnectedTracks(trk,TRUE);            //Highlight all connected
+		}
+		if (!doingMove && !doingRotate) {
+			if (selectMode == 0)
+				if (!trk && selectZero)
+					DrawHighlightBoxes(FALSE, NULL);
+				else
+					DrawHighlightBoxes((MyGetKeyState() & WKEY_CTRL), NULL);
+			else {
+				if (!trk && selectZero)
+					DrawHighlightBoxes(FALSE, NULL);
+				else
+					DrawHighlightBoxes(!(MyGetKeyState() & WKEY_CTRL), trk);
+			}
+		}
+
 		return rc;
 
 	case C_LCLICK:

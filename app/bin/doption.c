@@ -218,6 +218,8 @@ EXPORT addButtonCallBack_t DisplayInit( void )
 static wWin_p cmdoptW;
 
 static char * preSelectLabels[] = { N_("Properties"), N_("Select"), NULL };
+static char * selectLabels[] = { N_("Only Selected, +Ctrl Add"), N_("Add to Selected, +Ctrl Only Selected"), NULL };
+static char * selectZeroLabels[] = { N_("Deselect All on select nothing"), NULL };
 
 #ifdef HIDESELECTIONWINDOW
 static char * hideSelectionWindowLabels[] = { N_("Hide"), NULL };
@@ -229,7 +231,9 @@ EXPORT paramData_t cmdoptPLs[] = {
 #ifdef HIDESELECTIONWINDOW
 	{ PD_TOGGLE, &hideSelectionWindow, PDO_NOPSHUPD, hideSelectionWindowLabels, N_("Hide Selection Window"), BC_HORZ },
 #endif
-	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, rightClickLabels, N_("Right Click"), 0 }
+	{ PD_RADIO, &rightClickMode, "rightclickmode", PDO_NOPSHUPD, rightClickLabels, N_("Right Click"), 0 },
+	{ PD_RADIO, &selectMode, "selectmode", PDO_NOPSHUPD, selectLabels, N_("Select Mode"), 0},
+	{ PD_TOGGLE, &selectZero, "selectzero", PDO_NOPSHUPD, selectZeroLabels, "", 0 }
 	};
 static paramGroup_t cmdoptPG = { "cmdopt", PGO_RECORD|PGO_PREFMISC, cmdoptPLs, sizeof cmdoptPLs/sizeof cmdoptPLs[0] };
 

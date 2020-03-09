@@ -244,6 +244,8 @@
 		{"line": "circle-radius", "contents": "Specifies the radius of the circle track" },
 		{"line": "cmdopt-preselect", "contents": "Default command is Describe or Select" },
 		{"line": "cmdopt-rightclickmode", "contents": "Action to invoke on Right-Click" },
+		{"line": "cmdopt-selectmode", "contents": "Select only clicked or Add clicked to Select" },
+		{"line": "cmdopt-selectzero", "contents": "Select on nothing Deselects All - if Select Mode is Add" },
 		{"line": "cmdopt-ok", "contents": "" },
 		{"line": "contmgm-inx", "contents": "The list of control elements" },
 		{"line": "contmgm-edit", "contents": "Edit the element" },

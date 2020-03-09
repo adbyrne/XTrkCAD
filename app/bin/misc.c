@@ -131,6 +131,8 @@ EXPORT wIndex_t cmdGroup;
 EXPORT wIndex_t joinCmdInx;
 EXPORT wIndex_t modifyCmdInx;
 EXPORT long rightClickMode = 0;
+EXPORT long selectMode = 0;
+EXPORT long selectZero = 1;
 EXPORT DIST_T easementVal = 0.0;
 EXPORT DIST_T easeR = 0.0;
 EXPORT DIST_T easeL = 0.0;
