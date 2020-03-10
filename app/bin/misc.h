@@ -346,6 +346,7 @@ void MapWindowShow( int state );
 wMenuToggle_p snapGridEnableMI;
 wMenuToggle_p snapGridShowMI;
 wMenuToggle_p mapShowMI;
+wMenuToggle_p anchorsMI;
 
 void ScaleLengthEnd( void );
 void EnumerateList( long, FLOAT_T, char * );

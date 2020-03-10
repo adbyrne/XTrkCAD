@@ -196,7 +196,7 @@ EXPORT STATUS_T CreateCurve(
 		    Da.trk = NULL;
 		    if (track) {
 				if ((mode == crvCmdFromEP1 || mode == crvCmdFromTangent || (mode == crvCmdFromChord))  &&
-						(MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
+						((MyGetKeyState() & WKEY_SHIFT) ==0 ) == anchorsShow) {
 					if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 						EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 						if (ep != -1) {
@@ -430,7 +430,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if (Da.state == -1) {
 			BOOL_T found = FALSE;
 			if (curveMode != crvCmdFromCenter ) {
-				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
+				if (((MyGetKeyState() & WKEY_SHIFT)==0) == anchorsShow) {
 					if ((t = OnTrack(&pos,FALSE,TRUE))!=NULL) {
 					   EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
 					   if (ep != -1) {
@@ -462,7 +462,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 	case wActionMove:
 		if ((Da.state<0) && (curveMode != crvCmdFromCenter)) {
 			DYNARR_RESET(trkSeg_t,anchors_da);
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
+			if (((MyGetKeyState() & WKEY_SHIFT)==0) == anchorsShow) {
 				if ((t=OnTrack(&pos,FALSE,TRUE))!= NULL) {
 					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
 						EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);

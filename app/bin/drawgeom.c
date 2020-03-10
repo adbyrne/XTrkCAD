@@ -275,7 +275,10 @@ STATUS_T DrawGeomMouse(
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		DYNARR_RESET( trkSeg_t, anchors_da );
 		lock = FALSE;
-		InfoMessage(_("+Shift to lock to nearby objects"));
+		if (!anchorsShow)
+			InfoMessage(_("+Shift to lock to nearby objects"));
+		else
+			InfoMessage(_("+Shift to not lock to nearby objects"));
 		return C_CONTINUE;
 
 	case wActionMove:
@@ -292,7 +295,7 @@ STATUS_T DrawGeomMouse(
 				case OP_POLY:
 				case OP_FILLPOLY:
 				case OP_POLYLINE:
-					if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0 ) {
+					if (((MyGetKeyState() & WKEY_SHIFT) == 0) == anchorsShow ) {
 						coOrd p = pos;
 						track_p t;
 						if ((t=OnTrack(&p,FALSE,FALSE))!=NULL) {
@@ -328,13 +331,14 @@ STATUS_T DrawGeomMouse(
 		}
 		context->Started = TRUE;
 		line_angle = 90.0;
-		if ((context->Op == OP_CURVE1 && context->State == 1) ||
+		if ((context->Op == OP_CURVE1 && context->State != 2) ||
 			(context->Op == OP_CURVE2 && context->State == 0) ||
+			(context->Op == OP_CURVE3 && context->State != 0) ||
 			(context->Op == OP_CURVE4 && context->State != 2) ||
 			(context->Op == OP_LINE) || (context->Op == OP_DIMLINE) ||
 			(context->Op == OP_BENCH) ) {
 			BOOL_T found = FALSE;
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0 ) {
+			if (((MyGetKeyState() & WKEY_SHIFT) ==0) == anchorsShow ) {
 				coOrd p = pos;
 				track_p t;
 				if ((t=OnTrack(&p,FALSE,FALSE))!=NULL) {
@@ -481,7 +485,7 @@ STATUS_T DrawGeomMouse(
 			(context->Op == OP_CURVE4 && context->State != 2) ||
 			(context->Op == OP_LINE) ||
 			(context->Op == OP_BENCH) ) {
-			if ( (MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT ) {
+			if (( (MyGetKeyState() & WKEY_SHIFT)==0) == anchorsShow) {
 				if (OnTrack( &pos, FALSE, FALSE )!=NULL)
 					CreateEndAnchor(pos,TRUE);
 			}
@@ -661,10 +665,11 @@ STATUS_T DrawGeomMouse(
 		createTrack = FALSE;
 		if ((context->Op == OP_CURVE1 && context->State == 1) ||
 			(context->Op == OP_CURVE2 && context->State == 0) ||
+			(context->Op == OP_CURVE3 && context->State != 0) ||
 			(context->Op == OP_CURVE4 && context->State != 2) ||
 			(context->Op == OP_LINE) || (context->Op == OP_DIMLINE) ||
 			(context->Op == OP_BENCH) ) {
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) != WKEY_SHIFT ) {
+			if (((MyGetKeyState() & WKEY_SHIFT)==0) == anchorsShow ) {
 				coOrd p = pos1;
 				track_p t;
 				if ((t=OnTrack(&p,FALSE,FALSE))) {
@@ -2066,6 +2071,7 @@ STATUS_T DrawGeomModify(
 		case SEG_TBLEDGE:
 			if ( MyGetKeyState() & WKEY_CTRL )
 				OnTableEdgeEndPt( NULL, &pos );
+			/* no break */
 		case SEG_STRLIN:
 		case SEG_DIMLIN:
 		case SEG_BENCH:

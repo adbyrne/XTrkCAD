@@ -116,6 +116,7 @@ EXPORT wButton_p redoB;
 EXPORT wButton_p zoomUpB;
 EXPORT wButton_p zoomDownB;
 wButton_p mapShowB;
+wButton_p anchorsB;
 wButton_p backgroundB;
 
 EXPORT wIndex_t checkPtMark = 0;
@@ -754,6 +755,25 @@ void MapWindowShow(int state) {
 	wWinShow(mapW, mapVisible);
 	wButtonSetBusy(mapShowB, (wBool_t) mapVisible);
 }
+
+/**
+ * Set anchor state
+ */
+void AnchorsShow(int state)
+{
+	anchorsShow = state;
+	wPrefSetInteger("misc", "anchors", anchorsShow);
+	wMenuToggleSet(anchorsMI, anchorsShow);
+	wButtonSetBusy(anchorsB, (wBool_t) anchorsShow);
+}
+
+/**
+ * Toggle visibility of anchors
+ */
+void AnchorsToggleShow(void) {
+	AnchorsShow(!anchorsShow);
+}
+
 
 static void DoShowWindow(int index, const char * name, void * data) {
 	if (data == mapW) {
@@ -2091,6 +2111,7 @@ static void SetAccelKey(char * prefName, wAccelKey_e key, int mode,
 #include "bitmaps/document-open.xpm"
 #include "bitmaps/document-print.xpm"
 #include "bitmaps/map.xpm"
+#include "bitmaps/magnet.xpm"
 
 static void CreateMenus(void) {
 	wMenu_p fileM, editM, viewM, optionM, windowM, macroM, helpM, toolbarM,
@@ -2165,8 +2186,10 @@ static void CreateMenus(void) {
 			0, (void*) (wMenuCallBack_p) SnapGridEnable, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridShow", _("SnapGrid Show"), 0,
 			(void*) (wMenuCallBack_p) SnapGridShow, 0, (void *) 0);
+	MiscMenuItemCreate(popup1M, popup2M, "cmdAnchorsShow", _("On/Off Add Anchors"), 0,
+			(void*) (wMenuCallBack_p) AnchorsToggleShow, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdMapShow", _("Show/Hide Map"), 0,
-			(void*) (wMenuCallBack_p) MapWindowToggleShow, 0, (void *) 0);
+				(void*) (wMenuCallBack_p) MapWindowToggleShow, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdBackgroundShow", _("Show/Hide Background"), 0,
 			(void*) (wMenuCallBack_p) BackgroundToggleShow, 0, (void *) 0);
 	wMenuSeparatorCreate(popup1M);
@@ -2360,6 +2383,17 @@ static void CreateMenus(void) {
 
 	wMenuSeparatorCreate(viewM);
 
+	// visibility toggle for anchors
+	// get the start value
+	long anchors_long;
+	wPrefGetInteger("misc", "anchors", (long *) &anchors_long, 1);
+	anchorsShow = anchors_long ? TRUE : FALSE;
+	anchorsMI = wMenuToggleCreate(viewM, "cmdAnchorsShow", _("Show/Hide Anchors"),
+			0, anchorsShow,
+			(wMenuToggleCallBack_p) AnchorsToggleShow, NULL);
+
+	wMenuSeparatorCreate(viewM);
+
 	toolbarM = wMenuMenuCreate(viewM, "toolbarM", _("&Tool Bar"));
 	CreateToolbarM(toolbarM);
 
@@ -2368,6 +2402,11 @@ static void CreateMenus(void) {
 
 	cmdGroup = BG_SNAP;
 	InitSnapGridButtons();
+	anchorsB = AddToolbarButton("cmdAnchorsShow", wIconCreatePixMap(magnet_xpm),
+				IC_MODETRAIN_TOO, (addButtonCallBack_t) AnchorsToggleShow, NULL);
+		wControlLinkedSet((wControl_p) anchorsMI, (wControl_p) anchorsB);
+		wButtonSetBusy(anchorsB, (wBool_t) anchorsShow);
+
 	mapShowB = AddToolbarButton("cmdMapShow", wIconCreatePixMap(map_xpm),
 			IC_MODETRAIN_TOO, (addButtonCallBack_t) MapWindowToggleShow, NULL);
 	wControlLinkedSet((wControl_p) mapShowMI, (wControl_p) mapShowB);

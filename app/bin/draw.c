@@ -129,6 +129,7 @@ static wPos_t infoHeight;
 static wPos_t textHeight;
 EXPORT wWin_p mapW;
 EXPORT BOOL_T mapVisible;
+EXPORT BOOL_T anchorsShow;
 
 EXPORT wDrawColor markerColor;
 EXPORT wDrawColor borderColor;

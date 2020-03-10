@@ -6,6 +6,7 @@
 		{"line": "cmdAbout", "contents": "About box dialog" },
 		{"line": "cmdAbove", "contents": "Move Selected object to top" },
 		{"line": "cmdAddElevations", "contents": "Raise or Lower all Selected tracks" },
+		{"line": "cmdAnchorsShow", "contents": "On/Off Add Anchors" },
 		{"line": "cmdBelow", "contents": "Move Selected object to bottom" },
 		{"line": "cmdBlockCreate", "contents": "Create a section of track for automation" },
 		{"line": "cmdBlockEdit", "contents": "Edit a Block Definition " },
