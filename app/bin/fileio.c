@@ -731,8 +731,14 @@ static BOOL_T ReadTrackFile(
 			if( !(ret = InputError( "unknown command", TRUE )))
 				break;
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(paramLine + 7);
+#endif // WINDOWS
 			SetLayoutTitle(paramLine + 7);
 		} else if (strncmp( paramLine, "TITLE2 ", 7 ) == 0) {
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(paramLine + 7);
+#endif // WINDOWS
 			SetLayoutSubtitle(paramLine + 7);
 		} else if (strncmp( paramLine, "ROOMSIZE", 8 ) == 0) {
 			if ( ParseRoomSize( paramLine+8, &roomSize ) ) {

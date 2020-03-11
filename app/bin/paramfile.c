@@ -274,9 +274,15 @@ bool ReadParams(
                 MakeFullpath(&paramFileName, fileName);
             }
         } else if (strncmp(paramLine, "CONTENTS ", 9) == 0) {
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(paramLine + 9);
+#endif
             curContents = MyStrdup(paramLine + 9);
             curSubContents = curContents;
         } else if (strncmp(paramLine, "SUBCONTENTS ", 12) == 0) {
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(paramLine + 12);
+#endif // WINDOWS
             curSubContents = MyStrdup(paramLine + 12);
         } else if (strncmp(paramLine, "PARAM ", 6) == 0) {
             paramVersion = atol(paramLine + 6);
@@ -315,5 +321,3 @@ nextLine:
 
     return TRUE;
 }
-
-
