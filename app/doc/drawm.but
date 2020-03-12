@@ -70,13 +70,13 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \dd \G{png.d/dcurve1.png} Select the start of the curve and drag in the direction of the curve.
 
-If the cursor is over a Draw object the first position will snap to the nearest part of that object. If \e{Shift} is held the snap will be suppressed.
+If the cursor is over a Draw object and \f{MagneticSnap} is on, the first position will snap to the nearest part of that object. If \e{Shift} is held the snap will be suppressed.
+If \f{MagneticSnap} is disabled, the snap will happen if \e{Shift} is held.  The second end will act similarly.
 
 \u000
 
 \dd \G{png.d/dcurve2.png} Select one end of the curve and drag to the center.
-
-If the mouse is over a draw object the first position will snap to the nearest part of that object. If \e{Shift} is held the snap will be suppressed. 
+The first and second ends will act like "CurvedLine From End" with \f{MagneticSnap}.
 To complete the command, drag on the red arrows to adjust the curve from the initial end.
 
 \u000
@@ -88,14 +88,15 @@ To complete the command, drag on the red arrows to adjust the curve.
 \u000
 
 \dd \G{png.d/dcurve4.png} Drag from one end of the curve to the other to form the chord of the curve.
-
+The first and second ends will act like "CurvedLine From End" with \f{MagneticSnap}.
 To complete the command, drag on the red arrows to adjust the curve. If the mouse is over a draw object the second position will snap to the nearest part of that object. If \e{Shift} is held the snap will be suppressed. 
 
 \u000
 
 \dd \G{png.d/dbezier.png} \e{Left-Drag} out control point from one end of the curve and then \e{Left-Drag} out the second control point from the other end.
 
-The curve ends will lock to the nearest part of nearby Draw objects unless \e{Shift} is held.
+If \f{MagneticSnap} is enabled, the curve ends will snap to the nearest part of nearby Draw objects unless \e{Shift} is held.
+If it is disabled, snapping will only occure if \e{Shift} is held.
 
 The precise values of Radius and Arc Length can be set using the text boxes on the bottom rail once the mouse button is released.
 
@@ -183,7 +184,8 @@ Shapes are drawn by:
 \u000
 
 \dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \G{png.d/dpolyline} \f{PolyLines} and \f{Polygons} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. When using Drag, the node will be positioned when you release the button.
-\u An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Shift} is held. 
+\u If \f{MagneticSnap} is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Shift} is held. 
+\u If it is disabled, the snap will only occur if \e{Shift} is held.
 \u If \c{Ctrl} is held down when a new point is placed, it will snap the relative angle of the new side to a multiple of 90 degrees from the previous side.
 \u A special square anchor will show when the cursor is in a position such that it is 90 degrees away from both the last point and the first point of the Polygon.
 \u The last polygon segment dimensions can be altered using the text boxes that appear showing the segment length and the relative angle to the previous segment.
@@ -206,7 +208,8 @@ Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been
 Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.  
 
 \dd \G{png.d/dline.png} Creates a \f{Straight Line} of specified color and width.
-The new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
+With \f{MagneticSnap} enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
+If it is diabled, it will onlt snap if \e{Shift} is held.
 If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees. 
 The precise angle and length can be set after drawing using the text entry boxes on the bottom rail. 
 

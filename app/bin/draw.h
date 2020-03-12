@@ -106,7 +106,7 @@ extern BOOL_T inError;
 extern DIST_T pixelBins;
 extern wWin_p mapW;
 extern BOOL_T mapVisible;
-extern BOOL_T anchorsShow;
+extern BOOL_T magneticSnap;
 extern drawCmd_t mainD;
 extern coOrd mainCenter;
 extern drawCmd_t mapD;

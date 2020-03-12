@@ -275,7 +275,7 @@ STATUS_T DrawGeomMouse(
 		DYNARR_RESET( trkSeg_t, tempSegs_da );
 		DYNARR_RESET( trkSeg_t, anchors_da );
 		lock = FALSE;
-		if (!anchorsShow)
+		if (!magneticSnap)
 			InfoMessage(_("+Shift to lock to nearby objects"));
 		else
 			InfoMessage(_("+Shift to not lock to nearby objects"));
@@ -295,7 +295,7 @@ STATUS_T DrawGeomMouse(
 				case OP_POLY:
 				case OP_FILLPOLY:
 				case OP_POLYLINE:
-					if (((MyGetKeyState() & WKEY_SHIFT) == 0) == anchorsShow ) {
+					if (((MyGetKeyState() & WKEY_SHIFT) == 0) == magneticSnap ) {
 						coOrd p = pos;
 						track_p t;
 						if ((t=OnTrack(&p,FALSE,FALSE))!=NULL) {
@@ -338,7 +338,7 @@ STATUS_T DrawGeomMouse(
 			(context->Op == OP_LINE) || (context->Op == OP_DIMLINE) ||
 			(context->Op == OP_BENCH) ) {
 			BOOL_T found = FALSE;
-			if (((MyGetKeyState() & WKEY_SHIFT) ==0) == anchorsShow ) {
+			if (((MyGetKeyState() & WKEY_SHIFT) ==0) == magneticSnap ) {
 				coOrd p = pos;
 				track_p t;
 				if ((t=OnTrack(&p,FALSE,FALSE))!=NULL) {
@@ -485,7 +485,7 @@ STATUS_T DrawGeomMouse(
 			(context->Op == OP_CURVE4 && context->State != 2) ||
 			(context->Op == OP_LINE) ||
 			(context->Op == OP_BENCH) ) {
-			if (( (MyGetKeyState() & WKEY_SHIFT)==0) == anchorsShow) {
+			if (( (MyGetKeyState() & WKEY_SHIFT)==0) == magneticSnap) {
 				if (OnTrack( &pos, FALSE, FALSE )!=NULL)
 					CreateEndAnchor(pos,TRUE);
 			}
@@ -669,7 +669,7 @@ STATUS_T DrawGeomMouse(
 			(context->Op == OP_CURVE4 && context->State != 2) ||
 			(context->Op == OP_LINE) || (context->Op == OP_DIMLINE) ||
 			(context->Op == OP_BENCH) ) {
-			if (((MyGetKeyState() & WKEY_SHIFT)==0) == anchorsShow ) {
+			if (((MyGetKeyState() & WKEY_SHIFT)==0) == magneticSnap ) {
 				coOrd p = pos1;
 				track_p t;
 				if ((t=OnTrack(&p,FALSE,FALSE))) {

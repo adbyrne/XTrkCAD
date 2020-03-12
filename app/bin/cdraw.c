@@ -2114,7 +2114,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionRDown:
 	case wActionRDrag:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
-		if (!((MyGetKeyState() & WKEY_SHIFT) != anchorsShow)) {
+		if (!((MyGetKeyState() & WKEY_SHIFT) != magneticSnap)) {
 			SnapPos( &pos );
 		}
 		return DrawGeomMouse( action, pos, &drawCmdContext);

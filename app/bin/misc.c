@@ -116,7 +116,7 @@ EXPORT wButton_p redoB;
 EXPORT wButton_p zoomUpB;
 EXPORT wButton_p zoomDownB;
 wButton_p mapShowB;
-wButton_p anchorsB;
+wButton_p magnetsB;
 wButton_p backgroundB;
 
 EXPORT wIndex_t checkPtMark = 0;
@@ -757,21 +757,21 @@ void MapWindowShow(int state) {
 }
 
 /**
- * Set anchor state
+ * Set magnets state
  */
-void AnchorsShow(int state)
+void MagneticSnap(int state)
 {
-	anchorsShow = state;
-	wPrefSetInteger("misc", "anchors", anchorsShow);
-	wMenuToggleSet(anchorsMI, anchorsShow);
-	wButtonSetBusy(anchorsB, (wBool_t) anchorsShow);
+	magneticSnap = state;
+	wPrefSetInteger("misc", "magnets", magneticSnap);
+	wMenuToggleSet(magnetsMI, magneticSnap);
+	wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
 }
 
 /**
- * Toggle visibility of anchors
+ * Toggle magnets on/off
  */
-void AnchorsToggleShow(void) {
-	AnchorsShow(!anchorsShow);
+void MagneticSnapToggle(void) {
+	MagneticSnap(!magneticSnap);
 }
 
 
@@ -2186,8 +2186,8 @@ static void CreateMenus(void) {
 			0, (void*) (wMenuCallBack_p) SnapGridEnable, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridShow", _("SnapGrid Show"), 0,
 			(void*) (wMenuCallBack_p) SnapGridShow, 0, (void *) 0);
-	MiscMenuItemCreate(popup1M, popup2M, "cmdAnchorsShow", _("On/Off Add Anchors"), 0,
-			(void*) (wMenuCallBack_p) AnchorsToggleShow, 0, (void *) 0);
+	MiscMenuItemCreate(popup1M, popup2M, "cmdMagneticSnap", _("On/Off Magnetic Snap"), 0,
+			(void*) (wMenuCallBack_p) MagneticSnapToggle, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdMapShow", _("Show/Hide Map"), 0,
 				(void*) (wMenuCallBack_p) MapWindowToggleShow, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdBackgroundShow", _("Show/Hide Background"), 0,
@@ -2387,10 +2387,10 @@ static void CreateMenus(void) {
 	// get the start value
 	long anchors_long;
 	wPrefGetInteger("misc", "anchors", (long *) &anchors_long, 1);
-	anchorsShow = anchors_long ? TRUE : FALSE;
-	anchorsMI = wMenuToggleCreate(viewM, "cmdAnchorsShow", _("Show/Hide Anchors"),
-			0, anchorsShow,
-			(wMenuToggleCallBack_p) AnchorsToggleShow, NULL);
+	magneticSnap = anchors_long ? TRUE : FALSE;
+	magnetsMI = wMenuToggleCreate(viewM, "cmdMagneticSnap", _("Magnetic Snap On/Off"),
+			0, magneticSnap,
+			(wMenuToggleCallBack_p) MagneticSnapToggle, NULL);
 
 	wMenuSeparatorCreate(viewM);
 
@@ -2402,10 +2402,10 @@ static void CreateMenus(void) {
 
 	cmdGroup = BG_SNAP;
 	InitSnapGridButtons();
-	anchorsB = AddToolbarButton("cmdAnchorsShow", wIconCreatePixMap(magnet_xpm),
-				IC_MODETRAIN_TOO, (addButtonCallBack_t) AnchorsToggleShow, NULL);
-		wControlLinkedSet((wControl_p) anchorsMI, (wControl_p) anchorsB);
-		wButtonSetBusy(anchorsB, (wBool_t) anchorsShow);
+	magnetsB = AddToolbarButton("cmdMagneticSnap", wIconCreatePixMap(magnet_xpm),
+				IC_MODETRAIN_TOO, (addButtonCallBack_t) MagneticSnapToggle, NULL);
+		wControlLinkedSet((wControl_p) magnetsMI, (wControl_p) magnetsB);
+		wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
 
 	mapShowB = AddToolbarButton("cmdMapShow", wIconCreatePixMap(map_xpm),
 			IC_MODETRAIN_TOO, (addButtonCallBack_t) MapWindowToggleShow, NULL);

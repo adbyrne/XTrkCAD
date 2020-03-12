@@ -2252,7 +2252,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			int end = 0;
 			if (Da.state != NONE) end=1;
 			EPINX_T ep = -1;
-			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
+			if (((MyGetKeyState()&WKEY_SHIFT) == WKEY_SHIFT) != magneticSnap) {
 				//Lock to endpoint if one is available and under pointer
 				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL && t != Da.selectTrack) {
 					if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where
@@ -2381,7 +2381,8 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		if (Da.state != NONE && Da.state != LOC_2) return C_CONTINUE;
 		if (Da.trk[0] && Da.trk[1]) return C_CONTINUE;
 		EPINX_T ep = -1;
-		if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == 0) {
+		t = NULL;
+		if (((MyGetKeyState() & WKEY_SHIFT) == WKEY_SHIFT) != magneticSnap) {
 			//Lock to endpoint if one is available and under pointer
 			if ((t = OnTrack(&pos, FALSE, TRUE)) != NULL && t != Da.selectTrack) {
 				if (QueryTrack(t,Q_HAS_VARIABLE_ENDPOINTS)) {    //Circle/Helix find if there is an open slot and where

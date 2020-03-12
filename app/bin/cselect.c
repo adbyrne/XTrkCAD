@@ -1733,13 +1733,14 @@ static STATUS_T CmdMove(
 			SnapPos( &base );
 			SetMoveD( TRUE, base, 0.0 );
 
-
-			if (FindEndIntersection(base,zero,0.0,&t1,&ep1,&t2,&ep2)) {
-				coOrd pos2 = GetTrkEndPos(t2,ep2);
-				pos2.x +=base.x;
-				pos2.y +=base.y;
-				CreateEndAnchor(pos2,FALSE);
-				CreateEndAnchor(GetTrkEndPos(t1,ep1),TRUE);
+			if (((MyGetKeyState()&(WKEY_SHIFT|WKEY_CTRL)) == WKEY_SHIFT) != magneticSnap) {  //Just Shift
+				if (FindEndIntersection(base,zero,0.0,&t1,&ep1,&t2,&ep2)) {
+					coOrd pos2 = GetTrkEndPos(t2,ep2);
+					pos2.x +=base.x;
+					pos2.y +=base.y;
+					CreateEndAnchor(pos2,FALSE);
+					CreateEndAnchor(GetTrkEndPos(t1,ep1),TRUE);
+				}
 			}
 #ifdef DRAWCOUNT
 			InfoMessage( "   [%s %s] #%ld", FormatDistance(base.x), FormatDistance(base.y), drawCount );
@@ -1802,7 +1803,7 @@ static STATUS_T CmdMove(
 			if (state) return C_CONTINUE;
 			if (SelectedTracksAreFrozen()) return C_TERMINATE;
 			if ((MyGetKeyState() &
-					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) {
+					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) {  //Both
 				base = zero;
 				DIST_T w = tempD.scale/tempD.dpi;
 				switch((wAccelKey_e) action>>8) {
@@ -2042,7 +2043,7 @@ static STATUS_T CmdRotate(
 				orig_base = base = pos;
 				//angle = NormalizeAngle( angle-baseAngle );
 				diff_angle = DifferenceBetweenAngles(baseAngle,angle);
-				if ( MyGetKeyState()&WKEY_SHIFT ) {
+				if ( (MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == (WKEY_CTRL|WKEY_SHIFT) ) {  //Both Shift+Ctrl
 					if (clockwise) {
 						if (diff_angle<0) diff_angle+=360;
 					} else {
@@ -2054,12 +2055,14 @@ static STATUS_T CmdRotate(
 				Translate( &base, orig, angle, FindDistance(orig,pos) );  //Line one
 				Translate( &orig_base,orig, baseAngle, FindDistance(orig,pos)<=(60.0/75.00*mainD.scale)?FindDistance(orig,pos):60.0/75.00*mainD.scale ); //Line two
 				SetMoveD( FALSE, orig, NormalizeAngle( angle-baseAngle ) );
-				if (FindEndIntersection(zero,orig,NormalizeAngle( angle-baseAngle ),&t1,&ep1,&t2,&ep2)) {
-					coOrd pos2 = GetTrkEndPos(t2,ep2);
-					coOrd pos1 = GetTrkEndPos(t1,ep1);
-					Rotate(&pos2,orig,NormalizeAngle( angle-baseAngle ));
-					CreateEndAnchor(pos2,FALSE);
-					CreateEndAnchor(pos1,TRUE);
+				if (((MyGetKeyState()&(WKEY_SHIFT|WKEY_CTRL)) == WKEY_SHIFT) != magneticSnap) {  //Just Shift
+					if (FindEndIntersection(zero,orig,NormalizeAngle( angle-baseAngle ),&t1,&ep1,&t2,&ep2)) {
+						coOrd pos2 = GetTrkEndPos(t2,ep2);
+						coOrd pos1 = GetTrkEndPos(t1,ep1);
+						Rotate(&pos2,orig,NormalizeAngle( angle-baseAngle ));
+						CreateEndAnchor(pos2,FALSE);
+						CreateEndAnchor(pos1,TRUE);
+					}
 				}
 
 #ifdef DRAWCOUNT

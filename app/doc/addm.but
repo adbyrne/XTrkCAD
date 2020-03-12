@@ -109,12 +109,13 @@ Creating a curve is a two step operation.
 The five methods (with their Shortcut keys) used to create a Curved Track are:
 
 \dd \G{png.d/bcurve1.png} (\c{Control-4}) Drag from one endpoint in the direction of the Curve at that point and release. \c{Left-Drag} the red arrows to position the second endpoint.
-While the first endpoint is being placed, unless \e{Shift} is held, if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you will drag out the second end in aligned to that track, once you are dragging the second end it will be restricted to an arc that has the same end angle as the first endpoint. After a track is competed, the new track will be connected to this first track.
+While the first endpoint is being placed, and \f{MagneticSnap} is enabled, unless \e{Shift} is held, if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you will drag out the second end in aligned to that track, once you are dragging the second end it will be restricted to an arc that has the same end angle as the first endpoint. After a track is competed, the new track will be connected to this first track.
+This will also happen with \f{MagneticSnap} if \e{Shift} is held.
 
 \u000
 
-\dd \G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints to the Center of the Curved track and release.  \c{Left-Drag} on the arrows to position the second endpoint.
-While the first endpoint is being placed, unless \c{Shift} is held down, if the cursor is on a track, the new curve end will "Snap" to the nearest open track endpoint and you can only drag out the center at right angles aligned to that end. After a track is competed, the new track will be connected to this first track.
+\dd \G{png.d/bcurve2.png} (\c{Control-5}) Drag from one of the endpoints (which will behave like the first point in "CurvedTrack From End" to the Center of the Curved track and release.  \c{Left-Drag} on the arrows to position the second endpoint.
+While the first endpoint is being placed, unless \c{Shift} is held down, if the cursor is on a track, the new curve end will snap to the nearest open track endpoint and you can only drag out the center at right angles aligned to that end. After a track is competed, the new track will be connected to this first track.
 
 \u000
 
@@ -123,12 +124,13 @@ While the first endpoint is being placed, unless \c{Shift} is held down, if the 
 \u000
 
 \dd \G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.  \c{Left-Click} on the center of the track and Drag to form the Curve.
-While the first end point is being placed, unles \c{Shift} is held, if the cursor is on a track, the point snaps to an open endpoint and the chord starts at right-angles to the end track. After a track is competed, the new track will be connected to this first track.
+The first end point acts like "CurvedTrack From End". If an exitsing track end is selected, the Chord will only move along line orthogonal to the track.
 
 \u000
 
 \dd \G{png.d/bezier.png} Place one endpoint and drag out the first control point and release, \c{Left-Click} to place the second Endpoint and \c{Left-Drag} out the second control point and release. Once all 4 points are placed, you can pick one at a time and drag it to move it. Complete the Curve by pressing \c{Enter|, or Reject it with c\{Esc}.
-While the endpoints are being placed, unless \c{Shift} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks. After the new track is completed, it will be connected to these existing track.
+While the endpoints are being placed, if \f{MagneticSnap} is enabled, unless \c{Shift} is held down, they will "Snap" to an open track endpoint of the tracks underneath the cursor and you can only drag out the control point aligned to the end of those tracks. After the new track is completed, it will be connected to these existing track.
+If \f{MagneticSnap} is disabled, the snap will only happen if \e{Shift} is held.
 
 \u000
 
@@ -148,7 +150,7 @@ Optionally, the curve center point and radius can be displayed for the Curve. Th
  
 For Beziers, the active control point will be drawn in red and the available endpoints are shown with circles. 
 
-For Cornus, the active control point is drawn in blue and dynamic blue anchor points illuminate when the cursor is near to an anchor.
+For Cornus, the active control point is drawn in blue and dynamic blue anchor points illuminate when the cursor is near to an anchor and \f{MagneticSnap} is operating or \e{Shift} is held.
 
 \f{Note:} You can also create Straight and Curved tracks using \k{cmdModify} by \c{Left-Drag}ing out extra track from an open end-point.
 
@@ -156,9 +158,11 @@ For Cornus, the active control point is drawn in blue and dynamic blue anchor po
 
 \S{cmdCornu} Create Cornu Track
 
-\dd \G{png.d/bcornu.png} \c{Left-Click} to place each endpoint on an open track end or just on the layout
+\dd \G{png.d/bcornu.png} \c{Left-Click} to place each endpoint on an open track end or just on the layout.
+During the move to the click, if \f{MagneticSnap} is enabled, an anchor will show when the cursor is near an open end point. This can be inhibited with \e{Shift}. 
+If \f{MagneticSnap} is disabled this will only happen if \e{Shift} is held.
 
-\c{Left-Drag} with the endpoint not on an existing track drags out the end angle of the new track. This is shown by the Cornu endanchor 
+\c{Left-Drag} if the endpoint not on an existing track drags out the end angle of the new track. This is shown by the Cornu endanchor. 
 
 \G{png.d/cornuendanchor.png}
 
