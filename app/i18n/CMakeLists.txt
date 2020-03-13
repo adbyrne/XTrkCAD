@@ -4,6 +4,7 @@ PROJECT(i18n)
 SET(XTRKCAD_LOCALE_IDS
 	de_DE
 	fi
+	fr_FR
 	pt_BR
 	)
 
