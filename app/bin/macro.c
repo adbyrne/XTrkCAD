@@ -1491,6 +1491,9 @@ static char * demoInitParams[] = {
 		"GROUP sticky",
 		"turnout hide 0",
 		"layer button-count 10",
+		"misc cmdMagneticSnap 0",
+		"cmdopt selectmode 0",
+		"cmdopt selectzero 1",
 		NULL };
 
 static void DemoInitValues( void )
