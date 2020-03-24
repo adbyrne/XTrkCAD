@@ -205,11 +205,27 @@ static cairo_t* gtkDrawCreateCairoContext(
 	else {
 		if (opts & wDrawOptTemp) {
 			if ( ! bd->bTempMode )
-				printf( "Temp draw in Main Mode\n" );
+				printf( "Temp draw in Main Mode. Contact Developers. See %s:%d\n", "gtkdraw-cario.c", __LINE__+1 );
+/* Temp Draw In Main Mode:
+	You are seeing this message because there is a wDraw*() call on tempD but you are not in the context of TempRedraw()
+	Typically this happens when Cmd<Object>() is processing a C_DOWN or C_MOVE action and it writes directly to tempD
+	Instead it sould set some state which allows c_redraw to do the actual drawing
+	If you set a break point on the printf you'll see the offending wDraw*() call in the traceback
+	It should be sufficient to remove that draw code or move it to C_REDRAW
+	This is not fatal but the draw will be ineffective because the next TempRedraw() will erase the temp surface
+	before the expose event can copy (or bitblt) it
+*/
 			cairo = cairo_create(bd->temp_surface);
 		} else {
 			if ( bd->bTempMode )
-				printf( "Main draw in Temp Mode\n" );
+				printf( "Main draw in Temp Mode. Contact Developers. See %s:%d\n", "gtkdraw-cario.c", __LINE__+1 );
+/* Main Draw In Temp Mode:
+	You are seeing this message because there is a wDraw*() call on mainD but you are in the context of TempRedraw()
+	Typically this happens when C_REDRAW action calls wDraw*() on mainD, in which case it should be writing to tempD.
+	Or the wDraw*() call should be removed if it is redundant.
+	If you set a break point on the printf you'll see the offending wDraw*() call in the traceback
+	This is not fatal but could result in garbage being left on the screen if the command is cancelled.
+*/
 			cairo = gdk_cairo_create(bd->pixmap);
 		}
 	}
