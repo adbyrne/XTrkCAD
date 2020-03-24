@@ -135,7 +135,7 @@ MOUSE 4 1.000 10.000
 MESSAGE
 _________________________________________
 
-The <Rotate> command will restrict the rotation to increments of 15° if you hold down the <Shift> key.
+The <Rotate> command will restrict the rotation to increments of 15° if you hold down the <Shift> and <Ctrl> keys.
 END
 STEP
 PARAMETER misc cmdUndo
@@ -307,11 +307,11 @@ COMMAND Select
 MOUSE 2 4.25 4.5
 MOUSE 4 4.25 4.5
 COMMAND Rotate
-KEYSTATE 2
+KEYSTATE 6
 MOUSE 2 4.25 4.5
-KEYSTATE 2
+KEYSTATE 6
 MOUSE 3 12.000 18.000
-KEYSTATE 2
+KEYSTATE 6
 MOUSE 4 1.000 10.000
 MESSAGE
 _________________________________________
