@@ -770,30 +770,30 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 	case C_START:
 		if (helix) {
 			if (helixW == NULL)
-				helixW = ParamCreateDialog( &helixPG, MakeWindowTitle(_("Helix")), NULL, NULL, HelixCancel, TRUE, NULL, 0, ComputeHelix );
-			ParamLoadControls( &helixPG );
-			ParamGroupRecord( &helixPG );
-			ComputeHelix( NULL, 6, NULL );
-			wShow( helixW );
-			memset( h_orders, 0, sizeof h_orders );
+				helixW = ParamCreateDialog(&helixPG, MakeWindowTitle(_("Helix")), NULL, NULL, HelixCancel, TRUE, NULL, 0, ComputeHelix);
+			ParamLoadControls(&helixPG);
+			ParamGroupRecord(&helixPG);
+			ComputeHelix(NULL, 6, NULL);
+			wShow(helixW);
+			memset(h_orders, 0, sizeof h_orders);
 			h_clock = 0;
 		} else {
-			ParamLoadControls( &circleRadiusPG );
-			ParamGroupRecord( &circleRadiusPG );
-			switch ( circleMode ) {
+			ParamLoadControls(&circleRadiusPG);
+			ParamGroupRecord(&circleRadiusPG);
+			switch (circleMode) {
 			case circleCmdFixedRadius:
 				controls[0] = circleRadiusPLs[0].control;
 				controls[1] = NULL;
 				labels[0] = N_("Circle Radius");
-				InfoSubstituteControls( controls, labels );
+				InfoSubstituteControls(controls, labels);
 				break;
 			case circleCmdFromTangent:
-				InfoSubstituteControls( NULL, NULL );
-				InfoMessage( _("Click on Circle Edge") );
+				InfoSubstituteControls(NULL, NULL);
+				InfoMessage(_("Click on Circle Edge"));
 				break;
 			case circleCmdFromCenter:
-				InfoSubstituteControls( NULL, NULL );
-				InfoMessage( _("Click on Circle Center") );
+				InfoSubstituteControls(NULL, NULL);
+				InfoMessage(_("Click on Circle Center"));
 				break;
 			}
 		}
@@ -801,97 +801,95 @@ static STATUS_T CmdCircleCommon( wAction_t action, coOrd pos, BOOL_T helix )
 		return C_CONTINUE;
 
 	case C_DOWN:
-		DYNARR_SET( trkSeg_t, tempSegs_da, 1 );
+		DYNARR_SET(trkSeg_t, tempSegs_da, 1);
 		tempSegs_da.cnt = 0;
 		if (helix) {
 			if (helixRadius <= 0.0) {
-				ErrorMessage( MSG_RADIUS_GTR_0 );
+				ErrorMessage(MSG_RADIUS_GTR_0);
 				return C_ERROR;
 			}
 			if (helixTurns <= 0) {
-				ErrorMessage( MSG_HELIX_TURNS_GTR_0 );
+				ErrorMessage(MSG_HELIX_TURNS_GTR_0);
 				return C_ERROR;
 			}
-			ParamLoadData( &helixPG );
+			ParamLoadData(&helixPG);
 		} else {
-			ParamLoadData( &circleRadiusPG );
-			switch( circleMode ) {
+			ParamLoadData(&circleRadiusPG);
+			switch (circleMode) {
 			case circleCmdFixedRadius:
 				if (circleRadius <= 0.0) {
-					ErrorMessage( MSG_RADIUS_GTR_0 );
+					ErrorMessage(MSG_RADIUS_GTR_0);
 					return C_ERROR;
 				}
 				break;
 			case circleCmdFromTangent:
-				InfoSubstituteControls( NULL, NULL );
-				InfoMessage( _("Drag to Center") );
+				InfoSubstituteControls(NULL, NULL);
+				InfoMessage(_("Drag to Center"));
 				break;
 			case circleCmdFromCenter:
-				InfoSubstituteControls( NULL, NULL );
-				InfoMessage( _("Drag to Edge") );
+				InfoSubstituteControls(NULL, NULL);
+				InfoMessage(_("Drag to Edge"));
 				break;
 			}
 		}
-		SnapPos( &pos );
+		SnapPos(&pos);
 		tempSegs(0).u.c.center = pos0 = pos;
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
 		return C_CONTINUE;
 
 	case C_MOVE:
-		SnapPos( &pos );
+		SnapPos(&pos);
 		tempSegs(0).u.c.center = pos;
-		if ( !helix ) {
-			switch ( circleMode ) {
+		if (!helix) {
+			switch (circleMode) {
 			case circleCmdFixedRadius:
 				break;
 			case circleCmdFromCenter:
 				tempSegs(0).u.c.center = pos0;
-				circleRadius = FindDistance( tempSegs(0).u.c.center, pos );
-				InfoMessage( _("Radius=%s"), FormatDistance(circleRadius) );
+				circleRadius = FindDistance(tempSegs(0).u.c.center, pos);
+				InfoMessage(_("Radius=%s"), FormatDistance(circleRadius));
 				break;
 			case circleCmdFromTangent:
-				circleRadius = FindDistance( tempSegs(0).u.c.center, pos0 );
-				InfoMessage( _("Radius=%s"), FormatDistance(circleRadius) );
+				circleRadius = FindDistance(tempSegs(0).u.c.center, pos0);
+				InfoMessage(_("Radius=%s"), FormatDistance(circleRadius));
 				break;
 			}
 		}
 		tempSegs(0).type = SEG_CRVTRK;
-		tempSegs(0).u.c.radius = helix?helixRadius:circleRadius;
+		tempSegs(0).u.c.radius = helix ? helixRadius : circleRadius;
 		tempSegs(0).u.c.a0 = 0.0;
 		tempSegs(0).u.c.a1 = 360.0;
 		tempSegs_da.cnt = 1;
 		return C_CONTINUE;
 
 	case C_UP:
-            
-		if (helixRadius > mapD.size.x && helixRadius > mapD.size.y) {
-			ErrorMessage( MSG_RADIUS_TOO_BIG );
-			return C_ERROR;
-		}
-		if (circleRadius > mapD.size.x && circleRadius > mapD.size.y) {
-			ErrorMessage( MSG_RADIUS_TOO_BIG );
-			return C_ERROR;
-		}
-
-		if ( helix ) {
-			if (helixRadius > 10000) {
-				ErrorMessage( MSG_RADIUS_GTR_10000 );
+		if (helix) {
+			if (helixRadius > mapD.size.x || helixRadius > mapD.size.y) {
+				ErrorMessage(MSG_RADIUS_TOO_BIG);
 				return C_ERROR;
 			}
-			UndoStart( _("Create Helix Track"), "newHelix" );
-			t = NewCurvedTrack( tempSegs(0).u.c.center, helixRadius, 0.0, 0.0, helixTurns );
+			if (helixRadius > 10000) {
+				ErrorMessage(MSG_RADIUS_GTR_10000);
+				return C_ERROR;
+			}
+			UndoStart(_("Create Helix Track"), "newHelix");
+			t = NewCurvedTrack(tempSegs(0).u.c.center, helixRadius, 0.0, 0.0, helixTurns);
 		} else {
-			if ( circleRadius <= 0 ) {
-				ErrorMessage( MSG_RADIUS_GTR_0 );
+			if (circleRadius > mapD.size.x || circleRadius > mapD.size.y) {
+				ErrorMessage(MSG_RADIUS_TOO_BIG);
+				return C_ERROR;
+			}
+			if (circleRadius <= 0) {
+				ErrorMessage(MSG_RADIUS_GTR_0);
 				return C_ERROR;
 			}
 			if ((circleRadius > 100000) || (helixRadius > 10000)) {
-				ErrorMessage( MSG_RADIUS_GTR_10000 );
+				ErrorMessage(MSG_RADIUS_GTR_10000);
 				return C_ERROR;
 			}
-			UndoStart( _("Create Circle Track"), "newCircle" );
-			t = NewCurvedTrack( tempSegs(0).u.c.center, circleRadius, 0.0, 0.0, 0 );
+			UndoStart(_("Create Circle Track"), "newCircle");
+			t = NewCurvedTrack(tempSegs(0).u.c.center, circleRadius, 0.0, 0.0, 0);
 		}
 		UndoEnd();
 		DrawNewTrack(t);
