@@ -101,8 +101,6 @@ FILE * OpenCustom( char * );
 
 void SetWindowTitle( void );
 char * PutTitle( char * cp );
-bool RequiresConvToUTF8(char *string);
-void ConvertUTF8ToSystem(unsigned char *in);
 
 void ParamFileListLoad(int paramFileCnt, dynArr_t *paramFiles);
 void DoParamFiles(void * junk);

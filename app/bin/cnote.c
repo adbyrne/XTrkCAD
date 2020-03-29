@@ -128,29 +128,28 @@ BOOL_T WriteMainNote(FILE* f)
     BOOL_T rc = TRUE;
 	char *noteText = mainText;
 
+	if (noteText && *noteText) {
 #ifdef WINDOWS
-	char *out = NULL;
-	if (RequiresConvToUTF8(mainText)) {
-		unsigned cnt = strlen(mainText) * 2 + 1;
-		out = MyMalloc(cnt);
-		wSystemToUTF8(mainText, out, cnt);
-		noteText = out;
-	}
+		char *out = NULL;
+		if (RequiresConvToUTF8(mainText)) {
+			unsigned cnt = strlen(mainText) * 2 + 1;
+			out = MyMalloc(cnt);
+			wSystemToUTF8(mainText, out, cnt);
+			noteText = out;
+		}
 #endif // WINDOWS
 
-    if (noteText && *noteText) {
+
         rc &= fprintf(f, "NOTE MAIN 0 0 0 0 %lu\n", strlen(noteText))>0;
         rc &= fprintf(f, "%s", noteText)>0;
         rc &= fprintf(f, "\n    END\n")>0;
-    }
 
 #ifdef WINDOWS
-	if (out) {
-		MyFree(out);
-	}
+		if (out) {
+			MyFree(out);
+		}
 #endif // WINDOWS
-
-
+    }
     return rc;
 }
 

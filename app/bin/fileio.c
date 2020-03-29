@@ -70,6 +70,10 @@
 #include "utility.h"
 #include "version.h"
 
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
+
 
 /*#define TIME_READTRACKFILE*/
 
@@ -243,28 +247,6 @@ EXPORT void SyntaxError(
 	InputError( "%s scan returned %d (expected %d)",
 		TRUE, event, actual, expected );
 }
-
-#ifdef WINDOWS
-/**
- * Convert a string from UTF-8 to system codepage in place. As the length of
- * the result most be equal or smaller than the input this is a safe
- * approach.
- *
- * \param [in,out] in the string to be converted
- */
-
-void
-ConvertUTF8ToSystem(unsigned char *in)
-{
-	if (wIsUTF8(in)) {
-		unsigned cnt = strlen(in) * 2 + 1;
-		unsigned char *out = MyMalloc(cnt);
-		wUTF8ToSystem(in, out, cnt);
-		strcpy(in, out);
-		MyFree(out);
-	}
-}
-#endif // WINDOWS
 
 
 /**
@@ -538,30 +520,6 @@ EXPORT void AddParam(
 	paramProc(paramProc_da.cnt-1).name = name;
 	paramProc(paramProc_da.cnt-1).proc = proc;
 }
-
-#ifdef WINDOWS
-
-/**
- * Requires convert to UTF-8 If at least one character is >127 the string
- * has to be converted.
- *
- * \param [in9 string the string.
- *
- * \returns True if conversion is required, false if not.
- */
-
-bool
-RequiresConvToUTF8(char *string)
-{
-	while (*string) {
-		if (*string++ & 0x7F) {
-			return(true);
-		}
-	}
-	return(false);
-}
-#endif // WINDOWS
-
 
 EXPORT char * PutTitle( char * cp )
 {

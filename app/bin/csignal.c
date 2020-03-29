@@ -59,6 +59,9 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
 #include "utility.h"
 #include "messages.h"
 
@@ -308,7 +311,7 @@ static void DescribeSignal (track_p trk, char * str, CSIZE_T len )
         *str = tolower((unsigned char)*str);
         str++;
     }
-    sprintf( str, _("(%d [%s]): Layer=%d, %d heads at %0.3f,%0.3f A%0.3f"),
+    sprintf( str, _("(%d [%s]): Layer=%u, %d heads at %0.3f,%0.3f A%0.3f"),
              GetTrkIndex(trk), 
              xx->name,GetTrkLayer(trk)+1, xx->numHeads,
              xx->orig.x, xx->orig.y,xx->angle );
@@ -338,16 +341,24 @@ static BOOL_T WriteSignal ( track_p t, FILE * f )
     BOOL_T rc = TRUE;
     wIndex_t ia;
     signalData_p xx = GetsignalData(t);
-    rc &= fprintf(f, "SIGNAL %d %d %s %d %0.6f %0.6f %0.6f %d \"%s\"\n",
+	char *signalName = MyStrdup(xx->name);
+
+#ifdef WINDOWS
+	signalName = Convert2UTF8(signalName);
+#endif // WINDOWS
+
+    rc &= fprintf(f, "SIGNAL %d %u %s %d %0.6f %0.6f %0.6f %d \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t), 
                   GetTrkVisible(t), xx->orig.x, xx->orig.y, xx->angle, 
-                  xx->numHeads, xx->name)>0;
+                  xx->numHeads, signalName)>0;
     for (ia = 0; ia < xx->numAspects; ia++) {
         rc &= fprintf(f, "\tASPECT \"%s\" \"%s\"\n",
                       (&(xx->aspectList))[ia].aspectName,
                       (&(xx->aspectList))[ia].aspectScript)>0;
     }
     rc &= fprintf( f, "\tEND\n" )>0;
+
+	MyFree(signalName);
     return rc;
 }
 
@@ -371,6 +382,11 @@ static void ReadSignal ( char * line )
                  &angle, &numHeads,&name)) {
         return;
     }
+
+#ifdef WINDOWS
+	ConvertUTF8ToSystem(name);
+#endif // WINDOWS
+
     DYNARR_RESET( signalAspect_p, signalAspect_da );
     while ( (cp = GetNextLine()) != NULL ) {
         while (isspace((unsigned char)*cp)) cp++;
