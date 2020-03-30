@@ -2098,7 +2098,10 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			drawCmdContext.Color = benchColor;
 
 		} else if ( drawCmdContext.Op == OP_DIMLINE ) {
+			drawCmdContext.Color = wDrawColorBlack;
 			drawCmdContext.benchOption = dimArrowSize;
+		} else if ( drawCmdContext.Op == OP_TBLEDGE ) {
+			drawCmdContext.Color = wDrawColorBlack;
 		} else {
 			drawCmdContext.Color = lineColor;
 		}
