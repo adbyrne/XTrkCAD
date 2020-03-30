@@ -231,6 +231,7 @@ void FileIsChanged(void);
 char * ConvertFromEscapedText(const char * text);
 char * ConvertToEscapedText(const char * text);
 
+int MagneticSnap( int state );
 void wShow( wWin_p );
 void wHide( wWin_p );
 void CloseDemoWindows( void );
