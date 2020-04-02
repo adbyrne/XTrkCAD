@@ -82,7 +82,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		p = pos;
 		BOOL_T found = FALSE;
 		Dl.trk = NULL;
-		if (((MyGetKeyState() & WKEY_SHIFT) == 0) == magneticSnap) {
+		if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 			   EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 			   if (ep != -1) {
@@ -114,7 +114,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (!Dl.down) {
-			if (((MyGetKeyState() & WKEY_SHIFT) == 0) == magneticSnap) {
+			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 				p = pos;
 				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
