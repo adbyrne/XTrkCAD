@@ -56,7 +56,7 @@ static char * searchUiLabels[] = { N_("Show File Names"), NULL };
 
 static paramData_t searchUiPLs[] = {
 #define I_QUERYSTRING  (0)
-    { PD_STRING, searchUiQuery, "query", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)(340), N_(""), 0, 0, MAXQUERYLENGTH-1 },
+    { PD_STRING, searchUiQuery, "query", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)(340), "", 0, 0, MAXQUERYLENGTH-1 },
 #define I_SEARCHBUTTON (1)
     { PD_BUTTON, (void*)SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, (void *)NULL },
 #define I_MESSAGE (2)
@@ -227,12 +227,14 @@ static void SearchUiSelectAll(void *junk)
 /**
  * Action handler for Done button. Hides the dialog.
  *
- * \param junk ignored
+ * \param [in,out] junk ignored.
  */
 
 void SearchUiOk(void * junk)
 {
-    wHide(searchUiW);
+    if (searchUiW) {
+        wHide(searchUiW);
+    }
 }
 
 /**

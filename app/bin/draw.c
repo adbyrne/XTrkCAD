@@ -2092,7 +2092,7 @@ EXPORT void DoZoomUp( void * mode )
 				if (mainD.scale <=1.0) 
 					InfoMessage(_("Macro Zoom Mode"));
 				else
-					InfoMessage(_(""));
+					InfoMessage("");
 				DoNewScale( zoomList[ i - 1 ].value );	
 				
 			} else InfoMessage("Minimum Macro Zoom");
@@ -2125,7 +2125,7 @@ EXPORT void DoZoomDown( void  * mode)
 		i = ScaleInx( mainD.scale );
 		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
 		if( i>= 0 && i < ( sizeof zoomList/sizeof zoomList[0] - 1 )) {
-			InfoMessage(_(""));
+			InfoMessage("");
 			DoNewScale( zoomList[ i + 1 ].value );
 		} else
 			InfoMessage(_("At Maximum Zoom Out"));
