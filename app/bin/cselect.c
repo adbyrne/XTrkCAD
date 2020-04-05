@@ -3007,19 +3007,19 @@ static STATUS_T CmdSelect(
 			}
 		}
 		if ( trk && !IsTrackDeleted(trk)) {
-			if ((selectMode == 0) && GetTrkSelected(trk))
+			if (selectMode == 0)
 				DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
 			else if ((selectMode == 1) && !GetTrkSelected(trk))
 				DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
-			else if ((MyGetKeyState() & WKEY_SHIFT) && !IsInsideABox(pos))
-				SelectConnectedTracks(trk,TRUE);            //Highlight all connected
+			if ((MyGetKeyState() & WKEY_SHIFT) && !IsInsideABox(pos))
+				SelectConnectedTracks(trk,TRUE);                  //Highlight all connected
 		}
 		if (!doingMove && !doingRotate) {
 			if (selectMode == 0)
 				if (!trk && selectZero)
 					DrawHighlightBoxes(FALSE, NULL);
 				else
-					DrawHighlightBoxes((MyGetKeyState() & WKEY_CTRL), NULL);
+					DrawHighlightBoxes((MyGetKeyState() & WKEY_CTRL), trk);
 			else {
 				if (!trk && selectZero)
 					DrawHighlightBoxes(FALSE, NULL);
