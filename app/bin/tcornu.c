@@ -854,8 +854,8 @@ static BOOL_T SplitCornu( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
     UpdateTrkEndElev( trk, ep, ELEV_NONE, 0, NULL);
 
 	*leftover = trk1;
-	*ep0 = ep;    		//Which end is for new on pos?
-	*ep1 = 1-ep;		//Which end is for old trk?
+	*ep0 = 1-ep;    		//Which end is for new on pos?
+	*ep1 = ep;		//Which end is for old trk?
 
 	return TRUE;
 }
