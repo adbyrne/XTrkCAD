@@ -111,6 +111,20 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).width = 0;
 }
 
+static void CreateLineAnchor(coOrd p, coOrd p0) {
+	DIST_T d = tempD.scale*0.15;
+	coOrd p1;
+	ANGLE_T a = FindAngle(p0,p);
+	Translate(&p1,p,a,d*5);
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = SEG_STRLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.l.pos[0] = p;
+	anchors(i).u.l.pos[1] = p0;
+	anchors(i).width = 0;
+}
+
 static void CreateSquareAnchor(coOrd p) {
 	DIST_T d = tempD.scale*0.15;
 	int i = anchors_da.cnt;
@@ -518,7 +532,7 @@ STATUS_T DrawGeomMouse(
 						l = fabs(l*cos(D2R(((quad==0||quad==4)?line_angle:line_angle+180.0)-FindAngle(pos,pos0))));
 					Translate( &pos1, pos0, NormalizeAngle((quad==0||quad==4)?line_angle:line_angle+180.0), l );
 				}
-				CreateEndAnchor(pos1,TRUE);
+				CreateLineAnchor(pos1,pos0);
 			}
 			tempSegs(0).u.l.pos[1] = pos1;
 			context->message( _("Length = %s, Angle = %0.2f"),
@@ -531,11 +545,11 @@ STATUS_T DrawGeomMouse(
 		case OP_FILLPOLY:
 		case OP_POLYLINE:
 			if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL ) {
-				coOrd last_point;
+				coOrd last_point = zero;
 				ANGLE_T last_angle, initial_angle;
 				if (tempSegs_da.cnt == 1) {
 					last_angle = 90.0;
-					last_point = pos;
+					last_point = tempSegs(0).u.l.pos[0];
 					initial_angle = 90.0;
 				} else {
 					last_point = tempSegs(tempSegs_da.cnt-2).u.l.pos[1];
@@ -558,7 +572,7 @@ STATUS_T DrawGeomMouse(
 					Translate( &pos, tempSegs(tempSegs_da.cnt-1).u.l.pos[0], NormalizeAngle((quad==0||quad==4)?last_angle:last_angle+180.0), l );
 				}
 				CreateEndAnchor(pos,TRUE);
-
+				if (FindDistance(pos,last_point)>0.0) CreateLineAnchor(pos,last_point);
 			}
 			//If there is any point on this line that will give a 90 degree return to the first point, show it
 			if (tempSegs_da.cnt > 1) {
