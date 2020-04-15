@@ -759,12 +759,14 @@ void MapWindowShow(int state) {
 /**
  * Set magnets state
  */
-void MagneticSnap(int state)
+int MagneticSnap(int state)
 {
+	int oldState = magneticSnap;
 	magneticSnap = state;
 	wPrefSetInteger("misc", "magnets", magneticSnap);
 	wMenuToggleSet(magnetsMI, magneticSnap);
 	wButtonSetBusy(magnetsB, (wBool_t) magneticSnap);
+	return oldState;
 }
 
 /**
