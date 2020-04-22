@@ -4,7 +4,7 @@ msgstr ""
 "Project-Id-Version: XTrackCAD 5.2.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-04-22 17:47+0200\n"
-"PO-Revision-Date: 2020-04-22 17:56+0200\n"
+"PO-Revision-Date: 2020-04-22 18:05+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "Language: de\n"
@@ -5774,9 +5774,8 @@ msgid "Context Commands"
 msgstr "Kontextbefehle"
 
 #: ../bin/misc.c:2172
-#, fuzzy
 msgid "Shift Context Commands"
-msgstr "Kontextbefehle umschalten"
+msgstr "Umsch+Kontextbefehle"
 
 #: ../bin/misc.c:2187 ../bin/misc.c:2370
 msgid "Enable SnapGrid"
@@ -5943,9 +5942,8 @@ msgid "Show SnapGrid"
 msgstr "Fangraster zeigen"
 
 #: ../bin/misc.c:2382
-#, fuzzy
 msgid "Enable Magnetic Snap"
-msgstr "Ein/Aus Magnetischer Schnapper"
+msgstr "Magnetisches Fangen aktivieren"
 
 #: ../bin/misc.c:2397
 msgid "&Tool Bar"
@@ -6210,7 +6208,6 @@ msgid "Find parameter files"
 msgstr "Parameterdateien finden"
 
 #: ../bin/paramfilesearch_ui.c:314
-#, fuzzy
 msgid "No parameter files found, search is disabled."
 msgstr "Keine Parameterdateien gefunden, die Suche ist deaktiviert."
 
