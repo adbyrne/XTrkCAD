@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: XTrackCAD 5.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-22 17:47+0200\n"
-"PO-Revision-Date: 2020-04-22 18:05+0200\n"
+"POT-Creation-Date: 2020-04-22 18:22+0200\n"
+"PO-Revision-Date: 2020-04-22 18:29+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "Language: de\n"
@@ -10048,28 +10048,27 @@ msgstr ""
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:25
 #: ../../../../build/work/app/i18n/custmsg.h:28
-#, fuzzy
 msgid ""
-"You can create Curved tracks in four ways by dragging from:\n"
-"  the 1st End-Point in the direction of the curve\n"
-"  Center of the Curve to the 1st End-Point\n"
-"   End-Point to the Center\n"
-"  the 1st to 2nd End-Point\n"
+"You can create curved tracks in four ways by dragging from:\n"
+"  the 1st endpoint in the direction of the curve\n"
+"  center of the curve to the 1st endpoint\n"
+"  endpoint to the center\n"
+"  the 1st to 2nd endpoint\n"
 "Then drag on one of the Red arrows to create the final shape of the curve.\n"
 "\n"
 "You can click on the small button to the right of the Curve command button "
 "to change the method."
 msgstr ""
-"Gebogene Gleise können auf vier verschiedene Weisen erstellt werden:\n"
-"  vom ersten Endpunkt in Richtung der Kurve\n"
-"  vom Mittelpunkt des Gleisbogens zum ersten Endpunkt\n"
-"  vom Endpunkt zum Mittelpunkt hin\n"
-"  vom ersten zum zweiten Endpunkt\n"
-"Ziehen Sie dann an einem der beiden roten Pfeile, um die endgültige Kurve "
-"festzulegen.\n"
-"Die verschiedenen Methoden zur Gleisbogenerstellung können durch Anklicken "
-"des Knopfes rechts neben dem Kurvenknopf in der Werkzeugleiste ausgewählt "
-"werden ."
+"Sie können gebogene Gleise auf vier Arten durch Ziehen erstellen, vom:\n"
+"  1. Endpunkt in Richtung der Kurve\n"
+"  Mittelpunkt der Kurve zum 1. Endpunkt\n"
+"  Endpunkt zum Zentrum\n"
+"  1. zum 2. Endpunkt\n"
+"Ziehen Sie dann an einem der roten Pfeile, um die endgültige Form der Kurve "
+"zu erstellen.\n"
+"\n"
+"Sie können auf die kleine Schaltfläche rechts neben der Befehlsschaltfläche "
+"Kurve klicken, um die Methode zu ändern."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:34
 #: ../../../../build/work/app/i18n/custmsg.h:30
@@ -10144,7 +10143,6 @@ msgstr ""
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:51
 #: ../../../../build/work/app/i18n/custmsg.h:38
-#, fuzzy
 msgid ""
 "When creating stall tracks for a turntable, you usually want the the stall "
 "tracks to be spaced evenly.\n"
@@ -10152,10 +10150,10 @@ msgid ""
 "specify the minimum angle between stall tracks."
 msgstr ""
 "Beim Anschluss von Endgleisen an eine Drehscheibe, möchte man diese "
-"üblicherweise gleichmäßig anschließen.\n"
+"üblicherweise gleichmäßig verteilen.\n"
 "Der Punkt \"Drehscheibenwinkel\" im Dialog \"Optionen|Einstellungen\" kann "
-"dazu benutzt werden den kleinst möglichen Winkel, beim Anschluss solcher "
-"Gleise einzustellen."
+"dazu benutzt werden den kleinstmöglichen Winkel, beim Anschluss solcher "
+"Gleise, einzustellen."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:54
 #: ../../../../build/work/app/i18n/custmsg.h:40
@@ -10293,13 +10291,12 @@ msgstr ""
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:81
 #: ../../../../build/work/app/i18n/custmsg.h:60
-#, fuzzy
 msgid ""
-"The size of the Map window is controlled by the overall size of the room "
-"(specified on the Layout dialog) and the Map Scale (on the Display dialog).  "
+"The size of the map window is controlled by the overall size of the room "
+"(specified on the layout dialog) and the map scale (on the display dialog).  "
 "You can make the Map window larger (or smaller) by decreasing (or "
-"increasing) the Map Scale.\n"
-"XTrackCad will prevent you from making the Map window too small or too large."
+"increasing) the map scale.\n"
+"XTrackCad will prevent you from making the map window too small or too large."
 msgstr ""
 "Die Größe des Kartenfensters wird in Abhängigkeit zur eingestellten "
 "Gesamtgröße des Raums kontrolliert. Die Gesamtgröße des Raums wird über den "
@@ -10455,7 +10452,7 @@ msgstr ""
 #: ../../../../build/work/app/i18n/custmsg.h:86
 msgid ""
 "Each Layer can be drawn or hidden by the 'Visible' toggle on the Layers "
-"dialog.  "
+"dialog."
 msgstr ""
 "Jede Ebene kann im Dialog \"Verwalten|Ebenen\" verborgen oder angezeigt "
 "werden. "
@@ -10579,7 +10576,7 @@ msgid ""
 "You use the Below command to place the Polygon below (or behind) other "
 "objects.\n"
 "\n"
-"You can also use a Polygon to represent aisles. "
+"You can also use a Polygon to represent aisles."
 msgstr ""
 "Wasserbereiche können durch Polygone mit Hilfe des \"Zeichnen|Formen|Zeichne "
 "Polyline\" in der entsprechenden Farbe erstellt werden.\n"
@@ -10587,7 +10584,7 @@ msgstr ""
 "hinzu zu fügen oder zu löschen, um diese so besser der Form des Wassers "
 "anpassen zu können.\n"
 "\n"
-"Polylinien können auch dazu verwendet werden um Zwischengänge darzustellen. "
+"Polylinien können auch dazu verwendet werden um Gänge darzustellen. "
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:140
 #: ../../../../build/work/app/i18n/custmsg.h:108
@@ -10630,14 +10627,12 @@ msgstr ""
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:147
 #: ../../../../build/work/app/i18n/custmsg.h:116
-#, fuzzy
 msgid ""
 "You can also press the 's' key to convert a Prototype measurement to a Scale "
 "measurement by dividing by the ratio for the current scale."
 msgstr ""
-"Sie können die Taste 's' benutzen um eine Muster Messung in eine Maßstab "
-"Messung zu verwandeln, die Taste 'y' gibt hierbei den Teiler Faktor des "
-"momentanen Maßstabs an."
+"Sie können auch die Taste 's' drücken, um eine Prototyp-Abmessung durch "
+"Division durch das Verhältnis in eine maßstäbliche Abmessung umzuwandeln."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:148
 #: ../../../../build/work/app/i18n/custmsg.h:118
@@ -10979,9 +10974,8 @@ msgstr ""
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:228
 #: ../../../../build/work/app/i18n/custmsg.h:178
-#, fuzzy
 msgid ""
-"Once you have elevations on some end points, you can use the Profile command "
+"Once you have elevations on some endpoints, you can use the Profile command "
 "to produce an elevation graph. \n"
 "The graph shows the selected elevations, grades and distances.  \n"
 "Please see the Profile help and demo for details."
@@ -11033,13 +11027,12 @@ msgstr ""
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:243
 #: ../../../../build/work/app/i18n/custmsg.h:186
-#, fuzzy
 msgid ""
 "If you hold down the Control key when using the Rotate command, the rotation "
-"will be done in increments of 15°."
+"will be done in increments of 15ï¿œ."
 msgstr ""
-"Durch festhalten der Strg Taste wird beim Drehen Kommando, die Rotation um "
-"jeweils 15° verringert."
+"Durch Festhalten der Strg Taste erfolgt die Rotation beim Drehen Kommando in "
+"15° Schritten."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/help/xtrkcad.tip:245
 #: ../../../../build/work/app/i18n/custmsg.h:188
