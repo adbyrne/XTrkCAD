@@ -2184,11 +2184,11 @@ static void CreateMenus(void) {
 	wMenuPushCreate(popup2M, "cmdZoomOut", _("Zoom Out"), 0,
 			(wMenuCallBack_p) DoZoomDown, (void*) 1);
 	/* Display */
-	MiscMenuItemCreate(popup1M, popup2M, "cmdGridEnable", _("SnapGrid Enable"),
+	MiscMenuItemCreate(popup1M, popup2M, "cmdGridEnable", _("Enable SnapGrid"),
 			0, (void*) (wMenuCallBack_p) SnapGridEnable, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdGridShow", _("SnapGrid Show"), 0,
 			(void*) (wMenuCallBack_p) SnapGridShow, 0, (void *) 0);
-	MiscMenuItemCreate(popup1M, popup2M, "cmdMagneticSnap", _("On/Off Magnetic Snap"), 0,
+	MiscMenuItemCreate(popup1M, popup2M, "cmdMagneticSnap", _(" Enable Magnetic Snap"), 0,
 			(void*) (wMenuCallBack_p) MagneticSnapToggle, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdMapShow", _("Show/Hide Map"), 0,
 				(void*) (wMenuCallBack_p) MapWindowToggleShow, 0, (void *) 0);
@@ -2374,6 +2374,15 @@ static void CreateMenus(void) {
 			FALSE, (wMenuToggleCallBack_p) SnapGridShow, NULL);
 	gridCmdInx = InitGrid(viewM);
 
+	// visibility toggle for anchors
+	// get the start value
+	long anchors_long;
+	wPrefGetInteger("misc", "anchors", (long *)&anchors_long, 1);
+	magneticSnap = anchors_long ? TRUE : FALSE;
+	magnetsMI = wMenuToggleCreate(viewM, "cmdMagneticSnap", _("Enable Magnetic Snap"),
+		0, magneticSnap,
+		(wMenuToggleCallBack_p)MagneticSnapToggle, NULL);
+
 	// visibility toggle for map window
 	// get the start value
 	long mapVisible_long;
@@ -2382,17 +2391,6 @@ static void CreateMenus(void) {
 	mapShowMI = wMenuToggleCreate(viewM, "cmdMapShow", _("Show/Hide Map"),
 			ACCL_MAPSHOW, mapVisible,
 			(wMenuToggleCallBack_p) MapWindowToggleShow, NULL);
-
-	wMenuSeparatorCreate(viewM);
-
-	// visibility toggle for anchors
-	// get the start value
-	long anchors_long;
-	wPrefGetInteger("misc", "anchors", (long *) &anchors_long, 1);
-	magneticSnap = anchors_long ? TRUE : FALSE;
-	magnetsMI = wMenuToggleCreate(viewM, "cmdMagneticSnap", _("Magnetic Snap On/Off"),
-			0, magneticSnap,
-			(wMenuToggleCallBack_p) MagneticSnapToggle, NULL);
 
 	wMenuSeparatorCreate(viewM);
 
