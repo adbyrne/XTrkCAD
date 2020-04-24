@@ -110,9 +110,9 @@ CURVE 20 0 0 0 0 DEMO 2 64.968888 34.882599 17.000000
 REDRAW
 RESET
 MESSAGE
-We have designed part of the layout with a siding, 2 branches and a spiral loop.  We want to set Elevations.
+We have designed part of the layout with a siding, 2 branches and a spiral loop.  We want to set elevations.
 
-Note: make sure you set End-Pt Elevations on the Display dialog.
+Note: make sure you set endpoint elevations on the Display dialog.
 END
 STEP
 PARAMETER misc cmdDisplay
@@ -258,7 +258,7 @@ REDRAW
 MESSAGE
 _________________________________________
 
-Notice at the End-Point where the tracks cross, we see the Elevation has changed from 2.33 to 2.64.
+Notice at the endpoint where the tracks cross, we see the elevation has changed from 2.33 to 2.64.
 END
 STEP
 MESSAGE
@@ -274,9 +274,9 @@ STEP
 MESSAGE
 _________________________________________
 
-There is no End-Point on the lower track here.
+There is no endpoint on the lower track here.
 
-Use Shift-Left-Click to Split the track and create an End-Point we can use for an Elevation,
+Use Shift-Left-Click to Split the track and create an endpoint we can use for an elevation,
 END
 STEP
 KEYSTATE 2
@@ -302,7 +302,7 @@ BIGPAUSE
 MESSAGE
 _________________________________________
 
-Now we want to label the Grade on this section of track.
+Now we want to label the grade on this section of track.
 END
 STEP
 #COMMAND Elevation
@@ -311,7 +311,7 @@ STEP
 MESSAGE
 _________________________________________
 
-Again, since there is no End-Point nearby, we split the track to create an End-Point we can use,
+Again, since there is no endpoint nearby, we split the track to create an endpoint we can use,
 END
 STEP
 KEYSTATE 2
@@ -319,7 +319,7 @@ MOUSE 2 24.280 6.240
 KEYSTATE 2
 MOUSE 4 24.280 6.240
 MESSAGE
-and create a Grade marker.
+and create a grade marker.
 END
 STEP
 PARAMETER elev mode 4

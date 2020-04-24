@@ -17,7 +17,7 @@ DRAW 2 0 0 0 0 0.000000 0.000000 0.000000
 REDRAW
 RESET
 MESSAGE
-Polylines and Polygons (created with the <Draw> command) can be modified by dragging on their Corners or Edges.
+Polylines and polygons (created with the <Draw> command) can be modified by dragging on their corners or edges.
 
 First Left Click on the shape you want to modify.
 END
@@ -28,7 +28,7 @@ MOUSE 4 11.333 18.889
 BIGPAUSE
 MESSAGE
 
-Then drag on point you want to move
+Then drag on the point you want to move
 END
 MOUSE 2 11.333 18.889
 MOUSE 3 18.889 19.333

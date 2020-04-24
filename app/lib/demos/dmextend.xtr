@@ -19,14 +19,14 @@ STRAIGHT 2 DEMO 1
 REDRAW
 RESET
 MESSAGE
-The unconnected End-Point of any track can also be extended with the <Modify> command using Right-Drag.
+The unconnected endpoint of any track can also be extended with the <Modify> command using Right-Drag.
 END
 STEP
 COMMAND Modify
 MESSAGE
 _________________________________________
 
-Select the End-Point and Right-Drag.
+Select the endoint and Right-Drag.
 END
 BIGPAUSE
 MOUSE 5 12.250 2.750
@@ -51,7 +51,7 @@ MOUSE 7 26.333 12.417
 MESSAGE
 _________________________________________
 
-If you extend a Straight or Curved flex track and enable Easements then an Easement curve will be automatically generated when you extend the track.
+If you extend a straight or curved flex track and enable Easements then an Easement curve will be automatically generated when you extend the track.
 END
 STEP
 PARAMETER misc cmdEasement
