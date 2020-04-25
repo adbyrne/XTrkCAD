@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: XTrackCAD 5.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-24 08:04+0200\n"
-"PO-Revision-Date: 2020-04-24 08:18+0200\n"
+"POT-Creation-Date: 2020-04-25 19:42+0200\n"
+"PO-Revision-Date: 2020-04-25 19:50+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "Language: de\n"
@@ -153,10 +153,10 @@ msgstr "Ändern der Bezier-Kurve abgeschlossen"
 msgid "Modify Bezier Cancelled"
 msgstr "Ändern der Bezier-Kurve abgebrochen"
 
-#: ../bin/cbezier.c:1038
-#, fuzzy, c-format
-msgid "Place 1st end point of Bezier - snap to %s"
-msgstr "Ersten Endpunkt der Bezier setzen, mit Umschalt das %s Ende benutzen"
+#: ../bin/cbezier.c:1038 ../bin/cbezier.c:1129
+#, c-format
+msgid "Place 1st endpoint of Bezier - snap to %s"
+msgstr "Ersten Endpunkt der Bezierkurve festlegen, an %s fangen"
 
 #: ../bin/cbezier.c:1056 ../bin/ccornu.c:2280 ../bin/ccurve.c:205
 #: ../bin/ccurve.c:439 ../bin/cstraigh.c:91
@@ -164,24 +164,17 @@ msgid "Track is different gauge"
 msgstr "Gleis hat andere Spurweite"
 
 #: ../bin/cbezier.c:1084
-msgid "Drag end of first Control Arm"
-msgstr "Das Ende des ersten Steuer-Arms verschieben"
+msgid "Drag end of first control arm"
+msgstr "Das Ende des ersten Kontrolllinie ziehen"
 
 #: ../bin/cbezier.c:1091
-msgid "Drag end of second Control Arm"
-msgstr "Das Ende des zweiten Steuer-Arms verschieben"
-
-#: ../bin/cbezier.c:1129
-#, fuzzy, c-format
-msgid "Place 1st end point of Bezier - snap to %s end"
-msgstr "Ersten Endpunkt der Bezier setzen, mit Umschalt das %s Ende benutzen"
+msgid "Drag end of second control arm"
+msgstr "Das Ende der zweiten Kontrolllinie ziehen"
 
 #: ../bin/cbezier.c:1133 ../bin/cbezier.c:1170
-#, fuzzy, c-format
+#, c-format
 msgid "Select other end of Bezier - snap to %s end"
-msgstr ""
-"Das andere Ende der Bezier-Kurve auswählen, durch gleichzeitiges Halten der "
-"Umschalt-Taste zum %s Ende springen"
+msgstr "Das andere Ende der Bezierkurve auswählen, am Ende von %s fangen"
 
 #: ../bin/cbezier.c:1165
 msgid "Control Arm 1 is too short, try again"
@@ -2534,7 +2527,7 @@ msgstr "Rückgängig"
 msgid "Redo"
 msgstr "Wiederholen"
 
-#: ../bin/cselect.c:3175 ../bin/cselect.c:3187 ../bin/draw.c:3006
+#: ../bin/cselect.c:3175 ../bin/cselect.c:3187
 #, fuzzy
 msgid "Pan Center Here - '@'"
 msgstr "Pan Zentrieren Sie hier - '@'."
@@ -4505,14 +4498,12 @@ msgid "Zoom keeps lower corner in view"
 msgstr "Linke untere Ecke beim Zoomen festhalten"
 
 #: ../bin/doption.c:131
-#, fuzzy
 msgid "Color Track"
-msgstr "Cornu-Gleis"
+msgstr "Farbiges Gleis"
 
 #: ../bin/doption.c:132
-#, fuzzy
 msgid "Color Draw"
-msgstr "Farbe"
+msgstr "Farbige Objekte"
 
 #: ../bin/doption.c:133
 msgid "Draw Tunnel"
@@ -4607,19 +4598,16 @@ msgid "Manuf/Proto/Partno/Item"
 msgstr "Hersteller/Vorbild/Bestellnr./lfd. Nr."
 
 #: ../bin/doption.c:221
-#, fuzzy
-msgid "Only Selected, +Ctrl Add"
-msgstr "Nur Ausgewählte, +Strg Add"
+msgid "Single item selected, +Ctrl Add to selection"
+msgstr "Nur aktuelles  Element ausgewählt, +Strg Auswahl erweitern"
 
 #: ../bin/doption.c:221
-#, fuzzy
-msgid "Add to Selected, +Ctrl Only Selected"
-msgstr "Zu Ausgewähltem hinzufügen, +Strg Nur Ausgewähltes"
+msgid "Add to selection, +Ctrl Single item selected"
+msgstr "Auswahl erweitern,  +Strg Nur aktuelles Element"
 
 #: ../bin/doption.c:222
-#, fuzzy
-msgid "Deselect All on select nothing"
-msgstr "Ausgewählte Objekte abwählen"
+msgid "Deselect all on select nothing"
+msgstr "Auswahl durch Klick auf leere Fläche rücksetzen"
 
 #: ../bin/doption.c:227
 msgid "Normal: Command List, Shift: Command Options"
@@ -4642,9 +4630,8 @@ msgid "Right Click"
 msgstr "Rechte Mausetaste"
 
 #: ../bin/doption.c:235
-#, fuzzy
 msgid "Select Mode"
-msgstr "Objekte auswählen"
+msgstr "Auswahlmodus"
 
 #: ../bin/doption.c:260
 msgid "Command Options"
@@ -4903,7 +4890,6 @@ msgid "Select all"
 msgstr "Alles auswählen"
 
 #: ../bin/dprmfile.c:78
-#, fuzzy
 msgid "Favorite"
 msgstr "Favorit"
 
@@ -4964,21 +4950,20 @@ msgid "Map"
 msgstr "Karte"
 
 #: ../bin/draw.c:2832
-#, fuzzy
 msgid ""
-"Left-Drag to Pan, CTRL+Left-Drag to Zoom, 0 to set Origin to zero, 1-9 to "
-"Zoom#, e to set to Extents"
+"Left-Drag to pan, Ctrl+Left-Drag to zoom, 0 to set origin to zero, 1-9 to "
+"zoom#, e to set to extents"
 msgstr ""
-"Links ziehen um den Ausschnitt zu verschieben, rechts ziehen für Zoom, 0 "
-"setzt den Ausgangspunkt auf 0,0, 1-9 für die Zoomstufe, e um die Größe zu "
-"setzen"
+"Ziehen mit der linken Maustaste um den Ausschnitt zu verschieben, Strg"
+"+Ziehen mit der linken Maustaste zum Zoomen, 0 um den Ursprung auf Null zu "
+"setzen, 1-9 zum Zoomfaktor, e um an die Fenstergröße anzupassen."
 
 #: ../bin/draw.c:2839
 msgid "Pan Mode - drag point to new position"
 msgstr "Ausschnitt wählen - Punkt an die neue Position ziehen"
 
 #: ../bin/draw.c:2846
-msgid "Zoom Mode - drag Area to Zoom"
+msgid "Zoom Mode - drag area to zoom"
 msgstr "Zoom Modus -auf den ausgewählten Bereich zoomen"
 
 #: ../bin/draw.c:2870
@@ -4986,81 +4971,71 @@ msgid "Can't move any further in that direction"
 msgstr "In diese Richtung können Sie nicht weiter gehen"
 
 #: ../bin/draw.c:2872
-#, fuzzy
-msgid "Left Click to Pan, Right Click to Zoom, 'o' for Origin, 'e' for Extents"
+msgid "Left click to pan, right click to zoom, 'o' for origin, 'e' for extents"
 msgstr ""
-"Links ziehen um den Ausschnitt zu verschieben, rechts ziehen für Zoom, 0 "
-"setzt den Ausgangspunkt auf 0,0, 1-9 für die Zoomstufe, e um die Größe zu "
-"setzen"
+"Linksklick zum Verschieben, Rechtsklick zum Zoomen, 'o' für Ursprung, 'e' "
+"für Anpassen an Fenstergröße"
 
 #: ../bin/draw.c:2909
-#, fuzzy
 msgid ""
 "Left Drag to Pan, +CTRL to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to "
 "set to Extent"
 msgstr ""
-"Links ziehen um den Ausschnitt zu verschieben, rechts ziehen für Zoom, 0 "
-"setzt den Ausgangspunkt auf 0,0, 1-9 für die Zoomstufe, e um die Größe zu "
-"setzen"
+"Ziehen mit der linken Maustaste um den Ausschnitt zu verschieben, +Strg zum "
+"Zoomen, 0 zum Setzen des Ursprungs auf 0,0, 1-9 zum Zoomfaktor, e um an die "
+"Fenstergröße anzupassen"
 
 #: ../bin/draw.c:2985
 msgid "Pan/Zoom"
 msgstr "Verschieben/Zoomen"
 
 #: ../bin/draw.c:2995
-#, fuzzy
-msgid "Zoom To Extents - 'e'"
-msgstr "Vergrößern - 'e'"
+msgid "Zoom to extents - 'e'"
+msgstr "Auf Fenstergröße anpassen- 'e'"
 
 #: ../bin/draw.c:2996
-#, fuzzy
-msgid "Zoom To 1::1 - '1'"
-msgstr "Vergrößern Sie auf 1::1 - '1'."
+msgid "Zoom to 1:1 - '1'"
+msgstr "Auf 1:1 vergrößern - '1'."
 
 #: ../bin/draw.c:2997
-#, fuzzy
-msgid "Zoom To 1::2 - '2'"
-msgstr "Vergrößern Sie auf 1::2 - '2'."
+msgid "Zoom to 1:2 - '2'"
+msgstr "Auf 1:2 vergrößern - '2'."
 
 #: ../bin/draw.c:2998
-#, fuzzy
-msgid "Zoom To 1::3 - '3'"
-msgstr "Vergrößern Sie auf 1::3 - '3'."
+msgid "Zoom to 1:3 - '3'"
+msgstr "Auf 1:3 vergrößern - '3'."
 
 #: ../bin/draw.c:2999
-#, fuzzy
-msgid "Zoom To 1::4 - '4'"
-msgstr "Vergrößern auf 1::4 - '4"
+msgid "Zoom to 1:4 - '4'"
+msgstr "Auf 1:4 vergrößern - '4'."
 
 #: ../bin/draw.c:3000
-#, fuzzy
-msgid "Zoom To 1::5 - '5'"
-msgstr "Vergrößern auf 1::5 - '5"
+msgid "Zoom to 1:5 - '5'"
+msgstr "Auf 1:5 vergrößern - '5'."
 
 #: ../bin/draw.c:3001
-#, fuzzy
-msgid "Zoom To 1::6 - '6'"
-msgstr "Vergrößern auf 1::6 - '6"
+msgid "Zoom to 1:6 - '6'"
+msgstr "Auf 1:6 vergrößern - '6'."
 
 #: ../bin/draw.c:3002
-#, fuzzy
-msgid "Zoom To 1::7 - '7'"
-msgstr "Vergrößern auf 1::7 - '7"
+msgid "Zoom to 1:7 - '7'"
+msgstr "Auf 1:7 vergrößern - '7'."
 
 #: ../bin/draw.c:3003
-#, fuzzy
-msgid "Zoom To 1::8 - '8'"
-msgstr "Vergrößern auf 1::8 - '8"
+msgid "Zoom to 1:8 - '8'"
+msgstr "Auf 1:8 vergrößern - '8'."
 
 #: ../bin/draw.c:3004
-#, fuzzy
-msgid "Zoom To 1::9 - '9'"
-msgstr "Vergrößern auf 1::9 - '9"
+msgid "Zoom to 1:9 - '9'"
+msgstr "Auf 1:9 vergrößern - '9'."
 
 #: ../bin/draw.c:3005
-#, fuzzy
-msgid "Pan To Origin - 'o'"
-msgstr "Schwenken zum Ursprung - 'o'."
+msgid "Pan to origin - 'o'"
+msgstr "Ausschnitt auf Ursprung zurücksetzen - '0'."
+
+#: ../bin/draw.c:3006
+msgid "Pan center here - '@'"
+msgstr "Hier zentrieren - '@'."
 
 #: ../bin/drawgeom.c:77 ../bin/drawgeom.c:92
 msgid "Create Lines"
@@ -15358,6 +15333,11 @@ msgstr "Polygone modifizieren"
 #: ../../../../build/work/app/i18n/custmsg.h:1263
 msgid "Control Panels"
 msgstr "Stellpulte"
+
+#, fuzzy
+#~ msgid "Place 1st end point of Bezier - snap to %s end"
+#~ msgstr ""
+#~ "Ersten Endpunkt der Bezier setzen, mit Umschalt das %s Ende benutzen"
 
 #~ msgid "SnapGrid Enable"
 #~ msgstr "Fangraster aktivieren"

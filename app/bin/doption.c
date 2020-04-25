@@ -218,8 +218,8 @@ EXPORT addButtonCallBack_t DisplayInit( void )
 static wWin_p cmdoptW;
 
 static char * preSelectLabels[] = { N_("Properties"), N_("Select"), NULL };
-static char * selectLabels[] = { N_("Only Selected, +Ctrl Add"), N_("Add to Selected, +Ctrl Only Selected"), NULL };
-static char * selectZeroLabels[] = { N_("Deselect All on select nothing"), NULL };
+static char * selectLabels[] = { N_("Single item selected, +Ctrl Add to selection"), N_("Add to selection, +Ctrl Single item selected"), NULL };
+static char * selectZeroLabels[] = { N_("Deselect all on select nothing"), NULL };
 
 #ifdef HIDESELECTIONWINDOW
 static char * hideSelectionWindowLabels[] = { N_("Hide"), NULL };

@@ -2829,7 +2829,7 @@ static STATUS_T CmdPan(
 	case C_START:
 		start_pos = zero;
         panmode = NONE;
-        InfoMessage(_("Left-Drag to Pan, CTRL+Left-Drag to Zoom, 0 to set Origin to zero, 1-9 to Zoom#, e to set to Extents"));
+        InfoMessage(_("Left-Drag to pan, Ctrl+Left-Drag to zoom, 0 to set origin to zero, 1-9 to zoom#, e to set to extents"));
         wSetCursor(mainD.d,wCursorSizeAll);
 		 break;
 	case C_DOWN:
@@ -2843,7 +2843,7 @@ static STATUS_T CmdPan(
 			start_pos = pos;
 			base = pos;
 			size = zero;
-			InfoMessage(_("Zoom Mode - drag Area to Zoom"));
+			InfoMessage(_("Zoom Mode - drag area to zoom"));
 		}
 		break;
 	case C_MOVE:
@@ -2869,7 +2869,7 @@ static STATUS_T CmdPan(
 					if ((oldOrig.x == mainD.orig.x) && (oldOrig.y == mainD.orig.y))
 						InfoMessage(_("Can't move any further in that direction"));
 					else
-					    InfoMessage(_("Left Click to Pan, Right Click to Zoom, 'o' for Origin, 'e' for Extents"));
+					    InfoMessage(_("Left click to pan, right click to zoom, 'o' for origin, 'e' for extents"));
 				}
 			}
 		else if (panmode == ZOOM) {
@@ -2992,16 +2992,16 @@ EXPORT void InitCmdPan2( wMenu_p menu )
 	wMenuPushCreate(panPopupM, "cmdDescribeMode", GetBalloonHelpStr(_("cmdDescribeMode")), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
 	wMenuPushCreate(panPopupM, "cmdModifyMode", GetBalloonHelpStr(_("cmdModifyMode")), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
 	wMenuSeparatorCreate(panPopupM);
-	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom To Extents - 'e'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'e');
-	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::1 - '1'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '1');
-	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::2 - '2'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '2');
-	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::3 - '3'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '3');
-	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::4 - '4'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '4');
-	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::5 - '5'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '5');
-	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::6 - '6'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '6');
-	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::7 - '7'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '7');
-	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::8 - '8'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '8');
-	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom To 1::9 - '9'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '9');
-	panOrig = wMenuPushCreate( panPopupM, "", _("Pan To Origin - 'o'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'o');
-	panHere = wMenuPushCreate( panPopupM, "", _("Pan Center Here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 0);
+	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'e');
+	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:1 - '1'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '1');
+	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:2 - '2'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '2');
+	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:3 - '3'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '3');
+	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:4 - '4'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '4');
+	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:5 - '5'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '5');
+	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:6 - '6'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '6');
+	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '7');
+	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '8');
+	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '9');
+	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to origin - 'o'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'o');
+	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 0);
 }
