@@ -2213,7 +2213,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 				valid = FALSE;
 				tempSegs(0).u.c.a1 = 0;
 				tempSegs(0).u.c.a0 = end_angle;
-				InfoMessage( _("Inside Turnout Track"));
+				InfoMessage( _("Inside turnout track"));
 				return C_CONTINUE;
 			}
 			end_angle = GetTrkEndAngle( trk, ep );
@@ -2231,7 +2231,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 			tempSegs_da.cnt = 1;
 			valid = TRUE;
 			if (action == C_MOVE)
-				InfoMessage( _("Curve: Length=%s, Radius=%0.3f Arc=%0.3f"),
+				InfoMessage( _("Curve: Length=%s Radius=%0.3f Arc=%0.3f"),
 						FormatDistance( d ), FormatDistance(tempSegs(0).u.c.radius), PutAngle( fabs(a) ) );
 			return C_CONTINUE;
 		} else {
@@ -2248,7 +2248,7 @@ EXPORT STATUS_T ExtendTrackFromOrig( track_p trk, wAction_t action, coOrd pos )
 				valid = FALSE;
 				tempSegs(0).u.c.a1 = 0;
 				tempSegs(0).u.c.a0 = end_angle;
-				InfoMessage( _("Inside Turnout Track"));
+				InfoMessage( _("Inside turnout track"));
 				return C_CONTINUE;
 			}
 			Translate( &tempSegs(0).u.l.pos[1], tempSegs(0).u.l.pos[0], GetTrkEndAngle( trk, ep ), d );

@@ -166,18 +166,18 @@ EXPORT STATUS_T CreateCurve(
 		switch ( curveMode ) {
 		case crvCmdFromEP1:
 			if (track) 
-				message(_("Drag from End-Point in direction of curve - lock to track open end-point") );
+				message(_("Drag from endpoint in direction of curve - lock to track open endpoint") );
 			else 	
-				message (_("Drag from End-Point in direction of curve") );
+				message (_("Drag from endpoint in direction of curve") );
 			break;
 		case crvCmdFromTangent:
 			if (track)
-				message(_("Drag from End-Point to Center - lock to track open end-point") );
+				message(_("Drag from endpoint to center - lock to track open endpoint") );
 			else
-				message(_("Drag from End-Point to Center") );
+				message(_("Drag from endpoint to center") );
 			break;
 		case crvCmdFromCenter:
-			message(_("Drag from Center to End-Point") );
+			message(_("Drag from center to endpoint") );
 			break;
 		case crvCmdFromChord:
 			message(_("Drag from one to other end of chord") );
@@ -238,7 +238,7 @@ EXPORT STATUS_T CreateCurve(
 				Da.create_state = FIRSTEND_DEF;
 				Da.end0 = pos;
 				CreateEndAnchor(pos,anchor_array,found);
-				if (Da.trk) message(_("End Locked: Drag out curve start"));
+				if (Da.trk) message(_("End locked: Drag out curve start"));
 				else message(_("Drag along curve start") );
 				break;
 			case crvCmdFromTangent:
@@ -247,15 +247,15 @@ EXPORT STATUS_T CreateCurve(
 				tempSegs(0).color = color;
 				Da.create_state = CENTER_DEF;
 				CreateEndAnchor(pos,anchor_array,found);
-				if (Da.trk) message(_("End Locked: Drag out curve center"));
-				else message(_("Drag along curve center") );
+				if (Da.trk) message(_("End locked: Drag out curve center"));
+				else message(_("Drag out curve center") );
 				break;
 			case crvCmdFromCenter:
 				tempSegs(0).type = SEG_STRLIN;
 				tempSegs(0).color = color;
 				Da.create_state = CENTER_DEF;
 				CreateEndAnchor(pos,anchor_array,FALSE);
-				message(_("Drag out from Center to End-Point"));
+				message(_("Drag out from center to endpoint"));
 				break;
 			case crvCmdFromChord:
 				tempSegs(0).type = (track?SEG_STRTRK:SEG_STRLIN);
@@ -264,7 +264,7 @@ EXPORT STATUS_T CreateCurve(
 				CreateEndAnchor(pos,anchor_array,FALSE);
 				Da.create_state = FIRSTEND_DEF;
 				if (Da.trk)
-					message( _("End-locked: Drag to other end of chord") );
+					message( _("End locked: Drag to other end of chord") );
 				else
 					message( _("Drag to other end of chord") );
 				break;
@@ -328,7 +328,7 @@ EXPORT STATUS_T CreateCurve(
 			tempSegs_da.cnt = 1;
 			break;
 		case crvCmdFromTangent:
-			if (Da.trk) message( _("Tangent Locked: Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
+			if (Da.trk) message( _("Tangent locked: Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
 			else message( _("Drag out center - Radius=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
 			CreateEndAnchor(Da.pos1,anchor_array,TRUE);
 			DrawArrowHeadsArray( anchor_array, Da.pos0, FindAngle(Da.pos0,Da.pos1)+90, TRUE, wDrawColorBlue );
@@ -341,8 +341,8 @@ EXPORT STATUS_T CreateCurve(
 			tempSegs_da.cnt = 1;
 			break;
 		case crvCmdFromChord:
-			if (Da.trk) message( _("Start Locked: Drag out chord Length=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
-			else message( _("Drag out chord Length=%s Angle=%0.3f"), FormatDistance(d), PutAngle(a) );
+			if (Da.trk) message( _("Start locked: Drag out chord length=%s angle=%0.3f"), FormatDistance(d), PutAngle(a) );
+			else message( _("Drag out chord length=%s angle=%0.3f"), FormatDistance(d), PutAngle(a) );
 			Da.middle.x = (Da.pos1.x+Da.pos0.x)/2.0;
 			Da.middle.y = (Da.pos1.y+Da.pos0.y)/2.0;
 			if (track && Da.trk) {

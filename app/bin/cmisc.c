@@ -655,8 +655,8 @@ void InitCmdDescribe(wMenu_p menu)
 void InitCmdDescribe2(wMenu_p menu)
 {
     descPopupM = MenuRegister( "Describe Context Menu" );
-    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr(_("cmdSelectMode")), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
-    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr(_("cmdModifyMode")), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
-    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr(_("cmdPanMode")), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
+    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
+    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
 
 }

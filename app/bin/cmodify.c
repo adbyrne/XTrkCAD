@@ -511,12 +511,12 @@ extendTrack:
 					return C_ERROR;
 				}
 			} else {
-				InfoMessage ( _("No Track to extend"));
+				InfoMessage ( _("No track to extend"));
 				return C_ERROR;
 			}
 			Dex.first = TRUE;
 		} else if (!Dex.Trk) {
-			InfoMessage ( _("No Track selected"));
+			InfoMessage ( _("No track selected"));
 			return C_ERROR;
 		}
         /* no break */
@@ -787,11 +787,11 @@ void InitCmdModify( wMenu_p menu )
 	modifyCmdInx = AddMenuButton( menu, CmdModify, "cmdModify", _("Modify"), wIconCreatePixMap(extend_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_MODIFY, NULL );
 	log_modify = LogFindIndex( "modify" );
 	modPopupM = MenuRegister( "Modify Context Menu" );
-	wMenuPushCreate(modPopupM, "cmdSelectMode", GetBalloonHelpStr(_("cmdSelectMode")), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
-	wMenuPushCreate(modPopupM, "cmdDescribeMode", GetBalloonHelpStr(_("cmdDescribeMode")), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
-	wMenuPushCreate(modPopupM, "cmdPanMode", GetBalloonHelpStr(_("cmdPanMode")), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+	wMenuPushCreate(modPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
+	wMenuPushCreate(modPopupM, "cmdDescribeMode", GetBalloonHelpStr("cmdDescribeMode"), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
+	wMenuPushCreate(modPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
 	wMenuSeparatorCreate(modPopupM);
 	wMenuPushCreate(modPopupM, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(modPopupM, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
-	wMenuPushCreate(modPopupM, "", _("Pan Center - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 0);
+	wMenuPushCreate(modPopupM, "", _("Pan center - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 0);
 }

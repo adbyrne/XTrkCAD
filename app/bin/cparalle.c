@@ -48,11 +48,11 @@ static char * parTypeLabels[] = { N_("Track"), N_("Line"), NULL };
 static paramFloatRange_t r_0o1_100 = { 0.0, 100.0, 100 };
 static paramFloatRange_t r_0_10 = { 0.0, 10.0 };
 static paramData_t parSepPLs[] = {
-	{   PD_RADIO, &parType, "type", 0, parTypeLabels, N_("Output Type"), BC_HORZ|BC_NONE },
+	{   PD_RADIO, &parType, "type", 0, parTypeLabels, N_("Output type"), BC_HORZ|BC_NONE },
 #define parSepPD (parSepPLs[1])
 	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NOPREF, &r_0o1_100, N_("Separation") },
 #define parFactorPD (parSepPLs[2])
-	{   PD_FLOAT, &parSepFactor, "factor", PDO_NOPREF, &r_0_10, N_("Radius Factor") } 
+	{   PD_FLOAT, &parSepFactor, "factor", PDO_NOPREF, &r_0_10, N_("Radius factor") } 
 };
 static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, sizeof parSepPLs/sizeof parSepPLs[0] };
 
@@ -123,8 +123,8 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         controls[2] = parFactorPD.control;
         controls[3] = NULL;
         labels[0] = N_("Separation");
-        labels[1] = N_("Type:");
-        labels[2] = N_("Radius Factor");
+        labels[1] = N_("Output type:");
+        labels[2] = N_("Radius factor");
         InfoSubstituteControls(controls, labels);
         ParamLoadData(&parSepPG);
         Dpa.orig = pos;
