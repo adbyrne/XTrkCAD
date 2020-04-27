@@ -567,7 +567,10 @@ EXPORT void DrawHilightPolygon( drawCmd_p d, coOrd *p, int cnt )
 	for (i=0; i<cnt; i++) {
 		d->CoOrd2Pix(d,p[i],&q[i][0],&q[i][1]);
 	}
-	wDrawPolygon( d->d, q, NULL, cnt, wDrawColorBlack, 0, 0, wDrawOptTemp|wDrawOptTransparent, 1, 0 );
+	static wDrawColor color = 0;
+	if ( color == 0 )
+		color = wDrawColorGray( 50 );
+	wDrawPolygon( d->d, q, NULL, cnt, color, 0, 0, wDrawOptTemp|wDrawOptTransparent, 1, 0 );
 }
 
 
