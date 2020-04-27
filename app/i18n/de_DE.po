@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: XTrackCAD 5.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-27 08:18+0200\n"
-"PO-Revision-Date: 2020-04-27 08:19+0200\n"
+"POT-Creation-Date: 2020-04-27 08:41+0200\n"
+"PO-Revision-Date: 2020-04-27 08:43+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -1262,14 +1262,12 @@ msgid "Type"
 msgstr "Typ"
 
 #: ../bin/cdraw.c:2024
-#, fuzzy
 msgid "Dash-Dot"
-msgstr "Gestrichelt"
+msgstr "Strichpunktiert"
 
 #: ../bin/cdraw.c:2025
-#, fuzzy
 msgid "Dash-Dot-Dot"
-msgstr "Dash-Dot-Dot"
+msgstr "Strich-Punkt-Punkt"
 
 #: ../bin/cdraw.c:2038
 #, c-format
@@ -1289,9 +1287,8 @@ msgid "Seg Length"
 msgstr "Segmentlänge"
 
 #: ../bin/cdraw.c:2185
-#, fuzzy
 msgid "Rel Angle"
-msgstr "Linker Winkel"
+msgstr "Relativer  Winkel"
 
 #: ../bin/cdraw.c:2199
 #, fuzzy
@@ -4911,7 +4908,7 @@ msgid ""
 msgstr ""
 "Ziehen mit der linken Maustaste um den Ausschnitt zu verschieben, Strg"
 "+Ziehen mit der linken Maustaste zum Zoomen, 0 um den Ursprung auf Null zu "
-"setzen, 1-9 zum Zoomfaktor, e um an die Fenstergröße anzupassen."
+"setzen, 1-9 zum Zoomfaktor, e um an die Fenstergröße anzupassen"
 
 #: ../bin/draw.c:2839
 msgid "Pan Mode - drag point to new position"
@@ -5001,15 +4998,13 @@ msgid "+Shift to lock to nearby objects"
 msgstr "+Umschalt um auf ein naheliegendes Objekt zu fangen"
 
 #: ../bin/drawgeom.c:295
-#, fuzzy
 msgid "+Shift to not lock to nearby objects"
-msgstr "+Umschalt um auf ein naheliegendes Objekt zu fangen"
+msgstr "+Umschalt um nicht auf ein naheliegendes Objekt zu fangen"
 
 #: ../bin/drawgeom.c:395
-#, fuzzy
 msgid "Drag to next point, +Shift to lock to object, +Ctrl to lock to 90deg"
 msgstr ""
-"Ziehen Sie zum nächsten Punkt, +Umschalten, um das Objekt zu sperren, +Strg, "
+"Ziehen Sie zum nächsten Punkt, +Umschalten um aufein Objekt zu fangen, +Strg "
 "um auf 90 Grad zu sperren"
 
 #: ../bin/drawgeom.c:405
@@ -5055,17 +5050,15 @@ msgid "Width = %s, Height = %s"
 msgstr "Breite = %s, Höhe = %s"
 
 #: ../bin/drawgeom.c:1134
-#, fuzzy
-msgid "Select Points, or use Context Menu"
-msgstr "Wählen Sie Punkte aus oder verwenden Sie das Kontextmenü"
+msgid "Select points or use context menu"
+msgstr "Punkt auswählen oder Kontextmenu benutzen"
 
 #: ../bin/drawgeom.c:1389
-#, fuzzy, c-format
-msgid "Length = %s, Last_Angle = %0.2f"
-msgstr "Länge = %s, Winkel = %0.2f"
+#, c-format
+msgid "Length = %s, Last angle = %0.2f"
+msgstr "Länge = %s, letzter Winkel = %0.2f"
 
 #: ../bin/drawgeom.c:1469
-#, fuzzy
 msgid "Move Origin Mode"
 msgstr "Modus Ursprung verschieben"
 
@@ -5074,14 +5067,12 @@ msgid "Point Deleted"
 msgstr "Punkt gelöscht"
 
 #: ../bin/drawgeom.c:1924
-#, fuzzy
-msgid "Not Close to End of Line"
-msgstr "Nicht nah am Zeilenende"
+msgid "Not close to end of line"
+msgstr "Nicht nah am Ende der Linie"
 
 #: ../bin/drawgeom.c:1977
-#, fuzzy
-msgid "Not Close to Ends or Middle of Line, Reselect"
-msgstr "Nicht an den Enden oder in der Mitte der Zeile, wiederwählen"
+msgid "Not close to ends or middle of mine, reselect"
+msgstr "Nicht an einem Ende oder in der Mitte der Linie, Auswahl wiederholen"
 
 #: ../bin/drawgeom.c:2025 ../bin/drawgeom.c:2247
 msgid "Drag to Move Corner Point"
