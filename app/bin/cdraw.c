@@ -1935,7 +1935,7 @@ static paramData_t drawPLs[] = {
 #define drawLengthPD			(drawPLs[6])
 	{ PD_FLOAT, &drawCmdContext.length, "Length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
 #define drawWidthPD				(drawPLs[7])
-	{ PD_FLOAT, &drawCmdContext.width, "BoxWidth", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Box Width") },
+	{ PD_FLOAT, &drawCmdContext.width, "BoxWidth", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Width") },
 #define drawAnglePD				(drawPLs[8])
 #define drawAngleInx					8
 	{ PD_FLOAT, &drawCmdContext.angle, "Angle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Angle") },
@@ -2196,8 +2196,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				controls[0] = drawLengthPD.control;
 				controls[1] = drawWidthPD.control;
 				controls[2] = NULL;
-				labels[0] = N_("Box Length");
-				labels[1] = N_("Box Width");
+				labels[0] = N_("Length");
+				labels[1] = N_("Width");
 				ParamLoadControls( &drawPG );
 				InfoSubstituteControls( controls, labels );
 				drawLengthPD.option &= ~PDO_NORECORD;

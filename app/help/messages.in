@@ -1087,7 +1087,7 @@ END
 
 # fileio.c
 MESSAGE MSG_OPEN_DIR_FAIL
-Open filed for directory: %s 
+Open failed for directory: %s 
 #NOHELP
 END
 

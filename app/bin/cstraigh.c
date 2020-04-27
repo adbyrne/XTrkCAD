@@ -74,7 +74,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		Dl.trk = NULL;
 		Dl.ep=-1;
 		Dl.down = FALSE;
-		InfoMessage( _("Place 1st end point of straight track snap to unconnected endpoint") );
+		InfoMessage( _("Place 1st endpoint of straight track, snap to unconnected endpoint") );
 		return C_CONTINUE;
 
 	case C_DOWN:
