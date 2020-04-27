@@ -3,8 +3,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: XTrackCAD 5.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-26 17:37+0200\n"
-"PO-Revision-Date: 2020-04-26 17:38+0200\n"
+"POT-Creation-Date: 2020-04-27 08:18+0200\n"
+"PO-Revision-Date: 2020-04-27 08:19+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
@@ -470,19 +470,16 @@ msgid "Select Point, or Add Point"
 msgstr "Punkt auswählen oder neuen Punkt hinzufügen"
 
 #: ../bin/ccornu.c:1243
-#, fuzzy
 msgid "Not close enough to track or point, reselect"
-msgstr "Kein Endpunkte in der Nähe, bitte wiederholen"
+msgstr "Kein Gleis oder Endpunkt in der Nähe, bitte wiederholen"
 
 #: ../bin/ccornu.c:1249
-#, fuzzy
-msgid "Drag out End of Cornu"
-msgstr "Anderes Ende der Klothoide setzen"
+msgid "Drag out end of Cornu"
+msgstr "Ende der Cornu ziehen"
 
 #: ../bin/ccornu.c:1251
-#, fuzzy
-msgid "Drag along end track"
-msgstr "Entlang der Anfangs der Kurve ziehen"
+msgid "Drag along end of track"
+msgstr "Entlang des Ende des Gleises ziehen"
 
 #: ../bin/ccornu.c:1253
 msgid "Drag to move"
@@ -501,9 +498,10 @@ msgid "Drag to change end angle"
 msgstr "Ziehen um den Abschlußwinkel zu ändern"
 
 #: ../bin/ccornu.c:1278
-#, fuzzy
-msgid "Pick any circle to adjust, or Add - Enter to accept, Esc to cancel"
-msgstr "Wähle einen beliebigen Kreis aus passe die Kurve durch verschieben an"
+msgid "Pick any circle to adjust or add - Enter to accept, Esc to cancel"
+msgstr ""
+"Um Anzupassen einen beliebigen Kreis auswählen -Eingabe zum Bestätigen, Esc "
+"zum Abbrechen"
 
 #: ../bin/ccornu.c:1290
 msgid "Track can't be split"
@@ -514,9 +512,8 @@ msgid "Too close to other end of selected Track"
 msgstr "Zu nahe am anderen Ende des ausgewählten Gleises"
 
 #: ../bin/ccornu.c:1360
-#, fuzzy
-msgid "Can't move end inside a Turnout"
-msgstr "Erstelle eine Selbstbauweiche"
+msgid "Can't move end inside a turnout"
+msgstr "Ende kann nicht in ein festes Gleis hinein verschoben werden"
 
 #: ../bin/ccornu.c:1502
 msgid "Can't extend connected Bezier or Cornu"
@@ -542,23 +539,22 @@ msgid "Track is different scale"
 msgstr "Das Gleis hat einen anderen Maßstab"
 
 #: ../bin/ccornu.c:1665
-#, fuzzy
 msgid ""
 "Pick on point to adjust it along track - Delete to remove, Enter to confirm, "
 "ESC to abort"
 msgstr ""
-"Einen Punkte auswählen und entlang des Gleises verschieben - Bestätigen mit "
-"Eingabe, Abbrechen mit Esc"
+"Einen Punkt auswählen und verschieben - Bestätigen mit Eingabe, Abbrechen "
+"mit Esc"
 
 #: ../bin/ccornu.c:1695
 msgid "Cornu has too complex shape - adjust end pts"
 msgstr "Die Form der Cornu-Kurve ist zu komplex, Endpunkte anpassen"
 
 #: ../bin/ccornu.c:1706
-#, fuzzy, c-format
+#, c-format
 msgid "Cornu point %d too close to other end of connect track - reposition it"
 msgstr ""
-"Cornu-Ende %d zu dicht am anderen Ende des Gleises - anderere Position setzen"
+"Cornu-Punkt %d zu dicht am anderen Ende des Gleises - Position verändern"
 
 #: ../bin/ccornu.c:1711
 msgid "Create Cornu"
@@ -594,7 +590,7 @@ msgstr "Änderung der Cornu-Kurve abbrechen"
 
 #: ../bin/ccornu.c:2236
 msgid "Left click - Start Cornu track"
-msgstr "Durch Drücken der linken Maustaste mit einer Klothoide beginnen"
+msgstr "Durch Drücken der linken Maustaste mit einer Cornu beginnen"
 
 #: ../bin/ccornu.c:2238
 msgid "Left click - Place Flextrack"
@@ -611,19 +607,12 @@ msgstr ""
 "Verschieben zum Verbinden"
 
 #: ../bin/ccornu.c:2275
-#, fuzzy
-msgid "No Valid open end point on that track"
-msgstr "Kein unverbundener Endpunkt auf diesem Gleis"
+msgid "No valid open endpoint on that track"
+msgstr "Kein gültiger und unbenutzter Endpunkt auf diesem Gleis"
 
-#: ../bin/ccornu.c:2304
-#, fuzzy
-msgid "Drag arm in direction of track"
-msgstr "Vom Endpunkt in Richtung der Kurve ziehen"
-
-#: ../bin/ccornu.c:2316
-#, fuzzy
+#: ../bin/ccornu.c:2304 ../bin/ccornu.c:2316
 msgid "Drag arm in the direction of track"
-msgstr "Vom Endpunkt in Richtung der Kurve ziehen"
+msgstr "Kontrollarm in Richtung des Gleises ziehen"
 
 #: ../bin/ccornu.c:2320
 msgid "No Unconnected Track End there"
@@ -634,21 +623,20 @@ msgid "No Valid Track End there"
 msgstr "Hier ist kein gültiges Gleisende"
 
 #: ../bin/ccornu.c:2343
-#, fuzzy
 msgid "Locked - Move 1st end point of Cornu track along track 1"
 msgstr ""
-"Verschiebe den ersten Endpunkt des Cornu-Gleis entlang des ersten Gleises"
+"Fixiert - verschiebe den ersten Endpunkt des Cornu-Gleis entlang des ersten "
+"Gleises"
 
 #: ../bin/ccornu.c:2367
-#, fuzzy
 msgid "Locked - Move 2nd end point of Cornu track along track 2"
 msgstr ""
-"Verschiebe den zweiten Endpunkt des Cornu-Gleis entlang des zweiten Gleises"
+"Fixiert, verschiebe den zweiten Endpunkt des Cornu-Gleis entlang des zweiten "
+"Gleises"
 
 #: ../bin/ccornu.c:2441
-#, fuzzy
-msgid "Can't Split - So Locked to End Point"
-msgstr "Trennen nicht möglich - am Endpunkt verriegelt"
+msgid "Track can't be split - so locked to endpoint"
+msgstr "Das Gleis kann  nicht getrennt werden - daher am Endpunkt fixiert "
 
 #: ../bin/ccornu.c:2446
 msgid "Point not on track 1"
@@ -656,15 +644,14 @@ msgstr "Der Punkt ist nicht auf Gleis 1"
 
 #: ../bin/ccornu.c:2484
 msgid "Pick other end of Cornu"
-msgstr "Anderes Ende der Klothoide setzen"
+msgstr "Anderes Ende der Cornu setzen"
 
 #: ../bin/ccornu.c:2486
-#, fuzzy
 msgid ""
-"Select Flextrack ends or anchors and Drag, Enter to approve, Esc to Cancel"
+"Select flextrack ends or anchors and drag, Enter to approve, Esc to Cancel"
 msgstr ""
-"Wählen Sie Flextrack-Enden oder Anker aus und ziehen Sie, geben Sie ein, um "
-"zu genehmigen, Esc, um abzubrechen"
+"Wählen Sie Flextrack-Enden oder Anker aus und ziehen Sie, Enter zum "
+"Bestätigen, Esc zum Abbrechen"
 
 #: ../bin/ccornu.c:2490
 msgid "Put other end of Cornu on a track with an unconnected end point"
@@ -682,11 +669,11 @@ msgstr "Gleis für das Umwandeln auswählen"
 
 #: ../bin/ccornu.c:2713
 msgid "Convert all Selected Tracks to Cornu Tracks?"
-msgstr "Sollen alle ausgewählten Gleise in Klothoide umgewandelt werden?"
+msgstr "Sollen alle ausgewählten Gleise in Cornu umgewandelt werden?"
 
 #: ../bin/ccornu.c:2718
 msgid "Convert Cornu"
-msgstr "Klothoide umwandeln"
+msgstr "Cornu umwandeln"
 
 #: ../bin/ccornu.c:2902
 msgid "Select a Cornu or Bezier Track To Convert to Fixed"
@@ -699,7 +686,7 @@ msgstr "Sollen alle ausgewählten Gleise in feste Gleise umgewandelt werden?"
 
 #: ../bin/ccornu.c:2915
 msgid "Convert Bezier and Cornu"
-msgstr "Bezier-Kurve oder Klothoide umwandeln"
+msgstr "Bezier-Kurve oder Cornu umwandeln"
 
 #: ../bin/ccornu.c:2983
 msgid "Convert"
@@ -707,11 +694,11 @@ msgstr "Umwandeln"
 
 #: ../bin/ccornu.c:2984
 msgid "Convert To Cornu"
-msgstr "Klothoide erstellen"
+msgstr "In Cornu erstellen"
 
 #: ../bin/ccornu.c:2985
 msgid "Convert From Cornu"
-msgstr "Aus Klothoide umwandeln"
+msgstr "Aus Cornu umwandeln"
 
 #: ../bin/ccurve.c:169
 msgid "Drag from endpoint in direction of curve - lock to track open endpoint"
@@ -915,7 +902,7 @@ msgstr "Erstelle Gleiskreis"
 
 #: ../bin/ccurve.c:946
 msgid "Cornu Curve"
-msgstr "Klothoide"
+msgstr "Cornu"
 
 #: ../bin/ccurve.c:948
 msgid "Curve Track"
@@ -2363,7 +2350,7 @@ msgstr "Maßstab ändern"
 
 #: ../bin/cselect.c:1439
 msgid "Cornu too tight - it was deleted"
-msgstr "Klothoide ist zu eng und wurde gelöscht"
+msgstr "Cornu ist zu eng und wurde gelöscht"
 
 #: ../bin/cselect.c:1502
 msgid "Move To Join"
@@ -4292,7 +4279,7 @@ msgstr "Weit"
 
 #: ../bin/dease.c:67
 msgid "Cornu"
-msgstr "Klothoide"
+msgstr "Cornu"
 
 #: ../bin/dease.c:74
 msgid "Value"
@@ -6227,7 +6214,7 @@ msgstr "Bezierkurven zusammenfassen"
 #: ../bin/tcornu.c:222
 #, c-format
 msgid "Cornu: len=%0.2f min_rad=%0.2f"
-msgstr "Klothoide: Länge = %0.2f Kleinster Radius %0.2f"
+msgstr "Cornu: Länge = %0.2f Kleinster Radius %0.2f"
 
 #: ../bin/tcornu.c:296
 msgid "Radius "
@@ -6676,8 +6663,8 @@ msgid ""
 "Try adjusting the end angles and radii to be closer in values."
 msgstr ""
 "MSG_TODSGN_CORNU_TOO_COMPLEX\tDie mit dem Weichen-Designer erstellten Kurven "
-"für eine Klothoide haben mehr als 128 Segmente....\tDie mit dem Weichen-"
-"Designer erstellten Kurven für eine Klthoide haben mehr als 128 Segmente.\n"
+"für eine Cornu haben mehr als 128 Segmente....\tDie mit dem Weichen-Designer "
+"erstellten Kurven für eine Klthoide haben mehr als 128 Segmente.\n"
 "Versuchen Sie, die Endwinkel und Radien so einzustellen, dass die Werte "
 "näher beieinander liegen."
 
@@ -7980,11 +7967,11 @@ msgstr "Konvertierungsmodus einstellen"
 
 #: ../../../../build/work/app/bin/bllnhlp.c:33
 msgid "Convert from Fixed Track to Cornu"
-msgstr "Aus festem Gleis in eine Klothoide umwandeln"
+msgstr "Aus festem Gleis in eine Cornu umwandeln"
 
 #: ../../../../build/work/app/bin/bllnhlp.c:34
 msgid "Convert from Cornu and Bezier to Fixed Track"
-msgstr "Von Klothoide oder Bezier auf festes Gleis umwandeln"
+msgstr "Von Cornu oder Bezier auf festes Gleis umwandeln"
 
 #: ../../../../build/work/app/bin/bllnhlp.c:35
 msgid "Copy selected objects to clipboard"
@@ -7992,7 +7979,7 @@ msgstr "Ausgewählte Objekte in die Zwischenablage kopieren"
 
 #: ../../../../build/work/app/bin/bllnhlp.c:36
 msgid "Create Cornu track"
-msgstr "Klothoiden-Gleis erstellen"
+msgstr "Cornu-Bogen erstellen"
 
 #: ../../../../build/work/app/bin/bllnhlp.c:37
 msgid "Create curved track from center"
@@ -13120,12 +13107,12 @@ msgstr ""
 
 #: ../../../../build/work/app/i18n/custmsg.h:729
 msgid "We will enable Cornu easements\n"
-msgstr "Zuerst schalten wir Übergangsbögen mit Klothoiden an.\n"
+msgstr "Zuerst schalten wir Übergangsbögen mit Cornu an.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjncs.xtr:32
 #: ../../../../build/work/app/i18n/custmsg.h:731
 msgid "A connecting cornu track is drawn between the two tracks.\n"
-msgstr "Eine Klothoide wird zwischen den beiden Gleisen gezeichnet.\n"
+msgstr "Eine Cornu wird zwischen den beiden Gleisen gezeichnet.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjncs.xtr:41
 #: ../../../../build/work/app/i18n/custmsg.h:733
@@ -13235,13 +13222,13 @@ msgstr "Das ist wahrscheinlich keine sinnvolle Lösung.\n"
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnss.xtr:90
 #: ../../../../build/work/app/i18n/custmsg.h:760
 msgid "Now we will do this with Cornu Easements  \n"
-msgstr "Jetzt werden wir dies mit den Klothoiden-Übergangsbögen tun\n"
+msgstr "Jetzt werden wir dies mit den Cornu-Übergangsbögen tun\n"
 
 #: ../../../../build/work/app/i18n/custmsg.h:761
 msgid "First, we will select Easements Cornu and then select Join\n"
 msgstr ""
-"Zuerst legen wir Klothoide als Übergangsbogen fest, dann wählen wir "
-"Verbinden aus.\n"
+"Zuerst legen wir Cornu als Übergangsbogen fest, dann wählen wir Verbinden "
+"aus.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnss.xtr:102
 #: ../../../../build/work/app/i18n/custmsg.h:763
@@ -13254,7 +13241,7 @@ msgid ""
 "A connecting cornu is drawn between the two tracks.  Notice how it behaves "
 "as the cursor is dragged along the second track.\n"
 msgstr ""
-"Eine Klothoide wird zwischen den beiden Gleisen gezeichnet. Beachten Sie wie "
+"Eine Cornu wird zwischen den beiden Gleisen gezeichnet. Beachten Sie wie "
 "dieses neu geformt wird, wenn der Mauszeiger entlang des zweiten Gleises "
 "bewegt wird.\n"
 
