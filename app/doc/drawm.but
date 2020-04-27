@@ -46,7 +46,6 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \rule
 
-
 \S{cmdCircleL} Circles and Filled Circles
 
 \G{png.d/mdrawcircles.png}
@@ -258,5 +257,12 @@ The position where text is to be placed on the layout must be selected prior to 
 The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents of existing \f{Text} objects and to draw boxes around them.
 
 Note: loading fonts (or changing sizes) can take a noticeable amount of time.
+
+\S{DrawOrigin} Draw Objects Origin
+
+By default, Draw objects are constructed with the origin at the layout origin and with a rotation value of 0 degrees. This is referred to as an \e{Absolute} origin.  When they are moved or rotated, the origin remains fixed and the point values are adjusted as needed. 
+Some objects have a natural rotation point within them. By setting the origin to this point, subsequent rotation will be about that point and not the layout origin. This is referred to as a \e{Relative} origin. When one of these is moved or rotated, the origin and angle are adjusted but the relative draw point values remain the same.
+
+You can choose to set the origin to make it Relative or put it back to Absolute during \K{cmdModify} or by using the \K{cmdDescribe} settings.  As a practical matter, the object will appear identical until a subsequent rotation value is entered in the \K{cmdDescribe} window in both cases.
 
 \rule
