@@ -712,9 +712,9 @@ static STATUS_T CmdPull(
 
 	case C_START:
 		if (selectedTrackCount==0)
-			InfoMessage( _("Select first end-point to connect or turntable, +Shift to tighten") );
+			InfoMessage( _("Select first endpoint or turntable to connect, +Shift to tighten") );
 		else
-			InfoMessage( _("Select first end-point to connect, or Right-Click for connecting selected tracks (not turntable)") );
+			InfoMessage( _("Select first endpoint to connect, or Right-Click for connecting selected tracks (not turntable)") );
 		trk1 = NULL;
 		turntable = FALSE;
 		t1 = t2 = NULL;
@@ -773,7 +773,7 @@ static STATUS_T CmdPull(
 							ep1 = -1;
 						} else trk1 = NULL;
 					} else {
-						InfoMessage( _("Select second end-point to connect or turntable") );
+						InfoMessage( _("Select second endpoint or turntable to connect") );
 					}
 
 				}

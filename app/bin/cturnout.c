@@ -2619,7 +2619,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 	case C_UP:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		CreateMoveAnchor(pos);
-		InfoMessage( _("Left drag to move, ctrl+left-drag or right-drag to rotate, press Space or Return to accept or Esc to cancel") );
+		InfoMessage( _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel") );
 		return C_CONTINUE;
 
 	case C_RDOWN:
@@ -2674,7 +2674,7 @@ LOG( log_turnout, 1, ( "RMOVE post @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 		if ( curTurnout == NULL ) return C_CONTINUE;
 		Dto.state = 1;
 		CreateMoveAnchor(pos);
-		InfoMessage( _("Left-drag to move, ctl+left-drag or right-drag to rotate, press Space or Return to accept or Esc to cancel") );
+		InfoMessage( _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel") );
 		return C_CONTINUE;
 
 	case C_LCLICK:
@@ -2799,7 +2799,7 @@ static STATUS_T CmdTurnout(
 		if (hideTurnoutWindow)
 			wShow( turnoutW );
 
-		InfoMessage( _("Left drag to move, +Ctrl drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
+		InfoMessage( _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel") );
 		if (((action&0xFF) == C_UP) && (MyGetKeyState()&WKEY_CTRL))
 						return CmdTurnoutAction (C_RUP, pos);
 		return CmdTurnoutAction( action, pos );
@@ -2938,7 +2938,7 @@ static STATUS_T CmdTurnoutHotBar(
 		}
 		/*no break*/
 	case C_RUP:
-		InfoMessage( _("Left drag to move, +Ctrl drag to rotate, press Space or Return to fix track in place or Esc to cancel") );
+		InfoMessage( _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel") );
 		return CmdTurnoutAction( action, pos );
 
 	case C_REDRAW:
