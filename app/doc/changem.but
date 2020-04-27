@@ -785,14 +785,16 @@ For detail about;
 
 Draw elements have blue handles that show how they can be modified. They also have text entry boxes that allow precise entry of parameters. These values become active when a \e{Tab} is entered, or the cursor is moved out of the text box.
 
-There is a context menu accessed via \e{Right-Click} for Draw Objects that can change the edit mode from the initial "Points Mode" to "Origin Mode" where \e{Click} sets the position of the drawn object's origin - which will cause subsequent rotations using \K{cmdModify} to be centered about that point.
+There is a context menu accessed via \e{Right-Click} for Draw Objects that can change the edit mode from the initial "Points Mode" to "Origin Mode" where \e{Click} sets the position of the drawn object's origin - which will cause subsequent rotations using \K{cmdModify} or \K{cmdDescribe} to be centered about that point.
 
 The context menu can be used to go back to Points Mode, or to set the origin to one of a number of defined points.
 There are text shortcuts - "o" for Origin Mode and "p" for Points Mode.
 
-In Origin Mode,
+In Origin Mode, the context menu allows the origin to be set to be -
 
-\dd the context menu allows the origin to be set by dragging or snapped to the layout origin (shortcut "0") or the position of the corner points (shortcut "1" through "4") or the centroid of the shape (shortcut "c"). For a polygon, if a node is selected, the origin can be moved to it (shortcut "l").
+\dd \e{Absolute} (shortcut "0") with the origin at the layout origin or
+
+\dd \e{Relative} by dragging the origin to a point, or snapping to the position of the first 4 corner points (shortcut "1" through "4"), or to the centroid of the shape (shortcut "c"). For a Polygon or Polyline the \e{Relative} origin can be snapped to a selected node (shortcut "l").
 
 \u000
 
@@ -1165,8 +1167,8 @@ By setting a different Rotation Origin, subsequent Rotations will be about that 
 
 \dt Lock Rotation Origin
 
-\dd For ease of use, the rotation origin can be locked to be relative to the First Point. If this is done, altering either the First Point or the Rotation Origin will move both.
-This value is set to locked if the origin is non-zero when the Describe command is started but can be unset to allow repositioning of the Rotate Origin.
+\dd For ease of use, the rotation origin can be \e{Relative} to the First Point. If this is done, altering either the First Point or the Rotation Origin will move the both values.
+This value is always set to locked if the Draw origin is non-zero when the \K{cmdDescribe} command is started but can be unset to allow repositioning of the Rotate Origin without moving the object. If the Rotate Origin is set to zero, the Object has an \e{Absolute} origin.
 
 \dt Layer
 
