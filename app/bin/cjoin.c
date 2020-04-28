@@ -481,9 +481,18 @@ static STATUS_T CmdJoinLine(
 		coOrd pos1= pos;
 		Dl.curr_line = OnTrack( &pos1, FALSE, FALSE );
 		if (!Dl.curr_line) return C_CONTINUE;
-		if (IsTrack(Dl.curr_line)) return C_CONTINUE;
-		if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) return C_CONTINUE;
-		if (!GetTrackParams(PARAMS_NODES,Dl.curr_line,pos,&Dl.params)) return C_CONTINUE;
+		if (IsTrack(Dl.curr_line)) {
+			Dl.curr_line = NULL;
+			return C_CONTINUE;
+		}
+		if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) {
+			Dl.curr_line = NULL;
+			return C_CONTINUE;
+		}
+		if (!GetTrackParams(PARAMS_NODES,Dl.curr_line,pos,&Dl.params)) {
+			Dl.curr_line = NULL;
+			return C_CONTINUE;
+		}
 		if ( (Dl.line_state != NO_LINE) &&
 				(Dl.inp[0].line == Dl.curr_line) &&
 				(IsClose(FindDistance(Dl.inp[0].pos,Dl.params.lineOrig)) ) ) {
@@ -527,8 +536,8 @@ static STATUS_T CmdJoinLine(
 				return C_CONTINUE;
 			}
 			if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) return C_CONTINUE;
+			if (!GetTrackParams(PARAMS_NODES,Dl.curr_line,pos,&Dl.params)) return C_CONTINUE;
 			if (Dl.curr_line == Dl.inp[0].line) {
-				if (!GetTrackParams(PARAMS_NODES,Dl.curr_line,pos,&Dl.params)) return C_CONTINUE;
 				if ((Dl.params.lineOrig.x == Dl.inp[0].pos.x) &&
 					(Dl.params.lineOrig.y == Dl.inp[0].pos.y)) {
 					InfoMessage( _("Same line and end-point - Try again") );

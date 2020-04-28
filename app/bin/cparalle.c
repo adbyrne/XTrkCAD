@@ -67,10 +67,13 @@ static void ParallelDlgUpdate(
 {
 	if (inx==parTypeI) {
 		if (parType == PAR_TRACK) {
-		     parSeparation = ceil(13.0*12.0/curScaleRatio);
+		     parSeparation = 13.0*12.0/curScaleRatio;
+		     sprintf(message, "parallel-separation-%s", curScaleName);
 		} else {
 		     parSeparation = 5.0*12.0/curScaleRatio;
+		     sprintf(message, "parallel-line-separation-%s", curScaleName);
 		}
+		wPrefGetFloat("misc", message, &parSeparation, parSeparation);
 		ParamLoadControl(&parSepPG,parSepI);
 	}
 
@@ -96,16 +99,14 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         if (parSepPLs[0].control==NULL) {
             ParamCreateControls(&parSepPG, ParallelDlgUpdate);
         }
-
         if (parType == PAR_TRACK) {
         	sprintf(message, "parallel-separation-%s", curScaleName);
         	parSeparation = ceil(13.0*12.0/curScaleRatio);
-        	wPrefGetFloat("misc", message, &parSeparation, parSeparation);
         } else {
         	sprintf(message, "parallel-line-separation-%s", curScaleName);
             parSeparation = 5.0*12.0/curScaleRatio;
-            wPrefGetFloat("misc", message, &parSeparation, parSeparation);
         }
+        wPrefGetFloat("misc", message, &parSeparation, parSeparation);
         ParamLoadControls(&parSepPG);
         ParamGroupRecord(&parSepPG);
         parSepPD.option |= PDO_NORECORD;
@@ -266,7 +267,10 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         DrawNewTrack(t);
         UndoEnd();
         InfoSubstituteControls(NULL, NULL);
-        sprintf(message, "parallel-separation-%s", curScaleName);
+        if (parType == PAR_TRACK)
+        	sprintf(message, "parallel-separation-%s", curScaleName);
+        else
+        	sprintf(message, "parallel-line-separation-%s", curScaleName);
         wPrefSetFloat("misc", message, parSeparation);
         tempSegs_da.cnt = 0;
         return C_TERMINATE;
