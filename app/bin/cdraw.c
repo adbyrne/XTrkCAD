@@ -506,7 +506,7 @@ static descData_t drawDesc[] = {
 /*LN*/	{ DESC_DIM, N_("Length"), &drawData.length },
 /*HT*/  { DESC_DIM, N_("Height"), &drawData.height },
 /*WT*/ 	{ DESC_DIM, N_("Width"), &drawData.width },
-/*LK*/  { DESC_BOXED, N_("Lock Origin Offset"), &drawData.lock_origin},
+/*LK*/  { DESC_BOXED, N_("Keep Origin Relative"), &drawData.lock_origin},
 /*OI*/  { DESC_POS, N_("Rot Origin: X,Y"), &drawData.origin },
 /*RA*/  { DESC_FLOAT, N_("Rotate Angle"), &drawData.angle },
 /*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
