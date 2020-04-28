@@ -2867,8 +2867,8 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	elevColorIgnore = drawColorBlue;
 	elevColorDefined = drawColorGold;
 	profilePathColor = drawColorPurple;
-	exceptionColor = wDrawFindColor(wRGB(255, 0, 128));
-	tieColor = wDrawFindColor(wRGB(255, 128, 0));
+	exceptionColor = wDrawFindColor(wRGB(255, 89, 0 ));
+	tieColor = wDrawFindColor(wRGB(153, 89, 68));
 
 	newToolbarMax = (1 << BG_COUNT) - 1;
 	wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);
