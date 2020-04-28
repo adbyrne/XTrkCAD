@@ -1209,32 +1209,25 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 		ErrorMessage( MSG_CANT_EXTEND_HELIX );
 		return FALSE;
 	}
+	if (inx == PARAMS_NODES) return FALSE;
 	params->len = params->arcR * params->arcA1 *2.0*M_PI/360.0;
 	if (xx->helixTurns > 0)
 		params->len += (xx->helixTurns-(xx->circle?1:0)) * xx->radius * 2.0 * M_PI;
 	params->helixTurns = xx->helixTurns;
-	if ( inx == PARAMS_PARALLEL ) {
-		params->ep = 0;
-		if (xx->helixTurns > 0) {
-			params->arcA0 = 0.0;
-			params->arcA1 = 360.0;
-		}
+	params->circleOrHelix = FALSE;
+	if ( IsCurveCircle( trk ) ) {
+		params->ep = PickArcEndPt( params->arcP, /*Dj.inp[0].*/pos, pos );
+		params->angle = params->track_angle;
+		params->circleOrHelix = TRUE;
+		return TRUE;
+	} else if (inx == PARAMS_CORNU ) {
+		params->ep = PickEndPoint(pos, trk);
 	} else {
-		params->circleOrHelix = FALSE;
-		if ( IsCurveCircle( trk ) ) {
-			params->ep = PickArcEndPt( params->arcP, /*Dj.inp[0].*/pos, pos );
-			params->angle = params->track_angle;
-			params->circleOrHelix = TRUE;
-			return TRUE;
-		} else if (inx == PARAMS_CORNU ) {
-			params->ep = PickEndPoint(pos, trk);
-		} else {
-			params->ep = PickUnconnectedEndPointSilent( pos, trk );
-		}
-		if (params->ep == -1)
-			return FALSE;
-		params->angle = GetTrkEndAngle(trk,params->ep); ;
+		params->ep = PickUnconnectedEndPointSilent( pos, trk );
 	}
+	if (params->ep == -1)
+		return FALSE;
+	params->angle = GetTrkEndAngle(trk,params->ep); ;
 	return TRUE;
 }
 

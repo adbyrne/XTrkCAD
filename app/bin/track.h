@@ -72,14 +72,16 @@ typedef enum { curveTypeNone, curveTypeCurve, curveTypeStraight, curveTypeBezier
 #define PARAMS_1ST_JOIN (0)
 #define PARAMS_2ND_JOIN (1)
 #define PARAMS_EXTEND	(2)
-#define PARAMS_PARALLEL (3)
+#define PARAMS_NODES (3)
 #define PARAMS_BEZIER   (4)	   //Not used (yet)
 #define PARAMS_CORNU    (5)    //Called to get end characteristics
 #define PARAMS_TURNOUT  (6)
+#define PARAMS_LINE     (7)	   //Called on Lines
 
 typedef struct {
 		curveType_e type;			//Straight, Curve, Bezier, Cornu
 		EPINX_T ep;					//End point that is nearby pos
+		dynArr_t nodes;				//Array of nodes -> PARAMS_PARALLEL only
 		DIST_T len;					//Length of track
 		ANGLE_T angle;				//Angle at end of track
 		coOrd lineOrig;				//Start of straight
@@ -131,6 +133,7 @@ typedef struct {
 #define Q_IS_ACTIVATEABLE				(29)
 #define Q_IS_STRUCTURE					(30)
 #define Q_IS_TURNOUT                    (31)
+#define Q_GET_NODES						(32)
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track

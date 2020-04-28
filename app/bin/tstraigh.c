@@ -590,9 +590,8 @@ static DIST_T GetLengthStraight( track_p trk )
 static BOOL_T GetParamsStraight( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
 	params->type = curveTypeStraight;
-	if ( inx == PARAMS_PARALLEL ) {
-		params->ep = 0;
-	} else if (inx == PARAMS_CORNU ){
+	if ( inx == PARAMS_NODES ) return FALSE;
+	if (inx == PARAMS_CORNU ){
 		params->ep = PickEndPoint( pos, trk);
 		params->arcP = zero;
 		params->arcR = 0.0;
