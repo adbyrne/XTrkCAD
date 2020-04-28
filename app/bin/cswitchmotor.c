@@ -205,7 +205,7 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
         Translate (&p[iPoint], orig, x_angle, switchmotorPoly_Pix[iPoint].x * switchmotorPoly_SF / scaleRatio );
         Translate (&p[iPoint], p[iPoint], y_angle, (10+switchmotorPoly_Pix[iPoint].y) * switchmotorPoly_SF / scaleRatio );
     }
-    DrawPoly(d, switchmotorPoly_CNT, p, NULL, wDrawColorBlack, 0, 1, 0);
+    DrawPoly(d, switchmotorPoly_CNT, p, NULL, color, 0, 1, 0);
 }
 
 static struct {
@@ -312,7 +312,13 @@ static DIST_T DistanceSwitchMotor (track_p t, coOrd * p )
 {
 	switchmotorData_p xx = GetswitchmotorData(t);
         if (xx->turnout == NULL) return 0;
-	return GetTrkDistance(xx->turnout,p);
+    coOrd center,hi,lo;
+    GetBoundingBox(t,&hi,&lo);
+    center.x = (hi.x+lo.x)/2;
+    center.y = (hi.y+lo.y)/2;
+    DIST_T d = FindDistance(center,*p);
+    *p = center;
+	return d;
 }
 
 static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
@@ -427,7 +433,7 @@ static void ReadSwitchMotor ( char * line )
 	xx->reverse = reverse;
 	xx->pointsense = pointsense;
     xx->turnindx = trkindex;
-    if (!last_motor) {
+    if (last_motor) {
     	last_trk = last_motor;
     	xx1 = GetswitchmotorData(last_trk);
     	xx1->next_motor = trk;
