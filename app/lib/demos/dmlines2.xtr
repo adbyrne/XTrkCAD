@@ -132,7 +132,7 @@ MOUSE 8200 0.316 8.842
 MESSAGE
 _________________________________________
 
-A Filled Polygon is drawn in the same way.
+A filled Polygon is drawn in the same way.
 END
 COMMAND DrawFilledPolygon
 PARAMETER draw linecolor 65280

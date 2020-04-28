@@ -34,7 +34,7 @@ RESET
 MESSAGE
 Pushing the <Describe> button will cancel any other command in progress.
 
-Here we will begin to create a Curved track which is a two step process.
+Here we will begin to create a curved track which is a two step process.
 END
 STEP
 COMMAND CurveEndPt
@@ -49,7 +49,7 @@ _________________________________________
 
 When we clicked on the <Describe> button, the current command was cancelled.
 
-When in <Describe> mode, selecting any object will print a description in the Status Bar and display a Dialog showing properties of the clicked-on object.
+When in <Describe> mode, selecting any object will print a description in the Status Bar and display a dialog showing properties of the clicked-on object.
 END
 STEP
 MOUSE 2 11.333 2.167
@@ -57,7 +57,7 @@ MOUSE 4 11.333 2.167
 MESSAGE
 _________________________________________
 
-Certain parameters of the object can be changed.  In this case we'll change the Length
+Certain parameters of the object can be changed.  In this case we'll change the length
 END
 STEP
 #DESCRIBE Length	7.500
@@ -71,7 +71,7 @@ BIGPAUSE
 MOUSE 2 18.083 2.250
 MOUSE 4 18.083 2.250
 MESSAGE
-and change the turnout Name and Part No.
+and change the turnout name and part no.
 END
 STEP
 #DESCRIBE Name	Medium Left
@@ -84,7 +84,7 @@ MOUSE 4 11.500 6.625
 MESSAGE
 _________________________________________
 
-You can change the contents of Text...
+You can change the contents of text...
 END
 STEP
 #DESCRIBE Text	Goodbye
@@ -100,7 +100,7 @@ STEP
 MESSAGE
 _________________________________________
 
-If you select a Note, the Description dialog appears which displays the contents of the note.
+If you select a note, the Description dialog appears which displays the contents of the note.
 END
 BIGPAUSE
 MOUSE 2 16.750 4.583

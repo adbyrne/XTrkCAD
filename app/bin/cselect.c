@@ -2087,7 +2087,7 @@ static STATUS_T CmdRotate(
 			} else {
 				if ( rotateAlignState == 1 ) {
 					if ( trk && GetTrkSelected(trk) ) {
-						InfoMessage( _("Align: Click on the 2nd Unselected object") );
+						InfoMessage( _("Align: Click on the 2nd unselected object") );
 						rotateAlignState = 2;
 					}
 					return C_CONTINUE;

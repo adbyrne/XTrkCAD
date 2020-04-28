@@ -379,7 +379,7 @@ RESET
 MESSAGE
 We can also create turnouts from simple straight and curved tracks.
 
-We'll create two tracks that have a common End-Point.
+We'll create two tracks that have a common endpoint.
 END
 STEP
 COMMAND Straight
@@ -389,7 +389,7 @@ MOUSE 3 10.000 2.000
 MOUSE 4 10.000 2.000
 MESSAGE
 
-When we create the curve from the straight track End-Point we need to hold down the Shift key to prevent XTrkCad from trying to join the two tracks.
+When we create the curve from the straight track endpoint we need to hold down the Shift key to prevent XTrackCAD from trying to join the two tracks.
 END
 COMMAND CurveEndPt
 MOUSE 1 2.000 2.000

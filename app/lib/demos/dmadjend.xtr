@@ -23,7 +23,7 @@ CURVE 3 DEMO 1 7.500000 8.333333 6.000000
 REDRAW
 RESET
 MESSAGE
-The unconnected End-Points of a straight or curved track can be changed with the 'Modify Track' command.
+The unconnected endpoints of a straight or curved track can be changed with the 'Modify Track' command.
 END
 STEP
 COMMAND Modify
@@ -31,7 +31,7 @@ MOUSE 1 35.833 5.917
 MESSAGE
 _________________________________________
 
-The End-Point of a straight track is selected and then Left-Dragged to change its length. A blue anchor shows that the length can be extended.
+The endpoint of a straight track is selected and then Left-Dragged to change its length. A blue anchor shows that the length can be extended.
 END
 STEP
 BIGPAUSE
@@ -48,7 +48,7 @@ BIGPAUSE
 MESSAGE
 _________________________________________
 
-If you try to drag the selected End-Point beyond the far End-Point, the track extends in the opposite direction.
+If you try to drag the selected endpoint beyond the far endpoint, the track extends in the opposite direction.
 
 END
 STEP
@@ -71,7 +71,7 @@ END
 STEP
 CLEAR
 MESSAGE
-A curved track is selected and it's new End-Point is determined by the angle to the cursor. 
+A curved track is selected and it's new endpoint is determined by the angle to the cursor. 
 END
 STEP
 MOUSE 1 13.67 8.100
@@ -172,8 +172,8 @@ END
 STEP
 CLEAR
 MESSAGE
-If you adjust the End-Point of a turnout or sectional track the track is extended by a similar track segment. The extension can be 
-a Straight or a Curve.
+If you adjust the endpoint of a turnout or sectional track the track is extended by a similar track segment. The extension can be 
+a straight or a curve.
 END
 STEP
 MOUSE 1 19.750 10.583
@@ -193,7 +193,7 @@ END
 STEP
 CLEAR
 MESSAGE
-You can change the radius of a Straight or Curved track that is connected at one End-Point by holding down the Shift key while Left-dragging on it.
+You can change the radius of a straight or curved track that is connected at one endpoint by holding down the Shift key while Left-dragging on it.
 The blue cross anchor shows that this is possible when shift is held down with no buttons.
 END
 STEP
@@ -209,7 +209,7 @@ MOUSE 4 31 20
 MESSAGE
 _________________________________________
 
-This lets you change a Straight track into a Curved track (and vice versa) as well as changing the radius of a Curved track.
+This lets you change a straight track into a curved track (and vice versa) as well as changing the radius of a curved track.
 
 END
 REGRESSION START 10 - adjust ep 1
@@ -250,8 +250,8 @@ STEP
 PARAMETER misc cmdUndo
 CLEAR
 MESSAGE
-You can form an extension of a Straight or Curved Track that is connected at one End-Point using an easment by holding down the Ctrl key while Left-dragging on it.
-The Blue half cross anchor shows that this is possible when the Ctrl key is held down with no mouse button.
+You can form an extension of a straight or curved Track that is connected at one endpoint using an easement by holding down the Ctrl key while Left-dragging on it.
+The blue half cross anchor shows that this is possible when the Ctrl key is held down with no mouse button.
 END
 STEP
 COMMAND Modify

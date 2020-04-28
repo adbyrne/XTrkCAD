@@ -291,6 +291,11 @@ static BOOL_T RefreshCompound1(
 	xx->segCnt = to->segCnt;
 	xx->segs = (trkSeg_p)MyMalloc( xx->segCnt * sizeof *(trkSeg_p)0 );
 	memcpy( xx->segs, to->segs, xx->segCnt * sizeof *(trkSeg_p)0 );
+	MyFree( xx->paths);
+	xx->paths = (char*)MyMalloc( to->pathLen * sizeof *xx->paths );
+	memcpy( xx->paths, to->paths, to->pathLen * sizeof *xx->paths );
+	xx->pathLen = to->pathLen;
+	xx->pathCurr = xx->paths;
 	if ( flip )
 		FlipSegs( xx->segCnt, xx->segs, zero, 90.0 );
 	ClrTrkBits( trk, TB_SELECTED );

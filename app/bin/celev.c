@@ -371,7 +371,7 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		ParamControlActive( &elevationPG, I_STATION, FALSE );
 		ParamLoadMessage( &elevationPG, I_COMPUTED, "" );
 		ParamLoadMessage( &elevationPG, I_GRADE, "" );
-		InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
+		InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		elevTrk = NULL;
 		elevUndo = FALSE;
 		CmdMoveDescription( action, pos );
@@ -391,11 +391,11 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			DIST_T elev0, elev1;
 			if (GetTrkEndPtCnt(trk0) == 2) {
 				if (!GetPointElev(trk0,p0,&elev0)) {
-					InfoMessage( _("Move to End or Track Xing +Shift to split") );
+					InfoMessage( _("Move to end or track crossing +Shift to split") );
 					return C_CONTINUE;
 				}
 			} else {
-				InfoMessage( _("Move to End-Point or Track Crossing") );
+				InfoMessage( _("Move to end or track crossing") );
 				return C_CONTINUE;
 			}
 			if ((trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0)) != NULL) {
@@ -403,9 +403,9 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 					if (GetTrkEndPtCnt(trk1) == 2) {
 						if (GetPointElev(trk1,p2,&elev1)) {
 							if (MyGetKeyState()&WKEY_SHIFT) {
-								InfoMessage (_("Xing - LowElev %0.3f, High %0.3f, Clearance %0.3f - Click to Split"), elev0, elev1, fabs(elev0-elev1));
+								InfoMessage (_("Crossing - LowElev %0.3f, High %0.3f, Clearance %0.3f - Click to Split"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
 							} else
-								InfoMessage (_("Xing - LowElev %0.3f, High %0.3f, Clearance %0.3f"), elev0, elev1, fabs(elev0-elev1));
+								InfoMessage (_("Crossing - LowElev %0.3f, High %0.3f, Clearance %0.3f"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
 						}
 						CreateSquareAnchor(p2);
 						return C_CONTINUE;
@@ -415,15 +415,15 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			if ((ep0 = PickEndPoint( p0, trk0 )) != -1)  {
 				if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
 					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
-					InfoMessage (_("Track Elevation %0.3f"), elev0);
+					InfoMessage (_("Track elevation %0.3f"), PutDim(elev0));
 				} else if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
 						&& !(QueryTrack(trk0,Q_IS_TURNOUT))) {
-					InfoMessage( _("Click to Split here - Elevation %0.3f"), elev0);
+					InfoMessage( _("Click to split here - elevation %0.3f"), PutDim(elev0));
 					CreateEndAnchor(p0,TRUE);
 				}
-			} else InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
+			} else InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		} else
-			InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
+			InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		return C_CONTINUE;
 	case C_DOWN:
 	case C_MOVE:
@@ -442,19 +442,19 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 		if ((trk0 = OnTrack( &p0, TRUE, TRUE )) == NULL) {
 			wHide(elevW);
 			elevTrk = NULL;
-			InfoMessage( _("Click on End, +Shift = Split, +Ctrl = Move Description") );
+			InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );
 		} else {
 			ep0 = PickEndPoint( p0, trk0 );
 			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
-				InfoMessage( _("Point Selected!") );
+				InfoMessage( _("Point selected!") );
 				ElevSelect( trk0, ep0 );
 			} else if ( (MyGetKeyState()&WKEY_SHIFT) ) {
-				UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
+				UndoStart( _("Split track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 				oldTrackCount = trackCount;
 				if (!QueryTrack(trk0,Q_IS_TURNOUT) &&
 					!SplitTrack( trk0, p0, ep0, &trk1, FALSE ))
 					return C_CONTINUE;
-				InfoMessage( _("Track Split!") );
+				InfoMessage( _("Track split!") );
 				ElevSelect( trk0, ep0 );
 				UndoEnd();
 				elevUndo = FALSE;

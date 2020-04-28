@@ -22,11 +22,11 @@ You can add track to any unconnected End-Point with the Modify command.\
 Hold down the Shift key and click on the End-Point and drag away to create a new track segment attached to the End-Point.\
 Repeat with the new End-Point to create flowing tracks.
 
-You can create Curved tracks in four ways by dragging from:\
-  the 1st End-Point in the direction of the curve\
-  Center of the Curve to the 1st End-Point\
-   End-Point to the Center\
-  the 1st to 2nd End-Point\
+You can create curved tracks in four ways by dragging from:\
+  the 1st endpoint in the direction of the curve\
+  center of the curve to the 1st endpoint\
+  endpoint to the center\
+  the 1st to 2nd endpoint\
 Then drag on one of the Red arrows to create the final shape of the curve.\
 \
 You can click on the small button to the right of the Curve command button to change the method.
@@ -78,8 +78,8 @@ You can give each layer a name (by using the "Manage|Layer" dialog).  This name 
 
 You can remove groups of buttons or the Hot Bar from the Main window to give you more room if you are not using some features.  Also, the number of Layer buttons displayed is controlled by the "Manage|Layers" dialog.
 
-The size of the Map window is controlled by the overall size of the room (specified on the Layout dialog) and the Map Scale (on the Display dialog).  You can make the Map window larger (or smaller) by decreasing (or increasing) the Map Scale.\
-XTrackCad will prevent you from making the Map window too small or too large.
+The size of the map window is controlled by the overall size of the room (specified on the layout dialog) and the map scale (on the display dialog).  You can make the Map window larger (or smaller) by decreasing (or increasing) the map scale.\
+XTrackCad will prevent you from making the map window too small or too large.
 
 You can unload parameter files you are not using by the Parameter Files dialog.  This removes unused Turnout and Structure definitions from the Hot Bar and makes the program start faster.
 
@@ -108,7 +108,7 @@ The colors of different parts of the Main window can be changed with the Colors 
 By default objects are drawn in their normal colors.  Tracks will be drawn in Black.  Objects can also be drawn in the color according to their Layer.  The color of a Layer is displayed on the corresponding Layer button.\
 The Display dialog 'Color Layers' item has separate toggles for Tracks and non-Tracks.
 
-Each Layer can be drawn or hidden by the 'Visible' toggle on the Layers dialog.  
+Each Layer can be drawn or hidden by the 'Visible' toggle on the Layers dialog.
 Short cut Layer buttons can also be displayed on the tool bar for up to the first 20 layers.\
 This buttons allow to Show or Hide the layers.
 
@@ -135,7 +135,7 @@ Areas of water can represented by a Polygon (use the Draw command) of the approp
 By using the Modify command, you can move, add or remove corners of the Polygon to fit the shape of the water.\
 You use the Below command to place the Polygon below (or behind) other objects.\
 \
-You can also use a Polygon to represent aisles. 
+You can also use a Polygon to represent aisles.
 
 When you create Benchwork you can move it below other objects by Selecting the Benchwork and use the Below command.\
 Also, put Benchwork in a separate Layer so you can hide it if desired.
@@ -225,7 +225,7 @@ Elevations of intermediate end points can be computed automatically based on the
 Grades can also be displayed at selected end points.  \
 Please see the Elevations help and demo.
 
-Once you have elevations on some end points, you can use the Profile command to produce an elevation graph. \
+Once you have elevations on some endpoints, you can use the Profile command to produce an elevation graph. \
 The graph shows the selected elevations, grades and distances.  \
 Please see the Profile help and demo for details.
 
@@ -240,7 +240,7 @@ Then you can place the Helix and join to other tracks as you would a Circle trac
 Many objects on the layout have labels: Turnouts/Helix/Curved Titles, Track Lenghts, End-Point Elevations, Track Elevations and Cars.  \
 You can turn these labels on or off with the Label Enable toggle buttons on the Display options dialog.
 
-If you hold down the Control key when using the Rotate command, the rotation will be done in increments of 15°.
+If you hold down the Control key when using the Rotate command, the rotation will be done in increments of 15ï¿½.
 
 When using the Rotate command, Shift-Right-Click displays a menu allowing you to rotate by specific amounts or to align the selected objects with another object.
 

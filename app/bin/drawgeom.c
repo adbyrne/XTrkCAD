@@ -1131,7 +1131,7 @@ STATUS_T DrawGeomPolyModify(
 			tempSegs(0).u.p.polyType = context->segPtr[segInx].u.p.polyType;
 			tempSegs(0).u.p.pts = &points(0);
 			CreatePolyAnchors( -1);
-			InfoMessage(_("Select Points, or use Context Menu"));
+			InfoMessage(_("Select points or use context menu"));
 			ClrAllTrkBitsRedraw( TB_UNDRAWN, TRUE );
 			UndrawNewTrack( context->trk );
 			return C_CONTINUE;
@@ -1386,7 +1386,7 @@ STATUS_T DrawGeomPolyModify(
 					if (IsClose(d)) {
 						pos = intersect;
 					}
-					InfoMessage( _("Length = %s, Last_Angle = %0.2f"),
+					InfoMessage( _("Length = %s, Last angle = %0.2f"),
 							FormatDistance(FindDistance(pos_lock,last_point)),
 							PutAngle(FindAngle(pos_lock,last_point)));
 
@@ -1921,9 +1921,9 @@ STATUS_T DrawGeomModify(
 				}
 			}
 			if (lineInx < 0 ) {
-				InfoMessage( _("Not Close to End of Line"));
+				InfoMessage( _("Not close to end of line"));
 			} else {
-				InfoMessage("End Selected Drag to Reposition");
+				InfoMessage("End selected, drag to reposition");
 				context->state = MOD_SELECTED_PT;
 			}
 			tempSegs(0).color = wDrawColorBlack;
@@ -1974,13 +1974,13 @@ STATUS_T DrawGeomModify(
 					}
 				}
 				if (curveInx < 0) {
-					InfoMessage( _("Not Close to Ends or Middle of Line, Reselect"));
+					InfoMessage( _("Not close to ends or middle of mine, reselect"));
 					return C_CONTINUE;
 				} else {
 					if (curveInx <2 )
-						InfoMessage("Drag to Move End, +CTL to lock to other objects");
+						InfoMessage("Drag to move end, +Ctrl to lock to other objects");
 					else
-						InfoMessage("Drag to Change Radius");
+						InfoMessage("Drag to change radius");
 				}
 				tempSegs_da.cnt = 1;
 				if (tempSegs(0).u.c.a1 < 360.0)

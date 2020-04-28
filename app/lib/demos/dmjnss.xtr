@@ -12,7 +12,7 @@ STRAIGHT 2 DEMO 1
 REDRAW
 RESET
 MESSAGE
-Two straight tracks can be joined by selecting the two End-Points.  The selected End-Points will be those closest to the cursor when the track is selected.
+Two straight tracks can be joined by selecting the two endoints.  The selected endpoints will be those closest to the cursor when the track is selected.
 
 First, we will select Easements None and then select Join
 END

@@ -1040,7 +1040,7 @@ static STATUS_T CmdStructureHotBar(
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RUP, pos );
 		}
-		InfoMessage( _("Left drag to move, Ctrl+ left_drag to rotate, or press Return or click Ok to finalize") );
+		InfoMessage( _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel") );
 		return CmdStructureAction( action, pos );
 
 	case C_TEXT:

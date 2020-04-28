@@ -153,8 +153,8 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         controls[2] = parFactorPD.control;
         controls[3] = NULL;
         labels[0] = N_("Separation");
-        labels[1] = N_("Type:");
-        labels[2] = N_("Radius Factor");
+        labels[1] = N_("Output type:");
+        labels[2] = N_("Radius factor");
         InfoSubstituteControls(controls, labels);
         ParamLoadData(&parSepPG);
         Dpa.orig = pos;

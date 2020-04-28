@@ -1035,7 +1035,7 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 		DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
 		Da.cp1Segs_da_cnt = 0;
 		Da.cp2Segs_da_cnt = 0;
-		InfoMessage( _("Place 1st end point of Bezier - snap to %s"), Da.track?"Unconnected Track":"Line" );
+		InfoMessage( _("Place 1st endpoint of Bezier - snap to %s"), Da.track?"unconnected Track":"line" );
 		return C_CONTINUE;
 
 
@@ -1081,14 +1081,14 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 				Da.pos[1] = pos;
 				Da.state = CONTROL_ARM_1;  //Draw the first control arm
 				Da.selectPoint = 1;
-				InfoMessage( _("Drag end of first Control Arm") );
+				InfoMessage( _("Drag end of first control arm") );
 				Da.cp1Segs_da_cnt = createControlArm(Da.cp1Segs_da, Da.pos[0], Da.pos[1], Da.track,TRUE,Da.trk[1]!=NULL,1,wDrawColorBlack);
             } else {
 				Da.pos[3] = pos;  //2nd End Point
 				Da.pos[2] = pos;  //2nd Ctl Point
 				Da.state = POINT_PICKED; // Drag out the second control arm
 				Da.selectPoint = 2;
-				InfoMessage( _("Drag end of second Control Arm") );
+				InfoMessage( _("Drag end of second control arm") );
 				Da.cp1Segs_da_cnt = createControlArm(Da.cp1Segs_da, Da.pos[0], Da.pos[1], Da.track,FALSE,Da.trk[0]!=NULL,-1,wDrawColorBlack);
 				Da.cp2Segs_da_cnt = createControlArm(Da.cp2Segs_da, Da.pos[3], Da.pos[2], Da.track,TRUE,Da.trk[1]!=NULL,1,wDrawColorBlack);
 				if (ConvertToArcs(Da.pos,&Da.crvSegs_da,Da.track,Da.color,Da.width)) Da.crvSegs_da_cnt = Da.crvSegs_da.cnt;
@@ -1126,11 +1126,11 @@ STATUS_T CmdBezCurve( wAction_t action, coOrd pos )
 			
 	case C_MOVE:
 		if (Da.state == POS_1) {
-			InfoMessage( _("Place 1st end point of Bezier - snap to %s end"), Da.track?"Unconnected Track":"Line" );
+			InfoMessage( _("Place 1st endpoint of Bezier - snap to %s"), Da.track?"unconnected track":"line" );
 			return C_CONTINUE;
 		}
 		if (Da.state == POS_2) {
-			InfoMessage( _("Select other end of Bezier - snap to %s end"), Da.track?"Unconnected Track":"Line" );
+			InfoMessage( _("Select other end of Bezier - snap to %s end"), Da.track?"unconnected track":"line" );
 		}
 		if (Da.state == CONTROL_ARM_1 ) {
 			if (Da.trk[0]) {
