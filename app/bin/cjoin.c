@@ -468,7 +468,7 @@ static STATUS_T CmdJoinLine(
 
 	switch (action&0xFF) {
 	case C_START:
-		InfoMessage( _("Left click - join with Polyline") );
+		InfoMessage( _("Left click - Select first Draw object end") );
 		Dl.line_state = NO_LINE;
 		Dl.joinMoveState = 0;
 		tempSegs_da.cnt = 0;
@@ -529,6 +529,7 @@ static STATUS_T CmdJoinLine(
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt = DYNARR_N(coOrd,Dl.params.nodes,Dl.params.nodes.cnt-1-i);
 				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt_type = wPolyLineStraight;
 			}
+			InfoMessage( _("Left click - Select second object end") );
 		} else {
 			Dl.curr_line = OnTrack( &pos, FALSE, FALSE );
 			if (!Dl.curr_line || IsTrack(Dl.curr_line)) {
@@ -540,7 +541,7 @@ static STATUS_T CmdJoinLine(
 			if (Dl.curr_line == Dl.inp[0].line) {
 				if ((Dl.params.lineOrig.x == Dl.inp[0].pos.x) &&
 					(Dl.params.lineOrig.y == Dl.inp[0].pos.y)) {
-					InfoMessage( _("Same line and end-point - Try again") );
+					InfoMessage( _("Same Draw object and same end-point - Try again") );
 					return C_CONTINUE;
 				}
 			}
