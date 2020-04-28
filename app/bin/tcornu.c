@@ -1182,8 +1182,8 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 		params->cornuCenter[i] = xx->cornuData.c[i];
 	}
 	params->len = xx->cornuData.length;
-	if ( inx == PARAMS_PARALLEL ) {
-			params->ep = 0;
+	if ( inx == PARAMS_NODES ) {
+		return FALSE;
 	} else if (inx == PARAMS_CORNU) {
 		params->ep = PickEndPoint( pos, trk);
 	} else {

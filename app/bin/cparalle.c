@@ -40,7 +40,7 @@ static struct {
 
 static DIST_T parSeparation = 1.0;
 static double parSepFactor = 0.0;
-static long parType;
+static long parType = 0;
 
 enum PAR_TYPE_E { PAR_TRACK, PAR_LINE };
 static char * parTypeLabels[] = { N_("Track"), N_("Line"), NULL };
@@ -48,14 +48,33 @@ static char * parTypeLabels[] = { N_("Track"), N_("Line"), NULL };
 static paramFloatRange_t r_0o1_100 = { 0.0, 100.0, 100 };
 static paramFloatRange_t r_0_10 = { 0.0, 10.0 };
 static paramData_t parSepPLs[] = {
-	{   PD_RADIO, &parType, "type", 0, parTypeLabels, N_("Output Type"), BC_HORZ|BC_NONE },
+#define parTypeI 0
+	{   PD_RADIO, &parType, "type", PDO_NORECORD , parTypeLabels, N_("Output Type"), BC_HORZ|BC_NONE },
 #define parSepPD (parSepPLs[1])
-	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NOPREF, &r_0o1_100, N_("Separation") },
+#define parSepI 1
+	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NORECORD, &r_0o1_100, N_("Separation") },
 #define parFactorPD (parSepPLs[2])
-	{   PD_FLOAT, &parSepFactor, "factor", PDO_NOPREF, &r_0_10, N_("Radius Factor") } 
+#define parFactorI 2
+	{   PD_FLOAT, &parSepFactor, "factor", PDO_NORECORD, &r_0_10, N_("Radius Factor") }
 };
 static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, sizeof parSepPLs/sizeof parSepPLs[0] };
 
+
+static void ParallelDlgUpdate(
+		paramGroup_p pg,
+		int inx,
+		void * valueP )
+{
+	if (inx==parTypeI) {
+		if (parType == PAR_TRACK) {
+		     parSeparation = ceil(13.0*12.0/curScaleRatio);
+		} else {
+		     parSeparation = 5.0*12.0/curScaleRatio;
+		}
+		ParamLoadControl(&parSepPG,parSepI);
+	}
+
+}
 
 static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 {
@@ -75,15 +94,23 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 
     case C_START:
         if (parSepPLs[0].control==NULL) {
-            ParamCreateControls(&parSepPG, NULL);
+            ParamCreateControls(&parSepPG, ParallelDlgUpdate);
         }
-        sprintf(message, "parallel-separation-%s", curScaleName);
-        parSeparation = ceil(13.0*12.0/curScaleRatio);
-        wPrefGetFloat("misc", message, &parSeparation, parSeparation);
-        parRFactor = 0.0;
-        parType = PAR_TRACK;
+
+        if (parType == PAR_TRACK) {
+        	sprintf(message, "parallel-separation-%s", curScaleName);
+        	parSeparation = ceil(13.0*12.0/curScaleRatio);
+        	wPrefGetFloat("misc", message, &parSeparation, parSeparation);
+        } else {
+        	sprintf(message, "parallel-line-separation-%s", curScaleName);
+            parSeparation = 5.0*12.0/curScaleRatio;
+            wPrefGetFloat("misc", message, &parSeparation, parSeparation);
+        }
         ParamLoadControls(&parSepPG);
         ParamGroupRecord(&parSepPG);
+        parSepPD.option |= PDO_NORECORD;
+        parSepPLs[0].option |= PDO_NORECORD;
+		parFactorPD.option |= PDO_NORECORD;
         controls[0] = parSepPD.control;
         controls[1] = parSepPLs[0].control;
         controls[2] = parFactorPD.control;
@@ -92,6 +119,9 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         labels[1] = N_("Output Type");
         labels[2] = N_("Radius Factor");
         InfoSubstituteControls(controls, labels);
+        parSepPD.option &= ~PDO_NORECORD;
+        parSepPLs[0].option &= ~PDO_NORECORD;
+        parFactorPD.option &= ~PDO_NORECORD;
         Dpa.anchor_Trk = NULL;
         tempSegs_da.cnt = 0;
         return C_CONTINUE;
@@ -173,32 +203,35 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         if (Dpa.Trk == NULL) {
             return C_CONTINUE;
         }
-        p = p0;
-        tempSegs_da.cnt = 0;
-        if ((t0=OnTrack(&p, FALSE, TRUE)) != NULL) {
-            ep0 = PickEndPoint(p, t0);
-            if (GetTrkEndTrk(t0,ep0) != NULL) {
-                t0 = NULL;
-            } else {
-                p = GetTrkEndPos(t0, ep0);
-                d = FindDistance(p, p0);
-                if (d > connectDistance) {
-                    t0 = NULL;
-                }
-            }
-        }
-        p = p1;
-        if ((t1=OnTrack(&p, FALSE, TRUE)) != NULL) {
-            ep1 = PickEndPoint(p, t1);
-            if (GetTrkEndTrk(t1,ep1) != NULL) {
-                t1 = NULL;
-            } else {
-                p = GetTrkEndPos(t1, ep1);
-                d = FindDistance(p, p1);
-                if (d > connectDistance) {
-                    t1 = NULL;
-                }
-            }
+        t0=t1=NULL;
+        if (parType == PAR_TRACK) {
+			p = p0;
+			tempSegs_da.cnt = 0;
+			if ((t0=OnTrack(&p, FALSE, TRUE)) != NULL) {
+				ep0 = PickEndPoint(p, t0);
+				if (GetTrkEndTrk(t0,ep0) != NULL) {
+					t0 = NULL;
+				} else {
+					p = GetTrkEndPos(t0, ep0);
+					d = FindDistance(p, p0);
+					if (d > connectDistance) {
+						t0 = NULL;
+					}
+				}
+			}
+			p = p1;
+			if ((t1=OnTrack(&p, FALSE, TRUE)) != NULL) {
+				ep1 = PickEndPoint(p, t1);
+				if (GetTrkEndTrk(t1,ep1) != NULL) {
+					t1 = NULL;
+				} else {
+					p = GetTrkEndPos(t1, ep1);
+					d = FindDistance(p, p1);
+					if (d > connectDistance) {
+						t1 = NULL;
+					}
+				}
+			}
         }
         UndoStart(_("Create Parallel Track"), "newParallel");
         if (!MakeParallelTrack(Dpa.Trk, pos, parSeparation, parRFactor, &t, NULL, NULL,

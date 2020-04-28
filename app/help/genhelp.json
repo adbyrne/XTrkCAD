@@ -86,6 +86,8 @@
 		{"line": "cmdImport", "contents": "Import a .xti file" },
 		{"line": "cmdImportModule", "contents": "Import an .xti file as a Module" },
 		{"line": "cmdJoin", "contents": "Join two tracks" },
+		{"line": "cmdJoinLine", "contents": "Join two lines or polylines" },
+		{"line": "cmdJoinSetCmd", "contents": "Set Join mode" },
 		{"line": "cmdLayer", "contents": "Change Layers" },
 		{"line": "cmdLayerSet", "contents": "Selects the current drawing layer" },
 		{"line": "cmdLayout", "contents": "Layout parameters" },
