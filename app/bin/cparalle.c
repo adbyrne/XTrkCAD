@@ -43,41 +43,19 @@ static double parSepFactor = 0.0;
 static long parType = 0;
 
 enum PAR_TYPE_E { PAR_TRACK, PAR_LINE };
-static char * parTypeLabels[] = { N_("Track"), N_("Line"), NULL };
 
 static paramFloatRange_t r_0o1_100 = { 0.0, 100.0, 100 };
 static paramFloatRange_t r_0_10 = { 0.0, 10.0 };
 static paramData_t parSepPLs[] = {
-#define parTypeI 0
-	{   PD_RADIO, &parType, "type", PDO_NORECORD , parTypeLabels, N_("Output Type"), BC_HORZ|BC_NONE },
-#define parSepPD (parSepPLs[1])
-#define parSepI 1
-	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM|PDO_NORECORD, &r_0o1_100, N_("Separation") },
-#define parFactorPD (parSepPLs[2])
-#define parFactorI 2
-	{   PD_FLOAT, &parSepFactor, "factor", PDO_NORECORD, &r_0_10, N_("Radius Factor") }
+#define parSepPD (parSepPLs[0])
+#define parSepI 0
+	{	PD_FLOAT, &parSeparation, "separation", PDO_DIM, &r_0o1_100, N_("Separation") },
+#define parFactorPD (parSepPLs[1])
+#define parFactorI 1
+	{   PD_FLOAT, &parSepFactor, "factor", 0, &r_0_10, N_("Radius Factor") }
 };
 static paramGroup_t parSepPG = { "parallel", 0, parSepPLs, sizeof parSepPLs/sizeof parSepPLs[0] };
 
-
-static void ParallelDlgUpdate(
-		paramGroup_p pg,
-		int inx,
-		void * valueP )
-{
-	if (inx==parTypeI) {
-		if (parType == PAR_TRACK) {
-		     parSeparation = 13.0*12.0/curScaleRatio;
-		     sprintf(message, "parallel-separation-%s", curScaleName);
-		} else {
-		     parSeparation = 5.0*12.0/curScaleRatio;
-		     sprintf(message, "parallel-line-separation-%s", curScaleName);
-		}
-		wPrefGetFloat("misc", message, &parSeparation, parSeparation);
-		ParamLoadControl(&parSepPG,parSepI);
-	}
-
-}
 
 static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 {
@@ -93,11 +71,13 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
     char * labels[3];
     static DIST_T parRFactor;
 
-    switch (action) {
+    parType = (long)commandContext;
+
+    switch (action&0xFF) {
 
     case C_START:
         if (parSepPLs[0].control==NULL) {
-            ParamCreateControls(&parSepPG, ParallelDlgUpdate);
+            ParamCreateControls(&parSepPG, NULL);
         }
         if (parType == PAR_TRACK) {
         	sprintf(message, "parallel-separation-%s", curScaleName);
@@ -110,18 +90,14 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         ParamLoadControls(&parSepPG);
         ParamGroupRecord(&parSepPG);
         parSepPD.option |= PDO_NORECORD;
-        parSepPLs[0].option |= PDO_NORECORD;
 		parFactorPD.option |= PDO_NORECORD;
         controls[0] = parSepPD.control;
-        controls[1] = parSepPLs[0].control;
-        controls[2] = parFactorPD.control;
-        controls[3] = NULL;
+        controls[1] = parFactorPD.control;
+        controls[2] = NULL;
         labels[0] = N_("Separation");
-        labels[1] = N_("Output Type");
-        labels[2] = N_("Radius Factor");
+        labels[1] = N_("Radius Factor");
         InfoSubstituteControls(controls, labels);
         parSepPD.option &= ~PDO_NORECORD;
-        parSepPLs[0].option &= ~PDO_NORECORD;
         parFactorPD.option &= ~PDO_NORECORD;
         Dpa.anchor_Trk = NULL;
         tempSegs_da.cnt = 0;
@@ -150,12 +126,10 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         }
 
         controls[0] = parSepPD.control;
-        controls[1] = parSepPLs[0].control;
-        controls[2] = parFactorPD.control;
-        controls[3] = NULL;
+        controls[1] = parFactorPD.control;
+        controls[2] = NULL;
         labels[0] = N_("Separation");
-        labels[1] = N_("Output type:");
-        labels[2] = N_("Radius factor");
+        labels[1] = N_("Radius factor");
         InfoSubstituteControls(controls, labels);
         ParamLoadData(&parSepPG);
         Dpa.orig = pos;
@@ -298,9 +272,13 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 
 
 #include "bitmaps/parallel.xpm"
+#include "bitmaps/parallel-line.xpm"
 
 EXPORT void InitCmdParallel( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdParallel, "cmdParallel", _("Parallel"), wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, NULL );
+	ButtonGroupBegin( _("Parallel"), "cmdParallelSetCmd", _("Parallel") );
+	AddMenuButton( menu, CmdParallel, "cmdParallel", _("Parallel Track"), wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, (void*)0 );
+	AddMenuButton( menu, CmdParallel, "cmdParallelLine", _("Parallel Line"), wIconCreatePixMap(parallel_line_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, (void*)1 );
+	ButtonGroupEnd();
 	ParamRegister( &parSepPG );
 }
