@@ -88,7 +88,7 @@ To complete the command, drag on the red arrows to adjust the curve.
 
 \dd \G{png.d/dcurve4.png} Drag from one end of the curve to the other to form the chord of the curve.
 The first and second ends will act like "CurvedLine From End" with \f{MagneticSnap} unless \e{Alt} is held.
-To complete the command, drag on the red arrows to adjust the curve. If the mouse is over a draw object the second position will snap to the nearest part of that object. If \e{Shift} is held the snap will be suppressed. 
+To complete the command, drag on the red arrows to adjust the curve. If the mouse is over a draw object the second position will snap to the nearest part of that object. If \e{Shift} is held the snap will be suppressed.
 
 \u000
 
@@ -183,9 +183,9 @@ Shapes are drawn by:
 \u000
 
 \dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \G{png.d/dpolyline} \f{PolyLines} and \f{Polygons} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. When using Drag, the node will be positioned when you release the button.
-\u If \f{MagneticSnap} is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held. 
+\u If \f{MagneticSnap} is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
 \u If it is disabled, the snap will only occur if \e{Alt} is held.
-\u If \c{Ctrl} is held down when a new point is placed, it will snap the relative angle of the new side to a multiple of 90 degrees from the previous side. 
+\u If \c{Ctrl} is held down when a new point is placed, it will snap the relative angle of the new side to a multiple of 90 degrees from the previous side.
 On the first polygon side this will be at a multiple of 90 degrees to the axes. The line from the previous point will be highlighted in Blue.
 \u A special blue square anchor will show when the cursor is in a position such that it is 90 degrees away from both the last point and the first point of the Polygon.
 \u The last polygon segment dimensions can be altered using the text boxes that appear showing the segment length and the relative angle to the previous segment.
@@ -193,9 +193,9 @@ On the first polygon side this will be at a multiple of 90 degrees to the axes. 
 \u The polygon or polyline are ended using \c{Enter} or \c{Space}. A polygon will be auto-closed.
 
 If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, before it is completed either with a \c{Space} or \c{Return} or by selecting a new operation.
- 
+
 The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \c{Space} or \c{Return} key or by selecting another operation. Before they are finished, precise dimensions can be entered for the last side drawn.
-All Polylines and Polygons must have more than 2 corners to be created successfully. 
+All Polylines and Polygons must have more than 2 corners to be created successfully.
 
 Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been finished to alter individual points and to make them curved or rounded points.
 
@@ -205,13 +205,13 @@ Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been
 
 \G{png.d/mdrawstraight.png}
 
-Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.  
+Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.
 
 \dd \G{png.d/dline.png} Creates a \f{Straight Line} of specified color and width.
 With \f{MagneticSnap} enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
 If it is diabled, it will onlt snap if \e{Shift} is held.
-If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees. 
-The precise angle and length can be set after drawing using the text entry boxes on the bottom rail. 
+If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees.
+The precise angle and length can be set after drawing using the text entry boxes on the bottom rail.
 
 
 \u000
@@ -260,7 +260,6 @@ Note: loading fonts (or changing sizes) can take a noticeable amount of time.
 
 \S{DrawOrigin} Draw Objects Origin
 
-By default, Draw objects are constructed with the origin at the layout origin and with a rotation value of 0 degrees. This is referred to as an \e{Absolute} origin.  When they are moved or rotated, the origin remains fixed and the point values are adjusted as needed. 
 Some objects have a natural rotation point within them. By setting the origin to this point, subsequent rotation will be about that point and not the layout origin. This is referred to as a \e{Relative} origin. When one of these is moved or rotated, the origin and angle are adjusted but the relative draw point values remain the same.
 
 You can choose to set the origin to make it Relative or put it back to Absolute during \K{cmdModify} or by using the \K{cmdDescribe} settings.  As a practical matter, the object will appear identical until a subsequent rotation value is entered in the \K{cmdDescribe} window in both cases.
