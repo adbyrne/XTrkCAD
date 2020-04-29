@@ -1774,7 +1774,7 @@ static void StickyOk(void * junk) {
 static void DoSticky(void) {
 	if (!stickyW)
 		stickyW = ParamCreateDialog(&stickyPG,
-				MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, NULL,
+				MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, wHide,
 				TRUE, NULL, 0, NULL);
 	ParamLoadControls(&stickyPG);
 	wShow(stickyW);
@@ -1981,7 +1981,7 @@ static void CreateDebugW(void) {
 	debugPG.paramCnt = debugCnt;
 	ParamRegister(&debugPG);
 	debugW = ParamCreateDialog(&debugPG, MakeWindowTitle(_("Debug")), _("Ok"),
-			DebugOk, NULL, FALSE, NULL, 0, NULL);
+			DebugOk, wHide, FALSE, NULL, 0, NULL);
 	wHide(debugW);
 }
 

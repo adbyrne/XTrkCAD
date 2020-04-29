@@ -1437,7 +1437,7 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
             labelH = textsize.y;
             labelW = textsize.x;
             profileW = ParamCreateDialog(&profilePG, MakeWindowTitle(_("Profile")), NULL,
-                                         NULL, NULL, TRUE, NULL, F_RESIZE, CloseProfileWindow);
+                                         NULL, wHide, TRUE, NULL, F_RESIZE, CloseProfileWindow);
         }
         ParamLoadControls(&profilePG);
         ParamGroupRecord(&profilePG);

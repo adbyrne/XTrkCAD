@@ -293,7 +293,7 @@ void DoSearchParams(void * junk)
         ParamRegister(&searchUiPG);
 
         searchUiW = ParamCreateDialog(&searchUiPG,
-                                      MakeWindowTitle(_("Find parameter files")), _("Done"), NULL, NULL,
+                                      MakeWindowTitle(_("Find parameter files")), _("Done"), NULL, wHide,
                                       TRUE, NULL, 0, SearchUiDlgUpdate);
 
         wControlActive((wControl_p)APPLYBUTTON, FALSE);
