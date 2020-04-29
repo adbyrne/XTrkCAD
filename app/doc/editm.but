@@ -42,7 +42,8 @@ The \f{Edit Menu} shows commands affecting the \f{Main Canvas} (\K{mainW}).
 
 \u000
 
-\dd \f{Paste} - Copies the contents of the clipboard to the layout. The newly pasted parts are in \f{Selected} state and can easily be moved into place. Any previously selected objects are unselected.
+\dd \f{Paste} - Copies the contents of the clipboard to the layout. If the cursor is off the drawing area, the paste will be placed at the center of the draw area. If \e{Ctrl+v} or \e{Shift+Insert} is used, the parts will be placed at the cursor position. 
+The newly pasted parts are in \f{Selected} state and can easily be moved into place. Any previously selected objects are unselected.
 
 \u000
 
