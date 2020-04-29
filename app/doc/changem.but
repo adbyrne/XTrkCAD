@@ -1143,7 +1143,8 @@ Until an object is selected, the object under the cursor that will be selected w
 
 A \e{Left-Click} on an object while in \f{Properties} mode causes a properties dialog window to appear.
 The properties dialog contains information pertaining to the selected objects position, size, color and layer as appropriate for each type of object.
-Certain values can be changed to modify the object. If a track is connected to other tracks, then some values, e.g., endpoint positions, can not be changed.
+Certain values can be changed to modify the object. Some values, e.g., endpoint positions, can not be changed if, for example, a Track is joined to another Track.
+The values will take effect when \f{Enter}, \f{Tab} is pressed or the cursor leaves the entry field.
 
 \G{png.d/dproperties.png}
 
