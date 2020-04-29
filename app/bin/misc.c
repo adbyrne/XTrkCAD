@@ -366,12 +366,11 @@ EXPORT char * ConvertToEscapedText(const char * text) {
  *  \n = LineFeed 	0x0A
  *  \t = Tab 		0x09
  *  \\ = \ 			The way to still produce backslash
- *  "" = "			Take out quotes included so that other (CSV-like) programs could read the files
  *
  */
 EXPORT char * ConvertFromEscapedText(const char * text) {
 	enum {
-		CHARACTER, ESCAPE, QUOTE
+		CHARACTER, ESCAPE
 	} state = CHARACTER;
 	char * cout = MyMalloc(strlen(text) + 1);  //always equal to or shorter than
 	int text_i = 0;
@@ -383,8 +382,6 @@ EXPORT char * ConvertFromEscapedText(const char * text) {
 		case CHARACTER:
 			if (c == '\\') {
 				state = ESCAPE;
-			} else if (c == '\"') {
-				state = QUOTE;
 			} else {
 				cout[cout_i] = c;
 				cout_i++;
@@ -408,14 +405,6 @@ EXPORT char * ConvertFromEscapedText(const char * text) {
 			}
 			state = CHARACTER;
 			break;
-		case QUOTE:
-			switch (c) {
-			case '\"':
-				cout[cout_i] = c;
-				cout_i++;
-				break;   //One quote = NULL, Two quotes = 1 quote
-			}
-			state = CHARACTER;
 		}
 		text_i++;
 	}
