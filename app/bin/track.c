@@ -1471,7 +1471,11 @@ EXPORT void ImportEnd( void )
 	coOrd pos;
 	wPos_t x, y;
 	wPos_t ww, hh;
-	double xmax,ymax,ymin,xmin = 0.0;
+	double xmin = 0.0;
+	double xmax = 0.0;
+	double ymin = 0.0;
+	double ymax = 0.0;
+
 
 	// get the current mouse position
 	GetMousePosition( &x, &y );

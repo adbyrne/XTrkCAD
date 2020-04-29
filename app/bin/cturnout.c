@@ -1962,7 +1962,6 @@ static void TurnoutChange( long changes )
 
 static void RedrawTurnout()
 {
-	coOrd p, s;
 	RescaleTurnout();
 LOG( log_turnout, 2, ( "SelTurnout(%s)\n", (curTurnout?curTurnout->title:"<NULL>") ) )
 

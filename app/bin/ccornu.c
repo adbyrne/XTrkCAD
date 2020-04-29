@@ -2623,7 +2623,6 @@ static STATUS_T cmdCornuCreate(
 				wAction_t action,
 				coOrd pos ) {
 	static int createState = 0;
-	cornuParm_t cp;
 	int rc = 0;
 
 	switch(action&0xFF) {
