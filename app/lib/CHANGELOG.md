@@ -4,22 +4,155 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [5.2.0]
 
-### Added
-+ Page positions can be shown on the center of each printed page.
-+ A new type of note can be used to store a weblink. Double-clicking on the
-weblink icon in a drawing opens the website in the default browser.
-+ Usabillity / compatibility of parameter files for current scale and gauge is
-shown in the parameter file dialog.
-+ Additional enhanced file format .xtce allows storing background image and
-related information with the trackplan.
+### New and changed features
 
-### Fixed
++ Add Join Line Command to create PolyLines from Straight, Bezier, Curved and PolyLines
++ countless internal changes were done to improve drawing performance and stability
++ Change Magnetic Snap reverse to be on the “Alt” key.
++ Added french translation for the UI, contributed by Jacques Glize
++ Windows: support for utf-8 character encoding in text fields, labels etc.
++ Add new options for SelectMode (Only, Add) and SelectZero (On, Off) to Options->Command.
++ Add regression testing when running demos
++ New Rotate Symbol during Rotate.
++ Profile window: fill color, label formating and positioning
++ Add PNG export for Windows using FreeImage
++ Apply rescale operation to background as well. When the scale,not the gauge, is changed, the background image is resized and repositioned to the same ratio.
++ Update demo files
++ Add the indexing and searching functions for parameter files
++ Add ‘?’ as a means to jump to the properties screen in Select Mode
++ Update Layout File Version to V11 and minimum required version to V5.2.0
++ Add a new Parallel Track Radius Factor option to increase the separation of the parallel track based on Radius. The default value is 0.0 which is no increase. A value of 1.0 is set to be a prototype increase scaled as appropriate.  In OO this will add about 1.5” for a 24” radius.
++ Add support for dotted and dashed lines to Draw Objects
++ Set and un-set favorite property for parameter files
++ Add option to create a Line rather than a Track in Parallel Command
++ Sort parameter file list by compatibility and contents description
++ Upgrade Select DoubleClick: Activate on Link and Documents, Modify for Cornu and Bezier, Draw except Text, otherwise Open Describe.
++ Default to Context Menu on Right-Click, Command Menu Shift+Right-Click
++ Increase visibility of Select Anchors by adding width when in hover.
++ Snap Dimension lines to other objects (tracks of draw objects) regardless of Shift state
++ Add full Module support including documentation for modular layouts.
++ Add two extra track properties and Edit Commands for them - “Bridge” - adds simple abutment symbol
+“Ties/No Ties” - hides Ties on a selected track even if zoomed in - this can be useful for dual gauge or in docks and goods yards, where the rails are inset into the ground.
++ Rename “Above” to “Move to Front” and “Below” to “Move to Back” this has caused confusion in the past.
++ Allow Parallel separation of 0 when using different tracks gauges to produce overlaid tracks to simulate dual gauge.
++ Improve detailed editing of circles and curved lines
++ Updates to Demos
++ Add automatic fixed flex track element to hotbar - acts as Cornu and will join tracks as needed
++ Stop writing out tracks with colors
++ Rewrite Notes functions, add link and file reference options to Note
++ First run: turnoff track description and lenght labels to avoid clutter
++ Add new looks for Cursor and instrument cursor draw.
++ Initialize the Sticky dialog to reasonable values on first run.
+All commands are sticky except for Helix, Handlaid Turnouts, Turntables and
+Connect Two Tracks.
++ Cope with Multiple Cornus joined and either selected or not selected
++ Show Cornu Shape as connected tracks are being moved or rotated.
++ Allow for new Turnouts to be placed on Cornu tracks
++ Add highlighting to Select in which prompts for Move and Rotate and new draw aids when selected - allowing clear work for Shift (Select Connected) and Ctrl (Select an additional individual track)  Ensure that Right-Click is always used for context menus in the main commands.
++ Add Anchor for Join, Describe, Connect/Pull, also make selecting second track easier.
++ Add dynamic anchor prompts for Split that show the split or disconnect that will occur, and make disconnect a little more sticky by snapping to the connect point when close.
++ Change Modify to use Cornu easements if selected
++ Handles for no-track at end Cornu for angle and radius.
++ Show visible anchor points on Move/Rotate
++ Make Room stand-out in display with grey outside it
++ Curved Polygon support
++ Add placing Turnouts on Cornu Track. Fix Cornu extension code.
++ Add Turnouts with curved ends and new Cornu Turnout Designer options to build them.
++ Origin Mode for Draw Objects
++ Add Convert To Cornu from Fixed and Convert To Fixed From Cornu
++ Add Icon for Cornu
++ Extra Draw and Modify command features
++ Improve Polygon Create and Modify and Other Draw Create
++ Improve ruler with “English” measurements in High Zoom
++ Improved and fixed printing of page position
++ Indicate parameter file state by colored icons, show information about compatibility to current scale and gauge
++ Create proper flex-track lengths for pricing.
++ Text for Balloon Help (Tooltips) is created from a JSON format
++ Desktop icon can be created with Windows installation 
++ Installing on Windows overwrittes earlier version
++ Double clicking a note opens the note or the external application
++ Additional note type for web and local file links
++ Add button to select all pages for printing
++ Background images are stored in xtce files 
++ Background images can be loaded into a separate layer
++ New extended file format (.xtce) 
++ Cornus can be used for turnout design
 
-### Added and changed parameter files
-+ Prototype definitions for North American narrow gauge
-+ Blackstone and Rail Line car parts for HOn3
+### Bugs fixed
+
++ Fix Paste positioning issues and document.
++ Add Escape to hide many dialog Windows
++ Fix embedded quote in Text object issue. Don�t re-de-escape quotes.
++ Actually restore the GTK main window to be the size saved at last Exit. If that won�t fit, it will have been resized down. Also remove the �base� geometry settings - they aren�t for what the code thought they were.  The result should be between 30% and 100% of the max screen size.
++ Fix several highlighting and a Read bug for switchMotor
++ Fix crash on reading turnout motors from file
++ Fix #327, array bounds where not considered when creating layer list
++ To ease translation a text's source file and line are added in a comment to
+the pot and po files
++ Remove Ruler at and of demo
++ TableEdges and DimLines are always Black
++ Only check circle radius for available room size when creating a circle
++ Fix some display bugs in the Profile window.
++ Clean up option flags
++ "Quit" can be cancelled
++ Fix crash when creating blocks from a larger number (>10?) of tracks elements
++ Fix crashes when loading and deleting block definitions
++ Set button label in Parameter dialog to Hide / Unhide as suggested in bug #319
++ Reduce Zoom messages to useful set
++ Adjust Ties algo to give a more even look
++ Stop Delete key (not backspace) working in other commands than Select
++ Fix icons to reflect circle drawing properly
++ Fix bug in Describe of BenchWork when setting angle
++ Fix display of offset structures in HotBar
++ Updated and corrected the TIP file.
++ Respect Turntable Angle for Modify and Join
++ Fix splash screen overlay by removing it when a dialog pops up under it.
++ Fix file save when file filter is missing
++ Increase details on Turnout Path failure message
++ Fix for Export Parameter File Menu
++ Correct the tip for Metric/English units. Although Canada is officially metric, everyone here models in inches.
++ Fix for #301 On first run, File|Open and File|Parameter Files open wrong directory
++ Fix for #300 Problems with Car Inventory dialogs
++ Fix for #299 Order of params in HotBar popup menu is backwards
++ Fix for #297 After Turnout window is created, unable to select from HotBar
++ Fix: Turntable Join with Cornu
++ #296 Escape key doesn't cancel the first dialog
++ Fix for #295 Crash when playing recorded sessions
++ Fix for #294 Linux: Cursor not visible when running demos
++ Fix - circle<->circle Cornu regression
++ Fix for #292	Join 2 curves with a straight and easements leaves a kink
++ Fix for bug #291 Incorrect tip shown at initial startup
++ Fix bounding box for multi-line text
++ Fix cursor position on Text add for GTK - side-effect of back-level Pango patch for some versions of Linux
++ Fix varieties of reversed multi-segment Cornu
++ Fix for split to preserve elevation properly (keep end point elev type and station name (if any) - new split end point gets elev_none.
++ Fix Block Load error with random endCnt
++ Fix failure on Modify of Cornu with one end disconnected
++ Approximating large radius curves is fixed
++ Fix bug #277: Describe demo doesn't work
++ Improve re-calculation of all end elevations on redraw.  Cache end elevations and distances on end points.
++ Fix problem of closing Notice Windows with the red button in GTK leading to a frozen application (Modal)
++ Fixes for GTK Text Positioning in Draw and Print
++ Added extra page indexes to page registration
++ Made registration marks print on top of layout elements
++ Fix profile to ensure more space on LHS and RHS based on text sizes used.
++ Fix dialog resize issue with small screens
++ Windows: fix uninstaller script so uninstall removes all entries from Start Menu
++ Fix rounding problem when connecting track
+
+### Parameter file additions and changes
+
++ Updated and new parameter files for Maerklin and Walthers Cornerstone
++ Updated and renamed parameter files for Maerklin C, K and M and
+Atlas O-scale 2 rail and 3 rail
++ Upgrade Tomix 1421 Buffer to stop Train before buffer
++ Reduce number of parameter files for Kato N scale
++ Add American and HOn3 car prototypes
++ Added parameter file for Remco Mighty Casey
++ Fix Atlas 832 Curve to have ends on track
+
 
 ## [5.1.2]
 
@@ -85,7 +218,7 @@ If there is enough use, we can add to the print dialog itself.
 + All: Check string length for all relevant PD_STRING entry fields
 + Windows: Always set color before drawing text
 + Make sure that Text Segs and Poly Segs copy string and Pts when UnGrouping. Stop weird results and Abends.
-+ Make Cairo use pure RGB to retrieve the same color it stored for wDrawColor rather than ask for GDK�s version (which might not be exact).
++ Make Cairo use pure RGB to retrieve the same color it stored for wDrawColor rather than ask for GDKï¿½s version (which might not be exact).
 + Fix Cornu Rate of Change of Curvature.
 + Fix situation where a Bezier or Cornu is modified when the scale  or gauge has since been set to a different value than the track to be modified. Remember the old track values.
 + Fix Abend on cornu Join to turntable, also make sure cornu Modify leaves more than minlength on connected tracks

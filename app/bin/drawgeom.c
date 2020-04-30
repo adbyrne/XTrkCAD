@@ -49,7 +49,6 @@ static void EndPoly( drawContext_t * context, int cnt, wBool_t open)
 {
 	trkSeg_p segPtr;
 	track_p trk;
-	long oldOptions;
 	pts_t * pts;
 	int inx;
 
@@ -202,7 +201,6 @@ STATUS_T DrawGeomMouse(
 	ANGLE_T a1,a2;
 	static ANGLE_T line_angle;
 	BOOL_T createTrack;
-	long oldOptions;
 
 	width = context->line_Width/context->D->dpi;
 

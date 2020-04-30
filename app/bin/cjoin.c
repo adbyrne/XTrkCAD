@@ -468,7 +468,7 @@ static STATUS_T CmdJoinLine(
 
 	switch (action&0xFF) {
 	case C_START:
-		InfoMessage( _("Left click - Select first Draw object end") );
+		InfoMessage( _("Left click - Select first draw object end") );
 		Dl.line_state = NO_LINE;
 		Dl.joinMoveState = 0;
 		tempSegs_da.cnt = 0;
@@ -507,7 +507,7 @@ static STATUS_T CmdJoinLine(
 		if (Dl.line_state == NO_LINE) {
 			Dl.curr_line = OnTrack( &pos, FALSE, FALSE);
 			if (!Dl.curr_line || IsTrack(Dl.curr_line)) {
-				InfoMessage( _("Not a Line - Try Again") );
+				InfoMessage( _("Not a line - Try again") );
 				return C_CONTINUE;
 			}
 			if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) return C_CONTINUE;
@@ -533,7 +533,7 @@ static STATUS_T CmdJoinLine(
 		} else {
 			Dl.curr_line = OnTrack( &pos, FALSE, FALSE );
 			if (!Dl.curr_line || IsTrack(Dl.curr_line)) {
-				InfoMessage( _("Not a Line - Try again") );
+				InfoMessage( _("Not a line - Try again") );
 				return C_CONTINUE;
 			}
 			if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) return C_CONTINUE;
@@ -541,7 +541,7 @@ static STATUS_T CmdJoinLine(
 			if (Dl.curr_line == Dl.inp[0].line) {
 				if ((Dl.params.lineOrig.x == Dl.inp[0].pos.x) &&
 					(Dl.params.lineOrig.y == Dl.inp[0].pos.y)) {
-					InfoMessage( _("Same Draw object and same end-point - Try again") );
+					InfoMessage( _("Same draw object and same endpoint - Try again") );
 					return C_CONTINUE;
 				}
 			}

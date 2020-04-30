@@ -1819,7 +1819,7 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * pa
 			if (FindDistance(start,pos) > FindDistance(end,pos)) back = TRUE;
 			if (fabs(xx->segs[0].u.c.radius) > 0.5) {
 				double min_angle = R2D(2*acos(1.0-(0.1/fabs(xx->segs[0].u.c.radius))));    //Error max is 0.1"
-				double number = ceil(xx->segs[0].u.c.a1/min_angle);
+				int number = (int) ceil(xx->segs[0].u.c.a1/min_angle);
 				double arc_size = xx->segs[0].u.c.a1/number;
 				for (int i=0;i<=number;i++) {
 					DYNARR_APPEND(coOrd,params->nodes,number);
@@ -1867,7 +1867,7 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * pa
 					back = FindDistance(start,curr_pos)>FindDistance(end,curr_pos);
 					if (fabs(segPtr->u.c.radius) > 0.2) {
 						double min_angle = 360*acos(1.0-(0.1/fabs(segPtr->u.c.radius)))/M_PI;    //Error max is 0.1"
-						int number = ceil(segPtr->u.c.a1/min_angle);
+						int number = (int)ceil(segPtr->u.c.a1/min_angle);
 						double arc_size = segPtr->u.c.a1/number;
 						for (int j=1-first;j<number;j++) {
 							DYNARR_APPEND(coOrd,params->nodes,number-first);
