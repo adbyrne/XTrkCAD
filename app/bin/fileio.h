@@ -123,6 +123,7 @@ void DoExportDXF( void );
 BOOL_T EditCopy( void );
 BOOL_T EditCut( void );
 BOOL_T EditPaste( void );
+BOOL_T EditClone( void );
 
 
 void DoRecord( void * );

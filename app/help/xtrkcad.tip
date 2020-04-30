@@ -121,7 +121,7 @@ Many of the commands and dialogs can be invoked by special key combinations call
 The Connect command is used to join Sectional track pieces that don't quite fit together.\
 This command works by adding small gaps between other tracks to move the selected End-Points closer together.
 
-To copy a group of objects: Select the objects, press Control-C (or select Copy from the Edit menu), press Control-V (or select Paste from the Edit menu).\
+To copy a group of objects: Select the objects, press Control-c (or select Copy from the Edit menu), press Control-v (or select Paste from the Edit menu).\
 The selected tracks will be copied to the layout and you can Move or Rotate them into position.
 
 In the Rotate (or Select) commands you can press Shift-Right-Click to display the Rotate menu which allows you to rotate the selected objects by a specific angle.

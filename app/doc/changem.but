@@ -1577,7 +1577,7 @@ The following commands operate on the objects you have selected:
 
 \b \f{Rescale} (\K{cmdRescale}) the selected objects.
 
-The \f{Cut}, \f{Copy} and \f{Paste} commands found on the \f{Edit} (\K{editM}) menu will also operate on selected objects.
+The \f{Cut}, \f{Copy}, \f{Clone} and \f{Paste} commands found on the \f{Edit} (\K{editM}) menu will also operate on selected objects.
 
 Notes:
 

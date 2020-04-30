@@ -111,6 +111,7 @@
 #define ACCL_COPY		(WCTL+'c')
 #define ACCL_CUT		(WCTL+'x')
 #define ACCL_PASTE		(WCTL+'v')
+#define ACCL_CLONE      (0)
 #define ACCL_SELECTALL	(WCTL+WSHIFT+'a')
 #define ACCL_DESELECTALL	(0)
 #define ACCL_THIN		(WCTL+'1')

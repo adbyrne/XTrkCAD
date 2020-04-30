@@ -80,10 +80,12 @@ EXPORT const char * libDir;
 
 
 EXPORT char * clipBoardN;
-
+static coOrd paste_offset, cursor_offset;
 
 EXPORT wBool_t bExample = FALSE;
 EXPORT wBool_t bReadOnly = FALSE;
+
+
 
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
@@ -1129,6 +1131,8 @@ EXPORT void DoLoad( void )
 			sSourceFilePattern, LoadTracks, NULL );
 	bExample = FALSE;
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+	paste_offset = zero;
+	cursor_offset = zero;
 	SaveState();
 }
 
@@ -1277,8 +1281,6 @@ static int importAsModule;
  *
  */
 
-
-
 static int ImportTracks(
 		int cnt,
 		char **fileName,
@@ -1310,7 +1312,7 @@ static int ImportTracks(
 	UndoStart( _("Import Tracks"), "importTracks" );
 	useCurrentLayer = TRUE;
 	ReadTrackFile( fileName[ 0 ], nameOfFile, FALSE, FALSE, TRUE );
-	ImportEnd();
+	ImportEnd(zero, TRUE, FALSE);
 	if (importAsModule) SetLayerModule(layer,TRUE);
 	useCurrentLayer = FALSE;
 	SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
@@ -1369,7 +1371,8 @@ static int DoExportTracks(
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
-	ExportTracks( f );
+	coOrd offset;
+	ExportTracks( f , &offset);
 	fprintf(f, "END\n");
 	fclose(f);
 
@@ -1396,7 +1399,6 @@ EXPORT void DoExport( void )
 }
 
 
-
 EXPORT BOOL_T EditCopy( void )
 {
 	FILE * f;
@@ -1418,10 +1420,11 @@ EXPORT BOOL_T EditCopy( void )
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
-	ExportTracks(f);
+	ExportTracks(f, &paste_offset);
 	fprintf(f, "END\n");
 	RestoreLocale(oldLocale);
 	fclose(f);
+
 	return TRUE;
 }
 
@@ -1434,6 +1437,7 @@ EXPORT BOOL_T EditCut( void )
 	return TRUE;
 }
 
+
 /**
  * Paste clipboard content. XTrackCAD uses a disk file as clipboard replacement. This file is read and the
  * content is inserted.
@@ -1441,8 +1445,9 @@ EXPORT BOOL_T EditCut( void )
  * \return    TRUE if success, FALSE on error (file not found)
  */
 
-EXPORT BOOL_T EditPaste( void )
+BOOL_T EditPastePlace( wBool_t inPlace )
 {
+
 	BOOL_T rc = TRUE;
 	char *oldLocale = NULL;
 
@@ -1451,6 +1456,13 @@ EXPORT BOOL_T EditPaste( void )
 	wSetCursor( mainD.d, wCursorWait );
 	Reset();
 	SetAllTrackSelect( FALSE );
+
+	double offset = 20*mainD.scale/mainD.dpi;
+
+	paste_offset.x += offset;
+	paste_offset.y += offset;
+
+
 	ImportStart();
 	UndoStart( _("Paste"), "paste" );
 	useCurrentLayer = TRUE;
@@ -1458,7 +1470,10 @@ EXPORT BOOL_T EditPaste( void )
 		NoticeMessage( MSG_CANT_PASTE, _("Continue"), NULL );
 		rc = FALSE;
 	}
-	ImportEnd();
+	if (inPlace)
+		ImportEnd(paste_offset, FALSE, TRUE);
+	else
+		ImportEnd(zero, FALSE, FALSE);
 	useCurrentLayer = FALSE;
 	/*DoRedraw();*/
 	EnableCommands();
@@ -1468,9 +1483,21 @@ EXPORT BOOL_T EditPaste( void )
 	SelectRecount();
 	UpdateAllElevations();
 	RestoreLocale(oldLocale);
+
 	return rc;
 }
+
+EXPORT BOOL_T EditPaste( void) {
+	return EditPastePlace(FALSE);
+}
 
+EXPORT BOOL_T EditClone( void ) {
+	BOOL_T rc = TRUE;
+	if (!EditCopy()) return FALSE;
+	if (!EditPastePlace(TRUE)) return FALSE;
+	return rc;
+}
+
 /*****************************************************************************
  *
  * INITIALIZATION
