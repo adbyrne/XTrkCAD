@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
 + Add Join Line Command to create PolyLines from Straight, Bezier, Curved and PolyLines
 + countless internal changes were done to improve drawing performance and stability
-+ Change Magnetic Snap reverse to be on the “Alt” key.
++ Change Magnetic Snap reverse to be on the Alt key.
 + Added french translation for the UI, contributed by Jacques Glize
 + Windows: support for utf-8 character encoding in text fields, labels etc.
 + Add new options for SelectMode (Only, Add) and SelectZero (On, Off) to Options->Command.
@@ -21,9 +21,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Apply rescale operation to background as well. When the scale,not the gauge, is changed, the background image is resized and repositioned to the same ratio.
 + Update demo files
 + Add the indexing and searching functions for parameter files
-+ Add ‘?’ as a means to jump to the properties screen in Select Mode
++ Add "?" as a means to jump to the properties screen in Select Mode
 + Update Layout File Version to V11 and minimum required version to V5.2.0
-+ Add a new Parallel Track Radius Factor option to increase the separation of the parallel track based on Radius. The default value is 0.0 which is no increase. A value of 1.0 is set to be a prototype increase scaled as appropriate.  In OO this will add about 1.5” for a 24” radius.
++ Add a new Parallel Track Radius Factor option to increase the separation of the parallel track based on Radius. The default value is 0.0 which is no increase. A value of 1.0 is set to be a prototype increase scaled as appropriate.  In OO this will add about 1.5" for a 24" radius.
 + Add support for dotted and dashed lines to Draw Objects
 + Set and un-set favorite property for parameter files
 + Add option to create a Line rather than a Track in Parallel Command
@@ -33,9 +33,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Increase visibility of Select Anchors by adding width when in hover.
 + Snap Dimension lines to other objects (tracks of draw objects) regardless of Shift state
 + Add full Module support including documentation for modular layouts.
-+ Add two extra track properties and Edit Commands for them - “Bridge” - adds simple abutment symbol
-“Ties/No Ties” - hides Ties on a selected track even if zoomed in - this can be useful for dual gauge or in docks and goods yards, where the rails are inset into the ground.
-+ Rename “Above” to “Move to Front” and “Below” to “Move to Back” this has caused confusion in the past.
++ Add two extra track properties and Edit Commands for them - Bridge - adds simple abutment symbol, Ties/No Ties - hides Ties on a selected track even if zoomed in - this can be useful for dual gauge or in docks and goods yards, where the rails are inset into the ground.
++ Rename Above to "Move to Front" and "Below" to "Move to Back" this has caused confusion in the past.
 + Allow Parallel separation of 0 when using different tracks gauges to produce overlaid tracks to simulate dual gauge.
 + Improve detailed editing of circles and curved lines
 + Updates to Demos
@@ -44,9 +43,7 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Rewrite Notes functions, add link and file reference options to Note
 + First run: turnoff track description and lenght labels to avoid clutter
 + Add new looks for Cursor and instrument cursor draw.
-+ Initialize the Sticky dialog to reasonable values on first run.
-All commands are sticky except for Helix, Handlaid Turnouts, Turntables and
-Connect Two Tracks.
++ Initialize the Sticky dialog to reasonable values on first run. All commands are sticky except for Helix, Handlaid Turnouts, Turntables and Connect Two Tracks.
 + Cope with Multiple Cornus joined and either selected or not selected
 + Show Cornu Shape as connected tracks are being moved or rotated.
 + Allow for new Turnouts to be placed on Cornu tracks
@@ -84,13 +81,12 @@ Connect Two Tracks.
 
 + Fix Paste positioning issues and document.
 + Add Escape to hide many dialog Windows
-+ Fix embedded quote in Text object issue. Don�t re-de-escape quotes.
-+ Actually restore the GTK main window to be the size saved at last Exit. If that won�t fit, it will have been resized down. Also remove the �base� geometry settings - they aren�t for what the code thought they were.  The result should be between 30% and 100% of the max screen size.
++ Fix embedded quote in Text object issue. Don't re-de-escape quotes.
++ Restore the GTK main window to be the size saved at last Exit. 
 + Fix several highlighting and a Read bug for switchMotor
 + Fix crash on reading turnout motors from file
 + Fix #327, array bounds where not considered when creating layer list
-+ To ease translation a text's source file and line are added in a comment to
-the pot and po files
++ To ease translation a text's source file and line are added in a comment to the pot and po files
 + Remove Ruler at and of demo
 + TableEdges and DimLines are always Black
 + Only check circle radius for available room size when creating a circle
@@ -118,7 +114,7 @@ the pot and po files
 + Fix for #299 Order of params in HotBar popup menu is backwards
 + Fix for #297 After Turnout window is created, unable to select from HotBar
 + Fix: Turntable Join with Cornu
-+ #296 Escape key doesn't cancel the first dialog
++ Fix for #296 Escape key doesn't cancel the first dialog
 + Fix for #295 Crash when playing recorded sessions
 + Fix for #294 Linux: Cursor not visible when running demos
 + Fix - circle<->circle Cornu regression
@@ -131,7 +127,7 @@ the pot and po files
 + Fix Block Load error with random endCnt
 + Fix failure on Modify of Cornu with one end disconnected
 + Approximating large radius curves is fixed
-+ Fix bug #277: Describe demo doesn't work
++ Fix for #277: Describe demo doesn't work
 + Improve re-calculation of all end elevations on redraw.  Cache end elevations and distances on end points.
 + Fix problem of closing Notice Windows with the red button in GTK leading to a frozen application (Modal)
 + Fixes for GTK Text Positioning in Draw and Print
@@ -145,8 +141,7 @@ the pot and po files
 ### Parameter file additions and changes
 
 + Updated and new parameter files for Maerklin and Walthers Cornerstone
-+ Updated and renamed parameter files for Maerklin C, K and M and
-Atlas O-scale 2 rail and 3 rail
++ Updated and renamed parameter files for Maerklin C, K and M and Atlas O-scale 2 rail and 3 rail
 + Upgrade Tomix 1421 Buffer to stop Train before buffer
 + Reduce number of parameter files for Kato N scale
 + Add American and HOn3 car prototypes
