@@ -38,6 +38,23 @@ you can find in the file COPYING.
 
 
 # Installation #
+
+## Dependencies ##
+
+XTrackCAD starting with V5.2 depends on some external libraries:
+
++ zlib Compression Library https://www.zlib.net/
++ libzip for handling zip files https://libzip.org/
+
+Additionally on Windows only
+
++ FreeImage image handling http://freeimage.sourceforge.net/
+
+The Windows installer comes with these libraries so no additional downloads
+are necessary. On Linux and OSX the necessary libraries will need to
+be installed using the software installation tools of the 
+operating system.
+
 ## Windows ##
 
 XTrackCad has only been tested on Windows 10.
