@@ -621,8 +621,12 @@ static BOOL_T ReadTrackFile(
 
 	InfoMessage("0");
 	count = 0;
+	double skipLines = 0;
+	BOOL_T skip = FALSE;
 	while ( paramFile && ( fgets(paramLine, sizeof paramLine, paramFile) ) != NULL ) {
 		count++;
+		BOOL_T old_skip = skip;
+		skip = FALSE;
 		if (count%10 == 0) {
 			InfoMessage( "%d", count );
 			wFlush();
@@ -690,8 +694,17 @@ static BOOL_T ReadTrackFile(
 		} else if (strncmp( paramLine, "LAYERS ", 7 ) == 0) {
 			ReadLayers( paramLine+7 );
 		} else {
-			if( !(ret = InputError( "unknown command", TRUE )))
-				break;
+			if (!old_skip) {
+				if (InputError(_("Unknown layout file object - skip until next good object?"), TRUE)) {   //OK to carry on
+					/* SKIP until next main line we recognize */
+					skip = TRUE;
+					skipLines++;
+					continue;
+				} else {
+					break;    //Close File
+				}
+			} else skip = TRUE;
+			skipLines++;
 		}
 	}
 
@@ -704,6 +717,9 @@ static BOOL_T ReadTrackFile(
 		if (!noSetCurDir)
 			SetCurrentPath( LAYOUTPATHKEY, fileName );
 	}
+
+	 if (skipLines>0)
+		 NoticeMessage( MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
 
 	RestoreLocale( oldLocale );
 
