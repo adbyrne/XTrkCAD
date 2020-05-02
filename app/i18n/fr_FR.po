@@ -2,14 +2,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xtrkcad 5.1.2a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-02 07:59+0200\n"
-"PO-Revision-Date: 2020-02-11 15:41+0100\n"
+"POT-Creation-Date: 2020-05-02 08:03+0200\n"
+"PO-Revision-Date: 2020-05-02 08:04+0200\n"
 "Last-Translator: zileg31 <zileg31@users.sourceforge.net>\n"
 "Language-Team: French <zileg31@users.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.2.4\n"
+"X-Generator: Poedit 2.3\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "Language: fr_FR\n"
 "X-Poedit-SourceCharset: UTF-8\n"
@@ -23,16 +23,16 @@ msgstr ""
 #: ../bin/dcar.c:4538 ../bin/dcar.c:4556 ../bin/dcar.c:4569 ../bin/dcar.c:4574
 #: ../bin/dcar.c:4603 ../bin/dcar.c:4765 ../bin/directory.c:65
 #: ../bin/directory.c:100 ../bin/directory.c:107 ../bin/directory.c:138
-#: ../bin/directory.c:154 ../bin/dxfoutput.c:193 ../bin/fileio.c:229
-#: ../bin/fileio.c:612 ../bin/fileio.c:790 ../bin/fileio.c:917
-#: ../bin/fileio.c:984 ../bin/fileio.c:990 ../bin/fileio.c:1066
-#: ../bin/fileio.c:1076 ../bin/fileio.c:1362 ../bin/fileio.c:1412
-#: ../bin/fileio.c:1458 ../bin/macro.c:179 ../bin/macro.c:845
+#: ../bin/directory.c:154 ../bin/dxfoutput.c:193 ../bin/fileio.c:231
+#: ../bin/fileio.c:614 ../bin/fileio.c:808 ../bin/fileio.c:935
+#: ../bin/fileio.c:1002 ../bin/fileio.c:1008 ../bin/fileio.c:1084
+#: ../bin/fileio.c:1094 ../bin/fileio.c:1380 ../bin/fileio.c:1430
+#: ../bin/fileio.c:1486 ../bin/macro.c:179 ../bin/macro.c:845
 #: ../bin/macro.c:883 ../bin/macro.c:904 ../bin/macro.c:1045
 #: ../bin/macro.c:1061 ../bin/macro.c:1320 ../bin/param.c:2081
 #: ../bin/paramfile.c:227 ../bin/paramfilelist.c:390 ../bin/track.c:1113
-#: ../bin/track.c:1607 ../bin/track.c:1913 ../bin/track.c:1917
-#: ../bin/track.c:1929 ../bin/track.c:1993 ../wlib/gtklib/wpref.c:248
+#: ../bin/track.c:1626 ../bin/track.c:1932 ../bin/track.c:1936
+#: ../bin/track.c:1948 ../bin/track.c:2012 ../wlib/gtklib/wpref.c:248
 #: ../wlib/gtklib/wpref.c:255
 msgid "Continue"
 msgstr "Continuez"
@@ -189,8 +189,8 @@ msgstr "Le bras de commande 1 est trop court, veuillez réessayer"
 #: ../bin/ccontrol.c:168 ../bin/ccontrol.c:408 ../bin/compound.c:567
 #: ../bin/csensor.c:160 ../bin/csensor.c:372 ../bin/csignal.c:235
 #: ../bin/csignal.c:481 ../bin/csignal.c:492 ../bin/csignal.c:518
-#: ../bin/cswitchmotor.c:90 ../bin/cswitchmotor.c:109
-#: ../bin/cswitchmotor.c:221 ../bin/dcontmgm.c:91 ../bin/dlayer.c:483
+#: ../bin/cswitchmotor.c:90 ../bin/cswitchmotor.c:109 ../bin/cswitchmotor.c:221
+#: ../bin/dcontmgm.c:91 ../bin/dlayer.c:483
 msgid "Name"
 msgstr "Nom"
 
@@ -270,19 +270,21 @@ msgstr "Bout 2: X,Y"
 #: ../bin/dlayer.c:891 ../bin/doption.c:180 ../bin/doption.c:260
 #: ../bin/doption.c:442 ../bin/doption.c:445 ../bin/doption.c:458
 #: ../bin/doption.c:524 ../bin/dprmfile.c:400 ../bin/draw.c:2518
-#: ../bin/fileio.c:532 ../bin/fileio.c:652 ../bin/fileio.c:654
-#: ../bin/fileio.c:659 ../bin/fileio.c:937 ../bin/layout.c:373
-#: ../bin/layout.c:561 ../bin/macro.c:1154 ../bin/macro.c:1158
-#: ../bin/macro.c:1218 ../bin/macro.c:1287 ../bin/macro.c:1519
-#: ../bin/macro.c:1537 ../bin/misc.c:426 ../bin/misc.c:473 ../bin/misc.c:1777
-#: ../bin/misc.c:1898 ../bin/misc.c:1906 ../bin/misc.c:1983 ../bin/misc.c:2758
-#: ../bin/misc.c:2767 ../bin/misc.c:2787 ../bin/misc.c:2793 ../bin/misc2.c:453
-#: ../bin/param.c:738 ../bin/param.c:1839 ../bin/param.c:1962
-#: ../bin/param.c:1965 ../bin/param.c:2088 ../bin/param.c:2094
-#: ../bin/paramfile.c:304 ../bin/paramfilelist.c:90 ../bin/paramfilelist.c:110
+#: ../bin/fileio.c:534 ../bin/fileio.c:658 ../bin/fileio.c:660
+#: ../bin/fileio.c:665 ../bin/fileio.c:722 ../bin/fileio.c:955
+#: ../bin/layout.c:373 ../bin/layout.c:561 ../bin/macro.c:1154
+#: ../bin/macro.c:1158 ../bin/macro.c:1218 ../bin/macro.c:1287
+#: ../bin/macro.c:1519 ../bin/macro.c:1537 ../bin/misc.c:426 ../bin/misc.c:473
+#: ../bin/misc.c:1777 ../bin/misc.c:1898 ../bin/misc.c:1906 ../bin/misc.c:1983
+#: ../bin/misc.c:2762 ../bin/misc.c:2771 ../bin/misc.c:2791 ../bin/misc.c:2797
+#: ../bin/misc2.c:453 ../bin/param.c:738 ../bin/param.c:1839
+#: ../bin/param.c:1962 ../bin/param.c:1965 ../bin/param.c:2088
+#: ../bin/param.c:2094 ../bin/paramfile.c:292 ../bin/paramfile.c:294
+#: ../bin/paramfile.c:299 ../bin/paramfile.c:319 ../bin/paramfile.c:340
+#: ../bin/paramfile.c:346 ../bin/paramfilelist.c:90 ../bin/paramfilelist.c:110
 #: ../bin/paramfilelist.c:124 ../bin/paramfilelist.c:188 ../bin/smalldlg.c:90
-#: ../bin/smalldlg.c:222 ../bin/tease.c:1012 ../bin/track.c:1621
-#: ../wlib/gtklib/wpref.c:122 ../../../../build/work/app/bin/bllnhlp.c:572
+#: ../bin/smalldlg.c:222 ../bin/tease.c:1012 ../bin/track.c:1640
+#: ../wlib/gtklib/wpref.c:122 ../../../../build/work/app/bin/bllnhlp.c:573
 msgid "Ok"
 msgstr "Ok"
 
@@ -348,8 +350,8 @@ msgstr "Voulez-vous vraiment supprimer le bloc %s ?"
 #: ../bin/dcar.c:3730 ../bin/dcar.c:3808 ../bin/dcar.c:3892 ../bin/dcar.c:3911
 #: ../bin/dcar.c:4238 ../bin/dcar.c:4655 ../bin/dcontmgm.c:173
 #: ../bin/dcustmgm.c:165 ../bin/misc.c:1210 ../bin/misc.c:1217
-#: ../bin/misc.c:1288 ../bin/track.c:1623 ../bin/track.c:1720
-#: ../bin/track.c:1734
+#: ../bin/misc.c:1288 ../bin/track.c:1642 ../bin/track.c:1739
+#: ../bin/track.c:1753
 msgid "Yes"
 msgstr "Oui"
 
@@ -359,8 +361,8 @@ msgstr "Oui"
 #: ../bin/ctodesgn.c:3168 ../bin/ctrain.c:2466 ../bin/dcar.c:3730
 #: ../bin/dcar.c:3808 ../bin/dcar.c:3892 ../bin/dcar.c:3911 ../bin/dcar.c:4238
 #: ../bin/dcar.c:4655 ../bin/dcontmgm.c:173 ../bin/dcustmgm.c:165
-#: ../bin/misc.c:1210 ../bin/misc.c:1217 ../bin/misc.c:1288
-#: ../bin/track.c:1623 ../bin/track.c:1720 ../bin/track.c:1734
+#: ../bin/misc.c:1210 ../bin/misc.c:1217 ../bin/misc.c:1288 ../bin/track.c:1642
+#: ../bin/track.c:1739 ../bin/track.c:1753
 msgid "No"
 msgstr "Non"
 
@@ -454,8 +456,8 @@ msgstr "Second"
 #: ../bin/tcornu.c:829 ../bin/tcornu.c:1036 ../bin/tcornu.c:1359
 #, c-format
 msgid ""
-"Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%"
-"0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"
+"Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] "
+"c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"
 msgstr ""
 "La création de Cornu a échoué pour p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,"
 "%0.3f] c2[%0.3f,%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s"
@@ -1075,9 +1077,9 @@ msgid "Line Type"
 msgstr "Type de structure"
 
 #: ../bin/cdraw.c:521 ../bin/cdraw.c:2055 ../bin/cdraw.c:2057
-#: ../bin/cdraw.c:2155 ../bin/cdraw.c:2188 ../bin/cmisc.c:125
-#: ../bin/ctext.c:68 ../bin/ctext.c:147 ../bin/ctodesgn.c:203
-#: ../bin/dcar.c:2034 ../bin/dlayer.c:485 ../bin/doption.c:524
+#: ../bin/cdraw.c:2155 ../bin/cdraw.c:2188 ../bin/cmisc.c:125 ../bin/ctext.c:68
+#: ../bin/ctext.c:147 ../bin/ctodesgn.c:203 ../bin/dcar.c:2034
+#: ../bin/dlayer.c:485 ../bin/doption.c:524
 msgid "Color"
 msgstr "Couleur"
 
@@ -1106,7 +1108,7 @@ msgid "Orientation"
 msgstr "Orientation"
 
 #: ../bin/cdraw.c:527 ../bin/cdraw.c:2071
-#: ../../../../build/work/app/bin/bllnhlp.c:574
+#: ../../../../build/work/app/bin/bllnhlp.c:575
 msgid "Size"
 msgstr "Dimension"
 
@@ -1130,8 +1132,7 @@ msgstr "Pivot"
 #: ../bin/cdraw.c:533 ../bin/compound.c:571 ../bin/cturntbl.c:253
 #: ../bin/doption.c:120 ../bin/doption.c:121 ../bin/tbezier.c:263
 #: ../bin/tcornu.c:309 ../bin/tcurve.c:378 ../bin/tease.c:531
-#: ../bin/tstraigh.c:93 ../../../../build/work/app/bin/bllnhlp.c:652
-#: ../../../../build/work/app/bin/bllnhlp.c:653
+#: ../bin/tstraigh.c:93 ../../../../build/work/app/bin/bllnhlp.c:653
 #: ../../../../build/work/app/bin/bllnhlp.c:654
 #: ../../../../build/work/app/bin/bllnhlp.c:655
 #: ../../../../build/work/app/bin/bllnhlp.c:656
@@ -1150,6 +1151,7 @@ msgstr "Pivot"
 #: ../../../../build/work/app/bin/bllnhlp.c:669
 #: ../../../../build/work/app/bin/bllnhlp.c:670
 #: ../../../../build/work/app/bin/bllnhlp.c:671
+#: ../../../../build/work/app/bin/bllnhlp.c:672
 msgid "Layer"
 msgstr "Calque"
 
@@ -1309,8 +1311,7 @@ msgstr "Ligne Bézier"
 msgid "%s Line Width"
 msgstr "%s épaisseur"
 
-#: ../bin/cdraw.c:2156 ../bin/dcar.c:2007 ../bin/dcar.c:4136
-#: ../bin/dcar.c:4141
+#: ../bin/cdraw.c:2156 ../bin/dcar.c:2007 ../bin/dcar.c:4136 ../bin/dcar.c:4141
 msgid "Type"
 msgstr "Type"
 
@@ -1534,21 +1535,21 @@ msgstr ""
 msgid "Smooth Corner - 's'"
 msgstr ""
 
-#: ../bin/cdraw.c:2745 ../bin/cselect.c:3210
+#: ../bin/cdraw.c:2745 ../bin/cselect.c:3211
 msgid "LineType..."
 msgstr ""
 
-#: ../bin/cdraw.c:2746 ../bin/cselect.c:3211
+#: ../bin/cdraw.c:2746 ../bin/cselect.c:3212
 #, fuzzy
 msgid "Solid Line"
 msgstr "Poly Ligne"
 
-#: ../bin/cdraw.c:2747 ../bin/cselect.c:3212
+#: ../bin/cdraw.c:2747 ../bin/cselect.c:3213
 #, fuzzy
 msgid "Dashed Line"
 msgstr "Dessiner un trait"
 
-#: ../bin/cdraw.c:2748 ../bin/cselect.c:3213
+#: ../bin/cdraw.c:2748 ../bin/cselect.c:3214
 #, fuzzy
 msgid "Dotted Line"
 msgstr "Ligne courbe"
@@ -1601,7 +1602,7 @@ msgid "Station"
 msgstr "Gare"
 
 #: ../bin/celev.c:47 ../bin/cprofile.c:1524 ../bin/dcmpnd.c:75
-#: ../bin/misc.c:2706
+#: ../bin/misc.c:2710
 msgid "Ignore"
 msgstr "Ignoré"
 
@@ -1692,10 +1693,9 @@ msgstr "Remplacer par un nouveau groupe ?"
 
 #: ../bin/cgroup.c:623 ../bin/compound.c:566 ../bin/cstruct.c:72
 #: ../bin/ctodesgn.c:194 ../bin/ctodesgn.c:2914 ../bin/cturnout.c:81
-#: ../bin/dcar.c:1999 ../bin/dcar.c:4136 ../bin/dcar.c:4141
-#: ../bin/dcmpnd.c:456 ../bin/dcustmgm.c:56
-#: ../../../../build/work/app/bin/bllnhlp.c:368
-#: ../../../../build/work/app/bin/bllnhlp.c:551
+#: ../bin/dcar.c:1999 ../bin/dcar.c:4136 ../bin/dcar.c:4141 ../bin/dcmpnd.c:456
+#: ../bin/dcustmgm.c:56 ../../../../build/work/app/bin/bllnhlp.c:369
+#: ../../../../build/work/app/bin/bllnhlp.c:552
 msgid "Manufacturer"
 msgstr "Fabricant"
 
@@ -1704,7 +1704,7 @@ msgstr "Fabricant"
 #: ../bin/cturnout.c:81 ../bin/dcar.c:2015 ../bin/dcar.c:4137
 #: ../bin/dcar.c:4142 ../bin/dcmpnd.c:457 ../bin/dcustmgm.c:57
 #: ../bin/denum.c:182 ../bin/denum.c:183 ../bin/denum.c:186
-#: ../../../../build/work/app/bin/bllnhlp.c:369
+#: ../../../../build/work/app/bin/bllnhlp.c:370
 msgid "Description"
 msgstr "Description"
 
@@ -1875,8 +1875,8 @@ msgstr "Deuxième type de voie non pris en charge pour un raccord non Cornu"
 msgid "Second "
 msgstr "Second "
 
-#: ../bin/cjoin.c:914 ../bin/track.c:2239 ../bin/track.c:2275
-#: ../bin/track.c:2341
+#: ../bin/cjoin.c:914 ../bin/track.c:2258 ../bin/track.c:2294
+#: ../bin/track.c:2360
 msgid "Connecting "
 msgstr "Se connecter "
 
@@ -2187,7 +2187,7 @@ msgstr "Remise à zéro"
 msgid "Setup"
 msgstr "Configuration"
 
-#: ../bin/cprint.c:154 ../bin/cselect.c:3176 ../bin/misc.c:2196
+#: ../bin/cprint.c:154 ../bin/cselect.c:3176 ../bin/misc.c:2198
 msgid "Select All"
 msgstr "Tout sélectionner"
 
@@ -2232,7 +2232,7 @@ msgstr "Imprimer ..."
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:350
 #: ../bin/cprofile.c:606 ../bin/cprofile.c:1439 ../bin/cprofile.c:1518
-#: ../../../../build/work/app/bin/bllnhlp.c:121
+#: ../../../../build/work/app/bin/bllnhlp.c:122
 #: ../../../../build/work/app/i18n/custmsg.h:1223
 msgid "Profile"
 msgstr "Profil"
@@ -2390,11 +2390,11 @@ msgstr "Resserrer les voies"
 msgid "Ties Tracks "
 msgstr "Voies fines"
 
-#: ../bin/cselect.c:792 ../bin/misc.c:2314
+#: ../bin/cselect.c:792 ../bin/misc.c:2318
 msgid "Move To Current Layer"
 msgstr "Déplacer vers le calque actuel"
 
-#: ../bin/cselect.c:832 ../bin/misc.c:2464
+#: ../bin/cselect.c:832 ../bin/misc.c:2468
 msgid "Clear Elevations"
 msgstr "Effacer les élévations"
 
@@ -2540,7 +2540,7 @@ msgstr "Déplacer l'étiquette"
 msgid "To Hide, use Context Menu"
 msgstr ""
 
-#: ../bin/cselect.c:2438 ../bin/cselect.c:3201
+#: ../bin/cselect.c:2438 ../bin/cselect.c:3202
 #, fuzzy
 msgid "Show/Hide Description"
 msgstr "Montrer la description"
@@ -2581,11 +2581,11 @@ msgstr "Refaire"
 msgid "Pan Center Here - '@'"
 msgstr ""
 
-#: ../bin/cselect.c:3177 ../bin/misc.c:2199 ../bin/misc.c:2320
+#: ../bin/cselect.c:3177 ../bin/misc.c:2201 ../bin/misc.c:2324
 msgid "Select Current Layer"
 msgstr "Sélectionner le calque actuel"
 
-#: ../bin/cselect.c:3188 ../bin/misc.c:2201
+#: ../bin/cselect.c:3188 ../bin/misc.c:2203
 msgid "Deselect All"
 msgstr "Tout désélectionner"
 
@@ -2608,91 +2608,96 @@ msgstr "C&ouper"
 msgid "Copy"
 msgstr "Copier"
 
-#: ../bin/cselect.c:3195 ../bin/fileio.c:1455 ../bin/misc.c:2193
+#: ../bin/cselect.c:3195 ../bin/fileio.c:1483 ../bin/misc.c:2193
 msgid "Paste"
 msgstr "Coller"
 
-#: ../bin/cselect.c:3197
+#: ../bin/cselect.c:3196 ../bin/misc.c:2195
+#, fuzzy
+msgid "Clone"
+msgstr "Fermer"
+
+#: ../bin/cselect.c:3198
 #, fuzzy
 msgid "Rotate..."
 msgstr "Rotation"
 
-#: ../bin/cselect.c:3199
+#: ../bin/cselect.c:3200
 msgid "Align"
 msgstr "Aligner"
 
-#: ../bin/cselect.c:3203
+#: ../bin/cselect.c:3204
 msgid "Hide/NoHide"
 msgstr ""
 
-#: ../bin/cselect.c:3204
+#: ../bin/cselect.c:3205
 msgid "Bridge/NoBridge"
 msgstr ""
 
-#: ../bin/cselect.c:3205
+#: ../bin/cselect.c:3206
 msgid "NoTies/Ties"
 msgstr ""
 
-#: ../bin/cselect.c:3206
+#: ../bin/cselect.c:3207
 msgid "Thickness..."
 msgstr ""
 
-#: ../bin/cselect.c:3207 ../bin/misc.c:2332
+#: ../bin/cselect.c:3208 ../bin/misc.c:2336
 msgid "Thin Tracks"
 msgstr "Voies fines"
 
-#: ../bin/cselect.c:3208 ../bin/misc.c:2333
+#: ../bin/cselect.c:3209 ../bin/misc.c:2337
 msgid "Medium Tracks"
 msgstr "Voies moyennes"
 
-#: ../bin/cselect.c:3209 ../bin/misc.c:2334
+#: ../bin/cselect.c:3210 ../bin/misc.c:2338
 msgid "Thick Tracks"
 msgstr "Voies épaisses"
 
-#: ../bin/cselect.c:3214
+#: ../bin/cselect.c:3215
 msgid "Dash-Dotted Line"
 msgstr ""
 
-#: ../bin/cselect.c:3215
+#: ../bin/cselect.c:3216
 msgid "Dash-Dot-Dotted Line"
 msgstr ""
 
-#: ../bin/cselect.c:3217
+#: ../bin/cselect.c:3218
 #, fuzzy
 msgid "Move To Front"
 msgstr "Déplacer pour Raccorder"
 
-#: ../bin/cselect.c:3218
+#: ../bin/cselect.c:3219
 #, fuzzy
 msgid "Move To Back"
 msgstr "Déplacer des voies"
 
-#: ../bin/cselect.c:3220
+#: ../bin/cselect.c:3221
 #, fuzzy
 msgid "Group"
 msgstr "Grouper"
 
-#: ../bin/cselect.c:3221
+#: ../bin/cselect.c:3222
 #, fuzzy
 msgid "UnGroup"
 msgstr "&Dissocier"
 
-#: ../bin/cselect.c:3256
+#: ../bin/cselect.c:3257
 msgid "Move Description"
 msgstr "Déplacer l'étiquette"
 
-#: ../bin/cselect.c:3263 ../bin/misc.c:1906 ../bin/misc.c:2204
+#: ../bin/cselect.c:3264 ../bin/misc.c:1906 ../bin/misc.c:2206
 msgid "Move"
 msgstr "Déplacer"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:368
-#: ../bin/cselect.c:3265 ../bin/misc.c:1897 ../bin/misc.c:2206
+#: ../bin/cselect.c:3266 ../bin/misc.c:1897 ../bin/misc.c:2208
 #: ../../../../build/work/app/i18n/custmsg.h:1259
 msgid "Rotate"
 msgstr "Rotation"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:369
-#: ../bin/cselect.c:3267 ../bin/dcar.c:2021
+#: ../bin/cselect.c:3268 ../bin/dcar.c:2021
 #: ../../../../build/work/app/i18n/custmsg.h:1261
 msgid "Flip"
 msgstr "Miroir"
@@ -2952,8 +2957,7 @@ msgstr ""
 msgid "Place %s and draw into position"
 msgstr "Placer %s et mettre en position"
 
-#: ../bin/cswitchmotor.c:93 ../bin/cswitchmotor.c:112
-#: ../bin/cswitchmotor.c:224
+#: ../bin/cswitchmotor.c:93 ../bin/cswitchmotor.c:112 ../bin/cswitchmotor.c:224
 msgid "Point Sense"
 msgstr "Sens des aiguilles"
 
@@ -3330,8 +3334,7 @@ msgstr "Conception d'aiguillage"
 msgid "%s %s Designer"
 msgstr "%s concepteur de %s"
 
-#: ../bin/ctrain.c:181 ../bin/dcar.c:2052 ../bin/dcar.c:4136
-#: ../bin/dcar.c:4141
+#: ../bin/ctrain.c:181 ../bin/dcar.c:2052 ../bin/dcar.c:4136 ../bin/dcar.c:4141
 msgid "Index"
 msgstr "Index"
 
@@ -3361,7 +3364,7 @@ msgid "Forward"
 msgstr "Avant"
 
 #: ../bin/ctrain.c:645 ../bin/ctrain.c:3061 ../bin/dcar.c:4473
-#: ../bin/dcar.c:4483 ../bin/dcar.c:4603 ../bin/fileio.c:229 ../bin/macro.c:92
+#: ../bin/dcar.c:4483 ../bin/dcar.c:4603 ../bin/fileio.c:231 ../bin/macro.c:92
 #: ../bin/macro.c:904
 msgid "Stop"
 msgstr "Stop"
@@ -3487,7 +3490,7 @@ msgstr "Connecter les voies ajustables"
 msgid "splitTurnout: can't find segment"
 msgstr "aiguillage fractionné : impossible de trouver le segment"
 
-#: ../bin/cturnout.c:1425 ../bin/track.c:2228 ../bin/track.c:2334
+#: ../bin/cturnout.c:1425 ../bin/track.c:2247 ../bin/track.c:2353
 #: ../bin/tstraigh.c:552
 msgid "Drag to change track length"
 msgstr "Faites glisser pour changer la longueur de la voie"
@@ -3577,7 +3580,7 @@ msgstr "Annuler la trace"
 msgid "Undo: %s"
 msgstr "Annuler : %s"
 
-#: ../bin/cundo.c:539 ../../../../build/work/app/bin/bllnhlp.c:157
+#: ../bin/cundo.c:539 ../../../../build/work/app/bin/bllnhlp.c:158
 msgid "Undo last command"
 msgstr "Annuler la dernière commande"
 
@@ -3586,7 +3589,7 @@ msgstr "Annuler la dernière commande"
 msgid "Redo: %s"
 msgstr "Refaire : %s"
 
-#: ../bin/cundo.c:547 ../../../../build/work/app/bin/bllnhlp.c:123
+#: ../bin/cundo.c:547 ../../../../build/work/app/bin/bllnhlp.c:124
 msgid "Redo last undo"
 msgstr "Refaire la dernière annulation"
 
@@ -3760,7 +3763,7 @@ msgstr "Taille approchée du fichier : %0.1fMb"
 
 #: ../bin/dbitmap.c:208 ../bin/filenoteui.c:158 ../bin/misc.c:1210
 #: ../bin/misc.c:1288 ../bin/param.c:2609 ../wlib/gtklib/browserhelp.c:87
-#: ../../../../build/work/app/bin/bllnhlp.c:570
+#: ../../../../build/work/app/bin/bllnhlp.c:571
 msgid "Cancel"
 msgstr "Annuler"
 
@@ -3842,7 +3845,7 @@ msgid "Poor"
 msgstr "Mauvais"
 
 #: ../bin/dcar.c:1427 ../bin/dpricels.c:45
-#: ../../../../build/work/app/bin/bllnhlp.c:435
+#: ../../../../build/work/app/bin/bllnhlp.c:436
 msgid "Item"
 msgstr "Objet"
 
@@ -3870,9 +3873,9 @@ msgstr "Prototype"
 msgid "Part"
 msgstr "Référence"
 
-#: ../bin/dcar.c:2011 ../../../../build/work/app/bin/bllnhlp.c:370
-#: ../../../../build/work/app/bin/bllnhlp.c:554
+#: ../bin/dcar.c:2011 ../../../../build/work/app/bin/bllnhlp.c:371
 #: ../../../../build/work/app/bin/bllnhlp.c:555
+#: ../../../../build/work/app/bin/bllnhlp.c:556
 msgid "Part Number"
 msgstr "Référence N°"
 
@@ -3924,7 +3927,7 @@ msgstr "Longueur de l'attelage"
 msgid "Purchase Price"
 msgstr "Prix d'achat"
 
-#: ../bin/dcar.c:2056 ../../../../build/work/app/bin/bllnhlp.c:234
+#: ../bin/dcar.c:2056 ../../../../build/work/app/bin/bllnhlp.c:235
 msgid "Current Price"
 msgstr "Prix actuel"
 
@@ -3958,8 +3961,8 @@ msgstr "Remarques"
 msgid "Car Part"
 msgstr "Partie de véhicule"
 
-#: ../bin/dcar.c:2076 ../../../../build/work/app/bin/bllnhlp.c:209
-#: ../../../../build/work/app/bin/bllnhlp.c:210
+#: ../bin/dcar.c:2076 ../../../../build/work/app/bin/bllnhlp.c:210
+#: ../../../../build/work/app/bin/bllnhlp.c:211
 msgid "Car Prototype"
 msgstr "Prototype de véhicule"
 
@@ -3990,8 +3993,7 @@ msgstr "Ajouter"
 msgid "Update %s Scale Car"
 msgstr "Mettre à jour le véhicule à l'échelle %s"
 
-#: ../bin/dcar.c:2888 ../bin/dcar.c:2897 ../bin/dcar.c:2906
-#: ../bin/dcmpnd.c:173
+#: ../bin/dcar.c:2888 ../bin/dcar.c:2897 ../bin/dcar.c:2906 ../bin/dcmpnd.c:173
 msgid "Update"
 msgstr "Mise à jour"
 
@@ -4139,7 +4141,7 @@ msgid "New Car Part"
 msgstr "Nouvelle fiche de véhicule"
 
 #: ../bin/dcar.c:4137 ../bin/dcar.c:4142
-#: ../../../../build/work/app/bin/bllnhlp.c:407
+#: ../../../../build/work/app/bin/bllnhlp.c:408
 msgid "Roadname"
 msgstr "Compagnie ferroviaire"
 
@@ -4185,19 +4187,19 @@ msgid "Edit"
 msgstr "Editer"
 
 #: ../bin/dcar.c:4172 ../bin/dcontmgm.c:101 ../bin/dcustmgm.c:70
-#: ../bin/misc.c:2210
+#: ../bin/misc.c:2212
 msgid "Delete"
 msgstr "Effacer"
 
-#: ../bin/dcar.c:4176 ../bin/fileio.c:1362
+#: ../bin/dcar.c:4176 ../bin/fileio.c:1380
 msgid "Export"
 msgstr "Exporter"
 
-#: ../bin/dcar.c:4178 ../../../../build/work/app/bin/bllnhlp.c:571
+#: ../bin/dcar.c:4178 ../../../../build/work/app/bin/bllnhlp.c:572
 msgid "List"
 msgstr "Liste"
 
-#: ../bin/dcar.c:4289 ../bin/dcar.c:5021 ../bin/misc.c:2584
+#: ../bin/dcar.c:4289 ../bin/dcar.c:5021 ../bin/misc.c:2588
 msgid "Car Inventory"
 msgstr "Inventaire des véhicules"
 
@@ -5188,7 +5190,7 @@ msgstr "Faites glisser pour déplacer le bord"
 msgid "Export to DXF"
 msgstr "Exporter en DXF"
 
-#: ../bin/fileio.c:228
+#: ../bin/fileio.c:230
 msgid ""
 "\n"
 "Do you want to continue?"
@@ -5196,58 +5198,62 @@ msgstr ""
 "\n"
 "Voulez-vous continuer ?"
 
-#: ../bin/fileio.c:532
+#: ../bin/fileio.c:534
 #, c-format
 msgid "putTitle: title too long: %s"
 msgstr "poser le titre : titre trop long : %s"
 
-#: ../bin/fileio.c:552
+#: ../bin/fileio.c:554
 msgid "Unnamed Trackplan"
 msgstr "Plan de voie sans nom"
 
-#: ../bin/fileio.c:553
+#: ../bin/fileio.c:555
 msgid " (R/O)"
 msgstr ""
 
-#: ../bin/fileio.c:573 ../bin/fileio.c:1156
+#: ../bin/fileio.c:575 ../bin/fileio.c:1176
 msgid "Check Pointing"
 msgstr "Écrire une sauvegarde"
 
-#: ../bin/fileio.c:917
+#: ../bin/fileio.c:698
+msgid "Unknown layout file object - skip until next good object?"
+msgstr ""
+
+#: ../bin/fileio.c:935
 msgid "Track"
 msgstr "Voie"
 
-#: ../bin/fileio.c:1103
+#: ../bin/fileio.c:1121
 msgid "Save Tracks"
 msgstr "Sauver le réseau"
 
-#: ../bin/fileio.c:1118
+#: ../bin/fileio.c:1136
 msgid "Save Tracks As"
 msgstr "Enregistrer les voies sous"
 
-#: ../bin/fileio.c:1128
+#: ../bin/fileio.c:1146
 msgid "Open Tracks"
 msgstr "Ouvrir un réseau"
 
-#: ../bin/fileio.c:1140
+#: ../bin/fileio.c:1160
 #, fuzzy
 msgid "Example Tracks"
 msgstr "Simples voies"
 
-#: ../bin/fileio.c:1305
+#: ../bin/fileio.c:1323
 #, fuzzy, c-format
 msgid "Module - %s"
 msgstr "Élév = %s"
 
-#: ../bin/fileio.c:1310 ../bin/fileio.c:1331
+#: ../bin/fileio.c:1328 ../bin/fileio.c:1349
 msgid "Import Tracks"
 msgstr "Importer des voies"
 
-#: ../bin/fileio.c:1392
+#: ../bin/fileio.c:1411
 msgid "Export Tracks"
 msgstr "Exporter les voies"
 
-#: ../bin/fileio.c:1412
+#: ../bin/fileio.c:1430
 msgid "Clipboard"
 msgstr "Presse-papiers"
 
@@ -5267,7 +5273,7 @@ msgid "Title"
 msgstr "Sous-titre"
 
 #: ../bin/filenoteui.c:70 ../bin/trknote.c:61
-#: ../../../../build/work/app/bin/bllnhlp.c:84
+#: ../../../../build/work/app/bin/bllnhlp.c:85
 #, fuzzy
 msgid "Document"
 msgstr "Qté"
@@ -5436,7 +5442,7 @@ msgstr "Suivant"
 msgid "Quit"
 msgstr "Quitter"
 
-#: ../bin/macro.c:694 ../../../../build/work/app/bin/bllnhlp.c:526
+#: ../bin/macro.c:694 ../../../../build/work/app/bin/bllnhlp.c:527
 msgid "Speed"
 msgstr "Vitesse"
 
@@ -5513,7 +5519,7 @@ msgstr ""
 "\n"
 "Si vous n'enregistrez pas maintenant, vos modifications seront ignorées."
 
-#: ../bin/misc.c:586 ../bin/misc.c:2259
+#: ../bin/misc.c:586 ../bin/misc.c:2261
 msgid "&Save"
 msgstr "&Sauver"
 
@@ -5554,11 +5560,10 @@ msgstr "XTrackCAD Font"
 msgid "No balloon help for %s\n"
 msgstr "Aucune bulle d'aide pour %s\n"
 
-#: ../bin/misc.c:906 ../../../../build/work/app/bin/bllnhlp.c:589
-#: ../../../../build/work/app/bin/bllnhlp.c:590
-#: ../../../../build/work/app/bin/bllnhlp.c:592
+#: ../bin/misc.c:906 ../../../../build/work/app/bin/bllnhlp.c:590
+#: ../../../../build/work/app/bin/bllnhlp.c:591
 #: ../../../../build/work/app/bin/bllnhlp.c:593
-#: ../../../../build/work/app/bin/bllnhlp.c:595
+#: ../../../../build/work/app/bin/bllnhlp.c:594
 #: ../../../../build/work/app/bin/bllnhlp.c:596
 #: ../../../../build/work/app/bin/bllnhlp.c:597
 #: ../../../../build/work/app/bin/bllnhlp.c:598
@@ -5613,7 +5618,8 @@ msgstr "Aucune bulle d'aide pour %s\n"
 #: ../../../../build/work/app/bin/bllnhlp.c:647
 #: ../../../../build/work/app/bin/bllnhlp.c:648
 #: ../../../../build/work/app/bin/bllnhlp.c:649
-#: ../../../../build/work/app/bin/bllnhlp.c:651
+#: ../../../../build/work/app/bin/bllnhlp.c:650
+#: ../../../../build/work/app/bin/bllnhlp.c:652
 msgid "No Help"
 msgstr "Pas d'aide"
 
@@ -5694,7 +5700,7 @@ msgstr "Boutons de calques"
 msgid "Hot Bar"
 msgstr "Barre rapide"
 
-#: ../bin/misc.c:1865 ../../../../build/work/app/bin/bllnhlp.c:79
+#: ../bin/misc.c:1865 ../../../../build/work/app/bin/bllnhlp.c:80
 msgid "Change Elevations"
 msgstr "Modifier les élévations"
 
@@ -5811,7 +5817,7 @@ msgstr "Autres commandes"
 msgid "Shift Context Commands"
 msgstr ""
 
-#: ../bin/misc.c:2176 ../bin/misc.c:2359
+#: ../bin/misc.c:2176 ../bin/misc.c:2363
 msgid "Enable SnapGrid"
 msgstr "Activer la Grille magnétique"
 
@@ -5824,7 +5830,7 @@ msgstr "Montrer la grille magnétique"
 msgid " Enable Magnetic Snap"
 msgstr "Activer la Grille magnétique"
 
-#: ../bin/misc.c:2182 ../bin/misc.c:2380
+#: ../bin/misc.c:2182 ../bin/misc.c:2384
 msgid "Show/Hide Map"
 msgstr "Afficher/Masquer la carte de navigation"
 
@@ -5833,297 +5839,302 @@ msgstr "Afficher/Masquer la carte de navigation"
 msgid "Show/Hide Background"
 msgstr "Afficher/masquer le calque"
 
-#: ../bin/misc.c:2213 ../bin/misc.c:2214
+#: ../bin/misc.c:2215 ../bin/misc.c:2216
 #, fuzzy
 msgid "Add..."
 msgstr "Ajouter"
 
-#: ../bin/misc.c:2217 ../bin/misc.c:2218
+#: ../bin/misc.c:2219 ../bin/misc.c:2220
 #, fuzzy
 msgid "More..."
 msgstr "Plus"
 
-#: ../bin/misc.c:2253
+#: ../bin/misc.c:2255
 msgid "&New ..."
 msgstr "&Nouveau ..."
 
-#: ../bin/misc.c:2255
+#: ../bin/misc.c:2257
 msgid "&Open ..."
 msgstr "&Ouvrir ..."
 
-#: ../bin/misc.c:2261
+#: ../bin/misc.c:2263
 msgid "Save &As ..."
 msgstr "Sauver &Sous ..."
 
-#: ../bin/misc.c:2263
+#: ../bin/misc.c:2265
 msgid "Revert"
 msgstr "Revenir"
 
-#: ../bin/misc.c:2266
+#: ../bin/misc.c:2268
 msgid "P&rint Setup ..."
 msgstr "R&églages d'impression ..."
 
-#: ../bin/misc.c:2271
+#: ../bin/misc.c:2273
 msgid "&Import"
 msgstr "&Importer"
 
-#: ../bin/misc.c:2273
+#: ../bin/misc.c:2275
 #, fuzzy
 msgid "Import &Module"
 msgstr "Importation"
 
-#: ../bin/misc.c:2275
+#: ../bin/misc.c:2277
 msgid "Export to &Bitmap"
 msgstr "Exporter en &bitmap"
 
-#: ../bin/misc.c:2278
+#: ../bin/misc.c:2280
 msgid "E&xport"
 msgstr "E&xporter"
 
-#: ../bin/misc.c:2280
+#: ../bin/misc.c:2282
 msgid "Export D&XF"
 msgstr "Exporter en D&XF"
 
-#: ../bin/misc.c:2285
+#: ../bin/misc.c:2287
 msgid "Parameter &Files ..."
 msgstr "&Fichiers de paramètres ..."
 
-#: ../bin/misc.c:2287
+#: ../bin/misc.c:2289
 msgid "No&tes ..."
 msgstr "R&emarques ..."
 
-#: ../bin/misc.c:2294
+#: ../bin/misc.c:2296
 msgid "E&xit"
 msgstr "Q&uitter"
 
-#: ../bin/misc.c:2300
+#: ../bin/misc.c:2302
 msgid "&Undo"
 msgstr "&Annuler"
 
-#: ../bin/misc.c:2302
+#: ../bin/misc.c:2304
 msgid "R&edo"
 msgstr "R&efaire"
 
-#: ../bin/misc.c:2305
+#: ../bin/misc.c:2307
 msgid "Cu&t"
 msgstr "C&ouper"
 
-#: ../bin/misc.c:2307
+#: ../bin/misc.c:2309
 msgid "&Copy"
 msgstr "&Copier"
 
-#: ../bin/misc.c:2309
+#: ../bin/misc.c:2311
 msgid "&Paste"
 msgstr "&Coller"
 
-#: ../bin/misc.c:2311
+#: ../bin/misc.c:2313
+#, fuzzy
+msgid "C&lone"
+msgstr "Fermer"
+
+#: ../bin/misc.c:2315
 msgid "De&lete"
 msgstr "E&ffacer"
 
-#: ../bin/misc.c:2319
+#: ../bin/misc.c:2323
 msgid "Select &All"
 msgstr "T&out sélectionner"
 
-#: ../bin/misc.c:2321
+#: ../bin/misc.c:2325
 msgid "&Deselect All"
 msgstr "&Tout désélectionner"
 
-#: ../bin/misc.c:2322
+#: ../bin/misc.c:2326
 msgid "&Invert Selection"
 msgstr "&Inverser la sélection"
 
-#: ../bin/misc.c:2323
+#: ../bin/misc.c:2327
 msgid "Select Stranded Track"
 msgstr "Sélectionnez une voie isolée"
 
-#: ../bin/misc.c:2325
+#: ../bin/misc.c:2329
 msgid "Tu&nnel"
 msgstr "Tu&nnel"
 
-#: ../bin/misc.c:2326
+#: ../bin/misc.c:2330
 #, fuzzy
 msgid "B&ridge"
 msgstr "Pont"
 
-#: ../bin/misc.c:2327
+#: ../bin/misc.c:2331
 msgid "Ties/NoTies"
 msgstr ""
 
-#: ../bin/misc.c:2328
+#: ../bin/misc.c:2332
 #, fuzzy
 msgid "Move to &Front"
 msgstr "Déplacer pour raccorder"
 
-#: ../bin/misc.c:2329
+#: ../bin/misc.c:2333
 #, fuzzy
 msgid "Move to &Back"
 msgstr "Déplacer des voies"
 
-#: ../bin/misc.c:2339
+#: ../bin/misc.c:2343
 msgid "Zoom &In"
 msgstr "Zoom &avant"
 
-#: ../bin/misc.c:2341
+#: ../bin/misc.c:2345
 msgid "&Zoom"
 msgstr "&Zoom"
 
-#: ../bin/misc.c:2342
+#: ../bin/misc.c:2346
 msgid "Zoom &Out"
 msgstr "Zoom &Arrière"
 
-#: ../bin/misc.c:2352
+#: ../bin/misc.c:2356
 msgid "&Redraw"
 msgstr "&Redessiner"
 
-#: ../bin/misc.c:2354
+#: ../bin/misc.c:2358
 msgid "Redraw All"
 msgstr "Tout redessiner"
 
-#: ../bin/misc.c:2361
+#: ../bin/misc.c:2365
 msgid "Show SnapGrid"
 msgstr "Afficher la Grille magnétique"
 
-#: ../bin/misc.c:2371
+#: ../bin/misc.c:2375
 #, fuzzy
 msgid "Enable Magnetic Snap"
 msgstr "Activer la Grille magnétique"
 
-#: ../bin/misc.c:2386
+#: ../bin/misc.c:2390
 msgid "&Tool Bar"
 msgstr "&Barre d'outils"
 
-#: ../bin/misc.c:2419
+#: ../bin/misc.c:2423
 #, fuzzy
 msgid "Control Element"
 msgstr "Éléments de contrôle"
 
-#: ../bin/misc.c:2445
+#: ../bin/misc.c:2449
 msgid "&Loosen Tracks"
 msgstr "&Desserrer les voies"
 
-#: ../bin/misc.c:2457
+#: ../bin/misc.c:2461
 msgid "Raise/Lower Elevations"
 msgstr "Monter/Descendre les Elévations"
 
-#: ../bin/misc.c:2466
+#: ../bin/misc.c:2470
 msgid "Recompute Elevations"
 msgstr "Recalculer les élévations"
 
-#: ../bin/misc.c:2471
+#: ../bin/misc.c:2475
 msgid "Change Scale"
 msgstr "Modifier l'échelle"
 
-#: ../bin/misc.c:2492
+#: ../bin/misc.c:2496
 msgid "L&ayout ..."
 msgstr "P&lan ..."
 
-#: ../bin/misc.c:2494
+#: ../bin/misc.c:2498
 msgid "&Display ..."
 msgstr "&Affichage ..."
 
-#: ../bin/misc.c:2496
+#: ../bin/misc.c:2500
 msgid "Co&mmand ..."
 msgstr "Co&mmande ..."
 
-#: ../bin/misc.c:2498
+#: ../bin/misc.c:2502
 msgid "&Easements ..."
 msgstr "&Courbes de transition ..."
 
-#: ../bin/misc.c:2501
+#: ../bin/misc.c:2505
 msgid "&Fonts ..."
 msgstr "&Polices ..."
 
-#: ../bin/misc.c:2503
+#: ../bin/misc.c:2507
 msgid "Stic&ky ..."
 msgstr "M&aintient ..."
 
-#: ../bin/misc.c:2508
+#: ../bin/misc.c:2512
 msgid "&Debug ..."
 msgstr "&Déboguer ..."
 
-#: ../bin/misc.c:2511
+#: ../bin/misc.c:2515
 msgid "&Preferences ..."
 msgstr "&Préférences ..."
 
-#: ../bin/misc.c:2513
+#: ../bin/misc.c:2517
 msgid "&Colors ..."
 msgstr "&Couleurs ..."
 
-#: ../bin/misc.c:2519
+#: ../bin/misc.c:2523
 msgid "&Record ..."
 msgstr "&Enregistrer ..."
 
-#: ../bin/misc.c:2521
+#: ../bin/misc.c:2525
 msgid "&Play Back ..."
 msgstr "&Lecture ..."
 
-#: ../bin/misc.c:2527
+#: ../bin/misc.c:2531
 msgid "Main window"
 msgstr "Fenêtre principale"
 
-#: ../bin/misc.c:2541
+#: ../bin/misc.c:2545
 msgid "Recent Messages"
 msgstr "Messages récents"
 
-#: ../bin/misc.c:2548
+#: ../bin/misc.c:2552
 msgid "Tip of the Day..."
 msgstr "Astuce du jour ..."
 
-#: ../bin/misc.c:2549
+#: ../bin/misc.c:2553
 msgid "&Demos"
 msgstr "&Demos"
 
-#: ../bin/misc.c:2550
+#: ../bin/misc.c:2554
 #, fuzzy
 msgid "Examples..."
 msgstr "&Courbes de transition ..."
 
-#: ../bin/misc.c:2554 ../bin/smalldlg.c:222
+#: ../bin/misc.c:2558 ../bin/smalldlg.c:222
 msgid "About"
 msgstr "À propos"
 
-#: ../bin/misc.c:2567
+#: ../bin/misc.c:2571
 msgid "Tur&nout Designer..."
 msgstr "Conception d'a&iguillage ..."
 
-#: ../bin/misc.c:2570
+#: ../bin/misc.c:2574
 msgid "Layout &Control Elements"
 msgstr "Éléments de &contrôle du plan"
 
-#: ../bin/misc.c:2572
+#: ../bin/misc.c:2576
 msgid "&Group"
 msgstr "Grouper"
 
-#: ../bin/misc.c:2574
+#: ../bin/misc.c:2578
 msgid "&Ungroup"
 msgstr "&Dissocier"
 
-#: ../bin/misc.c:2578
+#: ../bin/misc.c:2582
 msgid "Custom defined parts..."
 msgstr "Matériels prototypes ..."
 
-#: ../bin/misc.c:2581
+#: ../bin/misc.c:2585
 msgid "Update Turnouts and Structures"
 msgstr "Mise à jour des aiguillages et structures"
 
-#: ../bin/misc.c:2590
+#: ../bin/misc.c:2594
 msgid "Layers ..."
 msgstr "Calques ..."
 
-#: ../bin/misc.c:2594
+#: ../bin/misc.c:2598
 msgid "Parts &List ..."
 msgstr "N&omenclature ..."
 
-#: ../bin/misc.c:2597
+#: ../bin/misc.c:2601
 msgid "Price List..."
 msgstr "Liste de prix ..."
 
-#: ../bin/misc.c:2675
+#: ../bin/misc.c:2679
 #, fuzzy
 msgid "Import/Export"
 msgstr "Exporter"
 
-#: ../bin/misc.c:2705
+#: ../bin/misc.c:2709
 msgid ""
 "Program was not terminated properly. Do you want to resume working on the "
 "previous trackplan?"
@@ -6131,28 +6142,28 @@ msgstr ""
 "Le programme ne s'est pas été terminé correctement. Voulez-vous reprendre le "
 "travail précédent?"
 
-#: ../bin/misc.c:2706
+#: ../bin/misc.c:2710
 msgid "Resume"
 msgstr "Résumé"
 
-#: ../bin/misc.c:2818
+#: ../bin/misc.c:2822
 #, c-format
 msgid "Unnamed Trackplan - %s(%s)"
 msgstr "Plan de voie sans nom -%s(%s)"
 
-#: ../bin/misc.c:2900
+#: ../bin/misc.c:2904
 msgid "Initializing commands"
 msgstr "Initialisation des commandes"
 
-#: ../bin/misc.c:2909
+#: ../bin/misc.c:2913
 msgid "Initializing menus"
 msgstr "Initialisation des menus"
 
-#: ../bin/misc.c:2944
+#: ../bin/misc.c:2948
 msgid "Reading parameter files"
 msgstr "Lecture des fichiers de paramètres"
 
-#: ../bin/misc.c:2978
+#: ../bin/misc.c:2982
 msgid "Initialization complete"
 msgstr "Initialisation terminée"
 
@@ -6230,6 +6241,10 @@ msgstr "Aide"
 #: ../bin/paramfile.c:227
 msgid "Parameter"
 msgstr "Paramètre"
+
+#: ../bin/paramfile.c:312
+msgid "Unknown param file line - skip until next good object?"
+msgstr ""
 
 #: ../bin/paramfilelist.c:106
 #, c-format
@@ -6314,11 +6329,11 @@ msgstr "Couleur de ligne"
 #: ../bin/tbezier.c:379
 #, c-format
 msgid ""
-"Bezier %s(%d): Layer=%u MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,%"
-"0.3f] CP1=[%0.3f,%0.3f] CP2=[%0.3f, %0.3f]"
+"Bezier %s(%d): Layer=%u MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,"
+"%0.3f] CP1=[%0.3f,%0.3f] CP2=[%0.3f, %0.3f]"
 msgstr ""
-"Bezier %s(%d): Calque=%u Rayon Min=%s Longueur=%s EP=[%0.3f,%0.3f] [%0.3f,%"
-"0.3f] CP1=[%0.3f,%0.3f] CP2=[%0.3f, %0.3f]"
+"Bezier %s(%d): Calque=%u Rayon Min=%s Longueur=%s EP=[%0.3f,%0.3f] [%0.3f,"
+"%0.3f] CP1=[%0.3f,%0.3f] CP2=[%0.3f, %0.3f]"
 
 #: ../bin/tbezier.c:453
 msgid "Bezier Track"
@@ -6352,8 +6367,8 @@ msgstr "Angle total"
 #: ../bin/tcornu.c:444
 #, c-format
 msgid ""
-"Cornu Track(%d): Layer=%u MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,%"
-"0.3f]"
+"Cornu Track(%d): Layer=%u MinRadius=%s Length=%s EP=[%0.3f,%0.3f] [%0.3f,"
+"%0.3f]"
 msgstr ""
 "Voie  de Cornu(%d) : couche =%u Rayon Min =%s longueur =%s EP=[%0.3f,%0.3f] "
 "[%0.3f,%0.3f]"
@@ -6388,8 +6403,8 @@ msgstr "Longueur angulaire"
 #: ../bin/tcurve.c:553
 #, c-format
 msgid ""
-"Helix Track(%d): Layer=%d Radius=%s Turns=%ld Length=%s Center=[%s,%s] EP=[%"
-"0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"
+"Helix Track(%d): Layer=%d Radius=%s Turns=%ld Length=%s Center=[%s,%s] "
+"EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"
 msgstr ""
 "Voie de l'hélicoïde\n"
 "\n"
@@ -6399,11 +6414,11 @@ msgstr ""
 #: ../bin/tcurve.c:563
 #, c-format
 msgid ""
-"Curved Track(%d): Layer=%d Radius=%s Length=%s Center=[%s,%s] EP=[%0.3f,%"
-"0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"
+"Curved Track(%d): Layer=%d Radius=%s Length=%s Center=[%s,%s] EP=[%0.3f,"
+"%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"
 msgstr ""
-"Voie courbe (%d) : Couche =%d Rayon =%s Longueur =%s Centre = [%s,%s] EP=[%"
-"0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"
+"Voie courbe (%d) : Couche =%d Rayon =%s Longueur =%s Centre = [%s,%s] "
+"EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A%0.3f]"
 
 #: ../bin/tcurve.c:640
 msgid "Helix Track"
@@ -6453,8 +6468,8 @@ msgid ""
 "Joint Track(%d): Layer=%d Length=%0.3f EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A"
 "%0.3f]"
 msgstr ""
-"Voie raccordée(%d): Couche=%d Longueur=%0.3f EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%"
-"0.3f A%0.3f]"
+"Voie raccordée(%d): Couche=%d Longueur=%0.3f EP=[%0.3f,%0.3f A%0.3f] [%0.3f,"
+"%0.3f A%0.3f]"
 
 #: ../bin/tease.c:615
 msgid "Easement Track"
@@ -6495,38 +6510,38 @@ msgstr "Déplacer les objets ci-dessus"
 msgid "Mode Objects Below"
 msgstr "Objets ci-dessous"
 
-#: ../bin/track.c:1607
+#: ../bin/track.c:1626
 msgid "Audit"
 msgstr "Vérification"
 
-#: ../bin/track.c:1896
+#: ../bin/track.c:1915
 #, c-format
 msgid "%d Track(s) loosened"
 msgstr "%d Voie(s) détachées"
 
-#: ../bin/track.c:1903
+#: ../bin/track.c:1922
 msgid "No tracks loosened"
 msgstr "Pas de voies détachées"
 
-#: ../bin/track.c:1913 ../bin/track.c:1917
+#: ../bin/track.c:1932 ../bin/track.c:1936
 #, c-format
 msgid "Connecting a non-track(%d) to (%d)"
 msgstr "Connecter un autre objet (%d) à une voie (%d)"
 
-#: ../bin/track.c:1972
+#: ../bin/track.c:1991
 msgid "Join Abutting Tracks"
 msgstr "Raccorder les voies adjacentes"
 
-#: ../bin/track.c:2249 ../bin/track.c:2284
+#: ../bin/track.c:2268 ../bin/track.c:2303
 msgid "Inside turnout track"
 msgstr ""
 
-#: ../bin/track.c:2267
+#: ../bin/track.c:2286
 #, fuzzy, c-format
 msgid "Curve: Length=%s Radius=%0.3f Arc=%0.3f"
 msgstr "Courbe de Cornu : longueur =%0.3f rayon minimum =%0.3f"
 
-#: ../bin/track.c:2290 ../bin/track.c:2348 ../bin/tstraigh.c:566
+#: ../bin/track.c:2309 ../bin/track.c:2367 ../bin/tstraigh.c:566
 #, c-format
 msgid "Straight: Length=%s Angle=%0.3f"
 msgstr "Droit : Longueur = %s Angle = %0.3f"
@@ -6541,7 +6556,7 @@ msgstr "Sommaire"
 msgid "Link"
 msgstr "Ligne"
 
-#: ../bin/trknote.c:60 ../../../../build/work/app/bin/bllnhlp.c:100
+#: ../bin/trknote.c:60 ../../../../build/work/app/bin/bllnhlp.c:101
 msgid "Weblink"
 msgstr ""
 
@@ -6549,7 +6564,7 @@ msgstr ""
 msgid "Expected END statement not found!"
 msgstr ""
 
-#: ../bin/trknote.c:591 ../../../../build/work/app/bin/bllnhlp.c:107
+#: ../bin/trknote.c:591 ../../../../build/work/app/bin/bllnhlp.c:108
 msgid "Place a note on the layout"
 msgstr "Mettre une note sur le plan"
 
@@ -6568,8 +6583,8 @@ msgid ""
 "Straight Track(%d): Layer=%d Length=%s EP=[%0.3f,%0.3f A%0.3f] [%0.3f,%0.3f A"
 "%0.3f]"
 msgstr ""
-"Voie droite (%d) : Couche =%d Longueur =%s EP =[%0.3f,%0.3f A%0.3f] [%0.3f,%"
-"0.3f A%0.3f]"
+"Voie droite (%d) : Couche =%d Longueur =%s EP =[%0.3f,%0.3f A%0.3f] [%0.3f,"
+"%0.3f A%0.3f]"
 
 #: ../bin/tstraigh.c:479
 msgid "Extending Straight Track"
@@ -6785,8 +6800,8 @@ msgstr ""
 #: ../../../../build/work/app/help/messages.h:16
 msgid "MSG_CURVE_OUT_OF_RANGE\tAngle must be between 0\\u00B0 and 360\\u00B0."
 msgstr ""
-"MSG_CURVE_OUT_OF_RANGE\tL'angle doit être compris entre 0\\u00B0 et 360"
-"\\u00B0."
+"MSG_CURVE_OUT_OF_RANGE\tL'angle doit être compris entre 0\\u00B0 et "
+"360\\u00B0."
 
 #: ../../../../build/work/app/help/messages.h:17
 msgid ""
@@ -7025,6 +7040,46 @@ msgstr ""
 "mettre à jour votre version de %s"
 
 #: ../../../../build/work/app/help/messages.h:51
+#, c-format
+msgid ""
+"MSG_LAYOUT_LINES_SKIPPED\tWhile processing Layout file %s, %d lines were "
+"skipped because they were not recognized."
+msgstr ""
+
+#: ../../../../build/work/app/help/messages.h:52
+#, fuzzy, c-format
+msgid ""
+"MSG_PARAM_UPGRADE_VERSION1\tFile version %ld is greater than supported..."
+"\tFile version %ld is greater than supported\n"
+"version %d. You need to upgrade %s\n"
+"to at least version %s."
+msgstr ""
+"MSG_UPGRADE_VERSION1\tLa version du fichier %ld est supérieure à celle "
+"supportée ...\tLa version du fichier %ld est supérieure \n"
+"à la version prise en charge %d. Vous devez \n"
+"mettre à niveau %s au moins vers la version %s ."
+
+#: ../../../../build/work/app/help/messages.h:53
+#, fuzzy, c-format
+msgid ""
+"MSG_PARAM_UPGRADE_VERSION2\tFile version %ld is greater than supported..."
+"\tFile version %ld is greater than supported\n"
+"version %d. You need to upgrade your\n"
+"version of %s"
+msgstr ""
+"MSG_UPGRADE_VERSION2\tLa version du fichier %ld est supérieure à celle "
+"supportée...\tLa version du fichier %ld est supérieure à \n"
+"la version prise en charge %d. Vous devez \n"
+"mettre à jour votre version de %s"
+
+#: ../../../../build/work/app/help/messages.h:54
+#, c-format
+msgid ""
+"MSG_PARAM_LINES_SKIPPED\tWhile processing Parameter file %s, %d lines were "
+"skipped because they were not recognized."
+msgstr ""
+
+#: ../../../../build/work/app/help/messages.h:55
 msgid ""
 "MSG_MOVE_POINTS_OTHER_SIDE\tFrog angle prevents placement of points. Move "
 "points to opposite side of frog."
@@ -7032,35 +7087,35 @@ msgstr ""
 "MSG_MOVE_POINTS_OTHER_SIDE\tL'angle du cœur empêche le placement des points. "
 "Déplacez les points sur le côté opposé au cœur."
 
-#: ../../../../build/work/app/help/messages.h:52
+#: ../../../../build/work/app/help/messages.h:56
 msgid "MSG_NO_ROOM_BTW_TRKS\tInsufficient space between existing stall tracks."
 msgstr ""
 "MSG_NO_ROOM_BTW_TRKS\tEspace insuffisant entre les voies de manœuvre "
 "existantes."
 
-#: ../../../../build/work/app/help/messages.h:53
+#: ../../../../build/work/app/help/messages.h:57
 #, c-format
 msgid ""
-"MSG_JOIN_DIFFER_ELEV\tJoining tracks with differing elevations (N.NNN)"
-"\tJoining tracks with differing elevations (%0.2f)"
+"MSG_JOIN_DIFFER_ELEV\tJoining tracks with differing elevations (N."
+"NNN)\tJoining tracks with differing elevations (%0.2f)"
 msgstr ""
-"MSG_JOIN_DIFFER_ELEV\tJonction de voies d’élévation différentes (N.NNN)"
-"\tJonction de voies d’élévation différentes (%0.2f)"
+"MSG_JOIN_DIFFER_ELEV\tJonction de voies d’élévation différentes (N."
+"NNN)\tJonction de voies d’élévation différentes (%0.2f)"
 
-#: ../../../../build/work/app/help/messages.h:54
+#: ../../../../build/work/app/help/messages.h:58
 #, fuzzy
 msgid "MSG_TRK_DESC_NOT_VISIBLE\tLabel description is hidden"
 msgstr "MSG_DESC_NOT_VISIBLE\tDescriptions d'étiquettes non visibles"
 
-#: ../../../../build/work/app/help/messages.h:55
+#: ../../../../build/work/app/help/messages.h:59
 msgid "MSG_DESC_NOT_VISIBLE\tLabel descriptions not visible"
 msgstr "MSG_DESC_NOT_VISIBLE\tDescriptions d'étiquettes non visibles"
 
-#: ../../../../build/work/app/help/messages.h:56
+#: ../../../../build/work/app/help/messages.h:60
 msgid "MSG_OBJECT_TOO_SHORT\tLength of object is too short."
 msgstr "MSG_OBJECT_TOO_SHORT\tLa longueur de l'objet est trop courte."
 
-#: ../../../../build/work/app/help/messages.h:57
+#: ../../../../build/work/app/help/messages.h:61
 #, c-format
 msgid ""
 "MSG_PRINT_MAX_SIZE\tMaximum allowed page size is W x H\tMaximum allowed page "
@@ -7069,7 +7124,7 @@ msgstr ""
 "MSG_PRINT_MAX_SIZE\tLa taille de page maximale autorisée est W x H\tLa "
 "taille de page maximale autorisée est %s x %s"
 
-#: ../../../../build/work/app/help/messages.h:58
+#: ../../../../build/work/app/help/messages.h:62
 #, c-format
 msgid ""
 "MSG_PRMFIL_NO_CONTENTS\tNew Parameter File has no CONTENTS line: FILENAME."
@@ -7079,7 +7134,7 @@ msgstr ""
 "CONTENTS : FILENAME.\tLe nouveau fichier de paramètres n'a pas de ligne "
 "CONTENTS :%s"
 
-#: ../../../../build/work/app/help/messages.h:59
+#: ../../../../build/work/app/help/messages.h:63
 msgid ""
 "MSG_NO_CARS\tNo Cars are defined for the current scale....\tNo Cars are "
 "defined for the current scale.\n"
@@ -7091,7 +7146,7 @@ msgstr ""
 "\n"
 "Voulez-vous utiliser la boîte de dialogue Car Inventory ?"
 
-#: ../../../../build/work/app/help/messages.h:60
+#: ../../../../build/work/app/help/messages.h:64
 msgid ""
 "MSG_NO_CARPROTO\tNo Car Prototypes are defined....\tNo Car Prototypes are "
 "defined.\n"
@@ -7105,23 +7160,23 @@ msgstr ""
 "de dialogue Fichiers de paramètres ou créez une définition de \n"
 "prototype à l'aide de la boîte de dialogue Prototype de voiture."
 
-#: ../../../../build/work/app/help/messages.h:61
+#: ../../../../build/work/app/help/messages.h:65
 msgid "MSG_CARIMP_NO_DATA\tNo data present in Car Import file."
 msgstr ""
 "MSG_CARIMP_NO_DATA\tAucune donnée présente dans le fichier d'importation de "
 "véhicule."
 
-#: ../../../../build/work/app/help/messages.h:62
+#: ../../../../build/work/app/help/messages.h:66
 msgid "MSG_PRINT_NO_PAGES\tNo pages selected for printing."
 msgstr "MSG_PRINT_NO_PAGES\tAucune page sélectionnée pour l'impression."
 
-#: ../../../../build/work/app/help/messages.h:63
+#: ../../../../build/work/app/help/messages.h:67
 msgid "MSG_NO_PATH_TO_EP\tNo path between Profile and selected endpoint."
 msgstr ""
 "MSG_NO_PATH_TO_EP\tIl n'y a pas de connexion entre le profil de la grotte et "
 "le point final sélectionné."
 
-#: ../../../../build/work/app/help/messages.h:64
+#: ../../../../build/work/app/help/messages.h:68
 #, c-format
 msgid ""
 "MSG_PRMFIL_NO_MAP\tNo Parameter File Map for CONTENTS\tNo Parameter File Map "
@@ -7130,17 +7185,17 @@ msgstr ""
 "MSG_PRMFIL_NO_MAP\tAucun fichier de paramètre de carte pour CONTENTS\tLe "
 "nouveau fichier de paramètres %s ne peut pas être ouvert"
 
-#: ../../../../build/work/app/help/messages.h:65
+#: ../../../../build/work/app/help/messages.h:69
 msgid "MSG_NO_SELECTED_TRK\tNo track(s) selected!"
 msgstr "MSG_NO_SELECTED_TRK\tAucune voie(s) sélectionnée!"
 
-#: ../../../../build/work/app/help/messages.h:66
+#: ../../../../build/work/app/help/messages.h:70
 msgid ""
 "MSG_NO_EMPTY_LAYER\tNo layer was found that has no contents, so the module "
 "can not be imported"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:67
+#: ../../../../build/work/app/help/messages.h:71
 #, c-format
 msgid ""
 "MSG_NO_TURNOUTS_AVAILABLE\tNo Turnouts|Structures are available.\tNo %s are "
@@ -7149,7 +7204,7 @@ msgstr ""
 "MSG_NO_TURNOUTS_AVAILABLE\tAucun aiguillages|bâtiments sont disponibles."
 "\tAucun %s n'est disponible."
 
-#: ../../../../build/work/app/help/messages.h:68
+#: ../../../../build/work/app/help/messages.h:72
 msgid ""
 "MSG_CARDESC_VALUE_ZERO\tNumeric values on the Car Description...\tNumeric "
 "values on the Car Description\n"
@@ -7159,11 +7214,11 @@ msgstr ""
 "\tValeurs numériques de la description de véhicule\n"
 "Doit être supérieur à 0."
 
-#: ../../../../build/work/app/help/messages.h:69
+#: ../../../../build/work/app/help/messages.h:73
 msgid "MSG_MOVE_OUT_OF_BOUNDS\tObject has moved beyond room boundaries."
 msgstr "MSG_MOVE_OUT_OF_BOUNDS\tL'objet a dépassé les limites de la pièce."
 
-#: ../../../../build/work/app/help/messages.h:70
+#: ../../../../build/work/app/help/messages.h:74
 #, fuzzy
 msgid ""
 "MSG_PARALLEL_SEP_GTR_0\tParallel separation must be greater than 0, or the "
@@ -7171,7 +7226,7 @@ msgid ""
 msgstr ""
 "MSG_PARALLEL_SEP_GTR_0\tLa séparation parallèle doit être supérieure à 0."
 
-#: ../../../../build/work/app/help/messages.h:71
+#: ../../../../build/work/app/help/messages.h:75
 msgid ""
 "MSG_CARPART_DUPNAME\tPart Number for this Manufacturer already exists...."
 "\tPart Number for this Manufacturer already exists.\n"
@@ -7183,7 +7238,7 @@ msgstr ""
 "\n"
 "Voulez-vous le mettre à jour?"
 
-#: ../../../../build/work/app/help/messages.h:72
+#: ../../../../build/work/app/help/messages.h:76
 #, c-format
 msgid ""
 "MSG_PLAYBACK_LISTENTRY\tPlayback: Cannot find list entry: NAME\tPlayback: "
@@ -7192,7 +7247,7 @@ msgstr ""
 "MSG_PLAYBACK_LISTENTRY\tLecture : entrée de liste introuvable : NOM"
 "\tLecture : entrée de liste introuvable : %s"
 
-#: ../../../../build/work/app/help/messages.h:73
+#: ../../../../build/work/app/help/messages.h:77
 #, c-format
 msgid ""
 "MSG_PLAYBACK_VERSION_UPGRADE\tPlayback file version %ld is...\tPlayback file "
@@ -7205,7 +7260,7 @@ msgstr ""
 "supérieure à la version prise en charge %d\n"
 "Vous devez mettre à jour votre version de %s"
 
-#: ../../../../build/work/app/help/messages.h:74
+#: ../../../../build/work/app/help/messages.h:78
 #, c-format
 msgid ""
 "MSG_DOMOUSE_BAD_OP\tPlayback: unknown action NNN\tPlayback: unknown action %d"
@@ -7213,21 +7268,21 @@ msgstr ""
 "MSG_DOMOUSE_BAD_OP\tLecture : action inconnue NNN\tLecture : action inconnue "
 "%d"
 
-#: ../../../../build/work/app/help/messages.h:75
+#: ../../../../build/work/app/help/messages.h:79
 msgid "MSG_MOVE_POINTS_AWAY_CLOSE\tPoints are to close to frog; move away."
 msgstr ""
 "MSG_MOVE_POINTS_AWAY_CLOSE\tLes points sont trop proches du cœur; s'éloigner."
 
-#: ../../../../build/work/app/help/messages.h:76
+#: ../../../../build/work/app/help/messages.h:80
 msgid "MSG_POLY_SHAPES_3_SIDES\tPoly shapes must have at least 3 sides."
 msgstr ""
 "MSG_POLY_SHAPES_3_SIDES\tLes Polyformes doivent avoir au moins 3 côtés."
 
-#: ../../../../build/work/app/help/messages.h:77
+#: ../../../../build/work/app/help/messages.h:81
 msgid "MSG_POLY_MULTIPLE_SELECTED\tCan't delete multiple points at once"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:78
+#: ../../../../build/work/app/help/messages.h:82
 msgid ""
 "MSG_CARPROTO_DUPNAME\tPrototype name already exists....\tPrototype name "
 "already exists.\n"
@@ -7239,15 +7294,15 @@ msgstr ""
 "\n"
 "Voulez-vous le mettre à jour?"
 
-#: ../../../../build/work/app/help/messages.h:79
+#: ../../../../build/work/app/help/messages.h:83
 msgid "MSG_RADIUS_GTR_0\tRadius must be greater than 0."
 msgstr "MSG_RADIUS_GTR_0\tLe rayon doit être supérieur à 0."
 
-#: ../../../../build/work/app/help/messages.h:80
+#: ../../../../build/work/app/help/messages.h:84
 msgid "MSG_RADIUS_GTR_10000\tRadius must be less than 10000."
 msgstr "MSG_RADIUS_GTR_10000\tLe rayon doit être inférieur à 10000."
 
-#: ../../../../build/work/app/help/messages.h:81
+#: ../../../../build/work/app/help/messages.h:85
 msgid ""
 "MSG_RADIUS_TOO_BIG\tThe Circle or Helix will not fit within the layouts room "
 "parameters (Height and Width)."
@@ -7255,7 +7310,7 @@ msgstr ""
 "MSG_RADIUS_TOO_BIG\tLe cercle ou l'hélicoïde ne rentre pas dans le plan de "
 "la pièce (hauteur et largeur)."
 
-#: ../../../../build/work/app/help/messages.h:82
+#: ../../../../build/work/app/help/messages.h:86
 #, c-format
 msgid ""
 "MSG_RESCALE_TOO_BIG\tRescaled tracks do not fit within layouts room "
@@ -7269,7 +7324,7 @@ msgstr ""
 "(Longueur et largeur). La taille requise est\n"
 "au moins %s sur %s."
 
-#: ../../../../build/work/app/help/messages.h:83
+#: ../../../../build/work/app/help/messages.h:87
 msgid ""
 "MSG_CARIMP_MISSING_COLUMNS\tRequired column headers missing from Car Import "
 "file."
@@ -7277,7 +7332,7 @@ msgstr ""
 "MSG_CARIMP_MISSING_COLUMNS\tLes en-têtes de colonne requises sont absentes "
 "du fichier d'importation de véhicule."
 
-#: ../../../../build/work/app/help/messages.h:84
+#: ../../../../build/work/app/help/messages.h:88
 #, c-format
 msgid ""
 "MSG_2ND_TRK_NOT_SEL_UNSEL\tSecond track must be selected|unselected\tSecond "
@@ -7286,15 +7341,15 @@ msgstr ""
 "MSG_2ND_TRK_NOT_SEL_UNSEL\t La deuxième voie peut être sélectionnée ou non\t "
 "La deuxième voie doit être %s."
 
-#: ../../../../build/work/app/help/messages.h:85
+#: ../../../../build/work/app/help/messages.h:89
 msgid "MSG_OUT_OF_BOUNDS\tSelected page is out of bounds."
 msgstr "MSG_OUT_OF_BOUNDS\tLa page sélectionnée est hors de portée."
 
-#: ../../../../build/work/app/help/messages.h:86
+#: ../../../../build/work/app/help/messages.h:90
 msgid "MSG_SEL_POS_FIRST\tSelect position prior to entering Text."
 msgstr "MSG_SEL_POS_FIRST\tSélectionnez la position avant de saisir du texte."
 
-#: ../../../../build/work/app/help/messages.h:87
+#: ../../../../build/work/app/help/messages.h:91
 msgid ""
 "MSG_CARPROTO_BADSEGS\tSelected shapes must define a rectangular area ..."
 "\tSelected shapes must define a rectangular\n"
@@ -7305,7 +7360,7 @@ msgstr ""
 "rectangulaire\n"
 "zone de longueur supérieure à la hauteur."
 
-#: ../../../../build/work/app/help/messages.h:88
+#: ../../../../build/work/app/help/messages.h:92
 msgid ""
 "MSG_TOO_FAR_APART_DIVERGE\tSelected tracks deviate too much or are too far "
 "apart from each other."
@@ -7313,21 +7368,21 @@ msgstr ""
 "MSG_TOO_FAR_APART_DIVERGE\tLes voies sélectionnées s'écartent trop ou sont "
 "trop éloignées les unes des autres."
 
-#: ../../../../build/work/app/help/messages.h:89
+#: ../../../../build/work/app/help/messages.h:93
 msgid "MSG_COMMAND_DISABLED\tSpecified command disabled."
 msgstr "MSG_COMMAND_DISABLED\tCommande spécifiée désactivée."
 
-#: ../../../../build/work/app/help/messages.h:90
+#: ../../../../build/work/app/help/messages.h:94
 msgid "MSG_SPLIT_POS_BTW_MERGEPTS\tSplit position between Turnout Points"
 msgstr ""
 "MSG_SPLIT_POS_BTW_MERGEPTS\tLe point de séparation est situé entre les "
 "points de l'aiguillage"
 
-#: ../../../../build/work/app/help/messages.h:91
+#: ../../../../build/work/app/help/messages.h:95
 msgid "MSG_SPLIT_PATH_NOT_UNIQUE\tSplit position not on unique path"
 msgstr "MSG_SPLIT_PATH_NOT_UNIQUE\tLe point de séparation n'est pas clair"
 
-#: ../../../../build/work/app/help/messages.h:92
+#: ../../../../build/work/app/help/messages.h:96
 #, c-format
 msgid ""
 "MSG_CARIMP_MISSING_DIMS\tThe following car has no dimensions and a...\tThe "
@@ -7346,7 +7401,7 @@ msgstr ""
 "\n"
 "Souhaitez-vous continuer à importer d'autres véhicule ?"
 
-#: ../../../../build/work/app/help/messages.h:93
+#: ../../../../build/work/app/help/messages.h:97
 #, c-format
 msgid ""
 "MSG_CARIMP_MISSING_PARTNO\tThe following car has no Part Number...\tThe "
@@ -7363,7 +7418,7 @@ msgstr ""
 "\n"
 "Souhaitez-vous continuer à importer d'autres matériels roulants ?"
 
-#: ../../../../build/work/app/help/messages.h:94
+#: ../../../../build/work/app/help/messages.h:98
 #, c-format
 msgid ""
 "MSG_CARIMP_IGNORED_COLUMN\tThe following column in the Car Import file will "
@@ -7378,7 +7433,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../../../../build/work/app/help/messages.h:95
+#: ../../../../build/work/app/help/messages.h:99
 msgid ""
 "MSG_CANT_MOVE_UNDER_TRAIN\tThe position of a turnout or turntable cannot be "
 "changed while occupied by a train."
@@ -7386,7 +7441,7 @@ msgstr ""
 "MSG_CANT_MOVE_UNDER_TRAIN\tLa position d'un aiguillage ou d'un pont tournant "
 "ne peut pas être modifiée tant qu'elle est occupée par un train."
 
-#: ../../../../build/work/app/help/messages.h:96
+#: ../../../../build/work/app/help/messages.h:100
 msgid ""
 "MSG_STRUCT_NO_STRUCTS\tThere are no structures to choose from in the "
 "structure...\tThere are no structures to choose from in the structure\n"
@@ -7401,7 +7456,7 @@ msgstr ""
 "<Fichier|Fichiers de paramètres> ou créez un nouveau \n"
 "bâtiment à l’aide de la commande Grouper."
 
-#: ../../../../build/work/app/help/messages.h:97
+#: ../../../../build/work/app/help/messages.h:101
 msgid ""
 "MSG_TURNOUT_NO_TURNOUT\tThere are no turnouts to choose from in the "
 "turnout...\tThere are no turnouts to choose from in the turnout\n"
@@ -7418,38 +7473,38 @@ msgstr ""
 "<Fichier|Fichiers de paramètres> pour charger un autre \n"
 "fichier de paramètres"
 
-#: ../../../../build/work/app/help/messages.h:98
+#: ../../../../build/work/app/help/messages.h:102
 msgid "MSG_NO_UNCONN_EP\tThere are no unconnected end points for this track"
 msgstr ""
 "MSG_NO_UNCONN_EP\tIl n'y a pas de points de fin non connectés pour cette voie"
 
-#: ../../../../build/work/app/help/messages.h:99
+#: ../../../../build/work/app/help/messages.h:103
 msgid "MSG_PULL_FEW_SECTIONS\tThere are too few sections in this loop."
 msgstr "MSG_PULL_FEW_SECTIONS\tIl y a trop peu de sections dans cette boucle."
 
-#: ../../../../build/work/app/help/messages.h:100
+#: ../../../../build/work/app/help/messages.h:104
 msgid "MSG_NO_REDO\tThere is nothing to redo!"
 msgstr "MSG_NO_REDO\tIl n'y a rien à refaire!"
 
-#: ../../../../build/work/app/help/messages.h:101
+#: ../../../../build/work/app/help/messages.h:105
 msgid "MSG_NO_UNDO\tThere is nothing to undo!"
 msgstr "MSG_NO_UNDO\tIl n'y a rien à défaire!"
 
-#: ../../../../build/work/app/help/messages.h:102
+#: ../../../../build/work/app/help/messages.h:106
 msgid "MSG_TOOMANYSEGSINGROUP\tToo many segments in Group."
 msgstr "MSG_TOOMANYSEGSINGROUP\tTrop de segments dans le groupe."
 
-#: ../../../../build/work/app/help/messages.h:103
+#: ../../../../build/work/app/help/messages.h:107
 msgid "MSG_CANNOT_CHANGE\tTrack cannot be changed."
 msgstr "MSG_CANNOT_CHANGE\tLa voie ne peut pas être modifiée."
 
-#: ../../../../build/work/app/help/messages.h:104
+#: ../../../../build/work/app/help/messages.h:108
 msgid "MSG_POINT_INSIDE_TURNTABLE\tTrack endpoint is within turntable radius."
 msgstr ""
 "MSG_POINT_INSIDE_TURNTABLE\tLe point de fin de la voie est à l'intérieur du "
 "pont tournant."
 
-#: ../../../../build/work/app/help/messages.h:105
+#: ../../../../build/work/app/help/messages.h:109
 msgid ""
 "MSG_MOVE_POINTS_AWAY_NO_INTERSECTION\tTrack intersection not possible; move "
 "points away from frog."
@@ -7457,7 +7512,7 @@ msgstr ""
 "MSG_MOVE_POINTS_AWAY_NO_INTERSECTION\tIntersection de la voie impossible; "
 "éloignez les points du cœur."
 
-#: ../../../../build/work/app/help/messages.h:106
+#: ../../../../build/work/app/help/messages.h:110
 #, c-format
 msgid ""
 "MSG_TRK_TOO_SHORT\tTrack is too short by N.NNN\t%strack is too short by %0.3f"
@@ -7465,7 +7520,7 @@ msgstr ""
 "MSG_TRK_TOO_SHORT\tLa voie est trop courte autour de N.NNN\tLa voie %s est "
 "trop courte de %0.3f"
 
-#: ../../../../build/work/app/help/messages.h:107
+#: ../../../../build/work/app/help/messages.h:111
 #, c-format
 msgid ""
 "MSG_RADIUS_LSS_EASE_MIN\tTrack radius (N.NNN) is smaller than easement "
@@ -7475,21 +7530,21 @@ msgstr ""
 "de transition minimum (N.NNN).\tLe rayon de la voie (%s) est inférieur à "
 "l'arc de transition minimum (%s)."
 
-#: ../../../../build/work/app/help/messages.h:108
+#: ../../../../build/work/app/help/messages.h:112
 msgid ""
 "MSG_CANT_MODIFY_FROZEN_TRK\tTracks in a frozen layer cannot be modified."
 msgstr ""
 "MSG_CANT_MODIFY_FROZEN_TRK\tLes voies d'un calque gelé ne peuvent pas être "
 "modifiées."
 
-#: ../../../../build/work/app/help/messages.h:109
+#: ../../../../build/work/app/help/messages.h:113
 #, fuzzy
 msgid "MSG_CANT_MODIFY_MODULE_TRK\tTracks in a module cannot be modified."
 msgstr ""
 "MSG_CANT_MODIFY_FROZEN_TRK\tLes voies d'un calque gelé ne peuvent pas être "
 "modifiées."
 
-#: ../../../../build/work/app/help/messages.h:110
+#: ../../../../build/work/app/help/messages.h:114
 msgid ""
 "MSG_SEGMENTS_DIFFER\tTurnout definition contains non-track segments...."
 "\tTurnout definition contains non-track segments.\n"
@@ -7501,17 +7556,17 @@ msgstr ""
 "\n"
 "Voulez-vous les inclure dans cette mise à jour ?"
 
-#: ../../../../build/work/app/help/messages.h:111
+#: ../../../../build/work/app/help/messages.h:115
 msgid "MSG_TURNTABLE_DIAM_GTR_0\tTurntable diameter must greater than 0."
 msgstr ""
 "MSG_TURNTABLE_DIAM_GTR_0\tLe diamètre du pont tournant doit être supérieur à "
 "0."
 
-#: ../../../../build/work/app/help/messages.h:112
+#: ../../../../build/work/app/help/messages.h:116
 #, c-format
 msgid ""
-"MSG_UNDO_ASSERT\tUndo assertion failure %s:%d...\tUndo assertion failure %s:%"
-"d\n"
+"MSG_UNDO_ASSERT\tUndo assertion failure %s:%d...\tUndo assertion failure %s:"
+"%d\n"
 "Val = %ld(%lx)\n"
 "%s\n"
 "Please report this error to the XTrackCAD project development team at "
@@ -7524,7 +7579,7 @@ msgstr ""
 "Signalez cette erreur à l'équipe de développement du projet XTrackCAD de "
 "SourceForge."
 
-#: ../../../../build/work/app/help/messages.h:113
+#: ../../../../build/work/app/help/messages.h:117
 #, c-format
 msgid ""
 "MSG_PROG_CORRUPTED\tCritical file damaged!...\tCritical file damaged!\n"
@@ -7540,7 +7595,7 @@ msgstr ""
 "\n"
 "Veuillez réinstaller le logiciel."
 
-#: ../../../../build/work/app/help/messages.h:114
+#: ../../../../build/work/app/help/messages.h:118
 #, c-format
 msgid ""
 "MSG_ENTERED_STRING_TRUNCATED\tThe entered text is too long. Maximum length "
@@ -7549,13 +7604,13 @@ msgstr ""
 "MSG_ENTERED_STRING_TRUNCATED\tLe texte saisi est trop long. La longueur "
 "maximale est %d."
 
-#: ../../../../build/work/app/help/messages.h:115
+#: ../../../../build/work/app/help/messages.h:119
 #, c-format
 msgid "MSG_PT_IS_NOT_TRK\t[X Y] is not a track\t[%s %s] is not a track."
 msgstr ""
 "MSG_PT_IS_NOT_TRK\t[X Y] n'est pas une voie\t[%s %s] n'est pas une voie."
 
-#: ../../../../build/work/app/help/messages.h:116
+#: ../../../../build/work/app/help/messages.h:120
 msgid ""
 "MSG_BITMAP_SIZE_WARNING\tYou have specified a large Bitmap....\tYou have "
 "specified a large Bitmap.\n"
@@ -7567,12 +7622,12 @@ msgstr ""
 "\n"
 "Etes-vous sur de vouloir continuer ?"
 
-#: ../../../../build/work/app/help/messages.h:117
+#: ../../../../build/work/app/help/messages.h:121
 #, c-format
 msgid "Are you sure you want to delete these %d car(s)?"
 msgstr "Êtes-vous sûr de vouloir supprimer ces %d matériels roulants ?"
 
-#: ../../../../build/work/app/help/messages.h:118
+#: ../../../../build/work/app/help/messages.h:122
 #, c-format
 msgid ""
 "Cannot open %s file:\n"
@@ -7581,123 +7636,123 @@ msgstr ""
 "Impossible d'ouvrir le fichier %s :\n"
 "%s : %s"
 
-#: ../../../../build/work/app/help/messages.h:119
+#: ../../../../build/work/app/help/messages.h:123
 #, fuzzy, c-format
 msgid "Cannot create directory: %s - %s"
 msgstr "Impossible de créer %s"
 
-#: ../../../../build/work/app/help/messages.h:120
+#: ../../../../build/work/app/help/messages.h:124
 #, fuzzy, c-format
 msgid "Cannot open directory: %s"
 msgstr ""
 "Impossible d'ouvrir le fichier %s :\n"
 "%s : %s"
 
-#: ../../../../build/work/app/help/messages.h:121
+#: ../../../../build/work/app/help/messages.h:125
 #, c-format
 msgid "Path for deletion is not a directory: %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:122
+#: ../../../../build/work/app/help/messages.h:126
 #, c-format
 msgid "Open failed for directory: %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:123
+#: ../../../../build/work/app/help/messages.h:127
 #, c-format
 msgid "Can't add directory record %s to zip - %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:124
+#: ../../../../build/work/app/help/messages.h:128
 #, c-format
 msgid "Can't add file record %s to zip at %s - %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:125
+#: ../../../../build/work/app/help/messages.h:129
 #, fuzzy, c-format
 msgid "Can't create zip %s - %s"
 msgstr "Impossible de créer %s"
 
-#: ../../../../build/work/app/help/messages.h:126
+#: ../../../../build/work/app/help/messages.h:130
 #, c-format
 msgid "Close failure for zip %s - %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:127
+#: ../../../../build/work/app/help/messages.h:131
 #, c-format
 msgid "Rename failure for zip from %s to %s - %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:128
+#: ../../../../build/work/app/help/messages.h:132
 #, c-format
 msgid "Open failure for zip %s - %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:129
+#: ../../../../build/work/app/help/messages.h:133
 #, c-format
 msgid "Index failure for zip %s - %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:130
+#: ../../../../build/work/app/help/messages.h:134
 #, c-format
 msgid "Open read file failure %s %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:131
+#: ../../../../build/work/app/help/messages.h:135
 #, c-format
 msgid "Open file in zip failure %s %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:132
+#: ../../../../build/work/app/help/messages.h:136
 #, c-format
 msgid "Unlink failed for: %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:133
+#: ../../../../build/work/app/help/messages.h:137
 #, c-format
 msgid "Remove Directory failed for: %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:134
+#: ../../../../build/work/app/help/messages.h:138
 #, c-format
 msgid "Cannot save archive to %s from directory: %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:135
+#: ../../../../build/work/app/help/messages.h:139
 #, c-format
 msgid "Cannot save manifest file to %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:136
+#: ../../../../build/work/app/help/messages.h:140
 #, fuzzy, c-format
 msgid "Cannot open manifest file %s"
 msgstr ""
 "Impossible d'ouvrir le fichier %s :\n"
 "%s : %s"
 
-#: ../../../../build/work/app/help/messages.h:137
+#: ../../../../build/work/app/help/messages.h:141
 #, c-format
 msgid "Cannot unpack file: %s for file: %s in directory: %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:138
+#: ../../../../build/work/app/help/messages.h:142
 #, fuzzy, c-format
 msgid "Cannot open file %s"
 msgstr ""
 "Impossible d'ouvrir le fichier %s :\n"
 "%s : %s"
 
-#: ../../../../build/work/app/help/messages.h:139
+#: ../../../../build/work/app/help/messages.h:143
 #, c-format
 msgid "Cannot copy file %s into directory %s"
 msgstr ""
 
-#: ../../../../build/work/app/help/messages.h:140
+#: ../../../../build/work/app/help/messages.h:144
 #, c-format
 msgid "Unrecognized Option: %s"
 msgstr "Option non reconnue : %s"
 
-#: ../../../../build/work/app/help/messages.h:141
+#: ../../../../build/work/app/help/messages.h:145
 #, c-format
 msgid ""
 "End-Of-Line is unexpected in a quoted field.\n"
@@ -7710,7 +7765,7 @@ msgstr ""
 "\n"
 "Voulez-vous continuer à lire le fichier?"
 
-#: ../../../../build/work/app/help/messages.h:142
+#: ../../../../build/work/app/help/messages.h:146
 #, c-format
 msgid ""
 "A comma was expected after this quoted field.\n"
@@ -7723,7 +7778,7 @@ msgstr ""
 "\n"
 "Voulez-vous continuer à charger le fichier?"
 
-#: ../../../../build/work/app/help/messages.h:143
+#: ../../../../build/work/app/help/messages.h:147
 #, c-format
 msgid ""
 "Error \\\\\"%s\\\\\" occurred while writing %s.\n"
@@ -7732,7 +7787,7 @@ msgstr ""
 "Une erreur \\\\\"%s\\\\\" s'est produite lors de l'écriture de %s.\n"
 "Veuillez vérifier l'espace disque et l'état du système."
 
-#: ../../../../build/work/app/help/messages.h:144
+#: ../../../../build/work/app/help/messages.h:148
 #, c-format
 msgid ""
 "At least one path for the Turnout T%d does not\n"
@@ -7743,28 +7798,28 @@ msgstr ""
 "termine pas sur un bout. Une telle voie ne peut pas être groupée.\n"
 "La voie a été désélectionnée."
 
-#: ../../../../build/work/app/help/messages.h:145
+#: ../../../../build/work/app/help/messages.h:149
 msgid "inv-pathEndTrk on Path."
 msgstr "tracé invalide de fin de voie."
 
-#: ../../../../build/work/app/help/messages.h:146
+#: ../../../../build/work/app/help/messages.h:150
 msgid "inv-pathStartTrk on Path"
 msgstr "tracé invalide de début de voie"
 
-#: ../../../../build/work/app/help/messages.h:147
+#: ../../../../build/work/app/help/messages.h:151
 #, c-format
 msgid "%s:%d- %s"
 msgstr "%s:%d- %s"
 
-#: ../../../../build/work/app/help/messages.h:148
+#: ../../../../build/work/app/help/messages.h:152
 msgid "pathEndTrk not on Path."
 msgstr "tracé de fin de voie invalide."
 
-#: ../../../../build/work/app/help/messages.h:149
+#: ../../../../build/work/app/help/messages.h:153
 msgid "pathStartTrk not on Path."
 msgstr "tracé invalide de début de voie."
 
-#: ../../../../build/work/app/help/messages.h:150
+#: ../../../../build/work/app/help/messages.h:154
 msgid ""
 "The tracks cannot be connected together.\n"
 "\n"
@@ -7778,7 +7833,7 @@ msgstr ""
 "ou augmentez la valeur Angle de connexion sur\n"
 "la boîte de dialogue \"Options|Préférences\"."
 
-#: ../../../../build/work/app/help/messages.h:151
+#: ../../../../build/work/app/help/messages.h:155
 msgid ""
 "The tracks cannot be connected together.\n"
 "\n"
@@ -7792,7 +7847,7 @@ msgstr ""
 "ou augmentez la distance de connexion et\n"
 "Valeurs d'angle dans la boîte de dialogue \"Options|Préférences\""
 
-#: ../../../../build/work/app/help/messages.h:152
+#: ../../../../build/work/app/help/messages.h:156
 msgid ""
 "The tracks cannot be connected together.\n"
 "\n"
@@ -7805,7 +7860,7 @@ msgstr ""
 "ou augmentez la distance de connexion sur\n"
 "la boîte de dialogue \"Options|Préférences\""
 
-#: ../../../../build/work/app/help/messages.h:153
+#: ../../../../build/work/app/help/messages.h:157
 msgid ""
 "The first track for the Align\n"
 "Rotate command must be Selected."
@@ -7813,7 +7868,7 @@ msgstr ""
 "Première voie pour \"Alignement\n"
 "La commande \"Rotation\" doit être sélectionnée."
 
-#: ../../../../build/work/app/help/messages.h:154
+#: ../../../../build/work/app/help/messages.h:158
 msgid ""
 "The second track for the Align\n"
 "Rotate command must be Unselected."
@@ -7821,15 +7876,15 @@ msgstr ""
 "La deuxième voie pour l'Aligner\n"
 "La commande de rotation doit être désélectionnée."
 
-#: ../../../../build/work/app/help/messages.h:155
+#: ../../../../build/work/app/help/messages.h:159
 msgid "Too many selected tracks, drawing tracks as End Point."
 msgstr "Trop de voies sélectionnées, seuls les points de fin sont affichés."
 
-#: ../../../../build/work/app/help/messages.h:156
+#: ../../../../build/work/app/help/messages.h:160
 msgid "Select an endpoint between two tracks."
 msgstr "Sélectionnez un point de fin entre deux voies."
 
-#: ../../../../build/work/app/help/messages.h:157
+#: ../../../../build/work/app/help/messages.h:161
 msgid ""
 "According to values that have been entered the diverging\n"
 "track does not connect with the tangent track. Please\n"
@@ -7843,11 +7898,11 @@ msgstr ""
 "cœur ou en degrés, comme spécifié par les boutons \n"
 "radio du mode Angle."
 
-#: ../../../../build/work/app/help/messages.h:158
+#: ../../../../build/work/app/help/messages.h:162
 msgid "Moved before the end of the turnout"
 msgstr "Déplacé avant la fin de l'aiguillage"
 
-#: ../../../../build/work/app/help/messages.h:159
+#: ../../../../build/work/app/help/messages.h:163
 msgid ""
 "The Coupled Length must be greater than the Car Length,\n"
 "and the Coupler Length must be greater than 0."
@@ -7855,7 +7910,7 @@ msgstr ""
 "La longueur attelée doit être supérieure à la longueur du chaudron,\n"
 "et la longueur de l'attelage doit être supérieure à 0."
 
-#: ../../../../build/work/app/help/messages.h:160
+#: ../../../../build/work/app/help/messages.h:164
 msgid ""
 "The Car Length value must be greater\n"
 "than the Car Width value."
@@ -7863,7 +7918,7 @@ msgstr ""
 "La longueur du véhicule doit \n"
 "être supérieure à sa largeur."
 
-#: ../../../../build/work/app/help/messages.h:161
+#: ../../../../build/work/app/help/messages.h:165
 msgid ""
 "The specified Index is already in use.\n"
 "The Index will be updated to the next available value."
@@ -7871,7 +7926,7 @@ msgstr ""
 "Le numéro d'index spécifié est déjà pris.\n"
 "Le numéro d'index est mis à jour avec la valeur libre suivante."
 
-#: ../../../../build/work/app/help/messages.h:162
+#: ../../../../build/work/app/help/messages.h:166
 msgid ""
 "You have changed values for this object.\n"
 "\n"
@@ -7881,7 +7936,7 @@ msgstr ""
 "\n"
 "Voulez-vous vraiment fermer cette boîte de dialogue?"
 
-#: ../../../../build/work/app/help/messages.h:163
+#: ../../../../build/work/app/help/messages.h:167
 #, c-format
 msgid ""
 "File version %ld is lower than the minimum\n"
@@ -7893,7 +7948,19 @@ msgstr ""
 "devez mettre à jour votre fichier du projet \n"
 "utilisant une ancienne version de %s"
 
-#: ../../../../build/work/app/help/messages.h:164
+#: ../../../../build/work/app/help/messages.h:168
+#, fuzzy, c-format
+msgid ""
+"File version %ld is lower than the minimum\n"
+"supported version %d.This parameter file will only work using an older "
+"version of %s"
+msgstr ""
+"La version du fichier %ld est plus ancienne que \n"
+"plus ancienne celle prise en charge %d. Vous \n"
+"devez mettre à jour votre fichier du projet \n"
+"utilisant une ancienne version de %s"
+
+#: ../../../../build/work/app/help/messages.h:169
 #, c-format
 msgid ""
 "%s cannot read the demo file:\n"
@@ -7902,16 +7969,16 @@ msgstr ""
 "%s ne peut pas lire le fichier de démonstration:\n"
 "%s"
 
-#: ../../../../build/work/app/help/messages.h:165
+#: ../../../../build/work/app/help/messages.h:170
 #, c-format
 msgid "doDemo: bad number (%d)"
 msgstr "doDemo : nombre invalide (%d)"
 
-#: ../../../../build/work/app/help/messages.h:166
+#: ../../../../build/work/app/help/messages.h:171
 msgid "Playback TIMEEND without TIMESTART"
 msgstr "TIMEEND en lecture sans TIMESTART"
 
-#: ../../../../build/work/app/help/messages.h:167
+#: ../../../../build/work/app/help/messages.h:172
 #, c-format
 msgid ""
 "Unknown playback command (%d)\n"
@@ -7920,7 +7987,7 @@ msgstr ""
 "Commande de lecture inconnue (%d)\n"
 "%s"
 
-#: ../../../../build/work/app/help/messages.h:168
+#: ../../../../build/work/app/help/messages.h:173
 #, c-format
 msgid ""
 "Playback file version %ld is lower than the\n"
@@ -7933,12 +8000,12 @@ msgstr ""
 "Vous devez mettre à jour votre fichier de plan \n"
 "en utilisant une ancienne version de %s"
 
-#: ../../../../build/work/app/help/messages.h:169
+#: ../../../../build/work/app/help/messages.h:174
 #, c-format
 msgid "Scale index (%d) is not valid"
 msgstr "L'indice d'échelle (%d) n'est pas valide"
 
-#: ../../../../build/work/app/help/messages.h:170
+#: ../../../../build/work/app/help/messages.h:175
 #, c-format
 msgid ""
 "Scale %s is not valid\n"
@@ -7947,62 +8014,62 @@ msgstr ""
 "L'échelle %s n'est pas valide\n"
 "Veuillez vérifier votre fichier %s.xtq"
 
-#: ../../../../build/work/app/help/messages.h:171
+#: ../../../../build/work/app/help/messages.h:176
 msgid "Cannot extend a helix"
 msgstr "Impossible d'étendre une hélicoïde"
 
-#: ../../../../build/work/app/help/messages.h:172
+#: ../../../../build/work/app/help/messages.h:177
 msgid "Cannot trim a helix"
 msgstr "Impossible de couper une hélicoïde"
 
-#: ../../../../build/work/app/help/messages.h:173
+#: ../../../../build/work/app/help/messages.h:178
 msgid "Ignore further audit notices?"
 msgstr "Ignorer les autres indications de protocole?"
 
-#: ../../../../build/work/app/help/messages.h:174
+#: ../../../../build/work/app/help/messages.h:179
 #, c-format
 msgid "%s"
 msgstr "%s"
 
-#: ../../../../build/work/app/help/messages.h:175
+#: ../../../../build/work/app/help/messages.h:180
 msgid "Audit Abort?"
 msgstr "Abandonner la vérification ?"
 
-#: ../../../../build/work/app/help/messages.h:176
+#: ../../../../build/work/app/help/messages.h:181
 msgid "Write Audit File?"
 msgstr "Écrire un fichier journal?"
 
-#: ../../../../build/work/app/help/messages.h:177
+#: ../../../../build/work/app/help/messages.h:182
 #, c-format
 msgid "checkTrackLength: Short track length = %0.3f"
 msgstr "vérifier la longueur de voie : longueur voie courte =%0.3f"
 
-#: ../../../../build/work/app/help/messages.h:178
+#: ../../../../build/work/app/help/messages.h:183
 #, c-format
 msgid "checkTrackLength: unknown type: %d"
 msgstr "vérifier la longueur de voie : type inconnu :%d"
 
-#: ../../../../build/work/app/help/messages.h:179
+#: ../../../../build/work/app/help/messages.h:184
 #, c-format
 msgid "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f"
 msgstr "connecter des voies : T%d[%d] T%d[%d] d=%0.3f a=%0.3f"
 
-#: ../../../../build/work/app/help/messages.h:180
+#: ../../../../build/work/app/help/messages.h:185
 #, c-format
 msgid "GetAngleAtPoint: bad type(%d) for T(%d)"
 msgstr "Obtenir l'angle à un point : type incorrect (%d) pour T (%d)"
 
-#: ../../../../build/work/app/help/messages.h:181
+#: ../../../../build/work/app/help/messages.h:186
 #, c-format
 msgid "joinTracks: invalid track type=%d"
 msgstr "raccorder des voies : type de voie non valide =%d"
 
-#: ../../../../build/work/app/help/messages.h:182
+#: ../../../../build/work/app/help/messages.h:187
 #, c-format
 msgid "resolveIndex: T%d[%d]: T%d doesn\\\\'t exist"
 msgstr "revoir l'index : T%d[%d] : T%d n'existe\\\\ pas"
 
-#: ../../../../build/work/app/help/messages.h:183
+#: ../../../../build/work/app/help/messages.h:188
 msgid "Moved beyond the end of the track"
 msgstr "Déplacé au-delà de la fin de voie"
 
@@ -8081,1087 +8148,1091 @@ msgid "Removes elevation from Selected tracks"
 msgstr "Supprime l'élévation des voies sélectionnées"
 
 #: ../../../../build/work/app/bin/bllnhlp.c:26
+msgid "Copy objects to clipboard and duplicate them in exactly the same place"
+msgstr ""
+
+#: ../../../../build/work/app/bin/bllnhlp.c:27
 msgid "Command Options dialog"
 msgstr "Boîte de dialogue pour les options de commande"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:27
+#: ../../../../build/work/app/bin/bllnhlp.c:28
 msgid "Controls colors"
 msgstr "Ajuste les couleurs"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:28
+#: ../../../../build/work/app/bin/bllnhlp.c:29
 msgid "Connect two tracks"
 msgstr "Connecter deux voies"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:29
+#: ../../../../build/work/app/bin/bllnhlp.c:30
 msgid "Create a control for layout automation"
 msgstr "Créer un contrôle pour l'automatisation du réseau"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:30
+#: ../../../../build/work/app/bin/bllnhlp.c:31
 #, fuzzy
 msgid "Select control element to create"
 msgstr "Sélectionnez le deuxième point de fin a connecter"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:31
+#: ../../../../build/work/app/bin/bllnhlp.c:32
 msgid "Manage control elements"
 msgstr "Gérer les contrôles"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:32
+#: ../../../../build/work/app/bin/bllnhlp.c:33
 #, fuzzy
 msgid "Set Convert mode"
 msgstr "Définir le mode de création de voie de courbe"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:33
+#: ../../../../build/work/app/bin/bllnhlp.c:34
 msgid "Convert from Fixed Track to Cornu"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:34
+#: ../../../../build/work/app/bin/bllnhlp.c:35
 msgid "Convert from Cornu and Bezier to Fixed Track"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:35
+#: ../../../../build/work/app/bin/bllnhlp.c:36
 msgid "Copy selected objects to clipboard"
 msgstr "Copier les objets sélectionnés du presse-papiers"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:36
+#: ../../../../build/work/app/bin/bllnhlp.c:37
 #, fuzzy
 msgid "Create Cornu track"
 msgstr "Créer une Cornu"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:37
+#: ../../../../build/work/app/bin/bllnhlp.c:38
 msgid "Create curved track from center"
 msgstr "Créer une voie courbe à partir du centre"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:38
+#: ../../../../build/work/app/bin/bllnhlp.c:39
 msgid "Create curved track from chord"
 msgstr "Créer une voie courbe à partir d'une corde"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:39
+#: ../../../../build/work/app/bin/bllnhlp.c:40
 msgid "Create curved track from end-point"
 msgstr "Créer une voie courbe à partir de l'extrémité"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:40
+#: ../../../../build/work/app/bin/bllnhlp.c:41
 msgid "Create Bezier track"
 msgstr "Créer une voie de Bézier"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:41
+#: ../../../../build/work/app/bin/bllnhlp.c:42
 msgid "Set Curve Track creation mode"
 msgstr "Définir le mode de création de voie de courbe"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:42
+#: ../../../../build/work/app/bin/bllnhlp.c:43
 msgid "Create curved track from tangent"
 msgstr "Créer une voie courbe à partir de la tangente"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:43
+#: ../../../../build/work/app/bin/bllnhlp.c:44
 msgid "Manipulate Custom designer entries"
 msgstr "Éditez vos propres dessins"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:44
+#: ../../../../build/work/app/bin/bllnhlp.c:45
 msgid "Moves selected objects to clipboard"
 msgstr "Déplace les objets sélectionnés vers le presse-papiers"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:45
+#: ../../../../build/work/app/bin/bllnhlp.c:46
 msgid "Delete objects"
 msgstr "Supprimer des objets"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:46
+#: ../../../../build/work/app/bin/bllnhlp.c:47
 msgid "Playback demos"
 msgstr "Lecture des démos"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:47
+#: ../../../../build/work/app/bin/bllnhlp.c:48
 msgid "Change Object Properties"
 msgstr "Modifier les propriétés d'un objet"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:48
+#: ../../../../build/work/app/bin/bllnhlp.c:49
 #, fuzzy
 msgid "Change to properties mode"
 msgstr "Modifier les propriétés d'un objet"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:49
+#: ../../../../build/work/app/bin/bllnhlp.c:50
 msgid "Deselect all selected objects"
 msgstr "Désélectionner tous les objets"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:50
+#: ../../../../build/work/app/bin/bllnhlp.c:51
 msgid "Change Display parameters"
 msgstr "Modifier les paramètres d'affichage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:51
+#: ../../../../build/work/app/bin/bllnhlp.c:52
 msgid "Create benchwork"
 msgstr "Tracer un plateau de travail"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:52
+#: ../../../../build/work/app/bin/bllnhlp.c:53
 msgid "Create a box"
 msgstr "Tracer une boite"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:53
+#: ../../../../build/work/app/bin/bllnhlp.c:54
 msgid "Set Circle drawing command"
 msgstr "Définir la commande de dessin du cercle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:54
+#: ../../../../build/work/app/bin/bllnhlp.c:55
 msgid "Create a circle"
 msgstr "Créer un cercle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:55
+#: ../../../../build/work/app/bin/bllnhlp.c:56
 msgid "Draw a circle line from center"
 msgstr "Tracer un Cercle à partir du centre"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:56
+#: ../../../../build/work/app/bin/bllnhlp.c:57
 msgid "Draw a fixed radius circle line"
 msgstr "Trace un cercle d'un rayon donné"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:57
+#: ../../../../build/work/app/bin/bllnhlp.c:58
 msgid "Draw a circle line from tangent"
 msgstr "Tracer un Cercle à partir de la tangente"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:58
+#: ../../../../build/work/app/bin/bllnhlp.c:59
 msgid "Set Curve drawing command"
 msgstr "Choisissez la commande pour dessiner des lignes courbes"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:59
+#: ../../../../build/work/app/bin/bllnhlp.c:60
 msgid "Create a curved line"
 msgstr "Créer une ligne courbe"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:60
+#: ../../../../build/work/app/bin/bllnhlp.c:61
 msgid "Create a curved line from End"
 msgstr "Tracer une courbe à partir de l'extrémité"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:61
+#: ../../../../build/work/app/bin/bllnhlp.c:62
 msgid "Create a curved line from center"
 msgstr "Tracer une courbe à partir du centre"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:62
+#: ../../../../build/work/app/bin/bllnhlp.c:63
 msgid "Create a curved line from chord"
 msgstr "Tracer une courbe à partir de la corde"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:63
+#: ../../../../build/work/app/bin/bllnhlp.c:64
 msgid "Create a curved line from tangent"
 msgstr "Tracer une courbe à partir de la tangente"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:64
+#: ../../../../build/work/app/bin/bllnhlp.c:65
 msgid "Create a Bezier line"
 msgstr "Tracer une ligne de Bézier"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:65
+#: ../../../../build/work/app/bin/bllnhlp.c:66
 msgid "Create a dimension line"
 msgstr "Tracer une ligne de cote"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:66
+#: ../../../../build/work/app/bin/bllnhlp.c:67
 msgid "Create a filled box"
 msgstr "Tracer une boite pleine"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:67
+#: ../../../../build/work/app/bin/bllnhlp.c:68
 msgid "Create a filled circle"
 msgstr "Créer un cercle rempli"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:68
+#: ../../../../build/work/app/bin/bllnhlp.c:69
 msgid "Draw a filled circle from center"
 msgstr "Tracer un Cercle plein autour du centre"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:69
+#: ../../../../build/work/app/bin/bllnhlp.c:70
 msgid "Draw a fixed radius filled circle"
 msgstr "Trace un cercle plein d'un rayon donné"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:70
+#: ../../../../build/work/app/bin/bllnhlp.c:71
 msgid "Draw a filled circle from tangent"
 msgstr "Tracer un Cercle plein depuis la tangente"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:71
+#: ../../../../build/work/app/bin/bllnhlp.c:72
 #, fuzzy
 msgid "Create a polygon"
 msgstr "Tracer une polyligne"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:72
+#: ../../../../build/work/app/bin/bllnhlp.c:73
 msgid "Create a filled polygon"
 msgstr "Tracer un polygone plein"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:73
+#: ../../../../build/work/app/bin/bllnhlp.c:74
 msgid "Create a polyline"
 msgstr "Tracer une polyligne"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:74
+#: ../../../../build/work/app/bin/bllnhlp.c:75
 msgid "Create a straight line"
 msgstr "Tracer une ligne droite"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:75
+#: ../../../../build/work/app/bin/bllnhlp.c:76
 msgid "Set Line drawing command"
 msgstr "Choisissez la commande pour dessiner des lignes"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:76
+#: ../../../../build/work/app/bin/bllnhlp.c:77
 msgid "Set Shape drawing command"
 msgstr "Choisir la commande pour dessiner des formes"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:77
+#: ../../../../build/work/app/bin/bllnhlp.c:78
 msgid "Draw table edge"
 msgstr "Tracer le bord de table"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:78
+#: ../../../../build/work/app/bin/bllnhlp.c:79
 msgid "Easement menu"
 msgstr "Menu courbes de transition"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:80
+#: ../../../../build/work/app/bin/bllnhlp.c:81
 msgid "Generate a Parts List of selected objects"
 msgstr "Créer une liste de pièces à partir des objets sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:81
+#: ../../../../build/work/app/bin/bllnhlp.c:82
 msgid "Set Import/Export mode"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:82
+#: ../../../../build/work/app/bin/bllnhlp.c:83
 msgid "Export a .xti file"
 msgstr "Exporter un fichier *.xti"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:83
+#: ../../../../build/work/app/bin/bllnhlp.c:84
 msgid "Export a DXF file"
 msgstr "Exporter dans un fichier DXF"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:85
+#: ../../../../build/work/app/bin/bllnhlp.c:86
 msgid "Flip selected objects"
 msgstr "Retourner les objets sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:86
+#: ../../../../build/work/app/bin/bllnhlp.c:87
 msgid "Adjust snap grid"
 msgstr "Ajuster la grille magnétique"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:87
+#: ../../../../build/work/app/bin/bllnhlp.c:88
 msgid "Enable snap grid"
 msgstr "Activer la grille magnétique"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:88
+#: ../../../../build/work/app/bin/bllnhlp.c:89
 msgid "Show snap grid"
 msgstr "Afficher la grille magnétique"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:89
+#: ../../../../build/work/app/bin/bllnhlp.c:90
 msgid "Create a structure from a Group of objects"
 msgstr "Créer une bâtiment à partir d'un groupe d'objets"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:90
+#: ../../../../build/work/app/bin/bllnhlp.c:91
 msgid "Create a hand-laid turnout"
 msgstr "Créer un aiguillage conçu en manuel"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:91
+#: ../../../../build/work/app/bin/bllnhlp.c:92
 msgid "Create a track helix"
 msgstr "Créer une voie hélicoïdale"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:92
+#: ../../../../build/work/app/bin/bllnhlp.c:93
 msgid "Import a .xti file"
 msgstr "Importer un fichier *.xti"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:93
+#: ../../../../build/work/app/bin/bllnhlp.c:94
 #, fuzzy
 msgid "Import an .xti file as a Module"
 msgstr "Importer un fichier *.xti"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:94
+#: ../../../../build/work/app/bin/bllnhlp.c:95
 msgid "Join two tracks"
 msgstr "Raccorder deux voies"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:95
+#: ../../../../build/work/app/bin/bllnhlp.c:96
 msgid "Join two lines or polylines"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:96
+#: ../../../../build/work/app/bin/bllnhlp.c:97
 msgid "Set Join mode"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:97
+#: ../../../../build/work/app/bin/bllnhlp.c:98
 msgid "Change Layers"
 msgstr "Changer de calques"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:98
+#: ../../../../build/work/app/bin/bllnhlp.c:99
 msgid "Selects the current drawing layer"
 msgstr "Sélectionne le calque courant du dessin"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:99
+#: ../../../../build/work/app/bin/bllnhlp.c:100
 msgid "Layout parameters"
 msgstr "Paramètres de calques"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:101
+#: ../../../../build/work/app/bin/bllnhlp.c:102
 msgid "Show/Hide Map Window"
 msgstr "Afficher/Masquer la fenêtre de navigation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:102
+#: ../../../../build/work/app/bin/bllnhlp.c:103
 msgid "Modify or extend a track"
 msgstr "Modifier ou prolonger une voie"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:103
+#: ../../../../build/work/app/bin/bllnhlp.c:104
 msgid "Change To modify mode"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:104
+#: ../../../../build/work/app/bin/bllnhlp.c:105
 msgid "Move selected objects"
 msgstr "Déplacer les objets sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:105
+#: ../../../../build/work/app/bin/bllnhlp.c:106
 msgid "Move a label"
 msgstr "Déplacer une étiquette"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:106
+#: ../../../../build/work/app/bin/bllnhlp.c:107
 msgid "Move selected objects to current layer"
 msgstr "Déplacer les objets sélectionnés vers le calque actuel"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:108
+#: ../../../../build/work/app/bin/bllnhlp.c:109
 #, fuzzy
 msgid "Print a bitmap"
 msgstr "Imprimer un BitMap"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:109
+#: ../../../../build/work/app/bin/bllnhlp.c:110
 #, fuzzy
 msgid "Pan or zoom the layout"
 msgstr "Changer de section ou zoomer sur le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:110
+#: ../../../../build/work/app/bin/bllnhlp.c:111
 msgid "Change to zoom/pan mode"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:111
-msgid "Create a parallel track"
-msgstr "Créer une voie parallèle"
-
 #: ../../../../build/work/app/bin/bllnhlp.c:112
-#, fuzzy
-msgid "Create a parallel line"
+msgid "Create a parallel track"
 msgstr "Créer une voie parallèle"
 
 #: ../../../../build/work/app/bin/bllnhlp.c:113
 #, fuzzy
+msgid "Create a parallel line"
+msgstr "Créer une voie parallèle"
+
+#: ../../../../build/work/app/bin/bllnhlp.c:114
+#, fuzzy
 msgid "Set Parallel mode"
 msgstr "Parallèle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:114
+#: ../../../../build/work/app/bin/bllnhlp.c:115
 msgid "Register"
 msgstr "Registre"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:115
+#: ../../../../build/work/app/bin/bllnhlp.c:116
 msgid "Copy objects from clipboard"
 msgstr "Copier les objets du presse-papiers"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:116
+#: ../../../../build/work/app/bin/bllnhlp.c:117
 msgid "Perferences dialog"
 msgstr "Boîte de dialogue des préférences"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:117
+#: ../../../../build/work/app/bin/bllnhlp.c:118
 msgid "Display prices of turnouts, sectional tracks and structures"
 msgstr ""
 "Affichage des prix des aiguillages, des sections de voies et des bâtiments"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:118
+#: ../../../../build/work/app/bin/bllnhlp.c:119
 msgid "Print the layout"
 msgstr "Imprimer le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:119
+#: ../../../../build/work/app/bin/bllnhlp.c:120
 #, fuzzy
 msgid "Loads and unloads parameter files into/from toolbar"
 msgstr "Charge et décharge les fichiers de paramètres"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:120
+#: ../../../../build/work/app/bin/bllnhlp.c:121
 msgid "Elevation Profile Command"
 msgstr "Commande de profil d'élévation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:122
+#: ../../../../build/work/app/bin/bllnhlp.c:123
 msgid "Command recorder"
 msgstr "Enregistrement de commande"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:124
+#: ../../../../build/work/app/bin/bllnhlp.c:125
 msgid "Update selected Turnout and Structure definitions"
 msgstr ""
 "Mettre à jour les définitions sélectionnées d'aiguillage et de bâtiment"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:125
+#: ../../../../build/work/app/bin/bllnhlp.c:126
 msgid "Rescale selected objects"
 msgstr "Changer d'échelle les objets sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:126
+#: ../../../../build/work/app/bin/bllnhlp.c:127
 msgid "Rotate selected object(s)"
 msgstr "Faire pivoter le ou les objets sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:127
+#: ../../../../build/work/app/bin/bllnhlp.c:128
 msgid "Show a ruler"
 msgstr "Afficher une règle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:128
+#: ../../../../build/work/app/bin/bllnhlp.c:129
 msgid "Select objects"
 msgstr "Sélectionnez des objets"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:129
+#: ../../../../build/work/app/bin/bllnhlp.c:130
 #, fuzzy
 msgid "Change To Select Mode"
 msgstr "Modifier l'échelle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:130
+#: ../../../../build/work/app/bin/bllnhlp.c:131
 msgid "Selects all objects on the layout"
 msgstr "Sélectionne tous les objets du plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:131
+#: ../../../../build/work/app/bin/bllnhlp.c:132
 msgid "Selects all objects in the current Layer"
 msgstr "Sélectionne tous les objets du calque actuel"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:132
+#: ../../../../build/work/app/bin/bllnhlp.c:133
 msgid "Invert current selection"
 msgstr "Inverser la sélection actuelle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:133
+#: ../../../../build/work/app/bin/bllnhlp.c:134
 msgid "Split a track"
 msgstr "Segmenter une voie"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:134
+#: ../../../../build/work/app/bin/bllnhlp.c:135
 msgid "Select stranded (unconnected) track pieces"
 msgstr "Sélectionner des segments de voie isolés (non connectés)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:135
+#: ../../../../build/work/app/bin/bllnhlp.c:136
 msgid "Create a sensor (ie. a occupancy detector or a toggle switch)"
 msgstr ""
 "Créer un capteur (c'est-à-dire un détecteur de présence ou un interrupteur à "
 "bascule)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:136
+#: ../../../../build/work/app/bin/bllnhlp.c:137
 msgid "Create a signal for train control"
 msgstr "Créer un signal pour le contrôle du train"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:137
+#: ../../../../build/work/app/bin/bllnhlp.c:138
 msgid "Choose which commands are sticky"
 msgstr "Choisissez les commandes qui sont maintenues (sticky)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:138
+#: ../../../../build/work/app/bin/bllnhlp.c:139
 msgid "Create straight track"
 msgstr "Créer une voie droite"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:139
+#: ../../../../build/work/app/bin/bllnhlp.c:140
 msgid "Place a structure on the layout"
 msgstr "Mettre une bâtiment sur le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:140
+#: ../../../../build/work/app/bin/bllnhlp.c:141
 msgid "Create a switchmotor for turnout control"
 msgstr "Créer un moteur pour le contrôle d'un aiguillage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:141
+#: ../../../../build/work/app/bin/bllnhlp.c:142
 msgid "Edit a switchmotor definition"
 msgstr "Editer une définition de moteur d'aiguillage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:142
+#: ../../../../build/work/app/bin/bllnhlp.c:143
 msgid "Enter text on the layout"
 msgstr "Entrer du texte sur le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:143
-#: ../../../../build/work/app/bin/bllnhlp.c:517
+#: ../../../../build/work/app/bin/bllnhlp.c:144
+#: ../../../../build/work/app/bin/bllnhlp.c:518
 msgid "Controls the size of the entered text"
 msgstr "Ajuste la taille du texte saisi"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:144
+#: ../../../../build/work/app/bin/bllnhlp.c:145
 msgid "Plain Text"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:145
+#: ../../../../build/work/app/bin/bllnhlp.c:146
 msgid "Tip of the Day window"
 msgstr "Fenêtre d'astuce du jour"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:146
+#: ../../../../build/work/app/bin/bllnhlp.c:147
 msgid "Run Trains"
 msgstr "Mode Trains"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:147
+#: ../../../../build/work/app/bin/bllnhlp.c:148
 msgid "Change To Run Trains Mode"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:148
+#: ../../../../build/work/app/bin/bllnhlp.c:149
 msgid "Pause/Resume Trains"
 msgstr "Pause/Go Trains"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:149
+#: ../../../../build/work/app/bin/bllnhlp.c:150
 msgid "Place a car on the layout"
 msgstr "Mettre un véhicule sur le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:150
+#: ../../../../build/work/app/bin/bllnhlp.c:151
 msgid "Exit Trains"
 msgstr "Quitter \"Trains\""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:151
+#: ../../../../build/work/app/bin/bllnhlp.c:152
 msgid "Hide/Unhide a track"
 msgstr "Masquer/afficher une voie"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:152
+#: ../../../../build/work/app/bin/bllnhlp.c:153
 msgid "Make/Unmake a track a bridge"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:153
+#: ../../../../build/work/app/bin/bllnhlp.c:154
 msgid "Place a turnout or sectional track"
 msgstr "Placer un aiguillage ou une section de voie"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:154
+#: ../../../../build/work/app/bin/bllnhlp.c:155
 msgid "Create a new turnout definition"
 msgstr "Créer une nouvelle définition d'aiguillage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:155
+#: ../../../../build/work/app/bin/bllnhlp.c:156
 msgid "Place a turntable"
 msgstr "Mettre un pont tournant"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:156
+#: ../../../../build/work/app/bin/bllnhlp.c:157
 msgid "Updates old source files with 3 part titles"
 msgstr "Met à jour les anciens fichiers source avec des titres en 3 parties"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:158
+#: ../../../../build/work/app/bin/bllnhlp.c:159
 msgid "Ungroup objects"
 msgstr "Dissocier l'objet"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:159
+#: ../../../../build/work/app/bin/bllnhlp.c:160
 msgid "Draw tracks with thin lines"
 msgstr "Tracez des voies avec des voies fines"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:160
+#: ../../../../build/work/app/bin/bllnhlp.c:161
 msgid "Draw tracks with medium lines"
 msgstr "Tracez des voies avec des voies moyennes"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:161
+#: ../../../../build/work/app/bin/bllnhlp.c:162
 msgid "Draw tracks with thick lines"
 msgstr "Tracez des voies avec des voies épaisses"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:162
+#: ../../../../build/work/app/bin/bllnhlp.c:163
 msgid "Change drawing scale"
 msgstr "Changer l'échelle de dessin"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:163
-#: ../../../../build/work/app/bin/bllnhlp.c:175
+#: ../../../../build/work/app/bin/bllnhlp.c:164
+#: ../../../../build/work/app/bin/bllnhlp.c:176
 msgid "Zoom in"
 msgstr "Zoom avant"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:164
-#: ../../../../build/work/app/bin/bllnhlp.c:176
+#: ../../../../build/work/app/bin/bllnhlp.c:165
+#: ../../../../build/work/app/bin/bllnhlp.c:177
 msgid "Zoom out"
 msgstr "Zoom arrière"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:165
+#: ../../../../build/work/app/bin/bllnhlp.c:166
 msgid "File Menu"
 msgstr "Menu fichier"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:166
+#: ../../../../build/work/app/bin/bllnhlp.c:167
 msgid "Save layout"
 msgstr "Enregistrer le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:167
+#: ../../../../build/work/app/bin/bllnhlp.c:168
 msgid "Save layout under a new name "
 msgstr "Enregistrer le plan sous un nouveau nom "
 
-#: ../../../../build/work/app/bin/bllnhlp.c:168
+#: ../../../../build/work/app/bin/bllnhlp.c:169
 msgid "New layout"
 msgstr "Nouveau plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:169
+#: ../../../../build/work/app/bin/bllnhlp.c:170
 msgid "Generate parts list"
 msgstr "Créer une liste de pièces"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:170
+#: ../../../../build/work/app/bin/bllnhlp.c:171
 msgid "Load a layout"
 msgstr "Charger un plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:171
+#: ../../../../build/work/app/bin/bllnhlp.c:172
 msgid "Exit the program"
 msgstr "Quitter le programme"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:172
+#: ../../../../build/work/app/bin/bllnhlp.c:173
 msgid "Revert to last saved state of layout plan"
 msgstr "Revenir au dernier état enregistré du plan de réseau"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:173
+#: ../../../../build/work/app/bin/bllnhlp.c:174
 msgid "Edit menu"
 msgstr "Menu d'édition"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:174
+#: ../../../../build/work/app/bin/bllnhlp.c:175
 msgid "Redraw layout"
 msgstr "Redessiner le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:177
-#: ../../../../build/work/app/bin/bllnhlp.c:180
+#: ../../../../build/work/app/bin/bllnhlp.c:178
+#: ../../../../build/work/app/bin/bllnhlp.c:181
 msgid "Tools menu"
 msgstr "Menu d'outils"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:178
+#: ../../../../build/work/app/bin/bllnhlp.c:179
 msgid "View menu"
 msgstr "Afficher le menu"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:179
+#: ../../../../build/work/app/bin/bllnhlp.c:180
 msgid "Toolbar configuration"
 msgstr "Configuration de la barre d'outils"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:181
+#: ../../../../build/work/app/bin/bllnhlp.c:182
 msgid "Options menu"
 msgstr "Menu d'options"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:182
+#: ../../../../build/work/app/bin/bllnhlp.c:183
 msgid "Playback/Record commands"
 msgstr "Commandes de Lecture/Enregistrement"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:183
+#: ../../../../build/work/app/bin/bllnhlp.c:184
 msgid "Window menu"
 msgstr "Menu fenêtre"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:184
+#: ../../../../build/work/app/bin/bllnhlp.c:185
 msgid "Help menu"
 msgstr "Menu d'aide"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:185
+#: ../../../../build/work/app/bin/bllnhlp.c:186
 msgid "Recent error messages and explanations"
 msgstr "Messages d'erreur récents et explications"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:186
+#: ../../../../build/work/app/bin/bllnhlp.c:187
 msgid "Move Hot Bar left"
 msgstr "Faire défiler la Hot Bar à gauche"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:187
+#: ../../../../build/work/app/bin/bllnhlp.c:188
 msgid "Move Hot Bar right"
 msgstr "Faire défiler la Hot Bar à droite"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:188
+#: ../../../../build/work/app/bin/bllnhlp.c:189
 msgid "Total track count"
 msgstr "Nombre total de voies"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:189
+#: ../../../../build/work/app/bin/bllnhlp.c:190
 msgid "X Position of cursor"
 msgstr "Position X du curseur"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:190
+#: ../../../../build/work/app/bin/bllnhlp.c:191
 msgid "Y Position of cursor"
 msgstr "Position Y du curseur"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:191
+#: ../../../../build/work/app/bin/bllnhlp.c:192
 msgid "Drawing scale"
 msgstr "Échelle du dessin"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:192
+#: ../../../../build/work/app/bin/bllnhlp.c:193
 msgid "Message and status line"
 msgstr "Message et ligne d'état"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:193
 #: ../../../../build/work/app/bin/bllnhlp.c:194
+#: ../../../../build/work/app/bin/bllnhlp.c:195
 msgid "Main layout canvas"
 msgstr "Zone de dessin principale"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:195
+#: ../../../../build/work/app/bin/bllnhlp.c:196
 msgid "Main drawing canvas"
 msgstr "Zone de travail principale"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:196
+#: ../../../../build/work/app/bin/bllnhlp.c:197
 msgid "Command buttons"
 msgstr "Boutons de commande"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:197
+#: ../../../../build/work/app/bin/bllnhlp.c:198
 msgid "Menus"
 msgstr "Menus"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:198
+#: ../../../../build/work/app/bin/bllnhlp.c:199
 msgid "Tile, Filename and Window Manager buttons"
 msgstr "Boutons, Nom de fichier et Gestionnaire de fenêtres"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:199
+#: ../../../../build/work/app/bin/bllnhlp.c:200
 msgid "Turnout and Structure Hot Bar"
 msgstr "Barre de sélection des aiguillages et bâtiments"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:200
+#: ../../../../build/work/app/bin/bllnhlp.c:201
 msgid "Active layer list and layer buttons"
 msgstr "Liste de calques actifs et boutons de calque"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:201
+#: ../../../../build/work/app/bin/bllnhlp.c:202
 msgid "Map window"
 msgstr "Fenêtre principale"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:202
+#: ../../../../build/work/app/bin/bllnhlp.c:203
 msgid "This is the portion of the layout shown in the Main Window canvas"
 msgstr ""
 "Il s'agit de la partie du plan affichée dans le zone de dessin de la fenêtre "
 "principale"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:203
+#: ../../../../build/work/app/bin/bllnhlp.c:204
 msgid "Raise or Lower all Selected Track"
 msgstr "Elever ou abaisser toute la voie sélectionnée"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:204
+#: ../../../../build/work/app/bin/bllnhlp.c:205
 msgid "Name of block"
 msgstr "Nom du bloc"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:205
+#: ../../../../build/work/app/bin/bllnhlp.c:206
 msgid "Script that the block will run"
 msgstr "Script d'exécution du bloc"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:206
+#: ../../../../build/work/app/bin/bllnhlp.c:207
 msgid "List of tracks in the Block"
 msgstr "Liste des voies du bloc"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:207
+#: ../../../../build/work/app/bin/bllnhlp.c:208
 msgid "Add or Update car object"
 msgstr "Ajouter ou mettre à jour un objet véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:208
+#: ../../../../build/work/app/bin/bllnhlp.c:209
 msgid "Manufacturer name"
 msgstr "Nom du fabricant"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:211
+#: ../../../../build/work/app/bin/bllnhlp.c:212
 msgid "Is the Car a Locomotive?"
 msgstr "Le véhicule est-il une locomotive?"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:212
+#: ../../../../build/work/app/bin/bllnhlp.c:213
 msgid "Part Number and Description"
 msgstr "Référence N° et description"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:213
+#: ../../../../build/work/app/bin/bllnhlp.c:214
 msgid "Manufacturer Part Number"
 msgstr "Référence fabricant"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:214
+#: ../../../../build/work/app/bin/bllnhlp.c:215
 msgid "Use the Selected figure as the car image"
 msgstr "Utilisez la figure sélectionnée comme image de véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:215
+#: ../../../../build/work/app/bin/bllnhlp.c:216
 msgid "Use the default figure as the car image"
 msgstr "Utilisez la figure par défaut comme image de véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:216
+#: ../../../../build/work/app/bin/bllnhlp.c:217
 msgid "Optional description of the Car Part"
 msgstr "Description facultative du modèle de véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:217
+#: ../../../../build/work/app/bin/bllnhlp.c:218
 msgid "Flip car image"
 msgstr "Effet miroir d'un véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:218
+#: ../../../../build/work/app/bin/bllnhlp.c:219
 msgid "Display Car Item information or reporting marks and dimensions"
 msgstr ""
 "Afficher des informations sur le véhicule ou la plaque d'immatriculation et "
 "les dimensions"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:219
+#: ../../../../build/work/app/bin/bllnhlp.c:220
 msgid "Full Roadname"
 msgstr "Nom complet de la route"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:220
 #: ../../../../build/work/app/bin/bllnhlp.c:221
+#: ../../../../build/work/app/bin/bllnhlp.c:222
 msgid "Car Type"
 msgstr "Type de véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:222
+#: ../../../../build/work/app/bin/bllnhlp.c:223
 msgid "Reporting Marks (Roadname abbreviation)"
 msgstr "Sigles (abréviation du nom du réseau)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:223
-#: ../../../../build/work/app/bin/bllnhlp.c:408
+#: ../../../../build/work/app/bin/bllnhlp.c:224
+#: ../../../../build/work/app/bin/bllnhlp.c:409
 msgid "Car Number"
 msgstr "N° de véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:224
+#: ../../../../build/work/app/bin/bllnhlp.c:225
 msgid "Car body Color"
 msgstr "Couleur de carrosserie"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:225
+#: ../../../../build/work/app/bin/bllnhlp.c:226
 msgid "Length of car body"
 msgstr "Longueur du chaudron"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:226
+#: ../../../../build/work/app/bin/bllnhlp.c:227
 msgid "Width of car body"
 msgstr "Largeur du chaudron"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:227
+#: ../../../../build/work/app/bin/bllnhlp.c:228
 msgid "Distance between Trucks "
 msgstr "Distance entre les bogies "
 
-#: ../../../../build/work/app/bin/bllnhlp.c:228
+#: ../../../../build/work/app/bin/bllnhlp.c:229
 msgid "Coupler are mounted on body or truck"
 msgstr "Les attelages sont montés sur les chassis ou les bogies"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:229
+#: ../../../../build/work/app/bin/bllnhlp.c:230
 msgid "Overall Coupled Length"
 msgstr "Longueur totale couplée"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:230
+#: ../../../../build/work/app/bin/bllnhlp.c:231
 msgid "Coupler Length from end of car"
 msgstr "Longueur de l'attelage à partir du bout du wagon"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:231
+#: ../../../../build/work/app/bin/bllnhlp.c:232
 msgid "Diagram of Car"
 msgstr "Schéma de véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:232
+#: ../../../../build/work/app/bin/bllnhlp.c:233
 msgid "Item Index Number"
 msgstr "Numéro d'index de l'objet"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:233
+#: ../../../../build/work/app/bin/bllnhlp.c:234
 msgid "Original Purchase Price"
 msgstr "Prix d'achat d'origine"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:235
+#: ../../../../build/work/app/bin/bllnhlp.c:236
 msgid "Condition of car"
 msgstr "Etat du véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:236
+#: ../../../../build/work/app/bin/bllnhlp.c:237
 msgid "Original Purchase Date"
 msgstr "Date d'achat d'origine"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:237
+#: ../../../../build/work/app/bin/bllnhlp.c:238
 msgid "Last Service Date"
 msgstr "Date du dernier service"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:238
+#: ../../../../build/work/app/bin/bllnhlp.c:239
 msgid "Number of identical cars to be entered"
 msgstr "Nombre de matériels roulants identiques à inscrire"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:239
+#: ../../../../build/work/app/bin/bllnhlp.c:240
 msgid "Do all the cars have the same Number?"
 msgstr "Est-ce que toutes les matériels roulants ont le même numéro ?"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:240
+#: ../../../../build/work/app/bin/bllnhlp.c:241
 msgid "Notes about the car"
 msgstr "Notes sur le véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:241
 #: ../../../../build/work/app/bin/bllnhlp.c:242
+#: ../../../../build/work/app/bin/bllnhlp.c:243
 msgid "Create a new car Part or Prototype definitions"
 msgstr "Créer une nouvelle définition de pièce ou de prototype de véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:243
+#: ../../../../build/work/app/bin/bllnhlp.c:244
 msgid "Finds the selected Car Item on the layout"
 msgstr "Trouve l'article de véhicule sélectionné sur le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:244
 #: ../../../../build/work/app/bin/bllnhlp.c:245
 #: ../../../../build/work/app/bin/bllnhlp.c:246
 #: ../../../../build/work/app/bin/bllnhlp.c:247
+#: ../../../../build/work/app/bin/bllnhlp.c:248
 msgid "Sort the Item list"
 msgstr "Trier la liste d'articles"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:249
+#: ../../../../build/work/app/bin/bllnhlp.c:250
 msgid "Edit the selected Car Item"
 msgstr "Modifier le titre du véhicule sélectionné"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:250
+#: ../../../../build/work/app/bin/bllnhlp.c:251
 msgid "Add a new Car Item"
 msgstr "Ajouter un nouveau nom de véhicule"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:251
+#: ../../../../build/work/app/bin/bllnhlp.c:252
 msgid "Delete the selected Car Items"
 msgstr "Supprimer les wagons ou locomotives sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:252
+#: ../../../../build/work/app/bin/bllnhlp.c:253
 msgid "Import a Car Item .csv file"
 msgstr "Importer du véhicule à partir d'un fichier .csv"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:253
+#: ../../../../build/work/app/bin/bllnhlp.c:254
 msgid "Export a Car Item .csv file"
 msgstr "Exporter un fichier Car Item .csv"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:254
+#: ../../../../build/work/app/bin/bllnhlp.c:255
 msgid "Create a text list of the Car Items"
 msgstr "Créer la liste des noms de matériels roulants"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:255
+#: ../../../../build/work/app/bin/bllnhlp.c:256
 msgid "Specifies the radius of the circle track"
 msgstr "Spécifie le rayon de la voie circulaire"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:256
+#: ../../../../build/work/app/bin/bllnhlp.c:257
 msgid "Default command is Describe or Select"
 msgstr "La commande par défaut est \"Propriétés\" ou \"Sélectionner\""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:257
+#: ../../../../build/work/app/bin/bllnhlp.c:258
 msgid "Action to invoke on Right-Click"
 msgstr "Action à appeler lors d'un clic droit"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:258
+#: ../../../../build/work/app/bin/bllnhlp.c:259
 msgid ""
 "Replace current selection with clicked object or add clicked object to "
 "selection"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:259
+#: ../../../../build/work/app/bin/bllnhlp.c:260
 msgid "Clicking into an empty area clears selection if select mode is <add>"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:261
+#: ../../../../build/work/app/bin/bllnhlp.c:262
 msgid "The list of control elements"
 msgstr "La liste des éléments de contrôle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:262
+#: ../../../../build/work/app/bin/bllnhlp.c:263
 msgid "Edit the element"
 msgstr "Editer l'élément"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:263
+#: ../../../../build/work/app/bin/bllnhlp.c:264
 msgid "Delete the element"
 msgstr "Supprimer l'élément"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:264
+#: ../../../../build/work/app/bin/bllnhlp.c:265
 msgid "Contents Label for new Parameter file"
 msgstr "Contenu de l'étiquette du nouveau fichier de paramètres"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:265
+#: ../../../../build/work/app/bin/bllnhlp.c:266
 msgid "List of custom designed turnouts and structures"
 msgstr "Liste des aiguillages et des bâtiments conçus sur mesure"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:266
+#: ../../../../build/work/app/bin/bllnhlp.c:267
 msgid "Invoke designer editor"
 msgstr "Ouvre l'éditeur de modélisation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:267
+#: ../../../../build/work/app/bin/bllnhlp.c:268
 msgid "Remove selected entries"
 msgstr "Supprimer les entrées sélectionnées"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:268
+#: ../../../../build/work/app/bin/bllnhlp.c:269
 msgid "Copy selected entries to Parameter File"
 msgstr "Copier les entrées sélectionnées dans le fichier de paramètres"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:269
+#: ../../../../build/work/app/bin/bllnhlp.c:270
 msgid "Create a New part or prototype"
 msgstr "Créer une nouvelle pièce ou un prototype"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:270
+#: ../../../../build/work/app/bin/bllnhlp.c:271
 msgid "Update custom file and close"
 msgstr "Mettre à jour le fichier personnalisé et fermer"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:271
+#: ../../../../build/work/app/bin/bllnhlp.c:272
 msgid "Executes the next step of the demo"
 msgstr "Exécute la prochaine étape de la démo"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:272
+#: ../../../../build/work/app/bin/bllnhlp.c:273
 msgid "Skip to next demo"
 msgstr "Passer à la prochaine démo"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:273
+#: ../../../../build/work/app/bin/bllnhlp.c:274
 msgid "Stops the demonstration and returns you to XTrackCAD"
 msgstr "Arrêt de la démonstration et retour à XTrackCAD"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:274
+#: ../../../../build/work/app/bin/bllnhlp.c:275
 msgid "Select speed of Playback"
 msgstr "Sélectionnez la vitesse de lecture"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:275
+#: ../../../../build/work/app/bin/bllnhlp.c:276
 msgid "This is where comments about the demo are displayed"
 msgstr "C'est là que les commentaires sur la démo sont affichés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:312
+#: ../../../../build/work/app/bin/bllnhlp.c:313
 msgid "Move the Main canvas if you drag near the edge"
 msgstr ""
 "Déplacez la zone de dessin principale lorsque vous vous approchez des bords"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:313
+#: ../../../../build/work/app/bin/bllnhlp.c:314
 msgid "Color tracks by layer or individually"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:314
+#: ../../../../build/work/app/bin/bllnhlp.c:315
 #, fuzzy
 msgid "Color draw objects by layer or individually"
 msgstr "Couleurs des voies ou autres objets par calque"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:315
+#: ../../../../build/work/app/bin/bllnhlp.c:316
 msgid "Controls the drawing of hidden tracks"
 msgstr "Ajuste le dessin des voies cachées"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:316
+#: ../../../../build/work/app/bin/bllnhlp.c:317
 msgid "Controls the drawing of End-Points"
 msgstr "Ajuste le dessin des points d'extrémité"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:317
+#: ../../../../build/work/app/bin/bllnhlp.c:318
 msgid "How to draw track ties"
 msgstr "Comment dessiner des traverses"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:318
+#: ../../../../build/work/app/bin/bllnhlp.c:319
 msgid "Show crosshair at center of curves"
 msgstr "Afficher le réticule au centre des courbes"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:319
+#: ../../../../build/work/app/bin/bllnhlp.c:320
 msgid "Drawing scale when to draw tracks with 2 rails"
 msgstr "Échelle minimale pour dessiner les voies avec 2 rails"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:320
+#: ../../../../build/work/app/bin/bllnhlp.c:321
 msgid "Drawing scale of the map window"
 msgstr "Échelle de dessin de la fenêtre de navigation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:321
+#: ../../../../build/work/app/bin/bllnhlp.c:322
 msgid "Whether the main layout is updated while dragging on the Map"
 msgstr "Mise à jour du plan de trajet lors du dessin sur la carte"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:322
+#: ../../../../build/work/app/bin/bllnhlp.c:323
 msgid "Enable labels for Turnouts, Flextrack Lengths and Elevations"
 msgstr ""
 "Afficher les étiquettes pour les aiguillages, les voies flexibles et les "
 "élévations"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:323
+#: ../../../../build/work/app/bin/bllnhlp.c:324
 msgid "When to label Turnout, Flextrack Lengths and Elevations"
 msgstr ""
 "Quand étiqueter les aiguillages, les longueurs de voie flexibles ou les "
 "mesures d'élévation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:324
+#: ../../../../build/work/app/bin/bllnhlp.c:325
 msgid "Font size for labels on layout"
 msgstr "Taille de police des étiquettes sur le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:325
+#: ../../../../build/work/app/bin/bllnhlp.c:326
 msgid "Label elements on the Hot Bar"
 msgstr "Éléments d'étiquetage sur la barre d'objets"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:326
+#: ../../../../build/work/app/bin/bllnhlp.c:327
 msgid "Label elements on layout"
 msgstr "Éléments d'étiquetage sur le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:327
+#: ../../../../build/work/app/bin/bllnhlp.c:328
 msgid "Label elements for lists"
 msgstr "Éléments d'étiquetage pour les listes"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:328
+#: ../../../../build/work/app/bin/bllnhlp.c:329
 msgid "How to group cars on the Train Hot Bar"
 msgstr "Regroupement des matériels roulants dans le catalogue de pièces"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:329
+#: ../../../../build/work/app/bin/bllnhlp.c:330
 msgid "Delay (in mS) between updating train movements"
 msgstr "Intervalle de mise à jour (en ms) des mouvements de train"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:330
+#: ../../../../build/work/app/bin/bllnhlp.c:331
 msgid "Don't show trains in tunnels when tunnels are hidden"
 msgstr ""
 "Ne pas visualiser les trains dans les tunnels quand les tunnels sont cachés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:331
+#: ../../../../build/work/app/bin/bllnhlp.c:332
 msgid "Display unconnected endpoints of track with special marks"
 msgstr "Mettez en surbrillance les extrémités non connectées"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:332
+#: ../../../../build/work/app/bin/bllnhlp.c:333
 msgid "Whether zoom is locked to the bottom left corner or the center point"
 msgstr ""
 "Si le zoom est verrouillé dans le coin inférieur gauche ou au point central"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:334
+#: ../../../../build/work/app/bin/bllnhlp.c:335
 msgid "Width of the lines"
 msgstr "Largeur des lignes"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:335
+#: ../../../../build/work/app/bin/bllnhlp.c:336
 msgid "Color of the lines"
 msgstr "Couleur des voies"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:336
+#: ../../../../build/work/app/bin/bllnhlp.c:337
 msgid "List of types of Lumber"
 msgstr "Liste des types d'éléments de structure"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:337
+#: ../../../../build/work/app/bin/bllnhlp.c:338
 msgid "Color of Benchwork"
 msgstr "Couleur de la sous-bâtiment"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:338
+#: ../../../../build/work/app/bin/bllnhlp.c:339
 msgid "Orientation of Benchwork"
 msgstr "Orientation de la sous-bâtiment"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:339
+#: ../../../../build/work/app/bin/bllnhlp.c:340
 msgid "Size of Dimension Arrows"
 msgstr "Largeur des Flèches de cotation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:340
+#: ../../../../build/work/app/bin/bllnhlp.c:341
 msgid "This controls the sharpness of the easement curve"
 msgstr "Cela contrôle la netteté et la taille de la courbe de transition"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:341
+#: ../../../../build/work/app/bin/bllnhlp.c:342
 msgid "Minimum radius"
 msgstr "Rayon minimum"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:342
+#: ../../../../build/work/app/bin/bllnhlp.c:343
 msgid "Maximum offset"
 msgstr "Décalage maximum"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:343
+#: ../../../../build/work/app/bin/bllnhlp.c:344
 msgid "Easement length"
 msgstr "Longueur de la courbe de transition"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:344
+#: ../../../../build/work/app/bin/bllnhlp.c:345
 msgid ""
 "These radio buttons are a short-cut for Values of 0.0, 0.5, 1.0 and 2.0.  "
 "None turns Easements off"
@@ -9169,183 +9240,183 @@ msgstr ""
 "Ces boutons sont un raccourci pour les valeurs de 0.0, 0.5, 1.0 et 2.0. "
 "Aucun ne désactive les courbes de transition"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:345
+#: ../../../../build/work/app/bin/bllnhlp.c:346
 msgid "Complete easement selection"
 msgstr "Terminer la sélection des courbes de transition"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:346
+#: ../../../../build/work/app/bin/bllnhlp.c:347
 msgid "Type of elevation"
 msgstr "Type d'élévation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:347
+#: ../../../../build/work/app/bin/bllnhlp.c:348
 msgid "Height of End Point"
 msgstr "Hauteur du point de fin"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:348
+#: ../../../../build/work/app/bin/bllnhlp.c:349
 msgid "Compute elevation based on neighbors"
 msgstr "Calculer la hauteur en fonction des voies adjacentes"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:349
+#: ../../../../build/work/app/bin/bllnhlp.c:350
 msgid "Compute grade based on neighbors"
 msgstr "Calculer la pente en fonction des voies adjacentes"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:350
+#: ../../../../build/work/app/bin/bllnhlp.c:351
 msgid "Specify a name for an End-Point"
 msgstr "Spécifiez un nom pour un point de fin"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:352
+#: ../../../../build/work/app/bin/bllnhlp.c:353
 msgid "Print parts list"
 msgstr "Imprimer la nomenclature"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:353
-#: ../../../../build/work/app/bin/bllnhlp.c:461
-#: ../../../../build/work/app/bin/bllnhlp.c:561
+#: ../../../../build/work/app/bin/bllnhlp.c:354
+#: ../../../../build/work/app/bin/bllnhlp.c:462
+#: ../../../../build/work/app/bin/bllnhlp.c:562
 msgid "Invoke the Print Setup dialog"
 msgstr "Ouvre la boîte de dialogue Configuration d'impression"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:354
+#: ../../../../build/work/app/bin/bllnhlp.c:355
 msgid "Save parts list to file"
 msgstr "Enregistrer la nomenclature dans un fichier"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:355
+#: ../../../../build/work/app/bin/bllnhlp.c:356
 msgid "This is the list of parts for the layout"
 msgstr "Voici la liste des pièces pour ce plan de voie"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:356
+#: ../../../../build/work/app/bin/bllnhlp.c:357
 msgid "Enable prices on the Parts List"
 msgstr "Activer les prix sur la liste des pièces"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:357
-#: ../../../../build/work/app/bin/bllnhlp.c:360
+#: ../../../../build/work/app/bin/bllnhlp.c:358
+#: ../../../../build/work/app/bin/bllnhlp.c:361
 msgid "Spacing between major grid lines"
 msgstr "Espacement entre les lignes principales de la grille"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:358
-#: ../../../../build/work/app/bin/bllnhlp.c:361
+#: ../../../../build/work/app/bin/bllnhlp.c:359
+#: ../../../../build/work/app/bin/bllnhlp.c:362
 msgid "Allows the spacing to be subdivided"
 msgstr "Permet de diviser l'espacement"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:359
-#: ../../../../build/work/app/bin/bllnhlp.c:362
+#: ../../../../build/work/app/bin/bllnhlp.c:360
+#: ../../../../build/work/app/bin/bllnhlp.c:363
 msgid "Specifies if positions are snaped in this direction"
 msgstr "Activez la grille magnétique pour cette orientation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:363
 #: ../../../../build/work/app/bin/bllnhlp.c:364
 #: ../../../../build/work/app/bin/bllnhlp.c:365
+#: ../../../../build/work/app/bin/bllnhlp.c:366
 msgid "Shows the origin and angle of the grid"
 msgstr "Affiche l'origine et l'angle de la grille"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:366
+#: ../../../../build/work/app/bin/bllnhlp.c:367
 msgid "Specifies if the grid is shown"
 msgstr "Spécifie si la grille est affichée"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:367
+#: ../../../../build/work/app/bin/bllnhlp.c:368
 msgid "Completes the grid specification"
 msgstr "Enregistrer le réglage de la grille et quitter"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:371
+#: ../../../../build/work/app/bin/bllnhlp.c:372
 msgid "Number of segments in Group"
 msgstr "Nombre de segments dans le groupe"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:372
+#: ../../../../build/work/app/bin/bllnhlp.c:373
 msgid "Replace the Selected object with the new definition?"
 msgstr "Faut-il remplacer l'objet sélectionné par la nouvelle définition?"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:373
+#: ../../../../build/work/app/bin/bllnhlp.c:374
 msgid "Creates a new Structure (or Turnout)"
 msgstr "Crée une nouvelle bâtiment (ou aiguillage)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:374
+#: ../../../../build/work/app/bin/bllnhlp.c:375
 msgid "Elevation difference of Helix End-Points"
 msgstr "Différence d'élévation des bouts de l'hélicoïde"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:375
+#: ../../../../build/work/app/bin/bllnhlp.c:376
 msgid "Helix Radius"
 msgstr "Rayon de l'hélicoïde"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:376
+#: ../../../../build/work/app/bin/bllnhlp.c:377
 msgid "Number of turns in the helix"
 msgstr "Nombre de tours de l'hélicoïde"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:377
+#: ../../../../build/work/app/bin/bllnhlp.c:378
 msgid "Angle betweek helix entrance and exit"
 msgstr "Angle entre l'entrée et la sortie de l'hélicoïde"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:378
+#: ../../../../build/work/app/bin/bllnhlp.c:379
 msgid "Grade in helix"
 msgstr "Pente de l'hélicoïde"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:379
+#: ../../../../build/work/app/bin/bllnhlp.c:380
 msgid "Separation between helix layers"
 msgstr "Séparation entre couches hélicoïdales"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:380
+#: ../../../../build/work/app/bin/bllnhlp.c:381
 msgid "Layer list"
 msgstr "Liste des calques"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:381
+#: ../../../../build/work/app/bin/bllnhlp.c:382
 msgid "Layer Name"
 msgstr "Nom du calque"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:382
+#: ../../../../build/work/app/bin/bllnhlp.c:383
 msgid "Color of layer"
 msgstr "Couleur de la couche"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:383
+#: ../../../../build/work/app/bin/bllnhlp.c:384
 msgid "Layer is drawn on Main window"
 msgstr "La couche est dessinée dans la fenêtre principale"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:384
+#: ../../../../build/work/app/bin/bllnhlp.c:385
 msgid "Layer cannot be changed"
 msgstr "Le calque ne peut pas être modifié"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:385
+#: ../../../../build/work/app/bin/bllnhlp.c:386
 msgid "Layer is drawn on Map window"
 msgstr "La couche est dessinée dans la fenêtre de navigation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:386
+#: ../../../../build/work/app/bin/bllnhlp.c:387
 msgid "Number of layer buttons to show"
 msgstr "Nombre de boutons de calques à afficher"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:387
+#: ../../../../build/work/app/bin/bllnhlp.c:388
 msgid "Number of objects in this layer"
 msgstr "Nombre d'objets dans cette couche"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:389
+#: ../../../../build/work/app/bin/bllnhlp.c:390
 msgid "Load layer configuration from default"
 msgstr "Charger la configuration de la couche par défaut"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:390
+#: ../../../../build/work/app/bin/bllnhlp.c:391
 msgid "Save current layer configuration as default"
 msgstr "Enregistrer la configuration actuelle comme couche par défaut"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:391
+#: ../../../../build/work/app/bin/bllnhlp.c:392
 msgid "Overwrite layer configuration with system default values"
 msgstr "Réinitialiser le réglage des couches aux valeurs par défaut du système"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:392
 #: ../../../../build/work/app/bin/bllnhlp.c:393
+#: ../../../../build/work/app/bin/bllnhlp.c:394
 msgid "Specifies the size of the room (in inches or centimeters)"
 msgstr "Spécifie la taille de la pièce (en pouces ou en centimètres)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:394
+#: ../../../../build/work/app/bin/bllnhlp.c:395
 msgid "Specifies the layout Title that will appear on printouts"
 msgstr "Spécifie le titre du plan qui apparaîtra sur les impressions"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:395
+#: ../../../../build/work/app/bin/bllnhlp.c:396
 msgid "Specifies the layout Subtitle that will appear on printouts"
 msgstr "Spécifie le sous-titre du plan qui apparaîtra sur les impressions"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:396
+#: ../../../../build/work/app/bin/bllnhlp.c:397
 msgid "Specifies the Modelling Scale"
 msgstr "Spécifie l'échelle de modélisation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:397
+#: ../../../../build/work/app/bin/bllnhlp.c:398
 msgid "Specifies the rail gauge, ie. the distance between the rails"
 msgstr "Spécifie l'écartement des rails, c.à.d. la distance entre les rails"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:398
+#: ../../../../build/work/app/bin/bllnhlp.c:399
 msgid ""
 "Specifies minimum track radius (in inches or centimeters). Tracks with a "
 "smaller radius are considered exceptional."
@@ -9353,7 +9424,7 @@ msgstr ""
 "Spécifie le rayon de voie minimal (en pouces ou en centimètres). Les voies "
 "avec un rayon plus petit sont considérées comme exceptionnelles."
 
-#: ../../../../build/work/app/bin/bllnhlp.c:399
+#: ../../../../build/work/app/bin/bllnhlp.c:400
 msgid ""
 "Specifies maximum track elevation expressed as a percent (%). Tracks with a "
 "larger elevation are considered exceptional."
@@ -9361,44 +9432,44 @@ msgstr ""
 "Spécifie l'élévation maximale de la voie exprimée en pourcentage (%). Les "
 "voies avec une élévation plus grande sont considérées comme exceptionnelles."
 
-#: ../../../../build/work/app/bin/bllnhlp.c:400
+#: ../../../../build/work/app/bin/bllnhlp.c:401
 #, fuzzy
 msgid "Select the background image"
 msgstr "Sélectionne le calque courant du dessin"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:401
+#: ../../../../build/work/app/bin/bllnhlp.c:402
 msgid "Remove the background image"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:402
+#: ../../../../build/work/app/bin/bllnhlp.c:403
 #, fuzzy
 msgid "Specifies the x offset of the bottom left of the background image"
 msgstr "Spécifie la taille de la pièce (en pouces ou en centimètres)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:403
+#: ../../../../build/work/app/bin/bllnhlp.c:404
 #, fuzzy
 msgid "Specifies the y offset of the bottom left of the background image"
 msgstr "Spécifie la taille de la pièce (en pouces ou en centimètres)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:404
+#: ../../../../build/work/app/bin/bllnhlp.c:405
 msgid ""
 "Specifies how large the bottom edge of the background image should be in "
 "model units"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:405
+#: ../../../../build/work/app/bin/bllnhlp.c:406
 msgid ""
 "Specifies the screening of the background image from 0 (none) to 100% "
 "(vanishes)"
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:406
+#: ../../../../build/work/app/bin/bllnhlp.c:407
 #, fuzzy
 msgid "Specifies the rotation angle of the background image in degrees"
 msgstr ""
 "Spécifie si les angles sont entrés sous forme de N° de cœur ou en degrés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:409
+#: ../../../../build/work/app/bin/bllnhlp.c:410
 msgid ""
 "This is the body of the Note.  To change this select Modify from the File "
 "Menu"
@@ -9406,11 +9477,11 @@ msgstr ""
 "Ceci est le texte de la note. Pour le changer, sélectionnez «Modifier» dans "
 "le menu «Fichier»"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:411
+#: ../../../../build/work/app/bin/bllnhlp.c:412
 msgid "Specifies number of pixels per inch (or centimeter)"
 msgstr "Spécifie le nombre de pixels par pouce (ou centimètre)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:413
+#: ../../../../build/work/app/bin/bllnhlp.c:414
 msgid ""
 "Specifies whether Layout Titles, Borders or Track Centerlines are printed on "
 "the BitMap"
@@ -9418,88 +9489,88 @@ msgstr ""
 "Spécifie si les titres du plan, les bordures ou les axes des voies sont "
 "imprimés sur le BitMap"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:414
+#: ../../../../build/work/app/bin/bllnhlp.c:415
 #, fuzzy
 msgid ""
 "Specifies the separation between the original track and the parallel track/"
 "line"
 msgstr "Spécifie la séparation entre les voies parallèles"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:415
+#: ../../../../build/work/app/bin/bllnhlp.c:416
 msgid ""
 "Specifies the a factor that increases the seperation as the radius of the "
 "original track reduces. 0.0 means no increase."
 msgstr ""
 
-#: ../../../../build/work/app/bin/bllnhlp.c:416
+#: ../../../../build/work/app/bin/bllnhlp.c:417
 msgid "Enter your name as specified in the XTrackCAD Registration Notice"
 msgstr ""
 "Entrez votre nom comme spécifié dans la notification d'enregistrement "
 "d'XTrackCAD"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:417
+#: ../../../../build/work/app/bin/bllnhlp.c:418
 msgid "Enter the key value as specified in the XTrackCAD Registration Notice"
 msgstr ""
 "Entrez la valeur de la clé telle que spécifiée dans la notification "
 "d'enregistrement d'XTrackCAD"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:418
+#: ../../../../build/work/app/bin/bllnhlp.c:419
 msgid "Validates the name and key.  Terminates the registration command"
 msgstr "Valide le nom et la clé.  Met fin à la commande d'enregistrement"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:419
+#: ../../../../build/work/app/bin/bllnhlp.c:420
 msgid "0ï¿œ is up or to the right"
 msgstr "0ï¿œ est en haut ou à droite"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:420
+#: ../../../../build/work/app/bin/bllnhlp.c:421
 msgid "Choose english (inches) or metric (centimeters)"
 msgstr "Choisissez anglais (pouces) ou métrique (cm)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:421
+#: ../../../../build/work/app/bin/bllnhlp.c:422
 msgid "How to display length measurements"
 msgstr "Comment afficher les mesures de longueur"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:422
+#: ../../../../build/work/app/bin/bllnhlp.c:423
 msgid "Do not create tracks to be shorter than this value"
 msgstr "Ne créez pas de voies plus courtes que cette valeur"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:423
+#: ../../../../build/work/app/bin/bllnhlp.c:424
 msgid "Maximum distance between connected end points"
 msgstr "Distance maximale entre des extrémités connectées"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:424
+#: ../../../../build/work/app/bin/bllnhlp.c:425
 msgid "Minimum angle between connected End-Points"
 msgstr "Angle minimal entre les extrémités connectées"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:425
+#: ../../../../build/work/app/bin/bllnhlp.c:426
 msgid "Specifies the minimum angle between tracks connected to a turntable"
 msgstr "Spécifie l'angle minimum entre les voies connectées à un pont tournant"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:426
+#: ../../../../build/work/app/bin/bllnhlp.c:427
 msgid "Trains will crash above this speed"
 msgstr "Les trains dérailleront au-dessus de cette vitesse"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:427
+#: ../../../../build/work/app/bin/bllnhlp.c:428
 msgid "Enable/Disable balloon popup help windows"
 msgstr "Activer/Désactiver les bulles d'aide contextuelles"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:428
+#: ../../../../build/work/app/bin/bllnhlp.c:429
 msgid "How far you can move the mouse before its considered a drag"
 msgstr ""
 "Jusqu'où vous pouvez déplacer la souris avant que ce soit considéré comme un "
 "glisser"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:429
+#: ../../../../build/work/app/bin/bllnhlp.c:430
 msgid "How long you can hold a mouse button down before its considered a drag"
 msgstr ""
 "Combien de temps pouvez-vous maintenir un bouton de la souris enfoncé avant "
 "que ce soit considéré comme un glisser"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:430
+#: ../../../../build/work/app/bin/bllnhlp.c:431
 msgid "Minimum distance (in pixels) between grid lines/ticks"
 msgstr "Distance minimale (en pixels) entre les lignes/marques de quadrillage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:431
+#: ../../../../build/work/app/bin/bllnhlp.c:432
 msgid ""
 "Specifies the Check Point frequency; number of modifications made since the "
 "last save."
@@ -9507,376 +9578,376 @@ msgstr ""
 "Nombre de modifications avant qu'une nouvelle sauvegarde automatique n'ait "
 "lieu."
 
-#: ../../../../build/work/app/bin/bllnhlp.c:432
+#: ../../../../build/work/app/bin/bllnhlp.c:433
 msgid "Resume work on last layout or start with new layout"
 msgstr "Modifier le dernier plan de voies ou en créer un nouveau"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:434
+#: ../../../../build/work/app/bin/bllnhlp.c:435
 msgid "Updated cost of current selected item"
 msgstr "Coût actualisé de l'élément actuellement sélectionné"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:436
+#: ../../../../build/work/app/bin/bllnhlp.c:437
 msgid "Selection list for prices"
 msgstr "Liste de sélection des prix"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:437
 #: ../../../../build/work/app/bin/bllnhlp.c:438
 #: ../../../../build/work/app/bin/bllnhlp.c:439
+#: ../../../../build/work/app/bin/bllnhlp.c:440
 msgid "Price of specified length of flex-track"
 msgstr "Prix d'une longueur spécifiée de voie flexible"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:441
+#: ../../../../build/work/app/bin/bllnhlp.c:442
 msgid "Controls the printing of a centerline of track cmdPrint"
 msgstr "Ajuste le dessin de l’axe des voies"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:442
+#: ../../../../build/work/app/bin/bllnhlp.c:443
 msgid "Controls the reduction (scale) of the printout"
 msgstr "Ajuste la réduction (d'échelle) pour l'impression"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:443
+#: ../../../../build/work/app/bin/bllnhlp.c:444
 msgid "Scaled page width (Scale times physical page width)"
 msgstr ""
 "Spécifiez la largeur de la page (échelle multipliée par la largeur du papier "
 "physique)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:444
+#: ../../../../build/work/app/bin/bllnhlp.c:445
 msgid "Sets page size to the maximum (based on scale and physical page size)"
 msgstr ""
 "Définit le format maximum de la page (en fonction de l'échelle et du format "
 "de papier physique)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:445
+#: ../../../../build/work/app/bin/bllnhlp.c:446
 msgid "Scaled page height (Scale times physical page height)"
 msgstr ""
 "Hauteur de page mise à l'échelle (échelle multipliée par la hauteur de page "
 "physique)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:446
+#: ../../../../build/work/app/bin/bllnhlp.c:447
 msgid "Sets scale, origin and angle for a one page printout of the layout"
 msgstr ""
 "Définit l'échelle, l'orientation et l'angle pour l'impression d'une page du "
 "plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:447
+#: ../../../../build/work/app/bin/bllnhlp.c:448
 msgid "Print page in Portrait or Landscape format"
 msgstr "Imprimer la page au format Portrait ou Paysage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:448
+#: ../../../../build/work/app/bin/bllnhlp.c:449
 msgid "Order of printing pages"
 msgstr "Ordre des pages d'impression"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:449
+#: ../../../../build/work/app/bin/bllnhlp.c:450
 msgid "Print Title, Date, Author and other information at bottom of page?"
 msgstr ""
 "Imprimer le titre, la date, l'auteur et d'autres informations en bas de "
 "page ?"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:450
+#: ../../../../build/work/app/bin/bllnhlp.c:451
 msgid "Ignore unprintable page margins?"
 msgstr "Ignorer les marges non imprimables?"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:451
+#: ../../../../build/work/app/bin/bllnhlp.c:452
 msgid "Print Registration Marks at 1:1?"
 msgstr "Imprimer les aides au positionnement à l'échelle 1:1 ?"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:452
+#: ../../../../build/work/app/bin/bllnhlp.c:453
 msgid "Print Snap Grid?"
 msgstr "Imprimer la grille magnétique ?"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:453
+#: ../../../../build/work/app/bin/bllnhlp.c:454
 msgid "Print Rulers on all page edges?"
 msgstr "Imprimer des règles sur tous les bords de page ?"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:454
+#: ../../../../build/work/app/bin/bllnhlp.c:455
 msgid "Print Roadbed Outline?"
 msgstr "Imprimer le contour du ballast ?"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:455
+#: ../../../../build/work/app/bin/bllnhlp.c:456
 msgid "Print Roadbed Outline"
 msgstr "Imprimer le contour du ballast"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:456
 #: ../../../../build/work/app/bin/bllnhlp.c:457
-#: ../../../../build/work/app/bin/bllnhlp.c:459
+#: ../../../../build/work/app/bin/bllnhlp.c:458
+#: ../../../../build/work/app/bin/bllnhlp.c:460
 msgid ""
 "Origin of the print grid.  This is useful if you want to reprint a set of "
 "pages"
 msgstr ""
 "Origine de la grille d'impression. Utile si certaines pages sont réimprimées"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:458
+#: ../../../../build/work/app/bin/bllnhlp.c:459
 msgid "Resets the origin and angle to 0"
 msgstr "Réinitialise à 0 l'alignement et l'angle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:460
+#: ../../../../build/work/app/bin/bllnhlp.c:461
 msgid "Deselects all pages"
 msgstr "Désélectionner toutes les pages"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:462
+#: ../../../../build/work/app/bin/bllnhlp.c:463
 msgid "Print selected pages and terminates the print command"
 msgstr "Imprime les pages sélectionnées et termine la commande d'impression"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:463
+#: ../../../../build/work/app/bin/bllnhlp.c:464
 msgid "List of loaded and unloaded parameter files"
 msgstr "Liste des fichiers de paramètres chargés et non chargés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:464
+#: ../../../../build/work/app/bin/bllnhlp.c:465
 msgid "Show parameter files by names or descriptions"
 msgstr "Afficher les fichiers de paramètres par noms ou descriptions"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:465
+#: ../../../../build/work/app/bin/bllnhlp.c:466
 msgid "Toggle the loaded status of the selected parameter file"
 msgstr "Modifie l'état des fichiers de paramètres sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:466
+#: ../../../../build/work/app/bin/bllnhlp.c:467
 msgid "Find a parameter file for loading"
 msgstr "Trouver un fichier de paramètres à charger"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:467
+#: ../../../../build/work/app/bin/bllnhlp.c:468
 msgid "Update parameter file list"
 msgstr "Mettre à jour la liste des fichiers de paramètres"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:468
+#: ../../../../build/work/app/bin/bllnhlp.c:469
 msgid "Select all parameter files shown"
 msgstr "Sélectionnez tous les fichiers de paramètres affichés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:469
+#: ../../../../build/work/app/bin/bllnhlp.c:470
 msgid "Profile of specified path"
 msgstr "Profil de la voie spécifiée"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:470
+#: ../../../../build/work/app/bin/bllnhlp.c:471
 msgid "Clear the profile"
 msgstr "Effacer le profil de hauteur"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:471
+#: ../../../../build/work/app/bin/bllnhlp.c:472
 msgid "Print the profile"
 msgstr "Imprimer le profil"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:473
+#: ../../../../build/work/app/bin/bllnhlp.c:474
 msgid "Stop recording"
 msgstr "Arrêt d'enregistrement"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:474
+#: ../../../../build/work/app/bin/bllnhlp.c:475
 msgid "Insert a message"
 msgstr "Insérer un message"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:475
+#: ../../../../build/work/app/bin/bllnhlp.c:476
 msgid "End a message"
 msgstr "Fin du message"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:476
+#: ../../../../build/work/app/bin/bllnhlp.c:477
 msgid "Message body"
 msgstr "Corps du message"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:477
+#: ../../../../build/work/app/bin/bllnhlp.c:478
 msgid "Possible turnouts"
 msgstr "Aiguillages possibles"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:478
+#: ../../../../build/work/app/bin/bllnhlp.c:479
 msgid "Skip this turnout"
 msgstr "Ignorer cette participation"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:480
+#: ../../../../build/work/app/bin/bllnhlp.c:481
 msgid "Manufacturer of Object"
 msgstr "Marque de l'objet"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:481
+#: ../../../../build/work/app/bin/bllnhlp.c:482
 msgid "Description of Object"
 msgstr "Description d'objet"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:482
+#: ../../../../build/work/app/bin/bllnhlp.c:483
 msgid "Part Nuber of Object"
 msgstr "Référence de l'objet"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:484
+#: ../../../../build/work/app/bin/bllnhlp.c:485
 msgid "Rescale by Scale Conversion or by Ratio"
 msgstr "Redimensionner par conversion d'échelle ou rapport"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:485
+#: ../../../../build/work/app/bin/bllnhlp.c:486
 msgid "Original Scale of the selected objects"
 msgstr "Échelle d'origine des objets sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:486
+#: ../../../../build/work/app/bin/bllnhlp.c:487
 msgid "Original Gauge of the selected objects"
 msgstr "Ecartement de voies d'origine des objets sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:487
+#: ../../../../build/work/app/bin/bllnhlp.c:488
 msgid "New Scale of the selected objects"
 msgstr "Nouvelle échelle des objets sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:488
+#: ../../../../build/work/app/bin/bllnhlp.c:489
 msgid "New Gauge of the selected objects"
 msgstr "Nouvel écartement de voies des objets sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:489
+#: ../../../../build/work/app/bin/bllnhlp.c:490
 msgid "Change track dimensions to new scale"
 msgstr "Convertir les dimensions de la voie à la nouvelle échelle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:490
+#: ../../../../build/work/app/bin/bllnhlp.c:491
 msgid "Change size by this amount"
 msgstr "Changer la taille d'un facteur"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:492
+#: ../../../../build/work/app/bin/bllnhlp.c:493
 msgid "Snap Grid Line and Division"
 msgstr "Grille magnétique voie et division"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:493
+#: ../../../../build/work/app/bin/bllnhlp.c:494
 msgid "X and Y position markers"
 msgstr "Repères de position X et Y"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:494
+#: ../../../../build/work/app/bin/bllnhlp.c:495
 msgid "Border rulers, room boundaries and table edges"
 msgstr "Règles de bordures,  limites de pièce et bords de table"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:495
+#: ../../../../build/work/app/bin/bllnhlp.c:496
 msgid "Primary Axis of grid rotation"
 msgstr "Axe principal de rotation de la grille"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:496
+#: ../../../../build/work/app/bin/bllnhlp.c:497
 msgid "Secondary Axis of grid rotation"
 msgstr "Axe secondaire de rotation de la grille"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:497
+#: ../../../../build/work/app/bin/bllnhlp.c:498
 msgid "Unselected tracks"
 msgstr "Voies non sélectionnées"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:498
+#: ../../../../build/work/app/bin/bllnhlp.c:499
 msgid "Selected tracks"
 msgstr "Voies sélectionnées"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:499
+#: ../../../../build/work/app/bin/bllnhlp.c:500
 msgid "Color of tracks on the Profile path"
 msgstr "Couleur des voies sur le profil de hauteur"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:500
+#: ../../../../build/work/app/bin/bllnhlp.c:501
 msgid "Color of Exceptional tracks"
 msgstr "Couleur des voies exceptionnelles (hors limites)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:501
+#: ../../../../build/work/app/bin/bllnhlp.c:502
 msgid "Color of track ties"
 msgstr "Couleur des traverses"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:502
+#: ../../../../build/work/app/bin/bllnhlp.c:503
 msgid "Updates the colors"
 msgstr "Met à jour les couleurs"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:503
+#: ../../../../build/work/app/bin/bllnhlp.c:504
 msgid "Angle in degrees"
 msgstr "Angle en degrés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:504
+#: ../../../../build/work/app/bin/bllnhlp.c:505
 msgid "Rotate object(s) by specified amount"
 msgstr "Faire pivoter le ou les objets d'un certain angle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:505
+#: ../../../../build/work/app/bin/bllnhlp.c:506
 msgid "Choose commands to be sticky"
 msgstr "Choisissez les commandes à maintenir (sticky)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:506
+#: ../../../../build/work/app/bin/bllnhlp.c:507
 msgid "Make the commands sticky"
 msgstr "Rendre les commandes collantes (sticky)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:507
+#: ../../../../build/work/app/bin/bllnhlp.c:508
 msgid "List of available structure"
 msgstr "Liste des bâtiments disponibles"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:508
+#: ../../../../build/work/app/bin/bllnhlp.c:509
 msgid "Diagram of the selected structure"
 msgstr "Schéma de la bâtiment sélectionnée"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:509
+#: ../../../../build/work/app/bin/bllnhlp.c:510
 msgid "Hide Selection window when placing Structure"
 msgstr "Masquer la fenêtre de sélection lors du placement de la bâtiment"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:510
+#: ../../../../build/work/app/bin/bllnhlp.c:511
 msgid "Drawing scale and size"
 msgstr "Échelle et taille du dessin"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:511
+#: ../../../../build/work/app/bin/bllnhlp.c:512
 msgid "Complete structure placement"
 msgstr "Placement complet de la bâtiment"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:512
+#: ../../../../build/work/app/bin/bllnhlp.c:513
 msgid "Choose a Pier number"
 msgstr "Choisissez un numéro de colonne"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:513
+#: ../../../../build/work/app/bin/bllnhlp.c:514
 msgid "Name of the Motor"
 msgstr "Nom du moteur"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:514
+#: ../../../../build/work/app/bin/bllnhlp.c:515
 msgid "Value when switch is normal"
 msgstr "Valeur lorsque l'aiguillage est normal"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:515
+#: ../../../../build/work/app/bin/bllnhlp.c:516
 msgid "Value when the switch is reversed"
 msgstr "Valeur lorsque l'aiguillage est dévié"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:516
+#: ../../../../build/work/app/bin/bllnhlp.c:517
 msgid "Value for a positive comfirmation of switch position"
 msgstr "Valeur pour une confirmation positive de la position de l'aiguillage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:518
+#: ../../../../build/work/app/bin/bllnhlp.c:519
 msgid "Useful information about the program"
 msgstr "Informations utiles sur le programme"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:519
+#: ../../../../build/work/app/bin/bllnhlp.c:520
 msgid "Show Tip of the Day every time the program starts"
 msgstr "Montrer le conseil du jour à chaque démarrage du programme"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:520
+#: ../../../../build/work/app/bin/bllnhlp.c:521
 msgid "Show the next Tip of the Day"
 msgstr "Montrer le prochain conseil du jour"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:521
+#: ../../../../build/work/app/bin/bllnhlp.c:522
 msgid "Show the previous Tip of the Day"
 msgstr "Montrer le précédent conseil du jour"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:523
+#: ../../../../build/work/app/bin/bllnhlp.c:524
 msgid "Controls which Command Buttons are displayed"
 msgstr "Afficher ou masquer les boutons de commande dans la barre d'outils"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:524
+#: ../../../../build/work/app/bin/bllnhlp.c:525
 msgid "List of Cars"
 msgstr "Liste des matériels roulants"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:525
+#: ../../../../build/work/app/bin/bllnhlp.c:526
 msgid "List of active trains"
 msgstr "Liste des trains actifs"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:527
+#: ../../../../build/work/app/bin/bllnhlp.c:528
 msgid "Train odometer"
 msgstr "Compteur de distance"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:528
+#: ../../../../build/work/app/bin/bllnhlp.c:529
 msgid "Reset odometer to 0"
 msgstr "Remise à 0"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:529
+#: ../../../../build/work/app/bin/bllnhlp.c:530
 msgid "Find train on layout"
 msgstr "Chercher la train sur le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:530
+#: ../../../../build/work/app/bin/bllnhlp.c:531
 msgid "Follow train around layout"
 msgstr "Suivre le train sur le plan"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:531
+#: ../../../../build/work/app/bin/bllnhlp.c:532
 msgid "Flip direction at End Of Track"
 msgstr "Inverser la direction à la fin de la voie"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:532
+#: ../../../../build/work/app/bin/bllnhlp.c:533
 msgid "Change direction of train"
 msgstr "Inverser la direction du train"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:533
+#: ../../../../build/work/app/bin/bllnhlp.c:534
 msgid "Stop the train"
 msgstr "Arrêt du train"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:534
+#: ../../../../build/work/app/bin/bllnhlp.c:535
 msgid "List of available turnouts for the current scale"
 msgstr "Liste des aiguilles disponibles pour l'échelle actuelle"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:535
+#: ../../../../build/work/app/bin/bllnhlp.c:536
 msgid ""
 "Diagram of the currently selected turnout.  Click on a End-Point to select "
 "the Active End-Point"
@@ -9884,141 +9955,141 @@ msgstr ""
 "Schéma de l'aiguillage actuellement sélectionné. Cliquez sur une extrémité "
 "pour sélectionner l'extrémité active"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:536
+#: ../../../../build/work/app/bin/bllnhlp.c:537
 msgid ""
 "A menu list of various type of turnouts and sectional tracks you can define"
 msgstr ""
 "Une gamme de différents types d'aiguillages et de sections de voies que vous "
 "pouvez définir"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:537
+#: ../../../../build/work/app/bin/bllnhlp.c:538
 msgid "Hide Selection window when placing Turnout"
 msgstr "Masquer la fenêtre de sélection lorsque vous placez l'aiguillage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:538
+#: ../../../../build/work/app/bin/bllnhlp.c:539
 msgid "The selected Active End-Point"
 msgstr "Le point de fin actif sélectionné"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:539
+#: ../../../../build/work/app/bin/bllnhlp.c:540
 msgid "Current selected turnout, (displayed in the diagram window)"
 msgstr ""
 "Aiguillage sélectionné actuellement, (affiché dans la fenêtre du diagramme)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:540
+#: ../../../../build/work/app/bin/bllnhlp.c:541
 msgid "One the End-Points that can be selected"
 msgstr "L'un des points d'extrémité pouvant être sélectionnés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:542
 #: ../../../../build/work/app/bin/bllnhlp.c:543
+#: ../../../../build/work/app/bin/bllnhlp.c:544
 msgid "Angle of the specified track to the center line of the turnout"
 msgstr "Angle de la voie spécifiée par rapport à l'axe de l'aiguillage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:544
+#: ../../../../build/work/app/bin/bllnhlp.c:545
 msgid "Specifies if angles are entered as Frog Numbers or in degrees"
 msgstr ""
 "Spécifie si les angles sont entrés sous forme de N° de cœur ou en degrés"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:545
 #: ../../../../build/work/app/bin/bllnhlp.c:546
+#: ../../../../build/work/app/bin/bllnhlp.c:547
 msgid "Desciption"
 msgstr "Desciption"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:547
+#: ../../../../build/work/app/bin/bllnhlp.c:548
 msgid "Turnout description (Manuf., Size, Part Number, etc)"
 msgstr "Description de l'aiguillage (fabricant, angle, numéro de pièce, etc.)"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:548
 #: ../../../../build/work/app/bin/bllnhlp.c:549
 #: ../../../../build/work/app/bin/bllnhlp.c:550
+#: ../../../../build/work/app/bin/bllnhlp.c:551
 msgid "Length from the base to the end of the specified track"
 msgstr "Longueur de la ligne de base à la fin de la voie sélectionnée"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:552
 #: ../../../../build/work/app/bin/bllnhlp.c:553
+#: ../../../../build/work/app/bin/bllnhlp.c:554
 msgid "Offset of the track End-Point from the center line of the turnout"
 msgstr ""
 "Décalage du point de fin de la voie par rapport à l'axe central de "
 "l'aiguillage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:556
 #: ../../../../build/work/app/bin/bllnhlp.c:557
+#: ../../../../build/work/app/bin/bllnhlp.c:558
 msgid "Prints a full size diagram of the turnout for checking"
 msgstr ""
 "Imprime un diagramme en taille réelle de l'aiguillage pour vérification"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:558
+#: ../../../../build/work/app/bin/bllnhlp.c:559
 msgid "Color of Roadbed lines"
 msgstr "Couleur des voies de balast"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:559
+#: ../../../../build/work/app/bin/bllnhlp.c:560
 msgid "Width of Roadbed lines"
 msgstr "Largeur des lignes de ballast"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:560
+#: ../../../../build/work/app/bin/bllnhlp.c:561
 msgid "Width of Roadbed"
 msgstr "Largeur du ballast"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:562
+#: ../../../../build/work/app/bin/bllnhlp.c:563
 msgid "Closes the window and returns to the Turnout Selection window"
 msgstr "Ferme la fenêtre et retourne à la sélection d'aiguillage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:563
+#: ../../../../build/work/app/bin/bllnhlp.c:564
 msgid "Specifies the diameter of the turntable"
 msgstr "Spécifie le diamètre du pont tournant"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:564
+#: ../../../../build/work/app/bin/bllnhlp.c:565
 msgid "Old Turnout title"
 msgstr "Ancien titre de l'aiguillage"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:565
+#: ../../../../build/work/app/bin/bllnhlp.c:566
 msgid "List of available titles"
 msgstr "Liste des titres disponibles"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:566
+#: ../../../../build/work/app/bin/bllnhlp.c:567
 msgid "Leave the Turnouts' title unchanged"
 msgstr "Laisser le titre d'aiguillage inchangé"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:567
+#: ../../../../build/work/app/bin/bllnhlp.c:568
 msgid "Invoke the Parameter Files dialog"
 msgstr "Ouvre la boîte de dialogue Fichier de paramètres"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:568
+#: ../../../../build/work/app/bin/bllnhlp.c:569
 msgid "List of available turnouts"
 msgstr "Liste des aiguillages disponibles"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:569
+#: ../../../../build/work/app/bin/bllnhlp.c:570
 msgid "Update the Turnouts' title"
 msgstr "Mettre à jour le titre des aiguillages"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:573
+#: ../../../../build/work/app/bin/bllnhlp.c:574
 msgid "Sample"
 msgstr "Exemple"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:575
+#: ../../../../build/work/app/bin/bllnhlp.c:576
 msgid "Slant"
 msgstr "Incliner"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:576
+#: ../../../../build/work/app/bin/bllnhlp.c:577
 msgid "Font selection dialog"
 msgstr "Boite de dialogue de sélection de police"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:577
+#: ../../../../build/work/app/bin/bllnhlp.c:578
 msgid "Weight"
 msgstr "Poids"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:578
+#: ../../../../build/work/app/bin/bllnhlp.c:579
 msgid "Printer Abort Window"
 msgstr "Annuler l'impression"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:579
+#: ../../../../build/work/app/bin/bllnhlp.c:580
 msgid "Print to filename"
 msgstr "Nom du fichier d'impression"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:580
+#: ../../../../build/work/app/bin/bllnhlp.c:581
 msgid "Specify Postscript font alias mapping"
 msgstr "Spécifier l'affectation des polices Postscript"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:581
+#: ../../../../build/work/app/bin/bllnhlp.c:582
 msgid ""
 "Displays the Print Setup window to change printers, orientation, paper size, "
 "etc."
@@ -10026,31 +10097,31 @@ msgstr ""
 "Affiche la fenêtre configuration de l’impression pour changer d'imprimante, "
 "d'orientation, de format du papier, etc."
 
-#: ../../../../build/work/app/bin/bllnhlp.c:582
+#: ../../../../build/work/app/bin/bllnhlp.c:583
 msgid "Closes this dialog"
 msgstr "Ferme cette boîte de dialogue"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:583
+#: ../../../../build/work/app/bin/bllnhlp.c:584
 msgid "Page orientation"
 msgstr "Orientation de la page"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:584
+#: ../../../../build/work/app/bin/bllnhlp.c:585
 msgid "Unprintable margins"
 msgstr "Marges non imprimables"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:585
+#: ../../../../build/work/app/bin/bllnhlp.c:586
 msgid "Updates and closes this dialog"
 msgstr "Met à jour et ferme cette boîte de dialogue"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:586
+#: ../../../../build/work/app/bin/bllnhlp.c:587
 msgid "Choose paper size"
 msgstr "Choisissez le format de papier"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:587
+#: ../../../../build/work/app/bin/bllnhlp.c:588
 msgid "Choose printer"
 msgstr "Choisissez une imprimante"
 
-#: ../../../../build/work/app/bin/bllnhlp.c:588
+#: ../../../../build/work/app/bin/bllnhlp.c:589
 msgid "Print test page"
 msgstr "Impression de la page de test"
 
@@ -12922,8 +12993,8 @@ msgid ""
 "We will be creating a helix with a Elevation Difference of 12\", Grade of "
 "1.5% and limit the Vertical Separation to at least 2\".\n"
 msgstr ""
-"Nous allons créer une hélicoïde de voie avec une différence d'élévation de 12"
-"\", une pente de 1,5% et limiter la distance verticale à au moins 2\".\n"
+"Nous allons créer une hélicoïde de voie avec une différence d'élévation de "
+"12\", une pente de 1,5% et limiter la distance verticale à au moins 2\".\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:34
 #: ../../../../build/work/app/i18n/custmsg.h:629
@@ -14161,8 +14232,8 @@ msgid ""
 "and selecting Define.\n"
 msgstr ""
 "Pour ce faire, cliquez sur le bouton droit de la souris pour afficher le "
-"menu contextuel \"Elévation\" et sélectionnez l'élément de voie puis \"Défini"
-"(e)\".\n"
+"menu contextuel \"Elévation\" et sélectionnez l'élément de voie puis "
+"\"Défini(e)\".\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmprof.xtr:237
 #: ../../../../build/work/app/i18n/custmsg.h:933
