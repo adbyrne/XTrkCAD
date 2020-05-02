@@ -2192,6 +2192,8 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) EditCopy, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdPaste", _("Paste"), 0,
 			(void*) (wMenuCallBack_p) EditPaste, 0, (void *) 0);
+	MiscMenuItemCreate(popup2M, NULL, "cmdClone", _("Clone"), 0,
+			(void*) (wMenuCallBack_p) EditClone, 0, (void *) 0);
 	/*Select*/
 	MiscMenuItemCreate(popup1M, popup2M, "cmdSelectAll", _("Select All"), 0,
 			(void*) (wMenuCallBack_p) SetAllTrackSelect, 0, (void *) 1);
@@ -2308,6 +2310,8 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) EditCopy, IC_SELECTED, (void *) 0);
 	MiscMenuItemCreate(editM, NULL, "cmdPaste", _("&Paste"), ACCL_PASTE,
 			(void*) (wMenuCallBack_p) EditPaste, 0, (void *) 0);
+	MiscMenuItemCreate(editM, NULL, "cmdClone", _("C&lone"), ACCL_CLONE,
+				(void*) (wMenuCallBack_p) EditClone, 0, (void *) 0);
 	MiscMenuItemCreate(editM, NULL, "cmdDelete", _("De&lete"), ACCL_DELETE,
 			(void*) (wMenuCallBack_p) SelectDelete, IC_SELECTED, (void *) 0);
 	MiscMenuItemCreate(editM, NULL, "cmdMoveToCurrentLayer",

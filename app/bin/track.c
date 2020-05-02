@@ -1463,7 +1463,9 @@ EXPORT void ImportStart( void )
 }
 
 
-EXPORT void ImportEnd( void )
+
+
+EXPORT void ImportEnd( coOrd offset, wBool_t import, wBool_t inPlace )
 {
 	track_p to_firstOld;
 	wIndex_t trackCountOld;
@@ -1471,20 +1473,29 @@ EXPORT void ImportEnd( void )
 	coOrd pos;
 	wPos_t x, y;
 	wPos_t ww, hh;
+	wBool_t offscreen = FALSE;
+
 	double xmin = 0.0;
 	double xmax = 0.0;
 	double ymin = 0.0;
 	double ymax = 0.0;
-
 
 	// get the current mouse position
 	GetMousePosition( &x, &y );
 	mainD.Pix2CoOrd( &mainD, x, y, &pos );
 	
 
-
 	// get the size of the drawing area
 	wDrawGetSize( mainD.d, &ww, &hh );
+
+	coOrd middle_screen;
+	wPos_t mx,my;
+
+	mx = ww/2;
+	my = hh/2;
+
+	mainD.Pix2CoOrd( &mainD, mx, my, &middle_screen );
+
 
 	for ( trk=*importTrack; trk; trk=trk->next ) {
 		if (!IsTrackDeleted(trk)) {
@@ -1495,31 +1506,31 @@ EXPORT void ImportEnd( void )
 		}
 	}
 
-	coOrd old_pos;
-	wPos_t ox,oy;
-	old_pos.x = xmin;
-	old_pos.y = ymin;
-	mainD.CoOrd2Pix( &mainD, old_pos, &ox, &oy);
+	coOrd size = {xmax-xmin,ymax-ymin};
 
-	//If the pointer is off the drawing area put with paste origin in middle of display
-	if (abs(y-hh) < TBORDER ) {
-		mainD.Pix2CoOrd( &mainD, ww/2, hh/2, &pos );
-	} else {
-		// in case the pointer is close to the edge
-		// recalculate the destination position so the pasted part remains visible
-		if( abs( y - hh ) < (TBORDER+CLOSETOTHEEDGE)  ) {
-			pos.y -= ymax-ymin;
+
+
+	if (import) {
+		offset = zero;
+	} else if (!inPlace) {
+		//If cursor is off drawing area - cursor is in middle screen
+		if ((x<LBORDER) || (x>(ww-RBORDER)) || (y<BBORDER) || (y>(hh-TBORDER))) {
+			pos.x = middle_screen.x;
+			pos.y = middle_screen.y;
 		}
-		if( abs( x - ww ) < (RBORDER+CLOSETOTHEEDGE) ) {
-			pos.x -= xmax-xmin;
-		}
-		if ( abs(y) < LBORDER) {
-			pos.y += ymax-ymin;
-		}
-		if ( abs(x) < BBORDER) {
-			pos.x += xmax-xmin;
-		}
+		offset.x += pos.x;
+		offset.y += pos.y;
 	}
+
+	coOrd middle_object;
+
+	middle_object.x = offset.x + (size.x/2);
+	middle_object.y = offset.y + (size.y/2);
+
+	wPos_t ox,oy;
+	mainD.CoOrd2Pix( &mainD, middle_object, &ox, &oy );
+
+	if ((ox<0) || (ox>ww) || (oy<0) || (oy>hh) ) offscreen = TRUE;
 
 	to_firstOld = to_first;
 	to_first = *importTrack;
@@ -1531,22 +1542,29 @@ EXPORT void ImportEnd( void )
 	// move the imported track into place
 	for ( trk=*importTrack; trk; trk=trk->next ) if (!IsTrackDeleted(trk)) {
 		coOrd move;
-		move.x = pos.x-xmin;
-		move.y = pos.y-ymin;
-		MoveTrack( trk, pos );// mainD.orig );
+		move.x = offset.x;
+		move.y = offset.y;
+		MoveTrack( trk, move );// mainD.orig );
 		trk->bits |= TB_SELECTED;
 		DrawTrack( trk, &mainD, wDrawColorBlack );
 	}
 	importTrack = NULL; 
 	trackCount = trackCountOld;
 	InfoCount( trackCount );
+	// Pan screen if needed to center of new
+	if (offscreen) {
+		panCenter = middle_object;
+		PanHere((void*)0);
+	}
 }
 
-
-EXPORT BOOL_T ExportTracks( FILE * f )
+/*******
+ * Move Selected Tracks to origin zero and write out
+ *******/
+EXPORT BOOL_T ExportTracks( FILE * f, coOrd * offset)
 {
 	track_p trk;
-	coOrd xlat, orig;
+	coOrd xlat,orig;
 	
 	exportingTracks = TRUE;
 	orig = mapD.size;
@@ -1560,8 +1578,9 @@ EXPORT BOOL_T ExportTracks( FILE * f )
 			trk->index = ++max_index;
 		}
 	}
-	orig.x -= trackGauge;
-	orig.y -= trackGauge;
+
+	*offset = orig;
+
 	xlat.x = - orig.x;
 	xlat.y = - orig.y;
 	TRK_ITERATE( trk ) {

@@ -17,6 +17,7 @@
 		{"line": "cmdCircleSetCmd", "contents": "Set Circle Track creation mode" },
 		{"line": "cmdCircleTangent", "contents": "Create track circle from tangent" },
 		{"line": "cmdClearElevations", "contents": "Removes elevation from Selected tracks" },
+		{"line": "cmdClone", "contents": "Copy objects to clipboard and duplicate them in exactly the same place" },
 		{"line": "cmdCmdopt", "contents": "Command Options dialog" },
 		{"line": "cmdColor", "contents": "Controls colors" },
 		{"line": "cmdConnect", "contents": "Connect two tracks" },
