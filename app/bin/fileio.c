@@ -37,9 +37,6 @@
 	#define W_OK (2)
 	#define access	_access
 	#include <windows.h>
-	//#if _MSC_VER >=1400
-	//	#define strdup _strdup
-	//#endif
 #endif
 #include <sys/stat.h>
 #include <stdarg.h>
@@ -67,7 +64,7 @@
 #include "messages.h"
 #include "misc.h"
 #include "param.h"
-#include "paramfile.h"
+#include "include/paramfile.h"
 #include "paths.h"
 #include "track.h"
 #include "utility.h"
@@ -83,10 +80,12 @@ EXPORT const char * libDir;
 
 
 EXPORT char * clipBoardN;
-
+static coOrd paste_offset, cursor_offset;
 
 EXPORT wBool_t bExample = FALSE;
 EXPORT wBool_t bReadOnly = FALSE;
+
+
 
 #ifdef WINDOWS
 #define rename( F1, F2 ) Copyfile( F1, F2 )
@@ -254,6 +253,23 @@ EXPORT void SyntaxError(
  * \param format IN ???
  *
  * \return FALSE in case of parsing error, TRUE on success
+ *
+ * format chars are:
+ * 0 - read a number and discard
+ * X - no read, *pi = 0
+ * Y - no read, *pf = 0L
+ * Z - no read, *pl = 0.0
+ * L - *pi = number
+ * d - *pi = number
+ * w - *pf = read a width
+ * u - *pul = number
+ * l - *pl = number
+ * f - *pf = number
+ * z - *pf = 0.0
+ * p - *pp = ( number, number ) a coOrd
+ * s - *ps = string
+ * q - *ps = quoted string
+ * c - *qp = position of next non-space char or NULL
  */
 
 EXPORT BOOL_T GetArgs(
@@ -605,8 +621,12 @@ static BOOL_T ReadTrackFile(
 
 	InfoMessage("0");
 	count = 0;
+	double skipLines = 0;
+	BOOL_T skip = FALSE;
 	while ( paramFile && ( fgets(paramLine, sizeof paramLine, paramFile) ) != NULL ) {
 		count++;
+		BOOL_T old_skip = skip;
+		skip = FALSE;
 		if (count%10 == 0) {
 			InfoMessage( "%d", count );
 			wFlush();
@@ -674,8 +694,17 @@ static BOOL_T ReadTrackFile(
 		} else if (strncmp( paramLine, "LAYERS ", 7 ) == 0) {
 			ReadLayers( paramLine+7 );
 		} else {
-			if( !(ret = InputError( "unknown command", TRUE )))
-				break;
+			if (!old_skip) {
+				if (InputError(_("Unknown layout file object - skip until next good object?"), TRUE)) {   //OK to carry on
+					/* SKIP until next main line we recognize */
+					skip = TRUE;
+					skipLines++;
+					continue;
+				} else {
+					break;    //Close File
+				}
+			} else skip = TRUE;
+			skipLines++;
 		}
 	}
 
@@ -687,22 +716,17 @@ static BOOL_T ReadTrackFile(
 	if( ret ) {
 		if (!noSetCurDir)
 			SetCurrentPath( LAYOUTPATHKEY, fileName );
-
-		if (full) {
-//			SetCurrentPath(LAYOUTPATHKEY, pathName);
-			SetLayoutFullPath(pathName);
-			//strcpy(curPathName, pathName);
-			//curFileName = &curPathName[fileName-pathName];
-			SetWindowTitle();
-		}
 	}
+
+	 if (skipLines>0)
+		 NoticeMessage( MSG_LAYOUT_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
 
 	RestoreLocale( oldLocale );
 
 	paramFile = NULL;
 
 	free(paramFileName);
-	paramFileName = NULL;
+    paramFileName = NULL;
 	InfoMessage( "%d", count );
 	return ret;
 }
@@ -746,7 +770,7 @@ int LoadTracks(
 
 	BOOL_T zipped = FALSE;
 	BOOL_T loadXTC = TRUE;
-	char * full_path = fileName[0];
+	char * full_path = strdup(fileName[0]);
 
 	if (extOfFile && (strcmp(extOfFile, ZIPFILETYPEEXTENSION )==0)) {
 
@@ -795,6 +819,8 @@ int LoadTracks(
 				free(manifest);
 			}
 
+			free(full_path);
+			full_path = NULL;
 			// If no manifest value use same name as the archive
 			if (arch_file && arch_file[0])
 			{
@@ -823,7 +849,9 @@ int LoadTracks(
 
 		free(zip_input);
 
+
 	}
+
 	if ( bExample )
 		bReadOnly = TRUE;
 	else if ( access( fileName[0], W_OK ) == -1 )
@@ -831,20 +859,22 @@ int LoadTracks(
 	else
 		bReadOnly = FALSE;
 
-	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, FALSE, TRUE )) {
+	char *copyOfFileName = MyStrdup(fileName[0]);
 
-		if (zipped) {  //Put back to zipped extension - change back title and path
-			nameOfFile = FindFilename( fileName[0]);
-			extOfFile = FindFileExtension( fileName[0]);
-			SetCurrentPath( LAYOUTPATHKEY, fileName[0] );
-			SetLayoutFullPath(fileName[0]);
-			SetWindowTitle();
-			free(full_path);
-			full_path = fileName[0];
+	if (loadXTC && ReadTrackFile( full_path, FindFilename( fileName[0]), TRUE, TRUE, TRUE )) {
+
+		nameOfFile = NULL;
+		extOfFile = NULL;
+		SetCurrentPath( LAYOUTPATHKEY, copyOfFileName );
+		SetLayoutFullPath(copyOfFileName);
+		SetWindowTitle();
+
+		if ( ! bExample && (nameOfFile != NULL) ) {
+			char * copyFile = strdup(fileName[0]);
+			char * listName = FindFilename(strdup(fileName[0]));  //Make sure the list name is new
+			wMenuListAdd( fileList_ml, 0, listName, copyFile );
 		}
 
-		if ( ! bExample )
-			wMenuListAdd( fileList_ml, 0, nameOfFile, MyStrdup(fileName[0]) );
 
 		ResolveIndex();
 #ifdef TIME_READTRACKFILE
@@ -858,6 +888,11 @@ int LoadTracks(
 		LoadLayerLists();
 		LayerSetCounts();
 	}
+
+	MyFree(copyOfFileName);
+	free(full_path);
+	full_path = NULL;
+
 	UndoResume();
 	Reset();
 	wSetCursor( mainD.d, defaultCursor );
@@ -914,7 +949,7 @@ static BOOL_T DoSaveTracks(
 	rc &= fprintf(f, "SCALE %s\n", curScaleName )>0;
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
-	rc &= WriteTracks( f );
+	rc &= WriteTracks( f, TRUE );
 	rc &= fprintf(f, "END\n")>0;
 	if ( !rc )
 		NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName );
@@ -1112,6 +1147,8 @@ EXPORT void DoLoad( void )
 			sSourceFilePattern, LoadTracks, NULL );
 	bExample = FALSE;
 	wFilSelect( loadFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+	paste_offset = zero;
+	cursor_offset = zero;
 	SaveState();
 }
 
@@ -1260,8 +1297,6 @@ static int importAsModule;
  *
  */
 
-
-
 static int ImportTracks(
 		int cnt,
 		char **fileName,
@@ -1293,7 +1328,7 @@ static int ImportTracks(
 	UndoStart( _("Import Tracks"), "importTracks" );
 	useCurrentLayer = TRUE;
 	ReadTrackFile( fileName[ 0 ], nameOfFile, FALSE, FALSE, TRUE );
-	ImportEnd();
+	ImportEnd(zero, TRUE, FALSE);
 	if (importAsModule) SetLayerModule(layer,TRUE);
 	useCurrentLayer = FALSE;
 	SetCurrLayer(saveLayer, NULL, 0, NULL, NULL);
@@ -1309,7 +1344,7 @@ static int ImportTracks(
 
 EXPORT void DoImport( void * type )
 {
-	importAsModule = (int)type;
+	importAsModule = (int)(long)type;
 	if (importFile_fs == NULL)
 		importFile_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Tracks"),
 			sImportFilePattern, ImportTracks, NULL );
@@ -1352,7 +1387,8 @@ static int DoExportTracks(
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
-	ExportTracks( f );
+	coOrd offset;
+	ExportTracks( f , &offset);
 	fprintf(f, "END\n");
 	fclose(f);
 
@@ -1379,7 +1415,6 @@ EXPORT void DoExport( void )
 }
 
 
-
 EXPORT BOOL_T EditCopy( void )
 {
 	FILE * f;
@@ -1401,10 +1436,11 @@ EXPORT BOOL_T EditCopy( void )
 	time(&clock);
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
-	ExportTracks(f);
+	ExportTracks(f, &paste_offset);
 	fprintf(f, "END\n");
 	RestoreLocale(oldLocale);
 	fclose(f);
+
 	return TRUE;
 }
 
@@ -1417,6 +1453,7 @@ EXPORT BOOL_T EditCut( void )
 	return TRUE;
 }
 
+
 /**
  * Paste clipboard content. XTrackCAD uses a disk file as clipboard replacement. This file is read and the
  * content is inserted.
@@ -1424,8 +1461,9 @@ EXPORT BOOL_T EditCut( void )
  * \return    TRUE if success, FALSE on error (file not found)
  */
 
-EXPORT BOOL_T EditPaste( void )
+BOOL_T EditPastePlace( wBool_t inPlace )
 {
+
 	BOOL_T rc = TRUE;
 	char *oldLocale = NULL;
 
@@ -1434,6 +1472,13 @@ EXPORT BOOL_T EditPaste( void )
 	wSetCursor( mainD.d, wCursorWait );
 	Reset();
 	SetAllTrackSelect( FALSE );
+
+	double offset = 20*mainD.scale/mainD.dpi;
+
+	paste_offset.x += offset;
+	paste_offset.y += offset;
+
+
 	ImportStart();
 	UndoStart( _("Paste"), "paste" );
 	useCurrentLayer = TRUE;
@@ -1441,7 +1486,10 @@ EXPORT BOOL_T EditPaste( void )
 		NoticeMessage( MSG_CANT_PASTE, _("Continue"), NULL );
 		rc = FALSE;
 	}
-	ImportEnd();
+	if (inPlace)
+		ImportEnd(paste_offset, FALSE, TRUE);
+	else
+		ImportEnd(zero, FALSE, FALSE);
 	useCurrentLayer = FALSE;
 	/*DoRedraw();*/
 	EnableCommands();
@@ -1451,9 +1499,21 @@ EXPORT BOOL_T EditPaste( void )
 	SelectRecount();
 	UpdateAllElevations();
 	RestoreLocale(oldLocale);
+
 	return rc;
 }
+
+EXPORT BOOL_T EditPaste( void) {
+	return EditPastePlace(FALSE);
+}
 
+EXPORT BOOL_T EditClone( void ) {
+	BOOL_T rc = TRUE;
+	if (!EditCopy()) return FALSE;
+	if (!EditPastePlace(TRUE)) return FALSE;
+	return rc;
+}
+
 /*****************************************************************************
  *
  * INITIALIZATION

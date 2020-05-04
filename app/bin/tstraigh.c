@@ -274,20 +274,12 @@ static DIST_T DistanceStraight( track_p t, coOrd * p )
 
 static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 {
-	long widthOptions = DTS_LEFT|DTS_RIGHT|DTS_TIES;
-	if (GetTrkWidth(t) == 2)
-		widthOptions |= DTS_THICK2;
-	if ((GetTrkWidth(t) == 3) || (d->options & DC_THICK))
-		widthOptions |= DTS_THICK3;
-	if (GetTrkBridge(t)) widthOptions |= DTS_BRIDGE;
-		else widthOptions &=~DTS_BRIDGE;
+	long widthOptions = DTS_LEFT|DTS_RIGHT;
 	DrawStraightTrack( d, GetTrkEndPos(t,0), GetTrkEndPos(t,1),
 				GetTrkEndAngle(t,0),
-				t, GetTrkGauge(t), color, widthOptions );
-	if ( (d->funcs->options & wDrawOptTemp) == 0 && (d->options & DC_QUICK) == 0 ) {
-		DrawEndPt( d, t, 0, color );
-		DrawEndPt( d, t, 1, color );
-	}
+				t, color, widthOptions );
+	DrawEndPt( d, t, 0, color );
+	DrawEndPt( d, t, 1, color );
 }
 
 static void DeleteStraight( track_p t )
@@ -319,9 +311,15 @@ static void ReadStraight( char * line )
 		return;
 	trk = NewTrack( index, T_STRAIGHT, 0, 0 );
 	SetTrkScale( trk, LookupScale(scale) );
-	SetTrkVisible(trk, visible&2);
-	SetTrkNoTies(trk, visible&4);
-	SetTrkBridge(trk, visible&8);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+		SetTrkNoTies(trk, FALSE);
+		SetTrkBridge(trk, FALSE);
+	} else {
+		SetTrkVisible(trk, visible&2);
+		SetTrkNoTies(trk, visible&4);
+		SetTrkBridge(trk, visible&8);
+	}
 	SetTrkLayer(trk, layer);
 	SetTrkWidth( trk, (int)(options&3) );
 	ReadSegs();
@@ -437,9 +435,8 @@ static BOOL_T TrimStraight( track_p trk, EPINX_T ep, DIST_T dist, coOrd endpos, 
 					AdjustStraightEndPt( trk, ep, pos );
 					DrawNewTrack( trk );
 	} else {
+		UndrawNewTrack( trk );
 		DeleteTrack( trk, TRUE );
-		MainRedraw();
-		MapRedraw();
 	}
 	return TRUE;
 }
@@ -505,9 +502,8 @@ BOOL_T ExtendStraightToJoin(
 			DisconnectTracks( trk1, 1-ep1, trk1x, ep1x );
 		}
 		if (trk2) {
+			UndrawNewTrack( trk1 );
 			DeleteTrack( trk1, TRUE );
-			MainRedraw();
-			MapRedraw();
 		} else {
 			trk2 = trk1;
 			UndrawNewTrack( trk2 );
@@ -569,17 +565,13 @@ static STATUS_T ModifyStraight( track_p trk, wAction_t action, coOrd pos )
 		if (action == C_MOVE)
 			InfoMessage( _("Straight: Length=%s Angle=%0.3f"),
 					FormatDistance( d ), PutAngle( GetTrkEndAngle( trk, ep ) ) );
-        MainRedraw();
-        MapRedraw();
 		return C_CONTINUE;
 
 	case C_UP:
 		if (valid)
 			AdjustStraightEndPt( trk, ep, tempSegs(0).u.l.pos[1] );
 		tempSegs_da.cnt = 0;
-        DrawNewTrack( trk );
-        MainRedraw();
-        MapRedraw();
+	        DrawNewTrack( trk );
 		return C_TERMINATE;
 
 	default:
@@ -598,9 +590,8 @@ static DIST_T GetLengthStraight( track_p trk )
 static BOOL_T GetParamsStraight( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
 	params->type = curveTypeStraight;
-	if ( inx == PARAMS_PARALLEL ) {
-		params->ep = 0;
-	} else if (inx == PARAMS_CORNU ){
+	if ( inx == PARAMS_NODES ) return FALSE;
+	if (inx == PARAMS_CORNU ){
 		params->ep = PickEndPoint( pos, trk);
 		params->arcP = zero;
 		params->arcR = 0.0;
@@ -703,6 +694,12 @@ static BOOL_T MakeParallelStraight(
 }
 
 
+static wBool_t CompareStraight( track_cp trk1, track_cp trk2 )
+{
+	return TRUE;
+}
+
+
 static trackCmd_t straightCmds = {
 		"STRAIGHT",
 		DrawStraight,
@@ -732,8 +729,13 @@ static trackCmd_t straightCmds = {
 		NULL,
 		NULL,
 		NULL,
-		MakeParallelStraight };
-
+		MakeParallelStraight,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		CompareStraight };
 
 EXPORT void StraightSegProc(
 		segProc_e cmd,

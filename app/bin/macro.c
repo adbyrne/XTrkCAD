@@ -1,4 +1,5 @@
 /** \file macro.c
+
  * Macros
  */
 
@@ -60,6 +61,7 @@
 #include "param.h" 
 #include "paths.h"
 #include "track.h"
+#include "trackx.h"
 #include "utility.h"
 #include "version.h"
 
@@ -68,6 +70,8 @@ static void DemoInitValues( void );
 
 extern char *userLocale;
 static int log_playbackCursor = 0;
+
+
 
 /*****************************************************************************
  *
@@ -186,7 +190,7 @@ static int StartRecord( int cnt, char ** pathName, void * context )
 	if ( logTable_da.cnt > 11 )
 		lprintf( "StartRecord( %s ) @ %s\n", pathName, ctime(&clock) );
 	ParamStartRecord();
-	WriteTracks( recordF );
+	WriteTracks( recordF, TRUE );
 	WriteLayers( recordF );
 	fprintf( recordF, "REDRAW\n" );
 	fflush( recordF );
@@ -368,35 +372,12 @@ static void MacroDrawBitMap(
 		wPos_t y,
 		wDrawColor color )
 {
-	wDrawOpts opts = 0;
-	switch(dbm) {
-		case RESET:
-		case DRAW:
-		case ORIG:
-		case FLASH_PLUS:
-		case REDRAW:
-		case MOVE_PLYBCK1:
-		case MOVE_PLYBCK2:
-			opts = wDrawOptCursor;
-			break;
-		case FLASH_MINUS:
-			opts = wDrawOptCursorRmv;
-			break;
-		case CLEAR:
-		case MOVE_PLYBCK3:
-		case MOVE_PLYBCK4:
-			opts = wDrawOptCursorClr;
-			break;
-		case QUIT:
-			opts = wDrawOptCursorQuit;
-			break;
-		default:
-			opts = 0;
-		}
-	wDrawBitMap( d->d, bm, x, y, color, opts|wDrawOptTemp|wDrawOptNoClip );
+	wBool_t ret = wDrawSetTempMode( d->d, TRUE );
+	wDrawBitMap( d->d, bm, x, y, color, wDrawOptTemp|wDrawOptNoClip );
+	wDrawSetTempMode( d->d, ret );
 	wFlush();
-	LOG( log_playbackCursor, 1, ("%s %d DrawBitMap( %p %p %d %d %d %d )\n", DrawBitMapToString(dbm), DBMCount, d->d, bm, x, y, color, opts|wDrawOptTemp|wDrawOptNoClip ) );
-	DBMCount++;
+
+	LOG( log_playbackCursor, 1, ("%s %d DrawBitMap( %p %p %d %d %d %d )\n", DrawBitMapToString(dbm), DBMCount++, d->d, bm, x, y, color, wDrawOptTemp|wDrawOptNoClip ) );
 }
 
 
@@ -404,9 +385,9 @@ static void Flash( drawCmd_p d, wPos_t x, wPos_t y, wDrawColor flashColor )
 {
 	if (playbackTimer != 0)
 		return;
+
 	MacroDrawBitMap( FLASH_PLUS, d, flash_bm, x, y, flashColor );
 	wPause( flashTO*2 );
-	MacroDrawBitMap( FLASH_MINUS, d, flash_bm, x, y, flashColor );
 }
 
 
@@ -430,9 +411,6 @@ static void SetPlaybackSpeed(
 
 static void ClearPlaybackCursor( BOOL_T quit )
 {
-	if (playbackBm != NULL) {
-		MacroDrawBitMap( quit?QUIT:CLEAR, playbackD, playbackBm, playbackX, playbackY, playbackColor );
-	}
 	playbackBm = NULL;
 }
 
@@ -447,6 +425,7 @@ static void DrawPlaybackCursor(
 		printf( "DrawPlayBack: playbackBm not null\n" );
 	MacroDrawBitMap( DRAW,  playbackD=d, playbackBm=bm, playbackX=xx, playbackY=yy, playbackColor=color );
 }
+
 
 EXPORT void RedrawPlaybackCursor() {
 	if ( playbackBm && inPlayback)
@@ -474,14 +453,9 @@ static void MoveCursor(
 
 	d->CoOrd2Pix( d, pos, &x, &y );
 
-	if (playbackTimer == 0 && playbackD == d && !didPause) {
+	if (playbackTimer == 0 && playbackD == d /*&& !didPause*/) {
 		dx = (DIST_T)(x-x0);
 		dy = (DIST_T)(y-y0);
-		if ((dx==0) && (dy==0)) {
-			ClearPlaybackCursor(FALSE);
-			DrawPlaybackCursor( d, bm, x0, y0, color );
-			return;
-		}
 		dist = sqrt( dx*dx + dy*dy );
 		steps = (int)(dist / PixelsPerStep ) + 1;
 		dx /= steps;
@@ -491,23 +465,28 @@ static void MoveCursor(
 		dpos.y = (pos.y-pos1.y)/steps;
 
 		for ( i=1; i<=steps; i++ ) {
+
 			ClearPlaybackCursor(FALSE);
+
 			xx = x0+(wPos_t)(i*dx);
 			yy = y0+(wPos_t)(i*dy);
-			if (IsClose(FindDistance(pos1,pos)/10) || steps%4) {
-				if (d->d == mainD.d && !proc) {
-					InfoPos( pos1 );  						//Calls Redraw which calls Clear
-				}
-				if (proc)
-					proc( action, pos1 );					//May call redraw
-				if (IsClose(FindDistance(pos1,pos))) wPause( 200 );
-				else if (IsClose(FindDistance(pos1,pos)/10)) wPause( stepTO*playbackDelay/100 );
-				//MainRedraw();
-				DrawPlaybackCursor( d, bm, xx, yy, color );
-				wPause(playbackDelay/5);
-			}
+
 			pos1.x += dpos.x;
 			pos1.y += dpos.y;
+			if ( proc != NULL ) {
+				proc( action, pos1 );
+			} else {
+				TempRedraw();
+			}
+			DrawPlaybackCursor( d, bm, xx, yy, color );
+			if ( d->d == mainD.d ) {
+				InfoPos( pos1 );
+				wFlush();
+			}
+			// Simple mouse moves happen twice as fast
+			wPause( stepTO*playbackDelay/100/(action==wActionMove?2:1) );
+
+
 			if (!inPlayback) {
 				ClearPlaybackCursor(FALSE);
 				return;
@@ -542,17 +521,15 @@ static void PlaybackCursor(
 	case wActionMove:
 		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm); //0 is normal, shift, ctrl
 		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );
-		//( REDRAW, playbackD, playbackBm, playbackX, playbackY, playbackColor );
 		break;
 
 	case C_DOWN:
 		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
-		MoveCursor( d, NULL, wActionMove, pos, bm, wDrawColorBlack );  //Go to spot
+		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );  //Go to spot
 		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow3_bm);
 		if (flashTwice) Flash( d, x, y, rightDragColor );
 		Flash( d, x, y, playbackColor=rightDragColor );
 		proc( action, pos );
-		MoveCursor( d, NULL, 0, pos, bm, rightDragColor );
 		/* no break */
 
 	case C_MOVE:
@@ -562,7 +539,7 @@ static void PlaybackCursor(
 
 	case C_UP:
 		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow0_bm);
-		MoveCursor( d, NULL, C_MOVE, pos, bm, rightDragColor );
+		MoveCursor( d, proc, C_MOVE, pos, bm, rightDragColor );
 		if (flashTwice) Flash( d, x, y, rightDragColor );
 		Flash( d, x, y, rightDragColor );
 		proc( action, pos );
@@ -572,12 +549,11 @@ static void PlaybackCursor(
 
 	case C_RDOWN:
 		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
-		MoveCursor( d, NULL, wActionMove, pos, bm, wDrawColorBlack );  //Go to spot
+		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );  //Go to spot
 		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrowr3_ctl_bm:arrowr3_bm);
 		if (flashTwice) Flash( d, x, y, leftDragColor );
-		proc( action, pos );
 		Flash( d, x, y, playbackColor=leftDragColor );
-		MoveCursor( d, NULL, 0, pos, bm, rightDragColor );
+		proc( action, pos );
 		/* no break */
 
 	case C_RMOVE:
@@ -603,16 +579,15 @@ static void PlaybackCursor(
 	case C_TEXT:
 		proc( action, pos);
 		char c = action>>8;
-		InfoMessage("Key '%c' value - %d - pressed", c, c);
+		bm = playbackBm;
 		break;
 
 
 	default:
-		;
+		bm = playbackBm;
 	}
 
 	playbackBm = bm;
-	MainRedraw();
 	time1 = wGetTimer();
 	adjTimer += (time1-time0);
 }
@@ -689,6 +664,7 @@ static coOrd oldMainOrig;
 static coOrd oldMainSize;
 static DIST_T oldMainScale;
 static char * oldScaleName;
+static int oldMagneticSnap;
 
 static wBool_t pauseDemo = FALSE;
 static long bigPause = 2000;
@@ -754,6 +730,7 @@ static void PlaybackQuit( void )
 	wWinSetBusy( mainW, FALSE );
 	wWinSetBusy( mapW, FALSE );
 	ParamRestoreAll();
+	magneticSnap = oldMagneticSnap;
 	RestoreLayers();
 	wEnableBalloonHelp( (int)enableBalloonHelp );
 	mainD.scale = oldMainScale;
@@ -763,11 +740,11 @@ static void PlaybackQuit( void )
 	tempD.orig = mainD.orig;
 	tempD.size = mainD.size;
 	tempD.scale = mainD.scale;
+	Reset();
 	ClearTracks();
 	checkPtMark = changed = 0;
 	RestoreTrackState();
 	inPlaybackQuit = FALSE;
-	Reset();
 	DoSetScale( oldScaleName );
 	DoChangeNotification( CHANGE_ALL );
 	CloseDemoWindows();
@@ -835,6 +812,126 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 	}
 }
 
+/*
+* Regression test
+*/
+static int log_regression = 0;
+wBool_t bWriteEndPtDirectIndex;
+
+void DoRegression( char * sFileName )
+{
+	typedef enum { REGRESSION_NONE, REGRESSION_CHECK, REGRESSION_QUIET, REGRESSION_SAVE } E_REGRESSION;
+	E_REGRESSION eRegression = REGRESSION_NONE;
+	long oldParamVersion;
+	long regressVersion;
+	FILE * fRegression;
+	char * sRegressionFile =  NULL;
+	wBool_t bWroteActualTracks;
+	eRegression = log_regression > 0 ? logTable(log_regression).level : 0;
+	char * cp;
+	regressVersion = strtol( paramLine+16, &cp, 10 );
+	if (cp == paramLine+16 )
+		regressVersion = PARAMVERSION;
+	LOG( log_regression, 1, ("REGRESSION %s %d %s:%d %s\n",
+				eRegression==REGRESSION_SAVE?"SAVE":"CHECK",
+				regressVersion,
+				sFileName, paramLineNum,
+				cp ) );
+	MakeFullpath( &sRegressionFile, workingDir, "xtrkcad.regress", NULL );
+	switch ( eRegression ){
+	case REGRESSION_SAVE:
+		fRegression = fopen( sRegressionFile, "a" );
+		if ( fRegression == NULL ) {
+			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sFileName, strerror(errno) );
+		} else {
+			fprintf( fRegression, "REGRESSION START %d %s\n",
+				PARAMVERSION, cp );
+			fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
+			WriteTracks( fRegression, FALSE );
+			fprintf( fRegression, "REGRESSION END\n" );
+			fclose( fRegression );
+		}
+		while ( fgets(paramLine, STR_LONG_SIZE, paramFile) != NULL ) {
+			if ( strncmp( paramLine, "REGRESSION END", 14 ) == 0)
+				break;
+		}
+		break;
+	case REGRESSION_CHECK:
+	case REGRESSION_QUIET:
+		oldParamVersion = paramVersion;
+		paramVersion = regressVersion;
+		bWroteActualTracks = FALSE;
+		track_p to_first_save = to_first;
+		track_p* to_last_save = to_last;
+		while ( GetNextLine() ) {
+			// Read Expected track
+			to_first = NULL;
+			to_last = &to_first;
+			paramVersion = regressVersion;
+			if ( !ReadTrack( paramLine ) )
+				break;
+			track_cp tExpected = to_first;
+			to_first = to_first_save;
+			// Find corresponding Actual track
+			track_cp tActual = FindTrack( GetTrkIndex( tExpected ) );
+			strcat( message, "Regression " );
+			if ( ! CompareTrack( tActual, tExpected ) ) {
+				// Actual doesn't match Expected
+				LOG( log_regression, 1, ("  FAIL: %s", message) );
+				fRegression = fopen( sRegressionFile, "a" );
+				if ( fRegression == NULL ) {
+					NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sRegressionFile, strerror(errno) );
+					break;
+				}
+				fprintf( fRegression, "REGRESSION FAIL %d\n",
+					PARAMVERSION );
+				fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
+				fprintf( fRegression, "# %s", message );
+				if ( !bWroteActualTracks ) {
+					// Print Actual tracks
+					fprintf( fRegression, "Actual Tracks\n" );
+					paramVersion = PARAMVERSION;
+					WriteTracks( fRegression, FALSE );
+					bWroteActualTracks = TRUE;
+				}
+				// Print Expected track
+				to_first = tExpected;
+				fprintf( fRegression, "Expected Track\n" );
+				WriteTracks( fRegression, FALSE );
+				fclose( fRegression );
+				strcat( message, "Continue test?" );
+				if ( eRegression == REGRESSION_CHECK ) {
+					int rc = wNoticeEx( NT_ERROR, message, _("Stop"), _("Continue") );
+					if ( !rc ) {
+						while ( GetNextLine() &&
+							strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
+							;
+						break;
+					}
+				}
+			}
+			// Delete Expected track
+			to_first = tExpected;
+			to_last = &to_first;
+			FreeTrack( tExpected );
+		}
+		to_first = to_first_save;
+		to_last = to_last_save;
+		if ( strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
+			InputError( "Expected REGRESSION END", TRUE );
+		paramVersion = oldParamVersion;
+		break;
+	case REGRESSION_NONE:
+	default:
+		while ( GetNextLine() ) {
+			if ( strncmp( paramLine, "REGRESSION END", 14 ) == 0 )
+				break;
+		}
+		break;
+	}
+	free( sRegressionFile );
+}
+
 static void EnableButtons(
 		BOOL_T enable )
 {
@@ -880,7 +977,6 @@ static void PlaybackSetup( void )
 	wTextClear( demoT );
 	wShow( demoW );
 	wFlush();
-	RulerRedraw( TRUE );
 	wPrefFlush();
 	wWinSetBusy( mainW, TRUE );
 	wWinSetBusy( mapW, TRUE );
@@ -924,6 +1020,8 @@ static void Playback( void )
 		wWinTop( mainW );
 		demoWinOnTop = FALSE;
 	}
+	char * oldLocale = NULL;
+	oldLocale = SaveLocale( "C" );
 	while (TRUE) {
 		if ( paramFile == NULL ||
 			 fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
@@ -945,6 +1043,7 @@ static void Playback( void )
 			paramFile = fopen( demoFileName, "r" );
 			if ( paramFile == NULL ) {
 				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName, strerror(errno) );
+				RestoreLocale( oldLocale );
 				return;
 			}
 			
@@ -956,13 +1055,13 @@ static void Playback( void )
 			UndoSuspend();
 			wWinBlockEnable( FALSE );
 			checkPtMark = 0;
-			RulerRedraw( TRUE );
 			DoChangeNotification( CHANGE_ALL );
 			CompoundClearDemoDefns();
 			if ( fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
 				NoticeMessage( MSG_CANT_READ_DEMO, _("Continue"), NULL, sProdName, demoFileName );
 				fclose( paramFile );
 				paramFile = NULL;
+				RestoreLocale( oldLocale );
 				return;
 			}
 			free(demoFileName);
@@ -1006,6 +1105,7 @@ static void Playback( void )
 				wPause( 1000 );
 				EnableButtons( FALSE );
 			} else {
+				RestoreLocale( oldLocale );
 				return;
 			}
 		} else if (strncmp( paramLine, "CLEAR", 5 ) == 0) {
@@ -1022,6 +1122,7 @@ static void Playback( void )
 					wWinTop( demoW );
 					demoWinOnTop = TRUE;
 					EnableButtons( TRUE );
+					RestoreLocale( oldLocale );
 					return;
 				}
 				PlaybackMessage( paramLine );
@@ -1071,7 +1172,7 @@ static void Playback( void )
 				zoom = scale_x;
 			}
 			mainD.scale = zoom;
-			InfoMessage("Zoom Set to %d", zoom);
+			InfoMessage("Zoom Set to %.0f", zoom);
 			mainD.orig.x = x;
 			mainD.orig.y = y;
 			SetMainSize();
@@ -1157,6 +1258,9 @@ static void Playback( void )
 			}
 		} else if ( strncmp( paramLine, "DEMOINIT", 8 ) == 0 ) {
 			DemoInitValues();
+		} else if ( strncmp( paramLine, "REGRESSION START", 16 ) == 0 ) {
+			DoRegression( curDemo < 1 ? paramFileName :
+					            demoList(curDemo-1).fileName );
 		} else {
 			if (strncmp( paramLine, "MOUSE ", 6 ) == 0) {
 				thisCmd = mouseCmd;
@@ -1188,6 +1292,7 @@ static void Playback( void )
 		if (pauseDemo) {
 			EnableButtons( TRUE );
 			pauseDemo = FALSE;
+			RestoreLocale( oldLocale );
 			return;
 		}
 	}
@@ -1200,6 +1305,7 @@ static void Playback( void )
 		documentFile = NULL;
 	}
 	PlaybackQuit();
+	RestoreLocale( oldLocale );
 }
 
 
@@ -1320,11 +1426,10 @@ static char * demoInitParams[] = {
 		"GROUP layout",
 		"display tunnels 1",
 		"display endpt 2",
-		"display labelenable 7",
+		"display labelenable 0",
 		"display description-fontsize 48",
 		"display labelscale 8",
 		"display layoutlabels 6",
-		"display color-layers 0",
 		"display tworailscale 16",
 		"display tiedraw 0",
 		"pref mingridspacing 5",
@@ -1335,7 +1440,6 @@ static char * demoInitParams[] = {
 		"display carhotbarlabels 1",
 		"display hideTrainsInTunnels 0",
 		"GROUP display",
-		"cmdopt move-quick 0",
 		"pref turntable-angle 15.00",
 		"cmdopt preselect 1",
 		"pref coupling-speed-max 100",
@@ -1385,10 +1489,12 @@ static char * demoInitParams[] = {
 		"GROUP grid",
 		"misc toolbarset 65535",
 		"GROUP misc",
-		"sticky set 268435383", /* 0xfffffb7 - all but Helix and Turntable */
+		"sticky set 67108479", /* 0x3fffe7f - all but Helix and Turntable */
 		"GROUP sticky",
 		"turnout hide 0",
 		"layer button-count 10",
+		"cmdopt selectmode 0",
+		"cmdopt selectzero 1",
 		NULL };
 
 static void DemoInitValues( void )
@@ -1415,6 +1521,8 @@ static void DemoInitValues( void )
 	}
 	for ( cpp = demoInitParams; *cpp; cpp++ )
 		paramPlaybackProc( *cpp );
+	// Have to do this manually
+	oldMagneticSnap = MagneticSnap( TRUE );
 }
 
 
@@ -1508,6 +1616,7 @@ EXPORT BOOL_T MacroInit( void )
 	ParamRegister( &demoPG );
 
 	log_playbackCursor = LogFindIndex( "playbackcursor" );
+	log_regression = LogFindIndex( "regression" );
 
 	return TRUE;
 }

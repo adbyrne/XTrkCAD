@@ -166,7 +166,7 @@ CreateEditableLayersList()
     int i = 0;
     int j = 0;
 
-    while (i <= NUM_LAYERS) {
+    while (i < NUM_LAYERS) {
         if (!GetLayerFrozen(i)) {
             editableLayerList[j++] = i;
         }
@@ -211,7 +211,7 @@ static void DrawDescHilite(BOOL_T selected)
     w = (wPos_t)((descSize.x/mainD.scale)*mainD.dpi+0.5);
     h = (wPos_t)((descSize.y/mainD.scale)*mainD.dpi+0.5);
     mainD.CoOrd2Pix(&mainD,descOrig,&x,&y);
-    wDrawFilledRectangle(mainD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp);
+    wDrawFilledRectangle(tempD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
 }
 
 
@@ -236,10 +236,6 @@ static void DescribeUpdate(
 
     if (ddp->type == DESC_PIVOT) {
         return;
-    }
-
-    if ((ddp->mode&DESC_NOREDRAW) == 0) {
-        DrawDescHilite(TRUE);
     }
 
     if (!descUndoStarted) {
@@ -269,7 +265,6 @@ static void DescribeUpdate(
         descOrig.y -= descBorder;
         descSize.x -= descOrig.x-descBorder;
         descSize.y -= descOrig.y-descBorder;
-        DrawDescHilite(TRUE);
     }
 
     for (inx = 0; inx < sizeof describePLs/sizeof describePLs[0]; inx++) {
@@ -305,9 +300,6 @@ static void DescOk(void * junk)
 {
     wHide(describePG.win);
 
-    if (descTrk) {
-        DrawDescHilite(TRUE);
-    }
     if (layerValue && *layerValue>=0) {
     	SetTrkLayer(descTrk, editableLayerList[*layerValue]);  //int found that is really in the parm controls.
     }
@@ -321,7 +313,7 @@ static void DescOk(void * junk)
     }
 
     descNeedDrawHilite = FALSE;
-    Reset();
+    Reset(); // DescOk
 }
 
 
@@ -555,7 +547,6 @@ EXPORT void DescribeCancel(void)
         	if (!IsTrackDeleted(descTrk))
         		descUpdateFunc(descTrk, -1, descData, TRUE);
         	descTrk = NULL;
-        	DrawDescHilite(TRUE);
 
         }
 
@@ -585,16 +576,12 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case wActionMove:
-    	if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
-    		DrawTrack(trk,&mainD,wDrawColorBlue);
-    	}
     	return C_CONTINUE;
 
 
     case C_DOWN:
         if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
             if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
-                DrawDescHilite(TRUE);
                 descUpdateFunc(descTrk, -1, descData, TRUE);
                 descTrk = NULL;
             }
@@ -612,7 +599,6 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
             descSize.x -= descOrig.x-descBorder;
             descSize.y -= descOrig.y-descBorder;
             descNeedDrawHilite = TRUE;
-            DrawDescHilite(TRUE);
             DescribeTrack(trk, msg, 255);
             inDescribeCmd = FALSE;
             InfoMessage(msg);
@@ -630,7 +616,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 				DrawOriginAnchor(descTrk);
 			}
         } else if (trk){
-        	DrawTrack(trk,&mainD,wDrawColorBlue);
+        	DrawTrack(trk,&tempD,wDrawColorBlue);
         }
 
 
@@ -669,8 +655,8 @@ void InitCmdDescribe(wMenu_p menu)
 void InitCmdDescribe2(wMenu_p menu)
 {
     descPopupM = MenuRegister( "Describe Context Menu" );
-    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr(_("cmdSelectMode")), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
-    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr(_("cmdModifyMode")), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
-    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr(_("cmdPanMode")), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
+    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
+    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
 
 }

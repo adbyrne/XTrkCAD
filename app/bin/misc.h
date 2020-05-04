@@ -93,6 +93,8 @@ extern int enumerateMaxDescLen;
 extern long enableBalloonHelp;
 extern long hotBarLabels;
 extern long rightClickMode;
+extern long selectMode;
+extern long selectZero;
 extern void * commandContext;
 extern coOrd cmdMenuPos;
 #define MODE_DESIGN		(0)
@@ -229,6 +231,7 @@ void FileIsChanged(void);
 char * ConvertFromEscapedText(const char * text);
 char * ConvertToEscapedText(const char * text);
 
+int MagneticSnap( int state );
 void wShow( wWin_p );
 void wHide( wWin_p );
 void CloseDemoWindows( void );
@@ -344,6 +347,7 @@ void MapWindowShow( int state );
 wMenuToggle_p snapGridEnableMI;
 wMenuToggle_p snapGridShowMI;
 wMenuToggle_p mapShowMI;
+wMenuToggle_p magnetsMI;
 
 void ScaleLengthEnd( void );
 void EnumerateList( long, FLOAT_T, char * );

@@ -186,7 +186,6 @@ if (oldElevationEvaluation) {
 		elev0 = GetTrkEndElevHeight(trk,ep);
 		rc = FALSE;
 	} else {
-		DIST_T height,length;
 		if (force || (!GetTrkEndElevCachedHeight(trk,ep,&elev0,&dist0))) {
 			elev0 = GetElevation( trk );
 			dist0 = GetTrkLength( trk, ep, -1 );
@@ -1001,7 +1000,7 @@ EXPORT void RecomputeElevations( void )
 	PropogateForkElevs();
 	PropogateDefElevs();
 	FindIslandElevs();
-	MainRedraw();
+	MainRedraw(); // RecomputeElevations
 LOG( log_fillElev, 1, ( "%s: Total (%ld)\n", elevPrefix, wGetTimer()-time0 ) )
 	if ( log_dumpElev > 0 ) {
 		track_p trk;
@@ -1301,8 +1300,7 @@ EXPORT void DrawTrackElev( track_cp trk, drawCmd_p d, BOOL_T drawIt )
 		 (labelScale < d->scale) ||
 		 (!GetTrkOnElevPath( trk, &elev )) ||
 		 ((GetTrkBits(trk)&TB_ELEVPATH) == 0) ||
-		 (d->funcs->options & wDrawOptTemp) != 0 ||
-		 (d->options & DC_QUICK) != 0 )
+		 (d->options & DC_SIMPLE) != 0 )
 		return;
 
 	if ( !GetCurveMiddle( trk, &pos ) ) {

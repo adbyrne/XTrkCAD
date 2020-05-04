@@ -123,6 +123,7 @@ void DoExportDXF( void );
 BOOL_T EditCopy( void );
 BOOL_T EditCut( void );
 BOOL_T EditPaste( void );
+BOOL_T EditClone( void );
 
 
 void DoRecord( void * );
@@ -142,5 +143,8 @@ BOOL_T MacroInit( void );
 
 char *SaveLocale( char *newLocale );
 void RestoreLocale( char * locale );
+
+// Parameter file search
+void DoSearchParams(void * junk);
 
 #endif

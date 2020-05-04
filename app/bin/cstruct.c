@@ -33,7 +33,7 @@
 #include "layout.h"
 #include "messages.h"
 #include "param.h"
-#include "paramfile.h"
+#include "include/paramfile.h"
 #include "track.h"
 #include "utility.h"
 #include "ccurve.h"
@@ -261,48 +261,31 @@ static void DrawStructure(
 		wDrawColor color )
 {
 	struct extraData *xx = GetTrkExtraData(t);
-	coOrd p00, px0, pxy, p0y, orig, size;
 
-	if (d->options&DC_QUICK) {
-		GetSegBounds( zero, 0.0, xx->segCnt, xx->segs, &orig, &size );
-		p00.x = p0y.x = orig.x;
-		p00.y = px0.y = orig.y;
-		px0.x = pxy.x = orig.x + size.x;
-		p0y.y = pxy.y = orig.y + size.y;
-		REORIGIN1( p00, xx->angle, xx->orig )
-		REORIGIN1( px0, xx->angle, xx->orig )
-		REORIGIN1( p0y, xx->angle, xx->orig )
-		REORIGIN1( pxy, xx->angle, xx->orig )
-		DrawLine( d, p00, px0, 0, color );
-		DrawLine( d, px0, pxy, 0, color );
-		DrawLine( d, pxy, p0y, 0, color );
-		DrawLine( d, p0y, p00, 0, color );
-	} else {
-		d->options &= ~DC_NOTSOLIDLINE;
-		switch(xx->lineType) {
-		case DRAWLINESOLID:
-			break;
-		case DRAWLINEDASH:
-			d->options |= DC_DASH;
-			break;
-		case DRAWLINEDOT:
-			d->options |= DC_DOT;
-			break;
-		case DRAWLINEDASHDOT:
-			d->options |= DC_DASHDOT;
-			break;
-		case DRAWLINEDASHDOTDOT:
-			d->options |= DC_DASHDOTDOT;
-			break;
-		}
-		DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
-		d->options &= ~DC_NOTSOLIDLINE;
-		if ( ((d->funcs->options&wDrawOptTemp)==0) &&
-			 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
-			 labelScale >= d->scale &&
-			 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
-			DrawCompoundDescription( t, d, color );
-		}
+	d->options &= ~DC_NOTSOLIDLINE;
+	switch(xx->lineType) {
+	case DRAWLINESOLID:
+		break;
+	case DRAWLINEDASH:
+		d->options |= DC_DASH;
+		break;
+	case DRAWLINEDOT:
+		d->options |= DC_DOT;
+		break;
+	case DRAWLINEDASHDOT:
+		d->options |= DC_DASHDOT;
+		break;
+	case DRAWLINEDASHDOTDOT:
+		d->options |= DC_DASHDOTDOT;
+		break;
+	}
+	DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
+	d->options &= ~DC_NOTSOLIDLINE;
+	if ( ((d->options & DC_SIMPLE)==0) &&
+		 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
+		 labelScale >= d->scale &&
+		 ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
+		DrawCompoundDescription( t, d, color );
 	}
 }
 
@@ -346,6 +329,23 @@ static BOOL_T QueryStructure( track_p trk, int query )
 }
 
 
+static wBool_t CompareStruct( track_cp trk1, track_cp trk2 )
+{
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
+	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
+	REGRESS_CHECK_INT( "Flipped", xx1, xx2, flipped )
+	REGRESS_CHECK_INT( "Ungrouped", xx1, xx2, ungrouped )
+	REGRESS_CHECK_INT( "Split", xx1, xx2, split )
+	/* desc orig is not stable
+	REGRESS_CHECK_POS( "DescOrig", xx1, xx2, descriptionOrig ) */
+	REGRESS_CHECK_POS( "DescOff", xx1, xx2, descriptionOff )
+	REGRESS_CHECK_POS( "DescSize", xx1, xx2, descriptionSize )
+	return CompareSegs( xx1->segs, xx1->segCnt, xx1->segs, xx1->segCnt );
+}
+
 static trackCmd_t structureCmds = {
 		"STRUCTURE",
 		DrawStructure,
@@ -371,7 +371,17 @@ static trackCmd_t structureCmds = {
 		NULL,	/* moveEndPt */
 		QueryStructure,
 		UngroupCompound,
-		FlipCompound };
+		FlipCompound,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		CompareStruct };
 
 static paramData_t pierPLs[] = {
 	{	PD_DROPLIST, &pierListInx, "inx", 0, (void*)50, N_("Pier Number") } };
@@ -632,8 +642,6 @@ static void NewStructure( void )
 		wListGetIndex(pierL) == -1) {
 		return;
 	}
-	DrawSegs( &tempD, Dst.pos, Dst.angle,
-		curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
 	UndoStart( _("Place Structure"), "newStruct" );
 	titleLen = strlen( curStructure->title );
 	trk = NewCompound( T_STRUCTURE, 0, Dst.pos, Dst.angle, curStructure->title, 0, NULL, NULL, 0, "", curStructure->segCnt, curStructure->segs );
@@ -697,17 +705,13 @@ static void NewStructure( void )
 
 static void StructRotate( void * pangle )
 {
+	if (Dst.state == 0)
+		return;
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
-	if (Dst.state == 1)
-		DrawSegs( &tempD, Dst.pos, Dst.angle,
-			curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
-	else
-		Dst.pos = cmdMenuPos;
+	Dst.pos = cmdMenuPos;
 	Rotate( &Dst.pos, cmdMenuPos, angle );
 	Dst.angle += angle;
-	DrawSegs( &tempD, Dst.pos, Dst.angle,
-		curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
-	Dst.state = 1;
+	TempRedraw(); // StructRotate
 }
 
 
@@ -740,9 +744,6 @@ EXPORT STATUS_T CmdStructureAction(
 		} else {
 			CreateMoveAnchor(pos);
 		}
-		if (anchors_da.cnt>0)
-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-		MainRedraw();
 		return C_CONTINUE;
 		break;
 
@@ -757,7 +758,6 @@ EXPORT STATUS_T CmdStructureAction(
 		Dst.state = 1;
 		InfoMessage( _("Drag to place") );
 		CreateMoveAnchor(pos);
-		MainRedraw();
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -765,8 +765,6 @@ EXPORT STATUS_T CmdStructureAction(
 		if ( curStructure == NULL ) return C_CONTINUE;
 		PlaceStructure( rot0, pos, origPos, &Dst.pos, &Dst.angle );
 		CreateMoveAnchor(pos);
-        MainRedraw();
-        MapRedraw();
 		InfoMessage( "[ %0.3f %0.3f ]", pos.x - origPos.x, pos.y - origPos.y );
 		return C_CONTINUE;
 
@@ -782,7 +780,6 @@ EXPORT STATUS_T CmdStructureAction(
 		origAngle = Dst.angle;
 		InfoMessage( _("Drag to rotate") );
 		Dst.state = 2;
-		MainRedraw();
 		validAngle = FALSE;
 		return C_CONTINUE;
 
@@ -804,7 +801,6 @@ EXPORT STATUS_T CmdStructureAction(
 		InfoMessage( _("Angle = %0.3f"), Dst.angle );
 		Dst.state = 2;
 		CreateRotateAnchor(rot0);
-		MainRedraw();
 		return C_CONTINUE;
 		
 	case C_RUP:
@@ -813,16 +809,10 @@ EXPORT STATUS_T CmdStructureAction(
 		CreateMoveAnchor(pos);
 		Dst.state = 1;
 		InfoMessage(_("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel"));
-        MainRedraw();
-        MapRedraw();
 		return C_CONTINUE;
 
 	case C_CMDMENU:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if ( structPopupM == NULL ) {
-			structPopupM = MenuRegister( "Structure Rotate" );
-			AddRotateMenu( structPopupM, StructRotate );
-		}
 		wMenuPopupShow( structPopupM );
 		return C_CONTINUE;
 
@@ -831,17 +821,14 @@ EXPORT STATUS_T CmdStructureAction(
 			DrawSegs( &tempD, Dst.pos, Dst.angle,
 				curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlue );
 		if (anchors_da.cnt>0) {
-				DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 			}
 		if (Dst.state == 2)
-			DrawLine( &mainD, rot0, rot1, 0, wDrawColorBlack );
+			DrawLine( &tempD, rot0, rot1, 0, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_CANCEL:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if (Dst.state == 1)
-			DrawSegs( &tempD, Dst.pos, Dst.angle,
-				curStructure->segs, curStructure->segCnt, 0.0, wDrawColorBlack );
 		Dst.state = 0;
 		InfoSubstituteControls( NULL, NULL );
 		HotBarCancel();
@@ -913,9 +900,6 @@ static STATUS_T CmdStructure(
 		} else {
 			CreateMoveAnchor(pos);
 		}
-		if (anchors_da.cnt>0)
-			DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-		MainRedraw();
 		return C_CONTINUE;
 		break;
 	case C_DOWN:
@@ -949,11 +933,11 @@ static STATUS_T CmdStructure(
 	case C_CANCEL:
 		wHide( structureW );
 		/*no break*/
+	case C_REDRAW:
 	case C_TEXT:
 	case C_OK:
 	case C_FINISH:
 	case C_CMDMENU:
-	case C_REDRAW:
 		return CmdStructureAction( action, pos );
 
 	default:
@@ -1055,7 +1039,7 @@ static STATUS_T CmdStructureHotBar(
 		if (MyGetKeyState()&WKEY_CTRL) {
 			return CmdStructureAction( C_RUP, pos );
 		}
-		InfoMessage( _("Left drag to move, Ctrl+ left_drag to rotate, or press Return or click Ok to finalize") );
+		InfoMessage( _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel") );
 		return CmdStructureAction( action, pos );
 
 	case C_TEXT:
@@ -1083,6 +1067,10 @@ EXPORT void InitCmdStruct( wMenu_p menu )
 	AddMenuButton( menu, CmdStructure, "cmdStructure", _("Structure"), wIconCreatePixMap(struct_xpm), LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, ACCL_STRUCTURE, NULL );
 	structureHotBarCmdInx = AddMenuButton( menu, CmdStructureHotBar, "cmdStructureHotBar", "", NULL, LEVEL0_50, IC_WANT_MOVE|IC_STICKY|IC_CMDMENU|IC_POPUP2, 0, NULL );
 	ParamRegister( &structurePG );
+	if ( structPopupM == NULL ) {
+		structPopupM = MenuRegister( "Structure Rotate" );
+		AddRotateMenu( structPopupM, StructRotate );
+	}
 }
 #endif
 

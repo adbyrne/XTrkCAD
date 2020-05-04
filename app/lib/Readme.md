@@ -1,4 +1,4 @@
-# XTrackCAD 5.1.2 #
+# XTrackCAD 5.2.0 #
 
 This file contains installation instructions and up-to-date information regarding XTrackCad.
 
@@ -38,6 +38,23 @@ you can find in the file COPYING.
 
 
 # Installation #
+
+## Dependencies ##
+
+XTrackCAD starting with V5.2 depends on some external libraries:
+
++ zlib Compression Library https://www.zlib.net/
++ libzip for handling zip files https://libzip.org/
+
+Additionally on Windows only
+
++ FreeImage image handling http://freeimage.sourceforge.net/
+
+The Windows installer comes with these libraries so no additional downloads
+are necessary. On Linux and OSX the necessary libraries will need to
+be installed using the software installation tools of the 
+operating system.
+
 ## Windows ##
 
 XTrackCad has only been tested on Windows 10.
@@ -48,25 +65,25 @@ self-installing program using the NSIS Installer from Nullsoft Inc.
 Using Windows Explorer, locate the directory in which you downloaded or copied your new version of XTrackCAD.
 
 Start the installation program by double clicking on the
-**[xtrkcad-setup-5.1.2a.exe][]** file icon.
+**[xtrkcad-setup-5.2.0.exe][]** file icon.
 
 Follow the steps in the installation program.
 
 The installation lets you define the directory into which XTrackCAD is
 installed. The directory is created automatically if it doesn't already exist.
 
-A program folder named XTrackCAD 5.1.2a will be created during the installation
+A program folder named XTrackCAD 5 will be created during the installation
 process. This folder contains the program, documentation, parameter and
 example files. An existing installation of earlier versions of XTrackCad is
 not overwritten.
 
-A new program group named XTrackCad 5.1.2 will be created in the Start menu.
+A new program group named XTrackCAD 5 will be created in the Start menu.
 
 ## OSX ##
 
 XTrackCAD for Mac is shipped as a self-installing OSX package
 Start the install by double clicking on the 
-**[xtrkcad-osx-5.1.2a.dmg][]** file icon.
+**[xtrkcad-osx-5.2.0.dmg][]** file icon.
 
 Drag the package and drop into the Applications folder. 
 
@@ -91,7 +108,7 @@ Use your operating system's package manager to install XTrackCAD.
 
 After downloading open a command line then as root run
 
-    ./xtrkcad-setup-5.1.2a.x86_64.sh --prefix=/usr/local --exclude-subdir
+    ./xtrkcad-setup-5.2.0.x86_64.sh --prefix=/usr/local --exclude-subdir
 
 This will install the executable in /usr/local/bin. A directory named
 xtrkcad will be created in /usr/local/share and all files will be unpacked
@@ -104,10 +121,12 @@ environment variable to point to that directory.
 
 ## Upgrade Information ##
 
-**Note:** This version of XTrackCAD comes with the new cornu feature. In order to support
-this feature, the file format for layout files (.xtc) had to be extended.
-Files from earlier versions of XTrackCAD can be read without problems.
-Layouts that were saved from this version of the program cannot be read by older
+**Note:** This version of XTrackCAD comes with the several new features
+like backgroudn images or extensions to notes. In order to support
+this feature, an additional file format for layout files (.xtce) was added. 
+The old .xtc format is still supported for reading and writing. So
+files from earlier versions of XTrackCAD can be read without problems.
+Layouts that were saved in the new format cannot be read by older
 versions of XTrackCAD.
 
 # Building #

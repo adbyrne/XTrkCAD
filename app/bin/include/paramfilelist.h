@@ -1,7 +1,7 @@
 #ifndef HAVE_PARAMFILELIST_H
 	#define HAVE_PARAMFILELIST_H
 	#include <stdbool.h>
-	#include "paramfile.h"
+	#include "include/paramfile.h"
 
 	typedef struct {
 		char * name;				/** < name of parameter file */
@@ -9,6 +9,7 @@
 		int deleted;
 		int deletedShadow;
 		int valid;					/** < FALSE for dropped file */
+		bool favorite;
 		enum paramFileState trackState;
 		enum paramFileState structureState;
 	} paramFileInfo_t;
@@ -28,5 +29,7 @@
 	void ParamFileListConfirmChange(void);
 	void ParamFileListCancelChange(void);
 	BOOL_T ParamFileListInit(void);
+
+	void SearchUiOk(void * junk);
 
 #endif // !HAVE_PARAMFILELIST_H

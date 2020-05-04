@@ -256,7 +256,7 @@ EXPORT track_p MakePolyLineFromSegs(
 					if (first || !IsClose(FindDistance(this, last))) {
 						cnt++;									//Add first point
 					}
-					cnt += floor(spb->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
+					cnt += (int)floor(spb->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
 					if (spb->u.c.radius > 0)
 						Translate(&last, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
 					else
@@ -282,7 +282,7 @@ EXPORT track_p MakePolyLineFromSegs(
 			if (first || !IsClose(FindDistance(this, last))) {
 				cnt++;									//Add first point
 			}
-			cnt += floor(sp->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
+			cnt += (int)floor(sp->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
 			if (sp->u.c.radius > 0)
 				Translate(&last, sp->u.c.center, sp->u.c.a0+sp->u.c.a1, fabs(sp->u.c.radius));
 			else
@@ -330,7 +330,7 @@ EXPORT track_p MakePolyLineFromSegs(
 						xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 						j++;
 					}
-					int slices = floor(spb->u.c.a1/22.5);
+					int slices = (int)floor(spb->u.c.a1/22.5);
 					for (int k=1; k<=slices;k++) {
 						if (spb->u.c.radius>0)
 							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+(k*(spb->u.c.a1/(slices+1))), fabs(spb->u.c.radius));
@@ -374,7 +374,7 @@ EXPORT track_p MakePolyLineFromSegs(
 				xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 				j++;
 			}
-			int slices = floor(sp->u.c.a1/22.5);
+			int slices = (int)floor(sp->u.c.a1/22.5);
 			for (int k=1; k<=slices;k++) {
 				if (sp->u.c.radius>0)
 					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+(k*(sp->u.c.a1/(slices+1))), fabs(sp->u.c.radius));
@@ -394,17 +394,23 @@ EXPORT track_p MakePolyLineFromSegs(
 			first = FALSE;
 		}
 		if (sp->type == SEG_POLY) {
-			if (first || !IsClose(FindDistance(xx->segs[0].u.p.pts[j].pt, last))) {
+			if (first || !IsClose(FindDistance(sp->u.p.pts[0].pt, last))) {
 				xx->segs[0].u.p.pts[j] = sp->u.p.pts[0];
 				j++;
 			}
-			memcpy(&xx->segs[0].u.p.pts[j],&sp->u.p.pts[1], sp->u.p.cnt-1 * sizeof (pts_t));
+			memcpy(&xx->segs[0].u.p.pts[j],&sp->u.p.pts[1], (sp->u.p.cnt-1) * sizeof (pts_t));
 			last = xx->segs[0].u.p.pts[sp->u.p.cnt-1].pt;
-			j +=sp->u.p.cnt;
+			j +=sp->u.p.cnt-1;
 			first = FALSE;
 		}
 		ASSERT(j<=cnt);
 
+	}
+	xx->segs[0].u.p.cnt = j;
+
+	if (IsClose(FindDistance(xx->segs[0].u.p.pts[0].pt,xx->segs[0].u.p.pts[xx->segs[0].u.p.cnt-1].pt))) {
+		xx->segs[0].u.p.polyType = FREEFORM;
+		xx->segs[0].u.p.cnt = xx->segs[0].u.p.cnt-1;
 	}
 
 	ComputeDrawBoundingBox( trk );
@@ -444,7 +450,7 @@ EXPORT void DrawOriginAnchor(track_p trk) {
 	if ((xx->orig.x != 0.0) || (xx->orig.y !=0.0) ) {
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		CreateOriginAnchor(xx->orig,FALSE);
-		DrawSegs(&mainD, zero, 0.0, anchors_da.ptr, anchors_da.cnt, trackGauge, wDrawColorBlue);
+		DrawSegs(&tempD, zero, 0.0, anchors_da.ptr, anchors_da.cnt, trackGauge, wDrawColorBlue);
 	}
 }
 
@@ -506,7 +512,7 @@ static descData_t drawDesc[] = {
 /*LN*/	{ DESC_DIM, N_("Length"), &drawData.length },
 /*HT*/  { DESC_DIM, N_("Height"), &drawData.height },
 /*WT*/ 	{ DESC_DIM, N_("Width"), &drawData.width },
-/*LK*/  { DESC_BOXED, N_("Lock Origin Offset"), &drawData.lock_origin},
+/*LK*/  { DESC_BOXED, N_("Keep Origin Relative"), &drawData.lock_origin},
 /*OI*/  { DESC_POS, N_("Rot Origin: X,Y"), &drawData.origin },
 /*RA*/  { DESC_FLOAT, N_("Rotate Angle"), &drawData.angle },
 /*VC*/	{ DESC_LONG, N_("Point Count"), &drawData.pointCount },
@@ -567,8 +573,6 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 		if (segPtr->type != SEG_TEXT) return;
 		else inx = TX;  //Always look at TextField for SEG_TEXT on "Done"
 	}
-    MainRedraw();
-    MapRedraw();
 	UndrawNewTrack( trk );
 	coOrd pt;
 	coOrd off;
@@ -997,8 +1001,7 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 	drawData.oldOrigin = drawData.origin;
 	ComputeDrawBoundingBox( trk );
 	DrawNewTrack( trk );
-	MainRedraw();
-	DoCurCommand( C_REDRAW, zero );
+	TempRedraw(); // UpdateDraw
 }
 
 extern BOOL_T inDescribeCmd;
@@ -1276,8 +1279,7 @@ static void DrawDraw( track_p t, drawCmd_p d, wDrawColor color )
 	else if (xx->lineType == DRAWLINEDOT) d->options |= DC_DOT;
 	else if (xx->lineType == DRAWLINEDASHDOT) d->options |= DC_DASHDOT;
 	else if (xx->lineType == DRAWLINEDASHDOTDOT) d->options |= DC_DASHDOTDOT;
-	if ( (d->funcs->options&DC_QUICK) == 0 )
-		DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
+	DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
 	d->options = d->options&~(DC_NOTSOLIDLINE);
 }
 
@@ -1316,7 +1318,7 @@ static void ReadDraw( char * header )
 	int lineType;
 	struct extraData * xx;
 
-	if ( !GetArgs( header+5, paramVersion<3?"dXpYf":paramVersion<9?"dL000pYf":"dLd00pff",
+	if ( !GetArgs( header+5, paramVersion<3?"dXXpYf":paramVersion<9?"dLX00pYf":"dLd00pff",
 				&index, &layer, &lineType, &orig, &elev, &angle ) )
 		return;
 	ReadSegs();
@@ -1367,15 +1369,9 @@ static void DoConvertFill(void) {
 
 }
 
-static void DrawModRedraw( void )
-{
-	MainRedraw();
-	MapRedraw();
-}
-
 static drawModContext_t drawModCmdContext = {
 		InfoMessage,
-		DrawModRedraw,
+		DoRedraw,
 		&mainD};
 
 
@@ -1423,6 +1419,8 @@ static void DrawModDlgUpdate(
 	 ParamLoadControl(&drawModPG,drawModRotCenterInx-1);	  	//Make sure the angle is updated in case center moved
 	 ParamLoadControl(&drawModPG,drawModRadius);			 	// Make sure Radius updated
 	 ParamLoadControl(&drawModPG,drawModRelAngle);				//Relative Angle as well
+	 MainRedraw();
+
 }
 
 static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
@@ -1491,7 +1489,6 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		rc = DrawGeomModify( action, pos, &drawModCmdContext );
 		ignoredDraw = NULL;
 		ComputeDrawBoundingBox( trk );
-		//DrawNewTrack( trk );
 		if (drawModCmdContext.state == MOD_AFTER_PT) {
 			switch(drawModCmdContext.type) {
 			case SEG_POLY:
@@ -1605,10 +1602,11 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 					InfoSubstituteControls( NULL, NULL );
 					infoSubst = FALSE;
 		}
-		MainRedraw();
+		ignoredDraw = NULL;
 		if (rc == C_CONTINUE) break;
 		/* no break*/
 	case C_FINISH:
+		ignoredDraw = trk;
 		rc = DrawGeomModify( C_FINISH, pos, &drawModCmdContext  );
 		xx->angle = drawModCmdContext.angle;
 		xx->orig = drawModCmdContext.orig;
@@ -1619,7 +1617,6 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
-		MainRedraw();
 		break;
 	case C_CANCEL:
 	case C_CONFIRM:
@@ -1631,7 +1628,6 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
 		}
-		MainRedraw();
 		break;
 
 	default:
@@ -1656,8 +1652,6 @@ static void UngroupDraw( track_p trk )
 			DrawNewTrack( trk );
 		}
 	}
-	MapRedraw();
-	MainRedraw();
 }
 
 
@@ -1762,11 +1756,152 @@ static BOOL_T QueryDraw( track_p trk, int query )
 	case Q_IS_TEXT:
 		if (xx->segs[0].type== SEG_TEXT) return TRUE;
 		else return FALSE;
+	case Q_GET_NODES:
+		return TRUE;
 	default:
 		return FALSE;
 	}
 }
 
+static wBool_t CompareDraw( track_cp trk1, track_cp trk2 )
+{
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Orig", xx1, xx2, orig )
+	REGRESS_CHECK_ANGLE( "Angle", xx1, xx2, angle )
+	REGRESS_CHECK_INT( "LineType", xx1, xx2, lineType )
+	return CompareSegs( xx1->segs, xx1->segCnt, xx2->segs, xx2->segCnt );
+}
+
+static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * params ) {
+
+	struct extraData * xx = GetTrkExtraData(trk);
+	if (inx != PARAMS_NODES ) return FALSE;
+	DYNARR_RESET(coOrd,params->nodes);
+	BOOL_T back = FALSE;
+	coOrd start,end;
+	switch (xx->segs[0].type) {
+		case SEG_POLY:
+			if (xx->segs[0].u.p.polyType != POLYLINE) return FALSE;
+			REORIGIN(start,xx->segs[0].u.p.pts[0].pt,xx->angle,xx->orig);
+			REORIGIN(end,xx->segs[0].u.p.pts[xx->segs[0].u.p.cnt-1].pt,xx->angle,xx->orig);
+			if (FindDistance(pos,start)>FindDistance(pos,end)) back = TRUE;
+			for (int i=0;i<xx->segs[0].u.p.cnt;i++) {
+				DYNARR_APPEND(coOrd,params->nodes,xx->segs[0].u.p.cnt);
+				if (back)
+					DYNARR_LAST(coOrd,params->nodes) = xx->segs[0].u.p.pts[xx->segs[0].u.p.cnt-1-i].pt;
+				else
+					DYNARR_LAST(coOrd,params->nodes) = xx->segs[0].u.p.pts[i].pt;
+				REORIGIN(DYNARR_LAST(coOrd,params->nodes),DYNARR_LAST(coOrd,params->nodes),xx->angle,xx->orig);
+			}
+			params->lineOrig = DYNARR_N(coOrd,params->nodes,0);
+			params->lineEnd = DYNARR_LAST(coOrd,params->nodes);
+			return TRUE;
+
+		case SEG_STRLIN:;
+			REORIGIN(start,xx->segs[0].u.l.pos[0],xx->angle,xx->orig);
+			REORIGIN(end,xx->segs[0].u.l.pos[1],xx->angle,xx->orig);
+			if (FindDistance(pos,start)>FindDistance(pos,end)) back = TRUE;
+			for (int i=0;i<2;i++) {
+				DYNARR_APPEND(coOrd,params->nodes,2);
+				REORIGIN(DYNARR_LAST(coOrd,params->nodes),xx->segs[0].u.l.pos[back?1-i:i],xx->angle,xx->orig);
+			}
+			params->lineOrig = DYNARR_N(coOrd,params->nodes,0);
+			params->lineEnd = DYNARR_LAST(coOrd,params->nodes);
+			return TRUE;
+
+		case SEG_CRVLIN:;
+			Translate(&start,xx->segs[0].u.c.center,xx->segs[0].u.c.a0,fabs(xx->segs[0].u.c.radius));
+			REORIGIN(start,start,xx->angle,xx->orig);
+			Translate(&end,xx->segs[0].u.c.center,xx->segs[0].u.c.a0+xx->segs[0].u.c.a1,fabs(xx->segs[0].u.c.radius));
+			REORIGIN(end,end,xx->angle,xx->orig);
+			if (FindDistance(start,pos) > FindDistance(end,pos)) back = TRUE;
+			if (fabs(xx->segs[0].u.c.radius) > 0.5) {
+				double min_angle = R2D(2*acos(1.0-(0.1/fabs(xx->segs[0].u.c.radius))));    //Error max is 0.1"
+				int number = (int) ceil(xx->segs[0].u.c.a1/min_angle);
+				double arc_size = xx->segs[0].u.c.a1/number;
+				for (int i=0;i<=number;i++) {
+					DYNARR_APPEND(coOrd,params->nodes,number);
+					if (back)
+						Translate(&DYNARR_LAST(coOrd,params->nodes),xx->segs[0].u.c.center,xx->segs[0].u.c.a0+xx->segs[0].u.c.a1-(i*arc_size),fabs(xx->segs[0].u.c.radius));
+					else
+						Translate(&DYNARR_LAST(coOrd,params->nodes),xx->segs[0].u.c.center,xx->segs[0].u.c.a0+(i*arc_size),fabs(xx->segs[0].u.c.radius));
+					REORIGIN(DYNARR_LAST(coOrd,params->nodes),DYNARR_LAST(coOrd,params->nodes),xx->angle,xx->orig);
+				}
+			} else {
+				DYNARR_APPEND(coOrd,params->nodes,2);
+				REORIGIN(DYNARR_LAST(coOrd,params->nodes),back?end:start,xx->angle,xx->orig);
+				DYNARR_APPEND(coOrd,params->nodes,2);
+				REORIGIN(DYNARR_LAST(coOrd,params->nodes),back?start:end,xx->angle,xx->orig);
+			}
+			params->lineOrig = DYNARR_N(coOrd,params->nodes,0);
+			params->lineEnd = DYNARR_LAST(coOrd,params->nodes);
+			return TRUE;
+
+		case SEG_BEZLIN:
+			REORIGIN(start,xx->segs[0].u.b.pos[0],xx->angle,xx->orig);
+			REORIGIN(end,xx->segs[0].u.b.pos[3],xx->angle,xx->orig);
+			if (FindDistance(pos,start) < FindDistance(pos,end))
+				params->ep = 0;
+			else params->ep = 1;
+			BOOL_T back = FALSE;
+			coOrd curr_pos = params->bezierPoints[params->ep*3];
+			BOOL_T first = TRUE;
+			for (int i = 0; i<xx->segs[0].bezSegs.cnt;i++) {
+				trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->segs[0].bezSegs,params->ep?xx->segs[0].bezSegs.cnt-1-i:i);
+				if (segPtr->type == SEG_STRLIN) {
+					back = FindDistance(segPtr->u.l.pos[0],curr_pos)>FindDistance(segPtr->u.l.pos[1],curr_pos);
+					if (first) {
+						first = FALSE;
+						DYNARR_APPEND(coOrd,params->nodes,2);
+						REORIGIN(DYNARR_LAST(coOrd,params->nodes),segPtr->u.l.pos[back],xx->angle,xx->orig);
+					}
+					DYNARR_APPEND(coOrd,params->nodes,2);
+					REORIGIN(DYNARR_LAST(coOrd,params->nodes),segPtr->u.l.pos[1-back],xx->angle,xx->orig);
+					curr_pos = DYNARR_LAST(coOrd,params->nodes);
+				} else {
+					coOrd start,end;
+					Translate(&start,segPtr->u.c.center,segPtr->u.c.a0,segPtr->u.c.radius);
+					Translate(&end,segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1,segPtr->u.c.radius);
+					back = FindDistance(start,curr_pos)>FindDistance(end,curr_pos);
+					if (fabs(segPtr->u.c.radius) > 0.2) {
+						double min_angle = 360*acos(1.0-(0.1/fabs(segPtr->u.c.radius)))/M_PI;    //Error max is 0.1"
+						int number = (int)ceil(segPtr->u.c.a1/min_angle);
+						double arc_size = segPtr->u.c.a1/number;
+						for (int j=1-first;j<number;j++) {
+							DYNARR_APPEND(coOrd,params->nodes,number-first);
+							if (back == params->ep)
+								Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,segPtr->u.c.a0+(j*arc_size),fabs(segPtr->u.c.radius) );
+							else
+								Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1-(j*arc_size),fabs(segPtr->u.c.radius) );
+							REORIGIN(DYNARR_LAST(coOrd,params->nodes),DYNARR_LAST(coOrd,params->nodes),xx->angle,xx->orig);
+						}
+						first = FALSE;
+					} else {
+						if (first) {
+							first = FALSE;
+							DYNARR_APPEND(coOrd,params->nodes,2);
+							REORIGIN(DYNARR_LAST(coOrd,params->nodes),start,xx->angle,xx->orig);
+						}
+						DYNARR_APPEND(coOrd,params->nodes,1);
+						REORIGIN(DYNARR_LAST(coOrd,params->nodes),end,xx->angle,xx->orig);
+						first = FALSE;
+					}
+					curr_pos = DYNARR_LAST(coOrd,params->nodes);
+				}
+			}
+			params->lineOrig = DYNARR_N(coOrd,params->nodes,0);
+			params->lineEnd = DYNARR_LAST(coOrd,params->nodes);
+			return TRUE;
+
+		default:
+			return FALSE;
+	}
+	return FALSE;
+
+
+}
 
 static trackCmd_t drawCmds = {
 		"DRAW",
@@ -1789,7 +1924,7 @@ static trackCmd_t drawCmds = {
 		NULL, /* merge */
 		ModifyDraw,
 		NULL, /* getLength */
-		NULL, /* getTrackParams */
+		GetParamsDraw, /* getTrackParams */
 		NULL, /* moveEndPt */
 		QueryDraw, /* query */
 		UngroupDraw,
@@ -1801,7 +1936,9 @@ static trackCmd_t drawCmds = {
 		NULL,
 		NULL, /*MakeSegs*/
 		ReplayDraw,
-		StoreDraw
+		StoreDraw,
+		NULL,
+		CompareDraw
 		};
 
 EXPORT BOOL_T OnTableEdgeEndPt( track_p trk, coOrd * pos )
@@ -1896,18 +2033,11 @@ EXPORT BOOL_T GetClosestEndPt( track_p trk, coOrd * pos)
 }
 
 
-static void DrawRedraw(void);
 static drawContext_t drawCmdContext = {
 		InfoMessage,
-		DrawRedraw,
+		DoRedraw,
 		&mainD,
 		OP_LINE };
-
-static void DrawRedraw( void )
-{
-	MainRedraw();
-	MapRedraw();
-}
 
 static wIndex_t benchChoice;
 static wIndex_t benchOrient;
@@ -1942,7 +2072,7 @@ static paramData_t drawPLs[] = {
 #define drawLengthPD			(drawPLs[6])
 	{ PD_FLOAT, &drawCmdContext.length, "Length", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Length") },
 #define drawWidthPD				(drawPLs[7])
-	{ PD_FLOAT, &drawCmdContext.width, "BoxWidth", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Box Width") },
+	{ PD_FLOAT, &drawCmdContext.width, "BoxWidth", PDO_DIM|PDO_NORECORD|BO_ENTER, &r0_10000, N_("Width") },
 #define drawAnglePD				(drawPLs[8])
 #define drawAngleInx					8
 	{ PD_FLOAT, &drawCmdContext.angle, "Angle", PDO_NORECORD|BO_ENTER, &r360_360, N_("Angle") },
@@ -2105,7 +2235,10 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 			drawCmdContext.Color = benchColor;
 
 		} else if ( drawCmdContext.Op == OP_DIMLINE ) {
+			drawCmdContext.Color = wDrawColorBlack;
 			drawCmdContext.benchOption = dimArrowSize;
+		} else if ( drawCmdContext.Op == OP_TBLEDGE ) {
+			drawCmdContext.Color = wDrawColorBlack;
 		} else {
 			drawCmdContext.Color = lineColor;
 		}
@@ -2121,7 +2254,7 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 	case wActionRDown:
 	case wActionRDrag:
 		if (drawCmdContext.Op == OP_BEZLIN) return CmdBezCurve(act2, pos);
-		if (!((MyGetKeyState() & WKEY_SHIFT) != 0)) {
+		if (!((MyGetKeyState() & WKEY_ALT) != magneticSnap)) {
 			SnapPos( &pos );
 		}
 		return DrawGeomMouse( action, pos, &drawCmdContext);
@@ -2200,8 +2333,8 @@ static STATUS_T CmdDraw( wAction_t action, coOrd pos )
 				controls[0] = drawLengthPD.control;
 				controls[1] = drawWidthPD.control;
 				controls[2] = NULL;
-				labels[0] = N_("Box Length");
-				labels[1] = N_("Box Width");
+				labels[0] = N_("Length");
+				labels[1] = N_("Width");
 				ParamLoadControls( &drawPG );
 				InfoSubstituteControls( controls, labels );
 				drawLengthPD.option &= ~PDO_NORECORD;
@@ -2496,7 +2629,6 @@ EXPORT BOOL_T ReadText( char * line )
 	wIndex_t layer;
 	track_p trk;
 	ANGLE_T angle;
-	BOOL_T boxed;
     wDrawColor color = wDrawColorBlack;
     if ( paramVersion<3 ) {
         if (!GetArgs( line, "XXpYql", &index, &layer, &pos, &angle, &text, &textSize ))
@@ -2531,7 +2663,6 @@ void MenuMode(int mode) {
 		DrawGeomModify(C_START,zero,&drawModCmdContext);
 		InfoMessage("Points Mode");
 	}
-	MainRedraw();
 }
 
 void MenuEnter(int key) {
@@ -2564,7 +2695,7 @@ void MenuLine(int key) {
 			xx->lineType = DRAWLINEDASHDOTDOT;
 			break;
 		}
-		MainRedraw();
+		MainRedraw(); // MenuLine
 	}
 }
 

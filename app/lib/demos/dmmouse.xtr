@@ -20,7 +20,7 @@ Note: these color changes occur only during the demo to simulate mouse button pr
 END
 STEP
 MOUSE 2 34.560 28.000
-RESET
+#RESET
 MESSAGE
 _________________________________________
 
@@ -28,7 +28,7 @@ Moving the mouse while a mouse button is pressed is called 'dragging'.
 END
 STEP
 MOUSE 3 36.160 4.000
-RESET
+#RESET
 MESSAGE
 _________________________________________
 
@@ -45,7 +45,7 @@ END
 STEP
 MOUSE 5 36.160 4.000
 MOUSE 6 3.680 4.800
-RESET
+#RESET
 MESSAGE
 __________________________________________
 

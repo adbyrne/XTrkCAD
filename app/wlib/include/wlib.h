@@ -455,12 +455,16 @@ void wTextSetPosition(		wText_p bt, int pos );
 typedef int wDrawOpts;
 #define wDrawOptTemp	(1<<0)
 #define wDrawOptNoClip	(1<<1)
-#define wDrawOptCursor  (1<<2)
-#define wDrawOptCursorClr (1<<3)
-#define wDrawOptCursorRmv (1<<4)
-#define wDrawOptCursorQuit (1<<5)
-#define wDrawOutlineFont (1<<11)
-#define wDrawOptOpaque   (1<<12)
+#define wDrawOptTransparent  (1<<2)
+#define wDrawOutlineFont (1<<3)
+#ifdef CURSOR_SURFACE
+#define wDrawOptCursor  (1<<4)
+#define wDrawOptCursorClr (1<<5)
+#define wDrawOptCursorClr (1<<6)
+#define wDrawOptCursorRmv (1<<7)
+#define wDrawOptCursorQuit (1<<8)
+#define wDrawOptOpaque   (1<<9)
+#endif
 
 
 typedef enum {
@@ -534,9 +538,11 @@ void wDrawPolygon(	wDraw_p, wPos_t [][2], wPolyLine_e [], wIndex_t, wDrawColor, 
 				wDrawOpts, int, int );
 void wDrawFilledCircle(		wDraw_p, wPos_t, wPos_t, wPos_t, wDrawColor, wDrawOpts );
 
-void wDrawGetTextSize(		wPos_t *, wPos_t *, wPos_t *, wDraw_p, const char *, wFont_p,
+void wDrawGetTextSize(		wPos_t *, wPos_t *, wPos_t *, wPos_t *, wDraw_p, const char *, wFont_p,
 				wFontSize_t );
 void wDrawClear(		wDraw_p );
+void wDrawClearTemp(		wDraw_p );
+wBool_t wDrawSetTempMode(	wDraw_p, wBool_t );
 
 void wDrawDelayUpdate(		wDraw_p, wBool_t );
 void wDrawClip(			wDraw_p, wPos_t, wPos_t, wPos_t, wPos_t );

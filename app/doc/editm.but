@@ -22,6 +22,12 @@ The \f{Edit Menu} shows commands affecting the \f{Main Canvas} (\K{mainW}).
 
 \u000
 
+\dd \f{Clone} - Copies the selected objects to the clipboard and duplicates them offset from the original. 
+Repeated Clone commands result in a series of offset copies.
+The new objects are selected and the old ones un-selected.
+
+\u000
+
 \dd \f{Cut} - Moves the selected objects to the clipboard.
 
 \u000
@@ -42,7 +48,10 @@ The \f{Edit Menu} shows commands affecting the \f{Main Canvas} (\K{mainW}).
 
 \u000
 
-\dd \f{Paste} - Copies the contents of the clipboard to the layout. The newly pasted parts are in \f{Selected} state and can easily be moved into place. Any previously selected objects are unselected.
+\dd \f{Paste} - Copies the contents of the clipboard to the layout. Using the paste Menu command it will be placed at the center of the screen. 
+If the context menu paste is used or the short-cuts \e{Ctrl+v} or \e{Shift+Insert}, the parts will be placed at the cursor position. 
+Repeated Pastes without moving the cursor result in overlaid copies. 
+The newly pasted parts are in \f{Selected} state and can easily be moved into place. Any previously selected objects are unselected.
 
 \u000
 

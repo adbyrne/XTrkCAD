@@ -275,7 +275,7 @@ STRUCTURE DEMO "LED 	T1 Green LED	 "
 	L3 0 0.000000 0.059000 0.000000 0 -0.059000 0.000000 0
 	L3 0 0.000000 0.000000 0.059000 0 0.000000 -0.059000 0
 	END
-STRUCTURE DEMO "Switch	ï¿½"" Push Button	 "
+STRUCTURE DEMO "Switch	¼"" Push Button	 "
 	G3 16448250 0.000000 0.125000 0.000000 0.000000 0
 	A3 0 0.013889 0.125000 0.000000 0.000000 0 0.000000 360.000000
 	A3 0 0.013889 0.050000 0.000000 0.000000 0 0.000000 360.000000
@@ -305,7 +305,7 @@ STRUCTURE DEMO "Signals 	Dbl Signal	2"
 	L3 0 0.027778 0.000000 -0.320000 0 0.000000 -0.600000 0
 	L3 0 0.027778 -0.100000 -0.600000 0 0.100000 -0.600000 0
 	END
-STRUCTURE DEMO "Symbols	ï¿½"" DOT	 "
+STRUCTURE DEMO "Symbols	¼"" DOT	 "
 	G3 0 0.000000 0.125000 0.000000 0.000000 0
 	END
 STRUCTURE DEMO "Symbols	Arrow	 "
@@ -367,7 +367,7 @@ DEMO "Poly-Shapes" dmlines2.xtr
 DEMO "Modifying Poly-Shapes" dmplymod.xtr
 DEMO "Rotate" dmrotate.xtr
 DEMO "Flip" dmflip.xtr
-DEMO "Control Panels (New)" dmctlpnl.xtr
+DEMO "Control Panels" dmctlpnl.xtr
 DEMO "Notes" dmnotes.xtr
 #DEMO "Text" dmtext.xtr
 #DEMOGROUP Example

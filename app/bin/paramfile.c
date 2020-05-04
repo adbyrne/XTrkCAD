@@ -38,18 +38,23 @@
 #include "messages.h"
 #include "misc2.h"
 #include "paths.h"
-#include "paramfile.h"
-#include "paramfilelist.h"
+#include "include/paramfile.h"
+#include "include/paramfilelist.h"
+
+#if _MSC_VER >1300
+	#define stricmp( a, b ) _stricmp(a, b )
+#endif
 
 static long paramCheckSum;
 
-typedef enum paramFileState(*GetCompatibilityFunction)(int index, SCALEINX_T scale);
+typedef enum paramFileState(*GetCompatibilityFunction)(int index,
+        SCALEINX_T scale);
 
 GetCompatibilityFunction GetCompatibility[] = {
-		GetTrackCompatibility,
-		GetStructureCompatibility,
-		GetCarProtoCompatibility,
-		GetCarPartCompatibility
+    GetTrackCompatibility,
+    GetStructureCompatibility,
+    GetCarProtoCompatibility,
+    GetCarPartCompatibility
 };
 
 #define COMPATIBILITYCHECKSCOUNT (sizeof(GetCompatibility)/sizeof(GetCompatibility[0]))
@@ -79,13 +84,13 @@ wBool_t IsParamValid(
 
 char *GetParamFileDir(void)
 {
-	return (GetCurrentPath(PARAMETERPATHKEY));
+    return (GetCurrentPath(PARAMETERPATHKEY));
 }
 
 void
 SetParamFileDir(char *fullPath)
 {
-	SetCurrentPath(PARAMETERPATHKEY, fullPath);
+    SetCurrentPath(PARAMETERPATHKEY, fullPath);
 }
 
 char * GetParamFileName(
@@ -105,9 +110,19 @@ bool IsParamFileDeleted(int inx)
     return paramFileInfo(inx).deleted;
 }
 
+bool IsParamFileFavorite(int inx)
+{
+    return paramFileInfo(inx).favorite;
+}
+
 void SetParamFileDeleted(int fileInx, bool deleted)
 {
     paramFileInfo(fileInx).deleted = deleted;
+}
+
+void SetParamFileFavorite(int fileInx, bool favorite)
+{
+    paramFileInfo(fileInx).favorite = favorite;
 }
 
 void ParamCheckSumLine(char * line)
@@ -120,58 +135,59 @@ void ParamCheckSumLine(char * line)
 
 /**
  * Set the compatibility state of a parameter file
- * 
+ *
  * \param index parameter file number in list
- * \return 
+ * \return
  */
 
-void SetParamFileState(int index )
+void SetParamFileState(int index)
 {
-	enum paramFileState state = PARAMFILE_NOTUSABLE;
-	enum paramFileState newState;
-	SCALEINX_T scale = GetLayoutCurScale();
+    enum paramFileState state = PARAMFILE_NOTUSABLE;
+    enum paramFileState newState;
+    SCALEINX_T scale = GetLayoutCurScale();
 
-	for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT && state != PARAMFILE_UNLOADED; i++) {
-		newState = (*GetCompatibility[i])(index, scale);
-		if (newState > state || newState == PARAMFILE_UNLOADED) {
-			state = newState;
-		}
-	}
+    for (int i = 0; i < COMPATIBILITYCHECKSCOUNT && state < PARAMFILE_FIT &&
+            state != PARAMFILE_UNLOADED; i++) {
+        newState = (*GetCompatibility[i])(index, scale);
+        if (newState > state || newState == PARAMFILE_UNLOADED) {
+            state = newState;
+        }
+    }
 
-	paramFileInfo(index).trackState = state;
+    paramFileInfo(index).trackState = state;
 }
 
 /**
  * Read a single parameter file and update the parameter file list
- * 
+ *
  * \param fileName full path for parameter file
- * \return 
+ * \return
  */
 
 int
 ReadParamFile(const char *fileName)
 {
-	DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
-	curParamFileIndex = paramFileInfo_da.cnt - 1;
-	paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
-	paramFileInfo(curParamFileIndex).deleted = FALSE;
-	paramFileInfo(curParamFileIndex).valid = TRUE;
-	paramFileInfo(curParamFileIndex).deletedShadow =
-	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
-	paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
+    DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
+    curParamFileIndex = paramFileInfo_da.cnt - 1;
+    paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
+    paramFileInfo(curParamFileIndex).deleted = FALSE;
+    paramFileInfo(curParamFileIndex).valid = TRUE;
+    paramFileInfo(curParamFileIndex).deletedShadow =
+        paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
+    paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
 
-	SetParamFileState(curParamFileIndex);
+    SetParamFileState(curParamFileIndex);
 
-	return(curParamFileIndex);
+    return (curParamFileIndex);
 }
 
 /**
  * Paramter file reader and interpreter
- * 
+ *
  * \param key unused
  * \param dirName prefix for parameter file path
  * \param fileName name of parameter file
- * \return 
+ * \return
  */
 
 bool ReadParams(
@@ -216,6 +232,8 @@ bool ReadParams(
     paramCheckSum = key;
     paramLineNum = 0;
     checkSummed = FALSE;
+    BOOL_T skip = false;
+    double skipLines = 0;
     while (paramFile && (fgets(paramLine, 256, paramFile)) != NULL) {
         paramLineNum++;
         Stripcr(paramLine);
@@ -257,22 +275,56 @@ bool ReadParams(
             } else {
                 MakeFullpath(&paramFileName, fileName);
             }
+            skip = FALSE;
         } else if (strncmp(paramLine, "CONTENTS ", 9) == 0) {
             curContents = MyStrdup(paramLine + 9);
             curSubContents = curContents;
+            skip = FALSE;
         } else if (strncmp(paramLine, "SUBCONTENTS ", 12) == 0) {
             curSubContents = MyStrdup(paramLine + 12);
+            skip = FALSE;
         } else if (strncmp(paramLine, "PARAM ", 6) == 0) {
-            paramVersion = atol(paramLine + 6);
+        	paramVersion = strtol( paramLine+8, &cp, 10 );
+			if (cp)
+				while (*cp && isspace((unsigned char)*cp)) cp++;
+			if ( paramVersion > iParamVersion ) {
+				if (cp && *cp) {
+					NoticeMessage( MSG_PARAM_UPGRADE_VERSION1, _("Ok"), NULL, paramVersion, iParamVersion, sProdName, cp );
+				} else {
+					NoticeMessage( MSG_PARAM_UPGRADE_VERSION2, _("Ok"), NULL, paramVersion, iParamVersion, sProdName );
+				}
+				break;
+			}
+			if ( paramVersion < iMinParamVersion ) {
+				NoticeMessage( MSG_PARAM_BAD_FILE_VERSION, _("Ok"), NULL, paramVersion, iMinParamVersion, sProdName );
+				break;
+			}
         } else {
-            for (pc = 0; pc < paramProc_da.cnt; pc++) {
-                if (strncmp(paramLine, paramProc(pc).name,
-                            strlen(paramProc(pc).name)) == 0) {
-                    paramProc(pc).proc(paramLine);
-                    goto nextLine;
-                }
-            }
-            InputError("Unknown param line", TRUE);
+			for (pc = 0; pc < paramProc_da.cnt; pc++) {
+				if (strncmp(paramLine, paramProc(pc).name,
+							strlen(paramProc(pc).name)) == 0) {
+					skip = FALSE;					//Stop skip so we re-message
+					paramProc(pc).proc(paramLine);
+					goto nextLine;
+				}
+			}
+			if (!skip) {
+				if (InputError(_("Unknown param file line - skip until next good object?"), TRUE)) {   //OK to carry on
+					/* SKIP until next main line we recognize */
+					skip = TRUE;
+					skipLines++;
+					goto nextLine;
+				} else {
+					if (skipLines>0)
+						NoticeMessage( MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
+					fclose(paramFile);
+					free(paramFileName);
+					paramFileName = NULL;
+					RestoreLocale(oldLocale);
+					return FALSE;
+				}
+			}
+			skipLines++;
         }
 nextLine:
         ;
@@ -290,6 +342,8 @@ nextLine:
             return FALSE;
         }
     }
+    if (skipLines>0)
+    	NoticeMessage( MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
     if (paramFile) {
         fclose(paramFile);
     }
@@ -299,4 +353,5 @@ nextLine:
 
     return TRUE;
 }
+
 

@@ -58,9 +58,13 @@ static void doNotice(
     GtkWidget * widget,
     long value)
 {
-    noticeValue = value;
-    if (noticeValue != 2)
+    if (value != 2) {
+	// event not from from closing the window but from a button press
+	// Close the Notice dialog
     	gtk_widget_destroy(noticeW.win);
+	// Remember the button
+        noticeValue = value;
+    }
     wlibDoModal(NULL, FALSE);
 }
 
@@ -261,6 +265,7 @@ int wNotice3(
         /*		gdk_window_set_group( nw->win->window, gtkMainW->gtkwin->window ); */
     }
 
+    noticeValue = 0; // Default: Cancel
     wlibDoModal(NULL, TRUE);
 
     if (aff) {

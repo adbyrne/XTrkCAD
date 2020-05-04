@@ -526,7 +526,7 @@ static void LayoutOk(void * junk)
     free(thisLayout.copyOfLayoutProps);
     wHide(layoutW);
 
-    MainRedraw();
+    MainLayout( TRUE, TRUE );
 }
 
 
@@ -650,7 +650,7 @@ LayoutDlgUpdate(
     if (inx == BACKGROUNDANGLE) {
 
     	ANGLE_T angle = NormalizeAngle(*(double *)valueP);
-    	wStringSetValue((wString_p)layoutPLs[BACKGROUNDANGLE].control,FormatLong(angle));
+    	wStringSetValue((wString_p)layoutPLs[BACKGROUNDANGLE].control,FormatFloat(angle));
     	SetLayoutBackGroundAngle(angle);
     	MainRedraw();
     }

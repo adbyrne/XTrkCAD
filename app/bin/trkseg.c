@@ -142,8 +142,14 @@ EXPORT coOrd GetSegEndPt(
 		break;
     case SEG_BEZTRK:
     case SEG_BEZLIN:
-        if (ep ==1) pos = segPtr->u.b.pos[3];       //For Bezier, use the End Points of the overall curve
-        else pos = segPtr->u.b.pos[0];
+        if (ep ==1) {
+        	pos = segPtr->u.b.pos[3];       //For Bezier, use the End Points of the overall curve
+        	angle = FindAngle(segPtr->u.b.pos[2],segPtr->u.b.pos[3]);
+        } else {
+        	pos = segPtr->u.b.pos[0];
+        	angle = FindAngle(segPtr->u.b.pos[1],segPtr->u.b.pos[0]);
+        }
+
         break;
     default:
 		AbortProg("GetSegCntPt(%c)", segPtr->type );
@@ -173,7 +179,7 @@ EXPORT void GetTextBounds(
 {
 
 	coOrd size, size2;
-	POS_T descent = 0.0;
+	POS_T descent = 0.0, ascent = 0.0;
 	coOrd lo, hi;
 	coOrd p[4];
 	coOrd lastL;
@@ -183,10 +189,9 @@ EXPORT void GetTextBounds(
 	// set up the corners of the rectangle
 	p[0].x = p[3].x = 0.0;
 	p[1].x = p[2].x = size.x;
-	DrawTextSize2(&mainD, "A", NULL, fs, FALSE, &size2, &descent);
-	POS_T ascent = size2.y-descent;
-	p[0].y = p[1].y = lastL.y + descent;
-	p[2].y = p[3].y = ascent;
+	DrawTextSize2(&mainD, "A", NULL, fs, FALSE, &size2, &descent, &ascent);
+	p[0].y = p[1].y = lastL.y - descent;
+	p[2].y = p[3].y = size2.y;
 
 	lo = hi = zero;
 
@@ -1133,7 +1138,7 @@ EXPORT BOOL_T ReadSegs( void )
 	int i;
 	DIST_T elev0, elev1;
 	BOOL_T hasElev;
-	BOOL_T isPolyV2, noVersion;
+	BOOL_T isPolyV1, isPolyV2, noVersion;
 	BOOL_T improvedEnds;
 	FLOAT_T ignoreFloat;
 	char type;
@@ -1169,20 +1174,17 @@ EXPORT BOOL_T ReadSegs( void )
 		}
 		if (subsegs) continue;
 		type = *cp++;
-		hasElev = FALSE;
+		improvedEnds = isPolyV2 = hasElev = isPolyV1 = FALSE;
 		noVersion = TRUE;
 		if ( *cp != ' ')
 			noVersion = FALSE;
 		if ( *cp == '3' ) {
 			cp++;
-			hasElev = TRUE;
+			hasElev = isPolyV1 = TRUE;
 		}
-		isPolyV2 = FALSE;
 		if (*cp == '4') {
 			cp++;
-			hasElev = TRUE;
-			isPolyV2 = TRUE;
-			improvedEnds = TRUE;
+			improvedEnds = isPolyV2 = hasElev = isPolyV1 = TRUE;
 		}
 		switch (type) {
 		case SEG_STRLIN:
@@ -1343,33 +1345,27 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
 			s->u.p.polyType = FREEFORM;
-			if (isPolyV2) {
-				if ( !GetArgs( cp, "lwdd",
-					 &rgb, &s->width,
-					 &s->u.p.cnt, &s->u.p.polyType) ) {
-					rc = FALSE;
-					/*??*/break;
-				}
-			} else {
-				if ( !GetArgs( cp, "lwd",
-						&rgb, &s->width,
-						&s->u.p.cnt) ) {
-					rc = FALSE;
-					/*??*/break;
-				}
+			if ( !GetArgs( cp,
+				isPolyV2?"lwdd":"lwdX",
+				 &rgb,
+				 &s->width,
+				 &s->u.p.cnt,
+				 &s->u.p.polyType) ) {
+				rc = FALSE;
+				/*??*/break;
 			}
 			s->color = wDrawFindColor( rgb );
 			s->u.p.pts = (pts_t*)MyMalloc( s->u.p.cnt * sizeof (pts_t) );
 			for ( i=0; i<s->u.p.cnt; i++ ) {
 				cp = GetNextLine();
-				if (cp == NULL || !GetArgs( cp, "pd", &s->u.p.pts[i].pt,&s->u.p.pts[i].pt_type)) {
+				if (cp == NULL ||
+				    !GetArgs( cp,
+// TODO: does elev belong here instead of the seg header?
+					isPolyV2?"pdY":isPolyV1?"pXf":"pXY",
+					&s->u.p.pts[i].pt,
+					&s->u.p.pts[i].pt_type,
+					&elev0 )) {
 					rc = FALSE;
-				}
-				if (!noVersion) {
-					if (cp == NULL || !GetArgs( cp, hasElev?"f":"Y", &elev0 ) ) {
-						rc = FALSE;
-						/*??*/break;
-					}
 				}
 			}
 			s->u.p.angle = 0.0;
@@ -1587,6 +1583,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			break;
 		case SEG_POLY:
 		case SEG_FILPOLY:
+// TODO: to be consistent, we should add a dummy 0 for elev. See ReadSegs/SEG_POLY
 			rc &= fprintf( f, "\t%c4 %ld %0.6f %d %d \n",
 				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
 				segs[i].u.p.cnt, segs[i].u.p.polyType ) > 0;
@@ -1751,66 +1748,14 @@ EXPORT void DrawSegsO(
 	long option;
 	wFontSize_t fs;
 
+	wBool_t bFill;
+
 	for (i=0; i<segCnt; i++,segPtr++ ) {
 		if (color == wDrawColorBlack) {
 			color1 = segPtr->color;
 			color2 = wDrawColorBlack;
 		} else {
 			color1 = color2 = color;
-		}
-		if ( (options&DTS_TIES)!=0 ) {
-			if ( segPtr->color == wDrawColorWhite )
-				continue;
-			switch (segPtr->type) {
-			case SEG_STRTRK:
-				REORIGIN( p0, segPtr->u.l.pos[0], angle, orig )
-				REORIGIN( p1, segPtr->u.l.pos[1], angle, orig )
-				DrawStraightTies( d, trk, p0, p1, color );
-				break;
-			case SEG_CRVTRK:
-				a0 = NormalizeAngle(segPtr->u.c.a0 + angle);
-				REORIGIN( c, segPtr->u.c.center, angle, orig );
-				DrawCurvedTies( d, trk, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1, color );
-				break;
-			case SEG_JNTTRK:
-				REORIGIN( p0, segPtr->u.j.pos, angle, orig );
-				DrawJointTrack( d, p0, NormalizeAngle(segPtr->u.j.angle+angle), segPtr->u.j.l0, segPtr->u.j.l1, segPtr->u.j.R, segPtr->u.j.L, segPtr->u.j.negate, segPtr->u.j.flip, segPtr->u.j.Scurve, trk, -1, -1, trackGauge, color1, options );
-				break;
-            case SEG_BEZTRK:
-                REORIGIN(p0, segPtr->u.b.pos[0], angle, orig);
-                REORIGIN(p1, segPtr->u.b.pos[1], angle, orig);
-                REORIGIN(p2, segPtr->u.b.pos[2], angle, orig);
-                REORIGIN(p3, segPtr->u.b.pos[3], angle, orig);
-                tempPtr = segPtr->bezSegs.ptr;
-                for(int j=0;j<segPtr->bezSegs.cnt;j++,tempPtr++) {   //Loop through sub parts (only Trks supported)
-                	if (tempPtr->type == SEG_CRVTRK) {
-                		a0 = NormalizeAngle(tempPtr->u.c.a0 + angle);
-                		REORIGIN( c, tempPtr->u.c.center, angle, orig );
-                		DrawCurvedTies( d, trk, c, fabs(tempPtr->u.c.radius), a0, tempPtr->u.c.a1, color );
-                	}
-                	if (tempPtr->type == SEG_STRTRK) {
-                		REORIGIN( p0, tempPtr->u.l.pos[0], angle, orig )
-                		REORIGIN( p1, tempPtr->u.l.pos[1], angle, orig )
-						DrawStraightTies( d, trk, p0, p1, color );
-                	}
-                }
-                break;
-            }
-			// continue; Ensure tracks also drawn
-		}
-		switch (segPtr->type) {
-		case SEG_STRTRK:
-		case SEG_CRVTRK:
-		case SEG_JNTTRK:
-        case SEG_BEZTRK:
-		case SEG_TEXT:
-			break;
-		default:
-			if (d->options&DC_QUICK)
-				return;
-			if ((d->options&DC_SIMPLE) != 0 &&
-				trackGauge != 0.0)
-				return;
 		}
 		wDrawWidth thick = 3;
 #ifdef WINDOWS
@@ -1833,7 +1778,7 @@ EXPORT void DrawSegsO(
 				DrawStraightTrack( d,
 					p0, p1,
 					FindAngle(p1, p0 ),
-					NULL, trackGauge, color1, options );
+					trk, color1, options );
 				break;
 			case SEG_STRLIN:
 				DrawLine( d, p0, p1, (d->options&DC_THICK)?thick:(wDrawWidth)floor(segPtr->width*factor+0.5), color1 );
@@ -1841,8 +1786,7 @@ EXPORT void DrawSegsO(
 			case SEG_DIMLIN:
 			case SEG_BENCH:
 			case SEG_TBLEDGE:
-				if ( (d->options&DC_GROUP) ||
-					 (segPtr->type == SEG_DIMLIN && d->funcs == &tempSegDrawFuncs) ) {
+				if ( (d->options&DC_SEGTRACK) ) {
 					DYNARR_APPEND( trkSeg_t, tempSegs_da, 10 );
 					tempPtr = &tempSegs(tempSegs_da.cnt-1);
 					memcpy( tempPtr, segPtr, sizeof segPtr[0] );
@@ -1884,7 +1828,7 @@ EXPORT void DrawSegsO(
 					fabs(segPtr->u.c.radius),
 					a0, segPtr->u.c.a1,
 					p0, p1,
-					NULL, trackGauge, color1, options );
+					trk, color1, options );
 			} else {
 				DrawArc( d, c, fabs(segPtr->u.c.radius), a0, segPtr->u.c.a1,
 						FALSE, (d->options&DC_THICK)?thick:(wDrawWidth)floor(segPtr->width*factor+0.5), color1 );
@@ -1919,7 +1863,7 @@ EXPORT void DrawSegsO(
             		   					fabs(tempPtr->u.c.radius),
             		   					a0, tempPtr->u.c.a1,
             		   					p0, p1,
-            		   					NULL, trackGauge, color1, options );
+            		   					trk, color1, options );
         				} else if (tempPtr->type == SEG_CRVLIN) {
         					DrawArc( d, c, fabs(tempPtr->u.c.radius), a0, tempPtr->u.c.a1,
         							FALSE, (d->options&DC_THICK)?thick:(wDrawWidth)floor(tempPtr->width*factor+0.5), color1 );
@@ -1930,10 +1874,9 @@ EXPORT void DrawSegsO(
         				if ( tempPtr->color == wDrawColorWhite ) break;
         				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
         				REORIGIN(p1,tempPtr->u.l.pos[1], angle, orig);
-        				DrawStraightTrack( d,
-        									p0, p1,
-											FindAngle(p1, p0 ),
-											NULL, trackGauge, color1, options );
+        				DrawStraightTrack( d, p0, p1,
+						FindAngle(p1, p0 ),
+						trk, color1, options );
             			break;
         			case SEG_STRLIN:
         				REORIGIN(p0,tempPtr->u.l.pos[0], angle, orig);
@@ -1963,15 +1906,19 @@ EXPORT void DrawSegsO(
 				REORIGIN( tempPts[j], segPtr->u.p.pts[j].pt, angle, orig );
 				tempTypes[j] = segPtr->u.p.pts[j].pt_type;
 			}
-			BOOL_T fill = ((d->options&DC_GROUP) != 0 || (d->funcs != &tempSegDrawFuncs));
-			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, (d->options&DC_THICK)?thick:(wDrawWidth)floor(segPtr->width*factor+0.5), (fill && (segPtr->type==SEG_FILPOLY))?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
+			bFill = (segPtr->type == SEG_FILPOLY);
+			if ( (d->options&DC_SIMPLE) && programMode != MODE_TRAIN )
+				bFill = FALSE;
+			DrawPoly( d, segPtr->u.p.cnt, tempPts, tempTypes, color1, (d->options&DC_THICK)?thick:(wDrawWidth)floor(segPtr->width*factor+0.5), bFill?1:0, segPtr->u.p.polyType==POLYLINE?1:0);
 			free(tempPts);
 			free(tempTypes);
 			break;
 		case SEG_FILCRCL:
 			REORIGIN( c, segPtr->u.c.center, angle, orig )
-			if ( (d->options&DC_GROUP) != 0 ||
-				 d->funcs != &tempSegDrawFuncs ) {
+			bFill = TRUE;
+			if ( (d->options&DC_SIMPLE) && programMode != MODE_TRAIN )
+				bFill = FALSE;
+			if ( bFill ) {
 				DrawFillCircle( d, c, fabs(segPtr->u.c.radius), color1 );
 			} else {
 				DrawArc( d, c, fabs(segPtr->u.c.radius), 0, 360,
@@ -2086,5 +2033,106 @@ EXPORT void CopyPoly(trkSeg_p p, wIndex_t segCnt) {
 }
 
 
-
-
+EXPORT wBool_t CompareSegs(
+	trkSeg_p segPtr1,
+	int segCnt1,
+	trkSeg_p segPtr2,
+	int segCnt2 )
+{
+	char * cp = message+strlen(message);
+	if ( segCnt1 != segCnt2 ) {
+		sprintf( cp, "SegCnt %d %d\n", segCnt1, segCnt2 );
+		return FALSE;
+	}
+	char * cq = cp-2;;
+	for ( int segInx = 0; segInx < segCnt1; segInx++ ) {
+		cp = cq;
+		sprintf( cp, "SEG:%d - ", segInx );
+		cp += strlen( cp );
+		trkSeg_p segP1 = &segPtr1[segInx];
+		trkSeg_p segP2 = &segPtr2[segInx];
+		REGRESS_CHECK_INT( "Type", segP1, segP2, type );
+		REGRESS_CHECK_COLOR( "Color", segP1, segP2, color );
+		switch( segP1->type ) {
+		case SEG_DIMLIN:
+		case SEG_TBLEDGE:
+		case SEG_BENCH:
+			// These don't have widths
+			break;
+		default:
+			REGRESS_CHECK_WIDTH( "Width", segP1, segP2, width );
+		}
+		switch( segP1->type ) {
+		case SEG_DIMLIN:
+		case SEG_TBLEDGE:
+			// These don't have color
+			break;
+		default:
+			REGRESS_CHECK_COLOR( "Color", segP1, segP2, color );
+		}
+		switch( segP1->type ) {
+		case SEG_STRTRK:
+		case SEG_STRLIN:
+		case SEG_DIMLIN:
+		case SEG_BENCH:
+		case SEG_TBLEDGE:
+			REGRESS_CHECK_POS( "Pos[0]", segP1, segP2, u.l.pos[0] )
+			REGRESS_CHECK_POS( "Pos[1]", segP1, segP2, u.l.pos[1] )
+//			REGRESS_CHECK_POS( "Pos[2]", segP1, segP2, u.l.pos[2] )
+//			REGRESS_CHECK_POS( "Pos[3]", segP1, segP2, u.l.pos[3] )
+			REGRESS_CHECK_ANGLE( "Angle", segP1, segP2, u.l.angle )
+			REGRESS_CHECK_INT( "Option", segP1, segP2, u.l.option )
+			break;
+		case SEG_BEZTRK:
+		case SEG_BEZLIN:
+			break; // u.b
+		case SEG_CRVLIN:
+		case SEG_CRVTRK:
+		case SEG_FILCRCL:
+			REGRESS_CHECK_POS( "Center", segP1, segP2, u.c.center )
+			REGRESS_CHECK_ANGLE( "A0", segP1, segP2, u.c.a0 )
+			REGRESS_CHECK_ANGLE( "A1", segP1, segP2, u.c.a1 )
+			REGRESS_CHECK_DIST( "Radius", segP1, segP2, u.c.radius )
+			break; // u.c
+		case SEG_JNTTRK:
+			REGRESS_CHECK_POS( "Pos", segP1, segP2, u.j.pos )
+			REGRESS_CHECK_ANGLE( "Angle", segP1, segP2, u.j.angle )
+			REGRESS_CHECK_DIST( "R", segP1, segP2, u.j.R )
+			REGRESS_CHECK_DIST( "L", segP1, segP2, u.j.L )
+			REGRESS_CHECK_DIST( "L0", segP1, segP2, u.j.l0 )
+			REGRESS_CHECK_DIST( "L1", segP1, segP2, u.j.l1 );
+			REGRESS_CHECK_INT( "Flip", segP1, segP2, u.j.flip )
+			REGRESS_CHECK_INT( "Negate", segP1, segP2, u.j.negate )
+			REGRESS_CHECK_INT( "Scurve", segP1, segP2, u.j.Scurve )
+			break; // u.j
+		case SEG_TEXT:
+			REGRESS_CHECK_POS( "Pos", segP1, segP2, u.t.pos )
+			REGRESS_CHECK_ANGLE( "Angle", segP1, segP2, u.t.angle )
+			// CHECK fontP
+			REGRESS_CHECK_DIST( "Fontsize", segP1, segP2, u.t.fontSize )
+			REGRESS_CHECK_INT( "Boxed", segP1, segP2, u.t.boxed )
+			// CHECK string
+			break; // u.t
+		case SEG_POLY:
+		case SEG_FILPOLY:
+			REGRESS_CHECK_INT( "Cnt", segP1, segP2, u.p.cnt )
+			// CHECK pts
+			REGRESS_CHECK_POS( "Orig", segP1, segP2, u.p.orig )
+			REGRESS_CHECK_ANGLE( "Angle", segP1, segP2, u.p.angle )
+			break; // u.p
+		// EndPts
+		case SEG_UNCEP:
+		case SEG_CONEP:
+			break;
+		// Turnout/Struct
+		case SEG_PATH:
+		case SEG_SPEC:
+		case SEG_CUST:
+		case SEG_DOFF:
+			break;
+		default:
+			break;
+		}
+	}
+	return TRUE;
+}

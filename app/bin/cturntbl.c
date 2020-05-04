@@ -162,9 +162,19 @@ static ANGLE_T ConstrainTurntableAngle( track_p trk, coOrd pos )
 static EPINX_T NewTurntableEndPt( track_p trk, ANGLE_T angle )
 {
 	struct extraData *xx = GetTrkExtraData(trk);
-	EPINX_T ep = GetTrkEndPtCnt(trk);
+	EPINX_T ep = -1;
+	/* Reuse an old empty ep if it exists */
+	for (int i =0;i< GetTrkEndPtCnt(trk)-1;i++) {
+		if (GetTrkEndTrk(trk,i) == NULL) {
+			ep = i;
+			break;
+		}
+	}
+	if (ep == -1) {
+		ep = GetTrkEndPtCnt(trk);
+		SetTrkEndPtCnt( trk, ep+1 );
+	}
 	coOrd pos;
-	SetTrkEndPtCnt( trk, ep+1 );
 	PointOnCircle( &pos, xx->pos, xx->radius, angle );
 	SetTrkEndPoint( trk, ep, pos, angle );
 	return ep;
@@ -182,7 +192,7 @@ static void DrawTurntable( track_p t, drawCmd_p d, wDrawColor color )
 	struct extraData *xx = GetTrkExtraData(t);
 	coOrd p0, p1;
 	EPINX_T ep;
-	long widthOptions = DTS_LEFT|DTS_RIGHT|DTS_TIES;
+	long widthOptions = DTS_LEFT|DTS_RIGHT;
 
 
 	if ( !ValidateTurntablePosition(t) ) {
@@ -196,17 +206,12 @@ static void DrawTurntable( track_p t, drawCmd_p d, wDrawColor color )
 	if (color == wDrawColorBlack)
 		color = normalColor;
 	DrawArc( d, xx->pos, xx->radius, 0.0, 360.0, 0, (color == wDrawColorBlueHighlight)?3:0, color );
-	if ( programMode != MODE_DESIGN )
-		return;
-	if ( (d->options&DC_QUICK) == 0 ) {
-		if (color == wDrawColorBlueHighlight) widthOptions |= DTS_THICK3;
-		DrawStraightTrack( d, p0, p1, FindAngle(p0,p1), t, GetTrkGauge(t), color, widthOptions );
-		for ( ep=0; ep<GetTrkEndPtCnt(t); ep++ ) {
-			if (GetTrkEndTrk(t,ep) != NULL )
-				DrawEndPt( d, t, ep, color );
-		}
+	DrawStraightTrack( d, p0, p1, FindAngle(p0,p1), t, color, widthOptions );
+	for ( ep=0; ep<GetTrkEndPtCnt(t); ep++ ) {
+		if (GetTrkEndTrk(t,ep) != NULL )
+			DrawEndPt( d, t, ep, color );
 	}
-	if ( ((d->funcs->options&wDrawOptTemp)==0) &&
+	if ( ((d->options&DC_SIMPLE)==0) &&
 		 (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
 		 labelScale >= d->scale ) {
 		LabelLengths( d, t, color );
@@ -220,9 +225,7 @@ static DIST_T DistanceTurntable( track_p trk, coOrd * p )
 	ANGLE_T a;
 	coOrd pos0, pos1;
 
-	d = FindDistance( xx->pos, *p ) - xx->radius;
-	if (d < 0.0)
-		d = 0.0;
+	d = FindDistance( xx->pos, *p ) - xx->radius;    //OK to be negative
 	if ( programMode == MODE_DESIGN ) {
 		a = FindAngle( xx->pos, *p );
 		Translate( p, xx->pos, a, d+xx->radius );
@@ -340,7 +343,11 @@ static void ReadTurntable( char * line )
 	ReadSegs();
 	SetEndPts( trk, 0 );
 	xx = GetTrkExtraData(trk);
-	SetTrkVisible(trk, visible);
+	if ( paramVersion < 3 ) {
+		SetTrkVisible(trk, visible!=0);
+	} else {
+		SetTrkVisible(trk, visible&2);
+	}
 	SetTrkScale(trk, LookupScale( scale ) );
 	SetTrkLayer(trk, layer);
 	xx->pos = p;
@@ -700,7 +707,7 @@ static BOOL_T QueryTurntable( track_p trk, int query )
 	switch ( query ) {
 	case Q_REFRESH_JOIN_PARAMS_ON_MOVE:
 	case Q_CANNOT_PLACE_TURNOUT:
-	case Q_DONT_DRAW_ENDPOINT:
+	case Q_NODRAWENDPT:
 	case Q_CAN_NEXT_POSITION:
 	case Q_ISTRACK:
 	case Q_NOT_PLACE_FROGPOINTS:
@@ -738,7 +745,19 @@ static void DrawTurntablePositionIndicator( track_p trk, wDrawColor color )
 	pos0 = GetTrkEndPos(trk,xx->currEp);
 	angle = FindAngle( xx->pos, pos0 );
 	PointOnCircle( &pos1, xx->pos, xx->radius, angle+180.0 );
-	DrawLine( &mainD, pos0, pos1, 3, color );
+	DrawLine( &tempD, pos0, pos1, 3, color );
+}
+
+static wBool_t CompareTurntable( track_cp trk1, track_cp trk2 )
+{
+	struct extraData *xx1 = GetTrkExtraData( trk1 );
+	struct extraData *xx2 = GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
+	REGRESS_CHECK_DIST( "Radius", xx1, xx2, radius )
+	REGRESS_CHECK_INT( "CurrEp", xx1, xx2, currEp )
+	REGRESS_CHECK_INT( "Reverse", xx1, xx2, reverse )
+	return TRUE;
 }
 
 static void AdvanceTurntablePositionIndicator(
@@ -755,7 +774,6 @@ static void AdvanceTurntablePositionIndicator(
 	angle1 = FindAngle( xx->pos, pos );
 	if ( !FindTurntableEndPt( trk, &angle1, &ep, &reverse ) )
 		return;
-	DrawTurntablePositionIndicator( trk, wDrawColorWhite );
 	angle0 = GetTrkEndAngle(trk,xx->currEp);
 	if ( ep == xx->currEp ) {
 		Rotate( posR, xx->pos, 180.0 );
@@ -773,7 +791,6 @@ static void AdvanceTurntablePositionIndicator(
 	}
 	*angleR = angle1;
 	xx->currEp = ep;
-	DrawTurntablePositionIndicator( trk, selectedColor );
 }
 
 
@@ -805,13 +822,21 @@ static trackCmd_t turntableCmds = {
 		FlipTurntable,
 		DrawTurntablePositionIndicator,
 		AdvanceTurntablePositionIndicator,
-		CheckTraverseTurntable };
+		CheckTraverseTurntable,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		CompareTurntable };
 
 
 static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 {
 	track_p t;
 	static coOrd pos0;
+	static int state = 0;
 	wControl_p controls[2];
 	char * labels[1];
 
@@ -830,6 +855,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		labels[0] = N_("Diameter");
 		InfoSubstituteControls( controls, labels );
 		/*InfoMessage( "Place Turntable");*/
+		state = 0;
 		return C_CONTINUE;
 
 	case C_DOWN:
@@ -844,18 +870,15 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		InfoSubstituteControls( controls, labels );
 		ParamLoadData( &turntablePG );
 		pos0 = pos;
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		state = 1;
 		return C_CONTINUE;
 
 	case C_MOVE:
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		SnapPos( &pos );
 		pos0 = pos;
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
 		SnapPos( &pos );
 		UndoStart( _("Create Turntable"), "NewTurntable" );
 		t = NewTurntable( pos, turntableDiameter/2.0 );
@@ -864,10 +887,13 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 		InfoSubstituteControls( NULL, NULL );
 		sprintf( message, "turntable-diameter-%s", curScaleName );
 		wPrefSetFloat( "misc", message, turntableDiameter );
+		state = 0;
 		return C_TERMINATE;
 
 	case C_REDRAW:
-		DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		if ( state > 0 ) {
+			DrawArc( &tempD, pos0, turntableDiameter/2.0, 0.0, 360.0, 0, 0, wDrawColorBlack );
+		}
 		return C_CONTINUE;
 
 	case C_CANCEL:
@@ -885,7 +911,7 @@ static STATUS_T CmdTurntable( wAction_t action, coOrd pos )
 
 EXPORT void InitCmdTurntable( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdTurntable, "cmdTurntable", _("Turntable"), wIconCreatePixMap(turntbl_xpm), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY, ACCL_TURNTABLE, NULL );
+	AddMenuButton( menu, CmdTurntable, "cmdTurntable", _("Custom Turntable"), wIconCreatePixMap(turntbl_xpm), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY, ACCL_TURNTABLE, NULL );
 }
 
 

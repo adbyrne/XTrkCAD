@@ -1,4 +1,4 @@
-CONTENTS Märklin C-Gleis HO-Scale
+CONTENTS Märklin C-Gleis HO Scale
 SUBCONTENTS Märklin C-Gleis Gleisgerade
 TURNOUT HO "Märklin C-Gleis	Gerade 64.3mm	24064"
 	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gerade 64.3mm" "24064" 2.531496
@@ -371,7 +371,7 @@ TURNOUT HO "Märklin C-Gleis	Schlanke Kreuzung 236.1mm 12.1°	24740"
 
 SUBCONTENTS Märklin C-Gleis Verschiedene Gleise
 TURNOUT HO "Märklin C-Gleis	Gleisende mit Prellbock 77.5mm	24977"
-	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gleisende mit Prellbock" "24977" 3.051181 
+	U "Gerader Abschnitt" "XtrkCad" "Märklin C-Gleis" "Gleisende mit Prellbock" "24977" 3.051181
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	S 0 0.000000 0.000000 0.000000 3.051181 0.000000

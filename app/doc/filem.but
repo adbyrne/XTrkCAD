@@ -29,7 +29,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. On Windows this is a *.bmp file, on Linux and Mac it is a *.png file.
+\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. The bitmap will be saved in PNG format.
 
 \u000
 
@@ -115,7 +115,7 @@ Note: This command can create a very large file and consume a lot of memory and 
 
 Pressing the \f{OK} button invokes a \f{File Save} dialog so you can choose the file name for the Bitmap.
 
-The format of the file depends on the Operating System: on MS-Windows it is a Windows Bitmap (.BMP) file, on Linux it is a X11 Pixmap (.XPM) file.
+The format of the file is PNG on all operating systems.
 
 \rule
 
@@ -141,37 +141,70 @@ After importing the objects from the file, the imported objects are in selected 
 
 \S{cmdPrmfile} \i{Parameter Files}
 
-\e{Parameter Files} contain turnout, sectional track and structure definitions.  Parameter Files are loaded and unloaded with the \f{Parameter Files} dialog.
+\e{Parameter Files} contain turnout, sectional track and structure definitions.  Active Parameter Files are managed with the \f{Parameter Files} dialog.
 
 \G{png.d/dprmfile.png}
 
 The dialog contains a list of parameter files.  Each file is preceded by a color indicator. These indicators show whether a parameter file contains definitions that
 are usable in the current scale and gauge.
 
-\G{png.d/greendot.png} Definitions loaded from this file are a perfect fit for the current layout options. For track this means that gauge and scale of the track elements
+\G{png.d/greendot.png} \G{png.d/greenstar.png} Definitions loaded from this file are a perfect fit for the current layout options. For track this means that gauge and scale of the track elements
 are identical to the layout settings.
 
-\G{png.d/yellowdot.png} Definitions from this file can be used with this layout but do not fit perfectly. A typical example is On30 where HO scale track can be used because the
+\G{png.d/yellowdot.png} \G{png.d/yellowstar.png} Definitions from this file can be used with this layout but do not fit perfectly. A typical example is On30 where HO scale track can be used because the
 gauge is the same. But differences in scale may make the track look out of scale.
 
-\G{png.d/reddot.png} This parameter file doesn't contain any usable definitions. You may want to change the layout options if you want to use elements from
+\G{png.d/reddot.png} \G{png.d/redstar.png} This parameter file doesn't contain any usable definitions. You may want to change the layout options if you want to use elements from
 this file.
 
-\G{png.d/greydot.png} This file is unloaded.
+\G{png.d/greydot.png} \G{png.d/greystar.png} This file is unloaded.
+If it is marked as favorite it will be kept on the
+list between runs. Otherwise it will be removed from the list when
+the program is terminated.
 
-Loaded definition files that are marked with a yellow or a green indictor appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An unloaded file may be \e{reloaded} by selecting the  \f{Reload} button (The \f{Unload} button changes to \f{Reload} when a selected file is unloaded). Note that loading a file does not change the existing definitions in the layout. To do that after loading, use \K{cmdRefreshSpecial}.
+Definition files can be marked as \e{favorite}. The indicator for favorites is a star.
+The meaning of the colors isn't changed.
+
+Loaded definition files that are marked with a yellow or a green indicator appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An unloaded file may be \e{reloaded} by selecting the  \f{Reload} button (The \f{Unload} button changes to \f{Reload} when a selected file is unloaded). Note that loading a file does not change the existing definitions in the layout. To do that after loading, use \K{cmdRefreshSpecial}.
 
 It is possible to change the state of several files at once. The \f{Select All} button allows you to select all parameter files for the next operation.
 
 \e{Unloaded} files are removed from the list when \e{XTrackCAD} terminates.
+In case the unloaded files are marked as favorite, they will not be removed.
+This makes it possible to keep a list of preferred parameter sets between
+runs of XTrackCAD but hide temporary unused files from the hotbar. That
+way the hotbar can be kept short containing only the relevant elements.
 
-Files can be listed by either their file name or by their contents description. This is controlled by the \f{Show File Names} check box.
+Files can be listed by either their file name or by their contents description.
+This is controlled by the \f{Show File Names} check box.
 
-The \f{Browse} button allows you to load other \e{parameter files} such as provided by other users or downloaded from the Internet.
+The \f{Find} button opens the \e{Find Parameter File} dialog (\K{searchgui}).
 
-When first installed, all available parameter files are loaded. You can unload parameter files you don't use to speed up \e{XTrackCAD} startup time.
+When first installed, parameter files for all common scales are loaded.
+You can unload parameter files you don't use to speed up \e{XTrackCAD} startup time.
 
-The order in this list controls the order of turnouts and structures on the \f{Hot Bar} (\K{cmdHotBar}). You can move a parameter file to the end of the list by \e{Unloading} it, and then loading it via the \f{Browse} button.
+The order in this list controls the order of turnouts and structures on the
+\f{Hot Bar} (\K{cmdHotBar}). You can move a parameter file to the end of the
+list by \e{Unloading} it, and then loading it via the \f{Browse} button.
+
+\S{searchgui} \i{Find Parameter Files}
+
+Selecting and loading additional parameter files is done in the
+\f{Find Parameter Files} dialog.
+
+\G{png.d/paramsearch.png}
+
+Using the Search function you can find and select parameter files that are
+part of the  XTrackCAD installation.
+Enter a single search word and select the Search button. Search results are
+shown in the list box. Select the files
+you're interested in and press the \f{Apply} button to add them to your
+parameter list.
+
+Addionally you can browse your local system allows you to load other
+\e{parameter files} such as provided by other users or
+downloaded from the Internet.
+Select the \f{Browse} button and navigate to the correct directory.
 
 \rule
 

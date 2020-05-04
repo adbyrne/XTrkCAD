@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "cundo.h"
 #include "custom.h"
@@ -100,10 +101,12 @@ static void DrawNote(track_p t, drawCmd_p d, wDrawColor color)
     if (d->scale >= 16) {
         return;
     }
-	if ((d->funcs->options & wDrawOptTemp)) {
+	if ((d->options & DC_SIMPLE)) {
 		//while the icon is moved, draw a square
+		//because CmdMove draws all selected object into tempSeg and
+		//tempSegDrawFuncs doesn't have a BitMap drawing func
 		DIST_T dist;
-		dist = 0.1*d->scale;
+		dist = 0.1*mainD.scale;
 		p[0].x = p[1].x = xx->pos.x - dist;
 		p[2].x = p[3].x = xx->pos.x + dist;
 		p[1].y = p[2].y = xx->pos.y - dist;
@@ -213,7 +216,6 @@ CommonUpdateNote(track_p trk, int inx, struct extraDataNote *noteData )
 		CommonCancelNote(trk);
 		break;
 	}
-	MainRedraw();
 }
 
 
@@ -439,7 +441,8 @@ ReadTrackNote(char *line)
 	
 	cp = GetNextLine();
 	
-	if (strcmp(cp, "    END")) {
+	while ( *cp && isspace(*cp ) ) cp++;
+	if (strncmp(cp, "END", 3)) {
 		InputError(_("Expected END statement not found!"),
 				TRUE );
 		exit(1);
@@ -522,6 +525,17 @@ static BOOL_T QueryNote( track_p trk, int query )
 	return FALSE;
 }
 
+static wBool_t CompareNote( track_cp trk1, track_cp trk2 )
+{
+	struct extraDataNote *xx1 = (struct extraDataNote *)GetTrkExtraData( trk1 );
+	struct extraDataNote *xx2 = (struct extraDataNote *)GetTrkExtraData( trk2 );
+	char * cp = message + strlen(message);
+	REGRESS_CHECK_POS( "Pos", xx1, xx2, pos )
+	REGRESS_CHECK_INT( "Layer", xx1, xx2, layer )
+	REGRESS_CHECK_INT( "Op", xx1, xx2, op )
+	return TRUE;
+}
+
 static trackCmd_t noteCmds = {
     "NOTE",
     DrawNote,
@@ -556,7 +570,8 @@ static trackCmd_t noteCmds = {
 	NULL,       /*rebuildSegs*/
 	NULL,       /*replayData*/
 	NULL,       /*storeData*/
-	ActivateNote
+	ActivateNote,
+	CompareNote
 };
 
 /*****************************************************************************
@@ -580,18 +595,15 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     case C_DOWN:
         state_on = TRUE;
         oldPos = pos;
-        MainRedraw();
         return C_CONTINUE;
 
     case C_MOVE:
         oldPos = pos;
-        MainRedraw();
         return C_CONTINUE;
 
     case C_UP:
         UndoStart(_("New Note"), "New Note");
         state_on = FALSE;
-        MainRedraw();
         trk = NewNote(-1, pos, curNoteType );
 		inDescribeCmd = TRUE;
         DrawNewTrack(trk);
@@ -629,7 +641,6 @@ static STATUS_T CmdNote(wAction_t action, coOrd pos)
     case C_CANCEL:
         DescribeCancel();
         state_on = FALSE;
-        MainRedraw();
         return C_CONTINUE;
     }
 

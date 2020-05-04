@@ -221,6 +221,11 @@ wDrawColor GetLayerColor(unsigned int layer)
     return layers[layer].color;
 }
 
+static void RedrawLayer( unsigned int l, BOOL_T draw )
+{
+	DoRedraw(); // RedrawLayer
+}
+
 
 static void FlipLayer(unsigned int layer)
 {
@@ -1117,7 +1122,7 @@ static void DoLayer(void * junk)
 {
     if (layerW == NULL) {
         layerW = ParamCreateDialog(&layerPG, MakeWindowTitle(_("Layers")), _("Done"),
-                                   LayerOk, NULL, TRUE, NULL, 0, LayerDlgUpdate);
+                                   LayerOk, wHide, TRUE, NULL, 0, LayerDlgUpdate);
     }
 
     /* set the globals to the values for the current layer */

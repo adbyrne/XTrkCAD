@@ -205,7 +205,7 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
         Translate (&p[iPoint], orig, x_angle, switchmotorPoly_Pix[iPoint].x * switchmotorPoly_SF / scaleRatio );
         Translate (&p[iPoint], p[iPoint], y_angle, (10+switchmotorPoly_Pix[iPoint].y) * switchmotorPoly_SF / scaleRatio );
     }
-    DrawPoly(d, switchmotorPoly_CNT, p, NULL, wDrawColorBlack, 0, 1, 0);
+    DrawPoly(d, switchmotorPoly_CNT, p, NULL, color, 0, 1, 0);
 }
 
 static struct {
@@ -312,7 +312,13 @@ static DIST_T DistanceSwitchMotor (track_p t, coOrd * p )
 {
 	switchmotorData_p xx = GetswitchmotorData(t);
         if (xx->turnout == NULL) return 0;
-	return GetTrkDistance(xx->turnout,p);
+    coOrd center,hi,lo;
+    GetBoundingBox(t,&hi,&lo);
+    center.x = (hi.x+lo.x)/2;
+    center.y = (hi.y+lo.y)/2;
+    DIST_T d = FindDistance(center,*p);
+    *p = center;
+	return d;
 }
 
 static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
@@ -369,7 +375,7 @@ static void switchmotorDebug (track_p trk)
 static void DeleteSwitchMotor ( track_p trk )
 {
 
-	track_p trk1,trk2;
+	track_p trk1; 
 	switchmotorData_p xx1;
 
 	LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(%p)\n",trk))
@@ -427,7 +433,7 @@ static void ReadSwitchMotor ( char * line )
 	xx->reverse = reverse;
 	xx->pointsense = pointsense;
     xx->turnindx = trkindex;
-    if (!last_motor) {
+    if (last_motor) {
     	last_trk = last_motor;
     	xx1 = GetswitchmotorData(last_trk);
     	xx1->next_motor = trk;
@@ -742,7 +748,7 @@ static void DrawSWMotorTrackHilite( void )
 	w = (wPos_t)((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
 	h = (wPos_t)((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,swmhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp );
+	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
 
 static int SwitchmotorMgmProc ( int cmd, void * data )
@@ -841,8 +847,8 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 }
 EXPORT void CheckDeleteSwitchmotor(track_p t)
 {
-    track_p sm,trk1;
-    switchmotorData_p xx,xx1;
+    track_p sm;
+    switchmotorData_p xx;
     if (GetTrkType( t ) != T_TURNOUT) return;   // SMs only on turnouts
     
     while ((sm = FindSwitchMotor( t ))) {	                 //Cope with multiple motors for one Turnout!

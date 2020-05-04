@@ -60,15 +60,6 @@ static struct {
 				coOrd pos;
 				EPINX_T ep;
 				trackParams_t params;
-#ifdef LATER
-				curveType_e type;
-				ANGLE_T angle;
-				coOrd lineOrig;
-				coOrd lineEnd;
-				coOrd arcP;
-				DIST_T arcR;
-				ANGLE_T arcA0, arcA1;
-#endif
 				} inp[2];
 		joinRes_t jRes;
 		coOrd inp_pos[2];
@@ -416,7 +407,6 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 				_("Click on an unselected End-Point"):
 				_("Click on a selected End-Point") );
 			Dj.inp[0].pos = pos;
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			return C_CONTINUE;
 		}
 		if ( GetTrkSelected(Dj.inp[0].trk) == GetTrkSelected(Dj.inp[1].trk) ) {
@@ -424,13 +414,198 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 					?  _("unselected") : _("selected") );
 			return C_CONTINUE;
 		}
-		DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 		if (GetTrkSelected(Dj.inp[0].trk))
 			MoveToJoin( Dj.inp[0].trk, Dj.inp[0].params.ep, Dj.inp[1].trk, Dj.inp[1].params.ep );
 		else
 			MoveToJoin( Dj.inp[1].trk, Dj.inp[1].params.ep, Dj.inp[0].trk, Dj.inp[0].params.ep );
 		Dj.joinMoveState = 0;
 		return C_TERMINATE;
+}
+
+typedef enum {NO_LINE,FIRST_END,HAVE_LINE,HAVE_SECOND_LINE} LineState_t;
+
+static struct {
+		LineState_t line_state;
+		int joinMoveState;
+		track_p curr_line;
+		struct {
+				TRKTYP_T realType;
+				track_p line;
+				coOrd pos;
+				coOrd end;
+				int cnt;
+				} inp[2];
+		joinRes_t jRes;
+		coOrd inp_pos[2];
+		dynArr_t anchors_da;
+		trackParams_t params;
+		dynArr_t newLine;
+		} Dl;
+
+#define anchors(N) DYNARR_N(trkSeg_t,Dl.anchors_da,N)
+
+void AddAnchorEnd(coOrd p) {
+	DIST_T d = tempD.scale*0.15;
+	DYNARR_APPEND(trkSeg_t,Dl.anchors_da,1);
+	trkSeg_p a = &DYNARR_LAST(trkSeg_t,Dl.anchors_da);
+	a->type = SEG_CRVLIN;
+	a->width = 0;
+	a->u.c.a0 = 0.0;
+	a->u.c.a1 = 360.0;
+	a->u.c.center = p;
+	a->u.c.radius = d/2;
+	a->color = wDrawColorPowderedBlue;
+}
+
+
+static STATUS_T CmdJoinLine(
+		wAction_t action,
+		coOrd pos )
+/*
+ * Join 2 lines.
+ */
+{
+
+	switch (action&0xFF) {
+	case C_START:
+		InfoMessage( _("Left click - Select first draw object end") );
+		Dl.line_state = NO_LINE;
+		Dl.joinMoveState = 0;
+		tempSegs_da.cnt = 0;
+		DYNARR_RESET(trkSeg_t,Dl.newLine);
+		Dl.curr_line = NULL;
+		return C_CONTINUE;
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,Dl.anchors_da);
+		Dl.curr_line = NULL;
+		coOrd pos1= pos;
+		Dl.curr_line = OnTrack( &pos1, FALSE, FALSE );
+		if (!Dl.curr_line) return C_CONTINUE;
+		if (IsTrack(Dl.curr_line)) {
+			Dl.curr_line = NULL;
+			return C_CONTINUE;
+		}
+		if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) {
+			Dl.curr_line = NULL;
+			return C_CONTINUE;
+		}
+		if (!GetTrackParams(PARAMS_NODES,Dl.curr_line,pos,&Dl.params)) {
+			Dl.curr_line = NULL;
+			return C_CONTINUE;
+		}
+		if ( (Dl.line_state != NO_LINE) &&
+				(Dl.inp[0].line == Dl.curr_line) &&
+				(IsClose(FindDistance(Dl.inp[0].pos,Dl.params.lineOrig)) ) ) {
+			Dl.curr_line = NULL;
+		} else {
+			AddAnchorEnd(Dl.params.lineOrig);
+		}
+		break;
+	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,Dl.anchors_da);
+		Dl.curr_line = NULL;
+		if (Dl.line_state == NO_LINE) {
+			Dl.curr_line = OnTrack( &pos, FALSE, FALSE);
+			if (!Dl.curr_line || IsTrack(Dl.curr_line)) {
+				InfoMessage( _("Not a line - Try again") );
+				return C_CONTINUE;
+			}
+			if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) return C_CONTINUE;
+			if (!GetTrackParams(PARAMS_NODES,Dl.curr_line,pos,&Dl.params)) return C_CONTINUE;
+			Dl.line_state = HAVE_LINE;
+			Dl.inp[0].line = Dl.curr_line;
+			Dl.inp[0].pos = Dl.params.lineOrig;
+			Dl.inp[0].end = Dl.params.lineEnd;
+			DYNARR_SET(trkSeg_t,Dl.newLine,1);
+
+			DYNARR_LAST(trkSeg_t,Dl.newLine).type = SEG_POLY;
+			DYNARR_LAST(trkSeg_t,Dl.newLine).color = wDrawColorBlack;
+			DYNARR_LAST(trkSeg_t,Dl.newLine).width = 0;
+			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.polyType = POLYLINE;
+			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyMalloc(sizeof(pts_t)*Dl.params.nodes.cnt);
+			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt = Dl.params.nodes.cnt;
+			//Copy in reverse as we want this point to be last
+			for (int i=0;i<Dl.params.nodes.cnt;i++) {
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt = DYNARR_N(coOrd,Dl.params.nodes,Dl.params.nodes.cnt-1-i);
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt_type = wPolyLineStraight;
+			}
+			InfoMessage( _("Left click - Select second object end") );
+		} else {
+			Dl.curr_line = OnTrack( &pos, FALSE, FALSE );
+			if (!Dl.curr_line || IsTrack(Dl.curr_line)) {
+				InfoMessage( _("Not a line - Try again") );
+				return C_CONTINUE;
+			}
+			if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) return C_CONTINUE;
+			if (!GetTrackParams(PARAMS_NODES,Dl.curr_line,pos,&Dl.params)) return C_CONTINUE;
+			if (Dl.curr_line == Dl.inp[0].line) {
+				if ((Dl.params.lineOrig.x == Dl.inp[0].pos.x) &&
+					(Dl.params.lineOrig.y == Dl.inp[0].pos.y)) {
+					InfoMessage( _("Same draw object and same endpoint - Try again") );
+					return C_CONTINUE;
+				}
+			}
+			Dl.line_state = HAVE_SECOND_LINE;
+			Dl.inp[1].line = Dl.curr_line;
+			Dl.inp[1].pos = Dl.params.lineOrig;
+			Dl.inp[1].end = Dl.params.lineEnd;
+			int old_cnt = DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt;
+			BOOL_T join_near = FALSE;
+			if (Dl.inp[1].line == Dl.inp[0].line) {
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyRealloc(DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+1));
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[old_cnt] = DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[0];   // Joined up Polygon
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt += 1;
+			} else {
+				if (IsClose(FindDistance(Dl.inp[0].pos,Dl.inp[1].pos)))
+					join_near = TRUE;
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyRealloc(DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+Dl.params.nodes.cnt-join_near));
+				//Copy forwards as this point is first
+				for (int i=join_near;i<Dl.params.nodes.cnt;i++) {
+					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i-join_near+old_cnt].pt = DYNARR_N(coOrd,Dl.params.nodes,i);
+					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i-join_near+old_cnt].pt_type = wPolyLineStraight;
+				}
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt += Dl.params.nodes.cnt-join_near;
+			}
+		}
+		UndrawNewTrack(Dl.curr_line);
+		Dl.curr_line = NULL;
+		break;
+	case C_MOVE:
+		break;
+	case C_UP:
+		if (Dl.line_state != HAVE_SECOND_LINE) return C_CONTINUE;
+		Dl.line_state = NO_LINE;
+		UndoStart(_("Create PolyLine"), "newPolyLine");
+		track_p newTrack = MakePolyLineFromSegs( zero, 0.0, &Dl.newLine );
+		DeleteTrack(Dl.inp[0].line,FALSE);
+		if (Dl.inp[0].line != Dl.inp[1].line)
+			DeleteTrack(Dl.inp[1].line,FALSE);
+		UndoEnd();
+		DrawNewTrack(newTrack);
+		CleanSegs(&Dl.newLine);
+		Dl.curr_line = NULL;
+		return C_TERMINATE;
+		break;
+	case C_CANCEL:
+		CleanSegs(&Dl.newLine);
+		Dl.line_state = NO_LINE;
+		Dl.curr_line = NULL;
+		break;
+	case C_REDRAW:
+		if (Dl.line_state != NO_LINE) DrawSegs(&tempD,zero,0.0,((trkSeg_t*)Dl.newLine.ptr), Dl.newLine.cnt, trackGauge, wDrawColorBlueHighlight);
+		if (Dl.curr_line) DrawTrack(Dl.curr_line,&tempD,wDrawColorBlueHighlight);
+		if (Dl.anchors_da.cnt>0)
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), Dl.anchors_da.cnt, trackGauge, wDrawColorBlueHighlight );
+		break;
+	case C_TEXT:
+	case C_OK:
+	default:;
+
+	}
+
+
+	return C_CONTINUE;
+
 }
 
 
@@ -470,15 +645,14 @@ static STATUS_T CmdJoin(
 		return C_CONTINUE;
 
 	case wActionMove:
-		if (easementVal < 0)
+		if ((easementVal < 0) && Dj.joinMoveState == 0 )
 			return CmdCornu(action, pos);
 		break;
 
 	case C_DOWN:
-
 		if ( !Dj.cornuMode && ((Dj.state == 0 && (MyGetKeyState() & WKEY_SHIFT) != 0) || Dj.joinMoveState != 0) )
 			return DoMoveToJoin( pos );
-		if (easementVal < 0.0) {
+		if (easementVal < 0.0 && Dj.joinMoveState == 0) {
 			Dj.cornuMode = TRUE;
 			return CmdCornu(action, pos);
 		}
@@ -506,7 +680,6 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			Dj.inp[0].realType = GetTrkType(Dj.inp[0].trk);
 			InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			return C_CONTINUE;
 		} else {
 			if ( (Dj.inp[1].trk = OnTrack( &pos, TRUE, TRUE )) == NULL)
@@ -555,7 +728,6 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 					rc = C_TERMINATE;
 			}
 			if ( rc == C_TERMINATE ) {
-				DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 				return rc;
 			}
 			if ( QueryTrack( Dj.inp[0].trk, Q_CANNOT_BE_ON_END ) ||
@@ -564,21 +736,19 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 				return C_CONTINUE;
 			}
 
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			Dj.state = 2;
 			Dj.jRes.flip = FALSE;
 		}
 		tempSegs_da.cnt = 0;
 
 	case C_MOVE:
-		if (easementVal < 0)
+		if (easementVal < 0 && Dj.cornuMode)
 			return CmdCornu(action, pos);
 
 LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 		if (Dj.state != 2)
 			return C_CONTINUE;
 
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorWhite );
 		tempSegs_da.cnt = 0;
 		tempSegs(0).color = drawColorBlack;
 		ok = FALSE;
@@ -809,7 +979,6 @@ errorReturn:
 		default:
 			AbortProg( "Bad track type %d", Dj.jRes.type );
 		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorBlack );
 		if (!ok)
 			Dj.jRes.type = curveTypeNone;
 		return C_CONTINUE;
@@ -817,8 +986,8 @@ errorReturn:
 	case C_UP:
 
 		if (Dj.state == 0) {
-			if (easementVal<0)
-						return CmdCornu(action, pos);
+			if (easementVal<0 && Dj.cornuMode)
+				return CmdCornu(action, pos);
 			else
 				return C_CONTINUE;
 		}
@@ -826,12 +995,10 @@ errorReturn:
 			InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
 		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorWhite );
 		tempSegs(0).color = drawColorBlack;
 		tempSegs_da.cnt = 0;
 		if (Dj.jRes.type == curveTypeNone) {
 			Dj.state = 1;
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
 		}
@@ -870,21 +1037,21 @@ errorReturn:
 		return rc;
 
 	case C_CANCEL:
+		break;
+
 	case C_REDRAW:
-
-
 		if ( Dj.joinMoveState == 1 || Dj.state == 1 ) {
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
-		} else if (easementVal<0 )
-				return CmdCornu(action,pos);
+		} else if (easementVal<0 && Dj.joinMoveState == 0)
+			return CmdCornu(action,pos);
 
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		break;
 
 	case C_TEXT:
 	case C_OK:
-		if (easementVal<0 )
-				return CmdCornu(action,pos);
+		if (easementVal<0 && Dj.cornuMode)
+			return CmdCornu(action,pos);
 
 	}
 
@@ -900,10 +1067,14 @@ errorReturn:
  */
 
 #include "bitmaps/join.xpm"
+#include "bitmaps/joinline.xpm"
 
 void InitCmdJoin( wMenu_p menu )
 {
-	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoin", _("Join"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
+	ButtonGroupBegin( _("Join"), "cmdJoinSetCmd", _("Join") );
+	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoin", _("Join Track"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
+	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"), wIconCreatePixMap(joinline_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
+	ButtonGroupEnd();
 	log_join = LogFindIndex( "join" );
 }
 

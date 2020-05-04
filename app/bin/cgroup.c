@@ -609,7 +609,7 @@ EXPORT void DoUngroup( void )
 
 
 static drawCmd_t groupD = {
-		NULL, &tempSegDrawFuncs, DC_GROUP, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
+		NULL, &tempSegDrawFuncs, DC_SEGTRACK, 1, 0.0, {0.0, 0.0}, {0.0, 0.0}, Pix2CoOrd, CoOrd2Pix };
 static long groupSegCnt;
 static long groupReplace;
 static double groupOriginX;
@@ -965,7 +965,6 @@ static void GroupOk( void * junk )
 	int inx;
 	EPINX_T ep, epCnt, epN;
 	coOrd orig, size;
-	long oldOptions;
 	FILE * f = NULL;
 	BOOL_T rc = TRUE;
 	track_p trk, trk1;
@@ -1069,10 +1068,7 @@ static void GroupOk( void * junk )
 
 				} else {
 					segCnt = tempSegs_da.cnt;
-					oldOptions = groupD.options;
-					groupD.options |= (DC_QUICK|DC_SIMPLE|DC_SEGTRACK);
 					DrawTrack( trk, &groupD, wDrawColorBlack );
-					groupD.options = oldOptions;
 					DYNARR_APPEND( trkSeg_t, trackSegs_da, 10 );
 					segPtr = &trackSegs(trackSegs_da.cnt-1);
 					*segPtr = tempSegs( segCnt );

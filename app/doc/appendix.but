@@ -144,6 +144,12 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 
 \f{Block Gap} - provides control by dividing the layout into electrically isolated blocks, where trains can be slowed or stopped by lowering or cutting the power to a block. Dividing a layout into blocks also permits operators to run more than one train on a layout with much less risk of a fast train catching up with and hitting a slow train. Blocks can also trigger signals or other animated accessories on the layout, adding more realism (or whimsy) to the layout. Three-rail systems will often insulate one of the common rails on a section of track, and use a passing train to complete the circuit and activate an accessory.
 
+\f{Cornu} -  * Cornu curves are a family of mathematically defined curves that define spirals that Euler spirals and elastica come from.
+They have the useful property for us that curvature increases linearly along the curve which
+means the acceleration towards the center of the curve also increases evenly. Railways have long understood that
+smoothly changing the radius is key to passenger comfort and reduced derailments. The railway versions of these
+curves were variously called easements, Talbot or Euler spirals.
+
 \f{DXF Format} - Abbreviation of \f{D}ata \f{E}xchange \f{F}ile, a two-dimensional graphics file format supported by virtually all PC-based CAD products. It was created by AutoDesk for the AutoCAD system. 
 
 \f{Easement} - special sections of gradually curving track used to connect straight and curved tracks (or two curved tracks). Easements reduce the effects of sudden changes in track curves which can cause derailments. They also look great!

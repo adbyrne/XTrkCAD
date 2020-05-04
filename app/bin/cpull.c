@@ -707,16 +707,14 @@ static STATUS_T CmdPull(
 
 	int countTracksR0 = 0, countTracksR1 = 0, possibleEndPoints = 0;
 	BOOL_T found = FALSE;
-	ANGLE_T a;
-	DIST_T d;
 
 	switch (action&0xFF) {
 
 	case C_START:
 		if (selectedTrackCount==0)
-			InfoMessage( _("Select first end-point to connect or turntable, +Shift to tighten") );
+			InfoMessage( _("Select first endpoint or turntable to connect, +Shift to tighten") );
 		else
-			InfoMessage( _("Select first end-point to connect, or Right-Click for connecting selected tracks (not turntable)") );
+			InfoMessage( _("Select first endpoint to connect, or Right-Click for connecting selected tracks (not turntable)") );
 		trk1 = NULL;
 		turntable = FALSE;
 		t1 = t2 = NULL;
@@ -763,7 +761,6 @@ static STATUS_T CmdPull(
 				return C_CONTINUE;
 			CreateConnectAnchor(t_ep1,t1,TRUE);
 		}
-		MainRedraw();
 		break;
 
 	case C_LCLICK:
@@ -776,7 +773,7 @@ static STATUS_T CmdPull(
 							ep1 = -1;
 						} else trk1 = NULL;
 					} else {
-						InfoMessage( _("Select second end-point to connect or turntable") );
+						InfoMessage( _("Select second endpoint or turntable to connect") );
 					}
 
 				}
@@ -819,17 +816,19 @@ static STATUS_T CmdPull(
 
 	case C_REDRAW:
 		if (anchors_da.cnt)
-					DrawSegs( &mainD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		if (t1 && t_turn1)
-					DrawTrack(t1,&mainD,wDrawColorBlue);
+					DrawTrack(t1,&tempD,wDrawColorBlue);
 		if (t2 && t_turn2)
-					DrawTrack(t2,&mainD,wDrawColorBlue);
+					DrawTrack(t2,&tempD,wDrawColorBlue);
 		return C_CONTINUE;
 
 	case C_TEXT:
-		if (action>>8 == 'S')
-			return ConnectMultiple();
-
+		if (action>>8 == 'S') {
+			wBool_t rc =  ConnectMultiple();
+			MainRedraw(); // CmdPull: ConnectMultiple
+			return rc;
+		}
 		break;
 
 	case C_CANCEL:
