@@ -621,7 +621,7 @@ static BOOL_T ReadTrackFile(
 
 	InfoMessage("0");
 	count = 0;
-	double skipLines = 0;
+	int skipLines = 0;
 	BOOL_T skip = FALSE;
 	while ( paramFile && ( fgets(paramLine, sizeof paramLine, paramFile) ) != NULL ) {
 		count++;

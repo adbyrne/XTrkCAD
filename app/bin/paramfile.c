@@ -233,7 +233,7 @@ bool ReadParams(
     paramLineNum = 0;
     checkSummed = FALSE;
     BOOL_T skip = false;
-    double skipLines = 0;
+    int skipLines = 0;
     while (paramFile && (fgets(paramLine, 256, paramFile)) != NULL) {
         paramLineNum++;
         Stripcr(paramLine);
@@ -299,6 +299,10 @@ bool ReadParams(
 				NoticeMessage( MSG_PARAM_BAD_FILE_VERSION, _("Ok"), NULL, paramVersion, iMinParamVersion, sProdName );
 				break;
 			}
+        } else if (skip && (strncmp(paramLine, "  ",1) == 0)) {
+        	//Always skip to next line starting in LeftHandColumn
+        	skipLines++;
+        	goto nextLine;
         } else {
 			for (pc = 0; pc < paramProc_da.cnt; pc++) {
 				if (strncmp(paramLine, paramProc(pc).name,
