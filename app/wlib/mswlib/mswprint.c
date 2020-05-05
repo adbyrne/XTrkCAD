@@ -27,7 +27,7 @@ struct tagPD printDlg;
 #endif
 static int printStatus = FALSE;
 static DOCINFO docInfo;
-static double pageSizeW = 8.5, pageSizeH = 11.0;
+static double tBorder = 0.0, rBorder = 0.0, bBorder = 0.0, lBorder = 0.0;
 static double physSizeW = 8.5, physSizeH = 11.0;
 static int pageCount = -1;
 
@@ -66,10 +66,16 @@ void getPageDim( HDC hDc )
 	size_h = GetDeviceCaps( hDc, VERTSIZE );
 	print_d.w = res_w = GetDeviceCaps( hDc, HORZRES );
 	print_d.h = res_h = GetDeviceCaps( hDc, VERTRES );
+	double pageSizeW, pageSizeH;
 	pageSizeW = ((double)res_w)/print_d.wFactor;
 	pageSizeH = ((double)res_h)/print_d.hFactor;
 	physSizeW = ((double)dims.x)/print_d.wFactor;
 	physSizeH = ((double)dims.y)/print_d.hFactor;
+	// Get Borders/Margins - offs are the top, left borders
+	lBorder = ((double)offs.x)/print_d.hFactor;
+	tBorder = ((double)offs.y)/print_d.hFactor;
+	rBorder = physSizeW-pageSizeW-lBorder;
+	bBorder = physSizeH-pageSizeH-tBorder;
 }
 
 static wBool_t printInit( void )
@@ -83,6 +89,7 @@ static wBool_t printInit( void )
 		return printerOk;
 	}
 	initted = TRUE;
+	memset(&printDlg, 0, sizeof printDlg);
 	printDlg.lStructSize = sizeof printDlg;
 	printDlg.hwndOwner = NULL;
 	printDlg.Flags = PD_RETURNDC|PD_RETURNDEFAULT;
@@ -194,16 +201,36 @@ void wPrintSetup( wPrintSetupCallBack_p callback )
 	}
 }
 
-
-void wPrintGetPageSize( double *w, double *h )
+const char* wPrintGetName()
 {
-	printInit();
-	*w = pageSizeW;
-	*h = pageSizeH;
+	static char sPrinterName[100];
+	HANDLE hDevNames = printDlg.hDevNames;
+	DEVNAMES* pDevNames = GlobalLock(hDevNames);
+	if (pDevNames == NULL) {
+		strcpy(sPrinterName, "Printer");
+	}
+	else {
+		strncpy(sPrinterName, (char*)pDevNames + pDevNames->wDeviceOffset, sizeof sPrinterName - 1);
+		sPrinterName[sizeof sPrinterName - 1] = '\0';
+	}
+	GlobalUnlock( hDevNames );
+	return sPrinterName;
+}
+
+void wPrintGetMargins(
+	double * tMargin,
+	double * rMargin,
+	double * bMargin,
+	double * lMargin )
+{
+	if ( tMargin ) *tMargin = tBorder;
+	if ( rMargin ) *rMargin = rBorder;
+	if ( bMargin ) *bMargin = bBorder;
+	if ( lMargin ) *lMargin = lBorder;
 }
 
 
-void wPrintGetPhysSize( double *w, double *h )
+void wPrintGetPageSize( double *w, double *h )
 {
 	printInit();
 	*w = physSizeW;
@@ -377,11 +404,4 @@ wBool_t wPrintNewPrinter( const char * printer )
 wBool_t wPrintNewMargin( const char * name, double t, double b, double l, double r )
 {
 	return TRUE;
-}
-
-void wPrintSetCallBacks(
-		wAddPrinterCallBack_p newPrinter,
-		wAddMarginCallBack_p newMargin,
-		wAddFontAliasCallBack_p newFontAlias )
-{
 }

@@ -88,7 +88,8 @@ static long iPrintScale = 16;
 static coOrd maxPageSize;
 static coOrd realPageSize;
 
-static wWin_p printWin;
+static wWin_p printWin = NULL;
+static wWin_p printMarginWin = NULL;
 
 static wMenu_p printGridPopupM;
 
@@ -102,6 +103,7 @@ static void DoPrintSetup( void );
 static void PrintClear( void );
 static void PrintMaxPageSize( void );
 static void SelectAllPages(void);
+static void DoPrintMargin(void);
 static bool PrintPageNumber( wPos_t x, wPos_t y, DIST_T width, DIST_T height );
 static bool PrintNextPageNumbers(int x, int y, DIST_T pageW, DIST_T pageH);
 
@@ -145,21 +147,25 @@ static paramData_t printPLs[] = {
 /*14*/{ PD_TOGGLE, &printRoadbed, "roadbed", PDO_DLGNOLABELALIGN, printRoadbedLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_ROADBEDWIDTH	(15)
 /*15*/{ PD_FLOAT, &printRoadbedWidth, "roadbedWidth", PDO_DIM , &r0_, N_("    Width") },
-/*16*/ { PD_TOGGLE, &printPhysSize, "physsize", PDO_DLGNOLABELALIGN | PDO_DLGBOXEND, printPhysSizeLabels, NULL, BC_HORZ | BC_NOBORDER, (void*)1 },
-/*17*/{ PD_FLOAT, &newPrintGrid.orig.x, "origx", PDO_DIM|PDO_DLGRESETMARGIN, &r_10_99999, N_("Origin: X"), 0, (void*)2 },
-/*18*/ { PD_FLOAT, &newPrintGrid.orig.y, "origy", PDO_DIM, &r_10_99999, N_("Y"), 0, (void*)2 },
-/*19*/ { PD_BUTTON, (void*)DoResetGrid, "reset", PDO_DLGHORZ, NULL, N_("Reset") },
-/*20*/ { PD_FLOAT, &newPrintGrid.angle, "origa", PDO_ANGLE|PDO_DLGBOXEND, &r0_360, N_("Angle"), 0, (void*)2 },
-/*21*/ { PD_BUTTON, (void*)DoPrintSetup, "setup", PDO_DLGCMDBUTTON, NULL, N_("Setup") },
-/*22*/ { PD_BUTTON, (void*)SelectAllPages, "selall", 0, NULL, N_("Select All") },
-/*23*/ { PD_BUTTON, (void*)PrintClear, "clear", 0, NULL, N_("Clear") },
-#define I_PAGECNT		(24)
-/*24*/ { PD_MESSAGE, N_("0 pages"), NULL, 0, (void*)80 },
-/*25*/ { PD_MESSAGE, N_("selected"), NULL, 0, (void*)80 }
+/*16*/ { PD_TOGGLE, &printPhysSize, "physsize", PDO_DLGNOLABELALIGN, printPhysSizeLabels, NULL, BC_HORZ | BC_NOBORDER, (void*)1 },
+/*17*/ { PD_BUTTON, (void*)DoPrintMargin, "margin", PDO_DLGHORZ|PDO_DLGBOXEND, NULL, N_("Margins") },
+/*18*/{ PD_FLOAT, &newPrintGrid.orig.x, "origx", PDO_DIM|PDO_DLGRESETMARGIN, &r_10_99999, N_("Origin: X"), 0, (void*)2 },
+/*19*/ { PD_FLOAT, &newPrintGrid.orig.y, "origy", PDO_DIM, &r_10_99999, N_("Y"), 0, (void*)2 },
+/*20*/ { PD_BUTTON, (void*)DoResetGrid, "reset", PDO_DLGHORZ, NULL, N_("Reset") },
+/*21*/ { PD_FLOAT, &newPrintGrid.angle, "origa", PDO_ANGLE|PDO_DLGBOXEND, &r0_360, N_("Angle"), 0, (void*)2 },
+/*22*/ { PD_BUTTON, (void*)DoPrintSetup, "setup", PDO_DLGCMDBUTTON, NULL, N_("Setup") },
+/*23*/ { PD_BUTTON, (void*)SelectAllPages, "selall", 0, NULL, N_("Select All") },
+/*24*/ { PD_BUTTON, (void*)PrintClear, "clear", 0, NULL, N_("Clear") },
+#define I_PAGECNT		(25)
+/*25*/ { PD_MESSAGE, N_("0 pages"), NULL, 0, (void*)80 },
+/*26*/ { PD_MESSAGE, N_("selected"), NULL, 0, (void*)80 }
 };
 
 static paramGroup_t printPG = { "print", PGO_PREFMISCGROUP, printPLs, sizeof printPLs/sizeof printPLs[0] };
 
+static struct {
+	double top, right, bottom, left;
+} printMargin = { 0.0, 0.0, 0.0, 0.0 };
 
 /*****************************************************************************
  *
@@ -526,10 +532,11 @@ static void PrintUpdate( int inx0 )
 static void SetPageSize( BOOL_T doScale )
 {
 	WDOUBLE_T temp, x, y;
-	if (printPhysSize)
-		wPrintGetPhysSize( &x, &y );
-	else
-		wPrintGetPageSize( &x, &y );
+	wPrintGetPageSize( &x, &y );
+	if (!printPhysSize) {
+		x -= (printMargin.left+printMargin.right);
+		y -= (printMargin.top+printMargin.bottom);
+	}
 	maxPageSize.x = x;
 	maxPageSize.y = y;
 	realPageSize = maxPageSize;
@@ -593,10 +600,146 @@ static void DoPrintScale( void )
 	PrintEnableControls();
 }
 
+/*
+ * Printer Margins
+ */
 
+static void PrintMarginReset();
+
+static paramFloatRange_t r0_1 = { 0.0, 1.0, 50 };
+static paramData_t printMarginPLs[] = {
+#define I_PM_FIRST (0)
+	{ PD_FLOAT, &printMargin.top, "marginT", PDO_DIM|PDO_NOPREF, &r0_1, NULL, 0, NULL },
+	{ PD_FLOAT, &printMargin.right, "marginR", PDO_DIM|PDO_NOPREF, &r0_1, NULL, 0, NULL },
+	{ PD_FLOAT, &printMargin.bottom, "marginB", PDO_DIM|PDO_NOPREF, &r0_1, NULL, 0, NULL },
+	{ PD_FLOAT, &printMargin.left, "marginL", PDO_DIM|PDO_NOPREF, &r0_1, NULL, 0, NULL },
+#define I_PM_COUNT (4)
+#define I_PM_MESSAGE (4)
+	{ PD_MESSAGE, NULL, NULL, 0, NULL },
+#define I_PM_RESET (5)
+	{ PD_BUTTON, (void*) PrintMarginReset, "marginReset", PDO_DLGCMDBUTTON, NULL, N_("Reset") } };
+static paramGroup_t printMarginPG = { "printMargin", PGO_PREFMISCGROUP|PGO_NODEFAULTPROC, printMarginPLs, sizeof printMarginPLs/sizeof printMarginPLs[0] };
+
+static wLines_t aPmLines[] = {
+		{ 1,  25,  11,  94,  11 },
+		{ 1,  94,  11,  94, 111 },
+		{ 1,  94, 111,  25, 111 },
+		{ 1,  25, 111,  25,  11 }};
+static int pmxoff=14;
+static int pmyoff=5;
+
+static void PrintMarginLayout(
+		paramData_t * pd,
+		int index,
+		wPos_t colX,
+		wPos_t * w,
+		wPos_t * h )
+{
+	if ( index < I_PM_FIRST || index > (I_PM_MESSAGE) )
+		return;
+	if ( index == I_PM_MESSAGE ) {
+		*h = wControlGetPosY( printMarginPLs[I_PM_FIRST+2].control ) + wControlGetHeight( printMarginPLs[I_PM_FIRST+2].control );
+		return;
+	}
+	wPos_t x0, y0;
+	x0 = (aPmLines[index-I_PM_FIRST].x0+aPmLines[index-I_PM_FIRST].x1)/2;
+	y0 = (aPmLines[index-I_PM_FIRST].y0+aPmLines[index-I_PM_FIRST].y1)/2;
+	x0 -= pmxoff;
+	y0 -= pmyoff;
+//	y0 += wControlGetPosY( printMarginPLs[0].control ) + wControlGetHeight( printMarginPLs[0].control );
+//	x0 -= wControlGetWidth( printMarginPLs[index-I_PM_FIRST].control )/2;
+//	y0 -= wControlGetHeight( printMarginPLs[index-I_PM_FIRST].control )/2;
+	*w = x0;
+	*h = y0;
+}
+
+
+static const char * sPrinterName = NULL;
+
+static BOOL_T SetMargins()
+{
+	double top, right, bottom, left;
+	wPrintGetMargins( &top, &right, &bottom, &left );
+	sprintf( message, "%s-marginT", sPrinterName );
+	wPrefGetFloat( "printer", message, &printMargin.top, top );
+	sprintf( message, "%s-marginR", sPrinterName );
+	wPrefGetFloat( "printer", message, &printMargin.right, right );
+	sprintf( message, "%s-marginB", sPrinterName );
+	wPrefGetFloat( "printer", message, &printMargin.bottom, bottom );
+	sprintf( message, "%s-marginL", sPrinterName );
+	wPrefGetFloat( "printer", message, &printMargin.left, left );
+	ParamLoadControls( &printMarginPG );
+	return
+	     fabs( top - printMargin.top ) >= 0.001 ||
+	     fabs( right - printMargin.right ) >= 0.001 ||
+	     fabs( bottom - printMargin.bottom ) >= 0.001 ||
+	     fabs( left - printMargin.left ) >= 0.001;
+}
+
+
+
+static void DoPrintMarginOk( void * context )
+{
+	wHide( printMarginWin );
+	sprintf( message, "%s-marginT", sPrinterName );
+	wPrefSetFloat( "printer", message, printMargin.top );
+	sprintf( message, "%s-marginR", sPrinterName );
+	wPrefSetFloat( "printer", message, printMargin.right );
+	sprintf( message, "%s-marginB", sPrinterName );
+	wPrefSetFloat( "printer", message, printMargin.bottom );
+	sprintf( message, "%s-marginL", sPrinterName );
+	wPrefSetFloat( "printer", message, printMargin.left );
+	SetPageSize( TRUE );
+	for ( int inx = 0; inx < sizeof printPLs/sizeof printPLs[0]; inx++ ) {
+		if ( printPLs[inx].context == (void*)2 )
+			ParamLoadControl( &printPG, inx );
+	}
+	DoPrintScale();
+}
+
+static void PrintMarginDlgUpdate( paramGroup_p pg, int index, void * context )
+{
+	wControlActive( printMarginPLs[I_PM_RESET].control, TRUE );
+}
+
+static void PrintMarginReset()
+{
+	wPrintGetMargins( &printMargin.top, &printMargin.right, &printMargin.bottom, &printMargin.left );
+	ParamLoadControls( &printMarginPG );
+	wControlActive( printMarginPLs[I_PM_RESET].control, FALSE );
+}
+
+static void DoPrintMargin( void )
+{
+	if ( printMarginWin == NULL ) {
+		wPos_t x=10, y=10;
+		printMarginWin = ParamCreateDialog( &printMarginPG, MakeWindowTitle(_("Print Margins")), _("Ok"), DoPrintMarginOk, NULL, TRUE, PrintMarginLayout, F_BLOCK, PrintMarginDlgUpdate );
+		if ( printMarginWin == NULL )
+			return;
+		for ( int i=0; i<sizeof aPmLines / sizeof aPmLines[0]; i++ ) {
+			aPmLines[i].x0 += x;
+			aPmLines[i].x1 += x;
+			aPmLines[i].y0 += y;
+			aPmLines[i].y1 += y;
+		}
+		wLineCreate( printMarginWin, NULL, sizeof aPmLines / sizeof aPmLines[0], aPmLines );
+	}
+	sPrinterName = wPrintGetName();
+	wMessageSetValue( (wMessage_p)printMarginPLs[I_PM_MESSAGE].control, sPrinterName );
+	// Enable Reset button if we've changed anything
+	wControlActive( printMarginPLs[I_PM_RESET].control, SetMargins() );
+	wShow( printMarginWin );
+
+}
+
+/*
+ * Misc buttons
+ */
 static void DoPrintSetup( void )
 {
 	wPrintSetup( (wPrintSetupCallBack_p)DoPrintScale );
+	sPrinterName = wPrintGetName();
+	SetPageSize( TRUE );
 }
 
 
@@ -913,6 +1056,10 @@ static BOOL_T PrintPage(
 			if (BITMAP(bm,x,y)) {
 				orig.x = currPrintGrid.orig.x + x*currPrintGrid.size.x;
 				orig.y = currPrintGrid.orig.y + y*currPrintGrid.size.y;
+				if (printPhysSize) {
+					orig.x += printMargin.left;
+					orig.y += printMargin.bottom;
+				}
 				Rotate( &orig, currPrintGrid.orig, currPrintGrid.angle );
 				p[0] = p[1] = p[2] = p[3] = orig;
 				p[1].x = p[2].x = orig.x + currPrintGrid.size.x;
@@ -1213,6 +1360,8 @@ static STATUS_T CmdPrint(
 			print_d.scale = printScale;
 			printWin = ParamCreateDialog( &printPG, MakeWindowTitle(_("Print")), _("Print"), DoPrintPrint, (paramActionCancelProc)Reset, TRUE, NULL, 0, PrintDlgUpdate );
 		}
+		sPrinterName = wPrintGetName();
+		SetMargins();
 		wShow( printWin );
 		SetPageSize( TRUE );
 		if (currPrintGrid.size.x == 0.0) {
@@ -1326,6 +1475,7 @@ EXPORT wIndex_t InitCmdPrint( wMenu_p menu )
 	RegisterChangeNotification( PrintChange );
 	printGridPopupM = MenuRegister( "Print Grid Rotate" );
 	AddRotateMenu( printGridPopupM, PrintGridRotate );
+	ParamRegister( &printMarginPG );
 	return InitCommand( menu, CmdPrint, N_("Print..."), NULL, LEVEL0, IC_LCLICK|IC_POPUP3|IC_CMDMENU, ACCL_PRINT );
 }
 

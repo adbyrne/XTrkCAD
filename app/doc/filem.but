@@ -279,7 +279,7 @@ As an additional aid, the numbers of the next pages are printed on each edge.
 
 \u000
 
-\dd \f{centerline below Scale 1:1} - dotted line down the center of the Track/Roadbed.  This line will always be printed at Scale 1:1, but selecting this option will print it at smaller scales. This option is disabled if tracks would be drawn with only one line (instead of two).
+\dd \f{Centerline below Scale 1:1} - dotted line down the center of the Track/Roadbed.  This line will always be printed at Scale 1:1, but selecting this option will print it at smaller scales. This option is disabled if tracks would be drawn with only one line (instead of two).
 
 \u000
 
@@ -288,6 +288,12 @@ As an additional aid, the numbers of the next pages are printed on each edge.
 \u000
 
 \dd \f{Ignore Page Margins} - use the physical page size.  This allows the printouts to abut without trimming.
+
+\u000
+
+\dd \f{Margins} - examine and update the printer margins for the current printer.  (\K{cmdPrintMargin})
+
+\u000
 
 \dt The orientation of the print grid is controlled by:
 
@@ -348,7 +354,7 @@ The \f{Printer Setup} window contains:
 
 \u000
 
-\dd \f{Orientation} - a Radio button to select various Landscape or Portrait formats.
+\dd \f{Orientation} - a Radio button to select various Landscape or Portrait formats. This setting is ignored, use the \f{Page Format} entry on the \f{Print} dialog.
 
 \u000
 
@@ -396,6 +402,52 @@ The \f{Printer Setup} window contains:
 
 \u000
 
-\dd \f{Orientation} - a Radio button to select either Landscape or Portrait format.
+\dd \f{Orientation} - a Radio button to select either Landscape or Portrait format. This setting is ignored, use the \f{Page Format} entry on the \f{Print} dialog.
+
+\rule
+
+\S{cmdPrintMargin} \i{Printer Margin}
+
+\G{png.d/printmargin.png}
+
+The \f{Printer Margins} dialog allows you to configure the selected printer's margins. 
+
+The margins for the four edges of the printed page are displayed.
+The default values are fetched from the Operating System.
+You can enter updated values if the System values don't match your actual printer.
+
+The \f{Reset} is enabled if the displayed values don't match the System values and will reload the System's values.
+
+To check your printer's margin:
+
+\dd Set \f{Scale} to 1
+
+\u000
+
+\dd Set \f{Origin} and \f{Angle} to 0.000 by clicking the \f{Reset} button
+
+\u000
+
+\dd Enable \f{Registration Marks}
+
+\u000
+
+\dd Enable \f{Ignore Page Margins}
+
+\u000
+
+\dd Select and \f{Print} the lower left page of you layout
+
+\u000
+
+\dd Measure the distance from the left and bottom edges to the Registration Mark at (3",3") or (10cm,10cm).
+
+\u000
+
+\dd Update the \f{Printer Margin} values for the left and bottom edges.  You can also update the top and right edges.
+
+\u000
+
+Margins values are stored for each printer.
 
 \rule

@@ -590,22 +590,19 @@ wFont_p wStandardFont(		int, wBool_t, wBool_t );
  * Printing
  */
 
-typedef void (*wAddPrinterCallBack_p)( const char *, const char * );
-typedef void (*wAddMarginCallBack_p)( const char *, double, double, double, double );
-typedef void (*wAddFontAliasCallBack_p)( const char *, const char * );
 typedef void (*wPrintSetupCallBack_p)( wBool_t );
 
 wBool_t wPrintInit(		void );
 void wPrintSetup(		wPrintSetupCallBack_p );
-void wPrintSetCallBacks(	wAddPrinterCallBack_p, wAddMarginCallBack_p, wAddFontAliasCallBack_p );
+void wPrintGetMargins(		double *, double *, double *, double * );
 void wPrintGetPageSize(		double *, double * );
-void wPrintGetPhysSize(		double *, double * );
 wBool_t wPrintDocStart(		const char *, int, int * );
 wDraw_p wPrintPageStart(	void );
 wBool_t wPrintPageEnd(		wDraw_p );
 void wPrintDocEnd(		void );
 wBool_t wPrintQuit(		void );
 void wPrintClip(		wPos_t, wPos_t, wPos_t, wPos_t );
+const char * wPrintGetName(	void );
 
 
 /*------------------------------------------------------------------------------

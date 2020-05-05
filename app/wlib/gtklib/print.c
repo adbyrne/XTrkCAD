@@ -131,7 +131,6 @@ WlibApplySettings(GtkPrintOperation *op)
             // create  default print settings
             settings = gtk_print_settings_new();
         }
-
         g_error_free(err);
     }
 
@@ -247,7 +246,8 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
     GError *err;
     GtkWidget *dialog;
 
-    WlibApplySettings(NULL);
+    if ( !settings )
+        WlibApplySettings(NULL);
 
     new_page_setup = gtk_print_run_page_setup_dialog(GTK_WINDOW(gtkMainW->gtkwin),
                      page_setup, settings);
@@ -262,6 +262,24 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
     WlibSaveSettings(NULL);
 }
 
+/*****************************************************************************
+ *
+ * 
+ *
+ */
+
+
+const char * wPrintGetName()
+{
+	static char sPrinterName[100];
+	WlibApplySettings( NULL );
+        strncpy (sPrinterName, gtk_print_settings_get( settings, "format-for-printer" ), sizeof sPrinterName - 1 );
+	sPrinterName[ sizeof sPrinterName - 1 ] = '\0';
+	for ( char * cp = sPrinterName; *cp; cp++ )
+		if ( *cp == ':' )
+			*cp = '-';
+	return sPrinterName;
+}
 /*****************************************************************************
  *
  * BASIC PRINTING
@@ -802,20 +820,19 @@ WlibGetPaperSize(void)
  * \return
  */
 
-void wPrintGetPageSize(
-    double * w,
-    double * h)
+
+void wPrintGetMargins(
+	double * tMargin,
+	double * rMargin,
+	double * bMargin,
+	double * lMargin )
 {
-    // if necessary load the settings
-    if (!settings) {
-        WlibApplySettings(NULL);
-    }
-
-    WlibGetPaperSize();
-
-    *w = paperWidth -lBorder - rBorder;
-    *h = paperHeight - tBorder - bBorder;
+	if ( tMargin ) *tMargin = tBorder;
+	if ( rMargin ) *rMargin = rBorder;
+	if ( bMargin ) *bMargin = bBorder;
+	if ( lMargin ) *lMargin = lBorder;
 }
+
 
 /**
  * Get the paper size. The size returned is the physical size of the
@@ -825,7 +842,7 @@ void wPrintGetPageSize(
  * \return
  */
 
-void wPrintGetPhysSize(
+void wPrintGetPageSize(
     double * w,
     double * h)
 {
@@ -952,13 +969,13 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
                                     NULL);
         psPrint_d.printContext = cairo_create(psPrint_d.curPrintSurface);
 
+        WlibApplySettings( NULL );
         //update the paper dimensions
         WlibGetPaperSize();
 
         /* for all surfaces including files the resolution is always 72 ppi (as all GTK uses PDF) */
         surface_type = cairo_surface_get_type(psPrint_d.curPrintSurface);
 
-        const char * printer_name = gtk_print_settings_get_printer(settings);
         /*
          * Override up-scaling for some printer drivers/Linux systems that don't support the latest CUPS
          * - the user sets the environment variable XTRKCADPRINTSCALE to a value
@@ -969,7 +986,8 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
          */
         char * sEnvScale = PRODUCT "PRINTSCALE";
 
-        if ((strcmp(printer_name,"Print to File") == 0) || getenv(sEnvScale) == NULL) {
+	const char * sPrinterName = gtk_print_settings_get_printer(settings);
+        if ((strcmp(sPrinterName,"Print to File") == 0) || getenv(sEnvScale) == NULL) {
 			double p_def = 600;
 			cairo_surface_set_fallback_resolution(psPrint_d.curPrintSurface, p_def, p_def);
 			psPrint_d.dpi = p_def;
