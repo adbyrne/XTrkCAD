@@ -395,6 +395,48 @@ necessary to upgrade your version of \e{XTrackCAD} to at least the version ident
 Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
 END
 
+#fileio.c
+MESSAGE MSG_LAYOUT_LINES_SKIPPED
+While processing Layout file %s, %d lines were skipped because they were not recognized.
+HELP
+The layout file that you loaded contained records that were not recognized. This could be because the file was written by a higher level of \e{XTrackCAD} or because it was corrupted.
+
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
+END
+
+#paramfile.c
+MESSAGE MSG_PARAM_UPGRADE_VERSION1
+File version %ld is greater than supported
+version %d. You need to upgrade %s
+to at least version %s.
+HELP
+The parameter file that you're attempting to load was designed for a newer version
+of \e{XTrackCAD}. In order to load this file it will be necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
+
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Website} and downloading the latest release.
+END
+
+#paramfile.c
+MESSAGE MSG_PARAM_UPGRADE_VERSION2
+File version %ld is greater than supported
+version %d. You need to upgrade your
+version of %s
+HELP
+The parameter file that you're attempting to load was designed for a newer version of \e{XTrackCAD}. In order to load this file it will be
+necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
+
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
+END
+
+#paramfile.c
+MESSAGE MSG_PARAM_LINES_SKIPPED
+While processing Parameter file %s, %d lines were skipped because they were not recognized.
+HELP
+The parameter file that you loaded contained records that were not recognized. This could be because the file was designed for a higher level of \e{XTrackCAD} or because it was corrupted.
+
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
+END
+
 # chndldto.c
 MESSAGE MSG_MOVE_POINTS_OTHER_SIDE
 Frog angle prevents placement of points. Move points to opposite side of frog.
@@ -1386,7 +1428,12 @@ layout file using an older version of %s
 #NOHELP
 END
 
-
+# paramfile.c
+MESSAGE MSG_PARAM_BAD_FILE_VERSION
+File version %ld is lower than the minimum
+supported version %d.This parameter file will only work using an older version of %s
+#NOHELP
+END
 
 # macro.c
 MESSAGE MSG_CANT_READ_DEMO

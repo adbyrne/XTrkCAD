@@ -965,7 +965,6 @@ static void GroupOk( void * junk )
 	int inx;
 	EPINX_T ep, epCnt, epN;
 	coOrd orig, size;
-	long oldOptions;
 	FILE * f = NULL;
 	BOOL_T rc = TRUE;
 	track_p trk, trk1;

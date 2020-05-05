@@ -261,7 +261,6 @@ static void DrawStructure(
 		wDrawColor color )
 {
 	struct extraData *xx = GetTrkExtraData(t);
-	coOrd p00, px0, pxy, p0y, orig, size;
 
 	d->options &= ~DC_NOTSOLIDLINE;
 	switch(xx->lineType) {

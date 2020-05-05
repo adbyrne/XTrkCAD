@@ -2139,7 +2139,7 @@ static STATUS_T CmdRotate(
 				DIST_T width = mainD.scale*0.5;
 				DrawLine( &tempD, base, orig, 0, wDrawColorBlue );
 				if (drawnAngle) {
-					DrawLine( &tempD, orig_base, orig, width, wDrawColorBlue );
+					DrawLine( &tempD, orig_base, orig, (wDrawWidth)width, wDrawColorBlue );
 					ANGLE_T a = DifferenceBetweenAngles(FindAngle(orig, orig_base),FindAngle(orig, base));
 
 					DIST_T dist = FindDistance(orig,base);
@@ -2154,7 +2154,6 @@ static STATUS_T CmdRotate(
 							DrawArc( &tempD, orig, dist/2, FindAngle(orig,base), fabs(a), FALSE, 0, wDrawColorBlue);
 						}
 						DIST_T d;
-						int inx;
 						d = mainD.scale*0.25;
 						ANGLE_T arrow_a = NormalizeAngle(FindAngle(orig,orig_base)+a/2);
 						coOrd arr1,arr2,arr3;
@@ -3194,6 +3193,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuPushCreate(selectPopup2M, "", _("Cut"), 0,(wMenuCallBack_p) EditCut, (void *) 0);
 	wMenuPushCreate(selectPopup2M, "", _("Copy"), 0,(wMenuCallBack_p) EditCopy, (void *) 0);
 	wMenuPushCreate(selectPopup2M,  "", _("Paste"), 0, (wMenuCallBack_p) EditPaste, (void *) 0);
+	wMenuPushCreate(selectPopup2M,  "", _("Clone"), 0, (wMenuCallBack_p) EditClone, (void *) 0);
 	AddMoveMenu( selectPopup2M, QuickMove);
 	selectPopup2RM = wMenuMenuCreate(selectPopup2M, "", _("Rotate..."));
 	AddRotateMenu( selectPopup2RM, QuickRotate );

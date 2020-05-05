@@ -166,7 +166,7 @@ CreateEditableLayersList()
     int i = 0;
     int j = 0;
 
-    while (i <= NUM_LAYERS) {
+    while (i < NUM_LAYERS) {
         if (!GetLayerFrozen(i)) {
             editableLayerList[j++] = i;
         }

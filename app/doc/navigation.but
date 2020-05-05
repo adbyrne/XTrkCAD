@@ -17,7 +17,7 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \u000
 
-\dd \G{png.d/main1.png}
+\dd \G{png.d/maintagged.png}
 
 \u000
 
@@ -135,7 +135,7 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \b \K{cmdPan} button on the \f{Tool-bar}
 
-\f{Note:} If The scale 1::1 is reached, "Macro Zoom" mode can be entered using CTRL+PageDown - with repeated presses a scale of 10::1 is possible. 
+\f{Note:} If The scale 1:1 is reached, "Macro Zoom" mode can be entered using CTRL+PageDown - with repeated presses a scale of 10::1 is possible. 
 
 }
 
@@ -146,6 +146,10 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 \u000
 
 \dd The ARROW keys move the \f{Canvas} left, right, up or down by half a screen. If Shift is used together with the arrow keys, the movement will be 1/20th of screen in the selected direction.
+
+\u000
+
+\dd In many commands, the result that will result from clicking the mouse is shown by \e{anchors} which highlight the track object or feature in blue that will be affected as the mouse is dragged over the canvas and becomes close enough to select it.
 
 \u000
 
@@ -649,7 +653,7 @@ Note Dialog
 
 }
 
-\b Pop-up menu of Hot Bar contents - \e{Right-Click}
+\b Pop-up menu of Hot Bar categories - \e{Right-Click}
 
 \u000
 
@@ -828,9 +832,11 @@ Note Dialog
 
 \e{Select Command}
 
+The \e{Select} command actions are affected by the mode selected in \f{Options->Command->Select}.   
+
 \dt \e{Left-Click}
  
-\dd Selects one object, deselects all objects if clicked off all objects.
+\dd Single Item Mode -> Selects one object, deselects all objects if clicked off all objects. Multiple Select Mode-> Adds unselected objects, deselects if the object is already selected.
 
 \dt \e{Shift-Left-Click} 
 
@@ -838,15 +844,15 @@ Note Dialog
 
 \dt \e{Ctrl+Left-Click} 
 
-\dd Adds an object to the selection.
+\dd Single Item Mode -> Adds an object to the selection. Multiple Select Mode -> Selects just this item.
 
 \dt \e{Double-Left-Click} 
 
-\dd Opens modify for Cornu and Draw Objects other than Text, Activates Link and Document Notes, otherwise opens Describe.
+\dd Opens Modify for Cornu and Draw Objects other than Text, Activates Link and Document Notes, otherwise opens Describe.
 
 \dt \e{Left+Drag} 
 
-\dd Selects all objects in an rubber-banded area and deselects all others.
+\dd Single Item Mode -> Selects all objects in an rubber-banded area and deselects all others. Multiple Select Mode -> Adds items in the rubber-banded area. 
 
 \dt \e{Shift+Left-Drag} 
 
@@ -858,11 +864,11 @@ Note Dialog
 
 \dt \e{Right-Click} 
 
-\dd Displays a pop-up menu of context commands (in Select, Move, Modify and Rotate commands) if in a selected area.
+\dd Displays a pop-up menu of context commands (in Select, Move, Modify and Rotate commands). If some track is selected, the menu has operations to perform on it, if not, it will have a command context menu.
 
 \dt \e{Shift+Right-Click} 
 
-\dd Displays a pop-up menu of commands.
+\dd Displays a pop-up menu of commands.  Displays the other context menu than Right-Click.
 
 \dt \e{Right+Drag} 
 
@@ -870,7 +876,7 @@ Note Dialog
 
 \dt \e{Rotate Wheel} 
 
-\dd Zooms drawing area in and out.
+\dd Zooms drawing area in and out.  Modern computers with Trackpads often map this guesture to two-finger drag.
 
 \e{When Moving and Rotating} ( Placing Turnouts and Structures, Moving the Print and Snap Grids, ... ):
 
@@ -1101,25 +1107,12 @@ The Shortcut key for each command is listed after the command name.
 
 }
 
-\dd Unselect all objects within the highlighted area - \e{Right+Drag}
 
 \dd Rotate selected objects - \e{Ctrl+Left-Drag}
 
 \lcont{
 
 \b in increments of 15\u00B0 - \e{Ctrl+Shift+Left+Drag}
-
-}
-
-\dd Select (or unselect) the object - \e{Left-Click} - note clicking on an area without tracks deselects all tracks
-
-\dd Select all objects
-
-\lcont{
-
-\b connected to object - \e{Shift+Left+Click}
-
-\b within the highlighted area - \e{Left+Drag}
 
 }
 

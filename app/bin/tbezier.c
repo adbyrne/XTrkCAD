@@ -939,8 +939,58 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 		params->arcA0 = segPtr->u.c.a0;
 		params->arcA1 = segPtr->u.c.a1;
 	}
-	if ( inx == PARAMS_PARALLEL ) {
-		params->ep = 0;
+	if ( inx == PARAMS_NODES ) {
+		if (GetTrkType(trk) == T_BEZIER) return FALSE;
+		if (FindDistance(pos,params->bezierPoints[0]) > FindDistance(pos,params->bezierPoints[3]))
+				params->ep = 1;
+		else params->ep = 0;
+		coOrd curr_pos = params->bezierPoints[params->ep*3];
+		BOOL_T first = TRUE;
+		DYNARR_RESET(coOrd,params->nodes);
+		for (int i = 0; i<xx->bezierData.arcSegs.cnt;i++) {
+			trkSeg_p segPtr = &DYNARR_N(trkSeg_t,xx->bezierData.arcSegs,params->ep?xx->bezierData.arcSegs.cnt-1-i:i);
+			if (segPtr->type == SEG_STRLIN) {
+				BOOL_T eps = FindDistance(segPtr->u.l.pos[0],curr_pos)>FindDistance(segPtr->u.l.pos[1],curr_pos);
+				if (first) {
+					first = FALSE;
+					DYNARR_APPEND(coOrd,params->nodes,1);
+					DYNARR_LAST(coOrd,params->nodes) = segPtr->u.l.pos[eps];
+				}
+				DYNARR_APPEND(coOrd,params->nodes,1);
+				DYNARR_LAST(coOrd,params->nodes) = segPtr->u.l.pos[1-eps];
+			} else {
+				coOrd start,end;
+				Translate(&start,segPtr->u.c.center,segPtr->u.c.a0,fabs(segPtr->u.c.radius));
+				Translate(&end,segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1,fabs(segPtr->u.c.radius));
+				BOOL_T back = FindDistance(start,curr_pos)>FindDistance(end,curr_pos);
+				if (segPtr->u.c.radius > 0.5) {
+					double min_angle = 360*acos(1.0-(0.1/fabs(segPtr->u.c.radius)))/M_PI;    //Error max is 0.1"
+					double number = ceil(segPtr->u.c.a1/min_angle);
+					double arc_size = segPtr->u.c.a1/number;
+					for (int j=1-first;j<=number;j++) {
+						DYNARR_APPEND(coOrd,params->nodes,1);
+						if (back == params->ep)
+							Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,segPtr->u.c.a0+segPtr->u.c.a1-(j*arc_size),fabs(segPtr->u.c.radius) );
+						else
+							Translate(&DYNARR_LAST(coOrd,params->nodes),segPtr->u.c.center,segPtr->u.c.a0+(j*arc_size),fabs(segPtr->u.c.radius) );
+					}
+					first = FALSE;
+				} else {
+					if (first) {
+						first = FALSE;
+						DYNARR_APPEND(coOrd,params->nodes,1);
+						DYNARR_LAST(coOrd,params->nodes) = start;
+					}
+					DYNARR_APPEND(coOrd,params->nodes,1);
+					DYNARR_LAST(coOrd,params->nodes) = end;
+
+				}
+			}
+			curr_pos = DYNARR_LAST(coOrd,params->nodes);
+		}
+		params->lineOrig = params->bezierPoints[params->ep*3];
+		params->lineEnd = params->bezierPoints[(1-params->ep)*3];
+		return TRUE;
 	} else if (inx == PARAMS_CORNU ){
 		params->ep = PickEndPoint( pos, trk);
 	} else {
@@ -990,6 +1040,8 @@ static BOOL_T QueryBezier( track_p trk, int query )
 	case Q_MODIFY_CAN_SPLIT:
 	case Q_CORNU_CAN_MODIFY:
 		return (GetTrkType(trk) == T_BEZIER);
+	case Q_GET_NODES:
+		return (GetTrkType(trk) == T_BZRLIN);
 	default:
 		return FALSE;
 	}
@@ -1459,7 +1511,7 @@ LOG( log_bezierSegments, 1, ( "    BezTr-Exit2 --> SI%d A%0.3f P[%0.3f %0.3f] D%
 		double dd;
 		coOrd split_p = data->split.pos;
 		ANGLE_T angle = GetAngleSegs(segPtr->bezSegs.cnt,(trkSeg_p)segPtr->bezSegs.ptr, &split_p, &inx, &dd, &back, &subinx, NULL);
-		coOrd current[4], newl[4], newr[4];
+		coOrd current[4];
 
 		BezierMathDistance(&split_p, segPtr->u.b.pos, 500, &t);  //Find t value
 

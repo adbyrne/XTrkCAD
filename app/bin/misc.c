@@ -366,12 +366,11 @@ EXPORT char * ConvertToEscapedText(const char * text) {
  *  \n = LineFeed 	0x0A
  *  \t = Tab 		0x09
  *  \\ = \ 			The way to still produce backslash
- *  "" = "			Take out quotes included so that other (CSV-like) programs could read the files
  *
  */
 EXPORT char * ConvertFromEscapedText(const char * text) {
 	enum {
-		CHARACTER, ESCAPE, QUOTE
+		CHARACTER, ESCAPE
 	} state = CHARACTER;
 	char * cout = MyMalloc(strlen(text) + 1);  //always equal to or shorter than
 	int text_i = 0;
@@ -383,8 +382,6 @@ EXPORT char * ConvertFromEscapedText(const char * text) {
 		case CHARACTER:
 			if (c == '\\') {
 				state = ESCAPE;
-			} else if (c == '\"') {
-				state = QUOTE;
 			} else {
 				cout[cout_i] = c;
 				cout_i++;
@@ -408,14 +405,6 @@ EXPORT char * ConvertFromEscapedText(const char * text) {
 			}
 			state = CHARACTER;
 			break;
-		case QUOTE:
-			switch (c) {
-			case '\"':
-				cout[cout_i] = c;
-				cout_i++;
-				break;   //One quote = NULL, Two quotes = 1 quote
-			}
-			state = CHARACTER;
 		}
 		text_i++;
 	}
@@ -1785,7 +1774,7 @@ static void StickyOk(void * junk) {
 static void DoSticky(void) {
 	if (!stickyW)
 		stickyW = ParamCreateDialog(&stickyPG,
-				MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, NULL,
+				MakeWindowTitle(_("Sticky Commands")), _("Ok"), StickyOk, wHide,
 				TRUE, NULL, 0, NULL);
 	ParamLoadControls(&stickyPG);
 	wShow(stickyW);
@@ -1992,7 +1981,7 @@ static void CreateDebugW(void) {
 	debugPG.paramCnt = debugCnt;
 	ParamRegister(&debugPG);
 	debugW = ParamCreateDialog(&debugPG, MakeWindowTitle(_("Debug")), _("Ok"),
-			DebugOk, NULL, FALSE, NULL, 0, NULL);
+			DebugOk, wHide, FALSE, NULL, 0, NULL);
 	wHide(debugW);
 }
 
@@ -2203,6 +2192,8 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) EditCopy, 0, (void *) 0);
 	MiscMenuItemCreate(popup1M, popup2M, "cmdPaste", _("Paste"), 0,
 			(void*) (wMenuCallBack_p) EditPaste, 0, (void *) 0);
+	MiscMenuItemCreate(popup2M, NULL, "cmdClone", _("Clone"), 0,
+			(void*) (wMenuCallBack_p) EditClone, 0, (void *) 0);
 	/*Select*/
 	MiscMenuItemCreate(popup1M, popup2M, "cmdSelectAll", _("Select All"), 0,
 			(void*) (wMenuCallBack_p) SetAllTrackSelect, 0, (void *) 1);
@@ -2319,6 +2310,8 @@ static void CreateMenus(void) {
 			(void*) (wMenuCallBack_p) EditCopy, IC_SELECTED, (void *) 0);
 	MiscMenuItemCreate(editM, NULL, "cmdPaste", _("&Paste"), ACCL_PASTE,
 			(void*) (wMenuCallBack_p) EditPaste, 0, (void *) 0);
+	MiscMenuItemCreate(editM, NULL, "cmdClone", _("C&lone"), ACCL_CLONE,
+				(void*) (wMenuCallBack_p) EditClone, 0, (void *) 0);
 	MiscMenuItemCreate(editM, NULL, "cmdDelete", _("De&lete"), ACCL_DELETE,
 			(void*) (wMenuCallBack_p) SelectDelete, IC_SELECTED, (void *) 0);
 	MiscMenuItemCreate(editM, NULL, "cmdMoveToCurrentLayer",
@@ -2867,8 +2860,8 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	elevColorIgnore = drawColorBlue;
 	elevColorDefined = drawColorGold;
 	profilePathColor = drawColorPurple;
-	exceptionColor = wDrawFindColor(wRGB(255, 0, 128));
-	tieColor = wDrawFindColor(wRGB(255, 128, 0));
+	exceptionColor = wDrawFindColor(wRGB(255, 89, 0 ));
+	tieColor = wDrawFindColor(wRGB(153, 89, 68));
 
 	newToolbarMax = (1 << BG_COUNT) - 1;
 	wPrefGetInteger("misc", "toolbarset", &toolbarSet, newToolbarMax);

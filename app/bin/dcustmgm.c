@@ -381,7 +381,7 @@ static void DoCustomMgr( void * junk )
     int i = 0;
     
 	if (customPG.win == NULL) {
-		ParamCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone, NULL, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
+		ParamCreateDialog( &customPG, MakeWindowTitle(_("Manage custom designed parts")), _("Done"), CustomDone, wHide, TRUE, NULL, F_RESIZE|F_RECALLSIZE|F_BLOCK, CustomDlgUpdate );
         while(customTypes[ i ] != NULL) {
             wListAddValue( ((wList_p)customPLs[I_CUSTOMNEWTYPE].control), customTypes[ i++ ], NULL, NULL );
         } 

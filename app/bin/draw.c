@@ -1451,7 +1451,6 @@ EXPORT void MainLayout(
    DIST_T w, h;
 #endif
 
-	coOrd orig, size;
 	DIST_T t1;
 	if (inPlaybackQuit)
 		return;
@@ -2243,7 +2242,6 @@ LOG( log_pan, 1, ( "START %0.3fx%0.3f %0.3f+%0.3f\n", mapOrig.x, mapOrig.y, size
 			pos.y = 0;
 		if (pos.y > mapD.size.y)
 			pos.y = mapD.size.y;
-		coOrd sizeMap;
 
 		xscale = fabs((pos.x-mapOrig.x)*2.0/size.x);
 		yscale = fabs((pos.y-mapOrig.y)*2.0/size.y);

@@ -286,11 +286,22 @@ Certain turnouts, such as a Wye's, Three-Way or Crossings are symmetrical and th
 \rule
 
 
-\S{cmdJoin} Join
+\S{cmdJoin} Join Tracks and Lines
+
+The \f{Join} command has two variatons, one used to Join Tracks by connecting them and the other to create a PolyLine from two Draw Objects or to Close a PolyLine as a Polygon.
+
+\S2{cmdJoinLines} Join Lines
+
+\G{png.d/bjoinline.png}
+
+The \f{Join Line} command produces a PolyLine from two Draw objects (Straight Line, Curved Line, Bezier Line or PolyLine). You select the two ends to join and the new Polyline will replace the two Draw objects, filling in any gap with a straight line segment. 
+If the two ends are of the same PolyLine, an unfilled Polygon will be created.
+
+\S2{cmdJoinTrack} Join Tracks
 
 \G{png.d/bjoin.png}
 
-The \f{Join} command is used to bring together and connect any two segments of track. During the join process, \e{XTrackCAD} ensures the connecting tracks are properly aligned.
+The \f{Join Track} command is used to bring together and connect any two segments of track. During the join process, \e{XTrackCAD} ensures the connecting tracks are properly aligned.
 
 See \f{Help>Demo} (\K{cmdDemo}) for examples of how to join tracks.
 
@@ -785,14 +796,16 @@ For detail about;
 
 Draw elements have blue handles that show how they can be modified. They also have text entry boxes that allow precise entry of parameters. These values become active when a \e{Tab} is entered, or the cursor is moved out of the text box.
 
-There is a context menu accessed via \e{Right-Click} for Draw Objects that can change the edit mode from the initial "Points Mode" to "Origin Mode" where \e{Click} sets the position of the drawn object's origin - which will cause subsequent rotations using \K{cmdModify} to be centered about that point.
+There is a context menu accessed via \e{Right-Click} for Draw Objects that can change the edit mode from the initial "Points Mode" to "Origin Mode" where \e{Click} sets the position of the drawn object's origin - which will cause subsequent rotations using \K{cmdModify} or \K{cmdDescribe} to be centered about that point.
 
 The context menu can be used to go back to Points Mode, or to set the origin to one of a number of defined points.
 There are text shortcuts - "o" for Origin Mode and "p" for Points Mode.
 
-In Origin Mode,
+In Origin Mode, the context menu allows the origin to be set to be -
 
-\dd the context menu allows the origin to be set by dragging or snapped to the layout origin (shortcut "0") or the position of the corner points (shortcut "1" through "4") or the centroid of the shape (shortcut "c"). For a polygon, if a node is selected, the origin can be moved to it (shortcut "l").
+\dd \e{Absolute} (shortcut "0") with the origin at the layout origin or
+
+\dd \e{Relative} by dragging the origin to a point, or snapping to the position of the first 4 corner points (shortcut "1" through "4"), or to the centroid of the shape (shortcut "c"). For a Polygon or Polyline the \e{Relative} origin can be snapped to a selected node (shortcut "l").
 
 \u000
 
@@ -1130,7 +1143,8 @@ Until an object is selected, the object under the cursor that will be selected w
 
 A \e{Left-Click} on an object while in \f{Properties} mode causes a properties dialog window to appear.
 The properties dialog contains information pertaining to the selected objects position, size, color and layer as appropriate for each type of object.
-Certain values can be changed to modify the object. If a track is connected to other tracks, then some values, e.g., endpoint positions, can not be changed.
+Certain values can be changed to modify the object. Some values, e.g., endpoint positions, can not be changed if, for example, a Track is joined to another Track.
+The values will take effect when \f{Enter}, \f{Tab} is pressed or the cursor leaves the entry field.
 
 \G{png.d/dproperties.png}
 
@@ -1165,8 +1179,8 @@ By setting a different Rotation Origin, subsequent Rotations will be about that 
 
 \dt Lock Rotation Origin
 
-\dd For ease of use, the rotation origin can be locked to be relative to the First Point. If this is done, altering either the First Point or the Rotation Origin will move both.
-This value is set to locked if the origin is non-zero when the Describe command is started but can be unset to allow repositioning of the Rotate Origin.
+\dd For ease of use, the rotation origin can be \e{Relative} to the First Point. If this is done, altering either the First Point or the Rotation Origin will move the both values.
+This value is always set to locked if the Draw origin is non-zero when the \K{cmdDescribe} command is started but can be unset to allow repositioning of the Rotate Origin without moving the object. If the Rotate Origin is set to zero, the Object has an \e{Absolute} origin.
 
 \dt Layer
 
@@ -1563,7 +1577,7 @@ The following commands operate on the objects you have selected:
 
 \b \f{Rescale} (\K{cmdRescale}) the selected objects.
 
-The \f{Cut}, \f{Copy} and \f{Paste} commands found on the \f{Edit} (\K{editM}) menu will also operate on selected objects.
+The \f{Cut}, \f{Copy}, \f{Clone} and \f{Paste} commands found on the \f{Edit} (\K{editM}) menu will also operate on selected objects.
 
 Notes:
 

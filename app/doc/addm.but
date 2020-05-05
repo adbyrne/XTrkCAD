@@ -32,7 +32,7 @@ The \f{Add Menu} has all the actions related to adding track pieces to the layou
 
 \u000
 
-\dd \f{Parallel} - create parallel track to existing flex-track, straight or curved.
+\dd \f{Parallel} - create parallel track or line to existing flex-track, straight or curved track.
 
 \u000
 
@@ -237,16 +237,16 @@ A label for the helix is drawn at it's the center.  If the elevations are set (e
 
 \S{cmdParallel} Parallel Track or Line
 
-\G{png.d/bparalle.png}
+\G{png.d/bparallel.png}
 
-You can create a new track or line parallel to any straight, curved, bezier, cornu, turnout or easement track.
+\G{png.d/bparalleline.png}
 
-\G{png.d/satusbarparallel.png}
+You can create a new track or line parallel to any straight, curved, bezier, cornu or easement track.
 
-The \f{Parallel Separation} control (Visible in the Status Bar) displays the current separation between parallel tracks.  This value can be changed before selecting a track.  The value must be greater than 0.0 if the gauges are equal.
-If the gauges are equal, a value of 0 means that the rail of the second track is overlaid on the first to simulate dual guage track.
+\G{png.d/statusbarparallel.png}
 
-The type of the output can be changed using the \f{Type} radio button to be a Track or a Line.
+The \f{Parallel Separation} control (Visible in the Status Bar) displays the intended separation between parallel tracks/line.  This value can be changed before selecting a track.  The value must be greater than 0.0 if the gauges are equal.
+If the gauges are equal, a value of 0.0 means that the rail of the second track is overlaid on the first to simulate dual guage track.
 
 The seperation can be automatically increased using the \f{Radius Factor} value. If this is set to 0.0 (default) the seperation value will be used regardless of radius.
 If the value is set to 1.0, the seperation will be increased by a scaled 2864 inches per inch of curvature of the paralled track - this is in accordance with North American prototype practice.

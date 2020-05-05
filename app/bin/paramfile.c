@@ -232,6 +232,8 @@ bool ReadParams(
     paramCheckSum = key;
     paramLineNum = 0;
     checkSummed = FALSE;
+    BOOL_T skip = false;
+    int skipLines = 0;
     while (paramFile && (fgets(paramLine, 256, paramFile)) != NULL) {
         paramLineNum++;
         Stripcr(paramLine);
@@ -273,22 +275,60 @@ bool ReadParams(
             } else {
                 MakeFullpath(&paramFileName, fileName);
             }
+            skip = FALSE;
         } else if (strncmp(paramLine, "CONTENTS ", 9) == 0) {
             curContents = MyStrdup(paramLine + 9);
             curSubContents = curContents;
+            skip = FALSE;
         } else if (strncmp(paramLine, "SUBCONTENTS ", 12) == 0) {
             curSubContents = MyStrdup(paramLine + 12);
+            skip = FALSE;
         } else if (strncmp(paramLine, "PARAM ", 6) == 0) {
-            paramVersion = atol(paramLine + 6);
+        	paramVersion = strtol( paramLine+8, &cp, 10 );
+			if (cp)
+				while (*cp && isspace((unsigned char)*cp)) cp++;
+			if ( paramVersion > iParamVersion ) {
+				if (cp && *cp) {
+					NoticeMessage( MSG_PARAM_UPGRADE_VERSION1, _("Ok"), NULL, paramVersion, iParamVersion, sProdName, cp );
+				} else {
+					NoticeMessage( MSG_PARAM_UPGRADE_VERSION2, _("Ok"), NULL, paramVersion, iParamVersion, sProdName );
+				}
+				break;
+			}
+			if ( paramVersion < iMinParamVersion ) {
+				NoticeMessage( MSG_PARAM_BAD_FILE_VERSION, _("Ok"), NULL, paramVersion, iMinParamVersion, sProdName );
+				break;
+			}
+        } else if (skip && (strncmp(paramLine, "  ",1) == 0)) {
+        	//Always skip to next line starting in LeftHandColumn
+        	skipLines++;
+        	goto nextLine;
         } else {
-            for (pc = 0; pc < paramProc_da.cnt; pc++) {
-                if (strncmp(paramLine, paramProc(pc).name,
-                            strlen(paramProc(pc).name)) == 0) {
-                    paramProc(pc).proc(paramLine);
-                    goto nextLine;
-                }
-            }
-            InputError("Unknown param line", TRUE);
+			for (pc = 0; pc < paramProc_da.cnt; pc++) {
+				if (strncmp(paramLine, paramProc(pc).name,
+							strlen(paramProc(pc).name)) == 0) {
+					skip = FALSE;					//Stop skip so we re-message
+					paramProc(pc).proc(paramLine);
+					goto nextLine;
+				}
+			}
+			if (!skip) {
+				if (InputError(_("Unknown param file line - skip until next good object?"), TRUE)) {   //OK to carry on
+					/* SKIP until next main line we recognize */
+					skip = TRUE;
+					skipLines++;
+					goto nextLine;
+				} else {
+					if (skipLines>0)
+						NoticeMessage( MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
+					fclose(paramFile);
+					free(paramFileName);
+					paramFileName = NULL;
+					RestoreLocale(oldLocale);
+					return FALSE;
+				}
+			}
+			skipLines++;
         }
 nextLine:
         ;
@@ -306,6 +346,8 @@ nextLine:
             return FALSE;
         }
     }
+    if (skipLines>0)
+    	NoticeMessage( MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
     if (paramFile) {
         fclose(paramFile);
     }

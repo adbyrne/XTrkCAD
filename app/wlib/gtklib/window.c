@@ -125,12 +125,12 @@ static void getWinSize(wWin_p win, const char * nameStr)
             (cp = wPrefGetString(SECTIONWINDOWSIZE, nameStr)) &&
             (w = strtod(cp, &cp1), cp != cp1) &&
             (h = strtod(cp1, &cp2), cp1 != cp2)) {
-        if (w < 10) {
-            w = 10;
+        if (w < 20) {
+            w = 20;
         }
 
-        if (h < 10) {
-            h = 10;
+        if (h < 20) {
+            h = 20;
         }
 
         if (w > maxDisplayWidth) w = maxDisplayWidth;
@@ -977,10 +977,12 @@ static wWin_p wWinCommonCreate(
     int scr_w, scr_h;
     	wGetDisplaySize(&scr_w, &scr_h);
         if (winType != W_MAIN) {
-        	wSetGeometry(w, 100, scr_w-10, 100, scr_h, w->w, w->h, -1);
+        	wSetGeometry(w, 100, scr_w-10, 100, scr_h, -1, -1, -1);
         } else {
-        	wSetGeometry(w, scr_w/2, scr_w-10, scr_h/2, scr_h-10, w->w, w->h, -1);
+        	wSetGeometry(w, scr_w/3, scr_w-10, scr_h/3, scr_h-10, -1, -1, -1);
      }
+
+
 
     w->first = w->last = NULL;
     w->winProc = winProc;
@@ -1002,6 +1004,7 @@ static wWin_p wWinCommonCreate(
 
     if (w->option & F_RESIZE) {
         gtk_window_set_resizable(GTK_WINDOW(w->gtkwin), TRUE);
+        gtk_window_resize(GTK_WINDOW(w->gtkwin), w->w, w->h);
     } else {
         gtk_window_set_resizable(GTK_WINDOW(w->gtkwin), FALSE);
     }
