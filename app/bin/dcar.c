@@ -383,8 +383,8 @@ static void CarProtoDrawTruck(
 
 	memcpy( p, truckOutline, sizeof truckOutline );
 	RescalePts( sizeof truckOutline/sizeof truckOutline[0], p, 1.0, width/56.5 );
-	RescalePts( sizeof wheelOutline/sizeof wheelOutline[0], p, ratio, ratio );
-	RotatePts( sizeof wheelOutline/sizeof wheelOutline[0], p, zero, angle );
+	RescalePts( sizeof truckOutline/sizeof truckOutline[0], p, ratio, ratio );
+	RotatePts( sizeof truckOutline/sizeof truckOutline[0], p, zero, angle );
 	MovePts( sizeof truckOutline/sizeof truckOutline[0], p, pos );
 	DrawPoly( d, sizeof truckOutline/sizeof truckOutline[0], p, NULL, color, 0, 1, 0);
 	pp.x = -70/2;
@@ -679,10 +679,12 @@ static BOOL_T CarProtoRead(
 	long options;
 	long type;
 	carDim_t dim;
+	long longCenterOffset;
 
-	if ( !GetArgs( line+9, "qllff0fff",
-		&desc, &options, &type, &dim.carLength, &dim.carWidth, &dim.truckCenterOffset, &dim.truckCenter, &dim.coupledLength ) )
+	if ( !GetArgs( line+9, "qllff0lff",
+		&desc, &options, &type, &dim.carLength, &dim.carWidth, &longCenterOffset, &dim.truckCenter, &dim.coupledLength ) )
 		return FALSE;
+	dim.truckCenterOffset = longCenterOffset/1000.0;
 	if ( !ReadSegs() )
 		return FALSE;
 	CarProtoNew( NULL, curParamFileIndex, desc, options, type, &dim, tempSegs_da.cnt, &tempSegs(0) );
@@ -701,8 +703,10 @@ static BOOL_T CarProtoWrite(
 
 	oldLocale = SaveLocale("C");
 
-	rc &= fprintf( f, "CARPROTO \"%s\" %ld %ld %0.3f %0.3f 0 %0.3f %0.3f %0.3f\n",
-		PutTitle(proto->desc), proto->options, proto->type, proto->dim.carLength, proto->dim.carWidth, proto->dim.truckCenterOffset, proto->dim.truckCenter, proto->dim.coupledLength )>0;
+	long longCenterOffset = proto->dim.truckCenterOffset*1000;
+
+	rc &= fprintf( f, "CARPROTO \"%s\" %ld %ld %0.3f %0.3f 0 %ld %0.3f %0.3f\n",
+		PutTitle(proto->desc), proto->options, proto->type, proto->dim.carLength, proto->dim.carWidth, longCenterOffset, proto->dim.truckCenter, proto->dim.coupledLength )>0;
 	rc &= WriteSegs( f, proto->segCnt, proto->segPtr );
 
 	RestoreLocale(oldLocale);
@@ -1038,10 +1042,12 @@ static BOOL_T CarPartRead(
 	char * title;
 	carDim_t dim;
 	long rgb;
+	long longCenterOffset;
 
-	if ( !GetArgs( line+8, "sqllff0fffl",
-		scale, &title, &options, &type, &dim.carLength, &dim.carWidth, &dim.truckCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb ) )
+	if ( !GetArgs( line+8, "sqllff0lffl",
+		scale, &title, &options, &type, &dim.carLength, &dim.carWidth, longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb ) )
 		return FALSE;
+	dim.truckCenterOffset = longCenterOffset/1000.0;
 	CarPartNew( NULL, curParamFileIndex, LookupScale(scale), title, options, type, &dim, wDrawFindColor(rgb) );
 	MyFree( title );
 	return TRUE;
@@ -1257,12 +1263,14 @@ EXPORT BOOL_T CarItemRead(
 	coOrd pos;
 	ANGLE_T angle;
 	wIndex_t index;
+	long longCenterOffset;
 
-	if ( !GetArgs( line+4, "lsqll" "ff0fffl" "fflll000000c",
+	if ( !GetArgs( line+4, "lsqll" "ff0lffl" "fflll000000c",
 		&itemIndex, scale, &title, &options, &type,
-		&dim.carLength, &dim.carWidth, &dim.truckCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb,
+		&dim.carLength, &dim.carWidth, longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb,
 		&purchPrice, &currPrice, &condition, &purchDate, &serviceDate, &cp ) )
 		return FALSE;
+	dim.truckCenterOffset = longCenterOffset/1000.0;
 	if ( (options&CAR_ITEM_HASNOTES) ) {
 		DYNARR_SET( char, buffer_da, 0 );
 		while ( (line=GetNextLine()) && strncmp( line, "    END", 7 ) != 0 ) {
@@ -1305,6 +1313,7 @@ static BOOL_T CarItemWrite(
 	ANGLE_T angle;
 	BOOL_T rc = TRUE;
 	char *oldLocale = NULL;
+	long longCenterOffset = item->dim.truckCenterOffset*1000;
 
 	oldLocale = SaveLocale("C");
 
@@ -1312,10 +1321,10 @@ static BOOL_T CarItemWrite(
 		options |= CAR_ITEM_HASNOTES;
 	if ( layout && item->car && !IsTrackDeleted(item->car) )
 		options |= CAR_ITEM_ONLAYOUT;
-	rc &= fprintf( f, "CAR %ld %s \"%s\" %ld %ld %0.3f %0.3f 0 %0.3f %0.3f %0.3f %ld %0.3f %0.3f %ld %ld %ld 0 0 0 0 0 0",
+	rc &= fprintf( f, "CAR %ld %s \"%s\" %ld %ld %0.3f %0.3f 0 %ld %0.3f %0.3f %ld %0.3f %0.3f %ld %ld %ld 0 0 0 0 0 0",
 		item->index, GetScaleName(item->scaleInx), PutTitle(item->title),
 		options, item->type,
-		item->dim.carLength, item->dim.carWidth, item->dim.truckCenterOffset, item->dim.truckCenter, item->dim.coupledLength, wDrawGetRGB(item->color),
+		item->dim.carLength, item->dim.carWidth, longCenterOffset, item->dim.truckCenter, item->dim.coupledLength, wDrawGetRGB(item->color),
 		item->data.purchPrice, item->data.currPrice, item->data.condition, item->data.purchDate, item->data.serviceDate )>0;
 	if ( ( options&CAR_ITEM_ONLAYOUT) ) {
 		CarGetPos( item->car, &pos, &angle );
@@ -1949,9 +1958,10 @@ EXPORT void CarItemDraw(
 	if ( drawCarTrucks ) {
 
 		length = item->dim.truckCenter/2.0;
-		Translate( &pos, item->pos, item->angle, length+(direction?item->dim.truckCenterOffset:-item->dim.truckCenterOffset) );
+		double offset = CarItemTruckOffset(item);
+		Translate( &pos, item->pos, item->angle, length+(direction?offset:-offset) );
 		DrawArc( d, pos, trackGauge/2.0, 0.0, 360.0, FALSE, 0, color );
-		Translate( &pos, item->pos, item->angle+180, length+(direction?-item->dim.truckCenterOffset:item->dim.truckCenterOffset) );
+		Translate( &pos, item->pos, item->angle+180, length+(direction?-offset:offset) );
 		DrawArc( d, pos, trackGauge/2.0, 0.0, 360.0, FALSE, 0, color );
 	}
 
@@ -2927,6 +2937,7 @@ static void CarDlgShowControls( void )
 	ParamControlShow( &carDlgPG, I_CD_CARLENGTH,			!( S_ITEM && carDlgDispMode==0 ) );
 	ParamControlShow( &carDlgPG, I_CD_CARWIDTH,				!( S_ITEM && carDlgDispMode==0 ) );
 	ParamControlShow( &carDlgPG, I_CD_TRKCENTER,			!( S_ITEM && carDlgDispMode==0 ) );
+	ParamControlShow( &carDlgPG, I_CD_TRKOFFSET,            !( S_ITEM && carDlgDispMode==0 ) );
 	ParamControlShow( &carDlgPG, I_CD_CANVAS,				!( S_ITEM && carDlgDispMode==0 ) );
 	ParamControlShow( &carDlgPG, I_CD_CPLRLEN,				S_PART || ( S_ITEM && carDlgDispMode==1 ) );
 	ParamControlShow( &carDlgPG, I_CD_CPLDLEN,				S_PART || ( S_ITEM && carDlgDispMode==1 ) );
@@ -3004,7 +3015,7 @@ static void CarDlgDoActions(
 	BOOL_T reload[sizeof carDlgPLs/sizeof carDlgPLs[0]];
 #define RELOAD_DIMS \
 		reload[I_CD_CARLENGTH] = reload[I_CD_CARWIDTH] = reload[I_CD_CPLDLEN] = \
-		reload[I_CD_TRKCENTER] = reload[I_CD_CPLRLEN] = TRUE
+		reload[I_CD_TRKCENTER] = reload[I_CD_TRKOFFSET] = reload[I_CD_CPLRLEN] = TRUE
 #define RELOAD_PARTDATA \
 		RELOAD_DIMS; \
 		reload[I_CD_PARTNO_STR] = reload[I_CD_DESC_STR] = \
@@ -3721,6 +3732,7 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		ParamLoadControl( &carDlgPG, I_CD_CARWIDTH );
 		ParamLoadControl( &carDlgPG, I_CD_CPLRLEN );
 		ParamLoadControl( &carDlgPG, I_CD_TRKCENTER );
+		ParamLoadControl( &carDlgPG, I_CD_TRKOFFSET );
 		redraw = TRUE;
 		break;
 
@@ -3763,6 +3775,8 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter the Car Width") );
 	else if ( carDlgDim.truckCenter <= 0 )
 		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter the Truck Centers") );
+	else if ( carDlgDim.truckCenterOffset < 0)
+		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Truck Center Offset must be greater than 0 or 0") );
 	else if ( carDlgDim.truckCenter >= carDlgDim.carLength )
 		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Truck Centers must be less than Car Length") );
 	else if ( 2*carDlgDim.truckCenterOffset > carDlgDim.carLength - carDlgDim.truckCenter)
