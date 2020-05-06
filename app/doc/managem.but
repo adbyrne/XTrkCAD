@@ -121,7 +121,7 @@ The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value 
 
 \u000
 
-\dd \e{CarLength}, \e{CarWidth}, \e{CoupledLength} and \e{TruckCenter} - car dimensions in inches
+\dd \e{CarLength}, \e{CarWidth}, \e{CoupledLength}, \e{Truch Center Offset} and \e{TruckCenter} - car dimensions in inches
 
 \u000
 
@@ -219,7 +219,7 @@ The middle section contains:
 
 \u000
 
-\dd \f{Car Dimensions} which contain the major dimensions of the car and how the coupler is mounted on the car. The \f{Coupler Length} is measured from the edge of the car body to the pulling face of the coupler.  It is equivalent to half the separation between two coupled cars.
+\dd \f{Car Dimensions} which contain the major dimensions of the car and how the coupler is mounted on the car. The \f{Coupler Length} is measured from the edge of the car body to the pulling face of the coupler.  It is equivalent to half the separation between two coupled cars. 
 
 \lcont{
 
@@ -236,6 +236,13 @@ The middle section contains:
 \u000
 
 \dd \f{Coupled Length = Car Length + 2 * Coupler Length}
+
+\u000
+
+\dd The \e{Center Offset} moves the center of the two trucks from the center of the Car. 
+This is a common feature of steam locomotives and means the envelope of the engine requires greater seperation between tracks on small radius curves.
+The minimum clearance needed can be seen by placing the car with the greatest distance from the center of the trucks to the corner on the inner radius and the car with the greatest distance between the trucks on the outer radius.
+See NMRA TN-7 Curved Track Centerline and Obstacle Clearance Calculation Methodology. 
 
 }
 

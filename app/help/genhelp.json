@@ -220,6 +220,7 @@
 		{"line": "carpart-carLength", "contents": "Length of car body" },
 		{"line": "carpart-carWidth", "contents": "Width of car body" },
 		{"line": "carpart-trkCenter", "contents": "Distance between Trucks " },
+		{"line": "carpart-trkCenterOffset", "contents": "Distance Trucks are displaced along Car" },
 		{"line": "carpart-cplrMount", "contents": "Coupler are mounted on body or truck" },
 		{"line": "carpart-cpldLen", "contents": "Overall Coupled Length" },
 		{"line": "carpart-cplrLen", "contents": "Coupler Length from end of car" },

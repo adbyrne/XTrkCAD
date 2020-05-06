@@ -56,7 +56,7 @@ BOOL_T CarItemIsLocoMaster( carItem_p );
 void CarItemSetLocoMaster( carItem_p, BOOL_T );
 void CarItemSetTrack( carItem_p, track_p );
 void CarItemPlace( carItem_p, traverseTrack_p, DIST_T * );
-void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t * );
+void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *, BOOL_T, track_p );
 enum paramFileState	GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 enum paramFileState	GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 int CarAvailableCount( void );

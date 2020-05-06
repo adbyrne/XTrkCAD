@@ -58,6 +58,7 @@ struct extraData {
     long            state;
     carItem_p       item;
     double          speed;
+    BOOL_T 			pencils;
     BOOL_T          direction;
     BOOL_T          autoReverse;
     trainStatus_e   status;
@@ -92,7 +93,7 @@ static wButton_p newcarB;
 static void ControllerDialogSyncAll(void);
 static STATUS_T CmdTrain(wAction_t, coOrd);
 static wMenu_p trainPopupM;
-static wMenuPush_p trainPopupMI[8];
+static wMenuPush_p trainPopupMI[10];
 static track_p followTrain;
 static coOrd followCenter;
 static BOOL_T trainsTimeoutPending;
@@ -358,7 +359,9 @@ static void DrawCar(
         }
     }
 
-    CarItemDraw(d, xx->item, color, xx->direction, IsLocoMaster(xx), coupler);
+
+
+    CarItemDraw(d, xx->item, color, xx->direction, IsLocoMaster(xx), coupler, xx->pencils, xx->trvTrk.trk);
 }
 
 
@@ -2437,6 +2440,8 @@ static BOOL_T TrainOnMovableTrack(
 #define DO_MUMASTER		(5)
 #define DO_CHANGEDIR	(6)
 #define DO_STOP			(7)
+#define DO_PENCILS_ON   (8)
+#define DO_PENCILS_OFF  (9)
 static track_p trainFuncCar;
 static coOrd trainFuncPos;
 static wButton_p trainPauseB;
@@ -2526,6 +2531,7 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
             }
 
             xx = GetTrkExtraData(currCar);
+            xx->pencils = FALSE;
             dist = CarItemCoupledLength(xx->item)/2.0;
             Translate(&pos, xx->trvTrk.pos, xx->trvTrk.angle, dist);
             SetTrkEndPoint(currCar, 0, pos, xx->trvTrk.angle);
@@ -2707,6 +2713,14 @@ static STATUS_T CmdTrain(wAction_t action, coOrd pos)
         }
 
         xx = GetTrkExtraData(trainFuncCar);
+        if (xx->pencils) {
+        	wMenuPushEnable(trainPopupMI[DO_PENCILS_OFF], TRUE);
+        	wMenuPushEnable(trainPopupMI[DO_PENCILS_ON], FALSE);
+        } else {
+        	wMenuPushEnable(trainPopupMI[DO_PENCILS_OFF], FALSE);
+        	wMenuPushEnable(trainPopupMI[DO_PENCILS_ON], TRUE);
+        }
+
         trk0 = FindMasterLoco(trainFuncCar,NULL);
         dir = IsAligned(xx->trvTrk.angle, FindAngle(xx->trvTrk.pos,
                         trainFuncPos)) ? 0 : 1;
@@ -2878,6 +2892,14 @@ static void TrainFunc(
         }
 
         break;
+
+    case DO_PENCILS_ON:
+    	xx->pencils = TRUE;
+    	break;
+
+    case DO_PENCILS_OFF:
+        	xx->pencils = FALSE;
+        	break;
 
     case DO_FLIPCAR:
         temp0 = GetTrkEndTrk(trainFuncCar,0);
@@ -3052,6 +3074,10 @@ void InitCmdTrain(wMenu_p menu)
                                   TrainFunc, (void*)DO_UNCOUPLE);
     trainPopupMI[DO_FLIPCAR]    = wMenuPushCreate(trainPopupM, "", _("Flip Car"), 0,
                                   TrainFunc, (void*)DO_FLIPCAR);
+    trainPopupMI[DO_PENCILS_ON]	= wMenuPushCreate(trainPopupM, "", _("Clearance Lines On"), 0,
+    							  TrainFunc, (void*)DO_PENCILS_ON);
+    trainPopupMI[DO_PENCILS_OFF]	= wMenuPushCreate(trainPopupM, "", _("Clearance Lines Off"), 0,
+       							  TrainFunc, (void*)DO_PENCILS_OFF);
     trainPopupMI[DO_FLIPTRAIN]  = wMenuPushCreate(trainPopupM, "", _("Flip Train"),
                                   0, TrainFunc, (void*)DO_FLIPTRAIN);
     trainPopupMI[DO_MUMASTER]   = wMenuPushCreate(trainPopupM, "", _("MU Master"),
