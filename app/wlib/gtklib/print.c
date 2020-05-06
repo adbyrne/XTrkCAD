@@ -273,7 +273,12 @@ const char * wPrintGetName()
 {
 	static char sPrinterName[100];
 	WlibApplySettings( NULL );
-        strncpy (sPrinterName, gtk_print_settings_get( settings, "format-for-printer" ), sizeof sPrinterName - 1 );
+	const char * name = gtk_print_settings_get( settings, "format-for-printer" );
+	if (!name) {
+		sPrinterName[0] = '\0';
+		return sPrinterName;  //No printer set up
+	}
+    strncpy (sPrinterName, gtk_print_settings_get( settings, "format-for-printer" ), sizeof sPrinterName - 1 );
 	sPrinterName[ sizeof sPrinterName - 1 ] = '\0';
 	for ( char * cp = sPrinterName; *cp; cp++ )
 		if ( *cp == ':' )
