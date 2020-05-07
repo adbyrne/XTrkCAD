@@ -711,6 +711,13 @@ static void PrintMarginReset()
 
 static void DoPrintMargin( void )
 {
+	sPrinterName = wPrintGetName();
+	while ( *sPrinterName == '\0' ) {
+		int rc = NoticeMessage( MSG_NO_PRINTER_SELECTED, _("Ok"), _("Cancel") );
+		if ( rc <= 0 )
+			return;
+		DoPrintSetup();
+	}
 	if ( printMarginWin == NULL ) {
 		wPos_t x=10, y=10;
 		printMarginWin = ParamCreateDialog( &printMarginPG, MakeWindowTitle(_("Print Margins")), _("Ok"), DoPrintMarginOk, NULL, TRUE, PrintMarginLayout, F_BLOCK, PrintMarginDlgUpdate );
@@ -724,7 +731,6 @@ static void DoPrintMargin( void )
 		}
 		wLineCreate( printMarginWin, NULL, sizeof aPmLines / sizeof aPmLines[0], aPmLines );
 	}
-	sPrinterName = wPrintGetName();
 	wMessageSetValue( (wMessage_p)printMarginPLs[I_PM_MESSAGE].control, sPrinterName );
 	// Enable Reset button if we've changed anything
 	wControlActive( printMarginPLs[I_PM_RESET].control, SetMargins() );

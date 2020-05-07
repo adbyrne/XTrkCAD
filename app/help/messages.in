@@ -510,6 +510,13 @@ Values for \f{Page Width} and \f{Height} can be manually entered thus overriding
 Refer to \k{cmdPrint} for detail.
 END
 
+MESSAGE MSG_NO_PRINTER_SELECTED
+Please select a printer from the Print Setup dialog.
+HELP
+Printer Margins are specific to the selected printer, but no selected printer is chosen.
+You can select a printer from the Print Setup dialog.
+END
+
 # dprmfile.c
 MESSAGE MSG_PRMFIL_NO_CONTENTS
 New Parameter File has no CONTENTS line: %s

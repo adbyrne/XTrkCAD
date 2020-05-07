@@ -70,9 +70,9 @@ extern wDrawColor wDrawColorBlack;
  *
  */
 
-static GtkPrintSettings *settings;			/**< current printer settings */
+static GtkPrintSettings *settings = NULL;			/**< current printer settings */
 static GtkPageSetup *page_setup;			/**< current paper settings */
-static GtkPrinter *selPrinter;				/**< printer selected by user */
+static GtkPrinter *selPrinter = NULL;				/**< printer selected by user */
 static GtkPrintJob *curPrintJob;			/**< currently active print job */
 extern struct wDraw_t psPrint_d;
 
@@ -269,16 +269,38 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
  */
 
 
+static GtkPrinter * pDefaultPrinter = NULL;
+gboolean isDefaultPrinter( GtkPrinter * printer, gpointer data )
+{
+const char * pPrinterName = gtk_printer_get_name( printer );
+	if ( gtk_printer_is_default( printer ) ) {
+		pDefaultPrinter = printer;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+static void getDefaultPrinter()
+{
+	pDefaultPrinter = NULL;
+	gtk_enumerate_printers( isDefaultPrinter, NULL, NULL, TRUE );
+} 
+
 const char * wPrintGetName()
 {
 	static char sPrinterName[100];
 	WlibApplySettings( NULL );
-	const char * name = gtk_print_settings_get( settings, "format-for-printer" );
-	if (!name) {
-		sPrinterName[0] = '\0';
-		return sPrinterName;  //No printer set up
+	const char * pPrinterName = 
+		gtk_print_settings_get( settings, "format-for-printer" );
+	if ( pPrinterName == NULL ) {
+		getDefaultPrinter();
+		if ( pDefaultPrinter )
+			pPrinterName = gtk_printer_get_name( pDefaultPrinter );
 	}
-    strncpy (sPrinterName, gtk_print_settings_get( settings, "format-for-printer" ), sizeof sPrinterName - 1 );
+	if ( pPrinterName == NULL ) {
+		pPrinterName = "";
+	}
+	strncpy (sPrinterName, pPrinterName, sizeof sPrinterName - 1 );
 	sPrinterName[ sizeof sPrinterName - 1 ] = '\0';
 	for ( char * cp = sPrinterName; *cp; cp++ )
 		if ( *cp == ':' )
@@ -991,7 +1013,7 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
          */
         char * sEnvScale = PRODUCT "PRINTSCALE";
 
-	const char * sPrinterName = gtk_print_settings_get_printer(settings);
+	const char * sPrinterName = gtk_printer_get_name( selPrinter );
         if ((strcmp(sPrinterName,"Print to File") == 0) || getenv(sEnvScale) == NULL) {
 			double p_def = 600;
 			cairo_surface_set_fallback_resolution(psPrint_d.curPrintSurface, p_def, p_def);
