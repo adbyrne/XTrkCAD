@@ -1045,7 +1045,7 @@ static BOOL_T CarPartRead(
 	long longCenterOffset;
 
 	if ( !GetArgs( line+8, "sqllff0lffl",
-		scale, &title, &options, &type, &dim.carLength, &dim.carWidth, longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb ) )
+		scale, &title, &options, &type, &dim.carLength, &dim.carWidth, &longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb ) )
 		return FALSE;
 	dim.truckCenterOffset = longCenterOffset/1000.0;
 	CarPartNew( NULL, curParamFileIndex, LookupScale(scale), title, options, type, &dim, wDrawFindColor(rgb) );
@@ -1267,7 +1267,7 @@ EXPORT BOOL_T CarItemRead(
 
 	if ( !GetArgs( line+4, "lsqll" "ff0lffl" "fflll000000c",
 		&itemIndex, scale, &title, &options, &type,
-		&dim.carLength, &dim.carWidth, longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb,
+		&dim.carLength, &dim.carWidth, &longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb,
 		&purchPrice, &currPrice, &condition, &purchDate, &serviceDate, &cp ) )
 		return FALSE;
 	dim.truckCenterOffset = longCenterOffset/1000.0;
