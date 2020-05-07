@@ -2762,22 +2762,6 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DRAWITEM:
     case WM_COMMAND:
     case WM_MEASUREITEM:
-    case WM_NOTVALID:
-        if (WCMD_PARAM_ID == IDM_DOHELP) {
-            b = getControlFromCursor(hWnd, NULL);
-            closeBalloonHelp();
-
-            if (!b) {
-                return 0L;
-            }
-
-            if (b->helpStr) {
-                wHelp(b->helpStr);
-            }
-
-            return 0L;
-        }
-
         closeBalloonHelp();
 
         if (WCMD_PARAM_ID < CONTROL_BASE || WCMD_PARAM_ID > (WPARAM)controlMap_da.cnt) {
