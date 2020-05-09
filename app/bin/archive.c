@@ -55,54 +55,55 @@
 #include "misc.h"
 #include "misc2.h"
 #include "paths.h"
+#include "include/utf8convert.h"
 
 int log_zip = 0;
 
-char *
-NativeToUtf8(const char *nativeString)
-{
-
-#ifdef WINDOWS
-
-	int cnt = 2 * (strlen(nativeString) + 1);
-	char *tempBuffer = MyMalloc( cnt );
-	char *destBuffer = MyMalloc( cnt );
-
-	//// find the 
-	//cnt = MultiByteToWideChar(CP_ACP,
-	//	0,
-	//	nativeString,
-	//	-1,
-	//	tempBuffer,
-	//	0);
-
-	//tempBuffer = realloc(tempBuffer, cnt * 2 + 4);
-
-	// convert to wide character (UTF16)
-	MultiByteToWideChar(CP_ACP,
-		0,
-		nativeString,
-		-1,
-		(LPWSTR)tempBuffer,
-		cnt);
-
-	// convert from wide char to UTF-8
-	WideCharToMultiByte(CP_UTF8,
-		0,
-		(LPCWCH)tempBuffer,
-		-1,
-		(LPSTR)destBuffer,
-		cnt,
-		NULL,
-		NULL);
-
-	MyFree(tempBuffer);
-#else
-	char * destBuffer = MyStrdup(nativeString);
-#endif
-
-	return(destBuffer);
-}
+//char *
+//NativeToUtf8(const char *nativeString)
+//{
+//
+//#ifdef WINDOWS
+//
+//	int cnt = 2 * (strlen(nativeString) + 1);
+//	char *tempBuffer = MyMalloc( cnt );
+//	char *destBuffer = MyMalloc( cnt );
+//
+//	//// find the 
+//	//cnt = MultiByteToWideChar(CP_ACP,
+//	//	0,
+//	//	nativeString,
+//	//	-1,
+//	//	tempBuffer,
+//	//	0);
+//
+//	//tempBuffer = realloc(tempBuffer, cnt * 2 + 4);
+//
+//	// convert to wide character (UTF16)
+//	MultiByteToWideChar(CP_ACP,
+//		0,
+//		nativeString,
+//		-1,
+//		(LPWSTR)tempBuffer,
+//		cnt);
+//
+//	// convert from wide char to UTF-8
+//	WideCharToMultiByte(CP_UTF8,
+//		0,
+//		(LPCWCH)tempBuffer,
+//		-1,
+//		(LPSTR)destBuffer,
+//		cnt,
+//		NULL,
+//		NULL);
+//
+//	MyFree(tempBuffer);
+//#else
+//	char * destBuffer = MyStrdup(nativeString);
+//#endif
+//
+//	return(destBuffer);
+//}
 
 /**
  * Create the full path for temporary directories used in zip archive operations
@@ -224,9 +225,14 @@ BOOL_T AddDirectoryToArchive(
             free(arch_path);
             continue;
         } else {
-			char *fullPathUtf8 = NativeToUtf8(full_path);
+			char *archPathUtf8 = MyStrdup(arch_path);
+			char *fullPathUtf8 = MyStrdup(full_path);
+#ifdef WINDOWS
+			archPathUtf8 = Convert2UTF8(archPathUtf8);
+			fullPathUtf8 = Convert2UTF8(fullPathUtf8);
+#endif // WINDOWS
             zt = zip_source_file(za, fullPathUtf8, 0, -1);
-            if (zip_file_add(za, arch_path, zt, 0) == -1) {
+            if (zip_file_add(za, archPathUtf8, zt, 0) == -1) {
                 zip_error_t  *ziperr = zip_get_error(za);
                 buf = zip_error_strerror(ziperr);
                 NoticeMessage(MSG_ZIP_FILE_ADD_FAIL, _("Continue"), NULL, full_path, arch_path,
@@ -234,9 +240,11 @@ BOOL_T AddDirectoryToArchive(
                 free(full_path);
                 free(arch_path);
 				MyFree(fullPathUtf8);
+				MyFree(archPathUtf8);
                 return FALSE;
             }
 			MyFree(fullPathUtf8);
+			MyFree(archPathUtf8);
 #if DEBUG
             printf("Added File %s", full_path);
 #endif
@@ -273,7 +281,10 @@ BOOL_T CreateArchive(
 
     MakeFullpath(&archive_path, workingDir, archive_name, NULL);
 	    
-	archiveUtf8 = NativeToUtf8(archive_path);
+	archiveUtf8 = MyStrdup(archive_path);
+#ifdef WINDOWS
+	archiveUtf8 = Convert2UTF8(archiveUtf8);
+#endif // WINDOWS
 
 	MyFree(archive);
 
@@ -342,7 +353,11 @@ BOOL_T UnpackArchiveFor(
     FILE  *fd;
     long long sum;
 
-	char *destBuffer = NativeToUtf8(pathName);
+	char *destBuffer = MyStrdup(pathName);
+#ifdef WINDOWS
+	destBuffer = Convert2UTF8(destBuffer);
+#endif // WINDOWS
+
 
     if ((za = zip_open(destBuffer, 0, &err)) == NULL) {
         zip_error_to_str(buf, sizeof(buf), err, errno);
@@ -392,7 +407,10 @@ BOOL_T UnpackArchiveFor(
                     }
                 }
                 MakeFullpath(&dirName, tempDir, &sb.name[0], NULL);
-                fd = fopen(dirName, "wb");
+#ifdef WINDOWS
+				ConvertUTF8ToSystem(dirName);
+#endif // WINDOWS
+				fd = fopen(dirName, "wb");
                 if (!fd) {
                     NoticeMessage(MSG_ZIP_FILE_OPEN_FAIL, _("Continue"), NULL, dirName,
                                   strerror(errno));
