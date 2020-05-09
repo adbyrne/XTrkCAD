@@ -58,6 +58,9 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
 #include "utility.h"
 #include "messages.h"
 
@@ -246,7 +249,7 @@ static void DescribeSensor (track_p trk, char * str, CSIZE_T len )
         *str = tolower((unsigned char)*str);
         str++;
     }
-    sprintf( str, _("(%d [%s]): Layer=%d, at %0.3f,%0.3f"),
+    sprintf( str, _("(%d [%s]): Layer=%u, at %0.3f,%0.3f"),
              GetTrkIndex(trk),
              xx->name,GetTrkLayer(trk)+1, xx->orig.x, xx->orig.y);
     strncpy(sensorProperties.name,xx->name,STR_SHORT_SIZE-1);
@@ -270,10 +273,18 @@ static BOOL_T WriteSensor ( track_p t, FILE * f )
 {
     BOOL_T rc = TRUE;
     sensorData_p xx = GetsensorData(t);
-    rc &= fprintf(f, "SENSOR %d %d %s %d %0.6f %0.6f \"%s\" \"%s\"\n",
+	char *sensorName = MyStrdup(xx->name);
+
+#ifdef WINDOWS
+	sensorName = Convert2UTF8(sensorName);
+#endif // WINDOWS
+
+    rc &= fprintf(f, "SENSOR %d %u %s %d %0.6f %0.6f \"%s\" \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t),
-                  GetTrkVisible(t), xx->orig.x, xx->orig.y, xx->name, 
+                  GetTrkVisible(t), xx->orig.x, xx->orig.y, sensorName, 
                   xx->script)>0;
+
+	MyFree(sensorName);
     return rc;
 }
 
@@ -293,6 +304,11 @@ static void ReadSensor ( char * line )
     if (!GetArgs(line+7,"dLsdpqq",&index,&layer,scale, &visible, &orig,&name,&script)) {
         return;
     }
+
+#ifdef WINDOWS
+	ConvertUTF8ToSystem(name);
+#endif // WINDOWS
+
     trk = NewTrack(index, T_SENSOR, 0, sizeof(sensorData_t));
     SetTrkVisible(trk, visible); 
     SetTrkScale(trk, LookupScale( scale ));

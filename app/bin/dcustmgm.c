@@ -42,6 +42,9 @@
 #include "track.h"
 #include "wlib.h"
 #include "include/paramfilelist.h"
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif
 
 static void CustomEdit( void * action );
 static void CustomDelete( void * action );
@@ -236,8 +239,17 @@ static int CustomDoExport(
 
 	oldLocale = SaveLocale("C");
 
-	if ( rc == -1 )
-		fprintf( customMgmF, "CONTENTS %s\n", custMgmContentsStr );
+	if (rc == -1)
+	{
+	#ifdef WINDOWS
+	    char *contents = MyStrdup(custMgmContentsStr);
+	    contents = Convert2UTF8(contents);
+	    fprintf(customMgmF, "CONTENTS %s\n", contents);
+		MyFree(contents);
+	#else
+	    fprintf(customMgmF, "CONTENTS %s\n", custMgmContentsStr);
+	#endif // WINDOWS
+	}
 
 	cnt = wListGetCount( (wList_p)customPLs[0].control );
 	for ( inx=0; inx<cnt; inx++ ) {

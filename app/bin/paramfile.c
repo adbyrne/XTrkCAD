@@ -277,10 +277,16 @@ bool ReadParams(
             }
             skip = FALSE;
         } else if (strncmp(paramLine, "CONTENTS ", 9) == 0) {
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(paramLine + 9);
+#endif
             curContents = MyStrdup(paramLine + 9);
             curSubContents = curContents;
             skip = FALSE;
         } else if (strncmp(paramLine, "SUBCONTENTS ", 12) == 0) {
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(paramLine + 12);
+#endif // WINDOWS
             curSubContents = MyStrdup(paramLine + 12);
             skip = FALSE;
         } else if (strncmp(paramLine, "PARAM ", 6) == 0) {
@@ -357,5 +363,3 @@ nextLine:
 
     return TRUE;
 }
-
-

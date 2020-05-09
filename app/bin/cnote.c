@@ -78,15 +78,15 @@ void DoNote(void)
 
 /**
  * Read the text for a note. Lines are read from the input file
- * until either the maximum length is reached or the END statement is 
+ * until either the maximum length is reached or the END statement is
  * found.
- * 
+ *
  * \todo Handle premature end as an error
- * 
+ *
  * \param textLength
  * \return pointer to string, has to be myfree'd by caller
  */
- 
+
 char *
 ReadMultilineText(size_t textLength)
 {
@@ -112,6 +112,12 @@ ReadMultilineText(size_t textLength)
 	string = MyStrdup(DynStringToCStr(&noteText));
 	string[strlen(string) - 1] = '\0';
 
+#ifdef WINDOWS
+	if (wIsUTF8(string)) {
+		ConvertUTF8ToSystem(string);
+	}
+#endif // WINDOWS
+
 	DynStringFree(&noteText);
 	return(string);
 }
@@ -120,22 +126,39 @@ ReadMultilineText(size_t textLength)
 BOOL_T WriteMainNote(FILE* f)
 {
     BOOL_T rc = TRUE;
+	char *noteText = mainText;
 
-    if (mainText && *mainText) {
-        rc &= fprintf(f, "NOTE MAIN 0 0 0 0 %lu\n", strlen(mainText))>0;
-        rc &= fprintf(f, "%s", mainText)>0;
+	if (noteText && *noteText) {
+#ifdef WINDOWS
+		char *out = NULL;
+		if (RequiresConvToUTF8(mainText)) {
+			unsigned cnt = strlen(mainText) * 2 + 1;
+			out = MyMalloc(cnt);
+			wSystemToUTF8(mainText, out, cnt);
+			noteText = out;
+		}
+#endif // WINDOWS
+
+
+        rc &= fprintf(f, "NOTE MAIN 0 0 0 0 %lu\n", strlen(noteText))>0;
+        rc &= fprintf(f, "%s", noteText)>0;
         rc &= fprintf(f, "\n    END\n")>0;
-    }
 
+#ifdef WINDOWS
+		if (out) {
+			MyFree(out);
+		}
+#endif // WINDOWS
+    }
     return rc;
 }
 
 /**
  * Read the layout main note
- * 
+ *
  * \param line complete NOTE statement
  */
- 
+
 void ReadMainNote(char *line)
 {
     size_t size;
@@ -155,4 +178,3 @@ void InitCmdNote()
 {
     ParamRegister(&notePG);
 }
-

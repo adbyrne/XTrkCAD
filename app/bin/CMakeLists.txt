@@ -150,6 +150,15 @@ SET(SOURCES
 	validator.h
 	)
 
+# add UTF-8 conversion utilities on Windows
+if(WIN32)
+	set( SOURCES
+		${SOURCES}
+		utf8convert.c
+		include/utf8convert.h
+	)
+endif(WIN32)
+
 set (SOURCES
 	${SOURCES}
 	include/dirent.h

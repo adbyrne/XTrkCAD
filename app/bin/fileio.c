@@ -70,6 +70,10 @@
 #include "utility.h"
 #include "version.h"
 
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
+
 
 /*#define TIME_READTRACKFILE*/
 
@@ -245,6 +249,7 @@ EXPORT void SyntaxError(
 	InputError( "%s scan returned %d (expected %d)",
 		TRUE, event, actual, expected );
 }
+
 
 /**
  * Parse a line in XTrackCAD's file format
@@ -458,6 +463,9 @@ EXPORT BOOL_T GetArgs(
 			} else {
 				message[0] = '\0';
 			}
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(message);
+#endif
 			*qp = (char*)MyStrdup(message);
 			break;
 		case 'c':
@@ -515,13 +523,21 @@ EXPORT void AddParam(
 	paramProc(paramProc_da.cnt-1).proc = proc;
 }
 
-
-
 EXPORT char * PutTitle( char * cp )
 {
-	static char title[STR_SIZE];
-	char * tp = title;
-	while (*cp && (tp-title)<=(sizeof title)-3) {
+	static char *title;
+	char * tp;
+	unsigned cnt = strlen(cp) * 2 + 3;		// add 3 for quotes and terminating \0
+
+	if (!title) {
+		title = MyMalloc(cnt);
+	} else {
+		title = MyRealloc(title, cnt);
+	}
+
+	tp = title;
+
+	while (*cp ) {
 		if (*cp == '\"') {
 			*tp++ = '\"';
 			*tp++ = '\"';
@@ -533,6 +549,16 @@ EXPORT char * PutTitle( char * cp )
 	if ( *cp )
 		NoticeMessage( _("putTitle: title too long: %s"), _("Ok"), NULL, title );
 	*tp = '\0';
+
+#ifdef WINDOWS
+	if(RequiresConvToUTF8(title)) {
+		char *out = MyMalloc(cnt);
+		wSystemToUTF8(title, out, cnt);
+		strcpy(title, out);
+		MyFree(out);
+	}
+#endif // WINDOWS
+
 	return title;
 }
 
@@ -669,8 +695,14 @@ static BOOL_T ReadTrackFile(
 			if( !(ret = InputError( "unknown command", TRUE )))
 				break;
 		} else if (strncmp( paramLine, "TITLE1 ", 7 ) == 0) {
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(paramLine + 7);
+#endif // WINDOWS
 			SetLayoutTitle(paramLine + 7);
 		} else if (strncmp( paramLine, "TITLE2 ", 7 ) == 0) {
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(paramLine + 7);
+#endif // WINDOWS
 			SetLayoutSubtitle(paramLine + 7);
 		} else if (strncmp( paramLine, "ROOMSIZE", 8 ) == 0) {
 			if ( ParseRoomSize( paramLine+8, &roomSize ) ) {
@@ -744,7 +776,7 @@ int LoadTracks(
 	char *extOfFile;
 
 	assert( fileName != NULL );
-	assert( cnt == 1 ); 
+	assert( cnt == 1 );
 
 	if ( ! bExample )
 		SetCurrentPath(LAYOUTPATHKEY, fileName[0]);
@@ -764,7 +796,7 @@ int LoadTracks(
 	nameOfFile = FindFilename( fileName[ 0 ] );
 
  /*
-  * Support zipped filetype 
+  * Support zipped filetype
   */
 	extOfFile = FindFileExtension( nameOfFile);
 
@@ -904,7 +936,7 @@ int LoadTracks(
  * path.
  * \param index IN ignored
  * \param label IN ignored
- * \param data IN path and filename 
+ * \param data IN path and filename
  */
 
 EXPORT void DoFileList(
@@ -1074,7 +1106,7 @@ static int SaveTracks(
 		char * manifest_file;
 
 		MakeFullpath(&manifest_file, zip_output, "manifest.json", NULL);
-		
+
 		FILE *fp = fopen(manifest_file, "wb");
 		if (fp != NULL)
 		{
@@ -1122,7 +1154,7 @@ EXPORT void DoSave( doSaveCallBack_p after )
 				sSourceFilePattern, SaveTracks, NULL );
 		wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
 	} else {
-		char *temp = GetLayoutFullPath(); 
+		char *temp = GetLayoutFullPath();
 		SaveTracks( 1, &temp, NULL );
 	}
 	SetWindowTitle();
@@ -1193,7 +1225,7 @@ EXPORT void DoCheckPoint( void )
 
 /**
  * Remove all temporary files before exiting. When the program terminates
- * normally through the exit choice, files and directories that were created 
+ * normally through the exit choice, files and directories that were created
  * temporarily are removed: xtrkcad.ckp
  *
  * \param none
@@ -1532,6 +1564,3 @@ EXPORT void FileInit( void )
 		MakeFullpath(&clipBoardN, workingDir, sClipboardF, NULL);
 
 }
-
-
-

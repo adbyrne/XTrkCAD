@@ -60,6 +60,9 @@
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
 #include "utility.h"
 #include "messages.h"
 
@@ -336,7 +339,7 @@ static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
 		*str = tolower((unsigned char)*str);
 		str++;
 	}
-	sprintf( str, _("(%d): Layer=%d %s"),
+	sprintf( str, _("(%d): Layer=%u %s"),
 		GetTrkIndex(trk), GetTrkLayer(trk)+1, message );
 	strncpy(switchmotorData.name,xx->name,STR_SHORT_SIZE-1);
 	switchmotorData.name[STR_SHORT_SIZE-1] = '\0';
@@ -406,11 +409,19 @@ static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
 {
 	BOOL_T rc = TRUE;
 	switchmotorData_p xx = GetswitchmotorData(t);
+	char *switchMotorName = MyStrdup(xx->name);
     
-        if (xx->turnout == NULL) return FALSE;
+#ifdef WINDOWS
+	switchMotorName = Convert2UTF8(switchMotorName);
+#endif // WINDOWS
+
+    if (xx->turnout == NULL) 
+		return FALSE;
 	rc &= fprintf(f, "SWITCHMOTOR %d %d \"%s\" \"%s\" \"%s\" \"%s\"\n",
-		GetTrkIndex(t), GetTrkIndex(xx->turnout), xx->name,
+		GetTrkIndex(t), GetTrkIndex(xx->turnout), switchMotorName,
 		xx->normal, xx->reverse, xx->pointsense)>0;
+
+	MyFree(switchMotorName);
 	return rc;
 }
 
@@ -426,6 +437,9 @@ static void ReadSwitchMotor ( char * line )
 	if (!GetArgs(line+12,"ddqqqq",&index,&trkindex,&name,&normal,&reverse,&pointsense)) {
 		return;
 	}
+#ifdef WINDOWS
+	ConvertUTF8ToSystem(name);
+#endif // WINDOWS
 	trk = NewTrack(index, T_SWITCHMOTOR, 0, sizeof(switchmotorData_t)+1);
 	xx = GetswitchmotorData( trk );
 	xx->name = name;

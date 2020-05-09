@@ -38,7 +38,7 @@
 #else
 	#include <dirent.h>
 #endif
-
+#include "fileio.h"
 #include "misc.h"
 #include "include/paramfile.h"
 #include "include/partcatalog.h"
@@ -317,11 +317,11 @@ CompareIndex(const void *entry1, const void *entry2)
 /*!
  * Filter keywords. Current rules:
  *	- single character string that only consist of a punctuation char
- * 
+ *
  * \param word IN keyword
  * \return true if any rule applies, false otherwise
  */
- 
+
 bool
 FilterKeyword(char *word)
 {
@@ -333,7 +333,7 @@ FilterKeyword(char *word)
 
 /**
  * Create the keyword index from a list of parameter files
- * 
+ *
  * \param catalog IN list of parameter files
  * \param index IN index table to be filled
  * \param capacityOfIndex IN total maximum of keywords
@@ -678,6 +678,9 @@ GetParameterFileContent(char *file)
 					/* if found, store the rest of the line and the filename	*/
 					ptr = strtok(NULL, "\t\n");
 					result = strdup(ptr);
+#ifdef WINDOWS
+					ConvertUTF8ToSystem(result);
+#endif // WINDOWS
 					found = true;
 				}
 			} else {
