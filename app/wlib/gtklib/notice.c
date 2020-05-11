@@ -183,6 +183,7 @@ int wNotice3(
     char *can = NULL;
     char *alt = NULL;
 
+    wDestroySplash();
 
     nw->win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
