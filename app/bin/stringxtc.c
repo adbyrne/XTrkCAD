@@ -99,7 +99,7 @@ XtcStricmp(const char *a, const char *b)
         cb = (unsigned char) *b++;
         ca = tolower(toupper(ca));
         cb = tolower(toupper(cb));
-    } while (ca == cb && ca != '\0');
+    } while (ca == cb && ca != '\0' && cb != '\0');  //Stop at end
     return ca - cb;
 }
 
