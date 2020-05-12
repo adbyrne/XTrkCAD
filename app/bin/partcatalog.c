@@ -676,7 +676,7 @@ GetParameterFileContent(char *file)
 
 				if (!XtcStricmp(ptr, CONTENTSCOMMAND)) {
 					/* if found, store the rest of the line and the filename	*/
-					ptr = strtok(NULL, "\t\n");
+					ptr = strtok(NULL, "\r\n\t");
 					result = strdup(ptr);
 #ifdef WINDOWS
 					ConvertUTF8ToSystem(result);

@@ -1726,16 +1726,53 @@ EXPORT void AddHotBarCarDesc( void )
 }
 
 
-EXPORT coOrd CarItemFindCouplerMountPoint(
+EXPORT void CarItemFindCouplerMountPoint(
 		carItem_p item,
-		traverseTrack_t trvTrk,
-		int dir )
+		traverseTrack_t trvTrk0,
+		coOrd pos[2] )
 {
-	DIST_T couplerOffset;
-	coOrd pos;
+	// We assume the coupler pivot is 'couplerLength' before the end of the car
+	DIST_T couplerLength = (item->dim.coupledLength - item->dim.carLength) / 2.0;
+	if ( IsClose(item->dim.truckCenter) ) {
+		// Single truck/bogie
+		DIST_T d = item->dim.carLength/2.0 - couplerLength;
+		Translate( &pos[0], trvTrk0.pos, trvTrk0.angle, d + item->dim.truckCenterOffset );
+		FlipTraverseTrack( &trvTrk0 );
+		Translate( &pos[1], trvTrk0.pos, trvTrk0.angle, d - item->dim.truckCenterOffset );
+		return;
+	}
+	// Find the pos of the 2 trucks
+	// Note this is a slight simplification, we should use the car center, not the on-track position
+	coOrd truck[2];
+	traverseTrack_t trvTrk1 = trvTrk0;
+	TraverseTrack2( &trvTrk0, item->dim.truckCenter/2.0 + item->dim.truckCenterOffset );
+	FlipTraverseTrack( & trvTrk1 );
+	TraverseTrack2( &trvTrk1, item->dim.truckCenter/2.0 - item->dim.truckCenterOffset );
 
-	if ( dir )
-		FlipTraverseTrack( &trvTrk );
+	// Get the angle to translate from the truck
+	ANGLE_T angle[2];
+	if ( trvTrk0.trk == NULL || (item->options&CAR_DESC_COUPLER_MODE_BODY)!=0 ) {
+		// Body mount couplers
+		// Angle is same as the car
+		angle[0] = FindAngle( trvTrk1.pos, trvTrk0.pos );
+		angle[1] = NormalizeAngle( angle[0]+180.0 );
+	} else {
+		// Truck mounted couplers
+		// Angle is same as the trucks
+		angle[0] = trvTrk0.angle;
+		angle[1] = trvTrk1.angle;
+	}
+
+	// Get the distance to translate
+	DIST_T d[2];
+	d[0] = item->dim.carLength/2.0 - couplerLength - ( item->dim.truckCenter/2.0 + item->dim.truckCenterOffset );
+	d[1] = item->dim.carLength/2.0 - couplerLength - ( item->dim.truckCenter/2.0 - item->dim.truckCenterOffset );
+
+	// And translate
+	Translate( &pos[0], trvTrk0.pos, angle[0], d[0] );
+	Translate( &pos[1], trvTrk1.pos, angle[1], d[1] );
+		
+#ifdef LATER
 	if ( trvTrk.trk == NULL || (item->options&CAR_DESC_COUPLER_MODE_BODY)!=0 ) {
 		couplerOffset = item->dim.coupledLength/2.0;
 		Translate( &pos, trvTrk.pos, trvTrk.angle, couplerOffset );
@@ -1752,7 +1789,7 @@ EXPORT coOrd CarItemFindCouplerMountPoint(
 			couplerOffset = couplerOffset - item->dim.truckCenterOffset;
 		Translate( &pos, trvTrk.pos, trvTrk.angle, couplerOffset );
 	}
-	return pos;
+#endif
 }
 
 
