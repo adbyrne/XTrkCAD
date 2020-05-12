@@ -26,6 +26,7 @@
 #include "layout.h"
 #include "misc2.h"
 #include "paths.h"
+#include "include/utf8convert.h"
 
 extern int log_zip;
 
@@ -48,20 +49,39 @@ extern int log_zip;
   */
 
 char* CreateManifest(char* nameOfLayout, char* background,
-	char* DependencyDir)
+	char* dependencyDir)
 {
 	cJSON* manifest = cJSON_CreateObject();
 	if (manifest != NULL) {
+		char *copyOfFileName = MyStrdup(nameOfLayout);
 		cJSON* a_object = cJSON_CreateObject();
 		cJSON_AddItemToObject(manifest, "layout", a_object);
-		cJSON_AddStringToObject(a_object, "name", nameOfLayout);
+#ifdef WINDOWS
+		copyOfFileName = Convert2UTF8(copyOfFileName);
+#endif // WINDOWS
+		cJSON_AddStringToObject(a_object, "name", copyOfFileName);
+		MyFree(copyOfFileName);
+
 		cJSON* dependencies = cJSON_AddArrayToObject(manifest, "dependencies");
 		cJSON* b_object = cJSON_CreateObject();
 		if (background && background[0]) {
+			char *backg;
 			cJSON_AddStringToObject(b_object, "name", "background");
-			cJSON_AddStringToObject(b_object, "copy-path", background);
-			cJSON_AddStringToObject(b_object, "filename", FindFilename(background));
-			cJSON_AddStringToObject(b_object, "arch-path", DependencyDir);
+
+			backg = MyStrdup(FindFilename(background));
+#ifdef WINDOWS
+			backg = Convert2UTF8(backg);
+#endif
+			cJSON_AddStringToObject(b_object, "filename", backg);
+			MyFree(backg);
+			backg = MyStrdup(background);
+#ifdef WINDOWS
+			backg = Convert2UTF8(backg);
+			ConvertPathForward(backg);
+#endif // WINDOWS			
+			cJSON_AddStringToObject(b_object, "copy-path", backg);
+			cJSON_AddStringToObject(b_object, "arch-path", dependencyDir);
+			MyFree(backg);
 			cJSON_AddNumberToObject(b_object, "size", GetLayoutBackGroundSize());
 			cJSON_AddNumberToObject(b_object, "pos-x", GetLayoutBackGroundPos().x);
 			cJSON_AddNumberToObject(b_object, "pos-y", GetLayoutBackGroundPos().y);
@@ -95,6 +115,10 @@ char* ParseManifest(char* manifest, char* zip_directory)
 	cJSON* layout = cJSON_GetObjectItemCaseSensitive(json_manifest, "layout");
 	cJSON* name = cJSON_GetObjectItemCaseSensitive(layout, "name");
 	layoutname = cJSON_GetStringValue(name);
+#ifdef WINDOWS
+	ConvertUTF8ToSystem(layoutname);
+#endif // WINDOWS
+
 	LOG(log_zip, 1, ("Zip-Manifest %s \n", layoutname))
 #if DEBUG
 		fprintf(stderr, "Layout name %s \n", layoutname);
@@ -106,10 +130,20 @@ char* ParseManifest(char* manifest, char* zip_directory)
 	cJSON_ArrayForEach(dependency, dependencies) {
 		cJSON* name = cJSON_GetObjectItemCaseSensitive(dependency, "name");
 		if (strcmp(cJSON_GetStringValue(name), "background") == 0) {
+			char *file;
+			char *path;
 			cJSON* filename = cJSON_GetObjectItemCaseSensitive(dependency, "filename");
 			cJSON* archpath = cJSON_GetObjectItemCaseSensitive(dependency, "arch-path");
-			MakeFullpath(&background_file[0], zip_directory, cJSON_GetStringValue(archpath),
-				cJSON_GetStringValue(filename), NULL);
+			file = MyStrdup(cJSON_GetStringValue(filename));
+			path = MyStrdup(cJSON_GetStringValue(archpath));
+#ifdef WINDOWS
+			ConvertUTF8ToSystem(file);
+			ConvertUTF8ToSystem(path);
+#endif
+			MakeFullpath(&background_file[0], zip_directory, path,
+				file, NULL);
+			MyFree(file);
+			MyFree(path);
 #if DEBUG
 			printf("Link to background image %s \n", background_file[0]);
 #endif
