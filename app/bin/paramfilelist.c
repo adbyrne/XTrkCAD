@@ -332,7 +332,9 @@ int LoadParamFile(
         wPrefSetString("Parameter File Map", curContents,
                        paramFileInfo(curParamFileIndex).name);
     }
-    SetParamFileDir(fileName[i - 1]);
+    //Only set the ParamFileDir if not the system directory
+    if (!strstr(fileName[i-1],"/share/xtrkcad/params/"))
+    	SetParamFileDir(fileName[i - 1]);
     curParamFileIndex = PARAM_CUSTOM;
     DoChangeNotification(CHANGE_PARAMS);
     return TRUE;

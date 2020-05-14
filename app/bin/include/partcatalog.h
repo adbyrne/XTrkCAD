@@ -32,6 +32,7 @@ struct sCatalogEntry {
     unsigned files;								/**< current count of files */
     char *fullFileName[MAXFILESPERCONTENT];		/**< fully qualified file name */
     char *contents;								/**< content field of parameter file */
+    struct sCatalogEntry *indirect;               /**< pointer to another catalog entry */
 };
 
 typedef struct sCatalogEntry CatalogEntry;
@@ -45,8 +46,9 @@ typedef struct sIndexEntry IndexEntry;
 
 struct sTrackLibrary {
     CatalogEntry *catalog;						/**< list of files cataloged */
-    IndexEntry *index;							/**< */
-    unsigned wordCount;							/**< */
+    IndexEntry *index;							/**< Index for lookup */
+    unsigned wordCount;							/**< How many words indexed */
+    void * words_array;							/**< The array of words */
     unsigned trackTypeCount;					/**< */
 };
 
@@ -56,6 +58,7 @@ typedef struct sTrackLibrary
 CatalogEntry *InitCatalog(void);
 TrackLibrary *InitLibrary(void);
 TrackLibrary *CreateLibrary(char *directory);
+void DeleteLibrary(TrackLibrary *tracklib);
 bool GetTrackFiles(TrackLibrary *trackLib, char *directory);
 int GetParameterFileInfo(int files, char ** fileName, void * data);
 unsigned CreateLibraryIndex(TrackLibrary *trackLib);

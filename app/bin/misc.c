@@ -2955,6 +2955,9 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	MacroInit();
 	wSetSplashInfo(_("Reading parameter files"));
 	LOG1(log_init, ( "paramFileInit\n" ))
+
+	SetParamFileDir(GetCurrentPath(LAYOUTPATHKEY));  //Set default for new parms to be the same as the layout
+
 	if (!ParamFileListInit())
 		return NULL;
 
