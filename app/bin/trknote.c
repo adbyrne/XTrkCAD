@@ -335,50 +335,43 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 {
     struct extraDataNote *xx = (struct extraDataNote *)GetTrkExtraData(t);
     BOOL_T rc = TRUE;
-	DynString noteText;
-	char *marker;
 
-	DynStringMalloc(&noteText, 16);
-	marker = GetNoteMarker(xx->op);
+	rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d", GetTrkIndex(t),
+		GetTrkLayer(t),
+		xx->pos.x, xx->pos.y, xx->op )>0;
 
+	char *s[2] = { NULL, NULL };
 	switch (xx->op) {
 	case OP_NOTETEXT:
-		DynStringPrintf(&noteText, "%s", xx->noteData.text);
+		s[0]=ConvertToEscapedText( xx->noteData.text );
 		break;
 	case OP_NOTELINK:
-		DynStringPrintf(&noteText, "%s %s", xx->noteData.linkData.url, xx->noteData.linkData.title);
+		s[0]=ConvertToEscapedText( xx->noteData.linkData.url );
+		s[1]=ConvertToEscapedText( xx->noteData.linkData.title );
 		break;
 	case OP_NOTEFILE:
-		DynStringPrintf(&noteText, "\"%s\" %s", xx->noteData.fileData.path, xx->noteData.fileData.title);
+		s[0]=ConvertToEscapedText( xx->noteData.fileData.path );
+		s[1]=ConvertToEscapedText( xx->noteData.fileData.title );
 		break;
 	default:
-		break;
+		AbortProg( "WriteNote: %d", xx->op );
 	}
-
 #ifdef WINDOWS
-	if (RequiresConvToUTF8(DynStringToCStr(&noteText))) {
-		char *textString = DynStringToCStr(&noteText);
-		unsigned cnt = strlen(textString) * 2 + 1;
-		unsigned char *out = MyMalloc(cnt);
-
-		wSystemToUTF8(textString, out, cnt);
-		DynStringClear(&noteText);
-		DynStringCatCStr(&noteText, out);
-		MyFree(out);
+	for ( int inx = 0; inx < 2; inx++ ) {
+		if ( RequiresConvToUTF8( s[inx] ) ) {
+			wSystemToUTF8 ( s[inx], message, sizeof message );
+			MyFree( s[inx] );
+			s[inx] = MyStrDup( message );
+		}
 	}
-#endif // WINDOWS
-
-	rc &= fprintf(f, "NOTE %d %u 0 0 %0.6f %0.6f 0 %d\n", GetTrkIndex(t),
-		GetTrkLayer(t),
-		xx->pos.x, xx->pos.y, (int)(DynStringSize(&noteText) + strlen(marker))) > 0;
-
-	if (*marker) {
-		rc &= fprintf(f, "%s", marker) > 0;
+#endif
+	rc &= fprintf( f, " \"%s\"", s[0] );
+	MyFree(s[0]);
+	if ( s[1] ) {
+		rc &= fprintf( f, "\"%s\"", s[1] )>0;
+		MyFree( s[1] );
 	}
-	rc &= fprintf(f, "%s", DynStringToCStr(&noteText)) > 0;
-    rc &= fprintf(f, "\n    END\n") > 0;
-    DynStringFree(&noteText);
-
+	
 	return rc;
 }
 
@@ -401,13 +394,62 @@ ReadTrackNote(char *line)
     DIST_T elev;
 	char *noteText;
 	enum noteCommands noteType;
+	char * sText;
 
-    if (!GetArgs(line + 5, paramVersion < 3 ? "XXpYd" : paramVersion < 9 ?
-                 "dL00pYd" : "dL00pfd",
-                 &index, &layer, &pos, &elev, &size)) {
+    if (!GetArgs(line + 5, paramVersion < 3 ? "XXpYdc" : paramVersion < 9 ?
+                 "dL00pYdc" : "dL00pfdc",
+                 &index, &layer, &pos, &elev, &size, &cp)) {
         return;
     }
 
+	if ( paramVersion >= 12 ) {
+		noteType = size;
+		t = NewNote(index, pos, noteType);
+   		SetTrkLayer(t, layer);
+	   
+   		xx = (struct extraDataNote *)GetTrkExtraData(t);
+		switch (noteType) {
+		case OP_NOTETEXT:
+			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+				return;
+#ifdef WINDOWS
+			ConvertUTF8ToSystem( sText );
+#endif
+			xx->noteData.text = sText;
+			break;
+		case OP_NOTELINK:
+			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+				return;
+#ifdef WINDOWS
+			ConvertUTF8ToSystem( sText );
+#endif
+			xx->noteData.linkData.url = sText;
+			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+				return;
+#ifdef WINDOWS
+			ConvertUTF8ToSystem( sText );
+#endif
+			xx->noteData.linkData.title = sText;
+			break;
+		case OP_NOTEFILE:
+			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+				return;
+#ifdef WINDOWS
+			ConvertUTF8ToSystem( sText );
+#endif
+			xx->noteData.fileData.path = sText;
+			if ( !GetArgs( cp, "qc", &sText, &cp ) )
+				return;
+#ifdef WINDOWS
+			ConvertUTF8ToSystem( sText );
+#endif
+			xx->noteData.fileData.title = sText;
+			xx->noteData.fileData.inArchive = FALSE;
+			break;
+		default:
+			AbortProg( "ReadNote: %d", noteType );
+		}
+	} else {
 	noteText = MyMalloc(size + 1);
 
 	fread(noteText, sizeof(char), size, paramFile);
@@ -423,12 +465,12 @@ ReadTrackNote(char *line)
 
     t = NewNote(index, pos, noteType);
     SetTrkLayer(t, layer);
-
+	   
     xx = (struct extraDataNote *)GetTrkExtraData(t);
 
 #ifdef WINDOWS
 	ConvertUTF8ToSystem(noteText);
-#endif // WINDOWS
+#endif
 
 	switch (noteType) {
 	case OP_NOTETEXT:
@@ -457,13 +499,12 @@ ReadTrackNote(char *line)
 
 	cp = GetNextLine();
 
-	while ( *cp && isspace(*cp ) ) cp++;
-	if (strncmp(cp, "END", 3)) {
-		InputError(_("Expected END statement not found!"),
-				TRUE );
+	if (!IsEND( "END" )) {
+		InputError(_("Expected END not found!"), TRUE ),
 		exit(1);
 	}
     MyFree(noteText);
+    }
 }
 
 /**

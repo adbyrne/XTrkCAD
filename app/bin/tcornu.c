@@ -589,7 +589,6 @@ static BOOL_T WriteCornu( track_p t, FILE * f )
 			rc &= WriteEndPt( f, t, 1 );
 		}
 	rc &= WriteSegs( f, xx->cornuData.arcSegs.cnt, xx->cornuData.arcSegs.ptr );
-	//rc &= fprintf(f, "\tEND\n" )>0;
 	return rc;
 }
 

@@ -315,7 +315,7 @@ static BOOL_T WriteTurntable( track_p t, FILE * f )
 				xx->pos.x, xx->pos.y, xx->radius, xx->currEp )>0;
 	for (ep=0; ep<GetTrkEndPtCnt(t); ep++)
 		rc &= WriteEndPt( f, t, ep );
-	rc &= fprintf(f, "\tEND\n")>0;
+	rc &= fprintf(f, "\t%s\n", END_SEGS)>0;
 	return rc;
 }
 

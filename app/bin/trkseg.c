@@ -1156,7 +1156,7 @@ EXPORT BOOL_T ReadSegs( void )
 		while (isspace(*cp)) cp++;
 		hasElev = FALSE;
 		improvedEnds = FALSE;
-		if ( strncmp( cp, "END", 3 ) == 0 ) {
+		if ( IsEND( END_SEGS ) ) {
 			rc = TRUE;
 			subsegs = FALSE;
 			break;
@@ -1376,14 +1376,11 @@ EXPORT BOOL_T ReadSegs( void )
 			s = &tempSegs(tempSegs_da.cnt-1);
 			s->type = type;
 			s->u.t.fontP = NULL;
-			char * expandedText;
-			if ( !GetArgs( cp, "lpfdfq", &rgb, &s->u.t.pos, &s->u.t.angle, &s->u.t.boxed, &s->u.t.fontSize, &expandedText ) ) {
+			if ( !GetArgs( cp, "lpfdfq", &rgb, &s->u.t.pos, &s->u.t.angle, &s->u.t.boxed, &s->u.t.fontSize, &plain_text ) ) {
 				rc = FALSE;
 				/*??*/break;
 			}
-			plain_text = ConvertFromEscapedText(expandedText);
 			s->u.t.string = plain_text;
-			MyFree(expandedText);
 			s->color = wDrawFindColor( rgb );
 			break;
 		case SEG_UNCEP:
@@ -1602,7 +1599,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			break;
 		}
 	}
-	if (writeEnd) rc &= fprintf( f, "\tEND\n" )>0;
+	if (writeEnd) rc &= fprintf( f, "\t%s\n", END_SEGS )>0;
 	return rc;
 }
 

@@ -212,7 +212,7 @@ static void DoRecordButton( void * context )
 	case 0: /* Stop */
 		fprintf( recordF, "CLEAR\nMESSAGE\n");
 		fprintf( recordF, N_("End of Playback.  Hit Step to exit\n"));
-		fprintf( recordF, "END\nSTEP\n" );
+		fprintf( recordF, "%s\nSTEP\n", END_MESSAGE );
 		fclose( recordF );
 		recordF = NULL;
 		wHide( recordW );
@@ -231,7 +231,7 @@ static void DoRecordButton( void * context )
 			wTextGetText( recordT, cp, len );
 			if ( cp[len-1] == '\n' ) len--;
 			cp[len] = '\0';
-			fprintf( recordF, "%s\nEND\nSTEP\n", cp );
+			fprintf( recordF, "%s\n%s\nSTEP\n", cp, END_MESSAGE );
 			MyFree( cp );
 			recordingMessage = FALSE;
 		}
@@ -1119,7 +1119,7 @@ static void Playback( void )
 			demoWinOnTop = TRUE;
 			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
-				if ( strncmp(paramLine, "END", 3) == 0 )
+				if ( IsEND( END_MESSAGE ) )
 					break;
 				if ( strncmp(paramLine, "STEP", 3) == 0 ) {
 					wWinTop( demoW );
@@ -1255,7 +1255,7 @@ static void Playback( void )
 		} else if (strncmp( paramLine, "DOCUMENT COPY", 13 ) == 0 ) {
 			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
-				if ( strncmp(paramLine, "END", 3) == 0 )
+				if ( IsEND( END_MESSAGE ) )
 					break;
 				if ( documentCopy && documentFile )
 					fprintf( documentFile, "%s", paramLine );

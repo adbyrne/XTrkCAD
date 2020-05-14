@@ -294,7 +294,7 @@ static BOOL_T WriteStraight( track_p t, FILE * f )
 				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0) )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
-	rc &= fprintf(f, "\tEND\n" )>0;
+	rc &= fprintf(f, "\t%s\n", END_SEGS)>0;
 	return rc;
 }
 

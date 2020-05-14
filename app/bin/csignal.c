@@ -389,10 +389,10 @@ static void ReadSignal ( char * line )
 
     DYNARR_RESET( signalAspect_p, signalAspect_da );
     while ( (cp = GetNextLine()) != NULL ) {
-        while (isspace((unsigned char)*cp)) cp++;
-        if ( strncmp( cp, "END", 3 ) == 0 ) {
+        if ( IsEND( END_SIGNAL) ) {
             break;
         }
+	while (isspace((unsigned char)*cp)) cp++;
         if ( *cp == '\n' || *cp == '#' ) {
             continue;
         }

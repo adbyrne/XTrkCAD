@@ -872,7 +872,7 @@ static BOOL_T WriteJoint(
 		xx->flip, xx->negate, xx->Scurve, xx->pos.x, xx->pos.y, xx->angle )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
-	rc &= fprintf(f, "\tEND\n" )>0;
+	rc &= fprintf(f, "\t%s\n", END_SEGS )>0;
 	return rc;
 }
 

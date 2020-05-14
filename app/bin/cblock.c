@@ -432,10 +432,10 @@ static void ReadBlock ( char * line )
 
 	DYNARR_RESET( btrackinfo_p , blockTrk_da );
 	while ( (cp = GetNextLine()) != NULL ) {
-		while (isspace((unsigned char)*cp)) cp++;
-		if ( strncmp( cp, "END", 3 ) == 0 ) {
+		if ( IsEND( END_BLOCK ) ) {
 			break;
 		}
+		while (isspace((unsigned char)*cp)) cp++;
 		if ( *cp == '\n' || *cp == '#' ) {
 			continue;
 		}

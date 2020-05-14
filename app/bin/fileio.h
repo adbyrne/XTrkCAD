@@ -30,7 +30,7 @@
 FILE * paramFile;
 extern char *paramFileName;
 wIndex_t paramLineNum;
-char paramLine[STR_LONG_SIZE];
+char paramLine[STR_HUGE_SIZE];
 char * curContents;
 char * curSubContents;
 #define PARAM_DEMO (-1)
@@ -85,6 +85,13 @@ dynArr_t paramProc_da;
 
 void Stripcr( char * );
 char * GetNextLine( void );
+
+#define END_TRK_FILE	"END$TRACKS"
+#define END_BLOCK	"END$BLOCK"
+#define END_SIGNAL	"END$SIGNAL"
+#define END_SEGS	"END$SEGS"
+#define END_MESSAGE	"END$MESSAGE"
+wBool_t IsEND( char * sEnd );
 
 BOOL_T GetArgs( char *, char *, ... );
 BOOL_T ParseRoomSize( char *, coOrd * );
