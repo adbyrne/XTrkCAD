@@ -48,45 +48,45 @@ _________________________________________
 
 Lines are drawn by clicking at the starting postion and dragging to the final position.
 
-By default, the new line will snap to existing objects.  Hold down the <Shift> key to prevent this from happening.
+By default, the new line will snap to existing objects.  Hold down the <Ctrl> and <Alt> keys to prevent this from happening.
 END
 STEP
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 2 0.533 4.693
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 3 4.320 4.693
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 4 4.320 4.693
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 2 4.373 4.693
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 3 4.533 5.120
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 4 4.533 5.120
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 2 0.533 4.693
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 3 0.533 4.693
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 4 0.267 5.120
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 2 0.267 3.253
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 3 0.533 3.787
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 4 0.533 3.787
 STEP
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 2 0.533 3.787
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 3 4.320 3.787
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 4 4.320 3.787
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 2 4.320 3.787
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 3 4.533 3.307
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 4 4.533 3.307
 MESSAGE
 _________________________________________
@@ -115,7 +115,7 @@ Here we will draw a Curve by dragging from one End-Point to the other to define 
 END
 STEP
 COMMAND DrawCurveChord
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 2 0.800 3.680
 #MOUSE 3 0.800 3.573
 #MOUSE 3 0.853 3.467
@@ -174,10 +174,12 @@ MOUSE 2 0.800 3.680
 #MOUSE 3 3.947 3.680
 #MOUSE 3 3.947 3.733
 #MOUSE 3 3.947 3.787
-KEYSTATE 2
+KEYSTATE 12
 MOUSE 4 4.107 3.787
 BIGPAUSE
+KEYSTATE 12
 MOUSE 2 2.9 3.78
+KEYSTATE 12
 MOUSE 4 2.9 1.5
 MESSAGE
 _________________________________________
