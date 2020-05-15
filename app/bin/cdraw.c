@@ -2641,10 +2641,6 @@ EXPORT BOOL_T ReadText( char * line )
             return FALSE;
     }
 
-    char * old = text;
-    text = ConvertFromEscapedText(text);
-    MyFree(old);
-
 	trk = NewText( index, pos, angle, text, textSize, color, FALSE );
 	SetTrkLayer( trk, layer );
 	MyFree(text);

@@ -164,7 +164,7 @@ RestoreLocale( char * locale )
 EXPORT FILE * paramFile = NULL;
 char *paramFileName;
 EXPORT wIndex_t paramLineNum = 0;
-EXPORT char paramLine[STR_LONG_SIZE];
+EXPORT char paramLine[STR_HUGE_SIZE];
 EXPORT char * curContents;
 EXPORT char * curSubContents;
 
@@ -466,7 +466,7 @@ EXPORT BOOL_T GetArgs(
 #ifdef WINDOWS
 			ConvertUTF8ToSystem(message);
 #endif
-			*qp = (char*)MyStrdup(message);
+			*qp = (char*)ConvertFromEscapedText(message);
 			break;
 		case 'c':
 			qp = va_arg( ap, char * * );
@@ -484,6 +484,26 @@ EXPORT BOOL_T GetArgs(
 	RestoreLocale(oldLocale);
 	return TRUE;
 }
+
+
+
+wBool_t IsEND( char * sEnd )
+{
+	char * cp;
+	wBool_t bAllowNakedENDs = paramVersion < 12;
+	for( cp = paramLine; *cp && isspace( *cp ); cp++ );
+	if ( strncmp( cp, sEnd, strlen(sEnd) ) == 0 )
+		cp += strlen( sEnd );
+	else if ( bAllowNakedENDs && strncmp( cp, "END", 3 ) == 0 )
+		cp += 3;
+	else
+		return FALSE;
+	for ( ; *cp && isspace( *cp ); cp++ );
+	if ( *cp != '\0' )
+		return FALSE;
+	return TRUE;
+}
+
 
 EXPORT wBool_t ParseRoomSize(
 		char * s,
@@ -673,7 +693,7 @@ static BOOL_T ReadTrackFile(
 
 		if (ReadTrack( paramLine )) {
 
-		} else if (strncmp( paramLine, "END", 3 ) == 0) {
+		} else if (IsEND( END_TRK_FILE ) ) {
 			break;
 		} else if (strncmp( paramLine, "VERSION ", 8 ) == 0) {
 			paramVersion = strtol( paramLine+8, &cp, 10 );
@@ -982,7 +1002,7 @@ static BOOL_T DoSaveTracks(
 	rc &= WriteLayers( f );
 	rc &= WriteMainNote( f );
 	rc &= WriteTracks( f, TRUE );
-	rc &= fprintf(f, "END\n")>0;
+	rc &= fprintf(f, "%s\n", END_TRK_FILE)>0;
 	if ( !rc )
 		NoticeMessage( MSG_WRITE_FAILURE, _("Ok"), NULL, strerror(errno), fileName );
 	fclose(f);
@@ -1421,7 +1441,7 @@ static int DoExportTracks(
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
 	coOrd offset;
 	ExportTracks( f , &offset);
-	fprintf(f, "END\n");
+	fprintf(f, "%s\n", END_TRK_FILE);
 	fclose(f);
 
 	RestoreLocale( oldLocale );
@@ -1469,7 +1489,7 @@ EXPORT BOOL_T EditCopy( void )
 	fprintf(f,"#%s Version: %s, Date: %s\n", sProdName, sVersion, ctime(&clock) );
 	fprintf(f, "VERSION %d %s\n", iParamVersion, PARAMVERSIONVERSION );
 	ExportTracks(f, &paste_offset);
-	fprintf(f, "END\n");
+	fprintf(f, "%s\n", END_TRK_FILE );
 	RestoreLocale(oldLocale);
 	fclose(f);
 

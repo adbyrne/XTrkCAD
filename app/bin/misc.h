@@ -44,6 +44,7 @@ typedef void (*addButtonCallBack_t)(void*);
 #define STR_SIZE		(256)
 #define STR_SHORT_SIZE	(80)
 #define STR_LONG_SIZE	(1024)
+#define STR_HUGE_SIZE	(10240)
 
 #define CAST_AWAY_CONST (char*)
 
@@ -185,7 +186,7 @@ extern wPos_t DlgSepFrmBottom;
 extern wWin_p mainW;
 extern wPos_t toolbarHeight;
 extern wIndex_t changed;
-extern char message[STR_LONG_SIZE];
+extern char message[STR_HUGE_SIZE];
 extern REGION_T curRegion;
 extern long paramVersion;
 extern coOrd zero;

@@ -1264,6 +1264,7 @@ EXPORT BOOL_T CarItemRead(
 	ANGLE_T angle;
 	wIndex_t index;
 	long longCenterOffset;
+	char * sNote = NULL;
 
 	if ( !GetArgs( line+4, "lsqll" "ff0lffl" "fflll000000c",
 		&itemIndex, scale, &title, &options, &type,
@@ -1271,23 +1272,30 @@ EXPORT BOOL_T CarItemRead(
 		&purchPrice, &currPrice, &condition, &purchDate, &serviceDate, &cp ) )
 		return FALSE;
 	dim.truckCenterOffset = longCenterOffset/1000.0;
-	if ( (options&CAR_ITEM_HASNOTES) ) {
-		DYNARR_SET( char, buffer_da, 0 );
-		while ( (line=GetNextLine()) && strncmp( line, "    END", 7 ) != 0 ) {
-			siz = buffer_da.cnt;
-			len = strlen( line );
-			DYNARR_SET( char, buffer_da, siz+len+1 );
-			memcpy( &((char*)buffer_da.ptr)[siz], line, len );
-			((char*)buffer_da.ptr)[siz+len] = '\n';
+	if ( paramVersion < 12 ) {
+		if ( (options&CAR_ITEM_HASNOTES) ) {
+			DYNARR_SET( char, buffer_da, 0 );
+			while ( (line=GetNextLine()) && !IsEND( "END" ) ) {
+				siz = buffer_da.cnt;
+				len = strlen( line );
+				DYNARR_SET( char, buffer_da, siz+len+1 );
+				memcpy( &((char*)buffer_da.ptr)[siz], line, len );
+				((char*)buffer_da.ptr)[siz+len] = '\n';
+			}
+			DYNARR_APPEND( char, buffer_da, 1 );
+			((char*)buffer_da.ptr)[buffer_da.cnt-1] = 0;
+			sNote = MyStrdup( (char*)buffer_da.ptr );
 		}
-		DYNARR_APPEND( char, buffer_da, 1 );
-		((char*)buffer_da.ptr)[buffer_da.cnt-1] = 0;
+	} else {
+		char * sEscapedText = NULL;
+		if ( !GetArgs( cp, "qc", &sNote, &cp ) )
+			return FALSE;
 	}
 	item = CarItemNew( NULL, curParamFileIndex, itemIndex, LookupScale(scale), title,
 				options&(CAR_DESC_BITS|CAR_ITEM_BITS), type, &dim, wDrawFindColor(rgb),
 				purchPrice, currPrice, condition, purchDate, serviceDate );
 	if ( (options&CAR_ITEM_HASNOTES) )
-		item->data.notes = MyStrdup( (char*)buffer_da.ptr );
+		item->data.notes = sNote;
 	MyFree(title);
 	if ( (options&CAR_ITEM_ONLAYOUT) ) {
 		if ( !GetArgs( cp, "dLpf",
@@ -1326,20 +1334,22 @@ static BOOL_T CarItemWrite(
 		options, item->type,
 		item->dim.carLength, item->dim.carWidth, longCenterOffset, item->dim.truckCenter, item->dim.coupledLength, wDrawGetRGB(item->color),
 		item->data.purchPrice, item->data.currPrice, item->data.condition, item->data.purchDate, item->data.serviceDate )>0;
+	if ( (options&CAR_ITEM_HASNOTES) ) {
+		char * sEscapedNote = ConvertToEscapedText( item->data.notes );
+		rc &= fprintf( f, " \"%s\"", sEscapedNote )>0;
+		MyFree( sEscapedNote );
+	} else {
+		rc &= fprintf( f, " \"\"" ) > 0;
+	}
 	if ( ( options&CAR_ITEM_ONLAYOUT) ) {
 		CarGetPos( item->car, &pos, &angle );
-		rc &= fprintf( f, " %d %u %0.3f %0.3f %0.3f",
+		rc &= fprintf( f, " %d %u %0.3f %0.3f %0.3f\n",
 				GetTrkIndex(item->car), GetTrkLayer(item->car), pos.x, pos.y, angle )>0;
-	}
-	rc &= fprintf( f, "\n" )>0;
-	if ( (options&CAR_ITEM_HASNOTES) ) {
-		rc &= fprintf( f, "%s\n", item->data.notes )>0;
-		rc &= fprintf( f, "    END\n" )>0;
-	}
-	if ( (options&CAR_ITEM_ONLAYOUT) ) {
 		rc &= WriteEndPt( f, item->car, 0 );
 		rc &= WriteEndPt( f, item->car, 1 );
-		rc &= fprintf( f, "\tEND\n" )>0;
+		rc &= fprintf( f, "\t%s\n", END_SEGS )>0;
+	} else {
+		rc &= fprintf( f, "\n" )>0;
 	}
 
 	RestoreLocale(oldLocale);
@@ -1726,16 +1736,53 @@ EXPORT void AddHotBarCarDesc( void )
 }
 
 
-EXPORT coOrd CarItemFindCouplerMountPoint(
+EXPORT void CarItemFindCouplerMountPoint(
 		carItem_p item,
-		traverseTrack_t trvTrk,
-		int dir )
+		traverseTrack_t trvTrk0,
+		coOrd pos[2] )
 {
-	DIST_T couplerOffset;
-	coOrd pos;
+	// We assume the coupler pivot is 'couplerLength' before the end of the car
+	DIST_T couplerLength = (item->dim.coupledLength - item->dim.carLength) / 2.0;
+	if ( IsClose(item->dim.truckCenter) ) {
+		// Single truck/bogie
+		DIST_T d = item->dim.carLength/2.0 - couplerLength;
+		Translate( &pos[0], trvTrk0.pos, trvTrk0.angle, d + item->dim.truckCenterOffset );
+		FlipTraverseTrack( &trvTrk0 );
+		Translate( &pos[1], trvTrk0.pos, trvTrk0.angle, d - item->dim.truckCenterOffset );
+		return;
+	}
+	// Find the pos of the 2 trucks
+	// Note this is a slight simplification, we should use the car center, not the on-track position
+	coOrd truck[2];
+	traverseTrack_t trvTrk1 = trvTrk0;
+	TraverseTrack2( &trvTrk0, item->dim.truckCenter/2.0 + item->dim.truckCenterOffset );
+	FlipTraverseTrack( & trvTrk1 );
+	TraverseTrack2( &trvTrk1, item->dim.truckCenter/2.0 - item->dim.truckCenterOffset );
 
-	if ( dir )
-		FlipTraverseTrack( &trvTrk );
+	// Get the angle to translate from the truck
+	ANGLE_T angle[2];
+	if ( trvTrk0.trk == NULL || (item->options&CAR_DESC_COUPLER_MODE_BODY)!=0 ) {
+		// Body mount couplers
+		// Angle is same as the car
+		angle[0] = FindAngle( trvTrk1.pos, trvTrk0.pos );
+		angle[1] = NormalizeAngle( angle[0]+180.0 );
+	} else {
+		// Truck mounted couplers
+		// Angle is same as the trucks
+		angle[0] = trvTrk0.angle;
+		angle[1] = trvTrk1.angle;
+	}
+
+	// Get the distance to translate
+	DIST_T d[2];
+	d[0] = item->dim.carLength/2.0 - couplerLength - ( item->dim.truckCenter/2.0 + item->dim.truckCenterOffset );
+	d[1] = item->dim.carLength/2.0 - couplerLength - ( item->dim.truckCenter/2.0 - item->dim.truckCenterOffset );
+
+	// And translate
+	Translate( &pos[0], trvTrk0.pos, angle[0], d[0] );
+	Translate( &pos[1], trvTrk1.pos, angle[1], d[1] );
+		
+#ifdef LATER
 	if ( trvTrk.trk == NULL || (item->options&CAR_DESC_COUPLER_MODE_BODY)!=0 ) {
 		couplerOffset = item->dim.coupledLength/2.0;
 		Translate( &pos, trvTrk.pos, trvTrk.angle, couplerOffset );
@@ -1752,7 +1799,7 @@ EXPORT coOrd CarItemFindCouplerMountPoint(
 			couplerOffset = couplerOffset - item->dim.truckCenterOffset;
 		Translate( &pos, trvTrk.pos, trvTrk.angle, couplerOffset );
 	}
-	return pos;
+#endif
 }
 
 

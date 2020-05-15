@@ -98,7 +98,7 @@ ReadMultilineText(size_t textLength)
 
 	line = GetNextLine();
 
-	while (strcmp(line, "    END")) {
+	while ( !IsEND("END") ) {
 		DynStringCatCStr(&noteText, line);
 		DynStringCatCStr(&noteText, "\n");
 		line = GetNextLine();
@@ -140,9 +140,9 @@ BOOL_T WriteMainNote(FILE* f)
 #endif // WINDOWS
 
 
-        rc &= fprintf(f, "NOTE MAIN 0 0 0 0 %lu\n", strlen(noteText))>0;
-        rc &= fprintf(f, "%s", noteText)>0;
-        rc &= fprintf(f, "\n    END\n")>0;
+	char * sText = ConvertToEscapedText( noteText );
+        rc &= fprintf(f, "NOTE MAIN 0 0 0 0 0 \"%s\"\n", sText )>0;
+	MyFree( sText );
 
 #ifdef WINDOWS
 		if (out) {
@@ -161,9 +161,13 @@ BOOL_T WriteMainNote(FILE* f)
 
 void ReadMainNote(char *line)
 {
-    size_t size;
+    long size;
+    char * sNote = NULL;
 
-    if (!GetArgs(line + 9, paramVersion < 3 ? "d" : "0000d", &size)) {
+    if (!GetArgs(line + 9,
+	paramVersion < 3 ? "l" :
+	paramVersion < 12 ? "0000l":
+	"0000lq", &size, &sNote)) {
         return;
     }
 
@@ -171,7 +175,10 @@ void ReadMainNote(char *line)
         MyFree(mainText);
     }
 
+    if ( paramVersion < 12 )
 	mainText = ReadMultilineText(size);
+    else
+	mainText = sNote;
 }
 
 void InitCmdNote()

@@ -212,7 +212,7 @@ static void DoRecordButton( void * context )
 	case 0: /* Stop */
 		fprintf( recordF, "CLEAR\nMESSAGE\n");
 		fprintf( recordF, N_("End of Playback.  Hit Step to exit\n"));
-		fprintf( recordF, "END\nSTEP\n" );
+		fprintf( recordF, "%s\nSTEP\n", END_MESSAGE );
 		fclose( recordF );
 		recordF = NULL;
 		wHide( recordW );
@@ -231,7 +231,7 @@ static void DoRecordButton( void * context )
 			wTextGetText( recordT, cp, len );
 			if ( cp[len-1] == '\n' ) len--;
 			cp[len] = '\0';
-			fprintf( recordF, "%s\nEND\nSTEP\n", cp );
+			fprintf( recordF, "%s\n%s\nSTEP\n", cp, END_MESSAGE );
 			MyFree( cp );
 			recordingMessage = FALSE;
 		}
@@ -721,8 +721,6 @@ static void PlaybackQuit( void )
 	if (paramFile)
 		fclose( paramFile );
 	paramFile = NULL;
-	if (!inPlayback)
-		return;
 	inPlaybackQuit = TRUE;
 	ClearPlaybackCursor(TRUE);
 	wPrefReset();
@@ -748,7 +746,6 @@ static void PlaybackQuit( void )
 	DoSetScale( oldScaleName );
 	DoChangeNotification( CHANGE_ALL );
 	CloseDemoWindows();
-	inPlayback = FALSE;
 	curDemo = -1;
 	wPrefSetInteger( "misc", "playbackspeed", playbackSpeed );
 	playbackNonStop = FALSE;
@@ -1023,6 +1020,9 @@ static void Playback( void )
 	char * oldLocale = NULL;
 	oldLocale = SaveLocale( "C" );
 	while (TRUE) {
+		if ( ! inPlayback )
+			// User pressed Quit
+			break;
 		if ( paramFile == NULL ||
 			 fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
 			paramTogglePlaybackHilite = FALSE;
@@ -1044,6 +1044,7 @@ static void Playback( void )
 			if ( paramFile == NULL ) {
 				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName, strerror(errno) );
 				RestoreLocale( oldLocale );
+				inPlayback = FALSE;
 				return;
 			}
 			
@@ -1062,6 +1063,7 @@ static void Playback( void )
 				fclose( paramFile );
 				paramFile = NULL;
 				RestoreLocale( oldLocale );
+				inPlayback = FALSE;
 				return;
 			}
 			free(demoFileName);
@@ -1106,6 +1108,7 @@ static void Playback( void )
 				EnableButtons( FALSE );
 			} else {
 				RestoreLocale( oldLocale );
+				inPlayback = FALSE;
 				return;
 			}
 		} else if (strncmp( paramLine, "CLEAR", 5 ) == 0) {
@@ -1116,13 +1119,14 @@ static void Playback( void )
 			demoWinOnTop = TRUE;
 			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
-				if ( strncmp(paramLine, "END", 3) == 0 )
+				if ( IsEND( END_MESSAGE ) )
 					break;
 				if ( strncmp(paramLine, "STEP", 3) == 0 ) {
 					wWinTop( demoW );
 					demoWinOnTop = TRUE;
 					EnableButtons( TRUE );
 					RestoreLocale( oldLocale );
+					inPlayback = FALSE;
 					return;
 				}
 				PlaybackMessage( paramLine );
@@ -1251,7 +1255,7 @@ static void Playback( void )
 		} else if (strncmp( paramLine, "DOCUMENT COPY", 13 ) == 0 ) {
 			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
-				if ( strncmp(paramLine, "END", 3) == 0 )
+				if ( IsEND( END_MESSAGE ) )
 					break;
 				if ( documentCopy && documentFile )
 					fprintf( documentFile, "%s", paramLine );
@@ -1293,6 +1297,7 @@ static void Playback( void )
 			EnableButtons( TRUE );
 			pauseDemo = FALSE;
 			RestoreLocale( oldLocale );
+			inPlayback = FALSE;
 			return;
 		}
 	}
@@ -1304,6 +1309,7 @@ static void Playback( void )
 		fclose( documentFile );
 		documentFile = NULL;
 	}
+	inPlayback = FALSE;
 	PlaybackQuit();
 	RestoreLocale( oldLocale );
 }
@@ -1368,7 +1374,13 @@ static void DoDemoButton( void * command )
 		break;
 	case 3:
 		/* quit */
-		PlaybackQuit();
+		if ( inPlayback ) {
+			// We will exit the loop in Playback() after the current command
+			inPlayback = FALSE;
+		} else {
+			// We're waiting for the user to press 'Step'
+			PlaybackQuit();
+		}
 		break;
 	default:
 		;

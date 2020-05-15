@@ -3201,7 +3201,7 @@ EXPORT void InitNewTurn( wMenu_p m )
 #include <stdio.h>
 #include <stdarg.h>
 
-char message[1024];
+char message[STR_HUGE_SIZE];
 char * curScaleName;
 double trackGauge;
 long units = 0;
@@ -3373,7 +3373,7 @@ EXPORT BOOL_T WriteSegs(
 			break;
 		}
 	}
-	rc &= fprintf( f, "\tEND\n" )>0;
+	rc &= fprintf( f, "\t%s\n", END_SEGS )>0;
 	return rc;
 }
 
@@ -3704,7 +3704,7 @@ int main ( int argc, char * argv[] )
 		}
 		fprintf( stdout, "\tA 16711680 0 %0.6f 0.000000 0.000000 0.000000 360.000000\n", radius2 );
 		fprintf( stdout, "\tA 16711680 0 %0.6f 0.000000 0.000000 0.000000 360.000000\n", radius );
-		fprintf( stdout, "\tEND\n" );
+		fprintf( stdout, "\t%s\n", END_SEGS );
 		break;
 	default:
 		fprintf( stderr, "Invalid command: %s\n", argv[-1] );

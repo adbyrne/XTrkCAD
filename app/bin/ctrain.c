@@ -1350,9 +1350,7 @@ static void PlaceCar(
     int dir;
     CarItemPlace(xx->item, &xx->trvTrk, dists);
 
-    for (dir=0; dir<2; dir++) {
-        xx->couplerPos[dir] = CarItemFindCouplerMountPoint(xx->item, xx->trvTrk, dir);
-    }
+    CarItemFindCouplerMountPoint(xx->item, xx->trvTrk, xx->couplerPos);
 
     car->endPt[0].angle = xx->trvTrk.angle;
     Translate(&car->endPt[0].pos, xx->trvTrk.pos, car->endPt[0].angle, dists[0]);

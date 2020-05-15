@@ -162,6 +162,21 @@ char *GetCurrentPath(
 }
 
 /**
+ * Convert path to forward slash
+ *
+ * \param [in,out] string If non-null, the string.
+ */
+
+void ConvertPathForward(char *string)
+{
+	char *ptr = string;
+	while ((ptr = strchr(ptr, '\\')) != NULL) {
+		ptr[0] = '/';
+		ptr++;
+	}
+}
+
+/**
 * Find the filename/extension piece in a fully qualified path
 *
 * \param path IN the full path

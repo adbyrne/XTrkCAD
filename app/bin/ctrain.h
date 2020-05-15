@@ -47,7 +47,7 @@ void CarSetVisible( track_p );
 void CarItemUpdate( carItem_p );
 void CarItemLoadList( void * );
 char * CarItemDescribe( carItem_p, long, long * );
-coOrd CarItemFindCouplerMountPoint( carItem_p, traverseTrack_t, int );
+void CarItemFindCouplerMountPoint( carItem_p, traverseTrack_t, coOrd[2] );
 void CarItemSize( carItem_p, coOrd * );
 char * CarItemNumber( carItem_p );
 DIST_T CarItemCoupledLength( carItem_p );

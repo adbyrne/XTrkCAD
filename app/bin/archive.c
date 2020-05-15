@@ -230,9 +230,10 @@ BOOL_T AddDirectoryToArchive(
 #ifdef WINDOWS
 			archPathUtf8 = Convert2UTF8(archPathUtf8);
 			fullPathUtf8 = Convert2UTF8(fullPathUtf8);
+			ConvertPathForward(archPathUtf8);
 #endif // WINDOWS
             zt = zip_source_file(za, fullPathUtf8, 0, -1);
-            if (zip_file_add(za, archPathUtf8, zt, 0) == -1) {
+            if (zip_file_add(za, archPathUtf8, zt, ZIP_FL_ENC_UTF_8) == -1) {
                 zip_error_t  *ziperr = zip_get_error(za);
                 buf = zip_error_strerror(ziperr);
                 NoticeMessage(MSG_ZIP_FILE_ADD_FAIL, _("Continue"), NULL, full_path, arch_path,

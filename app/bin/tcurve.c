@@ -708,7 +708,7 @@ static BOOL_T WriteCurve( track_p t, FILE * f )
 		xx->helixTurns, xx->descriptionOff.x, xx->descriptionOff.y )>0;
 	rc &= WriteEndPt( f, t, 0 );
 	rc &= WriteEndPt( f, t, 1 );
-	rc &= fprintf(f, "\tEND\n" )>0;
+	rc &= fprintf(f, "\t%s\n", END_SEGS)>0;
 	return rc;
 }
 
