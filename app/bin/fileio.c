@@ -491,7 +491,7 @@ wBool_t IsEND( char * sEnd )
 {
 	char * cp;
 	wBool_t bAllowNakedENDs = paramVersion < 12;
-	for( cp = paramLine; *cp && isspace( *cp ); cp++ );
+	for( cp = paramLine; *cp && (isspace( *cp ) || *cp == '\t'); cp++ );
 	if ( strncmp( cp, sEnd, strlen(sEnd) ) == 0 )
 		cp += strlen( sEnd );
 	else if ( bAllowNakedENDs && strncmp( cp, "END", 3 ) == 0 )

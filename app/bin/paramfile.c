@@ -202,7 +202,7 @@ bool ReadParams(
     long oldCheckSum;
     long checkSum = 0;
     BOOL_T checkSummed;
-    long paramVersion = -1;
+    paramVersion = -1;
     char *oldLocale = NULL;
 
     if (dirName) {
