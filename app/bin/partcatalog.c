@@ -144,6 +144,29 @@ EmptyCatalog(CatalogEntry *listHeader)
 }
 
 /**
+ * Find the position in the list and add
+ *
+ * \param listHeader IN start of list
+ * \param contents IN  contents to include
+ *
+ * \return CatalogEntry if found, NULL otherwise
+ */
+
+static CatalogEntry *
+InsertInOrder(CatalogEntry *listHeader, const char *contents)
+{
+    CatalogEntry *currentEntry = listHeader;
+
+    while (currentEntry->next != currentEntry->next->next) {
+    	CatalogEntry *nextEntry = currentEntry->next;
+        if (XtcStricmp(nextEntry->contents, contents)>0) {
+            return InsertIntoCatalogAfter(currentEntry);
+        }
+        currentEntry = nextEntry;
+    }
+    return InsertIntoCatalogAfter(currentEntry);
+}
+/**
  * Get the existing list element for a content
  *
  * \param listHeader IN start of list
@@ -276,23 +299,24 @@ GetNextParameterFile(DIR *dir, const char *dirName, char **fileName)
  */
 
 static CatalogEntry *
-ScanDirectory(CatalogEntry *insertAfter, const char *dirName)
+ScanDirectory(CatalogEntry *catalog, const char *dirName)
 {
     DIR *d;
+    CatalogEntry *newEntry = catalog;
 
     d = opendir(dirName);
     if (d) {
         char *fileName = NULL;
 
         while (GetNextParameterFile(d, dirName, &fileName)) {
-            CatalogEntry *newEntry;
+            CatalogEntry *existingEntry;
             char *contents = GetParameterFileContent(fileName);
-            if ((newEntry = IsExistingContents(insertAfter, contents,FALSE))) {
-                printf("Update existing parameter file %s\n", fileName);
-                if (strcmp(newEntry->fullFileName[newEntry->files-1],fileName))
-                	UpdateCatalogEntry(newEntry, fileName, contents);
+            if ((existingEntry = IsExistingContents(catalog, contents,FALSE))) {
+                printf("Duplicate CONTENTS record in parameter file %s\n", fileName);
+                if (strcmp(existingEntry->fullFileName[existingEntry->files-1],fileName))
+                	UpdateCatalogEntry(existingEntry, fileName, contents);
             } else {
-                newEntry = InsertIntoCatalogAfter(insertAfter);
+                newEntry = InsertInOrder(catalog,contents);
                 UpdateCatalogEntry(newEntry, fileName, contents);
             }
             free(contents);
@@ -302,7 +326,7 @@ ScanDirectory(CatalogEntry *insertAfter, const char *dirName)
         closedir(d);
     }
 
-    return (insertAfter);
+    return (newEntry);
 }
 
 /**
@@ -318,7 +342,7 @@ CompareIndex(const void *entry1, const void *entry2)
 {
 	IndexEntry index1 = *(IndexEntry *)entry1;
 	IndexEntry index2 = *(IndexEntry *)entry2;
-    return (strcmp(index1.keyWord, index2.keyWord));
+    return (strcoll(index1.keyWord, index2.keyWord));
 }
 
 /*!
@@ -385,7 +409,7 @@ CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index, void** words_array
 				index[wordCount].keyWord = wordListPtr;
 				wordListPtr += strlen(word) + 1;
 				wordCount++;
-				if (wordCount > capacityOfIndex) {
+				if (wordCount >= capacityOfIndex) {
 					AbortProg("Too many keywords were used!", NULL);
 				}
 			}
@@ -469,6 +493,22 @@ int InsertSorted(CatalogEntry *arr[], int n, CatalogEntry *key, int capacity)
 }
 
 /**
+ * Comparison function for CatalogEntries used by qsort()
+ *
+ * \param entry1 IN
+ * \param entry2 IN
+ * \return per C runtime conventions
+ */
+
+static int
+CompareResults(const void *entry1, const void *entry2)
+{
+	CatalogEntry * index1 = *(CatalogEntry **)entry1;
+	CatalogEntry * index2 = *(CatalogEntry **)entry2;
+    return (strcoll(index1->contents, index2->contents));
+}
+
+/**
  * Search the index for a keyword. The index is assumed to be sorted. So after one entry
  * is found, neighboring entries up and down are checked as well. The total result set
  * is placed into an array and returned. This array has to be free'd by the caller.
@@ -486,6 +526,7 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
     CatalogEntry **result;  //Array of pointers to Catalog Entries
     int found;
     int foundElements = 0;
+    *entries = NULL;
 
     //Get all the entries back for generic search
     if (!search || (search[0] == '*') || (search[0] == '\0')) {
@@ -519,6 +560,8 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
         for (i = 0; i < foundElements; i++) {
             result[i] = index[i+lower].value;
         }
+
+        qsort((void*)result, foundElements, sizeof(void *), CompareResults);
 
         *entries = result;
     }
@@ -684,6 +727,7 @@ SearchLibrary(TrackLibrary *library, char *searchExpression,
               CatalogEntry *resultEntries)
 {
     CatalogEntry **entries;
+    CatalogEntry * newEntry = resultEntries;
     unsigned entryCount;
 
     char * word;
@@ -702,37 +746,39 @@ SearchLibrary(TrackLibrary *library, char *searchExpression,
         unsigned int i = 0;
         while (i < entryCount) {
         	//Check if entire String Matches
-        	if (!searchExpression || !word || (word[0] = '*') || (word[0] = '\0')) {
-        		char * match =
-        			strcasestr(entries[i]->contents,searchExpression);
-        		if (match) {
-					CatalogEntry * newEntry = IsExistingContents(resultEntries, entries[i]->contents, TRUE);
-					//Same FileName already in one of the entries?
-					BOOL_T found = FALSE;
-					if (newEntry) {
-						for (int j=0;j<newEntry->files;j++) {
-							if (!strcmp(newEntry->fullFileName[j],entries[i]->fullFileName[entries[i]->files-1])) {
-								found=TRUE;
-								break;
-							}
+        	char * match;
+        	if (!searchExpression || !word || (word[0] = '*') || (word[0] = '\0') ||
+        		(match = strcasestr(entries[i]->contents,searchExpression))) {
+				CatalogEntry * existingEntry;
+				existingEntry = IsExistingContents(resultEntries, entries[i]->contents, TRUE);
+				//Same FileName already in one of the entries?
+				BOOL_T found = FALSE;
+				if (existingEntry) {
+					for (int j=0;j<existingEntry->files;j++) {
+						if (!strcmp(existingEntry->fullFileName[j],entries[i]->fullFileName[entries[i]->files-1])) {
+							found=TRUE;
+							break;
 						}
-						if (found == TRUE ) {
-							i++;
-							continue;
-						}
-					} else {
-						newEntry = InsertIntoCatalogAfter(resultEntries);
 					}
+					if (found == TRUE ) {
+						i++;
+						continue;
+					}
+					UpdateCatalogEntry(existingEntry, entries[i]->fullFileName[(entries[i]->files- 1)],
+												   entries[i]->contents);
+				} else {
+					newEntry = InsertInOrder(resultEntries,entries[i]->contents);
 					UpdateCatalogEntry(newEntry, entries[i]->fullFileName[(entries[i]->files- 1)],
-							   entries[i]->contents);
-					count++;
-        		}
+						   entries[i]->contents);
+				}
+				count++;
         	}
             i++;
         }
     }
     free(word);
-    free(entries);    //Clean-up after search
+    if (entries)
+    	free(entries);    //Clean-up after search
     return (count);
 }
 
@@ -757,10 +803,10 @@ GetParameterFileContent(char *file)
 			char buffer[512];
 			if (fgets(buffer, sizeof(buffer), fh)) {
 				char *ptr = strtok(buffer, " \t");
-
 				if (!XtcStricmp(ptr, CONTENTSCOMMAND)) {
 					/* if found, store the rest of the line and the filename	*/
-					ptr = strtok(NULL, "\r\n\t");
+					ptr = ptr+strlen(CONTENTSCOMMAND)+1;
+					ptr = strtok(ptr, "\r\n");
 					result = strdup(ptr);
 #ifdef WINDOWS
 					ConvertUTF8ToSystem(result);

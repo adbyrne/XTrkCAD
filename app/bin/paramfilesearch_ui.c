@@ -102,8 +102,8 @@ void SearchFileListLoad(CatalogEntry *catalog)
     wListClear(RESULTLIST);
 
     while (currentEntry != currentEntry->next) {
-        DynStringClear(&description);
         for (int i=0;i<currentEntry->files;i++) {
+        	DynStringClear(&description);
 			DynStringCatCStr(&description,
 							 ((!searchUiMode) && currentEntry->contents) ?
 							 currentEntry->contents :
