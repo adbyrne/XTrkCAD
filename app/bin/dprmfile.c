@@ -79,8 +79,7 @@ static paramData_t paramFilePLs[] = {
 #define I_PRMFILACTION	(4)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
     {	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_HIDE), 0L, FALSE },
-    {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Search Library") },
-	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") },
+    {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Find ...") }
 };
 
 static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };

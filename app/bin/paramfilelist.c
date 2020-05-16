@@ -41,7 +41,6 @@
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
 
-
 dynArr_t paramFileInfo_da;
 
 int curParamFileIndex = PARAM_DEMO;
@@ -60,8 +59,6 @@ int GetParamFileCount()
 {
     return (paramFileInfo_da.cnt);
 }
-
-
 
 
 /**
@@ -175,7 +172,7 @@ void LoadParamFileList(void)
     }
 
     for (fileNo = 1; ; fileNo++) {
-        char *fileName;
+        const char *fileName;
         const char * contents;
         enum paramFileState structState = PARAMFILE_UNLOADED;
 
@@ -190,14 +187,6 @@ void LoadParamFileList(void)
         if (fileName == NULL || *fileName == '\0') {
             NoticeMessage(MSG_PRMFIL_NO_MAP, _("Ok"), NULL, contents);
             continue;
-        }
-        char * share;
-
-        // Rewire to the latest system level
-        if ((share= strstr(fileName,"/share/xtrkcad/params/"))) {
-        	share += strlen("/share/xtrkcad/params/");
-        	MakeFullpath(&fileName, wGetAppLibDir(), "params", share, NULL);
-        	wPrefSetString("Parameter File Map", contents, fileName);
         }
 
         ReadParamFile(fileName);
@@ -332,9 +321,7 @@ int LoadParamFile(
         wPrefSetString("Parameter File Map", curContents,
                        paramFileInfo(curParamFileIndex).name);
     }
-    //Only set the ParamFileDir if not the system directory
-    if (!strstr(fileName[i-1],"/share/xtrkcad/params/"))
-    	SetParamFileDir(fileName[i - 1]);
+    SetParamFileDir(fileName[i - 1]);
     curParamFileIndex = PARAM_CUSTOM;
     DoChangeNotification(CHANGE_PARAMS);
     return TRUE;
