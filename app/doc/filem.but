@@ -173,12 +173,17 @@ It is possible to change the state of several files at once. The \f{Select All} 
 In case the unloaded files are marked as favorite, they will not be removed.
 This makes it possible to keep a list of preferred parameter sets between
 runs of XTrackCAD but hide temporary unused files from the hotbar. That
-way the hotbar can be kept short containing only the relevant elements.
+way the hotbar contents can be kept short containing only the currently needed elements.
 
 Files can be listed by either their file name or by their contents description.
 This is controlled by the \f{Show File Names} check box.
 
-The \f{Find} button opens the \e{Find Parameter File} dialog (\K{searchgui}).
+The \f{Search} button opens the \e{Search Parameter File} dialog (\K{searchgui}) this
+shows the all files included the system library so they can be added.
+
+The \f{Browse} button opens a file window that allows the user to add additional files
+to directly load other non-system \e{parameter files} such as provided by other users or
+downloaded from the Internet.
 
 When first installed, parameter files for all common scales are loaded.
 You can unload parameter files you don't use to speed up \e{XTrackCAD} startup time.
@@ -187,24 +192,21 @@ The order in this list controls the order of turnouts and structures on the
 \f{Hot Bar} (\K{cmdHotBar}). You can move a parameter file to the end of the
 list by \e{Unloading} it, and then loading it via the \f{Browse} button.
 
-\S{searchgui} \i{Find Parameter Files}
+\S{searchgui} \i{Search Parameter Files}
 
-Selecting and loading additional parameter files is done in the
-\f{Find Parameter Files} dialog.
+Selecting and loading additional parameter files from the System Library is done in the
+\f{Search Parameter Files} dialog.
 
 \G{png.d/paramsearch.png}
 
 Using the Search function you can find and select parameter files that are
-part of the  XTrackCAD installation.
-Enter a single search word and select the Search button. Search results are
-shown in the list box. Select the files
-you're interested in and press the \f{Apply} button to add them to your
-parameter list.
+part of the XTrackCAD installation.
+Enter at least one search word and select the Search button. Search results are
+shown in the list box. A blank search or the value "*" resets the search results to 
+show the entire libary. 
 
-Addionally you can browse your local system allows you to load other
-\e{parameter files} such as provided by other users or
-downloaded from the Internet.
-Select the \f{Browse} button and navigate to the correct directory.
+Select the files you're interested in and press the \f{Add} button to add them to your
+parameter list.
 
 \rule
 

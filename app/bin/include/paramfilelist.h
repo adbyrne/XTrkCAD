@@ -20,6 +20,7 @@
 	char *GetParamFileDir(void);
 	void SetParamFileDir(char *fullPath);
 	void LoadParamFileList(void);
+	BOOL_T ReadDefaultParams(const char * dirName);
 	void SaveParamFileList(void);
 	int GetParamFileCount();
 	void UpdateParamFileList(void);
