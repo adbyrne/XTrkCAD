@@ -2115,7 +2115,7 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 		DrawNewTrack( trk );
 		if (*leftover) {
 			trkl = *leftover;
-			ep0 = 1-ep;
+			ep0 = 1-epl;
 			while ( 1 ) {
 				DrawNewTrack( trkl );
 				trk0 = GetTrkEndTrk(trkl,ep0);
