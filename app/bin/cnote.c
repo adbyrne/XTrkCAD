@@ -159,7 +159,7 @@ BOOL_T WriteMainNote(FILE* f)
  * \param line complete NOTE statement
  */
 
-void ReadMainNote(char *line)
+BOOL_T ReadMainNote(char *line)
 {
     long size;
     char * sNote = NULL;
@@ -168,7 +168,7 @@ void ReadMainNote(char *line)
 	paramVersion < 3 ? "l" :
 	paramVersion < 12 ? "0000l":
 	"0000lq", &size, &sNote)) {
-        return;
+        return FALSE;
     }
 
     if (mainText) {
@@ -179,6 +179,7 @@ void ReadMainNote(char *line)
 	mainText = ReadMultilineText(size);
     else
 	mainText = sNote;
+    return TRUE;
 }
 
 void InitCmdNote()

@@ -1126,7 +1126,7 @@ EXPORT track_p NewCompound(
 }
 
 
-void ReadCompound(
+BOOL_T ReadCompound(
 		char * line,
 		TRKTYP_T trkType )
 {
@@ -1149,21 +1149,22 @@ void ReadCompound(
 	if (paramVersion<3) {
 		if ( !GetArgs( line, "dXsdpfq",
 			&index, &layer, scale, &visible, &orig, &angle, &title ) )
-			return;
+			return FALSE;
 	} else if (paramVersion <= 5 && trkType == T_STRUCTURE) {
 		if ( !GetArgs( line, "dL00sdpfq",
 			&index, &layer, scale, &visible, &orig, &angle, &title ) )
-			return;
+			return FALSE;
 	} else {
 		if ( !GetArgs( line, paramVersion<9?"dLlldsdpYfq":"dLlldsdpffq",
 			&index, &layer, &options, &position, &lineType, scale, &visible, &orig, &elev, &angle, &title ) )
-			return;
+			return FALSE;
 	}
 	if (paramVersion >=3 && paramVersion <= 5 && trkType == T_STRUCTURE)
 		strcpy( scale, curScaleName );
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 	pathCnt = 0;
-	ReadSegs();
+	if ( !ReadSegs() )
+		return FALSE;
 	path = pathPtr;
 	if ( tempEndPts_da.cnt > 0 && pathCnt <= 1 ) {
 		pathCnt = 10;
@@ -1205,16 +1206,19 @@ void ReadCompound(
 	if (tempSpecial[0] != '\0') {
 		if (strncmp( tempSpecial, ADJUSTABLE, strlen(ADJUSTABLE) ) == 0) {
 			xx->special = TOadjustable;
-			GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
-						&xx->u.adjustable.minD, &xx->u.adjustable.maxD );
+			if ( !GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
+						&xx->u.adjustable.minD, &xx->u.adjustable.maxD ) )
+				return FALSE;
 
 		} else if (strncmp( tempSpecial, PIER, strlen(PIER) ) == 0) {
 			xx->special = TOpier;
-			GetArgs( tempSpecial+strlen(PIER), "fq",
-						&xx->u.pier.height, &xx->u.pier.name );
+			if ( !GetArgs( tempSpecial+strlen(PIER), "fq",
+						&xx->u.pier.height, &xx->u.pier.name ) )
+				return FALSE;
 
 		} else {
 			InputError("Unknown special case", TRUE);
+			return FALSE;
 		}
 	}
 	if (pathCnt > 0) {
@@ -1229,7 +1233,7 @@ void ReadCompound(
 		}
 	}
 	xx->pathCurr = path;
-
+	return TRUE;
 }
 
 void MoveCompound(

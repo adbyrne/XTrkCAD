@@ -288,7 +288,7 @@ static BOOL_T WriteSensor ( track_p t, FILE * f )
     return rc;
 }
 
-static void ReadSensor ( char * line )
+static BOOL_T ReadSensor ( char * line )
 {
     wIndex_t index;
     /*TRKINX_T trkindex;*/
@@ -302,7 +302,7 @@ static void ReadSensor ( char * line )
     wIndex_t layer;
     sensorData_p xx;
     if (!GetArgs(line+7,"dLsdpqq",&index,&layer,scale, &visible, &orig,&name,&script)) {
-        return;
+        return FALSE;
     }
 
 #ifdef WINDOWS
@@ -318,6 +318,7 @@ static void ReadSensor ( char * line )
     xx->orig = orig;
     xx->script = script;
     ComputeSensorBoundingBox(trk);
+    return TRUE;
 }
 
 static void MoveSensor (track_p trk, coOrd orig )

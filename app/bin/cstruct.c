@@ -188,7 +188,8 @@ static dynArr_t pierInfo_da;
 
 	if ( !GetArgs( firstLine+10, "sq", scale, &title ) )
 		return FALSE;
-	ReadSegs();
+	if ( !ReadSegs() )
+		return FALSE; 
 	to = CreateNewStructure( scale, title, tempSegs_da.cnt, &tempSegs(0), FALSE );
 	if (to == NULL)
 		return FALSE;
@@ -199,7 +200,8 @@ static dynArr_t pierInfo_da;
 			cp = tempSpecial+strlen(PIER);
 			while (cp) {
 				DYNARR_APPEND( pierInfo_t, pierInfo_da, 10 );
-				GetArgs( cp, "fqc", &pierInfo(pierInfo_da.cnt-1).height, &pierInfo(pierInfo_da.cnt-1).name, &cp );
+				if ( !GetArgs( cp, "fqc", &pierInfo(pierInfo_da.cnt-1).height, &pierInfo(pierInfo_da.cnt-1).name, &cp ) )
+					return FALSE;
 			}
 			to->u.pierInfo.cnt = pierInfo_da.cnt;
 			to->u.pierInfo.info = (pierInfo_t*)MyMalloc( pierInfo_da.cnt * sizeof *(pierInfo_t*)NULL );
@@ -290,10 +292,10 @@ static void DrawStructure(
 }
 
 
-static void ReadStructure(
+static BOOL_T ReadStructure(
 		char * line )
 {
-	ReadCompound( line+10, T_STRUCTURE );
+	return ReadCompound( line+10, T_STRUCTURE );
 }
 
 

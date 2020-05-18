@@ -815,7 +815,7 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 static int log_regression = 0;
 wBool_t bWriteEndPtDirectIndex;
 
-void DoRegression( char * sFileName )
+static BOOL_T DoRegression( char * sFileName )
 {
 	typedef enum { REGRESSION_NONE, REGRESSION_CHECK, REGRESSION_QUIET, REGRESSION_SAVE } E_REGRESSION;
 	E_REGRESSION eRegression = REGRESSION_NONE;
@@ -865,8 +865,15 @@ void DoRegression( char * sFileName )
 			to_first = NULL;
 			to_last = &to_first;
 			paramVersion = regressVersion;
-			if ( !ReadTrack( paramLine ) )
+			if ( !ReadTrack( paramLine ) ) {
+				if ( paramFile == NULL )
+					return FALSE;
 				break;
+			}
+			if ( to_first == NULL ) {
+				// Something bad happened
+				break;
+			}
 			track_cp tExpected = to_first;
 			to_first = to_first_save;
 			// Find corresponding Actual track
@@ -1089,6 +1096,10 @@ static void Playback( void )
 		} else if (paramLine[0] == 0) {
 			/* empty paramLine */
 		} else if (ReadTrack( paramLine ) ) {
+			if ( paramFile == NULL ) {
+				inPlayback = FALSE;
+				break;
+			}
 		} else if (strncmp( paramLine, "STEP", 5 ) == 0) {
 			paramTogglePlaybackHilite = TRUE;
 			wWinTop( demoW );

@@ -584,7 +584,7 @@ static BOOL_T WriteBezier( track_p t, FILE * f )
 	return rc;
 }
 
-static void ReadBezier( char * line )
+static BOOL_T ReadBezier( char * line )
 {
 	struct extraData *xx;
 	track_p t;
@@ -601,8 +601,10 @@ static void ReadBezier( char * line )
 
 	if (!GetArgs( line+6, "dLluwsdppppdp",
 		&index, &layer, &options, &rgb, &width, scale, &visible, &p0, &c1, &c2, &p1, &lt, &dp ) ) {
-		return;
+		return FALSE;
 	}
+	if ( !ReadSegs() )
+		return FALSE;
 	if (strncmp(line,"BEZIER",6)==0)
 		t = NewTrack( index, T_BEZIER, 0, sizeof *xx );
 	else
@@ -623,12 +625,12 @@ static void ReadBezier( char * line )
     xx->bezierData.descriptionOff = dp;
     xx->bezierData.segsWidth = width;
     xx->bezierData.segsColor = wDrawFindColor( rgb );
-    ReadSegs();
     FixUpBezier(xx->bezierData.pos,xx,GetTrkType(t) == T_BEZIER);
     ComputeBezierBoundingBox(t,xx);
     if (GetTrkType(t) == T_BEZIER) {
 		SetEndPts(t,2);
 	}
+	return TRUE;
 }
 
 static void MoveBezier( track_p trk, coOrd orig )

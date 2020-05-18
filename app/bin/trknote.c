@@ -381,7 +381,7 @@ static BOOL_T WriteNote(track_p t, FILE * f)
  * \param line
  */
 
-static void
+static BOOL_T
 ReadTrackNote(char *line)
 {
     track_p t;
@@ -399,7 +399,7 @@ ReadTrackNote(char *line)
     if (!GetArgs(line + 5, paramVersion < 3 ? "XXpYdc" : paramVersion < 9 ?
                  "dL00pYdc" : "dL00pfdc",
                  &index, &layer, &pos, &elev, &size, &cp)) {
-        return;
+        return FALSE;
     }
 
 	if ( paramVersion >= 12 ) {
@@ -411,7 +411,7 @@ ReadTrackNote(char *line)
 		switch (noteType) {
 		case OP_NOTETEXT:
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
-				return;
+				return FALSE;
 #ifdef WINDOWS
 			ConvertUTF8ToSystem( sText );
 #endif
@@ -419,13 +419,13 @@ ReadTrackNote(char *line)
 			break;
 		case OP_NOTELINK:
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
-				return;
+				return FALSE;
 #ifdef WINDOWS
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.linkData.url = sText;
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
-				return;
+				return FALSE;
 #ifdef WINDOWS
 			ConvertUTF8ToSystem( sText );
 #endif
@@ -433,13 +433,13 @@ ReadTrackNote(char *line)
 			break;
 		case OP_NOTEFILE:
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
-				return;
+				return FALSE;
 #ifdef WINDOWS
 			ConvertUTF8ToSystem( sText );
 #endif
 			xx->noteData.fileData.path = sText;
 			if ( !GetArgs( cp, "qc", &sText, &cp ) )
-				return;
+				return FALSE;
 #ifdef WINDOWS
 			ConvertUTF8ToSystem( sText );
 #endif
@@ -505,6 +505,7 @@ ReadTrackNote(char *line)
 	}
     MyFree(noteText);
     }
+	return TRUE;
 }
 
 /**
@@ -513,13 +514,13 @@ ReadTrackNote(char *line)
  * \param line IN complete line with NOTE statement
  */
 
-static void
+static BOOL_T
 ReadNote(char * line)
 {
     if (strncmp(line, "NOTE MAIN", 9) == 0) {
-        ReadMainNote(line);
+        return ReadMainNote(line);
     } else {
-        ReadTrackNote(line);
+        return ReadTrackNote(line);
     }
 }
 

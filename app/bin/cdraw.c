@@ -1307,7 +1307,7 @@ static BOOL_T WriteDraw( track_p t, FILE * f )
 }
 
 
-static void ReadDraw( char * header )
+static BOOL_T ReadDraw( char * header )
 {
 	track_p trk;
 	wIndex_t index;
@@ -1320,8 +1320,9 @@ static void ReadDraw( char * header )
 
 	if ( !GetArgs( header+5, paramVersion<3?"dXXpYf":paramVersion<9?"dLX00pYf":"dLd00pff",
 				&index, &layer, &lineType, &orig, &elev, &angle ) )
-		return;
-	ReadSegs();
+		return FALSE;
+	if ( !ReadSegs() )
+		return FALSE;
 	if (tempSegs_da.cnt == 1) {
 		trk = MakeDrawFromSeg1( index, orig, angle, &tempSegs(0) );
 		SetTrkLayer( trk, layer );
@@ -1336,6 +1337,7 @@ static void ReadDraw( char * header )
 		memcpy( xx->segs, tempSegs_da.ptr, tempSegs_da.cnt * sizeof *(trkSeg_p)0 );
 		ComputeDrawBoundingBox( trk );
 	}
+	return TRUE;
 }
 
 

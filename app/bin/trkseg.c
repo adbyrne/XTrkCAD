@@ -1131,14 +1131,14 @@ static void AppendPath( signed char c )
 EXPORT BOOL_T ReadSegs( void )
 {
 	char *cp, *cpp;
-	BOOL_T rc=FALSE;
+	BOOL_T rc=TRUE;
 	trkSeg_p s;
 	trkEndPt_p e;
 	long rgb;
 	int i;
 	DIST_T elev0, elev1;
 	BOOL_T hasElev;
-	BOOL_T isPolyV1, isPolyV2, noVersion;
+	BOOL_T isPolyV1, isPolyV2;
 	BOOL_T improvedEnds;
 	FLOAT_T ignoreFloat;
 	char type;
@@ -1152,14 +1152,13 @@ EXPORT BOOL_T ReadSegs( void )
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 	pathCnt = 0;
-	while ( (cp = GetNextLine()) != NULL ) {
+	AppendPath(0);	// End of all paths
+	while ( rc && ((cp = GetNextLine()) != NULL) ) {
 		while (isspace(*cp)) cp++;
 		hasElev = FALSE;
 		improvedEnds = FALSE;
 		if ( IsEND( END_SEGS ) ) {
-			rc = TRUE;
-			subsegs = FALSE;
-			break;
+			return TRUE;
 		}
 		if ( strncmp(cp, "SUBSEGS", 7) == 0) {
 			subsegs = TRUE;
@@ -1169,22 +1168,22 @@ EXPORT BOOL_T ReadSegs( void )
 			subsegs = FALSE;
 			continue;
 		}
-		if ( *cp == '\n' || *cp == '#' ) {
+		if ( *cp == '\0' || *cp == '\n' || *cp == '#' ) {
 			continue;
 		}
 		if (subsegs) continue;
 		type = *cp++;
 		improvedEnds = isPolyV2 = hasElev = isPolyV1 = FALSE;
-		noVersion = TRUE;
-		if ( *cp != ' ')
-			noVersion = FALSE;
-		if ( *cp == '3' ) {
-			cp++;
-			hasElev = isPolyV1 = TRUE;
-		}
-		if (*cp == '4') {
-			cp++;
-			improvedEnds = isPolyV2 = hasElev = isPolyV1 = TRUE;
+		if ( isdigit( *cp ) ) {
+			long iVersion = strtol( cp, &cp, 10 );
+			if ( iVersion >= 3 )
+				hasElev = isPolyV1 = TRUE;
+			if ( iVersion >= 4 ) 
+				improvedEnds = isPolyV2 = TRUE;
+			if ( iVersion > 4 ) {
+				InputError( "Invalid segment version number, maximum is %d", TRUE, 4 );
+				break;
+			}
 		}
 		switch (type) {
 		case SEG_STRLIN:
@@ -1450,18 +1449,20 @@ EXPORT BOOL_T ReadSegs( void )
 		case SEG_PATH:
 			while (isspace(*cp)) cp++;
 			if (*cp == '\"') cp++;
-			while ( *cp != '\"') AppendPath((signed char)*cp++);
-			AppendPath(0);
+			pathCnt--;	// Overwrite previous terminator
+			while ( *cp != '\"') AppendPath((signed char)*cp++);	// Name of path
+			AppendPath(0);						// End of name
 			cp++;
 			while (1) {
 				i = (int)strtol(cp, &cpp, 10);
 				if (cp == cpp)
 					/*??*/break;
 				cp = cpp;
-				AppendPath( (signed char)i );
+				AppendPath( (signed char)i );			// Segment # of path component
 			}
-			AppendPath( 0 );
-			AppendPath( 0 );
+			AppendPath( 0 );	// End of last path components
+			AppendPath( 0 );	// End of path
+			AppendPath( 0 );	// End of all paths
 			break;
 		case SEG_SPEC:
 			strncpy( tempSpecial, cp+1, sizeof tempSpecial - 1 );
@@ -1476,11 +1477,18 @@ EXPORT BOOL_T ReadSegs( void )
 			}
 			break;
 		default:
+			InputError( "Unknown segment type: %c", TRUE, type );
+			rc = FALSE;
 			break;
 		}
 	}
-	AppendPath( 0 );
-	return rc;
+// We've hit an InputError.
+// The user may have chosen to not continue (paramFile == NULL)
+// Otherwise we have to flush until we see END$SEGS
+
+	while ( GetNextLine() && !IsEND( END_SEGS ) );	// Chomp, Chomp
+
+	return FALSE;
 }
 
 EXPORT BOOL_T WriteSegs(

@@ -592,7 +592,7 @@ static BOOL_T WriteCornu( track_p t, FILE * f )
 	return rc;
 }
 
-static void ReadCornu( char * line )
+static BOOL_T ReadCornu( char * line )
 {
 	struct extraData *xx;
 	track_p t;
@@ -608,8 +608,10 @@ static void ReadCornu( char * line )
 
 	if (!GetArgs( line+6, "dLl00sdpffppffp",
 		&index, &layer, &options, scale, &visible, &p0, &a0, &r0, &c0, &p1, &a1, &r1, &c1 ) ) {
-		return;
+		return FALSE;
 	}
+	if ( !ReadSegs() )
+		return FALSE;
 	t = NewTrack( index, T_CORNU, 0, sizeof *xx );
 
 	xx = GetTrkExtraData(t);
@@ -629,10 +631,10 @@ static void ReadCornu( char * line )
     xx->cornuData.c[1] = c1;
     xx->cornuData.r[1] = r1;
     xx->cornuData.descriptionOff.x = xx->cornuData.descriptionOff.y = 0.0;
-    ReadSegs();
     FixUpCornu0(xx->cornuData.pos,xx->cornuData.c,xx->cornuData.a, xx->cornuData.r, xx);
     ComputeCornuBoundingBox(t,xx);
 	SetEndPts(t,2);
+	return TRUE;
 }
 
 static void MoveCornu( track_p trk, coOrd orig )

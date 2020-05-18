@@ -323,7 +323,7 @@ static BOOL_T WriteControl ( track_p t, FILE * f )
     return rc;
 }
 
-static void ReadControl ( char * line )
+static BOOL_T ReadControl ( char * line )
 {
     wIndex_t index;
     /*TRKINX_T trkindex;*/
@@ -337,7 +337,7 @@ static void ReadControl ( char * line )
     wIndex_t layer;
     controlData_p xx;
     if (!GetArgs(line+7,"dLsdpqqq",&index,&layer,scale, &visible, &orig,&name,&onscript,&offscript)) {
-        return;
+        return FALSE;
     }
 
 #ifdef WINDOWS
@@ -354,6 +354,7 @@ static void ReadControl ( char * line )
     xx->onscript = onscript;
     xx->offscript = offscript;
     ComputeControlBoundingBox(trk);
+    return TRUE;
 }
 
 static void MoveControl (track_p trk, coOrd orig )

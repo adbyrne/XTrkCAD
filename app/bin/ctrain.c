@@ -470,10 +470,10 @@ static void DeleteCar(
 }
 
 
-static void ReadCar(
+static BOOL_T ReadCar(
     char * line)
 {
-    CarItemRead(line);
+    return CarItemRead(line);
 }
 
 

@@ -151,7 +151,7 @@ typedef struct {
 		void (*describe)( track_p, char * line, CSIZE_T len );
 		void (*delete)( track_p );
 		BOOL_T (*write)( track_p, FILE * );
-		void (*read)( char * );
+		BOOL_T (*read)( char * );
 		void (*move)( track_p, coOrd );
 		void (*rotate)( track_p, coOrd, ANGLE_T );
 		void (*rescale)( track_p, FLOAT_T );
@@ -695,8 +695,6 @@ void DrawPositionIndicators( void );
 void AdvancePositionIndicator( track_p, coOrd, coOrd *, ANGLE_T * );
 
 BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *, coOrd * , BOOL_T);
-
-void DoRegression();
 
 /* cmisc.c */
 wIndex_t describeCmdInx;

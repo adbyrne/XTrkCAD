@@ -876,7 +876,7 @@ static BOOL_T WriteJoint(
 	return rc;
 }
 
-static void ReadJoint(
+static BOOL_T ReadJoint(
 		char * line )
 /*
  * Read track data from a file (f).
@@ -894,7 +894,9 @@ static void ReadJoint(
 	if ( !GetArgs( line+6, paramVersion<3?"dXZsdffffdddpYf":paramVersion<9?"dLl00sdffffdddpYf":"dLl00sdffffdddpff",
 		&index, &layer, &options, scale, &visible, &e.l0, &e.l1, &e.R, &e.L,
 		&e.flip, &e.negate, &e.Scurve, &e.pos, &elev, &e.angle) )
-		return;
+		return FALSE;
+	if ( !ReadSegs() )
+		return FALSE;
 	trk = NewTrack( index, T_EASEMENT, 0, sizeof e );
 	xx = GetTrkExtraData(trk);
 	if ( paramVersion < 3 ) {
@@ -910,9 +912,9 @@ static void ReadJoint(
 	SetTrkLayer(trk, layer);
 	SetTrkWidth(trk, (int)(options&3));
 	*xx = e;
-	ReadSegs();
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );
+	return TRUE;
 }
 
 static void MoveJoint(

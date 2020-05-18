@@ -1301,9 +1301,10 @@ EXPORT BOOL_T CarItemRead(
 		if ( !GetArgs( cp, "dLpf",
 				&index, &layer, &pos, &angle ) )
 			return FALSE;
+		if ( !ReadSegs() )
+			return FALSE;
 		item->car = NewCar( index, item, pos, angle );
 		SetTrkLayer( item->car, layer );
-		ReadSegs();
 		SetEndPts( item->car, 2 );
 		ComputeBoundingBox( item->car );
 	}

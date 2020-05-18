@@ -319,7 +319,7 @@ static BOOL_T WriteTurntable( track_p t, FILE * f )
 	return rc;
 }
 
-static void ReadTurntable( char * line )
+static BOOL_T ReadTurntable( char * line )
 {
 	track_p trk;
 	struct extraData *xx;
@@ -338,9 +338,10 @@ static void ReadTurntable( char * line )
 				paramVersion<10?"dL000sdpffX":
 				"dL000sdpffd",
 		&index, &layer, scale, &visible, &p, &elev, &r, &currEp ))
-		return;
+		return FALSE;
+	if ( !ReadSegs() )
+		return FALSE;
 	trk = NewTrack( index, T_TURNTABLE, 0, sizeof *xx );
-	ReadSegs();
 	SetEndPts( trk, 0 );
 	xx = GetTrkExtraData(trk);
 	if ( paramVersion < 3 ) {
@@ -355,6 +356,7 @@ static void ReadTurntable( char * line )
 	xx->currEp = currEp;
 	xx->reverse = 0;
 	ComputeTurntableBoundingBox( trk );
+	return TRUE;
 }
 
 static void MoveTurntable( track_p trk, coOrd orig )

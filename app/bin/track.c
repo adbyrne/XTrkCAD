@@ -1110,7 +1110,9 @@ EXPORT void ResolveIndex( void )
 			if (trk->endPt[ep].index >= 0) {
 				trk->endPt[ep].track = FindTrack( trk->endPt[ep].index );
 				if (trk->endPt[ep].track == NULL) {
-					NoticeMessage( MSG_RESOLV_INDEX_BAD_TRK, _("Continue"), NULL, trk->index, ep, trk->endPt[ep].index );
+					int rc = NoticeMessage( MSG_RESOLV_INDEX_BAD_TRK, _("Continue"), _("Quit"), trk->index, ep, trk->endPt[ep].index );
+					if ( rc != 1 )
+						return;
 				}
 			}
                 ResolveBlockTrack (trk);
@@ -1400,6 +1402,15 @@ EXPORT BOOL_T ReadTrack( char * line )
 {
 	TRKINX_T inx, lo, hi;
 	int cmp;
+	if (strncmp( paramLine, "TABLEEDGE ", 10 ) == 0) {
+		ReadTableEdge( paramLine+10 );
+		return TRUE;
+	}
+	if (strncmp( paramLine, "TEXT ", 5 ) == 0) {
+		ReadText( paramLine+5 );
+		return TRUE;
+	}
+
 if (bsearchRead) {
 	if (sortedCmds == NULL) {
 		sortedCmds = (trackCmd_t**)MyMalloc( (trackCmds_da.cnt-1) * sizeof *(trackCmd_t*)0 );
@@ -1414,8 +1425,7 @@ if (bsearchRead) {
 		inx = (lo+hi)/2;
 		cmp = strncmp( line, sortedCmds[inx]->name, strlen(sortedCmds[inx]->name) );
 		if (cmp == 0) {
-			sortedCmds[inx]->read(line);
-			return TRUE;
+			return sortedCmds[inx]->read(line);
 		} else if (cmp < 0) {
 			hi = inx-1;
 		} else {
@@ -1425,15 +1435,15 @@ if (bsearchRead) {
 } else {
 	for (inx=1; inx<trackCmds_da.cnt; inx++) {
 		 if (strncmp( line, trackCmds(inx)->name, strlen(trackCmds(inx)->name) ) == 0 ) {
-			 trackCmds(inx)->read( line );
-			 return TRUE;
+			trackCmds(inx)->read( line );
+			// Return TRUE means we found the object type and processed it
+			// Any errors will be handled by the callee's:
+			// Either skip the definition (ReadSegs) or skip the remainder of the file (InputError)
+			return TRUE;
 		 }
 	}
 }
-	if (strncmp( paramLine, "TABLEEDGE ", 10 ) == 0)
-		return ReadTableEdge( paramLine+10 );
-	if (strncmp( paramLine, "TEXT ", 5 ) == 0)
-		return ReadText( paramLine+5 );
+	// Object type not found
 	return FALSE;
 }
 

@@ -339,26 +339,28 @@ static BOOL_T ReadTurnoutParam(
 		return FALSE;
 	DYNARR_RESET( trkEndPt_t, tempEndPts_da );
 	pathCnt = 0;
-	if (ReadSegs()) {
-		CheckPaths( tempSegs_da.cnt, &tempSegs(0), pathPtr );
-		to = CreateNewTurnout( scale, title, tempSegs_da.cnt, &tempSegs(0),
-						pathCnt, pathPtr, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE );
-		if (to == NULL)
+	if ( !ReadSegs() )
+		return FALSE;
+	CheckPaths( tempSegs_da.cnt, &tempSegs(0), pathPtr );
+	to = CreateNewTurnout( scale, title, tempSegs_da.cnt, &tempSegs(0),
+					pathCnt, pathPtr, tempEndPts_da.cnt, &tempEndPts(0), NULL, FALSE );
+	MyFree( title );
+	if (to == NULL)
+		return FALSE;
+	if (tempSpecial[0] != '\0') {
+		if (strncmp( tempSpecial, ADJUSTABLE, strlen(ADJUSTABLE) ) == 0) {
+			to->special = TOadjustable;
+			if ( !GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
+					&to->u.adjustable.minD, &to->u.adjustable.maxD ) )
+				return FALSE;
+		} else {
+			InputError(_("Unknown special case"), TRUE);
 			return FALSE;
-		if (tempSpecial[0] != '\0') {
-			if (strncmp( tempSpecial, ADJUSTABLE, strlen(ADJUSTABLE) ) == 0) {
-				to->special = TOadjustable;
-				GetArgs( tempSpecial+strlen(ADJUSTABLE), "ff",
-						&to->u.adjustable.minD, &to->u.adjustable.maxD );
-			} else {
-				InputError(_("Unknown special case"), TRUE);
-			}
-		}
-		if (tempCustom[0] != '\0') {
-			to->customInfo = MyStrdup( tempCustom );
 		}
 	}
-	MyFree( title );
+	if (tempCustom[0] != '\0') {
+		to->customInfo = MyStrdup( tempCustom );
+	}
 	return TRUE;
 }
 
@@ -705,11 +707,13 @@ static void DrawTurnout(
 }
 
 
-static void ReadTurnout(
+static BOOL_T ReadTurnout(
 		char * line )
 {
-	ReadCompound( line+8, T_TURNOUT );
+	if ( !ReadCompound( line+8, T_TURNOUT ) )
+		return FALSE;
 	CheckPaths( tempSegs_da.cnt, &tempSegs(0), pathPtr );
+	return TRUE;
 }
 
 
