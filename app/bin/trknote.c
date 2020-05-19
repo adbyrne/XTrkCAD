@@ -33,6 +33,7 @@
 #include "note.h"
 #include "param.h"
 #include "track.h"
+#include "include/utf8convert.h"
 #include "utility.h"
 
 extern BOOL_T inDescribeCmd;
@@ -361,7 +362,7 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 		if ( RequiresConvToUTF8( s[inx] ) ) {
 			wSystemToUTF8 ( s[inx], message, sizeof message );
 			MyFree( s[inx] );
-			s[inx] = MyStrDup( message );
+			s[inx] = MyStrdup( message );
 		}
 	}
 #endif
