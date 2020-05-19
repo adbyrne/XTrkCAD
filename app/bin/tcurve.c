@@ -712,7 +712,7 @@ static BOOL_T WriteCurve( track_p t, FILE * f )
 	return rc;
 }
 
-static void ReadCurve( char * line )
+static BOOL_T ReadCurve( char * line )
 {
 	struct extraData *xx;
 	track_p t;
@@ -725,13 +725,23 @@ static void ReadCurve( char * line )
 	wIndex_t layer;
 	long options;
 	char * cp = NULL;
+	long helixTurns = 0;
+	coOrd descriptionOff = { 0.0, 0.0 };
 
 	if (!GetArgs( line+6, paramVersion<3?"dXZsdpYfc":paramVersion<9?"dLl00sdpYfc":"dLl00sdpffc", 
 		&index, &layer, &options, scale, &visible, &p, &elev, &r, &cp ) ) {
-		return;
+		return FALSE;
 	}
+	if (cp) {
+		if ( !GetArgs( cp, "lp", &helixTurns, &descriptionOff ) )
+			return FALSE;
+	}
+	if ( !ReadSegs() )
+		return FALSE;
 	t = NewTrack( index, T_CURVE, 0, sizeof *xx );
 	xx = GetTrkExtraData(t);
+	xx->helixTurns = helixTurns;
+	xx->descriptionOff = descriptionOff;
 	if ( paramVersion < 3 ) {
 		SetTrkVisible(t, visible!=0);
 		SetTrkNoTies(t, FALSE);
@@ -746,19 +756,14 @@ static void ReadCurve( char * line )
 	SetTrkWidth(t, (int)(options&3));
 	xx->pos = p;
 	xx->radius = r;
-	xx->helixTurns = 0;
-	xx->descriptionOff.x = xx->descriptionOff.y = 0.0;
-	if (cp) {
-		GetArgs( cp, "lp", &xx->helixTurns, &xx->descriptionOff );
-	}
 	if ( ( ( options & 0x80 ) != 0 ) == ( xx->helixTurns > 0 ) ) 
 		SetTrkBits(t,TB_HIDEDESC);
-	ReadSegs();
 	SetEndPts(t,2);
 	if (GetTrkEndAngle( t, 0 ) == 270.0 &&
 		GetTrkEndAngle( t, 1 ) == 90.0 )
 		xx->circle = TRUE;
 	ComputeCurveBoundingBox( t, xx );
+	return TRUE;
 }
 
 static void MoveCurve( track_p trk, coOrd orig )

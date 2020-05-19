@@ -192,7 +192,12 @@ EXPORT char * GetNextLine( void )
 		return NULL;
 	}
 	if (fgets( paramLine, sizeof paramLine, paramFile ) == NULL) {
-		AbortProg( "Permature EOF on %s", paramFileName );
+		sprintf( message, "INPUT ERROR: premature EOF on %s", paramFileName );
+		wNoticeEx( NT_ERROR, message, _("Ok"), NULL );
+		if ( paramFile ) {
+			fclose( paramFile );
+			paramFile = NULL;
+		}
 	}
 	Stripcr( paramLine );
 	ParamCheckSumLine( paramLine );
@@ -233,9 +238,14 @@ EXPORT int InputError(
 	}
 	strcat( mp, _("\nDo you want to continue?") );
 	if (!(ret = wNoticeEx( NT_ERROR, message, _("Continue"), _("Stop") ))) {
-		if ( paramFile )
+		if ( paramFile ) {
 			fclose(paramFile);
-		paramFile = NULL;
+			paramFile = NULL;
+		}
+		if ( paramFileName ) {
+			free( paramFileName );
+			paramFileName = NULL;
+		}
 	}
 	return ret;
 }
@@ -258,6 +268,7 @@ EXPORT void SyntaxError(
  * \param format IN ???
  *
  * \return FALSE in case of parsing error, TRUE on success
+ * In the error case, InputError had been called which may have closed the input file (paramFile)
  *
  * format chars are:
  * 0 - read a number and discard
@@ -283,7 +294,6 @@ EXPORT BOOL_T GetArgs(
 		... )
 {
 	char * cp, * cq;
-	int argNo;
 	long * pl;
 	unsigned long *pul;
 	int * pi;
@@ -293,25 +303,24 @@ EXPORT BOOL_T GetArgs(
 	char ** qp;
 	va_list ap;
 	char *oldLocale = NULL;
+	char * sError = NULL;
 
 	oldLocale = SaveLocale("C");
 
 	cp = line;
 	va_start( ap, format );
-	for (argNo=1;*format;argNo++,format++) {
+	for ( ; sError==NULL && *format; format++ ) {
 		while (isspace((unsigned char)*cp)) cp++;
 		if (!*cp && strchr( "XZYzc", *format ) == NULL ) {
-			RestoreLocale(oldLocale);
-			InputError( "Arg %d: EOL unexpected", TRUE, argNo );
-			return FALSE;
+			sError = "EOL unexpected";
+			break;
 		}
 		switch (*format) {
 		case '0':
 			(void)strtol( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			cp = cq;
 			break;
@@ -331,9 +340,8 @@ EXPORT BOOL_T GetArgs(
 			pi = va_arg( ap, int * );
 			*pi = (int)strtol( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			cp = cq;
 			break;
@@ -341,9 +349,8 @@ EXPORT BOOL_T GetArgs(
 			pi = va_arg( ap, int * );
 			*pi = (int)strtol( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			cp = cq;
 			break;
@@ -351,9 +358,8 @@ EXPORT BOOL_T GetArgs(
 			pf = va_arg( ap, FLOAT_T * );
 			*pf = (FLOAT_T)strtol( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			if (*cq == '.')
 				*pf = strtod( cp, &cq );
@@ -365,9 +371,8 @@ EXPORT BOOL_T GetArgs(
 			pul = va_arg( ap, unsigned long * );
 			*pul = strtoul( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			cp = cq;
 			break;
@@ -375,9 +380,8 @@ EXPORT BOOL_T GetArgs(
 			pl = va_arg( ap, long * );
 			*pl = strtol( cp, &cq, 10 );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected integer", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected integer";
+				break;
 			}
 			cp = cq;
 			break;
@@ -385,43 +389,27 @@ EXPORT BOOL_T GetArgs(
 			pf = va_arg( ap, FLOAT_T * );
 			*pf = strtod( cp, &cq );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected float", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected float";
+				break;
 			}
 			cp = cq;
 			break;
 		case 'z':
 			pf = va_arg( ap, FLOAT_T * );
-#ifdef LATER
-			if ( paramVersion >= 9 ) {
-				*pf = strtod( cp, &cq );
-				if (cp == cq) {
-					RestoreLocale(oldLocale);
-					InputError( "Arg %d: expected float", TRUE, argNo );
-					return FALSE;
-				}
-				cp = cq;
-			} else {
-				*pf = 0.0;
-			}
-#endif
 			*pf = 0.0;
 			break;
 		case 'p':
 			pp = va_arg( ap, coOrd * );
 			p.x = strtod( cp, &cq );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected float", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected float";
+				break;
 			}
 			cp = cq;
 			p.y = strtod( cp, &cq );
 			if (cp == cq) {
-				RestoreLocale(oldLocale);
-				InputError( "Arg %d: expected float", TRUE, argNo );
-				return FALSE;
+				sError = "%s: expected float";
+				break;
 			}
 			cp = cq;
 			*pp = p;
@@ -477,11 +465,15 @@ EXPORT BOOL_T GetArgs(
 				*qp = NULL;
 			break;
 		default:
-			AbortProg( "getArgs: bad format char" );
+			AbortProg( "getArgs: bad format char: %c", *format );
 		}
 	}
 	va_end( ap );
 	RestoreLocale(oldLocale);
+	if ( sError ) {
+		InputError( sError, TRUE, cp );
+		return FALSE;
+	}
 	return TRUE;
 }
 
@@ -692,7 +684,7 @@ static BOOL_T ReadTrackFile(
 		}
 
 		if (ReadTrack( paramLine )) {
-
+			continue;
 		} else if (IsEND( END_TRK_FILE ) ) {
 			break;
 		} else if (strncmp( paramLine, "VERSION ", 8 ) == 0) {

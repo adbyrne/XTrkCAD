@@ -360,7 +360,7 @@ void DoNote( void );
 char * ReadMultilineText(size_t textLength);
 BOOL_T WriteMainNote( FILE * );
 
-void ReadMainNote(char * line);
+BOOL_T ReadMainNote(char * line);
 
 /* dbench.c */
 long GetBenchData( long, long );

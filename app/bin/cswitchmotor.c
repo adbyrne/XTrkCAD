@@ -425,7 +425,7 @@ static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
 	return rc;
 }
 
-static void ReadSwitchMotor ( char * line )
+static BOOL_T ReadSwitchMotor ( char * line )
 {
 	TRKINX_T trkindex;
 	wIndex_t index;
@@ -435,7 +435,7 @@ static void ReadSwitchMotor ( char * line )
 
 	LOG( log_switchmotor, 1, ("*** ReadSwitchMotor: line is '%s'\n",line))
 	if (!GetArgs(line+12,"ddqqqq",&index,&trkindex,&name,&normal,&reverse,&pointsense)) {
-		return;
+		return FALSE;
 	}
 #ifdef WINDOWS
 	ConvertUTF8ToSystem(name);
@@ -459,6 +459,7 @@ static void ReadSwitchMotor ( char * line )
         LOG( log_switchmotor, 1,("*** ReadSwitchMotor(): name = %p, normal = %p, reverse = %p, pointsense = %p\n",
                 name,normal,reverse,pointsense))
         switchmotorDebug(trk);
+	return TRUE;
 }
 
 EXPORT void ResolveSwitchmotorTurnout ( track_p trk )

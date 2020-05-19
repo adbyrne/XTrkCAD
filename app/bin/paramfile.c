@@ -266,7 +266,10 @@ bool ReadParams(
             oldFile = paramFile;
             oldLineNum = paramLineNum;
             oldCheckSum = paramCheckSum;
-            ReadParams(key, dirName, cp);
+            if ( !ReadParams(key, dirName, cp) ) {
+		RestoreLocale( oldLocale );
+		return FALSE;
+            }
             paramFile = oldFile;
             paramLineNum = oldLineNum;
             paramCheckSum = oldCheckSum;
@@ -327,9 +330,14 @@ bool ReadParams(
 				} else {
 					if (skipLines>0)
 						NoticeMessage( MSG_PARAM_LINES_SKIPPED, _("Ok"), NULL, paramFileName, skipLines);
-					fclose(paramFile);
-					free(paramFileName);
-					paramFileName = NULL;
+					if ( paramFile ) {
+						fclose(paramFile);
+						paramFile = NULL;
+					}
+					if ( paramFileName ) {
+						free(paramFileName);
+						paramFileName = NULL;
+					}
 					RestoreLocale(oldLocale);
 					return FALSE;
 				}

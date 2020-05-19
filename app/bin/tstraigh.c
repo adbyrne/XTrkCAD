@@ -298,7 +298,7 @@ static BOOL_T WriteStraight( track_p t, FILE * f )
 	return rc;
 }
 
-static void ReadStraight( char * line )
+static BOOL_T ReadStraight( char * line )
 {
 	track_p trk;
 	wIndex_t index;
@@ -308,7 +308,9 @@ static void ReadStraight( char * line )
 	long options;
 
 	if ( !GetArgs( line+8, paramVersion<3?"dXZsd":"dLl00sd", &index, &layer, &options, scale, &visible ) )
-		return;
+		return FALSE;
+	if ( !ReadSegs() )
+		return FALSE;
 	trk = NewTrack( index, T_STRAIGHT, 0, 0 );
 	SetTrkScale( trk, LookupScale(scale) );
 	if ( paramVersion < 3 ) {
@@ -322,9 +324,9 @@ static void ReadStraight( char * line )
 	}
 	SetTrkLayer(trk, layer);
 	SetTrkWidth( trk, (int)(options&3) );
-	ReadSegs();
 	SetEndPts( trk, 2 );
 	ComputeBoundingBox( trk );
+	return TRUE;
 }
 
 static void MoveStraight( track_p trk, coOrd orig )

@@ -362,7 +362,7 @@ static BOOL_T WriteSignal ( track_p t, FILE * f )
     return rc;
 }
 
-static void ReadSignal ( char * line )
+static BOOL_T ReadSignal ( char * line )
 {
     /*TRKINX_T trkindex;*/
     wIndex_t index;
@@ -380,7 +380,7 @@ static void ReadSignal ( char * line )
     signalData_p xx;
     if (!GetArgs(line+6,"dLsdpfdq",&index,&layer,scale, &visible, &orig, 
                  &angle, &numHeads,&name)) {
-        return;
+        return FALSE;
     }
 
 #ifdef WINDOWS
@@ -397,7 +397,7 @@ static void ReadSignal ( char * line )
             continue;
         }
         if ( strncmp( cp, "ASPECT", 6 ) == 0 ) {
-            if (!GetArgs(cp+4,"qq",&aspname,&aspscript)) return;
+            if (!GetArgs(cp+4,"qq",&aspname,&aspscript)) return FALSE;
             DYNARR_APPEND( signalAspect_p *, signalAspect_da, 10 );
             signalAspect(signalAspect_da.cnt-1).aspectName = aspname;
             signalAspect(signalAspect_da.cnt-1).aspectScript = aspscript;
@@ -418,6 +418,7 @@ static void ReadSignal ( char * line )
         (&(xx->aspectList))[ia].aspectScript = signalAspect(ia).aspectScript;
     }
     ComputeSignalBoundingBox(trk);
+    return TRUE;
 }
 
 static void MoveSignal (track_p trk, coOrd orig )

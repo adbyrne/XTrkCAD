@@ -409,7 +409,7 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 	return rc;
 }
 
-static void ReadBlock ( char * line )
+static BOOL_T ReadBlock ( char * line )
 {
 	TRKINX_T trkindex;
 	wIndex_t index;
@@ -423,7 +423,7 @@ static void ReadBlock ( char * line )
 
 	LOG( log_block, 1, ("*** ReadBlock: line is '%s'\n",line))
 	if (!GetArgs(line+6,"dqq",&index,&name,&script)) {
-		return;
+		return FALSE;
 	}
 
 #ifdef WINDOWS
@@ -440,7 +440,7 @@ static void ReadBlock ( char * line )
 			continue;
 		}
 		if ( strncmp( cp, "TRK", 3 ) == 0 ) {
-			if (!GetArgs(cp+4,"d",&trkindex)) return;
+			if (!GetArgs(cp+4,"d",&trkindex)) return FALSE;
 			/*trk = FindTrack(trkindex);*/
 			DYNARR_APPEND( btrackinfo_p *, blockTrk_da, 10 );
 			blockTrk(blockTrk_da.cnt-1).i = trkindex;
@@ -473,6 +473,7 @@ static void ReadBlock ( char * line )
 		tracklist(iTrack).t = NULL;  			// Not resolved yet!! //
 	}
 	blockDebug(trk);
+	return TRUE;
 }
 
 EXPORT void ResolveBlockTrack ( track_p trk )

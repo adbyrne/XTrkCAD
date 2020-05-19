@@ -137,7 +137,7 @@ void DescribeCompound( track_p, char *, CSIZE_T );
 void DeleteCompound( track_p );
 track_p NewCompound( TRKTYP_T, TRKINX_T, coOrd, ANGLE_T, char *, EPINX_T, trkEndPt_t *, DIST_T *, int, char *, wIndex_t, trkSeg_p );
 BOOL_T WriteCompound( track_p, FILE * );
-void ReadCompound( char *, TRKTYP_T );
+BOOL_T ReadCompound( char *, TRKTYP_T );
 void MoveCompound( track_p, coOrd );
 void RotateCompound( track_p, coOrd, ANGLE_T );
 void RescaleCompound( track_p, FLOAT_T );
