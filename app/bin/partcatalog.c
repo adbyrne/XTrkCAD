@@ -520,6 +520,8 @@ CompareResults(const void *entry1, const void *entry2)
  * \return array of found catalog entries, NULL if none found
  */
 
+static int findAll = 1;
+
 unsigned int
 FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
 {
@@ -528,8 +530,8 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
     int foundElements = 0;
     *entries = NULL;
 
-    //Get all the entries back for generic search
-    if (!search || (search[0] == '*') || (search[0] == '\0')) {
+    //Get all the entries back for generic search or if "generic find"
+    if (findAll || !search || (search[0] == '*') || (search[0] == '\0')) {
     	result = malloc((length) * sizeof(CatalogEntry *));
     	for (int i = 0; i < length; i++) {
 			result[i] = index[i].value;
@@ -706,6 +708,25 @@ DeleteLibrary(TrackLibrary* library)
 	free(library);
 }
 
+// Case insensitive comparison
+char* stristr( const char* haystack, const char* needle )
+{
+	int c = tolower((unsigned char)*needle);
+	    if (c == '\0')
+	        return (char *)haystack;
+	    for (; *haystack; haystack++) {
+	        if (tolower((unsigned char)*haystack) == c) {
+	            for (size_t i = 0;;) {
+	                if (needle[++i] == '\0')
+	                    return (char *)haystack;
+	                if (tolower((unsigned char)haystack[i]) != tolower((unsigned char)needle[i]))
+	                    break;
+	            }
+	        }
+	    }
+	    return NULL;
+}
+
 /**
  * Search the library for a keyword string and return the result list
  *
@@ -734,7 +755,7 @@ SearchLibrary(TrackLibrary *library, char *searchExpression,
 
     word = strdup(searchExpression);
 
-    word = strtok(word," \t");
+    //word = strtok(word," \t");
 
     if (library->index == NULL || library->wordCount == 0) {
         return (0);
@@ -745,10 +766,10 @@ SearchLibrary(TrackLibrary *library, char *searchExpression,
     if (entryCount) {
         unsigned int i = 0;
         while (i < entryCount) {
-        	//Check if entire String Matches
         	char * match;
-        	if (!searchExpression || !word || (word[0] = '*') || (word[0] = '\0') ||
-        		(match = strcasestr(entries[i]->contents,searchExpression))) {
+        	//Check if entire String Matches
+        	if (!searchExpression || !word || (word[0] == '*') || (word[0] == '\0') ||
+        		(match = stristr(entries[i]->contents,searchExpression))) {
 				CatalogEntry * existingEntry;
 				existingEntry = IsExistingContents(resultEntries, entries[i]->contents, TRUE);
 				//Same FileName already in one of the entries?
