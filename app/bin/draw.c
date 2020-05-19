@@ -1371,11 +1371,13 @@ if (wDrawDoTempDraw == FALSE) {
 } else {
 	wDrawDelayUpdate( tempD.d, TRUE );
 	wDrawSetTempMode( tempD.d, TRUE );
+	tempD.options = DC_TICKS;
 	wDrawClearTemp( tempD.d );
 	DrawMarkers();
 	DoCurCommand( C_REDRAW, zero );
 	RulerRedraw( FALSE );
 	RedrawPlaybackCursor();              //If in playback
+	tempD.options = DC_TICKS|DC_SIMPLE;
 	wDrawSetTempMode( tempD.d, FALSE );
 	wDrawDelayUpdate( tempD.d, FALSE );
 }
