@@ -27,6 +27,7 @@
 #include "i18n.h"
 #include "misc.h"
 #include "param.h"
+#include "include/utf8convert.h"
 
 static char * mainText = NULL;
 static wWin_p noteW;

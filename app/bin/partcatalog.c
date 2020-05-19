@@ -44,6 +44,7 @@
 #include "include/partcatalog.h"
 #include "paths.h"
 #include "include/stringxtc.h"
+#include "include/utf8convert.h"
 
 #if _MSC_VER > 1300
     #define strnicmp _strnicmp
