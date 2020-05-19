@@ -934,6 +934,8 @@ static BOOL_T DoRegression( char * sFileName )
 		break;
 	}
 	free( sRegressionFile );
+
+	return TRUE;
 }
 
 static void EnableButtons(
