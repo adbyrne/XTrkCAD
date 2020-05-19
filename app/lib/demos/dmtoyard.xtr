@@ -51,6 +51,7 @@ END
 STEP
 COMMAND Parallel
 PARAMETER parallel separation 1.25
+PARAMETER parallel factor 0
 MOUSE 2 23.083 1.917
 PARAMETER parallel separation 1.250000
 MOUSE 3 23.083 1.917

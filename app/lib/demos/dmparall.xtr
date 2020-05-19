@@ -27,6 +27,7 @@ CURVE 4 DEMO 1 26.550055 14.883322 12.000000
 	END
 REDRAW
 PARAMETER parallel separation 0.0
+PARAMETER parallel factor 0.0
 RESET
 MESSAGE
 This example shows how to create parallel tracks.
