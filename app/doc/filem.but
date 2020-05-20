@@ -201,7 +201,7 @@ Selecting and loading additional parameter files from the System Library is done
 
 Using the Search function you can find and select parameter files that are
 part of the XTrackCAD installation.
-Enter at least one search word and select the Search button. Search results are
+Enter a search string and select the Search button. Search results are
 shown in the list box. A blank search or the value "*" resets the search results to 
 show the entire libary. 
 
