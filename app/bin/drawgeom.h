@@ -90,8 +90,8 @@ typedef struct {
 				int max_inx;
 				track_p trk;
 				char type;
-				coOrd orig;
-				ANGLE_T angle;
+				coOrd orig;			//Origin Pos
+				ANGLE_T angle;      //Origin Angle
 				wIndex_t segCnt;
 				trkSeg_p segPtr;
 				wBool_t selected;

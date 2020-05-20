@@ -2272,7 +2272,7 @@ STATUS_T DrawGeomModify(
 		case SEG_BENCH:
 			p0 = context->p0;
 			p1 = context->p1;
-			context->angle = FindAngle(p0,p1);
+			context->abs_angle = FindAngle(p0,p1);
 			context->length = FindDistance(p0,p1);
 			CreateLineAnchors(lineInx,p0,p1);
 			context->last_inx = lineInx;
@@ -2324,8 +2324,8 @@ STATUS_T DrawGeomModify(
 				case SEG_STRLIN:
 				case SEG_DIMLIN:
 				case SEG_BENCH:
-					context->angle = NormalizeAngle(context->angle);
-					Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->angle,context->length);
+					context->abs_angle = NormalizeAngle(context->abs_angle);
+					Translate(&tempSegs(0).u.l.pos[1],tempSegs(0).u.l.pos[0],context->abs_angle,context->length);
 					CreateLineAnchors(context->last_inx,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1]);
 					context->p0 = tempSegs(0).u.l.pos[0];
 					context->p1 = tempSegs(0).u.l.pos[1];
