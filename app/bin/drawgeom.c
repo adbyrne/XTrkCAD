@@ -1464,7 +1464,7 @@ STATUS_T DrawGeomPolyModify(
 		case C_TEXT:
 			if (action>>8 == 'o') {  //"o" -> origin mode
 				MenuMode(1);
-				InfoMessage(_("Move Origin Mode"));
+				InfoMessage("Move Origin Mode: Place Origin, p for Points, Enter or Esc");
 				return C_CONTINUE;
 			}
 			if (((prev_inx>=0 && tempSegs(0).u.p.polyType != POLYLINE) || (prev_inx>=1 && prev_inx<=points_da.cnt-2)) &&
@@ -1637,7 +1637,14 @@ STATUS_T DrawGeomOriginMove(
 			if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) && (context->prev_inx>=0)) {
 				CreateSelectedAnchor(points(context->prev_inx).pt);
 			}
-			InfoMessage("Origin Mode: Place Origin, 0-4 or l, Enter or Esc");
+			InfoMessage("Move Origin Mode: Place Origin, 0-4, c or l, Enter or Esc");
+			return C_CONTINUE;
+			break;
+		case wActionMove:
+			CreateOriginAnchor(context->rot_center, TRUE);
+			if ((tempSegs(0).type == SEG_POLY || tempSegs(0).type == SEG_FILPOLY) && (context->prev_inx>=0)) {
+				CreateSelectedAnchor(points(context->prev_inx).pt);
+			}
 			return C_CONTINUE;
 			break;
 		case C_DOWN:
@@ -1844,6 +1851,7 @@ STATUS_T DrawGeomModify(
 		return C_CONTINUE;
 		break;
 	case wActionMove:
+		if (context->rotate_state) return DrawGeomOriginMove(action,pos,context);
 		if (polyMode) return DrawGeomPolyModify(action,pos,context);
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		switch( context->type) {
