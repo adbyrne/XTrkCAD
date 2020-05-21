@@ -64,6 +64,7 @@ struct extraData { char junk[2000]; };
 
 static wDrawBitMap_p endpt_bm;
 static wDrawBitMap_p angle_bm[4];
+track_p IsInsideABox(coOrd pos);
 
 static track_p moveDescTrk;
 static coOrd moveDescPos;
@@ -483,6 +484,25 @@ static void SelectOneTrack(
 }
 
 
+static void HighlightSelectedTracks(
+		track_p trk_ignore, BOOL_T box, BOOL_T invert )
+{
+	track_p trk = NULL;
+	if ( selectedTrackCount == 0 )
+		return;
+	while ( TrackIterate( &trk ) ) {
+		if (trk == trk_ignore) continue;
+	    if(GetTrkSelected(trk)) {
+	    	if (!GetLayerVisible( GetTrkLayer( trk ))) continue;
+	    	if (invert)
+	    		DrawTrack(trk,&tempD,wDrawColorYellowHighlight);
+	    	else
+	    		DrawTrack(trk,&tempD,wDrawColorBlueHighlight);
+	    }
+	}
+
+}
+
 static void SelectConnectedTracks(
 		track_p trk, BOOL_T display_only )
 {
@@ -501,6 +521,10 @@ static void SelectConnectedTracks(
 			GetTrkSelected(trk)) {
 			if (display_only)
 				DrawTrack(trk,&tempD,wDrawColorBlueHighlight);
+			continue;
+		} else if (GetTrkSelected(trk)) {
+			if (display_only)
+				DrawTrack(trk,&tempD,wDrawColorYellowHighlight);
 			continue;
 		}
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
@@ -3006,13 +3030,48 @@ static STATUS_T CmdSelect(
 			}
 		}
 		if ( trk && !IsTrackDeleted(trk)) {
-			if (selectMode == 0)
-				DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
-			else if ((selectMode == 1) && !GetTrkSelected(trk))
-				DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
-			if ((MyGetKeyState() & WKEY_SHIFT) && !IsInsideABox(pos))
-				SelectConnectedTracks(trk,TRUE);                  //Highlight all connected
+			if (selectMode == 0) {
+				if ((MyGetKeyState() & WKEY_SHIFT))
+					SelectConnectedTracks(trk, TRUE);        	 //Highlight all connected
+				else if ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) { //Add
+					if (GetTrkSelected(trk))
+						DrawTrack(trk,&tempD,wDrawColorYellowHighlight);   //Also remove
+					else
+						DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+				} else
+					DrawTrack(trk,&tempD,wDrawColorBlueHighlight);   //Special color means THICK3 as well
+			} else {											   //Old school
+				if ((MyGetKeyState() & WKEY_SHIFT))
+					SelectConnectedTracks(trk,TRUE);        	//Highlight all connected
+				else if (!GetTrkSelected(trk) &&
+						(!((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL)))
+					DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+				else {
+					DrawTrack(trk,&tempD,wDrawColorYellowHighlight);  //UnSelect this one
+				}
+			}
+
 		}
+		if (selectZero && !trk) {
+				HighlightSelectedTracks(NULL, TRUE, TRUE);
+		} else {
+			if (trk) {
+				if (selectMode == 0) {
+					if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
+						HighlightSelectedTracks(trk, TRUE, FALSE);
+					else
+						HighlightSelectedTracks(trk, TRUE, TRUE);
+
+				} else {
+					if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
+						HighlightSelectedTracks(trk, TRUE, TRUE);
+					else
+					    HighlightSelectedTracks(trk, TRUE, FALSE);
+				}
+			}
+		}
+
+
 		if (!doingMove && !doingRotate) {
 			if (selectMode == 0)
 				if (!trk && selectZero)
