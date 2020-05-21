@@ -32,7 +32,9 @@
 #define strcasecmp _stricmp
 #endif
 
+#ifndef MISC_H
 #include "dynarr.h"
+#endif
 
 #define BORDERSIZE	(4)
 #define LABEL_OFFSET	(3)

@@ -2176,6 +2176,8 @@ void wHelp(
 }
 
 
+
+
 void doHelpMenu(void * context)
 {
     HH_FTS_QUERY ftsQuery;
@@ -2200,6 +2202,13 @@ void doHelpMenu(void * context)
         HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_SEARCH,(DWORD)&ftsQuery);
         break;
 
+
+    case 3: /*Context*/
+    	char * topic;
+    	topic = GetCurCommandName();
+    	wHelp(topic);
+    	break;
+
     default:
         return;
     }
@@ -2207,11 +2216,16 @@ void doHelpMenu(void * context)
     helpInitted = TRUE;
 }
 
+void wDoAccelHelp(wAccelKey_e key, void * context) {
+	doHelpMenu(context);
+}
+
 void wMenuAddHelp(
     wMenu_p m)
 {
     wMenuPushCreate(m, NULL, "&Contents", 0, doHelpMenu, (void*)1);
     wMenuPushCreate(m, NULL, "&Search for Help on...", 0, doHelpMenu, (void*)2);
+    wMenuPushCreate(m, NULL, "Co&mmand Context Help", 0, doHelpMenu, (void*)3);
 }
 
 

@@ -241,6 +241,7 @@ void SelectFont();
 
 void CheckRoomSize( BOOL_T );
 const char * GetBalloonHelpStr( char* );
+const char * GetCurCommandName( void );
 void EnableCommands( void );
 void Reset( void );
 wIndex_t GetCurrentCommand(void);

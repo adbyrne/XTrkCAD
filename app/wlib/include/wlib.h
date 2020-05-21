@@ -155,6 +155,7 @@ wBool_t wNotice(		const char *, const char *, const char * );
 int wNotice3(			const char *, const char *, const char *, const char * );
 void wHelp(			const char * );
 
+
 #define NT_INFORMATION 1
 #define NT_WARNING	   2
 #define NT_ERROR	   4
@@ -659,6 +660,8 @@ typedef enum {
 	wModKey_Shift,
 	wModKey_Ctrl }
 	wModKey_e;
+
+void wDoAccelHelp( wAccelKey_e key, void * );
 
 /* Creation CallBacks */
 typedef void (*wMenuCallBack_p)( void * );

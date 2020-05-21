@@ -36,12 +36,23 @@ set(sources
 	gtkdraw-cairo.c
 	)
 
-
 # help system is OS and build specific, add appropriate source files
 if(APPLE)
-    set(sources 
-        ${sources}
-	osxhelp.c)	
+   if (XTRCAD_USE_APPLEHELP) 
+   		set(sources 
+      	  ${sources}
+			osxhelp.c)	
+	else()
+		if(XTRKCAD_USE_BROWSER) 
+        	set(sources 
+          	  ${sources}
+          	  browserhelp.c)
+    	else()
+       	 set(sources 
+       	     ${sources}
+       	     ixhelp.c)
+       	endif()
+    endif()    
 else()
     if(XTRKCAD_USE_BROWSER) 
         set(sources 

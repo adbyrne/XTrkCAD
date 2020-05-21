@@ -28,8 +28,11 @@
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 
+#include "misc.h"
+
 #include "gtkint.h"
 #include "i18n.h"
+
 
 /**
  * Handle the commands issued from the Help drop-down. Currently, we only have a table
@@ -44,16 +47,28 @@ DoHelpMenu(void *data)
 {
     int func = (intptr_t)data;
 
+    const char * topic;
+
     switch (func) {
     case 1:
         wHelp("index");
         break;
+
+    case 3:
+    	topic = GetCurCommandName();
+    	if (topic && topic[0])
+    		wHelp(topic);
+    	break;
 
     default:
         break;
     }
 
     return;
+}
+
+void wDoAccelHelp(wAccelKey_e key, void * context) {
+	DoHelpMenu(context);
 }
 
 /**
@@ -66,4 +81,5 @@ DoHelpMenu(void *data)
 void wMenuAddHelp(wMenu_p m)
 {
     wMenuPushCreate(m, NULL, _("&Contents"), 0, DoHelpMenu, (void*)1);
+    wMenuPushCreate(m, NULL, _("Co&mmand Context help"), 0, DoHelpMenu, (void*)3);
 }

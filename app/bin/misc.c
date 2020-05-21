@@ -924,6 +924,10 @@ static void ShowUnusedBalloonHelp( void )
 }
 #endif
 
+EXPORT const char* GetCurCommandName() {
+	return commandList[curCommand].helpKey;
+}
+
 EXPORT void EnableCommands(void) {
 	int inx, minx;
 	wBool_t enable;
@@ -2654,6 +2658,10 @@ static void CreateMenus(void) {
 			(wAccelKeyCallBack_p) DoZoomUp, (void*) 1);
 	SetAccelKey("zoomDown", wAccelKey_Numpad_Subtract, WKEY_CTRL,
 			(wAccelKeyCallBack_p) DoZoomDown, (void*) 1);
+	SetAccelKey("help", wAccelKey_F1, WKEY_SHIFT,
+			(wAccelKeyCallBack_p) wDoAccelHelp, (void*) 1);
+	SetAccelKey("help-context", wAccelKey_F1, 0,
+			(wAccelKeyCallBack_p) wDoAccelHelp, (void*) 3);
 
 	InitBenchDialog();
 	wPrefGetInteger( "DialogItem", "sticky-set", &stickySet, stickySet );
