@@ -254,6 +254,10 @@ Instead of using the menus or the buttons on the \f{Tool-bar} (\K{mainW}), most 
 
 \u000
 
+\dd The \c{F1} key opens the Help page for the currently selected command. \c{Shift+F1} opens the Contents Help Page.
+
+\u000
+
 \dd The \c{PAGE UP} and \c{PAGE DOWN} keys will zoom out or zoom in.
 
 \u000
