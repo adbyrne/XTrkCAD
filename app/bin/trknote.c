@@ -369,9 +369,10 @@ static BOOL_T WriteNote(track_p t, FILE * f)
 	rc &= fprintf( f, " \"%s\"", s[0] );
 	MyFree(s[0]);
 	if ( s[1] ) {
-		rc &= fprintf( f, "\"%s\"", s[1] )>0;
+		rc &= fprintf( f, " \"%s\"", s[1] )>0;
 		MyFree( s[1] );
 	}
+	rc &= fprintf( f, "\n" );
 	
 	return rc;
 }
