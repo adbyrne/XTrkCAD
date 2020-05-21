@@ -10,6 +10,10 @@
 
 The \f{Help Menu} displays information on various topics. The contents of the menu vary depending on the operating system.
 
+\dd The \f{Help} command opens the Help Window at the Contents Page.
+
+\dd The \f{Help Command Context} command opens the Help Window at the page for the current Command.
+
 \dd \G{png.d/mhelprecent.png}
 
 \dd \e{Recent Messages}
