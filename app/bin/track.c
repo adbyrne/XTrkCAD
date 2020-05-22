@@ -2699,7 +2699,7 @@ EXPORT void DrawCurvedTrack(
 	width = trk ? GetTrkWidth( trk ): 0;
 	if ( d->options&DC_THICK )
 		width = 3;
-	if ( color == wDrawColorBlueHighlight )
+	if ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected )
 		width = 3;
 #ifdef WINDOWS
 	width *= (wDrawWidth)(d->dpi/mainD.dpi);
@@ -2844,7 +2844,7 @@ EXPORT void DrawStraightTrack(
 	width = trk ? GetTrkWidth( trk ): 0;
 	if ( d->options&DC_THICK )
 		width = 3;
-	if ( color == wDrawColorBlueHighlight )
+	if ( color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected )
 		width = 3;
 #ifdef WINDOWS
 	width *= (wDrawWidth)(d->dpi/mainD.dpi);
@@ -2974,7 +2974,7 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 		if (color == wDrawColorBlack) {
 			color = GetTrkColor( trk, d );
 		}
-		if (color == wDrawColorBlueHighlight) {
+		if (color == wDrawColorPreviewSelected || color == wDrawColorPreviewUnselected ) {
 			d->options |= DC_THICK;
 		}
 	}

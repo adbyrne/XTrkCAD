@@ -495,9 +495,9 @@ static void HighlightSelectedTracks(
 	    if(GetTrkSelected(trk)) {
 	    	if (!GetLayerVisible( GetTrkLayer( trk ))) continue;
 	    	if (invert)
-	    		DrawTrack(trk,&tempD,wDrawColorYellowHighlight);
+	    		DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
 	    	else
-	    		DrawTrack(trk,&tempD,wDrawColorBlueHighlight);
+	    		DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
 	    }
 	}
 
@@ -520,22 +520,22 @@ static void SelectConnectedTracks(
 		if (inx!=0 && 
 			GetTrkSelected(trk)) {
 			if (display_only)
-				DrawTrack(trk,&tempD,wDrawColorBlueHighlight);
+				DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
 			continue;
 		} else if (GetTrkSelected(trk)) {
 			if (display_only)
-				DrawTrack(trk,&tempD,wDrawColorYellowHighlight);
+				DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
 			continue;
 		}
 		for (ep=0; ep<GetTrkEndPtCnt(trk); ep++) {
 			trk1 = GetTrkEndTrk( trk, ep );
 			if (trk1 && !TListSearch(trk1) && GetLayerVisible( GetTrkLayer( trk1 ))) {
 				if (GetTrkSelected(trk1)) {
-					if (display_only) DrawTrack(trk1,&tempD,wDrawColorBlueHighlight);
+					if (display_only) DrawTrack(trk1,&tempD,wDrawColorPreviewSelected );
 				} else TlistAppend( trk1 );
 			}
 		}
-		if (display_only) DrawTrack(trk,&tempD,wDrawColorBlueHighlight);
+		if (display_only) DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
 		else if (!GetTrkSelected(trk)) {
 			if (GetLayerModule(GetTrkLayer(trk))) {
 				continue;
@@ -2769,7 +2769,7 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, track_p not_this) {
 			DrawHighlightLayer(GetTrkLayer(ts));
 		}
 		coOrd hi,lo;
-		if (highlight_selected && (ts != not_this)) DrawTrack(ts,&tempD,wDrawColorBlueHighlight);
+		if (highlight_selected && (ts != not_this)) DrawTrack(ts,&tempD,wDrawColorPreviewSelected );
 		GetBoundingBox(ts, &hi, &lo);
 		if (first) {
 			origin = lo;
@@ -3026,7 +3026,7 @@ static STATUS_T CmdSelect(
 				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
 				DrawHighlightLayer(GetTrkLayer(trk));
 			} else {
-				DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+				DrawTrack(trk,&tempD,wDrawColorPreviewSelected );    //Special color means THICK3 as well
 			}
 		}
 		if ( trk && !IsTrackDeleted(trk)) {
@@ -3035,19 +3035,19 @@ static STATUS_T CmdSelect(
 					SelectConnectedTracks(trk, TRUE);        	 //Highlight all connected
 				else if ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) { //Add
 					if (GetTrkSelected(trk))
-						DrawTrack(trk,&tempD,wDrawColorYellowHighlight);   //Also remove
+						DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);   //Also remove
 					else
-						DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+						DrawTrack(trk,&tempD,wDrawColorPreviewSelected );    //Special color means THICK3 as well
 				} else
-					DrawTrack(trk,&tempD,wDrawColorBlueHighlight);   //Special color means THICK3 as well
+					DrawTrack(trk,&tempD,wDrawColorPreviewSelected );   //Special color means THICK3 as well
 			} else {											   //Old school
 				if ((MyGetKeyState() & WKEY_SHIFT))
 					SelectConnectedTracks(trk,TRUE);        	//Highlight all connected
 				else if (!GetTrkSelected(trk) &&
 						(!((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL)))
-					DrawTrack(trk,&tempD,wDrawColorBlueHighlight);    //Special color means THICK3 as well
+					DrawTrack(trk,&tempD,wDrawColorPreviewSelected );    //Special color means THICK3 as well
 				else {
-					DrawTrack(trk,&tempD,wDrawColorYellowHighlight);  //UnSelect this one
+					DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);  //UnSelect this one
 				}
 			}
 

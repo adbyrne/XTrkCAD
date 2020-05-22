@@ -592,10 +592,10 @@ static STATUS_T CmdJoinLine(
 		Dl.curr_line = NULL;
 		break;
 	case C_REDRAW:
-		if (Dl.line_state != NO_LINE) DrawSegs(&tempD,zero,0.0,((trkSeg_t*)Dl.newLine.ptr), Dl.newLine.cnt, trackGauge, wDrawColorBlueHighlight);
-		if (Dl.curr_line) DrawTrack(Dl.curr_line,&tempD,wDrawColorBlueHighlight);
+		if (Dl.line_state != NO_LINE) DrawSegs(&tempD,zero,0.0,((trkSeg_t*)Dl.newLine.ptr), Dl.newLine.cnt, trackGauge, wDrawColorPreviewSelected);
+		if (Dl.curr_line) DrawTrack(Dl.curr_line,&tempD,wDrawColorPreviewSelected);
 		if (Dl.anchors_da.cnt>0)
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), Dl.anchors_da.cnt, trackGauge, wDrawColorBlueHighlight );
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), Dl.anchors_da.cnt, trackGauge, wDrawColorPreviewSelected );
 		break;
 	case C_TEXT:
 	case C_OK:

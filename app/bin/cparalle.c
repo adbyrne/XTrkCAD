@@ -252,7 +252,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
     case C_REDRAW:
         if (Dpa.anchor_Trk) {
 			DrawTrack(Dpa.anchor_Trk,&tempD,
-				  wDrawColorBlueHighlight);    //Special color means THICK3 as well
+				  wDrawColorPreviewSelected);    //Special color means THICK3 as well
         }
         if (tempSegs_da.cnt>0) {
 			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge,

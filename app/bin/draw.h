@@ -133,8 +133,6 @@ extern wDrawColor drawColorBlue;
 extern wDrawColor drawColorGreen;
 extern wDrawColor drawColorAqua;
 extern wDrawColor drawColorPowderedBlue;
-extern wDrawColor drawColorBlueHighlight;
-extern wDrawColor drawColorYellowHighlight;
 extern wDrawColor drawColorPurple;
 extern wDrawColor drawColorGold;
 extern wDrawColor drawColorGrey10;
@@ -146,12 +144,13 @@ extern wDrawColor drawColorGrey60;
 extern wDrawColor drawColorGrey70;
 extern wDrawColor drawColorGrey80;
 extern wDrawColor drawColorGrey90;
+// Special colors
+extern wDrawColor drawColorPreviewSelected;
+extern wDrawColor drawColorPreviewUnselected;
 
 #define wDrawColorBlack drawColorBlack
 #define wDrawColorWhite drawColorWhite
 #define wDrawColorBlue  drawColorBlue
-#define wDrawColorBlueHighlight drawColorBlueHighlight
-#define wDrawColorYellowHighlight drawColorYellowHighlight
 #define wDrawColorPowderedBlue drawColorPowderedBlue
 #define wDrawColorAqua  drawColorAqua
 #define wDrawColorRed	drawColorRed
@@ -164,6 +163,8 @@ extern wDrawColor drawColorGrey90;
 #define wDrawColorGrey70 drawColorGrey70
 #define wDrawColorGrey80 drawColorGrey80
 #define wDrawColorGrey90 drawColorGrey90
+#define wDrawColorPreviewSelected drawColorPreviewSelected
+#define wDrawColorPreviewUnselected drawColorPreviewUnselected
 
 extern wDrawColor markerColor;
 extern wDrawColor borderColor;
