@@ -727,7 +727,7 @@ EXPORT void DrawBoxedString(
 	case BOX_INVERT:
 		DrawPoly( d, 4, p, NULL, color, 0, 1, 0);
 		if ( color != wDrawColorWhite )
-			DrawString( d, p0, 0.0, text, fp, fs, wDrawColorWhite );
+			DrawString( d, p0, 0.0, text, fp, fs, wDrawColorGray( 94 ) );
 		break;
 	case BOX_BACKGROUND:
 		DrawPoly( d, 4, p, NULL, wDrawColorWhite, 0, 1, 0 );

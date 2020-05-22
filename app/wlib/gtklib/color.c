@@ -100,7 +100,7 @@ static colorMap_t colorMap[] = {
     { 208, 208, 208 },	/* Gray */
     { 224, 224, 224 },	/* Gray */
     { 240, 240, 240 },	/* Gray */
-    {   0,   0,   0 }	/* BlackPixel */
+    { 255, 255, 255 }	/* WhitePixel */
 };
 
 #define NUM_GRAYS (16)
@@ -125,7 +125,7 @@ wDrawColor wDrawColorGray(
 
     if (n <= 0) {
         return wDrawColorBlack;
-    } else if (n > NUM_GRAYS) {
+    } else if (n >= NUM_GRAYS) {
         return wDrawColorWhite;
     } else {
         n = (n*256)/NUM_GRAYS;
