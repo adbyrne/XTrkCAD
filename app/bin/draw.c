@@ -1004,7 +1004,7 @@ EXPORT drawCmd_t mainD = {
 		NULL, &screenDrawFuncs, DC_TICKS, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix };
 
 EXPORT drawCmd_t tempD = {
-		NULL, &tempDrawFuncs, DC_TICKS|DC_SIMPLE, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix };
+		NULL, &tempDrawFuncs, DC_TICKS, INIT_MAIN_SCALE, 0.0, {0.0,0.0}, {0.0,0.0}, MainPix2CoOrd, MainCoOrd2Pix };
 
 EXPORT drawCmd_t mapD = {
 		NULL, &screenDrawFuncs, DC_SIMPLE, INIT_MAP_SCALE, 0.0, {0.0,0.0}, {96.0,48.0}, Pix2CoOrd, CoOrd2Pix };
@@ -1372,13 +1372,11 @@ if (wDrawDoTempDraw == FALSE) {
 } else {
 	wDrawDelayUpdate( tempD.d, TRUE );
 	wDrawSetTempMode( tempD.d, TRUE );
-	tempD.options = DC_TICKS;
 	wDrawClearTemp( tempD.d );
 	DrawMarkers();
 	DoCurCommand( C_REDRAW, zero );
 	RulerRedraw( FALSE );
 	RedrawPlaybackCursor();              //If in playback
-	tempD.options = DC_TICKS|DC_SIMPLE;
 	wDrawSetTempMode( tempD.d, FALSE );
 	wDrawDelayUpdate( tempD.d, FALSE );
 }
