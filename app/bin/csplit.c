@@ -185,7 +185,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		onTrackInSplit = TRUE;
-		if ((trk0 = OnTrack( &pos, FALSE, TRUE ))!=NULL && CheckTrackLayer( trk0 )) {
+		if ((trk0 = OnTrack( &pos, FALSE, TRUE ))!=NULL && CheckTrackLayerSilent( trk0 )) {
 			onTrackInSplit = FALSE;
 			ep0 = PickEndPoint( pos, trk0 );
 			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos)) && (GetTrkEndTrk(trk0,ep0)!=NULL)) {

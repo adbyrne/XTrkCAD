@@ -292,7 +292,7 @@ static BOOL_T RefreshCompound1(
 	xx->segs = (trkSeg_p)MyMalloc( xx->segCnt * sizeof *(trkSeg_p)0 );
 	memcpy( xx->segs, to->segs, xx->segCnt * sizeof *(trkSeg_p)0 );
 	MyFree( xx->paths);
-	xx->paths = (char*)MyMalloc( to->pathLen * sizeof *xx->paths );
+	xx->paths = (signed char*)MyMalloc( to->pathLen * sizeof *xx->paths );
 	memcpy( xx->paths, to->paths, to->pathLen * sizeof *xx->paths );
 	xx->pathLen = to->pathLen;
 	xx->pathCurr = xx->paths;
