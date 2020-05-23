@@ -2897,6 +2897,7 @@ static STATUS_T CmdSelect(
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
+		if (doingMove|doingRotate) return C_CONTINUE;
 
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		coOrd p = pos;
@@ -2936,20 +2937,22 @@ static STATUS_T CmdSelect(
 		}
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		switch (mode) {
+		rc = C_CONTINUE;
 		case MOVE:
 			if (SelectedTracksAreFrozen() || (selectedTrackCount==0)) {
 				rc = C_TERMINATE;
 				doingMove = FALSE;
-			} else if ((MyGetKeyState()&WKEY_CTRL)) {
+			} else if ((MyGetKeyState()&(WKEY_CTRL|WKEY_SHIFT))==WKEY_CTRL) {
 				doingRotate = TRUE;
 				doingMove = FALSE;
 				RotateAlign( FALSE );
 				rc = CmdRotate( action, pos );
-			} else if ((MyGetKeyState()&WKEY_SHIFT)) {
+			} else if ((MyGetKeyState()&(WKEY_SHIFT|WKEY_CTRL))==WKEY_SHIFT) {
 				doingMove = TRUE;
 				doingRotate = FALSE;
 				rc = CmdMove( action, pos );
 			}
+			TempRedraw();
 			break;
 		case AREA:
 			doingMove = FALSE;
@@ -2967,9 +2970,9 @@ static STATUS_T CmdSelect(
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
-		if ((action&0xFF) == wActionExtKey && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) == (WKEY_SHIFT|WKEY_CTRL))) { //Both
-				doingMove = TRUE;
-				mode = MOVE;
+		if ((action&0xFF) == wActionExtKey && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) == (WKEY_SHIFT|WKEY_CTRL))) { //Both + arrow
+			doingMove = TRUE;
+			mode = MOVE;
 		}
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		switch (mode) {
@@ -3034,15 +3037,21 @@ static STATUS_T CmdSelect(
 			return CallModify(action,pos);
 		}
 		if (doingMove) {
-			rc = CmdMove( C_REDRAW, pos );
+			return CmdMove( C_REDRAW, pos );
 		} else if (doingRotate) {
-			rc = CmdRotate( C_REDRAW, pos );
+			return CmdRotate( C_REDRAW, pos );
 		} else if (anchors_da.cnt) {
 			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		}
 
+
 		if (mode==AREA)
 			rc = SelectArea( action, pos );
+
+		if (IsInsideABox(pos) && (MyGetKeyState()&(WKEY_SHIFT|WKEY_CTRL))) {
+			return C_CONTINUE;
+		}
+
 		if (trk && !GetTrkSelected(trk)) {
 			if (GetLayerModule(GetTrkLayer(trk))) {
 				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
