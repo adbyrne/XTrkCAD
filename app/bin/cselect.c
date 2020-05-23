@@ -23,6 +23,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "draw.h"
 #include "ccurve.h"
 #include "tcornu.h"
 #include "tbezier.h"
@@ -569,7 +570,7 @@ static int DoModuleTracks( int moduleLayer, doModuleTrackCallBack_t doit, BOOL_T
 }
 
 static void DrawSingleTrack(track_p trk, BOOL_T bit) {
-	DrawTrack(trk,&mainD,wDrawColorBlue);
+	DrawTrack(trk,&tempD,bit?wDrawColorPreviewSelected:wDrawColorPreviewUnselected);
 }
 
 typedef BOOL_T (*doSelectedTrackCallBack_t)(track_p, BOOL_T);
@@ -2621,7 +2622,7 @@ static STATUS_T SelectArea(
 			add = (action == C_UP);
 			cnt = 0;
 			trk = NULL;
-			if (action==C_UP) SetAllTrackSelect( FALSE );							//Remove all tracks first
+			if ((action==C_UP) && (selectMode == 0)) SetAllTrackSelect( FALSE );							//Remove all tracks first
 			while ( TrackIterate( &trk ) ) {
 				GetBoundingBox( trk, &hi, &lo );
 				if (GetLayerVisible( GetTrkLayer( trk ) ) &&
@@ -2677,6 +2678,27 @@ static STATUS_T SelectArea(
 	case C_REDRAW:
 		if (state == 0)
 			break;
+		//Draw to-be selected tracks versus not.
+		trk = NULL;
+		while ( TrackIterate( &trk ) ) {
+			GetBoundingBox( trk, &hi, &lo );
+			if (GetLayerVisible( GetTrkLayer( trk ) ) &&
+				lo.x >= base.x && hi.x <= base.x+size.x &&
+				lo.y >= base.y && hi.y <= base.y+size.y) {
+				if (GetLayerModule(GetTrkLayer(trk))) {
+					if ((action==C_UP) && (selectMode == 0))
+						DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
+					else
+						DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,FALSE);
+				} else {
+					if ((action==C_UP) && (selectMode == 0))
+						DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+					else
+						DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
+				}
+			}
+		}
+
 		DrawHilight( &tempD, base, size, add );
 		break;
 
@@ -3021,7 +3043,7 @@ static STATUS_T CmdSelect(
 
 		if (mode==AREA)
 			rc = SelectArea( action, pos );
-		else if (trk && !GetTrkSelected(trk)) {
+		if (trk && !GetTrkSelected(trk)) {
 			if (GetLayerModule(GetTrkLayer(trk))) {
 				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
 				DrawHighlightLayer(GetTrkLayer(trk));
@@ -3056,17 +3078,22 @@ static STATUS_T CmdSelect(
 				HighlightSelectedTracks(NULL, TRUE, TRUE);
 		} else {
 			if (trk) {
-				if (selectMode == 0) {
-					if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
-						HighlightSelectedTracks(trk, TRUE, FALSE);
-					else
-						HighlightSelectedTracks(trk, TRUE, TRUE);
-
+				if (GetLayerModule(GetTrkLayer(trk))) {
+					DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
+					DrawHighlightLayer(GetTrkLayer(trk));
 				} else {
-					if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
-						HighlightSelectedTracks(trk, TRUE, TRUE);
-					else
-					    HighlightSelectedTracks(trk, TRUE, FALSE);
+					if (selectMode == 0) {
+						if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
+							HighlightSelectedTracks(trk, TRUE, FALSE);
+						else
+							HighlightSelectedTracks(trk, TRUE, TRUE);
+
+					} else {
+						if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
+							HighlightSelectedTracks(trk, TRUE, TRUE);
+						else
+							HighlightSelectedTracks(trk, TRUE, FALSE);
+					}
 				}
 			}
 		}

@@ -836,15 +836,17 @@ Note Dialog
 
 \e{Select Command}
 
-The \e{Select} command actions are affected by the mode selected in \f{Options->Command->Select}.   
+The \e{Select} command actions are affected by the mode selected in \f{Options->Command->Select}.  
+Note that a module layer counts as a single object for select. 
 
 \dt \e{Left-Click}
  
-\dd Single Item Mode -> Selects one object, deselects all objects if clicked off all objects. Multiple Select Mode-> Adds unselected objects, deselects if the object is already selected.
+\dd Single Item Mode -> Selects one object at a time, deselects other objects. 
+Multiple Select Mode-> Adds unselected objects, deselects if the object is already selected.
 
 \dt \e{Shift-Left-Click} 
 
-\dd Selects all connected tracks to the one clicked on up to the next selected item in each direction.
+\dd Selects all connected tracks from the one clicked up to the next selected item in each direction.
 
 \dt \e{Ctrl+Left-Click} 
 
@@ -856,7 +858,8 @@ The \e{Select} command actions are affected by the mode selected in \f{Options->
 
 \dt \e{Left+Drag} 
 
-\dd Single Item Mode -> Selects all objects in an rubber-banded area and deselects all others. Multiple Select Mode -> Adds items in the rubber-banded area. 
+\dd Single Item Mode -> Selects all objects in an rubber-banded area and deselects all others. 
+Multiple Select Mode -> Adds items in the rubber-banded area.  
 
 \dt \e{Shift+Left-Drag} 
 

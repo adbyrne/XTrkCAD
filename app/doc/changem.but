@@ -1476,7 +1476,7 @@ Clicking on the \f{Select} button cancels all active commands, closes any open d
 
 In combination with the mouse, the \f{Select} command can be used as follows;
 
-\dd Objects that will be selected with a \e{Left-Click} are highlighted in Blue. 
+\dd Objects that will be selected with a \e{Left-Click} are highlighted in Blue as the mouse moves over them. Items that will be deselected are highlighted in Gold. 
 
 \u000
 
@@ -1486,7 +1486,7 @@ If \f{SelectZero} is selected in \K{cmdCmdopt} and an point without a track is s
 
 \u000
 
-\dd \e{Ctrl+Left-Click} - in \f{SelectMode} "Only" it adds the track to the selected tracks, or removed it if it is already selected.
+\dd \e{Ctrl+Left-Click} - in \f{SelectMode} "Only" it adds the track to the selected tracks, or removes if it is already selected.
 If \f{SelectMode} "Add" is set, only the object is selected, with "Only" the object is added to the select set.
 If \f{SelectZero} is selected in \K{cmdCmdopt} and an point without a track is selected, all currently selected tracks are deselected.
 
