@@ -102,7 +102,7 @@ void SearchFileListLoad(CatalogEntry *catalog)
     wListClear(RESULTLIST);
 
     while (currentEntry != currentEntry->next) {
-        for (int i=0;i<currentEntry->files;i++) {
+        for (unsigned int i=0;i<currentEntry->files;i++) {
         	DynStringClear(&description);
 			DynStringCatCStr(&description,
 							 ((!searchUiMode) && currentEntry->contents) ?
@@ -185,7 +185,6 @@ SearchUILoadResults(void)
     char **fileNames;
     int files = wListGetSelectedCount(RESULTLIST);
     int found = 0;
-    CatalogEntry *currentEntry;
 
     if (files) {
         fileNames = malloc(sizeof(char *)*files);

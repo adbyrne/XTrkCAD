@@ -776,7 +776,7 @@ SearchLibrary(TrackLibrary *library, char *searchExpression,
 				//Same FileName already in one of the entries?
 				BOOL_T found = FALSE;
 				if (existingEntry) {
-					for (int j=0;j<existingEntry->files;j++) {
+					for (unsigned int j=0;j<existingEntry->files;j++) {
 						if (!strcmp(existingEntry->fullFileName[j],entries[i]->fullFileName[entries[i]->files-1])) {
 							found=TRUE;
 							break;

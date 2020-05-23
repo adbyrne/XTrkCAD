@@ -1347,7 +1347,6 @@ static void PlaceCar(
 {
     struct extraData *xx = GetTrkExtraData(car);
     DIST_T dists[2];
-    int dir;
     CarItemPlace(xx->item, &xx->trvTrk, dists);
 
     CarItemFindCouplerMountPoint(xx->item, xx->trvTrk, xx->couplerPos);

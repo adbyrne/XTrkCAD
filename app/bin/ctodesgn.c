@@ -1296,12 +1296,14 @@ static toDesignSchema_t * LoadSegs(
 	wIndex_t segCnt;
 	ANGLE_T angle0, angle1, angle2, angle3;
 	trkSeg_p segPtr;
+#ifndef MKTURNOUT
 	struct {
 		coOrd pos[10];
 		coOrd center[10];
 		DIST_T radius[10];
 		DIST_T angle[10];
 	} cornuData;
+#endif
 
 	DYNARR_RESET( trkSeg_t, tempSegs_da );
 	angle0 = newTurnAngle0;

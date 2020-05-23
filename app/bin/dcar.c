@@ -703,7 +703,7 @@ static BOOL_T CarProtoWrite(
 
 	oldLocale = SaveLocale("C");
 
-	long longCenterOffset = proto->dim.truckCenterOffset*1000;
+	long longCenterOffset = (long)(proto->dim.truckCenterOffset*1000);
 
 	rc &= fprintf( f, "CARPROTO \"%s\" %ld %ld %0.3f %0.3f 0 %ld %0.3f %0.3f\n",
 		PutTitle(proto->desc), proto->options, proto->type, proto->dim.carLength, proto->dim.carWidth, longCenterOffset, proto->dim.truckCenter, proto->dim.coupledLength )>0;
@@ -1322,7 +1322,7 @@ static BOOL_T CarItemWrite(
 	ANGLE_T angle;
 	BOOL_T rc = TRUE;
 	char *oldLocale = NULL;
-	long longCenterOffset = item->dim.truckCenterOffset*1000;
+	long longCenterOffset = (long)(item->dim.truckCenterOffset*1000);
 
 	oldLocale = SaveLocale("C");
 
@@ -1754,7 +1754,6 @@ EXPORT void CarItemFindCouplerMountPoint(
 	}
 	// Find the pos of the 2 trucks
 	// Note this is a slight simplification, we should use the car center, not the on-track position
-	coOrd truck[2];
 	traverseTrack_t trvTrk1 = trvTrk0;
 	TraverseTrack2( &trvTrk0, item->dim.truckCenter/2.0 + item->dim.truckCenterOffset );
 	FlipTraverseTrack( & trvTrk1 );
@@ -1893,7 +1892,6 @@ EXPORT void CarItemPlace(
 	dist = CarItemTruckCenter(item)/2.0;
 	offset = CarItemTruckOffset(item);				//Offset is the amount the truck centers are displaced
 	trks[0] = trks[1] = *trvTrk;
-	coOrd center = trvTrk->pos;
 	TraverseTrack2( &trks[0], dist+offset );
 	TraverseTrack2( &trks[1], -dist+offset );
 	item->angle = FindAngle( trks[1].pos, trks[0].pos );
