@@ -2573,7 +2573,7 @@ static STATUS_T CmdFlip(
 	return C_CONTINUE;
 }
 
-static STATUS_T SelectArea(
+static BOOL_T SelectArea(
 		wAction_t action,
 		coOrd pos )
 {
@@ -2581,6 +2581,7 @@ static STATUS_T SelectArea(
 	static int state;
 	static coOrd base, size, lo, hi;
 	static BOOL_T add;
+	static BOOL_T subtract;
 	int cnt;
 
 	track_p trk;
@@ -2589,13 +2590,16 @@ static STATUS_T SelectArea(
 
 	case C_START:
 		state = 0;
-		return C_CONTINUE;
+		add = FALSE;
+		subtract = FALSE;
+		return FALSE;
 
 	case C_DOWN:
 	case C_RDOWN:
 		pos0 = pos;
 		add = (action == C_DOWN);
-		return C_CONTINUE;
+		subtract = (action == C_RDOWN);
+		return TRUE;
 
 	case C_MOVE:
 	case C_RMOVE:
@@ -2613,16 +2617,17 @@ static STATUS_T SelectArea(
 			size.y = - size.y;
 			base.y = pos.y;
 		}
-		return C_CONTINUE;
+		return TRUE;
 
 	case C_UP:
 	case C_RUP:
 		if (state == 1) {
 			state = 0;
 			add = (action == C_UP);
+			subtract = (action == C_RUP);
 			cnt = 0;
 			trk = NULL;
-			if ((action==C_UP) && (selectMode == 0)) SetAllTrackSelect( FALSE );							//Remove all tracks first
+			if (add && (selectMode == 0)) SetAllTrackSelect( FALSE );		//Remove all tracks first
 			while ( TrackIterate( &trk ) ) {
 				GetBoundingBox( trk, &hi, &lo );
 				if (GetLayerVisible( GetTrkLayer( trk ) ) &&
@@ -2640,22 +2645,24 @@ static STATUS_T SelectArea(
 					lo.y >= base.y && hi.y <= base.y+size.y) {
 					if ( (GetTrkSelected( trk )==0) == (action==C_UP) ) {
 						if (GetLayerModule(GetTrkLayer(trk))) {
-							if (action==C_UP)
+							if (add)
 								DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,TRUE);
 							else
 								DoModuleTracks(GetTrkLayer(trk),SelectOneTrack,FALSE);
 						} else if (cnt > incrementalDrawLimit) {
 							selectedTrackCount += (action==C_UP?1:-1);
-							if (action==C_UP)
+							if (add)
 								SetTrkBits( trk, TB_SELECTED );
 							else
 								ClrTrkBits( trk, TB_SELECTED );
 						} else {
-							SelectOneTrack( trk, action==C_UP );
+							SelectOneTrack( trk, add );
 						}
 					}
 				}
 			}
+			add = FALSE;
+			subtract = FALSE;
 			if (cnt > incrementalDrawLimit) {
 				MainRedraw(); // SelectArea C_UP
 			} else {
@@ -2663,10 +2670,12 @@ static STATUS_T SelectArea(
 			}
 			SelectedTrackCountChange();
 		}
-		return C_CONTINUE;
+		return FALSE;
 
 	case C_CANCEL:
 		state = 0;
+		add = FALSE;
+		subtract = FALSE;
 		break;
 
 	case C_TEXT:
@@ -2680,30 +2689,39 @@ static STATUS_T SelectArea(
 			break;
 		//Draw to-be selected tracks versus not.
 		trk = NULL;
+		if (selectMode == 0 && add) HighlightSelectedTracks(NULL, TRUE, TRUE);
 		while ( TrackIterate( &trk ) ) {
 			GetBoundingBox( trk, &hi, &lo );
 			if (GetLayerVisible( GetTrkLayer( trk ) ) &&
 				lo.x >= base.x && hi.x <= base.x+size.x &&
 				lo.y >= base.y && hi.y <= base.y+size.y) {
 				if (GetLayerModule(GetTrkLayer(trk))) {
-					if ((action==C_UP) && (selectMode == 0))
+					if (add)
 						DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
-					else
+					else if (subtract)
 						DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,FALSE);
 				} else {
-					if ((action==C_UP) && (selectMode == 0))
-						DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
-					else
-						DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
+					if (add) {
+						if (selectMode == 0 && add)
+							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+						if (!GetTrkSelected(trk))
+							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+					}
+					else if (subtract) {
+						if (GetTrkSelected(trk))
+							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);
+					}
 				}
 			}
 		}
-
-		DrawHilight( &tempD, base, size, add );
+		if (add || subtract) {
+			DrawHilight( &tempD, base, size, add );
+			return TRUE;
+		}
 		break;
 
 	}
-	return C_CONTINUE;
+	return FALSE;
 }
 
 extern BOOL_T inDescribeCmd;
@@ -2780,7 +2798,7 @@ track_p IsInsideABox(coOrd pos) {
 	return NULL;
 }
 
-void DrawHighlightBoxes(BOOL_T highlight_selected, track_p not_this) {
+void DrawHighlightBoxes(BOOL_T highlight_selected, BOOL_T select, track_p not_this) {
 	track_p ts = NULL;
 	coOrd origin,max;
 	BOOL_T first = TRUE;
@@ -2791,7 +2809,7 @@ void DrawHighlightBoxes(BOOL_T highlight_selected, track_p not_this) {
 			DrawHighlightLayer(GetTrkLayer(ts));
 		}
 		coOrd hi,lo;
-		if (highlight_selected && (ts != not_this)) DrawTrack(ts,&tempD,wDrawColorPreviewSelected );
+		if (highlight_selected && (ts != not_this)) DrawTrack(ts,&tempD,select?wDrawColorPreviewSelected:wDrawColorPreviewUnselected );
 		GetBoundingBox(ts, &hi, &lo);
 		if (first) {
 			origin = lo;
@@ -2861,6 +2879,8 @@ static STATUS_T CmdSelect(
 
 	STATUS_T rc=C_CONTINUE;
 	static track_p trk = NULL;
+	typedef enum {NOSHOW,SHOWMOVE,SHOWROTATE,SHOWMODIFY,SHOWACTIVATE} showType;
+	static showType showMode;
 
 	mode = AREA;
 	if (doingAlign || doingRotate || doingMove )
@@ -2885,6 +2905,7 @@ static STATUS_T CmdSelect(
 		doingRotate = FALSE;
 		doingAlign = FALSE;
 		doingDouble = FALSE;
+		showMode = NOSHOW;
 		SelectArea( action, pos );
 		wMenuPushEnable( rotateAlignMI, FALSE );
 		wSetCursor(mainD.d,defaultCursor);
@@ -2897,8 +2918,7 @@ static STATUS_T CmdSelect(
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
-		if (doingMove|doingRotate) return C_CONTINUE;
-
+		showMode = NOSHOW;
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		coOrd p = pos;
 		trk = OnTrack( &p, FALSE, FALSE );
@@ -2907,23 +2927,28 @@ static STATUS_T CmdSelect(
 		if (trk && !CheckTrackLayerSilent( trk ) ) {
 			if (GetLayerFrozen(GetTrkLayer(trk)) ) {
 				trk = NULL;
-				return C_TERMINATE;
+				InfoMessage(_("Track is in Frozen Layer"));
+				return C_CONTINUE;
 			}
 		}
 		if (selectedTrackCount>0) {
 			if ((ht = IsInsideABox(pos)) != NULL) {
 				if ((MyGetKeyState()&WKEY_SHIFT)) {
 					CreateMoveAnchor(pos);
+					showMode = SHOWMOVE;
 				} else if ((MyGetKeyState()&WKEY_CTRL)) {
 					CreateRotateAnchor(pos);
+					showMode = SHOWROTATE;
 				} else if (!GetLayerModule(GetTrkLayer(ht))) {
 					if (QueryTrack( ht, Q_CAN_MODIFY_CONTROL_POINTS ) ||
 					QueryTrack( ht, Q_IS_CORNU ) ||
 					(QueryTrack( ht, Q_IS_DRAW ) && !QueryTrack( ht, Q_IS_TEXT))) {
 						CreateModifyAnchor(pos);
+						showMode = SHOWMODIFY;
 					} else {
 						if (QueryTrack(ht,Q_IS_ACTIVATEABLE))
 							CreateActivateAnchor(pos);
+							showMode = SHOWACTIVATE;
 					}
 				}
 			}
@@ -2952,12 +2977,11 @@ static STATUS_T CmdSelect(
 				doingRotate = FALSE;
 				rc = CmdMove( action, pos );
 			}
-			TempRedraw();
 			break;
 		case AREA:
 			doingMove = FALSE;
 			doingRotate = FALSE;
-			rc = SelectArea( action, pos );
+			SelectArea( action, pos );
 			break;
 		default: ;
 		}
@@ -2992,12 +3016,12 @@ static STATUS_T CmdSelect(
 		case AREA:
 			doingMove = FALSE;
 			doingRotate = FALSE;
-			rc = SelectArea( action, pos );
+			SelectArea( action, pos );
 			break;
 		default: ;
 		}
 		if ((action&0xFF) == wActionExtKey && ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL)) == (WKEY_SHIFT|WKEY_CTRL)))  //Both
-				doingMove = FALSE;
+			doingMove = FALSE;
 		return rc;
 		break;
 	case C_RUP:
@@ -3022,7 +3046,8 @@ static STATUS_T CmdSelect(
 		case AREA:
 			doingMove = FALSE;
 			doingRotate = FALSE;
-			rc = SelectArea( action, pos );
+			SelectArea( action, pos );
+			rc = C_CONTINUE;
 			break;
 		default: ;
 		}
@@ -3037,89 +3062,98 @@ static STATUS_T CmdSelect(
 			return CallModify(action,pos);
 		}
 		if (doingMove) {
-			return CmdMove( C_REDRAW, pos );
+			rc = CmdMove( C_REDRAW, pos );
 		} else if (doingRotate) {
-			return CmdRotate( C_REDRAW, pos );
-		} else if (anchors_da.cnt) {
-			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+			rc = CmdRotate( C_REDRAW, pos );
 		}
 
-
-		if (mode==AREA)
-			rc = SelectArea( action, pos );
-
-		if (IsInsideABox(pos) && (MyGetKeyState()&(WKEY_SHIFT|WKEY_CTRL))) {
+		//Once doing a move or a rotate, make an early exit
+		if (doingMove || doingRotate) {
+			if (anchors_da.cnt) {
+				DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+			}
 			return C_CONTINUE;
 		}
+		BOOL_T AreaSelect = FALSE;
+		// Draw the selected area, no-op if none selected
+		if (mode==AREA) {
+	    	AreaSelect = SelectArea( action, pos );
+	    	if (AreaSelect) return C_CONTINUE;
+		}
 
-		if (trk && !GetTrkSelected(trk)) {
-			if (GetLayerModule(GetTrkLayer(trk))) {
+		// Highlight a whole Module's worth of tracks if we are hovering over one
+		if (trk && GetLayerModule(GetTrkLayer(trk))) {
+			if ( (selectMode == 1) && ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL) )
+				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,!GetTrkSelected(trk));   //Toggle
+			else
 				DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
-				DrawHighlightLayer(GetTrkLayer(trk));
-			} else {
-				DrawTrack(trk,&tempD,wDrawColorPreviewSelected );    //Special color means THICK3 as well
-			}
+			DrawHighlightLayer(GetTrkLayer(trk));
 		}
-		if ( trk && !IsTrackDeleted(trk)) {
-			if (selectMode == 0) {
-				if ((MyGetKeyState() & WKEY_SHIFT))
-					SelectConnectedTracks(trk, TRUE);        	 //Highlight all connected
-				else if ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) { //Add
-					if (GetTrkSelected(trk))
-						DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);   //Also remove
-					else
-						DrawTrack(trk,&tempD,wDrawColorPreviewSelected );    //Special color means THICK3 as well
-				} else
-					DrawTrack(trk,&tempD,wDrawColorPreviewSelected );   //Special color means THICK3 as well
-			} else {											   //Old school
-				if ((MyGetKeyState() & WKEY_SHIFT))
-					SelectConnectedTracks(trk,TRUE);        	//Highlight all connected
-				else if (!GetTrkSelected(trk) &&
-						(!((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL)))
-					DrawTrack(trk,&tempD,wDrawColorPreviewSelected );    //Special color means THICK3 as well
-				else {
-					DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);  //UnSelect this one
-				}
-			}
 
-		}
-		if (selectZero && !trk) {
-				HighlightSelectedTracks(NULL, TRUE, TRUE);
-		} else {
-			if (trk) {
-				if (GetLayerModule(GetTrkLayer(trk))) {
-					DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
-					DrawHighlightLayer(GetTrkLayer(trk));
-				} else {
-					if (selectMode == 0) {
-						if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
-							HighlightSelectedTracks(trk, TRUE, FALSE);
-						else
-							HighlightSelectedTracks(trk, TRUE, TRUE);
+		//Draw all existing highlight boxes only
+		DrawHighlightBoxes(FALSE, FALSE, trk);
 
+		// If not on a track, show all tracks as going to be de-selected if selectZero on
+		if (!trk && selectZero ) {
+			HighlightSelectedTracks(NULL, TRUE, TRUE);
+		//Handle the SHIFT+ which means SelectAllConnected case
+		} else if ( trk && !IsTrackDeleted(trk)) {
+			if ((MyGetKeyState() & WKEY_SHIFT) )
+				SelectConnectedTracks(trk, TRUE);        	 //Highlight all connected
+			//Normal case - handle track we are hovering over
+			else  {
+				//Select=Add
+				if (selectMode == 1) {
+					if  ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) {
+						//Only Highlight if adding
+						if (!GetTrkSelected(trk))
+							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
 					} else {
-						if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
-							HighlightSelectedTracks(trk, TRUE, TRUE);
+						if (GetTrkSelected(trk))
+							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);           //Toggle
 						else
-							HighlightSelectedTracks(trk, TRUE, FALSE);
+							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+					}
+				//Select=Only
+				} else {
+					if  ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL) {
+						if (GetTrkSelected(trk))
+							DrawTrack(trk,&tempD,wDrawColorPreviewUnselected);           //Toggle
+						else
+							DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+					} else {
+						//Only Highlight if adding
+						if (!GetTrkSelected(trk))
+							DrawTrack(trk,&tempD,wDrawColorPreviewSelected );
 					}
 				}
 			}
-		}
-
-
-		if (!doingMove && !doingRotate) {
-			if (selectMode == 0)
-				if (!trk && selectZero)
-					DrawHighlightBoxes(FALSE, NULL);
+			// Now Highlight the rest of the tracks or Module
+			if (GetLayerModule(GetTrkLayer(trk))) {
+				if (selectMode == 1 && ((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL) )
+					DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,!GetTrkSelected(trk));             //Toggle
 				else
-					DrawHighlightBoxes((MyGetKeyState() & WKEY_CTRL), trk);
-			else {
-				if (!trk && selectZero)
-					DrawHighlightBoxes(FALSE, NULL);
-				else
-					DrawHighlightBoxes(!(MyGetKeyState() & WKEY_CTRL), trk);
+					DoModuleTracks(GetTrkLayer(trk),DrawSingleTrack,TRUE);
+				DrawHighlightLayer(GetTrkLayer(trk));
+			} else {
+				//Select=Add
+				if (selectMode == 1) {
+					if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) == WKEY_CTRL))
+						HighlightSelectedTracks(trk, TRUE, TRUE);
+					//else
+					//	HighlightSelectedTracks(trk, TRUE, FALSE);  Highlight all selected
+				//Select=Only
+				} else {
+					if (((MyGetKeyState() & (WKEY_CTRL|WKEY_SHIFT)) != WKEY_CTRL))
+						HighlightSelectedTracks(trk, TRUE, TRUE);
+					//else
+					//	HighlightSelectedTracks(trk, TRUE, TRUE); Highlight all selected
+				}
 			}
+		}
+		//Finally add the anchors for any actions or snaps
+		if (anchors_da.cnt) {
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		}
 
 		return rc;

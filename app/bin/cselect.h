@@ -50,6 +50,6 @@ void DoRefreshCompound( void );
 void WriteSelectedTracksToTempSegs( void );
 void DoRescale( void );
 STATUS_T CmdMoveDescription( wAction_t, coOrd );
-void DrawHighlightBoxes();
+void DrawHighlightBoxes(BOOL_T, BOOL_T,track_p);
 
 #endif

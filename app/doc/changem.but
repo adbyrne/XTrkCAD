@@ -1047,7 +1047,7 @@ Click the \f{Move Description} button to activate the \f{Move Description} comma
 
 Use \e{Left+Drag} to move the label to a new position and unhide if hidden. Once moved, the label becomes fixed in a position relative to the object. Subsequent moves of that object will cause the label to move as well.
 
-This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select mode (\K{cmdSelect}).
+This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select command (\K{cmdSelect}).
 
 The letter "\f{h}", can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels. The letter"\f{s} will show a hidden description. There is a \f{Context Menu} Show/Hide Toggle as well.
 
@@ -1476,31 +1476,37 @@ Clicking on the \f{Select} button cancels all active commands, closes any open d
 
 In combination with the mouse, the \f{Select} command can be used as follows;
 
-\dd Objects that will be selected with a \e{Left-Click} are highlighted in Blue as the mouse moves over them. Items that will be deselected are highlighted in Gold. 
+\dd Unselected Objects that will be added to the selected set with a \e{Left-Click} are highlighted in Blue as the mouse moves over them. Items that will be deselected are highlighted in Gold. 
 
 \u000
 
-\dd \e{Left-Click} - selects just the object if the \f{SelectMode} in \K{cmdCmdopt} is set to "Only". If it is set to "Add", it will add the object or remove it if is already selected. 
-Selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog) and a blue selection box surrounds all currently selected objects. 
-If \f{SelectZero} is selected in \K{cmdCmdopt} and an point without a track is selected, all currently selected tracks are deselected.
+\dd Objects that are part of a \f{Module Layer} are selected or deselected together.
 
 \u000
 
-\dd \e{Ctrl+Left-Click} - in \f{SelectMode} "Only" it adds the track to the selected tracks, or removes if it is already selected.
-If \f{SelectMode} "Add" is set, only the object is selected, with "Only" the object is added to the select set.
-If \f{SelectZero} is selected in \K{cmdCmdopt} and an point without a track is selected, all currently selected tracks are deselected.
+\dd \e{Left-Click} - if the \f{SelectMode} in \K{cmdCmdopt} is set to Single Item Mode it selects just an object near the cursor. 
+If it is set to Add Item Mode, it will add the nearby object or remove it if is already selected. 
+Already selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog) and a blue selection box surrounds all currently selected objects. 
+If \f{SelectZero} is selected in \K{cmdCmdopt} and an point that is not near to any object is selected, all objects are deselected.
 
 \u000
 
-\dd \e{Shift+Left-Click} - selects all unselected tracks connected to the track you select.  Selection stops at selected tracks.  Caution: This can select all tracks on the layout.
+\dd \e{Ctrl+Left-Click} - if \f{SelectMode} in \K{cmdCmdopt} is set to Single Item Mode it adds an object near to the cursor to the selected objects, or removes if it is already selected.
+If set to Add Item Mode, it will select only the nearby object and delselect all the others. 
+Already selected objects appear in red (unless changed in the \f{Color} (\K{cmdRgbcolor}) dialog) and a blue selection box surrounds all currently selected objects. 
+If \f{SelectZero} is selected in \K{cmdCmdopt} and an point that is not near to any objects is selected, all objects are deselected.
 
 \u000
 
-\dd \e{Left+Drag} - highlights an area, and just the objects within the area are selected.
+\dd \e{Shift+Left-Click} - selects all unselected tracks connected to a track you select. Selection stops at already selected tracks. Caution: This can select all tracks on the layout.
 
 \u000
 
-\dd \e{Right-Drag} - highlights an area, and the objects within the area are unselected.
+\dd \e{Left+Drag} - highlights an area, and all the objects within the area are selected, if \f{SelectMode} is in \K{cmdCmdopt} is set to "Add", already selected objects outside the area remain selected, otherwise "Only", they are deselected.
+
+\u000
+
+\dd \e{Right-Drag} - highlights an area, and all the objects within the area are unselected regardless of \f{SelectMode}.
 
 \u000
 

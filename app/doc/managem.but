@@ -378,7 +378,7 @@ The \f{Frozen} check-box indicates that tracks in that \f{Layer} can not be modi
 
 The \f{On Map} check-box controls whether the \f{Layer} is drawn on the Map (\K{cmdMap}) window.
 
-The \f{Module} check-box controls whether the \f{Layer} is selected and moved or rotated as a group - this can be used to denote a track module in a modular layout - allowing the modules to be positioned as units. Objects in a Module Layer can not be individually modified.  One way of getting a modules in is to build a library with \f{Export} and then \f{Import As Module} - this creates one layer per module, names it and sets the \f{Module} check-box.  
+The \f{Module} check-box controls whether the \f{Layer} is selected/deselected and so moved or rotated as a group - this can be used to denote a track module in a modular layout - allowing the modules to be positioned as units. Objects in a Module Layer can not be individually modified.  One way of getting a modules in is to build a library with \f{Export} and then \f{Import As Module} - this creates one layer per module, names it and sets the \f{Module} check-box.  
 
 You cannot uncheck \f{Visible} or check \f{Frozen} for the \f{Current Layer}.
 

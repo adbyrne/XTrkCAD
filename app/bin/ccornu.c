@@ -2528,7 +2528,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 		}
 		if (anchors_da.cnt)
 					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
-		if (MyGetKeyState()&WKEY_SHIFT) DrawHighlightBoxes(FALSE,NULL);
+		if (MyGetKeyState()&WKEY_SHIFT) DrawHighlightBoxes(FALSE,FALSE,NULL);
 
 		return C_CONTINUE;
 

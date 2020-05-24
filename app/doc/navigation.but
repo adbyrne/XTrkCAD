@@ -837,12 +837,13 @@ Note Dialog
 \e{Select Command}
 
 The \e{Select} command actions are affected by the mode selected in \f{Options->Command->Select}.  
-Note that a module layer counts as a single object for select. 
+Note - Objects in a Module Layer are selected and deselected as a group.
 
 \dt \e{Left-Click}
  
 \dd Single Item Mode -> Selects one object at a time, deselects other objects. 
-Multiple Select Mode-> Adds unselected objects, deselects if the object is already selected.
+Add Item Mode -> Adds unselected objects, deselects if the object is already selected.
+If the click is on an area without objects and \f{SelectZero} is set, all objects are deselected.
 
 \dt \e{Shift-Left-Click} 
 
@@ -850,7 +851,9 @@ Multiple Select Mode-> Adds unselected objects, deselects if the object is alrea
 
 \dt \e{Ctrl+Left-Click} 
 
-\dd Single Item Mode -> Adds an object to the selection. Multiple Select Mode -> Selects just this item.
+\dd Single Item Mode -> Adds an object to the selection, deselects if the object is already selected. 
+Add Item Mode -> Selects just this item and deselects other objects.
+If the click is on an area without objects and \f{SelectZero} is set, all objects are deselected.
 
 \dt \e{Double-Left-Click} 
 
@@ -859,7 +862,7 @@ Multiple Select Mode-> Adds unselected objects, deselects if the object is alrea
 \dt \e{Left+Drag} 
 
 \dd Single Item Mode -> Selects all objects in an rubber-banded area and deselects all others. 
-Multiple Select Mode -> Adds items in the rubber-banded area.  
+Add Item Mode -> Adds items in the rubber-banded area.  
 
 \dt \e{Shift+Left-Drag} 
 
