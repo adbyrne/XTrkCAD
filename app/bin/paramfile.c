@@ -40,6 +40,7 @@
 #include "paths.h"
 #include "include/paramfile.h"
 #include "include/paramfilelist.h"
+#include "include/utf8convert.h"
 
 #if _MSC_VER >1300
 	#define stricmp( a, b ) _stricmp(a, b )
