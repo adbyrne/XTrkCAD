@@ -130,7 +130,6 @@ static struct {
         int selectEndHandle;
         int prevSelected;
         int prevEndPoint;
-        wDrawColor color;
         DIST_T width;
 		track_p trk[2];
 		EPINX_T ep[2];
@@ -1099,7 +1098,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 			DYNARR_RESET(trkSeg_t,anchors_da);
 			for(int i=0;i<2;i++) {
 				if (IsClose(FindDistance(pos,Da.pos[i]))) {
-					if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
+					if (((MyGetKeyState() & WKEY_SHIFT) != 0) && Da.selectTrack) {
 						CreateCornuExtendAnchor(Da.pos[i], Da.angle[i], FALSE);
 						return C_CONTINUE;
 					} else {
@@ -1196,7 +1195,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 				}
 			}
 		} else {      //We picked an end point
-			if (!Da.trk[Da.selectEndPoint] && ((MyGetKeyState() & WKEY_SHIFT) != 0)) {	//With Shift no track -> Extend
+			if (!Da.trk[Da.selectEndPoint] && ((MyGetKeyState() & WKEY_SHIFT) != 0) && Da.selectTrack) {	//With Shift no track -> Extend
 				Da.extend[Da.selectEndPoint] = TRUE;		//Adding to end Point
 				DYNARR_RESET(trkSeg_t,anchors_da);
 				CreateCornuExtendAnchor(Da.pos[Da.selectEndPoint], Da.angle[Da.selectEndPoint], FALSE);
@@ -1363,8 +1362,8 @@ EXPORT STATUS_T AdjustCornuCurve(
 					return C_CONTINUE;
 				}
 			}
-			if(!Da.trk[sel]) {							//Cornu with no end
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0) {   //Extend end locked
+			if(!Da.trk[sel]) {			//Cornu with no end
+				if (((MyGetKeyState() & WKEY_SHIFT) != 0) && Da.selectTrack) {   //Extend end locked
 					SetUpCornuParms(&cp);
 					CallCornuM(Da.mid_points,Da.ends,Da.pos,&cp,&Da.crvSegs_da,FALSE);
 					struct extraData *xx = GetTrkExtraData(Da.selectTrack);
@@ -2199,7 +2198,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	Da.commandType = CORNU_CREATE;
 
-	Da.color = lineColor;
 	Da.width = (double)lineWidth/mainD.dpi;
 
 	Da.trackGauge = trackGauge;
@@ -2524,7 +2522,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 	case C_REDRAW:
 		if ( Da.state != NONE ) {
 			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, NULL,
-					Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,(trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,Da.color);
+					Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,(trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,wDrawColorBlack);
 		}
 		if (anchors_da.cnt)
 					DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
