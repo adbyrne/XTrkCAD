@@ -38,32 +38,32 @@ set(sources
 
 # help system is OS and build specific, add appropriate source files
 if(APPLE)
-   if (XTRCAD_USE_APPLEHELP) 
+   if (XTRKCAD_USE_APPLEHELP) 
    		set(sources 
       	  ${sources}
 			osxhelp.c)	
-	else()
+	else(XTRKCAD_USE_APPLEHELP)
 		if(XTRKCAD_USE_BROWSER) 
         	set(sources 
           	  ${sources}
           	  browserhelp.c)
-    	else()
+    	else(XTRKCAD_USE_BROWSER)
        	 set(sources 
        	     ${sources}
        	     ixhelp.c)
-       	endif()
-    endif()    
-else()
+       	endif(XTRKCAD_USE_BROWSER)
+    endif(XTRKCAD_USE_APPLEHELP)    
+else(APPLE)
     if(XTRKCAD_USE_BROWSER) 
         set(sources 
             ${sources}
             browserhelp.c)
-    else()
+    else(XTRKCAD_USE_BROWSER)
         set(sources 
             ${sources}
             ixhelp.c)
-    endif()    
-endif()
+    endif(XTRKCAD_USE_BROWSER)    
+endif(APPLE)
 
 include_directories(${XTrkCAD_BINARY_DIR})
 
