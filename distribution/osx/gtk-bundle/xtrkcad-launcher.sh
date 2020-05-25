@@ -36,7 +36,7 @@ if type -p "X" & > /dev/null; then
 fi 
 
 #XTRKCAD_BUNDLE="`echo "$0" | sed -e 's/\/Contents\/MacOS\/XTrackCAD//'`"
-XTRKCAD_BUNDLE="$bundle"
+XTRKCAD_BUNDLE="`echo "$bundle" | sed -e 's_/Contents/MacOS/XTrackCAD_/_'`"
 XTRKCAD_RESOURCES="$XTRKCAD_BUNDLE/Contents/Resources"
 XTRKCAD_TEMP="/tmp/xtrkcad/$UID"
 XTRKCAD_ETC="$XTRKCAD_TEMP/etc"
