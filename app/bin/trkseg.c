@@ -666,7 +666,7 @@ EXPORT void CloneFilledDraw(
 			sp->u.p.pts = newPts;
 			break;
 		case SEG_TEXT:
-			sp->u.t.string = strdup( sp->u.t.string);
+			sp->u.t.string = MyStrdup( sp->u.t.string);
 			break;
 		case SEG_BEZTRK:
 		case SEG_BEZLIN:
@@ -1379,7 +1379,7 @@ EXPORT BOOL_T ReadSegs( void )
 				rc = FALSE;
 				/*??*/break;
 			}
-			s->u.t.string = plain_text;
+			s->u.t.string = MyStrdup(plain_text);
 			s->color = wDrawFindColor( rgb );
 			break;
 		case SEG_UNCEP:

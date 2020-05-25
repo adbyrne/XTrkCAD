@@ -251,7 +251,7 @@ EXPORT void AddHotBarCornu( void )
 	hotB.txt.u.t.pos.x = 3.5*ratio;
 	hotB.txt.u.t.pos.y = 5.0*ratio;
 	hotB.txt.u.t.boxed = TRUE;
-	hotB.txt.u.t.string = " FLEX ";
+	hotB.txt.u.t.string = MyStrdup(_(" FLEX "));
 	hotB.txt.u.t.fontP = NULL;
 	hotB.txt.u.t.fontSize = 60.0*ratio;
 	hotB.txt.u.t.angle = 0.0;
