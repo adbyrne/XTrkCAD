@@ -2034,6 +2034,9 @@ EXPORT void CopyPoly(trkSeg_p p, wIndex_t segCnt) {
 			newPts = memdup( p->u.p.pts, p->u.p.cnt*sizeof (pts_t) );
 			p->u.p.pts = newPts;
 		}
+		if ( p->type == SEG_TEXT ) {
+			p->u.t.string = MyStrdup( p->u.t.string );
+		}
 	}
 }
 
