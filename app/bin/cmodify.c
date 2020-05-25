@@ -420,7 +420,9 @@ STATUS_T CmdModify(
 					CreateEndAnchor(pos,TRUE);
 				}
 			}
-		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL) && (!(GetLayerFrozen(GetTrkLayer(t)) && GetLayerModule(GetTrkLayer(t)))) && QueryTrack(t, Q_IS_DRAW )) {
+		} else if (((t=OnTrack(&pos,FALSE,FALSE))!= NULL)
+				&& (!(GetLayerFrozen(GetTrkLayer(t)) && GetLayerModule(GetTrkLayer(t))))
+				&& (QueryTrack(t, Q_IS_DRAW ) && !QueryTrack(t, Q_IS_TEXT)) ) {
 			CreateEndAnchor(pos,FALSE);
 		}
 		return C_CONTINUE;

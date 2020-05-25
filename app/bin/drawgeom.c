@@ -1844,6 +1844,10 @@ STATUS_T DrawGeomModify(
 					context->p1 = points(1).pt;
 				}
 				break;
+			case SEG_TEXT:
+				InfoMessage("Text can only be modified with Describe");
+				wBeep();
+				return C_ERROR;
 			default:
 				;
 		}

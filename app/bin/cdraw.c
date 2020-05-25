@@ -1453,6 +1453,10 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 				drawModCmdContext.subtype = xx->segs[0].u.p.polyType;
 				drawModCmdContext.open = (drawModCmdContext.subtype==POLYLINE)?TRUE:FALSE;
 				break;
+			case SEG_TEXT:
+				InfoMessage("Text can only be modified in Describe Mode");
+				wBeep();
+				return C_ERROR;
 			default:
 				break;
 
