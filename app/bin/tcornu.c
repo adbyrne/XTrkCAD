@@ -136,8 +136,8 @@ EXPORT char * CreateSegPathList(track_p trk) {
 	char * cp = "\0\0";
 	if (GetTrkType(trk) != T_CORNU) return cp;
 	struct extraData *xx = GetTrkExtraData(trk);
-	if (xx->cornuData.cornuPath) free(xx->cornuData.cornuPath);
-	xx->cornuData.cornuPath = malloc(xx->cornuData.arcSegs.cnt+2);
+	if (xx->cornuData.cornuPath) MyFree(xx->cornuData.cornuPath);
+	xx->cornuData.cornuPath = MyMalloc(xx->cornuData.arcSegs.cnt+2);
 	int j= 0;
 	for (int i = 0;i<xx->cornuData.arcSegs.cnt;i++,j++) {
 		xx->cornuData.cornuPath[j] = i+1;

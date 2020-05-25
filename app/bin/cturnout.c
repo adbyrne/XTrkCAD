@@ -150,7 +150,7 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 	to->paths = (PATHPTR_T)memdup( paths, (sizeof *to->paths) * to->pathLen );
 	to->paramFileIndex = curParamFileIndex;
 	if (curParamFileIndex == PARAM_CUSTOM)
-		to->contentsLabel = "Custom Turnouts";
+		to->contentsLabel = MyStrdup("Custom Turnouts");
 	else
 		to->contentsLabel = curSubContents;
 #ifdef TURNOUTCMD

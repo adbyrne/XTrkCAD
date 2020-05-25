@@ -135,7 +135,7 @@ EXPORT turnoutInfo_t * CreateNewStructure(
 #endif
 	to->paramFileIndex = curParamFileIndex;
 	if (curParamFileIndex == PARAM_CUSTOM)
-		to->contentsLabel = "Custom Structures";
+		to->contentsLabel = MyStrdup("Custom Structures");
 	else
 		to->contentsLabel = curSubContents;
 	to->endCnt = 0;

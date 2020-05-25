@@ -213,7 +213,7 @@ bool ReadParams(
     }
     paramLineNum = 0;
     curBarScale = -1;
-    curContents = strdup(fileName);
+    curContents = MyStrdup(fileName);
     curSubContents = curContents;
 
     //LOG1( log_paramFile, ("ReadParam( %s )\n", fileName ) )

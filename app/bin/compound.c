@@ -1312,12 +1312,12 @@ void FlipCompound(
 					 mP && strcmp( mP, mfg ) == 0 && nP && pP ) {
 					if ( strcmp( nP, descL ) == 0 && strcmp( pP, partL ) == 0 ) {
 						sprintf( message, "%s\t%s\t%s", mfg, descR, partR );
-						xx->title = strdup( message );
+						xx->title = MyStrdup( message );
 						return;
 					}
 					if ( strcmp( nP, descR ) == 0 && strcmp( pP, partR ) == 0 ) {
 						sprintf( message, "%s\t%s\t%s", mfg, descL, partL );
-						xx->title = strdup( message );
+						xx->title = MyStrdup( message );
 						return;
 					}
 				}
