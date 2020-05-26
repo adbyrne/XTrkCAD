@@ -570,7 +570,7 @@ EXPORT void DrawHilightPolygon( drawCmd_p d, coOrd *p, int cnt )
 	}
 	static wDrawColor color = 0;
 	if ( color == 0 )
-		color = wDrawColorGray( 50 );
+		color = wDrawColorGray( 70 );
 	wDrawPolygon( d->d, q, NULL, cnt, color, 0, 0, wDrawOptTemp|wDrawOptTransparent, 1, 0 );
 }
 
