@@ -138,6 +138,7 @@ struct wDraw_t {
 		HBITMAP hBmBackupOld;
 		void *background;
 		wBool_t bTempMode;
+		wBool_t bCopiedMain;
 		};
 
 extern HINSTANCE mswHInst;

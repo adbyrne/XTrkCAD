@@ -61,6 +61,8 @@ static long clrOp = 0xbb0226;
 
 #define CENTERMARK_LENGTH 6
 
+bool bDrawMainBM = 0;
+
 #ifdef SLOW
 static wPos_t XPIX2INCH( wDraw_p d, int ix )
 {
@@ -147,6 +149,22 @@ wBool_t wDrawSetTempMode(
 {
 	wBool_t rc = bd->bTempMode;
 	bd->bTempMode = bTemp;
+	if (rc == FALSE && bTemp == TRUE) {
+		// Main to Temp drawing
+		// Copy mainBM to tempBM
+		wDrawClearTemp( bd );
+		if (bDrawMainBM) return rc;
+		HDC hDcOld = CreateCompatibleDC(bd->hDc);
+		HBITMAP hBmOld = SelectObject(hDcOld, bd->hBmMain);
+		SelectObject(bd->hDc, bd->hBmTemp);
+		BitBlt(bd->hDc, 0, 0,
+			bd->w, bd->h,
+			hDcOld, 0, 0,
+			SRCCOPY);
+		SelectObject(hDcOld, hBmOld);
+		DeleteDC(hDcOld);
+		bd->bCopiedMain = TRUE;
+	}
 	return rc;
 }
 
@@ -1638,17 +1656,21 @@ long FAR PASCAL XEXPORT mswDrawPush(
 					}
 				}
 				HBITMAP hBmOld = SelectObject( b->hDc, b->hBmMain );
+
+			if (bDrawMainBM) {
+				BitBlt(hDc, rect.left, rect.top,
+					rect.right - rect.left, rect.bottom - rect.top,
+					b->hDc, rect.left, rect.top,
+					SRCCOPY);
+			}
+				SelectObject( b->hDc, b->bCopiedMain?b->hBmTemp:b->hBmMain );
 				BitBlt( hDc, rect.left, rect.top,
 						rect.right-rect.left, rect.bottom-rect.top,
 						b->hDc, rect.left, rect.top,
-						SRCCOPY );
-				SelectObject( b->hDc, b->hBmTemp );
-				BitBlt( hDc, rect.left, rect.top,
-						rect.right-rect.left, rect.bottom-rect.top,
-						b->hDc, rect.left, rect.top,
-						SRCAND );
+						bDrawMainBM?SRCAND:SRCCOPY);
 				SelectObject( b->hDc, hBmOld );
 				EndPaint( hWnd, &ps );
+				b->bCopiedMain = FALSE;
 			}
 		}
 		break;
@@ -1833,6 +1855,7 @@ wDraw_p wDrawCreate(
 		SelectPalette( hDc, mswPalette, 0 );
 		ReleaseDC( d->hWnd, hDc );
 	}
+	d->bCopiedMain = FALSE;
 	return d;
 }
 

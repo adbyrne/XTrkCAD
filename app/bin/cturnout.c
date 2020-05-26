@@ -2031,7 +2031,6 @@ static void HilightEndPt( void )
 	p.x = curTurnout->endPt[(int)curTurnoutEp].pos.x - trackGauge;
 	p.y = curTurnout->endPt[(int)curTurnoutEp].pos.y - trackGauge;
 	s.x = s.y = trackGauge*2.0 /*+ turnoutD.minSize*/;
-	wDrawClearTemp( turnoutD.d );
 	wDrawSetTempMode( turnoutD.d, TRUE );
 	DrawHilight( &turnoutD, p, s, FALSE );
 	wDrawSetTempMode( turnoutD.d, FALSE );

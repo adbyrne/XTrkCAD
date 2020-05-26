@@ -1372,7 +1372,6 @@ if (wDrawDoTempDraw == FALSE) {
 } else {
 	wDrawDelayUpdate( tempD.d, TRUE );
 	wDrawSetTempMode( tempD.d, TRUE );
-	wDrawClearTemp( tempD.d );
 	DrawMarkers();
 	DoCurCommand( C_REDRAW, zero );
 	RulerRedraw( FALSE );
@@ -1428,7 +1427,6 @@ EXPORT void MainRedraw( void )
 	InfoScale();
 	// The remainder is from TempRedraw
 	wDrawSetTempMode( tempD.d, TRUE );
-	wDrawClearTemp( tempD.d );
 	DrawMarkers();
 	DoCurCommand( C_REDRAW, zero );
 	RulerRedraw( FALSE );
@@ -1891,7 +1889,6 @@ static void DrawMapBoundingBox( BOOL_T set )
 {
 	if (mainD.d == NULL || mapD.d == NULL)
 		return;
-	wDrawClearTemp( mapD.d );
 	wDrawSetTempMode( mapD.d, TRUE );
 	DrawHilight( &mapD, mainD.orig, mainD.size, TRUE );
 	wDrawSetTempMode( mapD.d, FALSE );
