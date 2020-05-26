@@ -187,7 +187,7 @@ wBool_t wDrawSetTempMode(
 {
 	wBool_t ret = bd->bTempMode;
 	bd->bTempMode = bTemp;
-	if ( ret == FALSE && ret == TRUE ) {
+	if ( ret == FALSE && bTemp == TRUE ) {
 		// Main to Temp drawing
 		wDrawClearTemp( bd );
 	}
