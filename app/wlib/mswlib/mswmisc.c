@@ -2204,7 +2204,7 @@ void doHelpMenu(void * context)
 
 
     case 3: /*Context*/
-    	char * topic;
+    	const char * topic;
     	topic = GetCurCommandName();
     	wHelp(topic);
     	break;
