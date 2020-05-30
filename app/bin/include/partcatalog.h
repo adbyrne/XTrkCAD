@@ -32,7 +32,6 @@ struct sCatalogEntry {
     unsigned files;								/**< current count of files */
     char *fullFileName[MAXFILESPERCONTENT];		/**< fully qualified file name */
     char *contents;								/**< content field of parameter file */
-    struct sCatalogEntry *indirect;               /**< pointer to another catalog entry */
 };
 
 typedef struct sCatalogEntry CatalogEntry;
@@ -48,7 +47,6 @@ struct sTrackLibrary {
     CatalogEntry *catalog;						/**< list of files cataloged */
     IndexEntry *index;							/**< Index for lookup */
     unsigned wordCount;							/**< How many words indexed */
-    void * words_array;							/**< The array of words */
     unsigned trackTypeCount;					/**< */
 };
 

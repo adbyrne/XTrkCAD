@@ -74,8 +74,6 @@ InitCatalog(void)
     head->next = tail;
     tail->next = tail;
 
-
-
     return (head);
 }
 
@@ -213,7 +211,7 @@ UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents)
     if (entry->files < MAXFILESPERCONTENT) {
         entry->fullFileName[entry->files++] = strdup(path);
     } else {
-		AbortProg("Number of file with same content too large!", NULL);
+		AbortProg("Number of files with same content too large!", NULL);
     }
 }
 
@@ -313,7 +311,6 @@ ScanDirectory(CatalogEntry *catalog, const char *dirName)
             CatalogEntry *existingEntry;
             char *contents = GetParameterFileContent(fileName);
             if ((existingEntry = IsExistingContents(catalog, contents,FALSE))) {
-                printf("Duplicate CONTENTS record in parameter file %s\n", fileName);
                 if (strcmp(existingEntry->fullFileName[existingEntry->files-1],fileName))
                 	UpdateCatalogEntry(existingEntry, fileName, contents);
             } else {
@@ -373,8 +370,7 @@ FilterKeyword(char *word)
  * \return number of indexed keywords
  */
 static unsigned
-CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index, void** words_array,
-                    unsigned capacityOfIndex)
+CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index, unsigned capacityOfIndex)
 {
     CatalogEntry *currentEntry = catalog->next;
     unsigned totalMemory = 0;
@@ -388,7 +384,6 @@ CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index, void** words_array
     }
 
     wordList = malloc((totalMemory + 1) * sizeof(char));
-    *words_array = (void*)wordList;
 
     wordListPtr = wordList;
     currentEntry = catalog->next;
@@ -510,18 +505,18 @@ CompareResults(const void *entry1, const void *entry2)
 }
 
 /**
- * Search the index for a keyword. The index is assumed to be sorted. So after one entry
- * is found, neighboring entries up and down are checked as well. The total result set
- * is placed into an array and returned. This array has to be free'd by the caller.
+ * Search the index for a keyword. The index is assumed to be sorted. So
+ * after one entry is found, neighboring entries up and down are checked
+ * as well. The total result set is placed into an array and returned.
+ * This array has to be free'd by the caller.
  *
- * \param index IN	index list
- * \param length IN number of entries index
- * \param search IN search string
- * \param resultCount OUT count of found entries
- * \return array of found catalog entries, NULL if none found
+ * \param [in]	index	index list.
+ * \param 		length  number of entries index.
+ * \param [in]	search  search string.
+ * \param [out] entries	array of found entries.
+ *
+ * \returns number of found catalog entries, 0 if none found.
  */
-
-static int findAll = 1;
 
 unsigned int
 FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
@@ -532,7 +527,7 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
     *entries = NULL;
 
     //Get all the entries back for generic search or if "generic find"
-    if (findAll || !search || (search[0] == '*') || (search[0] == '\0')) {
+    if ( !search || (search[0] == '*') || (search[0] == '\0')) {
     	result = malloc((length) * sizeof(CatalogEntry *));
     	for (int i = 0; i < length; i++) {
 			result[i] = index[i].value;
@@ -594,7 +589,7 @@ InitLibrary(void)
 }
 
 /**
- * Scan directory and all parameter files found to the catalog
+ * Scan directory and add all parameter files found to the catalog
  *
  * \param trackLib IN the catalog
  * \param directory IN directory to scan
@@ -658,8 +653,7 @@ CreateLibraryIndex(TrackLibrary *trackLib)
                                        ESTIMATED_CONTENTS_WORDS);
 
     trackLib->wordCount = CreateContentsIndex(trackLib->catalog, trackLib->index,
-    					  &trackLib->words_array,
-                          ESTIMATED_CONTENTS_WORDS * trackLib->trackTypeCount);
+    					  ESTIMATED_CONTENTS_WORDS * trackLib->trackTypeCount);
 
     return (trackLib->wordCount);
 }
@@ -669,8 +663,6 @@ DeleteLibraryIndex(TrackLibrary *trackLib)
 {
 	free(trackLib->index);
 	trackLib->index = NULL;
-
-	free(trackLib->words_array);
 
 	trackLib->wordCount = 0;
 
@@ -744,65 +736,32 @@ char* stristr( const char* haystack, const char* needle )
  * \param resultEntries IN list header for result list
  * \return number of found entries
  */
+ 
 unsigned
 SearchLibrary(TrackLibrary *library, char *searchExpression,
-              CatalogEntry *resultEntries)
+	CatalogEntry *resultEntries)
 {
-    CatalogEntry **entries;
-    CatalogEntry * newEntry = resultEntries;
-    unsigned entryCount;
+	CatalogEntry **entries;
+	unsigned entryCount;
 
-    char * word;
-
-    word = strdup(searchExpression);
-
-    //word = strtok(word," \t");
-
-    if (library->index == NULL || library->wordCount == 0) {
-        return (0);
-    }
-    entryCount = FindWord(library->index, library->wordCount, word,
-                          &entries);
-    int count= 0;
-    if (entryCount) {
-        unsigned int i = 0;
-        while (i < entryCount) {
-        	char * match;
-        	//Check if entire String Matches
-        	if (!searchExpression || !word || (word[0] == '*') || (word[0] == '\0') ||
-        		(match = stristr(entries[i]->contents,searchExpression))) {
-				CatalogEntry * existingEntry;
-				existingEntry = IsExistingContents(resultEntries, entries[i]->contents, TRUE);
-				//Same FileName already in one of the entries?
-				BOOL_T found = FALSE;
-				if (existingEntry) {
-					for (unsigned int j=0;j<existingEntry->files;j++) {
-						if (!strcmp(existingEntry->fullFileName[j],entries[i]->fullFileName[entries[i]->files-1])) {
-							found=TRUE;
-							break;
-						}
-					}
-					if (found == TRUE ) {
-						i++;
-						continue;
-					}
-					UpdateCatalogEntry(existingEntry, entries[i]->fullFileName[(entries[i]->files- 1)],
-												   entries[i]->contents);
-				} else {
-					newEntry = InsertInOrder(resultEntries,entries[i]->contents);
-					UpdateCatalogEntry(newEntry, entries[i]->fullFileName[(entries[i]->files- 1)],
-						   entries[i]->contents);
-				}
-				count++;
-        	}
-            i++;
-        }
-    }
-    free(word);
-    if (entries)
-    	free(entries);    //Clean-up after search
-    return (count);
+	if (library->index == NULL || library->wordCount == 0) {
+		return (0);
+	}
+	entryCount = FindWord(library->index, library->wordCount, searchExpression,
+		&entries);
+	if (entryCount) {
+		unsigned int i = 0;
+		while (i < entryCount) {
+			CatalogEntry *newEntry = InsertIntoCatalogAfter(resultEntries);
+			UpdateCatalogEntry(newEntry, entries[i]->fullFileName[(entries[i]->files - 1)],
+				entries[i]->contents);
+			i++;
+		}
+		free(entries);
+	}
+	return (entryCount);
 }
+
 
 /**
  * Get the contents description from a parameter file. Returned string has to be freed after use.
