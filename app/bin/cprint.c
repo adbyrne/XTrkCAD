@@ -1298,7 +1298,7 @@ static void PrintGridRotate( void * pangle )
 {
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
 	currPrintGrid.orig = cmdMenuPos;
-	currPrintGrid.angle += angle;
+	currPrintGrid.angle += angle/1000;
 	newPrintGrid = currPrintGrid;
 	ParamLoadControls( &printPG );
 	ChangeDim();

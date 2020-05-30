@@ -2220,7 +2220,7 @@ static void QuickRotate( void* pangle )
 	GetMovedTracks(FALSE);
 	DrawSelectedTracksD( &mainD, wDrawColorWhite );
 	UndoStart( _("Rotate Tracks"), "Rotate Tracks" );
-	MoveTracks( FALSE, FALSE, TRUE, zero, cmdMenuPos, angle, TRUE);
+	MoveTracks( FALSE, FALSE, TRUE, zero, cmdMenuPos, (double)angle/1000, TRUE);
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 

@@ -1883,15 +1883,15 @@ static void ShowAddElevations(void) {
 
 static wWin_p rotateW;
 static wWin_p moveW;
-static long rotateValue;
+static double rotateValue;
 static coOrd moveValue;
 static rotateDialogCallBack_t rotateDialogCallBack;
 static moveDialogCallBack_t moveDialogCallBack;
 
 static void RotateEnterOk(void *);
 
-static paramIntegerRange_t rn360_360 = { -360, 360, 80 };
-static paramData_t rotatePLs[] = { { PD_LONG, &rotateValue, "rotate", PDO_ANGLE,
+static paramFloatRange_t rn360_360 = { -360.0, 360.0, 80.0 };
+static paramData_t rotatePLs[] = { { PD_FLOAT, &rotateValue, "rotate", PDO_ANGLE,
 		&rn360_360, N_("Angle:") } };
 static paramGroup_t rotatePG = { "rotate", 0, rotatePLs, sizeof rotatePLs
 		/ sizeof rotatePLs[0] };
@@ -1932,9 +1932,9 @@ static void MoveEnterOk(void * junk) {
 static void RotateEnterOk(void * junk) {
 	ParamLoadData(&rotatePG);
 	if (angleSystem == ANGLE_POLAR)
-		rotateDialogCallBack((void*) rotateValue);
+		rotateDialogCallBack((void*) (long)(rotateValue*1000));
 	else
-		rotateDialogCallBack((void*) -rotateValue);
+		rotateDialogCallBack((void*) (long)(-rotateValue*1000));
 	wHide(rotateW);
 }
 
@@ -1951,16 +1951,17 @@ EXPORT void AddMoveMenu(wMenu_p m, moveDialogCallBack_t func) {
 			(wMenuCallBack_p) StartMoveDialog, (void*) func);
 }
 
+//All values multipled by 100 to support decimal points from PD_FLOAT
 EXPORT void AddRotateMenu(wMenu_p m, rotateDialogCallBack_t func) {
-	wMenuPushCreate(m, "", _("180 "), 0, func, (void*) 180);
-	wMenuPushCreate(m, "", _("90  CW"), 0, func, (void*) (long) (90));
-	wMenuPushCreate(m, "", _("45  CW"), 0, func, (void*) (long) (45));
-	wMenuPushCreate(m, "", _("30  CW"), 0, func, (void*) (long) (30));
-	wMenuPushCreate(m, "", _("15  CW"), 0, func, (void*) (long) (15));
-	wMenuPushCreate(m, "", _("15  CCW"), 0, func, (void*) (long) (360 - 15));
-	wMenuPushCreate(m, "", _("30  CCW"), 0, func, (void*) (long) (360 - 30));
-	wMenuPushCreate(m, "", _("45  CCW"), 0, func, (void*) (long) (360 - 45));
-	wMenuPushCreate(m, "", _("90  CCW"), 0, func, (void*) (long) (360 - 90));
+	wMenuPushCreate(m, "", _("180 "), 0, func, (void*) 180000);
+	wMenuPushCreate(m, "", _("90  CW"), 0, func, (void*) (long) (90000));
+	wMenuPushCreate(m, "", _("45  CW"), 0, func, (void*) (long) (45000));
+	wMenuPushCreate(m, "", _("30  CW"), 0, func, (void*) (long) (30000));
+	wMenuPushCreate(m, "", _("15  CW"), 0, func, (void*) (long) (15000));
+	wMenuPushCreate(m, "", _("15  CCW"), 0, func, (void*) (long) (360000 - 15000));
+	wMenuPushCreate(m, "", _("30  CCW"), 0, func, (void*) (long) (360000 - 30000));
+	wMenuPushCreate(m, "", _("45  CCW"), 0, func, (void*) (long) (360000 - 45000));
+	wMenuPushCreate(m, "", _("90  CCW"), 0, func, (void*) (long) (360000 - 90000));
 	wMenuPushCreate(m, "", _("Enter Angle ..."), 0,
 			(wMenuCallBack_p) StartRotateDialog, (void*) func);
 }

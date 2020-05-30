@@ -711,7 +711,7 @@ static void StructRotate( void * pangle )
 		return;
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
 	Dst.pos = cmdMenuPos;
-	Rotate( &Dst.pos, cmdMenuPos, angle );
+	Rotate( &Dst.pos, cmdMenuPos, angle/1000 );
 	Dst.angle += angle;
 	TempRedraw(); // StructRotate
 }

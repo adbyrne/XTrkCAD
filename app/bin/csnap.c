@@ -681,7 +681,7 @@ static void SnapGridRotate( void * pangle )
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
 	wDrawDelayUpdate( tempD.d, TRUE );
 	grid.Orig = cmdMenuPos;
-	grid.Angle += angle;
+	grid.Angle += angle/1000;
 	oldGrid = grid;
 	DrawASnapGrid( &grid, &tempD, mapD.size, TRUE );
 	wDrawDelayUpdate( tempD.d, FALSE );

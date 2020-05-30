@@ -2512,7 +2512,7 @@ static void TurnoutRotate( void * pangle )
 		return;
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
 	Dto.pos = cmdMenuPos;
-	Rotate( &Dto.pos, cmdMenuPos, angle );
+	Rotate( &Dto.pos, cmdMenuPos, angle/1000 );
 	Dto.angle += angle;
 	TempRedraw(); // TurnoutRotate
 }
