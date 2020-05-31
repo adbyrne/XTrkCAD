@@ -186,6 +186,9 @@ static void setDrawMode(
 		wDrawColor dc,
 		wDrawOpts dopt )
 {
+	long centerPen[] = {40,10,20,10};
+	long phantomPen[] = {40,10,20,10,20,10};
+
 	HPEN hOldPen;
 	static wDraw_p d0;
 	static wDrawWidth dw0 = -1;
@@ -217,6 +220,9 @@ static void setDrawMode(
 
 	d0 = d; dw0 = dw; lt0 = lt; dc0 = dc;
 
+	void * penarray = NULL;
+	int penarray_size = 0;
+
 	logBrush.lbColor = mswGetColor(d->hasPalette,dc);
 	if ( lt==wDrawLineSolid ) {
 		penStyle = PS_GEOMETRIC | PS_SOLID;
@@ -228,14 +234,23 @@ static void setDrawMode(
 		penStyle = PS_GEOMETRIC | PS_DASH;
 	} else if (lt == wDrawLineDashDot) {
 		penStyle = PS_GEOMETRIC | PS_DASHDOT;
-	} else {
+	} else if ( lt == wDrawLineDashDotDot){
 		penStyle = PS_GEOMETRIC | PS_DASHDOTDOT;
-	}
+	} else if (  lt == wDrawLineCenter) {
+		penStyle = PS_GEOMETRIC | PS_USERSTYLE;
+		penarray = &centerPen;
+		penarray_size = length(centerPen);
+	} else if (  lt == wDrawLinePhantom) {
+		penStyle = PS_GEOMETRIC | PS_USERSTYLE;
+		penarray = &phantomPen;
+		penarray_size = length(phantomPen);
+	} else
+		penStyle = PS_GEOMETRIC | PS_SOLID;
 	d->hPen = ExtCreatePen( penStyle,
 					dw,
 					&logBrush,
-					0,
-					NULL );
+					penarray_size,
+					penarray );
 	hOldPen = SelectObject( d->hDc, d->hPen );
 	DeleteObject( hOldPen );
 }

@@ -956,6 +956,8 @@ void DescribeCompound(
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dot"), NULL, (void*)2 );
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("CenterDot"), NULL, (void*)5 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
 		wListSetIndex( (wList_p)compoundDesc[LT].control0, compoundData.linetype );
 	}
 
@@ -1060,6 +1062,12 @@ EXPORT void SetCompoundLineType( track_p trk, int width ) {
 		break;
 	case 4:
 		xx->lineType = DRAWLINEDASHDOTDOT;
+		break;
+	case 5:
+		xx->lineType = DRAWLINECENTER;
+		break;
+	case 6:
+		xx->lineType = DRAWLINEPHANTOM;
 		break;
 	}
 }

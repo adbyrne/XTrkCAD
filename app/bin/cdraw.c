@@ -57,6 +57,9 @@ static wMenuPush_p drawModDot;
 static wMenuPush_p drawModDash;
 static wMenuPush_p drawModDashDot;
 static wMenuPush_p drawModDashDotDot;
+static wMenuPush_p drawModCenterDot;
+static wMenuPush_p drawModPhantom;
+
 
 extern void wSetSelectedFontSize(int size);
 
@@ -1253,6 +1256,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dot"), NULL, (void*)2 );
 		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
 		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("CenterDot"), NULL, (void*)5 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
 		wListSetIndex( (wList_p)drawDesc[LT].control0, drawData.lineType );
 	}
 	if ( segPtr->type==SEG_DIMLIN && drawDesc[DS].control0!=NULL ) {
@@ -1279,6 +1284,8 @@ static void DrawDraw( track_p t, drawCmd_p d, wDrawColor color )
 	else if (xx->lineType == DRAWLINEDOT) d->options |= DC_DOT;
 	else if (xx->lineType == DRAWLINEDASHDOT) d->options |= DC_DASHDOT;
 	else if (xx->lineType == DRAWLINEDASHDOTDOT) d->options |= DC_DASHDOTDOT;
+	else if (xx->lineType == DRAWLINECENTER) d->options |= DC_CENTER;
+	else if (xx->lineType == DRAWLINEPHANTOM) d->options |= DC_PHANTOM;
 	DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
 	d->options = d->options&~(DC_NOTSOLIDLINE);
 }
@@ -1586,6 +1593,8 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		wMenuPushEnable( drawModDash, TRUE);
 		wMenuPushEnable( drawModDashDot, TRUE);
 		wMenuPushEnable( drawModDashDotDot, TRUE);
+		wMenuPushEnable( drawModCenterDot, TRUE);
+		wMenuPushEnable( drawModPhantom, TRUE);
 		if (!drawModCmdContext.rotate_state && (drawModCmdContext.type == SEG_POLY || drawModCmdContext.type == SEG_FILPOLY)) {
 			wMenuPushEnable( drawModDel,drawModCmdContext.prev_inx>=0);
 			if ((!drawModCmdContext.open && drawModCmdContext.prev_inx>=0) ||
@@ -2698,6 +2707,12 @@ void MenuLine(int key) {
 		case '4':
 			xx->lineType = DRAWLINEDASHDOTDOT;
 			break;
+		case '5':
+			xx->lineType = DRAWLINECENTER;
+			break;
+		case '6':
+			xx->lineType = DRAWLINEPHANTOM;
+			break;
 		}
 		MainRedraw(); // MenuLine
 	}
@@ -2722,6 +2737,12 @@ EXPORT void SetLineType( track_p trk, int width ) {
 				break;
 			case 4:
 				xx->lineType = DRAWLINEDASHDOTDOT;
+				break;
+			case 5:
+				xx->lineType = DRAWLINECENTER;
+				break;
+			case 6:
+				xx->lineType = DRAWLINEPHANTOM;
 				break;
 			}
 		}
@@ -2752,6 +2773,8 @@ EXPORT void InitTrkDraw( void )
 	drawModDash =  wMenuPushCreate( drawModLinMI, "", _("Dotted Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '2' );
 	drawModDashDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '3' );
 	drawModDashDotDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '4' );
+	drawModCenterDot =  wMenuPushCreate( drawModLinMI, "", _("Center-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '5' );
+	drawModPhantom =  wMenuPushCreate( drawModLinMI, "", _("Phantom-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '6' );
 	wMenuSeparatorCreate( drawModDelMI );
 	drawModriginMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, (wMenuCallBack_p)MenuMode, (void*) 1 );
 	drawModOrigin = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );

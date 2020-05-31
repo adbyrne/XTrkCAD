@@ -331,6 +331,11 @@ static void DDrawLine(
 			lineOpt = wDrawLineDashDot;
 		else if (opt == DC_DASHDOTDOT)
 			lineOpt = wDrawLineDashDotDot;
+		else if(opt == DC_CENTER)
+			lineOpt = wDrawLineCenter;
+		else if (opt == DC_PHANTOM)
+			lineOpt = wDrawLinePhantom;
+
 	if (drawEnable) {
 		wDrawLine( d->d, x0, y0, x1, y1,
 				width,
@@ -412,6 +417,10 @@ static void DDrawArc(
 		lineOpt = wDrawLineDashDot;
 	else if (opt == DC_DASHDOTDOT)
 		lineOpt = wDrawLineDashDotDot;
+	else if(opt == DC_CENTER)
+		lineOpt = wDrawLineCenter;
+	else if (opt == DC_PHANTOM)
+		lineOpt = wDrawLinePhantom;
     if (drawEnable)
     {
         wDrawArc(d->d, x, y, (wPos_t)(rr), angle0, angle1, drawCenter,
@@ -498,6 +507,10 @@ static void DDrawPoly(
 		lineOpt = wDrawLineDashDot;
 	else if (opt == DC_DASHDOTDOT)
 		lineOpt = wDrawLineDashDotDot;
+	else if(opt == DC_CENTER)
+		lineOpt = wDrawLineCenter;
+	else if (opt == DC_PHANTOM)
+		lineOpt = wDrawLinePhantom;
 	wDrawPolygon( d->d, &wpts(0), &wtype(0), cnt, color, width, lineOpt, (wDrawOpts)d->funcs->options, fill, open );
 }
 

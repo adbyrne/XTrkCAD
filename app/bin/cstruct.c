@@ -280,6 +280,12 @@ static void DrawStructure(
 	case DRAWLINEDASHDOTDOT:
 		d->options |= DC_DASHDOTDOT;
 		break;
+	case DRAWLINECENTER:
+		d->options |= DC_CENTER;
+		break;
+	case DRAWLINEPHANTOM:
+		d->options |= DC_CENTER;
+		break;
 	}
 	DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
 	d->options &= ~DC_NOTSOLIDLINE;

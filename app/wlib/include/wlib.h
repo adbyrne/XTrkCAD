@@ -480,7 +480,9 @@ typedef enum {
 	wDrawLineDash,
 	wDrawLineDot,
 	wDrawLineDashDot,
-	wDrawLineDashDotDot}
+	wDrawLineDashDotDot,
+	wDrawLineCenter,
+	wDrawLinePhantom}
 		wDrawLineType_e;
 
 typedef enum {
