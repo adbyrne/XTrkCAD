@@ -1739,19 +1739,21 @@ EXPORT void DrawRuler(
 						if (mm%100 != 0) {
 							sprintf(message, "%ld", mm/10%10 );
 							fs = rulerFontSize*2/3;
-							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/72.0 );
-							Translate( &p0, p0, 225, fs*d->scale/72.0 );
+							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/mainD.dpi );
+							Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
 							//p0.x = p1.x+4*dxn/10*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						} else {
 							sprintf(message, "%0.1f", mm/1000.0 );
 							fs = rulerFontSize;
-							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/72.0 );
-							Translate( &p0, p0, 225, 1.5*fs*d->scale/72.0 );
+							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/mainD.dpi );
+							Translate( &p0, p0, 225, 1.5*fs*d->scale/mainD.dpi );
 							//p0.x = p0.x+((-(LBORDER-2)/2)+((LBORDER-2)/2+2)*sin_aa)*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						}
 						d->CoOrd2Pix( d, p0, &x0, &y0 );
+						if (x0<0) x0 = 0;
+						if (y0<0) y0 = 0;
 						wDrawString( d->d, x0, y0, d->angle, message, rulerFp,
 										fs, color, (wDrawOpts)d->funcs->options );
 					}
@@ -1817,10 +1819,12 @@ EXPORT void DrawRuler(
 			if (fraction == 0) {
 				if ( (number == TRUE && d->scale<40) || (digit==0)) {
 					if (inch % 12 == 0 || d->scale <= 2) {
-						Translate( &p0, p0, aa, majorLength*d->scale/72.0 );
-						Translate( &p0, p0, 225, fs*d->scale/72.0 );
+						Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
+						Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
 						sprintf(message, "%d%c", digit, quote );
 						d->CoOrd2Pix( d, p0, &x0, &y0 );
+						if (x0<0) x0 = 0;
+						if (y0<0) y0 = 0;
 						wDrawString( d->d, x0, y0, d->angle, message, rulerFp, fs, color, (wDrawOpts)d->funcs->options );
 					}
 				}
