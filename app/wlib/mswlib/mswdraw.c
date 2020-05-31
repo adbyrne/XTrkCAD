@@ -222,21 +222,20 @@ static void setDrawMode(
 		penStyle = PS_GEOMETRIC | PS_SOLID;
 		if ( noFlatEndCaps == FALSE )
 			penStyle |= PS_ENDCAP_FLAT;
-		d->hPen = ExtCreatePen( penStyle,
-				dw,
-				&logBrush,
-				0,
-				NULL );
-				/*colorPalette.palPalEntry[dc] );*/
 	} else if (lt == wDrawLineDot) {
-		d->hPen = CreatePen( PS_DOT, 0, mswGetColor( d->hasPalette, dc ) );
+		penStyle = PS_GEOMETRIC | PS_DOT;
 	} else if (lt == wDrawLineDash) {
-		d->hPen = CreatePen( PS_DASH, 0, mswGetColor( d->hasPalette, dc ) );
+		penStyle = PS_GEOMETRIC | PS_DASH;
 	} else if (lt == wDrawLineDashDot) {
-		d->hPen = CreatePen( PS_DASHDOT, 0, mswGetColor( d->hasPalette, dc ) );
+		penStyle = PS_GEOMETRIC | PS_DASHDOT;
 	} else {
-		d->hPen = CreatePen( PS_DASHDOTDOT, 0, mswGetColor( d->hasPalette, dc ) );
+		penStyle = PS_GEOMETRIC | PS_DASHDOTDOT;
 	}
+	d->hPen = ExtCreatePen( penStyle,
+					dw,
+					&logBrush,
+					0,
+					NULL );
 	hOldPen = SelectObject( d->hDc, d->hPen );
 	DeleteObject( hOldPen );
 }
