@@ -599,16 +599,14 @@ static BOOL_T ReadBezier( char * line )
 	unsigned long rgb;
 	DIST_T width;
 
+	TRKTYP_T trkTyp = strncmp(line,"BEZIER",6)==0?T_BEZIER:T_BZRLIN;
 	if (!GetArgs( line+6, "dLluwsdppppdp",
 		&index, &layer, &options, &rgb, &width, scale, &visible, &p0, &c1, &c2, &p1, &lt, &dp ) ) {
 		return FALSE;
 	}
 	if ( !ReadSegs() )
 		return FALSE;
-	if (strncmp(line,"BEZIER",6)==0)
-		t = NewTrack( index, T_BEZIER, 0, sizeof *xx );
-	else
-		t = NewTrack( index, T_BZRLIN, 0, sizeof *xx );
+	t = NewTrack( index, trkTyp, 0, sizeof *xx );
 	xx = GetTrkExtraData(t);
 	SetTrkVisible(t, visible&2);
 	SetTrkNoTies(t,visible&4);
