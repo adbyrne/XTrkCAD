@@ -467,7 +467,8 @@ static void ChangeHotBar( long changes )
 	DYNARR_RESET( hotBarMap_t, hotBarMap_da );
 	curContentsLabel[0] = '\0';
 	if ( programMode == MODE_DESIGN ) {
-		AddHotBarCornu();
+		if (showFlexTrack)
+			AddHotBarCornu();
 		AddHotBarTurnouts();
 		AddHotBarStructures();
 	} else {

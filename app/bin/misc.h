@@ -92,6 +92,7 @@ extern DIST_T curScaleRatio;
 extern char * curScaleName;
 extern int enumerateMaxDescLen;
 extern long enableBalloonHelp;
+extern long showFlexTrack;
 extern long hotBarLabels;
 extern long rightClickMode;
 extern long selectMode;

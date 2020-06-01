@@ -421,6 +421,7 @@
 		{"line": "pref-turntable-angle", "contents": "Specifies the minimum angle between tracks connected to a turntable" },
 		{"line": "pref-coupling-speed-max", "contents": "Trains will crash above this speed" },
 		{"line": "pref-balloonhelp", "contents": "Enable/Disable balloon popup help windows" },
+		{"line": "pref-showflextrack", "contents": "Enable/Disable show of flextrack on hotbar" },
 		{"line": "pref-dragpixels", "contents": "How far you can move the mouse before its considered a drag" },
 		{"line": "pref-dragtimeout", "contents": "How long you can hold a mouse button down before its considered a drag" },
 		{"line": "pref-mingridspacing", "contents": "Minimum distance (in pixels) between grid lines/ticks" },

@@ -53,6 +53,8 @@ static wIndex_t distanceFormatInx;
 
 EXPORT long enableBalloonHelp = 1;
 
+EXPORT long showFlexTrack = 1;
+
 long GetChanges( paramGroup_p pg )
 {
 	long changes;
@@ -65,6 +67,7 @@ long GetChanges( paramGroup_p pg )
 	return changes;
 }
 
+static paramGroup_t prefPG;
 
 static void OptionDlgUpdate(
 		paramGroup_p pg,
@@ -88,6 +91,9 @@ static void OptionDlgUpdate(
 		if (pg->paramPtr[inx].valueP == &colorDraw) {
 			if (colorDraw == 1 ) colorLayers |= 2;
 			else colorLayers &= ~2;
+		}
+		if (pg->paramPtr[inx].valueP == &showFlexTrack) {
+			DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
 		}
 	}
 }
@@ -283,6 +289,7 @@ static long displayUnits;
 static char * unitsLabels[] = { N_("English"), N_("Metric"), NULL };
 static char * angleSystemLabels[] = { N_("Polar"), N_("Cartesian"), NULL };
 static char * enableBalloonHelpLabels[] = { N_("Balloon Help"), NULL };
+static char * enableFlexTrackLabels[] = { N_("Show FlexTrack in HotBar"), NULL };
 static char * startOptions[] = { N_("Load Last Layout"), N_("Start New Layout"), NULL };
 
 static paramData_t prefPLs[] = {
@@ -296,6 +303,7 @@ static paramData_t prefPLs[] = {
 	{ PD_FLOAT, &turntableAngle, "turntable-angle", PDO_NOPSHUPD, &r0_180, N_("Turntable Angle") },
 	{ PD_LONG, &maxCouplingSpeed, "coupling-speed-max", PDO_NOPSHUPD, &i10_100, N_("Max Coupling Speed"), 0 },
 	{ PD_TOGGLE, &enableBalloonHelp, "balloonhelp", PDO_NOPSHUPD, enableBalloonHelpLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &showFlexTrack, "showflextrack", PDO_NOPSHUPD, enableFlexTrackLabels, "", BC_HORZ},
 	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Distance") },
 	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Timeout") },
 	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD|PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
