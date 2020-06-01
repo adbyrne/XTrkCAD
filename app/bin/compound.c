@@ -937,6 +937,8 @@ void DescribeCompound(
 		}
 		compoundDesc[GR].mode = DESC_RO;
 	}
+	if ( compoundData.epCnt == 2 )
+		compoundData.length = GetTrkLength( trk, 0, 1 );
 	if ( compoundData.length > minLength && compoundData.epCnt > 1)
 		compoundData.grade = fabs( (compoundData.elev[0]-compoundData.elev[1])/compoundData.length )*100.0;
 	else
