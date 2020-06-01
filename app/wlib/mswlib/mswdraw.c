@@ -239,11 +239,11 @@ static void setDrawMode(
 	} else if (  lt == wDrawLineCenter) {
 		penStyle = PS_GEOMETRIC | PS_USERSTYLE;
 		penarray = &centerPen;
-		penarray_size = length(centerPen);
+		penarray_size = sizeof(centerPen)/sizeof(long);
 	} else if (  lt == wDrawLinePhantom) {
 		penStyle = PS_GEOMETRIC | PS_USERSTYLE;
 		penarray = &phantomPen;
-		penarray_size = length(phantomPen);
+		penarray_size = sizeof(phantomPen) / sizeof(long);
 	} else
 		penStyle = PS_GEOMETRIC | PS_SOLID;
 	d->hPen = ExtCreatePen( penStyle,
