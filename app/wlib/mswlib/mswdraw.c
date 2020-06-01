@@ -186,8 +186,8 @@ static void setDrawMode(
 		wDrawColor dc,
 		wDrawOpts dopt )
 {
-	long centerPen[] = {40,10,20,10};
-	long phantomPen[] = {40,10,20,10,20,10};
+	long centerPen[] = {10,4,2,4};
+	long phantomPen[] = {10,4,2,4,2,4};
 
 	HPEN hOldPen;
 	static wDraw_p d0;
