@@ -106,9 +106,9 @@ static BOOL_T printVert = TRUE;
 static wMenu_p profilePopupM;
 static track_p profilePopupTrk;
 static EPINX_T profilePopupEp;
-static wMenuToggle_p profilePopupToggles[3];
+static wMenuToggle_p profilePopupToggles[3]; 
 
-static int log_profile = 0;
+static int log_profile = 0; 
 
 #define LABELH (labelH*fontSize/screenProfileFontSize)
 #define LABELW (labelW*fontSize/screenProfileFontSize)
@@ -117,10 +117,10 @@ static int log_profile = 0;
 #define PBR(FS) (1.0*(labelW*(FS)/screenProfileFontSize+3.0/mainD.dpi))
 #define PBL(FS) (1.0*(labelW*(FS)/screenProfileFontSize+3.0/mainD.dpi))
 static FLOAT_T labelH;
-static FLOAT_T labelW;
+static FLOAT_T labelW;	
 
 
-track_p pathStartTrk;
+track_p pathStartTrk; 
 EPINX_T pathStartEp;
 track_p pathEndTrk;
 EPINX_T pathEndEp;
@@ -136,24 +136,26 @@ typedef struct {
     BOOL_T defined;			/* from prev PE to current */
 } profElem_t, *profElem_p;
 
-static dynArr_t profElem_da;
+static dynArr_t profElem_da; 
 static profElem_p copyOfprofElem;
 
-#define profElem(N) DYNARR_N( profElem_t, profElem_da, N )
+#define profElem(N) DYNARR_N( profElem_t, profElem_da, N )  
 
 typedef struct {
     DIST_T dist;
     char * name;
 } station_t, *station_p;
-static dynArr_t station_da;
+static dynArr_t station_da; 
+
 #define station(N) DYNARR_N( station_t, station_da, N )
+
 
 
 struct {
     DIST_T totalD, minE;
     int minC, maxC, incrC;
     DIST_T scaleX, scaleY;
-} prof;
+} prof;			
 
 
 /**
@@ -406,6 +408,7 @@ static void ProfilePix2CoOrd(
     pos->y = (yy/d->dpi+d->orig.y)/prof.scaleY+prof.minE;
 }
 
+
 static void ProfileCoOrd2Pix(
     drawCmd_p d,
     coOrd pos,
@@ -445,18 +448,20 @@ static void RedrawProfileW(void)
     coOrd textsize;
     char *pTestString;
 
-    wDrawDelayUpdate(screenProfileD.d, TRUE);
+    wDrawDelayUpdate(screenProfileD.d, TRUE); 
+	wDrawClear(screenProfileD.d);
 
-    wDrawClear(screenProfileD.d);
+	// get the size of the window area in pixels and convert to inches
     wDrawGetSize(screenProfileD.d, &ww, &hh);
-    fp = wStandardFont(F_HELV, FALSE, FALSE);
-
     screenProfileD.size.x = (ww)/screenProfileD.dpi;
     screenProfileD.size.y = (hh)/screenProfileD.dpi;
-    screenProfileD.orig.x = -PBL(screenProfileFontSize);
+
+	// calculate positions for labels???
+	fp = wStandardFont(F_HELV, FALSE, FALSE);
+	screenProfileD.orig.x = -PBL(screenProfileFontSize);
     screenProfileD.orig.y = -PBB(screenProfileFontSize);
 
-    /* Calculate usable dimension of canvas */
+    /* Calculate usable dimension of canvas in inches */
     size = screenProfileD.size;
     size.x -= (PBL(screenProfileFontSize));
     size.y -= (PBB(screenProfileFontSize));
@@ -483,6 +488,8 @@ static void RedrawProfileW(void)
     size.x -= textsize.x / 2;
     size.y -= textsize.y * 1.5 ;
 
+
+	// now we have the size of the profile area
 #ifdef WINDOWS
     if (printVert) {
         size.x -= PBR(screenProfileFontSize)/4.0;
@@ -493,6 +500,7 @@ static void RedrawProfileW(void)
         size.x -= PBR(screenProfileFontSize);
         size.y -= PBT;
     }
+
     if (size.x < 0.1 || size.y < 0.1) {
         wDrawDelayUpdate(screenProfileD.d, FALSE);
         return;
@@ -779,6 +787,7 @@ static void SelProfileW(
         oldElev = elev;
         profElem(inx).elev = oldElev;
         RedrawProfileW();
+		wPause(500l);
 		break;
     case C_UP:
         if (profileUndo == FALSE) {
