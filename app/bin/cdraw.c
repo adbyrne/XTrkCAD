@@ -1307,7 +1307,8 @@ static BOOL_T WriteDraw( track_p t, FILE * f )
 {
 	struct extraData * xx = GetTrkExtraData(t);
 	BOOL_T rc = TRUE;
-	rc &= fprintf(f, "DRAW %d %d 0 0 0 %0.6f %0.6f 0 %0.6f\n", GetTrkIndex(t), GetTrkLayer(t),
+	rc &= fprintf(f, "DRAW %d %d %d 0 0 %0.6f %0.6f 0 %0.6f\n", GetTrkIndex(t), GetTrkLayer(t),
+				xx->lineType,
 				xx->orig.x, xx->orig.y, xx->angle )>0;
 	rc &= WriteSegs( f, xx->segCnt, xx->segs );
 	return rc;
