@@ -592,9 +592,10 @@ wMenuPush_p wMenuPushCreate(
 	mi->mparent = m;
 	mi->acclKey = acclKey;
 	mi->enabled = TRUE;
-	strcpy( label, mi->labelStr );
+	strncpy( label, mi->labelStr, sizeof(label)-1 );
+	label[79] = '\0';
 	modifier = 0;
-	if ( acclKey != 0 ) {
+	if ( acclKey != 0 && strlen(label ) < 60 ) {
 		DYNARR_APPEND( acclTable_t, acclTable_da, 10 );
 		cp = label + strlen( label );
 		*cp++ = '\t';
