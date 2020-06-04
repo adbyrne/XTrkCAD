@@ -162,6 +162,20 @@ static cairo_t* gtkDrawCreateCairoCursorContext(
 			cairo_set_dash(cairo, dashes, len_dashes, 0);
 			break;
 		}
+		case wDrawLineCenter:
+		{
+			double dashes[] = { 8, 3, 5, 3};
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0.0);
+			break;
+		}
+		case wDrawLinePhantom:
+		{
+			double dashes[] = { 8, 3, 5, 3, 5, 3};
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0.0);
+			break;
+		}
 
 	}
 	GdkColor * gcolor;
@@ -275,6 +289,20 @@ static cairo_t* gtkDrawCreateCairoContext(
 			double dashes[] = { 5, 2, 1, 2, 1, 2 };
 			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
 			cairo_set_dash(cairo, dashes, len_dashes, 0);
+			break;
+		}
+		case wDrawLineCenter:
+		{
+			double dashes[] = { 8, 3, 5, 3};
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0.0);
+			break;
+		}
+		case wDrawLinePhantom:
+		{
+			double dashes[] = { 8, 3, 5, 3, 5, 3};
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cairo, dashes, len_dashes, 0.0);
 			break;
 		}
 

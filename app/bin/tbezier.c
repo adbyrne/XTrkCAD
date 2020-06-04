@@ -460,6 +460,8 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 			wListAddValue( (wList_p)bezDesc[LT].control0, _("Dot"), NULL, (void*)2 );
 			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
 			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("CenterDot"), NULL, (void*)5);
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
 			wListSetIndex( (wList_p)bezDesc[LT].control0, bezData.lineType );
 		}
 	}
@@ -484,6 +486,12 @@ EXPORT void SetBezierLineType( track_p trk, int width ) {
 			break;
 		case 4:
 			xx->bezierData.lineType = DRAWLINEDASHDOTDOT;
+			break;
+		case 5:
+			xx->bezierData.lineType = DRAWLINECENTER;
+			break;
+		case 6:
+			xx->bezierData.lineType = DRAWLINEPHANTOM;
 			break;
 		}
 	}
@@ -522,6 +530,8 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 		else if (xx->bezierData.lineType == DRAWLINEDOT) d->options |= DC_DOT;
 		else if (xx->bezierData.lineType == DRAWLINEDASHDOT) d->options |= DC_DASHDOT;
 		else if (xx->bezierData.lineType == DRAWLINEDASHDOTDOT) d->options |= DC_DASHDOTDOT;
+		else if (xx->bezierData.lineType == DRAWLINECENTER) d->options |= DC_CENTER;
+		else if (xx->bezierData.lineType == DRAWLINEPHANTOM) d->options |= DC_PHANTOM;
 		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, 0.0, color, 0);
 		d->options &= NotSolid;
 		return;

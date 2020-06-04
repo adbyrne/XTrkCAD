@@ -754,7 +754,9 @@ typedef enum {DRAWLINESOLID,
 			DRAWLINEDASH,
 			DRAWLINEDOT,
 			DRAWLINEDASHDOT,
-			DRAWLINEDASHDOTDOT} drawLineType_e;
+			DRAWLINEDASHDOTDOT,
+			DRAWLINECENTER,
+			DRAWLINEPHANTOM } drawLineType_e;
 track_p MakeDrawFromSeg( coOrd, ANGLE_T, trkSeg_p );
 track_p MakePolyLineFromSegs( coOrd, ANGLE_T, dynArr_t * );
 void DrawOriginAnchor(track_p);

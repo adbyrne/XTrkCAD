@@ -47,8 +47,10 @@
 #define DC_DOT          	(1<<13)
 #define DC_DASHDOT      	(1<<14)
 #define DC_DASHDOTDOT   	(1<<15)
+#define DC_CENTER			(1<<16)
+#define DC_PHANTOM          (1<<17)
 
-#define DC_NOTSOLIDLINE (DC_DASH|DC_DOT|DC_DASHDOT|DC_DASHDOTDOT)
+#define DC_NOTSOLIDLINE (DC_DASH|DC_DOT|DC_DASHDOT|DC_DASHDOTDOT|DC_CENTER|DC_PHANTOM)
 
 #define INIT_MAIN_SCALE (8.0)
 #define INIT_MAP_SCALE	(64.0)

@@ -373,6 +373,20 @@ static void setLineType(
 			cairo_set_dash(cr, dashes, len_dashes, 0.0);
 			break;
     	}
+    	case wDrawLineCenter:
+		{
+			double dashes[] = { 1.5*DASH_LENGTH, 3, DASH_LENGTH, 3};
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cr, dashes, len_dashes, 0.0);
+			break;
+		}
+    	case wDrawLinePhantom:
+		{
+			double dashes[] = { 1.5*DASH_LENGTH, 3, DASH_LENGTH, 3, DASH_LENGTH, 3};
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cr, dashes, len_dashes, 0.0);
+			break;
+		}
     	default:
     		cairo_set_dash(cr, NULL, 0, 0.0);
     }
