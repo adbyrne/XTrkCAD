@@ -1973,7 +1973,9 @@ EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM )
 	int inx;
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
-		if( zoomList[ inx ].value >= 1.0 ) {
+		if( (zoomList[ inx ].value >= 1.0 && zoomList[ inx ].value<=10 ) ||
+				 (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value))))
+				{
 			zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
 			if( zoomSubM )
 				zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
@@ -3072,5 +3074,7 @@ EXPORT void InitCmdPan2( wMenu_p menu )
 	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '8');
 	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '9');
 	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to origin - 'o'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'o');
+	wMenu_p zoomM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
+	InitCmdZoom(zoomM, NULL);
 	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 0);
 }
