@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */	
 
-#define _WIN32_WINNT 0x0500		/* for wheel mouse supposrt */
+#define _WIN32_WINNT 0x0600		/* for wheel mouse supposrt */
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
@@ -1711,24 +1711,21 @@ long FAR PASCAL XEXPORT mswDrawPush(
 static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	wAction_t action;
-	GESTUREINFO gi;
-
+	
 	switch( message ) {
 	case WM_MOUSEWHEEL:
 		/* handle mouse wheel events */
-		if ( GET_KEYSTATE_WPARAM(wParam) & MK_MBUTTON) {
-			if (GET_KEYSTATE_WPARAM(wParam) & MK_SHIFT) {
-				if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
-					action = wActionScrollRight;
-				} else {
-					action = wActionScrollLeft;
-				}
+		if (GET_KEYSTATE_WPARAM(wParam) & MK_SHIFT) {
+			if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
+				action = wActionScrollRight;
 			} else {
-				if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
-					action = wActionScrollUp;
-				} else {
-					action = wActionScrollDown;
-				}
+				action = wActionScrollLeft;
+			}
+		} else {
+			if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
+				action = wActionScrollUp;
+			} else {
+				action = wActionScrollDown;
 			}
 		}
 		if (b->action)
