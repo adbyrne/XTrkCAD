@@ -253,6 +253,7 @@ char * StringTrim(char *s)
 static void SearchUiDoSearch(void * ptr)
 {
     unsigned result;
+	SearchResult *currentResults;
 
     char * search;
 
@@ -263,7 +264,7 @@ static void SearchUiDoSearch(void * ptr)
     } else
     	catalogFileBrowse = InitCatalog();
 
-    result = SearchLibrary(trackLibrary, search, catalogFileBrowse);
+    result = SearchLibrary(trackLibrary, search, &currentResults);
 
     if (result) {
         DynString hitsMessage;
@@ -272,7 +273,7 @@ static void SearchUiDoSearch(void * ptr)
         wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
         DynStringFree(&hitsMessage);
 
-        SearchFileListLoad(catalogFileBrowse);
+        //SearchFileListLoad(catalogFileBrowse);
 
     } else {
 
@@ -280,6 +281,7 @@ static void SearchUiDoSearch(void * ptr)
         wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
         wMessageSetValue(MESSAGETEXT, _("No matches found."));
     }
+	SearchResultDiscard(currentResults);
 }
 
 /**

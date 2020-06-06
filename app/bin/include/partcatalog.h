@@ -27,6 +27,8 @@
 #define MAXFILESPERCONTENT	10					/**< count of files with the same content header */
 #define ESTIMATED_CONTENTS_WORDS 10				/**< average count of words in CONTENTS header */
 
+
+
 struct sCatalogEntry {
     struct sCatalogEntry *next;
     unsigned files;								/**< current count of files */
@@ -53,6 +55,17 @@ struct sTrackLibrary {
 typedef struct sTrackLibrary
 		TrackLibrary;							/**< core data structure for the catalog */
 
+struct sSearchResult {
+	CatalogEntry ** result;
+	unsigned totalFound;
+	struct sSingleResult{
+		char *keyWord;
+		unsigned count;
+	} *kw;
+};
+
+typedef struct sSearchResult SearchResult;
+
 CatalogEntry *InitCatalog(void);
 TrackLibrary *InitLibrary(void);
 TrackLibrary *CreateLibrary(char *directory);
@@ -60,9 +73,9 @@ void DeleteLibrary(TrackLibrary *tracklib);
 bool GetTrackFiles(TrackLibrary *trackLib, char *directory);
 int GetParameterFileInfo(int files, char ** fileName, void * data);
 unsigned CreateLibraryIndex(TrackLibrary *trackLib);
-unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
+unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, SearchResult **totalResult);
+void SearchResultDiscard(SearchResult *res);
 unsigned CountCatalogEntries(CatalogEntry *listHeader);
 void EmptyCatalog(CatalogEntry *listHeader);
-unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, CatalogEntry *resultEntries);
 bool FilterKeyword(char *word);
 #endif // !HAVE_TRACKCATALOG_H

@@ -490,6 +490,7 @@ int InsertSorted(CatalogEntry *arr[], int n, CatalogEntry *key, int capacity)
 
 /**
  * Comparison function for CatalogEntries used by qsort()
+ * Comparison is based on the The contents descriptions.
  *
  * \param entry1 IN
  * \param entry2 IN
@@ -528,7 +529,7 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
 
     //Get all the entries back for generic search or if "generic find"
     if ( !search || (search[0] == '*') || (search[0] == '\0')) {
-    	result = malloc((length) * sizeof(CatalogEntry *));
+    	result = MyMalloc((length) * sizeof(CatalogEntry *));
     	for (int i = 0; i < length; i++) {
 			result[i] = index[i].value;
 		}
@@ -553,7 +554,7 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
 
         foundElements = 1 + upper - lower;
 
-        result = malloc((foundElements) * sizeof(CatalogEntry *));
+        result = MyMalloc((foundElements) * sizeof(CatalogEntry *));
 
         for (i = 0; i < foundElements; i++) {
             result[i] = index[i+lower].value;
@@ -720,6 +721,81 @@ char* stristr( const char* haystack, const char* needle )
 	    return NULL;
 }
 
+
+/**
+ * Intersection of results
+ * See GeeksForGeeks https ://www.geeksforgeeks.org/union-and-intersection-of-two-sorted-arrays-2/
+ * 1) Use two index variables i and j, initial values i = 0, j = 0
+ * 2) If arr1[i] is smaller than arr2[j] then increment i.
+ * 3) If arr1[i] is greater than arr2[j] then increment j.
+ * 4) If both are same then print any of them and increment both i and j.
+ *  
+ * \param [in] array1 If non-null, the first result.
+ * \param [in] array2 If non-null, the second result.
+ *
+ * \returns number of elements in result set
+ */
+ 
+unsigned
+IntersectionOfResults(CatalogEntry *** resultEntries, CatalogEntry **array1, unsigned count1, CatalogEntry **array2, unsigned count2)
+{
+	unsigned index1 = 0;
+	unsigned index2 = 0;
+	unsigned maxResultSize = min(count1, count2);
+	unsigned matches = 0;
+	CatalogEntry **result = MyMalloc(maxResultSize * sizeof(CatalogEntry *));
+	int diff;
+
+	while (index1 < count1 && index2 < count2) {
+		diff = strcmp(array1[index1]->contents, array2[index2]->contents);
+
+		if (diff < 0) {
+			index1++;
+			continue;
+		}
+		if (diff > 0) {
+			index2++;
+			continue;
+		}
+
+		printf("Match found: %s\n", array1[index1]->contents);
+		result[matches++] = array1[index1];
+		index1++;
+		index2++;
+	}
+	*resultEntries = result;
+	return(matches);
+}
+
+
+// returns number of words in str 
+unsigned countWords(char *str)
+{
+	int state = FALSE;
+	unsigned wc = 0;  // word count 
+
+	// Scan all characters one by one 
+	while (*str) {
+		// If next character is a separator, set the  
+		// state as FALSE 
+		if (*str == ' ' || *str == '\n' || *str == '\t')
+			state = FALSE;
+
+		// If next character is not a word separator and  
+		// state is OUT, then set the state as IN and  
+		// increment word count 
+		else if (state == FALSE) {
+			state = TRUE;
+			++wc;
+		}
+
+		// Move to next character 
+		++str;
+	}
+
+	return wc;
+}
+
 /**
  * Search the library for a keyword string and return the result list
  *
@@ -739,29 +815,68 @@ char* stristr( const char* haystack, const char* needle )
  
 unsigned
 SearchLibrary(TrackLibrary *library, char *searchExpression,
-	CatalogEntry *resultEntries)
+	SearchResult **totalResult)
 {
 	CatalogEntry **entries;
-	unsigned entryCount;
+	unsigned entryCount = 0;
+	char *searchWord;
+	SearchResult *results = MyMalloc(sizeof(SearchResult));
+	unsigned words = countWords(searchExpression);
+	char *searchExp = MyStrdup(searchExpression);
+	unsigned i = 0;
 
 	if (library->index == NULL || library->wordCount == 0) {
 		return (0);
 	}
-	entryCount = FindWord(library->index, library->wordCount, searchExpression,
-		&entries);
-	if (entryCount) {
-		unsigned int i = 0;
-		while (i < entryCount) {
-			CatalogEntry *newEntry = InsertIntoCatalogAfter(resultEntries);
-			UpdateCatalogEntry(newEntry, entries[i]->fullFileName[(entries[i]->files - 1)],
-				entries[i]->contents);
-			i++;
-		}
-		free(entries);
+
+	results->kw = MyMalloc(words * sizeof(struct sSingleResult));
+	
+	searchWord = strtok(searchExp, " \t");
+	while (searchWord) {
+		results->kw[i++].keyWord = searchWord;
+		searchWord = strtok(NULL, " \t");
 	}
-	return (entryCount);
+
+	i = 0;
+	while (i < words) {
+		results->kw[i].count = FindWord(library->index, library->wordCount, results->kw[i].keyWord,
+			&entries);
+
+		// ignore any keywords that didn't return any results
+		if (results->kw[i].count) {
+			if (!results->result) {
+				results->result = entries;
+				results->totalFound = results->kw[i].count;
+			} else {
+				// do the intersection 
+				CatalogEntry **intersection;
+				results->totalFound = IntersectionOfResults(&intersection, results->result, results->totalFound, entries, results->kw[i].count);
+				MyFree(results->result);
+				results->result = intersection;
+				MyFree(entries);
+			}
+		}	
+		i++;
+	}
+	
+	*totalResult = results;
+	return (results->totalFound);
 }
 
+/**
+ * Discard results. The memory allocated with the search is freed
+ *
+ * \param [in] res If non-null, the results.
+ */
+
+void
+SearchResultDiscard(SearchResult *res)
+{
+	if (res) {
+		MyFree(res->kw);
+		MyFree(res->result);
+	}
+}
 
 /**
  * Get the contents description from a parameter file. Returned string has to be freed after use.
