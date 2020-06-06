@@ -2385,6 +2385,31 @@ GetMousePosition( int *x, int *y )
 	}
 }
 
+coOrd minIncrementSizes() {
+	double x,y;
+	if (mainD.scale >= 1.0) {
+		if (units == UNITS_ENGLISH) {
+			x = 0.25;   //>1:1 = 1/4 inch
+			y = 0.25;
+		} else {
+			x = 1/(2.54*2);  //>1:1 = 0.5 cm
+			y = 1/(2.54*2);
+		}
+	} else {
+		if (units == UNITS_ENGLISH) {
+			x = 1/64;   //<1:1 = 1/64 inch
+			y = 1/64;
+		} else {
+			x = 1/(25.4*2);  //>1:1 = 0.5 mm
+			y = 1/(25.4*2);
+		}
+	}
+	coOrd ret;
+	ret.x = x*1.5;
+	ret.y = y*1.5;
+	return ret;
+}
+
 static void DoMouse( wAction_t action, coOrd pos )
 {
 
@@ -2397,6 +2422,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 	if (recordF) {
 		RecordMouse( "MOUSE", action, pos.x, pos.y );
 	}
+
+
 
 	switch (action&0xFF) {
 	case C_UP:
@@ -2447,6 +2474,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 
 	panCenter.y = mainD.orig.y + mainD.size.y/2;
 	panCenter.x = mainD.orig.x + mainD.size.x/2;
+
+	coOrd min = minIncrementSizes();
 
 	switch ( action&0xFF ) {
 		case C_DOWN:
@@ -2541,19 +2570,19 @@ static void DoMouse( wAction_t action, coOrd pos )
 			DoZoomDown((void *)1L);
 			break;
 		case C_SCROLLUP:
-			panCenter.y = panCenter.y + mainD.size.y/40;
+			panCenter.y = panCenter.y + ((mainD.size.y/20>min.y)?mainD.size.y/20:min.y);
 			PanHere((void*)1);
 			break;
 		case C_SCROLLDOWN:
-			panCenter.y = panCenter.y - mainD.size.y/40;
+			panCenter.y = panCenter.y - ((mainD.size.y/20>min.y)?mainD.size.y/20:min.y);
 			PanHere((void*)1);
 			break;
 		case C_SCROLLLEFT:
-			panCenter.x = panCenter.x - mainD.size.x/40;
+			panCenter.x = panCenter.x - ((mainD.size.x/20>min.x)?mainD.size.x/20:min.x);
 			PanHere((void*)1);
 			break;
 		case C_SCROLLRIGHT:
-			panCenter.x = panCenter.x + mainD.size.x/40;
+			panCenter.x = panCenter.x + ((mainD.size.x/20>min.x)?mainD.size.x/20:min.x);
 			PanHere((void*)1);
 			break;
 		default:
