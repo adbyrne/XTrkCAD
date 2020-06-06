@@ -1202,11 +1202,32 @@ static gint draw_configure_event(
 	return TRUE;
 }
 
-static const char * actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "RDown", "RDrag", "RUp", "Text", "ExtKey", "WUp", "WDown" };
+static const char * actionNames[] = { "None", "Move", "LDown", "LDrag", "LUp", "RDown", "RDrag", "RUp", "Text", "ExtKey", "WUp", "WDown", "DblL", "ModK", "ScrU", "ScrD", "ScrL", "ScrR" };
 
 /**
  * Handler for scroll events, ie mouse wheel activity
  */
+
+static int scrollTimer;
+static int timer_busy_count;
+static wAction_t lastAction;
+
+static int ScrollTimerPop(wDraw_p bd) {
+
+		if (timer_busy_count>1) {
+			 timer_busy_count = 0;
+			 scrollTimer = 0;
+		} else {
+			timer_busy_count++;
+			return TRUE;
+		}
+		if (drawVerbose >= 2)
+			printf( "%s-Pop\n", actionNames[lastAction] );
+		bd->action( bd, bd->context, lastAction, 0, 0 );
+
+		return FALSE;
+}
+
 
 static gint draw_scroll_event(
 		GtkWidget *widget,
@@ -1214,17 +1235,77 @@ static gint draw_scroll_event(
 		wDraw_p bd)
 {
 	wAction_t action;
+	static int oldEventX = 0;
+	static int oldEventY = 0;
+	static int newEventX = 0;
+	static int newEventY = 0;
 
-	switch( event->direction ) {
-	case GDK_SCROLL_UP:
-		action = wActionWheelUp;
-		break;
-	case GDK_SCROLL_DOWN:
-		action = wActionWheelDown;
-		break;
-	default:
-		action = 0;
-		break;
+	if (event->state & (GDK_CONTROL_MASK|GDK_MOD1_MASK)) {
+
+		newEventX = OUTMAPX(bd, event->x);
+		newEventY = OUTMAPY(bd, event->y);
+		oldEventX = OUTMAPX(bd, event->x_root);
+		oldEventY = OUTMAPX(bd, event->y_root);
+
+		switch( event->direction ) {
+			case GDK_SCROLL_UP:
+				if (event->state & (GDK_SHIFT_MASK))
+					action = wActionScrollRight;
+				else
+					action = wActionScrollUp;
+				break;
+			case GDK_SCROLL_DOWN:
+				if (event->state & (GDK_SHIFT_MASK))
+					action = wActionScrollLeft;
+				else
+					action = wActionScrollDown;
+				break;
+			case GDK_SCROLL_LEFT:
+				action = wActionScrollLeft;
+				break;
+			case GDK_SCROLL_RIGHT:
+				action = wActionScrollRight;
+				break;
+			default:
+				return TRUE;
+				break;
+		}
+
+		if (drawVerbose >= 2)
+			printf( "%sNew[%dx%d]Delta[%dx%d]\n", actionNames[action],
+				newEventX, newEventY, oldEventX, oldEventY );
+
+
+
+			if (scrollTimer) {					// Already have a timer
+				lastAction = action;
+                return TRUE;
+            } else {
+            	 lastAction = action;
+            	 timer_busy_count = 0;
+                 scrollTimer = g_timeout_add(25,(GSourceFunc)ScrollTimerPop,bd);   // 25ms delay
+                 return TRUE;
+            }
+
+
+	} else {
+
+		switch( event->direction ) {
+		case GDK_SCROLL_UP:
+			action = wActionWheelUp;
+			break;
+		case GDK_SCROLL_DOWN:
+			action = wActionWheelDown;
+			break;
+		case GDK_SCROLL_LEFT:
+			return TRUE;
+			break;
+		case GDK_SCROLL_RIGHT:
+			return TRUE;
+			break;
+		default:
+			break;
+		}
 	}
 
 	if (action != 0) {
@@ -1487,7 +1568,7 @@ int xw, xh, cw, ch;
 							  | GDK_LEAVE_NOTIFY_MASK
 							  | GDK_BUTTON_PRESS_MASK
 							  | GDK_BUTTON_RELEASE_MASK
-/*							  | GDK_SCROLL_MASK */
+							  | GDK_SCROLL_MASK
 							  | GDK_POINTER_MOTION_MASK
 							  | GDK_POINTER_MOTION_HINT_MASK
 							  | GDK_KEY_PRESS_MASK

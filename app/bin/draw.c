@@ -2197,9 +2197,14 @@ EXPORT void CoOrd2Pix(
 }
 
 EXPORT void PanHere(void * mode) {
+	coOrd oldOrig = mainD.orig;
 	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
 	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
-	MainLayout( TRUE, FALSE ); // PanHere
+	ConstraintOrig( &mainD.orig, mainD.size, FALSE );
+	panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+	panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+	if ((oldOrig.x != mainD.orig.x) || (oldOrig.y != mainD.orig.y))
+		MainLayout( TRUE, FALSE ); // PanHere
 }
 
 
@@ -2440,6 +2445,9 @@ static void DoMouse( wAction_t action, coOrd pos )
 	if ( deferSubstituteControls[0] )
 		InfoSubstituteControls( deferSubstituteControls, deferSubstituteLabels );
 
+	panCenter.y = mainD.orig.y + mainD.size.y/2;
+	panCenter.x = mainD.orig.x + mainD.size.x/2;
+
 	switch ( action&0xFF ) {
 		case C_DOWN:
 		case C_RDOWN:
@@ -2531,6 +2539,22 @@ static void DoMouse( wAction_t action, coOrd pos )
 			break;
 		case C_WDOWN:
 			DoZoomDown((void *)1L);
+			break;
+		case C_SCROLLUP:
+			panCenter.y = panCenter.y + mainD.size.y/40;
+			PanHere((void*)1);
+			break;
+		case C_SCROLLDOWN:
+			panCenter.y = panCenter.y - mainD.size.y/40;
+			PanHere((void*)1);
+			break;
+		case C_SCROLLLEFT:
+			panCenter.x = panCenter.x - mainD.size.x/40;
+			PanHere((void*)1);
+			break;
+		case C_SCROLLRIGHT:
+			panCenter.x = panCenter.x + mainD.size.x/40;
+			PanHere((void*)1);
 			break;
 		default:
 			NoticeMessage( MSG_DOMOUSE_BAD_OP, _("Ok"), NULL, action&0xFF );

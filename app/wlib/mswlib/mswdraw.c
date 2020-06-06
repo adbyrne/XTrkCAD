@@ -186,8 +186,8 @@ static void setDrawMode(
 		wDrawColor dc,
 		wDrawOpts dopt )
 {
-	long centerPen[] = {10,4,2,4};
-	long phantomPen[] = {10,4,2,4,2,4};
+	long centerPen[] = {40,10,20,10};
+	long phantomPen[] = {40,10,20,10,20,10};
 
 	HPEN hOldPen;
 	static wDraw_p d0;
@@ -1711,15 +1711,36 @@ long FAR PASCAL XEXPORT mswDrawPush(
 static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	wAction_t action;
+	GESTUREINFO gi;
 
 	switch( message ) {
 	case WM_MOUSEWHEEL:
 		/* handle mouse wheel events */
-		/* fwKeys = GET_KEYSTATE_WPARAM(wParam); modifier keys are currently ignored */
-		if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
-			action = wActionWheelUp;
-		} else {
-			action = wActionWheelDown;
+		if ( GET_KEYSTATE_WPARAM(wParam) & MK_MBUTTON) {
+			if (GET_KEYSTATE_WPARAM(wParam) & MK_SHIFT) {
+				if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
+					action = wActionScrollRight;
+				} else {
+					action = wActionScrollLeft;
+				}
+			} else {
+				if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
+					action = wActionScrollUp;
+				} else {
+					action = wActionScrollDown;
+				}
+			}
+		}
+		if (b->action)
+			b->action( b, b->data, action, 0, 0 );
+		return 0;
+	case WM_MOUSEHWHEEL:
+		if ( GET_KEYSTATE_WPARAM(wParam) & MK_MBUTTON) {
+			if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
+				action = wActionScrollRight;
+			} else {
+				action = wActionScrollLeft;
+			}
 		}
 		if (b->action)
 			b->action( b, b->data, action, 0, 0 );
