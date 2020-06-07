@@ -106,9 +106,10 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget) {
 
 static void getWinSize(wWin_p win, const char * nameStr)
 {
-    int w, h;
+    int w=50, h=50;
     const char *cp;
     char *cp1, *cp2;
+
 
     /*
      * Clamp window to be no bigger than one monitor size (to start - the user can always maximize)
@@ -120,26 +121,29 @@ static void getWinSize(wWin_p win, const char * nameStr)
     wPos_t maxDisplayHeight = monitor_dimensions.height-50;
 
 
+
     if ((win->option&F_RECALLSIZE) &&
             (win->option&F_RECALLPOS) &&
             (cp = wPrefGetString(SECTIONWINDOWSIZE, nameStr)) &&
             (w = strtod(cp, &cp1), cp != cp1) &&
             (h = strtod(cp1, &cp2), cp1 != cp2)) {
-        if (w < 20) {
-            w = 20;
-        }
+    	win->option &= ~F_AUTOSIZE;
 
-        if (h < 20) {
-            h = 20;
-        }
+		if (w < 50) {
+			w = 50;
+		}
 
-        if (w > maxDisplayWidth) w = maxDisplayWidth;
-        if (h > maxDisplayHeight) h = maxDisplayHeight;
-
-        win->w = win->origX = w;
-        win->h = win->origY = h;
-        win->option &= ~F_AUTOSIZE;
+		if (h < 50) {
+			h = 50;
+		}
     }
+
+	if (w > maxDisplayWidth) w = maxDisplayWidth;
+	if (h > maxDisplayHeight) h = maxDisplayHeight;
+
+	win->w = win->origX = w;
+	win->h = win->origY = h;
+
 }
 
 /**
@@ -958,10 +962,10 @@ static wWin_p wWinCommonCreate(
 
 
     if (w->option&F_AUTOSIZE) {
-        w->realX = 0;
-        w->w = 0;
+        w->realX = 100;
+        w->w = 100;
         w->realY = h;
-        w->h = 0;
+        w->h = 100;
     } else if (w->origX != 0){
         w->w = w->realX = w->origX;
         w->h = w->realY = w->origY+h;
