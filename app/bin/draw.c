@@ -184,6 +184,8 @@ static struct {
 		double value;
 		wMenuRadio_p pdRadio;
 		wMenuRadio_p btRadio;
+		wMenuRadio_p ctxRadio1;
+		wMenuRadio_p panRadio;
 		} zoomList[] = {
 				{ "1:10", 1.0 / 10.0 },
 				{ "1:9", 1.0 / 9.0 },
@@ -1965,10 +1967,12 @@ LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
  * 
  * \param IN zoomM			Menu to which radio button is added
  * \param IN zoomSubM	Second menu to which radio button is added, ignored if NULL
+ * \param IN ctxMenu1
+ * \param IN ctxMenu2
  *
  */
 
-EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM )
+EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM, wMenu_p ctxMenu1, wMenu_p panMenu )
 {
 	int inx;
 	
@@ -1976,9 +1980,16 @@ EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM )
 		if( (zoomList[ inx ].value >= 1.0 && zoomList[ inx ].value<=10 ) ||
 				 (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value))))
 				{
-			zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
+			if (zoomM)
+				zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
 			if( zoomSubM )
 				zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
+			if (panMenu)
+				zoomList[inx].panRadio = wMenuRadioCreate( panMenu, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
+		}
+		if ((zoomList[inx].value >=1.0 && zoomList[inx].value <= 10.0) || (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value)))) {
+			if (ctxMenu1)
+				zoomList[inx].ctxRadio1 = wMenuRadioCreate( ctxMenu1, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
 		}
 	}
 }
@@ -1997,11 +2008,14 @@ static void SetZoomRadio( DIST_T scale )
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
 		if( curScale == zoomList[inx].value ) {
-		
-			wMenuRadioSetActive( zoomList[inx].btRadio );		
+			if (zoomList[inx].btRadio)
+				wMenuRadioSetActive( zoomList[inx].btRadio );
 			if( zoomList[inx].pdRadio )
 				wMenuRadioSetActive( zoomList[inx].pdRadio );
-
+			if (zoomList[inx].ctxRadio1)
+				wMenuRadioSetActive( zoomList[inx].ctxRadio1 );
+			if (zoomList[inx].panRadio)
+				wMenuRadioSetActive( zoomList[inx].panRadio );
 			/* activate / deactivate zoom buttons when appropriate */				
 			wControlLinkedActive( (wControl_p)zoomUpB, ( inx != 0 ) );
 			wControlLinkedActive( (wControl_p)zoomDownB, ( inx < (sizeof zoomList/sizeof zoomList[0] - 1)));			
@@ -2126,6 +2140,20 @@ EXPORT void DoZoomUp( void * mode )
 		wPrefSetInteger( "misc", "zoomin", (long)mainD.scale );
 		InfoMessage( _("Zoom In Program Value %ld:1, Shift+PageDwn to use"), (long)mainD.scale );
 	}
+}
+
+EXPORT void DoZoomExtents( void * mode) {
+
+	DIST_T scale_x, scale_y;
+	scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
+	scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
+	if (scale_x<scale_y)
+		scale_x = scale_y;
+	scale_x = ceil(scale_x);
+	if (scale_x < 1) scale_x = 1;
+	if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
+	mainD.orig = zero;
+	DoNewScale(scale_x);
 }
 
 
@@ -3074,7 +3102,7 @@ EXPORT void InitCmdPan2( wMenu_p menu )
 	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '8');
 	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '9');
 	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to origin - 'o'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'o');
-	wMenu_p zoomM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
-	InitCmdZoom(zoomM, NULL);
+	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
+	InitCmdZoom(NULL, NULL, NULL, zoomPanM);
 	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 0);
 }
