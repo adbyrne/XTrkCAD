@@ -210,7 +210,10 @@ wButton_p wButtonCreate(
     void 	* data)
 {
     wButton_p b;
-    b = wlibAlloc(parent, B_BUTTON, x, y, labelStr, sizeof *b, data);
+    if (option&BO_ICON)  //The labelStr here is a wIcon_p
+    	b = wlibAlloc(parent, B_BUTTON, x, y, " ", sizeof *b, data);
+    else
+    	b = wlibAlloc(parent, B_BUTTON, x, y, labelStr, sizeof *b, data);
     b->option = option;
     b->action = action;
     wlibComputePos((wControl_p)b);
@@ -223,6 +226,7 @@ wButton_p wButtonCreate(
     if (width > 0) {
         gtk_widget_set_size_request(b->widget, width, -1);
     }
+
     if( labelStr ){
         wButtonSetLabel(b, labelStr);
     }
