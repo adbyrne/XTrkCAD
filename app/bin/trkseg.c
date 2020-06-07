@@ -653,13 +653,12 @@ EXPORT void CloneFilledDraw(
 		case SEG_POLY:
 		case SEG_FILPOLY:
 			newPts = (pts_t*)MyMalloc( sp->u.p.cnt * sizeof (pts_t) );
+			memcpy( newPts, sp->u.p.pts, sp->u.p.cnt * sizeof (pts_t) );
 			if ( reorigin ) {
 				for ( inx = 0; inx<sp->u.p.cnt; inx++ )
 					REORIGIN( newPts[inx].pt, sp->u.p.pts[inx].pt, sp->u.p.angle, sp->u.p.orig );
 				sp->u.p.angle = 0;
 				sp->u.p.orig = zero;
-			} else {
-				memcpy( newPts, sp->u.p.pts, sp->u.p.cnt * sizeof (pts_t) );
 			}
 			//if (sp->u.p.pts)    Can't do this a pts could be pointing at static
 			//	free(sp->u.p.pts);
