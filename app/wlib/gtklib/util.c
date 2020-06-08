@@ -371,7 +371,7 @@ void wFlush(
             void)
 {
     while (gtk_events_pending()) {
-        gtk_main_iteration();
+        gtk_main_iteration_do(FALSE);
     }
 
     gdk_display_sync(gdk_display_get_default());
