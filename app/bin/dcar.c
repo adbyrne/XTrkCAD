@@ -633,7 +633,7 @@ static carProto_p CarProtoNew(
 		trkSeg_p segPtr )
 {
 	if ( proto == NULL ) {
-		proto = LookupListElem( &carProto_da, desc, CmpCarProto, sizeof *(carProto_p)0 );
+		proto = LookupListElem( &carProto_da, desc, CmpCarProto, sizeof *proto );
 		if ( proto->desc != NULL ) {
 			if ( proto->paramFileIndex == PARAM_CUSTOM &&
 				 paramFileIndex != PARAM_CUSTOM )
@@ -870,7 +870,7 @@ static roadnameMap_p LoadRoadnameList(
 
 	cmp_key.name = roadnameTab->ptr;
 	cmp_key.len = roadnameTab->len;
-	roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, sizeof *(roadnameMap_p)0 );
+	roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, sizeof roadnameMapP );
 	if ( roadnameMapP->roadname == NULL ) {
 		roadnameMapP->roadname = TabStringDup(roadnameTab);
 		roadnameMapP->repmark = TabStringDup(repmarkTab);
