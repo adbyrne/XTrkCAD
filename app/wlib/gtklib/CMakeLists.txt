@@ -70,6 +70,7 @@ include_directories(${XTrkCAD_BINARY_DIR})
 add_library(xtrkcad-wlib ${headers} ${sources})
 
 # GTK 
+find_package (GTK2)
 include_directories(${GTK_INCLUDE_DIRS})
 target_link_libraries(xtrkcad-wlib ${GTK_LIBRARIES})
 
