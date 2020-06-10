@@ -94,15 +94,19 @@ void wlibSetLabel(
             } else {
                 pixbuf = wlibPixbufFromXBM( bm );
             }
+            GdkPixbuf *pixbuf2 =
+            		gdk_pixbuf_scale_simple(pixbuf, gdk_pixbuf_get_width(pixbuf)*1.25, gdk_pixbuf_get_height(pixbuf)*1.25, GDK_INTERP_BILINEAR);
+            g_object_ref_sink(pixbuf);
+            g_object_unref((gpointer)pixbuf);
             if (*imageG==NULL) {
-                *imageG = gtk_image_new_from_pixbuf(pixbuf);
+                *imageG = gtk_image_new_from_pixbuf(pixbuf2);
                 gtk_container_add(GTK_CONTAINER(widget), *imageG);
                 gtk_widget_show(*imageG);
             } else {
-                gtk_image_set_from_pixbuf(GTK_IMAGE(*imageG), pixbuf);
+                gtk_image_set_from_pixbuf(GTK_IMAGE(*imageG), pixbuf2);
             }
-            g_object_ref_sink(pixbuf);
-            g_object_unref((gpointer)pixbuf);
+            g_object_ref_sink(pixbuf2);
+            g_object_unref((gpointer)pixbuf2);
         } else {
             if (*labelG==NULL) {
                 *labelG = (GtkLabel*)gtk_label_new(wlibConvertInput(labelStr));
