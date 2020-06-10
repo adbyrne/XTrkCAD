@@ -2686,12 +2686,19 @@ static STATUS_T CmdConvertTo(
 		wAction_t action,
 		coOrd pos )
 {
-	track_p trk;
+	static track_p trk;
 	cornuParm_t cp;
 	switch (action) {
 
+	case wActionMove:
+		if ((trk = OnTrack(&pos,FALSE,TRUE)) == NULL) return C_CONTINUE;
+		if (!QueryTrack(trk, Q_CORNU_CAN_MODIFY) &&  //Not Fixed Track/Turnout/Turntable
+			!QueryTrack(trk, Q_IGNORE_EASEMENT_ON_EXTEND ))
+			trk = NULL;
+		return C_CONTINUE;
+
 	case C_LCLICK:
-			if ((trk = OnTrack(&pos,TRUE,TRUE))!=NULL) {
+			if ((trk = OnTrack(&pos,FALSE,TRUE))!=NULL) {
 				SetTrkBits(trk,TB_SELECTED);
 				selectedTrackCount = 1;
 			} else {
@@ -2699,6 +2706,7 @@ static STATUS_T CmdConvertTo(
 				InfoMessage( _("Not on a Track") );
 				return C_CONTINUE;
 			}
+			trk = NULL;
 
 			/* no break */
 	case C_START:
@@ -2714,13 +2722,16 @@ static STATUS_T CmdConvertTo(
 			}
 			UndoStart( _("Convert Cornu"),"newCornu curves");
 			trk = NULL;
+			int converted=0, not_convertable = 0, created=0, deleted=0;
 			DYNARR_RESET(track_p,Da.tracks);
 			while ( TrackIterate( &trk ) ) {
 				if (!GetTrkSelected( trk )) continue;		//Only selected
 				if (!QueryTrack(trk, Q_CORNU_CAN_MODIFY) &&  //Not Fixed Track/Turnout/Turntable
 					!QueryTrack( trk, Q_IGNORE_EASEMENT_ON_EXTEND )) { //But Yes to Easement
+					not_convertable++;
 					continue;
 				}
+				converted++;
 				DYNARR_RESET(trkSeg_t,Da.crvSegs_da);
 				Da.ep1Segs_da_cnt = 0;
 				Da.ep2Segs_da_cnt = 0;
@@ -2740,7 +2751,7 @@ static STATUS_T CmdConvertTo(
 				else Da.ep[0] = -1;
 				EPINX_T ep0 = 0;
 				//Move down the LHS adding tracks until no more Selected or not modifyable
-				while (Da.trk[0] && GetTrkSelected( Da.trk[0]) && IsTrack(trk) && (QueryTrack(trk, Q_CORNU_CAN_MODIFY) || QueryTrack(trk, Q_IS_CORNU)) ) {
+				while (Da.trk[0] && GetTrkSelected( Da.trk[0]) && IsTrack(Da.trk[0]) && (QueryTrack(Da.trk[0], Q_CORNU_CAN_MODIFY) || QueryTrack(Da.trk[0], Q_IS_CORNU)) ) {
 					prior = Da.trk[0];
 					ep0 = 1-Da.ep[0];
 					ClrTrkBits( Da.trk[0], TB_SELECTED );          //Done with this one
@@ -2755,6 +2766,7 @@ static STATUS_T CmdConvertTo(
 					Da.trk[0] = GetTrkEndTrk( prior, ep0 );
 					if (Da.trk[0]) Da.ep[0] = GetEndPtConnectedToMe(Da.trk[0],prior);
 					else Da.ep[0] = -1;
+					converted++;
 				}
 				Da.radius[0] = -1.0; //Initialize with no end
 				Da.ends[0] = FALSE;
@@ -2772,7 +2784,7 @@ static STATUS_T CmdConvertTo(
 				if (Da.trk[1]) Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],trk);
 				else Da.ep[1] = -1;
 				//Move down RHS adding tracks until no more Selected or not modifyable
-				while (Da.trk[1] && GetTrkSelected( Da.trk[1]) && (QueryTrack(trk, Q_CORNU_CAN_MODIFY) || QueryTrack(trk, Q_IS_CORNU))) {
+				while (Da.trk[1] && GetTrkSelected( Da.trk[1]) && (QueryTrack(Da.trk[1], Q_CORNU_CAN_MODIFY) || QueryTrack(Da.trk[1], Q_IS_CORNU))) {
 					next = Da.trk[1];
 					ep1 = 1-Da.ep[1];
 					if (selectedTrackCount>0) selectedTrackCount--;
@@ -2783,6 +2795,7 @@ static STATUS_T CmdConvertTo(
 					DYNARR_LAST(coOrd,Da.mid_points) = GetTrkEndPos(next,1-ep1);
 					Da.trk[1] = GetTrkEndTrk( next, ep1 );
 					if (Da.trk[1]) Da.ep[1] = GetEndPtConnectedToMe(Da.trk[1],next);
+					converted++;
 				}
 				Da.radius[1] = -1.0; //Initialize with no end
 				Da.ends[1] = FALSE;
@@ -2796,7 +2809,6 @@ static STATUS_T CmdConvertTo(
 				else continue;   //Checks that a solution can be found
 
 				// Do the deed - Create a replacement Cornu
-
 
 				BOOL_T end_point[2];
 				end_point[0] = TRUE;
@@ -2828,6 +2840,7 @@ static STATUS_T CmdConvertTo(
 				end_point[1] = TRUE;
 				if (Da.radius[1] == -1) end_point[1] = FALSE;
 				if ((trk1 = CreateCornuFromPoints(sub_pos,end_point)) == NULL) continue;
+				created++;
 				DrawNewTrack(trk1);
 				if (Da.trk[0]) {
 					CopyAttributes( Da.trk[0], trk1 );
@@ -2851,17 +2864,22 @@ static STATUS_T CmdConvertTo(
 				}
 
 			}			//Find next track
+			SetAllTrackSelect(FALSE);
 			//Get rid of old tracks
 			for (int i = 0; i<Da.tracks.cnt;i++) {
 				DeleteTrack(DYNARR_N(track_p,Da.tracks,i),FALSE);
+				deleted++;
 			}
 
-			SetAllTrackSelect(FALSE);
 			UndoEnd();  //Stop accumulating
+			NoticeMessage(_("Tracks Counts: %d converted %d unconvertible %d created %d deleted"),_("OK"),NULL,converted,not_convertable,created,deleted);
 
 			return C_TERMINATE;
 
 		case C_REDRAW:
+			if (trk) {
+				DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+			}
 			return C_CONTINUE;
 
 		case C_CANCEL:
@@ -2881,11 +2899,19 @@ static STATUS_T CmdConvertFrom(
 		wAction_t action,
 		coOrd pos )
 {
-	track_p trk,trk1,trk2;
+	static track_p trk;
+	track_p trk1,trk2;
 	switch (action) {
 
+		case wActionMove:
+			if ((trk = OnTrack(&pos,FALSE,TRUE)) == NULL) return C_CONTINUE;
+			if ((!(GetTrkType(trk) == T_CORNU)) ||
+				(!(GetTrkType(trk) == T_BEZIER)))
+				trk = NULL;
+			return C_CONTINUE;
+
 		case C_LCLICK:
-			if ((trk = OnTrack(&pos,TRUE,TRUE))!=NULL) {
+			if ((trk = OnTrack(&pos,FALSE,TRUE))!=NULL) {
 				SetTrkBits(trk,TB_SELECTED);
 				selectedTrackCount = 1;
 			} else {
@@ -2912,6 +2938,7 @@ static STATUS_T CmdConvertFrom(
 			UndoStart( _("Convert Bezier and Cornu"),"Try to convert all selected tracks");
 			track_p tracks[2];
 			DYNARR_RESET(track_p,Da.tracks);
+			int converted=0, not_convertable = 0, created=0, deleted=0;
 			while ( TrackIterate( &trk1 ) ) {
 				if ( GetTrkSelected( trk1 ) && IsTrack( trk1 ) ) {
 					//Only Cornu or Bezier
@@ -2922,11 +2949,16 @@ static STATUS_T CmdConvertFrom(
 						GetTracksFromCornuTrack(trk1,tracks);
 						DYNARR_APPEND(track_p,Da.tracks,1);
 						DYNARR_LAST(track_p,Da.tracks) = trk1;
+						converted++;
 					} else if (GetTrkType(trk1) == T_BEZIER) {
 						GetTracksFromBezierTrack(trk1,tracks);
 						DYNARR_APPEND(track_p,Da.tracks,1);
 						DYNARR_LAST(track_p,Da.tracks) = trk1;
-					} else continue;
+						converted++;
+					} else {
+						not_convertable++;
+						continue;
+					}
 					for (int i=0;i<2;i++) {
 						track_p trk2 = GetTrkEndTrk(trk1,i);
 						if (trk2) {
@@ -2948,14 +2980,19 @@ static STATUS_T CmdConvertFrom(
 					}
 				}
 			}
+			SetAllTrackSelect(FALSE);
 			for (int i = 0; i<Da.tracks.cnt;i++) {
 				DeleteTrack(DYNARR_N(track_p,Da.tracks,i),FALSE);
+				deleted++;
 			}
-			SetAllTrackSelect(FALSE);
 			UndoEnd();
+			NoticeMessage(_("Tracks Counts: %d converted %d unconvertible %d deleted"),_("OK"),NULL,converted,not_convertable,deleted);
 			return C_TERMINATE;
 
 		case C_REDRAW:
+			if (trk) {
+				DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
+			}
 			return C_CONTINUE;
 
 		case C_CANCEL:
@@ -2978,8 +3015,8 @@ static STATUS_T CmdConvertFrom(
 EXPORT void InitCmdCornu( wMenu_p menu )
 {	
 	ButtonGroupBegin( _("Convert"), "cmdConvertSetCmd", _("Convert") );
-	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"), wIconCreatePixMap(convertto_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3,ACCL_CONVERTTO, NULL );
-	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"), wIconCreatePixMap(convertfr_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3,ACCL_CONVERTFR, NULL );
+	AddMenuButton( menu, CmdConvertTo, "cmdConvertTo", _("Convert To Cornu"), wIconCreatePixMap(convertto_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTTO, NULL );
+	AddMenuButton( menu, CmdConvertFrom, "cmdConvertFrom", _("Convert From Cornu"), wIconCreatePixMap(convertfr_xpm), LEVEL0_50, IC_STICKY|IC_LCLICK|IC_POPUP3|IC_WANT_MOVE,ACCL_CONVERTFR, NULL );
 	cornuHotBarCmdInx = AddMenuButton(menu, cmdCornuCreate, "cmdCornuCreate", "", NULL, LEVEL0_50, IC_STICKY|IC_POPUP3|IC_WANT_MOVE, 0, NULL);
 	ButtonGroupEnd();
 	ParamCreateControls( &cornuModPG, cornuModDlgUpdate) ;

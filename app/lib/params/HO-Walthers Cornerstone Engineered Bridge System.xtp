@@ -137,7 +137,7 @@ END
 
 SUBCONTENTS Walthers HO Cornerstone Engineered Bridge System - Truss Bridges
 TURNOUT HO "Walthers HO Cornerstone Engr Bridge System	109' Double-Track Truss Bridge (2-3/16" Tk Sp)	933-4510"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 1.093750 270.000000
 	E 15.017222 1.093750 90.000000
 	E 0.000000 -1.093750 270.000000
@@ -265,7 +265,7 @@ TURNOUT HO "Walthers HO Cornerstone Engr Bridge System	109' Single-Track Pratt D
 	L3 13528100 0.053333 0.000000 -0.593750 0 15.017222 -0.593750 0
 END
 TURNOUT HO "Walthers HO Cornerstone Engr Bridge System	167' Double-Track Pratt Arched Truss Bridge (2-3/16" Tk Sp)	933-4522"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 1.093750 270.000000
 	E 23.008037 1.093750 90.000000
 	E 0.000000 -1.093750 270.000000
@@ -321,7 +321,7 @@ END
 
 SUBCONTENTS Walthers HO Cornerstone Engineered Bridge System - Bascula Bridge
 TURNOUT HO "Walthers HO Cornerstone Engr Bridge System	156' Bascula Truss Bridge	933-3070"
-    P "Normal" 1
+    P "Normal" 1 2
     E 0.000000 0.000000 270.000000
     E 28.750000 0.000000 90.000000
     S 0 0.000000 0.000000 0.000000 7.250000 0.000000
@@ -414,7 +414,7 @@ END
 
 SUBCONTENTS Walthers HO Cornerstone Engineered Bridge System - Swing Bridge
 TURNOUT HO "Walthers HO Cornerstone Engr Bridge System	200.5' Double-Track Truss Swing Bridge (2-1/16" Tk Sp)	933-3088"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 1.031250 270.000000
 	E 27.625000 1.031250 90.000000
 	E 0.000000 -1.031250 270.000000

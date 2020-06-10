@@ -108,7 +108,6 @@ wCreateSplash(char *appName, char *appVer)
     message = label;
 
     gtk_widget_show(window);
-
     return (TRUE);
 }
 
@@ -122,8 +121,8 @@ int
 wSetSplashInfo(char *msg)
 {
 	if (!window) return FALSE;
-    if (msg) {
-        gtk_label_set_text((GtkLabel *)message, msg);
+    if (msg && message) {
+        gtk_label_set_text(GTK_LABEL(message), msg);
         wFlush();
         return TRUE;
     }

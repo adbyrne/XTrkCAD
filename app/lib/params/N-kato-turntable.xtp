@@ -4,7 +4,7 @@ CONTENTS Kato Unitrack N Scale Turntable
 
 SUBCONTENTS Kato Unitrack Turntable
 TURNOUT N "Kato Unitrack	3 Stall Round House	20-xxx"
-	P "Normal" 1
+	P "Normal" 1 0 2 0 3
 	E -0.148334 1.695463 260.000000
 	E 0.000000 0.000000 270.000000
 	E -0.148334 -1.695463 280.000000

@@ -1,7 +1,7 @@
 CONTENTS Central Valley HO Scale
 SUBCONTENTS Central Valley HO Scale - Bridges
 TURNOUT HO  "Central Valley	200' Parker Truss Dbl Track Bridge 29in	1900"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 29.000000 1.000000 90.000000
 	E 0.000000 1.000000 270.000000
 	E 29.000000 -1.000000 90.000000
@@ -364,7 +364,7 @@ TURNOUT HO "Central Valley	72' Plate Girder Bridge 9.92in	1903"
 	L 10223889  0.137773 0.000000 -1.156250 9.919633 -1.156250
 END
 TURNOUT HO "Central Valley	72' Plate Girder Dbl Track Bridge 9.92in	1904"
-	P "P0" 1
+	P "P0" 1 0 2
 	E 9.919633 1.156250 90.000000
 	E 0.000000 1.156250 270.000000
 	E 9.919633 -1.156250 90.000000

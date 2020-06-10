@@ -691,7 +691,7 @@ TURNOUT N  "Tomix Fine Track	Overhead PC Curve 13.93R 354mm 45°	1874"
 
 SUBCONTENTS Tomix N-Scale Fine Track - Overhead Double Track
 TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Straight 5.51 140mm	1061"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 5.511811 0.728346 90.000000
 	E 0.000000 -0.728346 270.000000
@@ -702,7 +702,7 @@ TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Straight 5.51 140mm	1061"
 	L 11579568 0.053333 0.000000 -1.456692 5.511811 -1.456692
 	END
 TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Straight 11.02 280mm	1062"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 11.023622 0.728346 90.000000
 	E 0.000000 -0.728346 270.000000
@@ -713,7 +713,7 @@ TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Straight 11.02 280mm	1062"
 	L 11579568 0.053333 0.000000 -1.456692 11.023622 -1.456692
 	END
 TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Straight 44.09 1120mm	1069"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 44.094488 0.728346 90.000000
 	E 0.000000 -0.728346 270.000000
@@ -724,7 +724,7 @@ TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Straight 44.09 1120mm	1069"
 	L 11579568 0.053333 0.000000 -1.456692 44.094488 -1.456692
 	END
 TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Curve 11.02/12.48R 280/317mm 45°	1161"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 0.000000 -0.728346 270.000000
 	E 8.824915 -2.927054 135.000000
@@ -735,7 +735,7 @@ TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Curve 11.02/12.48R 280/317mm 45°	1
 	A 11579568 0.053333 10.295276 0.000000 -11.751968 0.000000 45.000000
 	END
 TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Curve 13.93/15.39R 354/391mm 45°	1162"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 0.000000 -0.728346 270.000000
 	E 10.884990 -3.780365 135.000000
@@ -746,7 +746,7 @@ TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Curve 13.93/15.39R 354/391mm 45°	1
 	A 11579568 0.053333 13.208662 0.000000 -14.663354 0.000000 45.000000
 	END
 TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Curve 16.85/18.30R 428/465mm 45°	1163"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 0.000000 -0.728346 270.000000
 	E 12.945065 -4.633676 135.000000
@@ -759,7 +759,7 @@ TURNOUT N  "Tomix Fine Track	Overhead Dbl Trk Curve 16.85/18.30R 428/465mm 45°	1
 
 SUBCONTENTS Tomix N-Scale Fine Track - Viaduct Double Track Slab Type
 TURNOUT N  "Tomix Fine Track	Viaduct Dbl Trk Straight 5.51 140mm (slab type)	1066"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 5.511811 0.728346 90.000000
 	E 0.000000 -0.728346 270.000000
@@ -770,7 +770,7 @@ TURNOUT N  "Tomix Fine Track	Viaduct Dbl Trk Straight 5.51 140mm (slab type)	106
 	L 11579568 0.053333 0.000000 -1.456692 5.511811 -1.456692
 	END
 TURNOUT N  "Tomix Fine Track	Viaduct Dbl Trk Straight 11.02 280mm (slab type)	1067"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 11.023622 0.728346 90.000000
 	E 0.000000 -0.728346 270.000000
@@ -781,7 +781,7 @@ TURNOUT N  "Tomix Fine Track	Viaduct Dbl Trk Straight 11.02 280mm (slab type)	10
 	L 11579568 0.053333 0.000000 -1.456692 11.023622 -1.456692
 	END
 TURNOUT N  "Tomix Fine Track	Viaduct Dbl Trk Straight 44.09 1120mm (slab type)	1070"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 44.094488 0.728346 90.000000
 	E 0.000000 -0.728346 270.000000
@@ -792,7 +792,7 @@ TURNOUT N  "Tomix Fine Track	Viaduct Dbl Trk Straight 44.09 1120mm (slab type)	1
 	L 11579568 0.053333 0.000000 -1.456692 44.094488 -1.456692
 	END
 TURNOUT N  "Tomix Fine Track	Viaduct Dbl Trk Curve 16.85/18.30R 428/465mm 45°(slab type)	1168"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 0.000000 -0.728346 270.000000
 	E 12.945065 -4.633676 135.000000
@@ -803,7 +803,7 @@ TURNOUT N  "Tomix Fine Track	Viaduct Dbl Trk Curve 16.85/18.30R 428/465mm 45°(sl
 	A 11579568 0.053333 16.122048 0.000000 -17.578740 0.000000 45.000000
 	END
 TURNOUT N  "Tomix Fine Track	Viaduct Dbl Trk Curve 19.76/21.22R 502/539mm 22.5°(slab type)	1169"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 0.000000 -0.728346 270.000000
 	E 8.120723 -0.886966 112.500000
@@ -1269,7 +1269,7 @@ TURNOUT N  "Tomix Fine Track	Truss Bridge 11.02 280mm	3030/31/32/33"
 	L 0 0.053333 10.104985 -0.701680 10.104985 0.701680
 	END
 TURNOUT N  "Tomix Fine Track	Dbl Trk Truss Bridge 11.02 280mm	3051/52/53/3257"
-	P "Normal" 1
+	P "Normal" 1 0 2
 	E 0.000000 0.728346 270.000000
 	E 11.023622 0.728346 90.000000
 	E 0.000000 -0.728346 270.000000

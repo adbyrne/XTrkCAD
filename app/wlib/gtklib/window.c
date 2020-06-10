@@ -106,9 +106,10 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget) {
 
 static void getWinSize(wWin_p win, const char * nameStr)
 {
-    int w, h;
+    int w=50, h=50;
     const char *cp;
     char *cp1, *cp2;
+
 
     /*
      * Clamp window to be no bigger than one monitor size (to start - the user can always maximize)
@@ -120,26 +121,29 @@ static void getWinSize(wWin_p win, const char * nameStr)
     wPos_t maxDisplayHeight = monitor_dimensions.height-50;
 
 
+
     if ((win->option&F_RECALLSIZE) &&
             (win->option&F_RECALLPOS) &&
             (cp = wPrefGetString(SECTIONWINDOWSIZE, nameStr)) &&
             (w = strtod(cp, &cp1), cp != cp1) &&
             (h = strtod(cp1, &cp2), cp1 != cp2)) {
-        if (w < 20) {
-            w = 20;
-        }
+    	win->option &= ~F_AUTOSIZE;
 
-        if (h < 20) {
-            h = 20;
-        }
+		if (w < 50) {
+			w = 50;
+		}
 
-        if (w > maxDisplayWidth) w = maxDisplayWidth;
-        if (h > maxDisplayHeight) h = maxDisplayHeight;
-
-        win->w = win->origX = w;
-        win->h = win->origY = h;
-        win->option &= ~F_AUTOSIZE;
+		if (h < 50) {
+			h = 50;
+		}
     }
+
+	if (w > maxDisplayWidth) w = maxDisplayWidth;
+	if (h > maxDisplayHeight) h = maxDisplayHeight;
+
+	win->w = win->origX = w;
+	win->h = win->origY = h;
+
 }
 
 /**
@@ -842,6 +846,7 @@ static gint window_char_event(
 
 void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio ) {
 	GdkGeometry hints;
+	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE;
     hints.min_width = min_width;
 	hints.max_width = max_width;
 	hints.min_height = min_height;
@@ -849,14 +854,19 @@ void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int 
 	hints.min_aspect = hints.max_aspect = aspect_ratio;
 	hints.base_width = base_width;
 	hints.base_height = base_height;
+	if( base_width != -1 && base_height != -1 ) {
+		hintMask |= GDK_HINT_BASE_SIZE;
+	}
+	
+	if(aspect_ratio > -1.0 ) {
+		hintMask |= GDK_HINT_ASPECT;
+	}	
 
 	gtk_window_set_geometry_hints(
 			GTK_WINDOW(win->gtkwin),
 			win->gtkwin,
 			&hints,
-			(GdkWindowHints)(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE |
-					GDK_HINT_ASPECT | GDK_HINT_BASE_SIZE ));
-
+			hintMask);
 }
 
 
@@ -958,10 +968,10 @@ static wWin_p wWinCommonCreate(
 
 
     if (w->option&F_AUTOSIZE) {
-        w->realX = 0;
-        w->w = 0;
+        w->realX = 100;
+        w->w = 100;
         w->realY = h;
-        w->h = 0;
+        w->h = 100;
     } else if (w->origX != 0){
         w->w = w->realX = w->origX;
         w->h = w->realY = w->origY+h;
