@@ -1240,7 +1240,7 @@ static gint draw_scroll_event(
 	static int newEventX = 0;
 	static int newEventY = 0;
 
-	if (event->state & (GDK_SHIFT_MASK)) {
+	if (event->state & (GDK_SHIFT_MASK|GDK_BUTTON2_MASK|GDK_MOD1_MASK)) {
 
 		newEventX = OUTMAPX(bd, event->x);
 		newEventY = OUTMAPY(bd, event->y);

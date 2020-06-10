@@ -125,9 +125,9 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \b "@" key in \f{Select}, \f{Modify} and \f{Pan/Zoom}.
 
-\b Mouse Wheel - adding \e{Shift} key will Pan the screen. adding \e{Ctrl} as well makes up Pan left and down Pan right.
+\b Mouse Wheel - adding \e{Shift} key or the \e{Mouse Middle Button} will Pan the screen. adding \e{Ctrl} as well makes up Pan left and down Pan right.
 
-\b Horizontal Mouse Wheel - adding \e{Shift} will Pan the screen left and Right
+\b Horizontal Mouse Wheel - adding \e{Shift} or the \e{Mouse Middle Button} will Pan the screen left and Right (if available)
 
 \b Scroll Left and Right - if the scroll left and right guestures are mapped to the trackpad by the operating system, with \e{Shift} depressed the screen will Pan.
 
