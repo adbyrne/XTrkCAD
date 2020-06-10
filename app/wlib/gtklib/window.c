@@ -29,6 +29,9 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
+#define MIN_WIDTH 100
+#define MIN_HEIGHT 100
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -37,8 +40,11 @@
 
 wWin_p gtkMainW;
 
-#define MIN_WIN_WIDTH (50)
-#define MIN_WIN_HEIGHT (50)
+#define MIN_WIN_WIDTH 150
+#define MIN_WIN_HEIGHT 150
+
+#define MIN_WIN_WIDTH_MAIN 400
+#define MIN_WIN_HEIGHT_MAIN 400
 
 #define SECTIONWINDOWSIZE  "gtklib window size"
 #define SECTIONWINDOWPOS   "gtklib window pos"
@@ -93,6 +99,7 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget) {
 
 	gdk_screen_get_monitor_geometry(screen,monitor,&monitor_dimensions);
 
+
 	return monitor_dimensions;
 }
 
@@ -140,6 +147,9 @@ static void getWinSize(wWin_p win, const char * nameStr)
 
 	if (w > maxDisplayWidth) w = maxDisplayWidth;
 	if (h > maxDisplayHeight) h = maxDisplayHeight;
+
+	if (w<MIN_WIDTH) w = MIN_WIDTH;
+	if (h<MIN_HEIGHT) h = MIN_HEIGHT;
 
 	win->w = win->origX = w;
 	win->h = win->origY = h;
@@ -968,13 +978,13 @@ static wWin_p wWinCommonCreate(
 
 
     if (w->option&F_AUTOSIZE) {
-        w->realX = 100;
-        w->w = 100;
+        w->realX = 0;
+        w->w = MIN_WIN_WIDTH+20;
         w->realY = h;
-        w->h = 100;
+        w->h = MIN_WIN_HEIGHT;
     } else if (w->origX != 0){
-        w->w = w->realX = w->origX;
-        w->h = w->realY = w->origY+h;
+        w->realX = w->origX;
+        w->realY = w->origY+h;
 
         w->default_size_x = w->w;
         w->default_size_y = w->h;
@@ -985,11 +995,15 @@ static wWin_p wWinCommonCreate(
         }
     }
     int scr_w, scr_h;
-    	wGetDisplaySize(&scr_w, &scr_h);
-        if (winType != W_MAIN) {
-        	wSetGeometry(w, 100, scr_w-10, 100, scr_h, -1, -1, -1);
-        } else {
-        	wSetGeometry(w, scr_w/3, scr_w-10, scr_h/3, scr_h-10, -1, -1, -1);
+	wGetDisplaySize(&scr_w, &scr_h);
+	if (scr_w < MIN_WIN_WIDTH) scr_w = MIN_WIN_WIDTH+10;
+	if (scr_h < MIN_WIN_HEIGHT) scr_h = MIN_WIN_HEIGHT;
+	if (winType != W_MAIN) {
+		wSetGeometry(w, MIN_WIN_WIDTH, scr_w-10, MIN_WIN_HEIGHT, scr_h, -1, -1, -1);
+	} else {
+		if (scr_w < MIN_WIN_WIDTH_MAIN+10) scr_w = MIN_WIN_WIDTH_MAIN+200;
+		if (scr_h < MIN_WIN_HEIGHT_MAIN+10) scr_h = MIN_WIN_HEIGHT_MAIN+200;
+		wSetGeometry(w, MIN_WIN_WIDTH_MAIN, scr_w-10, MIN_WIN_HEIGHT_MAIN, scr_h-10, -1, -1, -1);
      }
 
 
