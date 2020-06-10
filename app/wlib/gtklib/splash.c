@@ -108,7 +108,6 @@ wCreateSplash(char *appName, char *appVer)
     message = label;
 
     gtk_widget_show(window);
-
     return (TRUE);
 }
 
@@ -124,11 +123,7 @@ wSetSplashInfo(char *msg)
 	if (!window) return FALSE;
     if (msg && message) {
         gtk_label_set_text(GTK_LABEL(message), msg);
-// Remove the call to wFlush as it can cause a hang in debug at g_dbus_connection_signal_subscribe
-// for unknown reasons.
-// Removing this means the splash screen won't be completely updated until the main window is created
-// but initialization happens quick enough that noone will notice
-//        wFlush();
+        wFlush();
         return TRUE;
     }
 

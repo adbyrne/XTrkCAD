@@ -846,6 +846,7 @@ static gint window_char_event(
 
 void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio ) {
 	GdkGeometry hints;
+	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE;
     hints.min_width = min_width;
 	hints.max_width = max_width;
 	hints.min_height = min_height;
@@ -853,14 +854,19 @@ void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int 
 	hints.min_aspect = hints.max_aspect = aspect_ratio;
 	hints.base_width = base_width;
 	hints.base_height = base_height;
+	if( base_width != -1 && base_height != -1 ) {
+		hintMask |= GDK_HINT_BASE_SIZE;
+	}
+	
+	if(aspect_ratio > -1.0 ) {
+		hintMask |= GDK_HINT_ASPECT;
+	}	
 
 	gtk_window_set_geometry_hints(
 			GTK_WINDOW(win->gtkwin),
 			win->gtkwin,
 			&hints,
-			(GdkWindowHints)(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE |
-					GDK_HINT_ASPECT | GDK_HINT_BASE_SIZE ));
-
+			hintMask);
 }
 
 
