@@ -141,23 +141,14 @@ Holding down the Shift key while clicking the \f{Zoom In} or \f{Zoom Out} button
 
 }
 
-\dd \e{\i{Programmed Zoom}}
-
-\lcont{
-
-\u000
-
-\b The \e{Programmed Zoom} value for the \f{Zoom In} button is set to the current Drawing Scale by holding down the Shift and Ctrl keys while clicking on the \f{Zoom In} button.
-
-\u000
-
-\b The \e{Programmed Zoom} value for the \f{Zoom Out} button is set to the current Drawing Scale by holding down the Shift and Ctrl keys while clicking on the \f{Zoom Out} button.
-
-}
-
 Normally a zoom in more of more than 1:1 is not possible, however if the Ctrl key is held down while the \f{Zoom In} button is pressed a zoom less that 1:1 can be achieved. This function is useful when working on detail.
 
 Pressing the middle Zoom button on the Tool Bar pop-ups a list of Zoom factors that can be select from.
+
+\u000
+
+\dd The Pan function can be accessed using the Mouse Wheel with \e{Shift}. Adding \e{Ctrl} as well as \e{Shift} chnages Up to Left and Down to Right. 
+Pan Left and Right can also be driven by the Horizontal Mouse Wheel (if available) or the Scroll Left/Right Guestures (if mapped by the Operating System).
 
 \rule
 

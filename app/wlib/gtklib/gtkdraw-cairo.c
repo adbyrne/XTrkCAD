@@ -1240,7 +1240,7 @@ static gint draw_scroll_event(
 	static int newEventX = 0;
 	static int newEventY = 0;
 
-	if (event->state & (GDK_CONTROL_MASK|GDK_MOD1_MASK)) {
+	if (event->state & (GDK_SHIFT_MASK)) {
 
 		newEventX = OUTMAPX(bd, event->x);
 		newEventY = OUTMAPY(bd, event->y);
@@ -1249,13 +1249,13 @@ static gint draw_scroll_event(
 
 		switch( event->direction ) {
 			case GDK_SCROLL_UP:
-				if (event->state & (GDK_SHIFT_MASK))
+				if (event->state & GDK_CONTROL_MASK)
 					action = wActionScrollRight;
 				else
 					action = wActionScrollUp;
 				break;
 			case GDK_SCROLL_DOWN:
-				if (event->state & (GDK_SHIFT_MASK))
+				if (event->state & GDK_CONTROL_MASK)
 					action = wActionScrollLeft;
 				else
 					action = wActionScrollDown;

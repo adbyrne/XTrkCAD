@@ -1715,11 +1715,19 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 	switch( message ) {
 	case WM_MOUSEWHEEL:
 		/* handle mouse wheel events */
-		if (GET_KEYSTATE_WPARAM(wParam) & MK_SHIFT) {
-			if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
-				action = wActionScrollRight;
+		if (GET_KEYSTATE_WPARAM(wParam) & MK_SHIFT ) {
+			if (GET_KEYSTATE_WPARAM(wParam) & MK_CTRL ) {
+				if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
+					action = wActionScrollLeft;
+				} else {
+					action = wActionScrollRight;
+				}
 			} else {
-				action = wActionScrollLeft;
+				if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
+					action = wActionScrollUp;
+				} else {
+					action = wActionScrollDown;
+				}
 			}
 		} else {
 			if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
@@ -1732,7 +1740,7 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			b->action( b, b->data, action, 0, 0 );
 		return 0;
 	case WM_MOUSEHWHEEL:
-		if ( GET_KEYSTATE_WPARAM(wParam) & MK_MBUTTON) {
+		if ( GET_KEYSTATE_WPARAM(wParam) & MK_SHIFT) {
 			if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
 				action = wActionScrollRight;
 			} else {
