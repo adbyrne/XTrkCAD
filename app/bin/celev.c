@@ -399,16 +399,18 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			if ((trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0)) != NULL) {
-				if (GetEndPtConnectedToMe(trk0,trk1) == -1) {	//Not simply connected to each other!!!
-					if (GetTrkEndPtCnt(trk1) == 2) {
-						if (GetPointElev(trk1,p2,&elev1)) {
-							if (MyGetKeyState()&WKEY_SHIFT) {
-								InfoMessage (_("Crossing - LowElev %0.3f, High %0.3f, Clearance %0.3f - Click to Split"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
-							} else
-								InfoMessage (_("Crossing - LowElev %0.3f, High %0.3f, Clearance %0.3f"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
+				if (IsClose(FindDistance(p0,p2))) {
+					if (GetEndPtConnectedToMe(trk0,trk1) == -1) {	//Not simply connected to each other!!!
+						if (GetTrkEndPtCnt(trk1) == 2) {
+							if (GetPointElev(trk1,p2,&elev1)) {
+								if (MyGetKeyState()&WKEY_SHIFT) {
+									InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f - Click to Split"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
+								} else
+									InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
+							}
+							CreateSquareAnchor(p2);
+							return C_CONTINUE;
 						}
-						CreateSquareAnchor(p2);
-						return C_CONTINUE;
 					}
 				}
 			}
