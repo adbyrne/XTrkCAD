@@ -2548,6 +2548,8 @@ EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 #define DRAW_TUNNEL_DASH		(1)
 #define DRAW_TUNNEL_SOLID		(2)
 EXPORT long drawTunnel = DRAW_TUNNEL_DASH;
+EXPORT long colorTrack;
+EXPORT long colorDraw;
 
 /******************************************************************************
  *
@@ -2946,7 +2948,7 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 		if ((d->options&DC_PRINT)==0 && GetTrkSelected(trk))
 			return selectedColor;
 	}
-	if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) ) {
+	if ( (IsTrack(trk)?(colorTrack):(colorDraw)) ) {
 		unsigned int iLayer = GetTrkLayer( trk );
 		if (GetLayerUseColor( iLayer ) )
 			return GetLayerColor( iLayer );

@@ -35,6 +35,8 @@ typedef struct track_t * track_p;
 typedef struct track_t * track_cp;
 extern track_p tempTrack;
 extern wIndex_t trackCount;
+extern long colorTrack;
+extern long colorDraw;
 extern long drawTunnel;
 extern long drawEndPtV;
 extern long drawUnconnectedEndPt;

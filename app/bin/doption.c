@@ -43,9 +43,6 @@ static paramFloatRange_t r1_10 = { 1, 10 };
 static paramFloatRange_t r1_1000 = { 1, 1000 };
 static paramFloatRange_t r0_180 = { 0, 180 };
 
-static long colorTrack;
-static long colorDraw;
-
 static void UpdatePrefD( void );
 static void UpdateMeasureFmt(void);
 
@@ -83,14 +80,6 @@ static void OptionDlgUpdate(
 		}
 		if (pg->paramPtr[inx].valueP == &distanceFormatInx) {
 			UpdateMeasureFmt();
-		}
-		if (pg->paramPtr[inx].valueP == &colorTrack) {
-			if (colorTrack == 1) colorLayers |= 1;
-			else colorLayers &= ~1;
-		}
-		if (pg->paramPtr[inx].valueP == &colorDraw) {
-			if (colorDraw == 1 ) colorLayers |= 2;
-			else colorLayers &= ~2;
 		}
 		if (pg->paramPtr[inx].valueP == &showFlexTrack) {
 			DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
@@ -192,10 +181,6 @@ static void DoDisplay( void * junk )
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Part Number"), NULL, (void*)0x0321 );
 		wListAddValue( (wList_p)displayPLs[I_HOTBARLABELS].control, _("Manuf/Proto/Partno/Item"), NULL, (void*)0x4321 );
 	}
-	if (colorLayers&1) colorTrack = 1;
-	else colorTrack = 0;
-	if (colorLayers&2) colorDraw = 1;
-	else colorDraw = 0;
 
 	ParamLoadControls( &displayPG );
 	wShow( displayW );
