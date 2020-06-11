@@ -1716,7 +1716,7 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 	case WM_MOUSEWHEEL:
 		/* handle mouse wheel events */
 		if (GET_KEYSTATE_WPARAM(wParam) & (MK_SHIFT|MK_MBUTTON) ) {
-			if (GET_KEYSTATE_WPARAM(wParam) & MK_CTRL ) {
+			if (GET_KEYSTATE_WPARAM(wParam) & MK_CONTROL ) {
 				if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
 					action = wActionScrollLeft;
 				} else {
