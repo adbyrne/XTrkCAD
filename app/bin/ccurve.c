@@ -382,7 +382,7 @@ EXPORT STATUS_T CreateCurve(
 					Translate( &pos, Da.pos0, angle1-90.0, dp );
 				Da.pos1 = pos;
 			}
-			if (FindDistance(Da.pos0,Da.pos1) <minLength) {
+			if (FindDistance(Da.pos0,Da.pos1)<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(FindDistance(Da.pos0,Da.pos1)) );
 				return C_TERMINATE;
 			}
@@ -446,7 +446,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				}
 			}
 			if (!found) SnapPos( &pos );
-			Da.pos0 = pos;
+			Da.pos0 = Da.pos1 = pos;
 			Da.state = 0;
 			rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
 			segCnt = tempSegs_da.cnt ;
@@ -545,6 +545,10 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord) || (curveMode == crvCmdFromChord && !Da.trk))) {
 			SnapPos( &pos );
 			Da.pos1 = pos;
+			if (FindDistance(Da.pos0,Da.pos1)<minLength) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
+				return C_TERMINATE;
+			}
 			Da.state = 1;
 			CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
 			tempSegs_da.cnt = 1;
@@ -554,6 +558,10 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
 			pos = Da.middle;
+			if (FindDistance(Da.pos0,Da.pos1)<minLength) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
+				return C_TERMINATE;
+			}
 			PlotCurve( curveMode, Da.pos0, Da.pos1, Da.middle, &Da.curveData, TRUE );
 		}
 		mainD.funcs->options = 0;
