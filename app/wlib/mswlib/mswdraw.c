@@ -1731,9 +1731,9 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			}
 		} else {
 			if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
-				action = wActionScrollUp;
+				action = wActionWheelUp;
 			} else {
-				action = wActionScrollDown;
+				action = wActionWheelDown;
 			}
 		}
 		if (b->action)
