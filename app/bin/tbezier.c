@@ -1045,7 +1045,7 @@ static BOOL_T QueryBezier( track_p trk, int query )
 		return GetTrkType(trk) == T_BEZIER?TRUE:FALSE;
 		break;
 	case Q_CAN_PARALLEL:
-		return (GetTrkType(trk) == T_BEZIER);
+		return TRUE;
 		break;
 	case Q_MODIFY_CAN_SPLIT:
 	case Q_CORNU_CAN_MODIFY:

@@ -851,7 +851,7 @@ EXPORT ANGLE_T GetAngleSegs(
 {
 	wIndex_t inx;
 	ANGLE_T angle = 0.0;
-	coOrd p0;
+	coOrd p0,p1;
 	DIST_T d, dd;
 	segProcData_t segProcData;
 	coOrd pos2 = * pos1;
@@ -894,15 +894,17 @@ EXPORT ANGLE_T GetAngleSegs(
         break;
 	case SEG_POLY:
 	case SEG_FILPOLY:
-		p0 = pos2;
+		p0 = p1 = pos2;
 		dd = LineDistance( &p0, segPtr->u.p.pts[segPtr->u.p.cnt-1].pt, segPtr->u.p.pts[0].pt );
 		angle = FindAngle( segPtr->u.p.pts[segPtr->u.p.cnt-1].pt, segPtr->u.p.pts[0].pt );
 		for ( inx=0; inx<segPtr->u.p.cnt-1; inx++ ) {
-			p0 = pos2;
+			p0 = p1;
 			d = LineDistance( &p0, segPtr->u.p.pts[inx].pt, segPtr->u.p.pts[inx+1].pt );
 			if ( d < dd ) {
 				dd = d;
 				angle = FindAngle( segPtr->u.p.pts[inx].pt, segPtr->u.p.pts[inx+1].pt );
+				if (subSegInxR) *subSegInxR = inx;
+				pos2 = p0;
 			}
 		}
 		break;

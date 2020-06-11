@@ -1776,6 +1776,11 @@ static BOOL_T QueryDraw( track_p trk, int query )
 		else return FALSE;
 	case Q_GET_NODES:
 		return TRUE;
+	case Q_CAN_PARALLEL:
+		if ((xx->segs[0].type == SEG_STRLIN) || (xx->segs[0].type == SEG_CRVLIN ||
+			((xx->segs[0].type == SEG_POLY) && (xx->segs[0].u.p.polyType == POLYLINE))
+		)) return TRUE;
+		else return FALSE;
 	default:
 		return FALSE;
 	}
@@ -1921,6 +1926,109 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * pa
 
 }
 
+static BOOL_T MakeParallelDraw(
+		track_p trk,
+		coOrd pos,
+		DIST_T sep,
+		DIST_T factor,
+		track_p * newTrkR,
+		coOrd * p0R,
+		coOrd * p1R,
+		BOOL_T track)
+{
+	if (track) return FALSE;
+	struct extraData * xx = GetTrkExtraData(trk);
+
+	ANGLE_T a, a2, angle;
+	coOrd  p;
+	DIST_T rad;
+	coOrd p0,p1;
+
+	switch (xx->segs[0].type) {
+		case SEG_STRLIN:
+			angle = FindAngle(xx->segs[0].u.l.pos[0],xx->segs[0].u.l.pos[1]);
+			if ( NormalizeAngle( FindAngle( xx->segs[0].u.l.pos[0], pos ) - angle ) < 180.0 )
+				angle += 90;
+			else
+				angle -= 90;
+			Translate(&p0,xx->segs[0].u.l.pos[0], angle, sep);
+			Translate(&p1,xx->segs[0].u.l.pos[1], angle, sep);
+			tempSegs(0).color = xx->segs[0].color;
+			tempSegs(0).width = xx->segs[0].width;
+			tempSegs_da.cnt = 1;
+			tempSegs(0).type = SEG_STRLIN;
+			tempSegs(0).u.l.pos[0] = p0;
+			tempSegs(0).u.l.pos[1] = p1;
+			if (newTrkR) {
+				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+				struct extraData * yy = GetTrkExtraData(*newTrkR);
+				yy->lineType = xx->lineType;
+			}
+
+			if ( p0R ) *p0R = p0;
+			if ( p1R ) *p1R = p1;
+			return TRUE;
+			break;
+		case SEG_CRVLIN:
+			rad = FindDistance( pos, xx->segs[0].u.c.center );
+			if ( rad > xx->segs[0].u.c.radius )
+				rad = xx->segs[0].u.c.radius + sep;
+			else
+				rad = xx->segs[0].u.c.radius - sep;
+			tempSegs(0).color = xx->segs[0].color;
+			tempSegs(0).width = xx->segs[0].width;
+			tempSegs_da.cnt = 1;
+			tempSegs(0).type = SEG_CRVLIN;
+			tempSegs(0).u.c.center = xx->segs[0].u.c.center;
+			tempSegs(0).u.c.radius = rad;
+			tempSegs(0).u.c.a0 = xx->segs[0].u.c.a0;
+			tempSegs(0).u.c.a1 = xx->segs[0].u.c.a1;
+			if (newTrkR) {
+				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+				struct extraData * yy = GetTrkExtraData(*newTrkR);
+				yy->lineType = xx->lineType;
+			}
+			if ( p0R ) PointOnCircle( p0R, xx->segs[0].u.c.center, rad, xx->segs[0].u.c.a0 );
+			if ( p1R ) PointOnCircle( p1R, xx->segs[0].u.c.center, rad, xx->segs[0].u.c.a0+xx->segs[0].u.c.a1 );
+			return TRUE;
+			break;
+		case SEG_POLY:
+			if (xx->segs[0].u.p.polyType != POLYLINE) return FALSE;
+			int inx2;
+			coOrd p = pos;
+			angle = GetAngleSegs(1,&xx->segs[0],&p,NULL,NULL,NULL,&inx2,NULL);
+			if ( NormalizeAngle( FindAngle( p, pos ) - angle ) < 180.0 ) {
+				sep = sep*1.4;
+				angle += 135;
+			} else {
+				angle -= 135;
+				sep = sep*1.4;
+			}
+			tempSegs(0).color = xx->segs[0].color;
+			tempSegs(0).width = xx->segs[0].width;
+			tempSegs_da.cnt = 1;
+			tempSegs(0).type = SEG_POLY;
+			if (tempSegs(0).u.p.pts) MyFree(tempSegs(0).u.p.pts);
+			tempSegs(0).u.p.pts = memdup( xx->segs[0].u.p.pts, xx->segs[0].u.p.cnt*sizeof (pts_t) );
+			for (int i=0;i<tempSegs(0).u.p.cnt;i++) {
+				Translate(&tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i].pt,angle,sep);
+			}
+			if (newTrkR) {
+				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+				struct extraData * yy = GetTrkExtraData(*newTrkR);
+				yy->lineType = xx->lineType;
+				if (tempSegs(0).u.p.pts) MyFree(tempSegs(0).u.p.pts);
+			}
+			if (p0R) *p0R = tempSegs(0).u.p.pts[0].pt;
+			if (p1R) *p1R = tempSegs(0).u.p.pts[tempSegs(0).u.p.cnt-1].pt;
+			return TRUE;
+			break;
+		default:
+		return FALSE;
+	}
+	return FALSE;
+}
+
 static trackCmd_t drawCmds = {
 		"DRAW",
 		DrawDraw,
@@ -1950,7 +2058,7 @@ static trackCmd_t drawCmds = {
 		NULL,
 		NULL,
 		NULL,
-		NULL, /*Parallel*/
+		MakeParallelDraw, /*Parallel*/
 		NULL,
 		NULL, /*MakeSegs*/
 		ReplayDraw,

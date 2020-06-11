@@ -92,7 +92,10 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         parSepPD.option |= PDO_NORECORD;
 		parFactorPD.option |= PDO_NORECORD;
         controls[0] = parSepPD.control;
-        controls[1] = parFactorPD.control;
+        if (parType == PAR_TRACK)
+        	controls[1] = parFactorPD.control;
+        else
+        	controls[1] = NULL;
         controls[2] = NULL;
         labels[0] = N_("Separation");
         labels[1] = N_("Radius Factor");
@@ -106,14 +109,20 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
     case wActionMove:
         tempSegs_da.cnt = 0;
         Dpa.anchor_Trk = NULL;
-        Dpa.anchor_Trk = OnTrack(&pos, FALSE, TRUE);
+        if (parType == PAR_TRACK)
+        	Dpa.anchor_Trk = OnTrack(&pos, FALSE, TRUE);
+        else
+        	Dpa.anchor_Trk = OnTrack(&pos, FALSE, FALSE);
+
         if (!Dpa.anchor_Trk) {
             return C_CONTINUE;
         }
         if (Dpa.anchor_Trk && !CheckTrackLayerSilent(Dpa.anchor_Trk)) {
+        	Dpa.anchor_Trk = NULL;
             return C_CONTINUE;
         }
         if (!QueryTrack(Dpa.anchor_Trk, Q_CAN_PARALLEL)) {
+        	Dpa.anchor_Trk = NULL;
             return C_CONTINUE;
         }
         break;
@@ -133,17 +142,22 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
         InfoSubstituteControls(controls, labels);
         ParamLoadData(&parSepPG);
         Dpa.orig = pos;
-        Dpa.Trk = OnTrack(&Dpa.orig, TRUE, TRUE);
+        if (parType == PAR_TRACK)
+			Dpa.Trk = OnTrack(&pos, FALSE, TRUE);
+		else
+			Dpa.Trk = OnTrack(&pos, FALSE, FALSE);  //Also lines for line
         if (!Dpa.Trk) {
             return C_CONTINUE;
         }
         if (!QueryTrack(Dpa.Trk, Q_CAN_PARALLEL)) {
             Dpa.Trk = NULL;
-            InfoMessage(_(" Track doesn't support parallel"));
+            InfoMessage(_(" Track/Line doesn't support parallel"));
+            wBeep();
             return C_CONTINUE;
         }
-        parRFactor = (2864.0*(double)parSepFactor)/curScaleRatio;
-        if (parSeparation == 0.0) {
+
+        if ((parType == PAR_TRACK) && (parSeparation == 0.0)) {
+        	parRFactor = (2864.0*(double)parSepFactor)/curScaleRatio;
             DIST_T orig_gauge = GetTrkGauge(Dpa.Trk);
             DIST_T new_gauge = GetScaleTrackGauge(GetLayoutCurScale());
             if (orig_gauge == new_gauge) {
@@ -160,6 +174,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
          */
         //Dpa.Trk = OnTrack( &Dpa.orig, TRUE, TRUE );
         tempSegs_da.cnt = 0;
+        /* no break */
 
     case C_MOVE:
         if (Dpa.Trk == NULL) {
@@ -214,29 +229,31 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
             tempSegs_da.cnt = 0;
             return C_TERMINATE;
         }
-        if (GetTrkGauge(Dpa.Trk)> parSeparation) {
-            SetTrkNoTies(t, TRUE);
-        }
+        if (parType == PAR_TRACK) {
+        	if (GetTrkGauge(Dpa.Trk)> parSeparation) {
+        		SetTrkNoTies(t, TRUE);
+        	}
         //CopyAttributes( Dpa.Trk, t );    Don't force scale or track width or Layer
-        SetTrkBits(t,(GetTrkBits(t)&TB_HIDEDESC) | (GetTrkBits(Dpa.Trk)&~TB_HIDEDESC));
+        	SetTrkBits(t,(GetTrkBits(t)&TB_HIDEDESC) | (GetTrkBits(Dpa.Trk)&~TB_HIDEDESC));
 
-        if (t0) {
-            a = NormalizeAngle(GetTrkEndAngle(t0, ep0) - GetTrkEndAngle(t,
-                               0) + (180.0+connectAngle/2.0));
-            if (a < connectAngle) {
-                DrawEndPt(&mainD, t0, ep0, wDrawColorWhite);
-                ConnectTracks(t0, ep0, t, 0);
-                DrawEndPt(&mainD, t0, ep0, wDrawColorBlack);
-            }
-        }
-        if (t1) {
-            a = NormalizeAngle(GetTrkEndAngle(t1, ep1) - GetTrkEndAngle(t,
-                               1) + (180.0+connectAngle/2.0));
-            if (a < connectAngle) {
-                DrawEndPt(&mainD, t1, ep1, wDrawColorWhite);
-                ConnectTracks(t1, ep1, t, 1);
-                DrawEndPt(&mainD, t1, ep1, wDrawColorBlack);
-            }
+			if (t0) {
+				a = NormalizeAngle(GetTrkEndAngle(t0, ep0) - GetTrkEndAngle(t,
+								   0) + (180.0+connectAngle/2.0));
+				if (a < connectAngle) {
+					DrawEndPt(&mainD, t0, ep0, wDrawColorWhite);
+					ConnectTracks(t0, ep0, t, 0);
+					DrawEndPt(&mainD, t0, ep0, wDrawColorBlack);
+				}
+			}
+			if (t1) {
+				a = NormalizeAngle(GetTrkEndAngle(t1, ep1) - GetTrkEndAngle(t,
+								   1) + (180.0+connectAngle/2.0));
+				if (a < connectAngle) {
+					DrawEndPt(&mainD, t1, ep1, wDrawColorWhite);
+					ConnectTracks(t1, ep1, t, 1);
+					DrawEndPt(&mainD, t1, ep1, wDrawColorBlack);
+				}
+			}
         }
         DrawNewTrack(t);
         UndoEnd();
