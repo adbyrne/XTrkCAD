@@ -87,6 +87,9 @@ static paramData_t searchUiPLs[] = {
 static paramGroup_t searchUiPG = { "searchgui", 0, searchUiPLs, sizeof searchUiPLs/sizeof searchUiPLs[0] };
 static wWin_p searchUiW;
 
+#define FILESECTION "file"
+#define PARAMDIRECTORY "paramdir"
+
 /**
  * Reload the listbox showing the current catalog
  */
@@ -347,6 +350,29 @@ static void SearchUiDlgUpdate(
 }
 
 /**
+ * Get the system default directory for parameter files. First step is to 
+ * check the configuration file for a user specific setting. If that is not
+ * found, the diretory is based derived from the installation directory.
+ * The returned string has to be free'd() when no longer needed.
+ *
+ * \return   parameter file directory
+ */
+
+static char *
+GetParamsPath()
+{
+	char * params_path;
+	char *params_pref;
+	params_pref = wPrefGetString(FILESECTION, PARAMDIRECTORY);
+
+	if (!params_pref) {
+		MakeFullpath(&params_path, wGetAppLibDir(), "params", NULL);
+	} else {
+		params_path = strdup(params_pref);
+	}
+	return(params_path);
+}
+/**
  * Create and open the search dialog.
  *
  * \param junk
@@ -358,9 +384,9 @@ void DoSearchParams(void * junk)
         catalogFileBrowse = InitCatalog();
 
         //Make the Find menu bound to the System Library initially
-        char * parms_path;
-        MakeFullpath(&parms_path, wGetAppLibDir(), "params", NULL);
-        trackLibrary = CreateLibrary(parms_path);
+		char *paramsDir = GetParamsPath();
+        trackLibrary = CreateLibrary(paramsDir);
+		free(paramsDir);
 
         searchUiPLs[I_SEARCHBUTTON].winLabel = (char *)wIconCreatePixMap(magnifier_xpm);
 
@@ -369,9 +395,9 @@ void DoSearchParams(void * junk)
         searchUiW = ParamCreateDialog(&searchUiPG,
                                       MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL, wHide,
                                       TRUE, NULL, 0, SearchUiDlgUpdate);
-
-        SearchFileListLoad(trackLibrary->catalog);  //Start with system files
-
+		if (trackLibrary) {
+			SearchFileListLoad(trackLibrary->catalog);  //Start with system files
+		}
         wControlActive((wControl_p)APPLYBUTTON, FALSE);
         wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
 
