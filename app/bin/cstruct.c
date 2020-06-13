@@ -1088,6 +1088,6 @@ EXPORT void InitTrkStruct( void )
 	T_STRUCTURE = InitObject( &structureCmds );
 
 	log_structure = LogFindIndex( "Structure" );
-	AddParam( "STRUCTURE ", ReadStructureParam );
+	AddParam( "STRUCTURE ", ReadStructureParam, NULL);
 	ParamRegister( &pierPG );
 }

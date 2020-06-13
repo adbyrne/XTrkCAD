@@ -37,6 +37,7 @@ char * curSubContents;
 
 typedef void (*playbackProc_p)( char * );
 typedef BOOL_T (*readParam_t) ( char * );
+typedef BOOL_T (*deleteParam_t) (void *param);
 
 extern const char * workingDir;
 extern const char * libDir;
@@ -79,6 +80,7 @@ wMenuList_p fileList_ml;
 typedef struct {
 	char * name;
 	readParam_t proc;
+	deleteParam_t delete;
 } paramProc_t;
 dynArr_t paramProc_da;
 #define paramProc(N) DYNARR_N( paramProc_t, paramProc_da, N )
@@ -96,9 +98,9 @@ wBool_t IsEND( char * sEnd );
 BOOL_T GetArgs( char *, char *, ... );
 BOOL_T ParseRoomSize( char *, coOrd * );
 int InputError( char *, BOOL_T, ... );
-void SyntaxError( char *, wIndex_t, wIndex_t );
+void SyntaxError( char *, wIndex_t, wIndex_t ); 
 
-void AddParam( char *, readParam_t );
+void AddParam( char *name, readParam_t proc, deleteParam_t delete );
 
 FILE * OpenCustom( char * );
 
