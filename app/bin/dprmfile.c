@@ -64,6 +64,7 @@ static void ParamFileFavorite(void * favorite);
 static void ParamFileAction(void * action);
 static void ParamFileBrowse(void *);
 static void ParamFileSelectAll(void *);
+static void ParamFileReload(void *);
 
 static paramListData_t paramFileListData = { 10, 370 };
 static char * paramFileLabels[] = { N_("Show File Names"), NULL };
@@ -79,6 +80,7 @@ static paramData_t paramFilePLs[] = {
 #define I_PRMFILACTION	(4)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
     {	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_HIDE), 0L, FALSE },
+	{	PD_BUTTON, (void*)ParamFileReload, "reload", 0, NULL, N_("Reload") },
     {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Search Library") },
 	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") },
 };
@@ -87,7 +89,8 @@ static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFile
 
 enum PARAMFILESETTING {
     SET_FAVORITE,
-    SET_DELETED
+    SET_DELETED,
+	SET_RELOAD
 };
 
 static dynArr_t *sortFiles;
@@ -254,9 +257,32 @@ UpdateParamFileProperties(enum PARAMFILESETTING paramSetting, bool newState)
             // set the desired state
             if (paramSetting == SET_FAVORITE) {
                 SetParamFileFavorite(fileInx, newState);
-            } else {
+            } else if (paramSetting == SET_DELETED ){
                 SetParamFileDeleted(fileInx, newState);
+            } else {									//SET_RELOADED
+
+            	enum paramFileState structState = PARAMFILE_UNLOADED;
+				int newIndex;
+
+				curContents = curSubContents = NULL;
+
+				newIndex = ReadParamFile(paramFileInfo(fileInx).name);
+
+				// in case the contents is already present, make invalid
+				for (inx = 0; inx < newIndex; inx++) {
+					if (paramFileInfo(inx).valid &&
+							strcmp(paramFileInfo(inx).contents, curContents) == 0) {
+						paramFileInfo(inx).valid = FALSE;
+						break;
+					}
+				}
+
+				wPrefSetString("Parameter File Map", curContents,
+							   paramFileInfo(curParamFileIndex).name);
+            	curParamFileIndex = PARAM_CUSTOM;
+            	DoChangeNotification(CHANGE_PARAMS);
             }
+
         }
     }
     DoChangeNotification(CHANGE_PARAMS);
@@ -310,6 +336,22 @@ static void ParamFileAction(void * action)
 
         UpdateParamFileProperties(SET_DELETED, newDeletedState);
     }
+}
+
+/**
+ * Reload selected files.
+ *
+ */
+static void ParamFileReload(void * action) {
+	wIndex_t selcnt = wListGetSelectedCount(paramFileL);
+
+	    //nothing selected -> leave
+	    if (selcnt) {
+
+	    	UpdateParamFileProperties(SET_RELOAD, NULL);
+	    	UpdateParamFileProperties(SET_DELETED, FALSE);
+
+	    }
 }
 
 /**
