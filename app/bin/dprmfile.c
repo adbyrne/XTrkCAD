@@ -53,6 +53,7 @@ static struct wFilSel_t * paramFile_fs;
 
 #define PARAMBUTTON_HIDE "Hide"
 #define PARAMBUTTON_UNHIDE "Unhide"
+#define PARAMBUTTON_RELOAD "Reload"
 
 static wIcon_p indicatorIcons[ 2 ][PARAMFILE_MAXSTATE];
 
@@ -62,6 +63,7 @@ static long paramFileSel = 0;
 
 static void ParamFileFavorite(void * favorite);
 static void ParamFileAction(void * action);
+static void ParamFileReload(void *);
 static void ParamFileBrowse(void *);
 static void ParamFileSelectAll(void *);
 
@@ -79,6 +81,7 @@ static paramData_t paramFilePLs[] = {
 #define I_PRMFILACTION	(4)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
     {	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_HIDE), 0L, FALSE },
+	{   PD_BUTTON, (void*)ParamFileReload, "reload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_RELOAD), 0L, FALSE },
     {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Search Library") },
 	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") },
 };
@@ -310,6 +313,23 @@ static void ParamFileAction(void * action)
 
         UpdateParamFileProperties(SET_DELETED, newDeletedState);
     }
+}
+
+static void ParamFileReload(void * action)
+{
+	wIndex_t selcnt = wListGetSelectedCount(paramFileL);
+	wIndex_t inx, cnt;
+	wIndex_t fileInx;
+
+	// get the number of items in list
+	cnt = wListGetCount(paramFileL);
+
+	for (inx = 0; inx < cnt; inx++) {
+	     if (wListGetItemSelected((wList_p)paramFileL, inx)) {
+			fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+			LoadParamFile(1,&paramFileInfo(fileInx).name, NULL);
+	     }
+	}
 }
 
 /**
