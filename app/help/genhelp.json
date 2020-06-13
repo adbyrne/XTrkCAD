@@ -457,7 +457,7 @@
 		{"line": "print-clear", "contents": "Deselects all pages" },
 		{"line": "print-setup", "contents": "Invoke the Print Setup dialog" },
 		{"line": "print-ok", "contents": "Print selected pages and terminates the print command" },
-		{"line": "prmfile-inx", "contents": "List of loaded and unloaded parameter files" },
+		{"line": "prmfile-inx", "contents": "List of loaded, shown or hidden parameter files" },
 		{"line": "prmfile-mode", "contents": "Show parameter files by names or descriptions" },
 		{"line": "prmfile-action", "contents": "Toggle the shown status of the selected parameter file" },
 		{"line": "prmfile-browse", "contents": "Find extra parameter files from the filesystem" },

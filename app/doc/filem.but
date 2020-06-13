@@ -165,7 +165,7 @@ the program is terminated.
 Definition files can be marked as \e{favorite}. The indicator for favorites is a star.
 The meaning of the colors isn't changed.
 
-Definition files that show in the \f{HotBar} are marked with a yellow or a green indicator appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{Hide} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An hidden file may be \e{Shown} by selecting the  \f{Show} button (The \f{Hide} button changes to \f{Show} when a selected file is hidden). 
+Definition files that will show in the \f{HotBar} are marked with a yellow or a green indicator appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{Hide} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An hidden file may be \e{Shown} by selecting the  \f{Show} button (The \f{Hide} button changes to \f{Show} when a selected file is hidden). 
 
 Note that loading a file does not change the existing definitions in the layout. To do that after loading, use \K{cmdRefreshSpecial}.
 
