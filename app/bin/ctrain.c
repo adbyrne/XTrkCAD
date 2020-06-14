@@ -1797,6 +1797,9 @@ static BOOL_T CheckCoupling(
 
     /* Move second train back along track half a car length */
     TraverseTrack2(&trvTrk1, distc/2.0-dist);
+    if ( trvTrk0.trk == NULL || trvTrk1.trk == NULL )
+        // fell off the end of track
+        return FALSE;
 
     /* If tracks are not the same - dont couple */
     if (trvTrk1.trk != trvTrk0.trk) {
