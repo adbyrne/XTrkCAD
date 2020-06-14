@@ -276,7 +276,7 @@ EXPORT wIndex_t CheckPaths(
 		for ( int inx = 0; inx<segCnt; inx++ ) {
 			if ( IsSegTrack( &segs[inx] ) ) {
 				trkSegInx++;
-				char signed * cp = paths;
+				PATHPTR_T cp = paths;
 				while ( *cp ) {
 					// path is: 'N' 'A' 'M' 'E' 0 1 2 0 3 4 0 0
 					// skip name

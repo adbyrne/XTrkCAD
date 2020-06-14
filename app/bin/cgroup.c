@@ -1330,7 +1330,7 @@ if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
 		ppp = &pathElem(inx);
 		LogPrintf( "    %d: GTx: %d, EP: %d %d, F:%s, P:",
 			inx, ppp->groupInx, ppp->ep1, ppp->ep2, ppp->flip?"T":"F" );
-		for ( char signed * cp = ppp->path; cp[0] || cp[1]; cp++ ) {
+		for ( PATHPTR_T cp = ppp->path; cp[0] || cp[1]; cp++ ) {
 			LogPrintf( " %d", *cp );
 		}
 		LogPrintf( " 0\n" );
