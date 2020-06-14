@@ -1939,8 +1939,7 @@ static BOOL_T MakeParallelDraw(
 	if (track) return FALSE;
 	struct extraData * xx = GetTrkExtraData(trk);
 
-	ANGLE_T a, a2, angle;
-	coOrd  p;
+	ANGLE_T angle;
 	DIST_T rad;
 	coOrd p0,p1;
 

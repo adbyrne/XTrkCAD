@@ -352,7 +352,7 @@ static void ParamFileReload(void * action) {
 	    //nothing selected -> leave
 	    if (selcnt) {
 
-	    	UpdateParamFileProperties(SET_RELOAD, NULL);
+	    	UpdateParamFileProperties(SET_RELOAD, FALSE);
 	    	UpdateParamFileProperties(SET_DELETED, FALSE);
 
 	    }

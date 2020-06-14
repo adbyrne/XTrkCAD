@@ -438,7 +438,6 @@ static void MoveCursor(
 	coOrd pos1, dpos;
 	int i, steps;
 	wPos_t x, y;
-	wPos_t xx, yy;
 	wPos_t x0=playbackX;
 	wPos_t y0=playbackY;
 

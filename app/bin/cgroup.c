@@ -674,11 +674,9 @@ static char * FindPathBtwEP(
 		BOOL_T * flip )
 {
 	struct extraData * xx = GetTrkExtraData( trk );
-	char * cp, *cp0;
-	int epN;
+	char * cp;
 	coOrd trkPos[2];
-	int segInx;
-	EPINX_T segEP;
+
  
 	LOG( log_group, 3, ("  FindPathBtwEP: T%d .%d .%d = ", trk?GetTrkIndex(trk):-1, ep1, ep2 ));
 	if ( GetTrkType(trk) != T_TURNOUT ) {
