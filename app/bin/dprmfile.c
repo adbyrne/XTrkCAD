@@ -340,22 +340,7 @@ static void ParamFileAction(void * action)
     }
 }
 
-static void ParamFileReload(void * action)
-{
-	wIndex_t selcnt = wListGetSelectedCount(paramFileL);
-	wIndex_t inx, cnt;
-	wIndex_t fileInx;
 
-	// get the number of items in list
-	cnt = wListGetCount(paramFileL);
-
-	for (inx = 0; inx < cnt; inx++) {
-	     if (wListGetItemSelected((wList_p)paramFileL, inx)) {
-			fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
-			LoadParamFile(1,&paramFileInfo(fileInx).name, NULL);
-	     }
-	}
-}
 
 /**
  * Reload selected files.
