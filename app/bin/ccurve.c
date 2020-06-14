@@ -545,7 +545,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord) || (curveMode == crvCmdFromChord && !Da.trk))) {
 			SnapPos( &pos );
 			Da.pos1 = pos;
-			if (d = FindDistance(Da.pos0,Da.pos1)<minLength) {
+			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -558,7 +558,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
 			pos = Da.middle;
-			if (d = FindDistance(Da.pos0,Da.pos1)<minLength) {
+			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
