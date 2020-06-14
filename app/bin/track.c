@@ -44,6 +44,7 @@
 #include "track.h"
 #include "utility.h"
 #include "misc.h"
+#include "ctrain.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
@@ -1148,6 +1149,7 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	}
     CheckDeleteSwitchmotor( trk );
     CheckDeleteBlock( trk );
+    CheckCarTraverse( trk );
 	DecrementLayerObjects(trk->layer);
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);

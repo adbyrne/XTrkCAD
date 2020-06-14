@@ -312,6 +312,24 @@ BOOL_T TraverseTrack2(
     return TRUE;
 }
 
+/***************
+ * When a track is deleted, cross check that the Traverse Track reference is removed.
+ */
+EXPORT void CheckCarTraverse(track_p track) {
+
+    track_p car;
+	for (car=NULL; TrackIterate(&car);) {
+        if (GetTrkType(car) == T_CAR) {
+        	struct extraData * xx = GetTrkExtraData(car);
+			if (xx->trvTrk.trk == track) {
+				xx->trvTrk.trk=NULL;
+				xx->status = ST_NotOnTrack;
+			}
+        }
+	}
+
+}
+
 
 
 static BOOL_T drawCarEnable = TRUE;

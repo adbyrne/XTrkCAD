@@ -62,5 +62,6 @@ enum paramFileState	GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scal
 int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );
+void CheckCarTraverse( track_p trk);
 
 #endif // !HAVE_CTRAIN_H
