@@ -239,10 +239,11 @@ void InitInfoBar(void);
 void DrawInit(int);
 void DoZoomUp(void *);
 void DoZoomDown(void *);
+void DoZoomExtents( void *);
 void DoZoom(DIST_T *);
 void PanHere(void *);
 
-void InitCmdZoom(wMenu_p, wMenu_p);
+void InitCmdZoom(wMenu_p, wMenu_p, wMenu_p, wMenu_p);
 
 void InfoPos(coOrd);
 void InfoCount(wIndex_t);

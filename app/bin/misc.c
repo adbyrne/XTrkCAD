@@ -2360,7 +2360,7 @@ static void CreateMenus(void) {
 			ACCL_ZOOMOUT, (wMenuCallBack_p) DoZoomDown, (void*) 1);
 	wMenuSeparatorCreate(viewM);
 
-	InitCmdZoom(zoomM, zoomSubM);
+	InitCmdZoom(zoomM, zoomSubM, NULL, NULL);
 
 	/* these menu choices and toolbar buttons are synonymous and should be treated as such */
 	wControlLinkedSet((wControl_p) zoomInM, (wControl_p) zoomUpB);

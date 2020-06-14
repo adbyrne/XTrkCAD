@@ -142,6 +142,10 @@ extern long programMode;
 #define C_WDOWN			wActionWheelDown
 #define C_LDOUBLE       wActionLDownDouble
 #define C_MODKEY        wActionModKey
+#define C_SCROLLUP	    wActionScrollUp
+#define C_SCROLLDOWN    wActionScrollDown
+#define C_SCROLLLEFT	wActionScrollLeft
+#define C_SCROLLRIGHT   wActionScrollRight
 #define C_INIT			(wActionLast+1)
 #define C_START			(wActionLast+2)
 #define C_REDRAW		(wActionLast+3)
