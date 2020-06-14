@@ -356,7 +356,7 @@ static BOOL_T WriteSignal ( track_p t, FILE * f )
                       (&(xx->aspectList))[ia].aspectName,
                       (&(xx->aspectList))[ia].aspectScript)>0;
     }
-    rc &= fprintf( f, "\tEND\n" )>0;
+    rc &= fprintf( f, "\t%s\n",END_SIGNAL )>0;
 
 	MyFree(signalName);
     return rc;
