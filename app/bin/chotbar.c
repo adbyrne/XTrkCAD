@@ -506,6 +506,13 @@ EXPORT void LayoutHotBar( void * redraw )
 
 	wWinGetSize( mainW, &winWidth, &winHeight );
 	hotBarHeight = hotBarDrawHeight;
+	double scaleicon;
+	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleicon, 1.0);
+	if (scaleicon<1.0) scaleicon=1.0;
+	if (scaleicon>2.0) scaleicon=2.0;
+	if (scaleicon>1.0) {
+		hotBarHeight = hotBarHeight*scaleicon;
+	}
 	if ( hotBarLabels) {
 	   hotBarHeight += wMessageGetHeight(0L);
 	}

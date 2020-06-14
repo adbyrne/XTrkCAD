@@ -369,8 +369,12 @@ wButton_p wButtonCreate(
 	b->selected = 0;
 	mswComputePos( (wControl_p)b, x, y );
 	if (b->option&BO_ICON) {
-		width = bm->w+10;
-		h = bm->h+10;
+		double scaleicon;
+		wPrefGetFloat(PREFSECTION, LARGEICON, &scaleicon, 1.0);
+		if (scaleicon<1.0) scaleicon=1.0;
+		if (scaleicon>2.0) scaleicon=2.0;
+		width = (bm->w*scaleicon)+10;
+		h = (bm->h*scaleicon)+10;
 		b->icon = bm;
 	} else {
 		width = (wPos_t)(width*mswScale);
