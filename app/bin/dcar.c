@@ -5270,8 +5270,8 @@ EXPORT void InitCarDlg( void )
 	ParamRegister( &carDlgPG );
 	ParamRegister( &carInvPG );
 	RegisterChangeNotification( CarDlgChange );
-	AddParam( "CARPROTO ", CarProtoRead );
-	AddParam( "CARPART ", CarPartRead );
+	AddParam( "CARPROTO ", CarProtoRead, NULL );
+	AddParam( "CARPART ", CarPartRead, NULL);
 	ParamRegister( &newCarPG );
 	ParamCreateControls( &newCarPG, CarItemHotbarUpdate );
 	newCarControls[0] = newCarPLs[0].control;

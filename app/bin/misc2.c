@@ -720,7 +720,7 @@ static void ScaleChange( long changes )
 
 EXPORT void Misc2Init( void )
 {
-	AddParam( "SCALE ", AddScale );
+	AddParam( "SCALE ", AddScale, NULL);
 	wPrefGetInteger( "draw", "label-when", &labelWhen, labelWhen );
 	RegisterChangeNotification( ScaleChange );
 	wPrefGetInteger( "misc", "include same gauge turnouts", &includeSameGaugeTurnouts, 1 );

@@ -490,7 +490,7 @@ EXPORT void InitHotBar( void )
 {
 	long v;
 
-	AddParam( "BARSCALE", SetHotBarScale );
+	AddParam( "BARSCALE", SetHotBarScale, NULL );
 	AddPlaybackProc( "HOTBARSELECT", (playbackProc_p)HotBarSelectPlayback, NULL );
 	RegisterChangeNotification( ChangeHotBar );
 	wPrefGetInteger( "misc", "hotbar-start", &v, hotBarCurrStart );

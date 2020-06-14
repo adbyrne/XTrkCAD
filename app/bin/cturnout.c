@@ -176,6 +176,29 @@ EXPORT turnoutInfo_t * CreateNewTurnout(
 	return to;
 }
 
+/**
+ * Delete a turnout parameter from the list and free the related memory
+ *
+ * \param [IN] to turnout definition to be deleted 
+ */
+
+BOOL_T
+DeleteTurnout(void *toInfo)
+{
+	turnoutInfo_t * to = (turnoutInfo_t *)toInfo;
+	MyFree(to->title);
+	MyFree(to->segs);
+	MyFree(to->endPt);
+	MyFree(to->paths);
+	if (to->special) {
+		DYNARR_FREE(DIST_T, to->u.curved.radii);
+	}
+
+	MyFree(to);
+	return(TRUE);
+}
+
+
 /** 
  * Check to find out to what extent the contents of the parameter file can be used with 
  * the current layout scale / gauge. 
@@ -3016,7 +3039,7 @@ EXPORT void InitTrkTurnout( void )
 	T_TURNOUT = InitObject( &turnoutCmds );
 
 	/*InitDebug( "Turnout", &debugTurnout );*/
-	AddParam( "TURNOUT ", ReadTurnoutParam );
+	AddParam( "TURNOUT ", ReadTurnoutParam, DeleteTurnout);
 }
 
 #ifdef TEST

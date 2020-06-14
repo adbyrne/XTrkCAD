@@ -525,14 +525,22 @@ EXPORT wBool_t ParseRoomSize(
 	return FALSE;
 }
 
-
+/**
+ * Parameter file parser definitions
+ *
+ * \param [IN] name command
+ * \param [IN] proc function for reading the parameter definition
+ * \param [IN] delete if not NULL function for freeing the definition
+ */
 EXPORT void AddParam(
 		char * name,
-		readParam_t proc )
+		readParam_t proc,
+		deleteParam_t delete )
 {
 	DYNARR_APPEND( paramProc_t, paramProc_da, 10 );
 	paramProc(paramProc_da.cnt-1).name = name;
 	paramProc(paramProc_da.cnt-1).proc = proc;
+	paramProc(paramProc_da.cnt - 1).delete = delete;
 }
 
 EXPORT char * PutTitle( char * cp )
