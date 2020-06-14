@@ -545,7 +545,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord) || (curveMode == crvCmdFromChord && !Da.trk))) {
 			SnapPos( &pos );
 			Da.pos1 = pos;
-			if (FindDistance(Da.pos0,Da.pos1)<minLength) {
+			if (d = FindDistance(Da.pos0,Da.pos1)<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -558,7 +558,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
 			pos = Da.middle;
-			if (FindDistance(Da.pos0,Da.pos1)<minLength) {
+			if (d = FindDistance(Da.pos0,Da.pos1)<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -570,7 +570,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		Da.state = -1;
 		DYNARR_RESET(trkSeg_t,anchors_da);          // No More anchors for this one
 		if (Da.curveData.type == curveTypeStraight) {
-			if ((d=FindDistance( Da.pos0, Da.curveData.pos1 )) <= minLength) {
+			if ((d = FindDistance( Da.pos0, Da.curveData.pos1 )) < minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
@@ -582,7 +582,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			}
 			UndoEnd();
 		} else if (Da.curveData.type == curveTypeCurve) {
-			if ((d= Da.curveData.curveRadius * Da.curveData.a1 *2.0*M_PI/360.0) <= minLength) {
+			if ((d = Da.curveData.curveRadius * Da.curveData.a1 *2.0*M_PI/360.0) < minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
