@@ -178,9 +178,13 @@ void mswDrawIcon(
 		memset( bmiInfo->bmiColors, 0, bm->colorcnt * sizeof( RGBQUAD ));
 		memset( &bmiInfo->bmiColors[ bm->transparent ], 0xFF, sizeof( RGBQUAD ));
 	}
+	double scaleicon;
+	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleicon, 1.0);
+	if (scaleicon<1.0) scaleicon=1.0;
+	if (scaleicon>2.0) scaleicon=2.0;
 	StretchDIBits(hDc, offw, offh,
-        bmiInfo->bmiHeader.biWidth*1.25,
-        bmiInfo->bmiHeader.biHeight*1.25,
+        bmiInfo->bmiHeader.biWidth*scaleicon,
+        bmiInfo->bmiHeader.biHeight*scaleicon,
         0, 0,
         bmiInfo->bmiHeader.biWidth,
         bmiInfo->bmiHeader.biHeight,
