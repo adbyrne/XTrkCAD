@@ -3216,12 +3216,15 @@ static STATUS_T CmdSelect(
 		}
 		return C_CONTINUE;
 	case C_TEXT:
+		if (doingDouble) {
+			return CallModify(action,pos);
+		}
 		if ((action>>8) == '@') {
 			panCenter = pos;
 			PanHere((void*)0);
 		}
-		if (doingDouble) {
-			return CallModify(action,pos);
+		if ((action>>8) == '0' || (action>>8 == 'o')) {
+			PanMenuEnter('o');
 		}
 		if ((action>>8) == '?') {
 			if((moveDescTrk = OnTrack(&pos,FALSE,FALSE)) != NULL)
@@ -3305,6 +3308,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenu_p zoomPop1 = wMenuMenuCreate(selectPopup1M, "", _("&Zoom"));
 	InitCmdZoom(NULL, NULL, zoomPop1, NULL);
 	wMenuPushCreate(selectPopup1M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
+	wMenuPushCreate(selectPopup1M, "", _("Pan to Origin - 'o'/'0'"), 0,	(wMenuCallBack_p) PanMenuEnter, (void*) 'o');
 	wMenuPushCreate(selectPopup1M, "", _("Pan Center Here - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 0);
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,(wMenuCallBack_p) SetAllTrackSelect, (void *) 1);

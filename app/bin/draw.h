@@ -242,6 +242,7 @@ void DoZoomDown(void *);
 void DoZoomExtents( void *);
 void DoZoom(DIST_T *);
 void PanHere(void *);
+void PanMenuEnter(int);
 
 void InitCmdZoom(wMenu_p, wMenu_p, wMenu_p, wMenu_p);
 

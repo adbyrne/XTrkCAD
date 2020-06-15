@@ -3037,7 +3037,7 @@ static STATUS_T CmdPan(
 			DoNewScale(scale_x);
 		} else if (((action>>8) == '0') || ((action>>8) == 'o')) {     //"0" or "o"
 			mainD.orig = zero;
-			MainLayout( TRUE, FALSE ); // CmdPan C_TEXT '0' 'o'
+			MainLayout( TRUE, TRUE ); // CmdPan C_TEXT '0' 'o'
 		} else if ((action>>8) >= '1' && (action>>8) <= '9') {         //"1" to "9"
 			scale_x = (action>>8)&0x0F;
 			DoNewScale(scale_x);
@@ -3067,7 +3067,7 @@ static STATUS_T CmdPan(
 static wMenuPush_p zoomExtents,panOrig,panHere;
 static wMenuPush_p zoomLvl1,zoomLvl2,zoomLvl3,zoomLvl4,zoomLvl5,zoomLvl6,zoomLvl7,zoomLvl8,zoomLvl9;
 
-void panMenuEnter(int key) {
+EXPORT void PanMenuEnter(int key) {
 	int action;
 	action = C_TEXT;
 	action |= key<<8;
@@ -3091,17 +3091,17 @@ EXPORT void InitCmdPan2( wMenu_p menu )
 	wMenuPushCreate(panPopupM, "cmdDescribeMode", GetBalloonHelpStr("cmdDescribeMode"), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
 	wMenuPushCreate(panPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
 	wMenuSeparatorCreate(panPopupM);
-	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'e');
-	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:1 - '1'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '1');
-	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:2 - '2'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '2');
-	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:3 - '3'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '3');
-	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:4 - '4'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '4');
-	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:5 - '5'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '5');
-	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:6 - '6'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '6');
-	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '7');
-	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '8');
-	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '9');
-	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to origin - 'o'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'o');
+	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'e');
+	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:1 - '1'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '1');
+	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:2 - '2'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '2');
+	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:3 - '3'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '3');
+	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:4 - '4'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '4');
+	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:5 - '5'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '5');
+	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:6 - '6'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '6');
+	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '7');
+	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '8');
+	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '9');
+	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to origin - 'o'/'0'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'o');
 	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
 	InitCmdZoom(NULL, NULL, NULL, zoomPanM);
 	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 0);
