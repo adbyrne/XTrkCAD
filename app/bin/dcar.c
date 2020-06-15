@@ -672,6 +672,45 @@ static void CarProtoDelete(
 }
 
 
+/**
+* Delete all car prototype definitions that came from a specific parameter file.
+* Due to the way the definitions are loaded from file it is safe to
+* assume that they form a contiguous block in the array.
+*
+* \param [IN] fileIndex parameter file
+*/
+
+void
+DeleteCarProto(int fileIndex)
+{
+	int inx = 0;
+	int startInx = -1;
+	int cnt = 0;
+
+	// go to the start of the block
+	while (inx < carProto_da.cnt && carProto(inx)->paramFileIndex != fileIndex) {
+		startInx = inx++;
+	}
+
+	// delete them
+	for (; inx < carProto_da.cnt && carProto(inx)->paramFileIndex == fileIndex; inx++) {
+		carProto_t * cp = carProto(inx);
+		if (cp->paramFileIndex == fileIndex) {
+			CarProtoDelete(cp);
+			cnt++;
+		}
+	}
+
+	// copy down the rest of the list to fill the gap
+	startInx++;
+	while (inx < carProto_da.cnt) {
+		carProto(startInx++) = carProto(inx++);
+	}
+
+	// and reduce the actual number
+	carProto_da.cnt -= cnt;
+}
+
 static BOOL_T CarProtoRead(
 		char * line )
 {
@@ -1032,6 +1071,44 @@ static void CarPartDelete(
 	MyFree( partP );
 }
 
+/**
+* Delete all car part definitions that came from a specific parameter file.
+* Due to the way the definitions are loaded from file it is safe to
+* assume that they form a contiguous block in the array.
+*
+* \param [IN] fileIndex parameter file
+*/
+
+void
+DeleteCarPart(int fileIndex)
+{
+	//int inx = 0;
+	//int startInx = -1;
+	//int cnt = 0;
+
+	//// go to the start of the block
+	//while (inx < caroto_da.cnt && carProto(inx)->paramFileIndex != fileIndex) {
+	//	startInx = inx++;
+	//}
+
+	//// delete them
+	//for (; inx < carProto_da.cnt && carProto(inx)->paramFileIndex == fileIndex; inx++) {
+	//	carProto_t * cp = carProto(inx);
+	//	if (cp->paramFileIndex == fileIndex) {
+	//		CarProtoDelete(cp);
+	//		cnt++;
+	//	}
+	//}
+
+	//// copy down the rest of the list to fill the gap
+	//startInx++;
+	//while (inx < carProto_da.cnt) {
+	//	carProto(startInx++) = carProto(inx++);
+	//}
+
+	//// and reduce the actual number
+	//carProto_da.cnt -= cnt;
+}
 
 static BOOL_T CarPartRead(
 		char * line )
@@ -5270,8 +5347,8 @@ EXPORT void InitCarDlg( void )
 	ParamRegister( &carDlgPG );
 	ParamRegister( &carInvPG );
 	RegisterChangeNotification( CarDlgChange );
-	AddParam( "CARPROTO ", CarProtoRead, NULL );
-	AddParam( "CARPART ", CarPartRead, NULL);
+	AddParam( "CARPROTO ", CarProtoRead );
+	AddParam( "CARPART ", CarPartRead);
 	ParamRegister( &newCarPG );
 	ParamCreateControls( &newCarPG, CarItemHotbarUpdate );
 	newCarControls[0] = newCarPLs[0].control;

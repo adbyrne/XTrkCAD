@@ -1617,8 +1617,8 @@ error:
 
 EXPORT BOOL_T MacroInit( void )
 {
-	AddParam( "DEMOGROUP ", ReadDemo, NULL);
-	AddParam( "DEMO ", ReadDemo, NULL);
+	AddParam( "DEMOGROUP ", ReadDemo );
+	AddParam( "DEMO ", ReadDemo );
 
 	recordMouseMoves = ( getenv( "XTRKCADNORECORDMOUSEMOVES" ) == NULL );
 

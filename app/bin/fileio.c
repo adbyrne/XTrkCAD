@@ -534,13 +534,11 @@ EXPORT wBool_t ParseRoomSize(
  */
 EXPORT void AddParam(
 		char * name,
-		readParam_t proc,
-		deleteParam_t delete )
+		readParam_t proc)
 {
 	DYNARR_APPEND( paramProc_t, paramProc_da, 10 );
 	paramProc(paramProc_da.cnt-1).name = name;
 	paramProc(paramProc_da.cnt-1).proc = proc;
-	paramProc(paramProc_da.cnt - 1).delete = delete;
 }
 
 EXPORT char * PutTitle( char * cp )

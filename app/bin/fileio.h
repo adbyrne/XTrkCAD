@@ -80,7 +80,6 @@ wMenuList_p fileList_ml;
 typedef struct {
 	char * name;
 	readParam_t proc;
-	deleteParam_t delete;
 } paramProc_t;
 dynArr_t paramProc_da;
 #define paramProc(N) DYNARR_N( paramProc_t, paramProc_da, N )
@@ -100,7 +99,7 @@ BOOL_T ParseRoomSize( char *, coOrd * );
 int InputError( char *, BOOL_T, ... );
 void SyntaxError( char *, wIndex_t, wIndex_t ); 
 
-void AddParam( char *name, readParam_t proc, deleteParam_t delete );
+void AddParam( char *name, readParam_t proc );
 
 FILE * OpenCustom( char * );
 

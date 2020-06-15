@@ -197,6 +197,44 @@ DeleteTurnout(void *toInfo)
 	return(TRUE);
 }
 
+/**
+ * Delete all turnout definitions that came from a specific parameter file. 
+ * Due to the way the definitions are loaded from file it is safe to 
+ * assume that they form a contiguous block in the array.
+ * 
+ * \param [IN] fileIndex parameter file
+ */
+
+void
+DeleteTurnoutParams(int fileIndex)
+{
+	int inx=0;
+	int startInx = -1;
+	int cnt = 0;
+
+	// go to the start of the block
+	while (inx < turnoutInfo_da.cnt && turnoutInfo(inx)->paramFileIndex != fileIndex) {
+		startInx = inx++;
+	}
+
+	// delete them
+	for ( ; inx < turnoutInfo_da.cnt && turnoutInfo(inx)->paramFileIndex == fileIndex; inx++) {
+		turnoutInfo_t * to = turnoutInfo(inx);
+		if (to->paramFileIndex == fileIndex) {
+			DeleteTurnout(to);
+			cnt++;
+		}
+	}
+
+	// copy down the rest of the list to fill the gap
+	startInx++;
+	while (inx < turnoutInfo_da.cnt) {
+		turnoutInfo(startInx++) = turnoutInfo(inx++);
+	}
+
+	// and reduce the actual number
+	turnoutInfo_da.cnt -= cnt;
+}
 
 /** 
  * Check to find out to what extent the contents of the parameter file can be used with 
@@ -3008,7 +3046,7 @@ EXPORT void InitTrkTurnout( void )
 	T_TURNOUT = InitObject( &turnoutCmds );
 
 	/*InitDebug( "Turnout", &debugTurnout );*/
-	AddParam( "TURNOUT ", ReadTurnoutParam, DeleteTurnout);
+	AddParam( "TURNOUT ", ReadTurnoutParam);
 }
 
 #ifdef TEST

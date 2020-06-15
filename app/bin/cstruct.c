@@ -156,7 +156,7 @@ EXPORT turnoutInfo_t * CreateNewStructure(
  */
 
 BOOL_T
-DeleteStructure(void *structure)
+StructureDelete(void *structure)
 {
 	turnoutInfo_t * to = (turnoutInfo_t *)structure;
 	MyFree(to->title);
@@ -164,6 +164,45 @@ DeleteStructure(void *structure)
 
 	MyFree(to);
 	return(TRUE);
+}
+
+/**
+* Delete all structure definitions that came from a specific parameter file.
+* Due to the way the definitions are loaded from file it is safe to
+* assume that they form a contiguous block in the array.
+*
+* \param [IN] fileIndex parameter file
+*/
+
+void
+DeleteStructures(int fileIndex)
+{
+	int inx = 0;
+	int startInx = -1;
+	int cnt = 0;
+
+	// go to the start of the block
+	while (inx < structureInfo_da.cnt && structureInfo(inx)->paramFileIndex != fileIndex) {
+		startInx = inx++;
+	}
+
+	// delete them
+	for (; inx < structureInfo_da.cnt && structureInfo(inx)->paramFileIndex == fileIndex; inx++) {
+		turnoutInfo_t * to = structureInfo(inx);
+		if (to->paramFileIndex == fileIndex) {
+			StructureDelete(to);
+			cnt++;
+		}
+	}
+
+	// copy down the rest of the list to fill the gap
+	startInx++;
+	while (inx < structureInfo_da.cnt) {
+		structureInfo(startInx++) = structureInfo(inx++);
+	}
+
+	// and reduce the actual number
+	structureInfo_da.cnt -= cnt;
 }
 
 enum paramFileState
@@ -1096,6 +1135,6 @@ EXPORT void InitTrkStruct( void )
 	T_STRUCTURE = InitObject( &structureCmds );
 
 	log_structure = LogFindIndex( "Structure" );
-	AddParam( "STRUCTURE ", ReadStructureParam, DeleteStructure);
+	AddParam( "STRUCTURE ", ReadStructureParam);
 	ParamRegister( &pierPG );
 }

@@ -30,6 +30,7 @@
 
 #include "common.h"
 #include "compound.h"
+#include "ctrain.h"
 #include "custom.h"
 #include "dynstring.h"
 #include "fileio.h"
@@ -450,4 +451,27 @@ BOOL_T ParamFileListInit(void)
 
     return TRUE;
 
+}
+
+bool
+UnloadParamFile(wIndex_t fileIndex)
+{
+	paramFileInfo_t paramFileInfo = paramFileInfo(fileIndex);
+
+	DeleteTurnoutParams(fileIndex);
+	DeleteCarProto(fileIndex);
+//	DeleteCarPart(fileIndex);
+	DeleteStructures(fileIndex);
+
+	MyFree( paramFileInfo.name );
+	MyFree(paramFileInfo.contents);
+
+	// Remove from list of parameter files
+	for (int inx = fileIndex; inx < paramFileInfo_da.cnt-1; inx++) {
+		paramFileInfo(inx) = paramFileInfo(inx + 1);
+	}
+
+	paramFileInfo_da.cnt--;
+
+	return(true);
 }
