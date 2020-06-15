@@ -456,22 +456,18 @@ BOOL_T ParamFileListInit(void)
 bool
 UnloadParamFile(wIndex_t fileIndex)
 {
-	paramFileInfo_t paramFileInfo = paramFileInfo(fileIndex);
+	paramFileInfo_p paramFileInfo = &paramFileInfo(fileIndex);
 
 	DeleteTurnoutParams(fileIndex);
 	DeleteCarProto(fileIndex);
 //	DeleteCarPart(fileIndex);
 	DeleteStructures(fileIndex);
 
-	MyFree( paramFileInfo.name );
-	MyFree(paramFileInfo.contents);
+	MyFree(paramFileInfo->name );
+	MyFree(paramFileInfo->contents);
 
-	// Remove from list of parameter files
-	for (int inx = fileIndex; inx < paramFileInfo_da.cnt-1; inx++) {
-		paramFileInfo(inx) = paramFileInfo(inx + 1);
-	}
+	DYNARR_REMOVE(paramFileInfo_t,paramFileInfo_da,fileIndex);
 
-	paramFileInfo_da.cnt--;
 
 	return(true);
 }
