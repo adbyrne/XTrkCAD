@@ -347,23 +347,23 @@ int LoadParamFile(
  */
 
 
-void
-ParamFileListConfirmChange(void)
-{
-    wIndex_t fileInx;
-    for (fileInx = 0; fileInx < paramFileInfo_da.cnt; fileInx++) {
-        paramFileInfo(fileInx).deletedShadow = paramFileInfo(fileInx).deleted;
-    }
-}
+//void
+//ParamFileListConfirmChange(void)
+//{
+//    wIndex_t fileInx;
+//    for (fileInx = 0; fileInx < paramFileInfo_da.cnt; fileInx++) {
+//        paramFileInfo(fileInx).deletedShadow = paramFileInfo(fileInx).deleted;
+//    }
+//}
 
-void
-ParamFileListCancelChange(void)
-{
-    wIndex_t fileInx;
-    for (fileInx = 0; fileInx < paramFileInfo_da.cnt; fileInx++) {
-        paramFileInfo(fileInx).deleted = paramFileInfo(fileInx).deletedShadow;
-    }
-}
+//void
+//ParamFileListCancelChange(void)
+//{
+//    wIndex_t fileInx;
+//    for (fileInx = 0; fileInx < paramFileInfo_da.cnt; fileInx++) {
+//        paramFileInfo(fileInx).deleted = paramFileInfo(fileInx).deletedShadow;
+//    }
+//}
 
 
 static void ReadCustom(void)
@@ -456,18 +456,17 @@ BOOL_T ParamFileListInit(void)
 bool
 UnloadParamFile(wIndex_t fileIndex)
 {
-	paramFileInfo_p paramFileInfo = &paramFileInfo(fileIndex);
+	paramFileInfo_p paramFileI = &paramFileInfo(fileIndex);
 
 	DeleteTurnoutParams(fileIndex);
 	DeleteCarProto(fileIndex);
 //	DeleteCarPart(fileIndex);
 	DeleteStructures(fileIndex);
 
-	MyFree(paramFileInfo->name );
-	MyFree(paramFileInfo->contents);
+	MyFree(paramFileI->name );
+	MyFree(paramFileI->contents);
 
 	DYNARR_REMOVE(paramFileInfo_t,paramFileInfo_da,fileIndex);
-
 
 	return(true);
 }

@@ -51,9 +51,9 @@ static struct wFilSel_t * paramFile_fs;
 #define FAVORITE_PARAM 1
 #define STANDARD_PARAM 0
 
-#define PARAMBUTTON_HIDE "Hide"
-#define PARAMBUTTON_UNHIDE "Unhide"
 #define PARAMBUTTON_UNLOAD "Unload"
+#define PARAMBUTTON_LOAD "Unhide"
+#define PARAMBUTTON_REFRESH "Refresh"
 
 static wIcon_p indicatorIcons[ 2 ][PARAMFILE_MAXSTATE];
 
@@ -80,8 +80,8 @@ static paramData_t paramFilePLs[] = {
     {   PD_BUTTON, (void *)ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, (void *)TRUE, N_("Favorite")},
 #define I_PRMFILACTION	(4)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
-    {	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_HIDE), 0L, FALSE },
-	{   PD_BUTTON, (void*)ParamFileUnload, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
+    {	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
+	{   PD_BUTTON, (void*)ParamFileUnload, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
     {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Search Library") },
 	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") },
 };
@@ -205,7 +205,7 @@ static void UpdateParamFileButton(void)
     }
 
     // set the default
-    wButtonSetLabel(paramFileActionB, _(PARAMBUTTON_HIDE));
+    wButtonSetLabel(paramFileActionB, _(PARAMBUTTON_UNLOAD));
     paramFilePLs[ I_PRMFILACTION ].context = FALSE;
     paramFilePLs[I_PRMFILEFAVORITE].context = FALSE;
 
@@ -223,7 +223,7 @@ static void UpdateParamFileButton(void)
             }
             if (IsParamFileDeleted(fileInx)) {
                 // if selected file was unloaded, set button to reload 
-                wButtonSetLabel(paramFileActionB, _(PARAMBUTTON_UNHIDE));
+                wButtonSetLabel(paramFileActionB, _(PARAMBUTTON_LOAD));
                 paramFilePLs[ I_PRMFILACTION ].context = (void *)TRUE;
             }
             if (!IsParamFileFavorite(fileInx)) {
@@ -350,7 +350,7 @@ static void ParamFileSelectAll(void *junk)
 static void ParamFileOk(void * junk)
 {
     SearchUiOk(junk);
-    ParamFileListConfirmChange();
+    //ParamFileListConfirmChange();
     wHide(paramFileW);
 }
 
@@ -420,7 +420,7 @@ void DoParamFiles(void * junk)
         ParamRegister(&paramFilePG);
 
         paramFileW = ParamCreateDialog(&paramFilePG,
-                                       MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, ParamFileCancel,
+                                       MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, NULL,
                                        TRUE, NULL, 0, ParamFileDlgUpdate);
         paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FS_MULTIPLEFILES,
                                      _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);
