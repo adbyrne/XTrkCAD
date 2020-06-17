@@ -1256,7 +1256,6 @@ EXPORT BOOL_T CarItemRead(
 	long purchDate = 0;
 	long serviceDate = 0;
 	int len, siz;
-	static dynArr_t buffer_da;
 	carItem_p item;
 	char * cp;
 	wIndex_t layer;
@@ -1274,20 +1273,9 @@ EXPORT BOOL_T CarItemRead(
 	dim.truckCenterOffset = longCenterOffset/1000.0;
 	if ( paramVersion < 12 ) {
 		if ( (options&CAR_ITEM_HASNOTES) ) {
-			DYNARR_SET( char, buffer_da, 0 );
-			while ( (line=GetNextLine()) && !IsEND( "END" ) ) {
-				siz = buffer_da.cnt;
-				len = strlen( line );
-				DYNARR_SET( char, buffer_da, siz+len+1 );
-				memcpy( &((char*)buffer_da.ptr)[siz], line, len );
-				((char*)buffer_da.ptr)[siz+len] = '\n';
-			}
-			DYNARR_APPEND( char, buffer_da, 1 );
-			((char*)buffer_da.ptr)[buffer_da.cnt-1] = 0;
-			sNote = MyStrdup( (char*)buffer_da.ptr );
+			sNote = ReadMultilineText();
 		}
 	} else {
-		char * sEscapedText = NULL;
 		if ( !GetArgs( cp, "qc", &sNote, &cp ) )
 			return FALSE;
 	}

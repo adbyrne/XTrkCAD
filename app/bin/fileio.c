@@ -69,6 +69,7 @@
 #include "track.h"
 #include "utility.h"
 #include "version.h"
+#include "dynstring.h"
 
 #ifdef WINDOWS
 #include "include/utf8convert.h"
@@ -494,6 +495,44 @@ wBool_t IsEND( char * sEnd )
 	if ( *cp != '\0' )
 		return FALSE;
 	return TRUE;
+}
+
+
+/**
+ * Read the text for a note/car. Lines are read from the input file
+ * until the END statement is found.
+ *
+ * \todo Handle premature end as an error
+ *
+ * \return pointer to string, has to be myfree'd by caller
+ */
+
+char *
+ReadMultilineText()
+{
+	char *string;
+	DynString noteText;
+	DynStringMalloc(&noteText, 0);
+	char *line;
+
+	line = GetNextLine();
+
+	while ( !IsEND("END") ) {
+		DynStringCatCStr(&noteText, line);
+		DynStringCatCStr(&noteText, "\n");
+		line = GetNextLine();
+	}
+	string = MyStrdup(DynStringToCStr(&noteText));
+	string[strlen(string) - 1] = '\0';
+
+#ifdef WINDOWS
+	if (wIsUTF8(string)) {
+		ConvertUTF8ToSystem(string);
+	}
+#endif // WINDOWS
+
+	DynStringFree(&noteText);
+	return(string);
 }
 
 

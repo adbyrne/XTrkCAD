@@ -77,52 +77,6 @@ void DoNote(void)
     wShow(noteW);
 }
 
-/**
- * Read the text for a note. Lines are read from the input file
- * until either the maximum length is reached or the END statement is
- * found.
- *
- * \todo Handle premature end as an error
- *
- * \param textLength
- * \return pointer to string, has to be myfree'd by caller
- */
-
-char *
-ReadMultilineText(size_t textLength)
-{
-	char *string;
-	DynString noteText;
-	DynStringMalloc(&noteText, 0);
-	size_t charsRead = 0;
-	char *line;
-
-	line = GetNextLine();
-
-	while ( !IsEND("END") ) {
-		DynStringCatCStr(&noteText, line);
-		DynStringCatCStr(&noteText, "\n");
-		line = GetNextLine();
-	}
-	charsRead = DynStringSize(&noteText);
-	if (charsRead > textLength+1) {				// Cope with trailing '/n' and only care if larger
-		if (!(InputError("Expected note length: %d read: %d",
-			TRUE, textLength, charsRead)))		//If TRUE, carry on
-			exit(1);
-	}
-	string = MyStrdup(DynStringToCStr(&noteText));
-	string[strlen(string) - 1] = '\0';
-
-#ifdef WINDOWS
-	if (wIsUTF8(string)) {
-		ConvertUTF8ToSystem(string);
-	}
-#endif // WINDOWS
-
-	DynStringFree(&noteText);
-	return(string);
-}
-
 
 BOOL_T WriteMainNote(FILE* f)
 {
@@ -177,7 +131,7 @@ BOOL_T ReadMainNote(char *line)
     }
 
     if ( paramVersion < 12 )
-	mainText = ReadMultilineText(size);
+	mainText = ReadMultilineText();
     else
 	mainText = sNote;
     return TRUE;
