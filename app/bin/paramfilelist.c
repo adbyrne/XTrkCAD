@@ -460,7 +460,7 @@ UnloadParamFile(wIndex_t fileIndex)
 
 	DeleteTurnoutParams(fileIndex);
 	DeleteCarProto(fileIndex);
-//	DeleteCarPart(fileIndex);
+	DeleteCarPart(fileIndex);
 	DeleteStructures(fileIndex);
 
 	MyFree(paramFileI->name );
