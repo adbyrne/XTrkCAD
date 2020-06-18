@@ -229,8 +229,8 @@ void mswDrawIcon(
     
     /* show the bitmap */
     StretchDIBits(hDc, offw, offh,
-            bmiInfo->bmiHeader.biWidth*1.25,
-            bmiInfo->bmiHeader.biHeight*1.25,
+            (bmiInfo->bmiHeader.biWidth)*scaleicon,
+            (bmiInfo->bmiHeader.biHeight)*scaleicon,
             0, 0,
             bmiInfo->bmiHeader.biWidth,
             bmiInfo->bmiHeader.biHeight,
