@@ -54,7 +54,7 @@
 
 static void DrawRoomWalls( wBool_t );
 static void DrawMarkers( void );
-static void ConstraintOrig( coOrd *, coOrd, int );
+static void ConstraintOrig( coOrd *, coOrd, int, int );
 static void DoMouse( wAction_t action, coOrd pos );
 static void DDrawPoly(
 		drawCmd_p d,
@@ -1499,7 +1499,7 @@ EXPORT void MainLayout(
 			pixelBins /= 2.0;
 		}
 	}
-	ConstraintOrig( &mainD.orig, mainD.size, bNoBorder );
+	ConstraintOrig( &mainD.orig, mainD.size, bNoBorder, FALSE );
 	tempD.orig = mainD.orig;
 	tempD.size = mainD.size;
 	mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
@@ -1858,12 +1858,14 @@ static void DrawTicks( drawCmd_p d, coOrd size )
 
 	offset = 0.0;
 
-	if ( d->orig.x<0.0 ) {
+	double blank_zone = 40*d->scale/72.0;
+
+	if ( d->orig.x<0.0-blank_zone ) {
 		 p0.y = 0.0; p1.y = mapD.size.y;
 		 p0.x = p1.x = 0.0;
 		 DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
 	}
-	if (d->orig.x+d->size.x>mapD.size.x) {
+	if (d->orig.x+d->size.x>mapD.size.x+blank_zone) {
 		 p0.y = 0.0; p1.y = mapD.size.y;
 		 p0.x = p1.x = mapD.size.x;
 		 DrawRuler( d, p0, p1, offset, FALSE, FALSE, borderColor );
@@ -1877,12 +1879,12 @@ static void DrawTicks( drawCmd_p d, coOrd size )
 
 	offset = 0.0;
 
-	if ( d->orig.y<0.0 ) {
+	if ( d->orig.y<0.0-blank_zone) {
 		p0.x = 0.0; p1.x = mapD.size.x;
 		p0.y = p1.y = 0.0;
 		DrawRuler( d, p0, p1, offset, FALSE, FALSE, borderColor );
 	}
-	if (d->orig.y+d->size.y>mapD.size.y) {
+	if (d->orig.y+d->size.y>mapD.size.y+blank_zone) {
 		 p0.x = 0.0; p1.x = mapD.size.x;
 		 p0.y = p1.y = mapD.size.y;
 		 DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
@@ -1914,47 +1916,59 @@ static void DrawMapBoundingBox( BOOL_T set )
 }
 
 
-static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bNoBorder  )
+static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bNoBorder, wBool_t round  )
 {
 LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%0.3fx%0.3f",
 				orig->x, orig->y, mapD.size.x, mapD.size.y,
 				size.x, size.y ) )
 
 	coOrd bound = zero;
-	if ( !bNoBorder ) {
+
+    if ( !bNoBorder ) {
 		bound.x = size.x/2;
 		bound.y = size.y/2;
 	}
-	if ((orig->x+size.x) > (mapD.size.x+bound.x)) {
-		orig->x = mapD.size.x-size.x+bound.x;
-		orig->x += (units==UNITS_ENGLISH?1.0:(1.0/2.54));
-	}
-	if (orig->x < (0-bound.x))
-		orig->x = 0-bound.x;
 
-	if ((orig->y+size.y) > (mapD.size.y+bound.y) ) {
-		orig->y = mapD.size.y-size.y+bound.y;
-		orig->y += (units==UNITS_ENGLISH?1.0:1.0/2.54);
 
-	}
-	if (orig->y < (0-bound.y))
-		orig->y = 0-bound.y;
 
-	if (mainD.scale >= 1.0) {
-		if (units == UNITS_ENGLISH) {
-			orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
-			orig->y = floor(orig->y*4)/4;
-		} else {
-			orig->x = floor(orig->x*2.54*2)/(2.54*2);  //>1:1 = 0.5 cm
-			orig->y = floor(orig->y*2.54*2)/(2.54*2);
+	if (orig->x > 0.0) {
+		if ((orig->x+size.x) > (mapD.size.x+bound.x)) {
+			orig->x = mapD.size.x-size.x+bound.x;
+			//orig->x += (units==UNITS_ENGLISH?1.0:(1.0/2.54));
 		}
-	} else {
-		if (units == UNITS_ENGLISH) {
-			orig->x = floor(orig->x*64)/64;   //<1:1 = 1/64 inch
-			orig->y = floor(orig->y*64)/64;
+	}
+
+	if (orig->x < (0-bound.x))
+				orig->x = 0-bound.x;
+
+	if (orig->y > 0.0) {
+		if ((orig->y+size.y) > (mapD.size.y+bound.y) ) {
+			orig->y = mapD.size.y-size.y+bound.y;
+			//orig->y += (units==UNITS_ENGLISH?1.0:1.0/2.54);
+
+		}
+	}
+
+	if (orig->y < (0-bound.y))
+				orig->y = 0-bound.y;
+
+	if (round) {
+		if (mainD.scale >= 1.0) {
+			if (units == UNITS_ENGLISH) {
+				orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
+				orig->y = floor(orig->y*4)/4;
+			} else {
+				orig->x = floor(orig->x*2.54*2)/(2.54*2);  //>1:1 = 0.5 cm
+				orig->y = floor(orig->y*2.54*2)/(2.54*2);
+			}
 		} else {
-			orig->x = floor(orig->x*25.4*2)/(25.4*2);  //>1:1 = 0.5 mm
-			orig->y = floor(orig->y*25.4*2)/(25.4*2);
+			if (units == UNITS_ENGLISH) {
+				orig->x = floor(orig->x*64)/64;   //<1:1 = 1/64 inch
+				orig->y = floor(orig->y*64)/64;
+			} else {
+				orig->x = floor(orig->x*25.4*2)/(25.4*2);  //>1:1 = 0.5 mm
+				orig->y = floor(orig->y*25.4*2)/(25.4*2);
+			}
 		}
 	}
 	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
@@ -2230,7 +2244,7 @@ EXPORT void PanHere(void * mode) {
 	coOrd oldOrig = mainD.orig;
 	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
 	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
-	ConstraintOrig( &mainD.orig, mainD.size, FALSE );
+	ConstraintOrig( &mainD.orig, mainD.size, FALSE, FALSE );
 	panCenter.x = mainD.orig.x + mainD.size.x/2.0;
 	panCenter.y = mainD.orig.y + mainD.size.y/2.0;
 	if ((oldOrig.x != mainD.orig.x) || (oldOrig.y != mainD.orig.y))
@@ -2543,7 +2557,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 					mainD.orig.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
 				else
 					mainD.orig.x += mainD.size.x/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMouse: wActionKey/Right
+				MainLayout( TRUE, (MyGetKeyState() & WKEY_ALT) != 0 ); // DoMouse: wActionKey/Right
 
 				break;
 			case wAccelKey_Left:
@@ -2552,7 +2566,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 					mainD.orig.x -= 0.25*mainD.scale;
 				else
 					mainD.orig.x -= mainD.size.x/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMouse: wActionKey/Left
+				MainLayout( TRUE, (MyGetKeyState() & WKEY_ALT) != 0 ); // DoMouse: wActionKey/Left
 
 				break;
 			case wAccelKey_Up:
@@ -2561,7 +2575,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 					mainD.orig.y += 0.25*mainD.scale;
 				else
 					mainD.orig.y += mainD.size.y/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMouse: wActionKey/Up
+				MainLayout( TRUE, (MyGetKeyState() & WKEY_ALT) != 0 ); // DoMouse: wActionKey/Up
 
 				break;
 			case wAccelKey_Down:
@@ -2570,7 +2584,7 @@ static void DoMouse( wAction_t action, coOrd pos )
 					mainD.orig.y -= 0.25*mainD.scale;
 				else
 					mainD.orig.y -= mainD.size.y/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMouse: wActionKey/Down
+				MainLayout( TRUE, (MyGetKeyState() & WKEY_ALT) != 0 ); // DoMouse: wActionKey/Down
 
 				break;
 			default:
@@ -2965,6 +2979,8 @@ static STATUS_T CmdPan(
 					coOrd oldOrig = mainD.orig;
 					mainD.orig.x -= (pos.x - start_pos.x);
 					mainD.orig.y -= (pos.y - start_pos.y);
+					if ((MyGetKeyState()&WKEY_SHIFT) != 0)
+						ConstraintOrig(&mainD.orig,mainD.size,TRUE,FALSE);
 					if ((oldOrig.x == mainD.orig.x) && (oldOrig.y == mainD.orig.y))
 						InfoMessage(_("Can't move any further in that direction"));
 					else
