@@ -42,6 +42,7 @@ int kludge12 = 0;
 static XWNDPROC oldButtProc = NULL;
 static XWNDPROC newButtProc;
 
+double static scaleicon = 1.0;
 
 struct wButton_t {
 		WOBJ_COMMON
@@ -88,9 +89,9 @@ static void drawButton(
 	COLORREF colF;
 
 #define LEFT (0)
-#define RIGHT (bm->w+10)
+#define RIGHT (bm->w*scaleicon+10)
 #define TOP (0)
-#define BOTTOM (bm->h+10)
+#define BOTTOM (bm->h*scaleicon+10)
 
 	/* get the lightest and the darkest color to use */
 	colL = GetSysColor( COLOR_BTNHIGHLIGHT );
@@ -239,6 +240,7 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 	DRAWITEMSTRUCT * di = (DRAWITEMSTRUCT *)lParam;
 	wBool_t selected;
 
+
 	switch (message) {
 	case WM_COMMAND:
 		if (bb->action /*&& !bb->busy*/) {
@@ -253,8 +255,8 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			break;
 		mi->CtlType = ODT_BUTTON;
 		mi->CtlID = wParam;
-		mi->itemWidth = bb->w;
-		mi->itemHeight = bb->h;
+		mi->itemWidth = bb->w*scaleicon;
+		mi->itemHeight = bb->h*scaleicon;
 		} return 0L;
 
 	case WM_DRAWITEM:
@@ -369,7 +371,6 @@ wButton_p wButtonCreate(
 	b->selected = 0;
 	mswComputePos( (wControl_p)b, x, y );
 	if (b->option&BO_ICON) {
-		double scaleicon;
 		wPrefGetFloat(PREFSECTION, LARGEICON, &scaleicon, 1.0);
 		if (scaleicon<1.0) scaleicon=1.0;
 		if (scaleicon>2.0) scaleicon=2.0;
