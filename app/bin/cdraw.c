@@ -780,8 +780,33 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			case SEG_POLY:
 			case SEG_FILPOLY:
 				break;			//Doesn't Use
-			case SEG_CRVLIN:;
-				break;			//Doesn't Use
+			case SEG_CRVLIN:
+				switch ( drawData.pivot ) {
+					case DESC_PIVOT_FIRST:
+						segPtr->u.c.a1 = drawData.angle;
+						drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
+						drawDesc[A2].mode |= DESC_CHANGE;
+						break;
+					case DESC_PIVOT_SECOND:
+						segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a1+segPtr->u.c.a0-drawData.angle);
+						segPtr->u.c.a1 = drawData.angle;
+						drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
+						drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
+						drawDesc[A1].mode |= DESC_CHANGE;
+						drawDesc[A2].mode |= DESC_CHANGE;
+						break;
+					case DESC_PIVOT_MID:
+						segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1/2.0-drawData.angle/2.0);
+						segPtr->u.c.a1 = drawData.angle;
+						drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
+						drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
+						drawDesc[A1].mode |= DESC_CHANGE;
+						drawDesc[A2].mode |= DESC_CHANGE;
+						break;
+					default:
+						break;
+				}
+				break;
 			case SEG_FILCRCL:
 				break;			//Doesn't Use
 			case SEG_STRLIN:
@@ -1118,6 +1143,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			drawData.angle = segPtr->u.c.a1;
 			drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
 			drawData.angle1 = NormalizeAngle( drawData.angle0+drawData.angle );
+			drawDesc[AL].mode =
 			drawDesc[A1].mode =
 			drawDesc[A2].mode = 0;
 			drawDesc[PV].mode = 0;
