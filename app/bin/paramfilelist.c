@@ -453,8 +453,8 @@ UnloadParamFile(wIndex_t fileIndex)
     paramFileI->valid = FALSE;
 
     for (int i = 0; i < paramFileInfo_da.cnt; i++) {
-        LOG1(log_params, ("UnloadParamFiles: = %s: %d %d\n", paramFileInfo(i).contents,
-                          paramFileInfo(i).trackState, paramFileInfo(i).structureState))
+        LOG1(log_params, ("UnloadParamFiles: = %s: %d\n", paramFileInfo(i).contents,
+                          paramFileInfo(i).trackState))
     }
 
     return (true);

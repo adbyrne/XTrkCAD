@@ -11,7 +11,7 @@
 		int valid;					/** < FALSE for dropped file */
 		bool favorite;
 		enum paramFileState trackState;
-		enum paramFileState structureState;
+		//enum paramFileState structureState;
 	} paramFileInfo_t;
 	typedef paramFileInfo_t * paramFileInfo_p;
 
