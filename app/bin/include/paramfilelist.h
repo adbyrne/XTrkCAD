@@ -26,9 +26,6 @@
 	void UpdateParamFileList(void);
 	void ParamFilesChange(long changes);
 	int LoadParamFile(int files, char ** fileName, void * data);
-	void InitializeParamDir(void);
-	void ParamFileListConfirmChange(void);
-	void ParamFileListCancelChange(void);
 	BOOL_T ParamFileListInit(void);
 
 	void SearchUiOk(void * junk);

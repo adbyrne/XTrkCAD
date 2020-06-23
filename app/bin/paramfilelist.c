@@ -47,7 +47,7 @@ dynArr_t paramFileInfo_da;
 
 int curParamFileIndex = PARAM_DEMO;
 
-static int log_paramFile;
+static int log_params;
 
 static char * customPath;
 static char * customPathBak;
@@ -307,8 +307,6 @@ int LoadParamFile(
     wIndex_t inx;
     int i = 0;
 
-    wBool_t redrawList = FALSE;
-
     assert(fileName != NULL);
     assert(files > 0);
 
@@ -325,7 +323,6 @@ int LoadParamFile(
             if (paramFileInfo(inx).valid &&
                     strcmp(paramFileInfo(inx).contents, curContents) == 0) {
                 paramFileInfo(inx).valid = FALSE;
-                redrawList = TRUE;
                 break;
             }
         }
@@ -340,31 +337,6 @@ int LoadParamFile(
     DoChangeNotification(CHANGE_PARAMS);
     return TRUE;
 }
-
-/**
- * Set the directory for parameter files, either the installation as default or the user setting.
- *
- */
-
-
-//void
-//ParamFileListConfirmChange(void)
-//{
-//    wIndex_t fileInx;
-//    for (fileInx = 0; fileInx < paramFileInfo_da.cnt; fileInx++) {
-//        paramFileInfo(fileInx).deletedShadow = paramFileInfo(fileInx).deleted;
-//    }
-//}
-
-//void
-//ParamFileListCancelChange(void)
-//{
-//    wIndex_t fileInx;
-//    for (fileInx = 0; fileInx < paramFileInfo_da.cnt; fileInx++) {
-//        paramFileInfo(fileInx).deleted = paramFileInfo(fileInx).deletedShadow;
-//    }
-//}
-
 
 static void ReadCustom(void)
 {
@@ -435,7 +407,7 @@ addButtonCallBack_t ParamFilesInit(void)
  */
 BOOL_T ParamFileListInit(void)
 {
-    log_paramFile = LogFindIndex("paramFile");
+    log_params = LogFindIndex("params");
 
 	// get the default definitions
     if (ReadParams(lParamKey, libDir, sParamQF) == FALSE) {
@@ -453,20 +425,37 @@ BOOL_T ParamFileListInit(void)
 
 }
 
+/**
+ * Unload parameter file: all parameter definitions from this file are deleted
+ * from memory. Strings allocated to store the filename and contents 
+ * description are free'd as well. 
+ * In order to keep the overall data structures consistent, the file info
+ * structure is not removed from the array but flagged as garbage
+ *
+ * \param  fileIndex Zero-based index of the file.
+ *
+ * \returns True if it succeeds, false if it fails.
+ */
+
 bool
 UnloadParamFile(wIndex_t fileIndex)
 {
-	paramFileInfo_p paramFileI = &paramFileInfo(fileIndex);
+    paramFileInfo_p paramFileI = &paramFileInfo(fileIndex);
 
-	DeleteTurnoutParams(fileIndex);
-	DeleteCarProto(fileIndex);
-	DeleteCarPart(fileIndex);
-	DeleteStructures(fileIndex);
+    DeleteTurnoutParams(fileIndex);
+    DeleteCarProto(fileIndex);
+    DeleteCarPart(fileIndex);
+    DeleteStructures(fileIndex);
 
-	MyFree(paramFileI->name );
-	MyFree(paramFileI->contents);
+    MyFree(paramFileI->name);
+    MyFree(paramFileI->contents);
 
-	DYNARR_REMOVE(paramFileInfo_t,paramFileInfo_da,fileIndex);
+    paramFileI->valid = FALSE;
 
-	return(true);
+    for (int i = 0; i < paramFileInfo_da.cnt; i++) {
+        LOG1(log_params, ("UnloadParamFiles: = %s: %d %d\n", paramFileInfo(i).contents,
+                          paramFileInfo(i).trackState, paramFileInfo(i).structureState))
+    }
+
+    return (true);
 }

@@ -63,5 +63,6 @@ int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );
 void DeleteCarProto(int fileIndex);
+void DeleteCarPart(int fileIndex);
 
 #endif // !HAVE_CTRAIN_H

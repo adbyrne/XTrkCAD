@@ -167,42 +167,44 @@ StructureDelete(void *structure)
 }
 
 /**
-* Delete all structure definitions that came from a specific parameter file.
-* Due to the way the definitions are loaded from file it is safe to
-* assume that they form a contiguous block in the array.
-*
-* \param [IN] fileIndex parameter file
-*/
+ * Delete all structure definitions that came from a specific parameter
+ * file. Due to the way the definitions are loaded from file it is safe to
+ * assume that they form a contiguous block in the array.
+ *
+ * \param  fileIndex parameter file.
+ */
 
 void
 DeleteStructures(int fileIndex)
 {
-	int inx = 0;
-	int startInx = -1;
-	int cnt = 0;
+    int inx = 0;
+    int startInx = -1;
+    int cnt = 0;
 
-	// go to the start of the block
-	while (inx < structureInfo_da.cnt && structureInfo(inx)->paramFileIndex != fileIndex) {
-		startInx = inx++;
-	}
+    // go to the start of the block
+    while (inx < structureInfo_da.cnt &&
+            structureInfo(inx)->paramFileIndex != fileIndex) {
+        startInx = inx++;
+    }
 
-	// delete them
-	for (; inx < structureInfo_da.cnt && structureInfo(inx)->paramFileIndex == fileIndex; inx++) {
-		turnoutInfo_t * to = structureInfo(inx);
-		if (to->paramFileIndex == fileIndex) {
-			StructureDelete(to);
-			cnt++;
-		}
-	}
+    // delete them
+    for (; inx < structureInfo_da.cnt &&
+            structureInfo(inx)->paramFileIndex == fileIndex; inx++) {
+        turnoutInfo_t * to = structureInfo(inx);
+        if (to->paramFileIndex == fileIndex) {
+            StructureDelete(to);
+            cnt++;
+        }
+    }
 
-	// copy down the rest of the list to fill the gap
-	startInx++;
-	while (inx < structureInfo_da.cnt) {
-		structureInfo(startInx++) = structureInfo(inx++);
-	}
+    // copy down the rest of the list to fill the gap
+    startInx++;
+    while (inx < structureInfo_da.cnt) {
+        structureInfo(startInx++) = structureInfo(inx++);
+    }
 
-	// and reduce the actual number
-	structureInfo_da.cnt -= cnt;
+    // and reduce the actual number
+    structureInfo_da.cnt -= cnt;
 }
 
 enum paramFileState

@@ -208,32 +208,34 @@ DeleteTurnout(void *toInfo)
 void
 DeleteTurnoutParams(int fileIndex)
 {
-	int inx=0;
-	int startInx = -1;
-	int cnt = 0;
+    int inx=0;
+    int startInx = -1;
+    int cnt = 0;
 
-	// go to the start of the block
-	while (inx < turnoutInfo_da.cnt && turnoutInfo(inx)->paramFileIndex != fileIndex) {
-		startInx = inx++;
-	}
+    // go to the start of the block
+    while (inx < turnoutInfo_da.cnt &&
+            turnoutInfo(inx)->paramFileIndex != fileIndex) {
+        startInx = inx++;
+    }
 
-	// delete them
-	for ( ; inx < turnoutInfo_da.cnt && turnoutInfo(inx)->paramFileIndex == fileIndex; inx++) {
-		turnoutInfo_t * to = turnoutInfo(inx);
-		if (to->paramFileIndex == fileIndex) {
-			DeleteTurnout(to);
-			cnt++;
-		}
-	}
+    // delete them
+    for (; inx < turnoutInfo_da.cnt &&
+            turnoutInfo(inx)->paramFileIndex == fileIndex; inx++) {
+        turnoutInfo_t * to = turnoutInfo(inx);
+        if (to->paramFileIndex == fileIndex) {
+            DeleteTurnout(to);
+            cnt++;
+        }
+    }
 
-	// copy down the rest of the list to fill the gap
-	startInx++;
-	while (inx < turnoutInfo_da.cnt) {
-		turnoutInfo(startInx++) = turnoutInfo(inx++);
-	}
+    // copy down the rest of the list to fill the gap
+    startInx++;
+    while (inx < turnoutInfo_da.cnt) {
+        turnoutInfo(startInx++) = turnoutInfo(inx++);
+    }
 
-	// and reduce the actual number
-	turnoutInfo_da.cnt -= cnt;
+    // and reduce the actual number
+    turnoutInfo_da.cnt -= cnt;
 }
 
 /** 

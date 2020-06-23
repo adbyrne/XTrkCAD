@@ -4314,18 +4314,6 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 
 	CarDlgDoStateActions( actions );
 
-	/*CarDlgShowControls();*/
-
-#ifdef LATER
-if ( logTable(log_carList).level >= 1 ) {
-	int inx;
-	carPart_p partP;
-	for ( inx=0; inx<carPart_da.cnt; inx++ ) {
-		partP = carPart(inx);
-		LogPrintf( "%d %s %d\n", inx, partP->title, partP->paramFileIndex );
-	}
-}
-#endif
 	wShow( carDlgPG.win );
 }
 

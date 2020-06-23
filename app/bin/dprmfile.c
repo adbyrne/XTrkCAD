@@ -147,6 +147,7 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
     DynString description;
     DynStringMalloc(&description, STR_SHORT_SIZE);
     int *sortedIndex = MyMalloc(sizeof(int)*paramFileCnt);
+	int log_params = LogFindIndex("params");
 
     SortParamFileList(paramFileCnt, paramFiles, sortedIndex);
 
@@ -167,6 +168,8 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
                           DynStringToCStr(&description),
                           indicatorIcons[ paramFileInfo.favorite ][paramFileInfo.trackState],
                           (void*)(intptr_t)sortedIndex[i]);
+
+			LOG1(log_params, ("ParamFileListLoad: = %s: %d\n", paramFileInfo.contents, paramFileInfo.trackState))
         }
     }
     wControlShow((wControl_p)paramFileL, TRUE);
@@ -317,7 +320,6 @@ static void ParamFileAction(void * action)
 
 static void ParamFileUnload(void * action)
 {
-	wIndex_t selcnt = wListGetSelectedCount(paramFileL);
 	wIndex_t inx, cnt;
 	wIndex_t fileInx;
 
@@ -350,18 +352,11 @@ static void ParamFileSelectAll(void *junk)
 static void ParamFileOk(void * junk)
 {
     SearchUiOk(junk);
-    //ParamFileListConfirmChange();
+    
+	DoChangeNotification(CHANGE_PARAMS);
     wHide(paramFileW);
 }
 
-
-static void ParamFileCancel(wWin_p junk)
-{
-    ParamFileListCancelChange();
-    SearchUiOk(junk);
-    wHide(paramFileW);
-    DoChangeNotification(CHANGE_PARAMS);
-}
 
 static void ParamFileDlgUpdate(
     paramGroup_p pg,
@@ -397,7 +392,6 @@ void ParamFilesChange(long changes)
 
 void DoParamFiles(void * junk)
 {
-    wIndex_t listInx;
     void * data;
 
     if (paramFileW == NULL) {
@@ -427,7 +421,7 @@ void DoParamFiles(void * junk)
     }
     ParamLoadControls(&paramFilePG);
     ParamGroupRecord(&paramFilePG);
-    if ((listInx = wListGetValues(paramFileL, NULL, 0, NULL, &data))>=0) {
+    if ((wListGetValues(paramFileL, NULL, 0, NULL, &data))>=0) {
         UpdateParamFileButton();
     }
 
