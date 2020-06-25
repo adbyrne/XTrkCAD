@@ -52,8 +52,10 @@ static struct wFilSel_t * paramFile_fs;
 #define STANDARD_PARAM 0
 
 #define PARAMBUTTON_UNLOAD "Unload"
-#define PARAMBUTTON_LOAD "Unhide"
 #define PARAMBUTTON_REFRESH "Refresh"
+
+#define PARAMFILE_UNLOAD (0)
+#define PARAMFILE_REFRESH (1)
 
 static wIcon_p indicatorIcons[ 2 ][PARAMFILE_MAXSTATE];
 
@@ -62,8 +64,8 @@ static wWin_p paramFileW;
 static long paramFileSel = 0;
 
 static void ParamFileFavorite(void * favorite);
-static void ParamFileAction(void * action);
-static void ParamFileUnload(void *);
+static void ParamRefreshSelectedFiles(void * action);
+static void ParamUnloadSelectedFiles(void *);
 static void ParamFileBrowse(void *);
 static void ParamFileSelectAll(void *);
 
@@ -80,8 +82,8 @@ static paramData_t paramFilePLs[] = {
     {   PD_BUTTON, (void *)ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, (void *)TRUE, N_("Favorite")},
 #define I_PRMFILACTION	(4)
 #define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
-    {	PD_BUTTON, (void*)ParamFileUnload, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
-	{   PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
+    {	PD_BUTTON, (void*)ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
+	{   PD_BUTTON, (void*)ParamRefreshSelectedFiles, "refresh", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
     {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Search Library") },
 	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") },
 };
@@ -226,7 +228,7 @@ static void UpdateParamFileButton(void)
             }
             if (IsParamFileDeleted(fileInx)) {
                 // if selected file was unloaded, set button to reload 
-                wButtonSetLabel(paramFileActionB, _(PARAMBUTTON_LOAD));
+ //               wButtonSetLabel(paramFileActionB, _(PARAMBUTTON_LOAD));
                 paramFilePLs[ I_PRMFILACTION ].context = (void *)TRUE;
             }
             if (!IsParamFileFavorite(fileInx)) {
@@ -294,31 +296,13 @@ static void ParamFileFavorite(void * setFavorite)
 }
 
 /**
- * Unload selected files.
+ * Parameter change selected files
  *
- * \param action IN FALSE = unload, TRUE = reload parameter files
- * \return
+ * \param  paramFileChange The parameter file change.
  */
 
-static void ParamFileAction(void * action)
-{
-    wIndex_t selcnt = wListGetSelectedCount(paramFileL);
-
-    //nothing selected -> leave
-    if (selcnt) {
-        unsigned newDeletedState;
-
-        if (action) {
-            newDeletedState = FALSE;
-        } else {
-            newDeletedState = TRUE;
-        }
-
-        UpdateParamFileProperties(SET_DELETED, newDeletedState);
-    }
-}
-
-static void ParamFileUnload(void * action)
+static void
+ParamChangeSelectedFiles(unsigned paramFileChange)
 {
 	wIndex_t inx, cnt;
 	wIndex_t fileInx;
@@ -327,14 +311,56 @@ static void ParamFileUnload(void * action)
 	cnt = wListGetCount(paramFileL);
 
 	for (inx = 0; inx < cnt; inx++) {
-	     if (wListGetItemSelected((wList_p)paramFileL, inx)) {
+		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
 			fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
-			UnloadParamFile(fileInx);
-	     }
+
+			switch (paramFileChange) {
+			case PARAMFILE_UNLOAD:
+				UnloadParamFile(fileInx);
+				break;
+			case PARAMFILE_REFRESH:
+				ReloadParamFile(fileInx);
+				break;
+			default:
+				AbortProg("Invalid change type %d in  ParamChangeSelectedFiles", paramFileChange);
+			}
+		}
 	}
 	ParamFileListLoad(paramFileInfo_da.cnt, &paramFileInfo_da);
 	DoChangeNotification(CHANGE_PARAMS);
 }
+
+/**
+ * Refresh selected files.
+ *
+ * \param action IN FALSE = unload, TRUE = reload parameter files
+ * \return
+ */
+
+static void ParamRefreshSelectedFiles(void * action)
+{
+    wIndex_t selcnt = wListGetSelectedCount(paramFileL);
+
+    //nothing selected -> leave
+    if (selcnt) {
+		ParamChangeSelectedFiles(PARAMFILE_REFRESH);
+	} else {
+		wBeep();
+	}
+}
+
+static void ParamUnloadSelectedFiles(void * action)
+{
+	wIndex_t selcnt = wListGetSelectedCount(paramFileL);
+
+	//nothing selected -> leave
+	if (selcnt) {
+		ParamChangeSelectedFiles(PARAMFILE_UNLOAD);
+	} else {
+		wBeep();
+	}
+}
+
 
 /**
  * Select all files in the list and set action button

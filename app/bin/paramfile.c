@@ -183,7 +183,31 @@ ReadParamFile(const char *fileName)
 }
 
 /**
- * Paramter file reader and interpreter
+ * Reload a single parameter file that had been unloaded before.
+ *
+ * \param  fileindex index of previously created paramFileInfo
+ *
+ * \returns 
+ */
+
+int
+ReloadDeletedParamFile(int fileindex)
+{
+	curParamFileIndex = fileindex;
+	paramFileInfo(curParamFileIndex).deleted = FALSE;
+	paramFileInfo(curParamFileIndex).valid = TRUE;
+	paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, paramFileInfo(curParamFileIndex).name);
+	paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
+
+	SetParamFileState(curParamFileIndex);
+
+	return (curParamFileIndex);
+}
+
+
+
+/**
+ * Parameter file reader and interpreter
  *
  * \param key unused
  * \param dirName prefix for parameter file path

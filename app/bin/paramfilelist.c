@@ -426,6 +426,23 @@ BOOL_T ParamFileListInit(void)
 }
 
 /**
+ * Deletes all parameter types described by index
+ *
+ * \param  index Zero-based index of the.
+ */
+
+static void
+DeleteAllParamTypes(int index)
+{
+
+	DeleteTurnoutParams(index);
+	DeleteCarProto(index);
+	DeleteCarPart(index);
+	DeleteStructures(index);
+}
+
+
+/**
  * Unload parameter file: all parameter definitions from this file are deleted
  * from memory. Strings allocated to store the filename and contents 
  * description are free'd as well. 
@@ -441,12 +458,9 @@ bool
 UnloadParamFile(wIndex_t fileIndex)
 {
     paramFileInfo_p paramFileI = &paramFileInfo(fileIndex);
-
-    DeleteTurnoutParams(fileIndex);
-    DeleteCarProto(fileIndex);
-    DeleteCarPart(fileIndex);
-    DeleteStructures(fileIndex);
-
+	
+	DeleteAllParamTypes(fileIndex);
+	
     MyFree(paramFileI->name);
     MyFree(paramFileI->contents);
 
@@ -458,4 +472,25 @@ UnloadParamFile(wIndex_t fileIndex)
     }
 
     return (true);
+}
+
+/**
+ * Reload parameter file
+ *
+ * \param  index Zero-based index of the paramFileInfo struct.
+ *
+ * \returns True if it succeeds, false if it fails.
+ */
+
+bool
+ReloadParamFile(wIndex_t index)
+{
+	paramFileInfo_p paramFileI = &paramFileInfo(index);
+	
+	DeleteAllParamTypes(index);
+	MyFree(paramFileI->contents);
+
+	ReloadDeletedParamFile(index);
+
+	return(true);
 }
