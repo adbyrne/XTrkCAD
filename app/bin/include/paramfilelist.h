@@ -6,12 +6,10 @@
 	typedef struct {
 		char * name;				/** < name of parameter file */
 		char * contents;
-		int deleted;
-		int deletedShadow;
-		int valid;					/** < FALSE for dropped file */
+		bool deleted;
+		bool valid;					/** < FALSE for dropped file */
 		bool favorite;
 		enum paramFileState trackState;
-		//enum paramFileState structureState;
 	} paramFileInfo_t;
 	typedef paramFileInfo_t * paramFileInfo_p;
 
@@ -29,5 +27,6 @@
 	BOOL_T ParamFileListInit(void);
 
 	void SearchUiOk(void * junk);
+	bool ReloadParamFile(wIndex_t index);
 	bool UnloadParamFile(wIndex_t fileIndex);
 #endif // !HAVE_PARAMFILELIST_H

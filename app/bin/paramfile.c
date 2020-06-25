@@ -171,10 +171,8 @@ ReadParamFile(const char *fileName)
     DYNARR_APPEND(paramFileInfo_t, paramFileInfo_da, 10);
     curParamFileIndex = paramFileInfo_da.cnt - 1;
     paramFileInfo(curParamFileIndex).name = MyStrdup(fileName);
-    paramFileInfo(curParamFileIndex).deleted = FALSE;
     paramFileInfo(curParamFileIndex).valid = TRUE;
-    paramFileInfo(curParamFileIndex).deletedShadow =
-        paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
+    paramFileInfo(curParamFileIndex).deleted = !ReadParams(0, NULL, fileName);
     paramFileInfo(curParamFileIndex).contents = MyStrdup(curContents);
 
     SetParamFileState(curParamFileIndex);
