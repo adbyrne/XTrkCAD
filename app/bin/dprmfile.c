@@ -292,9 +292,8 @@ ParamChangeSelectedFiles(unsigned paramFileChange)
 				if (IsParamFileFavorite(fileInx) && IsParamFileDeleted(fileInx)) {
 					SetParamFileDeleted(fileInx, FALSE);
 				} else {
-					UnloadParamFile(fileInx);
+					ReloadParamFile(fileInx);
 				}
-				ReloadParamFile(fileInx);
 				break;
 			default:
 				AbortProg("Invalid change type %d in  ParamChangeSelectedFiles", paramFileChange);
