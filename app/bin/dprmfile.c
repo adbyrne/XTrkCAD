@@ -331,8 +331,9 @@ static void ParamRefreshSelectedFiles(void * action)
 		DynStringMalloc(&reloadMessage, 16);
 		if (selcnt > 1) {
 			fmtString = _("%d parameter files reloaded.");
-		}
-		DynStringPrintf(&reloadMessage, fmtString, (selcnt>1?selcnt:_("One")));
+			DynStringPrintf(&reloadMessage, fmtString, selcnt);
+		} else
+			DynStringPrintf(&reloadMessage, fmtString, _("One"));
 		wMessageSetValue(MESSAGETEXT, DynStringToCStr(&reloadMessage));
 
 	} else {
