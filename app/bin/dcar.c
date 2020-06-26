@@ -1867,6 +1867,22 @@ static DIST_T CarItemCouplerLength(
 	return item->dim.coupledLength-item->dim.carLength;
 }
 
+EXPORT BOOL_T StoreCarItem (carItem_p item, void **data,long *len) {
+
+	*data = item;
+	*len = sizeof (carItem_t);
+	return TRUE;
+
+}
+
+EXPORT BOOL_T ReplayCarItem(carItem_p item, void *data,long len) {
+
+
+	item->pos = ((carItem_t *)data)->pos;
+	item->angle = ((carItem_t *)data)->angle;
+	return TRUE;
+
+}
 
 EXPORT void CarItemPlace(
 		carItem_p item,
