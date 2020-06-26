@@ -40,8 +40,6 @@
 
 EXPORT TRKTYP_T T_STRUCTURE = -1;
 
-#define STRUCTCMD
-
 EXPORT dynArr_t structureInfo_da;
 
 typedef struct compoundData extraData;
@@ -53,7 +51,6 @@ static int log_structure = 0;
 
 static wMenu_p structPopupM;
 
-#ifdef STRUCTCMD
 static drawCmd_t structureD = {
 		NULL,
 		&screenDrawFuncs,
@@ -88,7 +85,7 @@ static paramData_t structurePLs[] = {
 #define I_MSGHEIGHT		(5)
 	{	PD_MESSAGE, NULL, NULL, 0, (void*)80 } };
 static paramGroup_t structurePG = { "structure", 0, structurePLs, sizeof structurePLs/sizeof structurePLs[0] };
-#endif
+
 
 
 /****************************************
@@ -141,16 +138,73 @@ EXPORT turnoutInfo_t * CreateNewStructure(
 	to->endCnt = 0;
 	to->pathLen = 0;
 	to->paths = (PATHPTR_T)"";
-#ifdef STRUCTCMD
 	if (updateList && structureListL != NULL) {
 		FormatCompoundTitle( LABEL_TABBED|LABEL_MANUF|LABEL_PARTNO|LABEL_DESCR, to->title );
 		if (message[0] != '\0')
 			wListAddValue( structureListL, message, NULL, to );
 	}
-#endif
 
 	to->barScale = curBarScale>0?curBarScale:-1;
 	return to;
+}
+
+/**
+ * Delete a structure definition from memory. 
+ * \TODO Find a better way to handle Custom Structures (see CreateNewStructure)
+ *
+ * \param [IN] structure the structure to be deleted
+ */
+
+BOOL_T
+StructureDelete(void *structure)
+{
+	turnoutInfo_t * to = (turnoutInfo_t *)structure;
+	MyFree(to->title);
+	MyFree(to->segs);
+
+	MyFree(to);
+	return(TRUE);
+}
+
+/**
+ * Delete all structure definitions that came from a specific parameter
+ * file. Due to the way the definitions are loaded from file it is safe to
+ * assume that they form a contiguous block in the array.
+ *
+ * \param  fileIndex parameter file.
+ */
+
+void
+DeleteStructures(int fileIndex)
+{
+    int inx = 0;
+    int startInx = -1;
+    int cnt = 0;
+
+    // go to the start of the block
+    while (inx < structureInfo_da.cnt &&
+            structureInfo(inx)->paramFileIndex != fileIndex) {
+        startInx = inx++;
+    }
+
+    // delete them
+    for (; inx < structureInfo_da.cnt &&
+            structureInfo(inx)->paramFileIndex == fileIndex; inx++) {
+        turnoutInfo_t * to = structureInfo(inx);
+        if (to->paramFileIndex == fileIndex) {
+            StructureDelete(to);
+            cnt++;
+        }
+    }
+
+    // copy down the rest of the list to fill the gap
+    startInx++;
+    while (inx < structureInfo_da.cnt) {
+        structureInfo(startInx++) = structureInfo(inx++);
+    }
+
+    // and reduce the actual number
+    structureInfo_da.cnt -= cnt;
 }
 
 enum paramFileState
@@ -427,7 +481,6 @@ static void ShowPierL( void )
 }
 
 
-#ifdef STRUCTCMD
 /*****************************************
  *
  *	 Structure Dialog
@@ -536,7 +589,7 @@ static void DoStructOk( void )
 	Reset();
 }
 
-#endif
+
 
 /****************************************
  *
@@ -1066,8 +1119,6 @@ static STATUS_T CmdStructureHotBar(
 	}
 }
 
-
-#ifdef STRUCTCMD
 #include "bitmaps/struct.xpm"
 
 EXPORT void InitCmdStruct( wMenu_p menu )
@@ -1080,14 +1131,12 @@ EXPORT void InitCmdStruct( wMenu_p menu )
 		AddRotateMenu( structPopupM, StructRotate );
 	}
 }
-#endif
-
 
 EXPORT void InitTrkStruct( void )
 {
 	T_STRUCTURE = InitObject( &structureCmds );
 
 	log_structure = LogFindIndex( "Structure" );
-	AddParam( "STRUCTURE ", ReadStructureParam, NULL);
+	AddParam( "STRUCTURE ", ReadStructureParam);
 	ParamRegister( &pierPG );
 }

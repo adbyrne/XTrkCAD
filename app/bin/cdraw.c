@@ -2860,8 +2860,8 @@ EXPORT void SetLineType( track_p trk, int width ) {
 EXPORT void InitTrkDraw( void )
 {
 	T_DRAW = InitObject( &drawCmds );
-	AddParam( "TABLEEDGE", ReadTableEdge, NULL);
-	AddParam( "TEXT", ReadText, NULL);
+	AddParam( "TABLEEDGE", ReadTableEdge );
+	AddParam( "TEXT", ReadText );
 
 	drawModDelMI = MenuRegister( "Modify Draw Edit Menu" );
 	drawModClose = wMenuPushCreate( drawModDelMI, "", _("Close Polygon - 'c'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c');

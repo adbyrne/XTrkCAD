@@ -163,6 +163,7 @@ void GetSegInxEP( signed char, int *, EPINX_T * );
 void SetSegInxEP( signed char *, int, EPINX_T) ;
 wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T );
 turnoutInfo_t * CreateNewTurnout( char *, char *, wIndex_t, trkSeg_p, wIndex_t, PATHPTR_T, EPINX_T, trkEndPt_t *, DIST_T *, wBool_t );
+void DeleteTurnoutParams(int fileInx);
 turnoutInfo_t * TurnoutAdd( long, SCALEINX_T, wList_p, coOrd *, EPINX_T );
 STATUS_T CmdTurnoutAction( wAction_t, coOrd );
 BOOL_T ConnectAdjustableTracks( track_p trk1, EPINX_T ep1, track_p trk2, EPINX_T ep2 );
@@ -179,6 +180,7 @@ enum paramFileState	GetStructureCompatibility(int paramFileIndex, SCALEINX_T sca
 turnoutInfo_t * StructAdd( long, SCALEINX_T, wList_p, coOrd * ); 
 STATUS_T CmdStructureAction( wAction_t, coOrd );
 BOOL_T StructLoadCarDescList( wList_p );
+void DeleteStructures(int fileIndex);
 
 /* cstrdsgn.c */
 void EditCustomStructure( turnoutInfo_t * );
