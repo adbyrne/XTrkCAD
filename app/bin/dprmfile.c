@@ -323,22 +323,20 @@ static void ParamRefreshSelectedFiles(void * action)
 
     //nothing selected -> leave
     if (selcnt) {
-		DynString reloadMessage;
-		char *fmtString=_("%s parameter file reloaded.");
+        DynString reloadMessage;
+        ParamChangeSelectedFiles(PARAMFILE_REFRESH);
 
-		ParamChangeSelectedFiles(PARAMFILE_REFRESH);
-
-		DynStringMalloc(&reloadMessage, 16);
-		if (selcnt > 1) {
-			fmtString = _("%d parameter files reloaded.");
-			DynStringPrintf(&reloadMessage, fmtString, selcnt);
-		} else
-			DynStringPrintf(&reloadMessage, fmtString, _("One"));
-		wMessageSetValue(MESSAGETEXT, DynStringToCStr(&reloadMessage));
-
-	} else {
-		wBeep();
-	}
+        DynStringMalloc(&reloadMessage, 16);
+        if (selcnt > 1) {
+            DynStringPrintf(&reloadMessage, _("%d parameter files reloaded."), selcnt);
+        } else {
+            DynStringCatCStr(&reloadMessage, _("One parameter file reloaded."));
+        }
+        wMessageSetValue(MESSAGETEXT, DynStringToCStr(&reloadMessage));
+		DynStringFree(&reloadMessage);
+    } else {
+        wBeep();
+    }
 }
 
 static void ParamUnloadSelectedFiles(void * action)
