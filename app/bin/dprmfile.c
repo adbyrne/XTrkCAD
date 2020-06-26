@@ -69,24 +69,30 @@ static void ParamUnloadSelectedFiles(void *);
 static void ParamFileBrowse(void *);
 static void ParamFileSelectAll(void *);
 
-static paramListData_t paramFileListData = { 10, 370 };
+static paramListData_t paramFileListData = { 15, 370 };
 static char * paramFileLabels[] = { N_("Show File Names"), NULL };
 static paramData_t paramFilePLs[] = {
 #define I_PRMFILLIST	(0)
 #define paramFileL				((wList_p)paramFilePLs[I_PRMFILLIST].control)
-    {	PD_LIST, NULL, "inx", 0, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
+    {	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_PRMFILTOGGLE	(1)
     {	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
+#define I_MESSAGE (2)
+	{ PD_MESSAGE, "", NULL, 0, (void *)370 },
     {	PD_BUTTON, (void *)ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
-#define I_PRMFILEFAVORITE (3)
+#define I_PRMFILEFAVORITE (4)
     {   PD_BUTTON, (void *)ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, (void *)TRUE, N_("Favorite")},
     {	PD_BUTTON, (void*)ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
 	{   PD_BUTTON, (void*)ParamRefreshSelectedFiles, "refresh", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
     {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Search Library") },
 	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") },
+
+
 };
 
 static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };
+
+#define MESSAGETEXT ((wMessage_p)paramFilePLs[I_MESSAGE].control)
 
 static dynArr_t *sortFiles;
 
@@ -175,7 +181,7 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 
 static void ParamFileBrowse(void * junk)
 {
-
+	wMessageSetValue(MESSAGETEXT, "");
     wFilSelect(paramFile_fs, GetParamFileDir());
     return;
 }
@@ -255,7 +261,7 @@ UpdateParamFileProperties( bool newState)
 static void ParamFileFavorite(void * setFavorite)
 {
     wIndex_t selcnt = wListGetSelectedCount(paramFileL);
-
+	wMessageSetValue(MESSAGETEXT, "");
     if (selcnt) {
         UpdateParamFileProperties(setFavorite?TRUE:FALSE);
     }
@@ -317,7 +323,18 @@ static void ParamRefreshSelectedFiles(void * action)
 
     //nothing selected -> leave
     if (selcnt) {
+		DynString reloadMessage;
+		char *fmtString=_("%s parameter file reloaded.");
+
 		ParamChangeSelectedFiles(PARAMFILE_REFRESH);
+
+		DynStringMalloc(&reloadMessage, 16);
+		if (selcnt > 1) {
+			fmtString = _("%d parameter files reloaded.");
+		}
+		DynStringPrintf(&reloadMessage, fmtString, (selcnt>1?selcnt:_("One")));
+		wMessageSetValue(MESSAGETEXT, DynStringToCStr(&reloadMessage));
+
 	} else {
 		wBeep();
 	}
@@ -326,7 +343,7 @@ static void ParamRefreshSelectedFiles(void * action)
 static void ParamUnloadSelectedFiles(void * action)
 {
 	wIndex_t selcnt = wListGetSelectedCount(paramFileL);
-
+	wMessageSetValue(MESSAGETEXT, "");
 	//nothing selected -> leave
 	if (selcnt) {
 		ParamChangeSelectedFiles(PARAMFILE_UNLOAD);
@@ -345,6 +362,7 @@ static void ParamUnloadSelectedFiles(void * action)
 
 static void ParamFileSelectAll(void *junk)
 {
+	wMessageSetValue(MESSAGETEXT, "");
     wListSelectAll(paramFileL);
     UpdateParamFileButton();
 }
@@ -415,7 +433,7 @@ void DoParamFiles(void * junk)
 
         paramFileW = ParamCreateDialog(&paramFilePG,
                                        MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, NULL,
-                                       TRUE, NULL, 0, ParamFileDlgUpdate);
+                                       TRUE, NULL, F_RESIZE | F_RECALLSIZE, ParamFileDlgUpdate);
         paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FS_MULTIPLEFILES,
                                      _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);
     }
