@@ -116,7 +116,7 @@ static char * colorTrackLabels[] = { N_("Object"), N_("Layer"), NULL };
 static char * colorDrawLabels[] = { N_("Object"), N_("Layer"), NULL };
 static char * liveMapLabels[] = { N_("Live Map"), NULL };
 static char * hideTrainsInTunnelsLabels[] = { N_("Hide Trains On Hidden Track"), NULL };
-static char * zoomCornerLabels[] = {N_("Zoom keeps lower corner in view"), NULL};
+static char * constrainMainLabels[] = {N_("Constrain Drawing Area to Room boundaries"), NULL};
 
 extern long trainPause;
 
@@ -132,7 +132,7 @@ static paramData_t displayPLs[] = {
 	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, (void*)(CHANGE_MAIN | CHANGE_MAP) },
 	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, (void*)(CHANGE_MAIN) },
 	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, (void*)(CHANGE_MAP) },
-	{ PD_TOGGLE, &zoomCorner, "zoom-corner", PDO_NOPSHUPD, zoomCornerLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &constrainMain, "constrain-main", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, (void*)(CHANGE_MAIN) },

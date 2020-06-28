@@ -790,7 +790,6 @@ wBool_t catch_shift_ctrl_alt_keys(
     void * data)
 {
     int state = 0;
-
     switch (event->keyval ) {
     case GDK_KEY_Shift_L:
     case GDK_KEY_Shift_R:
@@ -806,6 +805,13 @@ wBool_t catch_shift_ctrl_alt_keys(
     case GDK_KEY_Alt_R:
         state |= WKEY_ALT;
         break;
+
+    case GDK_KEY_Meta_L:
+    case GDK_KEY_Meta_R:
+	// Pressing SHIFT and then ALT generates a Meta key
+	//printf( "Meta\n" );
+        state |= WKEY_ALT;
+        break;
     }
 
     if (state != 0) {
@@ -814,10 +820,8 @@ wBool_t catch_shift_ctrl_alt_keys(
         } else {
             keyState &= ~state;
         }
-
         return TRUE;
     }
-
     return FALSE;
 }
 
