@@ -452,9 +452,8 @@ ReadTrackNote(char *line)
 			AbortProg( "ReadNote: %d", noteType );
 		}
 	} else {
-	noteText = MyMalloc(size + 1);
+	noteText = ReadMultilineText();
 
-	fread(noteText, sizeof(char), size, paramFile);
 	noteType = OP_NOTETEXT;
 
 	if( !strncmp(noteText, DELIMITER, strlen( DELIMITER )) &&
@@ -469,10 +468,6 @@ ReadTrackNote(char *line)
     SetTrkLayer(t, layer);
 	   
     xx = (struct extraDataNote *)GetTrkExtraData(t);
-
-#ifdef WINDOWS
-	ConvertUTF8ToSystem(noteText);
-#endif
 
 	switch (noteType) {
 	case OP_NOTETEXT:
@@ -495,15 +490,7 @@ ReadTrackNote(char *line)
 		xx->noteData.fileData.inArchive = FALSE;
 		break;
 	}
-	}
 
-	fgetc(paramFile);
-
-	cp = GetNextLine();
-
-	if (!IsEND( "END" )) {
-		InputError(_("Expected END not found!"), TRUE ),
-		exit(1);
 	}
     MyFree(noteText);
     }

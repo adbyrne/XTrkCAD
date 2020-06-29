@@ -363,7 +363,6 @@ void EnumerateEnd(void);
 
 /* cnote.c */
 void DoNote( void );
-char * ReadMultilineText(size_t textLength);
 BOOL_T WriteMainNote( FILE * );
 
 BOOL_T ReadMainNote(char * line);

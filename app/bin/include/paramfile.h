@@ -14,6 +14,7 @@
 	bool IsParamFileFavorite(int fileInx);
 	void SetParamFileState(int index);
 	int ReadParamFile(const char *fileName);
+	int	ReloadDeletedParamFile(int fileindex);
 	void SetParamFileDeleted(int fileInx, bool deleted);
 	void SetParamFileFavorite(int fileInx, bool favorite);
 	char * GetParamFileName(int fileInx);

@@ -165,14 +165,20 @@ the program is terminated.
 Definition files can be marked as \e{favorite}. The indicator for favorites is a star.
 The meaning of the colors isn't changed.
 
-Definition files that will show in the \f{HotBar} are marked with a yellow or a green indicator appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{Hide} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An hidden file may be \e{Shown} by selecting the  \f{Show} button (The \f{Hide} button changes to \f{Show} when a selected file is hidden). 
+Loaded definition files that are marked with a yellow or a green indicator appear on the \f{Hot Bar} (\K{cmdHotBar}).  
+
+If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  
+If the unloaded file was marked as a favorite it can be \e{reloaded} by selecting the  \f{Reload} button.
+
+Files that are still loaded can be \e{reloaded} as well. In that case the old definitions are refreshed and extended by the 
+rereading the file. This can be useful if you want to check changes you made by hand-editing a parameter file. 
 
 Note that loading a file does not change the existing definitions in the layout. To do that after loading, use \K{cmdRefreshSpecial}.
 
 It is possible to change the state of several files at once. The \f{Select All} button allows you to select all parameter files for the next operation.
 
-\e{Hidden} files are removed from the list when \e{XTrackCAD} terminates.
-In case the hidden files are marked as favorite, they will not be removed.
+In case unloaded files are marked as favorite, their state will be preserved 
+between runs of the program.
 This makes it possible to keep a list of preferred parameter sets between
 runs of XTrackCAD but hide temporary unused files from the hotbar. That
 way the hotbar contents can be kept short containing only the currently needed elements.

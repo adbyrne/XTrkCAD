@@ -69,6 +69,7 @@
 #include "track.h"
 #include "utility.h"
 #include "version.h"
+#include "dynstring.h"
 
 #ifdef WINDOWS
 #include "include/utf8convert.h"
@@ -497,6 +498,44 @@ wBool_t IsEND( char * sEnd )
 }
 
 
+/**
+ * Read the text for a note/car. Lines are read from the input file
+ * until the END statement is found.
+ *
+ * \todo Handle premature end as an error
+ *
+ * \return pointer to string, has to be myfree'd by caller
+ */
+
+char *
+ReadMultilineText()
+{
+	char *string;
+	DynString noteText;
+	DynStringMalloc(&noteText, 0);
+	char *line;
+
+	line = GetNextLine();
+
+	while ( !IsEND("END") ) {
+		DynStringCatCStr(&noteText, line);
+		DynStringCatCStr(&noteText, "\n");
+		line = GetNextLine();
+	}
+	string = MyStrdup(DynStringToCStr(&noteText));
+	string[strlen(string) - 1] = '\0';
+
+#ifdef WINDOWS
+	if (wIsUTF8(string)) {
+		ConvertUTF8ToSystem(string);
+	}
+#endif // WINDOWS
+
+	DynStringFree(&noteText);
+	return(string);
+}
+
+
 EXPORT wBool_t ParseRoomSize(
 		char * s,
 		coOrd * roomSizeRet )
@@ -534,13 +573,11 @@ EXPORT wBool_t ParseRoomSize(
  */
 EXPORT void AddParam(
 		char * name,
-		readParam_t proc,
-		deleteParam_t delete )
+		readParam_t proc)
 {
 	DYNARR_APPEND( paramProc_t, paramProc_da, 10 );
 	paramProc(paramProc_da.cnt-1).name = name;
 	paramProc(paramProc_da.cnt-1).proc = proc;
-	paramProc(paramProc_da.cnt - 1).delete = delete;
 }
 
 EXPORT char * PutTitle( char * cp )

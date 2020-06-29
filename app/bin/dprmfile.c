@@ -51,9 +51,11 @@ static struct wFilSel_t * paramFile_fs;
 #define FAVORITE_PARAM 1
 #define STANDARD_PARAM 0
 
-#define PARAMBUTTON_HIDE "Hide"
-#define PARAMBUTTON_UNHIDE "Unhide"
-#define PARAMBUTTON_RELOAD "Reload"
+#define PARAMBUTTON_UNLOAD "Unload"
+#define PARAMBUTTON_REFRESH "Reload"
+
+#define PARAMFILE_UNLOAD (0)
+#define PARAMFILE_REFRESH (1)
 
 static wIcon_p indicatorIcons[ 2 ][PARAMFILE_MAXSTATE];
 
@@ -62,38 +64,35 @@ static wWin_p paramFileW;
 static long paramFileSel = 0;
 
 static void ParamFileFavorite(void * favorite);
-static void ParamFileAction(void * action);
-static void ParamFileReload(void *);
+static void ParamRefreshSelectedFiles(void * action);
+static void ParamUnloadSelectedFiles(void *);
 static void ParamFileBrowse(void *);
 static void ParamFileSelectAll(void *);
-static void ParamFileReload(void *);
 
-static paramListData_t paramFileListData = { 10, 370 };
+static paramListData_t paramFileListData = { 15, 370 };
 static char * paramFileLabels[] = { N_("Show File Names"), NULL };
 static paramData_t paramFilePLs[] = {
 #define I_PRMFILLIST	(0)
 #define paramFileL				((wList_p)paramFilePLs[I_PRMFILLIST].control)
-    {	PD_LIST, NULL, "inx", 0, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
+    {	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &paramFileListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_PRMFILTOGGLE	(1)
     {	PD_TOGGLE, &paramFileSel, "mode", 0, paramFileLabels, NULL, BC_HORZ|BC_NOBORDER },
+#define I_MESSAGE (2)
+	{ PD_MESSAGE, "", NULL, 0, (void *)370 },
     {	PD_BUTTON, (void *)ParamFileSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
-#define I_PRMFILEFAVORITE (3)
+#define I_PRMFILEFAVORITE (4)
     {   PD_BUTTON, (void *)ParamFileFavorite, "favorite", PDO_DLGCMDBUTTON, (void *)TRUE, N_("Favorite")},
-#define I_PRMFILACTION	(4)
-#define paramFileActionB		((wButton_p)paramFilePLs[I_PRMFILACTION].control)
-    {	PD_BUTTON, (void*)ParamFileAction, "action", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_HIDE), 0L, FALSE },
-	{	PD_BUTTON, (void*)ParamFileReload, "reload", 0, NULL, N_("Reload") },
+    {	PD_BUTTON, (void*)ParamUnloadSelectedFiles, "unload", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_UNLOAD), 0L, FALSE },
+	{   PD_BUTTON, (void*)ParamRefreshSelectedFiles, "refresh", PDO_DLGCMDBUTTON, NULL, N_(PARAMBUTTON_REFRESH), 0L, FALSE },
     {	PD_BUTTON, (void*)DoSearchParams, "find", 0, NULL, N_("Search Library") },
 	{	PD_BUTTON, (void*)ParamFileBrowse, "browse", 0, NULL, N_("Browse ...") },
+
+
 };
 
 static paramGroup_t paramFilePG = { "prmfile", 0, paramFilePLs, sizeof paramFilePLs/sizeof paramFilePLs[0] };
 
-enum PARAMFILESETTING {
-    SET_FAVORITE,
-    SET_DELETED,
-	SET_RELOAD
-};
+#define MESSAGETEXT ((wMessage_p)paramFilePLs[I_MESSAGE].control)
 
 static dynArr_t *sortFiles;
 
@@ -149,6 +148,7 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
     DynString description;
     DynStringMalloc(&description, STR_SHORT_SIZE);
     int *sortedIndex = MyMalloc(sizeof(int)*paramFileCnt);
+	int log_params = LogFindIndex("params");
 
     SortParamFileList(paramFileCnt, paramFiles, sortedIndex);
 
@@ -169,6 +169,8 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
                           DynStringToCStr(&description),
                           indicatorIcons[ paramFileInfo.favorite ][paramFileInfo.trackState],
                           (void*)(intptr_t)sortedIndex[i]);
+
+			LOG1(log_params, ("ParamFileListLoad: = %s: %d\n", paramFileInfo.contents, paramFileInfo.trackState))
         }
     }
     wControlShow((wControl_p)paramFileL, TRUE);
@@ -179,7 +181,7 @@ void ParamFileListLoad(int paramFileCnt,  dynArr_t *paramFiles)
 
 static void ParamFileBrowse(void * junk)
 {
-
+	wMessageSetValue(MESSAGETEXT, "");
     wFilSelect(paramFile_fs, GetParamFileDir());
     return;
 }
@@ -188,11 +190,7 @@ static void ParamFileBrowse(void * junk)
  * Update the action buttons.
  *
  * If at least one selected file is not a favorite, the favorite button is set to 'SetFavorite'
- * If at least one selected file is unloaded, the action button
- * is set to 'Reload'. If all selected files are loaded, the button will be set to 'Unload'.
  *
- * \param varname1 IN this is a variable
- * \return
  */
 
 static void UpdateParamFileButton(void)
@@ -207,8 +205,6 @@ static void UpdateParamFileButton(void)
     }
 
     // set the default
-    wButtonSetLabel(paramFileActionB, _(PARAMBUTTON_HIDE));
-    paramFilePLs[ I_PRMFILACTION ].context = FALSE;
     paramFilePLs[I_PRMFILEFAVORITE].context = FALSE;
 
     // get the number of items in list
@@ -223,11 +219,6 @@ static void UpdateParamFileButton(void)
             if (fileInx < 0 || fileInx >= GetParamFileCount()) {
                 return;
             }
-            if (IsParamFileDeleted(fileInx)) {
-                // if selected file was unloaded, set button to reload 
-                wButtonSetLabel(paramFileActionB, _(PARAMBUTTON_UNHIDE));
-                paramFilePLs[ I_PRMFILACTION ].context = (void *)TRUE;
-            }
             if (!IsParamFileFavorite(fileInx)) {
                 paramFilePLs[I_PRMFILEFAVORITE].context = (void *)TRUE;
             }
@@ -238,12 +229,11 @@ static void UpdateParamFileButton(void)
 /**
  * Set the property for a parameter file in memory
  *
- * \param paramSetting IN property to be changed
  * \param newState IN new value for property
  */
 
 void
-UpdateParamFileProperties(enum PARAMFILESETTING paramSetting, bool newState)
+UpdateParamFileProperties( bool newState)
 {
     wIndex_t inx, cnt;
     wIndex_t fileInx;
@@ -255,41 +245,11 @@ UpdateParamFileProperties(enum PARAMFILESETTING paramSetting, bool newState)
     for (inx = 0; inx < cnt; inx++) {
         if (wListGetItemSelected((wList_p)paramFileL, inx)) {
             fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
-
-            // set the desired state
-            if (paramSetting == SET_FAVORITE) {
-                SetParamFileFavorite(fileInx, newState);
-            } else if (paramSetting == SET_DELETED ){
-                SetParamFileDeleted(fileInx, newState);
-            } else {									//SET_RELOADED
-
-            	enum paramFileState structState = PARAMFILE_UNLOADED;
-				int newIndex;
-
-				curContents = curSubContents = NULL;
-
-				newIndex = ReadParamFile(paramFileInfo(fileInx).name);
-
-				// in case the contents is already present, make invalid
-				for (inx = 0; inx < newIndex; inx++) {
-					if (paramFileInfo(inx).valid &&
-							strcmp(paramFileInfo(inx).contents, curContents) == 0) {
-						paramFileInfo(inx).valid = FALSE;
-						break;
-					}
-				}
-
-				wPrefSetString("Parameter File Map", curContents,
-							   paramFileInfo(curParamFileIndex).name);
-            	curParamFileIndex = PARAM_CUSTOM;
-            	DoChangeNotification(CHANGE_PARAMS);
-            }
-
+            SetParamFileFavorite(fileInx, newState);
         }
     }
     DoChangeNotification(CHANGE_PARAMS);
 }
-
 
 /**
  * Mark selected files as favorite
@@ -301,62 +261,96 @@ UpdateParamFileProperties(enum PARAMFILESETTING paramSetting, bool newState)
 static void ParamFileFavorite(void * setFavorite)
 {
     wIndex_t selcnt = wListGetSelectedCount(paramFileL);
-
+	wMessageSetValue(MESSAGETEXT, "");
     if (selcnt) {
-        bool newFavoriteState;
-
-        if (setFavorite) {
-            newFavoriteState = TRUE;
-        } else {
-            newFavoriteState = FALSE;
-        }
-
-        UpdateParamFileProperties(SET_FAVORITE, newFavoriteState);
+        UpdateParamFileProperties(setFavorite?TRUE:FALSE);
     }
 }
 
 /**
- * Unload selected files.
+ * Parameter change selected files
+ *
+ * \param  paramFileChange The parameter file change.
+ */
+
+static void
+ParamChangeSelectedFiles(unsigned paramFileChange)
+{
+	wIndex_t inx, cnt;
+	wIndex_t fileInx;
+
+	// get the number of items in list
+	cnt = wListGetCount(paramFileL);
+
+	for (inx = 0; inx < cnt; inx++) {
+		if (wListGetItemSelected((wList_p)paramFileL, inx)) {
+			fileInx = (intptr_t)wListGetItemContext(paramFileL, inx);
+
+			switch (paramFileChange) {
+			case PARAMFILE_UNLOAD:
+				if (IsParamFileFavorite(fileInx)) {
+					SetParamFileDeleted(fileInx, TRUE);
+				} else {
+					UnloadParamFile(fileInx);
+				}
+				break;
+			case PARAMFILE_REFRESH:
+				if (IsParamFileFavorite(fileInx) && IsParamFileDeleted(fileInx)) {
+					SetParamFileDeleted(fileInx, FALSE);
+				} else {
+					ReloadParamFile(fileInx);
+				}
+				break;
+			default:
+				AbortProg("Invalid change type %d in  ParamChangeSelectedFiles", paramFileChange);
+			}
+		}
+	}
+	ParamFileListLoad(paramFileInfo_da.cnt, &paramFileInfo_da);
+	DoChangeNotification(CHANGE_PARAMS);
+}
+
+/**
+ * Refresh selected files.
  *
  * \param action IN FALSE = unload, TRUE = reload parameter files
  * \return
  */
 
-static void ParamFileAction(void * action)
+static void ParamRefreshSelectedFiles(void * action)
 {
     wIndex_t selcnt = wListGetSelectedCount(paramFileL);
 
     //nothing selected -> leave
     if (selcnt) {
-        unsigned newDeletedState;
+        DynString reloadMessage;
+        ParamChangeSelectedFiles(PARAMFILE_REFRESH);
 
-        if (action) {
-            newDeletedState = FALSE;
+        DynStringMalloc(&reloadMessage, 16);
+        if (selcnt > 1) {
+            DynStringPrintf(&reloadMessage, _("%d parameter files reloaded."), selcnt);
         } else {
-            newDeletedState = TRUE;
+            DynStringCatCStr(&reloadMessage, _("One parameter file reloaded."));
         }
-
-        UpdateParamFileProperties(SET_DELETED, newDeletedState);
+        wMessageSetValue(MESSAGETEXT, DynStringToCStr(&reloadMessage));
+		DynStringFree(&reloadMessage);
+    } else {
+        wBeep();
     }
 }
 
-
-
-/**
- * Reload selected files.
- *
- */
-static void ParamFileReload(void * action) {
+static void ParamUnloadSelectedFiles(void * action)
+{
 	wIndex_t selcnt = wListGetSelectedCount(paramFileL);
-
-	    //nothing selected -> leave
-	    if (selcnt) {
-
-	    	UpdateParamFileProperties(SET_RELOAD, FALSE);
-	    	UpdateParamFileProperties(SET_DELETED, FALSE);
-
-	    }
+	wMessageSetValue(MESSAGETEXT, "");
+	//nothing selected -> leave
+	if (selcnt) {
+		ParamChangeSelectedFiles(PARAMFILE_UNLOAD);
+	} else {
+		wBeep();
+	}
 }
+
 
 /**
  * Select all files in the list and set action button
@@ -367,6 +361,7 @@ static void ParamFileReload(void * action) {
 
 static void ParamFileSelectAll(void *junk)
 {
+	wMessageSetValue(MESSAGETEXT, "");
     wListSelectAll(paramFileL);
     UpdateParamFileButton();
 }
@@ -374,18 +369,11 @@ static void ParamFileSelectAll(void *junk)
 static void ParamFileOk(void * junk)
 {
     SearchUiOk(junk);
-    ParamFileListConfirmChange();
+    
+	DoChangeNotification(CHANGE_PARAMS);
     wHide(paramFileW);
 }
 
-
-static void ParamFileCancel(wWin_p junk)
-{
-    ParamFileListCancelChange();
-    SearchUiOk(junk);
-    wHide(paramFileW);
-    DoChangeNotification(CHANGE_PARAMS);
-}
 
 static void ParamFileDlgUpdate(
     paramGroup_p pg,
@@ -421,7 +409,6 @@ void ParamFilesChange(long changes)
 
 void DoParamFiles(void * junk)
 {
-    wIndex_t listInx;
     void * data;
 
     if (paramFileW == NULL) {
@@ -444,18 +431,16 @@ void DoParamFiles(void * junk)
         ParamRegister(&paramFilePG);
 
         paramFileW = ParamCreateDialog(&paramFilePG,
-                                       MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, ParamFileCancel,
-                                       TRUE, NULL, 0, ParamFileDlgUpdate);
+                                       MakeWindowTitle(_("Parameter Files")), _("Ok"), ParamFileOk, NULL,
+                                       TRUE, NULL, F_RESIZE | F_RECALLSIZE, ParamFileDlgUpdate);
         paramFile_fs = wFilSelCreate(mainW, FS_LOAD, FS_MULTIPLEFILES,
                                      _("Load Parameters"), _("Parameter files (*.xtp)|*.xtp"), LoadParamFile, NULL);
     }
     ParamLoadControls(&paramFilePG);
     ParamGroupRecord(&paramFilePG);
-    if ((listInx = wListGetValues(paramFileL, NULL, 0, NULL, &data))>=0) {
+    if ((wListGetValues(paramFileL, NULL, 0, NULL, &data))>=0) {
         UpdateParamFileButton();
     }
 
     wShow(paramFileW);
 }
-
-
