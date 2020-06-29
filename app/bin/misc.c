@@ -1367,7 +1367,7 @@ static void DoCommandBIndirect(void * cmdInxP) {
 }
 
 EXPORT void LayoutSetPos(wIndex_t inx) {
-	wPos_t w, h;
+	wPos_t w, h, offset;
 	static wPos_t toolbarRowHeight = 0;
 	static wPos_t width;
 	static int lastGroup;
@@ -1407,6 +1407,10 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 			}
 			w = wControlGetWidth(buttonList[inx].control);
 			h = wControlGetHeight(buttonList[inx].control);
+			if (h<toolbarRowHeight) {
+				offset = (h-toolbarRowHeight)/2;
+				h = toolbarRowHeight;  //Uniform
+			} else offset = 0;
 			if (inx < buttonCnt - 1 && (buttonList[inx + 1].options & IC_ABUT))
 				w += wControlGetWidth(buttonList[inx + 1].control);
 			if (toolbarWidth + w > width - 20) {
@@ -1414,9 +1418,9 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 				toolbarHeight += h + 5;
 			}
 			wControlSetPos(buttonList[inx].control, toolbarWidth,
-					toolbarHeight - (h + 5));
+					toolbarHeight - (h + 5 +offset));
 			buttonList[inx].x = toolbarWidth;
-			buttonList[inx].y = toolbarHeight - (h + 5);
+			buttonList[inx].y = toolbarHeight - (h + 5 + offset);
 			toolbarWidth += wControlGetWidth(buttonList[inx].control);
 			wControlShow(buttonList[inx].control, TRUE);
 		} else {
