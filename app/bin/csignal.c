@@ -789,20 +789,21 @@ static ANGLE_T orient;
 static STATUS_T CmdSignal ( wAction_t action, coOrd pos )
 {
     
-    
+    static BOOL_T create;
     switch (action) {
     case C_START:
         InfoMessage(_("Place base of signal"));
+        create = FALSE;
         return C_CONTINUE;
     case C_DOWN:
         SnapPos(&pos);
         pos0 = pos;
+        create = TRUE;
         InfoMessage(_("Drag to orient signal"));
         return C_CONTINUE;
     case C_MOVE:
         SnapPos(&pos);
         orient = FindAngle(pos0,pos);
-        DDrawSignal( &tempD, pos0, orient, 1, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         return C_CONTINUE;
     case C_UP:
         SnapPos(&pos);
@@ -810,8 +811,11 @@ static STATUS_T CmdSignal ( wAction_t action, coOrd pos )
         CreateNewSignal(pos0,orient);
         return C_TERMINATE;
     case C_REDRAW:
+    	if (create)
+    		DDrawSignal( &tempD, pos0, orient, 1, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+    	return C_CONTINUE;
     case C_CANCEL:
-        DDrawSignal( &tempD, pos0, orient, 1, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+    	create = FALSE;
         return C_CONTINUE;
     default:
         return C_CONTINUE;

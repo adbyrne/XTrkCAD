@@ -519,24 +519,29 @@ static void CreateNewControl (coOrd orig)
 static STATUS_T CmdControl ( wAction_t action, coOrd pos )
 {
     
-    
+    static coOrd control_pos;
+    static BOOL_T create;
     switch (action) {
     case C_START:
         InfoMessage(_("Place control"));
+        create = FALSE;
         return C_CONTINUE;
     case C_DOWN:
+    	create = TRUE;
+    	/* no break */
 	case C_MOVE:
 		SnapPos(&pos);
-        DDrawControl( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+		control_pos = pos;
         return C_CONTINUE;
     case C_UP:
         SnapPos(&pos);
-        DDrawControl( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         CreateNewControl(pos);
         return C_TERMINATE;
     case C_REDRAW:
+    	if (create)
+    		DDrawControl( &tempD, control_pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+    	return C_CONTINUE;
     case C_CANCEL:
-        DDrawControl( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         return C_CONTINUE;
     default:
         return C_CONTINUE;
