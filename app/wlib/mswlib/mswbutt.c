@@ -37,12 +37,7 @@ int kludge12 = 0;
  *****************************************************************************
  */
 
-
-
 static XWNDPROC oldButtProc = NULL;
-static XWNDPROC newButtProc;
-
-double static scaleicon = 1.0;
 
 struct wButton_t {
 		WOBJ_COMMON
@@ -89,9 +84,9 @@ static void drawButton(
 	COLORREF colF;
 
 #define LEFT (0)
-#define RIGHT (bm->w*scaleicon+10)
+#define RIGHT (LONG)ceil(bm->w*scaleIcon+10)
 #define TOP (0)
-#define BOTTOM (bm->h*scaleicon+10)
+#define BOTTOM (LONG)ceil(bm->h*scaleIcon+10)
 
 	/* get the lightest and the darkest color to use */
 	colL = GetSysColor( COLOR_BTNHIGHLIGHT );
@@ -255,8 +250,8 @@ static LRESULT buttPush( wControl_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			break;
 		mi->CtlType = ODT_BUTTON;
 		mi->CtlID = wParam;
-		mi->itemWidth = bb->w*scaleicon;
-		mi->itemHeight = bb->h*scaleicon;
+		mi->itemWidth = (UINT)ceil(bb->w*scaleIcon);
+		mi->itemHeight = (UINT)ceil(bb->h*scaleIcon);
 		} return 0L;
 
 	case WM_DRAWITEM:
@@ -371,11 +366,8 @@ wButton_p wButtonCreate(
 	b->selected = 0;
 	mswComputePos( (wControl_p)b, x, y );
 	if (b->option&BO_ICON) {
-		wPrefGetFloat(PREFSECTION, LARGEICON, &scaleicon, 1.0);
-		if (scaleicon<1.0) scaleicon=1.0;
-		if (scaleicon>2.0) scaleicon=2.0;
-		width = (bm->w*scaleicon)+10;
-		h = (bm->h*scaleicon)+10;
+		width = (wPos_t)ceil(bm->w*scaleIcon)+10;
+		h = (int)ceil(bm->h*scaleIcon)+10;
 		b->icon = bm;
 	} else {
 		width = (wPos_t)(width*mswScale);
@@ -410,5 +402,9 @@ wButton_p wButtonCreate(
 	}
 	if ( !mswThickFont )
 		SendMessage( b->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L );
+
+
+	InvalidateRect(b->hWnd, &rect, TRUE);
+
 	return b;
 }
