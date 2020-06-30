@@ -373,6 +373,7 @@
 		{"line": "helix-angSep", "contents": "Angle betweek helix entrance and exit" },
 		{"line": "helix-grade", "contents": "Grade in helix" },
 		{"line": "helix-vertSep", "contents": "Separation between helix layers" },
+		{"line": "join-fixed-radius", "contents": "Desired curve radius between straight tracks" },
 		{"line": "layer-layer", "contents": "Layer list" },
 		{"line": "layer-name", "contents": "Layer Name" },
 		{"line": "layer-color", "contents": "Color of layer" },
