@@ -217,6 +217,98 @@ void FindPos( coOrd * res, double * beyond, coOrd pos, coOrd orig, double angle,
 }
 
 
+/* Find Arc Intersection
+ * Given two circles described by centers and radius (C1, R1) (C2, R2) Find the zero, one or two intersection points
+ *
+ */
+BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1, DIST_T radius1, coOrd center2, DIST_T radius2) {
+	double d,a,h;
+
+	d = FindDistance(center1, center2);
+	if (d >(radius1+radius2)) return FALSE; 		//Too far apart
+	if (d<fabs(radius1-radius2)) return FALSE;  	//Inside each other
+	if ((d == 0) && (radius1 == radius2)) return FALSE;  // Coincident and the same
+	a=((radius1*radius1)-(radius2*radius2)+(d*d))/(2*d);
+	if ((radius1*radius1)<(a*a)) return FALSE;
+	h = sqrt((radius1*radius1)-(a*a));
+
+	coOrd center_c;
+	center_c.x = center1.x+a*(center2.x - center1.x)/d;
+	center_c.y = center1.y+a*(center2.y - center1.y)/d;
+
+	(*Pc).x = center_c.x+h*(center2.y-center1.y)/d;
+	(*Pc).y = center_c.y+h*(center2.x-center1.x)/d;
+	(*Pc2).x = center_c.x-h*(center2.y-center1.y)/d;
+	(*Pc2).y = center_c.y-h*(center2.x-center1.x)/d;
+
+	return TRUE;
+}
+
+/*
+ * Find Intersections between a line and a circle
+ *
+ * |c-x|^2 = r^2
+ *
+ * 𝑥(𝑡)=𝑎+𝑡𝑏
+ *
+ * where 𝑎 is a point and 𝑏 is a vector.
+ *
+ * For a point on this line to satisfy the equation, you need to have
+ *
+ * (𝑡𝑏+(𝑎−𝑐))⋅(𝑡𝑏+(𝑎−𝑐))=𝑟^2
+ *
+ * which is a quadratic in 𝑡:
+ * |b|^2*t^2 + 2(a-c).bt +(|a-c|^2-r^2) = 0
+ *
+ * whose solutions are
+ *
+ * t = (-2(a-c).b +/- SQRT([2(a-c).b]^2 - 4|b|^2(|a-c|^2-r^2)) / 2|b|^2
+ *
+ */
+
+double VectorLength (coOrd v) {
+	return sqrt(v.x*v.x+v.y+v.y);
+}
+double VectorDot (coOrd v1, coOrd v2) {
+	return (v1.x*v2.x+ v1.y*v2.y);
+}
+coOrd VectorSubtract (coOrd v1, coOrd v2) {
+	coOrd result;
+	result.x = v1.x-v2.x;
+	result.y = v1.y-v2.y;
+	return result;
+}
+coOrd VectorAdd (coOrd v1, coOrd v2) {
+	coOrd result;
+	result.x = v1.x+v2.x;
+	result.y = v1.y+v2.y;
+	return result;
+}
+BOOL_T FindArcAndLineIntersections (coOrd *Pc1, coOrd *Pc2, coOrd c, DIST_T r, coOrd a, ANGLE_T A0) {
+	double dx0 = sin( D2R( A0 ) );
+    double dy0 = cos( D2R( A0 ) );
+    coOrd b;
+    b.x = dx0; b.y=dy0;
+
+    double bi = 2*VectorDot(VectorSubtract(a,c),b);
+    double ai = VectorLength(b); ai *= ai;
+    double ci = VectorLength(VectorSubtract(a,c));
+    ci = ci*ci-(r*r);
+
+    if (ai <0.001) return FALSE;  // No roots
+
+    double t1 = (-bi+sqrt(bi*bi- 4*ai*ci))/(2*ai);
+    double t2 = (-bi-sqrt(bi*bi- 4*ai*ci))/(2*ai);
+
+    (*Pc1).x = a.x+t1*b.x;
+    (*Pc1).y = a.y+t1*b.y;
+
+    (*Pc2).x = a.x+t2*b.x;
+    (*Pc2).y = a.y+t2*b.y;
+
+    return TRUE;
+
+}
 
 /* Find intersection:
    Given 2 lines each described by a point and angle (P0,A0) (P1,A1)
@@ -489,6 +581,7 @@ static void IntersectBox( coOrd *p1, coOrd p0, coOrd size, int x1, int y1 )
 #ifndef WINDOWS
 	else
 		fprintf(stderr, "intersectBox bogus\n" );
+		getchar();
 #endif
 }
 
