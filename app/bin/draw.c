@@ -2083,7 +2083,7 @@ static void DoNewScale( DIST_T scale )
 	SetZoomRadio( scale ); 
 	InfoScale();
 	SetMainSize(); 
-	PanHere( (void*)0 );
+	PanHere( (void*)1 );
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
 	sprintf( tmp, "%0.3f", mainD.scale );
 	wPrefSetString( "draw", "zoom", tmp );
@@ -2111,9 +2111,9 @@ EXPORT void DoZoomUp( void * mode )
 		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
 		/* 
 		 * Zooming into macro mode happens when we are at scale 1:1. 
-		 * To jump into macro mode, the ALT-key has to be pressed and held.
+		 * To jump into macro mode, the CTRL-key has to be pressed and held.
 		 */
-		if( mainD.scale != 1.0 || (mainD.scale == 1.0 && (MyGetKeyState()&WKEY_ALT))) {
+		if( mainD.scale != 1.0 || (mainD.scale == 1.0 && (MyGetKeyState()&WKEY_CTRL))) {
 			if( i ) {
 				if (mainD.scale <=1.0) 
 					InfoMessage(_("Macro Zoom Mode"));
@@ -2123,11 +2123,11 @@ EXPORT void DoZoomUp( void * mode )
 				
 			} else InfoMessage("Minimum Macro Zoom");
 		} else {
-			InfoMessage(_("Scale 1:1 - Use Alt+ to go to Macro Zoom Mode"));
+			InfoMessage(_("Scale 1:1 - Use Ctrl+ to go to Macro Zoom Mode"));
 		}
-	} else if ( (MyGetKeyState()&WKEY_ALT) == 0 ) {
+	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomin", &newScale, 4 );
-		InfoMessage(_("Preset Zoom In Value selected. Alt+Shift+PageDwn to reset value"));
+		InfoMessage(_("Preset Zoom In Value selected. Shift+Ctrl+PageDwn to reset value"));
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomin", (long)mainD.scale );
@@ -2172,9 +2172,9 @@ EXPORT void DoZoomDown( void  * mode)
 			InfoMessage(_("At Maximum Zoom Out"));
 					
 			
-	} else if ( (MyGetKeyState()&WKEY_ALT) == 0 ) {
+	} else if ( (MyGetKeyState()&WKEY_CTRL) == 0 ) {
 		wPrefGetInteger( "misc", "zoomout", &newScale, 16 );
-		InfoMessage(_("Preset Zoom Out Value selected. Alt+Shift+PageUp to reset value"));
+		InfoMessage(_("Preset Zoom Out Value selected. Shift+Ctrl+PageUp to reset value"));
 		DoNewScale( newScale );
 	} else {
 		wPrefSetInteger( "misc", "zoomout", (long)mainD.scale );
@@ -2220,18 +2220,26 @@ EXPORT void CoOrd2Pix(
 	*y = (wPos_t)((pos.y-d->orig.y)/d->scale*d->dpi);
 }
 
+/*
+* Position mainD based on panCenter
+* \param mode control effect of constrainMain and CTRL key
+*
+* mode:
+*  - 0: constrain if constrainMain==1 or CTRL is pressed
+*  - 1: same as 0, but ignore CTRL
+*  - 2: same as 0, plus liveMap
+*/
 EXPORT void PanHere(void * mode) {
 	coOrd oldOrig = mainD.orig;
 	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
 	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
-	wBool_t bNoBorder = FALSE;
+	wBool_t bNoBorder = (constrainMain != 0);
+	if ( 1 != (long)mode )
+		if ( (MyGetKeyState()&WKEY_CTRL)!= 0 )
+			bNoBorder = !bNoBorder;
 	wBool_t bLiveMap = TRUE;
-	if ( mode == (void*)2 )
+	if ( 2 == (long)mode )
 		bLiveMap = liveMap;
-	if ( mode == (void*)0 || mode == (void*)2 ) {
-		if ( (constrainMain==0) == ((MyGetKeyState()&WKEY_CTRL)!= 0) )
-			bNoBorder = TRUE;
-	}
 	MainLayout( bLiveMap, bNoBorder ); // PanHere
 }
 
