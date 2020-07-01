@@ -86,6 +86,17 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 \u000
 
 \dd Manipulate track and other objects
+The toolbar buttons size can be adjusted using a User Preference in the .ini or .rc file 
+(on Windows or Mac/Linux) in the xtrkcad directory.  
+If running Linux or Mac
+a line \c{"Preference.LargeIcons: 1.5"} can be added. The scale value can be from 1.0 to 2.0 only.
+The corresponding configuration Windows would be
+
+\c        [Preference]
+\c           LargeIcons=1.5
+
+\e{Note} The configuration file uses the language specific definitions for the decimal separator.
+Eg. in Germany, where the comma is used,  the correct value would be\c{LargeIcons=1,5}.
 
 \u000
 
