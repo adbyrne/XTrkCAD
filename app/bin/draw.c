@@ -1275,7 +1275,7 @@ static void ChangeMapScale( BOOL_T reset )
 	h = (wPos_t)fh;
 	if (reset) {
 		wGetDisplaySize( &dw, &dh );
-		wSetGeometry(mapW, 50, dw/2, 50, dh/2, w, h, mapD.size.x/mapD.size.y);
+		wSetGeometry(mapW, 50, dw, 50, dh, -1, -1, mapD.size.x/mapD.size.y);
 		wWinSetSize( mapW, w+DlgSepLeft+DlgSepRight, h+DlgSepTop+DlgSepBottom);
 	}
 	wDrawSetSize( mapD.d, w, h, NULL );
