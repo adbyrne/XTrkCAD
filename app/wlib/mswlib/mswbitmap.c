@@ -24,6 +24,7 @@
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
+#include <math.h>
 #include <stdlib.h>
 #include <commdlg.h>
 #include <stdio.h>
@@ -178,14 +179,15 @@ void mswDrawIcon(
 		memset( bmiInfo->bmiColors, 0, bm->colorcnt * sizeof( RGBQUAD ));
 		memset( &bmiInfo->bmiColors[ bm->transparent ], 0xFF, sizeof( RGBQUAD ));
 	}
+
 	StretchDIBits(hDc, offw, offh,
-        bmiInfo->bmiHeader.biWidth,
-        bmiInfo->bmiHeader.biHeight,
-        0, 0,
-        bmiInfo->bmiHeader.biWidth,
-        bmiInfo->bmiHeader.biHeight,
-        bm->pixels, bmiInfo, 				
-        DIB_RGB_COLORS, SRCAND);
+				 (int)ceil(bmiInfo->bmiHeader.biWidth*scaleIcon),
+	             (int)ceil(bmiInfo->bmiHeader.biHeight*scaleIcon),
+	              0, 0,
+	              bmiInfo->bmiHeader.biWidth,
+	              bmiInfo->bmiHeader.biHeight,
+	              bm->pixels, bmiInfo,
+	              DIB_RGB_COLORS, SRCAND);
 	
 	/* now paint the bitmap with transparent set to black */
 	if( bm->type == mswIcon_bitmap ) {
@@ -222,16 +224,16 @@ void mswDrawIcon(
         }
 		memset( &bmiInfo->bmiColors[ bm->transparent ], 0, sizeof( RGBQUAD ));
     }
-    
+
     /* show the bitmap */
     StretchDIBits(hDc, offw, offh,
-            bmiInfo->bmiHeader.biWidth,
-            bmiInfo->bmiHeader.biHeight,
-            0, 0,
-            bmiInfo->bmiHeader.biWidth,
-            bmiInfo->bmiHeader.biHeight,
-            bm->pixels, bmiInfo, 				
-            DIB_RGB_COLORS, SRCPAINT);
+				 (int)ceil(bmiInfo->bmiHeader.biWidth*scaleIcon),
+	             (int)ceil(bmiInfo->bmiHeader.biHeight*scaleIcon),
+                  0, 0,
+                  bmiInfo->bmiHeader.biWidth,
+                  bmiInfo->bmiHeader.biHeight,
+                  bm->pixels, bmiInfo,
+                  DIB_RGB_COLORS, SRCPAINT);
 
     /* forget the data */
     free( bmiInfo );

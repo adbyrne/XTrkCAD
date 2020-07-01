@@ -83,6 +83,8 @@ HFONT mswLabelFont;
 long mswThickFont = 1;
 double mswScale = 1.0;
 
+double scaleIcon = 1.0;				   /**< Scaling factor for toolbar icons */
+
 callBacks_t *mswCallBacks[CALLBACK_CNT];
 
 void closeBalloonHelp(void);
@@ -864,6 +866,10 @@ wWin_p wWinMainCreate(
 
 	wPrefGetInteger("draw", "maximized", &maximize, 0L);
 	option |= (maximize ? F_MAXIMIZE : 0);
+
+	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleIcon, 1.0);
+	if (scaleIcon < 1.0) scaleIcon = 1.0;
+	if (scaleIcon > 2.0) scaleIcon = 2.0;
 
     showCmd = SW_SHOW;
     w = winCommonCreate(NULL, W_MAIN, option|F_RESIZE, "MswMainWindow",

@@ -789,4 +789,11 @@ wPos_t wStatusGetHeight(long flags);
 
 void wStatusSetValue(wStatus_p b, const char * arg);
 void wStatusSetWidth(wStatus_p b, wPos_t width);
+
+/*-------------------------------------------------------------------------------
+ * User Preferences
+ */
+
+#define PREFSECTION "Preference"
+#define LARGEICON   "LargeIcons"
 #endif
