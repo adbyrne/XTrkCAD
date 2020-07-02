@@ -653,6 +653,8 @@ static paramData_t joinPLs[] = {
 };
 static paramGroup_t joinPG = { "join-fixed", 0, joinPLs, sizeof joinPLs/sizeof joinPLs[0] };
 
+static BOOL_T debug = 1;
+
 BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T an1) {
 	coOrd point1,point2;
 	switch ( Dj.inp[1].params.type ) {
@@ -666,10 +668,12 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 				//Offset line by desired_radius
 				Translate(&newP,Dj.inp[0].params.lineEnd,an0,desired_radius);
 				Translate(&newP1,Dj.inp[0].params.lineOrig,an0,desired_radius);
-				AnchorTempLine(newP,newP1);
+				if (debug)
+					AnchorTempLine(newP,newP1);
 				//Intersect - this is the joining curve center
-				AnchorTempCircle(Dj.inp[1].params.arcP,newR1,Dj.inp[1].params.arcA0,Dj.inp[1].params.arcA1);
-				if (!FindArcAndLineIntersections(&point1,&point2,Dj.inp[1].params.arcP,newR1,newP,Dj.inp[0].params.angle))
+				if (debug)
+					AnchorTempCircle(Dj.inp[1].params.arcP,newR1,Dj.inp[1].params.arcA0,Dj.inp[1].params.arcA1);
+				if (!FindArcAndLineIntersections(&point1,&point2,Dj.inp[1].params.arcP,newR1,newP,newP1))
 					return FALSE;
 			} else if (Dj.inp[0].params.type == curveTypeCurve) {
 				coOrd CnewPos;
@@ -678,12 +682,14 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 				newR0 = Dj.inp[0].params.arcR + desired_radius*((an0==Dj.inp[0].params.arcA0)?1:-1);
 				if (newR0<=0.0) return FALSE;
 				//Offset curve by desired_radius
-				AnchorTempCircle(Dj.inp[0].params.arcP,newR0,Dj.inp[0].params.arcA0,Dj.inp[0].params.arcA1);
+				if (debug)
+					AnchorTempCircle(Dj.inp[0].params.arcP,newR0,Dj.inp[0].params.arcA0,Dj.inp[0].params.arcA1);
 				DIST_T newR1;
 				newR1 = Dj.inp[1].params.arcR + desired_radius*((an1==Dj.inp[1].params.arcA0)?1:-1);
 				if (newR1<=0.0) return FALSE;
 				//Intersect - this is the joining curve center
-				AnchorTempCircle(Dj.inp[1].params.arcP,newR1,Dj.inp[1].params.arcA0,Dj.inp[1].params.arcA1);
+				if (debug)
+					AnchorTempCircle(Dj.inp[1].params.arcP,newR1,Dj.inp[1].params.arcA0,Dj.inp[1].params.arcA1);
 				if (!FindArcIntersections(&point1,&point2,Dj.inp[0].params.arcP,newR0,Dj.inp[1].params.arcP,newR1))
 					return FALSE;
 			}
@@ -696,11 +702,13 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 				//Offset line1 by desired_radius
 				Translate(&newP0,Dj.inp[0].params.lineEnd,an0,desired_radius);
 				Translate(&newP01,Dj.inp[0].params.lineOrig,an0,desired_radius);
-				AnchorTempLine(newP0,newP01);
+				if (debug)
+					AnchorTempLine(newP0,newP01);
 				//Offset line2 by desired_radius
 				Translate(&newP1,Dj.inp[1].params.lineEnd,an1,desired_radius);
 				Translate(&newP11,Dj.inp[1].params.lineOrig,an1,desired_radius);
-				AnchorTempLine(newP1,newP11);
+				if (debug)
+					AnchorTempLine(newP1,newP11);
 				if (!FindIntersection(&newI,newP0,Dj.inp[0].params.angle,newP1,Dj.inp[1].params.angle))
 					return FALSE;
 				point1 = point2 = newI;
@@ -710,17 +718,21 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 				DIST_T newR0;
 				newR0 = Dj.inp[0].params.arcR + desired_radius*((an0==Dj.inp[0].params.arcA0)?1:-1);
 				if (newR0<=0.0) return FALSE;
-				AnchorTempCircle(Dj.inp[0].params.arcP,newR0,Dj.inp[0].params.arcA0,Dj.inp[0].params.arcA1);
+				if (debug)
+					AnchorTempCircle(Dj.inp[0].params.arcP,newR0,Dj.inp[0].params.arcA0,Dj.inp[0].params.arcA1);
 				//Offset line by desired_radius
 				Translate(&newP,Dj.inp[1].params.lineEnd,an1,desired_radius);
 				Translate(&newP1,Dj.inp[1].params.lineOrig,an1,desired_radius);
-				AnchorTempLine(newP,newP1);
+				if (debug)
+					AnchorTempLine(newP,newP1);
 				//Intersect - this is the joining curve center
-				if (!FindArcAndLineIntersections(&point1,&point2,Dj.inp[0].params.arcP,newR0,newP,Dj.inp[1].params.angle))
+				if (!FindArcAndLineIntersections(&point1,&point2,Dj.inp[0].params.arcP,newR0,newP,newP1))
 					return FALSE;
 			}
-			AnchorPoint(point1);
-			AnchorPoint(point2);
+			if (debug) {
+				AnchorPoint(point1);
+				AnchorPoint(point2);
+			}
 			break;
 		default:
 			return FALSE;
@@ -829,7 +841,7 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			} else
 				InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
-			if (Dj.inp[0].params.type == curveTypeStraight) {
+			//if (Dj.inp[0].params.type == curveTypeStraight) {
 				wPrefGetFloat("misc", "desired_radius", &desired_radius, desired_radius);
 				controls[0] = joinRadPD.control;
 				controls[1] = NULL;
@@ -839,7 +851,7 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 				joinRadPD.option |= PDO_NORECORD;
 				ParamLoadControls(&joinPG);
 				ParamGroupRecord(&joinPG);
-			} else desired_radius = 0.0;
+			//} else desired_radius = 0.0;
 
 			return C_CONTINUE;
 		} else {
@@ -923,7 +935,8 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			DIST_T d = FindDistance(Dj.inp[1].params.lineOrig,pos);
 			Translate(&pos,Dj.inp[1].params.lineOrig,Dj.inp[1].params.angle,d*cos(D2R(a)));
 		} else {
-			desired_radius = 0.0;   //For now, only straight to straight
+			ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,pos);
+			Translate(&pos,Dj.inp[1].params.arcP,a,Dj.inp[1].params.arcR);
 		}
 		if (desired_radius != 0.0) {
 			//Work out which side of the first track it is on
@@ -931,6 +944,13 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].ep);
 			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].ep);
 			if (Dj.inp[0].params.type == curveTypeStraight) {
+				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(end0, pos));
+				na0 = NormalizeAngle( Dj.inp[0].params.angle +
+										((a0>0.0)?90.0:-90.0));
+				if (DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(end0, end1))>0.0) {
+					if (a0<0.0) beyond0 = TRUE;
+				} else if (a0>0.0) beyond0 = TRUE;
+			} else {
 				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(end0, pos));
 				na0 = NormalizeAngle( Dj.inp[0].params.angle +
 										((a0>0.0)?90.0:-90.0));
@@ -958,7 +978,8 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 						beyond = 1.0;
 					}
 				}
-				if (beyond>-0.01) {
+				//Suppress result unless on track and close to user position (when on track)
+				if (beyond>-0.01 && IsClose(FindDistance(pos,pos1))) {
 					pos = pos1;
 					DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
 					trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);

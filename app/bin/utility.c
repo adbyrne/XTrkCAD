@@ -224,7 +224,7 @@ void FindPos( coOrd * res, double * beyond, coOrd pos, coOrd orig, double angle,
 BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1, DIST_T radius1, coOrd center2, DIST_T radius2) {
 	double d,a,h;
 
-	d = FindDistance(center1, center2);
+	d = sqrt((center2.x-center1.x)*(center2.x-center1.x)+(center2.y-center1.y)*(center2.y-center1.y));
 	if (d >(radius1+radius2)) return FALSE; 		//Too far apart
 	if (d<fabs(radius1-radius2)) return FALSE;  	//Inside each other
 	if ((d == 0) && (radius1 == radius2)) return FALSE;  // Coincident and the same
@@ -237,9 +237,9 @@ BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1, DIST_T radiu
 	center_c.y = center1.y+a*(center2.y - center1.y)/d;
 
 	(*Pc).x = center_c.x+h*(center2.y-center1.y)/d;
-	(*Pc).y = center_c.y+h*(center2.x-center1.x)/d;
+	(*Pc).y = center_c.y-h*(center2.x-center1.x)/d;
 	(*Pc2).x = center_c.x-h*(center2.y-center1.y)/d;
-	(*Pc2).y = center_c.y-h*(center2.x-center1.x)/d;
+	(*Pc2).y = center_c.y+h*(center2.x-center1.x)/d;
 
 	return TRUE;
 }
@@ -284,30 +284,47 @@ coOrd VectorAdd (coOrd v1, coOrd v2) {
 	result.y = v1.y+v2.y;
 	return result;
 }
-BOOL_T FindArcAndLineIntersections (coOrd *Pc1, coOrd *Pc2, coOrd c, DIST_T r, coOrd a, ANGLE_T A0) {
-	double dx0 = sin( D2R( A0 ) );
-    double dy0 = cos( D2R( A0 ) );
-    coOrd b;
-    b.x = dx0; b.y=dy0;
 
-    double bi = 2*VectorDot(VectorSubtract(a,c),b);
-    double ai = VectorLength(b); ai *= ai;
-    double ci = VectorLength(VectorSubtract(a,c));
-    ci = ci*ci-(r*r);
+BOOL_T FindArcAndLineIntersections(coOrd *intersection1, coOrd *intersection2, coOrd c, DIST_T radius,
+                                        coOrd point1, coOrd point2 )
+{
+    double dx, dy, cx, cy, A, B, C, det, t;
 
-    if (ai <0.001) return FALSE;  // No roots
+    dx = point2.x - point1.x;
+    dy = point2.y - point1.y;
 
-    double t1 = (-bi+sqrt(bi*bi- 4*ai*ci))/(2*ai);
-    double t2 = (-bi-sqrt(bi*bi- 4*ai*ci))/(2*ai);
+    cx = c.x;
+    cy = c.y;
 
-    (*Pc1).x = a.x+t1*b.x;
-    (*Pc1).y = a.y+t1*b.y;
+    A = dx * dx + dy * dy;
+    B = 2 * (dx * (point1.x - cx) + dy * (point1.x - cy));
+    C = (point1.x - cx) * (point1.x - cx) + (point1.y - cy) * (point1.y - cy) - radius * radius;
 
-    (*Pc2).x = a.x+t2*b.x;
-    (*Pc2).y = a.y+t2*b.y;
-
-    return TRUE;
-
+    det = B * B - 4 * A * C;
+    if ((A <= 0.0000001) || (det < 0))
+    {
+    	return FALSE;
+    }
+    else if (det == 0)
+    {
+        // One solution.
+        t = -B / (2 * A);
+        (*intersection1).x = point1.x + t * dx;
+        (*intersection1).y = point1.y + t * dy;
+        intersection2 = intersection1;
+        return TRUE;
+    }
+    else
+    {
+        // Two solutions.
+        t = (float)((-B + sqrt(det)) / (2 * A));
+        (*intersection1).x = point1.x + t * dx;
+        (*intersection1).y = point1.y + t * dy;
+        t = (float)((-B - sqrt(det)) / (2 * A));
+        (*intersection2).x = point1.x + t * dx;
+        (*intersection2).y = point1.y + t * dy;
+        return TRUE;
+    }
 }
 
 /* Find intersection:
