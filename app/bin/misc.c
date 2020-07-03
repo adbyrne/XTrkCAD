@@ -568,7 +568,7 @@ FileIsChanged(void)
 	changed++;
 	SetWindowTitle();
 }
-
+
 /*****************************************************************************
  *
  * MAIN BUTTON HANDLERS
