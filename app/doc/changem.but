@@ -355,9 +355,15 @@ This method of joining track may be used using Normal Easments where tracks are 
 
 }
 
-If the track is straight, an entry field to enter a prefered radius will be shown. If this value is not 0.0 and the second track is also straight, the program will try to exactly fit this radius for the join track. 
+After the first track is selected, an entry field for prefered radius will be shown. A non-zero value will enable the snap anchor for the join radius. 
 
-\n Move the mouse pointer over the endpoint of the other track then \e{Left-Click} and hold the mouse button down. A track connecting the two endpoints will appear. If the track appears in black (and you are happy with the curve as its drawn), release the mouse button.
+\n Move the mouse pointer over the endpoint of the other track then \e{Left-Click} and hold the mouse button down. A track connecting the two endpoints will appear. 
+
+If the track appears in black (and you are happy with the curve as its drawn), release the mouse button.
+
+If the radius snap-anchor is active, and the position of the cursor is close to a position where the Join is exactly the desired radius, a blue circle will be shown. 
+Releasing the button while it shows will snap the Join to the desired radius. If Easements are enabled as well, this fixed radius Join track will be joined to by easements.
+
 
 \lcont{
 
