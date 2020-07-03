@@ -1084,7 +1084,7 @@ EXPORT void ClearTracks( void )
 	to_first = NULL;
 	to_last = &to_first;
 	max_index = 0;
-	changed = 0;
+	changed = checkPtMark = 0;
 	trackCount = 0;
 	ClearCars();
 	InfoCount( trackCount );
