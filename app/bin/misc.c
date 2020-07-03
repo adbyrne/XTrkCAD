@@ -565,7 +565,7 @@ EXPORT int NoticeMessage2(int playbackRC, char * format, char * yes, char * no,
 void
 FileIsChanged(void)
 {
-	changed = TRUE;
+	changed++;
 	SetWindowTitle();
 }
 
