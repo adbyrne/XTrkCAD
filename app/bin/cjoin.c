@@ -704,8 +704,10 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 				if (!FindArcIntersections(&point1,&point2,Dj.inp[0].params.arcP,newR0,Dj.inp[1].params.arcP,newR1))
 					return FALSE;
 			}
-			AnchorPoint(point1);
-			AnchorPoint(point2);
+			if (debug) {
+				AnchorPoint(point1);
+				AnchorPoint(point2);
+			}
 			break;
 		case curveTypeStraight:
 			if (Dj.inp[0].params.type == curveTypeStraight) {
