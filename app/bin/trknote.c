@@ -294,7 +294,7 @@ void UpdateText(struct extraDataNote *noteUIData, int inx, BOOL_T needUndoStart)
 	default:
 		break;
 	}
-	changed = TRUE;
+	changed++;
 }
 
 /**

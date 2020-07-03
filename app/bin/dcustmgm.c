@@ -376,8 +376,7 @@ static void CustMgmChange( long changes )
 {
 	if (changes) {
 		if (changed) {
-			changed = 1;
-			checkPtMark = 1;
+			changed = checkPtMark = 1;
 		}
 	}
 	if ((changes&CHANGE_PARAMS) == 0 ||

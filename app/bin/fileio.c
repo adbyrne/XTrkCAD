@@ -1362,7 +1362,7 @@ EXPORT int LoadCheckpoint( void )
 
 	SetLayoutFullPath("");
 	SetWindowTitle();
-	changed = TRUE;
+	checkPtMark = changed = 1;
 	free( search );
 	return TRUE;
 }

@@ -591,7 +591,7 @@ static void DoLayerOp(void * data)
     if (layoutLayerChanged) {
         MainProc(mainW, wResize_e, NULL, NULL);
         layoutLayerChanged = FALSE;
-        changed = TRUE;
+        changed++;
         SetWindowTitle();
     }
 }
@@ -900,7 +900,7 @@ static void LayerUpdate(void)
             layers[(int)layerCurrent].frozen != (BOOL_T)layerFrozen ||
             layers[(int)layerCurrent].onMap != (BOOL_T)layerOnMap ||
 			layers[(int)layerCurrent].module != (BOOL_T)layerModule) {
-        changed = TRUE;
+        changed++;
         SetWindowTitle();
     }
 
