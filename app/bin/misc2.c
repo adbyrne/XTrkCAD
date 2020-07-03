@@ -53,6 +53,7 @@
 
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
 EXPORT long checkPtInterval = 10;
+EXPORT long autosaveChkPoints = 2;
 
 EXPORT DIST_T curScaleRatio;
 EXPORT char * curScaleName;

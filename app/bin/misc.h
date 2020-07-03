@@ -78,6 +78,7 @@ extern long twoRailScale;
 extern long mapScale;
 extern long zoomCorner;
 extern long checkPtInterval;
+extern long autosaveChkPoints;
 extern long liveMap;
 extern long preSelect;
 extern long hideTrainsInTunnels;

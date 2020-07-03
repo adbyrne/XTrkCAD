@@ -713,7 +713,7 @@ static void DoClearAfter(void) {
 
 	/* set all layers to their default properties and set current layer to 0 */
 	DoLayout(NULL);
-	checkPtMark = 0;
+	checkPtMark = changed = 0;
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
 	bReadOnly = TRUE;
 	EnableCommands();
@@ -987,6 +987,8 @@ EXPORT wIndex_t GetCurrentCommand() {
 	return curCommand;
 }
 
+static wIndex_t autosave_count = 0;
+
 EXPORT void Reset(void) {
 	if (recordF) {
 		fprintf(recordF, "RESET\n");
@@ -1012,7 +1014,18 @@ EXPORT void Reset(void) {
 			&& !inPlayback) {
 		DoCheckPoint();
 		checkPtMark = changed;
+
+		autosave_count++;
+
+		if ((autosaveChkPoints>0) && (autosave_count>=autosaveChkPoints)) {
+			DoSave(NULL);
+			InfoMessage(_("File AutoSaved"));
+			autosave_count = 0;
+		}
 	}
+
+
+
 	ClrAllTrkBits( TB_UNDRAWN );
 	DoRedraw(); // Reset
 	EnableCommands();

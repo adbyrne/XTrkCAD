@@ -35,6 +35,7 @@ static paramIntegerRange_t i1_64 = { 1, 64 };
 static paramIntegerRange_t i1_100 = { 1, 100 };
 static paramIntegerRange_t i1_256 = { 1, 256 };
 static paramIntegerRange_t i0_10000 = { 0, 10000 };
+static paramIntegerRange_t i0_99 = { 0, 99};
 static paramIntegerRange_t i1_1000 = { 1, 1000 };
 static paramIntegerRange_t i10_1000 = { 10, 1000 };
 static paramIntegerRange_t i10_100 = { 10, 100 };
@@ -45,6 +46,7 @@ static paramFloatRange_t r0_180 = { 0, 180 };
 
 static void UpdatePrefD( void );
 static void UpdateMeasureFmt(void);
+static void UpdateCheckPtInterval(void) ;
 
 static wIndex_t distanceFormatInx;
 
@@ -66,6 +68,8 @@ long GetChanges( paramGroup_p pg )
 
 static paramGroup_t prefPG;
 
+
+
 static void OptionDlgUpdate(
 		paramGroup_p pg,
 		int inx,
@@ -83,6 +87,14 @@ static void OptionDlgUpdate(
 		}
 		if (pg->paramPtr[inx].valueP == &showFlexTrack) {
 			DoChangeNotification(CHANGE_PARAMS|CHANGE_TOOLBAR);
+		}
+		if (pg->paramPtr[inx].valueP == &checkPtInterval) {
+			checkPtInterval = *(long *)valueP;
+			if (checkPtInterval == 0 )
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning off AutoSave") );
+			else
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
+			UpdateCheckPtInterval();
 		}
 	}
 }
@@ -292,7 +304,10 @@ static paramData_t prefPLs[] = {
 	{ PD_LONG, &dragPixels, "dragpixels", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Distance") },
 	{ PD_LONG, &dragTimeout, "dragtimeout", PDO_NOPSHUPD|PDO_DRAW, &i1_1000, N_("Drag Timeout") },
 	{ PD_LONG, &minGridSpacing, "mingridspacing", PDO_NOPSHUPD|PDO_DRAW, &i1_100, N_("Min Grid Spacing"), 0, 0 },
-	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point") },
+#define I_CHKPT		(13)
+	{ PD_LONG, &checkPtInterval, "checkpoint", PDO_NOPSHUPD|PDO_FILE, &i0_10000, N_("Check Point Frequency") },
+#define I_AUTOSAVE		(14)
+	{ PD_LONG, &autosaveChkPoints, "autosave", PDO_NOPSHUPD|PDO_FILE, &i0_99, N_("Autosave Checkpoint Frequency") },
 	{ PD_RADIO, &onStartup, "onstartup", PDO_NOPSHUPD, startOptions, N_("On Program Startup"), 0, NULL }
 	};
 static paramGroup_t prefPG = { "pref", PGO_RECORD|PGO_PREFMISC, prefPLs, sizeof prefPLs/sizeof prefPLs[0] };
@@ -343,6 +358,15 @@ static dstFmts_t metricDstFmts[] = {
 		{ NULL, 0 },
 		{ NULL, 0 } };
 static dstFmts_t *dstFmts[] = { englishDstFmts, metricDstFmts };
+
+void UpdateCheckPtInterval()
+{
+	if (checkPtInterval == 0)  {
+		autosaveChkPoints = 0;
+		ParamLoadControl(&prefPG, I_AUTOSAVE);
+		ParamLoadControl(&prefPG, I_CHKPT);
+	}
+}
 
 /**
  * Load the selection list for number formats with the appropriate list of variants.

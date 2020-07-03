@@ -660,6 +660,7 @@ static paramGroup_t checkPointingPG = { "checkpoint", 0, checkPointingPLs, sizeo
 
 static char * checkPtFileName1;
 static char * checkPtFileName2;
+static char * checkPtFileNameBackup;
 
 /** Read the layout design.
  *
@@ -1210,6 +1211,7 @@ EXPORT void DoSave( doSaveCallBack_p after )
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
 				sSourceFilePattern, SaveTracks, NULL );
 		wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+		changed = checkPtMark = 1;
 	} else {
 		char *temp = GetLayoutFullPath();
 		SaveTracks( 1, &temp, NULL );
@@ -1225,6 +1227,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
 			sSaveFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+	changed = checkPtMark = 1;
 	SetWindowTitle();
 	SaveState();
 }
@@ -1255,10 +1258,19 @@ EXPORT void DoExamples( void )
 	SaveState();
 }
 
+static wIndex_t generations_count = 0;
+wIndex_t max_generations_count = 10;
+static char sCheckPointBF[STR_LONG_SIZE];
+
 
 EXPORT void DoCheckPoint( void )
 {
 	int rc;
+
+	if (!checkPtFileNameBackup || (changed <= checkPtInterval+1)) {
+		sprintf(sCheckPointBF,"%s00.bkp",GetLayoutFilename());
+		MakeFullpath(&checkPtFileNameBackup, workingDir, sCheckPointBF, NULL);
+	}
 
 	if (checkPointingW == NULL) {
 		ParamRegister( &checkPointingPG );
@@ -1270,12 +1282,28 @@ EXPORT void DoCheckPoint( void )
 
 	/* could the check point file be written ok? */
 	if( rc ) {
-		/* yes, delete the backup copy of the checkpoint file */
-		remove( checkPtFileName2 );
+		/* yes, archive/delete the backup copy of the checkpoint file */
+		if (checkPtFileNameBackup) {
+			char * spot = strrchr(checkPtFileNameBackup,'.');
+			if (spot && spot>checkPtFileNameBackup+3) {
+				spot[-2]=generations_count/10+'0';
+				spot[-1]=generations_count%10+'0';
+			}
+			generations_count++;
+			if (((autosaveChkPoints == 0) && (generations_count > 5)) ||
+			    ((autosaveChkPoints > 0) && (generations_count > autosaveChkPoints)) ) {
+				generations_count = 0;
+			}
+			remove( checkPtFileNameBackup);
+			rename( checkPtFileName2, checkPtFileNameBackup );
+		} else {
+			remove(checkPtFileName2);
+		}
 	} else {
 		/* no, rename the backup copy back to the checkpoint file name */
 		rename( checkPtFileName2, checkPtFileName1 );
 	}
+
 	//wHide( checkPointingW );
 	wShow( mainW );
 }
@@ -1294,8 +1322,13 @@ EXPORT void CleanupFiles( void )
 {
 	char *tempDir;
 
-	if( checkPtFileName1 )
+	if( checkPtFileName1 ) {
+		if (checkPtFileNameBackup) {
+			remove( checkPtFileNameBackup );
+			rename( checkPtFileName1, checkPtFileNameBackup );
+		}
 		remove( checkPtFileName1 );
+	}
 
 	for (int i = ARCHIVE_READ; i <= ARCHIVE_WRITE; ++i) {
 		tempDir = GetZipDirectoryName(i);
@@ -1307,7 +1340,7 @@ EXPORT void CleanupFiles( void )
 }
 
 /**
- * Check for existance of checkpoint file. Existance of a checkpoint file means that XTrkCAD was not properly
+ * Check for existence of checkpoint file. Existence of a checkpoint file means that XTrkCAD was not properly
  * terminated.
  *
  * \param none
