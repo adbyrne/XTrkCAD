@@ -1407,9 +1407,10 @@ static void MoveTracks(
 	wSetCursor( mainD.d, wCursorWait );
 	/*UndoStart( "Move/Rotate Tracks", "move/rotate" );*/
 	if (tlist_da.cnt <= incrementalDrawLimit) {
-		if (eraseFirst)
+		if (eraseFirst) {
 			DrawSelectedTracksD( &mainD, wDrawColorWhite );
-		DrawSelectedTracksD( &mapD, wDrawColorWhite );
+			DrawSelectedTracksD( &mapD, wDrawColorWhite );
+		}
 	}
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
 		trk = Tlist(inx);
@@ -1497,17 +1498,9 @@ static void MoveTracks(
 	    }
 
 		InfoCount( inx );
-#ifdef LATER
-		if (tlist_da.cnt <= incrementalDrawLimit)
-			DrawNewTrack( trk );
-#endif
 	}
-	if (tlist_da.cnt > incrementalDrawLimit) {
-		DoRedraw();
-	} else {
-		DrawSelectedTracksD( &mainD, wDrawColorBlack );
-		DrawSelectedTracksD( &mapD, wDrawColorBlack );
-	}
+	ClrAllTrkBits(TB_UNDRAWN);
+	DoRedraw();
 	wSetCursor( mainD.d, defaultCursor );
 	if (undo) UndoEnd();
 	InfoCount( trackCount );
@@ -2210,7 +2203,7 @@ static void QuickMove( void* pos) {
 	wDrawDelayUpdate( mainD.d, TRUE );
 	GetMovedTracks(FALSE);
 	UndoStart( _("Move Tracks"), "Move Tracks" );
-	MoveTracks( FALSE, TRUE, FALSE, move_pos, zero, 0.0, TRUE );
+	MoveTracks( TRUE, TRUE, FALSE, move_pos, zero, 0.0, TRUE );
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
@@ -2221,9 +2214,9 @@ static void QuickRotate( void* pangle )
 		return;
 	wDrawDelayUpdate( mainD.d, TRUE );
 	GetMovedTracks(FALSE);
-	DrawSelectedTracksD( &mainD, wDrawColorWhite );
+	//DrawSelectedTracksD( &mainD, wDrawColorWhite );
 	UndoStart( _("Rotate Tracks"), "Rotate Tracks" );
-	MoveTracks( FALSE, FALSE, TRUE, zero, cmdMenuPos, (double)angle/1000, TRUE);
+	MoveTracks( TRUE, FALSE, TRUE, zero, cmdMenuPos, (double)angle/1000, TRUE);
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 

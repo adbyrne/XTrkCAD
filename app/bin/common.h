@@ -119,6 +119,17 @@ typedef struct {
 		} \
 		(DA).max = 0; \
 		(DA).cnt = 0; }
+#define DYNARR_REMOVE(T,DA,I) \
+		{ \
+		 { if ((DA).cnt-1 > I) { \
+				for (int i=I;i<(DA).cnt-1;i++) { \
+				(((T*)(DA).ptr)[i])= (((T*)(DA).ptr)[i+1]); \
+				} \
+			} \
+		 } \
+		if ((DA.cnt)>=I) (DA).cnt--; \
+		}
+
 
 #ifdef WINDOWS
 #define M_PI 3.14159

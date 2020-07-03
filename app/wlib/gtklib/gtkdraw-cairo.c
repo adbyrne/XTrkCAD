@@ -1490,6 +1490,11 @@ static gint draw_char_event(
 		if (!(bd->option & BD_NOFOCUS))
 				gtk_widget_grab_focus( bd->widget );
 		return TRUE;
+	} else if ((key >=wAccelKey_Up) && (key<=wAccelKey_Left) && bd->action) {
+		bd->action( bd, bd->context, wActionText+(key<<8), bd->lastX, bd->lastY );
+		if (!(bd->option & BD_NOFOCUS))
+			gtk_widget_grab_focus( bd->widget );
+		return TRUE;
 	} else if (key <= 0xFF && (event->state&(GDK_CONTROL_MASK|GDK_MOD1_MASK)) == 0 && bd->action) {
 		bd->action( bd, bd->context, wActionText+(key<<8), bd->lastX, bd->lastY );
 		if (!(bd->option & BD_NOFOCUS))

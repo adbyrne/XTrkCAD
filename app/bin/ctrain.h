@@ -57,11 +57,15 @@ void CarItemSetLocoMaster( carItem_p, BOOL_T );
 void CarItemSetTrack( carItem_p, track_p );
 void CarItemPlace( carItem_p, traverseTrack_p, DIST_T * );
 void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *, BOOL_T, track_p );
+BOOL_T StoreCarItem (carItem_p item, void **data,long *len);
+BOOL_T ReplayCarItem(carItem_p item, void *data,long len);
 enum paramFileState	GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 enum paramFileState	GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );
 void CheckCarTraverse( track_p trk);
+void DeleteCarProto(int fileIndex);
+void DeleteCarPart(int fileIndex);
 
 #endif // !HAVE_CTRAIN_H

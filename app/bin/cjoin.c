@@ -64,6 +64,7 @@ static struct {
 		joinRes_t jRes;
 		coOrd inp_pos[2];
 		easementData_t jointD[2];
+		dynArr_t anchors;
 		} Dj;
 
 
@@ -608,6 +609,143 @@ static STATUS_T CmdJoinLine(
 
 }
 
+void AnchorTempLine(coOrd p0, coOrd p1) {
+	DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
+	trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
+	p->type = SEG_STRLIN;
+	p->color = wDrawColorBlue;
+	p->width = 0.0;
+	p->u.l.pos[0] = p0;
+	p->u.l.pos[1] = p1;
+}
+
+void AnchorTempCircle(coOrd center,DIST_T radius, ANGLE_T a0, ANGLE_T a1) {
+	DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
+	trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
+	p->type = SEG_CRVLIN;
+	p->color = wDrawColorBlue;
+	p->width = 0.0;
+	p->u.c.a0 =a0;
+	p->u.c.a1 = a1;
+	p->u.c.radius = radius;
+	p->u.c.center = center;
+}
+
+void AnchorPoint(coOrd center) {
+	DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
+	trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
+	p->type = SEG_CRVLIN;
+	p->color = wDrawColorAqua;
+	p->width = 0.0;
+	p->u.c.a0 =0.0;
+	p->u.c.a1 = 360.0;
+	p->u.c.radius = mainD.scale/4;
+	p->u.c.center = center;
+}
+
+static DIST_T desired_radius = 0.0;
+
+static paramFloatRange_t r_0_10000 = { 0.0, 100000.0 };
+static paramData_t joinPLs[] = {
+#define joinRadPD (joinPLs[0])
+#define joinRadI 0
+	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
+};
+static paramGroup_t joinPG = { "join-fixed", 0, joinPLs, sizeof joinPLs/sizeof joinPLs[0] };
+
+BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T an1) {
+	coOrd point1,point2;
+	switch ( Dj.inp[1].params.type ) {
+		case curveTypeCurve:
+			if (Dj.inp[0].params.type == curveTypeStraight) {
+				coOrd  newP, newP1, newPos;
+				//Offset curve by desired_radius
+				DIST_T newR1;
+				newR1 = Dj.inp[1].params.arcR + desired_radius*((an1==Dj.inp[1].params.arcA0)?1:-1);
+				if (newR1<=0.0) return FALSE;
+				//Offset line by desired_radius
+				Translate(&newP,Dj.inp[0].params.lineEnd,an0,desired_radius);
+				Translate(&newP1,Dj.inp[0].params.lineOrig,an0,desired_radius);
+				AnchorTempLine(newP,newP1);
+				//Intersect - this is the joining curve center
+				AnchorTempCircle(Dj.inp[1].params.arcP,newR1,Dj.inp[1].params.arcA0,Dj.inp[1].params.arcA1);
+				if (!FindArcAndLineIntersections(&point1,&point2,Dj.inp[1].params.arcP,newR1,newP,Dj.inp[0].params.angle))
+					return FALSE;
+			} else if (Dj.inp[0].params.type == curveTypeCurve) {
+				coOrd CnewPos;
+				//Offset curve by desired_radius
+				DIST_T newR0;
+				newR0 = Dj.inp[0].params.arcR + desired_radius*((an0==Dj.inp[0].params.arcA0)?1:-1);
+				if (newR0<=0.0) return FALSE;
+				//Offset curve by desired_radius
+				AnchorTempCircle(Dj.inp[0].params.arcP,newR0,Dj.inp[0].params.arcA0,Dj.inp[0].params.arcA1);
+				DIST_T newR1;
+				newR1 = Dj.inp[1].params.arcR + desired_radius*((an1==Dj.inp[1].params.arcA0)?1:-1);
+				if (newR1<=0.0) return FALSE;
+				//Intersect - this is the joining curve center
+				AnchorTempCircle(Dj.inp[1].params.arcP,newR1,Dj.inp[1].params.arcA0,Dj.inp[1].params.arcA1);
+				if (!FindArcIntersections(&point1,&point2,Dj.inp[0].params.arcP,newR0,Dj.inp[1].params.arcP,newR1))
+					return FALSE;
+			}
+			AnchorPoint(point1);
+			AnchorPoint(point2);
+			break;
+		case curveTypeStraight:
+			if (Dj.inp[0].params.type == curveTypeStraight) {
+				coOrd newI,newP0,newP01, newP1, newP11;
+				//Offset line1 by desired_radius
+				Translate(&newP0,Dj.inp[0].params.lineEnd,an0,desired_radius);
+				Translate(&newP01,Dj.inp[0].params.lineOrig,an0,desired_radius);
+				AnchorTempLine(newP0,newP01);
+				//Offset line2 by desired_radius
+				Translate(&newP1,Dj.inp[1].params.lineEnd,an1,desired_radius);
+				Translate(&newP11,Dj.inp[1].params.lineOrig,an1,desired_radius);
+				AnchorTempLine(newP1,newP11);
+				if (!FindIntersection(&newI,newP0,Dj.inp[0].params.angle,newP1,Dj.inp[1].params.angle))
+					return FALSE;
+				point1 = point2 = newI;
+			} else if (Dj.inp[0].params.type == curveTypeCurve) {
+				coOrd newP, newP1, newPos;
+				//Offset curve by desired_radius
+				DIST_T newR0;
+				newR0 = Dj.inp[0].params.arcR + desired_radius*((an0==Dj.inp[0].params.arcA0)?1:-1);
+				if (newR0<=0.0) return FALSE;
+				AnchorTempCircle(Dj.inp[0].params.arcP,newR0,Dj.inp[0].params.arcA0,Dj.inp[0].params.arcA1);
+				//Offset line by desired_radius
+				Translate(&newP,Dj.inp[1].params.lineEnd,an1,desired_radius);
+				Translate(&newP1,Dj.inp[1].params.lineOrig,an1,desired_radius);
+				AnchorTempLine(newP,newP1);
+				//Intersect - this is the joining curve center
+				if (!FindArcAndLineIntersections(&point1,&point2,Dj.inp[0].params.arcP,newR0,newP,Dj.inp[1].params.angle))
+					return FALSE;
+			}
+			AnchorPoint(point1);
+			AnchorPoint(point2);
+			break;
+		default:
+			return FALSE;
+	}
+	coOrd point3, point4;
+	if (FindDistance(*pos,point1)<=FindDistance(*pos,point2)) {
+		if (Dj.inp[1].params.type == curveTypeCurve) {
+			ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,point1);
+			Translate(pos,Dj.inp[1].params.arcP,a,Dj.inp[1].params.arcR);
+		} else {
+			Translate(pos,point1,NormalizeAngle(an1+180),desired_radius);
+		}
+	} else {
+		if (Dj.inp[1].params.type == curveTypeCurve) {
+			ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,point2);
+			Translate(pos,Dj.inp[1].params.arcP,a,Dj.inp[1].params.arcR);
+		} else
+			Translate(pos,point2,NormalizeAngle(an1+180),desired_radius);
+	}
+
+	return TRUE;
+
+}
+
+static BOOL_T infoSubst = FALSE;
 
 static STATUS_T CmdJoin(
 		wAction_t action,
@@ -627,21 +765,25 @@ static STATUS_T CmdJoin(
 	ANGLE_T a, a1;
 	DIST_T eR[2];
 	BOOL_T ok;
+	wControl_p controls[2];
+	char * labels[1];
 
 	switch (action&0xFF) {
 
 	case C_START:
+		if (joinPLs[0].control==NULL) {
+		       ParamCreateControls(&joinPG, NULL);
+		}
 		if (selectedTrackCount==0)
 			InfoMessage( _("Left click - join with track") );
 		else
 			InfoMessage( _("Left click - join with track, Shift Left click - move to join") );
+		DYNARR_RESET(trkSeg_t,Dj.anchors);
 		Dj.state = 0;
 		Dj.joinMoveState = 0;
 		Dj.cornuMode = FALSE;
 		/*ParamGroupRecord( &easementPG );*/
-		if (easementVal < 0)
-			return CmdCornu(action, pos);
-
+		infoSubst = FALSE;
 		return C_CONTINUE;
 
 	case wActionMove:
@@ -656,6 +798,10 @@ static STATUS_T CmdJoin(
 			Dj.cornuMode = TRUE;
 			return CmdCornu(action, pos);
 		}
+
+		if (infoSubst)
+			InfoSubstituteControls(NULL, NULL);
+		infoSubst = FALSE;
 
 		DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 		tempSegs(0).color = drawColorBlack;
@@ -678,8 +824,23 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			if (!GetTrackParams( PARAMS_1ST_JOIN, Dj.inp[0].trk, pos, &Dj.inp[0].params ))
 				return C_CONTINUE;
 			Dj.inp[0].realType = GetTrkType(Dj.inp[0].trk);
-			InfoMessage( _("Select 2nd track") );
+			if (easementVal==0.0 && desired_radius > 0.0) {
+				InfoMessage(_("Select 2nd track - desired radius %0.3f"),FormatDistance(desired_radius));
+			} else
+				InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
+			if (Dj.inp[0].params.type == curveTypeStraight) {
+				wPrefGetFloat("misc", "desired_radius", &desired_radius, desired_radius);
+				controls[0] = joinRadPD.control;
+				controls[1] = NULL;
+				labels[0] = N_("Desired Radius");
+				InfoSubstituteControls(controls, labels);
+				infoSubst = TRUE;
+				joinRadPD.option |= PDO_NORECORD;
+				ParamLoadControls(&joinPG);
+				ParamGroupRecord(&joinPG);
+			} else desired_radius = 0.0;
+
 			return C_CONTINUE;
 		} else {
 			if ( (Dj.inp[1].trk = OnTrack( &pos, TRUE, TRUE )) == NULL)
@@ -712,7 +873,6 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 				ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
 				return C_CONTINUE;
 			}
-
 			rc = C_CONTINUE;
 			if ( MergeTracks( Dj.inp[0].trk, Dj.inp[0].params.ep,
 							  Dj.inp[1].trk, Dj.inp[1].params.ep ) )
@@ -740,6 +900,7 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			Dj.jRes.flip = FALSE;
 		}
 		tempSegs_da.cnt = 0;
+		/* no break */
 
 	case C_MOVE:
 		if (easementVal < 0 && Dj.cornuMode)
@@ -749,15 +910,83 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 		if (Dj.state != 2)
 			return C_CONTINUE;
 
+		DYNARR_RESET(trkSeg_t,Dj.anchors);
+
+		ANGLE_T na0 = 0.0 , na1 =0.0;
+		coOrd end0, end1;
+		ANGLE_T a0;
+		DIST_T d0,d1;
+		BOOL_T beyond0 = FALSE;
+		//Fix Pos onto the line of the second track
+		if (Dj.inp[1].params.type == curveTypeStraight) {
+			ANGLE_T a = NormalizeAngle(FindAngle(Dj.inp[1].params.lineOrig,pos)-Dj.inp[1].params.angle);
+			DIST_T d = FindDistance(Dj.inp[1].params.lineOrig,pos);
+			Translate(&pos,Dj.inp[1].params.lineOrig,Dj.inp[1].params.angle,d*cos(D2R(a)));
+		} else {
+			desired_radius = 0.0;   //For now, only straight to straight
+		}
+		if (desired_radius != 0.0) {
+			//Work out which side of the first track it is on
+			beyond0 = FALSE;
+			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].ep);
+			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].ep);
+			if (Dj.inp[0].params.type == curveTypeStraight) {
+				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(end0, pos));
+				na0 = NormalizeAngle( Dj.inp[0].params.angle +
+										((a0>0.0)?90.0:-90.0));
+				if (DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(end0, end1))>0.0) {
+					if (a0<0.0) beyond0 = TRUE;
+				} else if (a0>0.0) beyond0 = TRUE;
+			}
+			//Now Second Line offset
+			if (Dj.inp[1].params.type == curveTypeStraight) {
+				a1 = DifferenceBetweenAngles(Dj.inp[1].params.angle,FindAngle(end1, end0));
+				na1 = NormalizeAngle( Dj.inp[1].params.angle +
+										((a1>0.0)?90.0:-90.0));
+			}
+			if (beyond0)   //If Pos past line, flip
+				na1 = NormalizeAngle(na1+180.0);
+			//Adjust pos to make it so
+			coOrd pos1 = pos;
+			if (AdjustPosToRadius(&pos1,desired_radius+(Dj.jointD[0].x), na0, na1)) {
+				if (Dj.inp[1].params.type == curveTypeStraight) {
+					FindPos( &off, &beyond, pos1, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
+										 FindDistance(Dj.inp[1].params.lineOrig,Dj.inp[1].params.lineEnd) );
+				} else if (Dj.inp[1].params.type == curveTypeCurve) {
+					ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,pos1);
+					if ((a>Dj.inp[1].params.arcA0+Dj.inp[1].params.arcA1) || (a< Dj.inp[1].params.arcA0)) {
+						beyond = 1.0;
+					}
+				}
+				if (beyond>-0.01) {
+					pos = pos1;
+					DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
+					trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
+					p->type= SEG_CRVLIN;
+					p->width = 0;
+					p->color = wDrawColorBlue;
+					p->u.c.center = pos;
+					p->u.c.a1= 360.0;
+					p->u.c.a0 = 0.0;
+					p->u.c.radius = tempD.scale*0.25/2;
+				}
+			}
+
+		}
+
+
 		tempSegs_da.cnt = 0;
 		tempSegs(0).color = drawColorBlack;
 		ok = FALSE;
 
 /* Populate (Dj.inp[1]) */ 
+
 		if ( QueryTrack(Dj.inp[1].trk,Q_REFRESH_JOIN_PARAMS_ON_MOVE) ) {
 			if ( !GetTrackParams( PARAMS_2ND_JOIN, Dj.inp[1].trk, pos, &Dj.inp[1].params ) )
 				return C_CONTINUE;
 		}
+
+
 		beyond = 1.0;
 		switch ( Dj.inp[1].params.type ) {
 		case curveTypeCurve:
@@ -1023,7 +1252,10 @@ errorReturn:
 		UndrawNewTrack( Dj.inp[1].trk );
 		ep = Dj.jRes.flip?1:0;
 		Dj.state = 0;
+		DYNARR_RESET(trkSeg_t,Dj.anchors);
 		rc = C_TERMINATE;
+		if (easementVal == 0.0)
+			wPrefSetFloat("misc", "desired_radius", desired_radius);
 		if ( (!JoinTracks( Dj.inp[0].trk, Dj.inp[0].params.ep, Dj.inp_pos[0],
 					trk, ep, Dj.jRes.pos[0], &Dj.jointD[0] ) ) ||
 			 (!JoinTracks( Dj.inp[1].trk, Dj.inp[1].params.ep, Dj.inp_pos[1],
@@ -1034,9 +1266,15 @@ errorReturn:
 		DrawNewTrack( Dj.inp[0].trk );
 		DrawNewTrack( Dj.inp[1].trk );
 		DrawNewTrack( trk );
+		if (infoSubst)
+			InfoSubstituteControls(NULL, NULL);
+		infoSubst = FALSE;
 		return rc;
 
 	case C_CANCEL:
+		if (infoSubst)
+			InfoSubstituteControls(NULL, NULL);
+		infoSubst = FALSE;
 		break;
 
 	case C_REDRAW:
@@ -1044,7 +1282,8 @@ errorReturn:
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 		} else if (easementVal<0 && Dj.joinMoveState == 0)
 			return CmdCornu(action,pos);
-
+		if (Dj.anchors.cnt)
+				DrawSegs(&tempD, zero, 0.0, &Dj.anchors.ptr[0], Dj.anchors.cnt,trackGauge,wDrawColorBlack);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		break;
 
@@ -1052,6 +1291,9 @@ errorReturn:
 	case C_OK:
 		if (easementVal<0 && Dj.cornuMode)
 			return CmdCornu(action,pos);
+		if (infoSubst)
+			InfoSubstituteControls(NULL, NULL);
+		infoSubst = FALSE;
 
 	}
 

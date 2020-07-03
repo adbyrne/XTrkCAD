@@ -355,6 +355,8 @@ This method of joining track may be used using Normal Easments where tracks are 
 
 }
 
+If the track is straight, an entry field to enter a prefered radius will be shown. If this value is not 0.0 and the second track is also straight, the program will try to exactly fit this radius for the join track. 
+
 \n Move the mouse pointer over the endpoint of the other track then \e{Left-Click} and hold the mouse button down. A track connecting the two endpoints will appear. If the track appears in black (and you are happy with the curve as its drawn), release the mouse button.
 
 \lcont{

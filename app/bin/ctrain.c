@@ -542,6 +542,24 @@ static BOOL_T QueryCar(track_p trk, int query)
     }
 }
 
+static BOOL_T StoreCar(
+		track_p car,
+		void **data,
+		long * len) {
+
+	struct extraData *xx = GetTrkExtraData(car);
+	return StoreCarItem(xx->item,data,len);
+
+}
+
+static BOOL_T ReplayCar (track_p car, void *data,long len) {
+
+	struct extraData *xx = GetTrkExtraData(car);
+	return ReplayCarItem(xx->item,data,len);
+
+}
+
+
 static wBool_t CompareCar( track_cp trk1, track_cp trk2 )
 {
 	return TRUE;
@@ -580,9 +598,9 @@ static trackCmd_t carCmds = {
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    NULL,
+    ReplayCar,
+    StoreCar,
+    NULL, /*activate*/
     CompareCar
 };
 

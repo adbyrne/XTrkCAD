@@ -672,6 +672,45 @@ static void CarProtoDelete(
 }
 
 
+/**
+* Delete all car prototype definitions that came from a specific parameter file.
+* Due to the way the definitions are loaded from file it is safe to
+* assume that they form a contiguous block in the array.
+*
+* \param [IN] fileIndex parameter file
+*/
+
+void
+DeleteCarProto(int fileIndex)
+{
+	int inx = 0;
+	int startInx = -1;
+	int cnt = 0;
+
+	// go to the start of the block
+	while (inx < carProto_da.cnt && carProto(inx)->paramFileIndex != fileIndex) {
+		startInx = inx++;
+	}
+
+	// delete them
+	for (; inx < carProto_da.cnt && carProto(inx)->paramFileIndex == fileIndex; inx++) {
+		carProto_t * cp = carProto(inx);
+		if (cp->paramFileIndex == fileIndex) {
+			CarProtoDelete(cp);
+			cnt++;
+		}
+	}
+
+	// copy down the rest of the list to fill the gap
+	startInx++;
+	while (inx < carProto_da.cnt) {
+		carProto(startInx++) = carProto(inx++);
+	}
+
+	// and reduce the actual number
+	carProto_da.cnt -= cnt;
+}
+
 static BOOL_T CarProtoRead(
 		char * line )
 {
@@ -977,29 +1016,29 @@ static carPart_p CarPartNew(
 	carPart_t cmp_key;
 	tabString_t tabs[7];
 
-	TabStringExtract( title, 7, tabs );
-	if ( TabStringCmp( "Undecorated", &tabs[T_MANUF] ) == 0 ||
-		 TabStringCmp( "Custom", &tabs[T_MANUF] ) == 0 ||
-		 tabs[T_PART].len == 0 )
+	TabStringExtract(title, 7, tabs);
+	if (TabStringCmp("Undecorated", &tabs[T_MANUF]) == 0 ||
+		TabStringCmp("Custom", &tabs[T_MANUF]) == 0 ||
+		tabs[T_PART].len == 0)
 		return NULL;
-	if ( tabs[T_PROTO].len == 0 )
+	if (tabs[T_PROTO].len == 0)
 		return NULL;
-	if ( partP == NULL ) {
-		partP = CarPartFind( tabs[T_MANUF].ptr, tabs[T_MANUF].len, tabs[T_PART].ptr, tabs[T_PART].len, scaleInx );
-		if ( partP != NULL &&
-			 partP->paramFileIndex == PARAM_CUSTOM &&
-			 paramFileIndex != PARAM_CUSTOM )
+	if (partP == NULL) {
+		partP = CarPartFind(tabs[T_MANUF].ptr, tabs[T_MANUF].len, tabs[T_PART].ptr, tabs[T_PART].len, scaleInx);
+		if (partP != NULL &&
+			partP->paramFileIndex == PARAM_CUSTOM &&
+			paramFileIndex != PARAM_CUSTOM)
 			return partP;
-LOG( log_carList, 2, ( "new car part: %s (%d) at %d\n", title, paramFileIndex, lookupListIndex ) )
+		LOG(log_carList, 2, ("new car part: %s (%d) at %d\n", title, paramFileIndex, lookupListIndex))
 	}
-	if ( partP != NULL ) {
-		CarPartUnlink( partP );
-		if ( partP->title != NULL )
-			MyFree( partP->title );
-LOG( log_carList, 2, ( "upd car part: %s (%d)\n", title, paramFileIndex ) )
+	if (partP != NULL) {
+		CarPartUnlink(partP);
+		if (partP->title != NULL)
+			MyFree(partP->title);
+		LOG(log_carList, 2, ("upd car part: %s (%d)\n", title, paramFileIndex))
 	}
-	LoadRoadnameList( &tabs[T_ROADNAME], &tabs[T_REPMARK] );
-	parentP = CarPartParentNew( tabs[T_MANUF].ptr, tabs[T_MANUF].len, tabs[T_PROTO].ptr, tabs[T_PROTO].len, scaleInx );
+	LoadRoadnameList(&tabs[T_ROADNAME], &tabs[T_REPMARK]);
+	parentP = CarPartParentNew(tabs[T_MANUF].ptr, tabs[T_MANUF].len, tabs[T_PROTO].ptr, tabs[T_PROTO].len, scaleInx);
 	cmp_key.title = title;
 	cmp_key.parent = parentP;
 	cmp_key.paramFileIndex = paramFileIndex;
@@ -1009,13 +1048,13 @@ LOG( log_carList, 2, ( "upd car part: %s (%d)\n", title, paramFileIndex ) )
 	cmp_key.color = color;
 	cmp_key.partnoP = tabs[T_PART].ptr;
 	cmp_key.partnoL = tabs[T_PART].len;
-	partP = (carPart_p)LookupListElem( &parentP->parts_da, &cmp_key, Cmp_part, sizeof * partP );
-	if ( partP->title != NULL )
-		MyFree( partP->title );
+	partP = (carPart_p)LookupListElem(&parentP->parts_da, &cmp_key, Cmp_part, sizeof * partP);
+	if (partP->title != NULL)
+		MyFree(partP->title);
 	*partP = cmp_key;
-	sprintf( message, "\t\t%s", tabs[2].ptr );
-	partP->title = MyStrdup( message );
-	partP->partnoP = partP->title + 2+tabs[2].len+1;;
+	sprintf(message, "\t\t%s", tabs[2].ptr);
+	partP->title = MyStrdup(message);
+	partP->partnoP = partP->title + 2 + tabs[2].len + 1;;
 	partP->partnoL = tabs[T_PART].len;
 	return partP;
 }
@@ -1032,6 +1071,32 @@ static void CarPartDelete(
 	MyFree( partP );
 }
 
+/**
+* Delete all car part definitions that came from a specific parameter file.
+* CarParts are stored in DYNARR for the specific car model. These DYNARRs
+* are linked from CarPartParents, again DYNARRs. Thes parents are created
+* from part definition and only contain manufacturer and type information.
+*
+* \param [IN] fileIndex parameter file
+*/
+
+void
+DeleteCarPart(int fileIndex)
+{
+	int inxParent = 0;
+	int inx;
+
+	while (inxParent < carPartParent_da.cnt) {
+		inx = 0;
+		while (inx < carPartParent(inxParent)->parts_da.cnt) {
+			carPart_p part = carPart(carPartParent(inxParent), inx++);
+			if (part->paramFileIndex == fileIndex) {
+				CarPartDelete(part);
+			}
+		}
+		inxParent++;
+	}
+}
 
 static BOOL_T CarPartRead(
 		char * line )
@@ -1867,6 +1932,22 @@ static DIST_T CarItemCouplerLength(
 	return item->dim.coupledLength-item->dim.carLength;
 }
 
+EXPORT BOOL_T StoreCarItem (carItem_p item, void **data,long *len) {
+
+	*data = item;
+	*len = sizeof (carItem_t);
+	return TRUE;
+
+}
+
+EXPORT BOOL_T ReplayCarItem(carItem_p item, void *data,long len) {
+
+
+	item->pos = ((carItem_t *)data)->pos;
+	item->angle = ((carItem_t *)data)->angle;
+	return TRUE;
+
+}
 
 EXPORT void CarItemPlace(
 		carItem_p item,
@@ -4237,18 +4318,6 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 
 	CarDlgDoStateActions( actions );
 
-	/*CarDlgShowControls();*/
-
-#ifdef LATER
-if ( logTable(log_carList).level >= 1 ) {
-	int inx;
-	carPart_p partP;
-	for ( inx=0; inx<carPart_da.cnt; inx++ ) {
-		partP = carPart(inx);
-		LogPrintf( "%d %s %d\n", inx, partP->title, partP->paramFileIndex );
-	}
-}
-#endif
 	wShow( carDlgPG.win );
 }
 
@@ -5258,8 +5327,8 @@ EXPORT void InitCarDlg( void )
 	ParamRegister( &carDlgPG );
 	ParamRegister( &carInvPG );
 	RegisterChangeNotification( CarDlgChange );
-	AddParam( "CARPROTO ", CarProtoRead, NULL );
-	AddParam( "CARPART ", CarPartRead, NULL);
+	AddParam( "CARPROTO ", CarProtoRead );
+	AddParam( "CARPART ", CarPartRead);
 	ParamRegister( &newCarPG );
 	ParamCreateControls( &newCarPG, CarItemHotbarUpdate );
 	newCarControls[0] = newCarPLs[0].control;
