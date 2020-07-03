@@ -39,7 +39,7 @@
 #include "cselect.h"
 #include "fileio.h"
 
-
+static BOOL_T debug = 0;
 static int log_join = 0;
 typedef struct {
 				curveType_e type;
@@ -162,7 +162,8 @@ LOG( log_join, 2, ("    = CURVE @ Pc=[%0.3f %0.3f] R=%0.3f A0=%0.3f A1=%0.3f Fli
 	d = D2R(res->arcA1);
 	if (d < 0.0)
 		d = 2*M_PI + d;
-	InfoMessage( _("Curved Track: Radius=%s Length=%s"),
+	if (!debug)
+		InfoMessage( _("Curved Track: Radius=%s Length=%s"),
 				FormatDistance(res->arcR), FormatDistance(res->arcR*d) );
 	return TRUE;
 
@@ -206,7 +207,7 @@ LOG( log_join, 3, ("     p1=[%0.3f %0.3f] aa=%0.3f a=%0.3f\n",
 /* Straight: */
 		PointOnCircle( &pt, pos0, r0, a1);
 LOG( log_join, 2, ("    = STRAIGHT [%0.3f %0.3f] [%0.3f %0.3f]\n", pt.x, pt.y, pos1.x, pos1.y ) )
-		InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
+		if (!debug) InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
 				FormatDistance(FindDistance( pt, pos1 )), PutAngle(FindAngle( pt, pos1 )) );
 		res->type = curveTypeStraight;
 		res->pos[0]=pt;
@@ -248,7 +249,7 @@ LOG( log_join, 3, ("       A0=%0.3f A1=%0.3f R=%0.3f\n", res->arcA0, res->arcA1,
 		d = D2R(res->arcA1);
 		if (d < 0.0)
 			d = 2*M_PI + d;
-		InfoMessage( _("Curved Track: Radius=%s Length=%s Angle=%0.3f"),
+		if (!debug) InfoMessage( _("Curved Track: Radius=%s Length=%s Angle=%0.3f"),
 				FormatDistance(res->arcR), FormatDistance(res->arcR*d), PutAngle(res->arcA1) );
 		res->type = curveTypeCurve;
 	}
@@ -361,7 +362,8 @@ LOG( log_join, 2, (" Move P0 X%0.3f A%0.3f  P1 X%0.3f A%0.3f\n",
 	}
 	d -= l;
 	if ( d <= minLength ) {
-		InfoMessage( _("Connecting track is too short by %0.3f"), PutDim(fabs(minLength-d)) );
+		if (!debug)
+			InfoMessage( _("Connecting track is too short by %0.3f"), PutDim(fabs(minLength-d)) );
 		return FALSE;
 	}
 
@@ -653,7 +655,7 @@ static paramData_t joinPLs[] = {
 };
 static paramGroup_t joinPG = { "join-fixed", 0, joinPLs, sizeof joinPLs/sizeof joinPLs[0] };
 
-static BOOL_T debug = 1;
+
 
 BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T an1) {
 	coOrd point1,point2;
@@ -663,8 +665,11 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 				coOrd  newP, newP1, newPos;
 				//Offset curve by desired_radius
 				DIST_T newR1;
-				newR1 = Dj.inp[1].params.arcR + desired_radius*((an1==Dj.inp[1].params.arcA0)?1:-1);
-				if (newR1<=0.0) return FALSE;
+				newR1 = Dj.inp[1].params.arcR + desired_radius*((fabs(an1-Dj.inp[1].params.arcA0)<1.0)?1:-1);
+				if (newR1<=0.0) {
+					if (debug) InfoMessage("Zero Radius C1");
+					return FALSE;
+				}
 				//Offset line by desired_radius
 				Translate(&newP,Dj.inp[0].params.lineEnd,an0,desired_radius);
 				Translate(&newP1,Dj.inp[0].params.lineOrig,an0,desired_radius);
@@ -679,14 +684,20 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 				coOrd CnewPos;
 				//Offset curve by desired_radius
 				DIST_T newR0;
-				newR0 = Dj.inp[0].params.arcR + desired_radius*((an0==Dj.inp[0].params.arcA0)?1:-1);
-				if (newR0<=0.0) return FALSE;
+				newR0 = Dj.inp[0].params.arcR + desired_radius*((fabs(an0-Dj.inp[0].params.arcA0)<1.0)?1:-1);
+				if (newR0<=0.0) {
+					if (debug) InfoMessage("Zero Radius C0");
+					return FALSE;
+				}
 				//Offset curve by desired_radius
 				if (debug)
 					AnchorTempCircle(Dj.inp[0].params.arcP,newR0,Dj.inp[0].params.arcA0,Dj.inp[0].params.arcA1);
 				DIST_T newR1;
-				newR1 = Dj.inp[1].params.arcR + desired_radius*((an1==Dj.inp[1].params.arcA0)?1:-1);
-				if (newR1<=0.0) return FALSE;
+				newR1 = Dj.inp[1].params.arcR + desired_radius*((fabs(an1-Dj.inp[1].params.arcA0)<1.0)?1:-1);
+				if (newR1<=0.0) {
+					if (debug) InfoMessage("Zero Radius C1");
+					return FALSE;
+				}
 				//Intersect - this is the joining curve center
 				if (debug)
 					AnchorTempCircle(Dj.inp[1].params.arcP,newR1,Dj.inp[1].params.arcA0,Dj.inp[1].params.arcA1);
@@ -716,8 +727,11 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 				coOrd newP, newP1, newPos;
 				//Offset curve by desired_radius
 				DIST_T newR0;
-				newR0 = Dj.inp[0].params.arcR + desired_radius*((an0==Dj.inp[0].params.arcA0)?1:-1);
-				if (newR0<=0.0) return FALSE;
+				newR0 = Dj.inp[0].params.arcR + desired_radius*((fabs(an0-Dj.inp[0].params.arcA0)<1.0)?1:-1);
+				if (newR0<=0.0) {
+					if (debug) InfoMessage("Zero Radius C0");
+					return FALSE;
+				}
 				if (debug)
 					AnchorTempCircle(Dj.inp[0].params.arcP,newR0,Dj.inp[0].params.arcA0,Dj.inp[0].params.arcA1);
 				//Offset line by desired_radius
@@ -841,17 +855,15 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			} else
 				InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
-			//if (Dj.inp[0].params.type == curveTypeStraight) {
-				wPrefGetFloat("misc", "desired_radius", &desired_radius, desired_radius);
-				controls[0] = joinRadPD.control;
-				controls[1] = NULL;
-				labels[0] = N_("Desired Radius");
-				InfoSubstituteControls(controls, labels);
-				infoSubst = TRUE;
-				joinRadPD.option |= PDO_NORECORD;
-				ParamLoadControls(&joinPG);
-				ParamGroupRecord(&joinPG);
-			//} else desired_radius = 0.0;
+			wPrefGetFloat("misc", "desired_radius", &desired_radius, desired_radius);
+			controls[0] = joinRadPD.control;
+			controls[1] = NULL;
+			labels[0] = N_("Desired Radius");
+			InfoSubstituteControls(controls, labels);
+			infoSubst = TRUE;
+			joinRadPD.option |= PDO_NORECORD;
+			ParamLoadControls(&joinPG);
+			ParamGroupRecord(&joinPG);
 
 			return C_CONTINUE;
 		} else {
@@ -924,11 +936,7 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 
 		DYNARR_RESET(trkSeg_t,Dj.anchors);
 
-		ANGLE_T na0 = 0.0 , na1 =0.0;
-		coOrd end0, end1;
-		ANGLE_T a0;
-		DIST_T d0,d1;
-		BOOL_T beyond0 = FALSE;
+
 		//Fix Pos onto the line of the second track
 		if (Dj.inp[1].params.type == curveTypeStraight) {
 			ANGLE_T a = NormalizeAngle(FindAngle(Dj.inp[1].params.lineOrig,pos)-Dj.inp[1].params.angle);
@@ -938,35 +946,37 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,pos);
 			Translate(&pos,Dj.inp[1].params.arcP,a,Dj.inp[1].params.arcR);
 		}
-		if (desired_radius != 0.0) {
+
+		if ((desired_radius != 0.0) &&
+			((Dj.inp[0].params.type == curveTypeStraight) || (Dj.inp[0].params.type == curveTypeCurve)) &&
+			((Dj.inp[1].params.type == curveTypeStraight) || (Dj.inp[1].params.type == curveTypeCurve)) &&
+				Dj.jRes.type==curveTypeCurve
+			) {
+			ANGLE_T na0=0.0,na1 =0.0;
+			coOrd end0, end1;
+			ANGLE_T a0,a1;
 			//Work out which side of the first track it is on
-			beyond0 = FALSE;
-			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].ep);
-			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].ep);
+			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
+			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
 			if (Dj.inp[0].params.type == curveTypeStraight) {
-				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(end0, pos));
+				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(Dj.jRes.pos[0], pos));
 				na0 = NormalizeAngle( Dj.inp[0].params.angle +
 										((a0>0.0)?90.0:-90.0));
-				if (DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(end0, end1))>0.0) {
-					if (a0<0.0) beyond0 = TRUE;
-				} else if (a0>0.0) beyond0 = TRUE;
 			} else {
-				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(end0, pos));
-				na0 = NormalizeAngle( Dj.inp[0].params.angle +
-										((a0>0.0)?90.0:-90.0));
-				if (DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(end0, end1))>0.0) {
-					if (a0<0.0) beyond0 = TRUE;
-				} else if (a0>0.0) beyond0 = TRUE;
+				na0 = Dj.inp[0].params.arcA0;
+				if (FindDistance(Dj.inp[0].params.arcP,pos)<Dj.inp[0].params.arcR)
+					na0 = NormalizeAngle(na0+180.0);
 			}
 			//Now Second Line offset
 			if (Dj.inp[1].params.type == curveTypeStraight) {
-				a1 = DifferenceBetweenAngles(Dj.inp[1].params.angle,FindAngle(end1, end0));
+				a1 = DifferenceBetweenAngles(Dj.inp[1].params.angle,FindAngle(pos, Dj.jRes.pos[0]));
 				na1 = NormalizeAngle( Dj.inp[1].params.angle +
 										((a1>0.0)?90.0:-90.0));
+			} else {
+				na1 = Dj.inp[1].params.arcA0;
+				if (FindDistance(Dj.inp[1].params.arcP,Dj.jRes.pos[0])<Dj.inp[1].params.arcR)
+					na1 = NormalizeAngle(na1+180.0);
 			}
-			if (beyond0)   //If Pos past line, flip
-				na1 = NormalizeAngle(na1+180.0);
-			//Adjust pos to make it so
 			coOrd pos1 = pos;
 			if (AdjustPosToRadius(&pos1,desired_radius+(Dj.jointD[0].x), na0, na1)) {
 				if (Dj.inp[1].params.type == curveTypeStraight) {
