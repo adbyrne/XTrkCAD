@@ -662,7 +662,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 	switch ( Dj.inp[1].params.type ) {
 		case curveTypeCurve:
 			if (Dj.inp[0].params.type == curveTypeStraight) {
-				coOrd  newP, newP1, newPos;
+				coOrd  newP, newP1;
 				//Offset curve by desired_radius
 				DIST_T newR1;
 				newR1 = Dj.inp[1].params.arcR + desired_radius*((fabs(an1-Dj.inp[1].params.arcA0)<1.0)?1:-1);
@@ -681,7 +681,6 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 				if (!FindArcAndLineIntersections(&point1,&point2,Dj.inp[1].params.arcP,newR1,newP,newP1))
 					return FALSE;
 			} else if (Dj.inp[0].params.type == curveTypeCurve) {
-				coOrd CnewPos;
 				//Offset curve by desired_radius
 				DIST_T newR0;
 				newR0 = Dj.inp[0].params.arcR + desired_radius*((fabs(an0-Dj.inp[0].params.arcA0)<1.0)?1:-1);
@@ -726,7 +725,7 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 					return FALSE;
 				point1 = point2 = newI;
 			} else if (Dj.inp[0].params.type == curveTypeCurve) {
-				coOrd newP, newP1, newPos;
+				coOrd newP, newP1;
 				//Offset curve by desired_radius
 				DIST_T newR0;
 				newR0 = Dj.inp[0].params.arcR + desired_radius*((fabs(an0-Dj.inp[0].params.arcA0)<1.0)?1:-1);
@@ -753,7 +752,6 @@ BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T
 		default:
 			return FALSE;
 	}
-	coOrd point3, point4;
 	if (FindDistance(*pos,point1)<=FindDistance(*pos,point2)) {
 		if (Dj.inp[1].params.type == curveTypeCurve) {
 			ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,point1);
@@ -954,10 +952,9 @@ LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 			((Dj.inp[1].params.type == curveTypeStraight) || (Dj.inp[1].params.type == curveTypeCurve)) &&
 				Dj.jRes.type==curveTypeCurve
 			) {
-			ANGLE_T na0=0.0,na1 =0.0;
+			ANGLE_T na0=0.0,na1=0.0;
 			coOrd end0, end1;
 			ANGLE_T a0,a1;
-			//Work out which side of the first track it is on
 			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
 			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
 			if (Dj.inp[0].params.type == curveTypeStraight) {
@@ -1316,7 +1313,7 @@ errorReturn:
 		} else if (easementVal<0 && Dj.joinMoveState == 0)
 			return CmdCornu(action,pos);
 		if (Dj.anchors.cnt)
-				DrawSegs(&tempD, zero, 0.0, &Dj.anchors.ptr[0], Dj.anchors.cnt,trackGauge,wDrawColorBlack);
+				DrawSegs(&tempD, zero, 0.0, &(((trkSeg_t *)Dj.anchors.ptr)[0]), Dj.anchors.cnt,trackGauge,wDrawColorBlack);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		break;
 
