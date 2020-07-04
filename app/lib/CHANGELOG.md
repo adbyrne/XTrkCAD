@@ -4,6 +4,67 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.2.0 Beta 2.0]
+
+### Added
+
++ Two new line styles: Center Dot and Phantom Dot
++ Preference option to suppress Flex Track in HotBar
++ Pan using Shift+Mousewheel Up/Downand Shift+Ctrl MouseWheel for left/right
++ Pan using Shift+horizontal scroll on GTK
++ Param Reload Button to force reload of a param file
++ Multi Keyword search on param library files
++ "@" Pan to Center and "e" Pan to extents and "0" or "o" Pan to Origin 
++ Middle button also able to select Pan
++ Selectable Icon Button size between 1.0 and 2.0
++ Parallel Lines now can parallel other lines or tracks
++ Add angles for curved line properties
++ Desired Radius feature for non-Cornu Join
++ AutoSave feature and add keep checkpoints between saves
++ Suppress edge rules on layout if close to window edge rulers
+
+
+### Fixed
+
++ Bug #256 Mislabelled Turnout
++ Bug #330 Use 3 decimal points in rotate angle
++ Bug #331 Correct Custom File Append Message
++ Bug #338 Correct Ruler Text size
++ Linetype changing doesn't change line width
++ Bug #332 Lowercase names in .xtp
++ Bug #339 Grades for 2 ended sectional track
++ Bug #340 Bezier Tracks open properly
++ Dragging in Profile Window fixed
++ Draw Objects remember linetype when saved/restored
++ Axis boundaries removed on Zoom Up and Down
++ Correct icons for xte and xtc in Windows
++ Windows size opening fixes
++ FilledDraw copies now work
++ Hangs on Linux startup
++ Linewidth correct in xpms
++ Elevation Points for clearances cleaned up
++ Convert Fixed->Cornu fixes
++ Bug #345 Fix paths in some Turnouts
++ Respect parmdir setting in configuration file
++ Bug #348 Fix Demo 
++ Bug #349 Fix inaccessible track segments
++ Bug #346 Fix layout file ends for Signal and Block
++ Bug #351 Fix loading layout with Cars off tracks
++ Bug #354 MultiLine Notes
++ Correct Undo when Cars are moved/rotated
++ Fix redraw of >20 elements in move/rotate
++ Ensure webkitgtk only required if not using browser for help
++ Fix mapD scale at startup, allow Map to be larger than 1/2 screen
+
+
+### Added and changed parameter files
+
++ N-Tomix Track improvements
++ Cleanup double track pieces
++ Micro-Engineering track improvements
++ HO-Endo and Atlas controllers
+
+
 ## [5.2.0 Beta 1.0]
 
 ### Added
