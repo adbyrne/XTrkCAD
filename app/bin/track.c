@@ -187,7 +187,9 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 		}
 		p = *fp;
 		distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
-		if (fabs(distance) < fabs(closestDistance)) {
+		if (IsClose(distance) ||
+			(IsTrack(trk) && (distance < trackGauge))) distance = 0.0;   //Make the hotspot close first in order if close
+		if (fabs(distance) <= fabs(closestDistance)) { //Make the last (highest) preferred
 			closestDistance = distance;
 			closestTrack = trk;
 			closestPos = p;
