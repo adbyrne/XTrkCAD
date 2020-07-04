@@ -46,7 +46,8 @@ static paramFloatRange_t r0_180 = { 0, 180 };
 
 static void UpdatePrefD( void );
 static void UpdateMeasureFmt(void);
-static void UpdateCheckPtInterval(void) ;
+static void UpdateAutoSaveInterval(long);
+static void UpdateChkPtInterval(long);
 
 static wIndex_t distanceFormatInx;
 
@@ -90,11 +91,22 @@ static void OptionDlgUpdate(
 		}
 		if (pg->paramPtr[inx].valueP == &checkPtInterval) {
 			checkPtInterval = *(long *)valueP;
-			if (checkPtInterval == 0 )
+			if (checkPtInterval == 0 ) {
 				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning off AutoSave") );
-			else
+				UpdateAutoSaveInterval(0);
+			} else {
 				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
-			UpdateCheckPtInterval();
+			}
+		}
+		if (pg->paramPtr[inx].valueP == &autosaveChkPoints) {
+			autosaveChkPoints = *(long *)valueP;
+			if (checkPtInterval == 0 && autosaveChkPoints>0 ) {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, _("Turning on CheckPointing") );
+				UpdateChkPtInterval(10);
+			} else {
+				wControlSetBalloon( pg->paramPtr[inx].control, 0, -5, NULL );
+			}
+
 		}
 	}
 }
@@ -359,13 +371,18 @@ static dstFmts_t metricDstFmts[] = {
 		{ NULL, 0 } };
 static dstFmts_t *dstFmts[] = { englishDstFmts, metricDstFmts };
 
-void UpdateCheckPtInterval()
+void UpdateAutoSaveInterval(long value)
 {
-	if (checkPtInterval == 0)  {
-		autosaveChkPoints = 0;
-		ParamLoadControl(&prefPG, I_AUTOSAVE);
-		ParamLoadControl(&prefPG, I_CHKPT);
-	}
+	autosaveChkPoints = value;
+	ParamLoadControl(&prefPG, I_AUTOSAVE);
+	ParamLoadControl(&prefPG, I_CHKPT);
+}
+
+void UpdateChkPtInterval(long value)
+{
+	checkPtInterval = value;
+	ParamLoadControl(&prefPG, I_AUTOSAVE);
+	ParamLoadControl(&prefPG, I_CHKPT);
 }
 
 /**
