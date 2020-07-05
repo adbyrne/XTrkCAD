@@ -810,6 +810,8 @@ static STATUS_T CmdJoin(
 		Dj.cornuMode = FALSE;
 		/*ParamGroupRecord( &easementPG );*/
 		infoSubst = FALSE;
+		if (easementVal < 0.0)
+			return CmdCornu(action, pos);
 		return C_CONTINUE;
 
 	case wActionMove:
