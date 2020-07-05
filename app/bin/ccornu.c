@@ -1203,25 +1203,31 @@ EXPORT STATUS_T AdjustCornuCurve(
 		}
 		if (Da.selectMidPoint ==-1 && Da.selectEndPoint ==-1 && Da.selectEndHandle ==-1) {
 			coOrd temp_pos = pos;
-			if (IsClose(DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,NULL))) {
+			wIndex_t index;
+			if (IsClose(DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,&index))) {
 				//Add Point between two other points
 				//Find closest two points along Track
-				int closest = 0;
+				int closest = -1;
+				wIndex_t pIndex, nIndex;
+				temp_pos = Da.pos[0];
+				DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,&pIndex);
 				if (Da.mid_points.cnt>0) {
-					coOrd near = pos;
-					coOrd last = Da.pos[0];
-					DIST_T dd = LineDistance(&near,last,DYNARR_N(coOrd,Da.mid_points,0));
-					for (int i=0;i<Da.mid_points.cnt-1;i++) {
-						near = pos;
-						d = LineDistance(&near,DYNARR_N(coOrd,Da.mid_points,i),DYNARR_N(coOrd,Da.mid_points,i+1));
-						if (d < dd) {
-							dd = d;
-							closest = i+1;
+					for (int i=0;i<Da.mid_points.cnt;i++) {
+						temp_pos = DYNARR_N(coOrd ,Da.mid_points,i);
+						DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,&nIndex);
+						if (((pIndex == index) && (nIndex == index)) ||
+							((pIndex < index) && (nIndex>index))) {
+							closest = i;
+							break;
 						}
+						pIndex = nIndex;
 					}
-					d = LineDistance(&near,DYNARR_N(coOrd,Da.mid_points,Da.mid_points.cnt-1),Da.pos[1]);
-					if (d<dd) closest = Da.mid_points.cnt;
-				}
+					temp_pos = Da.pos[1];
+					DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,&nIndex);
+					if (index == nIndex) closest = Da.mid_points.cnt;
+				    if (closest == -1)
+						closest = Da.mid_points.cnt;
+				} else closest = 0;
 				DYNARR_APPEND(coOrd,Da.mid_points,1);
 				for (int i=Da.mid_points.cnt-1;i>closest;i--) {
 					DYNARR_N(coOrd,Da.mid_points,i) = DYNARR_N(coOrd ,Da.mid_points,i-1);
@@ -1579,7 +1585,10 @@ EXPORT STATUS_T AdjustCornuCurve(
 
 	case C_UP:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		if (Da.state != POINT_PICKED) return C_CONTINUE;
+		if (Da.state != POINT_PICKED) {
+			Da.state = PICK_POINT;
+			return C_CONTINUE;
+		}
 		ep = 0;
 		if (Da.selectMidPoint!=-1) Da.prevSelected = Da.selectMidPoint;
 		else if (Da.selectEndPoint!=-1) {
