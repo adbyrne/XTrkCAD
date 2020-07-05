@@ -1225,7 +1225,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 					temp_pos = Da.pos[1];
 					DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,&nIndex);
 					if (index == nIndex) closest = Da.mid_points.cnt;
-				    if (closest == -1)
+					if (closest == -1)
 						closest = Da.mid_points.cnt;
 				} else closest = 0;
 				DYNARR_APPEND(coOrd,Da.mid_points,1);
@@ -1920,6 +1920,10 @@ STATUS_T CmdCornuModify (track_p trk, wAction_t action, coOrd pos, DIST_T trackG
 		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up
 		return AdjustCornuCurve(C_DOWN, pos, InfoMessage);
 
+	case C_LCLICK:
+		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up
+		AdjustCornuCurve(C_DOWN, pos, InfoMessage);
+		return AdjustCornuCurve(C_UP, pos, InfoMessage);
 
 	case C_MOVE:
 		if (Da.state == TRACK_SELECTED) return C_CONTINUE;                   //Ignore until first up and down

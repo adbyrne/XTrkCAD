@@ -148,6 +148,7 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
 	if (Dex.Trk == NULL) return C_ERROR;   //No track picked yet!
 	switch (action&0xFF) {
+		case C_LCLICK:
 		case C_START:
 		case C_DOWN:
 		case C_MOVE:
@@ -759,6 +760,8 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 			if (rc == C_CONTINUE)
 				return ModifyDraw(C_UP, pos);
 		}
+		if (modifyCornuMode)
+			return ModifyCornu(action, pos);
 		/*no break*/
 	default:
 		if (modifyBezierMode) return ModifyBezier(action, pos);
