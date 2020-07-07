@@ -3,14 +3,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: XTrackCAD 5.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-19 20:28+0200\n"
-"PO-Revision-Date: 2020-05-19 20:46+0200\n"
+"POT-Creation-Date: 2020-05-27 17:19+0200\n"
+"PO-Revision-Date: 2020-07-05 16:28+0200\n"
 "Last-Translator: \n"
 "Language-Team: German <m_fischer@users.sourceforge.net>\n"
-"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Language: de\n"
 "X-Generator: Poedit 2.3\n"
 
 #: ../bin/archive.c:178 ../bin/archive.c:185 ../bin/archive.c:214
@@ -18,9 +18,9 @@ msgstr ""
 #: ../bin/archive.c:315 ../bin/archive.c:365 ../bin/archive.c:400
 #: ../bin/archive.c:416 ../bin/archive.c:426 ../bin/archive.c:449
 #: ../bin/cblock.c:491 ../bin/cswitchmotor.c:475 ../bin/dbench.c:147
-#: ../bin/dcar.c:4465 ../bin/dcar.c:4651 ../bin/dcar.c:4661 ../bin/dcar.c:4709
-#: ../bin/dcar.c:4716 ../bin/dcar.c:4734 ../bin/dcar.c:4747 ../bin/dcar.c:4752
-#: ../bin/dcar.c:4781 ../bin/dcar.c:4945 ../bin/directory.c:65
+#: ../bin/dcar.c:4463 ../bin/dcar.c:4649 ../bin/dcar.c:4659 ../bin/dcar.c:4707
+#: ../bin/dcar.c:4714 ../bin/dcar.c:4732 ../bin/dcar.c:4745 ../bin/dcar.c:4750
+#: ../bin/dcar.c:4779 ../bin/dcar.c:4943 ../bin/directory.c:65
 #: ../bin/directory.c:100 ../bin/directory.c:107 ../bin/directory.c:138
 #: ../bin/directory.c:154 ../bin/dxfoutput.c:193 ../bin/fileio.c:240
 #: ../bin/fileio.c:652 ../bin/fileio.c:852 ../bin/fileio.c:979
@@ -28,8 +28,8 @@ msgstr ""
 #: ../bin/fileio.c:1138 ../bin/fileio.c:1424 ../bin/fileio.c:1474
 #: ../bin/fileio.c:1530 ../bin/macro.c:179 ../bin/macro.c:842
 #: ../bin/macro.c:887 ../bin/macro.c:908 ../bin/macro.c:1054
-#: ../bin/macro.c:1071 ../bin/macro.c:1339 ../bin/param.c:2081
-#: ../bin/paramfile.c:227 ../bin/paramfilelist.c:403 ../bin/track.c:1113
+#: ../bin/macro.c:1071 ../bin/macro.c:1339 ../bin/param.c:2090
+#: ../bin/paramfile.c:228 ../bin/paramfilelist.c:403 ../bin/track.c:1113
 #: ../bin/track.c:1636 ../bin/track.c:1942 ../bin/track.c:1946
 #: ../bin/track.c:1958 ../bin/track.c:2022 ../wlib/gtklib/wpref.c:248
 #: ../wlib/gtklib/wpref.c:255
@@ -137,7 +137,7 @@ msgstr "Bezier erstellen"
 msgid "%s picked - now select a Point"
 msgstr "%s ausgewählt - jetzt einen Punkt auswählen"
 
-#: ../bin/cbezier.c:888 ../bin/ccornu.c:1941
+#: ../bin/cbezier.c:888 ../bin/ccornu.c:1940
 msgid "No changes made"
 msgstr "Keine Änderungen durchgeführt"
 
@@ -158,7 +158,7 @@ msgstr "Ändern der Bezier-Kurve abgebrochen"
 msgid "Place 1st endpoint of Bezier - snap to %s"
 msgstr "Ersten Endpunkt der Bezierkurve festlegen, an %s fangen"
 
-#: ../bin/cbezier.c:1056 ../bin/ccornu.c:2280 ../bin/ccurve.c:205
+#: ../bin/cbezier.c:1056 ../bin/ccornu.c:2278 ../bin/ccurve.c:205
 #: ../bin/ccurve.c:439 ../bin/cstraigh.c:91
 msgid "Track is different gauge"
 msgstr "Gleis hat andere Spurweite"
@@ -200,8 +200,8 @@ msgid "Segments"
 msgstr "Segmente"
 
 #: ../bin/cblock.c:170 ../bin/cdraw.c:512 ../bin/cdraw.c:1391
-#: ../bin/cdraw.c:1531 ../bin/cdraw.c:2075 ../bin/cdraw.c:2301
-#: ../bin/cdraw.c:2338 ../bin/ctodesgn.c:170 ../bin/ctodesgn.c:171
+#: ../bin/cdraw.c:1537 ../bin/cdraw.c:2081 ../bin/cdraw.c:2307
+#: ../bin/cdraw.c:2344 ../bin/ctodesgn.c:170 ../bin/ctodesgn.c:171
 #: ../bin/ctodesgn.c:172 ../bin/ctodesgn.c:173 ../bin/ctodesgn.c:185
 #: ../bin/ctodesgn.c:186 ../bin/ctodesgn.c:236 ../bin/ctodesgn.c:239
 #: ../bin/ctodesgn.c:259 ../bin/ctodesgn.c:264 ../bin/ctodesgn.c:296
@@ -235,15 +235,15 @@ msgstr "Endpunkt 2: X,Y"
 #: ../bin/cblock.c:596 ../bin/cblock.c:604 ../bin/cblock.c:674
 #: ../bin/cblock.c:795 ../bin/cblock.c:807 ../bin/cblock.c:845
 #: ../bin/ccontrol.c:205 ../bin/ccontrol.c:218 ../bin/ccontrol.c:230
-#: ../bin/ccontrol.c:486 ../bin/cdraw.c:127 ../bin/cdraw.c:2134
+#: ../bin/ccontrol.c:486 ../bin/cdraw.c:127 ../bin/cdraw.c:2140
 #: ../bin/cgroup.c:1009 ../bin/cgroup.c:1080 ../bin/cgroup.c:1100
 #: ../bin/cgroup.c:1139 ../bin/cgroup.c:1166 ../bin/cgroup.c:1222
-#: ../bin/cgroup.c:1589 ../bin/cnote.c:68 ../bin/compound.c:603
+#: ../bin/cgroup.c:1589 ../bin/cnote.c:69 ../bin/compound.c:603
 #: ../bin/compound.c:618 ../bin/compound.c:651 ../bin/cprint.c:512
 #: ../bin/cprint.c:716 ../bin/cprint.c:723 ../bin/cprint.c:1247
 #: ../bin/cpull.c:511 ../bin/cpull.c:526 ../bin/cpull.c:528 ../bin/cpull.c:530
-#: ../bin/cpull.c:690 ../bin/cselect.c:1043 ../bin/cselect.c:1139
-#: ../bin/cselect.c:1960 ../bin/csensor.c:194 ../bin/csensor.c:206
+#: ../bin/cpull.c:690 ../bin/cselect.c:1068 ../bin/cselect.c:1164
+#: ../bin/cselect.c:1985 ../bin/csensor.c:194 ../bin/csensor.c:206
 #: ../bin/csensor.c:444 ../bin/csignal.c:267 ../bin/csignal.c:666
 #: ../bin/csignal.c:734 ../bin/csnap.c:576 ../bin/csnap.c:705
 #: ../bin/cstruct.c:876 ../bin/cstruct.c:885 ../bin/cstruct.c:1010
@@ -251,33 +251,33 @@ msgstr "Endpunkt 2: X,Y"
 #: ../bin/cswitchmotor.c:274 ../bin/cswitchmotor.c:286
 #: ../bin/cswitchmotor.c:544 ../bin/cswitchmotor.c:580
 #: ../bin/cswitchmotor.c:714 ../bin/cswitchmotor.c:745 ../bin/ctext.c:173
-#: ../bin/ctodesgn.c:204 ../bin/ctodesgn.c:1199 ../bin/ctodesgn.c:1334
-#: ../bin/ctodesgn.c:1932 ../bin/ctodesgn.c:2047 ../bin/ctodesgn.c:2346
-#: ../bin/ctodesgn.c:2628 ../bin/ctrain.c:205 ../bin/cturnout.c:2769
-#: ../bin/cturnout.c:2907 ../bin/cundo.c:161 ../bin/cundo.c:166
+#: ../bin/ctodesgn.c:204 ../bin/ctodesgn.c:1199 ../bin/ctodesgn.c:1336
+#: ../bin/ctodesgn.c:1934 ../bin/ctodesgn.c:2049 ../bin/ctodesgn.c:2348
+#: ../bin/ctodesgn.c:2630 ../bin/ctrain.c:205 ../bin/cturnout.c:2768
+#: ../bin/cturnout.c:2906 ../bin/cundo.c:161 ../bin/cundo.c:166
 #: ../bin/dbitmap.c:68 ../bin/dbitmap.c:125 ../bin/dbitmap.c:203
-#: ../bin/dbitmap.c:238 ../bin/dcar.c:3757 ../bin/dcar.c:3952
-#: ../bin/dcar.c:3956 ../bin/dcar.c:3960 ../bin/dcar.c:3965 ../bin/dcar.c:4281
-#: ../bin/dcar.c:4389 ../bin/dcar.c:4771 ../bin/dcmpnd.c:399
+#: ../bin/dbitmap.c:238 ../bin/dcar.c:3755 ../bin/dcar.c:3950
+#: ../bin/dcar.c:3954 ../bin/dcar.c:3958 ../bin/dcar.c:3963 ../bin/dcar.c:4279
+#: ../bin/dcar.c:4387 ../bin/dcar.c:4769 ../bin/dcmpnd.c:399
 #: ../bin/dcmpnd.c:410 ../bin/dcmpnd.c:542 ../bin/dcustmgm.c:221
 #: ../bin/dcustmgm.c:227 ../bin/dcustmgm.c:236 ../bin/dcustmgm.c:261
 #: ../bin/dease.c:242 ../bin/dlayer.c:240 ../bin/dlayer.c:262
 #: ../bin/dlayer.c:879 ../bin/dlayer.c:885 ../bin/dlayer.c:891
 #: ../bin/doption.c:180 ../bin/doption.c:260 ../bin/doption.c:442
 #: ../bin/doption.c:445 ../bin/doption.c:458 ../bin/doption.c:524
-#: ../bin/dprmfile.c:401 ../bin/draw.c:2523 ../bin/fileio.c:196
+#: ../bin/dprmfile.c:401 ../bin/draw.c:2519 ../bin/fileio.c:196
 #: ../bin/fileio.c:562 ../bin/fileio.c:696 ../bin/fileio.c:698
 #: ../bin/fileio.c:703 ../bin/fileio.c:766 ../bin/fileio.c:999
 #: ../bin/layout.c:373 ../bin/layout.c:561 ../bin/macro.c:1171
 #: ../bin/macro.c:1175 ../bin/macro.c:1235 ../bin/macro.c:1304
 #: ../bin/macro.c:1544 ../bin/macro.c:1562 ../bin/misc.c:434 ../bin/misc.c:481
-#: ../bin/misc.c:1785 ../bin/misc.c:1906 ../bin/misc.c:1914 ../bin/misc.c:1991
-#: ../bin/misc.c:2770 ../bin/misc.c:2779 ../bin/misc.c:2799 ../bin/misc.c:2805
-#: ../bin/misc2.c:453 ../bin/param.c:738 ../bin/param.c:1839
-#: ../bin/param.c:1962 ../bin/param.c:1965 ../bin/param.c:2088
-#: ../bin/param.c:2094 ../bin/paramfile.c:301 ../bin/paramfile.c:303
-#: ../bin/paramfile.c:308 ../bin/paramfile.c:332 ../bin/paramfile.c:358
-#: ../bin/paramfile.c:364 ../bin/paramfilelist.c:93 ../bin/paramfilelist.c:113
+#: ../bin/misc.c:1789 ../bin/misc.c:1910 ../bin/misc.c:1918 ../bin/misc.c:1995
+#: ../bin/misc.c:2778 ../bin/misc.c:2787 ../bin/misc.c:2807 ../bin/misc.c:2813
+#: ../bin/misc2.c:453 ../bin/param.c:738 ../bin/param.c:1848
+#: ../bin/param.c:1971 ../bin/param.c:1974 ../bin/param.c:2097
+#: ../bin/param.c:2103 ../bin/paramfile.c:302 ../bin/paramfile.c:304
+#: ../bin/paramfile.c:309 ../bin/paramfile.c:333 ../bin/paramfile.c:359
+#: ../bin/paramfile.c:365 ../bin/paramfilelist.c:93 ../bin/paramfilelist.c:113
 #: ../bin/paramfilelist.c:127 ../bin/paramfilelist.c:191 ../bin/smalldlg.c:90
 #: ../bin/smalldlg.c:222 ../bin/tease.c:1014 ../bin/track.c:1650
 #: ../wlib/gtklib/wpref.c:122 ../../../../build/work/app/bin/bllnhlp.c:582
@@ -339,25 +339,25 @@ msgstr "Kein Block!"
 msgid "Really delete block %s?"
 msgstr "Soll der Block %s wirklich gelöscht werden?"
 
-#: ../bin/cblock.c:749 ../bin/ccornu.c:2712 ../bin/ccornu.c:2905
+#: ../bin/cblock.c:749 ../bin/ccornu.c:2710 ../bin/ccornu.c:2903
 #: ../bin/cdraw.c:131 ../bin/cgroup.c:1015 ../bin/cpull.c:648
-#: ../bin/csignal.c:712 ../bin/cswitchmotor.c:670 ../bin/ctodesgn.c:2636
-#: ../bin/ctodesgn.c:3168 ../bin/ctrain.c:2469 ../bin/dbitmap.c:208
-#: ../bin/dcar.c:3903 ../bin/dcar.c:3982 ../bin/dcar.c:4066 ../bin/dcar.c:4085
-#: ../bin/dcar.c:4414 ../bin/dcar.c:4835 ../bin/dcontmgm.c:173
-#: ../bin/dcustmgm.c:168 ../bin/misc.c:1218 ../bin/misc.c:1225
-#: ../bin/misc.c:1296 ../bin/track.c:1652 ../bin/track.c:1749
+#: ../bin/csignal.c:712 ../bin/cswitchmotor.c:670 ../bin/ctodesgn.c:2638
+#: ../bin/ctodesgn.c:3170 ../bin/ctrain.c:2468 ../bin/dbitmap.c:208
+#: ../bin/dcar.c:3901 ../bin/dcar.c:3980 ../bin/dcar.c:4064 ../bin/dcar.c:4083
+#: ../bin/dcar.c:4412 ../bin/dcar.c:4833 ../bin/dcontmgm.c:173
+#: ../bin/dcustmgm.c:168 ../bin/misc.c:1222 ../bin/misc.c:1229
+#: ../bin/misc.c:1300 ../bin/track.c:1652 ../bin/track.c:1749
 #: ../bin/track.c:1763
 msgid "Yes"
 msgstr "Ja"
 
-#: ../bin/cblock.c:749 ../bin/ccornu.c:2712 ../bin/ccornu.c:2905
+#: ../bin/cblock.c:749 ../bin/ccornu.c:2710 ../bin/ccornu.c:2903
 #: ../bin/cdraw.c:131 ../bin/cgroup.c:1015 ../bin/cpull.c:648
-#: ../bin/csignal.c:712 ../bin/cswitchmotor.c:670 ../bin/ctodesgn.c:2636
-#: ../bin/ctodesgn.c:3168 ../bin/ctrain.c:2469 ../bin/dcar.c:3903
-#: ../bin/dcar.c:3982 ../bin/dcar.c:4066 ../bin/dcar.c:4085 ../bin/dcar.c:4414
-#: ../bin/dcar.c:4835 ../bin/dcontmgm.c:173 ../bin/dcustmgm.c:168
-#: ../bin/misc.c:1218 ../bin/misc.c:1225 ../bin/misc.c:1296 ../bin/track.c:1652
+#: ../bin/csignal.c:712 ../bin/cswitchmotor.c:670 ../bin/ctodesgn.c:2638
+#: ../bin/ctodesgn.c:3170 ../bin/ctrain.c:2468 ../bin/dcar.c:3901
+#: ../bin/dcar.c:3980 ../bin/dcar.c:4064 ../bin/dcar.c:4083 ../bin/dcar.c:4412
+#: ../bin/dcar.c:4833 ../bin/dcontmgm.c:173 ../bin/dcustmgm.c:168
+#: ../bin/misc.c:1222 ../bin/misc.c:1229 ../bin/misc.c:1300 ../bin/track.c:1652
 #: ../bin/track.c:1749 ../bin/track.c:1763
 msgid "No"
 msgstr "Nein"
@@ -434,21 +434,25 @@ msgstr "Steuerung bearbeiten"
 msgid "Place control"
 msgstr "Steuerung setzen"
 
-#: ../bin/ccornu.c:201 ../bin/ccornu.c:204 ../bin/ccornu.c:207
-#: ../bin/ccornu.c:261
+#: ../bin/ccornu.c:200 ../bin/ccornu.c:203 ../bin/ccornu.c:206
+#: ../bin/ccornu.c:260
 #, c-format
 msgid "%s FlexTrack"
 msgstr "%s Flexgleis"
 
-#: ../bin/ccornu.c:904 ../bin/cjoin.c:707 ../bin/cmisc.c:59
+#: ../bin/ccornu.c:254
+msgid " FLEX "
+msgstr "FLEX"
+
+#: ../bin/ccornu.c:903 ../bin/cjoin.c:707 ../bin/cmisc.c:59
 msgid "First"
 msgstr "Erste"
 
-#: ../bin/ccornu.c:911 ../bin/cjoin.c:712
+#: ../bin/ccornu.c:910 ../bin/cjoin.c:712
 msgid "Second"
 msgstr "Zweite"
 
-#: ../bin/ccornu.c:982 ../bin/ccornu.c:1993 ../bin/ccornu.c:2023
+#: ../bin/ccornu.c:981 ../bin/ccornu.c:1992 ../bin/ccornu.c:2022
 #: ../bin/tcornu.c:830 ../bin/tcornu.c:1037 ../bin/tcornu.c:1360
 #, c-format
 msgid ""
@@ -458,90 +462,90 @@ msgstr ""
 "Erstellen der mit p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%0.3f,"
 "%0.3f], a1=%0.3f a2=%0.3f, r1=%s r2=%s nicht möglich"
 
-#: ../bin/ccornu.c:1021 ../bin/ccornu.c:1632 ../bin/ccornu.c:1651
+#: ../bin/ccornu.c:1020 ../bin/ccornu.c:1631 ../bin/ccornu.c:1650
 #: ../bin/tbezier.c:246 ../bin/tbezier.c:253 ../bin/tcornu.c:295
 #: ../bin/tcornu.c:300
 msgid "End Angle"
 msgstr "Endwinkel"
 
-#: ../bin/ccornu.c:1024 ../bin/ccornu.c:1631 ../bin/ccornu.c:1650
+#: ../bin/ccornu.c:1023 ../bin/ccornu.c:1630 ../bin/ccornu.c:1649
 msgid "End Radius"
 msgstr "Endradius"
 
-#: ../bin/ccornu.c:1077
+#: ../bin/ccornu.c:1076
 msgid "Select Point, or Add Point"
 msgstr "Punkt auswählen oder neuen Punkt hinzufügen"
 
-#: ../bin/ccornu.c:1243
+#: ../bin/ccornu.c:1242
 msgid "Not close enough to track or point, reselect"
 msgstr "Kein Gleis oder Endpunkt in der Nähe, bitte wiederholen"
 
-#: ../bin/ccornu.c:1249
+#: ../bin/ccornu.c:1248
 msgid "Drag out end of Cornu"
 msgstr "Ende der Cornu ziehen"
 
-#: ../bin/ccornu.c:1251
+#: ../bin/ccornu.c:1250
 msgid "Drag along end of track"
 msgstr "Entlang des Ende des Gleises ziehen"
 
-#: ../bin/ccornu.c:1253
+#: ../bin/ccornu.c:1252
 msgid "Drag to move"
 msgstr "Ziehen zum Verschieben"
 
-#: ../bin/ccornu.c:1256
+#: ../bin/ccornu.c:1255
 msgid "Drag point to new location, Delete to remove"
 msgstr "Den Punkt an die neue Position verschieben, mit Entf löschen"
 
-#: ../bin/ccornu.c:1260
+#: ../bin/ccornu.c:1259
 msgid "Drag to change end radius"
 msgstr "Radius durch Ziehen ändern"
 
-#: ../bin/ccornu.c:1263
+#: ../bin/ccornu.c:1262
 msgid "Drag to change end angle"
 msgstr "Ziehen um den Abschlußwinkel zu ändern"
 
-#: ../bin/ccornu.c:1278
+#: ../bin/ccornu.c:1277
 msgid "Pick any circle to adjust or add - Enter to accept, Esc to cancel"
 msgstr ""
 "Um Anzupassen einen beliebigen Kreis auswählen -Eingabe zum Bestätigen, Esc "
 "zum Abbrechen"
 
-#: ../bin/ccornu.c:1290
+#: ../bin/ccornu.c:1289
 msgid "Track can't be split"
 msgstr "Das Gleis kann  nicht getrennt werden"
 
-#: ../bin/ccornu.c:1352
+#: ../bin/ccornu.c:1351
 msgid "Too close to other end of selected Track"
 msgstr "Zu nahe am anderen Ende des ausgewählten Gleises"
 
-#: ../bin/ccornu.c:1360
+#: ../bin/ccornu.c:1359
 msgid "Can't move end inside a turnout"
 msgstr "Ende kann nicht in ein festes Gleis hinein verschoben werden"
 
-#: ../bin/ccornu.c:1502
+#: ../bin/ccornu.c:1501
 msgid "Can't extend connected Bezier or Cornu"
 msgstr "Bezier- oder Cornu-Kurve  kann nicht erweitert werden"
 
-#: ../bin/ccornu.c:1574
+#: ../bin/ccornu.c:1573
 #, c-format
 msgid ""
 "Cornu : Min Radius=%s MaxRateofCurveChange/Scale=%s Length=%s Winding Arc=%s"
 msgstr ""
 "Cornu: Mindestradius =%s Max. Änderungsrate des Radius=%s Länge=%s Bogen=%s"
 
-#: ../bin/ccornu.c:1593 ../bin/ccornu.c:2261
+#: ../bin/ccornu.c:1592 ../bin/ccornu.c:2259
 msgid "Helix Already Connected"
 msgstr "Gleiswendel ist bereits verbunden"
 
-#: ../bin/ccornu.c:1607
+#: ../bin/ccornu.c:1606
 msgid "No Valid end point on that track"
 msgstr "Kein gültiger Endpunkt auf diesem Gleis"
 
-#: ../bin/ccornu.c:1612
+#: ../bin/ccornu.c:1611
 msgid "Track is different scale"
 msgstr "Das Gleis hat einen anderen Maßstab"
 
-#: ../bin/ccornu.c:1665
+#: ../bin/ccornu.c:1664
 msgid ""
 "Pick on point to adjust it along track - Delete to remove, Enter to confirm, "
 "ESC to abort"
@@ -549,157 +553,157 @@ msgstr ""
 "Einen Punkt auswählen und verschieben - Bestätigen mit Eingabe, Abbrechen "
 "mit Esc"
 
-#: ../bin/ccornu.c:1695
+#: ../bin/ccornu.c:1694
 msgid "Cornu has too complex shape - adjust end pts"
 msgstr "Die Form der Cornu-Kurve ist zu komplex, Endpunkte anpassen"
 
-#: ../bin/ccornu.c:1706
+#: ../bin/ccornu.c:1705
 #, c-format
 msgid "Cornu point %d too close to other end of connect track - reposition it"
 msgstr ""
 "Cornu-Punkt %d zu dicht am anderen Ende des Gleises - Position verändern"
 
-#: ../bin/ccornu.c:1711
+#: ../bin/ccornu.c:1710
 msgid "Create Cornu"
 msgstr "Cornu-Kurve erstellen"
 
-#: ../bin/ccornu.c:1900
+#: ../bin/ccornu.c:1899
 msgid "Now Select or Add (+Shift) a Point"
 msgstr "Jetzt einen Punkt auswählen oder (+Umschalttaste) hinzufügen"
 
-#: ../bin/ccornu.c:1955
+#: ../bin/ccornu.c:1954
 #, c-format
 msgid "Cornu end %d too close to other end of connect track - reposition it"
 msgstr ""
 "Cornu-Ende %d zu dicht am anderen Ende des Gleises - anderere Position setzen"
 
-#: ../bin/ccornu.c:1960
+#: ../bin/ccornu.c:1959
 msgid "Modify Cornu"
 msgstr "Cornu-Kurve ändern"
 
-#: ../bin/ccornu.c:1975
+#: ../bin/ccornu.c:1974
 #, c-format
 msgid "Cornu Extension Create Failed for end %d"
 msgstr "Das Erzeugen einer Klothide aus dem Endpunkt %d ist nicht möglich"
 
-#: ../bin/ccornu.c:2067
+#: ../bin/ccornu.c:2066
 #, c-format
 msgid "Connected Track End Adjust for end %d failed"
 msgstr "Ende %d des Gleis ist verbunden und kann nicht angepasst werden"
 
-#: ../bin/ccornu.c:2078
+#: ../bin/ccornu.c:2077
 msgid "Modify Cornu Cancelled"
 msgstr "Änderung der Cornu-Kurve abbrechen"
 
-#: ../bin/ccornu.c:2236
+#: ../bin/ccornu.c:2234
 msgid "Left click - Start Cornu track"
 msgstr "Durch Drücken der linken Maustaste mit einer Cornu beginnen"
 
-#: ../bin/ccornu.c:2238
+#: ../bin/ccornu.c:2236
 msgid "Left click - Place Flextrack"
 msgstr "Linke Maustaste - Flexgleis setzen"
 
-#: ../bin/ccornu.c:2241
+#: ../bin/ccornu.c:2239
 msgid "Left click - join with Cornu track"
 msgstr "Durch Drücken der linken Maustaste mit einer Cornu-Kurve verbinden"
 
-#: ../bin/ccornu.c:2243
+#: ../bin/ccornu.c:2241
 msgid "Left click - join with Cornu track, Shift Left click - move to join"
 msgstr ""
 "Linke Maustaste - Verbinden mit Cornu-Gleis, Umschalten + linke Maustaste - "
 "Verschieben zum Verbinden"
 
-#: ../bin/ccornu.c:2275
+#: ../bin/ccornu.c:2273
 msgid "No valid open endpoint on that track"
 msgstr "Kein gültiger und unbenutzter Endpunkt auf diesem Gleis"
 
-#: ../bin/ccornu.c:2304 ../bin/ccornu.c:2316
+#: ../bin/ccornu.c:2302 ../bin/ccornu.c:2314
 msgid "Drag arm in the direction of track"
 msgstr "Kontrollarm in Richtung des Gleises ziehen"
 
-#: ../bin/ccornu.c:2320
+#: ../bin/ccornu.c:2318
 msgid "No Unconnected Track End there"
 msgstr "Hier ist kein offenes Gleisende"
 
-#: ../bin/ccornu.c:2331 ../bin/ccornu.c:2355
+#: ../bin/ccornu.c:2329 ../bin/ccornu.c:2353
 msgid "No Valid Track End there"
 msgstr "Hier ist kein gültiges Gleisende"
 
-#: ../bin/ccornu.c:2343
+#: ../bin/ccornu.c:2341
 msgid "Locked - Move 1st end point of Cornu track along track 1"
 msgstr ""
 "Fixiert - verschiebe den ersten Endpunkt des Cornu-Gleis entlang des ersten "
 "Gleises"
 
-#: ../bin/ccornu.c:2367
+#: ../bin/ccornu.c:2365
 msgid "Locked - Move 2nd end point of Cornu track along track 2"
 msgstr ""
 "Fixiert, verschiebe den zweiten Endpunkt des Cornu-Gleis entlang des zweiten "
 "Gleises"
 
-#: ../bin/ccornu.c:2441
+#: ../bin/ccornu.c:2439
 msgid "Track can't be split - so locked to endpoint"
 msgstr "Das Gleis kann  nicht getrennt werden - daher am Endpunkt fixiert"
 
-#: ../bin/ccornu.c:2446
+#: ../bin/ccornu.c:2444
 msgid "Point not on track 1"
 msgstr "Der Punkt ist nicht auf Gleis 1"
 
-#: ../bin/ccornu.c:2484
+#: ../bin/ccornu.c:2482
 msgid "Pick other end of Cornu"
 msgstr "Anderes Ende der Cornu setzen"
 
-#: ../bin/ccornu.c:2486
+#: ../bin/ccornu.c:2484
 msgid ""
 "Select flextrack ends or anchors and drag, Enter to approve, Esc to Cancel"
 msgstr ""
 "Wählen Sie Flextrack-Enden oder Anker aus und ziehen Sie, Enter zum "
 "Bestätigen, Esc zum Abbrechen"
 
-#: ../bin/ccornu.c:2490
+#: ../bin/ccornu.c:2488
 msgid "Put other end of Cornu on a track with an unconnected end point"
 msgstr ""
 "Setze den aneren Endpunkt des Cornu-Gleis auf ein Gleis mit einem "
 "unverbundenen Endpunkt"
 
-#: ../bin/ccornu.c:2701 ../bin/ccornu.c:2895
+#: ../bin/ccornu.c:2699 ../bin/ccornu.c:2893
 msgid "Not on a Track"
 msgstr "Nicht auf einem Gleis"
 
-#: ../bin/ccornu.c:2708
+#: ../bin/ccornu.c:2706
 msgid "Select a Track To Convert"
 msgstr "Gleis für das Umwandeln auswählen"
 
-#: ../bin/ccornu.c:2712
+#: ../bin/ccornu.c:2710
 msgid "Convert all Selected Tracks to Cornu Tracks?"
 msgstr "Sollen alle ausgewählten Gleise in Cornu umgewandelt werden?"
 
-#: ../bin/ccornu.c:2717
+#: ../bin/ccornu.c:2715
 msgid "Convert Cornu"
 msgstr "Cornu umwandeln"
 
-#: ../bin/ccornu.c:2901
+#: ../bin/ccornu.c:2899
 msgid "Select a Cornu or Bezier Track To Convert to Fixed"
 msgstr ""
 "Wählen Sie eine Cornu- oder ein Bezier-Gleis um es festes Gleis zu wandeln"
 
-#: ../bin/ccornu.c:2905
+#: ../bin/ccornu.c:2903
 msgid "Convert all Selected Tracks to Fixed Tracks?"
 msgstr "Sollen alle ausgewählten Gleise in feste Gleise umgewandelt werden?"
 
-#: ../bin/ccornu.c:2914
+#: ../bin/ccornu.c:2912
 msgid "Convert Bezier and Cornu"
 msgstr "Bezier-Kurve oder Cornu umwandeln"
 
-#: ../bin/ccornu.c:2982
+#: ../bin/ccornu.c:2980
 msgid "Convert"
 msgstr "Umwandeln"
 
-#: ../bin/ccornu.c:2983
+#: ../bin/ccornu.c:2981
 msgid "Convert To Cornu"
 msgstr "In Cornu erstellen"
 
-#: ../bin/ccornu.c:2984
+#: ../bin/ccornu.c:2982
 msgid "Convert From Cornu"
 msgstr "Aus Cornu umwandeln"
 
@@ -798,13 +802,13 @@ msgstr "Sehne ziehen Länge=%s Winkel=%0.3f"
 msgid "Drag on Red arrows to adjust curve"
 msgstr "An den roten Pfeilen ziehen, um die Kurve anzupassen"
 
-#: ../bin/ccurve.c:497 ../bin/cjoin.c:208 ../bin/cmodify.c:577
+#: ../bin/ccurve.c:497 ../bin/cjoin.c:208 ../bin/cmodify.c:579
 #: ../bin/cturntbl.c:580
 #, c-format
 msgid "Straight Track: Length=%s Angle=%0.3f"
 msgstr "Gleisgerade: Länge=%s Winkel=%0.3f"
 
-#: ../bin/ccurve.c:504 ../bin/cmodify.c:582 ../bin/drawgeom.c:618
+#: ../bin/ccurve.c:504 ../bin/cmodify.c:584 ../bin/drawgeom.c:618
 #: ../wlib/gtklib/ixhelp.c:235
 msgid "Back"
 msgstr "Zurück"
@@ -826,9 +830,9 @@ msgstr "Erstelle Gleisbogen"
 msgid "Elevation Difference"
 msgstr "Höhenunterschied"
 
-#: ../bin/ccurve.c:653 ../bin/cdraw.c:511 ../bin/cdraw.c:1401
-#: ../bin/cdraw.c:1543 ../bin/cdraw.c:2082 ../bin/cdraw.c:2281
-#: ../bin/cdraw.c:2295 ../bin/compound.c:545 ../bin/compound.c:550
+#: ../bin/ccurve.c:653 ../bin/cdraw.c:511 ../bin/cdraw.c:1403
+#: ../bin/cdraw.c:1549 ../bin/cdraw.c:2088 ../bin/cdraw.c:2287
+#: ../bin/cdraw.c:2301 ../bin/compound.c:545 ../bin/compound.c:550
 #: ../bin/compound.c:555 ../bin/compound.c:560 ../bin/ctodesgn.c:180
 #: ../bin/ctodesgn.c:181 ../bin/ctodesgn.c:182 ../bin/ctodesgn.c:183
 #: ../bin/ctodesgn.c:299 ../bin/ctodesgn.c:302 ../bin/ctodesgn.c:304
@@ -931,7 +935,7 @@ msgstr "Bogen um Mittelpunkt"
 msgid "Curve from Chord"
 msgstr "Bogen aus Sehne"
 
-#: ../bin/ccurve.c:953 ../bin/cdraw.c:2423
+#: ../bin/ccurve.c:953 ../bin/cdraw.c:2429
 msgid "Bezier Curve"
 msgstr "Bezierkurve"
 
@@ -967,20 +971,20 @@ msgstr "Erster Punkt: X,Y"
 msgid "Center: X,Y"
 msgstr "Mittelpunkt: X,Y"
 
-#: ../bin/cdraw.c:508 ../bin/cdraw.c:529 ../bin/cdraw.c:1532
-#: ../bin/cdraw.c:2080 ../bin/cdraw.c:2302 ../bin/cdraw.c:2322
-#: ../bin/cdraw.c:2326 ../bin/compound.c:543 ../bin/compound.c:548
-#: ../bin/compound.c:553 ../bin/compound.c:558 ../bin/compound.c:564
-#: ../bin/cprint.c:155 ../bin/csignal.c:240 ../bin/csignal.c:515
-#: ../bin/ctodesgn.c:188 ../bin/ctodesgn.c:189 ../bin/ctodesgn.c:190
-#: ../bin/ctodesgn.c:192 ../bin/ctodesgn.c:237 ../bin/ctodesgn.c:260
-#: ../bin/ctodesgn.c:262 ../bin/ctodesgn.c:297 ../bin/ctodesgn.c:300
-#: ../bin/ctodesgn.c:326 ../bin/ctodesgn.c:329 ../bin/ctodesgn.c:363
-#: ../bin/ctodesgn.c:368 ../bin/ctodesgn.c:392 ../bin/ctodesgn.c:396
-#: ../bin/ctodesgn.c:433 ../bin/ctodesgn.c:437 ../bin/ctodesgn.c:442
-#: ../bin/ctodesgn.c:468 ../bin/ctodesgn.c:488 ../bin/ctodesgn.c:509
-#: ../bin/ctodesgn.c:616 ../bin/ctrain.c:184 ../bin/tease.c:524
-#: ../bin/tstraigh.c:90
+#: ../bin/cdraw.c:508 ../bin/cdraw.c:529 ../bin/cdraw.c:1393
+#: ../bin/cdraw.c:1538 ../bin/cdraw.c:2086 ../bin/cdraw.c:2308
+#: ../bin/cdraw.c:2328 ../bin/cdraw.c:2332 ../bin/compound.c:543
+#: ../bin/compound.c:548 ../bin/compound.c:553 ../bin/compound.c:558
+#: ../bin/compound.c:564 ../bin/cprint.c:155 ../bin/csignal.c:240
+#: ../bin/csignal.c:515 ../bin/ctodesgn.c:188 ../bin/ctodesgn.c:189
+#: ../bin/ctodesgn.c:190 ../bin/ctodesgn.c:192 ../bin/ctodesgn.c:237
+#: ../bin/ctodesgn.c:260 ../bin/ctodesgn.c:262 ../bin/ctodesgn.c:297
+#: ../bin/ctodesgn.c:300 ../bin/ctodesgn.c:326 ../bin/ctodesgn.c:329
+#: ../bin/ctodesgn.c:363 ../bin/ctodesgn.c:368 ../bin/ctodesgn.c:392
+#: ../bin/ctodesgn.c:396 ../bin/ctodesgn.c:433 ../bin/ctodesgn.c:437
+#: ../bin/ctodesgn.c:442 ../bin/ctodesgn.c:468 ../bin/ctodesgn.c:488
+#: ../bin/ctodesgn.c:509 ../bin/ctodesgn.c:616 ../bin/ctrain.c:184
+#: ../bin/tease.c:524 ../bin/tstraigh.c:90
 msgid "Angle"
 msgstr "Winkel"
 
@@ -992,14 +996,14 @@ msgstr "Winkel (gegen Uhrzeigersinn)"
 msgid "CW Angle"
 msgstr "Winkel (im Uhrzeigersinn)"
 
-#: ../bin/cdraw.c:513 ../bin/cdraw.c:1398 ../bin/cdraw.c:1516
+#: ../bin/cdraw.c:513 ../bin/cdraw.c:1400 ../bin/cdraw.c:1522
 #: ../bin/cprint.c:130
 msgid "Height"
 msgstr "Seitenhöhe"
 
-#: ../bin/cdraw.c:514 ../bin/cdraw.c:1396 ../bin/cdraw.c:1515
-#: ../bin/cdraw.c:2077 ../bin/cdraw.c:2339 ../bin/ctrain.c:186
-#: ../bin/dcar.c:2167
+#: ../bin/cdraw.c:514 ../bin/cdraw.c:1398 ../bin/cdraw.c:1521
+#: ../bin/cdraw.c:2083 ../bin/cdraw.c:2345 ../bin/ctrain.c:186
+#: ../bin/dcar.c:2165
 msgid "Width"
 msgstr "Breite"
 
@@ -1011,7 +1015,7 @@ msgstr "Relativer Bezugspunkt"
 msgid "Rot Origin: X,Y"
 msgstr "Drehzentrum: X,Y"
 
-#: ../bin/cdraw.c:517 ../bin/cdraw.c:1405
+#: ../bin/cdraw.c:517 ../bin/cdraw.c:1407
 msgid "Rotate Angle"
 msgstr "Drehwinkel"
 
@@ -1019,18 +1023,18 @@ msgstr "Drehwinkel"
 msgid "Point Count"
 msgstr "Anzahl der Punkte"
 
-#: ../bin/cdraw.c:519 ../bin/cdraw.c:2055 ../bin/ctodesgn.c:202
+#: ../bin/cdraw.c:519 ../bin/cdraw.c:2061 ../bin/ctodesgn.c:202
 #: ../bin/tbezier.c:261
 msgid "Line Width"
 msgstr "Strichdicke"
 
-#: ../bin/cdraw.c:520 ../bin/cdraw.c:2084 ../bin/tbezier.c:260
+#: ../bin/cdraw.c:520 ../bin/cdraw.c:2090 ../bin/tbezier.c:260
 msgid "Line Type"
 msgstr "Linienart"
 
-#: ../bin/cdraw.c:521 ../bin/cdraw.c:2057 ../bin/cdraw.c:2059
-#: ../bin/cdraw.c:2157 ../bin/cdraw.c:2190 ../bin/cmisc.c:125 ../bin/ctext.c:68
-#: ../bin/ctext.c:147 ../bin/ctodesgn.c:203 ../bin/dcar.c:2163
+#: ../bin/cdraw.c:521 ../bin/cdraw.c:2063 ../bin/cdraw.c:2065
+#: ../bin/cdraw.c:2163 ../bin/cdraw.c:2196 ../bin/cmisc.c:125 ../bin/ctext.c:68
+#: ../bin/ctext.c:147 ../bin/ctodesgn.c:203 ../bin/dcar.c:2161
 #: ../bin/dlayer.c:485 ../bin/doption.c:524
 msgid "Color"
 msgstr "Farbe"
@@ -1048,7 +1052,7 @@ msgstr "Offenes Ende"
 msgid "Boxed"
 msgstr "Eingerahmt"
 
-#: ../bin/cdraw.c:525 ../bin/cdraw.c:1080 ../bin/cdraw.c:2091
+#: ../bin/cdraw.c:525 ../bin/cdraw.c:1080 ../bin/cdraw.c:2097
 msgid "Lumber"
 msgstr "Holzleiste"
 
@@ -1056,7 +1060,7 @@ msgstr "Holzleiste"
 msgid "Orientation"
 msgstr "Ausrichtung"
 
-#: ../bin/cdraw.c:527 ../bin/cdraw.c:2073
+#: ../bin/cdraw.c:527 ../bin/cdraw.c:2079
 #: ../../../../build/work/app/bin/bllnhlp.c:584
 msgid "Size"
 msgstr "Größe"
@@ -1108,16 +1112,16 @@ msgstr "Ebene"
 msgid "Straight Line"
 msgstr "Gerade Linie"
 
-#: ../bin/cdraw.c:1070 ../bin/cdraw.c:2415
+#: ../bin/cdraw.c:1070 ../bin/cdraw.c:2421
 msgid "Dimension Line"
 msgstr "Maßlinie"
 
-#: ../bin/cdraw.c:1091 ../bin/cdraw.c:2092 ../bin/cdraw.c:2417
+#: ../bin/cdraw.c:1091 ../bin/cdraw.c:2098 ../bin/cdraw.c:2423
 msgid "Table Edge"
 msgstr "Tischkante"
 
-#: ../bin/cdraw.c:1111 ../bin/cdraw.c:2097 ../bin/cdraw.c:2098
-#: ../bin/cdraw.c:2099
+#: ../bin/cdraw.c:1111 ../bin/cdraw.c:2103 ../bin/cdraw.c:2104
+#: ../bin/cdraw.c:2105
 msgid "Circle"
 msgstr "Kreis"
 
@@ -1125,8 +1129,8 @@ msgstr "Kreis"
 msgid "Curved Line"
 msgstr "Gebogene Linie"
 
-#: ../bin/cdraw.c:1137 ../bin/cdraw.c:2102 ../bin/cdraw.c:2103
-#: ../bin/cdraw.c:2104
+#: ../bin/cdraw.c:1137 ../bin/cdraw.c:2108 ../bin/cdraw.c:2109
+#: ../bin/cdraw.c:2110
 msgid "Filled Circle"
 msgstr "Gefüllter Kreis"
 
@@ -1134,11 +1138,11 @@ msgstr "Gefüllter Kreis"
 msgid "Rectangle"
 msgstr "Rechteck"
 
-#: ../bin/cdraw.c:1170 ../bin/cdraw.c:2108
+#: ../bin/cdraw.c:1170 ../bin/cdraw.c:2114
 msgid "Polyline"
 msgstr "Polylinie"
 
-#: ../bin/cdraw.c:1174 ../bin/cdraw.c:2101 ../bin/cdraw.c:2434
+#: ../bin/cdraw.c:1174 ../bin/cdraw.c:2107 ../bin/cdraw.c:2440
 msgid "Polygon"
 msgstr "Vieleck"
 
@@ -1146,7 +1150,7 @@ msgstr "Vieleck"
 msgid "Filled Rectangle"
 msgstr "Gefülltes Rechteck"
 
-#: ../bin/cdraw.c:1205 ../bin/cdraw.c:2106 ../bin/cdraw.c:2435
+#: ../bin/cdraw.c:1205 ../bin/cdraw.c:2112 ../bin/cdraw.c:2441
 msgid "Filled Polygon"
 msgstr "Gefülltes Ploygon"
 
@@ -1155,17 +1159,17 @@ msgstr "Gefülltes Ploygon"
 msgid "%s(%d) Layer=%d"
 msgstr "%s (%d) Ebene=%d"
 
-#: ../bin/cdraw.c:1251 ../bin/cdraw.c:2160 ../bin/compound.c:954
+#: ../bin/cdraw.c:1251 ../bin/cdraw.c:2166 ../bin/compound.c:954
 #: ../bin/doption.c:115 ../bin/tbezier.c:458
 msgid "Solid"
 msgstr "Gefüllt"
 
-#: ../bin/cdraw.c:1252 ../bin/cdraw.c:2162 ../bin/compound.c:955
+#: ../bin/cdraw.c:1252 ../bin/cdraw.c:2168 ../bin/compound.c:955
 #: ../bin/doption.c:112 ../bin/tbezier.c:459
 msgid "Dash"
 msgstr "Gestrichelt"
 
-#: ../bin/cdraw.c:1253 ../bin/cdraw.c:2161 ../bin/compound.c:956
+#: ../bin/cdraw.c:1253 ../bin/cdraw.c:2167 ../bin/compound.c:956
 #: ../bin/tbezier.c:460
 msgid "Dot"
 msgstr "Punkt"
@@ -1178,335 +1182,335 @@ msgstr "Strich Punkt"
 msgid "DashDotDot"
 msgstr "Strich Punkt  Punkt"
 
-#: ../bin/cdraw.c:1260 ../bin/cdraw.c:2208
+#: ../bin/cdraw.c:1260 ../bin/cdraw.c:2214
 msgid "Tiny"
 msgstr "Winzig"
 
-#: ../bin/cdraw.c:1261 ../bin/cdraw.c:2209
+#: ../bin/cdraw.c:1261 ../bin/cdraw.c:2215
 msgid "Small"
 msgstr "Klein"
 
-#: ../bin/cdraw.c:1262 ../bin/cdraw.c:2210
+#: ../bin/cdraw.c:1262 ../bin/cdraw.c:2216
 msgid "Medium"
 msgstr "Mittel"
 
-#: ../bin/cdraw.c:1263 ../bin/cdraw.c:2211
+#: ../bin/cdraw.c:1263 ../bin/cdraw.c:2217
 msgid "Large"
 msgstr "Groß"
 
-#: ../bin/cdraw.c:1394
+#: ../bin/cdraw.c:1396
 msgid "Relative Angle"
 msgstr "Relativer Winkel"
 
-#: ../bin/cdraw.c:1403 ../bin/cdraw.c:1547 ../bin/cdraw.c:2296
+#: ../bin/cdraw.c:1405 ../bin/cdraw.c:1553 ../bin/cdraw.c:2302
 msgid "Arc Angle"
 msgstr "Bogenwinkel"
 
-#: ../bin/cdraw.c:1408
+#: ../bin/cdraw.c:1410
 msgid "Rot Center X"
 msgstr "Drehzentrum X"
 
-#: ../bin/cdraw.c:1410
+#: ../bin/cdraw.c:1412
 msgid "Rot Center Y"
 msgstr "Drehzentrum Y"
 
-#: ../bin/cdraw.c:1503
+#: ../bin/cdraw.c:1509
 msgid "Seg Lth"
 msgstr "Segment Länge"
 
-#: ../bin/cdraw.c:1504
+#: ../bin/cdraw.c:1510
 msgid "Rel Ang"
 msgstr "Rel. Winkel"
 
-#: ../bin/cdraw.c:2062 ../bin/cdraw.c:2064 ../bin/cdraw.c:2188
+#: ../bin/cdraw.c:2068 ../bin/cdraw.c:2070 ../bin/cdraw.c:2194
 msgid "Lumber Type"
 msgstr "Leistenart"
 
-#: ../bin/cdraw.c:2089
+#: ../bin/cdraw.c:2095
 msgid "Straight"
 msgstr "Gerade"
 
-#: ../bin/cdraw.c:2090
+#: ../bin/cdraw.c:2096
 msgid "Dimension"
 msgstr "Abmessung"
 
-#: ../bin/cdraw.c:2093 ../bin/cdraw.c:2094 ../bin/cdraw.c:2095
-#: ../bin/cdraw.c:2096
+#: ../bin/cdraw.c:2099 ../bin/cdraw.c:2100 ../bin/cdraw.c:2101
+#: ../bin/cdraw.c:2102
 msgid "Curved"
 msgstr "Gebogen"
 
-#: ../bin/cdraw.c:2100 ../bin/cdraw.c:2432
+#: ../bin/cdraw.c:2106 ../bin/cdraw.c:2438
 msgid "Box"
 msgstr "Rechteck"
 
-#: ../bin/cdraw.c:2105 ../bin/cdraw.c:2433
+#: ../bin/cdraw.c:2111 ../bin/cdraw.c:2439
 msgid "Filled Box"
 msgstr "Gefülltes Rechteck"
 
-#: ../bin/cdraw.c:2107 ../bin/tbezier.c:455
+#: ../bin/cdraw.c:2113 ../bin/tbezier.c:455
 msgid "Bezier Line"
 msgstr "Bezierlinie"
 
-#: ../bin/cdraw.c:2155
+#: ../bin/cdraw.c:2161
 #, c-format
 msgid "%s Line Width"
 msgstr "%s Strichdicke"
 
-#: ../bin/cdraw.c:2158 ../bin/dcar.c:2136 ../bin/dcar.c:4312 ../bin/dcar.c:4317
+#: ../bin/cdraw.c:2164 ../bin/dcar.c:2134 ../bin/dcar.c:4310 ../bin/dcar.c:4315
 msgid "Type"
 msgstr "Typ"
 
-#: ../bin/cdraw.c:2163
+#: ../bin/cdraw.c:2169
 msgid "Dash-Dot"
 msgstr "Strichpunktiert"
 
-#: ../bin/cdraw.c:2164
+#: ../bin/cdraw.c:2170
 msgid "Dash-Dot-Dot"
 msgstr "Strich-Punkt-Punkt"
 
-#: ../bin/cdraw.c:2177
+#: ../bin/cdraw.c:2183
 #, c-format
 msgid "%s Color"
 msgstr "%s Farbe"
 
-#: ../bin/cdraw.c:2206
+#: ../bin/cdraw.c:2212
 msgid "Dimension Line Size"
 msgstr "Maßliniengröße"
 
-#: ../bin/cdraw.c:2218
+#: ../bin/cdraw.c:2224
 msgid "Drag to create Table Edge"
 msgstr "Durch Ziehen die Tischkante erstellen"
 
-#: ../bin/cdraw.c:2320
+#: ../bin/cdraw.c:2326
 msgid "Seg Length"
 msgstr "Segmentlänge"
 
-#: ../bin/cdraw.c:2324
+#: ../bin/cdraw.c:2330
 msgid "Rel Angle"
 msgstr "Relativer  Winkel"
 
-#: ../bin/cdraw.c:2414
+#: ../bin/cdraw.c:2420
 msgid "Line"
 msgstr "Linie"
 
-#: ../bin/cdraw.c:2414
+#: ../bin/cdraw.c:2420
 msgid "Draw Line"
 msgstr "Zeichne Linie"
 
-#: ../bin/cdraw.c:2415
+#: ../bin/cdraw.c:2421
 msgid "Draw Dimension Line"
 msgstr "Zeichne Maßlinie"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:363
-#: ../bin/cdraw.c:2416 ../../../../build/work/app/i18n/custmsg.h:1249
+#: ../bin/cdraw.c:2422 ../../../../build/work/app/i18n/custmsg.h:1249
 msgid "Benchwork"
 msgstr "Unterbau"
 
-#: ../bin/cdraw.c:2416
+#: ../bin/cdraw.c:2422
 msgid "Draw Benchwork"
 msgstr "Zeichne Unterbau"
 
-#: ../bin/cdraw.c:2417
+#: ../bin/cdraw.c:2423
 msgid "Draw Table Edge"
 msgstr "Zeichne Tischkante"
 
-#: ../bin/cdraw.c:2419
+#: ../bin/cdraw.c:2425
 msgid "Curve End"
 msgstr "Kurvenenden"
 
-#: ../bin/cdraw.c:2419
+#: ../bin/cdraw.c:2425
 msgid "Draw Curve from End"
 msgstr "Zeichne Kurve durch Enden"
 
-#: ../bin/cdraw.c:2420
+#: ../bin/cdraw.c:2426
 msgid "Curve Tangent"
 msgstr "Kurve Tangente"
 
-#: ../bin/cdraw.c:2420
+#: ../bin/cdraw.c:2426
 msgid "Draw Curve from Tangent"
 msgstr "Zeichne Kurve an Tangente"
 
-#: ../bin/cdraw.c:2421
+#: ../bin/cdraw.c:2427
 msgid "Curve Center"
 msgstr "Kurve um Mittelpunkt"
 
-#: ../bin/cdraw.c:2421
+#: ../bin/cdraw.c:2427
 msgid "Draw Curve from Center"
 msgstr "Zeichne Kurve um Mittelpunkt"
 
-#: ../bin/cdraw.c:2422
+#: ../bin/cdraw.c:2428
 msgid "Curve Chord"
 msgstr "Kurve durch Sehne"
 
-#: ../bin/cdraw.c:2422
+#: ../bin/cdraw.c:2428
 msgid "Draw Curve from Chord"
 msgstr "Zeichne Kurve durch Sehne"
 
-#: ../bin/cdraw.c:2423
+#: ../bin/cdraw.c:2429
 msgid "Draw Bezier"
 msgstr "Zeichne Bezier"
 
-#: ../bin/cdraw.c:2426
+#: ../bin/cdraw.c:2432
 msgid "Circle Tangent"
 msgstr "Kreis an Tangente"
 
-#: ../bin/cdraw.c:2426
+#: ../bin/cdraw.c:2432
 msgid "Draw Circle from Tangent"
 msgstr "Zeichne Kreis an Tangente"
 
-#: ../bin/cdraw.c:2427
+#: ../bin/cdraw.c:2433
 msgid "Circle Center"
 msgstr "Kreismittelpunkt"
 
-#: ../bin/cdraw.c:2427
+#: ../bin/cdraw.c:2433
 msgid "Draw Circle from Center"
 msgstr "Zeichne Kreis um Mittelpunkt"
 
-#: ../bin/cdraw.c:2429
+#: ../bin/cdraw.c:2435
 msgid "Circle Filled Tangent"
 msgstr "Gefüllter Kreis  an Tangente"
 
-#: ../bin/cdraw.c:2429
+#: ../bin/cdraw.c:2435
 msgid "Draw Filled Circle from Tangent"
 msgstr "Gefüllter Kreis an Tangente"
 
-#: ../bin/cdraw.c:2430
+#: ../bin/cdraw.c:2436
 msgid "Circle Filled Center"
 msgstr "Gefüllter Kreis Mittelpunkt"
 
-#: ../bin/cdraw.c:2430
+#: ../bin/cdraw.c:2436
 msgid "Draw Filled Circle from Center"
 msgstr "Gefüllter Kreis von Mittelpunkt"
 
-#: ../bin/cdraw.c:2432
+#: ../bin/cdraw.c:2438
 msgid "Draw Box"
 msgstr "Zeichne Rechteck"
 
-#: ../bin/cdraw.c:2433
+#: ../bin/cdraw.c:2439
 msgid "Draw Filled Box"
 msgstr "Zeichne gefülltes Rechteck"
 
-#: ../bin/cdraw.c:2434
+#: ../bin/cdraw.c:2440
 msgid "Draw Polygon"
 msgstr "Zeichne Vieleck"
 
-#: ../bin/cdraw.c:2435
+#: ../bin/cdraw.c:2441
 msgid "Draw Filled Polygon"
 msgstr "Gefülltes Polygon zeichnen"
 
-#: ../bin/cdraw.c:2436
+#: ../bin/cdraw.c:2442
 msgid "PolyLine"
 msgstr "Polylinie"
 
-#: ../bin/cdraw.c:2436
+#: ../bin/cdraw.c:2442
 msgid "Draw PolyLine"
 msgstr "Zeichne Polylinie"
 
-#: ../bin/cdraw.c:2453
+#: ../bin/cdraw.c:2459
 msgid "Straight Objects"
 msgstr "Gerade Objekte"
 
-#: ../bin/cdraw.c:2453
+#: ../bin/cdraw.c:2459
 msgid "Draw Straight Objects"
 msgstr "Zeichne gerade Objekte"
 
-#: ../bin/cdraw.c:2454
+#: ../bin/cdraw.c:2460
 msgid "Curved Lines"
 msgstr "Gebogene Linien"
 
-#: ../bin/cdraw.c:2454
+#: ../bin/cdraw.c:2460
 msgid "Draw Curved Lines"
 msgstr "Zeichne gebogene Linien"
 
-#: ../bin/cdraw.c:2455
+#: ../bin/cdraw.c:2461
 msgid "Circle Lines"
 msgstr "Kreislinien"
 
-#: ../bin/cdraw.c:2455
+#: ../bin/cdraw.c:2461
 msgid "Draw Circles"
 msgstr "Zeichne Kreise"
 
-#: ../bin/cdraw.c:2456
+#: ../bin/cdraw.c:2462
 msgid "Shapes"
 msgstr "Formen"
 
-#: ../bin/cdraw.c:2456
+#: ../bin/cdraw.c:2462
 msgid "Draw Shapes"
 msgstr "Zeichne Formen"
 
-#: ../bin/cdraw.c:2732
+#: ../bin/cdraw.c:2738
 msgid "Close Polygon - 'c'"
 msgstr "Schliesse Ploygon - 'c'"
 
-#: ../bin/cdraw.c:2733
+#: ../bin/cdraw.c:2739
 msgid "Make PolyLine - 'l'"
 msgstr "Erstelle PolyLine - 'I'"
 
-#: ../bin/cdraw.c:2734
+#: ../bin/cdraw.c:2740
 msgid "Fill Polygon - 'f'"
 msgstr "Gefülltes Polygon - 'f'"
 
-#: ../bin/cdraw.c:2735
+#: ../bin/cdraw.c:2741
 msgid "Empty Polygon - 'e'"
 msgstr "Leeres Polygon - 'e'."
 
-#: ../bin/cdraw.c:2737
+#: ../bin/cdraw.c:2743
 msgid "Points Mode - 'p'"
 msgstr "Punkte-Modus - 'p"
 
-#: ../bin/cdraw.c:2738
+#: ../bin/cdraw.c:2744
 msgid "Delete Selected Point - 'Del'"
 msgstr "Ausgewählten Punkt löschen - 'Entf'."
 
-#: ../bin/cdraw.c:2739
+#: ../bin/cdraw.c:2745
 msgid "Vertex Point - 'v'"
 msgstr "Eckpunkt - 'v"
 
-#: ../bin/cdraw.c:2740
+#: ../bin/cdraw.c:2746
 msgid "Round Corner - 'r'"
 msgstr "Runde Ecke - 'r'."
 
-#: ../bin/cdraw.c:2741
+#: ../bin/cdraw.c:2747
 msgid "Smooth Corner - 's'"
 msgstr "Abgerundete Ecke - 's"
 
-#: ../bin/cdraw.c:2743 ../bin/cselect.c:3211
+#: ../bin/cdraw.c:2749 ../bin/cselect.c:3340
 msgid "LineType..."
 msgstr "Linienart..."
 
-#: ../bin/cdraw.c:2744 ../bin/cselect.c:3212
+#: ../bin/cdraw.c:2750 ../bin/cselect.c:3341
 msgid "Solid Line"
 msgstr "Durchgezogene Linie"
 
-#: ../bin/cdraw.c:2745 ../bin/cselect.c:3213
+#: ../bin/cdraw.c:2751 ../bin/cselect.c:3342
 msgid "Dashed Line"
 msgstr "Gestrichelte Linie"
 
-#: ../bin/cdraw.c:2746 ../bin/cselect.c:3214
+#: ../bin/cdraw.c:2752 ../bin/cselect.c:3343
 msgid "Dotted Line"
 msgstr "Gepunktete Linie"
 
-#: ../bin/cdraw.c:2747
+#: ../bin/cdraw.c:2753
 msgid "Dash-Dot Line"
 msgstr "Strich-Punkt Linie"
 
-#: ../bin/cdraw.c:2748
+#: ../bin/cdraw.c:2754
 msgid "Dash-Dot-Dot Line"
 msgstr "Strich-Punkt-Punkt Linie"
 
-#: ../bin/cdraw.c:2750
+#: ../bin/cdraw.c:2756
 msgid "Origin Mode - 'o'"
 msgstr "Bezugs-Modus - \"o\"."
 
-#: ../bin/cdraw.c:2751
+#: ../bin/cdraw.c:2757
 msgid "Reset Origin - '0'"
 msgstr "Bezugspunkt zurücksetzen - '0'."
 
-#: ../bin/cdraw.c:2752
+#: ../bin/cdraw.c:2758
 msgid "Origin to Selected - 'l'"
 msgstr "Ausgewählter als Bezugspunkt - 'l'."
 
-#: ../bin/cdraw.c:2753
+#: ../bin/cdraw.c:2759
 msgid "Origin to Centroid - 'c'"
 msgstr "Schwerpunkt als  Bezugspunkt - 'c"
 
@@ -1533,7 +1537,7 @@ msgid "Station"
 msgstr "Bahnhof"
 
 #: ../bin/celev.c:47 ../bin/cprofile.c:1524 ../bin/dcmpnd.c:75
-#: ../bin/misc.c:2718
+#: ../bin/misc.c:2726
 msgid "Ignore"
 msgstr "Ignorieren"
 
@@ -1553,7 +1557,7 @@ msgstr "Höhe"
 #: ../bin/celev.c:362 ../bin/cmisc.c:459 ../bin/dcontmgm.c:300
 #: ../bin/dcustmgm.c:396 ../bin/dlayer.c:1124 ../bin/dpricels.c:154
 #: ../bin/filenoteui.c:249 ../bin/linknoteui.c:182
-#: ../bin/paramfilesearch_ui.c:371 ../bin/textnoteui.c:171
+#: ../bin/paramfilesearch_ui.c:370 ../bin/textnoteui.c:171
 msgid "Done"
 msgstr "Fertig"
 
@@ -1622,17 +1626,17 @@ msgid "Replace with new group?"
 msgstr "Durch neue Gruppe ersetzen?"
 
 #: ../bin/cgroup.c:623 ../bin/compound.c:566 ../bin/cstruct.c:72
-#: ../bin/ctodesgn.c:194 ../bin/ctodesgn.c:2914 ../bin/cturnout.c:81
-#: ../bin/dcar.c:2128 ../bin/dcar.c:4312 ../bin/dcar.c:4317 ../bin/dcmpnd.c:456
+#: ../bin/ctodesgn.c:194 ../bin/ctodesgn.c:2916 ../bin/cturnout.c:81
+#: ../bin/dcar.c:2126 ../bin/dcar.c:4310 ../bin/dcar.c:4315 ../bin/dcmpnd.c:456
 #: ../bin/dcustmgm.c:59 ../../../../build/work/app/bin/bllnhlp.c:370
 #: ../../../../build/work/app/bin/bllnhlp.c:561
 msgid "Manufacturer"
 msgstr "Hersteller"
 
 #: ../bin/cgroup.c:624 ../bin/cmisc.c:459 ../bin/cstruct.c:72
-#: ../bin/ctodesgn.c:2915 ../bin/ctodesgn.c:2916 ../bin/ctrain.c:187
-#: ../bin/cturnout.c:81 ../bin/dcar.c:2144 ../bin/dcar.c:4313
-#: ../bin/dcar.c:4318 ../bin/dcmpnd.c:457 ../bin/dcustmgm.c:60
+#: ../bin/ctodesgn.c:2917 ../bin/ctodesgn.c:2918 ../bin/ctrain.c:187
+#: ../bin/cturnout.c:81 ../bin/dcar.c:2142 ../bin/dcar.c:4311
+#: ../bin/dcar.c:4316 ../bin/dcmpnd.c:457 ../bin/dcustmgm.c:60
 #: ../bin/denum.c:182 ../bin/denum.c:183 ../bin/denum.c:186
 #: ../../../../build/work/app/bin/bllnhlp.c:371
 msgid "Description"
@@ -1848,7 +1852,7 @@ msgstr "Eigenschaften"
 msgid "Bridge"
 msgstr "Brücke"
 
-#: ../bin/cmodify.c:202 ../bin/cmodify.c:468
+#: ../bin/cmodify.c:202 ../bin/cmodify.c:470
 msgid "Modify Track"
 msgstr "Gleis bearbeiten"
 
@@ -1860,50 +1864,50 @@ msgstr ""
 "Wählen Sie ein Gleis zum Verändern aus, ändern Sie mit der linken Maustaste "
 "die Länge, fügen Sie mit der rechten Maustaste ein Flexgleis hinzu"
 
-#: ../bin/cmodify.c:509
+#: ../bin/cmodify.c:511
 msgid "Drag to add flex track"
 msgstr "Ziehen um Flexgleis zu erstellen"
 
-#: ../bin/cmodify.c:514
+#: ../bin/cmodify.c:516
 msgid "No track to extend"
 msgstr "Keine Gleise zu erweitern"
 
-#: ../bin/cmodify.c:519
+#: ../bin/cmodify.c:521
 msgid "No track selected"
 msgstr "Keine Gleise ausgewählt"
 
-#: ../bin/cmodify.c:652
+#: ../bin/cmodify.c:654
 #, c-format
 msgid "Curve Track: Radius=%s Length=%s Angle=%0.3f"
 msgstr "Gleisbogen: Radius=%s Länge=%s Winkel=%0.3f"
 
-#: ../bin/cmodify.c:667
+#: ../bin/cmodify.c:669
 msgid "Extend Track"
 msgstr "Gleis verlängern"
 
-#: ../bin/cmodify.c:787
+#: ../bin/cmodify.c:789
 msgid "Modify"
 msgstr "Verändern"
 
-#: ../bin/cmodify.c:794 ../bin/cselect.c:3172 ../bin/cselect.c:3184
-#: ../bin/misc.c:2175 ../bin/misc.c:2177
+#: ../bin/cmodify.c:796 ../bin/cselect.c:3301 ../bin/cselect.c:3313
+#: ../bin/misc.c:2179 ../bin/misc.c:2181
 msgid "Zoom In"
 msgstr "Zoom größer"
 
-#: ../bin/cmodify.c:795 ../bin/cselect.c:3173 ../bin/cselect.c:3185
-#: ../bin/misc.c:2179 ../bin/misc.c:2181
+#: ../bin/cmodify.c:797 ../bin/cselect.c:3302 ../bin/cselect.c:3314
+#: ../bin/misc.c:2183 ../bin/misc.c:2185
 msgid "Zoom Out"
 msgstr "Zoom kleiner"
 
-#: ../bin/cmodify.c:796
+#: ../bin/cmodify.c:798
 msgid "Pan center - '@'"
 msgstr "Ausschnitt hier zentrieren - '@'."
 
-#: ../bin/cnote.c:68 ../bin/textnoteui.c:48 ../bin/trknote.c:59
+#: ../bin/cnote.c:69 ../bin/textnoteui.c:48 ../bin/trknote.c:60
 msgid "Note"
 msgstr "Notiz"
 
-#: ../bin/cnote.c:74
+#: ../bin/cnote.c:75
 msgid "Replace this text with your layout notes"
 msgstr "Ersetzen Sie diesen Text durch Ihre Notizen"
 
@@ -1938,7 +1942,7 @@ msgid "Z4"
 msgstr "Z4"
 
 #: ../bin/compound.c:568 ../bin/cstruct.c:72 ../bin/cturnout.c:81
-#: ../bin/dcar.c:4312 ../bin/dcar.c:4317 ../bin/dcustmgm.c:60
+#: ../bin/dcar.c:4310 ../bin/dcar.c:4315 ../bin/dcustmgm.c:60
 #: ../bin/doption.c:118 ../bin/doption.c:119
 msgid "Part No"
 msgstr "Teilenr"
@@ -1952,7 +1956,7 @@ msgid "Structure"
 msgstr "Gebäude"
 
 #: ../bin/compound.c:832 ../bin/cswitchmotor.c:228 ../bin/cturnout.c:970
-#: ../bin/cturnout.c:2760
+#: ../bin/cturnout.c:2759
 msgid "Turnout"
 msgstr "Weiche"
 
@@ -2096,7 +2100,7 @@ msgid "Y"
 msgstr "Y"
 
 #: ../bin/cprint.c:154 ../bin/cprint.c:620 ../bin/cprofile.c:707
-#: ../bin/dcar.c:2148
+#: ../bin/dcar.c:2146
 msgid "Reset"
 msgstr "Zurücksetzen"
 
@@ -2104,7 +2108,7 @@ msgstr "Zurücksetzen"
 msgid "Setup"
 msgstr "Einstellungen"
 
-#: ../bin/cprint.c:157 ../bin/cselect.c:3176 ../bin/misc.c:2206
+#: ../bin/cprint.c:157 ../bin/cselect.c:3305 ../bin/misc.c:2210
 msgid "Select All"
 msgstr "Alles auswählen"
 
@@ -2133,7 +2137,7 @@ msgid "PrintScale 1:%ld   Room %s x %s   Model Scale %s   File %s"
 msgstr "Druckmaßstab 1:%ld Raum %s x %s Modellmaßstab %s Datei %s"
 
 #: ../bin/cprint.c:716 ../bin/dbitmap.c:208 ../bin/filenoteui.c:158
-#: ../bin/misc.c:1218 ../bin/misc.c:1296 ../bin/param.c:2609
+#: ../bin/misc.c:1222 ../bin/misc.c:1300 ../bin/param.c:2618
 #: ../wlib/gtklib/browserhelp.c:87 ../../../../build/work/app/bin/bllnhlp.c:580
 msgid "Cancel"
 msgstr "Abbruch"
@@ -2142,7 +2146,7 @@ msgstr "Abbruch"
 msgid "Print Margins"
 msgstr "Druckbegrenzungen"
 
-#: ../bin/cprint.c:1367 ../bin/cprofile.c:711 ../bin/ctodesgn.c:2862
+#: ../bin/cprint.c:1367 ../bin/cprofile.c:711 ../bin/ctodesgn.c:2864
 #: ../bin/denum.c:55
 msgid "Print"
 msgstr "Drucken"
@@ -2168,7 +2172,7 @@ msgstr "Höhenprofil"
 msgid "%s Profile: %s"
 msgstr "%s Höhenprofil: %s"
 
-#: ../bin/cprofile.c:705 ../bin/misc.c:1873
+#: ../bin/cprofile.c:705 ../bin/misc.c:1877
 msgid "Change"
 msgstr "Ändern"
 
@@ -2287,324 +2291,328 @@ msgstr "Alle ausgewählten Gleise verbinden - 'S'"
 msgid "Ruler"
 msgstr "Lineal"
 
-#: ../bin/cselect.c:591
+#: ../bin/cselect.c:616
 msgid "Change Track Width"
 msgstr "Gleisbreite ändern"
 
-#: ../bin/cselect.c:615
+#: ../bin/cselect.c:640
 msgid "Change Line Type"
 msgstr "Linienstil ändern"
 
-#: ../bin/cselect.c:644
+#: ../bin/cselect.c:669
 msgid "Delete Tracks"
 msgstr "Gleise löschen"
 
-#: ../bin/cselect.c:720
+#: ../bin/cselect.c:745
 msgid "Hide Tracks (Tunnel)"
 msgstr "Gleise verbergen (Tunnel)"
 
-#: ../bin/cselect.c:738
+#: ../bin/cselect.c:763
 msgid "Bridge Tracks "
 msgstr "Brückengleise "
 
-#: ../bin/cselect.c:755
+#: ../bin/cselect.c:780
 msgid "Ties Tracks "
 msgstr "Schwellengleise "
 
-#: ../bin/cselect.c:792 ../bin/misc.c:2326
+#: ../bin/cselect.c:817 ../bin/misc.c:2330
 msgid "Move To Current Layer"
 msgstr "Auf aktuelle Ebene verschieben"
 
-#: ../bin/cselect.c:832 ../bin/misc.c:2476
+#: ../bin/cselect.c:857 ../bin/misc.c:2480
 msgid "Clear Elevations"
 msgstr "Höhen löschen"
 
-#: ../bin/cselect.c:876
+#: ../bin/cselect.c:901
 msgid "Add Elevations"
 msgstr "Höhen hinzufügen"
 
-#: ../bin/cselect.c:891
+#: ../bin/cselect.c:916
 msgid "Refresh Compound"
 msgstr "Zusammenstellung aktualisieren"
 
-#: ../bin/cselect.c:923 ../bin/dcar.c:4312 ../bin/dcar.c:4317
+#: ../bin/cselect.c:948 ../bin/dcar.c:4310 ../bin/dcar.c:4315
 #: ../bin/dcustmgm.c:60 ../bin/layout.c:463
 msgid "Scale"
 msgstr "Maßstab"
 
-#: ../bin/cselect.c:923 ../bin/cselect.c:948
+#: ../bin/cselect.c:948 ../bin/cselect.c:973
 msgid "Ratio"
 msgstr "Verhältnis"
 
-#: ../bin/cselect.c:932
+#: ../bin/cselect.c:957
 msgid "Do not resize track"
 msgstr "Gleismaße nicht ändern"
 
-#: ../bin/cselect.c:936
+#: ../bin/cselect.c:961
 msgid "Rescale by:"
 msgstr "Skalieren um:"
 
-#: ../bin/cselect.c:938
+#: ../bin/cselect.c:963
 msgid "From:"
 msgstr "Von:"
 
-#: ../bin/cselect.c:942
+#: ../bin/cselect.c:967
 msgid "To: "
 msgstr "Nach:"
 
-#: ../bin/cselect.c:1009
+#: ../bin/cselect.c:1034
 msgid "Rescale Tracks"
 msgstr "Gleise skalieren"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:357
-#: ../bin/cselect.c:1139 ../../../../build/work/app/i18n/custmsg.h:1237
+#: ../bin/cselect.c:1164 ../../../../build/work/app/i18n/custmsg.h:1237
 msgid "Rescale"
 msgstr "Maßstab ändern"
 
-#: ../bin/cselect.c:1439
+#: ../bin/cselect.c:1464
 msgid "Cornu too tight - it was deleted"
 msgstr "Cornu ist zu eng und wurde gelöscht"
 
-#: ../bin/cselect.c:1502
+#: ../bin/cselect.c:1527
 msgid "Move To Join"
 msgstr "Verbinde durch Verschieben"
 
-#: ../bin/cselect.c:1695
+#: ../bin/cselect.c:1720
 msgid "Drag to move selected tracks - Shift+Ctrl+Arrow micro-steps the move"
 msgstr ""
 "Ziehen um die ausgewählten Gleise zu verschieben - mit Umschalt+Str"
 "+Pfeiltasten umd feine Stufen verschieben"
 
-#: ../bin/cselect.c:1716 ../bin/cselect.c:1828 ../bin/cselect.c:2184
+#: ../bin/cselect.c:1741 ../bin/cselect.c:1853 ../bin/cselect.c:2209
 msgid "Move Tracks"
 msgstr "Gleise verschieben"
 
-#: ../bin/cselect.c:1873
+#: ../bin/cselect.c:1898
 msgid "Align: Click on a selected object to be aligned"
 msgstr ""
 "Ausrichten: Auf ausgewähltes Objekt klicken, das ausgerichtet werden soll"
 
-#: ../bin/cselect.c:1911
+#: ../bin/cselect.c:1936
 msgid "Drag to rotate selected tracks, Shift+RightClick for QuickRotate Menu"
 msgstr ""
 "Ziehen um die ausgewählten Gleise zu rotieren, Umschalt-Taste und "
 "Rechtsklich das Schnellauswahlmenu öffnen"
 
-#: ../bin/cselect.c:1927 ../bin/cselect.c:2197
+#: ../bin/cselect.c:1952 ../bin/cselect.c:2222
 msgid "Rotate Tracks"
 msgstr "Gleise drehen"
 
-#: ../bin/cselect.c:1940
+#: ../bin/cselect.c:1965
 msgid "Center of Rotation snapped to Turntable center"
 msgstr ""
 "Der Mittelpunkt der Drehscheibe wird als Mittelpunkt der Rotation genutt"
 
-#: ../bin/cselect.c:1982 ../bin/cselect.c:2013
+#: ../bin/cselect.c:2007 ../bin/cselect.c:2038
 #, c-format
 msgid "Angle %0.3f"
 msgstr "Winkel %0.3f"
 
-#: ../bin/cselect.c:2069
+#: ../bin/cselect.c:2094
 #, c-format
 msgid "Angle %0.3f #%ld"
 msgstr "Winkel %0.3f #%ld"
 
-#: ../bin/cselect.c:2071
+#: ../bin/cselect.c:2096
 #, c-format
 msgid "Angle %0.3f %s"
 msgstr "Winkel %0.3f %s"
 
-#: ../bin/cselect.c:2076
+#: ../bin/cselect.c:2101
 msgid "Origin Set. Drag away to set start angle"
 msgstr "Ausgangspunkt gesetzt. Zum Einstellen des Startwinkels wegziehen"
 
-#: ../bin/cselect.c:2090
+#: ../bin/cselect.c:2115
 msgid "Align: Click on the 2nd unselected object"
 msgstr "Ausrichten: Klicken Sie auf das zweite, nicht ausgewählte Objekt"
 
-#: ../bin/cselect.c:2209
+#: ../bin/cselect.c:2234
 msgid "Toggle Label"
 msgstr "Beschriftung umschalten"
 
-#: ../bin/cselect.c:2328 ../bin/cselect.c:2367
+#: ../bin/cselect.c:2353 ../bin/cselect.c:2392
 msgid "Select and drag a description"
 msgstr "Beschreibung auswählen und verschieben"
 
-#: ../bin/cselect.c:2353
+#: ../bin/cselect.c:2378
 msgid "Elevation description"
 msgstr "Beschreibung der Höhe"
 
-#: ../bin/cselect.c:2356
+#: ../bin/cselect.c:2381
 msgid "Hidden description - 's' to Show"
 msgstr "Verborgene  Beschreibung - 's' zum Anzeigen"
 
-#: ../bin/cselect.c:2360
+#: ../bin/cselect.c:2385
 msgid "Shown description - 'h' to Hide"
 msgstr "Sichtbare Beschreibung  - Verbergen mit 'h'"
 
-#: ../bin/cselect.c:2381
+#: ../bin/cselect.c:2406
 msgid "Hidden Label - Drag to reveal"
 msgstr "Verborgene Beschriftung - Ziehen zum Aufdecken"
 
-#: ../bin/cselect.c:2383
+#: ../bin/cselect.c:2408
 msgid "Drag label"
 msgstr "Beschriftung ziehen"
 
-#: ../bin/cselect.c:2385
+#: ../bin/cselect.c:2410
 msgid "Move Label"
 msgstr "Beschreibung verschieben"
 
-#: ../bin/cselect.c:2422
+#: ../bin/cselect.c:2447
 msgid "To Hide, use Context Menu"
 msgstr "Zum Verbergen verwenden Sie das Kontextmenü"
 
-#: ../bin/cselect.c:2438 ../bin/cselect.c:3202
+#: ../bin/cselect.c:2463 ../bin/cselect.c:3331
 msgid "Show/Hide Description"
 msgstr "Beschreibung anzeigen/verbergen"
 
-#: ../bin/cselect.c:2517
+#: ../bin/cselect.c:2542
 msgid "Drag to mark mirror line"
 msgstr "Ziehen um die Spiegelachse zu erstellen"
 
-#: ../bin/cselect.c:2528
+#: ../bin/cselect.c:2553
 #, c-format
 msgid "Angle %0.2f"
 msgstr "Winkel %0.2f"
 
-#: ../bin/cselect.c:2531
+#: ../bin/cselect.c:2556
 msgid "Flip Tracks"
 msgstr "Gleise spiegeln"
 
-#: ../bin/cselect.c:2836
+#: ../bin/cselect.c:2902
 msgid "Select track"
 msgstr "Gleis auswählen"
 
+#: ../bin/cselect.c:2930
+msgid "Track is in Frozen Layer"
+msgstr "Das Gleis ist auf einer fixierten Ebene"
+
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:323
-#: ../bin/cselect.c:3148 ../bin/dcar.c:1620 ../bin/doption.c:220
+#: ../bin/cselect.c:3277 ../bin/dcar.c:1620 ../bin/doption.c:220
 #: ../../../../build/work/app/i18n/custmsg.h:1169
 msgid "Select"
 msgstr "Auswählen"
 
-#: ../bin/cselect.c:3165 ../bin/cselect.c:3181 ../bin/misc.c:2170
+#: ../bin/cselect.c:3294 ../bin/cselect.c:3310 ../bin/misc.c:2174
 msgid "Undo"
 msgstr "Rückgängig"
 
-#: ../bin/cselect.c:3166 ../bin/cselect.c:3182 ../bin/misc.c:2172
+#: ../bin/cselect.c:3295 ../bin/cselect.c:3311 ../bin/misc.c:2176
 msgid "Redo"
 msgstr "Wiederholen"
 
-#: ../bin/cselect.c:3174 ../bin/cselect.c:3186
+#: ../bin/cselect.c:3303 ../bin/cselect.c:3315
 msgid "Pan Center Here - '@'"
 msgstr "Hier zentrieren - '@'."
 
-#: ../bin/cselect.c:3177 ../bin/misc.c:2209 ../bin/misc.c:2332
+#: ../bin/cselect.c:3306 ../bin/misc.c:2213 ../bin/misc.c:2336
 msgid "Select Current Layer"
 msgstr "Aktuelle Ebene auswählen"
 
-#: ../bin/cselect.c:3188 ../bin/misc.c:2211
+#: ../bin/cselect.c:3317 ../bin/misc.c:2215
 msgid "Deselect All"
 msgstr "Alles Abwählen"
 
-#: ../bin/cselect.c:3190
+#: ../bin/cselect.c:3319
 msgid "Properties -'?'"
 msgstr "Eigenschaften -'?'"
 
-#: ../bin/cselect.c:3191
+#: ../bin/cselect.c:3320
 msgid "Modify/Activate Track"
 msgstr "Gleis bearbeiten"
 
-#: ../bin/cselect.c:3193 ../bin/misc.c:2197
+#: ../bin/cselect.c:3322 ../bin/misc.c:2201
 msgid "Cut"
 msgstr "Ausschneiden"
 
-#: ../bin/cselect.c:3194 ../bin/misc.c:2199
+#: ../bin/cselect.c:3323 ../bin/misc.c:2203
 msgid "Copy"
 msgstr "Kopiere"
 
-#: ../bin/cselect.c:3195 ../bin/fileio.c:1527 ../bin/misc.c:2201
+#: ../bin/cselect.c:3324 ../bin/fileio.c:1527 ../bin/misc.c:2205
 msgid "Paste"
 msgstr "Einfügen"
 
-#: ../bin/cselect.c:3196 ../bin/misc.c:2203
+#: ../bin/cselect.c:3325 ../bin/misc.c:2207
 msgid "Clone"
 msgstr "Klonen"
 
-#: ../bin/cselect.c:3198
+#: ../bin/cselect.c:3327
 msgid "Rotate..."
 msgstr "Drehen..."
 
-#: ../bin/cselect.c:3200
+#: ../bin/cselect.c:3329
 msgid "Align"
 msgstr "Ausrichten"
 
-#: ../bin/cselect.c:3204
+#: ../bin/cselect.c:3333
 msgid "Hide/NoHide"
 msgstr "Zeigen/Verbergen"
 
-#: ../bin/cselect.c:3205
+#: ../bin/cselect.c:3334
 msgid "Bridge/NoBridge"
 msgstr "Brücke"
 
-#: ../bin/cselect.c:3206
+#: ../bin/cselect.c:3335
 msgid "NoTies/Ties"
 msgstr "Ohne / mit Schwellen"
 
-#: ../bin/cselect.c:3207
+#: ../bin/cselect.c:3336
 msgid "Thickness..."
 msgstr "Dicke..."
 
-#: ../bin/cselect.c:3208 ../bin/misc.c:2344
+#: ../bin/cselect.c:3337 ../bin/misc.c:2348
 msgid "Thin Tracks"
 msgstr "Dünne Gleise"
 
-#: ../bin/cselect.c:3209 ../bin/misc.c:2345
+#: ../bin/cselect.c:3338 ../bin/misc.c:2349
 msgid "Medium Tracks"
 msgstr "Mittlere Gleise"
 
-#: ../bin/cselect.c:3210 ../bin/misc.c:2346
+#: ../bin/cselect.c:3339 ../bin/misc.c:2350
 msgid "Thick Tracks"
 msgstr "Dicke Gleise"
 
-#: ../bin/cselect.c:3215
+#: ../bin/cselect.c:3344
 msgid "Dash-Dotted Line"
 msgstr "Gestrichelte Linie"
 
-#: ../bin/cselect.c:3216
+#: ../bin/cselect.c:3345
 msgid "Dash-Dot-Dotted Line"
 msgstr "Strich-Punkt-gestrichelte Linie"
 
-#: ../bin/cselect.c:3218
+#: ../bin/cselect.c:3347
 msgid "Move To Front"
 msgstr "Nach vorne"
 
-#: ../bin/cselect.c:3219
+#: ../bin/cselect.c:3348
 msgid "Move To Back"
 msgstr "Nach hinten"
 
-#: ../bin/cselect.c:3221
+#: ../bin/cselect.c:3350
 msgid "Group"
 msgstr "Gruppieren"
 
-#: ../bin/cselect.c:3222
+#: ../bin/cselect.c:3351
 msgid "UnGroup"
 msgstr "Gruppierung auflösen"
 
-#: ../bin/cselect.c:3257
+#: ../bin/cselect.c:3386
 msgid "Move Description"
 msgstr "Beschreibungen verschieben"
 
-#: ../bin/cselect.c:3264 ../bin/misc.c:1914 ../bin/misc.c:2214
+#: ../bin/cselect.c:3393 ../bin/misc.c:1918 ../bin/misc.c:2218
 msgid "Move"
 msgstr "Verschieben"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:368
-#: ../bin/cselect.c:3266 ../bin/misc.c:1905 ../bin/misc.c:2216
+#: ../bin/cselect.c:3395 ../bin/misc.c:1909 ../bin/misc.c:2220
 #: ../../../../build/work/app/i18n/custmsg.h:1259
 msgid "Rotate"
 msgstr "Drehen"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:369
-#: ../bin/cselect.c:3268 ../bin/dcar.c:2150
+#: ../bin/cselect.c:3397 ../bin/dcar.c:2148
 #: ../../../../build/work/app/i18n/custmsg.h:1261
 msgid "Flip"
 msgstr "Spiegeln"
@@ -2823,8 +2831,8 @@ msgid "Place Structure"
 msgstr "Gebäude plazieren"
 
 #: ../bin/cstruct.c:739 ../bin/cstruct.c:813 ../bin/cstruct.c:1044
-#: ../bin/cturnout.c:2625 ../bin/cturnout.c:2680 ../bin/cturnout.c:2805
-#: ../bin/cturnout.c:2944
+#: ../bin/cturnout.c:2624 ../bin/cturnout.c:2679 ../bin/cturnout.c:2804
+#: ../bin/cturnout.c:2943
 msgid ""
 "Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter "
 "to accept, Esc to Cancel"
@@ -2857,7 +2865,7 @@ msgstr ""
 "Ziehen mit linker Maustaste zum Verschieben, mit rechter zum Drehen, oder "
 "Eingabetaste oder OK zum Abschliessen"
 
-#: ../bin/cstruct.c:1014 ../bin/cturnout.c:2911
+#: ../bin/cstruct.c:1014 ../bin/cturnout.c:2910
 #, c-format
 msgid "Place %s and draw into position"
 msgstr "%s setzen und in Position ziehen"
@@ -2973,7 +2981,7 @@ msgstr "Vier Positionen"
 msgid "Offset"
 msgstr "Abstand"
 
-#: ../bin/ctodesgn.c:196 ../bin/ctodesgn.c:2909 ../bin/ctodesgn.c:2910
+#: ../bin/ctodesgn.c:196 ../bin/ctodesgn.c:2911 ../bin/ctodesgn.c:2912
 msgid "Left Description"
 msgstr "Beschreibung, links"
 
@@ -2981,7 +2989,7 @@ msgstr "Beschreibung, links"
 msgid " #"
 msgstr " Nr."
 
-#: ../bin/ctodesgn.c:199 ../bin/ctodesgn.c:2908
+#: ../bin/ctodesgn.c:199 ../bin/ctodesgn.c:2910
 msgid "Right Description"
 msgstr "Beschreibung, rechts"
 
@@ -3119,7 +3127,7 @@ msgstr "Länge des Mittelgleis"
 msgid "Center Angle"
 msgstr "Winkel des Mittelgleis"
 
-#: ../bin/ctodesgn.c:438 ../bin/dcar.c:2171
+#: ../bin/ctodesgn.c:438 ../bin/dcar.c:2169
 msgid "Center Offset"
 msgstr "Abstand des Mittelgleis"
 
@@ -3196,38 +3204,38 @@ msgstr "Radius 2"
 msgid "Turntable Section"
 msgstr "Drehscheibenabschnitt"
 
-#: ../bin/ctodesgn.c:2536
+#: ../bin/ctodesgn.c:2538
 #, c-format
 msgid "%s Designer"
 msgstr "%s Designer"
 
-#: ../bin/ctodesgn.c:2540
+#: ../bin/ctodesgn.c:2542
 #, c-format
 msgid "%s %d x %d (of %d x %d)"
 msgstr "%s %d x %d (von %d x %d)"
 
-#: ../bin/ctodesgn.c:2540
+#: ../bin/ctodesgn.c:2542
 msgid "Page"
 msgstr "Seite"
 
-#: ../bin/ctodesgn.c:2548
+#: ../bin/ctodesgn.c:2550
 msgid "Frog Number"
 msgstr "Herzstücksteigung"
 
-#: ../bin/ctodesgn.c:2862
+#: ../bin/ctodesgn.c:2864
 msgid "Turnout Designer"
 msgstr "Weichendesigner"
 
-#: ../bin/ctodesgn.c:2872
+#: ../bin/ctodesgn.c:2874
 #, c-format
 msgid "%s %s Designer"
 msgstr "%s %s Designer"
 
-#: ../bin/ctrain.c:182 ../bin/dcar.c:2183 ../bin/dcar.c:4312 ../bin/dcar.c:4317
+#: ../bin/ctrain.c:182 ../bin/dcar.c:2181 ../bin/dcar.c:4310 ../bin/dcar.c:4315
 msgid "Index"
 msgstr "Verzeichnis"
 
-#: ../bin/ctrain.c:188 ../bin/dcar.c:4313
+#: ../bin/ctrain.c:188 ../bin/dcar.c:4311
 msgid "Rep Marks"
 msgstr "Wagennummer"
 
@@ -3243,7 +3251,7 @@ msgstr "Folgen"
 msgid "Auto Reverse"
 msgstr "Automat. Wenden"
 
-#: ../bin/ctrain.c:640 ../bin/dcar.c:5202
+#: ../bin/ctrain.c:640 ../bin/dcar.c:5200
 msgid "Find"
 msgstr "Finden"
 
@@ -3252,8 +3260,8 @@ msgstr "Finden"
 msgid "Forward"
 msgstr "Vorwärts"
 
-#: ../bin/ctrain.c:648 ../bin/ctrain.c:3085 ../bin/dcar.c:4651
-#: ../bin/dcar.c:4661 ../bin/dcar.c:4781 ../bin/fileio.c:240 ../bin/macro.c:92
+#: ../bin/ctrain.c:648 ../bin/ctrain.c:3084 ../bin/dcar.c:4649
+#: ../bin/dcar.c:4659 ../bin/dcar.c:4779 ../bin/fileio.c:240 ../bin/macro.c:92
 #: ../bin/macro.c:908
 msgid "Stop"
 msgstr "Anhalten"
@@ -3311,47 +3319,47 @@ msgstr "Zugsteuerung %d"
 msgid "Train Control"
 msgstr "Zugsteuerung"
 
-#: ../bin/ctrain.c:3058
+#: ../bin/ctrain.c:3057
 msgid "Train"
 msgstr "Zug"
 
-#: ../bin/ctrain.c:3071
+#: ../bin/ctrain.c:3070
 msgid "Uncouple"
 msgstr "Entkuppeln"
 
-#: ../bin/ctrain.c:3073
+#: ../bin/ctrain.c:3072
 msgid "Flip Car"
 msgstr "Wagen umdrehen"
 
-#: ../bin/ctrain.c:3075
+#: ../bin/ctrain.c:3074
 msgid "Clearance Lines On"
 msgstr "Begrenzungslinien an"
 
-#: ../bin/ctrain.c:3077
+#: ../bin/ctrain.c:3076
 msgid "Clearance Lines Off"
 msgstr "Begrenzungslinien aus"
 
-#: ../bin/ctrain.c:3079
+#: ../bin/ctrain.c:3078
 msgid "Flip Train"
 msgstr "Zug umdrehen"
 
-#: ../bin/ctrain.c:3081
+#: ../bin/ctrain.c:3080
 msgid "MU Master"
 msgstr "Mehrtraktionssteuerung"
 
-#: ../bin/ctrain.c:3084
+#: ../bin/ctrain.c:3083
 msgid "Change Direction"
 msgstr "Richtung ändern"
 
-#: ../bin/ctrain.c:3088
+#: ../bin/ctrain.c:3087
 msgid "Remove Car"
 msgstr "Wagen entfernen"
 
-#: ../bin/ctrain.c:3091
+#: ../bin/ctrain.c:3090
 msgid "Remove Train"
 msgstr "Zug entfernen"
 
-#: ../bin/cturnout.c:94 ../bin/dcar.c:2205 ../bin/dcar.c:2209
+#: ../bin/cturnout.c:94 ../bin/dcar.c:2203 ../bin/dcar.c:2207
 msgid "New"
 msgstr "Neu"
 
@@ -3398,35 +3406,35 @@ msgstr "Ziehen um die Gleislänge zu ändern"
 msgid "Length=%s"
 msgstr "Länge=%s"
 
-#: ../bin/cturnout.c:2252
+#: ../bin/cturnout.c:2251
 #, c-format
 msgid "%d connections, max distance %0.3f (%s)"
 msgstr "%d Verbindungen, max. Abstand %0.3f (%s)"
 
-#: ../bin/cturnout.c:2257
+#: ../bin/cturnout.c:2256
 #, c-format
 msgid "0 connections (%s)"
 msgstr "Keine Verbindungen (%s)"
 
-#: ../bin/cturnout.c:2297
+#: ../bin/cturnout.c:2296
 msgid "Place New Turnout"
 msgstr "Neue Weiche setzen"
 
-#: ../bin/cturnout.c:2670
+#: ../bin/cturnout.c:2669
 #, c-format
 msgid "Angle = %0.3f (%s)"
 msgstr "Winkel = %0.3f (%s)"
 
-#: ../bin/cturnout.c:2760 ../bin/param.c:2609
+#: ../bin/cturnout.c:2759 ../bin/param.c:2618
 msgid "Close"
 msgstr "Schliessen"
 
-#: ../bin/cturnout.c:2777
+#: ../bin/cturnout.c:2776
 msgid "Pick turnout and active End Point, then place on the layout"
 msgstr ""
 "Weiche und aktiven Endpunkt auswählen und dann auf den Gleisplan setzen"
 
-#: ../bin/cturnout.c:2971
+#: ../bin/cturnout.c:2970
 msgid "Predefined Track"
 msgstr "Vordefiniertes Gleis"
 
@@ -3679,7 +3687,7 @@ msgstr "Drehgestell"
 msgid "Body"
 msgstr "Aufbau"
 
-#: ../bin/dcar.c:156 ../bin/dcar.c:2635 ../bin/dcar.c:2639
+#: ../bin/dcar.c:156 ../bin/dcar.c:2633 ../bin/dcar.c:2637
 msgid "Unknown"
 msgstr "Unbekannt"
 
@@ -3711,27 +3719,27 @@ msgstr "Arbeitswagen"
 msgid "Other"
 msgstr "Sonstige"
 
-#: ../bin/dcar.c:1118 ../bin/dcar.c:5023
+#: ../bin/dcar.c:1118 ../bin/dcar.c:5021
 msgid "N/A"
 msgstr "Keine Angabe"
 
-#: ../bin/dcar.c:1119 ../bin/dcar.c:5028
+#: ../bin/dcar.c:1119 ../bin/dcar.c:5026
 msgid "Mint"
 msgstr "Neuwertig"
 
-#: ../bin/dcar.c:1120 ../bin/dcar.c:5027
+#: ../bin/dcar.c:1120 ../bin/dcar.c:5025
 msgid "Excellent"
 msgstr "Exzellent"
 
-#: ../bin/dcar.c:1121 ../bin/dcar.c:5026
+#: ../bin/dcar.c:1121 ../bin/dcar.c:5024
 msgid "Good"
 msgstr "Gut"
 
-#: ../bin/dcar.c:1122 ../bin/dcar.c:5025
+#: ../bin/dcar.c:1122 ../bin/dcar.c:5023
 msgid "Fair"
 msgstr "In Ordnung"
 
-#: ../bin/dcar.c:1123 ../bin/dcar.c:5024
+#: ../bin/dcar.c:1123 ../bin/dcar.c:5022
 msgid "Poor"
 msgstr "Schlecht"
 
@@ -3740,390 +3748,390 @@ msgstr "Schlecht"
 msgid "Item"
 msgstr "Gegenstand"
 
-#: ../bin/dcar.c:2107 ../wlib/gtklib/notice.c:96 ../wlib/mswlib/mswmisc.c:2091
+#: ../bin/dcar.c:2105 ../wlib/gtklib/notice.c:96 ../wlib/mswlib/mswmisc.c:2091
 msgid "Information"
 msgstr "Information"
 
-#: ../bin/dcar.c:2107
+#: ../bin/dcar.c:2105
 msgid "Customize"
 msgstr "Anpassen"
 
-#: ../bin/dcar.c:2119
+#: ../bin/dcar.c:2117
 msgid "Sequential"
 msgstr "Aufsteigend"
 
-#: ../bin/dcar.c:2119
+#: ../bin/dcar.c:2117
 msgid "Repeated"
 msgstr "Wiederholend"
 
-#: ../bin/dcar.c:2130 ../bin/dcar.c:2132 ../bin/dcar.c:5353
+#: ../bin/dcar.c:2128 ../bin/dcar.c:2130 ../bin/dcar.c:5351
 msgid "Prototype"
 msgstr "Vorbild"
 
-#: ../bin/dcar.c:2138
+#: ../bin/dcar.c:2136
 msgid "Part"
 msgstr "Teil"
 
-#: ../bin/dcar.c:2140 ../../../../build/work/app/bin/bllnhlp.c:372
+#: ../bin/dcar.c:2138 ../../../../build/work/app/bin/bllnhlp.c:372
 #: ../../../../build/work/app/bin/bllnhlp.c:564
 #: ../../../../build/work/app/bin/bllnhlp.c:565
 msgid "Part Number"
 msgstr "Bestellnummer"
 
-#: ../bin/dcar.c:2142
+#: ../bin/dcar.c:2140
 msgid "Loco?"
 msgstr "Lok?"
 
-#: ../bin/dcar.c:2146 ../bin/dcar.c:4350
+#: ../bin/dcar.c:2144 ../bin/dcar.c:4348
 msgid "Import"
 msgstr "Import"
 
-#: ../bin/dcar.c:2153
+#: ../bin/dcar.c:2151
 msgid "Mode"
 msgstr "Modus"
 
-#: ../bin/dcar.c:2157
+#: ../bin/dcar.c:2155
 msgid "Road"
 msgstr "Gesellschaft"
 
-#: ../bin/dcar.c:2159
+#: ../bin/dcar.c:2157
 msgid "Reporting Mark"
 msgstr "Wagennummer"
 
-#: ../bin/dcar.c:2161
+#: ../bin/dcar.c:2159
 msgid "Number"
 msgstr "Nummer"
 
-#: ../bin/dcar.c:2165
+#: ../bin/dcar.c:2163
 msgid "Car Length"
 msgstr "Wagenlänge"
 
-#: ../bin/dcar.c:2169
+#: ../bin/dcar.c:2167
 msgid "Truck Centers"
 msgstr "Drehgestellabstand"
 
-#: ../bin/dcar.c:2173
+#: ../bin/dcar.c:2171
 msgid "Coupler Mount"
 msgstr "Kupplungsbefestigung"
 
-#: ../bin/dcar.c:2175
+#: ../bin/dcar.c:2173
 msgid "Coupled Length"
 msgstr "Gekuppelte Länge"
 
-#: ../bin/dcar.c:2177 ../bin/dcar.c:4185
+#: ../bin/dcar.c:2175 ../bin/dcar.c:4183
 msgid "Coupler Length"
 msgstr "Kupplungslänge"
 
-#: ../bin/dcar.c:2185
+#: ../bin/dcar.c:2183
 msgid "Purchase Price"
 msgstr "Kaufpreis"
 
-#: ../bin/dcar.c:2187 ../../../../build/work/app/bin/bllnhlp.c:236
+#: ../bin/dcar.c:2185 ../../../../build/work/app/bin/bllnhlp.c:236
 msgid "Current Price"
 msgstr "Aktueller Preis"
 
-#: ../bin/dcar.c:2189 ../bin/dcar.c:4314 ../bin/dcar.c:4319
+#: ../bin/dcar.c:2187 ../bin/dcar.c:4312 ../bin/dcar.c:4317
 msgid "Condition"
 msgstr "Zustand"
 
-#: ../bin/dcar.c:2191
+#: ../bin/dcar.c:2189
 msgid "Purchase Date"
 msgstr "Kaufdatum"
 
-#: ../bin/dcar.c:2193 ../bin/dcar.c:4319
+#: ../bin/dcar.c:2191 ../bin/dcar.c:4317
 msgid "Service Date"
 msgstr "Servicedatum"
 
-#: ../bin/dcar.c:2195
+#: ../bin/dcar.c:2193
 msgid "Quantity"
 msgstr "Anzahl"
 
-#: ../bin/dcar.c:2197
+#: ../bin/dcar.c:2195
 msgid "Numbers"
 msgstr "Nummern"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:371
-#: ../bin/dcar.c:2199 ../bin/dcar.c:4315 ../bin/trknote.c:719
+#: ../bin/dcar.c:2197 ../bin/dcar.c:4313 ../bin/trknote.c:721
 #: ../../../../build/work/app/i18n/custmsg.h:1265
 msgid "Notes"
 msgstr "Notizen"
 
-#: ../bin/dcar.c:2206
+#: ../bin/dcar.c:2204
 msgid "Car Part"
 msgstr "Wagenvorlage"
 
-#: ../bin/dcar.c:2207 ../../../../build/work/app/bin/bllnhlp.c:210
+#: ../bin/dcar.c:2205 ../../../../build/work/app/bin/bllnhlp.c:210
 #: ../../../../build/work/app/bin/bllnhlp.c:211
 msgid "Car Prototype"
 msgstr "Wagenvorbild"
 
-#: ../bin/dcar.c:2569 ../bin/dcar.c:2886
+#: ../bin/dcar.c:2567 ../bin/dcar.c:2884
 msgid "Undecorated"
 msgstr "Unbeschriftet"
 
-#: ../bin/dcar.c:2627 ../bin/dcar.c:2631 ../bin/paramfilelist.c:403
+#: ../bin/dcar.c:2625 ../bin/dcar.c:2629 ../bin/paramfilelist.c:403
 msgid "Custom"
 msgstr "Individual"
 
-#: ../bin/dcar.c:2796
+#: ../bin/dcar.c:2794
 msgid "Undecorated "
 msgstr "Unbeschriftet "
 
-#: ../bin/dcar.c:3018
+#: ../bin/dcar.c:3016
 #, c-format
 msgid "New %s Scale Car"
 msgstr "Neuer Wagen in %s"
 
-#: ../bin/dcar.c:3019 ../bin/dcar.c:3028 ../bin/dcar.c:3037 ../bin/dcar.c:4218
-#: ../bin/dcar.c:4346 ../bin/paramfilesearch_ui.c:74
+#: ../bin/dcar.c:3017 ../bin/dcar.c:3026 ../bin/dcar.c:3035 ../bin/dcar.c:4216
+#: ../bin/dcar.c:4344 ../bin/paramfilesearch_ui.c:74
 msgid "Add"
 msgstr "Hinzufügen"
 
-#: ../bin/dcar.c:3021
+#: ../bin/dcar.c:3019
 #, c-format
 msgid "Update %s Scale Car"
 msgstr "Aktualisiere Wagen in Maßstab %s"
 
-#: ../bin/dcar.c:3022 ../bin/dcar.c:3031 ../bin/dcar.c:3040 ../bin/dcmpnd.c:173
+#: ../bin/dcar.c:3020 ../bin/dcar.c:3029 ../bin/dcar.c:3038 ../bin/dcmpnd.c:173
 msgid "Update"
 msgstr "Aktualisieren"
 
-#: ../bin/dcar.c:3027
+#: ../bin/dcar.c:3025
 #, c-format
 msgid "New %s Scale Car Part"
 msgstr "Neue Wagenvorlage in %s"
 
-#: ../bin/dcar.c:3030
+#: ../bin/dcar.c:3028
 #, c-format
 msgid "Update %s Scale Car Part"
 msgstr "Wagenvorlage in %s aktualisieren"
 
-#: ../bin/dcar.c:3036
+#: ../bin/dcar.c:3034
 msgid "New Prototype"
 msgstr "Neues Vorbild"
 
-#: ../bin/dcar.c:3039
+#: ../bin/dcar.c:3037
 msgid "Update Prototype"
 msgstr "Aktualisiere Vorbild"
 
-#: ../bin/dcar.c:3711
+#: ../bin/dcar.c:3709
 msgid "Enter a 8 digit numeric date"
 msgstr "Geben Sie ein 8-stelliges numerisches Datum ein"
 
-#: ../bin/dcar.c:3714
+#: ../bin/dcar.c:3712
 msgid "Enter a 8 digit date"
 msgstr "Geben Sie ein 8-stelliges Datum ein"
 
-#: ../bin/dcar.c:3716
+#: ../bin/dcar.c:3714
 msgid "Enter a date between 19000101 and 21991231"
 msgstr "Geben Sie ein Datum zwischen 19000101 und 21991231 ein"
 
-#: ../bin/dcar.c:3721
+#: ../bin/dcar.c:3719
 msgid "Invalid month"
 msgstr "Ungültiger Monat"
 
-#: ../bin/dcar.c:3723
+#: ../bin/dcar.c:3721
 msgid "Invalid day"
 msgstr "Ungültiger Kalendertag"
 
-#: ../bin/dcar.c:3815
+#: ../bin/dcar.c:3813
 msgid "Enter a Prototype name"
 msgstr "Geben Sie den Namen des Vorbild ein"
 
-#: ../bin/dcar.c:3817
+#: ../bin/dcar.c:3815
 msgid "Select or Enter a Manufacturer"
 msgstr "Hersteller auswählen oder eingeben"
 
-#: ../bin/dcar.c:3819
+#: ../bin/dcar.c:3817
 msgid "Enter a Part Number"
 msgstr "Bestellnummer eingeben"
 
-#: ../bin/dcar.c:3821
+#: ../bin/dcar.c:3819
 msgid "Enter the Car Length"
 msgstr "Länge des Wagen eingeben"
 
-#: ../bin/dcar.c:3823
+#: ../bin/dcar.c:3821
 msgid "Enter the Car Width"
 msgstr "Breite des Wagen eingeben"
 
-#: ../bin/dcar.c:3825
+#: ../bin/dcar.c:3823
 msgid "Enter the Truck Centers"
 msgstr "Drehgestellabstand eingeben"
 
-#: ../bin/dcar.c:3827
+#: ../bin/dcar.c:3825
 msgid "Truck Center Offset must be greater than 0 or 0"
 msgstr "Abstand der Drehgestelle vom Ende muss größer oder gleich 0 sein"
 
-#: ../bin/dcar.c:3829
+#: ../bin/dcar.c:3827
 msgid "Truck Centers must be less than Car Length"
 msgstr "Abstand der Drehgestelle muss kleiner als die Wagenlänge sein"
 
-#: ../bin/dcar.c:3831
+#: ../bin/dcar.c:3829
 msgid "Truck Center Offset plus Truck Centers must be less than Car Length"
 msgstr ""
 "Abstand der Drehgestelle vom Ende und deren Abstand muss kleiner als die "
 "Wagenlänge sein"
 
-#: ../bin/dcar.c:3833
+#: ../bin/dcar.c:3831
 msgid "Enter the Coupled Length or Coupler Length"
 msgstr "Geben Sie die gekuppelte Länge oder die Kupplungslänge ein"
 
-#: ../bin/dcar.c:3835
+#: ../bin/dcar.c:3833
 msgid "Enter the Coupled Length"
 msgstr "Geben Sie die gekuppelte Länge ein"
 
-#: ../bin/dcar.c:3837
+#: ../bin/dcar.c:3835
 msgid "Enter a item Index"
 msgstr "Geben Sie eine Kennnummer ein"
 
-#: ../bin/dcar.c:3839
+#: ../bin/dcar.c:3837
 msgid "Purchase Price is not valid"
 msgstr "Kaufpreis ist nicht gültig"
 
-#: ../bin/dcar.c:3841
+#: ../bin/dcar.c:3839
 msgid "Current Price is not valid"
 msgstr "Aktueller Preis ist nicht gültig"
 
-#: ../bin/dcar.c:3843
+#: ../bin/dcar.c:3841
 msgid "Purchase Date is not valid"
 msgstr "Kaufdatum ist nicht gültig"
 
-#: ../bin/dcar.c:3845
+#: ../bin/dcar.c:3843
 msgid "Service Date is not valid"
 msgstr "Servicedatum ist nicht gültig"
 
-#: ../bin/dcar.c:3848
+#: ../bin/dcar.c:3846
 #, c-format
 msgid "Item Index %ld duplicated an existing item: updated to new value"
 msgstr "Kennnummer %ld existiert bereits: mit neuem Wert aktualisiert"
 
-#: ../bin/dcar.c:4044
+#: ../bin/dcar.c:4042
 #, c-format
 msgid "Added %ld new Cars"
 msgstr "%ld neue Wagen hinzugefügt"
 
-#: ../bin/dcar.c:4046
+#: ../bin/dcar.c:4044
 msgid "Added new Car"
 msgstr "Neuen Wagen hinzugefügt"
 
-#: ../bin/dcar.c:4049
+#: ../bin/dcar.c:4047
 msgid "Updated Car"
 msgstr "Wagen aktualisiert"
 
-#: ../bin/dcar.c:4052
+#: ../bin/dcar.c:4050
 msgid " and Part"
 msgstr " und Teil"
 
-#: ../bin/dcar.c:4079
+#: ../bin/dcar.c:4077
 #, c-format
 msgid "%s Part: %s %s %s %s %s %s"
 msgstr "%s Teil: %s %s %s %s %s %s"
 
-#: ../bin/dcar.c:4079 ../bin/dcar.c:4096
+#: ../bin/dcar.c:4077 ../bin/dcar.c:4094
 msgid "Added new"
 msgstr "Neu hinzugefügt"
 
-#: ../bin/dcar.c:4079 ../bin/dcar.c:4096
+#: ../bin/dcar.c:4077 ../bin/dcar.c:4094
 msgid "Updated"
 msgstr "Aktualisiert"
 
-#: ../bin/dcar.c:4095
+#: ../bin/dcar.c:4093
 #, c-format
 msgid "%s Prototype: %s%s."
 msgstr "%s Vorbild: %s%s."
 
-#: ../bin/dcar.c:4097
+#: ../bin/dcar.c:4095
 msgid ". Enter new values or press Close"
 msgstr ". Neue Werte eingeben oder Abbruch drücken"
 
-#: ../bin/dcar.c:4218
+#: ../bin/dcar.c:4216
 msgid "New Car Part"
 msgstr "Neues Wagenmuster"
 
-#: ../bin/dcar.c:4313 ../bin/dcar.c:4318
+#: ../bin/dcar.c:4311 ../bin/dcar.c:4316
 #: ../../../../build/work/app/bin/bllnhlp.c:409
 msgid "Roadname"
 msgstr "Gesellschaft"
 
-#: ../bin/dcar.c:4313
+#: ../bin/dcar.c:4311
 msgid "Purc Price"
 msgstr "Kaufpreis"
 
-#: ../bin/dcar.c:4314 ../bin/dcar.c:4319
+#: ../bin/dcar.c:4312 ../bin/dcar.c:4317
 msgid "Curr Price"
 msgstr "Akt. Preis"
 
-#: ../bin/dcar.c:4314
+#: ../bin/dcar.c:4312
 msgid "Purc Date"
 msgstr "Kaufdaum"
 
-#: ../bin/dcar.c:4314
+#: ../bin/dcar.c:4312
 msgid "Srvc Date"
 msgstr "Servicedatum"
 
-#: ../bin/dcar.c:4315
+#: ../bin/dcar.c:4313
 msgid "Locat'n"
 msgstr "Ort"
 
-#: ../bin/dcar.c:4318
+#: ../bin/dcar.c:4316
 msgid "RepMarks"
 msgstr "Wagennummer"
 
-#: ../bin/dcar.c:4318
+#: ../bin/dcar.c:4316
 msgid "Purch Price"
 msgstr "Kaufpreis"
 
-#: ../bin/dcar.c:4319
+#: ../bin/dcar.c:4317
 msgid "Purch Date"
 msgstr "Kaufdatum"
 
-#: ../bin/dcar.c:4336
+#: ../bin/dcar.c:4334
 msgid "Sort By"
 msgstr "Sortierung"
 
-#: ../bin/dcar.c:4344 ../bin/dcontmgm.c:99 ../bin/dcustmgm.c:71
+#: ../bin/dcar.c:4342 ../bin/dcontmgm.c:99 ../bin/dcustmgm.c:71
 #: ../bin/dcustmgm.c:108
 msgid "Edit"
 msgstr "Bearbeiten"
 
-#: ../bin/dcar.c:4348 ../bin/dcontmgm.c:101 ../bin/dcustmgm.c:73
-#: ../bin/misc.c:2220
+#: ../bin/dcar.c:4346 ../bin/dcontmgm.c:101 ../bin/dcustmgm.c:73
+#: ../bin/misc.c:2224
 msgid "Delete"
 msgstr "Löschen"
 
-#: ../bin/dcar.c:4352 ../bin/fileio.c:1424
+#: ../bin/dcar.c:4350 ../bin/fileio.c:1424
 msgid "Export"
 msgstr "Export"
 
-#: ../bin/dcar.c:4354 ../../../../build/work/app/bin/bllnhlp.c:581
+#: ../bin/dcar.c:4352 ../../../../build/work/app/bin/bllnhlp.c:581
 msgid "List"
 msgstr "Auflisten"
 
-#: ../bin/dcar.c:4465 ../bin/dcar.c:5202 ../bin/misc.c:2596
+#: ../bin/dcar.c:4463 ../bin/dcar.c:5200 ../bin/misc.c:2600
 msgid "Car Inventory"
 msgstr "Wagenverzeichnis"
 
-#: ../bin/dcar.c:4585
+#: ../bin/dcar.c:4583
 msgid "List Cars"
 msgstr "Wagen auflisten"
 
-#: ../bin/dcar.c:4709 ../bin/dcar.c:4874
+#: ../bin/dcar.c:4707 ../bin/dcar.c:4872
 msgid "Import Cars"
 msgstr "Wagen importieren"
 
-#: ../bin/dcar.c:4875 ../bin/dcar.c:4998
+#: ../bin/dcar.c:4873 ../bin/dcar.c:4996
 msgid "Comma-Separated-Values (*.csv)|*.csv"
 msgstr "Durch-Kommata getrennte Werte(*.csv)|*.csv"
 
-#: ../bin/dcar.c:4945 ../bin/dcar.c:4997
+#: ../bin/dcar.c:4943 ../bin/dcar.c:4995
 msgid "Export Cars"
 msgstr "Wagen exportieren"
 
-#: ../bin/dcar.c:5031
+#: ../bin/dcar.c:5029
 msgid "Layout"
 msgstr "Anlage"
 
-#: ../bin/dcar.c:5033
+#: ../bin/dcar.c:5031
 msgid "Shelf"
 msgstr "Regal"
 
@@ -4836,55 +4844,55 @@ msgstr "Durchsuchen..."
 msgid "Parameter Files"
 msgstr "Parameterdateien"
 
-#: ../bin/dprmfile.c:404 ../bin/paramfilesearch_ui.c:380
+#: ../bin/dprmfile.c:404 ../bin/paramfilesearch_ui.c:379
 msgid "Load Parameters"
 msgstr "Lade Parameter"
 
-#: ../bin/dprmfile.c:404 ../bin/paramfilesearch_ui.c:380
+#: ../bin/dprmfile.c:404 ../bin/paramfilesearch_ui.c:379
 msgid "Parameter files (*.xtp)|*.xtp"
 msgstr "Parameterdateien (*.xtp)|*.xtp"
 
-#: ../bin/draw.c:2097
+#: ../bin/draw.c:2093
 msgid "Macro Zoom Mode"
 msgstr "Makro-Zoom-Modus"
 
-#: ../bin/draw.c:2104
+#: ../bin/draw.c:2100
 msgid "Scale 1:1 - Use Ctrl+ to go to Macro Zoom Mode"
 msgstr "Maßstab 1:1 - Mit Strg+ in den Makro-Zoom wechseln"
 
-#: ../bin/draw.c:2108
+#: ../bin/draw.c:2104
 msgid "Preset Zoom In Value selected. Shift+Ctrl+PageDwn to reset value"
 msgstr ""
 "Der gespeicherte untere Zoom-Faktor wird benutzt, Durch Umschalt+Strg+Bild "
 "runter zurücksetzen"
 
-#: ../bin/draw.c:2112
+#: ../bin/draw.c:2108
 #, c-format
 msgid "Zoom In Program Value %ld:1, Shift+PageDwn to use"
 msgstr ""
 "Programmierter Zoom Größer Wert %ld:1, Verwenden mit Umschalt+Bild runter"
 
-#: ../bin/draw.c:2135
+#: ../bin/draw.c:2131
 msgid "At Maximum Zoom Out"
 msgstr "Maximal rausgezoomt"
 
-#: ../bin/draw.c:2140
+#: ../bin/draw.c:2136
 msgid "Preset Zoom Out Value selected. Shift+Ctrl+PageUp to reset value"
 msgstr ""
 "Der gespeicherte obere Zoom-Faktor wird benutzt, Durch Umschalt+Strg+Bild "
 "hoch zurücksetzen"
 
-#: ../bin/draw.c:2144
+#: ../bin/draw.c:2140
 #, c-format
 msgid "Zoom Out Program Value %ld:1 set, Shift+PageUp to use"
 msgstr ""
 "Programmierter Zoom Größer Wert %ld:1, Verwenden mit Umschalt+Bild hoch"
 
-#: ../bin/draw.c:2787
+#: ../bin/draw.c:2783
 msgid "Map"
 msgstr "Karte"
 
-#: ../bin/draw.c:2835
+#: ../bin/draw.c:2831
 msgid ""
 "Left-Drag to pan, Ctrl+Left-Drag to zoom, 0 to set origin to zero, 1-9 to "
 "zoom#, e to set to extents"
@@ -4893,25 +4901,25 @@ msgstr ""
 "+Ziehen mit der linken Maustaste zum Zoomen, 0 um den Ursprung auf Null zu "
 "setzen, 1-9 zum Zoomfaktor, e um an die Fenstergröße anzupassen"
 
-#: ../bin/draw.c:2842
+#: ../bin/draw.c:2838
 msgid "Pan Mode - drag point to new position"
 msgstr "Ausschnitt wählen - Punkt an die neue Position ziehen"
 
-#: ../bin/draw.c:2849
+#: ../bin/draw.c:2845
 msgid "Zoom Mode - drag area to zoom"
 msgstr "Zoom Modus -auf den ausgewählten Bereich zoomen"
 
-#: ../bin/draw.c:2873
+#: ../bin/draw.c:2869
 msgid "Can't move any further in that direction"
 msgstr "In diese Richtung können Sie nicht weiter gehen"
 
-#: ../bin/draw.c:2875
+#: ../bin/draw.c:2871
 msgid "Left click to pan, right click to zoom, 'o' for origin, 'e' for extents"
 msgstr ""
 "Linksklick zum Verschieben, Rechtsklick zum Zoomen, 'o' für Ursprung, 'e' "
 "für Anpassen an Fenstergröße"
 
-#: ../bin/draw.c:2912
+#: ../bin/draw.c:2908
 msgid ""
 "Left Drag to Pan, +CTRL to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to "
 "set to Extent"
@@ -4920,55 +4928,55 @@ msgstr ""
 "Zoomen, 0 zum Setzen des Ursprungs auf 0,0, 1-9 zum Zoomfaktor, e um an die "
 "Fenstergröße anzupassen"
 
-#: ../bin/draw.c:2988
+#: ../bin/draw.c:2984
 msgid "Pan/Zoom"
 msgstr "Verschieben/Zoomen"
 
-#: ../bin/draw.c:2998
+#: ../bin/draw.c:2994
 msgid "Zoom to extents - 'e'"
 msgstr "Auf Fenstergröße anpassen- 'e'"
 
-#: ../bin/draw.c:2999
+#: ../bin/draw.c:2995
 msgid "Zoom to 1:1 - '1'"
 msgstr "Auf 1:1 vergrößern - '1'."
 
-#: ../bin/draw.c:3000
+#: ../bin/draw.c:2996
 msgid "Zoom to 1:2 - '2'"
 msgstr "Auf 1:2 vergrößern - '2'."
 
-#: ../bin/draw.c:3001
+#: ../bin/draw.c:2997
 msgid "Zoom to 1:3 - '3'"
 msgstr "Auf 1:3 vergrößern - '3'."
 
-#: ../bin/draw.c:3002
+#: ../bin/draw.c:2998
 msgid "Zoom to 1:4 - '4'"
 msgstr "Auf 1:4 vergrößern - '4'."
 
-#: ../bin/draw.c:3003
+#: ../bin/draw.c:2999
 msgid "Zoom to 1:5 - '5'"
 msgstr "Auf 1:5 vergrößern - '5'."
 
-#: ../bin/draw.c:3004
+#: ../bin/draw.c:3000
 msgid "Zoom to 1:6 - '6'"
 msgstr "Auf 1:6 vergrößern - '6'."
 
-#: ../bin/draw.c:3005
+#: ../bin/draw.c:3001
 msgid "Zoom to 1:7 - '7'"
 msgstr "Auf 1:7 vergrößern - '7'."
 
-#: ../bin/draw.c:3006
+#: ../bin/draw.c:3002
 msgid "Zoom to 1:8 - '8'"
 msgstr "Auf 1:8 vergrößern - '8'."
 
-#: ../bin/draw.c:3007
+#: ../bin/draw.c:3003
 msgid "Zoom to 1:9 - '9'"
 msgstr "Auf 1:9 vergrößern - '9'."
 
-#: ../bin/draw.c:3008
+#: ../bin/draw.c:3004
 msgid "Pan to origin - 'o'"
 msgstr "Ausschnitt auf Ursprung zurücksetzen - '0'."
 
-#: ../bin/draw.c:3009
+#: ../bin/draw.c:3005
 msgid "Pan center here - '@'"
 msgstr "Hier zentrieren - '@'."
 
@@ -5041,36 +5049,32 @@ msgstr "Punkt auswählen oder Kontextmenu benutzen"
 msgid "Length = %s, Last angle = %0.2f"
 msgstr "Länge = %s, letzter Winkel = %0.2f"
 
-#: ../bin/drawgeom.c:1467
-msgid "Move Origin Mode"
-msgstr "Modus Ursprung verschieben"
-
 #: ../bin/drawgeom.c:1538
 msgid "Point Deleted"
 msgstr "Punkt gelöscht"
 
-#: ../bin/drawgeom.c:1922
+#: ../bin/drawgeom.c:1934
 msgid "Not close to end of line"
 msgstr "Nicht nah am Ende der Linie"
 
-#: ../bin/drawgeom.c:1975
+#: ../bin/drawgeom.c:1987
 msgid "Not close to ends or middle of mine, reselect"
 msgstr "Nicht an einem Ende oder in der Mitte der Linie, Auswahl wiederholen"
 
-#: ../bin/drawgeom.c:2023 ../bin/drawgeom.c:2245
+#: ../bin/drawgeom.c:2035 ../bin/drawgeom.c:2257
 msgid "Drag to Move Corner Point"
 msgstr "Ziehen um den Eckpunkt zu verschieben"
 
-#: ../bin/drawgeom.c:2030
+#: ../bin/drawgeom.c:2042
 msgid "Drag to Move Edge "
 msgstr "Ziehen um die Kante zu verschieben "
 
-#: ../bin/drawgeom.c:2092
+#: ../bin/drawgeom.c:2104
 #, c-format
 msgid "Length = %0.3f Angle = %0.3f"
 msgstr "Länge = %0.3f Winkel = %0.3f"
 
-#: ../bin/drawgeom.c:2240
+#: ../bin/drawgeom.c:2252
 msgid "Drag to Move Edge"
 msgstr "Ziehen um die Kante zu verschieben"
 
@@ -5157,7 +5161,7 @@ msgstr "Position Y"
 msgid "Title"
 msgstr "Titel"
 
-#: ../bin/filenoteui.c:70 ../bin/trknote.c:61
+#: ../bin/filenoteui.c:70 ../bin/trknote.c:62
 #: ../../../../build/work/app/bin/bllnhlp.c:85
 msgid "Document"
 msgstr "Dokument"
@@ -5392,7 +5396,7 @@ msgstr ""
 "Wenn Sie jetzt nicht speichern, werden Ihre nicht gespeicherten Ãnderungen "
 "verworfen."
 
-#: ../bin/misc.c:594 ../bin/misc.c:2269
+#: ../bin/misc.c:594 ../bin/misc.c:2273
 msgid "&Save"
 msgstr "&Speichern"
 
@@ -5494,7 +5498,7 @@ msgstr "Kein Tooltip für %s vorhanden\n"
 msgid "No Help"
 msgstr "Keine Hilfe vorhanden"
 
-#: ../bin/misc.c:1216 ../bin/misc.c:1223 ../bin/misc.c:1294
+#: ../bin/misc.c:1220 ../bin/misc.c:1227 ../bin/misc.c:1298
 msgid ""
 "Cancelling the current command will undo the changes\n"
 "you are currently making. Do you want to update?"
@@ -5502,495 +5506,495 @@ msgstr ""
 "Abbruch des aktuelle Befehls wird alle aktuell laufenden\n"
 "Änderungen zurücknehmen. Soll aktualisiert werden?"
 
-#: ../bin/misc.c:1785
+#: ../bin/misc.c:1789
 msgid "Sticky Commands"
 msgstr "Wiederholte Befehle"
 
-#: ../bin/misc.c:1798
+#: ../bin/misc.c:1802
 msgid "File Buttons"
 msgstr "Dateischaltflächen"
 
-#: ../bin/misc.c:1798
+#: ../bin/misc.c:1802
 msgid "Import/Export Buttons"
 msgstr "Import/Export Aktionen"
 
-#: ../bin/misc.c:1798
+#: ../bin/misc.c:1802
 msgid "Zoom Buttons"
 msgstr "Lupenknöpfe"
 
-#: ../bin/misc.c:1799
+#: ../bin/misc.c:1803
 msgid "Undo Buttons"
 msgstr "Rückgängig/Wiederholen"
 
-#: ../bin/misc.c:1799
+#: ../bin/misc.c:1803
 msgid "Easement Button"
 msgstr "Übergangsbogen"
 
-#: ../bin/misc.c:1799
+#: ../bin/misc.c:1803
 msgid "SnapGrid Buttons"
 msgstr "Fangraster"
 
-#: ../bin/misc.c:1800
+#: ../bin/misc.c:1804
 msgid "Create Track Buttons"
 msgstr "Erstelle Gleise"
 
-#: ../bin/misc.c:1800
+#: ../bin/misc.c:1804
 msgid "Layout Control Elements"
 msgstr "Elemente zur Anlagensteuerung"
 
-#: ../bin/misc.c:1801
+#: ../bin/misc.c:1805
 msgid "Modify Track Buttons"
 msgstr "Verändere Gleise"
 
-#: ../bin/misc.c:1801
+#: ../bin/misc.c:1805
 msgid "Properties/Select"
 msgstr "Eigenschaften/Auswählen"
 
-#: ../bin/misc.c:1802
+#: ../bin/misc.c:1806
 msgid "Track Group Buttons"
 msgstr "Objekt Werkzeuge"
 
-#: ../bin/misc.c:1802
+#: ../bin/misc.c:1806
 msgid "Train Group Buttons"
 msgstr "Zugbetrieb"
 
-#: ../bin/misc.c:1803
+#: ../bin/misc.c:1807
 msgid "Create Misc Buttons"
 msgstr "Zeichnen/Schrift  Werkzeuge"
 
-#: ../bin/misc.c:1803
+#: ../bin/misc.c:1807
 msgid "Ruler Button"
 msgstr "Linealschaltfläche"
 
-#: ../bin/misc.c:1803
+#: ../bin/misc.c:1807
 msgid "Layer Buttons"
 msgstr "Ebenenknöpfe"
 
-#: ../bin/misc.c:1804
+#: ../bin/misc.c:1808
 msgid "Hot Bar"
 msgstr "Teilekatalog"
 
-#: ../bin/misc.c:1873 ../../../../build/work/app/bin/bllnhlp.c:80
+#: ../bin/misc.c:1877 ../../../../build/work/app/bin/bllnhlp.c:80
 msgid "Change Elevations"
 msgstr "Höhen ändern"
 
-#: ../bin/misc.c:1891
+#: ../bin/misc.c:1895
 msgid "Angle:"
 msgstr "Winkel:"
 
-#: ../bin/misc.c:1898
+#: ../bin/misc.c:1902
 msgid "Move X:"
 msgstr "Verschieben X:"
 
-#: ../bin/misc.c:1899
+#: ../bin/misc.c:1903
 msgid "Move Y:"
 msgstr "Verschieben Y:"
 
-#: ../bin/misc.c:1946
+#: ../bin/misc.c:1950
 msgid "Enter Move ..."
 msgstr "Verschiebung eingeben..."
 
-#: ../bin/misc.c:1951
+#: ../bin/misc.c:1955
 msgid "180 "
 msgstr "180 "
 
-#: ../bin/misc.c:1952
+#: ../bin/misc.c:1956
 msgid "90  CW"
 msgstr "90 Uhrzeiger"
 
-#: ../bin/misc.c:1953
+#: ../bin/misc.c:1957
 msgid "45  CW"
 msgstr "45 Uhrzeiger"
 
-#: ../bin/misc.c:1954
+#: ../bin/misc.c:1958
 msgid "30  CW"
 msgstr "30 Uhrzeiger"
 
-#: ../bin/misc.c:1955
+#: ../bin/misc.c:1959
 msgid "15  CW"
 msgstr "15 Uhrzeiger"
 
-#: ../bin/misc.c:1956
+#: ../bin/misc.c:1960
 msgid "15  CCW"
 msgstr "15 gegen Uhr"
 
-#: ../bin/misc.c:1957
+#: ../bin/misc.c:1961
 msgid "30  CCW"
 msgstr "30 gehen Uhr"
 
-#: ../bin/misc.c:1958
+#: ../bin/misc.c:1962
 msgid "45  CCW"
 msgstr "45 gegen Uhr"
 
-#: ../bin/misc.c:1959
+#: ../bin/misc.c:1963
 msgid "90  CCW"
 msgstr "90 gegen Uhr"
 
-#: ../bin/misc.c:1960
+#: ../bin/misc.c:1964
 msgid "Enter Angle ..."
 msgstr "Winkel eingeben..."
 
-#: ../bin/misc.c:1991
+#: ../bin/misc.c:1995
 msgid "Debug"
 msgstr "Fehlersuche (Debug)"
 
-#: ../bin/misc.c:2122
+#: ../bin/misc.c:2126
 msgid "&File"
 msgstr "&Datei"
 
-#: ../bin/misc.c:2123
+#: ../bin/misc.c:2127
 msgid "&Edit"
 msgstr "&Bearbeiten"
 
-#: ../bin/misc.c:2124
+#: ../bin/misc.c:2128
 msgid "&View"
 msgstr "&Ansicht"
 
-#: ../bin/misc.c:2125
+#: ../bin/misc.c:2129
 msgid "&Add"
 msgstr "&Hinzufügen"
 
-#: ../bin/misc.c:2126
+#: ../bin/misc.c:2130
 msgid "&Change"
 msgstr "&Ändern"
 
-#: ../bin/misc.c:2127
+#: ../bin/misc.c:2131
 msgid "&Draw"
 msgstr "&Zeichnen"
 
-#: ../bin/misc.c:2128
+#: ../bin/misc.c:2132
 msgid "&Manage"
 msgstr "&Verwalten"
 
-#: ../bin/misc.c:2129
+#: ../bin/misc.c:2133
 msgid "&Options"
 msgstr "&Optionen"
 
-#: ../bin/misc.c:2130
+#: ../bin/misc.c:2134
 msgid "&Macro"
 msgstr "&Makro"
 
-#: ../bin/misc.c:2131
+#: ../bin/misc.c:2135
 msgid "&Window"
 msgstr "&Fenster"
 
-#: ../bin/misc.c:2132
+#: ../bin/misc.c:2136
 msgid "&Help"
 msgstr "&Hilfe"
 
-#: ../bin/misc.c:2168
+#: ../bin/misc.c:2172
 msgid "Context Commands"
 msgstr "Kontextbefehle"
 
-#: ../bin/misc.c:2169
+#: ../bin/misc.c:2173
 msgid "Shift Context Commands"
 msgstr "Umsch+Kontextbefehle"
 
-#: ../bin/misc.c:2184 ../bin/misc.c:2371
+#: ../bin/misc.c:2188 ../bin/misc.c:2375
 msgid "Enable SnapGrid"
 msgstr "Fangraster aktivieren"
 
-#: ../bin/misc.c:2186
+#: ../bin/misc.c:2190
 msgid "SnapGrid Show"
 msgstr "Fangraster anzeigen"
 
-#: ../bin/misc.c:2188
+#: ../bin/misc.c:2192
 msgid " Enable Magnetic Snap"
 msgstr " Ein/Aus Magnetischer Schnapper"
 
-#: ../bin/misc.c:2190 ../bin/misc.c:2392
+#: ../bin/misc.c:2194 ../bin/misc.c:2396
 msgid "Show/Hide Map"
 msgstr "Karte anzeigen/verbergen"
 
-#: ../bin/misc.c:2192
+#: ../bin/misc.c:2196
 msgid "Show/Hide Background"
 msgstr "Hintergrund zeigen"
 
-#: ../bin/misc.c:2223 ../bin/misc.c:2224
+#: ../bin/misc.c:2227 ../bin/misc.c:2228
 msgid "Add..."
 msgstr "Hinzufügen..."
 
-#: ../bin/misc.c:2227 ../bin/misc.c:2228
+#: ../bin/misc.c:2231 ../bin/misc.c:2232
 msgid "More..."
 msgstr "Weiter..."
 
-#: ../bin/misc.c:2263
+#: ../bin/misc.c:2267
 msgid "&New ..."
 msgstr "&Neu..."
 
-#: ../bin/misc.c:2265
+#: ../bin/misc.c:2269
 msgid "&Open ..."
 msgstr "&Öffnen..."
 
-#: ../bin/misc.c:2271
+#: ../bin/misc.c:2275
 msgid "Save &As ..."
 msgstr "Speichern &unter..."
 
-#: ../bin/misc.c:2273
+#: ../bin/misc.c:2277
 msgid "Revert"
 msgstr "Neu laden"
 
-#: ../bin/misc.c:2276
+#: ../bin/misc.c:2280
 msgid "P&rint Setup ..."
 msgstr "Druckereinstellungen..."
 
-#: ../bin/misc.c:2281
+#: ../bin/misc.c:2285
 msgid "&Import"
 msgstr "Import"
 
-#: ../bin/misc.c:2283
+#: ../bin/misc.c:2287
 msgid "Import &Module"
 msgstr "Modul importieren"
 
-#: ../bin/misc.c:2285
+#: ../bin/misc.c:2289
 msgid "Export to &Bitmap"
 msgstr "Export als Bitmap"
 
-#: ../bin/misc.c:2288
+#: ../bin/misc.c:2292
 msgid "E&xport"
 msgstr "Export"
 
-#: ../bin/misc.c:2290
+#: ../bin/misc.c:2294
 msgid "Export D&XF"
 msgstr "Export als DXF"
 
-#: ../bin/misc.c:2295
+#: ../bin/misc.c:2299
 msgid "Parameter &Files ..."
 msgstr "Parameterdateien..."
 
-#: ../bin/misc.c:2297
+#: ../bin/misc.c:2301
 msgid "No&tes ..."
 msgstr "Notizen..."
 
-#: ../bin/misc.c:2304
+#: ../bin/misc.c:2308
 msgid "E&xit"
 msgstr "Beenden"
 
-#: ../bin/misc.c:2310
+#: ../bin/misc.c:2314
 msgid "&Undo"
 msgstr "Rückgängig"
 
-#: ../bin/misc.c:2312
+#: ../bin/misc.c:2316
 msgid "R&edo"
 msgstr "Wiederholen"
 
-#: ../bin/misc.c:2315
+#: ../bin/misc.c:2319
 msgid "Cu&t"
 msgstr "Ausschneiden"
 
-#: ../bin/misc.c:2317
+#: ../bin/misc.c:2321
 msgid "&Copy"
 msgstr "Kopieren"
 
-#: ../bin/misc.c:2319
+#: ../bin/misc.c:2323
 msgid "&Paste"
 msgstr "Einfügen"
 
-#: ../bin/misc.c:2321
+#: ../bin/misc.c:2325
 msgid "C&lone"
 msgstr "K&lonen"
 
-#: ../bin/misc.c:2323
+#: ../bin/misc.c:2327
 msgid "De&lete"
 msgstr "Löschen"
 
-#: ../bin/misc.c:2331
+#: ../bin/misc.c:2335
 msgid "Select &All"
 msgstr "Alles auswählen"
 
-#: ../bin/misc.c:2333
+#: ../bin/misc.c:2337
 msgid "&Deselect All"
 msgstr "Alles abwählen"
 
-#: ../bin/misc.c:2334
+#: ../bin/misc.c:2338
 msgid "&Invert Selection"
 msgstr "Auswahl umkehren"
 
-#: ../bin/misc.c:2335
+#: ../bin/misc.c:2339
 msgid "Select Stranded Track"
 msgstr "Vereinzelte Gleise auswählen"
 
-#: ../bin/misc.c:2337
+#: ../bin/misc.c:2341
 msgid "Tu&nnel"
 msgstr "Tunnel"
 
-#: ../bin/misc.c:2338
+#: ../bin/misc.c:2342
 msgid "B&ridge"
 msgstr "B&rücke"
 
-#: ../bin/misc.c:2339
+#: ../bin/misc.c:2343
 msgid "Ties/NoTies"
 msgstr "Mit / ohne Schwellen"
 
-#: ../bin/misc.c:2340
+#: ../bin/misc.c:2344
 msgid "Move to &Front"
 msgstr "Nach vorne"
 
-#: ../bin/misc.c:2341
+#: ../bin/misc.c:2345
 msgid "Move to &Back"
 msgstr "Nach hinten"
 
-#: ../bin/misc.c:2351
+#: ../bin/misc.c:2355
 msgid "Zoom &In"
 msgstr "Zoom größer"
 
-#: ../bin/misc.c:2353
+#: ../bin/misc.c:2357
 msgid "&Zoom"
 msgstr "&Zoom"
 
-#: ../bin/misc.c:2354
+#: ../bin/misc.c:2358
 msgid "Zoom &Out"
 msgstr "Zoom kleiner"
 
-#: ../bin/misc.c:2364
+#: ../bin/misc.c:2368
 msgid "&Redraw"
 msgstr "Neu zeichnen"
 
-#: ../bin/misc.c:2366
+#: ../bin/misc.c:2370
 msgid "Redraw All"
 msgstr "Alles neu zeichnen"
 
-#: ../bin/misc.c:2373
+#: ../bin/misc.c:2377
 msgid "Show SnapGrid"
 msgstr "Fangraster zeigen"
 
-#: ../bin/misc.c:2383
+#: ../bin/misc.c:2387
 msgid "Enable Magnetic Snap"
 msgstr "Magnetisches Fangen aktivieren"
 
-#: ../bin/misc.c:2398
+#: ../bin/misc.c:2402
 msgid "&Tool Bar"
 msgstr "Werkzeugleiste anpassen"
 
-#: ../bin/misc.c:2431
+#: ../bin/misc.c:2435
 msgid "Control Element"
 msgstr "Steuerungselement"
 
-#: ../bin/misc.c:2457
+#: ../bin/misc.c:2461
 msgid "&Loosen Tracks"
 msgstr "Gleise lockern"
 
-#: ../bin/misc.c:2469
+#: ../bin/misc.c:2473
 msgid "Raise/Lower Elevations"
 msgstr "Höhen auf/ab"
 
-#: ../bin/misc.c:2478
+#: ../bin/misc.c:2482
 msgid "Recompute Elevations"
 msgstr "Höhen neu berechnen"
 
-#: ../bin/misc.c:2483
+#: ../bin/misc.c:2487
 msgid "Change Scale"
 msgstr "Maßstab ändern"
 
-#: ../bin/misc.c:2504
+#: ../bin/misc.c:2508
 msgid "L&ayout ..."
 msgstr "Gleisplan..."
 
-#: ../bin/misc.c:2506
+#: ../bin/misc.c:2510
 msgid "&Display ..."
 msgstr "Anzeige..."
 
-#: ../bin/misc.c:2508
+#: ../bin/misc.c:2512
 msgid "Co&mmand ..."
 msgstr "Befehl..."
 
-#: ../bin/misc.c:2510
+#: ../bin/misc.c:2514
 msgid "&Easements ..."
 msgstr "Übergangsbögen..."
 
-#: ../bin/misc.c:2513
+#: ../bin/misc.c:2517
 msgid "&Fonts ..."
 msgstr "Schri&ftarten..."
 
-#: ../bin/misc.c:2515
+#: ../bin/misc.c:2519
 msgid "Stic&ky ..."
 msgstr "Dauerhaft..."
 
-#: ../bin/misc.c:2520
+#: ../bin/misc.c:2524
 msgid "&Debug ..."
 msgstr "&Fehlersuche..."
 
-#: ../bin/misc.c:2523
+#: ../bin/misc.c:2527
 msgid "&Preferences ..."
 msgstr "Einstellungen..."
 
-#: ../bin/misc.c:2525
+#: ../bin/misc.c:2529
 msgid "&Colors ..."
 msgstr "Farben..."
 
-#: ../bin/misc.c:2531
+#: ../bin/misc.c:2535
 msgid "&Record ..."
 msgstr "Aufzeichnen..."
 
-#: ../bin/misc.c:2533
+#: ../bin/misc.c:2537
 msgid "&Play Back ..."
 msgstr "Wiedergeben..."
 
-#: ../bin/misc.c:2539
+#: ../bin/misc.c:2543
 msgid "Main window"
 msgstr "Hauptfenster"
 
-#: ../bin/misc.c:2553
+#: ../bin/misc.c:2557
 msgid "Recent Messages"
 msgstr "Letzte Mitteilungen"
 
-#: ../bin/misc.c:2560
+#: ../bin/misc.c:2564
 msgid "Tip of the Day..."
 msgstr "Tipp des Tages..."
 
-#: ../bin/misc.c:2561
+#: ../bin/misc.c:2565
 msgid "&Demos"
 msgstr "&Demos"
 
-#: ../bin/misc.c:2562
+#: ../bin/misc.c:2566
 msgid "Examples..."
 msgstr "Beispiele..."
 
-#: ../bin/misc.c:2566 ../bin/smalldlg.c:222
+#: ../bin/misc.c:2570 ../bin/smalldlg.c:222
 msgid "About"
 msgstr "Über"
 
-#: ../bin/misc.c:2579
+#: ../bin/misc.c:2583
 msgid "Tur&nout Designer..."
 msgstr "Weichendesigner..."
 
-#: ../bin/misc.c:2582
+#: ../bin/misc.c:2586
 msgid "Layout &Control Elements"
 msgstr "Steuerungselemente"
 
-#: ../bin/misc.c:2584
+#: ../bin/misc.c:2588
 msgid "&Group"
 msgstr "&Gruppierung"
 
-#: ../bin/misc.c:2586
+#: ../bin/misc.c:2590
 msgid "&Ungroup"
 msgstr "Gruppierung aufheben"
 
-#: ../bin/misc.c:2590
+#: ../bin/misc.c:2594
 msgid "Custom defined parts..."
 msgstr "Eigene Teile..."
 
-#: ../bin/misc.c:2593
+#: ../bin/misc.c:2597
 msgid "Update Turnouts and Structures"
 msgstr "Weichen und Gebäude aktualisieren"
 
-#: ../bin/misc.c:2602
+#: ../bin/misc.c:2606
 msgid "Layers ..."
 msgstr "Ebenen..."
 
-#: ../bin/misc.c:2606
+#: ../bin/misc.c:2610
 msgid "Parts &List ..."
 msgstr "Teile&liste..."
 
-#: ../bin/misc.c:2609
+#: ../bin/misc.c:2613
 msgid "Price List..."
 msgstr "Preisliste..."
 
-#: ../bin/misc.c:2687
+#: ../bin/misc.c:2695
 msgid "Import/Export"
 msgstr "Import/Export"
 
-#: ../bin/misc.c:2717
+#: ../bin/misc.c:2725
 msgid ""
 "Program was not terminated properly. Do you want to resume working on the "
 "previous trackplan?"
@@ -5998,28 +6002,28 @@ msgstr ""
 "Das Programm wurde nicht ordnungsgemäss beendet. Wollen Sie die Bearbeitung "
 "des vorherigen Gleisplans fortsetzen?"
 
-#: ../bin/misc.c:2718
+#: ../bin/misc.c:2726
 msgid "Resume"
 msgstr "Fortsetzen"
 
-#: ../bin/misc.c:2830
+#: ../bin/misc.c:2838
 #, c-format
 msgid "Unnamed Trackplan - %s(%s)"
 msgstr "Unbenannter Gleisplan - %s(%s)"
 
-#: ../bin/misc.c:2912
+#: ../bin/misc.c:2924
 msgid "Initializing commands"
 msgstr "Initialisiere Befehle"
 
-#: ../bin/misc.c:2921
+#: ../bin/misc.c:2933
 msgid "Initializing menus"
 msgstr "Initialisiere Menüs"
 
-#: ../bin/misc.c:2956
+#: ../bin/misc.c:2968
 msgid "Reading parameter files"
 msgstr "Einlesen der Parameterdateien"
 
-#: ../bin/misc.c:2993
+#: ../bin/misc.c:3005
 msgid "Initialization complete"
 msgstr "Initialisierung beendet"
 
@@ -6090,15 +6094,15 @@ msgstr "Einen Wert kleiner als %s eingeben"
 msgid "Enter a value between %s and %s"
 msgstr "Einen Wert zwischen %s und %s eingeben"
 
-#: ../bin/param.c:2634
+#: ../bin/param.c:2643
 msgid "Help"
 msgstr "Hilfe"
 
-#: ../bin/paramfile.c:227
+#: ../bin/paramfile.c:228
 msgid "Parameter"
 msgstr "Parameter"
 
-#: ../bin/paramfile.c:325
+#: ../bin/paramfile.c:326
 msgid "Unknown param file line - skip until next good object?"
 msgstr ""
 "Unbekannte Parameter-Dateizeile - bis zum nächsten guten Objekt überspringen?"
@@ -6116,20 +6120,20 @@ msgstr "Mindestens ein Suchwort eingeben"
 msgid "Reload Library"
 msgstr "Bibliothek neu laden"
 
-#: ../bin/paramfilesearch_ui.c:272
+#: ../bin/paramfilesearch_ui.c:271
 #, c-format
 msgid "%d parameter files found."
 msgstr "%d Parameterdateien gefunden."
 
-#: ../bin/paramfilesearch_ui.c:282
+#: ../bin/paramfilesearch_ui.c:281
 msgid "No matches found."
 msgstr "Keine Übereinstimmungen gefunden."
 
-#: ../bin/paramfilesearch_ui.c:371
+#: ../bin/paramfilesearch_ui.c:370
 msgid "Choose parameter files"
 msgstr "Parameterdateien auswählen"
 
-#: ../bin/paramfilesearch_ui.c:391
+#: ../bin/paramfilesearch_ui.c:390
 msgid "No system parameter files found, search is disabled."
 msgstr "Keine Parameterdateien gefunden, die Suche ist deaktiviert."
 
@@ -6402,31 +6406,31 @@ msgstr "Bogen: Länge = %s Radius=%0.3f Winkel = %0.3f"
 msgid "Straight: Length=%s Angle=%0.3f"
 msgstr "Gerade: Länge=%s Winkel=%0.3f"
 
-#: ../bin/trknote.c:59
+#: ../bin/trknote.c:60
 msgid "Comment"
 msgstr "Kommentar"
 
-#: ../bin/trknote.c:60
+#: ../bin/trknote.c:61
 msgid "Link"
 msgstr "Weblink"
 
-#: ../bin/trknote.c:60 ../../../../build/work/app/bin/bllnhlp.c:101
+#: ../bin/trknote.c:61 ../../../../build/work/app/bin/bllnhlp.c:101
 msgid "Weblink"
 msgstr "Weblink"
 
-#: ../bin/trknote.c:503
+#: ../bin/trknote.c:505
 msgid "Expected END not found!"
 msgstr "Erwartete END-Anweisung nicht gefunden!"
 
-#: ../bin/trknote.c:649 ../../../../build/work/app/bin/bllnhlp.c:108
+#: ../bin/trknote.c:651 ../../../../build/work/app/bin/bllnhlp.c:108
 msgid "Place a note on the layout"
 msgstr "Eine Notiz auf den Gleisplan setzen"
 
-#: ../bin/trknote.c:663
+#: ../bin/trknote.c:665
 msgid "New Note"
 msgstr "Neue Notiz"
 
-#: ../bin/trknote.c:719
+#: ../bin/trknote.c:721
 msgid "Add notes"
 msgstr "Notizen hinzufügen"
 
@@ -6459,9 +6463,13 @@ msgstr "Grafikdateien"
 msgid "Font Select"
 msgstr "Auswahl der Schriftart"
 
-#: ../wlib/gtklib/help.c:68
+#: ../wlib/gtklib/help.c:83
 msgid "&Contents"
 msgstr "Inhalt"
+
+#: ../wlib/gtklib/help.c:84
+msgid "Co&mmand Context help"
+msgstr "Kontexthilfe für Befehle"
 
 #: ../wlib/gtklib/ixhelp.c:243
 msgid "Home"
@@ -11098,8 +11106,7 @@ msgstr ""
 "Dies ist der letzte Tipp.  Wenn Sie Ergänzungen oder Anmerkungen haben, "
 "lassen Sie es uns bitte wissen."
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:25
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:25
 #: ../../../../build/work/app/i18n/custmsg.h:192
 msgid ""
 "The unconnected endpoints of a straight or curved track can be changed with "
@@ -11108,8 +11115,7 @@ msgstr ""
 "Die nicht verbundenen Endpunkte eines geraden oder eines gebogenen Gleise "
 "können mit 'Ändern Gleis' verändert werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:31
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:31
 #: ../../../../build/work/app/i18n/custmsg.h:194
 msgid ""
 "The endpoint of a straight track is selected and then Left-Dragged to change "
@@ -11118,8 +11124,7 @@ msgstr ""
 "Der Endpunkt eines geraden Gleises wird ausgewählt und die Länge wird durch "
 "Ziehen mit dem linken Maus-Knopf geändert.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:48
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:48
 #: ../../../../build/work/app/i18n/custmsg.h:196
 msgid ""
 "If you try to drag the selected endpoint beyond the far endpoint, the track "
@@ -11128,10 +11133,8 @@ msgstr ""
 "Wenn der ausgewählte Endpunkt über den entfernten Endpunkt hinaus gezogen "
 "wird, wird das Gleis in die entgegengesetzte Richtung erweitert.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:68
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:73
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:68
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:73
 #: ../../../../build/work/app/i18n/custmsg.h:199
 msgid ""
 "A curved track is selected and it's new endpoint is determined by the angle "
@@ -11140,8 +11143,7 @@ msgstr ""
 "Ein gebogenes Gleis wird ausgewählt und der neue Endpunkt durch den Winkel "
 "des Mauszeiger festgelegt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:105
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:105
 #: ../../../../build/work/app/i18n/custmsg.h:201
 msgid "It's possible to almost create a complete circle.\n"
 msgstr "Es ist beinahe möglich, einen vollständigen Kreis zu erstellen.\n"
@@ -11154,14 +11156,12 @@ msgstr ""
 "Wenn Sie die Maus über den Startpunkt des Bogen hinaus ziehen, wird das "
 "Gleis sehr kurz.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:113
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:113
 #: ../../../../build/work/app/i18n/custmsg.h:204
 msgid "Here you are warned that the track will be too short.\n"
 msgstr "Jetzt werden Sie gewarnt, dass das Gleis zu kurz wird.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:147
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:147
 #: ../../../../build/work/app/i18n/custmsg.h:206
 msgid ""
 "If you move the cursor away from the curve, you will create a straight track "
@@ -11170,10 +11170,8 @@ msgstr ""
 "Wenn Sie den Mauszeiger vom Bogen weg bewegen, erstellen Sie ein gerades "
 "Gleis als Tangente an dem Bogen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:169
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:174
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:169
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:174
 #: ../../../../build/work/app/i18n/custmsg.h:209
 msgid ""
 "If you adjust the endpoint of a turnout or sectional track the track is "
@@ -11186,10 +11184,8 @@ msgstr ""
 msgid "a straight or a curve.\n"
 msgstr "eine Gerade oder eine Kurve.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:190
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:195
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:190
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:195
 #: ../../../../build/work/app/i18n/custmsg.h:213
 msgid ""
 "You can change the radius of a straight or curved track that is connected at "
@@ -11206,8 +11202,7 @@ msgstr ""
 "Das blaue Kreuz zeigt, dass dies möglich ist, wenn die Umschalttaste ohne "
 "Mausknöpfe gedrückt gehalten wird.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:209
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:209
 #: ../../../../build/work/app/i18n/custmsg.h:216
 msgid ""
 "This lets you change a straight track into a curved track (and vice versa) "
@@ -11216,8 +11211,7 @@ msgstr ""
 "Dadurch können Sie ein gerades Gleis in ein gebogenes (und umgekehrt) "
 "umwandeln und den Radius eines Bogengleises ändern.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:252
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:252
 #: ../../../../build/work/app/i18n/custmsg.h:218
 msgid ""
 "You can form an extension of a straight or curved Track that is connected at "
@@ -11236,8 +11230,7 @@ msgstr ""
 "Der blaue halbe Kreuz zeigt, dass dies möglich ist, wenn die Strg ohne "
 "Mausknopf gedrückt gehalten wird.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:267
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmadjend.xtr:267
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmbench.xtr:9
 #: ../../../../build/work/app/i18n/custmsg.h:222
 msgid "You can draw a variety of different types of benchwork:\n"
@@ -11287,8 +11280,7 @@ msgstr "Ändere die Ausrichtung auf rechts.\n"
 msgid "Now both flanges are on the inside of the two girders.\n"
 msgstr "Jetzt sind beide Schmalseiten auf der Innenseite der beiden Träger.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:34
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:34
 #: ../../../../build/work/app/i18n/custmsg.h:237
 msgid ""
 "Pushing the <Describe> button will cancel any other command in progress.\n"
@@ -11303,8 +11295,7 @@ msgstr ""
 "In zwei Schritten werden wir mit dem Erstellen eines gebogenen Gleises "
 "beginnen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:47
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:47
 #: ../../../../build/work/app/i18n/custmsg.h:240
 msgid ""
 "When we clicked on the <Describe> button, the current command was "
@@ -11323,8 +11314,7 @@ msgstr ""
 "in der Statuszeile angezeigt und die Eigenschaften des Objektes werden in "
 "einem Dialogfenster angezeigt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:57
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:57
 #: ../../../../build/work/app/i18n/custmsg.h:243
 msgid ""
 "Certain parameters of the object can be changed.  In this case we'll change "
@@ -11333,32 +11323,27 @@ msgstr ""
 "Einige der Eigenschaften des Objektes können geändert werden. In diesem Fall "
 "ändern wir die Länge\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:65
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:65
 #: ../../../../build/work/app/i18n/custmsg.h:245
 msgid "Let's look at the Turnout...\n"
 msgstr "Jetzt wollen wir uns die Weiche anschauen...\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:73
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:73
 #: ../../../../build/work/app/i18n/custmsg.h:247
 msgid "and change the turnout name and part no.\n"
 msgstr "und Titel und Bestellnummer der Weiche ändern.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:84
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:84
 #: ../../../../build/work/app/i18n/custmsg.h:249
 msgid "You can change the contents of text...\n"
 msgstr "Sie können den Text ändern...\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:93
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:93
 #: ../../../../build/work/app/i18n/custmsg.h:251
 msgid "and its size.\n"
 msgstr "und seine Größe.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:100
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:100
 #: ../../../../build/work/app/i18n/custmsg.h:253
 msgid ""
 "If you select a note, the Description dialog appears which displays the "
@@ -11367,8 +11352,7 @@ msgstr ""
 "Wenn Sie eine Notiz auswählen, erscheint ein Dialogfenster, in dem der "
 "Inhalt der Notiz angezeigt wird.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:112
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcancel.xtr:112
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcircle.xtr:7
 #: ../../../../build/work/app/i18n/custmsg.h:256
 msgid ""
@@ -11390,15 +11374,13 @@ msgstr ""
 msgid "We will change the Radius before proceeding.\n"
 msgstr "Bevor wir weitermachen, ändern wir den Radius.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcircle.xtr:24
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcircle.xtr:24
 #: ../../../../build/work/app/i18n/custmsg.h:260
 msgid "The next method is to drag from the edge of the Circle to the center.\n"
 msgstr ""
 "Die nächste Methode ist das Ziehen von der Kreislinie zum Mittelpunkt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcircle.xtr:37
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcircle.xtr:37
 #: ../../../../build/work/app/i18n/custmsg.h:262
 msgid ""
 "The last is similar, but you drag from the center of the Circle to the "
@@ -11407,10 +11389,8 @@ msgstr ""
 "Die letzte, aber vergleichbare, Methode ist das Ziehen vom Mittelpunkt zur "
 "Kreislinie.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcircle.xtr:50
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:157
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcircle.xtr:50
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:157
 #: ../../../../build/work/app/i18n/custmsg.h:265
 msgid ""
 "We have built a siding using Sectional track and have 2 End-Points that "
@@ -11420,8 +11400,7 @@ msgstr ""
 "Wir haben ein Ausweichgleis erstellt und haben zwei Endpunkte erhaltem, die "
 "beim Setzen von Festgleisen nicht automatisch verbunden wurden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:162
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:162
 #: ../../../../build/work/app/i18n/custmsg.h:267
 msgid ""
 "We use the <Connect> command to adjust neighboring tracks so the gap is "
@@ -11439,20 +11418,17 @@ msgstr ""
 "Verbindungsn gemacht. In diesem Besipiel wurden die Weichen nicht "
 "verändert.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:175
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:175
 #: ../../../../build/work/app/i18n/custmsg.h:270
 msgid "And now the gap is closed.\n"
 msgstr "Und jetzt ist die Lücke geschlossen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:181
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:181
 #: ../../../../build/work/app/i18n/custmsg.h:272
 msgid "Other tracks have been shifted slightly to close the gap.\n"
 msgstr "Andere Gleise wurden leicht verschoben, um die Lücke zu schliessen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:188
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:188
 #: ../../../../build/work/app/i18n/custmsg.h:274
 msgid "You can see these slight mis-alignments.\n"
 msgstr "Sie können die kleinen Versätze sehen.\n"
@@ -11463,10 +11439,8 @@ msgstr ""
 "Aber diese werden keinen Einfluss haben, wenn die Anlage später gebaut "
 "wird.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:196
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:353
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:196
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:353
 #: ../../../../build/work/app/i18n/custmsg.h:278
 msgid ""
 "After working with Sectional track you might get to point where these mis-"
@@ -11491,8 +11465,7 @@ msgstr ""
 "Zuerst benutzen Sie den <Trennen> Befehl um die Verbindung der Gleise zu "
 "lösen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:363
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:363
 #: ../../../../build/work/app/i18n/custmsg.h:282
 msgid ""
 "Then with the <Connect> command, Shift-Left-Click on the 2 End-Points.\n"
@@ -11500,10 +11473,8 @@ msgstr ""
 "Dank ativieren Sie den <Verbinden> Befehl und Klicken bei gedrückter "
 "Umschaltetaste auf die beiden Endpunkte.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:378
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn2.xtr:199
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn1.xtr:378
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn2.xtr:199
 #: ../../../../build/work/app/i18n/custmsg.h:285
 msgid "In example shows a simple figure-8 layout using Sectional track.\n"
 msgstr "In diesem Besipiel wird aus Festgleisen eine \"8\" gelegt.\n"
@@ -11514,8 +11485,7 @@ msgid ""
 msgstr ""
 "Wie Sie sehen, sind die Gleise an einer Stelle nicht exakt ausgerichtet.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn2.xtr:211
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn2.xtr:211
 #: ../../../../build/work/app/i18n/custmsg.h:288
 msgid ""
 "We can use the <Connect> command to move the connecting tracks slightly and "
@@ -11524,22 +11494,19 @@ msgstr ""
 "Mit dem <Verbinden> Befehl können wir die zu verbindenden Gleise leicht "
 "verschiebenund die beiden Endpunkte verbinden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn2.xtr:224
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn2.xtr:224
 #: ../../../../build/work/app/i18n/custmsg.h:290
 msgid "The two End-Points are now aligned and connected.\n"
 msgstr "Die beiden Endpunkte sind jetzt ausgerichtet und verbunden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn2.xtr:231
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn2.xtr:231
 #: ../../../../build/work/app/i18n/custmsg.h:292
 msgid "The connection was made by adding small gaps in other tracks.\n"
 msgstr ""
 "Die Verbindung wurde hergestellt, in dem kleine Lücken zwischen andere "
 "Gleise eingefügt wurden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn2.xtr:238
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmconn2.xtr:238
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:7
 #: ../../../../build/work/app/i18n/custmsg.h:295
 msgid "There are several ways to create a Curved track.\n"
@@ -11562,8 +11529,7 @@ msgstr ""
 "In der ersten Möglichkeit wird dieser durch Auswahl des ersten Endpunktes "
 "und Ziehen in die Richtung des Bogen erstellt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:20
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:20
 #: ../../../../build/work/app/i18n/custmsg.h:299
 msgid ""
 "You will see a straight track with a double ended Red arrow at the end.\n"
@@ -11576,8 +11542,7 @@ msgstr ""
 "Klicken und ziehen Sie eine der roten Spitzem um den Bogen zu "
 "vervollständigen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:39
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:39
 #: ../../../../build/work/app/i18n/custmsg.h:302
 msgid ""
 "The next method is to click at one End-Point and drag to the center of the "
@@ -11586,8 +11551,7 @@ msgstr ""
 "Die nächste Methode ist das Klicken auf einen Endpunkt und das Ziehen zum "
 "Mittelpunkt der Kurzve.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:50
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:50
 #: ../../../../build/work/app/i18n/custmsg.h:304
 msgid ""
 "Now you will see the double ended Red arrow connected to the center of the "
@@ -11603,8 +11567,7 @@ msgstr ""
 "Wie schon vorher beenden Sie den Bogen, indem Sie an einer der Pfeilspitzemn "
 "ziehen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:63
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:63
 #: ../../../../build/work/app/i18n/custmsg.h:307
 msgid ""
 "The next method is similar to the last except that you drag first from the "
@@ -11613,15 +11576,13 @@ msgstr ""
 "Die nächste Methode ist vergleichbar zur vorherigen, allerdings Ziehen Sie "
 "zuerst vom Mittelpunkt zu einem Endpunkt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:80
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:80
 #: ../../../../build/work/app/i18n/custmsg.h:309
 msgid "Once again, drag on a Red arrow to complete the Curve.\n"
 msgstr ""
 "Auch diesmal ziehen Sie an der roten Pfeilspitze um den Bogen zu vollenden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:90
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:90
 #: ../../../../build/work/app/i18n/custmsg.h:311
 msgid ""
 "The last method begins by drawing a line between the two End-Points of the "
@@ -11630,24 +11591,20 @@ msgstr ""
 "Bei der letzten Methode beginnen Sie, indem Sie eine Linie zwischen den "
 "beiden Endpunkten ziehen. Diese bildet die Sehne des Bogen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:108
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:108
 #: ../../../../build/work/app/i18n/custmsg.h:313
 msgid "Now drag on a Red arrow to complete the Curve.\n"
 msgstr "Jetzt ziehen Sie an der roten Pfeilspitze um den Bogen zu erstellen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:118
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:112
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmcrvtrk.xtr:118
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:112
 #: ../../../../build/work/app/i18n/custmsg.h:316
 msgid "This demo will construct a control panel for part of a bigger layout.\n"
 msgstr ""
 "In dieser Demo wird ein Steuerpult für einen Teil einer größeren Anlage "
 "erstellt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:117
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:117
 #: ../../../../build/work/app/i18n/custmsg.h:318
 msgid "For our control panel we will use Œ\" lines. \n"
 msgstr "Für unser Pult werden wir 1/2\" breite Linien benutzen.\n"
@@ -11665,14 +11622,12 @@ msgstr ""
 "Als erstes stellen wir das Fangraster auf 1\" Rasterlinien und 8 "
 "Unterteilungen ein.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:132
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:132
 #: ../../../../build/work/app/i18n/custmsg.h:322
 msgid "Now, clear the layout and turn on the Snap Grid.\n"
 msgstr "Jetzt  löschen wir den Entwurf und schalten das Fangraster ein.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:147
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:147
 #: ../../../../build/work/app/i18n/custmsg.h:324
 msgid "First step: draw the lines representing the tracks.\n"
 msgstr "Erster Schritte: zeichnen Sie die Linien, die die Gleise darstellen.\n"
@@ -11702,8 +11657,7 @@ msgstr ""
 "Unter Linux ist die Auflösung normalerweise 72, also wählen wir 72 / 4 = "
 "18.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:495
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:495
 #: ../../../../build/work/app/i18n/custmsg.h:330
 msgid ""
 "Notice how the Snap Grid keeps the main line and siding track parallel and "
@@ -11712,8 +11666,7 @@ msgstr ""
 "Beachten Sie, wie das Fangraster die Haupt- und die Nebenstrecke parallel "
 "führt und die Verbindungen und das Abstellgleis auf einem 45° Winkel hält.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:503
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:503
 #: ../../../../build/work/app/i18n/custmsg.h:332
 msgid "Second step: add LEDs for the turnout position indicators.\n"
 msgstr "ZweiterSchritt: hinzufügen der LEDs für die Weichenanzeige.\n"
@@ -11726,8 +11679,7 @@ msgstr "Wir werden T1 rote und grüne LEDs benutzen.\n"
 msgid "We will zoom in to show positioning.\n"
 msgstr "Wir zoomen rein, um die Positionierung zu zeigen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:513
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:513
 #: ../../../../build/work/app/i18n/custmsg.h:336
 msgid ""
 "Notice that when we are in the correct position (on the 1/8\" grid), the "
@@ -11739,14 +11691,12 @@ msgstr ""
 "Sobald beide Markierungen hervorgehoben sind, die LED durch Drücken der "
 "Leertaste fixieren.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:558
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:558
 #: ../../../../build/work/app/i18n/custmsg.h:338
 msgid "Now we'll add push buttons to control the turnouts.\n"
 msgstr "Jetzt fügen wir Drucktaster für die Steuerung der Weichen dazu.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:595
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:595
 #: ../../../../build/work/app/i18n/custmsg.h:340
 msgid "Let's add signals to our siding.\n"
 msgstr "Lassen Sie uns noch Signale an unserem Ausweichgleich aufstellen.\n"
@@ -11762,8 +11712,7 @@ msgstr ""
 msgid "We'll select a signal from the HotBar and place it into position.\n"
 msgstr "Wir wählen ein Signal aus der HotBar aus und bringen es in Position.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:608
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:608
 #: ../../../../build/work/app/i18n/custmsg.h:344
 msgid ""
 "We rotate the signals by Shift-Right-Click and select 90° CW on the popup "
@@ -11774,16 +11723,14 @@ msgstr ""
 "gleichzeitigem Mausklick.Aus dem Menu wählen wir 90° gegen UZS aus. Im Demo-"
 "Mode kann das  Menu nicht angezeigt werden, aber wir simulieren den Effekt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:657
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:657
 #: ../../../../build/work/app/i18n/custmsg.h:346
 msgid "The exits from the siding will be protected by single headed signals.\n"
 msgstr ""
 "Die Ausfahrt aus dem Ausweichgleich wird durch ein einfaches Signal "
 "gesichert.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:711
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:711
 #: ../../../../build/work/app/i18n/custmsg.h:348
 msgid "Now for some touch-ups.\n"
 msgstr "Nun noch ein paar kleinere Nachbesserungen.\n"
@@ -11810,8 +11757,7 @@ msgstr ""
 msgid "Users on those platforms will not see the gap.\n"
 msgstr "Users on those platforms will not see the gap.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:734
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:734
 #: ../../../../build/work/app/i18n/custmsg.h:354
 msgid ""
 "Add an arrow head to indicate the tracks that connect to the rest of the "
@@ -11824,14 +11770,12 @@ msgstr ""
 msgid "The second arrow will be flipped 180°\"\n"
 msgstr "Der zweite Pfeil wird um 180° umgedreht\"\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:772
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:772
 #: ../../../../build/work/app/i18n/custmsg.h:357
 msgid "And add some labels.\n"
 msgstr "Und fügen einige Beschriftungen hinzu.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:831
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:831
 #: ../../../../build/work/app/i18n/custmsg.h:359
 msgid ""
 "We want to print our control panel onto a 8œx11 page, but the control panel "
@@ -11852,33 +11796,28 @@ msgstr ""
 "Zuerst schalten Sie bitte das Fangraster wieder ein, damit die Objekte beim "
 "Verschieben ausgerichtet bleiben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:840
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:840
 #: ../../../../build/work/app/i18n/custmsg.h:363
 msgid "Lets move the spur track to the left 3/4\"\n"
 msgstr "Lassen Sie uns das Abstellgleis um ein 3/4 Inch nach links schieben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:862
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:862
 #: ../../../../build/work/app/i18n/custmsg.h:365
 msgid "Now move the right side of the siding over.\n"
 msgstr "Jetzt verschieben Sie die rechte Seite des Ausweichgleises.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:882
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:882
 #: ../../../../build/work/app/i18n/custmsg.h:367
 msgid "Now, adjust the ends of the mainline and siding tracks.\n"
 msgstr ""
 "Und passen nun die Enden des Hauptgleises und des Ausweichgleises an.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:902
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:902
 #: ../../../../build/work/app/i18n/custmsg.h:369
 msgid "And move the title over as well.\n"
 msgstr "Anschliessend noch den Titel verschieben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:919
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmctlpnl.xtr:919
 #: ../../../../build/work/app/i18n/custmsg.h:371
 msgid "Now you can print it.\n"
 msgstr "Jetzt können Sie das Ergebnis drucken.\n"
@@ -11889,8 +11828,7 @@ msgstr ""
 "Fadenkreuze markieren die Mittelpunkte der LEDs und Schalter und ermöglichen "
 "so ein einfaches Bohren.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdelund.xtr:33
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdelund.xtr:33
 #: ../../../../build/work/app/i18n/custmsg.h:374
 msgid ""
 "Pressing the <Delete> button lets you delete selected tracks from the "
@@ -11907,8 +11845,7 @@ msgstr ""
 "Zuerst wählen Sie die Gleise, die Sie löschen wollen und drücken dann "
 "<Entf>.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdelund.xtr:47
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdelund.xtr:47
 #: ../../../../build/work/app/i18n/custmsg.h:377
 msgid ""
 "If you delete a track connected to an easement curve, then the easement "
@@ -11917,16 +11854,14 @@ msgstr ""
 "Wenn Sie ein Gleis löschen, das einen Übergangsbogen besitzt, so wird dieser "
 "Übergangsbogen ebenfalls gelöscht.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdelund.xtr:57
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdelund.xtr:57
 #: ../../../../build/work/app/i18n/custmsg.h:379
 msgid "You can use the <Undo> command to undelete tracks.\n"
 msgstr ""
 "Sie können den <Rückgängig>-Befehl nutzen, um ein versehentliches Löschen "
 "rückgängig zu machen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdelund.xtr:67
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdelund.xtr:67
 #: ../../../../build/work/app/i18n/custmsg.h:381
 msgid ""
 "If you Left-Drag on the layout you can select all tracks within an area.\n"
@@ -11943,8 +11878,7 @@ msgstr ""
 "werden. Da der Übergangsbogen mit einem gelöschten Gleis verbunden ist, wird "
 "dieser ebenfalls gelöscht.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdelund.xtr:80
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdelund.xtr:80
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:6
 #: ../../../../build/work/app/i18n/custmsg.h:385
 msgid ""
@@ -11962,8 +11896,7 @@ msgstr ""
 "Dies wird simuliert, in dem ein Rechteck um das Eingabefeld gezeichnet wird, "
 "wenn Werte eingegeben oder geändert werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:13
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:13
 #: ../../../../build/work/app/i18n/custmsg.h:388
 msgid ""
 "Here we are going to make some changes to the Display dialog.  Notice how "
@@ -11976,20 +11909,17 @@ msgstr ""
 msgid "First we are setting 'Draw Tunnel' to 'Normal'\n"
 msgstr "Zuerst setzen wir 'Tunnel zeichnen' auf 'Normal'.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:21
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:21
 #: ../../../../build/work/app/i18n/custmsg.h:391
 msgid "Now we're changing 'Label Font Size' to '56'\n"
 msgstr "Jetzt ändern wir 'Schriftartgröße' nach '56'.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:26
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:26
 #: ../../../../build/work/app/i18n/custmsg.h:393
 msgid "We'll change some other options\n"
 msgstr "Wir werden einige andere Optionen ändern\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:38
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:38
 #: ../../../../build/work/app/i18n/custmsg.h:395
 msgid ""
 "This effect is only used in demonstration mode.  During normal operation you "
@@ -11998,10 +11928,8 @@ msgstr ""
 "Dieser Effekt wird nur im Demonstrations-Modus benutzt. Während der normalen "
 "Benutzung werden Sie das nicht sehen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:45
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdimlin.xtr:117
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdialog.xtr:45
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdimlin.xtr:117
 #: ../../../../build/work/app/i18n/custmsg.h:398
 msgid "Dimension Lines are used to mark the distances between two points.\n"
 msgstr ""
@@ -12015,8 +11943,7 @@ msgstr ""
 "Hier erstellen wir eine Maßlinie, um den Abstand zwischen zwei parallelen "
 "Gleisen zu zeigen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdimlin.xtr:132
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdimlin.xtr:132
 #: ../../../../build/work/app/i18n/custmsg.h:401
 msgid ""
 "We might also want to measure the distance between two structures.  In this "
@@ -12025,8 +11952,7 @@ msgstr ""
 "Möglicherweise wollen wir auch den Abstand zwischen zwei Gebäuden bestimmen."
 "In diesem Fall nutzen wir eine größere Maßlinie.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdimlin.xtr:143
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdimlin.xtr:143
 #: ../../../../build/work/app/i18n/custmsg.h:403
 msgid ""
 "We can use the <Describe> command to change the position of the Dimension "
@@ -12035,8 +11961,7 @@ msgstr ""
 "Der <Beschreiben> Befehl kann genutzt werden, um die Position der Maßlinie "
 "und die Größe der Zahlen zu ändern.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdimlin.xtr:161
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmdimlin.xtr:161
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmease.xtr:14
 #: ../../../../build/work/app/i18n/custmsg.h:406
 msgid ""
@@ -12306,8 +12231,7 @@ msgstr ""
 "ein.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmelev.xtr:376
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:31
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:31
 #: ../../../../build/work/app/i18n/custmsg.h:481
 msgid ""
 "XTrackCAD can help find tracks that are curved too sharply or are too "
@@ -12330,8 +12254,7 @@ msgstr ""
 msgid " \n"
 msgstr " \n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:39
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:39
 #: ../../../../build/work/app/i18n/custmsg.h:485
 msgid ""
 "The Layout dialog shows the Minimum Track Radius is 9\" and the Maximum "
@@ -12340,8 +12263,7 @@ msgstr ""
 "Im den Optionen für den Gleisplan sehen wir, dass der Mindestradius mit 9\" "
 "und die maximale Steigung mit 5% festgelegt sind.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:48
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:48
 #: ../../../../build/work/app/i18n/custmsg.h:487
 msgid ""
 "If we make the curved track sharper it will be drawn in the Exception "
@@ -12350,8 +12272,7 @@ msgstr ""
 "Verringern wir den Radius der Kurve, so wird das Gleis mit der Ausnahmefarbe "
 "dargestellt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:61
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:61
 #: ../../../../build/work/app/i18n/custmsg.h:489
 msgid ""
 "If we make the straight track steeper it will also be drawn in the Exception "
@@ -12360,8 +12281,7 @@ msgstr ""
 "Vergrößern wir die Steigung des geraden Gleises, so wird das Gleis ebenfalls "
 "in der Ausnahmefarbe dargestellt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:78
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:78
 #: ../../../../build/work/app/i18n/custmsg.h:491
 msgid ""
 "You can change the Exception color on the Colors dialog from the Options "
@@ -12370,10 +12290,8 @@ msgstr ""
 "Die Ausnahmefarbe kann im Farbdialogfenster des Optionen-Menus geändert "
 "werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:85
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:21
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmexcept.xtr:85
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:21
 #: ../../../../build/work/app/i18n/custmsg.h:494
 msgid ""
 "The unconnected endpoint of any track can also be extended with the <Modify> "
@@ -12383,26 +12301,22 @@ msgstr ""
 "können mit dem Befehl 'Ändern ' udn Rechts-Ziehen der Maus verändert "
 "werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:26
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:26
 #: ../../../../build/work/app/i18n/custmsg.h:496
 msgid "Select the endoint and Right-Drag.\n"
 msgstr "Endpunkt auswählen und mit rechter Maustaste ziehen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:34
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:34
 #: ../../../../build/work/app/i18n/custmsg.h:498
 msgid "The extending track can be straight...\n"
 msgstr "Die Erweiterung kann gerade sein...\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:44
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:44
 #: ../../../../build/work/app/i18n/custmsg.h:500
 msgid "... or curved.\n"
 msgstr "...oder gebogen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:51
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:51
 #: ../../../../build/work/app/i18n/custmsg.h:502
 msgid ""
 "If you extend a straight or curved flex track and enable Easements then an "
@@ -12411,8 +12325,7 @@ msgstr ""
 "Wenn die Funktion Übergangsbogen aktiv ist, während Sie ein gerades oder "
 "gebogenes Flexgleis verändern, so wird ein Übergangsbogen erstellt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:65
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmextend.xtr:65
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmflip.xtr:124
 #: ../../../../build/work/app/i18n/custmsg.h:505
 msgid ""
@@ -12539,14 +12452,12 @@ msgstr "Wir geben der Gruppe eine neue Beschreibung.\n"
 msgid "We're done with this definition.  Press Ok.\n"
 msgstr "Diese Definition ist fertig. Drücken Sie OK.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:101
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:101
 #: ../../../../build/work/app/i18n/custmsg.h:537
 msgid "You will see the updated image on the HotBar.\n"
 msgstr "Sie sehen das aktualisierte Bild in der Auswahlleiste.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:108
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:108
 #: ../../../../build/work/app/i18n/custmsg.h:539
 msgid ""
 "The <Ungroup> command replaces any Selected turnouts or structures with "
@@ -12577,8 +12488,7 @@ msgid "First Select the turnout and then Ungroup it.\n"
 msgstr ""
 "Zuerste wählen Sie die Weiche aus und lösen dann die Gruppierung auf.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:123
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:123
 #: ../../../../build/work/app/i18n/custmsg.h:544
 msgid "Notice that the Title now indicates the turnout is Ungrouped.\n"
 msgstr ""
@@ -12589,14 +12499,12 @@ msgstr ""
 msgid "Hit Escape to deselect everything.\n"
 msgstr "Durch Drücken von Escape wird die Auswhl aufgehoben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:133
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:133
 #: ../../../../build/work/app/i18n/custmsg.h:547
 msgid "Now Select the lines and squares.\n"
 msgstr "Jetzt wählen Sie die Linien und Quadrate aus.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:158
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:158
 #: ../../../../build/work/app/i18n/custmsg.h:549
 msgid ""
 "We could modify these object or add new ones.  For now we'll just delete "
@@ -12605,20 +12513,17 @@ msgstr ""
 "Wir können diese Objekt ändern oder neue hinzufügen.Diesmal werden wir sie "
 "einfach löschen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:165
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:165
 #: ../../../../build/work/app/i18n/custmsg.h:551
 msgid "And move the Label out of the way.\n"
 msgstr "Und die Beschriftung auf die Seite schieben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:176
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:176
 #: ../../../../build/work/app/i18n/custmsg.h:553
 msgid "Notice that the turnout has been broken into three parts.\n"
 msgstr "Beachten Sie, dass die Weiche in drei Teile zerfallen ist.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:198
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:198
 #: ../../../../build/work/app/i18n/custmsg.h:555
 msgid ""
 "Two ends of the turnout, from the frog to the end of the diverging leg and "
@@ -12678,14 +12583,12 @@ msgstr ""
 "Definition wiederherzustellen. Sie können auch andere Gleisabschnitte zur "
 "Weichendefinition zufügen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:242
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:242
 #: ../../../../build/work/app/i18n/custmsg.h:565
 msgid "Now, create a track and place the new turnout on it.\n"
 msgstr "Jetzt erstellen Sie bitte ein Gleis und setzen die Weiche darauf.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:260
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:260
 #: ../../../../build/work/app/i18n/custmsg.h:567
 msgid "Now suppose we want to replace the black squares with green circles.\n"
 msgstr ""
@@ -12696,15 +12599,13 @@ msgstr ""
 msgid "First we Select the turnout.\n"
 msgstr "Zuerst wählen wir die Weiche aus.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:272
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:272
 #: ../../../../build/work/app/i18n/custmsg.h:570
 msgid "And now Ungroup it (from the Tools Menu)\n"
 msgstr ""
 "Der ersten und der letzte Abschnitt wurden in gerade Gleise umgewandelt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:277
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:277
 #: ../../../../build/work/app/i18n/custmsg.h:572
 msgid ""
 "Notice that the name has changed to indicate the turnout was Ungrouped.\n"
@@ -12712,8 +12613,7 @@ msgstr ""
 "Beachten Sie, dass der Name geändert wurde, um anzuzeigen, dass die "
 "Gruppierung der Weiche aufgelöst wurde.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:283
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:283
 #: ../../../../build/work/app/i18n/custmsg.h:574
 msgid ""
 "Now, hit escape to deselect everything and then Select the 2 squares and "
@@ -12722,20 +12622,17 @@ msgstr ""
 "Jetzt drücken Sie Escape umd die Auswahl zurückzusetzen. Dann wählen Sie die "
 "zwei Quadrate und löschen diese.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:300
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:300
 #: ../../../../build/work/app/i18n/custmsg.h:576
 msgid "Now draw the green circles...\n"
 msgstr "Jetzt zeichnen Sie die grünen Kreise...\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:321
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:321
 #: ../../../../build/work/app/i18n/custmsg.h:578
 msgid "and Group the new definition.\n"
 msgstr "und gruppieren die neue Definition.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:340
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:340
 #: ../../../../build/work/app/i18n/custmsg.h:580
 msgid ""
 "Notice that the turnout in the HotBar is angled the same as the turnout on "
@@ -12745,8 +12642,7 @@ msgstr ""
 "auf der Anlage ist. Stellen Sie sicher, das die neuen Definitionen so "
 "ausgerichtet sind, wie Sie es bevorzugen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:379
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:379
 #: ../../../../build/work/app/i18n/custmsg.h:582
 msgid "We can also create turnouts from simple straight and curved tracks.\n"
 msgstr ""
@@ -12757,8 +12653,7 @@ msgstr ""
 msgid "We'll create two tracks that have a common endpoint.\n"
 msgstr "Wir erzeugen zwei Gleise mit einem gemeinsamen Endpunkt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:390
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:390
 #: ../../../../build/work/app/i18n/custmsg.h:585
 msgid ""
 "When we create the curve from the straight track endpoint we need to hold "
@@ -12768,8 +12663,7 @@ msgstr ""
 "wir die Umschalttaste gedrückt halten, um zu verhindern, dass XTrackCAD "
 "versucht, die beiden Strecken zu verbinden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:408
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:408
 #: ../../../../build/work/app/i18n/custmsg.h:587
 msgid "At this point we can modify the tracks if necessary.\n"
 msgstr ""
@@ -12781,8 +12675,7 @@ msgstr ""
 "Wir benutzen den Befehl <Beschreiben>  um die Eigenschaften der  Gleise zu "
 "verändern.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:420
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:420
 #: ../../../../build/work/app/i18n/custmsg.h:590
 msgid "We'll make the Length 7.5\".\n"
 msgstr "Wir setzen die Länge auf 7,5\".\n"
@@ -12800,20 +12693,17 @@ msgstr ""
 "linke Endpunkt unverändert bleibt wenn wir die Länge (oder den Winkel) des "
 "Gleises ändern.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:430
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:430
 #: ../../../../build/work/app/i18n/custmsg.h:593
 msgid "Now when change the Length only the Right End-Point will move.\n"
 msgstr "Jetzt wird beim Ändern der Länge nur der rechte Endpunkt verschoben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:441
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:441
 #: ../../../../build/work/app/i18n/custmsg.h:595
 msgid "Now let's look at the curved track.\n"
 msgstr "Jetzt schauen wir uns das gebogene Gleis an.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:451
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:451
 #: ../../../../build/work/app/i18n/custmsg.h:597
 msgid ""
 "Here the Left End-Point (which we don't want to move) is the Second End-"
@@ -12822,8 +12712,7 @@ msgstr ""
 "Hier ist der linke Endpunkt, den wir nicht verschieben wollen, der zweite "
 "Endpunkt. Also legen wir diesen als Fixpunkt fest.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:459
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:459
 #: ../../../../build/work/app/i18n/custmsg.h:599
 msgid "We want the curve to have a radius of 20\" and an angle of 17.5ï¿œ.\n"
 msgstr ""
@@ -12834,26 +12723,22 @@ msgstr ""
 msgid "First change the Radius...\n"
 msgstr "Zuerst ändern Sie den Radius...\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:468
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:468
 #: ../../../../build/work/app/i18n/custmsg.h:602
 msgid "and the the Angular Length.\n"
 msgstr "und den Winkelabstand.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:476
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:476
 #: ../../../../build/work/app/i18n/custmsg.h:604
 msgid "Now Select both tracks...\n"
 msgstr "Jetzt bitte beide Gleise auswählen...\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:492
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:492
 #: ../../../../build/work/app/i18n/custmsg.h:606
 msgid "and Group them.\n"
 msgstr "und gruppieren sie.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:503
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:503
 #: ../../../../build/work/app/i18n/custmsg.h:608
 msgid ""
 "If the two tracks have a common End-Point then they will form a Turnout and "
@@ -12864,8 +12749,7 @@ msgstr ""
 "Weiche bilden, dieim Betriebsmodus gesteuert werden kann. Andernfalls werden "
 "es einfach zwei gruppierte Gleise sein.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:510
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:510
 #: ../../../../build/work/app/i18n/custmsg.h:610
 msgid ""
 "We have created a left hand turnout and we also want a right hand version.\n"
@@ -12877,8 +12761,7 @@ msgstr ""
 msgid "We'll use the <Flip> command.\n"
 msgstr "Wir verwenden den Befehl <Spiegeln>\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:523
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:523
 #: ../../../../build/work/app/i18n/custmsg.h:613
 msgid ""
 "Drag a horizontal line that will be the mirror for the <Flip> command.\n"
@@ -12886,8 +12769,7 @@ msgstr ""
 "Ziehen Sie als  Spiegelstrich für den Spiegeln Befehl eine horizontale "
 "Linie.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:533
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:533
 #: ../../../../build/work/app/i18n/custmsg.h:615
 msgid "Notice the title has changed to Flipped Left.\n"
 msgstr ""
@@ -12897,15 +12779,13 @@ msgstr ""
 msgid "Now Group the turnout.\n"
 msgstr "Jetzt gruppieren Sie die Weiche\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:542
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:542
 #: ../../../../build/work/app/i18n/custmsg.h:618
 msgid "We'll change the Title and Part No for the new defintion.\n"
 msgstr ""
 "Wir werden den Titel und die Teilnummer für die neue Definition ändern.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:555
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:555
 #: ../../../../build/work/app/i18n/custmsg.h:620
 msgid ""
 "To Remove the definitions, use the Custom Management dialog on the Tools "
@@ -12914,14 +12794,12 @@ msgstr ""
 "Um Definitionen zu löschen benutzen Sie die \"Anpassungs Verwaltung\" im "
 "\"Verwalten\" Menü.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:560
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:560
 #: ../../../../build/work/app/i18n/custmsg.h:622
 msgid "Select the definitions you added and Delete them.\n"
 msgstr "Wählen Sie die zugefügten Definitionen aus udn löschen diese.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:573
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmgroup.xtr:573
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:16
 #: ../../../../build/work/app/i18n/custmsg.h:625
 msgid ""
@@ -13029,8 +12907,7 @@ msgstr ""
 "Nachdem die Eigenschaften für die Gleiswendel bestimmt sind, setzen wir "
 "diese auf die Anlage.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:112
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:112
 #: ../../../../build/work/app/i18n/custmsg.h:651
 msgid ""
 "Next, join the 2 straight tracks to the helix in the same way we join to a "
@@ -13039,8 +12916,7 @@ msgstr ""
 "Als nächstes verbinden Sie die zwei geraden Gleise mit der Wendel genauso "
 "wir Sie Gleise mit einem Kreis verbinden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:145
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:145
 #: ../../../../build/work/app/i18n/custmsg.h:653
 msgid ""
 "Notice that the length has increased because we have more than 4 turns in "
@@ -13049,8 +12925,7 @@ msgstr ""
 "Beachten Sie, dass sich die Länge vergrößert hat, da wir mehr als vier "
 "Windungen in der Wendel haben. Es sind nahe an 4,25 Umdrehungen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:155
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:155
 #: ../../../../build/work/app/i18n/custmsg.h:655
 msgid ""
 "Next, we assign elevations to the 2 End-Points of the helix.  This will "
@@ -13070,8 +12945,7 @@ msgstr ""
 "festlegen können. XTrackCAD behandelt bei den Höhen eine Wendel als ein "
 "durchgängiges Stück Gleis.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:176
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:176
 #: ../../../../build/work/app/i18n/custmsg.h:658
 msgid ""
 "We have set the elevations to 1\" and 13\" to produce a grade of 3.0% with "
@@ -13090,16 +12964,14 @@ msgstr ""
 "oder die Höhe an den Enden der Wendel zu ändern. Dadurch ändern sich die "
 "Steigung und der Abstand.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:184
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:184
 #: ../../../../build/work/app/i18n/custmsg.h:661
 msgid "The helix description can be moved by the <Move Label> command.\n"
 msgstr ""
 "Mit dem Befehl <Verschiebe Beschriftung> kann die Beschriftung der Wendel "
 "verschoben werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:194
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhelix.xtr:194
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhndld.xtr:16
 #: ../../../../build/work/app/i18n/custmsg.h:664
 msgid ""
@@ -13158,8 +13030,7 @@ msgstr "Die anderen Teile sind verschiedene gerade und gebogene Teilstücke.\n"
 msgid "The new curved turnout is also composed of several segments.\n"
 msgstr "Die neue Bogenweiche besteht ebenfalls aus mehreren Abschnitten.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhndld.xtr:107
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmhndld.xtr:107
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmintro.xtr:7
 #: ../../../../build/work/app/i18n/custmsg.h:684
 msgid "Welcome to the XTrackCAD demonstration.\n"
@@ -13315,8 +13186,7 @@ msgstr ""
 "Beachten Sie, dass die Verbindung an anderen Punkten der Kreise ansetzt als "
 "bem letzten Beispiel.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnabut.xtr:22
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnabut.xtr:22
 #: ../../../../build/work/app/i18n/custmsg.h:718
 msgid "This examples shows joining tracks whose End-Points are aligned.\n"
 msgstr ""
@@ -13331,29 +13201,25 @@ msgstr ""
 "Beachten Sie dass die Endpunkte der beiden Gleise nahe beieinander und "
 "parallel, aber nicht verbunden, sind.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnabut.xtr:30
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnabut.xtr:30
 #: ../../../../build/work/app/i18n/custmsg.h:721
 msgid "The first case joins the curve and straight track.\n"
 msgstr ""
 "Im ersten Fall werden eine gebogenes und ein gerades Gleis verbunden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnabut.xtr:40
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnabut.xtr:40
 #: ../../../../build/work/app/i18n/custmsg.h:723
 msgid "The second case will join the two straight tracks.\n"
 msgstr "Im zweiten Fall werden zwei gerade Gleise verbunden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnabut.xtr:50
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnabut.xtr:50
 #: ../../../../build/work/app/i18n/custmsg.h:725
 msgid "Note that the two straight tracks were combined to form one track.\n"
 msgstr ""
 "Beachten Sie, dass die beiden geraden Gleise zu einem Gleis zusammengefasst "
 "wurden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnabut.xtr:55
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnabut.xtr:55
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjncs.xtr:14
 #: ../../../../build/work/app/i18n/custmsg.h:728
 msgid ""
@@ -13395,8 +13261,7 @@ msgid "Adjusting the end point will fix it. \n"
 msgstr "Durch Anpassen des Endpunktes wird das verbessert.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjncs.xtr:64
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnmove.xtr:18
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnmove.xtr:18
 #: ../../../../build/work/app/i18n/custmsg.h:739
 msgid "The <Join> command can move one group of tracks to join with another.\n"
 msgstr ""
@@ -13411,16 +13276,14 @@ msgstr ""
 "Zuerst wählen Sie bei gedrücketr Strg-Taste die Gleise aus, die verschoben "
 "werden sollen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnmove.xtr:36
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnmove.xtr:36
 #: ../../../../build/work/app/i18n/custmsg.h:742
 msgid "Click <Join> and Shift-Left-Click on the two End-Points.\n"
 msgstr ""
 "Klicken Sie auf <Verbinden> und klicken dann bei gedrückter Umschalttaste "
 "auf die beiden Endpunkte.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnmove.xtr:51
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmjnmove.xtr:51
 #: ../../../../build/work/app/i18n/custmsg.h:744
 msgid "The selected tracks are moved into position.\n"
 msgstr "Die ausgewählten Gleise werden an die Position verschoben.\n"
@@ -13617,8 +13480,7 @@ msgid "You also draw in various colors and line widths.\n"
 msgstr ""
 "Sie können auch mit unterschiedlichen Farben und Liniendicken zeichnen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines.xtr:109
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines.xtr:109
 #: ../../../../build/work/app/i18n/custmsg.h:796
 msgid ""
 "Like Curved Tracks, Curved Lines can be drawn by a variety of methods.\n"
@@ -13636,16 +13498,14 @@ msgstr ""
 "ziehen um die Sehne der Kurve festzulegen. Dann Ziehen wir vom Mittelpunkt "
 "aus, um die Form der Kurve festzulegen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines.xtr:184
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines.xtr:184
 #: ../../../../build/work/app/i18n/custmsg.h:799
 msgid "Boxes are useful for drawing rectangular shapes.\n"
 msgstr ""
 "Gefüllte Rechtecke können für das Erstellen rechteckiger Formen benutzt "
 "werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines.xtr:194
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines.xtr:194
 #: ../../../../build/work/app/i18n/custmsg.h:801
 msgid ""
 "Circles can be drawn by clicking on the center or edge and dragging to set "
@@ -13658,23 +13518,19 @@ msgstr ""
 msgid "Here we will drag from the Center.\n"
 msgstr "Hier beginnen wir vom Mittelpunkt aus.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines.xtr:204
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines.xtr:204
 #: ../../../../build/work/app/i18n/custmsg.h:804
 msgid "Lines and Shapes can be deleted by Selecting and Deleting.\n"
 msgstr ""
 "Linien und Formen können durch Auswählen und Löschen entfernt werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines.xtr:227
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:91
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines.xtr:227
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:91
 #: ../../../../build/work/app/i18n/custmsg.h:807
 msgid "We also draw Polylines and filled shapes.\n"
 msgstr "Wir können auch Vielfachlinien und gefüllte Formen erstellen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:98
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:98
 #: ../../../../build/work/app/i18n/custmsg.h:809
 msgid ""
 "A Polyline is drawn by dragging to place each of the point in the Polyline.\n"
@@ -13682,8 +13538,7 @@ msgstr ""
 "Eine Vielfachlinie wird gezeichnet, indem jeder Eckpunkt durch Ziehen "
 "gesetzt wird.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:125
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:125
 #: ../../../../build/work/app/i18n/custmsg.h:811
 msgid ""
 "To finish off the Polyline press the <Space> key or choose another drawing "
@@ -13692,22 +13547,19 @@ msgstr ""
 "Um die Vielfachlinie zu beenden, drücken Sie die Leertaste oder wählen eine "
 "andere Zeichenoperation.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:132
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:132
 #: ../../../../build/work/app/i18n/custmsg.h:813
 msgid "A filled Polygon is drawn in the same way.\n"
 msgstr "Ein ausgefülltes Polygon wird auf die gleiche Weise gezeichnet.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:158
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:158
 #: ../../../../build/work/app/i18n/custmsg.h:815
 msgid "When you are finished, press the <Space> key to complete the polygon.\n"
 msgstr ""
 "Wenn Sie fertig sind, drücken Sie die Taste <Leerzeichen> , um das Polygon "
 "zu vervollständigen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:165
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:165
 #: ../../../../build/work/app/i18n/custmsg.h:817
 msgid ""
 "You can use the Above and Below Commands to move lines and shapes to the "
@@ -13716,14 +13568,12 @@ msgstr ""
 "Sie können die Befehle Über und  Unter benutzen, um Linien und Formen in den "
 "Vorder- oder Hintergrund zu verschieben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:182
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:182
 #: ../../../../build/work/app/i18n/custmsg.h:819
 msgid "Filled Boxes and Circles work the same as line Boxes and Circles.\n"
 msgstr "Gefüllte Rechtecke und Kreis werden genauso erstellt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:199
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmlines2.xtr:199
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmouse.xtr:8
 #: ../../../../build/work/app/i18n/custmsg.h:822
 msgid ""
@@ -13847,8 +13697,7 @@ msgstr ""
 "Dies wird durch einen nach zeigenden Pfeilumriß mit dem Buchstaben C in der "
 "Nähe des Pfeils angezeigt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmouse.xtr:114
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmouse.xtr:114
 #: ../../../../build/work/app/i18n/custmsg.h:848
 msgid "You can also use the Control key with the Right mouse button. \n"
 msgstr "Sie können auch die Strg-Taste mit der rechten Maustaste verwenden.\n"
@@ -13861,10 +13710,8 @@ msgstr ""
 "Dies wird durch einen nach rechts weisenden Pfeilumriß mit dem Buchstaben C "
 "in der Nähe des Pfeils angezeigt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmouse.xtr:130
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:23
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmouse.xtr:130
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:23
 #: ../../../../build/work/app/i18n/custmsg.h:852
 msgid ""
 "The main drawing area shows a portion of total layout.  You can zoom in or "
@@ -13882,18 +13729,15 @@ msgstr ""
 msgid "You can see the entire layout in the Map window.\n"
 msgstr "Den gesamten Gleisplan können Sie im Kartenfenster sehen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:33
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:33
 #: ../../../../build/work/app/i18n/custmsg.h:855
 msgid "As you Zoom Out tracks are drawn with one line instead of two.\n"
 msgstr ""
 "Wenn Sie die Ansicht verkleinern, werden Gleise durch eine anstelle von zwei "
 "Linien dargestellt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:49
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:54
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:49
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:54
 #: ../../../../build/work/app/i18n/custmsg.h:858
 msgid ""
 "You can change what portion of the layout is shown by using the 'Map' window "
@@ -13914,8 +13758,7 @@ msgstr ""
 "Durch Ziehen des hervorgehobenen Bereichs im Karten-Fenster können Sie den "
 "angezeigten Bereich des Gleisplans verändern.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:63
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:63
 #: ../../../../build/work/app/i18n/custmsg.h:861
 msgid ""
 "You can also Right-Drag on the Map window to set the scale and position of "
@@ -13924,8 +13767,7 @@ msgstr ""
 "Sie können auch Rechts-Ziehen um den Maßstab und die Position des Gleisplans "
 "im Hauptfenster zu bestimmen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:72
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmmovabt.xtr:72
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmnotes.xtr:6
 #: ../../../../build/work/app/i18n/custmsg.h:864
 msgid ""
@@ -13965,14 +13807,12 @@ msgstr "Klicken Sie auf Einzelschritt um zu XTrackCAD zurück zu kehren.\n"
 msgid "Thanks for watching.\n"
 msgstr "Danke für das Interesse.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:32
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:32
 #: ../../../../build/work/app/i18n/custmsg.h:874
 msgid "This example shows how to create parallel tracks.\n"
 msgstr "Dieses Besipiel zeigt wie paralle Gleise erstellt werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:37
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:37
 #: ../../../../build/work/app/i18n/custmsg.h:876
 msgid ""
 "The separation is set in the <Parallel Separation> window.  You should set "
@@ -13981,8 +13821,7 @@ msgstr ""
 "Der Abstand wird im Fenster <Parallelabstand> eingestellt. Dies muss "
 "geschehen, bevor das Glaus ausgewählt wird.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:49
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:49
 #: ../../../../build/work/app/i18n/custmsg.h:878
 msgid ""
 "You control which side the parallel track will be on by moving the cursor "
@@ -13991,8 +13830,7 @@ msgstr ""
 "Sie können steuern, auf welcher Seite das Parallalgleis erstellt wird, indem "
 "Sie den Mauszeiger von einer Seite derr Gleismitte auf die andere bewegen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:81
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:81
 #: ../../../../build/work/app/i18n/custmsg.h:880
 msgid "When you release the mouse button the new parallel track is created.\n"
 msgstr ""
@@ -14007,14 +13845,12 @@ msgstr ""
 "Gleis erstellt haben. Dies wird durch die Einstellungen in Wiederholte "
 "Befehle festgelegt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:92
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:92
 #: ../../../../build/work/app/i18n/custmsg.h:883
 msgid "You cannot create a track parallel to a turnout.\n"
 msgstr "Zu einer Weiche können keine Parallelen erstellt werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:172
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:172
 #: ../../../../build/work/app/i18n/custmsg.h:885
 msgid ""
 "Note that the new curved track is automatically connected to the short "
@@ -14023,10 +13859,8 @@ msgstr ""
 "Beachten Sie, dass das neue gebogene Gleis automatisch mit dem kurzen "
 "parallelen Gleis verbunden wird.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:180
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:19
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmparall.xtr:180
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:19
 #: ../../../../build/work/app/i18n/custmsg.h:888
 msgid ""
 "Polylines and polygons (created with the <Draw> command) can be modified by "
@@ -14041,44 +13875,38 @@ msgstr ""
 "Klicken Sie zunächst mit der linken Maustaste auf die Form, die Sie ändern "
 "möchten.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:29
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:29
 #: ../../../../build/work/app/i18n/custmsg.h:891
 msgid "Then drag on the point you want to move\n"
 msgstr "Dann ziehen Sie an dem Punkt, der verschoben werden soll\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:39
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:39
 #: ../../../../build/work/app/i18n/custmsg.h:893
 msgid "And finally press the Space bar to finish the change\n"
 msgstr ""
 "Und schließlich drücken Sie die Leertaste, um die Änderung abzuschließen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:54
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:54
 #: ../../../../build/work/app/i18n/custmsg.h:895
 msgid "If you select the middle of an Edge a new Corner is created.\n"
 msgstr ""
 "Wenn Sie die Mitte einer Kante auswählen, wird eine neue Ecke erzeugt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:72
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:72
 #: ../../../../build/work/app/i18n/custmsg.h:897
 msgid "To delete a corner, select and then press Delete or Backspace\n"
 msgstr ""
 "Um eine Ecke zu löschen, wählen Sie diese aus und drücken dann Löschen oder "
 "Rücktaste\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:98
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:98
 #: ../../../../build/work/app/i18n/custmsg.h:899
 msgid "But you cannot have a Poly-shape with less than 3 sides.\n"
 msgstr ""
 "Aber ein Vieleck oder eine Vielfachllinie mit weniger als drei Seiten ist "
 "nicht möglich.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:126
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmplymod.xtr:126
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmprof.xtr:126
 #: ../../../../build/work/app/i18n/custmsg.h:902
 msgid ""
@@ -14327,8 +14155,7 @@ msgstr ""
 "neue Höhe und Steigung anzuzeigen.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmprof.xtr:326
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:119
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:119
 #: ../../../../build/work/app/i18n/custmsg.h:955
 msgid "The <Rescale> command will change the size of the selected objects.\n"
 msgstr "Der Befehl <Skalieren>verändert die Größe der ausgwählten Objekte.\n"
@@ -14337,20 +14164,17 @@ msgstr "Der Befehl <Skalieren>verändert die Größe der ausgwählten Objekte.\n
 msgid "First we will try rescaling by ratio.\n"
 msgstr "Zuerst skalieren wir über das Verhältnis.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:126
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:126
 #: ../../../../build/work/app/i18n/custmsg.h:958
 msgid "We are going to make everything 150% bigger.\n"
 msgstr "Wir vergrößern alles auf 150 Prozent.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:136
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:136
 #: ../../../../build/work/app/i18n/custmsg.h:960
 msgid "Note the track gauge did not change.\n"
 msgstr "Beachten Sie, dass die Spurweite nicht geändert wurde.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:143
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:143
 #: ../../../../build/work/app/i18n/custmsg.h:962
 msgid "Let's try that again.\n"
 msgstr "Lassen Sie uns das nochmals versuchen.\n"
@@ -14359,28 +14183,23 @@ msgstr "Lassen Sie uns das nochmals versuchen.\n"
 msgid "Now we are going to convert from one scale to another.\n"
 msgstr "Jetzt ändern wir von einem Maßstab zu einem anderen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:154
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:154
 #: ../../../../build/work/app/i18n/custmsg.h:965
 msgid "We will convert everything from N scale to HO scale...\n"
 msgstr "Wir werden alles von Spur N nach Spur H0 umwandeln...\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:161
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:161
 #: ../../../../build/work/app/i18n/custmsg.h:967
 msgid "and change the track gauge as well.\n"
 msgstr "und die Spurweite gleichzeitig ändern.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:169
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:169
 #: ../../../../build/work/app/i18n/custmsg.h:969
 msgid "Note that the Title of the turnout did not change.\n"
 msgstr "Beachten Sie, dass der Titel der Weiche nicht geändert wurde.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:177
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrotate.xtr:72
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrescal.xtr:177
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrotate.xtr:72
 #: ../../../../build/work/app/i18n/custmsg.h:972
 msgid ""
 "The <Rotate> command will pivot the Selected objects.  First Click on the "
@@ -14396,8 +14215,7 @@ msgid ""
 msgstr ""
 "In diesem Beispiel werden wir das Gebäude um seinen Mittelpunkt drehen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrotate.xtr:135
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrotate.xtr:135
 #: ../../../../build/work/app/i18n/custmsg.h:975
 msgid ""
 "The <Rotate> command will restrict the rotation to increments of 15° if you "
@@ -14406,8 +14224,7 @@ msgstr ""
 "Der Drehwinkel wird auf Vielfache von 15° begrenzt, wenn Sie die Umschalt "
 "und die Strg-Taste gleichzeitig gedrückt halten.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrotate.xtr:316
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrotate.xtr:316
 #: ../../../../build/work/app/i18n/custmsg.h:977
 msgid ""
 "There are Rotate options that you can access by Shift-Right-Click command "
@@ -14439,8 +14256,7 @@ msgstr ""
 msgid "Unfortunately, we can not currently demonstrate these features.\n"
 msgstr "Leider können wir diese Merkmale derzeit nicht demonstrieren.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrotate.xtr:529
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmrotate.xtr:529
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmruler.xtr:14
 #: ../../../../build/work/app/i18n/custmsg.h:983
 msgid ""
@@ -14463,8 +14279,7 @@ msgid "But you can place it somewhere else.\n"
 msgstr "Aber Sie können dieses auch an eine andere Stelle versetzen.\n"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmruler.xtr:42
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:173
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:173
 #: ../../../../build/work/app/i18n/custmsg.h:990
 msgid "The <Select> command is used to select tracks.\n"
 msgstr "Der Befehl <Auswahl> wird benutzt, um Objekte auszuwählen.\n"
@@ -14487,14 +14302,12 @@ msgstr ""
 "Wenn Sie den Cursor in die Nähe eines Gleises bewegen, das ausgewählt werden "
 "könnte, wird dieses mit blauen Linien gezeichnet.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:184
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:184
 #: ../../../../build/work/app/i18n/custmsg.h:995
 msgid "A Left-Click selects a track\n"
 msgstr "Ein Klick mit der linken Maustaste wählt ein Gleis aus.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:192
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:192
 #: ../../../../build/work/app/i18n/custmsg.h:997
 msgid ""
 "The selected track will have red X's drawn where it is connected to "
@@ -14509,26 +14322,22 @@ msgstr ""
 msgid "A Ctrl-Left-Click adds tracks to the selection\n"
 msgstr "Mit einem Strg-Links-Klick werden Gleise zur Auswahl hinzugefügt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:211
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:211
 #: ../../../../build/work/app/i18n/custmsg.h:1000
 msgid "Selecting a selected track re-selects only it.\n"
 msgstr ""
 "Durch erneutes Auswählen eines bereits ausgewählten Gleises bleibt nur "
 "dieses ausgewählt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:219
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:219
 #: ../../../../build/work/app/i18n/custmsg.h:1002
 msgid "Selecting off all tracks de-selects them.\n"
 msgstr ""
 "Durch Klicken außerhalb des Auswahlbereichs wird die Auswahl der Gleise "
 "wieder aufgehoben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:227
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:232
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:227
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:232
 #: ../../../../build/work/app/i18n/custmsg.h:1005
 msgid ""
 "To demonstrate Select Connected, first select two tracks at the end of a "
@@ -14537,8 +14346,7 @@ msgstr ""
 "Um Auswahl verbundener Gleise zu demonstrieren, wählen Sie zunächst zwei "
 "Gleise am Ende eines Teils, der ausgewählt werden soll\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:248
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:248
 #: ../../../../build/work/app/i18n/custmsg.h:1007
 msgid ""
 "Shift-Left-Click on a track will select all unselected tracks connected to "
@@ -14548,8 +14356,7 @@ msgstr ""
 "verbunden sind. Der Vorgang bricht ab, sobald ein Gleis bereits ausgewählt "
 "ist.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:260
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:260
 #: ../../../../build/work/app/i18n/custmsg.h:1009
 msgid ""
 "Be careful with this because its very easy to select all tracks this way\n"
@@ -14557,24 +14364,20 @@ msgstr ""
 "Seien Sie vorsichtig, denn es ist sehr einfach unbeabsichtigt alle Gleise "
 "auszuwählen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:274
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:274
 #: ../../../../build/work/app/i18n/custmsg.h:1011
 msgid "The <esc> key will deselect all objects.\n"
 msgstr "Mit der Taste <Esc> werden alle Objekte abgewählt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:282
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:287
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:282
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:287
 #: ../../../../build/work/app/i18n/custmsg.h:1014
 msgid "Left-Drag is used to select all objects within an area.\n"
 msgstr ""
 "Ziehen mit gedrückter linker Maustaste wählt alle Objekt in einem Bereich "
 "aus.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:295
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:295
 #: ../../../../build/work/app/i18n/custmsg.h:1016
 msgid "Shift-Left-Drag is used to move selected tracks.\n"
 msgstr ""
@@ -14601,16 +14404,14 @@ msgstr ""
 "genug beieinander liegen, werden zwei Kreise angezeigt, die zeigen, wo die "
 "Gleise verbunden werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:313
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:313
 #: ../../../../build/work/app/i18n/custmsg.h:1020
 msgid "Let's move the Main window to see what's going on next\n"
 msgstr ""
 "Wir werden das Hauptfenster bewegen, um zu sehen, was passiert.\n"
 "\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:320
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:320
 #: ../../../../build/work/app/i18n/custmsg.h:1022
 msgid ""
 "Ctrl-Left-Drag rotates the selected tracks about the pivot point (which is "
@@ -14619,10 +14420,8 @@ msgstr ""
 "Strg-Rechts-Ziehen dreht die ausgewählten Gleise um das Zentrum, d.h. der "
 "Punkt an dem Sie das Ziehen begonnen haben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:382
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:387
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:382
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:387
 #: ../../../../build/work/app/i18n/custmsg.h:1025
 msgid ""
 "Next we select the <Join Tracks> command to demonstrate \"Move To Join\"  \n"
@@ -14630,8 +14429,7 @@ msgstr ""
 "Als nächstes wählen wir den Befehl <Verbinde Gleise>, um \"Verschieben zum "
 "Verbinden\" zu demonstrieren\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:392
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:392
 #: ../../../../build/work/app/i18n/custmsg.h:1027
 msgid ""
 "You can use Shift-Left-Click to select an open endpoint of a selected track "
@@ -14645,8 +14443,7 @@ msgstr ""
 msgid "We'll move the Main window again.\n"
 msgstr "Wir werden das Hauptfenster wieder bewegen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:415
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:415
 #: ../../../../build/work/app/i18n/custmsg.h:1030
 msgid ""
 "You then Left-Click on an endpoint of a unselected track to move the "
@@ -14656,8 +14453,7 @@ msgstr ""
 "ausgewählten Gleises, um die ausgewählten Gleise zum Verbinden zu "
 "verschieben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:430
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmselect.xtr:430
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmsplit.xtr:30
 #: ../../../../build/work/app/i18n/custmsg.h:1033
 msgid "The <Split> command is used to split and disconnect tracks.\n"
@@ -14715,8 +14511,7 @@ msgstr ""
 "Um die Gleise wieder sichtbar zu machen, wählen Sie diese aus und "
 "wiederholen den Befehl <Tunnel>.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmsplit.xtr:100
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmsplit.xtr:100
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmstrtrk.xtr:6
 #: ../../../../build/work/app/i18n/custmsg.h:1048
 msgid ""
@@ -14725,24 +14520,20 @@ msgstr ""
 "Gerade Gleise werden erstellt indem der erste Endpunkt des Gleises gewählt "
 "wird.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmstrtrk.xtr:12
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmstrtrk.xtr:12
 #: ../../../../build/work/app/i18n/custmsg.h:1050
 msgid "Then the other End-Point is dragged to its final postion.\n"
 msgstr ""
 "Dann wird der zweite Endpunkkt durch Ziehen an die richtige Position "
 "gebracht.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmstrtrk.xtr:20
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmstrtrk.xtr:20
 #: ../../../../build/work/app/i18n/custmsg.h:1052
 msgid "The left mouse button is released at the final end postion.\n"
 msgstr "An diesem Punkt wird der linke Mausknopf los gelassen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmstrtrk.xtr:27
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtbledg.xtr:23
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmstrtrk.xtr:27
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtbledg.xtr:23
 #: ../../../../build/work/app/i18n/custmsg.h:1055
 msgid ""
 "Table Edges are used to mark the edges of the layout, either for aisles or "
@@ -14751,21 +14542,18 @@ msgstr ""
 "Tischkanten werden benutzt um die Ränder des Gleisplans, entweder für "
 "Zugänge oder Wände benutzt.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtbledg.xtr:47
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtbledg.xtr:47
 #: ../../../../build/work/app/i18n/custmsg.h:1057
 msgid "A Table Edge is attracted to the ends of other Table Edges.\n"
 msgstr ""
 "Eine Tischlante wird von den Enden anderer Tischkantenlinien angezogen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtbledg.xtr:132
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtbledg.xtr:132
 #: ../../../../build/work/app/i18n/custmsg.h:1059
 msgid "Table Edges can be modified by dragging on their ends.\n"
 msgstr "Tischkanten können durch Ziehen an den Enden geändert werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtbledg.xtr:180
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtbledg.xtr:180
 #: ../../../../build/work/app/i18n/custmsg.h:1061
 msgid ""
 "If you hold down the Control key while dragging then the Table Edge will be "
@@ -14774,8 +14562,7 @@ msgstr ""
 "Wenn Sie die Strg-Taste während des Ziehens gedrückt halten, wird die "
 "Tischkante von anderen Objekten angezogen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtbledg.xtr:218
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtbledg.xtr:218
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtodes.xtr:6
 #: ../../../../build/work/app/i18n/custmsg.h:1064
 msgid ""
@@ -14881,8 +14668,7 @@ msgstr ""
 "Sie können mit Umschalten-Rechts-Klick ein Fenster öffnen, das das Drehen um "
 "feste Winkel ermöglicht.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:136
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:136
 #: ../../../../build/work/app/i18n/custmsg.h:1085
 msgid ""
 "When you are satisfied with the position and orientation of the turnout "
@@ -14901,10 +14687,8 @@ msgstr ""
 "Durch Drücken des Schliessen-Knopfes im Dialogfenster können Sie den Befehl "
 "beenden und die Weiche festlegen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:146
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:189
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:146
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:189
 #: ../../../../build/work/app/i18n/custmsg.h:1089
 msgid ""
 "If you drag along an existing track the new turnout will be attached to the "
@@ -14924,8 +14708,7 @@ msgstr ""
 "ist. Wie wir später sehen werden ist diese Information hilfreich, um "
 "komplexe Gleiskonfigurationen zu erstellen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:220
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:220
 #: ../../../../build/work/app/i18n/custmsg.h:1092
 msgid ""
 "By moving the cursor from one side to the other of the track centerline you "
@@ -14934,8 +14717,7 @@ msgstr ""
 "Durch Bewegen des Mauszeiger von einer Seite des Gleises auf die andere wird "
 "die Weiche um 180° gedreht.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:236
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:236
 #: ../../../../build/work/app/i18n/custmsg.h:1094
 msgid ""
 "If you try to drag across another turnout the new turnout will placed at the "
@@ -14944,8 +14726,7 @@ msgstr ""
 "Wenn Sie die neue Weiche über eine existierende Weiche ziehen, wird die neue "
 "Weiche mit dem nächstgelegenen Endpunkt der vorhandenen Weiche verbunden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:299
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:299
 #: ../../../../build/work/app/i18n/custmsg.h:1096
 msgid ""
 "When you press Space or Return while the turnout is on a track, the track "
@@ -14955,18 +14736,14 @@ msgstr ""
 "einem Gleis ist, wird dieses Gleis getrennt und die Weiche wird automatisch "
 "verbunden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:307
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:366
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:307
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:366
 #: ../../../../build/work/app/i18n/custmsg.h:1099
 msgid "Pressing Close ends the <Turnout> command.\n"
 msgstr "Durch Drücken von <Schliessen> wird der Befehl <Weiche> beendet.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:372
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:21
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtosel.xtr:372
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:21
 #: ../../../../build/work/app/i18n/custmsg.h:1102
 msgid "Sometimes it's useful to modify turnouts triming one of the ends.\n"
 msgstr ""
@@ -14976,23 +14753,20 @@ msgstr ""
 msgid "We use the <Split> command for this.\n"
 msgstr "Dafür benutzen wir den Befehl <Trennen>.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:28
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:28
 #: ../../../../build/work/app/i18n/custmsg.h:1105
 msgid "Normally, if we try to Split a turnout we get an error message.\n"
 msgstr ""
 "Normalerweise bekommen wir eine Fehlermeldung, wenn wir versuchen eine "
 "Weiche zu trennen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:37
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:37
 #: ../../../../build/work/app/i18n/custmsg.h:1107
 msgid "Hold down the Shift key and try again.\n"
 msgstr ""
 "Drücken und halten Sie die Umschalten-Taste und versuchen es nochmals.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:52
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:52
 #: ../../../../build/work/app/i18n/custmsg.h:1109
 msgid ""
 "The end of the turnout has been replaced by a piece of straight flex track "
@@ -15001,14 +14775,12 @@ msgstr ""
 "Das Ende der Weiche wurde durch ein Stück gereden Gleises ersetzt. Dieses "
 "können wir verändern.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:63
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:63
 #: ../../../../build/work/app/i18n/custmsg.h:1111
 msgid "We can try splitting the diverging leg.\n"
 msgstr "Wir können  versuchen, das abzweigende Gleis zu trennen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:74
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:74
 #: ../../../../build/work/app/i18n/custmsg.h:1113
 msgid ""
 "Notice that the tail of the diverging leg has been changed to a curved "
@@ -15017,16 +14789,13 @@ msgstr ""
 "Beachten Sie, dass das abzweigende Gleis in ein gebogenes Gleis umgewandelt "
 "wurde...\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:84
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:84
 #: ../../../../build/work/app/i18n/custmsg.h:1115
 msgid "and a straight track.\n"
 msgstr "und ein gerades Gleis.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:92
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:12
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtotrim.xtr:92
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:12
 #: ../../../../build/work/app/i18n/custmsg.h:1118
 msgid ""
 "This example show how to layout a yard using the <Turnout> and <Parallel> "
@@ -15035,8 +14804,7 @@ msgstr ""
 "Dieses Beispiel zeigt wie mit den Befehlen <Weiche> und <Paralleles Gleis> "
 "eine Gleisharfe erstellt werden kann.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:17
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:17
 #: ../../../../build/work/app/i18n/custmsg.h:1120
 msgid ""
 "You can resize and move the Turnout Selection dialog if it obscures the "
@@ -15049,14 +14817,12 @@ msgstr ""
 msgid "First we place a turnout on the main line.\n"
 msgstr "Zuerst legen wir eine Weiche auf das Hauptgleis.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:35
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:35
 #: ../../../../build/work/app/i18n/custmsg.h:1123
 msgid "Next extend the turnout with the <Modify> command.\n"
 msgstr "Dann erweitern wir die Weiche mit dem Befehl <Verändern>.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:46
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:46
 #: ../../../../build/work/app/i18n/custmsg.h:1125
 msgid ""
 "Now create a track parallel to the main line.  Make sure the separation is "
@@ -15065,8 +14831,7 @@ msgstr ""
 "Jetzt erstellen Sie ein Gleis, das parallel zum Hauptgleis liegt. Stellen "
 "Sie sicher, dass der Gleisabstand für Ihren Maßstab geeignet ist.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:62
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:62
 #: ../../../../build/work/app/i18n/custmsg.h:1127
 msgid "And place a turnout to connect the new track.\n"
 msgstr "Und legen eine Weiche, um das neue Gleis anzuschliessen.\n"
@@ -15075,8 +14840,7 @@ msgstr "Und legen eine Weiche, um das neue Gleis anzuschliessen.\n"
 msgid "We'll zoom in here to see what's going on.\n"
 msgstr "Durch Vergrößern können wir sehen, was passiert.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:78
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:78
 #: ../../../../build/work/app/i18n/custmsg.h:1130
 msgid ""
 "Notice how we control which way the turnout is facing by moving the mouse "
@@ -15085,8 +14849,7 @@ msgstr ""
 "Beachten Sie wie wir die Ausrichtung der Weiche beeinflussen indem wir die "
 "Maus über die Mittellinie des Gleise bewegen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:94
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:94
 #: ../../../../build/work/app/i18n/custmsg.h:1132
 msgid ""
 "The Status bar displays the number of auto-connections that will be made and "
@@ -15103,8 +14866,7 @@ msgstr ""
 "XTrackCAD verändert die Weichenposition um die beste Einpassung zu "
 "erreichen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:106
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:106
 #: ../../../../build/work/app/i18n/custmsg.h:1135
 msgid "Note that placing the turnout splits the parallel track.\n"
 msgstr ""
@@ -15114,23 +14876,19 @@ msgstr ""
 msgid "We have to delete the leftover piece by Selecting and Deleting it.\n"
 msgstr "Dieses Reststück müssen wir auswählen und löschen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:120
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:120
 #: ../../../../build/work/app/i18n/custmsg.h:1138
 msgid "Repeat the process for the other tracks in the yard.\n"
 msgstr "Wiederholen Sie diesen Ablauf für die anderen Gleise der Gleisharfe.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:149
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:149
 #: ../../../../build/work/app/i18n/custmsg.h:1140
 msgid "For the last track we will join with a curve instead of a turnout.\n"
 msgstr ""
 "Beim letzten Gleis benutzen wir einen Gleisbogen anstelle einer Weiche.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:185
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrkwid.xtr:91
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtoyard.xtr:185
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrkwid.xtr:91
 #: ../../../../build/work/app/i18n/custmsg.h:1143
 msgid "We can indicate the mainline by making the rails wider.\n"
 msgstr ""
@@ -15141,8 +14899,7 @@ msgstr ""
 msgid "First we select the mainline tracks...\n"
 msgstr "Zuerst wählen wir die Gleise der Hauptstrecke aus...\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrkwid.xtr:128
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrkwid.xtr:128
 #: ../../../../build/work/app/i18n/custmsg.h:1146
 msgid "And then select Medium Tracks from the Edit menu.\n"
 msgstr "Und wählen dann mittlere Stärke aus dem Bearbeiten Menu aus.\n"
@@ -15153,15 +14910,13 @@ msgstr ""
 "Wir können das Menü Bearbeiten nicht anzeigen, aber wir können die Wirkung "
 "zeigen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrkwid.xtr:137
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrkwid.xtr:137
 #: ../../../../build/work/app/i18n/custmsg.h:1149
 msgid "We can make the rail thicker by selecting Thick Tracks.\n"
 msgstr ""
 "Wir können das Gleis durch die Auswahl Breite Linie dicker darstellen.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrkwid.xtr:148
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrkwid.xtr:148
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrntab.xtr:6
 #: ../../../../build/work/app/i18n/custmsg.h:1152
 msgid ""
@@ -15172,14 +14927,12 @@ msgstr ""
 "Statuszeile eingegeben werden. Der Radius muss vor den nächsten Schritten "
 "geändert werden.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrntab.xtr:15
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrntab.xtr:15
 #: ../../../../build/work/app/i18n/custmsg.h:1154
 msgid "Then the turntable is dragged to its final location.\n"
 msgstr "Dann wird die Drehscheibe an die endgültige Position geschoben.\n"
 
-#. i18n:
-#. C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrntab.xtr:22
+#. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/demos/dmtrntab.xtr:22
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:317
 #: ../../../../build/work/app/i18n/custmsg.h:1157
 msgid "Introduction"
@@ -15404,6 +15157,9 @@ msgstr "Polygone modifizieren"
 #: ../../../../build/work/app/i18n/custmsg.h:1263
 msgid "Control Panels"
 msgstr "Stellpulte"
+
+#~ msgid "Move Origin Mode"
+#~ msgstr "Modus Ursprung verschieben"
 
 #~ msgid "Find ..."
 #~ msgstr "Finden..."
