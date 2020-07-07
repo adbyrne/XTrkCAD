@@ -2746,6 +2746,7 @@ static int OfferCheckpoint( void )
 		/* load the checkpoint file */
 		LoadCheckpoint();
 		ret = TRUE;
+
 	}
 	return ret;
 }
@@ -3035,8 +3036,26 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	/* check for existing checkpoint file */
 	resumeWork = FALSE;
-	if (ExistsCheckpoint())
+	if (ExistsCheckpoint()) {
 		resumeWork = OfferCheckpoint();
+		int ret2 = wNoticeEx( NT_INFORMATION,
+									_(
+											"Do you want to use the previous filename?"),
+									_("Yes"), _("No"));
+		if (ret2) {
+			long iExample;
+			initialFile = (char*)wPrefGetString("misc", "lastlayout");
+			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
+			bExample = (iExample == 1);
+			if (initialFile && strlen(initialFile)) {
+				SetCurrentPath( LAYOUTPATHKEY, initialFile );
+				SetLayoutFullPath(initialFile);
+			    LayoutBackGroundInit(FALSE);    //Get Prior BackGround
+			    LayoutBackGroundSave();		  //Remove Background
+			    SetWindowTitle();
+			}
+		}
+	}
 
 	if (!resumeWork) {
 		/* if work is not to be resumed and no filename was given on startup, load last layout */

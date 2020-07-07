@@ -1393,7 +1393,7 @@ EXPORT int LoadCheckpoint( void )
 
 	wSetCursor( mainD.d, defaultCursor );
 
-	SetLayoutFullPath("");
+	// SetLayoutFullPath("");
 	SetWindowTitle();
 	checkPtMark = changed = 1;
 	free( search );
