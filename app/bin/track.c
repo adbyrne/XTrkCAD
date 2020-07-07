@@ -2066,7 +2066,6 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 		} else {
 			LOG( log_track, 2, ( "    at endPt (no connection)\n") )
 		}
-		*leftover = trk2;
 		DrawNewTrack( trk );
 
 
@@ -2087,7 +2086,6 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 			LOG( log_track, 2, ( "    at endPt (no connection)\n") )
 		}
 		DrawNewTrack( trk );
-
 	} else {
 		/* TODO circle's don't have ep's */
 		trk2 = GetTrkEndTrk( trk, ep );
