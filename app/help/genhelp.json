@@ -325,7 +325,7 @@
 		{"line": "display-trainpause", "contents": "Delay (in mS) between updating train movements" },
 		{"line": "display-hideTrainsInTunnels", "contents": "Don't show trains in tunnels when tunnels are hidden" },
 		{"line": "display-unconnected-endpt", "contents": "Display unconnected endpoints of track with special marks" },
-		{"line": "display-zoom-corner", "contents": "Whether zoom is locked to the bottom left corner or the center point" },
+		{"line": "display-constrainmain", "contents": "Whether the Main Drawing Area shows as much of the room as possible" },
 		{"line": "display-ok", "contents": "" },
 		{"line": "draw-linewidth", "contents": "Width of the lines" },
 		{"line": "draw-linecolor", "contents": "Color of the lines" },

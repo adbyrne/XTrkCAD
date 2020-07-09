@@ -132,7 +132,7 @@ static paramData_t displayPLs[] = {
 	{ PD_RADIO, &centerDrawMode, "centerdraw", PDO_NOPSHUPD|PDO_DRAW, drawCenterCircle, N_("Draw Centers"), BC_HORZ, (void*)(CHANGE_MAIN | CHANGE_MAP) },
 	{ PD_LONG, &twoRailScale, "tworailscale", PDO_NOPSHUPD, &i1_64, N_("Two Rail Scale"), 0, (void*)(CHANGE_MAIN) },
 	{ PD_LONG, &mapScale, "mapscale", PDO_NOPSHUPD, &i1_256, N_("Map Scale"), 0, (void*)(CHANGE_MAP) },
-	{ PD_TOGGLE, &constrainMain, "constrain-main", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORZ },
+	{ PD_TOGGLE, &constrainMain, "constrainmain", PDO_NOPSHUPD, constrainMainLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &liveMap, "livemap", PDO_NOPSHUPD, liveMapLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &autoPan, "autoPan", PDO_NOPSHUPD, autoPanLabels, "", BC_HORZ },
 	{ PD_TOGGLE, &labelEnable, "labelenable", PDO_NOPSHUPD, labelEnableLabels, N_("Label Enable"), 0, (void*)(CHANGE_MAIN) },

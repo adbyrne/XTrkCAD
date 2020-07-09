@@ -144,6 +144,11 @@ This can be disabled in the Layer dialog for each Layer by unchecking the \f{Use
 
 \u000
 
+\dd \f{Constrain Drawing Area to Room Boundaries} - when Zooming and moving the Main Canvas (\K{mainW}) may show areas beyond the boundaries of the room.
+Setting this option constrains the Main Canvas to minimize these areas (the \f{grey} area).
+
+\u000
+
 \dd \f{Draw EndPts} - when to draw endpoints between connected track: never, only for turnouts or for all tracks.
 
 \u000
