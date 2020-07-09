@@ -1189,7 +1189,10 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 		params->ep = PickEndPoint( pos, trk);
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk );
+
 	}
+	if (params->ep == -1) return FALSE;
+
 	if (params->ep>=0) {
 		params->angle = GetTrkEndAngle(trk,params->ep);
 	}
