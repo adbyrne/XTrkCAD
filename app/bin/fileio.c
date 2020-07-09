@@ -1268,7 +1268,7 @@ EXPORT void DoCheckPoint( void )
 	int rc;
 
 	if (!checkPtFileNameBackup || (changed <= checkPtInterval+1)) {
-		sprintf(sCheckPointBF,"%d00.bkp",getpid());
+		sprintf(sCheckPointBF,"%s00.bkp",GetLayoutFilename());
 		MakeFullpath(&checkPtFileNameBackup, workingDir, sCheckPointBF, NULL);
 	}
 
