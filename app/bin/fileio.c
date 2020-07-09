@@ -1381,6 +1381,8 @@ EXPORT int LoadCheckpoint( void )
 
 	if (ReadTrackFile( search, search + strlen(search) - strlen( sCheckPointF ), TRUE, TRUE, TRUE )) {
 		ResolveIndex();
+		LayoutBackGroundInit(FALSE);    //Get Prior BackGround
+		LayoutBackGroundSave();		    //Save Background Values
 
 		RecomputeElevations();
 		AttachTrains();

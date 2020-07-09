@@ -3040,7 +3040,7 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 		resumeWork = OfferCheckpoint();
 		int ret2 = wNoticeEx( NT_INFORMATION,
 									_(
-											"Do you want to use the previous filename?"),
+									"Do you want to use the previous filename?"),
 									_("Yes"), _("No"));
 		if (ret2) {
 			long iExample;
@@ -3050,11 +3050,10 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			if (initialFile && strlen(initialFile)) {
 				SetCurrentPath( LAYOUTPATHKEY, initialFile );
 				SetLayoutFullPath(initialFile);
-			    LayoutBackGroundInit(FALSE);    //Get Prior BackGround
-			    LayoutBackGroundSave();		  //Remove Background
-			    SetWindowTitle();
+				SetWindowTitle();
 			}
 		}
+		MainRedraw();
 	}
 
 	if (!resumeWork) {
