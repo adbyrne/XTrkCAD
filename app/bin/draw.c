@@ -3059,9 +3059,9 @@ static STATUS_T CmdPan(
 			scale_x = (action>>8)&0x0F;
 			DoNewScale(scale_x);
 		} else if ((action>>8) == '@') {				// "@"
-			mainD.orig.x = pos.x - mainD.size.x/2.0;
-			mainD.orig.y = pos.y - mainD.size.y/2.0;
-			MainLayout( TRUE, FALSE ); // CmdPan C_TEXT '@'
+			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere( (void*)0 ); // CmdPan C_TEXT '@'
 		}
 
 		if ((action>>8) == 0x0D) {
