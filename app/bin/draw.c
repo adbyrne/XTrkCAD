@@ -1292,6 +1292,7 @@ EXPORT BOOL_T SetRoomSize( coOrd size )
 		 mapD.size.y == size.y )
 		return TRUE;
 	mapD.size = size;
+	SetLayoutRoomSize(size);
 	if ( mapW == NULL)
 		return TRUE;
 	ChangeMapScale(TRUE);

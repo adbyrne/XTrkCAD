@@ -2738,16 +2738,19 @@ static int OfferCheckpoint( void )
 
 	/* sProdName */
 	ret =
-			wNoticeEx( NT_INFORMATION,
+			wNotice3(
 					_(
 							"Program was not terminated properly. Do you want to resume working on the previous trackplan?"),
-					_("Resume"), _("Ignore"));
-	if (ret) {
+					_("Resume"), _("Resume with New Name"), _("Ignore Checkpoint"));
+	//ret==1 Same, ret==-1 New, ret==0 Ignore
+	printf("Return: %d \n",ret);
+	if (ret>=0) {
 		/* load the checkpoint file */
-		LoadCheckpoint();
+		LoadCheckpoint(ret==1);
 		ret = TRUE;
+
 	}
-	return ret;
+	return (ret>=0);
 }
 
 EXPORT wWin_p wMain(int argc, char * argv[]) {
@@ -3035,8 +3038,10 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	/* check for existing checkpoint file */
 	resumeWork = FALSE;
-	if (ExistsCheckpoint())
+	if (ExistsCheckpoint()) {
 		resumeWork = OfferCheckpoint();
+		MainRedraw();
+	}
 
 	if (!resumeWork) {
 		/* if work is not to be resumed and no filename was given on startup, load last layout */
@@ -3054,10 +3059,6 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			else
 				LayoutBackGroundInit(FALSE);    //Get Prior BackGround
 		}
-	} else {
-		LayoutBackGroundInit(FALSE);  //Resuming get values before-hand.
-									  //Note that this may be those used with an archive (temp)
-		LayoutBackGroundSave();		  //Remove Background
 	}
 	inMainW = FALSE;
 	return mainW;

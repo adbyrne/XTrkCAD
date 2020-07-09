@@ -125,7 +125,7 @@ void DoFileList( int, char *, void * );
 void DoCheckPoint( void );
 void CleanupFiles( void );
 int ExistsCheckpoint( void );
-int LoadCheckpoint( void );
+int LoadCheckpoint( BOOL_T );
 void DoImport( void * );
 void DoExport( void );
 void DoExportDXF( void );

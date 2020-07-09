@@ -554,7 +554,7 @@ static void LayoutChange(long changes)
 
 void DoLayout(void * junk)
 {
-    thisLayout.props.roomSize = mapD.size;
+    SetLayoutRoomSize(mapD.size);
 
     if (layoutW == NULL) {
         layoutW = ParamCreateDialog(&layoutPG, MakeWindowTitle(_("Layout Options")),
@@ -692,7 +692,14 @@ LayoutBackGroundInit(BOOL_T clear) {
 	}
 	char * str = GetLayoutBackGroundFullPath();
 	if (str && str[0]) {
-		LoadBackGroundImage();
+		if (!LoadBackGroundImage()) {    //Failed -> Wipe Out
+			SetLayoutBackGroundFullPath(noname);
+			SetLayoutBackGroundPos(zero);
+			SetLayoutBackGroundAngle(0.0);
+			SetLayoutBackGroundScreen(0);
+			SetLayoutBackGroundSize(0.0);
+			LayoutBackGroundSave();
+		}
 	} else {
 		wDrawSetBackground(  mainD.d, NULL, NULL);
 	}
