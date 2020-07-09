@@ -1365,11 +1365,13 @@ EXPORT int ExistsCheckpoint( void )
 /**
  * Load checkpoint file
  *
+ * \param if TRUE reuse old filename
+ * \param filename returned
  * \return TRUE if exists, FALSE otherwise
  *
  */
 
-EXPORT int LoadCheckpoint( void )
+EXPORT int LoadCheckpoint( BOOL_T sameName )
 {
 	char *search;
 
@@ -1384,18 +1386,29 @@ EXPORT int LoadCheckpoint( void )
 		LayoutBackGroundInit(FALSE);    //Get Prior BackGround
 		LayoutBackGroundSave();		    //Save Background Values
 
+		if (sameName) {
+			long iExample;
+			char * initialFile = (char*)wPrefGetString("misc", "lastlayout");
+			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
+			bExample = (iExample == 1);
+			if (initialFile && strlen(initialFile)) {
+				SetCurrentPath( LAYOUTPATHKEY, initialFile );
+				SetLayoutFullPath(initialFile);
+			}
+		} else SetLayoutFullPath("");
+
 		RecomputeElevations();
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
-	}
+	} else SetLayoutFullPath("");
 
 	Reset();
 	UndoResume();
 
 	wSetCursor( mainD.d, defaultCursor );
 
-	// SetLayoutFullPath("");
+
 	SetWindowTitle();
 	checkPtMark = changed = 1;
 	free( search );
