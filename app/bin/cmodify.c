@@ -727,6 +727,7 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 	case C_TEXT:
 		if ((action>>8) == '@') {
 			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			PanHere((void*)0);
 			return C_CONTINUE;
 		}
@@ -743,6 +744,7 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 	case C_CMDMENU:
 		if ( !Dex.Trk ) {
 			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			wMenuPopupShow(modPopupM);
 			return C_CONTINUE;
 		}

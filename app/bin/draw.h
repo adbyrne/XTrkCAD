@@ -127,6 +127,8 @@ extern long currRedraw;
 
 extern coOrd panCenter;
 
+extern int log_pan;
+
 
 extern wDrawColor drawColorBlack;
 extern wDrawColor drawColorWhite;

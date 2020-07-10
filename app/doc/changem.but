@@ -1094,8 +1094,9 @@ There is a context menu that contains these text based items as well.
 
 }
 
-As the window is Zoomed in and out, the setting of \f{Zoom Keeps Current Corner in View} setting in the \K{cmdDisplay} determines where the zoom is about.
-If this is not selected, the window center will stay fixed as the zoom changes.
+As the window is Zoomed in and out, the setting of \f{Constrain Drawing Area to Room Boundaries} setting in the \f{Display} \K{cmdDisplay} dialog determines where the zoom is about.
+If it is not set, the center of the Drawing Area will stay fixed as the zoom changes.
+Otherwise, position of the Drawing Area will be constraned so any \f{grey} area will be to the right or above the room boundaries.
 
 \S{cmdProfile} Profile
 

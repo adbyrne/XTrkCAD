@@ -1653,6 +1653,7 @@ void SetUpMenu2(coOrd pos, track_p trk) {
 	wMenuPushEnable( bridgeMI, FALSE );
 	wMenuPushEnable( tiesMI, FALSE );
 	panCenter = pos;
+	LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 	if ((trk) &&
 		QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
 		trackParams_t trackParams;
@@ -1803,6 +1804,7 @@ static STATUS_T CmdMove(
 		case C_TEXT:
 			if ((action>>8) == '@') {
 				panCenter = pos;
+				LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 				PanHere((void*)0);
 			}
 			break;
@@ -2144,6 +2146,7 @@ static STATUS_T CmdRotate(
 		case C_TEXT:
 			if ((action>>8) == '@') {
 				panCenter = pos;
+				LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 				PanHere((void*)0);
 			}
 			break;
@@ -2674,6 +2677,7 @@ static BOOL_T SelectArea(
 	case C_TEXT:
 		if ((action>>8) == '@') {
 			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			PanHere((void*)0);
 		}
 		break;
@@ -3201,6 +3205,7 @@ static STATUS_T CmdSelect(
 		}
 		if (selectedTrackCount <= 0) {
 			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			wMenuPopupShow( selectPopup1M );
 		} else {
 		    track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
@@ -3214,6 +3219,7 @@ static STATUS_T CmdSelect(
 		}
 		if ((action>>8) == '@') {
 			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			PanHere((void*)0);
 		}
 		if ((action>>8) == '0' || (action>>8 == 'o')) {

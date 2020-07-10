@@ -76,7 +76,7 @@ extern DIST_T connectDistance;
 extern ANGLE_T connectAngle;
 extern long twoRailScale;
 extern long mapScale;
-extern long zoomCorner;
+extern long constrainMain;
 extern long checkPtInterval;
 extern long autosaveChkPoints;
 extern long liveMap;

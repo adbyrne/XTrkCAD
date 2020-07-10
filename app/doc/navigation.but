@@ -132,6 +132,8 @@ Eg. in Germany, where the comma is used,  the correct value would be\c{LargeIcon
 
 \lcont{
 
+\b ARROW Keys
+
 \b Left-Click and drag in \K{cmdZoom} 
 
 \b "@" key in \f{Select}, \f{Modify} and \f{Pan/Zoom}.
@@ -143,6 +145,9 @@ Eg. in Germany, where the comma is used,  the correct value would be\c{LargeIcon
 \b Scroll Left and Right - if the scroll left and right guestures are mapped to the trackpad by the operating system, with \e{Shift} depressed the screen will Pan.
 
 }
+
+\dd The \f{Main Canvas} can be panned so that the area beyond the room boundaries is shown (the \f{grey} area).  The \f{Constrain Drawing Area to Room Boundaries} option on the \f{Display} (\K{cmdDisplay}) dialog under the \f{Options} (\K{optionM}) menu forces the \f{Main Canvas} stop panning once the room boundary is reached.
+Holding the \e{Control} key while panning will invert the value of this setting. 
 
 \u000
 
@@ -158,11 +163,15 @@ Eg. in Germany, where the comma is used,  the correct value would be\c{LargeIcon
 
 \b PAGE UP and PAGE DOWN keys
 
-\b \K{cmdPan} button on the \f{Tool-bar}
+\b \f{Pan/Zoom} \K{cmdPan} button on the \f{Tool-bar}
 
 \f{Note:} If The scale 1:1 is reached, "Macro Zoom" mode can be entered using CTRL+PageDown - with repeated presses a scale of 10::1 is possible. 
 
 }
+
+\dd When \f{Zooming}, the Main Canvas will retain the center of the display if 
+\f{Constrain Drawing Area to Room Boundaries} is not set.
+Otherwise, as much of the room as possible is displayed, and any \f{grey} area will be to the right and above the room.
 
 \u000
  
