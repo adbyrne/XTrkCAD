@@ -2797,7 +2797,6 @@ static void MapDlgUpdate(
 				return;
 			wWinGetSize( mapW, &width, &height );
 			if (height >= 100) {
-				//wDrawSetSize( mapD.d, width, height);
 				wControlSetPos( (wControl_p)mapD.d, 0, 0 );
 				double scaleX = (mapD.size.x/((width-DlgSepLeft-DlgSepRight-10)/mapD.dpi));
 				double scaleY = (mapD.size.y/((height-DlgSepTop-DlgSepBottom-10)/mapD.dpi));

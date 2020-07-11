@@ -2582,7 +2582,11 @@ static void ParamDlgProc(
 			DefaultProc( win, wClose_e, data );
 		break;
 	case wResize_e:
-		LayoutControls( pg, ParamPositionControl, NULL, NULL );
+		if (win == mapW)
+			pg->changeProc(pg, wResize_e, NULL);
+		else
+			LayoutControls( pg, ParamPositionControl, NULL, NULL );
+		break;
 	default:
 		break;
 	}
