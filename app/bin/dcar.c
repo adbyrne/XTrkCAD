@@ -4432,9 +4432,9 @@ static void CarInvDlgFind( void * junk )
 	if ( item == NULL || item->car == NULL || IsTrackDeleted(item->car) ) return;
 	CarGetPos( item->car, &pos, &angle );
 	CarSetVisible( item->car );
-	mainD.orig.x = pos.x-mainD.size.x/2;;
-	mainD.orig.y = pos.y-mainD.size.y/2;;
-	MainLayout( TRUE, TRUE );	// CarInvDlgFind
+	panCenter = pos;
+	LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+	PanHere( (void*)0 );		// CarInvDlgFind
 }
 
 
