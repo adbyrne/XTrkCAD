@@ -3,15 +3,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xtrkcad 5.2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-05 16:26+0200\n"
-"PO-Revision-Date: 2020-06-03 21:06+0200\n"
+"POT-Creation-Date: 2020-07-11 09:01+0200\n"
+"PO-Revision-Date: 2020-07-11 08:53+0200\n"
 "Last-Translator: zileg31 <zileg31@users.sourceforge.net>\n"
 "Language-Team: French <zileg31@users.sourceforge.net>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: fr_FR\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.3\n"
 
 #: ../bin/archive.c:178 ../bin/archive.c:185 ../bin/archive.c:214
 #: ../bin/archive.c:239 ../bin/archive.c:294 ../bin/archive.c:307
@@ -25,8 +25,8 @@ msgstr ""
 #: ../bin/directory.c:154 ../bin/dxfoutput.c:193 ../bin/fileio.c:241
 #: ../bin/fileio.c:698 ../bin/fileio.c:898 ../bin/fileio.c:1025
 #: ../bin/fileio.c:1092 ../bin/fileio.c:1098 ../bin/fileio.c:1174
-#: ../bin/fileio.c:1184 ../bin/fileio.c:1502 ../bin/fileio.c:1552
-#: ../bin/fileio.c:1608 ../bin/macro.c:179 ../bin/macro.c:832
+#: ../bin/fileio.c:1184 ../bin/fileio.c:1517 ../bin/fileio.c:1567
+#: ../bin/fileio.c:1623 ../bin/macro.c:179 ../bin/macro.c:832
 #: ../bin/macro.c:877 ../bin/macro.c:898 ../bin/macro.c:1043
 #: ../bin/macro.c:1060 ../bin/macro.c:1322 ../bin/param.c:2090
 #: ../bin/paramfile.c:250 ../bin/paramfilelist.c:376 ../bin/track.c:1116
@@ -244,7 +244,7 @@ msgstr "Bout 2: X,Y"
 #: ../bin/cprint.c:716 ../bin/cprint.c:723 ../bin/cprint.c:1247
 #: ../bin/cpull.c:511 ../bin/cpull.c:526 ../bin/cpull.c:528 ../bin/cpull.c:530
 #: ../bin/cpull.c:690 ../bin/cselect.c:1068 ../bin/cselect.c:1164
-#: ../bin/cselect.c:1978 ../bin/csensor.c:194 ../bin/csensor.c:206
+#: ../bin/cselect.c:1980 ../bin/csensor.c:194 ../bin/csensor.c:206
 #: ../bin/csensor.c:444 ../bin/csignal.c:267 ../bin/csignal.c:666
 #: ../bin/csignal.c:734 ../bin/csnap.c:576 ../bin/csnap.c:705
 #: ../bin/cstruct.c:935 ../bin/cstruct.c:944 ../bin/cstruct.c:1069
@@ -254,8 +254,8 @@ msgstr "Bout 2: X,Y"
 #: ../bin/cswitchmotor.c:714 ../bin/cswitchmotor.c:745 ../bin/ctext.c:173
 #: ../bin/ctodesgn.c:204 ../bin/ctodesgn.c:1199 ../bin/ctodesgn.c:1336
 #: ../bin/ctodesgn.c:1934 ../bin/ctodesgn.c:2049 ../bin/ctodesgn.c:2348
-#: ../bin/ctodesgn.c:2630 ../bin/ctrain.c:205 ../bin/cturnout.c:2861
-#: ../bin/cturnout.c:2999 ../bin/cundo.c:161 ../bin/cundo.c:166
+#: ../bin/ctodesgn.c:2630 ../bin/ctrain.c:205 ../bin/cturnout.c:2897
+#: ../bin/cturnout.c:3035 ../bin/cundo.c:161 ../bin/cundo.c:166
 #: ../bin/dbitmap.c:68 ../bin/dbitmap.c:125 ../bin/dbitmap.c:203
 #: ../bin/dbitmap.c:238 ../bin/dcar.c:3824 ../bin/dcar.c:4019
 #: ../bin/dcar.c:4023 ../bin/dcar.c:4027 ../bin/dcar.c:4032 ../bin/dcar.c:4336
@@ -266,14 +266,14 @@ msgstr "Bout 2: X,Y"
 #: ../bin/dlayer.c:879 ../bin/dlayer.c:885 ../bin/dlayer.c:891
 #: ../bin/doption.c:199 ../bin/doption.c:275 ../bin/doption.c:476
 #: ../bin/doption.c:479 ../bin/doption.c:492 ../bin/doption.c:558
-#: ../bin/dprmfile.c:434 ../bin/draw.c:2633 ../bin/fileio.c:197
+#: ../bin/dprmfile.c:434 ../bin/draw.c:2629 ../bin/fileio.c:197
 #: ../bin/fileio.c:607 ../bin/fileio.c:742 ../bin/fileio.c:744
 #: ../bin/fileio.c:749 ../bin/fileio.c:812 ../bin/fileio.c:1045
 #: ../bin/layout.c:373 ../bin/layout.c:561 ../bin/macro.c:1156
 #: ../bin/macro.c:1160 ../bin/macro.c:1218 ../bin/macro.c:1287
 #: ../bin/macro.c:1527 ../bin/macro.c:1545 ../bin/misc.c:434 ../bin/misc.c:481
 #: ../bin/misc.c:1806 ../bin/misc.c:1927 ../bin/misc.c:1935 ../bin/misc.c:2013
-#: ../bin/misc.c:2796 ../bin/misc.c:2805 ../bin/misc.c:2825 ../bin/misc.c:2831
+#: ../bin/misc.c:2799 ../bin/misc.c:2808 ../bin/misc.c:2828 ../bin/misc.c:2834
 #: ../bin/misc2.c:456 ../bin/param.c:738 ../bin/param.c:1848
 #: ../bin/param.c:1971 ../bin/param.c:1974 ../bin/param.c:2097
 #: ../bin/param.c:2103 ../bin/paramfile.c:324 ../bin/paramfile.c:326
@@ -454,7 +454,7 @@ msgid "Second"
 msgstr "Second"
 
 #: ../bin/ccornu.c:981 ../bin/ccornu.c:2005 ../bin/ccornu.c:2035
-#: ../bin/tcornu.c:830 ../bin/tcornu.c:1037 ../bin/tcornu.c:1360
+#: ../bin/tcornu.c:830 ../bin/tcornu.c:1037 ../bin/tcornu.c:1363
 #, c-format
 msgid ""
 "Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%"
@@ -1507,19 +1507,19 @@ msgstr "Coin rond - 'r"
 msgid "Smooth Corner - 's'"
 msgstr "Coin lisse - 's'"
 
-#: ../bin/cdraw.c:2904 ../bin/cselect.c:3342
+#: ../bin/cdraw.c:2904 ../bin/cselect.c:3348
 msgid "LineType..."
 msgstr "Type de ligne ..."
 
-#: ../bin/cdraw.c:2905 ../bin/cselect.c:3343
+#: ../bin/cdraw.c:2905 ../bin/cselect.c:3349
 msgid "Solid Line"
 msgstr "Ligne continue"
 
-#: ../bin/cdraw.c:2906 ../bin/cselect.c:3344
+#: ../bin/cdraw.c:2906 ../bin/cselect.c:3350
 msgid "Dashed Line"
 msgstr "Ligne en pointillés"
 
-#: ../bin/cdraw.c:2907 ../bin/cselect.c:3345
+#: ../bin/cdraw.c:2907 ../bin/cselect.c:3351
 msgid "Dotted Line"
 msgstr "Ligne en pointillé"
 
@@ -1580,7 +1580,6 @@ msgid "Station"
 msgstr "Gare"
 
 #: ../bin/celev.c:47 ../bin/cprofile.c:1533 ../bin/dcmpnd.c:75
-#: ../bin/misc.c:2744
 msgid "Ignore"
 msgstr "Ignoré"
 
@@ -1860,8 +1859,8 @@ msgstr "Deuxième type de voie non pris en charge pour un raccord non Cornu"
 msgid "Second "
 msgstr "Second "
 
-#: ../bin/cjoin.c:1175 ../bin/track.c:2272 ../bin/track.c:2308
-#: ../bin/track.c:2374
+#: ../bin/cjoin.c:1175 ../bin/track.c:2270 ../bin/track.c:2306
+#: ../bin/track.c:2372
 msgid "Connecting "
 msgstr "Se connecter "
 
@@ -1939,21 +1938,21 @@ msgstr "Voie courbe : Rayon = %s Longueur = %s Angle = %0.3f"
 msgid "Extend Track"
 msgstr "Prolonger la voie"
 
-#: ../bin/cmodify.c:792
+#: ../bin/cmodify.c:794
 msgid "Modify"
 msgstr "Modifier"
 
-#: ../bin/cmodify.c:799 ../bin/cselect.c:3299 ../bin/cselect.c:3315
+#: ../bin/cmodify.c:801 ../bin/cselect.c:3305 ../bin/cselect.c:3321
 #: ../bin/misc.c:2197 ../bin/misc.c:2199
 msgid "Zoom In"
 msgstr "Zoom Avant"
 
-#: ../bin/cmodify.c:800 ../bin/cselect.c:3303 ../bin/cselect.c:3316
+#: ../bin/cmodify.c:802 ../bin/cselect.c:3309 ../bin/cselect.c:3322
 #: ../bin/misc.c:2201 ../bin/misc.c:2203
 msgid "Zoom Out"
 msgstr "Zoom Arrière"
 
-#: ../bin/cmodify.c:801
+#: ../bin/cmodify.c:803
 msgid "Pan center - '@'"
 msgstr "Centre du panoramique - '@'"
 
@@ -2010,7 +2009,7 @@ msgid "Structure"
 msgstr "Structure"
 
 #: ../bin/compound.c:832 ../bin/cswitchmotor.c:228 ../bin/cturnout.c:1063
-#: ../bin/cturnout.c:2852
+#: ../bin/cturnout.c:2888
 msgid "Turnout"
 msgstr "Aiguillage"
 
@@ -2164,7 +2163,7 @@ msgstr "Remise à zéro"
 msgid "Setup"
 msgstr "Configuration"
 
-#: ../bin/cprint.c:157 ../bin/cselect.c:3307 ../bin/misc.c:2228
+#: ../bin/cprint.c:157 ../bin/cselect.c:3313 ../bin/misc.c:2228
 msgid "Select All"
 msgstr "Tout sélectionner"
 
@@ -2432,259 +2431,258 @@ msgstr "Cornu trop serrée - elle a été supprimée"
 msgid "Move To Join"
 msgstr "Déplacer pour Raccorder"
 
-#: ../bin/cselect.c:1713
+#: ../bin/cselect.c:1714
 msgid "Drag to move selected tracks - Shift+Ctrl+Arrow micro-steps the move"
 msgstr ""
 "Faites glisser pour déplacer la voie sélectionnée - utilisez Maj+Ctrl+4 "
 "flèches pour déplacer en pas fins"
 
-#: ../bin/cselect.c:1734 ../bin/cselect.c:1846 ../bin/cselect.c:2202
+#: ../bin/cselect.c:1735 ../bin/cselect.c:1848 ../bin/cselect.c:2205
 msgid "Move Tracks"
 msgstr "Déplacer des voies"
 
-#: ../bin/cselect.c:1891
+#: ../bin/cselect.c:1893
 msgid "Align: Click on a selected object to be aligned"
 msgstr "Aligner : cliquez sur un objet sélectionné à aligner"
 
-#: ../bin/cselect.c:1929
+#: ../bin/cselect.c:1931
 msgid "Drag to rotate selected tracks, Shift+RightClick for QuickRotate Menu"
 msgstr ""
 "Faites glisser pour faire pivoter les voies sélectionnées, Maj+Clic droit "
 "pour ouvrir le menu Rotation rapide"
 
-#: ../bin/cselect.c:1945 ../bin/cselect.c:2215
+#: ../bin/cselect.c:1947 ../bin/cselect.c:2218
 msgid "Rotate Tracks"
 msgstr "Faire pivoter les voies"
 
-#: ../bin/cselect.c:1958
+#: ../bin/cselect.c:1960
 msgid "Center of Rotation snapped to Turntable center"
 msgstr "Le centre de rotation est aligné sur le centre du pont tournant"
 
-#: ../bin/cselect.c:2000 ../bin/cselect.c:2031
+#: ../bin/cselect.c:2002 ../bin/cselect.c:2033
 #, c-format
 msgid "Angle %0.3f"
 msgstr "Angle %0.3f"
 
-#: ../bin/cselect.c:2087
+#: ../bin/cselect.c:2089
 #, c-format
 msgid "Angle %0.3f #%ld"
 msgstr "Angle %0.3f #%ld"
 
-#: ../bin/cselect.c:2089
+#: ../bin/cselect.c:2091
 #, c-format
 msgid "Angle %0.3f %s"
 msgstr "Angle %0.3f %s"
 
-#: ../bin/cselect.c:2094
+#: ../bin/cselect.c:2096
 msgid "Origin Set. Drag away to set start angle"
 msgstr "Réglage d'origine. Faites glisser pour définir l'angle de départ"
 
-#: ../bin/cselect.c:2108
+#: ../bin/cselect.c:2110
 msgid "Align: Click on the 2nd unselected object"
 msgstr "Aligner : Cliquez sur le 2ème objet non sélectionné"
 
-#: ../bin/cselect.c:2227
+#: ../bin/cselect.c:2230
 msgid "Toggle Label"
 msgstr "Modifie l'étiquette"
 
-#: ../bin/cselect.c:2346 ../bin/cselect.c:2385
+#: ../bin/cselect.c:2349 ../bin/cselect.c:2388
 msgid "Select and drag a description"
 msgstr "Sélectionnez et faites glisser une description"
 
-#: ../bin/cselect.c:2371
+#: ../bin/cselect.c:2374
 msgid "Elevation description"
 msgstr "Description de l'élévation"
 
-#: ../bin/cselect.c:2374
+#: ../bin/cselect.c:2377
 msgid "Hidden description - 's' to Show"
 msgstr "Description cachée - 's' à afficher"
 
-#: ../bin/cselect.c:2378
+#: ../bin/cselect.c:2381
 msgid "Shown description - 'h' to Hide"
 msgstr "Description visible - Cacher avec 'h'"
 
-#: ../bin/cselect.c:2399
+#: ../bin/cselect.c:2402
 msgid "Hidden Label - Drag to reveal"
 msgstr "Étiquette cachée - Faites glisser pour afficher"
 
-#: ../bin/cselect.c:2401
+#: ../bin/cselect.c:2404
 msgid "Drag label"
 msgstr "Faites glisser l'étiquette pour la positionner"
 
-#: ../bin/cselect.c:2403
+#: ../bin/cselect.c:2406
 msgid "Move Label"
 msgstr "Déplacer l'étiquette"
 
-#: ../bin/cselect.c:2440
+#: ../bin/cselect.c:2443
 msgid "To Hide, use Context Menu"
 msgstr "Pour masquer, utilisez le menu contextuel"
 
-#: ../bin/cselect.c:2456 ../bin/cselect.c:3333
+#: ../bin/cselect.c:2459 ../bin/cselect.c:3339
 msgid "Show/Hide Description"
 msgstr "Montrer/cacher la description"
 
-#: ../bin/cselect.c:2535
+#: ../bin/cselect.c:2538
 msgid "Drag to mark mirror line"
 msgstr "Faites glisser pour créer la voie d'axe du miroir"
 
-#: ../bin/cselect.c:2546
+#: ../bin/cselect.c:2549
 #, c-format
 msgid "Angle %0.2f"
 msgstr "Angle %0.2f"
 
-#: ../bin/cselect.c:2549
+#: ../bin/cselect.c:2552
 msgid "Flip Tracks"
 msgstr "Voies en miroir"
 
-#: ../bin/cselect.c:2895
+#: ../bin/cselect.c:2899
 msgid "Select track"
 msgstr "Sélectionner une voie"
 
-#: ../bin/cselect.c:2923
-#, fuzzy
+#: ../bin/cselect.c:2927
 msgid "Track is in Frozen Layer"
-msgstr "La voie a une échelle différente"
+msgstr "La voie est sur une couche bloquée"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:323
-#: ../bin/cselect.c:3273 ../bin/dcar.c:1673 ../bin/doption.c:235
+#: ../bin/cselect.c:3279 ../bin/dcar.c:1673 ../bin/doption.c:235
 #: ../../../../build/work/app/i18n/custmsg.h:1169
 msgid "Select"
 msgstr "Sélectionner"
 
-#: ../bin/cselect.c:3292 ../bin/cselect.c:3312 ../bin/misc.c:2192
+#: ../bin/cselect.c:3298 ../bin/cselect.c:3318 ../bin/misc.c:2192
 msgid "Undo"
 msgstr "Annuler"
 
-#: ../bin/cselect.c:3293 ../bin/cselect.c:3313 ../bin/misc.c:2194
+#: ../bin/cselect.c:3299 ../bin/cselect.c:3319 ../bin/misc.c:2194
 msgid "Redo"
 msgstr "Refaire"
 
-#: ../bin/cselect.c:3300 ../bin/draw.c:3110
+#: ../bin/cselect.c:3306 ../bin/draw.c:3112
 msgid "Zoom to extents - 'e'"
 msgstr "Zoom sur les extensions - 'e'"
 
-#: ../bin/cselect.c:3301 ../bin/draw.c:3121 ../bin/misc.c:2375
+#: ../bin/cselect.c:3307 ../bin/draw.c:3123 ../bin/misc.c:2375
 msgid "&Zoom"
 msgstr "&Zoom"
 
-#: ../bin/cselect.c:3304
+#: ../bin/cselect.c:3310 ../bin/draw.c:3122
 #, fuzzy
 msgid "Pan to Origin - 'o'/'0'"
 msgstr "Pan à l'origine - 'o'"
 
-#: ../bin/cselect.c:3305 ../bin/cselect.c:3317
+#: ../bin/cselect.c:3311 ../bin/cselect.c:3323
 msgid "Pan Center Here - '@'"
 msgstr "Centre du Panoramique ici - '@'"
 
-#: ../bin/cselect.c:3308 ../bin/misc.c:2231 ../bin/misc.c:2354
+#: ../bin/cselect.c:3314 ../bin/misc.c:2231 ../bin/misc.c:2354
 msgid "Select Current Layer"
 msgstr "Sélectionner le calque actuel"
 
-#: ../bin/cselect.c:3319 ../bin/misc.c:2233
+#: ../bin/cselect.c:3325 ../bin/misc.c:2233
 msgid "Deselect All"
 msgstr "Tout désélectionner"
 
-#: ../bin/cselect.c:3321
+#: ../bin/cselect.c:3327
 msgid "Properties -'?'"
 msgstr "Propriétés -'?'"
 
-#: ../bin/cselect.c:3322
+#: ../bin/cselect.c:3328
 msgid "Modify/Activate Track"
 msgstr "Modifier/Activer la voie"
 
-#: ../bin/cselect.c:3324 ../bin/misc.c:2219
+#: ../bin/cselect.c:3330 ../bin/misc.c:2219
 msgid "Cut"
 msgstr "Couper"
 
-#: ../bin/cselect.c:3325 ../bin/misc.c:2221
+#: ../bin/cselect.c:3331 ../bin/misc.c:2221
 msgid "Copy"
 msgstr "Copier"
 
-#: ../bin/cselect.c:3326 ../bin/fileio.c:1605 ../bin/misc.c:2223
+#: ../bin/cselect.c:3332 ../bin/fileio.c:1620 ../bin/misc.c:2223
 msgid "Paste"
 msgstr "Coller"
 
-#: ../bin/cselect.c:3327 ../bin/misc.c:2225
+#: ../bin/cselect.c:3333 ../bin/misc.c:2225
 #, fuzzy
 msgid "Clone"
 msgstr "Fermer"
 
-#: ../bin/cselect.c:3329
+#: ../bin/cselect.c:3335
 msgid "Rotate..."
 msgstr "Rotation ..."
 
-#: ../bin/cselect.c:3331
+#: ../bin/cselect.c:3337
 msgid "Align"
 msgstr "Aligner"
 
-#: ../bin/cselect.c:3335
+#: ../bin/cselect.c:3341
 msgid "Hide/NoHide"
 msgstr "Masqué/Affiché"
 
-#: ../bin/cselect.c:3336
+#: ../bin/cselect.c:3342
 msgid "Bridge/NoBridge"
 msgstr "Raccordé/Non raccordé"
 
-#: ../bin/cselect.c:3337
+#: ../bin/cselect.c:3343
 msgid "NoTies/Ties"
 msgstr "Non connectés/connectés"
 
-#: ../bin/cselect.c:3338
+#: ../bin/cselect.c:3344
 msgid "Thickness..."
 msgstr "Épaisseur..."
 
-#: ../bin/cselect.c:3339 ../bin/misc.c:2366
+#: ../bin/cselect.c:3345 ../bin/misc.c:2366
 msgid "Thin Tracks"
 msgstr "Voies fines"
 
-#: ../bin/cselect.c:3340 ../bin/misc.c:2367
+#: ../bin/cselect.c:3346 ../bin/misc.c:2367
 msgid "Medium Tracks"
 msgstr "Voies moyennes"
 
-#: ../bin/cselect.c:3341 ../bin/misc.c:2368
+#: ../bin/cselect.c:3347 ../bin/misc.c:2368
 msgid "Thick Tracks"
 msgstr "Voies épaisses"
 
-#: ../bin/cselect.c:3346
+#: ../bin/cselect.c:3352
 msgid "Dash-Dotted Line"
 msgstr "Ligne tiret-pointillé"
 
-#: ../bin/cselect.c:3347
+#: ../bin/cselect.c:3353
 msgid "Dash-Dot-Dotted Line"
 msgstr "Ligne en pointillé"
 
-#: ../bin/cselect.c:3349
+#: ../bin/cselect.c:3355
 msgid "Move To Front"
 msgstr "Déplacer vers l'avant"
 
-#: ../bin/cselect.c:3350
+#: ../bin/cselect.c:3356
 msgid "Move To Back"
 msgstr "Déplacer vers l'arrière"
 
-#: ../bin/cselect.c:3352
+#: ../bin/cselect.c:3358
 msgid "Group"
 msgstr "Grouper"
 
-#: ../bin/cselect.c:3353
+#: ../bin/cselect.c:3359
 msgid "UnGroup"
 msgstr "Dissocier"
 
-#: ../bin/cselect.c:3388
+#: ../bin/cselect.c:3394
 msgid "Move Description"
 msgstr "Déplacer l'étiquette"
 
-#: ../bin/cselect.c:3395 ../bin/misc.c:1935 ../bin/misc.c:2236
+#: ../bin/cselect.c:3401 ../bin/misc.c:1935 ../bin/misc.c:2236
 msgid "Move"
 msgstr "Déplacer"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:368
-#: ../bin/cselect.c:3397 ../bin/misc.c:1926 ../bin/misc.c:2238
+#: ../bin/cselect.c:3403 ../bin/misc.c:1926 ../bin/misc.c:2238
 #: ../../../../build/work/app/i18n/custmsg.h:1259
 msgid "Rotate"
 msgstr "Rotation"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:369
-#: ../bin/cselect.c:3399 ../bin/dcar.c:2217
+#: ../bin/cselect.c:3405 ../bin/dcar.c:2217
 #: ../../../../build/work/app/i18n/custmsg.h:1261
 msgid "Flip"
 msgstr "Miroir"
@@ -2903,8 +2901,8 @@ msgid "Place Structure"
 msgstr "Mettre un bâtiment"
 
 #: ../bin/cstruct.c:798 ../bin/cstruct.c:872 ../bin/cstruct.c:1103
-#: ../bin/cturnout.c:2717 ../bin/cturnout.c:2772 ../bin/cturnout.c:2897
-#: ../bin/cturnout.c:3036
+#: ../bin/cturnout.c:2753 ../bin/cturnout.c:2808 ../bin/cturnout.c:2933
+#: ../bin/cturnout.c:3072
 msgid ""
 "Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter "
 "to accept, Esc to Cancel"
@@ -2938,7 +2936,7 @@ msgstr ""
 "Faites glisser avec le bouton gauche de la souris pour vous déplacer, vers "
 "la droite pour faire pivoter ou sur Entrée ou sur OK pour terminer"
 
-#: ../bin/cstruct.c:1073 ../bin/cturnout.c:3003
+#: ../bin/cstruct.c:1073 ../bin/cturnout.c:3039
 #, c-format
 msgid "Place %s and draw into position"
 msgstr "Placer %s et mettre en position"
@@ -3473,7 +3471,7 @@ msgstr "Connecter les voies ajustables"
 msgid "splitTurnout: can't find segment"
 msgstr "aiguillage fractionné : impossible de trouver le segment"
 
-#: ../bin/cturnout.c:1522 ../bin/track.c:2261 ../bin/track.c:2367
+#: ../bin/cturnout.c:1522 ../bin/track.c:2259 ../bin/track.c:2365
 #: ../bin/tstraigh.c:554
 msgid "Drag to change track length"
 msgstr "Faites glisser pour changer la longueur de la voie"
@@ -3497,22 +3495,22 @@ msgstr "0 connections (%s)"
 msgid "Place New Turnout"
 msgstr "Mettre un nouvel aiguillage"
 
-#: ../bin/cturnout.c:2762
+#: ../bin/cturnout.c:2798
 #, c-format
 msgid "Angle = %0.3f (%s)"
 msgstr "Angle = %0.3f (%s)"
 
-#: ../bin/cturnout.c:2852 ../bin/param.c:2618
+#: ../bin/cturnout.c:2888 ../bin/param.c:2618
 msgid "Close"
 msgstr "Fermer"
 
-#: ../bin/cturnout.c:2869
+#: ../bin/cturnout.c:2905
 msgid "Pick turnout and active End Point, then place on the layout"
 msgstr ""
 "Choisissez l'aiguillage avec son point de fin actif, puis placez-le sur le "
 "plan"
 
-#: ../bin/cturnout.c:3063
+#: ../bin/cturnout.c:3099
 msgid "Predefined Track"
 msgstr "Voie sélectionnée"
 
@@ -4178,7 +4176,7 @@ msgstr "Editer"
 msgid "Delete"
 msgstr "Effacer"
 
-#: ../bin/dcar.c:4407 ../bin/fileio.c:1502
+#: ../bin/dcar.c:4407 ../bin/fileio.c:1517
 msgid "Export"
 msgstr "Exporter"
 
@@ -4521,8 +4519,8 @@ msgid "Hide Trains On Hidden Track"
 msgstr "Masquer les trains sur voie cachée"
 
 #: ../bin/doption.c:143
-msgid "Zoom keeps lower corner in view"
-msgstr "Le zoom garde le coin inférieur en vue"
+msgid "Constrain Drawing Area to Room boundaries"
+msgstr ""
 
 #: ../bin/doption.c:150
 msgid "Color Track"
@@ -4959,45 +4957,45 @@ msgstr "Chargers des paramètres d'objets"
 msgid "Parameter files (*.xtp)|*.xtp"
 msgstr "Fichier de paramètres (*.xtp)|*.xtp"
 
-#: ../bin/draw.c:2140
+#: ../bin/draw.c:2134
 msgid "Macro Zoom Mode"
 msgstr "Mode zoom macro"
 
-#: ../bin/draw.c:2147
+#: ../bin/draw.c:2141
 msgid "Scale 1:1 - Use Ctrl+ to go to Macro Zoom Mode"
 msgstr "Échelle 1:1 - Utilisez Ctrl+Pg.Suiv pour passer en mode Zoom macro"
 
-#: ../bin/draw.c:2151
+#: ../bin/draw.c:2145
 msgid "Preset Zoom In Value selected. Shift+Ctrl+PageDwn to reset value"
 msgstr ""
 "Facteur de zoom avant sélectionné. Maj + Ctrl + Pg.Suiv pour réinitialiser "
 "la valeur"
 
-#: ../bin/draw.c:2155
+#: ../bin/draw.c:2149
 #, c-format
 msgid "Zoom In Program Value %ld:1, Shift+PageDwn to use"
 msgstr "Zoom programmé Valeur plus grande %ld : 1, à utiliser avec Maj+Pg.Suiv"
 
-#: ../bin/draw.c:2192
+#: ../bin/draw.c:2187
 msgid "At Maximum Zoom Out"
 msgstr "Au zoom maximum"
 
-#: ../bin/draw.c:2197
+#: ../bin/draw.c:2192
 msgid "Preset Zoom Out Value selected. Shift+Ctrl+PageUp to reset value"
 msgstr ""
 "Facteur de zoom arrière sélectionné. Maj + Ctrl + Pg.Suiv pour réinitialiser "
 "la valeur"
 
-#: ../bin/draw.c:2201
+#: ../bin/draw.c:2196
 #, c-format
 msgid "Zoom Out Program Value %ld:1 set, Shift+PageUp to use"
 msgstr "Zoom programmé Valeur supérieure %ld : 1, à utiliser avec Maj+Pg.Préc"
 
-#: ../bin/draw.c:2897
+#: ../bin/draw.c:2893
 msgid "Map"
 msgstr "Carte de navigation"
 
-#: ../bin/draw.c:2945
+#: ../bin/draw.c:2941
 msgid ""
 "Left-Drag to pan, Ctrl+Left-Drag to zoom, 0 to set origin to zero, 1-9 to "
 "zoom#, e to set to extents"
@@ -5006,26 +5004,26 @@ msgstr ""
 "zoomer, 0 pour définir l'origine à 0.0, 1-9 pour le niveau de zoom#, e pour "
 "définir la taille"
 
-#: ../bin/draw.c:2952
+#: ../bin/draw.c:2948
 msgid "Pan Mode - drag point to new position"
 msgstr ""
 "Sélectionner une section - faites glisser le point vers la nouvelle position"
 
-#: ../bin/draw.c:2959
+#: ../bin/draw.c:2955
 msgid "Zoom Mode - drag area to zoom"
 msgstr "Mode Zoom - faites glisser la zone pour zoomer"
 
-#: ../bin/draw.c:2985
+#: ../bin/draw.c:2981
 msgid "Can't move any further in that direction"
 msgstr "Je ne peux plus avancer dans cette direction"
 
-#: ../bin/draw.c:2987
+#: ../bin/draw.c:2983
 msgid "Left click to pan, right click to zoom, 'o' for origin, 'e' for extents"
 msgstr ""
 "Clic gauche pour faire un panoramique, clic droit pour zoomer, 'o' pour "
 "origine, 'e' pour étendue"
 
-#: ../bin/draw.c:3024
+#: ../bin/draw.c:3022
 msgid ""
 "Left Drag to Pan, +CTRL to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to "
 "set to Extent"
@@ -5034,52 +5032,47 @@ msgstr ""
 "le point de départ sur 0.0, 1-9 pour le niveau de zoom, e pour définir la "
 "taille"
 
-#: ../bin/draw.c:3100
+#: ../bin/draw.c:3102
 msgid "Pan/Zoom"
 msgstr "Pan./Zoom"
 
-#: ../bin/draw.c:3111
+#: ../bin/draw.c:3113
 msgid "Zoom to 1:1 - '1'"
 msgstr "Zoom sur 1:1 - '1'"
 
-#: ../bin/draw.c:3112
+#: ../bin/draw.c:3114
 msgid "Zoom to 1:2 - '2'"
 msgstr "Zoom sur 1:2 - '2'"
 
-#: ../bin/draw.c:3113
+#: ../bin/draw.c:3115
 msgid "Zoom to 1:3 - '3'"
 msgstr "Zoom sur 1:3 - '3'"
 
-#: ../bin/draw.c:3114
+#: ../bin/draw.c:3116
 msgid "Zoom to 1:4 - '4'"
 msgstr "Zoom sur 1:4 - '4'"
 
-#: ../bin/draw.c:3115
+#: ../bin/draw.c:3117
 msgid "Zoom to 1:5 - '5'"
 msgstr "Zoom sur 1:5 - '5'"
 
-#: ../bin/draw.c:3116
+#: ../bin/draw.c:3118
 msgid "Zoom to 1:6 - '6'"
 msgstr "Zoom sur 1:6 - '6'"
 
-#: ../bin/draw.c:3117
+#: ../bin/draw.c:3119
 msgid "Zoom to 1:7 - '7'"
 msgstr "Zoom sur 1:7 - '7'"
 
-#: ../bin/draw.c:3118
+#: ../bin/draw.c:3120
 msgid "Zoom to 1:8 - '8'"
 msgstr "Zoom sur 1:8 - '8'"
 
-#: ../bin/draw.c:3119
+#: ../bin/draw.c:3121
 msgid "Zoom to 1:9 - '9'"
 msgstr "Zoom sur 1:9 - '9'"
 
-#: ../bin/draw.c:3120
-#, fuzzy
-msgid "Pan to origin - 'o'/'0'"
-msgstr "Pan à l'origine - 'o'"
-
-#: ../bin/draw.c:3123
+#: ../bin/draw.c:3125
 msgid "Pan center here - '@'"
 msgstr "Centre du panoramique ici - '@'"
 
@@ -5233,20 +5226,20 @@ msgstr "Ouvrir un réseau"
 msgid "Example Tracks"
 msgstr "Exemples de voies"
 
-#: ../bin/fileio.c:1445
+#: ../bin/fileio.c:1460
 #, c-format
 msgid "Module - %s"
 msgstr "Module - %s"
 
-#: ../bin/fileio.c:1450 ../bin/fileio.c:1471
+#: ../bin/fileio.c:1465 ../bin/fileio.c:1486
 msgid "Import Tracks"
 msgstr "Importer des voies"
 
-#: ../bin/fileio.c:1533
+#: ../bin/fileio.c:1548
 msgid "Export Tracks"
 msgstr "Exporter les voies"
 
-#: ../bin/fileio.c:1552
+#: ../bin/fileio.c:1567
 msgid "Clipboard"
 msgstr "Presse-papiers"
 
@@ -6110,24 +6103,32 @@ msgstr ""
 msgid "Resume"
 msgstr "Résumé"
 
-#: ../bin/misc.c:2856
+#: ../bin/misc.c:2744
+msgid "Resume with New Name"
+msgstr ""
+
+#: ../bin/misc.c:2744
+msgid "Ignore Checkpoint"
+msgstr ""
+
+#: ../bin/misc.c:2859
 #, c-format
 msgid "Unnamed Trackplan - %s(%s)"
 msgstr "Plan de voie sans nom -%s(%s)"
 
-#: ../bin/misc.c:2942
+#: ../bin/misc.c:2945
 msgid "Initializing commands"
 msgstr "Initialisation des commandes"
 
-#: ../bin/misc.c:2951
+#: ../bin/misc.c:2954
 msgid "Initializing menus"
 msgstr "Initialisation des menus"
 
-#: ../bin/misc.c:2986
+#: ../bin/misc.c:2989
 msgid "Reading parameter files"
 msgstr "Lecture des fichiers de paramètres"
 
-#: ../bin/misc.c:3023
+#: ../bin/misc.c:3026
 msgid "Initialization complete"
 msgstr "Initialisation terminée"
 
@@ -6502,16 +6503,16 @@ msgstr "Connecter un autre objet (%d) à une voie (%d)"
 msgid "Join Abutting Tracks"
 msgstr "Raccorder les voies adjacentes"
 
-#: ../bin/track.c:2282 ../bin/track.c:2317
+#: ../bin/track.c:2280 ../bin/track.c:2315
 msgid "Inside turnout track"
 msgstr "Voie d'aiguillage intérieure"
 
-#: ../bin/track.c:2300
+#: ../bin/track.c:2298
 #, c-format
 msgid "Curve: Length=%s Radius=%0.3f Arc=%0.3f"
 msgstr "Courbe : longueur=%s Rayon=%0.3f Arc=%0.3f"
 
-#: ../bin/track.c:2323 ../bin/track.c:2381 ../bin/tstraigh.c:568
+#: ../bin/track.c:2321 ../bin/track.c:2379 ../bin/tstraigh.c:568
 #, c-format
 msgid "Straight: Length=%s Angle=%0.3f"
 msgstr "Droit : Longueur = %s Angle = %0.3f"
@@ -9147,9 +9148,8 @@ msgid "Display unconnected endpoints of track with special marks"
 msgstr "Mettez en surbrillance les extrémités non connectées"
 
 #: ../../../../build/work/app/bin/bllnhlp.c:334
-msgid "Whether zoom is locked to the bottom left corner or the center point"
+msgid "Whether the Main Drawing Area shows as much of the room as possible"
 msgstr ""
-"Si le zoom est verrouillé dans le coin inférieur gauche ou au point central"
 
 #: ../../../../build/work/app/bin/bllnhlp.c:336
 msgid "Width of the lines"
@@ -15444,6 +15444,18 @@ msgstr "Modification des poly formes"
 #: ../../../../build/work/app/i18n/custmsg.h:1263
 msgid "Control Panels"
 msgstr "Panneaux de contrôle"
+
+#, fuzzy
+#~ msgid "Pan to origin - 'o'/'0'"
+#~ msgstr "Pan à l'origine - 'o'"
+
+#~ msgid "Zoom keeps lower corner in view"
+#~ msgstr "Le zoom garde le coin inférieur en vue"
+
+#~ msgid "Whether zoom is locked to the bottom left corner or the center point"
+#~ msgstr ""
+#~ "Si le zoom est verrouillé dans le coin inférieur gauche ou au point "
+#~ "central"
 
 #~ msgid "Find ..."
 #~ msgstr "Chercher ..."

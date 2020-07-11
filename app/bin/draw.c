@@ -2245,7 +2245,6 @@ EXPORT void CoOrd2Pix(
 *  - 2: same as 0, plus liveMap
 */
 EXPORT void PanHere(void * mode) {
-	coOrd oldOrig = mainD.orig;
 	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
 	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
 	wBool_t bNoBorder = (constrainMain != 0);
@@ -3120,7 +3119,7 @@ EXPORT void InitCmdPan2( wMenu_p menu )
 	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '7');
 	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '8');
 	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '9');
-	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to origin - 'o'/'0'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'o');
+	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to Origin - 'o'/'0'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'o');
 	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
 	InitCmdZoom(NULL, NULL, NULL, zoomPanM);
 	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 0);

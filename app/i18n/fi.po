@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: xtrkcad 4.1.0b1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-07-05 16:26+0200\n"
+"POT-Creation-Date: 2020-07-11 09:01+0200\n"
 "PO-Revision-Date: 2008-02-05 11:21+0200\n"
 "Last-Translator: Mikko Nissinen <mni77@users.sourceforge.net>\n"
 "Language-Team: Finnish <mni77@users.sourceforge.net>\n"
@@ -30,8 +30,8 @@ msgstr ""
 #: ../bin/directory.c:154 ../bin/dxfoutput.c:193 ../bin/fileio.c:241
 #: ../bin/fileio.c:698 ../bin/fileio.c:898 ../bin/fileio.c:1025
 #: ../bin/fileio.c:1092 ../bin/fileio.c:1098 ../bin/fileio.c:1174
-#: ../bin/fileio.c:1184 ../bin/fileio.c:1502 ../bin/fileio.c:1552
-#: ../bin/fileio.c:1608 ../bin/macro.c:179 ../bin/macro.c:832
+#: ../bin/fileio.c:1184 ../bin/fileio.c:1517 ../bin/fileio.c:1567
+#: ../bin/fileio.c:1623 ../bin/macro.c:179 ../bin/macro.c:832
 #: ../bin/macro.c:877 ../bin/macro.c:898 ../bin/macro.c:1043
 #: ../bin/macro.c:1060 ../bin/macro.c:1322 ../bin/param.c:2090
 #: ../bin/paramfile.c:250 ../bin/paramfilelist.c:376 ../bin/track.c:1116
@@ -248,7 +248,7 @@ msgstr "Päätepiste 2: X"
 #: ../bin/cprint.c:716 ../bin/cprint.c:723 ../bin/cprint.c:1247
 #: ../bin/cpull.c:511 ../bin/cpull.c:526 ../bin/cpull.c:528 ../bin/cpull.c:530
 #: ../bin/cpull.c:690 ../bin/cselect.c:1068 ../bin/cselect.c:1164
-#: ../bin/cselect.c:1978 ../bin/csensor.c:194 ../bin/csensor.c:206
+#: ../bin/cselect.c:1980 ../bin/csensor.c:194 ../bin/csensor.c:206
 #: ../bin/csensor.c:444 ../bin/csignal.c:267 ../bin/csignal.c:666
 #: ../bin/csignal.c:734 ../bin/csnap.c:576 ../bin/csnap.c:705
 #: ../bin/cstruct.c:935 ../bin/cstruct.c:944 ../bin/cstruct.c:1069
@@ -258,8 +258,8 @@ msgstr "Päätepiste 2: X"
 #: ../bin/cswitchmotor.c:714 ../bin/cswitchmotor.c:745 ../bin/ctext.c:173
 #: ../bin/ctodesgn.c:204 ../bin/ctodesgn.c:1199 ../bin/ctodesgn.c:1336
 #: ../bin/ctodesgn.c:1934 ../bin/ctodesgn.c:2049 ../bin/ctodesgn.c:2348
-#: ../bin/ctodesgn.c:2630 ../bin/ctrain.c:205 ../bin/cturnout.c:2861
-#: ../bin/cturnout.c:2999 ../bin/cundo.c:161 ../bin/cundo.c:166
+#: ../bin/ctodesgn.c:2630 ../bin/ctrain.c:205 ../bin/cturnout.c:2897
+#: ../bin/cturnout.c:3035 ../bin/cundo.c:161 ../bin/cundo.c:166
 #: ../bin/dbitmap.c:68 ../bin/dbitmap.c:125 ../bin/dbitmap.c:203
 #: ../bin/dbitmap.c:238 ../bin/dcar.c:3824 ../bin/dcar.c:4019
 #: ../bin/dcar.c:4023 ../bin/dcar.c:4027 ../bin/dcar.c:4032 ../bin/dcar.c:4336
@@ -270,14 +270,14 @@ msgstr "Päätepiste 2: X"
 #: ../bin/dlayer.c:879 ../bin/dlayer.c:885 ../bin/dlayer.c:891
 #: ../bin/doption.c:199 ../bin/doption.c:275 ../bin/doption.c:476
 #: ../bin/doption.c:479 ../bin/doption.c:492 ../bin/doption.c:558
-#: ../bin/dprmfile.c:434 ../bin/draw.c:2633 ../bin/fileio.c:197
+#: ../bin/dprmfile.c:434 ../bin/draw.c:2629 ../bin/fileio.c:197
 #: ../bin/fileio.c:607 ../bin/fileio.c:742 ../bin/fileio.c:744
 #: ../bin/fileio.c:749 ../bin/fileio.c:812 ../bin/fileio.c:1045
 #: ../bin/layout.c:373 ../bin/layout.c:561 ../bin/macro.c:1156
 #: ../bin/macro.c:1160 ../bin/macro.c:1218 ../bin/macro.c:1287
 #: ../bin/macro.c:1527 ../bin/macro.c:1545 ../bin/misc.c:434 ../bin/misc.c:481
 #: ../bin/misc.c:1806 ../bin/misc.c:1927 ../bin/misc.c:1935 ../bin/misc.c:2013
-#: ../bin/misc.c:2796 ../bin/misc.c:2805 ../bin/misc.c:2825 ../bin/misc.c:2831
+#: ../bin/misc.c:2799 ../bin/misc.c:2808 ../bin/misc.c:2828 ../bin/misc.c:2834
 #: ../bin/misc2.c:456 ../bin/param.c:738 ../bin/param.c:1848
 #: ../bin/param.c:1971 ../bin/param.c:1974 ../bin/param.c:2097
 #: ../bin/param.c:2103 ../bin/paramfile.c:324 ../bin/paramfile.c:326
@@ -473,7 +473,7 @@ msgid "Second"
 msgstr "Toinen"
 
 #: ../bin/ccornu.c:981 ../bin/ccornu.c:2005 ../bin/ccornu.c:2035
-#: ../bin/tcornu.c:830 ../bin/tcornu.c:1037 ../bin/tcornu.c:1360
+#: ../bin/tcornu.c:830 ../bin/tcornu.c:1037 ../bin/tcornu.c:1363
 #, c-format
 msgid ""
 "Cornu Create Failed for p1[%0.3f,%0.3f] p2[%0.3f,%0.3f], c1[%0.3f,%0.3f] c2[%"
@@ -1560,21 +1560,21 @@ msgstr ""
 msgid "Smooth Corner - 's'"
 msgstr ""
 
-#: ../bin/cdraw.c:2904 ../bin/cselect.c:3342
+#: ../bin/cdraw.c:2904 ../bin/cselect.c:3348
 msgid "LineType..."
 msgstr ""
 
-#: ../bin/cdraw.c:2905 ../bin/cselect.c:3343
+#: ../bin/cdraw.c:2905 ../bin/cselect.c:3349
 #, fuzzy
 msgid "Solid Line"
 msgstr "Monikulmio"
 
-#: ../bin/cdraw.c:2906 ../bin/cselect.c:3344
+#: ../bin/cdraw.c:2906 ../bin/cselect.c:3350
 #, fuzzy
 msgid "Dashed Line"
 msgstr "Piirrä viiva"
 
-#: ../bin/cdraw.c:2907 ../bin/cselect.c:3345
+#: ../bin/cdraw.c:2907 ../bin/cselect.c:3351
 #, fuzzy
 msgid "Dotted Line"
 msgstr "Kaari"
@@ -1636,7 +1636,6 @@ msgid "Station"
 msgstr "Asema"
 
 #: ../bin/celev.c:47 ../bin/cprofile.c:1533 ../bin/dcmpnd.c:75
-#: ../bin/misc.c:2744
 msgid "Ignore"
 msgstr "Hylkää"
 
@@ -1921,8 +1920,8 @@ msgstr ""
 msgid "Second "
 msgstr "Toinen "
 
-#: ../bin/cjoin.c:1175 ../bin/track.c:2272 ../bin/track.c:2308
-#: ../bin/track.c:2374
+#: ../bin/cjoin.c:1175 ../bin/track.c:2270 ../bin/track.c:2306
+#: ../bin/track.c:2372
 msgid "Connecting "
 msgstr "Yhdistetään "
 
@@ -2003,21 +2002,21 @@ msgstr "Kaareva raideosa: Säde=%s Pituus=%s Kulma=%0.3f"
 msgid "Extend Track"
 msgstr "Jatka raidetta"
 
-#: ../bin/cmodify.c:792
+#: ../bin/cmodify.c:794
 msgid "Modify"
 msgstr "Muokkaa"
 
-#: ../bin/cmodify.c:799 ../bin/cselect.c:3299 ../bin/cselect.c:3315
+#: ../bin/cmodify.c:801 ../bin/cselect.c:3305 ../bin/cselect.c:3321
 #: ../bin/misc.c:2197 ../bin/misc.c:2199
 msgid "Zoom In"
 msgstr "Lähennä"
 
-#: ../bin/cmodify.c:800 ../bin/cselect.c:3303 ../bin/cselect.c:3316
+#: ../bin/cmodify.c:802 ../bin/cselect.c:3309 ../bin/cselect.c:3322
 #: ../bin/misc.c:2201 ../bin/misc.c:2203
 msgid "Zoom Out"
 msgstr "Loitonna"
 
-#: ../bin/cmodify.c:801
+#: ../bin/cmodify.c:803
 msgid "Pan center - '@'"
 msgstr ""
 
@@ -2082,7 +2081,7 @@ msgid "Structure"
 msgstr "Rakennus"
 
 #: ../bin/compound.c:832 ../bin/cswitchmotor.c:228 ../bin/cturnout.c:1063
-#: ../bin/cturnout.c:2852
+#: ../bin/cturnout.c:2888
 msgid "Turnout"
 msgstr "Palaraide"
 
@@ -2246,7 +2245,7 @@ msgstr "Palauta"
 msgid "Setup"
 msgstr "Asetukset"
 
-#: ../bin/cprint.c:157 ../bin/cselect.c:3307 ../bin/misc.c:2228
+#: ../bin/cprint.c:157 ../bin/cselect.c:3313 ../bin/misc.c:2228
 #, fuzzy
 msgid "Select All"
 msgstr "Valitse kaikki"
@@ -2513,269 +2512,269 @@ msgstr ""
 msgid "Move To Join"
 msgstr "Siirrä yhdistääksesi"
 
-#: ../bin/cselect.c:1713
+#: ../bin/cselect.c:1714
 msgid "Drag to move selected tracks - Shift+Ctrl+Arrow micro-steps the move"
 msgstr ""
 
-#: ../bin/cselect.c:1734 ../bin/cselect.c:1846 ../bin/cselect.c:2202
+#: ../bin/cselect.c:1735 ../bin/cselect.c:1848 ../bin/cselect.c:2205
 msgid "Move Tracks"
 msgstr "Siirrä raiteita"
 
-#: ../bin/cselect.c:1891
+#: ../bin/cselect.c:1893
 #, fuzzy
 msgid "Align: Click on a selected object to be aligned"
 msgstr "Klikkaa valittua objektia kohdistaaksesi"
 
-#: ../bin/cselect.c:1929
+#: ../bin/cselect.c:1931
 #, fuzzy
 msgid "Drag to rotate selected tracks, Shift+RightClick for QuickRotate Menu"
 msgstr "Pyöritä valittuja raideosia raahaamalla"
 
-#: ../bin/cselect.c:1945 ../bin/cselect.c:2215
+#: ../bin/cselect.c:1947 ../bin/cselect.c:2218
 msgid "Rotate Tracks"
 msgstr "Pyöritä raiteita"
 
-#: ../bin/cselect.c:1958
+#: ../bin/cselect.c:1960
 msgid "Center of Rotation snapped to Turntable center"
 msgstr ""
 
-#: ../bin/cselect.c:2000 ../bin/cselect.c:2031
+#: ../bin/cselect.c:2002 ../bin/cselect.c:2033
 #, c-format
 msgid "Angle %0.3f"
 msgstr "Kulma %0.3f"
 
-#: ../bin/cselect.c:2087
+#: ../bin/cselect.c:2089
 #, fuzzy, c-format
 msgid "Angle %0.3f #%ld"
 msgstr "   Kulma %0.3f #%ld"
 
-#: ../bin/cselect.c:2089
+#: ../bin/cselect.c:2091
 #, fuzzy, c-format
 msgid "Angle %0.3f %s"
 msgstr "Kulma %0.3f"
 
-#: ../bin/cselect.c:2094
+#: ../bin/cselect.c:2096
 msgid "Origin Set. Drag away to set start angle"
 msgstr ""
 
-#: ../bin/cselect.c:2108
+#: ../bin/cselect.c:2110
 #, fuzzy
 msgid "Align: Click on the 2nd unselected object"
 msgstr "Klikkaa valitsematonta objektia"
 
-#: ../bin/cselect.c:2227
+#: ../bin/cselect.c:2230
 msgid "Toggle Label"
 msgstr "Näytä/piilota merkintä"
 
-#: ../bin/cselect.c:2346 ../bin/cselect.c:2385
+#: ../bin/cselect.c:2349 ../bin/cselect.c:2388
 msgid "Select and drag a description"
 msgstr "Valitse ja raahaa merkintöjä"
 
-#: ../bin/cselect.c:2371
+#: ../bin/cselect.c:2374
 #, fuzzy
 msgid "Elevation description"
 msgstr "Vasemman kuvaus"
 
-#: ../bin/cselect.c:2374
+#: ../bin/cselect.c:2377
 msgid "Hidden description - 's' to Show"
 msgstr ""
 
-#: ../bin/cselect.c:2378
+#: ../bin/cselect.c:2381
 #, fuzzy
 msgid "Shown description - 'h' to Hide"
 msgstr "Näytä kuvaus"
 
-#: ../bin/cselect.c:2399
+#: ../bin/cselect.c:2402
 msgid "Hidden Label - Drag to reveal"
 msgstr ""
 
-#: ../bin/cselect.c:2401
+#: ../bin/cselect.c:2404
 #, fuzzy
 msgid "Drag label"
 msgstr "Raahaa paikoilleen"
 
-#: ../bin/cselect.c:2403
+#: ../bin/cselect.c:2406
 msgid "Move Label"
 msgstr "Siirrä merkintöjä"
 
-#: ../bin/cselect.c:2440
+#: ../bin/cselect.c:2443
 msgid "To Hide, use Context Menu"
 msgstr ""
 
-#: ../bin/cselect.c:2456 ../bin/cselect.c:3333
+#: ../bin/cselect.c:2459 ../bin/cselect.c:3339
 #, fuzzy
 msgid "Show/Hide Description"
 msgstr "Näytä kuvaus"
 
-#: ../bin/cselect.c:2535
+#: ../bin/cselect.c:2538
 msgid "Drag to mark mirror line"
 msgstr "Vedä hiirellä peilauslinja"
 
-#: ../bin/cselect.c:2546
+#: ../bin/cselect.c:2549
 #, c-format
 msgid "Angle %0.2f"
 msgstr "Kulma %0.2f"
 
-#: ../bin/cselect.c:2549
+#: ../bin/cselect.c:2552
 msgid "Flip Tracks"
 msgstr "Peilaa raiteet"
 
-#: ../bin/cselect.c:2895
+#: ../bin/cselect.c:2899
 #, fuzzy
 msgid "Select track"
 msgstr "Valitse raideosat"
 
-#: ../bin/cselect.c:2923
+#: ../bin/cselect.c:2927
 msgid "Track is in Frozen Layer"
 msgstr ""
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:323
-#: ../bin/cselect.c:3273 ../bin/dcar.c:1673 ../bin/doption.c:235
+#: ../bin/cselect.c:3279 ../bin/dcar.c:1673 ../bin/doption.c:235
 #: ../../../../build/work/app/i18n/custmsg.h:1169
 msgid "Select"
 msgstr "Valitse"
 
-#: ../bin/cselect.c:3292 ../bin/cselect.c:3312 ../bin/misc.c:2192
+#: ../bin/cselect.c:3298 ../bin/cselect.c:3318 ../bin/misc.c:2192
 msgid "Undo"
 msgstr "Kumoa"
 
-#: ../bin/cselect.c:3293 ../bin/cselect.c:3313 ../bin/misc.c:2194
+#: ../bin/cselect.c:3299 ../bin/cselect.c:3319 ../bin/misc.c:2194
 msgid "Redo"
 msgstr "Tee uudelleen"
 
-#: ../bin/cselect.c:3300 ../bin/draw.c:3110
+#: ../bin/cselect.c:3306 ../bin/draw.c:3112
 msgid "Zoom to extents - 'e'"
 msgstr ""
 
-#: ../bin/cselect.c:3301 ../bin/draw.c:3121 ../bin/misc.c:2375
+#: ../bin/cselect.c:3307 ../bin/draw.c:3123 ../bin/misc.c:2375
 msgid "&Zoom"
 msgstr "&Zoom"
 
-#: ../bin/cselect.c:3304
+#: ../bin/cselect.c:3310 ../bin/draw.c:3122
 msgid "Pan to Origin - 'o'/'0'"
 msgstr ""
 
-#: ../bin/cselect.c:3305 ../bin/cselect.c:3317
+#: ../bin/cselect.c:3311 ../bin/cselect.c:3323
 msgid "Pan Center Here - '@'"
 msgstr ""
 
-#: ../bin/cselect.c:3308 ../bin/misc.c:2231 ../bin/misc.c:2354
+#: ../bin/cselect.c:3314 ../bin/misc.c:2231 ../bin/misc.c:2354
 msgid "Select Current Layer"
 msgstr "Valitse nykyinen taso"
 
-#: ../bin/cselect.c:3319 ../bin/misc.c:2233
+#: ../bin/cselect.c:3325 ../bin/misc.c:2233
 msgid "Deselect All"
 msgstr "Poista valinnat"
 
-#: ../bin/cselect.c:3321
+#: ../bin/cselect.c:3327
 #, fuzzy
 msgid "Properties -'?'"
 msgstr "Asetukset"
 
-#: ../bin/cselect.c:3322
+#: ../bin/cselect.c:3328
 #, fuzzy
 msgid "Modify/Activate Track"
 msgstr "Muokkaa raidetta"
 
-#: ../bin/cselect.c:3324 ../bin/misc.c:2219
+#: ../bin/cselect.c:3330 ../bin/misc.c:2219
 #, fuzzy
 msgid "Cut"
 msgstr "&Leikkaa"
 
-#: ../bin/cselect.c:3325 ../bin/misc.c:2221
+#: ../bin/cselect.c:3331 ../bin/misc.c:2221
 msgid "Copy"
 msgstr "Kopioi"
 
-#: ../bin/cselect.c:3326 ../bin/fileio.c:1605 ../bin/misc.c:2223
+#: ../bin/cselect.c:3332 ../bin/fileio.c:1620 ../bin/misc.c:2223
 msgid "Paste"
 msgstr "Liitä"
 
-#: ../bin/cselect.c:3327 ../bin/misc.c:2225
+#: ../bin/cselect.c:3333 ../bin/misc.c:2225
 #, fuzzy
 msgid "Clone"
 msgstr "Sulje"
 
-#: ../bin/cselect.c:3329
+#: ../bin/cselect.c:3335
 #, fuzzy
 msgid "Rotate..."
 msgstr "Pyöritä"
 
-#: ../bin/cselect.c:3331
+#: ../bin/cselect.c:3337
 msgid "Align"
 msgstr "Kohdista"
 
-#: ../bin/cselect.c:3335
+#: ../bin/cselect.c:3341
 msgid "Hide/NoHide"
 msgstr ""
 
-#: ../bin/cselect.c:3336
+#: ../bin/cselect.c:3342
 msgid "Bridge/NoBridge"
 msgstr ""
 
-#: ../bin/cselect.c:3337
+#: ../bin/cselect.c:3343
 msgid "NoTies/Ties"
 msgstr ""
 
-#: ../bin/cselect.c:3338
+#: ../bin/cselect.c:3344
 msgid "Thickness..."
 msgstr ""
 
-#: ../bin/cselect.c:3339 ../bin/misc.c:2366
+#: ../bin/cselect.c:3345 ../bin/misc.c:2366
 msgid "Thin Tracks"
 msgstr "Ohuet raiteet"
 
-#: ../bin/cselect.c:3340 ../bin/misc.c:2367
+#: ../bin/cselect.c:3346 ../bin/misc.c:2367
 msgid "Medium Tracks"
 msgstr "Keskipaksut raiteet"
 
-#: ../bin/cselect.c:3341 ../bin/misc.c:2368
+#: ../bin/cselect.c:3347 ../bin/misc.c:2368
 msgid "Thick Tracks"
 msgstr "Paksut raiteet"
 
-#: ../bin/cselect.c:3346
+#: ../bin/cselect.c:3352
 msgid "Dash-Dotted Line"
 msgstr ""
 
-#: ../bin/cselect.c:3347
+#: ../bin/cselect.c:3353
 msgid "Dash-Dot-Dotted Line"
 msgstr ""
 
-#: ../bin/cselect.c:3349
+#: ../bin/cselect.c:3355
 #, fuzzy
 msgid "Move To Front"
 msgstr "Siirrä yhdistääksesi"
 
-#: ../bin/cselect.c:3350
+#: ../bin/cselect.c:3356
 #, fuzzy
 msgid "Move To Back"
 msgstr "Siirrä raiteita"
 
-#: ../bin/cselect.c:3352
+#: ../bin/cselect.c:3358
 #, fuzzy
 msgid "Group"
 msgstr "Ryhmittele"
 
-#: ../bin/cselect.c:3353
+#: ../bin/cselect.c:3359
 #, fuzzy
 msgid "UnGroup"
 msgstr "Pura ryhmittely"
 
-#: ../bin/cselect.c:3388
+#: ../bin/cselect.c:3394
 msgid "Move Description"
 msgstr "Siirrä merkintöjä"
 
-#: ../bin/cselect.c:3395 ../bin/misc.c:1935 ../bin/misc.c:2236
+#: ../bin/cselect.c:3401 ../bin/misc.c:1935 ../bin/misc.c:2236
 msgid "Move"
 msgstr "Siirrä"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:368
-#: ../bin/cselect.c:3397 ../bin/misc.c:1926 ../bin/misc.c:2238
+#: ../bin/cselect.c:3403 ../bin/misc.c:1926 ../bin/misc.c:2238
 #: ../../../../build/work/app/i18n/custmsg.h:1259
 msgid "Rotate"
 msgstr "Pyöritä"
 
 #. i18n: C:/Users/mf/Documents/XTrackCAD/src/work/app/lib/xtrkcad.xtq:369
-#: ../bin/cselect.c:3399 ../bin/dcar.c:2217
+#: ../bin/cselect.c:3405 ../bin/dcar.c:2217
 #: ../../../../build/work/app/i18n/custmsg.h:1261
 msgid "Flip"
 msgstr "Peilikuva"
@@ -3010,8 +3009,8 @@ msgid "Place Structure"
 msgstr "Aseta rakennus"
 
 #: ../bin/cstruct.c:798 ../bin/cstruct.c:872 ../bin/cstruct.c:1103
-#: ../bin/cturnout.c:2717 ../bin/cturnout.c:2772 ../bin/cturnout.c:2897
-#: ../bin/cturnout.c:3036
+#: ../bin/cturnout.c:2753 ../bin/cturnout.c:2808 ../bin/cturnout.c:2933
+#: ../bin/cturnout.c:3072
 #, fuzzy
 msgid ""
 "Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter "
@@ -3045,7 +3044,7 @@ msgstr ""
 "Siirrä raahaamalla hiiren vasemmalla, pyöritä rahaamalla hiiren oikealla, "
 "tai paina return tai klikkaa Ok kun valmis"
 
-#: ../bin/cstruct.c:1073 ../bin/cturnout.c:3003
+#: ../bin/cstruct.c:1073 ../bin/cturnout.c:3039
 #, c-format
 msgid "Place %s and draw into position"
 msgstr "Aseta %s ja raahaa paikoilleen"
@@ -3603,7 +3602,7 @@ msgstr "Yhdistä säädettävä raide"
 msgid "splitTurnout: can't find segment"
 msgstr "Pilko: Lohkoja ei löytynyt."
 
-#: ../bin/cturnout.c:1522 ../bin/track.c:2261 ../bin/track.c:2367
+#: ../bin/cturnout.c:1522 ../bin/track.c:2259 ../bin/track.c:2365
 #: ../bin/tstraigh.c:554
 msgid "Drag to change track length"
 msgstr "Vedä muuttaaksesi raideosan pituutta"
@@ -3627,21 +3626,21 @@ msgstr "0 liitosta (%s)"
 msgid "Place New Turnout"
 msgstr "Aseta uusi vaihde"
 
-#: ../bin/cturnout.c:2762
+#: ../bin/cturnout.c:2798
 #, c-format
 msgid "Angle = %0.3f (%s)"
 msgstr "Kulma = %0.3f (%s)"
 
-#: ../bin/cturnout.c:2852 ../bin/param.c:2618
+#: ../bin/cturnout.c:2888 ../bin/param.c:2618
 msgid "Close"
 msgstr "Sulje"
 
-#: ../bin/cturnout.c:2869
+#: ../bin/cturnout.c:2905
 msgid "Pick turnout and active End Point, then place on the layout"
 msgstr ""
 "Valitse ensin vaihde ja aktiivinen päätepiste ja aseta sitten paikoilleen"
 
-#: ../bin/cturnout.c:3063
+#: ../bin/cturnout.c:3099
 #, fuzzy
 msgid "Predefined Track"
 msgstr "Valitut raiteet"
@@ -4309,7 +4308,7 @@ msgstr "Muokkaa"
 msgid "Delete"
 msgstr "Poista"
 
-#: ../bin/dcar.c:4407 ../bin/fileio.c:1502
+#: ../bin/dcar.c:4407 ../bin/fileio.c:1517
 msgid "Export"
 msgstr "Vie tiedostoon"
 
@@ -4658,7 +4657,7 @@ msgid "Hide Trains On Hidden Track"
 msgstr "Junat piilossa olevalla radalla"
 
 #: ../bin/doption.c:143
-msgid "Zoom keeps lower corner in view"
+msgid "Constrain Drawing Area to Room boundaries"
 msgstr ""
 
 #: ../bin/doption.c:150
@@ -5112,116 +5111,112 @@ msgstr "Lataa parametrit"
 msgid "Parameter files (*.xtp)|*.xtp"
 msgstr "Parametritiedostot|*.xtp"
 
-#: ../bin/draw.c:2140
+#: ../bin/draw.c:2134
 msgid "Macro Zoom Mode"
 msgstr ""
 
-#: ../bin/draw.c:2147
+#: ../bin/draw.c:2141
 msgid "Scale 1:1 - Use Ctrl+ to go to Macro Zoom Mode"
 msgstr ""
 
-#: ../bin/draw.c:2151
+#: ../bin/draw.c:2145
 msgid "Preset Zoom In Value selected. Shift+Ctrl+PageDwn to reset value"
 msgstr ""
 
-#: ../bin/draw.c:2155
+#: ../bin/draw.c:2149
 #, fuzzy, c-format
 msgid "Zoom In Program Value %ld:1, Shift+PageDwn to use"
 msgstr "Lähennä arvoon %ld:1"
 
-#: ../bin/draw.c:2192
+#: ../bin/draw.c:2187
 #, fuzzy
 msgid "At Maximum Zoom Out"
 msgstr "Suurin siirtymä"
 
-#: ../bin/draw.c:2197
+#: ../bin/draw.c:2192
 msgid "Preset Zoom Out Value selected. Shift+Ctrl+PageUp to reset value"
 msgstr ""
 
-#: ../bin/draw.c:2201
+#: ../bin/draw.c:2196
 #, fuzzy, c-format
 msgid "Zoom Out Program Value %ld:1 set, Shift+PageUp to use"
 msgstr "Loitonna arvoon %ld:1"
 
-#: ../bin/draw.c:2897
+#: ../bin/draw.c:2893
 msgid "Map"
 msgstr "Kartta"
 
-#: ../bin/draw.c:2945
+#: ../bin/draw.c:2941
 msgid ""
 "Left-Drag to pan, Ctrl+Left-Drag to zoom, 0 to set origin to zero, 1-9 to "
 "zoom#, e to set to extents"
 msgstr ""
 
-#: ../bin/draw.c:2952
+#: ../bin/draw.c:2948
 #, fuzzy
 msgid "Pan Mode - drag point to new position"
 msgstr "Aseta %s ja raahaa paikoilleen"
 
-#: ../bin/draw.c:2959
+#: ../bin/draw.c:2955
 msgid "Zoom Mode - drag area to zoom"
 msgstr ""
 
-#: ../bin/draw.c:2985
+#: ../bin/draw.c:2981
 msgid "Can't move any further in that direction"
 msgstr ""
 
-#: ../bin/draw.c:2987
+#: ../bin/draw.c:2983
 msgid "Left click to pan, right click to zoom, 'o' for origin, 'e' for extents"
 msgstr ""
 
-#: ../bin/draw.c:3024
+#: ../bin/draw.c:3022
 msgid ""
 "Left Drag to Pan, +CTRL to Zoom, 0 to set Origin to 0,0, 1-9 to Zoom#, e to "
 "set to Extent"
 msgstr ""
 
-#: ../bin/draw.c:3100
+#: ../bin/draw.c:3102
 #, fuzzy
 msgid "Pan/Zoom"
 msgstr "&Zoom"
 
-#: ../bin/draw.c:3111
+#: ../bin/draw.c:3113
 msgid "Zoom to 1:1 - '1'"
 msgstr ""
 
-#: ../bin/draw.c:3112
+#: ../bin/draw.c:3114
 msgid "Zoom to 1:2 - '2'"
 msgstr ""
 
-#: ../bin/draw.c:3113
+#: ../bin/draw.c:3115
 msgid "Zoom to 1:3 - '3'"
 msgstr ""
 
-#: ../bin/draw.c:3114
+#: ../bin/draw.c:3116
 msgid "Zoom to 1:4 - '4'"
 msgstr ""
 
-#: ../bin/draw.c:3115
+#: ../bin/draw.c:3117
 msgid "Zoom to 1:5 - '5'"
 msgstr ""
 
-#: ../bin/draw.c:3116
+#: ../bin/draw.c:3118
 msgid "Zoom to 1:6 - '6'"
 msgstr ""
 
-#: ../bin/draw.c:3117
+#: ../bin/draw.c:3119
 msgid "Zoom to 1:7 - '7'"
 msgstr ""
 
-#: ../bin/draw.c:3118
+#: ../bin/draw.c:3120
 msgid "Zoom to 1:8 - '8'"
 msgstr ""
 
-#: ../bin/draw.c:3119
+#: ../bin/draw.c:3121
 msgid "Zoom to 1:9 - '9'"
 msgstr ""
 
-#: ../bin/draw.c:3120
-msgid "Pan to origin - 'o'/'0'"
-msgstr ""
-
-#: ../bin/draw.c:3123
+#: ../bin/draw.c:3125
 msgid "Pan center here - '@'"
 msgstr ""
 
@@ -5381,20 +5376,20 @@ msgstr "Avaa"
 msgid "Example Tracks"
 msgstr "Yksinkertaiset raideosat"
 
-#: ../bin/fileio.c:1445
+#: ../bin/fileio.c:1460
 #, fuzzy, c-format
 msgid "Module - %s"
 msgstr "Ohje"
 
-#: ../bin/fileio.c:1450 ../bin/fileio.c:1471
+#: ../bin/fileio.c:1465 ../bin/fileio.c:1486
 msgid "Import Tracks"
 msgstr "Tuo raiteet tiedostosta"
 
-#: ../bin/fileio.c:1533
+#: ../bin/fileio.c:1548
 msgid "Export Tracks"
 msgstr "Vie raiteet tiedostoon"
 
-#: ../bin/fileio.c:1552
+#: ../bin/fileio.c:1567
 msgid "Clipboard"
 msgstr "Leikepöytä"
 
@@ -6293,24 +6288,32 @@ msgstr ""
 msgid "Resume"
 msgstr "Jatka"
 
-#: ../bin/misc.c:2856
+#: ../bin/misc.c:2744
+msgid "Resume with New Name"
+msgstr ""
+
+#: ../bin/misc.c:2744
+msgid "Ignore Checkpoint"
+msgstr ""
+
+#: ../bin/misc.c:2859
 #, c-format
 msgid "Unnamed Trackplan - %s(%s)"
 msgstr "Nimetön ratasuunnitelma - %s(%s)"
 
-#: ../bin/misc.c:2942
+#: ../bin/misc.c:2945
 msgid "Initializing commands"
 msgstr "Alustetaan komennot"
 
-#: ../bin/misc.c:2951
+#: ../bin/misc.c:2954
 msgid "Initializing menus"
 msgstr "Alustetaan valikot"
 
-#: ../bin/misc.c:2986
+#: ../bin/misc.c:2989
 msgid "Reading parameter files"
 msgstr "Luetaan parametritiedostot"
 
-#: ../bin/misc.c:3023
+#: ../bin/misc.c:3026
 msgid "Initialization complete"
 msgstr "Alustus valmis"
 
@@ -6693,16 +6696,16 @@ msgstr "Muun kuin raideosan (%d) yhdistäminen raiteeseen (%d)"
 msgid "Join Abutting Tracks"
 msgstr "Yhdistä vastakkaiset raideosat"
 
-#: ../bin/track.c:2282 ../bin/track.c:2317
+#: ../bin/track.c:2280 ../bin/track.c:2315
 msgid "Inside turnout track"
 msgstr ""
 
-#: ../bin/track.c:2300
+#: ../bin/track.c:2298
 #, fuzzy, c-format
 msgid "Curve: Length=%s Radius=%0.3f Arc=%0.3f"
 msgstr "Pituus = %0.3f Kulma = %0.3f"
 
-#: ../bin/track.c:2323 ../bin/track.c:2381 ../bin/tstraigh.c:568
+#: ../bin/track.c:2321 ../bin/track.c:2379 ../bin/tstraigh.c:568
 #, c-format
 msgid "Straight: Length=%s Angle=%0.3f"
 msgstr "Suora: Pituus=%s Kulma=%0.3f"
@@ -9310,7 +9313,7 @@ msgid "Display unconnected endpoints of track with special marks"
 msgstr ""
 
 #: ../../../../build/work/app/bin/bllnhlp.c:334
-msgid "Whether zoom is locked to the bottom left corner or the center point"
+msgid "Whether the Main Drawing Area shows as much of the room as possible"
 msgstr ""
 
 #: ../../../../build/work/app/bin/bllnhlp.c:336
