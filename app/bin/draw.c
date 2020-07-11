@@ -2163,6 +2163,8 @@ EXPORT void DoZoomExtents( void * mode) {
 	if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
 	mainD.orig = zero;
 	DoNewScale(scale_x);
+	MainLayout(TRUE,TRUE);
+
 }
 
 
@@ -3058,10 +3060,10 @@ static STATUS_T CmdPan(
 		} else if ((action>>8) >= '1' && (action>>8) <= '9') {         //"1" to "9"
 			scale_x = (action>>8)&0x0F;
 			DoNewScale(scale_x);
-		} else if ((action>>8) == '@') {				// "@"
+		} else if ((action>>8) == 'c') {				// "c"
 			panCenter = pos;
 			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
-			PanHere( (void*)0 ); // CmdPan C_TEXT '@'
+			PanHere( (void*)0 ); // CmdPan C_TEXT 'c'
 		}
 
 		if ((action>>8) == 0x0D) {
@@ -3121,5 +3123,5 @@ EXPORT void InitCmdPan2( wMenu_p menu )
 	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to Origin - 'o'/'0'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'o');
 	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
 	InitCmdZoom(NULL, NULL, NULL, zoomPanM);
-	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 3);
+	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - 'c'"), 0, (wMenuCallBack_p)PanHere, (void*) 3);
 }

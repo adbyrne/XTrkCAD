@@ -129,15 +129,15 @@ Holding down the Shift key while clicking the \f{Zoom In} or \f{Zoom Out} button
 
 \u000
 
-\b Key 'e' sets the zoom to a value that allows all the room to be shown
+\b Key 'e' sets the zoom to a value that allows all the room to be shown and moves the origin of bottom left of the window to be 0,0
 
 \u000
 
-\b Key '0' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
+\b Key '0' or 'o' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
 
 \u000
 
-\b Key '@' moves the center of the window to the cursor position
+\b Key 'c' moves the center of the window to the cursor position 
 
 }
 

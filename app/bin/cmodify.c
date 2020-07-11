@@ -726,7 +726,7 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 		return C_CONTINUE;
 
 	case C_TEXT:
-		if ((action>>8) == '@') {
+		if ((action>>8) == 'c') {
 			panCenter = pos;
 			LOG( log_pan, 2, ( "PanCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			PanHere((void*)0);
@@ -806,5 +806,5 @@ void InitCmdModify( wMenu_p menu )
 	wMenuSeparatorCreate(modPopupM);
 	wMenuPushCreate(modPopupM, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(modPopupM, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
-	wMenuPushCreate(modPopupM, "", _("Pan center - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
+	wMenuPushCreate(modPopupM, "", _("Pan center - 'c'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
 }

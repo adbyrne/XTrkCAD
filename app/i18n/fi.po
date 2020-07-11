@@ -2017,7 +2017,7 @@ msgid "Zoom Out"
 msgstr "Loitonna"
 
 #: ../bin/cmodify.c:803
-msgid "Pan center - '@'"
+msgid "Pan center - 'c'"
 msgstr ""
 
 #: ../bin/cnote.c:69 ../bin/textnoteui.c:48 ../bin/trknote.c:60
@@ -2655,7 +2655,7 @@ msgid "Pan to Origin - 'o'/'0'"
 msgstr ""
 
 #: ../bin/cselect.c:3311 ../bin/cselect.c:3323
-msgid "Pan Center Here - '@'"
+msgid "Pan Center Here - 'c'"
 msgstr ""
 
 #: ../bin/cselect.c:3314 ../bin/misc.c:2231 ../bin/misc.c:2354
@@ -5217,7 +5217,7 @@ msgid "Zoom to 1:9 - '9'"
 msgstr ""
 
 #: ../bin/draw.c:3125
-msgid "Pan center here - '@'"
+msgid "Pan center here - 'c'"
 msgstr ""
 
 #: ../bin/drawgeom.c:76 ../bin/drawgeom.c:91

@@ -1801,7 +1801,7 @@ static STATUS_T CmdMove(
 			return C_CONTINUE;
 
 		case C_TEXT:
-			if ((action>>8) == '@') {
+			if ((action>>8) == 'c') {
 				panCenter = pos;
 				LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 				PanHere((void*)0);
@@ -2150,7 +2150,7 @@ static STATUS_T CmdRotate(
 			return C_CONTINUE;
 
 		case C_TEXT:
-			if ((action>>8) == '@') {
+			if ((action>>8) == 'd') {
 				panCenter = pos;
 				LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 				PanHere((void*)0);
@@ -3222,7 +3222,7 @@ static STATUS_T CmdSelect(
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
-		if ((action>>8) == '@') {
+		if ((action>>8) == 'c') {
 			panCenter = pos;
 			LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			PanHere((void*)0);
@@ -3316,7 +3316,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	InitCmdZoom(NULL, NULL, zoomPop1, NULL);
 	wMenuPushCreate(selectPopup1M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
 	wMenuPushCreate(selectPopup1M, "", _("Pan to Origin - 'o'/'0'"), 0,	(wMenuCallBack_p) PanMenuEnter, (void*) 'o');
-	wMenuPushCreate(selectPopup1M, "", _("Pan Center Here - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
+	wMenuPushCreate(selectPopup1M, "", _("Pan Center Here - 'c'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,(wMenuCallBack_p) SetAllTrackSelect, (void *) 1);
 	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0,(wMenuCallBack_p) SelectCurrentLayer, (void *) 0);
@@ -3328,7 +3328,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(selectPopup2M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
-	wMenuPushCreate(selectPopup2M, "", _("Pan Center Here - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
+	wMenuPushCreate(selectPopup2M, "", _("Pan Center Here - 'c'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0, (wMenuCallBack_p) SetAllTrackSelect, (void *) 0);
 	wMenuSeparatorCreate( selectPopup2M );
