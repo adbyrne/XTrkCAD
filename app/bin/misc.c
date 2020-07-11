@@ -3027,6 +3027,8 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 	RegisterChangeNotification(ToolbarChange);
 	DoChangeNotification( CHANGE_MAIN | CHANGE_MAP);
 
+	panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+	panCenter.y = mainD.orig.y + mainD.size.y/2.0;
 	wWinShow(mainW, TRUE);
 	wWinShow(mapW, mapVisible);
 	wDestroySplash();
