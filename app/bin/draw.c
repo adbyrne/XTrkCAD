@@ -92,6 +92,7 @@ EXPORT BOOL_T drawEnable = TRUE;
 EXPORT long currRedraw = 0;
 
 EXPORT coOrd panCenter;
+EXPORT coOrd menuPos;
 
 EXPORT wDrawColor drawColorBlack;
 EXPORT wDrawColor drawColorWhite;
@@ -2243,8 +2244,13 @@ EXPORT void CoOrd2Pix(
 *  - 0: constrain if constrainMain==1 or CTRL is pressed
 *  - 1: same as 0, but ignore CTRL
 *  - 2: same as 0, plus liveMap
+*  - 3: Take position from menuPos
 */
 EXPORT void PanHere(void * mode) {
+	if ( 3 == (long)mode) {
+		panCenter = menuPos;
+		LOG( log_pan, 2, ( "MCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+	}
 	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
 	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
 	wBool_t bNoBorder = (constrainMain != 0);
@@ -2254,6 +2260,7 @@ EXPORT void PanHere(void * mode) {
 	wBool_t bLiveMap = TRUE;
 	if ( 2 == (long)mode )
 		bLiveMap = liveMap;
+
 	MainLayout( bLiveMap, bNoBorder ); // PanHere
 }
 
@@ -2885,6 +2892,8 @@ EXPORT void DrawInit( int initialZoom )
 	tempD.dpi = mainD.dpi;
 
 	SetMainSize();
+	panCenter.x = mainD.size.x/2 +mainD.orig.x;
+	panCenter.y = mainD.size.y/2 +mainD.orig.y;
 	mapD.scale = mapScale;
 	/*w = (wPos_t)((mapD.size.x/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	/*h = (wPos_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
@@ -3042,15 +3051,7 @@ static STATUS_T CmdPan(
 		panmode = NONE;
 
 		if ((action>>8) == 'e') {     //"e"
-			scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
-			scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
-			if (scale_x<scale_y)
-				scale_x = scale_y;
-			scale_x = ceil(scale_x);
-			if (scale_x < 1) scale_x = 1;
-			if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
-			mainD.orig = zero;
-			DoNewScale(scale_x);
+			DoZoomExtents(0);
 		} else if (((action>>8) == '0') || ((action>>8) == 'o')) {     //"0" or "o"
 			mainD.orig = zero;
 			MainLayout( TRUE, TRUE ); // CmdPan C_TEXT '0' 'o'
@@ -3072,8 +3073,7 @@ static STATUS_T CmdPan(
 		}
 		break;
 	case C_CMDMENU:
-		panCenter = pos;
-		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+		menuPos = pos;
 		wMenuPopupShow( panPopupM );
 		return C_CONTINUE;
 		break;
@@ -3121,5 +3121,5 @@ EXPORT void InitCmdPan2( wMenu_p menu )
 	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to Origin - 'o'/'0'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'o');
 	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
 	InitCmdZoom(NULL, NULL, NULL, zoomPanM);
-	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 0);
+	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 3);
 }

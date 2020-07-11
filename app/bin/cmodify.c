@@ -220,6 +220,7 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			break;
 		case C_CMDMENU:
+			menuPos = pos;
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			break;
 		default:
@@ -731,6 +732,12 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 			PanHere((void*)0);
 			return C_CONTINUE;
 		}
+		if ((action>>8) == 'e') {
+			DoZoomExtents(0);
+		}
+		if ((action>>8) == '0' || (action>>8 == 'o')) {
+			PanMenuEnter('o');
+		}
 		if ( !Dex.Trk )
 			return C_CONTINUE;
 		if (modifyBezierMode)
@@ -743,8 +750,7 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 
 	case C_CMDMENU:
 		if ( !Dex.Trk ) {
-			panCenter = pos;
-			LOG( log_pan, 2, ( "PanCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			menuPos = pos;
 			wMenuPopupShow(modPopupM);
 			return C_CONTINUE;
 		}
@@ -800,5 +806,5 @@ void InitCmdModify( wMenu_p menu )
 	wMenuSeparatorCreate(modPopupM);
 	wMenuPushCreate(modPopupM, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(modPopupM, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
-	wMenuPushCreate(modPopupM, "", _("Pan center - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 0);
+	wMenuPushCreate(modPopupM, "", _("Pan center - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
 }

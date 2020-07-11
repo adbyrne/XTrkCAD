@@ -180,6 +180,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			mode |= 1;
 		for ( inx=0; inx<4; inx++ )
 			wMenuToggleSet( splitPopupMI[quad&1][inx], mode == inx );
+		menuPos = pos;
 		wMenuPopupShow( splitPopupM[quad&1] );
 		break;
 	case wActionMove:

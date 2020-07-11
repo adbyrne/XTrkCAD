@@ -1488,6 +1488,7 @@ static STATUS_T CmdProfile(wAction_t action, coOrd pos)
                     wMenuToggleSet(profilePopupToggles[0], mode == ELEV_DEF);
                     wMenuToggleSet(profilePopupToggles[1], mode == ELEV_IGNORE);
                     wMenuToggleSet(profilePopupToggles[2], mode == ELEV_NONE);
+                    menuPos = pos;
                     wMenuPopupShow(profilePopupM);
                 }
             }

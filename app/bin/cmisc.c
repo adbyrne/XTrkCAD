@@ -628,6 +628,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case C_CMDMENU:
+    	menuPos = pos;
     	if (!trk) wMenuPopupShow(descPopupM);
     	return C_CONTINUE;
     }

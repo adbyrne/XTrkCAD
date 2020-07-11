@@ -126,6 +126,7 @@ extern BOOL_T drawEnable;
 extern long currRedraw;
 
 extern coOrd panCenter;
+extern coOrd menuPos;
 
 extern int log_pan;
 

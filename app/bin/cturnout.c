@@ -2863,6 +2863,7 @@ LOG( log_turnout, 1, ( "RMOVE post @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 		return C_TERMINATE;
 
 	case C_CMDMENU:
+		menuPos = pos;
 		wMenuPopupShow( turnoutPopupM );
 		return C_CONTINUE;
 

@@ -758,6 +758,7 @@ EXPORT STATUS_T CmdGrid(
 		return rc;
 
 	case C_CMDMENU:
+		menuPos = pos;
 		wMenuPopupShow( snapGridPopupM );
 		break;
 	}

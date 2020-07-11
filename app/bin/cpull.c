@@ -841,6 +841,7 @@ static STATUS_T CmdPull(
 		return C_CONTINUE;
 
 	case C_CMDMENU:
+		menuPos = pos;
 		wMenuPopupShow( pullPopupM );
 		return C_CONTINUE;
 		break;

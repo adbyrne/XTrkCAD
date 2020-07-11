@@ -874,6 +874,7 @@ EXPORT STATUS_T CmdStructureAction(
 
 	case C_CMDMENU:
 		DYNARR_RESET(trkSeg_t,anchors_da);
+		menuPos = pos;
 		wMenuPopupShow( structPopupM );
 		return C_CONTINUE;
 

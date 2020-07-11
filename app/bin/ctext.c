@@ -248,6 +248,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_CMDMENU:
+		menuPos = pos;
 		wMenuPopupShow( textPopupM );
 		return C_CONTINUE;
 	}

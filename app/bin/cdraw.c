@@ -1604,6 +1604,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		}
 		break;
 	case C_CMDMENU:
+		menuPos = pos;
 		wMenuPopupShow( drawModDelMI );
 		wMenuPushEnable( drawModPointsMode,drawModCmdContext.rotate_state);
 		wMenuPushEnable( drawModriginMode,!drawModCmdContext.rotate_state);
