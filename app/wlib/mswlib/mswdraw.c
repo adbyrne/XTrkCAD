@@ -1615,6 +1615,8 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		iy = HIWORD( lParam );
 		x = XPIX2INCH( b, ix );
 		y = YPIX2INCH( b, iy );
+		b->lastX = x;
+		b->lastY = y;
 		if (b->action)
 			b->action( b, b->data, action, x, y );
 		if (b->hWnd)
@@ -1651,9 +1653,9 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		}
 		if (b && b->action) {
 			if (extChar != wAccelKey_None)
-				b->action( b, b->data, wActionExtKey + ( (int)extChar << 8 ), 0, 0 );
+				b->action( b, b->data, wActionExtKey + ( (int)extChar << 8 ), b->lastX, b->lastY );
 			else
-				b->action( b, b->data, wActionText + ( wParam << 8 ), 0, 0 );
+				b->action( b, b->data, wActionText + ( wParam << 8 ), b->lastX, b->lastY );
 		}
 		return 0;
 
@@ -1737,7 +1739,7 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			}
 		}
 		if (b->action)
-			b->action( b, b->data, action, 0, 0 );
+			b->action( b, b->data, action, b->lastX, b->lastY );
 		return 0;
 	case WM_MOUSEHWHEEL:
 		if ( GET_KEYSTATE_WPARAM(wParam) & (MK_SHIFT|MK_MBUTTON)) {
@@ -1748,7 +1750,7 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 			}
 		}
 		if (b->action)
-			b->action( b, b->data, action, 0, 0 );
+			b->action( b, b->data, action, b->lastX, b->lastY );
 		return 0;
 	}
 

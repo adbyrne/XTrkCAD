@@ -139,6 +139,10 @@ struct wDraw_t {
 		void *background;
 		wBool_t bTempMode;
 		wBool_t bCopiedMain;
+
+		wPos_t lastX;
+		wPos_t lastY;
+
 		};
 
 extern HINSTANCE mswHInst;
