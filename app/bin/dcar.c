@@ -1320,7 +1320,6 @@ EXPORT BOOL_T CarItemRead(
 	long condition = 0;
 	long purchDate = 0;
 	long serviceDate = 0;
-	int len, siz;
 	carItem_p item;
 	char * cp;
 	wIndex_t layer;
