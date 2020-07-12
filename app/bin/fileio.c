@@ -889,7 +889,7 @@ int LoadTracks(
 			    fseek(f, 0, SEEK_SET);
 			    manifest = malloc(length + 1);
 			    if (manifest) {
-			        fread(manifest, 1, length, f);
+			        size_t siz = fread(manifest, 1, length, f);
 			        manifest[length] = '\0';
 			    }
 			    fclose(f);

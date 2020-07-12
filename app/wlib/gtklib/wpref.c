@@ -168,7 +168,7 @@ const char * wGetAppWorkDir(
 			if ( stat( appEtcConfig, &stFileInfo ) == 0 ) {
 				char copyConfigCmd[(BUFSIZ * 2) + 3];
 				sprintf( copyConfigCmd, "cp %s %s", appEtcConfig, appWorkDir );
-				system( copyConfigCmd );
+				int rc = system( copyConfigCmd );
 			}
 		}
 	}
