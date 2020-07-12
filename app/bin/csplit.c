@@ -59,7 +59,8 @@ static void ChangeSplitEPMode( wBool_t set, void * mode )
 }
 
 static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
-	DIST_T d = tempD.scale*0.15;
+	DIST_T d = tempD.scale*0.1;
+	DIST_T w = tempD.scale/tempD.dpi*4;
 	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0);
 	int i;
 	if (!end) {
@@ -69,7 +70,7 @@ static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
 		anchors(i).color = wDrawColorBlue;
 		Translate(&anchors(i).u.l.pos[0],pos,a,GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
-		anchors(i).width = 0.5;
+		anchors(i).width = w;
 	} else {
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
@@ -79,7 +80,7 @@ static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
 		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a+90,d);
 		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a+90,-d);
-		anchors(i).width = 0.5;
+		anchors(i).width = w;
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
 		anchors(i).type = SEG_STRLIN;
@@ -88,7 +89,7 @@ static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
 		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a+90,-d);
 		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a+90,d);
-		anchors(i).width = 0.5;
+		anchors(i).width = w;
 	}
 }
 
