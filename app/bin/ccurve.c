@@ -391,6 +391,7 @@ EXPORT STATUS_T CreateCurve(
 		case crvCmdFromEP1:			
 		case crvCmdFromTangent:
 		case crvCmdFromCenter:
+		case crvCmdFromChord:
 			for (int i=0;i<(*anchor_array).cnt;i++) {
 				DYNARR_N(trkSeg_t,*anchor_array,i).color = drawColorRed;
 			}
