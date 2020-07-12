@@ -187,8 +187,8 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 		}
 		p = *fp;
 		distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
-		if (IsClose(distance) ||
-			(IsTrack(trk) && (distance < trackGauge))) distance = 0.0;   //Make the hotspot close first in order if close
+		ANGLE_T a = FindAngle(p,*fp);
+		ANGLE_T ta = 0.0;
 		if (fabs(distance) <= fabs(closestDistance)) { //Make the last (highest) preferred
 			closestDistance = distance;
 			closestTrack = trk;
@@ -196,7 +196,7 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 		}
 	}
 	if (closestTrack && closestDistance <0 ) closestDistance = 0.0;  //Turntable was closest - inside well
-	if (closestTrack && (closestDistance <= mainD.scale*0.25 || closestDistance <= trackGauge*2.0) ) {
+	if (closestTrack && ((closestDistance <= mainD.scale*0.25) || (closestDistance <= trackGauge*2.0) )) {
 		*fp = closestPos;
 		return closestTrack;
 	}

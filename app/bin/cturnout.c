@@ -2199,8 +2199,13 @@ static void PlaceTurnoutTrial(
 	ANGLE_T epAngle;
 	int i, connCnt = 0;
 	DIST_T d, maxD = 0;
+	coOrd testP = pos;
 
-	if ( (*trkR = trk = OnTrack( &pos, FALSE, TRUE )) != NULL &&
+	if (*trkR && (GetTrkDistance(*trkR,&testP)<trackGauge)) {   //Have Track, stick with it unless outside bounds
+		trk = *trkR;
+		pos = testP;
+	} else *trkR = trk = OnTrack( &pos, FALSE, TRUE );
+    if ( (trk) != NULL &&
 		 !QueryTrack(trk,Q_CANNOT_PLACE_TURNOUT) &&
 		 (ep0 = PickEndPoint( pos, trk )) >= 0 &&
 		 ! ( GetTrkType(trk) == T_TURNOUT &&
@@ -2289,7 +2294,7 @@ LOG( log_turnout, 3, ( "placeTurnout T%d (%0.3f %0.3f) A%0.3f\n",
 
 
 static void PlaceTurnout(
-		coOrd pos )
+		coOrd pos, track_p trk )
 {
 	coOrd p, pos1, pos2;
 	track_p trk1, trk2;
@@ -2305,13 +2310,15 @@ LOG( log_turnout, 1, ( "Place Turnout @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) )
 	if (curTurnoutEp >= (long)curTurnout->endCnt)
 		curTurnoutEp = 0;
 	DYNARR_SET( vector_t, vector_da, curTurnout->endCnt );
+	if (trk) trk1 = trk;
+	else trk1 = NULL;
 	PlaceTurnoutTrial( &trk1, &pos1, &a1, &a2, &connCnt1, &maxD1, &vector(0) );
 	if (connCnt1 > 0) {
 		Dto.pos = pos1;		//First track pos
 LOG( log_turnout, 1, ( " trial 1 @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 		Dto.trk = trk1;		//Track
 		Dto.angle = a1;		//Angle of track to put down
-		if ( (MyGetKeyState()&WKEY_SHIFT)==0 && connCnt1 > 1 && maxD1 >= 0.001 ) {  //Adjust if Shift
+		if ( ((MyGetKeyState()&WKEY_SHIFT)==0) && (connCnt1 > 1) && (maxD1 >= 0.001) ) {  //Adjust if not Shift
 			maxV = &vector(0);
 			for ( i=1; i<connCnt1; i++ ) {		//Ignore first point
 				V = &vector(i);
@@ -2327,6 +2334,7 @@ LOG( log_turnout, 1, ( " trial 1 @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 				if (NormalizeAngle( maxV->angle - a3) > 180)
 					d = -d;
 				Translate( &pos2, pos, a2, d );
+				trk2 = trk1;
 				PlaceTurnoutTrial( &trk2, &pos2, &a2, &a, &connCnt2, &maxD2, &vector(0) );
 				if ( connCnt2 >= connCnt1 && maxD2 < maxD1 ) {
 					Dto.pos = pos2;
@@ -2732,7 +2740,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 	case C_DOWN:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curTurnout == NULL ) return C_CONTINUE;
-		PlaceTurnout( pos );
+		PlaceTurnout( pos, NULL );
 		Dto.state = 1;
 		CreateMoveAnchor(pos);
 		return C_CONTINUE;
@@ -2743,7 +2751,7 @@ EXPORT STATUS_T CmdTurnoutAction(
 		if ( curTurnoutEp >= (long)curTurnout->endCnt )
 			curTurnoutEp = 0;
 		Dto.state = 1;
-		PlaceTurnout( pos );
+		PlaceTurnout( pos, Dto.trk );
 		CreateMoveAnchor(pos);
 		return C_CONTINUE;
 
@@ -2818,7 +2826,7 @@ LOG( log_turnout, 1, ( "RMOVE post @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 				curTurnoutEp = 0;
 			if (Dto.trk == NULL)
 				Dto.angle = NormalizeAngle( Dto.angle + (angle - curTurnout->endPt[(int)curTurnoutEp].angle ) );
-			PlaceTurnout( Dto.place );
+			PlaceTurnout( Dto.place, Dto.trk );
 		} else {
 			CmdTurnoutAction( C_DOWN, pos );
 			CmdTurnoutAction( C_UP, pos );
@@ -2852,6 +2860,7 @@ LOG( log_turnout, 1, ( "RMOVE post @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		AddTurnout();
 		Dto.state=0;
+		Dto.trk = NULL;
 		return C_TERMINATE;
 
 	case C_FINISH:
