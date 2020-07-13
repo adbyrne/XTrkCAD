@@ -54,8 +54,8 @@ extern unsigned long playbackTimer;
 extern wBool_t executableOk;
 
 extern FILE * recordF;
-wBool_t inPlayback;
-wBool_t inPlaybackQuit;
+extern wBool_t inPlayback;
+extern wBool_t inPlaybackQuit;
 wWin_p demoW;
 int curDemo;
 

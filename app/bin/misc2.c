@@ -466,7 +466,9 @@ SetScale( SCALEINX_T newScaleInx )
 
 	SetScaleDescGauge((SCALEINX_T)newScaleInx);
 
-	wPrefSetString( "misc", "scale", curScaleName );
+
+	if (!inPlayback)
+		wPrefSetString( "misc", "scale", curScaleName );
 
 	// now load the minimum radius for the newly selected scale
 	LoadLayoutMinRadiusPref(curScaleName, curScale->R[0]);
