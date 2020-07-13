@@ -129,7 +129,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		}
 		ANGLE_T angle, angle2;
-		if (Dl.trk) {
+		if (Dl.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, Dl.pos0)-angle);
 			if (angle2 > 90.0 && angle2 < 270.0)
@@ -148,7 +148,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (!Dl.down) return C_CONTINUE;
 		tempSegs_da.cnt = 0;
-		if (Dl.trk) {
+		if (Dl.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, Dl.pos0)-angle);
 			if (angle2 > 90.0 && angle2 < 270.0)
@@ -161,7 +161,7 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		}
 		UndoStart( _("Create Straight Track"), "newStraight" );
 		t = NewStraightTrack( Dl.pos0, pos );
-		if (Dl.trk) {
+		if (Dl.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
 			ConnectTracks(Dl.trk, Dl.ep, t, 0);
 		}
 		UndoEnd();
