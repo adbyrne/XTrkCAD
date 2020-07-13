@@ -1632,7 +1632,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		params->type = curveTypeStraight;
 		params->arcR = 0.0;
 		params->arcP = zero;
-		params->ep = PickEndPoint(pos,trk);   //Nearest
+	    params->ep = PickEndPoint(pos, trk);
 		params->circleOrHelix = FALSE;
 		if (params->ep>=0) {
 			params->angle = GetTrkEndAngle(trk,params->ep);
@@ -1710,7 +1710,10 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		}
 		return TRUE;
 	}
-	params->ep = PickUnconnectedEndPointSilent( pos, trk );
+	if ((inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN))
+		PickEndPoint(pos, trk);
+	else
+		params->ep = PickUnconnectedEndPointSilent( pos, trk );
 	if (params->ep == -1)
 				 return FALSE;
 	params->lineOrig = GetTrkEndPos(trk,params->ep);

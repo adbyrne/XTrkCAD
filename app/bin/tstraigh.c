@@ -593,7 +593,7 @@ static BOOL_T GetParamsStraight( int inx, track_p trk, coOrd pos, trackParams_t 
 {
 	params->type = curveTypeStraight;
 	if ( inx == PARAMS_NODES ) return FALSE;
-	if (inx == PARAMS_CORNU ){
+	if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN) ){
 		params->ep = PickEndPoint( pos, trk);
 		params->arcP = zero;
 		params->arcR = 0.0;

@@ -1000,6 +1000,8 @@ static BOOL_T MergeCurve(
 	if ( xx0->helixTurns > 0 ||
 		 xx1->helixTurns > 0 )
 		return FALSE;
+	if (GetTrkType(trk0) != GetTrkType(trk1))
+		return FALSE;
 	d = FindDistance( xx0->pos, xx1->pos );
 	d += fabs( xx0->radius - xx1->radius );
 	if ( d > connectDistance )
@@ -1011,6 +1013,8 @@ static BOOL_T MergeCurve(
 	UndoStart( _("Merge Curves"), "MergeCurve( T%d[%d] T%d[%d] )", GetTrkIndex(trk0), ep0, GetTrkIndex(trk1), ep1 );
 	UndoModify( trk0 );
 	UndrawNewTrack( trk0 );
+	if (GetTrkEndTrk(trk0,ep0) == trk1)
+		DisconnectTracks( trk0, ep0, trk1, ep1);
 	trk2 = GetTrkEndTrk( trk1, 1-ep1 );
 	if (trk2) {
 		ep2 = GetEndPtConnectedToMe( trk2, trk1 );
@@ -1225,7 +1229,7 @@ static BOOL_T GetParamsCurve( int inx, track_p trk, coOrd pos, trackParams_t * p
 		params->angle = params->track_angle;
 		params->circleOrHelix = TRUE;
 		return TRUE;
-	} else if (inx == PARAMS_CORNU ) {
+	} else if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN)  ) {
 		params->ep = PickEndPoint(pos, trk);
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk );

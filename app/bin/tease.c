@@ -1264,7 +1264,10 @@ static BOOL_T MergeJoint(
 static BOOL_T GetParamsJoint( int inx, track_p trk, coOrd pos, trackParams_t * params )
 {
 	params->type = curveTypeStraight;
-	params->ep = PickUnconnectedEndPointSilent( pos, trk );
+	if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN))\
+		params->ep = PickEndPoint(pos, trk);
+	else
+		params->ep = PickUnconnectedEndPointSilent( pos, trk );
 	if (params->ep == -1)
 		 return FALSE;
 	params->lineOrig = GetTrkEndPos(trk,params->ep);

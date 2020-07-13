@@ -1185,7 +1185,7 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 	params->len = xx->cornuData.length;
 	if ( inx == PARAMS_NODES ) {
 		return FALSE;
-	} else if (inx == PARAMS_CORNU) {
+	} else if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN) ) {
 		params->ep = PickEndPoint( pos, trk);
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk );

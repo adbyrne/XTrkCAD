@@ -1001,7 +1001,7 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 		params->lineOrig = params->bezierPoints[params->ep*3];
 		params->lineEnd = params->bezierPoints[(1-params->ep)*3];
 		return TRUE;
-	} else if (inx == PARAMS_CORNU ){
+	} else if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN)){
 		params->ep = PickEndPoint( pos, trk);
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk);
