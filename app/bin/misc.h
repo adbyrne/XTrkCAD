@@ -313,9 +313,9 @@ void DoChangeNotification( long );
 extern drawCmd_t mapD;
 extern STATUS_T CmdEnumerate( wAction_t, coOrd );
 
-wIndex_t modifyCmdInx;
-wIndex_t joinCmdInx;
-wIndex_t tunnelCmdInx;
+extern wIndex_t modifyCmdInx;
+extern wIndex_t joinCmdInx;
+extern wIndex_t tunnelCmdInx;
 
 /* ctodesgn.c */
 void InitNewTurn( wMenu_p m );
@@ -330,7 +330,7 @@ STATUS_T ModifyRuler( wAction_t, coOrd );
 /* dialogs */
 void OutputBitMap( void );
 
-wDrawColor snapGridColor;
+extern wDrawColor snapGridColor;
 
 addButtonCallBack_t ColorInit( void );
 addButtonCallBack_t PrefInit( void );
@@ -352,10 +352,8 @@ void InitSnapGridButtons( void );
 void SnapGridEnable( void );
 void SnapGridShow( void );
 void MapWindowShow( int state );
-wMenuToggle_p snapGridEnableMI;
-wMenuToggle_p snapGridShowMI;
-wMenuToggle_p mapShowMI;
-wMenuToggle_p magnetsMI;
+extern wMenuToggle_p snapGridEnableMI;
+extern wMenuToggle_p snapGridShowMI;
 
 void ScaleLengthEnd( void );
 void EnumerateList( long, FLOAT_T, char * );
@@ -385,7 +383,7 @@ long BenchOutputOption( long );
 DIST_T BenchGetWidth( long );
 
 /* dcustmgm.c */
-FILE * customMgmF;
+extern FILE * customMgmF;
 #define CUSTMGM_DO_COPYTO		(1)
 #define CUSTMGM_CAN_EDIT		(2)
 #define CUSTMGM_DO_EDIT			(3)

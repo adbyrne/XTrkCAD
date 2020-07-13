@@ -45,6 +45,10 @@
 #include "cbezier.h"
 #include "misc.h"
 
+dynArr_t tempSegs_da;
+dynArr_t tempEndPts_da;
+char tempCustom[4096];
+
 #define TURNOUTDESIGNER			"CTURNOUT DESIGNER"
 
 

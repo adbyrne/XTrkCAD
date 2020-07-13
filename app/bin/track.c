@@ -61,6 +61,8 @@
 #endif
 #endif
 
+EXPORT char tempSpecial[4096];
+
 static int log_track = 0;
 static int log_endPt = 0;
 static int log_readTracks = 0;

@@ -25,10 +25,10 @@
 #include "common.h"
 #include "track.h"
 
-wIndex_t selectCmdInx;
-wIndex_t moveCmdInx;
-wIndex_t rotateCmdInx;
-BOOL_T importMove;
+extern wIndex_t selectCmdInx;
+extern wIndex_t moveCmdInx;
+extern wIndex_t rotateCmdInx;
+extern BOOL_T importMove;
 extern int incrementalDrawLimit;
 extern long selectedTrackCount;
 
