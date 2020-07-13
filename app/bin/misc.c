@@ -2743,7 +2743,12 @@ static int OfferCheckpoint( void )
 							"Program was not terminated properly. Do you want to resume working on the previous trackplan?"),
 					_("Resume"), _("Resume with New Name"), _("Ignore Checkpoint"));
 	//ret==1 Same, ret==-1 New, ret==0 Ignore
-	printf("Return: %d \n",ret);
+	if (ret == 1)
+		printf(_("Reload Checkpoint Selected\n"));
+	else if (ret == -1)
+		printf(_("Reload Checkpoint With New Name Selected\n"));
+	else
+		printf(_("Ignore Checkpoint Selected\n"));
 	if (ret>=0) {
 		/* load the checkpoint file */
 		LoadCheckpoint(ret==1);

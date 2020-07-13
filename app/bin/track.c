@@ -187,8 +187,6 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 		}
 		p = *fp;
 		distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
-		ANGLE_T a = FindAngle(p,*fp);
-		ANGLE_T ta = 0.0;
 		if (fabs(distance) <= fabs(closestDistance)) { //Make the last (highest) preferred
 			closestDistance = distance;
 			closestTrack = trk;
