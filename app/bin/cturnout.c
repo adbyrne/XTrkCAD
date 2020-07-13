@@ -1030,15 +1030,17 @@ static void SplitTurnoutCheckEndPt(
 	}
 }
 
-
-static BOOL_T SplitTurnout(
-		track_p trk,
-		coOrd pos,
-		EPINX_T ep,
-		track_p *leftover,
-		EPINX_T * ep0,
-		EPINX_T * ep1 )
-{
+EXPORT BOOL_T SplitTurnoutCheck(
+			track_p trk,
+			coOrd pos,
+			EPINX_T ep,
+			track_p *leftover,
+			EPINX_T * ep0,
+			EPINX_T * ep1,
+			BOOL_T check,
+			coOrd * outPos,
+			ANGLE_T * outAngle )
+	{
 	struct extraData * xx = GetTrkExtraData( trk );
 	wIndex_t segInx0, segInx, segCnt;
 	EPINX_T segEP, epCnt, ep2=0, epN;
@@ -1060,7 +1062,8 @@ static BOOL_T SplitTurnout(
 	trkSeg_t newSeg;
 
 	if ( (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
-		ErrorMessage( MSG_CANT_SPLIT_TRK, _("Turnout") );
+		if (!check)
+			ErrorMessage( MSG_CANT_SPLIT_TRK, _("Turnout") );
 		return FALSE;
 	}
 
@@ -1093,7 +1096,8 @@ static BOOL_T SplitTurnout(
 		}
 		pp++;
 	}
-	ErrorMessage( _("splitTurnout: can't find segment") );
+	if (!check)
+		ErrorMessage( _("splitTurnout: can't find segment") );
 	return FALSE;
 foundSeg:
 
@@ -1119,7 +1123,8 @@ foundSeg:
 						pp2 += dir;
 					}
 					if ( pp1[0]!='\0' || pp2[0]!='\0' ) {
-						ErrorMessage( MSG_SPLIT_POS_BTW_MERGEPTS );
+						if (!check)
+							ErrorMessage( MSG_SPLIT_POS_BTW_MERGEPTS );
 						return FALSE;
 					}
 				}
@@ -1134,10 +1139,21 @@ foundSeg:
 	 * 2b. Check that all paths from ep pass thru segInx0
 	 */
 	if ( !SplitTurnoutCheckEP( segInx0, epPos, splitTurnoutRoot, -splitTurnoutDir, xx->paths, xx->segs ) ) {
-		ErrorMessage( MSG_SPLIT_PATH_NOT_UNIQUE );
+		if (!check)
+			ErrorMessage( MSG_SPLIT_PATH_NOT_UNIQUE );
 		return FALSE;
 	}
 
+	if (check) {
+		segProcDataSplit.getAngle.pos = pos;
+		SegProc( SEGPROC_GETANGLE, xx->segs+segInx0, &segProcDataSplit );
+		*outAngle = NormalizeAngle(segProcDataSplit.getAngle.angle+xx->angle);
+		*outPos = segProcDataSplit.getAngle.pos;
+		(*outPos).x += xx->orig.x;
+		(*outPos).y += xx->orig.y;
+		Rotate( outPos, xx->orig, xx->angle );
+		return TRUE;
+	}
 
 	/*
 	 * 3. Split the found segment.
@@ -1301,6 +1317,16 @@ foundSeg:
 	return TRUE;
 }
 
+static BOOL_T SplitTurnout(
+		track_p trk,
+		coOrd pos,
+		EPINX_T ep,
+		track_p *leftover,
+		EPINX_T * ep0,
+		EPINX_T * ep1 )
+{
+	return SplitTurnoutCheck(trk,pos,ep,leftover,ep0,ep1,FALSE,NULL,NULL);
+}
 
 static BOOL_T CheckTraverseTurnout(
 		track_p trk,

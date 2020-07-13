@@ -159,6 +159,7 @@ wIndex_t FindListItemByContext( wList_p, void *);
 
 /* cturnout.c */
 EPINX_T TurnoutPickEndPt( coOrd p, track_p );
+BOOL_T SplitTurnoutCheck(track_p,coOrd,EPINX_T ep,track_p *,EPINX_T *,EPINX_T *,BOOL_T check, coOrd *, ANGLE_T *);
 void GetSegInxEP( signed char, int *, EPINX_T * );
 void SetSegInxEP( signed char *, int, EPINX_T) ;
 wIndex_t CheckPaths( wIndex_t, trkSeg_p, PATHPTR_T );
