@@ -238,7 +238,8 @@ EXPORT STATUS_T CreateCurve(
 				Da.create_state = FIRSTEND_DEF;
 				Da.end0 = pos;
 				CreateEndAnchor(pos,anchor_array,found);
-				if (Da.trk) message(_("End locked: Drag out curve start"));
+				if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) message(_("End locked: Drag out curve start"));
+				else if (Da.trk) message(_("End Position locked: Drag out curve start with Shift"));
 				else message(_("Drag along curve start") );
 				break;
 			case crvCmdFromTangent:
@@ -247,7 +248,8 @@ EXPORT STATUS_T CreateCurve(
 				tempSegs(0).color = color;
 				Da.create_state = CENTER_DEF;
 				CreateEndAnchor(pos,anchor_array,found);
-				if (Da.trk) message(_("End locked: Drag out curve center"));
+				if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) message(_("End locked: Drag out curve center"));
+				else if (Da.trk) message(_("End Position locked: Drag out curve start with Shift"));
 				else message(_("Drag out curve center") );
 				break;
 			case crvCmdFromCenter:
@@ -263,8 +265,9 @@ EXPORT STATUS_T CreateCurve(
 				tempSegs(0).width = width; 
 				CreateEndAnchor(pos,anchor_array,FALSE);
 				Da.create_state = FIRSTEND_DEF;
-				if (Da.trk)
+				if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT))
 					message( _("End locked: Drag to other end of chord") );
+				else if (Da.trk) message(_("End Position locked: Drag out curve start with Shift"));
 				else
 					message( _("Drag to other end of chord") );
 				break;
@@ -276,7 +279,7 @@ EXPORT STATUS_T CreateCurve(
 		DYNARR_RESET(trkSeg_t,*anchor_array);
 		DYNARR_APPEND(trkSeg_t,*anchor_array,1);
 		if (!Da.down) return C_CONTINUE;
-		if (Da.trk) {
+		if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {  //Shift inhibits direction lock
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, Da.pos0)-angle1);
 			if (mode ==crvCmdFromEP1 ) {
@@ -577,7 +580,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			}
 			UndoStart( _("Create Straight Track"), "newCurve - straight" );
 			t = NewStraightTrack( Da.pos0, Da.curveData.pos1 );
-			if (Da.trk) {
+			if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
 				EPINX_T ep = PickUnconnectedEndPoint(Da.pos0, t);
 				if (ep != -1) ConnectTracks(Da.trk, Da.ep, t, ep);
 			}
@@ -590,7 +593,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			UndoStart( _("Create Curved Track"), "newCurve - curve" );
 			t = NewCurvedTrack( Da.curveData.curvePos, Da.curveData.curveRadius,
 					Da.curveData.a0, Da.curveData.a1, 0 );
-			if (Da.trk) {
+			if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
 				EPINX_T ep = PickUnconnectedEndPoint(Da.pos0, t);
 				if (ep != -1) ConnectTracks(Da.trk, Da.ep, t, ep);
 			}
