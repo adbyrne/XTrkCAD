@@ -83,6 +83,7 @@
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
 
+EXPORT wMenuList_p fileList_ml;
 
 EXPORT char * clipBoardN;
 static coOrd paste_offset, cursor_offset;

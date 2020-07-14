@@ -27,12 +27,12 @@
 #include "common.h"
 #include "misc.h"
 
-FILE * paramFile;
+extern FILE * paramFile;
 extern char *paramFileName;
-wIndex_t paramLineNum;
-char paramLine[STR_HUGE_SIZE];
-char * curContents;
-char * curSubContents;
+extern wIndex_t paramLineNum;
+extern char paramLine[STR_HUGE_SIZE];
+extern char * curContents;
+extern char * curSubContents;
 #define PARAM_DEMO (-1)
 
 typedef void (*playbackProc_p)( char * );
@@ -56,10 +56,10 @@ extern wBool_t executableOk;
 extern FILE * recordF;
 extern wBool_t inPlayback;
 extern wBool_t inPlaybackQuit;
-wWin_p demoW;
-int curDemo;
+extern wWin_p demoW;
+extern int curDemo;
 
-wMenuList_p fileList_ml;
+extern wMenuList_p fileList_ml;
 
 #define ZIPFILETYPEEXTENSION "xtce"
 

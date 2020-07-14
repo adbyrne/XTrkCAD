@@ -27,7 +27,7 @@
 #include "include/paramfile.h"
 #include "track.h"
 
-wIndex_t trainCmdInx;
+extern wIndex_t trainCmdInx;
 
 struct carItem_t;
 typedef struct carItem_t carItem_t;
@@ -37,8 +37,8 @@ typedef struct {
 		ANGLE_T angle;
 		} vector_t;
 
-carItem_p currCarItemPtr;
-wControl_p newCarControls[2];
+extern carItem_p currCarItemPtr;
+extern wControl_p newCarControls[2];
 void DoCarDlg( void );
 BOOL_T CarItemRead( char * );
 track_p NewCar( wIndex_t, carItem_p, coOrd, ANGLE_T );

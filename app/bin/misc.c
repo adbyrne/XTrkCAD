@@ -73,6 +73,10 @@
 char *userLocale = NULL;
 
 extern wBalloonHelp_t balloonHelp[];
+
+static wMenuToggle_p mapShowMI;
+static wMenuToggle_p magnetsMI;
+
 #ifdef DEBUG
 #define CHECK_BALLOONHELP
 /*#define CHECK_UNUSED_BALLOONHELP*/
