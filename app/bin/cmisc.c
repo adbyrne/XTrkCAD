@@ -618,7 +618,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 				DrawOriginAnchor(descTrk);
 			}
         } else if (trk){
-        	DrawTrack(trk,&tempD,wDrawColorBlue);
+        	DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
         }
 
 
