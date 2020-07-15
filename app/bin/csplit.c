@@ -109,6 +109,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 	switch (action) {
 	case C_START:
 		InfoMessage( _("Select track to split") );
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		/* no break */
 	case C_DOWN:
 	case C_MOVE:

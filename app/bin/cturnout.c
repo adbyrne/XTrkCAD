@@ -58,6 +58,7 @@ static int curTurnoutInx = -1;
 static int log_turnout = 0;
 static int log_traverseTurnout = 0;
 static int log_suppressCheckPaths = 0;
+static int log_splitturnout = 0;
 
 static wMenu_p turnoutPopupM;
 
@@ -1012,6 +1013,7 @@ static void SplitTurnoutCheckEndPt(
 	if ( dir < 0 ) segEP = 1-segEP;
 	pos = GetSegEndPt( &segs[segInx], segEP, FALSE, NULL );
 	dist = FindDistance( pos, epPos );
+	LOG( log_splitturnout, 1, ( "  SPTChkEp P%d DIR:%d SegInx:%d SegEP:%d POS[%0.3f %0.3f] DIST:%0.3f\n", *path, dir, segInx, segEP, pos.x, pos.y, dist ) );
 	if ( dist>connectDistance )
 		return;
 	minDist = trackGauge;
@@ -1020,6 +1022,7 @@ static void SplitTurnoutCheckEndPt(
 		if ( dir < 0 ) segEP = 1-segEP;
 		pos = splitPos;
 		dist = DistanceSegs( zero, 0.0, 1, &segs[segInx], &pos, NULL );
+		LOG( log_splitturnout, 1, ( "  - P:%d SegInx:%d SegEP:%d DIST:%0.3f\n", path[0], segInx, segEP, dist ) );
 		if ( dist < minDist ) {
 			minDist = dist;
 			splitTurnoutPath = path;
@@ -1081,6 +1084,7 @@ EXPORT BOOL_T SplitTurnoutCheck(
 	epPos.y -= xx->orig.y;
 	splitTurnoutPath = NULL;
 	pp = xx->paths;
+	LOG( log_splitturnout, 1, ( "SplitTurnoutCheck T%d POS[%0.3f %0.3f] EP:%d CHK:%d EPPOS[%0.3f %0.3f]\n", trk?trk->index:0, pos.x, pos.y, ep, check, epPos.x, epPos.y ) );
 	while ( pp[0] ) {
 		pp += strlen((char *)pp)+1;
 		while ( pp[0] ) {
@@ -1105,6 +1109,7 @@ foundSeg:
 	 * 2a. Check that all other paths thru found segment are the same
 	 */
 	GetSegInxEP( splitTurnoutPath[0], &segInx0, &segEP );
+	LOG( log_splitturnout, 1, (" Found Seg: %d SEG:%d EP:%d\n", *splitTurnoutPath, segInx0, segEP ) );
 	pp = xx->paths;
 	pathCnt = 0;
 	while ( pp[0] ) {
@@ -3143,6 +3148,7 @@ EXPORT void InitCmdTurnout( wMenu_p menu )
 	log_turnout = LogFindIndex( "turnout" );
 	log_traverseTurnout = LogFindIndex( "traverseTurnout" );
 	log_suppressCheckPaths = LogFindIndex( "suppresscheckpaths" );
+	log_splitturnout = LogFindIndex( "splitturnout" );
 	if ( turnoutPopupM == NULL ) {
 		turnoutPopupM = MenuRegister( "Turnout Rotate" );
 		AddRotateMenu( turnoutPopupM, TurnoutRotate );

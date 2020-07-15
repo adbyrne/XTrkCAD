@@ -724,7 +724,7 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 	if (trk->endCnt <= 0)
 		return -1;
 	if ( onTrackInSplit && trk->endCnt > 2 ) {
-		if (GetTrkType(trk) != T_TURNOUT)
+		if (GetTrkType(trk) == T_TURNOUT)
 			return TurnoutPickEndPt( p, trk );
 	}
 	d = FindDistance( p, trk->endPt[0].pos );
