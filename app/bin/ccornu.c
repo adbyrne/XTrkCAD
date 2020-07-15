@@ -220,22 +220,22 @@ EXPORT void AddHotBarCornu( void )
 	hotB.st.type = SEG_STRTRK;
 	hotB.st.color = wDrawColorBlack;
 	hotB.st.u.l.pos[0] = zero;
-	DIST_T ratio = 150.0/curScaleRatio;
+	DIST_T ratio = 75.0/curScaleRatio;
 	Translate(&hotB.st.u.l.pos[1],zero,45.0,15.0*ratio);
 	hotB.st.u.l.angle = 45.0;
 
 	pts[0].pt_type = wPolyLineStraight;
-	pts[0].pt.x = 4.0*ratio;
-	pts[0].pt.y = 4.0*ratio;
+	pts[0].pt.x = 1.0*ratio;
+	pts[0].pt.y = 5.0*ratio;
 	pts[1].pt_type = wPolyLineStraight;
-	pts[1].pt.x = 4.0*ratio;
-	pts[1].pt.y = 6.5*ratio;
+	pts[1].pt.x = 1.0*ratio;
+	pts[1].pt.y = 8.0*ratio;
 	pts[2].pt_type = wPolyLineStraight;
-	pts[2].pt.x = 8.0*ratio;
-	pts[2].pt.y = 6.5*ratio;
+	pts[2].pt.x = 13.0*ratio;
+	pts[2].pt.y = 8.0*ratio;
 	pts[3].pt_type = wPolyLineStraight;
-	pts[3].pt.x = 8.0*ratio;
-	pts[3].pt.y = 4.0*ratio;
+	pts[3].pt.x = 13.0*ratio;
+	pts[3].pt.y = 5.0*ratio;
 
 	hotB.back.type = SEG_FILPOLY;
 	hotB.back.color = wDrawColorWhite;
@@ -248,12 +248,12 @@ EXPORT void AddHotBarCornu( void )
 
 	hotB.txt.type = SEG_TEXT;
 	hotB.txt.color = wDrawColorBlack;
-	hotB.txt.u.t.pos.x = 3.5*ratio;
+	hotB.txt.u.t.pos.x = 1.0*ratio;
 	hotB.txt.u.t.pos.y = 5.0*ratio;
 	hotB.txt.u.t.boxed = TRUE;
 	hotB.txt.u.t.string = MyStrdup(_(" FLEX "));
 	hotB.txt.u.t.fontP = NULL;
-	hotB.txt.u.t.fontSize = 60.0*ratio;
+	hotB.txt.u.t.fontSize = 160.0*ratio;
 	hotB.txt.u.t.angle = 0.0;
 
 	char * label = MyMalloc(256);

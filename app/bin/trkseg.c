@@ -245,6 +245,30 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 	case SEG_TBLEDGE:
 	case SEG_CRVLIN:
 	case SEG_JNTTRK:
+		if ( (segPtr->type == SEG_CRVTRK) ||
+			(segPtr->type == SEG_CRVLIN) ) {
+				/* TODO: be more precise about curved line width */
+				width.x = width.y = segPtr->width/2.0;
+				REORIGIN( pc, segPtr->u.c.center, angle, xlat );
+				a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
+				a1 = segPtr->u.c.a1;
+				radius = fabs(segPtr->u.c.radius);
+				if ( a1 >= 360.0 ) {
+					lo->x = pc.x - radius;
+					lo->y = pc.y - radius;
+					hi->x = pc.x + radius;
+					hi->y = pc.y + radius;
+					break;
+				}
+				if ( a0 + a1 >= 360.0 )
+					hi->y = pc.y + radius;
+				if ( a0 < 90.0 && a0+a1 >= 90.0 )
+					hi->x = pc.x + radius;
+				if ( a0 < 180 && a0+a1 >= 180.0 )
+					lo->y = pc.y - radius;
+				if ( a0 < 270.0 && a0+a1 >= 270.0 )
+					lo->x = pc.x - radius;
+			}
 			REORIGIN( p0, GetSegEndPt( segPtr, 0, FALSE, NULL ), angle, xlat )
 			REORIGIN( p1, GetSegEndPt( segPtr, 1, FALSE, NULL ), angle, xlat )
 			if (p0.x < p1.x) {
@@ -261,34 +285,9 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 				lo->y = p1.y;
 				hi->y = p0.y;
 			}
-			if ( segPtr->type == SEG_CRVTRK ||
-				 segPtr->type == SEG_CRVLIN ) {
-				REORIGIN( pc, segPtr->u.c.center, angle, xlat );
-				a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
-				a1 = segPtr->u.c.a1;
-				radius = fabs(segPtr->u.c.radius);
-				if ( a1 >= 360.0 ) {
-					lo->x = pc.x - radius;
-					lo->y = pc.y - radius;
-					hi->x = pc.x + radius;
-					hi->y = pc.y + radius;
-					return;
-				}
-				if ( a0 + a1 >= 360.0 )
-					hi->y = pc.y + radius;
-				if ( a0 < 90.0 && a0+a1 >= 90.0 )
-					hi->x = pc.x + radius;
-				if ( a0 < 180 && a0+a1 >= 180.0 )
-					lo->y = pc.y - radius;
-				if ( a0 < 270.0 && a0+a1 >= 270.0 )
-					lo->x = pc.x - radius;
-			}
 			if ( segPtr->type == SEG_STRLIN ) {
 				width.x = segPtr->width * fabs(cos( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
 				width.y = segPtr->width * fabs(sin( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
-			} else if ( segPtr->type == SEG_CRVLIN ) {
-				/* TODO: be more precise about curved line width */
-				width.x = width.y = segPtr->width/2.0;
 			} else if ( segPtr->type == SEG_BENCH ) {
 				width.x = BenchGetWidth( segPtr->u.l.option ) * fabs(cos( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
 				width.y = BenchGetWidth( segPtr->u.l.option ) * fabs(sin( D2R( FindAngle(p0, p1) ) ) ) / 2.0;

@@ -151,6 +151,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 			}
 		}
 		x *= barScale;
+		x -= tbm->orig.x;
 		orig.x = x;
 		hotBarD.scale = barScale;
 		hotBarD.size.x = barWidth*barScale;
@@ -417,10 +418,13 @@ EXPORT void AddHotBarElement(
 		}
 
 		if (barScale <= 0) {
-			if (isTrack)
+			if (!isTrack)
+				barScale = size.y/((double)hotBarDrawHeight/hotBarD.dpi);
+			else if (isTrack) {
 				barScale = (trackGauge>0.1)?trackGauge*24:10;
-			else
-				barScale = size.y/((double)hotBarDrawHeight/hotBarD.dpi-0.07);
+				if (size.y >= size.x)
+				   barScale = size.y/((double)hotBarDrawHeight/hotBarD.dpi);
+			}
 		}
 		DYNARR_APPEND( hotBarMap_t, hotBarMap_da, 10 );
 		tbm = &hotBarMap(hotBarMap_da.cnt-1);
