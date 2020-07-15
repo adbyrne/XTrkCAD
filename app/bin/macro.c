@@ -851,6 +851,8 @@ static BOOL_T DoRegression( char * sFileName )
 		track_p to_first_save = to_first;
 		track_p* to_last_save = to_last;
 		while ( GetNextLine() ) {
+			if ( paramLine[0] == '#' )
+				continue;
 			// Read Expected track
 			to_first = NULL;
 			to_last = &to_first;
