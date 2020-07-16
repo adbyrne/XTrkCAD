@@ -1215,8 +1215,7 @@ EXPORT STATUS_T AdjustCornuCurve(
 					for (int i=0;i<Da.mid_points.cnt;i++) {
 						temp_pos = DYNARR_N(coOrd ,Da.mid_points,i);
 						DistanceSegs(zero,0.0,Da.crvSegs_da.cnt,(trkSeg_p)Da.crvSegs_da.ptr,&temp_pos,&nIndex);
-						if (((pIndex == index) && (nIndex == index)) ||
-							((pIndex < index) && (nIndex>index))) {
+						if (((pIndex<=index) && (nIndex>=index))) {
 							closest = i;
 							break;
 						}
@@ -2553,6 +2552,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 				Da.trk[i] = NULL;
 				Da.ep[i] = -1;
 				Da.pos[i] = zero;
+				Da.endHandle[i].end_valid = FALSE;
 			}
 			//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 		}
