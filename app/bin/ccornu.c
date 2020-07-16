@@ -2531,7 +2531,7 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 
 	case C_REDRAW:
 		if ( Da.state != NONE ) {
-			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da.cnt, NULL,
+			DrawCornuCurve(NULL,Da.ep1Segs,Da.ep1Segs_da_cnt,Da.ep2Segs,Da.ep2Segs_da_cnt,(trkSeg_t *)Da.crvSegs_da.ptr,Da.crvSegs_da_cnt, NULL,
 					Da.extend[0]?&Da.extendSeg[0]:NULL,Da.extend[1]?&Da.extendSeg[1]:NULL,(trkSeg_t *)Da.midSegs.ptr,Da.midSegs.cnt,wDrawColorBlack);
 		}
 		if (anchors_da.cnt)
@@ -2557,7 +2557,6 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			//DYNARR_FREE(trkSeg_t,Da.crvSegs_da);
 		}
 		Da.state = NONE;
-		Da.cmdType = cornuCmdNone;
 		if (infoSubst) {
 			InfoSubstituteControls( NULL, NULL );
 			infoSubst = FALSE;
