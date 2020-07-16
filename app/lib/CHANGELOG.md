@@ -22,7 +22,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Desired Radius feature for non-Cornu Join
 + AutoSave feature and add keep checkpoints between saves
 + Suppress edge rules on layout if close to window edge rulers
-
++ Option to constrain drawing area to room boundaries on zoom 
++ New Anchors on Describe and Traditional Join
++ AutoSave feature and Backup of checkpoints
++ Anchors on Split within turnouts with Shift
++ Improved Turnout and Section placement when tracks overlap - less jumping
++ Change "@" to "c" for center Pan command in Select and Pan
 
 ### Fixed
 
@@ -55,6 +60,16 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 + Fix redraw of >20 elements in move/rotate
 + Ensure webkitgtk only required if not using browser for help
 + Fix mapD scale at startup, allow Map to be larger than 1/2 screen
++ Fix Turnout Trim with Split and Shift
++ Hotbar copes with large track objects (e.g., Turntables)
++ Make sure upper tracks are selected ahead of lower ones
++ Shift to suppress track end joins when drawing overlay tracks
++ Fix Curve from Chord anchors
++ Better sized Split and Connect Anchors
++ Windows PanHere now works
++ Fix Map Resize function on GTK
++ Fix Turnout placement on Cornu for Pins and other issues 
++ Fox Cornu Pin editing
 
 
 ### Added and changed parameter files
