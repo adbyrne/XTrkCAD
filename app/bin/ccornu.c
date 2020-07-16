@@ -192,7 +192,7 @@ static char * CmdCornuHotBarProc(
 	trkSeg_p trkseg = &hotB.st;
 	switch ( op ) {
 	case HB_SELECT:
-		CmdCornu( C_FINISH, zero );
+		CmdCornu( C_CANCEL, zero );
 		curCornu = trkseg;
 		DoCommandB( (void*)(intptr_t)cornuHotBarCmdInx );
 		return NULL;
