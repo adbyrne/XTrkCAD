@@ -28,7 +28,7 @@ set(CPACK_RPM_BUILDREQUIRES
 if(NOT XTRKCAD_USE_BROWSER)
     set(CPACK_RPM_PACKAGE_REQUIRES 
         "${CPACK_RPM_PACKAGE_REQUIRES} webkitgtk")
-    message(AUTHOR_WARNING "Add dependency to webkitgtk for viewing help!")
+#    message(AUTHOR_WARNING "Add dependency to webkitgtk for viewing help!")
 endif()
 
 # exclude these directories from the rpm
