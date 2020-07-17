@@ -1716,7 +1716,7 @@ static BOOL_T GetParamsTurnout( int inx, track_p trk, coOrd pos, trackParams_t *
 		return TRUE;
 	}
 	if ((inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN))
-		PickEndPoint(pos, trk);
+		params->ep = PickEndPoint(pos, trk);
 	else
 		params->ep = PickUnconnectedEndPointSilent( pos, trk );
 	if (params->ep == -1)
