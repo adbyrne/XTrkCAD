@@ -2527,7 +2527,23 @@ STATUS_T CmdCornu( wAction_t action, coOrd pos )
 			/* no break */
     case C_OK:
     	if (Da.state != PICK_POINT) return C_CONTINUE;
-        return AdjustCornuCurve( C_OK, pos, InfoMessage);
+    	STATUS_T rc = AdjustCornuCurve( C_OK, pos, InfoMessage);
+    	if (rc == C_TERMINATE) {
+    		Da.state = NONE;
+    		Da.ep1Segs_da_cnt = 0;
+			Da.ep2Segs_da_cnt = 0;
+			Da.crvSegs_da_cnt = 0;
+			for (int i=0;i<2;i++) {
+				Da.radius[i] = 0.0;
+				Da.angle[i] = 0.0;
+				Da.center[i] = zero;
+				Da.trk[i] = NULL;
+				Da.ep[i] = -1;
+				Da.pos[i] = zero;
+				Da.endHandle[i].end_valid = FALSE;
+			}
+    	}
+    	return rc;
 
 	case C_REDRAW:
 		if ( Da.state != NONE ) {
