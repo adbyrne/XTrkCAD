@@ -41,6 +41,23 @@ static struct {
 		BOOL_T down;
 		} Dl;
 
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
+
+static void CreateEndAnchor(coOrd p, wBool_t lock) {
+	DIST_T d = tempD.scale*0.15;
+
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	int i = anchors_da.cnt-1;
+	anchors(i).type = lock?SEG_FILCRCL:SEG_CRVLIN;
+	anchors(i).color = wDrawColorBlue;
+	anchors(i).u.c.center = p;
+	anchors(i).u.c.radius = d/2;
+	anchors(i).u.c.a0 = 0.0;
+	anchors(i).u.c.a1 = 360.0;
+	anchors(i).width = 0;
+}
+
 
 static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 {
@@ -48,45 +65,37 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 	DIST_T dist;
 	coOrd p;
 
-	switch (action) {
+	switch (action&0xFF) {
 
 	case C_START:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		Dl.pos0=pos;
 		Dl.pos1=pos;
 		Dl.trk = NULL;
 		Dl.ep=-1;
 		Dl.down = FALSE;
-		InfoMessage( _("Place 1st end point of straight track + Shift -> snap to unconnected endpoint") );
+		InfoMessage( _("Place 1st endpoint of straight track, snap to unconnected endpoint") );
 		return C_CONTINUE;
 
 	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		p = pos;
 		BOOL_T found = FALSE;
 		Dl.trk = NULL;
-		if ((MyGetKeyState() & WKEY_SHIFT) != 0) {
+		if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
 			if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
 			   EPINX_T ep = PickUnconnectedEndPointSilent(p, t);
 			   if (ep != -1) {
-				   if (GetTrkScale(t) != (char)GetLayoutCurScale()) {
+				   if (GetTrkGauge(t) != GetScaleTrackGauge(GetLayoutCurScale())) {
 				   		wBeep();
-				   		InfoMessage(_("Track is different scale"));
+				   		InfoMessage(_("Track is different gauge"));
 				   		return C_CONTINUE;
 				   	}
 			   		Dl.trk = t;
 			   		Dl.ep = ep;
 			   		pos = GetTrkEndPos(t, ep);
 			   		found = TRUE;
-			   } else {
-				   InfoMessage(_("No unconnected end-point on track - Try again or release Shift and click"));
-				   Dl.pos0=pos;
-				   Dl.pos1=pos;
-				   return C_CONTINUE;
 			   }
-			} else {
-				InfoMessage(_("Not on a track - Try again or release Shift and click"));
-				Dl.pos0=pos;
-				Dl.pos1=pos;
-				return C_CONTINUE;
 			}
 		}
 		Dl.down = TRUE;	
@@ -102,8 +111,23 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_CONTINUE;
 
 	case C_MOVE:
-		if (!Dl.down) return C_CONTINUE;
-		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		if (!Dl.down) {
+			if (((MyGetKeyState() & WKEY_ALT) == 0) == magneticSnap) {
+				p = pos;
+				if ((t = OnTrack(&p, FALSE, TRUE)) != NULL) {
+					if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale())) {
+					   EPINX_T ep = PickUnconnectedEndPointSilent(pos, t);
+					   if (ep != -1) {
+						   if (GetTrkGauge(t) == GetScaleTrackGauge(GetLayoutCurScale()))
+							   CreateEndAnchor(GetTrkEndPos(t,ep),FALSE);
+					   }
+					}
+				}
+			}
+			return C_CONTINUE;
+		}
 		ANGLE_T angle, angle2;
 		if (Dl.trk) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
@@ -118,13 +142,11 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 				PutAngle(FindAngle( Dl.pos0, pos )) );
 		tempSegs(0).u.l.pos[1] = pos;
 		tempSegs_da.cnt = 1;
-		MainRedraw();
-		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 
 	case C_UP:
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (!Dl.down) return C_CONTINUE;
-		//DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorWhite );
 		tempSegs_da.cnt = 0;
 		if (Dl.trk) {
 			angle = NormalizeAngle(GetTrkEndAngle( Dl.trk, Dl.ep));
@@ -147,12 +169,13 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_REDRAW:
+		if (anchors_da.cnt)
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
 		if (Dl.down)
-					DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
+			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		return C_CONTINUE;
 	case C_CANCEL:
 		Dl.down = FALSE;
-		MainRedraw();
 		return C_CONTINUE;
 
 	default:
@@ -165,5 +188,5 @@ static STATUS_T CmdStraight( wAction_t action, coOrd pos )
 
 void InitCmdStraight( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdStraight, "cmdStraight", _("Straight Track"), wIconCreatePixMap(straight_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_STRAIGHT, NULL );
+	AddMenuButton( menu, CmdStraight, "cmdStraight", _("Straight Track"), wIconCreatePixMap(straight_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2|IC_WANT_MOVE, ACCL_STRAIGHT, NULL );
 }

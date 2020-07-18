@@ -1,4 +1,5 @@
 /** \file macro.c
+
  * Macros
  */
 
@@ -60,6 +61,7 @@
 #include "param.h" 
 #include "paths.h"
 #include "track.h"
+#include "trackx.h"
 #include "utility.h"
 #include "version.h"
 
@@ -67,6 +69,9 @@ EXPORT long adjTimer;
 static void DemoInitValues( void );
 
 extern char *userLocale;
+static int log_playbackCursor = 0;
+
+
 
 /*****************************************************************************
  *
@@ -185,7 +190,7 @@ static int StartRecord( int cnt, char ** pathName, void * context )
 	if ( logTable_da.cnt > 11 )
 		lprintf( "StartRecord( %s ) @ %s\n", pathName, ctime(&clock) );
 	ParamStartRecord();
-	WriteTracks( recordF );
+	WriteTracks( recordF, TRUE );
 	WriteLayers( recordF );
 	fprintf( recordF, "REDRAW\n" );
 	fflush( recordF );
@@ -207,7 +212,7 @@ static void DoRecordButton( void * context )
 	case 0: /* Stop */
 		fprintf( recordF, "CLEAR\nMESSAGE\n");
 		fprintf( recordF, N_("End of Playback.  Hit Step to exit\n"));
-		fprintf( recordF, "END\nSTEP\n" );
+		fprintf( recordF, "%s\nSTEP\n", END_MESSAGE );
 		fclose( recordF );
 		recordF = NULL;
 		wHide( recordW );
@@ -226,7 +231,7 @@ static void DoRecordButton( void * context )
 			wTextGetText( recordT, cp, len );
 			if ( cp[len-1] == '\n' ) len--;
 			cp[len] = '\0';
-			fprintf( recordF, "%s\nEND\nSTEP\n", cp );
+			fprintf( recordF, "%s\n%s\nSTEP\n", cp, END_MESSAGE );
 			MyFree( cp );
 			recordingMessage = FALSE;
 		}
@@ -284,59 +289,101 @@ EXPORT void DoRecord( void * context )
  *
  */
 
+static drawCmd_p playbackD = NULL;
 static wDrawBitMap_p playbackBm = NULL;
 static wDrawColor playbackColor;
-static drawCmd_p playbackD;
 static wPos_t playbackX, playbackY;
+static wBool_t bDoFlash = FALSE;
+static wDrawColor flashColor;
 
 #include "bitmaps/arrow0.xbm"
+#include "bitmaps/arrow0_shift.xbm"
+#include "bitmaps/arrow0_ctl.xbm"
 #include "bitmaps/arrow3.xbm"
+#include "bitmaps/arrow3_shift.xbm"
+#include "bitmaps/arrow3_ctl.xbm"
 #include "bitmaps/arrows.xbm"
+#include "bitmaps/arrowr3.xbm"
+#include "bitmaps/arrowr3_shift.xbm"
+#include "bitmaps/arrowr3_ctl.xbm"
 #include "bitmaps/flash.xbm"
 
 static wDrawColor rightDragColor;
 static wDrawColor leftDragColor;
 static wDrawBitMap_p arrow0_bm;
+static wDrawBitMap_p arrow0_shift_bm;
+static wDrawBitMap_p arrow0_ctl_bm;
 static wDrawBitMap_p arrow3_bm;
+static wDrawBitMap_p arrow3_shift_bm;
+static wDrawBitMap_p arrow3_ctl_bm;
 static wDrawBitMap_p arrows_bm;
+static wDrawBitMap_p arrowr3_bm;
+static wDrawBitMap_p arrowr3_shift_bm;
+static wDrawBitMap_p arrowr3_ctl_bm;
 static wDrawBitMap_p flash_bm;
 
-static long flashTO = 60;
-static DIST_T PixelsPerStep = 20;
+static long flashTO = 120;
+static DIST_T PixelsPerStep = 5;
 static long stepTO = 100;
 EXPORT unsigned long playbackTimer;
 
 static wBool_t didPause;
 static wBool_t flashTwice = FALSE;
 
+int DBMCount=0;
 
 #define DRAWALL
+typedef enum { FLASH_PLUS, FLASH_MINUS, REDRAW, CLEAR, DRAW, RESET, ORIG, MOVE_PLYBCK1, MOVE_PLYBCK2, MOVE_PLYBCK3, MOVE_PLYBCK4, QUIT } DrawBitMap_e;
+
+char * DrawBitMapToString(DrawBitMap_e dbm) {
+	switch(dbm) {
+	case FLASH_PLUS:
+		return "Flsh+";
+	case FLASH_MINUS:
+		return "Flsh-";
+	case REDRAW:
+		return "Redraw";
+	case CLEAR:
+		return "Clr";
+	case DRAW:
+		return "Draw";
+	case RESET:
+		return "RESET";
+	case ORIG:
+		return "ORIG";
+	case MOVE_PLYBCK1:
+		return "MPBC1";
+	case MOVE_PLYBCK2:
+		return "MPBC2";
+	case MOVE_PLYBCK3:
+		return "MPBC3";
+	case MOVE_PLYBCK4:
+		return "MPBC4";
+	case QUIT:
+		return "Quit";
+	default:
+		return "";
+	}
+}
+
 static void MacroDrawBitMap(
-		drawCmd_p d,
+		DrawBitMap_e dbm,
 		wDrawBitMap_p bm,
 		wPos_t x,
 		wPos_t y,
 		wDrawColor color )
 {
-	wDrawBitMap( d->d, bm, x, y, color, wDrawOptTemp|wDrawOptNoClip );
+	wDrawBitMap( playbackD->d, bm, x, y, color, wDrawOptTemp|wDrawOptNoClip );
 	wFlush();
+
+	LOG( log_playbackCursor, 1, ("%s %d DrawBitMap( %p %p %d %d %d %d )\n", DrawBitMapToString(dbm), DBMCount++, playbackD->d, bm, x, y, color, wDrawOptTemp|wDrawOptNoClip ) );
 }
 
 
-static void Flash( drawCmd_p d, wPos_t x, wPos_t y, wDrawColor flashColor )
+static void Flash( drawCmd_p d, wPos_t x, wPos_t y, wDrawColor color )
 {
-	if (playbackTimer != 0)
-		return;
-	MacroDrawBitMap( d, flash_bm, x, y, flashColor );
-	wPause( flashTO );
-	MacroDrawBitMap( d, flash_bm, x, y, flashColor );
-	wPause( flashTO );
-#ifdef LATER
-	MacroDrawBitMap( d->d, flash_bm, x, y, flashColor );
-	wPause( flashTO );
-	MacroDrawBitMap( d->d, flash_bm, x, y, flashColor );
-	wPause( flashTO );
-#endif
+	bDoFlash = TRUE;
+	flashColor = color;
 }
 
 
@@ -358,13 +405,26 @@ static void SetPlaybackSpeed(
 	playbackSpeed = inx;
 }
 
-static void ClearPlaybackCursor( void )
-{
-	if (playbackBm != NULL)
-		MacroDrawBitMap( playbackD, playbackBm, playbackX, playbackY, playbackColor );
-	playbackBm = NULL;
-}
 
+EXPORT void RedrawPlaybackCursor() {
+	if ( playbackD && playbackBm && inPlayback) {
+		wBool_t ret;
+		if ( playbackD->d != mainD.d ) 
+			ret = wDrawSetTempMode( playbackD->d, TRUE );
+		if ( bDoFlash && playbackTimer == 0 ) {
+			MacroDrawBitMap( FLASH_PLUS, flash_bm, playbackX, playbackY, flashColor );
+			wPause( flashTO*2 );
+			if ( flashTwice ) {
+				MacroDrawBitMap( FLASH_PLUS, flash_bm, playbackX, playbackY, flashColor );
+				wPause( flashTO*2 );
+			}
+			bDoFlash = FALSE;
+		}
+		MacroDrawBitMap( DRAW, playbackBm, playbackX, playbackY, playbackColor );
+		if ( playbackD->d != mainD.d ) 
+			wDrawSetTempMode( playbackD->d, ret );
+	}
+}
 
 static void MoveCursor(
 		drawCmd_p d,
@@ -378,45 +438,56 @@ static void MoveCursor(
 	coOrd pos1, dpos;
 	int i, steps;
 	wPos_t x, y;
-	wPos_t xx, yy;
-
-	ClearPlaybackCursor();
+	wPos_t x0=playbackX;
+	wPos_t y0=playbackY;
 
 	if (d == NULL)
 		return;
 
-	pos1 = pos;
 	d->CoOrd2Pix( d, pos, &x, &y );
 
-	if (playbackTimer == 0 && playbackD == d && !didPause) {
-		dx = (DIST_T)(x-playbackX);
-		dy = (DIST_T)(y-playbackY);
+	if (playbackTimer == 0 /*&& !didPause*/) {
+		playbackBm = bm;
+		playbackColor = color;
+		dx = (DIST_T)(x-x0);
+		dy = (DIST_T)(y-y0);
 		dist = sqrt( dx*dx + dy*dy );
 		steps = (int)(dist / PixelsPerStep ) + 1;
 		dx /= steps;
 		dy /= steps;
-		d->Pix2CoOrd( d, playbackX, playbackY, &pos1 );
+		d->Pix2CoOrd( d, x0, y0, &pos1 );
 		dpos.x = (pos.x-pos1.x)/steps;
 		dpos.y = (pos.y-pos1.y)/steps;
+
 		for ( i=1; i<=steps; i++ ) {
-			xx = playbackX+(wPos_t)(i*dx);
-			yy = playbackY+(wPos_t)(i*dy);
-			MacroDrawBitMap( d, bm, xx, yy, color );
+
+			playbackX = x0+(wPos_t)(i*dx);
+			playbackY = y0+(wPos_t)(i*dy);
+
 			pos1.x += dpos.x;
 			pos1.y += dpos.y;
-			if (proc)
+			if ( proc != NULL ) {
 				proc( action, pos1 );
-			else if (d->d == mainD.d) {
-				InfoPos( pos1 );
+			} else {
+				TempRedraw();
 			}
-			wPause( stepTO*playbackDelay/100 );
-			MacroDrawBitMap( d, bm, xx, yy, color );
+//			DrawPlaybackCursor( d, bm, xx, yy, color );
+			if ( d->d == mainD.d ) {
+				InfoPos( pos1 );
+				wFlush();
+			}
+			// Simple mouse moves happen twice as fast
+			wPause( stepTO*playbackDelay/100/(action==wActionMove?2:1) );
+
+
 			if (!inPlayback) {
 				return;
 			}
 		}
+	} else {
+		playbackX = x;
+		playbackY = y;
 	}
-	MacroDrawBitMap( playbackD=d, playbackBm=bm, playbackX=x, playbackY=y, playbackColor=color );
 }
 
 
@@ -427,76 +498,86 @@ static void PlaybackCursor(
 		coOrd pos,
 		wDrawColor color )
 {
-	wDrawBitMap_p bm;
+	wDrawBitMap_p bm = playbackBm;
+	playbackD = d;
 	wPos_t x, y;
 	long time0, time1;
 
 	time0 = wGetTimer();
-	ClearPlaybackCursor();
 
 	d->CoOrd2Pix( d, pos, &x, &y );
 
-	switch( action ) {
+
+
+	switch( action&0xFF ) {
 
 	case wActionMove:
-		MacroDrawBitMap( playbackD=d, playbackBm=arrow0_bm, playbackX=x, playbackY=y, playbackColor=wDrawColorBlack );
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm); //0 is normal, shift, ctrl
+		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );
 		break;
 
 	case C_DOWN:
-		MoveCursor( d, proc, wActionMove, pos, arrow0_bm, wDrawColorBlack );
-		if (flashTwice) Flash( d, x, y, rightDragColor );
-		MacroDrawBitMap( d, arrow0_bm, x, y, wDrawColorBlack );
-		MacroDrawBitMap( playbackD=d, playbackBm=((MyGetKeyState()&WKEY_SHIFT)?arrows_bm:arrow3_bm), playbackX=x, playbackY=y,
-				playbackColor=rightDragColor );
-		Flash( d, x, y, rightDragColor );
-		break;
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );  //Go to spot
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow3_bm);
+		Flash( d, x, y, playbackColor=rightDragColor );
+		proc( action, pos );
+		/* no break */
 
 	case C_MOVE:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrows_bm:arrow3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow3_bm);
 		MoveCursor( d, proc, C_MOVE, pos, bm, rightDragColor );
-		playbackD=d; playbackBm=bm; playbackX=x; playbackY=y; playbackColor=rightDragColor;
 		break;
 
 	case C_UP:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrows_bm:arrow3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow3_ctl_bm:arrow0_bm);
 		MoveCursor( d, proc, C_MOVE, pos, bm, rightDragColor );
-		/*MacroDrawBitMap( d, bm, x, y, rightDragColor );*/
-		if (flashTwice) Flash( d, x, y, rightDragColor );
-		MacroDrawBitMap( d, bm, x, y, rightDragColor );
-		MacroDrawBitMap( playbackD=d, playbackBm=arrow0_bm, playbackX=x, playbackY=y, playbackColor=wDrawColorBlack );
 		Flash( d, x, y, rightDragColor );
+		proc( action, pos );
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		MoveCursor( d, NULL, 0, pos, bm, wDrawColorBlack );
 		break;
 
 	case C_RDOWN:
-		MoveCursor( d, proc, wActionMove, pos, arrow0_bm, wDrawColorBlack );
-		if (flashTwice) Flash( d, x, y, leftDragColor );
-		MacroDrawBitMap( d, arrow0_bm, x, y, wDrawColorBlack );
-		MacroDrawBitMap( playbackD=d, playbackBm=((MyGetKeyState()&WKEY_SHIFT)?arrows_bm:arrow3_bm), playbackX=x, playbackY=y, playbackColor=leftDragColor );
-		Flash( d, x, y, leftDragColor );
-		break;
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		MoveCursor( d, proc, wActionMove, pos, bm, wDrawColorBlack );  //Go to spot
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrowr3_ctl_bm:arrowr3_bm);
+		Flash( d, x, y, playbackColor=leftDragColor );
+		proc( action, pos );
+		/* no break */
 
 	case C_RMOVE:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrows_bm:arrow3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrowr3_ctl_bm:arrowr3_bm);
 		MoveCursor( d, proc, C_RMOVE, pos, bm, leftDragColor );
-		playbackD=d; playbackBm=bm; playbackX=x; playbackY=y; playbackColor=leftDragColor;
 		break;
 
 	case C_RUP:
-		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrows_bm:arrow3_bm);
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrowr3_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrowr3_ctl_bm:arrowr3_bm);
 		MoveCursor( d, proc, C_RMOVE, pos, bm, leftDragColor );
-		if (flashTwice) Flash( d, x, y, leftDragColor );
-		MacroDrawBitMap( d, bm, x, y, leftDragColor );
-		MacroDrawBitMap( playbackD=d, playbackBm=arrow0_bm, playbackX=x, playbackY=y, playbackColor=wDrawColorBlack );
 		Flash( d, x, y, leftDragColor );
+		proc( action, pos );
+		bm = ((MyGetKeyState()&WKEY_SHIFT)?arrow0_shift_bm:(MyGetKeyState()&WKEY_CTRL)?arrow0_ctl_bm:arrow0_bm);
+		MoveCursor( d, NULL, 0, pos, bm, wDrawColorBlack );
 		break;
 
 	case C_REDRAW:
-		MacroDrawBitMap( playbackD, playbackBm, playbackX, playbackY, playbackColor );
+		proc( action, pos );																	//Send Redraw to functions
+		playbackD = &tempD;
+		MacroDrawBitMap( REDRAW, playbackBm, playbackX, playbackY, playbackColor );
 		break;
 
+	case C_TEXT:
+		proc( action, pos);
+		char c = action>>8;
+		bm = playbackBm;
+		break;
+
+
 	default:
-		;
+		bm = playbackBm;
 	}
+
+	playbackBm = bm;
 	time1 = wGetTimer();
 	adjTimer += (time1-time0);
 }
@@ -509,25 +590,7 @@ EXPORT void PlaybackMouse(
 		coOrd pos,
 		wDrawColor color )
 {
-#ifdef LATER
-	if (action == C_DOWN || action == C_RDOWN) {
-		MoveCursor( d, proc, wActionMove, pos, arrow0_bm, wDrawColorBlack );
-		ClearPlaybackCursor();
-	} else {
-		PlaybackCursor( d, proc, action, pos, wDrawColorBlack );
-	}
-#endif
 	PlaybackCursor( d, proc, action, pos, wDrawColorBlack );
-	if (playbackBm != NULL)
-		MacroDrawBitMap( playbackD, playbackBm, playbackX, playbackY, playbackColor );
-	proc( action, pos );
-	if (playbackBm != NULL)
-		MacroDrawBitMap( playbackD, playbackBm, playbackX, playbackY, playbackColor );
-#ifdef LATER
-	if (action == C_DOWN || action == C_RDOWN) {
-		PlaybackCursor( d, proc, action, pos, wDrawColorBlack );
-	}
-#endif
 	didPause = FALSE;
 }
 
@@ -535,17 +598,29 @@ EXPORT void PlaybackMouse(
 EXPORT void MovePlaybackCursor(
 		drawCmd_p d,
 		wPos_t x,
-		wPos_t y )
+		wPos_t y, wBool_t direct, wControl_p control)
 {
 	coOrd pos;
+	playbackD = &tempD;
 	d->Pix2CoOrd( d, x, y, &pos );
 	d->CoOrd2Pix( d, pos, &x, &y );
-	MoveCursor( d, NULL, wActionMove, pos, arrow0_bm, wDrawColorBlack );
-	MacroDrawBitMap( d, arrow0_bm, x, y, wDrawColorBlack );
-	MacroDrawBitMap( d, arrow3_bm, x, y, rightDragColor );
+	if (!direct)
+		MoveCursor( d, NULL, wActionMove, pos, arrow0_bm, wDrawColorBlack );
+	wBool_t ret = wDrawSetTempMode( d->d, TRUE );
+	MacroDrawBitMap( MOVE_PLYBCK1, arrow0_bm, x, y, wDrawColorBlack );
+	MacroDrawBitMap( MOVE_PLYBCK2, arrow3_bm, x, y, rightDragColor );
+
 	Flash( d, x, y, rightDragColor );
-	MacroDrawBitMap( d, arrow3_bm, x, y, rightDragColor );
-	MacroDrawBitMap( d, arrow0_bm, x, y, wDrawColorBlack );
+	if (direct) {
+		wControlHilite(control,TRUE);
+	}
+	MacroDrawBitMap( MOVE_PLYBCK3, arrow3_bm, x, y, rightDragColor );
+	MacroDrawBitMap( MOVE_PLYBCK4, arrow0_bm, x, y, wDrawColorBlack );
+	if (direct) {
+		wPause(1000);
+		wControlHilite(control,FALSE);
+	}
+	wDrawSetTempMode( d->d, ret );
 }
 
 /*****************************************************************************
@@ -580,12 +655,10 @@ static coOrd oldMainOrig;
 static coOrd oldMainSize;
 static DIST_T oldMainScale;
 static char * oldScaleName;
+static int oldMagneticSnap;
 
 static wBool_t pauseDemo = FALSE;
 static long bigPause = 2000;
-#ifdef LATER
-static long MSEC_PER_PIXEL = 6;
-#endif
 #ifdef DEMOPAUSE
 static wButton_p demoPause;
 #endif
@@ -639,15 +712,13 @@ static void PlaybackQuit( void )
 	if (paramFile)
 		fclose( paramFile );
 	paramFile = NULL;
-	if (!inPlayback)
-		return;
 	inPlaybackQuit = TRUE;
-	ClearPlaybackCursor();
 	wPrefReset();
 	wHide( demoW );
 	wWinSetBusy( mainW, FALSE );
 	wWinSetBusy( mapW, FALSE );
 	ParamRestoreAll();
+	magneticSnap = oldMagneticSnap;
 	RestoreLayers();
 	wEnableBalloonHelp( (int)enableBalloonHelp );
 	mainD.scale = oldMainScale;
@@ -657,15 +728,14 @@ static void PlaybackQuit( void )
 	tempD.orig = mainD.orig;
 	tempD.size = mainD.size;
 	tempD.scale = mainD.scale;
+	Reset();
 	ClearTracks();
 	checkPtMark = changed = 0;
 	RestoreTrackState();
 	inPlaybackQuit = FALSE;
-	Reset();
 	DoSetScale( oldScaleName );
 	DoChangeNotification( CHANGE_ALL );
 	CloseDemoWindows();
-	inPlayback = FALSE;
 	curDemo = -1;
 	wPrefSetInteger( "misc", "playbackspeed", playbackSpeed );
 	playbackNonStop = FALSE;
@@ -729,6 +799,135 @@ EXPORT void TakeSnapshot( drawCmd_t * d )
 	}
 }
 
+/*
+* Regression test
+*/
+static int log_regression = 0;
+wBool_t bWriteEndPtDirectIndex;
+
+static BOOL_T DoRegression( char * sFileName )
+{
+	typedef enum { REGRESSION_NONE, REGRESSION_CHECK, REGRESSION_QUIET, REGRESSION_SAVE } E_REGRESSION;
+	E_REGRESSION eRegression = REGRESSION_NONE;
+	long oldParamVersion;
+	long regressVersion;
+	FILE * fRegression;
+	char * sRegressionFile =  NULL;
+	wBool_t bWroteActualTracks;
+	eRegression = log_regression > 0 ? logTable(log_regression).level : 0;
+	char * cp;
+	regressVersion = strtol( paramLine+16, &cp, 10 );
+	if (cp == paramLine+16 )
+		regressVersion = PARAMVERSION;
+	LOG( log_regression, 1, ("REGRESSION %s %d %s:%d %s\n",
+				eRegression==REGRESSION_SAVE?"SAVE":"CHECK",
+				regressVersion,
+				sFileName, paramLineNum,
+				cp ) );
+	MakeFullpath( &sRegressionFile, workingDir, "xtrkcad.regress", NULL );
+	switch ( eRegression ){
+	case REGRESSION_SAVE:
+		fRegression = fopen( sRegressionFile, "a" );
+		if ( fRegression == NULL ) {
+			NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sFileName, strerror(errno) );
+		} else {
+			fprintf( fRegression, "REGRESSION START %d %s\n",
+				PARAMVERSION, cp );
+			fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
+			WriteTracks( fRegression, FALSE );
+			fprintf( fRegression, "REGRESSION END\n" );
+			fclose( fRegression );
+		}
+		while ( fgets(paramLine, STR_LONG_SIZE, paramFile) != NULL ) {
+			if ( strncmp( paramLine, "REGRESSION END", 14 ) == 0)
+				break;
+		}
+		break;
+	case REGRESSION_CHECK:
+	case REGRESSION_QUIET:
+		oldParamVersion = paramVersion;
+		paramVersion = regressVersion;
+		bWroteActualTracks = FALSE;
+		track_p to_first_save = to_first;
+		track_p* to_last_save = to_last;
+		while ( GetNextLine() ) {
+			// Read Expected track
+			to_first = NULL;
+			to_last = &to_first;
+			paramVersion = regressVersion;
+			if ( !ReadTrack( paramLine ) ) {
+				if ( paramFile == NULL )
+					return FALSE;
+				break;
+			}
+			if ( to_first == NULL ) {
+				// Something bad happened
+				break;
+			}
+			track_cp tExpected = to_first;
+			to_first = to_first_save;
+			// Find corresponding Actual track
+			track_cp tActual = FindTrack( GetTrkIndex( tExpected ) );
+			strcat( message, "Regression " );
+			if ( ! CompareTrack( tActual, tExpected ) ) {
+				// Actual doesn't match Expected
+				LOG( log_regression, 1, ("  FAIL: %s", message) );
+				fRegression = fopen( sRegressionFile, "a" );
+				if ( fRegression == NULL ) {
+					NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Regression"), sRegressionFile, strerror(errno) );
+					break;
+				}
+				fprintf( fRegression, "REGRESSION FAIL %d\n",
+					PARAMVERSION );
+				fprintf( fRegression, "# %s - %d\n", sFileName, paramLineNum );
+				fprintf( fRegression, "# %s", message );
+				if ( !bWroteActualTracks ) {
+					// Print Actual tracks
+					fprintf( fRegression, "Actual Tracks\n" );
+					paramVersion = PARAMVERSION;
+					WriteTracks( fRegression, FALSE );
+					bWroteActualTracks = TRUE;
+				}
+				// Print Expected track
+				to_first = tExpected;
+				fprintf( fRegression, "Expected Track\n" );
+				WriteTracks( fRegression, FALSE );
+				fclose( fRegression );
+				strcat( message, "Continue test?" );
+				if ( eRegression == REGRESSION_CHECK ) {
+					int rc = wNoticeEx( NT_ERROR, message, _("Stop"), _("Continue") );
+					if ( !rc ) {
+						while ( GetNextLine() &&
+							strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
+							;
+						break;
+					}
+				}
+			}
+			// Delete Expected track
+			to_first = tExpected;
+			to_last = &to_first;
+			FreeTrack( tExpected );
+		}
+		to_first = to_first_save;
+		to_last = to_last_save;
+		if ( strncmp( paramLine, "REGRESSION END", 14 ) != 0 )
+			InputError( "Expected REGRESSION END", TRUE );
+		paramVersion = oldParamVersion;
+		break;
+	case REGRESSION_NONE:
+	default:
+		while ( GetNextLine() ) {
+			if ( strncmp( paramLine, "REGRESSION END", 14 ) == 0 )
+				break;
+		}
+		break;
+	}
+	free( sRegressionFile );
+
+	return TRUE;
+}
+
 static void EnableButtons(
 		BOOL_T enable )
 {
@@ -774,7 +973,6 @@ static void PlaybackSetup( void )
 	wTextClear( demoT );
 	wShow( demoW );
 	wFlush();
-	RulerRedraw( TRUE );
 	wPrefFlush();
 	wWinSetBusy( mainW, TRUE );
 	wWinSetBusy( mapW, TRUE );
@@ -785,6 +983,8 @@ static void PlaybackSetup( void )
 	oldMainSize = mainD.size;
 	oldMainScale = mainD.scale;
 	oldScaleName = curScaleName;
+	playbackX = 0;
+	playbackY = 0;
 	Reset();
 	paramVersion = -1;
 	playbackColor=wDrawColorBlack;
@@ -816,11 +1016,15 @@ static void Playback( void )
 		wWinTop( mainW );
 		demoWinOnTop = FALSE;
 	}
+	char * oldLocale = NULL;
+	oldLocale = SaveLocale( "C" );
 	while (TRUE) {
+		if ( ! inPlayback )
+			// User pressed Quit
+			break;
 		if ( paramFile == NULL ||
 			 fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
 			paramTogglePlaybackHilite = FALSE;
-			ClearPlaybackCursor();
 			CloseDemoWindows();
 			if (paramFile) {
 				fclose( paramFile );
@@ -837,6 +1041,8 @@ static void Playback( void )
 			paramFile = fopen( demoFileName, "r" );
 			if ( paramFile == NULL ) {
 				NoticeMessage( MSG_OPEN_FAIL, _("Continue"), NULL, _("Demo"), demoFileName, strerror(errno) );
+				RestoreLocale( oldLocale );
+				inPlayback = FALSE;
 				return;
 			}
 			
@@ -848,13 +1054,14 @@ static void Playback( void )
 			UndoSuspend();
 			wWinBlockEnable( FALSE );
 			checkPtMark = 0;
-			RulerRedraw( TRUE );
 			DoChangeNotification( CHANGE_ALL );
 			CompoundClearDemoDefns();
 			if ( fgets(paramLine, STR_LONG_SIZE, paramFile) == NULL ) {
 				NoticeMessage( MSG_CANT_READ_DEMO, _("Continue"), NULL, sProdName, demoFileName );
 				fclose( paramFile );
 				paramFile = NULL;
+				RestoreLocale( oldLocale );
+				inPlayback = FALSE;
 				return;
 			}
 			free(demoFileName);
@@ -880,6 +1087,10 @@ static void Playback( void )
 		} else if (paramLine[0] == 0) {
 			/* empty paramLine */
 		} else if (ReadTrack( paramLine ) ) {
+			if ( paramFile == NULL ) {
+				inPlayback = FALSE;
+				break;
+			}
 		} else if (strncmp( paramLine, "STEP", 5 ) == 0) {
 			paramTogglePlaybackHilite = TRUE;
 			wWinTop( demoW );
@@ -898,6 +1109,8 @@ static void Playback( void )
 				wPause( 1000 );
 				EnableButtons( FALSE );
 			} else {
+				RestoreLocale( oldLocale );
+				inPlayback = FALSE;
 				return;
 			}
 		} else if (strncmp( paramLine, "CLEAR", 5 ) == 0) {
@@ -908,12 +1121,14 @@ static void Playback( void )
 			demoWinOnTop = TRUE;
 			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
-				if ( strncmp(paramLine, "END", 3) == 0 )
+				if ( IsEND( END_MESSAGE ) )
 					break;
 				if ( strncmp(paramLine, "STEP", 3) == 0 ) {
 					wWinTop( demoW );
 					demoWinOnTop = TRUE;
 					EnableButtons( TRUE );
+					RestoreLocale( oldLocale );
+					inPlayback = FALSE;
 					return;
 				}
 				PlaybackMessage( paramLine );
@@ -928,14 +1143,13 @@ static void Playback( void )
 			RecomputeElevations();
 			DoRedraw();
 			/*DoChangeNotification( CHANGE_ALL );*/
-			if (playbackD != NULL && playbackBm != NULL)
-				MacroDrawBitMap( playbackD, playbackBm, playbackX, playbackY, wDrawColorBlack );
 		} else if (strncmp( paramLine, "COMMAND ", 8 ) == 0) {
 			paramTogglePlaybackHilite = FALSE;
 			PlaybackCommand( paramLine, paramLineNum );
 		} else if (strncmp( paramLine, "RESET", 5 ) == 0) {
 			paramTogglePlaybackHilite = TRUE;
-			Reset();
+			InfoMessage("Esc Key Pressed");
+			ConfirmReset(TRUE);
 		} else if (strncmp( paramLine, "VERSION", 7 ) == 0) {
 			paramVersion = atol( paramLine+8 );
 			if ( paramVersion > iParamVersion ) {
@@ -949,7 +1163,18 @@ static void Playback( void )
 		} else if (strncmp( paramLine, "ORIG ", 5 ) == 0) {
 			if ( !GetArgs( paramLine+5, "fff", &zoom, &x, &y ) )
 				continue;
+			if (zoom == 0.0) {
+				double scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
+				double scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
+				if (scale_x<scale_y)
+					scale_x = scale_y;
+				scale_x = ceil(scale_x);
+				if (scale_x < 1) scale_x = 1;
+				if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
+				zoom = scale_x;
+			}
 			mainD.scale = zoom;
+			InfoMessage("Zoom Set to %.0f", zoom);
 			mainD.orig.x = x;
 			mainD.orig.y = y;
 			SetMainSize();
@@ -958,8 +1183,6 @@ static void Playback( void )
 			tempD.scale = mainD.scale;
 
 			DoRedraw();
-			if (playbackD != NULL && playbackBm != NULL)
-				MacroDrawBitMap( playbackD, playbackBm, playbackX, playbackY, wDrawColorBlack );
 
 		} else if (strncmp( paramLine, "PAUSE ", 6 ) == 0) {
 			paramTogglePlaybackHilite = TRUE;
@@ -1028,13 +1251,16 @@ static void Playback( void )
 		} else if (strncmp( paramLine, "DOCUMENT COPY", 13 ) == 0 ) {
 			while ( ( fgets( paramLine, STR_LONG_SIZE, paramFile ) ) != NULL ) {
 				paramLineNum++;
-				if ( strncmp(paramLine, "END", 3) == 0 )
+				if ( IsEND( END_MESSAGE ) )
 					break;
 				if ( documentCopy && documentFile )
 					fprintf( documentFile, "%s", paramLine );
 			}
 		} else if ( strncmp( paramLine, "DEMOINIT", 8 ) == 0 ) {
 			DemoInitValues();
+		} else if ( strncmp( paramLine, "REGRESSION START", 16 ) == 0 ) {
+			DoRegression( curDemo < 1 ? paramFileName :
+					            demoList(curDemo-1).fileName );
 		} else {
 			if (strncmp( paramLine, "MOUSE ", 6 ) == 0) {
 				thisCmd = mouseCmd;
@@ -1066,6 +1292,8 @@ static void Playback( void )
 		if (pauseDemo) {
 			EnableButtons( TRUE );
 			pauseDemo = FALSE;
+			RestoreLocale( oldLocale );
+			inPlayback = FALSE;
 			return;
 		}
 	}
@@ -1077,7 +1305,9 @@ static void Playback( void )
 		fclose( documentFile );
 		documentFile = NULL;
 	}
+	inPlayback = FALSE;
 	PlaybackQuit();
+	RestoreLocale( oldLocale );
 }
 
 
@@ -1093,13 +1323,15 @@ static int StartPlayback( int cnt, char **pathName, void * context )
 		return FALSE;
 	}
 
-	strcpy( paramFileName, pathName[0] );
+	paramFileName = strdup( pathName[0] );
 
 	PlaybackSetup();
 	curDemo = -1;
 	UndoSuspend();
 	wWinBlockEnable( FALSE );
 	Playback();
+	free( paramFileName );
+	paramFileName = NULL;
 
 	return TRUE;
 }
@@ -1138,7 +1370,13 @@ static void DoDemoButton( void * command )
 		break;
 	case 3:
 		/* quit */
-		PlaybackQuit();
+		if ( inPlayback ) {
+			// We will exit the loop in Playback() after the current command
+			inPlayback = FALSE;
+		} else {
+			// We're waiting for the user to press 'Step'
+			PlaybackQuit();
+		}
 		break;
 	default:
 		;
@@ -1196,11 +1434,10 @@ static char * demoInitParams[] = {
 		"GROUP layout",
 		"display tunnels 1",
 		"display endpt 2",
-		"display labelenable 7",
+		"display labelenable 0",
 		"display description-fontsize 48",
 		"display labelscale 8",
 		"display layoutlabels 6",
-		"display color-layers 0",
 		"display tworailscale 16",
 		"display tiedraw 0",
 		"pref mingridspacing 5",
@@ -1211,8 +1448,7 @@ static char * demoInitParams[] = {
 		"display carhotbarlabels 1",
 		"display hideTrainsInTunnels 0",
 		"GROUP display",
-		"cmdopt move-quick 0",
-		"pref turntable-angle 7.500",
+		"pref turntable-angle 15.00",
 		"cmdopt preselect 1",
 		"pref coupling-speed-max 100",
 		"cmdopt rightclickmode 0",
@@ -1261,10 +1497,12 @@ static char * demoInitParams[] = {
 		"GROUP grid",
 		"misc toolbarset 65535",
 		"GROUP misc",
-		"sticky set 268435383", /* 0xfffffb7 - all but Helix and Turntable */
+		"sticky set 67108479", /* 0x3fffe7f - all but Helix and Turntable */
 		"GROUP sticky",
 		"turnout hide 0",
 		"layer button-count 10",
+		"cmdopt selectmode 0",
+		"cmdopt selectzero 1",
 		NULL };
 
 static void DemoInitValues( void )
@@ -1291,6 +1529,8 @@ static void DemoInitValues( void )
 	}
 	for ( cpp = demoInitParams; *cpp; cpp++ )
 		paramPlaybackProc( *cpp );
+	// Have to do this manually
+	oldMagneticSnap = MagneticSnap( TRUE );
 }
 
 
@@ -1369,11 +1609,22 @@ EXPORT BOOL_T MacroInit( void )
 	leftDragColor = drawColorBlue;
 
 	arrow0_bm = wDrawBitMapCreate( mainD.d, arrow0_width, arrow0_height, 12, 12, arrow0_bits );
+	arrow0_shift_bm = wDrawBitMapCreate( mainD.d, arrow0_shift_width, arrow0_shift_height, 12, 12, arrow0_shift_bits );
+	arrow0_ctl_bm = wDrawBitMapCreate( mainD.d, arrow0_ctl_width, arrow0_ctl_height, 12, 12, arrow0_ctl_bits );
 	arrow3_bm = wDrawBitMapCreate( mainD.d, arrow3_width, arrow3_height, 12, 12, arrow3_bits );
+	arrow3_shift_bm = wDrawBitMapCreate( mainD.d, arrow3_shift_width, arrow3_shift_height, 12, 12, arrow3_shift_bits );
+	arrow3_ctl_bm = wDrawBitMapCreate( mainD.d, arrow3_ctl_width, arrow3_ctl_height, 12, 12, arrow3_ctl_bits );
+	arrowr3_bm = wDrawBitMapCreate( mainD.d, arrowr3_width, arrowr3_height, 12, 12, arrowr3_bits );
+    arrowr3_shift_bm = wDrawBitMapCreate( mainD.d, arrowr3_shift_width, arrowr3_shift_height, 12, 12, arrowr3_shift_bits );
+	arrowr3_ctl_bm = wDrawBitMapCreate( mainD.d, arrowr3_ctl_width, arrowr3_ctl_height, 12, 12, arrowr3_ctl_bits );
 	arrows_bm = wDrawBitMapCreate( mainD.d, arrows_width, arrows_height, 12, 12, arrows_bits );
 	flash_bm = wDrawBitMapCreate( mainD.d, flash_width, flash_height, 12, 12, flash_bits );
 
 	ParamRegister( &recordPG );
 	ParamRegister( &demoPG );
+
+	log_playbackCursor = LogFindIndex( "playbackcursor" );
+	log_regression = LogFindIndex( "regression" );
+
 	return TRUE;
 }

@@ -32,7 +32,7 @@ Functions for drawing basic shapes and objects like lines and curves can be acce
 
 \u000
 
-\dd \f{Shapes} - draw boxes and poly-lines. (\K{cmdShapes})
+\dd \f{Shapes} - draw boxes, polygons and poly-lines. (\K{cmdShapes})
 
 \u000
 
@@ -46,10 +46,9 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \rule
 
-
 \S{cmdCircleL} Circles and Filled Circles
 
-\G{png.d/mdrawcircles.png} 
+\G{png.d/mdrawcircles.png}
 
 \f{Circles} and \f{Filled Circles} are created by selecting either the center position or a point on the edge of the circle and dragging to specify the radius.
 
@@ -70,56 +69,99 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \dd \G{png.d/dcurve1.png} Select the start of the curve and drag in the direction of the curve.
 
-If \e{Shift} is held down as the left mouse button is clicked for the first end point of the curve and the cursor is over a line object the position will snap to the nearest end of that line. 
-If \e{Shift} is held down when the button is released for the second end, it will snap to the nearest end of a line object if it is over one. 
+If the cursor is over a Draw object and \f{MagneticSnap} is on, the first position will snap to the nearest part of that object. If \e{Alt} is held the snap will be suppressed.
+If \f{MagneticSnap} is disabled, the snap will happen if \e{Alt} is held.  The second end will act similarly.
 
 \u000
 
 \dd \G{png.d/dcurve2.png} Select one end of the curve and drag to the center.
-
-To complete the command, drag on the red arrows to adjust the curve.
+The first and second ends will act like "CurvedLine From End" with \f{MagneticSnap} unless \e{Alt} is held.
+To complete the command, drag on the red arrows to adjust the curve from the initial end.
 
 \u000
 
 \dd \G{png.d/dcurve3.png} Select the center of the curve and drag to one end.
 
 To complete the command, drag on the red arrows to adjust the curve.
- 
+
 \u000
 
 \dd \G{png.d/dcurve4.png} Drag from one end of the curve to the other to form the chord of the curve.
-
-To complete the command, drag on the red arrows to adjust the curve.
+The first and second ends will act like "CurvedLine From End" with \f{MagneticSnap} unless \e{Alt} is held.
+To complete the command, drag on the red arrows to adjust the curve. If the mouse is over a draw object the second position will snap to the nearest part of that object. If \e{Shift} is held the snap will be suppressed.
 
 \u000
 
 \dd \G{png.d/dbezier.png} \e{Left-Drag} out control point from one end of the curve and then \e{Left-Drag} out the second control point from the other end.
 
-If \e{Shift} is held while the end points are selected, the curve will lock to the ends of nearby line objects.
+If \f{MagneticSnap} is enabled, the curve ends will snap to the nearest part of nearby Draw objects unless \e{Alt} is held.
+If it is disabled, snapping will only occure if \e{Alt} is held.
 
-To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a control point. Hit \e{Enter} to accept, \e{Esc} to reject.
+The precise values of Radius and Arc Length can be set using the text boxes on the bottom rail once the mouse button is released.
+
+To adjust the curve, \e{Left-Click} and \e{Left-Drag} an end or a the radius. Hit \e{Enter} or \e{Space} to accept, \e{Esc} to reject.
+
 
 \rule
 
+\S{cmdNote} Note Variants
 
-\S{cmdNote} Note
+\G{png.d/mnote.png}
 
-\G{png.d/bnote.png}
+The \f{Note} command allows you to attach \f{plain text notes} (\K{cmdTextEdit}),
+\f{weblinks} (\K{cmdLinkEdit}) or \f{document references}
+(\K{cmdFileEdit}) to selected places on the layout.
 
-The \f{Notepad} command allows you to attach notes (\G{png.d/iconnote.png}) to selected places on the layout.
+\S2{cmdTextEdit} Plain Text
 
-Click and drag on the Main Canvas (\K{mainW}) to place the note.
+\G{png.d/bnote.png} \G{png.d/iconnote.png} Click and drag on the Main Canvas (\K{mainW}) to place the note.
 
 When you release, the \e{Note Editor} dialog is displayed.  You can enter the note in the text area.
 
-When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Note} will display the \e{Property Sheet} to let you read or modify the note.  
+\G{png.d/notetext.png}
+
+When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Note} will display the \e{Property Sheet} to let you read or modify the note.
+
+\S2{cmdLinkEdit} Weblink
+
+\G{png.d/blink.png} \G{png.d/iconlink.png} Similar to text notes you can place a weblink on the layout.
+
+After releasing the mouse button, the \e{Link Editor} dialog is displayed.
+
+\G{png.d/notelink.png}
+
+You can enter the URL
+of the website and a short description. When clicking on the Open button, your default browser is
+used to display the website.
+
+ When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Weblink Note}
+ will display the \e{Property Sheet} to let you read or modify the URL or the
+ description.
+
+Double clicking on a weblink icon opens the website in your default browser.
+
+\S2{cmdFileEdit} Document
+
+\G{png.d/bfile.png} \G{png.d/iconfile.png} Similar to text notes you can place a reference to a file on the layout.
+
+After releasing the mouse button, the \e{Document Editor} dialog is displayed.
+
+\G{png.d/notefile.png}
+
+You can select the file and a enter a short description. When clicking on the Open button the file is opened with the default program for that file type.
+
+When in \f{Properties} (\K{cmdDescribe}) mode, clicking on a \e{Document Note} will display the \e{Property Sheet} to let you read or modify the filename or the
+ description.
+
+Double clicking on a document reference icon opens the document  in the default program.
+
 
 \rule
 
 
 \S{cmdRuler} Ruler
 
-\G{png.d/bruler.png} 
+\G{png.d/bruler.png}
 
 The \f{Ruler} command displays a ruler on the layout.  Click where you want the ruler to begin and drag the cursor to measure distances from the origin.  The measured length is displayed in the \f{Status-bar} (\K{mainW}).
 
@@ -136,24 +178,40 @@ Subsequent clicks on the \f{Ruler} button will hide or display the ruler.
 
 Shapes are drawn by:
 
-\dd \G{png.d/dbox.png} \G{png.d/dfilbox.png} \f{Boxes} and \f{Filled Boxes} are created by selecting one corner and dragging the opposite corner. 
+\dd \G{png.d/dbox.png} \G{png.d/dfilbox.png} \f{Boxes} and \f{Filled Boxes} are created by selecting one corner and dragging the opposite corner.
 
 \u000
 
-\dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \f{Poly Lines} and \f{Polygons} are created by \e{Left+Drag}, and a corner is placed when you release the left mouse button.  The \f{Poly} shape is finished by pressing the \e{Space} key or by selecting another operation.
+\dd \G{png.d/dpoly.png} \G{png.d/dfilpoly.png} \G{png.d/dpolyline} \f{PolyLines} and \f{Polygons} are created by either a series for \c{Left-Click}s or \c{Left+Drag}s, and a new "node" is placed for each. When using Drag, the node will be positioned when you release the button.
+\u If \f{MagneticSnap} is enabled, An anchor point will be shown on nearby draw objects that the next point will be snapped to unless \c{Alt} is held.
+\u If it is disabled, the snap will only occur if \e{Alt} is held.
+\u If \c{Ctrl} is held down when a new point is placed, it will snap the relative angle of the new side to a multiple of 90 degrees from the previous side.
+On the first polygon side this will be at a multiple of 90 degrees to the axes. The line from the previous point will be highlighted in Blue.
+\u A special blue square anchor will show when the cursor is in a position such that it is 90 degrees away from both the last point and the first point of the Polygon.
+\u The last polygon segment dimensions can be altered using the text boxes that appear showing the segment length and the relative angle to the previous segment.
+\u A polygon is closed if the next node is place over the start of the polygon
+\u The polygon or polyline are ended using \c{Enter} or \c{Space}. A polygon will be auto-closed.
+
+If \e{Sticky} is set for draw line and curve objects, after the object is created, precise dimensions can be entered to alter the new object, before it is completed either with a \c{Space} or \c{Return} or by selecting a new operation.
+
+The \f{Polygon} and \f{PolyLine} shapes are finished by pressing the \c{Space} or \c{Return} key or by selecting another operation. Before they are finished, precise dimensions can be entered for the last side drawn.
+All Polylines and Polygons must have more than 2 corners to be created successfully.
+
+Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been finished to alter individual points and to make them curved or rounded points.
 
 \rule
 
-
-\S{cmdStraightL} Straight Objects 
+\S{cmdStraightL} Straight Objects
 
 \G{png.d/mdrawstraight.png}
 
-Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.  If \e{Draw Straight Objects} is Sticky (\K{cmdSticky}), \e{Cntl+Left+Drag} will use the endpoint of the previous line as the starting point.
+Straight Objects are created by a \e{Left+Drag} (\K{windowTerms}) on the layout.
 
 \dd \G{png.d/dline.png} Creates a \f{Straight Line} of specified color and width.
-If \e{Shift} is held down for the first end point and the cursor is over a line object the new line start position will snap to the nearest end of the line. 
-If \e{Shift} is held down when the button is released at the end of the \e{Left+Drag} the line end position will snap to the nearest end of any line object it is over.  
+With \f{MagneticSnap} enabled, the new line start position will snap to the nearest draw object, as shown by the anchor unless \c{Shift} is held down.
+If it is diabled, it will onlt snap if \e{Shift} is held.
+If \c{Ctrl} is held down during \c{Left+Drag} the line will snap the relative angle of the new side to a multiple of 90 degrees.
+The precise angle and length can be set after drawing using the text entry boxes on the bottom rail.
 
 
 \u000
@@ -182,23 +240,28 @@ If \e{Shift} is held down when the button is released at the end of the \e{Left+
 
 \rule
 
-
 \S{cmdText} Text
 
-\G{png.d/btext.png} 
+\G{png.d/btext.png}
 
 The \f{Text} command lets you enter text on the layout at the selected position. You can use the Tab key to format the text to fixed tab positions and CTRL+Enter to enter a newLine character.
 
-\G{png.d/statustext.png} 
+\G{png.d/statustext.png}
 
 The font size can be changed by the Font Size drop list on the \f{Status-bar} (\K{mainW}).  The font size is scaled along with everything else on the layout so text is always the same relative size as other layout objects.
 
-The font can be selected by the \f{Font Selection} (\K{fontSelW}) dialog invoked by the \f{Options>Fonts} menu item or by \e{Shift+Right-Click} (\K{cmdAcclKeys}).
+The font can be selected by the \f{Font Selection} (\K{fontSelW}) dialog invoked by the \f{Options>Fonts} menu item or by \c{Shift+Right-Click} (\K{cmdAcclKeys}).
 
-The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \e{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \e{Left-Click+Drag}ing the text to any desired postion on the layout.
+The position where text is to be placed on the layout must be selected prior to text entry. The position is select by \c{Left-Click}ing on the layout at the point where the text is to appear. Desired text is entered after the position is selected. If necessary, the location can be changed once text entry begins by \c{Left-Click+Drag}ing the text to any desired postion on the layout.
 
-The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents of existing \f{Text} objects.
+The \f{Properties} (\K{cmdDescribe}) command can be used to modify the contents of existing \f{Text} objects and to draw boxes around them.
 
 Note: loading fonts (or changing sizes) can take a noticeable amount of time.
+
+\S{DrawOrigin} Draw Objects Origin
+
+Some objects have a natural rotation point within them. By setting the origin to this point, subsequent rotation will be about that point and not the layout origin. This is referred to as a \e{Relative} origin. When one of these is moved or rotated, the origin and angle are adjusted but the relative draw point values remain the same.
+
+You can choose to set the origin to make it Relative or put it back to Absolute during \K{cmdModify} or by using the \K{cmdDescribe} settings.  As a practical matter, the object will appear identical until a subsequent rotation value is entered in the \K{cmdDescribe} window in both cases.
 
 \rule

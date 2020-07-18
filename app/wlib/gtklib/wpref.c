@@ -293,7 +293,7 @@ void wPrefSetString(
 			if (p->val)
 				free(p->val);
 			p->dirty = TRUE;
-			p->val = strdup( sval );
+			p->val = (sval?strdup( sval ):NULL);
 			return;
 		}
 	}
@@ -302,7 +302,7 @@ void wPrefSetString(
 	p->name = strdup(name);
 	p->section = strdup(section);
 	p->dirty = TRUE;
-	p->val = strdup(sval);
+	p->val = (sval?strdup(sval):NULL);
 }
 
 /**
@@ -456,7 +456,9 @@ void wPrefFlush(
 		return;
 
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
-		fprintf( prefFile,  "%s.%s: %s\n", p->section, p->name, p->val );
+		if(p->val) {
+			fprintf( prefFile,  "%s.%s: %s\n", p->section, p->name, p->val );
+		}	
 	}
 	fclose( prefFile );
 }

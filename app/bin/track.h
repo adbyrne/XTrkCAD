@@ -23,6 +23,7 @@
 #ifndef TRACK_H
 #define TRACK_H
 
+#include <string.h>
 #include "common.h"
 #include "draw.h"
 #include "misc2.h"
@@ -34,6 +35,8 @@ typedef struct track_t * track_p;
 typedef struct track_t * track_cp;
 extern track_p tempTrack;
 extern wIndex_t trackCount;
+extern long colorTrack;
+extern long colorDraw;
 extern long drawTunnel;
 extern long drawEndPtV;
 extern long drawUnconnectedEndPt;
@@ -71,13 +74,16 @@ typedef enum { curveTypeNone, curveTypeCurve, curveTypeStraight, curveTypeBezier
 #define PARAMS_1ST_JOIN (0)
 #define PARAMS_2ND_JOIN (1)
 #define PARAMS_EXTEND	(2)
-#define PARAMS_PARALLEL (3)
+#define PARAMS_NODES (3)
 #define PARAMS_BEZIER   (4)	   //Not used (yet)
 #define PARAMS_CORNU    (5)    //Called to get end characteristics
+#define PARAMS_TURNOUT  (6)
+#define PARAMS_LINE     (7)	   //Called on Lines
 
 typedef struct {
 		curveType_e type;			//Straight, Curve, Bezier, Cornu
 		EPINX_T ep;					//End point that is nearby pos
+		dynArr_t nodes;				//Array of nodes -> PARAMS_PARALLEL only
 		DIST_T len;					//Length of track
 		ANGLE_T angle;				//Angle at end of track
 		coOrd lineOrig;				//Start of straight
@@ -95,6 +101,7 @@ typedef struct {
 		coOrd cornuCenter[2];		//Center at Cornu Ends
 		coOrd ttcenter;				//Turntable
 		DIST_T ttradius; 			//Turntable
+		coOrd centroid;				//Turnout
 
 		} trackParams_t;
 
@@ -102,7 +109,6 @@ typedef struct {
 #define Q_IGNORE_EASEMENT_ON_EXTEND		(2)
 #define Q_REFRESH_JOIN_PARAMS_ON_MOVE	(3)
 #define Q_CANNOT_PLACE_TURNOUT			(4)
-#define Q_DONT_DRAW_ENDPOINT			(5)
 #define Q_DRAWENDPTV_1					(6)
 #define Q_CAN_PARALLEL					(7)
 #define Q_CAN_MODIFYRADIUS				(8)
@@ -122,6 +128,14 @@ typedef struct {
 #define Q_CAN_ADD_ENDPOINTS             (22)    // Is T_TURNTABLE
 #define Q_HAS_VARIABLE_ENDPOINTS        (23)    // Is Helix or Circle
 #define Q_CORNU_CAN_MODIFY				(24)	// can be modified by CORNU MODIFY
+#define Q_ISTRAIN                       (25)
+#define Q_IS_POLY                       (26)
+#define Q_IS_DRAW					    (27)
+#define Q_IS_TEXT						(28)
+#define Q_IS_ACTIVATEABLE				(29)
+#define Q_IS_STRUCTURE					(30)
+#define Q_IS_TURNOUT                    (31)
+#define Q_GET_NODES						(32)
 
 typedef struct {
 		track_p trk;							// IN Current Track OUT Next Track
@@ -139,7 +153,7 @@ typedef struct {
 		void (*describe)( track_p, char * line, CSIZE_T len );
 		void (*delete)( track_p );
 		BOOL_T (*write)( track_p, FILE * );
-		void (*read)( char * );
+		BOOL_T (*read)( char * );
 		void (*move)( track_p, coOrd );
 		void (*rotate)( track_p, coOrd, ANGLE_T );
 		void (*rescale)( track_p, FLOAT_T );
@@ -149,7 +163,7 @@ typedef struct {
 		BOOL_T (*traverse)( traverseTrack_p, DIST_T * );
 		BOOL_T (*enumerate)( track_p );
 		void (*redraw)( void );
-		BOOL_T (*trim)( track_p, EPINX_T, DIST_T );
+		BOOL_T (*trim)( track_p, EPINX_T, DIST_T, coOrd endpos, ANGLE_T angle, DIST_T endradius, coOrd endcenter );
 		BOOL_T (*merge)( track_p, EPINX_T, track_p, EPINX_T );
 		STATUS_T (*modify)( track_p, wAction_t, coOrd );
 		DIST_T (*getLength)( track_p );
@@ -161,11 +175,13 @@ typedef struct {
 		void (*drawPositionIndicator)( track_p, wDrawColor );
 		void (*advancePositionIndicator)( track_p, coOrd, coOrd *, ANGLE_T * );
 		BOOL_T (*checkTraverse)( track_p, coOrd );
-		BOOL_T (*makeParallel)( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
+		BOOL_T (*makeParallel)( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *, coOrd *, BOOL_T );
 		void (*drawDesc)( track_p, drawCmd_p, wDrawColor );
 		BOOL_T (*rebuildSegs)(track_p);
 		BOOL_T (*replayData)(track_p, void *,long );
 		BOOL_T (*storeData)(track_p, void **,long *);
+		void  (*activate)(track_p);
+		wBool_t (*compare)( track_cp, track_cp );
 		} trackCmd_t;
 
 
@@ -180,6 +196,9 @@ typedef struct {
 			DIST_T height;
 			char * name;
 		} u;
+		BOOL_T cacheSet;
+		double cachedElev;
+		double cachedLength;
 		} elev_t;
 #define EPOPT_GAPPED	(1L<<0)
 typedef struct {
@@ -194,8 +213,9 @@ typedef struct {
 dynArr_t tempEndPts_da;
 #define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
 
-typedef enum { FREEFORM, RECTANGLE
+typedef enum { FREEFORM, RECTANGLE, POLYLINE
 } PolyType_e;
+
 
 typedef struct {
 		char type;
@@ -241,7 +261,7 @@ typedef struct {
 			} t;
 			struct {
 				int cnt;
-				coOrd * pts;
+				pts_t * pts;
 				coOrd orig;
 				ANGLE_T angle;
 				PolyType_e polyType;
@@ -273,6 +293,7 @@ typedef struct {
 #define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BEZTRK)
 
 dynArr_t tempSegs_da;
+
 #define tempSegs(N) DYNARR_N( trkSeg_t, tempSegs_da, N )
 
 char tempSpecial[4096];
@@ -397,6 +418,7 @@ void JointSegProc( segProc_e, trkSeg_p, segProcData_p );
 void BezierSegProc( segProc_e, trkSeg_p, segProcData_p );   //Used in Cornu join
 void CleanSegs( dynArr_t *);
 void CopyPoly(trkSeg_p seg_p, wIndex_t segCnt);
+wBool_t CompareSegs( trkSeg_p, int, trkSeg_p, int );
 
 /* debug.c */
 void SetDebug( char * );
@@ -409,7 +431,12 @@ void SetDebug( char * );
 #define TB_SHRTPATH		(1<<5)
 #define TB_HIDEDESC		(1<<6)
 #define TB_CARATTACHED	(1<<7)
-#define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED)
+#define TB_NOTIES       (1<<8)
+#define TB_BRIDGE       (1<<9)
+#define TB_SELREDRAW	(1<<10)
+// Track has been undrawn, don't draw it on Redraw
+#define TB_UNDRAWN	(1<<11)
+#define TB_TEMPBITS		(TB_PROFILEPATH|TB_PROCESSED|TB_UNDRAWN)
 
 /* track.c */
 #ifdef FASTTRACK
@@ -474,14 +501,21 @@ BOOL_T IsTrackDeleted( track_p );
 
 #define GetTrkSelected(T)		(GetTrkBits(T)&TB_SELECTED)
 #define GetTrkVisible(T)		(GetTrkBits(T)&TB_VISIBLE)
+#define GetTrkNoTies(T)			(GetTrkBits(T)&TB_NOTIES)
+#define GetTrkBridge(T)         (GetTrkBits(T)&TB_BRIDGE)
 #define SetTrkVisible(T,V)		((V)?SetTrkBits(T,TB_VISIBLE):ClrTrkBits(T,TB_VISIBLE))
+#define SetTrkNoTies(T,V)		((V)?SetTrkBits(T,TB_NOTIES):ClrTrkBits(T,TB_NOTIES))
+#define SetTrkBridge(T,V)		((V)?SetTrkBits(T,TB_BRIDGE):ClrTrkBits(T,TB_BRIDGE))
 int ClrAllTrkBits( int );
+int ClrAllTrkBitsRedraw( int, wBool_t );
 
 void GetTrkEndElev( track_p trk, EPINX_T e, int *option, DIST_T *height );
 void SetTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
 int GetTrkEndElevMode( track_p, EPINX_T );
 int GetTrkEndElevUnmaskedMode( track_p, EPINX_T );
 DIST_T GetTrkEndElevHeight( track_p, EPINX_T );
+BOOL_T GetTrkEndElevCachedHeight (track_p trk, EPINX_T e, DIST_T *height, DIST_T *length);
+void SetTrkEndElevCachedHeight ( track_p trk, EPINX_T e, DIST_T height, DIST_T length);
 char * GetTrkEndElevStation( track_p, EPINX_T );
 #define EndPtIsDefinedElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_DEF)
 #define EndPtIsIgnoredElev( T, E ) (GetTrkEndElevMode(T,E)==ELEV_IGNORE)
@@ -493,9 +527,10 @@ void ClearElevPath( void );
 BOOL_T GetTrkOnElevPath( track_p, DIST_T * elev );
 void SetTrkLayer( track_p, int );
 BOOL_T CheckTrackLayer( track_p );
+BOOL_T CheckTrackLayerSilent(track_p);
 void CopyAttributes( track_p, track_p );
 
-#define GetTrkGauge( T )		GetScaleTrackGauge(GetTrkScale(T))
+DIST_T GetTrkGauge( track_cp );
 #define GetTrkScaleName( T )	GetScaleName(GetTrkScale(T))
 void SetTrkEndPtCnt( track_p, EPINX_T );
 BOOL_T WriteEndPt( FILE *, track_cp, EPINX_T );
@@ -507,10 +542,55 @@ void AuditTracks( char *, ... );
 void CheckTrackLength( track_cp );
 track_p NewTrack( wIndex_t, TRKTYP_T, EPINX_T, CSIZE_T );
 void DescribeTrack( track_cp, char *, CSIZE_T );
+void ActivateTrack( track_cp );
 EPINX_T GetEndPtConnectedToMe( track_p, track_p );
 EPINX_T GetNearestEndPtConnectedToMe( track_p, track_p, coOrd);
 void SetEndPts( track_p, EPINX_T );
 BOOL_T DeleteTrack( track_p, BOOL_T );
+
+#define REGRESS_CHECK_POS( TITLE, P1, P2, FIELD ) \
+	if ( ! IsPosClose( P1->FIELD, P2->FIELD ) ) { \
+		sprintf( cp, TITLE ": Actual [%0.3f %0.3f], Expected [%0.3f %0.3f]\n", \
+			P1->FIELD.x, P1->FIELD.y, \
+			P2->FIELD.x, P2->FIELD.y ); \
+		return FALSE; \
+	}
+#define REGRESS_CHECK_DIST( TITLE, P1, P2, FIELD ) \
+	if ( ! IsDistClose( P1->FIELD, P2->FIELD ) ) { \
+		sprintf( cp, TITLE ": Actual %0.3f, Expected %0.3f\n", \
+			P1->FIELD, P2->FIELD ); \
+		return FALSE; \
+	}
+#define REGRESS_CHECK_WIDTH( TITLE, P1, P2, FIELD ) \
+	if ( ! IsWidthClose( P1->FIELD, P2->FIELD ) ) { \
+		sprintf( cp, TITLE ": Actual %0.3f, Expected %0.3f\n", \
+			P1->FIELD, P2->FIELD ); \
+		return FALSE; \
+	}
+#define REGRESS_CHECK_ANGLE( TITLE, P1, P2, FIELD ) \
+	if ( ! IsAngleClose( P1->FIELD, P2->FIELD ) ) { \
+		sprintf( cp, TITLE ": Actual %0.3f , Expected %0.3f\n", \
+			P1->FIELD, P2->FIELD ); \
+		return FALSE; \
+	}
+#define REGRESS_CHECK_INT( TITLE, P1, P2, FIELD ) \
+	if ( P1->FIELD != P2->FIELD ) { \
+		sprintf( cp, TITLE ": Actual %d, Expected %d\n", \
+			(int)(P1->FIELD), (int)(P2->FIELD) ); \
+		return FALSE; \
+	}
+#define REGRESS_CHECK_COLOR( TITLE, P1, P2, FIELD ) \
+	if ( ! IsColorClose(P1->FIELD, P2->FIELD) ) { \
+		sprintf( cp, TITLE ": Actual %6x, Expected %6x\n", \
+			(int)wDrawGetRGB(P1->FIELD), (int)wDrawGetRGB(P2->FIELD) ); \
+		return FALSE; \
+	}
+wBool_t IsPosClose( coOrd, coOrd );
+wBool_t IsAngleClose( ANGLE_T, ANGLE_T );
+wBool_t IsDistClose( DIST_T, DIST_T );
+wBool_t IsWidthClose( DIST_T, DIST_T );
+wBool_t IsColorClose( wDrawColor, wDrawColor );
+wBool_t CompareTrack( track_cp, track_cp );
 
 void MoveTrack( track_p, coOrd );
 void RotateTrack( track_p, coOrd, ANGLE_T );
@@ -524,19 +604,18 @@ EPINX_T GetNextTrkOnPath( track_p, EPINX_T );
 #define FDE_UDF 1
 #define FDE_END 2
 int FindDefinedElev( track_p, EPINX_T, int, BOOL_T, DIST_T *, DIST_T *);
-BOOL_T ComputeElev( track_p, EPINX_T, BOOL_T, DIST_T *, DIST_T * );
+BOOL_T ComputeElev( track_p trk, EPINX_T ep, BOOL_T on_path, DIST_T * elev, DIST_T * grade, BOOL_T force);
 
 #define DTS_LEFT		(1<<0)
 #define DTS_RIGHT		(1<<1)
-#define DTS_THICK2		(1<<2)
-#define DTS_THICK3		(1<<3)
-#define DTS_TIES		(1<<4)
 #define DTS_NOCENTER	(1<<5)
+#define DTS_DOT			(1<<7)
+#define DTS_DASH		(1<<8)
+#define DTS_DASHDOT		(1<<9)
+#define DTS_DASHDOTDOT  (1<<10)
 
-void DrawCurvedTies( drawCmd_p, track_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, wDrawColor );
-void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_p, DIST_T, wDrawColor, long );
-void DrawStraightTies( drawCmd_p, track_p, coOrd, coOrd, wDrawColor );
-void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_p, DIST_T, wDrawColor, long );
+void DrawCurvedTrack( drawCmd_p, coOrd, DIST_T, ANGLE_T, ANGLE_T, coOrd, coOrd, track_cp, wDrawColor, long );
+void DrawStraightTrack( drawCmd_p, coOrd, coOrd, ANGLE_T, track_cp, wDrawColor, long );
 
 ANGLE_T GetAngleAtPoint( track_p, coOrd, EPINX_T *, EPINX_T * );
 DIST_T GetTrkDistance( track_cp, coOrd *);
@@ -552,24 +631,23 @@ void DrawEndElev( drawCmd_p, track_p, EPINX_T, wDrawColor );
 wDrawColor GetTrkColor( track_p, drawCmd_p );
 void DrawTrack( track_cp, drawCmd_p, wDrawColor );
 void DrawTracks( drawCmd_p, DIST_T, coOrd, coOrd );
-void RedrawLayer( unsigned int, BOOL_T );
 void DrawNewTrack( track_cp );
 void DrawOneTrack( track_cp, drawCmd_p );
 void UndrawNewTrack( track_cp );
 void DrawSelectedTracks( drawCmd_p );
 void HilightElevations( BOOL_T );
 void HilightSelectedEndPt( BOOL_T, track_p, EPINX_T );
-DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T );
+DIST_T EndPtDescriptionDistance( coOrd, track_p, EPINX_T, coOrd *, BOOL_T show_hidden, BOOL_T * hidden );
 STATUS_T EndPtDescriptionMove( track_p, EPINX_T, wAction_t, coOrd );
 
 track_p FindTrack( TRKINX_T );
 void ResolveIndex( void );
 void RenumberTracks( void );
 BOOL_T ReadTrack( char * );
-BOOL_T WriteTracks( FILE * );
-BOOL_T ExportTracks( FILE * );
+BOOL_T WriteTracks( FILE *, wBool_t );
+BOOL_T ExportTracks( FILE * , coOrd *);
 void ImportStart( void );
-void ImportEnd( void );
+void ImportEnd( coOrd , wBool_t, wBool_t);
 void FreeTrack( track_p );
 void ClearTracks( void );
 BOOL_T TrackIterate( track_p * );
@@ -590,9 +668,10 @@ BOOL_T ConnectTurntableTracks(track_p, EPINX_T,	track_p, EPINX_T  );
 BOOL_T SplitTrack( track_p, coOrd, EPINX_T, track_p *leftover, BOOL_T );
 BOOL_T TraverseTrack( traverseTrack_p, DIST_T * );
 BOOL_T RemoveTrack( track_p*, EPINX_T*, DIST_T* );
-BOOL_T TrimTrack( track_p, EPINX_T, DIST_T );
+BOOL_T TrimTrack( track_p, EPINX_T, DIST_T, coOrd pos, ANGLE_T angle, DIST_T radius, coOrd center);
 BOOL_T MergeTracks( track_p, EPINX_T, track_p, EPINX_T );
 STATUS_T ExtendStraightFromOrig( track_p, wAction_t, coOrd );
+STATUS_T ExtendTrackFromOrig( track_p, wAction_t, coOrd );
 STATUS_T ModifyTrack( track_p, wAction_t, coOrd );
 BOOL_T GetTrackParams( int, track_p, coOrd, trackParams_t* );
 BOOL_T MoveEndPt( track_p *, EPINX_T *, coOrd, DIST_T );
@@ -617,8 +696,7 @@ void FlipTrack( track_p, coOrd, ANGLE_T );
 void DrawPositionIndicators( void );
 void AdvancePositionIndicator( track_p, coOrd, coOrd *, ANGLE_T * );
 
-BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, track_p *, coOrd *, coOrd * );
-
+BOOL_T MakeParallelTrack( track_p, coOrd, DIST_T, DIST_T, track_p *, coOrd *, coOrd * , BOOL_T);
 
 /* cmisc.c */
 wIndex_t describeCmdInx;
@@ -639,7 +717,7 @@ typedef struct {
 		char * label;
 		void * valueP;
 		char * helpStr;
-		int max_string;
+		unsigned int max_string;
 		int mode;
 		wControl_p control0;
 		wControl_p control1;
@@ -655,10 +733,11 @@ typedef void (*descUpdate_t)( track_p, int, descData_p, BOOL_T );
 void DoDescribe( char *, char *, track_p, descData_p, descUpdate_t );
 void DescribeCancel( void );
 BOOL_T UpdateDescStraight( int, int, int, int, int, descData_p, long );
+STATUS_T CmdDescribe(wAction_t,coOrd);
 
 		
 /* compound.c */
-DIST_T CompoundDescriptionDistance( coOrd, track_p );
+DIST_T CompoundDescriptionDistance( coOrd, track_p, coOrd *, BOOL_T, BOOL_T * );
 STATUS_T CompoundDescriptionMove( track_p, wAction_t, coOrd );
 
 /* elev.c */
@@ -670,7 +749,7 @@ STATUS_T CompoundDescriptionMove( track_p, wAction_t, coOrd );
 long oldElevationEvaluation;
 EPINX_T GetNextTrkOnPath( track_p trk, EPINX_T ep );
 int FindDefinedElev( track_p, EPINX_T, int, BOOL_T, DIST_T *, DIST_T * );
-BOOL_T ComputeElev( track_p, EPINX_T, BOOL_T, DIST_T *, DIST_T * );
+BOOL_T ComputeElev( track_p, EPINX_T, BOOL_T, DIST_T *, DIST_T *, BOOL_T );
 void RecomputeElevations( void );
 void UpdateAllElevations( void );
 DIST_T GetElevation( track_p );
@@ -680,20 +759,31 @@ void UpdateTrkEndElev( track_p, EPINX_T, int, DIST_T, char * );
 void DrawTrackElev( track_p, drawCmd_p, BOOL_T );
 
 /* cdraw.c */
+typedef enum {DRAWLINESOLID,
+			DRAWLINEDASH,
+			DRAWLINEDOT,
+			DRAWLINEDASHDOT,
+			DRAWLINEDASHDOTDOT,
+			DRAWLINECENTER,
+			DRAWLINEPHANTOM } drawLineType_e;
 track_p MakeDrawFromSeg( coOrd, ANGLE_T, trkSeg_p );
+track_p MakePolyLineFromSegs( coOrd, ANGLE_T, dynArr_t * );
+void DrawOriginAnchor(track_p);
 BOOL_T OnTableEdgeEndPt( track_p, coOrd * );
 BOOL_T GetClosestEndPt( track_p, coOrd * );
 BOOL_T ReadTableEdge( char * );
 BOOL_T ReadText( char * );
+void SetLineType( track_p trk, int width );
+void MenuMode(int );
 
 /* chotbar.c */
 extern DIST_T curBarScale;
 void InitHotBar( void );
 void HideHotBar( void );
-void LayoutHotBar( void );
+void LayoutHotBar ( void *);
 typedef enum { HB_SELECT, HB_DRAW, HB_LISTTITLE, HB_BARTITLE, HB_FULLTITLE } hotBarProc_e;
 typedef char * (*hotBarProc_t)( hotBarProc_e, void *, drawCmd_p, coOrd * );
-void AddHotBarElement( char *, coOrd, coOrd, BOOL_T, DIST_T, void *, hotBarProc_t );
+void AddHotBarElement( char *, coOrd, coOrd, BOOL_T, BOOL_T, DIST_T, void *, hotBarProc_t );
 void HotBarCancel( void );
 void AddHotBarTurnouts( void );
 void AddHotBarStructures( void );

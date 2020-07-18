@@ -70,9 +70,9 @@ extern wDrawColor wDrawColorBlack;
  *
  */
 
-static GtkPrintSettings *settings;			/**< current printer settings */
+static GtkPrintSettings *settings = NULL;			/**< current printer settings */
 static GtkPageSetup *page_setup;			/**< current paper settings */
-static GtkPrinter *selPrinter;				/**< printer selected by user */
+static GtkPrinter *selPrinter = NULL;				/**< printer selected by user */
 static GtkPrintJob *curPrintJob;			/**< currently active print job */
 extern struct wDraw_t psPrint_d;
 
@@ -131,7 +131,6 @@ WlibApplySettings(GtkPrintOperation *op)
             // create  default print settings
             settings = gtk_print_settings_new();
         }
-
         g_error_free(err);
     }
 
@@ -247,12 +246,13 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
     GError *err;
     GtkWidget *dialog;
 
-    WlibApplySettings(NULL);
+    if ( !settings )
+        WlibApplySettings(NULL);
 
     new_page_setup = gtk_print_run_page_setup_dialog(GTK_WINDOW(gtkMainW->gtkwin),
                      page_setup, settings);
 
-    if (page_setup) {
+    if (page_setup && (page_setup != new_page_setup)) {      //Can be the same if no mods...
         g_object_unref(page_setup);
     }
 
@@ -262,6 +262,51 @@ void wPrintSetup(wPrintSetupCallBack_p callback)
     WlibSaveSettings(NULL);
 }
 
+/*****************************************************************************
+ *
+ * 
+ *
+ */
+
+
+static GtkPrinter * pDefaultPrinter = NULL;
+gboolean isDefaultPrinter( GtkPrinter * printer, gpointer data )
+{
+const char * pPrinterName = gtk_printer_get_name( printer );
+	if ( gtk_printer_is_default( printer ) ) {
+		pDefaultPrinter = printer;
+		return TRUE;
+	}
+	return FALSE;
+}
+
+static void getDefaultPrinter()
+{
+	pDefaultPrinter = NULL;
+	gtk_enumerate_printers( isDefaultPrinter, NULL, NULL, TRUE );
+} 
+
+const char * wPrintGetName()
+{
+	static char sPrinterName[100];
+	WlibApplySettings( NULL );
+	const char * pPrinterName = 
+		gtk_print_settings_get( settings, "format-for-printer" );
+	if ( pPrinterName == NULL ) {
+		getDefaultPrinter();
+		if ( pDefaultPrinter )
+			pPrinterName = gtk_printer_get_name( pDefaultPrinter );
+	}
+	if ( pPrinterName == NULL ) {
+		pPrinterName = "";
+	}
+	strncpy (sPrinterName, pPrinterName, sizeof sPrinterName - 1 );
+	sPrinterName[ sizeof sPrinterName - 1 ] = '\0';
+	for ( char * cp = sPrinterName; *cp; cp++ )
+		if ( *cp == ':' )
+			*cp = '-';
+	return sPrinterName;
+}
 /*****************************************************************************
  *
  * BASIC PRINTING
@@ -299,12 +344,53 @@ static void setLineType(
     }
 
     cairo_set_line_width(cr, lineWidth);
-
-    if (lineType == wDrawLineDash) {
-        cairo_set_dash(cr, dashes, len_dashes, 0.0);
-    } else {
-        cairo_set_dash(cr, NULL, 0, 0.0);
+    switch(lineType) {
+    	case wDrawLineDot:
+    	{
+    		double dashes[] = { 1,  2 , 1,  2};
+    	    static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+    	    cairo_set_dash(cr, dashes, len_dashes, 0.0);
+    	    break;
+    	}
+    	case wDrawLineDash:
+    	{
+    		double dashes[] = { DASH_LENGTH, 3 };							//Reduce gap in between dashes
+    		static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+    		cairo_set_dash(cr, dashes, len_dashes, 0.0);
+			break;
+    	}
+    	case wDrawLineDashDot:
+    	{
+    		double dashes[] = { 3, 2, 1, 2};
+    		static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+    		cairo_set_dash(cr, dashes, len_dashes, 0.0);
+    		break;
+    	}
+    	case wDrawLineDashDotDot:
+    	{
+    		double dashes[] = { 3, 2, 1, 2, 1, 2};
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cr, dashes, len_dashes, 0.0);
+			break;
+    	}
+    	case wDrawLineCenter:
+		{
+			double dashes[] = { 1.5*DASH_LENGTH, 3, DASH_LENGTH, 3};
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cr, dashes, len_dashes, 0.0);
+			break;
+		}
+    	case wDrawLinePhantom:
+		{
+			double dashes[] = { 1.5*DASH_LENGTH, 3, DASH_LENGTH, 3, DASH_LENGTH, 3};
+			static int len_dashes  = sizeof(dashes) / sizeof(dashes[0]);
+			cairo_set_dash(cr, dashes, len_dashes, 0.0);
+			break;
+		}
+    	default:
+    		cairo_set_dash(cr, NULL, 0, 0.0);
     }
+
 }
 
 /**
@@ -479,14 +565,18 @@ void psPrintFillRectangle(
  * \param cnt IN the number of points
  * \param color IN fill color
  * \param opts IN options
+ * \paran fill IN Fill or not
  * \return
  */
 
 void psPrintFillPolygon(
     wPos_t p[][2],
+	wPolyLine_e type[],
     int cnt,
     wDrawColor color,
-    wDrawOpts opts)
+    wDrawOpts opts,
+	int fill,
+	int open )
 {
     int inx;
     cairo_t *cr = psPrint_d.printContext;
@@ -501,13 +591,67 @@ void psPrintFillPolygon(
 
     psSetColor(color);
 
-    cairo_move_to(cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ]);
+    wPos_t mid0[2], mid1[2], mid2[2], mid3[2], mid4[2];
 
     for (inx=0; inx<cnt; inx++) {
-        cairo_line_to(cr, p[ inx ][ 0 ], p[ inx ][ 1 ]);
+    	int j = inx-1;
+    	int k = inx+1;
+    	if (j < 0) j = cnt-1;
+    	if (k > cnt-1) k = 0;
+		double len0, len1;
+		double d0x = (p[inx][0]-p[j][0]);
+		double d0y = (p[inx][1]-p[j][1]);
+		double d1x = (p[k][0]-p[inx][0]);
+		double d1y = (p[k][1]-p[inx][1]);
+		len0 = (d0x*d0x+d0y*d0y);
+		len1 = (d1x*d1x+d1y*d1y);
+		mid0[0] = (d0x/2)+p[j][0];
+		mid0[1] = (d0y/2)+p[j][1];
+		mid1[0] = (d1x/2)+p[inx][0];
+		mid1[1] = (d1y/2)+p[inx][1];
+		if (type && (type[inx] == wPolyLineRound) && (len1>0) && (len0>0)) {
+			double ratio = sqrt(len0/len1);
+			if (len0 < len1) {
+				mid1[0] = ((d1x*ratio)/2)+p[inx][0];
+				mid1[1] = ((d1y*ratio)/2)+p[inx][1];
+			} else {
+				mid0[0] = p[inx][0]-(d0x/(2*ratio));
+				mid0[1] = p[inx][1]-(d0y/(2*ratio));
+			}
+		}
+		mid3[0] = (p[inx][0]-mid0[0])/2+mid0[0];
+		mid3[1] = (p[inx][1]-mid0[1])/2+mid0[1];
+		mid4[0] = (mid1[0]-p[inx][0])/2+p[inx][0];
+		mid4[1] = (mid1[1]-p[inx][1])/2+p[inx][1];
+		wPos_t save[2];
+		if (inx==0) {
+			 if (!type || (type && type[0] == wPolyLineStraight) || open) {
+				 cairo_move_to(cr, p[ 0 ][ 0 ], p[ 0 ][ 1 ]);
+				 save[0] = p[0][0]; save[1] = p[0][1];
+			 } else {
+				 cairo_move_to(cr, mid0[0], mid0[1]);
+				 if (type[inx] == wPolyLineSmooth)
+				 	cairo_curve_to(cr, p[inx][0], p[inx][1], p[inx][0], p[inx][1], mid1[0], mid1[1]);
+				 else
+				 	cairo_curve_to(cr, mid3[0], mid3[1], mid4[0], mid4[1], mid1[0], mid1[1]);
+				 save[0] = mid0[0]; save[1] = mid0[1];
+			 }
+		} else if (!type || (type && type[inx] == wPolyLineStraight) || (open && (inx==cnt-1)) ) {
+			cairo_line_to(cr, p[ inx ][ 0 ], p[ inx ][ 1 ]);
+		} else {
+			cairo_line_to(cr, mid0[ 0 ], mid0[ 1 ]);
+			if (type && type[inx] == wPolyLineSmooth)
+				cairo_curve_to(cr, p[inx][0],p[inx][1],p[inx][0],p[inx][1],mid1[0],mid1[1]);
+			else
+				cairo_curve_to(cr, mid3[0],mid3[1],mid4[0],mid4[1],mid1[0],mid1[1]);
+		}
+		if ((inx==cnt-1) && !open) {
+			cairo_line_to(cr, save[0], save[1]);
+		}
     }
 
-    cairo_fill(cr);
+    if (fill && !open) cairo_fill(cr);
+    else cairo_stroke(cr);
 }
 
 /**
@@ -602,13 +746,13 @@ void psPrintString(
 
     cairo_matrix_transform_point(&matrix, &x0, &y0);
 
+    cairo_identity_matrix(cr);
 
     layout = pango_cairo_create_layout(cr);
 
     // set the correct font and size
     /** \todo use a getter function instead of double conversion */
     desc = pango_font_description_from_string(wlibFontTranslate(fp));
-
 
     pango_font_description_set_size(desc, fs * PANGO_SCALE * scale_text);
 
@@ -617,28 +761,41 @@ void psPrintString(
     pango_layout_set_text(layout, s, -1);
     pango_layout_set_width(layout, -1);
     pango_layout_set_alignment(layout, PANGO_ALIGN_LEFT);
-    pango_layout_get_pixel_size(layout, &text_width, &text_height);
+    pango_layout_get_size(layout, &text_width, &text_height);
+
+    text_width = text_width / PANGO_SCALE;
+    text_height = text_height / PANGO_SCALE;
 
     // get the height of the string
     pcontext = pango_cairo_create_context(cr);
     metrics = pango_context_get_metrics(pcontext, desc,
                                         pango_context_get_language(pcontext));
 
-    ascent = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE *scale_adjust;
+    ascent = pango_font_metrics_get_ascent(metrics) / PANGO_SCALE;
 
-    cairo_identity_matrix(cr);
+    int baseline = pango_layout_get_baseline(layout) / PANGO_SCALE;
 
-    cairo_translate(cr, x0 + ((ascent + (bBorder*scale_adjust)) * sin(-a * M_PI / 180.0))+((lBorder*scale_adjust)* cos(a * M_PI / 180.0)),
-    					y0 - ((ascent + (bBorder*scale_adjust)) * cos( a * M_PI / 180.0))+((lBorder*scale_adjust)* sin(a * M_PI / 180.0)));
-
+    cairo_translate(cr, x0,	y0 );
     cairo_rotate(cr, -a * M_PI / 180.0);
+    cairo_translate( cr, 0, -baseline );
+
+    cairo_move_to(cr,0,0);
+
+    pango_cairo_update_layout(cr, layout);
+
 
     // set the color
     psSetColor(color);
 
     // and show the string
-    pango_cairo_show_layout(cr, layout);
-
+    if(!(opts & wDrawOutlineFont)) {
+		pango_cairo_show_layout(cr, layout);
+	} else {
+		PangoLayoutLine *line;
+		line = pango_layout_get_line_readonly (layout, 0);
+		pango_cairo_layout_line_path (cr, line);
+		cairo_stroke( cr );	
+	}
     // free unused objects
     g_object_unref(layout);
     g_object_unref(pcontext);
@@ -704,20 +861,19 @@ WlibGetPaperSize(void)
  * \return
  */
 
-void wPrintGetPageSize(
-    double * w,
-    double * h)
+
+void wPrintGetMargins(
+	double * tMargin,
+	double * rMargin,
+	double * bMargin,
+	double * lMargin )
 {
-    // if necessary load the settings
-    if (!settings) {
-        WlibApplySettings(NULL);
-    }
-
-    WlibGetPaperSize();
-
-    *w = paperWidth -lBorder - rBorder;
-    *h = paperHeight - tBorder - bBorder;
+	if ( tMargin ) *tMargin = tBorder;
+	if ( rMargin ) *rMargin = rBorder;
+	if ( bMargin ) *bMargin = bBorder;
+	if ( lMargin ) *lMargin = lBorder;
 }
+
 
 /**
  * Get the paper size. The size returned is the physical size of the
@@ -727,7 +883,7 @@ void wPrintGetPageSize(
  * \return
  */
 
-void wPrintGetPhysSize(
+void wPrintGetPageSize(
     double * w,
     double * h)
 {
@@ -854,13 +1010,13 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
                                     NULL);
         psPrint_d.printContext = cairo_create(psPrint_d.curPrintSurface);
 
+        WlibApplySettings( NULL );
         //update the paper dimensions
         WlibGetPaperSize();
 
         /* for all surfaces including files the resolution is always 72 ppi (as all GTK uses PDF) */
         surface_type = cairo_surface_get_type(psPrint_d.curPrintSurface);
 
-        const char * printer_name = gtk_print_settings_get_printer(settings);
         /*
          * Override up-scaling for some printer drivers/Linux systems that don't support the latest CUPS
          * - the user sets the environment variable XTRKCADPRINTSCALE to a value
@@ -871,7 +1027,8 @@ wBool_t wPrintDocStart(const char * title, int fTotalPageCount, int * copiesP)
          */
         char * sEnvScale = PRODUCT "PRINTSCALE";
 
-        if ((strcmp(printer_name,"Print to File") == 0) || getenv(sEnvScale) == NULL) {
+	const char * sPrinterName = gtk_printer_get_name( selPrinter );
+        if ((strcmp(sPrinterName,"Print to File") == 0) || getenv(sEnvScale) == NULL) {
 			double p_def = 600;
 			cairo_surface_set_fallback_resolution(psPrint_d.curPrintSurface, p_def, p_def);
 			psPrint_d.dpi = p_def;

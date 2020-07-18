@@ -257,7 +257,7 @@ EXPORT void DrawBench(
 		Translate( &pp[1], p0, a-90, width );
 		Translate( &pp[2], p1, a-90, width );
 		Translate( &pp[3], p1, a+90, width );
-		DrawFillPoly( d, 4, pp, color1 );
+		DrawPoly( d, 4, pp, NULL, color1, 0, 1, 0);
 		/* Draw Outline */
 		if ( /*color1 != color2 &&*/
 			 ( ( d->scale < ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale) ) ||	/* big enough scale */

@@ -25,12 +25,15 @@
 #include "messages.h"
 #include "track.h"
 #include "utility.h"
+#include "fileio.h"
 
 static wMenu_p splitPopupM[2];
 static wMenuToggle_p splitPopupMI[2][4];
 static track_p splitTrkTrk[2];
 static EPINX_T splitTrkEP[2];
 static BOOL_T splitTrkFlip;
+static dynArr_t anchors_da;
+#define anchors(N) DYNARR_N(trkSeg_t,anchors_da,N)
 
 static void ChangeSplitEPMode( wBool_t set, void * mode )
 {
@@ -53,6 +56,40 @@ static void ChangeSplitEPMode( wBool_t set, void * mode )
 	}
 	DrawEndPt( &mainD, splitTrkTrk[0], splitTrkEP[0], wDrawColorBlack );
 	DrawEndPt( &mainD, splitTrkTrk[1], splitTrkEP[1], wDrawColorBlack );
+}
+
+static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
+	DIST_T d = tempD.scale*0.15;
+	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0);
+	int i;
+	if (!end) {
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		i = anchors_da.cnt-1;
+		anchors(i).type = SEG_STRLIN;
+		anchors(i).color = wDrawColorBlue;
+		Translate(&anchors(i).u.l.pos[0],pos,a,GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
+		anchors(i).width = 0.5;
+	} else {
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		i = anchors_da.cnt-1;
+		anchors(i).type = SEG_STRLIN;
+		anchors(i).color = wDrawColorBlue;
+		Translate(&anchors(i).u.l.pos[0],pos,a,GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a+90,d);
+		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a+90,-d);
+		anchors(i).width = 0.5;
+		DYNARR_APPEND(trkSeg_t,anchors_da,1);
+		i = anchors_da.cnt-1;
+		anchors(i).type = SEG_STRLIN;
+		anchors(i).color = wDrawColorBlue;
+		Translate(&anchors(i).u.l.pos[0],pos,a,GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a+90,-d);
+		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
+		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a+90,d);
+		anchors(i).width = 0.5;
+	}
 }
 
 static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
@@ -79,12 +116,16 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 				onTrackInSplit = FALSE;
 				return C_TERMINATE;
 			}
-			if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
-				onTrackInSplit = FALSE;
-				InfoMessage(_("Can't Split that Track"));
-				return C_CONTINUE;
-			}
 			ep0 = PickEndPoint( pos, trk0 );
+			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos)) && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
+				pos = GetTrkEndPos(trk0,ep0);
+			} else {
+				if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
+					onTrackInSplit = FALSE;
+					InfoMessage(_("Can't Split that Track"));
+					return C_CONTINUE;
+				}
+			}
 			onTrackInSplit = FALSE;
 			if (ep0 < 0) {
 				return C_CONTINUE;
@@ -141,7 +182,32 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			wMenuToggleSet( splitPopupMI[quad&1][inx], mode == inx );
 		wMenuPopupShow( splitPopupM[quad&1] );
 		break;
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,anchors_da);
+		onTrackInSplit = TRUE;
+		if ((trk0 = OnTrack( &pos, FALSE, TRUE ))!=NULL && CheckTrackLayerSilent( trk0 )) {
+			onTrackInSplit = FALSE;
+			ep0 = PickEndPoint( pos, trk0 );
+			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos)) && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
+				CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
+			} else if (QueryTrack(trk0,Q_IS_TURNOUT)) {
+				if ((MyGetKeyState()&WKEY_SHIFT) != 0 )
+					CreateSplitAnchor(pos,trk0,FALSE);
+				else
+					CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
+				break;
+			} else if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
+				CreateSplitAnchor(pos,trk0,FALSE);
+			}
+		}
+		onTrackInSplit = FALSE;
+		break;
+	case C_REDRAW:
+		if (anchors_da.cnt)
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), anchors_da.cnt, trackGauge, wDrawColorBlack );
+		break;
 	}
+
 	return C_CONTINUE;
 }
 
@@ -152,6 +218,6 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 
 void InitCmdSplit( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"), wIconCreatePixMap(splittrk_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_CMDMENU, ACCL_SPLIT, NULL );
+	AddMenuButton( menu, CmdSplitTrack, "cmdSplitTrack", _("Split Track"), wIconCreatePixMap(splittrk_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_CMDMENU|IC_WANT_MOVE, ACCL_SPLIT, NULL );
 }
 

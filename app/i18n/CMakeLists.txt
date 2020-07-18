@@ -4,6 +4,7 @@ PROJECT(i18n)
 SET(XTRKCAD_LOCALE_IDS
 	de_DE
 	fi
+	fr_FR
 	pt_BR
 	)
 
@@ -30,6 +31,10 @@ FILE(GLOB_RECURSE XGT_SOURCE_FILES
 	${XTrkCAD_SOURCE_DIR}/*.c
 	${XTrkCAD_SOURCE_DIR}/*.h)
 
+# add wlib files that have translatable strings
+FILE(RELATIVE_PATH TEMP_FILENAME ${i18n_SOURCE_DIR} "${wlib_SOURCE_DIR}/mswlib/mswmisc.c")
+LIST(APPEND XGT_SOURCE_FILES ${TEMP_FILENAME})
+
 # Dynamically generated files, such as messages.h and bllnhlp.c, must be added
 # to the list manually to make sure that everything works properly.
 # "FILE(RELATIVE_PATH ..." is used to get rid of the absolute paths like
@@ -45,7 +50,7 @@ LIST(APPEND XGT_SOURCE_FILES ${TEMP_FILENAME})
 # Extract strings and create xtrkcad.pot
 ADD_CUSTOM_COMMAND(
 	OUTPUT ${POTFILE}
-	COMMAND ${XTC_XGETTEXT} ${XGTKEYWORDS} -d ${GETTEXT_PACKAGE} -F -o ${POTFILE} --from-code=ISO-8859-15 ${XGT_SOURCE_FILES}
+	COMMAND ${XTC_XGETTEXT} ${XGTKEYWORDS} --add-comments=i18n -d ${GETTEXT_PACKAGE} -F -o ${POTFILE} --from-code=ISO-8859-15 ${XGT_SOURCE_FILES}
 	DEPENDS xtrkcad ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
 	WORKING_DIRECTORY ${i18n_SOURCE_DIR}
 	)
@@ -115,11 +120,10 @@ FILE(GLOB_RECURSE XTC_CUSTOM_MSG_FILES
 
 # Custom string extractor utility
 ADD_EXECUTABLE(stripmsg stripmsg.c)
-GET_TARGET_PROPERTY(stripmsg_EXE stripmsg LOCATION)
 
 # Extract translatable strings from custom message files to one temporary file
 ADD_CUSTOM_COMMAND(
 	OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
-	COMMAND ${stripmsg_EXE} ${XTC_CUSTOM_MSG_FILES} > ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
+	COMMAND stripmsg ${XTC_CUSTOM_MSG_FILES} > ${CMAKE_CURRENT_BINARY_DIR}/custmsg.h
 	DEPENDS stripmsg
 	)

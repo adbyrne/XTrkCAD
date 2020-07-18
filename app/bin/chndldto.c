@@ -91,7 +91,6 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 			Dhlt.normalP = Dhlt.reverseP = Dhlt.reverseP1 = pos;
 			Dhlt.normalA = GetAngleAtPoint( Dhlt.normalT, Dhlt.normalP, NULL, NULL );
 			InfoMessage( _("Drag to set angle") );
-			DrawLine( &tempD, Dhlt.reverseP, Dhlt.reverseP1, 0, wDrawColorBlack );
 			Dhlt.state = 1;
 			pointC = pointP = pointP1 = reverseC = zero;
 			return C_CONTINUE;
@@ -102,7 +101,6 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 		if (Dhlt.normalT == NULL)
 			break;
 		if (Dhlt.state == 1) {
-			DrawLine( &tempD, Dhlt.reverseP, Dhlt.reverseP1, 0, wDrawColorBlack );
 			Dhlt.reverseP1 = pos;
 			Dhlt.reverseA = FindAngle( Dhlt.reverseP, Dhlt.reverseP1 );
 			Dhlt.frogA = NormalizeAngle( Dhlt.reverseA - Dhlt.normalA );
@@ -141,10 +139,8 @@ static STATUS_T CmdHandLaidTurnout( wAction_t action, coOrd pos )
 				Translate( &Dhlt.reverseP, Dhlt.reverseP, Dhlt.normalA+(right?+90:-90), trackGauge );
 				Translate( &Dhlt.reverseP1, Dhlt.reverseP1, Dhlt.normalA+(right?+90:-90), trackGauge );
 			}
-			DrawLine( &tempD, Dhlt.reverseP, Dhlt.reverseP1, 0, wDrawColorBlack );
 			return C_CONTINUE;
 		} else if ( Dhlt.state == 2 ) {
-			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 			tempSegs_da.cnt = 0;
 			pointP = pos;
 			if ((pointT = OnTrack( &pointP, TRUE, TRUE )) == NULL)
@@ -273,7 +269,6 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 			if (action != C_UP) {
 				dist = FindDistance( pointP, Dhlt.normalP );
 				InfoMessage( _("Length = %0.2f Angle = %0.2f Frog# = %0.2f"), dist, Dhlt.frogA, Dhlt.frogNo );
-				DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 				return C_CONTINUE;
 			}
 			UndoStart( _("Create Hand Laid Turnout"), "Hndldto( T%d[%d] )", GetTrkIndex(pointT), pointEp0 );
@@ -334,7 +329,6 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 			DrawTrack( trk, &mainD, wDrawColorBlack );
 			for (trkpp=trks; *trkpp; trkpp++)
 				DrawTrack( *trkpp, &mainD, wDrawColorBlack );
-			DrawLine( &tempD, Dhlt.reverseP, Dhlt.reverseP1, 0, wDrawColorBlack );
 		
 			Dhlt.state = 0;
 			return C_TERMINATE;
@@ -348,12 +342,6 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 		return C_CONTINUE;
 
 	case C_CANCEL:
-		if (Dhlt.state >= 1)
-			DrawLine( &tempD, Dhlt.reverseP, Dhlt.reverseP1, 0, wDrawColorBlack );
-		if (Dhlt.state >= 2) {
-			DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
-			tempSegs_da.cnt = 0;
-		}
 		return C_CONTINUE;
 
 	}
@@ -367,5 +355,5 @@ PTRACE(( " a2=%0.1f rA1=%0.1f\n", angle2, reverseA1 ))
 
 EXPORT void InitCmdHandLaidTurnout( wMenu_p menu )
 {
-	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", _("HandLaidTurnout"), wIconCreatePixMap(hndldto_xpm), LEVEL0_50, IC_STICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
+	AddMenuButton( menu, CmdHandLaidTurnout, "cmdHandLaidTurnout", _("HandLaidTurnout"), wIconCreatePixMap(hndldto_xpm), LEVEL0_50, IC_STICKY|IC_INITNOTSTICKY|IC_POPUP2, ACCL_HNDLDTO, NULL );
 }

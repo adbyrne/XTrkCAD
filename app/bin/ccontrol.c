@@ -58,6 +58,9 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
 #include "utility.h"
 #include "messages.h"
 
@@ -176,7 +179,7 @@ static void UpdateControlProperties (  track_p trk, int inx, descData_p
 {
     controlData_p xx = GetcontrolData(trk);
     const char *thename, *theonscript, *theoffscript;
-    int max_str;
+    unsigned int max_str;
     char *newName, *newOnScript, *newOffScript;
     BOOL_T changed, nChanged, pChanged, onChanged, offChanged;
     
@@ -276,7 +279,7 @@ static void DescribeControl (track_p trk, char * str, CSIZE_T len )
         *str = tolower((unsigned char)*str);
         str++;
     }
-    sprintf( str, _("(%d [%s]): Layer=%d, at %0.3f,%0.3f"),
+    sprintf( str, _("(%d [%s]): Layer=%u, at %0.3f,%0.3f"),
              GetTrkIndex(trk),
              xx->name,GetTrkLayer(trk)+1, xx->orig.x, xx->orig.y);
     strncpy(controlProperties.name,xx->name,STR_SHORT_SIZE-1);
@@ -305,14 +308,22 @@ static BOOL_T WriteControl ( track_p t, FILE * f )
 {
     BOOL_T rc = TRUE;
     controlData_p xx = GetcontrolData(t);
-    rc &= fprintf(f, "CONTROL %d %d %s %d %0.6f %0.6f \"%s\" \"%s\" \"%s\"\n",
+	char *controlName = MyStrdup(xx->name);
+
+#ifdef WINDOWS
+	controlName = Convert2UTF8(controlName);
+#endif // WINDOWS
+
+    rc &= fprintf(f, "CONTROL %d %u %s %d %0.6f %0.6f \"%s\" \"%s\" \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t),
-                  GetTrkVisible(t), xx->orig.x, xx->orig.y, xx->name, 
+                  GetTrkVisible(t), xx->orig.x, xx->orig.y, controlName, 
                   xx->onscript, xx->offscript)>0;
+
+	MyFree(controlName);
     return rc;
 }
 
-static void ReadControl ( char * line )
+static BOOL_T ReadControl ( char * line )
 {
     wIndex_t index;
     /*TRKINX_T trkindex;*/
@@ -326,8 +337,13 @@ static void ReadControl ( char * line )
     wIndex_t layer;
     controlData_p xx;
     if (!GetArgs(line+7,"dLsdpqqq",&index,&layer,scale, &visible, &orig,&name,&onscript,&offscript)) {
-        return;
+        return FALSE;
     }
+
+#ifdef WINDOWS
+	ConvertUTF8ToSystem(name);
+#endif // WINDOWS
+
     trk = NewTrack(index, T_CONTROL, 0, sizeof(controlData_t));
     SetTrkVisible(trk, visible); 
     SetTrkScale(trk, LookupScale( scale ));
@@ -338,6 +354,7 @@ static void ReadControl ( char * line )
     xx->onscript = onscript;
     xx->offscript = offscript;
     ComputeControlBoundingBox(trk);
+    return TRUE;
 }
 
 static void MoveControl (track_p trk, coOrd orig )
@@ -502,24 +519,29 @@ static void CreateNewControl (coOrd orig)
 static STATUS_T CmdControl ( wAction_t action, coOrd pos )
 {
     
-    
+    static coOrd control_pos;
+    static BOOL_T create;
     switch (action) {
     case C_START:
         InfoMessage(_("Place control"));
+        create = FALSE;
         return C_CONTINUE;
     case C_DOWN:
+    	create = TRUE;
+    	/* no break */
 	case C_MOVE:
 		SnapPos(&pos);
-        DDrawControl( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+		control_pos = pos;
         return C_CONTINUE;
     case C_UP:
         SnapPos(&pos);
-        DDrawControl( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         CreateNewControl(pos);
         return C_TERMINATE;
     case C_REDRAW:
+    	if (create)
+    		DDrawControl( &tempD, control_pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+    	return C_CONTINUE;
     case C_CANCEL:
-        DDrawControl( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         return C_CONTINUE;
     default:
         return C_CONTINUE;
@@ -537,7 +559,7 @@ static void DrawControlTrackHilite( void )
 	w = (wPos_t)((ctlhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
 	h = (wPos_t)((ctlhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,ctlhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp );
+	wDrawFilledRectangle( mainD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
 
 static int ControlMgmProc ( int cmd, void * data )

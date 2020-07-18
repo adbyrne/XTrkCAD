@@ -15,7 +15,8 @@
 \define{XTCStgzPack} xtrkcad-setup-@XTRKCAD_VERSION@.i386.sh
 
 \define{XTCCopyRight} Copyright 2003, Sillub Technology and
-Copyright 2007, Bob Blackwell and Martin Fischer
+Copyright 2007, Bob Blackwell and Martin Fischer and
+Copyright 2020, Martin Fischer, Adam Richards and Dave Bullis
 
 
 \# Index Groupings
@@ -80,7 +81,7 @@ Using it, you can
 
 \u000
 
-\b Automatically generated Spiral \e{transition curves} (easements) whenever the track radius changes.
+\b Automatically generated Cornu \e{transition curves} (easements) whenever the track radius changes.
 
 \u000
 
@@ -109,31 +110,47 @@ Be sure to visit the project web page for latest news and updates: \W{http://www
 
 \f{Easy to use}
 
-As much as possible, \e{XTrackCAD} is designed to operate the same as pencil and paper: create tracks by simply dragging the mouse, place turnouts anywhere on existing tracks, use circles for initial design and create stall tracks by drawing from the turntable. 
+ \e{XTrackCAD} was designed to operate in a similar way to pencil and paper: You can draw tracks by dragging the mouse, you select and place turnout "templates" anywhere on existing tracks, and you can use fixed radii for initial design. 
+ 
+But extra capabilities have been added that give more power by using FlexTracks (Cornu) you have tracks that automatically redraw as you drag turnouts around, creating smooth curves, you can zoom in and out, and of course, undo and deleting tracks are easier!
 
-You don't have to be an expert CAD user to make the most of \e{XTrackCAD}. You don't specify line lengths or angles, just draw. 
+You don't have to be an expert CAD user to make the most of \e{XTrackCAD} but the program will ensure that dimensions, radii and angles are accurate. 
 
-\e{XTrackCAD} deals with tracks as tracks, not line segments. Tracks are connected to each other and can be drawn showing endpoints of turnouts and other components. As you zoom in, both rails are drawn. 
+You don't have to specify line lengths or angles and just draw. But if you want to be more precise, you can enter precise dimensions both in real-world and scale sizes.
 
-On-line demonstrations show the actual operation of many of the program's features. Extensive help is available for all commands and operations. 
+\e{XTrackCAD} is a specialized CAD for railway modelling, it deals with tracks as tracks, not as line segments. Tracks are connected correctly to each other and with endpoints of turnouts and other components. 
+
+As you zoom in, the two rails are drawn and then ties are added. 
+
+\f{Free}
+
+Thanks to the generosity of Dave Bullis, who wrote the progam, and the active help of open-source volunteers, XTrackCAD is free to own and use. You can even take up the cudgels and help!
+
+\f{Available Help}
+
+On-line demonstrations show the actual operation of many of the program's features. Extensive help is available for all commands and operations.  There are communities of users and developers who can answer quaestions.
 
 \f{Packed with features}
 
-\e{XTrackCAD} is designed from the ground up to be a complete tool for Model Railroad layout design. 
+\e{XTrackCAD} is designed from the ground up to be a complete tool for many aspects of Model Railroad layout design. 
+
+\dt \e{Active UI Prompting}
+
+\dd As the mouse moves over the layout objects, a set of different anchors are shown to indicate what is possible in each command with each modifier key if clicked or double clicked at that location.
 
 \dt \e{Train Simulation and Car Inventory}
 
-\dd Any number of Cars and Locomotives can be placed on your layout to check clearances, siding capacities and track layout. Trains can be animated to simulate operations and switching on your layout. But be careful you don't crash! 
+\dd Any number of Cars and Locomotives can be placed on your layout to check clearances, siding capacities and track layout. Trains can be animated to simulate operations and switching on your layout.
 
 \u000
 
-\dd The Car Inventory dialog records your cars and locomotives. 
+\dd The Car Inventory dialog records your cars and locomotives and these can be exported and imported from spreadsheets. 
 
 \u000
 
 \dt \e{Track Manipulation}
 
-\dd Track segments can be lengthened or shortened by simple click and drag. Tangents to a curve are created by dragging away from the curve. Tracks are extended by dragging from an Endpoint, creating new straight or curved segments. 
+\dd Track segments can be lengthened or shortened by simple click and drag. Tangents to a curve are created by dragging away from the curve. Tracks are extended by dragging from an Endpoint, creating new straight or curved segments. New tracks can be snapped into place or precisely placed and then Joined. 
 
 \u000
 
@@ -141,25 +158,32 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd The Parallel command easily creates new straight or curved tracks, laying out yards and sidings in a few easy steps. 
+\dd The Cornu flextrack features create dynamically variable tracks that optimise the curvature of tracks to ensure a protypical appearance. They alter as the other tracks are moved just as flextrack will in the 12 inches to the foot world! 
 
 \u000
 
-\dd The Join command links any two tracks (straight, curved, Turnouts or Turntables) with accurate aligned connecting track segments. The connected tracks are trimmed or extended as required. 
+\dd The Parallel command easily creates new straight or curved tracks, laying out yards and sidings in a few easy steps. Accurate platforms can be created with the Parallel Lines command followed by the Join Lines command.
 
 \u000
 
-\dd The Helix Track command computes the number of turns, radius, grade and vertical separation to based on your criteria. 
+\dd The Join command links any two tracks (Straights, Curves, Turnouts or Turntables) with accurate aligned connecting track segments which can be easements including Cornu easements. The connected tracks are trimmed or extended as required. 
 
 \u000
+
+\dd The Helix Track command computes the number of turns, radius, grade and vertical separation based on your criteria. 
+
+\u000
+
+\dd Turntables can be constructed with any radius and can either have fixed or dynamic bay tracks
 
 \dt \e{Turnout Select and Placement}
 
-\dd The Turnout Hot Bar contains a scrolling list of Turnouts, Sectional Tracks and Structures available in the current Scale. Simply click on one and drag it onto the layout. 
+\dd The Turnout Hot Bar contains a scrolling list of Turnouts, Sectional Tracks and Structures available in the current Scale. Simply click on one and click again drop it onto the layout. 
 
 \u000
 
-\dd As Turnouts are dragged over existing tracks they are automatically aligned. \e{XTrackCAD} searches for any other tracks that align with each of the Turnout's Endpoints, and shows you the number of connections that will be made and the maximum offset as you position the Turnout. Just adjust the Turnout's position to minimize the offset to ensure the best fit. 
+\dd As Turnouts are dragged over existing tracks they are automatically aligned. \e{XTrackCAD} searches for any other tracks that align with each of the Turnout's Endpoints, and shows you the number of connections that will be made and the maximum offset as you position the Turnout. 
+Just adjust the Turnout's position to minimize the offset to ensure the best fit. 
 
 \u000
 
@@ -169,11 +193,15 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \dt \e{Layers}
 
-\dd Layers are an important feature for designing layouts of any complexity. Use one layer for the main-line and others for staging tracks, Bench-work or scenery. Multilevel designs can have groups of layers for each level. 
+\dd Layers are an important feature for manageing the design for layouts of any complexity. Use one layer for the main-line and others for staging tracks, Bench-work or scenery. Multilevel designs can have groups of layers for each level. 
 
 \u000
 
-\dd \e{XTrackCAD} allows up to 99 layers and the first 20 layers can have their own button to control visibility. Each layer can have a name which is displayed as the balloon help for the layer button. 
+\dd \e{XTrackCAD} allows up to 99 layers layers can have their own button to control visibility. Each layer can have a name which is displayed as the balloon help for the layer button. 
+
+\u000
+
+\dd Modular Layout assembly is supported with Modular Layers which ensure thier contents are moved as a set.
 
 \u000
 
@@ -183,11 +211,11 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \dt \e{Elevations and Profile}
 
-\dd Elevations are one of the most powerful features of \e{XTrackCAD}. 
+\dd Elevations are one of the most powerful features of \e{XTrackCAD} they are dynamically recalulated as the layout changes. 
 
 \u000
 
-\dd Traditional layout designs (such as published in magazines) show elevations at selected spots on the layout. They may also show grades between elevations. 
+\dd Traditional layout designs (such as published in magazines) show elevations at selected spots on the layout. They may also show grades between elevations. These can be input into XtrkCAD.
 
 \u000
 
@@ -199,7 +227,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dt \e{Easements (Spiral Transition Curves)}
+\dt \e{Easements (Cornu Transition Curves)}
 
 \dd Easements are special sections of gradually curving track used to connect straight and curved tracks (or two curved tracks). Easements reduce the effects of sudden changes in track curves which can cause derailments. They also look great! 
 
@@ -211,7 +239,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \dt \e{Flexible and Powerful Printing}
 
-\dd Printing is an important part of a layout design program, and \e{XTrackCAD} has a flexible Print command to get your design onto the layout. 
+\dd Printing is an important part of a layout design program, and \e{XTrackCAD} has a flexible Print command to get your design onto the layout.
 
 \u000
 
@@ -261,7 +289,7 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd The \e{XTrackCAD} Draw command is used to draw lines (straight, curved and circles) and shapes (filled boxes, circles and polygons). These can be different colors and lines can have different widths. These are useful for drawing scenic features (rivers, bridges, mountains). 
+\dd The \e{XTrackCAD} Draw command is used to draw lines (straight, curved and circles) and shapes (filled boxes, circles, polylines and polygons). These can be different colors and lines can have different widths. The Polylines and Polygons can have curved sides. These are useful for drawing scenic features (rivers, bridges, mountains). 
 
 \u000
 
@@ -273,11 +301,11 @@ On-line demonstrations show the actual operation of many of the program's featur
 
 \u000
 
-\dd Text can be drawn on the layout too. 
+\dd Text can be added to the layout. 
 
 \u000
 
-\dd Notes can be attached to particular spots on the layout. When selected they can display special information about that part of the layout, such as prototype features, construction details or operation notes. 
+\dd Notes can be attached to particular spots on the layout. When selected they can display special information about that part of the layout, such as prototype features, construction details or operation notes.  This includes URL links to files on the Internet.
 
 \u000
 
@@ -334,7 +362,7 @@ Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrackCAD} feat
 
 \u000
 
-\b Draw lines, arcs and filled shapes (for showing river edges etc.)
+\b Draw lines, arcs, polylines and polygons and filled polygons or circular shapes (for showing river edges etc.)
 
 \u000
 
@@ -390,11 +418,11 @@ Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrackCAD} feat
 
 \u000
 
-\b Panning via a map window
+\b Panning and zooming via a map window and also in Pan/Zoom Mode
 
 \u000
 
-\b Price lists
+\b Price lists can be entered to allow the layout to be priced
 
 \u000
 
@@ -443,7 +471,11 @@ Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrackCAD} feat
 
 \e{XTrackCAD} has many other carefully selected features: 
 
-\b Sections of track can be hidden, which can be drawn as dashed lines, or completely hidden. A Tunnel Portal is drawn when a hidden track connects with normal track.
+\b Sections of track can be hidden, which can be drawn as dashed lines, or completely hidden. A Tunnel Portal is drawn when a hidden track connects with normal track. 
+
+\u000
+
+\b Sections of track can be tagged as bridge tracks which draws a bridge parapet on each side.
 
 \u000
 
@@ -489,8 +521,9 @@ Refer to \K{keyFeatures} and \K{addFeatures} for a listing of \e{XTrackCAD} feat
 
 \b You can rescale and flip objects, trim turnouts and create block gaps. 
 
-\rule
+\u000
 
+\rule
 
 \H{aboutmanual} About This Manual
 
@@ -529,7 +562,7 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \H{installSoftware} Installation
 
-\e{XTrackCAD} is designed to operate under Linux or MS Windows. Information within this section of the manual pertains to installation of the application in either of these environments.
+\e{XTrackCAD} is designed to operate under Linux, Apple MacOS or Microsoft Windows. Information within this section of the manual pertains to installation of the application in either of these environments.
 
 \rule
 
@@ -557,6 +590,27 @@ Throughout this manual the following typographic conventions are used to make fi
 
 \rule
 
+\S{OSXInstall} \i{OSX Installation} \i{Mac Installation}
+
+\e{XTrackCAD} for OSX is shipped as a package containing an application.
+
+\n Start the installation by opening the package and dragging the contained application into the \e{Applications} folder using the shortcut in the package. 
+The application includes the program, documentation, parameter and example files within it.  
+
+\lcont{\u000}
+
+\n To run on Apple MacOS, the \e{XQuartz} package must first have been installed - see \W{http://www.xquartz.org}{http://www.xquartz.org}. XQuartz will need to be upgraded after each OS version upgrade.
+
+\lcont{\u000}
+
+\n \i{OSX Run Security} When the application is first run, it will need to be authorized by OSX. There will be a OSX prompt that asks if it should be opened. And then it will still fail to run. 
+After opening it for the first time, go to \e{System Preferences>Security & Privacy} and you will see that the app is named as having been blocked. Hit the \e{Run Anyway} button and the program should start.
+This sequence may be necessary after each OS upgrade.
+
+\n On Mac OS Catalina, the program will need to be started by right-clicking it and selecting \f{Open}.
+
+\rule
+
 \S{LinuxInstall} \i{Linux Installation}
 
 \e{XTrackCAD} for LINUX is shipped as a self-extracting archive (executable). 
@@ -580,13 +634,20 @@ If you install \e{XTrackCAD} into another directory, set the \c{XTRKCADLIB} envi
 
 \H{startSoftware} \i{Start the Program}
 
-The \e{XTrackCAD} executable is named xtrkcad.exe on Windows and xtrkcad on Linux.
+The \e{XTrackCAD} executable is named xtrkcad.exe on Windows and xtrkcad on Linux and OSX.
+
+It is usually started by clicking on its icon, or right-click and \f{Open} in OSX Catalina, but there are command line options as well. 
 
 \f{Command Line}
 
 On Windows:
 
 \c xtrkcad [/c config] [/v] [/l logfile] [/d logcontrol] layoutfile
+
+On Mac OSX:
+
+\c cd /Applications
+\c ./open xtrkcad --args [-c config] [-v] [-l logfile] [-d logcontrol] layoutfile
 
 On Linux:
 
@@ -620,7 +681,7 @@ developers.
 \dt \c{d logcontrol}
 
 \dd specifies the amount of logging. The argument logcontrol has the format \c{logmodule[=level]}.
-logmodule defines the functionality that should be logged, the optional level specifies the loglevel.
+logmodule defines the functionality that should be logged, the optional level specifies the loglevel. Zero means no logging. 
 Defaults are no modules are logged and loglevel is 1 if omitted from logonctrol parameter.
 
 \u000
@@ -629,22 +690,21 @@ Defaults are no modules are logged and loglevel is 1 if omitted from logonctrol 
 
 \dd set logfile, only needed in conjunction with the debug option.
 
-
-
-
 \H{introQT} Quick Tour
 
 \G{png.d/main.png}
 
 When \e{XTrackCAD} starts, it displays the \f{Main} (\K{mainW}) and \f{Map} (\K{cmdMap}) windows.  The \f{Map} window is used to change the origin of the \f{Main} window when the entire layout cannot be displayed at one time.
 
-The Menu bar across the top of the \f{Main} window contains standard Windows menus.  Some of these are particularly useful to the new user:
+\G{png.d/maintagged.png}
+
+The Menu Bar across the top of the \f{Main} window contains standard Windows menus.  Some of these are particularly useful to the new user:
 
 \b The \f{File>Exit} menu exits \e{XTrackCAD}.  You can also exit by selecting the System menu in the upper left corner of the Window.
 
 \u000
 
-\b The \f{File>Open} menu opens existing layout files.  When first installed, the default directory contains some example programs you can look at.
+\b The \f{File>Open} menu opens existing layout files and archives. When first installed, the default directory contains some example programs you can look at.
 
 \u000
 
@@ -659,22 +719,42 @@ The Menu bar across the top of the \f{Main} window contains standard Windows men
 \b The \f{Options>Preferences} menu specifies some less frequently changed items.
 You can use this menu to choose Metric units (\K{cmdPref}).
 
+\u000
+
 \rule
 
+The Tool Bar contains icons for each of the commands in the Menus. The icons shown can be customized using the \f{View->ToolBar} submenu.
+
+\b The main drawing Mode command is \f{Select} - which is shown with the red arrow icon. From this mode, selected objects can be \f{Modified} as well. A close second is the \f{Describe} mode which allows properties of Objects to be seen and Changed.
+
+\u000
+
+\b A different mode is \f{Train} which allows trains to be simulated on the Layout.
+
+\u000
+
+Under the Tool Bar is the Hot Bar. This contains defined track and drawing objects taken from parameter files. To use a template you select it and then click on the Drawing Area.
+
+\rule
+
+The main part of the window is the Drawing Area, this is where the Layout is shown in 2D. The view can be zoomed or panned. The \f{Pan-Zoom} command whise symbol is the crossed arrows allows easiest control, but in \f{Select} command you can pan with the arrow keys and zoom with the trackpad or mousewheel or \f{Ctrl}+"+" or "-" can affect the zoom level.
+
+\rule 
+
+At the bottom on the screen are two more areas. The Status Bar contains messages about commands as they are being used, and the Info Bar shows the zoom level and the position of the cursor.
+
+\rule
 
 \H{performance} Performance Issues
 
 This section lists some things that can improve the performance of \e{XTrackCAD}.
 
+
+\b On the \f{View} dialog (\K{cmdView}) turn off \f{Show Snap Grid} or \f{Change Grid...} to have fewer grid points.
+
+\u000
+
 \b To speed up initialization, remove unused parameter files (See \f{Parameter Files} dialog - \K{cmdPrmfile}).
-
-\u000
-
-\b During moves and rotates, draw tracks \f{Simply} or as \f{Endpoints} (See \f{Command Options} dialog - \K{cmdCmdopt}).  Also \f{Zoom In} (\K{viewM}) to reduce the number of tracks that are being displayed.
-
-\u000
-
-\b If you have to move a lot of track a large distance, create a temporary track at the destination and use the \f{Join} (\K{cmdJoin}) command to move the selected track to join with the temporary track.  Then remove the temporary track.
 
 \u000
 
@@ -702,13 +782,19 @@ Information within this section of the manual identifies installation directory 
 
 \b The \e{XTrackCAD Working} directory, which contains configuration and Check Point files.
 
-On MS Windows the \e{Install} directory is set when you install \e{XTrackCAD}. All data files (parameters, 
+On MS Windows, the \e{Install} directory is set when you install \e{XTrackCAD}. All data files (parameters, 
 demos, examples) can be found in the \c{share/xtrkcad} subdirectory underneath the \e{Install} directory. 
 The \e{Working} directory is in your personal profile.
 
-On Linux the \e{Install} directory is usually \c{/usr/local/lib/xtrkcad/}, but you can change this by defining the \c{XTRKCADLIB} environment variable before starting \e{XTrackCAD}. The working directory is \c{\{HOME\}/.xtrkcad/}.
+On Linux, the \e{Install} directory is usually \c{/usr/local/lib/xtrkcad/}, but you can change this by defining the \c{XTRKCADLIB} environment variable before starting \e{XTrackCAD}. The working directory is \c{\{HOME\}/.xtrkcad/}.
+
+On Mac OSX, the \e{Install} directory is the application package, usually located in the \c{/Applications} directory.
+All the included parameters, demos and examples can be found inside the package under the  \c{/Applications/xtrkcad/Contents/Resources/xtrkcad} directory.
+The \e{Working} directory is created as \c{.xtrkcad} - a hidden directory - under the active user's directory in \c{/Users} 
 
 Layout files (\c{*.xtc}) and export (\K{cmdExport}) files (\c{*.xti}) can be saved anywhere you wish, as specified in the \f{Save File} and \f{Open File} dialogs.
+
+In MacOS Catalina, the program has no access to certain directories - the Documents and Download directories in particular.
 
 Example layouts can be found in the \c{example} directory under the \e{XTrackCAD} install directory.
 
@@ -728,7 +814,7 @@ Example layouts can be found in the \c{example} directory under the \e{XTrackCAD
 
 \u000
 
-\b \c{xtrkcad.exe} (MS-Windows) or \c{xtrkcad} (Linux) is the \e{XTrackCAD} program.
+\b \c{xtrkcad.exe} (MS-Windows) or \c{xtrkcad} (Linux or Mac OSX) is the \e{XTrackCAD} program.
 
 \u000
 
@@ -762,15 +848,15 @@ The check-point frequency is set by the \e{Check Point} field found in the \f{Pr
 
 \u000
 
-\b The \c{xtrkcad.ini} (on MS-Windows) or the \c{xtrkcad.rc} (on Linux) file contains various parameter settings from each use of \e{XTrackCAD}.  Most changes you make (such as scale, room size, window position) are saved in this file for the next time you use \e{XTrackCAD}.
+\b The \c{xtrkcad.ini} (on MS-Windows) or the \c{xtrkcad.rc} (on Linux or Mac OSX) file contains various parameter settings from each use of \e{XTrackCAD}.  Most changes you make (such as scale, room size, window position) are saved in this file for the next time you use \e{XTrackCAD}.
 
 \rule
 
 \H{uninstall} \i{Removing \e{XTrackCAD}}
 
-Remove \e{XTrackCAD} by deleting the \e{XTrackCAD Install} directory, deleting any \c{xtrkcad.*} files from the \e{Working} directory, and deleting any \e{*.xtc} and \e{*.xti} files.
+Remove \e{XTrackCAD} by deleting the \e{XTrackCAD Install} directory, or application (on Mac OSX), deleting any \c{xtrkcad.*} files from the \e{Working} directory, and deleting any \e{*.xtc} and \e{*.xti} files.
 
-On MS-Windows, you can also use the \f{Uninstall} icon in the \e{XTrackCAD} program group.
+On MS-Windows only, you can also use the \f{Uninstall} icon in the \e{XTrackCAD} program group.
 
 \rule
 
@@ -814,7 +900,7 @@ If you encounter an unreported bug please submit detail regarding such to the \f
 
 \f{If you don't understand an error message, ask for help.} Don't report an error message you don't understand as a bug. There are a lot of places you can ask for help in understanding what is going on before you can claim that an error message you do not understand is a bug. (Once you've understood the error message and have a good suggestion for a way to make the error message clearer, you might consider reporting it as a  \W{https://sourceforge.net/p/xtrkcad-fork/feature-requests/}{\e{XTrackCAD} Feature Request}).
 
-\f{Be brief, but don't leave any important details out.} This is a fine line to walk. But there are some general guidelines:
+\f{Please be brief, but don't leave any important details out.} This is a fine line to walk. But there are some general guidelines:
 
 Remember the three basics: what you were doing, what you expected to happen, and what happened. 
 
@@ -830,5 +916,9 @@ If you can recreate the problem the \f{Macro>Record} command can be used to reco
 \S{enhancements} \i{Enhancement Requests}
 
 Suggestions for improvements are encouraged and welcome. Submit your suggestion to the \e{XTrackCAD} \f{Feature Tracker} located at the \W{https://sourceforge.net/p/xtrkcad-fork/feature-requests/}{\e{XTrackCAD} Fork Project Site}.
+
+\S{support} \i{User Support}
+
+The developers maintain a forum \W{https://xtrackcad.groups.io/g/main}{\e{XtrackCAD} User Forum} a Wiki at \W{http://www.xtrkcad.org/Wikka/HomePage}{\e{XTrackCAD} Wiki}
 
 \rule

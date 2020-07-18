@@ -57,11 +57,15 @@ int PointOnCircle( coOrd * resP, coOrd center, double radius, double angle );
 double ConstrainR( double r );
 void FindPos( coOrd * res, double * beyond, coOrd pos, coOrd orig, double angle, double length );
 int FindIntersection( coOrd *Pc, coOrd P00, double A0, coOrd P10, double A1 );
+BOOL_T FindArcAndLineIntersections (coOrd *Pc1, coOrd *Pc2, coOrd c, DIST_T r, coOrd p0, coOrd p1);
+BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1, DIST_T radius1, coOrd center2, DIST_T radius2);
 double LineDistance( coOrd *p, coOrd p0, coOrd p1 );
 double CircleDistance( coOrd *p, coOrd c, double r, double a0, double a1 );
 int PickArcEndPt( coOrd, coOrd, coOrd );
 int PickLineEndPt( coOrd, double, coOrd );
 coOrd AddCoOrd( coOrd, coOrd, double );
 int ClipLine( coOrd *, coOrd *, coOrd, double, coOrd );
+coOrd FindCentroid(int vertexCount, pts_t vertices[] );
+double FindArcCenter(coOrd * c,coOrd p0,coOrd p1, double r );
 
 #endif

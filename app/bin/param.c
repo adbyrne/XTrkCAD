@@ -613,7 +613,6 @@ EXPORT void ParamLoadControl(
 		case PD_BITMAP:
 			break;
 		}
-
 }
 
 
@@ -1386,13 +1385,24 @@ static void ParamIntegerPush( const char * val, void * dp )
 	paramData_p p = (paramData_p)dp;
 	long valL;
 	char * cp;
+	const char * value;
 	paramIntegerRange_t * irangeP;
 
-	while ( isspace((unsigned char)*val)) val++;
-	valL = strtol( val, &cp, 10 );
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & BO_ENTER)) {
+		value = wStringGetValue((wString_p)p->control);
+		p->enter_pressed = TRUE;
+	} else {
+		p->enter_pressed = FALSE;
+		value = CAST_AWAY_CONST val;
+	}
+
+
+	while ( isspace((unsigned char)*value)) value++;
+	valL = strtol( value, &cp, 10 );
+
 
 	//wControlSetBalloon( p->control, 0, -5, NULL );
-	if ( val == cp ) {
+	if ( value == cp ) {
 		wControlSetBalloon( p->control, 0, -5, _("Invalid Number") );
 		return;
 	}
@@ -1434,7 +1444,15 @@ static void ParamFloatPush( const char * val, void * dp )
 	paramData_p p = (paramData_p)dp;
 	FLOAT_T valF;
 	BOOL_T valid;
+	const char * value;
 	paramFloatRange_t * frangeP;
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & PDO_ENTER)) {
+		value = wStringGetValue((wString_p)p->control);
+		p->enter_pressed = TRUE;
+	} else {
+		value = val;
+		p->enter_pressed = FALSE;
+	}
 
 	if (p->option & PDO_DIM) {
 		valF = DecodeDistance( (wString_p)p->control, &valid );
@@ -1472,7 +1490,7 @@ static void ParamFloatPush( const char * val, void * dp )
 	}
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
 		*((FLOAT_T*)(p->valueP)) = valF;
-	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( val ))
+	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc && strlen( value ))
 		p->group->changeProc( p->group, p-p->group->paramPtr, &valF );
 }
 
@@ -1480,14 +1498,23 @@ static void ParamFloatPush( const char * val, void * dp )
 static void ParamStringPush( const char * val, void * dp )
 {
 	paramData_p p = (paramData_p)dp;
+	const char * value;
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %s\n", p->group->nameStr, p->nameStr, val );
 		fflush( recordF );
 	}
+	if (strlen(val) == 1 && val[strlen(val)-1] == '\n' && (p->option & PDO_ENTER)) {
+			value = wStringGetValue((wString_p)p->control);
+			p->enter_pressed = TRUE;
+	} else {
+		p->enter_pressed = FALSE;
+		value = CAST_AWAY_CONST val;
+	}
+
 	if ( (p->option&PDO_NOPSHUPD)==0 && p->valueP)
-		strcpy( (char*)p->valueP, val );
+		strcpy( (char*)p->valueP, value );
 	if ( (p->option&PDO_NOPSHACT)==0 && p->group->changeProc)
-		p->group->changeProc( p->group, p-p->group->paramPtr, CAST_AWAY_CONST val );
+		p->group->changeProc( p->group, p-p->group->paramPtr, CAST_AWAY_CONST value );
 }
 
 
@@ -1533,6 +1560,15 @@ EXPORT void ParamMenuPush( void * dp )
 static void ParamColorSelectPush( void * dp, wDrawColor dc )
 {
 	paramData_p p = (paramData_p)dp;
+	long rgb = wDrawGetRGB( dc );
+	while ( dc == drawColorPreviewSelected || dc == drawColorPreviewUnselected ) {
+		// The user picked a special color, tweak it
+		rgb -= 1; // Make it very close but different
+		if ( ( rgb & 0xFF ) == 0 )
+			// Ran out of room - bail
+			break;
+		dc = wDrawFindColor( rgb );
+	}
 	if (recordF && (p->option&PDO_NORECORD)==0 && p->group->nameStr && p->nameStr) {
 		fprintf( recordF, "PARAMETER %s %s %ld\n", p->group->nameStr, p->nameStr, wDrawGetRGB(dc) );
 		fflush( recordF );
@@ -1865,13 +1901,19 @@ static void ParamPlayback( char * line )
 					pg->changeProc( pg, inx, &valF );
 				break;
 			case PD_STRING:
+			case PD_TEXT:
 				line += len;
 				while ( *line == ' ' ) line++;
 				Stripcr( line );
 				if (p->valueP)
 					strcpy( (char*)p->valueP, line );
 				if (p->control) {
-					wStringSetValue( (wString_p)p->control, line );
+					if (p->type == PD_STRING) {
+						wStringSetValue((wString_p)p->control, line);
+					} else {
+						wTextClear((wText_p)p->control);
+						wTextAppend((wText_p)p->control, line);
+					}
 					wFlush();
 				}
 				if (pg->changeProc)
@@ -1887,7 +1929,6 @@ static void ParamPlayback( char * line )
 				PlaybackMouse( ddp->action, ddp->d, a, pos, drawColorBlack );
 				break;
 			case PD_MESSAGE:
-			case PD_TEXT:
 			case PD_MENU:
 			case PD_BITMAP:
 				break;
@@ -2255,7 +2296,7 @@ static void ParamPositionControl(
 				ctlH = winH - (pd->group->origH-drawDataP->height);
 			else
 				ctlH = wControlGetHeight( pd->control );
-			wDrawSetSize( (wDraw_p)pd->control, ctlW, ctlH );
+			wDrawSetSize( (wDraw_p)pd->control, ctlW, ctlH, NULL );
 			if ( drawDataP->redraw )
 				drawDataP->redraw( (wDraw_p)pd->control, pd->context, ctlW, ctlH );
 			break;
@@ -2537,7 +2578,7 @@ SkipControl:
 				if ( group->boxs == NULL ) {
 					group->boxs = (wBox_p*)MyMalloc( boxCnt * sizeof *(wBox_p*)0 );
 					for ( box=0; box<boxCnt; box++ ) {
-						group->boxs[box] = wBoxCreate( group->win, DlgSepLeft, boxTop, NULL, wBoxBelow, columnK.term.x, boxPos[box]-boxTop );
+						group->boxs[box] = wBoxCreate( group->win, DlgSepLeft, boxTop, NULL, wBoxThickW, columnK.term.x, boxPos[box]-boxTop );
 						boxTop = boxPos[box] + 4;
 					}
 				} else {
@@ -2599,6 +2640,7 @@ SkipControl:
 static void ParamDlgProc(
 		wWin_p win,
 		winProcEvent e,
+		void * refresh,
 		void * data )
 {
 	paramGroup_p pg = (paramGroup_p)data;

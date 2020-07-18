@@ -18,6 +18,7 @@ set(sources
 	menu.c	
 	message.c
 	notice.c
+	opendocument.c
 	pixbuf.c
 	png.c
 	print.c
@@ -35,29 +36,41 @@ set(sources
 	gtkdraw-cairo.c
 	)
 
-
 # help system is OS and build specific, add appropriate source files
 if(APPLE)
-    set(sources 
-        ${sources}
-	osxhelp.c)	
-else()
+   if (XTRKCAD_USE_APPLEHELP) 
+   		set(sources 
+      	  ${sources}
+			osxhelp.c)	
+	else(XTRKCAD_USE_APPLEHELP)
+		if(XTRKCAD_USE_BROWSER) 
+        	set(sources 
+          	  ${sources}
+          	  browserhelp.c)
+    	else(XTRKCAD_USE_BROWSER)
+       	 set(sources 
+       	     ${sources}
+       	     ixhelp.c)
+       	endif(XTRKCAD_USE_BROWSER)
+    endif(XTRKCAD_USE_APPLEHELP)    
+else(APPLE)
     if(XTRKCAD_USE_BROWSER) 
         set(sources 
             ${sources}
             browserhelp.c)
-    else()
+    else(XTRKCAD_USE_BROWSER)
         set(sources 
             ${sources}
             ixhelp.c)
-    endif()    
-endif()
+    endif(XTRKCAD_USE_BROWSER)    
+endif(APPLE)
 
 include_directories(${XTrkCAD_BINARY_DIR})
 
 add_library(xtrkcad-wlib ${headers} ${sources})
 
 # GTK 
+find_package (GTK2)
 include_directories(${GTK_INCLUDE_DIRS})
 target_link_libraries(xtrkcad-wlib ${GTK_LIBRARIES})
 

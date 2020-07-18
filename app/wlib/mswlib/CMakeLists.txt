@@ -3,13 +3,11 @@ find_package(FreeImage REQUIRED)
 FILE(GLOB HEADERS *.h)
 
 SET(SOURCES
-#	checksum.c
 	backgnd.c
 	getopt.c
 	mswbox.c
 	mswbutt.c
 	mswbitmap.c
-	mswchksm.c
 	mswchoic.c
 	mswcolor.c
 	mswdraw.c
@@ -26,6 +24,7 @@ SET(SOURCES
 	mswtext.c
 	gwin32.c
 	simple-gettext.c
+	utf8conv.c
 	)
 
 include_directories(${FREEIMAGE_INCLUDE_PATH})
@@ -46,3 +45,7 @@ install(FILES
 	${FREEIMAGE_SHAREDLIB}
 	DESTINATION ${XTRKCAD_BIN_INSTALL_DIR}
 	)
+
+if(XTRKCAD_TESTING AND CMOCKA_FOUND)
+	add_subdirectory( unittest )
+endif()

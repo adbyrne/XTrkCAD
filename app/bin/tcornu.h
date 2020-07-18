@@ -37,6 +37,7 @@ typedef struct {
 		DIST_T radius[2];		//0.0 if straight
 		ANGLE_T angle[2];		//Set if straight
 		coOrd center[2];		//Set if radius >0
+		dynArr_t mids;			//If there are G2 points added
 		} cornuParm_t;
 
 
@@ -53,13 +54,14 @@ BOOL_T RebuildCornu (track_p trk);
 DIST_T DistanceCornu( track_p t, coOrd * p );
 
 STATUS_T CornuDescriptionMove(track_p trk,wAction_t action,coOrd pos );
-DIST_T CornuDescriptionDistance(coOrd pos,track_p trk );
+DIST_T CornuDescriptionDistance(coOrd pos,track_p trk, coOrd *, BOOL_T show_hidden, BOOL_T * hidden );
 void GetCornuParmsNear(track_p t, int sel, coOrd * pos, coOrd * center, ANGLE_T * angle,  DIST_T * radius );
+void GetCornuParmsTemp(dynArr_t *, int sel, coOrd * pos2, coOrd * center, ANGLE_T * angle2,  DIST_T * radius );
 
 BOOL_T CallCornu(coOrd[2],track_p[2],EPINX_T[2],dynArr_t *,cornuParm_t *);
 BOOL_T CallCornu0(coOrd[2], coOrd[2], ANGLE_T[2], DIST_T[2], dynArr_t *,BOOL_T);
 
-BOOL_T GetBezierSegmentsFromCornu(track_p, dynArr_t *);
+BOOL_T GetBezierSegmentsFromCornu(track_p, dynArr_t *, BOOL_T);
 
 char * CreateSegPathList(track_p trk);
 

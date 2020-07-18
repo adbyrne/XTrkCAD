@@ -217,6 +217,115 @@ void FindPos( coOrd * res, double * beyond, coOrd pos, coOrd orig, double angle,
 }
 
 
+/* Find Arc Intersection
+ * Given two circles described by centers and radius (C1, R1) (C2, R2) Find the zero, one or two intersection points
+ *
+ */
+BOOL_T FindArcIntersections ( coOrd *Pc, coOrd *Pc2, coOrd center1, DIST_T radius1, coOrd center2, DIST_T radius2) {
+	double d,a,h;
+
+	d = sqrt((center2.x-center1.x)*(center2.x-center1.x)+(center2.y-center1.y)*(center2.y-center1.y));
+	if (d >(radius1+radius2)) return FALSE; 		//Too far apart
+	if (d<fabs(radius1-radius2)) return FALSE;  	//Inside each other
+	if ((d == 0) && (radius1 == radius2)) return FALSE;  // Coincident and the same
+	a=((radius1*radius1)-(radius2*radius2)+(d*d))/(2*d);
+	if ((radius1*radius1)<(a*a)) return FALSE;
+	h = sqrt((radius1*radius1)-(a*a));
+
+	coOrd center_c;
+	center_c.x = center1.x+a*(center2.x - center1.x)/d;
+	center_c.y = center1.y+a*(center2.y - center1.y)/d;
+
+	(*Pc).x = center_c.x+h*(center2.y-center1.y)/d;
+	(*Pc).y = center_c.y-h*(center2.x-center1.x)/d;
+	(*Pc2).x = center_c.x-h*(center2.y-center1.y)/d;
+	(*Pc2).y = center_c.y+h*(center2.x-center1.x)/d;
+
+	return TRUE;
+}
+
+/*
+ * Find Intersections between a line and a circle
+ *
+ * |c-x|^2 = r^2
+ *
+ * 𝑥(𝑡)=𝑎+𝑡𝑏
+ *
+ * where 𝑎 is a point and 𝑏 is a vector.
+ *
+ * For a point on this line to satisfy the equation, you need to have
+ *
+ * (𝑡𝑏+(𝑎−𝑐))⋅(𝑡𝑏+(𝑎−𝑐))=𝑟^2
+ *
+ * which is a quadratic in 𝑡:
+ * |b|^2*t^2 + 2(a-c).bt +(|a-c|^2-r^2) = 0
+ *
+ * whose solutions are
+ *
+ * t = (-2(a-c).b +/- SQRT([2(a-c).b]^2 - 4|b|^2(|a-c|^2-r^2)) / 2|b|^2
+ *
+ */
+
+double VectorLength (coOrd v) {
+	return sqrt(v.x*v.x+v.y+v.y);
+}
+double VectorDot (coOrd v1, coOrd v2) {
+	return (v1.x*v2.x+ v1.y*v2.y);
+}
+coOrd VectorSubtract (coOrd v1, coOrd v2) {
+	coOrd result;
+	result.x = v1.x-v2.x;
+	result.y = v1.y-v2.y;
+	return result;
+}
+coOrd VectorAdd (coOrd v1, coOrd v2) {
+	coOrd result;
+	result.x = v1.x+v2.x;
+	result.y = v1.y+v2.y;
+	return result;
+}
+
+BOOL_T FindArcAndLineIntersections(coOrd *intersection1, coOrd *intersection2, coOrd c, DIST_T radius,
+                                        coOrd point1, coOrd point2 )
+{
+    double dx, dy, cx, cy, A, B, C, det, t;
+
+    dx = point2.x - point1.x;
+    dy = point2.y - point1.y;
+
+    cx = c.x;
+    cy = c.y;
+
+    A = dx * dx + dy * dy;
+    B = 2 * (dx * (point1.x - cx) + dy * (point1.x - cy));
+    C = (point1.x - cx) * (point1.x - cx) + (point1.y - cy) * (point1.y - cy) - radius * radius;
+
+    det = B * B - 4 * A * C;
+    if ((A <= 0.0000001) || (det < 0))
+    {
+    	return FALSE;
+    }
+    else if (det == 0)
+    {
+        // One solution.
+        t = -B / (2 * A);
+        (*intersection1).x = point1.x + t * dx;
+        (*intersection1).y = point1.y + t * dy;
+        intersection2 = intersection1;
+        return TRUE;
+    }
+    else
+    {
+        // Two solutions.
+        t = (float)((-B + sqrt(det)) / (2 * A));
+        (*intersection1).x = point1.x + t * dx;
+        (*intersection1).y = point1.y + t * dy;
+        t = (float)((-B - sqrt(det)) / (2 * A));
+        (*intersection2).x = point1.x + t * dx;
+        (*intersection2).y = point1.y + t * dy;
+        return TRUE;
+    }
+}
 
 /* Find intersection:
    Given 2 lines each described by a point and angle (P0,A0) (P1,A1)
@@ -489,6 +598,7 @@ static void IntersectBox( coOrd *p1, coOrd p0, coOrd size, int x1, int y1 )
 #ifndef WINDOWS
 	else
 		fprintf(stderr, "intersectBox bogus\n" );
+		getchar();
 #endif
 }
 
@@ -588,6 +698,67 @@ BOOL_T ClipLine( coOrd *fp0, coOrd *fp1, coOrd orig, double angle, coOrd size )
 	*fp1 = p1;
 	return 1;
 }
+
+coOrd FindCentroid(int vertexCount, pts_t vertices[] )
+{
+    coOrd centroid = {0, 0};
+    double signedArea = 0.0;
+    double x0 = 0.0; // Current vertex X
+    double y0 = 0.0; // Current vertex Y
+    double x1 = 0.0; // Next vertex X
+    double y1 = 0.0; // Next vertex Y
+    double a = 0.0;  // Partial signed area
+
+    // For all vertices except last
+    int i=0;
+    for (i=0; i<vertexCount-1; ++i)
+    {
+        x0 = vertices[i].pt.x;
+        y0 = vertices[i].pt.y;
+        x1 = vertices[i+1].pt.x;
+        y1 = vertices[i+1].pt.y;
+        a = x0*y1 - x1*y0;
+        signedArea += a;
+        centroid.x += (x0 + x1)*a;
+        centroid.y += (y0 + y1)*a;
+    }
+
+    // Do last vertex separately to avoid performing an expensive
+    // modulus operation in each iteration.
+    x0 = vertices[i].pt.x;
+    y0 = vertices[i].pt.y;
+    x1 = vertices[0].pt.x;
+    y1 = vertices[0].pt.y;
+    a = x0*y1 - x1*y0;
+    signedArea += a;
+    centroid.x += (x0 + x1)*a;
+    centroid.y += (y0 + y1)*a;
+
+    signedArea *= 0.5;
+    centroid.x /= (6.0*signedArea);
+    centroid.y /= (6.0*signedArea);
+
+    return centroid;
+}
+
+double FindArcCenter(
+		coOrd * pos,
+		coOrd p0,
+		coOrd p1,
+		double radius )
+{
+	double d;
+	double a0, a1;
+	d = FindDistance( p0, p1 )/2.0;
+	a0 = FindAngle( p0, p1 );
+	a1 = NormalizeAngle(R2D(asin( d/radius )));
+	if (a1 > 180)
+		a1 -= 360;
+	a0 = NormalizeAngle( a0 + (90.0-a1) );
+	Translate( pos, p0, a0, radius );
+	return a1*2.0;
+}
+
 
 #ifdef LATER
 BOOL_T ClipArc( double a0, double a1, coOrd pos, double radius, coOrd orig, double angle, double size )

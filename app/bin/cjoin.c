@@ -1,5 +1,5 @@
 /*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/bin/cjoin.c,v 1.4 2008-03-06 19:35:05 m_fischer Exp $
+ * $Header: /home/dave/Source/xtrkcad_5_1_2a/app/bin/RCS/cjoin.c,v 1.3 2019/07/24 15:11:51 dave Exp $
  *
  * JOINS
  *
@@ -39,7 +39,7 @@
 #include "cselect.h"
 #include "fileio.h"
 
-
+static BOOL_T debug = 0;
 static int log_join = 0;
 typedef struct {
 				curveType_e type;
@@ -53,25 +53,18 @@ typedef struct {
 static struct {
 		STATE_T state;
 		int joinMoveState;
+		BOOL_T cornuMode;
 		struct {
 				TRKTYP_T realType;
 				track_p trk;
 				coOrd pos;
 				EPINX_T ep;
 				trackParams_t params;
-#ifdef LATER
-				curveType_e type;
-				ANGLE_T angle;
-				coOrd lineOrig;
-				coOrd lineEnd;
-				coOrd arcP;
-				DIST_T arcR;
-				ANGLE_T arcA0, arcA1;
-#endif
 				} inp[2];
 		joinRes_t jRes;
 		coOrd inp_pos[2];
 		easementData_t jointD[2];
+		dynArr_t anchors;
 		} Dj;
 
 
@@ -169,7 +162,8 @@ LOG( log_join, 2, ("    = CURVE @ Pc=[%0.3f %0.3f] R=%0.3f A0=%0.3f A1=%0.3f Fli
 	d = D2R(res->arcA1);
 	if (d < 0.0)
 		d = 2*M_PI + d;
-	InfoMessage( _("Curved Track: Radius=%s Length=%s"),
+	if (!debug)
+		InfoMessage( _("Curved Track: Radius=%s Length=%s"),
 				FormatDistance(res->arcR), FormatDistance(res->arcR*d) );
 	return TRUE;
 
@@ -213,7 +207,7 @@ LOG( log_join, 3, ("     p1=[%0.3f %0.3f] aa=%0.3f a=%0.3f\n",
 /* Straight: */
 		PointOnCircle( &pt, pos0, r0, a1);
 LOG( log_join, 2, ("    = STRAIGHT [%0.3f %0.3f] [%0.3f %0.3f]\n", pt.x, pt.y, pos1.x, pos1.y ) )
-		InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
+		if (!debug) InfoMessage( _("Straight Track: Length=%s Angle=%0.3f"),
 				FormatDistance(FindDistance( pt, pos1 )), PutAngle(FindAngle( pt, pos1 )) );
 		res->type = curveTypeStraight;
 		res->pos[0]=pt;
@@ -255,7 +249,7 @@ LOG( log_join, 3, ("       A0=%0.3f A1=%0.3f R=%0.3f\n", res->arcA0, res->arcA1,
 		d = D2R(res->arcA1);
 		if (d < 0.0)
 			d = 2*M_PI + d;
-		InfoMessage( _("Curved Track: Radius=%s Length=%s Angle=%0.3f"),
+		if (!debug) InfoMessage( _("Curved Track: Radius=%s Length=%s Angle=%0.3f"),
 				FormatDistance(res->arcR), FormatDistance(res->arcR*d), PutAngle(res->arcA1) );
 		res->type = curveTypeCurve;
 	}
@@ -302,11 +296,11 @@ static STATUS_T AdjustJoint(
 	switch ( Dj.inp[0].params.type ) {
 	case curveTypeCurve:
 		if (adjust) {
-			a0 = FindAngle( Dj.inp[0].params.arcP, Dj.jRes.pos[0] ) +
-					((Dj.jointD[0].Scurve==TRUE || Dj.jointD[0].flip==FALSE)?0:+180);
+			a0 = FindAngle( Dj.inp[0].params.arcP, Dj.jRes.pos[0] );
 			Translate( &pc, Dj.inp[0].params.arcP, a0, Dj.jointD[0].x );
-LOG( log_join, 2, (" Move P0 X%0.3f A%0.3f  P1 X%0.3f A%0.3f)\n",
-					Dj.jointD[0].x, a0, Dj.jointD[1].x, a1 ) )
+LOG( log_join, 2, (" Move P0 X%0.3f A%0.3f  P1 X%0.3f A%0.3f SC%d FL%d\n",
+					Dj.jointD[0].x, a0, Dj.jointD[1].x, a1,
+					Dj.jointD[0].Scurve, Dj.jointD[0].flip ) )
 		} else {
 			pc = Dj.inp[0].params.arcP;
 		}
@@ -368,7 +362,8 @@ LOG( log_join, 2, (" Move P0 X%0.3f A%0.3f  P1 X%0.3f A%0.3f\n",
 	}
 	d -= l;
 	if ( d <= minLength ) {
-		InfoMessage( _("Connecting track is too short by %0.3f"), PutDim(fabs(minLength-d)) );
+		if (!debug)
+			InfoMessage( _("Connecting track is too short by %0.3f"), PutDim(fabs(minLength-d)) );
 		return FALSE;
 	}
 
@@ -415,7 +410,6 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 				_("Click on an unselected End-Point"):
 				_("Click on a selected End-Point") );
 			Dj.inp[0].pos = pos;
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			return C_CONTINUE;
 		}
 		if ( GetTrkSelected(Dj.inp[0].trk) == GetTrkSelected(Dj.inp[1].trk) ) {
@@ -423,7 +417,6 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 					?  _("unselected") : _("selected") );
 			return C_CONTINUE;
 		}
-		DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 		if (GetTrkSelected(Dj.inp[0].trk))
 			MoveToJoin( Dj.inp[0].trk, Dj.inp[0].params.ep, Dj.inp[1].trk, Dj.inp[1].params.ep );
 		else
@@ -432,6 +425,353 @@ static STATUS_T DoMoveToJoin( coOrd pos )
 		return C_TERMINATE;
 }
 
+typedef enum {NO_LINE,FIRST_END,HAVE_LINE,HAVE_SECOND_LINE} LineState_t;
+
+static struct {
+		LineState_t line_state;
+		int joinMoveState;
+		track_p curr_line;
+		struct {
+				TRKTYP_T realType;
+				track_p line;
+				coOrd pos;
+				coOrd end;
+				int cnt;
+				} inp[2];
+		joinRes_t jRes;
+		coOrd inp_pos[2];
+		dynArr_t anchors_da;
+		trackParams_t params;
+		dynArr_t newLine;
+		} Dl;
+
+#define anchors(N) DYNARR_N(trkSeg_t,Dl.anchors_da,N)
+
+void AddAnchorEnd(coOrd p) {
+	DIST_T d = tempD.scale*0.15;
+	DYNARR_APPEND(trkSeg_t,Dl.anchors_da,1);
+	trkSeg_p a = &DYNARR_LAST(trkSeg_t,Dl.anchors_da);
+	a->type = SEG_CRVLIN;
+	a->width = 0;
+	a->u.c.a0 = 0.0;
+	a->u.c.a1 = 360.0;
+	a->u.c.center = p;
+	a->u.c.radius = d/2;
+	a->color = wDrawColorPowderedBlue;
+}
+
+
+static STATUS_T CmdJoinLine(
+		wAction_t action,
+		coOrd pos )
+/*
+ * Join 2 lines.
+ */
+{
+
+	switch (action&0xFF) {
+	case C_START:
+		InfoMessage( _("Left click - Select first draw object end") );
+		Dl.line_state = NO_LINE;
+		Dl.joinMoveState = 0;
+		tempSegs_da.cnt = 0;
+		DYNARR_RESET(trkSeg_t,Dl.newLine);
+		Dl.curr_line = NULL;
+		return C_CONTINUE;
+	case wActionMove:
+		DYNARR_RESET(trkSeg_t,Dl.anchors_da);
+		Dl.curr_line = NULL;
+		coOrd pos1= pos;
+		Dl.curr_line = OnTrack( &pos1, FALSE, FALSE );
+		if (!Dl.curr_line) return C_CONTINUE;
+		if (IsTrack(Dl.curr_line)) {
+			Dl.curr_line = NULL;
+			return C_CONTINUE;
+		}
+		if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) {
+			Dl.curr_line = NULL;
+			return C_CONTINUE;
+		}
+		if (!GetTrackParams(PARAMS_NODES,Dl.curr_line,pos,&Dl.params)) {
+			Dl.curr_line = NULL;
+			return C_CONTINUE;
+		}
+		if ( (Dl.line_state != NO_LINE) &&
+				(Dl.inp[0].line == Dl.curr_line) &&
+				(IsClose(FindDistance(Dl.inp[0].pos,Dl.params.lineOrig)) ) ) {
+			Dl.curr_line = NULL;
+		} else {
+			AddAnchorEnd(Dl.params.lineOrig);
+		}
+		break;
+	case C_DOWN:
+		DYNARR_RESET(trkSeg_t,Dl.anchors_da);
+		Dl.curr_line = NULL;
+		if (Dl.line_state == NO_LINE) {
+			Dl.curr_line = OnTrack( &pos, FALSE, FALSE);
+			if (!Dl.curr_line || IsTrack(Dl.curr_line)) {
+				InfoMessage( _("Not a line - Try again") );
+				return C_CONTINUE;
+			}
+			if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) return C_CONTINUE;
+			if (!GetTrackParams(PARAMS_NODES,Dl.curr_line,pos,&Dl.params)) return C_CONTINUE;
+			Dl.line_state = HAVE_LINE;
+			Dl.inp[0].line = Dl.curr_line;
+			Dl.inp[0].pos = Dl.params.lineOrig;
+			Dl.inp[0].end = Dl.params.lineEnd;
+			DYNARR_SET(trkSeg_t,Dl.newLine,1);
+
+			DYNARR_LAST(trkSeg_t,Dl.newLine).type = SEG_POLY;
+			DYNARR_LAST(trkSeg_t,Dl.newLine).color = wDrawColorBlack;
+			DYNARR_LAST(trkSeg_t,Dl.newLine).width = 0;
+			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.polyType = POLYLINE;
+			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyMalloc(sizeof(pts_t)*Dl.params.nodes.cnt);
+			DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt = Dl.params.nodes.cnt;
+			//Copy in reverse as we want this point to be last
+			for (int i=0;i<Dl.params.nodes.cnt;i++) {
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt = DYNARR_N(coOrd,Dl.params.nodes,Dl.params.nodes.cnt-1-i);
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i].pt_type = wPolyLineStraight;
+			}
+			InfoMessage( _("Left click - Select second object end") );
+		} else {
+			Dl.curr_line = OnTrack( &pos, FALSE, FALSE );
+			if (!Dl.curr_line || IsTrack(Dl.curr_line)) {
+				InfoMessage( _("Not a line - Try again") );
+				return C_CONTINUE;
+			}
+			if (!QueryTrack(Dl.curr_line,Q_GET_NODES)) return C_CONTINUE;
+			if (!GetTrackParams(PARAMS_NODES,Dl.curr_line,pos,&Dl.params)) return C_CONTINUE;
+			if (Dl.curr_line == Dl.inp[0].line) {
+				if ((Dl.params.lineOrig.x == Dl.inp[0].pos.x) &&
+					(Dl.params.lineOrig.y == Dl.inp[0].pos.y)) {
+					InfoMessage( _("Same draw object and same endpoint - Try again") );
+					return C_CONTINUE;
+				}
+			}
+			Dl.line_state = HAVE_SECOND_LINE;
+			Dl.inp[1].line = Dl.curr_line;
+			Dl.inp[1].pos = Dl.params.lineOrig;
+			Dl.inp[1].end = Dl.params.lineEnd;
+			int old_cnt = DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt;
+			BOOL_T join_near = FALSE;
+			if (Dl.inp[1].line == Dl.inp[0].line) {
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyRealloc(DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+1));
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[old_cnt] = DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[0];   // Joined up Polygon
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt += 1;
+			} else {
+				if (IsClose(FindDistance(Dl.inp[0].pos,Dl.inp[1].pos)))
+					join_near = TRUE;
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts = MyRealloc(DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts,sizeof(pts_t)*(old_cnt+Dl.params.nodes.cnt-join_near));
+				//Copy forwards as this point is first
+				for (int i=join_near;i<Dl.params.nodes.cnt;i++) {
+					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i-join_near+old_cnt].pt = DYNARR_N(coOrd,Dl.params.nodes,i);
+					DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.pts[i-join_near+old_cnt].pt_type = wPolyLineStraight;
+				}
+				DYNARR_LAST(trkSeg_t,Dl.newLine).u.p.cnt += Dl.params.nodes.cnt-join_near;
+			}
+		}
+		UndrawNewTrack(Dl.curr_line);
+		Dl.curr_line = NULL;
+		break;
+	case C_MOVE:
+		break;
+	case C_UP:
+		if (Dl.line_state != HAVE_SECOND_LINE) return C_CONTINUE;
+		Dl.line_state = NO_LINE;
+		UndoStart(_("Create PolyLine"), "newPolyLine");
+		track_p newTrack = MakePolyLineFromSegs( zero, 0.0, &Dl.newLine );
+		DeleteTrack(Dl.inp[0].line,FALSE);
+		if (Dl.inp[0].line != Dl.inp[1].line)
+			DeleteTrack(Dl.inp[1].line,FALSE);
+		UndoEnd();
+		DrawNewTrack(newTrack);
+		CleanSegs(&Dl.newLine);
+		Dl.curr_line = NULL;
+		return C_TERMINATE;
+		break;
+	case C_CANCEL:
+		CleanSegs(&Dl.newLine);
+		Dl.line_state = NO_LINE;
+		Dl.curr_line = NULL;
+		break;
+	case C_REDRAW:
+		if (Dl.line_state != NO_LINE) DrawSegs(&tempD,zero,0.0,((trkSeg_t*)Dl.newLine.ptr), Dl.newLine.cnt, trackGauge, wDrawColorPreviewSelected);
+		if (Dl.curr_line) DrawTrack(Dl.curr_line,&tempD,wDrawColorPreviewSelected);
+		if (Dl.anchors_da.cnt>0)
+			DrawSegs( &tempD, zero, 0.0, &anchors(0), Dl.anchors_da.cnt, trackGauge, wDrawColorPreviewSelected );
+		break;
+	case C_TEXT:
+	case C_OK:
+	default:;
+
+	}
+
+
+	return C_CONTINUE;
+
+}
+
+void AnchorTempLine(coOrd p0, coOrd p1) {
+	DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
+	trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
+	p->type = SEG_STRLIN;
+	p->color = wDrawColorBlue;
+	p->width = 0.0;
+	p->u.l.pos[0] = p0;
+	p->u.l.pos[1] = p1;
+}
+
+void AnchorTempCircle(coOrd center,DIST_T radius, ANGLE_T a0, ANGLE_T a1) {
+	DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
+	trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
+	p->type = SEG_CRVLIN;
+	p->color = wDrawColorBlue;
+	p->width = 0.0;
+	p->u.c.a0 =a0;
+	p->u.c.a1 = a1;
+	p->u.c.radius = radius;
+	p->u.c.center = center;
+}
+
+void AnchorPoint(coOrd center) {
+	DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
+	trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
+	p->type = SEG_CRVLIN;
+	p->color = wDrawColorAqua;
+	p->width = 0.0;
+	p->u.c.a0 =0.0;
+	p->u.c.a1 = 360.0;
+	p->u.c.radius = mainD.scale/4;
+	p->u.c.center = center;
+}
+
+static DIST_T desired_radius = 0.0;
+
+static paramFloatRange_t r_0_10000 = { 0.0, 100000.0 };
+static paramData_t joinPLs[] = {
+#define joinRadPD (joinPLs[0])
+#define joinRadI 0
+	{	PD_FLOAT, &desired_radius, "radius", PDO_DIM, &r_0_10000, N_("Desired Radius") }
+};
+static paramGroup_t joinPG = { "join-fixed", 0, joinPLs, sizeof joinPLs/sizeof joinPLs[0] };
+
+
+
+BOOL_T AdjustPosToRadius(coOrd *pos, DIST_T desired_radius, ANGLE_T an0, ANGLE_T an1) {
+	coOrd point1,point2;
+	switch ( Dj.inp[1].params.type ) {
+		case curveTypeCurve:
+			if (Dj.inp[0].params.type == curveTypeStraight) {
+				coOrd  newP, newP1;
+				//Offset curve by desired_radius
+				DIST_T newR1;
+				newR1 = Dj.inp[1].params.arcR + desired_radius*((fabs(an1-Dj.inp[1].params.arcA0)<1.0)?1:-1);
+				if (newR1<=0.0) {
+					if (debug) InfoMessage("Zero Radius C1");
+					return FALSE;
+				}
+				//Offset line by desired_radius
+				Translate(&newP,Dj.inp[0].params.lineEnd,an0,desired_radius);
+				Translate(&newP1,Dj.inp[0].params.lineOrig,an0,desired_radius);
+				if (debug)
+					AnchorTempLine(newP,newP1);
+				//Intersect - this is the joining curve center
+				if (debug)
+					AnchorTempCircle(Dj.inp[1].params.arcP,newR1,Dj.inp[1].params.arcA0,Dj.inp[1].params.arcA1);
+				if (!FindArcAndLineIntersections(&point1,&point2,Dj.inp[1].params.arcP,newR1,newP,newP1))
+					return FALSE;
+			} else if (Dj.inp[0].params.type == curveTypeCurve) {
+				//Offset curve by desired_radius
+				DIST_T newR0;
+				newR0 = Dj.inp[0].params.arcR + desired_radius*((fabs(an0-Dj.inp[0].params.arcA0)<1.0)?1:-1);
+				if (newR0<=0.0) {
+					if (debug) InfoMessage("Zero Radius C0");
+					return FALSE;
+				}
+				//Offset curve by desired_radius
+				if (debug)
+					AnchorTempCircle(Dj.inp[0].params.arcP,newR0,Dj.inp[0].params.arcA0,Dj.inp[0].params.arcA1);
+				DIST_T newR1;
+				newR1 = Dj.inp[1].params.arcR + desired_radius*((fabs(an1-Dj.inp[1].params.arcA0)<1.0)?1:-1);
+				if (newR1<=0.0) {
+					if (debug) InfoMessage("Zero Radius C1");
+					return FALSE;
+				}
+				//Intersect - this is the joining curve center
+				if (debug)
+					AnchorTempCircle(Dj.inp[1].params.arcP,newR1,Dj.inp[1].params.arcA0,Dj.inp[1].params.arcA1);
+				if (!FindArcIntersections(&point1,&point2,Dj.inp[0].params.arcP,newR0,Dj.inp[1].params.arcP,newR1))
+					return FALSE;
+			}
+			if (debug) {
+				AnchorPoint(point1);
+				AnchorPoint(point2);
+			}
+			break;
+		case curveTypeStraight:
+			if (Dj.inp[0].params.type == curveTypeStraight) {
+				coOrd newI,newP0,newP01, newP1, newP11;
+				//Offset line1 by desired_radius
+				Translate(&newP0,Dj.inp[0].params.lineEnd,an0,desired_radius);
+				Translate(&newP01,Dj.inp[0].params.lineOrig,an0,desired_radius);
+				if (debug)
+					AnchorTempLine(newP0,newP01);
+				//Offset line2 by desired_radius
+				Translate(&newP1,Dj.inp[1].params.lineEnd,an1,desired_radius);
+				Translate(&newP11,Dj.inp[1].params.lineOrig,an1,desired_radius);
+				if (debug)
+					AnchorTempLine(newP1,newP11);
+				if (!FindIntersection(&newI,newP0,Dj.inp[0].params.angle,newP1,Dj.inp[1].params.angle))
+					return FALSE;
+				point1 = point2 = newI;
+			} else if (Dj.inp[0].params.type == curveTypeCurve) {
+				coOrd newP, newP1;
+				//Offset curve by desired_radius
+				DIST_T newR0;
+				newR0 = Dj.inp[0].params.arcR + desired_radius*((fabs(an0-Dj.inp[0].params.arcA0)<1.0)?1:-1);
+				if (newR0<=0.0) {
+					if (debug) InfoMessage("Zero Radius C0");
+					return FALSE;
+				}
+				if (debug)
+					AnchorTempCircle(Dj.inp[0].params.arcP,newR0,Dj.inp[0].params.arcA0,Dj.inp[0].params.arcA1);
+				//Offset line by desired_radius
+				Translate(&newP,Dj.inp[1].params.lineEnd,an1,desired_radius);
+				Translate(&newP1,Dj.inp[1].params.lineOrig,an1,desired_radius);
+				if (debug)
+					AnchorTempLine(newP,newP1);
+				//Intersect - this is the joining curve center
+				if (!FindArcAndLineIntersections(&point1,&point2,Dj.inp[0].params.arcP,newR0,newP,newP1))
+					return FALSE;
+			}
+			if (debug) {
+				AnchorPoint(point1);
+				AnchorPoint(point2);
+			}
+			break;
+		default:
+			return FALSE;
+	}
+	if (FindDistance(*pos,point1)<=FindDistance(*pos,point2)) {
+		if (Dj.inp[1].params.type == curveTypeCurve) {
+			ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,point1);
+			Translate(pos,Dj.inp[1].params.arcP,a,Dj.inp[1].params.arcR);
+		} else {
+			Translate(pos,point1,NormalizeAngle(an1+180),desired_radius);
+		}
+	} else {
+		if (Dj.inp[1].params.type == curveTypeCurve) {
+			ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,point2);
+			Translate(pos,Dj.inp[1].params.arcP,a,Dj.inp[1].params.arcR);
+		} else
+			Translate(pos,point2,NormalizeAngle(an1+180),desired_radius);
+	}
+
+	return TRUE;
+
+}
+
+static BOOL_T infoSubst = FALSE;
 
 static STATUS_T CmdJoin(
 		wAction_t action,
@@ -451,26 +791,43 @@ static STATUS_T CmdJoin(
 	ANGLE_T a, a1;
 	DIST_T eR[2];
 	BOOL_T ok;
+	wControl_p controls[2];
+	char * labels[1];
 
 	switch (action&0xFF) {
 
 	case C_START:
+		if (joinPLs[0].control==NULL) {
+		       ParamCreateControls(&joinPG, NULL);
+		}
 		if (selectedTrackCount==0)
 			InfoMessage( _("Left click - join with track") );
 		else
 			InfoMessage( _("Left click - join with track, Shift Left click - move to join") );
+		DYNARR_RESET(trkSeg_t,Dj.anchors);
 		Dj.state = 0;
 		Dj.joinMoveState = 0;
+		Dj.cornuMode = FALSE;
 		/*ParamGroupRecord( &easementPG );*/
-		if (easementVal < 0)
-			return CmdCornu(action, pos);
+		infoSubst = FALSE;
 		return C_CONTINUE;
+
+	case wActionMove:
+		if ((easementVal < 0) && Dj.joinMoveState == 0 )
+			return CmdCornu(action, pos);
+		break;
 
 	case C_DOWN:
-		if ( (Dj.state == 0 && (MyGetKeyState() & WKEY_SHIFT) != 0) || Dj.joinMoveState != 0 )
+		if ( !Dj.cornuMode && ((Dj.state == 0 && (MyGetKeyState() & WKEY_SHIFT) != 0) || Dj.joinMoveState != 0) )
 			return DoMoveToJoin( pos );
-		if (easementVal < 0.0)
+		if (easementVal < 0.0 && Dj.joinMoveState == 0) {
+			Dj.cornuMode = TRUE;
 			return CmdCornu(action, pos);
+		}
+
+		if (infoSubst)
+			InfoSubstituteControls(NULL, NULL);
+		infoSubst = FALSE;
 
 		DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 		tempSegs(0).color = drawColorBlack;
@@ -493,9 +850,21 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			if (!GetTrackParams( PARAMS_1ST_JOIN, Dj.inp[0].trk, pos, &Dj.inp[0].params ))
 				return C_CONTINUE;
 			Dj.inp[0].realType = GetTrkType(Dj.inp[0].trk);
-			InfoMessage( _("Select 2nd track") );
+			if (easementVal==0.0 && desired_radius > 0.0) {
+				InfoMessage(_("Select 2nd track - desired radius %0.3f"),FormatDistance(desired_radius));
+			} else
+				InfoMessage( _("Select 2nd track") );
 			Dj.state = 1;
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
+			wPrefGetFloat("misc", "desired_radius", &desired_radius, desired_radius);
+			controls[0] = joinRadPD.control;
+			controls[1] = NULL;
+			labels[0] = N_("Desired Radius");
+			InfoSubstituteControls(controls, labels);
+			infoSubst = TRUE;
+			joinRadPD.option |= PDO_NORECORD;
+			ParamLoadControls(&joinPG);
+			ParamGroupRecord(&joinPG);
+
 			return C_CONTINUE;
 		} else {
 			if ( (Dj.inp[1].trk = OnTrack( &pos, TRUE, TRUE )) == NULL)
@@ -528,7 +897,6 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 				ErrorMessage( MSG_TRK_ALREADY_CONN, _("Second") );
 				return C_CONTINUE;
 			}
-
 			rc = C_CONTINUE;
 			if ( MergeTracks( Dj.inp[0].trk, Dj.inp[0].params.ep,
 							  Dj.inp[1].trk, Dj.inp[1].params.ep ) )
@@ -544,7 +912,6 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 					rc = C_TERMINATE;
 			}
 			if ( rc == C_TERMINATE ) {
-				DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 				return rc;
 			}
 			if ( QueryTrack( Dj.inp[0].trk, Q_CANNOT_BE_ON_END ) ||
@@ -553,30 +920,103 @@ LOG( log_join, 1, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 				return C_CONTINUE;
 			}
 
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			Dj.state = 2;
 			Dj.jRes.flip = FALSE;
 		}
 		tempSegs_da.cnt = 0;
+		/* no break */
 
 	case C_MOVE:
-		if (easementVal < 0)
+		if (easementVal < 0 && Dj.cornuMode)
 			return CmdCornu(action, pos);
 
 LOG( log_join, 3, ("P1=[%0.3f %0.3f]\n", pos.x, pos.y ) )
 		if (Dj.state != 2)
 			return C_CONTINUE;
 
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorWhite );
+		DYNARR_RESET(trkSeg_t,Dj.anchors);
+
+
+		//Fix Pos onto the line of the second track
+		if (Dj.inp[1].params.type == curveTypeStraight) {
+			ANGLE_T a = NormalizeAngle(FindAngle(Dj.inp[1].params.lineOrig,pos)-Dj.inp[1].params.angle);
+			DIST_T d = FindDistance(Dj.inp[1].params.lineOrig,pos);
+			Translate(&pos,Dj.inp[1].params.lineOrig,Dj.inp[1].params.angle,d*cos(D2R(a)));
+		} else {
+			ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,pos);
+			Translate(&pos,Dj.inp[1].params.arcP,a,Dj.inp[1].params.arcR);
+		}
+
+		if ((desired_radius != 0.0) &&
+			((Dj.inp[0].params.type == curveTypeStraight) || (Dj.inp[0].params.type == curveTypeCurve)) &&
+			((Dj.inp[1].params.type == curveTypeStraight) || (Dj.inp[1].params.type == curveTypeCurve)) &&
+				Dj.jRes.type==curveTypeCurve
+			) {
+			ANGLE_T na0=0.0,na1=0.0;
+			coOrd end0, end1;
+			ANGLE_T a0,a1;
+			end0 = GetTrkEndPos(Dj.inp[0].trk,Dj.inp[0].params.ep);
+			end1 = GetTrkEndPos(Dj.inp[1].trk,Dj.inp[1].params.ep);
+			if (Dj.inp[0].params.type == curveTypeStraight) {
+				a0 = DifferenceBetweenAngles(Dj.inp[0].params.angle,FindAngle(Dj.jRes.pos[0], pos));
+				na0 = NormalizeAngle( Dj.inp[0].params.angle +
+										((a0>0.0)?90.0:-90.0));
+			} else {
+				na0 = Dj.inp[0].params.arcA0;
+				if (FindDistance(Dj.inp[0].params.arcP,pos)<Dj.inp[0].params.arcR)
+					na0 = NormalizeAngle(na0+180.0);
+			}
+			//Now Second Line offset
+			if (Dj.inp[1].params.type == curveTypeStraight) {
+				a1 = DifferenceBetweenAngles(Dj.inp[1].params.angle,FindAngle(pos, Dj.jRes.pos[0]));
+				na1 = NormalizeAngle( Dj.inp[1].params.angle +
+										((a1>0.0)?90.0:-90.0));
+			} else {
+				na1 = Dj.inp[1].params.arcA0;
+				if (FindDistance(Dj.inp[1].params.arcP,Dj.jRes.pos[0])<Dj.inp[1].params.arcR)
+					na1 = NormalizeAngle(na1+180.0);
+			}
+			coOrd pos1 = pos;
+			if (AdjustPosToRadius(&pos1,desired_radius+(Dj.jointD[0].x), na0, na1)) {
+				if (Dj.inp[1].params.type == curveTypeStraight) {
+					FindPos( &off, &beyond, pos1, Dj.inp[1].params.lineOrig, Dj.inp[1].params.angle,
+										 FindDistance(Dj.inp[1].params.lineOrig,Dj.inp[1].params.lineEnd) );
+				} else if (Dj.inp[1].params.type == curveTypeCurve) {
+					ANGLE_T a = FindAngle(Dj.inp[1].params.arcP,pos1);
+					if ((a>Dj.inp[1].params.arcA0+Dj.inp[1].params.arcA1) || (a< Dj.inp[1].params.arcA0)) {
+						beyond = 1.0;
+					}
+				}
+				//Suppress result unless on track and close to user position (when on track)
+				if (beyond>-0.01 && IsClose(FindDistance(pos,pos1))) {
+					pos = pos1;
+					DYNARR_APPEND(trkSeg_t,Dj.anchors,1);
+					trkSeg_p p = &DYNARR_LAST(trkSeg_t,Dj.anchors);
+					p->type= SEG_CRVLIN;
+					p->width = 0;
+					p->color = wDrawColorBlue;
+					p->u.c.center = pos;
+					p->u.c.a1= 360.0;
+					p->u.c.a0 = 0.0;
+					p->u.c.radius = tempD.scale*0.25/2;
+				}
+			}
+
+		}
+
+
 		tempSegs_da.cnt = 0;
 		tempSegs(0).color = drawColorBlack;
 		ok = FALSE;
 
 /* Populate (Dj.inp[1]) */ 
+
 		if ( QueryTrack(Dj.inp[1].trk,Q_REFRESH_JOIN_PARAMS_ON_MOVE) ) {
 			if ( !GetTrackParams( PARAMS_2ND_JOIN, Dj.inp[1].trk, pos, &Dj.inp[1].params ) )
 				return C_CONTINUE;
 		}
+
+
 		beyond = 1.0;
 		switch ( Dj.inp[1].params.type ) {
 		case curveTypeCurve:
@@ -798,7 +1238,6 @@ errorReturn:
 		default:
 			AbortProg( "Bad track type %d", Dj.jRes.type );
 		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorBlack );
 		if (!ok)
 			Dj.jRes.type = curveTypeNone;
 		return C_CONTINUE;
@@ -806,8 +1245,8 @@ errorReturn:
 	case C_UP:
 
 		if (Dj.state == 0) {
-			if (easementVal<0)
-						return CmdCornu(action, pos);
+			if (easementVal<0 && Dj.cornuMode)
+				return CmdCornu(action, pos);
 			else
 				return C_CONTINUE;
 		}
@@ -815,12 +1254,10 @@ errorReturn:
 			InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
 		}
-		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, drawColorWhite );
 		tempSegs(0).color = drawColorBlack;
 		tempSegs_da.cnt = 0;
 		if (Dj.jRes.type == curveTypeNone) {
 			Dj.state = 1;
-			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
 			InfoMessage( _("Select 2nd track") );
 			return C_CONTINUE;
 		}
@@ -845,7 +1282,10 @@ errorReturn:
 		UndrawNewTrack( Dj.inp[1].trk );
 		ep = Dj.jRes.flip?1:0;
 		Dj.state = 0;
+		DYNARR_RESET(trkSeg_t,Dj.anchors);
 		rc = C_TERMINATE;
+		if (easementVal == 0.0)
+			wPrefSetFloat("misc", "desired_radius", desired_radius);
 		if ( (!JoinTracks( Dj.inp[0].trk, Dj.inp[0].params.ep, Dj.inp_pos[0],
 					trk, ep, Dj.jRes.pos[0], &Dj.jointD[0] ) ) ||
 			 (!JoinTracks( Dj.inp[1].trk, Dj.inp[1].params.ep, Dj.inp_pos[1],
@@ -856,24 +1296,34 @@ errorReturn:
 		DrawNewTrack( Dj.inp[0].trk );
 		DrawNewTrack( Dj.inp[1].trk );
 		DrawNewTrack( trk );
+		if (infoSubst)
+			InfoSubstituteControls(NULL, NULL);
+		infoSubst = FALSE;
 		return rc;
 
 	case C_CANCEL:
+		if (infoSubst)
+			InfoSubstituteControls(NULL, NULL);
+		infoSubst = FALSE;
+		break;
+
 	case C_REDRAW:
-
-
 		if ( Dj.joinMoveState == 1 || Dj.state == 1 ) {
 			DrawFillCircle( &tempD, Dj.inp[0].pos, 0.10*mainD.scale, selectedColor );
-		} else if (easementVal<0 )
-				return CmdCornu(action,pos);
-
+		} else if (easementVal<0 && Dj.joinMoveState == 0)
+			return CmdCornu(action,pos);
+		if (Dj.anchors.cnt)
+				DrawSegs(&tempD, zero, 0.0, &(((trkSeg_t *)Dj.anchors.ptr)[0]), Dj.anchors.cnt,trackGauge,wDrawColorBlack);
 		DrawSegs( &tempD, zero, 0.0, &tempSegs(0), tempSegs_da.cnt, trackGauge, wDrawColorBlack );
 		break;
 
 	case C_TEXT:
 	case C_OK:
-		if (easementVal<0 )
-				return CmdCornu(action,pos);
+		if (easementVal<0 && Dj.cornuMode)
+			return CmdCornu(action,pos);
+		if (infoSubst)
+			InfoSubstituteControls(NULL, NULL);
+		infoSubst = FALSE;
 
 	}
 
@@ -889,10 +1339,14 @@ errorReturn:
  */
 
 #include "bitmaps/join.xpm"
+#include "bitmaps/joinline.xpm"
 
 void InitCmdJoin( wMenu_p menu )
 {
-	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoin", _("Join"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP, ACCL_JOIN, NULL );
+	ButtonGroupBegin( _("Join"), "cmdJoinSetCmd", _("Join") );
+	joinCmdInx = AddMenuButton( menu, CmdJoin, "cmdJoin", _("Join Track"), wIconCreatePixMap(join_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
+	AddMenuButton( menu, CmdJoinLine, "cmdJoinLine", _("Join Lines"), wIconCreatePixMap(joinline_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_JOIN, NULL );
+	ButtonGroupEnd();
 	log_join = LogFindIndex( "join" );
 }
 

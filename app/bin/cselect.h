@@ -28,7 +28,6 @@
 wIndex_t selectCmdInx;
 wIndex_t moveCmdInx;
 wIndex_t rotateCmdInx;
-long quickMove;
 BOOL_T importMove;
 extern int incrementalDrawLimit;
 extern long selectedTrackCount;
@@ -37,6 +36,8 @@ void InvertTrackSelect( void * );
 void OrphanedTrackSelect( void * );
 void SetAllTrackSelect( BOOL_T );
 void SelectTunnel( void );
+void SelectBridge( void );
+void SelectTies( void );
 void SelectRecount( void );
 void SelectTrackWidth( void* );
 void SelectDelete( void );
@@ -49,6 +50,6 @@ void DoRefreshCompound( void );
 void WriteSelectedTracksToTempSegs( void );
 void DoRescale( void );
 STATUS_T CmdMoveDescription( wAction_t, coOrd );
-void UpdateQuickMove( void * );
+void DrawHighlightBoxes(BOOL_T, BOOL_T,track_p);
 
 #endif

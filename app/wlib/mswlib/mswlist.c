@@ -243,7 +243,7 @@ wBool_t wListSetValues(
 		void * itemData )
 {
 	listData * ldp;		
-	WORD curSel;
+	WORD curSel = -1;
 	ldp = (listData*)malloc( sizeof *ldp );
 	ldp->itemContext = itemData;
 	ldp->bm = bm;

@@ -1,5 +1,5 @@
 # Automatically generate most of our external dependencies ...
-GET_TARGET_PROPERTY(XTRKCAD_LOCATION xtrkcad LOCATION)
+SET(XTRKCAD_LOCATION $<TARGET_FILE:xtrkcad>)
 CONFIGURE_FILE("${CMAKE_CURRENT_SOURCE_DIR}/dependencies.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake" @ONLY)
 INSTALL(SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/dependencies.cmake")
 

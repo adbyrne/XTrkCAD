@@ -47,7 +47,8 @@
 #define OP_FILLBOX		(16)
 #define OP_FILLPOLY		(17)
 #define OP_BEZLIN       (18)
-#define OP_LAST			(OP_BEZLIN)
+#define OP_POLYLINE     (19)
+#define OP_LAST			(OP_POLYLINE)
 
 typedef struct {
 				void (*message)( char *, ... );
@@ -55,20 +56,74 @@ typedef struct {
 				drawCmd_t *D;
 				long Op;
 				wDrawColor Color;
-				long Width;
+				long line_Width;
+				double width;
+				ANGLE_T angle;
+				double length;
+				double radius;
 				long benchOption;
+				drawLineType_e lineType;
 				int State;
+				int index;
 				curveData_t ArcData;
 				ANGLE_T ArcAngle;
 				int Started;
 				BOOL_T Changed;
 		} drawContext_t;
 
+typedef enum {MOD_NONE, MOD_STARTED, MOD_SELECTED_PT, MOD_AFTER_PT,
+		MOD_ORIGIN, MOD_AFTER_ORIG } ModState_e;
+
+typedef struct {
+				void (*message)( char *, ... );
+				void (*Redraw)( void );
+				drawCmd_t *D;
+				double length;
+				ANGLE_T rel_angle;
+				double radius;
+				ANGLE_T arc_angle;
+				int last_inx;
+				ANGLE_T abs_angle;
+				double height;
+				double width;
+				int prev_inx;
+				int max_inx;
+				track_p trk;
+				char type;
+				coOrd orig;			//Origin Pos
+				ANGLE_T angle;      //Origin Angle
+				wIndex_t segCnt;
+				trkSeg_p segPtr;
+				wBool_t selected;
+				wBool_t circle;
+				ModState_e state;
+				coOrd rel_center;
+				coOrd rot_center;
+				wBool_t rot_moved;
+				coOrd translate_center;
+				coOrd moved;
+				coOrd arm;
+				coOrd new_arm;
+				ANGLE_T rot_angle;
+				coOrd p0;
+				coOrd p1;
+				coOrd pm;
+				coOrd pc;
+				DIST_T disp;
+				wBool_t rotate_state;
+				wBool_t open;
+				wBool_t filled;
+				PolyType_e subtype;
+		} drawModContext_t;
+
+typedef enum {LENGTH_UPDATE, WIDTH_UPDATE} drawUpdateType_e;
+
 extern drawContext_t * drawContext;
 extern wDrawColor lineColor;
 extern long lineWidth;
 
 void DrawGeomOp( void * );
-STATUS_T DrawGeomMouse( wAction_t, coOrd, drawContext_t * );
-STATUS_T DrawGeomModify( coOrd, ANGLE_T, wIndex_t, trkSeg_p, wAction_t, coOrd, wBool_t );
+STATUS_T DrawGeomMouse( wAction_t, coOrd, drawContext_t *);
+STATUS_T DrawGeomModify( wAction_t, coOrd, drawModContext_t * );
+STATUS_T DrawGeomOriginMove(wAction_t, coOrd, drawModContext_t * );
 #endif //HAVE_DRAWGEOM_H

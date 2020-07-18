@@ -78,6 +78,16 @@ HELP
 The angle specified for a curve must be between 0\u00B0 and 360\u00B0.
 END
 
+# ctodesgn.c
+MESSAGE MSG_TODSGN_CORNU_TOO_COMPLEX
+The curves created by the Turnout Designer for a cornu curve have more than 128 segments.
+Try adjusting the end angles and radii to be closer in values.
+HELP
+Too complex a curve set to be used. Respecify \f{Turnout Designer} values.
+
+Refer to \k{cmdTurnoutNew} for detail.
+END
+
 # dcustmgm.c
 MESSAGE MSG_CUSTMGM_DELETE_CONFIRM
 Are you sure you want to delete the
@@ -160,6 +170,15 @@ The current \f{Layer} is where most new objects are created. It's not possible t
 Refer to \k{cmdLayer} for detail.
 END
 
+# dlayer.c
+MESSAGE MSG_LAYER_MODULE
+Cannot turn current layer into a Module
+HELP
+The current \f{Layer} is where new objects are created. It's not possible to turn this layer into a module, since then the objects can't be chnaged or added. Change the current \f{Layer} to some other \f{Layer} before trying to make this Layer into a module.
+
+Refer to \k{cmdLayer} for detail.
+END
+
 # cjoin.c track.c:getTrackParams/PARAMS_..._JOIN
 MESSAGE MSG_JOIN_EASEMENTS
 Cannot Join; Easements do not align or abut.
@@ -189,7 +208,7 @@ You cannot select a \f{Turntable} as the second track in \f{Join} command. If yo
 Refer to \k{cmdJoin} for detail.
 END
 
- ccornu.c
+# ccornu.c
 MESSAGE MSG_JOIN_CORNU_SAME
 Cannot Join; Selected endpoints are on same track.
 HELP
@@ -376,6 +395,48 @@ necessary to upgrade your version of \e{XTrackCAD} to at least the version ident
 Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
 END
 
+#fileio.c
+MESSAGE MSG_LAYOUT_LINES_SKIPPED
+While processing Layout file %s, %d lines were skipped because they were not recognized.
+HELP
+The layout file that you loaded contained records that were not recognized. This could be because the file was written by a higher level of \e{XTrackCAD} or because it was corrupted.
+
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
+END
+
+#paramfile.c
+MESSAGE MSG_PARAM_UPGRADE_VERSION1
+File version %ld is greater than supported
+version %d. You need to upgrade %s
+to at least version %s.
+HELP
+The parameter file that you're attempting to load was designed for a newer version
+of \e{XTrackCAD}. In order to load this file it will be necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
+
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Website} and downloading the latest release.
+END
+
+#paramfile.c
+MESSAGE MSG_PARAM_UPGRADE_VERSION2
+File version %ld is greater than supported
+version %d. You need to upgrade your
+version of %s
+HELP
+The parameter file that you're attempting to load was designed for a newer version of \e{XTrackCAD}. In order to load this file it will be
+necessary to upgrade your version of \e{XTrackCAD} to at least the version identified within the error message.
+
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
+END
+
+#paramfile.c
+MESSAGE MSG_PARAM_LINES_SKIPPED
+While processing Parameter file %s, %d lines were skipped because they were not recognized.
+HELP
+The parameter file that you loaded contained records that were not recognized. This could be because the file was designed for a higher level of \e{XTrackCAD} or because it was corrupted.
+
+Take full advantage of the latest features within \e{XTrackCAD} by visiting the \W{http://www.xtrkcad.org/}{\e{XTrackCAD} Fork Website} and downloading the latest release.
+END
+
 # chndldto.c
 MESSAGE MSG_MOVE_POINTS_OTHER_SIDE
 Frog angle prevents placement of points. Move points to opposite side of frog.
@@ -401,6 +462,16 @@ ALT
 Joining tracks with differing elevations (N.NNN)
 HELP
 You are connecting two \e{endpoints} which differ in heights by N.NNN. The elevation of the connection will be the average of the two heights. You should check if this is a problem.
+END
+
+# cselect.c:cmdMoveDescription
+MESSAGE MSG_TRK_DESC_NOT_VISIBLE
+Label description is hidden
+HELP
+The \f{Move Description} command can only be used when labels are visible on the layout. Labels can be hidden using the Context Menu.
+
+Use the Context Menu to toggle a track's visbility on and off.
+
 END
 
 # cselect.c:cmdMoveDescription
@@ -437,6 +508,13 @@ HELP
 Values for \f{Page Width} and \f{Height} can be manually entered thus overriding maximum values. For example, smaller values could be specified if each printed page is to contain an integral number of feet. Values larger than the selected paper size multiplied by the \e{Scale} cannot be entered.
 
 Refer to \k{cmdPrint} for detail.
+END
+
+MESSAGE MSG_NO_PRINTER_SELECTED
+Please select a printer from the Print Setup dialog.
+HELP
+Printer Margins are specific to the selected printer, but no selected printer is chosen.
+You can select a printer from the Print Setup dialog.
 END
 
 # dprmfile.c
@@ -518,6 +596,13 @@ The current command operates on \f{Select}ed tracks of which there are none. \f{
 Refer to \k{cmdSelect} for detail.
 END
 
+# dlayer.c
+MESSAGE MSG_NO_EMPTY_LAYER
+No layer was found that has no contents, so the module can not be imported
+HELP
+The import module function needs an empty layer to work with, but none could be found. Clear a layer and retry.
+END
+
 # dcmpnd.c:refreshCompound
 MESSAGE MSG_NO_TURNOUTS_AVAILABLE
 No %s are available.
@@ -551,9 +636,9 @@ END
 
 # cparalle.c
 MESSAGE MSG_PARALLEL_SEP_GTR_0
-Parallel separation must be greater than 0.
+Parallel separation must be greater than 0, or the new guage must be different than the old.
 HELP
-A parallel track with a separation of 0 or less cannot be created. Specify a positive value in the \f{Separation} field that appears in the Status Bar.
+A parallel track with an identical gauge and separation of 0 or less cannot be created. Specify a positive value in the \f{Separation} field that appears in the Status Bar, or select a track with a different guage.
 
 Refer to \k{cmdParallel} for detail.
 END
@@ -617,7 +702,14 @@ END
 MESSAGE MSG_POLY_SHAPES_3_SIDES
 Poly shapes must have at least 3 sides.
 HELP
-Polygons and Poly Lines must have at least 3 sides. By moving one of the corners close to another corner you're attempting to merge the corners and create a Poly shape with only 2 sides. Try moving the other corner to the new position first.
+Polygons and Poly Lines must have at least 3 sides. You're attempting to create a Poly shape with only 2 sides by deleting the third. 
+END
+
+# drawgeom.c
+MESSAGE MSG_POLY_MULTIPLE_SELECTED
+Can't delete multiple points at once
+HELP
+Polygons and Poly Lines points can only be deleted one at a time. 
 END
 
 # dcar.c
@@ -928,6 +1020,15 @@ This operation cannot be executed as the selected track is present on a frozen l
 Refer to \k{cmdLayer} for detail.
 END
 
+# track.c
+MESSAGE MSG_CANT_MODIFY_MODULE_TRK
+Tracks in a module cannot be modified.
+HELP
+This operation cannot be executed as the selected track is present in a module layer. Track modifications may be performed only on unfrozen, non-module layers.
+
+Refer to \k{cmdLayer} for detail.
+END
+
 #ctodesgn.c
 MESSAGE MSG_SEGMENTS_DIFFER
 Turnout definition contains non-track segments.
@@ -1012,6 +1113,132 @@ END
 MESSAGE MSG_OPEN_FAIL
 Cannot open %s file:
 %s:%s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_DIR_CREATE_FAIL
+Cannot create directory: %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_DIR_OPEN_FAIL
+Cannot open directory: %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_NOT_DIR_FAIL
+Path for deletion is not a directory: %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_OPEN_DIR_FAIL
+Open failed for directory: %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_DIR_ADD_FAIL
+Can't add directory record %s to zip - %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_FILE_ADD_FAIL
+Can't add file record %s to zip at %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_CREATE_FAIL
+Can't create zip %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_CLOSE_FAIL
+Close failure for zip %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_RENAME_FAIL
+Rename failure for zip from %s to %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_OPEN_FAIL
+Open failure for zip %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_INDEX_FAIL
+Index failure for zip %s - %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_FILE_OPEN_FAIL
+Open read file failure %s %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ZIP_READ_FAIL
+Open file in zip failure %s %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_UNLINK_FAIL
+Unlink failed for: %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_RMDIR_FAIL
+Remove Directory failed for: %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_ARCHIVE_FAIL
+Cannot save archive to %s from directory: %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_MANIFEST_FAIL
+Cannot save manifest file to %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_MANIFEST_OPEN_FAIL
+Cannot open manifest file %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_UNPACK_FAIL
+Cannot unpack file: %s for file: %s in directory: %s
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_COPY_OPEN_FAIL
+Cannot open file %s 
+#NOHELP
+END
+
+# fileio.c
+MESSAGE MSG_COPY_FAIL
+Cannot copy file %s into directory %s
 #NOHELP
 END
 
@@ -1208,7 +1435,12 @@ layout file using an older version of %s
 #NOHELP
 END
 
-
+# paramfile.c
+MESSAGE MSG_PARAM_BAD_FILE_VERSION
+File version %ld is lower than the minimum
+supported version %d.This parameter file will only work using an older version of %s
+#NOHELP
+END
 
 # macro.c
 MESSAGE MSG_CANT_READ_DEMO

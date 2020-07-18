@@ -10,16 +10,26 @@
 \G{png.d/mfile.png}
 
 The \f{File Menu} shows file oriented commands for loading and saving layout files.
+\i{File Types} The main two filetypes that XTrackCAD uses are normal Layout Files (*.xtc) and Archive Files (*.xtce). The internals of both formats are described in the XtrkCAD Wiki at \W{http://www.xtrkcad.org/Wikka/FileFormats}{Wiki FileFormats}.
+
+\i{Layout File} The layout file is named with a \e{*.xtc} extenstion and is a text-based description file of all the objects used in the layout plus some information about the options currently in use.
+\i{Archive} An archive is named with a \e{*.xtce} extension, is a zipped collection of -
+
+\b a \e{manifest} JSON file that lists the contents,
+
+\b the .xtc layout file, and
+
+\b any other content listed in the manifest -> such as referenced image files. Initially the only such content is the background image which is added to the archive if it is present.
 
 \dd \f{Exit} - Exits \e{XTrackCAD}. You will be asked to confirm your choice if there are unsaved changes.
 
 \u000
 
-\dd \f{Export} - Exports the selected objects to a file in \e{XTrackCAD} (*.xti) format. The exported file can then be imported into another layout design. Refer to the Import command listed above. 
+\dd \f{Export} - Exports the selected objects to a file in \e{XTrackCAD} (*.xti) format. The exported file can then be imported into another layout design. Refer to the Import command listed below.
 
 \u000
 
-\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. 
+\dd \f{Export to Bitmap} - Creates a bitmap file (\K{cmdOutputbitmap}) of the layout. The bitmap will be saved in PNG format.
 
 \u000
 
@@ -27,12 +37,15 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{File List} - List of the five most recently used \e{XTrackCAD} files.
+\dd \f{File List} - List of the five most recently used \e{XTrackCAD} files or archives.
 
 \u000
 
-\dd \f{Import} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport}) file. This function can be used to transfer parts like a yard design from one layout design to another. 
+\dd \f{Import} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) files. This function can be used to transfer parts like a yard design from one layout design to another.
 
+\u000
+
+\dd \f{Import Module} - Displays the file selection dialog which allows selection of an existing \e{XTrackCAD} Import (\K{cmdExport} *.xti) file. The imported parts are put into a empty layer, sets the layer name to the imported filename and sets the layer to be a module - see (\K{cmdLayer}).
 \u000
 
 \dd \G{png.d/bnew.png} \f{New} - Clears the current layout.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation. After that the Layout Options (\K{cmdLayout}) dialog will be opened.
@@ -43,7 +56,7 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \G{png.d/bopen.png} \f{Open} - Displays the \f{File Open} dialog which allows an existing \e{XTrackCAD} file to be selected and opened.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation.
+\dd \G{png.d/bopen.png} \f{Open} - Displays the \f{File Open} dialog which allows an existing \e{XTrackCAD} file or archive to be selected and opened.  In case there are any unsaved changes on the current plan, a warning pop-up will be displayed and you'll have the option to cancel the operation.
 
 \u000
 
@@ -59,15 +72,15 @@ The \f{File Menu} shows file oriented commands for loading and saving layout fil
 
 \u000
 
-\dd \f{Revert} - Undoes all changes and returns to the last saved layout plan. 
+\dd \f{Revert} - Undoes all changes and returns to the last saved layout plan.
 
 \u000
 
-\dd \G{png.d/bsave.png} \f{Save} - Saves the layout under the current file name.  If a filename has not yet been assigned then the \f{File Save} dialog is shown so you enter a file name.
+\dd \G{png.d/bsave.png} \f{Save} - Saves the layout under the current file name and with the same file type as was opened. If a filename has not yet been assigned then the \f{File Save} dialog is shown so you enter a file (.xtc) or archive name (.xtce).
 
 \u000
 
-\dd \f{Save As} - This command lets you make a copy of the track plan you are currently working on. It differs from the regular Save command. Save stores your data back into the folder (directory) it originally came from. "Save As" lets you give your plan a different name and/or put it in a different folder on your hard disk or floppy disk.
+\dd \f{Save As} - This command lets you make a copy of the track plan you are currently working on as an file (.xtc) or an archive (.xtce). It differs from the regular Save command. Save stores your data back into the folder (directory) it originally came from in the same filetype. "Save As" lets you give your plan a different name and/or put it in a different folder on your hard disk and chnage its filetype using the selection box at the bottom of the list of files or by hardcoding the extensions .xtc or .xtce (for an archive).
 
 \rule
 
@@ -89,7 +102,7 @@ This menu item creates a bitmap file of the layout.
 
 The \f{Bitmap} dialog specifies the style and size of the bitmap.  The three check-boxes (\f{Print Titles}, \f{Print Borders} and \f{Print Centerline}) control whether the Layout Title (\K{cmdLayout}), the borders or the track centerlines are printed on the bitmap.  The size of the bitmap is smaller if these are disabled.
 
-Printing the track centerlines (also seen when zoomed in 1:1) is useful when you later print the bitmap 
+Printing the track centerlines (also seen when zoomed in 1:1) is useful when you later print the bitmap
 full size for laying out track.
 
 If the Snap Grid (\K{cmdGrid}) is visible then it will be printed on the bitmap.
@@ -102,7 +115,7 @@ Note: This command can create a very large file and consume a lot of memory and 
 
 Pressing the \f{OK} button invokes a \f{File Save} dialog so you can choose the file name for the Bitmap.
 
-The format of the file depends on the Operating System: on MS-Windows it is a Windows Bitmap (.BMP) file, on Linux it is a X11 Pixmap (.XPM) file.
+The format of the file is PNG on all operating systems.
 
 \rule
 
@@ -128,25 +141,83 @@ After importing the objects from the file, the imported objects are in selected 
 
 \S{cmdPrmfile} \i{Parameter Files}
 
-\e{Parameter Files} contain turnout, sectional track and structure definitions.  Parameter Files are loaded and unloaded with the \f{Parameter Files} dialog.
+\e{Parameter Files} contain turnout, sectional track and structure definitions.  Loaded Parameter Files are managed with the \f{Parameter Files} dialog.
 
 \G{png.d/dprmfile.png}
 
-The dialog contains a list of parameter files.  Each file is preceded by a checked box. If the box is checked, the parameter file is loaded. If the box is not checked the file is unloaded.
+The dialog contains a list of parameter files. Each file is preceded by a color indicator. These indicators show whether a parameter file contains definitions that
+are usable in the current scale and gauge.
 
-Loaded definition files associated with current scale settings appear on the \f{Hot Bar} (\K{cmdHotBar}).  If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  An unloaded file may be \e{reloaded} by selecting the  \f{Reload} button (The \f{Unload} button changes to \f{Reload} when a selected file is unloaded).
+\G{png.d/greendot.png} \G{png.d/greenstar.png} Definitions from this file are a perfect fit for the current layout options. The file has been loaded and will be visible in the \f{HotBar}. For track this means that gauge and scale of the track elements
+are identical to the layout settings.
+
+\G{png.d/yellowdot.png} \G{png.d/yellowstar.png} Definitions from this file can be used with this layout but do not fit perfectly. A typical example is On30 where HO scale track can be used because the
+gauge is the same. But differences in scale may make the track look out of scale.
+
+\G{png.d/reddot.png} \G{png.d/redstar.png} This parameter file doesn't contain any usable definitions with current settings. You may want to change the layout options if you want to use elements from
+this file (for example altering the Layout Scale).
+
+\G{png.d/greydot.png} \G{png.d/greystar.png} This file is loaded but hidden.
+If it is marked as favorite it will be kept on the
+list between runs. Otherwise it will be removed from the list when
+the program is terminated.
+
+Definition files can be marked as \e{favorite}. The indicator for favorites is a star.
+The meaning of the colors isn't changed.
+
+Loaded definition files that are marked with a yellow or a green indicator appear on the \f{Hot Bar} (\K{cmdHotBar}).  
+
+If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  
+If the unloaded file was marked as a favorite it can be \e{reloaded} by selecting the  \f{Reload} button.
+
+Files that are still loaded can be \e{reloaded} as well. In that case the old definitions are refreshed and extended by the 
+rereading the file. This can be useful if you want to check changes you made by hand-editing a parameter file. 
+
+Note that loading a file does not change the existing definitions in the layout. To do that after loading, use \K{cmdRefreshSpecial}.
 
 It is possible to change the state of several files at once. The \f{Select All} button allows you to select all parameter files for the next operation.
 
-\e{Unloaded} files are removed from the list when \e{XTrackCAD} terminates.
+In case unloaded files are marked as favorite, their state will be preserved 
+between runs of the program.
+This makes it possible to keep a list of preferred parameter sets between
+runs of XTrackCAD but hide temporary unused files from the hotbar. That
+way the hotbar contents can be kept short containing only the currently needed elements.
 
-Files can be listed by either their file name or by their contents description. This is controlled by the \f{Show File Names} check box.
+In order to update the defintion of an already loaded file from disk, you can use the \e{Reload} button. This will reload the file contents - with any changes made.
+It is the equivalent of using \f{Browse} and selecting the file again.  
+ 
+Files can be listed by either their file name or by their contents description.
+This is controlled by the \f{Show File Names} check box.
 
-The \f{Browse} button allows you to load other \e{parameter files} such as provided by other users or downloaded from the Internet.
+The \f{Search} button opens the \e{Search Parameter File} dialog (\K{searchgui}) this
+shows the all files included the system library so they can be added.
 
-When first installed, all available parameter files are loaded. You can unload parameter files you don't use to speed up \e{XTrackCAD} startup time.
+The \f{Browse} button opens a file window that allows the user to add additional files
+to directly load other non-system \e{parameter files} such as provided by other users or
+downloaded from the Internet.
 
-The order in this list controls the order of turnouts and structures on the \f{Hot Bar} (\K{cmdHotBar}). You can move a parameter file to the end of the list by \e{Unloading} it, and then loading it via the \f{Browse} button.
+When first installed, parameter files for all common scales are loaded.
+You can unload parameter files you don't use to speed up \e{XTrackCAD} startup time.
+
+The order in this list controls the order of turnouts and structures on the
+\f{Hot Bar} (\K{cmdHotBar}). You can move a parameter file to the end of the
+list by \e{Unloading} it, and then loading it via the \f{Browse} button.
+
+\S{searchgui} \i{Search Parameter Files}
+
+Selecting and loading additional parameter files from the System Library is done in the
+\f{Search Parameter Files} dialog.
+
+\G{png.d/paramsearch.png}
+
+Using the Search function you can find and select parameter files that are
+part of the XTrackCAD installation.
+Enter a search string and select the Search button. Search results are
+shown in the list box. A blank search or the value "*" resets the search results to 
+show the entire libary. 
+
+Select the files you're interested in and press the \f{Add} button to add them to your
+parameter list.
 
 \rule
 
@@ -204,27 +275,36 @@ Whether tracks are printed with one or two lines (representing the center line a
 
 \u000
 
+\dd \f{Registration Marks} - at 1:1 scale, print location markers every 3" (or 10cm).  This option is only enabled at 1:1. This is useful for aligning multiple pages printed at different angles.
+
+\u000
+
+\dd \f{Page Numbers} - to help positioning the individual pages the page number is printed in the center of the page in the format (x/y). x is the position from left to right, y in from bottom to top, So (1/1) is the page at the bottom left.
+As an additional aid, the numbers of the next pages are printed on each edge.
+
+\u000
+
+\dd \f{Snap Grid} - if the Snap Grid (\K{cmdGrid}) is visible then it may be drawn on the printout. This option is only enabled if the \e{Snap Grid} is visible.
+
+\u000
+
+\dd \f{Rulers} - print rulers on all edges of the page.  This option is only enabled if the \f{Angle} is \e{0.000}.
+
+\u000
+
+\dd \f{Centerline below Scale 1:1} - dotted line down the center of the Track/Roadbed.  This line will always be printed at Scale 1:1, but selecting this option will print it at smaller scales. This option is disabled if tracks would be drawn with only one line (instead of two).
+
+\u000
+
+\dd \f{Roadbed Outline} - lines representing the edge of the Roadbed.  The Roadbed will be printed if the \e{Width} is greater than the track gauge.  Note: this option is most useful at 1:1.  This option is disabled if tracks would be drawn with only one line (instead of two).
+
+\u000
+
 \dd \f{Ignore Page Margins} - use the physical page size.  This allows the printouts to abut without trimming.
 
 \u000
 
-\dd \f{Print Registration Marks} - at 1:1 scale, print location markers every 3" (or 10cm).  This option is only enabled at 1:1. This is useful for aligning multiple pages printed at different angles.
-
-\u000
-
-\dd \f{Print Snap Grid} - if the Snap Grid (\K{cmdGrid}) is visible then it may be drawn on the printout. This option is only enabled if the \e{Snap Grid} is visible.
-
-\u000
-
-\dd \f{Print Rulers} - print rulers on all edges of the page.  This option is only enabled if the \f{Angle} is \e{0.000}.
-
-\u000
-
-\dd \f{Print centerline below Scale 1:1} - dotted line down the center of the Track/Roadbed.  This line will always be printed at Scale 1:1, but selecting this option will print it at smaller scales. This option is disabled if tracks would be drawn with only one line (instead of two).
-
-\u000
-
-\dd \f{Print Roadbed Outline} - lines representing the edge of the Roadbed.  The Roadbed will be printed if the \e{Width} is greater than the track gauge.  Note: this option is most useful at 1:1.  This option is disabled if tracks would be drawn with only one line (instead of two).
+\dd \f{Margins} - examine and update the printer margins for the current printer.  (\K{cmdPrintMargin})
 
 \u000
 
@@ -241,13 +321,15 @@ Whether tracks are printed with one or two lines (representing the center line a
 \dd \f{Angle} - of the grid.
 
 
-These values can be set directly or by dragging on the layout.  \e{Shift+Left+Drag} moves the grid and \e{Shift+Right+Drag} rotates the grid.  The \f{Reset} button resets the values to 0.
+These values can be set directly or by dragging on the layout.  \c{Shift+Left+Drag} moves the grid and \c{Shift+Right+Drag} rotates the grid.  The \f{Reset} button resets the values to 0.
 
 The \f{Print} button prints the selected pages and closes the \f{Print} dialog.  It is not enabled until you have selected some pages to print.
 
 The \f{Setup} button invokes the Printer Setup (\K{printSetup}) dialog.
 
-The \f{Clear} button unselects all selected pages.
+The \f{Select All} button selects all pages for printing.
+
+The \f{Clear} button unselects all selected pages, so no pages will be printed.
 
 \e{Suggested Uses:}
 
@@ -285,7 +367,7 @@ The \f{Printer Setup} window contains:
 
 \u000
 
-\dd \f{Orientation} - a Radio button to select various Landscape or Portrait formats.
+\dd \f{Orientation} - a Radio button to select various Landscape or Portrait formats. This setting is ignored, use the \f{Page Format} entry on the \f{Print} dialog.
 
 \u000
 
@@ -333,6 +415,52 @@ The \f{Printer Setup} window contains:
 
 \u000
 
-\dd \f{Orientation} - a Radio button to select either Landscape or Portrait format.
+\dd \f{Orientation} - a Radio button to select either Landscape or Portrait format. This setting is ignored, use the \f{Page Format} entry on the \f{Print} dialog.
+
+\rule
+
+\S{cmdPrintMargin} \i{Printer Margin}
+
+\G{png.d/printmargin.png}
+
+The \f{Printer Margins} dialog allows you to configure the selected printer's margins. 
+
+The margins for the four edges of the printed page are displayed.
+The default values are fetched from the Operating System.
+You can enter updated values if the System values don't match your actual printer.
+
+The \f{Reset} is enabled if the displayed values don't match the System values and will reload the System's values.
+
+To check your printer's margin:
+
+\dd Set \f{Scale} to 1
+
+\u000
+
+\dd Set \f{Origin} and \f{Angle} to 0.000 by clicking the \f{Reset} button
+
+\u000
+
+\dd Enable \f{Registration Marks}
+
+\u000
+
+\dd Enable \f{Ignore Page Margins}
+
+\u000
+
+\dd Select and \f{Print} the lower left page of you layout
+
+\u000
+
+\dd Measure the distance from the left and bottom edges to the Registration Mark at (3",3") or (10cm,10cm).
+
+\u000
+
+\dd Update the \f{Printer Margin} values for the left and bottom edges.  You can also update the top and right edges.
+
+\u000
+
+Margins values are stored for each printer.
 
 \rule

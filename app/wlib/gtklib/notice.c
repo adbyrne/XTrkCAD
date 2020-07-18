@@ -58,8 +58,13 @@ static void doNotice(
     GtkWidget * widget,
     long value)
 {
-    noticeValue = value;
-    gtk_widget_destroy(noticeW.win);
+    if (value != 2) {
+	// event not from from closing the window but from a button press
+	// Close the Notice dialog
+    	gtk_widget_destroy(noticeW.win);
+	// Remember the button
+        noticeValue = value;
+    }
     wlibDoModal(NULL, FALSE);
 }
 
@@ -106,12 +111,16 @@ int wNoticeEx(int type,
         parent = GTK_WINDOW(gtkMainW->gtkwin);
     }
 
+    wDestroySplash();
+
     dialog = gtk_message_dialog_new(parent,
                                     GTK_DIALOG_DESTROY_WITH_PARENT,
                                     flag,
                                     ((no==NULL)?GTK_BUTTONS_OK:GTK_BUTTONS_YES_NO),
                                     "%s", msg);
     gtk_window_set_title(GTK_WINDOW(dialog), headline);
+
+    gtk_window_set_position(GTK_WINDOW(dialog), GTK_WIN_POS_CENTER);
 
     res = gtk_dialog_run(GTK_DIALOG(dialog));
     gtk_widget_destroy(dialog);
@@ -174,6 +183,7 @@ int wNotice3(
     char *can = NULL;
     char *alt = NULL;
 
+    wDestroySplash();
 
     nw->win = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -243,6 +253,9 @@ int wNotice3(
         }
     }
 
+    g_signal_connect(GTK_WINDOW(nw->win),
+            "destroy", G_CALLBACK(doNotice), (void*)2);
+
     gtk_widget_grab_default(nw->butt[ 0 ]);
     gtk_widget_grab_focus(nw->butt[ 0 ]);
 
@@ -253,6 +266,7 @@ int wNotice3(
         /*		gdk_window_set_group( nw->win->window, gtkMainW->gtkwin->window ); */
     }
 
+    noticeValue = 0; // Default: Cancel
     wlibDoModal(NULL, TRUE);
 
     if (aff) {

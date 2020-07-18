@@ -27,6 +27,7 @@
 #include "compound.h"
 #include "fileio.h"
 #include "messages.h"
+#include "ccornu.h"
 #include "track.h"
 
 EXPORT DIST_T curBarScale = -1;
@@ -57,7 +58,7 @@ typedef struct {
 		DIST_T labelW;
 		coOrd size;
 		coOrd orig;
-		BOOL_T isTrack;
+		BOOL_T isFixed;
 		void * context;
 		hotBarProc_t proc;
 		DIST_T barScale;
@@ -72,12 +73,15 @@ static int hotBarCurrEnds[2] = { -1, -1 };
 #define hotBarCurrEnd (hotBarCurrEnds[programMode])
 static DIST_T hotBarWidth = 0.0;
 
-static void HotBarHighlight( int inx )
+static void HotBarHighlight( int inx, DIST_T fixed_x )
 {
 	wPos_t x0;
-	if ( inx >= hotBarCurrStart && inx < hotBarCurrEnd ) {
-		x0 = (wPos_t)((hotBarMap(inx).x-hotBarMap((int)hotBarCurrStart).x)*hotBarD.dpi);
-		wDrawFilledRectangle( hotBarD.d, x0, 0, (wPos_t)(hotBarMap(inx).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTemp );
+	if ( inx == 0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed) {
+		x0 = (wPos_t)0;
+		wDrawFilledRectangle( hotBarD.d, x0, 0, (wPos_t)(hotBarMap(0).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTransparent );
+	} else if ( inx >= hotBarCurrStart && inx < hotBarCurrEnd ) {
+		x0 = (wPos_t)((hotBarMap(inx).x-hotBarMap((int)hotBarCurrStart).x + (inx>0?fixed_x:0))*hotBarD.dpi);
+		wDrawFilledRectangle( hotBarD.d, x0, 0, (wPos_t)(hotBarMap(inx).w*hotBarD.dpi-2), hotBarHeight, wDrawColorBlack, wDrawOptTransparent );
 	}
 }
 
@@ -105,11 +109,38 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 	if ( hotBarLabels && !hotBarFp )
 		hotBarFp = wStandardFont( F_HELV, FALSE, FALSE );
 	wPos_t textSize = wMessageGetHeight(0L);
+	DIST_T fixed_x = 0.0;
+	if (hotBarCurrStart>0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed) {				//Do fixed element first - Cornu
+		tbm = &hotBarMap(0);
+		barScale = tbm->barScale;
+		x = 0.0;
+		orig.y = hh/2.0*barScale - tbm->size.y/2.0 - tbm->orig.y;
+		if ( hotBarLabels ) {
+			orig.y += textSize/hotBarD.dpi*barScale;
+			if ( tbm->labelW > tbm->objectW ) {
+				fixed_x = tbm->labelW;
+				x += (tbm->labelW-tbm->objectW)/2;
+			} else fixed_x = tbm->objectW;
+		} else fixed_x = tbm->objectW;
+		x *= barScale;
+		orig.x = x;
+		hotBarD.scale = barScale;
+		hotBarD.size.x = barWidth*barScale;
+		hotBarD.size.y = barHeight*barScale;
+		tbm->proc( HB_DRAW, tbm->context, &hotBarD, &orig );
+		if ( hotBarLabels ) {
+			hotBarD.scale = 1.0;
+			orig.x = 0.0;
+			orig.y = 2.0/hotBarD.dpi;	            //Draw Label under icon
+			DrawString( &hotBarD, orig, 0.0, tbm->proc( HB_BARTITLE, tbm->context, NULL, NULL ), hotBarFp, hotBarFs, drawColorBlack );
+		}
+
+	}
 	for ( inx=hotBarCurrStart; inx < hotBarMap_da.cnt; inx++ ) {
 		tbm = &hotBarMap(inx);
 		barScale = tbm->barScale;
-		x = tbm->x - hotBarMap(hotBarCurrStart).x;
-		if ( x + tbm->w > barWidth ) {
+		x = tbm->x - hotBarMap(hotBarCurrStart).x + fixed_x;   //Add space for fixed at start
+		if ( x + tbm->w + fixed_x > barWidth ) {
 			break;
 		}
 		orig.y = hh/2.0*barScale - tbm->size.y/2.0 - tbm->orig.y;
@@ -127,14 +158,15 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 		tbm->proc( HB_DRAW, tbm->context, &hotBarD, &orig );
 		if ( hotBarLabels ) {
 			hotBarD.scale = 1.0;
-			orig.x = tbm->x - hotBarMap(hotBarCurrStart).x;
+			orig.x = tbm->x - hotBarMap(hotBarCurrStart).x + fixed_x;
 			orig.y = 2.0/hotBarD.dpi;	            //Draw Label under icon
 			DrawString( &hotBarD, orig, 0.0, tbm->proc( HB_BARTITLE, tbm->context, NULL, NULL ), hotBarFp, hotBarFs, drawColorBlack );
 		}
 	}
 	hotBarCurrEnd = inx;
-	if (hotBarCurrSelect >= hotBarCurrStart && hotBarCurrSelect < hotBarCurrEnd )
-		HotBarHighlight( hotBarCurrSelect );
+	if ((hotBarCurrSelect==0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed) ||
+		((hotBarCurrSelect >= hotBarCurrStart) && (hotBarCurrSelect < hotBarCurrEnd)) )
+		HotBarHighlight( hotBarCurrSelect, fixed_x );
 /*	  else
 		hotBarCurrSelect = -1;*/
 	wControlActive( (wControl_p)hotBarRightB, hotBarCurrEnd < hotBarMap_da.cnt );
@@ -223,17 +255,33 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wPos_t w,
 		wMenuPopupShow( hotbarPopupM );
 		return;
 	}
-	x = w/hotBarD.dpi + hotBarMap(hotBarCurrStart).x;
-	for ( inx=hotBarCurrStart; inx<hotBarCurrEnd; inx++ ) {
-		if ((x >= hotBarMap(inx).x) &&						//leave spaces between buttons
-			(x <= hotBarMap(inx).x + hotBarMap(inx).w )) {
-				break;
+	inx = -1;
+	x = hotBarMap(0).x;
+	DIST_T fixed_x = 0.0;
+	if (hotBarCurrStart>0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed)  {
+		fixed_x = hotBarMap(0).w;
+		x = w/hotBarD.dpi + hotBarMap(0).x;
+		if ( (x>= hotBarMap(0).x) &&
+			 (x <=hotBarMap(0).w )) inx = 0;   //Match on fixed
+	}
+	if (inx<0){																//NoMatch
+		x = w/hotBarD.dpi + hotBarMap(hotBarCurrStart).x;
+		for ( inx=hotBarCurrStart; inx<hotBarCurrEnd; inx++ ) {
+			if ((x >= hotBarMap(inx).x + fixed_x) &&						//leave spaces between buttons
+				(x <= hotBarMap(inx).x + hotBarMap(inx).w + fixed_x )) {
+					break;
+			}
 		}
 	}
+
 	if (inx >= hotBarCurrEnd)
 		return;
 	tbm = &hotBarMap(inx);
-	px = (wPos_t)((tbm->x-hotBarMap(hotBarCurrStart).x)*hotBarD.dpi);
+	if (inx==0) {
+		px = (wPos_t)((tbm->x-hotBarMap(0).x)*hotBarD.dpi);
+	} else {
+		px = (wPos_t)(((tbm->x-hotBarMap(hotBarCurrStart).x)+fixed_x)*hotBarD.dpi);
+	}
 	px += (wPos_t)(tbm->w*hotBarD.dpi/2);
 	titleP = tbm->proc( HB_LISTTITLE, tbm->context, NULL, NULL );
 	px -= wLabelWidth( titleP ) / 2;
@@ -250,7 +298,7 @@ static void SelectHotBar( wDraw_p d, void * context, wAction_t action, wPos_t w,
 
 		tbm->proc( HB_SELECT, tbm->context, NULL, NULL );
 		hotBarCurrSelect = inx;
-		HotBarHighlight( hotBarCurrSelect );
+		HotBarHighlight( hotBarCurrSelect, fixed_x );
 		if (recordF) {
 			fprintf( recordF, "HOTBARSELECT %s\n", tbm->proc( HB_FULLTITLE, tbm->context, NULL, NULL ) );
 		}
@@ -309,8 +357,12 @@ static BOOL_T HotBarSelectPlayback( char * line )
 	int inx;
 	hotBarMap_t * tbm;
 	while (*line && isspace((unsigned char)*line) ) line++;
+	DIST_T fixed_x = 0;
 	for ( inx=0; inx<hotBarMap_da.cnt; inx++ ) {
 		tbm = &hotBarMap(inx);
+		if (inx == 0 && hotBarMap_da.cnt>0 && hotBarMap(0).isFixed) {
+			fixed_x = hotBarMap(0).w;
+		}
 		if ( strcmp( tbm->proc( HB_FULLTITLE, tbm->context, NULL, NULL ), line) == 0) {
 			if ( hotBarCurrSelect >= 0 ) {
 				//HotBarHighlight( hotBarCurrSelect );
@@ -321,7 +373,7 @@ static BOOL_T HotBarSelectPlayback( char * line )
 				hotBarCurrStart = hotBarCurrSelect;
 				RedrawHotBar( hotBarD.d, NULL, 0, 0 );
 			}
-			HotBarHighlight( hotBarCurrSelect );
+			HotBarHighlight( hotBarCurrSelect, fixed_x );
 			hotBarMap(inx).proc( HB_SELECT, hotBarMap(inx).context, NULL, NULL );
 			FakeDownMouseState();
 			return TRUE;
@@ -351,6 +403,7 @@ EXPORT void AddHotBarElement(
 		coOrd size,
 		coOrd orig,
 		BOOL_T isTrack,
+		BOOL_T isFixed,
 		DIST_T barScale,
 		void * context,
 		hotBarProc_t proc_p )
@@ -380,6 +433,7 @@ EXPORT void AddHotBarElement(
 		tbm->orig = orig;
 		tbm->proc = proc_p;
 		tbm->barScale = barScale;
+		tbm->isFixed = isFixed;
 		tbm->w = tbm->objectW = size.x/barScale + 5.0/hotBarD.dpi;
 		tbm->labelW = 0;
 		tbm->x = hotBarWidth;
@@ -413,6 +467,8 @@ static void ChangeHotBar( long changes )
 	DYNARR_RESET( hotBarMap_t, hotBarMap_da );
 	curContentsLabel[0] = '\0';
 	if ( programMode == MODE_DESIGN ) {
+		if (showFlexTrack)
+			AddHotBarCornu();
 		AddHotBarTurnouts();
 		AddHotBarStructures();
 	} else {
@@ -443,13 +499,20 @@ EXPORT void InitHotBar( void )
 	hotBarML = wMenuListCreate( hotbarPopupM, "", -1, HotbarJump );
 }
 
-EXPORT void LayoutHotBar( void )
+EXPORT void LayoutHotBar( void * redraw )
 {
 	wPos_t buttonWidth, winWidth, winHeight;
 	BOOL_T initialize = FALSE;
 
 	wWinGetSize( mainW, &winWidth, &winHeight );
 	hotBarHeight = hotBarDrawHeight;
+	double scaleicon;
+	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleicon, 1.0);
+	if (scaleicon<1.0) scaleicon=1.0;
+	if (scaleicon>2.0) scaleicon=2.0;
+	if (scaleicon>1.0) {
+		hotBarHeight = hotBarHeight*scaleicon;
+	}
 	if ( hotBarLabels) {
 	   hotBarHeight += wMessageGetHeight(0L);
 	}
@@ -471,7 +534,7 @@ EXPORT void LayoutHotBar( void )
 	wControlSetPos( (wControl_p)hotBarLeftB, 0, toolbarHeight );
 	wControlSetPos( (wControl_p)hotBarRightB, winWidth-20-buttonWidth, toolbarHeight );
 	wControlSetPos( (wControl_p)hotBarD.d, buttonWidth, toolbarHeight );
-	wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hotBarHeight+2 );
+	wDrawSetSize( hotBarD.d, winWidth-20-buttonWidth*2, hotBarHeight+2, redraw );
 	hotBarD.size.x = ((double)(winWidth-20-buttonWidth*2))/hotBarD.dpi*hotBarD.scale;
 	hotBarD.size.y = (double)hotBarDrawHeight/hotBarD.dpi*hotBarD.scale;  //Exclude Label from calc
 	wControlShow( (wControl_p)hotBarLeftB, TRUE );
@@ -479,7 +542,7 @@ EXPORT void LayoutHotBar( void )
 	wControlShow( (wControl_p)hotBarD.d, TRUE );
 	if (initialize)
 		ChangeHotBar( CHANGE_PARAMS );
-	else
+	else if (!redraw)
 		RedrawHotBar( NULL, NULL, 0, 0 );
 	toolbarHeight += hotBarHeight+3;
 }

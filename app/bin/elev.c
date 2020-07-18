@@ -137,7 +137,8 @@ BOOL_T ComputeElev(
 		EPINX_T ep,
 		BOOL_T onpath,
 		DIST_T *elevR,
-		DIST_T *gradeR )
+		DIST_T *gradeR,
+		BOOL_T force )
 {
 	DIST_T grade;
 	DIST_T elev0, elev1, dist0, dist1;
@@ -176,6 +177,7 @@ if (oldElevationEvaluation) {
 		elev0 = 0.0;
 	}
 } else {
+
 	track_p trk1;
 	EPINX_T ep1;
 	grade = -1;
@@ -184,30 +186,40 @@ if (oldElevationEvaluation) {
 		elev0 = GetTrkEndElevHeight(trk,ep);
 		rc = FALSE;
 	} else {
-		elev0 = GetElevation( trk );
-		dist0 = GetTrkLength( trk, ep, -1 );
+		if (force || (!GetTrkEndElevCachedHeight(trk,ep,&elev0,&dist0))) {
+			elev0 = GetElevation( trk );
+			dist0 = GetTrkLength( trk, ep, -1 );
+		}
+		SetTrkEndElevCachedHeight(trk,ep,elev0,dist0);
 		trk1 = GetTrkEndTrk( trk, ep );
 		if (trk1!=NULL) {
 			ep1 = GetEndPtConnectedToMe(trk1,trk);
-			elev1 = GetElevation( trk1 );
-			dist1 = GetTrkLength( trk1, ep1, -1 );
+			if (force || (!GetTrkEndElevCachedHeight(trk1,ep1,&elev1,&dist1))) {
+				elev1 = GetElevation( trk1 );
+				dist1 = GetTrkLength( trk1, ep1, -1 );
+			}
+			SetTrkEndElevCachedHeight(trk1,ep1,elev1,dist1);
 			if (dist0+dist1>0.1) {
 				grade = (elev1-elev0)/(dist0+dist1);
 				elev0 += grade*dist0;
 			} else {
 				elev0 = (elev0+elev1)/2.0;
 				rc = FALSE;
+				SetTrkEndElevCachedHeight(trk,ep,elev0,dist0);
+				SetTrkEndElevCachedHeight(trk1,ep1,elev0,dist1);
 			}
 		} else {
 			grade = 0.0;
 		}
+
 	}
 }
-	if ( elevR )
-		*elevR = elev0;
-	if ( gradeR )
-		*gradeR = grade;
-	return rc;
+if ( elevR )
+	*elevR = elev0;
+if ( gradeR )
+	*gradeR = grade;
+return rc;
+
 }
 
 
@@ -988,7 +1000,7 @@ EXPORT void RecomputeElevations( void )
 	PropogateForkElevs();
 	PropogateDefElevs();
 	FindIslandElevs();
-	MainRedraw();
+	MainRedraw(); // RecomputeElevations
 LOG( log_fillElev, 1, ( "%s: Total (%ld)\n", elevPrefix, wGetTimer()-time0 ) )
 	if ( log_dumpElev > 0 ) {
 		track_p trk;
@@ -1087,6 +1099,7 @@ EXPORT void ClrTrkElev( track_p trk )
 	needElevUpdate = TRUE;
 	DrawTrackElev( trk, &mainD, FALSE );
 	ClrTrkBits( trk, TB_ELEVPATH );
+
 }
 
 
@@ -1124,11 +1137,11 @@ EXPORT void SetTrkElevModes( BOOL_T connect, track_p trk0, EPINX_T ep0, track_p 
 		update = FALSE;;
 	} else if ( connect ) {
 		if ( mode0 == ELEV_ALONE ) {
-			ComputeElev( trk1, ep1, FALSE, &elev, NULL );
+			ComputeElev( trk1, ep1, FALSE, &elev, NULL, TRUE );
 			PropogateElevMode( trk0, elev, ELEV_ISLAND );
 			update = FALSE;
 		} else if ( mode1 == ELEV_ALONE ) {
-			ComputeElev( trk0, ep0, FALSE, &elev, NULL );
+			ComputeElev( trk0, ep0, FALSE, &elev, NULL, TRUE );
 			PropogateElevMode( trk1, elev, ELEV_ISLAND );
 			update = FALSE;
 		}
@@ -1287,8 +1300,7 @@ EXPORT void DrawTrackElev( track_cp trk, drawCmd_p d, BOOL_T drawIt )
 		 (labelScale < d->scale) ||
 		 (!GetTrkOnElevPath( trk, &elev )) ||
 		 ((GetTrkBits(trk)&TB_ELEVPATH) == 0) ||
-		 (d->funcs->options & wDrawOptTemp) != 0 ||
-		 (d->options & DC_QUICK) != 0 )
+		 (d->options & DC_SIMPLE) != 0 )
 		return;
 
 	if ( !GetCurveMiddle( trk, &pos ) ) {

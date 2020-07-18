@@ -148,8 +148,9 @@ utf8_to_native( char *str, unsigned int len, int dummy )
 		/* 2. convert from UTF-8 to system codepage */
 		WideCharToMultiByte(CP_ACP, 0, (LPWSTR)buf, wcharLen, resBuffer, len + 1, NULL, NULL );
 
-		free( buf );
+
 	}
+	free(buf);
 	return( resBuffer );	
 }
 

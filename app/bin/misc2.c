@@ -53,13 +53,16 @@
 
 EXPORT long units = 0;				/**< measurement units: 0 = English, 1 = metric */
 EXPORT long checkPtInterval = 10;
+EXPORT long autosaveChkPoints = 2;
 
 EXPORT DIST_T curScaleRatio;
 EXPORT char * curScaleName;
 EXPORT DIST_T trackGauge;
 EXPORT long labelScale = 8;
-EXPORT long labelEnable = ((1<<0)|LABELENABLE_LENGTHS|LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
+EXPORT long labelEnable = (LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
 EXPORT long labelWhen = 2;
+EXPORT long colorTrack = 0;
+EXPORT long colorDraw = 0;
 EXPORT long colorLayers = 0;
 EXPORT long zoomCorner = 0;
 EXPORT long hideSelectionWindow = 0;
@@ -155,10 +158,6 @@ EXPORT void DoChangeNotification( long changes )
  * SCALE
  *
  */
-
-
-#define SCALE_ANY	(-2)
-#define SCALE_DEMO	(-1)
 
 typedef struct {
 		char * scale;

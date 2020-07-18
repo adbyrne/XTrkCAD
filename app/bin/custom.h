@@ -45,6 +45,7 @@
 #define BG_COUNT		(13)
 #define BG_FILE			(14)
 #define BG_CONTROL		(15)
+#define BG_EXPORTIMPORT (16)
 #define BG_BIGGAP		(1<<8)
 extern int cmdGroup;
 
@@ -67,6 +68,8 @@ extern char * sUndoF;
 extern char * sAuditF;
 
 extern char * sSourceFilePattern;
+extern char * sSaveFilePattern;
+extern char * sImageFilePattern;
 extern char * sImportFilePattern;
 extern char * sDXFFilePattern;
 extern char * sRecordFilePattern;
@@ -89,7 +92,7 @@ void InitTrkBezier( void );
 void InitTrkDraw( void );
 void InitTrkEase( void );
 void InitTrkCornu( void );
-void InitTrkNote( void );
+void InitTrkNote(wMenu_p menu);
 void InitTrkStraight( void );
 void InitTrkStruct( void );
 void InitTrkText( void );
@@ -103,6 +106,7 @@ void InitTrkControl ( void );
 void InitTrkSensor ( void );
 
 void InitCmdCurve( wMenu_p menu );
+void InitCmdCornu( wMenu_p menu);
 void InitCmdHelix( wMenu_p menu );
 void InitCmdDraw( wMenu_p menu );
 void InitCmdElevation( wMenu_p menu );
@@ -114,11 +118,15 @@ void InitCmdMove( wMenu_p menu );
 void InitCmdMoveDescription( wMenu_p menu );
 void InitCmdStraight( wMenu_p menu );
 void InitCmdDescribe( wMenu_p menu );
+void InitCmdDescribe2( wMenu_p menu );
 void InitCmdSelect( wMenu_p menu );
-void InitCmdPan( wMenu_p menu);
+void InitCmdSelect2( wMenu_p menu );
+void InitCmdPan( wMenu_p menu );
+void InitCmdPan2( wMenu_p menu );
 void InitCmdDelete( void );
 void InitCmdSplit( wMenu_p menu );
 void InitCmdTunnel( void );
+void InitCmdBridge( void );
 void InitCmdRuler( wMenu_p menu );
 
 void InitCmdParallel( wMenu_p menu );
@@ -128,7 +136,7 @@ void InitCmdTrain( wMenu_p menu );
 void InitCmdTurnout( wMenu_p menu );
 void InitCmdHandLaidTurnout( wMenu_p menu );
 void InitCmdTurntable( wMenu_p menu );
-void InitCmdNote( wMenu_p menu );
+void InitCmdNote();
 void InitCmdUndo( void );
 void InitCmdStruct( wMenu_p menu );
 void InitCmdAboveBelow( void );

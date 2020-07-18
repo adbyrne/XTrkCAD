@@ -58,6 +58,9 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
 #include "utility.h"
 #include "messages.h"
 
@@ -168,7 +171,7 @@ static void UpdateSensorProperties (  track_p trk, int inx, descData_p
     sensorData_p xx = GetsensorData(trk);
     const char *thename, *thescript;
     char *newName, *newScript;
-    int max_str;
+    unsigned int max_str;
     BOOL_T changed, nChanged, pChanged, sChanged;
     
     switch (inx) {
@@ -246,7 +249,7 @@ static void DescribeSensor (track_p trk, char * str, CSIZE_T len )
         *str = tolower((unsigned char)*str);
         str++;
     }
-    sprintf( str, _("(%d [%s]): Layer=%d, at %0.3f,%0.3f"),
+    sprintf( str, _("(%d [%s]): Layer=%u, at %0.3f,%0.3f"),
              GetTrkIndex(trk),
              xx->name,GetTrkLayer(trk)+1, xx->orig.x, xx->orig.y);
     strncpy(sensorProperties.name,xx->name,STR_SHORT_SIZE-1);
@@ -270,14 +273,22 @@ static BOOL_T WriteSensor ( track_p t, FILE * f )
 {
     BOOL_T rc = TRUE;
     sensorData_p xx = GetsensorData(t);
-    rc &= fprintf(f, "SENSOR %d %d %s %d %0.6f %0.6f \"%s\" \"%s\"\n",
+	char *sensorName = MyStrdup(xx->name);
+
+#ifdef WINDOWS
+	sensorName = Convert2UTF8(sensorName);
+#endif // WINDOWS
+
+    rc &= fprintf(f, "SENSOR %d %u %s %d %0.6f %0.6f \"%s\" \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t),
-                  GetTrkVisible(t), xx->orig.x, xx->orig.y, xx->name, 
+                  GetTrkVisible(t), xx->orig.x, xx->orig.y, sensorName, 
                   xx->script)>0;
+
+	MyFree(sensorName);
     return rc;
 }
 
-static void ReadSensor ( char * line )
+static BOOL_T ReadSensor ( char * line )
 {
     wIndex_t index;
     /*TRKINX_T trkindex;*/
@@ -291,8 +302,13 @@ static void ReadSensor ( char * line )
     wIndex_t layer;
     sensorData_p xx;
     if (!GetArgs(line+7,"dLsdpqq",&index,&layer,scale, &visible, &orig,&name,&script)) {
-        return;
+        return FALSE;
     }
+
+#ifdef WINDOWS
+	ConvertUTF8ToSystem(name);
+#endif // WINDOWS
+
     trk = NewTrack(index, T_SENSOR, 0, sizeof(sensorData_t));
     SetTrkVisible(trk, visible); 
     SetTrkScale(trk, LookupScale( scale ));
@@ -302,6 +318,7 @@ static void ReadSensor ( char * line )
     xx->orig = orig;
     xx->script = script;
     ComputeSensorBoundingBox(trk);
+    return TRUE;
 }
 
 static void MoveSensor (track_p trk, coOrd orig )
@@ -457,23 +474,30 @@ static void CreateNewSensor (coOrd orig)
 
 static STATUS_T CmdSensor ( wAction_t action, coOrd pos )
 {
+	static coOrd sensor_pos;
+	static BOOL_T create;
     switch (action) {
     case C_START:
         InfoMessage(_("Place sensor"));
+        create = FALSE;
         return C_CONTINUE;
     case C_DOWN:
+    	create = TRUE;
+    	/* no break */
 	case C_MOVE:
 		SnapPos(&pos);
-        DDrawSensor( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+		sensor_pos = pos;
         return C_CONTINUE;
     case C_UP:
         SnapPos(&pos);
-        DDrawSensor( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         CreateNewSensor(pos);
         return C_TERMINATE;
     case C_REDRAW:
+    	if (create)
+    		DDrawSensor( &tempD, sensor_pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+    	return C_CONTINUE;
     case C_CANCEL:
-        DDrawSensor( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+    	create = FALSE;
         return C_CONTINUE;
     default:
         return C_CONTINUE;
@@ -491,7 +515,7 @@ static void DrawSensorTrackHilite( void )
 	w = (wPos_t)((ctlhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
 	h = (wPos_t)((ctlhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,ctlhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp );
+	wDrawFilledRectangle( tempD.d, x, y, w, h, ctlhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
 
 static int SensorMgmProc ( int cmd, void * data )

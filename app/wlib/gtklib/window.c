@@ -29,6 +29,9 @@
 #define GTK_DISABLE_DEPRECATED
 #define GSEAL_ENABLE
 
+#define MIN_WIDTH 100
+#define MIN_HEIGHT 100
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -37,8 +40,11 @@
 
 wWin_p gtkMainW;
 
-#define MIN_WIN_WIDTH (50)
-#define MIN_WIN_HEIGHT (50)
+#define MIN_WIN_WIDTH 150
+#define MIN_WIN_HEIGHT 150
+
+#define MIN_WIN_WIDTH_MAIN 400
+#define MIN_WIN_HEIGHT_MAIN 400
 
 #define SECTIONWINDOWSIZE  "gtklib window size"
 #define SECTIONWINDOWPOS   "gtklib window pos"
@@ -93,6 +99,7 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget) {
 
 	gdk_screen_get_monitor_geometry(screen,monitor,&monitor_dimensions);
 
+
 	return monitor_dimensions;
 }
 
@@ -106,9 +113,10 @@ static GdkRectangle getMonitorDimensions(GtkWidget * widget) {
 
 static void getWinSize(wWin_p win, const char * nameStr)
 {
-    int w, h;
+    int w=50, h=50;
     const char *cp;
     char *cp1, *cp2;
+
 
     /*
      * Clamp window to be no bigger than one monitor size (to start - the user can always maximize)
@@ -116,30 +124,36 @@ static void getWinSize(wWin_p win, const char * nameStr)
 
     GdkRectangle monitor_dimensions = getMonitorDimensions(GTK_WIDGET(win->gtkwin));
 
-    wPos_t maxDisplayWidth = monitor_dimensions.width-5;
-    wPos_t maxDisplayHeight = monitor_dimensions.height-25;
+    wPos_t maxDisplayWidth = monitor_dimensions.width-10;
+    wPos_t maxDisplayHeight = monitor_dimensions.height-50;
 
 
-    if ((win->option&F_RESIZE) &&
+
+    if ((win->option&F_RECALLSIZE) &&
             (win->option&F_RECALLPOS) &&
             (cp = wPrefGetString(SECTIONWINDOWSIZE, nameStr)) &&
             (w = strtod(cp, &cp1), cp != cp1) &&
             (h = strtod(cp1, &cp2), cp1 != cp2)) {
-        if (w < 10) {
-            w = 10;
-        }
+    	win->option &= ~F_AUTOSIZE;
 
-        if (h < 10) {
-            h = 10;
-        }
+		if (w < 50) {
+			w = 50;
+		}
 
-        if (w > maxDisplayWidth) w = maxDisplayWidth;
-        if (h > maxDisplayHeight) h = maxDisplayHeight;
-
-        win->w = win->origX = w;
-        win->h = win->origY = h;
-        win->option &= ~F_AUTOSIZE;
+		if (h < 50) {
+			h = 50;
+		}
     }
+
+	if (w > maxDisplayWidth) w = maxDisplayWidth;
+	if (h > maxDisplayHeight) h = maxDisplayHeight;
+
+	if (w<MIN_WIDTH) w = MIN_WIDTH;
+	if (h<MIN_HEIGHT) h = MIN_HEIGHT;
+
+	win->w = win->origX = w;
+	win->h = win->origY = h;
+
 }
 
 /**
@@ -152,8 +166,7 @@ static void getWinSize(wWin_p win, const char * nameStr)
 static void saveSize(wWin_p win)
 {
 
-    if ((win->option&F_RESIZE) &&
-            (win->option&F_RECALLPOS) &&
+    if ((win->option&F_RECALLSIZE) &&
             gtk_widget_get_visible(GTK_WIDGET(win->gtkwin))) {
         char pos_s[20];
 
@@ -210,7 +223,7 @@ static void getPos(wWin_p win)
             }
 
             gtk_window_move(GTK_WINDOW(win->gtkwin), x, y);
-            gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
+            //gtk_window_resize(GTK_WINDOW(win->gtkwin), win->w, win->h);
         }
     }
 }
@@ -328,25 +341,28 @@ void wWinShow(
         keyState = 0;
         getPos(win);
 
+        if (!win->shown) {
+			gtk_widget_show(win->gtkwin);
+			gtk_widget_show(win->widget);
+		}
+
         if (win->option & F_AUTOSIZE) {
         	GtkAllocation allocation;
-        	gtk_widget_get_allocation(win->widget, &allocation);
+        	GtkRequisition requistion;
+        	gtk_widget_size_request(win->widget,&requistion);
 
         	width = win->w;
         	height = win->h;
 
-        	if (win->realX > width) width = win->realX;
-        	if (win->realY > height) height = win->realY;
+            if (requistion.width != width || requistion.height != height ) {
 
-            if (allocation.width != width || allocation.height != height ) {
-            	GdkGeometry geometry;
-            	geometry.min_width = width;
-            	geometry.min_height = height;
+				width = requistion.width;
+				height = requistion.height;
 
-            	gtk_window_set_geometry_hints (GTK_WINDOW(win->gtkwin),
-            								   win->widget,
-            	                               &geometry,
-            	                               GDK_HINT_MIN_SIZE);
+            	win->w = width;
+            	win->h = height;
+
+
             	gtk_window_set_resizable(GTK_WINDOW(win->gtkwin),TRUE);
 
                 if (win->option&F_MENUBAR) {
@@ -360,10 +376,7 @@ void wWinShow(
         }
 
 
-        if (!win->shown) {
-            gtk_widget_show(win->gtkwin);
-            gtk_widget_show(win->widget);
-        }
+
 
         gdk_window_raise(gtk_widget_get_window(win->gtkwin));
 
@@ -616,7 +629,7 @@ static gint window_delete_event(
         }
 
     if (win->winProc) {
-        win->winProc(win, wClose_e, win->data);
+        win->winProc(win, wClose_e, NULL, win->data);
 
         if (win != gtkMainW) {
             wWinShow(win, FALSE);
@@ -631,21 +644,45 @@ static int fixed_expose_event(
     GdkEventExpose * event,
     wWin_p win)
 {
+	int rc;
+
     if (event->count==0) {
-        return window_redraw(win, TRUE);
+        rc = window_redraw(win, TRUE);
     } else {
-        return FALSE;
+        rc = FALSE;
     }
+    cairo_t* cr = gdk_cairo_create (gtk_widget_get_window(widget));
+#ifdef CURSOR_SURFACE
+    if (win && win->cursor_surface.surface && win->cursor_surface.show) {
+		cairo_set_source_surface(cr,win->cursor_surface.surface,event->area.x, event->area.y);
+		cairo_set_operator(cr,CAIRO_OPERATOR_OVER);
+		cairo_rectangle(cr,event->area.x, event->area.y,
+				event->area.width, event->area.height);
+		cairo_fill(cr);
+	}
+#endif
+    return rc;
 }
 
 static int resizeTime(wWin_p win) {
 
 	if (win->resizeW == win->w && win->resizeH == win->h) {  // If hasn't changed since last
-		win->resizeTimer = 0;
-		return FALSE;						//Stop Timer and don't resize
+		if (win->timer_idle_count>3) {
+			win->winProc(win, wResize_e, NULL, win->data);  //Trigger Redraw on last occasion if one-third of a second has elapsed
+			win->timer_idle_count = 0;
+			win->resizeTimer = 0;
+			win->timer_busy_count = 0;
+			return FALSE;						 //Stop Timer and don't resize
+		} else win->timer_idle_count++;
 	}
 	if (win->busy==FALSE && win->winProc) {   //Always drive once
-	    win->winProc(win, wResize_e, win->data);
+		if (win->timer_busy_count>10) {
+			 win->winProc(win, wResize_e, NULL, win->data); //Redraw if ten times we saw a change (1 sec)
+			 win->timer_busy_count = 0;
+		} else {
+			win->winProc(win, wResize_e, (void*) 1, win->data); //No Redraw
+			win->timer_busy_count++;
+		}
 	    win->resizeW = win->w;					//Remember this one
 	    win->resizeH = win->h;
 	}
@@ -693,6 +730,8 @@ static int window_configure_event(
             } else {
             	 win->resizeW = w;				//Remember where this started
             	 win->resizeH = h;
+            	 win->timer_idle_count = 0;          //Start background timer on redraw
+            	 win->timer_busy_count = 0;
                  win->resizeTimer = g_timeout_add(100,(GSourceFunc)resizeTime,win);   // 100ms delay
                  return FALSE;
             }
@@ -729,7 +768,7 @@ gboolean window_state_event(
     }
 
     if (win->busy==FALSE && win->winProc) {
-        win->winProc(win, wState_e, win->data);
+        win->winProc(win, wState_e, NULL, win->data);
     }
 
     return TRUE;
@@ -750,10 +789,9 @@ wBool_t catch_shift_ctrl_alt_keys(
     GdkEventKey *event,
     void * data)
 {
-    int state;
-    state = 0;
+    int state = 0;
 
-    switch (event->keyval) {
+    switch (event->keyval ) {
     case GDK_KEY_Shift_L:
     case GDK_KEY_Shift_R:
         state |= WKEY_SHIFT;
@@ -798,7 +836,7 @@ static gint window_char_event(
         return FALSE;
     }
 
-    if (event->state == 0) {
+    if ( ( event->state & GDK_MODIFIER_MASK ) == 0 ) {
         if (event->keyval == GDK_KEY_Escape) {
             for (bb=win->first; bb; bb=bb->next) {
                 if (bb->type == B_BUTTON && (bb->option&BB_CANCEL)) {
@@ -818,6 +856,7 @@ static gint window_char_event(
 
 void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int max_height, int base_width, int base_height, double aspect_ratio ) {
 	GdkGeometry hints;
+	GdkWindowHints hintMask = GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE;
     hints.min_width = min_width;
 	hints.max_width = max_width;
 	hints.min_height = min_height;
@@ -825,14 +864,19 @@ void wSetGeometry(wWin_p win, int min_width, int max_width, int min_height, int 
 	hints.min_aspect = hints.max_aspect = aspect_ratio;
 	hints.base_width = base_width;
 	hints.base_height = base_height;
+	if( base_width != -1 && base_height != -1 ) {
+		hintMask |= GDK_HINT_BASE_SIZE;
+	}
+	
+	if(aspect_ratio > -1.0 ) {
+		hintMask |= GDK_HINT_ASPECT;
+	}	
 
 	gtk_window_set_geometry_hints(
 			GTK_WINDOW(win->gtkwin),
 			win->gtkwin,
 			&hints,
-			(GdkWindowHints)(GDK_HINT_MIN_SIZE | GDK_HINT_MAX_SIZE |
-					GDK_HINT_ASPECT | GDK_HINT_BASE_SIZE ));
-
+			hintMask);
 }
 
 
@@ -897,8 +941,9 @@ static wWin_p wWinCommonCreate(
                                          GTK_WINDOW(gtkMainW->gtkwin));
         }
     }
+    getWinSize(w, nameStr);
     if (winType != W_MAIN) {
-            getWinSize(w, nameStr);
+            gtk_widget_set_app_paintable (w->gtkwin,TRUE);
     }
 
     if (option & F_HIDE) {
@@ -934,12 +979,12 @@ static wWin_p wWinCommonCreate(
 
     if (w->option&F_AUTOSIZE) {
         w->realX = 0;
-        w->w = 0;
+        w->w = MIN_WIN_WIDTH+20;
         w->realY = h;
-        w->h = 0;
+        w->h = MIN_WIN_HEIGHT;
     } else if (w->origX != 0){
-        w->w = w->realX = w->origX;
-        w->h = w->realY = w->origY+h;
+        w->realX = w->origX;
+        w->realY = w->origY+h;
 
         w->default_size_x = w->w;
         w->default_size_y = w->h;
@@ -950,12 +995,18 @@ static wWin_p wWinCommonCreate(
         }
     }
     int scr_w, scr_h;
-    	wGetDisplaySize(&scr_w, &scr_h);
-        if (winType != W_MAIN) {
-        	wSetGeometry(w, 100, scr_w/2, 100, scr_h, w->w, w->h, -1);
-        } else {
-        	wSetGeometry(w, scr_w/2, scr_w-10, scr_h/2, scr_h-10, w->w, w->h, -1);
+	wGetDisplaySize(&scr_w, &scr_h);
+	if (scr_w < MIN_WIN_WIDTH) scr_w = MIN_WIN_WIDTH+10;
+	if (scr_h < MIN_WIN_HEIGHT) scr_h = MIN_WIN_HEIGHT;
+	if (winType != W_MAIN) {
+		wSetGeometry(w, MIN_WIN_WIDTH, scr_w-10, MIN_WIN_HEIGHT, scr_h, -1, -1, -1);
+	} else {
+		if (scr_w < MIN_WIN_WIDTH_MAIN+10) scr_w = MIN_WIN_WIDTH_MAIN+200;
+		if (scr_h < MIN_WIN_HEIGHT_MAIN+10) scr_h = MIN_WIN_HEIGHT_MAIN+200;
+		wSetGeometry(w, MIN_WIN_WIDTH_MAIN, scr_w-10, MIN_WIN_HEIGHT_MAIN, scr_h-10, -1, -1, -1);
      }
+
+
 
     w->first = w->last = NULL;
     w->winProc = winProc;
@@ -977,6 +1028,7 @@ static wWin_p wWinCommonCreate(
 
     if (w->option & F_RESIZE) {
         gtk_window_set_resizable(GTK_WINDOW(w->gtkwin), TRUE);
+        gtk_window_resize(GTK_WINDOW(w->gtkwin), w->w, w->h);
     } else {
         gtk_window_set_resizable(GTK_WINDOW(w->gtkwin), FALSE);
     }
@@ -1135,7 +1187,7 @@ void wExit(
     wPrefFlush();
 
     if (gtkMainW && gtkMainW->winProc != NULL) {
-        gtkMainW->winProc(gtkMainW, wQuit_e, gtkMainW->data);
+        gtkMainW->winProc(gtkMainW, wQuit_e, NULL, gtkMainW->data);
     }
 
     exit(rc);

@@ -204,8 +204,11 @@ wCreateSplash( char *appname, char *appver )
 
 	/* create the title string */	
 	pszBuf = malloc( strlen( appname ) + strlen( appver ) + 2 );
-	if( !pszBuf )
-		return( 0 );
+	if (!pszBuf) {
+		GlobalUnlock(hgbl);
+		GlobalFree(hgbl);
+		return(0);
+	}
 	sprintf( pszBuf, "%s %s", appname, appver );
 
 	lpw  += 1+MultiByteToWideChar (CP_ACP, 0, pszBuf, -1, (LPWSTR)lpw, 50);
@@ -226,7 +229,6 @@ wCreateSplash( char *appname, char *appver )
     GlobalUnlock(hgbl); 
     hSplash = CreateDialogIndirectParam( mswHInst, (LPDLGTEMPLATE) hgbl, 
         mswHWnd, (DLGPROC)SplashDlgProc, (LPARAM)hBmp ); 
-	GetLastError();
 	
 	/* free allocated memory */
 	GlobalFree(hgbl);     

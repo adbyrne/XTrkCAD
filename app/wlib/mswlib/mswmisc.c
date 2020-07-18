@@ -22,6 +22,7 @@
 
 #define _WIN32_WINNT 0x0500
 #include <windows.h>
+#include <shellapi.h>
 #include <string.h>
 #include <malloc.h>
 #include <stdlib.h>
@@ -30,8 +31,10 @@
 #include <stdio.h>
 #include <assert.h>
 #include <htmlhelp.h>
+#include "misc.h"
 #include "mswint.h"
 #include "i18n.h"
+#include "FreeImage.h"
 
 #if _MSC_VER > 1300
 #define stricmp _stricmp
@@ -47,6 +50,8 @@ char * mswStrdup(const char *);
 #define ALARM_TIMER		(902)
 #define BALLOONHELP_TIMER		(903)
 #define TRIGGER_TIMER	(904)
+#define CONTROLHILITEWIDTH (2)
+#define CONTROLHILITECOLOR (RGB(0x3a,0x5f,0xcd))
 
 #define WANT_LITTLE_LABEL_FONT
 
@@ -77,6 +82,8 @@ HFONT mswOldTextFont;
 HFONT mswLabelFont;
 long mswThickFont = 1;
 double mswScale = 1.0;
+
+double scaleIcon = 1.0;				   /**< Scaling factor for toolbar icons */
 
 callBacks_t *mswCallBacks[CALLBACK_CNT];
 
@@ -179,7 +186,20 @@ static int dumpControls;
 
 extern char *userLocale;
 
-char * filterImageFiles = "Image Files\0*.gif;*.jpg;*.jpeg;*.png\0All Files\0*\0";
+// list of supported fileformats for image files
+char * filterImageFiles[] = { N_("All image files"),
+							"*.gif;*.jpg;*.jpeg;*.png;*.tif;*.tiff",
+							N_("GIF files (*.gif)"),
+							"*.gif",
+							N_("JPEG files (*.jpeg,*.jpg)"),
+							"*.jpg;*.jpeg",
+							N_("PNG files (*.png)"),
+							"*.png",
+							N_("TIFF files (*.tiff, *.tif)"),
+							"*.tif;*.tiff",
+							N_("All files (*)"),
+							"*",
+							};
 
 /*
  *****************************************************************************
@@ -847,6 +867,10 @@ wWin_p wWinMainCreate(
 	wPrefGetInteger("draw", "maximized", &maximize, 0L);
 	option |= (maximize ? F_MAXIMIZE : 0);
 
+	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleIcon, 1.0);
+	if (scaleIcon < 1.0) scaleIcon = 1.0;
+	if (scaleIcon > 2.0) scaleIcon = 2.0;
+
     showCmd = SW_SHOW;
     w = winCommonCreate(NULL, W_MAIN, option|F_RESIZE, "MswMainWindow",
                         WS_OVERLAPPEDWINDOW, labelStr, winProc, x, y, data,
@@ -854,13 +878,10 @@ wWin_p wWinMainCreate(
     mswHWnd = w->hWnd;
 
     if (!mswThickFont) {
-        DWORD dw;
         SendMessage(w->hWnd, WM_SETFONT, (WPARAM)mswLabelFont, 0L);
         hDc = GetDC(w->hWnd);
         GetTextMetrics(hDc, &tm);
         mswEditHeight = tm.tmHeight+2;
-        dw = GetTextExtent(hDc, "AXqypj", 6);
-        mswEditHeight = HIWORD(dw)+2;
         ReleaseDC(w->hWnd, hDc);
     }
 
@@ -1415,7 +1436,7 @@ void wWinClear(
 {
 }
 
-void wSetCursor( wWin_p win,
+void wSetCursor(wDraw_p win,
     wCursor_t cursor)
 {
     switch (cursor) {
@@ -1733,7 +1754,7 @@ void wControlSetLabel(
     wControl_p b,
     const char * labelStr)
 {
-    if (b->type == B_RADIO || b->type == B_TOGGLE) {
+    if (b->type == B_RADIO ) {
         ;
     } else {
         int lab_l;
@@ -1763,8 +1784,6 @@ void wControlSetContext(
     b->data = context;
 }
 
-static int controlHiliteWidth = 5;
-static int controlHiliteWidth2 = 3;
 void wControlHilite(
     wControl_p b,
     wBool_t hilite)
@@ -1772,12 +1791,13 @@ void wControlHilite(
     HDC hDc;
     HPEN oldPen, newPen;
     int oldMode;
+	LOGBRUSH logBrush = { BS_SOLID, CONTROLHILITECOLOR, (ULONG_PTR)NULL };
 
     if (b == NULL) {
         return;
     }
 
-    if (!IsWindowVisible(b->parent->hWnd)) {
+    if (!IsWindowVisible(b->parent->hWnd)) {	
         return;
     }
 
@@ -1786,14 +1806,18 @@ void wControlHilite(
     }
 
     hDc = GetDC(b->parent->hWnd);
-    newPen = CreatePen(PS_SOLID, controlHiliteWidth, RGB(0,0,0));
+	newPen = ExtCreatePen(PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_ROUND | PS_JOIN_BEVEL,
+						  CONTROLHILITEWIDTH,
+						  &logBrush,
+						  0,
+						  NULL);
     oldPen = SelectObject(hDc, newPen);
     oldMode = SetROP2(hDc, R2_NOTXORPEN);
-    MoveTo(hDc, b->x-controlHiliteWidth2, b->y-controlHiliteWidth2);
-    LineTo(hDc, b->x+b->w+controlHiliteWidth2, b->y-controlHiliteWidth2);
-    LineTo(hDc, b->x+b->w+controlHiliteWidth2, b->y+b->h+controlHiliteWidth2);
-    LineTo(hDc, b->x-controlHiliteWidth2, b->y+b->h+controlHiliteWidth2);
-    LineTo(hDc, b->x-controlHiliteWidth2, b->y-controlHiliteWidth2);
+	Rectangle(hDc,
+		b->x - CONTROLHILITEWIDTH - 1,
+		b->y - CONTROLHILITEWIDTH - 1,
+		b->x + b->w + CONTROLHILITEWIDTH + 1,
+		b->y + b->h + CONTROLHILITEWIDTH + 1);
     SetROP2(hDc, oldMode);
     SelectObject(hDc, oldPen);
     DeleteObject(newPen);
@@ -1836,6 +1860,26 @@ void wMessage(
     ReleaseDC(w->hWnd, hDc);
 }
 
+/**
+ * Open a document using an external application
+ * 
+ * \param file
+ * \return TRUE on success, FALSE on error
+ * 
+ */
+unsigned wOpenFileExternal(char *file)
+{
+	HINSTANCE res;
+
+	res = ShellExecute(mswHWnd, "open", file, NULL, NULL, SW_SHOW);
+
+	if ((int)res <= 32) {
+		wNoticeEx(NT_ERROR, "Error when opening file!", "Cancel", NULL);
+		return(FALSE);
+	}
+
+	return(TRUE);
+}
 
 void wExit(int rc)
 {
@@ -1853,7 +1897,7 @@ void wExit(int rc)
                 savePos(w);
 
                 if (w->winProc != NULL) {
-                    w->winProc(w, wQuit_e, w->data);
+                    w->winProc(w, wQuit_e, NULL, w->data);
                 }
             }
         }
@@ -2138,6 +2182,8 @@ void wHelp(
 }
 
 
+
+
 void doHelpMenu(void * context)
 {
     HH_FTS_QUERY ftsQuery;
@@ -2162,6 +2208,13 @@ void doHelpMenu(void * context)
         HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_SEARCH,(DWORD)&ftsQuery);
         break;
 
+
+    case 3: /*Context*/
+    	const char * topic;
+    	topic = GetCurCommandName();
+    	wHelp(topic);
+    	break;
+
     default:
         return;
     }
@@ -2169,11 +2222,16 @@ void doHelpMenu(void * context)
     helpInitted = TRUE;
 }
 
+void wDoAccelHelp(wAccelKey_e key, void * context) {
+	doHelpMenu(context);
+}
+
 void wMenuAddHelp(
     wMenu_p m)
 {
     wMenuPushCreate(m, NULL, "&Contents", 0, doHelpMenu, (void*)1);
     wMenuPushCreate(m, NULL, "&Search for Help on...", 0, doHelpMenu, (void*)2);
+    wMenuPushCreate(m, NULL, "Co&mmand Context Help", 0, doHelpMenu, (void*)3);
 }
 
 
@@ -2396,6 +2454,24 @@ struct wFilSel_t {
 
 #define SELECTEDFILENAME_BUFFERSIZE	(8*1024)	/**<estimated size in case all param files are selected */
 
+char *
+GetImageFileFormats(void)
+{
+	char *filter = malloc(2048);
+	char *current = filter;
+	char *message;
+
+	for (int i = 0; i < sizeof(filterImageFiles) / sizeof(filterImageFiles[0]); i += 2) {
+		message = gettext(filterImageFiles[i]);
+		strcpy(current, message);
+		current += strlen(message) + 1;
+		strcpy(current, filterImageFiles[i + 1]);
+		current += strlen(current) + 1;
+	}
+	*current = '\0';
+	return(filter);
+}
+
 /**
  * Run the file selector. After the selector is finished an array of filenames is
  * created. Each filename will be fully qualified. The array and the number of
@@ -2426,12 +2502,11 @@ int wFilSelect(
             strcmp(dirName, ".") == 0) {
         dirName = wGetUserHomeDir();
     }
-
     memset(&ofn, 0, sizeof ofn);
     ofn.lStructSize = sizeof ofn;
     ofn.hwndOwner = mswHWnd;
 	if (fs->option == FS_PICTURES) {
-		ofn.lpstrFilter = _(filterImageFiles);
+		ofn.lpstrFilter = GetImageFileFormats();
 	}
 	else {
 		ofn.lpstrFilter = fs->extList;
@@ -2707,22 +2782,6 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DRAWITEM:
     case WM_COMMAND:
     case WM_MEASUREITEM:
-    case WM_NOTVALID:
-        if (WCMD_PARAM_ID == IDM_DOHELP) {
-            b = getControlFromCursor(hWnd, NULL);
-            closeBalloonHelp();
-
-            if (!b) {
-                return 0L;
-            }
-
-            if (b->helpStr) {
-                wHelp(b->helpStr);
-            }
-
-            return 0L;
-        }
-
         closeBalloonHelp();
 
         if (WCMD_PARAM_ID < CONTROL_BASE || WCMD_PARAM_ID > (WPARAM)controlMap_da.cnt) {
@@ -2825,8 +2884,8 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             w->h = newH;
 
             if (w->winProc) {
-                w->winProc(w, wResize_e, w->data);
-				w->winProc(w, wState_e, w->data);
+                w->winProc(w, wResize_e, NULL, w->data);
+				w->winProc(w, wState_e, NULL, w->data);
 			}
 
             break;
@@ -3009,23 +3068,23 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         wSetCursor(NULL, curCursor);
 
         if (!mswAllowBalloonHelp) {
-            break;
+            return TRUE;
         }
 
         if (IsIconic(mswHWnd)) {
-            break;
+            return TRUE;
         }
 
         b = getControlFromCursor(hWnd, NULL);
 
         if (b == balloonControlButton) {
-            break;
+            return TRUE;
         }
 
         if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
                                          (!b) || b->type == B_DRAW || b->helpStr == NULL) {
             closeBalloonHelp();
-            break;
+            return TRUE;
         }
 
         if (b != balloonHelpButton) {
@@ -3033,19 +3092,19 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         if (balloonHelpState != balloonHelpIdle) {
-            break;
+            return TRUE;
         }
 
         balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
                                     balloonHelpTimeOut, NULL);
 
         if (balloonHelpTimer == (UINT)0) {
-            break;
+            return TRUE;
         }
 
         balloonHelpState = balloonHelpWait;
         balloonHelpButton = b;
-        break;
+        return TRUE;
 
     case WM_SYSCOMMAND:
         inx = GetWindowWord(hWnd, 0);
@@ -3073,7 +3132,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         if (w->winProc) {
-            w->winProc(w, wClose_e, w->data);
+            w->winProc(w, wClose_e, NULL, w->data);
         }
 
         wWinShow(w, FALSE);
@@ -3096,7 +3155,7 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             /* It's the big one! */
             /* call main window procedure for processing of shutdown */
             if (w->winProc) {
-                (w->winProc(w, wClose_e, NULL));
+                (w->winProc(w, wClose_e, NULL, NULL));
             }
 
             return 0L;
@@ -3304,13 +3363,13 @@ static BOOL InitApplication(HINSTANCE hinstCurrent)
         return FALSE;
     }
 
-    wc.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC;
+    wc.style = CS_VREDRAW | CS_HREDRAW | CS_OWNDC | CS_DBLCLKS;
     wc.lpfnWndProc = mswDrawPush;
     wc.lpszClassName = mswDrawWindowClassName;
     wc.cbWndExtra = 4;
 
     if (!RegisterClass(&wc)) {
-        mswFail("RegisterClass(drawClass)");
+		mswFail("RegisterClass(drawClass)");
         return FALSE;
     }
 
@@ -3331,8 +3390,6 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
     HDC hDc;
     char **argv;
     int argc;
-    TEXTMETRIC tm;
-    DWORD dw;
 
 	if (!hinstPrevious) {
 		if (!InitApplication(hinstCurrent)) {
@@ -3357,10 +3414,6 @@ int PASCAL WinMain(HINSTANCE hinstCurrent, HINSTANCE hinstPrevious,
         mswScale = 1.0;
     }
 
-    GetTextMetrics(hDc, &tm);
-    mswEditHeight = tm.tmHeight + 8;
-    dw = GetTextExtent(hDc, "AXqypj", 6);
-    mswEditHeight = HIWORD(dw)+2;
     ReleaseDC(0, hDc);
     mswCreateCheckBitmaps();
     /*

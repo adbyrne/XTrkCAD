@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "utility.h"
 #include "cundo.h"
 #include "i18n.h"
 #include "messages.h"
@@ -32,6 +33,10 @@
 
 EXPORT wIndex_t describeCmdInx;
 EXPORT BOOL_T inDescribeCmd;
+
+extern wIndex_t selectCmdInx;
+extern wIndex_t joinCmdInx;
+extern wIndex_t modifyCmdInx;
 
 static wWin_p describeWin;
 static paramGroup_t *describeCurrentPG;
@@ -52,13 +57,15 @@ static wPos_t describeW_posy;
 static int describe_row;
 static wPos_t describeCmdButtonEnd;
 
+static wMenu_p descPopupM;
+
 static unsigned int editableLayerList[NUM_LAYERS];		/**< list of non-frozen layers */
 static int * layerValue;								/**pointer to current Layer (int *) */
 
 static paramFloatRange_t rdata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
 static paramIntegerRange_t idata = { 0, 0, 100, PDO_NORANGECHECK_HIGH|PDO_NORANGECHECK_LOW };
 static paramTextData_t tdata = { 300, 150 };
-static char * pivotLabels[] = { N_("First"), N_("Middle"), N_("Second"), NULL };
+static char * pivotLabels[] = { N_("First"), N_("Middle"), N_("End"), NULL };
 static char * boxLabels[] = { "", NULL };
 static paramData_t describePLs[] = {
 #define I_FLOAT_0		(0)
@@ -130,7 +137,9 @@ static paramData_t describePLs[] = {
 #define I_LIST_0		I_COLOR_N
     { PD_DROPLIST, NULL, "L1", 0, (void*)150, NULL, 0 },
     { PD_DROPLIST, NULL, "L2", 0, (void*)150, NULL, 0 },
-#define I_LIST_N		I_LIST_0+2
+	{ PD_DROPLIST, NULL, "L3", 0, (void*)150, NULL, 0 },
+	{ PD_DROPLIST, NULL, "L4", 0, (void*)150, NULL, 0 },
+#define I_LIST_N		I_LIST_0+4
 
 #define I_EDITLIST_0	I_LIST_N
     { PD_DROPLIST, NULL, "LE1", 0, (void*)150, NULL, BL_EDITABLE },
@@ -145,8 +154,11 @@ static paramData_t describePLs[] = {
 #define I_PIVOT_N		I_PIVOT_0+1
 
 #define I_TOGGLE_0      I_PIVOT_N
-    { PD_TOGGLE, NULL, "boxed", PDO_NOPREF|PDO_DLGHORZ, boxLabels, N_("Boxed"), BC_HORZ|BC_NOBORDER },
-#define I_TOGGLE_N 		I_TOGGLE_0+1
+    { PD_TOGGLE, NULL, "boxed1", PDO_NOPREF|PDO_DLGHORZ, boxLabels, N_("Boxed"), BC_HORZ|BC_NOBORDER },
+	{ PD_TOGGLE, NULL, "boxed2", PDO_NOPREF|PDO_DLGHORZ, boxLabels, N_("Boxed"), BC_HORZ|BC_NOBORDER },
+	{ PD_TOGGLE, NULL, "boxed3", PDO_NOPREF|PDO_DLGHORZ, boxLabels, N_("Boxed"), BC_HORZ|BC_NOBORDER },
+	{ PD_TOGGLE, NULL, "boxed4", PDO_NOPREF|PDO_DLGHORZ, boxLabels, N_("Boxed"), BC_HORZ|BC_NOBORDER },
+#define I_TOGGLE_N 		I_TOGGLE_0+4
 };
 
 static paramGroup_t describePG = { "describe", 0, describePLs, sizeof describePLs/sizeof describePLs[0] };
@@ -163,7 +175,7 @@ CreateEditableLayersList()
     int i = 0;
     int j = 0;
 
-    while (i <= NUM_LAYERS) {
+    while (i < NUM_LAYERS) {
         if (!GetLayerFrozen(i)) {
             editableLayerList[j++] = i;
         }
@@ -193,7 +205,7 @@ SearchEditableLayerList(unsigned int layer)
     return (-1);
 }
 
-static void DrawDescHilite(void)
+static void DrawDescHilite(BOOL_T selected)
 {
     wPos_t x, y, w, h;
 
@@ -208,7 +220,7 @@ static void DrawDescHilite(void)
     w = (wPos_t)((descSize.x/mainD.scale)*mainD.dpi+0.5);
     h = (wPos_t)((descSize.y/mainD.scale)*mainD.dpi+0.5);
     mainD.CoOrd2Pix(&mainD,descOrig,&x,&y);
-    wDrawFilledRectangle(mainD.d, x, y, w, h, descColor, wDrawOptTemp);
+    wDrawFilledRectangle(tempD.d, x, y, w, h, selected?descColor:wDrawColorBlue, wDrawOptTemp|wDrawOptTransparent);
 }
 
 
@@ -233,10 +245,6 @@ static void DescribeUpdate(
 
     if (ddp->type == DESC_PIVOT) {
         return;
-    }
-
-    if ((ddp->mode&DESC_NOREDRAW) == 0) {
-        DrawDescHilite();
     }
 
     if (!descUndoStarted) {
@@ -266,7 +274,6 @@ static void DescribeUpdate(
         descOrig.y -= descBorder;
         descSize.x -= descOrig.x-descBorder;
         descSize.y -= descOrig.y-descBorder;
-        DrawDescHilite();
     }
 
 
@@ -303,9 +310,6 @@ static void DescOk(void * junk)
 {
     wHide(describeWin);
 
-    if (descTrk) {
-        DrawDescHilite();
-    }
     if (layerValue && *layerValue>=0) {
     	SetTrkLayer(descTrk, editableLayerList[*layerValue]);  //int found that is really in the parm controls.
     }
@@ -319,7 +323,7 @@ static void DescOk(void * junk)
     }
 
     descNeedDrawHilite = FALSE;
-    Reset();
+    Reset(); // DescOk
 }
 
 
@@ -437,7 +441,7 @@ static wControl_p AllocateButt(descData_p ddp, void * valueP, char * label,
         }
     }
 
-    AbortProg("allocateButt: can't find %d", ddp->type);
+    AbortProg("AssignParamToDescribeDialog: can't find %d", ddp->type);
     return NULL;
 }
 
@@ -694,7 +698,6 @@ EXPORT void DescribeCancel(void)
         	if (!IsTrackDeleted(descTrk))
         		descUpdateFunc(descTrk, -1, descData, TRUE);
         	descTrk = NULL;
-        	DrawDescHilite();
 
         }
 
@@ -710,9 +713,9 @@ EXPORT void DescribeCancel(void)
 }
 
 
-static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
+EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 {
-    track_p trk;
+    static track_p trk;
     char msg[STR_SIZE];
 
     switch (action) {
@@ -720,7 +723,12 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         InfoMessage(_("Select track to describe"));
         wSetCursor(mainD.d,wCursorQuestion);
         descUndoStarted = FALSE;
+        trk = NULL;
         return C_CONTINUE;
+
+    case wActionMove:
+    	return C_CONTINUE;
+
 
     case C_DOWN:
         if ((trk = OnTrack(&pos, FALSE, FALSE)) != NULL) {
@@ -743,7 +751,6 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
             descSize.x -= descOrig.x-descBorder;
             descSize.y -= descOrig.y-descBorder;
             descNeedDrawHilite = TRUE;
-            DrawDescHilite();
             DescribeTrack(trk, msg, 255);
             inDescribeCmd = FALSE;
             InfoMessage(msg);
@@ -754,9 +761,16 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case C_REDRAW:
-        if (describeWin && wWinIsVisible(describeWin) && descTrk) {
-            DrawDescHilite();
+
+        if (describePG.win && wWinIsVisible(describePG.win) && descTrk) {
+            DrawDescHilite(TRUE);
+            if (descTrk && QueryTrack(descTrk, Q_IS_DRAW)) {
+				DrawOriginAnchor(descTrk);
+			}
+        } else if (trk){
+        	DrawTrack(trk,&tempD,wDrawColorBlue);
         }
+
 
         break;
 
@@ -764,7 +778,12 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         DescribeCancel();
         wSetCursor(mainD.d,defaultCursor);
         return C_CONTINUE;
+
+    case C_CMDMENU:
+    	if (!trk) wMenuPopupShow(descPopupM);
+    	return C_CONTINUE;
     }
+
 
     return C_CONTINUE;
 }
@@ -773,11 +792,23 @@ static STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 
 #include "bitmaps/describe.xpm"
 
+extern wIndex_t selectCmdInx;
+extern wIndex_t modifyCmdInx;
+extern wIndex_t panCmdInx;
+
 void InitCmdDescribe(wMenu_p menu)
 {
     describeCmdInx = AddMenuButton(menu, CmdDescribe, "cmdDescribe",
                                    _("Properties"), wIconCreatePixMap(describe_xpm),
-                                   LEVEL0, IC_CANCEL|IC_POPUP, ACCL_DESCRIBE, NULL);
+                                   LEVEL0, IC_CANCEL|IC_POPUP|IC_WANT_MOVE|IC_CMDMENU, ACCL_DESCRIBE, NULL);
     RegisterChangeNotification(DescChange);
     ParamRegister(&describePG);
+}
+void InitCmdDescribe2(wMenu_p menu)
+{
+    descPopupM = MenuRegister( "Describe Context Menu" );
+    wMenuPushCreate(descPopupM, "cmdSelectMode", GetBalloonHelpStr("cmdSelectMode"), 0, DoCommandB, (void*) (intptr_t) selectCmdInx);
+    wMenuPushCreate(descPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
+    wMenuPushCreate(descPopupM, "cmdPanMode", GetBalloonHelpStr("cmdPanMode"), 0, DoCommandB, (void*) (intptr_t) panCmdInx);
+
 }

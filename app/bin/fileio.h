@@ -30,16 +30,20 @@
 FILE * paramFile;
 extern char *paramFileName;
 wIndex_t paramLineNum;
-char paramLine[STR_LONG_SIZE];
+char paramLine[STR_HUGE_SIZE];
 char * curContents;
 char * curSubContents;
 #define PARAM_DEMO (-1)
 
 typedef void (*playbackProc_p)( char * );
 typedef BOOL_T (*readParam_t) ( char * );
+typedef BOOL_T (*deleteParam_t) (void *param);
 
 extern const char * workingDir;
 extern const char * libDir;
+
+extern wBool_t bReadOnly;
+extern wBool_t bExample;
 
 #define PARAM_CUSTOM	(-2)
 #define PARAM_LAYOUT	(-3)
@@ -57,6 +61,8 @@ int curDemo;
 
 wMenuList_p fileList_ml;
 
+#define ZIPFILETYPEEXTENSION "xtce"
+
 #define PARAM_SUBDIR "params"
 
 #define LAYOUTPATHKEY "layout"
@@ -69,16 +75,32 @@ wMenuList_p fileList_ml;
 #define IMPORTPATHKEY "import"
 #define MACROPATHKEY "macro"
 #define CUSTOMPATHKEY "custom"
+#define ARCHIVEPATHKEY "archive"
+
+typedef struct {
+	char * name;
+	readParam_t proc;
+} paramProc_t;
+dynArr_t paramProc_da;
+#define paramProc(N) DYNARR_N( paramProc_t, paramProc_da, N )
 
 void Stripcr( char * );
 char * GetNextLine( void );
 
+#define END_TRK_FILE	"END$TRACKS"
+#define END_BLOCK	"END$BLOCK"
+#define END_SIGNAL	"END$SIGNAL"
+#define END_SEGS	"END$SEGS"
+#define END_MESSAGE	"END$MESSAGE"
+wBool_t IsEND( char * sEnd );
+
 BOOL_T GetArgs( char *, char *, ... );
+char * ReadMultilineText();
 BOOL_T ParseRoomSize( char *, coOrd * );
 int InputError( char *, BOOL_T, ... );
-void SyntaxError( char *, wIndex_t, wIndex_t );
+void SyntaxError( char *, wIndex_t, wIndex_t ); 
 
-void AddParam( char *, readParam_t );
+void AddParam( char *name, readParam_t proc );
 
 FILE * OpenCustom( char * );
 
@@ -88,29 +110,29 @@ FILE * OpenCustom( char * );
 
 void SetWindowTitle( void );
 char * PutTitle( char * cp );
-wBool_t IsParamValid( int );
-char * GetParamFileName( int );
-void RememberParamFiles( void );
-int LoadParamFile( int files, char **fileName, void *data );
-void ReadParamFiles( void );
+
+void ParamFileListLoad(int paramFileCnt, dynArr_t *paramFiles);
+void DoParamFiles(void * junk);
+
 int LoadTracks( int cnt, char **fileName, void *data );
-BOOL_T ReadParams( long, const char *, const char * );
 
 typedef void (*doSaveCallBack_p)( void );
 void DoSave( doSaveCallBack_p );
 void DoSaveAs( doSaveCallBack_p );
 void DoLoad( void );
+void DoExamples( void );
 void DoFileList( int, char *, void * );
 void DoCheckPoint( void );
 void CleanupFiles( void );
 int ExistsCheckpoint( void );
 int LoadCheckpoint( void );
-void DoImport( void );
+void DoImport( void * );
 void DoExport( void );
 void DoExportDXF( void );
 BOOL_T EditCopy( void );
 BOOL_T EditCut( void );
 BOOL_T EditPaste( void );
+BOOL_T EditClone( void );
 
 
 void DoRecord( void * );
@@ -125,10 +147,13 @@ void ReadKey( void );
 void PopupRegister( void * );
 
 void FileInit( void );
-BOOL_T ParamFileInit( void );
+
 BOOL_T MacroInit( void );
 
 char *SaveLocale( char *newLocale );
 void RestoreLocale( char * locale );
+
+// Parameter file search
+void DoSearchParams(void * junk);
 
 #endif

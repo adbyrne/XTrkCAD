@@ -47,6 +47,7 @@ static int log_carDlgState;
 static int log_carDlgList;
 
 static paramFloatRange_t r0_99999 = { 0, 99999, 80 };
+static paramFloatRange_t r9999_9999 = {-99999, 99999, 80};
 static paramIntegerRange_t i1_999999999 = { 1, 999999999, 80, PDO_NORANGECHECK_HIGH };
 static paramIntegerRange_t i1_9999 = { 1, 9999, 50 };
 static char * isLocoLabels[] = { "", 0 };
@@ -85,6 +86,7 @@ typedef struct {
 		DIST_T			carLength;
 		DIST_T			carWidth;
 		DIST_T			truckCenter;
+		DIST_T          truckCenterOffset;
 		DIST_T			coupledLength;
 		} carDim_t;
 typedef struct {
@@ -381,10 +383,10 @@ static void CarProtoDrawTruck(
 
 	memcpy( p, truckOutline, sizeof truckOutline );
 	RescalePts( sizeof truckOutline/sizeof truckOutline[0], p, 1.0, width/56.5 );
-	RescalePts( sizeof wheelOutline/sizeof wheelOutline[0], p, ratio, ratio );
-	RotatePts( sizeof wheelOutline/sizeof wheelOutline[0], p, zero, angle );
+	RescalePts( sizeof truckOutline/sizeof truckOutline[0], p, ratio, ratio );
+	RotatePts( sizeof truckOutline/sizeof truckOutline[0], p, zero, angle );
 	MovePts( sizeof truckOutline/sizeof truckOutline[0], p, pos );
-	DrawFillPoly( d, sizeof truckOutline/sizeof truckOutline[0], p, color );
+	DrawPoly( d, sizeof truckOutline/sizeof truckOutline[0], p, NULL, color, 0, 1, 0);
 	pp.x = -70/2;
 	pp.y = 0;
 	memcpy( p, wheelOutline, sizeof wheelOutline );
@@ -393,7 +395,7 @@ static void CarProtoDrawTruck(
 	RescalePts( sizeof wheelOutline/sizeof wheelOutline[0], p, ratio, ratio );
 	RotatePts( sizeof wheelOutline/sizeof wheelOutline[0], p, zero, angle );
 	MovePts( sizeof wheelOutline/sizeof wheelOutline[0], p, pos );
-	DrawFillPoly( d, sizeof wheelOutline/sizeof wheelOutline[0], p, color );
+	DrawPoly( d, sizeof wheelOutline/sizeof wheelOutline[0], p, NULL, color, 0, 1, 0);
 	pp.x = 70/2;
 	memcpy( p, wheelOutline, sizeof wheelOutline );
 	RescalePts( sizeof wheelOutline/sizeof wheelOutline[0], p, 1.0, width/56.5 );
@@ -401,7 +403,7 @@ static void CarProtoDrawTruck(
 	RescalePts( sizeof wheelOutline/sizeof wheelOutline[0], p, ratio, ratio );
 	RotatePts( sizeof wheelOutline/sizeof wheelOutline[0], p, zero, angle );
 	MovePts( sizeof wheelOutline/sizeof wheelOutline[0], p, pos );
-	DrawFillPoly( d, sizeof wheelOutline/sizeof wheelOutline[0], p, color );
+	DrawPoly( d, sizeof wheelOutline/sizeof wheelOutline[0], p, NULL, color, 0, 1, 0 );
 }
 
 
@@ -438,22 +440,11 @@ static void CarProtoDrawCoupler(
 	pp.x = length-12.0;
 	pp.y = 0;
 /* TODO - if length > 6 then draw Sills */
-#ifdef FUTURE
-	if ( angle == 270.0 ) {
-		pos.x -= (length-12.0);
-		for ( inx=0; inx<sizeof couplerOutline/sizeof couplerOutline[0]; inx++ ) {
-			p[inx].x = -p[inx].x;
-			p[inx].y = -p[inx].y;
-		}
-	} else {
-		pos.x += (length-12.0);
-	}
-#endif
 	MovePts( sizeof couplerOutline/sizeof couplerOutline[0], p, pp );
 	RescalePts( sizeof couplerOutline/sizeof couplerOutline[0], p, ratio, ratio );
 	RotatePts( sizeof couplerOutline/sizeof couplerOutline[0], p, zero, angle-90.0 );
 	MovePts( sizeof couplerOutline/sizeof couplerOutline[0], p, pos );
-	DrawFillPoly( d, sizeof couplerOutline/sizeof couplerOutline[0], p, color );
+	DrawPoly( d, sizeof couplerOutline/sizeof couplerOutline[0], p, NULL, color, 0, 1 ,0 );
 }
 
 
@@ -496,7 +487,7 @@ static trkSeg_p carProtoSegPtr;
 static int carProtoSegCnt;
 
 
-static coOrd dummyOutlineSegPts[5];
+static pts_t dummyOutlineSegPts[5];
 static trkSeg_t dummyOutlineSegs;
 static void CarProtoDlgCreateDummyOutline(
 		int * segCntP,
@@ -507,7 +498,7 @@ static void CarProtoDlgCreateDummyOutline(
 		wDrawColor color )
 {
 	trkSeg_p segPtr;
-	coOrd * pts;
+	pts_t * pts;
 	DIST_T length2;
 
 	*segCntP = 1;
@@ -523,22 +514,27 @@ static void CarProtoDlgCreateDummyOutline(
 	segPtr->u.p.angle = 0;
 	length2 = length;
 	if ( isLoco ) {
-		pts->x = length;
-		pts->y = width/2.0;
+		pts->pt.x = length;
+		pts->pt.y = width/2.0;
+		pts->pt_type = 0;
 		pts++;
 		length2 -= width/2.0;
 	}
-	pts->x = length2;
-	pts->y = 0.0;
+	pts->pt.x = length2;
+	pts->pt.y = 0.0;
+	pts->pt_type = 0;
 	pts++;
-	pts->x = 0.0;
-	pts->y = 0.0;
+	pts->pt.x = 0.0;
+	pts->pt.y = 0.0;
+	pts->pt_type = 0;
 	pts++;
-	pts->x = 0.0;
-	pts->y = width;
+	pts->pt.x = 0.0;
+	pts->pt.y = width;
+	pts->pt_type = 0;
 	pts++;
-	pts->x = length2;
-	pts->y = width;
+	pts->pt.x = length2;
+	pts->pt.y = width;
+	pts->pt_type = 0;
 }
 
 
@@ -605,6 +601,26 @@ static carProto_p CarProtoLookup(
 	return proto;
 }
 
+enum paramFileState
+GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
+{
+	int i;
+	enum paramFileState ret = PARAMFILE_NOTUSABLE;
+	DIST_T ratio = GetScaleRatio(scaleIndex);
+
+	if (!IsParamValid(paramFileIndex)) {
+		return(PARAMFILE_UNLOADED);
+	}
+
+	for (i = 0; i < carProto_da.cnt; i++) {
+		carProto_t *carProto = carProto(i);
+		if (carProto->paramFileIndex == paramFileIndex) {
+			ret = PARAMFILE_FIT;
+			break;
+		}
+	}
+	return(ret);
+}
 
 static carProto_p CarProtoNew(
 		carProto_p proto,
@@ -617,7 +633,7 @@ static carProto_p CarProtoNew(
 		trkSeg_p segPtr )
 {
 	if ( proto == NULL ) {
-		proto = LookupListElem( &carProto_da, desc, CmpCarProto, sizeof *(carProto_p)0 );
+		proto = LookupListElem( &carProto_da, desc, CmpCarProto, sizeof *proto );
 		if ( proto->desc != NULL ) {
 			if ( proto->paramFileIndex == PARAM_CUSTOM &&
 				 paramFileIndex != PARAM_CUSTOM )
@@ -656,6 +672,45 @@ static void CarProtoDelete(
 }
 
 
+/**
+* Delete all car prototype definitions that came from a specific parameter file.
+* Due to the way the definitions are loaded from file it is safe to
+* assume that they form a contiguous block in the array.
+*
+* \param [IN] fileIndex parameter file
+*/
+
+void
+DeleteCarProto(int fileIndex)
+{
+	int inx = 0;
+	int startInx = -1;
+	int cnt = 0;
+
+	// go to the start of the block
+	while (inx < carProto_da.cnt && carProto(inx)->paramFileIndex != fileIndex) {
+		startInx = inx++;
+	}
+
+	// delete them
+	for (; inx < carProto_da.cnt && carProto(inx)->paramFileIndex == fileIndex; inx++) {
+		carProto_t * cp = carProto(inx);
+		if (cp->paramFileIndex == fileIndex) {
+			CarProtoDelete(cp);
+			cnt++;
+		}
+	}
+
+	// copy down the rest of the list to fill the gap
+	startInx++;
+	while (inx < carProto_da.cnt) {
+		carProto(startInx++) = carProto(inx++);
+	}
+
+	// and reduce the actual number
+	carProto_da.cnt -= cnt;
+}
+
 static BOOL_T CarProtoRead(
 		char * line )
 {
@@ -663,10 +718,12 @@ static BOOL_T CarProtoRead(
 	long options;
 	long type;
 	carDim_t dim;
+	long longCenterOffset;
 
-	if ( !GetArgs( line+9, "qllff00ff",
-		&desc, &options, &type, &dim.carLength, &dim.carWidth, &dim.truckCenter, &dim.coupledLength ) )
+	if ( !GetArgs( line+9, "qllff0lff",
+		&desc, &options, &type, &dim.carLength, &dim.carWidth, &longCenterOffset, &dim.truckCenter, &dim.coupledLength ) )
 		return FALSE;
+	dim.truckCenterOffset = longCenterOffset/1000.0;
 	if ( !ReadSegs() )
 		return FALSE;
 	CarProtoNew( NULL, curParamFileIndex, desc, options, type, &dim, tempSegs_da.cnt, &tempSegs(0) );
@@ -685,8 +742,10 @@ static BOOL_T CarProtoWrite(
 
 	oldLocale = SaveLocale("C");
 
-	rc &= fprintf( f, "CARPROTO \"%s\" %ld %ld %0.3f %0.3f 0 0 %0.3f %0.3f\n",
-		PutTitle(proto->desc), proto->options, proto->type, proto->dim.carLength, proto->dim.carWidth, proto->dim.truckCenter, proto->dim.coupledLength )>0;
+	long longCenterOffset = (long)(proto->dim.truckCenterOffset*1000);
+
+	rc &= fprintf( f, "CARPROTO \"%s\" %ld %ld %0.3f %0.3f 0 %ld %0.3f %0.3f\n",
+		PutTitle(proto->desc), proto->options, proto->type, proto->dim.carLength, proto->dim.carWidth, longCenterOffset, proto->dim.truckCenter, proto->dim.coupledLength )>0;
 	rc &= WriteSegs( f, proto->segCnt, proto->segPtr );
 
 	RestoreLocale(oldLocale);
@@ -850,7 +909,7 @@ static roadnameMap_p LoadRoadnameList(
 
 	cmp_key.name = roadnameTab->ptr;
 	cmp_key.len = roadnameTab->len;
-	roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, sizeof *(roadnameMap_p)0 );
+	roadnameMapP = LookupListElem( &roadnameMap_da, &cmp_key, Cmp_roadnameMap, sizeof roadnameMapP );
 	if ( roadnameMapP->roadname == NULL ) {
 		roadnameMapP->roadname = TabStringDup(roadnameTab);
 		roadnameMapP->repmark = TabStringDup(repmarkTab);
@@ -957,29 +1016,29 @@ static carPart_p CarPartNew(
 	carPart_t cmp_key;
 	tabString_t tabs[7];
 
-	TabStringExtract( title, 7, tabs );
-	if ( TabStringCmp( "Undecorated", &tabs[T_MANUF] ) == 0 ||
-		 TabStringCmp( "Custom", &tabs[T_MANUF] ) == 0 ||
-		 tabs[T_PART].len == 0 )
+	TabStringExtract(title, 7, tabs);
+	if (TabStringCmp("Undecorated", &tabs[T_MANUF]) == 0 ||
+		TabStringCmp("Custom", &tabs[T_MANUF]) == 0 ||
+		tabs[T_PART].len == 0)
 		return NULL;
-	if ( tabs[T_PROTO].len == 0 )
+	if (tabs[T_PROTO].len == 0)
 		return NULL;
-	if ( partP == NULL ) {
-		partP = CarPartFind( tabs[T_MANUF].ptr, tabs[T_MANUF].len, tabs[T_PART].ptr, tabs[T_PART].len, scaleInx );
-		if ( partP != NULL &&
-			 partP->paramFileIndex == PARAM_CUSTOM &&
-			 paramFileIndex != PARAM_CUSTOM )
+	if (partP == NULL) {
+		partP = CarPartFind(tabs[T_MANUF].ptr, tabs[T_MANUF].len, tabs[T_PART].ptr, tabs[T_PART].len, scaleInx);
+		if (partP != NULL &&
+			partP->paramFileIndex == PARAM_CUSTOM &&
+			paramFileIndex != PARAM_CUSTOM)
 			return partP;
-LOG( log_carList, 2, ( "new car part: %s (%d) at %d\n", title, paramFileIndex, lookupListIndex ) )
+		LOG(log_carList, 2, ("new car part: %s (%d) at %d\n", title, paramFileIndex, lookupListIndex))
 	}
-	if ( partP != NULL ) {
-		CarPartUnlink( partP );
-		if ( partP->title != NULL )
-			MyFree( partP->title );
-LOG( log_carList, 2, ( "upd car part: %s (%d)\n", title, paramFileIndex ) )
+	if (partP != NULL) {
+		CarPartUnlink(partP);
+		if (partP->title != NULL)
+			MyFree(partP->title);
+		LOG(log_carList, 2, ("upd car part: %s (%d)\n", title, paramFileIndex))
 	}
-	LoadRoadnameList( &tabs[T_ROADNAME], &tabs[T_REPMARK] );
-	parentP = CarPartParentNew( tabs[T_MANUF].ptr, tabs[T_MANUF].len, tabs[T_PROTO].ptr, tabs[T_PROTO].len, scaleInx );
+	LoadRoadnameList(&tabs[T_ROADNAME], &tabs[T_REPMARK]);
+	parentP = CarPartParentNew(tabs[T_MANUF].ptr, tabs[T_MANUF].len, tabs[T_PROTO].ptr, tabs[T_PROTO].len, scaleInx);
 	cmp_key.title = title;
 	cmp_key.parent = parentP;
 	cmp_key.paramFileIndex = paramFileIndex;
@@ -989,13 +1048,13 @@ LOG( log_carList, 2, ( "upd car part: %s (%d)\n", title, paramFileIndex ) )
 	cmp_key.color = color;
 	cmp_key.partnoP = tabs[T_PART].ptr;
 	cmp_key.partnoL = tabs[T_PART].len;
-	partP = (carPart_p)LookupListElem( &parentP->parts_da, &cmp_key, Cmp_part, sizeof * partP );
-	if ( partP->title != NULL )
-		MyFree( partP->title );
+	partP = (carPart_p)LookupListElem(&parentP->parts_da, &cmp_key, Cmp_part, sizeof * partP);
+	if (partP->title != NULL)
+		MyFree(partP->title);
 	*partP = cmp_key;
-	sprintf( message, "\t\t%s", tabs[2].ptr );
-	partP->title = MyStrdup( message );
-	partP->partnoP = partP->title + 2+tabs[2].len+1;;
+	sprintf(message, "\t\t%s", tabs[2].ptr);
+	partP->title = MyStrdup(message);
+	partP->partnoP = partP->title + 2 + tabs[2].len + 1;;
 	partP->partnoL = tabs[T_PART].len;
 	return partP;
 }
@@ -1012,6 +1071,32 @@ static void CarPartDelete(
 	MyFree( partP );
 }
 
+/**
+* Delete all car part definitions that came from a specific parameter file.
+* CarParts are stored in DYNARR for the specific car model. These DYNARRs
+* are linked from CarPartParents, again DYNARRs. Thes parents are created
+* from part definition and only contain manufacturer and type information.
+*
+* \param [IN] fileIndex parameter file
+*/
+
+void
+DeleteCarPart(int fileIndex)
+{
+	int inxParent = 0;
+	int inx;
+
+	while (inxParent < carPartParent_da.cnt) {
+		inx = 0;
+		while (inx < carPartParent(inxParent)->parts_da.cnt) {
+			carPart_p part = carPart(carPartParent(inxParent), inx++);
+			if (part->paramFileIndex == fileIndex) {
+				CarPartDelete(part);
+			}
+		}
+		inxParent++;
+	}
+}
 
 static BOOL_T CarPartRead(
 		char * line )
@@ -1022,10 +1107,12 @@ static BOOL_T CarPartRead(
 	char * title;
 	carDim_t dim;
 	long rgb;
+	long longCenterOffset;
 
-	if ( !GetArgs( line+8, "sqllff00ffl",
-		scale, &title, &options, &type, &dim.carLength, &dim.carWidth, &dim.truckCenter, &dim.coupledLength, &rgb ) )
+	if ( !GetArgs( line+8, "sqllff0lffl",
+		scale, &title, &options, &type, &dim.carLength, &dim.carWidth, &longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb ) )
 		return FALSE;
+	dim.truckCenterOffset = longCenterOffset/1000.0;
 	CarPartNew( NULL, curParamFileIndex, LookupScale(scale), title, options, type, &dim, wDrawFindColor(rgb) );
 	MyFree( title );
 	return TRUE;
@@ -1181,6 +1268,42 @@ static carItem_p CarItemNew(
 	return item;
 }
 
+/**
+ * Check the whether the parameter file has CARPARTS that are compatible
+ * with the current state. For CARPARTS only the exactly identical scale
+ * is accepted as compatible
+ * 
+ * \param paramFileIndex IN the parameter file
+ * \param scaleIndex IN the scale to check against
+ * \return the compatibility state of the the
+ */
+enum paramFileState	
+GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex)
+{
+	int i;
+	enum paramFileState ret = PARAMFILE_NOTUSABLE;
+	DIST_T ratio = GetScaleRatio(scaleIndex);
+
+	if (!IsParamValid(paramFileIndex)) {
+		return(PARAMFILE_UNLOADED);
+	}
+
+	for (i = 0; i < carPartParent_da.cnt && ret != PARAMFILE_FIT; i++) {
+		carPartParent_t *carPartParent = carPartParent( i );
+
+		if(GetScaleRatio(carPartParent->scale) == ratio ){
+			for(int j = 0; j < carPartParent->parts_da.cnt; j++ ){
+				carPart_t *carPart = carPart( carPartParent, j  );
+
+				if (carPart->paramFileIndex == paramFileIndex) {
+					ret = PARAMFILE_FIT;
+					break;
+				}
+			}
+		}
+	}
+	return(ret);
+}
 
 EXPORT BOOL_T CarItemRead(
 		char * line )
@@ -1198,44 +1321,43 @@ EXPORT BOOL_T CarItemRead(
 	long purchDate = 0;
 	long serviceDate = 0;
 	int len, siz;
-	static dynArr_t buffer_da;
 	carItem_p item;
 	char * cp;
 	wIndex_t layer;
 	coOrd pos;
 	ANGLE_T angle;
 	wIndex_t index;
+	long longCenterOffset;
+	char * sNote = NULL;
 
-	if ( !GetArgs( line+4, "lsqll" "ff00ffl" "fflll000000c",
+	if ( !GetArgs( line+4, "lsqll" "ff0lffl" "fflll000000c",
 		&itemIndex, scale, &title, &options, &type,
-		&dim.carLength, &dim.carWidth, &dim.truckCenter, &dim.coupledLength, &rgb,
+		&dim.carLength, &dim.carWidth, &longCenterOffset, &dim.truckCenter, &dim.coupledLength, &rgb,
 		&purchPrice, &currPrice, &condition, &purchDate, &serviceDate, &cp ) )
 		return FALSE;
-	if ( (options&CAR_ITEM_HASNOTES) ) {
-		DYNARR_SET( char, buffer_da, 0 );
-		while ( (line=GetNextLine()) && strncmp( line, "    END", 7 ) != 0 ) {
-			siz = buffer_da.cnt;
-			len = strlen( line );
-			DYNARR_SET( char, buffer_da, siz+len+1 );
-			memcpy( &((char*)buffer_da.ptr)[siz], line, len );
-			((char*)buffer_da.ptr)[siz+len] = '\n';
+	dim.truckCenterOffset = longCenterOffset/1000.0;
+	if ( paramVersion < 12 ) {
+		if ( (options&CAR_ITEM_HASNOTES) ) {
+			sNote = ReadMultilineText();
 		}
-		DYNARR_APPEND( char, buffer_da, 1 );
-		((char*)buffer_da.ptr)[buffer_da.cnt-1] = 0;
+	} else {
+		if ( !GetArgs( cp, "qc", &sNote, &cp ) )
+			return FALSE;
 	}
 	item = CarItemNew( NULL, curParamFileIndex, itemIndex, LookupScale(scale), title,
 				options&(CAR_DESC_BITS|CAR_ITEM_BITS), type, &dim, wDrawFindColor(rgb),
 				purchPrice, currPrice, condition, purchDate, serviceDate );
 	if ( (options&CAR_ITEM_HASNOTES) )
-		item->data.notes = MyStrdup( (char*)buffer_da.ptr );
+		item->data.notes = sNote;
 	MyFree(title);
 	if ( (options&CAR_ITEM_ONLAYOUT) ) {
 		if ( !GetArgs( cp, "dLpf",
 				&index, &layer, &pos, &angle ) )
 			return FALSE;
+		if ( !ReadSegs() )
+			return FALSE;
 		item->car = NewCar( index, item, pos, angle );
 		SetTrkLayer( item->car, layer );
-		ReadSegs();
 		SetEndPts( item->car, 2 );
 		ComputeBoundingBox( item->car );
 	}
@@ -1253,6 +1375,7 @@ static BOOL_T CarItemWrite(
 	ANGLE_T angle;
 	BOOL_T rc = TRUE;
 	char *oldLocale = NULL;
+	long longCenterOffset = (long)(item->dim.truckCenterOffset*1000);
 
 	oldLocale = SaveLocale("C");
 
@@ -1260,25 +1383,27 @@ static BOOL_T CarItemWrite(
 		options |= CAR_ITEM_HASNOTES;
 	if ( layout && item->car && !IsTrackDeleted(item->car) )
 		options |= CAR_ITEM_ONLAYOUT;
-	rc &= fprintf( f, "CAR %ld %s \"%s\" %ld %ld %0.3f %0.3f 0 0 %0.3f %0.3f %ld %0.3f %0.3f %ld %ld %ld 0 0 0 0 0 0",
+	rc &= fprintf( f, "CAR %ld %s \"%s\" %ld %ld %0.3f %0.3f 0 %ld %0.3f %0.3f %ld %0.3f %0.3f %ld %ld %ld 0 0 0 0 0 0",
 		item->index, GetScaleName(item->scaleInx), PutTitle(item->title),
 		options, item->type,
-		item->dim.carLength, item->dim.carWidth, item->dim.truckCenter, item->dim.coupledLength, wDrawGetRGB(item->color),
+		item->dim.carLength, item->dim.carWidth, longCenterOffset, item->dim.truckCenter, item->dim.coupledLength, wDrawGetRGB(item->color),
 		item->data.purchPrice, item->data.currPrice, item->data.condition, item->data.purchDate, item->data.serviceDate )>0;
+	if ( (options&CAR_ITEM_HASNOTES) ) {
+		char * sEscapedNote = ConvertToEscapedText( item->data.notes );
+		rc &= fprintf( f, " \"%s\"", sEscapedNote )>0;
+		MyFree( sEscapedNote );
+	} else {
+		rc &= fprintf( f, " \"\"" ) > 0;
+	}
 	if ( ( options&CAR_ITEM_ONLAYOUT) ) {
 		CarGetPos( item->car, &pos, &angle );
-		rc &= fprintf( f, " %d %u %0.3f %0.3f %0.3f",
+		rc &= fprintf( f, " %d %u %0.3f %0.3f %0.3f\n",
 				GetTrkIndex(item->car), GetTrkLayer(item->car), pos.x, pos.y, angle )>0;
-	}
-	rc &= fprintf( f, "\n" )>0;
-	if ( (options&CAR_ITEM_HASNOTES) ) {
-		rc &= fprintf( f, "%s\n", item->data.notes )>0;
-		rc &= fprintf( f, "    END\n" )>0;
-	}
-	if ( (options&CAR_ITEM_ONLAYOUT) ) {
 		rc &= WriteEndPt( f, item->car, 0 );
 		rc &= WriteEndPt( f, item->car, 1 );
-		rc &= fprintf( f, "\tEND\n" )>0;
+		rc &= fprintf( f, "\t%s\n", END_SEGS )>0;
+	} else {
+		rc &= fprintf( f, "\n" )>0;
 	}
 
 	RestoreLocale(oldLocale);
@@ -1658,33 +1783,76 @@ EXPORT void AddHotBarCarDesc( void )
 			orig = zero;
 			size.x = item1->dim.carLength;
 			size.y = item1->dim.carWidth;
-			AddHotBarElement( FormatCarTitle( item1, carHotbarContents[carHotbarModeInx] ), size, orig, FALSE, (60.0*12.0/curScaleRatio), (void*)(intptr_t)inx, CarItemHotbarProc );
+			AddHotBarElement( FormatCarTitle( item1, carHotbarContents[carHotbarModeInx] ), size, orig, FALSE, FALSE, (60.0*12.0/curScaleRatio), (void*)(intptr_t)inx, CarItemHotbarProc );
 		}
 		item0 = item1;
 	}
 }
 
 
-EXPORT coOrd CarItemFindCouplerMountPoint(
+EXPORT void CarItemFindCouplerMountPoint(
 		carItem_p item,
-		traverseTrack_t trvTrk,
-		int dir )
+		traverseTrack_t trvTrk0,
+		coOrd pos[2] )
 {
-	DIST_T couplerOffset;
-	coOrd pos;
+	// We assume the coupler pivot is 'couplerLength' before the end of the car
+	DIST_T couplerLength = (item->dim.coupledLength - item->dim.carLength) / 2.0;
+	if ( IsClose(item->dim.truckCenter) ) {
+		// Single truck/bogie
+		DIST_T d = item->dim.carLength/2.0 - couplerLength;
+		Translate( &pos[0], trvTrk0.pos, trvTrk0.angle, d + item->dim.truckCenterOffset );
+		FlipTraverseTrack( &trvTrk0 );
+		Translate( &pos[1], trvTrk0.pos, trvTrk0.angle, d - item->dim.truckCenterOffset );
+		return;
+	}
+	// Find the pos of the 2 trucks
+	// Note this is a slight simplification, we should use the car center, not the on-track position
+	traverseTrack_t trvTrk1 = trvTrk0;
+	TraverseTrack2( &trvTrk0, item->dim.truckCenter/2.0 + item->dim.truckCenterOffset );
+	FlipTraverseTrack( & trvTrk1 );
+	TraverseTrack2( &trvTrk1, item->dim.truckCenter/2.0 - item->dim.truckCenterOffset );
 
-	if ( dir )
-		FlipTraverseTrack( &trvTrk );
+	// Get the angle to translate from the truck
+	ANGLE_T angle[2];
+	if ( trvTrk0.trk == NULL || (item->options&CAR_DESC_COUPLER_MODE_BODY)!=0 ) {
+		// Body mount couplers
+		// Angle is same as the car
+		angle[0] = FindAngle( trvTrk1.pos, trvTrk0.pos );
+		angle[1] = NormalizeAngle( angle[0]+180.0 );
+	} else {
+		// Truck mounted couplers
+		// Angle is same as the trucks
+		angle[0] = trvTrk0.angle;
+		angle[1] = trvTrk1.angle;
+	}
+
+	// Get the distance to translate
+	DIST_T d[2];
+	d[0] = item->dim.carLength/2.0 - couplerLength - ( item->dim.truckCenter/2.0 + item->dim.truckCenterOffset );
+	d[1] = item->dim.carLength/2.0 - couplerLength - ( item->dim.truckCenter/2.0 - item->dim.truckCenterOffset );
+
+	// And translate
+	Translate( &pos[0], trvTrk0.pos, angle[0], d[0] );
+	Translate( &pos[1], trvTrk1.pos, angle[1], d[1] );
+		
+#ifdef LATER
 	if ( trvTrk.trk == NULL || (item->options&CAR_DESC_COUPLER_MODE_BODY)!=0 ) {
-		couplerOffset = (item->dim.carLength-(item->dim.coupledLength-item->dim.carLength))/2.0;
+		couplerOffset = item->dim.coupledLength/2.0;
 		Translate( &pos, trvTrk.pos, trvTrk.angle, couplerOffset );
 	} else {
-		TraverseTrack2( &trvTrk, item->dim.truckCenter/2.0 );
+		if (dir)
+			TraverseTrack2( &trvTrk, item->dim.truckCenter/2.0-item->dim.truckCenterOffset );
+		else
+			TraverseTrack2( &trvTrk, item->dim.truckCenter/2.0+item->dim.truckCenterOffset );
 		/*Translate( &pos1, trvTrk.pos, trvTrk.angle, item->dim.truckCenter/2.0 );*/
-		couplerOffset = item->dim.carLength - (item->dim.truckCenter+item->dim.coupledLength)/2.0;
+		couplerOffset = (item->dim.coupledLength-item->dim.truckCenter)/2.0;
+		if (dir)
+			couplerOffset = couplerOffset + item->dim.truckCenterOffset;
+		else
+			couplerOffset = couplerOffset - item->dim.truckCenterOffset;
 		Translate( &pos, trvTrk.pos, trvTrk.angle, couplerOffset );
 	}
-	return pos;
+#endif
 }
 
 
@@ -1708,6 +1876,11 @@ static DIST_T CarItemTruckCenter(
 		carItem_p item )
 {
 	return item->dim.truckCenter;
+}
+
+static DIST_T CarItemTruckOffset(
+		carItem_p item ) {
+    return item->dim.truckCenterOffset;
 }
 
 
@@ -1759,6 +1932,22 @@ static DIST_T CarItemCouplerLength(
 	return item->dim.coupledLength-item->dim.carLength;
 }
 
+EXPORT BOOL_T StoreCarItem (carItem_p item, void **data,long *len) {
+
+	*data = item;
+	*len = sizeof (carItem_t);
+	return TRUE;
+
+}
+
+EXPORT BOOL_T ReplayCarItem(carItem_p item, void *data,long len) {
+
+
+	item->pos = ((carItem_t *)data)->pos;
+	item->angle = ((carItem_t *)data)->angle;
+	return TRUE;
+
+}
 
 EXPORT void CarItemPlace(
 		carItem_p item,
@@ -1766,18 +1955,37 @@ EXPORT void CarItemPlace(
 		DIST_T * dists )
 {
 	DIST_T dist;
+	DIST_T offset;
 	traverseTrack_t trks[2];
 
 	dist = CarItemTruckCenter(item)/2.0;
+	offset = CarItemTruckOffset(item);				//Offset is the amount the truck centers are displaced
 	trks[0] = trks[1] = *trvTrk;
-	TraverseTrack2( &trks[0], dist );
-	TraverseTrack2( &trks[1], -dist );
+	TraverseTrack2( &trks[0], dist+offset );
+	TraverseTrack2( &trks[1], -dist+offset );
+	item->angle = FindAngle( trks[1].pos, trks[0].pos );
 	item->pos.x = (trks[0].pos.x+trks[1].pos.x)/2.0;
 	item->pos.y = (trks[0].pos.y+trks[1].pos.y)/2.0;
-	item->angle = FindAngle( trks[1].pos, trks[0].pos );
+	Translate(&item->pos,item->pos,item->angle, -offset);  // Put truck center back along line by offset
 	dists[0] = dists[1] = CarItemCoupledLength(item)/2.0;
 }
 
+static dynArr_t clearance;
+
+static void ClearClearancePoints(void) {
+	//DYNARR_RESET(trkSeg_t,clearance);
+}
+
+static void CreateClearancePoint(coOrd pos, int position) {
+	//DYNARR_APPEND(trkSeg_t,clearance,1);
+
+}
+
+static void DrawClearancePoints(void) {
+	//for (int i=0;i<clearance.cnt;i++) {
+		//DrawSegs();
+	//}
+}
 
 
 static int drawCarTrucks = 0;
@@ -1787,14 +1995,16 @@ EXPORT void CarItemDraw(
 		wDrawColor color,
 		int direction,
 		BOOL_T locoIsMaster,
-		vector_t *coupler )
+		vector_t *coupler,
+		BOOL_T pencils,
+		track_p traverse)
 {
 	coOrd size, pos, pos2;
 	DIST_T length;
 	wFont_p fp;
 	wDrawWidth width;
 	trkSeg_t simpleSegs[1];
-	coOrd simplePts[4];
+	pts_t simplePts[4];
 	int dir;
 	DIST_T rad;
 	static int couplerLineWidth = 3;
@@ -1802,10 +2012,14 @@ EXPORT void CarItemDraw(
 
 	CarItemSize( item, &size );
 	if ( d->scale >= ((d->options&DC_PRINT)?(twoRailScale*2+1):twoRailScale) ) {
-		simplePts[0].x = simplePts[3].x = -size.x/2.0;
-		simplePts[1].x = simplePts[2].x = size.x/2.0;
-		simplePts[0].y = simplePts[1].y = -size.y/2.0;
-		simplePts[2].y = simplePts[3].y = size.y/2.0;
+		simplePts[0].pt.x = simplePts[3].pt.x = -size.x/2.0;
+		simplePts[1].pt.x = simplePts[2].pt.x = size.x/2.0;
+		simplePts[0].pt.y = simplePts[1].pt.y = -size.y/2.0;
+		simplePts[2].pt.y = simplePts[3].pt.y = size.y/2.0;
+		simplePts[0].pt_type = 0;
+		simplePts[1].pt_type = 0;
+		simplePts[2].pt_type = 0;
+		simplePts[3].pt_type = 0;
 		simpleSegs[0].type = SEG_FILPOLY;
 		simpleSegs[0].color = item->color;
 		simpleSegs[0].width = 0;
@@ -1822,11 +2036,47 @@ EXPORT void CarItemDraw(
 		DrawSegs( d, pos, item->angle-90.0, item->segPtr, item->segCnt, 0.0, color );
 	}
 
+	if (pencils) {
+		ClearClearancePoints();
+		coOrd posm1,posm2;
+		Translate( &posm1, item->pos, item->angle-90, -size.y/2.0 );
+		Translate( &posm2, item->pos, item->angle+90, -size.y/2.0 );
+		coOrd posm1a = posm1;
+		coOrd posm2a = posm2;
+		if (GetTrkDistance(traverse, &posm1a)>GetTrkDistance(traverse, &posm2a))
+			CreateClearancePoint(posm1,1);
+		else
+			CreateClearancePoint(posm2,2);
+
+		coOrd pose1,pose2;
+		Translate( &pose1, item->pos, item->angle, size.x/2.0 );
+		Translate( &pose1, pose1, item->angle-90, -size.y/2.0 );
+		Translate( &pose2, pose1, item->angle+90, -size.y );
+
+		traverseTrack_t traverseTrk;
+		traverseTrk.trk = traverse;
+		traverseTrk.pos = item->pos;
+		traverseTrk.angle = item->angle;
+		TraverseTrack2(&traverseTrk,size.x/2.0);
+		coOrd pose1a = pose1;
+		coOrd pose2a = pose2;
+		if (GetTrkDistance(traverseTrk.trk, &pose1a)>GetTrkDistance(traverseTrk.trk, &pose2a))
+			CreateClearancePoint(pose1,3);
+		else
+			CreateClearancePoint(pose2,4);
+
+
+		DrawClearancePoints();
+
+	}
+
 	if ( drawCarTrucks ) {
+
 		length = item->dim.truckCenter/2.0;
-		Translate( &pos, item->pos, item->angle, length );
+		double offset = CarItemTruckOffset(item);
+		Translate( &pos, item->pos, item->angle, length+(direction?offset:-offset) );
 		DrawArc( d, pos, trackGauge/2.0, 0.0, 360.0, FALSE, 0, color );
-		Translate( &pos, item->pos, item->angle+180, length );
+		Translate( &pos, item->pos, item->angle+180, length+(direction?-offset:offset) );
 		DrawArc( d, pos, trackGauge/2.0, 0.0, 360.0, FALSE, 0, color );
 	}
 
@@ -1925,7 +2175,7 @@ static char *dispmodeLabels[] = { N_("Information"), N_("Customize"), NULL };
 static drawCmd_t carDlgD = {
 		NULL,
 		&screenDrawFuncs,
-		DC_NOCLIP,
+		0,
 		1.0,
 		0.0,
 		{ 0, 0 }, { 0, 0 },
@@ -1984,16 +2234,18 @@ static paramData_t carDlgPLs[] = {
 	{ PD_FLOAT, &carDlgDim.carWidth, "carWidth", PDO_DIM|PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, &r0_99999, N_("Width") },
 #define I_CD_TRKCENTER          (B+6)
 	{ PD_FLOAT, &carDlgDim.truckCenter, "trkCenter", PDO_DIM|PDO_NOPREF, &r0_99999, N_("Truck Centers") },
-#define I_CD_CPLRMNT            (B+7)
-	{ PD_RADIO, &carDlgCouplerMount, "cplrMount", PDO_NOPREF|PDO_DLGHORZ|PDO_DLGWIDE, cplrModeLabels, N_("Coupler Mount"), BC_HORZ|BC_NOBORDER },
-#define I_CD_CPLDLEN            (B+8)
+#define I_CD_TRKOFFSET			(B+7)
+	{ PD_FLOAT, &carDlgDim.truckCenterOffset, "trkCenterOffset", PDO_DIM|PDO_NOPREF|PDO_DLGHORZ|PDO_DLGWIDE, &r9999_9999, N_("Center Offset") },
+#define I_CD_CPLRMNT            (B+8)
+	{ PD_RADIO, &carDlgCouplerMount, "cplrMount", PDO_NOPREF, cplrModeLabels, N_("Coupler Mount"), BC_HORZ|BC_NOBORDER },
+#define I_CD_CPLDLEN            (B+9)
 	{ PD_FLOAT, &carDlgDim.coupledLength, "cpldLen", PDO_DIM|PDO_NOPREF, &r0_99999, N_("Coupled Length") },
-#define I_CD_CPLRLEN            (B+9)
-	{ PD_FLOAT, &carDlgCouplerLength, "cplrLen", PDO_DIM|PDO_NOPREF|PDO_DLGWIDE|PDO_DLGHORZ, &r0_99999, N_("Coupler Length") },
-#define I_CD_CANVAS             (B+10)
+#define I_CD_CPLRLEN            (B+10)
+	{ PD_FLOAT, &carDlgCouplerLength, "cplrLen", PDO_DIM|PDO_NOPREF|PDO_DLGHORZ, &r0_99999, N_("Coupler Length") },
+#define I_CD_CANVAS             (B+11)
 	{ PD_DRAW, NULL, "canvas", PDO_NOPSHUPD|PDO_DLGWIDE|PDO_DLGNOLABELALIGN|PDO_DLGRESETMARGIN|PDO_DLGBOXEND|PDO_DLGRESIZE, &carDlgDrawData, NULL, 0 },
 
-#define C                       (B+11)
+#define C                       (B+12)
 #define I_CD_ITEMINDEX          (C+0)
 	{ PD_LONG, &carDlgItemIndex, "index", PDO_NOPREF|PDO_DLGWIDE, &i1_999999999, N_("Index"), 0 },
 #define I_CD_PURPRC             (C+1)
@@ -2276,6 +2528,7 @@ static void CarDlgLoadDimsFromProto( carProto_p protoP )
 	carDlgDim.carLength = protoP->dim.carLength/ratio;
 	carDlgDim.carWidth = protoP->dim.carWidth/ratio;
 	carDlgDim.truckCenter = protoP->dim.truckCenter/ratio;
+	carDlgDim.truckCenterOffset = protoP->dim.truckCenterOffset/ratio;
 	carDlgDim.coupledLength = carDlgDim.carLength + carDlgCouplerLength*2;
 	/*carDlgCouplerLength = (carDlgDim.coupledLength-carDlgDim.carLength)/2.0;*/
 	carDlgIsLoco = (protoP->options&CAR_DESC_IS_LOCO)?1:0;
@@ -2354,9 +2607,9 @@ static void CarDlgRedraw( void )
 	pos.y = orig.y+carDlgDim.carWidth/2.0;
 
 	if ( carDlgDim.truckCenter > 0.0 ) {
-		pos.x = orig.x+(carDlgDim.carLength-carDlgDim.truckCenter)/2.0;
+		pos.x = orig.x+(carDlgDim.carLength-carDlgDim.truckCenter)/2.0-carDlgDim.truckCenterOffset;
 		CarProtoDrawTruck( &carDlgD, trackGauge*curScaleRatio, ratio, pos, 0.0 );
-		pos.x = orig.x+(carDlgDim.carLength+carDlgDim.truckCenter)/2.0;
+		pos.x = orig.x+(carDlgDim.carLength+carDlgDim.truckCenter)/2.0-carDlgDim.truckCenterOffset;
 		CarProtoDrawTruck( &carDlgD, trackGauge*curScaleRatio, ratio, pos, 0.0 );
 	}
 	if ( carDlgDim.coupledLength > carDlgDim.carLength ) {
@@ -2756,6 +3009,7 @@ static BOOL_T CarDlgLoadLists(
 		protoTmp.dim.carLength = carDlgDim.carLength*ratio;
 		protoTmp.dim.coupledLength = carDlgDim.coupledLength*ratio;
 		protoTmp.dim.truckCenter = carDlgDim.truckCenter*ratio;
+		protoTmp.dim.truckCenterOffset = carDlgDim.truckCenterOffset*ratio;
 		CarProtoDlgCreateDummyOutline( &carProtoSegCnt, &carProtoSegPtr, (BOOL_T)carDlgIsLoco, protoTmp.dim.carLength, protoTmp.dim.carWidth, drawColorBlue );
 		protoTmp.segCnt = carProtoSegCnt;
 		protoTmp.segPtr = carProtoSegPtr;
@@ -2798,6 +3052,7 @@ static void CarDlgShowControls( void )
 	ParamControlShow( &carDlgPG, I_CD_CARLENGTH,			!( S_ITEM && carDlgDispMode==0 ) );
 	ParamControlShow( &carDlgPG, I_CD_CARWIDTH,				!( S_ITEM && carDlgDispMode==0 ) );
 	ParamControlShow( &carDlgPG, I_CD_TRKCENTER,			!( S_ITEM && carDlgDispMode==0 ) );
+	ParamControlShow( &carDlgPG, I_CD_TRKOFFSET,            !( S_ITEM && carDlgDispMode==0 ) );
 	ParamControlShow( &carDlgPG, I_CD_CANVAS,				!( S_ITEM && carDlgDispMode==0 ) );
 	ParamControlShow( &carDlgPG, I_CD_CPLRLEN,				S_PART || ( S_ITEM && carDlgDispMode==1 ) );
 	ParamControlShow( &carDlgPG, I_CD_CPLDLEN,				S_PART || ( S_ITEM && carDlgDispMode==1 ) );
@@ -2875,7 +3130,7 @@ static void CarDlgDoActions(
 	BOOL_T reload[sizeof carDlgPLs/sizeof carDlgPLs[0]];
 #define RELOAD_DIMS \
 		reload[I_CD_CARLENGTH] = reload[I_CD_CARWIDTH] = reload[I_CD_CPLDLEN] = \
-		reload[I_CD_TRKCENTER] = reload[I_CD_CPLRLEN] = TRUE
+		reload[I_CD_TRKCENTER] = reload[I_CD_TRKOFFSET] = reload[I_CD_CPLRLEN] = TRUE
 #define RELOAD_PARTDATA \
 		RELOAD_DIMS; \
 		reload[I_CD_PARTNO_STR] = reload[I_CD_DESC_STR] = \
@@ -2999,6 +3254,7 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 				carDlgDim.carWidth = 10*12/ratio;
 				carDlgDim.coupledLength = carDlgDim.carLength+carDlgCouplerLength*2;
 				carDlgDim.truckCenter = carDlgDim.carLength-59.0*2.0/ratio;
+
 				carDlgTypeInx = 0;
 				carDlgIsLoco = (typeListMap[0].value&1);
 			}
@@ -3012,6 +3268,7 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 			carDlgCouplerLength = 16.0;
 			carDlgDim.coupledLength = carDlgDim.carLength + 2 * carDlgCouplerLength;
 			carDlgDim.truckCenter *= ratio;
+			carDlgDim.truckCenterOffset *= ratio;
 			RELOAD_DIMS;
 			break;
 		case A_Redraw:
@@ -3158,6 +3415,7 @@ LOG( log_carDlgState, 2, ( "Action = %s\n", carDlgAction_s[*actions] ) )
 				carDlgDim.coupledLength = carDlgDim.carLength+16.0*2.0;
 				carDlgCouplerLength = (carDlgDim.coupledLength-carDlgDim.carLength)/2.0;
 				carDlgDim.truckCenter = carDlgDim.carLength-59.0*2.0;
+				carDlgDim.truckCenterOffset = 0;
 				carDlgIsLoco = (typeListMap[carDlgTypeInx].value&1);
 			} else {
 				strcpy( carDlgProtoStr , carDlgUpdateProtoPtr->desc );
@@ -3238,7 +3496,8 @@ static void CarDlgUpdate(
 	cmp_key_t cmp_key;
 	coOrd orig, size, size2;
 	carPartParent_p parentP;
-	static DIST_T carDlgTruckOffset;
+	static DIST_T carDlgTruckOffsetL;
+	static DIST_T carDlgTruckOffsetR;
 	static long carDlgClock;
 	static long carDlgCarLengthClock;
 	static long carDlgTruckCenterClock;
@@ -3252,10 +3511,15 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 	switch ( inx ) {
 
 	case -1:
-		if ( carDlgDim.truckCenter > 0 && carDlgDim.carLength > carDlgDim.truckCenter )
-			carDlgTruckOffset = carDlgDim.carLength - carDlgDim.truckCenter;
-		else
-			carDlgTruckOffset = 0;
+		if ( carDlgDim.truckCenter > 0 && carDlgDim.carLength > carDlgDim.truckCenter ) {
+			carDlgTruckOffsetL = (carDlgDim.carLength - carDlgDim.truckCenter)/2 - carDlgDim.truckCenterOffset;
+			carDlgTruckOffsetR = (carDlgDim.carLength - carDlgDim.truckCenter)/2 + carDlgDim.truckCenterOffset;
+		}
+		else {
+			carDlgTruckOffsetL = 0;
+			carDlgTruckOffsetR = 0;
+		}
+
 		carDlgCarLengthClock = carDlgCoupledLengthClock = carDlgTruckCenterClock = carDlgCouplerLengthClock = carDlgClock = 0;
 		redraw = TRUE;
 		break;
@@ -3448,16 +3712,36 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		redraw = TRUE;
 		break;
 
+	case I_CD_TRKOFFSET:
+		carDlgChanged++;
+		if ( carDlgDim.truckCenterOffset == 0 ) {
+			carDlgTruckOffsetL = carDlgDim.truckCenter/2;
+			carDlgTruckOffsetR = carDlgTruckOffsetL;
+		} else if (carDlgDim.carLength - carDlgDim.truckCenter > 2*fabs(carDlgDim.truckCenterOffset)) {
+			carDlgTruckOffsetL = carDlgDim.truckCenter/2 - carDlgDim.truckCenterOffset;
+			carDlgTruckOffsetR = carDlgDim.truckCenter/2 + carDlgDim.truckCenterOffset;
+		} else {
+			carDlgTruckOffsetL = 0;
+			carDlgTruckOffsetR = 0;
+		}
+		redraw = TRUE;
+		break;
+
 	case I_CD_TRKCENTER:
 		carDlgChanged++;
 		if ( carDlgDim.truckCenter == 0 ) {
-			carDlgTruckOffset = 0;
+			carDlgTruckOffsetL = 0;
+			carDlgTruckOffsetR = 0;
 		} else if ( carDlgDim.truckCenter < 100/ratio /*&& carDlgDim.carLength == 0.0*/ ) {
+			carDlgTruckOffsetL = 0;
+			carDlgTruckOffsetR = 0;
 			return;
-		} else if ( carDlgDim.carLength > carDlgDim.truckCenter ) {
-			carDlgTruckOffset = carDlgDim.carLength - carDlgDim.truckCenter;
+		} else if ( carDlgDim.carLength - carDlgDim.truckCenter > 2*fabs(carDlgDim.truckCenterOffset) ) {
+			carDlgTruckOffsetL = carDlgDim.truckCenter/2-carDlgDim.truckCenterOffset;
+			carDlgTruckOffsetR = carDlgDim.truckCenter/2+carDlgDim.truckCenterOffset;
 		} else {
-			carDlgTruckOffset = 0;
+			carDlgTruckOffsetL = 0;
+			carDlgTruckOffsetR = 0;
 		}
 		redraw = TRUE;
 		break;
@@ -3551,16 +3835,19 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		carDlgDim.coupledLength = carDlgDim.carLength + 32;
 		if ( carDlgDim.carLength > 120 ) {
 			carDlgDim.truckCenter = carDlgDim.carLength - 120;
-			carDlgTruckOffset = carDlgDim.carLength - carDlgDim.truckCenter;
+			carDlgTruckOffsetL = (carDlgDim.carLength - carDlgDim.truckCenter)/2;
+			carDlgTruckOffsetR = (carDlgDim.carLength - carDlgDim.truckCenter)/2;
 		} else {
 			carDlgDim.truckCenter = 0;
-			carDlgTruckOffset = 0;
+			carDlgTruckOffsetL = 0;
+			carDlgTruckOffsetR = 0;
 		}
 		carDlgFlipToggle = FALSE;
 		ParamLoadControl( &carDlgPG, I_CD_CARLENGTH );
 		ParamLoadControl( &carDlgPG, I_CD_CARWIDTH );
 		ParamLoadControl( &carDlgPG, I_CD_CPLRLEN );
 		ParamLoadControl( &carDlgPG, I_CD_TRKCENTER );
+		ParamLoadControl( &carDlgPG, I_CD_TRKOFFSET );
 		redraw = TRUE;
 		break;
 
@@ -3579,12 +3866,15 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 	}
 
 	if ( checkTruckCenter && carDlgDim.carLength > 0 ) {
-		if ( carDlgTruckOffset > 0 ) {
-			carDlgDim.truckCenter = carDlgDim.carLength - carDlgTruckOffset;
+		if ( carDlgTruckOffsetL > 0 || carDlgTruckOffsetR > 0 ) {
+			carDlgDim.truckCenter = carDlgTruckOffsetL + carDlgTruckOffsetR;
+			carDlgDim.truckCenterOffset = (carDlgTruckOffsetR - carDlgTruckOffsetL)/2;
 		} else {
 			carDlgDim.truckCenter = carDlgDim.carLength * 0.75;
+			carDlgDim.truckCenterOffset = 0;
 		}
 		ParamLoadControl( &carDlgPG, I_CD_TRKCENTER );
+		ParamLoadControl( &carDlgPG, I_CD_TRKOFFSET );
 	}
 
 	ok = FALSE;
@@ -3600,8 +3890,12 @@ LOG( log_carDlgState, 3, ( "CarDlgUpdate( %d )\n", inx ) )
 		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter the Car Width") );
 	else if ( carDlgDim.truckCenter <= 0 )
 		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter the Truck Centers") );
+	else if ( carDlgDim.truckCenterOffset < 0)
+		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Truck Center Offset must be greater than 0 or 0") );
 	else if ( carDlgDim.truckCenter >= carDlgDim.carLength )
 		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Truck Centers must be less than Car Length") );
+	else if ( 2*carDlgDim.truckCenterOffset > carDlgDim.carLength - carDlgDim.truckCenter)
+		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Truck Center Offset plus Truck Centers must be less than Car Length") );
 	else if ( (!S_PROTO) && ( carDlgDim.coupledLength <= 0 || carDlgCouplerLength <= 0 ) )
 		ParamLoadMessage( &carDlgPG, I_CD_MSG, _("Enter the Coupled Length or Coupler Length") );
 	else if ( S_PROTO && carDlgDim.coupledLength <= 0 )
@@ -3720,6 +4014,7 @@ LOG( log_carDlgState, 3, ( "CarDlgOk()\n" ) )
 	if ( carDlgDim.carLength <= 0.0 ||
 		 carDlgDim.carWidth <= 0.0 ||
 		 carDlgDim.truckCenter <= 0.0 ||
+		 carDlgDim.truckCenterOffset < 0.0 ||
 		 carDlgDim.coupledLength <= 0.0 ) {
 		NoticeMessage( MSG_CARDESC_VALUE_ZERO, _("Ok"), NULL );
 		return;
@@ -3951,7 +4246,6 @@ static void CarDlgLayout(
 	case I_CD_NEWPROTO:
 		*yy = wControlGetPosY(carDlgPLs[I_CD_NEW].control);
 		break;
-	case I_CD_CPLRMNT:
 	case I_CD_CPLRLEN:
 	case I_CD_CARWIDTH:
 		if ( col2pos == 0 )
@@ -3961,8 +4255,11 @@ static void CarDlgLayout(
 	case I_CD_DESC_STR:
 		*yy = wControlBelow(carDlgPLs[I_CD_PARTNO_STR].control) + 3;
 		break;
+	case I_CD_CPLRMNT:
+		*yy = wControlBelow(carDlgPLs[I_CD_TRKOFFSET].control) + 3;
+		break;
 	case I_CD_CPLDLEN:
-		*yy = wControlBelow(carDlgPLs[I_CD_TRKCENTER].control) + 3;
+		*yy = wControlBelow(carDlgPLs[I_CD_CPLRMNT].control) + 3;
 		break;
 	case I_CD_CANVAS:
 		*yy = wControlBelow(carDlgPLs[I_CD_CPLDLEN].control)+5;
@@ -3985,7 +4282,7 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 	int inx;
 
 	if ( carDlgPG.win == NULL ) {
-		ParamCreateDialog( &carDlgPG, MakeWindowTitle(_("New Car Part")), _("Add"), CarDlgOk, CarDlgClose, TRUE, CarDlgLayout, F_BLOCK|PD_F_ALT_CANCELLABEL, CarDlgUpdate );
+		ParamCreateDialog( &carDlgPG, MakeWindowTitle(_("New Car Part")), _("Add"), CarDlgOk, CarDlgClose, TRUE, CarDlgLayout, F_BLOCK|F_RESIZE|F_RECALLSIZE|PD_F_ALT_CANCELLABEL, CarDlgUpdate );
 
 		if ( carDlgDim.carWidth==0 )
 			carDlgDim.carWidth = 12.0*10.0/curScaleRatio;
@@ -4021,18 +4318,6 @@ static void DoCarPartDlg( carDlgAction_e *actions )
 
 	CarDlgDoStateActions( actions );
 
-	/*CarDlgShowControls();*/
-
-#ifdef LATER
-if ( logTable(log_carList).level >= 1 ) {
-	int inx;
-	carPart_p partP;
-	for ( inx=0; inx<carPart_da.cnt; inx++ ) {
-		partP = carPart(inx);
-		LogPrintf( "%d %s %d\n", inx, partP->title, partP->paramFileIndex );
-	}
-}
-#endif
 	wShow( carDlgPG.win );
 }
 
@@ -4147,13 +4432,9 @@ static void CarInvDlgFind( void * junk )
 	if ( item == NULL || item->car == NULL || IsTrackDeleted(item->car) ) return;
 	CarGetPos( item->car, &pos, &angle );
 	CarSetVisible( item->car );
-	//DrawMapBoundingBox( FALSE );
-	mainCenter = pos;
 	mainD.orig.x = pos.x-mainD.size.x/2;;
 	mainD.orig.y = pos.y-mainD.size.y/2;;
-	MainRedraw();
-	MapRedraw();
-	//DrawMapBoundingBox( TRUE );
+	MainLayout( TRUE, TRUE );	// CarInvDlgFind
 }
 
 
@@ -4357,7 +4638,7 @@ static void CarInvDlgSaveText( void )
 {
 	if ( carInvSaveText_fs == NULL )
 		carInvSaveText_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("List Cars"),
-				"Text|*.txt", CarInvSaveText, NULL );
+				"Text (*.txt)|*.txt", CarInvSaveText, NULL );
 	wFilSelect( carInvSaveText_fs, GetCurrentPath(CARSPATHKEY));
 }
 
@@ -4365,7 +4646,7 @@ static void CarInvDlgSaveText( void )
 static char *carCsvColumnTitles[] = {
 		"Index", "Scale", "Manufacturer", "Type", "Partno", "Prototype",
 		"Description", "Roadname", "Repmark", "Number", "Options", "CarLength",
-		"CarWidth", "CoupledLength", "TruckCenter", "Color", "PurchPrice",
+		"CarWidth", "CoupledLength", "TruckOffset", "TruckCenter", "Color", "PurchPrice",
 		"CurrPrice", "Condition", "PurchDate", "ServiceDate", "Notes" };
 #define M_INDEX			(0)
 #define M_SCALE			(1)
@@ -4381,14 +4662,16 @@ static char *carCsvColumnTitles[] = {
 #define M_CARLENGTH		(11)
 #define M_CARWIDTH		(12)
 #define M_CPLDLENGTH	(13)
-#define M_TRKCENTER		(14)
-#define M_COLOR			(15)
-#define M_PURCHPRICE	(16)
-#define M_CURRPRICE		(17)
-#define M_CONDITION		(18)
-#define M_PURCHDATE		(19)
-#define M_SRVDATE		(20)
-#define M_NOTES			(21)
+#define M_TRKOFFSET     (14)
+#define M_TRKCENTER		(15)
+#define M_COLOR			(16)
+#define M_PURCHPRICE	(17)
+#define M_CURRPRICE		(18)
+#define M_CONDITION		(19)
+#define M_PURCHDATE		(20)
+#define M_SRVDATE		(21)
+#define M_NOTES			(22)
+
 
 
 static int ParseCsvLine(
@@ -4564,6 +4847,7 @@ static int CarInvImportCsv(
 		dim.carWidth = TabGetFloat( &tabs[M_CARWIDTH] );
 		dim.coupledLength = TabGetFloat( &tabs[M_CPLDLENGTH] );
 		dim.truckCenter = TabGetFloat( &tabs[M_TRKCENTER] );
+		dim.truckCenterOffset = TabGetFloat( &tabs[M_TRKOFFSET] );
 		partP = NULL;
 		if ( tabs[M_MANUF].len > 0 && tabs[M_PARTNO].len > 0 )
 			partP = CarPartFind( tabs[M_MANUF].ptr, tabs[M_MANUF].len, tabs[M_PARTNO].ptr, tabs[M_PARTNO].len, scale );
@@ -4578,6 +4862,7 @@ static int CarInvImportCsv(
 			if ( dim.carWidth <= 0 ) dim.carWidth = partP->dim.carWidth;
 			if ( dim.coupledLength <= 0 ) dim.coupledLength = partP->dim.coupledLength;
 			if ( dim.truckCenter <= 0 ) dim.truckCenter = partP->dim.truckCenter;
+			if ( dim.truckCenterOffset < 0 ) dim.truckCenterOffset = partP->dim.truckCenterOffset;
 		}
 		cp = TabStringCpy( title, &tabs[M_MANUF] );
 		*cp++ = '\t';
@@ -4642,7 +4927,7 @@ static void CarInvDlgImportCsv( void )
 {
 	if ( carInvImportCsv_fs == NULL )
 		carInvImportCsv_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Import Cars"),
-				_("Comma-Separated-Values|*.csv"), CarInvImportCsv, NULL );
+				_("Comma-Separated-Values (*.csv)|*.csv"), CarInvImportCsv, NULL );
 	wFilSelect( carInvImportCsv_fs, GetCurrentPath(CARSPATHKEY));
 }
 
@@ -4738,6 +5023,7 @@ static int CarInvExportCsv(
 		CsvFormatLong( f, item->options, "," );
 		CsvFormatFloat( f, item->dim.carLength, 3, "," );
 		CsvFormatFloat( f, item->dim.carWidth, 3, "," );
+		CsvFormatFloat( f, item->dim.truckCenterOffset, 3, ",");
 		CsvFormatFloat( f, item->dim.coupledLength, 3, "," );
 		CsvFormatFloat( f, item->dim.truckCenter, 3, "," );
 		CsvFormatLong( f, wDrawGetRGB(item->color), "," );
@@ -4764,7 +5050,7 @@ static void CarInvDlgExportCsv( void )
 		return;
 	if ( carInvExportCsv_fs == NULL )
 		carInvExportCsv_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Export Cars"),
-				_("Comma-Separated-Values|*.csv"), CarInvExportCsv, NULL );
+				_("Comma-Separated-Values (*.csv)|*.csv"), CarInvExportCsv, NULL );
 	wFilSelect( carInvExportCsv_fs, GetCurrentPath(CARSPATHKEY));
 }
 
@@ -5042,7 +5328,7 @@ EXPORT void InitCarDlg( void )
 	ParamRegister( &carInvPG );
 	RegisterChangeNotification( CarDlgChange );
 	AddParam( "CARPROTO ", CarProtoRead );
-	AddParam( "CARPART ", CarPartRead );
+	AddParam( "CARPART ", CarPartRead);
 	ParamRegister( &newCarPG );
 	ParamCreateControls( &newCarPG, CarItemHotbarUpdate );
 	newCarControls[0] = newCarPLs[0].control;

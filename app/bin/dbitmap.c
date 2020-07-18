@@ -211,11 +211,11 @@ static void OutputBitMapOk( void * junk )
 	wHide( outputBitMapW );
 	if (bitmap_fs == NULL)
 		bitmap_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Bitmap"),
-#ifdef WINDOWS
-				_("Bitmap files|*.bmp"),
-#else
-				_("Bitmap files|*.xpm"),
-#endif
+//#ifdef WINDOWS
+//				_("Bitmap files (*.bmp)|*.bmp"),
+//#else
+				_("Bitmap files (*.png)|*.png"),
+//#endif
 				SaveBitmapFile, NULL );
 	wFilSelect( bitmap_fs, GetCurrentPath( BITMAPPATHKEY ));
 }

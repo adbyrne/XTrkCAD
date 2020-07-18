@@ -1,4 +1,4 @@
-CONTENTS Märklin Z-Scale Turnouts
+CONTENTS Märklin Z Scale Turnouts
 # From 'Märklin	Complete Program 1994/95 E'
 ##########################################################################
 ##########################################################################
@@ -50,7 +50,7 @@ TURNOUT Z  "Märklin	Curved 145mm 45°	8510"
 	E 4.036633 -1.672028 135.000000
 	C 0 0 5.709000 0.000000 -5.709000 0.000000 45.000000
 	END
-TURNOUT Z  "Märklin	Curved 195mm 45°	8520"	
+TURNOUT Z  "Märklin	Curved 195mm 45°	8520"
 	P "Normal" 1
 	E 0.000000 0.000000 270.000000
 	E 5.428576 -2.248590 135.000000

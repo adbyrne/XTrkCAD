@@ -15,6 +15,7 @@ END
 STEP
 COMMAND CurveEndPt
 MOUSE 2 6.500 1.625
+MOUSE 3 31.250 2.750
 MOUSE 4 31.250 2.750
 MESSAGE
 _________________________________________
@@ -25,9 +26,16 @@ Click and drag on one of the Red arrows to complete the Curve.
 END
 STEP
 MOUSE 2 31.125 2.500
+MOUSE 3 20.375 17.875
 MOUSE 4 20.375 17.875
 RESET
 RESET
+REGRESSION START 10 - curve track end point
+CURVE 1 0 0 0 0 DEMO 2 5.835913 16.234915 0 14.625000 0 0.000000 0.000000
+	E4 20.369399 17.868440 353.587021 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 6.500000 1.625000 267.397438 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END
+REGRESSION END
 MESSAGE
 _________________________________________
 
@@ -37,6 +45,7 @@ STEP
 PARAMETER misc cmdUndo
 COMMAND CurveTangent
 MOUSE 2 8.250 2.250
+MOUSE 3 31.875 2.500
 MOUSE 4 31.875 2.500
 MESSAGE
 _________________________________________
@@ -47,6 +56,7 @@ As before, drag on one of the Red arrows to complete the Curve.
 END
 STEP
 MOUSE 2 8.875 2.500
+MOUSE 3 17.375 19.125
 MOUSE 4 17.375 19.125
 RESET
 RESET
@@ -55,10 +65,17 @@ _________________________________________
 
 The next method is similar to the last except that you drag first from the center of the Curve to one End-Point.
 END
+REGRESSION START 10 - curve track tangent
+CURVE 2 0 0 0 0 DEMO 2 31.875000 2.500000 0 23.626323 0 0.000000 0.000000
+	E4 8.250000 2.250000 179.393718 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 16.345411 20.305477 48.905699 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END
+REGRESSION END
 STEP
 PARAMETER misc cmdUndo
 COMMAND CurveCenter
 MOUSE 2 27.375 4.250
+MOUSE 3 5.000 4.250
 MOUSE 4 5.000 4.250
 MESSAGE
 _________________________________________
@@ -67,6 +84,7 @@ Once again, drag on a Red arrow to complete the Curve.
 END
 STEP
 MOUSE 2 5.000 4.375
+MOUSE 3 15.625 18.875
 MOUSE 4 15.625 18.875
 RESET
 MESSAGE
@@ -75,10 +93,17 @@ _________________________________________
 The last method begins by drawing a line between the two End-Points of the Curve.  This forms the Chord of the Curve.
 END
 STEP
+REGRESSION START 10 - curve track center
+CURVE 3 0 0 0 0 DEMO 2 27.375000 4.250000 0 22.375000 0 0.000000 0.000000
+	E4 5.000000 4.250000 180.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 13.361117 21.692812 51.220950 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END
+REGRESSION END
 RESET
 PARAMETER misc cmdUndo
 COMMAND CurveChord
 MOUSE 2 5.625 1.500
+MOUSE 3 37.125 1.500
 MOUSE 4 37.125 1.500
 MESSAGE
 _________________________________________
@@ -87,10 +112,17 @@ Now drag on a Red arrow to complete the Curve.
 END
 STEP
 MOUSE 2 21.250 2.125
+MOUSE 3 20.750 16.750
 MOUSE 4 20.750 16.750
 RESET
 MESSAGE
 =========================================
 END
 STEP
+REGRESSION START 10 - curve track - chord
+CURVE 4 0 0 0 0 DEMO 2 21.375000 0.991803 0 15.758197 0 0.000000 0.000000
+	E4 5.625000 1.500000 181.848091 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 37.125000 1.500000 178.151909 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END
+REGRESSION END
 CLEAR

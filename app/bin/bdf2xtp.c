@@ -9,6 +9,7 @@
 #include <math.h>
 #ifndef _MSDOS
 #include <unistd.h>
+#include "fileio.h"
 #else
 #define M_PI 3.14159265358979323846
 #define strncasecmp strnicmp
@@ -563,7 +564,7 @@ void generateTurnout( void )
 			fprintf( fout, "\tC 0 0 %0.6f %0.6f %0.6f %0.6f %0.6f\n",
 						X(sp->radius), X(center.x), X(center.y), X(a0), X(a1) );
 		}
-	fprintf( fout, "\tEND\n" );
+	fprintf( fout, "\t%s\n", END_SEGS );
 }
 
 
@@ -875,7 +876,7 @@ void process( tokenDesc_t * tp, arg_t *args )
 				break;
 			}
 		}
-		fprintf( fout, "\tEND\n" );
+		fprintf( fout, "\t%s\n", END_SEGS );
 		break;
 
 	case ACT_TRANSFERTABLE:
@@ -928,7 +929,7 @@ void process( tokenDesc_t * tp, arg_t *args )
 			}
 			offset += length2;
 		}
-		fprintf( fout, "\tEND\n");
+		fprintf( fout, "\t%s\n", END_SEGS);
 		break;
 
 	case ACT_ENDTRANSFERTABLE:
@@ -956,7 +957,7 @@ void process( tokenDesc_t * tp, arg_t *args )
 				break;
 			}
 		}
-		fprintf( fout, "\tEND\n" );
+		fprintf( fout, "\t%s\n", END_SEGS );
 		break;
 
 	case ACT_FILL_POINT:

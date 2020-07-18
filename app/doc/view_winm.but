@@ -30,6 +30,10 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 
 \u000
 
+\dd \f{Magnetic Snap On/Off} - Toggles Magnets for Add Operations on and off.  The magnets make tracks auto-align and shapes touch when the cursor or object is close.  They can be defeated on each operation by holding down \e{Alt}.  If the Magnets are off, holding down \e{Alt} will enable them.
+
+\u000
+
 \dd \G{png.d/bmap.png} \f{ Show/Hide Map} - Toggles display of the \f{Map Window} on and off.
 
 \u000
@@ -115,23 +119,36 @@ The \f{Zoom In} and \f{Zoom Out} actions can also be accessed using buttons on t
 
 Holding down the Shift key while clicking the \f{Zoom In} or \f{Zoom Out} buttons sets the Drawing Scale to a \e{Programmed Zoom} value.
 
-\dd \e{\i{Programmed Zoom}}
+\dd \e{\i{Zoom/Pan Shortcut Keys}} 
 
 \lcont{
 
 \u000
 
-\b The \e{Programmed Zoom} value for the \f{Zoom In} button is set to the current Drawing Scale by holding down the Shift and Ctrl keys while clicking on the \f{Zoom In} button.
+\b Keys '1'-'9' set the zoom to between 1::1 and 1::9. 
 
 \u000
 
-\b The \e{Programmed Zoom} value for the \f{Zoom Out} button is set to the current Drawing Scale by holding down the Shift and Ctrl keys while clicking on the \f{Zoom Out} button.
+\b Key 'e' sets the zoom to a value that allows all the room to be shown
+
+\u000
+
+\b Key '0' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
+
+\u000
+
+\b Key '@' moves the center of the window to the cursor position
 
 }
 
 Normally a zoom in more of more than 1:1 is not possible, however if the Ctrl key is held down while the \f{Zoom In} button is pressed a zoom less that 1:1 can be achieved. This function is useful when working on detail.
 
 Pressing the middle Zoom button on the Tool Bar pop-ups a list of Zoom factors that can be select from.
+
+\u000
+
+\dd The Pan function can be accessed using the Mouse Wheel with \e{Shift} of the \e{Mouse Middle Button}. Adding \e{Ctrl} as well as \e{Shift} chnages Up to Left and Down to Right. 
+Pan Left and Right can also be driven by the Horizontal Mouse Wheel (if available) or the Scroll Left/Right Guestures (if mapped by the Operating System).
 
 \rule
 

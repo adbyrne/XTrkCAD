@@ -1,8 +1,26 @@
-/*
- * $Header: /home/dmarkle/xtrkcad-fork-cvs/xtrkcad/app/wlib/mswlib/mswdraw.c,v 1.6 2009-05-15 18:16:16 m_fischer Exp $
+/** \file mswdraw.c
+ * Draw basic geometric shapes
  */
 
-#define _WIN32_WINNT 0x0500		/* for wheel mouse supposrt */
+/*  XTrackCAD - Model Railroad CAD
+ *  Copyright (C) 2005 Dave Bullis
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */	
+
+#define _WIN32_WINNT 0x0600		/* for wheel mouse supposrt */
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
@@ -16,8 +34,12 @@
 #else
 #define wFont_t tagLOGFONT
 #endif
-#include "mswint.h"
 
+#include "misc.h"
+#include "mswint.h"
+#include <FreeImage.h>
+
+wBool_t wDrawDoTempDraw = TRUE;
 /*
  *****************************************************************************
  *
@@ -38,6 +60,8 @@ static long setOp = 0x8800c6;
 static long clrOp = 0xbb0226;
 
 #define CENTERMARK_LENGTH 6
+
+bool bDrawMainBM = 0;
 
 #ifdef SLOW
 static wPos_t XPIX2INCH( wDraw_p d, int ix )
@@ -119,6 +143,31 @@ void wDrawDelayUpdate(
 {
 }
 
+wBool_t wDrawSetTempMode(
+	wDraw_p bd,
+	wBool_t bTemp )
+{
+	wBool_t rc = bd->bTempMode;
+	bd->bTempMode = bTemp;
+	if (rc == FALSE && bTemp == TRUE) {
+		// Main to Temp drawing
+		// Copy mainBM to tempBM
+		wDrawClearTemp( bd );
+		if (bDrawMainBM) return rc;
+		HDC hDcOld = CreateCompatibleDC(bd->hDc);
+		HBITMAP hBmOld = SelectObject(hDcOld, bd->hBmMain);
+		SelectObject(bd->hDc, bd->hBmTemp);
+		BitBlt(bd->hDc, 0, 0,
+			bd->w, bd->h,
+			hDcOld, 0, 0,
+			SRCCOPY);
+		SelectObject(hDcOld, hBmOld);
+		DeleteDC(hDcOld);
+		bd->bCopiedMain = TRUE;
+	}
+	return rc;
+}
+
 /**
  * Sets the proper pen and composition for the next drawing operation
  * 
@@ -130,68 +179,83 @@ void wDrawDelayUpdate(
  * \param dc IN color
  * \param dopt IN ????
  */
-
 static void setDrawMode(
-		HDC hDc,
 		wDraw_p d,
 		wDrawWidth dw,
 		wDrawLineType_e lt,
 		wDrawColor dc,
 		wDrawOpts dopt )
 {
-	int mode;
+	long centerPen[] = {40,10,20,10};
+	long phantomPen[] = {40,10,20,10,20,10};
+
 	HPEN hOldPen;
 	static wDraw_p d0;
 	static wDrawWidth dw0 = -1;
 	static wDrawLineType_e lt0 = (wDrawLineType_e)-1;
 	static wDrawColor dc0 = -1;
-	static int mode0 = -1;
 	static LOGBRUSH logBrush = { 0, 0, 0 };
 	DWORD penStyle;
+
+	if ( wDrawDoTempDraw && (dopt & wDrawOptTemp) )
+		SelectObject(d->hDc, d->hBmTemp);
+	else
+		SelectObject(d->hDc, d->hBmMain);
 
 	if ( d->hasPalette ) {
 		int winPaletteClock = mswGetPaletteClock();
 		if ( d->paletteClock < winPaletteClock ) {
-			RealizePalette( hDc );
+			RealizePalette( d->hDc );
 			d->paletteClock = winPaletteClock;
 		}
 	}
 
-	if (dopt & wDrawOptTemp) {
-		mode = R2_NOTXORPEN;
-	} else {
-		mode = R2_COPYPEN;
-	}
-	SetROP2( hDc, mode );
-	if ( d == d0 && mode == mode0 && dw0 == dw && lt == lt0 && dc == dc0 )
+	SetROP2( d->hDc, R2_COPYPEN );
+	if ( d == d0 && dw0 == dw && lt == lt0 && dc == dc0 )
 		return;
 
 	// make sure that the line width is at least 1!
 	if( !dw ) 
 		dw++;
 
-	d0 = d; mode0 = mode; dw0 = dw; lt0 = lt; dc0 = dc;
+	d0 = d; dw0 = dw; lt0 = lt; dc0 = dc;
+
+	void * penarray = NULL;
+	int penarray_size = 0;
 
 	logBrush.lbColor = mswGetColor(d->hasPalette,dc);
 	if ( lt==wDrawLineSolid ) {
 		penStyle = PS_GEOMETRIC | PS_SOLID;
 		if ( noFlatEndCaps == FALSE )
 			penStyle |= PS_ENDCAP_FLAT;
-		d->hPen = ExtCreatePen( penStyle,
-				dw,
-				&logBrush,
-				0,
-				NULL );
-				/*colorPalette.palPalEntry[dc] );*/
-	} else {
-		d->hPen = CreatePen( PS_DOT, 0, mswGetColor( d->hasPalette, dc ) );
-	}
-	hOldPen = SelectObject( hDc, d->hPen );
+	} else if (lt == wDrawLineDot) {
+		penStyle = PS_GEOMETRIC | PS_DOT;
+	} else if (lt == wDrawLineDash) {
+		penStyle = PS_GEOMETRIC | PS_DASH;
+	} else if (lt == wDrawLineDashDot) {
+		penStyle = PS_GEOMETRIC | PS_DASHDOT;
+	} else if ( lt == wDrawLineDashDotDot){
+		penStyle = PS_GEOMETRIC | PS_DASHDOTDOT;
+	} else if (  lt == wDrawLineCenter) {
+		penStyle = PS_GEOMETRIC | PS_USERSTYLE;
+		penarray = &centerPen;
+		penarray_size = sizeof(centerPen)/sizeof(long);
+	} else if (  lt == wDrawLinePhantom) {
+		penStyle = PS_GEOMETRIC | PS_USERSTYLE;
+		penarray = &phantomPen;
+		penarray_size = sizeof(phantomPen) / sizeof(long);
+	} else
+		penStyle = PS_GEOMETRIC | PS_SOLID;
+	d->hPen = ExtCreatePen( penStyle,
+					dw,
+					&logBrush,
+					penarray_size,
+					penarray );
+	hOldPen = SelectObject( d->hDc, d->hPen );
 	DeleteObject( hOldPen );
 }
 
 static void setDrawBrush(
-		HDC hDc,
 		wDraw_p d,
 		wDrawColor dc,
 		wDrawOpts dopt )
@@ -200,7 +264,7 @@ static void setDrawBrush(
 	static wDraw_p d0;
 	static wDrawColor dc0 = -1;
 
-	setDrawMode( hDc, d, 0, wDrawLineSolid, dc, dopt );
+	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 	if ( d == d0 && dc == dc0 )
 		return;
 
@@ -208,7 +272,7 @@ static void setDrawBrush(
 
 	d->hBrush = CreateSolidBrush( 
 				mswGetColor(d->hasPalette,dc) );
-	hOldBrush = SelectObject( hDc, d->hBrush );
+	hOldBrush = SelectObject( d->hDc, d->hBrush );
 	DeleteObject( hOldBrush );
 }
 
@@ -270,7 +334,7 @@ void wDrawLine(
 {
 	POINT p0, p1;
 	RECT rect;
-	setDrawMode( d->hDc, d, dw, lt, dc, dopt );
+	setDrawMode( d, dw, lt, dc, dopt );
 	p0.x = XINCH2PIX(d,p0x);
 	p0.y = YINCH2PIX(d,p0y);
 	p1.x = XINCH2PIX(d,p1x);
@@ -381,7 +445,7 @@ void wDrawArc(
 	pe.x = XINCH2PIX(d,(wPos_t)pex);
 	pe.y = YINCH2PIX(d,(wPos_t)pey);
 
-	setDrawMode( d->hDc, d, dw, lt, dc, dopt );
+	setDrawMode( d, dw, lt, dc, dopt );
 
 	if (dw == 0)
 		dw = 1;
@@ -495,7 +559,7 @@ void wDrawPoint(
 		return;
 	if ( p0.x >= d->w || p0.y >= d->h )
 		return;
-	setDrawMode( d->hDc, d, 0, wDrawLineSolid, dc, dopt );
+	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 
 	SetPixel( d->hDc, p0.x, p0.y, mswGetColor(d->hasPalette,dc) /*colorPalette.palPalEntry[dc]*/ );
 	if (d->hWnd) {
@@ -689,6 +753,7 @@ void wDrawGetTextSize(
 		wPos_t *w,
 		wPos_t *h,
 		wPos_t *d,
+		wPos_t *a,
 		wDraw_p bd,
 		const char * text,
 		wFont_p fp,
@@ -717,12 +782,25 @@ void wDrawGetTextSize(
 	*w = XPIXELSTOINCH( bd, x );
 	*h = YPIXELSTOINCH( bd, y );
 	*d = YPIXELSTOINCH(bd, textMetric.tmDescent );
+	*a = YPIXELSTOINCH(bd, textMetric.tmAscent );
 
 	SelectObject( bd->hDc, prevFont );
 	DeleteObject( newFont );
 	fp->lfHeight = oldLfHeight;
 }
-
+/**
+ * Draw text
+ * 
+ * \param d	device context
+ * \param px position x
+ * \param py position y
+ * \param angle drawing angle
+ * \param text text to print
+ * \param fp font
+ * \param siz font size
+ * \param dc color
+ * \param dopts drawing options
+ */
 void wDrawString(
     wDraw_p d,
     wPos_t px,
@@ -736,8 +814,6 @@ void wDrawString(
 {
     int x, y;
     HFONT newFont, prevFont;
-    HDC newDc;
-    HBITMAP oldBm, newBm;
     DWORD extent;
     int w, h;
     RECT rect;
@@ -756,61 +832,47 @@ void wDrawString(
     y = YINCH2PIX(d,py) + (int)(mswcos(angle)*fp->lfHeight-0.5);
 
     if (noNegDrawArgs > 0 && (x < 0 || y < 0)) {
+		DeleteObject(newFont);
         return;
     }
 
-    if (dopts & wDrawOptTemp) {
-        setDrawMode(d->hDc, d, 0, wDrawLineSolid, dc, dopts);
-        newDc = CreateCompatibleDC(d->hDc);
-        prevFont = SelectObject(newDc, newFont);
-        extent = GetTextExtent(newDc, CAST_AWAY_CONST text, strlen(text));
-        w = LOWORD(extent);
-        h = HIWORD(extent);
-
-        if (h > w) {
-            w = h;
-        }
-
-        newBm = CreateCompatibleBitmap(d->hDc, w*2, w*2);
-        oldBm = SelectObject(newDc, newBm);
-        rect.top = rect.left = 0;
-        rect.bottom = rect.right = w*2;
-        FillRect(newDc, &rect, GetStockObject(WHITE_BRUSH));
-        TextOut(newDc, w, w, text, strlen(text));
-        BitBlt(d->hDc, x-w, y-w, w*2, w*2, newDc, 0, 0, tmpOp);
-        SelectObject(newDc, oldBm);
-        DeleteObject(newBm);
-        SelectObject(newDc, prevFont);
-        DeleteDC(newDc);
-
-        if (d->hWnd) {
-            rect.top = y-(w+1);
-            rect.bottom = y+(w+1);
-            rect.left = x-(w+1);
-            rect.right = x+(w+1);
-            myInvalidateRect(d, &rect);
-        }
-    } else {
-        COLORREF old;
-        prevFont = SelectObject(d->hDc, newFont);
+		setDrawMode( d, 0, wDrawLineSolid, dc, dopts );
+		prevFont = SelectObject(d->hDc, newFont);
         SetBkMode(d->hDc, TRANSPARENT);
-        old = SetTextColor(d->hDc, mswGetColor(d->hasPalette,
-                                               dc));
-        TextOut(d->hDc, x, y, text, strlen(text));
-        SetTextColor(d->hDc, old);
+
+        if (dopts & wDrawOutlineFont) {
+            HPEN oldPen;
+            BeginPath(d->hDc);
+            TextOut(d->hDc, x, y, text, strlen(text));
+            EndPath(d->hDc);
+
+            // Now draw outline text
+            oldPen = SelectObject(d->hDc,
+                                  CreatePen(PS_SOLID, 1,
+                                            mswGetColor(d->hasPalette, dc)));
+            StrokePath(d->hDc);
+            SelectObject(d->hDc, oldPen);
+        } else {
+            COLORREF old;
+
+            old = SetTextColor(d->hDc, mswGetColor(d->hasPalette,
+                                                   dc));
+            TextOut(d->hDc, x, y, text, strlen(text));
+            SetTextColor(d->hDc, old);
+        }
+
         extent = GetTextExtent(d->hDc, CAST_AWAY_CONST text, strlen(text));
         SelectObject(d->hDc, prevFont);
         w = LOWORD(extent);
         h = HIWORD(extent);
 
         if (d->hWnd) {
-            rect.top = y-(w+h+1);
-            rect.bottom = y+(w+h+1);
-            rect.left = x-(w+h+1);
-            rect.right = x+(w+h+1);
+            rect.top = y - (w + h + 1);
+            rect.bottom = y + (w + h + 1);
+            rect.left = x - (w + h + 1);
+            rect.right = x + (w + h + 1);
             myInvalidateRect(d, &rect);
         }
-    }
 
     DeleteObject(newFont);
     fp->lfHeight = oldLfHeight;
@@ -870,10 +932,18 @@ void wDrawFilledRectangle(
 		wDrawColor color,
 		wDrawOpts opts )
 {
+	int mode;
 	RECT rect;
 	if (d == NULL)
 		return;
-	setDrawBrush( d->hDc, d, color, opts );
+	setDrawBrush( d, color, opts );
+	if (opts & wDrawOptTransparent) {
+		mode = R2_NOTXORPEN;
+	}
+	else {
+		mode = R2_COPYPEN;
+	}
+	SetROP2(d->hDc, mode);
 	rect.left = XINCH2PIX(d,px);
 	rect.right = XINCH2PIX(d,px+sx);
 	rect.top = YINCH2PIX(d,py+sy);
@@ -903,103 +973,230 @@ void wDrawFilledRectangle(
 }
 
 #ifdef DRAWFILLPOLYLOG
-static FILE * logF;
+    static FILE * logF;
 #endif
-static int wFillPointsMax = 0;
-static POINT * wFillPoints;
+
+static dynArr_t wFillPoints_da;
+static dynArr_t wFillType_da;
+
+#define POINTTYPE(N) DYNARR_N( BYTE, wFillType_da, (N) )
+#define POINTPOS(N) DYNARR_N( POINT, wFillPoints_da, (N) )
+
+/**
+ * Add a point definition to the list. The clipping rectangle is recalculated to
+ * include the new point.
+ *
+ * \param d IN drawing context
+ * \param pk IN index of new point
+ * \param pp IN pointer to the point's coordinates
+ * \param type IN line type
+ * \param pr IN/OUT clipping rectangle
+ */
 
 static void addPoint(
-		int * pk,
-		POINT * pp,
-		RECT * pr )
+    wDraw_p d,
+    int pk,
+    coOrd * pp,
+    BYTE type, RECT * pr)
 {
+    POINT p;
+    p.x = XINCH2PIX(d, pp->x);
+    p.y = YINCH2PIX(d, pp->y);
+
 #ifdef DRAWFILLPOLYLOG
-fprintf( logF, "	q[%d] = {%d,%d}\n", *pk, pp->x, pp->y );
+    fprintf(logF, "	q[%d] = {%d,%d}\n", pk, p.x, p.y);
 #endif
-	if ( *pk > 0 &&
-		 wFillPoints[(*pk)-1].x == pp->x && wFillPoints[(*pk)-1].y == pp->y )
-		return;
-	wFillPoints[ (*pk)++ ] = *pp;
-	if (pp->x<pr->left)
-		pr->left = pp->x;
-	if (pp->x>pr->right)
-		pr->right = pp->x;
-	if (pp->y<pr->top)
-		pr->top = pp->y;
-	if (pp->y>pr->bottom)
-		pr->bottom = pp->y;
+
+    DYNARR_N(POINT, wFillPoints_da, pk) = p;
+    DYNARR_N(BYTE, wFillType_da, pk) = type;
+
+    if (p.x < pr->left) {
+        pr->left = p.x;
+    }
+    if (p.x > pr->right) {
+        pr->right = p.x;
+    }
+    if (p.y < pr->top) {
+        pr->top = p.y;
+    }
+    if (p.y > pr->bottom) {
+        pr->bottom = p.y;
+    }
 }
 
-void wDrawFilledPolygon(
-		wDraw_p d,
-		wPos_t p[][2],
-		int cnt,
-		wDrawColor color,
-		wDrawOpts opts )
-{				 
-	RECT rect;
-	int i, k;
-	POINT p0, p1, q0, q1;
-	static POINT zero = { 0, 0 };
-	wBool_t p1Clipped;
+/**
+ * Draw a polyline consisting of straights with smoothed or rounded corners.
+ * Optionally the area can be filled.
+ *
+ * \param d	IN	drawing context
+ * \param node IN 2 dimensional array of coordinates
+ * \param type IN type of corener (vertex, smooth or round)
+ * \param cnt IN number of points
+ * \param color IN color
+ * \param dw IN line width
+ * \param lt IN line type
+ * \param opts IN drawing options
+ * \param fill IN area will be filled if true
+ * \param open IN do not close area
+ */
 
-	if (d == NULL)
-		return;
-	if (cnt*2 > wFillPointsMax) {
-		wFillPoints = realloc( wFillPoints, cnt * 2 * sizeof *(POINT*)NULL );
-		if (wFillPoints == NULL) {
-			fputs("can't realloc wFillPoints\n", stderr);
-			abort();
+void wDrawPolygon(
+    wDraw_p d,
+    wPos_t node[][2],
+    wPolyLine_e type[],
+    wIndex_t cnt,
+    wDrawColor color,
+    wDrawWidth dw,
+    wDrawLineType_e lt,
+    wDrawOpts opts,
+    int fill,
+    int open)
+{
+    RECT rect;
+    int i, prevNode, nextNode;
+    int pointCount = 0;
+    coOrd endPoint0, endPoint1, controlPoint0, controlPoint1;
+    coOrd point, startingPoint;
+    BOOL rc;
+    int closed = 0;
+
+    if (d == NULL) {
+        return;
+    }
+
+    // make sure the array for the points is large enough
+    // worst case are rounded corners that require 4 points
+    DYNARR_RESET(POINT,wFillPoints_da);
+    DYNARR_SET(POINT,wFillPoints_da,(cnt + 1) * 4);
+    DYNARR_RESET(BYTE,wFillType_da);
+    DYNARR_SET(POINT,wFillType_da, (cnt + 1) * 4);
+
+    BeginPath(d->hDc);
+
+    if (fill) {
+		int mode;
+        setDrawBrush(d, color, opts);
+		if (opts & wDrawOptTransparent) {
+			mode = R2_NOTXORPEN;
 		}
-		wFillPointsMax = cnt*2;
-	}
-	setDrawBrush( d->hDc, d, color, opts );
-	p1.x = rect.left = rect.right = XINCH2PIX(d,p[cnt-1][0]-1);
-	p1.y = rect.top = rect.bottom = YINCH2PIX(d,p[cnt-1][1]+1);
-#ifdef DRAWFILLPOLYLOG
-logF = fopen( "log.txt", "a" );
-fprintf( logF, "\np[%d] = {%d,%d}\n", cnt-1, p1.x, p1.y );
-#endif
-	p1Clipped = FALSE;
-	for ( i=k=0; i<cnt; i++ ) {
-		p0 = p1;
-		p1.x = XINCH2PIX(d,p[i][0]-1);
-		p1.y = YINCH2PIX(d,p[i][1]+1);
-#ifdef DRAWFILLPOLYLOG
-fprintf( logF, "p[%d] = {%d,%d}\n", i, p1.x, p1.y );
-#endif
-		q0 = p0;
-		q1 = p1;
-		if ( clip0( &q0, &q1, NULL ) ) {
-#ifdef DRAWFILLPOLYLOG
-fprintf( logF, "  clip( {%d,%d} {%d,%d} )  = {%d,%d} {%d,%d}\n", p0.x, p0.y, p1.x, p1.y, q0.x, q0.y, q1.x, q1.y );
-#endif
-			if ( q0.x != p0.x || q0.y != p0.y ) {
-				if ( k > 0 && ( q0.x > q0.y ) != ( wFillPoints[k-1].x > wFillPoints[k-1].y ) )
-					 addPoint( &k, &zero, &rect );
-				addPoint( &k, &q0, &rect );
-			}
-			addPoint( &k, &q1, &rect );
-			p1Clipped = ( q1.x != p1.x || q1.y != p1.y );
+		else {
+			mode = R2_COPYPEN;
 		}
-	}
-	if ( p1Clipped &&
-		 ( wFillPoints[k-1].x > wFillPoints[k-1].y ) != ( wFillPoints[0].x > wFillPoints[0].y ) )
-		addPoint( &k, &zero, &rect );
+		SetROP2(d->hDc, mode);
+
+    } else {
+        setDrawMode(d, dw, lt, color, opts);
+    }
+
+    rect.left = rect.right = XINCH2PIX(d,node[cnt-1][0]-1);
+    rect.top = rect.bottom = YINCH2PIX(d,node[cnt-1][1]+1);
+
 #ifdef DRAWFILLPOLYLOG
-fflush( logF );
-fclose( logF );
+    logF = fopen("log.txt", "a");
+    fprintf(logF, "\np[%d] = {%d,%d}\n", cnt-1, node[0][0], node[0][1]);
 #endif
-	if ( k <= 2 )
-		return;
-	Polygon( d->hDc, wFillPoints, k );
-	if (d->hWnd) {
-		rect.top--;
-		rect.left--;
-		rect.bottom++;
-		rect.right++;
-		myInvalidateRect( d, &rect );
-	}
+
+    for (i=0; i<cnt; i++) {
+        wPolyLine_e type1;
+        point.x = node[i][0];
+        point.y = node[i][1];
+		if (type != NULL)
+			type1 = type[i];
+		else
+			type1 = wPolyLineStraight;
+
+        if (type1 == wPolyLineRound || type1 == wPolyLineSmooth) {
+            prevNode = (i == 0) ? cnt - 1 : i - 1;
+            nextNode = (i == cnt - 1) ? 0 : i + 1;
+
+            // calculate distance to neighboring nodes
+            int prevXDistance = node[i][0] - node[prevNode][0];
+            int prevYDistance = node[i][1] - node[prevNode][1];
+            int nextXDistance = node[nextNode][0]-node[i][0];
+            int nextYDistance = node[nextNode][1]-node[i][1];
+
+            // distance from node to endpoints of curve is half the line length
+            endPoint0.x = (prevXDistance/2)+node[prevNode][0];
+            endPoint0.y = (prevYDistance/2)+node[prevNode][1];
+            endPoint1.x = (nextXDistance/2)+node[i][0];
+            endPoint1.y = (nextYDistance/2)+node[i][1];
+
+            if (type1 == wPolyLineRound) {
+                double distNext = (nextXDistance*nextXDistance + nextYDistance * nextYDistance);
+                double distPrev = (prevXDistance*prevXDistance + prevYDistance * prevYDistance);
+                // but should be half of the shortest line length (equidistant from node) for round
+                if ((distPrev > 0) && (distNext > 0)) {
+                    double ratio = sqrt(distPrev / distNext);
+                    if (distPrev < distNext) {
+                        endPoint1.x = ((nextXDistance*ratio) / 2) + node[i][0];
+                        endPoint1.y = ((nextYDistance*ratio) / 2) + node[i][1];
+                    } else {
+                        endPoint0.x = node[i][0] - (prevXDistance / (2 * ratio));
+                        endPoint0.y = node[i][1] - (prevYDistance / (2 * ratio));
+                    }
+                }
+                // experience says that the best look is achieved if the
+                // control points are in the middle between end point and node
+                controlPoint0.x = (node[i][0] - endPoint0.x) / 2 + endPoint0.x;
+                controlPoint0.y = (node[i][1] - endPoint0.y) / 2 + endPoint0.y;
+
+                controlPoint1.x = (endPoint1.x - node[i][0]) / 2 + node[i][0];
+                controlPoint1.y = (endPoint1.y - node[i][1]) / 2 + node[i][1];
+            } else {
+                controlPoint0 = point;
+                controlPoint1 = point;
+            }
+        }
+
+        if (i==0) {
+            if (type1 == wPolyLineStraight || open) {
+                // for straight lines or open shapes use the starting point as passed
+                addPoint(d, pointCount++, &point, PT_MOVETO, &rect);
+                startingPoint = point;
+            } else {
+                // for Bezier begin with the calculated starting point
+                addPoint(d, pointCount++, &endPoint0, PT_MOVETO, &rect);
+                addPoint(d, pointCount++, &controlPoint0, PT_BEZIERTO, &rect);
+                addPoint(d, pointCount++, &controlPoint1, PT_BEZIERTO, &rect);
+                addPoint(d, pointCount++, &endPoint1, PT_BEZIERTO, &rect);
+                startingPoint = endPoint0;
+            }
+        } else {
+            if (type1 == wPolyLineStraight || (open && (i==cnt-1))) {
+                addPoint(d, pointCount++, &point, PT_LINETO, &rect);
+            } else {
+                if (i==cnt-1 && !open) {
+                    closed = TRUE;
+                }
+                addPoint(d, pointCount++, &endPoint0, PT_LINETO, &rect);
+                addPoint(d, pointCount++, &controlPoint0, PT_BEZIERTO, &rect);
+                addPoint(d, pointCount++, &controlPoint1, PT_BEZIERTO, &rect);
+                addPoint(d, pointCount++, &endPoint1,
+                         PT_BEZIERTO | (closed ? PT_CLOSEFIGURE : 0), &rect);
+            }
+        }
+    }
+
+    if (!open && !closed) {
+        addPoint(d, pointCount++, &startingPoint, PT_LINETO, &rect);
+    }
+    rc = PolyDraw(d->hDc, wFillPoints_da.ptr, wFillType_da.ptr, pointCount);
+
+    EndPath(d->hDc);
+
+    if (fill && !open) {
+        FillPath(d->hDc);
+    } else {
+        StrokePath(d->hDc);
+    }
+
+    if (d->hWnd) {
+        rect.top--;
+        rect.left--;
+        rect.bottom++;
+        rect.right++;
+        myInvalidateRect(d, &rect);
+    }
 }
 
 #define MAX_FILLCIRCLE_POINTS	(30)
@@ -1022,7 +1219,7 @@ void wDrawFilledCircle(
 	p1.x = XINCH2PIX(d,x+r);
 	p1.y = YINCH2PIX(d,y-r)+1;
 						   
-	setDrawBrush( d->hDc, d, color, opts );						  
+	setDrawBrush( d, color, opts );						  
 	if ( noNegDrawArgs > 0 && ( p0.x < 0 || p0.y < 0 ) ) {
 		if ( r > MAX_FILLCIRCLE_POINTS )
 			cnt = MAX_FILLCIRCLE_POINTS;
@@ -1035,7 +1232,8 @@ void wDrawFilledCircle(
 			circlePts[inx][0] = x + (int)(r * mswcos( inx*dang ) + 0.5 );
 			circlePts[inx][1] = y + (int)(r * mswsin( inx*dang ) + 0.5 );
 		}
-		wDrawFilledPolygon( d, circlePts, cnt, color, opts );
+		//wDrawFilledPolygon( d, circlePts, NULL, cnt, color, opts );
+		wDrawPolygon(d, circlePts, NULL, cnt, color, 1, wDrawLineSolid,opts, TRUE, FALSE );
 	} else {
 		Ellipse( d->hDc, p0.x, p0.y, p1.x, p1.y );
 		if (d->hWnd) {
@@ -1084,25 +1282,34 @@ void wDrawRestoreImage(
 }
 
 
-void wDrawClear( wDraw_p d )
+void wDrawClearTemp( wDraw_p d )
 {
 	RECT rect;
-	SetROP2( d->hDc, R2_WHITE );
-	Rectangle( d->hDc, 0, 0, d->w, d->h );
+	SelectObject( d->hDc, d->hBmTemp );
+	BitBlt(d->hDc, 0, 0, d->w, d->h, d->hDc, 0, 0, WHITENESS);
 	if (d->hWnd) {
-	rect.top = 0;
-	rect.bottom = d->h;
-	rect.left = 0;
-	rect.right = d->w;
-	InvalidateRect( d->hWnd, &rect, FALSE );
+		rect.top = 0;
+		rect.bottom = d->h;
+		rect.left = 0;
+		rect.right = d->w;
+		InvalidateRect( d->hWnd, &rect, FALSE );
 	}
+}
+
+
+void wDrawClear( wDraw_p d )
+{
+	SelectObject( d->hDc, d->hBmMain );
+	// BitBlt is faster than Rectangle
+	BitBlt(d->hDc, 0, 0, d->w, d->h, d->hDc, 0, 0, WHITENESS);
+	wDrawClearTemp(d);
 }
 
 
 void wDrawSetSize(
 		wDraw_p d,
 		wPos_t width,
-		wPos_t height )
+		wPos_t height, void * redraw)
 {
 	d->w = width;
 	d->h = height;
@@ -1196,7 +1403,7 @@ void wDrawBitMap(
 		wDrawColor dc,
 		wDrawOpts dopt )
 {
-	HDC bmDc, hDc;
+	HDC bmDc;
 	HBITMAP oldBm;
 	DWORD mode;
 	int x0, y0;
@@ -1208,9 +1415,7 @@ void wDrawBitMap(
 	if ( noNegDrawArgs > 0 && ( x0 < 0 || y0 < 0 ) )
 		return;
 #endif
-	if (dopt & wDrawOptTemp) {
-		mode = tmpOp;
-	} else if (dc == wDrawColorWhite) {
+	if (dc == wDrawColorWhite) {
 		mode = clrOp;
 		dc = wDrawColorBlack;
 	} else {
@@ -1224,22 +1429,9 @@ void wDrawBitMap(
 				RGB( 255, 255, 255 ), bm->w, bm->h, bm->bmx );
 		bm->color = dc;
 	}
-	if ( (dopt & wDrawOptNoClip) != 0 &&
-		 ( px < 0 || px >= d->w || py < 0 || py >= d->h ) ) {
-		x0 += d->x;
-		y0 += d->y;
-		hDc = GetDC( ((wControl_p)(d->parent))->hWnd );
-		bmDc = CreateCompatibleDC( hDc );
-		oldBm = SelectObject( bmDc, bm->bm );
-		BitBlt( hDc, x0, y0, bm->w, bm->h, bmDc, 0, 0, tmpOp );
-		SelectObject( bmDc, oldBm );
-		DeleteDC( bmDc );
-		ReleaseDC( ((wControl_p)(d->parent))->hWnd, hDc );
-		return;
-	}
 
 	bmDc = CreateCompatibleDC( d->hDc );
-	setDrawMode( d->hDc, d, 0, wDrawLineSolid, dc, dopt );
+	setDrawMode( d, 0, wDrawLineSolid, dc, dopt );
 	oldBm = SelectObject( bmDc, bm->bm );
 	BitBlt( d->hDc, x0, y0, bm->w, bm->h, bmDc, 0, 0, mode );
 	SelectObject( bmDc, oldBm );
@@ -1260,7 +1452,7 @@ wDrawBitMap_p wDrawBitMapCreate(
 		int h,
 		int x,
 		int y,
-		const char * bits )
+		const unsigned char * bits )
 {
 	wDrawBitMap_p bm;
 	int bmSize = ((w+7)/8) * h;
@@ -1322,12 +1514,14 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		hDc = GetDC(hWnd);
 		if ( b->option & BD_DIRECT ) {
 			b->hDc = hDc;
-			b->hBm = 0;
+			b->hBmMain = 0;
+			b->hBmTemp = 0;
 			b->hBmOld = 0;
 		} else {
 			b->hDc = CreateCompatibleDC( hDc ); 
-			b->hBm = CreateCompatibleBitmap( hDc, b->w, b->h );
-			b->hBmOld = SelectObject( b->hDc, b->hBm );
+			b->hBmMain = CreateCompatibleBitmap( hDc, b->w, b->h );
+			b->hBmTemp = CreateCompatibleBitmap( hDc, b->w, b->h );
+			b->hBmOld = SelectObject( b->hDc, b->hBmMain );
 		}
 		if (mswPalette) {
 			SelectPalette( b->hDc, mswPalette, 0 );
@@ -1355,8 +1549,12 @@ long FAR PASCAL XEXPORT mswDrawPush(
 			if ( b->option & BD_DIRECT ) {
 			} else {
 			hDc = GetDC( b->hWnd );
-			b->hBm = CreateCompatibleBitmap( hDc, b->w, b->h );
-			DeleteObject(SelectObject( b->hDc, b->hBm ));
+//-			DeleteObject( b->hBmOld );
+			DeleteObject( b->hBmMain );
+			DeleteObject( b->hBmTemp );
+			b->hBmMain = CreateCompatibleBitmap( hDc, b->w, b->h );
+			b->hBmTemp = CreateCompatibleBitmap( hDc, b->w, b->h );
+//-			b->hBmOld = SelectObject( b->hDc, b->hBmMain );
 			ReleaseDC( b->hWnd, hDc );
 			SetROP2( b->hDc, R2_WHITE );
 			Rectangle( b->hDc, 0, 0, b->w, b->h );
@@ -1383,6 +1581,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
+	case WM_LBUTTONDBLCLK:
 		if (message == WM_LBUTTONDOWN)
 			action = wActionLDown;
 		else if (message == WM_RBUTTONDOWN)
@@ -1391,6 +1590,8 @@ long FAR PASCAL XEXPORT mswDrawPush(
 			action = wActionLUp;
 		else if (message == WM_RBUTTONUP)
 			action = wActionRUp;
+		else if (message == WM_LBUTTONDBLCLK)
+			action = wActionLDownDouble;
 		else {
 			if ( (wParam & MK_LBUTTON) != 0)
 				action = wActionLDrag;
@@ -1468,11 +1669,22 @@ long FAR PASCAL XEXPORT mswDrawPush(
 						b->paletteClock = winPaletteClock;
 					}
 				}
+				HBITMAP hBmOld = SelectObject( b->hDc, b->hBmMain );
+
+			if (bDrawMainBM) {
+				BitBlt(hDc, rect.left, rect.top,
+					rect.right - rect.left, rect.bottom - rect.top,
+					b->hDc, rect.left, rect.top,
+					SRCCOPY);
+			}
+				SelectObject( b->hDc, b->bCopiedMain?b->hBmTemp:b->hBmMain );
 				BitBlt( hDc, rect.left, rect.top,
 						rect.right-rect.left, rect.bottom-rect.top,
 						b->hDc, rect.left, rect.top,
-						SRCCOPY );
+						bDrawMainBM?SRCAND:SRCCOPY);
+				SelectObject( b->hDc, hBmOld );
 				EndPaint( hWnd, &ps );
+				b->bCopiedMain = FALSE;
 			}
 		}
 		break;
@@ -1499,15 +1711,41 @@ long FAR PASCAL XEXPORT mswDrawPush(
 static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	wAction_t action;
-
+	
 	switch( message ) {
 	case WM_MOUSEWHEEL:
 		/* handle mouse wheel events */
-		/* fwKeys = GET_KEYSTATE_WPARAM(wParam); modifier keys are currently ignored */
-		if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
-			action = wActionWheelUp;
+		if (GET_KEYSTATE_WPARAM(wParam) & (MK_SHIFT|MK_MBUTTON) ) {
+			if (GET_KEYSTATE_WPARAM(wParam) & MK_CONTROL ) {
+				if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
+					action = wActionScrollLeft;
+				} else {
+					action = wActionScrollRight;
+				}
+			} else {
+				if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
+					action = wActionScrollUp;
+				} else {
+					action = wActionScrollDown;
+				}
+			}
 		} else {
-			action = wActionWheelDown;
+			if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
+				action = wActionWheelUp;
+			} else {
+				action = wActionWheelDown;
+			}
+		}
+		if (b->action)
+			b->action( b, b->data, action, 0, 0 );
+		return 0;
+	case WM_MOUSEHWHEEL:
+		if ( GET_KEYSTATE_WPARAM(wParam) & (MK_SHIFT|MK_MBUTTON)) {
+			if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
+				action = wActionScrollRight;
+			} else {
+				action = wActionScrollLeft;
+			}
 		}
 		if (b->action)
 			b->action( b, b->data, action, 0, 0 );
@@ -1521,10 +1759,12 @@ static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, L
 static void drawDoneProc( wControl_p b )
 {
 	wDraw_p d = (wDraw_p)b;
-	if (d->hBm) {
+	if (d->hBmMain) {
 		SelectObject( d->hDc, d->hBmOld );
-		DeleteObject( d->hBm );
-		d->hBm = (HBITMAP)0;
+		DeleteObject( d->hBmMain );
+		d->hBmMain = (HBITMAP)0;
+		DeleteObject( d->hBmTemp );
+		d->hBmTemp = (HBITMAP)0;
 	}
 	if (d->hPen) {
 		SelectObject( d->hDc, GetStockObject( BLACK_PEN ) );
@@ -1580,10 +1820,17 @@ void mswRepaintAll( void )
 	for ( b=drawList; b; b=b->drawNext ) {
 		if (GetUpdateRect( b->hWnd, &rect, FALSE )) {
 			hDc = BeginPaint( b->hWnd, &ps );
+			HBITMAP hBmOld = SelectObject( b->hDc, b->hBmMain );
 			BitBlt( hDc, rect.left, rect.top,
 						rect.right-rect.left, rect.bottom-rect.top,
 						b->hDc, rect.left, rect.top,
 						SRCCOPY );
+			SelectObject( b->hDc, b->hBmTemp );
+			BitBlt( hDc, rect.left, rect.top,
+						rect.right-rect.left, rect.bottom-rect.top,
+						b->hDc, rect.left, rect.top,
+						SRCAND );
+			SelectObject( b->hDc, hBmOld );
 			EndPaint( b->hWnd, &ps );
 		}
 	}
@@ -1648,6 +1895,7 @@ wDraw_p wDrawCreate(
 		SelectPalette( hDc, mswPalette, 0 );
 		ReleaseDC( d->hWnd, hDc );
 	}
+	d->bCopiedMain = FALSE;
 	return d;
 }
 
@@ -1681,14 +1929,19 @@ wDraw_p wBitMapCreate( wPos_t w, wPos_t h, int planes )
 		wNoticeEx( NT_ERROR, "CreateBitMap: CreateDC fails", "Ok", NULL );
 		return FALSE;
 	}
-	d->hBm = CreateCompatibleBitmap( hDc, d->w, d->h );
-	if ( d->hBm == (HBITMAP)0 ) {
-		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM fails", "Ok", NULL );
+	d->hBmMain = CreateCompatibleBitmap( hDc, d->w, d->h );
+	if ( d->hBmMain == (HBITMAP)0 ) {
+		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM Main fails", "Ok", NULL );
+		return FALSE;
+	}
+	d->hBmTemp = CreateCompatibleBitmap( hDc, d->w, d->h );
+	if ( d->hBmTemp == (HBITMAP)0 ) {
+		wNoticeEx( NT_ERROR, "CreateBitMap: CreateBM Temp fails", "Ok", NULL );
 		return FALSE;
 	}
 	d->hasPalette = (GetDeviceCaps(hDc,RASTERCAPS ) & RC_PALETTE) != 0;
 	ReleaseDC( mswHWnd, hDc );
-	d->hBmOld = SelectObject( d->hDc, d->hBm );
+	d->hBmOld = SelectObject( d->hDc, d->hBmMain );
 	if (mswPalette) {
 		SelectPalette( d->hDc, mswPalette, 0 );
 		RealizePalette( d->hDc );
@@ -1697,8 +1950,9 @@ wDraw_p wBitMapCreate( wPos_t w, wPos_t h, int planes )
 	d->hFactor = (double)GetDeviceCaps( d->hDc, LOGPIXELSY );
 	d->DPI = 96.0; /*min( d->wFactor, d->hFactor );*/
 	d->hWnd = 0;
-	SetROP2( d->hDc, R2_WHITE );
-	Rectangle( d->hDc, 0, 0, d->w, d->h );
+	wDrawClear(d);
+//-	SetROP2( d->hDc, R2_WHITE );
+//-	Rectangle( d->hDc, 0, 0, d->w, d->h );
 	return d;
 }
 
@@ -1709,10 +1963,12 @@ wBool_t wBitMapDelete( wDraw_p d )
 		DeleteObject( d->hPen );
 		d->hPen = (HPEN)0;
 	}
-	if (d->hBm) {
+	if (d->hBmMain) {
 		SelectObject( d->hDc, d->hBmOld );
-		DeleteObject( d->hBm );
-		d->hBm = (HBITMAP)0;
+		DeleteObject( d->hBmMain );
+		d->hBmMain = (HBITMAP)0;
+		DeleteObject( d->hBmTemp );
+		d->hBmTemp = (HBITMAP)0;
 	}
 	if (d->hDc) {
 		DeleteDC( d->hDc );
@@ -1722,74 +1978,75 @@ wBool_t wBitMapDelete( wDraw_p d )
 	return TRUE;
 }
 
-wBool_t wBitMapWriteFile( wDraw_p d, const char * fileName )
+/**
+ * write bitmap file. The bitmap in d must contain a valid HBITMAP
+ *
+ * \param  d	    A wDraw_p to process.
+ * \param  fileName Filename of the file.
+ *
+ * \returns A wBool_t. TRUE on success
+ */
+
+wBool_t
+wBitMapWriteFile(wDraw_p d, const char * fileName)
 {
-	char *pixels;
-	int j, ww, chunk;
-	FILE * f;
-	BITMAPFILEHEADER bmfh;
-	struct {
-		BITMAPINFOHEADER bmih;
-		RGBQUAD colors[256];
-	} bmi;
-	int rc;
-	
-	if ( d->hBm == 0)
-		return FALSE;
-	f = wFileOpen( fileName, "wb" );
-	if (!f) {
-		wNoticeEx( NT_ERROR, fileName, "Ok", NULL );
-		return FALSE;
-	}
-	ww = ((d->w +3) / 4) * 4;
-	bmfh.bfType = 'B'+('M'<<8);
-	bmfh.bfSize = (long)(sizeof bmfh) + (long)(sizeof bmi.bmih) + (long)(sizeof bmi.colors) + (long)ww * (long)(d->h);
-	bmfh.bfReserved1 = 0;
-	bmfh.bfReserved2 = 0;
-	bmfh.bfOffBits = sizeof bmfh + sizeof bmi.bmih + sizeof bmi.colors;
-	fwrite( &bmfh, 1, sizeof bmfh, f );
-	bmi.bmih.biSize = sizeof bmi.bmih;
-	bmi.bmih.biWidth = d->w;
-	bmi.bmih.biHeight = d->h;
-	bmi.bmih.biPlanes = 1;
-	bmi.bmih.biBitCount = 8;
-	bmi.bmih.biCompression = BI_RGB;
-	bmi.bmih.biSizeImage = 0;
-	bmi.bmih.biXPelsPerMeter = 75*(10000/254);
-	bmi.bmih.biYPelsPerMeter = 75*(10000/254);
-	bmi.bmih.biClrUsed = bmi.bmih.biClrImportant = mswGetColorList( bmi.colors );
-	SelectObject( d->hDc, d->hBmOld );
-	rc = GetDIBits( d->hDc, d->hBm, 0, 1, NULL, (BITMAPINFO*)&bmi, DIB_RGB_COLORS );
-	if ( rc == 0 ) {
-		wNoticeEx( NT_ERROR, "WriteBitMap: Can't get bitmapinfo from Bitmap", "Ok", NULL );
-		return FALSE;
-	}
-	bmi.bmih.biClrUsed = 256;
-	fwrite( &bmi.bmih, 1, sizeof bmi.bmih, f );
-	fwrite( bmi.colors, 1, sizeof bmi.colors, f );
-	chunk = 32000/ww;
-	pixels = (char*)malloc( ww*chunk );
-	if ( pixels == NULL ) {
-		wNoticeEx( NT_ERROR, "WriteBitMap: no memory", "OK", NULL );
-		return FALSE;
-	}
-	for (j=0;j<d->h;j+=chunk) {
-		if (j+chunk>d->h)
-			chunk = d->h-j;
-		rc = GetDIBits( d->hDc, d->hBm, j, chunk, pixels, (BITMAPINFO*)&bmi, DIB_RGB_COLORS );
-		if ( rc == 0 ) 
-		if ( rc == 0 ) {
-			wNoticeEx( NT_ERROR, "WriteBitMap: Can't get bits from Bitmap", "Ok", NULL );
-			return FALSE;
-		}
-		rc = fwrite( pixels, 1, ww*chunk, f );
-		if (rc != ww*chunk) {
-			wNoticeEx( NT_ERROR, "WriteBitMap: Bad fwrite", "Ok", NULL);
-		}
-	}
-	free( pixels );
-	SelectObject( d->hDc, d->hBm );
-	fclose( f );
-	return TRUE;
+    FIBITMAP *dib = NULL;
+    FIBITMAP *dib2 = NULL;
+    FREE_IMAGE_FORMAT fif = FIF_UNKNOWN;
+    BOOL bSuccess = FALSE;
+
+    if (d->hBmMain) {
+
+        BITMAP bm;
+        GetObject(d->hBmMain, sizeof(BITMAP), (LPSTR)&bm);
+        dib = FreeImage_Allocate(bm.bmWidth, bm.bmHeight, bm.bmBitsPixel, 0, 0, 0);
+        // The GetDIBits function clears the biClrUsed and biClrImportant BITMAPINFO members (dont't know why)
+        // So we save these infos below. This is needed for palettized images only.
+        int nColors = FreeImage_GetColorsUsed(dib);
+        HDC dc = GetDC(NULL);
+        GetDIBits(dc,
+                  d->hBmMain,
+                  0,
+                  FreeImage_GetHeight(dib),
+                  FreeImage_GetBits(dib),
+                  FreeImage_GetInfo(dib),
+                  DIB_RGB_COLORS);
+        ReleaseDC(NULL, dc);
+
+        // restore BITMAPINFO members
+        FreeImage_GetInfoHeader(dib)->biClrUsed = nColors;
+        FreeImage_GetInfoHeader(dib)->biClrImportant = nColors;
+        // we will get a 32 bit bitmap on Windows systems with invalid alpha
+        // so it needs to be converted to 24 bits.
+        // (see: https://sourceforge.net/p/freeimage/discussion/36110/thread/0699ce8e/ )
+        dib2 = FreeImage_ConvertTo24Bits(dib);
+        FreeImage_Unload(dib);
+    }
+
+    // Try to guess the file format from the file extension
+    fif = FreeImage_GetFIFFromFilename(fileName);
+    if (fif != FIF_UNKNOWN) {
+        // Check that the dib can be saved in this format
+        BOOL bCanSave;
+
+        FREE_IMAGE_TYPE image_type = FreeImage_GetImageType(dib2);
+        if (image_type == FIT_BITMAP) {
+            // standard bitmap type
+            WORD bpp = FreeImage_GetBPP(dib2);
+            bCanSave = (FreeImage_FIFSupportsWriting(fif) &&
+                        FreeImage_FIFSupportsExportBPP(fif, bpp));
+        } else {
+            // special bitmap type
+            bCanSave = FreeImage_FIFSupportsExportType(fif, image_type);
+        }
+
+        if (bCanSave) {
+            bSuccess = FreeImage_Save(fif, dib2, fileName, PNG_DEFAULT);
+            return bSuccess;
+        }
+    }
+    FreeImage_Unload(dib2);
+
+    return bSuccess;
 }
 

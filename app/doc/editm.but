@@ -22,6 +22,12 @@ The \f{Edit Menu} shows commands affecting the \f{Main Canvas} (\K{mainW}).
 
 \u000
 
+\dd \f{Clone} - Copies the selected objects to the clipboard and duplicates them offset from the original. 
+Repeated Clone commands result in a series of offset copies.
+The new objects are selected and the old ones un-selected.
+
+\u000
+
 \dd \f{Cut} - Moves the selected objects to the clipboard.
 
 \u000
@@ -42,7 +48,10 @@ The \f{Edit Menu} shows commands affecting the \f{Main Canvas} (\K{mainW}).
 
 \u000
 
-\dd \f{Paste} - Copies the contents of the clipboard to the layout. The newly pasted parts are in \f{Selected} state and can easily be moved into place. Any previously selected objects are unselected.
+\dd \f{Paste} - Copies the contents of the clipboard to the layout. Using the paste Menu command it will be placed at the center of the screen. 
+If the context menu paste is used or the short-cuts \e{Ctrl+v} or \e{Shift+Insert}, the parts will be placed at the cursor position. 
+Repeated Pastes without moving the cursor result in overlaid copies. 
+The newly pasted parts are in \f{Selected} state and can easily be moved into place. Any previously selected objects are unselected.
 
 \u000
 
@@ -62,28 +71,32 @@ The \f{Edit Menu} shows commands affecting the \f{Main Canvas} (\K{mainW}).
 
 \u000
 
-\dd \f{Thin, Medium and Thick Tracks} - set rail width of selected tracks.
+\dd \f{Thin, Medium and Thick Tracks} - set displayed rail width of selected tracks.
 
 \u000
 
-\dd \f{Tunnel} - Hides or reveals selected tracks.
+\dd \f{Tunnel} - Hides or reveals selected tracks and adds a tunnel portal symbol where the track passes from one to the other.
 
 \u000
 
-\dd \f{Undo} - Undoes the last command.  Up to the last ten commands can be undone.  If there are no commands that can be undone the \f{Undo} item is disabled.  The \f{Undo} command can also be invoked by the \f{Undo} button (\K{cmdUndo}).
+\dd \f{Bridge} - Adds parapet symbols to the sides of the track.
+
+\u000
+
+\dd \f{Undo} - Reverses the last command.  Up to the last ten commands can be undone.  If there are no commands that can be undone the \f{Undo} item is disabled.  The \f{Undo} command can also be invoked by the \f{Undo} button (\K{cmdUndo}).
 
 For more information on working with selected objects, see the Select (\K{cmdSelect}) command.
 
 \rule
 
 
-\S{cmdAboveBelow} Above and Below
+\S{cmdAboveBelow} "Move To Front" and "Move to Back"
 
 \G{png.d/btop_bottom.png}
 
-The Above/Below commands move the selected objects (\K{cmdSelect}) into the \f{Foreground} or \f{Background} making them more or less visible or prominent.
+The Move to Front and Move To Back commands move the selected objects (\K{cmdSelect}) to the top of the drawing list - the \f{Foreground} or to the bottom of the list - the \f{Background} making them more or less visible or prominent.
 
-The effect is to make the objects appear in front or behind other objects.  This command is most useful when dealing with filled shapes (\K{cmdDraw}).
+The effect is to make the objects move to be in front of all or behind all other objects.  This command is useful when dealing with filled shapes (\K{cmdDraw}).
 
 Selected objects moved to the \f{Background} become unselected.
 
@@ -94,23 +107,23 @@ Selected objects moved to the \f{Background} become unselected.
 
 Additional Shortcut keys perform the following:
 
-\dd \e{Shift+Backspace} - Undo
+\dd \c{Shift+Backspace} - Undo
 
 \u000
 
-\dd \e{Ctrl+Insert} - Copy
+\dd \c{Ctrl+Insert} - Copy
 
 \u000
 
-\dd \e{Shift+Insert} - Paste
+\dd \c{Shift+Insert} - Paste
 
 \u000
 
-\dd Shift+Delete - Cut
+\dd \c{Shift+Delete} - Cut
 
 \u000
 
-\dd Esc - Deselect All
+\dd \c{Esc} - Deselect All
 
 \rule
 
@@ -123,7 +136,7 @@ The \f{Delete} button is used to delete selected objects.  Remember, the \f{Undo
 
 Deleting a track that is connected to an easement (\K{cmdEasement}) causes the easement to be deleted as well.
 
-The \f{Delete} key invokes the Delete command.
+The \e{Delete} key invokes the Delete command.
 
 \rule
 
@@ -139,6 +152,25 @@ Select the tracks you want to hide in a tunnel.  Selecting a hidden track 'revea
 A tunnel portal is drawn where a hidden track connects with an 'unhidden' track.  You can split (\K{cmdSplitTrack}) a track to place a tunnel portal at a particular spot.
 
 The \f{Draw Tunnels} Radio button group on the \f{Options>Display} dialog (\K{cmdDisplay}) controls whether hidden tracks are not drawn, drawn as dashed lines or drawn as normal lines.
+
+\rule
+
+
+\S{cmdBridge} Bridge (Draw Abutments)
+
+The \f{Bridge} command is used to add abutments to a track (as on an underbridge).
+
+Select the tracks you want to be a bridge. Bridge abutments are drawn alongside the track. You can split (\K{cmdSplitTrack}) a track to shorten the length of the bridge, or to add an extra pier to the drawing.
+
+If you perform this action (or use Tunnel) the bridge is removed.
+
+\rule
+
+\S{cmdTies} Ties (Draw or Hide Ties)
+
+The \f{Ties} command is used to hide Ties (or reshow them).  This may be useful for overlapping track, like dual gauge, or in areas like docks or yards where the track is covered.
+
+Select the tracks you want to hide or show ties for. 
 
 \rule
 

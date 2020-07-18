@@ -197,6 +197,8 @@ void * wlibAlloc(
         abort();
     }
 
+    w->outline = FALSE;
+
     w->type = type;
     w->parent = parent;
     w->origX = origX;
@@ -369,7 +371,7 @@ void wFlush(
             void)
 {
     while (gtk_events_pending()) {
-        gtk_main_iteration();
+        gtk_main_iteration_do(FALSE);
     }
 
     gdk_display_sync(gdk_display_get_default());
@@ -481,9 +483,14 @@ const char * wMemStats(void)
 
 void wGetDisplaySize(wPos_t * w, wPos_t * h)
 {
-
-    *w = gdk_screen_width();
-    *h = gdk_screen_height();
+	GdkScreen *screen = gdk_screen_get_default();
+	guint monitor = gdk_screen_get_primary_monitor(screen);
+	GdkRectangle screen_geometry = { 0, 0, 0, 0 };
+	
+	gdk_screen_get_monitor_geometry( screen, monitor, &screen_geometry );
+	
+	*w = screen_geometry.width;
+	*h = screen_geometry.height;
 }
 
 

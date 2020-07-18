@@ -59,6 +59,9 @@ static const char rcsid[] = "@(#) : $Id$";
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
 #include "utility.h"
 #include "messages.h"
 
@@ -256,7 +259,7 @@ static void UpdateSignalProperties ( track_p trk, int inx, descData_p
         thename = wStringGetValue( (wString_p) signalDesc[NM].control0 );
         if (strcmp(thename,xx->name) != 0) {
             nChanged = changed = TRUE;
-            int max_str = signalDesc[NM].max_string;
+            unsigned int max_str = signalDesc[NM].max_string;
 			if (max_str && strlen(thename)>max_str) {
 				newName = MyMalloc(max_str);
 				newName[max_str-1] = '\0';
@@ -308,7 +311,7 @@ static void DescribeSignal (track_p trk, char * str, CSIZE_T len )
         *str = tolower((unsigned char)*str);
         str++;
     }
-    sprintf( str, _("(%d [%s]): Layer=%d, %d heads at %0.3f,%0.3f A%0.3f"),
+    sprintf( str, _("(%d [%s]): Layer=%u, %d heads at %0.3f,%0.3f A%0.3f"),
              GetTrkIndex(trk), 
              xx->name,GetTrkLayer(trk)+1, xx->numHeads,
              xx->orig.x, xx->orig.y,xx->angle );
@@ -338,20 +341,28 @@ static BOOL_T WriteSignal ( track_p t, FILE * f )
     BOOL_T rc = TRUE;
     wIndex_t ia;
     signalData_p xx = GetsignalData(t);
-    rc &= fprintf(f, "SIGNAL %d %d %s %d %0.6f %0.6f %0.6f %d \"%s\"\n",
+	char *signalName = MyStrdup(xx->name);
+
+#ifdef WINDOWS
+	signalName = Convert2UTF8(signalName);
+#endif // WINDOWS
+
+    rc &= fprintf(f, "SIGNAL %d %u %s %d %0.6f %0.6f %0.6f %d \"%s\"\n",
                   GetTrkIndex(t), GetTrkLayer(t), GetTrkScaleName(t), 
                   GetTrkVisible(t), xx->orig.x, xx->orig.y, xx->angle, 
-                  xx->numHeads, xx->name)>0;
+                  xx->numHeads, signalName)>0;
     for (ia = 0; ia < xx->numAspects; ia++) {
         rc &= fprintf(f, "\tASPECT \"%s\" \"%s\"\n",
                       (&(xx->aspectList))[ia].aspectName,
                       (&(xx->aspectList))[ia].aspectScript)>0;
     }
-    rc &= fprintf( f, "\tEND\n" )>0;
+    rc &= fprintf( f, "\t%s\n",END_SIGNAL )>0;
+
+	MyFree(signalName);
     return rc;
 }
 
-static void ReadSignal ( char * line )
+static BOOL_T ReadSignal ( char * line )
 {
     /*TRKINX_T trkindex;*/
     wIndex_t index;
@@ -369,19 +380,24 @@ static void ReadSignal ( char * line )
     signalData_p xx;
     if (!GetArgs(line+6,"dLsdpfdq",&index,&layer,scale, &visible, &orig, 
                  &angle, &numHeads,&name)) {
-        return;
+        return FALSE;
     }
+
+#ifdef WINDOWS
+	ConvertUTF8ToSystem(name);
+#endif // WINDOWS
+
     DYNARR_RESET( signalAspect_p, signalAspect_da );
     while ( (cp = GetNextLine()) != NULL ) {
-        while (isspace((unsigned char)*cp)) cp++;
-        if ( strncmp( cp, "END", 3 ) == 0 ) {
+        if ( IsEND( END_SIGNAL) ) {
             break;
         }
+	while (isspace((unsigned char)*cp)) cp++;
         if ( *cp == '\n' || *cp == '#' ) {
             continue;
         }
         if ( strncmp( cp, "ASPECT", 6 ) == 0 ) {
-            if (!GetArgs(cp+4,"qq",&aspname,&aspscript)) return;
+            if (!GetArgs(cp+4,"qq",&aspname,&aspscript)) return FALSE;
             DYNARR_APPEND( signalAspect_p *, signalAspect_da, 10 );
             signalAspect(signalAspect_da.cnt-1).aspectName = aspname;
             signalAspect(signalAspect_da.cnt-1).aspectScript = aspscript;
@@ -402,6 +418,7 @@ static void ReadSignal ( char * line )
         (&(xx->aspectList))[ia].aspectScript = signalAspect(ia).aspectScript;
     }
     ComputeSignalBoundingBox(trk);
+    return TRUE;
 }
 
 static void MoveSignal (track_p trk, coOrd orig )
@@ -772,20 +789,21 @@ static ANGLE_T orient;
 static STATUS_T CmdSignal ( wAction_t action, coOrd pos )
 {
     
-    
+    static BOOL_T create;
     switch (action) {
     case C_START:
         InfoMessage(_("Place base of signal"));
+        create = FALSE;
         return C_CONTINUE;
     case C_DOWN:
         SnapPos(&pos);
         pos0 = pos;
+        create = TRUE;
         InfoMessage(_("Drag to orient signal"));
         return C_CONTINUE;
     case C_MOVE:
         SnapPos(&pos);
         orient = FindAngle(pos0,pos);
-        DDrawSignal( &tempD, pos0, orient, 1, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         return C_CONTINUE;
     case C_UP:
         SnapPos(&pos);
@@ -793,8 +811,11 @@ static STATUS_T CmdSignal ( wAction_t action, coOrd pos )
         CreateNewSignal(pos0,orient);
         return C_TERMINATE;
     case C_REDRAW:
+    	if (create)
+    		DDrawSignal( &tempD, pos0, orient, 1, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+    	return C_CONTINUE;
     case C_CANCEL:
-        DDrawSignal( &tempD, pos0, orient, 1, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+    	create = FALSE;
         return C_CONTINUE;
     default:
         return C_CONTINUE;
@@ -812,7 +833,7 @@ static void DrawSignalTrackHilite( void )
 	w = (wPos_t)((sighiliteSize.x/mainD.scale)*mainD.dpi+0.5);
 	h = (wPos_t)((sighiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,sighiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, sighiliteColor, wDrawOptTemp );
+	wDrawFilledRectangle( tempD.d, x, y, w, h, sighiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
 
 static int SignalMgmProc ( int cmd, void * data )

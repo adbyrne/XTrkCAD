@@ -27,7 +27,7 @@ The \f{Options Menu} shows commands to change configuration options.
 
 \u000
 
-\dd \f{Fonts} - Displays the font selection (\K{fontSelW}) dialog which selects the font used by the text (\K{cmdText}) command.  This command is only available on UNIX based systems. 
+\dd \f{Fonts} - Displays the font selection (\K{fontSelW}) dialog which selects the font used by the text (\K{cmdText}) command.  This command is only available on UNIX based systems.
 
 \u000
 
@@ -101,15 +101,19 @@ The \f{Command Option} dialog is invoked from the Options (\K{optionM}) menu
 
 The \f{Command Option} dialog contains items which control the behavior of some commands.
 
-\dd \f{Draw Moving Tracks} - how to draw tracks during move and rotate operations. See  \K{cmdSelect} and \K{cmdMove} for additional detail.
-
-\u000
-
 \dd \f{Default Command} - selects the \f{Properties} (\K{cmdDescribe}) or \f{Select} (\K{cmdSelect}) as the default command which is invoked when any other command (if not \f{Sticky} (\K{cmdSticky})) is canceled or completed.
 
 \u000
 
 \dd \e{Right-Click} - will either display a pop-up menu of available commands or command-specific options depending on whether the \e{Shift} key is being held down or not.  This option allows you to choose which operation occurs.
+
+\u000
+
+\dd \e{Select-Mode} - will either (a) only select the current item unless Ctrl is added or (b) will add the current item to the selection unless Ctrl is added in which case it will only select this item. 
+
+\u000
+
+\dd \e{Select-Zero} - if selected will perform \f{Deselect All} if the selection is not on an object.
 
 \rule
 
@@ -130,7 +134,13 @@ The \f{Display} dialog contains items which control the display of objects on th
 
 \u000
 
-\dd \f{Color Layers} - when set, tracks and/or non-tracks (lines, table edges and structures) are drawn with color of the layer (\K{cmdLayer}) they belong to.
+\dd \f{Color Tracks} - when set to layers, tracks are drawn with color of the layer (\K{cmdLayer}) they belong to and not the normal track color.
+This can be disabled in the Layer dialog for each Layer by unchecking the \f{Use Color} checkbox.
+
+\u000
+
+\dd \f{Color Draws} - when set to layers, non-tracks (lines, table edges and structures) are drawn with color of the layer (\K{cmdLayer}) they belong to rather than based on thier own object setting.
+This can be disabled in the Layer dialog for each Layer by unchecking the \f{Use Color} checkbox.
 
 \u000
 
@@ -142,7 +152,7 @@ The \f{Display} dialog contains items which control the display of objects on th
 
 \u000
 
-\dd \f{Draw Ties} - how to draw ties under the rails when the drawing Scale is smaller than half of the \f{Two Rail Scale}.
+\dd \f{Draw Ties} - how to draw ties under the rails when the drawing Scale is smaller than half of the \f{Two Rail Scale}. Note that \K{cmdTies} can be used to hide ties for selected tracks.
 
 \u000
 
@@ -259,7 +269,7 @@ To draw an cornu easement see \k{joinCornu}, to Modify it afterwards see \k{chgC
 
 \S2{EasementsTraditional} \i{Easements with Fixed Sharpness}
 
-The values \f{R}, \f{X} and \f{L} are read-only. They are set using the radio buttons or the \f{Value} field which can be set to 0 (No Easment) or between 0.21 (sharpest Easement) 100 (broadest Easment). 
+The values \f{R}, \f{X} and \f{L} are read-only. They are set using the radio buttons or the \f{Value} field which can be set to 0 (No Easment) or between 0.21 (sharpest Easement) 100 (broadest Easment).
 
 These values indicate the worst case of joining a straight track with a curve of radius \f{R}. The two tracks are separated by the offset \f{X} while the easement curve extends for \f{L/2} inches or centimeters to each side of the endpoints.
 
@@ -290,7 +300,7 @@ The following diagrams illustrates the \f{R}, \f{X} and \f{L} values and the res
 
 \G{png.d/easeex2.png}
 
-If curves with a radius larger than \f{R} or two curves (that bend in the same direction) are being connecting then the easement curve will be shorter and the offset smaller.  If the computed offset is small then no easement is generated.  
+If curves with a radius larger than \f{R} or two curves (that bend in the same direction) are being connecting then the easement curve will be shorter and the offset smaller.  If the computed offset is small then no easement is generated.
 
 A curved track that bends in one direction and then bends in the opposite direction is an \e{S-curve}.  This will generate the worst case easement which is two easement curves placed end to end.
 
@@ -351,7 +361,12 @@ The \f{Layout Options} dialog, displayed by the Options (\K{optionM}) or the Fil
 
 \u000
 
-\dd \f{Background File Name} - The last 40 characters of the full file pathname for the image used for a temporary background behind all the drawn objects. It is set using the \f{Browse} and reset with the \f{Clear} buttons. It is also cleared along with all the other background values after a \f{Open} or \f{New} command.
+\dd \f{Background File Name} - The last 40 characters of the full file pathname for the image used for a temporary background behind all the drawn objects. It is set using the \f{Browse} and reset with the \f{Clear} buttons.
+It is also cleared along with all the other background values after a \f{Open} or \f{New} command.
+The file is initally specified to be in the local file system. In order to send it along with the layout, use \f{Save As} command and specify the \i{Archive} Archive format (*.xtce).
+This will create a single zipped package file containing the layout and the image file which can be sent and will open on a different system.
+If this has been done, after \f{Open} of the archive, the image file path will point into the extracted archive file directory.
+It can be changed to a new local file and the next \f{Save} will rebuild the package using the new image file instead of the old one.
 
 \u000
 
@@ -383,11 +398,19 @@ This dialog controls some parameters which likely will not be changed frequently
 
 \u000
 
+\dd \f{AutoSave} \i{AutoSave} - specifies the number of Check Points taken before an AutoSave. The same number of checkpoints are retained in a circular archive set in the (\K{workDir}) named for the layout file.  Setting this value to 0 disables AutoSave. 
+
+\u000
+
 \dd \f{Balloon Help} - disables the display of \f{Balloon Help} (\K{windowTerms}) which usually is shown when the cursor is placed over a control.
 
 \u000
 
-\dd \f{Check Point} \i{AutoSave} - specifies the Check Point frequency; the number of modifications made to the layout since the last save. The layout is automatically saved to the Check Point file (\K{workDir}) when the Check Point frequency is reached. Setting this value to 0 disables use of the Checkpoint file. Upon restart, if the program was not saved normally, the user will be prompted to see if they want to resume at the last checkpoint.
+\dd \f{Show FlexTrack} - disables the display or \f{FlexTrack} (\K{generalTerms}) which is shown on the left of the Toolbar.
+
+\u000
+
+\dd \f{Check Point} \i{AutoSave} - specifies the Check Point frequency; the number of modifications made to the layout since the last save. The layout is automatically saved to the Check Point file (\K{workDir}) when the Check Point frequency is reached. Setting this value to 0 disables use of the Checkpoint file \e{and AutoSave}. Upon restart, if the program was not saved normally, the user will be prompted to see if they want to resume at the last checkpoint.
 
 \u000
 

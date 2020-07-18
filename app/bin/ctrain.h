@@ -24,7 +24,10 @@
 #define HAVE_CTRAIN_H
 
 #include "common.h"
+#include "include/paramfile.h"
 #include "track.h"
+
+wIndex_t trainCmdInx;
 
 struct carItem_t;
 typedef struct carItem_t carItem_t;
@@ -44,7 +47,7 @@ void CarSetVisible( track_p );
 void CarItemUpdate( carItem_p );
 void CarItemLoadList( void * );
 char * CarItemDescribe( carItem_p, long, long * );
-coOrd CarItemFindCouplerMountPoint( carItem_p, traverseTrack_t, int );
+void CarItemFindCouplerMountPoint( carItem_p, traverseTrack_t, coOrd[2] );
 void CarItemSize( carItem_p, coOrd * );
 char * CarItemNumber( carItem_p );
 DIST_T CarItemCoupledLength( carItem_p );
@@ -53,9 +56,16 @@ BOOL_T CarItemIsLocoMaster( carItem_p );
 void CarItemSetLocoMaster( carItem_p, BOOL_T );
 void CarItemSetTrack( carItem_p, track_p );
 void CarItemPlace( carItem_p, traverseTrack_p, DIST_T * );
-void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t * );
+void CarItemDraw( drawCmd_p, carItem_p, wDrawColor, int, BOOL_T, vector_t *, BOOL_T, track_p );
+BOOL_T StoreCarItem (carItem_p item, void **data,long *len);
+BOOL_T ReplayCarItem(carItem_p item, void *data,long len);
+enum paramFileState	GetCarPartCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
+enum paramFileState	GetCarProtoCompatibility(int paramFileIndex, SCALEINX_T scaleIndex);
 int CarAvailableCount( void );
 BOOL_T TraverseTrack2( traverseTrack_p, DIST_T );
 void FlipTraverseTrack( traverseTrack_p );
+void CheckCarTraverse( track_p trk);
+void DeleteCarProto(int fileIndex);
+void DeleteCarPart(int fileIndex);
 
 #endif // !HAVE_CTRAIN_H

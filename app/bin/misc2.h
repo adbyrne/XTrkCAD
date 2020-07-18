@@ -87,11 +87,17 @@ BOOL_T DoSetScaleDesc( void );
 
 unsigned int curLayer;
 long layerCount;
+void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
+                         void * listContext, void * arg);
 wDrawColor GetLayerColor( unsigned int );
+BOOL_T GetLayerUseColor( unsigned int);
 BOOL_T GetLayerVisible( unsigned int );
 BOOL_T GetLayerFrozen( unsigned int );
 BOOL_T GetLayerOnMap( unsigned int );
+BOOL_T GetLayerModule( unsigned int );
+void SetLayerModule(unsigned int, BOOL_T);
 char * GetLayerName( unsigned int );
+void SetLayerName(unsigned int layer, char* name);
 BOOL_T ReadLayers( char * );
 BOOL_T WriteLayers( FILE * );
 char * FormatLayerName(unsigned int layerNumber);
@@ -103,7 +109,7 @@ void SaveLayers( void );
 void RestoreLayers( void );
 void LoadLayerLists( void );
 addButtonCallBack_t InitLayersDialog( void );
-
+void FillLayerList(wList_p layerList);
 void Misc2Init( void );
 
 #endif

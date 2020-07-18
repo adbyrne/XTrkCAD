@@ -44,6 +44,7 @@ typedef void (*addButtonCallBack_t)(void*);
 #define STR_SIZE		(256)
 #define STR_SHORT_SIZE	(80)
 #define STR_LONG_SIZE	(1024)
+#define STR_HUGE_SIZE	(10240)
 
 #define CAST_AWAY_CONST (char*)
 
@@ -77,6 +78,7 @@ extern long twoRailScale;
 extern long mapScale;
 extern long zoomCorner;
 extern long checkPtInterval;
+extern long autosaveChkPoints;
 extern long liveMap;
 extern long preSelect;
 extern long hideTrainsInTunnels;
@@ -91,8 +93,11 @@ extern DIST_T curScaleRatio;
 extern char * curScaleName;
 extern int enumerateMaxDescLen;
 extern long enableBalloonHelp;
+extern long showFlexTrack;
 extern long hotBarLabels;
 extern long rightClickMode;
+extern long selectMode;
+extern long selectZero;
 extern void * commandContext;
 extern coOrd cmdMenuPos;
 #define MODE_DESIGN		(0)
@@ -136,6 +141,12 @@ extern long programMode;
 #define C_TEXT			wActionText
 #define C_WUP			wActionWheelUp
 #define C_WDOWN			wActionWheelDown
+#define C_LDOUBLE       wActionLDownDouble
+#define C_MODKEY        wActionModKey
+#define C_SCROLLUP	    wActionScrollUp
+#define C_SCROLLDOWN    wActionScrollDown
+#define C_SCROLLLEFT	wActionScrollLeft
+#define C_SCROLLRIGHT   wActionScrollRight
 #define C_INIT			(wActionLast+1)
 #define C_START			(wActionLast+2)
 #define C_REDRAW		(wActionLast+3)
@@ -146,6 +157,7 @@ extern long programMode;
 #define C_RCLICK		(wActionLast+8)
 #define C_CMDMENU		(wActionLast+9)
 #define C_FINISH		(wActionLast+10)
+#define C_UPDATE        (wActionLast+11)
 
 #define C_CONTINUE		(100)
 #define C_TERMINATE		(101)
@@ -180,7 +192,7 @@ extern wPos_t DlgSepFrmBottom;
 extern wWin_p mainW;
 extern wPos_t toolbarHeight;
 extern wIndex_t changed;
-extern char message[STR_LONG_SIZE];
+extern char message[STR_HUGE_SIZE];
 extern REGION_T curRegion;
 extern long paramVersion;
 extern coOrd zero;
@@ -222,9 +234,11 @@ int NoticeMessage( char *, char*, char *, ... );
 int NoticeMessage2( int, char *, char*, char *, ... );
 void DoQuit( void );
 
+void FileIsChanged(void);
 char * ConvertFromEscapedText(const char * text);
 char * ConvertToEscapedText(const char * text);
 
+int MagneticSnap( int state );
 void wShow( wWin_p );
 void wHide( wWin_p );
 void CloseDemoWindows( void );
@@ -233,28 +247,34 @@ void SelectFont();
 
 void CheckRoomSize( BOOL_T );
 const char * GetBalloonHelpStr( char* );
+const char * GetCurCommandName( void );
 void EnableCommands( void );
 void Reset( void );
+wIndex_t GetCurrentCommand(void);
+BOOL_T IsCurCommandSticky(void);
 void ResetIfNotSticky( void );
 wBool_t DoCurCommand( wAction_t, coOrd );
 void ConfirmReset( BOOL_T );
-void LayoutToolBar( void );
-#define IC_STICKY		(1<<0)
-#define IC_CANCEL		(1<<1)
-#define IC_MENU			(1<<2)
-#define IC_NORESTART	(1<<3)
-#define IC_SELECTED		(1<<4)
-#define IC_POPUP		(1<<5)
-#define IC_LCLICK		(1<<6)
-#define IC_RCLICK		(1<<7)
-#define IC_CMDMENU		(1<<8)
-#define IC_POPUP2		(1<<9)
-#define IC_ABUT			(1<<10)
-#define IC_ACCLKEY		(1<<11)
-#define IC_MODETRAIN_TOO		(1<<12)
-#define IC_MODETRAIN_ONLY		(1<<13)
-#define IC_WANT_MOVE	(1<<14)
-#define IC_PLAYBACK_PUSH		(1<<15)
+void LayoutToolBar( void * );
+#define IC_STICKY               (1<<0)
+#define IC_INITNOTSTICKY        (1<<1)
+#define IC_CANCEL               (1<<2)
+#define IC_MENU                 (1<<3)
+#define IC_NORESTART            (1<<4)
+#define IC_SELECTED             (1<<5)
+#define IC_POPUP                (1<<6)
+#define IC_LCLICK               (1<<7)
+#define IC_RCLICK               (1<<8)
+#define IC_CMDMENU              (1<<9)
+#define IC_POPUP2               (1<<10)
+#define IC_ABUT                 (1<<11)
+#define IC_ACCLKEY              (1<<12)
+#define IC_MODETRAIN_TOO        (1<<13)
+#define IC_MODETRAIN_ONLY       (1<<14)
+#define IC_WANT_MOVE            (1<<15)
+#define IC_PLAYBACK_PUSH        (1<<16)
+#define IC_WANT_MODKEYS         (1<<17)
+#define IC_POPUP3				(1<<18)
 wIndex_t InitCommand( wMenu_p, procCommand_t, char *, char *,  int, long, long );
 void AddToolbarControl( wControl_p, long );
 BOOL_T CommandEnabled( wIndex_t );
@@ -335,6 +355,7 @@ void MapWindowShow( int state );
 wMenuToggle_p snapGridEnableMI;
 wMenuToggle_p snapGridShowMI;
 wMenuToggle_p mapShowMI;
+wMenuToggle_p magnetsMI;
 
 void ScaleLengthEnd( void );
 void EnumerateList( long, FLOAT_T, char * );
@@ -344,6 +365,8 @@ void EnumerateEnd(void);
 /* cnote.c */
 void DoNote( void );
 BOOL_T WriteMainNote( FILE * );
+
+BOOL_T ReadMainNote(char * line);
 
 /* dbench.c */
 long GetBenchData( long, long );
@@ -391,6 +414,7 @@ void ContMgmLoad (wIcon_p,contMgmCallBack_p,void *);
 
 /* dlayer.c */
 void LayerSetCounts();
+int FindUnusedLayer(unsigned int start);
 void DecrementLayerObjects(unsigned int index);
 void IncrementLayerObjects(unsigned int index);
 
@@ -420,4 +444,6 @@ void InitCmdControl ( wMenu_p menu );
 /* csensor.c */
 void SensorMgmLoad ( void );
 void InitCmdSensor ( wMenu_p menu );
+/* cmodify.c */
+STATUS_T CmdModify(wAction_t action,coOrd pos );
 #endif

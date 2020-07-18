@@ -60,6 +60,9 @@
 #include "param.h"
 #include "track.h"
 #include "trackx.h"
+#ifdef WINDOWS
+#include "include/utf8convert.h"
+#endif // WINDOWS
 #include "utility.h"
 #include "messages.h"
 
@@ -205,7 +208,7 @@ static void DrawSwitchMotor (track_p t, drawCmd_p d, wDrawColor color )
         Translate (&p[iPoint], orig, x_angle, switchmotorPoly_Pix[iPoint].x * switchmotorPoly_SF / scaleRatio );
         Translate (&p[iPoint], p[iPoint], y_angle, (10+switchmotorPoly_Pix[iPoint].y) * switchmotorPoly_SF / scaleRatio );
     }
-    DrawFillPoly(d, switchmotorPoly_CNT, p,  wDrawColorBlack);
+    DrawPoly(d, switchmotorPoly_CNT, p, NULL, color, 0, 1, 0);
 }
 
 static struct {
@@ -230,7 +233,7 @@ static void UpdateSwitchMotor (track_p trk, int inx, descData_p descUpd, BOOL_T 
 	switchmotorData_p xx = GetswitchmotorData(trk);
 	const char * thename, *thenormal, *thereverse, *thepointsense;
 	char *newName, *newNormal, *newReverse, *newPointSense;
-	int max_str;
+	unsigned int max_str;
 	BOOL_T changed, nChanged, norChanged, revChanged, psChanged;
 
 	LOG( log_switchmotor, 1, ("*** UpdateSwitchMotor(): needUndoStart = %d\n",needUndoStart))
@@ -312,7 +315,13 @@ static DIST_T DistanceSwitchMotor (track_p t, coOrd * p )
 {
 	switchmotorData_p xx = GetswitchmotorData(t);
         if (xx->turnout == NULL) return 0;
-	return GetTrkDistance(xx->turnout,p);
+    coOrd center,hi,lo;
+    GetBoundingBox(t,&hi,&lo);
+    center.x = (hi.x+lo.x)/2;
+    center.y = (hi.y+lo.y)/2;
+    DIST_T d = FindDistance(center,*p);
+    *p = center;
+	return d;
 }
 
 static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
@@ -330,7 +339,7 @@ static void DescribeSwitchMotor (track_p trk, char * str, CSIZE_T len )
 		*str = tolower((unsigned char)*str);
 		str++;
 	}
-	sprintf( str, _("(%d): Layer=%d %s"),
+	sprintf( str, _("(%d): Layer=%u %s"),
 		GetTrkIndex(trk), GetTrkLayer(trk)+1, message );
 	strncpy(switchmotorData.name,xx->name,STR_SHORT_SIZE-1);
 	switchmotorData.name[STR_SHORT_SIZE-1] = '\0';
@@ -369,7 +378,7 @@ static void switchmotorDebug (track_p trk)
 static void DeleteSwitchMotor ( track_p trk )
 {
 
-	track_p trk1,trk2;
+	track_p trk1; 
 	switchmotorData_p xx1;
 
 	LOG( log_switchmotor, 1,("*** DeleteSwitchMotor(%p)\n",trk))
@@ -400,15 +409,23 @@ static BOOL_T WriteSwitchMotor ( track_p t, FILE * f )
 {
 	BOOL_T rc = TRUE;
 	switchmotorData_p xx = GetswitchmotorData(t);
+	char *switchMotorName = MyStrdup(xx->name);
     
-        if (xx->turnout == NULL) return FALSE;
+#ifdef WINDOWS
+	switchMotorName = Convert2UTF8(switchMotorName);
+#endif // WINDOWS
+
+    if (xx->turnout == NULL) 
+		return FALSE;
 	rc &= fprintf(f, "SWITCHMOTOR %d %d \"%s\" \"%s\" \"%s\" \"%s\"\n",
-		GetTrkIndex(t), GetTrkIndex(xx->turnout), xx->name,
+		GetTrkIndex(t), GetTrkIndex(xx->turnout), switchMotorName,
 		xx->normal, xx->reverse, xx->pointsense)>0;
+
+	MyFree(switchMotorName);
 	return rc;
 }
 
-static void ReadSwitchMotor ( char * line )
+static BOOL_T ReadSwitchMotor ( char * line )
 {
 	TRKINX_T trkindex;
 	wIndex_t index;
@@ -418,8 +435,11 @@ static void ReadSwitchMotor ( char * line )
 
 	LOG( log_switchmotor, 1, ("*** ReadSwitchMotor: line is '%s'\n",line))
 	if (!GetArgs(line+12,"ddqqqq",&index,&trkindex,&name,&normal,&reverse,&pointsense)) {
-		return;
+		return FALSE;
 	}
+#ifdef WINDOWS
+	ConvertUTF8ToSystem(name);
+#endif // WINDOWS
 	trk = NewTrack(index, T_SWITCHMOTOR, 0, sizeof(switchmotorData_t)+1);
 	xx = GetswitchmotorData( trk );
 	xx->name = name;
@@ -439,6 +459,7 @@ static void ReadSwitchMotor ( char * line )
         LOG( log_switchmotor, 1,("*** ReadSwitchMotor(): name = %p, normal = %p, reverse = %p, pointsense = %p\n",
                 name,normal,reverse,pointsense))
         switchmotorDebug(trk);
+	return TRUE;
 }
 
 EXPORT void ResolveSwitchmotorTurnout ( track_p trk )
@@ -742,7 +763,7 @@ static void DrawSWMotorTrackHilite( void )
 	w = (wPos_t)((swmhiliteSize.x/mainD.scale)*mainD.dpi+0.5);
 	h = (wPos_t)((swmhiliteSize.y/mainD.scale)*mainD.dpi+0.5);
 	mainD.CoOrd2Pix(&mainD,swmhiliteOrig,&x,&y);
-	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp );
+	wDrawFilledRectangle( mainD.d, x, y, w, h, swmhiliteColor, wDrawOptTemp|wDrawOptTransparent );
 }
 
 static int SwitchmotorMgmProc ( int cmd, void * data )
@@ -841,8 +862,8 @@ EXPORT void InitCmdSwitchMotor( wMenu_p menu )
 }
 EXPORT void CheckDeleteSwitchmotor(track_p t)
 {
-    track_p sm,trk1;
-    switchmotorData_p xx,xx1;
+    track_p sm;
+    switchmotorData_p xx;
     if (GetTrkType( t ) != T_TURNOUT) return;   // SMs only on turnouts
     
     while ((sm = FindSwitchMotor( t ))) {	                 //Cope with multiple motors for one Turnout!

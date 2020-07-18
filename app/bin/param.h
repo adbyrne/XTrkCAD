@@ -58,6 +58,7 @@ typedef enum {
 #define PDO_MISC				(1L<<7)
 #define PDO_DRAW				(1L<<8)
 #define PDO_FILE				(1L<<9)
+#define PDO_ENTER               (1L<<10)
 
 #define PDO_GRID                (1L<<10)	/** Used in templates to still set position */
 
@@ -140,11 +141,12 @@ typedef struct {
 		char * winLabel;
 		long winOption;
 		void * context;
-        int max_string;
+        unsigned int max_string;
 		wControl_p control;
 		char * assigned_helpStr;
 		paramGroup_p group;
 		paramOldData_t oldD, demoD;
+		wBool_t enter_pressed;
 		} paramData_t, *paramData_p;
 
 

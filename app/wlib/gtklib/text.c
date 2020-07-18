@@ -98,6 +98,8 @@ void wTextAppend(wText_p bt,
 {
     GtkTextBuffer *tb;
     GtkTextIter ti1;
+    GtkTextMark *tm;
+    
 
     if (bt->text == 0) {
         abort();
@@ -109,6 +111,18 @@ void wTextAppend(wText_p bt,
     // append to end of buffer
     gtk_text_buffer_get_end_iter(tb, &ti1);
     gtk_text_buffer_insert(tb, &ti1, text, -1);
+    
+    if ( bt->option & BT_TOP ) {
+        // and scroll to start of text
+        gtk_text_buffer_get_start_iter(tb, &ti1);
+    } else {
+        // and scroll to end of text
+        gtk_text_buffer_get_end_iter(tb, &ti1);
+    }
+    tm = gtk_text_buffer_create_mark(tb, NULL, &ti1, TRUE );
+    gtk_text_view_scroll_mark_onscreen (GTK_TEXT_VIEW(bt->text), tm );
+    gtk_text_buffer_delete_mark( tb, tm );
+ 
     bt->changed = FALSE;
 }
 
@@ -116,7 +130,7 @@ void wTextAppend(wText_p bt,
  * Get the text from a text buffer in system codepage
  * The caller is responsible for free'ing the allocated storage.
  *
- * \todo handling of return from gtkConvertOutput can be improved
+ * Dont convert from UTF8
  *
  * \param bt IN the text widget
  * \return    pointer to the converted text
@@ -135,8 +149,8 @@ static char *wlibGetText(wText_p bt)
     tb = gtk_text_view_get_buffer(GTK_TEXT_VIEW(bt->text));
     gtk_text_buffer_get_bounds(tb, &ti1, &ti2);
     cp = gtk_text_buffer_get_text(tb, &ti1, &ti2, FALSE);
-    cp1 = wlibConvertOutput(cp);
-    res = strdup(cp1);
+    //cp1 = wlibConvertOutput(cp);
+    res = strdup(cp);
     g_free(cp);
     return res;
 }
@@ -375,7 +389,7 @@ wBool_t wTextPrint(
  * Get the length of text
  *
  * \param bt IN the text widget
- * \return    length of string
+ * \return    length of string including terminating \0
  */
 
 int wTextGetSize(wText_p bt)
@@ -383,7 +397,7 @@ int wTextGetSize(wText_p bt)
     char *cp = wlibGetText(bt);
     int len = strlen(cp);
     free(cp);
-    return len;
+    return len + 1;
 }
 
 /**

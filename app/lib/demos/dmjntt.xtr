@@ -16,14 +16,22 @@ REDRAW
 MESSAGE
 You can connect from any track to a turntable
 
-Note: you cannot have a turntable as your first connection point.
+With a Cornu Easement you can have a turntable as the first point.
+
 END
 STEP
 RESET
-COMMAND Join
-MOUSE 2 17.833 10.167
-MOUSE 4 17.833 10.167
+PARAMETER misc cmdEasement
+PARAMETER easement val -1.0
 BIGPAUSE
+PARAMETER easement ok
+COMMAND Join
+MOUSE 1 17.833 10.167
+MOUSE 2 17.833 10.167
+MOUSE 3 15.833 10.000
+MOUSE 4 15.833 10.000
+BIGPAUSE
+MOUSE 1 22.000 8.167
 MOUSE 2 22.000 8.167
 BIGPAUSE
 MOUSE 3 21.750 6.417
@@ -32,7 +40,7 @@ _________________________________________
 
 You cannot place the connecting track too close to an existing stall track.  How close you can get is controlled by the Turntable Angle on the Setup dialog.
 
-In this example it is set to 7.5 degrees.
+In this example it is set to 15 degrees.
 END
 STEP
 MOUSE 3 21.750 6.167
@@ -41,7 +49,7 @@ BIGPAUSE
 MOUSE 3 22.083 5.417
 MOUSE 3 21.750 6.000
 BIGPAUSE
-MOUSE 3 21.750 5.917
+MOUSE 3 21.750 5.00
 MOUSE 3 22.083 4.833
 MESSAGE
 _________________________________________
@@ -103,7 +111,7 @@ MOUSE 3 30.250 8.083
 MESSAGE
 _________________________________________
 
-Now the cursor will be moved within the turntable.  Notice the error message.
+Now the cursor will be moved within the turntable, but the end stays on the edge of the well.
 END
 BIGPAUSE
 MOUSE 3 29.917 8.000
@@ -150,24 +158,14 @@ MOUSE 3 22.083 10.333
 MOUSE 3 22.000 10.000
 MOUSE 3 21.833 9.667
 MOUSE 3 21.833 9.417
-MOUSE 3 21.750 9.167
-MOUSE 3 21.667 8.917
-MOUSE 3 21.667 8.667
-MOUSE 3 21.583 8.500
-MOUSE 3 21.500 8.333
-MOUSE 3 21.333 8.167
-MOUSE 3 21.333 8.000
-MOUSE 3 21.333 7.917
-MOUSE 3 21.250 7.917
-MOUSE 3 21.250 7.833
-MOUSE 3 21.333 7.833
 MESSAGE
 _________________________________________
 
 All done.
 END
 BIGPAUSE
-MOUSE 4 21.333 7.833
+MOUSE 4 21.333 9.417
+MOUSE 8200 21.333 9.417
 MESSAGE
 =========================================
 END

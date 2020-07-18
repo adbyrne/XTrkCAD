@@ -12,27 +12,40 @@ CURVE 2 DEMO 1 29.473372 12.727335 7.625000
 REDRAW
 RESET
 MESSAGE
-The <Join> command can join straight and curved tracks (in either order).
+The <Join> command can also join straight and curved tracks (in either order).
+
+We will enable Cornu easements
+
 END
+
 STEP
+PARAMETER misc cmdEasement
+PARAMETER easement val -1.0
+BIGPAUSE
+PARAMETER easement ok
 COMMAND Join
+MOUSE 1 34.167 6.917
 MOUSE 2 34.167 6.917
 MOUSE 4 34.167 6.917
+MOUSE 1 23.750 2.167
 MOUSE 2 23.750 2.167
 MESSAGE
 _________________________________________
 
-A connecting track is drawn between the two tracks.
+A connecting cornu track is drawn between the two tracks.
 END
 STEP
 MOUSE 3 23.750 2.083
 MOUSE 3 19.417 2.000
+MOUSE 4 19.417 2.000
 MESSAGE
 _________________________________________
 
 Notice that the curved track is extended as the connection point moves past the End-Point.
 END
 STEP
+MOUSE 1 34.167 6.917
+MOUSE 2 34.167 6.917
 MOUSE 3 19.167 2.000
 MOUSE 3 10.917 2.333
 BIGPAUSE
@@ -41,24 +54,25 @@ MOUSE 3 28.250 2.250
 MESSAGE
 _________________________________________
 
-Here the connection makes the curved track wrap around.
+Here the connection makes the curved track wrap around.  This is not a useful shape, there is a discontinuity at the end. 
+Adjusting the end point will fix it. 
 END
 STEP
 MOUSE 3 28.250 2.250
-MOUSE 3 3.250 2.333
-MESSAGE
-_________________________________________
+MOUSE 4 28.250 2.250
 
-Now the cursor is about to be moved past the other (far) End-Point of the straight track.  You will receive a warning and the connecting track turns Red.
-END
-STEP
-MOUSE 3 2.500 2.250
-MOUSE 3 0.667 2.167
-STEP
-MOUSE 3 0.667 2.167
-MOUSE 4 7.333 1.833
 MESSAGE
 =========================================
 END
+REGRESSION START 10 - join curve and straight
+STRAIGHT 1 0 0 0 0 DEMO 2
+	E4 1.883214 2.133372 270.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 31.050000 2.133333 90.000000 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END
+CURVE 2 0 0 0 0 DEMO 2 29.473372 12.727335 0 7.625000 0 0.000000 0.000000
+	E4 37.081031 13.241282 356.135245 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	E4 33.769610 6.427894 235.706018 0 0.0 0.0 0.0 0.0 0 0 0 0.000000 
+	END
+REGRESSION END
 STEP
 CLEAR

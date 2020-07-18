@@ -368,45 +368,41 @@ EXPORT STATUS_T GridAction(
 	switch (action) {
 	case C_DOWN:
 		pos1 = pos;
-		DrawBigCross( pos1, *angle );
 		return C_CONTINUE;
 
 	case C_MOVE:
-		DrawBigCross( pos1, *angle );
 		*orig = pos1 = pos;
-		DrawBigCross( pos1, *angle );
 		return C_CONTINUE;
 
 	case C_UP:
-		DrawBigCross( pos1, *angle );
 		*orig = pos1;
 		return C_CONTINUE;
 
 	case C_RDOWN:
 		pos0 = pos1 = pos;
 		oldAngle = newAngle = *angle;
-		DrawBigCross( pos0, newAngle );
 		return C_CONTINUE;
 
 	case C_RMOVE:
 		if ( FindDistance(pos0, pos) > 0.1*mainD.scale ) {
-			DrawBigCross( pos0, newAngle );
 			pos1 = pos;
 			newAngle = FindAngle( pos0, pos1 );
 			if (angleSystem!=ANGLE_POLAR)
 				newAngle = newAngle-90.0;
 			newAngle = NormalizeAngle( floor( newAngle*10.0 ) / 10.0 );
 			*angle = newAngle;
-			DrawBigCross( pos0, newAngle );
 		}
 		return C_CONTINUE;
 
 	case C_RUP:
-		DrawBigCross( pos0, newAngle );
 		Rotate( orig, pos0, newAngle-oldAngle );
 		*orig = pos0;
 		*angle = newAngle;
 		return C_CONTINUE;
+
+	case C_REDRAW:
+		DrawBigCross( *orig, *angle );
+		break;
 	}
 	return C_CONTINUE;
 }
@@ -564,8 +560,7 @@ static void RedrawGrid( void )
 	if (grid.Show != oldGrid.Show ||
 		GridChanged() ) {
 		wDrawDelayUpdate( tempD.d, TRUE );
-		DrawASnapGrid( &oldGrid, &tempD, mapD.size, TRUE );
-		DrawASnapGrid( &grid, &tempD, mapD.size, TRUE );
+		MainRedraw(); // RedrawGrid
 		wDrawDelayUpdate( tempD.d, FALSE );
 	}
 }
@@ -674,12 +669,9 @@ static void GridDlgUpdate(
 		GridButtonUpdate( CHK_SHOW );
 		break;
 	default:
-		wDrawDelayUpdate( tempD.d, TRUE );
-		DrawASnapGrid( &oldGrid, &tempD, mapD.size, TRUE );
 		ParamLoadData( &gridPG );
 		GridButtonUpdate( 0 );
-		DrawASnapGrid( &grid, &tempD, mapD.size, TRUE );
-		wDrawDelayUpdate( tempD.d, FALSE );
+		MainRedraw(); // GridDlgUpdate
 	}
 }
 
@@ -688,9 +680,8 @@ static void SnapGridRotate( void * pangle )
 {
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
 	wDrawDelayUpdate( tempD.d, TRUE );
-	DrawASnapGrid( &oldGrid, &tempD, mapD.size, TRUE );
 	grid.Orig = cmdMenuPos;
-	grid.Angle += angle;
+	grid.Angle += angle/1000;
 	oldGrid = grid;
 	DrawASnapGrid( &grid, &tempD, mapD.size, TRUE );
 	wDrawDelayUpdate( tempD.d, FALSE );
@@ -719,12 +710,12 @@ EXPORT STATUS_T CmdGrid(
 		return C_CONTINUE;
 
 	case C_REDRAW:
-		return C_TERMINATE;
+		DrawBigCross( grid.Orig, grid.Angle );
+		return C_CONTINUE;
 
 	case C_CANCEL:
 		grid = oldGrid;
 		wHide( gridW );
-		MainRedraw();
 		return C_TERMINATE;
 
 	case C_OK:

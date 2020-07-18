@@ -32,13 +32,25 @@
 #define strcasecmp _stricmp
 #endif
 
+#ifndef MISC_H
 #include "dynarr.h"
+#endif
 
 #define BORDERSIZE	(4)
 #define LABEL_OFFSET	(3)
 #define MENUH	(24)
 
 extern wWin_p gtkMainW;
+
+#ifdef CURSOR_SURFACE
+typedef struct {
+		cairo_surface_t* surface;
+		wPos_t width;
+		wPos_t height;
+		wBool_t show;
+} wCursorSurface_t, * wSurface_p;
+#endif
+
 
 typedef enum {
 		W_MAIN, W_POPUP,
@@ -69,6 +81,8 @@ typedef void (*setTriggerCallback_p)( wControl_p b );
 		GtkWidget * widget; \
 		GtkWidget * label; \
 		doneProcCallback_p doneProc; \
+		/* CURSOR_SURFACE wCursorSurface_t cursor_surface;*/ \
+		wBool_t outline; \
 		void * data;
 
 struct wWin_t {
@@ -86,6 +100,8 @@ struct wWin_t {
 		wBool_t busy;
 		int resizeTimer;		       /** resizing **/
 		int resizeW,resizeH;
+		int timer_idle_count;
+		int timer_busy_count;
 		int modalLevel;
 		};
 
@@ -170,6 +186,7 @@ typedef struct {
 GdkColor *wlibGetColor(wDrawColor color, wBool_t normal);
 
 /* control.c */
+wBool_t wControlExpose (GtkWidget * widget, GdkEventExpose * event, wControl_p b);
 
 /* droplist.c */
 enum columns {
@@ -190,7 +207,7 @@ wList_p wDropListCreate(wWin_p parent, wPos_t x, wPos_t y, const char *helpStr, 
 /* filesel.c */
 
 /* font.c */
-PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp, wFontSize_t fs, const char *s, int *width_p, int *height_p, int *ascent_p, int *descent_p);
+PangoLayout *wlibFontCreatePangoLayout(GtkWidget *widget, void *cairo, wFont_p fp, wFontSize_t fs, const char *s, int *width_p, int *height_p, int *ascent_p, int *descent_p, int *baseline_p);
 void wlibFontDestroyPangoLayout(PangoLayout *layout);
 const char *wlibFontTranslate(wFont_p fp);
 
@@ -254,6 +271,7 @@ struct wDraw_t {
 
 		GdkPixmap * pixmap;
 		GdkPixmap * pixmapBackup;
+		cairo_surface_t * temp_surface;
 
 		double dpi;
 
@@ -273,6 +291,8 @@ struct wDraw_t {
 		cairo_t *printContext;
 		cairo_surface_t *curPrintSurface;
 		GdkPixbuf * background;
+
+		wBool_t bTempMode;
 		};
 
 void WlibApplySettings(GtkPrintOperation *op);
@@ -280,7 +300,7 @@ void WlibSaveSettings(GtkPrintOperation *op);
 void psPrintLine(wPos_t x0, wPos_t y0, wPos_t x1, wPos_t y1, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
 void psPrintArc(wPos_t x0, wPos_t y0, wPos_t r, double angle0, double angle1, wBool_t drawCenter, wDrawWidth width, wDrawLineType_e lineType, wDrawColor color, wDrawOpts opts);
 void psPrintFillRectangle(wPos_t x0, wPos_t y0, wPos_t x1, wPos_t y1, wDrawColor color, wDrawOpts opts);
-void psPrintFillPolygon(wPos_t p[][2], int cnt, wDrawColor color, wDrawOpts opts);
+void psPrintFillPolygon(wPos_t p[][2], wPolyLine_e type[], int cnt, wDrawColor color, wDrawOpts opts, int fill, int open);
 void psPrintFillCircle(wPos_t x0, wPos_t y0, wPos_t r, wDrawColor color, wDrawOpts opts);
 void psPrintString(wPos_t x, wPos_t y, double a, char *s, wFont_p fp, double fs, wDrawColor color, wDrawOpts opts);
 static void WlibGetPaperSize(void);

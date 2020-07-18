@@ -121,7 +121,7 @@ The \f{Import} and \f{Export} buttons read and write a \e{Comma-Separated-Value 
 
 \u000
 
-\dd \e{CarLength}, \e{CarWidth}, \e{CoupledLength} and \e{TruckCenter} - car dimensions in inches
+\dd \e{CarLength}, \e{CarWidth}, \e{CoupledLength}, \e{Truch Center Offset} and \e{TruckCenter} - car dimensions in inches
 
 \u000
 
@@ -219,7 +219,7 @@ The middle section contains:
 
 \u000
 
-\dd \f{Car Dimensions} which contain the major dimensions of the car and how the coupler is mounted on the car. The \f{Coupler Length} is measured from the edge of the car body to the pulling face of the coupler.  It is equivalent to half the separation between two coupled cars.
+\dd \f{Car Dimensions} which contain the major dimensions of the car and how the coupler is mounted on the car. The \f{Coupler Length} is measured from the edge of the car body to the pulling face of the coupler.  It is equivalent to half the separation between two coupled cars. 
 
 \lcont{
 
@@ -236,6 +236,13 @@ The middle section contains:
 \u000
 
 \dd \f{Coupled Length = Car Length + 2 * Coupler Length}
+
+\u000
+
+\dd The \e{Center Offset} moves the center of the two trucks from the center of the Car. 
+This is a common feature of steam locomotives and means the envelope of the engine requires greater seperation between tracks on small radius curves.
+The minimum clearance needed can be seen by placing the car with the greatest distance from the center of the trucks to the corner on the inner radius and the car with the greatest distance between the trucks on the outer radius.
+See NMRA TN-7 Curved Track Centerline and Obstacle Clearance Calculation Methodology. 
 
 }
 
@@ -351,7 +358,7 @@ If you modify a definition from a \e{XTrackCAD} Library parameter file, the new 
 
 \S{cmdLayer} Layers Dialog
 
-Each object is contained in a layer.  Objects which are created independently of other objects (such as straight tracks (\K{cmdStraight}) or text (\K{cmdText})) are created in the current layer.  Objects which are associated with other objects (such as tracks created by the \f{Modify} (\K{cmdModify}) or \f{Join} (\K{cmdJoin}) commands) are created in the same layer as the associated object(s).
+Each object is contained in a layer - which is a custom group of objects that do not have a particular visual order, but can be treated as a set for certain commands.  Objects which are created independently of other objects (such as straight tracks (\K{cmdStraight}) or text (\K{cmdText})) are created in the current layer.  Objects which are associated with other objects (such as tracks created by the \f{Modify} (\K{cmdModify}) or \f{Join} (\K{cmdJoin}) commands) are created in the same layer as the associated object(s).
 
 The \f{Layers} dialog allows you to change various attributes of each of the 99 possible \f{layers}.
 
@@ -363,13 +370,15 @@ The drop down list at the top of the dialog selects the \f{Layer} you are intere
 
 The \f{Name} edit box contains the name of the \f{Layer}.  This name is listed in the \f{Current Layer} drop down list on the \f{Tool-bar} (\K{mainW}).  Also the \f{Name} is displayed as the balloon help for the corresponding \f{Layer Button}.
 
-The \f{Color} button specifies the color of tracks if \f{Color Layers} (\K{cmdDisplay}) radio button on the \f{Display} dialog is checked.
+The \f{Color} button specifies the color of tracks if either of the two \f{Color Layers} (\K{cmdDisplay}) radio buttons on the \f{Display} dialog is checked and the \f{Use Color} button for this layer is checked.
 
 The \f{Visible} check-box controls whether the \f{Layer} is drawn on the Main (\K{mainW}) window.
 
 The \f{Frozen} check-box indicates that tracks in that \f{Layer} can not be modified or deleted.
 
 The \f{On Map} check-box controls whether the \f{Layer} is drawn on the Map (\K{cmdMap}) window.
+
+The \f{Module} check-box controls whether the \f{Layer} is selected/deselected and so moved or rotated as a group - this can be used to denote a track module in a modular layout - allowing the modules to be positioned as units. Objects in a Module Layer can not be individually modified.  One way of getting a modules in is to build a library with \f{Export} and then \f{Import As Module} - this creates one layer per module, names it and sets the \f{Module} check-box.  
 
 You cannot uncheck \f{Visible} or check \f{Frozen} for the \f{Current Layer}.
 
@@ -391,8 +400,8 @@ The current layer is selected by picking a value from the drop down layer list. 
 
 You can hide (or show if not visible) the different layers by pushing one of the \f{Layer Buttons} on the Tool-bar (if you have configured the tool-bar (\K{toolbarM}) to show the Layer buttons).  If a layer is not visible then the corresponding layer button will be raised.  The active or current layer cannot be hidden.
 
-The color of each layer button shows the color that will be used to draw tracks in that layer, if you select \f{Color Layers} (\K{cmdDisplay}) on the \f{Display} dialog.
-
+The color of each layer button shows the color that will be used to draw tracks or draw objects in that layer, if you have selected the \f{Color Layers} (\K{cmdDisplay}) on the \f{Display} dialog. The \f{Use Color} button allows this layer to opt in or out - which can be usefu if you want to color other layers but a layer contains pre-colored objects (like Structures or Scenery).
+ 
 Any selected objects are unselected when the Layer is set to not visible.  If a layer is not visible, you cannot select objects in the Layer.  It is as if the objects do not exist until you show the layer again.
 
 The \f{Move To Current Layer} command on Edit menu (\K{editM}) will move all selected (\K{cmdSelect}) tracks to the current Layer.
@@ -673,6 +682,8 @@ The \f{Cancel} button removes the \f{Turnout Designer} dialog.
 
 \u000
 
+\b The new \i{Cornu Turnouts} allow you to build turnouts that have curved ends. The dialogs include radius information that can be set to zero for a straight end. The turnouts will be composed of simple curves and tracks and when extended the end radius will be used. 
+
 \b The Group (\K{cmdGroup}) command can be used to add cosmetic details to \f{Turnout} definitions.
 
 \rule
@@ -681,7 +692,9 @@ The \f{Cancel} button removes the \f{Turnout Designer} dialog.
 
 This command updates (or refreshes) selected turnouts, sectional tracks and structures on your layout with the current definitions from the loaded parameter files (\K{cmdPrmfile}).  Each selected object that is found in a parameter file is updated with the current definition.
 
-If an object can not be found or if the new definition does not fit (same number of endpoints and all the endpoints have the same position and angle) then a dialog is displayed which contains suitable definitions that you can choose from.  You can \f{Skip} the current object or \f{Cancel} to skip all the remaining objects.
+If an object can be found and if a new track definition fits in the same footprint, (i.e., has the same number of endpoints and all the endpoints have the same position and angle) then a dialog is displayed which contains suitable definitions that you can choose from.  You can \f{Skip} the current object or \f{Cancel} to skip all the remaining objects.
+
+Otherwise the update fails and must be done manually using \f{Delete} and \f{Add}.
 
 If an object has been updated then it is unselected, otherwise it will remain selected at the end of this command.
 

@@ -31,6 +31,7 @@
 #include <math.h>
 #include <ctype.h>
 #include <assert.h>
+#include "misc.h"
 #include "mswint.h"
 #include "i18n.h"
 
@@ -579,7 +580,7 @@ wMenuPush_p wMenuPushCreate(
 {
 	wMenuPush_p mi;
 	int rc;
-	char label[80];
+	char *label = malloc(strlen(labelStr) + 30 );	/**< The label and sufficient space for the keyboard shortcut */
 	char *cp;
 	char ac;
 	UINT vk;
@@ -591,9 +592,9 @@ wMenuPush_p wMenuPushCreate(
 	mi->mparent = m;
 	mi->acclKey = acclKey;
 	mi->enabled = TRUE;
-	strcpy( label, mi->labelStr );
+	strcpy(label, labelStr);
 	modifier = 0;
-	if ( acclKey != 0 ) {
+	if ( acclKey != 0 && strlen(label ) < 60 ) {
 		DYNARR_APPEND( acclTable_t, acclTable_da, 10 );
 		cp = label + strlen( label );
 		*cp++ = '\t';
@@ -625,6 +626,7 @@ wMenuPush_p wMenuPushCreate(
 		acclTable(acclTable_da.cnt-1).mp = mi;
 	}
 	rc = AppendMenu( m->menu, MF_STRING, mi->index, label );
+	free(label);
 	return mi;
 }
 

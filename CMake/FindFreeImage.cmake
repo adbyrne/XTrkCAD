@@ -5,33 +5,35 @@
 # FREEIMAGE_FOUND
 # FREEIMAGE_INCLUDE_PATH
 # FREEIMAGE_LIBRARY
+# FREEIMAGE_SHAREDLIB (Win32 only)
+#
+# There is no default installation for FreeImage on Windows so a
+# XTrackCAD specific directory tree is assumed
 #
 
-IF (WIN32)
-	FIND_PATH( FREEIMAGE_INCLUDE_PATH FreeImage.h
-		${FREEIMAGE_ROOT_DIR}/include
-		${FREEIMAGE_ROOT_DIR}
+if (WIN32)
+	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
+		PATHS
+    $ENV{XTCEXTERNALROOT}/x86/FreeImage
 		DOC "The directory where FreeImage.h resides")
-	FIND_LIBRARY( FREEIMAGE_LIBRARY
+	find_library( FREEIMAGE_LIBRARY
 		NAMES FreeImage freeimage
 		PATHS
-		${FREEIMAGE_ROOT_DIR}/lib
-		${FREEIMAGE_ROOT_DIR}
+    $ENV{XTCEXTERNALROOT}/x86/FreeImage
 		DOC "The FreeImage library")
-	FIND_FILE( FREEIMAGE_SHAREDLIB
+	find_file( FREEIMAGE_SHAREDLIB
 		NAMES freeimage.DLL
 		PATHS
-		${FREEIMAGE_ROOT_DIR}/dll
-		${FREEIMAGE_ROOT_DIR}
+    $ENV{XTCEXTERNALROOT}/x86/FreeImage
 	)
-ELSE (WIN32)
-	FIND_PATH( FREEIMAGE_INCLUDE_PATH FreeImage.h
+else (WIN32)
+	find_path( FREEIMAGE_INCLUDE_PATH FreeImage.h
 		/usr/include
 		/usr/local/include
 		/sw/include
 		/opt/local/include
 		DOC "The directory where FreeImage.h resides")
-	FIND_LIBRARY( FREEIMAGE_LIBRARY
+	find_library( FREEIMAGE_LIBRARY
 		NAMES FreeImage freeimage
 		PATHS
 		/usr/lib64
@@ -41,18 +43,16 @@ ELSE (WIN32)
 		/sw/lib
 		/opt/local/lib
 		DOC "The FreeImage library")
-ENDIF (WIN32)
+endif (WIN32)
 
-SET(FREEIMAGE_LIBRARIES ${FREEIMAGE_LIBRARY})
+find_package_handle_standard_args( FreeImage
+		DEFAULT_MSG
+		FREEIMAGE_LIBRARY
+		FREEIMAGE_INCLUDE_PATH
+)
 
-IF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
-	SET( FREEIMAGE_FOUND TRUE CACHE BOOL "Set to TRUE if FreeImage is found, FALSE otherwise")
-ELSE (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
-	SET( FREEIMAGE_FOUND FALSE CACHE BOOL "Set to TRUE if FreeImage is found, FALSE otherwise")
-ENDIF (FREEIMAGE_INCLUDE_PATH AND FREEIMAGE_LIBRARY)
-
-MARK_AS_ADVANCED(
+mark_as_advanced(
 	FREEIMAGE_FOUND
 	FREEIMAGE_LIBRARY
-	FREEIMAGE_LIBRARIES
-FREEIMAGE_INCLUDE_PATH)
+	FREEIMAGE_INCLUDE_PATH
+  FREEIMAGE_SHAREDLIB)

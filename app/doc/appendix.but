@@ -12,9 +12,10 @@
 
 The best way to move your design from computer to roadbed is to print out a full scale copy (or portions) of the layout. During the print process the orientation of the print grid can be adjusted so the printout will line up with the tracks. 
 
-If you have cut-sheet printer (like a laser or ink-jet) set the Ignore Page Margins toggle on the print dialog. Normally there is an unprintable margin around the edge of the page and \e{XTrackCAD} only prints on the printable area, which means you would have to trim or overlay the pages. Setting the Ignore Page Margins toggle makes \e{XTrackCAD} ignore this margin so you can just abut the paper. Also, turn on Print Roadbed Outline and set your roadbed width. 
+If you have cut-sheet printer (like a laser or ink-jet) set the Ignore Page Margins toggle on the print dialog. Normally there is an unprintable margin around the edge of the page and \e{XTrackCAD} only prints on the printable area, which means you would have to trim or overlay the pages. 
+Setting the Ignore Page Margins toggle makes \e{XTrackCAD} ignore this margin so you can just abut the paper. Also, turn on Print Roadbed Outline and set your roadbed width. 
 
-If you have a continuous form printer (like a dot matrix) you can print a series of pages to form a continuous strip as long as you need. I use an old wide carriage printer that was being thrown out and can print 8' by 13.2" strips. Accuracy is not critical, 9-pin will do fine. You may need to experiment with setting the Landscape/Portrait modes on the Printer Setup and the Print dialogs and rotating the Print Grid to get the pages in the correct orientation. In particular I've found it best to set the Printer Setup dialog to Portrait mode and select Landscape Page Format on the \e{XTrackCAD} Printer dialog. 
+For large scale printouts, the ability of many platforms to print as PDF is very helpful. Commercial printers can oftem print very large strips of paper.
 
 Once you have a full scale print-out of your layout (or portion, if you have a larger layout you don't want to do it all at once) you need to transfer this to the roadbed. Here's two methods that can be used:
 
@@ -23,6 +24,8 @@ Once you have a full scale print-out of your layout (or portion, if you have a l
 \u000
 
 \b Tape the print-out to the roadbed then using a tracing wheel (available at Sewing shops), trace the center-line of the track and roadbed outline. At this point consider places when you'll want to widen the roadbed to support signals, switch machines, joints etc.
+
+\b Some users have reported that they successfully used the DXF export to get a file into Computer Controlled Machines that can cut out trackbed. 
 
 \rule
 
@@ -71,17 +74,6 @@ Other prototype definitions can be created using the Car Prototype dialog. Refer
 \rule
 
 
-\H{faqsButtonColor} Button Bar Icons Missing or Obscure
-
-\f{Why are Button Bar icons missing or obscure?}
-
-On systems restricted to 256 colors, it's not possible to display all colors on button faces. In this case, Windows chooses the closest matching color, which may be the same as the buttons background color. When this occurs the Button Bar icon may be obscured or appear to be missing.
-
-In cases where Layer Buttons are affected the number on the button may not be visible. Although it may not be possible to view the layer number, the correct color will be used to color objects that appear on the layer.
-
-\rule
-
-
 \H{faqsJoin} How Do I Place and Join Tracks
 
 \f{How do I join tracks, place turnouts, build a yard etc?}
@@ -114,6 +106,8 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 \f{Drop Down List} - a list-box which is only displayed when you click on the 'drop-down' button.
 
 \f{Edit Box} - an area where you can enter a String, Integer or Floating Point value.
+
+\f{FlexTrack} - an automatic object on the ToolBar that creates a Cornu Track element
 
 \f{Highlighted} - an area on the Canvas which is in inverse-video.
 
@@ -151,6 +145,12 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 \f{Auto-connect} - when placing turnouts (\K{cmdHotBar}) and creating parallel (\K{cmdParallel}) tracks, the new track will automatically be connected to other tracks if the tracks are aligned properly.
 
 \f{Block Gap} - provides control by dividing the layout into electrically isolated blocks, where trains can be slowed or stopped by lowering or cutting the power to a block. Dividing a layout into blocks also permits operators to run more than one train on a layout with much less risk of a fast train catching up with and hitting a slow train. Blocks can also trigger signals or other animated accessories on the layout, adding more realism (or whimsy) to the layout. Three-rail systems will often insulate one of the common rails on a section of track, and use a passing train to complete the circuit and activate an accessory.
+
+\f{Cornu} -  * Cornu curves are a family of mathematically defined curves that define spirals that Euler spirals and elastica come from.
+They have the useful property for us that curvature increases linearly along the curve which
+means the acceleration towards the center of the curve also increases evenly. Railways have long understood that
+smoothly changing the radius is key to passenger comfort and reduced derailments. The railway versions of these
+curves were variously called easements, Talbot or Euler spirals.
 
 \f{DXF Format} - Abbreviation of \f{D}ata \f{E}xchange \f{F}ile, a two-dimensional graphics file format supported by virtually all PC-based CAD products. It was created by AutoDesk for the AutoCAD system. 
 
