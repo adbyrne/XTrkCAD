@@ -67,6 +67,7 @@ void wStatusSetValue(
     }
 
     gtk_entry_set_text(GTK_ENTRY(b->labelWidget), wlibConvertInput(arg));
+    gtk_widget_queue_draw (GTK_WIDGET(b->labelWidget));
 }
 /**
  * Create a window for a simple text.
