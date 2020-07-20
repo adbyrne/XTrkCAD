@@ -1484,7 +1484,7 @@ STATUS_T DrawGeomPolyModify(
 				}
 				return C_CONTINUE;
 			}
-			if ((action>>8 == 'c') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType == POLYLINE) ) {
+			if ((action>>8 == 'g') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType == POLYLINE) ) {
 				tempSegs(0).u.p.polyType = FREEFORM;
 				context->subtype=FREEFORM;
 				context->open = FALSE;
@@ -1502,7 +1502,7 @@ STATUS_T DrawGeomPolyModify(
 				context->filled = TRUE;
 				return C_CONTINUE;
 			}
-			if ((action>>8 == 'e') && (tempSegs(0).type == SEG_FILPOLY) ) {
+			if ((action>>8 == 'u') && (tempSegs(0).type == SEG_FILPOLY) ) {
 				tempSegs(0).type = SEG_POLY;
 				context->type =  SEG_POLY;
 				context->filled = FALSE;
@@ -1701,7 +1701,7 @@ STATUS_T DrawGeomOriginMove(
 			break;
 		case C_TEXT:
 			if ((context->state == MOD_ORIGIN || context->state == MOD_AFTER_ORIG) &&
-				((action>>8 >= '0' && action>>8 <= '1') || action>>8 == 'l' || action>>8 == 'c' || action>>8 == 'p')) {
+				((action>>8 >= '0' && action>>8 <= '1') || action>>8 == 'l' || action>>8 == 'm' || action>>8 == 'p')) {
 				// 0,1,2,3,4 -> reset rot center
 				if (action>>8 == '0') {
 					context->rot_center = zero;
@@ -1716,7 +1716,7 @@ STATUS_T DrawGeomOriginMove(
 						if (context->prev_inx !=-1) {
 							context->rot_center = points(context->prev_inx).pt;
 						}
-					} else if (action>>8 == 'c') {
+					} else if (action>>8 == 'm') {
 						context->rot_center = FindCentroid(points_da.cnt,&points(0));
 					}
 				}

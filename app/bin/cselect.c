@@ -70,8 +70,7 @@ track_p IsInsideABox(coOrd pos);
 static track_p moveDescTrk;
 static coOrd moveDescPos;
 
- BOOL_T importMove = 0;
- int incrementalDrawLimit = 20;
+int incrementalDrawLimit = 20;
  static int microCount = 0;
 
 static dynArr_t tlist_da;
@@ -2903,7 +2902,6 @@ static STATUS_T CmdSelect(
 	switch (action&0xFF) {
 	case C_START:
 		InfoMessage( _("Select track") );
-		importMove = FALSE;
 		doingMove = FALSE;
 		doingRotate = FALSE;
 		doingAlign = FALSE;

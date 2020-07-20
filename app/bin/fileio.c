@@ -1474,7 +1474,6 @@ static int ImportTracks(
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
 	paramVersion = paramVersionOld;
-	importMove = TRUE;
 	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	return TRUE;
@@ -1632,7 +1631,6 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 	/*DoRedraw();*/
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
-	importMove = TRUE;
 	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	UpdateAllElevations();

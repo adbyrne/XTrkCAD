@@ -814,7 +814,7 @@ In Origin Mode, the context menu allows the origin to be set to be -
 
 \dd \e{Absolute} (shortcut "0") with the origin at the layout origin or
 
-\dd \e{Relative} by dragging the origin to a point, or snapping to the position of the first 4 corner points (shortcut "1" through "4"), or to the centroid of the shape (shortcut "c"). For a Polygon or Polyline the \e{Relative} origin can be snapped to a selected node (shortcut "l").
+\dd \e{Relative} by dragging the origin to a point, or snapping to the position of the first 4 corner points (shortcut "1" through "4"), or to the middle/centroid of the shape (shortcut "m"). For a Polygon or Polyline the \e{Relative} origin can be snapped to a last selected node (shortcut "l").
 
 \u000
 
@@ -872,11 +872,11 @@ If no nodes are selected,
 
 \u000
 
-\b A context menu can be used to close a polyline into a polygon (shortcut "c") or open it (shortcut "o") into a non-filled polygon between its last and first nodes.
+\b A context menu can be used to close a polyline into a polygon (shortcut "g") or open it (shortcut "l") into a non-filled polygon between its last and first nodes.
 
 \u000
 
-\b A unfilled polygon can also be filled (shortcut "f") or a filled one emptied (shortcut "e").
+\b A unfilled polygon can also be filled (shortcut "f") or a filled one emptied (shortcut "u").
 
 \u000
 

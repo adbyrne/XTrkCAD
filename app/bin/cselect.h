@@ -28,7 +28,6 @@
 extern wIndex_t selectCmdInx;
 extern wIndex_t moveCmdInx;
 extern wIndex_t rotateCmdInx;
-extern BOOL_T importMove;
 extern int incrementalDrawLimit;
 extern long selectedTrackCount;
 
