@@ -156,8 +156,9 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
             return C_CONTINUE;
         }
 
+        parRFactor = (2864.0*(double)parSepFactor)/curScaleRatio;
+
         if ((parType == PAR_TRACK) && (parSeparation == 0.0)) {
-        	parRFactor = (2864.0*(double)parSepFactor)/curScaleRatio;
             DIST_T orig_gauge = GetTrkGauge(Dpa.Trk);
             DIST_T new_gauge = GetScaleTrackGauge(GetLayoutCurScale());
             if (orig_gauge == new_gauge) {
@@ -166,7 +167,8 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
             }
             parSeparation = fabs(orig_gauge/2-new_gauge/2);
             parRFactor = 0.0;
-        }
+        } else if (parType != PAR_TRACK)
+        	parRFactor = 0.0;
         /* in case query has changed things (eg joint) */
         /*
          * this seems to cause problems so I commented it out

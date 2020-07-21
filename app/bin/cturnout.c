@@ -303,6 +303,7 @@ EXPORT wIndex_t CheckPaths(
 		trkSeg_p segs,
 		PATHPTR_T paths )
 {
+	if ((segCnt == 0) || !segs) return -1;
 	int pc, ps;
 	PATHPTR_T pp = 0;
 	int inx;
@@ -806,7 +807,6 @@ static BOOL_T ReadTurnout(
 {
 	if ( !ReadCompound( line+8, T_TURNOUT ) )
 		return FALSE;
-	CheckPaths( tempSegs_da.cnt, &tempSegs(0), pathPtr );
 	return TRUE;
 }
 

@@ -1482,7 +1482,6 @@ STATUS_T DrawGeomPolyModify(
 				default:
 					return C_CONTINUE;
 				}
-				return C_CONTINUE;
 			}
 			if ((action>>8 == 'g') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType == POLYLINE) ) {
 				tempSegs(0).u.p.polyType = FREEFORM;

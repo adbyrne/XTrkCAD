@@ -216,6 +216,13 @@ EXPORT track_p MakeDrawFromSeg(
 	return MakeDrawFromSeg1( 0, pos, angle, sp );
 }
 
+int SliceCuts(ANGLE_T a, DIST_T radius) {
+	double Error = 0.05;
+	double Error_angle = acos(1-(Error/fabs(radius)));
+	if (Error_angle <0.0001) return 0;
+	return (int)(floor(D2R(a)/(2*Error_angle)));
+}
+
 /* Only straight, curved and PolyLine */
 EXPORT track_p MakePolyLineFromSegs(
 		coOrd pos,
@@ -252,15 +259,15 @@ EXPORT track_p MakePolyLineFromSegs(
 				}
 				else if (spb->type == SEG_CRVLIN || spb->type == SEG_CRVTRK) {
 					coOrd this;
-					if (spb->u.c.radius > 0)
+					if (spb->u.c.radius >= 0.0)
 						Translate(&this, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
 					else
 						Translate(&this, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
 					if (first || !IsClose(FindDistance(this, last))) {
 						cnt++;									//Add first point
 					}
-					cnt += (int)floor(spb->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
-					if (spb->u.c.radius > 0)
+					cnt += 1 + SliceCuts(spb->u.c.a1,spb->u.c.radius);
+					if (spb->u.c.radius >= 0.0)
 						Translate(&last, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
 					else
 						Translate(&last, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
@@ -278,15 +285,15 @@ EXPORT track_p MakePolyLineFromSegs(
 		}
 		else if (sp->type == SEG_CRVLIN || sp->type == SEG_CRVTRK) {
 			coOrd this;
-			if (sp->u.c.radius > 0)
+			if (sp->u.c.radius >= 0.0)
 				Translate(&this, sp->u.c.center, sp->u.c.a0, fabs(sp->u.c.radius));
 			else
 				Translate(&this, sp->u.c.center, sp->u.c.a0+sp->u.c.a1, fabs(sp->u.c.radius));
 			if (first || !IsClose(FindDistance(this, last))) {
 				cnt++;									//Add first point
 			}
-			cnt += (int)floor(sp->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
-			if (sp->u.c.radius > 0)
+			cnt += 1+ SliceCuts(sp->u.c.a1,sp->u.c.radius);
+			if (sp->u.c.radius >= 0.0)
 				Translate(&last, sp->u.c.center, sp->u.c.a0+sp->u.c.a1, fabs(sp->u.c.radius));
 			else
 				Translate(&last, sp->u.c.center, sp->u.c.a0, fabs(sp->u.c.radius));
@@ -316,7 +323,7 @@ EXPORT track_p MakePolyLineFromSegs(
 						xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 						j++;
 					}
-					xx->segs[0].u.p.pts[j].pt = last = spb->u.l.pos[1];
+					xx->segs[0].u.p.pts[j].pt = spb->u.l.pos[1];
 					xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 					last = xx->segs[0].u.p.pts[j].pt;
 					j ++;
@@ -324,7 +331,7 @@ EXPORT track_p MakePolyLineFromSegs(
 				}
 				if (spb->type == SEG_CRVLIN || spb->type == SEG_CRVTRK) {
 					coOrd this;
-					if (spb->u.c.radius>0)
+					if (spb->u.c.radius>=0.0)
 						Translate(&this, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
 					else
 						Translate(&this, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
@@ -333,16 +340,16 @@ EXPORT track_p MakePolyLineFromSegs(
 						xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 						j++;
 					}
-					int slices = (int)floor(spb->u.c.a1/22.5);
-					for (int k=1; k<=slices;k++) {
-						if (spb->u.c.radius>0)
-							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+(k*(spb->u.c.a1/(slices+1))), fabs(spb->u.c.radius));
+					int slices = SliceCuts(spb->u.c.a1,spb->u.c.radius);
+					for (int k=1; k<slices;k++) {
+						if (spb->u.c.radius>=0.0)
+							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+(k*(spb->u.c.a1/(slices))), fabs(spb->u.c.radius));
 						else
-							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+((slices+1-k)*(spb->u.c.a1/(slices+1))), fabs(spb->u.c.radius));
+							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+((slices-k)*(spb->u.c.a1/(slices))), fabs(spb->u.c.radius));
 						xx->segs[0].u.p.pts[j].pt_type = wPolyLineSmooth;
 						j++;
 					}
-					if (spb->u.c.radius>0)
+					if (spb->u.c.radius>=0.0)
 						Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
 					else
 						Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
@@ -377,12 +384,13 @@ EXPORT track_p MakePolyLineFromSegs(
 				xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 				j++;
 			}
-			int slices = (int)floor(sp->u.c.a1/22.5);
-			for (int k=1; k<=slices;k++) {
+			int slices = SliceCuts(sp->u.c.a1,sp->u.c.radius);
+
+			for (int k=1; k<slices;k++) {
 				if (sp->u.c.radius>0)
-					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+(k*(sp->u.c.a1/(slices+1))), fabs(sp->u.c.radius));
+					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+(k*(sp->u.c.a1/(slices))), fabs(sp->u.c.radius));
 				else
-					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+((slices+1-k)*(sp->u.c.a1/(slices+1))), fabs(sp->u.c.radius));
+					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+((slices-k)*(sp->u.c.a1/(slices))), fabs(sp->u.c.radius));
 				xx->segs[0].u.p.pts[j].pt_type = wPolyLineSmooth;
 				j++;
 			}
@@ -2024,19 +2032,20 @@ static BOOL_T MakeParallelDraw(
 			coOrd p = pos;
 			angle = GetAngleSegs(1,&xx->segs[0],&p,NULL,NULL,NULL,&inx2,NULL);
 			if ( NormalizeAngle( FindAngle( p, pos ) - angle ) < 180.0 ) {
-				sep = sep*1.4;
-				angle += 135;
+				sep = sep*1.0;
+				angle += 90;
 			} else {
-				angle -= 135;
-				sep = sep*1.4;
+				angle -= 90;
+				sep = sep*1.0;
 			}
 			tempSegs(0).color = xx->segs[0].color;
 			tempSegs(0).width = xx->segs[0].width;
 			tempSegs_da.cnt = 1;
 			tempSegs(0).type = SEG_POLY;
-			if (tempSegs(0).u.p.pts) MyFree(tempSegs(0).u.p.pts);
+			tempSegs(0).u.p.polyType = POLYLINE;
 			tempSegs(0).u.p.pts = memdup( xx->segs[0].u.p.pts, xx->segs[0].u.p.cnt*sizeof (pts_t) );
-			for (int i=0;i<tempSegs(0).u.p.cnt;i++) {
+			tempSegs(0).u.p.cnt = xx->segs[0].u.p.cnt;
+			for (int i=0;i<xx->segs[0].u.p.cnt;i++) {
 				Translate(&tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i].pt,angle,sep);
 			}
 			if (newTrkR) {

@@ -47,6 +47,7 @@
 
 #define TURNOUTDESIGNER			"CTURNOUT DESIGNER"
 
+dynArr_t tempSegs_da;
 
 
 /*****************************************

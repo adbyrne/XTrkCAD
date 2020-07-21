@@ -189,15 +189,10 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			break;
 		case C_TEXT:
 			//Delete or '0' - continues
-			if (action>>8 == 127 || action>>8 == 8 || 	// Del or backspace
-					action>>8 == 'o' || action>>8 == 'p' ||
-					action>>8 == 'l' || action>>8 == 'c' ||
-					action>>8 == 'r' || action>>8 == 's' ||
-					action>>8 == 'e' || action>>8 == 'f' ||
-					action>>8 == 'v' ||
-					(action>>8 >= 48 && action>>8 <= 52)) return ModifyTrack( Dex.Trk, action, pos );
+			if ((action>>8 !=32) && (action >>8 !=13))
+				return ModifyTrack( Dex.Trk, action, pos );
 			//Enter/Space does not
-			if (action>>8 !=32 && action>>8 != 13) return C_CONTINUE;
+			if ((action>>8 !=32) && (action>>8 != 13)) return C_CONTINUE;
 			/*no break*/
 		case C_OK:
 			UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
