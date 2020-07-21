@@ -25,7 +25,7 @@
 #include "utility.h"
 
 
-extern dynArr_t tempEndPts_da;
+dynArr_t tempEndPts_da;
 #define BezSegs(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
 
 #define bezCmdNone 			(0)
