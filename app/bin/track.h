@@ -210,7 +210,7 @@ typedef struct {
 		long option;
 		} trkEndPt_t, * trkEndPt_p;
 
-dynArr_t tempEndPts_da;
+extern dynArr_t tempEndPts_da;
 #define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
 
 typedef enum { FREEFORM, RECTANGLE, POLYLINE
@@ -292,12 +292,12 @@ typedef struct {
 
 #define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BEZTRK)
 
-dynArr_t tempSegs_da;
+extern dynArr_t tempSegs_da;
 
 #define tempSegs(N) DYNARR_N( trkSeg_t, tempSegs_da, N )
 
-char tempSpecial[4096];
-char tempCustom[4096];
+extern char tempSpecial[4096];
+extern char tempCustom[4096];
 
 void ComputeCurvedSeg(
 		trkSeg_p s,
