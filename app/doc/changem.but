@@ -179,11 +179,15 @@ The resulting track(s) will mimic the shape of the Cornu/Bezier(s) exactly. This
 
 \G{png.d/belev.png}
 
-The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, The Message Bar will show the computed elevation at the cursor. There will be an open blue circle if an endpoint will be selected with \f{Left-Click}. You click on the respective endpoint to set its elevation properties. The endpoint which you are working on is indicated with a big red dot.
+The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, The Message Bar will show the computed elevation at the cursor. There will be an open blue circle if an endpoint will be selected with \f{Left-Click}. You click on the respective endpoint to set its elevation properties. 
+
+The endpoint which you are working on is indicated with a big red dot.
+
+Moving around the layout will show you the elevation at the point indicated by a blue dot.
 
 If you hover over a point where two unconnected tracks pass over one another, a blue square will be drawn and the Message Bar will show the two elevations and the Clearance between them.
 
-If you add \f{Shift} as you move the cursor before clicking you will see a filled dot when it is over a track if a \f{Shift-Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation.
+If you add \f{Shift} as you move the cursor before clicking you will see a blue bar when it is over a track if a \f{Shift-Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation).
 
 Adding \f{Ctrl} allows you to \f{Ctrl+Left-Click} to Select and \f{Left-Drag} to move Elevation Labels if both the option is set for them to be displayed and the Zoom level is correct,, Only Defined and Station endpoint labels can be moved.
 
