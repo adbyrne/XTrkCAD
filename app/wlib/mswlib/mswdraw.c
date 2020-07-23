@@ -1638,7 +1638,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		case VK_RIGHT:	extChar = wAccelKey_Right; break;				
 		case VK_LEFT:	extChar = wAccelKey_Left; break;
 		case VK_BACK:	extChar = wAccelKey_Back; break;
-		/*case VK_F1:	extChar = wAccelKey_F1; break;*/
+		case VK_F1:		extChar = wAccelKey_F1; break;
 		case VK_F2:		extChar = wAccelKey_F2; break;
 		case VK_F3:		extChar = wAccelKey_F3; break;
 		case VK_F4:		extChar = wAccelKey_F4; break;
