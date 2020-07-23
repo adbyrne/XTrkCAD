@@ -101,6 +101,22 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).width = 0;
 }
 
+static void CreateSplitAnchor(coOrd pos, track_p t) {
+	DIST_T d = tempD.scale*0.1;
+	DIST_T w = tempD.scale/tempD.dpi*4;
+	int i;
+	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0);
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	i = anchors_da.cnt-1;
+	anchors(i).type = SEG_STRLIN;
+	anchors(i).color = wDrawColorBlue;
+	Translate(&anchors(i).u.l.pos[0],pos,a,GetTrkGauge(t));
+	Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
+	anchors(i).width = w;
+
+}
+
+
 void static CreateMoveAnchor(coOrd pos) {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
@@ -417,10 +433,13 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 			if ((ep0 = PickEndPoint( p0, trk0 )) != -1)  {
 				if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
 					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
-					InfoMessage (_("Track elevation %0.3f"), PutDim(elev0));
+					InfoMessage (_("Track End elevation %0.3f"), PutDim(elev0));
 				} else if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
 						&& !(QueryTrack(trk0,Q_IS_TURNOUT))) {
 					InfoMessage( _("Click to split here - elevation %0.3f"), PutDim(elev0));
+					CreateSplitAnchor(p0,trk0);
+				} else {
+					InfoMessage( _("Track Point elevation %0.3f"), PutDim(elev0));
 					CreateEndAnchor(p0,TRUE);
 				}
 			} else InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );

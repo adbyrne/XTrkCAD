@@ -1105,7 +1105,7 @@ BOOL_T GetBezierSegmentFromTrack(track_p trk, trkSeg_p seg_p) {
 
 }
 
-BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2]) {
+BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2], track_p trk) {
 	track_p trk_old = NULL;
 	newTracks[0] = NULL, newTracks[1] = NULL;
 	if (bezSeg->type != SEG_BEZTRK) return FALSE;
@@ -1117,6 +1117,7 @@ BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2]) {
 		else if (seg->type == SEG_STRTRK)
 			new_trk = NewStraightTrack(seg->u.l.pos[0],seg->u.l.pos[1]);
 		if (newTracks[0] == NULL) newTracks[0] = new_trk;
+		CopyAttributes( trk, new_trk );
 		newTracks[1] = new_trk;
 		if (trk_old) {
 			for (int i=0;i<2;i++) {
@@ -1148,7 +1149,7 @@ BOOL_T GetTracksFromBezierTrack(track_p trk, track_p newTracks[2]) {
 	//if (seg_temp->bezSegs.ptr) MyFree(seg_temp->bezSegs.ptr);
 	DYNARR_RESET(trkSeg_t,seg_temp.bezSegs);
 	FixUpBezierSeg(seg_temp.u.b.pos,&seg_temp,TRUE);
-	GetTracksFromBezierSegment(&seg_temp, newTracks);
+	GetTracksFromBezierSegment(&seg_temp, newTracks, trk);
 	MyFree(seg_temp.bezSegs.ptr);
 	seg_temp.bezSegs.cnt = 0;
 	seg_temp.bezSegs.max = 0;

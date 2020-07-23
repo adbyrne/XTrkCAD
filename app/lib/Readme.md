@@ -99,10 +99,16 @@ Once the XQuartz package has installed go to the XtrkCAD icon in Applications an
 
 XTrackCAD for LINUX is shipped as a RPM file and a self extracting archive.
 You will need libc6, X11R6, GTK+2.0.
+If you change the install package you should set the XTRKCADLIB enviroment variable 
+
+For example if the install is within the /usr/local/share/xtrkcad directory. you could use -
+
+env XTRKCADLIB="/usr/local/share/xtrkcad/" xtrkcad
 
 ### Installing from the RPM package. ###
 
 Use your operating system's package manager to install XTrackCAD.
+
 
 ### Installing from the self-extracting archive. ###
 

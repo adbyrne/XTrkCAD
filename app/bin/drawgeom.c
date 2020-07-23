@@ -1487,24 +1487,28 @@ STATUS_T DrawGeomPolyModify(
 				tempSegs(0).u.p.polyType = FREEFORM;
 				context->subtype=FREEFORM;
 				context->open = FALSE;
+				CreatePolyAnchors( -1);
 				return C_CONTINUE;
 			}
 			if ((action>>8 == 'l') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType == FREEFORM)) {
 				tempSegs(0).u.p.polyType = POLYLINE;
 				context->subtype=POLYLINE;
 				context->open = TRUE;
+				CreatePolyAnchors( -1);
 				return C_CONTINUE;
 			}
 			if ((action>>8 == 'f') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType != POLYLINE )) {
 				tempSegs(0).type = SEG_FILPOLY;
 				context->type =  SEG_FILPOLY;
 				context->filled = TRUE;
+				CreatePolyAnchors( -1);
 				return C_CONTINUE;
 			}
 			if ((action>>8 == 'u') && (tempSegs(0).type == SEG_FILPOLY) ) {
 				tempSegs(0).type = SEG_POLY;
 				context->type =  SEG_POLY;
 				context->filled = FALSE;
+				CreatePolyAnchors( -1);
 				return C_CONTINUE;
 			}
 			//Delete or backspace deletes last selected index
