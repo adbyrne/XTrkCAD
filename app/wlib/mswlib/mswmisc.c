@@ -2229,9 +2229,9 @@ void wDoAccelHelp(wAccelKey_e key, void * context) {
 void wMenuAddHelp(
     wMenu_p m)
 {
-    wMenuPushCreate(m, NULL, "&Contents", 0, doHelpMenu, (void*)1);
-    wMenuPushCreate(m, NULL, "&Search for Help on...", 0, doHelpMenu, (void*)2);
-    wMenuPushCreate(m, NULL, "Co&mmand Context Help", 0, doHelpMenu, (void*)3);
+    wMenuPushCreate(m, NULL, _("&Contents"), 0, doHelpMenu, (void*)1);
+    wMenuPushCreate(m, NULL, _("&Search for Help on..."), 0, doHelpMenu, (void*)2);
+    wMenuPushCreate(m, NULL, _("Co&mmand Context Help"), 0, doHelpMenu, (void*)3);
 }
 
 
