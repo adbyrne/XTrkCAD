@@ -2985,7 +2985,7 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 
 	if (d == &mapD && !GetLayerOnMap(curTrackLayer))
 		return;
-	if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) &&
+	if ( (IsTrack(trk)?(colorTrack):(colorDraw)) &&
 		d != &mapD && color == wDrawColorBlack )
 		if (GetLayerUseColor((unsigned int)curTrackLayer))
 			color = GetLayerColor((unsigned int)curTrackLayer);

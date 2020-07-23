@@ -63,7 +63,6 @@ EXPORT long labelEnable = (LABELENABLE_ENDPT_ELEV|LABELENABLE_CARS);
 EXPORT long labelWhen = 2;
 EXPORT long colorTrack = 0;
 EXPORT long colorDraw = 0;
-EXPORT long colorLayers = 0;
 EXPORT long constrainMain = 0;
 EXPORT long hideSelectionWindow = 0;
 EXPORT long angleSystem = 0;
