@@ -2598,7 +2598,7 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 		if (seg->type == SEG_BEZTRK) {
 			DYNARR_RESET(trkSeg_t,seg->bezSegs);
 			FixUpBezierSeg(seg->u.b.pos,seg,TRUE);
-			GetTracksFromBezierSegment(seg,bezTrack);
+			GetTracksFromBezierSegment(seg, bezTrack, trk);
 			if (newTracks[0] == NULL) newTracks[0] = bezTrack[0];
 			newTracks[1] = bezTrack[1];
 			if (trk_old) {
@@ -2622,6 +2622,7 @@ BOOL_T GetTracksFromCornuTrack(track_p trk, track_p newTracks[2]) {
 			else if (seg->type == SEG_STRTRK)
 				new_trk = NewStraightTrack(seg->u.l.pos[0],seg->u.l.pos[1]);
 			if (newTracks[0] == NULL) newTracks[0] = new_trk;
+			CopyAttributes( trk, new_trk );
 			newTracks[1] = new_trk;
 			if (trk_old) {
 				for (int i=0;i<2;i++) {

@@ -53,7 +53,7 @@ void FixUpBezierSeg(coOrd[4], trkSeg_p , BOOL_T);
 void FixUpBezierSegs(trkSeg_p p,int segCnt);
 BOOL_T GetBezierSegmentFromTrack(track_p, trkSeg_p);
 BOOL_T GetTracksFromBezierTrack(track_p trk, track_p newTracks[2]);
-BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2]);
+BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2], track_p old);
 void SetBezierLineType( track_p trk, int width );
 
 DIST_T 	BezierDescriptionDistance(coOrd pos,track_p trk, coOrd *, BOOL_T, BOOL_T * );
