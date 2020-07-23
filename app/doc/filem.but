@@ -189,7 +189,7 @@ It is the equivalent of using \f{Browse} and selecting the file again.
 Files can be listed by either their file name or by their contents description.
 This is controlled by the \f{Show File Names} check box.
 
-The \f{Search} button opens the \e{Search Parameter File} dialog (\K{searchgui}) this
+The \f{Search} button opens the \e{Search Parameter File} dialog (\K{cmdSearchgui}) this
 shows the all files included the system library so they can be added.
 
 The \f{Browse} button opens a file window that allows the user to add additional files
@@ -203,7 +203,7 @@ The order in this list controls the order of turnouts and structures on the
 \f{Hot Bar} (\K{cmdHotBar}). You can move a parameter file to the end of the
 list by \e{Unloading} it, and then loading it via the \f{Browse} button.
 
-\S{searchgui} \i{Search Parameter Files}
+\S{cmdSearchgui} \i{Search Parameter Files}
 
 Selecting and loading additional parameter files from the System Library is done in the
 \f{Search Parameter Files} dialog.
