@@ -2154,12 +2154,22 @@ int wNotice3(
     }
 }
 
+/**
+ * Show help text for the given topic. 
+ *
+ * \param  topic The topic. if NULL the index page is shown.
+ */
 
 void wHelp(
     const char * topic)
 {
     char *pszHelpTopic;
     HWND hwndHelp;
+	char *theTopic = "index";
+
+	if (topic) {
+		theTopic = topic;
+	}
 
     if (!helpInitted) {
         HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
@@ -2168,9 +2178,9 @@ void wHelp(
 
     /*	             "c:\\help.chm::/intro.htm>mainwin", */
     /* attention: always adapt constant value (10) to needed number of formatting characters */
-    pszHelpTopic = malloc(strlen(helpFile) + strlen(topic) + 10);
+    pszHelpTopic = malloc(strlen(helpFile) + strlen(theTopic) + 10);
     assert(pszHelpTopic != NULL);
-    sprintf(pszHelpTopic, "/%s.html", topic);
+    sprintf(pszHelpTopic, "/%s.html", theTopic);
     hwndHelp = HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOPIC,
                         (DWORD_PTR)pszHelpTopic);
 
