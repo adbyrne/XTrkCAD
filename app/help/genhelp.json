@@ -104,7 +104,7 @@
 		{"line": "cmdPan", "contents": "Pan or zoom the layout" },
 		{"line": "cmdPanMode", "contents": "Change to zoom/pan mode" },
 		{"line": "cmdParallel", "contents": "Create a parallel track" },
-		{"line": "cmdParallelLine", "contents": "Create a parallel line" },
+		{"line": "cmdParallel_Line", "contents": "Create a parallel line" },
 		{"line": "cmdParallelSetCmd", "contents": "Set Parallel mode" },
 		{"line": "cmdParameter", "contents": "Register" },
 		{"line": "cmdPaste", "contents": "Copy objects from clipboard" },
