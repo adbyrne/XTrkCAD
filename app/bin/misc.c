@@ -462,6 +462,64 @@ EXPORT char * Strcpytrimed(char * dst, char * src, BOOL_T double_quotes) {
 	return dst;
 }
 
+static char * directory;
+
+EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
+
+	char * htmlFile;
+
+ 	// Check the file exits in the distro
+
+	if (!directory)
+		directory = malloc(BUFSIZ);
+
+    if (directory == NULL) return 0;
+
+     sprintf(directory, "%s/html/", wGetAppLibDir());
+
+ 	 htmlFile = malloc(strlen(directory)+strlen(topic) + 6);
+
+ 	 sprintf(htmlFile, "%s%s.html", directory, topic);
+
+ 	 if( access( htmlFile, F_OK ) == -1 ) {
+
+     	printf("Missing help topic %s\n",topic);
+
+     	free(htmlFile);
+
+     	return 0;
+
+     }
+
+ 	 free(htmlFile);
+
+ 	 return 1;
+
+}
+
+EXPORT char * StripHelpTopicName(const char * in_topic) {
+
+ //Strip end of name after '-'
+
+	char * topic;
+
+ 	int topic_len = strlen(in_topic);
+
+ 	char * end = strchr(in_topic,'_');
+
+ 	if (end) topic_len = end-in_topic;
+
+ 	topic = malloc(topic_len+1);
+
+ 	memcpy(topic,in_topic,topic_len);
+
+ 	topic[topic_len] = '\0';
+
+ 	return topic;
+
+ }
+
+
 EXPORT char * BuildTrimedTitle(char * cp, char * sep, char * mfg, char * desc,
 		char * partno) {
 	cp = Strcpytrimed(cp, mfg, FALSE);

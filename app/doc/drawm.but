@@ -16,11 +16,11 @@ There are 4 command buttons on the tool-bar used to draw Straight Objects, Curve
 
 Functions for drawing basic shapes and objects like lines and curves can be accessed from this menu.
 
-\dd \f{Circle Lines} - draw empty or filled circles. (\K{cmdCircleL})
+\dd \f{Circle Lines} - draw empty or filled circles. (\K{cmdDrawCircle})
 
 \u000
 
-\dd \f{Curved Lines} - are created in the same manner as curved tracks. (\K{cmdCurvedL})
+\dd \f{Curved Lines} - are created in the same manner as curved tracks. (\K{cmdDrawCurve})
 
 \u000
 
@@ -32,11 +32,11 @@ Functions for drawing basic shapes and objects like lines and curves can be acce
 
 \u000
 
-\dd \f{Shapes} - draw boxes, polygons and poly-lines. (\K{cmdShapes})
+\dd \f{Shapes} - draw boxes, polygons and poly-lines. (\K{cmdDrawShapes})
 
 \u000
 
-\dd \f{Straight Objects} - draw straight objects. (\K{cmdStraightL})
+\dd \f{Straight Objects} - draw straight objects. (\K{cmdDrawStraight})
 
 \u000
 
@@ -46,7 +46,7 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 
 \rule
 
-\S{cmdCircleL} Circles and Filled Circles
+\S{cmdDrawCircle} Circles and Filled Circles
 
 \G{png.d/mdrawcircles.png}
 
@@ -61,7 +61,7 @@ Some commands display controls on the Status Line (\K{mainW}) to change line wid
 \rule
 
 
-\S{cmdCurvedL} Curved Lines
+\S{cmdDrawCurve} Curved Lines
 
 \G{png.d/mdrawcurve.png}
 
@@ -172,7 +172,7 @@ Subsequent clicks on the \f{Ruler} button will hide or display the ruler.
 \rule
 
 
-\S{cmdShapes} Shapes
+\S{cmdDrawShape} Shapes
 
 \G{png.d/mdrawshapes.png}
 
@@ -201,7 +201,7 @@ Note that \K{cmdModify} can be used on a Polygon or a Polyline after it has been
 
 \rule
 
-\S{cmdStraightL} Straight Objects
+\S{cmdDrawStraight} Straight Objects
 
 \G{png.d/mdrawstraight.png}
 

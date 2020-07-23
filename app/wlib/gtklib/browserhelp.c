@@ -29,6 +29,8 @@
 
 #include "dynstring.h"
 
+#define debug 0
+
 #define DEFAULTBROWSERCOMMAND "xdg-open"
 
 #define  HELPERRORTEXT 			"Help Error - help information can not be found.\n" \
@@ -71,20 +73,24 @@ TopicToUrl(char **helpUrl, const char *topic)
  * \param topic IN topic string
  */
 
-void wHelp(const char * topic)
+void wHelp(const char * in_topic)
 {
     int rc;
     char *url;
     char *currentPath;
 
-    assert(topic != NULL);
-    assert(strlen(topic));
+    assert(in_topic != NULL);
+    assert(strlen(in_topic));
+
+    char * topic = StripHelpTopicName(in_topic);
+
+     if (!CheckHelpTopicExists(topic)) return;
 
     TopicToUrl(&url, topic);
 
 	rc = wOpenFileExternal(url);
 
-    if (!rc) {
+	if (!rc) {
         wNotice(HELPERRORTEXT, _("Cancel"), NULL);
     }
 

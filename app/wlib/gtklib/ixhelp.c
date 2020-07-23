@@ -400,9 +400,18 @@ void load_into_view(char *file, int requested_view)
  * \param topic IN topic string
  */
 
-void wHelp(const char * topic)
+void wHelp(const char * in_topic)
 {
     char *htmlFile;
+
+    //Take off any topic characters after a '-'
+
+    if (!in_topic || !in_topic[0]) return;
+
+
+    char * topic = StripHelpTopicName(in_topic);
+
+    if (!CheckHelpTopicExists(topic)) return;
 
     if (!wHelpWindow) {
         directory = malloc(BUFSIZ);
@@ -417,11 +426,16 @@ void wHelp(const char * topic)
 
     /* need space for the 'html' extension plus dot plus \0 */
     htmlFile = malloc(strlen(topic) + 6);
+
     assert(htmlFile != NULL);
 
     sprintf(htmlFile, "%s.html", topic);
 
+    free(topic);
+
     load_into_view(htmlFile, MAIN_VIEW);
     gtk_widget_show_all(wHelpWindow);
     gtk_window_present(GTK_WINDOW(wHelpWindow));
+
+    free(htmlFile);
 }

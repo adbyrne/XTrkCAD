@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <fcntl.h>
 
+#include "misc.h"
 #include "gtkint.h"
 #include "i18n.h"
 
@@ -38,6 +39,7 @@
 static pid_t pidOfChild;
 static int handleOfPipe;
 extern char *wExecutableName;
+
 
 /**
  * Create the fully qualified filename for the help helper
@@ -67,17 +69,27 @@ char *ChildProgramFile(char *parentProgram)
  * \param topic IN topic string
  */
 
-void wHelp(const char * topic)
+void wHelp(const char * in_topic)
 {
     pid_t newPid;
-    int len;
     int status;
     const char html[] = ".html";
+    static char *directory;				/**< base directory for HTML files */
+    char * htmlFile;
+    char * topic;
+
+ struct {
+    int length;
     char *page;
-    
+ } buffer;
+
+ 	topic = StripHelpTopicName(in_topic);
+
+ 	if (!CheckHelpTopicExists(topic)) return;
+
     // check whether child already exists
     if (pidOfChild != 0) {
-        if (waitpid(pidOfChild, &status, WNOHANG) > 0) {
+        if (waitpid(pidOfChild, &status, WNOHANG) < 0) {
             // child exited -> clean up
             close(handleOfPipe);
             unlink(HELPCOMMANDPIPE);
@@ -88,7 +100,8 @@ void wHelp(const char * topic)
 
     // (re)start child
     if (pidOfChild == 0) {
-        mkfifo(HELPCOMMANDPIPE, 0666);
+    	unlink(HELPCOMMANDPIPE);
+        int rc = mkfifo(HELPCOMMANDPIPE, 0666);
         newPid = fork();  /* New process starts here */
 
         if (newPid > 0) {
@@ -103,31 +116,54 @@ void wHelp(const char * topic)
             free(child);
         } else { /* -1 signifies fork failure */
             pidOfChild = 0;
+            free(topic);
             return;
         }
     }
 
-    if (!handleOfPipe) {
-        handleOfPipe = open(HELPCOMMANDPIPE, O_WRONLY);
+    buffer.page = malloc(sizeof(int)+strlen(topic) + strlen(html) + 1);
 
-        if (handleOfPipe < 0) {
-            kill(pidOfChild, SIGKILL);  /* tidy up on next call */
-        }
-
-    }
-
-    page = malloc(strlen(topic) + strlen(html) + 1);
-
-    if (!page) {
+    if (!buffer.page) {
+    	free(topic);
         return;
     }
 
-    strcpy(page, topic);
-    strcat(page, html);
-    len = strlen(page);
+    strcpy(buffer.page, topic);
+    strcat(buffer.page, html);
+    buffer.length = strlen(buffer.page);
 
-    write(handleOfPipe, &len, sizeof(int));
-    write(handleOfPipe, page, strlen(page)+1);
+    if (buffer.length>255) {
+    	printf("Help Topic too long %s", buffer.page);
+    	return;
+    }
 
-    free(page);
+    free(topic);
+
+    if (!handleOfPipe) {
+		handleOfPipe = open(HELPCOMMANDPIPE, O_WRONLY);
+
+		if (handleOfPipe < 0) {
+			if (pidOfChild)
+				kill(pidOfChild, SIGKILL);  /* tidy up on next call */
+			handleOfPipe = 0;
+			return;
+		}
+
+	}
+
+    int written = 0;
+    int towrite = sizeof(int);
+
+    while (written < towrite){
+    	written += write(handleOfPipe, &buffer.length, sizeof(int));
+    }
+    written =0;
+    towrite = strlen(buffer.page);
+    while (written < towrite){
+        written += write(handleOfPipe, buffer.page+written, towrite-written);
+    }
+
+    fsync(handleOfPipe);
+
+    free(buffer.page);
 }
