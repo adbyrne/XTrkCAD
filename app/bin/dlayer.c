@@ -1136,7 +1136,7 @@ static void DoLayer(void * junk)
 BOOL_T ReadLayers(char * line)
 {
     char * name;
-    int inx, visible, frozen, color, onMap, module, dontUseColor;
+    int inx, visible, frozen, color, onMap, module, dontUseColor, ColorFlags;
     unsigned long rgb;
 
     /* older files didn't support layers */
@@ -1167,7 +1167,7 @@ BOOL_T ReadLayers(char * line)
 
     /* get the properties for a layer from the file and update the layer accordingly */
 
-    if (!GetArgs(line, "ddddudd00q", &inx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor,
+    if (!GetArgs(line, "dddduddd0q", &inx, &visible, &frozen, &onMap, &rgb, &module, &dontUseColor, &ColorFlags,
                  &name)) {
         return FALSE;
     }
@@ -1194,6 +1194,9 @@ BOOL_T ReadLayers(char * line)
     layers[inx].module = module;
     layers[inx].color = color;
     layers[inx].useColor = !dontUseColor;
+
+    colorTrack = ColorFlags&1;  //Make sure globals are set
+    colorDraw = ColorFlags&2;
 
     if (inx<NUM_BUTTONS) {
         if (strlen(name) > 0) {
@@ -1241,6 +1244,11 @@ BOOL_T WriteLayers(FILE * f)
 {
     unsigned int inx;
 
+    int ColorFlags = 0;
+
+    if (colorTrack) ColorFlags |= 1;
+    if (colorDraw) ColorFlags |= 2;
+
     for (inx = 0; inx < NUM_LAYERS; inx++) {
         if (IsLayerConfigured(inx)) {
             fprintf(f, "LAYERS %u %d %d %d %ld %d %d %d %d \"%s\"\n",
@@ -1251,7 +1259,7 @@ BOOL_T WriteLayers(FILE * f)
                     wDrawGetRGB(layers[inx].color),
                     layers[inx].module,
 					layers[inx].useColor?0:1,
-					0, 0,
+					ColorFlags, 0,
                     PutTitle(layers[inx].name));
         }
     }
