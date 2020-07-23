@@ -1428,9 +1428,6 @@ EXPORT void MainRedraw( void )
 	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
 		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
 	}
-	DrawRoomWalls( FALSE );
-	currRedraw++;
-	DrawSnapGrid( &mainD, mapD.size, TRUE );
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= RBORDER/mainD.dpi*mainD.scale;
@@ -1438,6 +1435,11 @@ EXPORT void MainRedraw( void )
 	size.x += (RBORDER+LBORDER)/mainD.dpi*mainD.scale;
 	size.y += (BBORDER+TBORDER)/mainD.dpi*mainD.scale;
 	DrawTracks( &mainD, mainD.scale, orig, size );
+
+	DrawRoomWalls( FALSE );
+	currRedraw++;
+	DrawSnapGrid( &mainD, mapD.size, TRUE );
+
 	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
 	// The remainder is from TempRedraw
