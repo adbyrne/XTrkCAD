@@ -699,7 +699,8 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T junk )
 	if (GetTrkVisible(trk)) {
 		ClrTrkBits( trk, TB_VISIBLE|(drawTunnel==0?(TB_SELECTED|TB_SELREDRAW):0) );
 		ClrTrkBits (trk, TB_BRIDGE);
-	} else {
+		ClrTrkBits (trk, TB_NOTIES);
+;	} else {
 		SetTrkBits( trk, TB_VISIBLE );
 	}
 	/*DrawNewTrack( trk );*/
@@ -731,6 +732,7 @@ static BOOL_T FlipTies( track_p trk, BOOL_T junk )
 		ClrTrkBits( trk, TB_NOTIES );
 	} else {
 		SetTrkBits( trk, TB_NOTIES );
+		SetTrkBits( trk, TB_VISIBLE );
 	}
 	return TRUE;
 }
