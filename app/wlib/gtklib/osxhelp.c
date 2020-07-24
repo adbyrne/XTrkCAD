@@ -69,21 +69,18 @@ char *ChildProgramFile(char *parentProgram)
  * \param topic IN topic string
  */
 
-void wHelp(const char * in_topic)
+void wHelp(const char * topic)
 {
     pid_t newPid;
     int status;
     const char html[] = ".html";
     static char *directory;				/**< base directory for HTML files */
     char * htmlFile;
-    char * topic;
 
  struct {
     int length;
     char *page;
  } buffer;
-
- 	topic = StripHelpTopicName(in_topic);
 
  	if (!CheckHelpTopicExists(topic)) return;
 
@@ -116,7 +113,6 @@ void wHelp(const char * in_topic)
             free(child);
         } else { /* -1 signifies fork failure */
             pidOfChild = 0;
-            free(topic);
             return;
         }
     }
@@ -124,7 +120,6 @@ void wHelp(const char * in_topic)
     buffer.page = malloc(sizeof(int)+strlen(topic) + strlen(html) + 1);
 
     if (!buffer.page) {
-    	free(topic);
         return;
     }
 
@@ -136,8 +131,6 @@ void wHelp(const char * in_topic)
     	printf("Help Topic too long %s", buffer.page);
     	return;
     }
-
-    free(topic);
 
     if (!handleOfPipe) {
 		handleOfPipe = open(HELPCOMMANDPIPE, O_WRONLY);

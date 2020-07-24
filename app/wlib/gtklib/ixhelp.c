@@ -400,16 +400,14 @@ void load_into_view(char *file, int requested_view)
  * \param topic IN topic string
  */
 
-void wHelp(const char * in_topic)
+void wHelp(const char * topic)
 {
     char *htmlFile;
 
     //Take off any topic characters after a '-'
 
-    if (!in_topic || !in_topic[0]) return;
+    if (!topic || !topic[0]) return;
 
-
-    char * topic = StripHelpTopicName(in_topic);
 
     if (!CheckHelpTopicExists(topic)) return;
 
@@ -430,8 +428,6 @@ void wHelp(const char * in_topic)
     assert(htmlFile != NULL);
 
     sprintf(htmlFile, "%s.html", topic);
-
-    free(topic);
 
     load_into_view(htmlFile, MAIN_VIEW);
     gtk_widget_show_all(wHelpWindow);

@@ -497,29 +497,6 @@ EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
 
 }
 
-EXPORT char * StripHelpTopicName(const char * in_topic) {
-
- //Strip end of name after '-'
-
-	char * topic;
-
- 	int topic_len = strlen(in_topic);
-
- 	char * end = strchr(in_topic,'_');
-
- 	if (end) topic_len = end-in_topic;
-
- 	topic = malloc(topic_len+1);
-
- 	memcpy(topic,in_topic,topic_len);
-
- 	topic[topic_len] = '\0';
-
- 	return topic;
-
- }
-
-
 EXPORT char * BuildTrimedTitle(char * cp, char * sep, char * mfg, char * desc,
 		char * partno) {
 	cp = Strcpytrimed(cp, mfg, FALSE);

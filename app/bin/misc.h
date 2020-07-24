@@ -310,9 +310,7 @@ typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
 void DoChangeNotification( long );
 
-char * StripHelpTopicName(const char * in_topic);
 wBool_t CheckHelpTopicExists(const char * topic);
-
 
 /* foreign externs */
 extern drawCmd_t mapD;

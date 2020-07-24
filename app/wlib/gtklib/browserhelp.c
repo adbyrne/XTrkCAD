@@ -73,18 +73,16 @@ TopicToUrl(char **helpUrl, const char *topic)
  * \param topic IN topic string
  */
 
-void wHelp(const char * in_topic)
+void wHelp(const char * topic)
 {
     int rc;
     char *url;
     char *currentPath;
 
-    assert(in_topic != NULL);
-    assert(strlen(in_topic));
+    assert(topic != NULL);
+    assert(strlen(topic));
 
-    char * topic = StripHelpTopicName(in_topic);
-
-     if (!CheckHelpTopicExists(topic)) return;
+    if (!CheckHelpTopicExists(topic)) return;
 
     TopicToUrl(&url, topic);
 
