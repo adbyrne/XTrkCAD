@@ -436,7 +436,7 @@ Add Text
 \rule
 
 
-\S2{cmdDrawCircles} Draw Circles
+\S2{cmdDrawCircle} Draw Circles
 
 Draw Circles
 
@@ -465,7 +465,7 @@ Draw Circles
 \rule
 
 
-\S2{cmdDrawCurves} Draw Curved Lines
+\S2{cmdDrawCurve} Draw Curved Lines
 
 Draw Curved Lines
 
@@ -486,7 +486,7 @@ Draw Curved Lines
 \rule
 
 
-\S2{cmdDrawShapes} Draw Shapes
+\S2{cmdDrawShape} Draw Shapes
 
 Draw Shapes
 
@@ -507,7 +507,7 @@ Draw Shapes
 \rule
 
 
-\S2{cmdDrawLines} Draw Straight Objects
+\S2{cmdDrawStraight} Draw Straight Objects
 
 Draw Straight Objects
 

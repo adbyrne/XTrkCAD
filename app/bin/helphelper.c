@@ -62,13 +62,14 @@ OSStatus MyGoToHelpPage (CFStringRef pagePath, CFStringRef anchorName)
     if (myBookName == NULL) {
     	myBookName = CFStringCreateWithCString(NULL, "XTrackCAD Help", kCFStringEncodingMacRoman);
     	printf("HelpHelper: Defaulting to 'XTrackCAD Help'\n" );  
-    } else
-    	printf("HelpHelper: BookName dictionary name %s found\n",CFStringGetCStringPtr(myBookName, kCFStringEncodingMacRoman));
+    	err = fnfErr; 
+    	return err;
+    }
+    printf("HelpHelper: BookName dictionary name %s found\n",CFStringGetCStringPtr(myBookName, kCFStringEncodingMacRoman));
  
     if (CFGetTypeID(myBookName) != CFStringGetTypeID()) {
     	printf("HelpHelper: Error - BookName is not a string\n" );
-        err = fnfErr;
-        return err;
+        err = paramErr;
     }
  
     if (err == noErr) {
@@ -93,11 +94,9 @@ int displayHelp(char* name) {
 int
 main( int argc, char **argv )
 {
-
-#define SIZE_OF_BUFFER 256
 	int handleOfPipe = 0;
-
-	char buffer[SIZE_OF_BUFFER];
+	char buffer[ 100 ];
+	char issue[ 100 ];
 	
 	int len;
 	int finished = 0;
@@ -115,12 +114,9 @@ main( int argc, char **argv )
 			
 			if( numBytes > 0 )
 				printf( "HelpHelper: read %d bytes\n", numBytes );
-			if (len > SIZE_OF_BUFFER-2) len = SIZE_OF_BUFFER-2;
 			if( numBytes == sizeof(int)) {
 				printf( "HelpHelper: Expecting %d bytes\n", len );
-				numBytes2 = read( handleOfPipe, buffer, len );
-				buffer[SIZE_OF_BUFFER-1] = '\0';
-				buffer[len] = '\0';
+				numBytes2 = read( handleOfPipe, buffer, len + 1 );
 				if (numBytes2 > 0) 
 					printf( "HelpHelper: Display help on: %s\n", buffer );
 				
