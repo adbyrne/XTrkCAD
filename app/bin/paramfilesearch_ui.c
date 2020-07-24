@@ -67,7 +67,7 @@ static paramData_t searchUiPLs[] = {
 #define I_MESSAGE (2)
     { PD_MESSAGE, N_("Enter at least one search word"), NULL, PDO_DLGBOXEND, (void *)370 },
 #define I_RESULTLIST	(3)
-    {	PD_LIST, NULL, "inx", 0, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
+    {	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_MODETOGGLE	(4)
     {	PD_TOGGLE, &searchUiMode, "mode", PDO_DLGBOXEND, searchUiLabels, NULL, BC_HORZ|BC_NOBORDER },
 #define I_APPLYBUTTON	(5)
@@ -396,7 +396,7 @@ void DoSearchParams(void * junk)
 
         searchUiW = ParamCreateDialog(&searchUiPG,
                                       MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL, wHide,
-                                      TRUE, NULL, 0, SearchUiDlgUpdate);
+                                      TRUE, NULL, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
 		if (trackLibrary) {
 			SearchFileListLoad(trackLibrary->catalog);  //Start with system files
 		}
