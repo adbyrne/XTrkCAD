@@ -296,7 +296,7 @@ static STATUS_T CmdParallel(wAction_t action, coOrd pos)
 EXPORT void InitCmdParallel( wMenu_p menu )
 {
 	ButtonGroupBegin( _("Parallel"), "cmdParallelSetCmd", _("Parallel") );
-	AddMenuButton( menu, CmdParallel, "cmdParallel", _("Parallel Track"), wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, (void*)0 );
+	AddMenuButton( menu, CmdParallel, "cmdParallelTrack", _("Parallel Track"), wIconCreatePixMap(parallel_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, (void*)0 );
 	AddMenuButton( menu, CmdParallel, "cmdParallelLine", _("Parallel Line"), wIconCreatePixMap(parallel_line_xpm), LEVEL0_50, IC_STICKY|IC_POPUP|IC_WANT_MOVE, ACCL_PARALLEL, (void*)1 );
 	ButtonGroupEnd();
 	ParamRegister( &parSepPG );

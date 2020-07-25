@@ -55,7 +55,7 @@
 static char *
 ExtendPath(void)
 {
-    char *path = getenv("PATH");
+    char *path = strdup(getenv("PATH"));
     DynString newPath;
     DynStringMalloc(&newPath, 16);
 
@@ -110,6 +110,7 @@ unsigned wOpenFileExternal(char * filename)
            currentPath,
            TRUE);
 
+    free(currentPath);
     DynStringFree(&commandLine);
     
     return(rc==0);

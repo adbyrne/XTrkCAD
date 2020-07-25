@@ -218,7 +218,7 @@ If \f{MagneticSnap} is disabled, the snap will only happen if \e{Alt} is held.
 
 \rule
 
-\S2{cmdCurveChord} Curved Track from Chord
+\S2{cmdCurveChord} Curved Track from Chord 
 
 \G{png.d/bcurve4.png} (\c{Control-7}) Drag from one endpoint to the other endpoint to form the Chord of the Curve and release.  \c{Left-Click} on the center of the track and Drag to form the Curve.
 The first end point acts like "CurvedTrack From End". If an exitsing track end is selected, the Chord will only move along line orthogonal to the track.
@@ -311,7 +311,7 @@ In the case where different parameters could be affected (for instance changing 
 
 Changing \e{Vertical Separation} affects \e{Turns} which must be an integer value (no fractions), and this in turn affects the \e{Vertical Separation}.  When you set \e{Vertical Separation} you are specifying the minimum separation which is adjusted upwards to the actual value.
 
-Note: only the \e{Radius} and \e{Turns} are used when creating the helix.  After joining the helix to other tracks, you will want to establish the heights of the endpoints at each end of the helix.  You can use the Elevation (\K{cmdElev}) command to do this.
+Note: only the \e{Radius} and \e{Turns} are used when creating the helix.  After joining the helix to other tracks, you will want to establish the heights of the endpoints at each end of the helix.  You can use the Elevation (\K{cmdElevation}) command to do this.
 
 A helix is placed the same way as a Circle Track (\K{cmdCircle}) with the addition that you specify the number of turns as well the as the radius of the helix.  Then the helix is dragged into position on the layout.
 
@@ -329,17 +329,17 @@ You can pick between two Parallel Commands:
 
 \u000
 
-\dd \G{png.d/bparallel.png} 
-\K{cmdParallelTrack}. You can create a new track parallel to any straight, curved, bezier, cornu or easement track.  
+\dd \K{cmdParallelTrack}. You can create a new track parallel to any straight, curved, bezier, cornu or easement track.  
 
 \u000
 
-\dd \G{png.d/bparalleline.png} 
-\K{cmdParallelLine}. You can create a line parallel to any straight, curved, bezier, cornu or easement track or straight lines, curved lines and PolyLines.
+\dd \K{cmdParallelLine}. You can create a line parallel to any straight, curved, bezier, cornu or easement track or straight lines, curved lines and PolyLines.
 
 \rule
 
 \S2{cmdParallelTrack} Parallel Track
+
+\G{png.d/bparallel.png} 
 
 Select the Track you want to parallel with \c{Left-Click}, and the new parallel track will appear beside it.  You control which side the new track will be on by \c{Left-Drag}ging the cursor from one side to the other of the selected track before releasing it.
 
@@ -367,9 +367,11 @@ These endpoints will be automatically connected.
 
 \S2{cmdParallelLine} Parallel Lines
 
+\G{png.d/bparalleline.png}
+
 Select the Track or Line you want to parallel with \c{Left-Click}, and the new parallel line will appear beside it.
 
-\b Note that Lines are not joined - if you wish you can select a series of Lines and turn them into a PolyLine using \K{cmdJoinLines}.
+\b Note that Lines are not joined - if you wish you can select a series of Lines and turn them into a PolyLine using \K{cmdJoinLine}.
 
 \rule
 

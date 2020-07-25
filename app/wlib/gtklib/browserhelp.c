@@ -24,6 +24,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include "misc.h"
+
 #include "gtkint.h"
 #include "i18n.h"
 
