@@ -1954,9 +1954,9 @@ EXPORT int ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1
 	pos1 = trk1->endPt[inx1].pos;
 LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f %0.3f]\n", trk0->index, inx0, pos0.x, pos0.y, trk1->index, inx1, pos1.x, pos1.y ) )
 	d = FindDistance( pos0, pos1 );
-	a = NormalizeAngle( trk0->endPt[inx0].angle -
-						trk1->endPt[inx1].angle + 180.0 );
-	if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle) ) {
+	a = fabs(DifferenceBetweenAngles( trk0->endPt[inx0].angle,
+						trk1->endPt[inx1].angle + 180.0 ));
+	if (d > connectDistance || (a > connectAngle ) ) {
 		LOG( log_endPt, 1, ( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n",
 				trk0->index, inx0, trk1->index, inx1, d, a ) );
 		NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );

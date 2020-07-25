@@ -1146,6 +1146,7 @@ BOOL_T GetTracksFromBezierTrack(track_p trk, track_p newTracks[2]) {
 	for (int i=0;i<4;i++) seg_temp.u.b.pos[i] = xx->bezierData.pos[i];
 	seg_temp.color = xx->bezierData.segsColor;
 	seg_temp.bezSegs.cnt = 0;
+	seg_temp.bezSegs.max = 0;
 	//if (seg_temp->bezSegs.ptr) MyFree(seg_temp->bezSegs.ptr);
 	DYNARR_RESET(trkSeg_t,seg_temp.bezSegs);
 	FixUpBezierSeg(seg_temp.u.b.pos,&seg_temp,TRUE);

@@ -234,12 +234,12 @@ double BezErrorLine(coOrd pos[4], coOrd start_point, coOrd end_point, double sta
 /*
  * Add element to DYNARR pointed to by caller from segment handed in
  */
-void addSegBezier(dynArr_t * const array_p, trkSeg_p seg) {
+void addSegBezier(dynArr_t * array_p, trkSeg_p seg) {
 	trkSeg_p s;
 
 
-	DYNARR_APPEND(trkSeg_t, * array_p, 1);          //Adds 1 to cnt
-	s = &DYNARR_N(trkSeg_t,* array_p,array_p->cnt-1);
+	DYNARR_APPEND(trkSeg_t,* array_p, 1);          //Adds 1 to cnt
+	s = &DYNARR_N(trkSeg_t,*array_p,(array_p->cnt)-1);
 	s->type = seg->type;
 	s->color = seg->color;
 	s->width = seg->width;
@@ -395,8 +395,8 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	          if (arc.curveData.type == curveTypeStraight) {
 	          	  double error = BezErrorLine(pos,start_point,end_point, t_s, t_e);
 	          	  curr_good = (error <= errorThreshold/4);
-	          	  arc.curveData.a0 = FindAngle(start_point,end_point);
-	          	  arc.curveData.a1 = FindAngle(end_point,start_point);
+	          	  //arc.curveData.a0 = FindAngle(start_point,end_point);
+	          	  //arc.curveData.a1 = FindAngle(end_point,start_point);
 
 	          } else if (arc.curveData.type == curveTypeNone) {
 	        	  return FALSE;			//Something wrong
@@ -466,7 +466,7 @@ EXPORT BOOL_T ConvertToArcs (coOrd pos[4], dynArr_t * segs, BOOL_T track, wDrawC
 	        		curveSeg.color = wDrawColorBlack;
 	        	else
 	        		curveSeg.color = color;
-	        	curveSeg.u.l.angle = prev_arc.curveData.a1;
+	        	curveSeg.u.l.angle = FindAngle(prev_arc.pos0,prev_arc.pos1);
 	        	curveSeg.u.l.pos[0] = prev_arc.pos0;
 	        	curveSeg.u.l.pos[1] = prev_arc.pos1;
 	        	curveSeg.u.l.option = 0;

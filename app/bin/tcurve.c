@@ -1671,7 +1671,7 @@ LOG( log_curve, 3, ( "Straight: %0.3f < %0.3f\n", d0*sin(D2R(a1)), (4.0/75.0)*ma
 		d0 = FindDistance( pos0, pos1 )/2.0;
 		Rotate( &pos2, pos1, -a0 );
 		pos2.x -= pos1.x;
-		if ( fabs(pos2.x) < 0.01 )
+		if ( fabs(pos2.x) < 0.005 )
 			break;
 		d2 = sqrt( d0*d0 + pos2.x*pos2.x )/2.0; 
 		r = d2*d2*2.0/pos2.x;
