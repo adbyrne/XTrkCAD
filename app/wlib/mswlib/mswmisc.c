@@ -2156,7 +2156,7 @@ int wNotice3(
 
 
 void wHelp(
-    const char * in_topic)
+    const char * topic)
 {
     char *pszHelpTopic;
     HWND hwndHelp;
@@ -2165,8 +2165,6 @@ void wHelp(
         HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
         helpInitted = TRUE;
     }
-
-    char * topic = StripHelpTopicName(in_topic); //Find Root topic name if "_" included
 
     if (!CheckHelpTopicExists(topic)) {
     	printf("Missing Help Topic: %s",topic);
@@ -2184,11 +2182,9 @@ void wHelp(
 
     if (!hwndHelp) {
         wNoticeEx(NT_ERROR, pszHelpTopic, "Ok", NULL);
-        printf("Missing Help Topic: %s",topic);
     }
 
     free(pszHelpTopic);
-    free(topic);
 }
 
 
