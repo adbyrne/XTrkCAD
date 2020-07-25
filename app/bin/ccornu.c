@@ -2941,9 +2941,11 @@ static STATUS_T CmdConvertFrom(
 			if ((trk = OnTrack(&pos,FALSE,TRUE))!=NULL) {
 				SetTrkBits(trk,TB_SELECTED);
 				selectedTrackCount = 1;
+				trk = NULL;
 			} else {
 				wBeep();
 				InfoMessage( _("Not on a Track") );
+				trk = NULL;
 				return C_CONTINUE;
 			}
 			/* no break */
@@ -2962,6 +2964,7 @@ static STATUS_T CmdConvertFrom(
 			DYNARR_RESET(trkSeg_t,trackSegs_da);
 			trk1 = NULL;
 			trk2 = NULL;
+			trk = NULL;
 			UndoStart( _("Convert Bezier and Cornu"),"Try to convert all selected tracks");
 			track_p tracks[2];
 			DYNARR_RESET(track_p,Da.tracks);
