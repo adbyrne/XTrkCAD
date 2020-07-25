@@ -310,6 +310,8 @@ typedef void (*changeNotificationCallBack_t)( long );
 void RegisterChangeNotification( changeNotificationCallBack_t );
 void DoChangeNotification( long );
 
+wBool_t CheckHelpTopicExists(const char * topic);
+
 /* foreign externs */
 extern drawCmd_t mapD;
 extern STATUS_T CmdEnumerate( wAction_t, coOrd );
@@ -445,4 +447,6 @@ void SensorMgmLoad ( void );
 void InitCmdSensor ( wMenu_p menu );
 /* cmodify.c */
 STATUS_T CmdModify(wAction_t action,coOrd pos );
+
+
 #endif

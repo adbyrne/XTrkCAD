@@ -117,6 +117,7 @@ main( int argc, char **argv )
 			if( numBytes == sizeof(int)) {
 				printf( "HelpHelper: Expecting %d bytes\n", len );
 				numBytes2 = read( handleOfPipe, buffer, len + 1 );
+				buffer[numBytes2] = '\0';
 				if (numBytes2 > 0) 
 					printf( "HelpHelper: Display help on: %s\n", buffer );
 				

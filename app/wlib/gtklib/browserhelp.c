@@ -24,10 +24,14 @@
 #include <assert.h>
 #include <string.h>
 
+#include "misc.h"
+
 #include "gtkint.h"
 #include "i18n.h"
 
 #include "dynstring.h"
+
+#define debug 0
 
 #define DEFAULTBROWSERCOMMAND "xdg-open"
 
@@ -80,11 +84,13 @@ void wHelp(const char * topic)
     assert(topic != NULL);
     assert(strlen(topic));
 
+    if (!CheckHelpTopicExists(topic)) return;
+
     TopicToUrl(&url, topic);
 
 	rc = wOpenFileExternal(url);
 
-    if (!rc) {
+	if (!rc) {
         wNotice(HELPERRORTEXT, _("Cancel"), NULL);
     }
 

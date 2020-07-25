@@ -2176,6 +2176,12 @@ void wHelp(
         helpInitted = TRUE;
     }
 
+    if (!CheckHelpTopicExists(topic)) {
+    	printf("Missing Help Topic: %s",topic);
+    	free(topic);
+    	return;
+    }
+
     /*	             "c:\\help.chm::/intro.htm>mainwin", */
     /* attention: always adapt constant value (10) to needed number of formatting characters */
     pszHelpTopic = malloc(strlen(helpFile) + strlen(theTopic) + 10);

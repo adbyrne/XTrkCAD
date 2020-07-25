@@ -995,7 +995,7 @@ The Shortcut key for each command is listed after the command name.
 \u000
 
 
-\dt Elevation Command (\K{cmdElev}) - \e{Ctrl+Shift+E}
+\dt Elevation Command (\K{cmdElevation}) - \e{Ctrl+Shift+E}
 
 \dd Choose endpoint - \e{Left-Click}
 
