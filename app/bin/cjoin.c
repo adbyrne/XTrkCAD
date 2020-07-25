@@ -840,7 +840,7 @@ static STATUS_T CmdJoin(
 		if ((easementVal < 0) && Dj.joinMoveState == 0 )
 			return CmdCornu(action, pos);
 		if ( Dj.state >= 2) return C_CONTINUE;
-		if ( (trk = OnTrack( &pos, TRUE, TRUE )) == NULL)
+		if ( (trk = OnTrack( &pos, FALSE, TRUE )) == NULL)
 			return C_CONTINUE;
 		if (!CheckTrackLayer( trk ) )
 			return C_CONTINUE;
@@ -867,10 +867,6 @@ static STATUS_T CmdJoin(
 			Dj.cornuMode = TRUE;
 			return CmdCornu(action, pos);
 		}
-
-		if (infoSubst)
-			InfoSubstituteControls(NULL, NULL);
-		infoSubst = FALSE;
 
 		DYNARR_SET( trkSeg_t, tempSegs_da, 3 );
 		tempSegs(0).color = drawColorBlack;
@@ -904,10 +900,9 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 			joinRadPD.option |= PDO_NORECORD;
 			ParamLoadControls(&joinPG);
 			ParamGroupRecord(&joinPG);
-
 			return C_CONTINUE;
 		} else {
-			if ( (Dj.inp[1].trk = OnTrack( &pos, TRUE, TRUE )) == NULL)
+			if ( (Dj.inp[1].trk = OnTrack( &pos, FALSE, TRUE )) == NULL)
 				return C_CONTINUE;
 			if (!CheckTrackLayer( Dj.inp[1].trk ) )
 				return C_CONTINUE;
@@ -918,6 +913,10 @@ LOG( log_join, 1, ("JOIN: 1st track %d @[%0.3f %0.3f]\n",
 				ErrorMessage( MSG_JOIN_SAME );
 				return C_CONTINUE;
 			}
+			if (infoSubst)
+				InfoSubstituteControls(NULL, NULL);
+			infoSubst = FALSE;
+
 			Dj.inp[1].realType = GetTrkType(Dj.inp[1].trk);
 			if ( IsCurveCircle( Dj.inp[0].trk ) )
 				Dj.inp[0].params.ep = PickArcEndPt( Dj.inp[0].params.arcP, Dj.inp[0].pos, pos );
@@ -1293,7 +1292,6 @@ errorReturn:
 		return C_CONTINUE;
 
 	case C_UP:
-
 		if (Dj.state == 0) {
 			if (easementVal<0 && Dj.cornuMode)
 				return CmdCornu(action, pos);
