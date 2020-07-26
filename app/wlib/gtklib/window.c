@@ -375,7 +375,7 @@ void wWinShow(
             gtk_window_resize(GTK_WINDOW(win->gtkwin), width+10, height+10);
         }
 
-
+        gtk_window_present(GTK_WINDOW(win->gtkwin));
 
 
         gdk_window_raise(gtk_widget_get_window(win->gtkwin));
@@ -941,8 +941,9 @@ static wWin_p wWinCommonCreate(
         w->gtkwin = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
         if (gtkMainW) {
-            gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
-                                         GTK_WINDOW(gtkMainW->gtkwin));
+        	if (!(w->option&F_NOTTRANSIENT))
+        		gtk_window_set_transient_for(GTK_WINDOW(w->gtkwin),
+        									GTK_WINDOW(gtkMainW->gtkwin));
         }
     }
     getWinSize(w, nameStr);

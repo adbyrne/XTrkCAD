@@ -350,9 +350,9 @@ wFontSize_t wSelectedFontSize(void)
  * \return    describe the return value
  */
 
-void wSetSelectedFontSize(int size)
+void wSetSelectedFontSize(wFontSize_t size)
 {
-    absoluteFontSize = (wFontSize_t)size;
+    absoluteFontSize = size;
 }
 
 /**

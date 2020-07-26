@@ -23,6 +23,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
+#include "wlib.h"
 
 #include "ccurve.h"
 #include "cbezier.h"
@@ -61,7 +62,7 @@ static wMenuPush_p drawModCenterDot;
 static wMenuPush_p drawModPhantom;
 
 
-extern void wSetSelectedFontSize(int size);
+extern void wSetSelectedFontSize(wFontSize_t size);
 
 static long fontSizeList[] = {
 		4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36,
@@ -135,7 +136,7 @@ EXPORT void UpdateFontSizeList(
 				
 					*fontSizeR = fontSize;
 					/* inform gtkfont dialog from change */
-					wSetSelectedFontSize((int)fontSize);
+					wSetSelectedFontSize((wFontSize_t)fontSize);
 					/*LoadFontSizeList( list, *fontSizeR );*/
 				} else {
 					sprintf( message, "%ld", *fontSizeR );

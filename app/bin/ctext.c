@@ -95,6 +95,7 @@ static void TextDlgUpdate(
 			Dt.lastLineLen = lastline.x;
 			Dt.lastLineOffset = lastline.y;
 		}
+		wSetSelectedFontSize((wFontSize_t)Dt.size);   //Update for next time
 		DrawTextSize( &mainD, "Aquilp", NULL, Dt.size, TRUE, &size );
 		Dt.cursHeight = size.y;
 		if ( Dt.state == SHOW_TEXT) {
