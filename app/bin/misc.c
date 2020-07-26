@@ -464,6 +464,10 @@ EXPORT char * Strcpytrimed(char * dst, char * src, BOOL_T double_quotes) {
 
 static char * directory;
 
+#ifdef WINDOWS
+#define F_OK (0)
+#endif
+
 EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
 
 	char * htmlFile;
