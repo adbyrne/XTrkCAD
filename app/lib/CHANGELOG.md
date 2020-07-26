@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.2.0 Beta 2.1]
+
+### Bugs
+
++ Failure in Parallel Line command fixed
++ Failure in ConvertFrom Bezier fixed
++ Bad track created in ConvertFrom Cornu that does not align (too liberal use of straight)
++ Context Help via F1 works in Wndows
++ Make all commands have target HTML pages for context help
++ Make Font Size be remembered when set from Text command
++ Fixed Radius field to be mainatained in Join after first point selected
++ Param Search UI result box resizeable 
++ Save Bridge Status for Segment Track
++ Updated German translations and translated Help Menu items
++ Clear NoTies if track is hidden
++ ConvertForm and ConvertTo to inherit characterstics of donor Tracks
++ ColorDraw and ColorTrack stored with layout file
++ Help content for Parameter File Dialog
++ Make Rulers overlay content
++ Change Modify/Create Polygon/PolyLine shortcuts to not clash with Pan center as 'c'
++ Track Segments in Structures and Turnouts retain color (including white)
+
+### Added
+
++ Elevation to show height and offset when mousing over tracks without Shift
++ New anchor for Elevation+Shift to show Split will result
++ Debian Install
+
+### Parameter Files
+
++ Peco G-45 file
+
 ## [5.2.0 Beta 2.0]
 
 ### Added

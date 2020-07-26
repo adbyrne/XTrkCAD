@@ -2178,7 +2178,6 @@ void wHelp(
 
     if (!CheckHelpTopicExists(topic)) {
     	printf("Missing Help Topic: %s",topic);
-    	free(topic);
     	return;
     }
 
