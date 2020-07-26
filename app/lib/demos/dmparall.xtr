@@ -33,7 +33,7 @@ MESSAGE
 This example shows how to create parallel tracks.
 END
 STEP
-COMMAND Parallel
+COMMAND ParallelTrack
 MESSAGE
 _________________________________________
 

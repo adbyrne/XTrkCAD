@@ -21,7 +21,7 @@ PARAMETER misc cmdEasement
 PARAMETER easement val 0.0
 BIGPAUSE
 PARAMETER easement ok
-COMMAND Join
+COMMAND JoinTrack
 STEP
 MESSAGE
 _____________________________________________________
@@ -97,7 +97,7 @@ PARAMETER misc cmdEasement
 PARAMETER easement val -1.0
 BIGPAUSE
 PARAMETER easement ok
-COMMAND Join
+COMMAND JoinTrack
 STEP
 MESSAGE
 _____________________________________________________
