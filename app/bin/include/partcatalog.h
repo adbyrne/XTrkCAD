@@ -23,20 +23,25 @@
 #define HAVE_TRACKCATALOG_H
 
 #include <stdbool.h>
+#include "include/utlist.h"
 
 #define MAXFILESPERCONTENT	10					/**< count of files with the same content header */
-#define ESTIMATED_CONTENTS_WORDS 10				/**< average count of words in CONTENTS header */
-
-
+#define ESTIMATED_CONTENTS_WORDS 10				/**< average count of words in CONTENTS header */		
 
 struct sCatalogEntry {
-    struct sCatalogEntry *next;
+	struct sCatalogEntry *next, *prev; 
     unsigned files;								/**< current count of files */
     char *fullFileName[MAXFILESPERCONTENT];		/**< fully qualified file name */
     char *contents;								/**< content field of parameter file */
 };
 
 typedef struct sCatalogEntry CatalogEntry;
+
+struct sCatalog {
+	CatalogEntry *head;							/**< The entries */
+};
+
+typedef struct sCatalog Catalog;
 
 struct sIndexEntry {
     CatalogEntry *value;						/**< catalog entry having the key word in contents */
@@ -45,15 +50,15 @@ struct sIndexEntry {
 
 typedef struct sIndexEntry IndexEntry;
 
-struct sTrackLibrary {
-    CatalogEntry *catalog;						/**< list of files cataloged */
+struct sParameterLib {
+    Catalog *catalog;							/**< list of files cataloged */
     IndexEntry *index;							/**< Index for lookup */
     unsigned wordCount;							/**< How many words indexed */
-    unsigned trackTypeCount;					/**< */
+    unsigned parameterFileCount;					/**< */
 };
 
-typedef struct sTrackLibrary
-		TrackLibrary;							/**< core data structure for the catalog */
+typedef struct sParameterLib
+		ParameterLib;							/**< core data structure for the catalog */
 
 struct sSearchResult {
 	CatalogEntry ** result;
@@ -66,16 +71,16 @@ struct sSearchResult {
 
 typedef struct sSearchResult SearchResult;
 
-CatalogEntry *InitCatalog(void);
-TrackLibrary *InitLibrary(void);
-TrackLibrary *CreateLibrary(char *directory);
-void DeleteLibrary(TrackLibrary *tracklib);
-bool GetTrackFiles(TrackLibrary *trackLib, char *directory);
+Catalog *InitCatalog(void);
+ParameterLib *InitLibrary(void);
+ParameterLib *CreateLibrary(char *directory);
+void DeleteLibrary(ParameterLib *tracklib);
+bool GetParameterFiles(ParameterLib *trackLib, char *directory);
 int GetParameterFileInfo(int files, char ** fileName, void * data);
-unsigned CreateLibraryIndex(TrackLibrary *trackLib);
-unsigned SearchLibrary(TrackLibrary *library, char *searchExpression, SearchResult **totalResult);
+unsigned CreateLibraryIndex(ParameterLib *trackLib);
+unsigned SearchLibrary(ParameterLib *library, char *searchExpression, SearchResult **totalResult);
 void SearchResultDiscard(SearchResult *res);
-unsigned CountCatalogEntries(CatalogEntry *listHeader);
+unsigned CountCatalogEntries(Catalog *listHeader);
 void EmptyCatalog(CatalogEntry *listHeader);
 bool FilterKeyword(char *word);
 #endif // !HAVE_TRACKCATALOG_H

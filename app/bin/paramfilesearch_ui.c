@@ -40,7 +40,7 @@
 #include "bitmaps/magnifier.xpm"
 
 static CatalogEntry *catalogFileBrowse;		/**< current search results */
-static TrackLibrary *trackLibrary;			/**< Track Library          */
+static ParameterLib *trackLibrary;			/**< Track Library          */
 static CatalogEntry *currentCat;			/**< catalog being shown    */
 
 /* define the search / browse dialog */
@@ -257,8 +257,7 @@ static void SearchUiDoSearch(void * ptr)
 {
     unsigned result;
 	SearchResult *currentResults;
-
-    char * search;
+	char * search;
 
     search = StringTrim(searchUiQuery);
 

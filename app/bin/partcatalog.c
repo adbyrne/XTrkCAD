@@ -19,6 +19,12 @@
 *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
+
+/**
+ * Data structures:
+ * 
+ * 
+ */
 #include <assert.h>
 #include <ctype.h>
 #ifdef HAVE_MALLOC_H
@@ -45,6 +51,7 @@
 #include "paths.h"
 #include "include/stringxtc.h"
 #include "include/utf8convert.h"
+#include "include/utlist.h"
 
 #if _MSC_VER > 1300
     #define strnicmp _strnicmp
@@ -53,28 +60,20 @@
 
 #define PUNCTUATION "+-*/.,&%=#"
 
-
-
 /**
  * Create and initialize the linked list for the catalog entries
  *
  * \return pointer to first element
  */
 
-CatalogEntry *
+Catalog *
 InitCatalog(void)
 {
-    CatalogEntry *head;
-    CatalogEntry *tail;
-
-    /* allocate two pseudo nodes for beginning and end of list */
-    head = (CatalogEntry *)malloc(sizeof(CatalogEntry));
-    tail = (CatalogEntry *)malloc(sizeof(CatalogEntry));
-
-    head->next = tail;
-    tail->next = tail;
-
-    return (head);
+	Catalog *newCatalog = MyMalloc(sizeof(Catalog));
+	if (newCatalog) {
+		newCatalog->head = NULL;
+	}
+    return (newCatalog);
 }
 
 /**
@@ -98,22 +97,18 @@ InsertIntoCatalogAfter(CatalogEntry *entry)
 }
 
 /**
- * Count the elements in the linked list ignoring dummy elements
+ * Count the elements in the linked list
  *
- * \param listHeader IN the linked list
- * \return the numberof elements
+ * \param catalog IN 
+ * \return the number of elements
  */
 
 unsigned
-CountCatalogEntries(CatalogEntry *listHeader)
+CountCatalogEntries(Catalog *catalog)
 {
-    CatalogEntry *currentEntry = listHeader->next;
+	CatalogEntry * entry;
     unsigned count = 0;
-
-    while (currentEntry != currentEntry->next) {
-        count++;
-        currentEntry = currentEntry->next;
-    }
+	DL_COUNT(catalog->head, entry, count);
     return (count);
 }
 
@@ -143,6 +138,21 @@ EmptyCatalog(CatalogEntry *listHeader)
 }
 
 /**
+ * Compare entries
+ *
+ * \param [in] a If non-null, a CatalogEntry to compare.
+ * \param [in] b If non-null, a CatalogEntry to compare.
+ *
+ * \returns An int.
+ */
+
+static int
+CompareEntries( CatalogEntry *a, CatalogEntry *b)
+{
+	return XtcStricmp(a->contents, b->contents);
+}
+
+/**
  * Find the position in the list and add
  *
  * \param listHeader IN start of list
@@ -152,19 +162,16 @@ EmptyCatalog(CatalogEntry *listHeader)
  */
 
 static CatalogEntry *
-InsertInOrder(CatalogEntry *listHeader, const char *contents)
+InsertInOrder(Catalog *catalog, const char *contents)
 {
-    CatalogEntry *currentEntry = listHeader;
+	CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
+	newEntry->contents = MyStrdup(contents);
 
-    while (currentEntry->next != currentEntry->next->next) {
-    	CatalogEntry *nextEntry = currentEntry->next;
-        if (XtcStricmp(nextEntry->contents, contents)>0) {
-            return InsertIntoCatalogAfter(currentEntry);
-        }
-        currentEntry = nextEntry;
-    }
-    return InsertIntoCatalogAfter(currentEntry);
+	DL_INSERT_INORDER(catalog->head, newEntry, CompareEntries);
+
+    return newEntry;
 }
+
 /**
  * Get the existing list element for a content
  *
@@ -176,18 +183,19 @@ InsertInOrder(CatalogEntry *listHeader, const char *contents)
  */
 
 static CatalogEntry *
-IsExistingContents(CatalogEntry *listHeader, const char *contents, BOOL_T silent)
+IsExistingContents(Catalog *catalog, const char *contents, BOOL_T silent)
 {
-    CatalogEntry *currentEntry = listHeader->next;
+    CatalogEntry *head = catalog->head;
+	CatalogEntry *currentEntry;
 
-    while (currentEntry != currentEntry->next) {
-        if (!XtcStricmp(currentEntry->contents, contents)) {
-        	if (!silent)
-        		printf("%s already exists in %s\n", contents, currentEntry->fullFileName[0]);
-            return (currentEntry);
-        }
-        currentEntry = currentEntry->next;
-    }
+	DL_FOREACH(head, currentEntry)
+	{
+		if (!XtcStricmp(currentEntry->contents, contents)) {
+			if (!silent)
+				printf("%s already exists in %s\n", contents, currentEntry->fullFileName[0]);
+			return (currentEntry);
+		}
+	};
     return (NULL);
 }
 
@@ -213,29 +221,6 @@ UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents)
     } else {
 		AbortProg("Number of files with same content too large!", NULL);
     }
-}
-
-/**
- * Create the list for the catalog entries
- *
- * \return
- */
-
-static CatalogEntry *
-CreateCatalog()
-{
-    CatalogEntry *catalog = InitCatalog();
-
-    return (catalog);
-}
-
-
-static IndexEntry *
-CreateIndexTable(unsigned int capacity)
-{
-    IndexEntry *index = (IndexEntry *)malloc(capacity * sizeof(IndexEntry));
-
-    return (index);
 }
 
 /**
@@ -288,46 +273,6 @@ GetNextParameterFile(DIR *dir, const char *dirName, char **fileName)
 }
 
 /**
- * Scan a directory for parameter files. For each file found the CONTENTS is
- * read and added to the list *
- *
- * \param insertAfter IN starting point for the list of files
- * \param dirName IN directory to be scanned
- *
- * \return pointer to the last element(?)
- */
-
-static CatalogEntry *
-ScanDirectory(CatalogEntry *catalog, const char *dirName)
-{
-    DIR *d;
-    CatalogEntry *newEntry = catalog;
-
-    d = opendir(dirName);
-    if (d) {
-        char *fileName = NULL;
-
-        while (GetNextParameterFile(d, dirName, &fileName)) {
-            CatalogEntry *existingEntry;
-            char *contents = GetParameterFileContent(fileName);
-            if ((existingEntry = IsExistingContents(catalog, contents,FALSE))) {
-                if (strcmp(existingEntry->fullFileName[existingEntry->files-1],fileName))
-                	UpdateCatalogEntry(existingEntry, fileName, contents);
-            } else {
-                newEntry = InsertInOrder(catalog,contents);
-                UpdateCatalogEntry(newEntry, fileName, contents);
-            }
-            free(contents);
-            free(fileName);
-            fileName = NULL;
-        }
-        closedir(d);
-    }
-
-    return (newEntry);
-}
-
-/**
  * Comparison function for IndexEntries used by qsort()
  *
  * \param entry1 IN
@@ -370,27 +315,27 @@ FilterKeyword(char *word)
  * \return number of indexed keywords
  */
 static unsigned
-CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index, unsigned capacityOfIndex)
+CreateContentsIndex(Catalog *catalog, IndexEntry *index, unsigned capacityOfIndex)
 {
-    CatalogEntry *currentEntry = catalog->next;
+    CatalogEntry *currentEntry = catalog->head;
+	CatalogEntry *element;
     unsigned totalMemory = 0;
     size_t wordCount = 0;
     char *wordList;
     char *wordListPtr;
 
-    while (currentEntry != currentEntry->next) {
-        totalMemory += strlen(currentEntry->contents) + 1;
-        currentEntry = currentEntry->next;
+	DL_FOREACH(currentEntry, element ) {
+        totalMemory += strlen(element->contents) + 1;
     }
 
     wordList = malloc((totalMemory + 1) * sizeof(char));
 
     wordListPtr = wordList;
-    currentEntry = catalog->next;
+    currentEntry = catalog->head;
 
-    while (currentEntry != currentEntry->next) {
+    DL_FOREACH(currentEntry, element) {
         char *word;
-        char *content = strdup(currentEntry->contents);
+        char *content = strdup(element->contents);
 
         word = strtok(content, " \t\n\r");
         while (word && wordCount < capacityOfIndex) {
@@ -401,7 +346,7 @@ CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index, unsigned capacityO
                 *p = tolower(*p);
             }
 			if (!FilterKeyword(wordListPtr)) {
-				index[wordCount].value = currentEntry;
+				index[wordCount].value = element;
 				index[wordCount].keyWord = wordListPtr;
 				wordListPtr += strlen(word) + 1;
 				wordCount++;
@@ -412,7 +357,6 @@ CreateContentsIndex(CatalogEntry *catalog, IndexEntry *index, unsigned capacityO
             word = strtok(NULL, " \t\n\r");
         }
         free(content);
-        currentEntry = currentEntry->next;
     }
     *wordListPtr = '\0';
 
@@ -574,16 +518,16 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
  * \return TRUE on success
  */
 
-TrackLibrary *
+ParameterLib *
 InitLibrary(void)
 {
-    TrackLibrary *trackLib = malloc(sizeof(TrackLibrary));
+    ParameterLib *trackLib = malloc(sizeof(ParameterLib));
 
     if (trackLib) {
-        trackLib->catalog = CreateCatalog();
+        trackLib->catalog = InitCatalog();
         trackLib->index = NULL;
         trackLib->wordCount = 0;
-        trackLib->trackTypeCount = 0;
+        trackLib->parameterFileCount = 0;
     }
 
     return (trackLib);
@@ -598,13 +542,40 @@ InitLibrary(void)
  */
 
 bool
-GetTrackFiles(TrackLibrary *trackLib, char *directory)
+GetParameterFiles(ParameterLib *paramLib, char *directory)
 {
-    ScanDirectory(trackLib->catalog, directory);
-    trackLib->trackTypeCount = CountCatalogEntries(trackLib->catalog);
+	DIR *d;
+	Catalog *catalog = paramLib->catalog;
 
-    return (trackLib->trackTypeCount);
+	d = opendir(directory);
+	if (d) {
+		char *fileName = NULL;
+
+		while (GetNextParameterFile(d, directory, &fileName)) {
+			CatalogEntry *existingEntry;
+
+			char *contents = GetParameterFileContent(fileName);
+
+			if ((existingEntry = IsExistingContents(catalog, contents, FALSE))) {
+				// [TODO] Find a reasonable way to handle duplicate contents descriptions
+				// if (strcmp(existingEntry->fullFileName[existingEntry->files - 1], fileName))
+				UpdateCatalogEntry(existingEntry, fileName, contents);
+			} else {
+				CatalogEntry *newEntry;
+				newEntry = InsertInOrder(catalog, contents);
+				UpdateCatalogEntry(newEntry, fileName, contents);
+			}
+			MyFree(contents);
+			free(fileName);
+			fileName = NULL;
+		}
+		closedir(d);
+	}
+    paramLib->parameterFileCount = CountCatalogEntries(paramLib->catalog);
+
+    return (paramLib->parameterFileCount);
 }
+
 /**
  * Add a list of parameters files to a catalog. This function is
  * called when the user selects files in the file selector.
@@ -620,7 +591,7 @@ int GetParameterFileInfo(
     char ** fileName,
     void * data)
 {
-    CatalogEntry *catalog = (CatalogEntry *)data;
+    Catalog *catalog = (Catalog *)data;
 
     assert(fileName != NULL);
     assert(files > 0);
@@ -629,9 +600,9 @@ int GetParameterFileInfo(
     for (int i = 0; i < files; i++) {
         CatalogEntry *newEntry;
         char *contents = GetParameterFileContent(fileName[i]);
-
+		///[TODO] try to find out what should happen here
         if (!(newEntry = IsExistingContents(catalog, contents,TRUE))) {
-            newEntry = InsertIntoCatalogAfter(catalog);
+            newEntry = InsertIntoCatalogAfter(catalog->head);
         }
         UpdateCatalogEntry(newEntry, fileName[i], contents);
         free(contents);
@@ -640,27 +611,30 @@ int GetParameterFileInfo(
 }
 
 /**
- * Create the search index from the contents description for the whole catalog.
- * A fixed number of words are added to the index. See ESTIMATED_CONTENTS_WORDS
+ * Create the search index from the contents description for the whole
+ * catalog. A fixed number of words are added to the index. See
+ * ESTIMATED_CONTENTS_WORDS
  *
- * \param trackLib IN the catalog
- * \return the number of words indexed
+ * \param [in] parameterLib IN the catalog.
+ *
+ * \returns the number of words indexed.
  */
 
 unsigned
-CreateLibraryIndex(TrackLibrary *trackLib)
+CreateLibraryIndex(ParameterLib *parameterLib)
 {
-    trackLib->index = CreateIndexTable(trackLib->trackTypeCount *
-                                       ESTIMATED_CONTENTS_WORDS);
+    parameterLib->index = (IndexEntry *)malloc(parameterLib->parameterFileCount *
+                            ESTIMATED_CONTENTS_WORDS * sizeof(IndexEntry));
 
-    trackLib->wordCount = CreateContentsIndex(trackLib->catalog, trackLib->index,
-    					  ESTIMATED_CONTENTS_WORDS * trackLib->trackTypeCount);
+    parameterLib->wordCount = CreateContentsIndex(parameterLib->catalog,
+                              parameterLib->index,
+                              ESTIMATED_CONTENTS_WORDS * parameterLib->parameterFileCount);
 
-    return (trackLib->wordCount);
+    return (parameterLib->wordCount);
 }
 
 void
-DeleteLibraryIndex(TrackLibrary *trackLib)
+DeleteLibraryIndex(ParameterLib *trackLib)
 {
 	free(trackLib->index);
 	trackLib->index = NULL;
@@ -677,14 +651,14 @@ DeleteLibraryIndex(TrackLibrary *trackLib)
  * \return  NULL if error or empty directory, else library handle
  */
 
-TrackLibrary *
+ParameterLib *
 CreateLibrary(char *directory)
 {
-    TrackLibrary *library;
+    ParameterLib *library;
 
     library = InitLibrary();
     if (library) {
-        if (!GetTrackFiles(library, directory)) {
+        if (!GetParameterFiles(library, directory)) {
             return (NULL);
         }
 
@@ -694,10 +668,9 @@ CreateLibrary(char *directory)
 }
 
 void
-DeleteLibrary(TrackLibrary* library)
+DeleteLibrary(ParameterLib* library)
 {
 	DeleteLibraryIndex(library);
-
 
 	free(library);
 }
@@ -814,7 +787,7 @@ unsigned countWords(char *str)
  */
  
 unsigned
-SearchLibrary(TrackLibrary *library, char *searchExpression,
+SearchLibrary(ParameterLib *library, char *searchExpression,
 	SearchResult **totalResult)
 {
 	CatalogEntry **entries;
@@ -879,7 +852,7 @@ SearchResultDiscard(SearchResult *res)
 }
 
 /**
- * Get the contents description from a parameter file. Returned string has to be freed after use.
+ * Get the contents description from a parameter file. Returned string has to be MyFree'd after use.
  *
  * \param file IN xtpfile
  * \return pointer to found contents or NULL if not present
@@ -903,7 +876,7 @@ GetParameterFileContent(char *file)
 					/* if found, store the rest of the line and the filename	*/
 					ptr = ptr+strlen(CONTENTSCOMMAND)+1;
 					ptr = strtok(ptr, "\r\n");
-					result = strdup(ptr);
+					result = MyStrdup(ptr);
 #ifdef WINDOWS
 					ConvertUTF8ToSystem(result);
 #endif // WINDOWS
