@@ -1215,6 +1215,20 @@ static BOOL_T AddSelectedTrack(
 	return TRUE;
 }
 
+static BOOL_T RemoveSelectedTrack(track_p trk) {
+
+	for(int i=0;i<tlist_da.cnt; i++) {
+		if (DYNARR_N(track_p,tlist_da,i) == trk) {
+			for (int j=i;j<tlist_da.cnt-1;j++) {
+				DYNARR_N(track_p,tlist_da,j) = DYNARR_N(track_p,tlist_da,j+1);
+			}
+			tlist_da.cnt--;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 static coOrd moveOrig;
 static ANGLE_T moveAngle;
 
@@ -1257,6 +1271,8 @@ static void AccumulateTracks( void )
 	/*wDrawDelayUpdate( moveD.d, FALSE );*/
 }
 
+static dynArr_t auto_select_da;
+
 static void AddEndCornus() {
 	for (int i=0;i<tlist_da.cnt;i++) {
 		track_p trk = DYNARR_N(track_p,tlist_da,i);
@@ -1267,9 +1283,25 @@ static void AddEndCornus() {
 				SelectOneTrack( tc, TRUE );
 				DYNARR_APPEND(track_p,tlist_da,1);	//Add to selected list
 				DYNARR_LAST(track_p,tlist_da) = tc;
+				DYNARR_APPEND(track_p,auto_select_da,1);
+				DYNARR_LAST(track_p,auto_select_da) = tc;
+				printf("Added Cornu %d \n",tc->index);
 			}
 		}
 	}
+}
+
+static void RemoveEndCornus() {
+	track_p tc;
+	for (int i=0;i<auto_select_da.cnt;i++) {
+		tc = DYNARR_N(track_p,auto_select_da,i);
+		SelectOneTrack( tc, FALSE );
+		if (RemoveSelectedTrack(tc))
+			printf("Removed Cornu %d \n",tc->index);
+		else
+			printf("Failed to Remove Cornu %d \n", tc->index);
+	}
+	DYNARR_RESET(track_p,auto_select_da);
 }
 
 
@@ -1465,7 +1497,7 @@ static void MoveTracks(
 							DeleteTrack(trk,TRUE);
 							ErrorMessage(_("Cornu too tight - it was deleted"));
 							DoRedraw(); // MoveTracks: Cornu/delete
-							return;
+							continue;
 						}
 					} else if (!trk1) {									//No end track
 						DrawTrack(trk,&mainD,wDrawColorWhite);
@@ -1500,6 +1532,7 @@ static void MoveTracks(
 
 		InfoCount( inx );
 	}
+	RemoveEndCornus();
 	ClrAllTrkBits(TB_UNDRAWN);
 	DoRedraw();
 	wSetCursor( mainD.d, defaultCursor );
@@ -1534,6 +1567,7 @@ void MoveToJoin(
 		ConnectTracks( trk0, ep0, trk1, ep1 );
 		DrawNewTrack( trk0 );
 		DrawNewTrack( trk1 );
+		RemoveEndCornus();
 }
 
 void FreeTempStrings() {
@@ -1734,7 +1768,7 @@ static STATUS_T CmdMove(
 			UndoStart( _("Move Tracks"), "move" );
 			base = zero;
 			orig = pos;
-
+			DYNARR_RESET(track_p,auto_select_da);
 			GetMovedTracks(TRUE);
 			SetMoveD( TRUE, base, 0.0 );
 			drawCount = 0;
@@ -1776,6 +1810,7 @@ static STATUS_T CmdMove(
 			}
 			ep1 = -1;
 			ep2 = -1;
+			RemoveEndCornus();
 			tlist_da.cnt = 0;
 			return C_TERMINATE;
 
@@ -1860,6 +1895,7 @@ static STATUS_T CmdMove(
 				microCount = 0;
 				MainRedraw(); // Micro step move
 			}
+			RemoveEndCornus();
 			return C_CONTINUE;
 			}
 			break;
@@ -1869,6 +1905,7 @@ static STATUS_T CmdMove(
 				doingMove = FALSE;
 				UndoEnd();
 			}
+			RemoveEndCornus();
 			tlist_da.cnt = 0;
 			break;
 		case C_CONFIRM:
@@ -1877,6 +1914,7 @@ static STATUS_T CmdMove(
 				doingMove = FALSE;
 				UndoUndo();
 			}
+			RemoveEndCornus();
 			tlist_da.cnt = 0;
 			break;
 		default:
@@ -1951,6 +1989,7 @@ static STATUS_T CmdRotate(
 				return C_TERMINATE;
 			}
 			UndoStart( _("Rotate Tracks"), "rotate" );
+			DYNARR_RESET(track_p,auto_select_da);
 			if ( rotateAlignState == 0 ) {
 				drawnAngle = FALSE;
 				angle = 0.0;
@@ -2127,6 +2166,7 @@ static STATUS_T CmdRotate(
 				}
 			}
 			UndoEnd();
+			RemoveEndCornus();
 			tlist_da.cnt = 0;
 			return C_TERMINATE;
 
@@ -2211,6 +2251,7 @@ static STATUS_T CmdRotate(
 
 static void QuickMove( void* pos) {
 	coOrd move_pos = *(coOrd*)pos;
+	DYNARR_RESET(track_p,auto_select_da);
 	if ( SelectedTracksAreFrozen() )
 		return;
 	wDrawDelayUpdate( mainD.d, TRUE );
@@ -2223,6 +2264,7 @@ static void QuickMove( void* pos) {
 static void QuickRotate( void* pangle )
 {
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
+	DYNARR_RESET(track_p,auto_select_da);
 	if ( SelectedTracksAreFrozen() )
 		return;
 	wDrawDelayUpdate( mainD.d, TRUE );
