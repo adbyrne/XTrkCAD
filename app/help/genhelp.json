@@ -7,6 +7,7 @@
 		{"line": "cmdAbove", "contents": "Move selected object to top" },
 		{"line": "cmdAddElevations", "contents": "Raise or lower all selected tracks" },
 		{"line": "cmdMagneticSnap", "contents": "Turn magnetic snap on or off" },
+		{"line": "cmdBackgroundShow", "contents": "Show/Hide Background" },
 		{"line": "cmdBelow", "contents": "Move selected object to bottom" },
 		{"line": "cmdBlockCreate", "contents": "Create a section of track for automation" },
 		{"line": "cmdBlockEdit", "contents": "Edit a block definition " },
