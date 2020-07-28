@@ -1136,6 +1136,10 @@ The Shortcut key for each command is listed after the command name.
 
 \u000
 
+\dt Angle Command (\K{cmdAngle})
+
+\dd Position Protractor - \e{Left-Drag}
+
 
 \dt Select Command (\K{cmdSelect}) - \e{Ctrl+E}
 

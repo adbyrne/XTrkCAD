@@ -1285,7 +1285,6 @@ static void AddEndCornus() {
 				DYNARR_LAST(track_p,tlist_da) = tc;
 				DYNARR_APPEND(track_p,auto_select_da,1);
 				DYNARR_LAST(track_p,auto_select_da) = tc;
-				printf("Added Cornu %d \n",tc->index);
 			}
 		}
 	}
@@ -1296,10 +1295,7 @@ static void RemoveEndCornus() {
 	for (int i=0;i<auto_select_da.cnt;i++) {
 		tc = DYNARR_N(track_p,auto_select_da,i);
 		SelectOneTrack( tc, FALSE );
-		if (RemoveSelectedTrack(tc))
-			printf("Removed Cornu %d \n",tc->index);
-		else
-			printf("Failed to Remove Cornu %d \n", tc->index);
+		RemoveSelectedTrack(tc);
 	}
 	DYNARR_RESET(track_p,auto_select_da);
 }

@@ -89,6 +89,7 @@
 #define ACCL_ABOVE		(WCTL+WSHIFT+'b')
 #define ACCL_BELOW		(WCTL+WSHIFT+'w')
 #define ACCL_RULER		(0)
+#define ACCL_ANGLE      (0)
 
 /* fileM */
 #define ACCL_NEW		(WCTL+'n')

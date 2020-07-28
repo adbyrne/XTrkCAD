@@ -900,8 +900,8 @@ EXPORT void SelectFont(void) {
  *
  */
 
-#define COMMAND_MAX (170)
-#define BUTTON_MAX (170)
+#define COMMAND_MAX (180)
+#define BUTTON_MAX (180)
 #define NUM_CMDMENUS (4)
 
 static struct {

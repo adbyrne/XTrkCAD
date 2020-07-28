@@ -32,6 +32,10 @@ Functions for drawing basic shapes and objects like lines and curves can be acce
 
 \u000
 
+\dd \f{Protractor} - create protractor and set visibility (\K{cmdAngle})
+
+\u000
+
 \dd \f{Shapes} - draw boxes, polygons and poly-lines. (\K{cmdDrawShapes})
 
 \u000
@@ -270,6 +274,18 @@ Subsequent clicks on the \f{Ruler} button will hide or display the ruler.
 
 \rule
 
+\S{cmdAngle} Protractor
+
+\G{png.d/bangle.png}
+
+The \f{Angle} command displays a protrractor on the layout. Click for the protractor origin and \c{left-drag} the cursor to set the base angle. Adding \c{Ctrl} will snap the angle to a multiple of 90 degrees. 
+
+Then \{Left-Drag the second line. Adding \c{Ctrl} will snap the angle to 90 degree relative to the base line. The angle between the lines is displayed. 
+
+Sunsequent clicks on the \f{Angle} button will hode or display the protractor.
+
+\rule
+ 
 
 \S{cmdDrawShapes} Shapes
 

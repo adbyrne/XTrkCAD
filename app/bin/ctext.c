@@ -37,6 +37,8 @@ void UpdateFontSizeList( long *, wList_p, wIndex_t );
 long GetFontSize(long);
 long GetFontSizeIndex(long size);
 
+extern void wSetSelectedFontSize(wFontSize_t size);
+
 static wMenu_p textPopupM;
 
 /*****************************************************************************
