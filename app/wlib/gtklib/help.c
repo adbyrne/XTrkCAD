@@ -51,7 +51,7 @@ DoHelpMenu(void *data)
 
     switch (func) {
     case 1:
-        wHelp("index");
+        wHelp("contents");
         break;
 
     case 3:
