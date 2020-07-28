@@ -2777,7 +2777,6 @@ EXPORT STATUS_T CmdTurnoutAction(
 		if ( curTurnout == NULL ) return C_CONTINUE;
 		PlaceTurnout( pos, NULL );
 		Dto.state = 1;
-		CreateMoveAnchor(pos);
 		return C_CONTINUE;
 
 	case C_MOVE:
@@ -2787,12 +2786,10 @@ EXPORT STATUS_T CmdTurnoutAction(
 			curTurnoutEp = 0;
 		Dto.state = 1;
 		PlaceTurnout( pos, Dto.trk );
-		CreateMoveAnchor(pos);
 		return C_CONTINUE;
 
 	case C_UP:
 		DYNARR_RESET(trkSeg_t,anchors_da);
-		CreateMoveAnchor(pos);
 		InfoMessage( _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel") );
 		return C_CONTINUE;
 
@@ -2804,7 +2801,6 @@ EXPORT STATUS_T CmdTurnoutAction(
 LOG( log_turnout, 1, ( "RDOWN @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 		}
 		Dto.rot0 = Dto.rot1 = pos;
-		CreateRotateAnchor(pos);
 		Dto.state = 2;
 		origPos = Dto.pos;
 #ifdef NEWROTATE
@@ -2840,14 +2836,12 @@ LOG( log_turnout, 1, ( "RMOVE post @ %0.3fx%0.3f\n", Dto.pos.x, Dto.pos.y ) );
 		FormatCompoundTitle( listLabels, curTurnout->title );
 		InfoMessage( _("Angle = %0.3f (%s)"), PutAngle( NormalizeAngle(Dto.angle + 90.0) ), message );
 		Dto.state = 2;
-		CreateRotateAnchor(Dto.rot0);
 		return C_CONTINUE;
 
 	case C_RUP:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if ( curTurnout == NULL ) return C_CONTINUE;
 		Dto.state = 1;
-		CreateMoveAnchor(pos);
 		InfoMessage( _("Left-Drag to place, Ctrl+Left-Drag or Right-Drag to Rotate, Space or Enter to accept, Esc to Cancel") );
 		return C_CONTINUE;
 
