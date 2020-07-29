@@ -44,8 +44,11 @@ struct sCatalog {
 typedef struct sCatalog Catalog;
 
 struct sIndexEntry {
-    CatalogEntry *value;						/**< catalog entry having the key word in contents */
+	struct sIndexEntry *next;
+	struct sIndexEntry *prev;
     char *keyWord;								/**< keyword */
+	dynArr_t *references;						/**< references to the CatalogEntry */
+
 };
 
 typedef struct sIndexEntry IndexEntry;

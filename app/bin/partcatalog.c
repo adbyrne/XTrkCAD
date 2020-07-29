@@ -305,63 +305,79 @@ FilterKeyword(char *word)
 	return(false);
 }
 
+int KeyWordCmp(IndexEntry *a, IndexEntry *b)
+{
+	return strcmp(a->keyWord, b->keyWord);
+}
+
 /**
  * Create the keyword index from a list of parameter files
  *
- * \param catalog IN list of parameter files
- * \param index IN index table to be filled
- * \param pointer IN/OUT array of words that are indexed
- * \param capacityOfIndex IN total maximum of keywords
- * \return number of indexed keywords
+ * \param [in] catalog  list of parameter files.
+ * \param [in,out] indexPtr index table to be filled.
+ *
+ * \returns number of indexed keywords.
  */
+
 static unsigned
-CreateContentsIndex(Catalog *catalog, IndexEntry *index, unsigned capacityOfIndex)
+CreateContentsIndex(Catalog *catalog, IndexEntry **indexPtr )
 {
-    CatalogEntry *currentEntry = catalog->head;
-	CatalogEntry *element;
+    CatalogEntry *listOfEntries = catalog->head;
+	CatalogEntry *curParamFile;
     unsigned totalMemory = 0;
     size_t wordCount = 0;
     char *wordList;
     char *wordListPtr;
+	IndexEntry *index = *indexPtr;
 
-	DL_FOREACH(currentEntry, element ) {
-        totalMemory += strlen(element->contents) + 1;
+	// allocate a  buffer for the complete set of keywords
+	DL_FOREACH(listOfEntries, curParamFile ) {
+        totalMemory += strlen(curParamFile->contents) + 1;
     }
-
-    wordList = malloc((totalMemory + 1) * sizeof(char));
+	wordList = malloc((totalMemory + 1) * sizeof(char));
 
     wordListPtr = wordList;
-    currentEntry = catalog->head;
+    listOfEntries = catalog->head;
 
-    DL_FOREACH(currentEntry, element) {
+    DL_FOREACH(listOfEntries, curParamFile) {
         char *word;
-        char *content = strdup(element->contents);
+        char *content = strdup(curParamFile->contents);
 
         word = strtok(content, " \t\n\r");
-        while (word && wordCount < capacityOfIndex) {
+        while (word) {
             strcpy(wordListPtr, word);
 
-            char *p = wordListPtr;
-            for (; *p; ++p) {
-                *p = tolower(*p);
-            }
+			strlwr(wordListPtr);
 			if (!FilterKeyword(wordListPtr)) {
-				index[wordCount].value = element;
-				index[wordCount].keyWord = wordListPtr;
+				IndexEntry *searchEntry = malloc(sizeof( IndexEntry ));
+				IndexEntry *existingEntry = NULL;
+				searchEntry->keyWord = wordListPtr;
+
+				if (index) {
+					DL_SEARCH(index, existingEntry, searchEntry, KeyWordCmp);
+				}
+				if (existingEntry) {
+					DYNARR_APPEND(CatalogEntry *, *(existingEntry->references), 5);
+					DYNARR_LAST(CatalogEntry *, *(existingEntry->references)) = curParamFile;
+				} else {
+					searchEntry->references = calloc(1, sizeof(dynArr_t));
+					DYNARR_APPEND(CatalogEntry *, *(searchEntry->references), 5);
+					DYNARR_LAST(CatalogEntry *, *(searchEntry->references)) = curParamFile;
+					DL_APPEND(index, searchEntry);
+				}
+
 				wordListPtr += strlen(word) + 1;
 				wordCount++;
-				if (wordCount >= capacityOfIndex) {
-					AbortProg("Too many keywords were used!", NULL);
-				}
 			}
             word = strtok(NULL, " \t\n\r");
         }
         free(content);
     }
     *wordListPtr = '\0';
-
-    qsort((void*)index, wordCount, sizeof(IndexEntry), CompareIndex);
-
+   
+	DL_SORT(index, KeyWordCmp);
+	
+	* indexPtr = index;
     return (wordCount);
 }
 
@@ -475,7 +491,7 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
     if ( !search || (search[0] == '*') || (search[0] == '\0')) {
     	result = MyMalloc((length) * sizeof(CatalogEntry *));
     	for (int i = 0; i < length; i++) {
-			result[i] = index[i].value;
+//			result[i] = index[i].value;
 		}
     	*entries = result;
     	return length;
@@ -501,7 +517,7 @@ FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
         result = MyMalloc((foundElements) * sizeof(CatalogEntry *));
 
         for (i = 0; i < foundElements; i++) {
-            result[i] = index[i+lower].value;
+ //           result[i] = index[i+lower].value;
         }
 
         qsort((void*)result, foundElements, sizeof(void *), CompareResults);
@@ -623,12 +639,10 @@ int GetParameterFileInfo(
 unsigned
 CreateLibraryIndex(ParameterLib *parameterLib)
 {
-    parameterLib->index = (IndexEntry *)malloc(parameterLib->parameterFileCount *
-                            ESTIMATED_CONTENTS_WORDS * sizeof(IndexEntry));
+	parameterLib->index = NULL;
 
     parameterLib->wordCount = CreateContentsIndex(parameterLib->catalog,
-                              parameterLib->index,
-                              ESTIMATED_CONTENTS_WORDS * parameterLib->parameterFileCount);
+                              &(parameterLib->index ));
 
     return (parameterLib->wordCount);
 }
