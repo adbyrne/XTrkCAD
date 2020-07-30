@@ -4863,6 +4863,7 @@ static int CarInvImportCsv(
 			if ( dim.truckCenter <= 0 ) dim.truckCenter = partP->dim.truckCenter;
 			if ( dim.truckCenterOffset < 0 ) dim.truckCenterOffset = partP->dim.truckCenterOffset;
 		}
+		if (dim.truckCenterOffset <0)  dim.truckCenterOffset  = 0;
 		cp = TabStringCpy( title, &tabs[M_MANUF] );
 		*cp++ = '\t';
 		cp = TabStringCpy( cp, &tabs[M_PROTO] );
@@ -5022,8 +5023,8 @@ static int CarInvExportCsv(
 		CsvFormatLong( f, item->options, "," );
 		CsvFormatFloat( f, item->dim.carLength, 3, "," );
 		CsvFormatFloat( f, item->dim.carWidth, 3, "," );
-		CsvFormatFloat( f, item->dim.truckCenterOffset, 3, ",");
 		CsvFormatFloat( f, item->dim.coupledLength, 3, "," );
+		CsvFormatFloat( f, item->dim.truckCenterOffset, 3, ",");
 		CsvFormatFloat( f, item->dim.truckCenter, 3, "," );
 		CsvFormatLong( f, wDrawGetRGB(item->color), "," );
 		CsvFormatFloat( f, item->data.purchPrice, 2, "," );
