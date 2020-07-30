@@ -2413,6 +2413,7 @@ static void CreateMenus(void) {
 	/*
 	 * VIEW MENU
 	 */
+
 	zoomInM = wMenuPushCreate(viewM, "menuEdit-zoomIn", _("Zoom &In"),
 			ACCL_ZOOMIN, (wMenuCallBack_p) DoZoomUp, (void*) 1);
 	zoomSubM = wMenuMenuCreate(viewM, "menuEdit-zoomTo", _("&Zoom"));
@@ -2507,7 +2508,8 @@ static void CreateMenus(void) {
 	cmdGroup = BG_SELECT;
 	InitCmdDescribe(changeM);
 	InitCmdSelect(changeM);
-	InitCmdPan(changeM);
+	InitCmdPan(viewM);
+
 	wMenuSeparatorCreate(changeM);
 
 	cmdGroup = BG_TRKGRP;

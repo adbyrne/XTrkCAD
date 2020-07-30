@@ -52,10 +52,6 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Pan/Zoom} - move or resize the viewport using the mouse.
-
-\u000
-
 \dd \f{Profile} - display the elevation profile of a definable stretch of track (\K{cmdProfile}).
 
 \u000

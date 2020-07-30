@@ -42,6 +42,10 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 
 \u000
 
+\dd \f{Pan/Zoom} - move or resize the viewport using the mouse (\K{cmdPan}).
+
+\u000
+
 \dd \G{png.d/mzoomscale.png}
 
 \u000
@@ -109,7 +113,6 @@ Whether the Snap Grid is drawn is controlled by the \f{Show} check-box.  Also, i
 Command button groups displayed on the \f{Tool-bar} are selected using the Tool-bar Configuration Menu (\K{toolbarM}). If none of the command button groups are selected, the \f{Tool-bar} is not shown.
 
 \rule
-
 
 \S{cmdZoom} \i{Zoom}
 
