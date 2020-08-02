@@ -285,6 +285,7 @@ void wDestroySplash( void );
 #define BO_NOTAB	(1L<<8)
 #define BO_BORDER	(1L<<9)
 #define BO_ENTER    (1L<<10)
+#define BO_REPEAT   (1L<<11)
 
 wPos_t wLabelWidth(		const char * );
 const char * wControlGetHelp(		wControl_p );

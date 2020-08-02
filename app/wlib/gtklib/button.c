@@ -148,9 +148,10 @@ void wlibButtonDoAction(
     }
 }
 
+
 /**
  * Signal handler for button push
- * \param widget IN the widget
+ * \param widget IN the widget or NULL for autorepeat
  * \param value IN the button handle (same as widget???)
  */
 
@@ -172,12 +173,121 @@ static void pushButt(
         b->action(b->data);
     }
 
-    if (!b->busy) {
-        b->recursion++;
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(b->widget), FALSE);
-        b->recursion--;
-    }
+
 }
+
+#define REPEAT_STAGE0_DELAY 500
+#define REPEAT_STAGE1_DELAY 150
+#define REPEAT_STAGE2_DELAY 75
+
+/* Timer callback function! */
+static int timer_func ( wButton_p bb)
+{
+
+   if (bb->timer_id == 0) {
+	   bb->timer_state = -1;
+	   return FALSE;
+   }
+   /* Autorepeat state machine */
+   switch (bb->timer_state) {
+      case 0: /* Enable slow auto-repeat */
+         g_source_remove(bb->timer_id);
+         bb->timer_id = 0;
+         bb->timer_state = 1;
+         bb->timer_id = g_timeout_add( REPEAT_STAGE1_DELAY, G_SOURCE_FUNC(timer_func), bb);
+         bb->timer_count = 0;
+         break;
+      case 1: /* Check if it's time for fast repeat yet */
+         if (bb->timer_count++ > 50)
+            bb->timer_state = 2;
+         break;
+      case 2: /* Start fast auto-repeat */
+         g_source_remove(bb->timer_id);
+         bb->timer_id = 0;
+         bb->timer_state = 3;
+         bb->timer_id = g_timeout_add( REPEAT_STAGE2_DELAY, G_SOURCE_FUNC(timer_func), bb);
+         break;
+      default:
+    	 g_source_remove(bb->timer_id);
+    	 bb->timer_id = 0;
+    	 bb->timer_state = -1;
+    	 return FALSE;
+         break;
+   }
+
+   printf("Repeat %p %s \n", bb, bb->labelStr?bb->labelStr:"No label");
+
+   pushButt(NULL,bb);
+
+   return TRUE;
+
+}
+
+static gint pressButt(
+		GtkWidget *widget,
+		GdkEventButton *event,
+		wButton_p bb) {
+
+	if (bb->recursion) {
+
+		printf("Push Recurse %p %s \n", bb, bb->labelStr?bb->labelStr:"No label");
+		return TRUE;
+
+	}
+
+
+	printf("Press %p %s \n", bb, bb->labelStr?bb->labelStr:"No label");
+
+
+	if (bb->option & BO_REPEAT)  {
+		/* Remove an existing timer */
+		if (bb->timer_id)
+		  g_source_remove(bb->timer_id);
+
+	   /* Setup a timer */
+	   bb->timer_id = g_timeout_add( REPEAT_STAGE0_DELAY, G_SOURCE_FUNC(timer_func), bb);
+	   bb->timer_state = 0;
+
+	}
+
+	if (!bb->busy) {
+		bb->recursion++;
+		int sensitive = gtk_widget_get_sensitive (GTK_WIDGET(bb->widget));
+		if (sensitive)
+			gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), TRUE);
+		bb->recursion--;
+	}
+
+
+	return TRUE;
+
+}
+
+static gint releaseButt(
+		GtkWidget *widget,
+		GdkEventButton *event,
+		wButton_p bb) {
+
+	printf("Release %p %s \n", bb, bb->labelStr?bb->labelStr:"No label");
+
+	/* Remove any existing timer */
+	if (bb->timer_id) {
+	  g_source_remove(bb->timer_id);
+	  bb->timer_id = 0;
+	}
+
+	bb->timer_state = -1;
+
+	pushButt(widget,bb);   //Do here to simulate "clicked"
+
+	if (!bb->busy) {
+		bb->recursion++;
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), FALSE);
+		bb->recursion--;
+	}
+	return TRUE;
+}
+
 
 /**
  * Called after expose event default hander - allows the button to be outlined
@@ -227,8 +337,12 @@ wButton_p wButtonCreate(
     wlibComputePos((wControl_p)b);
 
     b->widget = gtk_toggle_button_new();
-    g_signal_connect(GTK_OBJECT(b->widget), "clicked",
-                         G_CALLBACK(pushButt), b);
+    g_signal_connect(GTK_OBJECT(b->widget), "button_press_event",
+    		             G_CALLBACK(pressButt), b);
+    g_signal_connect(GTK_OBJECT(b->widget), "button_release_event",
+        		         G_CALLBACK(releaseButt), b);
+    //g_signal_connect(GTK_OBJECT(b->widget), "clicked",
+    //                     G_CALLBACK(pushButt), b);
     g_signal_connect_after(GTK_OBJECT(b->widget), "expose-event",
     					G_CALLBACK(exposeButt), b);
     if (width > 0) {

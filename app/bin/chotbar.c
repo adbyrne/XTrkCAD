@@ -101,8 +101,15 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 	DIST_T x;
 
 	wDrawClear( hotBarD.d );
-	wControlActive( (wControl_p)hotBarLeftB, hotBarCurrStart > 0 );
+	if (hotBarCurrStart >0)
+		wControlActive( (wControl_p)hotBarLeftB, TRUE );
+	else {
+		wButtonSetBusy(hotBarLeftB, FALSE);
+		wControlActive( (wControl_p)hotBarLeftB, FALSE );
+	}
+
 	if (hotBarCurrStart < 0) {
+		wButtonSetBusy(hotBarRightB, FALSE);
 		wControlActive( (wControl_p)hotBarRightB, FALSE );
 		return;
 	}
@@ -170,7 +177,12 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 		HotBarHighlight( hotBarCurrSelect, fixed_x );
 /*	  else
 		hotBarCurrSelect = -1;*/
-	wControlActive( (wControl_p)hotBarRightB, hotBarCurrEnd < hotBarMap_da.cnt );
+	if (hotBarCurrEnd < hotBarMap_da.cnt-1)
+		wControlActive( (wControl_p)hotBarRightB, TRUE );
+	else {
+		wButtonSetBusy(hotBarRightB, FALSE);
+		wControlActive( (wControl_p)hotBarRightB, FALSE );
+	}
 	wPrefSetInteger( "misc", "hotbar-start", hotBarCurrStart );
 }
 
@@ -525,9 +537,9 @@ EXPORT void LayoutHotBar( void * redraw )
 		if (winWidth < 50)
 			return;
 		bm_p = wIconCreateBitMap( 16, 16, turnbarl_bits, wDrawColorBlack );
-		hotBarLeftB = wButtonCreate( mainW, 0, 0, "hotBarLeft", (char*)bm_p, BO_ICON, 0, DoHotBarLeft, NULL );
+		hotBarLeftB = wButtonCreate( mainW, 0, 0, "hotBarLeft", (char*)bm_p, BO_ICON|BO_REPEAT, 0, DoHotBarLeft, NULL );
 		bm_p = wIconCreateBitMap( 16, 16, turnbarr_bits, wDrawColorBlack );
-		hotBarRightB = wButtonCreate( mainW, 0, 0, "hotBarRight", (char*)bm_p, BO_ICON, 0, DoHotBarRight, NULL );
+		hotBarRightB = wButtonCreate( mainW, 0, 0, "hotBarRight", (char*)bm_p, BO_ICON|BO_REPEAT, 0, DoHotBarRight, NULL );
 		hotBarD.d = wDrawCreate( mainW, 0, 0, NULL, BD_NOCAPTURE|BD_NOFOCUS, 100, hotBarHeight, NULL, RedrawHotBar, SelectHotBar );
 		hotBarD.dpi = wDrawGetDPI( hotBarD.d );
 		hotBarD.scale = 1.0;

@@ -1332,12 +1332,16 @@ static gint draw_leave_event(
  * Handler for mouse button clicks.
  */
 
+
+
 static gint draw_button_event(
 		GtkWidget *widget,
 		GdkEventButton *event,
 		wDraw_p bd )
 {
+
 	wAction_t action = 0;
+
 	if (bd->action == NULL)
 		return TRUE;
 
@@ -1360,6 +1364,7 @@ static gint draw_button_event(
 			printf( "%s[%dx%d]\n", actionNames[action], bd->lastX, bd->lastY );
 		bd->action( bd, bd->context, action, bd->lastX, bd->lastY );
 	}
+
 	if (!(bd->option & BD_NOFOCUS))
 		gtk_widget_grab_focus( bd->widget );
 	return TRUE;
