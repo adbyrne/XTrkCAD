@@ -3073,48 +3073,48 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0L;
 
     case WM_SETCURSOR:
-        /*if (any buttons down)
-        	break;*/
-        wSetCursor(NULL, curCursor);
+		if (hWnd == mswHWnd)
+			wSetCursor(NULL, curCursor);
 
-        if (!mswAllowBalloonHelp) {
-            return TRUE;
-        }
+		if (!mswAllowBalloonHelp) {
+			break;
+		}
 
-        if (IsIconic(mswHWnd)) {
-            return TRUE;
-        }
+		if (IsIconic(mswHWnd)) {
+			break;
+		}
 
-        b = getControlFromCursor(hWnd, NULL);
+		b = getControlFromCursor(hWnd, NULL);
 
-        if (b == balloonControlButton) {
-            return TRUE;
-        }
+		if (b == balloonControlButton) {
+			break;
+		}
 
-        if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
-                                         (!b) || b->type == B_DRAW || b->helpStr == NULL) {
-            closeBalloonHelp();
-            return TRUE;
-        }
+		if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
+			(!b) || b->type == B_DRAW || b->helpStr == NULL) {
+			closeBalloonHelp();
+			break;
+		}
 
-        if (b != balloonHelpButton) {
-            closeBalloonHelp();
-        }
+		if (b != balloonHelpButton) {
+			closeBalloonHelp();
+		}
 
-        if (balloonHelpState != balloonHelpIdle) {
-            return TRUE;
-        }
+		if (balloonHelpState != balloonHelpIdle) {
+			break;
+		}
 
-        balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
-                                    balloonHelpTimeOut, NULL);
+		balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
+			balloonHelpTimeOut, NULL);
 
-        if (balloonHelpTimer == (UINT)0) {
-            return TRUE;
-        }
+		if (balloonHelpTimer == (UINT)0) {
+			break;
+		}
 
-        balloonHelpState = balloonHelpWait;
-        balloonHelpButton = b;
-        return TRUE;
+		balloonHelpState = balloonHelpWait;
+		balloonHelpButton = b;
+		break;
+
 
     case WM_SYSCOMMAND:
         inx = GetWindowWord(hWnd, 0);
