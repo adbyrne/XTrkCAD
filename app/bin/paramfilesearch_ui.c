@@ -39,9 +39,9 @@
 
 #include "bitmaps/magnifier.xpm"
 
-static CatalogEntry *catalogFileBrowse;		/**< current search results */
+static Catalog *catalogFileBrowse;			/**< current search results */
 static ParameterLib *trackLibrary;			/**< Track Library          */
-static CatalogEntry *currentCat;			/**< catalog being shown    */
+static Catalog *currentCat;					/**< catalog being shown    */
 
 /* define the search / browse dialog */
 
@@ -90,21 +90,56 @@ static wWin_p searchUiW;
 #define FILESECTION "file"
 #define PARAMDIRECTORY "paramdir"
 
+
+static void ResultsListLoad(SearchResult *results)
+{
+	 DynString description;
+	 DynStringMalloc(&description, STR_SHORT_SIZE);
+
+	 wControlShow((wControl_p)RESULTLIST, FALSE);
+	 wListClear(RESULTLIST);
+    for(int count=0; count<results->totalFound; count++) {
+    	CatalogEntry *currentEntry = results->result[count];
+        for (unsigned int i=0;i<currentEntry->files;i++) {
+        	DynStringClear(&description);
+			DynStringCatCStr(&description,
+							 ((!searchUiMode) && currentEntry->contents) ?
+							 currentEntry->contents :
+							 currentEntry->fullFileName[i]);
+
+			wListAddValue(RESULTLIST,
+						  DynStringToCStr(&description),
+						  NULL,
+						  //		indicatorIcons[paramFileInfo.favorite][paramFileInfo.trackState],
+						  (void*)currentEntry->fullFileName[i]);
+        }
+    }
+
+    wControlShow((wControl_p)RESULTLIST, TRUE);
+    wControlActive((wControl_p)SELECTALLBUTTON,
+                     wListGetCount(RESULTLIST));
+
+    DynStringFree(&description);
+
+}
+
+
 /**
  * Reload the listbox showing the current catalog
  */
 
 static
-void SearchFileListLoad(CatalogEntry *catalog)
+void SearchFileListLoad(Catalog *catalog)
+
 {
-    CatalogEntry *currentEntry = catalog->next;
+	CatalogEntry *currentEntry = catalog->head;
     DynString description;
     DynStringMalloc(&description, STR_SHORT_SIZE);
 
     wControlShow((wControl_p)RESULTLIST, FALSE);
     wListClear(RESULTLIST);
 
-    while (currentEntry != currentEntry->next) {
+    while (currentEntry) {
         for (unsigned int i=0;i<currentEntry->files;i++) {
         	DynStringClear(&description);
 			DynStringCatCStr(&description,
@@ -130,6 +165,8 @@ void SearchFileListLoad(CatalogEntry *catalog)
 
     currentCat = catalog;
 }
+
+
 
 /**
  * Find parameter files using the file selector
@@ -268,6 +305,7 @@ static void SearchUiDoSearch(void * ptr)
 
     result = SearchLibrary(trackLibrary, search, &currentResults);
 
+
     if (result) {
         DynString hitsMessage;
         DynStringMalloc(&hitsMessage, 16);
@@ -275,7 +313,7 @@ static void SearchUiDoSearch(void * ptr)
         wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
         DynStringFree(&hitsMessage);
 
-        //SearchFileListLoad(catalogFileBrowse);
+        ResultsListLoad(currentResults);
 
     } else {
 

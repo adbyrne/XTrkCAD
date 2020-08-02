@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "utility.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -119,11 +120,11 @@ CountCatalogEntries(Catalog *catalog)
  */
 
 void
-EmptyCatalog(CatalogEntry *listHeader)
+EmptyCatalog(Catalog *catalog)
 {
-    CatalogEntry *current = listHeader;
+    CatalogEntry *current = catalog->head;
 
-    while (current->next != current->next->next) {
+    while (current) {
         CatalogEntry *removedElement;
         removedElement = current->next;
         current->next = current->next->next;
@@ -768,6 +769,7 @@ unsigned countWords(char *str)
 
 	return wc;
 }
+
 
 /**
  * Search the library for a keyword string and return the result list
