@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "utility.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -56,6 +57,7 @@
 #if _MSC_VER > 1300
     #define strnicmp _strnicmp
     #define strdup _strdup
+	#define strlwr _strlwr
 #endif
 
 #define PUNCTUATION "+-*/.,&%=#"
@@ -119,11 +121,11 @@ CountCatalogEntries(Catalog *catalog)
  */
 
 void
-EmptyCatalog(CatalogEntry *listHeader)
+EmptyCatalog(Catalog *catalog)
 {
-    CatalogEntry *current = listHeader;
+    CatalogEntry *current = catalog->head;
 
-    while (current->next != current->next->next) {
+    while (current) {
         CatalogEntry *removedElement;
         removedElement = current->next;
         current->next = current->next->next;
@@ -213,11 +215,11 @@ static void
 UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents)
 {
     if (!entry->contents) {
-        entry->contents = strdup(contents);
+        entry->contents = MyStrdup(contents);
     }
 
     if (entry->files < MAXFILESPERCONTENT) {
-        entry->fullFileName[entry->files++] = strdup(path);
+        entry->fullFileName[entry->files++] = MyStrdup(path);
     } else {
 		AbortProg("Number of files with same content too large!", NULL);
     }
@@ -302,12 +304,80 @@ FilterKeyword(char *word)
 	if (strlen(word) == 1 && strpbrk(word, PUNCTUATION )) {
 		return(true);
 	}
+
+	for (int i = 0; i < sizeof(stopwords) / sizeof(char *); i++) {
+		if (!strcmp(word, stopwords+i)) {
+			return(true);
+		}
+	}
+
+	for (int i = 0; i < sizeof(stopwords) / sizeof(char *); i++) {
+		if (!strcmp(word, stopwords+i)) {
+			return(true);
+		}
+	}
 	return(false);
 }
 
 int KeyWordCmp(IndexEntry *a, IndexEntry *b)
 {
 	return strcmp(a->keyWord, b->keyWord);
+}
+
+/**
+ * Standardize spelling: remove some typical spelling problems. It is assumed that the word 
+ * has already been converted to lower case
+ *
+ * \param [in,out] word If non-null, the word.
+ */
+
+void
+StandardizeSpelling(char *word)
+{
+	char *p = strchr(word, '-');
+	// remove the word 'scale' from combinations like N-scale 
+	if (p) {
+		if (!strcmp(p+1, "scale")) {
+			*p = '\0';
+		}
+	}
+
+	if (!strncmp(word, "h0", 2))
+		strncpy(word, "hO", 2);
+
+	if (!strncmp(word, "00", 2))
+		strncpy(word, "oo", 2);
+
+	if (word[0] == '0')
+		word[0] = 'o';
+}
+
+/**
+ * Standardize spelling: remove some typical spelling problems. It is assumed that the word 
+ * has already been converted to lower case
+ *
+ * \param [in,out] word If non-null, the word.
+ */
+
+void
+StandardizeSpelling(char *word)
+{
+	char *p = strchr(word, '-');
+	// remove the word 'scale' from combinations like N-scale 
+	if (p) {
+		if (!strcmp(p+1, "scale")) {
+			*p = '\0';
+		}
+	}
+
+	if (!strncmp(word, "h0", 2))
+		strncpy(word, "hO", 2);
+
+	if (!strncmp(word, "00", 2))
+		strncpy(word, "oo", 2);
+
+	if (word[0] == '0')
+		word[0] = 'o';
 }
 
 /**
@@ -382,149 +452,38 @@ CreateContentsIndex(Catalog *catalog, IndexEntry **indexPtr )
 }
 
 /**
-* A recursive binary search function. It returns location of x in
-* given array arr[l..r] is present, otherwise -1
-* Taken from http://www.geeksforgeeks.org/binary-search/ and modified
-*
-* \param arr IN array to search
-* \param l IN starting index
-* \param r IN highest index in array
-* \param key IN key to search
-* \return index if found, -1 otherwise
-*/
-
-static int SearchInIndex(IndexEntry arr[], int l, int r, char *key)
-{
-    if (r >= l) {
-        int mid = l + (r - l) / 2;
-        int res = XtcStricmp(key, arr[mid].keyWord);
-
-        // If the element is present at the middle itself
-        if (!res) {
-            return mid;
-        }
-
-        // If the array size is 1
-        if (r == 0) {
-            return -1;
-        }
-
-        // If element is smaller than mid, then it can only be present
-        // in left subarray
-        if (res < 0) {
-            return SearchInIndex(arr, l, mid - 1, key);
-        }
-
-        // Else the element can only be present in right subarray
-        return SearchInIndex(arr, mid + 1, r, key);
-    }
-
-    // We reach here when element is not present in array
-    return -1;
-}
-
-/**
- * Inserts a key in arr[] of given capacity.  n is current
- * size of arr[]. This function returns n+1 if insertion
- * is successful, else n.
- * Taken from http ://www.geeksforgeeks.org/search-insert-and-delete-in-a-sorted-array/ and modified
- */
-
-int InsertSorted(CatalogEntry *arr[], int n, CatalogEntry *key, int capacity)
-{
-    // Cannot insert more elements if n is already
-    // more than or equal to capcity
-    if (n >= capacity) {
-        return n;
-    }
-
-    int i;
-    for (i = n - 1; (i >= 0 && arr[i] > key); i--) {
-        arr[i + 1] = arr[i];
-    }
-
-    arr[i + 1] = key;
-
-    return (n + 1);
-}
-
-/**
- * Comparison function for CatalogEntries used by qsort()
- * Comparison is based on the The contents descriptions.
- *
- * \param entry1 IN
- * \param entry2 IN
- * \return per C runtime conventions
- */
-
-static int
-CompareResults(const void *entry1, const void *entry2)
-{
-	CatalogEntry * index1 = *(CatalogEntry **)entry1;
-	CatalogEntry * index2 = *(CatalogEntry **)entry2;
-    return (strcoll(index1->contents, index2->contents));
-}
-
-/**
- * Search the index for a keyword. The index is assumed to be sorted. So
- * after one entry is found, neighboring entries up and down are checked
- * as well. The total result set is placed into an array and returned.
- * This array has to be free'd by the caller.
+ * Search the index for a keyword. The index is assumed to be sorted.
+ * Each keyword has one entry in the index list. 
  *
  * \param [in]	index	index list.
  * \param 		length  number of entries index.
  * \param [in]	search  search string.
- * \param [out] entries	array of found entries.
+ * \param [out] entries	array of found entry.
  *
- * \returns number of found catalog entries, 0 if none found.
+ * \returns TRUE if found, FALSE otherwise
  */
 
 unsigned int
-FindWord(IndexEntry *index, int length, char *search, CatalogEntry ***entries)
+FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
 {
-    CatalogEntry **result;  //Array of pointers to Catalog Entries
     int found;
     int foundElements = 0;
+	IndexEntry *result = NULL;
+
+	IndexEntry *searchWord = malloc(sizeof(IndexEntry));
+	searchWord->keyWord = search;
+
+	IndexEntry *result = NULL;
+
+	IndexEntry *searchWord = malloc(sizeof(IndexEntry));
+	searchWord->keyWord = search;
+
     *entries = NULL;
 
-    //Get all the entries back for generic search or if "generic find"
-    if ( !search || (search[0] == '*') || (search[0] == '\0')) {
-    	result = MyMalloc((length) * sizeof(CatalogEntry *));
-    	for (int i = 0; i < length; i++) {
-//			result[i] = index[i].value;
-		}
-    	*entries = result;
-    	return length;
-    }
-
-    found = SearchInIndex(index, 0, length, search);
-
-    if (found >= 0) {
-        int lower = found;
-        int upper = found;
-        int i;
-
-        while (lower > 0 && !XtcStricmp(index[lower-1].keyWord, search)) {
-            lower--;
-        }
-
-        while (upper < length - 1 && !XtcStricmp(index[upper + 1].keyWord, search)) {
-            upper++;
-        }
-
-        foundElements = 1 + upper - lower;
-
-        result = MyMalloc((foundElements) * sizeof(CatalogEntry *));
-
-        for (i = 0; i < foundElements; i++) {
- //           result[i] = index[i+lower].value;
-        }
-
-        qsort((void*)result, foundElements, sizeof(void *), CompareResults);
-
-        *entries = result;
-    }
-    return (foundElements);
+	DL_SEARCH(index, result, searchWord, KeyWordCmp);
+	*entries = result;
+	
+    return (result != NULL);
 }
 
 /**
@@ -783,17 +742,70 @@ unsigned countWords(char *str)
 	return wc;
 }
 
+
+
+// returns number of words in str 
+unsigned countWords(char *str)
+{
+	int state = FALSE;
+	unsigned wc = 0;  // word count 
+
+	// Scan all characters one by one 
+	while (*str) {
+		// If next character is a separator, set the  
+		// state as FALSE 
+		if (*str == ' ' || *str == '\n' || *str == '\t')
+			state = FALSE;
+
+		// If next character is not a word separator and  
+		// state is OUT, then set the state as IN and  
+		// increment word count 
+		else if (state == FALSE) {
+			state = TRUE;
+			++wc;
+		}
+
+		// Move to next character 
+		++str;
+	}
+
+	return wc;
+}
+
+
+// returns number of words in str 
+unsigned countWords(char *str)
+{
+	int state = FALSE;
+	unsigned wc = 0;  // word count 
+
+	// Scan all characters one by one 
+	while (*str) {
+		// If next character is a separator, set the  
+		// state as FALSE 
+		if (*str == ' ' || *str == '\n' || *str == '\t')
+			state = FALSE;
+
+		// If next character is not a word separator and  
+		// state is OUT, then set the state as IN and  
+		// increment word count 
+		else if (state == FALSE) {
+			state = TRUE;
+			++wc;
+		}
+
+		// Move to next character 
+		++str;
+	}
+
+	return wc;
+}
+
 /**
  * Search the library for a keyword string and return the result list
  *
- * First the index is searched for the first word and then each "hit" is matched
- * to the entire search string
- *
- * Null, Blank and "*" match all entries
- *
- *  The list is de-duped of repeat of filenames as the same file might appear in
- *  more than once
- *
+ * Each key word exists only once in the index. 
+ * 
  * \param library IN the library
  * \param searchExpression	IN keyword to search for
  * \param resultEntries IN list header for result list
@@ -802,12 +814,12 @@ unsigned countWords(char *str)
  
 unsigned
 SearchLibrary(ParameterLib *library, char *searchExpression,
-	SearchResult **totalResult)
+	SearchResult *results)
 {
-	CatalogEntry **entries;
+	IndexEntry *entries;			
+	CatalogEntry *element;
 	unsigned entryCount = 0;
 	char *searchWord;
-	SearchResult *results = MyMalloc(sizeof(SearchResult));
 	unsigned words = countWords(searchExpression);
 	char *searchExp = MyStrdup(searchExpression);
 	unsigned i = 0;
@@ -817,7 +829,8 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 	}
 
 	results->kw = MyMalloc(words * sizeof(struct sSingleResult));
-	
+	results->subCatalog.head = NULL;
+
 	searchWord = strtok(searchExp, " \t");
 	while (searchWord) {
 		results->kw[i++].keyWord = searchWord;
@@ -826,27 +839,50 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 
 	i = 0;
 	while (i < words) {
-		results->kw[i].count = FindWord(library->index, library->wordCount, results->kw[i].keyWord,
-			&entries);
+		FindWord(library->index, library->wordCount, results->kw[i].keyWord, &entries);
+		if(entries) {
+			results->kw[i].count = entries->references->cnt;
 
-		// ignore any keywords that didn't return any results
-		if (results->kw[i].count) {
-			if (!results->result) {
-				results->result = entries;
-				results->totalFound = results->kw[i].count;
+			if (results->subCatalog.head == NULL) {
+				// if first keyword -> initialize result set
+				for (int j = 0; j < entries->references->cnt; j++) {
+					CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
+					CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
+					newEntry->contents = foundEntry->contents;
+					newEntry->files = foundEntry->files;
+					memcpy(newEntry->fullFileName, foundEntry->fullFileName, sizeof(char *) * MAXFILESPERCONTENT);
+
+					DL_APPEND(results->subCatalog.head, newEntry);
+				}
 			} else {
-				// do the intersection 
-				CatalogEntry **intersection;
-				results->totalFound = IntersectionOfResults(&intersection, results->result, results->totalFound, entries, results->kw[i].count);
-				MyFree(results->result);
-				results->result = intersection;
-				MyFree(entries);
+				// follow up keyword, create intersection with current result set
+				CatalogEntry *current;
+				CatalogEntry *temp;
+
+				DL_FOREACH_SAFE(results->subCatalog.head, current, temp)
+				{
+					int found = 0;
+					for (int j = 0; j < entries->references->cnt; j++) {
+						CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
+
+						if (foundEntry->contents == current->contents) {
+							found = TRUE;
+							break;
+						}
+					}
+					if (!found) {
+						DL_DELETE(results->subCatalog.head, current);
+					}
+				}
 			}
-		}	
+		} else {
+			// Searches that don't yield a result are ignored
+			results->kw[i].count = 0;
+		}
 		i++;
 	}
 	
-	*totalResult = results;
+	DL_COUNT(results->subCatalog.head, element, results->totalFound );
 	return (results->totalFound);
 }
 
@@ -860,8 +896,10 @@ void
 SearchResultDiscard(SearchResult *res)
 {
 	if (res) {
+		CatalogEntry *element;
+		CatalogEntry *element;
 		MyFree(res->kw);
-		MyFree(res->result);
+		DL_DELETE(res->subCatalog.head, element);
 	}
 }
 

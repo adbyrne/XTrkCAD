@@ -36,12 +36,11 @@
 #include "include/paramfilelist.h"
 #include "fileio.h"
 #include "directory.h"
+#include "wlib.h"
 
-#include "bitmaps/magnifier.xpm"
-
-static CatalogEntry *catalogFileBrowse;		/**< current search results */
+static Catalog *catalogFileBrowse;			/**< current search results */
 static ParameterLib *trackLibrary;			/**< Track Library          */
-static CatalogEntry *currentCat;			/**< catalog being shown    */
+static Catalog *currentCat;					/**< catalog being shown    */
 
 /* define the search / browse dialog */
 
@@ -90,21 +89,56 @@ static wWin_p searchUiW;
 #define FILESECTION "file"
 #define PARAMDIRECTORY "paramdir"
 
+
+static void ResultsListLoad(SearchResult *results)
+{
+	 DynString description;
+	 DynStringMalloc(&description, STR_SHORT_SIZE);
+
+	 wControlShow((wControl_p)RESULTLIST, FALSE);
+	 wListClear(RESULTLIST);
+    for(int count=0; count<results->totalFound; count++) {
+    	CatalogEntry *currentEntry = results->result[count];
+        for (unsigned int i=0;i<currentEntry->files;i++) {
+        	DynStringClear(&description);
+			DynStringCatCStr(&description,
+							 ((!searchUiMode) && catalogEntry->contents) ?
+							 catalogEntry->contents :
+							 catalogEntry->fullFileName[i]);
+
+			wListAddValue(RESULTLIST,
+						  DynStringToCStr(&description),
+						  NULL,
+						  //		indicatorIcons[paramFileInfo.favorite][paramFileInfo.trackState],
+						  (void*)catalogEntry->fullFileName[i]);
+        }
+    }
+
+    wControlShow((wControl_p)RESULTLIST, TRUE);
+    wControlActive((wControl_p)SELECTALLBUTTON,
+                     wListGetCount(RESULTLIST));
+
+    DynStringFree(&description);
+
+}
+
+
 /**
  * Reload the listbox showing the current catalog
  */
 
 static
-void SearchFileListLoad(CatalogEntry *catalog)
+void SearchFileListLoad(Catalog *catalog)
+
 {
-    CatalogEntry *currentEntry = catalog->next;
+	CatalogEntry *currentEntry = catalog->head;
     DynString description;
     DynStringMalloc(&description, STR_SHORT_SIZE);
 
     wControlShow((wControl_p)RESULTLIST, FALSE);
     wListClear(RESULTLIST);
 
-    while (currentEntry != currentEntry->next) {
+    while (currentEntry) {
         for (unsigned int i=0;i<currentEntry->files;i++) {
         	DynStringClear(&description);
 			DynStringCatCStr(&description,
@@ -118,8 +152,6 @@ void SearchFileListLoad(CatalogEntry *catalog)
 						  //		indicatorIcons[paramFileInfo.favorite][paramFileInfo.trackState],
 						  (void*)currentEntry->fullFileName[i]);
         }
-
-        currentEntry = currentEntry->next;
     }
 
     wControlShow((wControl_p)RESULTLIST, TRUE);
@@ -130,6 +162,8 @@ void SearchFileListLoad(CatalogEntry *catalog)
 
     currentCat = catalog;
 }
+
+
 
 /**
  * Find parameter files using the file selector
@@ -256,17 +290,18 @@ char * StringTrim(char *s)
 static void SearchUiDoSearch(void * ptr)
 {
     unsigned result;
-	SearchResult *currentResults;
+	SearchResult *currentResults = MyMalloc(sizeof(SearchResult));
 	char * search;
 
     search = StringTrim(searchUiQuery);
 
     if (catalogFileBrowse) {
     	EmptyCatalog(catalogFileBrowse);
-    } else
-    	catalogFileBrowse = InitCatalog();
+	} else {
+		catalogFileBrowse = InitCatalog();
+	}
+    result = SearchLibrary(trackLibrary, search, currentResults);
 
-    result = SearchLibrary(trackLibrary, search, &currentResults);
 
     if (result) {
         DynString hitsMessage;
@@ -275,7 +310,7 @@ static void SearchUiDoSearch(void * ptr)
         wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
         DynStringFree(&hitsMessage);
 
-        //SearchFileListLoad(catalogFileBrowse);
+        ResultsListLoad(currentResults);
 
     } else {
 
@@ -283,7 +318,7 @@ static void SearchUiDoSearch(void * ptr)
         wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
         wMessageSetValue(MESSAGETEXT, _("No matches found."));
     }
-	SearchResultDiscard(currentResults);
+	//SearchResultDiscard(currentResults);
 }
 
 /**
@@ -389,16 +424,14 @@ void DoSearchParams(void * junk)
         trackLibrary = CreateLibrary(paramsDir);
 		free(paramsDir);
 
-        searchUiPLs[I_SEARCHBUTTON].winLabel = (char *)wIconCreatePixMap(magnifier_xpm);
+        searchUiPLs[I_SEARCHBUTTON].winLabel = (char *)wIconCreatePixMap(funnel_xpm);
 
         ParamRegister(&searchUiPG);
 
         searchUiW = ParamCreateDialog(&searchUiPG,
                                       MakeWindowTitle(_("Choose parameter files")), _("Done"), NULL, wHide,
                                       TRUE, NULL, F_RESIZE | F_RECALLSIZE, SearchUiDlgUpdate);
-		if (trackLibrary) {
-			SearchFileListLoad(trackLibrary->catalog);  //Start with system files
-		}
+
         wControlActive((wControl_p)APPLYBUTTON, FALSE);
         wControlActive((wControl_p)SELECTALLBUTTON, FALSE);
 

@@ -2,7 +2,7 @@
  * Handling of parameter files
  */
 
-/*  XTrackkCad - Model Railroad CAD
+/*  XTrackCAD - Model Railroad CAD
  *  Copyright (C) 2019 Martin Fischer
  *
  *  This program is free software; you can redistribute it and/or modify
