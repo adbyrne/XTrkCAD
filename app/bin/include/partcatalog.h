@@ -80,7 +80,6 @@ int GetParameterFileInfo(int files, char ** fileName, void * data);
 unsigned CreateLibraryIndex(ParameterLib *trackLib);
 unsigned SearchLibrary(ParameterLib *library, char *searchExpression, SearchResult **totalResult);
 void SearchResultDiscard(SearchResult *res);
-void LoadCatalog(Catalog * catalog, SearchResult *results);
 unsigned CountCatalogEntries(Catalog *catalog);
 void EmptyCatalog(Catalog *catalog);
 bool FilterKeyword(char *word);
