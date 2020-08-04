@@ -60,7 +60,7 @@ static char * searchUiLabels[] = { N_("Show File Names"), NULL };
 
 static paramData_t searchUiPLs[] = {
 #define I_QUERYSTRING  (0)
-    { PD_STRING, searchUiQuery, "query", PDO_NOPREF | PDO_STRINGLIMITLENGTH, (void*)(340), "", 0, 0, MAXQUERYLENGTH-1 },
+    { PD_STRING, searchUiQuery, "query", PDO_NOPREF | PDO_STRINGLIMITLENGTH | PDO_DLGRESIZE, (void*)(340), "", 0, 0, MAXQUERYLENGTH-1 },
 #define I_SEARCHBUTTON (1)
     { PD_BUTTON, (void*)SearchUiDoSearch, "find", PDO_DLGHORZ, 0, NULL,  BO_ICON, (void *)NULL },
 #define I_MESSAGE (2)
