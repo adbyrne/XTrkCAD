@@ -62,6 +62,10 @@
 
 #define PUNCTUATION "+-*/.,&%=#"
 
+static char *stopwords = {
+	"scale",
+};
+
 /**
  * Create and initialize the linked list for the catalog entries
  *
@@ -124,19 +128,18 @@ void
 EmptyCatalog(Catalog *catalog)
 {
     CatalogEntry *current = catalog->head;
+	CatalogEntry *element;
+	CatalogEntry *tmp;
 
-    while (current) {
-        CatalogEntry *removedElement;
-        removedElement = current->next;
-        current->next = current->next->next;
-        if (removedElement->contents) {
-            free(removedElement->contents);
-        }
-        for (unsigned int i = 0; i < removedElement->files; i++) {
-            free(removedElement->fullFileName[i]);
-        }
-        free(removedElement);
-    }
+	DL_FOREACH_SAFE(current, element, tmp)
+	{
+		DL_DELETE(current, element);
+		MyFree(element->contents);
+		for (unsigned int i = 0; i < element->files; i++) {
+			MyFree(element->fullFileName[i]);
+		}
+		free(element);
+	}
 }
 
 /**
@@ -310,46 +313,12 @@ FilterKeyword(char *word)
 			return(true);
 		}
 	}
-
-	for (int i = 0; i < sizeof(stopwords) / sizeof(char *); i++) {
-		if (!strcmp(word, stopwords+i)) {
-			return(true);
-		}
-	}
 	return(false);
 }
 
 int KeyWordCmp(IndexEntry *a, IndexEntry *b)
 {
 	return strcmp(a->keyWord, b->keyWord);
-}
-
-/**
- * Standardize spelling: remove some typical spelling problems. It is assumed that the word 
- * has already been converted to lower case
- *
- * \param [in,out] word If non-null, the word.
- */
-
-void
-StandardizeSpelling(char *word)
-{
-	char *p = strchr(word, '-');
-	// remove the word 'scale' from combinations like N-scale 
-	if (p) {
-		if (!strcmp(p+1, "scale")) {
-			*p = '\0';
-		}
-	}
-
-	if (!strncmp(word, "h0", 2))
-		strncpy(word, "hO", 2);
-
-	if (!strncmp(word, "00", 2))
-		strncpy(word, "oo", 2);
-
-	if (word[0] == '0')
-		word[0] = 'o';
 }
 
 /**
@@ -466,13 +435,7 @@ CreateContentsIndex(Catalog *catalog, IndexEntry **indexPtr )
 unsigned int
 FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
 {
-    int found;
     int foundElements = 0;
-	IndexEntry *result = NULL;
-
-	IndexEntry *searchWord = malloc(sizeof(IndexEntry));
-	searchWord->keyWord = search;
-
 	IndexEntry *result = NULL;
 
 	IndexEntry *searchWord = malloc(sizeof(IndexEntry));
@@ -713,7 +676,6 @@ IntersectionOfResults(CatalogEntry *** resultEntries, CatalogEntry **array1, uns
 	return(matches);
 }
 
-
 // returns number of words in str 
 unsigned countWords(char *str)
 {
@@ -742,64 +704,6 @@ unsigned countWords(char *str)
 	return wc;
 }
 
-
-
-// returns number of words in str 
-unsigned countWords(char *str)
-{
-	int state = FALSE;
-	unsigned wc = 0;  // word count 
-
-	// Scan all characters one by one 
-	while (*str) {
-		// If next character is a separator, set the  
-		// state as FALSE 
-		if (*str == ' ' || *str == '\n' || *str == '\t')
-			state = FALSE;
-
-		// If next character is not a word separator and  
-		// state is OUT, then set the state as IN and  
-		// increment word count 
-		else if (state == FALSE) {
-			state = TRUE;
-			++wc;
-		}
-
-		// Move to next character 
-		++str;
-	}
-
-	return wc;
-}
-
-
-// returns number of words in str 
-unsigned countWords(char *str)
-{
-	int state = FALSE;
-	unsigned wc = 0;  // word count 
-
-	// Scan all characters one by one 
-	while (*str) {
-		// If next character is a separator, set the  
-		// state as FALSE 
-		if (*str == ' ' || *str == '\n' || *str == '\t')
-			state = FALSE;
-
-		// If next character is not a word separator and  
-		// state is OUT, then set the state as IN and  
-		// increment word count 
-		else if (state == FALSE) {
-			state = TRUE;
-			++wc;
-		}
-
-		// Move to next character 
-		++str;
-	}
-
-	return wc;
-}
 
 /**
  * Search the library for a keyword string and return the result list
@@ -816,8 +720,8 @@ unsigned
 SearchLibrary(ParameterLib *library, char *searchExpression,
 	SearchResult *results)
 {
-	IndexEntry *entries;			
 	CatalogEntry *element;
+	IndexEntry *entries;			
 	unsigned entryCount = 0;
 	char *searchWord;
 	unsigned words = countWords(searchExpression);
@@ -833,6 +737,13 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 
 	searchWord = strtok(searchExp, " \t");
 	while (searchWord) {
+		strlwr(searchWord);
+		if (!FilterKeyword(searchWord)) {
+			StandardizeSpelling(searchWord);
+			results->kw[i].state = SEARCHED;			
+		} else {
+			results->kw[i].state = DISCARDED;
+		}
 		results->kw[i++].keyWord = searchWord;
 		searchWord = strtok(NULL, " \t");
 	}
@@ -896,7 +807,6 @@ void
 SearchResultDiscard(SearchResult *res)
 {
 	if (res) {
-		CatalogEntry *element;
 		CatalogEntry *element;
 		MyFree(res->kw);
 		DL_DELETE(res->subCatalog.head, element);

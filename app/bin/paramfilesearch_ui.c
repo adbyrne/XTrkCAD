@@ -94,23 +94,25 @@ static void ResultsListLoad(SearchResult *results)
 {
 	 DynString description;
 	 DynStringMalloc(&description, STR_SHORT_SIZE);
+	 CatalogEntry *currentEntry;
 
 	 wControlShow((wControl_p)RESULTLIST, FALSE);
 	 wListClear(RESULTLIST);
-    for(int count=0; count<results->totalFound; count++) {
-    	CatalogEntry *currentEntry = results->result[count];
+
+	 DL_FOREACH(results->subCatalog.head, currentEntry ) {
+
         for (unsigned int i=0;i<currentEntry->files;i++) {
         	DynStringClear(&description);
 			DynStringCatCStr(&description,
-							 ((!searchUiMode) && catalogEntry->contents) ?
-							 catalogEntry->contents :
-							 catalogEntry->fullFileName[i]);
+							 ((!searchUiMode) && currentEntry->contents) ?
+							 currentEntry->contents :
+							 currentEntry->fullFileName[i]);
 
 			wListAddValue(RESULTLIST,
 						  DynStringToCStr(&description),
 						  NULL,
 						  //		indicatorIcons[paramFileInfo.favorite][paramFileInfo.trackState],
-						  (void*)catalogEntry->fullFileName[i]);
+						  (void*)currentEntry->fullFileName[i]);
         }
     }
 
@@ -131,26 +133,28 @@ static
 void SearchFileListLoad(Catalog *catalog)
 
 {
-	CatalogEntry *currentEntry = catalog->head;
+	CatalogEntry *head = catalog->head;
+    CatalogEntry *catalogEntry;
+
     DynString description;
     DynStringMalloc(&description, STR_SHORT_SIZE);
 
     wControlShow((wControl_p)RESULTLIST, FALSE);
     wListClear(RESULTLIST);
 
-    while (currentEntry) {
-        for (unsigned int i=0;i<currentEntry->files;i++) {
+    DL_FOREACH(head, catalogEntry) {
+        for (unsigned int i=0;i<catalogEntry->files;i++) {
         	DynStringClear(&description);
 			DynStringCatCStr(&description,
-							 ((!searchUiMode) && currentEntry->contents) ?
-							 currentEntry->contents :
-							 currentEntry->fullFileName[i]);
+							 ((!searchUiMode) && catalogEntry->contents) ?
+							 catalogEntry->contents :
+							 catalogEntry->fullFileName[i]);
 
 			wListAddValue(RESULTLIST,
 						  DynStringToCStr(&description),
 						  NULL,
 						  //		indicatorIcons[paramFileInfo.favorite][paramFileInfo.trackState],
-						  (void*)currentEntry->fullFileName[i]);
+						  (void*)catalogEntry->fullFileName[i]);
         }
     }
 
@@ -310,7 +314,7 @@ static void SearchUiDoSearch(void * ptr)
         wMessageSetValue(MESSAGETEXT, DynStringToCStr(&hitsMessage));
         DynStringFree(&hitsMessage);
 
-        ResultsListLoad(currentResults);
+        SearchFileListLoad(&(currentResults->subCatalog));
 
     } else {
 
@@ -408,6 +412,9 @@ GetParamsPath()
 	}
 	return(params_path);
 }
+
+#include "bitmaps/funnel.xpm"
+
 /**
  * Create and open the search dialog.
  *
