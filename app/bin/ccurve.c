@@ -238,7 +238,8 @@ EXPORT STATUS_T CreateCurve(
 				Da.create_state = FIRSTEND_DEF;
 				Da.end0 = pos;
 				CreateEndAnchor(pos,anchor_array,found);
-				if (Da.trk) message(_("End locked: Drag out curve start"));
+				if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) message(_("End locked: Drag out curve start"));
+				else if (Da.trk) message(_("End Position locked: Drag out curve start with Shift"));
 				else message(_("Drag along curve start") );
 				break;
 			case crvCmdFromTangent:
@@ -247,7 +248,8 @@ EXPORT STATUS_T CreateCurve(
 				tempSegs(0).color = color;
 				Da.create_state = CENTER_DEF;
 				CreateEndAnchor(pos,anchor_array,found);
-				if (Da.trk) message(_("End locked: Drag out curve center"));
+				if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) message(_("End locked: Drag out curve center"));
+				else if (Da.trk) message(_("End Position locked: Drag out curve start with Shift"));
 				else message(_("Drag out curve center") );
 				break;
 			case crvCmdFromCenter:
@@ -263,8 +265,9 @@ EXPORT STATUS_T CreateCurve(
 				tempSegs(0).width = width; 
 				CreateEndAnchor(pos,anchor_array,FALSE);
 				Da.create_state = FIRSTEND_DEF;
-				if (Da.trk)
+				if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT))
 					message( _("End locked: Drag to other end of chord") );
+				else if (Da.trk) message(_("End Position locked: Drag out curve start with Shift"));
 				else
 					message( _("Drag to other end of chord") );
 				break;
@@ -276,7 +279,7 @@ EXPORT STATUS_T CreateCurve(
 		DYNARR_RESET(trkSeg_t,*anchor_array);
 		DYNARR_APPEND(trkSeg_t,*anchor_array,1);
 		if (!Da.down) return C_CONTINUE;
-		if (Da.trk) {
+		if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {  //Shift inhibits direction lock
 			angle1 = NormalizeAngle(GetTrkEndAngle(Da.trk, Da.ep));
 			angle2 = NormalizeAngle(FindAngle(pos, Da.pos0)-angle1);
 			if (mode ==crvCmdFromEP1 ) {
@@ -382,7 +385,7 @@ EXPORT STATUS_T CreateCurve(
 					Translate( &pos, Da.pos0, angle1-90.0, dp );
 				Da.pos1 = pos;
 			}
-			if (FindDistance(Da.pos0,Da.pos1) <minLength) {
+			if (FindDistance(Da.pos0,Da.pos1)<minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(FindDistance(Da.pos0,Da.pos1)) );
 				return C_TERMINATE;
 			}
@@ -391,6 +394,7 @@ EXPORT STATUS_T CreateCurve(
 		case crvCmdFromEP1:			
 		case crvCmdFromTangent:
 		case crvCmdFromCenter:
+		case crvCmdFromChord:
 			for (int i=0;i<(*anchor_array).cnt;i++) {
 				DYNARR_N(trkSeg_t,*anchor_array,i).color = drawColorRed;
 			}
@@ -446,7 +450,7 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 				}
 			}
 			if (!found) SnapPos( &pos );
-			Da.pos0 = pos;
+			Da.pos0 = Da.pos1 = pos;
 			Da.state = 0;
 			rcode = CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
 			segCnt = tempSegs_da.cnt ;
@@ -545,6 +549,10 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		if (Da.state == 0 && ((curveMode != crvCmdFromChord) || (curveMode == crvCmdFromChord && !Da.trk))) {
 			SnapPos( &pos );
 			Da.pos1 = pos;
+			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
+				return C_TERMINATE;
+			}
 			Da.state = 1;
 			CreateCurve( action, pos, TRUE, wDrawColorBlack, 0, curveMode, &anchors_da, InfoMessage );
 			tempSegs_da.cnt = 1;
@@ -554,6 +562,10 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 			return C_CONTINUE;
 		} else if ((curveMode == crvCmdFromChord && Da.state == 0 && Da.trk)) {
 			pos = Da.middle;
+			if ((d = FindDistance(Da.pos0,Da.pos1))<minLength) {
+				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
+				return C_TERMINATE;
+			}
 			PlotCurve( curveMode, Da.pos0, Da.pos1, Da.middle, &Da.curveData, TRUE );
 		}
 		mainD.funcs->options = 0;
@@ -562,26 +574,26 @@ static STATUS_T CmdCurve( wAction_t action, coOrd pos )
 		Da.state = -1;
 		DYNARR_RESET(trkSeg_t,anchors_da);          // No More anchors for this one
 		if (Da.curveData.type == curveTypeStraight) {
-			if ((d=FindDistance( Da.pos0, Da.curveData.pos1 )) <= minLength) {
+			if ((d = FindDistance( Da.pos0, Da.curveData.pos1 )) < minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
 			UndoStart( _("Create Straight Track"), "newCurve - straight" );
 			t = NewStraightTrack( Da.pos0, Da.curveData.pos1 );
-			if (Da.trk) {
+			if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
 				EPINX_T ep = PickUnconnectedEndPoint(Da.pos0, t);
 				if (ep != -1) ConnectTracks(Da.trk, Da.ep, t, ep);
 			}
 			UndoEnd();
 		} else if (Da.curveData.type == curveTypeCurve) {
-			if ((d= Da.curveData.curveRadius * Da.curveData.a1 *2.0*M_PI/360.0) <= minLength) {
+			if ((d = Da.curveData.curveRadius * Da.curveData.a1 *2.0*M_PI/360.0) < minLength) {
 				ErrorMessage( MSG_TRK_TOO_SHORT, "Curved ", PutDim(fabs(minLength-d)) );
 				return C_TERMINATE;
 			}
 			UndoStart( _("Create Curved Track"), "newCurve - curve" );
 			t = NewCurvedTrack( Da.curveData.curvePos, Da.curveData.curveRadius,
 					Da.curveData.a0, Da.curveData.a1, 0 );
-			if (Da.trk) {
+			if (Da.trk && !(MyGetKeyState() & WKEY_SHIFT)) {
 				EPINX_T ep = PickUnconnectedEndPoint(Da.pos0, t);
 				if (ep != -1) ConnectTracks(Da.trk, Da.ep, t, ep);
 			}

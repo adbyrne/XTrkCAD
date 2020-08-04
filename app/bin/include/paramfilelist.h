@@ -32,5 +32,6 @@
 	BOOL_T ParamFileListInit(void);
 
 	void SearchUiOk(void * junk);
-
+	bool ReloadParamFile(wIndex_t index);
+	bool UnloadParamFile(wIndex_t fileIndex);
 #endif // !HAVE_PARAMFILELIST_H

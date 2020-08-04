@@ -48,6 +48,7 @@ if(APPLE)
           	  ${sources}
           	  browserhelp.c)
     	else(XTRKCAD_USE_BROWSER)
+    	 PKG_CHECK_MODULES(GTK_WEBKIT "webkit-1.0" REQUIRED)
        	 set(sources 
        	     ${sources}
        	     ixhelp.c)
@@ -59,6 +60,7 @@ else(APPLE)
             ${sources}
             browserhelp.c)
     else(XTRKCAD_USE_BROWSER)
+    	PKG_CHECK_MODULES(GTK_WEBKIT "webkit-1.0" REQUIRED)
         set(sources 
             ${sources}
             ixhelp.c)
@@ -70,6 +72,7 @@ include_directories(${XTrkCAD_BINARY_DIR})
 add_library(xtrkcad-wlib ${headers} ${sources})
 
 # GTK 
+find_package (GTK2)
 include_directories(${GTK_INCLUDE_DIRS})
 target_link_libraries(xtrkcad-wlib ${GTK_LIBRARIES})
 
@@ -79,7 +82,16 @@ include_directories(${GTK_UNIX_PRINT_INCLUDE_DIRS})
 target_link_libraries(xtrkcad-wlib ${GTK_UNIX_PRINT_LIBRARIES})
 
 # add dependency to webkit if configured
-if(NOT XTRKCAD_USE_BROWSER)
-    include_directories(${GTK_WEBKIT_INCLUDE_DIRS})
-    target_link_libraries(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
-endif()
+if (APPLE)
+	if(NOT XTRKCAD_USE_APPLEHELP) 
+		if(NOT XTRKCAD_USE_BROWSER)
+		   include_directories(${GTK_WEBKIT_INCLUDE_DIRS})
+	 	   target_link_libraries(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
+		endif()
+	endif() 
+else (APPLE)
+	if(NOT XTRKCAD_USE_BROWSER)
+ 	   include_directories(${GTK_WEBKIT_INCLUDE_DIRS})
+ 	   target_link_libraries(xtrkcad-wlib ${GTK_WEBKIT_LIBRARIES})
+	endif()
+endif(APPLE)

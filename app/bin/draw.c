@@ -54,7 +54,7 @@
 
 static void DrawRoomWalls( wBool_t );
 static void DrawMarkers( void );
-static void ConstraintOrig( coOrd *, coOrd, int );
+static void ConstraintOrig( coOrd *, coOrd, int, int );
 static void DoMouse( wAction_t action, coOrd pos );
 static void DDrawPoly(
 		drawCmd_p d,
@@ -68,7 +68,7 @@ static void DDrawPoly(
 static void DrawMapBoundingBox( BOOL_T set );
 static void DrawTicks( drawCmd_p d, coOrd size );
 
-static int log_pan = 0;
+EXPORT int log_pan = 0;
 static int log_zoom = 0;
 static int log_mouse = 0;
 static int log_redraw = 0;
@@ -76,8 +76,6 @@ static int log_redraw = 0;
 static BOOL_T hideBox = FALSE;
 
 static wFontSize_t drawMaxTextFontSize = 100;
-
-extern long zoomCorner; 
 
 /****************************************************************************
  *
@@ -94,6 +92,7 @@ EXPORT BOOL_T drawEnable = TRUE;
 EXPORT long currRedraw = 0;
 
 EXPORT coOrd panCenter;
+EXPORT coOrd menuPos;
 
 EXPORT wDrawColor drawColorBlack;
 EXPORT wDrawColor drawColorWhite;
@@ -184,6 +183,8 @@ static struct {
 		double value;
 		wMenuRadio_p pdRadio;
 		wMenuRadio_p btRadio;
+		wMenuRadio_p ctxRadio1;
+		wMenuRadio_p panRadio;
 		} zoomList[] = {
 				{ "1:10", 1.0 / 10.0 },
 				{ "1:9", 1.0 / 9.0 },
@@ -331,6 +332,11 @@ static void DDrawLine(
 			lineOpt = wDrawLineDashDot;
 		else if (opt == DC_DASHDOTDOT)
 			lineOpt = wDrawLineDashDotDot;
+		else if(opt == DC_CENTER)
+			lineOpt = wDrawLineCenter;
+		else if (opt == DC_PHANTOM)
+			lineOpt = wDrawLinePhantom;
+
 	if (drawEnable) {
 		wDrawLine( d->d, x0, y0, x1, y1,
 				width,
@@ -412,6 +418,10 @@ static void DDrawArc(
 		lineOpt = wDrawLineDashDot;
 	else if (opt == DC_DASHDOTDOT)
 		lineOpt = wDrawLineDashDotDot;
+	else if(opt == DC_CENTER)
+		lineOpt = wDrawLineCenter;
+	else if (opt == DC_PHANTOM)
+		lineOpt = wDrawLinePhantom;
     if (drawEnable)
     {
         wDrawArc(d->d, x, y, (wPos_t)(rr), angle0, angle1, drawCenter,
@@ -498,6 +508,10 @@ static void DDrawPoly(
 		lineOpt = wDrawLineDashDot;
 	else if (opt == DC_DASHDOTDOT)
 		lineOpt = wDrawLineDashDotDot;
+	else if(opt == DC_CENTER)
+		lineOpt = wDrawLineCenter;
+	else if (opt == DC_PHANTOM)
+		lineOpt = wDrawLinePhantom;
 	wDrawPolygon( d->d, &wpts(0), &wtype(0), cnt, color, width, lineOpt, (wDrawOpts)d->funcs->options, fill, open );
 }
 
@@ -1260,7 +1274,7 @@ static void ChangeMapScale( BOOL_T reset )
 	h = (wPos_t)fh;
 	if (reset) {
 		wGetDisplaySize( &dw, &dh );
-		wSetGeometry(mapW, 50, dw/2, 50, dh/2, w, h, mapD.size.x/mapD.size.y);
+		wSetGeometry(mapW, 50, dw, 50, dh, -1, -1, mapD.size.x/mapD.size.y);
 		wWinSetSize( mapW, w+DlgSepLeft+DlgSepRight, h+DlgSepTop+DlgSepBottom);
 	}
 	wDrawSetSize( mapD.d, w, h, NULL );
@@ -1277,6 +1291,7 @@ EXPORT BOOL_T SetRoomSize( coOrd size )
 		 mapD.size.y == size.y )
 		return TRUE;
 	mapD.size = size;
+	SetLayoutRoomSize(size);
 	if ( mapW == NULL)
 		return TRUE;
 	ChangeMapScale(TRUE);
@@ -1413,9 +1428,6 @@ EXPORT void MainRedraw( void )
 	if (GetLayoutBackGroundScreen() < 100.0 && GetLayoutBackGroundVisible()) {
 		wDrawShowBackground( mainD.d, back_x, back_y, back_width, GetLayoutBackGroundAngle(), GetLayoutBackGroundScreen());
 	}
-	DrawRoomWalls( FALSE );
-	currRedraw++;
-	DrawSnapGrid( &mainD, mapD.size, TRUE );
 	orig = mainD.orig;
 	size = mainD.size;
 	orig.x -= RBORDER/mainD.dpi*mainD.scale;
@@ -1423,6 +1435,11 @@ EXPORT void MainRedraw( void )
 	size.x += (RBORDER+LBORDER)/mainD.dpi*mainD.scale;
 	size.y += (BBORDER+TBORDER)/mainD.dpi*mainD.scale;
 	DrawTracks( &mainD, mainD.scale, orig, size );
+
+	DrawRoomWalls( FALSE );
+	currRedraw++;
+	DrawSnapGrid( &mainD, mapD.size, TRUE );
+
 	//wSetCursor( mainD.d, defaultCursor );
 	InfoScale();
 	// The remainder is from TempRedraw
@@ -1484,7 +1501,7 @@ EXPORT void MainLayout(
 			pixelBins /= 2.0;
 		}
 	}
-	ConstraintOrig( &mainD.orig, mainD.size, bNoBorder );
+	ConstraintOrig( &mainD.orig, mainD.size, bNoBorder, FALSE );
 	tempD.orig = mainD.orig;
 	tempD.size = mainD.size;
 	mainCenter.x = mainD.orig.x + mainD.size.x/2.0;
@@ -1535,6 +1552,9 @@ void MainProc( wWin_p win, winProcEvent e, void * refresh, void * data )
 			wControlSetPos( (wControl_p)mainD.d, 0, toolbarHeight );
 			SetMainSize();
 			SetInfoBar();
+			panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+			panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			MainLayout( !refresh, TRUE ); // MainProc: wResize_e event
 			wPrefSetInteger( "draw", "mainwidth", width );
 			wPrefSetInteger( "draw", "mainheight", height );
@@ -1739,19 +1759,21 @@ EXPORT void DrawRuler(
 						if (mm%100 != 0) {
 							sprintf(message, "%ld", mm/10%10 );
 							fs = rulerFontSize*2/3;
-							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/72.0 );
-							Translate( &p0, p0, 225, fs*d->scale/72.0 );
+							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/mainD.dpi );
+							Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
 							//p0.x = p1.x+4*dxn/10*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						} else {
 							sprintf(message, "%0.1f", mm/1000.0 );
 							fs = rulerFontSize;
-							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/72.0 );
-							Translate( &p0, p0, 225, 1.5*fs*d->scale/72.0 );
+							Translate( &p0, p0, aa, (fs/2.0+len)*d->scale/mainD.dpi );
+							Translate( &p0, p0, 225, 1.5*fs*d->scale/mainD.dpi );
 							//p0.x = p0.x+((-(LBORDER-2)/2)+((LBORDER-2)/2+2)*sin_aa)*d->scale/mainD.dpi;
 							//p0.y = p1.y+dyn*d->scale/mainD.dpi;
 						}
 						d->CoOrd2Pix( d, p0, &x0, &y0 );
+						if (x0<0) x0 = 0;
+						if (y0<0) y0 = 0;
 						wDrawString( d->d, x0, y0, d->angle, message, rulerFp,
 										fs, color, (wDrawOpts)d->funcs->options );
 					}
@@ -1817,10 +1839,12 @@ EXPORT void DrawRuler(
 			if (fraction == 0) {
 				if ( (number == TRUE && d->scale<40) || (digit==0)) {
 					if (inch % 12 == 0 || d->scale <= 2) {
-						Translate( &p0, p0, aa, majorLength*d->scale/72.0 );
-						Translate( &p0, p0, 225, fs*d->scale/72.0 );
+						Translate( &p0, p0, aa, majorLength*d->scale/mainD.dpi );
+						Translate( &p0, p0, 225, fs*d->scale/mainD.dpi );
 						sprintf(message, "%d%c", digit, quote );
 						d->CoOrd2Pix( d, p0, &x0, &y0 );
+						if (x0<0) x0 = 0;
+						if (y0<0) y0 = 0;
 						wDrawString( d->d, x0, y0, d->angle, message, rulerFp, fs, color, (wDrawOpts)d->funcs->options );
 					}
 				}
@@ -1839,12 +1863,14 @@ static void DrawTicks( drawCmd_p d, coOrd size )
 
 	offset = 0.0;
 
-	if ( d->orig.x<0.0 ) {
+	double blank_zone = 40*d->scale/72.0;
+
+	if ( d->orig.x<0.0-blank_zone ) {
 		 p0.y = 0.0; p1.y = mapD.size.y;
 		 p0.x = p1.x = 0.0;
 		 DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
 	}
-	if (d->orig.x+d->size.x>mapD.size.x) {
+	if (d->orig.x+d->size.x>mapD.size.x+blank_zone) {
 		 p0.y = 0.0; p1.y = mapD.size.y;
 		 p0.x = p1.x = mapD.size.x;
 		 DrawRuler( d, p0, p1, offset, FALSE, FALSE, borderColor );
@@ -1858,12 +1884,12 @@ static void DrawTicks( drawCmd_p d, coOrd size )
 
 	offset = 0.0;
 
-	if ( d->orig.y<0.0 ) {
+	if ( d->orig.y<0.0-blank_zone) {
 		p0.x = 0.0; p1.x = mapD.size.x;
 		p0.y = p1.y = 0.0;
 		DrawRuler( d, p0, p1, offset, FALSE, FALSE, borderColor );
 	}
-	if (d->orig.y+d->size.y>mapD.size.y) {
+	if (d->orig.y+d->size.y>mapD.size.y+blank_zone) {
 		 p0.x = 0.0; p1.x = mapD.size.x;
 		 p0.y = p1.y = mapD.size.y;
 		 DrawRuler( d, p0, p1, offset, FALSE, TRUE, borderColor );
@@ -1895,52 +1921,64 @@ static void DrawMapBoundingBox( BOOL_T set )
 }
 
 
-static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bNoBorder  )
+static void ConstraintOrig( coOrd * orig, coOrd size, wBool_t bNoBorder, wBool_t round  )
 {
 LOG( log_pan, 2, ( "ConstraintOrig [ %0.3f, %0.3f ] RoomSize(%0.3f %0.3f), WxH=%0.3fx%0.3f",
 				orig->x, orig->y, mapD.size.x, mapD.size.y,
 				size.x, size.y ) )
 
 	coOrd bound = zero;
-	if ( !bNoBorder ) {
+
+    if ( !bNoBorder ) {
 		bound.x = size.x/2;
 		bound.y = size.y/2;
 	}
-	if ((orig->x+size.x) > (mapD.size.x+bound.x)) {
-		orig->x = mapD.size.x-size.x+bound.x;
-		orig->x += (units==UNITS_ENGLISH?1.0:(1.0/2.54));
-	}
-	if (orig->x < (0-bound.x))
-		orig->x = 0-bound.x;
 
-	if ((orig->y+size.y) > (mapD.size.y+bound.y) ) {
-		orig->y = mapD.size.y-size.y+bound.y;
-		orig->y += (units==UNITS_ENGLISH?1.0:1.0/2.54);
 
-	}
-	if (orig->y < (0-bound.y))
-		orig->y = 0-bound.y;
 
-	if (mainD.scale >= 1.0) {
-		if (units == UNITS_ENGLISH) {
-			orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
-			orig->y = floor(orig->y*4)/4;
-		} else {
-			orig->x = floor(orig->x*2.54*2)/(2.54*2);  //>1:1 = 0.5 cm
-			orig->y = floor(orig->y*2.54*2)/(2.54*2);
+	if (orig->x > 0.0) {
+		if ((orig->x+size.x) > (mapD.size.x+bound.x)) {
+			orig->x = mapD.size.x-size.x+bound.x;
+			//orig->x += (units==UNITS_ENGLISH?1.0:(1.0/2.54));
 		}
-	} else {
-		if (units == UNITS_ENGLISH) {
-			orig->x = floor(orig->x*64)/64;   //<1:1 = 1/64 inch
-			orig->y = floor(orig->y*64)/64;
+	}
+
+	if (orig->x < (0-bound.x))
+				orig->x = 0-bound.x;
+
+	if (orig->y > 0.0) {
+		if ((orig->y+size.y) > (mapD.size.y+bound.y) ) {
+			orig->y = mapD.size.y-size.y+bound.y;
+			//orig->y += (units==UNITS_ENGLISH?1.0:1.0/2.54);
+
+		}
+	}
+
+	if (orig->y < (0-bound.y))
+				orig->y = 0-bound.y;
+
+	if (round) {
+		if (mainD.scale >= 1.0) {
+			if (units == UNITS_ENGLISH) {
+				orig->x = floor(orig->x*4)/4;   //>1:1 = 1/4 inch
+				orig->y = floor(orig->y*4)/4;
+			} else {
+				orig->x = floor(orig->x*2.54*2)/(2.54*2);  //>1:1 = 0.5 cm
+				orig->y = floor(orig->y*2.54*2)/(2.54*2);
+			}
 		} else {
-			orig->x = floor(orig->x*25.4*2)/(25.4*2);  //>1:1 = 0.5 mm
-			orig->y = floor(orig->y*25.4*2)/(25.4*2);
+			if (units == UNITS_ENGLISH) {
+				orig->x = floor(orig->x*64)/64;   //<1:1 = 1/64 inch
+				orig->y = floor(orig->y*64)/64;
+			} else {
+				orig->x = floor(orig->x*25.4*2)/(25.4*2);  //>1:1 = 0.5 mm
+				orig->y = floor(orig->y*25.4*2)/(25.4*2);
+			}
 		}
 	}
 	//orig->x = (long)(orig->x*pixelBins+0.5)/pixelBins;
 	//orig->y = (long)(orig->y*pixelBins+0.5)/pixelBins;
-LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
+	LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
 }
 
 /**
@@ -1948,18 +1986,29 @@ LOG( log_pan, 2, ( " = [ %0.3f %0.3f ]\n", orig->y, orig->y ) )
  * 
  * \param IN zoomM			Menu to which radio button is added
  * \param IN zoomSubM	Second menu to which radio button is added, ignored if NULL
+ * \param IN ctxMenu1
+ * \param IN ctxMenu2
  *
  */
 
-EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM )
+EXPORT void InitCmdZoom( wMenu_p zoomM, wMenu_p zoomSubM, wMenu_p ctxMenu1, wMenu_p panMenu )
 {
 	int inx;
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
-		if( zoomList[ inx ].value >= 1.0 ) {
-			zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
+		if( (zoomList[ inx ].value >= 1.0 && zoomList[ inx ].value<=10 ) ||
+				 (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value))))
+				{
+			if (zoomM)
+				zoomList[inx].btRadio = wMenuRadioCreate( zoomM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
 			if( zoomSubM )
 				zoomList[inx].pdRadio = wMenuRadioCreate( zoomSubM, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
+			if (panMenu)
+				zoomList[inx].panRadio = wMenuRadioCreate( panMenu, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
+		}
+		if ((zoomList[inx].value >=1.0 && zoomList[inx].value <= 10.0) || (ceil(log2(zoomList[ inx ].value)) == floor(log2(zoomList[ inx ].value)))) {
+			if (ctxMenu1)
+				zoomList[inx].ctxRadio1 = wMenuRadioCreate( ctxMenu1, "cmdZoom", zoomList[inx].name, 0, (wMenuCallBack_p)DoZoom, (void *)(&(zoomList[inx].value)));
 		}
 	}
 }
@@ -1978,11 +2027,14 @@ static void SetZoomRadio( DIST_T scale )
 	
 	for ( inx=0; inx<sizeof zoomList/sizeof zoomList[0]; inx++ ) {
 		if( curScale == zoomList[inx].value ) {
-		
-			wMenuRadioSetActive( zoomList[inx].btRadio );		
+			if (zoomList[inx].btRadio)
+				wMenuRadioSetActive( zoomList[inx].btRadio );
 			if( zoomList[inx].pdRadio )
 				wMenuRadioSetActive( zoomList[inx].pdRadio );
-
+			if (zoomList[inx].ctxRadio1)
+				wMenuRadioSetActive( zoomList[inx].ctxRadio1 );
+			if (zoomList[inx].panRadio)
+				wMenuRadioSetActive( zoomList[inx].panRadio );
 			/* activate / deactivate zoom buttons when appropriate */				
 			wControlLinkedActive( (wControl_p)zoomUpB, ( inx != 0 ) );
 			wControlLinkedActive( (wControl_p)zoomDownB, ( inx < (sizeof zoomList/sizeof zoomList[0] - 1)));			
@@ -2052,13 +2104,7 @@ static void DoNewScale( DIST_T scale )
 	SetZoomRadio( scale ); 
 	InfoScale();
 	SetMainSize(); 
-	if (zoomCorner) {
-		mainD.orig = zero;
-	} else {
-		mainD.orig.x = mainCenter.x - mainD.size.x/2.0;
-		mainD.orig.y = mainCenter.y - mainD.size.y/2.0;
-	}
-	MainLayout( TRUE, TRUE ); // DoNewScale
+	PanHere( (void*)1 );
 LOG( log_zoom, 1, ( "center = [%0.3f %0.3f]\n", mainCenter.x, mainCenter.y ) )
 	sprintf( tmp, "%0.3f", mainD.scale );
 	wPrefSetString( "draw", "zoom", tmp );
@@ -2080,6 +2126,7 @@ EXPORT void DoZoomUp( void * mode )
 	long newScale;
 	int i;
 	
+	LOG( log_zoom, 2, ( "DoZoomUp KS:%x\n", MyGetKeyState() ) );
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0) {
 		i = ScaleInx( mainD.scale );
 		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
@@ -2109,6 +2156,22 @@ EXPORT void DoZoomUp( void * mode )
 	}
 }
 
+EXPORT void DoZoomExtents( void * mode) {
+
+	DIST_T scale_x, scale_y;
+	scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
+	scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
+	if (scale_x<scale_y)
+		scale_x = scale_y;
+	scale_x = ceil(scale_x);
+	if (scale_x < 1) scale_x = 1;
+	if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
+	mainD.orig = zero;
+	DoNewScale(scale_x);
+	MainLayout(TRUE,TRUE);
+
+}
+
 
 /**
  * User selected zoom out, via mouse wheel, button or pulldown.
@@ -2121,6 +2184,7 @@ EXPORT void DoZoomDown( void  * mode)
 	long newScale;
 	int i;
 	
+	LOG( log_zoom, 2, ( "DoZoomDown KS:%x\n", MyGetKeyState() ) );
 	if ( mode != NULL || (MyGetKeyState()&WKEY_SHIFT) == 0 ) {
 		i = ScaleInx( mainD.scale );
 		if (i < 0) i = NearestScaleInx(mainD.scale, TRUE);
@@ -2179,10 +2243,96 @@ EXPORT void CoOrd2Pix(
 	*y = (wPos_t)((pos.y-d->orig.y)/d->scale*d->dpi);
 }
 
+/*
+* Position mainD based on panCenter
+* \param mode control effect of constrainMain and CTRL key
+*
+* mode:
+*  - 0: constrain if constrainMain==1 or CTRL is pressed
+*  - 1: same as 0, but ignore CTRL
+*  - 2: same as 0, plus liveMap
+*  - 3: Take position from menuPos
+*/
 EXPORT void PanHere(void * mode) {
+	if ( 3 == (long)mode) {
+		panCenter = menuPos;
+		LOG( log_pan, 2, ( "MCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+	}
 	mainD.orig.x = panCenter.x - mainD.size.x/2.0;
 	mainD.orig.y = panCenter.y - mainD.size.y/2.0;
-	MainLayout( TRUE, FALSE ); // PanHere
+	wBool_t bNoBorder = (constrainMain != 0);
+	if ( 1 != (long)mode )
+		if ( (MyGetKeyState()&WKEY_CTRL)!= 0 )
+			bNoBorder = !bNoBorder;
+	wBool_t bLiveMap = TRUE;
+	if ( 2 == (long)mode )
+		bLiveMap = liveMap;
+
+	MainLayout( bLiveMap, bNoBorder ); // PanHere
+}
+
+
+static void DoPanKeyAction( wAction_t action )
+{
+	switch ((wAccelKey_e)(action>>8)) {
+	case wAccelKey_Del:
+		SelectDelete();
+		return;
+#ifndef WINDOWS
+	case wAccelKey_Pgdn:
+		DoZoomUp(NULL);
+		break;
+	case wAccelKey_Pgup:
+		DoZoomDown(NULL);
+		break;
+#endif
+	case wAccelKey_Right:
+		panCenter.x = mainD.orig.x + mainD.size.x/2;
+		panCenter.y = mainD.orig.y + mainD.size.y/2;
+		if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+			panCenter.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
+		else
+			panCenter.x += mainD.size.x/2;
+		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+		PanHere((void*)0);
+		break;
+
+	case wAccelKey_Left:
+		panCenter.x = mainD.orig.x + mainD.size.x/2;
+		panCenter.y = mainD.orig.y + mainD.size.y/2;
+		if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+			panCenter.x -= 0.25*mainD.scale;
+		else
+			panCenter.x -= mainD.size.x/2;
+		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+		PanHere((void*)0);
+		break;
+
+	case wAccelKey_Up:
+		panCenter.x = mainD.orig.x + mainD.size.x/2;
+		panCenter.y = mainD.orig.y + mainD.size.y/2;
+		if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+			panCenter.y += 0.25*mainD.scale;
+		else
+			panCenter.y += mainD.size.y/2;
+		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+		PanHere((void*)0);
+		break;
+
+	case wAccelKey_Down:
+		panCenter.x = mainD.orig.x + mainD.size.x/2;
+		panCenter.y = mainD.orig.y + mainD.size.y/2;
+		if ((MyGetKeyState() & WKEY_SHIFT) != 0)
+			panCenter.y -= 0.25*mainD.scale;
+		else
+			panCenter.y -= mainD.size.y/2;
+		LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+		PanHere((void*)0);
+		break;
+
+	default:
+		return;
+	}
 }
 
 
@@ -2204,15 +2354,17 @@ static void DoMapPan( wAction_t action, coOrd pos )
 	case C_MOVE:
 		if ( mode != movePan )
 			break;
-		mainD.orig.x = pos.x - mainD.size.x/2.0;
-		mainD.orig.y = pos.y - mainD.size.y/2.0;
+//		mainD.orig.x = pos.x - mainD.size.x/2.0;
+//		mainD.orig.y = pos.y - mainD.size.y/2.0;
+		panCenter = pos;
 LOG( log_pan, 1, ( "%s = [ %0.3f, %0.3f ]\n", action == C_DOWN? "START":"MOVE", mainD.orig.x, mainD.orig.y ) )
-		MainLayout( liveMap, FALSE ); // DoMapPan C_MOVE
+		PanHere( (void*)2 );
 		break;
 	case C_UP:
 		if ( mode != movePan )
 			break;
-		MainLayout( TRUE, FALSE ); // DoMapPan C_UP
+		panCenter = pos;
+		PanHere( (void*)0 );
 LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", mainD.orig.x, mainD.orig.y ) )
 		mode = noPan;
 		break;
@@ -2226,6 +2378,7 @@ LOG( log_pan, 1, ( "FINAL = [ %0.3f, %0.3f ]\n", mainD.orig.x, mainD.orig.y ) )
 		size.x = mainD.size.x/mainD.scale;  //How big screen?
 		size.y = mainD.size.y/mainD.scale;
 		xscale = mainD.scale; //start at current
+		panCenter = pos;
 LOG( log_pan, 1, ( "START %0.3fx%0.3f %0.3f+%0.3f\n", mapOrig.x, mapOrig.y, size.x, size.y ) )
 		break;
 
@@ -2257,7 +2410,7 @@ LOG( log_pan, 1, ( "START %0.3fx%0.3f %0.3f+%0.3f\n", mapOrig.x, mapOrig.y, size
 		mainD.orig.x = mapOrig.x - mainD.size.x / 2.0;
 		mainD.orig.y = mapOrig.y - mainD.size.y / 2.0;
 		tempD.scale = mainD.scale = xscale;
-		MainLayout( liveMap, TRUE ); // DoMapPan C_RMOVE
+		PanHere( (void*)2 );
 LOG( log_pan, 1, ( "MOVE SCL:%0.3f %0.3fx%0.3f %0.3f+%0.3f\n", xscale, mainD.orig.x, mainD.orig.y, mainD.size.x, mainD.size.y ) )
 		InfoScale();
 	    break;
@@ -2269,50 +2422,13 @@ LOG( log_pan, 1, ( "MOVE SCL:%0.3f %0.3fx%0.3f %0.3f+%0.3f\n", xscale, mainD.ori
 		mode = noPan;
 		break;
 
-		case wActionExtKey:
-			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
-			switch ((wAccelKey_e)(action>>8)) {
-#ifndef WINDOWS
-			case wAccelKey_Pgdn:
-				DoZoomUp(NULL);
-				return;
-			case wAccelKey_Pgup:
-				DoZoomDown(NULL);
-				return;
-			case wAccelKey_F5:
-				MainLayout( TRUE, FALSE ); // DoMapPan: wActionExtKeys/F5
-				return;
-#endif
-			case wAccelKey_Right:
+	case wActionExtKey:
+		mainD.CoOrd2Pix(&mainD,pos,&x,&y);
+		DoPanKeyAction( action );
+		mainD.Pix2CoOrd( &mainD, x, y, &pos );
+		InfoPos( pos );
+		return;
 
-				mainD.orig.x += mainD.size.x/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMapPan: wActionExtKeys/Right
-				break;
-			case wAccelKey_Left:
-
-				mainD.orig.x -= mainD.size.x/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMapPan: wActionExtKeys/Left
-
-				break;
-			case wAccelKey_Up:
-
-				mainD.orig.y += mainD.size.y/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMapPan: wActionExtKeys/Up
-
-				break;
-                    
-			case wAccelKey_Down:
-
-				mainD.orig.y -= mainD.size.y/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMapPan: wActionExtKeys/Down
-
-				break;
-			default:
-				return;
-			}
-			mainD.Pix2CoOrd( &mainD, x, y, &pos );
-			InfoPos( pos );
-			return;
 	default:
 		return;
 	}
@@ -2363,6 +2479,31 @@ GetMousePosition( int *x, int *y )
 	}
 }
 
+coOrd minIncrementSizes() {
+	double x,y;
+	if (mainD.scale >= 1.0) {
+		if (units == UNITS_ENGLISH) {
+			x = 0.25;   //>1:1 = 1/4 inch
+			y = 0.25;
+		} else {
+			x = 1/(2.54*2);  //>1:1 = 0.5 cm
+			y = 1/(2.54*2);
+		}
+	} else {
+		if (units == UNITS_ENGLISH) {
+			x = 1/64;   //<1:1 = 1/64 inch
+			y = 1/64;
+		} else {
+			x = 1/(25.4*2);  //>1:1 = 0.5 mm
+			y = 1/(25.4*2);
+		}
+	}
+	coOrd ret;
+	ret.x = x*1.5;
+	ret.y = y*1.5;
+	return ret;
+}
+
 static void DoMouse( wAction_t action, coOrd pos )
 {
 
@@ -2375,6 +2516,8 @@ static void DoMouse( wAction_t action, coOrd pos )
 	if (recordF) {
 		RecordMouse( "MOUSE", action, pos.x, pos.y );
 	}
+
+
 
 	switch (action&0xFF) {
 	case C_UP:
@@ -2423,6 +2566,12 @@ static void DoMouse( wAction_t action, coOrd pos )
 	if ( deferSubstituteControls[0] )
 		InfoSubstituteControls( deferSubstituteControls, deferSubstituteLabels );
 
+//	panCenter.y = mainD.orig.y + mainD.size.y/2;
+//	panCenter.x = mainD.orig.x + mainD.size.x/2;
+//printf( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y );
+
+	coOrd min = minIncrementSizes();
+
 	switch ( action&0xFF ) {
 		case C_DOWN:
 		case C_RDOWN:
@@ -2436,62 +2585,17 @@ static void DoMouse( wAction_t action, coOrd pos )
 		case wActionExtKey:
 			mainD.CoOrd2Pix(&mainD,pos,&x,&y);
 			if ((MyGetKeyState() &
-					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL)) break;  //Allow SHIFT+CTRL for Move
+					(WKEY_SHIFT | WKEY_CTRL)) == (WKEY_SHIFT | WKEY_CTRL) &&
+				( action>>8 == wAccelKey_Up ||
+				  action>>8 == wAccelKey_Down ||
+				  action>>8 == wAccelKey_Left ||
+				  action>>8 == wAccelKey_Right ))
+				break;  //Allow SHIFT+CTRL for Move
 			if (((action>>8)&0xFF) == wAccelKey_LineFeed) {
 				action = C_TEXT+((int)(0x0A<<8));
 				break;
 			}
-			switch ((wAccelKey_e)(action>>8)) {
-			case wAccelKey_Del:
-				SelectDelete();
-				return;
-#ifndef WINDOWS
-			case wAccelKey_Pgdn:
-				DoZoomUp(NULL);
-				break;
-			case wAccelKey_Pgup:
-				DoZoomDown(NULL);
-				break;
-#endif
-			case wAccelKey_Right:
-
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.x += 0.25*mainD.scale;    //~1cm in 1::1, 1ft in 30:1, 1mm in 10:1
-				else
-					mainD.orig.x += mainD.size.x/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMouse: wActionKey/Right
-
-				break;
-			case wAccelKey_Left:
-
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.x -= 0.25*mainD.scale;
-				else
-					mainD.orig.x -= mainD.size.x/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMouse: wActionKey/Left
-
-				break;
-			case wAccelKey_Up:
-
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.y += 0.25*mainD.scale;
-				else
-					mainD.orig.y += mainD.size.y/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMouse: wActionKey/Up
-
-				break;
-			case wAccelKey_Down:
-
-				if ((MyGetKeyState() & WKEY_SHIFT) != 0)
-					mainD.orig.y -= 0.25*mainD.scale;
-				else
-					mainD.orig.y -= mainD.size.y/2;
-				MainLayout( TRUE, (MyGetKeyState() & WKEY_CTRL) != 0 ); // DoMouse: wActionKey/Down
-
-				break;
-			default:
-				return;
-			}
+			DoPanKeyAction( action );
 			return;
 		case C_TEXT:
 			if ((action>>8) == 0x0D) {
@@ -2514,6 +2618,26 @@ static void DoMouse( wAction_t action, coOrd pos )
 			break;
 		case C_WDOWN:
 			DoZoomDown((void *)1L);
+			break;
+		case C_SCROLLUP:
+			panCenter.y = panCenter.y + ((mainD.size.y/20>min.y)?mainD.size.y/20:min.y);
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere((void*)1);
+			break;
+		case C_SCROLLDOWN:
+			panCenter.y = panCenter.y - ((mainD.size.y/20>min.y)?mainD.size.y/20:min.y);
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere((void*)1);
+			break;
+		case C_SCROLLLEFT:
+			panCenter.x = panCenter.x - ((mainD.size.x/20>min.x)?mainD.size.x/20:min.x);
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere((void*)1);
+			break;
+		case C_SCROLLRIGHT:
+			panCenter.x = panCenter.x + ((mainD.size.x/20>min.x)?mainD.size.x/20:min.x);
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere((void*)1);
 			break;
 		default:
 			NoticeMessage( MSG_DOMOUSE_BAD_OP, _("Ok"), NULL, action&0xFF );
@@ -2594,6 +2718,9 @@ static void DoMousew( wDraw_p d, void * context, wAction_t action, wPos_t x, wPo
 						}
 					}
 					mainD.orig = orig;
+					panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+					panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+					LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 					MainLayout( TRUE, TRUE ); // DoMouseW: autopan
 					tempD.orig = mainD.orig;
 					wFlush();
@@ -2687,7 +2814,6 @@ static void MapDlgUpdate(
 				return;
 			wWinGetSize( mapW, &width, &height );
 			if (height >= 100) {
-				//wDrawSetSize( mapD.d, width, height);
 				wControlSetPos( (wControl_p)mapD.d, 0, 0 );
 				double scaleX = (mapD.size.x/((width-DlgSepLeft-DlgSepRight-10)/mapD.dpi));
 				double scaleY = (mapD.size.y/((height-DlgSepTop-DlgSepBottom-10)/mapD.dpi));
@@ -2776,6 +2902,8 @@ EXPORT void DrawInit( int initialZoom )
 	tempD.dpi = mainD.dpi;
 
 	SetMainSize();
+	panCenter.x = mainD.size.x/2 +mainD.orig.x;
+	panCenter.y = mainD.size.y/2 +mainD.orig.y;
 	mapD.scale = mapScale;
 	/*w = (wPos_t)((mapD.size.x/mapD.scale)*mainD.dpi + 0.5)+2;*/
 	/*h = (wPos_t)((mapD.size.y/mapD.scale)*mainD.dpi + 0.5)+2;*/
@@ -2865,6 +2993,8 @@ static STATUS_T CmdPan(
 					coOrd oldOrig = mainD.orig;
 					mainD.orig.x -= (pos.x - start_pos.x);
 					mainD.orig.y -= (pos.y - start_pos.y);
+					if ((MyGetKeyState()&WKEY_SHIFT) != 0)
+						ConstraintOrig(&mainD.orig,mainD.size,TRUE,FALSE);
 					if ((oldOrig.x == mainD.orig.x) && (oldOrig.y == mainD.orig.y))
 						InfoMessage(_("Can't move any further in that direction"));
 					else
@@ -2884,7 +3014,9 @@ static STATUS_T CmdPan(
 				base.y = pos.y;
 			}
 		}
-		MainLayout( TRUE, FALSE ); // CmdPan: C_MOVE
+		panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+		panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+		PanHere( (void*)0 );
 		break;
 	case C_UP:
 		if (panmode == ZOOM) {
@@ -2909,6 +3041,9 @@ static STATUS_T CmdPan(
 			DoNewScale(scale_x);
 			break;
 		} else if (panmode == PAN) {
+			panCenter.x = mainD.orig.x + mainD.size.x/2.0;
+			panCenter.y = mainD.orig.y + mainD.size.y/2.0;
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			panmode = NONE;
 		}
 		break;
@@ -2926,25 +3061,20 @@ static STATUS_T CmdPan(
 		panmode = NONE;
 
 		if ((action>>8) == 'e') {     //"e"
-			scale_x = mapD.size.x/(mainD.size.x/mainD.scale);
-			scale_y = mapD.size.y/(mainD.size.y/mainD.scale);
-			if (scale_x<scale_y)
-				scale_x = scale_y;
-			scale_x = ceil(scale_x);
-			if (scale_x < 1) scale_x = 1;
-			if (scale_x > MAX_MAIN_SCALE) scale_x = MAX_MAIN_SCALE;
-			mainD.orig = zero;
-			DoNewScale(scale_x);
+			DoZoomExtents(0);
 		} else if (((action>>8) == '0') || ((action>>8) == 'o')) {     //"0" or "o"
 			mainD.orig = zero;
-			MainLayout( TRUE, FALSE ); // CmdPan C_TEXT '0' 'o'
+			panCenter.x = mainD.size.x/2.0;
+			panCenter.y = mainD.size.y/2.0;
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			MainLayout( TRUE, TRUE ); // CmdPan C_TEXT '0' 'o'
 		} else if ((action>>8) >= '1' && (action>>8) <= '9') {         //"1" to "9"
 			scale_x = (action>>8)&0x0F;
 			DoNewScale(scale_x);
-		} else if ((action>>8) == '@') {				// "@"
-			mainD.orig.x = pos.x - mainD.size.x/2.0;
-			mainD.orig.y = pos.y - mainD.size.y/2.0;
-			MainLayout( TRUE, FALSE ); // CmdPan C_TEXT '@'
+		} else if ((action>>8) == 'c') {				// "c"
+			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere( (void*)0 ); // CmdPan C_TEXT 'c'
 		}
 
 		if ((action>>8) == 0x0D) {
@@ -2956,7 +3086,7 @@ static STATUS_T CmdPan(
 		}
 		break;
 	case C_CMDMENU:
-		panCenter = pos;
+		menuPos = pos;
 		wMenuPopupShow( panPopupM );
 		return C_CONTINUE;
 		break;
@@ -2967,7 +3097,7 @@ static STATUS_T CmdPan(
 static wMenuPush_p zoomExtents,panOrig,panHere;
 static wMenuPush_p zoomLvl1,zoomLvl2,zoomLvl3,zoomLvl4,zoomLvl5,zoomLvl6,zoomLvl7,zoomLvl8,zoomLvl9;
 
-void panMenuEnter(int key) {
+EXPORT void PanMenuEnter(int key) {
 	int action;
 	action = C_TEXT;
 	action |= key<<8;
@@ -2991,16 +3121,18 @@ EXPORT void InitCmdPan2( wMenu_p menu )
 	wMenuPushCreate(panPopupM, "cmdDescribeMode", GetBalloonHelpStr("cmdDescribeMode"), 0, DoCommandB, (void*) (intptr_t) describeCmdInx);
 	wMenuPushCreate(panPopupM, "cmdModifyMode", GetBalloonHelpStr("cmdModifyMode"), 0, DoCommandB, (void*) (intptr_t) modifyCmdInx);
 	wMenuSeparatorCreate(panPopupM);
-	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'e');
-	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:1 - '1'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '1');
-	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:2 - '2'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '2');
-	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:3 - '3'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '3');
-	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:4 - '4'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '4');
-	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:5 - '5'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '5');
-	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:6 - '6'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '6');
-	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '7');
-	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '8');
-	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) '9');
-	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to origin - 'o'"), 0, (wMenuCallBack_p)panMenuEnter, (void*) 'o');
-	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - '@'"), 0, (wMenuCallBack_p)PanHere, (void*) 0);
+	zoomExtents = wMenuPushCreate( panPopupM, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'e');
+	zoomLvl1 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:1 - '1'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '1');
+	zoomLvl2 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:2 - '2'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '2');
+	zoomLvl3 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:3 - '3'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '3');
+	zoomLvl4 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:4 - '4'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '4');
+	zoomLvl5 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:5 - '5'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '5');
+	zoomLvl6 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:6 - '6'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '6');
+	zoomLvl7 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:7 - '7'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '7');
+	zoomLvl8 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:8 - '8'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '8');
+	zoomLvl9 = wMenuPushCreate( panPopupM, "", _("Zoom to 1:9 - '9'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) '9');
+	panOrig = wMenuPushCreate( panPopupM, "", _("Pan to Origin - 'o'/'0'"), 0, (wMenuCallBack_p)PanMenuEnter, (void*) 'o');
+	wMenu_p zoomPanM = wMenuMenuCreate(panPopupM, "", _("&Zoom"));
+	InitCmdZoom(NULL, NULL, NULL, zoomPanM);
+	panHere = wMenuPushCreate( panPopupM, "", _("Pan center here - 'c'"), 0, (wMenuCallBack_p)PanHere, (void*) 3);
 }

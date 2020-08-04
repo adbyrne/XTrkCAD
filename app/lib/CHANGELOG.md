@@ -4,6 +4,114 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
+## [5.2.0 Beta 2.1]
+
+### Bugs
+
++ Failure in Parallel Line command fixed
++ Failure in ConvertFrom Bezier fixed
++ Bad track created in ConvertFrom Cornu that does not align (too liberal use of straight)
++ Context Help via F1 works in Wndows
++ Make all commands have target HTML pages for context help
++ Make Font Size be remembered when set from Text command
++ Fixed Radius field to be mainatained in Join after first point selected
++ Param Search UI result box resizeable 
++ Save Bridge Status for Segment Track
++ Updated German translations and translated Help Menu items
++ Clear NoTies if track is hidden
++ ConvertForm and ConvertTo to inherit characterstics of donor Tracks
++ ColorDraw and ColorTrack stored with layout file
++ Help content for Parameter File Dialog
++ Make Rulers overlay content
++ Change Modify/Create Polygon/PolyLine shortcuts to not clash with Pan center as 'c'
++ Track Segments in Structures and Turnouts retain color (including white)
+
+### Added
+
++ Elevation to show height and offset when mousing over tracks without Shift
++ New anchor for Elevation+Shift to show Split will result
++ Debian Install
+
+### Parameter Files
+
++ Peco G-45 file
+
+## [5.2.0 Beta 2.0]
+
+### Added
+
++ Two new line styles: Center Dot and Phantom Dot
++ Preference option to suppress Flex Track in HotBar
++ Pan using Shift+Mousewheel Up/Downand Shift+Ctrl MouseWheel for left/right
++ Pan using Shift+horizontal scroll on GTK
++ Param Reload Button to force reload of a param file
++ Multi Keyword search on param library files
++ "@" Pan to Center and "e" Pan to extents and "0" or "o" Pan to Origin 
++ Middle button also able to select Pan
++ Selectable Icon Button size between 1.0 and 2.0
++ Parallel Lines now can parallel other lines or tracks
++ Add angles for curved line properties
++ Desired Radius feature for non-Cornu Join
++ AutoSave feature and add keep checkpoints between saves
++ Suppress edge rules on layout if close to window edge rulers
++ Option to constrain drawing area to room boundaries on zoom 
++ New Anchors on Describe and Traditional Join
++ AutoSave feature and Backup of checkpoints
++ Anchors on Split within turnouts with Shift
++ Improved Turnout and Section placement when tracks overlap - less jumping
++ Change "@" to "c" for center Pan command in Select and Pan
+
+### Fixed
+
++ Bug #256 Mislabelled Turnout
++ Bug #330 Use 3 decimal points in rotate angle
++ Bug #331 Correct Custom File Append Message
++ Bug #338 Correct Ruler Text size
++ Linetype changing doesn't change line width
++ Bug #332 Lowercase names in .xtp
++ Bug #339 Grades for 2 ended sectional track
++ Bug #340 Bezier Tracks open properly
++ Dragging in Profile Window fixed
++ Draw Objects remember linetype when saved/restored
++ Axis boundaries removed on Zoom Up and Down
++ Correct icons for xte and xtc in Windows
++ Windows size opening fixes
++ FilledDraw copies now work
++ Hangs on Linux startup
++ Linewidth correct in xpms
++ Elevation Points for clearances cleaned up
++ Convert Fixed->Cornu fixes
++ Bug #345 Fix paths in some Turnouts
++ Respect parmdir setting in configuration file
++ Bug #348 Fix Demo 
++ Bug #349 Fix inaccessible track segments
++ Bug #346 Fix layout file ends for Signal and Block
++ Bug #351 Fix loading layout with Cars off tracks
++ Bug #354 MultiLine Notes
++ Correct Undo when Cars are moved/rotated
++ Fix redraw of >20 elements in move/rotate
++ Ensure webkitgtk only required if not using browser for help
++ Fix mapD scale at startup, allow Map to be larger than 1/2 screen
++ Fix Turnout Trim with Split and Shift
++ Hotbar copes with large track objects (e.g., Turntables)
++ Make sure upper tracks are selected ahead of lower ones
++ Shift to suppress track end joins when drawing overlay tracks
++ Fix Curve from Chord anchors
++ Better sized Split and Connect Anchors
++ Windows PanHere now works
++ Fix Map Resize function on GTK
++ Fix Turnout placement on Cornu for Pins and other issues 
++ Fox Cornu Pin editing
+
+
+### Added and changed parameter files
+
++ N-Tomix Track improvements
++ Cleanup double track pieces
++ Micro-Engineering track improvements
++ HO-Endo and Atlas controllers
+
+
 ## [5.2.0 Beta 1.0]
 
 ### Added

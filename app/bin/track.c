@@ -44,6 +44,7 @@
 #include "track.h"
 #include "utility.h"
 #include "misc.h"
+#include "ctrain.h"
 
 #ifndef TRACKDEP
 #ifndef FASTTRACK
@@ -59,6 +60,8 @@
 #define round(x) floor((x)+0.5)
 #endif
 #endif
+
+EXPORT char tempSpecial[4096];
 
 static int log_track = 0;
 static int log_endPt = 0;
@@ -186,14 +189,14 @@ EXPORT track_p OnTrack2( coOrd * fp, BOOL_T complain, BOOL_T track, BOOL_T ignor
 		}
 		p = *fp;
 		distance = trackCmds( GetTrkType(trk) )->distance( trk, &p );
-		if (fabs(distance) < fabs(closestDistance)) {
+		if (fabs(distance) <= fabs(closestDistance)) { //Make the last (highest) preferred
 			closestDistance = distance;
 			closestTrack = trk;
 			closestPos = p;
 		}
 	}
 	if (closestTrack && closestDistance <0 ) closestDistance = 0.0;  //Turntable was closest - inside well
-	if (closestTrack && (closestDistance <= mainD.scale*0.25 || closestDistance <= trackGauge*2.0) ) {
+	if (closestTrack && ((closestDistance <= mainD.scale*0.25) || (closestDistance <= trackGauge*2.0) )) {
 		*fp = closestPos;
 		return closestTrack;
 	}
@@ -721,7 +724,7 @@ EXPORT EPINX_T PickEndPoint( coOrd p, track_cp trk )
 	if (trk->endCnt <= 0)
 		return -1;
 	if ( onTrackInSplit && trk->endCnt > 2 ) {
-		if (GetTrkType(trk) != T_TURNOUT)
+		if (GetTrkType(trk) == T_TURNOUT)
 			return TurnoutPickEndPt( p, trk );
 	}
 	d = FindDistance( p, trk->endPt[0].pos );
@@ -1083,7 +1086,7 @@ EXPORT void ClearTracks( void )
 	to_first = NULL;
 	to_last = &to_first;
 	max_index = 0;
-	changed = 0;
+	changed = checkPtMark = 0;
 	trackCount = 0;
 	ClearCars();
 	InfoCount( trackCount );
@@ -1148,6 +1151,7 @@ LOG( log_track, 4, ( "DeleteTrack(T%d)\n", GetTrkIndex(trk) ) )
 	}
     CheckDeleteSwitchmotor( trk );
     CheckDeleteBlock( trk );
+    CheckCarTraverse( trk );
 	DecrementLayerObjects(trk->layer);
 	trackCount--;
 	AuditTracks( "deleteTrack T%d", trk->index);
@@ -1950,9 +1954,9 @@ EXPORT int ConnectTracks( track_p trk0, EPINX_T inx0, track_p trk1, EPINX_T inx1
 	pos1 = trk1->endPt[inx1].pos;
 LOG( log_track, 3, ( "ConnectTracks( T%d[%d] @ [%0.3f, %0.3f] = T%d[%d] @ [%0.3f %0.3f]\n", trk0->index, inx0, pos0.x, pos0.y, trk1->index, inx1, pos1.x, pos1.y ) )
 	d = FindDistance( pos0, pos1 );
-	a = NormalizeAngle( trk0->endPt[inx0].angle -
-						trk1->endPt[inx1].angle + 180.0 );
-	if (d > connectDistance || (a > connectAngle && a < 360.0 - connectAngle) ) {
+	a = fabs(DifferenceBetweenAngles( trk0->endPt[inx0].angle,
+						trk1->endPt[inx1].angle + 180.0 ));
+	if (d > connectDistance || (a > connectAngle ) ) {
 		LOG( log_endPt, 1, ( "connectTracks: T%d[%d] T%d[%d] d=%0.3f a=%0.3f\n",
 				trk0->index, inx0, trk1->index, inx1, d, a ) );
 		NoticeMessage( MSG_CONNECT_TRK, _("Continue"), NULL, trk0->index, inx0, trk1->index, inx1, d, a );
@@ -2062,7 +2066,6 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 		} else {
 			LOG( log_track, 2, ( "    at endPt (no connection)\n") )
 		}
-		*leftover = trk2;
 		DrawNewTrack( trk );
 
 
@@ -2083,7 +2086,6 @@ LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos
 			LOG( log_track, 2, ( "    at endPt (no connection)\n") )
 		}
 		DrawNewTrack( trk );
-
 	} else {
 		/* TODO circle's don't have ep's */
 		trk2 = GetTrkEndTrk( trk, ep );
@@ -2548,6 +2550,8 @@ EXPORT DIST_T GetTrkLength( track_p trk, EPINX_T ep0, EPINX_T ep1 )
 #define DRAW_TUNNEL_DASH		(1)
 #define DRAW_TUNNEL_SOLID		(2)
 EXPORT long drawTunnel = DRAW_TUNNEL_DASH;
+EXPORT long colorTrack;
+EXPORT long colorDraw;
 
 /******************************************************************************
  *
@@ -2946,7 +2950,7 @@ EXPORT wDrawColor GetTrkColor( track_p trk, drawCmd_p d )
 		if ((d->options&DC_PRINT)==0 && GetTrkSelected(trk))
 			return selectedColor;
 	}
-	if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) ) {
+	if ( (IsTrack(trk)?(colorTrack):(colorDraw)) ) {
 		unsigned int iLayer = GetTrkLayer( trk );
 		if (GetLayerUseColor( iLayer ) )
 			return GetLayerColor( iLayer );
@@ -2981,7 +2985,7 @@ EXPORT void DrawTrack( track_cp trk, drawCmd_p d, wDrawColor color )
 
 	if (d == &mapD && !GetLayerOnMap(curTrackLayer))
 		return;
-	if ( (IsTrack(trk)?(colorLayers&1):(colorLayers&2)) &&
+	if ( (IsTrack(trk)?(colorTrack):(colorDraw)) &&
 		d != &mapD && color == wDrawColorBlack )
 		if (GetLayerUseColor((unsigned int)curTrackLayer))
 			color = GetLayerColor((unsigned int)curTrackLayer);

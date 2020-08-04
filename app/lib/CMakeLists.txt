@@ -47,10 +47,10 @@ if(UNIX AND NOT APPLE)
         )
 	install(FILES
 		xtrkcad.desktop
-		DESTINATION "/usr/share/applications"
+		DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/applications"
 		)
 	install(FILES
 		xtrkcad.png
-		DESTINATION "/usr/share/pixmaps"
+		DESTINATION "${XTRKCAD_SHARE_INSTALL_DIR}/pixmaps"
 		)
 endif()

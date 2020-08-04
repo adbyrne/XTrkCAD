@@ -257,22 +257,23 @@ int wFilSelect( struct wFilSel_t * fs, const char * dirName )
 										   (fs->mode == FS_LOAD ? GTK_STOCK_OPEN : GTK_STOCK_SAVE ), GTK_RESPONSE_ACCEPT,
 										   NULL );
 		if (fs->window==0) abort();
-		// get confirmation before overwritting an existing file									
-		gtk_file_chooser_set_do_overwrite_confirmation( GTK_FILE_CHOOSER(fs->window), TRUE );
+		if ( fs->mode == FS_SAVE ) {
+			// get confirmation before overwritting an existing file									
+			gtk_file_chooser_set_do_overwrite_confirmation( GTK_FILE_CHOOSER(fs->window), TRUE );
+		}
 		
 		/** \todo for loading a shortcut folder could be added linking to the example directory */
 
 	}
 	strcpy( name, dirName );
 
-	if( fs->mode == FS_SAVE ) {
-		gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name ); 
+	gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name ); 
+	if( fs->mode == FS_SAVE || fs->mode == FS_UPDATE ) {
 		gtk_file_chooser_set_extra_widget( GTK_FILE_CHOOSER(fs->window), 
 				CreateFileformatSelector(fs, fs->pattCount, fs->filter ));
 	}	
     // Add a current folder and a shortcut to it for Load/import dialogs
     if( fs->mode == FS_LOAD ) {
-        gtk_file_chooser_set_current_folder( GTK_FILE_CHOOSER(fs->window), name );
         gtk_file_chooser_add_shortcut_folder( GTK_FILE_CHOOSER(fs->window), name, NULL );
 		// allow selecting multiple files
 		if( fs->opt & FS_MULTIPLEFILES ) {

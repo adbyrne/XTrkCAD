@@ -151,6 +151,7 @@ static void RedrawHotBar( wDraw_p dd, void * data, wPos_t w, wPos_t h  )
 			}
 		}
 		x *= barScale;
+		x -= tbm->orig.x;
 		orig.x = x;
 		hotBarD.scale = barScale;
 		hotBarD.size.x = barWidth*barScale;
@@ -417,10 +418,13 @@ EXPORT void AddHotBarElement(
 		}
 
 		if (barScale <= 0) {
-			if (isTrack)
+			if (!isTrack)
+				barScale = size.y/((double)hotBarDrawHeight/hotBarD.dpi);
+			else if (isTrack) {
 				barScale = (trackGauge>0.1)?trackGauge*24:10;
-			else
-				barScale = size.y/((double)hotBarDrawHeight/hotBarD.dpi-0.07);
+				if (size.y >= size.x)
+				   barScale = size.y/((double)hotBarDrawHeight/hotBarD.dpi);
+			}
 		}
 		DYNARR_APPEND( hotBarMap_t, hotBarMap_da, 10 );
 		tbm = &hotBarMap(hotBarMap_da.cnt-1);
@@ -467,7 +471,8 @@ static void ChangeHotBar( long changes )
 	DYNARR_RESET( hotBarMap_t, hotBarMap_da );
 	curContentsLabel[0] = '\0';
 	if ( programMode == MODE_DESIGN ) {
-		AddHotBarCornu();
+		if (showFlexTrack)
+			AddHotBarCornu();
 		AddHotBarTurnouts();
 		AddHotBarStructures();
 	} else {
@@ -505,6 +510,13 @@ EXPORT void LayoutHotBar( void * redraw )
 
 	wWinGetSize( mainW, &winWidth, &winHeight );
 	hotBarHeight = hotBarDrawHeight;
+	double scaleicon;
+	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleicon, 1.0);
+	if (scaleicon<1.0) scaleicon=1.0;
+	if (scaleicon>2.0) scaleicon=2.0;
+	if (scaleicon>1.0) {
+		hotBarHeight = hotBarHeight*scaleicon;
+	}
 	if ( hotBarLabels) {
 	   hotBarHeight += wMessageGetHeight(0L);
 	}

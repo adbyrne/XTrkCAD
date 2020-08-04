@@ -460,6 +460,8 @@ static void DescribeBezier( track_p trk, char * str, CSIZE_T len )
 			wListAddValue( (wList_p)bezDesc[LT].control0, _("Dot"), NULL, (void*)2 );
 			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
 			wListAddValue( (wList_p)bezDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("CenterDot"), NULL, (void*)5);
+			wListAddValue( (wList_p)bezDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
 			wListSetIndex( (wList_p)bezDesc[LT].control0, bezData.lineType );
 		}
 	}
@@ -484,6 +486,12 @@ EXPORT void SetBezierLineType( track_p trk, int width ) {
 			break;
 		case 4:
 			xx->bezierData.lineType = DRAWLINEDASHDOTDOT;
+			break;
+		case 5:
+			xx->bezierData.lineType = DRAWLINECENTER;
+			break;
+		case 6:
+			xx->bezierData.lineType = DRAWLINEPHANTOM;
 			break;
 		}
 	}
@@ -522,6 +530,8 @@ static void DrawBezier( track_p t, drawCmd_p d, wDrawColor color )
 		else if (xx->bezierData.lineType == DRAWLINEDOT) d->options |= DC_DOT;
 		else if (xx->bezierData.lineType == DRAWLINEDASHDOT) d->options |= DC_DASHDOT;
 		else if (xx->bezierData.lineType == DRAWLINEDASHDOTDOT) d->options |= DC_DASHDOTDOT;
+		else if (xx->bezierData.lineType == DRAWLINECENTER) d->options |= DC_CENTER;
+		else if (xx->bezierData.lineType == DRAWLINEPHANTOM) d->options |= DC_PHANTOM;
 		DrawSegsO(d,t,zero,0.0,xx->bezierData.arcSegs.ptr,xx->bezierData.arcSegs.cnt, 0.0, color, 0);
 		d->options &= NotSolid;
 		return;
@@ -599,16 +609,14 @@ static BOOL_T ReadBezier( char * line )
 	unsigned long rgb;
 	DIST_T width;
 
+	TRKTYP_T trkTyp = strncmp(line,"BEZIER",6)==0?T_BEZIER:T_BZRLIN;
 	if (!GetArgs( line+6, "dLluwsdppppdp",
 		&index, &layer, &options, &rgb, &width, scale, &visible, &p0, &c1, &c2, &p1, &lt, &dp ) ) {
 		return FALSE;
 	}
 	if ( !ReadSegs() )
 		return FALSE;
-	if (strncmp(line,"BEZIER",6)==0)
-		t = NewTrack( index, T_BEZIER, 0, sizeof *xx );
-	else
-		t = NewTrack( index, T_BZRLIN, 0, sizeof *xx );
+	t = NewTrack( index, trkTyp, 0, sizeof *xx );
 	xx = GetTrkExtraData(t);
 	SetTrkVisible(t, visible&2);
 	SetTrkNoTies(t,visible&4);
@@ -993,7 +1001,7 @@ static BOOL_T GetParamsBezier( int inx, track_p trk, coOrd pos, trackParams_t * 
 		params->lineOrig = params->bezierPoints[params->ep*3];
 		params->lineEnd = params->bezierPoints[(1-params->ep)*3];
 		return TRUE;
-	} else if (inx == PARAMS_CORNU ){
+	} else if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN)){
 		params->ep = PickEndPoint( pos, trk);
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk);
@@ -1037,7 +1045,7 @@ static BOOL_T QueryBezier( track_p trk, int query )
 		return GetTrkType(trk) == T_BEZIER?TRUE:FALSE;
 		break;
 	case Q_CAN_PARALLEL:
-		return (GetTrkType(trk) == T_BEZIER);
+		return TRUE;
 		break;
 	case Q_MODIFY_CAN_SPLIT:
 	case Q_CORNU_CAN_MODIFY:
@@ -1097,7 +1105,7 @@ BOOL_T GetBezierSegmentFromTrack(track_p trk, trkSeg_p seg_p) {
 
 }
 
-BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2]) {
+BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2], track_p trk) {
 	track_p trk_old = NULL;
 	newTracks[0] = NULL, newTracks[1] = NULL;
 	if (bezSeg->type != SEG_BEZTRK) return FALSE;
@@ -1109,6 +1117,7 @@ BOOL_T GetTracksFromBezierSegment(trkSeg_p bezSeg, track_p newTracks[2]) {
 		else if (seg->type == SEG_STRTRK)
 			new_trk = NewStraightTrack(seg->u.l.pos[0],seg->u.l.pos[1]);
 		if (newTracks[0] == NULL) newTracks[0] = new_trk;
+		CopyAttributes( trk, new_trk );
 		newTracks[1] = new_trk;
 		if (trk_old) {
 			for (int i=0;i<2;i++) {
@@ -1137,10 +1146,11 @@ BOOL_T GetTracksFromBezierTrack(track_p trk, track_p newTracks[2]) {
 	for (int i=0;i<4;i++) seg_temp.u.b.pos[i] = xx->bezierData.pos[i];
 	seg_temp.color = xx->bezierData.segsColor;
 	seg_temp.bezSegs.cnt = 0;
+	seg_temp.bezSegs.max = 0;
 	//if (seg_temp->bezSegs.ptr) MyFree(seg_temp->bezSegs.ptr);
 	DYNARR_RESET(trkSeg_t,seg_temp.bezSegs);
 	FixUpBezierSeg(seg_temp.u.b.pos,&seg_temp,TRUE);
-	GetTracksFromBezierSegment(&seg_temp, newTracks);
+	GetTracksFromBezierSegment(&seg_temp, newTracks, trk);
 	MyFree(seg_temp.bezSegs.ptr);
 	seg_temp.bezSegs.cnt = 0;
 	seg_temp.bezSegs.max = 0;

@@ -404,7 +404,7 @@ static BOOL_T WriteBlock ( track_p t, FILE * f )
 		rc &= fprintf(f, "\tTRK %d\n",
 				GetTrkIndex((&(xx->trackList))[iTrack].t))>0;
 	}
-	rc &= fprintf( f, "\tEND\n" )>0;
+	rc &= fprintf( f, "\t%s\n", END_BLOCK )>0;
 	MyFree(blockName);
 	return rc;
 }

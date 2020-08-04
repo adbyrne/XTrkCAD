@@ -659,18 +659,14 @@ static dynArr_t pathElem_da;
 static int pathElemStart;
 
 
-static BOOL_T CheckTurnoutEndPoint(
-		trkSeg_p segs,
-		coOrd pos,
-		int end )
-{
-	coOrd pos1;
-	DIST_T d;
-	pos1 = GetSegEndPt( segs, end, FALSE, NULL );
-	d = FindDistance( pos, pos1 );
-	return ( d < connectDistance );
-}
-
+/*
+ * Find sub-path that connects the 2 EPs for the given track
+ *
+ * \param trk IN Track 
+ * \param ep1, ep2 IN EndPt index
+ * \param BOOL_T *flip OUT whether path is flipped
+ * \return sub-path that connects the 2 EPs
+ */
 static char * FindPathBtwEP(
 		track_p trk,
 		EPINX_T ep1,
@@ -678,12 +674,11 @@ static char * FindPathBtwEP(
 		BOOL_T * flip )
 {
 	struct extraData * xx = GetTrkExtraData( trk );
-	char * cp, *cp0;
-	int epN;
-	coOrd pos1, pos2;
-	int segInx;
-	EPINX_T segEP;
+	char * cp;
+	coOrd trkPos[2];
+
  
+	LOG( log_group, 3, ("  FindPathBtwEP: T%d .%d .%d = ", trk?GetTrkIndex(trk):-1, ep1, ep2 ));
 	if ( GetTrkType(trk) != T_TURNOUT ) {
 		if ( ep1+ep2 != 1 )
 			AbortProg( "findPathBtwEP" );
@@ -692,40 +687,63 @@ static char * FindPathBtwEP(
 			cp = CreateSegPathList(trk);			// Make path
 LOG( log_group, 2, ( " Group: Cornu path:%s \n", cp ) )
 		} else cp = "\1\0\0";						//One segment (but could be a Bezier)
+		LOG( log_group, 3, (" Flip:%s Path= Seg=%d-\n", *flip?"T":"F", *cp ) );
 		return cp;
 	}
 	cp = (char *)xx->paths;
-	pos1 = GetTrkEndPos(trk,ep1);
-	Rotate( &pos1, xx->orig, -xx->angle );
-	pos1.x -= xx->orig.x;
-	pos1.y -= xx->orig.y;
-	pos2 = GetTrkEndPos(trk,ep2);
-	Rotate( &pos2, xx->orig, -xx->angle );
-	pos2.x -= xx->orig.x;
-	pos2.y -= xx->orig.y;
+	trkPos[0] = GetTrkEndPos(trk,ep1);
+	Rotate( &trkPos[0], xx->orig, -xx->angle );
+	trkPos[0].x -= xx->orig.x;
+	trkPos[0].y -= xx->orig.y;
+	trkPos[1] = GetTrkEndPos(trk,ep2);
+	Rotate( &trkPos[1], xx->orig, -xx->angle );
+	trkPos[1].x -= xx->orig.x;
+	trkPos[1].y -= xx->orig.y;
+	DIST_T dist = 1000.0;
+	char * path = NULL;
+	char * pName = "Not Found";
 	while ( cp[0] ) {
-		cp += strlen(cp)+1;						//Ignore Path Name
+		char * pName1 = cp;	// Save path name
+		cp += strlen(cp)+1;
 		while ( cp[0] ) {
-			cp0 = cp;
-			epN = -1;
+			int segInx;
+			int segEP;
+			coOrd segPos[2];
+			// Check if this sub-path endpts match the requested endpts
+			char * path1 = cp;
+
+			// get the seg indices for the start and end
 			GetSegInxEP( cp[0], &segInx, &segEP );
-			if ( CheckTurnoutEndPoint( &xx->segs[segInx], pos1, segEP ) )
-				epN = 1;
-			else if ( CheckTurnoutEndPoint( &xx->segs[segInx], pos2, segEP ) )
-				epN = 0;
+			segPos[0] = GetSegEndPt( &xx->segs[segInx], segEP, FALSE, NULL );
 			cp += strlen(cp);
-			if ( epN != -1 ) {
-				GetSegInxEP( cp[-1], &segInx, &segEP );
-				if ( CheckTurnoutEndPoint( &xx->segs[segInx], epN==0?pos1:pos2, 1-segEP ) ) {
-					*flip = epN==0;			 // If its reversed, set up to be flipped or noted
-					return cp0;				 //Found path between EPs
+			GetSegInxEP( cp[-1], &segInx, &segEP );
+			segPos[1] = GetSegEndPt( &xx->segs[segInx], 1-segEP, FALSE, NULL );
+			
+			// Find the closest seg end
+			for ( int inx = 0; inx<2; inx++ ) {
+				// Check 1st end
+				DIST_T dist1 = FindDistance( trkPos[0], segPos[inx] );
+				if ( dist1 < connectDistance && dist1 < dist ) {
+					// Closest so far,  Check 2nd end
+					DIST_T dist2 = FindDistance( trkPos[1], segPos[1-inx] );
+					if ( dist2 > dist1 )
+						// 2nd end is further away
+						dist1 = dist2;
+					if ( dist1 < connectDistance && dist1 < dist ) {
+						// both ends are closest
+						dist = dist1;
+						path = path1;
+						pName = pName1;
+						*flip = (inx==1);
+					}
 				}
 			}
 			cp++;
 		}
 		cp++;
 	}
-	return NULL;
+LOG( log_group, 3, (" %s: %d..%d Flip:%s\n", pName, path?path[0]:-1, path?path[strlen(path)-1]:-1, *flip?"T":"F"  ) );
+	return path;
 }
 
 
@@ -761,7 +779,7 @@ static int GroupShortestPathFunc(
 		return -1;
 
 	case SPTC_ADD_TRK:
-if (log_shortPath<=0||logTable(log_shortPath).level<4) LOG( log_group, 2, ( "     T%d[%d]\n", GetTrkIndex(trk), ep2 ) )
+		LOG( log_group, 4, ( "  Add T%d[%d]\n", GetTrkIndex(trk), ep2 ) )
 		DYNARR_APPEND( pathElem_t, pathElem_da, 10 );
 		ppp = &pathElem(pathElem_da.cnt-1); 
 		for ( inx=0; inx<groupTrk_da.cnt; inx++ ) {
@@ -800,7 +818,7 @@ if (log_shortPath<=0||logTable(log_shortPath).level<4) LOG( log_group, 2, ( "   
 			}
 		}
 		if ( ep1<0 || ep2<0 ) {
-LOG( log_group, 2, ( " Remove: ep not found\n" ) )
+LOG( log_group, 4, ( " Remove: ep not found\n" ) )
 			pathElem_da.cnt = pathElemStart;
 			return 0;
 		}
@@ -808,7 +826,7 @@ LOG( log_group, 2, ( " Remove: ep not found\n" ) )
 			pp = &path(inx);
 			if ( ( ep1 < 0 || ( pp->ep1 == ep1 || pp->ep2 == ep1 ) ) &&
 				 ( ep2 < 0 || ( pp->ep1 == ep2 || pp->ep2 == ep2 ) ) ) {
-LOG( log_group, 2, ( " Remove: duplicate path P%d\n", inx ) )
+LOG( log_group, 4, ( " Remove: duplicate path P%d\n", inx ) )
 				pathElem_da.cnt = pathElemStart;
 				return 0;
 			}
@@ -821,7 +839,7 @@ LOG( log_group, 2, ( " Remove: duplicate path P%d\n", inx ) )
 		pp->ep1 = ep1;
 		pp->ep2 = ep2;
 		pathElemStart = pathElem_da.cnt;
-LOG( log_group, 2, ( " Keep\n" ) )
+LOG( log_group, 4, ( " Keep\n" ) )
 		return 0;
 
 	case SPTC_IGNNXTTRK:
@@ -925,12 +943,11 @@ static BOOL_T CheckForBumper(
 }
 
 typedef struct {
-	trkSeg_p seg;
 	int inx;
 	wBool_t track;
 } segInMap_t;
 static dynArr_t segInMap_da;
-#define segInMap(N) DYNARR_N( segInMap_t, segInMap_da, N);
+#define segInMap(N) DYNARR_N( segInMap_t, segInMap_da, N)
 
 void AddToSegMap(int inx,wBool_t track) {
 	DYNARR_APPEND(segInMap_t,segInMap_da,10);
@@ -957,6 +974,55 @@ trkSeg_p GetSegFromSegMap(int index) {
 
 static dynArr_t outputSegs_da;
 #define outputSegs(N) DYNARR_N( trkSeg_t, outputSegs_da, N)
+
+static void LogSeg(
+	trkSeg_p segP )
+{
+	if ( segP == NULL ) {
+		LogPrintf( "<NULL>\n" );
+		return;
+	}
+	LogPrintf( "%c: ", segP->type );
+	switch ( segP->type ) {
+	case SEG_STRTRK:
+	case SEG_STRLIN:
+	case SEG_DIMLIN:
+	case SEG_BENCH:
+	case SEG_TBLEDGE:
+		LogPrintf( "[ %0.3f %0.3f ] [ %0.3f %0.3f ]\n",
+			segP->u.l.pos[0].x, segP->u.l.pos[0].y,
+			segP->u.l.pos[1].x, segP->u.l.pos[1].y );
+		break;
+	case SEG_CRVLIN:
+	case SEG_CRVTRK:
+		LogPrintf( "R:%0.3f [ %0.3f %0.3f } A0:%0.3f A1:%0.3f\n",
+			segP->u.c.radius,
+			segP->u.c.center.x, segP->u.c.center.y,
+			segP->u.c.a0, segP->u.c.a1 );
+		break;
+	default:
+		LogPrintf( "%c:\n", segP->type );
+	}
+}
+/*
+ * GroupOk: create a TURNOUT or STRUCTURE from the selected objects
+ * 1 - Add selected tracks to groupTrk[]
+ *   - Add each group trk's segments to trackSeg[] or tempSegs[]
+ *   - Add all segs to segInMap[]
+ *   - if no track segments goto step 9
+ * 2 - Collect boundary endPts and sort them in tempEndPts[]
+ * 3 - Find shortest path between all endPts (if it exists)
+ *   - For each track we add to the shortest path tree
+ *        capture the sub-path elements (FindPathBtwEP) in pathElem[]
+ * 4 - Flip tracks so sub-path elements match up
+ * 5 - Create conflict map
+ * 6 - Flip paths to minimize the number of flipped segments
+ * 7 - Build the path ('P') string
+ * 8 - Build segment list, adjust endPts in tempEndPts[]
+ * 9 - create new TURNOUT/STRUCTURE definition 
+ * 10 - write defn to xtrkcad.cus
+ * 11 - optionally replace grouped tracks with new defn
+ */
 
 static void GroupOk( void * junk )
 {
@@ -1019,7 +1085,7 @@ static void GroupOk( void * junk )
 
 	wDrawDelayUpdate( mainD.d, TRUE );
 	/*
-	 * Collect tracks
+	 * 1: Collect tracks
 	 */
 	trk = NULL;
 	int InInx = -1;
@@ -1094,6 +1160,25 @@ static void GroupOk( void * junk )
 			}
 		}
 	}
+if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
+	LogPrintf( "Track Segs:\n");
+	for ( int inx = 0; inx < trackSegs_da.cnt; inx++ ) {
+		LogPrintf( " %d: ", inx+1 );
+		LogSeg( &trackSegs(inx) );
+	}
+	LogPrintf( "Other Segs:\n");
+	for ( int inx = 0; inx < tempSegs_da.cnt; inx++ ) {
+		LogPrintf( " %d: ", inx+1 );
+		LogSeg( &tempSegs(inx) );
+	}
+}
+if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
+	LogPrintf( "Combined Segs:\n" );
+	for ( int inx = 0; inx<segInMap_da.cnt; inx++ ) {
+		LogPrintf( "%d: %s X%d - ", inx+1, segInMap(inx).track?"Track":"Other", segInMap(inx).inx );
+		LogSeg( GetSegFromSegMap( inx ) );
+	}
+}
 
 	if ( groupTrk_da.cnt>0 ) {
 		if ( groupTrk_da.cnt > 128 ) {
@@ -1135,6 +1220,17 @@ static void GroupOk( void * junk )
 				}
 			}
 		}
+if ( log_group >= 1 && logTable(log_group).level >= 4 ) {
+	LogPrintf( "EndPts:\n" );
+	for ( int inx=0; inx<tempEndPts_da.cnt; inx++ ) {
+		endPtP = &tempEndPts(inx);
+		LogPrintf( "  [ %0.3f %0.3f ] A:%0.3f, T:%d.%d\n",
+			endPtP->pos.x, endPtP->pos.y, endPtP->angle, endPtP->track?GetTrkIndex(endPtP->track):-1, endPtP->index );
+	}
+}
+		/*
+		 * 2: Collect EndPts
+		 */
 		if ( tempEndPts_da.cnt <= 0 ) {
 			NoticeMessage( _("No endpts"), _("Ok"), NULL );
 			wDrawDelayUpdate( mainD.d, FALSE );
@@ -1199,9 +1295,17 @@ static void GroupOk( void * junk )
 				tempEndPts(tempEndPts_da.cnt-ep) = tempEndPt;
 			}
 		}
+if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
+	LogPrintf( "Sorted EndPts:\n" );
+	for ( int inx=0; inx<tempEndPts_da.cnt; inx++ ) {
+		endPtP = &tempEndPts(inx);
+		LogPrintf( "  [ %0.3f %0.3f ] A:%0.3f, T:%d.%d\n",
+			endPtP->pos.x, endPtP->pos.y, endPtP->angle, endPtP->track?GetTrkIndex(endPtP->track):-1, endPtP->index );
+	}
+}
 
 		/*
-		 * Find shortest Paths
+		 * 3: Find shortest Paths
 		 */
 		for ( inx=0; inx<groupTrk_da.cnt; inx++ ) {
 			trk = groupTrk(inx).trk;
@@ -1210,13 +1314,37 @@ static void GroupOk( void * junk )
 				trk1 = GetTrkEndTrk(trk,ep);
 				if ( trk1 == NULL || !GetTrkSelected(trk1) ) {
 					/* boundary EP */
+					LOG( log_group, 3, ("FindShortPath: T%d.%d\n", GetTrkIndex(trk), ep ) );
 					rc = FindShortestPath( trk, ep, FALSE, GroupShortestPathFunc, NULL );
 				}
 			}
 		}
-
+if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
+	LogPrintf( "Shortest path:\n  Group Tracks\n" );
+	for ( int inx=0; inx<groupTrk_da.cnt; inx++ ) {
+		groupTrk_p gtp = &groupTrk(inx);
+		LogPrintf( "    %d: T%d S%d-%d\n", inx, GetTrkIndex( gtp->trk ), gtp->segStart+1, gtp->segEnd+1 );
+	}
+	LogPrintf( "  Path Elem\n" );
+	for ( int inx=0; inx<pathElem_da.cnt; inx++ ) {
+		ppp = &pathElem(inx);
+		LogPrintf( "    %d: GTx: %d, EP: %d %d, F:%s, P:",
+			inx, ppp->groupInx, ppp->ep1, ppp->ep2, ppp->flip?"T":"F" );
+		for ( PATHPTR_T cp = ppp->path; cp[0] || cp[1]; cp++ ) {
+			LogPrintf( " %d", *cp );
+		}
+		LogPrintf( " 0\n" );
+	}
+	LogPrintf( "  Path\n" );
+	for ( int inx=0; inx<path_da.cnt; inx++ ) {
+		path_p pp  = &path(inx);
+		LogPrintf( "    %d: PE: %d-%d, EP: %d-%d, Conf: %d, InGrp: %s, Done: %s\n",
+			inx, pp->pathElemStart, pp->pathElemEnd, pp->ep1, pp->ep2,
+			pp->conflicts, pp->inGroup?"T":"F", pp->done?"T":"F" );
+	}
+}
 		/*
-		 * Flip paths so they align
+		 * 4: Flip paths so they align
 		 */
 		if ( path_da.cnt == 0 ) {
 			NoticeMessage( _("No paths"), _("Ok"), NULL );
@@ -1274,11 +1402,11 @@ LOG( log_group, 1, ( "P%d aligns flipped with P%d\n", pinx, pinx2 ) );
 				path(inx).done = TRUE;
 			} 
 		}
-if ( log_group >= 1 && logTable(log_group).level > log_group ) {
+if ( log_group >= 1 && logTable(log_group).level >= 1 ) {
 	LogPrintf( "Group Paths\n" );
 	for ( pinx=0; pinx<path_da.cnt; pinx++ ) {
 		pp = &path(pinx);
-		LogPrintf( "P%2d:%d.%d ", pinx, pp->ep1, pp->ep2 );
+		LogPrintf( "  P%2d:%d.%d ", pinx, pp->ep1, pp->ep2 );
 		for ( pinx2=pp->pathElemEnd; pinx2>=pp->pathElemStart; pinx2-- ) {
 			ppp = &pathElem(pinx2);
 			LogPrintf( " %sT%d:%d.%d", ppp->flip?"-":"", GetTrkIndex(groupTrk(ppp->groupInx).trk), ppp->ep1, ppp->ep2 );
@@ -1289,7 +1417,7 @@ if ( log_group >= 1 && logTable(log_group).level > log_group ) {
 
 
 		/*
-		 * Create Conflict Map
+		 * 5: Create Conflict Map
 		 */
 		DYNARR_SET( int, conflictMap_da, path_da.cnt*path_da.cnt );
 		memset( conflictMap_da.ptr, 0, conflictMap_da.max * sizeof conflictMap(0,0) );
@@ -1348,18 +1476,18 @@ if ( log_group >= 1 && logTable(log_group).level > log_group ) {
 			}
 		}
 
-if ( log_group >= 1 && logTable(log_group).level > log_group ) {
+if ( log_group >= 1 && logTable(log_group).level >= 3 ) {
 	LogPrintf( "Group Map\n");
 	for ( pinx=0; pinx<groupCnt; pinx++ ) {
 		LogPrintf( "G%d:", pinx );
 		for ( ginx=0; groupMap(pinx,ginx) >= 0; ginx++ )
-			LogPrintf( " %d", groupMap(pinx,ginx) );
+			LogPrintf( " %d: %d", ginx, groupMap(pinx,ginx) );
 		LogPrintf( "\n" );
 	}
 }
 
 		/*
-		 * Count number of times each segment is used as flipped
+		 * 6: Count number of times each segment is used as flipped
 		 */
 		DYNARR_SET( int, conflictMap_da, trackSegs_da.cnt );
 		memset( &segFlip(0), 0, trackSegs_da.cnt * sizeof segFlip(0) );
@@ -1385,15 +1513,17 @@ if ( log_group >= 1 && logTable(log_group).level > log_group ) {
 		/*
 		 * Flip each segment that is used as flipped more than not
 		 */
+LOG( log_group, 3, ( "Flipping Segments:" ) );
 		for ( pinx=0; pinx<trackSegs_da.cnt; pinx++ ) {
 			if ( segFlip(pinx) < 0 ) {
-LOG( log_group, 1, ( "Flipping Segment %d\n", pinx+1 ) );
 					SegProc( SEGPROC_FLIP, &trackSegs(pinx), NULL );
+LOG( log_group, 3, ( " %d", pinx ) );
 			}
 		}
+LOG( log_group, 3, ( "\n" ) );
 
 		/*
-		 * Output Path lists
+		 * 7: Output Path lists
 		 */
 		for ( pinx=0; pinx<groupCnt; pinx++ ) {
 			sprintf( message, "P%d", pinx );
@@ -1402,8 +1532,10 @@ LOG( log_group, 1, ( "Flipping Segment %d\n", pinx+1 ) );
 			memcpy( &pathPtr(inx), message, pathPtr_da.cnt-inx );
 			for ( ginx=0; groupMap(pinx,ginx) >= 0; ginx++ ) {
 				pp = &path(groupMap(pinx,ginx));
+				LOG( log_group, 3, ("  Group Map(%d, %d): elem %d-%d, EP %d %d, Conflicts %d, inGrp %d, Done: %s\n", pinx, ginx, pp->pathElemStart, pp->pathElemEnd, pp->ep1, pp->ep2, pp->conflicts, pp->inGroup, pp->done?"T":"F" ) );
 				for ( pinx2=pp->pathElemEnd; pinx2>=pp->pathElemStart; pinx2-- ) {
 					ppp = &pathElem( pinx2 );
+					LOG( log_group, 3, ("    PE %d: GI %d, EP %d %d, Flip %d =", pinx2, ppp->groupInx, ppp->ep1, ppp->ep2, ppp->flip ));
 					groupP = &groupTrk( ppp->groupInx );
 					path = ppp->path;
 					flip = ppp->flip;
@@ -1424,7 +1556,9 @@ LOG( log_group, 1, ( "Flipping Segment %d\n", pinx+1 ) );
 						if ( flip1 ) pathChar = - pathChar;
 						pathPtr(pathPtr_da.cnt-1) = pathChar;
 						path += (flip?-1:1);
+						LOG( log_group, 3, (" %d", pathChar ) );
 					}
+					LOG( log_group, 3, ("\n") );
 				}
 				DYNARR_APPEND( char, pathPtr_da, 10 );
 				pathPtr(pathPtr_da.cnt-1) = 0;
@@ -1439,7 +1573,7 @@ LOG( log_group, 1, ( "Flipping Segment %d\n", pinx+1 ) );
 
 groupSimpleTurnout:
 		/*
-		 * Copy and Reorigin Segments - Start by putting them out in the original order
+		 * 8: Copy and Reorigin Segments - Start by putting them out in the original order
 		 */
 
 
@@ -1462,13 +1596,16 @@ groupSimpleTurnout:
 		}
 
 		/*
-		 * Final: create new definition
+		 * 9: Final: create new definition
 		 */
 
 		CheckPaths( outputSegs_da.cnt, &outputSegs(0), path );
 
 		to = CreateNewTurnout( curScaleName, groupTitle, outputSegs_da.cnt, &outputSegs(0), pathLen, path, tempEndPts_da.cnt, &tempEndPts(0), NULL, TRUE );
 
+		/*
+		 * 10: Write defn to xtrkcad.cus
+		 */
 		f = OpenCustom("a");
 		if (f && to) {
 			oldLocale = SaveLocale("C");
@@ -1476,6 +1613,9 @@ groupSimpleTurnout:
 			rc &= WriteCompoundPathsEndPtsSegs( f, path, outputSegs_da.cnt, &outputSegs(0), tempEndPts_da.cnt, &tempEndPts(0) );
 		}
 		if ( groupReplace ) {
+			/*
+			 * 11: Replace defn
+			 */
 			UndoStart( _("Group Tracks"), "group" );
 			orig.x = - orig.x;
 			orig.y = - orig.y;

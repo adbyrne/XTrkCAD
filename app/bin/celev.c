@@ -101,6 +101,22 @@ static void CreateEndAnchor(coOrd p, wBool_t lock) {
 	anchors(i).width = 0;
 }
 
+static void CreateSplitAnchor(coOrd pos, track_p t) {
+	DIST_T d = tempD.scale*0.1;
+	DIST_T w = tempD.scale/tempD.dpi*4;
+	int i;
+	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0);
+	DYNARR_APPEND(trkSeg_t,anchors_da,1);
+	i = anchors_da.cnt-1;
+	anchors(i).type = SEG_STRLIN;
+	anchors(i).color = wDrawColorBlue;
+	Translate(&anchors(i).u.l.pos[0],pos,a,GetTrkGauge(t));
+	Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
+	anchors(i).width = w;
+
+}
+
+
 void static CreateMoveAnchor(coOrd pos) {
 	DYNARR_SET(trkSeg_t,anchors_da,anchors_da.cnt+5);
 	DrawArrowHeads(&DYNARR_N(trkSeg_t,anchors_da,anchors_da.cnt-5),pos,0,TRUE,wDrawColorBlue);
@@ -399,26 +415,31 @@ static STATUS_T CmdElevation( wAction_t action, coOrd pos )
 				return C_CONTINUE;
 			}
 			if ((trk1 = OnTrack2(&p2,FALSE, TRUE, FALSE, trk0)) != NULL) {
-				if (GetEndPtConnectedToMe(trk0,trk1) == -1) {	//Not simply connected to each other!!!
-					if (GetTrkEndPtCnt(trk1) == 2) {
-						if (GetPointElev(trk1,p2,&elev1)) {
-							if (MyGetKeyState()&WKEY_SHIFT) {
-								InfoMessage (_("Crossing - LowElev %0.3f, High %0.3f, Clearance %0.3f - Click to Split"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
-							} else
-								InfoMessage (_("Crossing - LowElev %0.3f, High %0.3f, Clearance %0.3f"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
+				if (IsClose(FindDistance(p0,p2))) {
+					if (GetEndPtConnectedToMe(trk0,trk1) == -1) {	//Not simply connected to each other!!!
+						if (GetTrkEndPtCnt(trk1) == 2) {
+							if (GetPointElev(trk1,p2,&elev1)) {
+								if (MyGetKeyState()&WKEY_SHIFT) {
+									InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f - Click to Split"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
+								} else
+									InfoMessage (_("Crossing - First %0.3f, Second %0.3f, Clearance %0.3f"), PutDim(elev0), PutDim(elev1), PutDim(fabs(elev0-elev1)));
+							}
+							CreateSquareAnchor(p2);
+							return C_CONTINUE;
 						}
-						CreateSquareAnchor(p2);
-						return C_CONTINUE;
 					}
 				}
 			}
 			if ((ep0 = PickEndPoint( p0, trk0 )) != -1)  {
 				if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos))) {
 					CreateEndAnchor(GetTrkEndPos(trk0,ep0),FALSE);
-					InfoMessage (_("Track elevation %0.3f"), PutDim(elev0));
+					InfoMessage (_("Track End elevation %0.3f"), PutDim(elev0));
 				} else if ((MyGetKeyState()&WKEY_SHIFT) && QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)
 						&& !(QueryTrack(trk0,Q_IS_TURNOUT))) {
 					InfoMessage( _("Click to split here - elevation %0.3f"), PutDim(elev0));
+					CreateSplitAnchor(p0,trk0);
+				} else {
+					InfoMessage( _("Track Point elevation %0.3f"), PutDim(elev0));
 					CreateEndAnchor(p0,TRUE);
 				}
 			} else InfoMessage( _("Click on end, +Shift to split, +Ctrl to move description") );

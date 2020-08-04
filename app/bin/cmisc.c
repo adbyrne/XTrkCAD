@@ -576,6 +576,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case wActionMove:
+    	trk = OnTrack(&pos, FALSE, FALSE);
     	return C_CONTINUE;
 
 
@@ -602,6 +603,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
             DescribeTrack(trk, msg, 255);
             inDescribeCmd = FALSE;
             InfoMessage(msg);
+            trk = NULL;
         } else {
             InfoMessage("");
         }
@@ -616,7 +618,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
 				DrawOriginAnchor(descTrk);
 			}
         } else if (trk){
-        	DrawTrack(trk,&tempD,wDrawColorBlue);
+        	DrawTrack(trk,&tempD,wDrawColorPreviewSelected);
         }
 
 
@@ -628,6 +630,7 @@ EXPORT STATUS_T CmdDescribe(wAction_t action, coOrd pos)
         return C_CONTINUE;
 
     case C_CMDMENU:
+    	menuPos = pos;
     	if (!trk) wMenuPopupShow(descPopupM);
     	return C_CONTINUE;
     }

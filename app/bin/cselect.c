@@ -70,8 +70,7 @@ track_p IsInsideABox(coOrd pos);
 static track_p moveDescTrk;
 static coOrd moveDescPos;
 
- BOOL_T importMove = 0;
- int incrementalDrawLimit = 20;
+int incrementalDrawLimit = 20;
  static int microCount = 0;
 
 static dynArr_t tlist_da;
@@ -700,7 +699,8 @@ static BOOL_T FlipHidden( track_p trk, BOOL_T junk )
 	if (GetTrkVisible(trk)) {
 		ClrTrkBits( trk, TB_VISIBLE|(drawTunnel==0?(TB_SELECTED|TB_SELREDRAW):0) );
 		ClrTrkBits (trk, TB_BRIDGE);
-	} else {
+		ClrTrkBits (trk, TB_NOTIES);
+;	} else {
 		SetTrkBits( trk, TB_VISIBLE );
 	}
 	/*DrawNewTrack( trk );*/
@@ -732,6 +732,7 @@ static BOOL_T FlipTies( track_p trk, BOOL_T junk )
 		ClrTrkBits( trk, TB_NOTIES );
 	} else {
 		SetTrkBits( trk, TB_NOTIES );
+		SetTrkBits( trk, TB_VISIBLE );
 	}
 	return TRUE;
 }
@@ -1214,6 +1215,20 @@ static BOOL_T AddSelectedTrack(
 	return TRUE;
 }
 
+static BOOL_T RemoveSelectedTrack(track_p trk) {
+
+	for(int i=0;i<tlist_da.cnt; i++) {
+		if (DYNARR_N(track_p,tlist_da,i) == trk) {
+			for (int j=i;j<tlist_da.cnt-1;j++) {
+				DYNARR_N(track_p,tlist_da,j) = DYNARR_N(track_p,tlist_da,j+1);
+			}
+			tlist_da.cnt--;
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 static coOrd moveOrig;
 static ANGLE_T moveAngle;
 
@@ -1256,6 +1271,8 @@ static void AccumulateTracks( void )
 	/*wDrawDelayUpdate( moveD.d, FALSE );*/
 }
 
+static dynArr_t auto_select_da;
+
 static void AddEndCornus() {
 	for (int i=0;i<tlist_da.cnt;i++) {
 		track_p trk = DYNARR_N(track_p,tlist_da,i);
@@ -1266,9 +1283,21 @@ static void AddEndCornus() {
 				SelectOneTrack( tc, TRUE );
 				DYNARR_APPEND(track_p,tlist_da,1);	//Add to selected list
 				DYNARR_LAST(track_p,tlist_da) = tc;
+				DYNARR_APPEND(track_p,auto_select_da,1);
+				DYNARR_LAST(track_p,auto_select_da) = tc;
 			}
 		}
 	}
+}
+
+static void RemoveEndCornus() {
+	track_p tc;
+	for (int i=0;i<auto_select_da.cnt;i++) {
+		tc = DYNARR_N(track_p,auto_select_da,i);
+		SelectOneTrack( tc, FALSE );
+		RemoveSelectedTrack(tc);
+	}
+	DYNARR_RESET(track_p,auto_select_da);
 }
 
 
@@ -1407,9 +1436,10 @@ static void MoveTracks(
 	wSetCursor( mainD.d, wCursorWait );
 	/*UndoStart( "Move/Rotate Tracks", "move/rotate" );*/
 	if (tlist_da.cnt <= incrementalDrawLimit) {
-		if (eraseFirst)
+		if (eraseFirst) {
 			DrawSelectedTracksD( &mainD, wDrawColorWhite );
-		DrawSelectedTracksD( &mapD, wDrawColorWhite );
+			DrawSelectedTracksD( &mapD, wDrawColorWhite );
+		}
 	}
 	for ( inx=0; inx<tlist_da.cnt; inx++ ) {
 		trk = Tlist(inx);
@@ -1463,7 +1493,7 @@ static void MoveTracks(
 							DeleteTrack(trk,TRUE);
 							ErrorMessage(_("Cornu too tight - it was deleted"));
 							DoRedraw(); // MoveTracks: Cornu/delete
-							return;
+							continue;
 						}
 					} else if (!trk1) {									//No end track
 						DrawTrack(trk,&mainD,wDrawColorWhite);
@@ -1497,17 +1527,10 @@ static void MoveTracks(
 	    }
 
 		InfoCount( inx );
-#ifdef LATER
-		if (tlist_da.cnt <= incrementalDrawLimit)
-			DrawNewTrack( trk );
-#endif
 	}
-	if (tlist_da.cnt > incrementalDrawLimit) {
-		DoRedraw();
-	} else {
-		DrawSelectedTracksD( &mainD, wDrawColorBlack );
-		DrawSelectedTracksD( &mapD, wDrawColorBlack );
-	}
+	RemoveEndCornus();
+	ClrAllTrkBits(TB_UNDRAWN);
+	DoRedraw();
 	wSetCursor( mainD.d, defaultCursor );
 	if (undo) UndoEnd();
 	InfoCount( trackCount );
@@ -1540,6 +1563,7 @@ void MoveToJoin(
 		ConnectTracks( trk0, ep0, trk1, ep1 );
 		DrawNewTrack( trk0 );
 		DrawNewTrack( trk1 );
+		RemoveEndCornus();
 }
 
 void FreeTempStrings() {
@@ -1659,7 +1683,6 @@ void SetUpMenu2(coOrd pos, track_p trk) {
 	wMenuPushEnable( hideMI, FALSE );
 	wMenuPushEnable( bridgeMI, FALSE );
 	wMenuPushEnable( tiesMI, FALSE );
-	panCenter = pos;
 	if ((trk) &&
 		QueryTrack(trk,Q_CAN_ADD_ENDPOINTS)) {   //Turntable snap to center if within 1/4 radius
 		trackParams_t trackParams;
@@ -1741,7 +1764,7 @@ static STATUS_T CmdMove(
 			UndoStart( _("Move Tracks"), "move" );
 			base = zero;
 			orig = pos;
-
+			DYNARR_RESET(track_p,auto_select_da);
 			GetMovedTracks(TRUE);
 			SetMoveD( TRUE, base, 0.0 );
 			drawCount = 0;
@@ -1783,6 +1806,7 @@ static STATUS_T CmdMove(
 			}
 			ep1 = -1;
 			ep2 = -1;
+			RemoveEndCornus();
 			tlist_da.cnt = 0;
 			return C_TERMINATE;
 
@@ -1804,13 +1828,21 @@ static STATUS_T CmdMove(
 			moveDescPos = pos;
 			moveDescTrk = trk;
 			SetUpMenu2(pos,trk);
+			menuPos = pos;
 			wMenuPopupShow( selectPopup2M );
 			return C_CONTINUE;
 
 		case C_TEXT:
-			if ((action>>8) == '@') {
+			if ((action>>8) == 'c') {
 				panCenter = pos;
+				LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 				PanHere((void*)0);
+			}
+			if ((action>>8) == 'e') {
+				DoZoomExtents(0);
+			}
+			if ((action>>8) == '0' || (action>>8 == 'o')) {
+				PanMenuEnter('o');
 			}
 			break;
 		case C_REDRAW:
@@ -1859,6 +1891,7 @@ static STATUS_T CmdMove(
 				microCount = 0;
 				MainRedraw(); // Micro step move
 			}
+			RemoveEndCornus();
 			return C_CONTINUE;
 			}
 			break;
@@ -1868,6 +1901,7 @@ static STATUS_T CmdMove(
 				doingMove = FALSE;
 				UndoEnd();
 			}
+			RemoveEndCornus();
 			tlist_da.cnt = 0;
 			break;
 		case C_CONFIRM:
@@ -1876,6 +1910,7 @@ static STATUS_T CmdMove(
 				doingMove = FALSE;
 				UndoUndo();
 			}
+			RemoveEndCornus();
 			tlist_da.cnt = 0;
 			break;
 		default:
@@ -1950,6 +1985,7 @@ static STATUS_T CmdRotate(
 				return C_TERMINATE;
 			}
 			UndoStart( _("Rotate Tracks"), "rotate" );
+			DYNARR_RESET(track_p,auto_select_da);
 			if ( rotateAlignState == 0 ) {
 				drawnAngle = FALSE;
 				angle = 0.0;
@@ -2126,6 +2162,7 @@ static STATUS_T CmdRotate(
 				}
 			}
 			UndoEnd();
+			RemoveEndCornus();
 			tlist_da.cnt = 0;
 			return C_TERMINATE;
 
@@ -2145,13 +2182,21 @@ static STATUS_T CmdRotate(
 			moveDescPos = pos;
 			moveDescTrk = trk;
 			SetUpMenu2(pos,trk);
+			menuPos = pos;
 			wMenuPopupShow( selectPopup2M );
 			return C_CONTINUE;
 
 		case C_TEXT:
-			if ((action>>8) == '@') {
+			if ((action>>8) == 'd') {
 				panCenter = pos;
+				LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 				PanHere((void*)0);
+			}
+			if ((action>>8) == 'e') {
+				DoZoomExtents(0);
+			}
+			if ((action>>8) == '0' || (action>>8 == 'o')) {
+				PanMenuEnter('o');
 			}
 			break;
 		case C_REDRAW:
@@ -2202,25 +2247,27 @@ static STATUS_T CmdRotate(
 
 static void QuickMove( void* pos) {
 	coOrd move_pos = *(coOrd*)pos;
+	DYNARR_RESET(track_p,auto_select_da);
 	if ( SelectedTracksAreFrozen() )
 		return;
 	wDrawDelayUpdate( mainD.d, TRUE );
 	GetMovedTracks(FALSE);
 	UndoStart( _("Move Tracks"), "Move Tracks" );
-	MoveTracks( FALSE, TRUE, FALSE, move_pos, zero, 0.0, TRUE );
+	MoveTracks( TRUE, TRUE, FALSE, move_pos, zero, 0.0, TRUE );
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
 static void QuickRotate( void* pangle )
 {
 	ANGLE_T angle = (ANGLE_T)(long)pangle;
+	DYNARR_RESET(track_p,auto_select_da);
 	if ( SelectedTracksAreFrozen() )
 		return;
 	wDrawDelayUpdate( mainD.d, TRUE );
 	GetMovedTracks(FALSE);
-	DrawSelectedTracksD( &mainD, wDrawColorWhite );
+	//DrawSelectedTracksD( &mainD, wDrawColorWhite );
 	UndoStart( _("Rotate Tracks"), "Rotate Tracks" );
-	MoveTracks( FALSE, FALSE, TRUE, zero, cmdMenuPos, (double)angle/1000, TRUE);
+	MoveTracks( TRUE, FALSE, TRUE, zero, cmdMenuPos, (double)angle/1000, TRUE);
 	wDrawDelayUpdate( mainD.d, FALSE );
 }
 
@@ -2463,6 +2510,7 @@ STATUS_T CmdMoveDescription(
 			moveDescMI = wMenuToggleCreate( moveDescM, "", _("Show/Hide Description"), 0, TRUE, ChangeDescFlag, NULL );
 		}
 		wMenuToggleSet( moveDescMI, ( GetTrkBits( moveDescTrk ) & TB_HIDEDESC ) == 0 );
+		menuPos = pos;
 		wMenuPopupShow( moveDescM );
 		break;
 
@@ -2678,12 +2726,6 @@ static BOOL_T SelectArea(
 		subtract = FALSE;
 		break;
 
-	case C_TEXT:
-		if ((action>>8) == '@') {
-			panCenter = pos;
-			PanHere((void*)0);
-		}
-		break;
 	case C_REDRAW:
 		if (state == 0)
 			break;
@@ -2900,7 +2942,6 @@ static STATUS_T CmdSelect(
 	switch (action&0xFF) {
 	case C_START:
 		InfoMessage( _("Select track") );
-		importMove = FALSE;
 		doingMove = FALSE;
 		doingRotate = FALSE;
 		doingAlign = FALSE;
@@ -3206,8 +3247,8 @@ static STATUS_T CmdSelect(
 		if (doingDouble) {
 			return CallModify(action,pos);
 		}
+		menuPos = pos;
 		if (selectedTrackCount <= 0) {
-			panCenter = pos;
 			wMenuPopupShow( selectPopup1M );
 		} else {
 		    track_p trk = OnTrack(&pos, FALSE, FALSE);  //Note pollutes pos if turntable
@@ -3216,12 +3257,19 @@ static STATUS_T CmdSelect(
 		}
 		return C_CONTINUE;
 	case C_TEXT:
-		if ((action>>8) == '@') {
-			panCenter = pos;
-			PanHere((void*)0);
-		}
 		if (doingDouble) {
 			return CallModify(action,pos);
+		}
+		if ((action>>8) == 'c') {
+			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:Sel-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
+			PanHere((void*)0);
+		}
+		if ((action>>8) == 'e') {
+			DoZoomExtents(0);
+		}
+		if ((action>>8) == '0' || (action>>8 == 'o')) {
+			PanMenuEnter('o');
 		}
 		if ((action>>8) == '?') {
 			if((moveDescTrk = OnTrack(&pos,FALSE,FALSE)) != NULL)
@@ -3281,6 +3329,8 @@ EXPORT void InitCmdSelect( wMenu_p menu )
 extern wIndex_t trainCmdInx;
 
 EXPORT void InitCmdSelect2( wMenu_p menu ) {
+
+
 	endpt_bm = wDrawBitMapCreate( mainD.d, bmendpt_width, bmendpt_width, 7, 7, bmendpt_bits );
 	angle_bm[0] = wDrawBitMapCreate( mainD.d, bma90_width, bma90_width, 7, 7, bma90_bits );
 	angle_bm[1] = wDrawBitMapCreate( mainD.d, bma135_width, bma135_width, 7, 7, bma135_bits );
@@ -3299,8 +3349,12 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuPushCreate(selectPopup1M, "cmdTrainMode", GetBalloonHelpStr("cmdTrainMode"), 0, DoCommandB, (void*) (intptr_t) trainCmdInx);
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
+	wMenuPushCreate( selectPopup1M, "", _("Zoom to extents - 'e'"), 0, (wMenuCallBack_p)DoZoomExtents, (void*) 0);
+	wMenu_p zoomPop1 = wMenuMenuCreate(selectPopup1M, "", _("&Zoom"));
+	InitCmdZoom(NULL, NULL, zoomPop1, NULL);
 	wMenuPushCreate(selectPopup1M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
-	wMenuPushCreate(selectPopup1M, "", _("Pan Center Here - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 0);
+	wMenuPushCreate(selectPopup1M, "", _("Pan to Origin - 'o'/'0'"), 0,	(wMenuCallBack_p) PanMenuEnter, (void*) 'o');
+	wMenuPushCreate(selectPopup1M, "", _("Pan Center Here - 'c'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
 	wMenuSeparatorCreate( selectPopup1M );
 	wMenuPushCreate(selectPopup1M, "", _("Select All"), 0,(wMenuCallBack_p) SetAllTrackSelect, (void *) 1);
 	wMenuPushCreate(selectPopup1M, "",_("Select Current Layer"), 0,(wMenuCallBack_p) SelectCurrentLayer, (void *) 0);
@@ -3312,7 +3366,7 @@ EXPORT void InitCmdSelect2( wMenu_p menu ) {
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(selectPopup2M, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
-	wMenuPushCreate(selectPopup2M, "", _("Pan Center Here - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 0);
+	wMenuPushCreate(selectPopup2M, "", _("Pan Center Here - 'c'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
 	wMenuSeparatorCreate( selectPopup2M );
 	wMenuPushCreate(selectPopup2M, "", _("Deselect All"), 0, (wMenuCallBack_p) SetAllTrackSelect, (void *) 0);
 	wMenuSeparatorCreate( selectPopup2M );

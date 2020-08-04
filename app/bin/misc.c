@@ -73,6 +73,10 @@
 char *userLocale = NULL;
 
 extern wBalloonHelp_t balloonHelp[];
+
+static wMenuToggle_p mapShowMI;
+static wMenuToggle_p magnetsMI;
+
 #ifdef DEBUG
 #define CHECK_BALLOONHELP
 /*#define CHECK_UNUSED_BALLOONHELP*/
@@ -458,6 +462,45 @@ EXPORT char * Strcpytrimed(char * dst, char * src, BOOL_T double_quotes) {
 	return dst;
 }
 
+static char * directory;
+
+#ifdef WINDOWS
+#define F_OK (0)
+#endif
+
+EXPORT wBool_t CheckHelpTopicExists(const char * topic) {
+
+	char * htmlFile;
+
+ 	// Check the file exits in the distro
+
+	if (!directory)
+		directory = malloc(BUFSIZ);
+
+    if (directory == NULL) return 0;
+
+     sprintf(directory, "%s/html/", wGetAppLibDir());
+
+ 	 htmlFile = malloc(strlen(directory)+strlen(topic) + 6);
+
+ 	 sprintf(htmlFile, "%s%s.html", directory, topic);
+
+ 	 if( access( htmlFile, F_OK ) == -1 ) {
+
+     	printf("Missing help topic %s\n",topic);
+
+     	free(htmlFile);
+
+     	return 0;
+
+     }
+
+ 	 free(htmlFile);
+
+ 	 return 1;
+
+}
+
 EXPORT char * BuildTrimedTitle(char * cp, char * sep, char * mfg, char * desc,
 		char * partno) {
 	cp = Strcpytrimed(cp, mfg, FALSE);
@@ -565,10 +608,10 @@ EXPORT int NoticeMessage2(int playbackRC, char * format, char * yes, char * no,
 void
 FileIsChanged(void)
 {
-	changed = TRUE;
+	changed++;
 	SetWindowTitle();
 }
-
+
 /*****************************************************************************
  *
  * MAIN BUTTON HANDLERS
@@ -713,7 +756,7 @@ static void DoClearAfter(void) {
 
 	/* set all layers to their default properties and set current layer to 0 */
 	DoLayout(NULL);
-	checkPtMark = 0;
+	checkPtMark = changed = 0;
 	DoChangeNotification( CHANGE_MAIN|CHANGE_MAP );
 	bReadOnly = TRUE;
 	EnableCommands();
@@ -857,8 +900,8 @@ EXPORT void SelectFont(void) {
  *
  */
 
-#define COMMAND_MAX (170)
-#define BUTTON_MAX (170)
+#define COMMAND_MAX (180)
+#define BUTTON_MAX (180)
 #define NUM_CMDMENUS (4)
 
 static struct {
@@ -987,6 +1030,8 @@ EXPORT wIndex_t GetCurrentCommand() {
 	return curCommand;
 }
 
+static wIndex_t autosave_count = 0;
+
 EXPORT void Reset(void) {
 	if (recordF) {
 		fprintf(recordF, "RESET\n");
@@ -1012,7 +1057,18 @@ EXPORT void Reset(void) {
 			&& !inPlayback) {
 		DoCheckPoint();
 		checkPtMark = changed;
+
+		autosave_count++;
+
+		if ((autosaveChkPoints>0) && (autosave_count>=autosaveChkPoints)) {
+			DoSave(NULL);
+			InfoMessage(_("File AutoSaved"));
+			autosave_count = 0;
+		}
 	}
+
+
+
 	ClrAllTrkBits( TB_UNDRAWN );
 	DoRedraw(); // Reset
 	EnableCommands();
@@ -1367,7 +1423,7 @@ static void DoCommandBIndirect(void * cmdInxP) {
 }
 
 EXPORT void LayoutSetPos(wIndex_t inx) {
-	wPos_t w, h;
+	wPos_t w, h, offset;
 	static wPos_t toolbarRowHeight = 0;
 	static wPos_t width;
 	static int lastGroup;
@@ -1407,6 +1463,10 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 			}
 			w = wControlGetWidth(buttonList[inx].control);
 			h = wControlGetHeight(buttonList[inx].control);
+			if (h<toolbarRowHeight) {
+				offset = (h-toolbarRowHeight)/2;
+				h = toolbarRowHeight;  //Uniform
+			} else offset = 0;
 			if (inx < buttonCnt - 1 && (buttonList[inx + 1].options & IC_ABUT))
 				w += wControlGetWidth(buttonList[inx + 1].control);
 			if (toolbarWidth + w > width - 20) {
@@ -1414,9 +1474,9 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 				toolbarHeight += h + 5;
 			}
 			wControlSetPos(buttonList[inx].control, toolbarWidth,
-					toolbarHeight - (h + 5));
+					toolbarHeight - (h + 5 +offset));
 			buttonList[inx].x = toolbarWidth;
-			buttonList[inx].y = toolbarHeight - (h + 5);
+			buttonList[inx].y = toolbarHeight - (h + 5 + offset);
 			toolbarWidth += wControlGetWidth(buttonList[inx].control);
 			wControlShow(buttonList[inx].control, TRUE);
 		} else {
@@ -2353,6 +2413,7 @@ static void CreateMenus(void) {
 	/*
 	 * VIEW MENU
 	 */
+
 	zoomInM = wMenuPushCreate(viewM, "menuEdit-zoomIn", _("Zoom &In"),
 			ACCL_ZOOMIN, (wMenuCallBack_p) DoZoomUp, (void*) 1);
 	zoomSubM = wMenuMenuCreate(viewM, "menuEdit-zoomTo", _("&Zoom"));
@@ -2360,7 +2421,7 @@ static void CreateMenus(void) {
 			ACCL_ZOOMOUT, (wMenuCallBack_p) DoZoomDown, (void*) 1);
 	wMenuSeparatorCreate(viewM);
 
-	InitCmdZoom(zoomM, zoomSubM);
+	InitCmdZoom(zoomM, zoomSubM, NULL, NULL);
 
 	/* these menu choices and toolbar buttons are synonymous and should be treated as such */
 	wControlLinkedSet((wControl_p) zoomInM, (wControl_p) zoomUpB);
@@ -2447,7 +2508,8 @@ static void CreateMenus(void) {
 	cmdGroup = BG_SELECT;
 	InitCmdDescribe(changeM);
 	InitCmdSelect(changeM);
-	InitCmdPan(changeM);
+	InitCmdPan(viewM);
+
 	wMenuSeparatorCreate(changeM);
 
 	cmdGroup = BG_TRKGRP;
@@ -2721,16 +2783,24 @@ static int OfferCheckpoint( void )
 
 	/* sProdName */
 	ret =
-			wNoticeEx( NT_INFORMATION,
+			wNotice3(
 					_(
 							"Program was not terminated properly. Do you want to resume working on the previous trackplan?"),
-					_("Resume"), _("Ignore"));
-	if (ret) {
+					_("Resume"), _("Resume with New Name"), _("Ignore Checkpoint"));
+	//ret==1 Same, ret==-1 New, ret==0 Ignore
+	if (ret == 1)
+		printf(_("Reload Checkpoint Selected\n"));
+	else if (ret == -1)
+		printf(_("Reload Checkpoint With New Name Selected\n"));
+	else
+		printf(_("Ignore Checkpoint Selected\n"));
+	if (ret>=0) {
 		/* load the checkpoint file */
-		LoadCheckpoint();
+		LoadCheckpoint(ret==1);
 		ret = TRUE;
+
 	}
-	return ret;
+	return (ret>=0);
 }
 
 EXPORT wWin_p wMain(int argc, char * argv[]) {
@@ -3018,8 +3088,10 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 
 	/* check for existing checkpoint file */
 	resumeWork = FALSE;
-	if (ExistsCheckpoint())
+	if (ExistsCheckpoint()) {
 		resumeWork = OfferCheckpoint();
+		MainRedraw();
+	}
 
 	if (!resumeWork) {
 		/* if work is not to be resumed and no filename was given on startup, load last layout */
@@ -3037,10 +3109,6 @@ EXPORT wWin_p wMain(int argc, char * argv[]) {
 			else
 				LayoutBackGroundInit(FALSE);    //Get Prior BackGround
 		}
-	} else {
-		LayoutBackGroundInit(FALSE);  //Resuming get values before-hand.
-									  //Note that this may be those used with an archive (temp)
-		LayoutBackGroundSave();		  //Remove Background
 	}
 	inMainW = FALSE;
 	return mainW;

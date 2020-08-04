@@ -47,8 +47,10 @@
 #define DC_DOT          	(1<<13)
 #define DC_DASHDOT      	(1<<14)
 #define DC_DASHDOTDOT   	(1<<15)
+#define DC_CENTER			(1<<16)
+#define DC_PHANTOM          (1<<17)
 
-#define DC_NOTSOLIDLINE (DC_DASH|DC_DOT|DC_DASHDOT|DC_DASHDOTDOT)
+#define DC_NOTSOLIDLINE (DC_DASH|DC_DOT|DC_DASHDOT|DC_DASHDOTDOT|DC_CENTER|DC_PHANTOM)
 
 #define INIT_MAIN_SCALE (8.0)
 #define INIT_MAP_SCALE	(64.0)
@@ -124,6 +126,9 @@ extern BOOL_T drawEnable;
 extern long currRedraw;
 
 extern coOrd panCenter;
+extern coOrd menuPos;
+
+extern int log_pan;
 
 
 extern wDrawColor drawColorBlack;
@@ -176,10 +181,10 @@ extern wDrawColor profilePathColor;
 
 BOOL_T IsClose(DIST_T);
 
-drawFuncs_t screenDrawFuncs;
-drawFuncs_t tempDrawFuncs;
-drawFuncs_t tempSegDrawFuncs;
-drawFuncs_t printDrawFuncs;
+extern drawFuncs_t screenDrawFuncs;
+extern drawFuncs_t tempDrawFuncs;
+extern drawFuncs_t tempSegDrawFuncs;
+extern drawFuncs_t printDrawFuncs;
 
 #define DrawLine( D, P0, P1, W, C ) (D)->funcs->drawLine( D, P0, P1, W, C )
 #define DrawArc( D, P, R, A0, A1, F, W, C ) (D)->funcs->drawArc( D, P, R, A0, A1, F, W, C )
@@ -237,10 +242,12 @@ void InitInfoBar(void);
 void DrawInit(int);
 void DoZoomUp(void *);
 void DoZoomDown(void *);
+void DoZoomExtents( void *);
 void DoZoom(DIST_T *);
 void PanHere(void *);
+void PanMenuEnter(int);
 
-void InitCmdZoom(wMenu_p, wMenu_p);
+void InitCmdZoom(wMenu_p, wMenu_p, wMenu_p, wMenu_p);
 
 void InfoPos(coOrd);
 void InfoCount(wIndex_t);

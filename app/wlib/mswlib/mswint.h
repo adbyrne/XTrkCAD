@@ -139,6 +139,10 @@ struct wDraw_t {
 		void *background;
 		wBool_t bTempMode;
 		wBool_t bCopiedMain;
+
+		wPos_t lastX;
+		wPos_t lastY;
+
 		};
 
 extern HINSTANCE mswHInst;
@@ -154,6 +158,7 @@ extern wDrawColor wDrawColorWhite;
 extern wDrawColor wDrawColorBlack;
 extern long mswThickFont;
 extern double mswScale;
+extern double scaleIcon;
 
 DWORD mswGetBaseStyle( wWin_p );
 char * mswStrdup( const char * );

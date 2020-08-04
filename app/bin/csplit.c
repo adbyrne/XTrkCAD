@@ -21,6 +21,7 @@
  */
 
 #include "cundo.h"
+#include "compound.h"
 #include "i18n.h"
 #include "messages.h"
 #include "track.h"
@@ -58,9 +59,9 @@ static void ChangeSplitEPMode( wBool_t set, void * mode )
 	DrawEndPt( &mainD, splitTrkTrk[1], splitTrkEP[1], wDrawColorBlack );
 }
 
-static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
-	DIST_T d = tempD.scale*0.15;
-	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0);
+static void CreateSplitAnchorAngle(coOrd pos, track_p t, BOOL_T end, ANGLE_T a) {
+	DIST_T d = tempD.scale*0.1;
+	DIST_T w = tempD.scale/tempD.dpi*4;
 	int i;
 	if (!end) {
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
@@ -69,7 +70,7 @@ static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
 		anchors(i).color = wDrawColorBlue;
 		Translate(&anchors(i).u.l.pos[0],pos,a,GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
-		anchors(i).width = 0.5;
+		anchors(i).width = w;
 	} else {
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
@@ -79,7 +80,7 @@ static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
 		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a+90,d);
 		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a+90,-d);
-		anchors(i).width = 0.5;
+		anchors(i).width = w;
 		DYNARR_APPEND(trkSeg_t,anchors_da,1);
 		i = anchors_da.cnt-1;
 		anchors(i).type = SEG_STRLIN;
@@ -88,8 +89,13 @@ static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
 		Translate(&anchors(i).u.l.pos[0],anchors(i).u.l.pos[0],a+90,-d);
 		Translate(&anchors(i).u.l.pos[1],pos,a,-GetTrkGauge(t));
 		Translate(&anchors(i).u.l.pos[1],anchors(i).u.l.pos[1],a+90,d);
-		anchors(i).width = 0.5;
+		anchors(i).width = w;
 	}
+}
+
+static void CreateSplitAnchor(coOrd pos, track_p t, BOOL_T end) {
+	ANGLE_T a = NormalizeAngle(GetAngleAtPoint(t,pos,NULL,NULL)+90.0);
+	CreateSplitAnchorAngle(pos,t,end,a);
 }
 
 static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
@@ -103,6 +109,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 	switch (action) {
 	case C_START:
 		InfoMessage( _("Select track to split") );
+		DYNARR_RESET(trkSeg_t,anchors_da);
 		/* no break */
 	case C_DOWN:
 	case C_MOVE:
@@ -180,21 +187,25 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			mode |= 1;
 		for ( inx=0; inx<4; inx++ )
 			wMenuToggleSet( splitPopupMI[quad&1][inx], mode == inx );
+		menuPos = pos;
 		wMenuPopupShow( splitPopupM[quad&1] );
 		break;
 	case wActionMove:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		onTrackInSplit = TRUE;
 		if ((trk0 = OnTrack( &pos, FALSE, TRUE ))!=NULL && CheckTrackLayerSilent( trk0 )) {
-			onTrackInSplit = FALSE;
 			ep0 = PickEndPoint( pos, trk0 );
 			if (IsClose(FindDistance(GetTrkEndPos(trk0,ep0),pos)) && (GetTrkEndTrk(trk0,ep0)!=NULL)) {
 				CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
 			} else if (QueryTrack(trk0,Q_IS_TURNOUT)) {
-				if ((MyGetKeyState()&WKEY_SHIFT) != 0 )
-					CreateSplitAnchor(pos,trk0,FALSE);
-				else
+				if ((MyGetKeyState()&WKEY_SHIFT) != 0 ) {
+					if (SplitTurnoutCheck(trk0,pos,ep0,NULL,NULL,NULL,TRUE,&pos,&angle)) {
+						angle = NormalizeAngle(angle+90);
+						CreateSplitAnchorAngle(pos,trk0,FALSE,angle);
+					}
+				} else {
 					CreateSplitAnchor(GetTrkEndPos(trk0,ep0),trk0,TRUE);
+				}
 				break;
 			} else if (QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 				CreateSplitAnchor(pos,trk0,FALSE);

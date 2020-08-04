@@ -388,7 +388,7 @@ MESSAGE
 Next we select the <Join Tracks> command to demonstrate "Move To Join"  
 END
 STEP
-COMMAND Join
+COMMAND JoinTrack
 MESSAGE
 __________________________________________
 

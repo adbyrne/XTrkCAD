@@ -42,7 +42,7 @@ typedef struct {
 		} logTable_t;
 extern dynArr_t logTable_da;
 #define logTable(N) DYNARR_N( logTable_t, logTable_da, N )
-time_t logClock;
+extern time_t logClock;
 void LogOpen( char * );
 void LogClose( void );
 void LogSet( char *, int );
@@ -85,8 +85,8 @@ void LoadGaugeList( wList_p, SCALEDESCINX_T );
 BOOL_T CompatibleScale( BOOL_T, SCALEINX_T, SCALEINX_T );
 BOOL_T DoSetScaleDesc( void );
 
-unsigned int curLayer;
-long layerCount;
+extern unsigned int curLayer;
+extern long layerCount;
 void SetCurrLayer(wIndex_t inx, const char * name, wIndex_t op,
                          void * listContext, void * arg);
 wDrawColor GetLayerColor( unsigned int );

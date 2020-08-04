@@ -107,6 +107,8 @@ Menu and sub-menu items are indicated by \e{File>Open}, which means select the \
 
 \f{Edit Box} - an area where you can enter a String, Integer or Floating Point value.
 
+\f{FlexTrack} - an automatic object on the ToolBar that creates a Cornu Track element
+
 \f{Highlighted} - an area on the Canvas which is in inverse-video.
 
 \f{Left-Click} - same as \e{Click}, used in contexts where \e{Right-Click} is also used.

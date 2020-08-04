@@ -937,6 +937,8 @@ void DescribeCompound(
 		}
 		compoundDesc[GR].mode = DESC_RO;
 	}
+	if ( compoundData.epCnt == 2 )
+		compoundData.length = GetTrkLength( trk, 0, 1 );
 	if ( compoundData.length > minLength && compoundData.epCnt > 1)
 		compoundData.grade = fabs( (compoundData.elev[0]-compoundData.elev[1])/compoundData.length )*100.0;
 	else
@@ -956,6 +958,8 @@ void DescribeCompound(
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("Dot"), NULL, (void*)2 );
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
 		wListAddValue( (wList_p)compoundDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("CenterDot"), NULL, (void*)5 );
+		wListAddValue( (wList_p)compoundDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
 		wListSetIndex( (wList_p)compoundDesc[LT].control0, compoundData.linetype );
 	}
 
@@ -1012,7 +1016,7 @@ BOOL_T WriteCompound(
 	rc &= fprintf(f, "%s %d %d %ld %ld %d %s %d %0.6f %0.6f 0 %0.6f \"%s\"\n",
 				GetTrkTypeName(t),
 				GetTrkIndex(t), GetTrkLayer(t), options, position, lineType,
-				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0),
+				GetTrkScaleName(t), GetTrkVisible(t)|(GetTrkNoTies(t)?1<<2:0)|(GetTrkBridge(t)?1<<3:0),
 				xx->orig.x, xx->orig.y, xx->angle,
 				PutTitle(xtitle(xx)) )>0;
 	for (ep=0; ep<epCnt; ep++ )
@@ -1060,6 +1064,12 @@ EXPORT void SetCompoundLineType( track_p trk, int width ) {
 		break;
 	case 4:
 		xx->lineType = DRAWLINEDASHDOTDOT;
+		break;
+	case 5:
+		xx->lineType = DRAWLINECENTER;
+		break;
+	case 6:
+		xx->lineType = DRAWLINEPHANTOM;
 		break;
 	}
 }

@@ -148,6 +148,7 @@ static STATUS_T ModifyCornu(wAction_t action, coOrd pos) {
 	STATUS_T rc = C_CONTINUE;
 	if (Dex.Trk == NULL) return C_ERROR;   //No track picked yet!
 	switch (action&0xFF) {
+		case C_LCLICK:
 		case C_START:
 		case C_DOWN:
 		case C_MOVE:
@@ -188,15 +189,10 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			break;
 		case C_TEXT:
 			//Delete or '0' - continues
-			if (action>>8 == 127 || action>>8 == 8 || 	// Del or backspace
-					action>>8 == 'o' || action>>8 == 'p' ||
-					action>>8 == 'l' || action>>8 == 'c' ||
-					action>>8 == 'r' || action>>8 == 's' ||
-					action>>8 == 'e' || action>>8 == 'f' ||
-					action>>8 == 'v' ||
-					(action>>8 >= 48 && action>>8 <= 52)) return ModifyTrack( Dex.Trk, action, pos );
+			if ((action>>8 !=32) && (action >>8 !=13))
+				return ModifyTrack( Dex.Trk, action, pos );
 			//Enter/Space does not
-			if (action>>8 !=32 && action>>8 != 13) return C_CONTINUE;
+			if ((action>>8 !=32) && (action>>8 != 13)) return C_CONTINUE;
 			/*no break*/
 		case C_OK:
 			UndoStart( _("Modify Track"), "Modify( T%d[%d] )", GetTrkIndex(Dex.Trk), Dex.params.ep );
@@ -219,6 +215,7 @@ static STATUS_T ModifyDraw(wAction_t action, coOrd pos) {
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			break;
 		case C_CMDMENU:
+			menuPos = pos;
 			rc = ModifyTrack( Dex.Trk, action, pos );
 			break;
 		default:
@@ -724,10 +721,17 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 		return C_CONTINUE;
 
 	case C_TEXT:
-		if ((action>>8) == '@') {
+		if ((action>>8) == 'c') {
 			panCenter = pos;
+			LOG( log_pan, 2, ( "PanCenter:Mod-%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
 			PanHere((void*)0);
 			return C_CONTINUE;
+		}
+		if ((action>>8) == 'e') {
+			DoZoomExtents(0);
+		}
+		if ((action>>8) == '0' || (action>>8 == 'o')) {
+			PanMenuEnter('o');
 		}
 		if ( !Dex.Trk )
 			return C_CONTINUE;
@@ -741,7 +745,7 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 
 	case C_CMDMENU:
 		if ( !Dex.Trk ) {
-			panCenter = pos;
+			menuPos = pos;
 			wMenuPopupShow(modPopupM);
 			return C_CONTINUE;
 		}
@@ -759,6 +763,8 @@ LOG( log_modify, 1, ("R = %0.3f, A0 = %0.3f, A1 = %0.3f\n",
 			if (rc == C_CONTINUE)
 				return ModifyDraw(C_UP, pos);
 		}
+		if (modifyCornuMode)
+			return ModifyCornu(action, pos);
 		/*no break*/
 	default:
 		if (modifyBezierMode) return ModifyBezier(action, pos);
@@ -795,5 +801,5 @@ void InitCmdModify( wMenu_p menu )
 	wMenuSeparatorCreate(modPopupM);
 	wMenuPushCreate(modPopupM, "", _("Zoom In"), 0,(wMenuCallBack_p) DoZoomUp, (void*) 1);
 	wMenuPushCreate(modPopupM, "", _("Zoom Out"), 0,	(wMenuCallBack_p) DoZoomDown, (void*) 1);
-	wMenuPushCreate(modPopupM, "", _("Pan center - '@'"), 0,	(wMenuCallBack_p) PanHere, (void*) 0);
+	wMenuPushCreate(modPopupM, "", _("Pan center - 'c'"), 0,	(wMenuCallBack_p) PanHere, (void*) 3);
 }

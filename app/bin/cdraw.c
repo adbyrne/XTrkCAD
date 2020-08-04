@@ -23,6 +23,7 @@
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
+#include "wlib.h"
 
 #include "ccurve.h"
 #include "cbezier.h"
@@ -57,8 +58,11 @@ static wMenuPush_p drawModDot;
 static wMenuPush_p drawModDash;
 static wMenuPush_p drawModDashDot;
 static wMenuPush_p drawModDashDotDot;
+static wMenuPush_p drawModCenterDot;
+static wMenuPush_p drawModPhantom;
 
-extern void wSetSelectedFontSize(int size);
+
+extern void wSetSelectedFontSize(wFontSize_t size);
 
 static long fontSizeList[] = {
 		4, 5, 6, 7, 8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36,
@@ -132,7 +136,7 @@ EXPORT void UpdateFontSizeList(
 				
 					*fontSizeR = fontSize;
 					/* inform gtkfont dialog from change */
-					wSetSelectedFontSize((int)fontSize);
+					wSetSelectedFontSize((wFontSize_t)fontSize);
 					/*LoadFontSizeList( list, *fontSizeR );*/
 				} else {
 					sprintf( message, "%ld", *fontSizeR );
@@ -213,6 +217,13 @@ EXPORT track_p MakeDrawFromSeg(
 	return MakeDrawFromSeg1( 0, pos, angle, sp );
 }
 
+int SliceCuts(ANGLE_T a, DIST_T radius) {
+	double Error = 0.05;
+	double Error_angle = acos(1-(Error/fabs(radius)));
+	if (Error_angle <0.0001) return 0;
+	return (int)(floor(D2R(a)/(2*Error_angle)));
+}
+
 /* Only straight, curved and PolyLine */
 EXPORT track_p MakePolyLineFromSegs(
 		coOrd pos,
@@ -249,15 +260,15 @@ EXPORT track_p MakePolyLineFromSegs(
 				}
 				else if (spb->type == SEG_CRVLIN || spb->type == SEG_CRVTRK) {
 					coOrd this;
-					if (spb->u.c.radius > 0)
+					if (spb->u.c.radius >= 0.0)
 						Translate(&this, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
 					else
 						Translate(&this, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
 					if (first || !IsClose(FindDistance(this, last))) {
 						cnt++;									//Add first point
 					}
-					cnt += (int)floor(spb->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
-					if (spb->u.c.radius > 0)
+					cnt += 1 + SliceCuts(spb->u.c.a1,spb->u.c.radius);
+					if (spb->u.c.radius >= 0.0)
 						Translate(&last, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
 					else
 						Translate(&last, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
@@ -275,15 +286,15 @@ EXPORT track_p MakePolyLineFromSegs(
 		}
 		else if (sp->type == SEG_CRVLIN || sp->type == SEG_CRVTRK) {
 			coOrd this;
-			if (sp->u.c.radius > 0)
+			if (sp->u.c.radius >= 0.0)
 				Translate(&this, sp->u.c.center, sp->u.c.a0, fabs(sp->u.c.radius));
 			else
 				Translate(&this, sp->u.c.center, sp->u.c.a0+sp->u.c.a1, fabs(sp->u.c.radius));
 			if (first || !IsClose(FindDistance(this, last))) {
 				cnt++;									//Add first point
 			}
-			cnt += (int)floor(sp->u.c.a1/22.5)+1 ;				//Add a point for each 1/8 of a circle
-			if (sp->u.c.radius > 0)
+			cnt += 1+ SliceCuts(sp->u.c.a1,sp->u.c.radius);
+			if (sp->u.c.radius >= 0.0)
 				Translate(&last, sp->u.c.center, sp->u.c.a0+sp->u.c.a1, fabs(sp->u.c.radius));
 			else
 				Translate(&last, sp->u.c.center, sp->u.c.a0, fabs(sp->u.c.radius));
@@ -313,7 +324,7 @@ EXPORT track_p MakePolyLineFromSegs(
 						xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 						j++;
 					}
-					xx->segs[0].u.p.pts[j].pt = last = spb->u.l.pos[1];
+					xx->segs[0].u.p.pts[j].pt = spb->u.l.pos[1];
 					xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 					last = xx->segs[0].u.p.pts[j].pt;
 					j ++;
@@ -321,7 +332,7 @@ EXPORT track_p MakePolyLineFromSegs(
 				}
 				if (spb->type == SEG_CRVLIN || spb->type == SEG_CRVTRK) {
 					coOrd this;
-					if (spb->u.c.radius>0)
+					if (spb->u.c.radius>=0.0)
 						Translate(&this, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
 					else
 						Translate(&this, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
@@ -330,16 +341,16 @@ EXPORT track_p MakePolyLineFromSegs(
 						xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 						j++;
 					}
-					int slices = (int)floor(spb->u.c.a1/22.5);
-					for (int k=1; k<=slices;k++) {
-						if (spb->u.c.radius>0)
-							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+(k*(spb->u.c.a1/(slices+1))), fabs(spb->u.c.radius));
+					int slices = SliceCuts(spb->u.c.a1,spb->u.c.radius);
+					for (int k=1; k<slices;k++) {
+						if (spb->u.c.radius>=0.0)
+							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+(k*(spb->u.c.a1/(slices))), fabs(spb->u.c.radius));
 						else
-							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+((slices+1-k)*(spb->u.c.a1/(slices+1))), fabs(spb->u.c.radius));
+							Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+((slices-k)*(spb->u.c.a1/(slices))), fabs(spb->u.c.radius));
 						xx->segs[0].u.p.pts[j].pt_type = wPolyLineSmooth;
 						j++;
 					}
-					if (spb->u.c.radius>0)
+					if (spb->u.c.radius>=0.0)
 						Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0+spb->u.c.a1, fabs(spb->u.c.radius));
 					else
 						Translate(&xx->segs[0].u.p.pts[j].pt, spb->u.c.center, spb->u.c.a0, fabs(spb->u.c.radius));
@@ -374,12 +385,13 @@ EXPORT track_p MakePolyLineFromSegs(
 				xx->segs[0].u.p.pts[j].pt_type = wPolyLineStraight;
 				j++;
 			}
-			int slices = (int)floor(sp->u.c.a1/22.5);
-			for (int k=1; k<=slices;k++) {
+			int slices = SliceCuts(sp->u.c.a1,sp->u.c.radius);
+
+			for (int k=1; k<slices;k++) {
 				if (sp->u.c.radius>0)
-					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+(k*(sp->u.c.a1/(slices+1))), fabs(sp->u.c.radius));
+					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+(k*(sp->u.c.a1/(slices))), fabs(sp->u.c.radius));
 				else
-					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+((slices+1-k)*(sp->u.c.a1/(slices+1))), fabs(sp->u.c.radius));
+					Translate(&xx->segs[0].u.p.pts[j].pt, sp->u.c.center, sp->u.c.a0+((slices-k)*(sp->u.c.a1/(slices))), fabs(sp->u.c.radius));
 				xx->segs[0].u.p.pts[j].pt_type = wPolyLineSmooth;
 				j++;
 			}
@@ -777,8 +789,33 @@ static void UpdateDraw( track_p trk, int inx, descData_p descUpd, BOOL_T final )
 			case SEG_POLY:
 			case SEG_FILPOLY:
 				break;			//Doesn't Use
-			case SEG_CRVLIN:;
-				break;			//Doesn't Use
+			case SEG_CRVLIN:
+				switch ( drawData.pivot ) {
+					case DESC_PIVOT_FIRST:
+						segPtr->u.c.a1 = drawData.angle;
+						drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
+						drawDesc[A2].mode |= DESC_CHANGE;
+						break;
+					case DESC_PIVOT_SECOND:
+						segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a1+segPtr->u.c.a0-drawData.angle);
+						segPtr->u.c.a1 = drawData.angle;
+						drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
+						drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
+						drawDesc[A1].mode |= DESC_CHANGE;
+						drawDesc[A2].mode |= DESC_CHANGE;
+						break;
+					case DESC_PIVOT_MID:
+						segPtr->u.c.a0 = NormalizeAngle( segPtr->u.c.a0+segPtr->u.c.a1/2.0-drawData.angle/2.0);
+						segPtr->u.c.a1 = drawData.angle;
+						drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
+						drawData.angle1 = NormalizeAngle( drawData.angle0+segPtr->u.c.a1 );
+						drawDesc[A1].mode |= DESC_CHANGE;
+						drawDesc[A2].mode |= DESC_CHANGE;
+						break;
+					default:
+						break;
+				}
+				break;
 			case SEG_FILCRCL:
 				break;			//Doesn't Use
 			case SEG_STRLIN:
@@ -1115,6 +1152,7 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 			drawData.angle = segPtr->u.c.a1;
 			drawData.angle0 = NormalizeAngle( segPtr->u.c.a0+xx->angle );
 			drawData.angle1 = NormalizeAngle( drawData.angle0+drawData.angle );
+			drawDesc[AL].mode =
 			drawDesc[A1].mode =
 			drawDesc[A2].mode = 0;
 			drawDesc[PV].mode = 0;
@@ -1253,6 +1291,8 @@ static void DescribeDraw( track_p trk, char * str, CSIZE_T len )
 		wListAddValue( (wList_p)drawDesc[LT].control0, _("Dot"), NULL, (void*)2 );
 		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDot"), NULL, (void*)3 );
 		wListAddValue( (wList_p)drawDesc[LT].control0, _("DashDotDot"), NULL, (void*)4 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("CenterDot"), NULL, (void*)5 );
+		wListAddValue( (wList_p)drawDesc[LT].control0, _("PhantomDot"), NULL, (void*)6 );
 		wListSetIndex( (wList_p)drawDesc[LT].control0, drawData.lineType );
 	}
 	if ( segPtr->type==SEG_DIMLIN && drawDesc[DS].control0!=NULL ) {
@@ -1279,6 +1319,8 @@ static void DrawDraw( track_p t, drawCmd_p d, wDrawColor color )
 	else if (xx->lineType == DRAWLINEDOT) d->options |= DC_DOT;
 	else if (xx->lineType == DRAWLINEDASHDOT) d->options |= DC_DASHDOT;
 	else if (xx->lineType == DRAWLINEDASHDOTDOT) d->options |= DC_DASHDOTDOT;
+	else if (xx->lineType == DRAWLINECENTER) d->options |= DC_CENTER;
+	else if (xx->lineType == DRAWLINEPHANTOM) d->options |= DC_PHANTOM;
 	DrawSegs( d, xx->orig, xx->angle, xx->segs, xx->segCnt, 0.0, color );
 	d->options = d->options&~(DC_NOTSOLIDLINE);
 }
@@ -1300,7 +1342,8 @@ static BOOL_T WriteDraw( track_p t, FILE * f )
 {
 	struct extraData * xx = GetTrkExtraData(t);
 	BOOL_T rc = TRUE;
-	rc &= fprintf(f, "DRAW %d %d 0 0 0 %0.6f %0.6f 0 %0.6f\n", GetTrkIndex(t), GetTrkLayer(t),
+	rc &= fprintf(f, "DRAW %d %d %d 0 0 %0.6f %0.6f 0 %0.6f\n", GetTrkIndex(t), GetTrkLayer(t),
+				xx->lineType,
 				xx->orig.x, xx->orig.y, xx->angle )>0;
 	rc &= WriteSegs( f, xx->segCnt, xx->segs );
 	return rc;
@@ -1570,6 +1613,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		}
 		break;
 	case C_CMDMENU:
+		menuPos = pos;
 		wMenuPopupShow( drawModDelMI );
 		wMenuPushEnable( drawModPointsMode,drawModCmdContext.rotate_state);
 		wMenuPushEnable( drawModriginMode,!drawModCmdContext.rotate_state);
@@ -1586,6 +1630,8 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		wMenuPushEnable( drawModDash, TRUE);
 		wMenuPushEnable( drawModDashDot, TRUE);
 		wMenuPushEnable( drawModDashDotDot, TRUE);
+		wMenuPushEnable( drawModCenterDot, TRUE);
+		wMenuPushEnable( drawModPhantom, TRUE);
 		if (!drawModCmdContext.rotate_state && (drawModCmdContext.type == SEG_POLY || drawModCmdContext.type == SEG_FILPOLY)) {
 			wMenuPushEnable( drawModDel,drawModCmdContext.prev_inx>=0);
 			if ((!drawModCmdContext.open && drawModCmdContext.prev_inx>=0) ||
@@ -1766,6 +1812,11 @@ static BOOL_T QueryDraw( track_p trk, int query )
 		else return FALSE;
 	case Q_GET_NODES:
 		return TRUE;
+	case Q_CAN_PARALLEL:
+		if ((xx->segs[0].type == SEG_STRLIN) || (xx->segs[0].type == SEG_CRVLIN ||
+			((xx->segs[0].type == SEG_POLY) && (xx->segs[0].u.p.polyType == POLYLINE))
+		)) return TRUE;
+		else return FALSE;
 	default:
 		return FALSE;
 	}
@@ -1911,6 +1962,109 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * pa
 
 }
 
+static BOOL_T MakeParallelDraw(
+		track_p trk,
+		coOrd pos,
+		DIST_T sep,
+		DIST_T factor,
+		track_p * newTrkR,
+		coOrd * p0R,
+		coOrd * p1R,
+		BOOL_T track)
+{
+	if (track) return FALSE;
+	struct extraData * xx = GetTrkExtraData(trk);
+
+	ANGLE_T angle;
+	DIST_T rad;
+	coOrd p0,p1;
+
+	switch (xx->segs[0].type) {
+		case SEG_STRLIN:
+			angle = FindAngle(xx->segs[0].u.l.pos[0],xx->segs[0].u.l.pos[1]);
+			if ( NormalizeAngle( FindAngle( xx->segs[0].u.l.pos[0], pos ) - angle ) < 180.0 )
+				angle += 90;
+			else
+				angle -= 90;
+			Translate(&p0,xx->segs[0].u.l.pos[0], angle, sep);
+			Translate(&p1,xx->segs[0].u.l.pos[1], angle, sep);
+			tempSegs(0).color = xx->segs[0].color;
+			tempSegs(0).width = xx->segs[0].width;
+			tempSegs_da.cnt = 1;
+			tempSegs(0).type = SEG_STRLIN;
+			tempSegs(0).u.l.pos[0] = p0;
+			tempSegs(0).u.l.pos[1] = p1;
+			if (newTrkR) {
+				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+				struct extraData * yy = GetTrkExtraData(*newTrkR);
+				yy->lineType = xx->lineType;
+			}
+
+			if ( p0R ) *p0R = p0;
+			if ( p1R ) *p1R = p1;
+			return TRUE;
+			break;
+		case SEG_CRVLIN:
+			rad = FindDistance( pos, xx->segs[0].u.c.center );
+			if ( rad > xx->segs[0].u.c.radius )
+				rad = xx->segs[0].u.c.radius + sep;
+			else
+				rad = xx->segs[0].u.c.radius - sep;
+			tempSegs(0).color = xx->segs[0].color;
+			tempSegs(0).width = xx->segs[0].width;
+			tempSegs_da.cnt = 1;
+			tempSegs(0).type = SEG_CRVLIN;
+			tempSegs(0).u.c.center = xx->segs[0].u.c.center;
+			tempSegs(0).u.c.radius = rad;
+			tempSegs(0).u.c.a0 = xx->segs[0].u.c.a0;
+			tempSegs(0).u.c.a1 = xx->segs[0].u.c.a1;
+			if (newTrkR) {
+				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+				struct extraData * yy = GetTrkExtraData(*newTrkR);
+				yy->lineType = xx->lineType;
+			}
+			if ( p0R ) PointOnCircle( p0R, xx->segs[0].u.c.center, rad, xx->segs[0].u.c.a0 );
+			if ( p1R ) PointOnCircle( p1R, xx->segs[0].u.c.center, rad, xx->segs[0].u.c.a0+xx->segs[0].u.c.a1 );
+			return TRUE;
+			break;
+		case SEG_POLY:
+			if (xx->segs[0].u.p.polyType != POLYLINE) return FALSE;
+			int inx2;
+			coOrd p = pos;
+			angle = GetAngleSegs(1,&xx->segs[0],&p,NULL,NULL,NULL,&inx2,NULL);
+			if ( NormalizeAngle( FindAngle( p, pos ) - angle ) < 180.0 ) {
+				sep = sep*1.0;
+				angle += 90;
+			} else {
+				angle -= 90;
+				sep = sep*1.0;
+			}
+			tempSegs(0).color = xx->segs[0].color;
+			tempSegs(0).width = xx->segs[0].width;
+			tempSegs_da.cnt = 1;
+			tempSegs(0).type = SEG_POLY;
+			tempSegs(0).u.p.polyType = POLYLINE;
+			tempSegs(0).u.p.pts = memdup( xx->segs[0].u.p.pts, xx->segs[0].u.p.cnt*sizeof (pts_t) );
+			tempSegs(0).u.p.cnt = xx->segs[0].u.p.cnt;
+			for (int i=0;i<xx->segs[0].u.p.cnt;i++) {
+				Translate(&tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i].pt,angle,sep);
+			}
+			if (newTrkR) {
+				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+				struct extraData * yy = GetTrkExtraData(*newTrkR);
+				yy->lineType = xx->lineType;
+				if (tempSegs(0).u.p.pts) MyFree(tempSegs(0).u.p.pts);
+			}
+			if (p0R) *p0R = tempSegs(0).u.p.pts[0].pt;
+			if (p1R) *p1R = tempSegs(0).u.p.pts[tempSegs(0).u.p.cnt-1].pt;
+			return TRUE;
+			break;
+		default:
+		return FALSE;
+	}
+	return FALSE;
+}
+
 static trackCmd_t drawCmds = {
 		"DRAW",
 		DrawDraw,
@@ -1940,7 +2094,7 @@ static trackCmd_t drawCmds = {
 		NULL,
 		NULL,
 		NULL,
-		NULL, /*Parallel*/
+		MakeParallelDraw, /*Parallel*/
 		NULL,
 		NULL, /*MakeSegs*/
 		ReplayDraw,
@@ -2698,6 +2852,12 @@ void MenuLine(int key) {
 		case '4':
 			xx->lineType = DRAWLINEDASHDOTDOT;
 			break;
+		case '5':
+			xx->lineType = DRAWLINECENTER;
+			break;
+		case '6':
+			xx->lineType = DRAWLINEPHANTOM;
+			break;
 		}
 		MainRedraw(); // MenuLine
 	}
@@ -2723,6 +2883,12 @@ EXPORT void SetLineType( track_p trk, int width ) {
 			case 4:
 				xx->lineType = DRAWLINEDASHDOTDOT;
 				break;
+			case 5:
+				xx->lineType = DRAWLINECENTER;
+				break;
+			case 6:
+				xx->lineType = DRAWLINEPHANTOM;
+				break;
 			}
 		}
 	}
@@ -2735,10 +2901,10 @@ EXPORT void InitTrkDraw( void )
 	AddParam( "TEXT", ReadText );
 
 	drawModDelMI = MenuRegister( "Modify Draw Edit Menu" );
-	drawModClose = wMenuPushCreate( drawModDelMI, "", _("Close Polygon - 'c'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c');
+	drawModClose = wMenuPushCreate( drawModDelMI, "", _("Close Polygon - 'g'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'g');
 	drawModOpen = wMenuPushCreate( drawModDelMI, "", _("Make PolyLine - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l');
 	drawModFill = wMenuPushCreate( drawModDelMI, "", _("Fill Polygon - 'f'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'f');
-	drawModEmpty = wMenuPushCreate( drawModDelMI, "", _("Empty Polygon - 'e'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'e');
+	drawModEmpty = wMenuPushCreate( drawModDelMI, "", _("Empty Polygon - 'u'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'u');
 	wMenuSeparatorCreate( drawModDelMI );
 	drawModPointsMode = wMenuPushCreate( drawModDelMI, "", _("Points Mode - 'p'"), 0, (wMenuCallBack_p)MenuMode, (void*) 0 );
 	drawModDel = wMenuPushCreate( drawModDelMI, "", _("Delete Selected Point - 'Del'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 127 );
@@ -2752,10 +2918,12 @@ EXPORT void InitTrkDraw( void )
 	drawModDash =  wMenuPushCreate( drawModLinMI, "", _("Dotted Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '2' );
 	drawModDashDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '3' );
 	drawModDashDotDot =  wMenuPushCreate( drawModLinMI, "", _("Dash-Dot-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '4' );
+	drawModCenterDot =  wMenuPushCreate( drawModLinMI, "", _("Center-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '5' );
+	drawModPhantom =  wMenuPushCreate( drawModLinMI, "", _("Phantom-Dot Line"), 0, (wMenuCallBack_p)MenuLine, (void*) '6' );
 	wMenuSeparatorCreate( drawModDelMI );
 	drawModriginMode = wMenuPushCreate( drawModDelMI, "", _("Origin Mode - 'o'"), 0, (wMenuCallBack_p)MenuMode, (void*) 1 );
 	drawModOrigin = wMenuPushCreate( drawModDelMI, "", _("Reset Origin - '0'"), 0, (wMenuCallBack_p)MenuEnter, (void*) '0' );
 	drawModLast = wMenuPushCreate( drawModDelMI, "", _("Origin to Selected - 'l'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'l' );
-	drawModCenter = wMenuPushCreate( drawModDelMI, "", _("Origin to Centroid - 'c'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'c');
+	drawModCenter = wMenuPushCreate( drawModDelMI, "", _("Origin to Middle - 'm'"), 0, (wMenuCallBack_p)MenuEnter, (void*) 'm');
 
 }

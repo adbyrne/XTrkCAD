@@ -1185,11 +1185,14 @@ static BOOL_T GetParamsCornu( int inx, track_p trk, coOrd pos, trackParams_t * p
 	params->len = xx->cornuData.length;
 	if ( inx == PARAMS_NODES ) {
 		return FALSE;
-	} else if (inx == PARAMS_CORNU) {
+	} else if ((inx == PARAMS_CORNU) || (inx == PARAMS_1ST_JOIN) || (inx == PARAMS_2ND_JOIN) ) {
 		params->ep = PickEndPoint( pos, trk);
 	} else {
 		params->ep = PickUnconnectedEndPointSilent( pos, trk );
+
 	}
+	if (params->ep == -1) return FALSE;
+
 	if (params->ep>=0) {
 		params->angle = GetTrkEndAngle(trk,params->ep);
 	}
@@ -1323,13 +1326,13 @@ static BOOL_T MakeParallelCornu(
     BOOL_T above = FALSE;
     if ( diff_a < 180 ) above = TRUE; //Above track
     if (xx->cornuData.a[0] <180) above = !above;
-    DIST_T sep0 = sep+(xx->cornuData.r[0]!=0?fabs(factor/xx->cornuData.r[0]):0);
-    DIST_T sep1 = sep+(xx->cornuData.r[1]!=0?fabs(factor/xx->cornuData.r[1]):0);
+    DIST_T sep0 = sep+((xx->cornuData.r[0]!=0.0)?fabs(factor/xx->cornuData.r[0]):0);
+    DIST_T sep1 = sep+((xx->cornuData.r[1]!=0.0)?fabs(factor/xx->cornuData.r[1]):0);
     Translate(&np[0],xx->cornuData.pos[0],xx->cornuData.a[0]+(above?90:-90),sep0);
     Translate(&np[1],xx->cornuData.pos[1],xx->cornuData.a[1]+(above?-90:90),sep1);
     na[0]=xx->cornuData.a[0];
     na[1]=xx->cornuData.a[1];
-    if (xx->cornuData.r[0]) {
+    if (xx->cornuData.r[0] != 0.0) {
        //Find angle between center and end angle of track
        ANGLE_T ea0 =
         	   NormalizeAngle(FindAngle(xx->cornuData.c[0],xx->cornuData.pos[0])-xx->cornuData.a[0]);
@@ -1337,18 +1340,18 @@ static BOOL_T MakeParallelCornu(
         	nr[0]=xx->cornuData.r[0]+(above?sep0:-sep0);           //Needs adjustment
         	nc[0]=xx->cornuData.c[0];
      } else {
-        	nr[0] = 0;
+        	nr[0] = 0.0;
         	nc[0] = zero;
      }
 
-     if (xx->cornuData.r[1]) {
+     if (xx->cornuData.r[1] != 0.0) {
         	ANGLE_T ea1 =
         			NormalizeAngle(FindAngle(xx->cornuData.c[1],xx->cornuData.pos[1])-xx->cornuData.a[1]);
         	if (ea1<180) sep1 = -sep1;
         	nr[1]=xx->cornuData.r[1]+(above?sep1:-sep1);            //Needs adjustment
         	nc[1]=xx->cornuData.c[1];
      } else {
-        	nr[1] = 0;
+        	nr[1] = 0.0;
         	nc[1] = zero;
      }
 
@@ -1385,6 +1388,24 @@ static BOOL_T MakeParallelCornu(
 				}
 				if (seg->type == SEG_CRVTRK) {
 					seg->type = SEG_CRVLIN;
+					seg->color = wDrawColorBlack;
+					seg->width = 0;
+				}
+				if (seg->type == SEG_BEZTRK) {
+					for (int j=0;j<seg->bezSegs.cnt;j++) {
+						trkSeg_p bseg = &(((trkSeg_t *)seg->bezSegs.ptr)[j]);
+						if (bseg->type == SEG_STRTRK) {
+							bseg->type = SEG_STRLIN;
+							bseg->color = wDrawColorBlack;
+							bseg->width = 0;
+						}
+						if (bseg->type == SEG_CRVTRK) {
+							bseg->type = SEG_CRVLIN;
+							bseg->color = wDrawColorBlack;
+							bseg->width = 0;
+						}
+					}
+					seg->type = SEG_BEZLIN;
 					seg->color = wDrawColorBlack;
 					seg->width = 0;
 				}

@@ -124,7 +124,7 @@ Cannot change elevation mode.
 HELP
 In the \f{Profile} command, the \f{Elevation} mode for this \e{endpoint} can be change only if it is \f{Defined}, \f{Ignored} or \f{None}. The \f{Elevation} command can be used to change this \e{endpoint}.
 
-Refer to \k{cmdElev} for detail.
+Refer to \k{cmdElevation} for detail.
 END
 
 # csnap.c

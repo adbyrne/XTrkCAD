@@ -474,23 +474,30 @@ static void CreateNewSensor (coOrd orig)
 
 static STATUS_T CmdSensor ( wAction_t action, coOrd pos )
 {
+	static coOrd sensor_pos;
+	static BOOL_T create;
     switch (action) {
     case C_START:
         InfoMessage(_("Place sensor"));
+        create = FALSE;
         return C_CONTINUE;
     case C_DOWN:
+    	create = TRUE;
+    	/* no break */
 	case C_MOVE:
 		SnapPos(&pos);
-        DDrawSensor( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+		sensor_pos = pos;
         return C_CONTINUE;
     case C_UP:
         SnapPos(&pos);
-        DDrawSensor( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
         CreateNewSensor(pos);
         return C_TERMINATE;
     case C_REDRAW:
+    	if (create)
+    		DDrawSensor( &tempD, sensor_pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+    	return C_CONTINUE;
     case C_CANCEL:
-        DDrawSensor( &tempD, pos, GetScaleRatio(GetLayoutCurScale()), wDrawColorBlack );
+    	create = FALSE;
         return C_CONTINUE;
     default:
         return C_CONTINUE;

@@ -280,7 +280,7 @@ static int CustomDoExport(
 static void CustomExport( void * junk )
 {
 	if ( customMgmExport_fs == NULL )
-		customMgmExport_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Move To XTP"),
+		customMgmExport_fs = wFilSelCreate( mainW, FS_UPDATE, 0, _("Move To XTP"),
 				_("Parameter File (*.xtp)|*.xtp"), CustomDoExport, NULL );
 	wFilSelect( customMgmExport_fs, GetCurrentPath(CUSTOMPATHKEY));
 }
@@ -376,8 +376,7 @@ static void CustMgmChange( long changes )
 {
 	if (changes) {
 		if (changed) {
-			changed = 1;
-			checkPtMark = 1;
+			changed = checkPtMark = 1;
 		}
 	}
 	if ((changes&CHANGE_PARAMS) == 0 ||

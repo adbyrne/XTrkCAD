@@ -69,6 +69,7 @@
 #include "track.h"
 #include "utility.h"
 #include "version.h"
+#include "dynstring.h"
 
 #ifdef WINDOWS
 #include "include/utf8convert.h"
@@ -82,6 +83,7 @@
 EXPORT const char * workingDir;
 EXPORT const char * libDir;
 
+EXPORT wMenuList_p fileList_ml;
 
 EXPORT char * clipBoardN;
 static coOrd paste_offset, cursor_offset;
@@ -497,6 +499,44 @@ wBool_t IsEND( char * sEnd )
 }
 
 
+/**
+ * Read the text for a note/car. Lines are read from the input file
+ * until the END statement is found.
+ *
+ * \todo Handle premature end as an error
+ *
+ * \return pointer to string, has to be myfree'd by caller
+ */
+
+char *
+ReadMultilineText()
+{
+	char *string;
+	DynString noteText;
+	DynStringMalloc(&noteText, 0);
+	char *line;
+
+	line = GetNextLine();
+
+	while ( !IsEND("END") ) {
+		DynStringCatCStr(&noteText, line);
+		DynStringCatCStr(&noteText, "\n");
+		line = GetNextLine();
+	}
+	string = MyStrdup(DynStringToCStr(&noteText));
+	string[strlen(string) - 1] = '\0';
+
+#ifdef WINDOWS
+	if (wIsUTF8(string)) {
+		ConvertUTF8ToSystem(string);
+	}
+#endif // WINDOWS
+
+	DynStringFree(&noteText);
+	return(string);
+}
+
+
 EXPORT wBool_t ParseRoomSize(
 		char * s,
 		coOrd * roomSizeRet )
@@ -525,10 +565,16 @@ EXPORT wBool_t ParseRoomSize(
 	return FALSE;
 }
 
-
+/**
+ * Parameter file parser definitions
+ *
+ * \param [IN] name command
+ * \param [IN] proc function for reading the parameter definition
+ * \param [IN] delete if not NULL function for freeing the definition
+ */
 EXPORT void AddParam(
 		char * name,
-		readParam_t proc )
+		readParam_t proc)
 {
 	DYNARR_APPEND( paramProc_t, paramProc_da, 10 );
 	paramProc(paramProc_da.cnt-1).name = name;
@@ -615,6 +661,7 @@ static paramGroup_t checkPointingPG = { "checkpoint", 0, checkPointingPLs, sizeo
 
 static char * checkPtFileName1;
 static char * checkPtFileName2;
+static char * checkPtFileNameBackup;
 
 /** Read the layout design.
  *
@@ -843,7 +890,7 @@ int LoadTracks(
 			    fseek(f, 0, SEEK_SET);
 			    manifest = malloc(length + 1);
 			    if (manifest) {
-			        fread(manifest, 1, length, f);
+			        size_t siz = fread(manifest, 1, length, f);
 			        manifest[length] = '\0';
 			    }
 			    fclose(f);
@@ -1165,6 +1212,7 @@ EXPORT void DoSave( doSaveCallBack_p after )
 			saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks"),
 				sSourceFilePattern, SaveTracks, NULL );
 		wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+		changed = checkPtMark = 1;
 	} else {
 		char *temp = GetLayoutFullPath();
 		SaveTracks( 1, &temp, NULL );
@@ -1180,6 +1228,7 @@ EXPORT void DoSaveAs( doSaveCallBack_p after )
 		saveFile_fs = wFilSelCreate( mainW, FS_SAVE, 0, _("Save Tracks As"),
 			sSaveFilePattern, SaveTracks, NULL );
 	wFilSelect( saveFile_fs, GetCurrentPath(LAYOUTPATHKEY));
+	changed = checkPtMark = 1;
 	SetWindowTitle();
 	SaveState();
 }
@@ -1210,10 +1259,19 @@ EXPORT void DoExamples( void )
 	SaveState();
 }
 
+static wIndex_t generations_count = 0;
+wIndex_t max_generations_count = 10;
+static char sCheckPointBF[STR_LONG_SIZE];
+
 
 EXPORT void DoCheckPoint( void )
 {
 	int rc;
+
+	if (!checkPtFileNameBackup || (changed <= checkPtInterval+1)) {
+		sprintf(sCheckPointBF,"%s00.bkp",GetLayoutFilename());
+		MakeFullpath(&checkPtFileNameBackup, workingDir, sCheckPointBF, NULL);
+	}
 
 	if (checkPointingW == NULL) {
 		ParamRegister( &checkPointingPG );
@@ -1225,12 +1283,28 @@ EXPORT void DoCheckPoint( void )
 
 	/* could the check point file be written ok? */
 	if( rc ) {
-		/* yes, delete the backup copy of the checkpoint file */
-		remove( checkPtFileName2 );
+		/* yes, archive/delete the backup copy of the checkpoint file */
+		if (checkPtFileNameBackup) {
+			char * spot = strrchr(checkPtFileNameBackup,'.');
+			if (spot && spot>checkPtFileNameBackup+3) {
+				spot[-2]=generations_count/10+'0';
+				spot[-1]=generations_count%10+'0';
+			}
+			generations_count++;
+			if (((autosaveChkPoints == 0) && (generations_count > 5)) ||
+			    ((autosaveChkPoints > 0) && (generations_count > autosaveChkPoints)) ) {
+				generations_count = 0;
+			}
+			remove( checkPtFileNameBackup);
+			rename( checkPtFileName2, checkPtFileNameBackup );
+		} else {
+			remove(checkPtFileName2);
+		}
 	} else {
 		/* no, rename the backup copy back to the checkpoint file name */
 		rename( checkPtFileName2, checkPtFileName1 );
 	}
+
 	//wHide( checkPointingW );
 	wShow( mainW );
 }
@@ -1249,8 +1323,13 @@ EXPORT void CleanupFiles( void )
 {
 	char *tempDir;
 
-	if( checkPtFileName1 )
+	if( checkPtFileName1 ) {
+		if (checkPtFileNameBackup) {
+			remove( checkPtFileNameBackup );
+			rename( checkPtFileName1, checkPtFileNameBackup );
+		}
 		remove( checkPtFileName1 );
+	}
 
 	for (int i = ARCHIVE_READ; i <= ARCHIVE_WRITE; ++i) {
 		tempDir = GetZipDirectoryName(i);
@@ -1262,7 +1341,7 @@ EXPORT void CleanupFiles( void )
 }
 
 /**
- * Check for existance of checkpoint file. Existance of a checkpoint file means that XTrkCAD was not properly
+ * Check for existence of checkpoint file. Existence of a checkpoint file means that XTrkCAD was not properly
  * terminated.
  *
  * \param none
@@ -1287,11 +1366,13 @@ EXPORT int ExistsCheckpoint( void )
 /**
  * Load checkpoint file
  *
+ * \param if TRUE reuse old filename
+ * \param filename returned
  * \return TRUE if exists, FALSE otherwise
  *
  */
 
-EXPORT int LoadCheckpoint( void )
+EXPORT int LoadCheckpoint( BOOL_T sameName )
 {
 	char *search;
 
@@ -1303,21 +1384,34 @@ EXPORT int LoadCheckpoint( void )
 
 	if (ReadTrackFile( search, search + strlen(search) - strlen( sCheckPointF ), TRUE, TRUE, TRUE )) {
 		ResolveIndex();
+		LayoutBackGroundInit(FALSE);    //Get Prior BackGround
+		LayoutBackGroundSave();		    //Save Background Values
+
+		if (sameName) {
+			long iExample;
+			char * initialFile = (char*)wPrefGetString("misc", "lastlayout");
+			wPrefGetInteger("misc", "lastlayoutexample", &iExample, 0);
+			bExample = (iExample == 1);
+			if (initialFile && strlen(initialFile)) {
+				SetCurrentPath( LAYOUTPATHKEY, initialFile );
+				SetLayoutFullPath(initialFile);
+			}
+		} else SetLayoutFullPath("");
 
 		RecomputeElevations();
 		AttachTrains();
 		DoChangeNotification( CHANGE_ALL );
 		DoUpdateTitles();
-	}
+	} else SetLayoutFullPath("");
 
 	Reset();
 	UndoResume();
 
 	wSetCursor( mainD.d, defaultCursor );
 
-	SetLayoutFullPath("");
+
 	SetWindowTitle();
-	changed = TRUE;
+	checkPtMark = changed = 1;
 	free( search );
 	return TRUE;
 }
@@ -1380,7 +1474,6 @@ static int ImportTracks(
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
 	paramVersion = paramVersionOld;
-	importMove = TRUE;
 	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	return TRUE;
@@ -1538,7 +1631,6 @@ BOOL_T EditPastePlace( wBool_t inPlace )
 	/*DoRedraw();*/
 	EnableCommands();
 	wSetCursor( mainD.d, defaultCursor );
-	importMove = TRUE;
 	DoCommandB( (void*)(intptr_t)selectCmdInx );
 	SelectRecount();
 	UpdateAllElevations();

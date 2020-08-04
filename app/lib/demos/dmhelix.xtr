@@ -115,7 +115,7 @@ _________________________________________
 Next, join the 2 straight tracks to the helix in the same way we join to a circle.
 END
 STEP
-COMMAND Join
+COMMAND JoinTrack
 MOUSE 2 1.875 30.000
 MOUSE 4 1.875 30.000
 MOUSE 2 1.000 17.375

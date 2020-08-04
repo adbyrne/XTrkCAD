@@ -28,7 +28,7 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 
 \u000
 
-\dd \f{Elevation} - define an elevation at specified track location (\K{cmdElev}).
+\dd \f{Elevation} - define an elevation at specified track location (\K{cmdElevation}).
 
 \u000
 
@@ -49,10 +49,6 @@ The \f{Change Menu} has all functions related to modifying objects that exist on
 \u000
 
 \dd \f{Move Description} - move the endpoint description of a track piece to another location. (\K{cmdMoveLabel}).
-
-\u000
-
-\dd \f{Pan/Zoom} - move or resize the viewport using the mouse.
 
 \u000
 
@@ -155,19 +151,33 @@ You can undo the effect of the \f{Connect} command by splitting (\K{splitDisconn
 
 \S{cmdConvert} Convert Tracks
 
-A drop down menu, which allows selection of the Convert Mode, is invoked from the down arrow button (\G{png.d/bmenu.png}) located on the right side the Convert Tracks button. Dependent upon previous selection, the Convert Track button will look like \G{png.d/convertto.png} or \G{png.d/convertfrom.png}.
+\dd (\K{cmdConvertTo}). Convert Fixed to Cornu
+
+\dd (\K{cmdConvertFrom}). Convert Cornu to Fixed.
+
+A drop down menu, which allows selection of the Convert Mode, is invoked from the down arrow button (\G{png.d/bmenu.png}) located on the right side the Convert Tracks button. 
+Dependent upon previous selection, the Convert Track button will look like \G{png.d/convertto.png} or \G{png.d/convertfrom.png}.
+
+\rule
 
 \S2{cmdConvertTo} Convert Fixed Track(s) to Cornu(s)
 
 \G{png.d/convertto.png}
 
-This command will take a pre-selected set of fixed track elements (Straights, Curves, Joint or Bezier) and convert them into a set of Cornu Tracks. If there are no selected Tracks, the user can click on a single track.
+This command will take a pre-selected set of fixed track elements (Straights, Curves, Joint or Bezier) and convert them into a set of Cornu Tracks. 
+If there are no selected Tracks, the user can click on a single track.
 
-The Cornu(s) will smoothly pass through all the end points of the selected tracks and smoothly join to the end-points (if any). This may change the internal shape of the resulting track(s) due to smoothing. A subsequent \k{cmdModify} can be used to fine tune the Cornu(s) by moving, adding and deleting "pins" in the combined shape.
+The Cornu(s) will smoothly pass through all the end points of the selected tracks and smoothly join to the end-points (if any). 
+This may change the internal shape of the resulting track(s) due to smoothing. 
+A subsequent \k{cmdModify} can be used to fine tune the Cornu(s) by moving, adding and deleting "pins" in the combined shape.
 
 This command is intended to help conversion of track designs that were made before Cornu Track existed to Cornu.
 
-\G{png.d/bconvertfrom.png}
+\rule
+
+\S2{cmdConvertFrom} Convert Cornu(s) and Bezier(s) to Fixed Track(s)
+
+\G{png.d/convertfrom.png}
 
 This command will take a pre-selected set of Cornu and Bezier Tracks and convert them into a set of equivalent Straights or Curves,
 
@@ -175,15 +185,19 @@ The resulting track(s) will mimic the shape of the Cornu/Bezier(s) exactly. This
 
 \rule
 
-\S{cmdElev} Elevation
+\S{cmdElevation} Elevation
 
 \G{png.d/belev.png}
 
-The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, The Message Bar will show the computed elevation at the cursor. There will be an open blue circle if an endpoint will be selected with \f{Left-Click}. You click on the respective endpoint to set its elevation properties. The endpoint which you are working on is indicated with a big red dot.
+The \f{Elevation} command changes the elevation of track endpoints. After opening this dialog, The Message Bar will show the computed elevation at the cursor. There will be an open blue circle if an endpoint will be selected with \f{Left-Click}. You click on the respective endpoint to set its elevation properties. 
+
+The endpoint which you are working on is indicated with a big red dot.
+
+Moving around the layout will show you the elevation at the point indicated by a blue dot.
 
 If you hover over a point where two unconnected tracks pass over one another, a blue square will be drawn and the Message Bar will show the two elevations and the Clearance between them.
 
-If you add \f{Shift} as you move the cursor before clicking you will see a filled dot when it is over a track if a \f{Shift-Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation.
+If you add \f{Shift} as you move the cursor before clicking you will see a blue bar when it is over a track if a \f{Shift-Left-Click} will split the Track at that point (which will give you the opportunity to specify an elevation).
 
 Adding \f{Ctrl} allows you to \f{Ctrl+Left-Click} to Select and \f{Left-Drag} to move Elevation Labels if both the option is set for them to be displayed and the Zoom level is correct,, Only Defined and Station endpoint labels can be moved.
 
@@ -288,14 +302,24 @@ Certain turnouts, such as a Wye's, Three-Way or Crossings are symmetrical and th
 
 \S{cmdJoin} Join Tracks and Lines
 
-The \f{Join} command has two variatons, one used to Join Tracks by connecting them and the other to create a PolyLine from two Draw Objects or to Close a PolyLine as a Polygon.
+The \f{Join} command has two variatons, 
 
-\S2{cmdJoinLines} Join Lines
+\dd (\K{cmdJoinTrack}). Join Tracks by connecting them. 
+
+\u000
+
+\dd (\K{cmdJoinLine}). Create a PolyLine from two Draw Objects or Close a PolyLine as a Polygon.
+
+\rule
+
+\S2{cmdJoinLine} Join Lines
 
 \G{png.d/bjoinline.png}
 
 The \f{Join Line} command produces a PolyLine from two Draw objects (Straight Line, Curved Line, Bezier Line or PolyLine). You select the two ends to join and the new Polyline will replace the two Draw objects, filling in any gap with a straight line segment. 
 If the two ends are of the same PolyLine, an unfilled Polygon will be created.
+
+\rule
 
 \S2{cmdJoinTrack} Join Tracks
 
@@ -307,7 +331,12 @@ See \f{Help>Demo} (\K{cmdDemo}) for examples of how to join tracks.
 
 For detail about;
 
-\dd Using curved flex-track to join track segments refer to \K{joinTrackCurve}.
+\dd Using complex curves if Easement is set to Cornu \K{joinCornu}.
+
+\u000
+
+\dd Using Normal Easments where tracks are either joined with a straight or a 'simple curve' \k{joinNormalEasment}, 
+e.g. one which uses a curve in a single direction as opposed to using reverse curves (\K{generalTerms})
 
 \u000
 
@@ -318,10 +347,6 @@ For detail about;
 \dd Moving one segment of track to join with another refer to \K{joinTrackMove}.
 
 \rule
-
-\S2{joinTrackCurve} Using Curved Flex-Track
-
-This method of joining track may be used using Normal Easments where tracks are either joined with a 'simple curve'\k{joinNormalEasment}, e.g. one which uses a curve in a single direction as opposed to using reverse curves (\K{generalTerms}) or using complex curves if Easement is set to Cornu \K{joinCornu}.
 
 \S2{joinNormalEasment} Join with Normal Easement
 
@@ -355,9 +380,18 @@ This method of joining track may be used using Normal Easments where tracks are 
 
 }
 
-\n Move the mouse pointer over the endpoint of the other track then \e{Left-Click} and hold the mouse button down. A track connecting the two endpoints will appear. If the track appears in black (and you are happy with the curve as its drawn), release the mouse button.
+After the first track is selected, an entry field for prefered radius will be shown. A non-zero value will enable the snap anchor for the join radius. 
+
+\n Move the mouse pointer over the endpoint of the other track then \e{Left-Click} and hold the mouse button down. A track connecting the two endpoints will appear. 
 
 \lcont{
+
+If the track appears in black (and you are happy with the curve as its drawn), release the mouse button.
+
+If the radius snap-anchor is active, and the position of the cursor is close to a position where the Join is exactly the desired radius, a blue circle will be shown. 
+Releasing the button while it shows will snap the Join to the desired radius. If Easements are enabled as well, this fixed radius Join track will be joined to by easements.
+
+
 
 \u000
 
@@ -401,49 +435,55 @@ For detail about;
 
 \dd Moving one segment of track to join with another refer to \K{joinTrackMove}.
 
-\S2{joinCornu} \i{Creating a Cornu} \i{Modifying a Cornu} \i{Cornu Easements} Join with Cornu Easement
+\rule
 
-A Cornu is a form of curve that uses a mathematical approach to creating a curve between two sets of end conditions. The curve is designed to change curvature linearly along its length - which is the characteristic of a railway easement.
+\S2{joinCornu} Join with Cornu Easement
 
-The conditions used at each end are the radius, angle and position.  Cornus can have added constraints in the form of "pins" that force the curve to smoothly pass through that point while still respecting the end conditions.
+\i{Creating a Cornu} \i{Modifying a Cornu} \i{Cornu Easements}
 
-Cornus are used in XtrCAD to both Join tracks smoothly and form smooth curves that are not joined to other tracks.
+A Cornu is a form of curve that uses a mathematical approach to creating a curve between two sets of end conditions. 
 
-The Cornu curve is designed to change radius (curvature) linearly along its length, which mimics the characteristics of railway easements because it minimizes sudden changes in acceleration towards the center of curvature.
+The curve is designed to change curvature linearly along its length - which is the characteristic of a railway easement because it minimizes sudden changes in acceleration towards the center of curvature.
 
-Because Cornu are mathematically generated, they can also be regenerated at will and so Cornu Joins have the unique characteristic in XtrkCAD that they remain connected even if the tracks at the end are moved or even change shape.
+The conditions used at each end are the radius, angle and position.  
 
-Cornu Joins will use whatever space is available - that is their "tightness" (rate of change of curvature) is variable and dynamic.
+Cornus can have added constraints in the form of track "pins" that force the curve to smoothly pass through that point while still respecting the end conditions.
 
-\S2{cornuTrackPins}
+Cornus can be used in XtrackCAD to both Join tracks smoothly and form smooth curves that are not joined to other tracks.
 
-XTrackCAD Cornu can have "track pins" added that constrain the track to pass through those points in addition to meeting the end-conditions. This allows the track to be skewed or slewed around obstacles, or to suit some other constraint.
+Because Cornu are mathematically generated, they can also be regenerated at will and so Cornu Joins have the unique characteristic in XTrackCAD that they remain connected even if the tracks at the ends are moved or even change shape.
 
-The pins can be added when Cornus are created \K{cmdCornu} or during \K{cmdModify} after clicking on the track. They can be selected and then dragged to alter the curve shape or deleted with \f{Delete}.
+Cornu Joins will use whatever space is available - that is their "tightness" (rate of change of curvature) is variable and dynamic. The minimum radius is calculated and will show as an exception, but the acceptable rate of change of curvature is the choice of the designer.
 
-When a Cornu Track with pins is saved, it is split into two Cornu joined at the pin. If a Cornu that is joined to another Cornu is Modified with \K{cmdModify}, the joints are rendered as Pins and the Modify is for one continuous Cornu.
+It is not always the case that the Cornu will be the most efficient way to get from A to B - because of its shape it will be the smoothest.  If you want to bias the result, you can add TrackPins (\K{cornuTrackPins}).
+
+\rule
+
+\S2{cornuTrackPins} Cornu Track Pins
+
+XTrackCAD Cornu can have "track pins" added that constrain the track to pass through those points in addition to meeting the end-conditions. 
+This allows the track to be skewed or slewed around obstacles, or to suit some other constraint.
+
+The pins can be added when Cornus are created \K{cmdCornu} or during \K{cmdModify} after clicking on the track. They can be selected and then \c{Left-Drag} dragged to alter the curve shape or deleted with \c{Delete}.
+
+When a Cornu Track with pins is saved, it is split into two Cornu joined at the pin. If a Cornu that is joined to another Cornu is Modified with \K{cmdModify}, the joints are rendered as Pins and the Modify is done for one continuous Cornu.
 
 \u000
 
 \n First, ensure that the Easement type option is set to Cornu - see \k{cmdEasement}
 
-\n Start the join process by clicking on the Join button (\G{png.d/bjoin.png}). A blue dot will indicate the end that will be chosen with \e{Left-Click}.
+\n Start the Join Track process by clicking on the Join Track button (\G{png.d/bjoin.png}). 
 
-\lcont{
-
-\u000
+As you move over tracks a blue roundel will indicate the end that will be chosen with \e{Left-Click}.
 
 \G{png.d/joincornu1.png}
 
-\u000
-
-}
-
-\dd \e{Left-Click} the open endpoint of one of the two tracks being joined. A red dot within a red circle will appear at the end of the join.
+\dd \c{Left-Click} the open endpoint of one of the two tracks being joined. A red dot within a red circle will appear at the end of the join.
 
 \u000
 
-\dd \e{Left-Drag} the endpoint to where you want it and release the button. The point will only move along the piece of track with the open endpoint (if this track type can be split) as far as the opposite end, or as an extension of that track at the selected end with the same curvature (if this track can be extended). Note that you will be able to fine-tune the end positions later.
+\dd \c{Left-Drag} the endpoint to where you want it and release the button. 
+The point will only move along the piece of track with the open endpoint (if this track type can be split) as far as the opposite end, or as an extension of that track at the selected end with the same curvature (if this track can be extended). Note that you will be able to fine-tune the end positions later.
 
 \lcont{
 
@@ -455,11 +495,13 @@ When a Cornu Track with pins is saved, it is split into two Cornu joined at the 
 
 }
 
-\dd \e{Left-Click} the endpoint of the other track being joined. Another red dot within a circle will appear at that end of the join.
+\dd \c{Left-Click} the endpoint of the other track being joined. Another red dot within a circle will appear at that end of the join.
 
 \u000
 
-\dd \e{Left-Drag} the endpoint to where you want it and release the button. The second endpoint can only be moved along the second track as far as the other end (if it can be split) or as an extension beyond the end of this track (if it can be extended). The initial curve will be drawn - it will be red if the minimum radius is smaller than the minimum radius option.
+\dd \c{Left-Drag} the endpoint to where you want it and release the button. 
+The second endpoint can only be moved along the second track as far as the other end (if it can be split) or as an extension beyond the end of this track (if it can be extended). 
+The initial curve will be drawn - it will be red if the minimum radius is smaller than the minimum radius option.
 
 \lcont{
 
@@ -471,7 +513,19 @@ When a Cornu Track with pins is saved, it is split into two Cornu joined at the 
 
 }
 
-\dd You are now in "Select Points" mode. You can select one end point at a time with \e{Left-Click} and move it with \e{Left-Drag}.
+\dd You are now in "Select Points" mode. 
+
+\u000
+
+\dd You can select one end point at a time with \c{Left-Click} and move it with \c{Left-Drag}. If you drag the end point off the original track it will extend. 
+
+\u000
+
+\dd You can select a pin by \c{Left-Click}ing on it and move it with \c{Left-Drag}. \c{Delete} will remove the last selected Pin.
+
+\u000
+
+\dd You can add a Pin by \c{Left-Click}ing on an area of the track with no Pin or end.
 
 \u000
 
@@ -534,7 +588,7 @@ A Turntable (\K{cmdTurntable}) can be joined however it must be used as the seco
 
 For detail about;
 
-\dd Using curved flex-track to join track segments refer to \K{joinTrackCurve}.
+\dd Using curved flex-track to join track segments refer to \K{joinCornu}.
 
 \u000
 
@@ -594,7 +648,7 @@ This method of joining track may be used to move, align and join one section of 
 
 For detail about;
 
-\dd Using curved flex-track to join track segments refer to \K{joinTrackCurve}.
+\dd Using curved flex-track to join track segments refer to \K{joinCornu}.
 
 \u000
 
@@ -805,7 +859,7 @@ In Origin Mode, the context menu allows the origin to be set to be -
 
 \dd \e{Absolute} (shortcut "0") with the origin at the layout origin or
 
-\dd \e{Relative} by dragging the origin to a point, or snapping to the position of the first 4 corner points (shortcut "1" through "4"), or to the centroid of the shape (shortcut "c"). For a Polygon or Polyline the \e{Relative} origin can be snapped to a selected node (shortcut "l").
+\dd \e{Relative} by dragging the origin to a point, or snapping to the position of the first 4 corner points (shortcut "1" through "4"), or to the middle/centroid of the shape (shortcut "m"). For a Polygon or Polyline the \e{Relative} origin can be snapped to a last selected node (shortcut "l").
 
 \u000
 
@@ -863,11 +917,11 @@ If no nodes are selected,
 
 \u000
 
-\b A context menu can be used to close a polyline into a polygon (shortcut "c") or open it (shortcut "o") into a non-filled polygon between its last and first nodes.
+\b A context menu can be used to close a polyline into a polygon (shortcut "g") or open it (shortcut "l") into a non-filled polygon between its last and first nodes.
 
 \u000
 
-\b A unfilled polygon can also be filled (shortcut "f") or a filled one emptied (shortcut "e").
+\b A unfilled polygon can also be filled (shortcut "f") or a filled one emptied (shortcut "u").
 
 \u000
 
@@ -1039,7 +1093,7 @@ Any amount of precise transalation may be entered by \e{Left-Click}ing the \f{En
 
 \G{png.d/bmovedes.png}
 
-This command is used to move Elevation, Grade, Station (\K{cmdElev}), Curved Track (\K{cmdCurve}), Bezier, Cornu, Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
+This command is used to move Elevation, Grade, Station (\K{cmdElevation}), Curved Track (\K{cmdCurve}), Bezier, Cornu, Helix (\K{cmdHelix}) and Structure or Turnout (\K{cmdHotBar}) Labels.
 
 The \f{Move Description} command can be invoked using the \f{Change>Move Description} menu item or the \f{Move Description} button.
 
@@ -1051,7 +1105,7 @@ This operation can also be invoked by \e{Ctrl+Left+Drag} when in Select command 
 
 The letter "\f{h}", can be used to hide display of individual Curved Track, Bezier Track, Cornu, Helix or Turnout Labels. The letter"\f{s} will show a hidden description. There is a \f{Context Menu} Show/Hide Toggle as well.
 
-Note - existing defined elevation labels can be moved, but controlling thier visbility is done with the \K{cmdElev} command.
+Note - existing defined elevation labels can be moved, but controlling thier visbility is done with the \K{cmdElevation} command.
 
 \rule
 
@@ -1073,20 +1127,21 @@ There is a context menu that contains these text based items as well.
 
 \u000
 
-\b Key 'e' sets the zoom to a value that allows all the room to be shown
+\b Key 'e' sets the zoom to a value that allows all the room to be shown and moves the origin of the bottomm left of the window to 0,0
 
 \u000
 
-\b Key '0' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
+\b Key '0' or 'o' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
 
 \u000
 
-\b Key '@' moves the center of the window to the cursor position
+\b Key 'c' moves the center of the window to the cursor position but leaves the zoom alone
 
 }
 
-As the window is Zoomed in and out, the setting of \f{Zoom Keeps Current Corner in View} setting in the \K{cmdDisplay} determines where the zoom is about.
-If this is not selected, the window center will stay fixed as the zoom changes.
+As the window is Zoomed in and out, the setting of \f{Constrain Drawing Area to Room Boundaries} setting in the \f{Display} \K{cmdDisplay} dialog determines where the zoom is about.
+If it is not set, the center of the Drawing Area will stay fixed as the zoom changes.
+Otherwise, position of the Drawing Area will be constraned so any \f{grey} area will be to the right or above the room boundaries.
 
 \S{cmdProfile} Profile
 
@@ -1102,7 +1157,7 @@ If no route is possible an error message is displayed.  There are several reason
 
 \u000
 
-\b One of the endpoints on the route is \f{Ignored} (\K{cmdElev}).  Look for blue dots on the expected path when using the Profile or \f{Elevation} (\K{cmdElev}) commands.
+\b One of the endpoints on the route is \f{Ignored} (\K{cmdElevation}).  Look for blue dots on the expected path when using the Profile or \f{Elevation} (\K{cmdElevation}) commands.
 
 \u000
 
@@ -1110,7 +1165,7 @@ If no route is possible an error message is displayed.  There are several reason
 
 The path is drawn in the Profile Color (\K{cmdRgbcolor}) (default Purple) on the layout.
 
-If the shortest path is not what you want, you can choose endpoints that are closer to the end of the path.  Also, you can \f{Ignore} (\K{cmdElev}) endpoints to prevent the path from choosing a route through that endpoint.  Shift+Right-Click (\K{cmdAcclKeys}) displays a pop-up menu that allows you to change the specified endpoint to be a \f{Defined}, \f{Ignored} or \f{None} Elevation endpoint.
+If the shortest path is not what you want, you can choose endpoints that are closer to the end of the path.  Also, you can \f{Ignore} (\K{cmdElevation}) endpoints to prevent the path from choosing a route through that endpoint.  Shift+Right-Click (\K{cmdAcclKeys}) displays a pop-up menu that allows you to change the specified endpoint to be a \f{Defined}, \f{Ignored} or \f{None} Elevation endpoint.
 
 Each \f{Defined Elevation} endpoint on the path is drawn as a Vertical bar, labeled with its height and distance from the beginning of the path.
 
@@ -1704,7 +1759,7 @@ Dividing a section of flex track into two connected pieces;
 
 It's not possible to create a track shorter than the \e{Minimum Track Length} (\K{cmdPref}).
 
-This command is useful for placing tunnel portals or elevation points (\K{cmdElev}) at specific track locations.
+This command is useful for placing tunnel portals or elevation points (\K{cmdElevation}) at specific track locations.
 
 Normally a turnout cannot be split however, if the \e{Shift} key is held when executing this command then the turnout can be \e{trim}med. \e{Trim}ming replaces the portion of track between the split point and the turnouts endpoint with flex-track. For turnouts with more than one set of points (\K{generalTerms}), such as a slip switch or scissors crossover, a \e{trim} point cannot be selected between the \e{points} of the turnout.
 

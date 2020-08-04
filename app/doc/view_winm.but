@@ -42,6 +42,10 @@ The \f{View Menu} shows commands affecting the display of the \f{Main Canvas} (\
 
 \u000
 
+\dd \f{Pan/Zoom} - move or resize the viewport using the mouse (\K{cmdPan}).
+
+\u000
+
 \dd \G{png.d/mzoomscale.png}
 
 \u000
@@ -110,7 +114,6 @@ Command button groups displayed on the \f{Tool-bar} are selected using the Tool-
 
 \rule
 
-
 \S{cmdZoom} \i{Zoom}
 
 \G{png.d/bgzoom.png}
@@ -129,35 +132,26 @@ Holding down the Shift key while clicking the \f{Zoom In} or \f{Zoom Out} button
 
 \u000
 
-\b Key 'e' sets the zoom to a value that allows all the room to be shown
+\b Key 'e' sets the zoom to a value that allows all the room to be shown and moves the origin of bottom left of the window to be 0,0
 
 \u000
 
-\b Key '0' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
+\b Key '0' or 'o' keeps the zoom as is, but moves the origin of the bottom left of the window to 0,0
 
 \u000
 
-\b Key '@' moves the center of the window to the cursor position
-
-}
-
-\dd \e{\i{Programmed Zoom}}
-
-\lcont{
-
-\u000
-
-\b The \e{Programmed Zoom} value for the \f{Zoom In} button is set to the current Drawing Scale by holding down the Shift and Ctrl keys while clicking on the \f{Zoom In} button.
-
-\u000
-
-\b The \e{Programmed Zoom} value for the \f{Zoom Out} button is set to the current Drawing Scale by holding down the Shift and Ctrl keys while clicking on the \f{Zoom Out} button.
+\b Key 'c' moves the center of the window to the cursor position 
 
 }
 
 Normally a zoom in more of more than 1:1 is not possible, however if the Ctrl key is held down while the \f{Zoom In} button is pressed a zoom less that 1:1 can be achieved. This function is useful when working on detail.
 
 Pressing the middle Zoom button on the Tool Bar pop-ups a list of Zoom factors that can be select from.
+
+\u000
+
+\dd The Pan function can be accessed using the Mouse Wheel with \e{Shift} of the \e{Mouse Middle Button}. Adding \e{Ctrl} as well as \e{Shift} chnages Up to Left and Down to Right. 
+Pan Left and Right can also be driven by the Horizontal Mouse Wheel (if available) or the Scroll Left/Right Guestures (if mapped by the Operating System).
 
 \rule
 

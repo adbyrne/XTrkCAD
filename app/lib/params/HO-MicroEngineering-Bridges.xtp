@@ -79,7 +79,7 @@ TURNOUT HO "Micro-Engineering	100' Single-Track Thru-Girder Bridge	75-522"
 	L 11579568 0.100000 0.000000 -1.000000 13.777268 -1.000000
 END
 TURNOUT HO "Micro-Engineering	50' Double-Track Thru-Girder Bridge	75-521"
-	P "P0" 1 0 1
+	P "P0" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 6.888634 0.000000 90.000000
 	E 0.000000 -2.000000 270.000000
@@ -117,7 +117,7 @@ TURNOUT HO "Micro-Engineering	50' Double-Track Thru-Girder Bridge	75-521"
 	L 11579568 0.100000 0.000000 -3.000000 6.888634 -3.000000
 END
 TURNOUT HO "Micro-Engineering	100' Double-Track Thru-Girder Bridge	75-523"
-	P "P0" 1 0 1
+	P "P0" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 13.777268 0.000000 90.000000
 	E 0.000000 -2.000000 270.000000
@@ -597,7 +597,7 @@ TURNOUT HO "Micro-Engineering	150' Single-Track City Viaduct Bridge	75-511"
 
 END
 TURNOUT HO "Micro-Engineering	90' Double-Track City Viaduct Bridge	75-510"
-	P "P0" 1 0 1
+	P "P0" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 12.399541 0.000000 90.000000
 	E 0.000000 -1.000000 270.000000
@@ -618,7 +618,7 @@ TURNOUT HO "Micro-Engineering	90' Double-Track City Viaduct Bridge	75-510"
 	L 11579568 0.100000 8.266360 0.500000 8.266360 -1.500000
 END
 TURNOUT HO "Micro-Engineering	150' Double-Track City Viaduct Bridge	75-512"
-	P "P0" 1 0 1
+	P "P0" 1 0 2
 	E 0.000000 0.000000 270.000000
 	E 20.665901 0.000000 90.000000
 	E 0.000000 -1.000000 270.000000

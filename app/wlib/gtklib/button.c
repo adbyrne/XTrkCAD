@@ -94,15 +94,23 @@ void wlibSetLabel(
             } else {
                 pixbuf = wlibPixbufFromXBM( bm );
             }
+            double scaleicon;
+            wPrefGetFloat(PREFSECTION, LARGEICON, &scaleicon, 1.0);
+            if (scaleicon<1.0) scaleicon=1.0;
+            if (scaleicon>2.0) scaleicon=2.0;
+            GdkPixbuf *pixbuf2 =
+            		gdk_pixbuf_scale_simple(pixbuf, gdk_pixbuf_get_width(pixbuf)*scaleicon, gdk_pixbuf_get_height(pixbuf)*scaleicon, GDK_INTERP_BILINEAR);
+            g_object_ref_sink(pixbuf);
+            g_object_unref((gpointer)pixbuf);
             if (*imageG==NULL) {
-                *imageG = gtk_image_new_from_pixbuf(pixbuf);
+                *imageG = gtk_image_new_from_pixbuf(pixbuf2);
                 gtk_container_add(GTK_CONTAINER(widget), *imageG);
                 gtk_widget_show(*imageG);
             } else {
-                gtk_image_set_from_pixbuf(GTK_IMAGE(*imageG), pixbuf);
+                gtk_image_set_from_pixbuf(GTK_IMAGE(*imageG), pixbuf2);
             }
-            g_object_ref_sink(pixbuf);
-            g_object_unref((gpointer)pixbuf);
+            g_object_ref_sink(pixbuf2);
+            g_object_unref((gpointer)pixbuf2);
         } else {
             if (*labelG==NULL) {
                 *labelG = (GtkLabel*)gtk_label_new(wlibConvertInput(labelStr));
@@ -210,7 +218,10 @@ wButton_p wButtonCreate(
     void 	* data)
 {
     wButton_p b;
-    b = wlibAlloc(parent, B_BUTTON, x, y, labelStr, sizeof *b, data);
+    if (option&BO_ICON)  //The labelStr here is a wIcon_p
+    	b = wlibAlloc(parent, B_BUTTON, x, y, " ", sizeof *b, data);
+    else
+    	b = wlibAlloc(parent, B_BUTTON, x, y, labelStr, sizeof *b, data);
     b->option = option;
     b->action = action;
     wlibComputePos((wControl_p)b);
@@ -223,6 +234,7 @@ wButton_p wButtonCreate(
     if (width > 0) {
         gtk_widget_set_size_request(b->widget, width, -1);
     }
+
     if( labelStr ){
         wButtonSetLabel(b, labelStr);
     }

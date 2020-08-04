@@ -86,6 +86,17 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 \u000
 
 \dd Manipulate track and other objects
+The toolbar buttons size can be adjusted using a User Preference in the .ini or .rc file 
+(on Windows or Mac/Linux) in the xtrkcad directory.  
+If running Linux or Mac
+a line \c{"Preference.LargeIcons: 1.5"} can be added. The scale value can be from 1.0 to 2.0 only.
+The corresponding configuration Windows would be
+
+\c        [Preference]
+\c           LargeIcons=1.5
+
+\e{Note} The configuration file uses the language specific definitions for the decimal separator.
+Eg. in Germany, where the comma is used,  the correct value would be\c{LargeIcons=1,5}.
 
 \u000
 
@@ -117,7 +128,26 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \u000
 
-\dd The center of the \f{Main Canvas} can be moved to be at the cursor in \f{Select}, \f{Modify} and \f{Pan/Zoom} using the "@" key.
+\dd The center of the \f{Main Canvas} can be moved (Panned) using the; 
+
+\lcont{
+
+\b ARROW Keys
+
+\b Left-Click and drag in \K{cmdZoom} 
+
+\b "@" key in \f{Select}, \f{Modify} and \f{Pan/Zoom}.
+
+\b Mouse Wheel - adding \e{Shift} key or the \e{Mouse Middle Button} will Pan the screen. adding \e{Ctrl} as well makes up Pan left and down Pan right.
+
+\b Horizontal Mouse Wheel - adding \e{Shift} or the \e{Mouse Middle Button} will Pan the screen left and Right (if available)
+
+\b Scroll Left and Right - if the scroll left and right guestures are mapped to the trackpad by the operating system, with \e{Shift} depressed the screen will Pan.
+
+}
+
+\dd The \f{Main Canvas} can be panned so that the area beyond the room boundaries is shown (the \f{grey} area).  The \f{Constrain Drawing Area to Room Boundaries} option on the \f{Display} (\K{cmdDisplay}) dialog under the \f{Options} (\K{optionM}) menu forces the \f{Main Canvas} stop panning once the room boundary is reached.
+Holding the \e{Control} key while panning will invert the value of this setting. 
 
 \u000
 
@@ -133,11 +163,15 @@ Most windows can be opened, closed, resized, minimized, and moved around the scr
 
 \b PAGE UP and PAGE DOWN keys
 
-\b \K{cmdPan} button on the \f{Tool-bar}
+\b \f{Pan/Zoom} \K{cmdPan} button on the \f{Tool-bar}
 
 \f{Note:} If The scale 1:1 is reached, "Macro Zoom" mode can be entered using CTRL+PageDown - with repeated presses a scale of 10::1 is possible. 
 
 }
+
+\dd When \f{Zooming}, the Main Canvas will retain the center of the display if 
+\f{Constrain Drawing Area to Room Boundaries} is not set.
+Otherwise, as much of the room as possible is displayed, and any \f{grey} area will be to the right and above the room.
 
 \u000
  
@@ -961,7 +995,7 @@ The Shortcut key for each command is listed after the command name.
 \u000
 
 
-\dt Elevation Command (\K{cmdElev}) - \e{Ctrl+Shift+E}
+\dt Elevation Command (\K{cmdElevation}) - \e{Ctrl+Shift+E}
 
 \dd Choose endpoint - \e{Left-Click}
 
@@ -1101,6 +1135,10 @@ The Shortcut key for each command is listed after the command name.
 \dd Position Ruler - \e{Left+Drag}
 
 \u000
+
+\dt Angle Command (\K{cmdAngle})
+
+\dd Position Protractor - \e{Left-Drag}
 
 
 \dt Select Command (\K{cmdSelect}) - \e{Ctrl+E}

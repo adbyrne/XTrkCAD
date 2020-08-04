@@ -35,6 +35,8 @@ typedef struct track_t * track_p;
 typedef struct track_t * track_cp;
 extern track_p tempTrack;
 extern wIndex_t trackCount;
+extern long colorTrack;
+extern long colorDraw;
 extern long drawTunnel;
 extern long drawEndPtV;
 extern long drawUnconnectedEndPt;
@@ -208,7 +210,7 @@ typedef struct {
 		long option;
 		} trkEndPt_t, * trkEndPt_p;
 
-dynArr_t tempEndPts_da;
+extern dynArr_t tempEndPts_da;
 #define tempEndPts(N) DYNARR_N( trkEndPt_t, tempEndPts_da, N )
 
 typedef enum { FREEFORM, RECTANGLE, POLYLINE
@@ -290,12 +292,12 @@ typedef struct {
 
 #define IsSegTrack( S ) ( (S)->type == SEG_STRTRK || (S)->type == SEG_CRVTRK || (S)->type == SEG_JNTTRK || (S)->type == SEG_BEZTRK)
 
-dynArr_t tempSegs_da;
+extern dynArr_t tempSegs_da;
 
 #define tempSegs(N) DYNARR_N( trkSeg_t, tempSegs_da, N )
 
-char tempSpecial[4096];
-char tempCustom[4096];
+extern char tempSpecial[4096];
+extern char tempCustom[4096];
 
 void ComputeCurvedSeg(
 		trkSeg_p s,
@@ -737,7 +739,7 @@ STATUS_T CompoundDescriptionMove( track_p, wAction_t, coOrd );
 #define ELEV_ISLAND		(1)
 #define ELEV_ALONE		(0)
 
-long oldElevationEvaluation;
+extern long oldElevationEvaluation;
 EPINX_T GetNextTrkOnPath( track_p trk, EPINX_T ep );
 int FindDefinedElev( track_p, EPINX_T, int, BOOL_T, DIST_T *, DIST_T * );
 BOOL_T ComputeElev( track_p, EPINX_T, BOOL_T, DIST_T *, DIST_T *, BOOL_T );
@@ -754,7 +756,9 @@ typedef enum {DRAWLINESOLID,
 			DRAWLINEDASH,
 			DRAWLINEDOT,
 			DRAWLINEDASHDOT,
-			DRAWLINEDASHDOTDOT} drawLineType_e;
+			DRAWLINEDASHDOTDOT,
+			DRAWLINECENTER,
+			DRAWLINEPHANTOM } drawLineType_e;
 track_p MakeDrawFromSeg( coOrd, ANGLE_T, trkSeg_p );
 track_p MakePolyLineFromSegs( coOrd, ANGLE_T, dynArr_t * );
 void DrawOriginAnchor(track_p);

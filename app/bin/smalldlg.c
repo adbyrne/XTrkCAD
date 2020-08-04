@@ -87,7 +87,7 @@ static void CreateTipW( void )
 	char *filename;
 	char * cp;
 
-	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle(_("Tip of the Day")), _("Ok"), (paramActionOkProc)wHide, wHide, FALSE, NULL, F_CENTER, NULL );
+	tipW = ParamCreateDialog( &tipPG, MakeWindowTitle(_("Tip of the Day")), _("Ok"), (paramActionOkProc)wHide, wHide, FALSE, NULL, F_RESIZE|F_CENTER, NULL );
 
 	/* open the tip file */
 	MakeFullpath(&filename, libDir, sTipF, NULL);

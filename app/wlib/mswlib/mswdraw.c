@@ -20,7 +20,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */	
 
-#define _WIN32_WINNT 0x0500		/* for wheel mouse supposrt */
+#define _WIN32_WINNT 0x0600		/* for wheel mouse supposrt */
 #include <windows.h>
 #include <string.h>
 #include <malloc.h>
@@ -186,6 +186,9 @@ static void setDrawMode(
 		wDrawColor dc,
 		wDrawOpts dopt )
 {
+	long centerPen[] = {40,10,20,10};
+	long phantomPen[] = {40,10,20,10,20,10};
+
 	HPEN hOldPen;
 	static wDraw_p d0;
 	static wDrawWidth dw0 = -1;
@@ -217,26 +220,37 @@ static void setDrawMode(
 
 	d0 = d; dw0 = dw; lt0 = lt; dc0 = dc;
 
+	void * penarray = NULL;
+	int penarray_size = 0;
+
 	logBrush.lbColor = mswGetColor(d->hasPalette,dc);
 	if ( lt==wDrawLineSolid ) {
 		penStyle = PS_GEOMETRIC | PS_SOLID;
 		if ( noFlatEndCaps == FALSE )
 			penStyle |= PS_ENDCAP_FLAT;
-		d->hPen = ExtCreatePen( penStyle,
-				dw,
-				&logBrush,
-				0,
-				NULL );
-				/*colorPalette.palPalEntry[dc] );*/
 	} else if (lt == wDrawLineDot) {
-		d->hPen = CreatePen( PS_DOT, 0, mswGetColor( d->hasPalette, dc ) );
+		penStyle = PS_GEOMETRIC | PS_DOT;
 	} else if (lt == wDrawLineDash) {
-		d->hPen = CreatePen( PS_DASH, 0, mswGetColor( d->hasPalette, dc ) );
+		penStyle = PS_GEOMETRIC | PS_DASH;
 	} else if (lt == wDrawLineDashDot) {
-		d->hPen = CreatePen( PS_DASHDOT, 0, mswGetColor( d->hasPalette, dc ) );
-	} else {
-		d->hPen = CreatePen( PS_DASHDOTDOT, 0, mswGetColor( d->hasPalette, dc ) );
-	}
+		penStyle = PS_GEOMETRIC | PS_DASHDOT;
+	} else if ( lt == wDrawLineDashDotDot){
+		penStyle = PS_GEOMETRIC | PS_DASHDOTDOT;
+	} else if (  lt == wDrawLineCenter) {
+		penStyle = PS_GEOMETRIC | PS_USERSTYLE;
+		penarray = &centerPen;
+		penarray_size = sizeof(centerPen)/sizeof(long);
+	} else if (  lt == wDrawLinePhantom) {
+		penStyle = PS_GEOMETRIC | PS_USERSTYLE;
+		penarray = &phantomPen;
+		penarray_size = sizeof(phantomPen) / sizeof(long);
+	} else
+		penStyle = PS_GEOMETRIC | PS_SOLID;
+	d->hPen = ExtCreatePen( penStyle,
+					dw,
+					&logBrush,
+					penarray_size,
+					penarray );
 	hOldPen = SelectObject( d->hDc, d->hPen );
 	DeleteObject( hOldPen );
 }
@@ -894,9 +908,9 @@ wFontSize_t wSelectedFontSize( void )
 	return fontSize;
 }
 
-void wSetSelectedFontSize(int size)
+void wSetSelectedFontSize(wFontSize_t size)
 {
-	fontSize = (wFontSize_t)size;
+	fontSize = size;
 }
 
 /*
@@ -1601,6 +1615,8 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		iy = HIWORD( lParam );
 		x = XPIX2INCH( b, ix );
 		y = YPIX2INCH( b, iy );
+		b->lastX = x;
+		b->lastY = y;
 		if (b->action)
 			b->action( b, b->data, action, x, y );
 		if (b->hWnd)
@@ -1622,7 +1638,7 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		case VK_RIGHT:	extChar = wAccelKey_Right; break;				
 		case VK_LEFT:	extChar = wAccelKey_Left; break;
 		case VK_BACK:	extChar = wAccelKey_Back; break;
-		/*case VK_F1:	extChar = wAccelKey_F1; break;*/
+		case VK_F1:		extChar = wAccelKey_F1; break;
 		case VK_F2:		extChar = wAccelKey_F2; break;
 		case VK_F3:		extChar = wAccelKey_F3; break;
 		case VK_F4:		extChar = wAccelKey_F4; break;
@@ -1637,9 +1653,9 @@ long FAR PASCAL XEXPORT mswDrawPush(
 		}
 		if (b && b->action) {
 			if (extChar != wAccelKey_None)
-				b->action( b, b->data, wActionExtKey + ( (int)extChar << 8 ), 0, 0 );
+				b->action( b, b->data, wActionExtKey + ( (int)extChar << 8 ), b->lastX, b->lastY );
 			else
-				b->action( b, b->data, wActionText + ( wParam << 8 ), 0, 0 );
+				b->action( b, b->data, wActionText + ( wParam << 8 ), b->lastX, b->lastY );
 		}
 		return 0;
 
@@ -1697,18 +1713,44 @@ long FAR PASCAL XEXPORT mswDrawPush(
 static LRESULT drawMsgProc( wDraw_p b, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
 	wAction_t action;
-
+	
 	switch( message ) {
 	case WM_MOUSEWHEEL:
 		/* handle mouse wheel events */
-		/* fwKeys = GET_KEYSTATE_WPARAM(wParam); modifier keys are currently ignored */
-		if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
-			action = wActionWheelUp;
+		if (GET_KEYSTATE_WPARAM(wParam) & (MK_SHIFT|MK_MBUTTON) ) {
+			if (GET_KEYSTATE_WPARAM(wParam) & MK_CONTROL ) {
+				if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
+					action = wActionScrollLeft;
+				} else {
+					action = wActionScrollRight;
+				}
+			} else {
+				if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
+					action = wActionScrollUp;
+				} else {
+					action = wActionScrollDown;
+				}
+			}
 		} else {
-			action = wActionWheelDown;
+			if (GET_WHEEL_DELTA_WPARAM(wParam) > 0) {
+				action = wActionWheelUp;
+			} else {
+				action = wActionWheelDown;
+			}
 		}
 		if (b->action)
-			b->action( b, b->data, action, 0, 0 );
+			b->action( b, b->data, action, b->lastX, b->lastY );
+		return 0;
+	case WM_MOUSEHWHEEL:
+		if ( GET_KEYSTATE_WPARAM(wParam) & (MK_SHIFT|MK_MBUTTON)) {
+			if ( GET_WHEEL_DELTA_WPARAM(wParam) > 0 ) {
+				action = wActionScrollRight;
+			} else {
+				action = wActionScrollLeft;
+			}
+		}
+		if (b->action)
+			b->action( b, b->data, action, b->lastX, b->lastY );
 		return 0;
 	}
 

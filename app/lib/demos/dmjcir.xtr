@@ -17,7 +17,7 @@ You can also join to and from circles.  This will change the circles to curves.
 In this example we will join two circles.
 END
 STEP
-COMMAND Join
+COMMAND JoinTrack
 MOUSE 2 14.083 14.083
 MOUSE 4 14.083 14.083
 MOUSE 2 28.250 12.833
@@ -154,7 +154,7 @@ Now let's try a cross connection.
 END
 STEP
 PARAMETER misc cmdUndo
-COMMAND Join
+COMMAND JoinTrack
 MOUSE 2 15.500 13.333
 MOUSE 4 15.500 13.333
 MOUSE 2 27.667 4.167

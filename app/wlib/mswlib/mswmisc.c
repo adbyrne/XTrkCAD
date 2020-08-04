@@ -83,6 +83,8 @@ HFONT mswLabelFont;
 long mswThickFont = 1;
 double mswScale = 1.0;
 
+double scaleIcon = 1.0;				   /**< Scaling factor for toolbar icons */
+
 callBacks_t *mswCallBacks[CALLBACK_CNT];
 
 void closeBalloonHelp(void);
@@ -864,6 +866,10 @@ wWin_p wWinMainCreate(
 
 	wPrefGetInteger("draw", "maximized", &maximize, 0L);
 	option |= (maximize ? F_MAXIMIZE : 0);
+
+	wPrefGetFloat(PREFSECTION, LARGEICON, &scaleIcon, 1.0);
+	if (scaleIcon < 1.0) scaleIcon = 1.0;
+	if (scaleIcon > 2.0) scaleIcon = 2.0;
 
     showCmd = SW_SHOW;
     w = winCommonCreate(NULL, W_MAIN, option|F_RESIZE, "MswMainWindow",
@@ -2148,12 +2154,22 @@ int wNotice3(
     }
 }
 
+/**
+ * Show help text for the given topic. 
+ *
+ * \param  topic The topic. if NULL the index page is shown.
+ */
 
 void wHelp(
     const char * topic)
 {
     char *pszHelpTopic;
     HWND hwndHelp;
+	char *theTopic = "index";
+
+	if (topic) {
+		theTopic = topic;
+	}
 
     if (!helpInitted) {
         HtmlHelp(NULL, NULL, HH_INITIALIZE, (DWORD)&dwCookie) ;
@@ -2162,9 +2178,9 @@ void wHelp(
 
     /*	             "c:\\help.chm::/intro.htm>mainwin", */
     /* attention: always adapt constant value (10) to needed number of formatting characters */
-    pszHelpTopic = malloc(strlen(helpFile) + strlen(topic) + 10);
+    pszHelpTopic = malloc(strlen(helpFile) + strlen(theTopic) + 10);
     assert(pszHelpTopic != NULL);
-    sprintf(pszHelpTopic, "/%s.html", topic);
+    sprintf(pszHelpTopic, "/%s.html", theTopic);
     hwndHelp = HtmlHelp(mswHWnd, helpFile, HH_DISPLAY_TOPIC,
                         (DWORD_PTR)pszHelpTopic);
 
@@ -2223,9 +2239,9 @@ void wDoAccelHelp(wAccelKey_e key, void * context) {
 void wMenuAddHelp(
     wMenu_p m)
 {
-    wMenuPushCreate(m, NULL, "&Contents", 0, doHelpMenu, (void*)1);
-    wMenuPushCreate(m, NULL, "&Search for Help on...", 0, doHelpMenu, (void*)2);
-    wMenuPushCreate(m, NULL, "Co&mmand Context Help", 0, doHelpMenu, (void*)3);
+    wMenuPushCreate(m, NULL, _("&Contents"), 0, doHelpMenu, (void*)1);
+    wMenuPushCreate(m, NULL, _("&Search for Help on..."), 0, doHelpMenu, (void*)2);
+    wMenuPushCreate(m, NULL, _("Co&mmand Context Help"), 0, doHelpMenu, (void*)3);
 }
 
 
@@ -3057,48 +3073,48 @@ MainWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         return 0L;
 
     case WM_SETCURSOR:
-        /*if (any buttons down)
-        	break;*/
-        wSetCursor(NULL, curCursor);
+		if (hWnd == mswHWnd)
+			wSetCursor(NULL, curCursor);
 
-        if (!mswAllowBalloonHelp) {
-            return TRUE;
-        }
+		if (!mswAllowBalloonHelp) {
+			break;
+		}
 
-        if (IsIconic(mswHWnd)) {
-            return TRUE;
-        }
+		if (IsIconic(mswHWnd)) {
+			break;
+		}
 
-        b = getControlFromCursor(hWnd, NULL);
+		b = getControlFromCursor(hWnd, NULL);
 
-        if (b == balloonControlButton) {
-            return TRUE;
-        }
+		if (b == balloonControlButton) {
+			break;
+		}
 
-        if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
-                                         (!b) || b->type == B_DRAW || b->helpStr == NULL) {
-            closeBalloonHelp();
-            return TRUE;
-        }
+		if (/*(!IsWindowEnabled(hWnd))*/ GetActiveWindow() != hWnd ||
+			(!b) || b->type == B_DRAW || b->helpStr == NULL) {
+			closeBalloonHelp();
+			break;
+		}
 
-        if (b != balloonHelpButton) {
-            closeBalloonHelp();
-        }
+		if (b != balloonHelpButton) {
+			closeBalloonHelp();
+		}
 
-        if (balloonHelpState != balloonHelpIdle) {
-            return TRUE;
-        }
+		if (balloonHelpState != balloonHelpIdle) {
+			break;
+		}
 
-        balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
-                                    balloonHelpTimeOut, NULL);
+		balloonHelpTimer = SetTimer(mswHWnd, BALLOONHELP_TIMER,
+			balloonHelpTimeOut, NULL);
 
-        if (balloonHelpTimer == (UINT)0) {
-            return TRUE;
-        }
+		if (balloonHelpTimer == (UINT)0) {
+			break;
+		}
 
-        balloonHelpState = balloonHelpWait;
-        balloonHelpButton = b;
-        return TRUE;
+		balloonHelpState = balloonHelpWait;
+		balloonHelpButton = b;
+		break;
+
 
     case WM_SYSCOMMAND:
         inx = GetWindowWord(hWnd, 0);

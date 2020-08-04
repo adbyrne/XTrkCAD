@@ -312,6 +312,24 @@ BOOL_T TraverseTrack2(
     return TRUE;
 }
 
+/***************
+ * When a track is deleted, cross check that the Traverse Track reference is removed.
+ */
+EXPORT void CheckCarTraverse(track_p track) {
+
+    track_p car;
+	for (car=NULL; TrackIterate(&car);) {
+        if (GetTrkType(car) == T_CAR) {
+        	struct extraData * xx = GetTrkExtraData(car);
+			if (xx->trvTrk.trk == track) {
+				xx->trvTrk.trk=NULL;
+				xx->status = ST_NotOnTrack;
+			}
+        }
+	}
+
+}
+
 
 
 static BOOL_T drawCarEnable = TRUE;
@@ -524,6 +542,24 @@ static BOOL_T QueryCar(track_p trk, int query)
     }
 }
 
+static BOOL_T StoreCar(
+		track_p car,
+		void **data,
+		long * len) {
+
+	struct extraData *xx = GetTrkExtraData(car);
+	return StoreCarItem(xx->item,data,len);
+
+}
+
+static BOOL_T ReplayCar (track_p car, void *data,long len) {
+
+	struct extraData *xx = GetTrkExtraData(car);
+	return ReplayCarItem(xx->item,data,len);
+
+}
+
+
 static wBool_t CompareCar( track_cp trk1, track_cp trk2 )
 {
 	return TRUE;
@@ -562,9 +598,9 @@ static trackCmd_t carCmds = {
     NULL,
     NULL,
     NULL,
-    NULL,
-    NULL,
-    NULL,
+    ReplayCar,
+    StoreCar,
+    NULL, /*activate*/
     CompareCar
 };
 
@@ -1088,6 +1124,8 @@ static void MoveMainWindow(
     Translate(&pos, pos, angle, dist);
     mainD.orig.x = pos.x-mainD.size.x/2;;
     mainD.orig.y = pos.y-mainD.size.y/2;;
+    panCenter = pos;
+    LOG( log_pan, 2, ( "PanCenter:%d %0.3f %0.3f\n", __LINE__, panCenter.x, panCenter.y ) );
     MainLayout( TRUE, TRUE ); // MoveTrainWindow
 }
 
@@ -1797,6 +1835,9 @@ static BOOL_T CheckCoupling(
 
     /* Move second train back along track half a car length */
     TraverseTrack2(&trvTrk1, distc/2.0-dist);
+    if ( trvTrk0.trk == NULL || trvTrk1.trk == NULL )
+        // fell off the end of track
+        return FALSE;
 
     /* If tracks are not the same - dont couple */
     if (trvTrk1.trk != trvTrk0.trk) {

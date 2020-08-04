@@ -245,6 +245,30 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 	case SEG_TBLEDGE:
 	case SEG_CRVLIN:
 	case SEG_JNTTRK:
+		if ( (segPtr->type == SEG_CRVTRK) ||
+			(segPtr->type == SEG_CRVLIN) ) {
+				/* TODO: be more precise about curved line width */
+				width.x = width.y = segPtr->width/2.0;
+				REORIGIN( pc, segPtr->u.c.center, angle, xlat );
+				a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
+				a1 = segPtr->u.c.a1;
+				radius = fabs(segPtr->u.c.radius);
+				if ( a1 >= 360.0 ) {
+					lo->x = pc.x - radius;
+					lo->y = pc.y - radius;
+					hi->x = pc.x + radius;
+					hi->y = pc.y + radius;
+					break;
+				}
+				if ( a0 + a1 >= 360.0 )
+					hi->y = pc.y + radius;
+				if ( a0 < 90.0 && a0+a1 >= 90.0 )
+					hi->x = pc.x + radius;
+				if ( a0 < 180 && a0+a1 >= 180.0 )
+					lo->y = pc.y - radius;
+				if ( a0 < 270.0 && a0+a1 >= 270.0 )
+					lo->x = pc.x - radius;
+			}
 			REORIGIN( p0, GetSegEndPt( segPtr, 0, FALSE, NULL ), angle, xlat )
 			REORIGIN( p1, GetSegEndPt( segPtr, 1, FALSE, NULL ), angle, xlat )
 			if (p0.x < p1.x) {
@@ -261,34 +285,9 @@ static void Get1SegBounds( trkSeg_p segPtr, coOrd xlat, ANGLE_T angle, coOrd *lo
 				lo->y = p1.y;
 				hi->y = p0.y;
 			}
-			if ( segPtr->type == SEG_CRVTRK ||
-				 segPtr->type == SEG_CRVLIN ) {
-				REORIGIN( pc, segPtr->u.c.center, angle, xlat );
-				a0 = NormalizeAngle( segPtr->u.c.a0 + angle );
-				a1 = segPtr->u.c.a1;
-				radius = fabs(segPtr->u.c.radius);
-				if ( a1 >= 360.0 ) {
-					lo->x = pc.x - radius;
-					lo->y = pc.y - radius;
-					hi->x = pc.x + radius;
-					hi->y = pc.y + radius;
-					return;
-				}
-				if ( a0 + a1 >= 360.0 )
-					hi->y = pc.y + radius;
-				if ( a0 < 90.0 && a0+a1 >= 90.0 )
-					hi->x = pc.x + radius;
-				if ( a0 < 180 && a0+a1 >= 180.0 )
-					lo->y = pc.y - radius;
-				if ( a0 < 270.0 && a0+a1 >= 270.0 )
-					lo->x = pc.x - radius;
-			}
 			if ( segPtr->type == SEG_STRLIN ) {
 				width.x = segPtr->width * fabs(cos( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
 				width.y = segPtr->width * fabs(sin( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
-			} else if ( segPtr->type == SEG_CRVLIN ) {
-				/* TODO: be more precise about curved line width */
-				width.x = width.y = segPtr->width/2.0;
 			} else if ( segPtr->type == SEG_BENCH ) {
 				width.x = BenchGetWidth( segPtr->u.l.option ) * fabs(cos( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
 				width.y = BenchGetWidth( segPtr->u.l.option ) * fabs(sin( D2R( FindAngle(p0, p1) ) ) ) / 2.0;
@@ -653,13 +652,12 @@ EXPORT void CloneFilledDraw(
 		case SEG_POLY:
 		case SEG_FILPOLY:
 			newPts = (pts_t*)MyMalloc( sp->u.p.cnt * sizeof (pts_t) );
+			memcpy( newPts, sp->u.p.pts, sp->u.p.cnt * sizeof (pts_t) );
 			if ( reorigin ) {
 				for ( inx = 0; inx<sp->u.p.cnt; inx++ )
 					REORIGIN( newPts[inx].pt, sp->u.p.pts[inx].pt, sp->u.p.angle, sp->u.p.orig );
 				sp->u.p.angle = 0;
 				sp->u.p.orig = zero;
-			} else {
-				memcpy( newPts, sp->u.p.pts, sp->u.p.cnt * sizeof (pts_t) );
 			}
 			//if (sp->u.p.pts)    Can't do this a pts could be pointing at static
 			//	free(sp->u.p.pts);
@@ -852,7 +850,7 @@ EXPORT ANGLE_T GetAngleSegs(
 {
 	wIndex_t inx;
 	ANGLE_T angle = 0.0;
-	coOrd p0;
+	coOrd p0,p1;
 	DIST_T d, dd;
 	segProcData_t segProcData;
 	coOrd pos2 = * pos1;
@@ -895,15 +893,17 @@ EXPORT ANGLE_T GetAngleSegs(
         break;
 	case SEG_POLY:
 	case SEG_FILPOLY:
-		p0 = pos2;
+		p0 = p1 = pos2;
 		dd = LineDistance( &p0, segPtr->u.p.pts[segPtr->u.p.cnt-1].pt, segPtr->u.p.pts[0].pt );
 		angle = FindAngle( segPtr->u.p.pts[segPtr->u.p.cnt-1].pt, segPtr->u.p.pts[0].pt );
 		for ( inx=0; inx<segPtr->u.p.cnt-1; inx++ ) {
-			p0 = pos2;
+			p0 = p1;
 			d = LineDistance( &p0, segPtr->u.p.pts[inx].pt, segPtr->u.p.pts[inx+1].pt );
 			if ( d < dd ) {
 				dd = d;
 				angle = FindAngle( segPtr->u.p.pts[inx].pt, segPtr->u.p.pts[inx+1].pt );
+				if (subSegInxR) *subSegInxR = inx;
+				pos2 = p0;
 			}
 		}
 		break;
@@ -1515,7 +1515,7 @@ EXPORT BOOL_T WriteSegsEnd(
 		switch ( segs[i].type ) {
 		case SEG_STRTRK:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-				segs[i].type, wDrawGetRGB(wDrawColorBlack), segs[i].width,
+				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
 				segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
 				segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y ) > 0;
 			break;
@@ -1542,7 +1542,7 @@ EXPORT BOOL_T WriteSegsEnd(
 			break;
 		case SEG_CRVTRK:
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-				segs[i].type, wDrawGetRGB(wDrawColorBlack), segs[i].width,
+				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
 				segs[i].u.c.radius,
 				segs[i].u.c.center.x, segs[i].u.c.center.y,
 				segs[i].u.c.a0, segs[i].u.c.a1 ) > 0;
@@ -1550,7 +1550,7 @@ EXPORT BOOL_T WriteSegsEnd(
 		case SEG_JNTTRK:
 			option = (segs[i].u.j.negate?1:0) + (segs[i].u.j.flip?2:0) + (segs[i].u.j.Scurve?4:0);
 			rc &= fprintf( f, "\t%c %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %ld\n",
-				segs[i].type, wDrawGetRGB(wDrawColorBlack), segs[i].width,
+				segs[i].type, wDrawGetRGB(segs[i].color), segs[i].width,
 				segs[i].u.j.pos.x, segs[i].u.j.pos.y,
 				segs[i].u.j.angle,
 				segs[i].u.j.l0,
@@ -1562,7 +1562,7 @@ EXPORT BOOL_T WriteSegsEnd(
         case SEG_BEZTRK:
         case SEG_BEZLIN:
             rc &= fprintf( f, "\t%c3 %ld %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f %0.6f\n",
-                segs[i].type, (segs[i].type==SEG_BEZTRK)?wDrawGetRGB(wDrawColorBlack):wDrawGetRGB(segs[i].color),
+                segs[i].type, wDrawGetRGB(segs[i].color),
                 segs[i].width,
                 segs[i].u.l.pos[0].x, segs[i].u.l.pos[0].y,
                 segs[i].u.l.pos[1].x, segs[i].u.l.pos[1].y,

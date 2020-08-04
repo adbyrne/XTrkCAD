@@ -37,6 +37,8 @@ void UpdateFontSizeList( long *, wList_p, wIndex_t );
 long GetFontSize(long);
 long GetFontSizeIndex(long size);
 
+extern void wSetSelectedFontSize(wFontSize_t size);
+
 static wMenu_p textPopupM;
 
 /*****************************************************************************
@@ -95,6 +97,7 @@ static void TextDlgUpdate(
 			Dt.lastLineLen = lastline.x;
 			Dt.lastLineOffset = lastline.y;
 		}
+		wSetSelectedFontSize((wFontSize_t)Dt.size);   //Update for next time
 		DrawTextSize( &mainD, "Aquilp", NULL, Dt.size, TRUE, &size );
 		Dt.cursHeight = size.y;
 		if ( Dt.state == SHOW_TEXT) {
@@ -248,6 +251,7 @@ static STATUS_T CmdText( wAction_t action, coOrd pos )
 		return C_TERMINATE;
 
 	case C_CMDMENU:
+		menuPos = pos;
 		wMenuPopupShow( textPopupM );
 		return C_CONTINUE;
 	}
