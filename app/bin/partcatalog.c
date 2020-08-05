@@ -44,20 +44,10 @@
     #include "include/dirent.h"
 #else
 	#include <dirent.h>
-	char *strlwr(char *str)
-	{
-		unsigned char *p = (unsigned char *)str;
-
-		while (*p) {
-			*p = tolower((unsigned char)*p);
-			p++;
-		}
-
-	return str;
-	}
 #endif
 #include "fileio.h"
 #include "misc.h"
+#include "misc2.h"
 #include "include/paramfile.h"
 #include "include/partcatalog.h"
 #include "paths.h"
@@ -67,8 +57,8 @@
 
 #if _MSC_VER > 1300
     #define strnicmp _strnicmp
+	#define stricmp _stricmp
     #define strdup _strdup
-	#define strlwr _strlwr
 #endif
 
 #define PUNCTUATION "+-*/.,&%=#"
@@ -76,6 +66,8 @@
 static char *stopwords = {
 	"scale",
 };
+
+static int log_params;
 
 /**
  * Create and initialize the linked list for the catalog entries
@@ -288,22 +280,6 @@ GetNextParameterFile(DIR *dir, const char *dirName, char **fileName)
     return (res);
 }
 
-/**
- * Comparison function for IndexEntries used by qsort()
- *
- * \param entry1 IN
- * \param entry2 IN
- * \return per C runtime conventions
- */
-
-static int
-CompareIndex(const void *entry1, const void *entry2)
-{
-	IndexEntry index1 = *(IndexEntry *)entry1;
-	IndexEntry index2 = *(IndexEntry *)entry2;
-    return (strcoll(index1.keyWord, index2.keyWord));
-}
-
 /*!
  * Filter keywords. Current rules:
  *	- single character string that only consist of a punctuation char
@@ -320,7 +296,7 @@ FilterKeyword(char *word)
 	}
 
 	for (int i = 0; i < sizeof(stopwords) / sizeof(char *); i++) {
-		if (!strcmp(word, stopwords+i)) {
+		if (!stricmp(word, stopwords+i)) {
 			return(true);
 		}
 	}
@@ -329,7 +305,7 @@ FilterKeyword(char *word)
 
 int KeyWordCmp(IndexEntry *a, IndexEntry *b)
 {
-	return strcmp(a->keyWord, b->keyWord);
+	return stricmp(a->keyWord, b->keyWord);
 }
 
 /**
@@ -345,15 +321,15 @@ StandardizeSpelling(char *word)
 	char *p = strchr(word, '-');
 	// remove the word 'scale' from combinations like N-scale 
 	if (p) {
-		if (!strcmp(p+1, "scale")) {
+		if (!stricmp(p+1, "scale")) {
 			*p = '\0';
 		}
 	}
 
-	if (!strncmp(word, "h0", 2))
-		strncpy(word, "hO", 2);
+	if (!strnicmp(word, "h0", 2))
+		strncpy(word, "ho", 2);
 
-	if (!strncmp(word, "00", 2))
+	if (!strnicmp(word, "00", 2))
 		strncpy(word, "oo", 2);
 
 	if (word[0] == '0')
@@ -397,11 +373,12 @@ CreateContentsIndex(Catalog *catalog, IndexEntry **indexPtr )
         while (word) {
             strcpy(wordListPtr, word);
 
-			strlwr(wordListPtr);
+			XtcStrlwr(wordListPtr);
 			if (!FilterKeyword(wordListPtr)) {
 				IndexEntry *searchEntry = malloc(sizeof( IndexEntry ));
 				IndexEntry *existingEntry = NULL;
 				searchEntry->keyWord = wordListPtr;
+				StandardizeSpelling(wordListPtr);
 
 				if (index) {
 					DL_SEARCH(index, existingEntry, searchEntry, KeyWordCmp);
@@ -414,6 +391,8 @@ CreateContentsIndex(Catalog *catalog, IndexEntry **indexPtr )
 					DYNARR_APPEND(CatalogEntry *, *(searchEntry->references), 5);
 					DYNARR_LAST(CatalogEntry *, *(searchEntry->references)) = curParamFile;
 					DL_APPEND(index, searchEntry);
+					LOG1(log_params, ("Index Entry: <%s>\n", searchEntry->keyWord))
+
 				}
 
 				wordListPtr += strlen(word) + 1;
@@ -428,6 +407,12 @@ CreateContentsIndex(Catalog *catalog, IndexEntry **indexPtr )
 	DL_SORT(index, KeyWordCmp);
 	
 	* indexPtr = index;
+
+	IndexEntry *existingEntry;
+	DL_FOREACH(index, existingEntry)
+	{
+		LOG1(log_params, ("Index Entry: <%s> Count: %d\n", existingEntry->keyWord, existingEntry->references->cnt));
+	}
     return (wordCount);
 }
 
@@ -506,8 +491,6 @@ GetParameterFiles(ParameterLib *paramLib, char *directory)
 			char *contents = GetParameterFileContent(fileName);
 
 			if ((existingEntry = IsExistingContents(catalog, contents, FALSE))) {
-				// [TODO] Find a reasonable way to handle duplicate contents descriptions
-				// if (strcmp(existingEntry->fullFileName[existingEntry->files - 1], fileName))
 				UpdateCatalogEntry(existingEntry, fileName, contents);
 			} else {
 				CatalogEntry *newEntry;
@@ -603,6 +586,8 @@ CreateLibrary(char *directory)
 {
     ParameterLib *library;
 
+	log_params = LogFindIndex("params");
+
     library = InitLibrary();
     if (library) {
         if (!GetParameterFiles(library, directory)) {
@@ -622,70 +607,6 @@ DeleteLibrary(ParameterLib* library)
 	free(library);
 }
 
-// Case insensitive comparison
-char* stristr( const char* haystack, const char* needle )
-{
-	int c = tolower((unsigned char)*needle);
-	    if (c == '\0')
-	        return (char *)haystack;
-	    for (; *haystack; haystack++) {
-	        if (tolower((unsigned char)*haystack) == c) {
-	            for (size_t i = 0;;) {
-	                if (needle[++i] == '\0')
-	                    return (char *)haystack;
-	                if (tolower((unsigned char)haystack[i]) != tolower((unsigned char)needle[i]))
-	                    break;
-	            }
-	        }
-	    }
-	    return NULL;
-}
-
-
-/**
- * Intersection of results
- * See GeeksForGeeks https ://www.geeksforgeeks.org/union-and-intersection-of-two-sorted-arrays-2/
- * 1) Use two index variables i and j, initial values i = 0, j = 0
- * 2) If arr1[i] is smaller than arr2[j] then increment i.
- * 3) If arr1[i] is greater than arr2[j] then increment j.
- * 4) If both are same then print any of them and increment both i and j.
- *  
- * \param [in] array1 If non-null, the first result.
- * \param [in] array2 If non-null, the second result.
- *
- * \returns number of elements in result set
- */
- 
-unsigned
-IntersectionOfResults(CatalogEntry *** resultEntries, CatalogEntry **array1, unsigned count1, CatalogEntry **array2, unsigned count2)
-{
-	unsigned index1 = 0;
-	unsigned index2 = 0;
-	unsigned maxResultSize = min(count1, count2);
-	unsigned matches = 0;
-	CatalogEntry **result = MyMalloc(maxResultSize * sizeof(CatalogEntry *));
-	int diff;
-
-	while (index1 < count1 && index2 < count2) {
-		diff = strcmp(array1[index1]->contents, array2[index2]->contents);
-
-		if (diff < 0) {
-			index1++;
-			continue;
-		}
-		if (diff > 0) {
-			index2++;
-			continue;
-		}
-
-		printf("Match found: %s\n", array1[index1]->contents);
-		result[matches++] = array1[index1];
-		index1++;
-		index2++;
-	}
-	*resultEntries = result;
-	return(matches);
-}
 
 // returns number of words in str 
 unsigned countWords(char *str)
@@ -748,7 +669,7 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 
 	searchWord = strtok(searchExp, " \t");
 	while (searchWord) {
-		strlwr(searchWord);
+		XtcStrlwr(searchWord);
 		if (!FilterKeyword(searchWord)) {
 			StandardizeSpelling(searchWord);
 			results->kw[i].state = SEARCHED;			
@@ -818,9 +739,9 @@ void
 SearchResultDiscard(SearchResult *res)
 {
 	if (res) {
-		CatalogEntry *element;
+		EmptyCatalog(&(res->subCatalog));
+
 		MyFree(res->kw);
-		DL_DELETE(res->subCatalog.head, element);
 	}
 }
 
