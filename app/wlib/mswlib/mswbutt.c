@@ -29,6 +29,15 @@
 #include "mswint.h"
 int kludge12 = 0;
 
+/** Macros for button repeat timers */
+#define REPEAT_STAGE0_DELAY 500
+#define REPEAT_STAGE1_DELAY 150
+#define REPEAT_STAGE2_DELAY 75
+#define STOP_TIMER (-1)
+#define INITIAL_WAIT (0)
+#define SLOW_REPEATS (1)
+#define FAST_REPEATS (2)
+
 /*
  *****************************************************************************
  *
@@ -207,14 +216,22 @@ static void buttDrawIcon(
 }
 
 void wButtonSetBusy(
-		wButton_p b,
-		int value )
+    wButton_p b,
+    int value)
 {
-	b->busy = value;
-	if (!value)
-		b->selected = FALSE;
-	/*SendMessage( b->hWnd, BM_SETSTATE, (WPARAM)value, 0L );*/
-	InvalidateRgn( b->hWnd, NULL, FALSE );
+    b->busy = value;
+    if (!value) {
+        b->selected = FALSE;
+    }
+
+    // in case a timer is associated with the button, kill it
+    if (b->timer_id) {
+        KillTimer(b->hWnd, b->timer_id);
+        b->timer_id = 0;
+        b->timer_state = STOP_TIMER;
+    }
+
+    InvalidateRgn(b->hWnd, NULL, FALSE);
 }
 
 
@@ -231,57 +248,58 @@ void wButtonSetLabel(
 	InvalidateRgn( b->hWnd, NULL, FALSE );
 }
 
-long timer_id;
-int timer_count;
-int timer_state;
+/**
+ * Button timer: handle timer events for buttons. These are used for 
+ * auto-repeating presses. Three phases used are
+ * - initial delay before repetitions begin  
+ * - slow repeats for a few cycles  
+ * - fast repeats therafter  
+ * - stop timer
+ *
+ * \param  hWnd	    Handle of the window, unused
+ * \param  message  The message, unused
+ * \param  timer    The timer id is the wlib widget .
+ * \param  timepast The timepast, unused
+  */
 
-#define REPEAT_STAGE0_DELAY 500
-#define REPEAT_STAGE1_DELAY 150
-#define REPEAT_STAGE2_DELAY 75
+void CALLBACK buttTimer(HWND hWnd, UINT message, UINT_PTR timer,
+                        DWORD timepast)
+{
+    wButton_p b = (wButton_p)timer;
+    if (b->timer_id == 0) {
+        b->timer_state = STOP_TIMER;
+        return ;
+    }
 
-void buttTimer( HWND hWnd, UINT message, UINT_PTR timer, DWORD timepast) {
-
-	 wButton_p b = (wButton_p)timer;
-	 if (b->timer_id == 0) {
-		   b->timer_state = -1;
-		   return FALSE;
-	 }
-
-	 /* Autorepeat state machine */
-	    switch (b->timer_state) {
-	       case 0: /* Enable slow auto-repeat */
-	    	  KillTimer(hWnd,b->timer_id);
-	          b->timer_id = 0;
-	          b->timer_state = 1;
-	          b->timer_id = SetTimer(hWnd,b,REPEAT_STAGE1_DELAY,buttTimer);
-	          b->timer_count = 0;
-	          break;
-	       case 1: /* Check if it's time for fast repeat yet */
-	          if (b->timer_count++ > 50)
-	             b->timer_state = 2;
-	          break;
-	       case 2: /* Start fast auto-repeat */
-	    	  KillTimer(hWnd,b->timer_id);
-	          b->timer_id = 0;
-	          b->timer_state = 3;
-	          b->timer_id = SetTimer(hWnd,b,REPEAT_STAGE2_DELAY,buttTimer);
-	          break;
-	       default:
-	    	 KillTimer(hWnd,b->timer_id);
-	     	 b->timer_id = 0;
-	     	 b->timer_state = -1;
-	     	 return;
-	         break;
-	    }
-
-	    printf("Repeat %p %s \n", b, b->labelStr?b->labelStr:"No label");
-
-	    if (b->action /*&& !bb->busy*/) {
-			b->action( b->data );
-		}
-
-	    return;
-
+    /* Autorepeat state machine */
+    switch (b->timer_state) {
+    case INITIAL_WAIT:
+        b->timer_state = SLOW_REPEATS;
+        b->timer_count = 0;
+        KillTimer(hWnd, (UINT_PTR)b);
+        SetTimer(hWnd, (UINT_PTR)b, REPEAT_STAGE1_DELAY, buttTimer);
+        break;
+    case SLOW_REPEATS: /* Enable slow auto-repeat */
+        if (b->timer_count++ > 10) {
+            /* Start fast auto-repeat */
+            b->timer_state = FAST_REPEATS;
+            KillTimer(hWnd, (UINT_PTR)b);
+            SetTimer(hWnd, (UINT_PTR)b, REPEAT_STAGE2_DELAY, buttTimer);
+        }
+        break;
+    case FAST_REPEATS:
+        break;
+    case STOP_TIMER:
+    default:
+        KillTimer(hWnd, (UINT_PTR)b);
+        b->timer_id = 0;
+        return;
+        break;
+    }
+    if (b->action) {
+        b->action(b->data);
+    }
+    return;
 }
 				   
 
@@ -377,19 +395,18 @@ LRESULT CALLBACK pushButt(
 		break;
 	case WM_LBUTTONDOWN:
 		if (b->option&BO_REPEAT) {
-			b->timer_id = SetTimer(hWnd,b,REPEAT_STAGE0_DELAY,buttTimer);
-			b->timer_state = 0;
-			printf("Button %p %s Down",b,b->labelStr?b->labelStr:"No label");
+			SetTimer(hWnd, (UINT_PTR)b,REPEAT_STAGE0_DELAY,buttTimer);
+			b->timer_state = INITIAL_WAIT;
+			b->timer_id = (UINT_PTR)b;
 		}
 		break;
    case WM_LBUTTONUP:
 	   /* don't know why but this solves a problem with color selection */
 	    Sleep( 0 );
-	    printf("Button %p %s Up",b,b->labelStr?b->labelStr:"No label");
 		if (b->timer_id)
-			KillTimer(hWnd,b->timer_id);
-		b->timer_id = NULL;
-		b->timer_state = -1;
+			KillTimer(hWnd, (UINT_PTR)b);
+		b->timer_id = 0;
+		b->timer_state = STOP_TIMER;
 		break;
 	}
 	return CallWindowProc( oldButtProc, hWnd, message, wParam, lParam );
