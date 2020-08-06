@@ -358,11 +358,14 @@ If you modify a definition from a \e{XTrackCAD} Library parameter file, the new 
 
 \S{cmdLayer} Layers Dialog
 
-Each object is contained in a layer - which is a custom group of objects that do not have a particular visual order, but can be treated as a set for certain commands.  Objects which are created independently of other objects (such as straight tracks (\K{cmdStraight}) or text (\K{cmdText})) are created in the current layer.  Objects which are associated with other objects (such as tracks created by the \f{Modify} (\K{cmdModify}) or \f{Join} (\K{cmdJoin}) commands) are created in the same layer as the associated object(s).
+Each object is contained in a layer - which is a custom group of objects that do not have a particular visual order, but can be treated as a set for certain commands.  
+Objects which are created independently of other objects (such as straight tracks (\K{cmdStraight}) or text (\K{cmdText})) are created in the current layer.  
+Objects which are associated with other objects (such as tracks created by the \f{Modify} (\K{cmdModify}) or \f{Join} (\K{cmdJoin}) commands) are created in the same layer as the associated object(s).
 
 The \f{Layers} dialog allows you to change various attributes of each of the 99 possible \f{layers}.
 
-Attributes associated with a layout are stored within the associated layout file and apply only to the layout that's open at the time of a change. It is possible to apply attributes from one layout file to another using the \f{Load} and \f{Save} buttons.
+Attributes associated with a layout are stored within the associated layout file and apply only to the layout that's open at the time of a change. 
+It is possible to apply attributes from one layout file to another using the \f{Load} and \f{Save} buttons.
 
 \G{png.d/dlayers.png}
 
@@ -378,7 +381,13 @@ The \f{Frozen} check-box indicates that tracks in that \f{Layer} can not be modi
 
 The \f{On Map} check-box controls whether the \f{Layer} is drawn on the Map (\K{cmdMap}) window.
 
-The \f{Module} check-box controls whether the \f{Layer} is selected/deselected and so moved or rotated as a group - this can be used to denote a track module in a modular layout - allowing the modules to be positioned as units. Objects in a Module Layer can not be individually modified.  One way of getting a modules in is to build a library with \f{Export} and then \f{Import As Module} - this creates one layer per module, names it and sets the \f{Module} check-box.  
+The \f{Module} check-box controls whether the \f{Layer} is selected/deselected and so moved or rotated as a group - this can be used to denote a track module in a modular layout - allowing the modules to be positioned as units. 
+Objects in a Module Layer can not be individually modified.  
+One way of getting a modules in is to build a library with \f{Export} and then \f{Import As Module} - this creates one layer per module, names it and sets the \f{Module} check-box.  
+
+The \f{No Button} check-box selects if the \f{Layer} has a button to hide/show it. You may choose not to have a button if the layer is empty or if it is a sub-layer controlled by another layer.
+
+The \f{Linked Layers} text box can contain a comma-delimited set of layer numbers that will be shown and hidden along with this layer when its show/hidden state is chnaged. A blank meand no linked layers
 
 You cannot uncheck \f{Visible} or check \f{Frozen} for the \f{Current Layer}.
 
@@ -390,7 +399,7 @@ The \f{Load} button reads layer attributes from the \c{xtrkcad.ini} file then ap
 
 The \f{Defaults} button restores layer attributes to default \e{XTrackCAD} settings.
 
-The bottom of the dialog contains the \f{Number of Layer Buttons} integer edit box.  This controls the number of \f{Layer Buttons} displayed on the \f{Tool-bar} (\K{mainW}). These buttons make it easy to switch between layers. The maximum number of \f{Layer Buttons} that can be displayed is 20.  Therefore you should use layers one to twenty for objects which you will be showing and hiding frequently.
+The bottom of the dialog contains the \f{Number of Layer Buttons} integer edit box.  This controls the number of \f{Layer Buttons} displayed on the \f{Tool-bar} (\K{mainW}). These buttons make it easy to switch between layers. The maximum number of \f{Layer Buttons} that can be displayed is 99.  Layers with "no-button" set do not count towards the Number of Layer Buttons.
 
 \G{png.d/blayer.png}
 

@@ -1429,6 +1429,7 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 	static int lastGroup;
 	static wPos_t gap;
 	static int layerButtCnt;
+	static int layerButtNumber;
 	int currGroup;
 
 	if (inx == 0) {
@@ -1437,6 +1438,7 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 		gap = 5;
 		toolbarWidth = width - 20 + 5;
 		layerButtCnt = 0;
+		layerButtNumber = 0;
 		toolbarHeight = 0;
 	}
 
@@ -1448,6 +1450,7 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 		if (currGroup != lastGroup && (buttonList[inx].group & BG_BIGGAP)) {
 			gap = 15;
 		}
+
 		if ((toolbarSet & (1 << currGroup))
 				&& (programMode != MODE_TRAIN
 						|| (buttonList[inx].options
@@ -1455,12 +1458,13 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 				&& (programMode == MODE_TRAIN
 						|| (buttonList[inx].options & IC_MODETRAIN_ONLY) == 0)
 				&& ((buttonList[inx].group & ~BG_BIGGAP) != BG_LAYER
-						|| layerButtCnt++ <= layerCount)) {
+						|| layerButtCnt <= layerCount-1)) {
 			if (currGroup != lastGroup) {
 				toolbarWidth += gap;
 				lastGroup = currGroup;
 				gap = 5;
 			}
+
 			w = wControlGetWidth(buttonList[inx].control);
 			h = wControlGetHeight(buttonList[inx].control);
 			if (h<toolbarRowHeight) {
@@ -1473,12 +1477,21 @@ EXPORT void LayoutSetPos(wIndex_t inx) {
 				toolbarWidth = 0;
 				toolbarHeight += h + 5;
 			}
-			wControlSetPos(buttonList[inx].control, toolbarWidth,
+			if ((currGroup == BG_LAYER) && layerButtNumber>1 && GetLayerHidden(layerButtNumber-2) ) {
+				wControlShow(buttonList[inx].control, FALSE);
+				layerButtNumber++;
+			} else {
+				if (currGroup == BG_LAYER ) {
+					if (layerButtNumber>1) layerButtCnt++; // Ignore List and Background
+					layerButtNumber++;
+				}
+				wControlSetPos(buttonList[inx].control, toolbarWidth,
 					toolbarHeight - (h + 5 +offset));
-			buttonList[inx].x = toolbarWidth;
-			buttonList[inx].y = toolbarHeight - (h + 5 + offset);
-			toolbarWidth += wControlGetWidth(buttonList[inx].control);
-			wControlShow(buttonList[inx].control, TRUE);
+				buttonList[inx].x = toolbarWidth;
+				buttonList[inx].y = toolbarHeight - (h + 5 + offset);
+				toolbarWidth += wControlGetWidth(buttonList[inx].control);
+				wControlShow(buttonList[inx].control, TRUE);
+			}
 		} else {
 			wControlShow(buttonList[inx].control, FALSE);
 		}

@@ -95,6 +95,7 @@ BOOL_T GetLayerVisible( unsigned int );
 BOOL_T GetLayerFrozen( unsigned int );
 BOOL_T GetLayerOnMap( unsigned int );
 BOOL_T GetLayerModule( unsigned int );
+BOOL_T GetLayerHidden( unsigned int);
 void SetLayerModule(unsigned int, BOOL_T);
 char * GetLayerName( unsigned int );
 void SetLayerName(unsigned int layer, char* name);
