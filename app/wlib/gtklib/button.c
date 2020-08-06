@@ -224,8 +224,6 @@ static int timer_func ( wButton_p bb)
          break;
    }
 
-   printf("Repeat %p %s \n", bb, bb->labelStr?bb->labelStr:"No label");
-
    pushButt(NULL,bb);
 
    return TRUE;
@@ -238,14 +236,9 @@ static gint pressButt(
 		wButton_p bb) {
 
 	if (bb->recursion) {
-
-		printf("Push Recurse %p %s \n", bb, bb->labelStr?bb->labelStr:"No label");
 		return TRUE;
 
 	}
-
-
-	printf("Press %p %s \n", bb, bb->labelStr?bb->labelStr:"No label");
 
 
 	if (bb->option & BO_REPEAT)  {
@@ -276,8 +269,6 @@ static gint releaseButt(
 		GtkWidget *widget,
 		GdkEventButton *event,
 		wButton_p bb) {
-
-	printf("Release %p %s \n", bb, bb->labelStr?bb->labelStr:"No label");
 
 	/* Remove any existing timer */
 	if (bb->timer_id) {
