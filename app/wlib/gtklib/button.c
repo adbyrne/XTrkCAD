@@ -57,6 +57,13 @@ void wButtonSetBusy(wButton_p bb, int value)
     gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(bb->widget), value);
     bb->recursion--;
     bb->busy = value;
+    if (!value) {
+    	if (bb->timer_id) {
+    		g_source_remove(bb->timer_id);
+    		bb->timer_id = 0;
+    	}
+    	bb->timer_state = -1;
+    }
 }
 
 /**
@@ -178,7 +185,7 @@ static void pushButt(
 
 #define REPEAT_STAGE0_DELAY 500
 #define REPEAT_STAGE1_DELAY 150
-#define REPEAT_STAGE2_DELAY 75
+#define REPEAT_STAGE2_DELAY 100
 
 /* Timer callback function! */
 static int timer_func ( wButton_p bb)
@@ -198,7 +205,7 @@ static int timer_func ( wButton_p bb)
          bb->timer_count = 0;
          break;
       case 1: /* Check if it's time for fast repeat yet */
-         if (bb->timer_count++ > 50)
+         if (bb->timer_count++ > 10)
             bb->timer_state = 2;
          break;
       case 2: /* Start fast auto-repeat */
@@ -207,6 +214,8 @@ static int timer_func ( wButton_p bb)
          bb->timer_state = 3;
          bb->timer_id = g_timeout_add( REPEAT_STAGE2_DELAY, G_SOURCE_FUNC(timer_func), bb);
          break;
+      case 3:
+    	  break;
       default:
     	 g_source_remove(bb->timer_id);
     	 bb->timer_id = 0;
