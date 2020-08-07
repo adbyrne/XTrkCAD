@@ -45,11 +45,12 @@
 #define LAYERPREF_ONMAP	  (2)
 #define LAYERPREF_VISIBLE (4)
 #define LAYERPREF_MODULE  (8)
-#define LAYERPREF_NOBUTTON (12)
+#define LAYERPREF_NOBUTTON (16)
 #define LAYERPREF_SECTION ("Layers")
 #define LAYERPREF_NAME 	"name"
 #define LAYERPREF_COLOR "color"
 #define LAYERPREF_FLAGS "flags"
+#define LAYERPREF_LIST "list"
 
 unsigned int curLayer;
 long layerCount = 10;
@@ -558,28 +559,28 @@ void GetLayerLinkString(int inx,char * list) {
 		if (i==0)
 			cp += sprintf(cp,"%d",l);
 		else
-			cp += sprintf(cp,",%d",l);
+			cp += sprintf(cp,";%d",l);
 		cp[0] = '\0';
 	}
 }
 
-void PutLayerListArray(int inx,char * list) {
+void PutLayerListArray(int inx, char * list) {
 	char * cp = &list[0];
 	DYNARR_RESET(int, layers[inx].layerLinkList);
 	while (cp) {
-		cp = strchr(list,',');
+		cp = strpbrk(list,",; ");
 		if (cp) {
 			cp[0] ='\0';
 			int i =  abs((int)strtol(list,&list,0));
-			if (i>0) {
+			if (i>0 && i !=inx-1) {
 				DYNARR_APPEND(int,layers[inx].layerLinkList,1);
 				DYNARR_LAST(int, layers[inx].layerLinkList) = i;
 			}
-			cp[0] = ',';
+			cp[0] = ';';
 			list = cp+1;
 		} else {
 			int i =  abs((int)strtol(list,&list,0));
-			if (i>0) {
+			if (i>0 && i !=inx-1) {
 				DYNARR_APPEND(int,layers[inx].layerLinkList,1);
 				DYNARR_LAST(int,layers[inx].layerLinkList) = i;
 			}
@@ -777,6 +778,7 @@ LayerPrefSave(void)
     unsigned int inx;
     int flags;
     char buffer[ 80 ];
+    char links[STR_LONG_SIZE];
     char layersSaved[ 3 * NUM_LAYERS + 1 ];			/* 0..99 plus separator */
     /* FIXME: values for layers that are configured to default now should be overwritten in the settings */
     layersSaved[ 0 ] = '\0';
@@ -784,8 +786,10 @@ LayerPrefSave(void)
     for (inx = 0; inx < NUM_LAYERS; inx++) {
         /* if a name is set that is not the default value or a color different from the default has been set,
             information about the layer needs to be saved */
-        if ((layers[inx].name[0] && inx != 0) ||
+        if ((layers[inx].name[0]) ||
                 layers[inx].frozen || (!layers[inx].onMap) || (!layers[inx].visible) ||
+				layers[inx].button_off || (layers[inx].layerLinkList.cnt>0) ||
+				layers[inx].module ||
                 layers[inx].color != layerColorTab[inx%COUNT(layerColorTab)]) {
             sprintf(buffer, LAYERPREF_NAME ".%0u", inx);
             wPrefSetString(LAYERPREF_SECTION, buffer, layers[inx].name);
@@ -815,6 +819,12 @@ LayerPrefSave(void)
 
             sprintf(buffer, LAYERPREF_FLAGS ".%0u", inx);
             wPrefSetInteger(LAYERPREF_SECTION, buffer, flags);
+
+            if (layers[inx].layerLinkList.cnt>0) {
+            	sprintf(buffer, LAYERPREF_LIST ".%0u", inx);
+            	GetLayerLinkString(inx,links);
+            	wPrefSetString(LAYERPREF_SECTION, buffer, links);
+            }
 
             /* extend the list of layers that are set up via the preferences */
             if (layersSaved[ 0 ]) {
@@ -853,6 +863,7 @@ LayerPrefLoad(void)
             int inx;
             char layerOption[20];
             const char *layerValue;
+            char listValue[STR_LONG_SIZE];
             int color;
             inx = atoi(prefString);
             sprintf(layerOption, LAYERPREF_NAME ".%d", inx);
@@ -879,6 +890,17 @@ LayerPrefLoad(void)
             layers[inx].visible = ((flags & LAYERPREF_VISIBLE) != 0);
             layers[inx].module = ((flags & LAYERPREF_MODULE) !=0);
             layers[inx].button_off = ((flags & LAYERPREF_NOBUTTON) !=0);
+
+            sprintf(layerOption, LAYERPREF_LIST ".%d", inx);
+            layerValue = wPrefGetString(LAYERPREF_SECTION,layerOption);
+            if (layerValue) {
+            	strcpy(listValue,layerValue);
+            	PutLayerListArray(inx,listValue);
+            } else {
+            	listValue[0] = '\0';
+            	PutLayerListArray(inx,listValue);
+            }
+
             prefString = strtok(NULL, ",");
         }
     }
