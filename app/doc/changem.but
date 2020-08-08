@@ -1218,9 +1218,9 @@ Some fields are used by multiple types of objects - these are listed below
 \dd The width of the line for a line, curve or unfilled object can be set. 0 means a pixel width at all scales.
 Other values are the width of the line in scale units.
 
-\dt Pivot
+\dt Lock
 
-\dd The Pivot control can be set to the start, or the middle or the end, and it applies to the Length and Angle controls
+\dd The Lock control can be set to fix in place the start, or the middle or the end, and it applies to the Length and Angular Length controls. When these are chnaged the new dimensions are applied so as to keep the locked position in place.
 
 \dt Rotation Angle
 
@@ -1257,11 +1257,11 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dt Angle
 
-\dd Straight Lines have an angle - this is the angle between the two points, altering this moves End Pt2.
+\dd Straight Lines have an angle - this is the angle between the two points, altering this moves the ends so as to respect the Lock control setting.
 
 \dt Length
 
-\dd The Length control can add to the start or end or both of a Line object depending on the setting of the Pivot control.
+\dd The Length control can add to the start or end or both of a Line object depending on the setting of the \f{Lock} control setting.
 
 \S3{drawDescribeDim} Dimension Line Objects
 
@@ -1287,7 +1287,11 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 
 \dt CW Angle and CCW Angle
 
-\dd Curved Lines have an angle relative to the center that the arc starts and and one where it ends
+\dd Curved Lines have an angle relative to the center that the arc starts and and one where it ends. 
+
+\dt Angular Length
+
+\dd For Curved Lines this is the length of the arc. If altered it will move the arc to respect the \f{Lock} control setting.
 
 \S3{drawDescribePoly} Polygon Objects
 
@@ -1316,6 +1320,12 @@ This value is always set to locked if the Draw origin is non-zero when the \K{cm
 \dt Text Angle
 
 \dd For Text objects, the Text Angle determines the angle the text is rendered at. This is independent of the rotation of the starting position which is gained from the Rotation Angle and the Rotation Origin.
+
+\S2{DescribeCompound} Structures, Sectional Track and Turnouts
+
+\dt Pivot
+
+\dd The Pivot fixes the point about which the Angle of Rotation will occur
 
 
 Most commands return to \f{Properties} mode then they terminate unless the command is sticky (\K{cmdSticky}).

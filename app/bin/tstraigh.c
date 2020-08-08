@@ -89,7 +89,7 @@ static descData_t strDesc[] = {
 /*LN*/	{ DESC_DIM, N_("Length"), &strData.length },
 /*AN*/	{ DESC_ANGLE, N_("Angle"), &strData.angle },
 /*GR*/	{ DESC_FLOAT, N_("Grade"), &strData.grade },
-/*PV*/	{ DESC_PIVOT, N_("Pivot"), &strData.pivot },
+/*PV*/	{ DESC_PIVOT, N_("Lock"), &strData.pivot },
 /*LY*/	{ DESC_LAYER, N_("Layer"), &strData.layerNumber },
 		{ DESC_NULL } };
 

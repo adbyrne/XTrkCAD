@@ -141,7 +141,7 @@ static paramData_t describePLs[] = {
 #define I_TEXT_N		I_TEXT_0+1
 
 #define I_PIVOT_0		I_TEXT_N
-    { PD_RADIO, NULL, "P1", 0, pivotLabels, N_("Pivot"), BC_HORZ|BC_NOBORDER, 0 },
+    { PD_RADIO, NULL, "P1", 0, pivotLabels, N_("Lock"), BC_HORZ|BC_NOBORDER, 0 },
 #define I_PIVOT_N		I_PIVOT_0+1
 
 #define I_TOGGLE_0      I_PIVOT_N
