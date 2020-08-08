@@ -22,7 +22,7 @@
 #include <assert.h>
 #include <ctype.h>
 #ifdef HAVE_MALLOC_H
-#include <malloc.h>
+    #include <malloc.h>
 #endif
 #include <search.h>
 #include <stdbool.h>
@@ -36,7 +36,7 @@
 #ifdef WINDOWS
     #include "include/dirent.h"
 #else
-	#include <dirent.h>
+    #include <dirent.h>
 #endif
 #include "dynstring.h"
 #include "fileio.h"
@@ -53,7 +53,7 @@
 
 #if _MSC_VER > 1300
     #define strnicmp _strnicmp
-	#define stricmp _stricmp
+    #define stricmp _stricmp
     #define strdup _strdup
 #endif
 
@@ -61,7 +61,7 @@
 #define SEARCHDELIMITER " \t\n\r/"
 
 static char *stopwords = {
-	"scale",
+    "scale",
 };
 
 static int log_params;
@@ -75,10 +75,10 @@ static int log_params;
 Catalog *
 InitCatalog(void)
 {
-	Catalog *newCatalog = MyMalloc(sizeof(Catalog));
-	if (newCatalog) {
-		newCatalog->head = NULL;
-	}
+    Catalog *newCatalog = MyMalloc(sizeof(Catalog));
+    if (newCatalog) {
+        newCatalog->head = NULL;
+    }
     return (newCatalog);
 }
 
@@ -88,10 +88,10 @@ InitCatalog(void)
  * \param [in] catalog
  */
 
-void 
+void
 DestroyCatalog(Catalog *catalog)
 {
-	MyFree(catalog);
+    MyFree(catalog);
 }
 
 /**
@@ -117,16 +117,16 @@ InsertIntoCatalogAfter(CatalogEntry *entry)
 /**
  * Count the elements in the linked list
  *
- * \param catalog IN 
+ * \param catalog IN
  * \return the number of elements
  */
 
 unsigned
 CountCatalogEntries(Catalog *catalog)
 {
-	CatalogEntry * entry;
+    CatalogEntry * entry;
     unsigned count = 0;
-	DL_COUNT(catalog->head, entry, count);
+    DL_COUNT(catalog->head, entry, count);
     return (count);
 }
 
@@ -140,14 +140,13 @@ void
 CatalogDiscard(Catalog *catalog)
 {
     CatalogEntry *current = catalog->head;
-	CatalogEntry *element;
-	CatalogEntry *tmp;
+    CatalogEntry *element;
+    CatalogEntry *tmp;
 
-	DL_FOREACH_SAFE(current, element, tmp)
-	{
-		DL_DELETE(current, element);
-		MyFree(element);
-	}
+    DL_FOREACH_SAFE(current, element, tmp) {
+        DL_DELETE(current, element);
+        MyFree(element);
+    }
 }
 
 /**
@@ -160,29 +159,29 @@ CatalogDiscard(Catalog *catalog)
  */
 
 static int
-CompareEntries( CatalogEntry *a, CatalogEntry *b)
+CompareEntries(CatalogEntry *a, CatalogEntry *b)
 {
-	return XtcStricmp(a->contents, b->contents);
+    return XtcStricmp(a->contents, b->contents);
 }
 
 /**
  * Create a new CatalogEntry and insert it keeping the list sorted
  *
- * \param [in] catalog 
+ * \param [in] catalog
  * \param [in] contents to include.
  *
- * \returns CatalogEntry 
+ * \returns CatalogEntry
  */
 
 static CatalogEntry *
 InsertInOrder(Catalog *catalog, const char *contents)
 {
-	CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
-	newEntry->files = 0;
+    CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
+    newEntry->files = 0;
 
-	newEntry->contents = MyStrdup(contents);
+    newEntry->contents = MyStrdup(contents);
 
-	DL_INSERT_INORDER(catalog->head, newEntry, CompareEntries);
+    DL_INSERT_INORDER(catalog->head, newEntry, CompareEntries);
 
     return newEntry;
 }
@@ -190,7 +189,7 @@ InsertInOrder(Catalog *catalog, const char *contents)
 /**
  * Find an existing list element for a given content
  *
- * \param [in] catalog  
+ * \param [in] catalog
  * \param [in] contents contents to search.
  * \param [in] silent   we log error messages or not.
  *
@@ -201,16 +200,16 @@ static CatalogEntry *
 IsExistingContents(Catalog *catalog, const char *contents, BOOL_T silent)
 {
     CatalogEntry *head = catalog->head;
-	CatalogEntry *currentEntry;
+    CatalogEntry *currentEntry;
 
-	DL_FOREACH(head, currentEntry)
-	{
-		if (!XtcStricmp(currentEntry->contents, contents)) {
-			if (!silent)
-				printf("%s already exists in %s\n", contents, currentEntry->fullFileName[0]);
-			return (currentEntry);
-		}
-	}
+    DL_FOREACH(head, currentEntry) {
+        if (!XtcStricmp(currentEntry->contents, contents)) {
+            if (!silent) {
+                printf("%s already exists in %s\n", contents, currentEntry->fullFileName[0]);
+            }
+            return (currentEntry);
+        }
+    }
     return (NULL);
 }
 
@@ -234,7 +233,7 @@ UpdateCatalogEntry(CatalogEntry *entry, char *path, char *contents)
     if (entry->files < MAXFILESPERCONTENT) {
         entry->fullFileName[entry->files++] = MyStrdup(path);
     } else {
-		AbortProg("Number of files with same content too large!", NULL);
+        AbortProg("Number of files with same content too large!", NULL);
     }
 }
 
@@ -298,25 +297,25 @@ GetNextParameterFile(DIR *dir, const char *dirName, char **fileName)
 bool
 FilterKeyword(char *word)
 {
-	if (strlen(word) == 1 && strpbrk(word, PUNCTUATION )) {
-		return(true);
-	}
+    if (strlen(word) == 1 && strpbrk(word, PUNCTUATION)) {
+        return (true);
+    }
 
-	for (int i = 0; i < sizeof(stopwords) / sizeof(char *); i++) {
-		if (!stricmp(word, stopwords+i)) {
-			return(true);
-		}
-	}
-	return(false);
+    for (int i = 0; i < sizeof(stopwords) / sizeof(char *); i++) {
+        if (!stricmp(word, stopwords+i)) {
+            return (true);
+        }
+    }
+    return (false);
 }
 
 int KeyWordCmp(IndexEntry *a, IndexEntry *b)
 {
-	return XtcStricmp(a->keyWord, b->keyWord);
+    return XtcStricmp(a->keyWord, b->keyWord);
 }
 
 /**
- * Standardize spelling: remove some typical spelling problems. It is assumed that the word 
+ * Standardize spelling: remove some typical spelling problems. It is assumed that the word
  * has already been converted to lower case
  *
  * \param [in,out] word If non-null, the word.
@@ -325,22 +324,25 @@ int KeyWordCmp(IndexEntry *a, IndexEntry *b)
 void
 StandardizeSpelling(char *word)
 {
-	char *p = strchr(word, '-');
-	// remove the word 'scale' from combinations like N-scale 
-	if (p) {
-		if (!stricmp(p+1, "scale")) {
-			*p = '\0';
-		}
-	}
+    char *p = strchr(word, '-');
+    // remove the word 'scale' from combinations like N-scale
+    if (p) {
+        if (!stricmp(p+1, "scale")) {
+            *p = '\0';
+        }
+    }
 
-	if (!strnicmp(word, "h0", 2))
-		strncpy(word, "ho", 2);
+    if (!strnicmp(word, "h0", 2)) {
+        strncpy(word, "ho", 2);
+    }
 
-	if (!strnicmp(word, "00", 2))
-		strncpy(word, "oo", 2);
+    if (!strnicmp(word, "00", 2)) {
+        strncpy(word, "oo", 2);
+    }
 
-	if (word[0] == '0')
-		word[0] = 'o';
+    if (word[0] == '0') {
+        word[0] = 'o';
+    }
 }
 
 /**
@@ -352,21 +354,21 @@ StandardizeSpelling(char *word)
  */
 
 static unsigned
-CreateKeywordIndex(ParameterLib *library )
+CreateKeywordIndex(ParameterLib *library)
 {
     CatalogEntry *listOfEntries = library->catalog->head;
-	CatalogEntry *curParamFile;
+    CatalogEntry *curParamFile;
     unsigned totalMemory = 0;
     size_t wordCount = 0;
     char *wordList;
     char *wordListPtr;
-	IndexEntry *index = library->index;
+    IndexEntry *index = library->index;
 
-	// allocate a  buffer for the complete set of keywords
-	DL_FOREACH(listOfEntries, curParamFile ) {
+    // allocate a  buffer for the complete set of keywords
+    DL_FOREACH(listOfEntries, curParamFile) {
         totalMemory += strlen(curParamFile->contents) + 1;
     }
-	wordList = MyMalloc((totalMemory + 1) * sizeof(char));
+    wordList = MyMalloc((totalMemory + 1) * sizeof(char));
 
     wordListPtr = wordList;
 
@@ -378,47 +380,47 @@ CreateKeywordIndex(ParameterLib *library )
         while (word) {
             strcpy(wordListPtr, word);
 
-			XtcStrlwr(wordListPtr);
-			if (!FilterKeyword(wordListPtr)) {
-				IndexEntry *searchEntry = MyMalloc(sizeof( IndexEntry ));
-				IndexEntry *existingEntry = NULL;
-				searchEntry->keyWord = wordListPtr;
-				StandardizeSpelling(wordListPtr);
+            XtcStrlwr(wordListPtr);
+            if (!FilterKeyword(wordListPtr)) {
+                IndexEntry *searchEntry = MyMalloc(sizeof(IndexEntry));
+                IndexEntry *existingEntry = NULL;
+                searchEntry->keyWord = wordListPtr;
+                StandardizeSpelling(wordListPtr);
 
-				if (index) {
-					DL_SEARCH(index, existingEntry, searchEntry, KeyWordCmp);
-				}
-				if (existingEntry) {
-					DYNARR_APPEND(CatalogEntry *, *(existingEntry->references), 5);
-					DYNARR_LAST(CatalogEntry *, *(existingEntry->references)) = curParamFile;
-					MyFree(searchEntry);
-				} else {
-					searchEntry->references = calloc(1, sizeof(dynArr_t));
-					DYNARR_APPEND(CatalogEntry *, *(searchEntry->references), 5);
-					DYNARR_LAST(CatalogEntry *, *(searchEntry->references)) = curParamFile;
-					DL_APPEND(index, searchEntry);
-					LOG1(log_params, ("Index Entry: <%s>\n", searchEntry->keyWord))
-				}
+                if (index) {
+                    DL_SEARCH(index, existingEntry, searchEntry, KeyWordCmp);
+                }
+                if (existingEntry) {
+                    DYNARR_APPEND(CatalogEntry *, *(existingEntry->references), 5);
+                    DYNARR_LAST(CatalogEntry *, *(existingEntry->references)) = curParamFile;
+                    MyFree(searchEntry);
+                } else {
+                    searchEntry->references = calloc(1, sizeof(dynArr_t));
+                    DYNARR_APPEND(CatalogEntry *, *(searchEntry->references), 5);
+                    DYNARR_LAST(CatalogEntry *, *(searchEntry->references)) = curParamFile;
+                    DL_APPEND(index, searchEntry);
+                    LOG1(log_params, ("Index Entry: <%s>\n", searchEntry->keyWord))
+                }
 
-				wordListPtr += strlen(word) + 1;
-				wordCount++;
-			}
+                wordListPtr += strlen(word) + 1;
+                wordCount++;
+            }
             word = strtok(NULL, SEARCHDELIMITER);
         }
         free(content);
     }
     *wordListPtr = '\0';
-   
-	DL_SORT(index, KeyWordCmp);
-	
-	library->index = index;
-	library->words = wordList;
 
-	IndexEntry *existingEntry;
-	DL_FOREACH(index, existingEntry)
-	{
-		LOG1(log_params, ("Index Entry: <%s> Count: %d\n", existingEntry->keyWord, existingEntry->references->cnt));
-	}
+    DL_SORT(index, KeyWordCmp);
+
+    library->index = index;
+    library->words = wordList;
+
+    IndexEntry *existingEntry;
+    DL_FOREACH(index, existingEntry) {
+        LOG1(log_params, ("Index Entry: <%s> Count: %d\n", existingEntry->keyWord,
+                          existingEntry->references->cnt));
+    }
     return (wordCount);
 }
 
@@ -437,16 +439,16 @@ CreateKeywordIndex(ParameterLib *library )
 unsigned int
 FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
 {
-	IndexEntry *result = NULL;
+    IndexEntry *result = NULL;
 
-	IndexEntry searchWord;
-	searchWord.keyWord = search;
+    IndexEntry searchWord;
+    searchWord.keyWord = search;
 
     *entries = NULL;
 
-	DL_SEARCH(index, result, &searchWord, KeyWordCmp);
-	*entries = result;
-	
+    DL_SEARCH(index, result, &searchWord, KeyWordCmp);
+    *entries = result;
+
     return (result != NULL);
 }
 
@@ -481,10 +483,10 @@ InitLibrary(void)
 void
 DestroyLibrary(ParameterLib *library)
 {
-	if (library) {
-		DestroyCatalog(library->catalog);
-		MyFree(library);
-	}
+    if (library) {
+        DestroyCatalog(library->catalog);
+        MyFree(library);
+    }
 }
 
 /**
@@ -498,31 +500,31 @@ DestroyLibrary(ParameterLib *library)
 bool
 CreateCatalogFromDir(ParameterLib *paramLib, char *directory)
 {
-	DIR *d;
-	Catalog *catalog = paramLib->catalog;
+    DIR *d;
+    Catalog *catalog = paramLib->catalog;
 
-	d = opendir(directory);
-	if (d) {
-		char *fileName = NULL;
+    d = opendir(directory);
+    if (d) {
+        char *fileName = NULL;
 
-		while (GetNextParameterFile(d, directory, &fileName)) {
-			CatalogEntry *existingEntry;
+        while (GetNextParameterFile(d, directory, &fileName)) {
+            CatalogEntry *existingEntry;
 
-			char *contents = GetParameterFileContent(fileName);
+            char *contents = GetParameterFileContent(fileName);
 
-			if ((existingEntry = IsExistingContents(catalog, contents, FALSE))) {
-				UpdateCatalogEntry(existingEntry, fileName, contents);
-			} else {
-				CatalogEntry *newEntry;
-				newEntry = InsertInOrder(catalog, contents);
-				UpdateCatalogEntry(newEntry, fileName, contents);
-			}
-			MyFree(contents);
-			free(fileName);
-			fileName = NULL;
-		}
-		closedir(d);
-	}
+            if ((existingEntry = IsExistingContents(catalog, contents, FALSE))) {
+                UpdateCatalogEntry(existingEntry, fileName, contents);
+            } else {
+                CatalogEntry *newEntry;
+                newEntry = InsertInOrder(catalog, contents);
+                UpdateCatalogEntry(newEntry, fileName, contents);
+            }
+            MyFree(contents);
+            free(fileName);
+            fileName = NULL;
+        }
+        closedir(d);
+    }
     paramLib->parameterFileCount = CountCatalogEntries(paramLib->catalog);
     return (paramLib->parameterFileCount);
 }
@@ -536,18 +538,17 @@ CreateCatalogFromDir(ParameterLib *paramLib, char *directory)
 void
 DiscardCatalog(ParameterLib *library)
 {
-	CatalogEntry *entry;
-	CatalogEntry *temp;
+    CatalogEntry *entry;
+    CatalogEntry *temp;
 
-	DL_FOREACH_SAFE(library->catalog->head, entry, temp)
-	{
-		MyFree(entry->contents);
-		for (unsigned int i = 0; i < entry->files; i++) {
-			MyFree(entry->fullFileName[i]);
-		}
-		DL_DELETE(library->catalog->head, entry);
-		MyFree(entry);
-	}
+    DL_FOREACH_SAFE(library->catalog->head, entry, temp) {
+        MyFree(entry->contents);
+        for (unsigned int i = 0; i < entry->files; i++) {
+            MyFree(entry->fullFileName[i]);
+        }
+        DL_DELETE(library->catalog->head, entry);
+        MyFree(entry);
+    }
 
 }
 
@@ -575,7 +576,7 @@ int GetParameterFileInfo(
     for (int i = 0; i < files; i++) {
         CatalogEntry *newEntry;
         char *contents = GetParameterFileContent(fileName[i]);
-		///[TODO] try to find out what should happen here
+        ///[TODO] try to find out what should happen here
         if (!(newEntry = IsExistingContents(catalog, contents,TRUE))) {
             newEntry = InsertIntoCatalogAfter(catalog->head);
         }
@@ -587,7 +588,7 @@ int GetParameterFileInfo(
 
 /**
  * Create the search index from the contents description for the whole
- * catalog. 
+ * catalog.
  *
  * \param [in] parameterLib IN the catalog.
  *
@@ -597,7 +598,7 @@ int GetParameterFileInfo(
 unsigned
 CreateLibraryIndex(ParameterLib *parameterLib)
 {
-	parameterLib->index = NULL;
+    parameterLib->index = NULL;
 
     parameterLib->wordCount = CreateKeywordIndex(parameterLib);
 
@@ -606,7 +607,7 @@ CreateLibraryIndex(ParameterLib *parameterLib)
 
 /**
  * Discard library index freeing all memory used
- * references were created using MakeFullPath. These were allocated using malloc and 
+ * references were created using MakeFullPath. These were allocated using malloc and
  * not MyMalloc
  *
  * \param [in] trackLib the track library.
@@ -615,20 +616,19 @@ CreateLibraryIndex(ParameterLib *parameterLib)
 void
 DiscardLibraryIndex(ParameterLib *trackLib)
 {
-	IndexEntry *indexEntry;
-	IndexEntry *tmp;
+    IndexEntry *indexEntry;
+    IndexEntry *tmp;
 
-	DL_FOREACH_SAFE(trackLib->index, indexEntry, tmp)
-	{
-		DYNARR_FREE(CatalogEntry *, *(indexEntry->references));
-		free(indexEntry->references);
-		DL_DELETE(trackLib->index, indexEntry);
-		MyFree(indexEntry);
-	}
+    DL_FOREACH_SAFE(trackLib->index, indexEntry, tmp) {
+        DYNARR_FREE(CatalogEntry *, *(indexEntry->references));
+        free(indexEntry->references);
+        DL_DELETE(trackLib->index, indexEntry);
+        MyFree(indexEntry);
+    }
 
-	MyFree(trackLib->words);
-	trackLib->index = NULL;
-	trackLib->wordCount = 0;
+    MyFree(trackLib->words);
+    trackLib->index = NULL;
+    trackLib->wordCount = 0;
 }
 
 
@@ -644,7 +644,7 @@ CreateLibrary(char *directory)
 {
     ParameterLib *library;
 
-	log_params = LogFindIndex("params");
+    log_params = LogFindIndex("params");
 
     library = InitLibrary();
     if (library) {
@@ -666,23 +666,22 @@ CreateLibrary(char *directory)
 void
 DiscardLibrary(ParameterLib* library)
 {
-	CatalogEntry *entry = library->catalog->head;
-	CatalogEntry *element;
-	CatalogEntry *tmp;
+    CatalogEntry *entry = library->catalog->head;
+    CatalogEntry *element;
+    CatalogEntry *tmp;
 
-	DiscardLibraryIndex(library);
+    DiscardLibraryIndex(library);
 
-	DL_FOREACH_SAFE(entry, element, tmp)
-	{
-		MyFree(element->contents);
-		for (unsigned int i = 0; i < element->files; i++) {
-			MyFree(element->fullFileName[i]);
-		}
-		DL_DELETE(entry, element);
-		MyFree(element);
-	}
-	MyFree(library->words);
-	MyFree(library);
+    DL_FOREACH_SAFE(entry, element, tmp) {
+        MyFree(element->contents);
+        for (unsigned int i = 0; i < element->files; i++) {
+            MyFree(element->fullFileName[i]);
+        }
+        DL_DELETE(entry, element);
+        MyFree(element);
+    }
+    MyFree(library->words);
+    MyFree(library);
 }
 
 /**
@@ -696,59 +695,60 @@ DiscardLibrary(ParameterLib* library)
 char *
 SearchStatistics(SearchResult *result)
 {
-	DynString buffer;
-	DynString subStats[STATE_COUNT];
+    DynString buffer;
+    DynString subStats[STATE_COUNT];
 
-	unsigned searched = 0;
-	unsigned discarded = 0; 
-	unsigned notfound = 0;
+    unsigned searched = 0;
+    unsigned discarded = 0;
+    unsigned notfound = 0;
 
-	char *resStat;
-	DynStringMalloc(&buffer, 16);
+    char *resStat;
+    DynStringMalloc(&buffer, 16);
 
-	for (int i = SEARCHED; i < STATE_COUNT; i++) {
-		DynStringMalloc( subStats + i, 16);
-	}
-	
-	DynStringCatCStr(subStats + SEARCHED, _("Found: "));
-	DynStringCatCStr(subStats + DISCARDED, _("Ignored: "));
-	DynStringCatCStr(subStats + NOTFOUND, _("Not found: "));
+    for (int i = SEARCHED; i < STATE_COUNT; i++) {
+        DynStringMalloc(subStats + i, 16);
+    }
 
-	for (unsigned int i = 0; i < result->words; i++) {
-		switch (result->kw[i].state) {
-		case SEARCHED:
-			DynStringPrintf(&buffer, "%s (%d) ", result->kw[i].keyWord, result->kw[i].count);
-			searched++;
-			break;
-		case DISCARDED:
-			DynStringPrintf(&buffer, "%s ", result->kw[i].keyWord);
-			discarded++;
-			break;
-		case NOTFOUND:
-			DynStringPrintf(&buffer, "%s ", result->kw[i].keyWord);
-			notfound++;
-			break;
-		default:
-			break;
-		}
-		DynStringCatStr(subStats + result->kw[i].state, &buffer);
-	}
+    DynStringCatCStr(subStats + SEARCHED, _("Found: "));
+    DynStringCatCStr(subStats + DISCARDED, _("Ignored: "));
+    DynStringCatCStr(subStats + NOTFOUND, _("Not found: "));
 
-	DynStringReset(&buffer);
-	if (searched) {
-		DynStringCatStr(&buffer, subStats + SEARCHED);
-	}
-	if (notfound) {
-		DynStringCatStr(&buffer, subStats + NOTFOUND);
-	}
-	if (discarded) {
-		DynStringCatStr(&buffer, subStats + DISCARDED);
-	}
+    for (unsigned int i = 0; i < result->words; i++) {
+        switch (result->kw[i].state) {
+        case SEARCHED:
+            DynStringPrintf(&buffer, "%s (%d) ", result->kw[i].keyWord,
+                            result->kw[i].count);
+            searched++;
+            break;
+        case DISCARDED:
+            DynStringPrintf(&buffer, "%s ", result->kw[i].keyWord);
+            discarded++;
+            break;
+        case NOTFOUND:
+            DynStringPrintf(&buffer, "%s ", result->kw[i].keyWord);
+            notfound++;
+            break;
+        default:
+            break;
+        }
+        DynStringCatStr(subStats + result->kw[i].state, &buffer);
+    }
 
-	resStat = MyStrdup(DynStringToCStr(&buffer));
-	DynStringFree(&buffer);
+    DynStringReset(&buffer);
+    if (searched) {
+        DynStringCatStr(&buffer, subStats + SEARCHED);
+    }
+    if (notfound) {
+        DynStringCatStr(&buffer, subStats + NOTFOUND);
+    }
+    if (discarded) {
+        DynStringCatStr(&buffer, subStats + DISCARDED);
+    }
 
-	return(resStat);
+    resStat = MyStrdup(DynStringToCStr(&buffer));
+    DynStringFree(&buffer);
+
+    return (resStat);
 }
 
 /**
@@ -761,128 +761,129 @@ SearchStatistics(SearchResult *result)
 
 unsigned countWords(char *str)
 {
-	int state = FALSE;
-	unsigned wc = 0;  // word count 
+    int state = FALSE;
+    unsigned wc = 0;  // word count
 
-	// Scan all characters one by one 
-	while (*str) {
-		// If next character is a separator, set the  
-		// state as FALSE 
-		if (*str == ' ' || *str == '\n' || *str == '\t')
-			state = FALSE;
+    // Scan all characters one by one
+    while (*str) {
+        // If next character is a separator, set the
+        // state as FALSE
+        if (*str == ' ' || *str == '\n' || *str == '\t') {
+            state = FALSE;
+        }
 
-		// If next character is not a word separator and  
-		// state is OUT, then set the state as IN and  
-		// increment word count 
-		else if (state == FALSE) {
-			state = TRUE;
-			++wc;
-		}
+        // If next character is not a word separator and
+        // state is OUT, then set the state as IN and
+        // increment word count
+        else if (state == FALSE) {
+            state = TRUE;
+            ++wc;
+        }
 
-		// Move to next character 
-		++str;
-	}
+        // Move to next character
+        ++str;
+    }
 
-	return wc;
+    return wc;
 }
 
 /**
  * Search the library for a keyword string and return the result list
  *
- * Each key word exists only once in the index. 
- * 
+ * Each key word exists only once in the index.
+ *
  * \param library IN the library
  * \param searchExpression	IN keyword to search for
  * \param resultEntries IN list header for result list
  * \return number of found entries
  */
- 
+
 unsigned
 SearchLibrary(ParameterLib *library, char *searchExpression,
-	SearchResult *results)
+              SearchResult *results)
 {
-	CatalogEntry *element;
-	IndexEntry *entries;			
-	unsigned entryCount = 0;
-	char *searchWord;
-	unsigned words = countWords(searchExpression);
-	char *searchExp = MyStrdup(searchExpression);
-	unsigned i = 0;
+    CatalogEntry *element;
+    IndexEntry *entries;
+    unsigned entryCount = 0;
+    char *searchWord;
+    unsigned words = countWords(searchExpression);
+    char *searchExp = MyStrdup(searchExpression);
+    unsigned i = 0;
 
-	if (library->index == NULL || library->wordCount == 0) {
-		return (0);
-	}
+    if (library->index == NULL || library->wordCount == 0) {
+        return (0);
+    }
 
-	results->kw = MyMalloc(words * sizeof(struct sSingleResult));
-	results->subCatalog.head = NULL;
+    results->kw = MyMalloc(words * sizeof(struct sSingleResult));
+    results->subCatalog.head = NULL;
 
-	searchWord = strtok(searchExp, SEARCHDELIMITER);
-	while (searchWord) {
-		XtcStrlwr(searchWord);
-		if (!FilterKeyword(searchWord)) {
-			StandardizeSpelling(searchWord);
-			results->kw[i].state = SEARCHED;			
-		} else {
-			results->kw[i].state = DISCARDED;
-		}
-		results->kw[i++].keyWord = MyStrdup(searchWord);
-		searchWord = strtok(NULL, SEARCHDELIMITER);
-	}
-	results->words = words;
+    searchWord = strtok(searchExp, SEARCHDELIMITER);
+    while (searchWord) {
+        XtcStrlwr(searchWord);
+        if (!FilterKeyword(searchWord)) {
+            StandardizeSpelling(searchWord);
+            results->kw[i].state = SEARCHED;
+        } else {
+            results->kw[i].state = DISCARDED;
+        }
+        results->kw[i++].keyWord = MyStrdup(searchWord);
+        searchWord = strtok(NULL, SEARCHDELIMITER);
+    }
+    results->words = words;
 
-	i = 0;
-	while (i < words) {
-		if (results->kw[i].state == DISCARDED) {
-			i++;
-			continue;
-		}
-		FindWord(library->index, library->wordCount, results->kw[i].keyWord, &entries);
-		if(entries) {
-			results->kw[i].count = entries->references->cnt;
+    i = 0;
+    while (i < words) {
+        if (results->kw[i].state == DISCARDED) {
+            i++;
+            continue;
+        }
+        FindWord(library->index, library->wordCount, results->kw[i].keyWord, &entries);
+        if (entries) {
+            results->kw[i].count = entries->references->cnt;
 
-			if (results->subCatalog.head == NULL) {
-				// if first keyword -> initialize result set
-				for (int j = 0; j < entries->references->cnt; j++) {
-					CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
-					CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
-					newEntry->contents = foundEntry->contents;
-					newEntry->files = foundEntry->files;
-					memcpy(newEntry->fullFileName, foundEntry->fullFileName, sizeof(char *) * MAXFILESPERCONTENT);
+            if (results->subCatalog.head == NULL) {
+                // if first keyword -> initialize result set
+                for (int j = 0; j < entries->references->cnt; j++) {
+                    CatalogEntry *newEntry = MyMalloc(sizeof(CatalogEntry));
+                    CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
+                    newEntry->contents = foundEntry->contents;
+                    newEntry->files = foundEntry->files;
+                    memcpy(newEntry->fullFileName, foundEntry->fullFileName,
+                           sizeof(char *) * MAXFILESPERCONTENT);
 
-					DL_APPEND(results->subCatalog.head, newEntry);
-				}
-			} else {
-				// follow up keyword, create intersection with current result set
-				CatalogEntry *current;
-				CatalogEntry *temp;
+                    DL_APPEND(results->subCatalog.head, newEntry);
+                }
+            } else {
+                // follow up keyword, create intersection with current result set
+                CatalogEntry *current;
+                CatalogEntry *temp;
 
-				DL_FOREACH_SAFE(results->subCatalog.head, current, temp)
-				{
-					int found = 0;
-					for (int j = 0; j < entries->references->cnt; j++) {
-						CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
+                DL_FOREACH_SAFE(results->subCatalog.head, current, temp) {
+                    int found = 0;
+                    for (int j = 0; j < entries->references->cnt; j++) {
+                        CatalogEntry *foundEntry = DYNARR_N(CatalogEntry *, *(entries->references), j);
 
-						if (foundEntry->contents == current->contents) {
-							found = TRUE;
-							break;
-						}
-					}
-					if (!found) {
-						DL_DELETE(results->subCatalog.head, current);
-					}
-				}
-			}
-		} else {
-			// Searches that don't yield a result are ignored
-			results->kw[i].state = NOTFOUND;
-			results->kw[i].count = 0;
-		}
-		i++;
-	}
-	
-	DL_COUNT(results->subCatalog.head, element, results->totalFound );
-	MyFree(searchExp);
-	return (results->totalFound);
+                        if (foundEntry->contents == current->contents) {
+                            found = TRUE;
+                            break;
+                        }
+                    }
+                    if (!found) {
+                        DL_DELETE(results->subCatalog.head, current);
+                    }
+                }
+            }
+        } else {
+            // Searches that don't yield a result are ignored
+            results->kw[i].state = NOTFOUND;
+            results->kw[i].count = 0;
+        }
+        i++;
+    }
+
+    DL_COUNT(results->subCatalog.head, element, results->totalFound);
+    MyFree(searchExp);
+    return (results->totalFound);
 }
 
 /**
@@ -894,22 +895,21 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
 void
 SearchDiscardResult(SearchResult *res)
 {
-	if (res) {
-		CatalogEntry *current = res->subCatalog.head;
-		CatalogEntry *element;
-		CatalogEntry *tmp;
+    if (res) {
+        CatalogEntry *current = res->subCatalog.head;
+        CatalogEntry *element;
+        CatalogEntry *tmp;
 
-		DL_FOREACH_SAFE(current, element, tmp)
-		{
-			DL_DELETE(current, element);
-			MyFree(element);
-		}
+        DL_FOREACH_SAFE(current, element, tmp) {
+            DL_DELETE(current, element);
+            MyFree(element);
+        }
 
-		for (unsigned int i = 0; i < res->words; i++) {
-			MyFree(res->kw[i].keyWord);
-		}
-		MyFree(res->kw);
-	}
+        for (unsigned int i = 0; i < res->words; i++) {
+            MyFree(res->kw[i].keyWord);
+        }
+        MyFree(res->kw);
+    }
 }
 
 /**
@@ -922,57 +922,57 @@ SearchDiscardResult(SearchResult *res)
 char *
 GetParameterFileContent(char *file)
 {
-	FILE *fh;
-	char *result = NULL;
+    FILE *fh;
+    char *result = NULL;
 
-	fh = fopen(file, "rt");
-	if (fh) {
-		bool found = false;
+    fh = fopen(file, "rt");
+    if (fh) {
+        bool found = false;
 
-		while (!found) {
-			char buffer[512];
-			if (fgets(buffer, sizeof(buffer), fh)) {
-				char *ptr = strtok(buffer, " \t");
-				if (!XtcStricmp(ptr, CONTENTSCOMMAND)) {
-					/* if found, store the rest of the line and the filename	*/
-					ptr = ptr+strlen(CONTENTSCOMMAND)+1;
-					ptr = strtok(ptr, "\r\n");
-					result = MyStrdup(ptr);
+        while (!found) {
+            char buffer[512];
+            if (fgets(buffer, sizeof(buffer), fh)) {
+                char *ptr = strtok(buffer, " \t");
+                if (!XtcStricmp(ptr, CONTENTSCOMMAND)) {
+                    /* if found, store the rest of the line and the filename	*/
+                    ptr = ptr+strlen(CONTENTSCOMMAND)+1;
+                    ptr = strtok(ptr, "\r\n");
+                    result = MyStrdup(ptr);
 #ifdef WINDOWS
-					ConvertUTF8ToSystem(result);
+                    ConvertUTF8ToSystem(result);
 #endif // WINDOWS
-					found = true;
-				}
-			} else {
-				fprintf(stderr, "Nothing found in %s\n", file);
-				found = true;
-			}
-		}
-		fclose(fh);
-	}
-	return(result);
+                    found = true;
+                }
+            } else {
+                fprintf(stderr, "Nothing found in %s\n", file);
+                found = true;
+            }
+        }
+        fclose(fh);
+    }
+    return (result);
 }
 
 #ifdef MEMWATCH
 /** this is used to test for memory leaks. It should show no leaks from functions in this source file */
 RunMemoryTest(char *directory)
 {
-	ParameterLib *library;
-	SearchResult *results;
+    ParameterLib *library;
+    SearchResult *results;
 
-	mwInit();
-	library = InitLibrary();
-	if (library) {
-		CreateCatalogFromDir(library, directory); 
-		CreateLibraryIndex(library);
-		results = MyMalloc(sizeof(SearchResult));
-		SearchLibrary(library, "peco", results);
-		SearchDiscardResult(results);
-		MyFree(results);
-		DiscardLibraryIndex(library);
-		DiscardCatalog(library);
-	}
-	DestroyLibrary(library);
-	mwTerm();
+    mwInit();
+    library = InitLibrary();
+    if (library) {
+        CreateCatalogFromDir(library, directory);
+        CreateLibraryIndex(library);
+        results = MyMalloc(sizeof(SearchResult));
+        SearchLibrary(library, "peco", results);
+        SearchDiscardResult(results);
+        MyFree(results);
+        DiscardLibraryIndex(library);
+        DiscardCatalog(library);
+    }
+    DestroyLibrary(library);
+    mwTerm();
 }
 #endif //MEMWATCH

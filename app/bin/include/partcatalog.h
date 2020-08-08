@@ -28,7 +28,7 @@
 #define MAXFILESPERCONTENT	10					/**< count of files with the same content header */
 
 struct sCatalogEntry {
-	struct sCatalogEntry *next, *prev; 
+    struct sCatalogEntry *next, *prev;
     unsigned files;								/**< current count of files */
     char *fullFileName[MAXFILESPERCONTENT];		/**< fully qualified file name */
     char *contents;								/**< content field of parameter file */
@@ -36,21 +36,21 @@ struct sCatalogEntry {
 typedef struct sCatalogEntry CatalogEntry;
 
 struct sCatalog {
-	CatalogEntry *head;							/**< The entries */
+    CatalogEntry *head;							/**< The entries */
 };
 typedef struct sCatalog Catalog;
 
 
-/** 
-An index entry. This struct holds a keyword pointer and an array of pointers to  
+/**
+An index entry. This struct holds a keyword pointer and an array of pointers to
 CatalogEntry
 It is managed as a linked list
 */
 struct sIndexEntry {
-	struct sIndexEntry *next;
-	struct sIndexEntry *prev;
+    struct sIndexEntry *next;
+    struct sIndexEntry *prev;
     char *keyWord;								/**< keyword */
-	dynArr_t *references;						/**< references to the CatalogEntry */
+    dynArr_t *references;						/**< references to the CatalogEntry */
 };
 typedef struct sIndexEntry IndexEntry;
 
@@ -60,27 +60,27 @@ struct sParameterLib {
     IndexEntry *index;							/**< Index for lookup */
     unsigned wordCount;							/**< How many words indexed */
     unsigned parameterFileCount;					/**< */
-	char *words;
+    char *words;
 };
 typedef struct sParameterLib
-		ParameterLib;							/**< core data structure for the catalog */
+    ParameterLib;							/**< core data structure for the catalog */
 
 enum WORDSTATE {
-	SEARCHED,
-	DISCARDED,
-	NOTFOUND,
-	STATE_COUNT
+    SEARCHED,
+    DISCARDED,
+    NOTFOUND,
+    STATE_COUNT
 };
 
 struct sSearchResult {
-	Catalog subCatalog;
-	unsigned totalFound;
-	unsigned words;								/**< no of words in search string */
-	struct sSingleResult{
-		char *keyWord;
-		unsigned count;
-		enum WORDSTATE state;
-	} *kw;
+    Catalog subCatalog;
+    unsigned totalFound;
+    unsigned words;								/**< no of words in search string */
+    struct sSingleResult {
+        char *keyWord;
+        unsigned count;
+        enum WORDSTATE state;
+    } *kw;
 };
 typedef struct sSearchResult SearchResult;
 
@@ -91,7 +91,8 @@ void DiscardLibrary(ParameterLib *tracklib);
 bool CreateCatalogFromDir(ParameterLib *trackLib, char *directory);
 int GetParameterFileInfo(int files, char ** fileName, void * data);
 unsigned CreateLibraryIndex(ParameterLib *trackLib);
-unsigned SearchLibrary(ParameterLib *library, char *searchExpression, SearchResult *totalResult);
+unsigned SearchLibrary(ParameterLib *library, char *searchExpression,
+                       SearchResult *totalResult);
 char *SearchStatistics(SearchResult *result);
 void SearchDiscardResult(SearchResult *res);
 unsigned CountCatalogEntries(Catalog *catalog);
