@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include <dynstring.h>
+#include <assert.h>
 
 #include "custom.h"
 #include "i18n.h"
@@ -70,6 +71,9 @@ static paramFloatRange_t r1_9999999 = { 1, 9999999 };
 static paramFloatRange_t r360_360 = { -360, 360 };
 static paramFloatRange_t rN_9999999 = { -99999, 99999 };
 static paramIntegerRange_t i0_100 = { 0, 100 };
+
+static void SettingsWrite( void  );
+static void SettingsRead( void  );
 
 static void LayoutDlgUpdate(paramGroup_p pg, int inx, void * valueP);
 
@@ -425,7 +429,7 @@ void LayoutBackGroundSave(void) {
    	wPrefSetInteger("layout", "BackgroundScreen", thisLayout.props.backgroundScreen);
    	wPrefSetFloat("layout", "BackgroundSize", thisLayout.props.backgroundSize);
 
-   	wPrefFlush();
+   	wPrefFlush("");
 }
 
 /************************************************************
@@ -479,7 +483,10 @@ static paramData_t layoutPLs[] = {
 #define BACKGROUNDSCREEN (14)
 	{ PD_LONG, &thisLayout.props.backgroundScreen, "backgroundScreen", PDO_NOPSHUPD | PDO_DRAW, &i0_100, N_("Background Screen %"), 0, (void*)(CHANGE_BACKGROUND) },
 #define BACKGROUNDANGLE (15)
-	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW, &r360_360, N_("Background Angle"), 0, (void*)(CHANGE_BACKGROUND) }
+	{ PD_FLOAT, &thisLayout.props.backgroundAngle, "backgroundAngle", PDO_NOPSHUPD | PDO_DRAW | PDO_DLGBOXEND, &r360_360, N_("Background Angle"), 0, (void*)(CHANGE_BACKGROUND) },
+	{ PD_MESSAGE, N_("Settings Preferences"), NULL, PDO_DLGRESETMARGIN, (void *)180 },
+	{ PD_BUTTON, (void*)SettingsWrite, "write",  PDO_DLGHORZ, 0, N_("Write"), 0, (void *)0 },
+	{ PD_BUTTON, (void*)SettingsRead, "read", PDO_DLGHORZ | PDO_DLGBOXEND, 0, N_("Read"), 0, (void *)0 }
 
 };
 
@@ -705,3 +712,58 @@ LayoutBackGroundInit(BOOL_T clear) {
 	}
 
 }
+
+static int DoSettingsRead(
+		int files,
+		char ** fileName,
+		void * data )
+{
+	char * pref;
+	assert( fileName != NULL );
+	assert( files == 1 );
+	wPrefsLoad(fileName[0]);
+	// get the preferred scale from the new configuration file
+	pref = wPrefGetString("misc", "scale");
+	if (pref) {
+		char buffer[STR_SHORT_SIZE];
+		strcpy(buffer, pref);
+		DoSetScale(buffer);
+	}
+	return TRUE;
+}
+
+static struct wFilSel_t * settingsRead_fs;
+
+static void SettingsRead( void )
+{
+	if (settingsRead_fs == NULL)
+		settingsRead_fs = wFilSelCreate( mainW, FS_LOAD, 0, _("Read Settings"),
+				_("Settings File (*.xset)|*.xset"), DoSettingsRead, NULL );
+	bExample = FALSE;
+	wFilSelect( settingsRead_fs, wGetAppWorkDir());
+
+}
+
+static int DoSettingsWrite(
+		int files,
+		char ** fileName,
+		void * data )
+{
+	assert( fileName != NULL );
+	assert( files == 1 );
+	wPrefFlush(fileName[0]);
+	return TRUE;
+}
+
+static struct wFilSel_t * settingsWrite_fs;
+
+static void SettingsWrite( void  )
+{
+	if ( settingsWrite_fs == NULL )
+		settingsWrite_fs  = wFilSelCreate( mainW, FS_UPDATE, 0, _("Write Settings"),
+				_("Settings File (*.xset)|*.xset"), DoSettingsWrite, NULL );
+	wFilSelect( settingsWrite_fs, wGetAppWorkDir());
+}
+
+
+

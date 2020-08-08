@@ -756,6 +756,8 @@ char * wPrefGetString(const char *section, const char *name);
 char * wPrefGetStringBasic( const char *section, const char *name );
 char * wPrefGetStringExt(const char *section, const char *name);
 
+void wPrefsLoad(char * name);
+
 void wPrefSetInteger(const char *, const char *, long );
 wBool_t wPrefGetInteger(const char *section, const char *name, long *result, long defaultValue);
 wBool_t wPrefGetIntegerBasic(const char *section, const char *name, long *result, long defaultValue);
@@ -767,7 +769,7 @@ wBool_t wPrefGetFloatBasic(const char *section, const char *name, double *result
 wBool_t wPrefGetFloatExt(const char *section, const char *name, double *result, double defaultValue);
 
 const char * wPrefGetSectionItem( const char * sectionName, wIndex_t * index, const char ** name );
-void wPrefFlush(		void );
+void wPrefFlush( char * name);
 void wPrefReset(		void );
 
 void CleanupCustom( void );

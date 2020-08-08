@@ -1886,7 +1886,7 @@ void wExit(int rc)
     INDEX_T inx;
     wControl_p b;
     mswPutCustomColors();
-    wPrefFlush();
+    wPrefFlush("");
 
     for (inx=controlMap_da.cnt-1; inx>=0; inx--) {
         b = controlMap(inx).b;

@@ -223,7 +223,7 @@ wBool_t prefInitted = FALSE;
  * Read the configuration file into memory
  */
 
-static void readPrefs( void )
+static void readPrefs( char * name, wBool_t update )
 {
 	char tmp[BUFSIZ], *np, *vp, *cp;
 	const char * workDir;
@@ -232,7 +232,10 @@ static void readPrefs( void )
 
 	prefInitted = TRUE;
 	workDir = wGetAppWorkDir();
-	sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
+	if (name && name[0])
+		sprintf( tmp, "%s", name );
+	else
+		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
 	prefFile = fopen( tmp, "r" );
 	if (prefFile == NULL)
 		return;
@@ -260,12 +263,23 @@ static void readPrefs( void )
 		cp = vp + strlen(vp) -1;
 		while ( cp >= vp && (*cp=='\n' || *cp==' ' || *cp=='\t') ) cp--;
 		cp[1] = '\0';
-		DYNARR_APPEND( prefs_t, prefs_da, 10 );
-		p = &prefs(prefs_da.cnt-1);
-		p->name = strdup(np);
-		p->section = strdup(sp);
-		p->dirty = FALSE;
-		p->val = strdup(vp);
+		if (update) {
+			for (int i=0;i<prefs_da.cnt;i++) {
+				p = &DYNARR_N(prefs_t,prefs_da,i);
+				if (strcmp(p->name,np)==0 && strcmp(p->section,sp)==0) {
+					p->val = strdup(vp);
+					p->dirty = TRUE;
+					break;
+				}
+			}
+		} else {
+			DYNARR_APPEND( prefs_t, prefs_da, 10 );
+			p = &prefs(prefs_da.cnt-1);
+			p->name = strdup(np);
+			p->section = strdup(sp);
+			p->dirty = FALSE;
+			p->val = strdup(vp);
+		}
 	}
 	fclose( prefFile );
 }
@@ -286,7 +300,7 @@ void wPrefSetString(
 	prefs_t * p;
 
 	if (!prefInitted)
-		readPrefs();
+		readPrefs("", FALSE);
 	
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
 		if ( strcmp( p->section, section ) == 0 && strcmp( p->name, name ) == 0 ) {
@@ -319,7 +333,7 @@ char * wPrefGetStringBasic(
 	prefs_t * p;
 
 	if (!prefInitted)
-		readPrefs();
+		readPrefs("", FALSE);
 	
 	for (p=&prefs(0); p<&prefs(prefs_da.cnt); p++) {
 		if ( strcmp( p->section, section ) == 0 && strcmp( p->name, name ) == 0 ) {
@@ -432,6 +446,10 @@ wBool_t wPrefGetFloatBasic(
 	return TRUE;
 }
 
+void wPrefsLoad(char * name) {
+	readPrefs(name,TRUE);
+}
+
 /**
  * Save the configuration to a file. The config parameters are held and updated in an array.
  * To make the settings persistant, this function has to be called. 
@@ -439,7 +457,7 @@ wBool_t wPrefGetFloatBasic(
  */
 
 void wPrefFlush(
-		void )
+		char * name )
 {
 	prefs_t * p;
 	char tmp[BUFSIZ];
@@ -450,7 +468,10 @@ void wPrefFlush(
 		return;
 	
 	workDir = wGetAppWorkDir();
-	sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
+	if (name && name[0])
+		sprintf( tmp, "%s", name );
+	else
+		sprintf( tmp, "%s/%s.rc", workDir, wConfigName );
 	prefFile = fopen( tmp, "w" );
 	if (prefFile == NULL)
 		return;

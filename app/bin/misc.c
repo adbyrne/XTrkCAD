@@ -720,7 +720,7 @@ EXPORT void SaveState(void) {
 			}
 		}
 	}
-	wPrefFlush();
+	wPrefFlush("");
 	LogClose();
 }
 
