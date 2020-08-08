@@ -1,7 +1,7 @@
 /** \file partcatalog.h
 * Manage the catalog of track parameter files
 */
-/*  XTrkCad - Model Railroad CAD
+/*  XTrackCad - Model Railroad CAD
 *  Copyright (C) 2019 Martin Fischer
 *
 *  This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,6 @@
 #include "include/utlist.h"
 
 #define MAXFILESPERCONTENT	10					/**< count of files with the same content header */
-#define ESTIMATED_CONTENTS_WORDS 10				/**< average count of words in CONTENTS header */		
 
 struct sCatalogEntry {
 	struct sCatalogEntry *next, *prev; 
@@ -61,6 +60,7 @@ struct sParameterLib {
     IndexEntry *index;							/**< Index for lookup */
     unsigned wordCount;							/**< How many words indexed */
     unsigned parameterFileCount;					/**< */
+	char *words;
 };
 typedef struct sParameterLib
 		ParameterLib;							/**< core data structure for the catalog */
@@ -68,11 +68,14 @@ typedef struct sParameterLib
 enum WORDSTATE {
 	SEARCHED,
 	DISCARDED,
+	NOTFOUND,
+	STATE_COUNT
 };
 
 struct sSearchResult {
 	Catalog subCatalog;
 	unsigned totalFound;
+	unsigned words;								/**< no of words in search string */
 	struct sSingleResult{
 		char *keyWord;
 		unsigned count;
@@ -84,13 +87,14 @@ typedef struct sSearchResult SearchResult;
 Catalog *InitCatalog(void);
 ParameterLib *InitLibrary(void);
 ParameterLib *CreateLibrary(char *directory);
-void DeleteLibrary(ParameterLib *tracklib);
-bool GetParameterFiles(ParameterLib *trackLib, char *directory);
+void DiscardLibrary(ParameterLib *tracklib);
+bool CreateCatalogFromDir(ParameterLib *trackLib, char *directory);
 int GetParameterFileInfo(int files, char ** fileName, void * data);
 unsigned CreateLibraryIndex(ParameterLib *trackLib);
 unsigned SearchLibrary(ParameterLib *library, char *searchExpression, SearchResult *totalResult);
-void SearchResultDiscard(SearchResult *res);
+char *SearchStatistics(SearchResult *result);
+void SearchDiscardResult(SearchResult *res);
 unsigned CountCatalogEntries(Catalog *catalog);
-void EmptyCatalog(Catalog *catalog);
+void CatalogDiscard(Catalog *catalog);
 bool FilterKeyword(char *word);
 #endif // !HAVE_TRACKCATALOG_H
