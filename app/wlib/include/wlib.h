@@ -595,7 +595,7 @@ void wDrawShowBackground(   wDraw_p, wPos_t pos_x, wPos_t pos_y, wPos_t width, w
 void wInitializeFonts();
 void wSelectFont(		const char * );
 wFontSize_t wSelectedFontSize(	void );
-void wSetSelectionFontSize(wFontSize_t);
+void wSetSelectedFontSize(wFontSize_t size);
 #define F_TIMES	(1)
 #define F_HELV	(2)
 wFont_p wStandardFont(		int, wBool_t, wBool_t );
