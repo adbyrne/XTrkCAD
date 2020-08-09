@@ -1217,7 +1217,7 @@ static BOOL_T MakeParallelBezier(
 		tempSegs(0).bezSegs.max = 0;
 		tempSegs(0).bezSegs.cnt = 0;
 		for (int i=0;i<4;i++) tempSegs(0).u.b.pos[i] = np[i];
-		FixUpBezierSeg(tempSegs(0).u.b.pos,&tempSegs(0),TRUE);
+		FixUpBezierSeg(tempSegs(0).u.b.pos,&tempSegs(0),track);
 	}
 	if ( p0R ) *p0R = np[0];
 	if ( p1R ) *p1R = np[1];
