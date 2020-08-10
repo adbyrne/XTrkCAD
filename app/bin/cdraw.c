@@ -2058,33 +2058,40 @@ static BOOL_T MakeParallelDraw(
 			tempSegs(0).u.p.polyType = xx->segs[0].type==SEG_POLY?xx->segs[0].u.p.polyType:POLYLINE;
 			tempSegs(0).u.p.pts = memdup( xx->segs[0].u.p.pts, xx->segs[0].u.p.cnt*sizeof (pts_t) );
 			tempSegs(0).u.p.cnt = xx->segs[0].u.p.cnt;
-			ANGLE_T a;
+			ANGLE_T a,b;
 			for (int i=0;i<xx->segs[0].u.p.cnt;i++) {
 			    REORIGIN(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i].pt,xx->angle, xx->orig);
 			}
 			for (int i=0;i<xx->segs[0].u.p.cnt;i++) {
 				if (xx->segs[0].u.p.polyType == POLYLINE) {
-					if (i==0)
+					if (i==0) {
 						a = FindAngle(tempSegs(0).u.p.pts[0].pt,tempSegs(0).u.p.pts[1].pt);
-					else if (i==xx->segs[0].u.p.cnt-1)
+						b = 0;
+					} else if (i==xx->segs[0].u.p.cnt-1) {
 						a = NormalizeAngle(FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i-1].pt)+180.0);
-					else {
+						b = 0;
+					} else {
 						a = FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i+1].pt);
-						a = a + DifferenceBetweenAngles(a,FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i-1].pt)+180.0)/2;
+						b = DifferenceBetweenAngles(a,FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i-1].pt)+180.0)/2;
+						a = a + b;
 					}
 				} else {
 					if (i==0) {
 						a = FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i+1].pt);
-						a = a+DifferenceBetweenAngles(a,FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[xx->segs[0].u.p.cnt-1].pt)+180.0)/2;
+						b = DifferenceBetweenAngles(a,FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[xx->segs[0].u.p.cnt-1].pt)+180.0)/2;
+						a = a+b;
 					} else if (i==xx->segs[0].u.p.cnt-1) {
 						a = FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[0].pt);
-						a = a+DifferenceBetweenAngles(a,FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i-1].pt)+180.0)/2;
+						b = DifferenceBetweenAngles(a,FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i-1].pt)+180.0)/2;
+						a = a+b;
 					} else {
 						a = FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i+1].pt);
-						a = a+DifferenceBetweenAngles(a,FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i-1].pt)+180.0)/2;
+						b = DifferenceBetweenAngles(a,FindAngle(tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i-1].pt)+180.0)/2;
+						a = a+b;
 					}
 				}
-				Translate(&tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i].pt,a+angle,sep);
+
+				Translate(&tempSegs(0).u.p.pts[i].pt,tempSegs(0).u.p.pts[i].pt,a+angle,fabs(sep/cos(D2R(b))));
 			}
 			if (newTrkR) {
 				*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
