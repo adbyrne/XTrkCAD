@@ -1965,6 +1965,93 @@ static BOOL_T GetParamsDraw( int inx, track_p trk, coOrd pos, trackParams_t * pa
 
 }
 
+static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, EPINX_T * ep0, EPINX_T * ep1 )
+{
+		struct extraData * xx = GetTrkExtraData(trk);
+
+		ANGLE_T angle;
+		DIST_T rad;
+		coOrd p0,p1;
+		DIST_T d;
+
+		DYNARR_SET(trkSeg_t, tempSegs_da, 1);
+
+		switch (xx->segs[0].type) {
+			case SEG_STRLIN:
+				REORIGIN(p0,xx->segs[0].u.l.pos[0],xx->angle,xx->orig);
+				REORIGIN(p1,xx->segs[0].u.l.pos[1],xx->angle,xx->orig);
+				tempSegs(0).color = xx->segs[0].color;
+				tempSegs(0).width = xx->segs[0].width;
+				tempSegs_da.cnt = 1;
+				tempSegs(0).type = SEG_STRLIN;
+				tempSegs(0).u.l.pos[0] = 1-ep?p0:pos;
+				tempSegs(0).u.l.pos[1] = 1-ep?pos:p1;
+				*leftover = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+				xx->segs[0].u.l.pos[0] = 1-ep?p0:pos;
+				xx->segs[0].u.l.pos[1] = 1-ep?pos:p1;
+				xx->orig = zero;
+				xx->angle = 0.0;
+				*ep0 = 1-ep;
+				*ep1 = ep;
+				break;
+			case SEG_CRVLIN:;
+				coOrd c;
+				REORIGIN(c, xx->segs[0].u.c.center, xx->angle, xx->orig);
+				coOrd c0,c1;
+				Translate(&c0,c,xx->segs[0].u.c.a0+xx->angle,xx->segs[0].u.c.radius);
+				Translate(&c1,c,xx->segs[0].u.c.a1+xx->segs[0].u.c.a0+xx->angle,xx->segs[0].u.c.radius);
+				tempSegs(0).color = xx->segs[0].color;
+				tempSegs(0).width = xx->segs[0].width;
+				tempSegs_da.cnt = 1;
+				tempSegs(0).type = SEG_CRVLIN;
+				tempSegs(0).u.c.center = c;
+				tempSegs(0).u.c.radius = rad;
+				if (ep) {
+					tempSegs(0).u.c.a0 = FindAngle(c,c0);
+					tempSegs(0).u.c.a1 = FindAngle(c,pos);
+				} else {
+					tempSegs(0).u.c.a0 = FindAngle(c,pos);
+					tempSegs(0).u.c.a1 = FindAngle(c,c1)-tempSegs(0).u.c.a0;
+				}
+				*leftover = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+				if (ep) {
+					xx->segs[0].u.c.a0 = FindAngle(c,pos);
+					xx->segs[0].u.c.a1 = FindAngle(c,c1)-tempSegs(0).u.c.a0;
+				} else {
+					xx->segs[0].u.c.a0 = FindAngle(c,c0);
+					xx->segs[0].u.c.a1 = FindAngle(c,pos);
+				}
+				xx->orig = zero;
+				xx->angle = 0.0;
+				*ep0 = 1-ep;
+			    *ep1 = ep;
+				break;
+			case SEG_POLY:
+				d = 10000.0;
+				DIST_T dd;
+				int polyInx = -1;
+				for ( int inx=0; inx<xx->segs[0].u.p.cnt; inx++ ) {
+					p0 = pos;
+					dd = LineDistance( &p0, xx->segs[0].u.p.pts[inx==0?xx->segs[0].u.p.cnt-1:inx-1].pt,
+								xx->segs[0].u.p.pts[inx].pt );
+					if ( d > dd ) {
+						d = dd;
+						polyInx = inx;
+					}
+				}
+				if (xx->segs[0].u.p.polyType != POLYLINE) {
+					//Split Segment by adding two ends and moving the points
+				} else {
+					//
+				}
+				break;
+			default:
+				return FALSE;
+		}
+
+	return TRUE;
+}
+
 static BOOL_T MakeParallelDraw(
 		track_p trk,
 		coOrd pos,
