@@ -1687,7 +1687,7 @@ EXPORT void DrawRuler(
 	wPos_t len;
 	int digit;
 	char quote;
-	char message[10];
+	char message[STR_SHORT_SIZE];
 	coOrd d_orig, d_size;
 	wFontSize_t fs;
 	long mm, mm0, mm1, power;
