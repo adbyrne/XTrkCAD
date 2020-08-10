@@ -1503,20 +1503,20 @@ STATUS_T DrawGeomPolyModify(
 				InfoMessage("Move Origin Mode: Place Origin, p for Points, Enter or Esc");
 				return C_CONTINUE;
 			}
-			if (((prev_inx>=0 && tempSegs(0).u.p.polyType != POLYLINE) || (prev_inx>=1 && prev_inx<=points_da.cnt-2)) &&
+			if (((prev_inx>=0 && tempSegs(0).u.p.polyType != POLYLINE) ||
+				((tempSegs(0).u.p.polyType == POLYLINE) && (prev_inx>=1) && (prev_inx<=points_da.cnt-2)) ) &&
 					((action>>8 == 's') || (action>>8 == 'v') || (action>>8 == 'r')))  {
 				switch(action>>8) {
 				case 's':
 					points(context->prev_inx).pt_type = wPolyLineSmooth;
-					break;
+					return C_CONTINUE;
 				case 'v':
 					points(context->prev_inx).pt_type = wPolyLineStraight;
-					break;
+					return C_CONTINUE;
 				case 'r':
 					points(context->prev_inx).pt_type = wPolyLineRound;
-					break;
-				default:
 					return C_CONTINUE;
+				default:;
 				}
 			}
 			if ((action>>8 == 'g') && (tempSegs(0).type == SEG_POLY) && (tempSegs(0).u.p.polyType == POLYLINE) ) {
