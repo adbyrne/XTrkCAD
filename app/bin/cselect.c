@@ -70,8 +70,8 @@ track_p IsInsideABox(coOrd pos);
 static track_p moveDescTrk;
 static coOrd moveDescPos;
 
-int incrementalDrawLimit = 20;
- static int microCount = 0;
+int incrementalDrawLimit = 0;
+static int microCount = 0;
 
 static dynArr_t tlist_da;
 
