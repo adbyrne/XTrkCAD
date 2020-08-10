@@ -272,6 +272,7 @@ STATUS_T CmdModify(
 		return C_CONTINUE;
 
 	case C_DOWN:
+	case C_LDOUBLE:
 		DYNARR_RESET(trkSeg_t,anchors_da);
 		if (modifyBezierMode)
 			return ModifyBezier(C_DOWN, pos);
@@ -279,8 +280,6 @@ STATUS_T CmdModify(
 			return ModifyCornu(C_DOWN, pos);
 		if (modifyDrawMode)
 			return ModifyDraw(C_DOWN, pos);
-		/*no break*/
-	case C_LDOUBLE:
 		DYNARR_SET( trkSeg_t, tempSegs_da, 2 );
 		tempSegs(0).color = wDrawColorBlack;
 		tempSegs(0).width = 0;
