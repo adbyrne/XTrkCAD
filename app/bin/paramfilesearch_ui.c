@@ -71,7 +71,7 @@ static paramData_t searchUiPLs[] = {
 #define I_MESSAGE (3)
     { PD_MESSAGE, N_(QUERYPROMPTSTRING), NULL, 0, (void *)370 },
 #define I_STATISTICS (4)
-    { PD_MESSAGE, N_(""), NULL, PDO_DLGBOXEND, (void *)370 },
+    { PD_MESSAGE, "", NULL, PDO_DLGBOXEND, (void *)370 },
 #define I_RESULTLIST	(5)
     {	PD_LIST, NULL, "inx", PDO_NOPREF | PDO_DLGRESIZE, &searchUiListData, NULL, BL_DUP|BL_SETSTAY|BL_MANY },
 #define I_MODETOGGLE	(6)
@@ -80,7 +80,7 @@ static paramData_t searchUiPLs[] = {
     {	PD_BUTTON, (void *)SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
 #define I_SELECTALLBUTTON (8)
     {	PD_BUTTON, (void*)SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
-    {	PD_BUTTON, (void*)SearchUiDefault, "default", 0, NULL, N_("Reload Library") },
+    //{	PD_BUTTON, (void*)SearchUiDefault, "default", 0, NULL, N_("Reload Library") },
 };
 
 #define SEARCHBUTTON ((wButton_p)searchUiPLs[I_SEARCHBUTTON].control)

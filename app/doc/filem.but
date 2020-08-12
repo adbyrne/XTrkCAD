@@ -159,16 +159,15 @@ this file (for example altering the Layout Scale).
 
 \G{png.d/greydot.png} \G{png.d/greystar.png} This file is loaded but hidden.
 If it is marked as favorite it will be kept on the
-list between runs. Otherwise it will be removed from the list when
-the program is terminated.
+list between runs. 
 
-Definition files can be marked as \e{favorite}. The indicator for favorites is a star.
+Parameter files can be marked as \e{favorite}. The indicator for favorites is a star.
 The meaning of the colors isn't changed.
 
 Loaded definition files that are marked with a yellow or a green indicator appear on the \f{Hot Bar} (\K{cmdHotBar}).  
 
 If you \e{unload} a file the definitions are removed from the selection lists and the \f{Hot Bar}.  
-If the unloaded file was marked as a favorite it can be \e{reloaded} by selecting the  \f{Reload} button.
+If the unloaded file was marked as a favorite it can be \e{reloaded} by selecting the \f{Reload} button.
 
 Files that are still loaded can be \e{reloaded} as well. In that case the old definitions are refreshed and extended by the 
 rereading the file. This can be useful if you want to check changes you made by hand-editing a parameter file. 
@@ -189,7 +188,7 @@ It is the equivalent of using \f{Browse} and selecting the file again.
 Files can be listed by either their file name or by their contents description.
 This is controlled by the \f{Show File Names} check box.
 
-The \f{Search} button opens the \e{Search Parameter File} dialog (\K{cmdSearchgui}) this
+The \f{Library} button opens the \e{Choose Parameter File} dialog (\K{cmdSearchgui}) this
 shows the all files included the system library so they can be added.
 
 The \f{Browse} button opens a file window that allows the user to add additional files
@@ -203,18 +202,18 @@ The order in this list controls the order of turnouts and structures on the
 \f{Hot Bar} (\K{cmdHotBar}). You can move a parameter file to the end of the
 list by \e{Unloading} it, and then loading it via the \f{Browse} button.
 
-\S{cmdSearchgui} \i{Search Parameter Files}
+\S{cmdSearchgui} \i{Choose Parameter Files}
 
 Selecting and loading additional parameter files from the System Library is done in the
-\f{Search Parameter Files} dialog.
+\f{Choose Parameter Files} dialog.
 
 \G{png.d/paramsearch.png}
 
 Using the Search function you can find and select parameter files that are
 part of the XTrackCAD installation.
 Enter a search string and select the Search button. Search results are
-shown in the list box. A blank search or the value "*" resets the search results to 
-show the entire libary. 
+shown in the list box. Pressing the \i{Clear Filter} button shows the complete
+list again. 
 
 Select the files you're interested in and press the \f{Add} button to add them to your
 parameter list.
