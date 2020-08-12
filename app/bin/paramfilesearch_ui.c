@@ -80,7 +80,6 @@ static paramData_t searchUiPLs[] = {
     {	PD_BUTTON, (void *)SearchUiApply, "apply", PDO_DLGCMDBUTTON, NULL, N_("Add") },
 #define I_SELECTALLBUTTON (8)
     {	PD_BUTTON, (void*)SearchUiSelectAll, "selectall", PDO_DLGCMDBUTTON, NULL, N_("Select all") },
-    //{	PD_BUTTON, (void*)SearchUiDefault, "default", 0, NULL, N_("Reload Library") },
 };
 
 #define SEARCHBUTTON ((wButton_p)searchUiPLs[I_SEARCHBUTTON].control)
@@ -149,12 +148,7 @@ void SearchFileListLoad(Catalog *catalog)
 
 static void SearchUiBrowse(void * junk)
 {
-
-    //EmptyCatalog(catalogFileBrowse);
-
     wFilSelect(searchUi_fs, GetParamFileDir());
-
-    //SearchFileListLoad(catalogFileBrowse);
 
     return;
 }
