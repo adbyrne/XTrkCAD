@@ -188,9 +188,9 @@ static void pushButt(
 #define REPEAT_STAGE2_DELAY 100
 
 /* Timer callback function! */
-static int timer_func ( wButton_p bb)
+static int timer_func ( void * data)
 {
-
+	wButton_p bb = (wButton_p)data;
    if (bb->timer_id == 0) {
 	   bb->timer_state = -1;
 	   return FALSE;
@@ -201,7 +201,7 @@ static int timer_func ( wButton_p bb)
          g_source_remove(bb->timer_id);
          bb->timer_id = 0;
          bb->timer_state = 1;
-         bb->timer_id = g_timeout_add( REPEAT_STAGE1_DELAY, G_SOURCE_FUNC(timer_func), bb);
+         bb->timer_id = g_timeout_add( REPEAT_STAGE1_DELAY, timer_func, bb);
          bb->timer_count = 0;
          break;
       case 1: /* Check if it's time for fast repeat yet */
@@ -212,7 +212,7 @@ static int timer_func ( wButton_p bb)
          g_source_remove(bb->timer_id);
          bb->timer_id = 0;
          bb->timer_state = 3;
-         bb->timer_id = g_timeout_add( REPEAT_STAGE2_DELAY, G_SOURCE_FUNC(timer_func), bb);
+         bb->timer_id = g_timeout_add( REPEAT_STAGE2_DELAY, timer_func, bb);
          break;
       case 3:
     	  break;
@@ -247,7 +247,7 @@ static gint pressButt(
 		  g_source_remove(bb->timer_id);
 
 	   /* Setup a timer */
-	   bb->timer_id = g_timeout_add( REPEAT_STAGE0_DELAY, G_SOURCE_FUNC(timer_func), bb);
+	   bb->timer_id = g_timeout_add( REPEAT_STAGE0_DELAY, timer_func, bb);
 	   bb->timer_state = 0;
 
 	}
