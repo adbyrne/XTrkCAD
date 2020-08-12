@@ -1813,6 +1813,7 @@ static BOOL_T QueryDraw( track_p trk, int query )
 	case Q_GET_NODES:
 		return TRUE;
 	case Q_CAN_PARALLEL:
+	case Q_MODIFY_CAN_SPLIT:
 		if ((xx->segs[0].type == SEG_STRLIN) ||
 			(xx->segs[0].type == SEG_CRVLIN) ||
 			(xx->segs[0].type == SEG_BEZLIN) ||
@@ -2029,6 +2030,7 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 			case SEG_POLY:
 				d = 10000.0;
 				DIST_T dd;
+				BOOL_T onPoint = FALSE;
 				int polyInx = -1;
 				for ( int inx=0; inx<xx->segs[0].u.p.cnt; inx++ ) {
 					p0 = pos;
@@ -2037,12 +2039,67 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 					if ( d > dd ) {
 						d = dd;
 						polyInx = inx;
+						if (isClose(d)) onPoint=TRUE;
 					}
 				}
 				if (xx->segs[0].u.p.polyType != POLYLINE) {
-					//Split Segment by adding two ends and moving the points
+					xx->segs[0].type = SEG_POLY;
+					xx->segs[0].u.p.polyType = POLYLINE;
+					int old_cnt = xx->segs[0].u.p.cnt;
+					xx->segs[0].u.p.cnt = onPoint?xx->segs[0].u.p.cnt+1:xx->segs[0].u.p.cnt+2;
+					pts_t * newpts = MyMalloc(xx->segs[0].u.p.cnt*sizeof(pts_t));
+					newpts[0].pt = onPoint?xx->segs[0].u.p.pts[polyInx].pt:pos;
+					int j = 0;
+					for (int i=polyInx+1;i<old_cnt;i++) {
+						newpts[j] = xx->segs[0].u.p.pts[i];
+						j++;
+					}
+					for (int i=0;i<=polyInx;i++) {
+						newpts[j+1] = xx->segs[0].u.p.pts[i];
+						j++;
+					}
+					if (!onPoint) newpts[xx->segs[0].u.p.cnt].pt = pos;
+					newpts[xx->segs[0].u.p.cnt].pt_type = wPolyLineStraight;
+					MyFree(xx->segs[0].u.p.pts);
+					xx->segs[0].u.p.pts = newpts;
 				} else {
-					//
+					tempSegs(0).color = xx->segs[0].color;
+					tempSegs(0).width = xx->segs[0].width;
+					tempSegs_da.cnt = 1;
+					tempSegs(0).type = SEG_POLY;
+					tempSegs(0).u.p.polyType = POLYLINE;
+					if (ep)
+						tempSegs(0).u.p.cnt = xx->segs[0].u.p.cnt - polyInx+1;
+					else
+						tempSegs(0).u.p.cnt = polyInx+1;
+					tempSegs(0).u.p.pts = MyMalloc(tempSegs(0).u.p.cnt*sizeof(pts_t));
+					int j = 0;
+					if (ep) {
+						tempSegs(0).u.p.pts[0].pt = onPoint?xx->segs[0].u.p.pts[polyInx].pt:pos;
+						for (int i=polyInx+1;i<xx->segs[0].u.p.cnt;i++) {
+							tempSegs(0).u.p.pts[j] = xx->segs[0].u.p.pts[i];
+							j++;
+						}
+					} else {
+						for (int i=0;i<=polyInx;i++) {
+							newpts[i+1] = xx->segs[0].u.p.pts[i];
+							j++;
+						}
+					}
+
+					pts_t * newpts = MyMalloc(xx->segs[0].u.p.cnt*sizeof(pts_t));
+					newpts[0] = onPoint?xx->segs[0].u.p.pts[polyInx]:pos;
+					int j = 0;
+					for (int i=polyInx+1;i<old_cnt;i++) {
+						newpts[j] = xx->segs[0].u.p.pts[i];
+						j++;
+					}
+					for (int i=0;i<=polyInx;i++) {
+						newpts[j+i+1] = xx->segs[0].u.p.pts[i];
+					}
+					if (!onPoint) newpts[xx->segs[0].u.p.cnt] = pos;
+					MyFree(xx->segs[0].u.p.pts);
+					xx->segs[0].u.p.pts = newpts;
 				}
 				break;
 			default:
@@ -2202,7 +2259,7 @@ static trackCmd_t drawCmds = {
 		RescaleDraw,
 		NULL,
 		GetAngleDraw, /* getAngle */
-		NULL, /* split */
+		SplitDraw, /* split */
 		NULL, /* traverse */
 		EnumerateDraw,
 		NULL, /* redraw */

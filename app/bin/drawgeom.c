@@ -294,9 +294,10 @@ STATUS_T DrawGeomMouse(
 		return C_CONTINUE;
 
 	case wActionMove:
-		if (context->State == 0 || context->State ==2 ) {
+		if (context->State == 0 || context->State ==2 ||
+		   ( context->State ==1 && (context->Op == OP_POLY || context->Op == OP_FILLPOLY || context->Op == OP_POLYLINE))) {
 			DYNARR_RESET( trkSeg_t, anchors_da );
-			switch (context->Op) {  	//Snap pos to nearest line if this is end and just shift is depressed for lines and some curves
+			switch (context->Op) {  	//Snap pos to nearest line for lines and some curves
 				case OP_CURVE1:
 				case OP_CURVE2:
 				case OP_CURVE3:
@@ -1365,7 +1366,7 @@ STATUS_T DrawGeomPolyModify(
 					next_inx = first_inx+1;
 				}
 				//Lock to 90 degrees first/last point
-				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_SHIFT ) {
+				if ((MyGetKeyState() & (WKEY_SHIFT|WKEY_CTRL|WKEY_ALT)) == WKEY_CTRL ) {
 					ANGLE_T last_angle,next_angle;
 					coOrd last_point,next_point;
 					if (first_inx == 0) {
