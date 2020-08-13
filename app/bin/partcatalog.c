@@ -41,6 +41,7 @@
 #include "dynstring.h"
 #include "fileio.h"
 #include "i18n.h"
+#include "include/levenshtein.h"
 #include "misc.h"
 #include "misc2.h"
 #include "include/paramfile.h"
@@ -59,6 +60,7 @@
 
 #define PUNCTUATION "+-*/.,&%=#"
 #define SEARCHDELIMITER " \t\n\r/"
+#define LDISTANCELIMIT (2)
 
 static char *stopwords = {
     "scale",
@@ -447,8 +449,34 @@ FindWord(IndexEntry *index, int length, char *search, IndexEntry **entries)
     *entries = NULL;
 
     DL_SEARCH(index, result, &searchWord, KeyWordCmp);
-    *entries = result;
+	if (!result) {
+		int maxdistance = 1;
+		while (maxdistance <= LDISTANCELIMIT && !result ) {
+			IndexEntry *current;
+			size_t minDistance = LDISTANCELIMIT + 1;
+			int maxProbability = 0;
+			LOG1(log_params, ("Close match for: <%s> maxdistance: %d\n", search, maxdistance));
+				
+			DL_FOREACH(index, current)
+			{
+				size_t ldist = levenshtein(search, current->keyWord);
+				LOG1(log_params, ("Distance of: <%s> is %d\n", current->keyWord, ldist));
+				if (ldist == maxdistance) {
+					if (current->references->cnt > maxProbability) {
+						if (!result) {
+							result = MyMalloc(sizeof(IndexEntry));
+						}
+						memcpy(result, current, sizeof(IndexEntry));
+						maxProbability = current->references->cnt;
+					}
+				}
+			}
 
+			maxdistance++;
+		}
+	}
+    
+    *entries = result;
     return (result != NULL);
 }
 
@@ -701,6 +729,7 @@ SearchStatistics(SearchResult *result)
     unsigned searched = 0;
     unsigned discarded = 0;
     unsigned notfound = 0;
+	unsigned close = 0;
 
     char *resStat;
     DynStringMalloc(&buffer, 16);
@@ -710,6 +739,7 @@ SearchStatistics(SearchResult *result)
     }
 
     DynStringCatCStr(subStats + SEARCHED, _("Found: "));
+	DynStringCatCStr(subStats + CLOSE, _("Similar: "));
     DynStringCatCStr(subStats + DISCARDED, _("Ignored: "));
     DynStringCatCStr(subStats + NOTFOUND, _("Not found: "));
 
@@ -728,6 +758,10 @@ SearchStatistics(SearchResult *result)
             DynStringPrintf(&buffer, "%s ", result->kw[i].keyWord);
             notfound++;
             break;
+		case CLOSE:
+			DynStringPrintf(&buffer, "%s ", result->kw[i].keyWord);
+			close++;
+			break;
         default:
             break;
         }
@@ -738,6 +772,9 @@ SearchStatistics(SearchResult *result)
     if (searched) {
         DynStringCatStr(&buffer, subStats + SEARCHED);
     }
+	if (close) {
+		DynStringCatStr(&buffer, subStats + CLOSE);
+	}
     if (notfound) {
         DynStringCatStr(&buffer, subStats + NOTFOUND);
     }
@@ -747,7 +784,9 @@ SearchStatistics(SearchResult *result)
 
     resStat = MyStrdup(DynStringToCStr(&buffer));
     DynStringFree(&buffer);
-
+	for (int i = SEARCHED; i < STATE_COUNT; i++) {
+		DynStringFree(subStats + i);
+	}
     return (resStat);
 }
 
@@ -840,6 +879,11 @@ SearchLibrary(ParameterLib *library, char *searchExpression,
         FindWord(library->index, library->wordCount, results->kw[i].keyWord, &entries);
         if (entries) {
             results->kw[i].count = entries->references->cnt;
+			if (XtcStricmp(results->kw[i].keyWord, entries->keyWord)) {
+				results->kw[i].state = CLOSE;
+				MyFree(results->kw[i].keyWord);
+				results->kw[i].keyWord = MyStrdup(entries->keyWord);
+			}
 
             if (results->subCatalog.head == NULL) {
                 // if first keyword -> initialize result set

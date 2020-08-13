@@ -69,6 +69,7 @@ enum WORDSTATE {
     SEARCHED,
     DISCARDED,
     NOTFOUND,
+	CLOSE,
     STATE_COUNT
 };
 

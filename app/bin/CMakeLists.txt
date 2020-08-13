@@ -117,6 +117,7 @@ SET(SOURCES
 	filenoteui.c
 	i18n.c
 	layout.c
+	levenshtein.c
 	linknoteui.c
 	lprintf.c
 	macro.c
