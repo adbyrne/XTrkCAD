@@ -2038,6 +2038,17 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 	BOOL_T (*splitCmd)( track_p, coOrd, EPINX_T, track_p *, EPINX_T *, EPINX_T * );
 	coOrd pos0;
 
+	if (!IsTrack(trk)) {
+		if ((splitCmd = trackCmds(trk->type)->split) == NULL) return FALSE;
+		UndrawNewTrack( trk );
+	    UndoModify( trk );
+		rc = splitCmd( trk, pos, ep, leftover, &epl, &ep1 );
+		if (*leftover)
+			DrawNewTrack( *leftover );
+		DrawNewTrack( trk );
+		return rc;
+	}
+
 	trk0 = trk;
 	epl = ep;
 	epCnt = GetTrkEndPtCnt(trk);
@@ -2045,9 +2056,9 @@ EXPORT BOOL_T SplitTrack( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover,
 LOG( log_track, 2, ( "SplitTrack( T%d[%d], (%0.3f %0.3f)\n", trk->index, ep, pos.x, pos.y ) )
 
 	if (((splitCmd = trackCmds(trk->type)->split) == NULL)) {
-			if (!(FindDistance( trk->endPt[ep].pos, pos) <= minLength)) {
-				ErrorMessage( MSG_CANT_SPLIT_TRK, trackCmds(trk->type)->name );
-				return FALSE;
+		if (!(FindDistance( trk->endPt[ep].pos, pos) <= minLength)) {
+			ErrorMessage( MSG_CANT_SPLIT_TRK, trackCmds(trk->type)->name );
+			return FALSE;
 		}
 	}
 	UndrawNewTrack( trk );

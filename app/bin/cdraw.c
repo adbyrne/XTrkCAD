@@ -1649,6 +1649,7 @@ static STATUS_T ModifyDraw( track_p trk, wAction_t action, coOrd pos )
 		wMenuPushEnable( drawModLast,drawModCmdContext.rotate_state && (drawModCmdContext.prev_inx>=0));
 		wMenuPushEnable( drawModCenter,drawModCmdContext.rotate_state);
 		break;
+	case wActionExtKey:
 	case C_TEXT:
 		ignoredDraw = trk ;
 		rc = DrawGeomModify( action, pos, &drawModCmdContext  );
@@ -1817,8 +1818,7 @@ static BOOL_T QueryDraw( track_p trk, int query )
 		if ((xx->segs[0].type == SEG_STRLIN) ||
 			(xx->segs[0].type == SEG_CRVLIN) ||
 			(xx->segs[0].type == SEG_BEZLIN) ||
-			(xx->segs[0].type == SEG_POLY) ||
-			(xx->segs[0].type == SEG_FILPOLY)
+			((xx->segs[0].type == SEG_POLY) && (xx->segs[0].u.p.polyType == POLYLINE))
 		) return TRUE;
 		else return FALSE;
 	default:
@@ -1987,13 +1987,8 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 				tempSegs(0).type = SEG_STRLIN;
 				tempSegs(0).u.l.pos[0] = 1-ep?p0:pos;
 				tempSegs(0).u.l.pos[1] = 1-ep?pos:p1;
-				*leftover = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
-				xx->segs[0].u.l.pos[0] = 1-ep?p0:pos;
-				xx->segs[0].u.l.pos[1] = 1-ep?pos:p1;
-				xx->orig = zero;
-				xx->angle = 0.0;
-				*ep0 = 1-ep;
-				*ep1 = ep;
+				xx->segs[0].u.l.pos[0] = 1-ep?pos:p0;
+				xx->segs[0].u.l.pos[1] = 1-ep?p1:pos;
 				break;
 			case SEG_CRVLIN:;
 				coOrd c;
@@ -2006,107 +2001,186 @@ static BOOL_T SplitDraw( track_p trk, coOrd pos, EPINX_T ep, track_p *leftover, 
 				tempSegs_da.cnt = 1;
 				tempSegs(0).type = SEG_CRVLIN;
 				tempSegs(0).u.c.center = c;
-				tempSegs(0).u.c.radius = rad;
+				tempSegs(0).u.c.radius = xx->segs[0].u.c.radius;
 				if (ep) {
 					tempSegs(0).u.c.a0 = FindAngle(c,c0);
-					tempSegs(0).u.c.a1 = FindAngle(c,pos);
+					tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(c,pos)-tempSegs(0).u.c.a0);
 				} else {
 					tempSegs(0).u.c.a0 = FindAngle(c,pos);
-					tempSegs(0).u.c.a1 = FindAngle(c,c1)-tempSegs(0).u.c.a0;
+					tempSegs(0).u.c.a1 = NormalizeAngle(FindAngle(c,c1)-tempSegs(0).u.c.a0);
 				}
-				*leftover = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+				xx->segs[0].u.c.center = c;
 				if (ep) {
 					xx->segs[0].u.c.a0 = FindAngle(c,pos);
-					xx->segs[0].u.c.a1 = FindAngle(c,c1)-tempSegs(0).u.c.a0;
+					xx->segs[0].u.c.a1 = NormalizeAngle(FindAngle(c,c1)-xx->segs[0].u.c.a0);
 				} else {
 					xx->segs[0].u.c.a0 = FindAngle(c,c0);
-					xx->segs[0].u.c.a1 = FindAngle(c,pos);
+					xx->segs[0].u.c.a1 = NormalizeAngle(FindAngle(c,pos)-xx->segs[0].u.c.a0);
 				}
-				xx->orig = zero;
-				xx->angle = 0.0;
-				*ep0 = 1-ep;
-			    *ep1 = ep;
 				break;
 			case SEG_POLY:
+				if (xx->segs[0].u.p.polyType != POLYLINE) return FALSE;
 				d = 10000.0;
 				DIST_T dd;
 				BOOL_T onPoint = FALSE;
+				coOrd end;
 				int polyInx = -1;
-				for ( int inx=0; inx<xx->segs[0].u.p.cnt; inx++ ) {
+				for ( int inx=0; inx<xx->segs[0].u.p.cnt-1; inx++ ) {
 					p0 = pos;
-					dd = LineDistance( &p0, xx->segs[0].u.p.pts[inx==0?xx->segs[0].u.p.cnt-1:inx-1].pt,
-								xx->segs[0].u.p.pts[inx].pt );
+					coOrd pl0,pl1;
+					REORIGIN(pl0,xx->segs[0].u.p.pts[inx].pt,xx->angle,xx->orig);
+					REORIGIN(pl1,xx->segs[0].u.p.pts[inx+1].pt,xx->angle,xx->orig);
+					dd = LineDistance( &p0, pl0, pl1 );
 					if ( d > dd ) {
 						d = dd;
-						polyInx = inx;
-						if (isClose(d)) onPoint=TRUE;
+						if (IsClose(FindDistance(pos,pl1))) {
+							polyInx = inx;
+							REORIGIN(pos,xx->segs[0].u.p.pts[inx].pt,xx->angle,xx->orig);
+							onPoint = TRUE;
+							break;
+						} else if (IsClose(FindDistance(pos,pl1))) {
+							polyInx = inx+1;
+							REORIGIN(pos,xx->segs[0].u.p.pts[inx+1].pt,xx->angle,xx->orig);
+							onPoint=TRUE;
+							break;
+						} else {
+							if (!IsClose(d)) continue;
+							polyInx = inx;
+						}
 					}
 				}
-				if (xx->segs[0].u.p.polyType != POLYLINE) {
-					xx->segs[0].type = SEG_POLY;
-					xx->segs[0].u.p.polyType = POLYLINE;
-					int old_cnt = xx->segs[0].u.p.cnt;
-					xx->segs[0].u.p.cnt = onPoint?xx->segs[0].u.p.cnt+1:xx->segs[0].u.p.cnt+2;
-					pts_t * newpts = MyMalloc(xx->segs[0].u.p.cnt*sizeof(pts_t));
-					newpts[0].pt = onPoint?xx->segs[0].u.p.pts[polyInx].pt:pos;
-					int j = 0;
-					for (int i=polyInx+1;i<old_cnt;i++) {
-						newpts[j] = xx->segs[0].u.p.pts[i];
-						j++;
+				//Check if on an end-point -> reject
+				if ((polyInx <= 0 || polyInx >= xx->segs[0].u.p.cnt-1) && onPoint ) {
+					*leftover = NULL;
+					return FALSE;
+				}
+				if (polyInx == 0 || (polyInx == 1 && onPoint )) {
+					//Between First End and Next -> Trim end
+					end = xx->segs[0].u.p.pts[0].pt;
+					REORIGIN(end,end,xx->angle,xx->orig);
+					if (onPoint) {
+						for (int i=0;i< xx->segs[0].u.p.cnt-1;i++) {
+							xx->segs[0].u.p.pts[i] = xx->segs[0].u.p.pts[i+1];
+							REORIGIN(xx->segs[0].u.p.pts[i].pt,xx->segs[0].u.p.pts[i].pt,xx->angle,xx->orig);
+						}
+						--xx->segs[0].u.p.cnt;
+					} else {
+						xx->segs[0].u.p.pts[0].pt = pos;
+						for (int i=1;i< xx->segs[0].u.p.cnt;i++) {
+							REORIGIN(xx->segs[0].u.p.pts[i].pt,xx->segs[0].u.p.pts[i].pt,xx->angle,xx->orig);
+						}
 					}
-					for (int i=0;i<=polyInx;i++) {
-						newpts[j+1] = xx->segs[0].u.p.pts[i];
-						j++;
-					}
-					if (!onPoint) newpts[xx->segs[0].u.p.cnt].pt = pos;
-					newpts[xx->segs[0].u.p.cnt].pt_type = wPolyLineStraight;
-					MyFree(xx->segs[0].u.p.pts);
-					xx->segs[0].u.p.pts = newpts;
-				} else {
 					tempSegs(0).color = xx->segs[0].color;
 					tempSegs(0).width = xx->segs[0].width;
 					tempSegs_da.cnt = 1;
-					tempSegs(0).type = SEG_POLY;
-					tempSegs(0).u.p.polyType = POLYLINE;
-					if (ep)
-						tempSegs(0).u.p.cnt = xx->segs[0].u.p.cnt - polyInx+1;
-					else
-						tempSegs(0).u.p.cnt = polyInx+1;
-					tempSegs(0).u.p.pts = MyMalloc(tempSegs(0).u.p.cnt*sizeof(pts_t));
-					int j = 0;
-					if (ep) {
-						tempSegs(0).u.p.pts[0].pt = onPoint?xx->segs[0].u.p.pts[polyInx].pt:pos;
-						for (int i=polyInx+1;i<xx->segs[0].u.p.cnt;i++) {
-							tempSegs(0).u.p.pts[j] = xx->segs[0].u.p.pts[i];
-							j++;
+					tempSegs(0).type = SEG_STRLIN;
+					tempSegs(0).u.l.pos[0] = pos;
+					tempSegs(0).u.l.pos[1] = end;
+				} else if (polyInx == xx->segs[0].u.p.cnt-2) {
+					//Between second last and last -> Trim the other end
+					end = xx->segs[0].u.p.pts[xx->segs[0].u.p.cnt-1].pt;
+					REORIGIN(end,end,xx->angle,xx->orig);
+					if (onPoint) {
+						--xx->segs[0].u.p.cnt;
+						for (int i=0;i<xx->segs[0].u.p.cnt;i++) {
+						    REORIGIN(xx->segs[0].u.p.pts[i].pt,xx->segs[0].u.p.pts[i].pt,xx->angle,xx->orig);
+					    }
+					} else {
+						xx->segs[0].u.p.pts[xx->segs[0].u.p.cnt-1].pt = pos;
+					    for (int i=0;i<xx->segs[0].u.p.cnt;i++) {
+					    	REORIGIN(xx->segs[0].u.p.pts[i].pt,xx->segs[0].u.p.pts[i].pt,xx->angle,xx->orig);
+					    }
+					}
+					tempSegs(0).color = xx->segs[0].color;
+					tempSegs(0).width = xx->segs[0].width;
+					tempSegs_da.cnt = 1;
+					tempSegs(0).type = SEG_STRLIN;
+					tempSegs(0).u.l.pos[0] = end;
+					tempSegs(0).u.l.pos[1] = pos;
+				} else {
+					//Check that new line will have >=3 spots if not -> reject
+					if (xx->segs[0].u.p.cnt >3) {
+						tempSegs(0).color = xx->segs[0].color;
+						tempSegs(0).width = xx->segs[0].width;
+						tempSegs_da.cnt = 1;
+						tempSegs(0).type = SEG_POLY;
+						tempSegs(0).u.p.polyType = POLYLINE;
+						if (1-ep)
+							tempSegs(0).u.p.cnt = xx->segs[0].u.p.cnt - polyInx;
+						else
+							tempSegs(0).u.p.cnt = polyInx + 2 - onPoint;
+						tempSegs(0).u.p.pts = MyMalloc(tempSegs(0).u.p.cnt*sizeof(pts_t));
+						int j = 0;
+						if (1-ep) {
+							tempSegs(0).u.p.pts[0].pt=pos;
+							tempSegs(0).u.p.pts[0].pt_type = wPolyLineStraight;
+							j = 1;
+							for (int i=polyInx+1;i<tempSegs(0).u.p.cnt;i++,j++) {
+								tempSegs(0).u.p.pts[j] = xx->segs[0].u.p.pts[i];
+								REORIGIN(tempSegs(0).u.p.pts[j].pt,tempSegs(0).u.p.pts[j].pt,xx->angle,xx->orig);
+							}
+						} else {
+							for (int i=0;i<=polyInx+1;i++,j++) {
+								tempSegs(0).u.p.pts[j] = xx->segs[0].u.p.pts[i];
+								REORIGIN(tempSegs(0).u.p.pts[j].pt,tempSegs(0).u.p.pts[j].pt,xx->angle,xx->orig);
+							}
+							if (!onPoint) {
+								tempSegs(0).u.p.pts[tempSegs(0).u.p.cnt-1].pt = pos;
+								tempSegs(0).u.p.pts[tempSegs(0).u.p.cnt-1].pt_type = wPolyLineStraight;
+							}
 						}
 					} else {
-						for (int i=0;i<=polyInx;i++) {
-							newpts[i+1] = xx->segs[0].u.p.pts[i];
-							j++;
+						*leftover = NULL;
+						return FALSE;
+					}
+					int new_cnt, old_cnt = xx->segs[0].u.p.cnt;
+					if (1-ep)
+						new_cnt =  polyInx + 2 - onPoint;
+					else
+						new_cnt = xx->segs[0].u.p.cnt-polyInx;
+					pts_t * newpts = MyMalloc(new_cnt*sizeof(pts_t));
+					int j = 0;
+					if (1-ep) {
+						for (int i = 0; i<polyInx+1; i++,j++) {
+							newpts[j] = xx->segs[0].u.p.pts[i];
+							REORIGIN(newpts[j].pt,newpts[i].pt,xx->angle,xx->orig);
+						}
+						if (!onPoint) {
+							newpts[new_cnt-1].pt = pos;
+							newpts[new_cnt-1].pt_type = wPolyLineStraight;
+						}
+					} else {
+						newpts[0].pt = pos;
+						newpts[0].pt_type = wPolyLineStraight;
+						j = 1;
+						for (int i=polyInx+1;i<old_cnt;i++,j++) {
+							newpts[j] = xx->segs[0].u.p.pts[i];
+							REORIGIN(newpts[j].pt,newpts[j].pt,xx->angle,xx->orig);
 						}
 					}
-
-					pts_t * newpts = MyMalloc(xx->segs[0].u.p.cnt*sizeof(pts_t));
-					newpts[0] = onPoint?xx->segs[0].u.p.pts[polyInx]:pos;
-					int j = 0;
-					for (int i=polyInx+1;i<old_cnt;i++) {
-						newpts[j] = xx->segs[0].u.p.pts[i];
-						j++;
-					}
-					for (int i=0;i<=polyInx;i++) {
-						newpts[j+i+1] = xx->segs[0].u.p.pts[i];
-					}
-					if (!onPoint) newpts[xx->segs[0].u.p.cnt] = pos;
 					MyFree(xx->segs[0].u.p.pts);
+					xx->segs[0].u.p.cnt = new_cnt;
 					xx->segs[0].u.p.pts = newpts;
+
 				}
 				break;
 			default:
 				return FALSE;
 		}
-
-	return TRUE;
+		*leftover = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+		if (tempSegs(0).type == SEG_POLY && tempSegs(0).u.p.pts)  {
+			MyFree(tempSegs(0).u.p.pts);
+			tempSegs(0).u.p.cnt = 0;
+			tempSegs(0).u.p.pts = NULL;
+		}
+		struct extraData * yy = GetTrkExtraData(trk);
+		yy->lineType = xx->lineType;
+		xx->orig = zero;
+		xx->angle = 0.0;
+		ComputeDrawBoundingBox(trk);
+		*ep0 = 1-ep;
+		*ep1 = ep;
+		return TRUE;
 }
 
 static BOOL_T MakeParallelDraw(

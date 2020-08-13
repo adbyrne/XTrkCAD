@@ -129,7 +129,7 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 			} else {
 				if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 					onTrackInSplit = FALSE;
-					InfoMessage(_("Can't Split that Track"));
+					InfoMessage(_("Can't Split that Track Object"));
 					return C_CONTINUE;
 				}
 			}
@@ -145,13 +145,13 @@ static STATUS_T CmdSplitTrack( wAction_t action, coOrd pos )
 		} else if ((trk0 = OnTrack( &pos, FALSE, FALSE))!=NULL && CheckTrackLayerSilent( trk0 )) {
 			if (!QueryTrack(trk0,Q_MODIFY_CAN_SPLIT)) {
 				onTrackInSplit = FALSE;
-				InfoMessage(_("Can't Split that Draw"));
+				InfoMessage(_("Can't Split that Draw Object"));
 				return C_CONTINUE;
 			}
 			onTrackInSplit = FALSE;
 			UndoStart( _("Split Track"), "SplitTrack( T%d[%d] )", GetTrkIndex(trk0), ep0 );
 			oldTrackCount = trackCount;
-			SplitTrack( trk0, pos, &ep0, &trk1, FALSE );
+			SplitTrack( trk0, pos, ep0, &trk1, FALSE );
 			UndoEnd();
 			return C_TERMINATE;
 		} else {
