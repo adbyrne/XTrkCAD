@@ -272,8 +272,46 @@ static DIST_T DistanceStraight( track_p t, coOrd * p )
 	return LineDistance( p, GetTrkEndPos(t,0), GetTrkEndPos(t,1) );
 }
 
+static void DrawStraightDescription(
+		track_p trk,
+		drawCmd_p d,
+		wDrawColor color )
+{
+	struct extraData *xx = GetTrkExtraData(trk);
+	wFont_p fp;
+	coOrd pos, p0, p1;
+	DIST_T elev0, elev1, dist, grade=0, sep=0;
+	BOOL_T elevValid;
+	ANGLE_T a;
+
+
+
+	if (layoutLabels == 0)
+		return;
+	if ((labelEnable&LABELENABLE_TRKDESC)==0)
+		return;
+
+	coOrd end0, end0off, end1, end1off;
+	end0 = GetTrkEndPos(trk,0);
+	end1 = GetTrkEndPos(trk,1);
+	a = FindAngle(end0,end1);
+	Translate(&end0off,end0,a+90,2*trackGauge);
+	DrawLine(d,end0,end0off,0,color);
+	Translate(&end1off,end1,a+90,2*trackGauge);
+	DrawLine(d,end1,end1off,0,color);
+	sprintf( message, "L %0.3f A %0.3f", FindDistance(end0,end1),FindAngle(end0,end1));
+	DrawDimLine( d, end0off, end1off, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
+
+}
+
 static void DrawStraight( track_p t, drawCmd_p d, wDrawColor color )
 {
+	if (((d->options&(DC_SIMPLE|DC_SEGTRACK))==0) &&
+	   (labelWhen == 2 || (labelWhen == 1 && (d->options&DC_PRINT))) &&
+	   labelScale >= d->scale &&
+	   ( GetTrkBits( t ) & TB_HIDEDESC ) == 0 ) {
+	  DrawStraightDescription( t, d, color );
+	}
 	long widthOptions = DTS_LEFT|DTS_RIGHT;
 	DrawStraightTrack( d, GetTrkEndPos(t,0), GetTrkEndPos(t,1),
 				GetTrkEndAngle(t,0),
@@ -635,6 +673,7 @@ static BOOL_T QueryStraight( track_p trk, int query )
 	case Q_CORNU_CAN_MODIFY:
 	case Q_MODIFY_CAN_SPLIT:
 	case Q_CAN_EXTEND:
+	case Q_HAS_DESC:
 		return TRUE;
 	default:
 		return FALSE;
@@ -680,6 +719,7 @@ static BOOL_T MakeParallelStraight(
 			tempSegs(0).u.l.pos[0] = p0;
 			tempSegs(0).u.l.pos[1] = p1;
 			*newTrkR = MakeDrawFromSeg( zero, 0.0, &tempSegs(0) );
+			SetTrkBits( *newTrkR, TB_HIDEDESC );
 		}
 
 	} else {

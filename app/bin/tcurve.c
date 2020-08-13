@@ -266,6 +266,13 @@ static void DrawCurveDescription(
 		sprintf( message, "R %s", FormatDistance( xx->radius ) );
 		ratio = ( xx->descriptionOff.y + 1.0 ) / 2.0;
 		DrawDimLine( d, xx->pos, p0, message, (wFontSize_t)descriptionFontSize, ratio, 0, color, 0x11 );
+		coOrd end0, end1;
+		DIST_T off;
+		Translate(&end0,xx->pos,a0,xx->radius);
+		Translate(&end1,xx->pos,a0+a1,xx->radius);
+		off = xx->radius-(cos(D2R(a1/2))*xx->radius);
+		sprintf( message, "L %0.3f A %0.3f O %0.3f", FindDistance(end0,end1),FindAngle(end1,end0), off);
+		DrawDimLine( d, end0, end1, message, (wFontSize_t)descriptionFontSize, 0.5, 0, color, 0x00 );
 	}
 }
 
