@@ -150,7 +150,7 @@ static void CreateSquareAnchor(coOrd p) {
 
 BOOL_T FindTempNear(drawContext_t *context, coOrd *p) {
 	if (context->State == 2) {
-		if (context->Op >= OP_CURVE1 && context->Op <= OP_CURVE4) {
+		if ((context->Op >= OP_CURVE1) && (context->Op <= OP_CURVE4)) {
 			if (context->ArcData.type == curveTypeCurve) {
 				ANGLE_T a = FindAngle(context->ArcData.curvePos,*p);
 				if (IsClose(FindDistance(context->ArcData.curvePos,*p)-context->ArcData.curveRadius) &&
@@ -162,7 +162,7 @@ BOOL_T FindTempNear(drawContext_t *context, coOrd *p) {
 				if (IsClose(LineDistance(p,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1])))
 					return TRUE;
 			}
-		} else if ( context->Op >=OP_LINE && context->Op <= OP_BENCH) {
+		} else if ( (context->Op >=OP_LINE) && (context->Op <= OP_BENCH)) {
 			if (IsClose(LineDistance(p,tempSegs(0).u.l.pos[0],tempSegs(0).u.l.pos[1])))
 				return TRUE;
 		}

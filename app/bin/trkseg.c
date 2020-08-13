@@ -758,7 +758,7 @@ EXPORT DIST_T DistanceSegs(
 				pt = p0;
 				if (lin < segPtr->u.p.cnt-1 )
 					ddd = LineDistance( &pt, segPtr->u.p.pts[lin].pt, segPtr->u.p.pts[lin+1].pt );
-				else
+				else if (segPtr->u.p.polyType != POLYLINE)
 					ddd = LineDistance( &pt, segPtr->u.p.pts[lin].pt, segPtr->u.p.pts[0].pt );
 				if ( ddd < dd ) {
 					dd = ddd;
