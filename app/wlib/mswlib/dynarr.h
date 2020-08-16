@@ -31,9 +31,6 @@ typedef struct {
 
 
 #ifdef WINDOWS
-#ifndef WIN32
-#define FAR _far
-#endif
 #define M_PI 3.14159
 #define strcasecmp _stricmp
 #else

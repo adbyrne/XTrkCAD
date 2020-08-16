@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include <commdlg.h>
 #include <math.h>
-#ifndef WIN32
-#include <print.h>
-#endif
 #include "mswint.h"
 
 /*
@@ -20,11 +17,7 @@
 
 static struct wDraw_t print_d;
 
-#ifdef WIN32
 static struct tagPDA printDlg;
-#else
-static struct tagPD printDlg;
-#endif
 static int printStatus = FALSE;
 static DOCINFO docInfo;
 static double tBorder = 0.0, rBorder = 0.0, bBorder = 0.0, lBorder = 0.0;

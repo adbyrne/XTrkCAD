@@ -355,11 +355,8 @@ LRESULT CALLBACK pushButt(
 		LONG lParam )
 {
 	/* Catch <Return> and cause focus to leave control */
-#ifdef WIN32
+
 	long inx = GetWindowLong( hWnd, GWL_ID );
-#else
-	short inx = GetWindowWord( hWnd, GWW_ID );
-#endif
 	wButton_p b = (wButton_p)mswMapIndex( inx );
 	PAINTSTRUCT ps;
 
